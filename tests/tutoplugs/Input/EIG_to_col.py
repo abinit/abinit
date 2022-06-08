@@ -1,6 +1,6 @@
 import numpy as np
 
-nkpt = 205
+nkpt = 168
 nband = 38
 
 eigs = np.zeros((nband, nkpt))
@@ -9,7 +9,7 @@ print(nband/8.)
 nrows_eig = np.ceil(nband/8.)
 print(nrows_eig)
 
-with open("La2CuO4o_DS4_EIG", "r") as fopen:
+with open("tw90_6_2o_DS4_EIG", "r") as fopen:
     for l, line in enumerate(fopen.readlines()):
         print(l, line)
         if not l:

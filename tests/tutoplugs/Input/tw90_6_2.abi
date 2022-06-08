@@ -52,12 +52,12 @@ istwfk1         *1
 iscf2           -2
 prtvol2          1
 nstep2           100
-tolwfr2          1e-10  # Good resolution on the wave function necessary
+tolwfr2          1e-9   # Good resolution on the wave function necessary
 getwfk2          1      # Get wave function and density from previous dataset
 getden2          1
 prtden2          1      # Print for next one
 prtwf2           1
-ngkpt2           12 12 12
+ngkpt2           8 8 8
 
 #############################################################################
 # Third dataset: Call to the Wannier90 library
@@ -65,13 +65,13 @@ ngkpt2           12 12 12
 prtvol3          1
 iscf3           -2
 nstep3           0
-tolwfr3          1e-10
+tolwfr3          1e-9
 getwfk3          2
 getden3          2
 prtwant3         2     # ABINIT - Wannier90 interface
 istwfk3         *1
 kptopt3          3     # Do not use symmetries
-ngkpt3           12 12 12
+ngkpt3           8 8 8
 w90prtunk3       0     # Do not prints the unk matrices
 w90iniprj3       2     # Use projection defined in the .win file
 
@@ -88,7 +88,7 @@ kptbounds4       0.00000000  0.00000000  0.00000000  # Gamma
                  0.50000000  0.00000000  0.00000000  # X
                  0.00000000  0.00000000  0.00000000  # Gamma
                 -0.25000000  0.25000000  0.25000000  # Z
-tolwfr4          1.0d-10
+tolwfr4          1.0d-9
 enunit4          1
 
 pp_dirpath       "$ABI_PSPDIR"
