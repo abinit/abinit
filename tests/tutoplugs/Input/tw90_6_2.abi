@@ -25,15 +25,11 @@ xcart            0.0000000000  0.0000000000  9.0145301354
 # finer grid, wannier90 projection, band structure
 ndtset           4
 
-# symmorphi        0
-# optforces        1
-
 # Shared parameters
 nband            38    # Number of bands
 nbdbuf           4     # Extra bands easing convergence
-ecut             20    # Low but sufficient
-pawecutdg        35    # Low but sufficient
-# ecutsm           0.5
+ecut             10    # Low but sufficient
+pawecutdg        18    # Low but sufficient
 
 nshiftk          1     # For most datasets, need no shift
 shiftk           0 0 0
@@ -44,24 +40,23 @@ shiftk           0 0 0
 ngkpt1           6 6 6
 shiftk1          0.5 0.5 0.5
 nstep1           100
-tolvrs1          1.0d-10
+tolvrs1          1.0d-8
 prtden1          1     # Print density for other datasets
-prtwfk1          1
+prtwf1           1
 diemac1          12.0
-# kptopt1          1
-istwfk1          *1
+istwfk1         *1
 
 #############################################################################
 # Second dataset: Non-self-consistent ground state on a finer grid
 #############################################################################
-iscf2            -2
+iscf2           -2
 prtvol2          1
 nstep2           100
-tolwfr2          1e-12  # Good resolution on the wave function necessary
+tolwfr2          1e-10  # Good resolution on the wave function necessary
 getwfk2          1      # Get wave function and density from previous dataset
 getden2          1
 prtden2          1      # Print for next one
-# kptopt2          1
+prtwf2           1
 ngkpt2           12 12 12
 
 #############################################################################
@@ -70,7 +65,7 @@ ngkpt2           12 12 12
 prtvol3          1
 iscf3           -2
 nstep3           0
-tolwfr3          1e-12
+tolwfr3          1e-10
 getwfk3          2
 getden3          2
 prtwant3         2     # ABINIT - Wannier90 interface
@@ -83,17 +78,18 @@ w90iniprj3       2     # Use projection defined in the .win file
 #############################################################################
 # Fourth dataset: Band structure on the same path as Wannier90
 #############################################################################
-iscf4            -2
-getden4          -2
-kptopt4          -4    # Four segments of paths
+iscf4           -2
+getden4         -2
+getwfk4         -2
+kptopt4         -4    # Four segments of paths
 ndivsm4          16    # Smallest path has 16 points, other scaled
 kptbounds4       0.00000000  0.00000000  0.00000000  # Gamma
                  0.25000000  0.25000000 -0.25000000  # Sigma
                  0.50000000  0.00000000  0.00000000  # X
                  0.00000000  0.00000000  0.00000000  # Gamma
                 -0.25000000  0.25000000  0.25000000  # Z
-tolwfr4          1.0d-12
+tolwfr4          1.0d-10
 enunit4          1
 
 pp_dirpath       "$ABI_PSPDIR"
-pseudos          "PseudoDojo_PBE/La.psp8, PseudoDojo_PBE/Cu.psp8, PseudoDojo_PBE/O.psp8"
+pseudos          "Pseudodojo_paw_pw_standard/La.xml, Pseudodojo_paw_pw_standard/Cu.xml, Pseudodojo_paw_pw_standard/O.xml"
