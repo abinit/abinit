@@ -212,14 +212,14 @@ field as well as strain are uniform perturbations, so that they are defined only
 performed, which requires [[iscf]] = -3. The ddk wave functions will be used to
 calculate both the piezoelectric tensor and the Born effective charges, and in
 general we need them for **k** derivatives in all three (reduced) directions,
-[[rfdir]] = 1 1 1. Since there is no potential self-consistency in the ddk
+[[rfdir]] = 1 1 1 (that is the default). Since there is no potential self-consistency in the ddk
 calculations, we must specify convergence in terms of the wave function
 residuals using [[tolwfr]].
 
 Finally, dataset 3 performs the actual calculations of the needed 2DTE's for
 the elastic and piezoelectric tensors. Setting [[rfphon]] = 1 turns on the
-atomic displacement perturbation, which we need for all atoms ([[rfatpol]] = 1
-4) and all directions ([[rfdir]] = 1 1 1). Abinit will calculate first-order
+atomic displacement perturbation, which we need for all atoms (see [[rfatpol]])
+and all directions (see [[rfdir]]). Abinit will calculate first-order
 wave functions for each atom and direction in turn, and use those to calculate
 2DTE's with respect to all pairs of atomic displacements and with respect to
 one atomic displacement and one component of electric field. These quantities,
@@ -599,8 +599,8 @@ the gradients are approximated by finite-difference expressions constructed
 from neighboring points in the **k** mesh. These are closely related to the
 ddk wave functions used in RF calculations in section 2 and introduced in
 [[lesson:rf1#5|tutorial DFPT1, section 5]]. We will use [[berryopt]] = -1,
-which utilizes an improved coding of the calculation, and must specify
-[[rfdir]] = 1 1 1 so that the cartesian components of the polarization are computed.
+which utilizes an improved coding of the calculation.
+With the default [[rfdir]] = 1 1 1 all the cartesian components of the polarization are computed.
 
 Now, run the *telast_4.abi* calculation, which should only take a minute or two, and
 edit *telast_4.abo*. To calculate the elastic constants, we need to find the

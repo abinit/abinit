@@ -235,12 +235,8 @@ P          mk1mem4          4
            prtpot2          0
            prtpot3          1
            prtpot4          1
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          1       1
-          rfatpol4          1       2
-            rfdir1          0       0       0
-            rfdir2          0       0       0
+            rfdir1          1       1       1
+            rfdir2          1       1       1
             rfdir3          1       0       0
             rfdir4          1       1       1
            rfelfd1          0
@@ -723,7 +719,7 @@ tolerances: {tolwfr: 1.00E-22, }
 
  WARNING : Localization tensor calculation (this does not apply to other properties).
   Not all d/dk perturbations were computed. So the localization tensor in reciprocal space is incomplete,
-  and transformation to cartesian coordinates may be wrong.
+  and transformation to cartesian coordinates may be wrong. Check input variable rfdir.
 
  respfn : d/dk was computed, but no 2DTE, so no DDB output.
 
@@ -1377,12 +1373,8 @@ P          mk1mem4          4
            prtpot2          0
            prtpot3          1
            prtpot4          1
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          1       1
-          rfatpol4          1       2
-            rfdir1          0       0       0
-            rfdir2          0       0       0
+            rfdir1          1       1       1
+            rfdir2          1       1       1
             rfdir3          1       0       0
             rfdir4          1       1       1
            rfelfd1          0

@@ -10,7 +10,6 @@
 # Berry phase calculation of the polarization
 # berryopt -1 triggers the implementation of M. Viethen
 berryopt -1
-rfdir 1 1 1
 
 # three cell geometries will be computed
 ndtset 3

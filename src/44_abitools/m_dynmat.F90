@@ -1167,8 +1167,7 @@ subroutine chkph3(carflg,idir,mpert,natom)
  if(send==1)then
    write(msg, '(a,a,a,a)' )&
    ' chkph3 : WARNING -',ch10,&
-   '  The dynamical matrix was incomplete :',&
-   ' phonon frequencies may be wrong ...'
+   '  Dynamical matrix incomplete, phonon frequencies may be wrong, check input variables rfatpol and rfdir.'
    call wrtout([std_out, ab_out],msg)
  end if
 

@@ -253,20 +253,8 @@ P          mk1mem           1
               qpt12    1.00000000E-01  1.00000000E-01  2.00000000E-01
               qpt13    1.00000000E-01  1.00000000E-01  2.00000000E-01
               qpt14    1.00000000E-01  1.00000000E-01  2.00000000E-01
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          3       3
-          rfatpol4          3       3
-          rfatpol12         1       1
-          rfatpol13         3       3
-          rfatpol14         3       3
-            rfdir1          0       0       0
-            rfdir2          0       0       0
-            rfdir3          0       0       1
-            rfdir4          0       0       1
-            rfdir12         0       0       0
-            rfdir13         0       0       1
-            rfdir14         0       0       1
+          rfatpol           3       3
+            rfdir           0       0       1
            rfphon1          0
            rfphon2          0
            rfphon3          1
@@ -1469,7 +1457,7 @@ tolerances: {tolvrs: 1.00E-08, }
 -  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
 -  0.000000E+00  2.206569E+02  2.206569E+02
  chkph3 : WARNING -
-  The dynamical matrix was incomplete : phonon frequencies may be wrong ...
+  Dynamical matrix incomplete, phonon frequencies may be wrong, check input variables rfatpol and rfdir.
 
 ================================================================================
 == DATASET  4 ==================================================================
@@ -1707,7 +1695,7 @@ tolerances: {tolvrs: 1.00E-08, }
 -  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
 -  0.000000E+00  0.000000E+00  2.206569E+02
  chkph3 : WARNING -
-  The dynamical matrix was incomplete : phonon frequencies may be wrong ...
+  Dynamical matrix incomplete, phonon frequencies may be wrong, check input variables rfatpol and rfdir.
 
 ================================================================================
 == DATASET 12 ==================================================================
@@ -2127,7 +2115,7 @@ tolerances: {tolvrs: 1.00E-08, }
 -  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
 -  0.000000E+00  1.041428E+02  1.664572E+02
  chkph3 : WARNING -
-  The dynamical matrix was incomplete : phonon frequencies may be wrong ...
+  Dynamical matrix incomplete, phonon frequencies may be wrong, check input variables rfatpol and rfdir.
 
 ================================================================================
 == DATASET 14 ==================================================================
@@ -2371,7 +2359,7 @@ tolerances: {tolvrs: 1.00E-08, }
 -  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
 -  0.000000E+00  0.000000E+00  1.388411E+02
  chkph3 : WARNING -
-  The dynamical matrix was incomplete : phonon frequencies may be wrong ...
+  Dynamical matrix incomplete, phonon frequencies may be wrong, check input variables rfatpol and rfdir.
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -2509,20 +2497,8 @@ P          mk1mem           1
               qpt12    1.00000000E-01  1.00000000E-01  2.00000000E-01
               qpt13    1.00000000E-01  1.00000000E-01  2.00000000E-01
               qpt14    1.00000000E-01  1.00000000E-01  2.00000000E-01
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          3       3
-          rfatpol4          3       3
-          rfatpol12         1       1
-          rfatpol13         3       3
-          rfatpol14         3       3
-            rfdir1          0       0       0
-            rfdir2          0       0       0
-            rfdir3          0       0       1
-            rfdir4          0       0       1
-            rfdir12         0       0       0
-            rfdir13         0       0       1
-            rfdir14         0       0       1
+          rfatpol           3       3
+            rfdir           0       0       1
            rfphon1          0
            rfphon2          0
            rfphon3          1

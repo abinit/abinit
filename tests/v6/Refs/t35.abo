@@ -425,18 +425,6 @@ P          mk1mem          32
               qpt52    5.00000000E-01  2.50000000E-01 -2.50000000E-01
               qpt61    5.00000000E-01  0.00000000E+00  5.00000000E-01
               qpt62    5.00000000E-01  0.00000000E+00  5.00000000E-01
-            rfdir11         0       0       0
-            rfdir12         1       1       1
-            rfdir21         0       0       0
-            rfdir22         1       1       1
-            rfdir31         0       0       0
-            rfdir32         1       1       1
-            rfdir41         0       0       0
-            rfdir42         1       1       1
-            rfdir51         0       0       0
-            rfdir52         1       1       1
-            rfdir61         0       0       0
-            rfdir62         1       1       1
            rfphon11         0
            rfphon12         1
            rfphon21         0
@@ -2662,18 +2650,6 @@ P          mk1mem          32
               qpt52    5.00000000E-01  2.50000000E-01 -2.50000000E-01
               qpt61    5.00000000E-01  0.00000000E+00  5.00000000E-01
               qpt62    5.00000000E-01  0.00000000E+00  5.00000000E-01
-            rfdir11         0       0       0
-            rfdir12         1       1       1
-            rfdir21         0       0       0
-            rfdir22         1       1       1
-            rfdir31         0       0       0
-            rfdir32         1       1       1
-            rfdir41         0       0       0
-            rfdir42         1       1       1
-            rfdir51         0       0       0
-            rfdir52         1       1       1
-            rfdir61         0       0       0
-            rfdir62         1       1       1
            rfphon11         0
            rfphon12         1
            rfphon21         0

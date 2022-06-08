@@ -78,13 +78,13 @@ contains
 !!  nspden=number of spin densities
 !!  nsym=number of symmetries in space group
 !!  ntypat=number of atom types
+!!  nucefg=1 to print summary output, 2 for detailed output
 !!  ptcharge(ntypat)=user input charges on atoms to make simple point charge calc
 !!  paw_an(my_natom) <type(paw_an_type)>=paw arrays given on angular mesh
 !!  pawang <type(pawang_type)>=paw angular mesh and related data
 !!  pawrad(ntypat) <type(pawrad_type)>=paw radial mesh and related data
 !!  pawrhoij(my_natom) <type(pawrhoij_type)>= paw rhoij occupancies and related data
 !!  pawtab(ntypat) <type(pawtab_type)>=paw tabulated starting data
-!!  prtefg=1 to print summary output, 2 for detailed output
 !!  quadmom(ntypat)=quadrupole moments in barns of different atomic nuclei
 !!  rhor(nfft,nspden)=electron density on grid (strictly $\tilde{n}+\hat{n}$)
 !!  rprimd(3,3)=matrix relating cartesian coordinates to crystal coordinates
@@ -107,14 +107,14 @@ contains
 !!
 !! SOURCE
 
-  subroutine calc_efg(mpi_enreg,my_natom,natom,nfft,ngfft,nhat,nspden,nsym,ntypat,&
+  subroutine calc_efg(mpi_enreg,my_natom,natom,nfft,ngfft,nhat,nspden,nsym,nucefg,ntypat,&
                       paw_an,pawang,pawrad,pawrhoij,pawtab,&
-                      ptcharge,prtefg,quadmom,rhor,rprimd,symrel,tnons,typat,ucvol,usepaw,xred,zion,&
+                      ptcharge,quadmom,rhor,rprimd,symrel,tnons,typat,ucvol,usepaw,xred,zion,&
                       mpi_atmtab,comm_atom) ! optional arguments (parallelism)
 
     !Arguments ------------------------------------
     !scalars
-    integer,intent(in) :: my_natom,natom,nfft,nspden,nsym,ntypat,prtefg,usepaw
+    integer,intent(in) :: my_natom,natom,nfft,nspden,nsym,nucefg,ntypat,usepaw
     integer,optional,intent(in) :: comm_atom
     real(dp),intent(in) :: ucvol
     type(MPI_type),intent(in) :: mpi_enreg
@@ -183,7 +183,7 @@ contains
     !note here all atoms of the same type will have the same valence; in the future this
     !could be made more flexible by having ptcharge(natom) but that will require a slightly
     !different version than the existing make_efg_ion routine
-    if(prtefg > 2) then
+    if(nucefg > 2) then
        call make_efg_ion(efg_point_charge,natom,nsym,ntypat,rprimd,symrel,tnons,typat,ucvol,xred,ptcharge)
     end if
 
@@ -225,7 +225,7 @@ contains
        !  we always write Cq and eta, these are the NMR observables
        write(message,'(a,i3,a,i3,a,f13.6,a,f13.6)') ' Atom ',iatom,', typat ',typat(iatom),': Cq = ',cq,' MHz     eta = ',eta
        call wrtout(ab_out,message,'COLL')
-       if (prtefg > 1) then ! print detailed results on component EFG's
+       if (nucefg > 1) then ! print detailed results on component EFG's
           write(message,'(a,a,f13.6,a,a,3f13.6)')ch10,'      efg eigval : ',eigval(1),ch10,&
                &     '-         eigvec : ',matr(1,1),matr(2,1),matr(3,1)
           call wrtout(ab_out,message,'COLL')
@@ -260,7 +260,7 @@ contains
           write(message,'(a,3f13.6,a)')'      efg_paw : ',efg_paw(3,1,iatom),efg_paw(3,2,iatom),efg_paw(3,3,iatom),ch10
           call wrtout(ab_out,message,'COLL')
        end if
-       if (prtefg > 2) then ! write output of pure pointcharge calculation
+       if (nucefg > 2) then ! write output of pure pointcharge calculation
           matr(:,:) = efg_point_charge(:,:,iatom)
           call dsyev('V','U',N,matr,LDA,eigval,work,LWORK,INFO) ! get eigenvalues and eigenvectors
           if (eigval(3) > abs(eigval(1)) ) then ! In NMR, the convention is that whatever component is
