@@ -336,8 +336,7 @@ The interpolated band structure is in *tw90_4o_DS3_w90_band.dat*
 To plot the bands, open |gnuplot| in the terminal and type:
 
 ```
-gnuplot
-load "tw90_4o_DS3_w90_band.gnu"
+gnuplot "tw90_4o_DS3_w90_band.gnu"
 ```
 
 ![](wannier90_assets/load_tw90_4o_DS3_w90_band.png)
@@ -476,19 +475,21 @@ Finally, we want to compare the resulting band structure with the one coming fro
 This is enforced using the bands_plot keyword, along with a defined path which corresponds to the same path
 as the one calculated in ABINIT.
 
-To plot the resulting band structures, you will need a little bit of work. Copy this python script and run it:
+To plot the resulting band structures, you will need a little bit of work. Run this python script:
 
-    cp ../EIG_to_col.py .
+    python ../EIG_to_col.py
 
 Then you can use gnuplot to plot both the band structures together to compare them, with something like:
 
-    plot [][0:18] "tw90_6_2o_DS3_w90_band.dat" u ($1/3.0470170):2 tit "Wannier90" w l lw 4, "band_struct.dat" u ($1/204):2 tit "DFT" l
+    echo 'plot [][0:9] "tw90_6_2o_DS3_w90_band.dat" u ($1/3.0470170):2 tit "Wannier90" w l lw 4, "band_struct.dat" u ($1/167):2 tit "DFT" w l
+    pause -1' > plot.gnu
+    gnuplot plot.gnu
 
 Performing the calculation with more converged parameters, we find the following band strcture:
 
 ![](wannier90_assets/Wannier90_vs_ABINIT.png) 
 
-The resulting Hamiltonian is written as the tw90_6_2o_DS3_w90_hr.dat.
+The resulting Hamiltonian is written as the tw90_6_2o_DS3_w90_hr.dat file.
 It can be used for example using the TRIQS package to apply DMFT, thus correcting the
 DFT calculation to compute correctly the strong electronic correlations.
 We would then observe a Mott transition with respect to temperature.
