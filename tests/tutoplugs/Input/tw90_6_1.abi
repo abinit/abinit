@@ -30,8 +30,8 @@ jdtset           1 2
 # Shared parameters
 nband            38
 nbdbuf           4     # Extra bands easing convergence
-ecut             14    # Low but sufficient
-pawecutdg        22    # Low but sufficient
+ecut             10    # Low but sufficient
+pawecutdg        18    # Low but sufficient
 occopt           3     # Metal with partially occupied orbitals
 tsmear           0.01  # Effective temperature
 
@@ -40,7 +40,7 @@ pawprtvol        3
 nstep            100
 nline            3
 nnsclo           3
-tolwfr           1.0e-10
+tolwfr           1.0e-6
 istwfk          *1
 
 #############################################################################
