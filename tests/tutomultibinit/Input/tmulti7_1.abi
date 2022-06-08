@@ -33,8 +33,8 @@ bound_penalty = 1.001  # Penalty on the Goal Function (GF_new/GF_init) can't be 
 #%% md_hist = tmulti6_HIST.nc
 #%% [files]
 #%% files_to_test =
-#%%   tmulti7_1.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
-#%%   tmulti7_1_coeffs.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
+#%%   tmulti7_1.abo, tolnlines = 1, tolabs = 1.0e-6, tolrel = 1.0e-6, fld_options = -medium;
+#%%   tmulti7_1_coeffs.xml, tolnlines = 15, tolabs = 8.0, tolrel = 1.0e-4, fld_options = -medium;
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]

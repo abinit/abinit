@@ -25,17 +25,17 @@ dtion =  30       # Delta Time for IONs (default 100 , one atomic time unit is 2
 #%% input_ddb = tmulti6_DDB
 #%% need_cpp_vars = HAVE_XML
 #%% exclude_builders = .*_nag_7.0_.*
-#%% coeff_xml = tmulti8_1_coeffs.xml
+#%% coeff_xml = tmulti8_1.xml
 #%% [files]
 #%% files_to_test =
 #%%   tmulti8_1.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options = -medium;
 #%% [paral_info]
-#%% max_nprocs = 1
+#%% max_nprocs = 10
 #%% [extra_info]
 #%% authors = L. BASTOGNE
 #%% keywords = Effective potential, multibinit
 #%% description = 
-#%%   runnong a molecular dynamics using an effective lattice model
+#%%   running a molecular dynamics using an effective lattice model
 #%% topics = LatticeModel
 #%%<END TEST_INFO>
 

@@ -16,4 +16,7 @@ inp_files = [
     "tmulti5_1.abi",   # basic Multibinit spin dynamics run
     "tmulti5_2.abi",   # LaFeO3 MvT
     "tmulti5_3.abi",   # 1D AFM chain with DMI (spin canting example)
+    "tmulti6_1.abi",   # Fit BaHfO3 on 1 atom
+    "tmulti7_1.abi",   # Bounding BaHfO3 
+    "tmulti8_1.abi",   # MD
 ]

@@ -20,8 +20,9 @@ fit_generatecoeff = 1 # Default 1. Flag to activate the generation of the possib
 fit_rangePower = 3 4  # Range for the powers of the polynomial coefficient (default 3 to 4 )
 fit_cutoff = 5.6      # Cut-off for the interaction  (in Bohr) (default 1 unit cell)
 fit_dispterms = 1     # Activate the fit of terms related to displacement
-fit_SPCoupling = 1    # Activate the strain phonon coupling. This option will add terms like (Ba-Hf)^1eta^1
+fit_SPCoupling = 1    # Activate the strain phonon coupling. This option will add terms like (Ba-Hf)^3eta^1
 fit_SPC_maxS = 1      # Range for the powers of the polynomial coefficient related to strain in strain-phonon coupling
+fit_iatom = 2
 fit_EFS = 0 1 1       # Fit on the (E)nergy (F)orces and (S)tresses
 sel_EFS = 0 1 1       # Select coefficient on the (E)nergy (F)orces and (S)tresses
 
