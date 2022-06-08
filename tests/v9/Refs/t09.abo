@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.7.4 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,18 +14,18 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h36 )
+.Starting date : Wed  4 May 2022.
+- ( at 01h26 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v9_t09-t10/t09.in
-- output file    -> t09.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/v9_t09-t10/t09.abi
+- output file    -> t09.abo
 - root for input  files -> t09i
 - root for output files -> t09o
 
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ga.xml
+-   /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ga.xml
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/As.xml
+-   /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/As.xml
 
  DATASET    1 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
@@ -40,7 +40,7 @@
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        36    nfftf =     46656
 ================================================================================
-P This job should need less than                      16.447 Mbytes of memory.
+P This job should need less than                      16.462 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.092 Mbytes ; DEN or POT disk file :      0.358 Mbytes.
 ================================================================================
@@ -59,7 +59,7 @@ _ WF disk file :      0.092 Mbytes ; DEN or POT disk file :      0.358 Mbytes.
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        36    nfftf =     46656
 ================================================================================
-P This job should need less than                      14.370 Mbytes of memory.
+P This job should need less than                      14.403 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.195 Mbytes ; DEN or POT disk file :      0.358 Mbytes.
 ================================================================================
@@ -78,7 +78,7 @@ _ WF disk file :      0.195 Mbytes ; DEN or POT disk file :      0.358 Mbytes.
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        36    nfftf =     46656
 ================================================================================
-P This job should need less than                      15.969 Mbytes of memory.
+P This job should need less than                      16.232 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      1.547 Mbytes ; DEN or POT disk file :      0.358 Mbytes.
 ================================================================================
@@ -329,15 +329,21 @@ P          mk1mem6         16
         optdriver5          1
         optdriver6          1
         pawecutdg      2.40000000E+01 Hartree
+           prtpot1          0
+           prtpot2          0
+           prtpot3          0
+           prtpot4          1
+           prtpot5          1
+           prtpot6          1
             prtwf1          1
             prtwf2          1
             prtwf3          1
             prtwf4          3
             prtwf5          3
             prtwf6          3
-            rfdir1          0       0       0
-            rfdir2          0       0       0
-            rfdir3          0       0       0
+            rfdir1          1       1       1
+            rfdir2          1       1       1
+            rfdir3          1       1       1
             rfdir4          1       0       0
             rfdir5          0       1       0
             rfdir6          0       0       1
@@ -439,9 +445,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     24.000   => boxcut(ratio)=   2.17791
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ga.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ga.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ga.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ga.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ga.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ga.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.10359248
@@ -459,9 +465,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/As.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/As.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/As.xml
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/As.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/As.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/As.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.10391912
@@ -746,10 +752,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   4.1189E-02  8.5320E-02  2.3941E-01  3.3175E-01  3.9095E-01  4.1775E-01
   5.4478E-01  6.1285E-01  6.2502E-01  6.5033E-01  6.9346E-01  8.2293E-01
   8.6472E-01  8.8488E-01  9.3600E-01  9.4209E-01  9.5728E-01  1.0214E+00
-  prteigrs : nnsclo,ikpt=  100    1 max resid (incl. the buffer)=  1.22717E-09
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-  prteigrs : nnsclo,ikpt=  100    2 max resid (incl. the buffer)=  1.43249E-04
 
 
 --- !ResultsGS
@@ -928,24 +932,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   4.1189E-02  8.5320E-02  2.3941E-01  3.3175E-01  3.9095E-01  4.1775E-01
   5.4478E-01  6.1285E-01  6.2502E-01  6.5033E-01  6.9346E-01  8.2293E-01
   8.6472E-01  8.8488E-01  9.3600E-01  9.4209E-01  9.5728E-01  1.0214E+00
-  prteigrs : nnsclo,ikpt=  100    1 max resid (incl. the buffer)=  7.53021E-11
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-  prteigrs : nnsclo,ikpt=  100    2 max resid (incl. the buffer)=  7.53021E-11
-  prteigrs : nnsclo,ikpt=  100    3 max resid (incl. the buffer)=  7.53021E-11
-  prteigrs : nnsclo,ikpt=  100    4 max resid (incl. the buffer)=  3.11772E-05
-  prteigrs : nnsclo,ikpt=  100    5 max resid (incl. the buffer)=  7.53021E-11
-  prteigrs : nnsclo,ikpt=  100    6 max resid (incl. the buffer)=  7.53021E-11
-  prteigrs : nnsclo,ikpt=  100    7 max resid (incl. the buffer)=  7.53022E-11
-  prteigrs : nnsclo,ikpt=  100    8 max resid (incl. the buffer)=  3.11772E-05
-  prteigrs : nnsclo,ikpt=  100    9 max resid (incl. the buffer)=  7.53021E-11
-  prteigrs : nnsclo,ikpt=  100   10 max resid (incl. the buffer)=  7.53021E-11
-  prteigrs : nnsclo,ikpt=  100   11 max resid (incl. the buffer)=  3.11772E-05
-  prteigrs : nnsclo,ikpt=  100   12 max resid (incl. the buffer)=  7.53021E-11
-  prteigrs : nnsclo,ikpt=  100   13 max resid (incl. the buffer)=  7.53021E-11
-  prteigrs : nnsclo,ikpt=  100   14 max resid (incl. the buffer)=  7.53021E-11
-  prteigrs : nnsclo,ikpt=  100   15 max resid (incl. the buffer)=  7.53021E-11
-  prteigrs : nnsclo,ikpt=  100   16 max resid (incl. the buffer)=  3.11772E-05
 
 
 --- !ResultsGS
@@ -1109,7 +1097,6 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=     24.000   => boxcut(ratio)=   2.17791
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t09o_DS3_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -1126,7 +1113,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t09o_DS3_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1216,7 +1202,6 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=     24.000   => boxcut(ratio)=   2.17791
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t09o_DS3_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -1233,7 +1218,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t09o_DS3_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1323,7 +1307,6 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=     24.000   => boxcut(ratio)=   2.17791
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t09o_DS3_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -1340,7 +1323,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t09o_DS3_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1587,15 +1569,21 @@ P          mk1mem6         16
         optdriver5          1
         optdriver6          1
         pawecutdg      2.40000000E+01 Hartree
+           prtpot1          0
+           prtpot2          0
+           prtpot3          0
+           prtpot4          1
+           prtpot5          1
+           prtpot6          1
             prtwf1          1
             prtwf2          1
             prtwf3          1
             prtwf4          3
             prtwf5          3
             prtwf6          3
-            rfdir1          0       0       0
-            rfdir2          0       0       0
-            rfdir3          0       0       0
+            rfdir1          1       1       1
+            rfdir2          1       1       1
+            rfdir3          1       1       1
             rfdir4          1       0       0
             rfdir5          0       1       0
             rfdir6          0       0       1
@@ -1768,10 +1756,10 @@ P          mk1mem6         16
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          7.3  wall=          7.4
+- Proc.   0 individual time (sec): cpu=          8.0  wall=          8.2
 
 ================================================================================
 
  Calculation completed.
-.Delivered  32 WARNINGs and  10 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          7.3  wall=          7.4
+.Delivered  30 WARNINGs and  11 COMMENTs to log file.
++Overall time at end (sec) : cpu=          8.0  wall=          8.2

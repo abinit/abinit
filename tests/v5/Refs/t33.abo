@@ -1,8 +1,8 @@
 
-.Version 9.5.1 of ABINIT 
+.Version 9.7.4 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_intel19.0 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 12 Apr 2021.
-- ( at 11h21 )
+.Starting date : Thu 26 May 2022.
+- ( at 13h06 )
   
 - input  file    -> /home/jzwanzig/abinit/abinit/tmp-build/intel/fast/tests/Test_suite/v5_t33/t33.abi
 - output file    -> t33.abo
@@ -36,7 +36,7 @@
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        40    nfftf =     64000
 ================================================================================
-P This job should need less than                      37.322 Mbytes of memory.
+P This job should need less than                      37.405 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.744 Mbytes ; DEN or POT disk file :      0.979 Mbytes.
 ================================================================================
@@ -73,6 +73,7 @@ P           mkmem           1
             nstep          50
              nsym          48
            ntypat           2
+           nucefg           2
               occ      1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
@@ -89,7 +90,6 @@ P           mkmem           1
         pawecutdg      3.00000000E+01 Hartree
          pawmixdg           1
            prtden           0
-           prtefg           2
            prteig           0
             prtwf           0
           quadmom      2.20000000E-01 -2.55800000E-02
@@ -965,6 +965,7 @@ P           mkmem           1
             nstep          50
              nsym          48
            ntypat           2
+           nucefg           2
               occ      1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
@@ -981,7 +982,6 @@ P           mkmem           1
         pawecutdg      3.00000000E+01 Hartree
          pawmixdg           1
            prtden           0
-           prtefg           2
            prteig           0
             prtwf           0
           quadmom      2.20000000E-01 -2.55800000E-02
@@ -1093,7 +1093,7 @@ P           mkmem           1
 -
 - [2] First-principles calculation of electric field gradients in metals, semiconductors, and insulators.
 - J.W. Zwanziger, M. Torrent, Applied Magnetic Resonance 33, 447-456 (2008).
-- Comment: to be cited in case the computation of electric field gradient is used, i.e. prtefg>0 and usepaw=1.
+- Comment: to be cited in case the computation of electric field gradient is used, i.e. nucefg>0 and usepaw=1.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#zwanziger2008
 -
 - [3] Gamma and beta cerium: DFT+U calculations of ground-state parameters.

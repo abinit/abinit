@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.7.4 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,16 +14,16 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h37 )
+.Starting date : Wed  4 May 2022.
+- ( at 01h27 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v9_t41/t41.in
-- output file    -> t41.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/v9_t41/t41.abi
+- output file    -> t41.abo
 - root for input  files -> t41i
 - root for output files -> t41o
 
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Fe.xml
+-   /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Fe.xml
 
  DATASET    1 : space group Im -3 m (#229); Bravais cI (body-center cubic)
 ================================================================================
@@ -38,7 +38,7 @@
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        18    nfftf =      5832
 ================================================================================
-P This job should need less than                       8.337 Mbytes of memory.
+P This job should need less than                       8.759 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      2.158 Mbytes ; DEN or POT disk file :      0.091 Mbytes.
 ================================================================================
@@ -366,10 +366,10 @@ P          mk1mem          64
           pawnphi           8
         pawntheta           5
          pawxcdev           0
+           prtpot1          0
+           prtpot2          1
               qpt1     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt2     0.00000000E+00  0.00000000E+00  5.00000000E-01
-            rfdir1          0       0       0
-            rfdir2          1       1       1
            rfphon1          0
            rfphon2          1
             rprim     -5.0000000000E-01  5.0000000000E-01  5.0000000000E-01
@@ -455,9 +455,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.15090
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Fe.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Fe.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Fe.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Fe.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Fe.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Fe.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.11531574
@@ -747,7 +747,6 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.03316
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t41o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -770,10 +769,8 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t41o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t41o_DS1_WFK
  dfpt_looppert : total number of electrons, from k and k+q
   fully or partially occupied states are    1.600000E+01 and    1.600000E+01.
  Initialisation of the first-order wave-functions :
@@ -786,9 +783,9 @@ tolerances: {tolwfr: 1.00E-12, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   326.01032363658      2.155E+02 8.217E-01 7.595E+05
- ETOT  2   19.659621710370     -3.064E+02 1.026E-01 4.820E+04
- ETOT  3   1.1924071407075     -1.847E+01 9.542E-03 7.463E+02
+-ETOT  1   326.01032363536      2.155E+02 8.217E-01 7.595E+05
+ ETOT  2   19.659621711500     -3.064E+02 1.026E-01 4.820E+04
+ ETOT  3   1.1924071424191     -1.847E+01 9.542E-03 7.463E+02
 
  scprqt:  WARNING -
   nstep=    3 was not enough SCF cycles to converge;
@@ -818,9 +815,9 @@ tolerances: {tolwfr: 1.00E-12, }
  16 Contribution from 1st-order change of wavefunctions overlap
  eovl1 =   7.39993704E+02
  Resulting in :
- 2DEtotal=    0.1192407141E+01 Ha. Also 2DEtotal=    0.324470484232E+02 eV
+ 2DEtotal=    0.1192407142E+01 Ha. Also 2DEtotal=    0.324470484698E+02 eV
     (2DErelax=   -1.0927046771E+02 Ha. 2DEnonrelax=    1.1046287485E+02 Ha)
-    (  non-var. 2DEtotal :   -8.9772262107E+00 Ha)
+    (  non-var. 2DEtotal :   -8.9772262098E+00 Ha)
 
 
 --------------------------------------------------------------------------------
@@ -832,10 +829,8 @@ tolerances: {tolwfr: 1.00E-12, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t41o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t41o_DS1_WFK
  dfpt_looppert : total number of electrons, from k and k+q
   fully or partially occupied states are    1.600000E+01 and    1.600000E+01.
  Initialisation of the first-order wave-functions :
@@ -848,9 +843,9 @@ tolerances: {tolwfr: 1.00E-12, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   3316.6935327025      3.227E+03 1.566E+00 1.424E+07
- ETOT  2   59.364398068772     -3.257E+03 4.900E-01 1.987E+05
- ETOT  3   7.6872751158783     -5.168E+01 1.352E-02 1.618E+03
+-ETOT  1   3316.6935327012      3.227E+03 1.566E+00 1.424E+07
+ ETOT  2   59.364398069510     -3.257E+03 4.900E-01 1.987E+05
+ ETOT  3   7.6872751186095     -5.168E+01 1.352E-02 1.618E+03
 
  scprqt:  WARNING -
   nstep=    3 was not enough SCF cycles to converge;
@@ -880,9 +875,9 @@ tolerances: {tolwfr: 1.00E-12, }
  16 Contribution from 1st-order change of wavefunctions overlap
  eovl1 =   1.02593019E+03
  Resulting in :
- 2DEtotal=    0.7687275116E+01 Ha. Also 2DEtotal=    0.209181394016E+03 eV
-    (2DErelax=   -8.1944682762E+01 Ha. 2DEnonrelax=    8.9631957878E+01 Ha)
-    (  non-var. 2DEtotal :   -1.2555266268E+00 Ha)
+ 2DEtotal=    0.7687275119E+01 Ha. Also 2DEtotal=    0.209181394090E+03 eV
+    (2DErelax=   -8.1944682759E+01 Ha. 2DEnonrelax=    8.9631957878E+01 Ha)
+    (  non-var. 2DEtotal :   -1.2555266259E+00 Ha)
 
 ================================================================================
 
@@ -896,17 +891,17 @@ tolerances: {tolwfr: 1.00E-12, }
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
   
-   1    1   1    1        -8.9772262107         0.0000000000
-   1    1   2    1         4.4336748482         0.0000000000
-   1    1   3    1         2.2717756813         0.0000000000
+   1    1   1    1        -8.9772262098         0.0000000000
+   1    1   2    1         4.4336748524         0.0000000000
+   1    1   3    1         2.2717756787         0.0000000000
   
-   2    1   1    1         4.4336748482         0.0000000000
-   2    1   2    1        -8.9772262107         0.0000000000
-   2    1   3    1         2.2717756813         0.0000000000
+   2    1   1    1         4.4336748524         0.0000000000
+   2    1   2    1        -8.9772262098         0.0000000000
+   2    1   3    1         2.2717756787         0.0000000000
   
-   3    1   1    1         2.2717756813         0.0000000000
-   3    1   2    1         2.2717756813         0.0000000000
-   3    1   3    1         4.2916199955        -0.0000436473
+   3    1   1    1         2.2717756787         0.0000000000
+   3    1   2    1         2.2717756787         0.0000000000
+   3    1   3    1         4.2916199981        -0.0000436474
   
   
   Dynamical matrix, in cartesian coordinates,
@@ -914,17 +909,17 @@ tolerances: {tolwfr: 1.00E-12, }
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    1   1    1        -0.0061655752        -0.0000018944
+   1    1   1    1        -0.0061655753        -0.0000018944
    1    1   2    1         0.5759047833        -0.0000018944
    1    1   3    1         0.0000000000         0.0000000000
   
    2    1   1    1         0.5759047833        -0.0000018944
-   2    1   2    1        -0.0061655752        -0.0000018944
+   2    1   2    1        -0.0061655753        -0.0000018944
    2    1   3    1         0.0000000000         0.0000000000
   
    3    1   1    1         0.0000000000         0.0000000000
    3    1   2    1         0.0000000000         0.0000000000
-   3    1   3    1        -0.3944055002         0.0000000000
+   3    1   3    1        -0.3944054998         0.0000000000
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.50000
  Phonon energies in Hartree :
@@ -940,7 +935,7 @@ tolerances: {tolwfr: 1.00E-12, }
               amu      5.58470000E+01
              ecut      1.00000000E+01 Hartree
            etotal1    -1.2434825700E+02
-           etotal2     7.6872751159E+00
+           etotal2     7.6872751186E+00
             fcart1    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
 -          fftalg         312
@@ -1234,10 +1229,10 @@ P          mk1mem          64
           pawnphi           8
         pawntheta           5
          pawxcdev           0
+           prtpot1          0
+           prtpot2          1
               qpt1     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt2     0.00000000E+00  0.00000000E+00  5.00000000E-01
-            rfdir1          0       0       0
-            rfdir2          1       1       1
            rfphon1          0
            rfphon2          1
             rprim     -5.0000000000E-01  5.0000000000E-01  5.0000000000E-01
@@ -1396,10 +1391,10 @@ P          mk1mem          64
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         26.8  wall=         26.9
+- Proc.   0 individual time (sec): cpu=         32.0  wall=         32.2
 
 ================================================================================
 
  Calculation completed.
-.Delivered  19 WARNINGs and   8 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         26.8  wall=         26.9
+.Delivered   7 WARNINGs and   4 COMMENTs to log file.
++Overall time at end (sec) : cpu=         32.0  wall=         32.2

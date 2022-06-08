@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.7.4 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h26 )
+.Starting date : Wed  4 May 2022.
+- ( at 01h23 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v3_t77/t77.in
-- output file    -> t77.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/v3_t77/t77.abi
+- output file    -> t77.abo
 - root for input  files -> t77i
 - root for output files -> t77o
 
@@ -34,7 +34,7 @@
 -    mband =           9        mffmem =           1         mkmem =           2
        mpw =         150          nfft =        4096          nkpt =           2
 ================================================================================
-P This job should need less than                       2.206 Mbytes of memory.
+P This job should need less than                       2.324 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.043 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
@@ -51,7 +51,7 @@ _ WF disk file :      0.043 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =           8        mffmem =           1         mkmem =          16
        mpw =         150          nfft =        4096          nkpt =          16
 ================================================================================
-P This job should need less than                       1.998 Mbytes of memory.
+P This job should need less than                       2.116 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.295 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
@@ -219,14 +219,10 @@ P          mk1mem4         16
         optdriver3          1
         optdriver4          1
            prtbbb           1
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          1       1
-          rfatpol4          1       2
-            rfdir1          0       0       0
-            rfdir2          0       0       0
-            rfdir3          1       1       1
-            rfdir4          1       1       1
+           prtpot1          0
+           prtpot2          0
+           prtpot3          1
+           prtpot4          1
            rfelfd1          0
            rfelfd2          0
            rfelfd3          2
@@ -328,8 +324,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.17519
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/56ba.psp_mod
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/56ba.psp_mod
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/56ba.psp_mod
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/56ba.psp_mod
 - Barium.ion 5s2.5p6.6s0.5d0 rcs=rcp=rcd=1.7 ecut=22/28
 - 56.00000  10.00000    940000                znucl, zion, pspdat
     4    3    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -346,8 +342,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              1   -6.938476   21.148499
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/8o.psp_mod
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/8o.psp_mod
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/8o.psp_mod
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/8o.psp_mod
 - 1.65bohr 35 hartree exncc psp for oxygen with core 19 june 1992
 -  8.00000   6.00000    920619                znucl, zion, pspdat
     4    3    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -612,7 +608,6 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.17519
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t77o_DS2_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -634,7 +629,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t77o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -696,7 +690,6 @@ tolerances: {tolwfr: 1.00E-20, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t77o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -759,7 +752,6 @@ tolerances: {tolwfr: 1.00E-20, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t77o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1700,7 +1692,6 @@ meta: {optdriver: 1, rfelfd: 3, rfphon: 1, }
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.17519
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t77o_DS2_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -1750,7 +1741,6 @@ meta: {optdriver: 1, rfelfd: 3, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t77o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1768,14 +1758,14 @@ tolerances: {toldfe: 1.00E-10, }
  ETOT  3   4.7357817765807     -4.530E+00 4.860E-03 9.519E+00
  ETOT  4   4.7113142006482     -2.447E-02 3.201E-05 3.746E-02
  ETOT  5   4.7111709450959     -1.433E-04 5.063E-07 1.130E-03
- ETOT  6   4.7111667167643     -4.228E-06 2.139E-08 3.129E-05
+ ETOT  6   4.7111667167641     -4.228E-06 2.139E-08 3.129E-05
  ETOT  7   4.7111666201969     -9.657E-08 5.482E-10 2.537E-07
  ETOT  8   4.7111666190073     -1.190E-09 2.159E-12 2.441E-09
- ETOT  9   4.7111666189959     -1.148E-11 1.086E-13 6.323E-12
- ETOT 10   4.7111666189957     -2.274E-13 8.238E-16 2.445E-13
+ ETOT  9   4.7111666189957     -1.160E-11 1.086E-13 6.323E-12
+ ETOT 10   4.7111666189957      0.000E+00 8.238E-16 2.445E-13
 
  At SCF step   10, etot is converged : 
-  for the second time, diff in etot=  2.274E-13 < toldfe=  1.000E-10
+  for the second time, diff in etot=  0.000E+00 < toldfe=  1.000E-10
 -open ddk wf file :t77o_DS3_1WF7
 -open ddk wf file :t77o_DS3_1WF8
 -open ddk wf file :t77o_DS3_1WF9
@@ -1814,7 +1804,6 @@ tolerances: {toldfe: 1.00E-10, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t77o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1829,17 +1818,17 @@ tolerances: {toldfe: 1.00E-10, }
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   301.98220194300     -2.764E+02 1.979E+00 5.507E+04
  ETOT  2   80.742102132980     -2.212E+02 6.370E-01 1.134E+03
- ETOT  3   75.069915905549     -5.672E+00 7.126E-03 5.319E+00
+ ETOT  3   75.069915905548     -5.672E+00 7.126E-03 5.319E+00
  ETOT  4   75.051743672712     -1.817E-02 1.675E-04 9.825E-02
  ETOT  5   75.051383814200     -3.599E-04 2.853E-06 9.913E-04
  ETOT  6   75.051379407748     -4.406E-06 3.888E-08 6.110E-05
  ETOT  7   75.051379183207     -2.245E-07 4.014E-10 1.345E-07
- ETOT  8   75.051379182358     -8.483E-10 1.370E-11 3.535E-09
- ETOT  9   75.051379182335     -2.319E-11 1.596E-13 8.350E-11
- ETOT 10   75.051379182335     -3.979E-13 3.109E-15 4.697E-12
+ ETOT  8   75.051379182358     -8.482E-10 1.370E-11 3.535E-09
+ ETOT  9   75.051379182335     -2.353E-11 1.596E-13 8.350E-11
+ ETOT 10   75.051379182335     -2.274E-13 3.109E-15 4.697E-12
 
  At SCF step   10, etot is converged : 
-  for the second time, diff in etot=  3.979E-13 < toldfe=  1.000E-10
+  for the second time, diff in etot=  2.274E-13 < toldfe=  1.000E-10
 -open ddk wf file :t77o_DS3_1WF7
 -open ddk wf file :t77o_DS3_1WF8
 -open ddk wf file :t77o_DS3_1WF9
@@ -1877,7 +1866,6 @@ tolerances: {toldfe: 1.00E-10, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t77o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -2729,14 +2717,10 @@ P          mk1mem4         16
         optdriver3          1
         optdriver4          1
            prtbbb           1
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          1       1
-          rfatpol4          1       2
-            rfdir1          0       0       0
-            rfdir2          0       0       0
-            rfdir3          1       1       1
-            rfdir4          1       1       1
+           prtpot1          0
+           prtpot2          0
+           prtpot3          1
+           prtpot4          1
            rfelfd1          0
            rfelfd2          0
            rfelfd3          2
@@ -2892,10 +2876,10 @@ P          mk1mem4         16
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          5.6  wall=          5.7
+- Proc.   0 individual time (sec): cpu=          7.1  wall=          7.5
 
 ================================================================================
 
  Calculation completed.
-.Delivered   5 WARNINGs and  15 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          5.6  wall=          5.7
+.Delivered   3 WARNINGs and  12 COMMENTs to log file.
++Overall time at end (sec) : cpu=          7.1  wall=          7.5

@@ -6,7 +6,7 @@
 !! This module deals with rank objects for hashing k-point vector lists
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2021 ABINIT group (MVer,HM)
+!! Copyright (C) 2010-2022 ABINIT group (MVer,HM)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -238,7 +238,7 @@ type(krank_t) function krank_new(nkpt, kpts, nsym, symrec, time_reversal, max_li
      irank = new%get_rank(kpts(:,ikpt))
 
      if (irank > new%max_rank .or. irank < new%min_rank) then
-       write(msg,'(a,2i0)')" rank above max_rank or bellow min_rank, ikpt, rank ", ikpt, irank
+       write(msg,'(a,2i0)')" rank above max_rank or below min_rank, ikpt, rank ", ikpt, irank
        ABI_ERROR(msg)
      end if
      new%invrank(irank) = ikpt

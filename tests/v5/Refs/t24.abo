@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.7.4 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h27 )
+.Starting date : Wed  4 May 2022.
+- ( at 01h24 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v5_t24/t24.in
-- output file    -> t24.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/v5_t24/t24.abi
+- output file    -> t24.abo
 - root for input  files -> t24i
 - root for output files -> t24o
 
@@ -34,7 +34,7 @@
 -    mband =           5        mffmem =           1         mkmem =           2
        mpw =          52          nfft =        1728          nkpt =           2
 ================================================================================
-P This job should need less than                       1.430 Mbytes of memory.
+P This job should need less than                       1.480 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.010 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
@@ -87,7 +87,7 @@ _ WF disk file :      0.018 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           2
        mpw =          52          nfft =        1728          nkpt =           2
 ================================================================================
-P This job should need less than                       1.464 Mbytes of memory.
+P This job should need less than                       1.564 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.018 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
@@ -140,7 +140,7 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           2
        mpw =          52          nfft =        1728          nkpt =           2
 ================================================================================
-P This job should need less than                       1.743 Mbytes of memory.
+P This job should need less than                       1.844 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.018 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
@@ -349,8 +349,15 @@ P          mk1mem33         4
         optdriver31         0
         optdriver32         1
         optdriver33         1
-          rfatpol           1       2
-            rfdir           1       1       1
+           prtpot11         0
+           prtpot12         1
+           prtpot13         1
+           prtpot21         0
+           prtpot22         1
+           prtpot23         1
+           prtpot31         0
+           prtpot32         1
+           prtpot33         1
            rfelfd11         0
            rfelfd12         2
            rfelfd13         3
@@ -461,8 +468,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/32ge.4.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/32ge.4.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosHGH_pwteter/32ge.4.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosHGH_pwteter/32ge.4.hgh
 - Hartwigsen-Goedecker-Hutter psp for Ge,  from PRB58, 3641 (1998)
 - 32.00000   4.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -487,8 +494,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              2    0.513181
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/52te.6.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/52te.6.hgh
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosHGH_pwteter/52te.6.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosHGH_pwteter/52te.6.hgh
 - Hartwigsen-Goedecker-Hutter psp for Te,  from PRB58, 3641 (1998)
 - 52.00000   6.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -687,7 +694,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t24o_DS11_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -709,7 +715,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t24o_DS11_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -780,7 +785,6 @@ tolerances: {tolwfr: 1.00E-16, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t24o_DS11_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -851,7 +855,6 @@ tolerances: {tolwfr: 1.00E-16, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t24o_DS11_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -975,7 +978,6 @@ meta: {optdriver: 1, rfelfd: 3, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t24o_DS11_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -1025,7 +1027,6 @@ meta: {optdriver: 1, rfelfd: 3, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t24o_DS11_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1048,14 +1049,14 @@ tolerances: {tolwfr: 1.00E-16, }
  ETOT  8  0.70926064685953     -1.040E-05 2.581E-07 7.657E-04
  ETOT  9  0.70925239942522     -8.247E-06 2.187E-08 7.704E-07
  ETOT 10  0.70925237722690     -2.220E-08 2.393E-09 4.654E-07
- ETOT 11  0.70925237260953     -4.617E-09 7.591E-12 1.356E-07
+ ETOT 11  0.70925237260952     -4.617E-09 7.591E-12 1.356E-07
  ETOT 12  0.70925237113472     -1.475E-09 1.667E-11 2.470E-09
- ETOT 13  0.70925237109734     -3.739E-11 5.743E-13 7.469E-10
- ETOT 14  0.70925237108813     -9.209E-12 5.666E-14 3.651E-12
- ETOT 15  0.70925237108806     -6.395E-14 8.432E-15 1.577E-12
- ETOT 16  0.70925237108805     -1.421E-14 1.101E-15 1.224E-13
- ETOT 17  0.70925237108797     -7.816E-14 2.333E-16 1.826E-14
- ETOT 18  0.70925237108797      0.000E+00 7.302E-17 5.158E-15
+ ETOT 13  0.70925237109734     -3.738E-11 5.743E-13 7.469E-10
+ ETOT 14  0.70925237108812     -9.216E-12 5.666E-14 3.651E-12
+ ETOT 15  0.70925237108806     -5.684E-14 8.432E-15 1.577E-12
+ ETOT 16  0.70925237108804     -2.132E-14 1.101E-15 1.224E-13
+ ETOT 17  0.70925237108798     -6.395E-14 2.333E-16 1.826E-14
+ ETOT 18  0.70925237108798      0.000E+00 7.302E-17 5.158E-15
 
  At SCF step   18   max residual=  7.30E-17 < tolwfr=  1.00E-16 =>converged.
 -open ddk wf file :t24o_DS12_1WF7
@@ -1096,7 +1097,6 @@ tolerances: {tolwfr: 1.00E-16, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t24o_DS11_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1112,10 +1112,10 @@ tolerances: {tolwfr: 1.00E-16, }
 -ETOT  1   36.207278996875     -6.624E+01 2.970E-01 3.282E+03
  ETOT  2   2.0926640461674     -3.411E+01 2.146E-01 9.627E+01
  ETOT  3  0.77989518058975     -1.313E+00 2.050E-02 3.042E+00
- ETOT  4  0.71895673039315     -6.094E-02 3.436E-03 4.476E-01
+ ETOT  4  0.71895673039317     -6.094E-02 3.436E-03 4.476E-01
  ETOT  5  0.71185497112485     -7.102E-03 3.196E-04 2.118E-01
- ETOT  6  0.70882748537109     -3.027E-03 6.250E-05 8.620E-03
- ETOT  7  0.70866052233434     -1.670E-04 7.332E-06 5.326E-04
+ ETOT  6  0.70882748537112     -3.027E-03 6.250E-05 8.620E-03
+ ETOT  7  0.70866052233431     -1.670E-04 7.332E-06 5.326E-04
  ETOT  8  0.70863771386995     -2.281E-05 5.638E-07 3.329E-05
  ETOT  9  0.70863512615149     -2.588E-06 1.672E-07 5.912E-06
  ETOT 10  0.70863468267306     -4.435E-07 2.132E-08 1.975E-06
@@ -1123,8 +1123,8 @@ tolerances: {tolwfr: 1.00E-16, }
  ETOT 12  0.70863459999138     -1.117E-08 3.384E-10 3.198E-08
  ETOT 13  0.70863459871218     -1.279E-09 8.023E-11 1.378E-08
  ETOT 14  0.70863459848094     -2.312E-10 1.325E-12 1.771E-09
- ETOT 15  0.70863459844453     -3.641E-11 2.776E-12 2.670E-10
- ETOT 16  0.70863459844161     -2.942E-12 3.224E-14 5.712E-11
+ ETOT 15  0.70863459844456     -3.639E-11 2.776E-12 2.670E-10
+ ETOT 16  0.70863459844161     -2.956E-12 3.224E-14 5.712E-11
  ETOT 17  0.70863459844124     -3.695E-13 1.748E-15 7.171E-12
  ETOT 18  0.70863459844101     -2.132E-13 9.975E-17 1.564E-12
 
@@ -1166,7 +1166,6 @@ tolerances: {tolwfr: 1.00E-16, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t24o_DS11_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1194,12 +1193,12 @@ tolerances: {tolwfr: 1.00E-16, }
  ETOT 12  -3836.7990620072     -1.191E-07 2.087E-08 3.128E-06
  ETOT 13  -3836.7990620414     -3.425E-08 1.317E-10 1.247E-06
  ETOT 14  -3836.7990620534     -1.195E-08 2.228E-10 4.836E-08
- ETOT 15  -3836.7990620541     -6.894E-10 2.394E-12 1.416E-08
+ ETOT 15  -3836.7990620541     -6.899E-10 2.394E-12 1.416E-08
  ETOT 16  -3836.7990620540      3.001E-11 2.553E-13 3.044E-09
- ETOT 17  -3836.7990620542     -2.110E-10 8.744E-14 4.679E-11
- ETOT 18  -3836.7990620543     -4.366E-11 4.025E-15 5.248E-12
+ ETOT 17  -3836.7990620542     -2.101E-10 8.744E-14 4.679E-11
+ ETOT 18  -3836.7990620543     -4.502E-11 4.025E-15 5.248E-12
  ETOT 19  -3836.7990620541      1.464E-10 5.264E-15 6.079E-12
- ETOT 20  -3836.7990620542     -7.731E-11 6.606E-16 1.270E-14
+ ETOT 20  -3836.7990620542     -7.594E-11 6.606E-16 1.270E-14
 -open ddk wf file :t24o_DS12_1WF7
 -open ddk wf file :t24o_DS12_1WF8
 -open ddk wf file :t24o_DS12_1WF9
@@ -1695,7 +1694,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t24o_DS21_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -1717,7 +1715,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t24o_DS21_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1789,7 +1786,6 @@ tolerances: {tolwfr: 1.00E-16, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t24o_DS21_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1861,7 +1857,6 @@ tolerances: {tolwfr: 1.00E-16, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t24o_DS21_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1986,7 +1981,6 @@ meta: {optdriver: 1, rfelfd: 3, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t24o_DS21_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -2036,7 +2030,6 @@ meta: {optdriver: 1, rfelfd: 3, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t24o_DS21_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -2050,9 +2043,9 @@ tolerances: {tolwfr: 1.00E-16, }
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   17.918112154550     -2.493E+01 3.400E-01 1.527E+03
- ETOT  2   1.4472968849846     -1.647E+01 7.353E-02 4.626E+01
+ ETOT  2   1.4472968849845     -1.647E+01 7.353E-02 4.626E+01
  ETOT  3  0.75930964164292     -6.880E-01 9.740E-03 2.105E+00
- ETOT  4  0.71633486596551     -4.297E-02 1.098E-03 3.829E-01
+ ETOT  4  0.71633486596552     -4.297E-02 1.098E-03 3.829E-01
  ETOT  5  0.71259206799912     -3.743E-03 1.539E-04 2.518E-01
  ETOT  6  0.70935766092839     -3.234E-03 1.855E-05 5.348E-03
  ETOT  7  0.70927138330978     -8.628E-05 1.202E-05 1.276E-03
@@ -2063,10 +2056,10 @@ tolerances: {tolwfr: 1.00E-16, }
  ETOT 12  0.70925270999962     -1.475E-09 1.667E-11 2.469E-09
  ETOT 13  0.70925270996209     -3.752E-11 5.743E-13 7.469E-10
  ETOT 14  0.70925270995306     -9.038E-12 5.666E-14 3.651E-12
- ETOT 15  0.70925270995292     -1.350E-13 8.435E-15 1.576E-12
- ETOT 16  0.70925270995282     -9.948E-14 1.101E-15 1.224E-13
+ ETOT 15  0.70925270995291     -1.421E-13 8.435E-15 1.576E-12
+ ETOT 16  0.70925270995282     -9.237E-14 1.101E-15 1.224E-13
  ETOT 17  0.70925270995283      7.105E-15 2.333E-16 1.826E-14
- ETOT 18  0.70925270995280     -2.842E-14 7.299E-17 5.158E-15
+ ETOT 18  0.70925270995281     -2.132E-14 7.299E-17 5.158E-15
 
  At SCF step   18   max residual=  7.30E-17 < tolwfr=  1.00E-16 =>converged.
 -open ddk wf file :t24o_DS22_1WF7
@@ -2107,7 +2100,6 @@ tolerances: {tolwfr: 1.00E-16, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t24o_DS21_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -2124,20 +2116,20 @@ tolerances: {tolwfr: 1.00E-16, }
  ETOT  2   2.0926635184475     -3.411E+01 2.146E-01 9.627E+01
  ETOT  3  0.77989452189603     -1.313E+00 2.050E-02 3.042E+00
  ETOT  4  0.71895606358937     -6.094E-02 3.436E-03 4.476E-01
- ETOT  5  0.71185430305123     -7.102E-03 3.196E-04 2.118E-01
- ETOT  6  0.70882681619584     -3.027E-03 6.250E-05 8.620E-03
+ ETOT  5  0.71185430305125     -7.102E-03 3.196E-04 2.118E-01
+ ETOT  6  0.70882681619581     -3.027E-03 6.250E-05 8.620E-03
  ETOT  7  0.70865985310247     -1.670E-04 7.332E-06 5.326E-04
  ETOT  8  0.70863704462938     -2.281E-05 5.638E-07 3.329E-05
  ETOT  9  0.70863445691010     -2.588E-06 1.672E-07 5.912E-06
- ETOT 10  0.70863401343119     -4.435E-07 2.132E-08 1.975E-06
+ ETOT 10  0.70863401343122     -4.435E-07 2.132E-08 1.975E-06
  ETOT 11  0.70863394192246     -7.151E-08 3.340E-09 5.253E-07
  ETOT 12  0.70863393074923     -1.117E-08 3.384E-10 3.198E-08
  ETOT 13  0.70863392947042     -1.279E-09 8.023E-11 1.378E-08
  ETOT 14  0.70863392923901     -2.314E-10 1.325E-12 1.771E-09
  ETOT 15  0.70863392920280     -3.621E-11 2.776E-12 2.670E-10
  ETOT 16  0.70863392920019     -2.615E-12 3.224E-14 5.714E-11
- ETOT 17  0.70863392919937     -8.242E-13 1.748E-15 7.171E-12
- ETOT 18  0.70863392919928     -8.527E-14 9.976E-17 1.564E-12
+ ETOT 17  0.70863392919939     -7.958E-13 1.748E-15 7.171E-12
+ ETOT 18  0.70863392919928     -1.137E-13 9.976E-17 1.564E-12
 
  At SCF step   18   max residual=  9.98E-17 < tolwfr=  1.00E-16 =>converged.
 -open ddk wf file :t24o_DS22_1WF7
@@ -2177,7 +2169,6 @@ tolerances: {tolwfr: 1.00E-16, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t24o_DS21_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -2206,11 +2197,11 @@ tolerances: {tolwfr: 1.00E-16, }
  ETOT 13  -3836.7991291276     -3.448E-08 1.317E-10 1.247E-06
  ETOT 14  -3836.7991291395     -1.183E-08 2.228E-10 4.836E-08
  ETOT 15  -3836.7991291400     -5.402E-10 2.394E-12 1.416E-08
- ETOT 16  -3836.7991291400     -3.820E-11 2.553E-13 3.044E-09
- ETOT 17  -3836.7991291402     -1.310E-10 8.745E-14 4.679E-11
- ETOT 18  -3836.7991291401      3.911E-11 4.025E-15 5.248E-12
- ETOT 19  -3836.7991291401      1.455E-11 5.267E-15 6.081E-12
- ETOT 20  -3836.7991291401      5.457E-12 6.609E-16 1.270E-14
+ ETOT 16  -3836.7991291400     -3.774E-11 2.553E-13 3.044E-09
+ ETOT 17  -3836.7991291402     -1.314E-10 8.745E-14 4.679E-11
+ ETOT 18  -3836.7991291401      3.956E-11 4.025E-15 5.248E-12
+ ETOT 19  -3836.7991291401      1.364E-11 5.267E-15 6.081E-12
+ ETOT 20  -3836.7991291401      6.366E-12 6.609E-16 1.270E-14
 -open ddk wf file :t24o_DS22_1WF7
 -open ddk wf file :t24o_DS22_1WF8
 -open ddk wf file :t24o_DS22_1WF9
@@ -2534,8 +2525,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/32ge.4.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/32ge.4.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosHGH_pwteter/32ge.4.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosHGH_pwteter/32ge.4.hgh
 - Hartwigsen-Goedecker-Hutter psp for Ge,  from PRB58, 3641 (1998)
 - 32.00000   4.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2562,8 +2553,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
   spin-orbit 2    0.007832
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/52te.6.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/52te.6.hgh
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosHGH_pwteter/52te.6.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosHGH_pwteter/52te.6.hgh
 - Hartwigsen-Goedecker-Hutter psp for Te,  from PRB58, 3641 (1998)
 - 52.00000   6.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2769,7 +2760,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t24o_DS31_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -2791,7 +2781,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t24o_DS31_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -2866,7 +2855,6 @@ tolerances: {tolwfr: 1.00E-16, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t24o_DS31_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -2941,7 +2929,6 @@ tolerances: {tolwfr: 1.00E-16, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t24o_DS31_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -3069,7 +3056,6 @@ meta: {optdriver: 1, rfelfd: 3, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t24o_DS31_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -3119,7 +3105,6 @@ meta: {optdriver: 1, rfelfd: 3, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t24o_DS31_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -3137,7 +3122,7 @@ tolerances: {tolwfr: 1.00E-16, }
  ETOT  3  0.80298295733288     -5.199E-01 1.148E-02 1.708E+00
  ETOT  4  0.75673105185934     -4.625E-02 1.849E-03 3.773E-01
  ETOT  5  0.75013878390524     -6.592E-03 3.105E-04 3.022E-01
- ETOT  6  0.74482718425055     -5.312E-03 7.631E-05 2.338E-03
+ ETOT  6  0.74482718425056     -5.312E-03 7.631E-05 2.338E-03
  ETOT  7  0.74454418308032     -2.830E-04 4.454E-05 5.395E-03
  ETOT  8  0.74439017409465     -1.540E-04 2.614E-06 8.927E-04
  ETOT  9  0.74439100024462      8.261E-07 1.230E-06 1.301E-03
@@ -3148,9 +3133,9 @@ tolerances: {tolwfr: 1.00E-16, }
  ETOT 14  0.74437066166155     -2.033E-07 1.999E-09 1.923E-06
  ETOT 15  0.74437063644814     -2.521E-08 1.794E-09 4.067E-08
  ETOT 16  0.74437063547107     -9.771E-10 1.384E-10 1.259E-09
- ETOT 17  0.74437063537261     -9.846E-11 7.725E-12 2.104E-10
- ETOT 18  0.74437063536465     -7.958E-12 2.505E-12 4.485E-10
- ETOT 19  0.74437063536376     -8.882E-13 1.985E-13 6.650E-10
+ ETOT 17  0.74437063537261     -9.845E-11 7.725E-12 2.104E-10
+ ETOT 18  0.74437063536466     -7.958E-12 2.505E-12 4.485E-10
+ ETOT 19  0.74437063536376     -8.953E-13 1.985E-13 6.650E-10
  ETOT 20  0.74437063535617     -7.589E-12 7.997E-14 4.130E-11
 -open ddk wf file :t24o_DS32_1WF7
 -open ddk wf file :t24o_DS32_1WF8
@@ -3195,7 +3180,6 @@ tolerances: {tolwfr: 1.00E-16, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t24o_DS31_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -3222,7 +3206,7 @@ tolerances: {tolwfr: 1.00E-16, }
  ETOT 12  0.74373162907568     -9.419E-07 1.561E-08 5.476E-05
  ETOT 13  0.74373123436020     -3.947E-07 1.281E-08 2.842E-05
  ETOT 14  0.74373092539599     -3.090E-07 2.745E-09 2.505E-06
- ETOT 15  0.74373088972367     -3.567E-08 3.061E-09 5.240E-07
+ ETOT 15  0.74373088972370     -3.567E-08 3.061E-09 5.240E-07
  ETOT 16  0.74373088285866     -6.865E-09 9.197E-11 4.223E-08
  ETOT 17  0.74373088209651     -7.622E-10 8.128E-11 2.077E-08
  ETOT 18  0.74373088190227     -1.942E-10 2.281E-12 6.623E-09
@@ -3270,7 +3254,6 @@ tolerances: {tolwfr: 1.00E-16, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t24o_DS31_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -3302,8 +3285,8 @@ tolerances: {tolwfr: 1.00E-16, }
  ETOT 16  -5745.4338345148     -1.402E-07 8.883E-09 7.795E-07
  ETOT 17  -5745.4338345444     -2.967E-08 2.265E-09 2.169E-07
  ETOT 18  -5745.4338345537     -9.310E-09 4.901E-10 2.355E-09
- ETOT 19  -5745.4338345551     -1.395E-09 1.740E-10 2.609E-09
- ETOT 20  -5745.4338345555     -3.893E-10 2.616E-11 1.880E-10
+ ETOT 19  -5745.4338345551     -1.392E-09 1.740E-10 2.609E-09
+ ETOT 20  -5745.4338345555     -3.920E-10 2.616E-11 1.880E-10
 -open ddk wf file :t24o_DS32_1WF7
 -open ddk wf file :t24o_DS32_1WF8
 -open ddk wf file :t24o_DS32_1WF9
@@ -3779,8 +3762,15 @@ P          mk1mem33         4
         optdriver31         0
         optdriver32         1
         optdriver33         1
-          rfatpol           1       2
-            rfdir           1       1       1
+           prtpot11         0
+           prtpot12         1
+           prtpot13         1
+           prtpot21         0
+           prtpot22         1
+           prtpot23         1
+           prtpot31         0
+           prtpot32         1
+           prtpot33         1
            rfelfd11         0
            rfelfd12         2
            rfelfd13         3
@@ -3938,10 +3928,10 @@ P          mk1mem33         4
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         11.0  wall=         11.2
+- Proc.   0 individual time (sec): cpu=         14.1  wall=         15.0
 
 ================================================================================
 
  Calculation completed.
-.Delivered  26 WARNINGs and 130 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         11.0  wall=         11.2
+.Delivered  17 WARNINGs and  59 COMMENTs to log file.
++Overall time at end (sec) : cpu=         14.1  wall=         15.0

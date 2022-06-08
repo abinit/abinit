@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.7.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h29 )
+.Starting date : Thu 10 Feb 2022.
+- ( at 14h21 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v67mbpt_t04-t05/t04.in
-- output file    -> t04.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/TestBot_MPI1/v67mbpt_t04-t05/t04.abi
+- output file    -> t04.abo
 - root for input  files -> t04i
 - root for output files -> t04o
 
@@ -34,7 +34,7 @@
 -    mband =           5        mffmem =           1         mkmem =          10
        mpw =          87          nfft =        3375          nkpt =          10
 ================================================================================
-P This job should need less than                       1.521 Mbytes of memory.
+P This job should need less than                       1.620 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.068 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
@@ -51,7 +51,7 @@ _ WF disk file :      0.068 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 -    mband =          20        mffmem =           1         mkmem =           6
        mpw =          92          nfft =        3375          nkpt =           6
 ================================================================================
-P This job should need less than                       1.230 Mbytes of memory.
+P This job should need less than                       1.328 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.170 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
@@ -68,7 +68,7 @@ _ WF disk file :      0.170 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 -    mband =          20        mffmem =           1         mkmem =           6
        mpw =          92          nfft =        3375          nkpt =           6
 ================================================================================
-P This job should need less than                       1.642 Mbytes of memory.
+P This job should need less than                       1.740 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.170 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
@@ -85,7 +85,7 @@ _ WF disk file :      0.170 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 -    mband =          20        mffmem =           1         mkmem =           6
        mpw =          92          nfft =        3375          nkpt =           6
 ================================================================================
-P This job should need less than                       1.642 Mbytes of memory.
+P This job should need less than                       1.740 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.170 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
@@ -368,8 +368,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -555,14 +555,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   1.0038E+00  1.0038E+00  1.2215E+00  1.3570E+00  1.5646E+00  1.6876E+00
   1.6876E+00  1.7736E+00  2.0629E+00  2.0629E+00  2.2127E+00  2.3705E+00
   2.4204E+00  2.9275E+00
-  prteigrs : nnsclo,ikpt=  250    1 max resid (incl. the buffer)=  1.41153E-05
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-  prteigrs : nnsclo,ikpt=  250    2 max resid (incl. the buffer)=  1.76690E-09
-  prteigrs : nnsclo,ikpt=  250    3 max resid (incl. the buffer)=  4.91983E-09
-  prteigrs : nnsclo,ikpt=  250    4 max resid (incl. the buffer)=  3.42978E-05
-  prteigrs : nnsclo,ikpt=  250    5 max resid (incl. the buffer)=  3.14855E-10
-  prteigrs : nnsclo,ikpt=  250    6 max resid (incl. the buffer)=  7.69097E-07
 
 
 --- !ResultsGS
@@ -706,7 +700,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-        0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
+       -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
     2   0.000  -7.578   0.000  -1.201  -0.002  -1.204  -0.003  -1.198   0.009
        -0.000   0.000  -2.572   0.002  -0.871   0.000  -0.871   0.003  -0.863
@@ -714,7 +708,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
   chi0(G,G') at the    2 th omega   0.0000  31.1801 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-        0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
+       -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
     2   0.000  -3.259   0.000  -0.309  -0.001  -0.311  -0.003  -0.307   0.007
        -0.000   0.000  -0.569   0.002  -0.189   0.000  -0.189   0.003  -0.182
@@ -729,19 +723,19 @@ meta: {optdriver: 3, gwcalctyp: 0, }
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
       0.088   0.005  -0.005  -0.014   0.014   0.014  -0.014  -0.005   0.005
-      0.000   0.005   0.005  -0.014  -0.014   0.014   0.014  -0.005  -0.005
+     -0.000   0.005   0.005  -0.014  -0.014   0.014   0.014  -0.005  -0.005
        1       2       3       4       5       6       7       8       9
       0.088   0.005  -0.005  -0.014   0.014   0.014  -0.014  -0.005   0.005
-      0.000  -0.005  -0.005   0.014   0.014  -0.014  -0.014   0.005   0.005
+     -0.000  -0.005  -0.005   0.014   0.014  -0.014  -0.014   0.005   0.005
 
 
    Upper and lower wings at the    2 th omega   0.0000  31.1801 [eV]
        1       2       3       4       5       6       7       8       9
       0.536   0.006  -0.006  -0.018   0.018   0.018  -0.018  -0.006   0.006
-      0.000   0.006   0.006  -0.018  -0.018   0.018   0.018  -0.006  -0.006
+     -0.000   0.006   0.006  -0.018  -0.018   0.018   0.018  -0.006  -0.006
        1       2       3       4       5       6       7       8       9
       0.536   0.006  -0.006  -0.018   0.018   0.018  -0.018  -0.006   0.006
-      0.000  -0.006  -0.006   0.018   0.018  -0.018  -0.018   0.006   0.006
+     -0.000  -0.006  -0.006   0.018   0.018  -0.018  -0.018   0.006   0.006
 
 
 
@@ -1463,10 +1457,10 @@ P           mkmem4          6
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          3.9  wall=          3.9
+- Proc.   0 individual time (sec): cpu=          3.9  wall=          4.0
 
 ================================================================================
 
  Calculation completed.
-.Delivered   6 WARNINGs and  12 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.9  wall=          3.9
+.Delivered   4 WARNINGs and  13 COMMENTs to log file.
++Overall time at end (sec) : cpu=          3.9  wall=          4.0

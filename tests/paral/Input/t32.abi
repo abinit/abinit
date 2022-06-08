@@ -39,7 +39,7 @@ pseudos "Ga-low_r.psp8, As_r.psp8"
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = .*_nag_7.0_.*
+#%% exclude_builders = .*_nag_7.[01]_.*
 #%% [files]
 #%% [paral_info]
 #%% nprocs_to_test = 4

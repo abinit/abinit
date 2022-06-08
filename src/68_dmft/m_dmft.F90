@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2021 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2022 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -491,12 +491,14 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,paw_dmft,pawang,pawtab,pawprtv
 & '========'
  call wrtout(std_out,message,'COLL')
 
- ! compute Edc for U=1 and J=U/J
- call init_energy(cryst_struc,energies_tmp)
- !call compute_dftu_energy(cryst_struc,energies_tmp,green,paw_dmft,pawtab)
- call compute_dftu_energy(cryst_struc,energies_tmp,green,paw_dmft,pawtab,paw_dmft%forentropyDMFT%J_over_U)
- call data4entropyDMFT_setDc(paw_dmft%forentropyDMFT,energies_tmp%e_dc(:))
- call destroy_energy(energies_tmp,paw_dmft)
+ if(paw_dmft%dmft_entropy/=0) then
+   ! compute Edc for U=1 and J=U/J
+   call init_energy(cryst_struc,energies_tmp)
+   !call compute_dftu_energy(cryst_struc,energies_tmp,green,paw_dmft,pawtab)
+   call compute_dftu_energy(cryst_struc,energies_tmp,green,paw_dmft,pawtab,paw_dmft%forentropyDMFT%J_over_U)
+   call data4entropyDMFT_setDc(paw_dmft%forentropyDMFT,energies_tmp%e_dc(:))
+   call destroy_energy(energies_tmp,paw_dmft)
+ endif
 
 !== Compute final values for green functions, occupations, and spectral function
 !--------------------------------------------------------------------------------

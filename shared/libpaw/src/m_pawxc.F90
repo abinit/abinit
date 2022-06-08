@@ -6,7 +6,7 @@
 !!  XC+PAW related operations
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (MT, FJ, TR, GJ, TD)
+!!  Copyright (C) 2013-2022 ABINIT group (MT, FJ, TR, GJ, TD)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -992,8 +992,8 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
    msg='nkxc must be non-zero if nk3xc is!'
    LIBPAW_ERROR(msg)
  end if
- if(nspden==4.and.xclevel==2) then
-   msg='GGA/mGGA for nspden=4 not implemented!'
+ if(nspden==4.and.xclevel==2.and..not.non_magnetic_xc) then
+   msg='GGA/mGGA for nspden=4 not fully implemented! (only works if usepawu=4 or pawxcdev/=0)'
    LIBPAW_ERROR(msg)
  end if
  if(pawang%angl_size==0) then
@@ -1317,7 +1317,12 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
      else if (nspden==4) then
        mag_ => rhonow(1:nrad,2:4,1)
        mag(1:nrad,ipts,1:3)=mag_(1:nrad,1:3)
-       call pawxc_rotate_mag(rhonow(:,:,1),rho_updn,mag_,nrad)
+       call pawxc_rotate_mag(rhonow(:,:,1),rho_updn,mag_,nrad) ! Note : gradients are not computed there
+       if (non_magnetic_xc.and.xclevel==2) then ! In this case grho2_updn is easy to compute
+         grho2_updn(1:nrad,1)=quarter*(rhonow(1:nrad,1,2)**2+rhonow(1:nrad,1,3)**2+rhonow(1:nrad,1,4)**2)
+         grho2_updn(1:nrad,2)=grho2_updn(1:nrad,1)
+         grho2_updn(1:nrad,3)=rhonow(1:nrad,1,2)**2+rhonow(1:nrad,1,3)**2+rhonow(1:nrad,1,4)**2
+       end if
      end if
 
 !    Make the density positive everywhere (but do not care about gradients)
@@ -5782,7 +5787,7 @@ end subroutine pawxcmpositron
  real(dp),intent(out) :: exc(npts),vxcrho(npts,nspden)
  integer,intent(in),optional :: exexch
  real(dp),intent(in),optional :: el_temp
- real(dp),intent(in),optional :: grho2(npts,(2*nspden)*usegradient)
+ real(dp),intent(in),optional :: grho2(npts,(2*nspden-1)*usegradient)
  real(dp),intent(in),optional :: lrho(npts,nspden*uselaplacian)
  real(dp),intent(in),optional :: tau(npts,nspden*usekden)
  real(dp),intent(out),optional:: dvxc(npts,ndvxc),d2vxc(npts,nd2vxc),fxcT(npts)

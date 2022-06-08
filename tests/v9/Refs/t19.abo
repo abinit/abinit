@@ -2,7 +2,7 @@
 .Version 9.3.1 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -212,8 +212,8 @@ Result for kinetic energy density :
 
 --------------------------------------------------------------------------------
  Total kinetic energy density [Ha/Bohr^3]
-      Maximum=    4.1212E-01  at reduced coord.    0.6667    0.3333    0.9375
-      Minimum=    5.4231E-04  at reduced coord.    0.0000    0.0000    0.0625
+)     Maximum=    4.1212E-01  at reduced coord.    0.6667    0.3333    0.9375
+)     Minimum=    5.4231E-04  at reduced coord.    0.0000    0.0000    0.0625
    Integrated=    2.0312E+01
 --------------------------------------------------------------------------------
 

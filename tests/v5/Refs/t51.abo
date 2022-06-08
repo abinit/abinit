@@ -2,7 +2,7 @@
 .Version 9.3.1 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -452,24 +452,24 @@ Result for kinetic energy density :
 
 --------------------------------------------------------------------------------
  Total kinetic energy density [Ha/Bohr^3]
-      Maximum=    3.0097E-02  at reduced coord.    0.0000    0.9259    0.9630
-      Minimum=    8.4887E-06  at reduced coord.    0.4444    0.4444    0.4074
+)     Maximum=    3.0097E-02  at reduced coord.    0.0000    0.9259    0.9630
+)     Minimum=    8.4887E-06  at reduced coord.    0.4444    0.4444    0.4074
    Integrated=    1.7406E+00
  Spin up density      [Ha/Bohr^3]
-      Maximum=    2.1322E-02  at reduced coord.    0.9259    0.9630    0.9630
-      Minimum=    8.4487E-06  at reduced coord.    0.4444    0.4444    0.4074
+)     Maximum=    2.1322E-02  at reduced coord.    0.9259    0.9630    0.9630
+)     Minimum=    8.4487E-06  at reduced coord.    0.4444    0.4444    0.4074
    Integrated=    1.4362E+00
  Spin down density    [Ha/Bohr^3]
-      Maximum=    9.8647E-03  at reduced coord.    0.0000    0.0000    0.9259
-      Minimum=    0.0000E+00  at reduced coord.    0.0000    0.0000    0.0000
+)     Maximum=    9.8647E-03  at reduced coord.    0.0000    0.0000    0.9259
+)     Minimum=    0.0000E+00  at reduced coord.    0.0000    0.0000    0.0000
    Integrated=    3.0441E-01
  Magnetization (spin up - spin down) [Ha/Bohr^3]
-      Maximum=    1.5311E-02  at reduced coord.    0.9259    0.9259    0.9630
-      Minimum=    8.4087E-06  at reduced coord.    0.4444    0.4444    0.4074
+)     Maximum=    1.5311E-02  at reduced coord.    0.9259    0.9259    0.9630
+)     Minimum=    8.4087E-06  at reduced coord.    0.4444    0.4444    0.4074
    Integrated=    1.1318E+00
  Relative magnetization (=zeta, between -1 and 1)
-      Maximum=    1.0000E+00  at reduced coord.    0.0000    0.0000    0.0000
-      Minimum=    2.1398E-01  at reduced coord.    0.0370    0.0000    0.0000
+)     Maximum=    1.0000E+00  at reduced coord.    0.0000    0.0000    0.0000
+)     Minimum=    2.1398E-01  at reduced coord.    0.0370    0.0000    0.0000
 --------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -624,24 +624,24 @@ Result for kinetic energy density :
 
 --------------------------------------------------------------------------------
  Total kinetic energy density [Ha/Bohr^3]
-      Maximum=    3.0092E-02  at reduced coord.    0.0000    0.9259    0.9630
-      Minimum=    8.5806E-06  at reduced coord.    0.4444    0.4444    0.4074
+)     Maximum=    3.0092E-02  at reduced coord.    0.0000    0.9259    0.9630
+)     Minimum=    8.5806E-06  at reduced coord.    0.4444    0.4444    0.4074
    Integrated=    1.7400E+00
  Spin up density      [Ha/Bohr^3]
-      Maximum=    2.1229E-02  at reduced coord.    0.9259    0.9630    0.9630
-      Minimum=    8.4129E-06  at reduced coord.    0.4444    0.4444    0.4074
+)     Maximum=    2.1229E-02  at reduced coord.    0.9259    0.9630    0.9630
+)     Minimum=    8.4129E-06  at reduced coord.    0.4444    0.4444    0.4074
    Integrated=    1.4281E+00
  Spin down density    [Ha/Bohr^3]
-      Maximum=    9.9287E-03  at reduced coord.    0.0000    0.0000    0.9259
-      Minimum=    1.4398E-07  at reduced coord.    0.4815    0.4815    0.3704
+)     Maximum=    9.9287E-03  at reduced coord.    0.0000    0.0000    0.9259
+)     Minimum=    1.4398E-07  at reduced coord.    0.4815    0.4815    0.3704
    Integrated=    3.1189E-01
  Magnetization (spin up - spin down) [Ha/Bohr^3]
-      Maximum=    1.5102E-02  at reduced coord.    0.9259    0.9259    0.9630
-      Minimum=    8.2452E-06  at reduced coord.    0.4444    0.4444    0.4074
+)     Maximum=    1.5102E-02  at reduced coord.    0.9259    0.9259    0.9630
+)     Minimum=    8.2452E-06  at reduced coord.    0.4444    0.4444    0.4074
    Integrated=    1.1163E+00
  Relative magnetization (=zeta, between -1 and 1)
-      Maximum=    9.8681E-01  at reduced coord.    0.0000    0.8519    0.9630
-      Minimum=    2.1113E-01  at reduced coord.    0.0370    0.0000    0.0000
+)     Maximum=    9.8681E-01  at reduced coord.    0.0000    0.8519    0.9630
+)     Minimum=    2.1113E-01  at reduced coord.    0.0370    0.0000    0.0000
 --------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -806,28 +806,28 @@ Result for kinetic energy density :
 
 --------------------------------------------------------------------------------
  Total kinetic energy density [Ha/Bohr^3]
-      Maximum=    3.0097E-02  at reduced coord.    0.0741    0.0370    0.0000
-      Minimum=    8.4874E-06  at reduced coord.    0.4074    0.4444    0.4444
+)     Maximum=    3.0097E-02  at reduced coord.    0.0741    0.0370    0.0000
+)     Minimum=    8.4874E-06  at reduced coord.    0.4074    0.4444    0.4444
    Integrated=    1.7406E+00
  x component of magnetization [Ha/Bohr^3]
-      Maximum=    5.9860E-06  at reduced coord.    0.0741    0.9259    0.0370
-      Minimum=    0.0000E+00  at reduced coord.    0.4815    0.3704    0.1481
+)     Maximum=    5.9860E-06  at reduced coord.    0.0741    0.9259    0.0370
+)     Minimum=    0.0000E+00  at reduced coord.    0.4815    0.3704    0.1481
    Integrated=    3.3238E-04
  y component of magnetization [Ha/Bohr^3]
-      Maximum=    7.6112E-05  at reduced coord.    0.0741    0.0741    0.0370
-      Minimum=    4.0932E-08  at reduced coord.    0.5926    0.5556    0.4444
+)     Maximum=    7.6112E-05  at reduced coord.    0.0741    0.0741    0.0370
+)     Minimum=    4.0932E-08  at reduced coord.    0.5926    0.5556    0.4444
    Integrated=    5.5737E-03
  z component of magnetization [Ha/Bohr^3]
-      Maximum=    1.5311E-02  at reduced coord.    0.9259    0.9630    0.9259
-      Minimum=    8.4073E-06  at reduced coord.    0.4074    0.4444    0.4444
+)     Maximum=    1.5311E-02  at reduced coord.    0.9259    0.9630    0.9259
+)     Minimum=    8.4073E-06  at reduced coord.    0.4074    0.4444    0.4444
    Integrated=    1.1318E+00
  Magnetization (absolute value) [Ha/Bohr^3]
-      Maximum=    1.5311E-02  at reduced coord.    0.9259    0.9630    0.9259
-      Minimum=    8.4074E-06  at reduced coord.    0.4074    0.4444    0.4444
+)     Maximum=    1.5311E-02  at reduced coord.    0.9259    0.9630    0.9259
+)     Minimum=    8.4074E-06  at reduced coord.    0.4074    0.4444    0.4444
    Integrated=    1.1318E+00
  Relative magnetization (=zeta, between -1 and 1)
-      Maximum=    1.0000E+00  at reduced coord.    0.0000    0.0000    0.0000
-      Minimum=    2.1398E-01  at reduced coord.    0.0370    0.0000    0.0000
+)     Maximum=    1.0000E+00  at reduced coord.    0.0000    0.0000    0.0000
+)     Minimum=    2.1398E-01  at reduced coord.    0.0370    0.0000    0.0000
 --------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -978,28 +978,28 @@ Result for kinetic energy density :
 
 --------------------------------------------------------------------------------
  Total kinetic energy density [Ha/Bohr^3]
-      Maximum=    3.0092E-02  at reduced coord.    0.0741    0.0000    0.0370
-      Minimum=    8.5808E-06  at reduced coord.    0.4074    0.4444    0.4444
+)     Maximum=    3.0092E-02  at reduced coord.    0.0741    0.0000    0.0370
+)     Minimum=    8.5808E-06  at reduced coord.    0.4074    0.4444    0.4444
    Integrated=    1.7400E+00
  x component of magnetization [Ha/Bohr^3]
-      Maximum=    4.7020E-06  at reduced coord.    0.0741    0.9259    0.0370
-      Minimum=    0.0000E+00  at reduced coord.    0.4815    0.4074    0.1852
+)     Maximum=    4.7020E-06  at reduced coord.    0.0741    0.9259    0.0370
+)     Minimum=    0.0000E+00  at reduced coord.    0.4815    0.4074    0.1852
    Integrated=    3.2761E-04
  y component of magnetization [Ha/Bohr^3]
-      Maximum=    7.4466E-05  at reduced coord.    0.0741    0.0741    0.0370
-      Minimum=    4.0558E-08  at reduced coord.    0.5926    0.5556    0.4444
+)     Maximum=    7.4466E-05  at reduced coord.    0.0741    0.0741    0.0370
+)     Minimum=    4.0558E-08  at reduced coord.    0.5926    0.5556    0.4444
    Integrated=    5.4973E-03
  z component of magnetization [Ha/Bohr^3]
-      Maximum=    1.5102E-02  at reduced coord.    0.9259    0.9630    0.9259
-      Minimum=    8.2452E-06  at reduced coord.    0.4074    0.4444    0.4444
+)     Maximum=    1.5102E-02  at reduced coord.    0.9259    0.9630    0.9259
+)     Minimum=    8.2452E-06  at reduced coord.    0.4074    0.4444    0.4444
    Integrated=    1.1162E+00
  Magnetization (absolute value) [Ha/Bohr^3]
-      Maximum=    1.5102E-02  at reduced coord.    0.9259    0.9630    0.9259
-      Minimum=    8.2453E-06  at reduced coord.    0.4074    0.4444    0.4444
+)     Maximum=    1.5102E-02  at reduced coord.    0.9259    0.9630    0.9259
+)     Minimum=    8.2453E-06  at reduced coord.    0.4074    0.4444    0.4444
    Integrated=    1.1162E+00
  Relative magnetization (=zeta, between -1 and 1)
-      Maximum=    9.8679E-01  at reduced coord.    0.8519    0.9630    0.0000
-      Minimum=    2.1113E-01  at reduced coord.    0.0370    0.0000    0.0000
+)     Maximum=    9.8679E-01  at reduced coord.    0.8519    0.9630    0.0000
+)     Minimum=    2.1113E-01  at reduced coord.    0.0370    0.0000    0.0000
 --------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1156,28 +1156,28 @@ Result for kinetic energy density :
 
 --------------------------------------------------------------------------------
  Total kinetic energy density [Ha/Bohr^3]
-      Maximum=    3.0097E-02  at reduced coord.    0.0741    0.0370    0.0000
-      Minimum=    8.4874E-06  at reduced coord.    0.4074    0.4444    0.4444
+)     Maximum=    3.0097E-02  at reduced coord.    0.0741    0.0370    0.0000
+)     Minimum=    8.4874E-06  at reduced coord.    0.4074    0.4444    0.4444
    Integrated=    1.7406E+00
  x component of magnetization [Ha/Bohr^3]
-      Maximum=    5.9860E-06  at reduced coord.    0.0741    0.9259    0.0370
-      Minimum=    0.0000E+00  at reduced coord.    0.4815    0.3704    0.1481
+)     Maximum=    5.9860E-06  at reduced coord.    0.0741    0.9259    0.0370
+)     Minimum=    0.0000E+00  at reduced coord.    0.4815    0.3704    0.1481
    Integrated=    3.3238E-04
  y component of magnetization [Ha/Bohr^3]
-      Maximum=    7.6112E-05  at reduced coord.    0.0741    0.0741    0.0370
-      Minimum=    4.0932E-08  at reduced coord.    0.5926    0.5556    0.4444
+)     Maximum=    7.6112E-05  at reduced coord.    0.0741    0.0741    0.0370
+)     Minimum=    4.0932E-08  at reduced coord.    0.5926    0.5556    0.4444
    Integrated=    5.5737E-03
  z component of magnetization [Ha/Bohr^3]
-      Maximum=    1.5311E-02  at reduced coord.    0.9259    0.9630    0.9259
-      Minimum=    8.4073E-06  at reduced coord.    0.4074    0.4444    0.4444
+)     Maximum=    1.5311E-02  at reduced coord.    0.9259    0.9630    0.9259
+)     Minimum=    8.4073E-06  at reduced coord.    0.4074    0.4444    0.4444
    Integrated=    1.1318E+00
  Magnetization (absolute value) [Ha/Bohr^3]
-      Maximum=    1.5311E-02  at reduced coord.    0.9259    0.9630    0.9259
-      Minimum=    8.4074E-06  at reduced coord.    0.4074    0.4444    0.4444
+)     Maximum=    1.5311E-02  at reduced coord.    0.9259    0.9630    0.9259
+)     Minimum=    8.4074E-06  at reduced coord.    0.4074    0.4444    0.4444
    Integrated=    1.1318E+00
  Relative magnetization (=zeta, between -1 and 1)
-      Maximum=    1.0000E+00  at reduced coord.    0.0000    0.0000    0.0000
-      Minimum=    2.1398E-01  at reduced coord.    0.0370    0.0000    0.0000
+)     Maximum=    1.0000E+00  at reduced coord.    0.0000    0.0000    0.0000
+)     Minimum=    2.1398E-01  at reduced coord.    0.0370    0.0000    0.0000
 --------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1328,28 +1328,28 @@ Result for kinetic energy density :
 
 --------------------------------------------------------------------------------
  Total kinetic energy density [Ha/Bohr^3]
-      Maximum=    3.0092E-02  at reduced coord.    0.0741    0.0000    0.0370
-      Minimum=    8.5808E-06  at reduced coord.    0.4074    0.4444    0.4444
+)     Maximum=    3.0092E-02  at reduced coord.    0.0741    0.0000    0.0370
+)     Minimum=    8.5808E-06  at reduced coord.    0.4074    0.4444    0.4444
    Integrated=    1.7400E+00
  x component of magnetization [Ha/Bohr^3]
-      Maximum=    4.7020E-06  at reduced coord.    0.0741    0.9259    0.0370
-      Minimum=    0.0000E+00  at reduced coord.    0.4815    0.4074    0.1852
+)     Maximum=    4.7020E-06  at reduced coord.    0.0741    0.9259    0.0370
+)     Minimum=    0.0000E+00  at reduced coord.    0.4815    0.4074    0.1852
    Integrated=    3.2761E-04
  y component of magnetization [Ha/Bohr^3]
-      Maximum=    7.4466E-05  at reduced coord.    0.0741    0.0741    0.0370
-      Minimum=    4.0558E-08  at reduced coord.    0.5926    0.5556    0.4444
+)     Maximum=    7.4466E-05  at reduced coord.    0.0741    0.0741    0.0370
+)     Minimum=    4.0558E-08  at reduced coord.    0.5926    0.5556    0.4444
    Integrated=    5.4973E-03
  z component of magnetization [Ha/Bohr^3]
-      Maximum=    1.5102E-02  at reduced coord.    0.9259    0.9630    0.9259
-      Minimum=    8.2452E-06  at reduced coord.    0.4074    0.4444    0.4444
+)     Maximum=    1.5102E-02  at reduced coord.    0.9259    0.9630    0.9259
+)     Minimum=    8.2452E-06  at reduced coord.    0.4074    0.4444    0.4444
    Integrated=    1.1162E+00
  Magnetization (absolute value) [Ha/Bohr^3]
-      Maximum=    1.5102E-02  at reduced coord.    0.9259    0.9630    0.9259
-      Minimum=    8.2453E-06  at reduced coord.    0.4074    0.4444    0.4444
+)     Maximum=    1.5102E-02  at reduced coord.    0.9259    0.9630    0.9259
+)     Minimum=    8.2453E-06  at reduced coord.    0.4074    0.4444    0.4444
    Integrated=    1.1162E+00
  Relative magnetization (=zeta, between -1 and 1)
-      Maximum=    9.8679E-01  at reduced coord.    0.8519    0.9630    0.0000
-      Minimum=    2.1113E-01  at reduced coord.    0.0370    0.0000    0.0000
+)     Maximum=    9.8679E-01  at reduced coord.    0.8519    0.9630    0.0000
+)     Minimum=    2.1113E-01  at reduced coord.    0.0370    0.0000    0.0000
 --------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
