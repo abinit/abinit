@@ -82,7 +82,7 @@ iscf4           -2
 getden4         -2
 getwfk4         -2
 kptopt4         -4    # Four segments of paths
-ndivsm4          16    # Smallest path has 16 points, other scaled
+ndivsm4          13    # Smallest path has 16 points, other scaled
 kptbounds4       0.00000000  0.00000000  0.00000000  # Gamma
                  0.25000000  0.25000000 -0.25000000  # Sigma
                  0.50000000  0.00000000  0.00000000  # X
