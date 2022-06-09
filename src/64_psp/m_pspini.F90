@@ -160,7 +160,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
  integer :: ispin,itypalch,itypat,mtypalch,npsp,npspalch,ntypalch
  integer :: ntypat,ntyppure,paw_size
  logical :: has_coretau,has_kij,has_tproj,has_tvale,has_nabla,has_shapefncg,has_vminushalf,has_wvl
- real(dp),save :: ecore_old=zero,gsqcut_old=zero,gsqcutdg_old=zero, spnorbscl_old=-one
+ real(dp),save :: ecore_old=zero,gsqcut_old=zero,gsqcutdg_old=zero, spnorbscl_old=-one,hyb_mixing_old=-999.0_dp
  real(dp) :: dq,epsatm_psp,qmax,rmax,xcccrc
  character(len=500) :: msg
  type(pawrad_type) :: pawrad_dum
@@ -277,6 +277,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
 !Compute the general condition for new computation of pseudopotentials
  gencond=0
  if(   ixc_old /= dtset%ixc                &
+& .or. ABS(hyb_mixing_old - dtset%hyb_mixing)>tol8 &
 & .or. mqgridff_old /= psps%mqgrid_ff      &
 & .or. mqgridvl_old /= psps%mqgrid_vl      &
 & .or. mpssoang_old /= psps%mpssoang       &
@@ -608,6 +609,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
  mpssoang_old=psps%mpssoang
  spnorbscl_old = dtset%spnorbscl
  ixc_old=dtset%ixc
+ hyb_mixing_old=dtset%hyb_mixing
  gsqcut_old=gsqcut;if (psps%usepaw==1) gsqcutdg_old=gsqcutdg
  lmnmax_old=psps%lmnmax
  lnmax_old=psps%lnmax
