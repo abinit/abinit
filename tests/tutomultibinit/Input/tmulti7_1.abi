@@ -28,7 +28,7 @@ bound_penalty = 1.001  # Penalty on the Goal Function (GF_new/GF_init) can't be 
 #%% input_ddb = tmulti6_DDB
 #%% need_cpp_vars = HAVE_XML
 #%% system_xml = no
-#%% exclude_builders = .*_nag_7.0_.
+#%% exclude_builders = .*_nag_7.[01]_.*
 #%% coeff_xml = tmulti6_1_coeffs.xml
 #%% md_hist = tmulti6_HIST.nc
 #%% [files]
