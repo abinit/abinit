@@ -130,4 +130,7 @@ inp_files = [
 # Lattice Wannier function
 "t110.abi", # scdm-k method for lattice wannier function in anaddb (disentangle option 2)
 "t111.abi", # projWF method for lattice wannier function in anaddb (disentangle option 2)
+
+# GS PAW Hybrid functionals
+"t120.abi",  # test PBE0 and related functionals with PAW
 ]
