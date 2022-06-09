@@ -34,6 +34,7 @@ sel_EFS = 0 1 1       # Select coefficient on the (E)nergy (F)orces and (S)tress
 #%% executable = multibinit
 #%% input_ddb = tmulti6_DDB
 #%% md_hist = tmulti6_HIST.nc
+#%% exclude_builders = .*_nag_7.[01]_.* 
 #%% [files]
 #%% files_to_test =
 #%%   tmulti6_1.abo, tolnlines = 10, tolabs = 0.1, tolrel = 0.5, fld_options = -easy;
