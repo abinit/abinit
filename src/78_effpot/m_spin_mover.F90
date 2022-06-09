@@ -250,7 +250,7 @@ contains
     character(len=fnlen), intent(in) :: fname
     integer :: ierr, ncid, varid
     integer :: nspin, ntime
-    character(len=118) :: msg
+    character(len=500) :: msg
     ! open file
 
 #if defined HAVE_NETCDF
@@ -276,9 +276,10 @@ contains
 
     ! read Spin and set as initial state
     ierr =nf90_inq_varid(ncid, "S", varid)
-    NCF_CHECK_MSG(ierr, "when reading S. Try using spin_init_state=3 option instead (specify spin_init_qpoint,&
-      &  spin_init_rotate_axis and spin_init_orientation as needed).")
-    
+    msg="when reading S. Try using spin_init_state=3 option instead (specify spin_init_qpoint," // &
+      & "  spin_init_rotate_axis and spin_init_orientation as needed)."
+    NCF_CHECK_MSG(ierr, msg)
+
     ierr = nf90_get_var(ncid=ncid, varid=varid, values=self%Stmp(:,:), start=(/1, 1, ntime/), count=(/3, nspin,1/))
     NCF_CHECK_MSG(ierr, "when reading S from spin hist file")
 
