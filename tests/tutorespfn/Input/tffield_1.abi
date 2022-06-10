@@ -6,7 +6,6 @@
 # Berry phase calculation of the polarization
 # berryopt -1 triggers the implementation of M. Viethen
 berryopt -1
-rfdir 1 1 1
 
 #Definition of the unit cell
 # these cell parameters were derived from a relaxation run done with the

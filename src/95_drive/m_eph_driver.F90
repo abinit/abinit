@@ -6,7 +6,7 @@
 !!   Driver for EPH calculations
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2009-2021 ABINIT group (MG, MVer, GA)
+!!  Copyright (C) 2009-2022 ABINIT group (MG, MVer, GA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -483,8 +483,8 @@ if (iblock_quadrupoles == 0) then
  qdrp_cart=zero
  if (mtyp==33) then
    lwsym=1
-   call ddb_lw_copy(ddb,ddb_lw,mpert,dtset%natom,dtset%ntypat)
-   iblock_quadrupoles = ddb_lw%get_quadrupoles(lwsym,33,qdrp_cart)
+   call ddb_lw_copy(ddb, ddb_lw, mpert, dtset%natom, dtset%ntypat)
+   iblock_quadrupoles = ddb_lw%get_quadrupoles(lwsym, 33, qdrp_cart)
    call ddb_lw%free()
  end if
 endif
@@ -617,6 +617,14 @@ endif
      end if
    end if
 
+   if (dvdb%add_lr == 2) then
+      if (dvdb%has_quadrupoles) then
+        call wrtout(std_out, "dvdb_add_lr == 2 --> Quadrupoles are set to zero and won't be used in the interpolation")
+      end if
+      dvdb%has_quadrupoles = .False.
+      dvdb%qstar = zero
+   end if
+
    if (my_rank == master) then
      call dvdb%print()
      call dvdb%list_perts([-1, -1, -1], npert_miss)
@@ -656,7 +664,7 @@ endif
 
  ! Relase nkpt-based arrays in dtset to decreased memory requirement if dense sampling.
  ! EPH routines should not access them after this point.
- if (dtset%eph_task /= 6) call dtset%free_nkpt_arrays()
+ if (all(dtset%eph_task /= [6, 10])) call dtset%free_nkpt_arrays()
 
  ! ====================================================
  ! === This is the real EPH stuff once all is ready ===
@@ -702,7 +710,9 @@ endif
 
  case (6)
    ! Estimate zero-point renormalization and temperature-dependent electronic structure using the Frohlich model
-   call frohlichmodel(cryst, dtset, efmasdeg, efmasval, ifc)
+   if (my_rank == master) then
+     call frohlichmodel(cryst, dtset, efmasdeg, efmasval, ifc)
+   end if
 
  case (7)
    ! Compute phonon-limited RTA from SIGEPH file.
@@ -714,7 +724,9 @@ endif
 
  case (10)
    ! Estimate polaron effective mass in the triply-degenerate VB or CB cubic case
-   call polaronmass(cryst, dtset, efmasdeg, efmasval, ifc)
+   if (my_rank == master) then
+     call polaronmass(cryst, dtset, efmasdeg, efmasval, ifc)
+   end if
 
  case (15, -15)
    ! Write average of DFPT potentials to file.

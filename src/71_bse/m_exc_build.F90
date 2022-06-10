@@ -7,7 +7,7 @@
 !!
 !! COPYRIGHT
 !!  Copyright (C) 1992-2009 EXC group (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida)
-!!  Copyright (C) 2009-2021 ABINIT group (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, M.Giantomassi)
+!!  Copyright (C) 2009-2022 ABINIT group (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, M.Giantomassi)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -37,8 +37,8 @@ module m_exc_build
  use mpi
 #endif
  use m_hdr
- use m_wfd
 
+ use m_wfd,          only : wfdgw_t, wave_t, WFD_STORED
  use defs_datatypes, only : pseudopotential_type
  use m_gwdefs,       only : czero_gw, cone_gw, GW_TOLQ0
  use m_time,         only : cwtime, timab
@@ -97,7 +97,7 @@ contains
 !!  Pawang<pawang_type>=PAW angular mesh and related data.
 !!  Paw_pwff(Cryst%ntypat*Wfd%usepaw)<pawpwff_t>=Form factor used to calculate the onsite matrix
 !!    elements of a plane wave.
-!!  Wfd<wfd_t>=Handler for the wavefunctions.
+!!  Wfd<wfdgw_t>=Handler for the wavefunctions.
 !!    prtvol=Verbosity level.
 !!  rhxtwg_q0
 !!  is_resonant
@@ -177,7 +177,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
  type(Pseudopotential_type),intent(in) :: Psps
  type(Hdr_type),intent(inout) :: Hdr_bse
  type(pawang_type),intent(in) :: Pawang
- type(wfd_t),target,intent(inout) :: Wfd
+ type(wfdgw_t),target,intent(inout) :: Wfd
 !arrays
  integer,intent(in) :: ngfft_osc(18)
  integer,intent(in) :: ktabr(nfftot_osc,Kmesh%nbz)
@@ -1281,11 +1281,11 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
          end if
        end if
        tmp_size = INT(hsize_of(sender),kind=i4b)
-       call xmpi_exch(my_bsham,tmp_size,sender,buffer,master,comm,mpi_err)
+       call xmpi_exch(my_bsham,tmp_size,sender,buffer,master,comm,10*block+1,mpi_err)
        if (BSp%prep_interp) then
-         call xmpi_exch(acoeffs,tmp_size,sender,abuffer,master,comm,mpi_err)
-         call xmpi_exch(bcoeffs,tmp_size,sender,bbuffer,master,comm,mpi_err)
-         call xmpi_exch(ccoeffs,tmp_size,sender,cbuffer,master,comm,mpi_err)
+         call xmpi_exch(acoeffs,tmp_size,sender,abuffer,master,comm,10*block+2,mpi_err)
+         call xmpi_exch(bcoeffs,tmp_size,sender,bbuffer,master,comm,10*block+3,mpi_err)
+         call xmpi_exch(ccoeffs,tmp_size,sender,cbuffer,master,comm,10*block+4,mpi_err)
        end if
 
        ! TODO Be careful with the MPI TAG here, add optional Arguments in xmpi_exch so that the TAG can be specified!
@@ -1295,7 +1295,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
        my_extrema(:,2) = proc_end
 
        sender_extrema = my_extrema ! just to avoid NAN on sender. xechh_mpi is not well designed
-       call xmpi_exch(my_extrema,4,sender,sender_extrema,master,comm,mpi_err)
+       call xmpi_exch(my_extrema,4,sender,sender_extrema,master,comm,10*block+5,mpi_err)
 
        if (my_rank==master) then
           proc_start = sender_extrema(:,1)
@@ -1581,7 +1581,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
        if (my_rank==master)  then
          ABI_MALLOC(buffer_2d,(neh1,ncols_of(sender)))
        end if
-       call xmpi_exch(my_kxssp,neh1*ncols_of(sender),sender,buffer_2d,master,comm,mpi_err)
+       call xmpi_exch(my_kxssp,neh1*ncols_of(sender),sender,buffer_2d,master,comm,5,mpi_err)
        !
        if (my_rank==master) then ! Write the columns owned by sender.
          do jj=1,ncols_of(sender)
@@ -2106,7 +2106,7 @@ end subroutine exc_build_v
 !!  Pawtab(Psps%ntypat)<pawtab_type>=PAW tabulated starting data.
 !!  Pawang<pawang_type>=PAW angular mesh and related data.
 !!  Paw_pwff(Cryst%ntypat*Wfd%usepaw)<pawpwff_t>=Form factor used to calculate the onsite mat. elements of a plane wave.
-!!  Wfd<wfd_t>=Handler for the wavefunctions.
+!!  Wfd<wfdgw_t>=Handler for the wavefunctions.
 !!
 !! OUTPUT
 !!  The excitonic Hamiltonian is saved on an external binary file (see below).
@@ -2137,7 +2137,7 @@ subroutine exc_build_ham(BSp,BS_files,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,
  type(Pseudopotential_type),intent(in) :: Psps
  type(Hdr_type),intent(inout) :: Hdr_bse
  type(pawang_type),intent(in) :: Pawang
- type(wfd_t),target,intent(inout) :: Wfd
+ type(wfdgw_t),target,intent(inout) :: Wfd
 !arrays
  integer,intent(in) :: ngfft_osc(18)
  integer,intent(in) :: ktabr(nfftot_osc,Kmesh%nbz)
@@ -2221,7 +2221,7 @@ end subroutine exc_build_ham
 !! FUNCTION
 !!
 !! INPUTS
-!!  Wfd<wfd_t>=Handler for the wavefunctions.
+!!  Wfd<wfdgw_t>=Handler for the wavefunctions.
 !!  Cryst<crystal_t>=Info on the crystalline structure.
 !!  Qmesh<kmesh_t>=The list of q-points for epsilon^{-1} and related symmetry tables.
 !!  Gsph_x<gsphere_t>=G-sphere with the G-vectors in mgq0.
@@ -2261,7 +2261,7 @@ subroutine wfd_all_mgq0(Wfd,Cryst,Qmesh,Gsph_x,Vcp,&
  type(vcoul_t),intent(in) :: Vcp
  type(gsphere_t),intent(in) :: Gsph_x
  type(Pseudopotential_type),intent(in) :: Psps
- type(wfd_t),target,intent(inout) :: Wfd
+ type(wfdgw_t),target,intent(inout) :: Wfd
 !arrays
  integer,intent(in) :: lomo_spin(Wfd%nsppol),homo_spin(Wfd%nsppol),humo_spin(Wfd%nsppol)
  integer,intent(in) :: ngfft_osc(18)

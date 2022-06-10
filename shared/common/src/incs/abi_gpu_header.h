@@ -1,7 +1,7 @@
 /* abi_gpu_header.h */
 
 /*
- * Copyright (C) 2008-2021 ABINIT Group
+ * Copyright (C) 2008-2022 ABINIT Group
  *
  * This file is part of the ABINIT software package. For license information,
  * please see the COPYING file in the top-level directory of the ABINIT source
@@ -80,13 +80,13 @@ extern "C" {
                                    int *natoms, int *choice, int *signs,
                                    const double *four_pi_by_ucvol,const double *lambda
                                    );
-  
+
   void gpu_compute_nl_projections_(double2 *proj_gpu,double2 *dproj_gpu,
                                    double2 *vectin_gpu,double2 *ph3din_gpu,
                                    double *ffnlin_gpu,double *kpgin_gpu,
                                    int *indlmn_gpu,unsigned short int *atoms_gpu,
                                    unsigned char *lmn_gpu, unsigned char *typat_gpu,
-                                   int *nb_proj_to_compute,int *npw,int *choice,
+                                   int *nb_proj_to_compute,int *npw,int *choice, int* cpopt,
                                    int *dimffnlin,int *lmnmax,
                                    const char *cplex,const double *pi,const double *ucvol
                                    );

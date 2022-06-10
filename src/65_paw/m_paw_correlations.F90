@@ -7,7 +7,7 @@
 !!    correlations in the PAW approach (DFT+U, exact-exchange, ...).
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2021 ABINIT group (BA,FJ,MT)
+!! Copyright (C) 2018-2022 ABINIT group (BA,FJ,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -46,6 +46,7 @@ MODULE m_paw_correlations
 
 !public procedures.
  public :: pawpuxinit   ! Initialize some data for PAW+U/PAW+LocalExactExchange/PAW+DMFT
+ public :: calc_vee     ! Compute vee for DFT+U
  public :: pawuenergy   ! Compute contributions to energy for PAW+U
  public :: pawxenergy   ! Compute contributions to energy for PAW+[local exact exchange]
  public :: setnoccmmp   ! Compute DFT+U density matrix nocc_{m,m_prime} or impose it
@@ -92,7 +93,7 @@ CONTAINS  !=====================================================================
 !!
 !! OUTPUT
 !!  pawtab <type(pawtab_type)>=paw tabulated data read at start:
-!!     %euijkl=(2,2,lmn2_size,lmn2_size)= array for computing DFT+U terms without occupancies
+!!     %euijkl=(3,lmn2_size,lmn2_size)= array for computing DFT+U terms without occupancies
 !!     %ij_proj= nproj*(nproju+1)/2
 !!     %klmntomn(4,lmn2_size)= Array giving im, jm ,in, and jn for each klmn=(ilmn,jlmn)
 !!     %lnproju(nproj)= value of ln for projectors on which paw+u/local exact-exchange acts.
@@ -118,12 +119,12 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
  subroutine pawpuxinit(dmatpuopt,exchmix,f4of2_sla,f6of2_sla,is_dfpt,jpawu,llexexch,llpawu,&
-&           ntypat,pawang,pawprtvol,pawrad,pawtab,upawu,use_dmft,useexexch,usepawu,&
+&           nspinor,ntypat,pawang,pawprtvol,pawrad,pawtab,upawu,use_dmft,useexexch,usepawu,&
 &           ucrpa) ! optional argument
 
 !Arguments ---------------------------------------------
 !scalars
- integer,intent(in) :: dmatpuopt,ntypat,pawprtvol,use_dmft,useexexch,usepawu
+ integer,intent(in) :: dmatpuopt,nspinor,ntypat,pawprtvol,use_dmft,useexexch,usepawu
  logical :: is_dfpt
  real(dp),intent(in) :: exchmix
  type(pawang_type), intent(in) :: pawang
@@ -138,17 +139,17 @@ CONTAINS  !=====================================================================
 !Local variables ---------------------------------------
 !scalars
  integer :: icount,il,ilmn,ilmnp,isela,iselb,itemp,itypat,iu,iup,j0lmn,jl,jlmn,jlmnp,ju,jup
- integer :: klm0u,klm0x,klma,klmb,klmn,klmna,klmnb,kln,kln1,kln2,kyc,lcur,lexexch,lkyc,ll,ll1
- integer :: lmexexch,lmkyc,lmn_size,lmn2_size,lmpawu,lpawu
+ integer :: klm0x,klma,klmb,klmn,klmna,klmnb,kln,kln1,kln2,kyc,lcur,lexexch,lkyc,ll,ll1
+ integer :: lmexexch,lmkyc,lmn_size,lmn2_size,lpawu
  integer :: m1,m11,m2,m21,m3,m31,m4,m41
- integer :: mesh_size,int_meshsz,mkyc,sig,sigp,sz1
+ integer :: mesh_size,int_meshsz,mkyc,sz1
  logical :: compute_euijkl,compute_euij_fll
  real(dp) :: ak,f4of2,f6of2,int1,intg,phiint_ij,phiint_ipjp,vee1,vee2
  character(len=500) :: message
 !arrays
  integer,ABI_CONTIGUOUS pointer :: indlmn(:,:)
- real(dp) :: euijkl_temp(2,2),euijkl_temp2(2,2),euijkl_dc(2,2)
- real(dp),allocatable :: ff(:),fk(:),gg(:)
+ real(dp) :: euijkl_temp(3),euijkl_temp2(3),euijkl_dc(3)
+ real(dp),allocatable :: ff(:),gg(:)
 
 ! *************************************************************************
 
@@ -191,6 +192,9 @@ CONTAINS  !=====================================================================
    write(message, '(3a)' ) trim(message),ch10," DFT+U Method used: FLL (no use of occupation matrix) - experimental"
  else if(usepawu==-2) then
    write(message, '(3a)' ) trim(message),ch10," DFT+U Method used: AMF (no use of occupation matrix) - experimental"
+ else if(usepawu==-4) then
+   write(message, '(3a)' ) trim(message),ch10," DFT+U Method used: FLL with no spin polarization in the xc functional &
+     & (no use of occupation matrix) - experimental"
  end if
  if(useexexch/=0) write(message, '(3a)' ) trim(message),ch10," PAW Local Exact exchange: PBE0"
  if((abs(usepawu)>=1.and.abs(usepawu)<=4).or.useexexch/=0) &
@@ -429,115 +433,36 @@ CONTAINS  !=====================================================================
      if (usepawu/=0) then
        lpawu=lcur
 
-!      a. compute F(k)
-!      ---------------------------------------------
-       ABI_MALLOC(fk,(lpawu+1))
-       fk(1)=pawtab(itypat)%upawu
-!      cf Slater Physical Review 165, p 665 (1968) [[cite:Slater1958]]
-!      write(std_out,*) "f4of2_sla",pawtab(itypat)%f4of2_sla
-       if(lpawu==0) then
-         fk(1)=fk(1)
-       else if(lpawu==1) then
-         fk(2)=pawtab(itypat)%jpawu*5._dp
-       else if(lpawu==2) then
-!        f4of2=0._dp
-         if(pawtab(itypat)%f4of2_sla<-0.1_dp)  then
-           f4of2=0.625_dp
-           pawtab(itypat)%f4of2_sla=f4of2
-         else
-           f4of2=pawtab(itypat)%f4of2_sla
-         end if
-         fk(2)=pawtab(itypat)%jpawu*14._dp/(One+f4of2)
-         fk(3)=fk(2)*f4of2
-!        if(abs(pawprtvol)>=2) then
-         write(message,'(a,3x,a,f9.4,f9.4,f9.4,f9.4)') ch10,&
-&         "Slater parameters F^0, F^2, F^4 are",fk(1),fk(2),fk(3)
-         call wrtout(std_out,message,'COLL')
-!        end if
-       else if(lpawu==3) then
-         f4of2=0.6681_dp
-         f6of2=0.4943_dp
-         if(pawtab(itypat)%f4of2_sla<-0.1_dp)  then
-           f4of2=0.6681_dp
-           pawtab(itypat)%f4of2_sla=f4of2
-         else
-           f4of2=pawtab(itypat)%f4of2_sla
-         end if
-         if(pawtab(itypat)%f6of2_sla<-0.1_dp)  then
-           f6of2=0.4943_dp
-           pawtab(itypat)%f6of2_sla=f6of2
-         else
-           f6of2=pawtab(itypat)%f6of2_sla
-         end if
-         fk(2)=pawtab(itypat)%jpawu*6435._dp/(286._dp+195._dp*f4of2+250._dp*f6of2)
-         fk(3)=fk(2)*f4of2
-         fk(4)=fk(2)*f6of2
-         write(std_out,'(a,3x,a,f9.4,f9.4,f9.4,f9.4)') ch10,&
-&         "Slater parameters F^0, F^2, F^4, F^6 are",fk(1),fk(2),fk(3),fk(4)
-       else
-         write(message, '(a,i0,2a)' )&
-&         ' lpawu=',lpawu,ch10,&
-&         ' lpawu not equal to 0 ,1 ,2 or 3 is not allowed'
-         ABI_ERROR(message)
-       end if
-
-!      b. Compute ak and vee.
-!      ---------------------------------------------
        if (allocated(pawtab(itypat)%vee)) then
          ABI_FREE(pawtab(itypat)%vee)
        end if
        sz1=2*lpawu+1
        ABI_MALLOC(pawtab(itypat)%vee,(sz1,sz1,sz1,sz1))
-       pawtab(itypat)%vee=zero
-       lmpawu=(lpawu-1)**2+2*(lpawu-1)+1  ! number of m value below correlated orbitals
-       klm0u=lmpawu*(lmpawu+1)/2          ! value of klmn just below correlated orbitals
-!      --------- 4 loops for interaction matrix
-       do m1=-lpawu,lpawu
-         m11=m1+lpawu+1
-         do m2=-lpawu,m1
-           m21=m2+lpawu+1
-!          klma= number of pair before correlated orbitals +
-!          number of pair for m1 lower than correlated orbitals
-!          (m1+lpawu+1)*(lpawu-1) + number of pairs for correlated orbitals
-!          before (m1,m2) + number of pair for m2 lower than current value
-           klma=klm0u+m11*lmpawu+(m11-1)*m11/2+m21
-           do m3=-lpawu,lpawu
-             m31=m3+lpawu+1
-             do m4=-lpawu,m3
-               m41=m4+lpawu+1
-               klmb=klm0u+m31*lmpawu+(m31-1)*m31/2+m41
-!              --------- loop on k=1,2,3 (4 if f orbitals)
-               do kyc=1,2*lpawu+1,2
-                 lkyc=kyc-1
-                 lmkyc=(lkyc+1)*(lkyc)+1
-                 ak=zero
-                 do mkyc=-lkyc,lkyc,1
-                   isela=pawang%gntselect(lmkyc+mkyc,klma)
-                   iselb=pawang%gntselect(lmkyc+mkyc,klmb)
-                   if (isela>0.and.iselb>0) ak=ak +pawang%realgnt(isela)*pawang%realgnt(iselb)
-                 end do
-!                ----- end loop on k=1,2,3 (4 if f orbitals)
-                 ak=ak/(two*dble(lkyc)+one)
-                 pawtab(itypat)%vee(m11,m31,m21,m41)=ak*fk(lkyc/2+1)+pawtab(itypat)%vee(m11,m31,m21,m41)
-               end do  !kyc
-               pawtab(itypat)%vee(m11,m31,m21,m41)=pawtab(itypat)%vee(m11,m31,m21,m41)*four_pi
-               pawtab(itypat)%vee(m21,m31,m11,m41)=pawtab(itypat)%vee(m11,m31,m21,m41)
-               pawtab(itypat)%vee(m11,m41,m21,m31)=pawtab(itypat)%vee(m11,m31,m21,m41)
-               pawtab(itypat)%vee(m21,m41,m11,m31)=pawtab(itypat)%vee(m11,m31,m21,m41)
-             end do
-           end do
-         end do
-       end do
-       ABI_FREE(fk)
+       call calc_vee(pawtab(itypat)%f4of2_sla,pawtab(itypat)%f6of2_sla,pawtab(itypat)%jpawu,&
+&       pawtab(itypat)%lpawu,pawang,pawtab(itypat)%upawu,pawtab(itypat)%vee)
 
-     !  testu=0
-     !  write(std_out,*) " Matrix of interaction vee(m1,m2,m1,m2)"
-     !  do m1=1,2*lpawu+1
-     !    write(std_out,'(2x,14(f12.6,2x))') (pawtab(itypat)%vee(m1,m2,m1,m2),m2=1,2*lpawu+1)
-     !    do m2=1,2*lpawu+1
-     !      testu=testu+ pawtab(itypat)%vee(m1,m2,m1,m2)
-     !   enddo
-     !  enddo
+      ! testu=0
+      ! write(std_out,*) " Matrix of interaction vee(m1,m2,m1,m2)"
+      ! do m1=1,2*lpawu+1
+      !   write(std_out,'(2x,14(f12.6,2x))') (pawtab(itypat)%vee(m1,m2,m1,m2),m2=1,2*lpawu+1)
+      !   do m2=1,2*lpawu+1
+      !     testu=testu+ pawtab(itypat)%vee(m1,m2,m1,m2)
+      !  enddo
+      ! enddo
+       write(message,'(a)') ch10
+       call wrtout(std_out,message,'COLL')
+       write(message,'(a)') " Matrix of interaction vee(m1,m2,m1,m2)"
+       call wrtout(std_out,message,'COLL')
+       do m1=1,2*lpawu+1
+         write(message,'(2x,14(f20.14,2x))') (pawtab(itypat)%vee(m1,m2,m1,m2)*Ha_eV,m2=1,2*lpawu+1)
+         call wrtout(std_out,message,'COLL')
+       !  do m2=1,2*lpawu+1
+       !    testu=testu+ pawtab(itypat)%vee(m1,m2,m1,m2)
+       ! enddo
+       enddo
+       write(message,'(a)') ch10
+       call wrtout(std_out,message,'COLL')
+
      !  testu=testu/((two*lpawu+one)**2)
      !  write(std_out,*) "------------------------"
      !  write(std_out,'(a,f12.6)') " U=", testu
@@ -557,14 +482,14 @@ CONTAINS  !=====================================================================
      !  write(std_out,'(a,f12.6)')  " J=", testu-testumj
      !  write(std_out,*) "------------------------"
 
-!      c. For DFT (or with exp. values usepawu=-1 or -2), compute euijkl
+!      c. For DFPT (or with exp. values usepawu=-1,-2 or -4), compute euijkl
 !      ---------------------------------------------
        compute_euijkl=(is_dfpt.or.usepawu<0)
        if (compute_euijkl) then
          if (allocated(pawtab(itypat)%euijkl)) then
            ABI_FREE(pawtab(itypat)%euijkl)
          end if
-         ABI_MALLOC(pawtab(itypat)%euijkl,(2,2,lmn_size,lmn_size,lmn_size,lmn_size))
+         ABI_MALLOC(pawtab(itypat)%euijkl,(3,lmn_size,lmn_size,lmn_size,lmn_size))
          pawtab(itypat)%euijkl = zero
          compute_euij_fll = .false.
          euijkl_temp2=zero
@@ -607,39 +532,39 @@ CONTAINS  !=====================================================================
                  m3 = pawtab(itypat)%indlmn(2,jlmnp) ! mjp
                  m31=m3+lpawu+1
 
-                 euijkl_dc = zero
+                 euijkl_dc(:) = zero
 !                Compute the double-counting part of euijkl (invariant when exchanging i<-->j or ip<-->jp)
                  if (m1==m2.and.m3==m4) then ! In that case, we have to add the double-counting term
 
-                     do sig=1,2
-                       do sigp=1,2
+                   if (abs(usepawu)==1.and.nspinor==1) then ! FLL
 
-                         if (abs(usepawu)==1.or.abs(usepawu)==4) then ! FLL
+                     euijkl_dc(1) = &
+&                     phiint_ij * phiint_ipjp * ( pawtab(itypat)%upawu - pawtab(itypat)%jpawu )
+                     euijkl_dc(2) = &
+&                     phiint_ij * phiint_ipjp * pawtab(itypat)%upawu
 
-                           if (sig==sigp) then
-                             euijkl_dc(sig,sigp) = &
-&                             phiint_ij * phiint_ipjp * ( pawtab(itypat)%upawu - pawtab(itypat)%jpawu )
-                           else
-                             euijkl_dc(sig,sigp) = &
-&                             phiint_ij * phiint_ipjp * pawtab(itypat)%upawu
-                           end if
+                   else if (abs(usepawu)==2.and.nspinor==1) then ! AMF
 
-                         else if (abs(usepawu)==2) then ! AMF
+                     euijkl_dc(1) = &
+&                     two*lpawu/(two*lpawu+one) * phiint_ij * phiint_ipjp * ( pawtab(itypat)%upawu - pawtab(itypat)%jpawu )
+                     euijkl_dc(2) = &
+&                     phiint_ij * phiint_ipjp * pawtab(itypat)%upawu
 
-                           if (sig==sigp) then
-                             euijkl_dc(sig,sigp) = &
-&                             two*lpawu/(two*lpawu+one) * phiint_ij * phiint_ipjp * ( pawtab(itypat)%upawu - pawtab(itypat)%jpawu )
-                           else
-                             euijkl_dc(sig,sigp) = &
-&                             phiint_ij * phiint_ipjp * pawtab(itypat)%upawu
-                           end if
+                   else if (abs(usepawu)==4.or.nspinor>1) then ! FLL without polarization in XC or nspinor>1
 
-                         end if
+                     euijkl_dc(1:2) = &
+&                     phiint_ij * phiint_ipjp * ( pawtab(itypat)%upawu - half*pawtab(itypat)%jpawu )
 
-                       end do ! sigp
-                     end do ! sig
+                   end if
 
                  end if ! double-counting term
+
+                 ! Array of size 3:
+                 ! 1st element : coupled with up/up or down/down terms
+                 ! 2nd element : coupled with up/down or down/up terms (collinear part)
+                 ! 3rd element : coupled with up/down or down/up terms (non-collinear part)
+                 euijkl_temp(:) = zero
+                 euijkl_temp2(:) = zero
 
                  vee1 = pawtab(itypat)%vee(m11,m31,m21,m41)
 !                Note : vee(13|24) = vee(23|14) ( so : i    <--> j     )
@@ -648,11 +573,7 @@ CONTAINS  !=====================================================================
 !                Also : vee(13|24) = vee(31|42) ( so : i,j  <--> ip,jp )
 !                ==> vee1 is invariant with respect to the permutations i <--> j , ip <--> jp and i,ip <--> j,jp
 !                ( The term 'phiint_ij * phiint_ipjp' has the same properties)
-                 do sig=1,2
-                   do sigp=1,2
-                     euijkl_temp(sig,sigp) = phiint_ij * phiint_ipjp * vee1
-                   end do
-                 end do
+                 euijkl_temp(1:2) = phiint_ij * phiint_ipjp * vee1
 
                  vee2 = pawtab(itypat)%vee(m11,m31,m41,m21)
 !                Note : vee(13|42) = vee(43|12) ( so : ip   <--> j     )
@@ -664,25 +585,22 @@ CONTAINS  !=====================================================================
 !                ==> vee2 is invariant only with respect to the permutation i,ip <--> j,jp
 
 !                Terms i,j,ip,jp (m2,m1,m4,m3) and j,i,jp,ip (m1,m2,m3,m4)
-                 do sig=1,2
-                   euijkl_temp2(sig,sig) = phiint_ij * phiint_ipjp * vee2
-                 end do
-                 pawtab(itypat)%euijkl(:,:,ilmn,jlmn,ilmnp,jlmnp) = euijkl_temp(:,:) - euijkl_temp2(:,:) - euijkl_dc(:,:)
-                 pawtab(itypat)%euijkl(:,:,jlmn,ilmn,jlmnp,ilmnp) = pawtab(itypat)%euijkl(:,:,ilmn,jlmn,ilmnp,jlmnp)
+                 euijkl_temp2(1) = phiint_ij * phiint_ipjp * vee2
+                 euijkl_temp2(3) = phiint_ij * phiint_ipjp * vee2
+                 pawtab(itypat)%euijkl(:,ilmn,jlmn,ilmnp,jlmnp) = euijkl_temp(:) - euijkl_temp2(:) - euijkl_dc(:)
+                 pawtab(itypat)%euijkl(:,jlmn,ilmn,jlmnp,ilmnp) = pawtab(itypat)%euijkl(:,ilmn,jlmn,ilmnp,jlmnp)
 
 !                Term j,i,ip,jp (m1,m2,m4,m3)
                  vee2 = pawtab(itypat)%vee(m21,m31,m41,m11)
-                 do sig=1,2
-                   euijkl_temp2(sig,sig) = phiint_ij * phiint_ipjp * vee2
-                 end do
-                 pawtab(itypat)%euijkl(:,:,jlmn,ilmn,ilmnp,jlmnp) = euijkl_temp(:,:) - euijkl_temp2(:,:) - euijkl_dc(:,:)
+                 euijkl_temp2(1) = phiint_ij * phiint_ipjp * vee2
+                 euijkl_temp2(3) = phiint_ij * phiint_ipjp * vee2
+                 pawtab(itypat)%euijkl(:,jlmn,ilmn,ilmnp,jlmnp) = euijkl_temp(:) - euijkl_temp2(:) - euijkl_dc(:)
 
 !                Term i,j,jp,ip (m2,m1,m3,m4)
                  vee2 = pawtab(itypat)%vee(m11,m41,m31,m21)
-                 do sig=1,2
-                   euijkl_temp2(sig,sig) = phiint_ij * phiint_ipjp * vee2
-                 end do
-                 pawtab(itypat)%euijkl(:,:,ilmn,jlmn,jlmnp,ilmnp) = euijkl_temp(:,:) - euijkl_temp2(:,:) - euijkl_dc(:,:)
+                 euijkl_temp2(1) = phiint_ij * phiint_ipjp * vee2
+                 euijkl_temp2(3) = phiint_ij * phiint_ipjp * vee2
+                 pawtab(itypat)%euijkl(:,ilmn,jlmn,jlmnp,ilmnp) = euijkl_temp(:) - euijkl_temp2(:) - euijkl_dc(:)
 
                end if ! correlated orbitals
              end do ! klmnb
@@ -852,6 +770,174 @@ CONTAINS  !=====================================================================
 
 !----------------------------------------------------------------------
 
+!!****f* m_paw_correlations/calc_vee
+!! NAME
+!! calc_vee
+!!
+!! FUNCTION
+!!
+!! Compute matrix elements of coulomb interaction (see PRB vol.52 5467) [[cite:Liechenstein1995]]
+!!    (angular part computed from Gaunt coefficients)
+!!
+!! INPUTS
+!1  f4of2_sla= Ratio of Slater integrals.
+!1  f6of2_sla= Ratio of Slater integrals.
+!!  jpawu= value of J
+!!  lpawu= value of l on which DFT+U applies
+!!  upawu= value of U
+!!
+!! OUTPUT
+!!  vee(2*lpawu+1,:,:,:)=matrix of the screened interaction for correlated orbitals
+!!
+!! PARENTS
+!!      pawpuxinit
+!!
+!! CHILDREN
+!!      poisson,simp_gen,wrtout
+!!
+!! SOURCE
+
+ subroutine calc_vee(f4of2_sla,f6of2_sla,jpawu,lpawu,pawang,upawu,vee)
+
+!Arguments ---------------------------------------------
+!scalars
+ integer,intent(in) :: lpawu
+ real(dp),intent(in) :: upawu,jpawu
+ real(dp),intent(inout) :: f4of2_sla,f6of2_sla
+ type(pawang_type), intent(in) :: pawang
+!arrays
+ real(dp),intent(out) :: vee(2*lpawu+1,2*lpawu+1,2*lpawu+1,2*lpawu+1)
+
+!Local variables ---------------------------------------
+!scalars
+ integer :: isela,iselb
+ integer :: klm0u,klma,klmb,kyc,lkyc
+ integer :: lmkyc,lmpawu
+ integer :: m1,m11,m2,m21,m3,m31,m4,m41
+ integer :: mkyc,sz1
+ real(dp) :: ak,f4of2,f6of2
+ character(len=500) :: message
+!arrays
+ real(dp),allocatable :: fk(:)
+
+! *************************************************************************
+
+ DBG_ENTER("COLL")
+
+
+!  Select only atoms with +U
+   if(lpawu/=-1) then
+
+!    ======================================================================
+!    C-PAW+U: Matrix elements of coulomb interaction (see PRB vol.52 5467) [[cite:Liechenstein1995]]
+!    1. angular part computed from Gaunt coefficients
+!    --------------------------------------------------------------------
+!      a. compute F(k)
+!      ---------------------------------------------
+       ABI_MALLOC(fk,(lpawu+1))
+       fk(1)=upawu
+!      cf Slater Physical Review 165, p 665 (1968) [[cite:Slater1958]]
+!      write(std_out,*) "f4of2_sla",pawtab(itypat)%f4of2_sla
+       if(lpawu==0) then
+         fk(1)=fk(1)
+       else if(lpawu==1) then
+         fk(2)=jpawu*5._dp
+       else if(lpawu==2) then
+!        f4of2=0._dp
+         if(f4of2_sla<-0.1_dp)  then
+           f4of2=0.625_dp
+           f4of2_sla=f4of2
+         else
+           f4of2=f4of2_sla
+         end if
+         fk(2)=jpawu*14._dp/(One+f4of2)
+         fk(3)=fk(2)*f4of2
+!        if(abs(pawprtvol)>=2) then
+         write(message,'(a,3x,a,f9.4,f9.4,f9.4,f9.4)') ch10,&
+&         "Slater parameters F^0, F^2, F^4 are",fk(1),fk(2),fk(3)
+         call wrtout(std_out,message,'COLL')
+!        end if
+       else if(lpawu==3) then
+         f4of2=0.6681_dp
+         f6of2=0.4943_dp
+         if(f4of2_sla<-0.1_dp)  then
+           f4of2=0.6681_dp
+           f4of2_sla=f4of2
+         else
+           f4of2=f4of2_sla
+         end if
+         if(f6of2_sla<-0.1_dp)  then
+           f6of2=0.4943_dp
+           f6of2_sla=f6of2
+         else
+           f6of2=f6of2_sla
+         end if
+         fk(2)=jpawu*6435._dp/(286._dp+195._dp*f4of2+250._dp*f6of2)
+         fk(3)=fk(2)*f4of2
+         fk(4)=fk(2)*f6of2
+         write(std_out,'(a,3x,a,f9.4,f9.4,f9.4,f9.4)') ch10,&
+&         "Slater parameters F^0, F^2, F^4, F^6 are",fk(1),fk(2),fk(3),fk(4)
+       else
+         write(message, '(a,i0,2a)' )&
+&         ' lpawu=',lpawu,ch10,&
+&         ' lpawu not equal to 0 ,1 ,2 or 3 is not allowed'
+         ABI_ERROR(message)
+       end if
+
+!      b. Compute ak and vee.
+!      ---------------------------------------------
+      ! if (allocated(vee)) then
+      !   ABI_DEALLOCATE(vee)
+      ! end if
+       sz1=2*lpawu+1
+      ! ABI_ALLOCATE(vee,(sz1,sz1,sz1,sz1))
+       vee=zero
+       lmpawu=(lpawu-1)**2+2*(lpawu-1)+1  ! number of m value below correlated orbitals
+       klm0u=lmpawu*(lmpawu+1)/2          ! value of klmn just below correlated orbitals
+!      --------- 4 loops for interaction matrix
+       do m1=-lpawu,lpawu
+         m11=m1+lpawu+1
+         do m2=-lpawu,m1
+           m21=m2+lpawu+1
+!          klma= number of pair before correlated orbitals +
+!          number of pair for m1 lower than correlated orbitals
+!          (m1+lpawu+1)*(lpawu-1) + number of pairs for correlated orbitals
+!          before (m1,m2) + number of pair for m2 lower than current value
+           klma=klm0u+m11*lmpawu+(m11-1)*m11/2+m21
+           do m3=-lpawu,lpawu
+             m31=m3+lpawu+1
+             do m4=-lpawu,m3
+               m41=m4+lpawu+1
+               klmb=klm0u+m31*lmpawu+(m31-1)*m31/2+m41
+!              --------- loop on k=1,2,3 (4 if f orbitals)
+               do kyc=1,2*lpawu+1,2
+                 lkyc=kyc-1
+                 lmkyc=(lkyc+1)*(lkyc)+1
+                 ak=zero
+                 do mkyc=-lkyc,lkyc,1
+                   isela=pawang%gntselect(lmkyc+mkyc,klma)
+                   iselb=pawang%gntselect(lmkyc+mkyc,klmb)
+                   if (isela>0.and.iselb>0) ak=ak +pawang%realgnt(isela)*pawang%realgnt(iselb)
+                 end do
+!                ----- end loop on k=1,2,3 (4 if f orbitals)
+                 ak=ak/(two*dble(lkyc)+one)
+                 vee(m11,m31,m21,m41)=ak*fk(lkyc/2+1)+vee(m11,m31,m21,m41)
+               end do  !kyc
+               vee(m11,m31,m21,m41)=vee(m11,m31,m21,m41)*four_pi
+               vee(m21,m31,m11,m41)=vee(m11,m31,m21,m41)
+               vee(m11,m41,m21,m31)=vee(m11,m31,m21,m41)
+               vee(m21,m41,m11,m31)=vee(m11,m31,m21,m41)
+             end do
+           end do
+         end do
+       end do
+       ABI_FREE(fk)
+   endif 
+
+ end subroutine calc_vee
+!!***
+
+!----------------------------------------------------------------------
 !!****f* m_paw_correlations/pawuenergy
 !! NAME
 !! pawuenergy
@@ -1138,6 +1224,11 @@ CONTAINS  !=====================================================================
 &   +half*(upawu-jpawu)*(n_upup**2+n_dndn**2) &
 &   *(dble(2*lpawu)/dble(2*lpawu+1))
    edcdctemp=-edctemp
+ else if(pawtab%usepawu==6.or.dmftdc==6) then
+   edctemp=edctemp+upawu*(n_tot*n_tot/4_dp)&
+&   +half*(upawu-jpawu)*(n_tot**2+n_tot**2)/4_dp &
+&   *(dble(2*lpawu)/dble(2*lpawu+1))
+   edcdctemp=-edctemp
  else if(pawtab%usepawu==3.or.dmftdc==3) then
    edcdctemp=edcdc_opt3
    if(abs(pawprtvol)>=3) then
@@ -1418,7 +1509,7 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
  integer :: jspden,klmn,kspden,lcur,ldim,lmax,lmin,lpawu,lwork,my_comm_atom,ndij,nmat,nspden,nsploop
  logical,parameter :: afm_noncoll=.true.  ! TRUE if antiferro symmetries are used with non-collinear magnetism
  logical :: antiferro,my_atmtab_allocated,noccsym_error,paral_atom,use_afm
- real(dp),parameter :: invsqrt2=one/sqrt2
+! real(dp),parameter :: invsqrt2=one/sqrt2
  real(dp) :: factafm,mnorm,mx,my,mz,ntot,nup,ndn,snorm,sx,sy,szp,szm
  character(len=4) :: wrt_mode
  character(len=500) :: message
@@ -1432,7 +1523,7 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
  complex(dpc),allocatable :: zhdp(:,:),zhdp2(:,:),znoccmmp_tmp(:,:),zwork(:)
  character(len=9),parameter :: dspin(6)=  (/"up       ","down     ","up-up    ","down-down","Re[up-dn]","Im[up-dn]"/)
  character(len=9),parameter :: dspinc(6)= (/"up       ","down     ","up-up    ","down-down","up-dn    ","dn-up    "/)
- character(len=9),parameter :: dspinc2(6)=(/"up       ","down     ","dn-dn    ","up-up    ","dn-up    ","up-dn    "/)
+! character(len=9),parameter :: dspinc2(6)=(/"up       ","down     ","dn-dn    ","up-up    ","dn-up    ","up-dn    "/)
  character(len=9),parameter :: dspinm(6)= (/"dn       ","up i     ","n        ","mx       ","my       ","mz       "/)
  type(coeff4_type),allocatable :: tmp_noccmmp(:)
 

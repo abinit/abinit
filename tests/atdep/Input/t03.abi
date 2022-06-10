@@ -1,0 +1,42 @@
+NormalMode
+#DEFINE_UNITCELL
+brav 3 0
+natom_unitcell 4
+xred_unitcell   0.4165  0.25  0.1185       -0.4165 -0.25 -0.1185        -0.0835  0.25  0.3815        0.0835 -0.25  -0.3815
+typat_unitcell 1 1 1 1
+ntypat 1
+amu 2.69815390E+01
+#DEFINE_SUPERCELL
+rprimd  25.6846728 0.0000000 0.0000000 0.0000000 24.6770919 0.0000000 0.0000000 0.0000000 19.5801877
+multiplicity 3 0 0 0 3 0 0 0 4
+natom  144
+typat 1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1 
+temperature  5.00000000E+02
+#DEFINE_COMPUTATIONAL_DETAILS
+nstep_max 20
+nstep_min 1
+rcut 9.79
+#OPTIONAL_INPUT_VARIABLES
+use_ideal_positions 0
+enunit 1
+TheEnd
+ 
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = atdep
+#%% md_hist = t03
+#%% [files]
+#%% files_to_test = 
+#%%   t03.abo, tolnlines = 1, tolabs = 2.e-3, tolrel = 1.e-4, fld_options = -medium;
+#%%   t03omega.dat, tolnlines = 5, tolabs = 2.e-3, tolrel = 1.e-4, fld_options = -medium;
+#%%   t03thermo.dat, tolnlines = 5, tolabs = 2.e-3, tolrel = 1.e-4, fld_options = -medium;
+#%% [paral_info]
+#%% max_nprocs = 10
+#%% [extra_info]
+#%% authors = F. Bottin & J. Bouchet
+#%% keywords = atdep
+#%% description = 
+#%%   test aTDEP (2nd order)
+#%%   Aluminum (orthorombic with 4 atoms) with 144 atoms at T = 500 K.
+#%% topics = aTDEP
+#%%<END TEST_INFO>

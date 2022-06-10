@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2021 ABINIT group (MT)
+!!  Copyright (C) 1998-2022 ABINIT group (MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -643,6 +643,7 @@ contains
    end if
  end if
 
+
 !Additional steps before calculation
 !==============================================================
 
@@ -721,7 +722,7 @@ contains
 
 !  Test on local part
    testnl=(paw_opt/=0)
-   if (paw_opt==0) testnl=any(enl(:,:,:,:)>tol10)
+   if (paw_opt==0) testnl=any(abs(enl(:,:,:,:))>tol10)
 
 !  Some non-local part is to be applied for that type of atom
    if (testnl) then
@@ -848,7 +849,7 @@ contains
                end if
              end do
            end do
-         else
+         else ! cplex != 2
            do ispinor=1,nspinor
              do ia=1,nincat
                do ilmn=1,nlmn
@@ -876,8 +877,8 @@ contains
                end do
              end do
            end do
-         end if
-       end if
+         end if ! cplex == 2
+       end if ! cpopt==4 and ndgxdt>0
 
        ! Computation or <p_lmn|c> (and derivatives) for this block of atoms if :
        !    <p_lmn|c> are not in memory : cpopt<=1
@@ -953,7 +954,7 @@ contains
 &           nincat,nlmn,nspinor,nspinortot,optder,paw_opt,sij_typ)
            call timab(1105,2,tsec)
          else
-           gxfac_sij=gx
+            gxfac_sij=gx
          end if
 
 !        Operate with the non-local potential on the projected scalars,
@@ -997,7 +998,7 @@ contains
              end if
              ABI_FREE(gx_left)
            end if
-         end if
+         end if ! signs == 1
 
 !        Operate with the non-local potential on the projected scalars,
 !        in order to get matrix element
@@ -1021,9 +1022,9 @@ contains
 &             nloalg,npwout,nspinor,paw_opt,ph3dout,svectout,ucvol,vectout)
              call timab(1104,2,tsec)
            end if
-         end if
+         end if ! signs == 2
 
-       end if ! choice==0
+       end if ! choice>=0
 
 !      Deallocate temporary projected scalars
        ABI_FREE(gx)

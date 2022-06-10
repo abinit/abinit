@@ -43,14 +43,14 @@ current approach to be used with more complex electronic and magnetic states
 than just insulators.
 
 Within ABINIT, the electric field gradient computation is invoked with the key
-word [[prtefg]] (for Print EFG), together with the key word [[quadmom]]. The
-[[prtefg]] key word takes the values 1--3. For value 1, the electric field
+word [[nucefg]] (for NUClear site EFG), together with the key word [[quadmom]]. The
+[[nucefg]] key word takes the values 1--3. For value 1, the electric field
 gradient coupling in MHz is reported, where the conversion is made by atom by
 combining the gradient with the nuclear quadrupole moments supplied by
-[[quadmom]]. When [[prtefg]] is input as 2, the additional breakdown of the
+[[quadmom]]. When [[nucefg]] is input as 2, the additional breakdown of the
 field gradient in terms of valence and on-site PAW terms is reported, along
 with the eigenvectors of the EFG matrix, so that principal directions may be
-determined with respect to the crystal axes. Finally, [[prtefg]]=3 allows
+determined with respect to the crystal axes. Finally, [[nucefg]]=3 allows
 additional computation of a point-charge model of the gradient, for comparison
 purposes. The point charges by atom are supplied through the additional
 variable [[ptcharge]]. Detailed examples of the use of ABINIT to compute EFG's
@@ -70,7 +70,7 @@ elements of the on-site all-electron valence functions are required
 few points of the PAW radial functions.
 
 Within ABINIT the Fermi contact interaction is invoked with the key word
-[[prtfc]] (for Print Fermi Contact), which only takes the value 1. When
+[[nucfc]] (for NUClear site Fermi Contact), which only takes the value 1. When
 called, the electron density at each nuclear position is reported, in atomic
 units (electrons per cubic Bohr). The isomer shift as measured in Mossbauer
 spectroscopy is typically reported in velocity units and is obtained from the

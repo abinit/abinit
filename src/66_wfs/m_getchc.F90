@@ -6,7 +6,7 @@
 !! Compute <G|H|C> for input vector |C> expressed in reciprocal space;
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, LSI, MT)
+!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, LSI, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -535,12 +535,6 @@ subroutine getcsc(csc,cpopt,cwavef,cwavef_left,cprj,cprj_left,gs_ham,mpi_enreg,n
  if (size(cwavef_left,2)/=npw*nspinor*ndat) then
    ABI_BUG('Wrong size for cwavef_left')
  end if
- if (size(cprj,2)/=nspinor) then
-   ABI_BUG('Wrong size for cprj')
- end if
- if (size(cprj_left,2)/=nspinor*ndat) then
-   ABI_BUG('Wrong size for cprj_left')
- end if
 
  call timab(1361,1,tsec)
  if (istwf_k==1) then
@@ -561,6 +555,14 @@ subroutine getcsc(csc,cpopt,cwavef,cwavef_left,cprj,cprj_left,gs_ham,mpi_enreg,n
 
 
  if (gs_ham%usepaw==1) then
+
+   if (size(cprj,2)/=nspinor) then
+      ABI_BUG('Wrong size for cprj')
+   end if
+   if (size(cprj_left,2)/=nspinor*ndat) then
+      ABI_BUG('Wrong size for cprj_left')
+   end if
+
    select_k_=1;if (present(select_k)) select_k_=select_k
    choice=1 ; nnlout=1 ; idir=0 ; tim_nonlop=16 ; paw_opt=3
    ABI_MALLOC(gsc,(0,0))
@@ -581,6 +583,7 @@ subroutine getcsc(csc,cpopt,cwavef,cwavef_left,cprj,cprj_left,gs_ham,mpi_enreg,n
    ABI_FREE(gvnlxc)
    ABI_FREE(enlout   )
    ABI_FREE(enlout_im)
+
  end if
 
  call timab(1360+tim_getcsc,2,tsec)

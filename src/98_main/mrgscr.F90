@@ -7,7 +7,7 @@
 !! can be used to perform a sigma calculation.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2021 ABINIT group (RS, MG, MS)
+!! Copyright (C) 2005-2022 ABINIT group (RS, MG, MS)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -610,8 +610,8 @@ program mrgscr
      boxcutmin=two; igmax=Gsphere%shlim(Gsphere%nsh)
      ecut=Er%Hscr%Hdr%ecutdg
 
-     call getng(boxcutmin,ecut,Gsphere%gmet,k0,MPI_enreg%me_fft,&
-       mgfft,nfft,ngfft,MPI_enreg%nproc_fft,Cryst%nsym,paral_kgb0,Cryst%symrel)
+     call getng(boxcutmin,1,ecut,Gsphere%gmet,k0,MPI_enreg%me_fft,&
+       mgfft,nfft,ngfft,MPI_enreg%nproc_fft,Cryst%nsym,paral_kgb0,Cryst%symrel,Cryst%tnons)
 
      ! I am using standard valued, it would be better to call indefo
      ! ngfft(1:3)=Er%Hscr%Hdr%ngfft(1:3)

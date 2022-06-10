@@ -7,7 +7,7 @@
 !! DFT calculations of non linear response functions.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2002-2021 ABINIT group (MVeithen,MB,LB)
+!!  Copyright (C) 2002-2022 ABINIT group (MVeithen,MB,LB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -692,7 +692,7 @@ end if
    psps%n1xccc=maxval(pawtab(1:psps%ntypat)%usetcore)
    call setsym_ylm(gprimd,pawang%l_max-1,dtset%nsym,dtset%pawprtvol,rprimd,symrec,pawang%zarot)
    call pawpuxinit(dtset%dmatpuopt,dtset%exchmix,dtset%f4of2_sla,dtset%f6of2_sla,&
-&   is_dfpt,dtset%jpawu,dtset%lexexch,dtset%lpawu,ntypat,pawang,dtset%pawprtvol,pawrad,&
+&   is_dfpt,dtset%jpawu,dtset%lexexch,dtset%lpawu,dtset%nspinor,ntypat,pawang,dtset%pawprtvol,pawrad,&
 &   pawtab,dtset%upawu,dtset%usedmft,dtset%useexexch,dtset%usepawu)
    compch_fft=-1.d5;compch_sph=-1.d5
    usexcnhat=maxval(pawtab(:)%usexcnhat)
@@ -1158,7 +1158,7 @@ end if
        write(message,'(a,a,a,a,a,a)')ch10,&
 &       ' dfptnl_doutput: WARNING -',ch10,&
 &       '  matrix of third-order energies incomplete,',ch10,&
-&       '  non-linear optical coefficients may be wrong.'
+&       '  non-linear optical coefficients may be wrong, check input variables rfatpol and rfdir.'
        call wrtout(ab_out,message,'COLL')
        call wrtout(std_out,message,'COLL')
      end if
@@ -1211,7 +1211,7 @@ end if
        write(message,'(a,a,a,a,a,a)')ch10,&
 &       ' dfptnl_doutput: WARNING -',ch10,&
 &       '  matrix of third-order energies incomplete,',ch10,&
-&       '  changes in the dielectric susceptibility may be wrong.'
+&       '  changes in the dielectric susceptibility may be wrong, check input variables rfatpol and rfdir.'
        call wrtout(ab_out,message,'COLL')
        call wrtout(std_out,message,'COLL')
      end if

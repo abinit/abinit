@@ -7,7 +7,7 @@
 !! elements and calculates related properties - Tc, phonon linewidths...
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2021 ABINIT group (MVer, BXu, MG, JPC)
+!! Copyright (C) 2004-2022 ABINIT group (MVer, BXu, MG, JPC)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

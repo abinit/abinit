@@ -8,7 +8,7 @@
 !!  pawtab_type variables define TABulated data for PAW (from pseudopotential)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2021 ABINIT group (MT)
+!! Copyright (C) 2013-2022 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -156,6 +156,8 @@ MODULE m_pawtab
   integer :: has_nabla
    ! if 1, onsite matrix elements of the nabla operator are allocated.
    ! if 2, onsite matrix elements of the nabla operator are computed and stored.
+   ! if 3, onsite matrix elements of the nabla operator between valence and core states are computed and stored.
+   ! if 4, onsite matrix elements of the nabla operator between valence and core spinor states are are computed and stored.
 
   integer :: has_nablaphi
    ! if 1, nablaphi are allocated
@@ -281,6 +283,7 @@ MODULE m_pawtab
    ! usepawu= 4 ; use PAW+U formalism (FLL) without polarization in the XC
    ! usepawu=-1 ; use PAW+U formalism (FLL) - No use of the occupation matrix - Experimental
    ! usepawu=-2 ; use PAW+U formalism (AMF) - No use of the occupation matrix - Experimental
+   ! usepawu=-4 ; use PAW+U formalism (FLL) without polarization in the XC - No use of the occupation matrix - Experimental
    ! usepawu=10 ; use PAW+U within DMFT
    ! usepawu=14 ; use PAW+U within DMFT without polarization in the XC
 
@@ -428,9 +431,9 @@ MODULE m_pawtab
    ! Screened Hartree kernel for the on-site terms (E_hartree=Sum_ijkl[rho_ij rho_kl e_ijkl_sr])
    ! Used for screened Fock contributions
 
-  real(dp), allocatable :: euijkl(:,:,:,:,:,:)
-   ! euijkl(2,2,lmn_size,lmn_size,lmn_size,lmn_size)
-   ! PAW+U kernel for the on-site terms ( E_PAW+U = 0.5 * Sum_s1s2 Sum_ijkl [rho_ij^s1 rho_kl^s2 euijkl^s1s2] )
+  real(dp), allocatable :: euijkl(:,:,:,:,:)
+   ! euijkl(3,lmn_size,lmn_size,lmn_size,lmn_size)
+   ! PAW+U kernel for the on-site terms ( E_PAW+U = 0.5 * Sum_ijkl Sum_s1s2 [rho_ij^s1 rho_kl^s2 euijkl(s1,s2)] )
    ! Contrary to eijkl and eijkl_sr, euijkl is not invariant with respect to the permutations i <--> j or k <--> l
    ! However, it is still invariant with respect to the permutation i,k <--> j,l, see pawpuxinit.F90
    ! Also, it depends on two spin indexes
@@ -465,6 +468,11 @@ MODULE m_pawtab
   real(dp), allocatable :: nabla_ij(:,:,:)
    ! nabla_ij(3,lmn_size,lmn_size)
    ! Onsite matrix elements <phi|\nabla|phj>-<tphi|\nabla|tphj>
+
+  real(dp), allocatable :: nabla_im_ij(:,:,:)
+   ! nabla_im_ij(3,lmn_size,lmn_size)
+   ! Imaginary part of onsite matrix elements <phi|\nabla|phj>-<tphi|\nabla|tphj>
+   ! Used in case of core spinor wave functions
 
   real(dp), allocatable :: nablaphi(:,:)
    ! nablaphi(partialwave_mesh_size, basis_size)
@@ -833,6 +841,9 @@ subroutine pawtab_free_0D(Pawtab)
  end if
  if (allocated(Pawtab%nabla_ij))  then
    LIBPAW_DEALLOCATE(Pawtab%nabla_ij)
+ end if
+ if (allocated(Pawtab%nabla_im_ij))  then
+   LIBPAW_DEALLOCATE(Pawtab%nabla_im_ij)
  end if
  if (allocated(Pawtab%nablaphi))  then
    LIBPAW_DEALLOCATE(Pawtab%nablaphi)
@@ -1462,13 +1473,14 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
  integer :: ierr,ii,me,nn_dpr,nn_dpr_arr,nn_int,nn_int_arr
  integer :: siz_indklmn,siz_indlmn,siz_klmntomn,siz_kmix,siz_lnproju,siz_orbitals
  integer :: siz_coredens,siz_coretau,siz_dij0,siz_dltij,siz_dshpfunc,siz_eijkl,siz_eijkl_sr
- integer :: siz_euijkl,siz_euij_fll,siz_fk,siz_gammaij,siz_gnorm,siz_fock,siz_kij,siz_nabla_ij
- integer :: siz_nablaphi,siz_phi,siz_phiphj,siz_phiphjint,siz_ph0phiint,siz_qgrid_shp,siz_qijl
- integer :: siz_rad_for_spline,siz_rhoij0,siz_shape_alpha,siz_shape_q,siz_shapefunc
- integer :: siz_shapefncg,siz_sij,siz_tcoredens,siz_tcoretau,siz_tcorespl,siz_tcoretauspl
- integer :: siz_tnablaphi,siz_tphi,siz_tphitphj,siz_tproj,siz_tvalespl,siz_vee,siz_vex
- integer :: siz_vhtnzc,siz_vhnzc,siz_vminushalf,siz_zioneff,siz_wvlpaw,siz_wvl_pngau
- integer :: siz_wvl_parg,siz_wvl_pfac,siz_wvl_rholoc_rad,siz_wvl_rholoc_d,sz1,sz2
+ integer :: siz_euijkl,siz_euij_fll,siz_fk,siz_gammaij,siz_gnorm,siz_fock,siz_kij
+ integer :: siz_nabla_ij,siz_nabla_im_ij,siz_nablaphi,siz_phi,siz_phiphj,siz_phiphjint
+ integer :: siz_ph0phiint,siz_qgrid_shp,siz_qijl,siz_rad_for_spline,siz_rhoij0
+ integer :: siz_shape_alpha,siz_shape_q,siz_shapefunc,siz_shapefncg,siz_sij,siz_tcoredens
+ integer :: siz_tcoretau,siz_tcorespl,siz_tcoretauspl,siz_tnablaphi,siz_tphi,siz_tphitphj
+ integer :: siz_tproj,siz_tvalespl,siz_vee,siz_vex,siz_vhtnzc,siz_vhnzc,siz_vminushalf
+ integer :: siz_zioneff,siz_wvlpaw,siz_wvl_pngau,siz_wvl_parg,siz_wvl_pfac
+ integer :: siz_wvl_rholoc_rad,siz_wvl_rholoc_d,sz1,sz2
  logical :: full_broadcast
  character (len=500) :: msg,msg0
 !arrays
@@ -1684,13 +1696,14 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
 !-------------------------------------------------------------------------
    siz_dltij=0    ; siz_dshpfunc=0
    siz_eijkl=0    ; siz_eijkl_sr=0 ; siz_euijkl=0   ; siz_euij_fll=0
-   siz_fk=0       ; siz_gammaij=0  ; siz_gnorm=0    ; siz_nabla_ij=0
+   siz_fk=0       ; siz_gammaij=0  ; siz_gnorm=0
+   siz_nabla_ij=0 ; siz_nabla_im_ij=0
    siz_phiphj=0   ; siz_phiphjint=0; siz_ph0phiint=0
    siz_qgrid_shp=0; siz_qijl=0     ; siz_rad_for_spline=0
    siz_shapefncg=0; siz_sij=0      ; siz_tphitphj=0
    siz_vee=0      ; siz_vex=0      ; siz_zioneff=0
    if (full_broadcast) then
-     nn_int=nn_int+22
+     nn_int=nn_int+23
      if (allocated(pawtab%dltij)) then
        siz_dltij=size(pawtab%dltij)                   !(lmn2_size)
        if (siz_dltij/=pawtab%lmn2_size) msg=trim(msg)//' dltij'
@@ -1712,8 +1725,8 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
        nn_dpr=nn_dpr+siz_eijkl_sr
      end if
      if (allocated(pawtab%euijkl)) then
-       siz_euijkl=size(pawtab%euijkl)                 !(2,2,lmn_size,lmn_size,lmn_size,lmn_size)
-       if (siz_euijkl/=4*pawtab%lmn_size*pawtab%lmn_size*pawtab%lmn_size*pawtab%lmn_size) msg=trim(msg)//' euijkl'
+       siz_euijkl=size(pawtab%euijkl)                 !(3,lmn_size,lmn_size,lmn_size,lmn_size)
+       if (siz_euijkl/=3*pawtab%lmn_size*pawtab%lmn_size*pawtab%lmn_size*pawtab%lmn_size) msg=trim(msg)//' euijkl'
        nn_dpr=nn_dpr+siz_euijkl
      end if
      if (allocated(pawtab%euij_fll)) then
@@ -1740,6 +1753,11 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
        siz_nabla_ij=size(pawtab%nabla_ij)             !(3,lmn_size,lmn_size)
        if (siz_nabla_ij/=pawtab%lmn_size) msg=trim(msg)//' nabla_ij'
        nn_dpr=nn_dpr+siz_nabla_ij
+     end if
+     if (allocated(pawtab%nabla_im_ij)) then
+       siz_nabla_im_ij=size(pawtab%nabla_im_ij)       !(3,lmn_size,lmn_size)
+       if (siz_nabla_im_ij/=pawtab%lmn_size) msg=trim(msg)//' nabla_im_ij'
+       nn_dpr=nn_dpr+siz_nabla_im_ij
      end if
      if (allocated(pawtab%phiphj)) then
        siz_phiphj=size(pawtab%phiphj)                 !(mesh_size,ij_size)
@@ -1983,6 +2001,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
      list_int(ii)=siz_gammaij ;ii=ii+1
      list_int(ii)=siz_gnorm  ;ii=ii+1
      list_int(ii)=siz_nabla_ij  ;ii=ii+1
+     list_int(ii)=siz_nabla_im_ij  ;ii=ii+1
      list_int(ii)=siz_phiphj  ;ii=ii+1
      list_int(ii)=siz_phiphjint  ;ii=ii+1
      list_int(ii)=siz_ph0phiint  ;ii=ii+1
@@ -2159,6 +2178,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
      siz_gammaij=list_int(ii)  ;ii=ii+1
      siz_gnorm=list_int(ii)  ;ii=ii+1
      siz_nabla_ij=list_int(ii)  ;ii=ii+1
+     siz_nabla_im_ij=list_int(ii)  ;ii=ii+1
      siz_phiphj=list_int(ii)  ;ii=ii+1
      siz_phiphjint=list_int(ii)  ;ii=ii+1
      siz_ph0phiint=list_int(ii)  ;ii=ii+1
@@ -2412,6 +2432,10 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
      if (siz_nabla_ij>0) then
        list_dpr(ii:ii+siz_nabla_ij-1)=reshape(pawtab%nabla_ij,(/siz_nabla_ij/))
        ii=ii+siz_nabla_ij
+     end if
+     if (siz_nabla_im_ij>0) then
+       list_dpr(ii:ii+siz_nabla_im_ij-1)=reshape(pawtab%nabla_im_ij,(/siz_nabla_im_ij/))
+       ii=ii+siz_nabla_im_ij
      end if
      if (siz_phiphj>0) then
        list_dpr(ii:ii+siz_phiphj-1)=reshape(pawtab%phiphj,(/siz_phiphj/))
@@ -2764,8 +2788,8 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
        LIBPAW_DEALLOCATE(pawtab%euijkl)
      end if
      if (siz_euijkl>0) then
-       LIBPAW_ALLOCATE(pawtab%euijkl,(2,2,pawtab%lmn_size,pawtab%lmn_size,pawtab%lmn_size,pawtab%lmn_size))
-       pawtab%euijkl=reshape(list_dpr(ii:ii+siz_euijkl-1),(/2,2,pawtab%lmn_size,pawtab%lmn_size,pawtab%lmn_size,pawtab%lmn_size/))
+       LIBPAW_ALLOCATE(pawtab%euijkl,(3,pawtab%lmn_size,pawtab%lmn_size,pawtab%lmn_size,pawtab%lmn_size))
+       pawtab%euijkl=reshape(list_dpr(ii:ii+siz_euijkl-1),(/3,pawtab%lmn_size,pawtab%lmn_size,pawtab%lmn_size,pawtab%lmn_size/))
        ii=ii+siz_euijkl
      end if
      if (allocated(pawtab%euij_fll)) then
@@ -2807,6 +2831,14 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
        LIBPAW_ALLOCATE(pawtab%nabla_ij,(3,pawtab%lmn_size,pawtab%lmn_size))
        pawtab%nabla_ij=reshape(list_dpr(ii:ii+siz_nabla_ij-1),(/3,pawtab%lmn_size,pawtab%lmn_size/))
        ii=ii+siz_nabla_ij
+     end if
+     if (allocated(pawtab%nabla_im_ij)) then
+       LIBPAW_DEALLOCATE(pawtab%nabla_im_ij)
+     end if
+     if (siz_nabla_im_ij>0) then
+       LIBPAW_ALLOCATE(pawtab%nabla_im_ij,(3,pawtab%lmn_size,pawtab%lmn_size))
+       pawtab%nabla_im_ij=reshape(list_dpr(ii:ii+siz_nabla_im_ij-1),(/3,pawtab%lmn_size,pawtab%lmn_size/))
+       ii=ii+siz_nabla_im_ij
      end if
      if (allocated(pawtab%phiphj)) then
        LIBPAW_DEALLOCATE(pawtab%phiphj)

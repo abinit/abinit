@@ -52,5 +52,4 @@ Also there is a tutorial for [[tutorial:tdepes|the temperature dependence of the
 * (New implementation) Four tutorials for the new procedure are available at [[tutorial:eph_intro|an overview of the EPH code]], 
 [[tutorial:eph4zpr|Zero-point renormalization of the band gap and temperature-dependent band gaps]], 
 [[tutorial:eph4mob|Phonon-limited mobility]] and
-[[tutorial:eph4pem|Polaron effective mass in cubic materials]]
 :.

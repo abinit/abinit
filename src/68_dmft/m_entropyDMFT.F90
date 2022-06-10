@@ -6,7 +6,7 @@
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2014-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -72,7 +72,7 @@ module m_entropyDMFT
 !!  This structured datatype contains the necessary data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2014-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -124,7 +124,7 @@ contains
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2014-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -308,7 +308,7 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2014-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -366,7 +366,7 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2014-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -513,7 +513,7 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2014-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -633,7 +633,7 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2014-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -718,7 +718,7 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
       call wrtout(std_out,message,"COLL")
       call wrtout(ab_out,message,"COLL")
       call pawpuxinit(dt%dmatpuopt,dt%exchmix,dt%f4of2_sla,dt%f6of2_sla,&
-&        is_dfpt,jpawu,dt%lexexch,dt%lpawu,dt%ntypat,pawang,dt%pawprtvol,&
+&        is_dfpt,jpawu,dt%lexexch,dt%lpawu,dt%nspinor,dt%ntypat,pawang,dt%pawprtvol,&
 &        pawrad,pawtab,upawu,dt%usedmft,dt%useexexch,dt%usepawu)
       ABI_FREE(upawu)
       ABI_FREE(jpawu)
@@ -735,7 +735,7 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2014-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -890,7 +890,7 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2014-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1038,7 +1038,7 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2014-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1134,7 +1134,7 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2014-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.7.4 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h54 )
+.Starting date : Wed  4 May 2022.
+- ( at 03h22 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI10/paral_t51_MPI10-t52_MPI10-t53_MPI10/t52.in
-- output file    -> t52_MPI10.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/paral_t51_MPI10-t52_MPI10-t53_MPI10/t52.abi
+- output file    -> t52_MPI10.abo
 - root for input  files -> t52_MPI10i
 - root for output files -> t52_MPI10o
 
@@ -34,7 +34,7 @@
 -    mband =           5        mffmem =           1         mkmem =          26
        mpw =         168          nfft =        4096          nkpt =         256
 ================================================================================
-P This job should need less than                       2.392 Mbytes of memory.
+P This job should need less than                       2.509 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      3.283 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
@@ -51,7 +51,7 @@ _ WF disk file :      3.283 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =           5        mffmem =           1         mkmem =          26
        mpw =         168          nfft =        4096          nkpt =         256
 ================================================================================
-P This job should need less than                       2.392 Mbytes of memory.
+P This job should need less than                       2.509 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      3.283 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
@@ -223,8 +223,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10256
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosGTH_pwteter/13al.pspgth
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosGTH_pwteter/13al.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosGTH_pwteter/13al.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosGTH_pwteter/13al.pspgth
 - Goedecker-Teter-Hutter  Tue May 28 09:24:05 EDT 1996
 - 13.00000   3.00000    960528                znucl, zion, pspdat
     2    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -255,30 +255,30 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
  -6.3888E-03  5.5311E-01  6.8397E-01  7.4515E-01  7.8858E-01
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-  prteigrs : nnsclo,ikpt=   20   14 max resid (incl. the buffer)=  1.17706E-08
-  prteigrs : nnsclo,ikpt=   20   29 max resid (incl. the buffer)=  1.57766E-08
-  prteigrs : nnsclo,ikpt=   20   34 max resid (incl. the buffer)=  4.22655E-08
-  prteigrs : nnsclo,ikpt=   20   36 max resid (incl. the buffer)=  3.31438E-09
-  prteigrs : nnsclo,ikpt=   20   56 max resid (incl. the buffer)=  3.75137E-08
-  prteigrs : nnsclo,ikpt=   20   61 max resid (incl. the buffer)=  2.02503E-07
-  prteigrs : nnsclo,ikpt=   20   72 max resid (incl. the buffer)=  1.04640E-09
-  prteigrs : nnsclo,ikpt=   20   73 max resid (incl. the buffer)=  1.51968E-08
-  prteigrs : nnsclo,ikpt=   20  102 max resid (incl. the buffer)=  7.66407E-08
-  prteigrs : nnsclo,ikpt=   20  103 max resid (incl. the buffer)=  7.85595E-08
-  prteigrs : nnsclo,ikpt=   20  104 max resid (incl. the buffer)=  5.25537E-08
-  prteigrs : nnsclo,ikpt=   20  109 max resid (incl. the buffer)=  1.00960E-08
-  prteigrs : nnsclo,ikpt=   20  111 max resid (incl. the buffer)=  9.21028E-07
-  prteigrs : nnsclo,ikpt=   20  116 max resid (incl. the buffer)=  3.58227E-07
-  prteigrs : nnsclo,ikpt=   20  123 max resid (incl. the buffer)=  1.54201E-07
-  prteigrs : nnsclo,ikpt=   20  130 max resid (incl. the buffer)=  5.74120E-08
-  prteigrs : nnsclo,ikpt=   20  136 max resid (incl. the buffer)=  4.28456E-07
-  prteigrs : nnsclo,ikpt=   20  137 max resid (incl. the buffer)=  4.09891E-10
-  prteigrs : nnsclo,ikpt=   20  182 max resid (incl. the buffer)=  1.08949E-07
-  prteigrs : nnsclo,ikpt=   20  215 max resid (incl. the buffer)=  1.69443E-09
-  prteigrs : nnsclo,ikpt=   20  251 max resid (incl. the buffer)=  4.97018E-08
-  prteigrs : nnsclo,ikpt=   20  252 max resid (incl. the buffer)=  2.10456E-08
-  prteigrs : nnsclo,ikpt=   20  253 max resid (incl. the buffer)=  2.29614E-07
-  prteigrs : nnsclo,ikpt=   20  255 max resid (incl. the buffer)=  6.26968E-07
+  prteigrs : nnsclo,ikpt=   20   14 max resid (excl. the buffer)=  1.17706E-08
+  prteigrs : nnsclo,ikpt=   20   29 max resid (excl. the buffer)=  1.57766E-08
+  prteigrs : nnsclo,ikpt=   20   34 max resid (excl. the buffer)=  4.22655E-08
+  prteigrs : nnsclo,ikpt=   20   36 max resid (excl. the buffer)=  3.31438E-09
+  prteigrs : nnsclo,ikpt=   20   56 max resid (excl. the buffer)=  3.75137E-08
+  prteigrs : nnsclo,ikpt=   20   61 max resid (excl. the buffer)=  2.02503E-07
+  prteigrs : nnsclo,ikpt=   20   72 max resid (excl. the buffer)=  1.04640E-09
+  prteigrs : nnsclo,ikpt=   20   73 max resid (excl. the buffer)=  1.51968E-08
+  prteigrs : nnsclo,ikpt=   20  102 max resid (excl. the buffer)=  7.66407E-08
+  prteigrs : nnsclo,ikpt=   20  103 max resid (excl. the buffer)=  7.85595E-08
+  prteigrs : nnsclo,ikpt=   20  104 max resid (excl. the buffer)=  5.25537E-08
+  prteigrs : nnsclo,ikpt=   20  109 max resid (excl. the buffer)=  1.00960E-08
+  prteigrs : nnsclo,ikpt=   20  111 max resid (excl. the buffer)=  9.21028E-07
+  prteigrs : nnsclo,ikpt=   20  116 max resid (excl. the buffer)=  3.58227E-07
+  prteigrs : nnsclo,ikpt=   20  123 max resid (excl. the buffer)=  1.54201E-07
+  prteigrs : nnsclo,ikpt=   20  130 max resid (excl. the buffer)=  5.74120E-08
+  prteigrs : nnsclo,ikpt=   20  136 max resid (excl. the buffer)=  4.28456E-07
+  prteigrs : nnsclo,ikpt=   20  137 max resid (excl. the buffer)=  4.09891E-10
+  prteigrs : nnsclo,ikpt=   20  182 max resid (excl. the buffer)=  1.08949E-07
+  prteigrs : nnsclo,ikpt=   20  215 max resid (excl. the buffer)=  1.69443E-09
+  prteigrs : nnsclo,ikpt=   20  251 max resid (excl. the buffer)=  4.97018E-08
+  prteigrs : nnsclo,ikpt=   20  252 max resid (excl. the buffer)=  2.10456E-08
+  prteigrs : nnsclo,ikpt=   20  253 max resid (excl. the buffer)=  2.29614E-07
+  prteigrs : nnsclo,ikpt=   20  255 max resid (excl. the buffer)=  6.26968E-07
 
 
  scprqt:  WARNING -
@@ -373,30 +373,30 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   1.5875E-01  2.4082E-01  6.3846E-01  6.8449E-01  7.5387E-01
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-  prteigrs : nnsclo,ikpt=   20    2 max resid (incl. the buffer)=  5.25537E-08
-  prteigrs : nnsclo,ikpt=   20    4 max resid (incl. the buffer)=  4.28456E-07
-  prteigrs : nnsclo,ikpt=   20   40 max resid (incl. the buffer)=  1.69443E-09
-  prteigrs : nnsclo,ikpt=   20   67 max resid (incl. the buffer)=  4.05821E-09
-  prteigrs : nnsclo,ikpt=   20   70 max resid (incl. the buffer)=  3.75137E-08
-  prteigrs : nnsclo,ikpt=   20   72 max resid (incl. the buffer)=  9.21028E-07
-  prteigrs : nnsclo,ikpt=   20   74 max resid (incl. the buffer)=  1.89981E-09
-  prteigrs : nnsclo,ikpt=   20   75 max resid (incl. the buffer)=  1.51968E-08
-  prteigrs : nnsclo,ikpt=   20  108 max resid (incl. the buffer)=  8.70495E-08
-  prteigrs : nnsclo,ikpt=   20  109 max resid (incl. the buffer)=  7.85595E-08
-  prteigrs : nnsclo,ikpt=   20  114 max resid (incl. the buffer)=  1.94629E-08
-  prteigrs : nnsclo,ikpt=   20  127 max resid (incl. the buffer)=  4.97018E-08
-  prteigrs : nnsclo,ikpt=   20  128 max resid (incl. the buffer)=  1.54201E-07
-  prteigrs : nnsclo,ikpt=   20  133 max resid (incl. the buffer)=  2.29614E-07
-  prteigrs : nnsclo,ikpt=   20  136 max resid (incl. the buffer)=  5.74120E-08
-  prteigrs : nnsclo,ikpt=   20  141 max resid (incl. the buffer)=  6.26968E-07
-  prteigrs : nnsclo,ikpt=   20  143 max resid (incl. the buffer)=  4.09891E-10
-  prteigrs : nnsclo,ikpt=   20  169 max resid (incl. the buffer)=  4.95518E-08
-  prteigrs : nnsclo,ikpt=   20  187 max resid (incl. the buffer)=  1.08949E-07
-  prteigrs : nnsclo,ikpt=   20  192 max resid (incl. the buffer)=  1.17706E-08
-  prteigrs : nnsclo,ikpt=   20  224 max resid (incl. the buffer)=  4.12497E-08
-  prteigrs : nnsclo,ikpt=   20  238 max resid (incl. the buffer)=  2.71008E-07
-  prteigrs : nnsclo,ikpt=   20  253 max resid (incl. the buffer)=  2.10456E-08
-  prteigrs : nnsclo,ikpt=   20  256 max resid (incl. the buffer)=  1.57766E-08
+  prteigrs : nnsclo,ikpt=   20    2 max resid (excl. the buffer)=  5.25537E-08
+  prteigrs : nnsclo,ikpt=   20    4 max resid (excl. the buffer)=  4.28456E-07
+  prteigrs : nnsclo,ikpt=   20   40 max resid (excl. the buffer)=  1.69443E-09
+  prteigrs : nnsclo,ikpt=   20   67 max resid (excl. the buffer)=  4.05821E-09
+  prteigrs : nnsclo,ikpt=   20   70 max resid (excl. the buffer)=  3.75137E-08
+  prteigrs : nnsclo,ikpt=   20   72 max resid (excl. the buffer)=  9.21028E-07
+  prteigrs : nnsclo,ikpt=   20   74 max resid (excl. the buffer)=  1.89981E-09
+  prteigrs : nnsclo,ikpt=   20   75 max resid (excl. the buffer)=  1.51968E-08
+  prteigrs : nnsclo,ikpt=   20  108 max resid (excl. the buffer)=  8.70495E-08
+  prteigrs : nnsclo,ikpt=   20  109 max resid (excl. the buffer)=  7.85595E-08
+  prteigrs : nnsclo,ikpt=   20  114 max resid (excl. the buffer)=  1.94629E-08
+  prteigrs : nnsclo,ikpt=   20  127 max resid (excl. the buffer)=  4.97018E-08
+  prteigrs : nnsclo,ikpt=   20  128 max resid (excl. the buffer)=  1.54201E-07
+  prteigrs : nnsclo,ikpt=   20  133 max resid (excl. the buffer)=  2.29614E-07
+  prteigrs : nnsclo,ikpt=   20  136 max resid (excl. the buffer)=  5.74120E-08
+  prteigrs : nnsclo,ikpt=   20  141 max resid (excl. the buffer)=  6.26968E-07
+  prteigrs : nnsclo,ikpt=   20  143 max resid (excl. the buffer)=  4.09891E-10
+  prteigrs : nnsclo,ikpt=   20  169 max resid (excl. the buffer)=  4.95518E-08
+  prteigrs : nnsclo,ikpt=   20  187 max resid (excl. the buffer)=  1.08949E-07
+  prteigrs : nnsclo,ikpt=   20  192 max resid (excl. the buffer)=  1.17706E-08
+  prteigrs : nnsclo,ikpt=   20  224 max resid (excl. the buffer)=  4.12497E-08
+  prteigrs : nnsclo,ikpt=   20  238 max resid (excl. the buffer)=  2.71008E-07
+  prteigrs : nnsclo,ikpt=   20  253 max resid (excl. the buffer)=  2.10456E-08
+  prteigrs : nnsclo,ikpt=   20  256 max resid (excl. the buffer)=  1.57766E-08
 
 
  scprqt:  WARNING -
@@ -581,45 +581,46 @@ P           mkmem          26
 
 ================================================================================
 
-- Total cpu        time (s,m,h):         16.9        0.28      0.005
-- Total wall clock time (s,m,h):         17.0        0.28      0.005
+- Total cpu        time (s,m,h):         16.7        0.28      0.005
+- Total wall clock time (s,m,h):         16.8        0.28      0.005
 -
 - For major independent code sections, cpu and wall times (sec),
--  as well as % of the time and number of calls for node 0-
--<BEGIN_TIMER mpi_nprocs = 10, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =            1.7, wall_time =            1.7
+-  as well as % of the time and number of calls for node 0
 -
-- routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
--                                                                  (-1=no count)
-- fourwf%(pot)                   0.847   5.0      0.850   5.0           8520      -1.00        1.00       1.00
-- vtorho(MPI)                    0.175   1.0      0.175   1.0              2      -1.00        1.00       1.00
-- nonlop(apply)                  0.106   0.6      0.106   0.6           8520      -1.00        0.99       0.99
-- others (124)                   0.246   1.5      0.245   1.4             -1      -1.00        1.00       1.00
+-<BEGIN_TIMER mpi_nprocs = 10, omp_nthreads = 1, mpi_rank = 0>
+- cpu_time =            1.6, wall_time =            1.7
+-
+- routine                            cpu     %          wall     %      number of calls Gflops    Speedup Efficacity
+-                                                                        (-1=no count)
+- fourwf%(pot)                      0.851   5.1         0.854   5.1           8520      -1.00        1.00       1.00
+- vtorho(MPI)                       0.166   1.0         0.166   1.0              2      -1.00        1.00       1.00
+- nonlop(apply)                     0.105   0.6         0.107   0.6           8520      -1.00        0.99       0.99
+- others (136)                      0.235   1.4         0.234   1.4             -1      -1.00        1.00       1.00
 -<END_TIMER>
 -
-- subtotal                       1.373   8.1      1.377   8.1                                  1.00       1.00
+- subtotal                          1.357   8.1         1.361   8.1                                  1.00       1.00
 
 - For major independent code sections, cpu and wall times (sec),
 - as well as % of the total time and number of calls 
 
 -<BEGIN_TIMER mpi_nprocs = 10, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =          16.9, wall_time =          17.0
+- cpu_time =          16.7, wall_time =          16.8
 -
-- routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
--                                                                  (-1=no count)
-- fourwf%(pot)                   8.737  51.6      8.774  51.6          87909      -1.00        1.00       1.00
-- vtorho(MPI)                    1.325   7.8      1.328   7.8             20      -1.00        1.00       1.00
-- nonlop(apply)                  1.095   6.5      1.105   6.5          87909      -1.00        0.99       0.99
-- invars2                        0.738   4.4      0.741   4.4             20      -1.00        1.00       1.00
-- projbd                         0.571   3.4      0.577   3.4         126648      -1.00        0.99       0.99
-- getghc-other                   0.467   2.8      0.449   2.6            -10      -1.00        1.04       1.04
-- vtowfk(ssdiag)                 0.330   2.0      0.331   1.9            -10      -1.00        1.00       1.00
-- abinit(2)                      0.259   1.5      0.260   1.5             10      -1.00        1.00       1.00
-- ewald                          0.190   1.1      0.190   1.1             20      -1.00        1.00       1.00
-- others (118)                   0.107   0.6      0.107   0.6             -1      -1.00        0.99       0.99
+- routine                            cpu     %          wall     %      number of calls Gflops    Speedup Efficacity
+-                                                                        (-1=no count)
+- fourwf%(pot)                      8.742  52.2         8.774  52.1          87909      -1.00        1.00       1.00
+- vtorho(MPI)                       1.323   7.9         1.326   7.9             20      -1.00        1.00       1.00
+- nonlop(apply)                     1.085   6.5         1.095   6.5          87909      -1.00        0.99       0.99
+- invars2                           0.686   4.1         0.687   4.1             20      -1.00        1.00       1.00
+- projbd                            0.527   3.1         0.532   3.2         126648      -1.00        0.99       0.99
+- getghc-other                      0.428   2.6         0.411   2.4            -10      -1.00        1.04       1.04
+- vtowfk(ssdiag)                    0.266   1.6         0.266   1.6            -10      -1.00        1.00       1.00
+- ewald                             0.192   1.1         0.192   1.1             20      -1.00        1.00       1.00
+- abinit(2)                         0.183   1.1         0.183   1.1             10      -1.00        1.00       1.00
+- others (130)                      0.103   0.6         0.104   0.6             -1      -1.00        1.00       1.00
 -<END_TIMER>
 
-- subtotal                      13.819  81.6     13.862  81.5                                  1.00       1.00
+- subtotal                         13.534  80.8        13.571  80.6                                  1.00       1.00
 
 ================================================================================
 
@@ -703,10 +704,10 @@ P           mkmem          26
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          1.7  wall=          1.7
+- Proc.   0 individual time (sec): cpu=          1.6  wall=          1.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered   2 WARNINGs and   1 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         17.1  wall=         17.2
++Overall time at end (sec) : cpu=         16.9  wall=         17.0

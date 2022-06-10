@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2021 ABINIT group (AM)
+!!  Copyright (C) 2008-2022 ABINIT group (AM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -277,7 +277,7 @@ ABI_FREE(xcart)
    dtset%ph_nqshift = inp%nqshft
    dtset%prtxml = 0     ! print the xml
    dtset%signperm = 1   ! SIGN of PERMutation potential
-   dtset%strprecon = 1  ! STRess PRECONditioner
+   dtset%strprecon = inp%strprecon  ! STRess PRECONditioner
    dtset%supercell_latt(:) = 0
    do ii=1,3
      dtset%supercell_latt(ii) = sc_size(ii)
@@ -388,6 +388,8 @@ ABI_FREE(xcart)
    dtset%mixalch_orig(:,:,:)=zero
    ABI_MALLOC(dtset%ph_qshift,(3,dtset%ph_nqshift))
    dtset%ph_qshift = inp%q1shft
+   dtset%hmctt = inp%hmctt
+   dtset%hmcsst = inp%hmcsst
    if(option  > 0)then
      verbose = .TRUE.
      writeHIST = .TRUE.
@@ -416,7 +418,7 @@ ABI_FREE(xcart)
    end if
 
 !  Set the barostat and thermonstat if ionmov == 13
-   if(dtset%ionmov == 13)then
+   if(dtset%ionmov == 13 .or. dtset%ionmov == 25)then
 
 !    Select frequency of the barostat as a function of temperature
 !    For small temperature, we need huge barostat and inversely
@@ -580,7 +582,7 @@ ABI_FREE(xcart)
      call mover(scfcv_args,ab_xfh,acell,effective_potential%crystal%amu,dtfil,electronpositron,&
 &     rhog,rhor,dtset%rprimd_orig,vel,vel_cell,xred,xred_old,&
 &     effective_potential=effective_potential,filename_ddb=filnam(3),&
-&     verbose=verbose,writeHIST=writeHIST,scup_dtset=scup_inp)     
+&     verbose=verbose,writeHIST=writeHIST,scup_dtset=scup_inp,sc_size=sc_size(:))     
      INQUIRE(FILE='MD_anharmonic_terms_energy.dat',OPENED=file_opened,number=unit_out)
      if(file_opened) close(unit_out)
    else if(option== -1.or.option==-2)then
@@ -622,7 +624,8 @@ ABI_FREE(xcart)
 
 !        Get the additional coeff
          call fit_polynomial_coeff_fit(effective_potential,(/0/),listcoeff,hist,1,&
-&         inp%bound_rangePower,0,inp%bound_maxCoeff,ncoeff,1,comm,cutoff_in=inp%bound_cutoff,&
+&         inp%bound_rangePower,0,inp%bound_maxCoeff,ncoeff,inp%fit_nimposecoeff,inp%fit_imposecoeff,&
+&         1,comm,cutoff_in=inp%bound_cutoff,&
 &         max_power_strain=2,verbose=.true.,positive=.true.,spcoupling=inp%bound_SPCoupling==1,&
 &         anharmstr=inp%bound_anhaStrain==1,only_even_power=.true.,fit_on=inp%fit_on,sel_on=inp%sel_on)
 
@@ -671,7 +674,8 @@ ABI_FREE(xcart)
 !          Reset the simulation and set the coefficients of the model
            call effective_potential_setCoeffs(coeffs_tmp(1:ncoeff+ii),effective_potential,ncoeff+ii)
            call fit_polynomial_coeff_fit(effective_potential,(/0/),(/0/),hist,0,(/0,0/),0,0,&
-&           -1,1,comm,verbose=.true.,positive=.false.,fit_on=inp%fit_on,sel_on=inp%sel_on)
+&           -1,inp%fit_nimposecoeff,inp%fit_imposecoeff,1,comm,verbose=.true.,positive=.false.,& 
+&            fit_on=inp%fit_on,sel_on=inp%sel_on)
            call effective_potential_setSupercell(effective_potential,comm,ncell=sc_size)
            dtset%rprimd_orig(:,:,1) = effective_potential%supercell%rprimd
            acell(:) = one
@@ -856,7 +860,7 @@ ABI_FREE(xcart)
                  call effective_potential_setCoeffs(coeffs_tmp(1:ncoeff+ii),effective_potential,&
 &                 ncoeff+ii)
                  call fit_polynomial_coeff_fit(effective_potential,(/0/),(/0/),hist,0,(/0,0/),1,0,&
-&                 -1,1,comm,verbose=.false.,positive=.false.)
+&                 -1,inp%fit_nimposecoeff,inp%fit_imposecoeff,1,comm,verbose=.false.,positive=.false.)
                  call effective_potential_setSupercell(effective_potential,comm,ncell=sc_size)
                  dtset%rprimd_orig(:,:,1) = effective_potential%supercell%rprimd
                  acell(:) = one
@@ -937,7 +941,7 @@ ABI_FREE(xcart)
 &       ncoeff+model_ncoeffbound)
 
        call fit_polynomial_coeff_fit(effective_potential,(/0/),(/0/),hist,0,(/0,0/),0,0,&
-&       -1,1,comm,verbose=.false.,fit_on=inp%fit_on,sel_on=inp%sel_on)
+&       -1,inp%fit_nimposecoeff,inp%fit_imposecoeff,1,comm,verbose=.false.,fit_on=inp%fit_on,sel_on=inp%sel_on)
 
        write(message, '(3a)') ch10,' Fitted coefficients at the end of the fit bound process: '
        call wrtout(ab_out,message,'COLL')

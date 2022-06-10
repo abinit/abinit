@@ -6,7 +6,7 @@
 !!  Utility for profiling the FFT libraries supported by ABINIT.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2021 ABINIT group (MG)
+!! Copyright (C) 2004-2022 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -52,6 +52,7 @@
 !!                 Corresponds to the input variables (ecuteps, ecutsigx) used in the main code.
 !!     nsym     =Number of symmetry operations (DEFAULT 1)
 !!     symrel(3,3,nsym) = Symmetry operation in real space used to select the FFT mesh in the routine getng (default: Identity matrix)
+!!               NOTE that the real tnons is not taken into account anyhow: tnons is set to zero.
 !!
 !! PARENTS
 !!
@@ -129,6 +130,7 @@ program fftprof
  real(dp) :: ecut_arth(2)=zero
  real(dp) :: rprimd(3,3)
  real(dp) :: kpoint(3) = (/0.1,0.2,0.3/)
+ real(dp) :: tnons(3,MAX_NSYM) = zero
  logical :: use_lib_threads = .FALSE.
  namelist /CONTROL/ tasks, ncalls, max_nthreads, ndat, fftalgs, necut, ecut_arth, use_lib_threads, mixprec
  namelist /SYSTEM/ ecut, rprimd, kpoint, osc_ecut, nsym, symrel
@@ -438,8 +440,8 @@ program fftprof
      ut_ngfft(7) = fftalg
      ut_ngfft(8) = fftcache
 
-     call getng(boxcutmin2,ecut,gmet,k0,me_fft0,ut_mgfft,ut_nfft,ut_ngfft,nproc_fft1,nsym,&
-       paral_kgb0,symrel,unit=dev_null)
+     call getng(boxcutmin2,0,ecut,gmet,k0,me_fft0,ut_mgfft,ut_nfft,ut_ngfft,nproc_fft1,nsym,&
+       paral_kgb0,symrel,tnons,unit=dev_null)
 
      write(msg,"(3(a,i0))")"fftu_utests with fftalg = ",fftalg,", ndat = ",ndat,", nthreads = ",nthreads
      call wrtout(std_out, msg)
