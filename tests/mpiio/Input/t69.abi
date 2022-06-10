@@ -32,8 +32,6 @@
   getwfk4   2
     nqpt4   1
      qpt4   0.0d0 0.0d0 0.0d0
- rfatpol4   1 2
-   rfdir4   1 1 1
   rfelfd4   3
   rfphon4   1
   tolwfr4   1.0d-16

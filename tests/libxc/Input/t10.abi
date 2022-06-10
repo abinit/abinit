@@ -13,10 +13,10 @@ ecut 10
 kptopt 1
 pawecutdg 11
 
-prtefg 2
+nucefg 2
 quadmom 0.0 -0.02558
 
-prtfc 1
+nucfc 1
 
 toldff 1.0D-12
 

@@ -51,12 +51,8 @@
 optdriver5    5
  d3e_pert1_elfd5    1
  d3e_pert1_phon5    1
- d3e_pert1_atpol5   1 2
- d3e_pert1_dir5     1 1 1
  d3e_pert2_elfd5    1
- d3e_pert2_dir5     1 1 1
  d3e_pert3_elfd5    1
- d3e_pert3_dir5     1 1 1
 
 
 

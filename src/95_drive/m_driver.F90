@@ -67,6 +67,7 @@ module m_driver
  use m_gwls_sternheimer, only : gwls_sternheimer
  use m_nonlinear,        only : nonlinear
  use m_drivexc,          only : echo_xc_name
+ use m_rttddft_driver,   only : rttddft
 
 #if defined HAVE_BIGDFT
  use BigDFT_API,   only: xc_init, xc_end, XC_MIXED, XC_ABINIT,&
@@ -361,6 +362,10 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
          [dtset%optdriver, dtset%eph_task] , dict_key="meta")
 
      case(RUNL_LONGWAVE)
+       call ydoc%add_ints("optdriver", [dtset%optdriver], &
+         dict_key="meta")
+
+     case(RUNL_RTTDDFT)
        call ydoc%add_ints("optdriver", [dtset%optdriver], &
          dict_key="meta")
 
@@ -831,6 +836,9 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 
      call longwave(codvsn,dtfil,dtset,etotal,mpi_enregs(idtset),npwtot,occ,&
 &     pawrad,pawtab,psps,xred)
+
+   case(RUNL_RTTDDFT)
+     call rttddft(codvsn,dtfil,dtset,mpi_enregs(idtset),pawang,pawrad,pawtab,psps)
 
    case default
      ! Bad value for optdriver

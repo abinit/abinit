@@ -1,5 +1,5 @@
 
-.Version 9.3.4 of ABINIT 
+.Version 9.7.4 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_intel19.0 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat  6 Feb 2021.
-- ( at 10h39 )
+.Starting date : Thu 26 May 2022.
+- ( at 13h06 )
   
 - input  file    -> /home/jzwanzig/abinit/abinit/tmp-build/intel/fast/tests/Test_suite/v5_t32/t32.abi
 - output file    -> t32.abo
@@ -36,7 +36,7 @@
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        54    nfftf =    104976
 ================================================================================
-P This job should need less than                      41.265 Mbytes of memory.
+P This job should need less than                      41.290 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.248 Mbytes ; DEN or POT disk file :      0.803 Mbytes.
 ================================================================================
@@ -71,13 +71,13 @@ P           mkmem           2
             nstep          50
              nsym          16
            ntypat           2
+           nucefg           2
               occ      2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
                        2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
                        2.000000  2.000000  2.000000  2.000000  0.000000
         pawecutdg      5.00000000E+01 Hartree
          pawmixdg           1
            prtden           0
-           prtefg           2
            prteig           0
             prtwf           0
           quadmom      0.00000000E+00 -2.61000000E-02
@@ -622,13 +622,13 @@ P           mkmem           2
             nstep          50
              nsym          16
            ntypat           2
+           nucefg           2
               occ      2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
                        2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
                        2.000000  2.000000  2.000000  2.000000  0.000000
         pawecutdg      5.00000000E+01 Hartree
          pawmixdg           1
            prtden           0
-           prtefg           2
            prteig           0
             prtwf           0
           quadmom      0.00000000E+00 -2.61000000E-02
@@ -706,7 +706,7 @@ P           mkmem           2
 -
 - [2] First-principles calculation of electric field gradients in metals, semiconductors, and insulators.
 - J.W. Zwanziger, M. Torrent, Applied Magnetic Resonance 33, 447-456 (2008).
-- Comment: to be cited in case the computation of electric field gradient is used, i.e. prtefg>0 and usepaw=1.
+- Comment: to be cited in case the computation of electric field gradient is used, i.e. nucefg>0 and usepaw=1.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#zwanziger2008
 -
 - [3] Implementation of the Projector Augmented-Wave Method in the ABINIT code.
@@ -766,10 +766,10 @@ P           mkmem           2
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          1.3  wall=          1.4
+- Proc.   0 individual time (sec): cpu=          1.3  wall=          1.3
  
 ================================================================================
  
  Calculation completed.
-.Delivered   1 WARNINGs and   1 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.3  wall=          1.4
+.Delivered   0 WARNINGs and   2 COMMENTs to log file.
++Overall time at end (sec) : cpu=          1.3  wall=          1.3
