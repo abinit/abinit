@@ -561,7 +561,7 @@ extern "C" void alloc_nonlop_gpu_(int *npwin,int *npwout,int *nspinor,
     int count_ilmn=0;
     for(int ilmn=0;ilmn<(*lmnmax);ilmn++){
       if(indlmn[2+6*(ilmn + (*lmnmax)*(itypat))] > 0)
-	count_ilmn++;
+        count_ilmn++;
     }
     nlmn[itypat]=count_ilmn;
     nb_proj_to_compute+=count_ilmn*nattyp[itypat];
@@ -607,10 +607,10 @@ extern "C" void alloc_nonlop_gpu_(int *npwin,int *npwout,int *nspinor,
   for(int itypat=0;itypat<(*ntypat);itypat++){
     for(int iat=0;iat<nattyp[itypat];iat++){
       for(int ilmn=0;ilmn<nlmn[itypat];ilmn++){
-	typat[iproj]=itypat;
-	lmn[iproj]=ilmn;
-	atoms[iproj]=iatom;
-	iproj++;
+        typat[iproj]=itypat;
+        lmn[iproj]=ilmn;
+        atoms[iproj]=iatom;
+        iproj++;
       }
       iatom++;
     }
