@@ -5089,20 +5089,30 @@ subroutine sylwtens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
          do i2dir_ = 1, 3
            do i3dir_ = 1, 3
 
-!             i1pert = (mpert - i1pert_ + 1)
-!             if (i1pert <= natom) i1pert = natom + 1 - i1pert
-!             i2pert = (mpert - i2pert_ + 1)
-!             if (i2pert <= natom) i2pert = natom + 1 - i2pert
-!             i3pert = (mpert - i3pert_ + 1)
-!             if (i3pert <= natom) i3pert = natom + 1 - i3pert
+             i1pert = (mpert - i1pert_ + 1)
+             if (i1pert <= natom) i1pert = natom + 1 - i1pert
+             i2pert = (mpert - i2pert_ + 1)
+             if (i2pert <= natom) i2pert = natom + 1 - i2pert
+             i3pert = (mpert - i3pert_ + 1)
+             if (i3pert <= natom) i3pert = natom + 1 - i3pert
 
-             i1pert=i1pert_
-             i2pert=i2pert_
-             i3pert=i3pert_
+             if (i1pert <= natom) then
+               i1dir = i1dir_ ; i2dir = i2dir_ ; i3dir = i3dir_
+             else if (i2pert <= natom) then
+               i1dir = i2dir_ ; i2dir = i1dir_ ; i3dir = i3dir_
+             else if (i3pert <= natom) then
+               i1dir = i3dir_ ; i2dir = i2dir_ ; i3dir = i1dir_
+             else
+               i1dir = i1dir_ ; i2dir = i2dir_ ; i3dir = i3dir_
+             end if
 
-             i1dir= i1dir_
-             i2dir= i2dir_
-             i3dir= i3dir_
+!             i1pert=i1pert_
+!             i2pert=i2pert_
+!             i3pert=i3pert_
+
+!             i1dir= i1dir_
+!             i2dir= i2dir_
+!             i3dir= i3dir_
 
              if (rfpert(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) /= 0) then
 

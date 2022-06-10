@@ -303,26 +303,27 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 
  call sylwtens(indsym,mpert,natom,dtset%nsym,rfpert,symrec,dtset%symrel)
 
- write(msg,'(a,a,a)') ch10, &
-& ' The list of irreducible elements of the spatial-dispersion tensors is: ', ch10
+ write(msg,'(a,a,a,a,a)') ch10, &
+& ' The list of irreducible elements of the spatial-dispersion tensors is: ', ch10,& 
+& ' (in reduced coordinates except for strain pert.) ', ch10
  call wrtout(ab_out,msg,'COLL')
  call wrtout(std_out,msg,'COLL')
 
  write(msg,'(12x,a)')&
-& 'i1pert  i1dir   i2pert  i2dir   i3pert  i3dir'
+& 'i1dir   i1pert  i2dir   i2pert  i3dir  i3pert'
  call wrtout(ab_out,msg,'COLL')
  call wrtout(std_out,msg,'COLL')
  n1 = 0
- do i1pert = 1, mpert
-   do i1dir = 1, 3
+ do i3pert = 1, mpert
+   do i3dir = 1, 3
      do i2pert = 1, mpert
        do i2dir = 1,3
-         do i3pert = 1, mpert
-           do i3dir = 1, 3
+         do i1pert = 1, mpert
+           do i1dir = 1, 3
              if (rfpert(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1) then
                n1 = n1 + 1
                write(msg,'(2x,i4,a,6(5x,i3))') n1,')', &
-&               i1pert,i1dir,i2pert,i2dir,i3pert,i3dir
+             & i1dir,i1pert,i2dir,i2pert,i3dir,i3pert
                call wrtout(ab_out,msg,'COLL')
                call wrtout(std_out,msg,'COLL')
              else if (rfpert(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==-2) then
@@ -330,7 +331,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
                if (dtset%prtvol>=10) then
                  n1 = n1 + 1
                  write(msg,'(2x,i4,a,6(5x,i3),a)') n1,')', &
-  &               i1pert,i1dir,i2pert,i2dir,i3pert,i3dir,' => must be zero, not computed'
+  &               i1dir,i1pert,i2dir,i2pert,i3dir,i3pert,' => must be zero, not computed'
                  call wrtout(ab_out,msg,'COLL')
                  call wrtout(std_out,msg,'COLL')
                end if
@@ -338,7 +339,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
                if (dtset%prtvol>=10) then
                  n1 = n1 + 1
                  write(msg,'(2x,i4,a,6(5x,i3),a)') n1,')', &
-  &               i1pert,i1dir,i2pert,i2dir,i3pert,i3dir,' => symmetric of an other element, not computed'
+  &               i1dir,i1pert,i2dir,i2pert,i3dir,i3pert,' => symmetric of another element, not computed'
                  call wrtout(ab_out,msg,'COLL')
                  call wrtout(std_out,msg,'COLL')
                end if
