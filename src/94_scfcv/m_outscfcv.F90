@@ -221,12 +221,12 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 & nattyp,nfft,ngfft,nhat,nkpt,npwarr,nspden,nsppol,nsym,ntypat,n3xccc,occ,&
 & paw_dmft,pawang,pawfgr,pawfgrtab,pawrad,pawrhoij,pawtab,paw_an,paw_ij,&
 & prtvol,psps,results_gs,rhor,rprimd,&
-& taur,ucvol,usecprj,vhartr,vpsp,vtrial,vxc,wvl_den,xccc3d,xred)
+& taur,ucvol,usecprj,vhartr,vpsp,vtrial,vxc,wvl_den,xccc3d,xred,itime)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mband,mcg,mcprj,mgfftc,mkmem,mpsang,mpw,n3xccc,my_natom,natom,nfft
- integer,intent(in) :: nkpt,nspden,nsppol,nsym,ntypat,prtvol,usecprj
+ integer,intent(in) :: nkpt,nspden,nsppol,nsym,ntypat,prtvol,usecprj,itime
  real(dp),intent(in) :: compch_fft,compch_sph,ecut,ucvol
  real(dp),intent(inout) :: etotal
  type(electronpositron_type),pointer :: electronpositron
@@ -316,6 +316,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  type(self_type) :: self
  type(green_type) :: greenr
 
+ type(datafiles_type) :: dtfil_tmp
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -618,7 +619,9 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 #ifdef HAVE_NETCDF
  if (me == master .and. dtset%prtgsr == 1 .and. dtset%usewvl == 0) then
    !.and. (dtset%ionmov /= 0 .or. dtset%optcell /= 0)) then
-   fname = strcat(dtfil%filnam_ds(4), "_GSR.nc")
+   dtfil_tmp=dtfil
+   call dtfil_init_time(dtfil_tmp,itime)
+   fname = strcat(dtfil_tmp%fnameabo_app_gsr, ".nc")
 
    ! Write crystal and band structure energies.
    !call timab(1190,1,tsec)
