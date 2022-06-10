@@ -443,7 +443,6 @@ contains
       end do
     end if
 
-
     ! Computes the double counting term from the shiftfactor, and
     ! from the contributions to the kinetic energy and
     ! the number of electrons
@@ -458,8 +457,6 @@ contains
         end do
       end do
     end if
-
-    write(0,*) this%e_kinetic,this%shiftfactor,this%nelect,this%edc_kinetic
   end subroutine compute_e_kinetic
   !!***
 
