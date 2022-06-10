@@ -202,7 +202,7 @@ subroutine frohlichmodel(cryst, dtset, efmasdeg, efmasval, ifc)
  do imode=1,3*cryst%natom
   write(ab_out,'(i5,f28.12,f28.12)') &
         !Reversed cummulative sum to avoid rewriting the spherical intergration from above
-&       imode,dielt_avg(imode)-dielt_avg(mod(imode-1,3*cryst%natom)),dielt_avg(imode)
+&       imode,dielt_avg(imode)-dielt_avg(abs(mod(imode-1,3*cryst%natom))),dielt_avg(imode)
  enddo
  write(ab_out,'(a)')'--------------------------------------------------------------------------------'
 
