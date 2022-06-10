@@ -178,8 +178,8 @@ subroutine frohlichmodel(cryst, dtset, efmasdeg, efmasval, ifc)
  frohlich_phononfactor_qdir=zero
  dielt_avg=zero
  
-do imode=4,3*cryst%natom
-   do iqdir=1,nqdir
+ do iqdir=1,nqdir
+   do imode=4,3*cryst%natom
      proj_polarity_qdir(imode,iqdir)=DOT_PRODUCT(unit_qdir(:,iqdir),polarity_qdir(:,imode,iqdir))
      zpr_q0_phononfactor_qdir(iqdir)=zpr_q0_phononfactor_qdir(iqdir)+&
 &      proj_polarity_qdir(imode,iqdir)**2 / phfrq_qdir(imode,iqdir) **2
@@ -191,7 +191,7 @@ do imode=4,3*cryst%natom
    zpr_q0_avg=zpr_q0_avg+&
 &    weight_qdir(iqdir)*zpr_q0_phononfactor_qdir(iqdir)/dielt_qdir(iqdir)**2
  enddo
- dielt_avg=dielt_avg*two**(-half)*cryst%ucvol**(-half)
+ dielt_avg=dielt_avg*two**(-half)*cryst%ucvol**(-one)
  zpr_q0_avg=zpr_q0_avg*quarter*piinv
  zpr_q0_fact=zpr_q0_avg*eight*pi*(three*quarter*piinv)**third*cryst%ucvol**(-four*third)
 
@@ -200,7 +200,7 @@ do imode=4,3*cryst%natom
  write(ab_out,'(a)')'--------------------------------------------------------------------------------'
  write(ab_out,'(a)')' Mode    <1/epsilon*SQRT(w_LO/2)>              Cumulative sum'
  do imode=1,3*cryst%natom
-  write(ab_out,'(i5,f28.8,f28.8)') &
+  write(ab_out,'(i5,f28.12,f28.12)') &
         !Reversed cummulative sum to avoid rewriting the spherical intergration from above
 &       imode,dielt_avg(imode)-dielt_avg(mod(imode-1,3*cryst%natom)),dielt_avg(imode)
  enddo
