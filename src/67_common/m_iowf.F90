@@ -223,7 +223,7 @@ end subroutine outresid
 subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
 &                mpi_enreg,mpw,natom,nband,nkpt,npwarr,&
 &                nsppol,occ,response,unwff2,&
-&                wfs,wvl)
+&                wfs,wvl,force_write)
 
 !Arguments ------------------------------------
 !scalars
@@ -236,6 +236,7 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
  type(hdr_type), intent(inout) :: hdr
  type(wvl_wf_type),intent(in) :: wfs
  type(wvl_internal_type), intent(in) :: wvl
+ logical, intent(in), optional :: force_write
 !arrays
  integer, intent(in) :: kg(3,mpw*mkmem),nband(nkpt*nsppol),npwarr(nkpt)
  real(dp), intent(inout) :: cg(2,mcg)
@@ -244,14 +245,14 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
 
 !Local variables-------------------------------
  integer :: iomode,action,band_index,fform,formeig,iband,icg,iat,iproj
- integer :: ierr,ikg,ikpt,spin,master,mcg_disk,me,me0,my_nspinor
+ integer :: ierr,ikg,ikpt,spin,master,mcg_disk,me,me0,mtag,my_nspinor
  integer :: nband_k,nmaster,npw_k,option,rdwr,sender,source !npwtot_k,
  integer :: spaceComm,spaceComm_io,spacecomsender,spaceWorld,sread,sskip,tim_rwwf,xfdim2
 #ifdef HAVE_MPI
  integer :: ipwnbd
 #endif
  real(dp) :: cpu,wall,gflops
- logical :: ihave_data,iwrite,iam_master,done
+ logical :: ihave_data,iwrite,iam_master,done,prtwf
  character(len=500) :: msg
  type(wffile_type) :: wff2
  character(len=fnlen) :: path
@@ -330,7 +331,12 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
 !Will write the wavefunction file only when nstep>0
 !MT 07 2015: writing reactivated when nstep=0
 !if (nstep>0 .and. dtset%prtwf/=0) then
- if (dtset%prtwf/=0) then
+!FB 03/2022: Added an option to force writing (used in RT-TDDFT)
+ prtwf = dtset%prtwf/=0
+ if (present(force_write)) then
+    if (force_write) prtwf = .true.
+ end if
+ if (prtwf) then
 
    ! Only the master write the file, except if MPI I/O, but the
    ! full wff dataset should be provided to WffOpen in this case
@@ -504,6 +510,7 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
 
 #ifdef HAVE_MPI
        if (dtset%usewvl == 0) then
+         mtag=ikpt+(spin-1)*nkpt
          call xmpi_barrier(spaceWorld)
 
 !        Must transfer the wavefunctions to the master processor
@@ -551,12 +558,12 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
              !write(std_out,*)npw_k,nband_k
              call timab(48,1,tsec)
              if(action==2)then
-               call xmpi_exch(kg(:,1+ikg:npw_k+ikg),3*npw_k,source,kg_disk,nmaster,spaceWorld,ierr)
+               call xmpi_exch(kg(:,1+ikg:npw_k+ikg),3*npw_k,source,kg_disk,nmaster,spaceWorld,2*mtag+1,ierr)
                call xmpi_exch(cg(:,icg+1:icg+nband_k*npw_k*my_nspinor),2*nband_k*npw_k*my_nspinor, &
-&               source,cg_disk,nmaster,spaceWorld,ierr)
+&               source,cg_disk,nmaster,spaceWorld,2*mtag+2,ierr)
              else
-               call xmpi_exch(kg_disk,3*npw_k,source,kg_disk,nmaster,spaceWorld,ierr)
-               call xmpi_exch(cg_disk,2*nband_k*npw_k*my_nspinor,source,cg_disk,nmaster,spaceWorld,ierr)
+               call xmpi_exch(kg_disk,3*npw_k,source,kg_disk,nmaster,spaceWorld,2*mtag+1,ierr)
+               call xmpi_exch(cg_disk,2*nband_k*npw_k*my_nspinor,source,cg_disk,nmaster,spaceWorld,2*mtag+2,ierr)
              end if
              call timab(48,2,tsec)
            end if
@@ -607,21 +614,21 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
                if ( iband == 1 ) then
                  if (action==2) then
                    call xmpi_exch(kg(:,1+ikg:npw_k+ikg),3*npw_k,mpi_enreg%proc_distrb(ikpt,iband,spin), &
-&                   kg_disk,nmaster,spaceWorld,ierr)
+&                   kg_disk,nmaster,spaceWorld,iband*(mtag-1)+1,ierr)
                  else
                    call xmpi_exch(kg_disk,3*npw_k,mpi_enreg%proc_distrb(ikpt,iband,spin),  &
-&                   kg_disk,nmaster,spaceWorld,ierr)
+&                   kg_disk,nmaster,spaceWorld,iband*(mtag-1)+1,ierr)
                  end if
                end if       ! iband =1
                ipwnbd=(iband-1)*npw_k*my_nspinor
                if (action==2) then
                  call xmpi_exch( cg(:,ipwnbd+icg+1:ipwnbd+icg+npw_k*my_nspinor),2*npw_k*my_nspinor &
 &                 ,mpi_enreg%proc_distrb(ikpt,iband,spin)                    &
-&                 ,cg_disk(:,ipwnbd+1:ipwnbd+npw_k*my_nspinor),nmaster,spaceWorld,ierr)
+&                 ,cg_disk(:,ipwnbd+1:ipwnbd+npw_k*my_nspinor),nmaster,spaceWorld,iband*(mtag-1)+2,ierr)
                else
                  call xmpi_exch( cg_disk(:,ipwnbd+1:ipwnbd+npw_k*my_nspinor),2*npw_k*my_nspinor    &
 &                 ,mpi_enreg%proc_distrb(ikpt,iband,spin)                    &
-&                 ,cg_disk(:,ipwnbd+1:ipwnbd+npw_k*my_nspinor),nmaster,spaceWorld,ierr)
+&                 ,cg_disk(:,ipwnbd+1:ipwnbd+npw_k*my_nspinor),nmaster,spaceWorld,iband*(mtag-1)+2,ierr)
                end if
 
                call timab(48,2,tsec)
@@ -779,7 +786,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
 !scalars
  integer,parameter :: master=0,fform2=2
  integer :: ii,iomode,icg,iband,ikg,ikpt,spin,me_cell,me_kpt,me_band,me_spinor,my_nspinor,nband_k,npw_k
- integer :: comm_cell,comm_fft,comm_bandfft,formeig
+ integer :: comm_cell,comm_fft,comm_bandfft,mtag,formeig
  integer :: cnt,min_cnt,max_cnt,ierr,action,source,ncid,ncerr,cg_varid,kg_varid !,eig_varid,
  integer :: paral_kgb,npwtot_k !,start_pwblock !,start_cgblock !count_pwblock,
  integer :: ipw,ispinor_index,npwso,npwsotot,npwtot,nspinortot,ikpt_this_proc,ispinor
@@ -1106,6 +1113,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
        do ikpt=1,nkpt
          nband_k = nband(ikpt + (spin-1)*nkpt)
          npw_k   = npwarr(ikpt)
+         mtag = ikpt+(spin-1)*nkpt
 
          call xmpi_barrier(comm_cell)
 
@@ -1127,12 +1135,12 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
          if (action==2.or.action==3) then
            call timab(48,1,tsec)
            if (action==2) then
-             call xmpi_exch(kg(:,1+ikg:npw_k+ikg),3*npw_k,source,kg_k,master,comm_cell,ierr)
+             call xmpi_exch(kg(:,1+ikg:npw_k+ikg),3*npw_k,source,kg_k,master,comm_cell,2*mtag+1,ierr)
              call xmpi_exch(cg(:,icg+1:icg+nband_k*npw_k*my_nspinor),2*nband_k*npw_k*my_nspinor,&
-&             source,cg_k,master,comm_cell,ierr)
+&             source,cg_k,master,comm_cell,2*mtag+2,ierr)
            else
-             call xmpi_exch(kg_k,3*npw_k,source,kg_k,master,comm_cell,ierr)
-             call xmpi_exch(cg_k,2*nband_k*npw_k*my_nspinor,source,cg_k,master,comm_cell,ierr)
+             call xmpi_exch(kg_k,3*npw_k,source,kg_k,master,comm_cell,2*mtag+1,ierr)
+             call xmpi_exch(cg_k,2*nband_k*npw_k*my_nspinor,source,cg_k,master,comm_cell,2*mtag+2,ierr)
            end if
            call timab(48,2,tsec)
          end if

@@ -121,6 +121,12 @@ inp_files = [
 "t98.abi",  # test treatment of inaccurate POSCAR file
 "t99.abi",  # test treatment of inaccurate POSCAR file
 
+# Optics with spin-orbit coupling
+"t100.abi", # Optical conductivity with spin-orbit coupling - ABINIT step
+"t101.abi", # Optical conductivity with spin-orbit coupling - CONDUCTI step
+"t102.abi", # X-ray core spectrocopy with spin-orbit coupling - ABINIT step
+"t103.abi", # X-ray core spectrocopy with spin-orbit coupling - CONDUCTI step
+
 # Lattice Wannier function
 "t110.abi", # scdm-k method for lattice wannier function in anaddb (disentangle option 2)
 "t111.abi", # projWF method for lattice wannier function in anaddb (disentangle option 2)

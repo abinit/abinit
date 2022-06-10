@@ -193,18 +193,8 @@ P          mk1mem           1
            prtpot4          0
            prtpot5          0
            prtpot6          1
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          1       1
-          rfatpol4          1       1
-          rfatpol5          1       1
-          rfatpol6          2       2
-            rfdir1          0       0       0
-            rfdir2          0       0       0
-            rfdir3          0       0       0
-            rfdir4          0       0       0
-            rfdir5          0       0       0
-            rfdir6          1       0       0
+          rfatpol           2       2
+            rfdir           1       0       0
            rfmeth1          1
            rfmeth2          1
            rfmeth3          1
@@ -1221,7 +1211,7 @@ tolerances: {tolvrs: 1.00E-16, }
 -  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
 -  5.864598E+03
  chkph3 : WARNING -
-  The dynamical matrix was incomplete : phonon frequencies may be wrong ...
+  Dynamical matrix incomplete, phonon frequencies may be wrong, check input variables rfatpol and rfdir.
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -1302,18 +1292,8 @@ P          mk1mem           1
            prtpot4          0
            prtpot5          0
            prtpot6          1
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          1       1
-          rfatpol4          1       1
-          rfatpol5          1       1
-          rfatpol6          2       2
-            rfdir1          0       0       0
-            rfdir2          0       0       0
-            rfdir3          0       0       0
-            rfdir4          0       0       0
-            rfdir5          0       0       0
-            rfdir6          1       0       0
+          rfatpol           2       2
+            rfdir           1       0       0
            rfmeth1          1
            rfmeth2          1
            rfmeth3          1

@@ -7,6 +7,7 @@ jdtset 1 2 3 4
 paral_kgb 0
 prtvol 10
 pawprtvol 3
+prtgsr 0 # GSR file printing produces some unpredictable results
 #==================================================================================
 ############ Parameters common to all DATASETS
 #==================================================================================

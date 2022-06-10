@@ -324,6 +324,7 @@ module m_dtfil
   character(len=fnlen) :: fnameabo_sig
   character(len=fnlen) :: fnameabo_spcur
   character(len=fnlen) :: fnameabo_sus
+  character(len=fnlen) :: fnameabo_td_ener
   character(len=fnlen) :: fnameabo_vha
   character(len=fnlen) :: fnameabo_vpsp
   character(len=fnlen) :: fnameabo_vso
@@ -804,6 +805,7 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  dtfil%fnameabo_sig=trim(dtfil%filnam_ds(4))//'_SIG'
  dtfil%fnameabo_spcur=trim(dtfil%filnam_ds(4))//'_SPCUR'
  dtfil%fnameabo_sus=trim(dtfil%filnam_ds(4))//'_SUS'
+ dtfil%fnameabo_td_ener=trim(dtfil%filnam_ds(4))//'_TDENER'
  dtfil%fnameabo_vha=trim(dtfil%filnam_ds(4))//'_VHA'
  dtfil%fnameabo_vpsp=trim(dtfil%filnam_ds(4))//'_VPSP'
  dtfil%fnameabo_vso=trim(dtfil%filnam_ds(4))//'_VSO'
