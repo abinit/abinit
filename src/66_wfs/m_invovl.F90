@@ -10,7 +10,7 @@
 !!  inv_s_projs = - (s_projs^-1 + projs'*projs)^-1
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2021 ABINIT group (AL)
+!! Copyright (C) 2013-2022 ABINIT group (AL)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -205,7 +205,6 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
  integer :: ikpt_this_proc
  logical :: parity
  real(dp) :: tsec(2)
- character(len=500) :: message
  character :: blas_transpose
 
  type(invovl_kpt_type), pointer :: invovl
@@ -416,9 +415,6 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
  call timab(timer_mkinvovl,2,tsec)
 
  ABI_FREE(projs)
-
- write(message,*) 'Invovl built'
- call wrtout(std_out,message,'COLL')
 
 end subroutine make_invovl
 !!***

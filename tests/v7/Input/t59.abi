@@ -28,8 +28,6 @@
 # getwfk3  1
 # getddk3  2
 # rfphon3  1
-# rfatpol3 1 2
-# rfdir3   1 1 1 
 # rfelfd3  3   # Electric-field perturbation response only 
 # tolwfr3  1.0e-16
 # kptopt3  2 
@@ -54,8 +52,6 @@
 #                        # compute the lifetime of electronic levels.
 #                        # smdelta = 1 ==> Fermi-Dirac smearing.
 # rfphon5   1            # Do phonon response
-# rfatpol5  1 2          # Treat displacements of all atoms
-# rfdir5    1 1 1        # Do all directions 
 # tolwfr5   1.0d-16
 
 # Computation at q with getddb to cancel the divergence (el-ph)
@@ -69,8 +65,6 @@
 #                        # compute the lifetime of electronic levels.
 #                        # smdelta = 1 ==> Fermi-Dirac smearing.
 # rfphon6   1            # Do phonon response
-# rfatpol6  1 2          # Treat displacements of all atoms
-# rfdir6    1 1 1        # Do all directions 
 # tolwfr6   1.0d-16
 
 # Computation at q with irdddb to cancel the divergence (el-ph)
@@ -84,8 +78,6 @@
                         # compute the lifetime of electronic levels.
                         # smdelta = 1 ==> Fermi-Dirac smearing.
  rfphon7   1            # Do phonon response
- rfatpol7  1 2          # Treat displacements of all atoms
- rfdir7    1 1 1        # Do all directions 
  tolwfr7   1.0d-16
  kptopt7   3
 

@@ -7,7 +7,7 @@
 !! Can use either FoX or pure Fortran routines.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2021 ABINIT group (MT, FJ)
+!! Copyright (C) 2005-2022 ABINIT group (MT, FJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -161,6 +161,7 @@ type, public :: state_t
   real(dpxml)      :: ee
   integer          :: nn
   integer          :: ll
+  integer          :: kk
 end type state_t
 !!***
 
@@ -2755,20 +2756,22 @@ end subroutine paw_setup_copy
 !!
 !! SOURCE
 
- subroutine rdpawpsxml_core(energy_cor,filename,lcor,ncor,nphicor,pawrad,phi_cor)
+ subroutine rdpawpsxml_core(energy_cor,filename, &
+&           lcor,ncor,nphicor,pawrad,phi_cor,kappacor)
 
 !Arguments ---------------------------------------------
- character (len=fnlen),intent(in) :: filename
+ character (len=*),intent(in) :: filename
  integer,intent(out) :: nphicor
 !arrays
  integer,allocatable,intent(inout) :: lcor(:),ncor(:)
+ integer,allocatable,intent(inout),optional :: kappacor(:)
  real(dp),allocatable,intent(inout) :: phi_cor(:,:),energy_cor(:)
  type(pawrad_type),intent(in) :: pawrad
 
 
 !Local variables ---------------------------------------
  integer :: funit,iaewf,ii,imeshae,imsh,ir,igrid,icor,ierr,maxmeshz,mesh_size,nmesh,shft
- logical :: endfile,found,tread
+ logical :: endfile,found,tread,diracrel
  real(dp) :: yp1,ypn
  character(len=100) :: msg,version
  character (len=XML_RECL) :: line,readline
@@ -2790,7 +2793,7 @@ end subroutine paw_setup_copy
 !Start a reading loop
  endfile=.false.
  found=.false.
-
+ diracrel=.false.
 
  do while ((.not.endfile).and.(.not.found))
    read(funit,'(a)',err=10,end=10) readline
@@ -2809,6 +2812,21 @@ end subroutine paw_setup_copy
      cycle
    end if
 
+!  --Read GENERATOR
+   if (line(1:10)=='<generator') then
+     tread=.true.
+     call paw_rdfromline(" type",line,strg,ierr)
+     if(strg=="dirac-relativistic") then
+       diracrel=.true.
+     else
+       if(present(kappacor)) then
+         write(msg,'(a)') 'Error in pawpsp_read_core: To read kappa a diracrelativistic corewf file has to be provided!'
+         LIBPAW_ERROR(msg)
+       endif
+     endif
+     cycle
+   end if
+
 !  --Read BASIS SIZE, ORBITALS, RC AND OCCUPATIONS/STATE IDs
    if (line(1:13)=='<core_states>') then
      tread=.true.
@@ -2824,8 +2842,8 @@ end subroutine paw_setup_copy
            LIBPAW_ERROR(msg)
          end if
          call paw_rdfromline(" n",line,strg,ierr)
-         if (strg == "" ) then 
-           corestate(icor)%nn=-1    
+         if (strg == "" ) then
+           corestate(icor)%nn=-1
          else
            if (len(trim(strg))<=30) then
              strg1=trim(strg)
@@ -2841,8 +2859,19 @@ end subroutine paw_setup_copy
          else
            read(unit=strg,fmt=*) corestate(icor)%ll
          end if
+         if(diracrel) then!does not work if xml file is in the wrong order, which is bad xml, alternatives?
+           call paw_rdfromline(" kappa",line,strg,ierr)
+           if(present(kappacor)) then
+             if (len(trim(strg))<=30) then
+               strg1=trim(strg)
+               read(unit=strg1,fmt=*) corestate(icor)%kk
+             else
+               read(unit=strg,fmt=*) corestate(icor)%kk
+             end if
+           endif
+         endif
          call paw_rdfromline(" f",line,strg,ierr)
-         if (strg == "" ) then 
+         if (strg == "" ) then
            corestate(icor)%ff=-1.d0
          else
            if (len(trim(strg))<=30) then
@@ -2853,8 +2882,8 @@ end subroutine paw_setup_copy
            end if
          end if
          call paw_rdfromline(" rc",line,strg,ierr)
-         if (strg == "" ) then 
-           corestate(icor)%rc=-1    
+         if (strg == "" ) then
+           corestate(icor)%rc=-1
          else
            if (len(trim(strg))<=30) then
              strg1=trim(strg)
@@ -2943,7 +2972,7 @@ end subroutine paw_setup_copy
      call paw_rdfromline(" id",line,strg,ierr)
      grids(igrid)%id = trim(strg)
      if(igrid>10)then
-       close(funit) 
+       close(funit)
        msg="igrid>10"
        LIBPAW_ERROR(msg)
      end if
@@ -3049,10 +3078,14 @@ end subroutine paw_setup_copy
    LIBPAW_ALLOCATE(lcor,(nphicor))
    LIBPAW_ALLOCATE(energy_cor,(nphicor))
    LIBPAW_ALLOCATE(phi_cor,(pawrad%mesh_size,nphicor))
+   if (present(kappacor)) then
+     LIBPAW_ALLOCATE(kappacor,(nphicor))
+   endif
    phi_cor(:,:)=zero
    do ii=1,nphicor
      ncor(ii)=corestate(ii)%nn
      lcor(ii)=corestate(ii)%ll
+     if(present(kappacor)) kappacor(ii)=corestate(ii)%kk
      energy_cor(ii)=corestate(ii)%ee
      do imsh=1,nmesh
        if(trim(gridwf(ii))==trim(grids(imsh)%id)) imeshae=imsh

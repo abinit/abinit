@@ -48,7 +48,6 @@
  qpt3 0.00000000E+00  0.00000000E+00  0.00000000E+00
  rfelfd3 2
  rfphon3 0
- #rfdir3 1 1 1
  tolwfr3  1e-16
  iscf3 -3
 
@@ -59,12 +58,6 @@
  nqpt       1
 
  rfphon     1 
- rfatpol    1 2 
- rfdir      1 1 1
-
- #rfdir 1 0 0
- #rfatpol 1 1
- #rfphon 1
 
  rfelfd4 3
  getddk4 3

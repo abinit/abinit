@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.7.4 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h36 )
+.Starting date : Wed  4 May 2022.
+- ( at 01h14 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v8_t67-t68-t69-t70/t68.in
-- output file    -> t68.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/v8_t67-t68-t69-t70/t68.abi
+- output file    -> t68.abo
 - root for input  files -> t68i
 - root for output files -> t68o
 
@@ -109,6 +109,7 @@ P          mk1mem           8
                        0.000000  0.000000  0.000000  0.000000
            occopt           3
         optdriver           1
+           prtpot           1
            prtvol           1
               qpt      5.00000000E-01  0.00000000E+00  0.00000000E+00
             rfdir           0       0       1
@@ -160,8 +161,8 @@ meta: {optdriver: 1, rfmagn: 1, }
          ecut(hartree)=     30.000   => boxcut(ratio)=   1.98828
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/26fe.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/26fe.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/26fe.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/26fe.pspnc
 -  Troullier-Martins psp for element  Fe        Thu Oct 27 17:35:05 EDT 1994
 - 26.00000   8.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -181,15 +182,6 @@ meta: {optdriver: 1, rfmagn: 1, }
    4.96263733E+02                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t68i_WFK
-P newkpt: treating     16 bands with npw=     627 for ikpt=   1 by node    0
-P newkpt: treating     16 bands with npw=     630 for ikpt=   2 by node    0
-P newkpt: treating     16 bands with npw=     630 for ikpt=   3 by node    0
-P newkpt: treating     16 bands with npw=     630 for ikpt=   4 by node    0
-P newkpt: treating     16 bands with npw=     630 for ikpt=   5 by node    0
-P newkpt: treating     16 bands with npw=     630 for ikpt=   6 by node    0
-P newkpt: treating     16 bands with npw=     630 for ikpt=   7 by node    0
-P newkpt: treating     16 bands with npw=     610 for ikpt=   8 by node    0
 
  ==>  initialize data related to q vector <== 
 
@@ -205,57 +197,14 @@ P newkpt: treating     16 bands with npw=     610 for ikpt=   8 by node    0
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t68i_WFK
-P newkpt: treating     16 bands with npw=     627 for ikpt=   1 by node    0
-P newkpt: treating     16 bands with npw=     630 for ikpt=   2 by node    0
-P newkpt: treating     16 bands with npw=     630 for ikpt=   3 by node    0
-P newkpt: treating     16 bands with npw=     630 for ikpt=   4 by node    0
-P newkpt: treating     16 bands with npw=     630 for ikpt=   5 by node    0
-P newkpt: treating     16 bands with npw=     630 for ikpt=   6 by node    0
-P newkpt: treating     16 bands with npw=     630 for ikpt=   7 by node    0
-P newkpt: treating     16 bands with npw=     610 for ikpt=   8 by node    0
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t68i_WFK
-- newkpt: read input wf with ikpt,npw=   2     630, make ikpt,npw=   1     630
-- newkpt: read input wf with ikpt,npw=   1     627, make ikpt,npw=   2     627
-- newkpt: read input wf with ikpt,npw=   4     630, make ikpt,npw=   3     630
-- newkpt: read input wf with ikpt,npw=   3     630, make ikpt,npw=   4     630
-- newkpt: read input wf with ikpt,npw=   6     630, make ikpt,npw=   5     630
-- newkpt: read input wf with ikpt,npw=   5     630, make ikpt,npw=   6     630
-- newkpt: read input wf with ikpt,npw=   8     610, make ikpt,npw=   7     610
-- newkpt: read input wf with ikpt,npw=   7     630, make ikpt,npw=   8     630
--inwffil : will read wavefunctions from disk file t68i_WFK
-- newkpt: read input wf with ikpt,npw=   2     630, make ikpt,npw=   1     630
-- newkpt: read input wf with ikpt,npw=   1     627, make ikpt,npw=   2     627
-- newkpt: read input wf with ikpt,npw=   4     630, make ikpt,npw=   3     630
-- newkpt: read input wf with ikpt,npw=   3     630, make ikpt,npw=   4     630
-- newkpt: read input wf with ikpt,npw=   6     630, make ikpt,npw=   5     630
-- newkpt: read input wf with ikpt,npw=   5     630, make ikpt,npw=   6     630
-- newkpt: read input wf with ikpt,npw=   8     610, make ikpt,npw=   7     610
-- newkpt: read input wf with ikpt,npw=   7     630, make ikpt,npw=   8     630
  dfpt_looppert : total number of electrons, from k and k+q
   fully or partially occupied states are    8.000000E+00 and    8.000000E+00.
  dfpt_looppert : total number of electrons, from k and k-q
   fully or partially occupied states are    8.000000E+00 and    8.000000E+00.
  Initialisation of the first-order wave-functions :
   ireadwf=   0
-P newkpt: treating     16 bands with npw=     630 for ikpt=   1 by node    0
-P newkpt: treating     16 bands with npw=     627 for ikpt=   2 by node    0
-P newkpt: treating     16 bands with npw=     630 for ikpt=   3 by node    0
-P newkpt: treating     16 bands with npw=     630 for ikpt=   4 by node    0
-P newkpt: treating     16 bands with npw=     630 for ikpt=   5 by node    0
-P newkpt: treating     16 bands with npw=     630 for ikpt=   6 by node    0
-P newkpt: treating     16 bands with npw=     610 for ikpt=   7 by node    0
-P newkpt: treating     16 bands with npw=     630 for ikpt=   8 by node    0
-P newkpt: treating     16 bands with npw=     630 for ikpt=   1 by node    0
-P newkpt: treating     16 bands with npw=     627 for ikpt=   2 by node    0
-P newkpt: treating     16 bands with npw=     630 for ikpt=   3 by node    0
-P newkpt: treating     16 bands with npw=     630 for ikpt=   4 by node    0
-P newkpt: treating     16 bands with npw=     630 for ikpt=   5 by node    0
-P newkpt: treating     16 bands with npw=     630 for ikpt=   6 by node    0
-P newkpt: treating     16 bands with npw=     610 for ikpt=   7 by node    0
-P newkpt: treating     16 bands with npw=     630 for ikpt=   8 by node    0
 
 --- !BeginCycle
 iteration_state: {dtset: 1, }
@@ -273,14 +222,14 @@ tolerances: {toldfe: 1.00E-03, }
  ETOT  7   9.5750018200843      1.108E-01 1.428E+01 3.887E+00
  ETOT  8   9.6511303022491      7.613E-02 4.496E-03 2.272E+00
  ETOT  9   9.7885314498172      1.374E-01 1.406E+01 8.948E-01
- ETOT 10   9.8624550817103      7.392E-02 4.305E-03 7.056E-01
- ETOT 11   9.8674786417412      5.024E-03 1.411E+01 3.466E+00
+ ETOT 10   9.8624550817094      7.392E-02 4.305E-03 7.056E-01
+ ETOT 11   9.8674786417239      5.024E-03 1.411E+01 3.466E+00
  ETOT 12   9.9191210303094      5.164E-02 3.633E-03 7.333E-02
- ETOT 13   9.9312534843314      1.213E-02 1.422E+01 1.071E-02
- ETOT 14   9.9326574944172      1.404E-03 1.540E-03 1.109E-03
- ETOT 15   9.9306375192802     -2.020E-03 1.422E+01 4.159E-04
+ ETOT 13   9.9312534843316      1.213E-02 1.422E+01 1.071E-02
+ ETOT 14   9.9326574944178      1.404E-03 1.540E-03 1.109E-03
+ ETOT 15   9.9306375192803     -2.020E-03 1.422E+01 4.159E-04
  ETOT 16   9.9304727781221     -1.647E-04 6.709E-04 1.008E-04
- ETOT 17   9.9299083048993     -5.645E-04 1.422E+01 4.061E-05
+ ETOT 17   9.9299083048990     -5.645E-04 1.422E+01 4.061E-05
 
  At SCF step   17, etot is converged : 
   for the second time, diff in etot=  5.645E-04 < toldfe=  1.000E-03
@@ -389,6 +338,7 @@ P          mk1mem           8
                        0.000000  0.000000  0.000000  0.000000
            occopt           3
         optdriver           1
+           prtpot           1
            prtvol           1
               qpt      5.00000000E-01  0.00000000E+00  0.00000000E+00
             rfdir           0       0       1
@@ -497,10 +447,10 @@ P          mk1mem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         57.9  wall=         58.1
+- Proc.   0 individual time (sec): cpu=         47.4  wall=         47.6
 
 ================================================================================
 
  Calculation completed.
-.Delivered  17 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         57.9  wall=         58.1
+.Delivered  10 WARNINGs and   3 COMMENTs to log file.
++Overall time at end (sec) : cpu=         47.4  wall=         47.6

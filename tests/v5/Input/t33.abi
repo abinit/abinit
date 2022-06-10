@@ -24,7 +24,7 @@ prtwf 0
 prtden 0
 prteig 0
 
-prtefg 2 # get full report of efg tensors
+nucefg 2 # get full report of efg tensors
 quadmom 0.22 -0.02558 # quad moment for copper and oxygen
 
 #######################################################################
