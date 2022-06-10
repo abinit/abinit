@@ -6,7 +6,7 @@
 !!  XC+PAW related operations
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (MT, FJ, TR, GJ, TD)
+!!  Copyright (C) 2013-2022 ABINIT group (MT, FJ, TR, GJ, TD)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -993,7 +993,7 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
    LIBPAW_ERROR(msg)
  end if
  if(nspden==4.and.xclevel==2.and..not.non_magnetic_xc) then
-   msg='GGA/mGGA for nspden=4 not implemented! (only works if usepawu=4)'
+   msg='GGA/mGGA for nspden=4 not fully implemented! (only works if usepawu=4 or pawxcdev/=0)'
    LIBPAW_ERROR(msg)
  end if
  if(pawang%angl_size==0) then

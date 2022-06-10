@@ -2,7 +2,7 @@
 .Version 9.3.1 of ABINIT 
 .(sequential version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -105,7 +105,6 @@ P           mkmem          32
               occ      2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
                        2.000000  2.000000  0.000000
         pawecutdg      8.00000000E+01 Hartree
-            rfdir           1       1       1
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
@@ -530,7 +529,6 @@ P           mkmem          32
               occ      2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
                        2.000000  2.000000  0.000000
         pawecutdg      8.00000000E+01 Hartree
-            rfdir           1       1       1
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00

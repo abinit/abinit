@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.7.4 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h25 )
+.Starting date : Wed  4 May 2022.
+- ( at 01h23 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v3_t02/t02.in
-- output file    -> t02.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/v3_t02/t02.abi
+- output file    -> t02.abo
 - root for input  files -> t02i
 - root for output files -> t02o
 
@@ -34,18 +34,18 @@
 -    mband =           5        mffmem =           1         mkmem =           3
        mpw =          65          nfft =        1728          nkpt =           3
 ================================================================================
-P This job should need less than                       1.118 Mbytes of memory.
+P This job should need less than                       1.168 Mbytes of memory.
 P Max. in main chain + nonlop.f + opernl.f
 P           12 blocks of mpw  integer numbers, for      0.003 Mbytes.
-P           61 blocks of mpw  real(dp)  numbers, for      0.030 Mbytes.
+P           55 blocks of mpw  real(dp)  numbers, for      0.027 Mbytes.
 P            2 blocks of nfft integer numbers, for      0.013 Mbytes.
-P           30 blocks of nfft real(dp)  numbers, for      0.396 Mbytes.
+P           34 blocks of nfft real(dp)  numbers, for      0.448 Mbytes.
 P              Additional     real(dp)  numbers, for      0.439 Mbytes.
 P              With residue estimated to be             0.237 Mbytes.
 P
 P Comparison of the memory needs of different chains
-P Main chain + fourwf.f                 1.113 Mbytes.
-P Main chain + nonlop.f + opernl.f      1.118 Mbytes.
+P Main chain + fourwf.f                 1.163 Mbytes.
+P Main chain + nonlop.f + opernl.f      1.168 Mbytes.
 P XC chain                              1.006 Mbytes.
 P mkrho chain                           1.029 Mbytes.
 P fourdp chain                          1.028 Mbytes.
@@ -67,18 +67,18 @@ _ WF disk file :      0.017 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           5        mffmem =           1         mkmem =           3
        mpw =          65          nfft =        1728          nkpt =           3
 ================================================================================
-P This job should need less than                       1.118 Mbytes of memory.
+P This job should need less than                       1.168 Mbytes of memory.
 P Max. in main chain + nonlop.f + opernl.f
 P           12 blocks of mpw  integer numbers, for      0.003 Mbytes.
-P           61 blocks of mpw  real(dp)  numbers, for      0.030 Mbytes.
+P           55 blocks of mpw  real(dp)  numbers, for      0.027 Mbytes.
 P            2 blocks of nfft integer numbers, for      0.013 Mbytes.
-P           30 blocks of nfft real(dp)  numbers, for      0.396 Mbytes.
+P           34 blocks of nfft real(dp)  numbers, for      0.448 Mbytes.
 P              Additional     real(dp)  numbers, for      0.439 Mbytes.
 P              With residue estimated to be             0.237 Mbytes.
 P
 P Comparison of the memory needs of different chains
-P Main chain + fourwf.f                 1.113 Mbytes.
-P Main chain + nonlop.f + opernl.f      1.118 Mbytes.
+P Main chain + fourwf.f                 1.163 Mbytes.
+P Main chain + nonlop.f + opernl.f      1.168 Mbytes.
 P XC chain                              1.006 Mbytes.
 P mkrho chain                           1.029 Mbytes.
 P fourdp chain                          1.028 Mbytes.
@@ -100,18 +100,18 @@ _ WF disk file :      0.017 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           5        mffmem =           1         mkmem =           3
        mpw =          65          nfft =        1728          nkpt =           3
 ================================================================================
-P This job should need less than                       1.118 Mbytes of memory.
+P This job should need less than                       1.168 Mbytes of memory.
 P Max. in main chain + nonlop.f + opernl.f
 P           12 blocks of mpw  integer numbers, for      0.003 Mbytes.
-P           61 blocks of mpw  real(dp)  numbers, for      0.030 Mbytes.
+P           55 blocks of mpw  real(dp)  numbers, for      0.027 Mbytes.
 P            2 blocks of nfft integer numbers, for      0.013 Mbytes.
-P           30 blocks of nfft real(dp)  numbers, for      0.396 Mbytes.
+P           34 blocks of nfft real(dp)  numbers, for      0.448 Mbytes.
 P              Additional     real(dp)  numbers, for      0.439 Mbytes.
 P              With residue estimated to be             0.237 Mbytes.
 P
 P Comparison of the memory needs of different chains
-P Main chain + fourwf.f                 1.113 Mbytes.
-P Main chain + nonlop.f + opernl.f      1.118 Mbytes.
+P Main chain + fourwf.f                 1.163 Mbytes.
+P Main chain + nonlop.f + opernl.f      1.168 Mbytes.
 P XC chain                              1.006 Mbytes.
 P mkrho chain                           1.029 Mbytes.
 P fourdp chain                          1.028 Mbytes.
@@ -161,18 +161,18 @@ _ WF disk file :      0.017 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           3
        mpw =          65          nfft =        1728          nkpt =           3
 ================================================================================
-P This job should need less than                       1.174 Mbytes of memory.
+P This job should need less than                       1.274 Mbytes of memory.
 P Max. in main chain + nonlop.f + opernl.f
 P           12 blocks of mpw  integer numbers, for      0.003 Mbytes.
-P          165 blocks of mpw  real(dp)  numbers, for      0.082 Mbytes.
+P          153 blocks of mpw  real(dp)  numbers, for      0.076 Mbytes.
 P            2 blocks of nfft integer numbers, for      0.013 Mbytes.
-P           30 blocks of nfft real(dp)  numbers, for      0.396 Mbytes.
+P           38 blocks of nfft real(dp)  numbers, for      0.501 Mbytes.
 P              Additional     real(dp)  numbers, for      0.444 Mbytes.
 P              With residue estimated to be             0.237 Mbytes.
 P
 P Comparison of the memory needs of different chains
-P Main chain + fourwf.f                 1.170 Mbytes.
-P Main chain + nonlop.f + opernl.f      1.174 Mbytes.
+P Main chain + fourwf.f                 1.269 Mbytes.
+P Main chain + nonlop.f + opernl.f      1.274 Mbytes.
 P XC chain                              1.051 Mbytes.
 P mkrho chain                           1.075 Mbytes.
 P fourdp chain                          1.073 Mbytes.
@@ -222,18 +222,18 @@ _ WF disk file :      0.032 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           3
        mpw =          65          nfft =        1728          nkpt =           3
 ================================================================================
-P This job should need less than                       1.315 Mbytes of memory.
+P This job should need less than                       1.414 Mbytes of memory.
 P Max. in main chain + nonlop.f + opernl.f
 P           12 blocks of mpw  integer numbers, for      0.003 Mbytes.
-P          171 blocks of mpw  real(dp)  numbers, for      0.085 Mbytes.
+P          159 blocks of mpw  real(dp)  numbers, for      0.079 Mbytes.
 P            2 blocks of nfft integer numbers, for      0.013 Mbytes.
-P           30 blocks of nfft real(dp)  numbers, for      0.396 Mbytes.
+P           38 blocks of nfft real(dp)  numbers, for      0.501 Mbytes.
 P              Additional     real(dp)  numbers, for      0.581 Mbytes.
 P              With residue estimated to be             0.237 Mbytes.
 P
 P Comparison of the memory needs of different chains
-P Main chain + fourwf.f                 1.310 Mbytes.
-P Main chain + nonlop.f + opernl.f      1.315 Mbytes.
+P Main chain + fourwf.f                 1.410 Mbytes.
+P Main chain + nonlop.f + opernl.f      1.414 Mbytes.
 P XC chain                              1.188 Mbytes.
 P mkrho chain                           1.213 Mbytes.
 P fourdp chain                          1.211 Mbytes.
@@ -255,18 +255,18 @@ _ WF disk file :      0.032 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           3
        mpw =          65          nfft =        1728          nkpt =           3
 ================================================================================
-P This job should need less than                       1.315 Mbytes of memory.
+P This job should need less than                       1.414 Mbytes of memory.
 P Max. in main chain + nonlop.f + opernl.f
 P           12 blocks of mpw  integer numbers, for      0.003 Mbytes.
-P          171 blocks of mpw  real(dp)  numbers, for      0.085 Mbytes.
+P          159 blocks of mpw  real(dp)  numbers, for      0.079 Mbytes.
 P            2 blocks of nfft integer numbers, for      0.013 Mbytes.
-P           30 blocks of nfft real(dp)  numbers, for      0.396 Mbytes.
+P           38 blocks of nfft real(dp)  numbers, for      0.501 Mbytes.
 P              Additional     real(dp)  numbers, for      0.581 Mbytes.
 P              With residue estimated to be             0.237 Mbytes.
 P
 P Comparison of the memory needs of different chains
-P Main chain + fourwf.f                 1.310 Mbytes.
-P Main chain + nonlop.f + opernl.f      1.315 Mbytes.
+P Main chain + fourwf.f                 1.410 Mbytes.
+P Main chain + nonlop.f + opernl.f      1.414 Mbytes.
 P XC chain                              1.188 Mbytes.
 P mkrho chain                           1.213 Mbytes.
 P fourdp chain                          1.211 Mbytes.
@@ -288,18 +288,18 @@ _ WF disk file :      0.032 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           3
        mpw =          65          nfft =        1728          nkpt =           3
 ================================================================================
-P This job should need less than                       1.315 Mbytes of memory.
+P This job should need less than                       1.414 Mbytes of memory.
 P Max. in main chain + nonlop.f + opernl.f
 P           12 blocks of mpw  integer numbers, for      0.003 Mbytes.
-P          171 blocks of mpw  real(dp)  numbers, for      0.085 Mbytes.
+P          159 blocks of mpw  real(dp)  numbers, for      0.079 Mbytes.
 P            2 blocks of nfft integer numbers, for      0.013 Mbytes.
-P           30 blocks of nfft real(dp)  numbers, for      0.396 Mbytes.
+P           38 blocks of nfft real(dp)  numbers, for      0.501 Mbytes.
 P              Additional     real(dp)  numbers, for      0.581 Mbytes.
 P              With residue estimated to be             0.237 Mbytes.
 P
 P Comparison of the memory needs of different chains
-P Main chain + fourwf.f                 1.310 Mbytes.
-P Main chain + nonlop.f + opernl.f      1.315 Mbytes.
+P Main chain + fourwf.f                 1.410 Mbytes.
+P Main chain + nonlop.f + opernl.f      1.414 Mbytes.
 P XC chain                              1.188 Mbytes.
 P mkrho chain                           1.213 Mbytes.
 P fourdp chain                          1.211 Mbytes.
@@ -433,7 +433,18 @@ P          mk1mem           3
         optdriver8          0
         optdriver9          0
         optdriver10         1
+           prtpot1          0
+           prtpot2          0
+           prtpot3          0
+           prtpot4          1
+           prtpot5          0
+           prtpot6          1
+           prtpot7          0
+           prtpot8          0
+           prtpot9          0
+           prtpot10         1
            prtvol          10
+          rfatpol           1       1        
             rfdir           1       0       0
            rfphon1          0
            rfphon2          0
@@ -595,8 +606,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      2.000   => boxcut(ratio)=   2.09807
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -830,11 +841,11 @@ force_length_stats: {min:   1.01237417E-02, max:   1.01237417E-02, mean:   1.012
 
  Mean square residual over all n,k,spin=   51.975E-22; max=  15.564E-21
    0.2500  0.2500  0.2500    1  1.55635E-20 kpt; spin; max resid(k); each band:
-   6.55E-21  1.56E-20  9.33E-23  3.22E-22  1.35E-20
+  6.55E-21 1.56E-20 9.33E-23 3.22E-22 1.35E-20
   -0.2500  0.2500  0.2500    1  7.69273E-21 kpt; spin; max resid(k); each band:
-   5.61E-21  7.69E-21  2.20E-21  8.24E-24  5.88E-21
+  5.61E-21 7.69E-21 2.20E-21 8.24E-24 5.88E-21
    0.2500 -0.2500  0.2500    1  7.64048E-21 kpt; spin; max resid(k); each band:
-   5.52E-21  7.64E-21  1.95E-21  1.64E-22  5.32E-21
+  5.52E-21 7.64E-21 1.95E-21 1.64E-22 5.32E-21
  reduced coordinates (array xred) for    2 atoms
        0.230900000000      0.231000000000      0.231000000000
       -0.231000000000     -0.231000000000     -0.231000000000
@@ -867,10 +878,10 @@ force_length_stats: {min:   1.01237417E-02, max:   1.01237417E-02, mean:   1.012
  kpt#   3, nband=  5, wtk=  0.50000, kpt=  0.2500 -0.2500  0.2500 (reduced coord)
   -0.28978   -0.23836   -0.07393   -0.03902   -0.01686
  Total charge density [el/Bohr^3]
-      Maximum=    4.7067E-02  at reduced coord.    0.0000    0.0000    0.5000
- Next maximum=    4.7067E-02  at reduced coord.    0.0000    0.5000    0.0000
-      Minimum=    2.4743E-03  at reduced coord.    0.5000    0.5000    0.5000
- Next minimum=    2.5192E-03  at reduced coord.    0.0000    0.0000    0.0000
+)     Maximum=    4.7067E-02  at reduced coord.    0.0000    0.0000    0.5000
+)Next maximum=    4.7067E-02  at reduced coord.    0.0000    0.5000    0.0000
+)     Minimum=    2.4743E-03  at reduced coord.    0.5000    0.5000    0.5000
+)Next minimum=    2.5192E-03  at reduced coord.    0.0000    0.0000    0.0000
    Integrated=    1.0000E+01
 
 --- !EnergyTerms
@@ -1103,11 +1114,11 @@ force_length_stats: {min:   1.01080304E-02, max:   1.01080304E-02, mean:   1.010
 
  Mean square residual over all n,k,spin=   42.452E-21; max=  11.573E-20
    0.2500  0.2500  0.2500    1  7.67214E-20 kpt; spin; max resid(k); each band:
-   4.63E-20  3.55E-20  7.80E-21  4.51E-22  7.67E-20
+  4.63E-20 3.55E-20 7.80E-21 4.51E-22 7.67E-20
   -0.2500  0.2500  0.2500    1  1.15728E-19 kpt; spin; max resid(k); each band:
-   1.47E-20  1.29E-20  1.16E-19  1.35E-22  9.48E-20
+  1.47E-20 1.29E-20 1.16E-19 1.35E-22 9.48E-20
    0.2500 -0.2500  0.2500    1  9.70781E-20 kpt; spin; max resid(k); each band:
-   1.92E-20  2.69E-20  9.71E-20  8.89E-21  7.96E-20
+  1.92E-20 2.69E-20 9.71E-20 8.89E-21 7.96E-20
  reduced coordinates (array xred) for    2 atoms
        0.231000000000      0.231000000000      0.231000000000
       -0.231000000000     -0.231000000000     -0.231000000000
@@ -1140,10 +1151,10 @@ force_length_stats: {min:   1.01080304E-02, max:   1.01080304E-02, mean:   1.010
  kpt#   3, nband=  5, wtk=  0.50000, kpt=  0.2500 -0.2500  0.2500 (reduced coord)
   -0.28978   -0.23834   -0.07394   -0.03901   -0.01687
  Total charge density [el/Bohr^3]
-      Maximum=    4.7051E-02  at reduced coord.    0.0000    0.0000    0.5000
- Next maximum=    4.7051E-02  at reduced coord.    0.0000    0.5000    0.0000
-      Minimum=    2.4740E-03  at reduced coord.    0.5000    0.5000    0.5000
- Next minimum=    2.5187E-03  at reduced coord.    0.0000    0.0000    0.0000
+)     Maximum=    4.7051E-02  at reduced coord.    0.0000    0.0000    0.5000
+)Next maximum=    4.7051E-02  at reduced coord.    0.0000    0.5000    0.0000
+)     Minimum=    2.4740E-03  at reduced coord.    0.5000    0.5000    0.5000
+)Next minimum=    2.5187E-03  at reduced coord.    0.0000    0.0000    0.0000
    Integrated=    1.0000E+01
 
 --- !EnergyTerms
@@ -1376,11 +1387,11 @@ force_length_stats: {min:   1.00924029E-02, max:   1.00924029E-02, mean:   1.009
 
  Mean square residual over all n,k,spin=   42.498E-21; max=  11.574E-20
    0.2500  0.2500  0.2500    1  7.67231E-20 kpt; spin; max resid(k); each band:
-   4.63E-20  3.56E-20  7.80E-21  1.09E-21  7.67E-20
+  4.63E-20 3.56E-20 7.80E-21 1.09E-21 7.67E-20
   -0.2500  0.2500  0.2500    1  1.15740E-19 kpt; spin; max resid(k); each band:
-   1.47E-20  1.29E-20  1.16E-19  1.35E-22  9.48E-20
+  1.47E-20 1.29E-20 1.16E-19 1.35E-22 9.48E-20
    0.2500 -0.2500  0.2500    1  9.70938E-20 kpt; spin; max resid(k); each band:
-   1.92E-20  2.70E-20  9.71E-20  8.87E-21  7.95E-20
+  1.92E-20 2.70E-20 9.71E-20 8.87E-21 7.95E-20
  reduced coordinates (array xred) for    2 atoms
        0.231100000000      0.231000000000      0.231000000000
       -0.231000000000     -0.231000000000     -0.231000000000
@@ -1413,10 +1424,10 @@ force_length_stats: {min:   1.00924029E-02, max:   1.00924029E-02, mean:   1.009
  kpt#   3, nband=  5, wtk=  0.50000, kpt=  0.2500 -0.2500  0.2500 (reduced coord)
   -0.28977   -0.23832   -0.07394   -0.03899   -0.01688
  Total charge density [el/Bohr^3]
-      Maximum=    4.7053E-02  at reduced coord.    0.5000    0.0000    0.0000
- Next maximum=    4.7035E-02  at reduced coord.    0.0000    0.0000    0.5000
-      Minimum=    2.4737E-03  at reduced coord.    0.5000    0.5000    0.5000
- Next minimum=    2.5183E-03  at reduced coord.    0.0000    0.0000    0.0000
+)     Maximum=    4.7053E-02  at reduced coord.    0.5000    0.0000    0.0000
+)Next maximum=    4.7035E-02  at reduced coord.    0.0000    0.0000    0.5000
+)     Minimum=    2.4737E-03  at reduced coord.    0.5000    0.5000    0.5000
+)Next minimum=    2.5183E-03  at reduced coord.    0.0000    0.0000    0.0000
    Integrated=    1.0000E+01
 
 --- !EnergyTerms
@@ -1491,10 +1502,6 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      2.000   => boxcut(ratio)=   2.09807
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t02o_DS2_WFK
-P newkpt: treating      5 bands with npw=      65 for ikpt=   1 by node    0
-P newkpt: treating      5 bands with npw=      65 for ikpt=   2 by node    0
-P newkpt: treating      5 bands with npw=      65 for ikpt=   3 by node    0
 
  ==>  initialize data related to q vector <== 
 
@@ -1511,17 +1518,10 @@ P newkpt: treating      5 bands with npw=      65 for ikpt=   3 by node    0
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t02o_DS2_WFK
-P newkpt: treating      5 bands with npw=      65 for ikpt=   1 by node    0
-P newkpt: treating      5 bands with npw=      65 for ikpt=   2 by node    0
-P newkpt: treating      5 bands with npw=      65 for ikpt=   3 by node    0
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
-P newkpt: treating      5 bands with npw=      65 for ikpt=   1 by node    0
-P newkpt: treating      5 bands with npw=      65 for ikpt=   2 by node    0
-P newkpt: treating      5 bands with npw=      65 for ikpt=   3 by node    0
 
 --- !BeginCycle
 iteration_state: {dtset: 4, }
@@ -1545,7 +1545,7 @@ tolerances: {toldfe: 1.00E-07, }
 
  ETOT  7   2.3546579160240     -3.995E-07 2.855E-10 9.648E-07
 
- ETOT  8   2.3546579103752     -5.649E-09 2.886E-12 1.834E-08
+ ETOT  8   2.3546579103753     -5.649E-09 2.886E-12 1.834E-08
 
  ETOT  9   2.3546579102683     -1.070E-10 1.070E-13 2.267E-10
 
@@ -1557,11 +1557,11 @@ tolerances: {toldfe: 1.00E-07, }
 
  Mean square residual over all n,k,spin=   15.667E-15; max=  10.701E-14
    0.2500  0.2500  0.2500    1  1.07007E-13 kpt; spin; max resid(k); each band:
-   1.03E-14  5.42E-15  3.61E-15  8.29E-15  1.07E-13
+  1.03E-14 5.42E-15 3.61E-15 8.29E-15 1.07E-13
   -0.2500  0.2500  0.2500    1  1.23351E-14 kpt; spin; max resid(k); each band:
-   1.23E-14  9.10E-15  9.70E-15  5.98E-15  9.83E-15
+  1.23E-14 9.10E-15 9.70E-15 5.98E-15 9.83E-15
    0.2500 -0.2500  0.2500    1  2.13284E-14 kpt; spin; max resid(k); each band:
-   1.21E-14  4.90E-15  2.13E-14  8.52E-15  6.53E-15
+  1.21E-14 4.90E-15 2.13E-14 8.52E-15 6.53E-15
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -1738,7 +1738,7 @@ tolerances: {toldfe: 1.00E-07, }
 -  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
 -  0.000000E+00
  chkph3 : WARNING -
-  The dynamical matrix was incomplete : phonon frequencies may be wrong ...
+  Dynamical matrix incomplete, phonon frequencies may be wrong, check input variables rfatpol and rfdir.
 
 ================================================================================
 == DATASET  5 ==================================================================
@@ -1849,14 +1849,14 @@ force_length_stats: {min:   1.01080303E-02, max:   1.01080303E-02, mean:   1.010
 
  Mean square residual over all n,k,spin=   19.271E-27; max=  24.646E-26
    0.2500  0.2500  0.2500    1  2.46461E-25 kpt; spin; max resid(k); each band:
-   7.98E-28  7.94E-28  8.13E-28  8.13E-28  5.45E-27  5.45E-27  1.38E-26  1.38E-26
-   2.46E-25  2.46E-25
+  7.98E-28 7.94E-28 8.13E-28 8.13E-28 5.45E-27 5.45E-27 1.38E-26 1.38E-26
+  2.46E-25 2.46E-25
   -0.2500  0.2500  0.2500    1  5.05128E-27 kpt; spin; max resid(k); each band:
-   1.81E-28  1.80E-28  2.06E-27  2.06E-27  2.46E-28  2.46E-28  2.59E-30  2.58E-30
-   5.05E-27  5.05E-27
+  1.81E-28 1.80E-28 2.06E-27 2.06E-27 2.46E-28 2.46E-28 2.59E-30 2.58E-30
+  5.05E-27 5.05E-27
    0.2500 -0.2500  0.2500    1  1.08258E-26 kpt; spin; max resid(k); each band:
-   9.97E-29  1.01E-28  5.99E-28  5.98E-28  1.08E-26  1.08E-26  7.45E-28  7.44E-28
-   1.96E-27  1.96E-27
+  9.97E-29 1.01E-28 5.99E-28 5.98E-28 1.08E-26 1.08E-26 7.45E-28 7.44E-28
+  1.96E-27 1.96E-27
  reduced coordinates (array xred) for    2 atoms
        0.231000000000      0.231000000000      0.231000000000
       -0.231000000000     -0.231000000000     -0.231000000000
@@ -1892,10 +1892,10 @@ force_length_stats: {min:   1.01080303E-02, max:   1.01080303E-02, mean:   1.010
   -0.28978   -0.28978   -0.23834   -0.23834   -0.07394   -0.07394   -0.03901   -0.03901
   -0.01687   -0.01687
  Total charge density [el/Bohr^3]
-      Maximum=    4.7051E-02  at reduced coord.    0.0000    0.0000    0.5000
- Next maximum=    4.7051E-02  at reduced coord.    0.0000    0.5000    0.0000
-      Minimum=    2.4740E-03  at reduced coord.    0.5000    0.5000    0.5000
- Next minimum=    2.5187E-03  at reduced coord.    0.0000    0.0000    0.0000
+)     Maximum=    4.7051E-02  at reduced coord.    0.0000    0.0000    0.5000
+)Next maximum=    4.7051E-02  at reduced coord.    0.0000    0.5000    0.0000
+)     Minimum=    2.4740E-03  at reduced coord.    0.5000    0.5000    0.5000
+)Next minimum=    2.5187E-03  at reduced coord.    0.0000    0.0000    0.0000
    Integrated=    1.0000E+01
 
 --- !EnergyTerms
@@ -1970,10 +1970,6 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      2.000   => boxcut(ratio)=   2.09807
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t02o_DS5_WFK
-P newkpt: treating     10 bands with npw=      65 for ikpt=   1 by node    0
-P newkpt: treating     10 bands with npw=      65 for ikpt=   2 by node    0
-P newkpt: treating     10 bands with npw=      65 for ikpt=   3 by node    0
 
  ==>  initialize data related to q vector <== 
 
@@ -1990,17 +1986,10 @@ P newkpt: treating     10 bands with npw=      65 for ikpt=   3 by node    0
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t02o_DS5_WFK
-P newkpt: treating     10 bands with npw=      65 for ikpt=   1 by node    0
-P newkpt: treating     10 bands with npw=      65 for ikpt=   2 by node    0
-P newkpt: treating     10 bands with npw=      65 for ikpt=   3 by node    0
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
-P newkpt: treating     10 bands with npw=      65 for ikpt=   1 by node    0
-P newkpt: treating     10 bands with npw=      65 for ikpt=   2 by node    0
-P newkpt: treating     10 bands with npw=      65 for ikpt=   3 by node    0
 
 --- !BeginCycle
 iteration_state: {dtset: 6, }
@@ -2012,7 +2001,7 @@ tolerances: {toldfe: 1.00E-07, }
 
 -ETOT  1   24.631280774442     -4.172E+01 6.108E-02 2.043E+03
 
- ETOT  2   2.5574050172155     -2.207E+01 5.323E-03 2.113E+01
+ ETOT  2   2.5574050172156     -2.207E+01 5.323E-03 2.113E+01
 
  ETOT  3   2.3617356460669     -1.957E-01 5.826E-05 8.182E-01
 
@@ -2036,14 +2025,14 @@ tolerances: {toldfe: 1.00E-07, }
 
  Mean square residual over all n,k,spin=   15.609E-15; max=  10.698E-14
    0.2500  0.2500  0.2500    1  1.06985E-13 kpt; spin; max resid(k); each band:
-   1.03E-14  1.03E-14  5.39E-15  5.39E-15  3.56E-15  3.56E-15  8.17E-15  8.17E-15
-   1.07E-13  1.07E-13
+  1.03E-14 1.03E-14 5.39E-15 5.39E-15 3.56E-15 3.56E-15 8.17E-15 8.17E-15
+  1.07E-13 1.07E-13
   -0.2500  0.2500  0.2500    1  1.23209E-14 kpt; spin; max resid(k); each band:
-   1.23E-14  1.23E-14  9.07E-15  9.07E-15  9.54E-15  9.54E-15  5.97E-15  5.97E-15
-   9.81E-15  9.81E-15
+  1.23E-14 1.23E-14 9.07E-15 9.07E-15 9.54E-15 9.54E-15 5.97E-15 5.97E-15
+  9.81E-15 9.81E-15
    0.2500 -0.2500  0.2500    1  2.10936E-14 kpt; spin; max resid(k); each band:
-   1.21E-14  1.21E-14  4.89E-15  4.89E-15  2.11E-14  2.11E-14  8.44E-15  8.44E-15
-   6.48E-15  6.48E-15
+  1.21E-14 1.21E-14 4.89E-15 4.89E-15 2.11E-14 2.11E-14 8.44E-15 8.44E-15
+  6.48E-15 6.48E-15
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -2220,7 +2209,7 @@ tolerances: {toldfe: 1.00E-07, }
 -  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
 -  0.000000E+00
  chkph3 : WARNING -
-  The dynamical matrix was incomplete : phonon frequencies may be wrong ...
+  Dynamical matrix incomplete, phonon frequencies may be wrong, check input variables rfatpol and rfdir.
 
 ================================================================================
 == DATASET  7 ==================================================================
@@ -2251,8 +2240,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      2.000   => boxcut(ratio)=   2.09807
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2538,14 +2527,14 @@ force_length_stats: {min:   3.53104826E-03, max:   3.53104826E-03, mean:   3.531
 
  Mean square residual over all n,k,spin=   54.095E-22; max=  53.102E-21
    0.2500  0.2500  0.2500    1  5.31017E-20 kpt; spin; max resid(k); each band:
-   3.01E-21  3.71E-21  2.88E-21  3.26E-21  6.58E-22  1.52E-21  1.77E-20  1.58E-20
-   1.17E-20  5.31E-20
+  3.01E-21 3.71E-21 2.88E-21 3.26E-21 6.58E-22 1.52E-21 1.77E-20 1.58E-20
+  1.17E-20 5.31E-20
   -0.2500  0.2500  0.2500    1  3.85075E-21 kpt; spin; max resid(k); each band:
-   3.35E-21  3.85E-21  2.39E-21  3.17E-21  1.84E-21  2.33E-21  8.56E-22  1.22E-21
-   1.78E-21  2.26E-21
+  3.35E-21 3.85E-21 2.39E-21 3.17E-21 1.84E-21 2.33E-21 8.56E-22 1.22E-21
+  1.78E-21 2.26E-21
    0.2500 -0.2500  0.2500    1  3.45425E-21 kpt; spin; max resid(k); each band:
-   2.81E-21  3.40E-21  2.54E-21  3.45E-21  3.08E-21  3.33E-21  1.28E-21  1.98E-21
-   1.77E-21  2.31E-21
+  2.81E-21 3.40E-21 2.54E-21 3.45E-21 3.08E-21 3.33E-21 1.28E-21 1.98E-21
+  1.77E-21 2.31E-21
  reduced coordinates (array xred) for    2 atoms
        0.230900000000      0.231000000000      0.231000000000
       -0.231000000000     -0.231000000000     -0.231000000000
@@ -2581,10 +2570,10 @@ force_length_stats: {min:   3.53104826E-03, max:   3.53104826E-03, mean:   3.531
   -0.28728   -0.28728   -0.23668   -0.23668   -0.08320   -0.08320   -0.06346   -0.06346
   -0.00235   -0.00235
  Total charge density [el/Bohr^3]
-      Maximum=    4.5752E-02  at reduced coord.    0.0000    0.0000    0.5000
- Next maximum=    4.5752E-02  at reduced coord.    0.0000    0.5000    0.0000
-      Minimum=    2.3192E-03  at reduced coord.    0.5000    0.5000    0.5000
- Next minimum=    2.3807E-03  at reduced coord.    0.0000    0.0000    0.0000
+)     Maximum=    4.5752E-02  at reduced coord.    0.0000    0.0000    0.5000
+)Next maximum=    4.5752E-02  at reduced coord.    0.0000    0.5000    0.0000
+)     Minimum=    2.3192E-03  at reduced coord.    0.5000    0.5000    0.5000
+)Next minimum=    2.3807E-03  at reduced coord.    0.0000    0.0000    0.0000
    Integrated=    1.0000E+01
 
 --- !EnergyTerms
@@ -2856,14 +2845,14 @@ force_length_stats: {min:   3.51107577E-03, max:   3.51107577E-03, mean:   3.511
 
  Mean square residual over all n,k,spin=   36.429E-21; max=  88.592E-21
    0.2500  0.2500  0.2500    1  8.85915E-20 kpt; spin; max resid(k); each band:
-   4.80E-20  5.09E-20  4.35E-20  4.77E-20  2.41E-20  3.33E-20  8.86E-20  4.37E-20
-   7.64E-20  7.17E-20
+  4.80E-20 5.09E-20 4.35E-20 4.77E-20 2.41E-20 3.33E-20 8.86E-20 4.37E-20
+  7.64E-20 7.17E-20
   -0.2500  0.2500  0.2500    1  5.29303E-20 kpt; spin; max resid(k); each band:
-   4.61E-20  4.55E-20  5.29E-20  5.21E-20  1.59E-20  1.74E-20  1.39E-20  1.07E-20
-   1.16E-20  1.12E-20
+  4.61E-20 4.55E-20 5.29E-20 5.21E-20 1.59E-20 1.74E-20 1.39E-20 1.07E-20
+  1.16E-20 1.12E-20
    0.2500 -0.2500  0.2500    1  5.39216E-20 kpt; spin; max resid(k); each band:
-   5.29E-20  5.39E-20  4.36E-20  4.44E-20  2.24E-20  2.03E-20  1.22E-20  1.64E-20
-   1.27E-20  8.71E-21
+  5.29E-20 5.39E-20 4.36E-20 4.44E-20 2.24E-20 2.03E-20 1.22E-20 1.64E-20
+  1.27E-20 8.71E-21
  reduced coordinates (array xred) for    2 atoms
        0.231000000000      0.231000000000      0.231000000000
       -0.231000000000     -0.231000000000     -0.231000000000
@@ -2899,10 +2888,10 @@ force_length_stats: {min:   3.51107577E-03, max:   3.51107577E-03, mean:   3.511
   -0.28727   -0.28727   -0.23665   -0.23665   -0.08320   -0.08320   -0.06346   -0.06346
   -0.00235   -0.00235
  Total charge density [el/Bohr^3]
-      Maximum=    4.5736E-02  at reduced coord.    0.0000    0.0000    0.5000
- Next maximum=    4.5736E-02  at reduced coord.    0.0000    0.5000    0.0000
-      Minimum=    2.3188E-03  at reduced coord.    0.5000    0.5000    0.5000
- Next minimum=    2.3803E-03  at reduced coord.    0.0000    0.0000    0.0000
+)     Maximum=    4.5736E-02  at reduced coord.    0.0000    0.0000    0.5000
+)Next maximum=    4.5736E-02  at reduced coord.    0.0000    0.5000    0.0000
+)     Minimum=    2.3188E-03  at reduced coord.    0.5000    0.5000    0.5000
+)Next minimum=    2.3803E-03  at reduced coord.    0.0000    0.0000    0.0000
    Integrated=    1.0000E+01
 
 --- !EnergyTerms
@@ -3174,14 +3163,14 @@ force_length_stats: {min:   3.49125150E-03, max:   3.49125150E-03, mean:   3.491
 
  Mean square residual over all n,k,spin=   35.382E-21; max=  82.057E-21
    0.2500  0.2500  0.2500    1  8.20572E-20 kpt; spin; max resid(k); each band:
-   4.55E-20  4.87E-20  4.11E-20  4.57E-20  2.24E-20  3.22E-20  4.72E-20  8.21E-20
-   7.99E-20  7.59E-20
+  4.55E-20 4.87E-20 4.11E-20 4.57E-20 2.24E-20 3.22E-20 4.72E-20 8.21E-20
+  7.99E-20 7.59E-20
   -0.2500  0.2500  0.2500    1  5.08646E-20 kpt; spin; max resid(k); each band:
-   4.37E-20  4.28E-20  5.09E-20  4.97E-20  1.54E-20  1.67E-20  1.36E-20  9.80E-21
-   1.11E-20  1.07E-20
+  4.37E-20 4.28E-20 5.09E-20 4.97E-20 1.54E-20 1.67E-20 1.36E-20 9.80E-21
+  1.11E-20 1.07E-20
    0.2500 -0.2500  0.2500    1  5.12835E-20 kpt; spin; max resid(k); each band:
-   5.07E-20  5.13E-20  4.17E-20  4.21E-20  2.22E-20  1.93E-20  1.45E-20  1.39E-20
-   1.12E-20  9.54E-21
+  5.07E-20 5.13E-20 4.17E-20 4.21E-20 2.22E-20 1.93E-20 1.45E-20 1.39E-20
+  1.12E-20 9.54E-21
  reduced coordinates (array xred) for    2 atoms
        0.231100000000      0.231000000000      0.231000000000
       -0.231000000000     -0.231000000000     -0.231000000000
@@ -3217,10 +3206,10 @@ force_length_stats: {min:   3.49125150E-03, max:   3.49125150E-03, mean:   3.491
   -0.28727   -0.28727   -0.23663   -0.23663   -0.08321   -0.08321   -0.06345   -0.06345
   -0.00235   -0.00235
  Total charge density [el/Bohr^3]
-      Maximum=    4.5737E-02  at reduced coord.    0.5000    0.0000    0.0000
- Next maximum=    4.5720E-02  at reduced coord.    0.0000    0.0000    0.5000
-      Minimum=    2.3184E-03  at reduced coord.    0.5000    0.5000    0.5000
- Next minimum=    2.3799E-03  at reduced coord.    0.0000    0.0000    0.0000
+)     Maximum=    4.5737E-02  at reduced coord.    0.5000    0.0000    0.0000
+)Next maximum=    4.5720E-02  at reduced coord.    0.0000    0.0000    0.5000
+)     Minimum=    2.3184E-03  at reduced coord.    0.5000    0.5000    0.5000
+)Next minimum=    2.3799E-03  at reduced coord.    0.0000    0.0000    0.0000
    Integrated=    1.0000E+01
 
 --- !EnergyTerms
@@ -3295,10 +3284,6 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      2.000   => boxcut(ratio)=   2.09807
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t02o_DS8_WFK
-P newkpt: treating     10 bands with npw=      65 for ikpt=   1 by node    0
-P newkpt: treating     10 bands with npw=      65 for ikpt=   2 by node    0
-P newkpt: treating     10 bands with npw=      65 for ikpt=   3 by node    0
 
  ==>  initialize data related to q vector <== 
 
@@ -3315,17 +3300,10 @@ P newkpt: treating     10 bands with npw=      65 for ikpt=   3 by node    0
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t02o_DS8_WFK
-P newkpt: treating     10 bands with npw=      65 for ikpt=   1 by node    0
-P newkpt: treating     10 bands with npw=      65 for ikpt=   2 by node    0
-P newkpt: treating     10 bands with npw=      65 for ikpt=   3 by node    0
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
-P newkpt: treating     10 bands with npw=      65 for ikpt=   1 by node    0
-P newkpt: treating     10 bands with npw=      65 for ikpt=   2 by node    0
-P newkpt: treating     10 bands with npw=      65 for ikpt=   3 by node    0
 
 --- !BeginCycle
 iteration_state: {dtset: 10, }
@@ -3345,7 +3323,7 @@ tolerances: {toldfe: 1.00E-07, }
 
  ETOT  5   2.4815734492781     -2.210E-04 1.005E-06 9.633E-04
 
- ETOT  6   2.4815619444648     -1.150E-05 4.623E-08 6.748E-05
+ ETOT  6   2.4815619444649     -1.150E-05 4.623E-08 6.748E-05
 
  ETOT  7   2.4815612683995     -6.761E-07 3.171E-09 1.828E-06
 
@@ -3361,14 +3339,14 @@ tolerances: {toldfe: 1.00E-07, }
 
  Mean square residual over all n,k,spin=   13.217E-13; max=  14.605E-12
    0.2500  0.2500  0.2500    1  1.46049E-11 kpt; spin; max resid(k); each band:
-   8.96E-14  8.56E-14  7.17E-14  7.45E-14  9.02E-14  8.80E-14  8.23E-12  3.04E-12
-   1.46E-11  1.22E-11
+  8.96E-14 8.56E-14 7.17E-14 7.45E-14 9.02E-14 8.80E-14 8.23E-12 3.04E-12
+  1.46E-11 1.22E-11
   -0.2500  0.2500  0.2500    1  1.27980E-13 kpt; spin; max resid(k); each band:
-   5.38E-14  5.58E-14  6.17E-14  5.04E-14  1.10E-13  1.28E-13  2.30E-14  2.41E-14
-   2.24E-14  3.89E-14
+  5.38E-14 5.58E-14 6.17E-14 5.04E-14 1.10E-13 1.28E-13 2.30E-14 2.41E-14
+  2.24E-14 3.89E-14
    0.2500 -0.2500  0.2500    1  1.15747E-13 kpt; spin; max resid(k); each band:
-   4.41E-14  4.66E-14  4.81E-14  4.21E-14  1.06E-13  1.16E-13  1.92E-14  2.28E-14
-   2.72E-14  2.32E-14
+  4.41E-14 4.66E-14 4.81E-14 4.21E-14 1.06E-13 1.16E-13 1.92E-14 2.28E-14
+  2.72E-14 2.32E-14
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -3545,7 +3523,7 @@ tolerances: {toldfe: 1.00E-07, }
 -  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
 -  0.000000E+00
  chkph3 : WARNING -
-  The dynamical matrix was incomplete : phonon frequencies may be wrong ...
+  Dynamical matrix incomplete, phonon frequencies may be wrong, check input variables rfatpol and rfdir.
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -3666,7 +3644,18 @@ P          mk1mem           3
         optdriver8          0
         optdriver9          0
         optdriver10         1
+           prtpot1          0
+           prtpot2          0
+           prtpot3          0
+           prtpot4          1
+           prtpot5          0
+           prtpot6          1
+           prtpot7          0
+           prtpot8          0
+           prtpot9          0
+           prtpot10         1
            prtvol          10
+          rfatpol           1       1        
             rfdir           1       0       0
            rfphon1          0
            rfphon2          0
@@ -3882,10 +3871,10 @@ P          mk1mem           3
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          3.9  wall=          3.9
+- Proc.   0 individual time (sec): cpu=          4.9  wall=          5.6
 
 ================================================================================
 
  Calculation completed.
-.Delivered  13 WARNINGs and  27 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.9  wall=          3.9
+.Delivered  18 WARNINGs and  27 COMMENTs to log file.
++Overall time at end (sec) : cpu=          4.9  wall=          5.6

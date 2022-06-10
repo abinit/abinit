@@ -7,7 +7,7 @@
 !! the linear and non-linear optical responses in the RPA.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2021 ABINIT group (SSharma,MVer,VRecoules,YG,NAP)
+!! Copyright (C) 2002-2022 ABINIT group (SSharma,MVer,VRecoules,YG,NAP)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

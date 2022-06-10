@@ -22,7 +22,6 @@
     nqpt2   1        #one wave vector will be specified
      qpt2   0 0 0    #need to specify gamma point
   rfelfd2   2        #set for ddk wf's only
-   rfdir2   1 1 1    #full set of directions needed
   tolwfr2   1.0d-20  #only wf convergence can be monitored here
 
 # Set 3 : response-function calculations for all needed perturbations
@@ -33,9 +32,7 @@
     nqpt3   1
      qpt3   0 0 0
   rfphon3   1        #do atomic displacement perturbation
- rfatpol3   1 4      #do for all atoms
   rfstrs3   3        #do strain perturbation
-   rfdir3   1 1 1    #the full set of directions is needed
   tolvrs3   1.0d-10  #need reasonable convergence of 1st-order quantities
 
 

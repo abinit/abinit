@@ -7,7 +7,7 @@
 !!  used to handle interatomic force constant sets
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2021 ABINIT group (XG,MJV,EB,MG)
+!! Copyright (C) 2011-2022 ABINIT group (XG,MJV,EB,MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1689,11 +1689,13 @@ end subroutine corsifc9
 !!
 !! SOURCE
 
-subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid)
+subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid, &
+                                                    unit_out) ! optional arguments
 
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: ifcout,ifcana,prt_ifc,ncid
+ integer,optional,intent(in) :: unit_out
  class(ifc_type),intent(inout) :: Ifc
 !arrays
  integer,intent(in) :: atifc(Ifc%natom)
@@ -1717,6 +1719,9 @@ subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid)
 ! *********************************************************************
 
  iout = ab_out
+ if (present(unit_out)) then
+   iout = unit_out
+ end if   
  dielt = ifc%dielt
 
  ! Compute the distances between atoms
@@ -2289,7 +2294,7 @@ subroutine ifc_getiaf(Ifc,ifcana,ifcout,iout,zeff,ia,ra,list,&
        trace3=sriaf(1,1,ii)+sriaf(2,2,ii)+sriaf(3,3,ii)
        if (iout > 0) then
          write(iout,'(3(f9.5,17x))')trace1+tol10,trace2+tol10,trace3+tol10
-         write(iout,'(3(f9.5,17x))')1.0,trace2/trace1+tol10,trace3/trace1+tol10 !
+         write(iout,'(3(f9.5,17x))')1.0,(trace2+tol10)/(trace1+tol10),(trace3+tol10)/(trace1+tol10) !
        end if
 
        if(flag==1)then

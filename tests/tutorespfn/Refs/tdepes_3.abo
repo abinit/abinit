@@ -1,8 +1,8 @@
 
-.Version 9.7.2 of ABINIT 
+.Version 9.7.4 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 10 Feb 2022.
-- ( at 14h09 )
+.Starting date : Wed  4 May 2022.
+- ( at 03h29 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/TestBot_MPI1/tutorespfn_tdepes_3/tdepes_3.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/tutorespfn_tdepes_3/tdepes_3.abi
 - output file    -> tdepes_3.abo
 - root for input  files -> tdepes_3i
 - root for output files -> tdepes_3o
@@ -722,6 +722,30 @@ P          mk1mem           8
         optdriver81         0
         optdriver82         0
         optdriver83         1
+           prtpot11         0
+           prtpot12         0
+           prtpot13         1
+           prtpot21         0
+           prtpot22         0
+           prtpot23         1
+           prtpot31         0
+           prtpot32         0
+           prtpot33         1
+           prtpot41         0
+           prtpot42         0
+           prtpot43         1
+           prtpot51         0
+           prtpot52         0
+           prtpot53         1
+           prtpot61         0
+           prtpot62         0
+           prtpot63         1
+           prtpot71         0
+           prtpot72         0
+           prtpot73         1
+           prtpot81         0
+           prtpot82         0
+           prtpot83         1
               qpt11    0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt12    0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt13    0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -746,54 +770,6 @@ P          mk1mem           8
               qpt81    0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt82   -2.50000000E-01  5.00000000E-01  2.50000000E-01
               qpt83   -2.50000000E-01  5.00000000E-01  2.50000000E-01
-          rfatpol11         1       1
-          rfatpol12         1       1
-          rfatpol13         1       2
-          rfatpol21         1       1
-          rfatpol22         1       1
-          rfatpol23         1       2
-          rfatpol31         1       1
-          rfatpol32         1       1
-          rfatpol33         1       2
-          rfatpol41         1       1
-          rfatpol42         1       1
-          rfatpol43         1       2
-          rfatpol51         1       1
-          rfatpol52         1       1
-          rfatpol53         1       2
-          rfatpol61         1       1
-          rfatpol62         1       1
-          rfatpol63         1       2
-          rfatpol71         1       1
-          rfatpol72         1       1
-          rfatpol73         1       2
-          rfatpol81         1       1
-          rfatpol82         1       1
-          rfatpol83         1       2
-            rfdir11         0       0       0
-            rfdir12         0       0       0
-            rfdir13         1       1       1
-            rfdir21         0       0       0
-            rfdir22         0       0       0
-            rfdir23         1       1       1
-            rfdir31         0       0       0
-            rfdir32         0       0       0
-            rfdir33         1       1       1
-            rfdir41         0       0       0
-            rfdir42         0       0       0
-            rfdir43         1       1       1
-            rfdir51         0       0       0
-            rfdir52         0       0       0
-            rfdir53         1       1       1
-            rfdir61         0       0       0
-            rfdir62         0       0       0
-            rfdir63         1       1       1
-            rfdir71         0       0       0
-            rfdir72         0       0       0
-            rfdir73         1       1       1
-            rfdir81         0       0       0
-            rfdir82         0       0       0
-            rfdir83         1       1       1
            rfphon11         0
            rfphon12         0
            rfphon13         1
@@ -979,8 +955,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     37.000   => boxcut(ratio)=   2.01471
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
 - C     ONCVPSP-3.3.0  r_core=   1.20440   1.26326
 -  6.00000   4.00000    171101                znucl, zion, pspdat
     8   -1012    1    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2101,8 +2077,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=     37.000   => boxcut(ratio)=   1.97476
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
 - C     ONCVPSP-3.3.0  r_core=   1.20440   1.26326
 -  6.00000   4.00000    171101                znucl, zion, pspdat
     8   -1012    1    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2666,8 +2642,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     37.000   => boxcut(ratio)=   2.01471
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
 - C     ONCVPSP-3.3.0  r_core=   1.20440   1.26326
 -  6.00000   4.00000    171101                znucl, zion, pspdat
     8   -1012    1    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2934,8 +2910,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=     37.000   => boxcut(ratio)=   1.93514
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
 - C     ONCVPSP-3.3.0  r_core=   1.20440   1.26326
 -  6.00000   4.00000    171101                znucl, zion, pspdat
     8   -1012    1    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3505,8 +3481,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     37.000   => boxcut(ratio)=   2.01471
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
 - C     ONCVPSP-3.3.0  r_core=   1.20440   1.26326
 -  6.00000   4.00000    171101                znucl, zion, pspdat
     8   -1012    1    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3773,8 +3749,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=     37.000   => boxcut(ratio)=   1.97646
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
 - C     ONCVPSP-3.3.0  r_core=   1.20440   1.26326
 -  6.00000   4.00000    171101                znucl, zion, pspdat
     8   -1012    1    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4342,8 +4318,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     37.000   => boxcut(ratio)=   2.01471
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
 - C     ONCVPSP-3.3.0  r_core=   1.20440   1.26326
 -  6.00000   4.00000    171101                znucl, zion, pspdat
     8   -1012    1    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4610,8 +4586,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=     37.000   => boxcut(ratio)=   1.93649
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
 - C     ONCVPSP-3.3.0  r_core=   1.20440   1.26326
 -  6.00000   4.00000    171101                znucl, zion, pspdat
     8   -1012    1    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5177,8 +5153,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     37.000   => boxcut(ratio)=   2.01471
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
 - C     ONCVPSP-3.3.0  r_core=   1.20440   1.26326
 -  6.00000   4.00000    171101                znucl, zion, pspdat
     8   -1012    1    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5445,8 +5421,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=     37.000   => boxcut(ratio)=   1.97419
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
 - C     ONCVPSP-3.3.0  r_core=   1.20440   1.26326
 -  6.00000   4.00000    171101                znucl, zion, pspdat
     8   -1012    1    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -6012,8 +5988,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     37.000   => boxcut(ratio)=   2.01471
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
 - C     ONCVPSP-3.3.0  r_core=   1.20440   1.26326
 -  6.00000   4.00000    171101                znucl, zion, pspdat
     8   -1012    1    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -6280,8 +6256,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=     37.000   => boxcut(ratio)=   1.93591
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
 - C     ONCVPSP-3.3.0  r_core=   1.20440   1.26326
 -  6.00000   4.00000    171101                znucl, zion, pspdat
     8   -1012    1    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -6848,8 +6824,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     37.000   => boxcut(ratio)=   2.01471
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
 - C     ONCVPSP-3.3.0  r_core=   1.20440   1.26326
 -  6.00000   4.00000    171101                znucl, zion, pspdat
     8   -1012    1    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -7116,8 +7092,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=     37.000   => boxcut(ratio)=   1.93668
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
 - C     ONCVPSP-3.3.0  r_core=   1.20440   1.26326
 -  6.00000   4.00000    171101                znucl, zion, pspdat
     8   -1012    1    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -7982,6 +7958,30 @@ P          mk1mem           8
         optdriver81         0
         optdriver82         0
         optdriver83         1
+           prtpot11         0
+           prtpot12         0
+           prtpot13         1
+           prtpot21         0
+           prtpot22         0
+           prtpot23         1
+           prtpot31         0
+           prtpot32         0
+           prtpot33         1
+           prtpot41         0
+           prtpot42         0
+           prtpot43         1
+           prtpot51         0
+           prtpot52         0
+           prtpot53         1
+           prtpot61         0
+           prtpot62         0
+           prtpot63         1
+           prtpot71         0
+           prtpot72         0
+           prtpot73         1
+           prtpot81         0
+           prtpot82         0
+           prtpot83         1
               qpt11    0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt12    0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt13    0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -8006,54 +8006,6 @@ P          mk1mem           8
               qpt81    0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt82   -2.50000000E-01  5.00000000E-01  2.50000000E-01
               qpt83   -2.50000000E-01  5.00000000E-01  2.50000000E-01
-          rfatpol11         1       1
-          rfatpol12         1       1
-          rfatpol13         1       2
-          rfatpol21         1       1
-          rfatpol22         1       1
-          rfatpol23         1       2
-          rfatpol31         1       1
-          rfatpol32         1       1
-          rfatpol33         1       2
-          rfatpol41         1       1
-          rfatpol42         1       1
-          rfatpol43         1       2
-          rfatpol51         1       1
-          rfatpol52         1       1
-          rfatpol53         1       2
-          rfatpol61         1       1
-          rfatpol62         1       1
-          rfatpol63         1       2
-          rfatpol71         1       1
-          rfatpol72         1       1
-          rfatpol73         1       2
-          rfatpol81         1       1
-          rfatpol82         1       1
-          rfatpol83         1       2
-            rfdir11         0       0       0
-            rfdir12         0       0       0
-            rfdir13         1       1       1
-            rfdir21         0       0       0
-            rfdir22         0       0       0
-            rfdir23         1       1       1
-            rfdir31         0       0       0
-            rfdir32         0       0       0
-            rfdir33         1       1       1
-            rfdir41         0       0       0
-            rfdir42         0       0       0
-            rfdir43         1       1       1
-            rfdir51         0       0       0
-            rfdir52         0       0       0
-            rfdir53         1       1       1
-            rfdir61         0       0       0
-            rfdir62         0       0       0
-            rfdir63         1       1       1
-            rfdir71         0       0       0
-            rfdir72         0       0       0
-            rfdir73         1       1       1
-            rfdir81         0       0       0
-            rfdir82         0       0       0
-            rfdir83         1       1       1
            rfphon11         0
            rfphon12         0
            rfphon13         1
@@ -8306,10 +8258,10 @@ P          mk1mem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=        182.1  wall=        183.7
+- Proc.   0 individual time (sec): cpu=        155.8  wall=        157.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered  43 WARNINGs and  84 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        182.1  wall=        183.7
++Overall time at end (sec) : cpu=        155.8  wall=        157.0

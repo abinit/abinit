@@ -55,7 +55,8 @@ dmft_mxsf 0.3
 dmft_occnd_imag 0
 
 # DFT+U
-usepawu    1
+usepawu1    1
+usepawu     10
 lpawu   3    # Hubbard  CORRECTION ON f-ORBITALS
 upawu  0.23
 jpawu  0.0000
