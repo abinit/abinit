@@ -199,7 +199,7 @@ subroutine frohlichmodel(cryst, dtset, efmasdeg, efmasval, ifc)
  write(ab_out,'(a)')' Dielectric average (EQ. 25 Melo2022)'
  write(ab_out,'(a)')'--------------------------------------------------------------------------------'
  write(ab_out,'(a)')' Mode    <1/epsilon*SQRT(w_LO/2)>              Cumulative sum'
- do imode=1,3*cryst%natom
+ do imode=4,3*cryst%natom
   write(ab_out,'(i5,f28.12,f28.12)') &
         !Reversed cummulative sum to avoid rewriting the spherical intergration from above
 &       imode,dielt_avg(imode)-dielt_avg(abs(mod(imode-1,3*cryst%natom))),dielt_avg(imode)
