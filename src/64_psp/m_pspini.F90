@@ -6,7 +6,7 @@
 !!  Initialize pseudopotential datastructures from files.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, MT, FrD, AF, DRH, YP)
+!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, MT, FrD, AF, DRH, YP)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -81,7 +81,7 @@ contains
 !! Also compute ecore=[Sum(i) zion(i)] * [Sum(i) epsatm(i)] by calling pspcor.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, MT)
+!! Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -249,6 +249,10 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
    paw_options(3) = 1
    paw_options(4) = 1
    !end if
+
+   ! JWZ debug added for development of testcprj routine in m_orbmag
+   if(dtset%userid .EQ. 1) paw_options(8) = 1
+ 
  end if
 
 !Determine whether the spin-orbit characteristic has changed

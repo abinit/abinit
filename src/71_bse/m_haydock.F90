@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2021 ABINIT group (M.Giantomassi, Y. Gillet, L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida)
+!!  Copyright (C) 2008-2022 ABINIT group (M.Giantomassi, Y. Gillet, L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -51,7 +51,7 @@ MODULE m_haydock
  use m_bz_mesh,           only : kmesh_t, findqg0, get_bz_item
  use m_double_grid,       only : double_grid_t, get_kpt_from_indices_coarse, compute_corresp
  use m_paw_hr,            only : pawhur_t
- use m_wfd,               only : wfd_t
+ use m_wfd,               only : wfdgw_t
  use m_bse_io,            only : exc_write_optme
  use m_pawtab,            only : pawtab_type
  use m_vcoul,             only : vcoul_t
@@ -87,7 +87,7 @@ CONTAINS  !=====================================================================
 !! Hdr_bse
 !! KS_BSt=The KS energies.
 !! QP_BSt=The QP energies.
-!! Wfd<wfd_t>=Wavefunction descriptor (input k-mesh)
+!! Wfd<wfdgw_t>=Wavefunction descriptor (input k-mesh)
 !! Psps <type(pseudopotential_type)>=variables related to pseudopotentials.
 !! Pawtab(Cryst%ntypat*usepaw)<pawtab_type>=PAW tabulated starting data.
 !! Hur(Cryst%natom*usepaw)<type(pawhur_t)>=Only for PAW and DFT+U, quantities used to evaluate the commutator [H_u,r].
@@ -102,8 +102,8 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd,Psps,Pawtab,Hur,Epren,&
-& Kmesh_dense, KS_BSt_dense, QP_BSt_dense, Wfd_dense, Vcp_dense, grid)
+subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd,Psps,Pawtab,Hur,Epren, &
+ Kmesh_dense, KS_BSt_dense, QP_BSt_dense, Wfd_dense, Vcp_dense, grid) ! Optional args
 
 !Arguments ------------------------------------
 !scalars
@@ -112,12 +112,12 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
  type(kmesh_t),intent(in) :: Kmesh
  type(crystal_t),intent(in) :: Cryst
  type(Hdr_type),intent(in) :: Hdr_bse
- type(wfd_t),intent(inout) :: Wfd
+ type(wfdgw_t),intent(inout) :: Wfd
  type(pseudopotential_type),intent(in) :: Psps
  type(ebands_t),intent(in) :: KS_BSt,QP_Bst
  type(double_grid_t),intent(in),optional :: grid
  type(kmesh_t),intent(in),optional :: Kmesh_dense
- type(wfd_t),intent(inout),optional :: Wfd_dense
+ type(wfdgw_t),intent(inout),optional :: Wfd_dense
  type(ebands_t),intent(in),optional :: KS_BSt_dense, QP_Bst_dense
  type(vcoul_t),intent(in),optional :: Vcp_dense
  type(eprenorms_t),intent(in) :: Epren

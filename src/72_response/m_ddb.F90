@@ -9,7 +9,7 @@
 !!  Main entry point for client code that needs to read the DDB data.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2021 ABINIT group (MJV, XG, MT, MM, MVeithen, MG, PB, JCC, SP)
+!! Copyright (C) 2011-2022 ABINIT group (MJV, XG, MT, MM, MVeithen, MG, PB, JCC, SP)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1060,7 +1060,7 @@ end subroutine ddb_read_block
 !! OUTPUT
 !! acell(3)=length scales of cell (bohr)
 !! amu(ntypat)=mass of the atoms (atomic mass unit)
-!! ddb : ddb blok datatype
+!! ddb: ddb blok datatype
 !!   contents: ddb%flg(msize,nblok)= flag of existence for each element of the DDB
 !!             ddb%nrm(3,nblok)  : blok wavevector normalization
 !!             ddb%qpt(9,nblok)  : blok wavevector (unnormalized)

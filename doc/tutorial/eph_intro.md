@@ -135,7 +135,6 @@ The use of the different sub-drivers is discussed in more detail in the speciali
 
 * [Phonon-limited mobilities](/tutorial/eph4mob)
 * [ZPR and T-dependent band structures](/tutorial/eph4zpr)
-* [Polaron effective mass in cubic materials](/tutorial/eph4pem)
 
 <!--
 * [Isotropic superconductivity in metals](tutorial/eph4isotc)

@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of MULTIBINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 9.7.1 of MULTIBINIT 
+.(MPI version, prepared for a x86_64_linux_gnu7.5 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  MULTIBINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,15 +14,15 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h33 )
+.Starting date : Tue 12 Oct 2021.
+- ( at 14h10 )
   
 -  nproc =    1
 
 ================================================================================
 
  Read the information in the reference structure in 
--/home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/v8/Input/t14_sys.xml
+-/home/marcus/CODES/DEVELOP-MULTIBINIT/abinit/tests/v8/Input/t14_sys.xml
  to initialize the multibinit input
 
 ================================================================================
@@ -44,11 +44,14 @@
           fit_grid  1  1  1
          ts_option  0
     fit_rangePower  3  4
+     fit_dispterms  1
     fit_anhaStrain  0
     fit_SPCoupling  1
       fit_SPC_maxS  1
      fit_nfixcoeff  2
       fit_fixcoeff          1      2
+    fit_nimposecoe  1
+    fit_imposecoef          4
  Miscellaneous information :
          asr         2
  Interatomic Force Constants Inputs :
@@ -72,8 +75,8 @@ dipdip_range         1         1         1
 
 ================================================================================
 
--Opening the file /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/v8/Input/t14_sys.xml
--Reading the file /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/v8/Input/t14_sys.xml with Fortran
+-Opening the file /home/marcus/CODES/DEVELOP-MULTIBINIT/abinit/tests/v8/Input/t14_sys.xml
+-Reading the file /home/marcus/CODES/DEVELOP-MULTIBINIT/abinit/tests/v8/Input/t14_sys.xml with LibXML library
 
  Bound for ifc SR:
 
@@ -160,46 +163,43 @@ dipdip_range         1         1         1
 
  Read the coefficients of the polynomial fit from XML and perform some checks
 
--Opening the file /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/v8/Input/t14_coeffs.xml
--Reading the file /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/v8/Input/t14_coeffs.xml with Fortran
+-Opening the file /home/marcus/CODES/DEVELOP-MULTIBINIT/abinit/tests/v8/Input/t14_coeffs.xml
+-Reading the file /home/marcus/CODES/DEVELOP-MULTIBINIT/abinit/tests/v8/Input/t14_coeffs.xml with LibXML library
 
 ================================================================================
 
 -Reading the training-set file :
--/home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/v8/Input/t13_HIST
+-/home/marcus/CODES/DEVELOP-MULTIBINIT/abinit/tests/v8/Input/t13_HIST
 
 
-================================================================================
+--------------------------------------------------------------------------------
 
  Starting Fit process
 
 --------------------------------------------------------------------------------
 
  The coefficients present in the effective potential will be used for the fit
- Mean Standard Deviation values at the begining of the fit process (meV**2/atm):
-   Energy          :   3.3728496603818279E+01
+
  Goal function values at the begining of the fit process (eV^2/A^2):
-   Forces+Stresses :   7.5066662460720130E-03
-   Forces          :   7.3678367059222868E-03
-   Stresses        :   1.3882954014972593E-04
+   Energy          :   4.0372991533524820E-05
+   Forces+Stresses :   7.4805075157619557E-03
+   Forces          :   7.3678367059221766E-03
+   Stresses        :   1.1267080983977989E-04
 
  N   Selecting          MSDE              MSDFS              MSDF              MSDS
-    Coefficient      (meV^2/atm)        (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)
- 3     3           8.2581347440E+00  4.0003838705E-03  3.8455523719E-03  1.5483149867E-04
- 4     4           8.5804227752E+00  3.7876180836E-03  3.6336164702E-03  1.5400161341E-04
+    Coefficient      (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)
+ 3     3           9.8269210000E-06  3.9567590496E-03  3.8455243722E-03  1.1123467737E-04
 
  Fitted coefficients at the end of the fit process:
- 1 =>   1.8768485555E+00 (Ru_x-O1_x)^2(Ru_y-O1_y)^2
- 2 =>   1.2509427246E-01 (Sr_x-Ru_x)^4
- 3 =>  -5.8315809708E-01 (Sr_x-O1_x)^1(Sr_y-O1_y)^1(Ru_x-O1_x)^1(Ru_y-O1_y)^1
- 4 =>   9.0373997419E-02 (Ru_x-O1_x)^1(Ru_y-O1_y)^1(O1_x-O2_x)^1
+ 1 =>   1.9349535870E+00 (Ru_x-O1_x)^2(Ru_y-O1_y)^2
+ 2 =>   1.3342181626E-01 (Sr_x-Ru_x)^4
+ 3 =>  -5.2764593172E-01 (Sr_x-O1_x)^1(Sr_y-O1_y)^1(Ru_x-O1_x)^1(Ru_y-O1_y)^1
 
- Mean Standard Deviation values at the end of the fit process (meV^2/atm): 
-   Energy          :   8.5804227751882269E+00
  Goal function values at the end of the fit process (eV^2/A^2):
-   Forces+Stresses :   3.7876180836315487E-03
-   Forces          :   3.6336164702180937E-03
-   Stresses        :   1.5400161341345517E-04
+   Energy          :   9.8269209999523779E-06
+   Forces+Stresses :   3.9567590496088264E-03
+   Forces          :   3.8455243722435089E-03
+   Stresses        :   1.1123467736531754E-04
 
 
 ================================================================================
@@ -209,10 +209,15 @@ dipdip_range         1         1         1
 ================================================================================
 
 -
-- Proc.   0 individual time (sec): cpu=          0.6  wall=          0.6
+- Proc.   0 individual time (sec): cpu=          0.2  wall=          0.2
 
 ================================================================================
 
-+Total cpu time      0.639  and wall time      0.641 sec
++Total cpu time      0.169  and wall time      0.171 sec
 
  multibinit : the run completed succesfully.
+- [ALL OK] MEMORY CONSUMPTION REPORT FOR C CODE:
+-   There were 0 allocations and 0 deallocations in C code
+- [ALL OK] MEMORY CONSUMPTION REPORT FOR FORTRAN CODE:
+-   There were 3914 allocations and 3914 deallocations in Fortran
+-   Remaining memory at the end of the calculation is 0

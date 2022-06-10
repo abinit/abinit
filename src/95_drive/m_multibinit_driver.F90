@@ -7,7 +7,7 @@
 !! Main routine MULTIBINIT.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2021 ABINIT group (AM, hexu)
+!! Copyright (C) 1999-2022 ABINIT group (AM, hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -130,13 +130,13 @@ contains
     character(len=500) :: message
     character(len=fnlen) :: name
 
-    integer :: filetype,ii,lenstr
+    integer :: filetype,ii,lenstr,iiter,niter
     integer :: natom,nph1l,nrpt,ntypat
     integer :: option
     logical :: need_analyze_anh_pot,need_prt_files
 ! MS
 ! temporary variables for testing SCALE-UP with Multibinit
-  !Variable to pass tu effpot_evaluate routine of multibinit
+  !Variable to pass to effpot_evaluate routine of multibinit
   !To declare evaluation of electronice model
   logical  :: elec_eval
 #if defined DEV_MS_SCALEUP
@@ -325,7 +325,7 @@ elec_eval = .FALSE.
     ! If needed, fit the anharmonic part and compute the confinement potential
     !****************************************************************************************
    if (inp%fit_coeff/=0.or.inp%confinement==2.or.inp%bound_model/=0 .or. inp%opt_effpot/=0) then
-
+        
        if(iam_master) then
           !    Read the MD file
           write(message,'(a,(80a),7a)')ch10,('=',ii=1,80),ch10,ch10,&
@@ -425,30 +425,79 @@ elec_eval = .FALSE.
                call fit_polynomial_coeff_fit(reference_effective_potential,&
                     &         inp%fit_bancoeff,inp%fit_fixcoeff,hist,inp%fit_generateCoeff,&
                     &         inp%fit_rangePower,inp%fit_nbancoeff,inp%fit_ncoeff,&
-                    &         inp%fit_nfixcoeff,option,comm,cutoff_in=inp%fit_cutoff,&
+                    &         inp%fit_nfixcoeff,inp%fit_nimposecoeff,inp%fit_imposecoeff,& 
+                    &         option,comm,cutoff_in=inp%fit_cutoff,&
                     &         max_power_strain=inp%fit_SPC_maxS,initialize_data=inp%fit_initializeData==1,&
                     &         fit_tolMSDF=inp%fit_tolMSDF,fit_tolMSDS=inp%fit_tolMSDS,fit_tolMSDE=inp%fit_tolMSDE,&
-                    &         fit_tolMSDFS=inp%fit_tolMSDFS,&
+                    &         fit_tolMSDFS=inp%fit_tolMSDFS,fit_tolGF=inp%fit_tolGF,&
                     &         verbose=.true.,positive=.false.,&
                     &         anharmstr=inp%fit_anhaStrain==1,&
                     &         spcoupling=inp%fit_SPCoupling==1,prt_anh=inp%analyze_anh_pot,&
-                    &         fit_iatom=inp%fit_iatom,prt_files=.TRUE.,fit_on=inp%fit_on,sel_on=inp%sel_on)
+                    &         fit_iatom=inp%fit_iatom,prt_files=.TRUE.,fit_on=inp%fit_on,sel_on=inp%sel_on,&
+                    &         fit_factors=inp%fit_factors,prt_GF_csv=inp%prt_GF_csv,dispterms=inp%fit_dispterms==1)
              else
-                inp%fit_nfixcoeff = -1
+                if (inp%fit_ncoeff_per_iatom/=0)then 
+                   if (mod(inp%fit_ncoeff,inp%fit_ncoeff_per_iatom) /= 0)then 
+                      write(message,'(2a,I3,2a,I3,3a)') ch10,& 
+                           & 'fit_ncoeff_per_iatom = ', inp%fit_ncoeff_per_iatom,ch10,& 
+                           & 'is not a divider of fit_ncoeff = ', inp%fit_ncoeff,ch10,&
+                           & 'Action: Change fit_ncoeff and/or fit_ncoeff_per_iatom',ch10   
+                      ABI_ERROR(message)
+                   endif
+                   niter = inp%fit_ncoeff/inp%fit_ncoeff_per_iatom 
+                   if (mod(niter,reference_effective_potential%crystal%nirredat) /= 0)then 
+                      write(message,'(2a,I3,2a,I3,2a,I3,3a)') ch10,& 
+                           & 'fit_ncoeff_per_iatom = ', inp%fit_ncoeff_per_iatom,ch10,& 
+                           & 'times the number of irreducible atoms = ',reference_effective_potential%crystal%nirredat,ch10,&
+                           & 'is not a divider of fit_ncoeff = ', inp%fit_ncoeff,ch10,&
+                           & 'Action: Change fit_ncoeff and/or fit_ncoeff_per_iatom',ch10   
+                      ABI_ERROR(message)
+                   endif
+                   niter = niter/reference_effective_potential%crystal%nirredat
+                else if (inp%fit_ncoeff_per_iatom == 0)then      
+                   if (mod(inp%fit_ncoeff,reference_effective_potential%crystal%nirredat) /= 0)then 
+                      write(message,'(2a,I3,2a,I3,3a)') ch10,& 
+                           & 'The number of irreducible atoms = ',reference_effective_potential%crystal%nirredat,ch10,&
+                           & 'is not a divider of fit_ncoeff = ', inp%fit_ncoeff,ch10,&
+                           & 'Action: Change fit_ncoeff',ch10   
+                      ABI_ERROR(message)
+                   endif
+                   inp%fit_ncoeff_per_iatom = inp%fit_ncoeff/reference_effective_potential%crystal%nirredat
+                   niter = 1
+                endif
+                write(message,'(a,(80a),7a,I3,3a,I3,3a,I3,3a,I3,2a)') ch10,('=',ii=1,80),ch10,ch10,& 
+                     & '  Starting Fit Iterations  ',ch10,&
+                     & '  -----------------------  ',ch10,&
+                     & '  Select in total fit_ncoeff = ', inp%fit_ncoeff,' coefficients',ch10,&
+                     & '  In ', niter,' iterations',ch10,&
+                     & '  Over ', reference_effective_potential%crystal%nirredat, ' irreducible atoms',ch10,& 
+                     & '  Selecting ', inp%fit_ncoeff_per_iatom, ' coefficients per atom in each iteration',ch10 
+                call wrtout(std_out,message,'COLL')
+                call wrtout(ab_out,message,'COLL')
                 need_prt_files=.FALSE.
-                do ii=1,natom
-                  if(ii == natom)need_prt_files=.TRUE.
-                  call fit_polynomial_coeff_fit(reference_effective_potential,&
-                       &         inp%fit_bancoeff,inp%fit_fixcoeff,hist,inp%fit_generateCoeff,&
-                       &         inp%fit_rangePower,inp%fit_nbancoeff,inp%fit_ncoeff,&
-                       &         inp%fit_nfixcoeff,option,comm,cutoff_in=inp%fit_cutoff,&
-                       &         max_power_strain=inp%fit_SPC_maxS,initialize_data=inp%fit_initializeData==1,&
-                       &         fit_tolMSDF=inp%fit_tolMSDF,fit_tolMSDS=inp%fit_tolMSDS,fit_tolMSDE=inp%fit_tolMSDE,&
-                       &         fit_tolMSDFS=inp%fit_tolMSDFS,&
-                       &         verbose=.true.,positive=.false.,&
-                       &         anharmstr=inp%fit_anhaStrain==1,&
-                       &         spcoupling=inp%fit_SPCoupling==1,prt_anh=inp%analyze_anh_pot,&
-                       &         fit_iatom=ii,prt_files=need_prt_files,fit_on=inp%fit_on,sel_on=inp%sel_on)
+                do iiter=1,niter
+                  write(message,'(a,(80a),3a,I3,a,I3,2a)') ch10,('-',ii=1,80),ch10,ch10,& 
+                          &    ' Start Iteration (',iiter,'/',niter,')',ch10
+                  call wrtout(std_out,message,'COLL')
+                  call wrtout(ab_out,message,'COLL')
+                  do ii=1,reference_effective_potential%crystal%nirredat
+                    if(ii == reference_effective_potential%crystal%nirredat .and. iiter==niter)need_prt_files=.TRUE.
+                    if(ii > 1 .or. iiter > 1)inp%fit_nfixcoeff = -1 
+                       call fit_polynomial_coeff_fit(reference_effective_potential,&
+                          &         inp%fit_bancoeff,inp%fit_fixcoeff,hist,inp%fit_generateCoeff,&
+                          &         inp%fit_rangePower,inp%fit_nbancoeff,inp%fit_ncoeff_per_iatom,&
+                          &         inp%fit_nfixcoeff,inp%fit_nimposecoeff,inp%fit_imposecoeff,& 
+                          &         option,comm,cutoff_in=inp%fit_cutoff,&
+                          &         max_power_strain=inp%fit_SPC_maxS,initialize_data=inp%fit_initializeData==1,&
+                          &         fit_tolMSDF=inp%fit_tolMSDF,fit_tolMSDS=inp%fit_tolMSDS,fit_tolMSDE=inp%fit_tolMSDE,&
+                          &         fit_tolMSDFS=inp%fit_tolMSDFS,fit_tolGF=inp%fit_tolGF,&
+                          &         verbose=.true.,positive=.false.,&
+                          &         anharmstr=inp%fit_anhaStrain==1,&
+                          &         spcoupling=inp%fit_SPCoupling==1,prt_anh=inp%analyze_anh_pot,& 
+                          &         fit_iatom=reference_effective_potential%crystal%irredatindx(ii),&
+                          &         prt_files=need_prt_files,fit_on=inp%fit_on,sel_on=inp%sel_on,& 
+                          &         fit_factors=inp%fit_factors,prt_GF_csv=inp%prt_GF_csv,dispterms=inp%fit_dispterms==1)
+                  enddo
                 enddo
              endif
           end if
@@ -472,7 +521,8 @@ elec_eval = .FALSE.
     call wrtout(std_out,message,'COLL')
     call wrtout(ab_out,message,'COLL')
 
-    call opt_effpotbound(reference_effective_potential,inp%bound_rangePower,hist,comm)
+    call opt_effpotbound(reference_effective_potential,inp%bound_rangePower,hist,inp%bound_EFS,&
+&                       inp%bound_factors,inp%bound_penalty,comm) 
 
     end if
 
@@ -491,8 +541,8 @@ elec_eval = .FALSE.
      need_analyze_anh_pot = .FALSE.
      if(inp%analyze_anh_pot == 1) need_analyze_anh_pot = .TRUE.
 
-    call opt_effpot(reference_effective_potential,inp%opt_ncoeff,inp%opt_coeff,hist,comm,&
-&        print_anh=need_analyze_anh_pot)
+    call opt_effpot(reference_effective_potential,inp%opt_ncoeff,inp%opt_coeff,hist,inp%opt_on,& 
+&                   inp%opt_factors,comm,print_anh=need_analyze_anh_pot)
  end if
 
 

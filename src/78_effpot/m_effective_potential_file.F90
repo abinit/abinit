@@ -8,7 +8,7 @@
 !! (XML or DDB)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2021 ABINIT group (AM)
+!! Copyright (C) 2000-2022 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1291,7 +1291,7 @@ end subroutine system_getDimFromXML
  real(dp):: energy,tolsym,ucvol
  character(len=500) :: message
  integer,parameter :: master=0
- logical :: has_anharmonics = .FALSE.
+ logical :: has_anharmonics
  logical :: iam_master
 #ifndef HAVE_XML
  integer :: funit = 1,ios=0
@@ -1300,7 +1300,7 @@ end subroutine system_getDimFromXML
  logical :: found,found2,short_range,total_range
  character (len=XML_RECL) :: line,readline
  character (len=XML_RECL) :: strg,strg1
- logical :: has_straincoupling = .FALSE.
+ logical :: has_straincoupling
 #endif
  !arrays
  integer :: bravais(11)
@@ -1434,6 +1434,7 @@ end subroutine system_getDimFromXML
 &                                         phonon_strain_atmfrc,phonon_straincell)
 
 !      Check if the 3rd order strain_coupling is present
+       has_anharmonics = .FALSE.
        if(any(elastic3rd>tol10).or.any(elastic_displacement>tol10)) has_anharmonics = .TRUE.
        phonon_strain(voigt)%atmfrc(:,:,:,:,:) = phonon_strain_atmfrc(:,:,:,:,:)
        phonon_strain(voigt)%cell(:,:)   = phonon_straincell(:,:)
@@ -1470,7 +1471,7 @@ end subroutine system_getDimFromXML
    amu    = zero
    short_range  = .false.
    total_range  = .false.
-
+   has_straincoupling = .FALSE.
    do while ((ios==0).and.(.not.found))
      read(funit,'(a)',iostat=ios) readline
      if(ios == 0)then
@@ -2234,7 +2235,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
  integer :: ipert2,irpt,irpt2,ivarA,ivarB,max1,max2,max3,min1,min2,min3
  integer :: msize,mpert,natom,nblok,nrpt_new,nrpt_new2,rftyp,selectz
  integer :: my_rank,nproc,prt_internalstr
- logical :: iam_master=.FALSE.
+ logical :: iam_master
  integer,parameter :: master=0
  integer :: nptsym,nsym
  integer :: msym = 384,  use_inversion = 1, space_group
@@ -2260,6 +2261,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 
 !0 MPI variables
  nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+ iam_master=.FALSE.
  iam_master = (my_rank == master)
 
 !Free the eff_pot before filling
@@ -2927,7 +2929,7 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
  character(len=5),allocatable :: symbols(:)
  integer,parameter :: master=0
  logical :: iam_master
- logical :: debug =.FALSE.
+ logical :: debug
  !arrays
  real(dp),allocatable :: coefficient(:),weight(:,:)
  integer,allocatable :: atindx(:,:,:,:), cell(:,:,:,:,:),direction(:,:,:),power_disp(:,:,:)
@@ -3255,6 +3257,7 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
 !10-checks
 
 !11-debug print
+ debug = .FALSE.
  if(debug)then
    do ii=1,ncoeff
      do jj=1,coeffs(ii)%nterm
@@ -3434,7 +3437,7 @@ end subroutine effective_potential_file_readMDfile
 !!
 !! SOURCE
 
-subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,iatfix,verbose)
+subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,iatfix,verbose,sc_size)
 
 !Arguments ------------------------------------
 !scalars
@@ -3444,6 +3447,7 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,iatfix,verbos
  type(effective_potential_type),intent(inout) :: eff_pot
  type(abihist),intent(inout) :: hist
  integer,optional,allocatable,intent(inout) :: iatfix(:,:)
+ integer,optional,intent(in) :: sc_size(3)
 !Local variables-------------------------------
 !scalar
  integer :: factE_hist,ia,ib,ii,jj,natom_hist,ncells,nstep_hist
@@ -3473,33 +3477,37 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,iatfix,verbos
  rprimd_ref(:,:)  = eff_pot%crystal%rprimd
  rprimd_hist(:,:) = hist%rprimd(:,:,1)
 
- do ia=1,3
-   scale_cell(:) = 0
-   do ii=1,3
-     if(abs(rprimd_ref(ii,ia)) > tol10)then
-       scale_cell(ii) = nint(rprimd_hist(ii,ia) / rprimd_ref(ii,ia))
-     end if
-   end do
-!  Check if the factor for the supercell is revelant
-   revelant_factor = .TRUE.
-   do ii=1,3
-     if(abs(scale_cell(ii)) < tol10) cycle
-     factor = abs(scale_cell(ii))
-     do jj=ii,3
-       if(abs(scale_cell(jj)) < tol10) cycle
-       if(abs(abs(scale_cell(ii))-abs(scale_cell(jj))) > tol10) revelant_factor = .FALSE.
-     end do
-   end do
-   if(.not.revelant_factor)then
-     write(msg, '(3a)' )&
-&         'unable to map the hist file ',ch10,&
-&         'Action: check/change your MD file'
-     ABI_ERROR(msg)
-   else
-     ncell(ia) = int(factor)
-   end if
- end do
-
+ if(present(sc_size))then 
+    ncell(:) = sc_size 
+ else 
+    do ia=1,3
+      scale_cell(:) = 0
+      do ii=1,3
+        if(abs(rprimd_ref(ii,ia)) > tol10)then
+          scale_cell(ii) = nint(rprimd_hist(ii,ia) / rprimd_ref(ii,ia))
+        end if
+      end do
+!     Check if the factor for the supercell is revelant
+      revelant_factor = .TRUE.
+      do ii=1,3
+        if(abs(scale_cell(ii)) < tol10) cycle
+        factor = abs(scale_cell(ii))
+        do jj=ii,3
+          if(abs(scale_cell(jj)) < tol10) cycle
+          if(abs(abs(scale_cell(ii))-abs(scale_cell(jj))) > tol10) revelant_factor = .FALSE.
+        end do
+      end do
+      if(.not.revelant_factor)then
+        write(msg, '(3a)' )&
+&            'unable to map the hist file ',ch10,&
+&            'Action: check/change your MD file'
+        ABI_ERROR(msg)
+      else
+        ncell(ia) = int(factor)
+      end if
+    end do
+ end if 
+ 
  ncells = product(ncell)
 
 !Check if the energy stored in the hist is revelant, sometimes some MD files gives

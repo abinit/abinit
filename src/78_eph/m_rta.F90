@@ -14,7 +14,7 @@
 !!  can be easily included once an appropriate model is added to the ab-initio e-ph scattering rates.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2021 ABINIT group (HM, MG)
+!!  Copyright (C) 2008-2022 ABINIT group (HM, MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -770,7 +770,7 @@ subroutine compute_rta(self, cryst, dtset, dtfil, comm)
 
  ! Set default energy range for DOS
  ! If sigma_erange is set, get emin and emax from this variable
- ! MG: TODO This value should be read from SIGPEH
+ ! MG: TODO This value should be read from SIGEPH
  ! Recheck metals
  if (self%assume_gap) then
    emin = huge(one); emax = -huge(one)

@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of MULTIBINIT 
+.Version 9.5.2 of MULTIBINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  MULTIBINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,15 +14,15 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h50 )
+.Starting date : Thu 22 Jul 2021.
+- ( at 13h59 )
   
 -  nproc =    4
 
 ================================================================================
 
  Read the information in the reference structure in 
--/home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/paral/Input/t97_sys.xml
+-/home/mschmitt/abninit-git/abinit/tests/paral/Input/t97_sys.xml
  to initialize the multibinit input
 
 ================================================================================
@@ -67,8 +67,8 @@ dipdip_range         2         2         2
 
 ================================================================================
 
--Opening the file /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/paral/Input/t97_sys.xml
--Reading the file /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/paral/Input/t97_sys.xml with Fortran
+-Opening the file /home/mschmitt/abninit-git/abinit/tests/paral/Input/t97_sys.xml
+-Reading the file /home/mschmitt/abninit-git/abinit/tests/paral/Input/t97_sys.xml with LibXML library
 
  Bound for ifc SR:
 
@@ -172,20 +172,20 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297331200E+02 Hartree
- Energy of the ifc part                    :  2.2408400104861514E-30 Hartree
+ Energy of the ifc part                    :  2.7032498335025478E-30 Hartree
 
     >>>>>>>>> Etotal= -1.37161412973312E+02
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  9.69618200E-20  sigma(3 2)= -2.67456052E-31
-  sigma(2 2)= -5.09075774E-20  sigma(3 1)= -4.39177224E-26
-  sigma(3 3)= -6.29266170E-20  sigma(2 1)=  4.92885886E-20
+  sigma(1 1)=  1.21606719E-19  sigma(3 2)= -9.29194296E-32
+  sigma(2 2)= -7.55524791E-20  sigma(3 1)= -4.39174542E-26
+  sigma(3 3)= -6.29266170E-20  sigma(2 1)=  8.87821464E-28
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.6547E-16 GPa]
-- sigma(1 1)=  2.85271475E-15  sigma(3 2)= -7.86882740E-27
-- sigma(2 2)= -1.49775239E-15  sigma(3 1)= -1.29210379E-21
-- sigma(3 3)= -1.85136468E-15  sigma(2 1)=  1.45012010E-15
+- sigma(1 1)=  3.57779258E-15  sigma(3 2)= -2.73378354E-27
+- sigma(2 2)= -2.22283030E-15  sigma(3 1)= -1.29209590E-21
+- sigma(3 3)= -1.85136468E-15  sigma(2 1)=  2.61206049E-23
 --------------------------------------------------------------------------------
 
 
@@ -199,21 +199,21 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297331200E+02 Hartree
- Energy of the ifc part                    :  2.4325857464291313E-03 Hartree
- Energy of the elastic part                :  4.1502949385198453E-09 Hartree
+ Energy of the ifc part                    :  2.4325857464291287E-03 Hartree
+ Energy of the elastic part                :  4.1502949461453033E-09 Hartree
 
     >>>>>>>>> Etotal= -1.37158980383415E+02
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)= -9.88427019E-07  sigma(3 2)=  2.00600955E-06
-  sigma(2 2)=  1.21078087E-06  sigma(3 1)= -1.94826794E-07
-  sigma(3 3)=  1.00596617E-06  sigma(2 1)= -2.07498904E-06
+  sigma(1 1)= -1.24295458E-06  sigma(3 2)=  2.08220733E-06
+  sigma(2 2)= -7.97096126E-08  sigma(3 1)= -1.87136211E-07
+  sigma(3 3)=  5.38358575E-07  sigma(2 1)= -1.90825659E-06
 
--Cartesian components of stress tensor (GPa)         [Pressure= -1.2046E-02 GPa]
-- sigma(1 1)= -2.90805220E-02  sigma(3 2)=  5.90188286E-02
-- sigma(2 2)=  3.56223969E-02  sigma(3 1)= -5.73200120E-03
-- sigma(3 3)=  2.95965416E-02  sigma(2 1)= -6.10482750E-02
+-Cartesian components of stress tensor (GPa)         [Pressure=  7.6917E-03 GPa]
+- sigma(1 1)= -3.65689800E-02  sigma(3 2)=  6.12606444E-02
+- sigma(2 2)= -2.34513737E-03  sigma(3 1)= -5.50573648E-03
+- sigma(3 3)=  1.58390534E-02  sigma(2 1)= -5.61428379E-02
 --------------------------------------------------------------------------------
 
 
@@ -227,21 +227,21 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297331200E+02 Hartree
- Energy of the ifc part                    :  9.4961164613441632E-03 Hartree
- Energy of the elastic part                :  2.1250562886448053E-08 Hartree
+ Energy of the ifc part                    :  9.4961170582317841E-03 Hartree
+ Energy of the elastic part                :  2.1964775803074270E-08 Hartree
 
-    >>>>>>>>> Etotal= -1.37151916835600E+02
+    >>>>>>>>> Etotal= -1.37151916834289E+02
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)= -1.70084013E-06  sigma(3 2)=  3.88951021E-06
-  sigma(2 2)=  3.64444239E-06  sigma(3 1)= -3.91672259E-07
-  sigma(3 3)=  2.45610232E-06  sigma(2 1)= -4.26187503E-06
+  sigma(1 1)= -2.69632441E-06  sigma(3 2)=  4.18620361E-06
+  sigma(2 2)= -1.37844924E-06  sigma(3 1)= -3.62442798E-07
+  sigma(3 3)=  6.18847364E-07  sigma(2 1)= -3.61519535E-06
 
--Cartesian components of stress tensor (GPa)         [Pressure= -4.3148E-02 GPa]
-- sigma(1 1)= -5.00404358E-02  sigma(3 2)=  1.14433322E-01
-- sigma(2 2)=  1.07223179E-01  sigma(3 1)= -1.15233938E-02
-- sigma(3 3)=  7.22610129E-02  sigma(2 1)= -1.25388671E-01
+-Cartesian components of stress tensor (GPa)         [Pressure=  3.3892E-02 GPa]
+- sigma(1 1)= -7.93285897E-02  sigma(3 2)=  1.23162342E-01
+- sigma(2 2)= -4.05553698E-02  sigma(3 1)= -1.06634335E-02
+- sigma(3 3)=  1.82071150E-02  sigma(2 1)= -1.06362702E-01
 --------------------------------------------------------------------------------
 
 
@@ -255,21 +255,21 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297331200E+02 Hartree
- Energy of the ifc part                    :  2.0522215772043384E-02 Hartree
- Energy of the elastic part                :  3.9394727840998412E-08 Hartree
+ Energy of the ifc part                    :  2.0522224197956941E-02 Hartree
+ Energy of the elastic part                :  4.5683410936013789E-08 Hartree
 
-    >>>>>>>>> Etotal= -1.37140890718145E+02
+    >>>>>>>>> Etotal= -1.37140890703431E+02
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)= -2.14703411E-06  sigma(3 2)=  5.61445334E-06
-  sigma(2 2)=  7.09058985E-06  sigma(3 1)= -5.83873055E-07
-  sigma(3 3)=  4.28779424E-06  sigma(2 1)= -6.48864386E-06
+  sigma(1 1)= -4.30550009E-06  sigma(3 2)=  6.25266852E-06
+  sigma(2 2)= -3.70950844E-06  sigma(3 1)= -5.23651926E-07
+  sigma(3 3)=  2.73487899E-07  sigma(2 1)= -5.10653435E-06
 
--Cartesian components of stress tensor (GPa)         [Pressure= -9.0532E-02 GPa]
-- sigma(1 1)= -6.31679138E-02  sigma(3 2)=  1.65182892E-01
-- sigma(2 2)=  2.08612320E-01  sigma(3 1)= -1.71781355E-02
-- sigma(3 3)=  1.26151241E-01  sigma(2 1)= -1.90902461E-01
+-Cartesian components of stress tensor (GPa)         [Pressure=  7.5921E-02 GPa]
+- sigma(1 1)= -1.26672165E-01  sigma(3 2)=  1.83959828E-01
+- sigma(2 2)= -1.09137488E-01  sigma(3 1)= -1.54063690E-02
+- sigma(3 3)=  8.04629044E-03  sigma(2 1)= -1.50239402E-01
 --------------------------------------------------------------------------------
 
 
@@ -283,21 +283,21 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297331200E+02 Hartree
- Energy of the ifc part                    :  3.4500035490333980E-02 Hartree
- Energy of the elastic part                :  2.2469968407360017E-08 Hartree
+ Energy of the ifc part                    :  3.4500082964023855E-02 Hartree
+ Energy of the elastic part                :  4.9504572656587219E-08 Hartree
 
-    >>>>>>>>> Etotal= -1.37126912915352E+02
+    >>>>>>>>> Etotal= -1.37126912840843E+02
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)= -2.35530057E-06  sigma(3 2)=  7.15551270E-06
-  sigma(2 2)=  1.12377505E-05  sigma(3 1)= -7.64012828E-07
-  sigma(3 3)=  6.41574722E-06  sigma(2 1)= -8.67273208E-06
+  sigma(1 1)= -6.00191287E-06  sigma(3 2)=  8.22054363E-06
+  sigma(2 2)= -6.78297274E-06  sigma(3 1)= -6.70074962E-07
+  sigma(3 3)= -4.39951424E-07  sigma(2 1)= -6.38681713E-06
 
--Cartesian components of stress tensor (GPa)         [Pressure= -1.5003E-01 GPa]
-- sigma(1 1)= -6.92953236E-02  sigma(3 2)=  2.10522416E-01
-- sigma(2 2)=  3.30625980E-01  sigma(3 1)= -2.24780297E-02
-- sigma(3 3)=  1.88757768E-01  sigma(2 1)= -2.55160544E-01
+-Cartesian components of stress tensor (GPa)         [Pressure=  1.2970E-01 GPa]
+- sigma(1 1)= -1.76582343E-01  sigma(3 2)=  2.41856703E-01
+- sigma(2 2)= -1.99561914E-01  sigma(3 1)= -1.97142827E-02
+- sigma(3 3)= -1.29438156E-02  sigma(2 1)= -1.87906616E-01
 --------------------------------------------------------------------------------
 
 
@@ -311,21 +311,21 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297331200E+02 Hartree
- Energy of the ifc part                    :  5.0197769623259461E-02 Hartree
- Energy of the elastic part                : -8.5877527240241230E-08 Hartree
+ Energy of the ifc part                    :  5.0197938942866435E-02 Hartree
+ Energy of the elastic part                : -4.9760575673316403E-09 Hartree
 
-    >>>>>>>>> Etotal= -1.37111215289566E+02
+    >>>>>>>>> Etotal= -1.37111215039345E+02
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)= -2.36640058E-06  sigma(3 2)=  8.49693796E-06
-  sigma(2 2)=  1.57094320E-05  sigma(3 1)= -9.24323103E-07
-  sigma(3 3)=  8.74087095E-06  sigma(2 1)= -1.07270223E-05
+  sigma(1 1)= -7.70944793E-06  sigma(3 2)=  1.00293937E-05
+  sigma(2 2)= -1.02409659E-05  sigma(3 1)= -8.02310997E-07
+  sigma(3 3)= -1.44619777E-06  sigma(2 1)= -7.47456938E-06
 
--Cartesian components of stress tensor (GPa)         [Pressure= -2.1658E-01 GPa]
-- sigma(1 1)= -6.96218970E-02  sigma(3 2)=  2.49988504E-01
-- sigma(2 2)=  4.62187368E-01  sigma(3 1)= -2.71945200E-02
-- sigma(3 3)=  2.57165259E-01  sigma(2 1)= -3.15599840E-01
+-Cartesian components of stress tensor (GPa)         [Pressure=  1.9022E-01 GPa]
+- sigma(1 1)= -2.26819751E-01  sigma(3 2)=  2.95074902E-01
+- sigma(2 2)= -3.01299569E-01  sigma(3 1)= -2.36048005E-02
+- sigma(3 3)= -4.25486004E-02  sigma(2 1)= -2.19909386E-01
 --------------------------------------------------------------------------------
 
 
@@ -339,21 +339,21 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297331200E+02 Hartree
- Energy of the ifc part                    :  6.6284185839931190E-02 Hartree
- Energy of the elastic part                : -3.5573541701863264E-07 Hartree
+ Energy of the ifc part                    :  6.6284640678704293E-02 Hartree
+ Energy of the elastic part                : -1.6219258362901686E-07 Hartree
 
-    >>>>>>>>> Etotal= -1.37095129143207E+02
+    >>>>>>>>> Etotal= -1.37095128494826E+02
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)= -2.22676623E-06  sigma(3 2)=  9.63018164E-06
-  sigma(2 2)=  2.00999578E-05  sigma(3 1)= -1.05695208E-06
-  sigma(3 3)=  1.11585461E-05  sigma(2 1)= -1.25647062E-05
+  sigma(1 1)= -9.35025199E-06  sigma(3 2)=  1.16203543E-05
+  sigma(2 2)= -1.36932970E-05  sigma(3 1)= -9.21838725E-07
+  sigma(3 3)= -2.66097684E-06  sigma(2 1)= -8.39611616E-06
 
--Cartesian components of stress tensor (GPa)         [Pressure= -2.8471E-01 GPa]
-- sigma(1 1)= -6.55137132E-02  sigma(3 2)=  2.83329678E-01
-- sigma(2 2)=  5.91361076E-01  sigma(3 1)= -3.10965986E-02
-- sigma(3 3)=  3.28295706E-01  sigma(2 1)= -3.69666356E-01
+-Cartesian components of stress tensor (GPa)         [Pressure=  2.5208E-01 GPa]
+- sigma(1 1)= -2.75093865E-01  sigma(3 2)=  3.41882568E-01
+- sigma(2 2)= -4.02870639E-01  sigma(3 1)= -2.71214271E-02
+- sigma(3 3)= -7.82886284E-02  sigma(2 1)= -2.47022224E-01
 --------------------------------------------------------------------------------
 
 
@@ -367,21 +367,21 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297331200E+02 Hartree
- Energy of the ifc part                    :  8.1430953543587120E-02 Hartree
- Energy of the elastic part                : -8.6255382836304046E-07 Hartree
+ Energy of the ifc part                    :  8.1431956911262357E-02 Hartree
+ Energy of the elastic part                : -4.6540293759899040E-07 Hartree
 
-    >>>>>>>>> Etotal= -1.37079982882322E+02
+    >>>>>>>>> Etotal= -1.37079981481804E+02
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)= -1.98202345E-06  sigma(3 2)=  1.05509004E-05
-  sigma(2 2)=  2.40046080E-05  sigma(3 1)= -1.15407161E-06
-  sigma(3 3)=  1.35648249E-05  sigma(2 1)= -1.41024756E-05
+  sigma(1 1)= -1.08491261E-05  sigma(3 2)=  1.29356203E-05
+  sigma(2 2)= -1.67479583E-05  sigma(3 1)= -1.03057340E-06
+  sigma(3 3)= -3.99819045E-06  sigma(2 1)= -9.17908553E-06
 
--Cartesian components of stress tensor (GPa)         [Pressure= -3.4901E-01 GPa]
-- sigma(1 1)= -5.83131333E-02  sigma(3 2)=  3.10418155E-01
-- sigma(2 2)=  7.06239833E-01  sigma(3 1)= -3.39539532E-02
-- sigma(3 3)=  3.99090861E-01  sigma(2 1)= -4.14909087E-01
+-Cartesian components of stress tensor (GPa)         [Pressure=  3.0985E-01 GPa]
+- sigma(1 1)= -3.19192256E-01  sigma(3 2)=  3.80579024E-01
+- sigma(2 2)= -4.92741863E-01  sigma(3 1)= -3.03205110E-02
+- sigma(3 3)= -1.17630804E-01  sigma(2 1)= -2.70057974E-01
 --------------------------------------------------------------------------------
 
 
@@ -395,21 +395,21 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297331200E+02 Hartree
- Energy of the ifc part                    :  9.4393105620116269E-02 Hartree
- Energy of the elastic part                : -1.6766943403551694E-06 Hartree
+ Energy of the ifc part                    :  9.4395015308741115E-02 Hartree
+ Energy of the elastic part                : -9.4841481721746646E-07 Hartree
 
-    >>>>>>>>> Etotal= -1.37067021544386E+02
+    >>>>>>>>> Etotal= -1.37067018906418E+02
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)= -1.67121096E-06  sigma(3 2)=  1.12558687E-05
-  sigma(2 2)=  2.70436158E-05  sigma(3 1)= -1.20786612E-06
-  sigma(3 3)=  1.58603089E-05  sigma(2 1)= -1.52624319E-05
+  sigma(1 1)= -1.21365901E-05  sigma(3 2)=  1.39169233E-05
+  sigma(2 2)= -1.90358090E-05  sigma(3 1)= -1.13043718E-06
+  sigma(3 3)= -5.37523158E-06  sigma(2 1)= -9.84607812E-06
 
--Cartesian components of stress tensor (GPa)         [Pressure= -4.0437E-01 GPa]
-- sigma(1 1)= -4.91687158E-02  sigma(3 2)=  3.31159035E-01
-- sigma(2 2)=  7.95650514E-01  sigma(3 1)= -3.55366422E-02
-- sigma(3 3)=  4.66626318E-01  sigma(2 1)= -4.49036174E-01
+-Cartesian components of stress tensor (GPa)         [Pressure=  3.5842E-01 GPa]
+- sigma(1 1)= -3.57070749E-01  sigma(3 2)=  4.09449952E-01
+- sigma(2 2)= -5.60052742E-01  sigma(3 1)= -3.32586045E-02
+- sigma(3 3)= -1.58144746E-01  sigma(2 1)= -2.89681571E-01
 --------------------------------------------------------------------------------
 
 
@@ -423,21 +423,21 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297331200E+02 Hartree
- Energy of the ifc part                    :  1.0408093246059419E-01 Hartree
- Energy of the elastic part                : -2.8494097336206471E-06 Hartree
+ Energy of the ifc part                    :  1.0408416517434133E-01 Hartree
+ Energy of the elastic part                : -1.6247641199491924E-06 Hartree
 
-    >>>>>>>>> Etotal= -1.37057334890261E+02
+    >>>>>>>>> Etotal= -1.37057330432902E+02
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)= -1.32138872E-06  sigma(3 2)=  1.17401901E-05
-  sigma(2 2)=  2.88844372E-05  sigma(3 1)= -1.21051696E-06
-  sigma(3 3)=  1.79525537E-05  sigma(2 1)= -1.59739248E-05
+  sigma(1 1)= -1.31515072E-05  sigma(3 2)=  1.45038912E-05
+  sigma(2 2)= -2.02335737E-05  sigma(3 1)= -1.22295046E-06
+  sigma(3 3)= -6.71693344E-06  sigma(2 1)= -1.04084133E-05
 
--Cartesian components of stress tensor (GPa)         [Pressure= -4.4637E-01 GPa]
-- sigma(1 1)= -3.88765917E-02  sigma(3 2)=  3.45408259E-01
-- sigma(2 2)=  8.49809340E-01  sigma(3 1)= -3.56146326E-02
-- sigma(3 3)=  5.28182275E-01  sigma(2 1)= -4.69969013E-01
+-Cartesian components of stress tensor (GPa)         [Pressure=  3.9328E-01 GPa]
+- sigma(1 1)= -3.86930636E-01  sigma(3 2)=  4.26719138E-01
+- sigma(2 2)= -5.95292191E-01  sigma(3 1)= -3.59804386E-02
+- sigma(3 3)= -1.97618971E-01  sigma(2 1)= -3.06226041E-01
 --------------------------------------------------------------------------------
 
 
@@ -451,21 +451,21 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297331200E+02 Hartree
- Energy of the ifc part                    :  1.0964837538165174E-01 Hartree
- Energy of the elastic part                : -4.3926969525848469E-06 Hartree
+ Energy of the ifc part                    :  1.0965333750743124E-01 Hartree
+ Energy of the elastic part                : -2.4721765125382981E-06 Hartree
 
-    >>>>>>>>> Etotal= -1.37051768990627E+02
+    >>>>>>>>> Etotal= -1.37051762107981E+02
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)= -9.41989449E-07  sigma(3 2)=  1.19951251E-05
-  sigma(2 2)=  2.92703691E-05  sigma(3 1)= -1.15436712E-06
-  sigma(3 3)=  1.97587231E-05  sigma(2 1)= -1.61772041E-05
+  sigma(1 1)= -1.38447424E-05  sigma(3 2)=  1.46337383E-05
+  sigma(2 2)= -2.00928976E-05  sigma(3 1)= -1.30882747E-06
+  sigma(3 3)= -7.95942248E-06  sigma(2 1)= -1.08596139E-05
 
--Cartesian components of stress tensor (GPa)         [Pressure= -4.7159E-01 GPa]
-- sigma(1 1)= -2.77142818E-02  sigma(3 2)=  3.52908704E-01
-- sigma(2 2)=  8.61163844E-01  sigma(3 1)= -3.39626475E-02
-- sigma(3 3)=  5.81321607E-01  sigma(2 1)= -4.75949696E-01
+-Cartesian components of stress tensor (GPa)         [Pressure=  4.1088E-01 GPa]
+- sigma(1 1)= -4.07326315E-01  sigma(3 2)=  4.30539374E-01
+- sigma(2 2)= -5.91153357E-01  sigma(3 1)= -3.85070270E-02
+- sigma(3 3)= -2.34174255E-01  sigma(2 1)= -3.19500818E-01
 --------------------------------------------------------------------------------
 
 
@@ -479,21 +479,21 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297331200E+02 Hartree
- Energy of the ifc part                    :  1.1062688097673087E-01 Hartree
- Energy of the elastic part                : -6.2507868893559323E-06 Hartree
+ Energy of the ifc part                    :  1.1063387108616779E-01 Hartree
+ Energy of the elastic part                : -3.4107527756046612E-06 Hartree
 
-    >>>>>>>>> Etotal= -1.37050792343122E+02
+    >>>>>>>>> Etotal= -1.37050782512979E+02
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)= -5.18589433E-07  sigma(3 2)=  1.20070169E-05
-  sigma(2 2)=  2.80648555E-05  sigma(3 1)= -1.03252803E-06
-  sigma(3 3)=  2.12107985E-05  sigma(2 1)= -1.58311805E-05
+  sigma(1 1)= -1.41855596E-05  sigma(3 2)=  1.42445238E-05
+  sigma(2 2)= -1.84843959E-05  sigma(3 1)= -1.38757690E-06
+  sigma(3 3)= -9.05551863E-06  sigma(2 1)= -1.11687487E-05
 
--Cartesian components of stress tensor (GPa)         [Pressure= -4.7816E-01 GPa]
-- sigma(1 1)= -1.52574253E-02  sigma(3 2)=  3.53258574E-01
-- sigma(2 2)=  8.25696417E-01  sigma(3 1)= -3.03780184E-02
-- sigma(3 3)=  6.24043131E-01  sigma(2 1)= -4.65769333E-01
+-Cartesian components of stress tensor (GPa)         [Pressure=  4.0920E-01 GPa]
+- sigma(1 1)= -4.17353501E-01  sigma(3 2)=  4.19088287E-01
+- sigma(2 2)= -5.43829611E-01  sigma(3 1)= -4.08239149E-02
+- sigma(3 3)= -2.66422511E-01  sigma(2 1)= -3.28595877E-01
 --------------------------------------------------------------------------------
 
 
@@ -507,21 +507,21 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297331200E+02 Hartree
- Energy of the ifc part                    :  1.0711901128410170E-01 Hartree
- Energy of the elastic part                : -8.2652390983748081E-06 Hartree
+ Energy of the ifc part                    :  1.0712810359778503E-01 Hartree
+ Energy of the elastic part                : -4.2772539193726521E-06 Hartree
 
-    >>>>>>>>> Etotal= -1.37054302227267E+02
+    >>>>>>>>> Etotal= -1.37054289146968E+02
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)= -7.28072770E-09  sigma(3 2)=  1.17582532E-05
-  sigma(2 2)=  2.53161747E-05  sigma(3 1)= -8.40222505E-07
-  sigma(3 3)=  2.22655334E-05  sigma(2 1)= -1.49271100E-05
+  sigma(1 1)= -1.41718101E-05  sigma(3 2)=  1.32849968E-05
+  sigma(2 2)= -1.54609476E-05  sigma(3 1)= -1.45719896E-06
+  sigma(3 3)= -9.98288116E-06  sigma(2 1)= -1.12754571E-05
 
--Cartesian components of stress tensor (GPa)         [Pressure= -4.6656E-01 GPa]
-- sigma(1 1)= -2.14206368E-04  sigma(3 2)=  3.45939696E-01
-- sigma(2 2)=  7.44827450E-01  sigma(3 1)= -2.47201954E-02
-- sigma(3 3)=  6.55074498E-01  sigma(2 1)= -4.39170664E-01
+-Cartesian components of stress tensor (GPa)         [Pressure=  3.8851E-01 GPa]
+- sigma(1 1)= -4.16948977E-01  sigma(3 2)=  3.90858035E-01
+- sigma(2 2)= -4.54876706E-01  sigma(3 1)= -4.28722663E-02
+- sigma(3 3)= -2.93706454E-01  sigma(2 1)= -3.31735345E-01
 --------------------------------------------------------------------------------
 
 
@@ -535,21 +535,21 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297331200E+02 Hartree
- Energy of the ifc part                    :  1.0001150565396158E-01 Hartree
- Energy of the elastic part                : -1.0147136253392857E-05 Hartree
+ Energy of the ifc part                    :  1.0002241858871797E-01 Hartree
+ Energy of the elastic part                : -4.8077701249005023E-06 Hartree
 
-    >>>>>>>>> Etotal= -1.37061411614794E+02
+    >>>>>>>>> Etotal= -1.37061395362493E+02
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  6.66006382E-07  sigma(3 2)=  1.12317675E-05
-  sigma(2 2)=  2.13295618E-05  sigma(3 1)= -5.76981604E-07
-  sigma(3 3)=  2.29192175E-05  sigma(2 1)= -1.35070661E-05
+  sigma(1 1)= -1.38422642E-05  sigma(3 2)=  1.17335393E-05
+  sigma(2 2)= -1.13270398E-05  sigma(3 1)= -1.51425674E-06
+  sigma(3 3)= -1.07538369E-05  sigma(2 1)= -1.10917420E-05
 
--Cartesian components of stress tensor (GPa)         [Pressure= -4.4048E-01 GPa]
-- sigma(1 1)=  1.95945810E-02  sigma(3 2)=  3.30449953E-01
-- sigma(2 2)=  6.27537268E-01  sigma(3 1)= -1.69753820E-02
-- sigma(3 3)=  6.74306545E-01  sigma(2 1)= -3.97391539E-01
+-Cartesian components of stress tensor (GPa)         [Pressure=  3.5230E-01 GPa]
+- sigma(1 1)= -4.07253406E-01  sigma(3 2)=  3.45212585E-01
+- sigma(2 2)= -3.33252962E-01  sigma(3 1)= -4.45509638E-02
+- sigma(3 3)= -3.16388753E-01  sigma(2 1)= -3.26330261E-01
 --------------------------------------------------------------------------------
 
 
@@ -563,21 +563,21 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297331200E+02 Hartree
- Energy of the ifc part                    :  9.1062535152408294E-02 Hartree
- Energy of the elastic part                : -1.1487538678490974E-05 Hartree
+ Energy of the ifc part                    :  9.1074480360310378E-02 Hartree
+ Energy of the elastic part                : -4.6552537112991708E-06 Hartree
 
-    >>>>>>>>> Etotal= -1.37070361925698E+02
+    >>>>>>>>> Etotal= -1.37070343148205E+02
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  1.59329679E-06  sigma(3 2)=  1.04203894E-05
-  sigma(2 2)=  1.66994995E-05  sigma(3 1)= -2.49169661E-07
-  sigma(3 3)=  2.32215554E-05  sigma(2 1)= -1.16791008E-05
+  sigma(1 1)= -1.32839198E-05  sigma(3 2)=  9.62414436E-06
+  sigma(2 2)= -6.66745313E-06  sigma(3 1)= -1.55478780E-06
+  sigma(3 3)= -1.14209764E-05  sigma(2 1)= -1.05187178E-05
 
--Cartesian components of stress tensor (GPa)         [Pressure= -4.0713E-01 GPa]
-- sigma(1 1)=  4.68764021E-02  sigma(3 2)=  3.06578390E-01
-- sigma(2 2)=  4.91316157E-01  sigma(3 1)= -7.33082328E-03
-- sigma(3 3)=  6.83201632E-01  sigma(2 1)= -3.43610951E-01
+-Cartesian components of stress tensor (GPa)         [Pressure=  3.0767E-01 GPa]
+- sigma(1 1)= -3.90826349E-01  sigma(3 2)=  2.83152055E-01
+- sigma(2 2)= -1.96163211E-01  sigma(3 1)= -4.57434288E-02
+- sigma(3 3)= -3.36016669E-01  sigma(2 1)= -3.09471310E-01
 --------------------------------------------------------------------------------
 
 
@@ -591,21 +591,21 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297331200E+02 Hartree
- Energy of the ifc part                    :  8.2635598062258050E-02 Hartree
- Energy of the elastic part                : -1.1842507038845873E-05 Hartree
+ Energy of the ifc part                    :  8.2647137479236799E-02 Hartree
+ Energy of the elastic part                : -3.4701852483243612E-06 Hartree
 
-    >>>>>>>>> Etotal= -1.37078789217757E+02
+    >>>>>>>>> Etotal= -1.37078769306018E+02
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  2.85332231E-06  sigma(3 2)=  9.33974434E-06
-  sigma(2 2)=  1.22270998E-05  sigma(3 1)=  1.28755124E-07
-  sigma(3 3)=  2.32755191E-05  sigma(2 1)= -9.61306073E-06
+  sigma(1 1)= -1.26221519E-05  sigma(3 2)=  7.06722437E-06
+  sigma(2 2)= -2.26222196E-06  sigma(3 1)= -1.57634769E-06
+  sigma(3 3)= -1.20680055E-05  sigma(2 1)= -9.48311499E-06
 
--Cartesian components of stress tensor (GPa)         [Pressure= -3.7616E-01 GPa]
-- sigma(1 1)=  8.39476266E-02  sigma(3 2)=  2.74784719E-01
-- sigma(2 2)=  3.59733637E-01  sigma(3 1)=  3.78810589E-03
-- sigma(3 3)=  6.84789298E-01  sigma(2 1)= -2.82825964E-01
+-Cartesian components of stress tensor (GPa)         [Pressure=  2.6432E-01 GPa]
+- sigma(1 1)= -3.71356468E-01  sigma(3 2)=  2.07924885E-01
+- sigma(2 2)= -6.65568566E-02  sigma(3 1)= -4.63777425E-02
+- sigma(3 3)= -3.55052921E-01  sigma(2 1)= -2.79002829E-01
 --------------------------------------------------------------------------------
 
 
@@ -619,21 +619,21 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297331200E+02 Hartree
- Energy of the ifc part                    :  7.6988434244785159E-02 Hartree
- Energy of the elastic part                : -1.0887210419067403E-05 Hartree
+ Energy of the ifc part                    :  7.6997483570963796E-02 Hartree
+ Energy of the elastic part                : -1.0336009424209459E-06 Hartree
 
-    >>>>>>>>> Etotal= -1.37084435426278E+02
+    >>>>>>>>> Etotal= -1.37084416523342E+02
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  4.46961137E-06  sigma(3 2)=  8.03811010E-06
-  sigma(2 2)=  8.68987380E-06  sigma(3 1)=  5.36238160E-07
-  sigma(3 3)=  2.32112736E-05  sigma(2 1)= -7.50447372E-06
+  sigma(1 1)= -1.19872080E-05  sigma(3 2)=  4.24469270E-06
+  sigma(2 2)=  1.14205353E-06  sigma(3 1)= -1.58053442E-06
+  sigma(3 3)= -1.27801172E-05  sigma(2 1)= -7.98179147E-06
 
--Cartesian components of stress tensor (GPa)         [Pressure= -3.5669E-01 GPa]
-- sigma(1 1)=  1.31500484E-01  sigma(3 2)=  2.36489324E-01
-- sigma(2 2)=  2.55664871E-01  sigma(3 1)=  1.57766687E-02
-- sigma(3 3)=  6.82899131E-01  sigma(2 1)= -2.20789202E-01
+-Cartesian components of stress tensor (GPa)         [Pressure=  2.3169E-01 GPa]
+- sigma(1 1)= -3.52675775E-01  sigma(3 2)=  1.24883150E-01
+- sigma(2 2)=  3.36003691E-02  sigma(3 1)= -4.65009202E-02
+- sigma(3 3)= -3.76003967E-01  sigma(2 1)= -2.34832373E-01
 --------------------------------------------------------------------------------
 
 
@@ -647,21 +647,21 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297331200E+02 Hartree
- Energy of the ifc part                    :  7.5442008067195809E-02 Hartree
- Energy of the elastic part                : -8.5532236100519015E-06 Hartree
+ Energy of the ifc part                    :  7.5446176123471848E-02 Hartree
+ Energy of the elastic part                :  2.6364003955061049E-06 Hartree
 
-    >>>>>>>>> Etotal= -1.37085979518468E+02
+    >>>>>>>>> Etotal= -1.37085964160788E+02
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  6.38565306E-06  sigma(3 2)=  6.59396969E-06
-  sigma(2 2)=  6.56644229E-06  sigma(3 1)=  9.52022830E-07
-  sigma(3 3)=  2.31417331E-05  sigma(2 1)= -5.51813813E-06
+  sigma(1 1)= -1.14712802E-05  sigma(3 2)=  1.36930592E-06
+  sigma(2 2)=  3.10133884E-06  sigma(3 1)= -1.57422684E-06
+  sigma(3 3)= -1.36067840E-05  sigma(2 1)= -6.10348738E-06
 
--Cartesian components of stress tensor (GPa)         [Pressure= -3.5397E-01 GPa]
-- sigma(1 1)=  1.87872368E-01  sigma(3 2)=  1.94001254E-01
-- sigma(2 2)=  1.93191370E-01  sigma(3 1)=  2.80094740E-02
-- sigma(3 3)=  6.80853179E-01  sigma(2 1)= -1.62349201E-01
+-Cartesian components of stress tensor (GPa)         [Pressure=  2.1553E-01 GPa]
+- sigma(1 1)= -3.37496657E-01  sigma(3 2)=  4.02863643E-02
+- sigma(2 2)=  9.12445235E-02  sigma(3 1)= -4.63153449E-02
+- sigma(3 3)= -4.00325338E-01  sigma(2 1)= -1.79570768E-01
 --------------------------------------------------------------------------------
 
 
@@ -675,21 +675,21 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297331200E+02 Hartree
- Energy of the ifc part                    :  7.8007548222477241E-02 Hartree
- Energy of the elastic part                : -5.0440164268240923E-06 Hartree
+ Energy of the ifc part                    :  7.8004771054599936E-02 Hartree
+ Energy of the elastic part                :  7.2917830387413934E-06 Hartree
 
-    >>>>>>>>> Etotal= -1.37083410469106E+02
+    >>>>>>>>> Etotal= -1.37083400910474E+02
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  8.48024394E-06  sigma(3 2)=  5.09921485E-06
-  sigma(2 2)=  5.90508190E-06  sigma(3 1)=  1.35994834E-06
-  sigma(3 3)=  2.31284212E-05  sigma(2 1)= -3.74677439E-06
+  sigma(1 1)= -1.11050924E-05  sigma(3 2)= -1.37191912E-06
+  sigma(2 2)=  3.59824782E-06  sigma(3 1)= -1.56824424E-06
+  sigma(3 3)= -1.45431592E-05  sigma(2 1)= -4.00578986E-06
 
--Cartesian components of stress tensor (GPa)         [Pressure= -3.6790E-01 GPa]
-- sigma(1 1)=  2.49497348E-01  sigma(3 2)=  1.50024055E-01
-- sigma(2 2)=  1.73733478E-01  sigma(3 1)=  4.00110548E-02
-- sigma(3 3)=  6.80461529E-01  sigma(2 1)= -1.10233890E-01
+-Cartesian components of stress tensor (GPa)         [Pressure=  2.1624E-01 GPa]
+- sigma(1 1)= -3.26723045E-01  sigma(3 2)= -4.03632472E-02
+- sigma(2 2)=  1.05864088E-01  sigma(3 1)= -4.61393308E-02
+- sigma(3 3)= -4.27874443E-01  sigma(2 1)= -1.17854387E-01
 --------------------------------------------------------------------------------
 
 
@@ -703,21 +703,21 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297331200E+02 Hartree
- Energy of the ifc part                    :  8.3681412397076063E-02 Hartree
- Energy of the elastic part                : -7.2420905128537122E-07 Hartree
+ Energy of the ifc part                    :  8.3670532166779110E-02 Hartree
+ Energy of the elastic part                :  1.2567992411539259E-05 Hartree
 
-    >>>>>>>>> Etotal= -1.37077732285124E+02
+    >>>>>>>>> Etotal= -1.37077729873153E+02
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  1.06120786E-05  sigma(3 2)=  3.63800899E-06
-  sigma(2 2)=  6.41040767E-06  sigma(3 1)=  1.75166428E-06
-  sigma(3 3)=  2.31782537E-05  sigma(2 1)= -2.20862713E-06
+  sigma(1 1)= -1.08670801E-05  sigma(3 2)= -3.85529638E-06
+  sigma(2 2)=  2.95120825E-06  sigma(3 1)= -1.57432042E-06
+  sigma(3 3)= -1.55412048E-05  sigma(2 1)= -1.86299107E-06
 
--Cartesian components of stress tensor (GPa)         [Pressure= -3.9425E-01 GPa]
-- sigma(1 1)=  3.12218081E-01  sigma(3 2)=  1.07033902E-01
-- sigma(2 2)=  1.88600673E-01  sigma(3 1)=  5.15357338E-02
-- sigma(3 3)=  6.81927653E-01  sigma(2 1)= -6.49800427E-02
+-Cartesian components of stress tensor (GPa)         [Pressure=  2.3004E-01 GPa]
+- sigma(1 1)= -3.19720481E-01  sigma(3 2)= -1.13426717E-01
+- sigma(2 2)=  8.68275297E-02  sigma(3 1)= -4.63180981E-02
+- sigma(3 3)= -4.57237956E-01  sigma(2 1)= -5.48110803E-02
 --------------------------------------------------------------------------------
 
 
@@ -731,21 +731,21 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297331200E+02 Hartree
- Energy of the ifc part                    :  9.1054353064571825E-02 Hartree
- Energy of the elastic part                :  4.0214866317574192E-06 Hartree
+ Energy of the ifc part                    :  9.1035341821072285E-02 Hartree
+ Energy of the elastic part                :  1.8112542538804662E-05 Hartree
 
-    >>>>>>>>> Etotal= -1.37070354598761E+02
+    >>>>>>>>> Etotal= -1.37070359518948E+02
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  1.26607543E-05  sigma(3 2)=  2.27351099E-06
-  sigma(2 2)=  7.63867687E-06  sigma(3 1)=  2.12571346E-06
-  sigma(3 3)=  2.32632580E-05  sigma(2 1)= -8.73681056E-07
+  sigma(1 1)= -1.07102501E-05  sigma(3 2)= -6.02416554E-06
+  sigma(2 2)=  1.61931483E-06  sigma(3 1)= -1.60251119E-06
+  sigma(3 3)= -1.65355654E-05  sigma(2 1)=  1.78754367E-07
 
--Cartesian components of stress tensor (GPa)         [Pressure= -4.2722E-01 GPa]
-- sigma(1 1)=  3.72492188E-01  sigma(3 2)=  6.68889913E-02
-- sigma(2 2)=  2.24737595E-01  sigma(3 1)=  6.25406387E-02
-- sigma(3 3)=  6.84428566E-01  sigma(2 1)= -2.57045798E-02
+-Cartesian components of stress tensor (GPa)         [Pressure=  2.5132E-01 GPa]
+- sigma(1 1)= -3.15106384E-01  sigma(3 2)= -1.77237039E-01
+- sigma(2 2)=  4.76418791E-02  sigma(3 1)= -4.71474989E-02
+- sigma(3 3)= -4.86493048E-01  sigma(2 1)=  5.25913417E-03
 --------------------------------------------------------------------------------
 
 
@@ -759,21 +759,21 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297331200E+02 Hartree
- Energy of the ifc part                    :  9.8798155102679280E-02 Hartree
- Energy of the elastic part                :  8.8770976075862319E-06 Hartree
+ Energy of the ifc part                    :  9.8771993966349059E-02 Hartree
+ Energy of the elastic part                :  2.3658551181817984E-05 Hartree
 
-    >>>>>>>>> Etotal= -1.37062605941112E+02
+    >>>>>>>>> Etotal= -1.37062617320794E+02
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  1.45448006E-05  sigma(3 2)=  1.04590255E-06
-  sigma(2 2)=  9.15950887E-06  sigma(3 1)=  2.48492615E-06
-  sigma(3 3)=  2.33427315E-05  sigma(2 1)=  3.06353260E-07
+  sigma(1 1)= -1.05856438E-05  sigma(3 2)= -7.87059437E-06
+  sigma(2 2)=  4.30868635E-08  sigma(3 1)= -1.66016879E-06
+  sigma(3 3)= -1.74642219E-05  sigma(2 1)=  2.01963635E-06
 
--Cartesian components of stress tensor (GPa)         [Pressure= -4.6139E-01 GPa]
-- sigma(1 1)=  4.27922735E-01  sigma(3 2)=  3.07715104E-02
-- sigma(2 2)=  2.69482010E-01  sigma(3 1)=  7.31090390E-02
-- sigma(3 3)=  6.86766757E-01  sigma(2 1)=  9.01322258E-03
+-Cartesian components of stress tensor (GPa)         [Pressure=  2.7466E-01 GPa]
+- sigma(1 1)= -3.11440341E-01  sigma(3 2)= -2.31560842E-01
+- sigma(2 2)=  1.26765908E-03  sigma(3 1)= -4.88438439E-02
+- sigma(3 3)= -5.13815062E-01  sigma(2 1)=  5.94197429E-02
 --------------------------------------------------------------------------------
 
 
@@ -787,21 +787,21 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297331200E+02 Hartree
- Energy of the ifc part                    :  1.0588129499753059E-01 Hartree
- Energy of the elastic part                :  1.3619685369178051E-05 Hartree
+ Energy of the ifc part                    :  1.0584969819069083E-01 Hartree
+ Energy of the elastic part                :  2.9038783251286941E-05 Hartree
 
-    >>>>>>>>> Etotal= -1.37055518058629E+02
+    >>>>>>>>> Etotal= -1.37055534236338E+02
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  1.62199282E-05  sigma(3 2)= -2.24943086E-08
-  sigma(2 2)=  1.06321759E-05  sigma(3 1)=  2.83399663E-06
-  sigma(3 3)=  2.33764849E-05  sigma(2 1)=  1.37835847E-06
+  sigma(1 1)= -1.04541012E-05  sigma(3 2)= -9.41308674E-06
+  sigma(2 2)= -1.42911828E-06  sigma(3 1)= -1.75218632E-06
+  sigma(3 3)= -1.82768381E-05  sigma(2 1)=  3.60281455E-06
 
--Cartesian components of stress tensor (GPa)         [Pressure= -4.9259E-01 GPa]
-- sigma(1 1)=  4.77206683E-01  sigma(3 2)= -6.61805295E-04
-- sigma(2 2)=  3.12809363E-01  sigma(3 1)=  8.33790455E-02
-- sigma(3 3)=  6.87759814E-01  sigma(2 1)=  4.05526995E-02
+-Cartesian components of stress tensor (GPa)         [Pressure=  2.9578E-01 GPa]
+- sigma(1 1)= -3.07570225E-01  sigma(3 2)= -2.76942527E-01
+- sigma(2 2)= -4.20461044E-02  sigma(3 1)= -5.15510926E-02
+- sigma(3 3)= -5.37723051E-01  sigma(2 1)=  1.05998446E-01
 --------------------------------------------------------------------------------
 
 
@@ -815,21 +815,21 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297331200E+02 Hartree
- Energy of the ifc part                    :  1.1158798781521746E-01 Hartree
- Energy of the elastic part                :  1.8105769914339927E-05 Hartree
+ Energy of the ifc part                    :  1.1155313103765165E-01 Hartree
+ Energy of the elastic part                :  3.4168272282907947E-05 Hartree
 
-    >>>>>>>>> Etotal= -1.37049806879727E+02
+    >>>>>>>>> Etotal= -1.37049825674002E+02
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  1.76688643E-05  sigma(3 2)= -9.20210988E-07
-  sigma(2 2)=  1.18175750E-05  sigma(3 1)=  3.17792482E-06
-  sigma(3 3)=  2.33291311E-05  sigma(2 1)=  2.37904136E-06
+  sigma(1 1)= -1.02888813E-05  sigma(3 2)= -1.06798603E-05
+  sigma(2 2)= -2.55099260E-06  sigma(3 1)= -1.88174875E-06
+  sigma(3 3)= -1.89340922E-05  sigma(2 1)=  4.90235062E-06
 
--Cartesian components of stress tensor (GPa)         [Pressure= -5.1796E-01 GPa]
-- sigma(1 1)=  5.19835847E-01  sigma(3 2)= -2.70735374E-02
-- sigma(2 2)=  3.47685003E-01  sigma(3 1)=  9.34977606E-02
-- sigma(3 3)=  6.86366618E-01  sigma(2 1)=  6.99938014E-02
+-Cartesian components of stress tensor (GPa)         [Pressure=  3.1161E-01 GPa]
+- sigma(1 1)= -3.02709287E-01  sigma(3 2)= -3.14212284E-01
+- sigma(2 2)= -7.50527808E-02  sigma(3 1)= -5.53629502E-02
+- sigma(3 3)= -5.57060132E-01  sigma(2 1)=  1.44232110E-01
 --------------------------------------------------------------------------------
 
 
@@ -843,21 +843,21 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297331200E+02 Hartree
- Energy of the ifc part                    :  1.1545428765816217E-01 Hartree
- Energy of the elastic part                :  2.2245992589651769E-05 Hartree
+ Energy of the ifc part                    :  1.1541860599494327E-01 Hartree
+ Energy of the elastic part                :  3.9020136659998370E-05 Hartree
 
-    >>>>>>>>> Etotal= -1.37045936439661E+02
+    >>>>>>>>> Etotal= -1.37045955347180E+02
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  1.88908861E-05  sigma(3 2)= -1.64055956E-06
-  sigma(2 2)=  1.25617235E-05  sigma(3 1)=  3.52120939E-06
-  sigma(3 3)=  2.31693338E-05  sigma(2 1)=  3.33259599E-06
+  sigma(1 1)= -1.00741124E-05  sigma(3 2)= -1.16990868E-05
+  sigma(2 2)= -3.16029137E-06  sigma(3 1)= -2.05106280E-06
+  sigma(3 3)= -1.94031668E-05  sigma(2 1)=  5.91121525E-06
 
--Cartesian components of stress tensor (GPa)         [Pressure= -5.3568E-01 GPa]
-- sigma(1 1)=  5.55788964E-01  sigma(3 2)= -4.82669205E-02
-- sigma(2 2)=  3.69578604E-01  sigma(3 1)=  1.03597539E-01
-- sigma(3 3)=  6.81665219E-01  sigma(2 1)=  9.80483428E-02
+-Cartesian components of stress tensor (GPa)         [Pressure=  3.2008E-01 GPa]
+- sigma(1 1)= -2.96390571E-01  sigma(3 2)= -3.44198958E-01
+- sigma(2 2)= -9.29789665E-02  sigma(3 1)= -6.03443407E-02
+- sigma(3 3)= -5.70860780E-01  sigma(2 1)=  1.73913928E-01
 --------------------------------------------------------------------------------
 
 
@@ -871,21 +871,21 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297331200E+02 Hartree
- Energy of the ifc part                    :  1.1719264265414911E-01 Hartree
- Energy of the elastic part                :  2.5981267921613918E-05 Hartree
+ Energy of the ifc part                    :  1.1715869875226941E-01 Hartree
+ Energy of the elastic part                :  4.3606300874420954E-05 Hartree
 
-    >>>>>>>>> Etotal= -1.37044194349390E+02
+    >>>>>>>>> Etotal= -1.37044210668259E+02
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  1.98941690E-05  sigma(3 2)= -2.17718202E-06
-  sigma(2 2)=  1.27741853E-05  sigma(3 1)=  3.86746139E-06
-  sigma(3 3)=  2.28671859E-05  sigma(2 1)=  4.25080744E-06
+  sigma(1 1)= -9.80240049E-06  sigma(3 2)= -1.24941838E-05
+  sigma(2 2)= -3.15611142E-06  sigma(3 1)= -2.26185391E-06
+  sigma(3 3)= -1.96525620E-05  sigma(2 1)=  6.63261681E-06
 
--Cartesian components of stress tensor (GPa)         [Pressure= -5.4464E-01 GPa]
-- sigma(1 1)=  5.85306561E-01  sigma(3 2)= -6.40548958E-02
-- sigma(2 2)=  3.75829443E-01  sigma(3 1)=  1.13784623E-01
-- sigma(3 3)=  6.72775723E-01  sigma(2 1)=  1.25063052E-01
+-Cartesian components of stress tensor (GPa)         [Pressure=  3.1982E-01 GPa]
+- sigma(1 1)= -2.88396531E-01  sigma(3 2)= -3.67591518E-01
+- sigma(2 2)= -9.28559881E-02  sigma(3 1)= -6.65460284E-02
+- sigma(3 3)= -5.78198238E-01  sigma(2 1)=  1.95138291E-01
 --------------------------------------------------------------------------------
 
 
@@ -899,21 +899,21 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297331200E+02 Hartree
- Energy of the ifc part                    :  1.1663437424758814E-01 Hartree
- Energy of the elastic part                :  2.9264135463518918E-05 Hartree
+ Energy of the ifc part                    :  1.1660477099768708E-01 Hartree
+ Energy of the elastic part                :  4.7966191828863268E-05 Hartree
 
-    >>>>>>>>> Etotal= -1.37044749334929E+02
+    >>>>>>>>> Etotal= -1.37044760236122E+02
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  2.06912376E-05  sigma(3 2)= -2.52093876E-06
-  sigma(2 2)=  1.24116091E-05  sigma(3 1)=  4.21915003E-06
-  sigma(3 3)=  2.23913258E-05  sigma(2 1)=  5.13331139E-06
+  sigma(1 1)= -9.47307128E-06  sigma(3 2)= -1.30820119E-05
+  sigma(2 2)= -2.48138133E-06  sigma(3 1)= -2.51558008E-06
+  sigma(3 3)= -1.96474243E-05  sigma(2 1)=  7.07490026E-06
 
--Cartesian components of stress tensor (GPa)         [Pressure= -5.4423E-01 GPa]
-- sigma(1 1)=  6.08757126E-01  sigma(3 2)= -7.41685664E-02
-- sigma(2 2)=  3.65162084E-01  sigma(3 1)=  1.24131659E-01
-- sigma(3 3)=  6.58775437E-01  sigma(2 1)=  1.51027210E-01
+-Cartesian components of stress tensor (GPa)         [Pressure=  3.0992E-01 GPa]
+- sigma(1 1)= -2.78707332E-01  sigma(3 2)= -3.84886014E-01
+- sigma(2 2)= -7.30047469E-02  sigma(3 1)= -7.40109086E-02
+- sigma(3 3)= -5.78047081E-01  sigma(2 1)=  2.08150717E-01
 --------------------------------------------------------------------------------
 
 
@@ -927,21 +927,21 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297331200E+02 Hartree
- Energy of the ifc part                    :  1.1369798859789798E-01 Hartree
- Energy of the elastic part                :  3.2044842493407104E-05 Hartree
+ Energy of the ifc part                    :  1.1367529211595172E-01 Hartree
+ Energy of the elastic part                :  5.2163155650670353E-05 Hartree
 
-    >>>>>>>>> Etotal= -1.37047682939872E+02
+    >>>>>>>>> Etotal= -1.37047685518040E+02
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  2.12969081E-05  sigma(3 2)= -2.65767649E-06
-  sigma(2 2)=  1.14694618E-05  sigma(3 1)=  4.57727016E-06
-  sigma(3 3)=  2.17064508E-05  sigma(2 1)=  5.96695196E-06
+  sigma(1 1)= -9.09151199E-06  sigma(3 2)= -1.34725534E-05
+  sigma(2 2)= -1.11352365E-06  sigma(3 1)= -2.81333811E-06
+  sigma(3 3)= -1.93456380E-05  sigma(2 1)=  7.24936851E-06
 
--Cartesian components of stress tensor (GPa)         [Pressure= -5.3422E-01 GPa]
-- sigma(1 1)=  6.26576562E-01  sigma(3 2)= -7.81915288E-02
-- sigma(2 2)=  3.37443159E-01  sigma(3 1)=  1.34667915E-01
-- sigma(3 3)=  6.38625725E-01  sigma(2 1)=  1.75553758E-01
+-Cartesian components of stress tensor (GPa)         [Pressure=  2.8980E-01 GPa]
+- sigma(1 1)= -2.67481473E-01  sigma(3 2)= -3.96376139E-01
+- sigma(2 2)= -3.27609915E-02  sigma(3 1)= -8.27712509E-02
+- sigma(3 3)= -5.69168224E-01  sigma(2 1)=  2.13283749E-01
 --------------------------------------------------------------------------------
 
 
@@ -955,21 +955,21 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297331200E+02 Hartree
- Energy of the ifc part                    :  1.0838437015802350E-01 Hartree
- Energy of the elastic part                :  3.4260806370665167E-05 Hartree
+ Energy of the ifc part                    :  1.0837100212524069E-01 Hartree
+ Energy of the elastic part                :  5.6287917759047624E-05 Hartree
 
-    >>>>>>>>> Etotal= -1.37052994342348E+02
+    >>>>>>>>> Etotal= -1.37052985683269E+02
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  2.17280897E-05  sigma(3 2)= -2.56661784E-06
-  sigma(2 2)=  9.98249645E-06  sigma(3 1)=  4.94076497E-06
-  sigma(3 3)=  2.07716530E-05  sigma(2 1)=  6.72385341E-06
+  sigma(1 1)= -8.66968087E-06  sigma(3 2)= -1.36693977E-05
+  sigma(2 2)=  9.36140075E-07  sigma(3 1)= -3.15539127E-06
+  sigma(3 3)= -1.86948211E-05  sigma(2 1)=  7.17043707E-06
 
--Cartesian components of stress tensor (GPa)         [Pressure= -5.1469E-01 GPa]
-- sigma(1 1)=  6.39262363E-01  sigma(3 2)= -7.55124912E-02
-- sigma(2 2)=  2.93695136E-01  sigma(3 1)=  1.45362300E-01
-- sigma(3 3)=  6.11123027E-01  sigma(2 1)=  1.97822564E-01
+-Cartesian components of stress tensor (GPa)         [Pressure=  2.5918E-01 GPa]
+- sigma(1 1)= -2.55070775E-01  sigma(3 2)= -4.02167497E-01
+- sigma(2 2)=  2.75421873E-02  sigma(3 1)= -9.28348005E-02
+- sigma(3 3)= -5.50020533E-01  sigma(2 1)=  2.10961506E-01
 --------------------------------------------------------------------------------
 
 
@@ -983,21 +983,21 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297331200E+02 Hartree
- Energy of the ifc part                    :  1.0079924112906491E-01 Hartree
- Energy of the elastic part                :  3.5828931406389288E-05 Hartree
+ Energy of the ifc part                    :  1.0079728697443027E-01 Hartree
+ Energy of the elastic part                :  6.0468888672026454E-05 Hartree
 
-    >>>>>>>>> Etotal= -1.37060577903252E+02
+    >>>>>>>>> Etotal= -1.37060555217449E+02
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  2.20049927E-05  sigma(3 2)= -2.21954793E-06
-  sigma(2 2)=  8.03374832E-06  sigma(3 1)=  5.30555777E-06
-  sigma(3 3)=  1.95402959E-05  sigma(2 1)=  7.35835381E-06
+  sigma(1 1)= -8.22766275E-06  sigma(3 2)= -1.36709439E-05
+  sigma(2 2)=  3.61415454E-06  sigma(3 1)= -3.54017207E-06
+  sigma(3 3)= -1.76308685E-05  sigma(2 1)=  6.85780189E-06
 
--Cartesian components of stress tensor (GPa)         [Pressure= -4.8622E-01 GPa]
-- sigma(1 1)=  6.47409128E-01  sigma(3 2)= -6.53013437E-02
-- sigma(2 2)=  2.36360996E-01  sigma(3 1)=  1.56094872E-01
-- sigma(3 3)=  5.74895256E-01  sigma(2 1)=  2.16490207E-01
+-Cartesian components of stress tensor (GPa)         [Pressure=  2.1815E-01 GPa]
+- sigma(1 1)= -2.42066155E-01  sigma(3 2)= -4.02212987E-01
+- sigma(2 2)=  1.06332080E-01  sigma(3 1)= -1.04155441E-01
+- sigma(3 3)= -5.18717973E-01  sigma(2 1)=  2.01763463E-01
 --------------------------------------------------------------------------------
 
 
@@ -1011,21 +1011,21 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297331200E+02 Hartree
- Energy of the ifc part                    :  9.1201789612094714E-02 Hartree
- Energy of the elastic part                :  3.6642389063668407E-05 Hartree
+ Energy of the ifc part                    :  9.1212653732528404E-02 Hartree
+ Energy of the elastic part                :  6.4889019177798586E-05 Hartree
 
-    >>>>>>>>> Etotal= -1.37070174541311E+02
+    >>>>>>>>> Etotal= -1.37070135430560E+02
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  2.21532504E-05  sigma(3 2)= -1.58170282E-06
-  sigma(2 2)=  5.77044530E-06  sigma(3 1)=  5.66310702E-06
-  sigma(3 3)=  1.79628798E-05  sigma(2 1)=  7.80388703E-06
+  sigma(1 1)= -7.79576975E-06  sigma(3 2)= -1.34726959E-05
+  sigma(2 2)=  6.80869427E-06  sigma(3 1)= -3.96256565E-06
+  sigma(3 3)= -1.60797461E-05  sigma(2 1)=  6.34032811E-06
 
--Cartesian components of stress tensor (GPa)         [Pressure= -4.5001E-01 GPa]
-- sigma(1 1)=  6.51771021E-01  sigma(3 2)= -4.65352956E-02
-- sigma(2 2)=  1.69772333E-01  sigma(3 1)=  1.66614333E-01
-- sigma(3 3)=  5.28486080E-01  sigma(2 1)=  2.29598245E-01
+-Cartesian components of stress tensor (GPa)         [Pressure=  1.6737E-01 GPa]
+- sigma(1 1)= -2.29359426E-01  sigma(3 2)= -3.96380331E-01
+- sigma(2 2)=  2.00318668E-01  sigma(3 1)= -1.16582687E-01
+- sigma(3 3)= -4.73082383E-01  sigma(2 1)=  1.86538862E-01
 --------------------------------------------------------------------------------
 
 
@@ -1039,21 +1039,21 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297331200E+02 Hartree
- Energy of the ifc part                    :  8.0068248930062702E-02 Hartree
- Energy of the elastic part                :  3.6577142116821646E-05 Hartree
+ Energy of the ifc part                    :  8.0092095653784542E-02 Hartree
+ Energy of the elastic part                :  6.9806243490044183E-05 Hartree
 
-    >>>>>>>>> Etotal= -1.37081308147240E+02
+    >>>>>>>>> Etotal= -1.37081251071415E+02
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  2.22058660E-05  sigma(3 2)= -6.16379345E-07
-  sigma(2 2)=  3.42041617E-06  sigma(3 1)=  5.99863513E-06
-  sigma(3 3)=  1.59952399E-05  sigma(2 1)=  7.97287461E-06
+  sigma(1 1)= -7.41570193E-06  sigma(3 2)= -1.30713296E-05
+  sigma(2 2)=  1.03301315E-05  sigma(3 1)= -4.41138442E-06
+  sigma(3 3)= -1.39657542E-05  sigma(2 1)=  5.66067786E-06
 
--Cartesian components of stress tensor (GPa)         [Pressure= -4.0818E-01 GPa]
-- sigma(1 1)=  6.53319025E-01  sigma(3 2)= -1.81345034E-02
-- sigma(2 2)=  1.00632101E-01  sigma(3 1)=  1.76485909E-01
-- sigma(3 3)=  4.70596126E-01  sigma(2 1)=  2.34570030E-01
+-Cartesian components of stress tensor (GPa)         [Pressure=  1.0838E-01 GPa]
+- sigma(1 1)= -2.18177447E-01  sigma(3 2)= -3.84571729E-01
+- sigma(2 2)=  3.03922909E-01  sigma(3 1)= -1.29787389E-01
+- sigma(3 3)= -4.10886605E-01  sigma(2 1)=  1.66542864E-01
 --------------------------------------------------------------------------------
 
 
@@ -1067,21 +1067,21 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297331200E+02 Hartree
- Energy of the ifc part                    :  6.8131348406795619E-02 Hartree
- Energy of the elastic part                :  3.5517949420007143E-05 Hartree
+ Energy of the ifc part                    :  6.8166367419023877E-02 Hartree
+ Energy of the elastic part                :  7.5566134096320231E-05 Hartree
 
-    >>>>>>>>> Etotal= -1.37093246106956E+02
+    >>>>>>>>> Etotal= -1.37093171039759E+02
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  2.22024512E-05  sigma(3 2)=  7.03577648E-07
-  sigma(2 2)=  1.29182127E-06  sigma(3 1)=  6.28980212E-06
-  sigma(3 3)=  1.36145284E-05  sigma(2 1)=  7.76589434E-06
+  sigma(1 1)= -7.13744514E-06  sigma(3 2)= -1.24710205E-05
+  sigma(2 2)=  1.39030604E-05  sigma(3 1)= -4.86647278E-06
+  sigma(3 3)= -1.12305045E-05  sigma(2 1)=  4.87777824E-06
 
--Cartesian components of stress tensor (GPa)         [Pressure= -3.6393E-01 GPa]
-- sigma(1 1)=  6.53218556E-01  sigma(3 2)=  2.06999656E-02
-- sigma(2 2)=  3.80066876E-02  sigma(3 1)=  1.85052336E-01
-- sigma(3 3)=  4.00553187E-01  sigma(2 1)=  2.28480461E-01
+-Cartesian components of stress tensor (GPa)         [Pressure=  4.3787E-02 GPa]
+- sigma(1 1)= -2.09990851E-01  sigma(3 2)= -3.66910029E-01
+- sigma(2 2)=  4.09042090E-01  sigma(3 1)= -1.43176548E-01
+- sigma(3 3)= -3.30412794E-01  sigma(2 1)=  1.43509166E-01
 --------------------------------------------------------------------------------
 
 
@@ -1095,21 +1095,21 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297331200E+02 Hartree
- Energy of the ifc part                    :  5.6313651783857929E-02 Hartree
- Energy of the elastic part                :  3.3413469747333066E-05 Hartree
+ Energy of the ifc part                    :  5.6355476994936968E-02 Hartree
+ Energy of the elastic part                :  8.2579647548103460E-05 Hartree
 
-    >>>>>>>>> Etotal= -1.37105065908058E+02
+    >>>>>>>>> Etotal= -1.37104974916670E+02
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  2.21816472E-05  sigma(3 2)=  2.37496031E-06
-  sigma(2 2)= -2.74493360E-07  sigma(3 1)=  6.50764480E-06
-  sigma(3 3)=  1.08422986E-05  sigma(2 1)=  7.09855729E-06
+  sigma(1 1)= -7.00693406E-06  sigma(3 2)= -1.16911169E-05
+  sigma(2 2)=  1.71983092E-05  sigma(3 1)= -5.29709911E-06
+  sigma(3 3)= -7.86432951E-06  sigma(2 1)=  4.06153058E-06
 
--Cartesian components of stress tensor (GPa)         [Pressure= -3.2117E-01 GPa]
-- sigma(1 1)=  6.52606483E-01  sigma(3 2)=  6.98737329E-02
-- sigma(2 2)= -8.07587211E-03  sigma(3 1)=  1.91461488E-01
-- sigma(3 3)=  3.18991385E-01  sigma(2 1)=  2.08846731E-01
+-Cartesian components of stress tensor (GPa)         [Pressure= -2.2821E-02 GPa]
+- sigma(1 1)= -2.06151083E-01  sigma(3 2)= -3.43964477E-01
+- sigma(2 2)=  5.05991641E-01  sigma(3 1)= -1.55846010E-01
+- sigma(3 3)= -2.31376523E-01  sigma(2 1)=  1.19494335E-01
 --------------------------------------------------------------------------------
 
 
@@ -1123,21 +1123,21 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297331200E+02 Hartree
- Energy of the ifc part                    :  4.5465574952906929E-02 Hartree
- Energy of the elastic part                :  3.0352907668063713E-05 Hartree
+ Energy of the ifc part                    :  4.5507594641252480E-02 Hartree
+ Energy of the elastic part                :  9.1228086767254177E-05 Hartree
 
-    >>>>>>>>> Etotal= -1.37115917045451E+02
+    >>>>>>>>> Etotal= -1.37115814150584E+02
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  2.21642555E-05  sigma(3 2)=  4.33798090E-06
-  sigma(2 2)= -1.02554277E-06  sigma(3 1)=  6.62218733E-06
-  sigma(3 3)=  7.76509202E-06  sigma(2 1)=  5.94808377E-06
+  sigma(1 1)= -7.04225323E-06  sigma(3 2)= -1.07713288E-05
+  sigma(2 2)=  1.99328569E-05  sigma(3 1)= -5.66468936E-06
+  sigma(3 3)= -3.94121233E-06  sigma(2 1)=  3.27445570E-06
 
--Cartesian components of stress tensor (GPa)         [Pressure= -2.8346E-01 GPa]
-- sigma(1 1)=  6.52094800E-01  sigma(3 2)=  1.27627783E-01
-- sigma(2 2)= -3.01725048E-02  sigma(3 1)=  1.94831445E-01
-- sigma(3 3)=  2.28456856E-01  sigma(2 1)=  1.74998637E-01
+-Cartesian components of stress tensor (GPa)         [Pressure= -8.7767E-02 GPa]
+- sigma(1 1)= -2.07190208E-01  sigma(3 2)= -3.16903380E-01
+- sigma(2 2)=  5.86444798E-01  sigma(3 1)= -1.66660887E-01
+- sigma(3 3)= -1.15954451E-01  sigma(2 1)=  9.63377965E-02
 --------------------------------------------------------------------------------
 
 
@@ -1151,21 +1151,21 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297331200E+02 Hartree
- Energy of the ifc part                    :  3.5950412783683217E-02 Hartree
- Energy of the elastic part                :  2.6617679207858596E-05 Hartree
+ Energy of the ifc part                    :  3.5985641763487342E-02 Hartree
+ Energy of the elastic part                :  1.0169075506884199E-04 Hartree
 
-    >>>>>>>>> Etotal= -1.37125435942849E+02
+    >>>>>>>>> Etotal= -1.37125325640793E+02
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  2.21340173E-05  sigma(3 2)=  6.46140817E-06
-  sigma(2 2)= -9.56156723E-07  sigma(3 1)=  6.61292864E-06
-  sigma(3 3)=  4.53277734E-06  sigma(2 1)=  4.39899244E-06
+  sigma(1 1)= -7.20830154E-06  sigma(3 2)= -9.76859385E-06
+  sigma(2 2)=  2.20163417E-05  sigma(3 1)= -5.93210443E-06
+  sigma(3 3)=  3.67995382E-07  sigma(2 1)=  2.54484482E-06
 
--Cartesian components of stress tensor (GPa)         [Pressure= -2.5214E-01 GPa]
-- sigma(1 1)=  6.51205162E-01  sigma(3 2)=  1.90101160E-01
-- sigma(2 2)= -2.81310973E-02  sigma(3 1)=  1.94559045E-01
-- sigma(3 3)=  1.33358891E-01  sigma(2 1)=  1.29422804E-01
+-Cartesian components of stress tensor (GPa)         [Pressure= -1.4883E-01 GPa]
+- sigma(1 1)= -2.12075518E-01  sigma(3 2)= -2.87401905E-01
+- sigma(2 2)=  6.47743028E-01  sigma(3 1)= -1.74528508E-01
+- sigma(3 3)=  1.08267961E-02  sigma(2 1)=  7.48719069E-02
 --------------------------------------------------------------------------------
 
 
@@ -1179,21 +1179,21 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297331200E+02 Hartree
- Energy of the ifc part                    :  2.7366117486619240E-02 Hartree
- Energy of the elastic part                :  2.2642029516665677E-05 Hartree
+ Energy of the ifc part                    :  2.7390079144797592E-02 Hartree
+ Energy of the elastic part                :  1.1378875916466419E-04 Hartree
 
-    >>>>>>>>> Etotal= -1.37134024213796E+02
+    >>>>>>>>> Etotal= -1.37133909105408E+02
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  2.20345116E-05  sigma(3 2)=  8.56120607E-06
-  sigma(2 2)= -3.85687714E-07  sigma(3 1)=  6.47874766E-06
-  sigma(3 3)=  1.32116122E-06  sigma(2 1)=  2.64515373E-06
+  sigma(1 1)= -7.41341817E-06  sigma(3 2)= -8.74388562E-06
+  sigma(2 2)=  2.36388630E-05  sigma(3 1)= -6.07621348E-06
+  sigma(3 3)=  4.82966305E-06  sigma(2 1)=  1.85192377E-06
 
--Cartesian components of stress tensor (GPa)         [Pressure= -2.2527E-01 GPa]
-- sigma(1 1)=  6.48277603E-01  sigma(3 2)=  2.51879336E-01
-- sigma(2 2)= -1.13473224E-02  sigma(3 1)=  1.90611305E-01
-- sigma(3 3)=  3.88698984E-02  sigma(2 1)=  7.78230964E-02
+-Cartesian components of stress tensor (GPa)         [Pressure= -2.0649E-01 GPa]
+- sigma(1 1)= -2.18110256E-01  sigma(3 2)= -2.57253953E-01
+- sigma(2 2)=  6.95479244E-01  sigma(3 1)= -1.78768342E-01
+- sigma(3 3)=  1.42093569E-01  sigma(2 1)=  5.44854693E-02
 --------------------------------------------------------------------------------
 
 
@@ -1207,21 +1207,21 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297331200E+02 Hartree
- Energy of the ifc part                    :  1.8711394200585582E-02 Hartree
- Energy of the elastic part                :  1.8880400303886453E-05 Hartree
+ Energy of the ifc part                    :  1.8724084278679321E-02 Hartree
+ Energy of the elastic part                :  1.2699417535543895E-04 Hartree
 
-    >>>>>>>>> Etotal= -1.37142682698711E+02
+    >>>>>>>>> Etotal= -1.37142561894858E+02
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  2.17933375E-05  sigma(3 2)=  1.04523940E-05
-  sigma(2 2)=  1.52343968E-07  sigma(3 1)=  6.23903306E-06
-  sigma(3 3)= -1.72383569E-06  sigma(2 1)=  9.27709468E-07
+  sigma(1 1)= -7.54110825E-06  sigma(3 2)= -7.74668059E-06
+  sigma(2 2)=  2.51980346E-05  sigma(3 1)= -6.09500752E-06
+  sigma(3 3)=  9.21876472E-06  sigma(2 1)=  1.14139058E-06
 
--Cartesian components of stress tensor (GPa)         [Pressure= -1.9832E-01 GPa]
-- sigma(1 1)=  6.41182019E-01  sigma(3 2)=  3.07519997E-01
-- sigma(2 2)=  4.48211353E-03  sigma(3 1)=  1.83558659E-01
-- sigma(3 3)= -5.07169885E-02  sigma(2 1)=  2.72941503E-02
+-Cartesian components of stress tensor (GPa)         [Pressure= -2.6357E-01 GPa]
+- sigma(1 1)= -2.21867027E-01  sigma(3 2)= -2.27915173E-01
+- sigma(2 2)=  7.41351649E-01  sigma(3 1)= -1.79321282E-01
+- sigma(3 3)=  2.71225377E-01  sigma(2 1)=  3.35808647E-02
 --------------------------------------------------------------------------------
 
 
@@ -1235,21 +1235,21 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297331200E+02 Hartree
- Energy of the ifc part                    :  8.8955912727117989E-03 Hartree
- Energy of the elastic part                :  1.5675873389793974E-05 Hartree
+ Energy of the ifc part                    :  8.9012090460068045E-03 Hartree
+ Energy of the elastic part                :  1.4062749563699918E-04 Hartree
 
-    >>>>>>>>> Etotal= -1.37152501706166E+02
+    >>>>>>>>> Etotal= -1.37152371136770E+02
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  2.13573305E-05  sigma(3 2)=  1.20004756E-05
-  sigma(2 2)=  1.38018480E-07  sigma(3 1)=  5.92478034E-06
-  sigma(3 3)= -4.52215882E-06  sigma(2 1)= -5.50385652E-07
+  sigma(1 1)= -7.49590422E-06  sigma(3 2)= -6.80760044E-06
+  sigma(2 2)=  2.71108728E-05  sigma(3 1)= -6.00409652E-06
+  sigma(3 3)=  1.33798077E-05  sigma(2 1)=  3.60579257E-07
 
--Cartesian components of stress tensor (GPa)         [Pressure= -1.6646E-01 GPa]
-- sigma(1 1)=  6.28354251E-01  sigma(3 2)=  3.53066123E-01
-- sigma(2 2)=  4.06064318E-03  sigma(3 1)=  1.74313026E-01
-- sigma(3 3)= -1.33046484E-01  sigma(2 1)= -1.61929022E-02
+-Cartesian components of stress tensor (GPa)         [Pressure= -3.2358E-01 GPa]
+- sigma(1 1)= -2.20537079E-01  sigma(3 2)= -2.00286486E-01
+- sigma(2 2)=  7.97629283E-01  sigma(3 1)= -1.76646589E-01
+- sigma(3 3)=  3.93647466E-01  sigma(2 1)=  1.06086062E-02
 --------------------------------------------------------------------------------
 
 
@@ -1263,21 +1263,21 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297331200E+02 Hartree
- Energy of the ifc part                    : -2.8246629829240342E-03 Hartree
- Energy of the elastic part                :  1.3215333518284421E-05 Hartree
+ Energy of the ifc part                    : -2.8195495456686901E-03 Hartree
+ Energy of the elastic part                :  1.5408918423462763E-04 Hartree
 
-    >>>>>>>>> Etotal= -1.37164224420961E+02
+    >>>>>>>>> Etotal= -1.37164078433673E+02
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  2.07122064E-05  sigma(3 2)=  1.31406688E-05
-  sigma(2 2)= -7.64254594E-07  sigma(3 1)=  5.56725402E-06
-  sigma(3 3)= -7.05849973E-06  sigma(2 1)= -1.67363863E-06
+  sigma(1 1)= -7.23013266E-06  sigma(3 2)= -5.94107610E-06
+  sigma(2 2)=  2.96599951E-05  sigma(3 1)= -5.82705507E-06
+  sigma(3 3)=  1.72430693E-05  sigma(2 1)= -5.15352392E-07
 
--Cartesian components of stress tensor (GPa)         [Pressure= -1.2641E-01 GPa]
-- sigma(1 1)=  6.09374047E-01  sigma(3 2)=  3.86611759E-01
-- sigma(2 2)= -2.24851427E-02  sigma(3 1)=  1.63794241E-01
-- sigma(3 3)= -2.07668197E-01  sigma(2 1)= -4.92401401E-02
+-Cartesian components of stress tensor (GPa)         [Pressure= -3.8907E-01 GPa]
+- sigma(1 1)= -2.12717811E-01  sigma(3 2)= -1.74792464E-01
+- sigma(2 2)=  8.72627035E-01  sigma(3 1)= -1.71437850E-01
+- sigma(3 3)=  5.07308528E-01  sigma(2 1)= -1.51621883E-02
 --------------------------------------------------------------------------------
 
 
@@ -1291,21 +1291,21 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297331200E+02 Hartree
- Energy of the ifc part                    : -1.6714544261413680E-02 Hartree
- Energy of the elastic part                :  1.1563336981041572E-05 Hartree
+ Energy of the ifc part                    : -1.6702950525354768E-02 Hartree
+ Energy of the elastic part                :  1.6698075318935171E-04 Hartree
 
-    >>>>>>>>> Etotal= -1.37178115954236E+02
+    >>>>>>>>> Etotal= -1.37177948943084E+02
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  1.98798153E-05  sigma(3 2)=  1.38659132E-05
-  sigma(2 2)= -2.67038413E-06  sigma(3 1)=  5.19124653E-06
-  sigma(3 3)= -9.35927543E-06  sigma(2 1)= -2.41252968E-06
+  sigma(1 1)= -6.74269217E-06  sigma(3 2)= -5.15214607E-06
+  sigma(2 2)=  3.29513162E-05  sigma(3 1)= -5.58712402E-06
+  sigma(3 3)=  2.08048835E-05  sigma(2 1)= -1.47876487E-06
 
--Cartesian components of stress tensor (GPa)         [Pressure= -7.6987E-02 GPa]
-- sigma(1 1)=  5.84884261E-01  sigma(3 2)=  4.07949182E-01
-- sigma(2 2)= -7.85654005E-02  sigma(3 1)=  1.52731720E-01
-- sigma(3 3)= -2.75359343E-01  sigma(2 1)= -7.09790618E-02
+-Cartesian components of stress tensor (GPa)         [Pressure= -4.6106E-01 GPa]
+- sigma(1 1)= -1.98376819E-01  sigma(3 2)= -1.51581345E-01
+- sigma(2 2)=  9.69461031E-01  sigma(3 1)= -1.64378836E-01
+- sigma(3 3)=  6.12100702E-01  sigma(2 1)= -4.35067572E-02
 --------------------------------------------------------------------------------
 
 
@@ -1319,21 +1319,21 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297331200E+02 Hartree
- Energy of the ifc part                    : -3.2654287116424048E-02 Hartree
- Energy of the elastic part                :  1.0719225454091582E-05 Hartree
+ Energy of the ifc part                    : -3.2630096055398863E-02 Hartree
+ Energy of the elastic part                :  1.7910475728258186E-04 Hartree
 
-    >>>>>>>>> Etotal= -1.37194056541203E+02
+    >>>>>>>>> Etotal= -1.37193863964610E+02
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  1.89044376E-05  sigma(3 2)=  1.42036684E-05
-  sigma(2 2)= -5.52938123E-06  sigma(3 1)=  4.81375441E-06
-  sigma(3 3)= -1.14689450E-05  sigma(2 1)= -2.79601490E-06
+  sigma(1 1)= -6.06339256E-06  sigma(3 2)= -4.44221724E-06
+  sigma(2 2)=  3.69502719E-05  sigma(3 1)= -5.30331841E-06
+  sigma(3 3)=  2.40983893E-05  sigma(2 1)= -2.49837074E-06
 
--Cartesian components of stress tensor (GPa)         [Pressure= -1.8693E-02 GPa]
-- sigma(1 1)=  5.56187662E-01  sigma(3 2)=  4.17886282E-01
-- sigma(2 2)= -1.62679985E-01  sigma(3 1)=  1.41625521E-01
-- sigma(3 3)= -3.37427954E-01  sigma(2 1)= -8.22615844E-02
+-Cartesian components of stress tensor (GPa)         [Pressure= -5.3924E-01 GPa]
+- sigma(1 1)= -1.78391138E-01  sigma(3 2)= -1.30694521E-01
+- sigma(2 2)=  1.08711435E+00  sigma(3 1)= -1.56028988E-01
+- sigma(3 3)=  7.08998971E-01  sigma(2 1)= -7.35045924E-02
 --------------------------------------------------------------------------------
 
 
@@ -1347,21 +1347,21 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297331200E+02 Hartree
- Energy of the ifc part                    : -5.0293431284309909E-02 Hartree
- Energy of the elastic part                :  1.0661182908153521E-05 Hartree
+ Energy of the ifc part                    : -5.0251979127267435E-02 Hartree
+ Energy of the elastic part                :  1.9040711106607360E-04 Hartree
 
-    >>>>>>>>> Etotal= -1.37211695743413E+02
+    >>>>>>>>> Etotal= -1.37211474545328E+02
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  1.78395719E-05  sigma(3 2)=  1.41964292E-05
-  sigma(2 2)= -9.19419932E-06  sigma(3 1)=  4.44551901E-06
-  sigma(3 3)= -1.34349277E-05  sigma(2 1)= -2.88308517E-06
+  sigma(1 1)= -5.23690679E-06  sigma(3 2)= -3.81240015E-06
+  sigma(2 2)=  4.15379878E-05  sigma(3 1)= -4.98989489E-06
+  sigma(3 3)=  2.71709639E-05  sigma(2 1)= -3.53030461E-06
 
--Cartesian components of stress tensor (GPa)         [Pressure=  4.6971E-02 GPa]
-- sigma(1 1)=  5.24858238E-01  sigma(3 2)=  4.17673296E-01
-- sigma(2 2)= -2.70502638E-01  sigma(3 1)=  1.30791663E-01
-- sigma(3 3)= -3.95269152E-01  sigma(2 1)= -8.48232800E-02
+-Cartesian components of stress tensor (GPa)         [Pressure= -6.2247E-01 GPa]
+- sigma(1 1)= -1.54075091E-01  sigma(3 2)= -1.12164666E-01
+- sigma(2 2)=  1.22208959E+00  sigma(3 1)= -1.46807751E-01
+- sigma(3 3)=  7.99397221E-01  sigma(2 1)= -1.03865130E-01
 --------------------------------------------------------------------------------
 
 
@@ -1375,21 +1375,21 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297331200E+02 Hartree
- Energy of the ifc part                    : -6.9176675711517255E-02 Hartree
- Energy of the elastic part                :  1.1370175031227555E-05 Hartree
+ Energy of the ifc part                    : -6.9114878138276936E-02 Hartree
+ Energy of the elastic part                :  2.0091482108339906E-04 Hartree
 
-    >>>>>>>>> Etotal= -1.37230578278848E+02
+    >>>>>>>>> Etotal= -1.37230326936629E+02
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  1.67393588E-05  sigma(3 2)=  1.38900964E-05
-  sigma(2 2)= -1.34759504E-05  sigma(3 1)=  4.09318379E-06
-  sigma(3 3)= -1.53006956E-05  sigma(2 1)= -2.74323180E-06
+  sigma(1 1)= -4.31182196E-06  sigma(3 2)= -3.26501715E-06
+  sigma(2 2)=  4.65563285E-05  sigma(3 1)= -4.65729123E-06
+  sigma(3 3)=  3.00714245E-05  sigma(2 1)= -4.52626510E-06
 
--Cartesian components of stress tensor (GPa)         [Pressure=  1.1805E-01 GPa]
-- sigma(1 1)=  4.92488857E-01  sigma(3 2)=  4.08660675E-01
-- sigma(2 2)= -3.96476082E-01  sigma(3 1)=  1.20425605E-01
-- sigma(3 3)= -4.50161931E-01  sigma(2 1)= -8.07086524E-02
+-Cartesian components of stress tensor (GPa)         [Pressure= -7.0920E-01 GPa]
+- sigma(1 1)= -1.26858161E-01  sigma(3 2)= -9.60601050E-02
+- sigma(2 2)=  1.36973424E+00  sigma(3 1)= -1.37022216E-01
+- sigma(3 3)=  8.84731704E-01  sigma(2 1)= -1.33167294E-01
 --------------------------------------------------------------------------------
 
 
@@ -1403,21 +1403,21 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297331200E+02 Hartree
- Energy of the ifc part                    : -8.8824217764964700E-02 Hartree
- Energy of the elastic part                :  1.2839371375962316E-05 Hartree
+ Energy of the ifc part                    : -8.8740448303215896E-02 Hartree
+ Energy of the elastic part                :  2.1069027058507182E-04 Hartree
 
-    >>>>>>>>> Etotal= -1.37250224351706E+02
+    >>>>>>>>> Etotal= -1.37249942731345E+02
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  1.56540958E-05  sigma(3 2)=  1.33286982E-05
-  sigma(2 2)= -1.81768065E-05  sigma(3 1)=  3.76107110E-06
-  sigma(3 3)= -1.71038315E-05  sigma(2 1)= -2.44559032E-06
+  sigma(1 1)= -3.33456141E-06  sigma(3 2)= -2.80410569E-06
+  sigma(2 2)=  5.18363180E-05  sigma(3 1)= -4.31335209E-06
+  sigma(3 3)=  3.28444023E-05  sigma(2 1)= -5.43837243E-06
 
--Cartesian components of stress tensor (GPa)         [Pressure=  1.9248E-01 GPa]
-- sigma(1 1)=  4.60559323E-01  sigma(3 2)=  3.92143773E-01
-- sigma(2 2)= -5.34780021E-01  sigma(3 1)=  1.10654513E-01
-- sigma(3 3)= -5.03212011E-01  sigma(2 1)= -7.19517393E-02
+-Cartesian components of stress tensor (GPa)         [Pressure= -7.9776E-01 GPa]
+- sigma(1 1)= -9.81061672E-02  sigma(3 2)= -8.24996237E-02
+- sigma(2 2)=  1.52507687E+00  sigma(3 1)= -1.26903178E-01
+- sigma(3 3)=  9.66315514E-01  sigma(2 1)= -1.60002414E-01
 --------------------------------------------------------------------------------
 
 
@@ -1431,21 +1431,21 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297331200E+02 Hartree
- Energy of the ifc part                    : -1.0877875045639318E-01 Hartree
- Energy of the elastic part                :  1.5075573639670789E-05 Hartree
+ Energy of the ifc part                    : -1.0867259151870540E-01 Hartree
+ Energy of the elastic part                :  2.1980352267511990E-04 Hartree
 
-    >>>>>>>>> Etotal= -1.37270176648195E+02
+    >>>>>>>>> Etotal= -1.37269865761308E+02
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  1.46281147E-05  sigma(3 2)=  1.25528984E-05
-  sigma(2 2)= -2.31079695E-05  sigma(3 1)=  3.45237946E-06
-  sigma(3 3)= -1.88764302E-05  sigma(2 1)= -2.05362713E-06
+  sigma(1 1)= -2.34633693E-06  sigma(3 2)= -2.43542286E-06
+  sigma(2 2)=  5.72145118E-05  sigma(3 1)= -3.96437146E-06
+  sigma(3 3)=  3.55287468E-05  sigma(2 1)= -6.22198677E-06
 
--Cartesian components of stress tensor (GPa)         [Pressure=  2.6828E-01 GPa]
-- sigma(1 1)=  4.30373922E-01  sigma(3 2)=  3.69318959E-01
-- sigma(2 2)= -6.79859820E-01  sigma(3 1)=  1.01572493E-01
-- sigma(3 3)= -5.55363658E-01  sigma(2 1)= -6.04197861E-02
+-Cartesian components of stress tensor (GPa)         [Pressure= -8.8652E-01 GPa]
+- sigma(1 1)= -6.90316042E-02  sigma(3 2)= -7.16526022E-02
+- sigma(2 2)=  1.68330877E+00  sigma(3 1)= -1.16635815E-01
+- sigma(3 3)=  1.04529164E+00  sigma(2 1)= -1.83057140E-01
 --------------------------------------------------------------------------------
 
 
@@ -1459,21 +1459,21 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297331200E+02 Hartree
- Energy of the ifc part                    : -1.2863479390655197E-01 Hartree
- Energy of the elastic part                :  1.8096770408939776E-05 Hartree
+ Energy of the ifc part                    : -1.2850671513190745E-01 Hartree
+ Energy of the elastic part                :  2.2831766312417785E-04 Hartree
 
-    >>>>>>>>> Etotal= -1.37290029670448E+02
+    >>>>>>>>> Etotal= -1.37289691370781E+02
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  1.36986255E-05  sigma(3 2)=  1.16003694E-05
-  sigma(2 2)= -2.80997798E-05  sigma(3 1)=  3.16989438E-06
-  sigma(3 3)= -2.06463594E-05  sigma(2 1)= -1.62259812E-06
+  sigma(1 1)= -1.38154780E-06  sigma(3 2)= -2.16617352E-06
+  sigma(2 2)=  6.25429790E-05  sigma(3 1)= -3.61585055E-06
+  sigma(3 3)=  3.81578263E-05  sigma(2 1)= -6.83770053E-06
 
--Cartesian components of stress tensor (GPa)         [Pressure=  3.4371E-01 GPa]
-- sigma(1 1)=  4.03027410E-01  sigma(3 2)=  3.41294595E-01
-- sigma(2 2)= -8.26723925E-01  sigma(3 1)=  9.32614967E-02
-- sigma(3 3)= -6.07436762E-01  sigma(2 1)= -4.77384767E-02
+-Cartesian components of stress tensor (GPa)         [Pressure= -9.7402E-01 GPa]
+- sigma(1 1)= -4.06465326E-02  sigma(3 2)= -6.37310145E-02
+- sigma(2 2)=  1.84007766E+00  sigma(3 1)= -1.06381978E-01
+- sigma(3 3)=  1.12264182E+00  sigma(2 1)= -2.01172061E-01
 --------------------------------------------------------------------------------
 
 
@@ -1487,21 +1487,21 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297331200E+02 Hartree
- Energy of the ifc part                    : -1.4806149045022060E-01 Hartree
- Energy of the elastic part                :  2.1927814030290913E-05 Hartree
+ Energy of the ifc part                    : -1.4791247831569715E-01 Hartree
+ Energy of the elastic part                :  2.3628202315013333E-04 Hartree
 
-    >>>>>>>>> Etotal= -1.37309452535948E+02
+    >>>>>>>>> Etotal= -1.37309089169605E+02
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  1.28947234E-05  sigma(3 2)=  1.05068983E-05
-  sigma(2 2)= -3.30088080E-05  sigma(3 1)=  2.91634777E-06
-  sigma(3 3)= -2.24386838E-05  sigma(2 1)= -1.19804714E-06
+  sigma(1 1)= -4.66674156E-07  sigma(3 2)= -2.00452341E-06
+  sigma(2 2)=  6.76968998E-05  sigma(3 1)= -3.27299692E-06
+  sigma(3 3)=  4.07605594E-05  sigma(2 1)= -7.25328454E-06
 
--Cartesian components of stress tensor (GPa)         [Pressure=  4.1732E-01 GPa]
-- sigma(1 1)=  3.79375796E-01  sigma(3 2)=  3.09123568E-01
-- sigma(2 2)= -9.71152497E-01  sigma(3 1)=  8.58018992E-02
-- sigma(3 3)= -6.60168757E-01  sigma(2 1)= -3.52477577E-02
+-Cartesian components of stress tensor (GPa)         [Pressure= -1.0591E+00 GPa]
+- sigma(1 1)= -1.37300254E-02  sigma(3 2)= -5.89751048E-02
+- sigma(2 2)=  1.99171122E+00  sigma(3 1)= -9.62948777E-02
+- sigma(3 3)=  1.19921686E+00  sigma(2 1)= -2.13398963E-01
 --------------------------------------------------------------------------------
 
 
@@ -1515,21 +1515,21 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297331200E+02 Hartree
- Energy of the ifc part                    : -1.6682480502040720E-01 Hartree
- Energy of the elastic part                :  2.6595004586099524E-05 Hartree
+ Energy of the ifc part                    : -1.6665596174551744E-01 Hartree
+ Energy of the elastic part                :  2.4372964453587921E-04 Hartree
 
-    >>>>>>>>> Etotal= -1.37328211183328E+02
+    >>>>>>>>> Etotal= -1.37327825205413E+02
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  1.22362196E-05  sigma(3 2)=  9.30762310E-06
-  sigma(2 2)= -3.77245419E-05  sigma(3 1)=  2.69452673E-06
-  sigma(3 3)= -2.42769657E-05  sigma(2 1)= -8.14464462E-07
+  sigma(1 1)=  3.80767276E-07  sigma(3 2)= -1.95888590E-06
+  sigma(2 2)=  7.25819614E-05  sigma(3 1)= -2.94100989E-06
+  sigma(3 3)=  4.33626146E-05  sigma(2 1)= -7.44596444E-06
 
--Cartesian components of stress tensor (GPa)         [Pressure=  4.8805E-01 GPa]
-- sigma(1 1)=  3.60001948E-01  sigma(3 2)=  2.73839680E-01
-- sigma(2 2)= -1.10989415E+00  sigma(3 1)=  7.92757000E-02
-- sigma(3 3)= -7.14252871E-01  sigma(2 1)= -2.39623677E-02
+-Cartesian components of stress tensor (GPa)         [Pressure= -1.1408E+00 GPa]
+- sigma(1 1)=  1.12025581E-02  sigma(3 2)= -5.76324032E-02
+- sigma(2 2)=  2.13543467E+00  sigma(3 1)= -8.65274837E-02
+- sigma(3 3)=  1.27577195E+00  sigma(2 1)= -2.19067800E-01
 --------------------------------------------------------------------------------
 
 
@@ -1543,21 +1543,21 @@ dipdip_range         2         2         2
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -1.3716141297331200E+02 Hartree
- Energy of the ifc part                    : -1.8481082949148420E-01 Hartree
- Energy of the elastic part                :  3.2119849563271866E-05 Hartree
+ Energy of the ifc part                    : -1.8462296742308607E-01 Hartree
+ Energy of the elastic part                :  2.5067682223195491E-04 Hartree
 
-    >>>>>>>>> Etotal= -1.37346191682954E+02
+    >>>>>>>>> Etotal= -1.37345785263913E+02
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  1.17322825E-05  sigma(3 2)=  8.03807904E-06
-  sigma(2 2)= -4.21765947E-05  sigma(3 1)=  2.50719101E-06
-  sigma(3 3)= -2.61843193E-05  sigma(2 1)= -4.93803690E-07
+  sigma(1 1)=  1.15327437E-06  sigma(3 2)= -2.03695029E-06
+  sigma(2 2)=  7.71422814E-05  sigma(3 1)= -2.62518435E-06
+  sigma(3 3)=  4.59875157E-05  sigma(2 1)= -7.40508277E-06
 
--Cartesian components of stress tensor (GPa)         [Pressure=  5.5536E-01 GPa]
-- sigma(1 1)=  3.45175611E-01  sigma(3 2)=  2.36488410E-01
-- sigma(2 2)= -1.24087805E+00  sigma(3 1)=  7.37640937E-02
-- sigma(3 3)= -7.70369140E-01  sigma(2 1)= -1.45282037E-02
+-Cartesian components of stress tensor (GPa)         [Pressure= -1.2188E+00 GPa]
+- sigma(1 1)=  3.39304978E-02  sigma(3 2)= -5.99291365E-02
+- sigma(2 2)=  2.26960389E+00  sigma(3 1)= -7.72355770E-02
+- sigma(3 3)=  1.35299920E+00  sigma(2 1)= -2.17865020E-01
 --------------------------------------------------------------------------------
 
 
@@ -1567,10 +1567,10 @@ dipdip_range         2         2         2
 ================================================================================
 
 -
-- Proc.   0 individual time (sec): cpu=          0.3  wall=          0.3
+- Proc.   0 individual time (sec): cpu=          0.1  wall=          0.6
 
 ================================================================================
 
-+Total cpu time      1.371  and wall time      1.375 sec
++Total cpu time      1.748  and wall time      2.230 sec
 
  multibinit : the run completed succesfully.

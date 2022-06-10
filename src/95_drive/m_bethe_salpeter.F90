@@ -9,7 +9,7 @@
 !!
 !! COPYRIGHT
 !! Copyright (C) 1992-2009 EXC group (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida)
-!! Copyright (C) 2009-2021 ABINIT group (MG, YG)
+!! Copyright (C) 2009-2022 ABINIT group (MG, YG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -65,7 +65,7 @@ module m_bethe_salpeter
  use m_gsphere,         only : gsphere_t, gsph_free, gsph_init, print_gsphere, gsph_extend
  use m_vcoul,           only : vcoul_t, vcoul_init, vcoul_free
  use m_qparticles,      only : rdqps, rdgw  !, show_QP , rdgw
- use m_wfd,             only : wfd_init, wfd_t, test_charge
+ use m_wfd,             only : wfd_init, wfdgw_t, test_charge
  use m_wfk,             only : wfk_read_eigenvalues
  use m_energies,        only : energies_type, energies_init
  use m_io_screening,    only : hscr_t, hscr_free, hscr_io, hscr_bcast, hscr_from_file, hscr_print
@@ -228,7 +228,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  type(ebands_t) :: KS_BSt,QP_BSt,KS_BSt_dense,QP_BSt_dense
  type(Energies_type) :: KS_energies
  type(vcoul_t) :: Vcp
- type(wfd_t) :: Wfd,Wfd_dense
+ type(wfdgw_t) :: Wfd, Wfd_dense
  type(screen_t) :: W
  type(screen_info_t) :: W_info
  type(wvl_data) :: wvl
@@ -398,7 +398,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
    ! Initialize and compute data for DFT+U
    Paw_dmft%use_dmft=Dtset%usedmft
    call pawpuxinit(Dtset%dmatpuopt,Dtset%exchmix,Dtset%f4of2_sla,Dtset%f6of2_sla,&
-      is_dfpt,Dtset%jpawu,Dtset%lexexch,Dtset%lpawu,Cryst%ntypat,Pawang,Dtset%pawprtvol,&
+      is_dfpt,Dtset%jpawu,Dtset%lexexch,Dtset%lpawu,Dtset%nspinor,Cryst%ntypat,Pawang,Dtset%pawprtvol,&
       Pawrad,Pawtab,Dtset%upawu,Dtset%usedmft,Dtset%useexexch,Dtset%usepawu)
    if (Dtset%usepawu>0.or.Dtset%useexexch>0) then
      ABI_ERROR('BS equation with DFT+U not completely coded!')
@@ -545,6 +545,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
    call wfd_dense%print(header="Wavefunctions on the dense K-mesh used for interpolation",mode_paral='PERS')
 
    call wfd_dense%read_wfk(Dtfil%fnameabi_wfkfine, iomode_from_fname(dtfil%fnameabi_wfkfine))
+   !call wfd_dense%update_bkstab()
 
    ! This test has been disabled (too expensive!)
    if (.False.) call wfd_dense%test_ortho(Cryst,Pawtab,unit=std_out,mode_paral="COLL")
@@ -946,8 +947,9 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
 
    if (BSp%use_interp) then
 
-     call exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_BSt,Wfd,Psps,Pawtab,Hur,Epren,&
-       Kmesh_dense,KS_BSt_dense,QP_BSt_dense,Wfd_dense,Vcp_dense,grid)
+     call exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_BSt,Wfd,Psps,Pawtab,Hur,Epren, &
+       kmesh_dense=Kmesh_dense, ks_bst_dense=KS_BSt_dense, qp_bst_dense=QP_BSt_dense,wfd_dense=Wfd_dense, &
+       vcp_dense=Vcp_dense, grid=grid)
    else
      call exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_BSt,Wfd,Psps,Pawtab,Hur,Epren)
    end if

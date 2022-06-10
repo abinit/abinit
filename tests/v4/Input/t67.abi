@@ -10,7 +10,6 @@ tolvrs1 1.0d-18
 
 #set 2 the ddk
 rfelfd2 2  # only derivative of the gs wf
-rfdir2 1 1 1
 nqpt2 1
 qpt2 0.0 0.0 0.0 #only the gamma point
 getwfk2 -1
@@ -22,9 +21,7 @@ tolwfr2 1.0d-20
 # Set 3 : response-function strain calculation
 
 rfphon3 1
-rfatpol3 1 4
 rfelfd3 3
-rfdir3 1 1 1
 nqpt3 1
 qpt3 0 0 0
 rfstrs3  3

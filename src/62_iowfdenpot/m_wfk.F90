@@ -15,7 +15,7 @@
 !!  See notes below for more info.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2021 ABINIT group (MG)
+!! Copyright (C) 2009-2022 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3158,10 +3158,11 @@ subroutine wfk_read_my_kptbands(inpath_, distrb_flags, comm, ecut_eff_in,&
  iomode = iomode_from_fname(inpath)
  wfk_unt = get_unit()
 
- ! TODO: this still does not read in parallel properly:
- ! if I use xmpi_comm_self only the mother thread gets eigen and cg
- ! if I use comm and MPIO_stuff then it hangs on this call
- ! if I impose FORTRAN_IO and xmpio_single it complains the file is already opened by another proc
+! TODO: this still does not read in parallel properly:
+! if I use xmpi_comm_self only the mother thread gets eigen and cg
+! if I use comm and MPIO_stuff then it hangs on this call
+! if I impose FORTRAN_IO and xmpio_single it complains the file is already opened by another proc
+ ABI_UNUSED(comm)
  call wfk_open_read(wfk_disk,inpath,formeig,iomode,wfk_unt,xmpi_comm_self)
 
  if(present(eigen)) eigen = zero
@@ -4698,7 +4699,7 @@ subroutine wfk_tofullbz(in_path, dtset, psps, pawtab, out_path)
  if (nctk_try_fort_or_ncfile(my_inpath, msg) /= 0) then
    ABI_ERROR(msg)
  end if
- call wrtout(std_out, sjoin("Converting:", my_inpath, "to", out_path))
+ call wrtout(std_out, sjoin(" Converting:", my_inpath, "to", out_path))
 
  in_iomode = iomode_from_fname(my_inpath)
 
@@ -4833,8 +4834,8 @@ subroutine wfk_tofullbz(in_path, dtset, psps, pawtab, out_path)
    !     - For each k-point in the star of kpt_ibz:
    !        - Rotate wavefunctions in G-space to get the k-point in the full BZ.
    !        - Write kbz data to file.
-   if (out_iomode == IO_MODE_MPI) call wrtout(std_out,"Using MPI-IO to generate full WFK file", do_flush=.True.)
-   if (out_iomode == IO_MODE_ETSF) call wrtout(std_out,"Using Netcdf-IO to generate full WFK file", do_flush=.True.)
+   if (out_iomode == IO_MODE_MPI) call wrtout(std_out," Using MPI-IO to generate full WFK file", do_flush=.True.)
+   if (out_iomode == IO_MODE_ETSF) call wrtout(std_out, "Using Netcdf-IO to generate full WFK file", do_flush=.True.)
 
    ! Construct sorted mapping BZ --> IBZ to speedup qbz search below.
    ABI_MALLOC(iperm, (nkfull))
@@ -4914,7 +4915,7 @@ subroutine wfk_tofullbz(in_path, dtset, psps, pawtab, out_path)
    ABI_FREE(bz2ibz_sort)
  end if
 
- call cwtime_report(" FULL_WFK written to file. ", cpu, wall, gflops)
+ call cwtime_report(sjoin(" FULL_WFK written to: ", out_path), cpu, wall, gflops)
 
  ABI_FREE(kg_ki)
  ABI_FREE(cg_ki)

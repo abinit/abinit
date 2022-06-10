@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2005-2021 ABINIT group (XG)
+!!  Copyright (C) 2005-2022 ABINIT group (XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -626,7 +626,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
    !call timab(1190,2,tsec)
 
    !call timab(1191,1,tsec)
-   NCF_CHECK(hdr%ncwrite(ncid, fform_den, nc_define=.True.))
+   NCF_CHECK(hdr%ncwrite(ncid, fform_den, spinat=dtset%spinat, nc_define=.True.))
    !call timab(1191,2,tsec)
 
    !call timab(1192,1,tsec)
@@ -1085,11 +1085,13 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  if (psps%usepaw==1.and.prtnabla>0) then
    if (prtnabla==1.or.prtnabla==2) then
      call optics_paw(atindx1,cg,cprj,dimcprj,dtfil,dtset,eigen,gprimd,hdr,kg,&
-&     mband,mcg,mcprj,mkmem,mpi_enreg,mpsang,mpw,natom,nkpt,npwarr,nsppol,pawrad,pawtab)
+&     mband,mcg,mcprj,mkmem,mpi_enreg,mpsang,mpw,natom,nkpt,npwarr,nsppol,pawang,&
+&     pawrad,pawrhoij,pawtab,psps%znuclpsp)
    end if
    if (prtnabla==2.or.prtnabla==3) then
      call optics_paw_core(atindx1,cprj,dimcprj,dtfil,dtset,eigen,psps%filpsp,hdr,&
-&     mband,mcprj,mkmem,mpi_enreg,mpsang,natom,nkpt,nsppol,pawrad,pawtab)
+&     mband,mcprj,mkmem,mpi_enreg,mpsang,natom,nkpt,nsppol,pawang,pawrad,pawrhoij,pawtab,&
+&     psps%znuclpsp)
    end if
  end if
  if (prtnabla<0) then
@@ -1295,18 +1297,18 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  end if
 
 !Optionally provide output for electric field gradient calculation
- if (dtset%prtefg > 0) then
+ if (dtset%nucefg > 0) then
    call timab(1176,1,tsec)
-   call calc_efg(mpi_enreg,my_natom,natom,nfft,ngfft,nhat,nspden,dtset%nsym,ntypat,&
-&   paw_an,pawang,pawrad,pawrhoij,pawtab,&
-&   dtset%ptcharge,dtset%prtefg,dtset%quadmom,rhor,rprimd,dtset%symrel,&
+   call calc_efg(mpi_enreg,my_natom,natom,nfft,ngfft,nhat,nspden,dtset%nsym,dtset%nucefg,&
+&   ntypat,paw_an,pawang,pawrad,pawrhoij,pawtab,&
+&   dtset%ptcharge,dtset%quadmom,rhor,rprimd,dtset%symrel,&
 &   dtset%tnons,dtset%typat,ucvol,psps%usepaw,xred,psps%zionpsp,&
 &   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
    call timab(1176,2,tsec)
  end if
 
 !Optionally provide output for Fermi-contact term at nuclear positions
- if (dtset%prtfc > 0) then
+ if (dtset%nucfc > 0) then
    call timab(1177,1,tsec)
    call calc_fc(my_natom,natom,nspden,ntypat,pawrad,pawrhoij,pawtab,dtset%typat,psps%usepaw,&
 &   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)

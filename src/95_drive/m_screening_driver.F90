@@ -8,7 +8,7 @@
 !! Calculate screening and dielectric functions
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2021 ABINIT group (MG, GMR, VO, LR, RWG, MT, RShaltaf, AS, FB)
+!!  Copyright (C) 2008-2022 ABINIT group (MG, GMR, VO, LR, RWG, MT, RShaltaf, AS, FB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -71,7 +71,7 @@ module m_screening_driver
  use m_fftcore,       only : print_ngfft
  use m_fft_mesh,      only : rotate_FFT_mesh, cigfft, get_gftt, setmesh
  use m_fft,           only : fourdp
- use m_wfd,           only : wfd_init, wfd_t, wfd_copy, test_charge
+ use m_wfd,           only : wfd_init, wfdgw_t, wfdgw_copy, test_charge
  use m_wfk,           only : wfk_read_eigenvalues
  use m_io_kss,        only : make_gvec_kss
  use m_chi0tk,        only : output_chi0sumrule
@@ -217,7 +217,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  type(MPI_type) :: MPI_enreg_seq
  type(Pawfgr_type) :: Pawfgr
  type(hscr_t) :: Hem1,Hchi0
- type(wfd_t) :: Wfd,Wfdf
+ type(wfdgw_t) :: Wfd,Wfdf
  type(spectra_t) :: spectra
  type(chi_t) :: chihw
  type(wvl_data) :: wvl_dummy
@@ -392,7 +392,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 !  * Initialize and compute data for DFT+U.
 !  paw_dmft%use_dmft=dtset%usedmft
    call pawpuxinit(Dtset%dmatpuopt,Dtset%exchmix,Dtset%f4of2_sla,Dtset%f6of2_sla,&
-&     is_dfpt,Dtset%jpawu,Dtset%lexexch,Dtset%lpawu,Cryst%ntypat,Pawang,Dtset%pawprtvol,&
+&     is_dfpt,Dtset%jpawu,Dtset%lexexch,Dtset%lpawu,dtset%nspinor,Cryst%ntypat,Pawang,Dtset%pawprtvol,&
 &     Pawrad,Pawtab,Dtset%upawu,Dtset%usedmft,Dtset%useexexch,Dtset%usepawu,dtset%ucrpa)
 
    if (my_rank == master) call pawtab_print(Pawtab)
@@ -643,7 +643,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  call wfd%read_wfk(wfk_fname,iomode_from_fname(wfk_fname))
 
  if (Dtset%pawcross==1) then
-   call wfd_copy(Wfd,Wfdf)
+   call wfdgw_copy(Wfd, Wfdf)
    call wfdf%change_ngfft(Cryst,Psps,ngfftf)
  end if
 
@@ -1522,7 +1522,6 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    call pawpwff_free(Paw_pwff)
    if (Dtset%pawcross==1) then
      call paw_pwaves_lmn_free(Paw_onsite)
-     Wfdf%bks_comm = xmpi_comm_null
      call wfdf%free()
    end if
  end if

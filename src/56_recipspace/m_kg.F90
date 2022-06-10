@@ -6,7 +6,7 @@
 !!  Low-level functions to operate of G-vectors.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2021 ABINIT group (DCA, XG, GMR, MT, DRH, AR)
+!!  Copyright (C) 2008-2022 ABINIT group (DCA, XG, GMR, MT, DRH, AR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -548,7 +548,6 @@ subroutine kpgio(ecut,exchn2n3d,gmet,istwfk,kg,kptns,mkmem,nband,nkpt,&
      end do
    end if
  end if
-
  npwarr(:)=0
  npwtot(:)=0
 

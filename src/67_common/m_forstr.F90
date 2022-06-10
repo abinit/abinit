@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, AF, AR, MB, MT)
+!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, AF, AR, MB, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -410,6 +410,9 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 &   dtset%nkpt,dtset%nloalg,npwarr,dtset%nspden,dtset%nspinor,dtset%nsppol,dtset%nsym,ntypat,&
 &   dtset%nucdipmom,occ,optfor,paw_ij,pawtab,ph1d,psps,rprimd,stress_needed,symrec,dtset%typat,&
 &   usecprj,dtset%usefock,dtset%use_gpu_cuda,dtset%wtk,xred,ylm,ylmgr)
+!DEBUG
+!   write(6,*)' after forstrnps, nlstr=',nlstr(1:6)
+!ENDDEBUG
  else if (optfor>0) then !WVL
    ABI_MALLOC(xcart,(3, dtset%natom))
    call xred2xcart(dtset%natom, rprimd, xcart, xred)
@@ -448,6 +451,9 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 &   nattyp,nfftf,ngfftf,nhat,nlstr,dtset%nspden,dtset%nsym,ntypat,optgr,optgr2,optstr,optstr2,&
 &   pawang,pawfgrtab,pawrhoij,pawtab,ph1df,psps,k0,rprimd,symrec,dtset%typat,ucvol_,vlocal,vxc,xred,&
 &   mpi_atmtab=mpi_enreg%my_atmtab, comm_atom=mpi_enreg%comm_atom,mpi_comm_grid=comm_grid)
+!DEBUG
+!   write(6,*)' after pawgrnl, nlstr=',nlstr(1:6)
+!ENDDEBUG
    ABI_FREE(vlocal)
 
  end if

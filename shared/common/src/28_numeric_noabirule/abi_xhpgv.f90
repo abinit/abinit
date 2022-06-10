@@ -12,7 +12,7 @@
 !!  stored in packed format  and B is also positive definite.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2021 ABINIT group (LNguyen,FDahm,MT)
+!!  Copyright (C) 2001-2022 ABINIT group (LNguyen,FDahm,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~ABINIT/Infos/copyright
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -33,6 +33,8 @@
 !! SOURCE
 !!
   subroutine abi_dhpgv(itype,jobz,uplo,n,a,b,w,z,ldz,istwf_k,use_slk)
+
+    use m_fstrings,     only : sjoin, itoa
 
 !Arguments ------------------------------------
  integer :: itype
@@ -96,6 +98,20 @@
    else
      call dspgv(itype,jobz,uplo,n,a,b,w,z,ldz,eigen_d_work,info)
    endif
+ end if
+
+  if (info < 0) then
+    ABI_COMMENT(sjoin("argument #", itoa(-info), "had an illegal value"))
+ end if
+
+ if (info > 0) then
+    ABI_COMMENT("DSPEV failed to converge")
+    if (info <= n) then
+       ABI_COMMENT(sjoin("DSPEV failed to converge;", itoa(info), " off-diagonal elements of"))
+       ABI_COMMENT(" an intermediate tridiagonal form did not converge to zero.")
+    else
+       ABI_COMMENT("The factorization of B could not be completed and no eigenvalues or eigenvectors were computed.")
+    endif
  end if
 
  ABI_CHECK(info==0,"abi_dhpgv returned info!=0!")

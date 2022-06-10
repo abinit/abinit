@@ -8,7 +8,7 @@
 !!  Subdriver for DFPT calculations.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2021 ABINIT group (XG, DRH, MT, MKV)
+!!  Copyright (C) 1999-2022 ABINIT group (XG, DRH, MT, MKV)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -650,7 +650,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    psps%n1xccc=maxval(pawtab(1:psps%ntypat)%usetcore)
    call setsym_ylm(gprimd,pawang%l_max-1,dtset%nsym,dtset%pawprtvol,rprimd,symrec,pawang%zarot)
    call pawpuxinit(dtset%dmatpuopt,dtset%exchmix,dtset%f4of2_sla,dtset%f6of2_sla,&
-&   is_dfpt,dtset%jpawu,dtset%lexexch,dtset%lpawu,ntypat,pawang,dtset%pawprtvol,pawrad,&
+&   is_dfpt,dtset%jpawu,dtset%lexexch,dtset%lpawu,dtset%nspinor,ntypat,pawang,dtset%pawprtvol,pawrad,&
 &   pawtab,dtset%upawu,dtset%usedmft,dtset%useexexch,dtset%usepawu)
    compch_fft=-1.d5;compch_sph=-1.d5
    usexcnhat=maxval(pawtab(:)%usexcnhat)
@@ -1639,14 +1639,9 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
          call wrtout(ab_out,message,'COLL')
          call wrtout(std_out,message,'COLL')
 
-         ! CP modified
-         !call prteigrs(eigen0,dtset%enunit,fermie,dtfil%fnameabo_eig,ab_out,-1,dtset%kptns,dtset%kptopt,&
-!&         dtset%mband,dtset%nband,dtset%nkpt,1,dtset%nsppol,occ,dtset%occopt,3,0,dtset%prtvol,&
-!&         eigen0,zero,zero,dtset%wtk)
          call prteigrs(eigen0,dtset%enunit,fermie,fermih,dtfil%fnameabo_eig,ab_out,-1,dtset%kptns,dtset%kptopt,&
-&         dtset%mband,dtset%nband,dtset%nkpt,1,dtset%nsppol,occ,dtset%occopt,3,0,dtset%prtvol,&
+&         dtset%mband,dtset%nband,dtset%nbdbuf,dtset%nkpt,1,dtset%nsppol,occ,dtset%occopt,3,0,dtset%prtvol,&
 &         eigen0,zero,zero,dtset%wtk)
-         ! Emd CP modified
 
          write(message, '(a)' ) ch10
          call wrtout(ab_out,message,'COLL')
@@ -1658,18 +1653,9 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
          call elph2_fanddw(dim_eig2nkq,displ,eig2nkq,eigen_fan,gprimd,&
 &         dtset%mband,natom,dtset%nkpt,dtset%nsppol,1,phfrq,dtset%prtvol)
          call eigen_meandege(eigen0,eigen_fan,eigen_fan_mean,dtset%mband,dtset%nband,dtset%nkpt,dtset%nsppol,2)
-         ! CP modified
-         !call prteigrs(eigen_fan_mean,dtset%enunit,fermie,dtfil%fnameabo_eig,ab_out,-1,dtset%kptns,dtset%kptopt,&
-!&         dtset%mband,dtset%nband,dtset%nkpt,1,dtset%nsppol,occ,dtset%occopt,5,0,dtset%prtvol,&
-!&         eigen0,zero,zero,dtset%wtk)
          call prteigrs(eigen_fan_mean,dtset%enunit,fermie,fermih,dtfil%fnameabo_eig,ab_out,-1,dtset%kptns,dtset%kptopt,&
-&         dtset%mband,dtset%nband,dtset%nkpt,1,dtset%nsppol,occ,dtset%occopt,5,0,dtset%prtvol,&
+&         dtset%mband,dtset%nband,dtset%nbdbuf,dtset%nkpt,1,dtset%nsppol,occ,dtset%occopt,5,0,dtset%prtvol,&
 &         eigen0,zero,zero,dtset%wtk)
-         ! End CP modified
-         !call prteigrs(eigen_fan_mean,dtset%enunit,fermie,dtfil%fnameabo_eig,ab_out,-1,dtset%kptns,dtset%kptopt,&
-!&         dtset%mband,dtset%nband,dtset%nkpt,1,dtset%nsppol,occ,dtset%occopt,5,0,dtset%prtvol,&
-!&         eigen0,zero,zero,dtset%wtk)
-          ! End CP modified
 
          if(qeq0 .or. dtset%getgam_eig2nkq>0)then
 
@@ -1703,14 +1689,9 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
              end if
            end if
            call eigen_meandege(eigen0,eigen_ddw,eigen_ddw_mean,dtset%mband,dtset%nband,dtset%nkpt,dtset%nsppol,2)
-           ! CP modified
-           !call prteigrs(eigen_ddw_mean,dtset%enunit,fermie,dtfil%fnameabo_eig,ab_out,-1,dtset%kptns,dtset%kptopt,&
-!&           dtset%mband,dtset%nband,dtset%nkpt,1,dtset%nsppol,occ,dtset%occopt,6,0,dtset%prtvol,&
-!&           eigen0,zero,zero,dtset%wtk)
            call prteigrs(eigen_ddw_mean,dtset%enunit,fermie,fermih,dtfil%fnameabo_eig,ab_out,-1,dtset%kptns,dtset%kptopt,&
-&           dtset%mband,dtset%nband,dtset%nkpt,1,dtset%nsppol,occ,dtset%occopt,6,0,dtset%prtvol,&
+&           dtset%mband,dtset%nband,dtset%nbdbuf,dtset%nkpt,1,dtset%nsppol,occ,dtset%occopt,6,0,dtset%prtvol,&
 &           eigen0,zero,zero,dtset%wtk)
-           ! End CP modified
            write(message, '(a)' ) ch10
            call wrtout(ab_out,message,'COLL')
            call wrtout(std_out,message,'COLL')
@@ -1718,12 +1699,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 !          Print sum of mean Fan and DDW
            ABI_MALLOC(eigen_fanddw,(dtset%mband*dtset%nkpt*dtset%nsppol))
            eigen_fanddw=eigen_fan_mean+eigen_ddw_mean
-           ! CP modified
-           !call prteigrs(eigen_fanddw,dtset%enunit,fermie,dtfil%fnameabo_eig,ab_out,-1,dtset%kptns,dtset%kptopt,&
-!&           dtset%mband,dtset%nband,dtset%nkpt,1,dtset%nsppol,occ,dtset%occopt,7,0,dtset%prtvol,&
-!&           eigen0,zero,zero,dtset%wtk)
            call prteigrs(eigen_fanddw,dtset%enunit,fermie,fermih,dtfil%fnameabo_eig,ab_out,-1,dtset%kptns,dtset%kptopt,&
-&           dtset%mband,dtset%nband,dtset%nkpt,1,dtset%nsppol,occ,dtset%occopt,7,0,dtset%prtvol,&
+&           dtset%mband,dtset%nband,dtset%nbdbuf,dtset%nkpt,1,dtset%nsppol,occ,dtset%occopt,7,0,dtset%prtvol,&
 &           eigen0,zero,zero,dtset%wtk)
            ! End CP modified
 
@@ -2034,7 +2011,7 @@ subroutine wrtloctens(blkflg,d2bbb,d2nl,mband,mpert,natom,prtbbb,rprimd,usepaw)
    write(message,'(6a)')ch10,&
 &   ' WARNING : Localization tensor calculation (this does not apply to other properties).',ch10,&
 &   '  Not all d/dk perturbations were computed. So the localization tensor in reciprocal space is incomplete,',ch10,&
-&   '  and transformation to cartesian coordinates may be wrong.'
+&   '  and transformation to cartesian coordinates may be wrong. Check input variable rfdir.'
    call wrtout(std_out,message,'COLL')
    call wrtout(ab_out,message,'COLL')
  end if
