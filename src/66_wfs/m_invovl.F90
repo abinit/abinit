@@ -173,18 +173,28 @@ end type invovl_kpt_type
    subroutine f_gpu_apply_invovl_inner_dealloc() bind(c, name='gpu_apply_invovl_inner_dealloc')
    end subroutine f_gpu_apply_invovl_inner_dealloc
 
+   !> init data for GPU
+   subroutine f_gpu_init_invovl_data(indlmn_dim, indlmn_ptr) bind(c, name='init_invovl_data')
+     use, intrinsic :: iso_c_binding
+     implicit none
+     integer(kind=c_int32_t),        intent(in) :: indlmn_dim(3)
+     type(c_ptr)                                :: indlmn_ptr
+   end subroutine f_gpu_init_invovl_data
+
    !> solver_inner on GPU
-   subroutine f_solve_inner_gpu(invovl_gpu, proj_ptr, proj_dim, f_comm_fft, me_fft, nproc_fft, paral_kgb) bind(c, name='solve_inner_gpu')
+   subroutine f_solve_inner_gpu(invovl_gpu, proj_dim, proj_ptr, sm1proj_ptr, ptp_sm1proj_ptr, nattyp_dim, nattyp_ptr, cplx, block_sliced) bind(c, name='solve_inner_gpu')
      use, intrinsic :: iso_c_binding
      import invovl_kpt_gpu_type
      implicit none
      type(invovl_kpt_gpu_type),      intent(inout) :: invovl_gpu
-     type(c_ptr)                                   :: proj_ptr
      integer(kind=c_int32_t),        intent(in)    :: proj_dim(3)
-     integer(kind=c_int32_t)                       :: f_comm_fft
-     integer(kind=c_int32_t), value, intent(in)    :: me_fft
-     integer(kind=c_int32_t), value, intent(in)    :: nproc_fft
-     integer(kind=c_int32_t), value, intent(in)    :: paral_kgb
+     type(c_ptr)                                   :: proj_ptr
+     type(c_ptr)                                   :: sm1proj_ptr
+     type(c_ptr)                                   :: ptp_sm1proj_ptr
+     integer(kind=c_int32_t), value, intent(in)    :: nattyp_dim
+     type(c_ptr)                                   :: nattyp_ptr
+     integer(kind=c_int32_t), value, intent(in)    :: cplx
+     integer(kind=c_int32_t), value, intent(in)    :: block_sliced
    end subroutine f_solve_inner_gpu
 
  end interface
@@ -338,7 +348,7 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
  use m_abi_linalg
  implicit none
 
- type(gs_hamiltonian_type),intent(in) :: ham
+ type(gs_hamiltonian_type),intent(in), target :: ham
  integer, intent(in) :: dimffnl
  real(dp),intent(in) :: ffnl(ham%npw_k,dimffnl,ham%lmnmax,ham%ntypat)
  real(dp),intent(in) :: ph3d(2,ham%npw_k,ham%matblk)
@@ -366,6 +376,7 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
  integer, parameter :: timer_mkinvovl = 1620, timer_mkinvovl_build_d = 1621, timer_mkinvovl_build_ptp = 1622
 
  integer(kind=c_int32_t) :: proj_dim(3)
+ integer(kind=c_int32_t) :: indlmn_dim(3)
 
 ! *************************************************************************
 
@@ -565,13 +576,21 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
  call xmpi_sum(invovl%gram_projs,mpi_enreg%comm_band,ierr)
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_FC_ISO_C_BINDING)
+
  !! memory allocation of data used in solve_inner_gpu
  if (ham%use_gpu_cuda==1) then
    proj_dim(1) = 2
    proj_dim(2) = ham%npw_k
    proj_dim(3) = invovl%nprojs
    call f_gpu_apply_invovl_inner_alloc(proj_dim, mpi_enreg%nproc_fft)
+
+   ! TODO find a better place to put that initialization
+   indlmn_dim(1) = size(ham%indlmn,1)
+   indlmn_dim(2) = size(ham%indlmn,2)
+   indlmn_dim(3) = size(ham%indlmn,3)
+   call f_gpu_init_invovl_data(indlmn_dim, c_loc(ham%indlmn(1,1,1)))
  endif
+
 #endif
 
  call timab(timer_mkinvovl_build_ptp, 2, tsec)
@@ -608,7 +627,7 @@ end subroutine make_invovl
  implicit none
 
  ! args
- type(gs_hamiltonian_type), intent(in) :: ham
+ type(gs_hamiltonian_type), intent(in), target :: ham
  integer, intent(in) :: npw, ndat
  integer, intent(in) :: nspinor
  integer, intent(in) :: block_sliced
@@ -621,6 +640,7 @@ end subroutine make_invovl
 
  ! used to pass proj dimensions to cuda
  integer(kind=c_int32_t) :: proj_dim(3)
+ integer(kind=c_int32_t) :: nattyp_dim
 
  integer :: idat, iatom, nlmn, shift
  real(dp) :: tsec(2)
@@ -660,8 +680,8 @@ end subroutine make_invovl
    blas_transpose = 't'
  end if
 
- ABI_MALLOC(proj, (cplx,invovl%nprojs,nspinor*ndat))
- ABI_MALLOC(sm1proj, (cplx,invovl%nprojs,nspinor*ndat))
+ ABI_MALLOC(proj,       (cplx,invovl%nprojs,nspinor*ndat))
+ ABI_MALLOC(sm1proj,    (cplx,invovl%nprojs,nspinor*ndat))
  ABI_MALLOC(PtPsm1proj, (cplx,invovl%nprojs,nspinor*ndat))
  proj = zero
  sm1proj = zero
@@ -706,10 +726,16 @@ end subroutine make_invovl
 !  if (ham%use_gpu_cuda == 1) then
 
 ! #if defined(HAVE_FC_ISO_C_BINDING) && defined(HAVE_GPU_CUDA)
+!
+ if (mpi_enreg%nproc_fft /= 1) then
+   ABI_ERROR("[66_wfs/m_invovl.F90:apply_invovl] nproc_fft must be 1, when GPU/CUDA is activated")
+ end if
 
-!    !call solve_inner_gpu(invovl, ham, cplx, mpi_enreg, proj, ndat*nspinor, sm1proj, PtPsm1proj)
+ !nattyp_dim = size(ham%nattyp)
+
 !    invovl_gpu = make_invovl_kpt_gpu(invovl)
-!    call f_solve_inner_gpu(invovl_gpu, c_loc(proj(1,1,1)), proj_dim, mpi_enreg%comm_fft, mpi_enreg%me_fft, mpi_enreg%nproc_fft, mpi_enreg%paral_kgb)
+! call f_solve_inner_gpu(invovl_gpu, proj_dim, c_loc(proj(1,1,1)), &
+!   & c_loc(sm1proj(1,1,1)), c_loc(PtPsm1proj(1,1,1)), nattyp_dim, c_loc(ham%nattyp(1)), cplx, block_sliced)
 
 ! #endif
 
@@ -792,7 +818,7 @@ subroutine solve_inner(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj, PtPsm1
 
  integer,intent(in) :: ndat,cplx
  type(invovl_kpt_type), intent(in) :: invovl
- real(dp), intent(inout) :: proj(cplx, invovl%nprojs,ndat), sm1proj(cplx, invovl%nprojs,ndat), PtPsm1proj(cplx, invovl%nprojs,ndat)
+ real(dp), intent(inout) :: proj(cplx, invovl%nprojs,ndat), sm1proj(cplx, invovl%nprojs, ndat), PtPsm1proj(cplx, invovl%nprojs, ndat)
  real(dp), allocatable :: temp_proj(:,:,:)
  type(mpi_type), intent(in) :: mpi_enreg
  type(gs_hamiltonian_type),intent(in) :: ham
@@ -929,6 +955,7 @@ subroutine apply_block(ham, cplx, mat, nprojs, ndat, x, y, block_sliced)
            nlmn = count(ham%indlmn(3,:,itypat)>0)
            !! apply mat to all atoms at once
            ! perform natom multiplications of size nlmn
+           ! compute y = mat*x
            if(cplx == 2) then
               call ZHEMM('L','U', nlmn, ham%nattyp(itypat), cone, &
                    &  mat(:, :, :, itypat), ham%lmnmax, &
