@@ -1113,8 +1113,6 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, eph_np_pqbks, priority, n
      ! Here we try to optimize performance but it's clear that for large systems the user
      ! has to specify eph_np_pqbks in the input file.
 
-     np = nproc_spin(spin)
-
      select case (priority)
      case ("q")
        order = "1"
@@ -1128,6 +1126,7 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, eph_np_pqbks, priority, n
        ABI_ERROR(sjoin("Wrong priority:", priority))
      end select
 
+     np = nproc_spin(spin)
      call xmpi_distrib_2d(np, order, gqk%glob_nq, gqk%glob_nk, gqk%qpt_comm%nproc, gqk%kpt_comm%nproc, ierr)
      ABI_CHECK(ierr == 0, sjoin("Cannot distribute nprocs:", itoa(np), " with priority: ", priority))
      !if (ierr /= 0) call xmpi_distrib_2d_extra(np, gqk%qpt_comm%nproc, gqk%kpt_comm%nproc, gqk%pert_comm%nproc, ierr)
@@ -1145,7 +1144,7 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, eph_np_pqbks, priority, n
 
  end do ! my_is
 
- ! For each spin treated by this rank, create 3D cartesian communicato: (q-points, k-points, perturbations)
+ ! For each spin treated by this rank, create 3D cartesian communicator: (q-points, k-points, perturbations)
  periods(:) = .False.; reorder = .False.
 
  do my_is=1,gstore%my_nspins
@@ -1302,7 +1301,7 @@ subroutine gstore_malloc__(gstore, with_cplex, max_nq, qglob2bz, max_nk, kglob2b
    spin = gstore%my_spins(my_is)
 
    ! Split q-points and transfer symmetry tables.
-   ! FIXME: Note that glob_nq and glob_nk does not necessarily correspond to the size of the BZ
+   ! Note that glob_nq and glob_nk does not necessarily correspond to the size of the BZ
    ! First of all we have to consider kzone
    ! Even if kzone == "bz" we may have filtered the wavevectors e.g. Fermi surface.
    call xmpi_split_block(gqk%glob_nq, gqk%qpt_comm%value, gqk%my_nq, myq2glob)
@@ -1562,7 +1561,7 @@ subroutine gstore_filter_erange__(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, kbz2
  comm = gstore%comm
  all_nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
 
- ! filter k  and k+q points according to erange and define gstore%brange_spin automatically.
+ ! filter k and k + q points according to erange and define gstore%brange_spin automatically.
  ! NB: here we recompute brange_spin
  call wrtout(std_out, sjoin(" Filtering k-points using gstore_erange:", &
                             ltoa(reshape(gstore%erange_spin, [2 * gstore%nsppol]) * Ha_eV), "(eV)"))
@@ -2130,6 +2129,7 @@ end subroutine gstore_get_lambda_iso_iw
 !! gstore_get_a2fw
 !!
 !! FUNCTION
+!!  Compute a^2F(omega)
 !!
 !! INPUTS
 !!
@@ -2784,7 +2784,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  type(gqk_t),pointer :: gqk
  character(len=500) :: msg
 !arrays
- integer :: g0_k(3), g0_kq(3), work_ngfft(18),gmax(3),gamma_ngqpt(3), indkk_kq(6,1)
+ integer :: g0_k(3), g0_kq(3), work_ngfft(18),gmax(3),indkk_kq(6,1)
  integer(i1b),allocatable :: itreat_qibz(:)
  integer,allocatable :: kg_k(:,:), kg_kq(:,:), nband(:,:), wfd_istwfk(:), qselect(:)
  integer,allocatable :: my_pinfo(:,:), pert_table(:,:)
@@ -2832,12 +2832,6 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  nfft = product(ngfft(1:3)) ; mgfft = maxval(ngfft(1:3))
  n1 = ngfft(1); n2 = ngfft(2); n3 = ngfft(3)
  n4 = ngfft(4); n5 = ngfft(5); n6 = ngfft(6)
-
- ! Define q-mesh, eph_ngqpt_fine activates the Fourier interpolation of the DFPT potentials.
- gamma_ngqpt = ifc%ngqpt; if (all(dtset%eph_ngqpt_fine /= 0)) gamma_ngqpt = dtset%eph_ngqpt_fine
-
- !call wrtout(std_out, sjoin("q-mesh for the phonon linewidths:", ltoa(gamma_ngqpt)))
- !call wrtout(std_out, sjoin("Will compute", itoa(gams%nqibz), "q-points in the IBZ"))
 
  ! Open the DVDB file
  call dvdb%open_read(ngfftf, xmpi_comm_self)
@@ -3174,10 +3168,8 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
        kq = kk + qpt
 
        if (kpts_map("symrel", ebands_timrev, cryst, gstore%krank_ibz, 1, kq, indkk_kq) /= 0) then
-         write(msg, '(9a)' ) &
-          "The WFK file cannot be used to compute phonon linewidths.",ch10, &
-          "At least one of the k-points on the FS could not be generated from a symmetrical one.",ch10, &
-          "Q-mesh: ", trim(ltoa(gamma_ngqpt)), ", K-mesh (from kptrlatt) ", trim(ltoa(get_diag(ebands%kptrlatt))), &
+         write(msg, '(3a)' ) &
+          "Cannot find k+q in kmesh", ch10,
           'Action: check your WFK file and the (k, q) point input variables.'
           ABI_ERROR(msg)
        end if
