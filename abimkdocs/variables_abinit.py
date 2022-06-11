@@ -22782,6 +22782,8 @@ eigensolver to **accelerate** GS computations, structural relaxations and molecu
 The algorithm is inspired to [[cite:Kresse1996]] although the ABINIT implementation is not
 completely equivalent to the original formulation.
 RMM-DIIS can be used both with NC and PAW pseudos and is fully compatible with the [[paral_kgb]] distribution.
+Note, however, that PAW seems to be more sensitive to some internal tricks used to accelerate the computation
+so you should not expect to see the same speedup as in the NC case.
 This variable has no effect when [[optdriver]] > 0.
 
 It is worth noting that RMM-DIIS is usually employed **in conjunction with another eigenvalue solver**
