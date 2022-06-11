@@ -548,7 +548,6 @@ subroutine kpgio(ecut,exchn2n3d,gmet,istwfk,kg,kptns,mkmem,nband,nkpt,&
      end do
    end if
  end if
-
  npwarr(:)=0
  npwtot(:)=0
 

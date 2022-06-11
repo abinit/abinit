@@ -517,6 +517,7 @@ type, public :: dataset_type
  integer :: prtlden = 0
  integer :: prtnabla = 0
  integer :: prtnest = 0
+ integer :: prtocc = 0
  integer :: prtpmp
  integer :: prtposcar = 0
  integer :: prtprocar = 0
@@ -583,7 +584,12 @@ type, public :: dataset_type
  integer :: symsigma = 1
  integer :: symv1scf = 0
 !T
+ integer :: td_exp_order
  integer :: td_mexcit
+ integer :: td_scnmax
+ integer :: td_prtstr
+ integer :: td_propagator
+ integer :: td_restart
  integer :: tfkinfunc
  integer :: tim1rev
  integer :: timopt
@@ -730,6 +736,7 @@ type, public :: dataset_type
  real(dp) :: dmftqmc_n
  real(dp) :: dosdeltae
  real(dp) :: dtion
+ real(dp) :: dtele
  !real(dp) :: dvdb_qcache_mb = 1024.0_dp
  real(dp) :: dvdb_qcache_mb = zero
  real(dp) :: dvdb_qdamp = 0.1_dp
@@ -813,6 +820,7 @@ type, public :: dataset_type
  real(dp) :: strfact
  real(dp) :: strprecon
  real(dp) :: td_maxene
+ real(dp) :: td_scthr
  real(dp) :: tfw_toldfe
  real(dp) :: tl_radius
  real(dp) :: toldfe
@@ -1289,7 +1297,7 @@ subroutine dtset_initocc_chkneu(dtset, nelectjell, occopt)
 
 !      There is a discrepancy
        write(msg, &
-       '(a,a,i4,a,e16.8,a,e16.8,a,a,a,e22.14,a,a,a,i5,a,a,a,a)' ) ch10,&
+       '(a,a,i4,a,e22.14,a,e16.8,a,a,a,e22.14,a,a,a,i5,a,a,a,a)' ) ch10,&
        ' initocc_chkneu: image=',iimage,', nelect_occ=',nelect_occ,', zval=',zval,',',ch10,&
        '         and input value of cellcharge=',dtset%cellcharge(iimage),',',ch10,&
        '   nelec_occ is computed from occ and wtk, iimage=',iimage,ch10,&
@@ -1856,6 +1864,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%prtnabla           = dtin%prtnabla
  dtout%prtnest            = dtin%prtnest
  dtout%prtphbands         = dtin%prtphbands
+ dtout%prtocc             = dtin%prtocc
  dtout%prtphdos           = dtin%prtphdos
  dtout%prtphsurf          = dtin%prtphsurf
  dtout%prtposcar          = dtin%prtposcar
@@ -1919,14 +1928,20 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%symchi             = dtin%symchi
  dtout%symmorphi          = dtin%symmorphi
  dtout%symsigma           = dtin%symsigma
+ dtout%td_exp_order       = dtin%td_exp_order
  dtout%td_mexcit          = dtin%td_mexcit
+ dtout%td_scnmax          = dtin%td_scnmax
+ dtout%td_prtstr          = dtin%td_prtstr
+ dtout%td_restart         = dtin%td_restart
+ dtout%td_propagator      = dtin%td_propagator
+ dtout%td_scthr           = dtin%td_scthr
  dtout%tfkinfunc          = dtin%tfkinfunc
  dtout%tim1rev            = dtin%tim1rev
  dtout%timopt             = dtin%timopt
  dtout%use_gemm_nonlop    = dtin%use_gemm_nonlop
  dtout%use_gpu_cuda       = dtin%use_gpu_cuda
- dtout%use_nvtx           = dtin%use_nvtx
  dtout%useextfpmd         = dtin%useextfpmd
+ dtout%use_nvtx           = dtin%use_nvtx
  dtout%use_yaml           = dtin%use_yaml   ! This variable activates the Yaml output for testing purposes
                                             ! It will be removed when Yaml output enters production.
  dtout%use_slk            = dtin%use_slk
@@ -2031,6 +2046,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%dilatmx            = dtin%dilatmx
  dtout%dosdeltae          = dtin%dosdeltae
  dtout%dtion              = dtin%dtion
+ dtout%dtele              = dtin%dtele
  dtout%ecut               = dtin%ecut
  dtout%ecuteps            = dtin%ecuteps
  dtout%ecutsigx           = dtin%ecutsigx
@@ -3307,7 +3323,8 @@ subroutine chkvars(string)
 ! list_vars=trim(list_vars)//' dmft_tolfreq dmft_tollc dmft_t2g dmft_x2my2d'
  list_vars=trim(list_vars)//' dosdeltae dtion dynamics dynimage'
  list_vars=trim(list_vars)//' dmft_tolfreq dmft_tollc dmft_t2g dmft_wanorthnorm' ! dmft_wanorthnorm is not documented
- list_vars=trim(list_vars)//' dosdeltae dtion dynamics dynimage'
+!list_vars=trim(list_vars)//' dmft_tolfreq dmft_tollc dmft_t2g dmft_x2my2d dmft_wanorthnorm' ! dmft_x2my2d is not tested neither documented.
+ list_vars=trim(list_vars)//' dosdeltae dtion dtele dynamics dynimage' !FB: dynamics?
  list_vars=trim(list_vars)//' dvdb_add_lr dvdb_ngqpt dvdb_qcache_mb dvdb_qdamp dvdb_rspace_cell'
  list_vars=trim(list_vars)//' dyn_chksym dyn_tolsym'
  list_vars=trim(list_vars)//' d3e_pert1_atpol d3e_pert1_dir d3e_pert1_elfd d3e_pert1_phon'
@@ -3434,7 +3451,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' prtatlist prtbbb prtbltztrp prtchkprdm prtcif prtden'
  list_vars=trim(list_vars)//' prtdensph prtdipole prtdos prtdosm prtebands prtefmas prteig prteliash prtelf'
  list_vars=trim(list_vars)//' prtfull1wf prtfsurf prtgden prtgeo prtgsr prtgkk prtkden prtkpt prtlden'
- list_vars=trim(list_vars)//' prt_GF_csv prt_model prtnabla prtnest prtphbands prtphdos prtphsurf prtposcar'
+ list_vars=trim(list_vars)//' prt_GF_csv prt_model prtnabla prtnest prtphbands prtocc prtphdos prtphsurf prtposcar'
  list_vars=trim(list_vars)//' prtprocar prtpot prtpsps'
  list_vars=trim(list_vars)//' prtspcur prtstm prtsuscep prtvclmb prtvha prtvdw prtvhxc prtkbff'
  list_vars=trim(list_vars)//' prtvol prtvolimg prtvpsp prtvxc prtwant prtwf prtwf_full prtxml prt1dm'
@@ -3488,7 +3505,8 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' supercell_latt symafm symchi symdynmat symmorphi symrel symsigma symv1scf'
  list_vars=trim(list_vars)//' structure '
 !T
- list_vars=trim(list_vars)//' td_maxene td_mexcit tfkinfunc temperature test_effpot test_prt_ph tfw_toldfe tim1rev timopt'
+ list_vars=trim(list_vars)//' td_exp_order td_maxene td_mexcit td_scnmax td_prtstr td_restart td_propagator td_scthr'
+ list_vars=trim(list_vars)//' tfkinfunc temperature test_effpot test_prt_ph tfw_toldfe tim1rev timopt'
  list_vars=trim(list_vars)//' tmesh tmpdata_prefix transport_ngkpt'
  list_vars=trim(list_vars)//' tl_nprccg tl_radius tnons toldfe tolmxde toldff tolimg tolmxf tolrde tolrff tolsym'
  list_vars=trim(list_vars)//' tolvrs tolwfr tphysel ts_option tsmear typat'
