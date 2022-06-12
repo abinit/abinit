@@ -245,9 +245,9 @@ module m_phonons
  end type phstore_t
 !!***
 
- public :: phstore_new   ! Creation method (allocates memory, initialize data from input vars).
-
- public :: test_phrotation
+ public :: pheigvec_rotate      ! Obtain phonon eigenvectors for q in the BZ from the symmetrical image in the IBZ.
+ public :: phstore_new          ! Creation method (allocates memory, initialize data from input vars).
+ public :: test_phrotation      ! Validate pheigvec_rotate routine
 
 contains  !=====================================================
 !!***
@@ -3317,12 +3317,13 @@ end subroutine freeze_displ_allmodes
 !!***
 
 !----------------------------------------------------------------------
+
 !!****f* m_phonons/pheigvec_rotate
 !! NAME
 !! pheigvec_rotate
 !!
 !! FUNCTION
-!!  Obtain phonon frequencies and eigenvectors for q in the BZ from the symmetrical image in the IBZ.
+!!  Obtain phonon eigenvectors for q in the BZ from the symmetrical image in the IBZ.
 !!
 !! INPUTS
 !!  cryst: crystal structure
@@ -3579,7 +3580,7 @@ subroutine phstore_async_rotate(self, cryst, ifc, iq_ibz, qpt_ibz, qpt_bz, isym_
      call phdispl_from_eigvec(cryst%natom, cryst%ntypat, cryst%typat, cryst%amu, &
                               self%pheigvec_qibz(:,:,:,iq_ibz), self%displ_cart)
    else
-     ! q in BZ --> rotatee phonon eigenvectors.
+     ! q in BZ --> rotate phonon eigenvectors.
      call pheigvec_rotate(cryst, self%qibz(:, iq_ibz), qpt_bz, isym_q, trev_q, self%pheigvec_qibz(:,:,:,iq_ibz), eigvec_qpt)
      call phdispl_from_eigvec(cryst%natom, cryst%ntypat, cryst%typat, cryst%amu, eigvec_qpt, self%displ_cart)
    end if

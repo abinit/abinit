@@ -683,9 +683,8 @@ pure subroutine ddk_red2car(rprimd, vred, vcar)
  real(dp) :: vtmp(2,3)
 
 !************************************************************************
- ! vcar = vred; return
 
- ! Go to cartesian coordinates (same as pmat2cart routine)
+ ! Go to Cartesian coordinates (same as pmat2cart routine)
  ! V_cart = 1/(2pi) * Rprimd x V_red
  ! where V_red is the derivative computed in the DFPT routines (derivative wrt reduced component).
  vtmp(1,:) = rprimd(:,1)*vred(1,1) &

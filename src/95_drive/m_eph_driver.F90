@@ -187,7 +187,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  type(pawfgr_type) :: pawfgr
  type(mpi_type) :: mpi_enreg
  type(phonon_dos_type) :: phdos
- type(gstore_t) :: gstore !, other_gstore
+ type(gstore_t) :: gstore
 !arrays
  integer :: ngfftc(18), ngfftf(18), count_wminmax(2)
  integer,allocatable :: dummy_atifc(:)
@@ -743,7 +743,6 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  case (11)
    ! Write e-ph matrix elements to GSTORE file.
-
    if (dtfil%filgstorein /= ABI_NOFILE) then
      call wrtout([std_out, ab_out], sjoin(" Restarting GSTORE computation from:", dtfil%filgstorein))
      gstore = gstore_from_ncpath(dtfil%filgstorein, 1, dtset, cryst, ebands, ifc, comm)
@@ -752,18 +751,16 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
      gstore = gstore_new(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm)
      call gstore%compute(wfk0_path, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, ifc, &
                          pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
-
-     ! DEBUG
-     !if (nprocs == 1) then
-     !call wrtout(std_out, " DEBUG: Trying to reread GSTORE file")
-     !other_gstore = gstore_from_ncpath(gstore%path, 1, dtset, cryst, ebands, ifc, comm)
-     !call other_gstore%free()
-     !end if
    end if
-
    call gstore%free()
 
+ !case (12)
+   ! Variational polaron equations
+   !gstore = gstore_from_ncpath(dtfil%filgstorein, with_cplex2, dtset, cryst, ebands, ifc, comm)
+   !call variational_polaron(gstore, dtset, dtfil)
+
  case (12, -12)
+ !case (13, -13)
    ! Migdal-Eliashberg equations (isotropic/anisotropic case)
    gstore = gstore_from_ncpath(dtfil%filgstorein, with_cplex1, dtset, cryst, ebands, ifc, comm)
    if (dtset%eph_task == -12) call migdal_eliashberg_iso(gstore, dtset, dtfil)
@@ -773,7 +770,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  case (15, -15)
    ! Write average of DFPT potentials to file.
    if (nprocs > 1) then
-     ABI_WARNING("eph_task in [15, -15] does not support nprocs > 1. Running in sequential...")
+     ABI_WARNING("eph_task in [15, -15] (average of DFPT potentials) does not support nprocs > 1. Running in sequential.")
    end if
    dvdb%comm = xmpi_comm_self
    if (my_rank == master) then
@@ -785,7 +782,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  case (-16, 16)
    if (nprocs > 1) then
-     ABI_WARNING("eph_task in [16, -16] does not support nprocs > 1. Running in sequential...")
+     ABI_WARNING("eph_task in [16, -16] (test_phrotation) does not support nprocs > 1. Running in sequential.")
    end if
 
    call test_phrotation(ifc, cryst, dtset%ph_ngqpt, comm)
@@ -814,6 +811,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  call ebands_free(ebands_kq)
  call pawfgr_destroy(pawfgr)
  call destroy_mpi_enreg(mpi_enreg)
+ !call gstore%free()
 
  if (allocated(efmasdeg)) call efmasdeg_free_array(efmasdeg)
  if (allocated(efmasval)) call efmasval_free_array(efmasval)
