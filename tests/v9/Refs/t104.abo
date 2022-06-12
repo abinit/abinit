@@ -17,10 +17,10 @@
 .Starting date : Sun 12 Jun 2022.
 - ( at 13h54 )
   
-- input  file    -> pto.abi
-- output file    -> pto.abo
-- root for input  files -> ptoi
-- root for output files -> ptoo
+- input  file    -> t104.abi
+- output file    -> t104.abo
+- root for input  files -> t104i
+- root for output files -> t104o
  
  
  Symmetries : space group Cm (#  8); Bravais mC (1-face-center monocl.)
@@ -492,7 +492,7 @@ force_length_stats: {min:   4.89123519E-05, max:   4.30839677E-04, mean:   2.514
  frms,max,avg= 8.5497558E-03 1.5334947E-02   4.555E-05  4.555E-05 -1.032E-04 e/A
  length scales=  7.351034624558  7.351034624558  7.381369672906 bohr
               =  3.889999982872  3.889999982872  3.906052599079 angstroms
- prteigrs : about to open file ptoo_EIG
+ prteigrs : about to open file t104o_EIG
  Fermi (or HOMO) energy (hartree) =   0.16991   Average Vxc (hartree)=  -0.45816
  Eigenvalues (hartree) for nkpt=   4  k points:
  kpt#   1, nband= 32, wtk=  0.25000, kpt=  0.2500  0.2500  0.2500 (reduced coord)
