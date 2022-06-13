@@ -1073,7 +1073,7 @@ end subroutine incomprs
 !!   one could add more information, eg whether a ? or a : was used, etc...
 !!   [key_value]=Stores the value of key if typevarphys=="KEY".
 !!      The string must be large enough to contain the output. fnlen is OK in many cases
-!!      except when reading a list of files. The routine aborts is key_value cannot store the output.
+!!      except when reading a list of files. The routine aborts if key_value cannot store the output.
 !!      Output string is left justified.
 !!
 !! NOTES
@@ -1977,7 +1977,7 @@ end subroutine intagm_img_2D
 !! Might read instead one word, after the specified blank. Takes care of multipliers.
 !!
 !! INPUTS
-!!  cs=character token
+!!  cs=character token (starts with a blank)
 !!  marr=dimension of the intarr and dprarr arrays, as declared in the
 !!   calling subroutine.
 !!  narr=actual size of array to be read in  (if typevarphys='KEY', only narr=1 is allowed)
@@ -2032,10 +2032,14 @@ subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
 
 ! *************************************************************************
 
- !write(std_out,'(2a)' )' inarray: token: ',trim(cs)
- !write(std_out,'(2a)' )'          string: ',trim(string(b1:))
- !write(std_out,'(a,i0)' )'        narr: ',narr
- !write(std_out,'(2a)' )'          typevarphys: ',typevarphys
+!DEBUG
+! write(std_out,'(5a)' )' inarray: token: ',trim(cs),' "',cs(1:6),'"'
+! if(trim(cs)==' UPAWU1')then
+!   write(std_out,'(2a)' )'          string: ',trim(string(b1:))
+!   write(std_out,'(a,i0)' )'        narr: ',narr
+!   write(std_out,'(2a)' )'          typevarphys: ',typevarphys
+! endif
+!ENDDEBUG
 
  ii = 0
  typevar='INT'
@@ -2112,10 +2116,14 @@ subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
      ! If no second blank is found put the second blank just beyond strln
      if(b2==0) b2=strln-b1+1
 
-     ! write(std_out,*)' inarray : strln=',strln
-     ! write(std_out,*)' inarray : b1=',b1, b2=',b2
-     ! write(std_out,*)' inarray : string(b1+1:)=',string(b1+1:)
-     ! write(std_out,*)' typevarphys==',typevarphys
+!DEBUG
+! if(trim(cs)==' UPAWU1')then
+!     write(std_out,*)' inarray : strln=',strln
+!     write(std_out,*)' inarray : b1=',b1,' b2=',b2
+!     write(std_out,*)' inarray : string(b1+1:)=',string(b1+1:)
+!     write(std_out,*)' typevarphys==',typevarphys
+! endif
+!ENDDEBUG
 
      ! Identify the presence of a non-digit character
      asciichar=iachar(string(b1+1:b1+1))
@@ -2145,15 +2153,20 @@ subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
        exit
      else
        ! A digit has been observed, go to the next sequence
-       b1=b2
+       b1=b1+b2
        cycle
      end if
 
    end do
  end if
 
-!write(std_out,*)' dprarr(1:narr)==',dprarr(1:narr)
+!DEBUG
+! if(trim(cs)==' UPAWU1')then
+!   write(std_out,*)' dprarr(1:narr)==',dprarr(1:narr)
+!   stop
+! endif
 !write(std_out,*)' inarray : exit '
+!ENDDEBUG
 
 end subroutine inarray
 !!***
