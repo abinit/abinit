@@ -1829,7 +1829,7 @@ $$
 
 The nesting factor is calculated for every point of the k-grid employed during the
 previous GS calculation. The values are subsequently interpolated along the
-trajectory in q space defined by [[anaddb:qpath]], and written in the _NEST
+trajectory in q space defined by [[anaddb:qpath]], and written in the `kpluq`
 file using the X-Y format ( **prtnest** =1). It is also possible to analyze
 the behavior of the function in the reciprocal unit cell saving the values in
 the NEST_XSF file that can be read using [XCrySDen](http://www.xcrysden.org) (**prtnest** =2).

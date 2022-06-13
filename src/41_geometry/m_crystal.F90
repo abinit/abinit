@@ -167,7 +167,6 @@ MODULE m_crystal
   ! spinrot(4,nsym)
   ! spinor rotation matrices.
 
-  ! Useful quantities that might be added in the future
   real(dp),allocatable :: amu(:)
   !  amu(ntypat)
   !  mass of the atoms (atomic mass unit)

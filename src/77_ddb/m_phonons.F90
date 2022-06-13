@@ -247,7 +247,7 @@ module m_phonons
 
  public :: pheigvec_rotate      ! Obtain phonon eigenvectors for q in the BZ from the symmetrical image in the IBZ.
  public :: phstore_new          ! Creation method (allocates memory, initialize data from input vars).
- public :: test_phrotation      ! Validate pheigvec_rotate routine
+ public :: test_phrotation      ! Validate pheigvec_rotate routine.
 
 contains  !=====================================================
 !!***
@@ -3323,26 +3323,32 @@ end subroutine freeze_displ_allmodes
 !! pheigvec_rotate
 !!
 !! FUNCTION
-!!  Obtain phonon eigenvectors for q in the BZ from the symmetrical image in the IBZ.
+!!  Return phonon eigenvectors for q in the BZ from the symmetrical image in the IBZ.
 !!
 !! INPUTS
 !!  cryst: crystal structure
-!!  q: q-point in the IBZ
-!!  sq: q-point in the BZ. sq = TS q_ibz
+!!  qq_ibz: q-point in the IBZ
 !!  isym
 !!  itimrev
-!!  eigvec_in: Input ph eigenvectors at q_ibz.
+!!  eigvec_ibz: Input phonon eigenvectors at qq_ibz.
 !!
 !! OUTPUT
-!!  eigvec_out: Otput ph eigenvectors at q_bz.
+!!  eigvec_bz: phonon eigenvectors at q_bz.
+!!  displ_cart_qbz: phonon displacement at q_bz in Cartesian coordinates.
+!!  [displ_red_qbz]: phonon displacement at q_bz in reduced coordinates.
 !!
 
-subroutine pheigvec_rotate(cryst, q, sq, isym, itimrev, eigvec_in, eigvec_out)
+subroutine pheigvec_rotate(cryst, qq_ibz, isym, itimrev, eigvec_ibz, eigvec_qbz, displ_cart_qbz, &
+                           displ_red_qbz) ! Optional
 
+!Arguments ------------------------------------
+!scalars
  type(crystal_t),intent(in) :: cryst
  integer,intent(in) :: isym, itimrev
- real(dp),intent(in) :: q(3), sq(3), eigvec_in(2,3*cryst%natom,3*cryst%natom)
- real(dp),intent(out) :: eigvec_out(2,3*cryst%natom,3*cryst%natom)
+ real(dp),intent(in) :: qq_ibz(3), eigvec_ibz(2,3*cryst%natom,3*cryst%natom)
+ real(dp),intent(out) :: eigvec_qbz(2,3*cryst%natom,3*cryst%natom)
+ real(dp),intent(out) :: displ_cart_qbz(2,3*cryst%natom,3*cryst%natom)
+ real(dp),optional,intent(out) :: displ_red_qbz(2,3*cryst%natom,3*cryst%natom)
 
 !Local variables-------------------------------
 !scalars
@@ -3350,40 +3356,28 @@ subroutine pheigvec_rotate(cryst, q, sq, isym, itimrev, eigvec_in, eigvec_out)
  real(dp) :: arg
 !arrays
  integer :: r0(3)
- real(dp) :: gamma_matrix(2,3,cryst%natom,3,cryst%natom) !, gamma2(2,3,cryst%natom,3,cryst%natom)
- real(dp) :: symat(3,3), phase(2) !, dum(0, 0)
+ real(dp) :: gamma_matrix(2,3,cryst%natom,3,cryst%natom)
+ real(dp) :: symat(3,3), phase(2) !, dum(0, 0), gamma2(2,3,cryst%natom,3,cryst%natom)
 
 !************************************************************************
 
  natom = cryst%natom
  natom3 = cryst%natom * 3
 
- !isym_inv = toinv(1, isym)
  symat = cryst%symrel_cart(:,:,isym)
- !symat = transpose(cryst%symrel_cart(:,:,isym))
- !symat = cryst%symrel_cart(:,:,isym_inv)
 
  ! Build Gamma matrix in Cartesian coordinates.
- ! e(Sq) = Gamma({S, v}) e(q)
+ ! e(S q_ibz) = Gamma({S, v}) e(q_ibz)
  gamma_matrix = zero
  do iat=1,natom
    !do iat_sym=1,natom
    ! $ R^{-1} (xred(:,iat)-\tau) = xred(:,iat_sym) + R_0 $
-   ! * indsym(4,  isym,iat) gives iat_sym in the original unit cell.
-   ! * indsym(1:3,isym,iat) gives the lattice vector $R_0$.
+   !   indsym(4,  isym,iat) gives iat_sym in the original unit cell.
+   !   indsym(1:3,isym,iat) gives the lattice vector $R_0$.
    iat_sym = cryst%indsym(4, isym, iat)
    r0 = cryst%indsym(1:3, isym, iat)
-   !r0 = cryst%indsym(1:3, isym_inv, iat)
-   !iat_sym = cryst%indsym(4, isym_inv, iat)
-   !r0 = -cryst%indsym(1:3, isym_inv, iat)
-   !r0 = matmul(cryst%symrec(:,:, isym), r0)
-   !r0 = matmul(transpose(cryst%symrec(:,:, isym)), r0)
-   !r0 = matmul(cryst%symrel(:,:, isym), r0)
-   !r0 = matmul(transpose(cryst%symrel(:,:, isym)), r0)
-   !arg = two_pi * dot_product(sq, r0)
-   arg = two_pi * dot_product(q, real(r0))
-   phase(:) = [cos(arg), sin(arg)]
-   !write(std_out, *)" ro: ", r0, "phase: " ,phase, "qibz: ", q
+   arg = two_pi * dot_product(qq_ibz, real(r0))
+   phase(:) = [cos(arg), sin(arg)] !; write(std_out, *)" ro: ", r0, "phase: " ,phase, "qq_ibz: ", qq_ibz
    do jdir=1,3
      do idir=1,3
        gamma_matrix(:, idir, iat, jdir, iat_sym) = symat(idir, jdir) * phase(:)
@@ -3391,30 +3385,30 @@ subroutine pheigvec_rotate(cryst, q, sq, isym, itimrev, eigvec_in, eigvec_out)
    end do
  end do
 
- !write(std_out, "(2a)")" Gamma_matrix for sq:", trim(ktoa(sq))
+ !write(std_out, "(2a)")" Gamma_matrix for qq_bz:", trim(ktoa(qq_bz))
  !call print_arr(reshape(cmplx(gamma_matrix(1,:,:,:,:), gamma_matrix(2,:,:,:,:)), [natom3, natom3]))
-
  !gamma2 = gamma_matrix
- !call cg_zgemm("C", "N", natom3, natom3, natom3, gamma_matrix, gamma2, eigvec_out)
+ !call cg_zgemm("C", "N", natom3, natom3, natom3, gamma_matrix, gamma2, eigvec_qbz)
  !write(std_out, "(a)")" gamma^H gamma:"
- !call print_arr(reshape(cmplx(eigvec_out(1,:,:), eigvec_out(2,:,:)), [natom3, natom3]))
+ !call print_arr(reshape(cmplx(eigvec_qbz(1,:,:), eigvec_qbz(2,:,:)), [natom3, natom3]))
  !call cg_check_unitary(natom3, gamm_matrix)
 
- call cg_zgemm("N", "N", natom3, natom3, natom3, gamma_matrix, eigvec_in, eigvec_out)
- if (itimrev == 1) eigvec_out(2,:,:) = -eigvec_out(2,:,:)
+ call cg_zgemm("N", "N", natom3, natom3, natom3, gamma_matrix, eigvec_ibz, eigvec_qbz)
+ if (itimrev == 1) eigvec_qbz(2,:,:) = -eigvec_qbz(2,:,:)
 
  ! Fix the phase of the eigenvectors
- !call fxphas_seq(eigvec_out, dum, 0, 0, 1, 3*natom*3*natom, 0, 3*natom, 3*natom, 0)
+ !call fxphas_seq(eigvec_qbz, dum, 0, 0, 1, 3*natom*3*natom, 0, 3*natom, 3*natom, 0)
 
  ! Normalise the eigenvectors
- !call pheigvec_normalize(natom, eigvec_out)
+ !call pheigvec_normalize(natom, eigvec_qbz)
 
- ! Get the phonon displacements
- !call phdispl_from_eigvec(natom, ntypat, typat, amu, eigvec_out, displ)
+ ! phonon displacements in Cartesian coordinates
+ call phdispl_from_eigvec(cryst%natom, cryst%ntypat, cryst%typat, cryst%amu, eigvec_qbz, displ_cart_qbz)
 
- ! Return phonon displacement in reduced coordinates.
- !call phdispl_cart2red(natom, crystal%gprimd, displ_cart, out_displ_red)
- ABI_UNUSED(sq(1))
+ if (present(displ_red_qbz)) then
+   ! phonon displacements in reduced coordinates.
+   call phdispl_cart2red(cryst%natom, cryst%gprimd, displ_cart_qbz, displ_red_qbz)
+ end if
 
 end subroutine pheigvec_rotate
 !!***
@@ -3553,8 +3547,7 @@ subroutine phstore_async_rotate(self, cryst, ifc, iq_ibz, qpt_ibz, qpt_bz, isym_
 
  if (self%use_ifc_fourq) then
    ! Debugging section.
-   call ifc%fourq(cryst, qpt_bz, self%phfrq, self%displ_cart)
-   return
+   call ifc%fourq(cryst, qpt_bz, self%phfrq, self%displ_cart); return
  end if
 
  ! Find the rank MPI storing the q-point in the IBZ.
@@ -3570,7 +3563,10 @@ subroutine phstore_async_rotate(self, cryst, ifc, iq_ibz, qpt_ibz, qpt_bz, isym_
  call xmpi_ibcast(self%phfrq, master, self%comm, self%requests(1), ierr)
 
  ! Rotate eigvectors at q_ibz to get eigenvector at q_bz
- ! Don't test if umklapp == 0 because we use the periodic gauge: phfreq(q+G) = phfreq(q) and eigvec(q) = eigvec(q+G)
+ ! Don't test if umklapp == 0 because we use the periodic gauge:
+ !
+ !   phfreq(q+G) = phfreq(q) and eigvec(q) = eigvec(q+G)
+ !
  isirr_q = (isym_q == 1 .and. trev_q == 0)
 
  if (self%my_rank == master) then
@@ -3581,8 +3577,8 @@ subroutine phstore_async_rotate(self, cryst, ifc, iq_ibz, qpt_ibz, qpt_bz, isym_
                               self%pheigvec_qibz(:,:,:,iq_ibz), self%displ_cart)
    else
      ! q in BZ --> rotate phonon eigenvectors.
-     call pheigvec_rotate(cryst, self%qibz(:, iq_ibz), qpt_bz, isym_q, trev_q, self%pheigvec_qibz(:,:,:,iq_ibz), eigvec_qpt)
-     call phdispl_from_eigvec(cryst%natom, cryst%ntypat, cryst%typat, cryst%amu, eigvec_qpt, self%displ_cart)
+     call pheigvec_rotate(cryst, self%qibz(:, iq_ibz), isym_q, trev_q, self%pheigvec_qibz(:,:,:,iq_ibz), &
+                          eigvec_qpt, self%displ_cart)
    end if
  end if
 
@@ -3660,8 +3656,8 @@ subroutine test_phrotation(ifc, cryst, ngqpt, comm)
  integer :: in_qptrlatt(3,3), new_qptrlatt(3,3), g0(3)
  integer,allocatable :: bz2ibz(:,:), bz2ibz_listkk(:,:), toinv(:,:)
  real(dp) :: qshift(3, nqshft1), phfrq(3*cryst%natom), work(3*cryst%natom)
- real(dp) :: eigvec_out(2,3*cryst%natom,3*cryst%natom) !eigvec_in(2,3*cryst%natom,3*cryst%natom),
- real(dp) :: eigvec_bz(2,3*cryst%natom,3*cryst%natom)
+ real(dp) :: eigvec_out(2,3*cryst%natom,3*cryst%natom) !eigvec_ibz(2,3*cryst%natom,3*cryst%natom),
+ real(dp) :: eigvec_bz(2,3*cryst%natom,3*cryst%natom), displ_cart_qbz(2,3*cryst%natom,3*cryst%natom)
  real(dp) :: d2cart(2,3*cryst%natom,3*cryst%natom), d2tmp(2,3*cryst%natom,3*cryst%natom)
  real(dp),allocatable :: wtq_ibz(:), qbz(:,:), qibz(:,:)
  real(dp),allocatable :: displ_cart(:,:,:,:),displ_red(:,:,:,:)
@@ -3683,6 +3679,7 @@ subroutine test_phrotation(ifc, cryst, ngqpt, comm)
 
  call kpts_ibz_from_kptrlatt(cryst, in_qptrlatt, qptopt1, nqshft1, qshift, &
                              nqibz, qibz, wtq_ibz, nqbz, qbz, new_kptrlatt=new_qptrlatt, bz2ibz=bz2ibz)
+ ABI_FREE(bz2ibz)
 
  !write(std_out, "(2(a, i0))")" nqibz: ", nqibz, ", nqbz:", nqbz
  !write(std_out, "(a)") " qibz_list:"
@@ -3750,7 +3747,8 @@ subroutine test_phrotation(ifc, cryst, ngqpt, comm)
    end if
 
    ! Rotate and compare eigenvectors
-   call pheigvec_rotate(cryst, qibz(:, iq_ibz), qbz(:, iq_bz), isym, itimrev, eigvec_ibz(:,:,:,iq_ibz), eigvec_out)
+   call pheigvec_rotate(cryst, qibz(:, iq_ibz), isym, itimrev, eigvec_ibz(:,:,:,iq_ibz), &
+                        eigvec_out, displ_cart_qbz)
 
    ! e^H D e = w**2 I
    call massmult_and_breaksym(natom, cryst%ntypat, cryst%typat, cryst%amu, d2cart)
@@ -3811,7 +3809,6 @@ subroutine test_phrotation(ifc, cryst, ngqpt, comm)
  ABI_SFREE(bz2ibz_listkk)
  ABI_SFREE(qbz)
  ABI_SFREE(qibz)
- ABI_SFREE(bz2ibz)
  ABI_SFREE(wtq_ibz)
  ABI_FREE(phfreqs_qibz)
  ABI_FREE(displ_cart_ibz)
