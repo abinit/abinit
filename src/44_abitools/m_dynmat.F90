@@ -4628,25 +4628,18 @@ subroutine d3lwsym(blkflg,d3,indsym,mpert,natom,nsym,symrec,symrel)
  integer :: found,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert,idisy1,idisy2,idisy3
  integer :: ipesy1,ipesy2,ipesy3,isym,ithree
  real(dp) :: sumi,sumr
+ logical :: is_strain
 !arrays
- integer :: sym1(3,3),sym2(3,3),sym3(3,3)
+ integer :: iden(3,3),sym1(3,3),sym2(3,3),sym3(3,3)
 
 ! *********************************************************************
 
-!DEBUG
-!write(std_out,*)'d3sym : enter'
-!do i1dir = 1, 3
-!do i2dir = 1, 3
-!do i3dir = 1, 3
-!write(std_out,*)i1dir,i2dir,i3dir,blkflg(i1dir,natom+2,i2dir,natom+2,i3dir,natom+2)
-!end do
-!end do
-!end do
-!stop
-!ENDDEBUG
+ is_strain=.false.
+ iden(:,:)=0
+ iden(1,1)=1;iden(2,2)=1;iden(3,3)=1
 
 !First, take into account the permutations symmetry of
-!(i1pert,i1dir) and (i3pert,i3dir)
+!(i1pert,i1dir) and (i2pert,i2dir)
  do i1pert = 1, mpert
    do i2pert = 1, mpert
      do i3pert = 1, mpert
@@ -4716,6 +4709,9 @@ subroutine d3lwsym(blkflg,d3,indsym,mpert,natom,nsym,symrec,symrel)
                    else if (i2pert == natom + 2.or.i2pert == natom + 8) then
                      ipesy2 = i2pert
                      sym2(:,:) = symrel(:,:,isym)
+                   else if (i2pert == natom + 3.or.i2pert == natom + 4) then
+                     is_strain=.true.
+                     ipesy2 = i2pert
                    else
                      found = 0
                    end if
@@ -4730,33 +4726,63 @@ subroutine d3lwsym(blkflg,d3,indsym,mpert,natom,nsym,symrec,symrel)
                      found = 0
                    end if
 
-                   sumr = 0_dp ; sumi = 0_dp;
-                   do idisy1 = 1, 3
-                     do idisy2 = 1, 3
-                       do idisy3 = 1, 3
+                   if (.not.is_strain) then 
+                     sumr = 0_dp ; sumi = 0_dp;
+                     do idisy1 = 1, 3
+                       do idisy2 = 1, 3
+                         do idisy3 = 1, 3
 
-                         if ((sym1(i1dir,idisy1) /=0).and.(sym2(i2dir,idisy2) /=0) &
-&                         .and.(sym3(i3dir,idisy3) /=0)) then
+                           if ((sym1(i1dir,idisy1) /=0).and.(sym2(i2dir,idisy2) /=0) &
+&                           .and.(sym3(i3dir,idisy3) /=0)) then
 
-                           if (blkflg(idisy1,ipesy1,idisy2,ipesy2,idisy3,ipesy3) == 1) then
+                             if (blkflg(idisy1,ipesy1,idisy2,ipesy2,idisy3,ipesy3) == 1) then
 
-                             sumr = sumr + sym1(i1dir,idisy1)*sym2(i2dir,idisy2)*&
-&                             sym3(i3dir,idisy3)*d3(1,idisy1,ipesy1,idisy2,ipesy2,idisy3,ipesy3)
-                             sumi = sumi + sym1(i1dir,idisy1)*sym2(i2dir,idisy2)*&
-&                             sym3(i3dir,idisy3)*d3(2,idisy1,ipesy1,idisy2,ipesy2,idisy3,ipesy3)
+                               sumr = sumr + sym1(i1dir,idisy1)*sym2(i2dir,idisy2)*&
+&                               sym3(i3dir,idisy3)*d3(1,idisy1,ipesy1,idisy2,ipesy2,idisy3,ipesy3)
+                               sumi = sumi + sym1(i1dir,idisy1)*sym2(i2dir,idisy2)*&
+&                               sym3(i3dir,idisy3)*d3(2,idisy1,ipesy1,idisy2,ipesy2,idisy3,ipesy3)
 
-                           else
+                             else
 
-                             found = 0
+                               found = 0
+
+                             end if
 
                            end if
 
-                         end if
-
+                         end do
                        end do
                      end do
-                   end do
 
+                   else 
+  
+                     sumr = 0_dp ; sumi = 0_dp;
+                     do idisy1 = 1, 3
+                       do idisy2 = 1, 3
+                         do idisy3 = 1, 3
+
+                           if ((sym1(i1dir,idisy1) /=0).and.(sym3(i3dir,idisy3) /=0)) then
+
+                             if (blkflg(idisy1,ipesy1,idisy2,ipesy2,idisy3,ipesy3) == 1) then
+
+                               sumr = sumr + sym1(i1dir,idisy1)*&
+&                               sym3(i3dir,idisy3)*d3(1,idisy1,ipesy1,idisy2,ipesy2,idisy3,ipesy3)
+                               sumi = sumi + sym1(i1dir,idisy1)*&
+&                               sym3(i3dir,idisy3)*d3(2,idisy1,ipesy1,idisy2,ipesy2,idisy3,ipesy3)
+
+                             else
+
+                               found = 0
+
+                             end if
+
+                           end if
+
+                         end do
+                       end do
+                     end do
+                   end if
+  
                    if (found == 1) then
                      d3(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = sumr
                      d3(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = sumi
@@ -5069,6 +5095,7 @@ subroutine sylwtens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
  integer :: flag,found,i1dir,i1dir_,i1pert,i1pert_,i2dir,i2dir_,i2pert,i2pert_
  integer :: i3dir,i3dir_,i3pert,i3pert_,idisy1,idisy2,idisy3,ipesy1,ipesy2
  integer :: ipesy3,isym
+ logical :: is_strain
 !arrays
  integer :: sym1(3,3),sym2(3,3),sym3(3,3),iden(3,3)
  integer,allocatable :: pertsy(:,:,:,:,:,:)
@@ -5077,7 +5104,9 @@ subroutine sylwtens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
 
  ABI_MALLOC(pertsy,(3,mpert,3,mpert,3,mpert))
  pertsy(:,:,:,:,:,:) = 0
- iden(:,:)=0;iden(1,1)=1;iden(2,2)=1;iden(3,3)=1
+ iden(:,:)=0
+ iden(1,1)=1;iden(2,2)=1;iden(3,3)=1
+ is_strain=.false.
 
 !Loop over perturbations
 
@@ -5106,14 +5135,6 @@ subroutine sylwtens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
                i1dir = i1dir_ ; i2dir = i2dir_ ; i3dir = i3dir_
              end if
 
-!             i1pert=i1pert_
-!             i2pert=i2pert_
-!             i3pert=i3pert_
-
-!             i1dir= i1dir_
-!             i2dir= i2dir_
-!             i3dir= i3dir_
-
              if (rfpert(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) /= 0) then
 
 !              Loop over all symmetries
@@ -5141,6 +5162,9 @@ subroutine sylwtens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
                  else if (i2pert == natom + 2.or.i2pert == natom + 8) then
                    ipesy2 = i2pert
                    sym2(:,:) = symrel(:,:,isym)
+                 else if (i2pert == natom + 3.or.i2pert == natom + 4) then
+                   is_strain=.true.
+                   ipesy2 = i2pert
                  else
                    found = 0
                  end if
@@ -5155,52 +5179,101 @@ subroutine sylwtens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
                    found = 0
                  end if
 
-!                See if the symmetric element is available and check if some
-!                of the elements may be zero. In the latter case, they do not need
-!                to be computed.
+                 if (.not.is_strain) then 
+
+!                  See if the symmetric element is available and check if some
+!                  of the elements may be zero. In the latter case, they do not need
+!                  to be computed.
 
 
-                 if ((flag /= -1).and.&
-&                 (ipesy1==i1pert).and.(ipesy2==i2pert).and.(ipesy3==i3pert)) then
-                   flag = sym1(i1dir,i1dir)*sym2(i2dir,i2dir)*sym3(i3dir,i3dir)
-                 end if
+                   if ((flag /= -1).and.&
+&                   (ipesy1==i1pert).and.(ipesy2==i2pert).and.(ipesy3==i3pert)) then
+                     flag = sym1(i1dir,i1dir)*sym2(i2dir,i2dir)*sym3(i3dir,i3dir)
+                   end if
 
 
-                 do idisy1 = 1, 3
-                   do idisy2 = 1, 3
-                     do idisy3 = 1, 3
+                   do idisy1 = 1, 3
+                     do idisy2 = 1, 3
+                       do idisy3 = 1, 3
 
-                       if ((sym1(i1dir,idisy1) /= 0).and.(sym2(i2dir,idisy2) /= 0).and.&
-&                       (sym3(i3dir,idisy3) /= 0)) then
-                         if (pertsy(idisy1,ipesy1,idisy2,ipesy2,idisy3,ipesy3) == 0) then
-                           found = 0
-!                          exit      ! exit loop over symmetries
+                         if ((sym1(i1dir,idisy1) /= 0).and.(sym2(i2dir,idisy2) /= 0).and.&
+&                         (sym3(i3dir,idisy3) /= 0)) then
+                           if (pertsy(idisy1,ipesy1,idisy2,ipesy2,idisy3,ipesy3) == 0) then
+                             found = 0
+!                            exit      ! exit loop over symmetries
+                           end if
                          end if
-                       end if
 
 
-                       if ((flag == -1).and.&
-&                       ((idisy1/=i1dir).or.(idisy2/=i2dir).or.(idisy3/=i3dir))) then
-                         if ((sym1(i1dir,idisy1)/=0).and.(sym2(i2dir,idisy2)/=0).and.&
-&                         (sym3(i3dir,idisy3)/=0)) then
-                           flag = 0
+                         if ((flag == -1).and.&
+&                         ((idisy1/=i1dir).or.(idisy2/=i2dir).or.(idisy3/=i3dir))) then
+                           if ((sym1(i1dir,idisy1)/=0).and.(sym2(i2dir,idisy2)/=0).and.&
+&                           (sym3(i3dir,idisy3)/=0)) then
+                             flag = 0
+                           end if
                          end if
-                       end if
 
+                       end do
                      end do
                    end do
-                 end do
 
-                 if (found == 1) then
-                   pertsy(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = -1
-                 end if
+                   if (found == 1) then
+                     pertsy(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = -1
+                   end if
 
-!                In case a symmetry operation only changes the sign of an
-!                element, this element has to be equal to zero
+!                  In case a symmetry operation only changes the sign of an
+!                  element, this element has to be equal to zero
 
-                 if (flag == -1) then
-                   pertsy(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = -2
-                   exit
+                   if (flag == -1) then
+                     pertsy(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = -2
+                     exit
+                   end if
+
+!                Strain part
+                 else
+
+                   if ((flag /= -1).and.&
+!&                   (ipesy1==i1pert).and.(ipesy2==i2pert).and.(ipesy3==i3pert)) then
+&                   (ipesy1==i1pert).and.(ipesy3==i3pert)) then
+                     flag = sym1(i1dir,i1dir)*sym3(i3dir,i3dir)
+                   end if
+
+
+                   do idisy1 = 1, 3
+                     do idisy2 = 1, 3
+                       do idisy3 = 1, 3
+
+                         if ((sym1(i1dir,idisy1) /= 0).and.(sym3(i3dir,idisy3) /= 0)) then
+                           if (pertsy(idisy1,ipesy1,idisy2,ipesy2,idisy3,ipesy3) == 0) then
+                             found = 0
+!                            exit      ! exit loop over symmetries
+                           end if
+                         end if
+
+
+                         if ((flag == -1).and.&
+&                         ((idisy1/=i1dir).or.(idisy3/=i3dir))) then
+                           if ((sym1(i1dir,idisy1)/=0).and.&
+&                           (sym3(i3dir,idisy3)/=0)) then
+                             flag = 0
+                           end if
+                         end if
+
+                       end do
+                     end do
+                   end do
+
+                   if (found == 1) then
+                     pertsy(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = -1
+                   end if
+
+!                  In case a symmetry operation only changes the sign of an
+!                  element, this element has to be equal to zero
+
+                   if (flag == -1) then
+                     pertsy(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = -2
+                     exit
+                   end if
                  end if
 
                end do    ! close loop on symmetries
