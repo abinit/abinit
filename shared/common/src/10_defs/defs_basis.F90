@@ -302,6 +302,7 @@ module defs_basis
  integer, parameter, public :: RUNL_SCREENING  = 3
  integer, parameter, public :: RUNL_SIGMA      = 4
  integer, parameter, public :: RUNL_NONLINEAR  = 5
+ integer, parameter, public :: RUNL_GWR        = 6
  integer, parameter, public :: RUNL_EPH        = 7
  integer, parameter, public :: RUNL_WFK        = 8
  integer, parameter, public :: RUNL_RTTDDFT    = 9

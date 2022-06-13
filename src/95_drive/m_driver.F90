@@ -61,6 +61,7 @@ module m_driver
  use m_screening_driver, only : screening
  use m_sigma_driver,     only : sigma
  use m_bethe_salpeter,   only : bethe_salpeter
+ use m_gwr_driver,       only : gwr
  use m_eph_driver,       only : eph
  use m_wfk_analyze,      only : wfk_analyze
  use m_gstateimg,        only : gstateimg
@@ -352,6 +353,10 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
      case (RUNL_SCREENING, RUNL_SIGMA)
        call ydoc%add_ints("optdriver, gwcalctyp", &
          [dtset%optdriver, dtset%gwcalctyp] , dict_key="meta")
+
+     case (RUNL_GWR)
+       call ydoc%add_ints("optdriver", [dtset%optdriver], &
+         dict_key="meta")
 
      case (RUNL_BSE)
        call ydoc%add_ints("optdriver, bs_calctype, bs_algorithm", &
@@ -800,6 +805,9 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 
    case(RUNL_NONLINEAR)
      call nonlinear(codvsn,dtfil,dtset,etotal,mpi_enregs(idtset),npwtot,occ,pawang,pawrad,pawtab,psps,xred)
+
+   case (RUNL_GWR)
+     call gwr(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim, xred)
 
    case (RUNL_BSE)
      call bethe_salpeter(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
