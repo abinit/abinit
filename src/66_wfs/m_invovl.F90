@@ -205,7 +205,6 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
  integer :: ikpt_this_proc
  logical :: parity
  real(dp) :: tsec(2)
- character(len=500) :: message
  character :: blas_transpose
 
  type(invovl_kpt_type), pointer :: invovl
@@ -416,9 +415,6 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
  call timab(timer_mkinvovl,2,tsec)
 
  ABI_FREE(projs)
-
- write(message,*) 'Invovl built'
- call wrtout(std_out,message,'COLL')
 
 end subroutine make_invovl
 !!***

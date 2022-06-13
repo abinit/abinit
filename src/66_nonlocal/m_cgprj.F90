@@ -691,10 +691,14 @@ contains
  if (npband_bandfft>1) then
    ABI_MALLOC(npw_block,(npband_bandfft))
    ABI_MALLOC(npw_disp,(npband_bandfft))
-   ABI_MALLOC(bufsize,(npband_bandfft*cg_bandpp))
-   ABI_MALLOC(bufdisp,(npband_bandfft*cg_bandpp))
-   ABI_MALLOC(bufsize_wf,(npband_bandfft*cg_bandpp))
-   ABI_MALLOC(bufdisp_wf,(npband_bandfft*cg_bandpp))
+   !FB ABI_MALLOC(bufsize,(npband_bandfft*cg_bandpp))
+   ABI_MALLOC(bufsize,(npband_bandfft))
+   !FB ABI_MALLOC(bufdisp,(npband_bandfft*cg_bandpp))
+   ABI_MALLOC(bufdisp,(npband_bandfft))
+   !FB ABI_MALLOC(bufsize_wf,(npband_bandfft*cg_bandpp))
+   ABI_MALLOC(bufsize_wf,(npband_bandfft))
+   !FB ABI_MALLOC(bufdisp_wf,(npband_bandfft*cg_bandpp))
+   ABI_MALLOC(bufdisp_wf,(npband_bandfft))
  end if
 
 !Set output datastructure to zero
@@ -827,7 +831,8 @@ contains
      if (npband_bandfft>1) then
        isize=2*my_nspinor*cg_bandpp;bufsize(:)=isize*npw_block(:);bufdisp(:)=isize*npw_disp(:)
        isize=2*my_nspinor*npw_k*cg_bandpp;bufsize_wf(:)=isize
-       do ii=1,npband_bandfft*cg_bandpp
+       !FB do ii=1,npband_bandfft*cg_bandpp
+       do ii=1,npband_bandfft
          bufdisp_wf(ii)=(ii-1)*isize
        end do
      end if
@@ -861,8 +866,10 @@ contains
          ABI_FREE(cwavef_tmp)
          !Reorder WF according to cg_bandpp and/or spinor
          if (cg_bandpp>1.or.my_nspinor>1) then
-           ABI_MALLOC(cwavef_tmp,(2,npw_nk*my_nspinor*blocksz))
-           do ig=1,npw_nk*my_nspinor*blocksz
+           !FB ABI_MALLOC(cwavef_tmp,(2,npw_nk*my_nspinor*blocksz))
+           ABI_MALLOC(cwavef_tmp,(2,npw_nk*my_nspinor*cg_bandpp))
+           !FB do ig=1,npw_nk*my_nspinor*blocksz
+           do ig=1,npw_nk*my_nspinor*cg_bandpp
              cwavef_tmp(:,ig)=cwavef(:,ig)
            end do
            shift1=0
@@ -913,7 +920,8 @@ contains
 !    Shift array memory (if mkmem/=0)
      if (mkmem/=0) then
        ibg=ibg+my_nspinor*nband_cprj_k
-       icg=icg+my_nspinor*nband_cg_k*npw_k
+       !FB icg=icg+my_nspinor*nband_cg_k*npw_k
+       icg=icg+my_nspinor*nband_k*npw_k
        ikg=ikg+npw_k
      end if
 
