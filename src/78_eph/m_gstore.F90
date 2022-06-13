@@ -149,8 +149,6 @@ module m_gstore
  use m_kpts,           only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, kpts_map, kpts_sort, kpts_pack_in_stars
  use m_getgh1c,        only : getgh1c, rf_transgrid_and_pack, getgh1c_setup
  use m_ifc,            only : ifc_type
- use m_geometry,       only : phdispl_cart2red
- use m_dynmat,         only : phdispl_from_eigvec
  use m_phonons,        only : pheigvec_rotate
  use m_pawang,         only : pawang_type
  use m_pawrad,         only : pawrad_type
@@ -790,7 +788,7 @@ function gstore_new(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm) result (gst
      nctkarr_t("gstore_brange_spin", "i", "two, number_of_spins"), &
      nctkarr_t("gstore_erange_spin", "dp", "two, number_of_spins"), &
      nctkarr_t("phfreqs_ibz", "dp", "natom3, gstore_nqibz"), &
-     nctkarr_t("phdispl_cart_ibz", "dp", "two, three, natom, natom3, gstore_nqibz"), &
+     nctkarr_t("pheigvec_cart_ibz", "dp", "two, three, natom, natom3, gstore_nqibz"), &
      nctkarr_t("gstore_glob_nq_spin", "i", "number_of_spins"), &
      nctkarr_t("gstore_glob_nk_spin", "i", "number_of_spins"), &
      nctkarr_t("gstore_done_qbz_spin", "i", "gstore_nqbz, number_of_spins"), &
@@ -1287,7 +1285,7 @@ subroutine gstore_malloc__(gstore, with_cplex, max_nq, qglob2bz, max_nk, kglob2b
 !Local variables-------------------------------
 !scalars
  integer :: spin, my_is, ierr, my_iq, my_ik, iq_glob, iq_bz, ik_glob, ik_bz
- integer :: ik_ibz, isym_k, trev_k, tsign, g0_k(3)
+ integer :: ik_ibz, isym_k, trev_k, tsign_k, g0_k(3)
  logical :: isirr_k
  real(dp) :: mem_mb
  type(gqk_t),pointer :: gqk
@@ -1340,10 +1338,10 @@ subroutine gstore_malloc__(gstore, with_cplex, max_nq, qglob2bz, max_nk, kglob2b
      ik_ibz = gqk%my_k2ibz(1, my_ik); isym_k = gqk%my_k2ibz(2, my_ik)
      trev_k = gqk%my_k2ibz(6, my_ik); g0_k = gqk%my_k2ibz(3:5, my_ik)
      isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
-     tsign = 1; if (trev_k == 1) tsign = -1
+     tsign_k = 1; if (trev_k == 1) tsign_k = -1
 
      !! symrel^T convention for k
-     gqk%my_kpts(:, my_ik) = tsign * matmul(transpose(gstore%cryst%symrel(:,:,isym_k)), gstore%kibz(:, ik_ibz)) + g0_k
+     gqk%my_kpts(:, my_ik) = tsign_k * matmul(transpose(gstore%cryst%symrel(:,:,isym_k)), gstore%kibz(:, ik_ibz)) + g0_k
 
      select case(gstore%kzone)
      case ("ibz")
@@ -2313,7 +2311,7 @@ pure subroutine gqk_myqpt(gqk, my_iq, gstore, weight, qpt)
 
 !Local variables ------------------------------
 !scalars
- integer :: iq_ibz, isym_q, trev_q, tsign, g0_q(3)
+ integer :: iq_ibz, isym_q, trev_q, tsign_q, g0_q(3)
  logical :: isirr_q
 
 !----------------------------------------------------------------------
@@ -2321,10 +2319,10 @@ pure subroutine gqk_myqpt(gqk, my_iq, gstore, weight, qpt)
  iq_ibz = gqk%my_q2ibz(1, my_iq); isym_q = gqk%my_q2ibz(2, my_iq)
  trev_q = gqk%my_q2ibz(6, my_iq); g0_q = gqk%my_q2ibz(3:5, my_iq)
  isirr_q = (isym_q == 1 .and. trev_q == 0 .and. all(g0_q == 0))
- tsign = 1; if (trev_q == 1) tsign = -1
+ tsign_q = 1; if (trev_q == 1) tsign_q = -1
 
  ! NB: Use symrec convention for q
- qpt = tsign * matmul(gstore%cryst%symrec(:,:,isym_q), gstore%qibz(:, iq_ibz)) + g0_q
+ qpt = tsign_q * matmul(gstore%cryst%symrec(:,:,isym_q), gstore%qibz(:, iq_ibz)) + g0_q
 
  select case(gstore%qzone)
  case ("ibz")
@@ -2722,7 +2720,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  real(dp),allocatable :: ylm_kq(:,:), ylm_k(:,:), ylmgr_kq(:,:,:)
  real(dp),allocatable :: dummy_vtrial(:,:), gvnlx1(:,:), work(:,:,:,:)
  real(dp),allocatable :: gs1c(:,:), vk_cart_ibz(:,:,:) !, vkmat_cart_ibz(:,:,:,:)
- real(dp),allocatable :: my_gbuf(:,:,:,:,:,:), buf_wqnu(:,:), buf_displ_cart(:,:,:,:,:)
+ real(dp),allocatable :: my_gbuf(:,:,:,:,:,:), buf_wqnu(:,:), buf_eigvec_cart(:,:,:,:,:)
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:)
  type(pawcprj_type),allocatable  :: cwaveprj0(:,:)
 
@@ -2908,29 +2906,31 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 
    call xmpi_split_block(gstore%nqibz, gstore%comm, my_nqibz, my_iqibz_inds)
    ABI_MALLOC(buf_wqnu, (natom3, my_nqibz))
-   ABI_MALLOC(buf_displ_cart, (2, 3, natom, natom3, my_nqibz))
+   ABI_MALLOC(buf_eigvec_cart, (2, 3, natom, natom3, my_nqibz))
 
    do ii=1,my_nqibz
      iq_ibz = my_iqibz_inds(ii)
-     call ifc%fourq(cryst, gstore%qibz(:, iq_ibz), buf_wqnu(:,ii), buf_displ_cart(:,:,:,:,ii))
+     !call ifc%fourq(cryst, gstore%qibz(:, iq_ibz), buf_wqnu(:,ii), buf_displ_cart(:,:,:,:,ii))
+     call ifc%fourq(cryst, gstore%qibz(:, iq_ibz), buf_wqnu(:,ii), displ_cart_qibz, &
+                    out_eigvec=buf_eigvec_cart(:,:,:,:,ii))
    end do
    if (nproc > 1 .and. gstore%nqibz >= nproc) then
      NCF_CHECK(nctk_set_collective(root_ncid, root_vid("phfreqs_ibz")))
-     NCF_CHECK(nctk_set_collective(root_ncid, root_vid("phdispl_cart_ibz")))
+     NCF_CHECK(nctk_set_collective(root_ncid, root_vid("pheigvec_cart_ibz")))
    end if
 
    if (my_nqibz > 0) then
      iq_start = my_iqibz_inds(1)
      ncerr = nf90_put_var(root_ncid, root_vid("phfreqs_ibz"), buf_wqnu, start=[1, iq_start], count=[natom3, my_nqibz])
      NCF_CHECK(ncerr)
-     ncerr = nf90_put_var(root_ncid, root_vid("phdispl_cart_ibz"), buf_displ_cart, &
+     ncerr = nf90_put_var(root_ncid, root_vid("pheigvec_cart_ibz"), buf_eigvec_cart, &
                           start=[1,1,1,1,iq_start], count=[2, 3, natom, natom3, my_nqibz])
      NCF_CHECK(ncerr)
    end if
 
    ABI_FREE(my_iqibz_inds)
    ABI_FREE(buf_wqnu)
-   ABI_FREE(buf_displ_cart)
+   ABI_FREE(buf_eigvec_cart)
    call cwtime_report(" phonon computation + output", cpu, wall, gflops)
  else
    call wrtout(std_out, &
@@ -3046,7 +3046,10 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 
      iq_ibz = gqk%my_q2ibz(1, my_iq); isym_q = gqk%my_q2ibz(2, my_iq)
      trev_q = gqk%my_q2ibz(6, my_iq); g0_q = gqk%my_q2ibz(3:5,my_iq)
-     ! Don't test if umklapp == 0 because we use the periodic gauge: phfreq(q+G) = phfreq(q) and eigvec(q) = eigvec(q+G)
+     ! Don't test if umklapp == 0 because we use the periodic gauge:
+     !
+     !      phfreq(q+G) = phfreq(q) and eigvec(q) = eigvec(q+G)
+     !
      !isirr_q = (isym_q == 1 .and. trev_q == 0 .and. all(g0_q == 0))
      isirr_q = (isym_q == 1 .and. trev_q == 0)
      qq_ibz = gstore%qibz(:, iq_ibz)
@@ -3066,12 +3069,10 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
        displ_red_qbz = displ_red_qibz
        pheigvec_qbz = pheigvec_qibz
      else
-       ! rotate phonon eigenvectors from q_ibz to q_bz
-       ! This part is needed to enforce a particular gauge in the eigenvectors,
-       ! including e(-q) = e(q)^*
-       call pheigvec_rotate(cryst, qq_ibz, qq_bz, isym_q, trev_q, pheigvec_qibz, pheigvec_qbz)
-       call phdispl_from_eigvec(cryst%natom, cryst%ntypat, cryst%typat, cryst%amu, pheigvec_qbz, displ_cart_qbz)
-       call phdispl_cart2red(cryst%natom, cryst%gprimd, displ_cart_qbz, displ_red_qbz)
+       ! Rotate phonon eigenvectors from q_ibz to q_bz.
+       ! This part is needed to enforce the gauge in the ph eigenvectors, including e(-q) = e(q)^*
+       call pheigvec_rotate(cryst, qq_ibz, isym_q, trev_q, pheigvec_qibz, pheigvec_qbz, displ_cart_qbz, &
+                            displ_red_qbz=displ_red_qbz)
      end if
 
      !call ifc%fourq(cryst, qq_bz, phfrq, displ_cart_qbz, out_displ_red=displ_red_qbz, out_eigvec=pheigvec_qbz)
@@ -3100,7 +3101,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
      ! Loop over my k-points
      do my_ik=1,gqk%my_nk
 
-       ! Important as there are cycle instructions inside these loops
+       ! Set entry to zero. Important as there are cycle instructions inside these loops
        ! and we don't want to write random numbers to disk.
        my_gbuf(:,:,:,:, my_ik, iqbuf_cnt) = zero
 
@@ -3148,7 +3149,6 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
        ! Number of bands crossing the Fermi level at k+q
        !bstart_kq = fs%bstart_cnt_ibz(1, ikq_ibz); nband_kq = fs%bstart_cnt_ibz(2, ikq_ibz)
        bstart_kq = gqk%bstart; nband_kq = gqk%nb
-
        ABI_CHECK(nband_k <= nb .and. nband_kq <= nb, "wrong nband")
 
        ! Get npw_k, kg_k and symmetrize wavefunctions from IBZ (if needed).
@@ -3324,7 +3324,6 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  ABI_FREE(displ_red_qibz)
  ABI_FREE(pheigvec_qbz)
  ABI_FREE(pheigvec_qibz)
-
  ABI_FREE(done_qbz_spin)
 
  call pawcprj_free(cwaveprj0)
@@ -3428,17 +3427,22 @@ function gstore_from_ncpath(path, with_cplex, dtset, cryst, ebands, ifc, comm) r
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0
- integer :: my_rank, ncid, spin, spin_ncid, nproc, ierr, fform, max_nb, ib
+ integer :: my_rank, ncid, spin, spin_ncid, nproc, ierr, fform, max_nb, ib, natom, natom3
  integer :: max_nq, max_nk, gstore_cplex, ncerr, my_is, my_iq, iq_glob, my_ik, ik_glob, my_ip, ipert
+ integer :: iq_ibz, isym_q, trev_q, tsign_q, g0_q(3)
  real(dp) :: cpu, wall, gflops
  character(len=10) :: priority
+ logical :: store_phdispl, isirr_q
  type(hdr_type) :: wfk0_hdr
  type(crystal_t) :: gstore_cryst
  type(gqk_t),pointer :: gqk
 !arrays
  integer :: ibuffer(9), nproc_spin(ebands%nsppol), comm_spin(ebands%nsppol), brange_spin(2, ebands%nsppol)
  integer,allocatable :: qglob2bz(:,:), kglob2bz(:,:), qbz2ibz(:,:), kbz2ibz(:,:)
+ real(dp) :: qq_ibz(3)
  real(dp),allocatable :: gwork_q(:,:,:,:,:), slice_bb(:,:,:)
+ real(dp),allocatable :: phfreqs_ibz(:,:), pheigvec_cart_ibz(:,:,:,:,:)
+ real(dp),allocatable :: pheigvec_cart_qbz(:,:,:,:), displ_cart_qbz(:,:,:,:)
 
 ! *************************************************************************
 
@@ -3454,6 +3458,9 @@ function gstore_from_ncpath(path, with_cplex, dtset, cryst, ebands, ifc, comm) r
  gstore%ebands => ebands
  gstore%ifc => ifc
  gstore%kibz => ebands%kptns
+ natom = cryst%natom
+ natom3 = cryst%natom * 3
+
  ABI_CALLOC(gstore%erange_spin, (2, gstore%nsppol))
  ABI_MALLOC(gstore%glob_nk_spin, (gstore%nsppol))
  ABI_MALLOC(gstore%glob_nq_spin, (gstore%nsppol))
@@ -3640,6 +3647,58 @@ function gstore_from_ncpath(path, with_cplex, dtset, cryst, ebands, ifc, comm) r
  !
  call cwtime(cpu, wall, gflops, "start")
 
+ ! ========================================
+ ! Load phonon frequencies and eigenvectors
+ ! ========================================
+
+ ! nctkarr_t("phfreqs_ibz", "dp", "natom3, gstore_nqibz")
+ ! nctkarr_t("pheigvec_cart_ibz", "dp", "two, three, natom, natom3, gstore_nqibz")
+ ABI_MALLOC(phfreqs_ibz, (natom3, gstore%nqibz))
+ ABI_MALLOC(pheigvec_cart_ibz, (2, 3, cryst%natom, cryst%natom * 3, gstore%nqibz))
+ ABI_MALLOC(pheigvec_cart_qbz, (2, 3, cryst%natom, cryst%natom * 3))
+ ABI_MALLOC(displ_cart_qbz, (2, 3, cryst%natom, cryst%natom * 3))
+
+ NCF_CHECK(nctk_open_read(ncid, gstore%path, gstore%comm))
+
+ if (nproc > 1) then
+   NCF_CHECK(nctk_set_collective(ncid, vid("phfreqs_ibz")))
+ end if
+ NCF_CHECK(nf90_get_var(ncid, vid("phfreqs_ibz"), phfreqs_ibz))
+ if (nproc > 1) then
+   NCF_CHECK(nctk_set_collective(ncid, vid("pheigvec_cart_ibz")))
+ end if
+ NCF_CHECK(nf90_get_var(ncid, vid("pheigvec_cart_ibz"), pheigvec_cart_ibz))
+ NCF_CHECK(nf90_close(ncid))
+
+ store_phdispl = .True.
+ do my_is=1,gstore%my_nspins
+   gqk => gstore%gqk(my_is)
+
+   ABI_MALLOC(gqk%my_wnuq, (gqk%my_npert, gqk%my_nq))
+   if (store_phdispl) then
+     ABI_MALLOC(gqk%my_displ_cart, (2, 3, cryst%natom, gqk%my_npert, gqk%my_nq))
+   end if
+
+   do my_iq=1,gqk%my_nq
+     iq_ibz = gqk%my_q2ibz(1, my_iq); isym_q = gqk%my_q2ibz(2, my_iq)
+     trev_q = gqk%my_q2ibz(6, my_iq); g0_q = gqk%my_q2ibz(3:5, my_iq)
+     !isirr_q = (isym_q == 1 .and. trev_q == 0 .and. all(g0_q == 0))
+     isirr_q = (isym_q == 1 .and. trev_q == 0)
+     tsign_q = 1; if (trev_q == 1) tsign_q = -1
+     qq_ibz = gstore%qibz(:, iq_ibz)
+     call pheigvec_rotate(cryst, qq_ibz, isym_q, trev_q, pheigvec_cart_ibz(:,:,:,:,iq_ibz), &
+                          pheigvec_qbz, displ_cart_qbz)
+
+     gqk%my_wnuq(:, my_iq) = phfreqs_ibz(gqk%my_iperts(:), iq_ibz)
+     if (store_phdispl) gqk%my_displ_cart(:,:,:,:,my_iq) = displ_cart_qbz(:,:,:,gqk%my_iperts(:))
+   end do ! my_iq
+ end do ! my_is
+
+ ABI_FREE(phfreqs_ibz)
+ ABI_SFREE(pheigvec_cart_ibz)
+ ABI_SFREE(displ_cart_qbz)
+ ABI_FREE(pheigvec_cart_qbz)
+
  do spin=1,gstore%nsppol
    my_is = gstore%spin2my_is(spin)
 
@@ -3691,7 +3750,9 @@ function gstore_from_ncpath(path, with_cplex, dtset, cryst, ebands, ifc, comm) r
      ABI_FREE(gwork_q)
      ABI_FREE(slice_bb)
 
-     ! Read matrix elements of the velocity operator.
+     ! ==============================================
+     ! Read matrix elements of the velocity operator
+     ! ==============================================
      if (gstore%with_vk == 1) then
        if (gqk%grid_comm%nproc > 1) then
          NCF_CHECK(nctk_set_collective(spin_ncid, spin_vid("vk_cart_ibz")))
@@ -3711,10 +3772,10 @@ function gstore_from_ncpath(path, with_cplex, dtset, cryst, ebands, ifc, comm) r
      end if
 
      NCF_CHECK(nf90_close(ncid))
-   end if ! my_is /= 0
+   end if
 
    call xmpi_barrier(gstore%comm)
- end do
+ end do ! spin
 
  call cwtime_report(" gstore_from_ncpath", cpu, wall, gflops)
 

@@ -4268,7 +4268,7 @@ Variable(
 Select the electron-phonon task to be performed when [[optdriver]] == 7.
 The choice is among:
 
-* 0 --> No computation (mainly used to access the post-processing tools)
+* 0 --> No computation. Mainly used to access the post-processing tools.
 * 1 --> Compute phonon linewidths in metals and superconducting properties (isotropic formalism).
 * 2 --> Compute e-ph matrix elements. Save results in GKK.nc file.
 * -2 --> Compute e-ph matrix elements. Save results in GKQ.nc file that can be post-processed with AbiPy.
@@ -15788,7 +15788,7 @@ Variable(
 
 Variable(
     abivarname="prtnest",
-    varset="dev",
+    varset="eph",
     vartype="integer",
     topics=['printing_prfermi'],
     dimensions="scalar",
@@ -15797,9 +15797,16 @@ Variable(
     characteristics=['[[DEVELOP]]'],
     added_in_version="before_v9",
     text=r"""
-If set to 1, the nesting function for the k-point grid is printed. For the
-moment the path in q space for the nesting function is fixed, but will become
-an input as well.
+Same meaning as [[prtnest@anaddb]].
+The only difference with respect to the anaddb version is that the path in q-space
+must be specified in terms of [[ph_qpath]] and [[ph_nqpath]].
+
+By default, the nesting factor is computed using the Fermi level obtained in the GS run.
+In order to shift the Fermi level, use [[fermie_nest]].
+Note that, for the time being, the implementation is not compatible with [[nshiftk]] > 1.
+
+[[prtnest]] can be used either in the GS part or in the EPH code [[optdriver]] == 7 (possibly with
+[[eph_task]] = 0).
 """,
 ),
 
