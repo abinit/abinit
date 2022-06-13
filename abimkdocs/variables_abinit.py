@@ -2026,7 +2026,7 @@ Variable(
     vartype="integer",
     topics=['nonlinear_basic'],
     dimensions=[2],
-    defaultval=[1, 1],
+    defaultval=[1, '[[natom]]' ],
     mnemonics="3rd Derivative of Energy, mixed PERTurbation 1: limits of ATomic POLarisations",
     requires="[[optdriver]] == 5 (non-linear response computations)",
     added_in_version="before_v9",
@@ -2044,7 +2044,7 @@ Variable(
     vartype="integer",
     topics=['nonlinear_basic'],
     dimensions=[3],
-    defaultval=[0, 0, 0],
+    defaultval=[1, 1, 1],
     mnemonics="3rd Derivative of Energy, mixed PERTurbation 1: DIRections",
     requires="[[optdriver]] == 5 (non-linear response computations)",
     added_in_version="before_v9",
@@ -2097,7 +2097,7 @@ Variable(
     vartype="integer",
     topics=['nonlinear_basic'],
     dimensions=[2],
-    defaultval=[1, 1],
+    defaultval=[1, '[[natom]]' ],
     mnemonics="3rd Derivative of Energy, mixed PERTurbation 2: limits of ATomic POLarisations",
     requires="[[optdriver]] == 5 (non-linear response computations)",
     added_in_version="before_v9",
@@ -2168,7 +2168,7 @@ Variable(
     vartype="integer",
     topics=['nonlinear_basic'],
     dimensions=[2],
-    defaultval=[1, 1],
+    defaultval=[1, '[[natom]]' ],
     mnemonics="3rd Derivative of Energy, mixed PERTurbation 3: limits of ATomic POLarisations",
     requires="[[optdriver]] == 5 (non-linear response computations)",
     added_in_version="before_v9",
@@ -17259,7 +17259,7 @@ Variable(
     vartype="integer",
     topics=['DFPT_basic', 'Elastic_compulsory', 'Phonons_compulsory'],
     dimensions=[2],
-    defaultval=[1, 1],
+    defaultval=[1, '[[natom]]' ],
     mnemonics="Response Function: ATomic POLarisation",
     added_in_version="before_v9",
     text=r"""
@@ -17272,12 +17272,17 @@ The atoms to be moved will be defined by the do-loop variable iatpol:
   - do iatpol=[[rfatpol]](1),[[rfatpol]](2)
 
 For the calculation of a full dynamical matrix, use [[rfatpol]](1)=1 and
-[[rfatpol]](2)=[[natom]], together with [[rfdir]] 1 1 1. For selected
+[[rfatpol]](2)=[[natom]], together with [[rfdir]] 1 1 1, both being the default values. 
+For selected
 elements of the dynamical matrix, use different values of [[rfatpol]] and/or
 [[rfdir]]. The name 'iatpol' is used for the part of the internal variable
 ipert when it runs from 1 to [[natom]]. The internal variable ipert can also
 assume values larger than [[natom]], denoting perturbations of electric field
 or stress type (see [the DFPT help file](/guide/respfn)).
+
+As a side technical information, the value [[rfatpol]](1)=-1 is admitted, and transformed
+immediately to [[rfatpol]](1)=1, while [[rfatpol]](2)=-1 is transformed to  [[rfatpol]](2)=[[natom]],
+while the default input values are actually [[rfatpol]]=-1 .
 """,
 ),
 
@@ -17308,7 +17313,7 @@ Variable(
     vartype="integer",
     topics=['DFPT_compulsory', 'Elastic_compulsory', 'Phonons_compulsory'],
     dimensions=[3],
-    defaultval=[0, 0, 0],
+    defaultval=[1, 1, 1],
     mnemonics="Response Function: DIRections",
     added_in_version="before_v9",
     text=r"""
@@ -17320,8 +17325,9 @@ space (phonon calculations), or in reciprocal space ($\,d/ \,d k$, homogeneous
 electric field, homogeneous magnetic field calculations). So, they generate a
 basis for the generation of the dynamical matrix or the macroscopic dielectric
 tensor or magnetic susceptibility and magnetic shielding, or the effective charge tensors.
-If equal to 1, response functions, as defined by [[rfddk]], [[rfelfd]],
-[[rfphon]], [[rfdir]] and [[rfatpol]], are to be computed for the
+If equal to 1, response functions, as defined by [[rfdir]], [[rfddk]], [[rfelfd]],
+[[rfphon]], [[rfstrs]], [[rfmagn]], [[rfatpol]], and possibly other response-function activating 
+input variables, but also [[berryopt]] are to be computed for the
 corresponding direction. If 0, this direction should not be considered.
 """,
 ),

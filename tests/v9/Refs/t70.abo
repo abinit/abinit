@@ -286,16 +286,6 @@ P          mk1mem5         16
            prtpot3          1
            prtpot4          1
            prtpot5          0
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          1       1
-          rfatpol4          1       2
-          rfatpol5          1       1
-            rfdir1          0       0       0
-            rfdir2          1       1       1
-            rfdir3          1       1       1
-            rfdir4          1       1       1
-            rfdir5          0       0       0
            rfelfd1          0
            rfelfd2          2
            rfelfd3          0
@@ -311,16 +301,6 @@ P          mk1mem5         16
          rf2_dkdk3          1
          rf2_dkdk4          0
          rf2_dkdk5          0
-    rf2_pert1_dir1          0       0       0
-    rf2_pert1_dir2          0       0       0
-    rf2_pert1_dir3          1       1       1
-    rf2_pert1_dir4          0       0       0
-    rf2_pert1_dir5          0       0       0
-    rf2_pert2_dir1          0       0       0
-    rf2_pert2_dir2          0       0       0
-    rf2_pert2_dir3          1       1       1
-    rf2_pert2_dir4          0       0       0
-    rf2_pert2_dir5          0       0       0
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
@@ -2258,16 +2238,6 @@ P          mk1mem5         16
            prtpot3          1
            prtpot4          1
            prtpot5          0
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          1       1
-          rfatpol4          1       2
-          rfatpol5          1       1
-            rfdir1          0       0       0
-            rfdir2          1       1       1
-            rfdir3          1       1       1
-            rfdir4          1       1       1
-            rfdir5          0       0       0
            rfelfd1          0
            rfelfd2          2
            rfelfd3          0
@@ -2283,16 +2253,6 @@ P          mk1mem5         16
          rf2_dkdk3          1
          rf2_dkdk4          0
          rf2_dkdk5          0
-    rf2_pert1_dir1          0       0       0
-    rf2_pert1_dir2          0       0       0
-    rf2_pert1_dir3          1       1       1
-    rf2_pert1_dir4          0       0       0
-    rf2_pert1_dir5          0       0       0
-    rf2_pert2_dir1          0       0       0
-    rf2_pert2_dir2          0       0       0
-    rf2_pert2_dir3          1       1       1
-    rf2_pert2_dir4          0       0       0
-    rf2_pert2_dir5          0       0       0
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00

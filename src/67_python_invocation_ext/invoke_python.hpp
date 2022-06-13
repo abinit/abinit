@@ -10,6 +10,7 @@
  * ******************/
 
 #if defined HAVE_MPI
+// #include <mpi.h>
 // starts the interpreter
 // the location of the PythonLibrary must be in the var env_var
 int init_python_interpreter_from_env(const char* env_var);
@@ -24,10 +25,12 @@ int execute_python_file(const char* filename);
 int close_python_interpreter();
 
 extern "C"{
+    // void invoke_python_triqs(int rank, char* filapp_in, MPI_Fint *MPI_world_ptr);
     void invoke_python_triqs(int rank, char* filapp_in);
 }
 #else
 extern "C"{
+    // void invoke_python_triqs(int rank, char* filapp_in, int *MPI_world_ptr);
     void invoke_python_triqs(int rank, char* filapp_in);
 }
 #endif
