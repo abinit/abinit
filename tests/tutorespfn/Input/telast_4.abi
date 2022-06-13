@@ -20,8 +20,6 @@ berryopt2  -1  #preferred method to calulate electric polarization
            -0.866025403784439  0.5  0.0
             0.0                0.0  0.9999
 
-   rfdir2   1 1 1 #will calculate Cartesian polarization
-
 # Set 3 : Self-consistent run for stress
 
   getwfk3  -1  #wave function shouldn't change much
@@ -38,7 +36,6 @@ berryopt4  -1
    rprim4   0.866025403784439  0.5  0.0
            -0.866025403784439  0.5  0.0
             0.0                0.0  1.0001
-   rfdir4   1 1 1
 
 #Common input data
 
