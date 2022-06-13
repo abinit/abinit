@@ -34,12 +34,12 @@ module m_gwr_base
  use m_wfk
 
  !use defs_datatypes, only : ebands_t
- use m_fstrings, only : sjoin, itoa
- use m_crystal,  only : crystal_t
- use m_dtset,    only : dataset_type
+ use m_fstrings,  only : sjoin, itoa
+ use m_crystal,   only : crystal_t
+ use m_dtset,     only : dataset_type
  !use m_fft_core, only : get_kg
- use m_fft,      only : fft_ug
- use m_fft_mesh,      only : times_eikr !, times_eigr, ig2gfft, get_gftt, calc_ceikr, calc_eigr rotate_fft_mesh,
+ use m_fft,       only : fft_ug
+ use m_fft_mesh,  only : times_eikr !, times_eigr, ig2gfft, get_gftt, calc_ceikr, calc_eigr rotate_fft_mesh,
 
  implicit none
 
@@ -544,7 +544,7 @@ function gwr_new(dtset, comm) result (gwr)
           npwsp, npwsp, slk_processor, 1) !, tbloc=[npwsp, col_bsize])
      end do
 
-     ! Allocate chi_k(g, g')
+    ! Allocate chi_k(g, g')
     do iq=1,gwr%nq
       npwsp = gwr%chi_desc_q(iq)%npw * gwr%nspinor
       col_bsize = npwsp / gwr%gr_comm%nproc
