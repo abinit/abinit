@@ -4633,20 +4633,8 @@ subroutine d3lwsym(blkflg,d3,indsym,mpert,natom,nsym,symrec,symrel)
 
 ! *********************************************************************
 
-!DEBUG
-!write(std_out,*)'d3sym : enter'
-!do i1dir = 1, 3
-!do i2dir = 1, 3
-!do i3dir = 1, 3
-!write(std_out,*)i1dir,i2dir,i3dir,blkflg(i1dir,natom+2,i2dir,natom+2,i3dir,natom+2)
-!end do
-!end do
-!end do
-!stop
-!ENDDEBUG
-
 !First, take into account the permutations symmetry of
-!(i1pert,i1dir) and (i3pert,i3dir)
+!(i1pert,i1dir) and (i2pert,i2dir)
  do i1pert = 1, mpert
    do i2pert = 1, mpert
      do i3pert = 1, mpert
@@ -5070,14 +5058,13 @@ subroutine sylwtens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
  integer :: i3dir,i3dir_,i3pert,i3pert_,idisy1,idisy2,idisy3,ipesy1,ipesy2
  integer :: ipesy3,isym
 !arrays
- integer :: sym1(3,3),sym2(3,3),sym3(3,3),iden(3,3)
+ integer :: sym1(3,3),sym2(3,3),sym3(3,3)
  integer,allocatable :: pertsy(:,:,:,:,:,:)
 
 !***********************************************************************
 
  ABI_MALLOC(pertsy,(3,mpert,3,mpert,3,mpert))
  pertsy(:,:,:,:,:,:) = 0
- iden(:,:)=0;iden(1,1)=1;iden(2,2)=1;iden(3,3)=1
 
 !Loop over perturbations
 
@@ -5105,14 +5092,6 @@ subroutine sylwtens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
              else
                i1dir = i1dir_ ; i2dir = i2dir_ ; i3dir = i3dir_
              end if
-
-!             i1pert=i1pert_
-!             i2pert=i2pert_
-!             i3pert=i3pert_
-
-!             i1dir= i1dir_
-!             i2dir= i2dir_
-!             i3dir= i3dir_
 
              if (rfpert(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) /= 0) then
 
