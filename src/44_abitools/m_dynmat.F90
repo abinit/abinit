@@ -4634,6 +4634,10 @@ subroutine d3lwsym(blkflg,d3,indsym,mpert,natom,nsym,symrec,symrel)
 
 ! *********************************************************************
 
+ is_strain=.false.
+ iden(:,:)=0
+ iden(1,1)=1;iden(2,2)=1;iden(3,3)=1
+
 !First, take into account the permutations symmetry of
 !(i1pert,i1dir) and (i2pert,i2dir)
  do i1pert = 1, mpert
@@ -4689,7 +4693,6 @@ subroutine d3lwsym(blkflg,d3,indsym,mpert,natom,nsym,symrec,symrel)
 
                    found = 1
 
-                   is_strain=.false.
                    if (i1pert <= natom) then
                      ipesy1 = indsym(4,isym,i1pert)
                      sym1(:,:) = symrec(:,:,isym)
@@ -5103,6 +5106,7 @@ subroutine sylwtens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
  pertsy(:,:,:,:,:,:) = 0
  iden(:,:)=0
  iden(1,1)=1;iden(2,2)=1;iden(3,3)=1
+ is_strain=.false.
 
 !Loop over perturbations
 
@@ -5142,7 +5146,6 @@ subroutine sylwtens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
 
 !                Select the symmetric element of i1pert,i2pert,i3pert
 
-                 is_strain=.false.
                  if (i1pert <= natom) then
                    ipesy1 = indsym(4,isym,i1pert)
                    sym1(:,:) = symrec(:,:,isym)
