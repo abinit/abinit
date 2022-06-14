@@ -653,7 +653,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 !Merge stationay and nonvariational contributions
  d3etot(:,:,:,:,:,:,:)=d3etot(:,:,:,:,:,:,:) + d3etot_nv(:,:,:,:,:,:,:)
 
-!Complete missing elements using symmetry operations
+ !Complete missing elements using symmetry operations
  call d3lwsym(blkflg,d3etot,indsym,mpert,natom,dtset%nsym,symrec,dtset%symrel)
 
 !Deallocate global proc_distrib
