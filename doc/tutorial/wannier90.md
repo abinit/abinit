@@ -1,5 +1,5 @@
 ---
-authors: T. Rangel
+authors: T. Rangel, O. Gingras
 ---
 
 # Tutorial on the use of Wannier90 library
@@ -12,7 +12,7 @@ Maximally Localized Wannier Functions (MLWFs).
 You will learn how to get MLWFs with ABINIT and Wannier90 and what are the
 basic variables to govern the numerical efficiency.
 
-This tutorial should take about 2 hour and it is important to note that the examples in this tutorial
+This tutorial should take about 2 hours and it is important to note that the examples in this tutorial
 are not converged, they are just examples to show how to use the code.
 
 [TUTORIAL_README]
