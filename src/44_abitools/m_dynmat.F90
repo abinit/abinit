@@ -4755,17 +4755,17 @@ subroutine d3lwsym(blkflg,d3,indsym,mpert,natom,nsym,symrec,symrel)
   
                      sumr = 0_dp ; sumi = 0_dp;
                      do idisy1 = 1, 3
-!                       do idisy2 = 1, 3
+                       do idisy2 = 1, 3
                          do idisy3 = 1, 3
 
                            if ((sym1(i1dir,idisy1) /=0).and.(sym3(i3dir,idisy3) /=0)) then
 
-                             if (blkflg(idisy1,ipesy1,i2dir,ipesy2,idisy3,ipesy3) == 1) then
+                             if (blkflg(idisy1,ipesy1,idisy2,ipesy2,idisy3,ipesy3) == 1) then
 
                                sumr = sumr + sym1(i1dir,idisy1)*&
-&                               sym3(i3dir,idisy3)*d3(1,idisy1,ipesy1,i2dir,ipesy2,idisy3,ipesy3)
+&                               sym3(i3dir,idisy3)*d3(1,idisy1,ipesy1,idisy2,ipesy2,idisy3,ipesy3)
                                sumi = sumi + sym1(i1dir,idisy1)*&
-&                               sym3(i3dir,idisy3)*d3(2,idisy1,ipesy1,i2dir,ipesy2,idisy3,ipesy3)
+&                               sym3(i3dir,idisy3)*d3(2,idisy1,ipesy1,idisy2,ipesy2,idisy3,ipesy3)
 
                              else
 
@@ -4776,7 +4776,7 @@ subroutine d3lwsym(blkflg,d3,indsym,mpert,natom,nsym,symrec,symrel)
                            end if
 
                          end do
-!                       end do
+                       end do
                      end do
                    end if
   
@@ -5230,17 +5230,18 @@ subroutine sylwtens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
                  else
 
                    if ((flag /= -1).and.&
-&                   (ipesy1==i1pert).and.(ipesy2==i2pert).and.(ipesy3==i3pert)) then
+!&                   (ipesy1==i1pert).and.(ipesy2==i2pert).and.(ipesy3==i3pert)) then
+&                   (ipesy1==i1pert).and.(ipesy3==i3pert)) then
                      flag = sym1(i1dir,i1dir)*sym3(i3dir,i3dir)
                    end if
 
 
                    do idisy1 = 1, 3
-!                     do idisy2 = 1, 3
+                     do idisy2 = 1, 3
                        do idisy3 = 1, 3
 
                          if ((sym1(i1dir,idisy1) /= 0).and.(sym3(i3dir,idisy3) /= 0)) then
-                           if (pertsy(idisy1,ipesy1,i2dir,ipesy2,idisy3,ipesy3) == 0) then
+                           if (pertsy(idisy1,ipesy1,idisy2,ipesy2,idisy3,ipesy3) == 0) then
                              found = 0
 !                            exit      ! exit loop over symmetries
                            end if
@@ -5256,7 +5257,7 @@ subroutine sylwtens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
                          end if
 
                        end do
-!                     end do
+                     end do
                    end do
 
                    if (found == 1) then
