@@ -968,7 +968,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1634) = "rmm_diis:band_opt             "; basic(1634) = 1
 
  ! lobpcg2
- names(1650) = 'lobpcgwf2                     '; 
+ names(1650) = 'lobpcgwf2                     ';
  names(1651) = 'lobpcg_init                    '
  names(1652) = 'lobpcg_free                    '
  names(1653) = 'lobpcg_run                     '
@@ -1096,7 +1096,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1762) = 'chebfi2_amp_f                 '
  names(1763) = 'chebfi2_alltoall              '
 
- names(1780)='ctk_rotate'; basic(1780) = 1
+ names(1780)='ctgk_rotate'; basic(1780) = 1
 
 
  ! DVDB object

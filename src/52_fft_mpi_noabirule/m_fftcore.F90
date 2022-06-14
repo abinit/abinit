@@ -949,7 +949,7 @@ subroutine getng(boxcutmin,chksymtnons,ecut,gmet,kpt,me_fft,mgfft,nfft,ngfft,&
 ! Moreover, to cope with the non-symmorphic translation vectors, at least the
 ! origin must be sent to a point of the FFT grid. Hence, the non-symmorphic
 ! translations tnons(i) multiplied by ngfft(i) must be an integer.
-! The latter condition is however imposed only when chksymtnons=3. 
+! The latter condition is however imposed only when chksymtnons=3.
 ! Indeed, ABINIT will be able to reimpose the symmetry at the level of the density and potential.
 ! This might be a problem for GW calculations, though ...
 
@@ -1007,11 +1007,11 @@ subroutine getng(boxcutmin,chksymtnons,ecut,gmet,kpt,me_fft,mgfft,nfft,ngfft,&
 !  taking both the constraint on nproc_nfft and the constraint on tnons.
 !  First decompose nproc_fft, providing divisors of ngfft(2:3)
    nn=nproc_fft
-   npower(:,:)=0 
+   npower(:,:)=0
    do ipower=1,mpower
      valpow=power(ipower)
      do while (mod(nn,valpow)==0)
-       nn=nn/valpow 
+       nn=nn/valpow
        npower(3,ipower)=npower(3,ipower)+1
      end do
      if(nn/=1)then
@@ -1026,7 +1026,7 @@ subroutine getng(boxcutmin,chksymtnons,ecut,gmet,kpt,me_fft,mgfft,nfft,ngfft,&
        do ifactor=1,nfactor
          testok=1
          do isym=1,nsym
-           tnscaled=factor(ifactor)*tnons(ii,isym) 
+           tnscaled=factor(ifactor)*tnons(ii,isym)
            if(abs(tnscaled-nint(tnscaled))>tol8)testok=0
          enddo
          if(testok==1)exit
@@ -1037,7 +1037,7 @@ subroutine getng(boxcutmin,chksymtnons,ecut,gmet,kpt,me_fft,mgfft,nfft,ngfft,&
            if(ifactor==3)npower(ii,2)=max(npower(ii,2),1)  ! At least one power of 3
            if(ifactor==4)npower(ii,1)=max(npower(ii,1),2)  ! At least two powers of 2
            if(ifactor==5)npower(ii,3)=max(npower(ii,3),1)  ! At least one power of 5
-           if(ifactor==6)then 
+           if(ifactor==6)then
              npower(ii,1)=max(npower(ii,1),1)  ! At least one power of 2
              npower(ii,2)=max(npower(ii,2),1)  ! At least one power of 3
            endif
@@ -1047,7 +1047,7 @@ subroutine getng(boxcutmin,chksymtnons,ecut,gmet,kpt,me_fft,mgfft,nfft,ngfft,&
              npower(ii,1)=max(npower(ii,1),1)  ! At least one power of 2
              npower(ii,3)=max(npower(ii,3),1)  ! At least one power of 5
            end if
-           if(ifactor==10)then 
+           if(ifactor==10)then
              npower(ii,1)=max(npower(ii,1),2)  ! At least two powers of 2
              npower(ii,2)=max(npower(ii,2),1)  ! At least one power of 3
            end if
@@ -1074,7 +1074,7 @@ subroutine getng(boxcutmin,chksymtnons,ecut,gmet,kpt,me_fft,mgfft,nfft,ngfft,&
    end do
 
 !  Get maximal search indices : the ngtrial values must be identical (to fulfill the constraint induced by the
-!  off diagonal elements of symrel), but also must contain sufficient powers of basic primes (2, 3, 5, 7, 11), 
+!  off diagonal elements of symrel), but also must contain sufficient powers of basic primes (2, 3, 5, 7, 11),
 !  and be bigger than all current ngfft components. This should guarantee that such a triplet fulfills all constraints.
 !  Determine the divisor of allowed ngmax
    ngdiv=1
@@ -4403,8 +4403,8 @@ subroutine kpgsph(ecut,exchn2n3d,gmet,ikg,ikpt,istwf_k,kg,kpt,mkmem,mpi_enreg,mp
      if(mpi_enreg%me_fft < npw_remain) npw=npw+1
      ig=npw
 #ifdef DEBUG_MODE
-     write(msg,*) 'New npw_fft = ', npw
-     call wrtout(std_out,msg)
+     !write(msg,*) 'New npw_fft = ', npw
+     !call wrtout(std_out,msg)
 #endif
      alloc_size = max(alloc_size,npw)
      if(mpw>0 ) then  !Step for requilibration between fft process

@@ -6,7 +6,7 @@
 !! This module deals with rank objects for hashing k-point vector lists
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2022 ABINIT group (MVer,HM)
+!! Copyright (C) 2010-2022 ABINIT group (MVer, HM, MG)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -65,6 +65,9 @@ module m_krank
    real(dp),ABI_CONTIGUOUS pointer :: kpts(:,:)
     ! Reference to input k-points or copy of the array depending on kpts_owns_memory
 
+    ! Internal tables used by krank_get_mapping
+   integer,allocatable :: rank2ikpt_(:), rank2symtime_(:)
+
  contains
 
    procedure :: get_rank
@@ -83,11 +86,17 @@ module m_krank
     ! Prints the arrays and dimensions of a krank_t structure
 
    procedure :: get_mapping => krank_get_mapping
+    ! Use symmetries to map input kptn2 to the list of k-points used to generate krank_t.
+    ! Similar to listkk but, unlike listkk, this algo does not try to minimize the distance.
+    ! Must faster than listkk for dense meshes
 
  end type krank_t
 
  public :: krank_from_kptrlatt  ! Initialize object from kptrlatt
  public :: krank_new            ! Sets up the kpt ranks for comparing kpts
+
+ public :: get_ibz2bz           ! Return array with the index of the IBZ wave vectors in the BZ.
+ public :: star_from_ibz_idx    ! Return array with the indices of the star of the ik_ibz wavevector in the IBZ.
 !!***
 
 contains
@@ -107,6 +116,10 @@ contains
 !! OUTPUT
 !!  krank = object containing ranking and inverse ranking
 !!
+!! NOTES
+!!  By default, the object holds a reference to kpts so do not change/deallocate this array
+!!  while using krank.
+!!
 !! PARENTS
 !!
 !! CHILDREN
@@ -121,7 +134,7 @@ type(krank_t) function krank_from_kptrlatt(nkpt, kpts, kptrlatt, compute_invrank
  logical,optional,intent(in) :: compute_invrank
 !arrays
  integer,intent(in) :: kptrlatt(3,3)
- real(dp),intent(in) :: kpts(3,nkpt)
+ real(dp),target,intent(in) :: kpts(3,nkpt)
 
 !Local variables -------------------------
 !scalars
@@ -209,6 +222,7 @@ type(krank_t) function krank_new(nkpt, kpts, nsym, symrec, time_reversal, max_li
    end do
    new%max_linear_density = nint(one/smallestlen)
  else
+   ! Get it from input
    new%max_linear_density = max_linear_density
  end if
 
@@ -339,7 +353,12 @@ integer function get_rank(krank, kpt) result(rank)
              real(krank%max_linear_density)*(redkpt(3)+half+tol8))))
 
  if (rank > krank%max_rank) then
-   write(msg,'(2(a,i0))') ' Rank should be inferior to: ', krank%max_rank, ' but got: ', rank
+   write(msg,'(2(a,i0))') ' Rank should be <= max_rank: ', krank%max_rank, ' but got: ', rank
+   ABI_ERROR(msg)
+ end if
+ if (rank < krank%min_rank) then
+   !print *, "redkpt", redkpt
+   write(msg,'(2(a,i0))') ' Rank should be >= min_rank ', krank%min_rank, ' but got: ', rank
    ABI_ERROR(msg)
  end if
 
@@ -460,10 +479,13 @@ subroutine krank_free(krank)
 ! *********************************************************************
 
  ABI_SFREE(krank%invrank)
+ ABI_SFREE(krank%rank2ikpt_)
+ ABI_SFREE(krank%rank2symtime_)
+
  if (krank%kpts_owns_memory) then
-   if (associated(krank%kpts)) then
-     ABI_FREE(krank%kpts)
-   end if
+   ABI_SFREE_PTR(krank%kpts)
+   krank%kpts_owns_memory = .False.
+   krank%kpts => null()
  else
    krank%kpts => null()
  end if
@@ -537,6 +559,7 @@ end subroutine krank_print
 !!  symmat(3,3,nsym)=symmetry operations (symrel or symrec, depending on value of use_symrec)
 !!  timrev=1 if the use of time-reversal is allowed; 0 otherwise
 !!  [use_symrec]: if present and true, symmat assumed to be symrec, otherwise assumed to be symrel (default)
+!!  [qpt]: q-point to be added to kptns2. 0 if not specified.
 !!
 !! OUTPUT
 !!  dksqmax=maximal value of the norm**2 of the difference between
@@ -555,11 +578,11 @@ end subroutine krank_print
 !! SOURCE
 
 subroutine krank_get_mapping(self, nkpt2, kptns2, dksqmax, gmet, indkk, nsym, symafm, symmat, timrev, &
-                             use_symrec) ! optional
+                             use_symrec, qpt) ! optional
 
 !Arguments ------------------------------------
 !scalars
- class(krank_t),intent(in) :: self
+ class(krank_t),intent(inout) :: self
  integer,intent(in) :: nkpt2, nsym, timrev
  real(dp),intent(out) :: dksqmax
  logical,optional,intent(in) :: use_symrec
@@ -567,6 +590,7 @@ subroutine krank_get_mapping(self, nkpt2, kptns2, dksqmax, gmet, indkk, nsym, sy
  integer,intent(in) :: symafm(nsym), symmat(3,3,nsym)
  integer,intent(out) :: indkk(6, nkpt2)
  real(dp),intent(in) :: gmet(3,3), kptns2(3,nkpt2)
+ real(dp),optional,intent(in) :: qpt(3)
 
 !Local variables-------------------------------
 !scalars
@@ -574,13 +598,13 @@ subroutine krank_get_mapping(self, nkpt2, kptns2, dksqmax, gmet, indkk, nsym, sy
  logical :: my_use_symrec
 !arrays
  integer :: dkint(3), my_symmat(3, 3, nsym)
- integer,allocatable :: rank2ikpt(:)
- integer(i1b),allocatable :: rank2symtime(:)
- real(dp) :: kpt1a(3), dk(3)
+ !integer,allocatable :: rank2ikpt(:), rank2symtime(:)
+ real(dp) :: kpt1a(3), dk(3), my_qpt(3)
 
 ! *************************************************************************
 
  my_use_symrec = .False.; if (present(use_symrec)) my_use_symrec = use_symrec
+ my_qpt = zero; if (present(qpt)) my_qpt = qpt
 
  if (my_use_symrec) then
    ! Symrec k
@@ -592,10 +616,9 @@ subroutine krank_get_mapping(self, nkpt2, kptns2, dksqmax, gmet, indkk, nsym, sy
    end do
  end if
 
- ! Use 1 byte to save memory
- ABI_MALLOC(rank2symtime, (self%min_rank:self%max_rank))
- ABI_MALLOC(rank2ikpt, (self%min_rank:self%max_rank))
- rank2ikpt = -1
+ ABI_MALLOC_IFNOT(self%rank2symtime_, (self%min_rank:self%max_rank))
+ ABI_MALLOC_IFNOT(self%rank2ikpt_, (self%min_rank:self%max_rank))
+ self%rank2ikpt_ = -1 !; self%rank2symtime_ = -1
 
  do ikpt1=1,self%npoints
 
@@ -606,9 +629,9 @@ subroutine krank_get_mapping(self, nkpt2, kptns2, dksqmax, gmet, indkk, nsym, sy
 
        kpt1a = (1 - 2*itimrev) * matmul(my_symmat(:, :, isym), self%kpts(:, ikpt1))
        irank = self%get_rank(kpt1a)
-       if (rank2ikpt(irank) == -1) then
-         rank2ikpt(irank) = ikpt1
-         rank2symtime(irank) = isym + itimrev * nsym
+       if (self%rank2ikpt_(irank) == -1) then
+         self%rank2ikpt_(irank) = ikpt1
+         self%rank2symtime_(irank) = isym + itimrev * nsym
        end if
      end do
    end do
@@ -617,31 +640,144 @@ subroutine krank_get_mapping(self, nkpt2, kptns2, dksqmax, gmet, indkk, nsym, sy
 
  dksqmax = zero
  do ikpt2=1,nkpt2
-   irank = self%get_rank(kptns2(:, ikpt2))
-   ikpt1 = rank2ikpt(irank)
-   ii = int(rank2symtime(irank))
+   irank = self%get_rank(kptns2(:, ikpt2) + my_qpt)
+   ikpt1 = self%rank2ikpt_(irank)
+   ii = self%rank2symtime_(irank)
    isym = 1 + mod(ii - 1, nsym)
    itimrev = (ii - 1) / nsym
+   kpt1a = (1 - 2 * itimrev) * matmul(my_symmat(:, :, isym), self%kpts(:, ikpt1))
+   dk(:) = kptns2(:,ikpt2) + my_qpt - kpt1a(:)
+   dkint(:) = nint(dk(:) + tol12)
+
    indkk(1, ikpt2) = ikpt1
    indkk(2, ikpt2) = isym
-   kpt1a = (1 - 2 * itimrev) * matmul(my_symmat(:, :, isym), self%kpts(:, ikpt1))
-   dk(:) = kptns2(:,ikpt2) - kpt1a(:)
-   dkint(:) = nint(dk(:) + tol12)
    indkk(3:5, ikpt2) = dkint(:)
    indkk(6, ikpt2) = itimrev
 
    ! Compute norm of the difference vector.
    dk(:) = dk(:) - dkint(:)
+
    dksqmax = max(dksqmax, &
                  gmet(1,1)*dk(1)**2 + gmet(2,2)*dk(2)**2 + gmet(3,3)*dk(3)**2 + &
                  two * (gmet(2,1)*dk(2)*dk(1) + gmet(3,2)*dk(3)*dk(2)+gmet(3,1)*dk(3)*dk(1)))
+
+   !if (dksqmax > tol8) then
+   !  print *, "kbase:", self%kpts(:, ikpt1)
+   !  print *, "k", kptns2(:, ikpt2)
+   !  print *, "k + q", kptns2(:, ikpt2) + my_qpt
+   !  print *, "dk", dk, "dksqmax", dksqmax
+   !end if
  end do
 
- ABI_FREE(rank2ikpt)
- ABI_FREE(rank2symtime)
+ !ABI_FREE(self%rank2ikpt_)
+ !ABI_FREE(self%rank2symtime_)
 
 end subroutine krank_get_mapping
 !!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_krank/get_ibz2bz
+!! NAME
+!! get_ibz2bz
+!!
+!! FUNCTION
+!!  Return array with the index of the IBZ wave vectors in the BZ.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine get_ibz2bz(nibz, nbz, bz2ibz, ibz2bz, ierr)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nibz, nbz
+ integer,intent(in) :: bz2ibz(6, nbz)
+ integer,intent(out) :: ierr
+!arrays
+ integer,allocatable,intent(out) :: ibz2bz(:)
+
+!Local variables-------------------------------
+!scalars
+ integer :: iq_bz, iq_ibz, isym_q, trev_q, cnt, g0_q(3)
+ logical :: isirr_q
+
+!----------------------------------------------------------------------
+
+ ABI_MALLOC(ibz2bz, (nibz))
+
+ cnt = 0
+ do iq_bz=1,nbz
+   iq_ibz = bz2ibz(1, iq_bz); isym_q = bz2ibz(2, iq_bz)
+   trev_q = bz2ibz(6, iq_bz); g0_q = bz2ibz(3:5,iq_bz)
+   isirr_q = (isym_q == 1 .and. trev_q == 0 .and. all(g0_q == 0))
+   if (isirr_q) then
+     cnt = cnt + 1
+     ibz2bz(iq_ibz) = iq_bz
+   end if
+ end do
+
+ ierr = merge(0, 1, cnt == nibz)
+
+end subroutine get_ibz2bz
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_krank/star_from_ibz_idx
+!! NAME
+!! star_from_ibz_idx
+!!
+!! FUNCTION
+!!  Return array with the indices of the star of the ik_ibz wavevector in the IBZ.
+!!  Return number of points in the star, allocate array with the indices of the
+!!  star points in the BZ.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine star_from_ibz_idx(ik_ibz, nkbz, bz2ibz, nk_in_star, kstar_bz_inds)
+
+!Arguments ------------------------------------
+ integer,intent(in) :: ik_ibz, nkbz
+ integer,intent(out) :: nk_in_star
+ integer,intent(in) :: bz2ibz(6, nkbz)
+ integer,allocatable,intent(out) :: kstar_bz_inds(:)
+
+!Local variables-------------------------------
+!scalars
+ integer :: iq_bz
+
+!----------------------------------------------------------------------
+
+ nk_in_star = count(bz2ibz(1, :) == ik_ibz)
+ ABI_MALLOC(kstar_bz_inds, (nk_in_star))
+
+ nk_in_star = 0
+ do iq_bz=1,nkbz
+   if (bz2ibz(1, iq_bz) /= ik_ibz) cycle
+   nk_in_star = nk_in_star + 1
+   kstar_bz_inds(nk_in_star) = iq_bz
+ end do
+
+end subroutine star_from_ibz_idx
+!!***
+
+!----------------------------------------------------------------------
 
 end module m_krank
 !!***
