@@ -565,6 +565,7 @@ subroutine kpts_pack_in_stars(nkpt, kpts, kmap)
  iperm = [(ikpt, ikpt=1, nkpt)]
 
  call sort_int(nkpt, ibz_ids, iperm)
+ ABI_FREE(ibz_ids)
 
  ! Rearrange items in _ord arrays.
  ABI_MALLOC(kpts_ord, (3, nkpt))
