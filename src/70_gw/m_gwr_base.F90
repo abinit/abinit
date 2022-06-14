@@ -26,20 +26,20 @@
 module m_gwr_base
 
  use defs_basis
- !use m_abicore
+ use m_abicore
  use m_errors
  use m_xmpi
- !use m_xomp
+ use m_xomp
  use m_slk
  use m_wfk
 
- !use defs_datatypes, only : ebands_t
+ use defs_datatypes, only : pseudopotential_type, ebands_t
  use m_fstrings,  only : sjoin, itoa
  use m_crystal,   only : crystal_t
  use m_dtset,     only : dataset_type
- !use m_fft_core, only : get_kg
+ use m_fftcore,   only : get_kg, sphereboundary
  use m_fft,       only : fft_ug
- use m_fft_mesh,  only : times_eikr !, times_eigr, ig2gfft, get_gftt, calc_ceikr, calc_eigr rotate_fft_mesh,
+ use m_fft_mesh,  only : times_eikr !, times_eigr, ig2gfft, get_gftt, calc_ceikr, calc_eigr rotate_fft_mesh
 
  implicit none
 
@@ -122,36 +122,27 @@ module m_gwr_base
 
  type, public :: gwr_t
 
-   integer :: nspinor
-   ! Number of spinor components.
+   integer :: nsppol = 1, nspinor = -1
+   ! Number of independent spin polarizations and number of spinor components.
 
-   integer :: nsppol
-   ! Global number of independent spin polarizations.
-
-   integer :: my_nsppol
+   integer :: my_nsppol = -1
    ! Number of independent spin polarizations treated by this MPI proc
 
-   integer :: nkbz
-   ! Number of k-points in the full BZ
+   integer :: nkbz = -1, nkibz = -1
+   ! Number of k-points in the BZ/IBZ
 
-   integer :: nkibz
-   ! Number of k-points in the IBZ
-
-   integer :: nk
+   integer :: nk = -1
    ! nkbz if GWr, nkibz if GWrk
 
-   integer :: nq
+   integer :: nq = -1
 
-   integer :: nqbz
-   ! Number of q-points in the full BZ
+   integer :: nqbz = -1, nqibz = -1
+   ! Number of q-points in the BZ/IBZ
 
-   integer :: nqibz
-   ! Number of q-points in the IBZ
-
-   integer :: ntau, niw
+   integer :: ntau = -1, niw = -1
    ! Total number of imaginary time/frequency points
 
-   integer :: my_ntau, my_niw
+   integer :: my_ntau = -1, my_niw = -1
    ! Number of imaginary time/frequency points treated by this MPI rank.
 
    logical :: use_supercell = .True.
@@ -202,7 +193,7 @@ module m_gwr_base
    ! Cartesian coordinates of this processor in the Cartesian grid.
 
    integer :: comm
-   ! MPI communicator with all procs involved in the calculation
+   ! Initial MPI communicator with all procs involved in the calculation
 
    type(xcomm_t) :: spin_comm
    ! MPI communicator for parallelism over spins (high-level)
@@ -221,9 +212,16 @@ module m_gwr_base
 
    type(dataset_type), pointer :: dtset => null()
 
-   type(crystal_t) :: cryst
+   type(crystal_t), pointer  :: cryst => null()
+
+   type(ebands_t), pointer  :: ebands => null()
+
+   type(pseudopotential_type), pointer :: psps => null()
+
+   !type(mpi_type),pointer :: mpi_enreg => null()
 
    type(matrix_scalapack),allocatable :: go_g_gp(:,:,:)
+
    type(matrix_scalapack),allocatable :: ge_g_gp(:,:,:)
    ! (nk, my_ntau, my_nsppol)
 
@@ -239,124 +237,57 @@ module m_gwr_base
    !character(len=fnlen) :: wfk_filepath
    ! Path to the WFK file with the KS wavefunctions.
 
-  real(dp),allocatable :: kbz(:,:)
-  ! kbz(3, nkbz)
-  ! Reduced coordinates of the k-points in the full BZ.
+   real(dp),allocatable :: kbz(:,:)
+   ! (3, nkbz)
+   ! Reduced coordinates of the k-points in the full BZ.
 
-  real(dp),allocatable :: kibz(:,:)
-   ! kibz(3, nkibz)
-   ! Reduced coordinates of the k-points in the IBZ (full simmetry of the system).
+   real(dp),allocatable :: kibz(:,:)
+    ! (3, nkibz)
+    ! Reduced coordinates of the k-points in the IBZ (full simmetry of the system).
 
-  real(dp),allocatable :: wt_kibz(:)
-   ! wt_kibz(nqibz)
-   ! Weights of the k-points in the IBZ (normalized to one).
-
-  real(dp),allocatable :: qbz(:,:)
-  ! qbz(3, nqbz)
-  ! Reduced coordinates of the q-points in the full BZ.
-
-  real(dp),allocatable :: qibz(:,:)
-   ! qibz(3, nqibz)
-   ! Reduced coordinates of the q-points in the IBZ (full simmetry of the system).
-
-  real(dp),allocatable :: wt_qibz(:)
-   ! wtq_qibz(nqibz)
-   ! Weights of the q-points in the IBZ (normalized to one).
-
-   !integer,allocatable:: qbz2ibz(:, :)
-   !integer,allocatable:: kbz2ibz(:, :)
-   ! (6, %nkbz))
-   ! Mapping k+q --> initial IBZ. Depends on ikcalc.
+   !integer,allocatable :: kbz2ibz(:,:)
+    ! (6, nkbz)
    ! These table used the conventions for the symmetrization of the wavefunctions expected by cgtk_rotate.
    ! In this case listkk has been called with symrel and use_symrec=False
 
+   real(dp),allocatable :: wt_kibz(:)
+    ! (nqibz)
+    ! Weights of the k-points in the IBZ (normalized to one).
+
+   real(dp),allocatable :: qbz(:,:)
+    ! (3, nqbz)
+    ! Reduced coordinates of the q-points in the full BZ.
+
+   !real(dp),allocatable :: qbz2ibz(:,:)
+   ! (6, nqbz)
+
+   real(dp),allocatable :: qibz(:,:)
+    ! (3, nqibz)
+    ! Reduced coordinates of the q-points in the IBZ (full simmetry of the system).
+
+    real(dp),allocatable :: wt_qibz(:)
+   ! (nqibz)
+   ! Weights of the q-points in the IBZ (normalized to one).
+
  contains
 
-   !procedure :: new => gwr_new
-
    procedure :: ggp_to_gpr  => gwr_ggp_to_gpr
+
    procedure :: cos_transform  => gwr_cos_transform
+
    procedure :: free => gwr_free
    ! Free memory.
 
+   !procedure :: print => gwr_print
+
+   procedure :: build_gtau_from_wfk => gwr_build_gtau_from_wfk
+
  end type gwr_t
+
+ public :: gwr_new
 !!***
 
 contains
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_gwr_base/gr_desc_new
-!! NAME
-!!
-!! FUNCTION
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-type(grdesc_t) function gr_desc_new(ecut, kpoint, gmet) result (new)
-
-!Arguments ------------------------------------
-!scalars
- real(dp),intent(in) :: ecut
-!arrays
- real(dp),intent(in) :: kpoint(3), gmet(3,3)
- !integer,intent(out) :: npw_k
- !integer,allocatable,intent(out) :: kg_k(:,:)
-
-!Local variables-------------------------------
-!scalars
-
-! *************************************************************************
-
- ! Calculate G-sphere from input ecut.
- !call get_kg(kpoint, istwf_1, ecut, gmet, new%npw_k, new%kg_k)
-
- !if (present(ngfft))
- !  !mgfft = maxval(ngfft(1:3))
- !  !ABI_MALLOC(gbound, (2*mgfft+8, 2))
- !  !call sphereboundary(gbound, istwf_1, kg_k, mgfft, npw_k)
- !end if
-
-end function gr_desc_new
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_gwr_base/gr_desc_free
-!! NAME
-!!
-!! FUNCTION
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-subroutine gr_desc_free(self)
-
-!Arguments ------------------------------------
- class(grdesc_t) :: self
-
-! *************************************************************************
-
- ABI_SFREE(self%gvec)
- ABI_SFREE(self%gbound)
-
-end subroutine gr_desc_free
 !!***
 
 !----------------------------------------------------------------------
@@ -376,19 +307,20 @@ end subroutine gr_desc_free
 !!
 !! SOURCE
 
-function gwr_new(dtset, comm) result (gwr)
+function gwr_new(dtset, cryst, psps, ebands, comm) result (gwr)
 
 !Arguments ------------------------------------
 !scalars
- type(dataset_type),target,intent(in) :: dtset
- integer,intent(in) :: comm
  type(gwr_t),target :: gwr
-!arrays
+ type(dataset_type),target,intent(in) :: dtset
+ type(crystal_t),target,intent(in) :: cryst
+ type(pseudopotential_type),target,intent(in) :: psps
+ type(ebands_t),target,intent(in) :: ebands
+ integer,intent(in) :: comm
 
 !Local variables-------------------------------
 !scalars
- integer :: my_spin, my_it, ik, iq, ii, my_ir, my_nr, npwsp, col_bsize, iq_ibz, mgfft, nfft, ig1, ig2
- integer :: sc_nfft, sc_augsize
+ integer :: my_spin, my_it, ik, iq, ii, my_ir, my_nr, npwsp, col_bsize, iq_ibz, mgfft, nfft, ig1, ig2, sc_nfft, sc_augsize
  real(dp) :: ecuteff
  type(grdesc_t) :: desc_k, desc_kpq
  type(grdesc_t),pointer :: pdesc_k, pdesc_q
@@ -404,30 +336,27 @@ function gwr_new(dtset, comm) result (gwr)
 ! *************************************************************************
 
  gwr%dtset => dtset
- gwr%comm = comm
- gwr%use_supercell = .True.
- gwr%cryst = dtset%get_crystal(img=1)
+ gwr%cryst => cryst
+ gwr%ebands => ebands
+ gwr%psps => psps
+ !gwr%pawtab => pawtab
 
+ gwr%comm = comm
  gwr%nspinor = dtset%nspinor
  gwr%nsppol = dtset%nsppol
+ gwr%use_supercell = .True.
  gwr%my_nsppol = 1
+
+ ! Compute dimensions
 
  ! =======================
  ! Setup k-mesh and q-mesh
  ! =======================
- ! TODO: Should rearrange kbz so that the first nkibz items are equal to kbz
- ! and we can simply loop like
+ ! TODO: Should rearrange kbz so that the first nkibz items are equal to kbz and we can simply loop like
  ! do ik=1,gwr%nk
  !   kk = gwr%kbz(ik)
  ! end do
  ! use similar approach for the q-points.
-
- ! Define q-mesh for integration of the self-energy.
- ! Either q-mesh from DVDB (no interpolation) or eph_ngqpt_fine (Fourier interpolation if q not in DDB)
- !new%ngqpt = dtset%ddb_ngqpt; my_nshiftq = 1; my_shiftq(:,1) = dtset%ddb_shiftq
- !if (all(dtset%eph_ngqpt_fine /= 0)) then
- !  new%ngqpt = dtset%eph_ngqpt_fine; my_shiftq = 0
- !end if
 
  !! Setup IBZ, weights and BZ. Always use q --> -q symmetry for phonons even in systems without inversion
  !qptrlatt = 0; qptrlatt(1, 1) = new%ngqpt(1); qptrlatt(2, 2) = new%ngqpt(2); qptrlatt(3, 3) = new%ngqpt(3)
@@ -464,12 +393,16 @@ function gwr_new(dtset, comm) result (gwr)
  gwr%niw = 1
  gwr%my_niw = 1
 
- ! TODO: Set MPI grid and communicators.
+ ! ==========================
+ ! MPI grid and communicators
+ ! ==========================
  call gwr%spin_comm%set_to_self()
  call gwr%gr_comm%set_to_self()
  call gwr%tau_comm%set_to_self()
 #ifdef HAVE_MPI
 #endif
+
+ return
 
  ! Build FFT descriptors for Green's functions
  ! TODO: I still need to decide if I want to use k-centered G-spheres or use a single gvec array as in the GW code.
@@ -756,49 +689,46 @@ end function gwr_new
 !!
 !! SOURCE
 
-subroutine gwr_free(self)
+subroutine gwr_free(gwr)
 
 !Arguments ------------------------------------
- class(gwr_t), intent(inout) :: self
+ class(gwr_t), intent(inout) :: gwr
 
 !Local variables-------------------------------
  integer :: ii, jj, kk
 
 ! *************************************************************************
 
- call self%cryst%free()
+ ABI_SFREE(gwr%kbz)
+ ABI_SFREE(gwr%kibz)
+ ABI_SFREE(gwr%wt_kibz)
+ ABI_SFREE(gwr%qbz)
+ ABI_SFREE(gwr%qibz)
+ ABI_SFREE(gwr%wt_qibz)
 
- ABI_SFREE(self%kbz)
- ABI_SFREE(self%kibz)
- ABI_SFREE(self%wt_kibz)
-
- ABI_SFREE(self%qbz)
- ABI_SFREE(self%qibz)
- ABI_SFREE(self%wt_qibz)
-
- do kk=1,self%nk
-   call self%gf_desc_k(kk)%free()
+ do kk=1,gwr%nk
+   call gwr%gf_desc_k(kk)%free()
  end do
- ABI_SFREE(self%gf_desc_k)
+ ABI_SFREE(gwr%gf_desc_k)
 
- do kk=1,self%nq
-   call self%chi_desc_q(kk)%free()
+ do kk=1,gwr%nq
+   call gwr%chi_desc_q(kk)%free()
  end do
- ABI_SFREE(self%chi_desc_q)
+ ABI_SFREE(gwr%chi_desc_q)
 
- call free_slk_array3(self%go_g_gp)
- ABI_SFREE(self%go_g_gp)
- call free_slk_array3(self%ge_g_gp)
- ABI_SFREE(self%ge_g_gp)
- call free_slk_array3(self%chi_g_gp)
- ABI_SFREE(self%chi_g_gp)
- call free_slk_array2(self%wc_g_gp)
- ABI_SFREE(self%wc_g_gp)
+ call free_slk_array3(gwr%go_g_gp)
+ ABI_SFREE(gwr%go_g_gp)
+ call free_slk_array3(gwr%ge_g_gp)
+ ABI_SFREE(gwr%ge_g_gp)
+ call free_slk_array3(gwr%chi_g_gp)
+ ABI_SFREE(gwr%chi_g_gp)
+ call free_slk_array2(gwr%wc_g_gp)
+ ABI_SFREE(gwr%wc_g_gp)
 
  ! Free MPI communicators
- call self%spin_comm%free()
- call self%gr_comm%free()
- call self%tau_comm%free()
+ call gwr%spin_comm%free()
+ call gwr%gr_comm%free()
+ call gwr%tau_comm%free()
 
  contains
    subroutine free_slk_array2(slk_arr3)
@@ -851,9 +781,7 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_filepath)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: formeig0 = 0
- !integer,intent(in) :: my_it, my_spin
- !integer,intent(in) :: ik_ibz,spin,sc_mode
- type(wfk_t) :: wfk
+ !type(wfk_t) :: wfk
 !arrays
  !integer,intent(out), DEV_CONTARRD  optional :: kg_k(:,:) !(3,npw_k)
  !real(dp),intent(out), DEV_CONTARRD optional :: cg_k(:,:) !(2,npw_k*nspinor*nband)
@@ -1246,6 +1174,83 @@ subroutine slk_ptran(self, trans, out_mat)
  end if
 
 end subroutine slk_ptran
+!!***
+
+
+
+
+!----------------------------------------------------------------------
+
+!!****f* m_gwr_base/gr_desc_new
+!! NAME
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+type(grdesc_t) function gr_desc_new(ecut, kpoint, gmet) result (new)
+
+!Arguments ------------------------------------
+!scalars
+ real(dp),intent(in) :: ecut
+!arrays
+ real(dp),intent(in) :: kpoint(3), gmet(3,3)
+ !integer,intent(out) :: npw_k
+ !integer,allocatable,intent(out) :: kg_k(:,:)
+
+!Local variables-------------------------------
+!scalars
+
+! *************************************************************************
+
+ ! Calculate G-sphere from input ecut.
+ !call get_kg(kpoint, istwf_1, ecut, gmet, new%npw_k, new%kg_k)
+
+ !if (present(ngfft))
+ !  !mgfft = maxval(ngfft(1:3))
+ !  !ABI_MALLOC(gbound, (2*mgfft+8, 2))
+ !  !call sphereboundary(gbound, istwf_1, kg_k, mgfft, npw_k)
+ !end if
+
+end function gr_desc_new
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_gwr_base/gr_desc_free
+!! NAME
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine gr_desc_free(self)
+
+!Arguments ------------------------------------
+ class(grdesc_t) :: self
+
+! *************************************************************************
+
+ ABI_SFREE(self%gvec)
+ ABI_SFREE(self%gbound)
+
+end subroutine gr_desc_free
 !!***
 
 end module m_gwr_base
