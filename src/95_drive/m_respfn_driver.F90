@@ -1166,9 +1166,9 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 ! endif
 
 !For longwave calculation
- if (dtset%prepalw==1.and.rfphon==1) then
-   pertsy(:,1:natom)=1
- else if (dtset%prepalw==2.and.rfphon==1) then
+ if (dtset%prepalw==1.and.rfphon==1) pertsy(:,1:natom)=1
+ if (dtset%prepalw/=0.and.rfelfd==3) pertsy(:,natom+2)=1
+ if (dtset%prepalw==2.and.rfphon==1) then
    ABI_MALLOC(rfpert_lw,(3,natom+8,3,natom+8,3,natom+8))
    rfpert_lw=0
    rfpert_lw(:,natom+2,:,1:natom,:,natom+8)=1
@@ -1201,10 +1201,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    end do
    write(message,'(a,a)') ch10,ch10
    call wrtout(std_out,message,'COLL')
- else if (dtset%prepalw/=0.and.rfelfd==3) then
-   pertsy(:,natom+2)=1
  end if
-
 
  write(message,'(a)') ' The list of irreducible perturbations for this q vector is:'
  call wrtout(ab_out,message,'COLL')
