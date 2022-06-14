@@ -58,6 +58,7 @@ module m_gwr_driver
  use m_pawrhoij,        only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy, pawrhoij_free, pawrhoij_symrhoij
  use m_pawfgr,          only : pawfgr_type, pawfgr_init, pawfgr_destroy
  use m_pspini,          only : pspini
+ use m_gwr_base,        only : gwr_new, gwr_t
  !use m_ephtk,          only : ephtk_update_ebands
 
  implicit none
@@ -65,15 +66,15 @@ module m_gwr_driver
  private
 !!***
 
- public :: gwr
+ public :: gwr_driver
 !!***
 
 contains
 !!***
 
-!!****f* m_gwr_driver/gwr
+!!****f* m_gwr_driver/gwr_driver
 !! NAME
-!!  gwr
+!!  gwr_driver
 !!
 !! FUNCTION
 !! Main routine for GWR calculations.
@@ -119,14 +120,14 @@ contains
 !!
 !! SOURCE
 
-subroutine gwr(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim, xred)
+subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim, xred)
 
 !Arguments ------------------------------------
 !scalars
  character(len=8),intent(in) :: codvsn
  type(datafiles_type),intent(in) :: dtfil
- type(dataset_type),intent(inout) :: dtset
- type(pawang_type),intent(inout) :: pawang
+ type(dataset_type),intent(in) :: dtset
+ type(pawang_type),intent(in) :: pawang
  type(pseudopotential_type),intent(inout) :: psps
 !arrays
  real(dp),intent(in) :: acell(3),rprim(3,3),xred(3,dtset%natom)
@@ -152,6 +153,7 @@ subroutine gwr(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  type(ebands_t) :: ebands
  type(pawfgr_type) :: pawfgr
  type(mpi_type) :: mpi_enreg
+ type(gwr_t) :: gwr
 !arrays
  integer :: ngfftc(18), ngfftf(18)
  real(dp),parameter :: k0(3) = zero
@@ -276,16 +278,13 @@ subroutine gwr(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  ! ===========================================
  call pspini(dtset, dtfil, ecore, psp_gencond, gsqcutc_eff, gsqcutf_eff, pawrad, pawtab, psps, cryst%rprimd, comm_mpi=comm)
 
- !gwr = gwr_new(dtset, comm)
-
+ gwr = gwr_new(dtset, cryst, psps, ebands, comm)
 
  ! ====================================================
  ! === This is the real GWR stuff once all is ready ===
  ! ====================================================
 
  !select case (dtset%gwr_task)
- !case (0)
- !  continue
  !case (1)
  !case default
  !  !ABI_ERROR(sjoin("Invalid value of gwr_task:", itoa(dtset%gwr_task)))
@@ -294,7 +293,7 @@ subroutine gwr(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  !=====================
  !==== Free memory ====
  !=====================
- !call gwr%free()
+ call gwr%free()
  call cryst%free()
  call wfk0_hdr%free()
  call ebands_free(ebands)
@@ -313,7 +312,7 @@ subroutine gwr(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    !ABI_FREE(paw_an)
  end if
 
-end subroutine gwr
+end subroutine gwr_driver
 !!***
 
 end module m_gwr_driver
