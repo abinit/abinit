@@ -187,7 +187,7 @@ end subroutine sort_dp
 !!
 !! SOURCE
 
-subroutine sort_int(n,list,iperm)
+subroutine sort_int(n, list, iperm)
 
 !Arguments ------------------------------------
 !scalars

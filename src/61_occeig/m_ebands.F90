@@ -90,6 +90,7 @@ MODULE m_ebands
  public :: ebands_apply_scissors   ! Apply scissors operator (no k-dependency)
  public :: ebands_get_occupied     ! Returns band indeces after wich occupations are less than an input value.
  public :: ebands_enclose_degbands ! Adjust band indeces such that all degenerate states are treated.
+ public :: ebands_get_bands_e0     ! Find min/max band indices crossing energy e0
  public :: ebands_get_erange       ! Compute the minimum and maximum energy enclosing a list of states.
  public :: ebands_nelect_per_spin  ! Returns number of electrons per spin channel
  public :: ebands_get_minmax       ! Returns min and Max value of (eig|occ|doccde).
@@ -115,7 +116,7 @@ MODULE m_ebands
  public :: ebands_get_edos_matrix_elements ! Compute e-DOS and other DOS-like quantities involving
                                            ! vectorial or tensorial matrix elements.
 
- public :: ebands_interp_kmesh     ! Use SWK Interpolate energies on a k-mesh.
+ public :: ebands_interp_kmesh     ! Use SWK to interpolate energies on a k-mesh.
  public :: ebands_interp_kpath     ! Interpolate energies on a k-path.
  public :: ebands_interpolate_kpath
 
@@ -1395,7 +1396,7 @@ end subroutine unpack_eneocc
 !!
 !! SOURCE
 
-subroutine pack_eneocc(nkpt,nsppol,mband,nband,bantot,array3d,vect)
+subroutine pack_eneocc(nkpt, nsppol, mband, nband, bantot, array3d, vect)
 
 !Arguments ------------------------------------
 !scalars
@@ -1451,7 +1452,7 @@ end subroutine pack_eneocc
 !!
 !! SOURCE
 
-subroutine get_eneocc_vect(ebands,arr_name,vect)
+subroutine get_eneocc_vect(ebands, arr_name, vect)
 
 !Arguments ------------------------------------
 !scalars
@@ -1463,13 +1464,13 @@ subroutine get_eneocc_vect(ebands,arr_name,vect)
  integer :: nkpt,nsppol,mband,bantot
 ! *************************************************************************
 
- mband =ebands%mband; bantot=ebands%bantot; nkpt=ebands%nkpt; nsppol=ebands%nsppol
+ mband = ebands%mband; bantot = ebands%bantot; nkpt = ebands%nkpt; nsppol = ebands%nsppol
 
  select case (arr_name)
  case ('occ')
-   call pack_eneocc(nkpt,nsppol,mband,ebands%nband,bantot,ebands%occ,vect)
+   call pack_eneocc(nkpt, nsppol, mband, ebands%nband, bantot, ebands%occ, vect)
  case ('eig')
-   call pack_eneocc(nkpt,nsppol,mband,ebands%nband,bantot,ebands%eig,vect)
+   call pack_eneocc(nkpt,nsppol,mband,ebands%nband,bantot,ebands%eig, vect)
  case ('doccde')
    call pack_eneocc(nkpt,nsppol,mband,ebands%nband,bantot,ebands%doccde,vect)
  case default
@@ -1700,7 +1701,7 @@ pure subroutine ebands_get_bands_from_erange(ebands, elow, ehigh, bstart, bstop)
  bstart = huge(1); bstop = -huge(1)
  do spin=1,ebands%nsppol
    do ik=1,ebands%nkpt
-     do band=1,ebands%nband(ik+(spin-1)*ebands%nkpt)
+     do band=1,ebands%nband(ik + (spin - 1) * ebands%nkpt)
        if (ebands%eig(band, ik , spin) >= elow .and. ebands%eig(band, ik , spin) <= ehigh) then
           bstart = min(bstart, band)
           bstop = max(bstop, band)
@@ -2052,6 +2053,62 @@ subroutine ebands_enclose_degbands(ebands, ikibz, spin, ibmin, ibmax, changed, t
  end if
 
 end subroutine ebands_enclose_degbands
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ebands/ebands_get_bands_e0
+!! NAME
+!!  ebands_get_bands_e0
+!!
+!! FUNCTION
+!!  Find min/max band indices crossing energy e0
+!!  min/max are returned in brange_spin(1:2, spin) for each spin.
+!!  If no band crosses e0, bmin is set to +huge(1) and bmax to -huge(1) and ierr != 0
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine ebands_get_bands_e0(ebands, e0, brange_spin, ierr)
+
+!Arguments ------------------------------------
+!scalars
+ class(ebands_t),intent(in) :: ebands
+ real(dp),intent(in) :: e0
+ integer,intent(out) :: brange_spin(2, ebands%nsppol)
+ integer,intent(out) :: ierr
+
+!Local variables-------------------------------
+ integer :: band, spin, bmin, bmax
+ real(dp) :: emin, emax
+
+! *************************************************************************
+
+ ierr = 0
+ do spin=1,ebands%nsppol
+   bmin = +huge(1); bmax = -huge(1)
+
+   do band=1,minval(ebands%nband)
+     emin = minval(ebands%eig(band, :, spin))
+     emax = maxval(ebands%eig(band, :, spin))
+     if (emin <= e0 .and. emax >= e0) then
+       bmin = min(bmin, band)
+       bmax = max(bmax, band)
+     end if
+   end do
+
+   brange_spin(:, spin) = [bmin, bmax]
+   if (bmin == +huge(1)) ierr = ierr + 1
+ end do
+
+end subroutine ebands_get_bands_e0
 !!***
 
 !----------------------------------------------------------------------
@@ -2745,7 +2802,7 @@ subroutine ebands_set_extrael(ebands, nelect, nholes, spinmagntarget, msg, prtvo
  ebands%extrael = nelect-nholes
  ebands%nelect = ebands%nelect + ebands%extrael
 ! CP modified and added
- if (ebands%occopt /=9 ) then
+ if (ebands%occopt /= 9) then
     ebands%ne_qFD = zero
     ebands%nh_qFD = zero
  else
@@ -4392,7 +4449,7 @@ subroutine ebands_sort(self)
  do spin=1,self%nsppol
    do ik_ibz=1,self%nkpt
      nband_k = self%nband(ik_ibz + (spin - 1) * self%nkpt)
-     iperm_k = [(band, band=1,nband_k)]
+     iperm_k = [(band, band=1, nband_k)]
      call sort_dp(nband_k, self%eig(:, ik_ibz, spin), iperm_k, tol12)
 
      ! Shuffle other arrays depending on nband_k

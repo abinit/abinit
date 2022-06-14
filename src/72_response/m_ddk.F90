@@ -138,6 +138,9 @@ MODULE m_ddk
    procedure :: get_vdiag => ddkop_get_vdiag
     ! Compute diagonal matrix element (real) in cartesian coords.
 
+   procedure :: get_vnondiag => ddkop_get_vnondiag
+    ! Compute off diagonal matrix elements in cartesian coords.
+
    procedure :: free => ddkop_free
     ! Free memory.
 
@@ -266,10 +269,7 @@ subroutine ddkstore_compute_ddk(ds, wfk_path, prefix, dtset, psps, pawtab, ngfft
  ebands = wfk_read_ebands(wfk_path, comm, out_hdr=hdr)
  cryst = hdr%get_crystal()
 
- ! Extract important dimensions from the header of the WFK file
- ! so that we avoid depending on the values stored in dtset%.
- ! For instance, the number of k-points in the header may differ from dtset%nkpt
- ! if we have used wfk_tofullbz to generate a WFK in the full BZ
+ ! Extract important dimensions from hdr%
  nkpt    = hdr%nkpt
  nsppol  = hdr%nsppol
  nspinor = hdr%nspinor
@@ -683,9 +683,8 @@ pure subroutine ddk_red2car(rprimd, vred, vcar)
  real(dp) :: vtmp(2,3)
 
 !************************************************************************
- ! vcar = vred; return
 
- ! Go to cartesian coordinates (same as pmat2cart routine)
+ ! Go to Cartesian coordinates (same as pmat2cart routine)
  ! V_cart = 1/(2pi) * Rprimd x V_red
  ! where V_red is the derivative computed in the DFPT routines (derivative wrt reduced component).
  vtmp(1,:) = rprimd(:,1)*vred(1,1) &
@@ -1089,6 +1088,47 @@ function ddkop_get_vdiag(self, eig0nk, istwf_k, npw_k, nspinor, cwave, cwaveprj,
  vk = cvk(1, :)
 
 end function ddkop_get_vdiag
+!!***
+
+!!****f* m_ddk/ddkop_get_vnondiag
+!! NAME
+!!  ddkop_get_vdiag
+!!
+!! FUNCTION
+!!  Simplified interface to compute the off-diagonal matrix elemente of the velocity operator in cartesian coords.
+!!
+!! INPUTS
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+function ddkop_get_vnondiag(self, eig0nk_bra, istwf_k, npw_k, nspinor, cwave_bra, cwave_ket, cwaveprj, mode) result(cvk)
+
+!Arguments ------------------------------------
+!scalars
+ class(ddkop_t),intent(inout) :: self
+ integer,intent(in) :: istwf_k, npw_k, nspinor
+ real(dp),intent(in) :: eig0nk_bra
+ character(len=*),optional,intent(in) :: mode
+!arrays
+ real(dp),intent(inout) :: cwave_bra(2,npw_k*nspinor),cwave_ket(2,npw_k*nspinor)
+ type(pawcprj_type),intent(inout) :: cwaveprj(:,:)
+ real(dp) :: cvk(2,3)
+
+!Local variables-------------------------------
+ character(len=50) :: my_mode
+!arrays
+
+!************************************************************************
+
+ my_mode = "cart"; if (present(mode)) my_mode = mode
+ call self%apply(eig0nk_bra, npw_k, nspinor, cwave_ket, cwaveprj)
+ cvk = self%get_braket(eig0nk_bra, istwf_k, npw_k, nspinor, cwave_bra, mode=my_mode)
+
+end function ddkop_get_vnondiag
 !!***
 
 !----------------------------------------------------------------------

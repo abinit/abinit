@@ -167,7 +167,6 @@ MODULE m_crystal
   ! spinrot(4,nsym)
   ! spinor rotation matrices.
 
-  ! Useful quantities that might be added in the future
   real(dp),allocatable :: amu(:)
   !  amu(ntypat)
   !  mass of the atoms (atomic mass unit)
@@ -472,13 +471,13 @@ subroutine crystal_init(amu,Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typa
    endif
  enddo
 
- !Write indexes of irreducible atoms
+ ! Write indexes of irreducible atoms
  ABI_MALLOC(cryst%irredatindx,(cryst%nirredat))
  indx = 0
  do iat = 1,natom
-    if(irredat_tmp(iat))then
-        indx = indx + 1
-        cryst%irredatindx(indx) = iat
+    if (irredat_tmp(iat)) then
+      indx = indx + 1
+      cryst%irredatindx(indx) = iat
     endif
  enddo
 
@@ -1749,7 +1748,7 @@ end subroutine prtposcar
 !!
 !! INPUTS
 !!  v(3)=Vector in Cartesian coordinates.
-!!  time_opt=Prefacator that defines how the vectors transforms under TR. Usually +1 or -1
+!!  time_opt=Prefactor that defines how the vectors transforms under TR. Usually +1 or -1
 !!      Note that TR is used only if cryst%timrev == 2. time_opt = 0 disables TR for testing purposes.
 !!
 !! PARENTS

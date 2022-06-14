@@ -28,6 +28,7 @@ module m_dtset
  use m_xmpi
 
  use m_fstrings,     only : inupper
+ use m_numeric_tools,only : arth
  use m_symtk,        only : mati3inv, littlegroup_q, symatm
  use m_symkpt,       only : symkpt
  use m_geometry,     only : mkrdim, metric, littlegroup_pert, irreducible_set_pert
@@ -176,7 +177,9 @@ type, public :: dataset_type
  integer :: eph_intmeth = 2
  integer :: eph_frohlichm = 0
  integer :: eph_phrange(2) = 0
+ real(dp) :: eph_phrange_w(2) = zero
 
+ integer :: eph_prtscratew = 0
  integer :: eph_restart = 0
  integer :: eph_stern = 0
  integer :: eph_task = 1
@@ -225,6 +228,15 @@ type, public :: dataset_type
  integer :: gethaydock = 0
  integer :: goprecon
  integer :: gpu_linalg_limit
+
+ integer :: gstore_cplex = 2
+ integer :: gstore_with_vk = 1
+ character(len=fnlen) :: gstore_kzone = "ibz"
+ character(len=fnlen) :: gstore_qzone = "bz"
+ character(len=fnlen) :: gstore_kfilter = "none"
+ integer :: gstore_brange(2, 2) = 0
+ real(dp) :: gstore_erange(2, 2) = zero
+
  integer :: gwaclowrank = 0
  integer :: gwcalctyp = 0
  integer :: gwcomp = 0
@@ -881,7 +893,7 @@ type, public :: dataset_type
  real(dp) :: red_efieldbar(3)
  real(dp) :: sigma_erange(2) = zero
  real(dp) :: strtarget(6)
- real(dp) :: tmesh(3) = [5._dp, 59._dp, 6._dp]
+ real(dp) :: tmesh(3) = [5._dp, 59._dp, 6._dp]  ! [start, stop, num]
  real(dp) :: ucrpa_window(2)
  real(dp) :: vcutgeo(3)
  real(dp) :: vprtrb(2)
@@ -957,6 +969,7 @@ type, public :: dataset_type
  character(len=fnlen) :: getpot_filepath = ABI_NOFILE
  character(len=fnlen) :: getscr_filepath = ABI_NOFILE
  character(len=fnlen) :: getsigeph_filepath = ABI_NOFILE
+ character(len=fnlen) :: getgstore_filepath = ABI_NOFILE
 
  contains
 
@@ -979,7 +992,10 @@ type, public :: dataset_type
    ! Test wether a new susceptibility matrix and/or a new dielectric matrix must be computed
 
  procedure :: get_crystal => dtset_get_crystal
-   !  Build crystal_t object from dtset and image index.
+   ! Build crystal_t object from dtset and image index.
+
+ procedure :: get_ktmesh => dtset_get_ktmesh
+   ! Build (linear) mesh of K * temperatures. tsmesh(1:3) = [start, step, num]
 
  end type dataset_type
 !!***
@@ -1467,6 +1483,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%eph_intmeth        = dtin%eph_intmeth
  dtout%eph_tols_idelta    = dtin%eph_tols_idelta
  dtout%eph_phrange        = dtin%eph_phrange
+ dtout%eph_phrange_w      = dtin%eph_phrange_w
  dtout%eph_extrael        = dtin%eph_extrael
  dtout%eph_fermie         = dtin%eph_fermie
  dtout%eph_frohlichm      = dtin%eph_frohlichm
@@ -1477,6 +1494,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%eph_ngqpt_fine     = dtin%eph_ngqpt_fine
  dtout%eph_np_pqbks       = dtin%eph_np_pqbks
 
+ dtout%eph_prtscratew     = dtin%eph_prtscratew
  dtout%eph_restart        = dtin%eph_restart
  dtout%eph_task           = dtin%eph_task
  dtout%eph_stern          = dtin%eph_stern
@@ -1552,6 +1570,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%getdvdb_filepath       = dtin%getdvdb_filepath
  dtout%getpot_filepath        = dtin%getpot_filepath
  dtout%getsigeph_filepath     = dtin%getsigeph_filepath
+ dtout%getgstore_filepath     = dtin%getgstore_filepath
  dtout%getscr_filepath        = dtin%getscr_filepath
  dtout%getwfk_filepath        = dtin%getwfk_filepath
  dtout%getwfkfine_filepath    = dtin%getwfkfine_filepath
@@ -1569,6 +1588,15 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%get1wf             = dtin%get1wf
  dtout%goprecon           = dtin%goprecon
  dtout%gpu_linalg_limit   = dtin%gpu_linalg_limit
+
+ dtout%gstore_cplex       = dtin%gstore_cplex
+ dtout%gstore_with_vk     = dtin%gstore_with_vk
+ dtout%gstore_kzone       = dtin%gstore_kzone
+ dtout%gstore_qzone       = dtin%gstore_qzone
+ dtout%gstore_kfilter     = dtin%gstore_kfilter
+ dtout%gstore_brange      = dtin%gstore_brange
+ dtout%gstore_erange      = dtin%gstore_erange
+
  dtout%gwaclowrank        = dtin%gwaclowrank
  dtout%gwcalctyp          = dtin%gwcalctyp
  dtout%gwcomp             = dtin%gwcomp
@@ -2871,6 +2899,38 @@ type(crystal_t) function dtset_get_crystal(dtset, img) result(cryst)
 end function dtset_get_crystal
 !!***
 
+!!****f* m_dtset/dtset_get_ktmesh
+!! NAME
+!! dtset_get_ktmesh
+!!
+!! FUNCTION
+!!  Build (linear) mesh of K * temperatures from tsmesh(1:3) = [start, step, num]
+!!  Return number of temperatures (ntemp) and ktmesh array.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine dtset_get_ktmesh(dtset, ntemp, ktmesh)
+
+!Arguments-------------------------------
+!scalars
+ class(dataset_type),intent(in) :: dtset
+ integer,intent(out) :: ntemp
+ real(dp),allocatable,intent(out) :: ktmesh(:)
+
+! *********************************************************************
+
+ ntemp = nint(dtset%tmesh(3))
+ ABI_CHECK(ntemp > 0, "ntemp <= 0")
+ ABI_MALLOC(kTmesh, (ntemp))
+ kTmesh = arth(dtset%tmesh(1), dtset%tmesh(2), ntemp) * kb_HaK
+
+end subroutine dtset_get_ktmesh
+!!***
+
 !!****f* m_dtset/macroin
 !! NAME
 !! macroin
@@ -3283,8 +3343,8 @@ subroutine chkvars(string)
  ! whereas EPH requires GS + DFPT + MRGDV + MRGDDB + TESTS_MULTIPLES_PROCS
  list_vars=trim(list_vars)//' eph_np_pqbks eph_phwinfact'
  list_vars=trim(list_vars)//' eph_intmeth eph_mustar eph_ngqpt_fine'
- list_vars=trim(list_vars)//' eph_phrange eph_tols_idelta'
- list_vars=trim(list_vars)//' eph_restart eph_stern eph_task eph_transport eph_use_ftinterp'
+ list_vars=trim(list_vars)//' eph_phrange eph_phrange_w eph_tols_idelta'
+ list_vars=trim(list_vars)//' eph_prtscratew eph_restart eph_stern eph_task eph_transport eph_use_ftinterp'
  list_vars=trim(list_vars)//' eshift esmear exchmix exchn2n3d expert_user extfpmd_nbcut extrapwf'
 !F
  list_vars=trim(list_vars)//' fband fermie_nest'
@@ -3305,11 +3365,13 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' getddb getddb_filepath getden_filepath getddk'
  list_vars=trim(list_vars)//' getdelfd getdkdk getdkde getden getdvdb getdvdb_filepath'
  list_vars=trim(list_vars)//' getefmas getkerange_filepath getgam_eig2nkq'
- list_vars=trim(list_vars)//' gethaydock getocc getpawden getpot_filepath getsigeph_filepath getqps getscr getscr_filepath'
+ list_vars=trim(list_vars)//' gethaydock getocc getpawden getpot_filepath getsigeph_filepath getgstore_filepath'
+ list_vars=trim(list_vars)//' getqps getscr getscr_filepath'
  list_vars=trim(list_vars)//' getwfkfine getwfkfine_filepath getsuscep'
  list_vars=trim(list_vars)//' getvel getwfk getwfk_filepath getwfq getwfq_filepath getxcart getxred'
  list_vars=trim(list_vars)//' get1den get1wf goprecon goprecprm'
  list_vars=trim(list_vars)//' gpu_devices gpu_linalg_limit gwaclowrank gwcalctyp gwcomp gwencomp gwgamma gwmem'
+ list_vars=trim(list_vars)//' gstore_cplex gstore_with_vk gstore_kzone gstore_qzone gstore_kfilter gstore_brange gstore_erange'
  list_vars=trim(list_vars)//' gwpara gwrpacorr gwgmcorr gw_customnfreqsp gw1rdm'
  list_vars=trim(list_vars)//' gw_frqim_inzgrid gw_frqre_inzgrid gw_frqre_tangrid gw_freqsp'
  list_vars=trim(list_vars)//' gw_invalid_freq'
@@ -3491,7 +3553,7 @@ subroutine chkvars(string)
 
 !Extra token, also admitted:
 !<ABINIT_UNITS>
- list_vars=trim(list_vars)//' au Angstr Angstrom Angstroms Bohr Bohrs eV Ha'
+ list_vars=trim(list_vars)//' au Angstr Angstrom Angstroms Bohr Bohrs eV meV Ha'
  list_vars=trim(list_vars)//' Hartree Hartrees K nm Ry Rydberg Rydbergs S Sec Second T Tesla'
 !</ABINIT_UNITS>
 

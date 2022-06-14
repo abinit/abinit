@@ -380,7 +380,7 @@ module m_hdr
  !    Moreover the files produced by the DFPT code do not have a well-defined extension and, as a consequence,
  !    they require a special treatment. In python I would use regexp but Fortran is not python!
 
- type(abifile_t),private,parameter :: all_abifiles(50) = [ &
+ type(abifile_t),private,parameter :: all_abifiles(51) = [ &
 
     ! Files with wavefunctions:
     abifile_t(varname="coefficients_of_wavefunctions", fform=2, ext="WFK", class="wf_planewave"), &
@@ -436,7 +436,7 @@ module m_hdr
     abifile_t(varname="pawnabla_core", fform=611, ext="OPT2", class="data"), &
     abifile_t(varname="pawnabla_loc", fform=612, ext="OPT", class="data"), &
 
-   ! Data used in elphon
+   ! Data used in E-PH code
     abifile_t(varname="gkk_elements", fform=42, ext="GKK", class="data"), &
 
    ! DKK matrix elements in netcdf format (optic, eph)
@@ -461,7 +461,8 @@ module m_hdr
    abifile_t(varname="spectral_weights", fform=5000, ext="FOLD2BLOCH", class="data"), &
    abifile_t(varname="no_fftdatar_write", fform=6000, ext="ABIWAN", class="data"), &
    abifile_t(varname="None", fform=6001, ext="KERANGE", class="data"), &
-   abifile_t(varname="None", fform=6002, ext="SIGEPH", class="data") &
+   abifile_t(varname="None", fform=6002, ext="SIGEPH", class="data"), &
+   abifile_t(varname="None", fform=6003, ext="GSTORE", class="data") &
   ]
 
  type(abifile_t),public,parameter :: abifile_none = abifile_t(varname="None", fform=0, ext="None", class="None")
@@ -1062,8 +1063,6 @@ subroutine hdr_free(hdr)
 
 ! *************************************************************************
 
- DBG_ENTER("COLL")
-
  !@hdr_type
 
  !integer
@@ -1101,8 +1100,6 @@ subroutine hdr_free(hdr)
    call pawrhoij_free(hdr%pawrhoij)
    ABI_FREE(hdr%pawrhoij)
  end if
-
- DBG_EXIT("COLL")
 
 end subroutine hdr_free
 !!***
@@ -3576,6 +3573,7 @@ integer function hdr_ncwrite(hdr, ncid, fform, spinat, nc_define) result(ncerr)
    !call wrtout(std_out, "hdr_ncwrite: defining variables")
    NCF_CHECK(nctk_def_basedims(ncid, defmode=.True.))
 
+   ! Write ETSF-dims
    ncerr = nctk_def_dims(ncid, [ &
      nctkdim_t("max_number_of_states", hdr%mband), &
      nctkdim_t("number_of_atoms", hdr%natom), &
@@ -3741,7 +3739,7 @@ integer function hdr_ncwrite(hdr, ncid, fform, spinat, nc_define) result(ncerr)
  ! Switch to write mode.
  NCF_CHECK(nctk_set_datamode(ncid))
 
- ! Associate and write values to ETSF groups.
+ ! write ETSF variables.
  if (hdr%usewvl == 0) then
    ! Plane wave case.
    basis_set = "plane_waves"
@@ -3805,9 +3803,9 @@ integer function hdr_ncwrite(hdr, ncid, fform, spinat, nc_define) result(ncerr)
 &  [hdr%ecut_eff, hdr%ecutdg, hdr%ecutsm, hdr%etot, hdr%residm, hdr%stmbias, hdr%tphysel, hdr%tsmear])
  NCF_CHECK(ncerr)
 
-!Array variables.
+ ! Write Abinit array variables.
 
-! FIXME Be careful with zionpsp if alchemical mixing!
+ ! FIXME Be careful with zionpsp if alchemical mixing!
  NCF_CHECK(nf90_put_var(ncid, vid("istwfk"), hdr%istwfk))
  NCF_CHECK(nf90_put_var(ncid, vid("pspcod"), hdr%pspcod))
  NCF_CHECK(nf90_put_var(ncid, vid("pspdat"), hdr%pspdat))
@@ -3834,11 +3832,11 @@ integer function hdr_ncwrite(hdr, ncid, fform, spinat, nc_define) result(ncerr)
  end if
 
  ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: &
-   "kptopt", "pawcpxocc"],[hdr%kptopt, hdr%pawcpxocc])
+   "kptopt", "pawcpxocc"], [hdr%kptopt, hdr%pawcpxocc])
  NCF_CHECK(ncerr)
 
  ncerr = nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: &
-   "nelect", "charge"],[hdr%nelect, hdr%cellcharge])
+   "nelect", "charge"], [hdr%nelect, hdr%cellcharge])
  NCF_CHECK(ncerr)
 
  ! NB: In etsf_io the number of electrons is declared as integer.
@@ -5030,10 +5028,10 @@ subroutine hdr_vs_dtset(Hdr,Dtset)
 
  if (.not.(tsymrel.and.ttnons.and.tsymafm)) then
    write(msg,'(a)')' Header '
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(std_out,msg)
    call print_symmetries(Hdr%nsym,Hdr%symrel,Hdr%tnons,Hdr%symafm)
    write(msg,'(a)')' Dtset  '
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(std_out,msg)
    call print_symmetries(Dtset%nsym,Dtset%symrel,Dtset%tnons,Dtset%symafm)
    ABI_ERROR('Check symmetry operations')
  end if
@@ -5044,13 +5042,13 @@ subroutine hdr_vs_dtset(Hdr,Dtset)
  end if
  ! CP added
  if (abs(Dtset%ne_qFD-hdr%ne_qFD)>tol6) then
-   write(msg,'(2(a,f8.2))')"File contains ", hdr%ne_qFD,&
-&  " electrons in the conduction bands but nelect initialized from input is ",Dtset%ne_qFD
+   write(msg,'(2(a,f8.2))')"File contains ", hdr%ne_qFD, &
+    " electrons in the conduction bands but nelect initialized from input is ",Dtset%ne_qFD
    ABI_ERROR(msg)
  end if
  if (abs(Dtset%nh_qFD-hdr%nh_qFD)>tol6) then
    write(msg,'(2(a,f8.2))')"File contains ", hdr%nh_qFD,&
-&  " electrons in the valence bands but nelect initialized from input is ",Dtset%nh_qFD
+     " electrons in the valence bands but nelect initialized from input is ",Dtset%nh_qFD
    ABI_ERROR(msg)
  end if
  ! End CP added
@@ -5067,7 +5065,7 @@ subroutine hdr_vs_dtset(Hdr,Dtset)
  end if
 
  if (any(hdr%kptrlatt /= dtset%kptrlatt)) then
-   write(msg,"(5a)")&
+   write(msg,"(5a)") &
    "hdr%kptrlatt: ",trim(ltoa(reshape(hdr%kptrlatt, [9]))),ch10,&
    "dtset%kptrlatt: ",trim(ltoa(reshape(dtset%kptrlatt, [9])))
    ABI_ERROR(msg)
@@ -5088,47 +5086,58 @@ subroutine hdr_vs_dtset(Hdr,Dtset)
  end if
 
  ! Check if the k-points from the input file agrees with that read from the WFK file
- if ((ANY(ABS(Hdr%kptns(:,:) - Dtset%kpt(:,1:Dtset%nkpt)) > tol6))) then
-   write(msg,'(9a)')ch10,&
-   ' hdr_vs_dtset: ERROR - ',ch10,&
-   '  k-points read from Header ',ch10,&
-   '  differ from the values specified in the input file',ch10,&
-   '  k-points from Hdr file                        | k-points from input file ',ch10
-   call wrtout(std_out,msg,'COLL')
-   do ik=1,Dtset%nkpt
-     if (any(abs(Hdr%kptns(:,ik) - Dtset%kpt(:,ik)) > tol6)) then
-       write(msg,'(3(3es16.6,3x))')Hdr%kptns(:,ik),Dtset%kpt(:,ik)
-       call wrtout(std_out,msg,'COLL')
-     end if
-   end do
-   ABI_ERROR('Modify the k-mesh in the input file')
+ !
+ ! Note that the EPH code frees several dtset arrays that depend on nkpt (see dtset_free_nkpt_arrays)
+ ! in order to reduce memory when large meshes are used (e.g. 200x200x200)
+ ! so we have to test whether the dtset array is allocated before testing.
+ !
+ if (allocated (dtset%kpt)) then
+   if ((any(abs(Hdr%kptns(:,:) - Dtset%kpt(:,1:Dtset%nkpt)) > tol6))) then
+     write(msg,'(9a)')ch10,&
+     ' hdr_vs_dtset: ERROR - ',ch10,&
+     '  k-points read from Header ',ch10,&
+     '  differ from the values specified in the input file',ch10,&
+     '  k-points from Hdr file                        | k-points from input file ',ch10
+     call wrtout(std_out,msg)
+     do ik=1,Dtset%nkpt
+       if (any(abs(Hdr%kptns(:,ik) - Dtset%kpt(:,ik)) > tol6)) then
+         write(msg,'(3(3es16.6,3x))')Hdr%kptns(:,ik),Dtset%kpt(:,ik)
+         call wrtout(std_out,msg)
+       end if
+     end do
+     ABI_ERROR('Modify the k-mesh in the input file')
+   end if
  end if
 
- if (ANY(ABS(Hdr%wtk(:) - Dtset%wtk(1:Dtset%nkpt)) > tol6)) then
-   write(msg,'(9a)')ch10,&
-   ' hdr_vs_dtset : ERROR - ',ch10,&
-   '  k-point weights read from Header ',ch10,&
-   '  differ from the values specified in the input file',ch10,&
-   '  Hdr file  |  File ',ch10
-   call wrtout(std_out,msg,'COLL')
-   do ik=1,Dtset%nkpt
-     if (abs(Hdr%wtk(ik) - Dtset%wtk(ik)) > tol6) then
-       write(msg,'(2(f11.5,1x))')Hdr%wtk(ik),Dtset%wtk(ik)
-       call wrtout(std_out,msg,'COLL')
-     end if
-   end do
-   ABI_ERROR('Check the k-mesh and the symmetries of the system. ')
+ if (allocated(dtset%wtk)) then
+   if (ANY(ABS(Hdr%wtk(:) - Dtset%wtk(1:Dtset%nkpt)) > tol6)) then
+     write(msg,'(9a)')ch10,&
+     ' hdr_vs_dtset : ERROR - ',ch10,&
+     '  k-point weights read from Header ',ch10,&
+     '  differ from the values specified in the input file',ch10,&
+     '  Hdr file  |  File ',ch10
+     call wrtout(std_out,msg)
+     do ik=1,Dtset%nkpt
+       if (abs(Hdr%wtk(ik) - Dtset%wtk(ik)) > tol6) then
+         write(msg,'(2(f11.5,1x))')Hdr%wtk(ik),Dtset%wtk(ik)
+         call wrtout(std_out,msg)
+       end if
+     end do
+     ABI_ERROR('Check the k-mesh and the symmetries of the system. ')
+   end if
  end if
 
  ! Check istwfk storage
- if ( (ANY(Hdr%istwfk(:)/=Dtset%istwfk(1:Dtset%nkpt))) ) then
-   ABI_COMMENT('istwfk read from Header differs from the values specified in the input file (this is not critical)')
-   !call wrtout(std_out, "  Hdr | input ")
-   !do ik=1,Dtset%nkpt
-   !  write(msg,'(i5,3x,i5)')Hdr%istwfk(ik),Dtset%istwfk(ik)
-   !  call wrtout(std_out,msg,'COLL')
-   !end do
-   !ABI_ERROR('Modify istwfk in the input file.')
+ if (allocated(dtset%istwfk)) then
+   if ((any(Hdr%istwfk(:) /= Dtset%istwfk(1:Dtset%nkpt))) ) then
+     ABI_COMMENT('istwfk read from Header differs from the values specified in the input file (this is not critical)')
+     !call wrtout(std_out, "  Hdr | input ")
+     !do ik=1,Dtset%nkpt
+     !  write(msg,'(i5,3x,i5)')Hdr%istwfk(ik),Dtset%istwfk(ik)
+     !  call wrtout(std_out,msg)
+     !end do
+     !ABI_ERROR('Modify istwfk in the input file.')
+   end if
  end if
 
  CONTAINS

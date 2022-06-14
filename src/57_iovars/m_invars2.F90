@@ -259,6 +259,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  integer :: densfor_pred,ipsp,iscf,isiz,itypat,jj,kptopt,lpawu,marr,natom,natomcor,nband1,nberry
  integer :: niatcon,nimage,nkpt,nkpthf,npspalch,nqpt,nsp,nspinor,nsppol,nsym,ntypalch,ntypat,ntyppure
  integer :: occopt,occopt_tmp,response,sumnbl,tfband,tnband,tread,tread_alt,tread_dft,tread_fock,tread_key,tread_extrael
+ integer :: tread_brange, tread_erange, tread_kfilter
  integer :: itol, itol_gen, ds_input, ifreq, ncerr, ierr, image, tread_dipdip, my_rank
  real(dp) :: areaxy,cellcharge_min,fband,kptrlen,nelectjell,sum_spinat
  real(dp) :: rhoavg,zelect,zval
@@ -1421,6 +1422,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getsigeph_filepath',tread,'KEY', key_value=key_value)
  if(tread==1) dtset%getsigeph_filepath = key_value
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getgstore_filepath',tread,'KEY', key_value=key_value)
+ if(tread==1) dtset%getgstore_filepath = key_value
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getcell',tread,'INT')
  if(tread==1) dtset%getcell=intarr(1)
 
@@ -1475,8 +1479,11 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'symv1scf',tread,'INT')
  if(tread==1) dtset%symv1scf = intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_prtscratew',tread,'INT')
+ if(tread==1) dtset%eph_prtscratew = intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_restart',tread,'INT')
- if(tread==1) dtset%eph_restart=intarr(1)
+ if(tread==1) dtset%eph_restart = intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_task',tread,'INT')
  if(tread==1) dtset%eph_task=intarr(1)
@@ -1489,6 +1496,13 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'eph_phrange',tread,'INT')
  if (tread == 1) dtset%eph_phrange = intarr(1:2)
+
+ call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'eph_phrange_w',tread,'ENE')
+ if (tread == 1) dtset%eph_phrange_w = dprarr(1:2)
+
+ if (any(abs(dtset%eph_phrange) /= 0) .and. any(abs(dtset%eph_phrange_w) > tol16)) then
+   ABI_ERROR("eph_phrange and eph_phrange_w are mutually exclusive")
+ end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_intmeth',tread,'INT')
  if (tread == 1) then
@@ -2153,10 +2167,45 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'goprecprm',tread,'DPR')
  if(tread==1) dtset%goprecprm(1:3)=dprarr(1:3)
 
- call intagm(dprarr,intarr,jdtset,marr,ntypat,string(1:lenstr),'lambsig',tread,'DPR')
- if(tread==1)then
-   dtset%lambsig(1:ntypat)=dprarr(1:ntypat)
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gstore_cplex', tread, 'INT')
+ if (tread == 1) dtset%gstore_cplex = intarr(1)
+
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gstore_with_vk', tread, 'INT')
+ if (tread == 1) dtset%gstore_with_vk = intarr(1)
+
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gstore_kzone', tread, 'KEY', key_value=key_value)
+ if (tread == 1) dtset%gstore_kzone = tolower(key_value)
+
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gstore_qzone', tread, 'KEY', key_value=key_value)
+ if (tread == 1) dtset%gstore_qzone = tolower(key_value)
+
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gstore_kfilter', tread_kfilter, 'KEY', key_value=key_value)
+ if (tread_kfilter == 1) dtset%gstore_kfilter = tolower(key_value)
+
+ narr = 2 * nsppol
+ call intagm(dprarr, intarr, jdtset, marr, narr, string(1:lenstr), 'gstore_brange', tread_brange, 'INT')
+ if (tread_brange == 1) then
+   if (nsppol == 1) dtset%gstore_brange(:, 1) = intarr(1:narr)
+   if (nsppol == 2) dtset%gstore_brange = reshape(intarr(1:narr), [2, nsppol])
  end if
+
+ narr = 2 * nsppol
+ call intagm(dprarr, intarr, jdtset, marr, narr, string(1:lenstr), 'gstore_erange', tread_erange, 'ENE')
+ if (tread_erange == 1) then
+   if (nsppol == 1) dtset%gstore_erange(:, 1) = dprarr(1:narr)
+   if (nsppol == 2) dtset%gstore_erange = reshape(dprarr(1:narr), [2, nsppol])
+ end if
+
+ if (tread_erange == 1 .and. tread_brange == 1) then
+   ABI_ERROR("gstore_erange and gstore_brange are mutually exclusive!")
+ end if
+
+ if (tread_erange == 1 .and. tread_kfilter == 1) then
+   ABI_ERROR("gstore_erange and gstore_kfilter are mutually exclusive!")
+ end if
+
+ call intagm(dprarr,intarr,jdtset,marr,ntypat,string(1:lenstr),'lambsig',tread,'DPR')
+ if(tread==1) dtset%lambsig(1:ntypat)=dprarr(1:ntypat)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nwfshist',tread,'INT')
  if(tread==1) dtset%nwfshist=intarr(1)
@@ -3293,13 +3342,13 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  if (dtset%nkptgw>0) then
    ! Read bdgw.
    call intagm(dprarr,intarr,jdtset,marr,2*dtset%nkptgw*dtset%nsppol,string(1:lenstr),'bdgw',tread,'INT')
-   if(tread==1) then
+   if (tread==1) then
      dtset%bdgw(1:2,1:dtset%nkptgw,1:dtset%nsppol) =  &
        reshape(intarr(1:2*dtset%nkptgw*dtset%nsppol),[2,dtset%nkptgw,dtset%nsppol])
    end if
 
    ! Test bdgw values.
-   if (dtset%optdriver == RUNL_SIGMA) then
+   if (any(dtset%optdriver == [RUNL_SIGMA, RUNL_EPH])) then
      if (any(dtset%bdgw(1:2,1:dtset%nkptgw,1:dtset%nsppol) <= 0)) then
        ABI_ERROR("bdgw entries cannot be <= 0. Check input file")
      end if

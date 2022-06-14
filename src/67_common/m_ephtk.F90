@@ -65,7 +65,7 @@ contains  !=====================================================
 !! Setup a mask to skip accumulating the contribution of certain phonon modes.
 !!
 !! INPUT
-!!  dtset<dataset_type>=All input variables for this dataset.
+!!  eph_phrange=Abinit input variable.
 !!
 !! OUTPUT
 !!   phmodes_skip(natom3) For each mode: 1 to skip the contribution given by this phonon branch else 0
@@ -74,16 +74,15 @@ contains  !=====================================================
 !!      m_sigmaph
 !!
 !! CHILDREN
-!!      ebands_apply_scissors,ebands_print,ebands_set_extrael,ebands_set_fermie
-!!      ebands_set_scheme,ebands_update_occ,wrtout
 !!
 !! SOURCE
 
-subroutine ephtk_set_phmodes_skip(dtset, phmodes_skip)
+subroutine ephtk_set_phmodes_skip(natom, eph_phrange, phmodes_skip)
 
 !Arguments ------------------------------------
- type(dataset_type),intent(in) :: dtset
+ integer,intent(in) :: natom
 !arrays
+ integer,intent(in) :: eph_phrange(2)
  integer,allocatable,intent(out) :: phmodes_skip(:)
 
 !Local variables ------------------------------
@@ -94,20 +93,29 @@ subroutine ephtk_set_phmodes_skip(dtset, phmodes_skip)
 
  ! Setup a mask to skip accumulating the contribution of certain phonon modes.
  ! By default do not skip, if set skip all but specified
- natom3 = dtset%natom * 3
+ natom3 = natom * 3
  ABI_MALLOC(phmodes_skip, (natom3))
  phmodes_skip = 0
 
- if (all(dtset%eph_phrange /= 0)) then
-   if (minval(dtset%eph_phrange) < 1 .or. &
-       maxval(dtset%eph_phrange) > natom3 .or. &
-       dtset%eph_phrange(2) < dtset%eph_phrange(1)) then
+ if (all(eph_phrange /= 0)) then
+   if (minval(abs(eph_phrange)) < 1 .or. &
+       maxval(abs(eph_phrange)) > natom3 .or. &
+       abs(eph_phrange(2)) < abs(eph_phrange(1))) then
      ABI_ERROR('Invalid range for eph_phrange. Should be between [1, 3*natom] and eph_modes(2) > eph_modes(1)')
    end if
-   call wrtout(std_out, sjoin(" Including phonon modes between [", &
-               itoa(dtset%eph_phrange(1)), ',', itoa(dtset%eph_phrange(2)), "]"))
-   phmodes_skip = 1
-   phmodes_skip(dtset%eph_phrange(1):dtset%eph_phrange(2)) = 0
+   if (all(eph_phrange > 0)) then
+      call wrtout(std_out, sjoin(" Including phonon modes between [", &
+                   itoa(eph_phrange(1)), ',', itoa(eph_phrange(2)), "]"))
+      phmodes_skip = 1
+      phmodes_skip(eph_phrange(1):eph_phrange(2)) = 0
+   else if (all(eph_phrange < 0)) then
+      call wrtout(std_out, sjoin(" Excluding phonon modes between [", &
+                   itoa(abs(eph_phrange(1))), ',', itoa(abs(eph_phrange(2))), "]"))
+      phmodes_skip = 0
+      phmodes_skip(abs(eph_phrange(1)):abs(eph_phrange(2))) = 1
+   else
+      ABI_ERROR(sjoin("Invalid eph_phrange: ", itoa(eph_phrange(1)), ',', itoa(eph_phrange(2))))
+   end if
  end if
 
 end subroutine ephtk_set_phmodes_skip
@@ -140,8 +148,6 @@ end subroutine ephtk_set_phmodes_skip
 !!      m_phgamma,m_sigmaph
 !!
 !! CHILDREN
-!!      ebands_apply_scissors,ebands_print,ebands_set_extrael,ebands_set_fermie
-!!      ebands_set_scheme,ebands_update_occ,wrtout
 !!
 !! SOURCE
 
@@ -150,8 +156,7 @@ subroutine ephtk_set_pertables(natom, my_npert, pert_table, my_pinfo, comm)
 !Arguments ------------------------------------
  integer,intent(in) :: natom, my_npert, comm
 !arrays
- integer,allocatable :: pert_table(:,:)
- integer,allocatable :: my_pinfo(:,:)
+ integer,allocatable :: pert_table(:,:), my_pinfo(:,:)
 
 !Local variables ------------------------------
 !scalars
@@ -209,8 +214,6 @@ end subroutine ephtk_set_pertables
 !!      m_phgamma
 !!
 !! CHILDREN
-!!      ebands_apply_scissors,ebands_print,ebands_set_extrael,ebands_set_fermie
-!!      ebands_set_scheme,ebands_update_occ,wrtout
 !!
 !! SOURCE
 
@@ -299,8 +302,6 @@ end subroutine ephtk_mkqtabs
 !!      m_phgamma
 !!
 !! CHILDREN
-!!      ebands_apply_scissors,ebands_print,ebands_set_extrael,ebands_set_fermie
-!!      ebands_set_scheme,ebands_update_occ,wrtout
 !!
 !! SOURCE
 
@@ -364,8 +365,6 @@ end subroutine ephtk_gam_atm2qnu
 !!      m_sigmaph
 !!
 !! CHILDREN
-!!      ebands_apply_scissors,ebands_print,ebands_set_extrael,ebands_set_fermie
-!!      ebands_set_scheme,ebands_update_occ,wrtout
 !!
 !! SOURCE
 
@@ -424,8 +423,6 @@ end subroutine ephtk_gkknu_from_atm
 !!      m_eph_driver,m_rta
 !!
 !! CHILDREN
-!!      ebands_apply_scissors,ebands_print,ebands_set_extrael,ebands_set_fermie
-!!      ebands_set_scheme,ebands_update_occ,wrtout
 !!
 !! SOURCE
 
@@ -439,6 +436,7 @@ subroutine ephtk_update_ebands(dtset, ebands, header)
 
 !Local variables-------------------------
 !scalars
+ real(dp),parameter :: nholes = zero
  character(len=500) :: msg
  integer :: unts(2)
 
@@ -473,10 +471,7 @@ subroutine ephtk_update_ebands(dtset, ebands, header)
  else if (abs(dtset%eph_extrael) > zero) then
    call wrtout(unts, sjoin(" Adding eph_extrael:", ftoa(dtset%eph_extrael), "to input nelect:", ftoa(ebands%nelect)))
    call ebands_set_scheme(ebands, dtset%occopt, dtset%tsmear, dtset%spinmagntarget, dtset%prtvol, update_occ=.False.)
-   ! CP modified
-   ! call ebands_set_extrael(ebands, dtset%eph_extrael, dtset%spinmagntarget, msg)
-   call ebands_set_extrael(ebands, dtset%eph_extrael, 0.d0, dtset%spinmagntarget, msg)
-   ! End CP modified
+   call ebands_set_extrael(ebands, dtset%eph_extrael, nholes, dtset%spinmagntarget, msg)
    call wrtout(unts, msg)
  end if
 

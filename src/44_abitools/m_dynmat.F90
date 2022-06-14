@@ -1896,15 +1896,12 @@ end subroutine d2sym3
 !! FUNCTION
 !! Takes care of the inclusion of the ewald q=0 term in the dynamical
 !! matrix - corrects the dyew matrix provided as input
-!! See Eq.(71) in Gonze&Lee PRB 55, 10355 (1997) [[cite:Gonze1997a]], 
+!! See Eq.(71) in Gonze&Lee PRB 55, 10355 (1997) [[cite:Gonze1997a]],
 !! get the left hand side.
 !!
 !! INPUTS
-!!  dyewq0(3,3,natom) = part needed to correct
-!!    the dynamical matrix for atom self-interaction.
+!!  dyewq0(3,3,natom) = part needed to correct the dynamical matrix for atom self-interaction.
 !!  natom= number of atom in the unit cell
-!!
-!! OUTPUT
 !!
 !! SIDE EFFECTS
 !!  dyew(2,3,natom,3,natom)= dynamical matrix corrected on output
@@ -5552,7 +5549,7 @@ end subroutine pheigvec_normalize
 !! phdispl_from_eigvec
 !!
 !! FUNCTION
-!!  Phonon displacements from eigenvectors
+!!  Phonon displacements in cart coords from eigenvectors
 !!
 !! INPUTS
 !!  natom: number of atoms in unit cell
