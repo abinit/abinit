@@ -51,7 +51,7 @@ module m_respfn_driver
  use m_fft,         only : zerosym, fourdp
  use m_kpts,        only : symkchk
  use m_geometry,    only : irreducible_set_pert
- use m_dynmat,      only : chkph3, d2sym3, q0dy3_apply, q0dy3_calc, wings3, dfpt_phfrq, sytens, dfpt_prtph, &
+ use m_dynmat,      only : chkph3, d2sym3, q0dy3_apply, q0dy3_calc, wings3, dfpt_phfrq, sylwtens, sytens, dfpt_prtph, &
                            asria_calc, asria_corr, cart29, cart39, chneu9, dfpt_sydy
  use m_ddb,         only : DDB_VERSION
  use m_ddb_hdr,     only : ddb_hdr_type, ddb_hdr_init
@@ -259,7 +259,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  integer,allocatable :: atindx(:),atindx1(:),blkflg(:,:,:,:),blkflgfrx1(:,:,:,:),blkflg1(:,:,:,:)
  integer,allocatable :: blkflg2(:,:,:,:),carflg(:,:,:,:),clflg(:,:),indsym(:,:,:)
  integer,allocatable :: irrzon(:,:,:),kg(:,:),l_size_atm(:),nattyp(:),npwarr(:)
- integer,allocatable :: pertsy(:,:),rfpert(:),rfpert_nl(:,:,:,:,:,:),symq(:,:,:),symrec(:,:,:)
+ integer,allocatable :: pertsy(:,:),rfpert(:)
+ integer,allocatable :: rfpert_lw(:,:,:,:,:,:),rfpert_nl(:,:,:,:,:,:),symq(:,:,:),symrec(:,:,:)
  logical,allocatable :: distrb_flags(:,:,:)
  real(dp) :: dum_gauss(0),dum_dyfrn(0),dum_dyfrv(0),dum_eltfrxc(0)
  real(dp) :: dum_grn(0),dum_grv(0),dum_rhog(0),dum_vg(0)
@@ -1154,15 +1155,15 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  ABI_MALLOC(pertsy,(3,natom+6))
  call irreducible_set_pert(indsym,natom+6,natom,dtset%nsym,pertsy,rfdir,rfpert,symq,symrec,dtset%symrel)
 
-!MR: Deactivate perturbation symmetries temporarily for a longwave calculation
+!MR: Deactivate perturbation symmetries for a longwave calculation
 !The same has been done in 51_manage_mpi/get_npert_rbz.F90
-! if (dtset%prepalw==1) then
-!   do ipert=1,natom+6
-!     do idir=1,3
-!       if( pertsy(idir,ipert)==-1 ) pertsy(idir,ipert)=1
-!     end do
-!   end do
-! endif
+ if (dtset%prepalw/=0) then
+   do ipert=1,natom+6
+     do idir=1,3
+       if( pertsy(idir,ipert)==-1 ) pertsy(idir,ipert)=1
+     end do
+   end do
+ endif
 
  write(message,'(a)') ' The list of irreducible perturbations for this q vector is:'
  call wrtout(ab_out,message,'COLL')
@@ -1245,6 +1246,44 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
      end do
    end do
  end if
+
+!For quadrupoles calculation
+ if (dtset%prepalw==2) then
+   pertsy(:,1:natom)=0
+   ABI_MALLOC(rfpert_lw,(3,natom+8,3,natom+8,3,natom+8))
+   rfpert_lw=0
+   rfpert_lw(:,natom+2,:,1:natom,:,natom+8)=1
+   call sylwtens(indsym,natom+8,natom,dtset%nsym,rfpert_lw,symrec,dtset%symrel)
+   write(message, '(a,a,a)' ) ch10, &
+ & 'The list of irreducible elements of the Quadrupoles tensor is:',ch10
+   call wrtout(std_out,message,'COLL')
+
+   write(message,'(12x,a)') 'i1dir   i1pert  i2dir   i2pert  i3dir  i3pert'
+   call wrtout(std_out,message,'COLL')
+   n1 = 0
+   do i3pert = natom+8,natom+8
+     do i3dir = 1, 3
+       do i2pert = 1, natom
+         do i2dir = 1,3
+           do i1pert = natom+2,natom+2
+             do i1dir = 1, 3
+               if (rfpert_lw(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1) then
+                 n1 = n1 + 1
+                 write(message,'(2x,i4,a,6(5x,i3))') n1,')', &
+               & i1dir,i1pert,i2dir,i2pert,i3dir,i3pert
+                 call wrtout(std_out,message,'COLL')
+                 pertsy(i2dir,i2pert)=1
+               end if
+             end do
+           end do
+         end do
+       end do
+     end do
+   end do
+   write(message,'(a,a)') ch10,ch10
+   call wrtout(std_out,message,'COLL')
+ end if
+
 
 !Contribution to the dynamical matrix from ion-ion energy
  if(rfphon==1)then

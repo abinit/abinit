@@ -525,7 +525,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      if(ipert<dtset%natom+10 .and. rfpert(ipert)==1 .and. rfdir(idir) == 1 ) then
        if ((pertsy(idir,ipert)==1).or.&
 &       ((dtset%prepanl == 1).and.(ipert == dtset%natom+2)).or.&
-&       ((dtset%prepalw == 1).and.(ipert == dtset%natom+2)).or.&
+&       ((dtset%prepalw /= 0).and.(ipert == dtset%natom+2)).or.&
 &       ((dtset%prepgkk == 1).and.(ipert <= dtset%natom))  ) then
          to_compute_this_pert = 1
        else
@@ -905,7 +905,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      timrev_kpt = timrev_pert
 
      !MR: Modified to agree with longwave driver
-     if(dtset%prepalw==1) then
+     if(dtset%prepalw/=0) then
        if (dtset%kptopt==2) timrev_pert=1
        if (dtset%kptopt==3) timrev_pert=0
        timrev_kpt = timrev_pert

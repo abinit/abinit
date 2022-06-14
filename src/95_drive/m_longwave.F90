@@ -309,8 +309,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  call wrtout(ab_out,msg,'COLL')
  call wrtout(std_out,msg,'COLL')
 
- write(msg,'(12x,a)')&
-& 'i1dir   i1pert  i2dir   i2pert  i3dir  i3pert'
+ write(msg,'(12x,a)') 'i1dir   i1pert  i2dir   i2pert  i3dir  i3pert'
  call wrtout(ab_out,msg,'COLL')
  call wrtout(std_out,msg,'COLL')
  n1 = 0
