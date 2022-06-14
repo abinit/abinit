@@ -211,12 +211,6 @@ P          mk1mem           8
               qpt1     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt2     0.00000000E+00  0.00000000E+00  4.16666667E-02
               qpt3     0.00000000E+00  0.00000000E+00  4.16666667E-02
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          1       2
-            rfdir1          0       0       0
-            rfdir2          0       0       0
-            rfdir3          1       1       1
            rfphon1          0
            rfphon2          0
            rfphon3          1
@@ -2969,12 +2963,6 @@ P          mk1mem           8
               qpt1     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt2     0.00000000E+00  0.00000000E+00  4.16666667E-02
               qpt3     0.00000000E+00  0.00000000E+00  4.16666667E-02
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          1       2
-            rfdir1          0       0       0
-            rfdir2          0       0       0
-            rfdir3          1       1       1
            rfphon1          0
            rfphon2          0
            rfphon3          1

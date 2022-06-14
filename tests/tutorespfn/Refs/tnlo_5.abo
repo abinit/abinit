@@ -1027,18 +1027,6 @@ P          mk1mem34       432
             rfddk32         0
             rfddk33         1
             rfddk34         0
-            rfdir11         0       0       0
-            rfdir12         0       0       0
-            rfdir13         1       1       1
-            rfdir14         1       1       1
-            rfdir21         0       0       0
-            rfdir22         0       0       0
-            rfdir23         1       1       1
-            rfdir24         1       1       1
-            rfdir31         0       0       0
-            rfdir32         0       0       0
-            rfdir33         1       1       1
-            rfdir34         1       1       1
            rfelfd11         0
            rfelfd12         0
            rfelfd13         0
@@ -4464,18 +4452,6 @@ P          mk1mem34       432
             rfddk32         0
             rfddk33         1
             rfddk34         0
-            rfdir11         0       0       0
-            rfdir12         0       0       0
-            rfdir13         1       1       1
-            rfdir14         1       1       1
-            rfdir21         0       0       0
-            rfdir22         0       0       0
-            rfdir23         1       1       1
-            rfdir24         1       1       1
-            rfdir31         0       0       0
-            rfdir32         0       0       0
-            rfdir33         1       1       1
-            rfdir34         1       1       1
            rfelfd11         0
            rfelfd12         0
            rfelfd13         0

@@ -2262,17 +2262,18 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmftctqmc_gmove = dtsets(idtset)%dmftqmc_therm / 10
    dtsets(idtset)%dosdeltae=zero
    dtsets(idtset)%dtion=100.0_dp
-   dtsets(idtset)%d3e_pert1_atpol(1:2)=1
-   dtsets(idtset)%d3e_pert1_dir(1:3)=0
+   dtsets(idtset)%dtele=0.1_dp
+   dtsets(idtset)%d3e_pert1_atpol(1:2)=-1
+   dtsets(idtset)%d3e_pert1_dir(1:3)=1
    dtsets(idtset)%d3e_pert1_elfd=0
    dtsets(idtset)%d3e_pert1_phon=0
-   dtsets(idtset)%d3e_pert2_atpol(1:2)=1
-   dtsets(idtset)%d3e_pert2_dir(1:3)=0
+   dtsets(idtset)%d3e_pert2_atpol(1:2)=-1
+   dtsets(idtset)%d3e_pert2_dir(1:3)=1
    dtsets(idtset)%d3e_pert2_elfd=0
    dtsets(idtset)%d3e_pert2_phon=0
    dtsets(idtset)%d3e_pert2_strs=0
-   dtsets(idtset)%d3e_pert3_atpol(1:2)=1
-   dtsets(idtset)%d3e_pert3_dir(1:3)=0
+   dtsets(idtset)%d3e_pert3_atpol(1:2)=-1
+   dtsets(idtset)%d3e_pert3_dir(1:3)=1
    dtsets(idtset)%d3e_pert3_elfd=0
    dtsets(idtset)%d3e_pert3_phon=0
 !  E
@@ -2568,6 +2569,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%prteig=1    ; if (dtsets(idtset)%nimage>1) dtsets(idtset)%prteig=0
    dtsets(idtset)%prtgsr=1    ; if (dtsets(idtset)%nimage>1) dtsets(idtset)%prtgsr=0
    dtsets(idtset)%prtkpt = -1
+   dtsets(idtset)%prtocc=0
    dtsets(idtset)%prtwf=1     ; if (dtsets(idtset)%nimage>1) dtsets(idtset)%prtwf=0
    !if (dtsets%(idtset)%optdriver == RUNL_RESPFN and all(dtsets(:)%optdriver /= RUNL_NONLINEAR) dtsets(idtset)%prtwf = -1
    do ii=1,dtsets(idtset)%natom,1
@@ -2596,9 +2598,9 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%rcut=zero
    dtsets(idtset)%restartxf=0
    dtsets(idtset)%rfasr=0
-   dtsets(idtset)%rfatpol(1:2)=1
+   dtsets(idtset)%rfatpol(1:2)=-1
    dtsets(idtset)%rfddk=0
-   dtsets(idtset)%rfdir(1:3)=0
+   dtsets(idtset)%rfdir(1:3)=1
    dtsets(idtset)%rfelfd=0
    dtsets(idtset)%rfmagn=0
    dtsets(idtset)%rfmeth=1
@@ -2608,8 +2610,8 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%rfuser=0
    dtsets(idtset)%rf2_dkdk=0
    dtsets(idtset)%rf2_dkde=0
-   dtsets(idtset)%rf2_pert1_dir(1:3)=0
-   dtsets(idtset)%rf2_pert2_dir(1:3)=0
+   dtsets(idtset)%rf2_pert1_dir(1:3)=1
+   dtsets(idtset)%rf2_pert2_dir(1:3)=1
    dtsets(idtset)%rhoqpmix=one
 !  S
    dtsets(idtset)%shiftk_orig(:,:)=one
@@ -2628,8 +2630,14 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%strprecon=one
    dtsets(idtset)%strtarget(1:6)=zero
 !  T
+   dtsets(idtset)%td_exp_order=4
    dtsets(idtset)%td_maxene=zero
    dtsets(idtset)%td_mexcit=0
+   dtsets(idtset)%td_scnmax=3
+   dtsets(idtset)%td_prtstr=10
+   dtsets(idtset)%td_restart=0
+   dtsets(idtset)%td_propagator=1
+   dtsets(idtset)%td_scthr=1e-7_dp
    dtsets(idtset)%tfw_toldfe=0.000001_dp
    dtsets(idtset)%tim1rev = 1
    dtsets(idtset)%tl_nprccg = 30

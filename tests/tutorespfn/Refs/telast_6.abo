@@ -1628,17 +1628,17 @@ P          mk1mem34      2000
            prtpot32         0
            prtpot33         0
            prtpot34         1
-            rfdir11         0       0       0
-            rfdir12         0       0       0
-            rfdir13         0       0       0
+            rfdir11         1       1       1
+            rfdir12         1       1       1
+            rfdir13         1       1       1
             rfdir14         1       0       0
-            rfdir21         0       0       0
-            rfdir22         0       0       0
-            rfdir23         0       0       0
+            rfdir21         1       1       1
+            rfdir22         1       1       1
+            rfdir23         1       1       1
             rfdir24         1       0       0
-            rfdir31         0       0       0
-            rfdir32         0       0       0
-            rfdir33         0       0       0
+            rfdir31         1       1       1
+            rfdir32         1       1       1
+            rfdir33         1       1       1
             rfdir34         1       0       0
            rfstrs11         0
            rfstrs12         0
@@ -6101,17 +6101,17 @@ P          mk1mem34      2000
            prtpot32         0
            prtpot33         0
            prtpot34         1
-            rfdir11         0       0       0
-            rfdir12         0       0       0
-            rfdir13         0       0       0
+            rfdir11         1       1       1
+            rfdir12         1       1       1
+            rfdir13         1       1       1
             rfdir14         1       0       0
-            rfdir21         0       0       0
-            rfdir22         0       0       0
-            rfdir23         0       0       0
+            rfdir21         1       1       1
+            rfdir22         1       1       1
+            rfdir23         1       1       1
             rfdir24         1       0       0
-            rfdir31         0       0       0
-            rfdir32         0       0       0
-            rfdir33         0       0       0
+            rfdir31         1       1       1
+            rfdir32         1       1       1
+            rfdir33         1       1       1
             rfdir34         1       0       0
            rfstrs11         0
            rfstrs12         0
