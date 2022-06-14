@@ -1157,13 +1157,54 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
 !MR: Deactivate perturbation symmetries for a longwave calculation
 !The same has been done in 51_manage_mpi/get_npert_rbz.F90
- if (dtset%prepalw/=0) then
-   do ipert=1,natom+6
-     do idir=1,3
-       if( pertsy(idir,ipert)==-1 ) pertsy(idir,ipert)=1
+! if (dtset%prepalw/=0) then
+!   do ipert=1,natom+6
+!     do idir=1,3
+!       if( pertsy(idir,ipert)==-1 ) pertsy(idir,ipert)=1
+!     end do
+!   end do
+! endif
+
+!For longwave calculation
+ if (dtset%prepalw==1.and.rfphon==1) then
+   pertsy(:,1:natom)=1
+ else if (dtset%prepalw==2.and.rfphon==1) then
+   ABI_MALLOC(rfpert_lw,(3,natom+8,3,natom+8,3,natom+8))
+   rfpert_lw=0
+   rfpert_lw(:,natom+2,:,1:natom,:,natom+8)=1
+   call sylwtens(indsym,natom+8,natom,dtset%nsym,rfpert_lw,symrec,dtset%symrel)
+   write(message, '(a,a,a)' ) ch10, &
+ & 'The list of irreducible elements of the Quadrupoles tensor is:',ch10
+   call wrtout(std_out,message,'COLL')
+
+   write(message,'(12x,a)') 'i1dir   i1pert  i2dir   i2pert  i3dir  i3pert'
+   call wrtout(std_out,message,'COLL')
+   n1 = 0
+   do i3pert = natom+8,natom+8
+     do i3dir = 1, 3
+       do i2pert = 1, natom
+         do i2dir = 1,3
+           do i1pert = natom+2,natom+2
+             do i1dir = 1, 3
+               if (rfpert_lw(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1) then
+                 n1 = n1 + 1
+                 write(message,'(2x,i4,a,6(5x,i3))') n1,')', &
+               & i1dir,i1pert,i2dir,i2pert,i3dir,i3pert
+                 call wrtout(std_out,message,'COLL')
+                 pertsy(i2dir,i2pert)=1
+               end if
+             end do
+           end do
+         end do
+       end do
      end do
    end do
- endif
+   write(message,'(a,a)') ch10,ch10
+   call wrtout(std_out,message,'COLL')
+ else if (dtset%prepalw/=0.and.rfelfd==3) then
+   pertsy(:,natom+2)=1
+ end if
+
 
  write(message,'(a)') ' The list of irreducible perturbations for this q vector is:'
  call wrtout(ab_out,message,'COLL')
@@ -1245,43 +1286,6 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
        call wrtout(std_out,message,'COLL')
      end do
    end do
- end if
-
-!For quadrupoles calculation
- if (dtset%prepalw==2) then
-   pertsy(:,1:natom)=0
-   ABI_MALLOC(rfpert_lw,(3,natom+8,3,natom+8,3,natom+8))
-   rfpert_lw=0
-   rfpert_lw(:,natom+2,:,1:natom,:,natom+8)=1
-   call sylwtens(indsym,natom+8,natom,dtset%nsym,rfpert_lw,symrec,dtset%symrel)
-   write(message, '(a,a,a)' ) ch10, &
- & 'The list of irreducible elements of the Quadrupoles tensor is:',ch10
-   call wrtout(std_out,message,'COLL')
-
-   write(message,'(12x,a)') 'i1dir   i1pert  i2dir   i2pert  i3dir  i3pert'
-   call wrtout(std_out,message,'COLL')
-   n1 = 0
-   do i3pert = natom+8,natom+8
-     do i3dir = 1, 3
-       do i2pert = 1, natom
-         do i2dir = 1,3
-           do i1pert = natom+2,natom+2
-             do i1dir = 1, 3
-               if (rfpert_lw(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1) then
-                 n1 = n1 + 1
-                 write(message,'(2x,i4,a,6(5x,i3))') n1,')', &
-               & i1dir,i1pert,i2dir,i2pert,i3dir,i3pert
-                 call wrtout(std_out,message,'COLL')
-                 pertsy(i2dir,i2pert)=1
-               end if
-             end do
-           end do
-         end do
-       end do
-     end do
-   end do
-   write(message,'(a,a)') ch10,ch10
-   call wrtout(std_out,message,'COLL')
  end if
 
 
