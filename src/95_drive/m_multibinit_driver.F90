@@ -125,7 +125,6 @@ contains
     type(abihist) :: hist, hist_tes
 
     !type(spin_model_t) :: spin_model
-    type(mb_manager_t) :: manager
     character(len=strlen) :: string, raw_string
     character(len=500) :: message
     character(len=fnlen) :: name
@@ -167,7 +166,6 @@ contains
 
     integer :: master, my_rank, comm, nproc, ierr
     logical :: iam_master
-    integer :: l
 
 
 !MPI variables

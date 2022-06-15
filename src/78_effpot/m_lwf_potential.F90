@@ -114,7 +114,6 @@ contains
   !-------------------------------------------------------------------!
   subroutine finalize(self)
     class(lwf_potential_t), intent(inout) :: self
-    integer :: ilwf
     self%has_displacement=.False.
     call self%onebody_coeff%finalize()
     call self%coeff2%finalize()
@@ -184,8 +183,6 @@ contains
 
   subroutine convert_coeff_to_csr(self)
     class(lwf_potential_t), intent(inout) :: self
-    integer :: i
-
     if (.not. self%csr_mat_ready) then
        !call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
        !if(iam_master) then
@@ -318,7 +315,7 @@ contains
     real(dp),  intent(inout) :: lwf(:),  lwf_new
     integer,  intent(in) :: ilwf
     real(dp), intent(inout) :: deltaE
-    real(dp) :: tmp, dlwf, lold, val
+    real(dp) :: tmp, dlwf, lold
 
     lold=lwf(ilwf)
     dlwf=lwf_new-lold
@@ -362,8 +359,6 @@ contains
     else
        deltaE=deltaE+ self%beta*((lwf_new**2- lold**2)*lwf(ilwf+1)**2)
     endif
-
-    deltaE=deltaE*340.0/1200.0
 
     lwf(ilwf)=lwf(ilwf)-dlwf
   end subroutine get_delta_E_lwf

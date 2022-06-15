@@ -158,7 +158,6 @@ contains
   !-------------------------------------------------------------------!
   subroutine get_T_and_Ek(self)
     class(lwf_mover_t), intent(inout):: self
-    integer:: i
     self%Ek = 0.5*sum(self%lwf_masses * (self%vcart*self%vcart))
     self%T_ob = 2.0*self%Ek/self%nlwf
   end subroutine get_T_and_Ek
@@ -352,7 +351,6 @@ contains
     class(lwf_mover_t), intent(inout):: self
     character(len=*), intent(in):: fname
     integer:: ierr, ncid, id_id, value_id
-    character(len = 118):: msg
     ! open file
     if (self%params%lwf_constraint .eq. 0) then
       self%n_fixed_lwf = 0
