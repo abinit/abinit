@@ -93,7 +93,7 @@ contains
     ABI_UNUSED_A(scmaker)
     ABI_UNUSED_A(params)
     ABI_UNUSED_A(scpot)
-
+    ABI_UNUSED_A(supercell)
     nullify(tmp)
   end subroutine fill_supercell
 

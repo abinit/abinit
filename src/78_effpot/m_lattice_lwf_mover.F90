@@ -38,6 +38,8 @@ module  m_lattice_lwf_mover
 
   private
 
+!!***
+
   type, public, extends(abstract_mover_t) :: lattice_lwf_mover_t
     class(lattice_mover_t), pointer :: lattice_mover => null()
     class(lwf_mover_t),    pointer :: lwf_mover => null()

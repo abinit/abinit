@@ -183,7 +183,6 @@ contains
     logical :: iam_master
     integer :: i
     integer :: c
-    character(len=90) :: msg
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
     self%input_path=input_path
     self%filenames(:)=filenames(:)
@@ -498,11 +497,9 @@ contains
   !-------------------------------------------------------------------!
   subroutine set_spin_mover(self)
     class(mb_manager_t), intent(inout) :: self
-    character(len=fnlen) :: fname
     if (self%params%spin_dynamics>0) then
        ABI_MALLOC_TYPE_SCALAR(spin_mover_t, self%spin_mover)
     end if
-    !fname=trim(self%filenames(2))//"_spinhist_input.nc"
     call self%spin_mover%initialize(params=self%params,&
             & supercell=self%supercell, rng=self%rng)
    end subroutine set_spin_mover
