@@ -153,9 +153,6 @@ P          mk1mem3          1
            prtpot1          0
            prtpot2          0
            prtpot3          1
-            rfdir1          0       0       0
-            rfdir2          0       0       0
-            rfdir3          1       1       1
            rfelfd1          0
            rfelfd2          0
            rfelfd3          2
@@ -953,9 +950,6 @@ P          mk1mem3          1
            prtpot1          0
            prtpot2          0
            prtpot3          1
-            rfdir1          0       0       0
-            rfdir2          0       0       0
-            rfdir3          1       1       1
            rfelfd1          0
            rfelfd2          0
            rfelfd3          2

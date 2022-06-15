@@ -223,7 +223,7 @@ end subroutine outresid
 subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
 &                mpi_enreg,mpw,natom,nband,nkpt,npwarr,&
 &                nsppol,occ,response,unwff2,&
-&                wfs,wvl)
+&                wfs,wvl,force_write)
 
 !Arguments ------------------------------------
 !scalars
@@ -236,6 +236,7 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
  type(hdr_type), intent(inout) :: hdr
  type(wvl_wf_type),intent(in) :: wfs
  type(wvl_internal_type), intent(in) :: wvl
+ logical, intent(in), optional :: force_write
 !arrays
  integer, intent(in) :: kg(3,mpw*mkmem),nband(nkpt*nsppol),npwarr(nkpt)
  real(dp), intent(inout) :: cg(2,mcg)
@@ -251,7 +252,7 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
  integer :: ipwnbd
 #endif
  real(dp) :: cpu,wall,gflops
- logical :: ihave_data,iwrite,iam_master,done
+ logical :: ihave_data,iwrite,iam_master,done,prtwf
  character(len=500) :: msg
  type(wffile_type) :: wff2
  character(len=fnlen) :: path
@@ -330,7 +331,12 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
 !Will write the wavefunction file only when nstep>0
 !MT 07 2015: writing reactivated when nstep=0
 !if (nstep>0 .and. dtset%prtwf/=0) then
- if (dtset%prtwf/=0) then
+!FB 03/2022: Added an option to force writing (used in RT-TDDFT)
+ prtwf = dtset%prtwf/=0
+ if (present(force_write)) then
+    if (force_write) prtwf = .true.
+ end if
+ if (prtwf) then
 
    ! Only the master write the file, except if MPI I/O, but the
    ! full wff dataset should be provided to WffOpen in this case

@@ -59,7 +59,6 @@
 
   getwfq5  4
      qpt5  0.5d0 0.0d0 0.0d0
- rfatpol5  1 1
    rfdir5  1 0 0
   rfphon5  1
   toldfe5  1.0d-8
@@ -107,7 +106,6 @@
    nband8  8*3
   getwfq8  4
      qpt8  0.5d0 0.0d0 0.0d0
- rfatpol8  1 1
    rfdir8  1 0 0
   rfphon8  1
   toldfe8  1.0d-8
