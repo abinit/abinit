@@ -278,14 +278,24 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  ! ===========================================
  call pspini(dtset, dtfil, ecore, psp_gencond, gsqcutc_eff, gsqcutf_eff, pawrad, pawtab, psps, cryst%rprimd, comm_mpi=comm)
 
- gwr = gwr_new(dtset, cryst, psps, ebands, comm)
+ ! Build gwr object.
+ gwr = gwr_new(dtset, cryst, psps, pawtab, ebands, mpi_enreg, comm)
+
+ !if (use_wfk) then
+ !  call gwr%build_gtau_from_wfk(wfk0_path)
+ !else
+ !  call gwr%build_gtau_from_pot(pot_path)
+ !end if
 
  ! ====================================================
  ! === This is the real GWR stuff once all is ready ===
  ! ====================================================
 
  !select case (dtset%gwr_task)
- !case (1)
+ !case ("G0W0")
+ !  call gwr%g0w0()
+ !case ("RPA_ENERGY")
+ !  call gwr%rpa_energy()
  !case default
  !  !ABI_ERROR(sjoin("Invalid value of gwr_task:", itoa(dtset%gwr_task)))
  !end select

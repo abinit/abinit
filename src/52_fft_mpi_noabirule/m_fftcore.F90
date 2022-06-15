@@ -702,7 +702,7 @@ end subroutine bound
 !! INPUTS
 !! boxcutmin=minimum value of boxcut admitted (boxcut is the ratio
 !!  between the radius of the sphere contained in the FFT box, and the
-!!  radius of the planewave sphere) : usually 2.0 .
+!!  radius of the planewave sphere): usually 2.0.
 !! chksymtnons= if==3, will impose the FFT grid to be invariant under the spatial symmetries.
 !! ecut=energy cutoff in Hartrees
 !! gmet(3,3)=reciprocal space metric (bohr**-2).
@@ -710,7 +710,7 @@ end subroutine bound
 !! me_fft=index of the processor in the FFT set (use 0 if sequential)
 !! nproc_fft=number of processors in the FFT set (use 1 if sequential)
 !! nsym=number of symmetry elements in group
-!! paral_fft=0 if no FFT parallelisation ; 1 if FFT parallelisation
+!! paral_fft=0 if no FFT parallelisation; 1 if FFT parallelisation
 !! symrel(3,3,nsym)=symmetry matrices in real space (integers)
 !! tnons(3,nsym)=nonsymmorphic translations associated to symrel
 !!
