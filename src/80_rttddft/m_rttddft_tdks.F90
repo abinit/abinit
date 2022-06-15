@@ -84,7 +84,7 @@ module m_rttddft_tdks
 
 !! NAME
 !! tdks_type: Time Dependent Kohn-Sham type
-!! Object containing the TD KS orbitals and all other 
+!! Object containing the TD KS orbitals and all other
 !! important variables required to run RT-TDDFT
 !!
 !! SOURCE
@@ -123,7 +123,7 @@ module m_rttddft_tdks
    type(wvl_data)                   :: wvl         !wavelets ojects (unused but
                                                    !required by various routines)
    character(len=fnlen)             :: fname_tdener!Name of the TDENER file
-   character(len=fnlen)             :: fname_wfk0  !Name of the input WFK file containing 
+   character(len=fnlen)             :: fname_wfk0  !Name of the input WFK file containing
                                                    !the intial (t=0) wfs
    !arrays
    integer,allocatable              :: atindx(:)   !index table of atom ordered by type
@@ -266,7 +266,7 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
       if (open_file('TD_RESTART', msg, newunit=tdks%tdrestart_unit, status='old', form='formatted') /= 0) then
          write(msg,'(a,a,a)') 'Error while trying to open file TD_RESTART needed to restart the calculation.'
          ABI_ERROR(msg)
-      end if 
+      end if
       read(tdks%tdrestart_unit,*) tdks%first_step
       tdks%first_step = tdks%first_step + 1
       read(tdks%tdrestart_unit,*) tdks%fname_tdener
@@ -283,13 +283,13 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
       if (open_file('TD_RESTART', msg, newunit=tdks%tdrestart_unit, status='unknown', form='formatted') /= 0) then
          write(msg,'(a,a,a)') 'Error while trying to open file TD_RESTART.'
          ABI_ERROR(msg)
-      end if 
+      end if
    end if
  end if
 
  !3) Reads initial KS orbitals from file (calls inwffil)
  call read_wfk(dtfil,dtset,ecut_eff,fname_wfk,mpi_enreg,tdks)
- 
+
  !4) Init occupation numbers
  ABI_MALLOC(tdks%occ0,(dtset%mband*dtset%nkpt*dtset%nsppol))
  tdks%occ0(:)=dtset%occ_orig(:,1)
@@ -313,7 +313,7 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
    tdks%cg0(:,:) = tdks%cg(:,:)
  end if
  !and associated cprojs to compute occupations
- if (psps%usepaw ==1) then 
+ if (psps%usepaw ==1) then
     ncpgr=0
     ABI_MALLOC(tdks%cprj0,(dtset%natom,tdks%mcprj))
     call pawcprj_alloc(tdks%cprj0,ncpgr,tdks%dimcprj)
@@ -379,7 +379,7 @@ subroutine tdks_free(tdks,dtset,mpi_enreg,psps)
 
    !Destroy hidden save variables
    call bandfft_kpt_destroy_array(bandfft_kpt,mpi_enreg)
-   if (psps%usepaw ==1) then 
+   if (psps%usepaw ==1) then
       call destroy_invovl(dtset%nkpt)
    end if
    if(tdks%gemm_nonlop_use_gemm) then
@@ -398,48 +398,48 @@ subroutine tdks_free(tdks,dtset,mpi_enreg,psps)
    if(associated(tdks%pawrhoij)) call pawrhoij_free(tdks%pawrhoij)
 
    !Deallocate allocatables
-   if(allocated(tdks%atindx))      ABI_FREE(tdks%atindx)
-   if(allocated(tdks%atindx1))     ABI_FREE(tdks%atindx1)
-   if(allocated(tdks%cg))          ABI_FREE(tdks%cg)
-   if(allocated(tdks%cg0))         ABI_FREE(tdks%cg0)
-   if(allocated(tdks%dimcprj))     ABI_FREE(tdks%dimcprj)
-   if(allocated(tdks%eigen))       ABI_FREE(tdks%eigen)
-   if(allocated(tdks%eigen0))      ABI_FREE(tdks%eigen0)
-   if(allocated(tdks%grvdw))       ABI_FREE(tdks%grvdw)
-   if(allocated(tdks%indsym))      ABI_FREE(tdks%indsym)
-   if(allocated(tdks%irrzon))      ABI_FREE(tdks%irrzon)
-   if(allocated(tdks%kg))          ABI_FREE(tdks%kg)
-   if(allocated(tdks%nattyp))      ABI_FREE(tdks%nattyp)
-   if(allocated(tdks%nhat))        ABI_FREE(tdks%nhat)
-   if(allocated(tdks%nhatgr))      ABI_FREE(tdks%nhatgr)
-   if(allocated(tdks%npwarr))      ABI_FREE(tdks%npwarr)
-   if(allocated(tdks%occ))         ABI_FREE(tdks%occ)
-   if(allocated(tdks%occ0))        ABI_FREE(tdks%occ0)
-   if(allocated(tdks%ph1d))        ABI_FREE(tdks%ph1d)
-   if(allocated(tdks%ph1df))       ABI_FREE(tdks%ph1df)
-   if(allocated(tdks%phnons))      ABI_FREE(tdks%phnons)
-   if(allocated(tdks%rhog))        ABI_FREE(tdks%rhog)
-   if(allocated(tdks%rhor))        ABI_FREE(tdks%rhor)
-   if(allocated(tdks%symrec))      ABI_FREE(tdks%symrec)
-   if(allocated(tdks%taug))        ABI_FREE(tdks%taug)
-   if(allocated(tdks%taur))        ABI_FREE(tdks%taur)
-   if(allocated(tdks%vhartr))      ABI_FREE(tdks%vhartr)
-   if(allocated(tdks%vpsp))        ABI_FREE(tdks%vpsp)
-   if(allocated(tdks%vtrial))      ABI_FREE(tdks%vtrial)
-   if(allocated(tdks%vxc))         ABI_FREE(tdks%vxc)
-   if(allocated(tdks%vxctau))      ABI_FREE(tdks%vxctau)
-   if(allocated(tdks%vxc_hybcomp)) ABI_FREE(tdks%vxc_hybcomp)
-   if(allocated(tdks%xred))        ABI_FREE(tdks%xred)
-   if(allocated(tdks%xccc3d))      ABI_FREE(tdks%xccc3d)
-   if(allocated(tdks%xcctau3d))    ABI_FREE(tdks%xcctau3d)
-   if(allocated(tdks%ylm))         ABI_FREE(tdks%ylm)
-   if(allocated(tdks%ylmgr))       ABI_FREE(tdks%ylmgr)
+   ABI_SFREE(tdks%atindx)
+   ABI_SFREE(tdks%atindx1)
+   ABI_SFREE(tdks%cg)
+   ABI_SFREE(tdks%cg0)
+   ABI_SFREE(tdks%dimcprj)
+   ABI_SFREE(tdks%eigen)
+   ABI_SFREE(tdks%eigen0)
+   ABI_SFREE(tdks%grvdw)
+   ABI_SFREE(tdks%indsym)
+   ABI_SFREE(tdks%irrzon)
+   ABI_SFREE(tdks%kg)
+   ABI_SFREE(tdks%nattyp)
+   ABI_SFREE(tdks%nhat)
+   ABI_SFREE(tdks%nhatgr)
+   ABI_SFREE(tdks%npwarr)
+   ABI_SFREE(tdks%occ)
+   ABI_SFREE(tdks%occ0)
+   ABI_SFREE(tdks%ph1d)
+   ABI_SFREE(tdks%ph1df)
+   ABI_SFREE(tdks%phnons)
+   ABI_SFREE(tdks%rhog)
+   ABI_SFREE(tdks%rhor)
+   ABI_SFREE(tdks%symrec)
+   ABI_SFREE(tdks%taug)
+   ABI_SFREE(tdks%taur)
+   ABI_SFREE(tdks%vhartr)
+   ABI_SFREE(tdks%vpsp)
+   ABI_SFREE(tdks%vtrial)
+   ABI_SFREE(tdks%vxc)
+   ABI_SFREE(tdks%vxctau)
+   ABI_SFREE(tdks%vxc_hybcomp)
+   ABI_SFREE(tdks%xred)
+   ABI_SFREE(tdks%xccc3d)
+   ABI_SFREE(tdks%xcctau3d)
+   ABI_SFREE(tdks%ylm)
+   ABI_SFREE(tdks%ylmgr)
 
-   if(allocated(tdks%cprj)) then       
+   if(allocated(tdks%cprj)) then
       call pawcprj_free(tdks%cprj)
       ABI_FREE(tdks%cprj)
    end if
-   if(allocated(tdks%cprj0)) then       
+   if(allocated(tdks%cprj0)) then
       call pawcprj_free(tdks%cprj0)
       ABI_FREE(tdks%cprj0)
    end if
