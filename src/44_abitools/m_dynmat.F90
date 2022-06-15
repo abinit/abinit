@@ -5055,9 +5055,13 @@ subroutine sylwtens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
 !Local variables -------------------------
 !scalars
  integer :: flag,found,i1dir,i1dir_,i1pert,i1pert_,i2dir,i2dir_,i2pert,i2pert_
+ integer :: i2dir_a,i2dir_b
  integer :: i3dir,i3dir_,i3pert,i3pert_,idisy1,idisy2,idisy3,ipesy1,ipesy2
- integer :: ipesy3,isym
+ integer :: ipesy3,istr,isym
+ integer :: idisy2_a,idisy2_b
+ logical :: is_strain
 !arrays
+ integer,save :: idx(18)=(/1,1,2,2,3,3,3,2,3,1,2,1,2,3,1,3,1,2/)
  integer :: sym1(3,3),sym2(3,3),sym3(3,3)
  integer,allocatable :: pertsy(:,:,:,:,:,:)
 
@@ -5070,6 +5074,7 @@ subroutine sylwtens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
 
  do i1pert_ = 1, mpert
    do i2pert_ = 1, mpert
+     is_strain=.false.    
      do i3pert_ = 1, mpert
 
        do i1dir_ = 1, 3
@@ -5107,7 +5112,8 @@ subroutine sylwtens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
                  if (i1pert <= natom) then
                    ipesy1 = indsym(4,isym,i1pert)
                    sym1(:,:) = symrec(:,:,isym)
-                 else if (i1pert == natom + 2.or.i1pert == natom + 8) then
+                 else if (i1pert == natom + 2.or.i1pert == natom + 3.or. &
+                 & i1pert == natom + 4.or.i1pert == natom + 8) then
                    ipesy1 = i1pert
                    sym1(:,:) = symrel(:,:,isym)
                  else
@@ -5117,17 +5123,21 @@ subroutine sylwtens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
                  if (i2pert <= natom) then
                    ipesy2 = indsym(4,isym,i2pert)
                    sym2(:,:) = symrec(:,:,isym)
-                 else if (i2pert == natom + 2.or.i2pert == natom + 8) then
+                 else if (i2pert == natom + 2.or.i2pert == natom + 3.or. &
+                 & i2pert == natom + 4.or.i2pert == natom + 8) then
                    ipesy2 = i2pert
                    sym2(:,:) = symrel(:,:,isym)
+                   if (i2pert == natom + 3.or. i2pert == natom + 4) then
+                     is_strain=.true.
+                     if (i2pert==natom+3) istr=i2dir
+                     if (i2pert==natom+4) istr=3+i2dir
+                     i2dir_a=idx(2*istr-1); i2dir_b=idx(2*istr)
+                   end if
                  else
                    found = 0
                  end if
 
-                 if (i3pert <= natom) then
-                   ipesy3 = indsym(4,isym,i3pert)
-                   sym3(:,:) = symrec(:,:,isym)
-                 else if (i3pert == natom + 2.or.i3pert == natom + 8) then
+                 if (i3pert == natom + 8) then
                    ipesy3 = i3pert
                    sym3(:,:) = symrel(:,:,isym)
                  else
@@ -5139,36 +5149,71 @@ subroutine sylwtens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
 !                to be computed.
 
 
-                 if ((flag /= -1).and.&
-&                 (ipesy1==i1pert).and.(ipesy2==i2pert).and.(ipesy3==i3pert)) then
-                   flag = sym1(i1dir,i1dir)*sym2(i2dir,i2dir)*sym3(i3dir,i3dir)
-                 end if
+                 if (.not.is_strain) then
+                   if ((flag /= -1).and.&
+&                   (ipesy1==i1pert).and.(ipesy2==i2pert).and.(ipesy3==i3pert)) then
+                     flag = sym1(i1dir,i1dir)*sym2(i2dir,i2dir)*sym3(i3dir,i3dir)
+                   end if
 
+                   do idisy1 = 1, 3
+                     do idisy2 = 1, 3
+                       do idisy3 = 1, 3
 
-                 do idisy1 = 1, 3
-                   do idisy2 = 1, 3
-                     do idisy3 = 1, 3
-
-                       if ((sym1(i1dir,idisy1) /= 0).and.(sym2(i2dir,idisy2) /= 0).and.&
-&                       (sym3(i3dir,idisy3) /= 0)) then
-                         if (pertsy(idisy1,ipesy1,idisy2,ipesy2,idisy3,ipesy3) == 0) then
-                           found = 0
-!                          exit      ! exit loop over symmetries
+                         if ((sym1(i1dir,idisy1) /= 0).and.(sym2(i2dir,idisy2) /= 0).and.&
+&                         (sym3(i3dir,idisy3) /= 0)) then
+                           if (pertsy(idisy1,ipesy1,idisy2,ipesy2,idisy3,ipesy3) == 0) then
+                             found = 0
+!                            exit      ! exit loop over symmetries
+                           end if
                          end if
-                       end if
 
 
-                       if ((flag == -1).and.&
-&                       ((idisy1/=i1dir).or.(idisy2/=i2dir).or.(idisy3/=i3dir))) then
-                         if ((sym1(i1dir,idisy1)/=0).and.(sym2(i2dir,idisy2)/=0).and.&
-&                         (sym3(i3dir,idisy3)/=0)) then
-                           flag = 0
+                         if ((flag == -1).and.&
+&                         ((idisy1/=i1dir).or.(idisy2/=i2dir).or.(idisy3/=i3dir))) then
+                           if ((sym1(i1dir,idisy1)/=0).and.(sym2(i2dir,idisy2)/=0).and.&
+&                           (sym3(i3dir,idisy3)/=0)) then
+                             flag = 0
+                           end if
                          end if
-                       end if
 
+                       end do
                      end do
                    end do
-                 end do
+                 else 
+                   if ((flag /= -1).and.&
+&                   (ipesy1==i1pert).and.(ipesy2==i2pert).and.(ipesy3==i3pert)) then
+                     flag = sym1(i1dir,i1dir)*sym2(i2dir_a,i2dir_a)* &
+                   & sym2(i2dir_b,i2dir_b)*sym3(i3dir,i3dir)
+                   end if
+
+                   do idisy1 = 1, 3
+                     do idisy2 = 1, 3
+                       if (ipesy2==natom+3) istr=idisy2
+                       if (ipesy2==natom+4) istr=3+idisy2
+                       idisy2_a=idx(2*istr-1); idisy2_b=idx(2*istr)
+                       do idisy3 = 1, 3
+
+                         if ((sym1(i1dir,idisy1) /= 0).and.(sym2(i2dir_a,idisy2_a) /= 0).and.&
+&                          (sym2(i2dir_b,idisy2_b) /= 0).and.(sym3(i3dir,idisy3) /= 0)) then
+                           if (pertsy(idisy1,ipesy1,idisy2,ipesy2,idisy3,ipesy3) == 0) then
+                             found = 0
+!                            exit      ! exit loop over symmetries
+                           end if
+                         end if
+
+
+                         if ((flag == -1).and.&
+&                         ((idisy1/=i1dir).or.(idisy2_a/=i2dir_a).or.(idisy2_b/=i2dir_b).or.(idisy3/=i3dir))) then
+                           if ((sym1(i1dir,idisy1)/=0).and.(sym2(i2dir_a,idisy2_a)/=0).and.&
+&                           (sym2(i2dir_b,idisy2_b)/=0).and.(sym3(i3dir,idisy3)/=0)) then
+                             flag = 0
+                           end if
+                         end if
+
+                       end do
+                     end do
+                   end do
+                 end if
 
                  if (found == 1) then
                    pertsy(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = -1
@@ -5205,26 +5250,28 @@ subroutine sylwtens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
 
  do i1pert = 1, mpert
    do i2pert = 1, mpert
-     do i3pert = 1, mpert
+     if (i2pert/=natom+3.and.i2pert/=natom+4) then
+       do i3pert = 1, mpert
 
-       do i1dir = 1, 3
-         do i2dir = 1, 3
-           do i3dir = 1, 3
+         do i1dir = 1, 3
+           do i2dir = 1, 3
+             do i3dir = 1, 3
 
-             if ((i1pert /= i2pert).or.(i1dir /= i2dir)) then
+               if ((i1pert /= i2pert).or.(i1dir /= i2dir)) then
 
-               if ((pertsy(i1dir,i1pert,i2dir,i2pert,i2dir,i2pert) == 1).and.&
-&               (pertsy(i2dir,i2pert,i2dir,i2pert,i1dir,i1pert) == 1)) then
-                 pertsy(i2dir,i2pert,i2dir,i2pert,i1dir,i1pert) = -1
+                 if ((pertsy(i1dir,i1pert,i2dir,i2pert,i2dir,i2pert) == 1).and.&
+&                 (pertsy(i2dir,i2pert,i2dir,i2pert,i1dir,i1pert) == 1)) then
+                   pertsy(i2dir,i2pert,i2dir,i2pert,i1dir,i1pert) = -1
+                 end if
+
                end if
 
-             end if
-
+             end do
            end do
          end do
-       end do
 
-     end do
+       end do
+     end if
    end do
  end do
 
