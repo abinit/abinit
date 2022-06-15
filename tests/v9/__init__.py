@@ -126,6 +126,8 @@ inp_files = [
 "t101.abi", # Optical conductivity with spin-orbit coupling - CONDUCTI step
 "t102.abi", # X-ray core spectrocopy with spin-orbit coupling - ABINIT step
 "t103.abi", # X-ray core spectrocopy with spin-orbit coupling - CONDUCTI step
+# Optcell test
+"t104.abi", # Testing optcell 6 to relax 3rd vector not orthogonal to 1st and 2nd vectors
 
 # Lattice Wannier function
 "t110.abi", # scdm-k method for lattice wannier function in anaddb (disentangle option 2)
