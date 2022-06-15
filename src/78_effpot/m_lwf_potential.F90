@@ -58,9 +58,9 @@ module m_lwf_potential
      type(NDCOO_mat_t) :: coeff2 ! twobody anharmonic
 
      logical :: use_harmonic = .True.
-     logical :: has_self_bound_term = .False.
-     integer :: self_bound_order=0
-     real(dp) :: self_bound_coeff=0.0_dp
+     !logical :: has_self_bound_term = .False.
+     !integer :: self_bound_order=0
+     !real(dp) :: self_bound_coeff=0.0_dp
 
      real(dp) :: beta
      real(dp), allocatable :: coeff_diag(:)
@@ -80,7 +80,7 @@ module m_lwf_potential
      procedure :: convert_coeff_to_csr
      procedure :: get_delta_E_lwf
      procedure :: add_onebody_term
-     procedure :: add_self_bound_term
+     !procedure :: add_self_bound_term
   end type lwf_potential_t
 
 contains
@@ -269,12 +269,12 @@ contains
     end if
 
     ! self_bound_term as from the input parameters
-    if (self%has_self_bound_term) then
-       self%lwf_force(:) = self%lwf_force(:) - &
-            & self%self_bound_coeff*self%self_bound_order* lwf**(self%self_bound_order-1)
-       etmp = etmp + &
-            & self%self_bound_coeff*sum(lwf**(self%self_bound_order))
-    endif
+    !if (self%has_self_bound_term) then
+    !   self%lwf_force(:) = self%lwf_force(:) - &
+    !        & self%self_bound_coeff*self%self_bound_order* lwf**(self%self_bound_order-1)
+    !   etmp = etmp + &
+    !        & self%self_bound_coeff*sum(lwf**(self%self_bound_order))
+    !endif
 
     if (self%onebody_coeff%nnz/= 0) then
        do i =1, self%onebody_coeff%nnz
@@ -332,13 +332,13 @@ contains
     deltaE=deltaE+ tmp*dlwf - 0.5* self%coeff_diag(ilwf)*dlwf*dlwf
 
     ! bound term
-    if (self%has_self_bound_term) then
-       deltaE= deltaE+ &
-            & self%self_bound_coeff*(lwf_new**(self%self_bound_order) &
-            & - lold**(self%self_bound_order))
-    ! Adding x^6 and x^8 for VO2
-        deltaE=deltaE -1.1344*(lwf_new**6-lold**6) + 0.438*(lwf_new**8-lold**8)
-    end if
+    !if (self%has_self_bound_term) then
+    !   deltaE= deltaE+ &
+    !        & self%self_bound_coeff*(lwf_new**(self%self_bound_order) &
+    !        & - lold**(self%self_bound_order))
+    !! Adding x^6 and x^8 for VO2
+    !    deltaE=deltaE -1.1344*(lwf_new**6-lold**6) + 0.438*(lwf_new**8-lold**8)
+    !end if
 
     ! (Q1 Q2)^2 term
    ! if(modulo(ilwf, 2)==0) then
@@ -368,16 +368,16 @@ contains
     lwf(ilwf)=lwf(ilwf)-dlwf
   end subroutine get_delta_E_lwf
 
-  subroutine add_self_bound_term(self, order, coeff)
-    class(lwf_potential_t), intent(inout) :: self 
-    integer, intent(in) :: order
-    real(dp), intent(in) :: coeff
-    if (order /= 0) then
-       self%has_self_bound_term=.True.
-       self%self_bound_order=order
-       self%self_bound_coeff=coeff
-    end if
-  end subroutine add_self_bound_term
+  !subroutine add_self_bound_term(self, order, coeff)
+  !  class(lwf_potential_t), intent(inout) :: self 
+  !  integer, intent(in) :: order
+  !  real(dp), intent(in) :: coeff
+  !  if (order /= 0) then
+  !     self%has_self_bound_term=.True.
+  !     self%self_bound_order=order
+  !     self%self_bound_coeff=coeff
+  !  end if
+  !end subroutine add_self_bound_term
 
   !----------------------------------------------------------------------
   !> @brief set_params: set the parameters from input file parameters

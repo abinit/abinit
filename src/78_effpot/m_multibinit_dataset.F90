@@ -125,6 +125,7 @@ module m_multibinit_dataset
   integer :: dipdip_prt
   integer :: prt_phfrq
   integer :: prt_ifc
+  integer :: randomseed
   integer :: strcpling  ! Print the 3rd order in xml file
   integer :: prtsrlr  ! print the short-range/long-range decomposition of phonon freq.
   integer :: rfmeth
@@ -153,13 +154,14 @@ module m_multibinit_dataset
   ! parameter for hybrid lattice_lwf
   integer :: latt_lwf_anharmonic
 
+
   ! parameters for lwf
   integer :: lwf_constraint
   integer :: lwf_dynamics
   integer :: lwf_init_state
   integer :: lwf_ntime
   integer :: lwf_nctime
-  integer :: lwf_self_bound_order
+  !integer :: lwf_self_bound_order
   integer :: lwf_temperature_nstep    ! var temperature number of steps
   integer :: lwf_var_temperature
 
@@ -229,7 +231,7 @@ module m_multibinit_dataset
   real(dp) :: lwf_mc_avg_amp
   real(dp) :: lwf_taut
   real(dp) :: lwf_temperature
-  real(dp) :: lwf_self_bound_coeff
+  !real(dp) :: lwf_self_bound_coeff
   real(dp) :: lwf_temperature_start   ! var temperature start
   real(dp) :: lwf_temperature_end     ! var temperature end
 
@@ -319,8 +321,8 @@ module m_multibinit_dataset
 ! characters
   character(len=fnlen) :: latt_init_hist_fname
   character(len=fnlen) :: latt_pot_fname
-  character(len=fnlen) :: latt_inp_ddb_fname
-  character(len=fnlen) :: latt_inp_coeff_fname
+  character(len=fnlen) :: latt_harm_pot_fname
+  character(len=fnlen) :: latt_anharm_pot_fname
   character(len=fnlen) :: latt_training_set_fname
   character(len=fnlen) :: latt_test_set_fname
   character(len=fnlen) :: latt_ddb_fnames(12)
@@ -449,6 +451,7 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  !multibinit_dtset%latt_taup=1000.0
  !multibinit_dtset%latt_compressibility=0.0
 
+
  multibinit_dtset%ntime=200
  multibinit_dtset%nctime=1
  multibinit_dtset%natifc=natom
@@ -465,6 +468,7 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%prt_phfrq=0
  multibinit_dtset%prt_ifc = 0
  multibinit_dtset%prt_GF_csv = .FALSE.
+ multibinit_dtset%randomseed = 0 
  multibinit_dtset%strcpling = -1
  multibinit_dtset%qrefine=1
  multibinit_dtset%restartxf=0
@@ -493,8 +497,8 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
 
  multibinit_dtset%latt_init_hist_fname=""
  multibinit_dtset%latt_pot_fname=""
- multibinit_dtset%latt_inp_ddb_fname=""
- multibinit_dtset%latt_inp_coeff_fname=""
+ multibinit_dtset%latt_harm_pot_fname=""
+ multibinit_dtset%latt_anharm_pot_fname=""
  multibinit_dtset%latt_training_set_fname=""
  multibinit_dtset%latt_test_set_fname=""
  multibinit_dtset%latt_ddb_fnames(12)=""
@@ -503,11 +507,11 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%lwf_pot_fname=""
  multibinit_dtset%slc_pot_fname=""
  multibinit_dtset%lwf_dt=0
- multibinit_dtset%lwf_self_bound_order=0
+ !multibinit_dtset%lwf_self_bound_order=0
  multibinit_dtset%lwf_taut=0.0_dp
  multibinit_dtset%lwf_temperature=0.0_dp
  multibinit_dtset%lwf_mc_avg_amp=0.0_dp
- multibinit_dtset%lwf_self_bound_coeff=0.0_dp
+ !multibinit_dtset%lwf_self_bound_coeff=0.0_dp
  multibinit_dtset%lwf_temperature_start=0.0
  multibinit_dtset%lwf_temperature_end= 0.0
  multibinit_dtset%lwf_temperature_nstep= 0
@@ -720,7 +724,7 @@ subroutine invars_multibinit_filenames( string, lenstr, outdata_prefix, sys_fnam
 
   if(present(sys_fname)) then
      sys_fname=""
-     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'latt_inp_ddb_fname',tread,'KEY',&
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'latt_harm_pot_fname',tread,'KEY',&
           & key_value=sys_fname)
      if(.not. tread==1) sys_fname=""
   end if
@@ -746,7 +750,6 @@ subroutine invars_multibinit_filenames_from_input_file(input_path, outdata_prefi
   option=1
   if (iam_master) then
      call instrng (input_path,lenstr,option,strlen,string, raw_string)
-     print *, string
      !To make case-insensitive, map characters to upper case:
      call inupper(string(1:lenstr))
      !Check whether the string only contains valid keywords
@@ -1449,14 +1452,14 @@ multibinit_dtset%latt_temperature_start=0.0
  end if
 
 
- multibinit_dtset%lwf_self_bound_order=0
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'lwf_self_bound_order',tread,'INT')
- if(tread==1) multibinit_dtset%lwf_self_bound_order=intarr(1)
+ !multibinit_dtset%lwf_self_bound_order=0
+ !call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'lwf_self_bound_order',tread,'INT')
+ !if(tread==1) multibinit_dtset%lwf_self_bound_order=intarr(1)
 
 
- multibinit_dtset%lwf_self_bound_coeff=0.0
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'lwf_self_bound_coeff',tread,'DPR')
- if(tread==1) multibinit_dtset%lwf_self_bound_coeff=dprarr(1)
+ !multibinit_dtset%lwf_self_bound_coeff=0.0
+ !call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'lwf_self_bound_coeff',tread,'DPR')
+ !if(tread==1) multibinit_dtset%lwf_self_bound_coeff=dprarr(1)
 
  multibinit_dtset%lwf_taut=0.0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'lwf_taut',tread,'TIM')
@@ -1548,15 +1551,15 @@ multibinit_dtset%lwf_temperature_start=0.0
       & key_value=multibinit_dtset%latt_pot_fname)
  if(.not. tread==1) multibinit_dtset%latt_pot_fname=""
 
- multibinit_dtset%latt_inp_ddb_fname=""
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'latt_inp_ddb_fname',tread,'KEY',&
-      & key_value=multibinit_dtset%latt_inp_ddb_fname)
- if(.not. tread==1) multibinit_dtset%latt_inp_ddb_fname=""
+ multibinit_dtset%latt_harm_pot_fname=""
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'latt_harm_pot_fname',tread,'KEY',&
+      & key_value=multibinit_dtset%latt_harm_pot_fname)
+ if(.not. tread==1) multibinit_dtset%latt_harm_pot_fname=""
 
- multibinit_dtset%latt_inp_coeff_fname=""
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'latt_inp_coeff_fname',tread,'KEY',&
-      & key_value=multibinit_dtset%latt_inp_coeff_fname)
- if(.not. tread==1) multibinit_dtset%latt_inp_coeff_fname=""
+ multibinit_dtset%latt_anharm_pot_fname=""
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'latt_anharm_pot_fname',tread,'KEY',&
+      & key_value=multibinit_dtset%latt_anharm_pot_fname)
+ if(.not. tread==1) multibinit_dtset%latt_anharm_pot_fname=""
 
  multibinit_dtset%latt_training_set_fname=""
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'latt_training_set_fname',tread,'KEY',&
@@ -1876,6 +1879,23 @@ multibinit_dtset%lwf_temperature_start=0.0
 &   'Action: correct prt_ifc in your input file.'
    ABI_ERROR(message)
  end if
+
+
+ multibinit_dtset%randomseed= 0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'randomseed',tread,'INT')
+ if(tread==1) multibinit_dtset%randomseed= intarr(1)
+
+ if(multibinit_dtset%randomseed /=0) then
+    write(message, "(a, a, a, a)") &
+    "The random seed is set to an fixed number, which might lead to wrong result if you're", &
+&   "performing a series of Monte Carlo/dynamics calculation as the random number will repeat. Only", &
+&   "do this when you want to repeat previous results. And note that it is only meaningful when", &
+&    "the number of cpu cores is consistent."
+    ABI_WARNING(message)
+ end if
+    
+
+
 
 !Default is no output of the 3rd derivative
  multibinit_dtset%strcpling = -1

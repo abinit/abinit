@@ -183,6 +183,7 @@ contains
     logical :: iam_master
     integer :: i
     integer :: c
+    character(len=90) :: msg
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
     self%input_path=input_path
     self%filenames(:)=filenames(:)
@@ -198,10 +199,13 @@ contains
     endif
 
     ! Initialize the random number generator
-    !if(self%params%mb_random_seed()
-    !call self%rng%set_seed([111111_dp, 2_dp])
-    call system_clock(c)
-    call self%rng%set_seed([int(c, dp)+111111_dp, int(c, dp) ])
+    c=self%params%randomseed
+    if(c==0) then
+        call system_clock(c)
+    endif
+    call self%rng%set_seed([int(c, dp), int(c, dp)-111109_dp ])
+
+
     ! use jump so that each cpu generates independent random numbers.
     if(my_rank>0) then
        do i =1,my_rank
@@ -302,10 +306,6 @@ contains
     nrpt=0
     ntypat=0
     call init_mpi_info(master, iam_master, my_rank, comm, nproc)
-    !To automate a maximum calculation, multibinit reads the number of atoms
-    !in the file (ddb or xml). If DDB file is present in input, the ifc calculation
-    !will be initilaze array to the maximum of atoms (natifc=natom,atifc=1,natom...) in invars10
-
 
     !Read the input file, and store the information in a long string of characters
     !strlen from defs_basis module
@@ -316,7 +316,7 @@ contains
        call inupper(string(1:lenstr))
 
        !Check whether the string only contains valid keywords
-       !call chkvars(string)
+       call chkvars(string)
     end if
 
     call xmpi_bcast(string,master, comm, ierr)

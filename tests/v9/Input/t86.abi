@@ -28,6 +28,9 @@ spin_damping=0.0
 slc_coupling = 0010 # activate only Oiju terms
 
 
+randomseed=111111 # for testing only
+
+
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
@@ -45,7 +48,7 @@ slc_coupling = 0010 # activate only Oiju terms
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = X. He 
-#%% keywords = Effective potential, multibinit
+#%% keywords = Effective potential, multibinit, lattpot, spinpot
 #%% description = 
 #%%   read netcdf and run coupled spin lattice dynamics. Only Oiju terms activated (slc_coupling=0010)
 #%%   Disabled on nag@alps because integer overflow (-C=intovf option of NAG compiler)

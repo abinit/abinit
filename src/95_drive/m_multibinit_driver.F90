@@ -134,6 +134,9 @@ contains
     integer :: natom,nph1l,nrpt,ntypat
     integer :: option
     logical :: need_analyze_anh_pot,need_prt_files
+
+    ! Whether the "new" MULTIBNIT framework should be used. 
+    logical :: need_new_multibinit
 ! MS
 ! temporary variables for testing SCALE-UP with Multibinit
   !Variable to pass to effpot_evaluate routine of multibinit
@@ -164,6 +167,7 @@ contains
 
     integer :: master, my_rank, comm, nproc, ierr
     logical :: iam_master
+    integer :: l
 
 
 !MPI variables
@@ -189,17 +193,31 @@ contains
     !To automate a maximum calculation, multibinit reads the number of atoms
     !in the file (ddb or xml). If DDB file is present in input, the ifc calculation
     !will be initilaze array to the maximum of atoms (natifc=natom,atifc=1,natom...) in invars10
+
+
+    !Read the input file assuming natom=1 so that the invars10 can work.
+    natom=0
+
+    ! TODO: in invars10
+    call invars10(inp,lenstr,natom,string)
+    call postfix_fnames(input_path, filnam, inp)
+
+    need_new_multibinit= inp%spin_dynamics > 0 .or. inp%lwf_dynamics > 0 .or. inp%dynamics >= 100
+
+    if(need_new_multibinit) then
+        ABI_ERROR("The new MULTINIT mode should be enabled with --F03 option. ")
+    end if
+
+    ! read the reference structure to get natom
     write(message, '(6a)' )' Read the information in the reference structure in ',ch10,&
-         & '-',trim(filnam(3)),ch10,' to initialize the multibinit input'
+            & '-',trim(filnam(3)),ch10,' to initialize the multibinit input'
     call wrtout(ab_out,message,'COLL')
     call wrtout(std_out,message,'COLL')
     call effective_potential_file_getDimSystem(filnam(3),natom,ntypat,nph1l,nrpt)
+    call multibinit_dtset_free(inp)
 
-
-
-    !Read the input file
+    ! read the input again to use the right natom
     call invars10(inp,lenstr,natom,string)
-    call postfix_fnames(input_path, filnam, inp)
 
     if (iam_master) then
        !  Echo the inputs to console and main output file
@@ -213,45 +231,33 @@ contains
        !goto 100
     endif
 
-    ! Read and treat the reference structure
-    !****************************************************************************************
-    if (inp%spin_dynamics>0) then
-       if (iam_master) then
-          write(message,'(a,(80a),3a)') ch10,('=',ii=1,80),ch10,ch10,&
-               &     'reading spin terms.'
-       end if
-       !call spin_model%initialize( filnam, inp )
-       call  manager%initialize(input_path, filnam, params=inp)
-    else
-       !  Read the model (from DDB or XML)
-       call effective_potential_file_read(filnam(3),reference_effective_potential,inp,comm)
+    !  Read the model (from DDB or XML)
+    call effective_potential_file_read(filnam(3),reference_effective_potential,inp,comm)
 
-       !Read the coefficient from fit
-       !FIXME: hexu: on test farm, it is not no but $path/no
-       if(filnam(4)/=''.and.filnam(4)/='no')then
-          call effective_potential_file_getType(filnam(4),filetype)
-          if(filetype==3.or.filetype==23) then
-             call effective_potential_file_read(filnam(4),reference_effective_potential,inp,comm)
-          else
-             write(message,'(a,(80a),3a)') ch10,('=',ii=1,80),ch10,ch10,&
-                  &         ' There is no specific file for the coefficients from polynomial fitting'
-             call wrtout(ab_out,message,'COLL')
-             call wrtout(std_out,message,'COLL')
-          end if
+
+    if(filnam(4)/=''.and.filnam(4)/='no') then
+       call effective_potential_file_getType(filnam(4),filetype)
+       if(filetype==3.or.filetype==23) then
+          call effective_potential_file_read(filnam(4),reference_effective_potential,inp,comm)
        else
-          if(inp%ncoeff/=0) then
-             write(message, '(5a)' )&
-                  &         'ncoeff is specified in the input but,',ch10,&
-                  &         'there is no file for the coefficients ',ch10,&
-                  &         'Action: add coefficients.xml file'
-             ABI_ERROR(message)
+          write(message,'(a,(80a),3a)') ch10,('=',ii=1,80),ch10,ch10,&
+               &         ' There is no specific file for the coefficients from polynomial fitting'
+          call wrtout(ab_out,message,'COLL')
+          call wrtout(std_out,message,'COLL')
+       end if
+    else
+       if(inp%ncoeff/=0) then
+          write(message, '(5a)' )&
+               &         'ncoeff is specified in the input but,',ch10,&
+               &         'there is no file for the coefficients ',ch10,&
+               &         'Action: add coefficients.xml file'
+          ABI_ERROR(message)
 
-          else
-             write(message,'(a,(80a),3a)') ch10,('=',ii=1,80),ch10,ch10,&
-                  &         ' There is no file for the coefficients from polynomial fitting'
-             call wrtout(ab_out,message,'COLL')
-             call wrtout(std_out,message,'COLL')
-          end if
+       else
+          write(message,'(a,(80a),3a)') ch10,('=',ii=1,80),ch10,ch10,&
+               &         ' There is no file for the coefficients from polynomial fitting'
+          call wrtout(ab_out,message,'COLL')
+          call wrtout(std_out,message,'COLL')
        end if
     end if
 
@@ -594,7 +600,6 @@ elec_eval = .FALSE.
 
     !****************************************************************************************
     !Print the effective potential system + coefficients (only master CPU)
-    ! TODO hexu: add print spin model.
     if(iam_master) then
        if (inp%prt_model >= 1) then
           write(message, '(a,(80a),a)' ) ch10,&
@@ -648,21 +653,9 @@ elec_eval = .FALSE.
     !****************************************************************************************
 
 
-    ! Run spin dynamics
-    !****************************************************************************************
-    if(inp%spin_dynamics/=0) then
-       !call spin_model%run()
-       call manager%run()
-    end if
-    !****************************************************************************************
-
 
     !Free the effective_potential and dataset
     !****************************************************************************************
-    if(inp%spin_dynamics/=0) then
-       call manager%finalize()
-    end if
-
     call effective_potential_free(reference_effective_potential)
     call multibinit_dtset_free(inp)
     call abihist_free(hist)
