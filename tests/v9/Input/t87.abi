@@ -27,6 +27,7 @@ spin_damping=0.0
 
 slc_coupling = 1010 # Tijuv and Oiju
 
+randomseed=111111 # for testing only
 
 
 #%%<BEGIN TEST_INFO>
@@ -45,7 +46,7 @@ slc_coupling = 1010 # Tijuv and Oiju
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = X. He 
-#%% keywords = Effective potential, multibinit
+#%% keywords = Effective potential, multibinit, spinpot, lattpot
 #%% description = 
 #%%   read netcdf and run coupled spin lattice dynamics. Oiju terms and Tijuv terms are both activated.
 #%%   Disabled on nag@alps because integer overflow (-C=intovf option of NAG compiler)

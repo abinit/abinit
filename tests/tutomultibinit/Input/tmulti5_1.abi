@@ -18,6 +18,8 @@ spin_projection_qpoint = 0.0 0.0 0.0       ! Wave vector for summation of spin i
 
 spin_write_traj = 0             ! do not write spin trajectory to netcdf file
 
+randomseed = 111111             ! DO NOT set randomseed. It is only for testing the code.
+
 
 ##############################################################
 # This section is used only for regression testing of ABINIT #
@@ -29,6 +31,7 @@ spin_write_traj = 0             ! do not write spin trajectory to netcdf file
 #%% spin_pot= tmulti5_1.xml
 #%% exclude_builders = .*_nag_7.[01]_.*
 #%% coeff_xml = no
+#%% exec_args = --F03
 #%% [files]
 #%% files_to_test = 
 #%%   tmulti5_1.abo,tolnlines = 1, tolabs = 2.000e+03, tolrel = 3.000e-1, fld_options = -medium;
@@ -36,10 +39,11 @@ spin_write_traj = 0             ! do not write spin trajectory to netcdf file
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = X. He
-#%% keywords = Effective potential, multibinit
+#%% keywords = Effective potential, multibinit, spinpot
 #%% description = 
 #%%   read xml  and run spin dynamics. 
 #%%   The system is a simple cubic system with one spin per uc.
 #%%   The exchange is defined so that the Tc is about 620 K.
 #%%   Note: ncell, spin_ntime_pre, and spin_ntime are small.
+#%% topics = SpinDynamicsMultibinit
 #%%<END TEST_INFO>

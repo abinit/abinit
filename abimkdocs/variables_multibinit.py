@@ -1160,36 +1160,36 @@ Variable(
 ),
 
 Variable(
-    abivarname="latt_inp_coeff_fname@multibinit",
+    abivarname="latt_anharm_pot_fname@multibinit",
     varset="multibinit",
     vartype="string",
     topics=['DynamicsMultibinit_basic'],
     dimensions="scalar",
     defaultval="",
-    mnemonics="LATTice INPut COEFFicients File NAME",
-    added_in_version="9.3.3",
+    mnemonics="LATTice HARMornic POTential File NAME",
+    added_in_version="9.8",
     text=r"""
 Specify the input coefficients from fitted polynomial in multibinit lattice calculation, which can be a xml file. The string must be enclosed between quotation marks:
 
-    latt_inp_coeff_fname "BaTiO3_coeff.xml"
+    lat_anharm_pot_fname "BaTiO3_coeff.xml"
 
 """
 ),
 
 
 Variable(
-    abivarname="latt_inp_ddb_fname@multibinit",
+    abivarname="latt_harm_pot_fname@multibinit",
     varset="multibinit",
     vartype="string",
     topics=['DynamicsMultibinit_basic'],
     dimensions="scalar",
     defaultval="",
-    mnemonics="LATTice INPut Derivative DataBase File NAME",
-    added_in_version="9.3.3",
+    mnemonics="LATTice HARMonic POTential File NAME",
+    added_in_version="9.8",
     text=r"""
 Specify the input derivative database of reference structure in multibinit lattice calculation, which can be a DDB file or a xml file. The string must be enclosed between quotation marks:
 
-    latt_inp_ddb_fname "BaTiO3.ddb"
+    latt_harm_pot_fname "BaTiO3.ddb"
 
 """
 ),
@@ -1219,7 +1219,7 @@ Variable(
     dimensions="scalar",
     defaultval="",
     mnemonics="LATTice potential TEST SET File NAME",
-    added_in_version="9.3.3",
+    added_in_version="9.8",
     text=r"""
 Specify the test set file name for building multibinit lattice potential, which is usually a abinit molecular dynamics history  netcdf file. The string must be enclosed between quotation marks:
 
@@ -1237,7 +1237,7 @@ Variable(
     dimensions="scalar",
     defaultval="",
     mnemonics="LATTice POTential FileNAME",
-    added_in_version="9.3.3",
+    added_in_version="9.8",
     text=r"""
 Specify the lattice potential file name in the multibinit lattice dynamics calculation, which can be a netcdf file. This variable is only used in the harmonic-only lattice potential for testing only. The string must be enclosed between quotation marks:
 
@@ -2089,6 +2089,29 @@ Variable(
 Indices of the terms to refit in the effective potential.
 """,
 ),
+
+Variable(
+    abivarname="randomseed@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['SpinDynamicsMultibinit_expert'],
+    dimensions='scalar',
+    defaultval=0,
+    mnemonics="RANDOM SEED",
+    added_in_version="9.8",
+    text=r"""
+Random seed to be used in Multibinit spin/LWF dynamics. 
+It should be 0, or a large positive integer.
+The default value 0 means it will use the current clock time.
+DO NOT set this number unless it is to repeat the previous result. If a series
+of dynamics is done with the same seed, the results could be wrong due to the
+artificial periodicity of the random number. Even it is set, it is not guranteed
+that the previous result can be recoverd, as it is also affected by the number of 
+processors, type of type of CPU, compiler,  and versions of MULTIBINIT. 
+""",
+),
+
+
 
 Variable(
     abivarname="slc_coupling@multibinit",

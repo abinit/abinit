@@ -169,6 +169,8 @@ subroutine init10(input_path, filnam,comm)
 end subroutine init10
 !!***
 
+
+
 !===============================================================
 ! Change the extension of a filename. e.g. run.abo -> run_hist.nc
 !> @ fname: the old fname
@@ -194,6 +196,7 @@ end function change_extension
 !> @ params: data read from inputfile
 !===============================================================
 subroutine postfix_fnames(input_path, filnam, params)
+  ! TODO: hexu: Once the files file is to be fully removed, remove the filnam variable.
   character(len=fnlen), intent(inout) :: input_path, filnam(18)
   type(multibinit_dtset_type), intent(inout) :: params
   ! if using files file, set the params%*_fname according to filnam
@@ -203,8 +206,8 @@ subroutine postfix_fnames(input_path, filnam, params)
      if (len_trim(params%latt_pot_fname)==0) params%latt_pot_fname=filnam(3)
      if (len_trim(params%slc_pot_fname)==0) params%slc_pot_fname=filnam(3)
      ! TODO lattice model
-     if (len_trim(params%latt_inp_ddb_fname)==0) params%latt_inp_ddb_fname=filnam(3)
-     if (len_trim(params%latt_inp_coeff_fname)==0) params%latt_inp_coeff_fname=filnam(4)
+     if (len_trim(params%latt_harm_pot_fname)==0) params%latt_harm_pot_fname=filnam(3)
+     if (len_trim(params%latt_anharm_pot_fname)==0) params%latt_anharm_pot_fname=filnam(4)
      if (len_trim(params%latt_training_set_fname)==0) params%latt_training_set_fname=filnam(5)
      if (len_trim(params%latt_test_set_fname)==0) params%latt_test_set_fname=filnam(6)
      do i=1, 12
@@ -212,8 +215,14 @@ subroutine postfix_fnames(input_path, filnam, params)
      end do
   else
      filnam(2)=params%outdata_prefix
-     filnam(3)=params%latt_inp_ddb_fname
-     filnam(4)=params%latt_inp_coeff_fname
+     if(len_trim(params%latt_pot_fname) > 0) then
+       filnam(3)=params%latt_pot_fname
+     else if(len_trim(params%latt_harm_pot_fname) > 0) then
+       filnam(3)=params%latt_harm_pot_fname
+     else
+       filnam(3)=''
+     endif
+     filnam(4)=params%latt_anharm_pot_fname
      filnam(5)=params%latt_training_set_fname
      filnam(6)=params%latt_test_set_fname
      do i=1, 12

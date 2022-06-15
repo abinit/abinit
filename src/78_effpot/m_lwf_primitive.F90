@@ -75,9 +75,9 @@ module m_lwf_primitive_potential
      integer, allocatable:: Rlist(:,:)  ! The list of R points (3, number of R-points)
 
      ! For testing the bounding.
-     logical:: has_self_bound_term= .False.
-     integer:: self_bound_order = 0
-     real(dp):: self_bound_coeff = 0.0_dp
+     !logical:: has_self_bound_term= .False.
+     !integer:: self_bound_order = 0
+     !real(dp):: self_bound_coeff = 0.0_dp
 
      !. Rlist(:, ind_R) is a R-vector.
      real(dp):: ref_energy = 0.0                  ! reference energy
@@ -92,7 +92,7 @@ module m_lwf_primitive_potential
      procedure:: fill_supercell     ! fill a supercell potential
      procedure:: get_hamk          ! generate hamiltonian for one k point.
      procedure:: get_eigen         ! eigen values and eigen vectors
-     procedure:: add_self_bound_term  ! add a self bound term
+     !procedure:: add_self_bound_term  ! add a self bound term
   end type lwf_primitive_potential_t
 
 
@@ -154,8 +154,8 @@ contains
     type(multibinit_dtset_type), intent(in):: params
     character(len = fnlen), intent(in):: fnames(:)
     call self%load_from_netcdf(fnames(1))
-    call self%add_self_bound_term(params%lwf_self_bound_order, &
-         & params%lwf_self_bound_coeff)
+    !call self%add_self_bound_term(params%lwf_self_bound_order, &
+    !     & params%lwf_self_bound_coeff)
     self%as_lattice_anharmonic= (params%latt_lwf_anharmonic == 1)
   end subroutine load_from_files
 
@@ -485,9 +485,9 @@ contains
 
        ! anharmonic terms
        !call scpot%set_ref_energy(self%ref_energy*scmaker%ncells)
-       if (self%has_self_bound_term) then
-          call scpot%add_self_bound_term(self%self_bound_order, self%self_bound_coeff)
-       end if
+       !if (self%has_self_bound_term) then
+       !   call scpot%add_self_bound_term(self%self_bound_order, self%self_bound_coeff)
+       !end if
 
        if (self%onebody_nterm /= 0) then
           do i = 1, self%onebody_nterm
@@ -542,17 +542,17 @@ contains
     call eigensh(evals, evecs)
   end subroutine get_eigen
 
-  subroutine add_self_bound_term(self, order, coeff)
-    class(lwf_primitive_potential_t), intent(inout):: self 
-    integer, intent(in):: order
-    real(dp), intent(in):: coeff
-    if (order /= 0) then
-       self%has_self_bound_term=.True.
-       self%self_bound_order = order
-       self%self_bound_coeff = coeff
-    end if
+  !subroutine add_self_bound_term(self, order, coeff)
+  !  class(lwf_primitive_potential_t), intent(inout):: self 
+  !  integer, intent(in):: order
+  !  real(dp), intent(in):: coeff
+  !  if (order /= 0) then
+  !     self%has_self_bound_term=.True.
+  !     self%self_bound_order = order
+  !     self%self_bound_coeff = coeff
+  !  end if
 
-  end subroutine add_self_bound_term
+  !end subroutine add_self_bound_term
 
 
 end module m_lwf_primitive_potential
