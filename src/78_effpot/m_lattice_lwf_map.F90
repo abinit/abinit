@@ -54,7 +54,6 @@ contains
   subroutine initialize(self, nlwf, natom)
     class(lwf_latt_coeff_t), intent(inout) :: self
     integer, intent(in) :: nlwf, natom
-    print *, self%coeffs%ndim
     call self%coeffs%initialize([natom, nlwf])
   end subroutine initialize
 
