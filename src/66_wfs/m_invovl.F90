@@ -181,8 +181,10 @@ end type invovl_kpt_type
      type(c_ptr)                                :: indlmn_ptr
    end subroutine f_gpu_init_invovl_data
 
-   !> solver_inner on GPU
-   subroutine f_solve_inner_gpu(invovl_gpu, proj_dim, proj_ptr, sm1proj_ptr, ptp_sm1proj_ptr, nattyp_dim, nattyp_ptr, cplx, block_sliced) bind(c, name='solve_inner_gpu')
+   !> solve_inner on GPU
+   subroutine f_solve_inner_gpu(invovl_gpu, proj_dim, proj_ptr, sm1proj_ptr, ptp_sm1proj_ptr, &
+     & nattyp_dim, nattyp_ptr, ntypat, lmnmax, cplx, block_sliced) bind(c, name='solve_inner_gpu')
+
      use, intrinsic :: iso_c_binding
      import invovl_kpt_gpu_type
      implicit none
@@ -193,6 +195,8 @@ end type invovl_kpt_type
      type(c_ptr)                                   :: ptp_sm1proj_ptr
      integer(kind=c_int32_t), value, intent(in)    :: nattyp_dim
      type(c_ptr)                                   :: nattyp_ptr
+     integer(kind=c_int32_t), value, intent(in)    :: ntypat
+     integer(kind=c_int32_t), value, intent(in)    :: lmnmax
      integer(kind=c_int32_t), value, intent(in)    :: cplx
      integer(kind=c_int32_t), value, intent(in)    :: block_sliced
    end subroutine f_solve_inner_gpu
@@ -734,8 +738,9 @@ end subroutine make_invovl
  !nattyp_dim = size(ham%nattyp)
 
 !    invovl_gpu = make_invovl_kpt_gpu(invovl)
-! call f_solve_inner_gpu(invovl_gpu, proj_dim, c_loc(proj(1,1,1)), &
-!   & c_loc(sm1proj(1,1,1)), c_loc(PtPsm1proj(1,1,1)), nattyp_dim, c_loc(ham%nattyp(1)), cplx, block_sliced)
+ call f_solve_inner_gpu(invovl_gpu, proj_dim, c_loc(proj(1,1,1)), &
+   & c_loc(sm1proj(1,1,1)), c_loc(PtPsm1proj(1,1,1)), nattyp_dim, c_loc(ham%nattyp(1)), ham%ntypat, &
+   & ham%lmnmax, cplx, block_sliced)
 
 ! #endif
 
@@ -976,8 +981,10 @@ subroutine apply_block(ham, cplx, mat, nprojs, ndat, x, y, block_sliced)
      shift = 1
      do itypat=1, ham%ntypat
         nlmn = count(ham%indlmn(3,:,itypat)>0)
-        !! apply mat to all atoms at once
+        !! apply mat to all atoms at once, all idat at once
         ! perform natom multiplications of size nlmn
+        ! be careful here matrix extracted from x and y are not memory contiguous
+        ! ==> so in the GPU version we will need to adapt leading dimension
         if(cplx == 2) then
            call ZHEMM('L','U', nlmn, ham%nattyp(itypat)*ndat, cone, &
                 &  mat(:, :, :, itypat), ham%lmnmax, &
@@ -989,7 +996,7 @@ subroutine apply_block(ham, cplx, mat, nprojs, ndat, x, y, block_sliced)
                 &  x(:, shift:shift+nlmn*ham%nattyp(itypat)-1, 1:ndat), nlmn, zero, &
                 &  y(:, shift:shift+nlmn*ham%nattyp(itypat)-1, 1:ndat), nlmn)
         end if
-        shift = shift + ham%nattyp(itypat)*nlmn
+        shift = shift + nlmn*ham%nattyp(itypat)
      end do
 
   end if

@@ -26,6 +26,7 @@
 #include <assert.h>
 #include <math.h>
 
+#include <cublas.h> // TODO => move to cublas_v2
 #include "abi_gpu_header.h"
 #include "cuda_api_error_check.h"
 
@@ -52,8 +53,77 @@ static double* temp_proj;
 static uint8_t *nlmn;
 
 //! same functionality as apply_block (in m_invovl.F90) but adapted to GPU
-void apply_block_gpu(int32_t cplx, double* mat, int32_t nprojs, int32_t ndat, double* x, double* y, int32_t block_sliced)
+void apply_block_gpu(int32_t cplx,
+                     int32_t ntypat, int32_t nattyp_dim, int32_t* nattyp, int32_t lmnmax,
+                     double* mat, int32_t nprojs, int32_t ndat,
+                     double* x,
+                     double* y,
+                     int32_t block_sliced)
 {
+
+  if (block_sliced == 1) {
+
+    // TODO
+
+  } else {
+
+    for (int itypat=0; itypat < ntypat; ++itypat) {
+
+      int nlmn_at = nlmn[itypat];
+
+      if (cplx == 2) {
+
+        const cuDoubleComplex c_one  = make_cuDoubleComplex(1.0, 0.0);
+        const cuDoubleComplex c_zero = make_cuDoubleComplex(0.0, 0.0);
+
+        cuDoubleComplex *mat_ptr = (cuDoubleComplex *) mat;
+        cuDoubleComplex* x_ptr = (cuDoubleComplex*) x;
+        cuDoubleComplex* y_ptr = (cuDoubleComplex*) y;
+
+        if (itypat>0) {
+
+          int32_t shift = nlmn_at * nattyp[itypat-1];
+
+          mat_ptr += (lmnmax*lmnmax);
+          x_ptr += shift;
+          y_ptr += shift;
+
+        }
+
+        cublasZhemm(CUBLAS_SIDE_LEFT,CUBLAS_FILL_MODE_UPPER, nlmn_at, nattyp[itypat]*ndat, c_one,
+                    mat_ptr, lmnmax,
+                    x_ptr, nprojs, c_zero,
+                    y_ptr, nprojs);
+
+      } else {
+
+        const double one  = 1.0;
+        const double zero = 0.0;
+
+        double *mat_ptr = (double *) mat;
+        double* x_ptr = (double*) x;
+        double* y_ptr = (double*) y;
+
+        if (itypat>0) {
+
+          int32_t shift = nlmn_at * nattyp[itypat-1];
+
+          mat_ptr += (lmnmax*lmnmax);
+          x_ptr += shift;
+          y_ptr += shift;
+
+        }
+
+        cublasDsymm(CUBLAS_SIDE_LEFT,CUBLAS_FILL_MODE_UPPER, nlmn_at, nattyp[itypat]*ndat, one,
+                    mat_ptr, lmnmax,
+                    x_ptr, nprojs, zero,
+                    y_ptr, nprojs);
+
+      }
+
+    } // end for itypat
+
+  } // end if block_sliced
 
 } // apply_block_gpu
 
@@ -128,6 +198,9 @@ extern "C" void init_invovl_data(int32_t indlmn_dim[3], int32_t* indlmn)
 //! \param[inout] sm1proj is a 3D array of size (cplx, nprojs, nspinor*ndat)
 //! \param[inout] ptp_sm1proj is a 3D array of size (cplx, nprojs, nspinor*ndat)
 //! \param[in] ndatspinor is the product of ndat and nspinor
+//! \param[in] ntypat number of types of atoms
+//! \param[in] lmnmax
+//! \param[in] cplx (complex or real data)
 //! \param[in] block_sliced (can only be 0 or 1), switch used inside apply_block_gpu
 extern "C" void solve_inner_gpu(invovl_kpt_gpu_t* invovl,
                                 int32_t proj_dim[3],
@@ -136,6 +209,8 @@ extern "C" void solve_inner_gpu(invovl_kpt_gpu_t* invovl,
                                 double* ptp_sm1proj,
                                 int32_t nattyp_dim,
                                 int32_t* nattyp,
+                                int32_t ntypat,
+                                int32_t lmnmax,
                                 int32_t cplx,
                                 int32_t block_sliced)
 {
@@ -147,11 +222,10 @@ extern "C" void solve_inner_gpu(invovl_kpt_gpu_t* invovl,
   int32_t nprojs = invovl->nprojs;
 
   // MPI error return value
-  int ierr;
-
-  int ibeg = 0;
-  int iend = nprojs;
-  int nlmntot_this_proc = nprojs;
+  //int ierr;
+  //int ibeg = 0;
+  //int iend = nprojs;
+  //int nlmntot_this_proc = nprojs;
 
   int ndat = proj_dim[2];
 
@@ -175,7 +249,10 @@ extern "C" void solve_inner_gpu(invovl_kpt_gpu_t* invovl,
   // x => proj
   // y => sm1proj
   // compute sm1proj = inv_s_approx * proj
-  //apply_block_gpu(cplx, invovl, ndat, proj_gpu, sm1proj_gpu, block_sliced)
+  apply_block_gpu(cplx, ntypat, nattyp_dim, nattyp, lmnmax,
+                  invovl->inv_s_approx, nprojs, ndat,
+                  proj_gpu, sm1proj_gpu,
+                  block_sliced);
 
   // Iterative refinement
   // TODO use a more efficient iterative algorithm than iterative refinement, use locking
@@ -203,7 +280,7 @@ extern "C" void solve_inner_gpu(invovl_kpt_gpu_t* invovl,
     // TODO errs = SUM(SUM(resid**2, 1),1)
 
     // TODO maxerr = sqrt(MAXVAL(errs/normprojs))
-    if(maxerr < precision or additional_steps_to_take == 1) {
+    if (maxerr < precision or additional_steps_to_take == 1) {
       exit(EXIT_FAILURE);
       // We might stall and never get to the specified precision because of machine errors.
       // If we got to 1e-10, extrapolate convergence rate and determine the number of additional
