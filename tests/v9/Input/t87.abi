@@ -7,7 +7,7 @@ prt_model = 0
 dynamics = 101  # Velocity Verlet NVE
 ncell = 6 6 6 
 temperature = 50
-ntime = 10000
+ntime = 1000
 nctime = 10
 dtion = 10
 
@@ -18,7 +18,7 @@ spin_init_qpoint = 0.5 0.5 0.5
 spin_init_rotate_axis = 1.0 0.0 0.0
 spin_mag_field= 0.0 0.0 0.0
 spin_temperature = 50
-spin_ntime =10000
+spin_ntime =1000
 spin_nctime=10
 spin_dt= 2.41888e-16 s 
 spin_projection_qpoint = 0.5 0.5 0.5
@@ -41,7 +41,7 @@ randomseed=111111 # for testing only
 #%% exec_args = --F03
 #%% [files]
 #%% files_to_test = 
-#%%   t87.abo, tolnlines = 6, tolabs = 0.3, tolrel = 0.7, fld_options = -medium;
+#%%   t87.abo, tolnlines = 8, tolabs = 0.3, tolrel = 0.7, fld_options = -medium;
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

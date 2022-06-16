@@ -726,7 +726,13 @@ subroutine invars_multibinit_filenames( string, lenstr, outdata_prefix, sys_fnam
      sys_fname=""
      call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'latt_harm_pot_fname',tread,'KEY',&
           & key_value=sys_fname)
-     if(.not. tread==1) sys_fname=""
+     if(.not. tread==1) then
+       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'latt_pot_fname',tread,'KEY',&
+          & key_value=sys_fname)
+        if(.not. tread==1) then
+        sys_fname=""
+        end if
+    end if
   end if
   ABI_SFREE(intarr)
   ABI_SFREE(dprarr)
@@ -1672,6 +1678,7 @@ multibinit_dtset%lwf_temperature_start=0.0
      ABI_ERROR(message)
    end if
  end do
+
  ! Set to diagonal ncell. Then if it is specified, overwrite.
  multibinit_dtset%ncellmat(:,:)= reshape([multibinit_dtset%ncell(1), 0, 0,&
         & 0, multibinit_dtset%ncell(2), 0, &
@@ -1696,7 +1703,7 @@ multibinit_dtset%lwf_temperature_start=0.0
  multibinit_dtset%nph1l=1
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nph1l',tread,'INT')
  if(tread==1) multibinit_dtset%nph1l=intarr(1)
- if(multibinit_dtset%nph1l<0)then
+ if(multibinit_dtset%nph1l<0) then
    write(message, '(a,i0,a,a,a)' )&
 &   'nph1l is',multibinit_dtset%nph1l,', which is lower than 0 .',ch10,&
 &   'Action: correct nph1l in your input file.'
