@@ -9,21 +9,15 @@ authors: xuhe
 
 This lesson aims at showing how to build a LWF model and run a spin dynamics calculation.
 
-**Before beginning, we recommend the reading of the theory on Lattice Wannier functions in the literature [[cite:rabe1995]]. The construction of LWF from the phonon band structure is covered in another [[tutorial|lattice_wannier]]. 
+**Before beginning, we recommend the reading of the theory on Lattice Wannier functions in the literature [[cite:rabe1995]]. The construction of LWF from the phonon band structure is covered in another [tutorial](/tutorial/lattice_wannier). 
 
 With this lesson, you will learn to:
 
   * Run the dynamics of LWF.
 
-*Before beginning, you might consider to work in a subdirectory for this tutorial. Why not Work_lwfdyn?*
-
 [TUTORIAL_README]
 
+*Before beginning, you might consider to work in a subdirectory for this tutorial. Why not Work_lwfdyn?* 
 
-This tutorial is under construction. 
-
-
-
-
-
+With the LWF model built and saved into a 
 

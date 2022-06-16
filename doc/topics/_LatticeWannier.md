@@ -15,7 +15,7 @@ In anaddb, we can use the "selected cloumns of the density matrix" (SCDM-k) algo
 
 
 ## Tutorials
-[[tutorial|lattice_wannier]] : The tutorial on how to build LWF's with anaddb from phonon calculations.
+[[tutorial:lattice_wannier][How to build Lattice Wannier functions]] : The tutorial on how to build LWF's with anaddb from phonon calculations.
 
   
 ## Related Input Variables
