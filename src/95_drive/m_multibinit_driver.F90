@@ -128,6 +128,7 @@ contains
     character(len=strlen) :: string, raw_string
     character(len=500) :: message
     character(len=fnlen) :: name
+    character(len=fnlen) :: sys_fname
 
     integer :: filetype,ii,lenstr,iiter,niter
     integer :: natom,nph1l,nrpt,ntypat
@@ -194,30 +195,33 @@ contains
 
 
     !Read the input file assuming natom=1 so that the invars10 can work.
-    natom=0
 
-    ! TODO: in invars10
+    !call invars10(inp,lenstr,natom,string)
+    call invars_multibinit_filenames(string, lenstr,  sys_fname=sys_fname)
+
+    
+    ! read the reference structure to get natom
+    if (iam_master) then
+      write(message, '(6a)' )' Read the information in the reference structure in ',ch10,&
+            & '-',trim(sys_fname),ch10,' to initialize the multibinit input'
+      call wrtout(ab_out,message,'COLL')
+      call wrtout(std_out,message,'COLL')
+    end if
+
+    call effective_potential_file_getDimSystem(sys_fname,natom,ntypat,nph1l,nrpt)
+    !call effective_potential_file_getDimSystem(filnam(3),natom,ntypat,nph1l,nrpt)
+
+
+    ! read the input again to use the right natom
     call invars10(inp,lenstr,natom,string)
     call postfix_fnames(input_path, filnam, inp)
 
     need_new_multibinit= inp%spin_dynamics > 0 .or. inp%lwf_dynamics > 0 .or. inp%dynamics >= 100
 
-    if(need_new_multibinit) then
-        ABI_ERROR("The new MULTINIT mode should be enabled with --F03 option. ")
-    end if
-
-    ! read the reference structure to get natom
-    write(message, '(6a)' )' Read the information in the reference structure in ',ch10,&
-            & '-',trim(filnam(3)),ch10,' to initialize the multibinit input'
-    call wrtout(ab_out,message,'COLL')
-    call wrtout(std_out,message,'COLL')
-    call effective_potential_file_getDimSystem(filnam(3),natom,ntypat,nph1l,nrpt)
-    call multibinit_dtset_free(inp)
-
-    ! read the input again to use the right natom
-    call invars10(inp,lenstr,natom,string)
-
     if (iam_master) then
+        if(need_new_multibinit) then
+            ABI_ERROR("The new MULTINIT mode should be enabled with --F03 option. ")
+        end if
        !  Echo the inputs to console and main output file
        call outvars_multibinit(inp,std_out)
        call outvars_multibinit(inp,ab_out)
@@ -586,6 +590,8 @@ elec_eval = .FALSE.
      call fit_polynomial_coeff_testEffPot(reference_effective_potential,hist_tes,master,comm,&
 &                                   print_anharmonic=need_analyze_anh_pot,scup_dtset=inp%scup_dtset,&
 &                                         prt_ph=inp%test_prt_ph)
+
+
 
    end if ! End if(inp%test_effpot == 1)then
 
