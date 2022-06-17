@@ -1,30 +1,19 @@
 ##############################################################################
 #Test for multibinit, just read lwf potential and run dynamics 
 ##############################################################################
-prt_model = 0
 
-#dynamics =  0
-#ncell =   16 16 80
-ncellmat = 0 2 0  2 0 0 0 0 2
-#ncell =   32 6 32
+ncellmat = 8 0 0  0 8 0 0 0 8 # size of supercell
+lwf_dynamics=3               # type of dynamics. 3: Berendsen thermostat
+lwf_dt =1e-16 s              # time step.
+lwf_ntime = 3000             # number of time steps
+lwf_nctime = 100             # write to netcdf history file per 100 steps.
+lwf_taut = 1e-14 s           # characteristic time for berendsen dynamics. 
+lwf_init_state=1             # initial state. 1: random amplitude.
 
-# 
-spin_dynamics=0
-
-dynamics=0
-
-###  LWF dynamics
-lwf_dynamics=3
-lwf_dt =1e-16 s
-lwf_ntime = 3000
-lwf_nctime = 100
-lwf_taut = 1e-14 s
-lwf_init_state=1
-
-lwf_var_temperature=1
-lwf_temperature_start=600.1
-lwf_temperature_end=0.1
-lwf_temperature_nstep=7
+lwf_var_temperature=1        # whether to do variable temperature calculation.
+lwf_temperature_start=600.1  # Starting temperature.
+lwf_temperature_end=0.1      # Ending temperature.
+lwf_temperature_nstep=7      # number of temperature steps.
 
 
 randomseed=111111 # for testing only
@@ -32,14 +21,14 @@ randomseed=111111 # for testing only
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = multibinit
-#%% need_cpp_vars = HAVE_NETCDF, HAVE_XML
+#%% need_cpp_vars = HAVE_NETCDF
 #%% exclude_hosts = nag@abiref
-#%% lwf_pot = t88.nc
+#%% lwf_pot = tmulti6_1.nc
 #%% exec_args = --F03
 
 #%% [files]
 #%% files_to_test = 
-#%%   t88.out, tolnlines = 0, tolabs = 0.01, tolrel = 0.02, fld_options = -medium;
+#%%   tmulti6_1.abo, tolnlines = 0, tolabs = 0.01, tolrel = 0.02, fld_options = -medium;
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
