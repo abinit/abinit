@@ -108,7 +108,6 @@ inp_files = [
     "t85.abi",  # Velocity Verlet NVE
     "t86.abi",  # Spin lattice coupling, Only Oiju term activated.
     "t87.abi",  # Spin lattice coupling, Oiju and Tijuv.
-    "t88.abi",  # Lattice Wannier Berendsen NVT + non-diagonal supercell
 
     # GS Coulomb cut-off
     "t90.abi",  # checkG Coulomb cut-off, large tolerance a.t.m.
