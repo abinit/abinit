@@ -122,10 +122,10 @@ subroutine rttddft(codvsn,dtfil,dtset,mpi_enreg,pawang,pawrad,pawtab,psps)
  if (do_write_log) call wrtout(std_out,msg)
 
  !FB: Do not allow RT-TDDFT for now. Still under development
- write(msg,'(3a)') ch10,'Real-time time dependent DFT is not yet available. Still under development..',ch10
- call wrtout(ab_out,msg)
- if (do_write_log) call wrtout(std_out,msg)
- ABI_ERROR(msg)
+ ! write(msg,'(3a)') ch10,'Real-time time dependent DFT is not yet available. Still under development..',ch10
+ ! call wrtout(ab_out,msg)
+ ! if (do_write_log) call wrtout(std_out,msg)
+ ! ABI_ERROR(msg)
 
  !** 1) Initialization: create main tdks (Time-Dependent Kohn-Sham) object
  write(msg,'(3a)') ch10,'---------------------------   Initialization   ----------------------------',ch10
