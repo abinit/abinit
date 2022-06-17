@@ -991,7 +991,7 @@ subroutine apply_block(ham, cplx, mat, nprojs, ndat, x, y, block_sliced)
                 &  x(:, 1:nlmn*ham%nattyp(itypat), 1:ndat), nlmn, czero, &
                 &  y(:, 1:shift+nlmn*ham%nattyp(itypat)-1, 1:ndat), nlmn)
         else
-           call DSYMM('L','U', nlmn, ham%nattyp(itypat), one, &
+           call DSYMM('L','U', nlmn, ham%nattyp(itypat)*ndat, one, &
                 &  mat(:, :, :, itypat), ham%lmnmax, &
                 &  x(:, shift:shift+nlmn*ham%nattyp(itypat)-1, 1:ndat), nlmn, zero, &
                 &  y(:, shift:shift+nlmn*ham%nattyp(itypat)-1, 1:ndat), nlmn)
