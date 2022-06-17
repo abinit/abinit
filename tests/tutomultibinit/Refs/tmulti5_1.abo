@@ -402,8 +402,3 @@ Measurement run:
 +Total cpu time     33.360  and wall time     33.571 sec
 
  multibinit : the run completed succesfully.
-- [ALL OK] MEMORY CONSUMPTION REPORT FOR C CODE:
--   There were 0 allocations and 0 deallocations in C code
-- [ALL OK] MEMORY CONSUMPTION REPORT FOR FORTRAN CODE:
--   There were 73881 allocations and 73881 deallocations in Fortran
--   Remaining memory at the end of the calculation is 0
