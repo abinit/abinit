@@ -46,7 +46,8 @@ MODULE m_hashtable_strval
   use defs_basis
   use m_errors
   use m_abicore
-  use iso_c_binding, only: c_double, c_int64_t
+  !use iso_c_binding, only: c_double, c_int64_t
+  !USE, INTRINSIC :: IEEE_ARITHMETIC
 
   !use, intrinsic :: ieee_arithmetic, only: IEEE_Value, IEEE_QUIET_NAN
   !use, intrinsic :: iso_fortran_env, only: real64
@@ -57,7 +58,11 @@ MODULE m_hashtable_strval
   !nan = IEEE_VALUE(nan, IEEE_QUIET_NAN)
   ! The above one is more standard, but how to make nan a parameter?
   ! The following is used instead.
-  real(c_double), parameter :: NAN = TRANSFER(9218868437227405313_c_int64_t, 1._c_double)
+  !real(c_double), parameter :: NAN=IEEE_VALUE(nan, IEEE_QUIET_NAN)
+
+  !real(c_double), parameter :: NAN = TRANSFER(9218868437227405313_c_int64_t, 1._c_double)
+  ! NOTE: this is not NAN really. The correct one is the last line. But NAG compiler does not think it is a valid floating number. 
+  ! real(c_double), parameter :: NAN = TRANSFER(921886843722740531_c_int64_t, 1._c_double)
 
   TYPE sllist
      TYPE(sllist), POINTER :: child => NULL()
@@ -125,7 +130,7 @@ CONTAINS
     INTEGER                                      :: vallen
 
     vallen = 0
-    val=nan
+    val=MAGIC_UNDEF
     IF (ALLOCATED(list%key) .AND. (list%key == key)) THEN
        val = list%val
     ELSE IF(ASSOCIATED(list%child)) THEN ! keep going
@@ -317,7 +322,7 @@ CONTAINS
     class(hash_table_t), intent(in) :: self
     character(*), intent(in) :: key
     logical :: has_key
-    has_key=(self%get(key)/=nan)
+    has_key=(self%get(key)/=MAGIC_UNDEF)
   end function has_key
   
   function sum_val_hash_table_t(self, label, prefix) result(s)
