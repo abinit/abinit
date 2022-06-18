@@ -43,7 +43,7 @@ module m_gwr_base
  use m_krank,         only : krank_t, krank_new, krank_from_kptrlatt, get_ibz2bz, star_from_ibz_idx
  use m_crystal,       only : crystal_t
  use m_dtset,         only : dataset_type
- use m_fftcore,       only : get_kg, sphereboundary, ngfft_seq !, kgindex
+ use m_fftcore,       only : get_kg, sphereboundary, ngfft_seq, getng, print_ngfft !, kgindex
  use m_fft,           only : fft_ug
  use m_fft_mesh,      only : times_eikr !, times_eigr, ig2gfft, get_gftt, calc_ceikr, calc_eigr rotate_fft_mesh
  use m_kpts,          only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, kpts_map, kpts_sort, kpts_pack_in_stars
@@ -155,6 +155,7 @@ module m_gwr_base
    ! Number of q-points in the IBZ/BZ stored by this MPI proc.
 
    integer,allocatable :: my_qibz_inds(:), my_qbz_inds(:)
+   ! FIXME: Do we really need my_qibz_inds and my_qibz_inds(:)
 
    integer :: ntau = -1
    ! Total number of imaginary time points.
@@ -185,37 +186,38 @@ module m_gwr_base
 
    real(dp),allocatable :: iw_mesh(:)
    ! tau_mesh(ntau)
-   ! Imaginary frequency mesh
+   ! Imaginary frequency mesh.
 
    real(dp),allocatable :: t2w_cos_wgs(:,:)
    ! (ntau, ntau)
-   ! weights for cosine transform
+   ! weights for cosine transform.
 
    real(dp),allocatable :: t2w_sin_wgs(:,:)
    ! (ntau, ntau)
-   ! weights for sine transform
+   ! weights for sine transform.
 
    integer :: green_mpw = -1
-   ! Max number of g-vectors for Green's function over k-points
+   ! Max number of g-vectors for Green's function over k-points.
 
    integer :: chi_mpw = -1
-   ! Max number of g-vectors for Chi over q-points
+   ! Max number of g-vectors for Chi over q-points.
 
    !integer :: sigma_mpw = -1
+   ! Max number of g-vectors for Sigma over q-points.
 
    !integer :: green_ngfft(18) = -1
    !integer :: chi_ngfft(18) = -1
    !integer :: sigma_ngfft(18) = -1
 
-   type(desc_t),allocatable :: green_desc_k(:)
-   ! (nk)
+   type(desc_t),allocatable :: my_green_desc_k(:)
+   ! (my_nkbz)
    ! Descriptor for Green's functions
 
-   !type(desc_t),allocatable :: sigma_desc_k(:)
+   !type(desc_t),allocatable :: my_sigma_desc_k(:)
    ! (nk)
    ! Descriptor for self-energy
 
-   type(desc_t),allocatable :: chi_desc_q(:)
+   type(desc_t),allocatable :: my_chi_desc_q(:)
    ! (my_nqbz)
    ! Descriptor for chi
 
@@ -377,10 +379,11 @@ function gwr_new(dtset, cryst, psps, pawtab, ebands, mpi_enreg, comm) result (gw
 
 !Local variables-------------------------------
 !scalars
+ integer,parameter :: me_fft0 = 0, paral_fft0 = 0, nproc_fft1 = 1
  integer,parameter :: qptopt1 = 1, timrev1 = 1, master = 0
  integer :: my_is, my_it, my_ik, my_iq, ii, my_ir, my_nr, npwsp, col_bsize, ebands_timrev
- integer :: mgfft, nfft, ig1, ig2, sc_nfft, sc_augsize, my_nshiftq, spin, ik_ibz, ik_bz, iq_bz, iq_ibz
- integer :: all_nproc, my_rank
+ integer :: ig1, ig2, sc_nfft, sc_augsize, my_nshiftq, spin, ik_ibz, ik_bz, iq_bz, iq_ibz
+ integer :: all_nproc, my_rank, mgfft, nfft
  real(dp) :: ecut_eff
  character(len=5000) :: msg
  !type(desc_t) :: desc_k, desc_kpq
@@ -389,10 +392,9 @@ function gwr_new(dtset, cryst, psps, pawtab, ebands, mpi_enreg, comm) result (gw
  type(matrix_scalapack) :: go_k_gpr, go_kpq_gpr, ge_k_gpr, ge_kpq_gpr, chi_r_gp
  type(krank_t) :: qrank, krank_ibz
 !arrays
- integer :: tmp_ngfft(18), ngfft(18), sc_ngfft(18)
+ integer :: ngfft(18), sc_ngfft(18), tmp_ngfft(18), ngqpt(3), qptrlatt(3,3)
  integer,allocatable :: green_sc_gvec(:,:), chi_sc_gvec(:,:)
  integer,allocatable :: kbz2ibz(:,:), qbz2ibz(:,:)
- integer :: ngqpt(3), qptrlatt(3,3)
  !integer,allocatable :: kibz2bz(:), qibz2bz(:), qglob2bz(:,:), kglob2bz(:,:)
  real(dp) :: my_shiftq(3,1), kk_ibz(3), kk_bz(3), qq_bz(3), kpq_bz(3), qq_ibz(3)
  real(dp),allocatable :: wtk(:), kibz(:,:)
@@ -590,7 +592,6 @@ function gwr_new(dtset, cryst, psps, pawtab, ebands, mpi_enreg, comm) result (gw
  ABI_MALLOC(gwr%my_qbz2ibz, (6, gwr%my_nqbz))
  gwr%my_qbz2ibz = qbz2ibz(:, gwr%my_qbz_inds(:))
 
- ABI_ICALLOC(count_ibz, (gwr%nqibz))
  do my_iq=1,gwr%my_nqbz
    iq_ibz = gwr%my_qbz2ibz(1, my_iq)
    count_ibz(iq_ibz) = count_ibz(iq_ibz) + 1
@@ -609,57 +610,62 @@ function gwr_new(dtset, cryst, psps, pawtab, ebands, mpi_enreg, comm) result (gw
  ABI_FREE(qbz2ibz)
  ABI_FREE(count_ibz)
 
- return
-
  ! Build FFT descriptors for Green's functions.
- ABI_MALLOC(gwr%green_desc_k, (gwr%my_nkbz))
+ ABI_MALLOC(gwr%my_green_desc_k, (gwr%my_nkbz))
 
+ ngfft = 0
  do my_ik=1,gwr%my_nkbz
-   ik_bz= gwr%my_kbz_inds(my_ik)
+   ik_bz = gwr%my_kbz_inds(my_ik)
    kk_bz = gwr%kbz(:, ik_bz)
-   desc_k => gwr%green_desc_k(my_ik)
+   desc_k => gwr%my_green_desc_k(my_ik)
    desc_k%point = kk_bz; desc_k%istwfk = 1
-   !gwr%green_desc_k(my_ik) = desc_new(ecut_eff, kpoint, gwr%cryst%gmet, ngfft=green_ngfft)
+   !gwr%my_green_desc_k(my_ik) = desc_new(ecut_eff, kpoint, gwr%cryst%gmet, ngfft=green_ngfft)
    ! Calculate G-sphere from input ecut.
    ecut_eff = dtset%ecut * dtset%dilatmx ** 2
    call get_kg(kk_bz, desc_k%istwfk, ecut_eff, gwr%cryst%gmet, desc_k%npw, desc_k%gvec)
-   !call getng(boxcutmin, ecut, gmet, kpt, me_fft, mgfft, nfft, ngfft, nproc_fft, nsym, paral_fft, symrel,&
-   !           ngfftc, use_gpu_cuda, unit) ! optional
-   gwr%green_mpw = max(gwr%green_mpw, gwr%green_desc_k(my_ik)%npw)
+   call getng(dtset%boxcutmin, dtset%chksymtnons, ecut_eff, cryst%gmet, &
+              kk_bz, me_fft0, mgfft, nfft, ngfft, nproc_fft1, cryst%nsym, paral_fft0, cryst%symrel, cryst%tnons, unit=dev_null)
+   gwr%green_mpw = max(gwr%green_mpw, gwr%my_green_desc_k(my_ik)%npw)
  end do
-
- ! Build FFT descriptors for chi
- ABI_MALLOC(gwr%chi_desc_q, (gwr%my_nqbz))
- do my_iq=1,gwr%my_nqbz
-   !iq_bz= gwr%my_qbz_inds(my_iq)
-   !iq_ibz= gwr%my_qibz_inds(my_iq)
-   qq_bz = gwr%qbz(:, my_iq)
-   desc_q => gwr%chi_desc_q(my_iq)
-   desc_k%point = qq_bz; desc_q%istwfk = 1
-   !gwr%chi_desc_q(my_iq) = desc_new(ecut_eff, qpoint, gwr%cryst%gmet, ngfft=chi_ngfft)
-   call get_kg(qq_bz, desc_q%istwfk, dtset%ecuteps, gwr%cryst%gmet, desc_q%npw, desc_q%gvec)
-   !call getng(boxcutmin, ecut, gmet, kpt, me_fft, mgfft, nfft, ngfft, nproc_fft, nsym, paral_fft, symrel,&
-   !           ngfftc, use_gpu_cuda, unit) ! optional
-   gwr%chi_mpw = max(gwr%chi_mpw, gwr%chi_desc_q(my_iq)%npw)
- end do
+ call print_ngfft(ngfft, header="FFT mesh for Green's functions", unit=std_out)
 
  ! Now we know the value of ngfft. Setup tables for zero-padded FFTs.
- !ngfft = ??
- nfft = product(ngfft(1:3)); mgfft = maxval(ngfft(1:3))
-
+ !nfft = product(ngfft(1:3)); mgfft = maxval(ngfft(1:3))
  do my_ik=1,gwr%my_nkbz
-   desc_k => gwr%green_desc_k(my_ik)
+   desc_k => gwr%my_green_desc_k(my_ik)
    desc_k%nfft = nfft; desc_k%mgfft = mgfft; desc_k%ngfft = ngfft
    ABI_MALLOC(desc_k%gbound, (2 * mgfft + 8, 2))
    call sphereboundary(desc_k%gbound, desc_k%istwfk, desc_k%gvec, mgfft, desc_k%npw)
  end do
 
+ ! Build FFT descriptors for chi.
+ ABI_MALLOC(gwr%my_chi_desc_q, (gwr%my_nqbz))
+
+ ngfft = 0
  do my_iq=1,gwr%my_nqbz
-   desc_q => gwr%chi_desc_q(my_ik)
+   iq_bz= gwr%my_qbz_inds(my_iq)
+   !iq_ibz= gwr%my_qibz_inds(my_iq)
+   qq_bz = gwr%qbz(:, my_iq)
+   desc_q => gwr%my_chi_desc_q(my_iq)
+   desc_k%point = qq_bz; desc_q%istwfk = 1
+   !gwr%my_chi_desc_q(my_iq) = desc_new(ecut_eff, qpoint, gwr%cryst%gmet, ngfft=chi_ngfft)
+   call get_kg(qq_bz, desc_q%istwfk, dtset%ecuteps, gwr%cryst%gmet, desc_q%npw, desc_q%gvec)
+   call getng(dtset%boxcutmin, dtset%chksymtnons, dtset%ecuteps, cryst%gmet, &
+              qq_bz, me_fft0, mgfft, nfft, ngfft, nproc_fft1, cryst%nsym, paral_fft0, cryst%symrel, cryst%tnons, unit=dev_null)
+
+   gwr%chi_mpw = max(gwr%chi_mpw, gwr%my_chi_desc_q(my_iq)%npw)
+ end do
+ call print_ngfft(ngfft, header="FFT mesh for Chi", unit=std_out)
+
+ ! Now we know the value of ngfft. Setup tables for zero-padded FFTs.
+ do my_iq=1,gwr%my_nqbz
+   desc_q => gwr%my_chi_desc_q(my_iq)
    desc_q%nfft = nfft; desc_q%mgfft = mgfft; desc_q%ngfft = ngfft
    ABI_MALLOC(desc_q%gbound, (2 * mgfft + 8, 2))
    call sphereboundary(desc_q%gbound, desc_q%istwfk, desc_q%gvec, mgfft, desc_q%npw)
  end do
+
+ return
 
  ! Allocate arrays storing Go_k, Ge_k and Chi_q
  ABI_MALLOC(gwr%go_g_gp, (gwr%my_nkbz, gwr%my_ntau, gwr%my_nspins))
@@ -675,7 +681,7 @@ function gwr_new(dtset, cryst, psps, pawtab, ebands, mpi_enreg, comm) result (gw
 
      ! Allocate G_k(g, g')
      do my_ik=1,gwr%my_nkbz
-       npwsp = gwr%green_desc_k(my_ik)%npw * gwr%nspinor
+       npwsp = gwr%my_green_desc_k(my_ik)%npw * gwr%nspinor
        col_bsize = npwsp / gwr%g_comm%nproc
        if (mod(npwsp, gwr%g_comm%nproc) /= 0) col_bsize = col_bsize + 1
        !col_bsize = 50
@@ -687,7 +693,7 @@ function gwr_new(dtset, cryst, psps, pawtab, ebands, mpi_enreg, comm) result (gw
 
     ! Allocate chi_k(g, g')
     do my_iq=1,gwr%my_nqbz
-      npwsp = gwr%chi_desc_q(my_iq)%npw * gwr%nspinor
+      npwsp = gwr%my_chi_desc_q(my_iq)%npw * gwr%nspinor
       col_bsize = npwsp / gwr%g_comm%nproc
       if (mod(npwsp, gwr%g_comm%nproc) /= 0) col_bsize = col_bsize + 1
       !col_bsize = 50
@@ -705,7 +711,7 @@ function gwr_new(dtset, cryst, psps, pawtab, ebands, mpi_enreg, comm) result (gw
  !if (gwr%use_supercell) then
  ABI_MALLOC(chiq_gp_r, (gwr%my_nqbz))
  do my_iq=1,gwr%my_nqbz
-   npwsp = gwr%chi_desc_q(my_iq)%npw * gwr%nspinor
+   npwsp = gwr%my_chi_desc_q(my_iq)%npw * gwr%nspinor
    col_bsize = npwsp / gwr%g_comm%nproc
    if (mod(npwsp, gwr%g_comm%nproc) /= 0) col_bsize = col_bsize + 1
    !col_bsize = 50
@@ -721,6 +727,7 @@ function gwr_new(dtset, cryst, psps, pawtab, ebands, mpi_enreg, comm) result (gw
  sc_ngfft(4:6) = sc_ngfft(1:3)
  sc_nfft = product(sc_ngfft(1:3))
  sc_augsize = product(sc_ngfft(4:6))
+
  !cal fftbox_plan3_init(sc_plan_Gp2Rp,, ndat, dims, embed, fftalg, fftcache, isign)
  !cal fftbox_plan3_init(sc_plan_Rp2Gp,, ndat, dims, embed, fftalg, fftcache, isign)
 
@@ -760,7 +767,7 @@ function gwr_new(dtset, cryst, psps, pawtab, ebands, mpi_enreg, comm) result (gw
        ! Note that we need to take the union of (k, g') for k in the BZ.
        ! TODO: Here I need a specialized version of sphere that does not initialize out to zero as I need to accumulate
        do my_ik=1,gwr%my_nkbz
-         desc_k => gwr%green_desc_k(my_ik)
+         desc_k => gwr%my_green_desc_k(my_ik)
          do ii=1,desc_k%npw
            green_sc_gvec(:,ii) = nint(gwr%kbz(:,my_ik) * gwr%ngkpt) + gwr%ngkpt * desc_k%gvec(:,ii)
          end do
@@ -787,7 +794,7 @@ function gwr_new(dtset, cryst, psps, pawtab, ebands, mpi_enreg, comm) result (gw
        ! not necessarly equal to the one used for the Green's function.
        ! NB: For the time being I'm assuming k-mesh == q-mesh.
        do my_iq=1,gwr%my_nqbz
-         desc_q => gwr%chi_desc_q(my_iq)
+         desc_q => gwr%my_chi_desc_q(my_iq)
          do ii=1,desc_q%npw
            chi_sc_gvec(:,ii) = nint(gwr%qbz(:, my_iq) * gwr%ngkpt) + gwr%ngkpt * desc_q%gvec(:,ii)
          end do
@@ -799,7 +806,7 @@ function gwr_new(dtset, cryst, psps, pawtab, ebands, mpi_enreg, comm) result (gw
      end do ! my_ir
 
      do my_iq=1,gwr%my_nqbz
-       desc_q => gwr%chi_desc_q(my_iq)
+       desc_q => gwr%my_chi_desc_q(my_iq)
        !chi_r_gp = chiq_gp_r(my_iq)%alloc_transpose()
        !call chiq_gp_r(my_iq)%ptran("C", chi_r_gp)
        call chiq_gp_r(my_iq)%free()
@@ -817,18 +824,19 @@ function gwr_new(dtset, cryst, psps, pawtab, ebands, mpi_enreg, comm) result (gw
      ! ====================================================
      ! Each MPI proc has all the G_k in the IBZ thus we only need to rotate to get the BZ on the fly.
 
-     do iq_ibz=1,gwr%nqibz
+     !do iq_ibz=1,gwr%nqibz
+     do my_iq=1,gwr%my_nqibz
        qq_ibz = gwr%qibz(:, iq_ibz)
        !qq_bz = gwr%qbz(:, iq_bz)
-       desc_q => gwr%chi_desc_q(iq_ibz)
+       desc_q => gwr%my_chi_desc_q(iq_ibz)
        do my_ik=1,gwr%my_nkbz
          ! Use symmetries to get Go_kq and Ge_k from the corresponding images in the IBZ.
          kk_bz = gwr%kbz(:, my_ik)
          kpq_bz = kk_bz + qq_ibz
          !ik_ibz = ??
          !ikpq_ibz = ??
-         !desc_k = gwr%green_desc_k(ik_ibz)%rotate(symtab_k)
-         !desc_kpq = gwr%green_desc_k(ikpq_ibz)%rotate(symtab_kpq)
+         !desc_k = gwr%my_green_desc_k(ik_ibz)%rotate(symtab_k)
+         !desc_kpq = gwr%my_green_desc_k(ikpq_ibz)%rotate(symtab_kpq)
 
          !go_k_gpr = gwr%go_g_gp(ik_ibz, my_it, my_is)%rotate_fftg1_and_ptran(desc_k, "C", symtab_k)
          !ge_k_gpr = gwr%ge_g_gp(ik_ibz, my_it, my_is)%rotate_fftg1_and_ptran(desc_k, "C", symtab_k)
@@ -916,7 +924,7 @@ subroutine gwr_free(gwr)
  class(gwr_t), intent(inout) :: gwr
 
 !Local variables-------------------------------
- integer :: ii, jj, ik
+ integer :: ii, jj, my_ik, my_iq
 
 ! *************************************************************************
 
@@ -939,19 +947,19 @@ subroutine gwr_free(gwr)
  ABI_SFREE(gwr%t2w_cos_wgs)
  ABI_SFREE(gwr%t2w_sin_wgs)
 
- if (allocated(gwr%green_desc_k)) then
-   do ik=1,gwr%my_nkbz
-     call gwr%green_desc_k(ik)%free()
+ if (allocated(gwr%my_green_desc_k)) then
+   do my_ik=1,gwr%my_nkbz
+     call gwr%my_green_desc_k(my_ik)%free()
    end do
  end if
- ABI_SFREE(gwr%green_desc_k)
+ ABI_SFREE(gwr%my_green_desc_k)
 
- if (allocated(gwr%chi_desc_q)) then
-   do ik=1,gwr%my_nqbz
-     call gwr%chi_desc_q(ik)%free()
+ if (allocated(gwr%my_chi_desc_q)) then
+   do my_iq=1,gwr%my_nqbz
+     call gwr%my_chi_desc_q(my_iq)%free()
    end do
  end if
- ABI_SFREE(gwr%chi_desc_q)
+ ABI_SFREE(gwr%my_chi_desc_q)
 
  call free_slk_array3(gwr%go_g_gp)
  ABI_SFREE(gwr%go_g_gp)
@@ -1150,12 +1158,12 @@ end subroutine gwr_build_gtau_from_wfk
 !!
 !! SOURCE
 
-subroutine gwr_ggp_to_gpr(gwr, what, ik, my_it, my_is, gp_r)
+subroutine gwr_ggp_to_gpr(gwr, what, my_ik, my_it, my_is, gp_r)
 
 !Arguments ------------------------------------
  class(gwr_t),target,intent(inout) :: gwr
  character(len=*),intent(in) :: what
- integer,intent(in) :: ik, my_it, my_is
+ integer,intent(in) :: my_ik, my_it, my_is
  type(matrix_scalapack),intent(out) :: gp_r
 
 !Local variables-------------------------------
@@ -1170,14 +1178,14 @@ subroutine gwr_ggp_to_gpr(gwr, what, ik, my_it, my_is, gp_r)
 
  select case (what)
  case ("go")
-   desc => gwr%green_desc_k(ik)
-   g_gp => gwr%go_g_gp(ik, my_it, my_is)
+   desc => gwr%my_green_desc_k(my_ik)
+   g_gp => gwr%go_g_gp(my_ik, my_it, my_is)
  case ("ge")
-   desc => gwr%green_desc_k(ik)
-   g_gp => gwr%ge_g_gp(ik, my_it, my_is)
- case ("chi")
-   desc => gwr%chi_desc_q(ik)
-   g_gp => gwr%chi_g_gp(ik, my_it, my_is)
+   desc => gwr%my_green_desc_k(my_ik)
+   g_gp => gwr%ge_g_gp(my_ik, my_it, my_is)
+ !case ("chi")
+ !  desc => gwr%my_chi_desc_q(my_ik)
+ !  g_gp => gwr%chi_g_gp(my_ik, my_it, my_is)
  case default
    ABI_ERROR(sjoin("Invalid value for what:", what))
  end select
@@ -1266,10 +1274,10 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
 
      select case (what)
      case ("chi")
-       desc => gwr%chi_desc_q(my_iq)
+       desc => gwr%my_chi_desc_q(my_iq)
        chit => gwr%chi_g_gp(my_iq, 1:gwr%my_ntau, my_is)
      !case ("wc")
-     !  desc => gwr%chi_desc_q(my_iq)
+     !  desc => gwr%my_chi_desc_q(my_iq)
      !  chit => gwr%wc_g_gp(my_iq, 1:gwr%my_ntau)
      case default
        ABI_ERROR(sjoin("Invalid value for what:", what))
@@ -1347,10 +1355,10 @@ subroutine gwr_wt_from_chiw(gwr)
  !ABI_MALLOC(gwr%wc_g_gp, (gwr%my_nqbz, gwr%my_ntau))
 
  do my_iq=1,gwr%my_nqbz
-   desc_q => gwr%chi_desc_q(my_iq)
+   desc_q => gwr%my_chi_desc_q(my_iq)
    is_gamma = all(abs(desc_q%point) < tol12)  ! TODO: Handle q --> 0 limit
 
-   !npwsp = gwr%chi_desc_q(my_iq)%npw * gwr%nspinor
+   !npwsp = gwr%my_chi_desc_q(my_iq)%npw * gwr%nspinor
    !col_bsize = npwsp / gwr%g_comm%nproc
    !if (mod(npwsp, gwr%g_comm%nproc) /= 0) col_bsize = col_bsize + 1
    !!col_bsize = 50
