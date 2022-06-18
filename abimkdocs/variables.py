@@ -215,6 +215,7 @@ ABI_TOPICS = [
     "k-points",
     "LatticeModel",
     "LatticeWannier",
+    "LWFModel",
     "LDAminushalf",
     "longwave",
     "LOTF",
