@@ -701,8 +701,8 @@ end subroutine bound
 !!
 !! INPUTS
 !! boxcutmin=minimum value of boxcut admitted (boxcut is the ratio
-!!  between the radius of the sphere contained in the FFT box, and the
-!!  radius of the planewave sphere): usually 2.0.
+!!   between the radius of the sphere contained in the FFT box, and the
+!!   radius of the planewave sphere): usually 2.0.
 !! chksymtnons= if==3, will impose the FFT grid to be invariant under the spatial symmetries.
 !! ecut=energy cutoff in Hartrees
 !! gmet(3,3)=reciprocal space metric (bohr**-2).
@@ -720,11 +720,9 @@ end subroutine bound
 !!
 !! SIDE EFFECTS
 !! Input/Output
-!! ngfft(1:18)=integer array with FFT box dimensions and other
-!!   information on FFTs. On input ngfft(1:3) contains
-!!   optional trial values. If ngfft(1:3)/minbox is greater than value
-!!   calculated to avoid wrap-around error and ngfft obeys constraint
-!!   placed by the FFT routine that is used
+!! ngfft(1:18)=integer array with FFT box dimensions and other information on FFTs.
+!!   On input ngfft(1:3) contains optional trial values. If ngfft(1:3)/minbox is greater than value
+!!   calculated to avoid wrap-around error and ngfft obeys constraint placed by the FFT routine that is used
 !!   then ngfft(1:3) is left unchanged. Otherwise set to value computed in now.
 !!
 !! Note that there is the possibility of an undetected error if we
@@ -732,9 +730,9 @@ end subroutine bound
 !! are different. In the future we should handle this case.
 !!
 !! ngfft(4),ngfft(5),ngfft(6)= modified values to avoid cache trashing,
-!!        presently : ngfft(4)=ngfft(1)+1 if ngfft(1) is even ;
-!!                    ngfft(5)=ngfft(2)+1 if ngfft(2) is even.
-!!           in the other cases, ngfft(4:6)=ngfft(1:3).
+!!   presently: ngfft(4)=ngfft(1)+1 if ngfft(1) is even;
+!!              ngfft(5)=ngfft(2)+1 if ngfft(2) is even.
+!!   in the other cases, ngfft(4:6)=ngfft(1:3).
 !!   Other choices may better, but this is left for the future.
 !! ngfft(7)=choice for FFT algorithm, see the input variable fftalg
 !! ngfft(8)=size of the cache, in bytes (not used here presently).!!
@@ -749,9 +747,9 @@ end subroutine bound
 !!
 !! SOURCE
 
-subroutine getng(boxcutmin,chksymtnons,ecut,gmet,kpt,me_fft,mgfft,nfft,ngfft,&
-&                nproc_fft,nsym,paral_fft,symrel,tnons,&
-&                ngfftc,use_gpu_cuda,unit) ! optional
+subroutine getng(boxcutmin, chksymtnons, ecut, gmet, kpt, me_fft, mgfft, nfft, ngfft, &
+                nproc_fft, nsym,paral_fft, symrel, tnons, &
+                ngfftc, use_gpu_cuda, unit) ! optional
 
  use defs_fftdata,  only : mg
 
@@ -796,7 +794,7 @@ subroutine getng(boxcutmin,chksymtnons,ecut,gmet,kpt,me_fft,mgfft,nfft,ngfft,&
 
 ! *************************************************************************
 
- ount = std_out; if (PRESENT(unit)) ount = unit
+ ount = std_out; if (present(unit)) ount = unit
 
 !DEBUG
 !write(std_out,*)' m_fftcore/getng : enter'
@@ -899,7 +897,7 @@ subroutine getng(boxcutmin,chksymtnons,ecut,gmet,kpt,me_fft,mgfft,nfft,ngfft,&
 !As an initial guess for ngfft, use the provided coarse mesh grid
  if (PRESENT(ngfftc)) then
    ngfft(1:3)=ngfftc(1:3)
-   call wrtout(ount,' Using supplied coarse mesh as initial guess.','COLL')
+   call wrtout(ount,' Using supplied coarse mesh as initial guess.')
  else
    ngfft(1:3)=2
  end if
@@ -1267,7 +1265,6 @@ subroutine getng(boxcutmin,chksymtnons,ecut,gmet,kpt,me_fft,mgfft,nfft,ngfft,&
    ngfft(12)=ngfft(2)/nproc_fft
    ngfft(13)=ngfft(3)/nproc_fft
  end if
-
 
  call print_ngfft(ngfft,header="FFT mesh",unit=ount,mode_paral="COLL")
 
