@@ -53,10 +53,25 @@ static double* temp_proj;
 static uint8_t *nlmn;
 
 //! same functionality as apply_block (in m_invovl.F90) but adapted to GPU
+//! compute sort of y = mat * x
+//!
+//! x is rectangular matrix, each column correspond to a wave vector.
+//! each wave vector is actually divided in pieces (one piece by atome type), and the piece
+//! is recast in a 2d matrix of size (nlmn[itypat],nattyp[itypat]), called the "x matrix"
+//! in cublas API.
+//!
+//! We use the cublas batch API to repeat the matrix multiplication for all wave vectors (ndat).
+//!
+//! \param[in] cplx (1 => real, 2 => complex data)
+//! \param[in] ntypat is the number of types of atoms
+//! \param[in] nattyp is the array (of size ntypat) which gives the number of atoms of a given type
+//! \param[in] mat is square matrix of size lmnmax (and leading dimension if also lmnmax)
+//! \param[in] x is a 2d array of size (nprojs, ndat)
+//! \param[inout] y is a 2d array of size (nprojs, ndat)
 void apply_block_gpu(int32_t cplx,
-                     int32_t ntypat, int32_t nattyp_dim, int32_t* nattyp, int32_t lmnmax,
-                     double* mat, int32_t nprojs, int32_t ndat,
-                     double* x,
+                     int32_t ntypat, int32_t* nattyp, int32_t lmnmax,
+                     const double* mat, int32_t nprojs, int32_t ndat,
+                     const double* x,
                      double* y,
                      int32_t block_sliced)
 {
@@ -317,7 +332,7 @@ extern "C" void solve_inner_gpu(invovl_kpt_gpu_t* invovl,
   // x => proj
   // y => sm1proj
   // compute sm1proj = inv_s_approx * proj
-  apply_block_gpu(cplx, ntypat, nattyp_dim, nattyp, lmnmax,
+  apply_block_gpu(cplx, ntypat, nattyp, lmnmax,
                   invovl->inv_s_approx, nprojs, ndat,
                   proj_gpu, sm1proj_gpu,
                   block_sliced);
