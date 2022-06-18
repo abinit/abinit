@@ -15794,7 +15794,7 @@ Variable(
     characteristics=['[[DEVELOP]]'],
     added_in_version="before_v9",
     text=r"""
-If set to 1, the nesting function for the k-point grid is printed. For the
+If set to 1, the nesting function for the k-point grid is printed (file extension _NEST). For the
 moment the path in q space for the nesting function is fixed, but will become
 an input as well.
 """,
