@@ -26,7 +26,7 @@
 #include <assert.h>
 #include <math.h>
 
-#include <cublas.h> // TODO => move to cublas_v2
+#include <gpu_linalg.h>
 #include "abi_gpu_header.h"
 #include "cuda_api_error_check.h"
 
@@ -61,67 +61,135 @@ void apply_block_gpu(int32_t cplx,
                      int32_t block_sliced)
 {
 
+  // TODO use cuda streams to dispatch all the small matrix-matrix multiplications and run
+  // concurrently on GPU
+
   if (block_sliced == 1) {
 
-    // TODO
+    for (int idat = 0; idat < ndat; ++idat) {
 
-  } else {
+      int32_t shift = 0;
 
-    for (int itypat=0; itypat < ntypat; ++itypat) {
+      for (int itypat=0; itypat < ntypat; ++itypat) {
 
-      int nlmn_at = nlmn[itypat];
+        if (cplx == 2) {
 
-      if (cplx == 2) {
+          const cuDoubleComplex c_one  = make_cuDoubleComplex(1.0, 0.0);
+          const cuDoubleComplex c_zero = make_cuDoubleComplex(0.0, 0.0);
 
-        const cuDoubleComplex c_one  = make_cuDoubleComplex(1.0, 0.0);
-        const cuDoubleComplex c_zero = make_cuDoubleComplex(0.0, 0.0);
+          cuDoubleComplex *mat_ptr = (cuDoubleComplex *) mat;
+          cuDoubleComplex* x_ptr = (cuDoubleComplex*) x;
+          cuDoubleComplex* y_ptr = (cuDoubleComplex*) y;
 
-        cuDoubleComplex *mat_ptr = (cuDoubleComplex *) mat;
-        cuDoubleComplex* x_ptr = (cuDoubleComplex*) x;
-        cuDoubleComplex* y_ptr = (cuDoubleComplex*) y;
-
-        if (itypat>0) {
-
-          int32_t shift = nlmn_at * nattyp[itypat-1];
-
-          mat_ptr += (lmnmax*lmnmax);
+          // move pointers
+          mat_ptr += (lmnmax*lmnmax*itypat);
           x_ptr += shift;
           y_ptr += shift;
 
-        }
+          cublasZhemm(cublas_handle, CUBLAS_SIDE_LEFT,CUBLAS_FILL_MODE_UPPER, nlmn[itypat], nattyp[itypat], &c_one,
+                      mat_ptr, lmnmax,
+                      x_ptr, nlmn[itypat], &c_zero,
+                      y_ptr, nlmn[itypat]);
 
-        cublasZhemm(CUBLAS_SIDE_LEFT,CUBLAS_FILL_MODE_UPPER, nlmn_at, nattyp[itypat]*ndat, c_one,
-                    mat_ptr, lmnmax,
-                    x_ptr, nprojs, c_zero,
-                    y_ptr, nprojs);
+        } else {
 
-      } else {
+          const double one  = 1.0;
+          const double zero = 0.0;
 
-        const double one  = 1.0;
-        const double zero = 0.0;
+          double *mat_ptr = (double *) mat;
+          double* x_ptr = (double*) x;
+          double* y_ptr = (double*) y;
 
-        double *mat_ptr = (double *) mat;
-        double* x_ptr = (double*) x;
-        double* y_ptr = (double*) y;
-
-        if (itypat>0) {
-
-          int32_t shift = nlmn_at * nattyp[itypat-1];
-
-          mat_ptr += (lmnmax*lmnmax);
+          // move pointers
+          mat_ptr += (lmnmax*lmnmax*itypat);
           x_ptr += shift;
           y_ptr += shift;
 
-        }
+          cublasDsymm(cublas_handle, CUBLAS_SIDE_LEFT,CUBLAS_FILL_MODE_UPPER, nlmn[itypat], nattyp[itypat], &one,
+                      mat_ptr, lmnmax,
+                      x_ptr, nlmn[itypat], &zero,
+                      y_ptr, nlmn[itypat]);
 
-        cublasDsymm(CUBLAS_SIDE_LEFT,CUBLAS_FILL_MODE_UPPER, nlmn_at, nattyp[itypat]*ndat, one,
-                    mat_ptr, lmnmax,
-                    x_ptr, nprojs, zero,
-                    y_ptr, nprojs);
+        } // end if cplx==2
 
-      }
+        shift += nlmn[itypat] * nattyp[itypat];
 
-    } // end for itypat
+      } // end for itypat
+
+    } // end for idat
+
+  } else { // block_sliced = 0
+
+    // we regroupe matrix-matrix multiplications of same sizes into a strided batch of GEMM for idat=0:ndata-1
+    // use regular matrix multipliy because batched hermitian matrices are not supported
+    // see https://developer.nvidia.com/blog/cublas-strided-batched-matrix-multiply/
+
+    if (cplx == 2) {
+
+      const cuDoubleComplex c_one  = make_cuDoubleComplex(1.0, 0.0);
+      const cuDoubleComplex c_zero = make_cuDoubleComplex(0.0, 0.0);
+
+      cuDoubleComplex *mat_ptr = (cuDoubleComplex *) mat;
+      cuDoubleComplex* x_ptr = (cuDoubleComplex*) x;
+      cuDoubleComplex* y_ptr = (cuDoubleComplex*) y;
+
+      for (int itypat=0; itypat < ntypat; ++itypat) {
+
+        // move pointers to the next itypat beginning
+        mat_ptr += (lmnmax*lmnmax);
+        x_ptr   += nlmn[itypat]*nattyp[itypat];
+        y_ptr   += nlmn[itypat]*nattyp[itypat];
+
+        // C = alpha*A*B + beta*C
+        // same matrix A for all idat => strideA = 0
+        cublasZgemmStridedBatched(cublas_handle,
+                                  CUBLAS_OP_N, // op A
+                                  CUBLAS_OP_N, // op B
+                                  nlmn[itypat], nattyp[itypat], nlmn[itypat], // m,n,k
+                                  &c_one,                                     // alpha
+                                  mat_ptr, lmnmax, 0,                         // A(m,k), lda, strideA
+                                  x_ptr, nlmn[itypat], nprojs,                // B(k,n), ldb, strideB
+                                  &c_zero,                                    // beta
+                                  y_ptr, nlmn[itypat], nprojs,                // C(m,n), ldc, strideC
+                                  ndat                                        // batch count
+                                  );
+
+
+      } // end of itypat
+
+    } else { // cplx = 1
+
+      const double one  = 1.0;
+      const double zero = 0.0;
+
+      double *mat_ptr = (double *) mat;
+      double* x_ptr = (double*) x;
+      double* y_ptr = (double*) y;
+
+      for (int itypat=0; itypat < ntypat; ++itypat) {
+
+        // move pointers to the next itypat beginning
+        mat_ptr += (lmnmax*lmnmax);
+        x_ptr   += nlmn[itypat]*nattyp[itypat];
+        y_ptr   += nlmn[itypat]*nattyp[itypat];
+
+        // C = alpha*A*B + beta*C
+        // same matrix A for all idat => strideA = 0
+        cublasDgemmStridedBatched(cublas_handle,
+                                  CUBLAS_OP_N, // op A
+                                  CUBLAS_OP_N, // op B
+                                  nlmn[itypat], nattyp[itypat], nlmn[itypat], // m,n,k
+                                  &one,                                       // alpha
+                                  mat_ptr, lmnmax, 0,                         // A(m,k), lda, strideA
+                                  x_ptr, nlmn[itypat], nprojs,                // B(k,n), ldb, strideB
+                                  &zero,                                      // beta
+                                  y_ptr, nlmn[itypat], nprojs,                // C(m,n), ldc, strideC
+                                  ndat                                        // batch count
+                                  );
+
+      } // end for itypat
+
+    } // end if cplx
 
   } // end if block_sliced
 
