@@ -260,6 +260,8 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
    ! Here we change the GS bands (Fermi level, scissors operator ...)
    ! All the modifications to ebands should be done here.
    !call ephtk_update_ebands(dtset, ebands, "Ground state energies")
+
+   ! TODO: Make sure that ef is inside the gap if semiconductor.
  end if
 
  call pawfgr_init(pawfgr, dtset, mgfftf, nfftf, ecut_eff, ecutdg_eff, ngfftc, ngfftf, &
