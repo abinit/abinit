@@ -46,6 +46,7 @@ static double* proj_gpu;
 static double* sm1proj_gpu;
 static double* ptp_sm1proj_gpu;
 static double* temp_proj;
+//static double* resid_gpu;
 
 // hamiltonian data on CPU/GPU
 
@@ -212,35 +213,45 @@ void apply_block_gpu(int32_t cplx,
 
 
 //! \brief Allocation routine for apply inverse overlap operator.
-extern "C" void gpu_apply_invovl_inner_alloc(int32_t proj_dim[3], int32_t ntypat)
+//! we reallocate only if explicitely requested
+extern "C" void gpu_apply_invovl_inner_alloc(int32_t proj_dim[3], int32_t ntypat, int32_t realloc)
 {
-  // when memory allocation already done, deallocate first before re-allocating
-  if (gpu_initialized==1)
+  // when memory allocation already done, and realloc is true, then
+  // we deallocate first before re-allocating
+  if (gpu_initialized==1 and realloc == true)
     gpu_apply_invovl_inner_dealloc();
-  else
+
+  if (gpu_initialized == 0) {
+    int32_t proj_size = proj_dim[0]*proj_dim[1]*proj_dim[2]*sizeof(double);
+
+    CHECK_CUDA_ERROR( cudaMalloc((void**)&proj_gpu, proj_size) );
+    CHECK_CUDA_ERROR( cudaMalloc((void**)&sm1proj_gpu, proj_size) );
+    CHECK_CUDA_ERROR( cudaMalloc((void**)&ptp_sm1proj_gpu, proj_size) );
+    CHECK_CUDA_ERROR( cudaMalloc((void**)&temp_proj, proj_size) );
+
+    nlmn =   (uint8_t *)  malloc(ntypat * sizeof(uint8_t) );
+
     gpu_initialized = 1;
-
-  int32_t proj_size = proj_dim[0]*proj_dim[1]*proj_dim[2];
-  CHECK_CUDA_ERROR( cudaMalloc((void**)&proj_gpu, proj_size) );
-  CHECK_CUDA_ERROR( cudaMalloc((void**)&sm1proj_gpu, proj_size) );
-  CHECK_CUDA_ERROR( cudaMalloc((void**)&ptp_sm1proj_gpu, proj_size) );
-  CHECK_CUDA_ERROR( cudaMalloc((void**)&temp_proj, proj_size) );
-
-  nlmn =   (uint8_t *)  malloc(ntypat * sizeof(uint8_t) );
+  }
 
 } // gpu_apply_invovl_inner_alloc
 
 //! \brief Allocation routine for apply inverse overlap operator.
 extern "C" void gpu_apply_invovl_inner_dealloc()
 {
-  gpu_initialized = 0;
 
-  CHECK_CUDA_ERROR( cudaFree(proj_gpu) );
-  CHECK_CUDA_ERROR( cudaFree(sm1proj_gpu) );
-  CHECK_CUDA_ERROR( cudaFree(ptp_sm1proj_gpu) );
-  CHECK_CUDA_ERROR( cudaFree(temp_proj) );
+  // if GPU data are not already allocated, don't do anything
+  if (gpu_initialized == 1) {
 
-  free(nlmn);
+    CHECK_CUDA_ERROR( cudaFree(proj_gpu) );
+    CHECK_CUDA_ERROR( cudaFree(sm1proj_gpu) );
+    CHECK_CUDA_ERROR( cudaFree(ptp_sm1proj_gpu) );
+    CHECK_CUDA_ERROR( cudaFree(temp_proj) );
+
+    free(nlmn);
+
+    gpu_initialized = 0;
+  }
 
 } // gpu_apply_invovl_inner_dealloc
 
