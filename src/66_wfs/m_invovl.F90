@@ -162,11 +162,12 @@ end type invovl_kpt_type
  interface
 
    !> allocate GPU workspace
-   subroutine f_gpu_apply_invovl_inner_alloc(proj_dim, nproc_fft) bind(c, name='gpu_apply_invovl_inner_alloc')
+   subroutine f_gpu_apply_invovl_inner_alloc(proj_dim, ntypat, realloc) bind(c, name='gpu_apply_invovl_inner_alloc')
      use, intrinsic :: iso_c_binding
      implicit none
      integer(kind=c_int32_t),        intent(in) :: proj_dim(3)
-     integer(kind=c_int32_t), value, intent(in) :: nproc_fft
+     integer(kind=c_int32_t), value, intent(in) :: ntypat
+     integer(kind=c_int32_t), value, intent(in) :: realloc
    end subroutine f_gpu_apply_invovl_inner_alloc
 
    !> deallocate GPU workspace
@@ -379,9 +380,6 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
 
  integer, parameter :: timer_mkinvovl = 1620, timer_mkinvovl_build_d = 1621, timer_mkinvovl_build_ptp = 1622
 
- integer(kind=c_int32_t) :: proj_dim(3)
- integer(kind=c_int32_t) :: indlmn_dim(3)
-
 ! *************************************************************************
 
  !! S = 1 + PDP', so
@@ -579,24 +577,6 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
  end do
  call xmpi_sum(invovl%gram_projs,mpi_enreg%comm_band,ierr)
 
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_FC_ISO_C_BINDING)
-
- !! memory allocation of data used in solve_inner_gpu
- if (ham%use_gpu_cuda==1) then
-   proj_dim(1) = 2
-   proj_dim(2) = ham%npw_k
-   proj_dim(3) = invovl%nprojs
-   call f_gpu_apply_invovl_inner_alloc(proj_dim, mpi_enreg%nproc_fft)
-
-   ! TODO find a better place to put that initialization
-   indlmn_dim(1) = size(ham%indlmn,1)
-   indlmn_dim(2) = size(ham%indlmn,2)
-   indlmn_dim(3) = size(ham%indlmn,3)
-   call f_gpu_init_invovl_data(indlmn_dim, c_loc(ham%indlmn(1,1,1)))
- endif
-
-#endif
-
  call timab(timer_mkinvovl_build_ptp, 2, tsec)
  call timab(timer_mkinvovl,2,tsec)
 
@@ -645,6 +625,7 @@ end subroutine make_invovl
  ! used to pass proj dimensions to cuda
  integer(kind=c_int32_t) :: proj_dim(3)
  integer(kind=c_int32_t) :: nattyp_dim
+ integer(kind=c_int32_t) :: indlmn_dim(3)
 
  integer :: idat, iatom, nlmn, shift
  real(dp) :: tsec(2)
@@ -692,6 +673,28 @@ end subroutine make_invovl
  PtPsm1proj = zero
 
  proj_dim = (/ size(proj,1), size(proj,2), size(proj,3) /)
+
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_FC_ISO_C_BINDING)
+
+ !! memory allocation of data used in solve_inner_gpu
+ !! note : this is actually done only once
+ if (ham%use_gpu_cuda==1) then
+   !! make sure to use sizes from apply_invovl
+   proj_dim(1) = cplx
+   proj_dim(2) = invovl%nprojs
+   proj_dim(3) = nspinor*ndat
+   call f_gpu_apply_invovl_inner_alloc(proj_dim, mpi_enreg%nproc_fft, 0)
+
+   ! TODO find a better place to put that initialization
+   indlmn_dim(1) = size(ham%indlmn,1)
+   indlmn_dim(2) = size(ham%indlmn,2)
+   indlmn_dim(3) = size(ham%indlmn,3)
+   call f_gpu_init_invovl_data(indlmn_dim, c_loc(ham%indlmn(1,1,1)))
+ endif
+
+#endif
+
+
 
  call timab(timer_apply_inv_ovl_opernla, 1, tsec)
 
