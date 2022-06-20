@@ -272,6 +272,9 @@ AC_DEFUN([_ABI_GPU_INIT_CUDA],[
       AC_MSG_WARN([could not find libcuda.${abi_so_ext}])
     fi
 
+    # add standart libc++ link flags
+    abi_gpu_cuda_libs="${abi_gpu_cuda_libs} -lstdc++"
+
     # C and C++ link flags
     AC_MSG_CHECKING([for Cuda link flags])
     if test "${CC_LDFLAGS_GPU}" = ""; then
