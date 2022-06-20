@@ -178,7 +178,7 @@ end type invovl_kpt_type
      use, intrinsic :: iso_c_binding
      implicit none
      integer(kind=c_int32_t),        intent(in)    :: indlmn_dim(3)
-     type(c_ptr)            , value, intent(inout) :: indlmn_ptr
+     type(c_ptr)            , value                :: indlmn_ptr
    end subroutine f_gpu_init_invovl_data
 
    !> solve_inner on GPU
