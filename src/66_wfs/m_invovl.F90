@@ -177,8 +177,8 @@ end type invovl_kpt_type
    subroutine f_gpu_init_invovl_data(indlmn_dim, indlmn_ptr) bind(c, name='init_invovl_data')
      use, intrinsic :: iso_c_binding
      implicit none
-     integer(kind=c_int32_t),        intent(in) :: indlmn_dim(3)
-     type(c_ptr)                                :: indlmn_ptr
+     integer(kind=c_int32_t),        intent(in)    :: indlmn_dim(3)
+     type(c_ptr)            , value, intent(inout) :: indlmn_ptr
    end subroutine f_gpu_init_invovl_data
 
    !> solve_inner on GPU
@@ -190,11 +190,11 @@ end type invovl_kpt_type
      implicit none
      type(invovl_kpt_gpu_type),      intent(inout) :: invovl_gpu
      integer(kind=c_int32_t),        intent(in)    :: proj_dim(3)
-     type(c_ptr)                                   :: proj_ptr
-     type(c_ptr)                                   :: sm1proj_ptr
-     type(c_ptr)                                   :: ptp_sm1proj_ptr
+     type(c_ptr)            , value                :: proj_ptr
+     type(c_ptr)            , value                :: sm1proj_ptr
+     type(c_ptr)            , value                :: ptp_sm1proj_ptr
      integer(kind=c_int32_t), value, intent(in)    :: nattyp_dim
-     type(c_ptr)                                   :: nattyp_ptr
+     type(c_ptr)            , value                :: nattyp_ptr
      integer(kind=c_int32_t), value, intent(in)    :: ntypat
      integer(kind=c_int32_t), value, intent(in)    :: lmnmax
      integer(kind=c_int32_t), value, intent(in)    :: cplx
