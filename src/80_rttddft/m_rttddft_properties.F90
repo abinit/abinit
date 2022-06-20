@@ -403,14 +403,14 @@ subroutine rttddft_calc_kin(kin,cg,dtset,ham_k,nband,npw,nspinor,occ0,wk,mpi_enr
 
  !Arguments ------------------------------------
  !scalars
- integer,                   intent(in)    :: nband
- integer,                   intent(in)    :: npw
- integer,                   intent(in)    :: nspinor
- real(dp),                  intent(in)    :: wk
- type(dataset_type),        intent(inout) :: dtset
- type(gs_hamiltonian_type), intent(in)    :: ham_k
- type(MPI_type),            intent(in)    :: mpi_enreg
- type(bandfft_kpt_type),    intent(in)    :: bandfft
+ integer,                         intent(in)    :: nband
+ integer,                         intent(in)    :: npw
+ integer,                         intent(in)    :: nspinor
+ real(dp),                        intent(in)    :: wk
+ type(dataset_type),              intent(inout) :: dtset
+ type(gs_hamiltonian_type),       intent(in)    :: ham_k
+ type(MPI_type),                  intent(in)    :: mpi_enreg
+ type(bandfft_kpt_type), pointer, intent(in)    :: bandfft
  !arrays
  real(dp),                  intent(in)    :: cg(2,npw*nspinor*nband)
  real(dp),                  intent(inout) :: kin
