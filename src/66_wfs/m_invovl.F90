@@ -683,7 +683,7 @@ end subroutine make_invovl
    proj_dim(1) = cplx
    proj_dim(2) = invovl%nprojs
    proj_dim(3) = nspinor*ndat
-   call f_gpu_apply_invovl_inner_alloc(proj_dim, mpi_enreg%nproc_fft, 0)
+   call f_gpu_apply_invovl_inner_alloc(proj_dim, ham%ntypat, 0)
 
    ! TODO find a better place to put that initialization
    indlmn_dim(1) = size(ham%indlmn,1)

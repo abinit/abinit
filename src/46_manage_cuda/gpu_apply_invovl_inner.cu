@@ -32,6 +32,10 @@
 
 #include "gpu_apply_invovl_inner.h" // definition of struct invovl_kpt_gpu_t
 
+#include <thrust/host_vector.h>
+#include <thrust/device_vector.h>
+#include <thrust/device_ptr.h>
+
 #include <mpi.h>
 
 extern "C" void xmpi_sum_dp_c(double* array, int32_t array_size, MPI_Fint* comm, int32_t* ierr);
@@ -46,7 +50,8 @@ static double* proj_gpu;
 static double* sm1proj_gpu;
 static double* ptp_sm1proj_gpu;
 static double* temp_proj;
-//static double* resid_gpu;
+static double* resid_gpu;
+static double* precondresid_gpu;
 
 // hamiltonian data on CPU/GPU
 
@@ -228,6 +233,8 @@ extern "C" void gpu_apply_invovl_inner_alloc(int32_t proj_dim[3], int32_t ntypat
     CHECK_CUDA_ERROR( cudaMalloc((void**)&sm1proj_gpu, proj_size) );
     CHECK_CUDA_ERROR( cudaMalloc((void**)&ptp_sm1proj_gpu, proj_size) );
     CHECK_CUDA_ERROR( cudaMalloc((void**)&temp_proj, proj_size) );
+    CHECK_CUDA_ERROR( cudaMalloc((void**)&resid_gpu, proj_size) );
+    CHECK_CUDA_ERROR( cudaMalloc((void**)&precondresid_gpu, proj_size) );
 
     nlmn =   (uint8_t *)  malloc(ntypat * sizeof(uint8_t) );
 
@@ -247,6 +254,8 @@ extern "C" void gpu_apply_invovl_inner_dealloc()
     CHECK_CUDA_ERROR( cudaFree(sm1proj_gpu) );
     CHECK_CUDA_ERROR( cudaFree(ptp_sm1proj_gpu) );
     CHECK_CUDA_ERROR( cudaFree(temp_proj) );
+    CHECK_CUDA_ERROR( cudaFree(resid_gpu) );
+    CHECK_CUDA_ERROR( cudaFree(precondresid_gpu) );
 
     free(nlmn);
 
@@ -356,10 +365,15 @@ extern "C" void solve_inner_gpu(invovl_kpt_gpu_t* invovl,
   double convergence_rate;
   int additional_steps_to_take = -1;
 
+  //thrust::device_vector<double> d_temp_proj(temp_proj,temp_proj+(proj_dim[0]*proj_dim[1]*proj_dim[2]));
+
   for (int i=1; i < 30; ++i) {
 
     // compute resid = proj - (D^-1 + PtP)sm1proj
-    // TODO apply_block_gpu(ham, cplx, invovl%inv_sij, nprojs, ndat, sm1proj, resid, block_sliced);
+    apply_block_gpu(cplx, ntypat, nattyp, lmnmax,
+                    invovl->inv_sij, nprojs, ndat,
+                    sm1proj_gpu, resid_gpu,
+                    block_sliced);
     // TODO temp_proj = sm1proj(:,ibeg:iend,:);
 
     // compute matrix multiplication : PtPsm1proj(:,:,1) = invovl%gram * temp_proj(:,:,1)
