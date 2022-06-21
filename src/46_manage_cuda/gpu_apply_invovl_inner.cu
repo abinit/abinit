@@ -51,7 +51,7 @@ static int gpu_inner_allocated = 0;
 static double* proj_gpu;
 static double* sm1proj_gpu;
 static double* ptp_sm1proj_gpu;
-static double* temp_proj;
+static double* temp_proj_gpu;
 static double* resid_gpu;
 static double* precondresid_gpu;
 
@@ -60,6 +60,7 @@ static double* precondresid_gpu;
 static int gpu_inv_overlap_matrix_allocated = 0;
 
 //! inverse overlap matrix on GPU
+static double* gram_projs_gpu;
 static double* inv_sij_gpu;
 static double* inv_s_approx_gpu;
 
@@ -263,7 +264,7 @@ extern "C" void gpu_apply_invovl_inner_alloc(int32_t proj_dim[3],
     CHECK_CUDA_ERROR( cudaMemset( sm1proj_gpu, 0, proj_size_in_bytes) );
     CHECK_CUDA_ERROR( cudaMemset( ptp_sm1proj_gpu, 0, proj_size_in_bytes) );
 
-    CHECK_CUDA_ERROR( cudaMalloc((void**)&temp_proj, proj_size_in_bytes) );
+    CHECK_CUDA_ERROR( cudaMalloc((void**)&temp_proj_gpu, proj_size_in_bytes) );
     CHECK_CUDA_ERROR( cudaMalloc((void**)&resid_gpu, proj_size_in_bytes) );
     CHECK_CUDA_ERROR( cudaMalloc((void**)&precondresid_gpu, proj_size_in_bytes) );
 
@@ -285,7 +286,7 @@ extern "C" void gpu_apply_invovl_inner_dealloc()
     CHECK_CUDA_ERROR( cudaFree(sm1proj_gpu) );
     CHECK_CUDA_ERROR( cudaFree(ptp_sm1proj_gpu) );
 
-    CHECK_CUDA_ERROR( cudaFree(temp_proj) );
+    CHECK_CUDA_ERROR( cudaFree(temp_proj_gpu) );
     CHECK_CUDA_ERROR( cudaFree(resid_gpu) );
     CHECK_CUDA_ERROR( cudaFree(precondresid_gpu) );
 
@@ -304,6 +305,7 @@ extern "C" void gpu_apply_invovl_inner_dealloc()
 //! \param[in] number of types of atoms
 //! \param[in] realloc if 1, dealloc before reallocating
 extern "C" void gpu_apply_invovl_matrix_alloc(int32_t cplx,
+                                              int32_t nprojs,
                                               int32_t lmnmax,
                                               int32_t ntypat,
                                               int32_t realloc)
@@ -315,6 +317,7 @@ extern "C" void gpu_apply_invovl_matrix_alloc(int32_t cplx,
 
   if (gpu_inv_overlap_matrix_allocated == 0) {
 
+    CHECK_CUDA_ERROR( cudaMalloc((void**) &gram_projs_gpu, cplx*nprojs*nprojs*sizeof(double)) );
     CHECK_CUDA_ERROR( cudaMalloc((void**) &inv_sij_gpu, cplx*lmnmax*lmnmax*ntypat*sizeof(double)) );
     CHECK_CUDA_ERROR( cudaMalloc((void**) &inv_s_approx_gpu, cplx*lmnmax*lmnmax*ntypat*sizeof(double)) );
 
@@ -330,6 +333,7 @@ extern "C" void gpu_apply_invovl_matrix_dealloc()
   // if GPU data are not already allocated, don't do anything
   if (gpu_inv_overlap_matrix_allocated == 1) {
 
+    CHECK_CUDA_ERROR( cudaFree(gram_projs_gpu)   );
     CHECK_CUDA_ERROR( cudaFree(inv_sij_gpu)      );
     CHECK_CUDA_ERROR( cudaFree(inv_s_approx_gpu) );
 
@@ -368,9 +372,13 @@ extern "C" void init_invovl_data(int32_t indlmn_dim[3], int32_t* indlmn)
 
 //! upload inverse overlap matrices
 extern "C" void upload_inverse_overlap(const invovl_kpt_gpu_t invovl,
-                                       int32_t cplx, int32_t lmnmax, int32_t ntypat)
+                                       int32_t cplx,
+                                       int32_t nprojs,
+                                       int32_t lmnmax,
+                                       int32_t ntypat)
 {
 
+  CHECK_CUDA_ERROR( cudaMemcpy(gram_projs_gpu, invovl.gram_projs, cplx*nprojs*nprojs*sizeof(double), cudaMemcpyHostToDevice) );
   CHECK_CUDA_ERROR( cudaMemcpy(inv_sij_gpu, invovl.inv_sij, cplx*lmnmax*lmnmax*ntypat*sizeof(double), cudaMemcpyHostToDevice) );
   CHECK_CUDA_ERROR( cudaMemcpy(inv_s_approx_gpu, invovl.inv_s_approx, cplx*lmnmax*lmnmax*ntypat*sizeof(double), cudaMemcpyHostToDevice) );
 
@@ -457,6 +465,9 @@ extern "C" void solve_inner_gpu(int32_t proj_dim[3],
 
   //thrust::device_vector<double> d_temp_proj(temp_proj,temp_proj+(proj_dim[0]*proj_dim[1]*proj_dim[2]));
 
+  const cuDoubleComplex c_one  = make_cuDoubleComplex(1.0, 0.0);
+  const cuDoubleComplex c_zero = make_cuDoubleComplex(0.0, 0.0);
+
   for (int i=1; i < 30; ++i) {
 
     // compute resid = proj - (D^-1 + PtP)sm1proj
@@ -464,14 +475,29 @@ extern "C" void solve_inner_gpu(int32_t proj_dim[3],
                     inv_sij_gpu, nprojs, ndat,
                     sm1proj_gpu, resid_gpu,
                     block_sliced);
-    // TODO temp_proj = sm1proj(:,ibeg:iend,:);
+
+    // copy temp_proj = sm1proj(:,ibeg:iend,:);
+    CHECK_CUDA_ERROR( cudaMemcpy(temp_proj_gpu, sm1proj_gpu, proj_size_in_bytes, cudaMemcpyDeviceToDevice));
 
     // compute matrix multiplication : PtPsm1proj(:,:,1) = invovl%gram * temp_proj(:,:,1)
+
     // TODO abi_xgemm('N', 'N', nprojs, ndat, nlmntot_this_proc, cone, &
     // & invovl%gram_projs(:,:,1), nprojs, &
     // & temp_proj(:,:,1), nlmntot_this_proc, czero, &
     // & PtPsm1proj(:,:,1), nprojs, &
     // & x_cplx=cplx)
+
+    cublasZgemm(cublas_handle,
+                CUBLAS_OP_N,            // op A
+                CUBLAS_OP_N,            // op B
+                nprojs, ndat, nprojs,   // m,n,k
+                &c_one,                 // alpha
+                (cuDoubleComplex*) gram_projs_gpu, nprojs, // A(m,k), lda
+                (cuDoubleComplex*) temp_proj_gpu, nprojs,  // B(k,n), ldb
+                &c_zero,                // beta
+                (cuDoubleComplex*) ptp_sm1proj_gpu, nprojs // C(m,n), ldc
+                );
+
     // TODO resid = proj - resid - Ptpsm1proj
 
     // exit check
