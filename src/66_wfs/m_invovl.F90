@@ -175,10 +175,11 @@ end type invovl_kpt_type
    end subroutine f_gpu_apply_invovl_inner_dealloc
 
    !> allocate GPU workspace for make_invovl (sij and s_approx)
-   subroutine f_gpu_apply_invovl_matrix_alloc(cplx, lmnmax, ntypat, realloc) bind(c, name='gpu_apply_invovl_matrix_alloc')
+   subroutine f_gpu_apply_invovl_matrix_alloc(cplx, nprojs, lmnmax, ntypat, realloc) bind(c, name='gpu_apply_invovl_matrix_alloc')
      use, intrinsic :: iso_c_binding
      implicit none
      integer(kind=c_int32_t), value, intent(in) :: cplx
+     integer(kind=c_int32_t), value, intent(in) :: nprojs
      integer(kind=c_int32_t), value, intent(in) :: ntypat
      integer(kind=c_int32_t), value, intent(in) :: lmnmax
      integer(kind=c_int32_t), value, intent(in) :: realloc
@@ -197,12 +198,13 @@ end type invovl_kpt_type
    end subroutine f_gpu_init_invovl_data
 
    !> upload inverse overlap matrices
-   subroutine f_upload_inverse_overlap(invovl_gpu, cplx, lmnmax, ntypat) bind(c, name='upload_inverse_overlap')
+   subroutine f_upload_inverse_overlap(invovl_gpu, cplx, nprojs, lmnmax, ntypat) bind(c, name='upload_inverse_overlap')
      use, intrinsic :: iso_c_binding
      import invovl_kpt_gpu_type
      implicit none
      type(invovl_kpt_gpu_type), value, intent(in) :: invovl_gpu
      integer(kind=c_int32_t),   value, intent(in) :: cplx
+     integer(kind=c_int32_t),   value, intent(in) :: nprojs
      integer(kind=c_int32_t),   value, intent(in) :: lmnmax
      integer(kind=c_int32_t),   value, intent(in) :: ntypat
    end subroutine f_upload_inverse_overlap
@@ -617,10 +619,10 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
  ! upload inverse overlap matrices (sij and s_approx) to GPU memory
  if (ham%use_gpu_cuda==1) then
    ! allocate memory for sij and s_approx on GPU
-   call f_gpu_apply_invovl_matrix_alloc(cplx, ham%lmnmax, ham%ntypat, 0)
+   call f_gpu_apply_invovl_matrix_alloc(cplx, invovl%nprojs, ham%lmnmax, ham%ntypat, 0)
 
    invovl_gpu = make_invovl_kpt_gpu(invovl)
-   call f_upload_inverse_overlap(invovl_gpu, cplx, ham%lmnmax, ham%ntypat)
+   call f_upload_inverse_overlap(invovl_gpu, cplx, invovl%nprojs, ham%lmnmax, ham%ntypat)
    write(message,*) 'Invovl uploaded to GPU memory'
    call wrtout(std_out,message,'COLL')
  end if
