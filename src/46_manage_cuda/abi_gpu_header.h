@@ -101,6 +101,9 @@ extern "C" {
   void gpu_apply_invovl_inner_alloc(int32_t proj_dim[3], int32_t ntypat, int32_t realloc);
   void gpu_apply_invovl_inner_dealloc();
 
+  void gpu_apply_invovl_matrix_alloc(int32_t cplx, int32_t ntypat, int32_t lmnmax, int32_t realloc);
+  void gpu_apply_invovl_matrix_dealloc();
+
 #ifdef __cplusplus
 }
 #endif

@@ -161,7 +161,7 @@ end type invovl_kpt_type
  !! these functions are entry point for calling cuda implemented functions
  interface
 
-   !> allocate GPU workspace
+   !> allocate GPU workspace for apply_invovl
    subroutine f_gpu_apply_invovl_inner_alloc(proj_dim, ntypat, realloc) bind(c, name='gpu_apply_invovl_inner_alloc')
      use, intrinsic :: iso_c_binding
      implicit none
@@ -170,9 +170,23 @@ end type invovl_kpt_type
      integer(kind=c_int32_t), value, intent(in) :: realloc
    end subroutine f_gpu_apply_invovl_inner_alloc
 
-   !> deallocate GPU workspace
+   !> deallocate GPU workspace for apply_invovl
    subroutine f_gpu_apply_invovl_inner_dealloc() bind(c, name='gpu_apply_invovl_inner_dealloc')
    end subroutine f_gpu_apply_invovl_inner_dealloc
+
+   !> allocate GPU workspace for make_invovl (sij and s_approx)
+   subroutine f_gpu_apply_invovl_matrix_alloc(cplx, lmnmax, ntypat, realloc) bind(c, name='gpu_apply_invovl_matrix_alloc')
+     use, intrinsic :: iso_c_binding
+     implicit none
+     integer(kind=c_int32_t), value, intent(in) :: cplx
+     integer(kind=c_int32_t), value, intent(in) :: ntypat
+     integer(kind=c_int32_t), value, intent(in) :: lmnmax
+     integer(kind=c_int32_t), value, intent(in) :: realloc
+   end subroutine f_gpu_apply_invovl_matrix_alloc
+
+   !> deallocate GPU workspace for make_invovl (sij and s_approx)
+   subroutine f_gpu_apply_invovl_matrix_dealloc() bind(c, name='gpu_apply_invovl_matrix_dealloc')
+   end subroutine f_gpu_apply_invovl_matrix_dealloc
 
    !> init data for GPU
    subroutine f_gpu_init_invovl_data(indlmn_dim, indlmn_ptr) bind(c, name='init_invovl_data')
@@ -182,24 +196,33 @@ end type invovl_kpt_type
      type(c_ptr)            , value                :: indlmn_ptr
    end subroutine f_gpu_init_invovl_data
 
-   !> solve_inner on GPU
-   subroutine f_solve_inner_gpu(invovl_gpu, proj_dim, proj_ptr, sm1proj_ptr, ptp_sm1proj_ptr, &
-     & nattyp_dim, nattyp_ptr, ntypat, lmnmax, cplx, block_sliced) bind(c, name='solve_inner_gpu')
-
+   !> upload inverse overlap matrices
+   subroutine f_upload_inverse_overlap(invovl_gpu, cplx, lmnmax, ntypat) bind(c, name='upload_inverse_overlap')
      use, intrinsic :: iso_c_binding
      import invovl_kpt_gpu_type
      implicit none
-     type(invovl_kpt_gpu_type),      intent(inout) :: invovl_gpu
-     integer(kind=c_int32_t),        intent(in)    :: proj_dim(3)
-     type(c_ptr)            , value                :: proj_ptr
-     type(c_ptr)            , value                :: sm1proj_ptr
-     type(c_ptr)            , value                :: ptp_sm1proj_ptr
-     integer(kind=c_int32_t), value, intent(in)    :: nattyp_dim
-     type(c_ptr)            , value                :: nattyp_ptr
-     integer(kind=c_int32_t), value, intent(in)    :: ntypat
-     integer(kind=c_int32_t), value, intent(in)    :: lmnmax
-     integer(kind=c_int32_t), value, intent(in)    :: cplx
-     integer(kind=c_int32_t), value, intent(in)    :: block_sliced
+     type(invovl_kpt_gpu_type), value, intent(in) :: invovl_gpu
+     integer(kind=c_int32_t),   value, intent(in) :: cplx
+     integer(kind=c_int32_t),   value, intent(in) :: lmnmax
+     integer(kind=c_int32_t),   value, intent(in) :: ntypat
+   end subroutine f_upload_inverse_overlap
+
+   !> solve_inner on GPU
+   subroutine f_solve_inner_gpu(proj_dim, proj_ptr, sm1proj_ptr, ptp_sm1proj_ptr, &
+     & nattyp_dim, nattyp_ptr, ntypat, lmnmax, cplx, block_sliced) bind(c, name='solve_inner_gpu')
+
+     use, intrinsic :: iso_c_binding
+     implicit none
+     integer(kind=c_int32_t),        intent(in) :: proj_dim(3)
+     type(c_ptr)            , value             :: proj_ptr
+     type(c_ptr)            , value             :: sm1proj_ptr
+     type(c_ptr)            , value             :: ptp_sm1proj_ptr
+     integer(kind=c_int32_t), value, intent(in) :: nattyp_dim
+     type(c_ptr)            , value             :: nattyp_ptr
+     integer(kind=c_int32_t), value, intent(in) :: ntypat
+     integer(kind=c_int32_t), value, intent(in) :: lmnmax
+     integer(kind=c_int32_t), value, intent(in) :: cplx
+     integer(kind=c_int32_t), value, intent(in) :: block_sliced
    end subroutine f_solve_inner_gpu
 
  end interface
@@ -300,10 +323,11 @@ CONTAINS
 !!      dsymm,zhemm
 !!
 !! SOURCE
- subroutine destroy_invovl(nkpt)
+ subroutine destroy_invovl(nkpt, use_gpu_cuda)
 
-  integer, intent(in) :: nkpt
-  integer :: ikpt
+   integer, intent(in) :: nkpt
+   integer, intent(in) :: use_gpu_cuda
+   integer :: ikpt
 
 ! *************************************************************************
 
@@ -323,7 +347,10 @@ CONTAINS
   ABI_FREE(invovl_kpt)
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_FC_ISO_C_BINDING)
-   call f_gpu_apply_invovl_inner_dealloc()
+  if (use_gpu_cuda == 1) then
+    call f_gpu_apply_invovl_inner_dealloc()
+    call f_gpu_apply_invovl_matrix_dealloc()
+  end if
 #endif
 
  end subroutine destroy_invovl
@@ -374,6 +401,9 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
  character :: blas_transpose
 
  type(invovl_kpt_type), pointer :: invovl
+#if defined(HAVE_FC_ISO_C_BINDING) && defined(HAVE_GPU_CUDA)
+ type(invovl_kpt_gpu_type) :: invovl_gpu
+#endif
  integer :: array_nprojs_pp(mpi_enreg%nproc_fft)
  integer :: iproc, slice_size
  real(dp), allocatable :: gramwork(:,:,:)
@@ -582,6 +612,24 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
 
  ABI_FREE(projs)
 
+#if defined(HAVE_FC_ISO_C_BINDING) && defined(HAVE_GPU_CUDA)
+
+ ! upload inverse overlap matrices (sij and s_approx) to GPU memory
+ if (ham%use_gpu_cuda==1) then
+   ! allocate memory for sij and s_approx on GPU
+   call f_gpu_apply_invovl_matrix_alloc(cplx, ham%lmnmax, ham%ntypat, 0)
+
+   invovl_gpu = make_invovl_kpt_gpu(invovl)
+   call f_upload_inverse_overlap(invovl_gpu, cplx, ham%lmnmax, ham%ntypat)
+   write(message,*) 'Invovl uploaded to GPU memory'
+   call wrtout(std_out,message,'COLL')
+ end if
+
+#endif
+
+ write(message,*) 'Invovl built'
+ call wrtout(std_out,message,'COLL')
+
 end subroutine make_invovl
 !!***
 
@@ -602,203 +650,198 @@ end subroutine make_invovl
 !!
 !! SOURCE
 
- subroutine apply_invovl(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_enreg, nspinor, block_sliced)
+subroutine apply_invovl(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_enreg, nspinor, block_sliced)
 
 #if defined(HAVE_FC_ISO_C_BINDING) && defined(HAVE_GPU_CUDA)
-   use, intrinsic :: iso_c_binding
+  use, intrinsic :: iso_c_binding
 #endif
 
- implicit none
+  implicit none
 
- ! args
- type(gs_hamiltonian_type), intent(in), target :: ham
- integer, intent(in) :: npw, ndat
- integer, intent(in) :: nspinor
- integer, intent(in) :: block_sliced
- real(dp), intent(inout) :: cwavef(2, npw*nspinor*ndat) ! TODO should be in, fix nonlop
- type(mpi_type) :: mpi_enreg
- real(dp), intent(inout) :: sm1cwavef(2, npw*nspinor*ndat)
- type(pawcprj_type), intent(inout) :: cwaveprj(ham%natom,nspinor*ndat)
+  ! args
+  type(gs_hamiltonian_type), intent(in), target :: ham
+  integer, intent(in) :: npw, ndat
+  integer, intent(in) :: nspinor
+  integer, intent(in) :: block_sliced
+  real(dp), intent(inout) :: cwavef(2, npw*nspinor*ndat) ! TODO should be in, fix nonlop
+  type(mpi_type) :: mpi_enreg
+  real(dp), intent(inout) :: sm1cwavef(2, npw*nspinor*ndat)
+  type(pawcprj_type), intent(inout) :: cwaveprj(ham%natom,nspinor*ndat)
 
- real(dp),allocatable, target :: proj(:,:,:),sm1proj(:,:,:),PtPsm1proj(:,:,:)
+  real(dp),allocatable, target :: proj(:,:,:),sm1proj(:,:,:),PtPsm1proj(:,:,:)
 
- ! used to pass proj dimensions to cuda
- integer(kind=c_int32_t) :: proj_dim(3)
- integer(kind=c_int32_t) :: nattyp_dim
- integer(kind=c_int32_t) :: indlmn_dim(3)
+  ! used to pass proj dimensions to cuda
+  integer(kind=c_int32_t) :: proj_dim(3)
+  integer(kind=c_int32_t) :: nattyp_dim
+  integer(kind=c_int32_t) :: indlmn_dim(3)
 
- integer :: idat, iatom, nlmn, shift
- real(dp) :: tsec(2)
+  integer :: idat, iatom, nlmn, shift
+  real(dp) :: tsec(2)
 
- integer :: choice, cpopt, paw_opt , cplx
- character :: blas_transpose
- type(pawcprj_type) :: cwaveprj_in(ham%natom,nspinor*ndat)
+  integer :: choice, cpopt, paw_opt , cplx
+  character :: blas_transpose
+  type(pawcprj_type) :: cwaveprj_in(ham%natom,nspinor*ndat)
 
- integer :: ikpt_this_proc
- integer, parameter :: tim_nonlop = 13
- ! dummies
- real(dp) :: enlout(ndat), lambda_block(1), gvnlxc(1,1)
- integer, parameter :: nnlout = 0, idir = 0, signs = 2
+  integer :: ikpt_this_proc
+  integer, parameter :: tim_nonlop = 13
+  ! dummies
+  real(dp) :: enlout(ndat), lambda_block(1), gvnlxc(1,1)
+  integer, parameter :: nnlout = 0, idir = 0, signs = 2
 
- type(invovl_kpt_type), pointer :: invovl
- type(c_ptr) :: invovl_c_handle
+  type(invovl_kpt_type), pointer :: invovl
+  type(c_ptr) :: invovl_c_handle
 
-#if defined(HAVE_FC_ISO_C_BINDING) && defined(HAVE_GPU_CUDA)
- type(invovl_kpt_gpu_type) :: invovl_gpu
-#endif
+  integer, parameter :: &
+    & timer_apply_inv_ovl_opernla = 1630, &
+    & timer_apply_inv_ovl_opernlb = 1631, &
+    & timer_apply_inv_ovl_inv_s   = 1632
 
- integer, parameter :: &
-      & timer_apply_inv_ovl_opernla = 1630, &
-      & timer_apply_inv_ovl_opernlb = 1631, &
-      & timer_apply_inv_ovl_inv_s   = 1632
+  ! *************************************************************************
 
-! *************************************************************************
+  ikpt_this_proc=bandfft_kpt_get_ikpt()
+  invovl => invovl_kpt(ikpt_this_proc)
 
- ikpt_this_proc=bandfft_kpt_get_ikpt()
- invovl => invovl_kpt(ikpt_this_proc)
+  if(ham%istwf_k == 1) then
+    cplx = 2
+    blas_transpose = 'c'
+  else
+    cplx = 1
+    blas_transpose = 't'
+  end if
 
- if(ham%istwf_k == 1) then
-   cplx = 2
-   blas_transpose = 'c'
- else
-   cplx = 1
-   blas_transpose = 't'
- end if
+  ABI_MALLOC(proj,       (cplx,invovl%nprojs,nspinor*ndat))
+  ABI_MALLOC(sm1proj,    (cplx,invovl%nprojs,nspinor*ndat))
+  ABI_MALLOC(PtPsm1proj, (cplx,invovl%nprojs,nspinor*ndat))
+  proj = zero
+  sm1proj = zero
+  PtPsm1proj = zero
 
- ABI_MALLOC(proj,       (cplx,invovl%nprojs,nspinor*ndat))
- ABI_MALLOC(sm1proj,    (cplx,invovl%nprojs,nspinor*ndat))
- ABI_MALLOC(PtPsm1proj, (cplx,invovl%nprojs,nspinor*ndat))
- proj = zero
- sm1proj = zero
- PtPsm1proj = zero
+  proj_dim = (/ size(proj,1), size(proj,2), size(proj,3) /)
 
- proj_dim = (/ size(proj,1), size(proj,2), size(proj,3) /)
+  indlmn_dim = (/ size(ham%indlmn,1), size(ham%indlmn,2), size(ham%indlmn,3) /)
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_FC_ISO_C_BINDING)
 
- !! memory allocation of data used in solve_inner_gpu
- !! note : this is actually done only once
- if (ham%use_gpu_cuda==1) then
-   !! make sure to use sizes from apply_invovl
-   proj_dim(1) = cplx
-   proj_dim(2) = invovl%nprojs
-   proj_dim(3) = nspinor*ndat
-   call f_gpu_apply_invovl_inner_alloc(proj_dim, ham%ntypat, 0)
+  !! memory allocation of data used in solve_inner_gpu
+  !! note : this is actually done only once
+  if (ham%use_gpu_cuda==1) then
 
-   ! TODO find a better place to put that initialization
-   indlmn_dim(1) = size(ham%indlmn,1)
-   indlmn_dim(2) = size(ham%indlmn,2)
-   indlmn_dim(3) = size(ham%indlmn,3)
-   call f_gpu_init_invovl_data(indlmn_dim, c_loc(ham%indlmn(1,1,1)))
- endif
+    ! make sure to use sizes from apply_invovl
+    call f_gpu_apply_invovl_inner_alloc(proj_dim, ham%ntypat, 0)
+
+    ! TODO find a better place to put that initialization
+    call f_gpu_init_invovl_data(indlmn_dim, c_loc(ham%indlmn(1,1,1)))
+
+  end if
 
 #endif
 
 
+  call timab(timer_apply_inv_ovl_opernla, 1, tsec)
 
- call timab(timer_apply_inv_ovl_opernla, 1, tsec)
+  call pawcprj_alloc(cwaveprj_in,0,ham%dimcprj)
 
- call pawcprj_alloc(cwaveprj_in,0,ham%dimcprj)
+  ! get the cprj
+  ABI_NVTX_START_RANGE(NVTX_INVOVL_NONLOP1)
+  choice = 0 ! only compute cprj, nothing else
+  cpopt = 0 ! compute and save cprj
+  paw_opt = 3 ! S nonlocal operator
+  if (mpi_enreg%paral_kgb==1) then
+    call prep_nonlop(choice,cpopt,cwaveprj_in,enlout,ham,idir,lambda_block,ndat,mpi_enreg,&
+      &                   nnlout,paw_opt,signs,sm1cwavef,tim_nonlop,cwavef,gvnlxc,already_transposed=.true.)
+  else
+    call nonlop(choice,cpopt,cwaveprj_in,enlout,ham,idir,lambda_block,mpi_enreg,ndat,nnlout,&
+      &              paw_opt,signs,sm1cwavef,tim_nonlop,cwavef,gvnlxc)
+  end if
+  ABI_NVTX_END_RANGE()
 
- ! get the cprj
- ABI_NVTX_START_RANGE(NVTX_INVOVL_NONLOP1)
- choice = 0 ! only compute cprj, nothing else
- cpopt = 0 ! compute and save cprj
- paw_opt = 3 ! S nonlocal operator
- if (mpi_enreg%paral_kgb==1) then
-   call prep_nonlop(choice,cpopt,cwaveprj_in,enlout,ham,idir,lambda_block,ndat,mpi_enreg,&
-&                   nnlout,paw_opt,signs,sm1cwavef,tim_nonlop,cwavef,gvnlxc,already_transposed=.true.)
- else
-   call nonlop(choice,cpopt,cwaveprj_in,enlout,ham,idir,lambda_block,mpi_enreg,ndat,nnlout,&
-&              paw_opt,signs,sm1cwavef,tim_nonlop,cwavef,gvnlxc)
- end if
- ABI_NVTX_END_RANGE()
+  call timab(timer_apply_inv_ovl_opernla, 2, tsec)
+  call timab(timer_apply_inv_ovl_inv_s, 1, tsec)
 
- call timab(timer_apply_inv_ovl_opernla, 2, tsec)
- call timab(timer_apply_inv_ovl_inv_s, 1, tsec)
+  ! copy cwaveprj_in to proj(:,:)
+  do idat=1, ndat*nspinor
+    shift = 0
+    do iatom = 1, ham%natom
+      nlmn = cwaveprj_in(iatom, idat)%nlmn
+      proj(1:cplx, shift+1:shift+nlmn, idat) = cwaveprj_in(iatom, idat)%cp(1:cplx, 1:nlmn)
+      shift = shift + nlmn
+    end do
+  end do
 
- ! copy cwaveprj_in to proj(:,:)
- do idat=1, ndat*nspinor
-   shift = 0
-   do iatom = 1, ham%natom
-     nlmn = cwaveprj_in(iatom, idat)%nlmn
-     proj(1:cplx, shift+1:shift+nlmn, idat) = cwaveprj_in(iatom, idat)%cp(1:cplx, 1:nlmn)
-     shift = shift + nlmn
-   end do
- end do
+  !multiply by S^1
+  ABI_NVTX_START_RANGE(NVTX_INVOVL_INNER)
+  ! TODO : when solve_inner_gpu is ready, update the following to activate GPU computation
+  if (ham%use_gpu_cuda == 42) then
 
- !multiply by S^1
- ABI_NVTX_START_RANGE(NVTX_INVOVL_INNER)
- ! TODO : when solve_inner_gpu is ready, uncomment the following
-!  if (ham%use_gpu_cuda == 1) then
+#if defined(HAVE_FC_ISO_C_BINDING) && defined(HAVE_GPU_CUDA)
 
-! #if defined(HAVE_FC_ISO_C_BINDING) && defined(HAVE_GPU_CUDA)
-!
- if (mpi_enreg%nproc_fft /= 1) then
-   ABI_ERROR("[66_wfs/m_invovl.F90:apply_invovl] nproc_fft must be 1, when GPU/CUDA is activated")
- end if
+    if (mpi_enreg%nproc_fft /= 1) then
+      ABI_ERROR("[66_wfs/m_invovl.F90:apply_invovl] nproc_fft must be 1, when GPU/CUDA is activated")
+    end if
 
- !nattyp_dim = size(ham%nattyp)
+    nattyp_dim = size(ham%nattyp)
 
-!    invovl_gpu = make_invovl_kpt_gpu(invovl)
- call f_solve_inner_gpu(invovl_gpu, proj_dim, c_loc(proj(1,1,1)), &
-   & c_loc(sm1proj(1,1,1)), c_loc(PtPsm1proj(1,1,1)), nattyp_dim, c_loc(ham%nattyp(1)), ham%ntypat, &
-   & ham%lmnmax, cplx, block_sliced)
+    call f_solve_inner_gpu(proj_dim, c_loc(proj(1,1,1)), &
+      & c_loc(sm1proj(1,1,1)), c_loc(PtPsm1proj(1,1,1)), &
+      & nattyp_dim, c_loc(ham%nattyp(1)), ham%ntypat, &
+      & ham%lmnmax, cplx, block_sliced)
 
-! #endif
+#endif
 
-!  else
-   call solve_inner(invovl, ham, cplx, mpi_enreg, proj, ndat*nspinor, sm1proj, PtPsm1proj, block_sliced)
-   sm1proj = - sm1proj
-   PtPsm1proj = - PtPsm1proj
-! end if
- ABI_NVTX_END_RANGE()
+  else
 
- ! copy sm1proj to cwaveprj(:,:)
- do idat=1, ndat*nspinor
-   shift = 0
-   do iatom = 1, ham%natom
-     nlmn = cwaveprj(iatom, idat)%nlmn
-     cwaveprj(iatom, idat)%cp(1:cplx, 1:nlmn) = sm1proj(1:cplx, shift+1:shift+nlmn, idat)
-     shift = shift + nlmn
-   end do
- end do
- call timab(timer_apply_inv_ovl_inv_s, 2, tsec)
- call timab(timer_apply_inv_ovl_opernlb, 1, tsec)
+    call solve_inner(invovl, ham, cplx, mpi_enreg, proj, ndat*nspinor, sm1proj, PtPsm1proj, block_sliced)
+    sm1proj = - sm1proj
+    PtPsm1proj = - PtPsm1proj
+  end if
 
- ! get the corresponding wf
- ABI_NVTX_START_RANGE(NVTX_INVOVL_NONLOP2)
- cpopt = 2 ! reuse cprj
- choice = 7 ! get wf from cprj, without the application of S
- paw_opt = 3
- if (mpi_enreg%paral_kgb==1) then
-   call prep_nonlop(choice,cpopt,cwaveprj,enlout,ham,idir,lambda_block,ndat,mpi_enreg,nnlout,&
-&                   paw_opt,signs,sm1cwavef,tim_nonlop,cwavef,gvnlxc,already_transposed=.true.)
- else
-   call nonlop(choice,cpopt,cwaveprj,enlout,ham,idir,lambda_block,mpi_enreg,ndat,nnlout,paw_opt,&
-&              signs,sm1cwavef,tim_nonlop,cwavef,gvnlxc)
- end if
- ABI_NVTX_END_RANGE()
+  ABI_NVTX_END_RANGE()
 
- call timab(timer_apply_inv_ovl_opernlb, 2, tsec)
+  ! copy sm1proj to cwaveprj(:,:)
+  do idat=1, ndat*nspinor
+    shift = 0
+    do iatom = 1, ham%natom
+      nlmn = cwaveprj(iatom, idat)%nlmn
+      cwaveprj(iatom, idat)%cp(1:cplx, 1:nlmn) = sm1proj(1:cplx, shift+1:shift+nlmn, idat)
+      shift = shift + nlmn
+    end do
+  end do
+  call timab(timer_apply_inv_ovl_inv_s, 2, tsec)
+  call timab(timer_apply_inv_ovl_opernlb, 1, tsec)
 
- ! copy PtPSm1proj to cwaveprj(:,:)
- do idat=1, ndat*nspinor
-   shift = 0
-   do iatom = 1, ham%natom
-     nlmn = cwaveprj(iatom, idat)%nlmn
-     cwaveprj(iatom, idat)%cp(1:cplx, 1:nlmn) = PtPsm1proj(1:cplx, shift+1:shift+nlmn, idat)
-     shift = shift + nlmn
-   end do
- end do
+  ! get the corresponding wf
+  ABI_NVTX_START_RANGE(NVTX_INVOVL_NONLOP2)
+  cpopt = 2 ! reuse cprj
+  choice = 7 ! get wf from cprj, without the application of S
+  paw_opt = 3
+  if (mpi_enreg%paral_kgb==1) then
+    call prep_nonlop(choice,cpopt,cwaveprj,enlout,ham,idir,lambda_block,ndat,mpi_enreg,nnlout,&
+      &                   paw_opt,signs,sm1cwavef,tim_nonlop,cwavef,gvnlxc,already_transposed=.true.)
+  else
+    call nonlop(choice,cpopt,cwaveprj,enlout,ham,idir,lambda_block,mpi_enreg,ndat,nnlout,paw_opt,&
+      &              signs,sm1cwavef,tim_nonlop,cwavef,gvnlxc)
+  end if
+  ABI_NVTX_END_RANGE()
 
- sm1cwavef = cwavef + sm1cwavef
- call pawcprj_axpby(one, one, cwaveprj_in, cwaveprj)
- call pawcprj_free(cwaveprj_in)
+  call timab(timer_apply_inv_ovl_opernlb, 2, tsec)
 
- ABI_FREE(proj)
- ABI_FREE(sm1proj)
- ABI_FREE(PtPsm1proj)
+  ! copy PtPSm1proj to cwaveprj(:,:)
+  do idat=1, ndat*nspinor
+    shift = 0
+    do iatom = 1, ham%natom
+      nlmn = cwaveprj(iatom, idat)%nlmn
+      cwaveprj(iatom, idat)%cp(1:cplx, 1:nlmn) = PtPsm1proj(1:cplx, shift+1:shift+nlmn, idat)
+      shift = shift + nlmn
+    end do
+  end do
+
+  sm1cwavef = cwavef + sm1cwavef
+  call pawcprj_axpby(one, one, cwaveprj_in, cwaveprj)
+  call pawcprj_free(cwaveprj_in)
+
+  ABI_FREE(proj)
+  ABI_FREE(sm1proj)
+  ABI_FREE(PtPsm1proj)
 
 end subroutine apply_invovl
 !!***
