@@ -167,15 +167,10 @@ real(dp) :: xred(3,ab_mover%natom),strten(6)
 !### 02. Compute the dimension of vectors (ndim)
 
  ndim=3*ab_mover%natom
- if(ab_mover%optcell==1 .or.&
-& ab_mover%optcell==4 .or.&
-& ab_mover%optcell==5 .or.&
-& ab_mover%optcell==6) ndim=ndim+1
+ if(ab_mover%optcell==1) ndim=ndim+1
  if(ab_mover%optcell==2 .or.&
 & ab_mover%optcell==3) ndim=ndim+6
- if(ab_mover%optcell==7 .or.&
-& ab_mover%optcell==8 .or.&
-& ab_mover%optcell==9) ndim=ndim+3
+ if(ab_mover%optcell>=4) ndim=ndim+3
 
  if(zDEBUG) write(std_out,*) 'Dimension of vin, vout and hessian (ndim): ',ndim
 
@@ -269,7 +264,7 @@ real(dp) :: xred(3,ab_mover%natom),strten(6)
 !The values of vin from the previous iteration
 !should be the same
 !if (itime==1)then
- call xfpack_x2vin(acell, acell0, ab_mover%natom, ndim,&
+ call xfpack_x2vin(acell, ab_mover%natom, ndim,&
 & ab_mover%nsym, ab_mover%optcell, rprim, rprimd0,&
 & ab_mover%symrel, ucvol, ucvol0, vin, xred)
 !end if
@@ -313,7 +308,7 @@ real(dp) :: xred(3,ab_mover%natom),strten(6)
 
    if (ab_mover%restartxf/=0) then
 
-     call xfh_recover_new(ab_xfh,ab_mover,acell,acell0,cycl_main,residual,&
+     call xfh_recover_new(ab_xfh,ab_mover,acell,cycl_main,residual,&
 &     hessin,ndim,rprim,rprimd0,strten,ucvol,ucvol0,vin,&
 &     vin_prev,vout,vout_prev,xred)
 
@@ -635,15 +630,10 @@ real(dp) :: strten(6)
 !### 02. Compute the dimension of vectors (ndim)
 
  ndim=3*ab_mover%natom
- if(ab_mover%optcell==1 .or.&
-& ab_mover%optcell==4 .or.&
-& ab_mover%optcell==5 .or.&
-& ab_mover%optcell==6) ndim=ndim+1
+ if(ab_mover%optcell==1) ndim=ndim+1
  if(ab_mover%optcell==2 .or.&
 & ab_mover%optcell==3) ndim=ndim+6
- if(ab_mover%optcell==7 .or.&
-& ab_mover%optcell==8 .or.&
-& ab_mover%optcell==9) ndim=ndim+3
+ if(ab_mover%optcell>=4) ndim=ndim+3
 
  if(zDEBUG) write(std_out,*) 'Dimension of vin, vout and hessian (ndim): ',ndim
 
@@ -737,7 +727,7 @@ real(dp) :: strten(6)
 !The values of vin from the previous iteration
 !should be the same
 !if (itime==1)then
- call xfpack_x2vin(acell, acell0, ab_mover%natom, ndim,&
+ call xfpack_x2vin(acell, ab_mover%natom, ndim,&
 & ab_mover%nsym, ab_mover%optcell, rprim, rprimd0,&
 & ab_mover%symrel, ucvol, ucvol0, vin, xred)
 !end if
@@ -771,9 +761,11 @@ real(dp) :: strten(6)
    ABI_FREE(diag)
 
    if (ab_mover%restartxf/=0) then
-     call xfh_recover_new(ab_xfh,ab_mover,acell,acell0,cycl_main,residual,&
+
+     call xfh_recover_new(ab_xfh,ab_mover,acell,cycl_main,residual,&
        hessin,ndim,rprim,rprimd0,strten,ucvol,ucvol0,vin,&
        vin_prev,vout,vout_prev,xred)
+
    end if
 
  end if

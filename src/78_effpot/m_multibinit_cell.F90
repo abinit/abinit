@@ -34,6 +34,9 @@ module m_multibinit_cell
   use m_supercell_maker , only: supercell_maker_t
   use m_multibinit_dataset, only : multibinit_dtset_type
   use m_crystal, only : crystal_t
+
+  use m_spmat_spvec, only: sp_real_vec
+  use m_lattice_lwf_map, only: lwf_latt_coeff_t
   implicit none
 
 !!***
@@ -49,6 +52,8 @@ module m_multibinit_cell
      integer:: natom = 0
      integer, allocatable  :: zion(:)
      real(dp), allocatable :: masses(:), xcart(:,:)
+     integer, allocatable :: ilatt_prim(:)
+     integer, allocatable :: rvec(:,:)
      real(dp) :: cell(3,3)
    contains
      procedure :: initialize => latt_initialize
@@ -85,8 +90,12 @@ module m_multibinit_cell
   !----------------------------------------------------------------------
   type, public :: mbcell_lwf_t
      integer :: nlwf =0 ! number of lattice wannier functions
+     integer, allocatable ::  ilwf_prim(:) ! index of primitive cell
+     integer, allocatable ::  rvec(:,:) ! R cell vectors for each spin (for supercell)
+     real(dp), allocatable :: lwf_masses(:)
+     type(lwf_latt_coeff_t) :: lwf_latt_coeffs  
    contains
-     procedure :: initialize => lwf_initialize
+     Procedure :: initialize => lwf_initialize
      procedure :: finalize => lwf_finalize
      procedure :: fill_supercell => lwf_fill_supercell
      procedure :: from_unitcell => lwf_from_unitcell
@@ -109,6 +118,7 @@ module m_multibinit_cell
      procedure :: finalize
      procedure :: set_lattice   ! intialize the lattice
      procedure :: set_spin      ! initilzie the spin
+     procedure :: set_lwf
      procedure :: fill_supercell  ! fill supercell.
      !procedure :: from_unitcell
   end type mbcell_t
@@ -151,9 +161,11 @@ contains
     class(mbcell_t), intent(inout) :: self
     integer, intent(in) :: natom, zion(:)
     real(dp), intent(in) :: cell(3,3), xcart(:,:), masses(:)
-    self%has_lattice=.True.
-    call self%lattice%initialize(natom=natom, cell=cell, &
-         &xcart=xcart, masses=masses, zion=zion)
+    if (.not. self%has_lattice) then
+        self%has_lattice=.True.
+        call self%lattice%initialize(natom=natom, cell=cell, &
+            &xcart=xcart, masses=masses, zion=zion)
+    endif
   end subroutine set_lattice
 
 
@@ -185,10 +197,11 @@ contains
   !----------------------------------------------------------------------
   !> @brief initialize LWF sub type
   !----------------------------------------------------------------------
-  subroutine set_lwf(self)
+  subroutine set_lwf(self, nlwf)
     class(mbcell_t) , intent(inout):: self
+    integer, intent(in) :: nlwf
     self%has_lwf=.True.
-    call self%lwf%initialize()
+    call self%lwf%initialize(nlwf)
   end subroutine set_lwf
 
   !----------------------------------------------------------------------
@@ -538,14 +551,25 @@ contains
 
 
   !========================= LWF =================================
-  Subroutine lwf_initialize(self)
+  Subroutine lwf_initialize(self, nlwf)
     class(mbcell_lwf_t), intent(inout) :: self
-    ABI_UNUSED_A(self)
+    integer, intent(in) :: nlwf
+    self%nlwf=nlwf
+    ABI_MALLOC(self%ilwf_prim, (nlwf))
+    ABI_MALLOC(self%rvec, (3, nlwf))
+    ABI_MALLOC(self%lwf_masses, (nlwf))
+    !ABI_MALLOC(self%lwf_latt_coeffs, (self%nlwf))
+    !call self%lwf_latt_coeffs%initialize(self%nlwf, wlf)
+    ! lwf_latt_coeffs is only initialized in primitive potential
   end subroutine lwf_initialize
 
   subroutine lwf_finalize(self)
     class(mbcell_lwf_t), intent(inout) :: self
-    ABI_UNUSED_A(self)
+    self%nlwf=0
+    ABI_SFREE(self%ilwf_prim)
+    ABI_SFREE(self%rvec)
+    ABI_SFREE(self%lwf_masses)
+    call self%lwf_latt_coeffs%finalize()
   end subroutine lwf_finalize
 
   subroutine lwf_fill_supercell(self, sc_maker,supercell)
@@ -559,9 +583,11 @@ contains
     class(mbcell_lwf_t) :: self
     type(supercell_maker_t):: sc_maker
     type(mbcell_lwf_t) :: unitcell
-    ABI_UNUSED_A(self)
-    ABI_UNUSED_A(sc_maker)
-    ABI_UNUSED_A(unitcell)
+    integer :: i
+    self%nlwf=sc_maker%ncells*unitcell%nlwf
+    call sc_maker%repeat([(i ,i=1, unitcell%nlwf)], self%ilwf_prim)
+    call sc_maker%rvec_for_each(unitcell%nlwf, self%rvec)
+    call sc_maker%repeat_real1d(unitcell%lwf_masses, self%lwf_masses)
   end subroutine lwf_from_unitcell
 
 end module m_multibinit_cell
