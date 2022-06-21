@@ -40,10 +40,12 @@
 
 extern "C" void xmpi_sum_dp_c(double* array, int32_t array_size, MPI_Fint* comm, int32_t* ierr);
 
-//! token used to store memory state.
-//! if memory     already allocated : gpu_initialized is 1
-//! if memory not already allocated : gpu_initialized is 0 and device memory allocation is needed
-static int gpu_initialized = 0;
+//! token used to store memory state for buffers that need to be uploaded each time
+//! apply_block is called.
+//!
+//! if memory     already allocated : gpu_inner_allocated is 1
+//! if memory not already allocated : gpu_inner_allocated is 0 and device memory allocation is needed
+static int gpu_inner_allocated = 0;
 
 //! proj, sm1proj, ptp_sm1proj in GPU memory
 static double* proj_gpu;
@@ -52,6 +54,14 @@ static double* ptp_sm1proj_gpu;
 static double* temp_proj;
 static double* resid_gpu;
 static double* precondresid_gpu;
+
+//! token used to store memory state for buffers that need to be uploaded each time
+//! make_block is called.
+static int gpu_inv_overlap_matrix_allocated = 0;
+
+//! inverse overlap matrix on GPU
+static double* inv_sij_gpu;
+static double* inv_s_approx_gpu;
 
 // hamiltonian data on CPU/GPU
 
@@ -219,26 +229,47 @@ void apply_block_gpu(int32_t cplx,
 
 //! \brief Allocation routine for apply inverse overlap operator.
 //! we reallocate only if explicitely requested
-extern "C" void gpu_apply_invovl_inner_alloc(int32_t proj_dim[3], int32_t ntypat, int32_t realloc)
+//!
+//! note:
+//! proj_dim[0] = cplx
+//! proj_dim[1] = nprojs
+//! proj_dim[2] = ndat*nspinor
+//!
+//! \param[in] proj_dim dimension of proj array
+//! \param[in] ntypat of nlmn array
+//! \param[in] maximun number of lmn used as a maximum dimension for inverse overlap matrices
+//! \param[in] realloc if 1, dealloc before reallocating
+extern "C" void gpu_apply_invovl_inner_alloc(int32_t proj_dim[3],
+                                             int32_t ntypat,
+                                             int32_t realloc)
 {
   // when memory allocation already done, and realloc is true, then
   // we deallocate first before re-allocating
-  if (gpu_initialized==1 and realloc == true)
+  if (gpu_inner_allocated==1 and realloc == 1)
     gpu_apply_invovl_inner_dealloc();
 
-  if (gpu_initialized == 0) {
-    int32_t proj_size = proj_dim[0]*proj_dim[1]*proj_dim[2]*sizeof(double);
+  if (gpu_inner_allocated == 0) {
+    //int32_t cplx = proj_dim[0];
+    //int32_t nprojs = proj_dim[1];
+    //int32_t ndat_nspinor = proj_dim[2];
 
-    CHECK_CUDA_ERROR( cudaMalloc((void**)&proj_gpu, proj_size) );
-    CHECK_CUDA_ERROR( cudaMalloc((void**)&sm1proj_gpu, proj_size) );
-    CHECK_CUDA_ERROR( cudaMalloc((void**)&ptp_sm1proj_gpu, proj_size) );
-    CHECK_CUDA_ERROR( cudaMalloc((void**)&temp_proj, proj_size) );
-    CHECK_CUDA_ERROR( cudaMalloc((void**)&resid_gpu, proj_size) );
-    CHECK_CUDA_ERROR( cudaMalloc((void**)&precondresid_gpu, proj_size) );
+    int32_t proj_size_in_bytes = proj_dim[0]*proj_dim[1]*proj_dim[2]*sizeof(double);
+
+    CHECK_CUDA_ERROR( cudaMalloc((void**)&proj_gpu, proj_size_in_bytes) );
+    CHECK_CUDA_ERROR( cudaMalloc((void**)&sm1proj_gpu, proj_size_in_bytes) );
+    CHECK_CUDA_ERROR( cudaMalloc((void**)&ptp_sm1proj_gpu, proj_size_in_bytes) );
+
+    CHECK_CUDA_ERROR( cudaMemset( proj_gpu, 0, proj_size_in_bytes) );
+    CHECK_CUDA_ERROR( cudaMemset( sm1proj_gpu, 0, proj_size_in_bytes) );
+    CHECK_CUDA_ERROR( cudaMemset( ptp_sm1proj_gpu, 0, proj_size_in_bytes) );
+
+    CHECK_CUDA_ERROR( cudaMalloc((void**)&temp_proj, proj_size_in_bytes) );
+    CHECK_CUDA_ERROR( cudaMalloc((void**)&resid_gpu, proj_size_in_bytes) );
+    CHECK_CUDA_ERROR( cudaMalloc((void**)&precondresid_gpu, proj_size_in_bytes) );
 
     nlmn =   (uint8_t *)  malloc(ntypat * sizeof(uint8_t) );
 
-    gpu_initialized = 1;
+    gpu_inner_allocated = 1;
   }
 
 } // gpu_apply_invovl_inner_alloc
@@ -248,21 +279,64 @@ extern "C" void gpu_apply_invovl_inner_dealloc()
 {
 
   // if GPU data are not already allocated, don't do anything
-  if (gpu_initialized == 1) {
+  if (gpu_inner_allocated == 1) {
 
     CHECK_CUDA_ERROR( cudaFree(proj_gpu) );
     CHECK_CUDA_ERROR( cudaFree(sm1proj_gpu) );
     CHECK_CUDA_ERROR( cudaFree(ptp_sm1proj_gpu) );
+
     CHECK_CUDA_ERROR( cudaFree(temp_proj) );
     CHECK_CUDA_ERROR( cudaFree(resid_gpu) );
     CHECK_CUDA_ERROR( cudaFree(precondresid_gpu) );
 
     free(nlmn);
 
-    gpu_initialized = 0;
+    gpu_inner_allocated = 0;
   }
 
 } // gpu_apply_invovl_inner_dealloc
+
+//! \brief Allocation routine for apply inverse overlap operator.
+//! we reallocate only if explicitely requested
+//!
+//! \param[in] complex or real data
+//! \param[in] maximun number of lmn used as a maximum dimension for inverse overlap matrices
+//! \param[in] number of types of atoms
+//! \param[in] realloc if 1, dealloc before reallocating
+extern "C" void gpu_apply_invovl_matrix_alloc(int32_t cplx,
+                                              int32_t lmnmax,
+                                              int32_t ntypat,
+                                              int32_t realloc)
+{
+  // when memory allocation already done, and realloc is true, then
+  // we deallocate first before re-allocating
+  if (gpu_inv_overlap_matrix_allocated==1 and realloc == 1)
+    gpu_apply_invovl_matrix_dealloc();
+
+  if (gpu_inv_overlap_matrix_allocated == 0) {
+
+    CHECK_CUDA_ERROR( cudaMalloc((void**) &inv_sij_gpu, cplx*lmnmax*lmnmax*ntypat*sizeof(double)) );
+    CHECK_CUDA_ERROR( cudaMalloc((void**) &inv_s_approx_gpu, cplx*lmnmax*lmnmax*ntypat*sizeof(double)) );
+
+    gpu_inv_overlap_matrix_allocated = 1;
+  }
+
+} // gpu_apply_invovl_matrix_alloc
+
+//! \brief Allocation routine for apply inverse overlap operator.
+extern "C" void gpu_apply_invovl_matrix_dealloc()
+{
+
+  // if GPU data are not already allocated, don't do anything
+  if (gpu_inv_overlap_matrix_allocated == 1) {
+
+    CHECK_CUDA_ERROR( cudaFree(inv_sij_gpu)      );
+    CHECK_CUDA_ERROR( cudaFree(inv_s_approx_gpu) );
+
+    gpu_inv_overlap_matrix_allocated = 0;
+  }
+
+} // gpu_apply_invovl_matrix_dealloc
 
 
 //! initialize arrays nlmn
@@ -292,10 +366,23 @@ extern "C" void init_invovl_data(int32_t indlmn_dim[3], int32_t* indlmn)
 
 } // init_invovl_data
 
+//! upload inverse overlap matrices
+extern "C" void upload_inverse_overlap(const invovl_kpt_gpu_t invovl,
+                                       int32_t cplx, int32_t lmnmax, int32_t ntypat)
+{
+
+  CHECK_CUDA_ERROR( cudaMemcpy(inv_sij_gpu, invovl.inv_sij, cplx*lmnmax*lmnmax*ntypat*sizeof(double), cudaMemcpyHostToDevice) );
+  CHECK_CUDA_ERROR( cudaMemcpy(inv_s_approx_gpu, invovl.inv_s_approx, cplx*lmnmax*lmnmax*ntypat*sizeof(double), cudaMemcpyHostToDevice) );
+
+} // upload_inverse_overlap
+
 //! apply inverse overlap operator (inner part of the computation)
 //!
+//! note:
+//! proj_dim[0] = cplx
+//! proj_dim[1] = nprojs
+//! proj_dim[2] = ndat*nspinor
 //!
-//! \param[in] invovl data
 //! \param[in] proj_dim gives the dimension of proj, sm1proj and ptp_sm1proj
 //! \param[in] proj is a 3D array of size (cplx, nprojs, nspinor*ndat)
 //! \param[inout] sm1proj is a 3D array of size (cplx, nprojs, nspinor*ndat)
@@ -305,9 +392,8 @@ extern "C" void init_invovl_data(int32_t indlmn_dim[3], int32_t* indlmn)
 //! \param[in] lmnmax
 //! \param[in] cplx (complex or real data)
 //! \param[in] block_sliced (can only be 0 or 1), switch used inside apply_block_gpu
-extern "C" void solve_inner_gpu(invovl_kpt_gpu_t* invovl,
-                                int32_t proj_dim[3],
-                                double* proj,
+extern "C" void solve_inner_gpu(int32_t proj_dim[3],
+                                const double* proj,
                                 double* sm1proj,
                                 double* ptp_sm1proj,
                                 int32_t nattyp_dim,
@@ -322,7 +408,7 @@ extern "C" void solve_inner_gpu(invovl_kpt_gpu_t* invovl,
   double* normprojs; // size is ndat*nspinor;
 
   // number of projections
-  int32_t nprojs = invovl->nprojs;
+  int32_t nprojs = proj_dim[1];
 
   // MPI error return value
   //int ierr;
@@ -331,6 +417,7 @@ extern "C" void solve_inner_gpu(invovl_kpt_gpu_t* invovl,
   //int nlmntot_this_proc = nprojs;
 
   int ndat = proj_dim[2];
+  int proj_size_in_bytes = proj_dim[0]*proj_dim[1]*proj_dim[2]*sizeof(double);
 
   // TO BE REMOVED
   printf("INSIDE solve_inner_gpu\n");
@@ -347,13 +434,16 @@ extern "C" void solve_inner_gpu(invovl_kpt_gpu_t* invovl,
     normprojs[idat] = norm;
   }
 
+  // upload proj to GPU memory
+  CHECK_CUDA_ERROR( cudaMemcpy(proj_gpu, proj, proj_size_in_bytes, cudaMemcpyHostToDevice) );
+
   // first guess for sm1proj
   // mat => inv_s_approx
   // x => proj
   // y => sm1proj
   // compute sm1proj = inv_s_approx * proj
   apply_block_gpu(cplx, ntypat, nattyp, lmnmax,
-                  invovl->inv_s_approx, nprojs, ndat,
+                  inv_s_approx_gpu, nprojs, ndat,
                   proj_gpu, sm1proj_gpu,
                   block_sliced);
 
@@ -371,7 +461,7 @@ extern "C" void solve_inner_gpu(invovl_kpt_gpu_t* invovl,
 
     // compute resid = proj - (D^-1 + PtP)sm1proj
     apply_block_gpu(cplx, ntypat, nattyp, lmnmax,
-                    invovl->inv_sij, nprojs, ndat,
+                    inv_sij_gpu, nprojs, ndat,
                     sm1proj_gpu, resid_gpu,
                     block_sliced);
     // TODO temp_proj = sm1proj(:,ibeg:iend,:);
@@ -408,7 +498,11 @@ extern "C" void solve_inner_gpu(invovl_kpt_gpu_t* invovl,
     // TODO sm1proj = sm1proj + precondresid
   }
 
-
   free(normprojs);
+
+  // download sm1proj and ptp_sm1proj to host memory
+  CHECK_CUDA_ERROR( cudaMemcpy(sm1proj, sm1proj_gpu, proj_size_in_bytes, cudaMemcpyDeviceToHost) );
+  CHECK_CUDA_ERROR( cudaMemcpy(ptp_sm1proj, ptp_sm1proj_gpu, proj_size_in_bytes, cudaMemcpyDeviceToHost) );
+
 
 } // solve_inner_gpu
