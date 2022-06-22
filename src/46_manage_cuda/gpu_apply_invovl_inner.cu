@@ -126,10 +126,12 @@ void apply_block_gpu(int32_t cplx,
           x_ptr += shift;
           y_ptr += shift;
 
-          cublasZhemm(cublas_handle, CUBLAS_SIDE_LEFT,CUBLAS_FILL_MODE_UPPER, nlmn[itypat], nattyp[itypat], &c_one,
-                      mat_ptr, lmnmax,
-                      x_ptr, nlmn[itypat], &c_zero,
-                      y_ptr, nlmn[itypat]);
+          cublasStatus_t cublas_status =
+            cublasZhemm(cublas_handle, CUBLAS_SIDE_LEFT,CUBLAS_FILL_MODE_UPPER, nlmn[itypat], nattyp[itypat], &c_one,
+                        mat_ptr, lmnmax,
+                        x_ptr, nlmn[itypat], &c_zero,
+                        y_ptr, nlmn[itypat]);
+          CHECK_CUDA_ERROR(cublas_status);
 
         } else {
 
@@ -145,10 +147,12 @@ void apply_block_gpu(int32_t cplx,
           x_ptr += shift;
           y_ptr += shift;
 
-          cublasDsymm(cublas_handle, CUBLAS_SIDE_LEFT,CUBLAS_FILL_MODE_UPPER, nlmn[itypat], nattyp[itypat], &one,
-                      mat_ptr, lmnmax,
-                      x_ptr, nlmn[itypat], &zero,
-                      y_ptr, nlmn[itypat]);
+          cublasStatus_t cublas_status =
+            cublasDsymm(cublas_handle, CUBLAS_SIDE_LEFT,CUBLAS_FILL_MODE_UPPER, nlmn[itypat], nattyp[itypat], &one,
+                        mat_ptr, lmnmax,
+                        x_ptr, nlmn[itypat], &zero,
+                        y_ptr, nlmn[itypat]);
+          CHECK_CUDA_ERROR(cublas_status);
 
         } // end if cplx==2
 
@@ -182,17 +186,19 @@ void apply_block_gpu(int32_t cplx,
 
         // C = alpha*A*B + beta*C
         // same matrix A for all idat => strideA = 0
-        cublasZgemmStridedBatched(cublas_handle,
-                                  CUBLAS_OP_N, // op A
-                                  CUBLAS_OP_N, // op B
-                                  nlmn[itypat], nattyp[itypat], nlmn[itypat], // m,n,k
-                                  &c_one,                                     // alpha
-                                  mat_ptr, lmnmax, 0,                         // A(m,k), lda, strideA
-                                  x_ptr, nlmn[itypat], nprojs,                // B(k,n), ldb, strideB
-                                  &c_zero,                                    // beta
-                                  y_ptr, nlmn[itypat], nprojs,                // C(m,n), ldc, strideC
-                                  ndat                                        // batch count
-                                  );
+        cublasStatus_t cublas_status =
+          cublasZgemmStridedBatched(cublas_handle,
+                                    CUBLAS_OP_N, // op A
+                                    CUBLAS_OP_N, // op B
+                                    nlmn[itypat], nattyp[itypat], nlmn[itypat], // m,n,k
+                                    &c_one,                                     // alpha
+                                    mat_ptr, lmnmax, 0,                         // A(m,k), lda, strideA
+                                    x_ptr, nlmn[itypat], nprojs,                // B(k,n), ldb, strideB
+                                    &c_zero,                                    // beta
+                                    y_ptr, nlmn[itypat], nprojs,                // C(m,n), ldc, strideC
+                                    ndat                                        // batch count
+                                    );
+        CHECK_CUDA_ERROR(cublas_status);
 
 
       } // end of itypat
@@ -215,17 +221,19 @@ void apply_block_gpu(int32_t cplx,
 
         // C = alpha*A*B + beta*C
         // same matrix A for all idat => strideA = 0
-        cublasDgemmStridedBatched(cublas_handle,
-                                  CUBLAS_OP_N, // op A
-                                  CUBLAS_OP_N, // op B
-                                  nlmn[itypat], nattyp[itypat], nlmn[itypat], // m,n,k
-                                  &one,                                       // alpha
-                                  mat_ptr, lmnmax, 0,                         // A(m,k), lda, strideA
-                                  x_ptr, nlmn[itypat], nprojs,                // B(k,n), ldb, strideB
-                                  &zero,                                      // beta
-                                  y_ptr, nlmn[itypat], nprojs,                // C(m,n), ldc, strideC
-                                  ndat                                        // batch count
-                                  );
+        cublasStatus_t cublas_status =
+          cublasDgemmStridedBatched(cublas_handle,
+                                    CUBLAS_OP_N, // op A
+                                    CUBLAS_OP_N, // op B
+                                    nlmn[itypat], nattyp[itypat], nlmn[itypat], // m,n,k
+                                    &one,                                       // alpha
+                                    mat_ptr, lmnmax, 0,                         // A(m,k), lda, strideA
+                                    x_ptr, nlmn[itypat], nprojs,                // B(k,n), ldb, strideB
+                                    &zero,                                      // beta
+                                    y_ptr, nlmn[itypat], nprojs,                // C(m,n), ldc, strideC
+                                    ndat                                        // batch count
+                                    );
+        CHECK_CUDA_ERROR(cublas_status);
 
       } // end for itypat
 
@@ -516,29 +524,33 @@ extern "C" void solve_inner_gpu(int32_t proj_dim[3],
     // & x_cplx=cplx)
 
     if (cplx == 2) {
-      cublasZgemm(cublas_handle,
-                  CUBLAS_OP_N,            // op A
-                  CUBLAS_OP_N,            // op B
-                  nprojs, ndat, nprojs,   // m,n,k
-                  &c_one,                 // alpha
-                  (cuDoubleComplex*) gram_projs_gpu, nprojs, // A(m,k), lda
-                  (cuDoubleComplex*) temp_proj_gpu, nprojs,  // B(k,n), ldb
-                  &c_zero,                // beta
-                  (cuDoubleComplex*) ptp_sm1proj_gpu, nprojs // C(m,n), ldc
-                  );
+        cublasStatus_t cublas_status =
+          cublasZgemm(cublas_handle,
+                      CUBLAS_OP_N,            // op A
+                      CUBLAS_OP_N,            // op B
+                      nprojs, ndat, nprojs,   // m,n,k
+                      &c_one,                 // alpha
+                      (cuDoubleComplex*) gram_projs_gpu, nprojs, // A(m,k), lda
+                      (cuDoubleComplex*) temp_proj_gpu, nprojs,  // B(k,n), ldb
+                      &c_zero,                // beta
+                      (cuDoubleComplex*) ptp_sm1proj_gpu, nprojs // C(m,n), ldc
+                      );
+        CHECK_CUDA_ERROR(cublas_status);
     } else {
       double r_one = 1.0;
       double r_zero = 0.0;
-      cublasDgemm(cublas_handle,
-                  CUBLAS_OP_N,            // op A
-                  CUBLAS_OP_N,            // op B
-                  nprojs, ndat, nprojs,   // m,n,k
-                  &r_one,                 // alpha
-                  (double*) gram_projs_gpu, nprojs, // A(m,k), lda
-                  (double*) temp_proj_gpu, nprojs,  // B(k,n), ldb
-                  &r_zero,                // beta
-                  (double*) ptp_sm1proj_gpu, nprojs // C(m,n), ldc
-                  );
+      cublasStatus_t cublas_status =
+        cublasDgemm(cublas_handle,
+                    CUBLAS_OP_N,            // op A
+                    CUBLAS_OP_N,            // op B
+                    nprojs, ndat, nprojs,   // m,n,k
+                    &r_one,                 // alpha
+                    (double*) gram_projs_gpu, nprojs, // A(m,k), lda
+                    (double*) temp_proj_gpu, nprojs,  // B(k,n), ldb
+                    &r_zero,                // beta
+                    (double*) ptp_sm1proj_gpu, nprojs // C(m,n), ldc
+                    );
+      CHECK_CUDA_ERROR(cublas_status);
     }
 
     // compute resid = proj - resid - Ptpsm1proj
@@ -616,7 +628,6 @@ extern "C" void solve_inner_gpu(int32_t proj_dim[3],
       dim3 gridSize {(proj_size+blockSize.x-1)/blockSize.x,1,1};
       compute_sm1proj_v2<<<gridSize,blockSize>>>(sm1proj_gpu, precondresid_gpu, proj_size);
       GET_LAST_CUDA_ERROR("compute_sm1proj_v2");
-
     }
 
   } // end for i (1 to 30)
