@@ -188,15 +188,10 @@ subroutine pred_delocint(ab_mover,ab_xfh,deloc,forstr,hist,ionmov,itime,zDEBUG,i
  ndim=ndeloc
  deloc_int(:)=zero
  deloc_gred(:)=zero
- if(ab_mover%optcell==1 .or.&
-& ab_mover%optcell==4 .or.&
-& ab_mover%optcell==5 .or.&
-& ab_mover%optcell==6) ndim=ndim+1
+ if(ab_mover%optcell==1) ndim=ndim+1
  if(ab_mover%optcell==2 .or.&
 & ab_mover%optcell==3) ndim=ndim+6
- if(ab_mover%optcell==7 .or.&
-& ab_mover%optcell==8 .or.&
-& ab_mover%optcell==9) ndim=ndim+3
+ if(ab_mover%optcell>=4) ndim=ndim+3
 
  if(DEBUG) write(std_out,*) 'Dimension of vin, vout and hessian (ndim): ',ndim
 
@@ -399,7 +394,7 @@ subroutine pred_delocint(ab_mover,ab_xfh,deloc,forstr,hist,ionmov,itime,zDEBUG,i
 !Initialize input vectors : first vin, then vout
 !The values of vin from the previous iteration
 !should be the same
- call xfpack_x2vin(acell, acell0, ab_mover%natom-1, ndim,&
+ call xfpack_x2vin(acell, ab_mover%natom-1, ndim,&
 & ab_mover%nsym, ab_mover%optcell, rprimd, rprimd0,&
 & ab_mover%symrel, ucvol, ucvol0, vin, deloc_int)
 !end if
@@ -450,7 +445,7 @@ subroutine pred_delocint(ab_mover,ab_xfh,deloc,forstr,hist,ionmov,itime,zDEBUG,i
 
    if (ab_mover%restartxf/=0) then
 
-     call xfh_recover_deloc(ab_xfh,ab_mover,acell,acell0,cycl_main,&
+     call xfh_recover_deloc(ab_xfh,ab_mover,acell,cycl_main,&
 &     residual,hessin,ndim,rprimd,rprimd0,strten,ucvol,ucvol0,vin,vin_prev,&
 &     vout,vout_prev,xred,deloc,deloc_int,deloc_gred,bt_inv_matrix,gprimd,prim_int,&
 &     u_matrix)
@@ -1756,7 +1751,7 @@ end subroutine align_u_matrices
 !!
 !! SOURCE
 
-subroutine xfh_recover_deloc(ab_xfh,ab_mover,acell,acell0,cycl_main,&
+subroutine xfh_recover_deloc(ab_xfh,ab_mover,acell,cycl_main,&
 & gred,hessin,ndim,rprim,rprimd0,strten,ucvol,ucvol0,vin,vin_prev,&
 & vout,vout_prev,xred,deloc,deloc_int,deloc_gred,btinv,gprimd,prim_int,&
 & u_matrix)
@@ -1774,7 +1769,6 @@ type(delocint),intent(in) :: deloc
 
 !arrays
 real(dp),intent(inout) :: acell(3)
-real(dp),intent(in) :: acell0(3)
 real(dp),intent(inout) :: hessin(:,:)
 real(dp),intent(inout) :: xred(3,ab_mover%natom)
 real(dp),intent(inout) :: rprim(3,3)
@@ -1839,7 +1833,7 @@ real(dp) :: xcart(3,ab_mover%natom)
      call gred2gdeloc(btinv,deloc_gred,gred,ab_mover%natom,gprimd)
 
 !    Transfer it in vin, vout
-     call xfpack_x2vin(acell,acell0,ab_mover%natom-1,&
+     call xfpack_x2vin(acell,ab_mover%natom-1,&
 &     ndim,ab_mover%nsym,ab_mover%optcell,rprim,rprimd0,&
 &     ab_mover%symrel,ucvol,ucvol0,vin,deloc_int)
      call xfpack_f2vout(deloc_gred,ab_mover%natom-1,&
@@ -1865,7 +1859,7 @@ real(dp) :: xcart(3,ab_mover%natom)
        call gred2gdeloc(btinv,deloc_gred,gred,ab_mover%natom,gprimd)
 
 !      Tranfer it in vin_prev, vout_prev
-       call xfpack_x2vin(acell,acell0,ab_mover%natom-1,&
+       call xfpack_x2vin(acell,ab_mover%natom-1,&
 &       ndim,ab_mover%nsym,ab_mover%optcell,rprim,rprimd0,&
 &       ab_mover%symrel,ucvol,ucvol0,vin_prev,deloc_int)
        call xfpack_f2vout(deloc_gred,ab_mover%natom-1,&

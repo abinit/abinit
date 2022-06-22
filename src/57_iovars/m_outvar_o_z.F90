@@ -575,6 +575,9 @@ contains
  intarr(1,:)=dtsets(:)%prtnest
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtnest','INT',0)
 
+ intarr(1,:)=dtsets(:)%prtocc
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtocc','INT',0)
+
  intarr(1,:)=dtsets(:)%prtphbands
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtphbands','INT',0)
 

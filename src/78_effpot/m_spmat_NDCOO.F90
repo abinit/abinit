@@ -55,7 +55,7 @@ module m_spmat_NDCOO
   !-----------------------------------------------------------------------
   type, public :: ndcoo_mat_t
      integer :: ndim=0                  ! number of dimensions
-     integer :: nnz=0                   ! Number of (None-zero) entries. 
+     integer :: nnz=0                   ! Number of (None-zero) entries.
      integer, allocatable :: mshape(:)  ! the shape of the matrix. len(mshape)=ndim.
      ! Note that it is not checked if the index by the shaped. If the shape for some
      ! dimension is unkown, it can be set to -1.
@@ -315,7 +315,7 @@ contains
   !> Output:
   !> ngroup: number of groups
   !> ilist: list of one index of the pair (array(ngroup))
-  !> jlist: list of other index of the pair (array(ngroup)) 
+  !> jlist: list of other index of the pair (array(ngroup))
   !> ijstartend: start and end of each group (array(ngroup+1))
   !>           The starts will be ijstartend(1:ngroup)
   !>           The ends will be ijstartend(2: ngroup+1)-1
@@ -362,7 +362,7 @@ contains
       end do
       call self%pair_startend%push(self%nnz+1)
     end if
-    
+
     self%is_pair_grouped = .true.
 
   end subroutine group_by_pair
@@ -390,7 +390,7 @@ contains
     integer,            intent(in)    :: iv  ! which index is used for multiplication
     class(ndcoo_mat_t), intent(inout) :: res ! result
 
-    integer :: iind, iiv, j, jv 
+    integer :: iind, iiv, j, jv
     integer :: ind(1:res%ndim)
     real(dp) :: val
 
@@ -422,7 +422,7 @@ contains
     integer,            intent(in)    :: iv, jv  ! which indices are used for multiplication
     class(ndcoo_mat_t), intent(inout) :: res ! result
 
-    integer :: iind, iiv, ijv, jnew, j 
+    integer :: iind, iiv, ijv, jnew, j
     integer :: ind(1:res%ndim)
     real(dp) :: val
 
@@ -439,8 +439,8 @@ contains
           ind(jnew) = self%ind%data(j, iind)
         endif
       enddo
-      val = self%val%data(iind)*veci(iiv)*vecj(ijv) 
-      call res%add_entry(ind, val) 
+      val = self%val%data(iind)*veci(iiv)*vecj(ijv)
+      call res%add_entry(ind, val)
     end do
     call sum_duplicates(res)
 
@@ -499,7 +499,7 @@ contains
     if(.not.(self%is_pair_grouped)) then
       call self%group_by_pair()
     endif
- 
+
     do igroup = 1, self%pair_1list%size
       !precalculate scalar product of first and second columns for each group
       istart=self%pair_startend%data(igroup)
@@ -538,8 +538,8 @@ contains
     !print *,  "ngroup: ", ngroup
     !print *, "i1list: ", i1list
     !print *, "ise: ", ise
-    if(allocated(i1list)) ABI_FREE(i1list)
-    if(allocated(ise)) ABI_FREE(ise)
+    ABI_SFREE(i1list)
+    ABI_SFREE(ise)
   end subroutine test_ndcoo
 
 end module m_spmat_NDCOO

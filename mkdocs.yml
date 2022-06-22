@@ -90,6 +90,7 @@ nav:
     - topics/k-points.md
     - topics/LatticeModel.md
     - topics/LatticeWannier.md
+    - topics/LWFModel.md
     - topics/LDAminushalf.md
     - topics/LOTF.md
     - topics/longwave.md
@@ -214,6 +215,7 @@ nav:
         - Lattice Model: tutorial/lattice_model.md
         #- Fit Process: tutorial/fit_process.md
         - Spin Model: tutorial/spin_model.md
+        - LWF Model: tutorial/lwf_model.md
     - aTDEP: 
         - ATDEP1: tutorial/atdep1.md
           #- ATDEP2: tutorial/atdep2.md
