@@ -579,7 +579,9 @@ extern "C" void solve_inner_gpu(int32_t proj_dim[3],
       const unsigned int gSize = ndat;
       dim3 blockSize {bSize,1,1};
       dim3 gridSize  {gSize,1,1};
-      compute_residue_errs<double,bSize><<<gridSize,blockSize>>>(resid_gpu, errs_gpu, cplx, nprojs, ndat);
+      int smemSize = (bSize <= 32) ? 2 * bSize * sizeof(double) : bSize * sizeof(double);
+
+      compute_residue_errs<double,bSize><<<gridSize,blockSize,smemSize>>>(resid_gpu, errs_gpu, cplx, nprojs, ndat);
       GET_LAST_CUDA_ERROR("compute_residue_errs");
 
       //printf("DEBUG %p %p %d %d %d\n",errs_cpu,errs_gpu,cplx,nprojs,ndat);
