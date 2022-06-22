@@ -773,7 +773,7 @@ subroutine apply_invovl(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_enreg, 
   !multiply by S^1
   ABI_NVTX_START_RANGE(NVTX_INVOVL_INNER)
   ! TODO : when solve_inner_gpu is ready, update the following to activate GPU computation
-  if (ham%use_gpu_cuda == 42) then
+  if (ham%use_gpu_cuda == 1) then
 
 #if defined(HAVE_FC_ISO_C_BINDING) && defined(HAVE_GPU_CUDA)
 

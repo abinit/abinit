@@ -32,9 +32,12 @@
 
 #include "gpu_apply_invovl_inner.h" // definition of struct invovl_kpt_gpu_t
 
+#include "gpu_apply_invovl_inner_kernel.h"
+
 #include <thrust/host_vector.h>
 #include <thrust/device_vector.h>
 #include <thrust/device_ptr.h>
+#include <thrust/transform_reduce.h>
 
 #include <mpi.h>
 
@@ -54,6 +57,7 @@ static double* ptp_sm1proj_gpu;
 static double* temp_proj_gpu;
 static double* resid_gpu;
 static double* precondresid_gpu;
+static double* errs_gpu;
 
 //! token used to store memory state for buffers that need to be uploaded each time
 //! make_block is called.
@@ -68,6 +72,10 @@ static double* inv_s_approx_gpu;
 
 //! number of tuple (l,m,n) by type of atomes (should always be smaller than 255 ?)
 static uint8_t *nlmn;
+
+//! number of streaming multiprocessor on current GPU
+static int sm_num = -1;
+
 
 //! same functionality as apply_block (in m_invovl.F90) but adapted to GPU
 //! compute sort of y = mat * x
@@ -229,7 +237,7 @@ void apply_block_gpu(int32_t cplx,
 
 
 //! \brief Allocation routine for apply inverse overlap operator.
-//! we reallocate only if explicitely requested
+//! we reallocate only if explicitly requested
 //!
 //! note:
 //! proj_dim[0] = cplx
@@ -268,6 +276,9 @@ extern "C" void gpu_apply_invovl_inner_alloc(int32_t proj_dim[3],
     CHECK_CUDA_ERROR( cudaMalloc((void**)&resid_gpu, proj_size_in_bytes) );
     CHECK_CUDA_ERROR( cudaMalloc((void**)&precondresid_gpu, proj_size_in_bytes) );
 
+    int32_t ndat_nspinor = proj_dim[2];
+    CHECK_CUDA_ERROR( cudaMalloc((void**)&errs_gpu, ndat_nspinor*sizeof(double)) );
+
     nlmn =   (uint8_t *)  malloc(ntypat * sizeof(uint8_t) );
 
     gpu_inner_allocated = 1;
@@ -289,6 +300,8 @@ extern "C" void gpu_apply_invovl_inner_dealloc()
     CHECK_CUDA_ERROR( cudaFree(temp_proj_gpu) );
     CHECK_CUDA_ERROR( cudaFree(resid_gpu) );
     CHECK_CUDA_ERROR( cudaFree(precondresid_gpu) );
+
+    CHECK_CUDA_ERROR( cudaFree(errs_gpu) );
 
     free(nlmn);
 
@@ -368,6 +381,16 @@ extern "C" void init_invovl_data(int32_t indlmn_dim[3], int32_t* indlmn)
 
   }
 
+  // also init the number of streaming multiprocessor
+  int device = -1;
+  CHECK_CUDA_ERROR( cudaGetDevice(&device) );
+  cudaDeviceProp deviceProp;
+  CHECK_CUDA_ERROR( cudaGetDeviceProperties(&deviceProp, device) );
+  sm_num = deviceProp.multiProcessorCount;
+
+  // if (sm_num < 1)
+  //   printf("CUDA Error : wrong number of streaming multiprocessor\n");
+
 } // init_invovl_data
 
 //! upload inverse overlap matrices
@@ -395,7 +418,6 @@ extern "C" void upload_inverse_overlap(const invovl_kpt_gpu_t invovl,
 //! \param[in] proj is a 3D array of size (cplx, nprojs, nspinor*ndat)
 //! \param[inout] sm1proj is a 3D array of size (cplx, nprojs, nspinor*ndat)
 //! \param[inout] ptp_sm1proj is a 3D array of size (cplx, nprojs, nspinor*ndat)
-//! \param[in] ndatspinor is the product of ndat and nspinor
 //! \param[in] ntypat number of types of atoms
 //! \param[in] lmnmax
 //! \param[in] cplx (complex or real data)
@@ -414,6 +436,7 @@ extern "C" void solve_inner_gpu(int32_t proj_dim[3],
 
   // projections norm array (for MPI all reduce)
   double* normprojs; // size is ndat*nspinor;
+  double* errs_cpu;
 
   // number of projections
   int32_t nprojs = proj_dim[1];
@@ -425,13 +448,16 @@ extern "C" void solve_inner_gpu(int32_t proj_dim[3],
   //int nlmntot_this_proc = nprojs;
 
   int ndat = proj_dim[2];
-  int proj_size_in_bytes = proj_dim[0]*proj_dim[1]*proj_dim[2]*sizeof(double);
+
+  int proj_size = proj_dim[0]*proj_dim[1]*proj_dim[2];
+  int proj_size_in_bytes = proj_size*sizeof(double);
 
   // TO BE REMOVED
   printf("INSIDE solve_inner_gpu\n");
 
   // compute normproj by summing over the first two dimensions
   normprojs = (double *) malloc(ndat*sizeof(double));
+  errs_cpu  = (double *) malloc(ndat*sizeof(double));
 
   for (int idat=0; idat<ndat; ++idat) {
     double norm = 0.0;
@@ -458,12 +484,14 @@ extern "C" void solve_inner_gpu(int32_t proj_dim[3],
   // Iterative refinement
   // TODO use a more efficient iterative algorithm than iterative refinement, use locking
 
-  double maxerr, previous_maxerr;
+  double maxerr;
+  double previous_maxerr = 0;
   const double precision = 1e-16; // maximum relative error. TODO: use tolwfr ?
   double convergence_rate;
   int additional_steps_to_take = -1;
 
-  //thrust::device_vector<double> d_temp_proj(temp_proj,temp_proj+(proj_dim[0]*proj_dim[1]*proj_dim[2]));
+  //thrust::device_vector<double> d_temp_proj(temp_proj_gpu,temp_proj_gpu+proj_size);
+  //thrust::device_vector<double> d_resid(resid_gpu, resid_gpu+proj_size);
 
   const cuDoubleComplex c_one  = make_cuDoubleComplex(1.0, 0.0);
   const cuDoubleComplex c_zero = make_cuDoubleComplex(0.0, 0.0);
@@ -487,48 +515,129 @@ extern "C" void solve_inner_gpu(int32_t proj_dim[3],
     // & PtPsm1proj(:,:,1), nprojs, &
     // & x_cplx=cplx)
 
-    cublasZgemm(cublas_handle,
-                CUBLAS_OP_N,            // op A
-                CUBLAS_OP_N,            // op B
-                nprojs, ndat, nprojs,   // m,n,k
-                &c_one,                 // alpha
-                (cuDoubleComplex*) gram_projs_gpu, nprojs, // A(m,k), lda
-                (cuDoubleComplex*) temp_proj_gpu, nprojs,  // B(k,n), ldb
-                &c_zero,                // beta
-                (cuDoubleComplex*) ptp_sm1proj_gpu, nprojs // C(m,n), ldc
-                );
+    if (cplx == 2) {
+      cublasZgemm(cublas_handle,
+                  CUBLAS_OP_N,            // op A
+                  CUBLAS_OP_N,            // op B
+                  nprojs, ndat, nprojs,   // m,n,k
+                  &c_one,                 // alpha
+                  (cuDoubleComplex*) gram_projs_gpu, nprojs, // A(m,k), lda
+                  (cuDoubleComplex*) temp_proj_gpu, nprojs,  // B(k,n), ldb
+                  &c_zero,                // beta
+                  (cuDoubleComplex*) ptp_sm1proj_gpu, nprojs // C(m,n), ldc
+                  );
+    } else {
+      double r_one = 1.0;
+      double r_zero = 0.0;
+      cublasDgemm(cublas_handle,
+                  CUBLAS_OP_N,            // op A
+                  CUBLAS_OP_N,            // op B
+                  nprojs, ndat, nprojs,   // m,n,k
+                  &r_one,                 // alpha
+                  (double*) gram_projs_gpu, nprojs, // A(m,k), lda
+                  (double*) temp_proj_gpu, nprojs,  // B(k,n), ldb
+                  &r_zero,                // beta
+                  (double*) ptp_sm1proj_gpu, nprojs // C(m,n), ldc
+                  );
+    }
 
-    // TODO resid = proj - resid - Ptpsm1proj
+    // compute resid = proj - resid - Ptpsm1proj
+
+    // version 1 : fixed grid size, with 4 cuda thread blocks per streaming multiprocessor (to be tuned)
+    // {
+    //   dim3 blockSize {256,1,1};
+    //   dim3 gridSize {sm_num*4,1,1};
+    //   compute_residue_v1<<<gridSize,blockSize>>>(proj_gpu, resid_gpu, ptp_sm1proj_gpu, proj_size);
+    //   GET_LAST_CUDA_ERROR("compute_residue_v1");
+    // }
+
+    // version 2 : adapted grid size
+    {
+      dim3 blockSize {256,1,1};
+      dim3 gridSize {(proj_size+blockSize.x-1)/blockSize.x,1,1};
+      compute_residue_v2<<<gridSize,blockSize>>>(proj_gpu, resid_gpu, ptp_sm1proj_gpu, proj_size);
+      GET_LAST_CUDA_ERROR("compute_residue_v2");
+    }
 
     // exit check
-    // TODO errs = SUM(SUM(resid**2, 1),1)
+    // compute errs = SUM(SUM(resid**2, 1),1)
+    // one block of threads per value of idat, i.e. ndat in total
+    {
+      const unsigned int bSize = 256;
+      const unsigned int gSize = ndat;
+      dim3 blockSize {bSize,1,1};
+      dim3 gridSize  {gSize,1,1};
+      compute_residue_errs<double,bSize><<<gridSize,blockSize>>>(resid_gpu, errs_gpu, cplx, nprojs, ndat);
+      GET_LAST_CUDA_ERROR("compute_residue_errs");
 
-    // TODO maxerr = sqrt(MAXVAL(errs/normprojs))
+      //printf("DEBUG %p %p %d %d %d\n",errs_cpu,errs_gpu,cplx,nprojs,ndat);
+      CHECK_CUDA_ERROR( cudaMemcpy(errs_cpu, errs_gpu, ndat*sizeof(double), cudaMemcpyDeviceToHost) );
+    }
+
+    // compute maxerr = sqrt(MAXVAL(errs/normprojs))
+    maxerr = 0;
+    for (int idat=0; idat<ndat; ++idat) {
+      double tmp = errs_cpu[idat]/normprojs[idat];
+      maxerr = (maxerr < tmp) ? tmp : maxerr;
+    }
+    maxerr = sqrt(maxerr);
+
     if (maxerr < precision or additional_steps_to_take == 1) {
+
       exit(EXIT_FAILURE);
       // We might stall and never get to the specified precision because of machine errors.
       // If we got to 1e-10, extrapolate convergence rate and determine the number of additional
       // steps to take to reach precision
+
     } else if (maxerr < 1e-10 and additional_steps_to_take == -1) {
+
       convergence_rate = -log(1e-10) / i;
       additional_steps_to_take = ceil(-log(precision/1e-10)/convergence_rate) + 1;
+
     } else if (additional_steps_to_take > 0) {
-      if (previous_maxerr<maxerr)
+
+      if (previous_maxerr > 0 and previous_maxerr<maxerr)
         exit(EXIT_FAILURE);
       additional_steps_to_take -= 1;
+
     }
     previous_maxerr=maxerr;
 
     // add preconditionned residual
-    // TODO call apply_block(ham, cplx, invovl%inv_s_approx, nprojs, ndat, resid, precondresid, block_sliced)
-    // TODO sm1proj = sm1proj + precondresid
+    // compute precondresid_gpu = inv_s_approx * resid_gpu
+    apply_block_gpu(cplx, ntypat, nattyp, lmnmax,
+                    inv_s_approx_gpu, nprojs, ndat,
+                    resid_gpu, precondresid_gpu,
+                    block_sliced);
+
+    // compute sm1proj = sm1proj + precondresid
+    {
+      dim3 blockSize {256,1,1};
+      dim3 gridSize {(proj_size+blockSize.x-1)/blockSize.x,1,1};
+      compute_sm1proj_v2<<<gridSize,blockSize>>>(sm1proj_gpu, precondresid_gpu, proj_size);
+      GET_LAST_CUDA_ERROR("compute_sm1proj_v2");
+
+    }
+
+  } // end for i (1 to 30)
+
+  if (maxerr >= precision and maxerr >= 1e-10) {
+    printf("In invovl, max error was %f after 30 iterations", maxerr);
   }
 
   free(normprojs);
+  free(errs_cpu);
+
+  // negate sm1proj and ptp_sm1proj
+  {
+    dim3 blockSize {256,1,1};
+    dim3 gridSize {(proj_size+blockSize.x-1)/blockSize.x,1,1};
+    compute_sm1proj_negate<<<gridSize,blockSize>>>(sm1proj_gpu, ptp_sm1proj_gpu, proj_size);
+    GET_LAST_CUDA_ERROR("compute_sm1proj_negate");
+  }
 
   // download sm1proj and ptp_sm1proj to host memory
   CHECK_CUDA_ERROR( cudaMemcpy(sm1proj, sm1proj_gpu, proj_size_in_bytes, cudaMemcpyDeviceToHost) );
   CHECK_CUDA_ERROR( cudaMemcpy(ptp_sm1proj, ptp_sm1proj_gpu, proj_size_in_bytes, cudaMemcpyDeviceToHost) );
-
 
 } // solve_inner_gpu
