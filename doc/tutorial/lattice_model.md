@@ -125,9 +125,9 @@ The fitted anharmonocites are stored in "tmulti_l_6_1_coeffs.xml" and informatio
     	Forces          :   9.1861216904870410E-03
     	Stresses        :   2.4991727912156494E-03
 
-In order to save computational time, the previous example restricts the fitting procedure to  [fit\_iatom](fit_iatom) = 2. This means that only anharmonic terms linked to the interactions between Hf and its nearest neighbours are considered, which might not be enough to produce a fully accurate model.
+In order to save computational time, the previous example restricts the fitting procedure to  [[multibinit: fit_iatom]] = 2. This means that only anharmonic terms linked to the interactions between Hf and its nearest neighbours are considered, which might not be enough to produce a fully accurate model.
 
-*Optional exercise $\Longrightarrow$ Try to fit on all irreducible atoms with [fit\_iatom](fit_iatom) = 0. This procedure is time consumming (around 15 min). You can also play with [fit\_cutoff](fit_cutoff) to see if there is other terms selected.*
+*Optional exercise $\Longrightarrow$ Try to fit on all irreducible atoms with [[multibinit: fit_iatom]] = 0. This procedure is time consumming (around 15 min). You can also play with [[multibinit: fit_cutoff]] to see if there is other terms selected.*
 
 ## 3 Bounding of the model
 
