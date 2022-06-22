@@ -63,31 +63,31 @@ In this tutorial, we take the perovskite $\mathrm{BaHfO_3}$ in its cubic phase a
 
 You can download the complete DDB file (resulting from the previous calculations) here:
 
-{% dialog tests/tutomultibinit/Input/tmulti6_DDB %}
+{% dialog tests/tutomultibinit/Input/tmulti_l_6_DDB %}
 
 **Before starting, you might to consider working in a different subdirectory than for the other lessons. Why not create "Work_fitLatticeModel"?**
 
-The file "~abinit/tests/tutomultibinit/Input/tmulti1_1.files" lists the file names and root names.
+The file "~abinit/tests/tutomultibinit/Input/tmulti_l_6_1.files" lists the file names and root names.
 You can copy it in the **Work_fitLatticeModel** directory and look at this file content, you should see:
 
-      tmulti6_1.abi
-      tmulti6_1.abo
-      tmulti6_DDB
+      tmulti_l_6_1.abi
+      tmulti_l_6_1.abo
+      tmulti_l_6_DDB
       no
-      tmulti6_HIST.nc
+      tmulti_l_6_HIST.nc
       no
 
 As mentioned in the guide of [[help:multibinit | MULTIBINIT]]:
 
-   * "tmulti6_1.abi" is the main input file
-   * "tmulti6_1.abo" is the main output file
-   * "tmulti6_DDB" is the DDB which contains the system definition and the list of energy derivatives
-   * "tmulti6_HIST.nc" is the set of DFT configurations to fit
+   * "tmulti_l_6_1.abi" is the main input file
+   * "tmulti_l_6_1.abo" is the main output file
+   * "tmulti_l_6_DDB" is the DDB which contains the system definition and the list of energy derivatives
+   * "tmulti_l_6_HIST.nc" is the set of DFT configurations to fit
 
-It is now time to copy the file ~abinit/tests/tutomultibinit/Input/tmulti6_1.abi, ~abinit/tests/tutomultibinit/Input/tmulti6_DDB and  tmulti6_HIST.nc in your **Work_fitLatticeModel** directory.
+It is now time to copy the file ~abinit/tests/tutomultibinit/Input/tmulti_l_6_1.abi, ~abinit/tests/tutomultibinit/Input/tmulti_l_6_DDB and  tmulti_l_6_HIST.nc in your **Work_fitLatticeModel** directory.
 You should read carefully the input file:
 
-{% dialog tests/tutomultibinit/Input/tmulti6_1.abi %}
+{% dialog tests/tutomultibinit/Input/tmulti_l_6_1.abi %}
 
 and read the documentation about the fit input variables:
 
@@ -101,12 +101,12 @@ and read the documentation about the fit input variables:
 
 You can now run (it should take less than 2 minutes):
 
-    mpirun -np 10 multibinit < multi6_1.files > tmulti6_1_stdout& 
+    mpirun -np 10 multibinit < multi_l_6_1.files > tmulti_l_6_1_stdout& 
     
-The resulting output file "tmulti6_1.abo" should be rather similar to the one below.
-{% dialog tests/tutomultibinit/Refs/tmulti6_1.abo %}
+The resulting output file "tmulti_l_6_1.abo" should be rather similar to the one below.
+{% dialog tests/tutomultibinit/Refs/tmulti_l_6_1.abo %}
 
-The fitted anharmonocites are stored in "tmulti6_1_coeffs.xml" and informations about the differences between the DFT data and the model are stored in "TRS\_fit\_diff\_energy.dat" and "TRS\_fit\_diff\_stress.dat". The global information about the reproduction of the DFT data is written in the output file.
+The fitted anharmonocites are stored in "tmulti_l_6_1_coeffs.xml" and informations about the differences between the DFT data and the model are stored in "TRS\_fit\_diff\_energy.dat" and "TRS\_fit\_diff\_stress.dat". The global information about the reproduction of the DFT data is written in the output file.
 
 **Before** the fit (including the harmonic part only), the goal function is equal to:
 
@@ -135,22 +135,22 @@ Since the approach of the procedure is based on a polynomial expansion of the en
 
 **Before starting, you might to consider working in a different subdirectory than for the other lessons. Why not create "Work_boundingLatticeModel"?**
 
-The file ~abinit/tests/tutomultibinit/Input/tmulti7\_1.files lists the file names and root names.
+The file ~abinit/tests/tutomultibinit/Input/tmulti\_l\_7\_1.files lists the file names and root names.
 You can copy it in the **Work_boundingLatticeModel** directory and look at this file content, you should see:
 
-      tmulti7_1.abi
-      tmulti7_1.abo
-      tmulti6_DDB
-      tmulti7_1_coeffs.xml
-      tmulti6_HIST.nc
+      tmulti_l_7_1.abi
+      tmulti_l_7_1.abo
+      tmulti_l_6_DDB
+      tmulti_l_7_1_coeffs.xml
+      tmulti_l_6_HIST.nc
       no
 
-"tmulti7\_1\_coeffs.xml" is the model that we produced with [[multibinit: fit_iatom]]=0 and  [[multibinit: fit_cutoff]]=$a \sqrt{3}/2$ and has to be bounded.
+"tmulti\_l\_7\_1\_coeffs.xml" is the model that we produced with [[multibinit: fit_iatom]]=0 and  [[multibinit: fit_cutoff]]=$a \sqrt{3}/2$ and has to be bounded.
 
-It is now time to copy the file ~abinit/tests/tutomultibinit/Input/tmulti7\_1.abi, ~abinit/tests/tutomultibinit/Input/tmulti6\_DDB, tmulti7\_1\_coeffs.xml and tmulti6\_HIST.nc in your **Work_boundingLatticeModel** directory.
+It is now time to copy the file ~abinit/tests/tutomultibinit/Input/tmulti\_l\_7\_1.abi, ~abinit/tests/tutomultibinit/Input/tmulti\_l\_6\_DDB, tmulti\_l\_7\_1\_coeffs.xml and tmulti\_l\_6\_HIST.nc in your **Work_boundingLatticeModel** directory.
 You should read carefully the input file:
 
-{% dialog tests/tutomultibinit/Input/tmulti7_1.abi %}
+{% dialog tests/tutomultibinit/Input/tmulti_l_7_1.abi %}
 
 and read the documentation about the bounding input variables:
 
@@ -160,7 +160,7 @@ and read the documentation about the bounding input variables:
 
 You can now run (it should take less than 1 minute):
 
-    multibinit < multi7_1.files > tmulti7_1_stdout&
+    multibinit < multi_l_7_1.files > tmulti_l_7_1_stdout&
     
 After this procedure, a new model has been generated with higher-order even terms according to [[multibinit: bound_rangePower]]. You can check in the ouput file that the inclusion of these new terms preserves the value of the goal function for forces and stresses.
     
@@ -168,23 +168,23 @@ After this procedure, a new model has been generated with higher-order even term
 
 The aim of the construction of effective models is to be able to run realistic molecular-dynamics simulations in order to access material properties at finite temperatures. 
 
-The file ~abinit/tests/tutomultibinit/Input/tmulti8\_1.files lists the file names and root names.
+The file ~abinit/tests/tutomultibinit/Input/tmulti\_l\_8\_1.files lists the file names and root names.
 You can copy it in the **Work_MDLatticeModel** directory and look at this file content, you should see:
 
 
-      tmulti8_1.abi
-      tmulti8_1.abo
-      tmulti6_DDB
-      tmulti8_1.xml
+      tmulti_l_8_1.abi
+      tmulti_l_8_1.abo
+      tmulti_l_6_DDB
+      tmulti_l_8_1.xml
       no
       no
 
-"tmulti8\_1\_coeffs.xml" is the model that have been bounded in the previous step.
+"tmulti\_l\_8\_1\_coeffs.xml" is the model that have been bounded in the previous step.
 
-It is now time to copy the file ~abinit/tests/tutomultibinit/Input/tutomulti7\_1.abi, ~abinit/tests/tutomultibinit/Input/tmulti6\_DDB, tmulti7\_1\_coeffs.xml and tmulti6\_HIST.nc in your **Work_MDLatticeModel** directory.
+It is now time to copy the file ~abinit/tests/tutomultibinit/Input/tutomulti\_l\_7\_1.abi, ~abinit/tests/tutomultibinit/Input/tmulti\_l\_6\_DDB, tmulti\_l\_7\_1\_coeffs.xml and tmulti\_l\_6\_HIST.nc in your **Work_MDLatticeModel** directory.
 You should read carefully the input file:
 
-{% dialog tests/tutomultibinit/Input/tmulti8_1.abi %}
+{% dialog tests/tutomultibinit/Input/tmulti_l_8_1.abi %}
 
 and read the documentation about the fit input variables:
 
@@ -196,29 +196,28 @@ and read the documentation about the fit input variables:
 
 You can now run (it should take less than 2 minutes):
 
-    multibinit -np 10 < multi8_1.files > tmulti8_1_stdout&
+    multibinit -np 10 < multi_l_8_1.files > tmulti_l_8_1_stdout&
     
-You can visualize your dynamics with the agate software:
+You can visualize your dynamics with the [AGATE](https://github.com/piti-diablotin/agate) software:
 
-    agate tmulti8_1_HIST.nc
+    agate tmulti_l_8_1_HIST.nc
     
-This simulation intents to reproduce the behaviour of BaHfO$_\mathrm{3}$ at room temperature. You can check that the system is thermalized at the end of the calculation by looking at energergy, pressure, volume and temperature with the agate software:
+This simulation intents to reproduce the behaviour of BaHfO$_\mathrm{3}$ at room temperature. You can check that the system is thermalized at the end of the calculation by looking at energergy, pressure, volume and temperature with the [AGATE](https://github.com/piti-diablotin/agate) software:
    
-   * :plot etotal
-   * :plot pressure
-   * :plot V
-   * :plot T
+   * <tt> :plot etotal </tt>
+   * <tt> :plot P </tt>
+   * <tt> :plot V </tt>
+   * <tt> :plot T </tt> 
 
-BaHfO$_\mathrm{3}$ remains cubic at all temperatures which is not the case of all materials. For instance, SrTiO$\mathrm{_3}$ exhibits an antiferrodistrotive (AFD) phase transition from $\mathrm{Pm\bar{3}m}$ to $\mathrm{I4/mcm}$ at 105K (experimentally). MULTIBINIT allows to study such kind of structural phase transition.
+$\mathrm{BaHfO_3}$ remains cubic at all temperatures which is not the case of all materials. For instance, $\mathrm{SrTiO_3}$ exhibits an antiferrodistrotive (AFD) phase transition from $\mathrm{Pm\bar{3}m}$ to $\mathrm{I4/mcm}$ at 105K (experimentally). MULTIBINIT allows to study such kind of structural phase transition.
    
-*Optional exercise $\Longrightarrow$ Try to recover the phase transition of $\mathrm{SrTiO_3}$ (PBEsol DDB is located in "~abinit/tests/tutomultibinit/Input/tutomulti9_1.ddb" and the anharmonic part of the model in "~abinit/tests/tutomultibinit/Input/tmulti9_1.xml").*
+*Optional exercise $\Longrightarrow$ Try to recover the phase transition of $\mathrm{SrTiO_3}$ (PBEsol DDB is located in "~abinit/tests/tutomultibinit/Input/tutomulti_l_9_1.ddb" and the anharmonic part of the model in "~abinit/tests/tutomultibinit/Input/tmulti_l_9_1.xml").*
 
 
 ![Schema 1](multibinit_assets/HeatingRot.pdf) 
 
-You should recover the results above, which highlights properly the AFD phase transition although at slightly higher temperature than experimentally observed. You should also notice the appeaance of polarization at very low temperature: this arises from the incipient ferroelectric character of SrTiO$\mathrm{_3}$ using classical MD simulations, neglecting quantum fluctuations.
+You should recover the results above, which highlights properly the AFD phase transition although at slightly higher temperature than experimentally observed. You should also notice the appeaance of polarization at very low temperature: this arises from the incipient ferroelectric character of $\mathrm{SrTiO_3}$ using classical MD simulations, neglecting quantum fluctuations.
 
 * * *
 
 This MULTIBINIT tutorial is now finished.
-
