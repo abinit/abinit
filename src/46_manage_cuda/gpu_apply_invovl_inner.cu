@@ -612,7 +612,7 @@ extern "C" void solve_inner_gpu(int32_t proj_dim[3],
     } else if (additional_steps_to_take > 0) {
 
       if (previous_maxerr > 0 and previous_maxerr<maxerr) {
-        printf("[solve_inner_gpu] exit failure; maxerr = %f previous maxerr=%d\n",maxerr,previous_maxerr);
+        printf("[solve_inner_gpu] exit failure; maxerr = %f previous maxerr=%f\n",maxerr,previous_maxerr);
         exit(EXIT_FAILURE);
       }
       additional_steps_to_take -= 1;
