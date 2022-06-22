@@ -331,10 +331,10 @@ subroutine migdal_eliashberg_iso(gstore, dtset, dtfil)
  ncid = nctk_noid
  if (my_rank == master) then
    NCF_CHECK(nctk_open_create(ncid, strcat(dtfil%filnam_ds(4), "_ISOME.nc") , xmpi_comm_self))
-   write(777, *)"# phmesh (meV), a2fw"
-   do iw=1, phmesh_size
-     write(777, *) phmesh(iw) * Ha_meV, a2fw(iw) / (edos%gef(0) / two)
-   end do
+   !write(777, *)"# phmesh (meV), a2fw"
+   !do iw=1, phmesh_size
+   !  write(777, *) phmesh(iw) * Ha_meV, a2fw(iw) / (edos%gef(0) / two)
+   !end do
    !close(777)
  end if
 
