@@ -304,6 +304,7 @@ module defs_basis
  integer, parameter, public :: RUNL_NONLINEAR  = 5
  integer, parameter, public :: RUNL_EPH        = 7
  integer, parameter, public :: RUNL_WFK        = 8
+ integer, parameter, public :: RUNL_RTTDDFT    = 9
  integer, parameter, public :: RUNL_GWLS       = 66
  integer, parameter, public :: RUNL_BSE        = 99
  integer, parameter, public :: RUNL_LONGWAVE   = 10
