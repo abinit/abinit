@@ -1605,7 +1605,6 @@ end subroutine sphereboundary
 
 subroutine sphere(cg,ndat,npw,cfft,n1,n2,n3,n4,n5,n6,kg_k,istwf_k,iflag,me_g0,shiftg,symm,xnorm)
 
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iflag,istwf_k,n1,n2,n3,n4,n5,n6,ndat,npw,me_g0

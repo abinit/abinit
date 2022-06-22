@@ -243,6 +243,15 @@ module m_slk
                                              ! to a binary file using MPI-IO.
  public :: slk_bsize_and_type                ! Returns the byte size and the MPI datatype associated to the matrix elements
                                              ! that are stored in the ScaLAPACK_matrix
+
+ interface slk_free_array
+   module procedure slk_free_array1
+   module procedure slk_free_array2
+   module procedure slk_free_array3
+   module procedure slk_free_array4
+ end interface slk_free_array
+ public :: slk_free_array                    !  Deallocate array of matrix_scalapack elements
+
 #endif
 
 CONTAINS  !==============================================================================
@@ -576,6 +585,114 @@ subroutine matrix_scalapack_free(matrix)
  matrix%descript%tab = 0
 
 end subroutine matrix_scalapack_free
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_slk/slk_free_array1
+!! NAME
+!!  slk_free_array1
+!!
+!! FUNCTION
+!!  Deallocate 1d array of matrix_scalapack elements
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine slk_free_array1(slk_arr1)
+  class(matrix_scalapack),intent(inout) :: slk_arr1(:)
+  integer :: i1
+  do i1=1,size(slk_arr1, dim=1)
+    call slk_arr1(i1)%free()
+  end do
+end subroutine slk_free_array1
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_slk/slk_free_array2
+!! NAME
+!!  slk_free_array2
+!!
+!! FUNCTION
+!!  Deallocate 2d array of matrix_scalapack elements
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine slk_free_array2(slk_arr2)
+  class(matrix_scalapack),intent(inout) :: slk_arr2(:,:)
+  integer :: i1, i2
+  do i2=1,size(slk_arr2, dim=2)
+    do i1=1,size(slk_arr2, dim=1)
+      call slk_arr2(i1, i2)%free()
+    end do
+  end do
+end subroutine slk_free_array2
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_slk/slk_free_array3
+!! NAME
+!!  slk_free_array3
+!!
+!! FUNCTION
+!!  Deallocate 3d array of matrix_scalapack elements
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine slk_free_array3(slk_arr3)
+  class(matrix_scalapack),intent(inout) :: slk_arr3(:,:,:)
+  integer :: i1, i2, i3
+  do i3=1,size(slk_arr3, dim=3)
+    do i2=1,size(slk_arr3, dim=2)
+      do i1=1,size(slk_arr3, dim=1)
+        call slk_arr3(i1, i2, i3)%free()
+      end do
+    end do
+  end do
+end subroutine slk_free_array3
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_slk/slk_free_array4
+!! NAME
+!!  slk_free_array4
+!!
+!! FUNCTION
+!!  Deallocate 4d array of matrix_scalapack elements
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine slk_free_array4(slk_arr4)
+  class(matrix_scalapack),intent(inout) :: slk_arr4(:,:,:,:)
+  integer :: i1, i2, i3, i4
+  do i4=1,size(slk_arr4, dim=4)
+    do i3=1,size(slk_arr4, dim=3)
+      do i2=1,size(slk_arr4, dim=2)
+        do i1=1,size(slk_arr4, dim=1)
+          call slk_arr4(i1, i2, i3, i4)%free()
+        end do
+      end do
+    end do
+  end do
+end subroutine slk_free_array4
 !!***
 
 !----------------------------------------------------------------------
