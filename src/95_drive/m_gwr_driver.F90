@@ -3,7 +3,7 @@
 !!  m_gwr_driver
 !!
 !! FUNCTION
-!!   Driver for EPH calculations
+!!   Driver for GWR calculations
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2021-2022 ABINIT group (MG)
@@ -282,10 +282,10 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
 
  gwr = gwr_new(dtset, cryst, psps, pawtab, ebands, mpi_enreg, comm)
 
- !if (use_wfk) then
- !  call gwr%build_gtau_from_wfk(wfk0_path)
- !else
- !end if
+ if (use_wfk) then
+   call gwr%build_gtau_from_wfk(wfk0_path)
+ else
+ end if
 
  ! ====================================================
  ! === This is the real GWR stuff once all is ready ===

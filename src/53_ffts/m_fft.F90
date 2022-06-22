@@ -221,23 +221,23 @@ end subroutine fft_allow_ialltoall
 !!
 !! SOURCE
 
-subroutine fftbox_plan3(plan,dims,fftalg,isign)
+subroutine fftbox_plan3(plan, dims, fftalg, isign)
 
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: fftalg,isign
+ integer,intent(in) :: fftalg, isign
  type(fftbox_plan3_t),intent(out) :: plan
 !arrays
  integer,intent(in) :: dims(3)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: ndat1=1,fftcache0=0
+ integer,parameter :: ndat1 = 1, fftcache0 = 0
 
 ! *************************************************************************
 
- call fftbox_plan3_init(plan,ndat1,dims,dims,fftalg,fftcache0,isign)
+ call fftbox_plan3_init(plan, ndat1, dims, dims, fftalg, fftcache0, isign)
 
 end subroutine fftbox_plan3
 !!***
@@ -262,8 +262,7 @@ end subroutine fftbox_plan3
 !!
 !! SOURCE
 
-subroutine fftbox_plan3_many(plan,ndat,dims,embed,fftalg,isign)
-
+subroutine fftbox_plan3_many(plan, ndat, dims, embed, fftalg, isign)
 
 !Arguments ------------------------------------
 !scalars
@@ -274,11 +273,11 @@ subroutine fftbox_plan3_many(plan,ndat,dims,embed,fftalg,isign)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: fftcache0=0
+ integer,parameter :: fftcache0 = 0
 
 ! *************************************************************************
 
- call fftbox_plan3_init(plan,ndat,dims,embed,fftalg,fftcache0,isign)
+ call fftbox_plan3_init(plan, ndat, dims, embed, fftalg, fftcache0, isign)
 
 end subroutine fftbox_plan3_many
 !!***
@@ -304,7 +303,7 @@ end subroutine fftbox_plan3_many
 !!
 !! SOURCE
 
-subroutine fftbox_plan3_init(plan,ndat,dims,embed,fftalg,fftcache,isign)
+subroutine fftbox_plan3_init(plan, ndat, dims, embed, fftalg, fftcache, isign)
 
 
 !Arguments ------------------------------------
@@ -338,7 +337,7 @@ end subroutine fftbox_plan3_init
 !!
 !! FUNCTION
 !!  In-place FFT transform of complex array.
-!!  Call (FFTW3|DFTI) routines if available, otherwise we fallback to SG routines
+!!  Call (FFTW3|DFTI) routines if available, otherwise fallback to SG routines
 !!  TARGET: spc arrays
 !!
 !! INPUTS
@@ -356,8 +355,7 @@ end subroutine fftbox_plan3_init
 !!
 !! SOURCE
 
-subroutine fftbox_execute_ip_spc(plan,ff)
-
+subroutine fftbox_execute_ip_spc(plan, ff)
 
 !Arguments ------------------------------------
 !scalars
@@ -398,8 +396,7 @@ end subroutine fftbox_execute_ip_spc
 !!
 !! SOURCE
 
-subroutine fftbox_execute_ip_dpc(plan,ff)
-
+subroutine fftbox_execute_ip_dpc(plan, ff)
 
 !Arguments ------------------------------------
 !scalars
@@ -439,7 +436,7 @@ end subroutine fftbox_execute_ip_dpc
 !!
 !! SOURCE
 
-subroutine fftbox_execute_op_spc(plan,ff,gg)
+subroutine fftbox_execute_op_spc(plan, ff, gg)
 
 
 !Arguments ------------------------------------
@@ -481,7 +478,7 @@ end subroutine fftbox_execute_op_spc
 !!
 !! SOURCE
 
-subroutine fftbox_execute_op_dpc(plan,ff,gg)
+subroutine fftbox_execute_op_dpc(plan, ff, gg)
 
 
 !Arguments ------------------------------------
