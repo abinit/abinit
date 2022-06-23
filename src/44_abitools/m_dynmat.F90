@@ -4594,6 +4594,7 @@ end subroutine d3sym
 !!   INVERSE of symmetry operation isym; first three elements are the primitive
 !!   translations which must be subtracted after the transformation to get back
 !!   to the original unit cell.
+!!  has_strain = if .true. i2pert includes strain perturbation
 !!  mpert =maximum number of ipert
 !!  natom= number of atoms
 !!  nsym=number of space group symmetries
@@ -4613,11 +4614,12 @@ end subroutine d3sym
 !!
 !! SOURCE
 
-subroutine d3lwsym(blkflg,d3,indsym,mpert,natom,nsym,symrec,symrel)
+subroutine d3lwsym(blkflg,d3,indsym,has_strain,mpert,natom,nsym,symrec,symrel)
 
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: mpert,natom,nsym
+ logical,intent(in) :: has_strain
 !arrays
  integer,intent(in) :: indsym(4,nsym,natom),symrec(3,3,nsym),symrel(3,3,nsym)
  integer,intent(inout) :: blkflg(3,mpert,3,mpert,3,mpert)
@@ -4626,42 +4628,81 @@ subroutine d3lwsym(blkflg,d3,indsym,mpert,natom,nsym,symrec,symrel)
 !Local variables -------------------------
 !scalars
  integer :: found,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert,idisy1,idisy2,idisy3
- integer :: ipesy1,ipesy2,ipesy3,isym,ithree
+ integer :: ipesy1,ipesy2,ipesy3,istr,isym,ithree
+ integer :: i2dir_a,i2dir_b
+ integer :: idisy2_a,idisy2_b
  real(dp) :: sumi,sumr
+ logical :: is_strain
 !arrays
+ integer,save :: idx(18)=(/1,1,2,2,3,3,3,2,3,1,2,1,2,3,1,3,1,2/)
  integer :: sym1(3,3),sym2(3,3),sym3(3,3)
+ integer :: strflg(3,mpert,3,3,3,mpert)
+ real(dp) :: d3str(2,3,mpert,3,3,3,mpert)
 
 ! *********************************************************************
 
 !First, take into account the permutations symmetry of
 !(i1pert,i1dir) and (i2pert,i2dir)
- do i1pert = 1, mpert
-   do i2pert = 1, mpert
-     do i3pert = 1, mpert
+ if (.not.has_strain) then
+   do i1pert = 1, mpert
+     do i2pert = 1, mpert
+       do i3pert = 1, mpert
 
-       do i1dir = 1, 3
-         do i2dir = 1, 3
-           do i3dir = 1, 3
+         do i1dir = 1, 3
+           do i2dir = 1, 3
+             do i3dir = 1, 3
 
-             if ((blkflg(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1).and. &
-&             (blkflg(i2dir,i2pert,i1dir,i1pert,i3dir,i3pert)/=1)) then
+               if ((blkflg(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1).and. &
+&               (blkflg(i2dir,i2pert,i1dir,i1pert,i3dir,i3pert)/=1)) then
 
-               d3(1,i2dir,i2pert,i1dir,i1pert,i3dir,i3pert) = &
-&              d3(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
-               d3(2,i2dir,i2pert,i1dir,i1pert,i3dir,i3pert) = &
-&             -d3(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
+                 d3(1,i2dir,i2pert,i1dir,i1pert,i3dir,i3pert) = &
+&                d3(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
+                 d3(2,i2dir,i2pert,i1dir,i1pert,i3dir,i3pert) = &
+&               -d3(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
 
-               blkflg(i2dir,i2pert,i1dir,i1pert,i3dir,i3pert) = 1
+                 blkflg(i2dir,i2pert,i1dir,i1pert,i3dir,i3pert) = 1
 
-             end if
+               end if
 
+             end do
+           end do
+         end do
+
+       end do
+     end do
+   end do
+ end if
+
+!For strain perturbation we need an array with the two strain indexes
+ if (has_strain) then
+   strflg=0
+   d3str=zero
+   do i3pert=1, mpert
+     do i3dir=1,3
+       do i2pert=natom+3,natom+4
+         do i2dir=1,3
+           if (i2pert==natom+3) istr=i2dir
+           if (i2pert==natom+4) istr=3+i2dir
+           i2dir_a=idx(2*istr-1); i2dir_b=idx(2*istr)
+           do i1pert=1,mpert
+             do i1dir=1,3
+               if (blkflg(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1) then
+                 strflg(i1dir,i1pert,i2dir_a,i2dir_b,i3dir,i3pert)=1
+                 d3str(:,i1dir,i1pert,i2dir_a,i2dir_b,i3dir,i3pert)= &
+               & d3(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)          
+                 if (i2pert==natom+4) then
+                   strflg(i1dir,i1pert,i2dir_b,i2dir_a,i3dir,i3pert)=1
+                   d3str(:,i1dir,i1pert,i2dir_b,i2dir_a,i3dir,i3pert)= &
+                 & d3(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)          
+                 end if
+               end if
+             end do
            end do
          end do
        end do
-
      end do
    end do
- end do
+ end if
 
 !Big Big Loop : symmetrize three times, because
 !of some cases in which one element is not yet available
@@ -4672,6 +4713,7 @@ subroutine d3lwsym(blkflg,d3,indsym,mpert,natom,nsym,symrec,symrel)
 !  Loop over perturbations
    do i1pert = 1, mpert
      do i2pert = 1, mpert
+       is_strain=.false.    
        do i3pert = 1, mpert
 
          do i1dir = 1, 3
@@ -4691,7 +4733,7 @@ subroutine d3lwsym(blkflg,d3,indsym,mpert,natom,nsym,symrec,symrel)
                    if (i1pert <= natom) then
                      ipesy1 = indsym(4,isym,i1pert)
                      sym1(:,:) = symrec(:,:,isym)
-                   else if (i1pert == natom + 2.or.i1pert == natom + 8) then
+                   else if (i1pert == natom + 2) then
                      ipesy1 = i1pert
                      sym1(:,:) = symrel(:,:,isym)
                    else
@@ -4701,9 +4743,16 @@ subroutine d3lwsym(blkflg,d3,indsym,mpert,natom,nsym,symrec,symrel)
                    if (i2pert <= natom) then
                      ipesy2 = indsym(4,isym,i2pert)
                      sym2(:,:) = symrec(:,:,isym)
-                   else if (i2pert == natom + 2.or.i2pert == natom + 8) then
+                   else if (i2pert == natom + 2.or.i2pert == natom + 3 &
+                   & .or. i2pert == natom + 4) then
                      ipesy2 = i2pert
                      sym2(:,:) = symrel(:,:,isym)
+                     if (i2pert == natom + 3.or. i2pert == natom + 4) then
+                       is_strain=.true.
+                       if (i2pert==natom+3) istr=i2dir
+                       if (i2pert==natom+4) istr=3+i2dir
+                       i2dir_a=idx(2*istr-1); i2dir_b=idx(2*istr)
+                     end if
                    else
                      found = 0
                    end if
@@ -4719,31 +4768,67 @@ subroutine d3lwsym(blkflg,d3,indsym,mpert,natom,nsym,symrec,symrel)
                    end if
 
                    sumr = 0_dp ; sumi = 0_dp;
-                   do idisy1 = 1, 3
-                     do idisy2 = 1, 3
-                       do idisy3 = 1, 3
+                   if (.not.is_strain) then
+                     do idisy1 = 1, 3
+                       do idisy2 = 1, 3
+                         do idisy3 = 1, 3
 
-                         if ((sym1(i1dir,idisy1) /=0).and.(sym2(i2dir,idisy2) /=0) &
-&                         .and.(sym3(i3dir,idisy3) /=0)) then
+                           if ((sym1(i1dir,idisy1) /=0).and.(sym2(i2dir,idisy2) /=0) &
+&                           .and.(sym3(i3dir,idisy3) /=0)) then
 
-                           if (blkflg(idisy1,ipesy1,idisy2,ipesy2,idisy3,ipesy3) == 1) then
+                             if (blkflg(idisy1,ipesy1,idisy2,ipesy2,idisy3,ipesy3) == 1) then
 
-                             sumr = sumr + sym1(i1dir,idisy1)*sym2(i2dir,idisy2)*&
-&                             sym3(i3dir,idisy3)*d3(1,idisy1,ipesy1,idisy2,ipesy2,idisy3,ipesy3)
-                             sumi = sumi + sym1(i1dir,idisy1)*sym2(i2dir,idisy2)*&
-&                             sym3(i3dir,idisy3)*d3(2,idisy1,ipesy1,idisy2,ipesy2,idisy3,ipesy3)
+                               sumr = sumr + sym1(i1dir,idisy1)*sym2(i2dir,idisy2)*&
+&                               sym3(i3dir,idisy3)*d3(1,idisy1,ipesy1,idisy2,ipesy2,idisy3,ipesy3)
+                               sumi = sumi + sym1(i1dir,idisy1)*sym2(i2dir,idisy2)*&
+&                               sym3(i3dir,idisy3)*d3(2,idisy1,ipesy1,idisy2,ipesy2,idisy3,ipesy3)
 
-                           else
+                             else
 
-                             found = 0
+                               found = 0
+
+                             end if
 
                            end if
 
-                         end if
-
+                         end do
                        end do
                      end do
-                   end do
+                   else 
+                     do idisy1 = 1, 3
+                       !do idisy2_a = 1, 3
+                       !  do idisy2_b = 1, 3
+                       do idisy2 = 1, 3
+                         if (ipesy2==natom+3) istr=idisy2
+                         if (ipesy2==natom+4) istr=3+idisy2
+                         idisy2_a=idx(2*istr-1); idisy2_b=idx(2*istr)
+                           do idisy3 = 1, 3
+
+                             if ((sym1(i1dir,idisy1) /=0).and.(sym2(i2dir_a,idisy2_a) /=0) &
+&                             .and.(sym2(i2dir_b,idisy2_b) /=0).and.(sym3(i3dir,idisy3) /=0)) then
+
+                               if (strflg(idisy1,ipesy1,idisy2_a,idisy2_b,idisy3,ipesy3) == 1) then
+
+                                 sumr = sumr + sym1(i1dir,idisy1)*sym2(i2dir_a,idisy2_a)* &
+&                                sym2(i2dir_b,idisy2_b)*sym3(i3dir,idisy3)*& 
+&                                d3str(1,idisy1,ipesy1,idisy2_a,idisy2_b,idisy3,ipesy3)
+                                 sumi = sumi + sym1(i1dir,idisy1)*sym2(i2dir_a,idisy2_b)*&
+&                                sym2(i2dir_b,idisy2_b)*sym3(i3dir,idisy3)*& 
+&                                d3str(2,idisy1,ipesy1,idisy2_a,idisy2_b,idisy3,ipesy3)
+
+                               else
+
+                                 found = 0
+
+                               end if
+
+                             end if
+
+                           end do
+                         !end do
+                       end do
+                     end do
+                   end if        
 
                    if (found == 1) then
                      d3(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = sumr
@@ -5112,8 +5197,7 @@ subroutine sylwtens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
                  if (i1pert <= natom) then
                    ipesy1 = indsym(4,isym,i1pert)
                    sym1(:,:) = symrec(:,:,isym)
-                 else if (i1pert == natom + 2.or.i1pert == natom + 3.or. &
-                 & i1pert == natom + 4.or.i1pert == natom + 8) then
+                 else if (i1pert == natom + 2) then
                    ipesy1 = i1pert
                    sym1(:,:) = symrel(:,:,isym)
                  else
@@ -5124,7 +5208,7 @@ subroutine sylwtens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
                    ipesy2 = indsym(4,isym,i2pert)
                    sym2(:,:) = symrec(:,:,isym)
                  else if (i2pert == natom + 2.or.i2pert == natom + 3.or. &
-                 & i2pert == natom + 4.or.i2pert == natom + 8) then
+                 & i2pert == natom + 4) then
                    ipesy2 = i2pert
                    sym2(:,:) = symrel(:,:,isym)
                    if (i2pert == natom + 3.or. i2pert == natom + 4) then
