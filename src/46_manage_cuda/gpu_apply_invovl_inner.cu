@@ -461,9 +461,6 @@ extern "C" void solve_inner_gpu(int32_t proj_dim[3],
   int proj_size = proj_dim[0]*proj_dim[1]*proj_dim[2];
   int proj_size_in_bytes = proj_size*sizeof(double);
 
-  // TO BE REMOVED
-  printf("INSIDE solve_inner_gpu\n");
-
   // compute normproj by summing over the first two dimensions
   normprojs = (double *) malloc(ndat*sizeof(double));
   errs_cpu  = (double *) malloc(ndat*sizeof(double));
@@ -600,8 +597,8 @@ extern "C" void solve_inner_gpu(int32_t proj_dim[3],
 
     if (maxerr < precision or additional_steps_to_take == 1) {
 
-      printf("[solve_inner_gpu] exit failure; maxerr = %f additionnal_steps=%d\n",maxerr,additional_steps_to_take);
-      exit(EXIT_FAILURE);
+      //printf("[solve_inner_gpu] exit failure; maxerr = %f additionnal_steps=%d\n",maxerr,additional_steps_to_take);
+      break;
       // We might stall and never get to the specified precision because of machine errors.
       // If we got to 1e-10, extrapolate convergence rate and determine the number of additional
       // steps to take to reach precision
@@ -614,8 +611,8 @@ extern "C" void solve_inner_gpu(int32_t proj_dim[3],
     } else if (additional_steps_to_take > 0) {
 
       if (previous_maxerr > 0 and previous_maxerr<maxerr) {
-        printf("[solve_inner_gpu] exit failure; maxerr = %f previous maxerr=%f\n",maxerr,previous_maxerr);
-        exit(EXIT_FAILURE);
+        //printf("[solve_inner_gpu] exit failure; maxerr = %f previous maxerr=%f\n",maxerr,previous_maxerr);
+        break;
       }
       additional_steps_to_take -= 1;
 
