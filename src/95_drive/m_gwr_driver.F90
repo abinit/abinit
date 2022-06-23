@@ -58,7 +58,7 @@ module m_gwr_driver
  use m_pawrhoij,        only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy, pawrhoij_free, pawrhoij_symrhoij
  use m_pawfgr,          only : pawfgr_type, pawfgr_init, pawfgr_destroy
  use m_pspini,          only : pspini
- use m_gwr_base,        only : gwr_new, gwr_t
+ use m_gwr,             only : gwr_new, gwr_t
  !use m_ephtk,          only : ephtk_update_ebands
 
  implicit none

@@ -185,6 +185,9 @@ module m_slk
 
    procedure :: zdhp_invert => slk_zdhp_invert
     ! Inverse of a Hermitian positive definite matrix.
+
+   procedure :: ptrans => slk_ptrans
+    ! Transpose matrix
 #endif
 
  end type matrix_scalapack
@@ -3512,6 +3515,87 @@ subroutine slk_zdhp_invert(Slk_mat, uplo)
  ABI_CHECK(info == 0, sjoin("PZPOTRI returned info:", itoa(info)))
 
 end subroutine slk_zdhp_invert
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_slk/slk_ptrans
+!! NAME
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine slk_ptrans(in_mat, trans, out_mat)
+
+!Arguments ------------------------------------
+ class(matrix_scalapack), intent(in) :: in_mat
+ character(len=1),intent(in) :: trans
+ class(matrix_scalapack), intent(inout) :: out_mat
+
+!Local variables-------------------------------
+ integer :: istwf_k
+
+! *************************************************************************
+
+ istwf_k = merge(1, 2, allocated(in_mat%buffer_cplx))
+
+ ! TODO: To be tested.
+
+ call out_mat%free()
+ call init_matrix_scalapack(out_mat, in_mat%sizeb_global(2), in_mat%sizeb_global(1), &
+                            in_mat%processor, istwf_k) !, tbloc=tbloc) TODO
+
+ ! prototype
+ !call pdtran(m, n, alpha, a, ia, ja, desca, beta, c, ic, jc, descc)
+
+ if (allocated(in_mat%buffer_cplx)) then
+   ! Transposes a complex distributed matrix, conjugated
+   ! sub(C):=beta*sub(C) + alpha*conjg(sub(A)'),
+   select case (trans)
+   case ("C")
+#ifdef HAVE_LINALG_SCALAPACK
+     call pztranc(in_mat%sizeb_global(2), in_mat%sizeb_global(1), cone, in_mat%buffer_cplx, 1, 1, &
+                  in_mat%descript%tab, czero, out_mat%buffer_cplx, 1, 1, out_mat%descript%tab)
+#else
+     out_mat%buffer_cplx = transpose(conjg(in_mat%buffer_cplx))
+#endif
+
+   case ("N")
+     ! sub(C):=beta*sub(C) + alpha*sub(A)',
+#ifdef HAVE_LINALG_SCALAPACK
+     call pztranu(in_mat%sizeb_global(2), in_mat%sizeb_global(1), cone, in_mat%buffer_cplx, 1, 1, &
+                  in_mat%descript%tab, czero, out_mat%buffer_cplx, 1, 1, out_mat%descript%tab)
+#else
+     out_mat%buffer_cplx = transpose(in_mat%buffer_cplx)
+#endif
+
+   case default
+     ABI_ERROR(sjoin("Invalid value for trans:", trans))
+   end select
+
+ else if (allocated(in_mat%buffer_real)) then
+
+#ifdef HAVE_LINALG_SCALAPACK
+     call pdtran(in_mat%sizeb_global(2), in_mat%sizeb_global(1), one, in_mat%buffer_real, 1, 1, &
+                 in_mat%descript%tab, zero, out_mat%buffer_real, 1, 1, out_mat%descript%tab)
+#else
+     out_mat%buffer_real = transpose(in_mat%buffer_real)
+#endif
+
+ else
+   ABI_ERROR("Neither buffer_cplx nor buffer_real are allocated!")
+ end if
+
+end subroutine slk_ptrans
 !!***
 
 !----------------------------------------------------------------------
