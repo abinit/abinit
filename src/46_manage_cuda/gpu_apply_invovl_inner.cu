@@ -108,7 +108,8 @@ void apply_block_gpu(int32_t cplx,
 
     for (int idat = 0; idat < ndat; ++idat) {
 
-      int32_t shift = 0;
+      // offset to the begining of the "idat" th column
+      int32_t shift = nprojs*idat;
 
       for (int itypat=0; itypat < ntypat; ++itypat) {
 
