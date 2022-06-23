@@ -153,7 +153,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 ! integer :: idir,ipert,
  real(dp) :: ecore,ecutdg_eff,ecut_eff,enxc,etot,fermie,fermih,gsqcut_eff,gsqcutc_eff,residm ! CP added fermih
  real(dp) :: ucvol,vxcavg
- logical :: non_magnetic_xc
+ logical :: has_strain,non_magnetic_xc
  character(len=fnlen) :: dscrpt
  character(len=500) :: msg
  type(ebands_t) :: bstruct
@@ -653,7 +653,9 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  d3etot(:,:,:,:,:,:,:)=d3etot(:,:,:,:,:,:,:) + d3etot_nv(:,:,:,:,:,:,:)
 
  !Complete missing elements using symmetry operations
- call d3lwsym(blkflg,d3etot,indsym,mpert,natom,dtset%nsym,symrec,dtset%symrel)
+ has_strain=.false.
+ if (dtset%lw_flexo==1.or.dtset%lw_flexo==2.or.dtset%lw_flexo==4) has_strain=.true.
+ call d3lwsym(blkflg,d3etot,indsym,has_strain,mpert,natom,dtset%nsym,symrec,dtset%symrel)
 
 !Deallocate global proc_distrib
  if(xmpi_paral==1) then
