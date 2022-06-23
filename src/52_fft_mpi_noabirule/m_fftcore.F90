@@ -1547,7 +1547,7 @@ end subroutine sphereboundary
 !! FUNCTION
 !! Array cg is defined in sphere with npw points. Insert cg inside box
 !! of n1*n2*n3 points to define array cfft for fft box.
-!! corresponds to given element in cg.  rest of cfft is filled with 0 s.
+!! corresponds to given element in cg. rest of cfft is filled with 0 s.
 !!
 !! iflag=1==>insert cg into cfft.
 !! iflag=2==>insert cg into cfft, where the second and third dimension
@@ -1555,7 +1555,7 @@ end subroutine sphereboundary
 !! iflag=-1==> extract cg from cfft.
 !! iflag=-2==> extract cg from cfft, where the second and third dimension
 !! have been switched (needed for new 2002 SGoedecker FFT)
-!!  (WARNING : iflag=-2 cannot use symmetry operations)
+!!  (WARNING: iflag=-2 cannot use symmetry operations)
 !!
 !! There is also the possibility to apply a symmetry operation,
 !! as well as to make a shift in reciprocal space, or to multiply
@@ -1676,9 +1676,9 @@ subroutine sphere(cg,ndat,npw,cfft,n1,n2,n3,n4,n5,n6,kg_k,istwf_k,iflag,me_g0,sh
 !$OMP PARALLEL DO PRIVATE(i1,i2,i3) IF (ndat>1)
        do idat=1,ndat
          do ipw=1,npw
-           i1=kg_k(1,ipw); if(i1<0)i1=i1+n1; i1=i1+1
-           i2=kg_k(2,ipw); if(i2<0)i2=i2+n2; i2=i2+1
-           i3=kg_k(3,ipw); if(i3<0)i3=i3+n3; i3=i3+1
+           i1=kg_k(1,ipw); if(i1<0) i1=i1+n1; i1=i1+1
+           i2=kg_k(2,ipw); if(i2<0) i2=i2+n2; i2=i2+1
+           i3=kg_k(3,ipw); if(i3<0) i3=i3+n3; i3=i3+1
 
            cfft(1,i1,i2,i3+n6*(idat-1))=cg(1,ipw+npw*(idat-1))
            cfft(2,i1,i2,i3+n6*(idat-1))=cg(2,ipw+npw*(idat-1))
@@ -1690,9 +1690,9 @@ subroutine sphere(cg,ndat,npw,cfft,n1,n2,n3,n4,n5,n6,kg_k,istwf_k,iflag,me_g0,sh
 !$OMP PARALLEL DO PRIVATE(i1,i2,i3) IF (ndat>1)
        do idat=1,ndat
          do ipw=1,npw
-           i1=kg_k(1,ipw); if(i1<0)i1=i1+n1; i1=i1+1
-           i2=kg_k(2,ipw); if(i2<0)i2=i2+n2; i2=i2+1
-           i3=kg_k(3,ipw); if(i3<0)i3=i3+n3; i3=i3+1
+           i1=kg_k(1,ipw); if(i1<0) i1=i1+n1; i1=i1+1
+           i2=kg_k(2,ipw); if(i2<0) i2=i2+n2; i2=i2+1
+           i3=kg_k(3,ipw); if(i3<0) i3=i3+n3; i3=i3+1
 
            cfft(1,i1,i3,i2+n6*(idat-1))=cg(1,ipw+npw*(idat-1))
            cfft(2,i1,i3,i2+n6*(idat-1))=cg(2,ipw+npw*(idat-1))
@@ -1716,9 +1716,9 @@ subroutine sphere(cg,ndat,npw,cfft,n1,n2,n3,n4,n5,n6,kg_k,istwf_k,iflag,me_g0,sh
 !$OMP PARALLEL DO PRIVATE(i1,i1inv,i2,i2inv,i3,i3inv) IF (ndat>1)
        do idat=1,ndat
          do ipw=npwmin,npw
-           i1=kg_k(1,ipw); if(i1<0)i1=i1+n1; i1=i1+1
-           i2=kg_k(2,ipw); if(i2<0)i2=i2+n2; i2=i2+1
-           i3=kg_k(3,ipw); if(i3<0)i3=i3+n3; i3=i3+1
+           i1=kg_k(1,ipw); if(i1<0) i1=i1+n1; i1=i1+1
+           i2=kg_k(2,ipw); if(i2<0) i2=i2+n2; i2=i2+1
+           i3=kg_k(3,ipw); if(i3<0) i3=i3+n3; i3=i3+1
            ! Construct the coordinates of -k-G
            i1inv=i1inver(i1) ; i2inv=i2inver(i2) ; i3inv=i3inver(i3)
 
@@ -1734,9 +1734,9 @@ subroutine sphere(cg,ndat,npw,cfft,n1,n2,n3,n4,n5,n6,kg_k,istwf_k,iflag,me_g0,sh
 !$OMP PARALLEL DO PRIVATE(i1,i1inv,i2,i2inv,i3,i3inv) IF (ndat>1)
        do idat=1,ndat
          do ipw=npwmin,npw
-           i1=kg_k(1,ipw); if(i1<0)i1=i1+n1; i1=i1+1
-           i2=kg_k(2,ipw); if(i2<0)i2=i2+n2; i2=i2+1
-           i3=kg_k(3,ipw); if(i3<0)i3=i3+n3; i3=i3+1
+           i1=kg_k(1,ipw); if(i1<0) i1=i1+n1; i1=i1+1
+           i2=kg_k(2,ipw); if(i2<0) i2=i2+n2; i2=i2+1
+           i3=kg_k(3,ipw); if(i3<0) i3=i3+n3; i3=i3+1
 
            ! Construct the coordinates of -k-G
            i1inv=i1inver(i1) ; i2inv=i2inver(i2) ; i3inv=i3inver(i3)
@@ -1766,9 +1766,9 @@ subroutine sphere(cg,ndat,npw,cfft,n1,n2,n3,n4,n5,n6,kg_k,istwf_k,iflag,me_g0,sh
 !$OMP PARALLEL DO PRIVATE(i1,i2,i3,ipwdat,i3dat) IF (ndat>1)
          do idat=1,ndat
            do ipw=1,npw
-             i1=kg_k(1,ipw); if(i1<0)i1=i1+n1; i1=i1+1
-             i2=kg_k(2,ipw); if(i2<0)i2=i2+n2; i2=i2+1
-             i3=kg_k(3,ipw); if(i3<0)i3=i3+n3; i3=i3+1
+             i1=kg_k(1,ipw); if(i1<0) i1=i1+n1; i1=i1+1
+             i2=kg_k(2,ipw); if(i2<0) i2=i2+n2; i2=i2+1
+             i3=kg_k(3,ipw); if(i3<0) i3=i3+n3; i3=i3+1
              ipwdat = ipw + (idat-1) * npw
              i3dat = i3 + (idat-1) * n6
 
@@ -1780,9 +1780,9 @@ subroutine sphere(cg,ndat,npw,cfft,n1,n2,n3,n4,n5,n6,kg_k,istwf_k,iflag,me_g0,sh
 !$OMP PARALLEL DO PRIVATE(i1,i2,i3,ipwdat,i2dat) IF (ndat>1)
          do idat=1,ndat
            do ipw=1,npw
-             i1=kg_k(1,ipw); if(i1<0)i1=i1+n1; i1=i1+1
-             i2=kg_k(2,ipw); if(i2<0)i2=i2+n2; i2=i2+1
-             i3=kg_k(3,ipw); if(i3<0)i3=i3+n3; i3=i3+1
+             i1=kg_k(1,ipw); if(i1<0) i1=i1+n1; i1=i1+1
+             i2=kg_k(2,ipw); if(i2<0) i2=i2+n2; i2=i2+1
+             i3=kg_k(3,ipw); if(i3<0) i3=i3+n3; i3=i3+1
 
              ipwdat = ipw + (idat-1) * npw
              i2dat = i2 + (idat-1) * n6
@@ -1836,9 +1836,9 @@ subroutine sphere(cg,ndat,npw,cfft,n1,n2,n3,n4,n5,n6,kg_k,istwf_k,iflag,me_g0,sh
 !$OMP PARALLEL DO PRIVATE(i1,i1inv,i2,i2inv,i3,i3inv,ipwdat,i3dat,i3invdat) IF (ndat>1)
          do idat=1,ndat
            do ipw=npwmin,npw
-             i1=kg_k(1,ipw); if(i1<0)i1=i1+n1; i1=i1+1
-             i2=kg_k(2,ipw); if(i2<0)i2=i2+n2; i2=i2+1
-             i3=kg_k(3,ipw); if(i3<0)i3=i3+n3; i3=i3+1
+             i1=kg_k(1,ipw); if(i1<0) i1=i1+n1; i1=i1+1
+             i2=kg_k(2,ipw); if(i2<0) i2=i2+n2; i2=i2+1
+             i3=kg_k(3,ipw); if(i3<0) i3=i3+n3; i3=i3+1
 
              ! Construct the coordinates of -k-G
              i1inv=i1inver(i1); i2inv=i2inver(i2); i3inv=i3inver(i3)
@@ -1857,9 +1857,9 @@ subroutine sphere(cg,ndat,npw,cfft,n1,n2,n3,n4,n5,n6,kg_k,istwf_k,iflag,me_g0,sh
 !$OMP PARALLEL DO PRIVATE(i1,i1inv,i2,i2inv,i3,i3inv,ipwdat,i2dat,i2invdat) IF (ndat>1)
          do idat=1,ndat
            do ipw=npwmin,npw
-             i1=kg_k(1,ipw); if(i1<0)i1=i1+n1; i1=i1+1
-             i2=kg_k(2,ipw); if(i2<0)i2=i2+n2; i2=i2+1
-             i3=kg_k(3,ipw); if(i3<0)i3=i3+n3; i3=i3+1
+             i1=kg_k(1,ipw); if(i1<0) i1=i1+n1; i1=i1+1
+             i2=kg_k(2,ipw); if(i2<0) i2=i2+n2; i2=i2+1
+             i3=kg_k(3,ipw); if(i3<0) i3=i3+n3; i3=i3+1
 
              ! Construct the coordinates of -k-G
              i1inv=i1inver(i1) ; i2inv=i2inver(i2) ; i3inv=i3inver(i3)
@@ -1884,9 +1884,9 @@ subroutine sphere(cg,ndat,npw,cfft,n1,n2,n3,n4,n5,n6,kg_k,istwf_k,iflag,me_g0,sh
        do idat=1,ndat
          do ipw=npwmin,npw
 
-           i1=kg_k(1,ipw); if(i1<0)i1=i1+n1; i1=i1+1
-           i2=kg_k(2,ipw); if(i2<0)i2=i2+n2; i2=i2+1
-           i3=kg_k(3,ipw); if(i3<0)i3=i3+n3; i3=i3+1
+           i1=kg_k(1,ipw); if(i1<0) i1=i1+n1; i1=i1+1
+           i2=kg_k(2,ipw); if(i2<0) i2=i2+n2; i2=i2+1
+           i3=kg_k(3,ipw); if(i3<0) i3=i3+n3; i3=i3+1
 
            i1inv=i1inver(i1) ; i2inv=i2inver(i2) ; i3inv=i3inver(i3)
 
