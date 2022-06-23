@@ -1,6 +1,6 @@
-!!****m* ABINIT/m_gwr_base
+!!****m* ABINIT/m_gwr
 !! NAME
-!!  m_gwr_base
+!!  m_gwr
 !!
 !! FUNCTION
 !!  Objects and procedures to implement GW in real-space and imaginary time.
@@ -23,7 +23,7 @@
 
 #include "abi_common.h"
 
-module m_gwr_base
+module m_gwr
 
  use defs_basis
  use m_abicore
@@ -59,7 +59,7 @@ module m_gwr_base
 
 !----------------------------------------------------------------------
 
-!!****t* m_gwr_base/desc_t
+!!****t* m_gwr/desc_t
 !! NAME
 !! desc_t
 !!
@@ -112,7 +112,7 @@ module m_gwr_base
 
 !----------------------------------------------------------------------
 
-!!****t* m_gwr_base/gwr_t
+!!****t* m_gwr/gwr_t
 !! NAME
 !! gwr_t
 !!
@@ -168,6 +168,9 @@ module m_gwr_base
 
    integer :: ngkpt(3) = -1
    ! Number of divisions in k-point mesh.
+
+   integer :: ngqpt(3) = -1
+   ! Number of divisions in q-point mesh.
 
    integer,allocatable :: my_spins(:)
    ! (my_nspins)
@@ -270,11 +273,11 @@ module m_gwr_base
 
    type(mpi_type),pointer :: mpi_enreg => null()
 
-   type(matrix_scalapack),allocatable :: gt_ibz(:,:,:,:)
+   type(matrix_scalapack),allocatable :: gt_kibz(:,:,:,:)
    ! Occupied/Empty Green's function G_k(g,g')
    ! (2, nkibz, my_ntau, my_nspins)
 
-   type(matrix_scalapack),allocatable :: chit_ibz(:,:,:)
+   type(matrix_scalapack),allocatable :: chit_qibz(:,:,:)
    ! (nqibz, my_ntau, my_nspins)
 
    type(matrix_scalapack),allocatable :: wct_ibz(:,:)
@@ -354,7 +357,7 @@ contains
 
 !----------------------------------------------------------------------
 
-!!****f* m_gwr_base/gwr_new
+!!****f* m_gwr/gwr_new
 !! NAME
 !!
 !! FUNCTION
@@ -397,7 +400,7 @@ function gwr_new(dtset, cryst, psps, pawtab, ebands, mpi_enreg, comm) result (gw
  type(processor_scalapack) :: slk_processor
  type(krank_t) :: qrank, krank_ibz
 !arrays
- integer :: sc_ngfft(18), ngqpt(3), qptrlatt(3,3)
+ integer :: sc_ngfft(18), qptrlatt(3,3) !ngqpt(3),
  integer,allocatable :: kbz2ibz(:,:), qbz2ibz(:,:), gvec_(:,:)
  !integer,allocatable :: kibz2bz(:), qibz2bz(:), qglob2bz(:,:), kglob2bz(:,:)
  real(dp) :: my_shiftq(3,1), kk_ibz(3), kk_bz(3), qq_bz(3), kpq_bz(3), qq_ibz(3)
@@ -476,6 +479,8 @@ function gwr_new(dtset, cryst, psps, pawtab, ebands, mpi_enreg, comm) result (gw
                              gwr%nqibz, gwr%qibz, gwr%wtq, gwr%nqbz, gwr%qbz)
                              !new_kptrlatt=gwr%qptrlatt, new_shiftk=gwr%qshift,
                              !bz2ibz=new%ind_qbz2ibz)  # FIXME
+
+ gwr%ngqpt = get_diag(qptrlatt)
 
  ! HM: the bz2ibz produced above is incomplete, I do it here using listkk
  ABI_MALLOC(qbz2ibz, (6, gwr%nqbz))
@@ -671,8 +676,8 @@ function gwr_new(dtset, cryst, psps, pawtab, ebands, mpi_enreg, comm) result (gw
  ! =====================================
  ! Allocate arrays storing G_k and Chi_q
  ! =====================================
- ABI_MALLOC(gwr%gt_ibz, (2, gwr%nkibz, gwr%my_ntau, gwr%my_nspins))
- ABI_MALLOC(gwr%chit_ibz, (gwr%nqibz, gwr%my_ntau, gwr%my_nspins))
+ ABI_MALLOC(gwr%gt_kibz, (2, gwr%nkibz, gwr%my_ntau, gwr%my_nspins))
+ ABI_MALLOC(gwr%chit_qibz, (gwr%nqibz, gwr%my_ntau, gwr%my_nspins))
 
  call init_scalapack(slk_processor, gwr%g_comm%value) !# grid_shape=[1, gwr%g_comm%value]
 
@@ -684,9 +689,9 @@ function gwr_new(dtset, cryst, psps, pawtab, ebands, mpi_enreg, comm) result (gw
        ik_ibz = gwr%my_kibz_inds(my_iki)
        npwsp = gwr%green_desc_kibz(ik_ibz)%npw * gwr%nspinor
        col_bsize = npwsp / gwr%g_comm%nproc; if (mod(npwsp, gwr%g_comm%nproc) /= 0) col_bsize = col_bsize + 1
-       call init_matrix_scalapack(gwr%gt_ibz(1, ik_ibz, my_it, my_is), &
+       call init_matrix_scalapack(gwr%gt_kibz(1, ik_ibz, my_it, my_is), &
           npwsp, npwsp, slk_processor, 1) ! , tbloc=[npwsp, col_bsize])
-       call init_matrix_scalapack(gwr%gt_ibz(2, ik_ibz, my_it, my_is), &
+       call init_matrix_scalapack(gwr%gt_kibz(2, ik_ibz, my_it, my_is), &
           npwsp, npwsp, slk_processor, 1) !, tbloc=[npwsp, col_bsize])
      end do
 
@@ -695,7 +700,7 @@ function gwr_new(dtset, cryst, psps, pawtab, ebands, mpi_enreg, comm) result (gw
       iq_ibz = gwr%my_qibz_inds(my_iqi)
       npwsp = gwr%chi_desc_qibz(iq_ibz)%npw * gwr%nspinor
       col_bsize = npwsp / gwr%g_comm%nproc; if (mod(npwsp, gwr%g_comm%nproc) /= 0) col_bsize = col_bsize + 1
-      call init_matrix_scalapack(gwr%chit_ibz(iq_ibz, my_it, my_is), &
+      call init_matrix_scalapack(gwr%chit_qibz(iq_ibz, my_it, my_is), &
          npwsp, npwsp, slk_processor, 1) !, tbloc=[npwsp, col_bsize])
     end do
 
@@ -709,7 +714,7 @@ end function gwr_new
 
 !----------------------------------------------------------------------
 
-!!****f* m_gwr_base/gwr_free
+!!****f* m_gwr/gwr_free
 !! NAME
 !! gwr_free
 !!
@@ -764,13 +769,13 @@ subroutine gwr_free(gwr)
    ABI_FREE(gwr%chi_desc_qibz)
  end if
  ! Free scalapack matrices
- if (allocated(gwr%gt_ibz)) then
-   call slk_free_array(gwr%gt_ibz)
-   ABI_FREE(gwr%gt_ibz)
+ if (allocated(gwr%gt_kibz)) then
+   call slk_free_array(gwr%gt_kibz)
+   ABI_FREE(gwr%gt_kibz)
  end if
- if (allocated(gwr%chit_ibz)) then
-   call slk_free_array(gwr%chit_ibz)
-   ABI_FREE(gwr%chit_ibz)
+ if (allocated(gwr%chit_qibz)) then
+   call slk_free_array(gwr%chit_qibz)
+   ABI_FREE(gwr%chit_qibz)
  end if
  if (allocated(gwr%wct_ibz)) then
    call slk_free_array(gwr%wct_ibz)
@@ -798,7 +803,7 @@ end subroutine gwr_free
 
 !----------------------------------------------------------------------
 
-!!****f* m_gwr_base/gwr_build_gtau_from_wfk
+!!****f* m_gwr/gwr_build_gtau_from_wfk
 !! NAME
 !!  gwr_build_gtau_from_wfk
 !!
@@ -924,8 +929,8 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk0_path)
        do my_it=1,gwr%my_ntau
          tau = gwr%tau_mesh(gwr%my_itaus(my_it))
          !cgwork(ig1) x cgwork(ig2) * exp(-tau * eig_nk)
-         !gwr%gt_ibz(1, ik_ibz, my_it, my_is)%buffer_cplx =
-         !gwr%gt_ibz(2, ik_ibz, my_it, my_is)%buffer_cplx =
+         !gwr%gt_kibz(1, ik_ibz, my_it, my_is)%buffer_cplx =
+         !gwr%gt_kibz(2, ik_ibz, my_it, my_is)%buffer_cplx =
        end do ! my_it
 
      end do ! ib
@@ -944,7 +949,7 @@ end subroutine gwr_build_gtau_from_wfk
 
 !----------------------------------------------------------------------
 
-!!****f* m_gwr_base/gwr_rotate_gt
+!!****f* m_gwr/gwr_rotate_gt
 !! NAME
 !!  gwr_rotate_gt
 !!
@@ -987,7 +992,7 @@ subroutine gwr_rotate_gt(gwr, my_ikf, my_it, my_is, desc_kbz, gt_kbz)
 
  if (isirr_k) then
    do ioe=1,2
-     gt_kbz(ioe) = gwr%gt_ibz(ioe, ik_ibz, my_it, my_is)%copy()
+     gt_kbz(ioe) = gwr%gt_kibz(ioe, ik_ibz, my_it, my_is)%copy()
    end do
    return
  end if
@@ -1000,7 +1005,7 @@ subroutine gwr_rotate_gt(gwr, my_ikf, my_it, my_is, desc_kbz, gt_kbz)
 
  ! Get G_k with k in the BZ.
  do ioe=1,2
-   gt_kbz(ioe) = gwr%gt_ibz(ioe, ik_ibz, my_it, my_is)%copy()
+   gt_kbz(ioe) = gwr%gt_kibz(ioe, ik_ibz, my_it, my_is)%copy()
    do il_g2=1, gt_kbz(ioe)%sizeb_local(2)
      do il_g1=1, gt_kbz(ioe)%sizeb_local(1)
        call gt_kbz(ioe)%loc2glob(il_g1, il_g2, ig1, ig2)  ! TODO: factorize call for efficiency reasons.
@@ -1014,7 +1019,7 @@ end subroutine gwr_rotate_gt
 
 !----------------------------------------------------------------------
 
-!!****f* m_gwr_base/gwr_green_gpr
+!!****f* m_gwr/gwr_green_gpr
 !! NAME
 !!  gwr_green_gpr
 !!
@@ -1104,7 +1109,7 @@ end subroutine gwr_green_gpr
 
 !----------------------------------------------------------------------
 
-!!****f* m_gwr_base/gwr_cos_transform
+!!****f* m_gwr/gwr_cos_transform
 !! NAME
 !!
 !! FUNCTION
@@ -1168,7 +1173,7 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
      select case (what)
      case ("chi")
        desc => gwr%chi_desc_qibz(my_iqf)
-       chit => gwr%chit_ibz(my_iqf, 1:gwr%my_ntau, my_is)
+       chit => gwr%chit_qibz(my_iqf, 1:gwr%my_ntau, my_is)
      !case ("wc")
      !  desc => gwr%chi_desc_qibz(my_iqf)
      !  chit => gwr%wct_ibz(my_iqf, 1:gwr%my_ntau)
@@ -1217,7 +1222,7 @@ end subroutine gwr_cos_transform
 
 !----------------------------------------------------------------------
 
-!!****f* m_gwr_base/gwr_wt_from_chiw
+!!****f* m_gwr/gwr_wt_from_chiw
 !! NAME
 !!  gwr_wt_from_chiw
 !!
@@ -1267,7 +1272,7 @@ subroutine gwr_wt_from_chiw(gwr)
    do my_is=1,gwr%my_nspins  ! FIXME
      do my_iw=1,gwr%my_ntau
        ! iq_ibz = ???
-       chi => gwr%chit_ibz(my_iqf, my_iw, my_is)
+       chi => gwr%chit_qibz(my_iqf, my_iw, my_is)
 
        ! Build epsilon(q, iw) =  delta_{g,g'} − v_q(g,g') chi_q(g,g, iw).
        do ig2=1,chi%sizeb_local(2)
@@ -1312,7 +1317,7 @@ end subroutine gwr_wt_from_chiw
 
 !----------------------------------------------------------------------
 
-!!****f* m_gwr_base/slk_init_ptrans
+!!****f* m_gwr/slk_init_ptrans
 !! NAME
 !!
 !! FUNCTION
@@ -1345,7 +1350,7 @@ end function slk_init_ptrans
 
 !----------------------------------------------------------------------
 
-!!****f* m_gwr_base/slk_ptrans
+!!****f* m_gwr/slk_ptrans
 !! NAME
 !!
 !! FUNCTION
@@ -1417,7 +1422,7 @@ end subroutine slk_ptrans
 
 !----------------------------------------------------------------------
 
-!!****f* m_gwr_base/desc_new
+!!****f* m_gwr/desc_new
 !! NAME
 !!
 !! FUNCTION
@@ -1461,7 +1466,7 @@ end function desc_new
 
 !----------------------------------------------------------------------
 
-!!****f* m_gwr_base/desc_copy
+!!****f* m_gwr/desc_copy
 !! NAME
 !!  desc_copy
 !!
@@ -1498,7 +1503,7 @@ end function desc_copy
 
 !----------------------------------------------------------------------
 
-!!****f* m_gwr_base/desc_free
+!!****f* m_gwr/desc_free
 !! NAME
 !!  desc_free
 !!
@@ -1530,7 +1535,7 @@ end subroutine desc_free
 
 !----------------------------------------------------------------------
 
-!!****f* m_gwr_base/gwr_build_chi
+!!****f* m_gwr/gwr_build_chi
 !! NAME
 !!  gwr_build_chi
 !!
@@ -1553,7 +1558,7 @@ subroutine gwr_build_chi(gwr)
 
 !Local variables-------------------------------
 !scalars
- integer :: my_is, my_it, my_ikf, my_iqf, ig, my_ir, my_nr, npwsp, col_bsize
+ integer :: my_is, my_it, my_ikf, my_iqf, ig, my_ir, my_nr, npwsp, col_bsize, my_iqi
  integer :: ig1, ig2, sc_nfft, sc_augsize, spin, ik_ibz, ik_bz, iq_bz, iq_ibz, ierr, ioe
  !integer :: all_nproc, my_rank !, mgfft, nfft
  real(dp) :: cpu, wall, gflops
@@ -1583,6 +1588,12 @@ subroutine gwr_build_chi(gwr)
  sc_nfft = product(sc_ngfft(1:3))
  sc_augsize = product(sc_ngfft(4:6))
 
+ ABI_MALLOC(gf_scbox, (sc_nfft, 2))
+ ABI_MALLOC(chi_scbox, (sc_nfft))
+
+ !cal fftbox_plan3_init(sc_plan_gp2rp, ndat, dims, embed, fftalg, fftcache, isign)
+ !cal fftbox_plan3_init(sc_plan_rp2gp, ndat, dims, embed, fftalg, fftcache, isign)
+
  ! The g-vectors in the supercell for G and chi.
  ABI_MALLOC(green_scg, (3, gwr%green_mpw))
  ABI_MALLOC(chi_scg, (3, gwr%chi_mpw))
@@ -1590,19 +1601,17 @@ subroutine gwr_build_chi(gwr)
  ! TODO: Very likely this is needed only for GWR
  ! Can be allocated inside loops to render code a bit clearer.
  !if (gwr%use_supercell) then
- ABI_MALLOC(chiq_gpr, (gwr%my_nqbz))
- do my_iqf=1,gwr%my_nqbz
-   npwsp = gwr%chi_desc_qibz(my_iqf)%npw * gwr%nspinor
+ ABI_MALLOC(chiq_gpr, (gwr%my_nqibz))
+
+ do my_iqi=1,gwr%my_nqibz
+   iq_ibz = gwr%my_qibz_inds(my_iqi)
+   !qq_ibz = gwr%qibz(:, iq_ibz)
+   !desc_q => gwr%chi_desc_qibz(iq_ibz)
+   npwsp = gwr%chi_desc_qibz(iq_ibz)%npw * gwr%nspinor
    col_bsize = npwsp / gwr%g_comm%nproc; if (mod(npwsp, gwr%g_comm%nproc) /= 0) col_bsize = col_bsize + 1
-   call init_matrix_scalapack(chiq_gpr(my_iqf), &
+   call init_matrix_scalapack(chiq_gpr(my_iqi), &
         npwsp, gwr%nfft * gwr%nspinor, slk_processor, 1) !, tbloc=[npwsp, col_bsize])
  end do
-
- !cal fftbox_plan3_init(sc_plan_gp2rp, ndat, dims, embed, fftalg, fftcache, isign)
- !cal fftbox_plan3_init(sc_plan_rp2gp, ndat, dims, embed, fftalg, fftcache, isign)
-
- ABI_MALLOC(gf_scbox, (sc_nfft, 2))
- ABI_MALLOC(chi_scbox, (sc_nfft))
  !end if ! gwr%use_supercell
 
  ! Loop over my spins and my taus.
@@ -1634,14 +1643,13 @@ subroutine gwr_build_chi(gwr)
          !isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
 
          desc_k => desc_kbz(my_ikf)
-
          do ig=1,desc_k%npw
            green_scg(:,ig) = nint(gwr%kbz(:, ik_bz) * gwr%ngkpt) + gwr%ngkpt * desc_k%gvec(:,ig)
          end do
 
          do ioe=1,2
            gf_gpr(ioe, my_ikf)%buffer_cplx(:, my_ir) = zero
-           !call gf_gpr(ioe, my_ikf)%insert_in_box(..., gf_scbox)
+           !call insert_in_box(gf_gpr(:, my_ikf), green_scg, gf_scbox)
            !call sphere(cg,ndat,npw,gf_scbox,n1,n2,n3,n4,n5,n6,kg_k,istwf_k,iflag,me_g0,shiftg,symm,xnorm)
          end do
        end do ! my_ikf
@@ -1658,30 +1666,35 @@ subroutine gwr_build_chi(gwr)
        ! Extract chi_q(g, r) on the g-sphere from the FFT box in the supercell.
        ! not necessarly equal to the one used for the Green's function.
        ! NB: For the time being I'm assuming k-mesh == q-mesh.
-       do my_iqf=1,gwr%my_nqbz
-         iq_bz = gwr%my_qbz_inds(my_iqf)
-         desc_q => gwr%chi_desc_qibz(my_iqf)
+       ! Only q-points in the IBZ are considered.
+       do my_iqi=1,gwr%my_nqibz
+         iq_ibz = gwr%my_qibz_inds(my_iqi)
+         qq_ibz = gwr%qibz(:, iq_ibz)
+         desc_q => gwr%chi_desc_qibz(iq_ibz)
          do ig=1,desc_q%npw
-           chi_scg(:,ig) = nint(gwr%qbz(:, my_iqf) * gwr%ngkpt) + gwr%ngkpt * desc_q%gvec(:,ig)
+           chi_scg(:,ig) = nint(gwr%qibz(:, iq_ibz) * gwr%ngqpt) + gwr%ngqpt * desc_q%gvec(:,ig)
          end do
 
          !call sphere(cg,ndat,npw,cfft_o,n1,n2,n3,n4,n5,n6,kg_k,istwf_k,iflag,me_g0,shiftg,symm,xnorm)
-         chiq_gpr(my_iqf)%buffer_cplx(:, my_ir) = zero
+         chiq_gpr(my_iqi)%buffer_cplx(:, my_ir) = zero
        end do
 
      end do ! my_ir
 
-     do my_iqf=1,gwr%my_nqbz
-       desc_q => gwr%chi_desc_qibz(my_iqf)
+     !do my_iqf=1,gwr%my_nqbz
+     do my_iqi=1,gwr%my_nqibz
+       iq_ibz = gwr%my_qibz_inds(my_iqi)
+       !qq_ibz = gwr%qibz(:, iq_ibz)
+       desc_q => gwr%chi_desc_qibz(iq_ibz)
        iq_bz = gwr%my_qbz_inds(my_iqf)
-       !chi_r_gp = chiq_gpr(my_iq)%alloc_trans()
-       !call chiq_gpr(my_iqf)%ptrans("C", chi_r_gp)
-       call chiq_gpr(my_iqf)%free()
+       !chi_r_gp = chiq_gpr(my_iqi)%alloc_trans()
+       !call chiq_gpr(my_iqi)%ptrans("C", chi_r_gp)
+       call chiq_gpr(my_iqi)%free()
        ! FFT along the first dimension: chi_q(r, g') --> chi_q(g, g')
        do ig2=1,chi_r_gp%sizeb_local(2)
          chi_r_gp%buffer_cplx(:, ig2) = zero
          !call fft_ur(npw_k, nfft, nspinor, ndat, mgfft, ngfft, istwf_k, kg_k, gbound_k, ur, ug)
-         gwr%chit_ibz(my_iqf, my_it, my_is)%buffer_cplx(:, ig2) = zero ! ug
+         gwr%chit_qibz(iq_ibz, my_it, my_is)%buffer_cplx(:, ig2) = zero ! ug
        end do
        call chi_r_gp%free()
      end do
@@ -1705,9 +1718,9 @@ subroutine gwr_build_chi(gwr)
          kpq_bz = kk_bz + qq_ibz
          !ik_ibz = ??
          !ikpq_ibz = ??
+
          !desc_k = gwr%green_desc_kibz(ik_ibz)%rotate(symtab_k)
          !desc_kpq = gwr%green_desc_kibz(ikpq_ibz)%rotate(symtab_kpq)
-
          !go_k_gpr = gwr%gf_g_gp(1, ik_ibz, my_it, my_is)%rotate_fftg1_and_ptran(desc_k, "C", symtab_k)
          !ge_k_gpr = gwr%ge_g_gp(2, ik_ibz, my_it, my_is)%rotate_fftg1_and_ptran(desc_k, "C", symtab_k)
          !go_kpq_gpr = gwr%gf_g_gp(1, ikpq_ibz, my_it, my_is)%rotate_fftg1_and_ptran(desc_kpq, "C", symtab_kpq)
@@ -1719,7 +1732,6 @@ subroutine gwr_build_chi(gwr)
             ge_k_gpr%buffer_cplx(:, my_ir) = zero
             go_kpq_gpr%buffer_cplx(:, my_ir) = zero
             ge_kpq_gpr%buffer_cplx(:, my_ir) = zero
-
             !chi_fft = go_rpr * ge_rpr
             ! from r' to g'
             !chi_gp_r(:, my_ir) = FFT_rg(chi_fft)
@@ -1727,7 +1739,6 @@ subroutine gwr_build_chi(gwr)
 
          !call desc_k%free()
          !call desc_kpq%free()
-
          call go_kpq_gpr%free()
          call go_k_gpr%free()
          call ge_kpq_gpr%free()
@@ -1737,7 +1748,7 @@ subroutine gwr_build_chi(gwr)
          !call chi_gp_r%free()
          !do ig2=1, chi_rp_g%sizeb_local(2)
            !chi_r_gp%buffer_cplx(:, ig2)
-           !!gwr%chit_ibz(iq_ibz, my_it, my_is)%buffer_cplx(:, ig2) = FFT_rg
+           !!gwr%chit_qibz(iq_ibz, my_it, my_is)%buffer_cplx(:, ig2) = FFT_rg
          !end do
          !call chi_r_gp%free()
        end do ! my_ikf
@@ -1748,7 +1759,6 @@ subroutine gwr_build_chi(gwr)
 
  ! Free scalapack matrices
  call slk_free_array(gf_gpr)
- !ABI_FREE(gf_gpr)
 
  if (allocated(chiq_gpr)) then
    call slk_free_array(chiq_gpr)
@@ -1760,14 +1770,14 @@ subroutine gwr_build_chi(gwr)
  ABI_FREE(green_scg)
  ABI_FREE(chi_scg)
 
- call cwtime_report(" gwr_buid_chi:", cpu, wall, gflops)
-
  ! Transform irreducible chi from imaginary tau to imaginary omega.
  ! Also sum over spins to get total chi if collinear spins.
  call gwr%cos_transform("chi", "t2w", sum_spins=.True.)
 
+ call cwtime_report(" gwr_buid_chi:", cpu, wall, gflops)
+
 end subroutine gwr_build_chi
 !!***
 
-end module m_gwr_base
+end module m_gwr
 !!***
