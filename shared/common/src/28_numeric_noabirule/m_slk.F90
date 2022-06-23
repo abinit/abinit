@@ -34,6 +34,7 @@ module m_slk
 #endif
 
  use m_fstrings,      only : firstchar, toupper, itoa, sjoin
+ use m_copy,          only : alloc_copy
  !use m_numeric_tools, only : print_arr
 
  implicit none
@@ -148,22 +149,20 @@ module m_slk
  type,public :: matrix_scalapack
 
    integer :: sizeb_local(2)
-     ! dimensions of the local buffer
+    ! dimensions of the local buffer
 
    integer :: sizeb_global(2)
-     ! dimensions of the global matrix
+    ! dimensions of the global matrix
 
    integer :: sizeb_blocs(2)
-     ! size of the block of consecutive data
-
-   integer,allocatable :: ipiv(:)
+    ! size of the block of consecutive data
 
    real(dp),allocatable  :: buffer_real(:,:)
-     ! local part of the (real) matrix.
-     ! The istwf_k option passed to the constructor defines whether we have a real or complex matrix
+    ! local part of the (real) matrix.
+    ! The istwf_k option passed to the constructor defines whether we have a real or complex matrix
 
    complex(dpc),allocatable :: buffer_cplx(:,:)
-     ! local part of the (complex) matrix
+    ! local part of the (complex) matrix
 
    type(processor_scalapack),pointer :: processor => null()
 
@@ -175,14 +174,17 @@ module m_slk
    procedure :: loc2glob => slk_matrix_loc2glob
     ! Return global indices of a matrix element from the local indices.
 
+   procedure :: copy => matrix_scalapack_copy
+    ! Copy object
+
    procedure :: free => matrix_scalapack_free
-    ! Free local buffer
+    ! Free memory
 
    procedure :: zinvert => slk_zinvert
-     ! Inverse of a complex matrix in double precision
+    ! Inverse of a complex matrix in double precision
 
    procedure :: zdhp_invert => slk_zdhp_invert
-     ! Inverse of a Hermitian positive definite matrix.
+    ! Inverse of a Hermitian positive definite matrix.
 #endif
 
  end type matrix_scalapack
@@ -244,13 +246,13 @@ module m_slk
  public :: slk_bsize_and_type                ! Returns the byte size and the MPI datatype associated to the matrix elements
                                              ! that are stored in the ScaLAPACK_matrix
 
+ public :: slk_free_array                    !  Deallocate array of matrix_scalapack elements
  interface slk_free_array
    module procedure slk_free_array1
    module procedure slk_free_array2
    module procedure slk_free_array3
    module procedure slk_free_array4
  end interface slk_free_array
- public :: slk_free_array                    !  Deallocate array of matrix_scalapack elements
 
 #endif
 
@@ -553,6 +555,41 @@ end subroutine init_matrix_scalapack
 
 !----------------------------------------------------------------------
 
+!!****f* m_slk/matrix_scalapack_copy
+!! NAME
+!!  matrix_scalapack_copy
+!!
+!! FUNCTION
+!!  Copy object.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+type(matrix_scalapack) function matrix_scalapack_copy(in_mat) result(new_mat)
+
+!Arguments ------------------------------------
+ class(matrix_scalapack),target,intent(in) :: in_mat
+
+! *********************************************************************
+
+ new_mat%sizeb_local  = in_mat%sizeb_local
+ new_mat%sizeb_global = in_mat%sizeb_global
+ new_mat%sizeb_blocs  = in_mat%sizeb_blocs
+
+ if (allocated(in_mat%buffer_real)) call alloc_copy(in_mat%buffer_real, new_mat%buffer_real)
+ if (allocated(in_mat%buffer_cplx)) call alloc_copy(in_mat%buffer_cplx, new_mat%buffer_cplx)
+
+ new_mat%processor => in_mat%processor
+ new_mat%descript = in_mat%descript
+
+end function matrix_scalapack_copy
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_slk/matrix_scalapack_free
 !! NAME
 !!  matrix_scalapack_free
@@ -578,7 +615,6 @@ subroutine matrix_scalapack_free(matrix)
  matrix%sizeb_global = 0
  ABI_SFREE(matrix%buffer_cplx)
  ABI_SFREE(matrix%buffer_real)
- ABI_SFREE(matrix%ipiv)
 
  matrix%sizeb_blocs = 0
  matrix%sizeb_local = 0
@@ -976,15 +1012,15 @@ integer pure function loc_glob(matrix, proc, idx, lico)
  integer, intent(in) :: idx,lico
 
 !Local variables-------------------------------
- integer :: nbcyc,reste,nblocs
+ integer :: nbcyc, rest, nblocs
 
 ! *********************************************************************
 
  nbcyc = INT((idx-1)/matrix%sizeb_blocs(lico))
- reste = MOD(idx-1,matrix%sizeb_blocs(lico))
+ rest = MOD(idx-1,matrix%sizeb_blocs(lico))
  nblocs = nbcyc*proc%grid%dims(lico)+ proc%coords(lico)
 
- loc_glob = nblocs * matrix%sizeb_blocs(lico) + reste + 1
+ loc_glob = nblocs * matrix%sizeb_blocs(lico) + rest + 1
 
 end function loc_glob
 !!***
@@ -3369,7 +3405,7 @@ subroutine slk_zinvert(Slk_mat)
  integer :: lwork,info,ipiv_size,liwork
  character(len=500) :: msg
 !array
- integer,allocatable :: ipiv(:),iwork(:)
+ integer,allocatable :: ipiv(:), iwork(:)
  complex(dpc),allocatable :: work(:)
 
 !************************************************************************
