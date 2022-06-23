@@ -468,9 +468,10 @@ extern "C" void solve_inner_gpu(int32_t proj_dim[3],
   normprojs = (double *) malloc(ndat*sizeof(double));
   errs_cpu  = (double *) malloc(ndat*sizeof(double));
 
+  const int slice = proj_dim[0]*proj_dim[1]; // cplx * nprojs
+
   for (int idat=0; idat<ndat; ++idat) {
     double norm = 0.0;
-    int slice = proj_dim[0]*proj_dim[1];
     for (int index = idat*slice; index<(idat+1)*slice; ++index) {
       norm += proj[index]*proj[index];
     }
