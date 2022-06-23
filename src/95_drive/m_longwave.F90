@@ -301,7 +301,9 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 !Symmetrize atomic coordinates over space group elements:
  call symmetrize_xred(natom,dtset%nsym,dtset%symrel,dtset%tnons,xred,indsym=indsym)
 
- call sylwtens(indsym,mpert,natom,dtset%nsym,rfpert,symrec,dtset%symrel)
+ has_strain=.false.
+ if (dtset%lw_flexo==1.or.dtset%lw_flexo==2.or.dtset%lw_flexo==4) has_strain=.true.
+ call sylwtens(gprimd,has_strain,indsym,mpert,natom,dtset%nsym,rfpert,rprimd,symrec,dtset%symrel)
 
  write(msg,'(a,a,a,a,a)') ch10, &
 & ' The list of irreducible elements of the spatial-dispersion tensors is: ', ch10,& 
@@ -652,10 +654,8 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 !Merge stationay and nonvariational contributions
  d3etot(:,:,:,:,:,:,:)=d3etot(:,:,:,:,:,:,:) + d3etot_nv(:,:,:,:,:,:,:)
 
- !Complete missing elements using symmetry operations
- has_strain=.false.
- if (dtset%lw_flexo==1.or.dtset%lw_flexo==2.or.dtset%lw_flexo==4) has_strain=.true.
- call d3lwsym(blkflg,d3etot,indsym,has_strain,mpert,natom,dtset%nsym,symrec,dtset%symrel)
+!Complete missing elements using symmetry operations
+ call d3lwsym(blkflg,d3etot,has_strain,indsym,mpert,natom,dtset%nsym,symrec,dtset%symrel)
 
 !Deallocate global proc_distrib
  if(xmpi_paral==1) then

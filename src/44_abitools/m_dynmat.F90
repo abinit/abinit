@@ -4589,12 +4589,12 @@ end subroutine d3sym
 !! build (nearly) all the other matrix elements that can be build using symmetries.
 !!
 !! INPUTS
+!!  has_strain = if .true. i2pert includes strain perturbation
 !!  indsym(4,nsym,natom)=indirect indexing array : for each
 !!   isym,iatom, fourth element is label of atom into which iatom is sent by
 !!   INVERSE of symmetry operation isym; first three elements are the primitive
 !!   translations which must be subtracted after the transformation to get back
 !!   to the original unit cell.
-!!  has_strain = if .true. i2pert includes strain perturbation
 !!  mpert =maximum number of ipert
 !!  natom= number of atoms
 !!  nsym=number of space group symmetries
@@ -4614,7 +4614,7 @@ end subroutine d3sym
 !!
 !! SOURCE
 
-subroutine d3lwsym(blkflg,d3,indsym,has_strain,mpert,natom,nsym,symrec,symrel)
+subroutine d3lwsym(blkflg,d3,has_strain,indsym,mpert,natom,nsym,symrec,symrel)
 
 !Arguments -------------------------------
 !scalars
@@ -4636,7 +4636,7 @@ subroutine d3lwsym(blkflg,d3,indsym,has_strain,mpert,natom,nsym,symrec,symrel)
 !arrays
  integer,save :: idx(18)=(/1,1,2,2,3,3,3,2,3,1,2,1,2,3,1,3,1,2/)
  integer :: sym1(3,3),sym2(3,3),sym3(3,3)
- integer :: strflg(3,mpert,3,3,3,mpert)
+ integer :: strflg(3,mpert,3,3,3,mpert),strflg_car(3,mpert,3,3,3,mpert)
  real(dp) :: d3str(2,3,mpert,3,3,3,mpert)
 
 ! *********************************************************************
@@ -5097,6 +5097,7 @@ end subroutine sytens
 !! optical susceptibility and Raman tensors
 !!
 !! INPUTS
+!!  has_strain = if .true. i2pert includes strain perturbation
 !!  indsym(4,nsym,natom)=indirect indexing array described above: for each
 !!   isym,iatom, fourth element is label of atom into which iatom is sent by
 !!   INVERSE of symmetry operation isym; first three elements are the primitive
@@ -5128,14 +5129,16 @@ end subroutine sytens
 !!
 !! SOURCE
 
-subroutine sylwtens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
+subroutine sylwtens(gprimd,has_strain,indsym,mpert,natom,nsym,rfpert,rprimd,symrec,symrel)
 
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: mpert,natom,nsym
+ logical,intent(in) :: has_strain
 !arrays
  integer,intent(in) :: indsym(4,nsym,natom),symrec(3,3,nsym),symrel(3,3,nsym)
  integer,intent(inout) :: rfpert(3,mpert,3,mpert,3,mpert)
+ real(dp),intent(in) :: gprimd(3,3),rprimd(3,3)
 
 !Local variables -------------------------
 !scalars
@@ -5149,6 +5152,9 @@ subroutine sylwtens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
  integer,save :: idx(18)=(/1,1,2,2,3,3,3,2,3,1,2,1,2,3,1,3,1,2/)
  integer :: sym1(3,3),sym2(3,3),sym3(3,3)
  integer,allocatable :: pertsy(:,:,:,:,:,:)
+ integer :: strflg(3,mpert,3,3,3,mpert)
+ integer :: flg1(3),flg2(3)
+ real(dp) :: vec1(3),vec2(3)
 
 !***********************************************************************
 
@@ -5332,9 +5338,9 @@ subroutine sylwtens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
 !Now, take into account the permutation of (i1pert,i1dir)
 !and (i2pert,i2dir)
 
- do i1pert = 1, mpert
-   do i2pert = 1, mpert
-     if (i2pert/=natom+3.and.i2pert/=natom+4) then
+ if (.not.has_strain) then
+   do i1pert = 1, mpert
+     do i2pert = 1, mpert
        do i3pert = 1, mpert
 
          do i1dir = 1, 3
@@ -5355,9 +5361,55 @@ subroutine sylwtens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
          end do
 
        end do
-     end if
+     end do
    end do
- end do
+ end if
+
+!For strain we need to convert the i2dir to cartesian
+ if (has_strain) then
+   strflg=0
+   do i3pert = 1, mpert
+     do i3dir = 1, 3
+       do i2pert = natom+3, natom+4
+         do i2dir = 1, 3
+           if (i2pert==natom+3) istr=i2dir
+           if (i2pert==natom+4) istr=3+i2dir
+           i2dir_a=idx(2*istr-1); i2dir_b=idx(2*istr)
+           do i1pert = 1, mpert
+             do i1dir = 1, 3
+               strflg(i1dir,i1pert,i2dir_a,i2dir_b,i3dir,i3pert)=&
+             & pertsy(i1dir,i1pert,i2dir,i2pert,i2dir,i2pert)
+!               if (i2pert==natom+4) then
+!               strflg(i1dir,i1pert,i2dir_b,i2dir_a,i3dir,i3pert)=&
+!             & pertsy(i1dir,i1pert,i2dir,i2pert,i2dir,i2pert)
+               end if
+             end do
+           end do
+         end do
+       end do
+     end do
+   end do
+
+   do i3pert = 1, mpert
+     do i3dir = 1, 3
+       do i1pert = 1, mpert
+         do i1dir = 1, 3
+           do i2dir_b= 1,3
+             flg1(:)=strflg(i1dir,i1pert,:,i2dir_b,i3dir,i3pert)               
+             call cart39(flg1,flg2,gprimd,natom+2,natom,rprimd,vec1,vec2)
+             strflg_car(i1dir,i1pert,:,i2dir_b,i3dir,i3pert)=flg2(:)
+           end do
+           do i2dir_a= 1,3
+             flg1(:)=strflg(i1dir,i1pert,i2dir_a,:,i3dir,i3pert)               
+             call cart39(flg1,flg2,gprimd,natom+2,natom,rprimd,vec1,vec2)
+             strflg_car(i1dir,i1pert,i2dir_a,:,i3dir,i3pert)=flg2(:)
+           end do
+         end do
+       end do
+     end do
+   end do
+
+ end if
 
  rfpert(:,:,:,:,:,:) = pertsy(:,:,:,:,:,:)
 
