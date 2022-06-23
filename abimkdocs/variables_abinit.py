@@ -13264,7 +13264,7 @@ updated, according to the forces. A target stress tensor might be defined, see [
   * **optcell** = 1: optimisation of volume only (do not modify [[rprim]], and allow an homogeneous dilatation of the three components of [[acell]])
   * **optcell** = 2: full optimization of cell geometry (modify [[acell]] and [[rprim]] \- normalize the vectors of [[rprim]] to generate the [[acell]]). This is the usual mode for cell shape and volume optimization. It takes into account the symmetry of the system, so that only the effectively relevant degrees of freedom are optimized.
   * **optcell** = 3: constant-volume optimization of cell geometry (modify [[acell]] and [[rprim]] under constraint \- normalize the vectors of [[rprim]] to generate the [[acell]])
-  * **optcell** = 4, 5 or 6: optimize [[acell]](1), [[acell]](2), or [[acell]](3), respectively (only works if the two other vectors are orthogonal to the optimized one, the latter being along its cartesian axis).
+  * **optcell** = 4, 5 or 6: optimize (both length and angle) the first, second or third vector, respectively (only works if, in the case **optcell**=6, the two other vectors lie in the xy cartesian plane; similarly for **optcell**=4 and **optcell**=5, the two clamped vectors must lie in the yz and xz plane respectively).
   * **optcell** = 7, 8 or 9: optimize the cell geometry while keeping the first, second or third vector unchanged (only works if the two other vectors are orthogonal to the one left unchanged, the latter being along its cartesian axis).
 
 A few details require attention when performing unit cell optimisation:
