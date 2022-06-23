@@ -102,14 +102,6 @@ module m_gwr
  end type desc_t
 !!***
 
-!type, extends(matrix_scalapack) :: twopoint_func_t
-!   type(desc_t), pointer :: desc => null()
-!   character(len=100) :: name
-!   type(matrix_scalapack) :: g_g
-!   type(matrix_scalapack) :: r_r
-!   type(matrix_scalapack) :: gr
-!end type twopoint_func_t
-
 !----------------------------------------------------------------------
 
 !!****t* m_gwr/gwr_t
@@ -229,12 +221,6 @@ module m_gwr
    !type(desc_t),allocatable :: sigma_desc_k(:)
    ! (nkibz)
    ! Descriptor for self-energy
-
-   !integer,allocatable :: gvec(:,:)
-   ! gvec(3, gvec_size, nk)
-   ! For each k, the gvectors are ordered according to |k+g|
-   ! so that we can use the same array for G, chi and Sigma_x
-   ! Note that this array is global i.e. is not MPI-distributed in G-space, only in k-space.
 
    !integer, allocatable :: npw_green(:)
    !integer, allocatable :: npw_chi(:)
@@ -716,6 +702,14 @@ function gwr_new(dtset, cryst, psps, pawtab, ebands, mpi_enreg, comm) result (gw
 
    end do ! my_it
  end do ! my_is
+
+#if 0
+ sigeph_filepath = strcat(dtfil%filnam_ds(4), "_SIGEPH.nc")
+ NCF_CHECK(nctk_open_create(ncid, sigeph_filepath, sigma%ncwrite_comm%value))
+ NCF_CHECK(nctk_set_datamode(cid))
+#endif
+
+
 
  call cwtime_report(" gwr_new:", cpu, wall, gflops)
 
