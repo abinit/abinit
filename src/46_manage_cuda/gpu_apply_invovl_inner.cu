@@ -180,11 +180,6 @@ void apply_block_gpu(int32_t cplx,
 
       for (int itypat=0; itypat < ntypat; ++itypat) {
 
-        // move pointers to the next itypat beginning
-        mat_ptr += (lmnmax*lmnmax);
-        x_ptr   += nlmn[itypat]*nattyp[itypat];
-        y_ptr   += nlmn[itypat]*nattyp[itypat];
-
         // C = alpha*A*B + beta*C
         // same matrix A for all idat => strideA = 0
         cublasStatus_t cublas_status =
@@ -201,6 +196,10 @@ void apply_block_gpu(int32_t cplx,
                                     );
         CHECK_CUDA_ERROR(cublas_status);
 
+        // move pointers to the next itypat beginning
+        mat_ptr += (lmnmax*lmnmax);
+        x_ptr   += nlmn[itypat]*nattyp[itypat];
+        y_ptr   += nlmn[itypat]*nattyp[itypat];
 
       } // end of itypat
 
@@ -214,11 +213,6 @@ void apply_block_gpu(int32_t cplx,
       double* y_ptr = (double*) y;
 
       for (int itypat=0; itypat < ntypat; ++itypat) {
-
-        // move pointers to the next itypat beginning
-        mat_ptr += (lmnmax*lmnmax);
-        x_ptr   += nlmn[itypat]*nattyp[itypat];
-        y_ptr   += nlmn[itypat]*nattyp[itypat];
 
         // C = alpha*A*B + beta*C
         // same matrix A for all idat => strideA = 0
@@ -235,6 +229,11 @@ void apply_block_gpu(int32_t cplx,
                                     ndat                                        // batch count
                                     );
         CHECK_CUDA_ERROR(cublas_status);
+
+        // move pointers to the next itypat beginning
+        mat_ptr += (lmnmax*lmnmax);
+        x_ptr   += nlmn[itypat]*nattyp[itypat];
+        y_ptr   += nlmn[itypat]*nattyp[itypat];
 
       } // end for itypat
 
