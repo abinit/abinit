@@ -70,10 +70,10 @@ static double* inv_s_approx_gpu;
 
 // hamiltonian data on CPU/GPU
 
-//! number of tuple (l,m,n) by type of atomes (should always be smaller than 255 ?)
+//! number of tuple (l,m,n) by type of atoms (should always be smaller than 255 ?)
 static uint8_t *nlmn;
 
-//! number of streaming multiprocessor on current GPU
+//! number of streaming multiprocessors on current GPU
 static int sm_num = -1;
 
 
