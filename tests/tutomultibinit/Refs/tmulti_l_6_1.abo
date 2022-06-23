@@ -1,6 +1,6 @@
 
-.Version 9.7.1 of MULTIBINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.4 computer) 
+.Version 9.5.4 of MULTIBINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2021 ABINIT group . 
  MULTIBINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,15 +14,15 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 27 May 2022.
-- ( at 17h37 )
+.Starting date : Thu 23 Jun 2022.
+- ( at 11h48 )
   
 -  nproc =   10
 
 ================================================================================
 
  Read the information in the reference structure in 
--tmulti6_DDB
+-tmulti_l_6_DDB
  to initialize the multibinit input
 
 ================================================================================
@@ -301,7 +301,7 @@ dipdip_range         2         2         2
 ================================================================================
 
 -Reading the training-set file :
--tmulti6_HIST.nc
+-tmulti_l_6_HIST.nc
 
 
 --------------------------------------------------------------------------------
@@ -317,8 +317,8 @@ dipdip_range         2         2         2
 
  Goal function values at the begining of the fit process (eV^2/A^2):
    Energy          :   2.2780100662032291E-03
-   Forces+Stresses :   3.9733621903060727E-02
-   Forces          :   2.4711894644538102E-02
+   Forces+Stresses :   3.9733621903060741E-02
+   Forces          :   2.4711894644538119E-02
    Stresses        :   1.5021727258522627E-02
 
  N   Selecting          MSDE              MSDFS              MSDF              MSDS
@@ -351,23 +351,23 @@ dipdip_range         2         2         2
  133 =>  -3.0147200326E-03 (Hf_x-O1_x)^1(Hf_x-O2_x)^1(Hf_y-O2_y)^1
 
  Goal function values at the end of the fit process (eV^2/A^2):
-   Energy          :   1.7493658081925374E-04
-   Forces+Stresses :   1.1685294481702690E-02
-   Forces          :   9.1861216904870410E-03
+   Energy          :   1.7493658081925382E-04
+   Forces+Stresses :   1.1685294481702704E-02
+   Forces          :   9.1861216904870532E-03
    Stresses        :   2.4991727912156494E-03
 
 
 ================================================================================
 
- Generation of the xml file for the fitted polynomial in tmulti6_1_coeffs.xml
+ Generation of the xml file for the fitted polynomial in tmulti_l_6_1_coeffs.xml
 
 ================================================================================
 
 -
-- Proc.   0 individual time (sec): cpu=        112.6  wall=        112.7
+- Proc.   0 individual time (sec): cpu=         60.5  wall=         60.6
 
 ================================================================================
 
-+Total cpu time   1126.236  and wall time   1126.677 sec
++Total cpu time    605.715  and wall time    606.110 sec
 
  multibinit : the run completed succesfully.
