@@ -400,6 +400,7 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
  integer :: ikpt_this_proc
  logical :: parity
  real(dp) :: tsec(2)
+ character(len=500) :: message
  character :: blas_transpose
 
  type(invovl_kpt_type), pointer :: invovl
