@@ -26,11 +26,10 @@ for j in range(2):
 
 ax['full5'].set_title('5 GPa')
 ax['full0'].set_title('0 GPa')
-ax['gap5'].set_xticks([0, int(0.5*(len(gap.kpoints)-1)), len(gap.kpoints)])
+ax['gap5'].set_xticks([0, 17, len(gap.kpoints)-1])
 ax['gap5'].set_xticklabels(['0.5H', 'A', '0.5L'])
-ax['gap0'].set_xticks([0, int(0.5*(len(gap.kpoints)-1)), len(gap.kpoints)])
+ax['gap0'].set_xticks([0, 17, len(gap.kpoints)-1])
 ax['gap0'].set_xticklabels(['0.5H', 'A', '0.5L'])
 
 plt.savefig('tz2_2_bandstructure.pdf')
 plt.show()
-
