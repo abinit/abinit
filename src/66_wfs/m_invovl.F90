@@ -348,6 +348,8 @@ CONTAINS
 
   ABI_FREE(invovl_kpt)
 
+  ABI_UNUSED(use_gpu_cuda)
+
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_FC_ISO_C_BINDING)
   if (use_gpu_cuda == 1) then
     call f_gpu_apply_invovl_inner_dealloc()
@@ -692,7 +694,6 @@ subroutine apply_invovl(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_enreg, 
   integer, parameter :: nnlout = 0, idir = 0, signs = 2
 
   type(invovl_kpt_type), pointer :: invovl
-  type(c_ptr) :: invovl_c_handle
 
   integer, parameter :: &
     & timer_apply_inv_ovl_opernla = 1630, &
@@ -720,6 +721,8 @@ subroutine apply_invovl(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_enreg, 
   PtPsm1proj = zero
 
   proj_dim = (/ size(proj,1), size(proj,2), size(proj,3) /)
+
+  nattyp_dim = size(ham%nattyp)
 
   indlmn_dim = (/ size(ham%indlmn,1), size(ham%indlmn,2), size(ham%indlmn,3) /)
 
@@ -781,8 +784,6 @@ subroutine apply_invovl(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_enreg, 
     if (mpi_enreg%nproc_fft /= 1) then
       ABI_ERROR("[66_wfs/m_invovl.F90:apply_invovl] nproc_fft must be 1, when GPU/CUDA is activated")
     end if
-
-    nattyp_dim = size(ham%nattyp)
 
     call f_solve_inner_gpu(proj_dim, c_loc(proj(1,1,1)), &
       & c_loc(sm1proj(1,1,1)), c_loc(PtPsm1proj(1,1,1)), &
@@ -872,7 +873,9 @@ subroutine solve_inner(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj, PtPsm1
 
  integer,intent(in) :: ndat,cplx
  type(invovl_kpt_type), intent(in) :: invovl
- real(dp), intent(inout) :: proj(cplx, invovl%nprojs,ndat), sm1proj(cplx, invovl%nprojs, ndat), PtPsm1proj(cplx, invovl%nprojs, ndat)
+ real(dp), intent(inout) :: proj(cplx, invovl%nprojs,ndat)
+ real(dp), intent(inout) :: sm1proj(cplx, invovl%nprojs, ndat)
+ real(dp), intent(inout) :: PtPsm1proj(cplx, invovl%nprojs, ndat)
  real(dp), allocatable :: temp_proj(:,:,:)
  type(mpi_type), intent(in) :: mpi_enreg
  type(gs_hamiltonian_type),intent(in) :: ham
