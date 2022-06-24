@@ -14,7 +14,7 @@ It might be useful that you already know how to do PAW calculations using
 ABINIT but it is not mandatory (you can follow the two tutorials on PAW in
 ABINIT ([PAW1](/tutorial/paw1), [PAW2](/tutorial/paw2))).
 The DFT+_U_ tutorial in ABINIT ([DFT+U](/tutorial/dftu)) might be useful to know some
-basic variables about correlated orbitals.
+basic variables related to correlated orbitals.
 
 The first GW tutorial in ABINIT ([GW](/tutorial/gw1)) is useful to learn how
 to compute the screening, and how to converge the relevant parameters
@@ -44,7 +44,7 @@ of this method using Projected Local Orbitals Wannier orbitals in ABINIT (The
 implementation of cRPA in ABINIT is described in [[cite:Amadon2014]] and projected
 local orbitals Wannier functions are presented in [[cite:Amadon2008]]). The
 discussion about the localization of Wannier orbitals has some similarities
-with the beginning on the DMFT tutorial (see [here](dmft.md#1) and [there](dmft.md#2))
+with the beginning of the DMFT tutorial (see [here](dmft.md#1) and [there](dmft.md#2))
 
 Several parameters (both physical and technical) are important for the cRPA calculation:
 
@@ -378,9 +378,9 @@ interaction computed on Wannier orbitals.
 
  * First we see that diagonal interactions are larger than off-diagonal terms,
    which is logical, because electron interaction is larger if electrons are located in the same orbital.
- * We recover in these interaction matrix the degeneracy of _d_ orbitals in the cubic symmetry
+ * We recover in this interaction matrix the degeneracy of _d_ orbitals in the cubic symmetry
    (we remind, as listed in [[dmatpawu]], that the order of orbitals in ABINIT are _xy_, _yz_,
-   _z<sup>2<\sup>_, _xy_, _x<sup>2</sup>-y<sup>2</sup>_).
+   _z<sup>2</sup>_, _xy_, _x<sup>2</sup>-y<sup>2</sup>_).
  * We note also that the interaction for _t<sub>2g</sub>_ and _e<sub>g</sub>_ orbitals are not the same.
    This effect is compared in e.g. Appendix C.1 of [[cite:Vaugier2012]] to the usual
    Slater parametrization of interaction matrices.
@@ -421,7 +421,7 @@ interaction computed on Wannier orbitals.
 ```
 
 
-  * Then, the cRPA effective interactions are given for all frequency.
+  * Then, the cRPA effective interactions are given for all frequencies.
      The first frequency is zero and the cRPA interactions are:
 
 ```
