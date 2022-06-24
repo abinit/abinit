@@ -5149,9 +5149,10 @@ subroutine sylwtens(has_strain,indsym,mpert,natom,nsym,rfpert,symrec,symrel,symr
  integer :: ipesy3,istr,isym
  integer :: idisy2_a,idisy2_b
  logical :: is_strain
+ real(dp) :: flag_dp
 !arrays
  integer,save :: idx(18)=(/1,1,2,2,3,3,3,2,3,1,2,1,2,3,1,3,1,2/)
- integer :: sym1(3,3),sym2(3,3),sym3(3,3)
+ integer :: sym2_dp(3,3),sym1(3,3),sym2(3,3),sym3(3,3)
  integer,allocatable :: pertsy(:,:,:,:,:,:)
  integer :: strflg(3,mpert,3,3,3,mpert)
  integer :: flg1(3),flg2(3)
@@ -5161,14 +5162,6 @@ subroutine sylwtens(has_strain,indsym,mpert,natom,nsym,rfpert,symrec,symrel,symr
 
  ABI_MALLOC(pertsy,(3,mpert,3,mpert,3,mpert))
  pertsy(:,:,:,:,:,:) = 0
-
- do isym=1,nsym
-   print*, symrel_cart(1,:,isym)
-   print*, symrel_cart(2,:,isym)
-   print*, symrel_cart(3,:,isym)
-   print*, "   "
- end do
- stop
 
 !Loop over perturbations
 
@@ -5222,16 +5215,16 @@ subroutine sylwtens(has_strain,indsym,mpert,natom,nsym,rfpert,symrec,symrel,symr
                  if (i2pert <= natom) then
                    ipesy2 = indsym(4,isym,i2pert)
                    sym2(:,:) = symrec(:,:,isym)
-                 else if (i2pert == natom + 2.or.i2pert == natom + 3.or. &
-                 & i2pert == natom + 4) then
+                 else if (i2pert == natom + 2) then
                    ipesy2 = i2pert
                    sym2(:,:) = symrel(:,:,isym)
-                   if (i2pert == natom + 3.or. i2pert == natom + 4) then
-                     is_strain=.true.
-                     if (i2pert==natom+3) istr=i2dir
-                     if (i2pert==natom+4) istr=3+i2dir
-                     i2dir_a=idx(2*istr-1); i2dir_b=idx(2*istr)
-                   end if
+                 else if (i2pert == natom + 3.or. i2pert == natom + 4) then
+                   ipesy2 = i2pert
+                   sym2_dp(:,:) = symrel_cart(:,:,isym)
+                   is_strain=.true.
+                   if (i2pert==natom+3) istr=i2dir
+                   if (i2pert==natom+4) istr=3+i2dir
+                   i2dir_a=idx(2*istr-1); i2dir_b=idx(2*istr)
                  else
                    found = 0
                  end if
@@ -5279,7 +5272,7 @@ subroutine sylwtens(has_strain,indsym,mpert,natom,nsym,rfpert,symrec,symrel,symr
                      end do
                    end do
                  else 
-                   if ((flag /= -1).and.&
+                   if ((flag_dp /= -1).and.&
 &                   (ipesy1==i1pert).and.(ipesy2==i2pert).and.(ipesy3==i3pert)) then
                      flag = sym1(i1dir,i1dir)*sym2(i2dir_a,i2dir_a)* &
                    & sym2(i2dir_b,i2dir_b)*sym3(i3dir,i3dir)
