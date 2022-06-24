@@ -254,7 +254,6 @@ module m_slk
 CONTAINS  !==============================================================================
 !!***
 
-!#ifdef HAVE_LINALG_SCALAPACK
 
 !!****f* m_slk/build_grid_scalapack
 !! NAME
@@ -482,7 +481,8 @@ subroutine init_matrix_scalapack(matrix, nbli_global, nbco_global, processor, is
 
 #ifdef HAVE_LINALG_SCALAPACK
 !Local variables-------------------------------
- integer, parameter :: SIZE_BLOCS = 24 ! As recommended by Intel MKL, a more sensible default than the previous value of 40
+ ! As recommended by Intel MKL, a more sensible default than the previous value of 40
+ integer, parameter :: SIZE_BLOCS = 24
  integer :: info,sizeb
  integer,external :: NUMROC
  character(len=500) :: msg
@@ -533,11 +533,11 @@ subroutine init_matrix_scalapack(matrix, nbli_global, nbco_global, processor, is
 
  ! Allocate local buffer.
  if (istwf_k/=2) then
-   ABI_MALLOC(matrix%buffer_cplx, (matrix%sizeb_local(1),matrix%sizeb_local(2)))
-   matrix%buffer_cplx(:,:) = (0._DP,0._DP)
+   ABI_MALLOC(matrix%buffer_cplx, (matrix%sizeb_local(1), matrix%sizeb_local(2)))
+   matrix%buffer_cplx(:,:) = czero
  else
-   ABI_MALLOC(matrix%buffer_real, (matrix%sizeb_local(1),matrix%sizeb_local(2)))
-   matrix%buffer_real(:,:) = 0._DP
+   ABI_MALLOC(matrix%buffer_real, (matrix%sizeb_local(1), matrix%sizeb_local(2)))
+   matrix%buffer_real(:,:) = zero
  end if
 #endif
 
@@ -4764,20 +4764,22 @@ subroutine slk_bsize_and_type(Slk_mat,bsize_elm,mpi_type_elm)
 
  ! @matrix_scalapack
  ierr=0
+#ifdef HAVE_MPI
  if (allocated(Slk_mat%buffer_cplx)) then
-   ierr=ierr+1
+   ierr = ierr + 1
    mpi_type_elm = MPI_DOUBLE_COMPLEX
    bsize_elm    = xmpi_bsize_dpc
  end if
 
  if (allocated(Slk_mat%buffer_real)) then
-   ierr=ierr+1
+   ierr = ierr + 1
    mpi_type_elm = MPI_DOUBLE_PRECISION
    bsize_elm    = xmpi_bsize_dp
  end if
+#endif
 
  ! One and only one buffer should be allocated.
- if (ierr/=1) then
+ if (ierr /= 1) then
    write(msg,'(a,i0)')" ScaLAPACK buffers are not allocated correctly, ierr= ",ierr
    ABI_ERROR(msg)
  end if
