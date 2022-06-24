@@ -2566,13 +2566,15 @@ subroutine compute_eigen1(comm,processor,cplex,nbli_global,nbco_global,matrix,ve
  ! ==============================
  ! CONCATENATE EIGEN VECTORS
  ! ==============================
- if ( istwf_k /= 2 ) then
+#ifdef HAVE_MPI
+ if (istwf_k /= 2) then
    call matrix_to_complexmatrix(sca_matrix2,z_tmp_evec,istwf_k)
    call MPI_ALLREDUCE(z_tmp_evec, matrix, nbli_global*nbco_global, MPI_DOUBLE_complex, MPI_SUM,comm,ierr)
  else
    call matrix_to_realmatrix(sca_matrix2,r_tmp_evec,istwf_k)
    call MPI_ALLREDUCE(r_tmp_evec, matrix, nbli_global*nbco_global, MPI_DOUBLE_PRECISION, MPI_SUM,comm,ierr)
  endif
+#endif
 
  ! ====================================
  ! DESTRUCTION SCALAPACK AND TMP MATRICES
