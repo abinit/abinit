@@ -52,7 +52,7 @@ for j in range(len(flist)):
     # plot electronic bands
     data = abiopen(flist[j])
     data.ebands.set_fermie_to_vbm()
-    data.ebands.plot(with_gaps=False, ylims=(-0.4, 0.8), ax=ax[j], show=False, fontsize=16)
+    data.ebands.plot(with_gaps=False, ylims=(-0.4, 0.8), ax=ax[j], show=False, fontsize=16, zorder=1)
 
 
     # compute Bi-p projections
@@ -64,7 +64,7 @@ for j in range(len(flist)):
 
     ax[j].set_title(title[j])
 
-    ax[j].set_xticks([0, int(0.5*(data.nkpt-1)), data.nkpt])
+    ax[j].set_xticks([0, 17, data.nkpt-1])
     ax[j].set_xticklabels(['0.5H', 'A', '0.5L'], fontsize=12)
 
 divider = make_axes_locatable(ax[1])

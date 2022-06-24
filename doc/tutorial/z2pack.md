@@ -1,5 +1,6 @@
 ---
 authors: O. Gingras, V. Brousseau-Couture
+acknowledgments: M. Hirsbrunner
 ---
 
 # Tutorial on the use of Z2Pack
@@ -50,7 +51,7 @@ which is based on the notion of Wannier orbitals.
 These are given by Fourier transforming the Bloch states
 $|\textbf{R}n\rangle = \frac{V}{(2\pi)^d} \int_{BZ} e^{-i\textbf{k} \cdot \textbf{R}} | \psi_{n, \textbf{k}} \rangle d\textbf{k}$ where $d$ is the dimensionality of the system and $V$ the unit cell volume.
 These orbitals can be changed by a Gauge transformation which affects their localization and position in real space.
-To compute topological invariants, hybrid Vannier orbitals are introduced as Fourier transforms performed only in one spatial direction, for example $|\textbf{R}_x, k_y, k_z; n \rangle = \frac{a_x}{2\pi} \int^{\pi/a_x}_{-\pi/ax} e^{-ik_xR_x} | \psi_{n \textbf{k}} \rangle$.
+To compute topological invariants, hybrid Wannier orbitals are introduced as Fourier transforms performed only in one spatial direction, for example $|\textbf{R}_x, k_y, k_z; n \rangle = \frac{a_x}{2\pi} \int^{\pi/a_x}_{-\pi/ax} e^{-ik_xR_x} | \psi_{n \textbf{k}} \rangle$.
 
 The average position of such orbital depend on the remaining reciprocal space varables:
 $\bar{x}_n(k_y, k_z) = \langle 0, k_y, k_z; n | \hat{x} | 0, k_y, k_z; n\rangle.$
@@ -60,11 +61,26 @@ This procedure of segmenting the surface is illustrated in [[cite:Gresch2018]] F
 
 The equivalence between hybrid Wannier charge centers and the Berry phase gives rise to a physical interpretation of the Chern number as a charge pumping process, where each cycle of $k_x$ moves the charge by $C$ unit cells.
 
-The Z2 invariant is defined as the Chern number mod 2 and Z2Pack needs two inputs: a description of the system and the surface on which the invariant should be calculated.
-In the interface with ABINIT, Z2Pack will start from a computed ground state and perform the Wannierization on lines in the Brillouin zone. 
-At the end it can sum the contribution to compute the Z2 invariant.
+For time-reversal invariant systems, the total Chern number is zero as 
+the Chern numbers of Kramers partners cancel each other.
+We will rather compute the Z2 invariant, which can only take values of 0 or 1.
+Z2Pack can handle this calculation in the following way.
+By fixing one reciprocal space coordinate at a time-reversal invariant value
+(i.e. $k_i=0$ or $k_i=0.5$ in reduced coordinates), we can define a surface in 
+reciprocal space which contains its own time-reversal image.
+Using the hybrid Wannier charge centers computed on this surface, we can
+then define a surface invariant $\Delta\in\{0,1\}$, which can be intuitively
+understood as the Chern number mod 2 of one subset of Kramers partners.
+More details about how Z2Pack handles this calculation will be provided later.
 
-Before we actually compute the Chern number, we will take a look at another indication of non-trivial topology: band inversion.
+To compute the surface invariant $\Delta$, Z2pack needs 2 inputs: a description
+of the system and the surface on which the invariant should be calculated.
+In the interface with ABINIT, Z2Pack will start from a computed ground state and 
+perform the Wannierization on lines in the Brillouin zone.
+At the end, it can sum mod 2 the surface invariants obtained on the two 
+time-reversal invariant surfaces to evaluate the Z2 invariant.
+
+Before we actually compute the Z2 invariant, we will take a look at another indication of non-trivial topology: band inversion.
 
 
 ## 2. Pressure dependent band inversion in BiTeI
@@ -108,22 +124,24 @@ The path of this band structure is first along a high-symmetry path in the $k_z=
 ($M$-$\Gamma$-$K$).
 Then is goes out of plane to the $k_z=\pi/c$ plane ($K$-$H$).
 It then goes in along the same path as in the $k_z=0$ plane, but translated to the $k_z=\pi/c$ one ($H$-$A$-$L$).
-By looking at the $K$-$H$ path, you can see that the dispersion out of plane is quite small.
 
-The most interesting thing that one can see from these band structures happen in the $k_z=\pi/c$ plane.
-Around the $A$ point at 0 GPa, the dispersion is essentially flat/parabolic, characteristic of bands that have a single character.
-At 5 GPa however, the band has a parabolic shape in the opposite direction around that point.
-This is indicative of a band inversion, where the character is exchanged between the two bands.
+At first glance, the two figures in the right column look very similar, as they are both gapped.
+The band gap energy is slightly smaller at 5 GPa compared to the 0 GPa value,
+which seems to indicate that the band gap of BiTeI closes with increasing pressure.
+However, if we compute the pressure dependence of the band gap energy between these two pressures,
+we will observe that the band gap decreases up to P\sim 2 GPa (and almost vanishes),
+then starts to \textit{increase} as pressure is further increased (see Figure 4 of [[cite:Brousseau-Couture2020]]).
+Knowing that a topological phase transition must be accompanied by a closing of the band gap,
+this behavior suggests that one of those pressures might have a non-trivial topology.
+If this is the case, the electronic bands in the non-trivial phase would display a band inversion.
 
-It can be understood as following: at 0 GPa, the band have pure character around that point.
-Increasing the pressure, the bands move towards the Fermi level and cross at some point.
-Because of spin-orbit coupling, a gap opens and we find band inversion which can lead to a topologically non-trival insulator.
-
-In order to illustrate this statement, we now plot the fatbands.
+Around the $A$ point, one can notice some band dispersions characteristic of band inversion.
+In order to check whether or not there is inversion of character between bands which are gap due to spin-orbit coupling,
+we plot the fatbands.
 One can use the fatbands plotting feature of abipy as used in the [Wannier90](/tutorial/wannier90) tutorial,
 but instead here we will use a more advanced script which plots the difference in character between
 the p orbitals of bismuth and of those of both the tellurium and iodine.
-This procedure makes more clear the band inversion and the script is the following: 
+This procedure makes more clear the band inversion and the script is the following:
 
 {% dialog tests/tutoplugs/Input/tz2_2_relative_projection.py %}
 
@@ -185,12 +203,23 @@ You will find the following figure:
 
 ![](z2pack_assets/tz2_3_hwcc_converged.png)
 
-In this figure, each point in $k_x$ corresponds to a calculated line.
-The empty circles denote the average positions of the Wannier charge centers for each band.
-The largest gap between to centers is denoted by a blue diamond.
-The surface invariant is computed as follow: between each line $k_x$, we count the number of Wannier charge centers
-between two blue diamond.
-This number is summed over $k_x$, and its parity at the end of the sum give the Z2 surface invariant.
+In this figure each open circle represents a hybrid Wannier charge center (HWCC).
+The left column is calculated in the $k_z=0$ plane and the right column in the $k_z=0.5$ plane.
+The HWCC form "bands", similar to the band structure of a dispersion relation,
+but the values are defined mod 1, so the y axis is periodic.
+In the continuum case, the parity of the number of times a horizontal line crosses the HWCCs constitutes
+a topological invariant of the $k_z=0$ and $0.5$ planes, which we denote by $\Delta$.
+If $\Delta$ differs between $k_z=0$ and $k_z=0.5$, the bulk $Z_2$ invariant is $\nu=1$.
+
+To calculate this invariant on a coarse k-mesh, we consider the points marking the middle
+of the largest gap at each $k_x$ value rather than a horizontal line.
+These points are marked by blue diamonds above.
+Whenever the location of the middle of the gap changes between two adjacent $k_x$ values,
+we count the number of HWCC that exist between the two gap centers and sum this number for all the crossings as $k_x$ goes from 0 to $pi/a_x$.
+If this value is even, $\Delta=0$, and if it is odd, $\Delta=1$.
+Performing this counting procedure for both $k_z$ planes produces $\Delta=0$ for each case
+besides $k_z=0.5$ with $P=5$ GPa, indicating that the 0 Gpa phase is trivial and the 5 GPa phase is topological.
+
 
 ## 4. Conclusion
 
