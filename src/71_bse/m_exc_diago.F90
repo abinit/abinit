@@ -255,7 +255,7 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst
  real(dp),allocatable :: exc_ene(:)
  complex(dpc),allocatable :: exc_mat(:,:),exc_vec(:,:)
 #if defined HAVE_LINALG_SCALAPACK && defined HAVE_MPI_IO
- integer :: amode,mpi_fh,istwf_k,tbloc,tmp_unt
+ integer :: amode,mpi_fh,istwf_k,tmp_unt,tbloc
  integer :: itloc,jj,jtloc,itglob,jtglob
  integer(XMPI_OFFSET_KIND) :: ehdr_offset,fmarker
  integer :: block_sizes(2,3),array_of_sizes(2),gsub(2,2)
@@ -550,9 +550,9 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst
    call init_scalapack(Slk_processor,comm)
    !
    ! Init scaLAPACK matrices
-   call init_matrix_scalapack(Slk_mat,exc_size,exc_size,Slk_processor,istwf_k,tbloc=tbloc)
+   call init_matrix_scalapack(Slk_mat,exc_size,exc_size,Slk_processor,istwf_k)
 
-   call init_matrix_scalapack(Slk_vec,exc_size,exc_size,Slk_processor,istwf_k,tbloc=tbloc)
+   call init_matrix_scalapack(Slk_vec,exc_size,exc_size,Slk_processor,istwf_k)
    !
    ! Open the file with MPI-IO and skip the record.
    amode=MPI_MODE_RDONLY
@@ -1407,7 +1407,7 @@ subroutine exc_diago_coupling_hegv(Bsp,BS_files,Hdr_bse,prtvol,comm)
    !
    ! Read  = ( R  - )
    !         ( -  R*)
-   call init_matrix_scalapack(Slk_Hbar,exc_size,exc_size,Slk_processor,istwfk1,tbloc=tbloc)
+   call init_matrix_scalapack(Slk_Hbar,exc_size,exc_size,Slk_processor,istwfk1)
 
    nullify(myel2loc)
    nsblocks=nsppol
@@ -1532,7 +1532,7 @@ subroutine exc_diago_coupling_hegv(Bsp,BS_files,Hdr_bse,prtvol,comm)
    ABI_CHECK_MPI(mpi_err,"FILE_CLOSE")
    !
    ! Init scaLAPACK matrix F
-   call init_matrix_scalapack(Slk_F,exc_size,exc_size,Slk_processor,istwfk1,tbloc=tbloc)
+   call init_matrix_scalapack(Slk_F,exc_size,exc_size,Slk_processor,istwfk1)
    !
    ! Global F = (1  0)
    !            (0 -1)
@@ -1554,7 +1554,7 @@ subroutine exc_diago_coupling_hegv(Bsp,BS_files,Hdr_bse,prtvol,comm)
    ! ===========================================================
    ! ==== Solve generalized EV problem H u = F Hbar u = e u ====
    ! ===========================================================
-   call init_matrix_scalapack(Slk_vec,exc_size,exc_size,Slk_processor,istwfk1,tbloc=tbloc)
+   call init_matrix_scalapack(Slk_vec,exc_size,exc_size,Slk_processor,istwfk1)
    !
    itype=2; vl=1; vu=1; il=1; iu=nstates
    abstol=zero !ABSTOL = PDLAMCH(comm,'U')
@@ -1632,14 +1632,14 @@ subroutine exc_diago_coupling_hegv(Bsp,BS_files,Hdr_bse,prtvol,comm)
      ABI_ERROR(" Init of Slk_ovlp is wrong")
    end if
 
-   call init_matrix_scalapack(Slk_ovlp,exc_size,exc_size,Slk_processor,istwfk1,tbloc=tbloc)
+   call init_matrix_scalapack(Slk_ovlp,exc_size,exc_size,Slk_processor,istwfk1)
 
    ! Calculate the overlap matrix.
    ! FIXME
    ! The ESLL manual says that "matrices matrix1 and matrix2 must have no common elements; otherwise, results are unpredictable."
    ! However the official scaLAPACK documentation does not report this (severe) limitation.
 
-   !call init_matrix_scalapack(Slk_tmp,exc_size,exc_size,Slk_processor,istwfk1,tbloc=tbloc)
+   !call init_matrix_scalapack(Slk_tmp,exc_size,exc_size,Slk_processor,istwfk1)
    !Slk_tmp%buffer_cplx = Slk_vec%buffer_cplx
    !call slk_pzgemm("C","N",Slk_tmp,cone,Slk_vec,czero,Slk_ovlp)
    !call Slk_tmp%free()
