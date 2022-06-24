@@ -37,9 +37,6 @@ module m_gwr_driver
  use m_dtfil
  use m_wfk
  use m_distribfft
-!#ifdef HAVE_NETCDF
-! use netcdf
-!#endif
  use m_nctk
 
  use defs_datatypes,    only : pseudopotential_type, ebands_t
@@ -140,14 +137,11 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  integer :: ii, comm, nprocs, my_rank, psp_gencond, mgfftf, nfftf
  integer :: omp_ncpus, work_size, nks_per_proc, ierr
  real(dp):: eff, mempercpu_mb, max_wfsmem_mb, nonscal_mem
-!#ifdef HAVE_NETCDF
-! integer :: ncid, ncerr
-!#endif
  real(dp) :: ecore, ecut_eff, ecutdg_eff, gsqcutc_eff, gsqcutf_eff
  real(dp) :: cpu, wall, gflops
  logical :: use_wfk
  character(len=500) :: msg
- character(len=fnlen) :: wfk0_path, path
+ character(len=fnlen) :: wfk0_path !, path
  type(hdr_type) :: wfk0_hdr
  type(crystal_t) :: cryst
  type(ebands_t) :: ebands
@@ -280,7 +274,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  ! ===========================================
  call pspini(dtset, dtfil, ecore, psp_gencond, gsqcutc_eff, gsqcutf_eff, pawrad, pawtab, psps, cryst%rprimd, comm_mpi=comm)
 
- gwr = gwr_new(dtset, cryst, psps, pawtab, ebands, mpi_enreg, comm)
+ gwr = gwr_new(dtset, dtfil, cryst, psps, pawtab, ebands, mpi_enreg, comm)
 
  if (use_wfk) then
    call gwr%build_gtau_from_wfk(wfk0_path)
