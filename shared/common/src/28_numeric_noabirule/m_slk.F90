@@ -1048,15 +1048,11 @@ subroutine matrix_from_global(matrix, reference, istwf_k)
  real(dp),intent(in) :: reference(*)
 
 !Local variables-------------------------------
- integer :: i,j,iglob,jglob,ind !cptr
- real(dp) :: val_real !err,
+ integer :: i,j,iglob,jglob,ind
+ real(dp) :: val_real
  complex(dp) :: val_cplx
- character(len=500) :: msg
 
 ! *********************************************************************
-
-!err = 0._DP
-!cptr = 0
 
  do i=1,matrix%sizeb_local(1)
    do j=1,matrix%sizeb_local(2)
@@ -1070,25 +1066,10 @@ subroutine matrix_from_global(matrix, reference, istwf_k)
        ind = (jglob*(jglob-1))/2 + iglob
        val_real = reference(ind)
        call matrix_set_local_real(matrix,i,j,val_real)
-
-! packed input now so this check has no sense anymore
-!        if(abs(reference(ind+1))>1.0d-10)then
-!          write(msg,'(2a,2i5,1es16.6,2a)')&
-! &         '  For istwf_k=2, observed the following element of matrix :',ch10,&
-! &         iglob,jglob,reference(ind+1),ch10,&
-! &         '  with a non-negligible imaginary part.'
-!          ABI_BUG(msg)
-!        end if
-
      end if
 
-!    cptr = cptr + 1
    end do
  end do
-
-!if (cptr /= 0) then
-!write(std_out,*) matrix%processor%myproc,"error Linf matrix scalapack", err,"on",cptr,"terms"
-!endif
 
 end subroutine matrix_from_global
 !!***
@@ -1122,16 +1103,11 @@ subroutine matrix_from_global_sym(matrix, reference, istwf_k)
  integer,intent(in) :: istwf_k
 
 !Local variables-------------------------------
- integer :: i,j,iglob,jglob,ind !cptr
- !real(dp) :: err
- complex(dp)::val_cplx
- real(dp)   ::val_real
- character(len=500) :: msg
+ integer :: i,j,iglob,jglob,ind
+ complex(dp):: val_cplx
+ real(dp) ::val_real
 
 ! *********************************************************************
-
-!err = 0._DP
-!cptr = 0
 
  do i=1,matrix%sizeb_local(1)
    do j=1,matrix%sizeb_local(2)
@@ -1152,23 +1128,9 @@ subroutine matrix_from_global_sym(matrix, reference, istwf_k)
         ind = (ind + 1) / 2
         val_real = reference(ind)
         call matrix_set_local_real(matrix,i,j,val_real)
-        ! if(abs(reference(ind+1))>1.0d-10)then
-        !    write(msg,'(2a,2i5,1es16.6,2a)')&
-        !         &         '  For istwf_k=2, observed the following element of matrix :',ch10,&
-        !         &         iglob,jglob,reference(ind+1),ch10,&
-        !         &         '  with a non-negligible imaginary part.'
-        !    ABI_BUG(msg)
-        ! end if
      end if
-
-     ! cptr = cptr + 1
    end do
  end do
-
-!if (cptr /= 0) then
-!write(std_out,*) matrix%processor%myproc,"error Linf matrix scalapack", &
-!&  err,"on",cptr,"terms"
-!endif
 
 end subroutine matrix_from_global_sym
 !!***
@@ -1205,7 +1167,7 @@ subroutine matrix_from_realmatrix(matrix, reference, istwf_k)
  real(dp),intent(in) :: reference(:,:)
 
 !Local variables-------------------------------
- integer :: i,j,iglob,jglob,cptr
+ integer :: i,j,iglob,jglob
  real(dp) :: val
 
 ! *********************************************************************
@@ -1253,7 +1215,7 @@ subroutine matrix_from_complexmatrix(matrix, reference, istwf_k)
  real(dp),intent(in) :: reference(:,:)
 
 !Local variables-------------------------------
- integer :: i,j,iglob,jglob,cptr
+ integer :: i,j,iglob,jglob
  complex(dpc) :: val
 
 ! *********************************************************************
@@ -1300,13 +1262,9 @@ subroutine matrix_to_global(matrix, reference, istwf_k)
  real(dp),intent(inout) :: reference(*) !(nband_k*(nband_k+1))
 
 !Local variables-------------------------------
- integer  :: i,j,iglob,jglob,ind,cptr
- !real(dp) :: err
+ integer  :: i,j,iglob,jglob,ind
 
 ! *********************************************************************
-
-!err = 0._DP
-!cptr = 0
 
  do i=1,matrix%sizeb_local(1)
    do j=1,matrix%sizeb_local(2)
@@ -1322,14 +1280,8 @@ subroutine matrix_to_global(matrix, reference, istwf_k)
           reference(ind) = matrix_get_local_real(matrix,i,j)
        end if
      end if
-!    cptr = cptr + 1
    end do
  end do
-
-!if (cptr /= 0) then
-!write(std_out,*) matrix%processor%myproc,"erreur Linf matrix scalapack", &
-!&  err,"on",cptr,"terms"
-!endif
 
 end subroutine matrix_to_global
 !!***
@@ -1366,7 +1318,7 @@ subroutine matrix_to_realmatrix(matrix, reference, istwf_k)
  real(dp),intent(inout) :: reference(:,:)
 
 !Local variables-------------------------------
- integer :: i,j,iglob,jglob,cptr
+ integer :: i,j,iglob,jglob
  !complex(dpc) :: zvar
 
 ! *********************************************************************
@@ -1413,7 +1365,7 @@ subroutine matrix_to_complexmatrix(matrix, reference, istwf_k)
  complex(dpc),intent(inout) :: reference(:,:)
 
 !Local variables-------------------------------
- integer  :: i,j,iglob,jglob,cptr
+ integer  :: i,j,iglob,jglob
  !real(dp) :: err
 
 ! *********************************************************************
@@ -1459,13 +1411,9 @@ subroutine matrix_to_reference(matrix, reference, istwf_k)
  real(dp),intent(inout) :: reference(:,:)
 
 !Local variables-------------------------------
- integer  :: i,j,iglob,jglob,ind,cptr
- !real(dp) :: err
+ integer  :: i,j,iglob,jglob,ind
 
 ! *********************************************************************
-
-!err = 0._DP
-!cptr = 0
 
  do i=1,matrix%sizeb_local(1)
    do j=1,matrix%sizeb_local(2)
@@ -1481,14 +1429,8 @@ subroutine matrix_to_reference(matrix, reference, istwf_k)
         !reference(ind+1,jglob) = 0._dp
      end if
 
-!    cptr = cptr + 1
    end do
  end do
-
-!if (cptr /= 0) then
-!write(std_out,*) matrix%processor%myproc,"error Linf matrix scalapack", &
-!&  err,"on",cptr,"terms"
-!endif
 
 end subroutine matrix_to_reference
 !!***
@@ -1795,10 +1737,9 @@ integer function my_locr(Slk_mat)
  type(matrix_scalapack),intent(in) :: Slk_mat
 
 !Local variables-------------------------------
- integer :: M, MB_A, MYROW, RSRC_A, NPROW
 #ifdef HAVE_LINALG_SCALAPACK
+ integer :: M, MB_A, MYROW, RSRC_A, NPROW
  integer,external :: NUMROC
-#endif
 
 ! *************************************************************************
 
@@ -1808,7 +1749,6 @@ integer function my_locr(Slk_mat)
  RSRC_A = Slk_mat%descript%tab(RSRC_)    ! The row of the processors at the beginning.
  NPROW  = Slk_mat%processor%grid%dims(1) ! The number of processors per row in the Scalapack grid.
 
-#ifdef HAVE_LINALG_SCALAPACK
  my_locr = NUMROC( M, MB_A, MYROW, RSRC_A, NPROW )
 #endif
 
@@ -1854,10 +1794,9 @@ integer function my_locc(Slk_mat)
  type(matrix_scalapack),intent(in) :: Slk_mat
 
 !Local variables-------------------------------
- integer :: N, NB_A, MYCOL, CSRC_A, NPCOL
 #ifdef HAVE_LINALG_SCALAPACK
+ integer :: N, NB_A, MYCOL, CSRC_A, NPCOL
  integer,external :: NUMROC
-#endif
 
 ! *************************************************************************
 
@@ -1867,7 +1806,6 @@ integer function my_locc(Slk_mat)
  CSRC_A = Slk_mat%descript%tab(CSRC_)    ! The column of the processors at the beginning.
  NPCOL  = Slk_mat%processor%grid%dims(2) ! The number of processors per column in the Scalapack grid.
 
-#ifdef HAVE_LINALG_SCALAPACK
  my_locc = NUMROC( N, NB_A, MYCOL, CSRC_A, NPCOL )
 #endif
 
@@ -3493,6 +3431,7 @@ subroutine slk_zdhp_invert(Slk_mat, uplo)
  character(len=*),intent(in) :: uplo
  class(matrix_scalapack),intent(inout) :: Slk_mat
 
+#ifdef HAVE_LINALG_SCALAPACK
 !Local variables ------------------------------
 !scalars
  integer :: info
@@ -3500,7 +3439,6 @@ subroutine slk_zdhp_invert(Slk_mat, uplo)
 
 !************************************************************************
 
-#ifdef HAVE_LINALG_SCALAPACK
  ABI_CHECK(allocated(Slk_mat%buffer_cplx), "buffer_cplx not allocated")
 
  ! ZPOTRF computes the Cholesky factorization of a complex Hermitian positive definite.
@@ -3663,18 +3601,17 @@ subroutine slk_write(Slk_mat, uplo, is_fortran_file, fname,mpi_fh, offset, flags
 
 !Local variables ------------------------------
 !scalars
+#if defined HAVE_LINALG_SCALAPACK && defined HAVE_MPI_IO
  integer :: jloc,iloc,iglob,jglob,nrows_glob,ncols_glob,elw,nrows_w,ncols_w
  integer :: slk_type,offset_err,etype,nfrec,bsize_elm,mpi_type_elm
  integer(XMPI_OFFSET_KIND) :: my_offset
  logical :: do_open
-#if defined HAVE_LINALG_SCALAPACK && defined HAVE_MPI_IO
  integer :: comm,my_flags,my_fh,buffer_size
  integer :: ierr,ij_loc,nelw,col_glob
 !arrays
  integer(XMPI_OFFSET_KIND),allocatable :: bsize_frecord(:)
  integer,pointer :: elw2slk(:,:)
  complex(dpc),allocatable :: buffer1_cplx(:)
-#endif
  character(len=500) :: msg
 
 !************************************************************************
@@ -3699,7 +3636,6 @@ subroutine slk_write(Slk_mat, uplo, is_fortran_file, fname,mpi_fh, offset, flags
 
  my_offset=0; if (PRESENT(offset)) my_offset=offset
 
-#if defined HAVE_LINALG_SCALAPACK && defined HAVE_MPI_IO
  comm = Slk_mat%processor%comm
 
  nrows_glob=Slk_mat%sizeb_global(1)
@@ -3898,13 +3834,8 @@ subroutine slk_read(Slk_mat,uplo,symtype,is_fortran_file,fname,mpi_fh,offset,fla
  integer(XMPI_OFFSET_KIND),allocatable :: bsize_frecord(:)
 !arrays
  character(len=500) :: msg
-#endif
 
 !************************************************************************
-
-!@matrix_scalapack
-
-#if defined HAVE_LINALG_SCALAPACK && defined HAVE_MPI_IO
 
  do_open = PRESENT(fname)
  if (do_open) then
@@ -4063,7 +3994,7 @@ end subroutine slk_read
 !! SOURCE
 
 subroutine slk_single_fview_read_mask(Slk_mat,mask_of_glob,offset_of_glob,nsblocks,sub_block,&
-& my_nel,myel2loc,etype,slk_type,offset_err,is_fortran_file)
+                                      my_nel,myel2loc,etype,slk_type,offset_err,is_fortran_file)
 
 !Arguments ------------------------------------
 !scalars
@@ -4367,7 +4298,7 @@ subroutine slk_single_fview_read(Slk_mat,uplo,etype,slk_type,offset_err,is_fortr
 !Local variables ------------------------------
 !scalars
  integer :: jloc,iloc,iglob,jglob,nrows_glob,ncols_glob,mpi_err,nel
- integer :: bsize_frm,mpi_type_elm,ij_loc,bsize_etype,bsize_elm,cpad_bsize
+ integer :: bsize_frm,mpi_type_elm,ij_loc,bsize_etype,bsize_elm
  integer(XMPI_OFFSET_KIND) :: ijp_glob,my_offset,cpad_frm
 !arrays
  character(len=500) :: msg
@@ -4572,11 +4503,10 @@ subroutine slk_single_fview_write(Slk_mat,uplo,nelw,elw2slk,etype,slk_type,offse
 !scalars
  integer :: jloc,iloc,iglob,jglob,nrows_glob,ncols_glob,mpi_err,nel_max
  integer :: grow_min,grow_max,gcol_min,gcol_max
- integer :: bsize_frm,mpi_type_elm,ij_loc,bsize_elm,cpad_bsize
+ integer :: bsize_frm,mpi_type_elm,ij_loc,bsize_elm
  integer(XMPI_OFFSET_KIND) :: ijp_glob,my_offset,cpad_frm
 !arrays
  character(len=500) :: msg
- integer :: starts(2),sub_sizes(2)
  integer,allocatable :: block_length(:),block_type(:)
  integer(XMPI_ADDRESS_KIND),allocatable :: block_displ(:)
 
