@@ -64,6 +64,7 @@ module m_longwave
  use m_dfptlw_pert, only : preca_ffnl
  use m_initylmg,    only : initylmg
  use m_dynmat,      only : d3lwsym, sylwtens
+ use m_geometry,    only : symredcart
 
  implicit none
 
@@ -146,7 +147,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  integer :: ask_accurate,bantot,coredens_method,dimffnl,gscase,iatom,ierr,indx,ireadwf0,iscf_eff,itypat
  integer :: ider,idir0
  integer :: i1dir,i1pert,i2dir,ii,i2pert,i3dir,i3pert
- integer :: mcg,mgfftf,natom,nfftf,nfftot,nfftotf,nhatdim,nhatgrdim
+ integer :: isym,mcg,mgfftf,natom,nfftf,nfftot,nfftotf,nhatdim,nhatgrdim
  integer :: mpert,my_natom,n1,nkxc,nk3xc,ntypat,n3xccc,nylmgr
  integer :: option,optorth,psp_gencond,rdwrpaw,spaceworld,timrev,tim_mkrho
  integer :: usexcnhat,useylmgr
@@ -181,7 +182,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  real(dp),allocatable :: eigen0(:),ffnl(:,:,:,:,:)
  real(dp),allocatable :: grxc(:,:),kxc(:,:),vxc(:,:),nhat(:,:),nhatgr(:,:,:)
  real(dp),allocatable :: phnons(:,:,:),rhog(:,:),rhor(:,:),dummy_dyfrx2(:,:,:)
- real(dp),allocatable :: work(:),xccc3d(:)
+ real(dp),allocatable :: symrel_cart(:,:,:),work(:),xccc3d(:)
  real(dp),allocatable :: ylm(:,:),ylmgr(:,:,:)
  type(pawrhoij_type),allocatable :: pawrhoij(:),pawrhoij_read(:)
 ! *************************************************************************
@@ -232,6 +233,12 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  call pawfgr_init(pawfgr,dtset,mgfftf,nfftf,ecut_eff,ecutdg_eff,ngfft,ngfftf)
  nfftot=product(ngfft(1:3))
  nfftotf=product(ngfftf(1:3))
+
+!Set up for iterations
+ call setup1(dtset%acell_orig(1:3,1),bantot,dtset,&
+& ecutdg_eff,ecut_eff,gmet,gprimd,gsqcut_eff,gsqcutc_eff,&
+& ngfftf,ngfft,dtset%nkpt,dtset%nsppol,&
+& response,rmet,dtset%rprim_orig(1:3,1:3,1),rprimd,ucvol,psps%usepaw)
 
 !Define the set of admitted perturbations taking into account
 !the possible permutations
@@ -301,9 +308,19 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 !Symmetrize atomic coordinates over space group elements:
  call symmetrize_xred(natom,dtset%nsym,dtset%symrel,dtset%tnons,xred,indsym=indsym)
 
+! Get symmetries in cartesian coordinates
+ ABI_MALLOC(symrel_cart, (3, 3, dtset%nsym))
+ do isym =1,dtset%nsym
+   call symredcart(rprimd, gprimd, symrel_cart(:,:,isym), dtset%symrel(:,:,isym))
+   ! purify operations in cartesian coordinates.
+   where (abs(symrel_cart(:,:,isym)) < tol14)
+     symrel_cart(:,:,isym) = zero
+   end where
+ end do
+
  has_strain=.false.
  if (dtset%lw_flexo==1.or.dtset%lw_flexo==2.or.dtset%lw_flexo==4) has_strain=.true.
- call sylwtens(gprimd,has_strain,indsym,mpert,natom,dtset%nsym,rfpert,rprimd,symrec,dtset%symrel)
+ call sylwtens(has_strain,indsym,mpert,natom,dtset%nsym,rfpert,symrec,dtset%symrel,symrel_cart)
 
  write(msg,'(a,a,a,a,a)') ch10, &
 & ' The list of irreducible elements of the spatial-dispersion tensors is: ', ch10,& 
@@ -354,12 +371,6 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  write(msg,'(a,a)') ch10,ch10
  call wrtout(ab_out,msg,'COLL')
  call wrtout(std_out,msg,'COLL')
-
-!Set up for iterations
- call setup1(dtset%acell_orig(1:3,1),bantot,dtset,&
-& ecutdg_eff,ecut_eff,gmet,gprimd,gsqcut_eff,gsqcutc_eff,&
-& ngfftf,ngfft,dtset%nkpt,dtset%nsppol,&
-& response,rmet,dtset%rprim_orig(1:3,1:3,1),rprimd,ucvol,psps%usepaw)
 
 !In some cases (e.g. getcell/=0), the plane wave vectors have
 !to be generated from the original simulation cell
@@ -704,6 +715,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  ABI_FREE(rhog)
  ABI_FREE(rhor)
  ABI_FREE(symrec)
+ ABI_FREE(symrel_cart)
  ABI_FREE(vxc)
  ABI_FREE(d3etot)
  ABI_FREE(pertsy)

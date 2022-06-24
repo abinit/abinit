@@ -5106,8 +5106,9 @@ end subroutine sytens
 !!  mpert =maximum number of ipert
 !!  natom= number of atoms
 !!  nsym=number of space group symmetries
-!!  symrec(3,3,nsym)=3x3 matrices of the group symmetries (reciprocal space)
-!!  symrel(3,3,nsym)=3x3 matrices of the group symmetries (real space)
+!!  symrec(3,3,nsym)=3x3 matrices of the group symmetries (reciprocal reduced space)
+!!  symrel(3,3,nsym)=3x3 matrices of the group symmetries (real reduced space)
+!!  symrel_cart(3,3,nsym)=3x3 matrices of the group symmetries (real cartesian space)
 !!
 !! OUTPUT
 !!  (see side effects)
@@ -5129,7 +5130,7 @@ end subroutine sytens
 !!
 !! SOURCE
 
-subroutine sylwtens(gprimd,has_strain,indsym,mpert,natom,nsym,rfpert,rprimd,symrec,symrel)
+subroutine sylwtens(has_strain,indsym,mpert,natom,nsym,rfpert,symrec,symrel,symrel_cart)
 
 !Arguments -------------------------------
 !scalars
@@ -5138,7 +5139,7 @@ subroutine sylwtens(gprimd,has_strain,indsym,mpert,natom,nsym,rfpert,rprimd,symr
 !arrays
  integer,intent(in) :: indsym(4,nsym,natom),symrec(3,3,nsym),symrel(3,3,nsym)
  integer,intent(inout) :: rfpert(3,mpert,3,mpert,3,mpert)
- real(dp),intent(in) :: gprimd(3,3),rprimd(3,3)
+ real(dp),intent(in) :: symrel_cart(3,3,nsym)
 
 !Local variables -------------------------
 !scalars
@@ -5160,6 +5161,14 @@ subroutine sylwtens(gprimd,has_strain,indsym,mpert,natom,nsym,rfpert,rprimd,symr
 
  ABI_MALLOC(pertsy,(3,mpert,3,mpert,3,mpert))
  pertsy(:,:,:,:,:,:) = 0
+
+ do isym=1,nsym
+   print*, symrel_cart(1,:,isym)
+   print*, symrel_cart(2,:,isym)
+   print*, symrel_cart(3,:,isym)
+   print*, "   "
+ end do
+ stop
 
 !Loop over perturbations
 
@@ -5349,9 +5358,9 @@ subroutine sylwtens(gprimd,has_strain,indsym,mpert,natom,nsym,rfpert,rprimd,symr
 
                if ((i1pert /= i2pert).or.(i1dir /= i2dir)) then
 
-                 if ((pertsy(i1dir,i1pert,i2dir,i2pert,i2dir,i2pert) == 1).and.&
-&                 (pertsy(i2dir,i2pert,i2dir,i2pert,i1dir,i1pert) == 1)) then
-                   pertsy(i2dir,i2pert,i2dir,i2pert,i1dir,i1pert) = -1
+                 if ((pertsy(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) == 1).and.&
+&                 (pertsy(i2dir,i2pert,i1dir,i1pert,i3dir,i3pert) == 1)) then
+                   pertsy(i2dir,i2pert,i1dir,i1pert,i3dir,i3pert) = -1
                  end if
 
                end if
@@ -5363,52 +5372,6 @@ subroutine sylwtens(gprimd,has_strain,indsym,mpert,natom,nsym,rfpert,rprimd,symr
        end do
      end do
    end do
- end if
-
-!For strain we need to convert the i2dir to cartesian
- if (has_strain) then
-   strflg=0
-   do i3pert = 1, mpert
-     do i3dir = 1, 3
-       do i2pert = natom+3, natom+4
-         do i2dir = 1, 3
-           if (i2pert==natom+3) istr=i2dir
-           if (i2pert==natom+4) istr=3+i2dir
-           i2dir_a=idx(2*istr-1); i2dir_b=idx(2*istr)
-           do i1pert = 1, mpert
-             do i1dir = 1, 3
-               strflg(i1dir,i1pert,i2dir_a,i2dir_b,i3dir,i3pert)=&
-             & pertsy(i1dir,i1pert,i2dir,i2pert,i2dir,i2pert)
-!               if (i2pert==natom+4) then
-!               strflg(i1dir,i1pert,i2dir_b,i2dir_a,i3dir,i3pert)=&
-!             & pertsy(i1dir,i1pert,i2dir,i2pert,i2dir,i2pert)
-               end if
-             end do
-           end do
-         end do
-       end do
-     end do
-   end do
-
-   do i3pert = 1, mpert
-     do i3dir = 1, 3
-       do i1pert = 1, mpert
-         do i1dir = 1, 3
-           do i2dir_b= 1,3
-             flg1(:)=strflg(i1dir,i1pert,:,i2dir_b,i3dir,i3pert)               
-             call cart39(flg1,flg2,gprimd,natom+2,natom,rprimd,vec1,vec2)
-             strflg_car(i1dir,i1pert,:,i2dir_b,i3dir,i3pert)=flg2(:)
-           end do
-           do i2dir_a= 1,3
-             flg1(:)=strflg(i1dir,i1pert,i2dir_a,:,i3dir,i3pert)               
-             call cart39(flg1,flg2,gprimd,natom+2,natom,rprimd,vec1,vec2)
-             strflg_car(i1dir,i1pert,i2dir_a,:,i3dir,i3pert)=flg2(:)
-           end do
-         end do
-       end do
-     end do
-   end do
-
  end if
 
  rfpert(:,:,:,:,:,:) = pertsy(:,:,:,:,:,:)

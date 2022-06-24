@@ -51,7 +51,7 @@ module m_respfn_driver
  use m_fft,         only : zerosym, fourdp
  use m_kpts,        only : symkchk
  use m_geometry,    only : irreducible_set_pert
- use m_dynmat,      only : chkph3, d2sym3, q0dy3_apply, q0dy3_calc, wings3, dfpt_phfrq, sylwtens, sytens, dfpt_prtph, &
+ use m_dynmat,      only : chkph3, d2sym3, q0dy3_apply, q0dy3_calc, wings3, dfpt_phfrq, sytens, sylwtens, dfpt_prtph, &
                            asria_calc, asria_corr, cart29, cart39, chneu9, dfpt_sydy
  use m_ddb,         only : DDB_VERSION
  use m_ddb_hdr,     only : ddb_hdr_type, ddb_hdr_init
@@ -238,7 +238,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  integer :: rfasr,rfddk,rfelfd,rfphon,rfstrs,rfuser,rf2_dkdk,rf2_dkde,rfmagn
  integer :: spaceworld,sumg0,sz1,sz2,tim_mkrho,timrev,usecprj,usevdw
  integer :: usexcnhat,use_sym,vloc_method,zero_by_symm
- logical :: has_full_piezo,has_allddk,is_dfpt=.true.,non_magnetic_xc
+ logical :: has_full_piezo,has_allddk,has_strain=.false.,is_dfpt=.true.,non_magnetic_xc
  logical :: paral_atom,qeq0,use_nhat_gga,call_pawinit
  real(dp) :: boxcut,compch_fft,compch_sph,cpus,ecore,ecut_eff,ecutdg_eff,ecutf
  real(dp) :: eei,eew,ehart,eii,ek,enl,entropy,enxc
@@ -1172,7 +1172,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    ABI_MALLOC(rfpert_lw,(3,natom+8,3,natom+8,3,natom+8))
    rfpert_lw=0
    rfpert_lw(:,natom+2,:,1:natom,:,natom+8)=1
-   call sylwtens(indsym,natom+8,natom,dtset%nsym,rfpert_lw,symrec,dtset%symrel)
+!   call sylwtens(has_strain,indsym,natom+8,natom,dtset%nsym,rfpert_lw,symrec,dtset%symrel)
    write(message, '(a,a,a)' ) ch10, &
  & 'The list of irreducible elements of the Quadrupoles tensor is:',ch10
    call wrtout(std_out,message,'COLL')
