@@ -73,3 +73,21 @@ kptbounds2       0.00000000  0.00000000  0.00000000     # Paths
 
 pp_dirpath       "$ABI_PSPDIR"
 pseudos          "Pseudodojo_paw_pw_standard/La.xml, Pseudodojo_paw_pw_standard/Cu.xml, Pseudodojo_paw_pw_standard/O.xml"
+
+
+##############################################################                  
+## This section is used only for regression testing of ABINIT #                  
+###############################################################                  
+#%%<BEGIN TEST_INFO>                                                            
+#%% [setup]                                                                     
+#%% executable = abinit                                                         
+#%% [files]                                                                     
+#%% files_to_test =                                                             
+#%%    tw90_6_1.abo, tolnlines=5, tolabs=7.00e-05, tolrel=1.10e+00, fld_options=-medium
+#%% [paral_info]                                                                
+#%% max_nprocs = 4                                                              
+#%% [extra_info]                                                                
+#%% authors = O. Gingras                                                           
+#%% keywords = wannier90, la2cuo4, fatbands, paw
+#%% description = Test interface with Wannier90 (PAW pseudopotentials)           
+#%%<END TEST_INFO> 
