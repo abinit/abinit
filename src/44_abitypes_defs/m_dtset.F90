@@ -3218,7 +3218,7 @@ subroutine chkvars(string)
 !scalars
  integer,parameter :: protocol1=1
  character(len=100) :: list_logicals,list_strings, list_vars_img
- character(len=10000) :: list_vars
+ character(len=20000) :: list_vars
 
 !************************************************************************
 
@@ -3342,11 +3342,29 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' kberry kpt kptbounds kptgw'
  list_vars=trim(list_vars)//' kptnrm kptopt kptrlatt kptrlen kssform'
 !L
- list_vars=trim(list_vars)//' lambsig latt_friction latt_taut'
+ list_vars=trim(list_vars)//' latt_ddb_fnames'
+ list_vars=trim(list_vars)//' latt_init_hist_fname'
+ list_vars=trim(list_vars)//' latt_anharm_pot_fname'
+ list_vars=trim(list_vars)//' latt_harm_pot_fname'
+ list_vars=trim(list_vars)//' latt_friction latt_lwf_anharmonic latt_pot_fname latt_taut'
+ list_vars=trim(list_vars)//' latt_test_set_fname'
+ list_vars=trim(list_vars)//' latt_temperature latt_temperature_start latt_temperature_end'
+ list_vars=trim(list_vars)//' latt_temperature_nstep latt_var_temperature'
+ list_vars=trim(list_vars)//' latt_training_set_fname'
+ list_vars=trim(list_vars)//' lambsig'
 ! list_vars=trim(list_vars)//' latt_taup latt_compressibility latt_mask'
  list_vars=trim(list_vars)//' ldaminushalf lexexch localrdwf lpawu'
  list_vars=trim(list_vars)//' lotf_classic lotf_nitex lotf_nneigx lotf_version'
  list_vars=trim(list_vars)//' lw_flexo lw_qdrpl'
+ list_vars=trim(list_vars)//' lwf_constraint'
+ list_vars=trim(list_vars)//' lwf_dt lwf_dynamics lwf_init_state lwf_init_hist_fname'
+ list_vars=trim(list_vars)//' lwf_mc_avg_amp'
+ list_vars=trim(list_vars)//' lwf_nctime lwf_ntime'
+ list_vars=trim(list_vars)//' lwf_pot_fname'
+ !list_vars=trim(list_vars)//' lwf_self_bound_coeff lwf_self_bound_order'
+ list_vars=trim(list_vars)//' lwf_taut'
+ list_vars=trim(list_vars)//' lwf_temperature lwf_temperature_start lwf_temperature_end'
+ list_vars=trim(list_vars)//' lwf_temperature_nstep lwf_var_temperature'
 !M
  list_vars=trim(list_vars)//' max_ncpus macro_uj maxestep maxnsym mdf_epsinf mdtemp mdwall'
  list_vars=trim(list_vars)//' magconon magcon_lambda mbpt_sciss'
@@ -3355,7 +3373,7 @@ subroutine chkvars(string)
 !N
  list_vars=trim(list_vars)//' natcon natfix natfixx natfixy natfixz'
  list_vars=trim(list_vars)//' natom natrd natsph natsph_extra natvshift nband nbandkss nbandhf'
- list_vars=trim(list_vars)//' ncell ncoeff nbdblock nbdbuf nberry nconeq nc_xccc_gspace'
+ list_vars=trim(list_vars)//' ncell ncellmat ncoeff nbdblock nbdbuf nberry nconeq nc_xccc_gspace'
  list_vars=trim(list_vars)//' nctime ndivk ndivsm ndtset neb_algo neb_spring'
  list_vars=trim(list_vars)//' nfreqim nfreqre nfreqsp ngfft ngfftdg'
  list_vars=trim(list_vars)//' ngkpt ngqpt nimage nkpath nkpt nkptgw nkpthf'
@@ -3399,7 +3417,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' q1shft qmass qprtrb qpt qptdm qptnrm qph1l'
  list_vars=trim(list_vars)//' qptopt quadquad qptrlatt quadmom'
 !R
- list_vars=trim(list_vars)//' random_atpos ratsm ratsph ratsph_extra rcut'
+ list_vars=trim(list_vars)//' random_atpos randomseed ratsm ratsph ratsph_extra rcut'
  list_vars=trim(list_vars)//' recefermi recgratio recnpath recnrec recptrott recrcut rectesteg rectolden'
  list_vars=trim(list_vars)//' red_dfield red_efield red_efieldbar restartxf rfasr'
  list_vars=trim(list_vars)//' rfatpol rfddk rfdir rfelfd rfmagn rfmeth rfphon'
@@ -3423,16 +3441,17 @@ subroutine chkvars(string)
 !list_vars=trim(list_vars)//' scup_smearing scup_freezden'
 !End SCALE-UP variables
  list_vars=trim(list_vars)//' slabwsrad slabzbeg slabzend slk_rankpp smdelta so_psp'
- list_vars=trim(list_vars)//' slc_coupling'
+ list_vars=trim(list_vars)//' slc_coupling slc_pot_fname'
  list_vars=trim(list_vars)//' spbroad spgaxor spgorig spgroup spgroupma'
  !list_vars=trim(list_vars)//' spin_calc_correlation_obs spin_calc_thermo_obs spin_calc_traj_obs'
  list_vars=trim(list_vars)//' spin_calc_thermo_obs'
  list_vars=trim(list_vars)//' spin_damping'
  list_vars=trim(list_vars)//' spin_dipdip spin_dt spin_dynamics '
+ list_vars=trim(list_vars)//' spin_init_hist_fname'
  list_vars=trim(list_vars)//' spin_init_orientation spin_init_qpoint spin_init_rotate_axis spin_init_state'
  list_vars=trim(list_vars)//' spin_mag_field spin_nctime spin_ntime spin_ntime_pre'
  !list_vars=trim(list_vars)//' spin_n1l spin_n2l'
- list_vars=trim(list_vars)//' spin_projection_qpoint'
+ list_vars=trim(list_vars)//' spin_pot_fname spin_projection_qpoint'
  list_vars=trim(list_vars)//' spin_sia_add spin_sia_k1amp spin_sia_k1dir'
  list_vars=trim(list_vars)//' spin_temperature spin_temperature_end'
  list_vars=trim(list_vars)//' spin_temperature_nstep spin_temperature_start'

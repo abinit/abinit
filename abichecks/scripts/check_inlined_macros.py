@@ -49,12 +49,12 @@ MACRO_NAMES = [
 
 def wrong_string(string):
     """Return 0 if input string does not contain inlined macros else 0"""
-    s = string.strip()
+    s = string.strip().upper()
     if s.startswith("!"): return 0
     for macro_name in MACRO_NAMES:
         if macro_name not in s: continue
         #pattern = regexps[macro_name]
-        if s.startswith("if ") and " then" not in s:
+        if s.startswith("IF") and "THEN " not in s:
             return 1
 
     return 0

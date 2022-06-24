@@ -203,6 +203,10 @@ the tutorial on non-linear optics, and the group of electron-phonon tutorials:**
   * [The second tutorial on MULTIBINIT](spin_model) presents how to build a spin model 
     and run spin dynamics in MULTIBINIT.
 
+  * [The third tutorial on MULTIBINIT](lwf_model) presents how to run a lattice Wannier function (LWF) dynamics 
+    in MULTIBINIT.
+
+
   * [The tutorial on static non-linear properties](nlo) presents the computation of responses beyond
     the linear order, within Density-Functional Perturbation Theory (beyond the simple Sum-Over-State approximation):
     Raman scattering efficiencies (non-resonant case), non-linear electronic susceptibility, electro-optic effect.
