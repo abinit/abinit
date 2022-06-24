@@ -266,6 +266,7 @@ CONTAINS  !=====================================================================
 !! INPUTS
 !!  nbprocs= total number of processors
 !!  comm= MPI communicator
+!!  [grid_dims]=Number of procs for each dimension.
 !!
 !! OUTPUT
 !!  grid= the grid of processors used by Scalapack
@@ -277,28 +278,35 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine build_grid_scalapack(grid, nbprocs, comm)
+subroutine build_grid_scalapack(grid, nbprocs, comm, grid_dims)
 
 !Arguments ------------------------------------
  integer,intent(in) :: nbprocs,comm
  type(grid_scalapack),intent(out) :: grid
+ integer,optional,intent(in) :: grid_dims(2)
 
 !Local variables-------------------------------
  integer :: i
 
 ! *********************************************************************
 
- grid%nbprocs=nbprocs
+ grid%nbprocs = nbprocs
 
-!Search for a rectangular grid of processors
- i=INT(SQRT(float(nbprocs)))
- do while (MOD(nbprocs,i) /= 0)
-   i = i-1
- end do
- i=max(i,1)
+ if (.not. present(grid_dims)) then
+   ! Search for a rectangular grid of processors
+   i=INT(SQRT(float(nbprocs)))
+   do while (MOD(nbprocs,i) /= 0)
+     i = i-1
+   end do
+   i=max(i,1)
 
- grid%dims(1) = i
- grid%dims(2) = INT(nbprocs/i)
+   grid%dims(1) = i
+   grid%dims(2) = INT(nbprocs/i)
+ else
+   grid%dims = grid_dims
+ end if
+
+ ABI_CHECK(product(grid%dims) == nbprocs, "grid%dims does not agree with nbprocs!")
 
  grid%ictxt = comm
 
@@ -353,8 +361,8 @@ subroutine build_processor_scalapack(processor,grid,myproc,comm)
                      processor%grid%dims(2),processor%coords(1), processor%coords(2))
 #endif
 
-!These values are the same as those computed by BLACS_GRIDINFO
-!except in the case where the myproc argument is not the local proc
+ ! These values are the same as those computed by BLACS_GRIDINFO
+ ! except in the case where the myproc argument is not the local proc
  processor%coords(1) = INT((myproc) / grid%dims(2))
  processor%coords(2) = MOD((myproc), grid%dims(2))
 
@@ -372,6 +380,7 @@ end subroutine build_processor_scalapack
 !!
 !! INPUTS
 !!  comm= MPI communicator
+!!  [grid_dims]=Number of procs for each dimension.
 !!
 !! OUTPUT
 !!  processor= descriptor of a processor
@@ -383,11 +392,12 @@ end subroutine build_processor_scalapack
 !!
 !! SOURCE
 
-subroutine init_scalapack(processor, comm)
+subroutine init_scalapack(processor, comm, grid_dims)
 
 !Arguments ------------------------------------
  integer, intent(in) :: comm
  type(processor_scalapack),intent(out) :: processor
+ integer,optional,intent(in) :: grid_dims(2)
 
 !Local variables-------------------------------
  type(grid_scalapack) :: grid
@@ -398,7 +408,11 @@ subroutine init_scalapack(processor, comm)
  nbproc = xmpi_comm_size(comm)
  myproc = xmpi_comm_rank(comm)
 
- call build_grid_scalapack(grid, nbproc, comm)
+ if (present(grid_dims)) then
+   call build_grid_scalapack(grid, nbproc, comm, grid_dims=grid_dims)
+ else
+   call build_grid_scalapack(grid, nbproc, comm)
+ end if
 
  call build_processor_scalapack(processor, grid, myproc, comm)
 
@@ -459,7 +473,7 @@ end subroutine end_scalapack
 !!  nbli_global= total number of lines
 !!  nbco_global= total number of columns
 !!  istwf_k= 2 if we have a real matrix else complex.
-!!  tbloc= custom block size NOTE: NOT USED in the present version.
+!!  size_blocs= custom block sizes.
 !!
 !! OUTPUT
 !!  matrix= the matrix to process
@@ -471,18 +485,18 @@ end subroutine end_scalapack
 !!
 !! SOURCE
 
-subroutine init_matrix_scalapack(matrix, nbli_global, nbco_global, processor, istwf_k, tbloc)
+subroutine init_matrix_scalapack(matrix, nbli_global, nbco_global, processor, istwf_k, size_blocs)
 
 !Arguments ------------------------------------
  integer,intent(in) :: nbli_global,nbco_global,istwf_k
  type(matrix_scalapack),intent(inout) :: matrix
  type(processor_scalapack),intent(in),target  :: processor
- integer,intent(in),optional :: tbloc
+ integer,intent(in),optional :: size_blocs(2)
 
 #ifdef HAVE_LINALG_SCALAPACK
 !Local variables-------------------------------
  ! As recommended by Intel MKL, a more sensible default than the previous value of 40
- integer, parameter :: SIZE_BLOCS = 24
+ integer, parameter :: DEFAULT_SIZE_BLOCS = 24
  integer :: info,sizeb
  integer,external :: NUMROC
  character(len=500) :: msg
@@ -492,13 +506,13 @@ subroutine init_matrix_scalapack(matrix, nbli_global, nbco_global, processor, is
 #ifdef HAVE_LINALG_ELPA
  sizeb  = 1
 #else
- sizeb = SIZE_BLOCS
+ sizeb = DEFAULT_SIZE_BLOCS
 #endif
 
 !Records of the matrix type:
  matrix%processor => processor
- matrix%sizeb_blocs(1) = MIN(sizeb,nbli_global)
- matrix%sizeb_blocs(2) = MIN(sizeb,nbco_global)
+ matrix%sizeb_blocs(1) = MIN(sizeb, nbli_global)
+ matrix%sizeb_blocs(2) = MIN(sizeb, nbco_global)
 
 #ifdef HAVE_LINALG_ELPA
  if(matrix%sizeb_blocs(1) .ne. matrix%sizeb_blocs(2)) then
@@ -506,6 +520,12 @@ subroutine init_matrix_scalapack(matrix, nbli_global, nbco_global, processor, is
     matrix%sizeb_blocs(2) = matrix%sizeb_blocs(1)
  end if
 #endif
+
+ ! Use custom block sizes.
+ if (present(size_blocs)) then
+   matrix%sizeb_blocs(1) = MIN(size_blocs(1), nbli_global)
+   matrix%sizeb_blocs(2) = MIN(size_blocs(2), nbco_global)
+ end if
 
  matrix%sizeb_global(1) = nbli_global
  matrix%sizeb_global(2) = nbco_global
@@ -2463,8 +2483,8 @@ subroutine compute_eigen1(comm,processor,cplex,nbli_global,nbco_global,matrix,ve
  ! ================================
  ! INITIALISATION SCALAPACK MATRIX
  ! ================================
- call init_matrix_scalapack(sca_matrix1,nbli_global,nbco_global,processor,istwf_k, tbloc=10)
- call init_matrix_scalapack(sca_matrix2,nbli_global,nbco_global,processor,istwf_k, tbloc=10)
+ call init_matrix_scalapack(sca_matrix1,nbli_global,nbco_global,processor,istwf_k)
+ call init_matrix_scalapack(sca_matrix2,nbli_global,nbco_global,processor,istwf_k)
 
  ! ==============================
  ! FILLING SCALAPACK MATRIX
@@ -2587,9 +2607,9 @@ subroutine compute_eigen2(comm,processor,cplex,nbli_global,nbco_global,matrix1,m
  ! ================================
  ! INITIALISATION SCALAPACK MATRIX
  ! ================================
- call init_matrix_scalapack(sca_matrix1,nbli_global,nbco_global,processor,istwf_k, tbloc=10)
- call init_matrix_scalapack(sca_matrix2,nbli_global,nbco_global,processor,istwf_k, tbloc=10)
- call init_matrix_scalapack(sca_matrix3,nbli_global,nbco_global,processor,istwf_k, tbloc=10)
+ call init_matrix_scalapack(sca_matrix1,nbli_global,nbco_global,processor,istwf_k)
+ call init_matrix_scalapack(sca_matrix2,nbli_global,nbco_global,processor,istwf_k)
+ call init_matrix_scalapack(sca_matrix3,nbli_global,nbco_global,processor,istwf_k)
 
  ! ==============================
  ! FILLING SCALAPACK MATRIX
@@ -3489,10 +3509,9 @@ subroutine slk_ptrans(in_mat, trans, out_mat)
  istwf_k = merge(1, 2, allocated(in_mat%buffer_cplx))
 
  ! TODO: To be tested.
-
  call out_mat%free()
  call init_matrix_scalapack(out_mat, in_mat%sizeb_global(2), in_mat%sizeb_global(1), &
-                            in_mat%processor, istwf_k) !, tbloc=tbloc) TODO
+                            in_mat%processor, istwf_k)
 
  ! prototype
  !call pdtran(m, n, alpha, a, ia, ja, desca, beta, c, ic, jc, descc)

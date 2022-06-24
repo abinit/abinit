@@ -669,7 +669,7 @@ function gwr_new(dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg, comm) 
  ABI_MALLOC(gwr%gt_kibz, (2, gwr%nkibz, gwr%ntau, gwr%nsppol))
  ABI_MALLOC(gwr%chit_qibz, (gwr%nqibz, gwr%ntau, gwr%nsppol))
 
- call init_scalapack(slk_processor, gwr%g_comm%value) !# grid_dims=[1, gwr%g_comm%nproc]
+ call init_scalapack(slk_processor, gwr%g_comm%value, grid_dims=[1, gwr%g_comm%nproc])
 
  do my_is=1,gwr%my_nspins
    spin = gwr%my_spins(my_is)

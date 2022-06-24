@@ -68,8 +68,8 @@
    dim_evec1= 2*n/istwf_k_
    ABI_MALLOC(tmp_evec,(dim_evec1,n))
    tmp_evec = zero
-   call init_matrix_scalapack(sca_a,n,n,slk_processor,istwf_k_, tbloc=10)
-   call init_matrix_scalapack(sca_ev,n,n,slk_processor,istwf_k_, tbloc=10)
+   call init_matrix_scalapack(sca_a,n,n,slk_processor,istwf_k_)
+   call init_matrix_scalapack(sca_ev,n,n,slk_processor,istwf_k_)
 #ifdef HAVE_LINALG_ELPA
    call matrix_from_global_sym(sca_a,a,istwf_k_)
 #else

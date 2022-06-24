@@ -208,8 +208,7 @@ subroutine rayleigh_ritz_subdiago(cg,ghc,gsc,gvnlxc,eig,has_fock,istwf_k,mpi_enr
 
 #else
  !! TODO non-functional, should be rewritten. Possibly faster (tests needed)
- write(message, *) 'Transposed, orthogonalizing'
- call wrtout(std_out,message,'COLL')
+ call wrtout(std_out, 'Transposed, orthogonalizing')
 
  ! orthonormalization
  call timab(timer_ortho, 1, tsec)
@@ -231,8 +230,7 @@ subroutine rayleigh_ritz_subdiago(cg,ghc,gsc,gvnlxc,eig,has_fock,istwf_k,mpi_enr
  end if
  call timab(timer_rotation, 2, tsec)
 
- write(message, *) 'Orthogonalized, building subham'
- call wrtout(std_out,message,'COLL')
+ call wrtout(std_out, 'Orthogonalized, building subham')
 
  ! build hamiltonian  in subspace
  call timab(timer_subham, 1, tsec)
@@ -243,8 +241,7 @@ subroutine rayleigh_ritz_subdiago(cg,ghc,gsc,gvnlxc,eig,has_fock,istwf_k,mpi_enr
  call xmpi_sum(subham,mpi_enreg%comm_bandspinorfft,ierr)
  call timab(timer_subham, 2, tsec)
 
- write(message, *) 'Subham built, diagonalizing'
- call wrtout(std_out,message,'COLL')
+ call wrtout(std_out, 'Subham built, diagonalizing')
 
  ! Rayleigh-Ritz
  call timab(timer_subdiago,1,tsec)
@@ -253,8 +250,7 @@ subroutine rayleigh_ritz_subdiago(cg,ghc,gsc,gvnlxc,eig,has_fock,istwf_k,mpi_enr
 & subham,dummy,0,gs_hamk%usepaw,mpi_enreg%me_g0)
  call timab(timer_subdiago,2,tsec)
 
- write(message, *) 'Diagonalization done'
- call wrtout(std_out,message,'COLL')
+ call wrtout(std_out, 'Diagonalization done')
 
  ! Rotate ghc and gvnlxc according to evecs
  call timab(timer_rotation, 1, tsec)
@@ -347,13 +343,13 @@ subroutine rayleigh_ritz_distributed(cg,ghc,gsc,gvnlxc,eig,has_fock,istwf_k,mpi_
  end if
 
  !write(message, *) 'RR: init'
- !call wrtout(std_out,message,'COLL')
+ !call wrtout(std_out,message)
  !======================================================================================================
  ! Init Scalapack matrices
  !======================================================================================================
- call init_matrix_scalapack(sca_ham ,nband,nband,slk_processor,istwf_k, tbloc=10)
- call init_matrix_scalapack(sca_ovl ,nband,nband,slk_processor,istwf_k, tbloc=10)
- call init_matrix_scalapack(sca_evec,nband,nband,slk_processor,istwf_k, tbloc=10)
+ call init_matrix_scalapack(sca_ham ,nband,nband,slk_processor,istwf_k)
+ call init_matrix_scalapack(sca_ovl ,nband,nband,slk_processor,istwf_k)
+ call init_matrix_scalapack(sca_evec,nband,nband,slk_processor,istwf_k)
 
  ! Get info
  blocksize = sca_ham%sizeb_blocs(1) ! Assume square blocs
@@ -382,7 +378,7 @@ subroutine rayleigh_ritz_distributed(cg,ghc,gsc,gvnlxc,eig,has_fock,istwf_k,mpi_
  do iproc=0,nbproc-1
    ! Build the local matrix belonging to processor iproc
    !write(message, *) 'RR: build', iproc
-   !call wrtout(std_out,message,'COLL')
+   !call wrtout(std_out,message)
 
    ! Get coordinates of iproc
    coords_iproc(1) = INT(iproc / grid_dims(2))
@@ -465,7 +461,7 @@ subroutine rayleigh_ritz_distributed(cg,ghc,gsc,gvnlxc,eig,has_fock,istwf_k,mpi_
  ! Do the diagonalization
  !======================================================================================================
  !write(message, *) 'RR: diag'
- !call wrtout(std_out,message,'COLL')
+ !call wrtout(std_out,message)
  call timab(timer_subdiago, 1, tsec)
  call compute_generalized_eigen_problem(slk_processor,sca_ham,sca_ovl,&
 & sca_evec,eig,slk_communicator,istwf_k)
@@ -481,7 +477,7 @@ subroutine rayleigh_ritz_distributed(cg,ghc,gsc,gvnlxc,eig,has_fock,istwf_k,mpi_
  do iproc=0,nbproc-1
    ! Compute the contribution to the rotated matrices from this block
    !write(message, *) 'RR: rot', iproc
-   !call wrtout(std_out,message,'COLL')
+   !call wrtout(std_out,message)
 
    ! Get coordinates of iproc
    coords_iproc(1) = INT(iproc / grid_dims(2))
