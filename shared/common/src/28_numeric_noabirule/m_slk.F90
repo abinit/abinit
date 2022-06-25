@@ -493,7 +493,7 @@ subroutine init_matrix_scalapack(matrix, nbli_global, nbco_global, processor, is
 !Arguments ------------------------------------
  class(matrix_scalapack),intent(inout) :: matrix
  integer,intent(in) :: nbli_global, nbco_global, istwf_k
- type(processor_scalapack),intent(in),target  :: processor
+ type(processor_scalapack),target,intent(in) :: processor
  integer,intent(in),optional :: size_blocs(2)
 
 #ifdef HAVE_LINALG_SCALAPACK
@@ -512,7 +512,7 @@ subroutine init_matrix_scalapack(matrix, nbli_global, nbco_global, processor, is
  sizeb = DEFAULT_SIZE_BLOCS
 #endif
 
-!Records of the matrix type:
+ !Records of the matrix type
  matrix%processor => processor
  matrix%sizeb_blocs(1) = MIN(sizeb, nbli_global)
  matrix%sizeb_blocs(2) = MIN(sizeb, nbco_global)
@@ -535,16 +535,18 @@ subroutine init_matrix_scalapack(matrix, nbli_global, nbco_global, processor, is
 
  ! Size of the local buffer
  ! NUMROC computes the NUMber of Rows Or Columns of a distributed matrix owned by the process indicated by IPROC.
+ ! NUMROC (n, nb, iproc, isrcproc, nprocs)
  matrix%sizeb_local(1) = NUMROC(nbli_global, matrix%sizeb_blocs(1), &
                                 processor%coords(1), 0, processor%grid%dims(1))
 
  matrix%sizeb_local(2) = NUMROC(nbco_global,matrix%sizeb_blocs(2), &
-                                processor%coords(2),0, processor%grid%dims(2))
+                                processor%coords(2), 0, processor%grid%dims(2))
 
- call idx_loc(matrix,matrix%sizeb_global(1),matrix%sizeb_global(2), &
-              matrix%sizeb_local(1),matrix%sizeb_local(2))
+ call idx_loc(matrix, matrix%sizeb_global(1), matrix%sizeb_global(2), &
+              matrix%sizeb_local(1), matrix%sizeb_local(2))
 
  ! Initialisation of the SCALAPACK description of the matrix
+ ! (desc, m, n, mb, nb, irsrc, icsrc, ictxt, lld, info)
  call DESCINIT(matrix%descript%tab, nbli_global, nbco_global, &
                matrix%sizeb_blocs(1), matrix%sizeb_blocs(2), 0, 0, &
                processor%grid%ictxt, MAX(1, matrix%sizeb_local(1)), info)
@@ -577,8 +579,12 @@ end subroutine init_matrix_scalapack
 !!  Print info on scalapack matrix.
 !!
 !! INPUTS
+!!  [unit]=Unit number (default: std_out)
+!!  [header]=title for info
+!!  [prtvol]=Verbosity level (default: 0)
 !!
 !! OUTPUT
+!!  Only writing
 !!
 !! PARENTS
 !!

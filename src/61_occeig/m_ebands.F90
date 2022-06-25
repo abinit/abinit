@@ -1214,9 +1214,9 @@ end subroutine ebands_move_alloc
 !!
 !! INPUTS
 !!  ebands<ebands_t>The type containing the data.
-!!  [unit]=Unit number (std_out if None)
+!!  [unit]=Unit number (default: std_out)
 !!  [header]=title for info
-!!  [prtvol]=Verbosity level (0 if None)
+!!  [prtvol]=Verbosity level (default: 0)
 !!
 !! OUTPUT
 !!  Only writing
