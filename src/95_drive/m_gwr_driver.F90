@@ -175,7 +175,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
    ABI_UNUSED((/pawang%nsym, pawrad(1)%mesh_size/))
  end if
 
-#ifdef HAVE_LINALG_SCALAPACK
+#ifndef HAVE_LINALG_SCALAPACK
   ABI_ERROR("GWR code requires scalapack library")
 #endif
 
