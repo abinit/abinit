@@ -1231,10 +1231,9 @@ end subroutine ebands_move_alloc
 subroutine ebands_print(ebands, header, unit, prtvol)
 
 !Arguments ------------------------------------
-!scalars
+ class(ebands_t),intent(in) :: ebands
  integer,optional,intent(in) :: prtvol,unit
  character(len=*),optional,intent(in) :: header
- class(ebands_t),intent(in) :: ebands
 
 !Local variables-------------------------------
  integer :: spin, ikpt, unt, my_prtvol, ii
@@ -1244,7 +1243,7 @@ subroutine ebands_print(ebands, header, unit, prtvol)
  unt = std_out; if (present(unit)) unt =unit
  my_prtvol = 0; if (present(prtvol)) my_prtvol = prtvol
 
- msg=' ==== Info on the ebands_t ==== '
+ msg = ' ==== Info on the ebands_t ==== '
  if (present(header)) msg=' ==== '//trim(adjustl(header))//' ==== '
  call wrtout(unt, msg)
 

@@ -88,13 +88,6 @@ contains
 !!      m_bethe_salpeter
 !!
 !! CHILDREN
-!!      end_scalapack,exc_fullh_from_blocks,exc_read_bshdr,exc_skip_bshdr_mpio
-!!      hermitianize,init_matrix_scalapack,init_scalapack,mpi_file_close
-!!      mpi_file_open,mpi_file_read_all,mpi_file_set_view,mpi_type_free
-!!      slk_f%free,slk_f%loc2glob,slk_hbar%free,slk_hbar%loc2glob,slk_ovlp%free
-!!      slk_ovlp%zinvert,slk_pzgemm,slk_pzhegvx,slk_single_fview_read_mask
-!!      slk_vec%free,slk_write,wrtout,xgemm,xhdp_invert,xhegv,xhegvx
-!!      xmpi_barrier,xmpio_read_frm
 !!
 !! SOURCE
 
@@ -217,13 +210,6 @@ end subroutine exc_diago_driver
 !!      m_exc_diago
 !!
 !! CHILDREN
-!!      end_scalapack,exc_fullh_from_blocks,exc_read_bshdr,exc_skip_bshdr_mpio
-!!      hermitianize,init_matrix_scalapack,init_scalapack,mpi_file_close
-!!      mpi_file_open,mpi_file_read_all,mpi_file_set_view,mpi_type_free
-!!      slk_f%free,slk_f%loc2glob,slk_hbar%free,slk_hbar%loc2glob,slk_ovlp%free
-!!      slk_ovlp%zinvert,slk_pzgemm,slk_pzhegvx,slk_single_fview_read_mask
-!!      slk_vec%free,slk_write,wrtout,xgemm,xhdp_invert,xhegv,xhegvx
-!!      xmpi_barrier,xmpio_read_frm
 !!
 !! SOURCE
 
@@ -550,9 +536,9 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst
    call init_scalapack(Slk_processor,comm)
    !
    ! Init scaLAPACK matrices
-   call init_matrix_scalapack(Slk_mat,exc_size,exc_size,Slk_processor,istwf_k)
+   call Slk_mat%init(exc_size,exc_size,Slk_processor,istwf_k)
 
-   call init_matrix_scalapack(Slk_vec,exc_size,exc_size,Slk_processor,istwf_k)
+   call Slk_vec%init(exc_size,exc_size,Slk_processor,istwf_k)
    !
    ! Open the file with MPI-IO and skip the record.
    amode=MPI_MODE_RDONLY
@@ -694,13 +680,6 @@ end subroutine exc_diago_resonant
 !!      m_exc_diago
 !!
 !! CHILDREN
-!!      end_scalapack,exc_fullh_from_blocks,exc_read_bshdr,exc_skip_bshdr_mpio
-!!      hermitianize,init_matrix_scalapack,init_scalapack,mpi_file_close
-!!      mpi_file_open,mpi_file_read_all,mpi_file_set_view,mpi_type_free
-!!      slk_f%free,slk_f%loc2glob,slk_hbar%free,slk_hbar%loc2glob,slk_ovlp%free
-!!      slk_ovlp%zinvert,slk_pzgemm,slk_pzhegvx,slk_single_fview_read_mask
-!!      slk_vec%free,slk_write,wrtout,xgemm,xhdp_invert,xhegv,xhegvx
-!!      xmpi_barrier,xmpio_read_frm
 !!
 !! SOURCE
 
@@ -847,13 +826,6 @@ end subroutine exc_print_eig
 !!      m_exc_diago
 !!
 !! CHILDREN
-!!      end_scalapack,exc_fullh_from_blocks,exc_read_bshdr,exc_skip_bshdr_mpio
-!!      hermitianize,init_matrix_scalapack,init_scalapack,mpi_file_close
-!!      mpi_file_open,mpi_file_read_all,mpi_file_set_view,mpi_type_free
-!!      slk_f%free,slk_f%loc2glob,slk_hbar%free,slk_hbar%loc2glob,slk_ovlp%free
-!!      slk_ovlp%zinvert,slk_pzgemm,slk_pzhegvx,slk_single_fview_read_mask
-!!      slk_vec%free,slk_write,wrtout,xgemm,xhdp_invert,xhegv,xhegvx
-!!      xmpi_barrier,xmpio_read_frm
 !!
 !! SOURCE
 
@@ -1117,13 +1089,6 @@ end subroutine exc_diago_coupling
 !!      m_exc_diago
 !!
 !! CHILDREN
-!!      end_scalapack,exc_fullh_from_blocks,exc_read_bshdr,exc_skip_bshdr_mpio
-!!      hermitianize,init_matrix_scalapack,init_scalapack,mpi_file_close
-!!      mpi_file_open,mpi_file_read_all,mpi_file_set_view,mpi_type_free
-!!      slk_f%free,slk_f%loc2glob,slk_hbar%free,slk_hbar%loc2glob,slk_ovlp%free
-!!      slk_ovlp%zinvert,slk_pzgemm,slk_pzhegvx,slk_single_fview_read_mask
-!!      slk_vec%free,slk_write,wrtout,xgemm,xhdp_invert,xhegv,xhegvx
-!!      xmpi_barrier,xmpio_read_frm
 !!
 !! SOURCE
 
@@ -1407,7 +1372,7 @@ subroutine exc_diago_coupling_hegv(Bsp,BS_files,Hdr_bse,prtvol,comm)
    !
    ! Read  = ( R  - )
    !         ( -  R*)
-   call init_matrix_scalapack(Slk_Hbar,exc_size,exc_size,Slk_processor,istwfk1)
+   call Slk_Hbar%init(exc_size,exc_size,Slk_processor,istwfk1)
 
    nullify(myel2loc)
    nsblocks=nsppol
@@ -1532,7 +1497,7 @@ subroutine exc_diago_coupling_hegv(Bsp,BS_files,Hdr_bse,prtvol,comm)
    ABI_CHECK_MPI(mpi_err,"FILE_CLOSE")
    !
    ! Init scaLAPACK matrix F
-   call init_matrix_scalapack(Slk_F,exc_size,exc_size,Slk_processor,istwfk1)
+   call Slk_F%init(exc_size,exc_size,Slk_processor,istwfk1)
    !
    ! Global F = (1  0)
    !            (0 -1)
@@ -1554,7 +1519,7 @@ subroutine exc_diago_coupling_hegv(Bsp,BS_files,Hdr_bse,prtvol,comm)
    ! ===========================================================
    ! ==== Solve generalized EV problem H u = F Hbar u = e u ====
    ! ===========================================================
-   call init_matrix_scalapack(Slk_vec,exc_size,exc_size,Slk_processor,istwfk1)
+   call Slk_vec%init(exc_size,exc_size,Slk_processor,istwfk1)
    !
    itype=2; vl=1; vu=1; il=1; iu=nstates
    abstol=zero !ABSTOL = PDLAMCH(comm,'U')
@@ -1632,14 +1597,14 @@ subroutine exc_diago_coupling_hegv(Bsp,BS_files,Hdr_bse,prtvol,comm)
      ABI_ERROR(" Init of Slk_ovlp is wrong")
    end if
 
-   call init_matrix_scalapack(Slk_ovlp,exc_size,exc_size,Slk_processor,istwfk1)
+   call Slk_ovlp%init(exc_size,exc_size,Slk_processor,istwfk1)
 
    ! Calculate the overlap matrix.
    ! FIXME
    ! The ESLL manual says that "matrices matrix1 and matrix2 must have no common elements; otherwise, results are unpredictable."
    ! However the official scaLAPACK documentation does not report this (severe) limitation.
 
-   !call init_matrix_scalapack(Slk_tmp,exc_size,exc_size,Slk_processor,istwfk1)
+   !call Slk_tmp%init(exc_size,exc_size,Slk_processor,istwfk1)
    !Slk_tmp%buffer_cplx = Slk_vec%buffer_cplx
    !call slk_pzgemm("C","N",Slk_tmp,cone,Slk_vec,czero,Slk_ovlp)
    !call Slk_tmp%free()

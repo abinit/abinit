@@ -281,6 +281,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  else
  end if
 
+
  ! ====================================================
  ! === This is the real GWR stuff once all is ready ===
  ! ====================================================
@@ -289,7 +290,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  !case ("RPA_ENERGY")
  !  call gwr%rpa_energy()
  !case ("G0W0")
- !  call gwr%run_g0w0()
+   call gwr%run_g0w0()
  !case default
  !  ABI_ERROR(sjoin("Invalid value of gwr_task:", itoa(dtset%gwr_task)))
  !end select

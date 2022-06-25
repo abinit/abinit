@@ -347,9 +347,9 @@ subroutine rayleigh_ritz_distributed(cg,ghc,gsc,gvnlxc,eig,has_fock,istwf_k,mpi_
  !======================================================================================================
  ! Init Scalapack matrices
  !======================================================================================================
- call init_matrix_scalapack(sca_ham ,nband,nband,slk_processor,istwf_k)
- call init_matrix_scalapack(sca_ovl ,nband,nband,slk_processor,istwf_k)
- call init_matrix_scalapack(sca_evec,nband,nband,slk_processor,istwf_k)
+ call sca_ham%init(nband,nband,slk_processor,istwf_k)
+ call sca_ovl%init(nband,nband,slk_processor,istwf_k)
+ call sca_evec%init(nband,nband,slk_processor,istwf_k)
 
  ! Get info
  blocksize = sca_ham%sizeb_blocs(1) ! Assume square blocs
