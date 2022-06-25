@@ -677,17 +677,17 @@ function gwr_new(dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg, comm) 
    do my_it=1,gwr%my_ntau
      itau = gwr%my_itaus(my_it)
 
-     ! Allocate G_k(g, g')
+     ! Allocate G_k(g,g') for k in my IBZ, MPI distributed over g' in blocks
      do my_iki=1,gwr%my_nkibz
        ik_ibz = gwr%my_kibz_inds(my_iki)
        npwsp = gwr%green_desc_kibz(ik_ibz)%npw * gwr%nspinor
        col_bsize = npwsp / gwr%g_comm%nproc; if (mod(npwsp, gwr%g_comm%nproc) /= 0) col_bsize = col_bsize + 1
        call gwr%gt_kibz(1, ik_ibz, itau, spin)%init(npwsp, npwsp, gwr%g_slkproc, 1, size_blocs=[npwsp, col_bsize])
        call gwr%gt_kibz(2, ik_ibz, itau, spin)%init(npwsp, npwsp, gwr%g_slkproc, 1, size_blocs=[npwsp, col_bsize])
-       call gwr%gt_kibz(1, ik_ibz, itau, spin)%print(header=sjoin("gt_kibz(1) for ik_ibz:", itoa(ik_ibz)))
+       !call gwr%gt_kibz(1, ik_ibz, itau, spin)%print(header=sjoin("gt_kibz(1) for ik_ibz:", itoa(ik_ibz)))
      end do
 
-    ! Allocate chi_k(g, g')
+    ! Allocate chi_q(g,g') for q in my IBZ, MPI distributed over g' in blocks
     do my_iqi=1,gwr%my_nqibz
       iq_ibz = gwr%my_qibz_inds(my_iqi)
       npwsp = gwr%chi_desc_qibz(iq_ibz)%npw * gwr%nspinor
@@ -816,7 +816,7 @@ end subroutine gwr_free
 !!  gwr_build_gtau_from_wfk
 !!
 !! FUNCTION
-!!  Build the Green's function in imaginary time for k-points in the IBZ from the WFK file
+!!  Build the Green's function in imaginary time from the WFK file
 !!
 !! INPUTS
 !!
@@ -986,7 +986,7 @@ subroutine gwr_rotate_gt(gwr, my_ikf, my_it, my_is, desc_kbz, gt_kbz)
  class(gwr_t),target,intent(in) :: gwr
  integer,intent(in) :: my_ikf, my_it, my_is
  type(desc_t),intent(out) :: desc_kbz
- type(matrix_scalapack),intent(out) :: gt_kbz(2)
+ type(matrix_scalapack),intent(inout) :: gt_kbz(2)
 
 !Local variables-------------------------------
 !scalars
@@ -1010,10 +1010,12 @@ subroutine gwr_rotate_gt(gwr, my_ikf, my_it, my_is, desc_kbz, gt_kbz)
  print *, "ik_ibz", ik_ibz, "kibz", gwr%kibz(:, ik_ibz), "isirr_k", isirr_k
  print *, "spin", spin, "itau:", itau
 
- call gwr%print(header="GWR in rotate_gt")
+ !call gwr%print(header="GWR in rotate_gt")
+ print *, "gwr%g_slkproc%grid%dims", gwr%g_slkproc%grid%dims
 
  ! Copy descriptor from IBZ, rotate gvec and recompute gbound.
  desc_kbz = gwr%green_desc_kibz(ik_ibz)%copy()
+ return
 
  if (isirr_k) then
    do ioe=1,2
@@ -1036,8 +1038,8 @@ subroutine gwr_rotate_gt(gwr, my_ikf, my_it, my_is, desc_kbz, gt_kbz)
    do il_g2=1, gt_kbz(ioe)%sizeb_local(2)
      do il_g1=1, gt_kbz(ioe)%sizeb_local(1)
        ! TODO: factorize call for efficiency reasons.
-       call gt_kbz(ioe)%loc2glob(il_g1, il_g2, ig1, ig2)
-       gt_kbz(ioe)%buffer_cplx(il_g1, il_g2) = gt_kbz(ioe)%buffer_cplx(il_g1, il_g2) ! * ??
+       !call gt_kbz(ioe)%loc2glob(il_g1, il_g2, ig1, ig2)
+       !gt_kbz(ioe)%buffer_cplx(il_g1, il_g2) = gt_kbz(ioe)%buffer_cplx(il_g1, il_g2) ! * ??
      end do
    end do
  end do
@@ -1075,8 +1077,8 @@ subroutine gwr_get_green_gpr(gwr, my_it, my_is, desc_kbz, gt_gpr)
 !Arguments ------------------------------------
  class(gwr_t),target,intent(inout) :: gwr
  integer,intent(in) :: my_it, my_is
- type(matrix_scalapack),intent(inout) :: gt_gpr(2, gwr%my_nkbz)
  type(desc_t),target,intent(out) :: desc_kbz(gwr%my_nkbz)
+ type(matrix_scalapack),intent(inout) :: gt_gpr(2, gwr%my_nkbz)
 
 !Local variables-------------------------------
 !scalars
@@ -1086,7 +1088,7 @@ subroutine gwr_get_green_gpr(gwr, my_it, my_is, desc_kbz, gt_gpr)
  real(dp) :: cpu, wall, gflops
  !logical :: isirr_k
  type(matrix_scalapack), pointer :: ggp
- type(matrix_scalapack) :: rgp !, gr
+ type(matrix_scalapack) :: rgp
  type(matrix_scalapack),target :: gt_kbz(2)
  type(desc_t),pointer :: desc_k
 
@@ -1097,12 +1099,15 @@ subroutine gwr_get_green_gpr(gwr, my_it, my_is, desc_kbz, gt_gpr)
 
  call gwr%print(header="GWR_GREEN_GPR")
 
+ print *, "gwr%g_slkproc%grid%dims", gwr%g_slkproc%grid%dims
+
  do my_ikf=1,gwr%my_nkbz
    !ik_ibz = gwr%my_kbz2ibz(1, my_ikf); isym_k = gwr%my_kbz2ibz(2, my_ikf)
    !trev_k = gwr%my_kbz2ibz(6, my_ikf); g0_k = gwr%my_kbz2ibz(3:5, my_ikf)
    !isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
    !ik_bz = gwr%my_kbz_inds(my_ikf)
 
+#if 0
    ! Get G_k in the BZ.
    !call gwr%print(header="Before rotate_gt"
    call gwr%rotate_gt(my_ikf, my_it, my_is, desc_kbz(my_ikf), gt_kbz)
@@ -1133,6 +1138,7 @@ subroutine gwr_get_green_gpr(gwr, my_it, my_is, desc_kbz, gt_gpr)
      call rgp%ptrans("C", gt_gpr(ioe, my_ikf))
      call rgp%free()
    end do ! ioe
+#endif
 
    call slk_free_array(gt_kbz)
  end do ! my_ikf
@@ -1421,15 +1427,16 @@ subroutine gwr_build_chi(gwr)
  real(dp) :: kk_bz(3), kpq_bz(3), qq_ibz(3) ! kk_ibz(3), qq_bz(3),
  complex(dp),allocatable :: gf_scbox(:,:), chi_scbox(:)
  type(matrix_scalapack),allocatable :: chiq_gpr(:)
- type(matrix_scalapack) :: gt_gpr(2, gwr%my_nkbz)
+ !type(matrix_scalapack) :: gt_gpr(2, gwr%my_nkbz)
+ type(matrix_scalapack),allocatable :: gt_gpr(:,:)
  type(desc_t), target :: desc_kbz(gwr%my_nkbz)
  type(fftbox_plan3_t) :: plan_gp2rp, plan_rp2gp
 
 ! *************************************************************************
 
  call cwtime(cpu, wall, gflops, "start")
- call wrtout(std_out, " Building chi...")
 
+ call wrtout(std_out, " Building chi...")
  call gwr%print(header="In build_chi")
 
  if (gwr%use_supercell) then
@@ -1475,7 +1482,10 @@ subroutine gwr_build_chi(gwr)
        !tau = gwr%tau_mesh(itau)
 
        ! G_k(g,g') --> G_k(g',r) for each k in the BZ treated by me.
+       ABI_MALLOC(gt_gpr, (2, gwr%my_nkbz))
        call gwr%get_green_gpr(my_it, my_is, desc_kbz, gt_gpr)
+       ABI_FREE(gt_gpr)
+#if 0
 
        ! Loop over the second index r (MPI-distributed in g_comm).
        my_nr = gt_gpr(1, 1)%sizeb_local(2)
@@ -1531,7 +1541,9 @@ subroutine gwr_build_chi(gwr)
          end do
 
        end do ! my_ir
+#endif
 
+#if 0
        ! chi_q(g',r) --> chi_q(r,g') --> chi_q(g,g')
        ! Only for the q-points in the IBZ treated by this MPI proc.
        do my_iqi=1,gwr%my_nqibz
@@ -1549,6 +1561,7 @@ subroutine gwr_build_chi(gwr)
          end do
          call chi_r_gp%free()
        end do
+#endif
 
      end do ! my_it
    end do ! spin
@@ -1621,11 +1634,15 @@ subroutine gwr_build_chi(gwr)
  end if
 
  ! Free scalapack matrices
+ if (allocated(gt_gpr)) then
  call slk_free_array(gt_gpr)
+ end if
 
  ! Transform irreducible chi from imaginary tau to imaginary omega.
  ! Also sum over spins to get total chi if collinear spins.
  call gwr%cos_transform("chi", "t2w", sum_spins=.True.)
+
+ call gwr%print(header="GWR before leaving build_chi")
 
  call cwtime_report(" gwr_build_chi:", cpu, wall, gflops)
 
@@ -1875,9 +1892,11 @@ subroutine gwr_run_g0w0(gwr)
 
 ! *************************************************************************
 
+ call gwr%print(header="Before build_chi")
  call gwr%build_chi()
  !call gwr%build_wc()
  !call gwr%build_sigmac()
+ call gwr%print(header="Before returning from run_g0w0")
 
 end subroutine gwr_run_g0w0
 !!***
