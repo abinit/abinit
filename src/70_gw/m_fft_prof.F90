@@ -955,14 +955,14 @@ subroutine time_fftbox(Ftest,isign,inplace,header,Ftprof)
  case (0)
    do icall=1,NCALLS_FOR_TEST
      ifft = empty_cache(CACHE_KBSIZE)
-     call fftbox_execute(plan,ffc,ggc)
+     call plan%execute(ffc, ggc)
      ! Store results at the first call.
      if (icall==1) results = ggc
    end do
  case (1)
    do icall=1,NCALLS_FOR_TEST
      ifft = empty_cache(CACHE_KBSIZE)
-     call fftbox_execute(plan,ffc)
+     call plan%execute(ffc)
      ! Store results at the first call.
      if (icall==1) results = ffc
    end do

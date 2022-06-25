@@ -392,13 +392,13 @@ subroutine wrap_ZHEEV(jobz, uplo, n, a, w, comm)
    istwf_k=1
 
    ! Initialize and fill Scalapack matrix from the global one.
-   call init_matrix_scalapack(Slk_mat,n,n,Slk_processor,istwf_k)
+   call Slk_mat%init(n,n,Slk_processor,istwf_k)
    call slk_matrix_from_global_dpc_2D(Slk_mat,uplo,a)
 
    want_eigenvectors = firstchar(jobz,(/"V","v"/))
    if (want_eigenvectors) then
     ! Initialize the distributed vectors.
-    call init_matrix_scalapack(Slk_vec,n,n,Slk_processor,istwf_k)
+    call Slk_vec%init(n,n,Slk_processor,istwf_k)
    end if
 
    ! Solve the problem with scaLAPACK.
@@ -577,13 +577,13 @@ subroutine xheev_cplex(jobz, uplo, cplex, n, a, w, msg, ierr, comm)
    !istwf_k=1
    !
    !! Initialize and fill Scalapack matrix from the global one.
-   !call init_matrix_scalapack(Slk_mat,n,n,Slk_processor,istwf_k)
+   !call Slk_mat%init(n,n,Slk_processor,istwf_k)
    !
    !call slk_matrix_from_global_dpc_2D(Slk_mat,uplo,a)
    !
    !want_eigenvectors = firstchar(jobz,(/"V","v"/))
    !if (want_eigenvectors) then ! Initialize the distributed vectors.
-   ! call init_matrix_scalapack(Slk_vec,n,n,Slk_processor,istwf_k)
+   ! call Slk_vec%init(n,n,Slk_processor,istwf_k)
    !end if
    !
    !! Solve the problem with scaLAPACK.
@@ -848,14 +848,13 @@ subroutine wrap_ZHPEV(jobz, uplo, n, ap, w, z, ldz, comm)
    istwf_k=1
 
    ! Initialize and fill Scalapack matrix from the global one.
-   call init_matrix_scalapack(Slk_mat,n,n,Slk_processor,istwf_k)
-
+   call Slk_mat%init(n,n,Slk_processor,istwf_k)
    call slk_matrix_from_global_dpc_1Dp(Slk_mat,uplo,ap)
 
    want_eigenvectors = firstchar(jobz,(/"V","v"/))
    if (want_eigenvectors) then
     ! Initialize the distributed vectors.
-    call init_matrix_scalapack(Slk_vec,n,n,Slk_processor,istwf_k)
+    call Slk_vec%init(n,n,Slk_processor,istwf_k)
    end if
 
    ! Solve the problem with scaLAPACK.
@@ -1025,10 +1024,10 @@ subroutine wrap_ZHEGV(itype, jobz, uplo, n, a, b, w, comm)
    istwf_k=1
 
    ! Initialize and fill Scalapack matrix from the global one.
-   call init_matrix_scalapack(Slk_matA,n,n,Slk_processor,istwf_k)
+   call Slk_matA%init(n,n,Slk_processor,istwf_k)
    call slk_matrix_from_global_dpc_2D(Slk_matA,uplo,a)
 
-   call init_matrix_scalapack(Slk_matB,n,n,Slk_processor,istwf_k)
+   call Slk_matB%init(n,n,Slk_processor,istwf_k)
    call slk_matrix_from_global_dpc_2D(Slk_matB,uplo,b)
 
    ! Solve the problem with scaLAPACK.
@@ -1251,10 +1250,10 @@ subroutine xhegv_cplex(itype, jobz, uplo, cplex, n, a, b, w, msg, ierr, comm)
   ! istwf_k=1
 
   ! ! Initialize and fill Scalapack matrix from the global one.
-  ! call init_matrix_scalapack(Slk_matA,n,n,Slk_processor,istwf_k)
+  ! call Slk_matA%init(n,n,Slk_processor,istwf_k)
   ! call slk_matrix_from_global_dpc_2D(Slk_matA,uplo,a)
 
-  ! call init_matrix_scalapack(Slk_matB,n,n,Slk_processor,istwf_k)
+  ! call Slk_matB%init(n,n,Slk_processor,istwf_k)
   ! call slk_matrix_from_global_dpc_2D(Slk_matB,uplo,b)
 
   ! ! Solve the problem with scaLAPACK.
@@ -1477,14 +1476,13 @@ subroutine wrap_ZHEEVX(jobz,range,uplo,n,a,vl,vu,il,iu,abstol,m,w,z,ldz,comm)
    istwf_k=1
 
    ! Initialize and fill Scalapack matrix from the global one.
-   call init_matrix_scalapack(Slk_mat,n,n,Slk_processor,istwf_k)
-
+   call Slk_mat%init(n,n,Slk_processor,istwf_k)
    call slk_matrix_from_global_dpc_2D(Slk_mat,uplo,a)
 
    want_eigenvectors = firstchar(jobz,(/"V","v"/))
    if (want_eigenvectors) then
      ! Initialize the distributed vectors.
-     call init_matrix_scalapack(Slk_vec,n,n,Slk_processor,istwf_k)
+     call Slk_vec%init(n,n,Slk_processor,istwf_k)
    end if
 
    ! Solve the problem.
@@ -1743,12 +1741,12 @@ subroutine xheevx_cplex(jobz, range, uplo, cplex, n, a, vl, vu, il, iu, &
   ! istwf_k=1
 
   ! ! Initialize and fill Scalapack matrix from the global one.
-  ! call init_matrix_scalapack(Slk_mat,n,n,Slk_processor,istwf_k)
+  ! call Slk_mat%init(n,n,Slk_processor,istwf_k)
   ! call slk_matrix_from_global_dpc_2D(Slk_mat,uplo,a)
 
   ! want_eigenvectors = firstchar(jobz,(/"V","v"/))
   ! if (want_eigenvectors) then ! Initialize the distributed vectors.
-  !  call init_matrix_scalapack(Slk_vec,n,n,Slk_processor,istwf_k)
+  !  call Slk_vec%init(n,n,Slk_processor,istwf_k)
   ! end if
 
   ! ! Solve the problem.
@@ -1988,15 +1986,15 @@ subroutine wrap_ZHEGVX(itype,jobz,range,uplo,n,a,b,vl,vu,il,iu,abstol,m,w,z,ldz,
    istwf_k=1
 
    ! Initialize and fill Scalapack matrix from the global one.
-   call init_matrix_scalapack(Slk_matA,n,n,Slk_processor,istwf_k)
+   call Slk_matA%init(n,n,Slk_processor,istwf_k)
    call slk_matrix_from_global_dpc_2D(Slk_matA,uplo,a)
 
-   call init_matrix_scalapack(Slk_matB,n,n,Slk_processor,istwf_k)
+   call Slk_matB%init(n,n,Slk_processor,istwf_k)
    call slk_matrix_from_global_dpc_2D(Slk_matB,uplo,b)
 
    want_eigenvectors = firstchar(jobz,(/"V","v"/))
    if (want_eigenvectors) then ! Initialize the distributed vectors.
-     call init_matrix_scalapack(Slk_vec,n,n,Slk_processor,istwf_k)
+     call Slk_vec%init(n,n,Slk_processor,istwf_k)
    end if
 
    ! Solve the problem.
@@ -2292,15 +2290,15 @@ subroutine xhegvx_cplex(itype, jobz, range, uplo, cplex, n, a, b, &
   ! istwf_k=1
 
   ! ! Initialize and fill Scalapack matrix from the global one.
-  ! call init_matrix_scalapack(Slk_matA,n,n,Slk_processor,istwf_k)
+  ! call Slk_matA%init(n,n,Slk_processor,istwf_k)
   ! call slk_matrix_from_global_dpc_2D(Slk_matA,uplo,a)
 
-  ! call init_matrix_scalapack(Slk_matB,n,n,Slk_processor,istwf_k)
+  ! call Slk_matB%init(n,n,Slk_processor,istwf_k)
   ! call slk_matrix_from_global_dpc_2D(Slk_matB,uplo,b)
 
   ! want_eigenvectors = firstchar(jobz,(/"V","v"/))
   ! if (want_eigenvectors) then ! Initialize the distributed vectors.
-  !  call init_matrix_scalapack(Slk_vec,n,n,Slk_processor,istwf_k)
+  !  call Slk_vec%init(n,n,Slk_processor,istwf_k)
   ! end if
 
   ! ! Solve the problem.
@@ -2694,7 +2692,7 @@ subroutine cginv(a, n, comm)
   istwf_k=1
 
   ! Initialize and fill Scalapack matrix from the global one.
-  call init_matrix_scalapack(Slk_mat,n,n,Slk_processor,istwf_k)
+  call Slk_mat%init(n,n,Slk_processor,istwf_k)
 
   ! IMPORTANT NOTE: PZGETRF requires square block decomposition i.e.,  MB_A = NB_A.
   if ( Slk_mat%descript%tab(MB_)/=Slk_mat%descript%tab(NB_) ) then
@@ -2873,7 +2871,7 @@ subroutine zginv(a, n, comm)
    istwf_k=1
 
    ! Initialize and fill Scalapack matrix from the global one.
-   call init_matrix_scalapack(Slk_mat,n,n,Slk_processor,istwf_k)
+   call Slk_mat%init(n,n,Slk_processor,istwf_k)
    call slk_matrix_from_global_dpc_2D(Slk_mat,"All",a)
 
    ! Perform the calculation with scaLAPACK.
@@ -3010,7 +3008,7 @@ subroutine zhpd_invert(uplo, a, n, comm)
    istwf_k=1
 
    ! Initialize and fill Scalapack matrix from the global one.
-   call init_matrix_scalapack(Slk_mat,n,n,Slk_processor,istwf_k)
+   call Slk_mat%init(n,n,Slk_processor,istwf_k)
    call slk_matrix_from_global_dpc_2D(Slk_mat,uplo,a)
 
    ! Perform the calculation with scaLAPACK.

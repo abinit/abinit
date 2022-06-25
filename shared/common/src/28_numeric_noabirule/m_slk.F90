@@ -28,12 +28,11 @@ module m_slk
 #ifdef HAVE_LINALG_ELPA
  use m_elpa
 #endif
-
 #ifdef HAVE_MPI2
  use mpi
 #endif
 
- use m_fstrings,      only : firstchar, toupper, itoa, sjoin
+ use m_fstrings,      only : firstchar, toupper, itoa, sjoin, ltoa
  use m_copy,          only : alloc_copy
  !use m_numeric_tools, only : print_arr
 
@@ -71,10 +70,10 @@ module m_slk
 
  type,public :: grid_scalapack
 
-   integer :: nbprocs
+   integer :: nbprocs = -1
    ! Total number of processors
 
-   integer :: dims(2)
+   integer :: dims(2) = -1
    ! Number of procs for rows/columns
 
    integer :: ictxt
@@ -98,16 +97,17 @@ module m_slk
 
  type,public :: processor_scalapack
 
-   integer :: myproc
+   integer :: myproc = -1
    ! number of the processor
 
    integer :: comm
    ! MPI communicator underlying the BLACS grid.
 
-   integer :: coords(2)
+   integer :: coords(2) = -1
+   ! The coordinates of the processor in the grid.
 
    type(grid_scalapack) :: grid
-   ! the grid to which the processor is associated
+   ! the grid to which the processor is associated to.
 
  end type processor_scalapack
 
@@ -144,13 +144,13 @@ module m_slk
 
  type,public :: matrix_scalapack
 
-   integer :: sizeb_local(2)
+   integer :: sizeb_local(2) = -1
     ! dimensions of the local buffer
 
-   integer :: sizeb_global(2)
+   integer :: sizeb_global(2) = -1
     ! dimensions of the global matrix
 
-   integer :: sizeb_blocs(2)
+   integer :: sizeb_blocs(2) = -1
     ! size of the block of consecutive data
 
    real(dp),allocatable  :: buffer_real(:,:)
@@ -165,6 +165,12 @@ module m_slk
    type(descript_scalapack) :: descript
 
  contains
+
+   procedure :: init => init_matrix_scalapack
+    ! Initialisation of a SCALAPACK matrix
+
+   procedure :: print => slkmat_print
+    !  Print info on scalapack matrix.
 
    procedure :: loc2glob => slk_matrix_loc2glob
     ! Return global indices of a matrix element from the local indices.
@@ -186,8 +192,6 @@ module m_slk
 
  end type matrix_scalapack
 
-
- public :: init_matrix_scalapack           ! Initialisation of a SCALAPACK matrix
  public :: matrix_get_local_cplx           ! Returns a local matrix coefficient of complex type.
  public :: matrix_get_local_real           ! Returns a local matrix coefficient of double precision type.
  public :: matrix_set_local_cplx           ! Sets a local matrix coefficient of complex type.
@@ -250,10 +254,8 @@ module m_slk
    module procedure slk_free_array4
  end interface slk_free_array
 
-
 CONTAINS  !==============================================================================
 !!***
-
 
 !!****f* m_slk/build_grid_scalapack
 !! NAME
@@ -302,6 +304,7 @@ subroutine build_grid_scalapack(grid, nbprocs, comm, grid_dims)
 
    grid%dims(1) = i
    grid%dims(2) = INT(nbprocs/i)
+
  else
    grid%dims = grid_dims
  end if
@@ -311,8 +314,8 @@ subroutine build_grid_scalapack(grid, nbprocs, comm, grid_dims)
  grid%ictxt = comm
 
 #ifdef HAVE_LINALG_SCALAPACK
- ! 'R' : Use row-major natural ordering
- call BLACS_GRIDINIT(grid%ictxt,'R',grid%dims(1),grid%dims(2))
+ ! 'R': Use row-major natural ordering
+ call BLACS_GRIDINIT(grid%ictxt, 'R', grid%dims(1), grid%dims(2))
 #endif
 
 end subroutine build_grid_scalapack
@@ -343,7 +346,7 @@ end subroutine build_grid_scalapack
 !!
 !! SOURCE
 
-subroutine build_processor_scalapack(processor,grid,myproc,comm)
+subroutine build_processor_scalapack(processor, grid, myproc, comm)
 
 !Arguments ------------------------------------
  integer,intent(in) :: myproc,comm
@@ -352,13 +355,13 @@ subroutine build_processor_scalapack(processor,grid,myproc,comm)
 
 ! *********************************************************************
 
- processor%grid= grid
+ processor%grid = grid
  processor%myproc = myproc
  processor%comm = comm
 
 #ifdef HAVE_LINALG_SCALAPACK
- call BLACS_GRIDINFO(grid%ictxt,processor%grid%dims(1), &
-                     processor%grid%dims(2),processor%coords(1), processor%coords(2))
+ call BLACS_GRIDINFO(grid%ictxt, processor%grid%dims(1), processor%grid%dims(2), &
+                     processor%coords(1), processor%coords(2))
 #endif
 
  ! These values are the same as those computed by BLACS_GRIDINFO
@@ -488,8 +491,8 @@ end subroutine end_scalapack
 subroutine init_matrix_scalapack(matrix, nbli_global, nbco_global, processor, istwf_k, size_blocs)
 
 !Arguments ------------------------------------
- integer,intent(in) :: nbli_global,nbco_global,istwf_k
- type(matrix_scalapack),intent(inout) :: matrix
+ class(matrix_scalapack),intent(inout) :: matrix
+ integer,intent(in) :: nbli_global, nbco_global, istwf_k
  type(processor_scalapack),intent(in),target  :: processor
  integer,intent(in),optional :: size_blocs(2)
 
@@ -532,8 +535,8 @@ subroutine init_matrix_scalapack(matrix, nbli_global, nbco_global, processor, is
 
  ! Size of the local buffer
  ! NUMROC computes the NUMber of Rows Or Columns of a distributed matrix owned by the process indicated by IPROC.
- matrix%sizeb_local(1) = NUMROC(nbli_global,matrix%sizeb_blocs(1), &
-                                processor%coords(1),0, processor%grid%dims(1))
+ matrix%sizeb_local(1) = NUMROC(nbli_global, matrix%sizeb_blocs(1), &
+                                processor%coords(1), 0, processor%grid%dims(1))
 
  matrix%sizeb_local(2) = NUMROC(nbco_global,matrix%sizeb_blocs(2), &
                                 processor%coords(2),0, processor%grid%dims(2))
@@ -543,16 +546,16 @@ subroutine init_matrix_scalapack(matrix, nbli_global, nbco_global, processor, is
 
  ! Initialisation of the SCALAPACK description of the matrix
  call DESCINIT(matrix%descript%tab, nbli_global, nbco_global, &
-               matrix%sizeb_blocs(1), matrix%sizeb_blocs(2), 0,0 , &
-               processor%grid%ictxt, MAX(1,matrix%sizeb_local(1)), info)
+               matrix%sizeb_blocs(1), matrix%sizeb_blocs(2), 0, 0, &
+               processor%grid%ictxt, MAX(1, matrix%sizeb_local(1)), info)
 
  if (info /= 0) then
-   write(msg,'(2(a,i0))')" proc: ",processor%myproc,' error in the initialisation of the scalapack matrix: ',info
+   write(msg,'(2(a,i0))')" rank: ",processor%myproc,' error while initializing scalapack matrix, info: ',info
    ABI_ERROR(msg)
  end if
 
  ! Allocate local buffer.
- if (istwf_k/=2) then
+ if (istwf_k /= 2) then
    ABI_MALLOC(matrix%buffer_cplx, (matrix%sizeb_local(1), matrix%sizeb_local(2)))
    matrix%buffer_cplx(:,:) = czero
  else
@@ -562,6 +565,55 @@ subroutine init_matrix_scalapack(matrix, nbli_global, nbco_global, processor, is
 #endif
 
 end subroutine init_matrix_scalapack
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_slk/slkmat_print
+!! NAME
+!!  slkmat_print
+!!
+!! FUNCTION
+!!  Print info on scalapack matrix.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine slkmat_print(mat, header, unit, prtvol)
+
+!Arguments ------------------------------------
+ class(matrix_scalapack),intent(in) :: mat
+ character(len=*),optional,intent(in) :: header
+ integer,optional,intent(in) :: prtvol, unit
+
+!Local variables-------------------------------
+ integer :: spin, ikpt, unt, my_prtvol, ii
+ character(len=500) :: msg
+
+! *********************************************************************
+
+ unt = std_out; if (present(unit)) unt =unit
+ my_prtvol = 0; if (present(prtvol)) my_prtvol = prtvol
+
+ msg = ' ==== Info on matrix_scalapack ==== '
+ if (present(header)) msg=' ==== '//trim(adjustl(header))//' ==== '
+ call wrtout(unt, msg)
+
+ write(msg,'(4(3a))') &
+   '  sizeb_global ..... ', trim(ltoa(mat%sizeb_global)), ch10, &
+   '  sizeb_local ...... ', trim(ltoa(mat%sizeb_local)), ch10, &
+   '  sizeb_blocs ...... ', trim(ltoa(mat%sizeb_blocs)), ch10, &
+   '  grid dims ........ ', trim(ltoa(mat%processor%grid%dims)), ch10
+ call wrtout(unt, msg)
+
+end subroutine slkmat_print
 !!***
 
 !----------------------------------------------------------------------
@@ -584,17 +636,37 @@ type(matrix_scalapack) function matrix_scalapack_copy(in_mat) result(new_mat)
 !Arguments ------------------------------------
  class(matrix_scalapack),target,intent(in) :: in_mat
 
+!Local variables-------------------------------
+ integer :: istwfk
+
 ! *********************************************************************
 
- new_mat%sizeb_local  = in_mat%sizeb_local
- new_mat%sizeb_global = in_mat%sizeb_global
- new_mat%sizeb_blocs  = in_mat%sizeb_blocs
+ call in_mat%print(header="in_mat")
 
- if (allocated(in_mat%buffer_real)) call alloc_copy(in_mat%buffer_real, new_mat%buffer_real)
- if (allocated(in_mat%buffer_cplx)) call alloc_copy(in_mat%buffer_cplx, new_mat%buffer_cplx)
+ istwfk = 1
+ if (allocated(in_mat%buffer_real)) istwfk = 2
 
- new_mat%processor => in_mat%processor
- new_mat%descript = in_mat%descript
+ print *, "in_mat%processor%grid%dims", in_mat%processor%grid%dims
+
+ call new_mat%init(in_mat%sizeb_global(1), in_mat%sizeb_global(2), in_mat%processor, istwfk, &
+                   size_blocs=in_mat%sizeb_blocs)
+
+ if (istwfk == 2) then
+   new_mat%buffer_real = in_mat%buffer_real
+ else
+   new_mat%buffer_cplx = in_mat%buffer_cplx
+ end if
+
+ !new_mat%sizeb_local  = in_mat%sizeb_local
+ !new_mat%sizeb_global = in_mat%sizeb_global
+ !new_mat%sizeb_blocs  = in_mat%sizeb_blocs
+ !if (allocated(in_mat%buffer_real)) call alloc_copy(in_mat%buffer_real, new_mat%buffer_real)
+ !if (allocated(in_mat%buffer_cplx)) call alloc_copy(in_mat%buffer_cplx, new_mat%buffer_cplx)
+ !new_mat%processor => in_mat%processor
+ !new_mat%descript = in_mat%descript
+ print *, "in matrix copy witn new/in_mat grid%dims"
+ print *, new_mat%processor%grid%dims, in_mat%processor%grid%dims
+ print *, "end in matrix copy"
 
 end function matrix_scalapack_copy
 !!***
@@ -621,7 +693,7 @@ subroutine matrix_scalapack_free(matrix)
 
 ! *********************************************************************
 
- nullify(matrix%processor)
+ matrix%processor => null()
 
  matrix%sizeb_global = 0
  ABI_SFREE(matrix%buffer_cplx)
@@ -1029,9 +1101,9 @@ integer pure function loc_glob(matrix, proc, idx, lico)
 
 ! *********************************************************************
 
- nbcyc = INT((idx-1)/matrix%sizeb_blocs(lico))
- rest = MOD(idx-1,matrix%sizeb_blocs(lico))
- nblocs = nbcyc*proc%grid%dims(lico)+ proc%coords(lico)
+ nbcyc = INT((idx-1) / matrix%sizeb_blocs(lico))
+ rest = MOD(idx-1, matrix%sizeb_blocs(lico))
+ nblocs = nbcyc * proc%grid%dims(lico) + proc%coords(lico)
 
  loc_glob = nblocs * matrix%sizeb_blocs(lico) + rest + 1
 
@@ -2262,8 +2334,8 @@ subroutine compute_generalized_eigen_problem(processor,matrix1,matrix2,results,e
   integer :: i,n_col, n_row
   integer,external :: indxl2g,numroc
 
-  call  init_matrix_scalapack(tmp1,matrix1%sizeb_global(1),matrix1%sizeb_global(2),processor,istwf_k)
-  call  init_matrix_scalapack(tmp2,matrix1%sizeb_global(1),matrix1%sizeb_global(2),processor,istwf_k)
+  call tmp1%init(matrix1%sizeb_global(1),matrix1%sizeb_global(2),processor,istwf_k)
+  call tmp2%init(matrix1%sizeb_global(1),matrix1%sizeb_global(2),processor,istwf_k)
   if (istwf_k/=2) then
      call solve_gevp_complex(matrix1%sizeb_global(1),matrix1%sizeb_global(2), &
 &          matrix1%sizeb_local(1),matrix1%sizeb_local(2),matrix1%sizeb_blocs(1), &
@@ -2472,7 +2544,10 @@ subroutine compute_eigen1(comm,processor,cplex,nbli_global,nbco_global,matrix,ve
  real(dp),intent(inout) :: vector(:)
 
 !Local variables-------------------------------
- integer :: i,j,ierr
+#ifdef HAVE_LINALG_ELPA
+ integer :: i,j
+#endif
+ integer :: ierr
  type(matrix_scalapack) :: sca_matrix1
  type(matrix_scalapack) :: sca_matrix2
  real(dp),allocatable :: r_tmp_evec(:,:)
@@ -2483,8 +2558,8 @@ subroutine compute_eigen1(comm,processor,cplex,nbli_global,nbco_global,matrix,ve
  ! ================================
  ! INITIALISATION SCALAPACK MATRIX
  ! ================================
- call init_matrix_scalapack(sca_matrix1,nbli_global,nbco_global,processor,istwf_k)
- call init_matrix_scalapack(sca_matrix2,nbli_global,nbco_global,processor,istwf_k)
+ call sca_matrix1%init(nbli_global,nbco_global,processor,istwf_k)
+ call sca_matrix2%init(nbli_global,nbco_global,processor,istwf_k)
 
  ! ==============================
  ! FILLING SCALAPACK MATRIX
@@ -2595,7 +2670,10 @@ subroutine compute_eigen2(comm,processor,cplex,nbli_global,nbco_global,matrix1,m
  real(dp),intent(inout) :: vector(:)
 
 !Local variables-------------------------------
- integer :: i,j,ierr
+#ifdef HAVE_LINALG_ELPA
+ integer :: i,j
+#endif
+ integer :: ierr
  type(matrix_scalapack) :: sca_matrix1
  type(matrix_scalapack) :: sca_matrix2
  type(matrix_scalapack) :: sca_matrix3
@@ -2607,9 +2685,9 @@ subroutine compute_eigen2(comm,processor,cplex,nbli_global,nbco_global,matrix1,m
  ! ================================
  ! INITIALISATION SCALAPACK MATRIX
  ! ================================
- call init_matrix_scalapack(sca_matrix1,nbli_global,nbco_global,processor,istwf_k)
- call init_matrix_scalapack(sca_matrix2,nbli_global,nbco_global,processor,istwf_k)
- call init_matrix_scalapack(sca_matrix3,nbli_global,nbco_global,processor,istwf_k)
+ call sca_matrix1%init(nbli_global,nbco_global,processor,istwf_k)
+ call sca_matrix2%init(nbli_global,nbco_global,processor,istwf_k)
+ call sca_matrix3%init(nbli_global,nbco_global,processor,istwf_k)
 
  ! ==============================
  ! FILLING SCALAPACK MATRIX
@@ -3510,8 +3588,7 @@ subroutine slk_ptrans(in_mat, trans, out_mat)
 
  ! TODO: To be tested.
  call out_mat%free()
- call init_matrix_scalapack(out_mat, in_mat%sizeb_global(2), in_mat%sizeb_global(1), &
-                            in_mat%processor, istwf_k)
+ call out_mat%init(in_mat%sizeb_global(2), in_mat%sizeb_global(1), in_mat%processor, istwf_k)
 
  ! prototype
  !call pdtran(m, n, alpha, a, ia, ja, desca, beta, c, ic, jc, descc)
@@ -3635,8 +3712,7 @@ subroutine slk_write(Slk_mat, uplo, is_fortran_file, fname,mpi_fh, offset, flags
 
 !************************************************************************
 
-!@matrix_scalapack
- ABI_CHECK(allocated(Slk_mat%buffer_cplx),"%buffer_cplx not allocated")
+ ABI_CHECK(allocated(Slk_mat%buffer_cplx), "%buffer_cplx not allocated")
 
  if (firstchar(uplo, ["U","L"]) .and. Slk_mat%sizeb_global(1) /= Slk_mat%sizeb_global(2) ) then
    ABI_ERROR("rectangular matrices are not compatible with the specified uplo")
@@ -4199,10 +4275,10 @@ subroutine slk_symmetrize(Slk_mat, uplo, symtype)
 
  is_hermitian=.FALSE.; is_symmetric=.FALSE.
  select case (symtype(1:1))
- case ("H","h")
-   is_hermitian=.TRUE.
+ case ("H", "h")
+   is_hermitian = .TRUE.
  case ("S","s")
-   is_symmetric=.TRUE.
+   is_symmetric = .TRUE.
  case("N","n")
    if (ALL(uplo(1:1) /= ["A","a"])) then
      msg = " Found symtype= "//TRIM(symtype)//", but uplo= "//TRIM(uplo)
@@ -4217,10 +4293,9 @@ subroutine slk_symmetrize(Slk_mat, uplo, symtype)
  !write(std_out,*)"is_hermitian",is_hermitian
 
  select case (uplo(1:1))
-
  case ("A","a")
    ! Full global matrix has been read, nothing to do.
-   RETURN
+   return
 
  case ("U", "u")
    ! Only the upper triangle of the global matrix was read.
@@ -4850,5 +4925,5 @@ subroutine slk_my_rclist(Slk_mat,rc_str,how_many,rc_list)
 end subroutine slk_my_rclist
 !!***
 
-END MODULE m_slk
+end module m_slk
 !!***

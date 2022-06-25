@@ -66,7 +66,6 @@ MODULE m_fft
  include 'mpif.h'
 #endif
 
- public :: fftbox_execute       ! Driver for FFTs on the full box (complex-to-complex version, operated on complex arrays)
  public :: fft_ug               ! Driver for zero-padded FFTs u(g) --> u(r)
  public :: fft_ur               ! Driver for zero-padded FFTs u(r) --> u(g)
  public :: fftpad               ! Driver for (low-level) zero-padded FFTs, note that fft_ug is the preferred interface.
@@ -92,13 +91,6 @@ MODULE m_fft
  public :: fourdp_mpi           ! MPI FFT of densities/potentials on the full box.
  public :: fourwf_mpi           ! specialized MPI-FFT for wavefunctions.
  !public :: fftmpi_u
-
- interface fftbox_execute
-   module procedure fftbox_execute_ip_spc
-   module procedure fftbox_execute_ip_dpc
-   module procedure fftbox_execute_op_spc
-   module procedure fftbox_execute_op_dpc
- end interface fftbox_execute
 
  interface fft_ug
    !module procedure fft_ug_dp   TODO
@@ -133,6 +125,7 @@ MODULE m_fft
 !! SOURCE
 
  type,public :: fftbox_plan3_t
+
    private
    integer :: fftalg=112      ! Flag defining the library to call.
    integer :: fftcache=16     ! Size of the cache (kB). Only used in SG routines.
@@ -143,16 +136,32 @@ MODULE m_fft
    !integer :: nthreads=-1    ! The number of threads associated to the plan.
    integer :: dims(3)=-1      ! The number of FFT divisions.
    integer :: embed(3)=-1     ! Leading dimensions of the input,output arrays.
+
+ contains
+
+   procedure :: execute_ip_spc  => fftbox_execute_ip_spc
+   procedure :: execute_ip_dpc  => fftbox_execute_ip_dpc
+   procedure :: execute_op_spc  => fftbox_execute_op_spc
+   procedure :: execute_op_dpc  => fftbox_execute_op_dpc
+
+   ! Main entry point for performing FFTs on the full box
+   ! (complex-to-complex version, operating on complex arrays)
+   generic :: execute => execute_ip_spc, &
+                         execute_ip_dpc, &
+                         execute_op_spc, &
+                         execute_op_dpc
+
  end type fftbox_plan3_t
 
  public :: fftbox_plan3       ! Basic interface to create the plan.
  public :: fftbox_plan3_many  ! Advanced interface
  public :: fftbox_plan3_init  ! Low-level constructor
+
 !!***
 
 !----------------------------------------------------------------------
 
-!unitary tests
+ ! unit tests
  public :: fftbox_utests          ! Unit tests for FFTs on the full box.
  public :: fftu_utests            ! Unit tests for the FFTs of wavefunctions.
  public :: fftbox_mpi_utests      ! Unit tests for the MPI-FFTs on the full box.
@@ -223,11 +232,10 @@ end subroutine fft_allow_ialltoall
 
 subroutine fftbox_plan3(plan, dims, fftalg, isign)
 
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: fftalg, isign
- type(fftbox_plan3_t),intent(out) :: plan
+ class(fftbox_plan3_t),intent(out) :: plan
 !arrays
  integer,intent(in) :: dims(3)
 
@@ -267,7 +275,7 @@ subroutine fftbox_plan3_many(plan, ndat, dims, embed, fftalg, isign)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: fftalg,isign,ndat
- type(fftbox_plan3_t),intent(out) :: plan
+ class(fftbox_plan3_t),intent(out) :: plan
 !arrays
  integer,intent(in) :: dims(3),embed(3)
 
@@ -305,11 +313,10 @@ end subroutine fftbox_plan3_many
 
 subroutine fftbox_plan3_init(plan, ndat, dims, embed, fftalg, fftcache, isign)
 
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ndat,fftalg,fftcache,isign !,nthreads
- type(fftbox_plan3_t),intent(out) :: plan
+ class(fftbox_plan3_t),intent(out) :: plan
 !arrays
  integer,intent(in) :: dims(3),embed(3)
 
@@ -359,7 +366,7 @@ subroutine fftbox_execute_ip_spc(plan, ff)
 
 !Arguments ------------------------------------
 !scalars
- type(fftbox_plan3_t),intent(in) :: plan
+ class(fftbox_plan3_t),intent(in) :: plan
 !arrays
  complex(spc),intent(inout) :: ff(plan%ldxyz*plan%ndat)
 
@@ -400,7 +407,7 @@ subroutine fftbox_execute_ip_dpc(plan, ff)
 
 !Arguments ------------------------------------
 !scalars
- type(fftbox_plan3_t),intent(in) :: plan
+ class(fftbox_plan3_t),intent(in) :: plan
 !arrays
  complex(dpc),intent(inout) :: ff(plan%ldxyz*plan%ndat)
 
@@ -438,10 +445,9 @@ end subroutine fftbox_execute_ip_dpc
 
 subroutine fftbox_execute_op_spc(plan, ff, gg)
 
-
 !Arguments ------------------------------------
 !scalars
- type(fftbox_plan3_t),intent(in) :: plan
+ class(fftbox_plan3_t),intent(in) :: plan
 !arrays
  complex(spc),intent(in) :: ff(plan%ldxyz*plan%ndat)
  complex(spc),intent(inout) :: gg(plan%ldxyz*plan%ndat)
@@ -480,10 +486,9 @@ end subroutine fftbox_execute_op_spc
 
 subroutine fftbox_execute_op_dpc(plan, ff, gg)
 
-
 !Arguments ------------------------------------
 !scalars
- type(fftbox_plan3_t),intent(in) :: plan
+ class(fftbox_plan3_t),intent(in) :: plan
 !arrays
  complex(dpc),intent(in) :: ff(plan%ldxyz*plan%ndat)
  complex(dpc),intent(inout) :: gg(plan%ldxyz*plan%ndat)
@@ -689,7 +694,6 @@ end subroutine fft_ug_dpc
 
 subroutine fft_ur_dp(npw_k,nfft,nspinor,ndat,mgfft,ngfft,istwf_k,kg_k,gbound_k,ur,ug)
 
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npw_k,nfft,nspinor,ndat,istwf_k,mgfft
@@ -707,6 +711,7 @@ subroutine fft_ur_dp(npw_k,nfft,nspinor,ndat,mgfft,ngfft,istwf_k,kg_k,gbound_k,u
 
 end subroutine fft_ur_dp
 !!***
+
 #endif
 
 !----------------------------------------------------------------------
@@ -1155,7 +1160,6 @@ end subroutine fft_use_lib_threads
 
 function fftbox_utests(fftalg,ndat,nthreads,unit) result(nfailed)
 
-
 !Arguments -----------------------------------
 !scalars
  integer,intent(in) :: fftalg,ndat,nthreads
@@ -1171,7 +1175,7 @@ function fftbox_utests(fftalg,ndat,nthreads,unit) result(nfailed)
  real(dp),parameter :: ATOL_SP=tol6,ATOL_DP=tol12 ! Tolerances on the absolute error
  real(dp) :: max_abserr
  character(len=500) :: msg,info,library,cplex_mode,padding_mode
- type(fftbox_plan3_t) :: bw_plan,fw_plan
+ type(fftbox_plan3_t) :: bw_plan, fw_plan
 !arrays
  integer :: pars(6,NSETS)
  real(dp) :: crand(2)
@@ -1234,8 +1238,8 @@ function fftbox_utests(fftalg,ndat,nthreads,unit) result(nfailed)
    ffsp = ff_refsp
 
    ! in-place version.
-   call fftbox_execute(bw_plan,ffsp)
-   call fftbox_execute(fw_plan,ffsp)
+   call bw_plan%execute(ffsp)
+   call fw_plan%execute(ffsp)
 
    ierr = COUNT(ABS(ffsp - ff_refsp) > ATOL_SP)
    nfailed = nfailed + ierr
@@ -1250,8 +1254,8 @@ function fftbox_utests(fftalg,ndat,nthreads,unit) result(nfailed)
    call wrtout(ount,sjoin(info,msg),"COLL")
 
    ffsp = ff_refsp
-   call fftbox_execute(bw_plan,ffsp,ggsp)
-   call fftbox_execute(fw_plan,ggsp,ffsp)
+   call bw_plan%execute(ffsp, ggsp)
+   call fw_plan%execute(ggsp, ffsp)
 
    ierr = COUNT(ABS(ffsp - ff_refsp) > ATOL_SP)
    nfailed = nfailed + ierr
@@ -1286,8 +1290,8 @@ function fftbox_utests(fftalg,ndat,nthreads,unit) result(nfailed)
    call cplx_setaug_zero_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,ff_ref)
    ff = ff_ref
 
-   call fftbox_execute(bw_plan,ff)
-   call fftbox_execute(fw_plan,ff)
+   call bw_plan%execute(ff)
+   call fw_plan%execute(ff)
 
    ierr = COUNT(ABS(ff - ff_ref) > ATOL_DP)
    nfailed = nfailed + ierr
@@ -1302,8 +1306,8 @@ function fftbox_utests(fftalg,ndat,nthreads,unit) result(nfailed)
    call wrtout(ount,sjoin(info,msg),"COLL")
 
    ff = ff_ref
-   call fftbox_execute(bw_plan,ff,gg)
-   call fftbox_execute(fw_plan,gg,ff)
+   call bw_plan%execute(ff, gg)
+   call fw_plan%execute(gg, ff)
 
    ierr = COUNT(ABS(ff - ff_ref) > ATOL_DP)
    nfailed = nfailed + ierr

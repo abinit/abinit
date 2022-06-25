@@ -70,9 +70,9 @@
  if (ABI_LINALG_SCALAPACK_ISON.and.use_slk_==1.and.n>slk_minsize)  then
 #if defined HAVE_LINALG_SCALAPACK
    z = zero
-   call init_matrix_scalapack(sca_a,n,n,slk_processor,istwf_k_)
-   call init_matrix_scalapack(sca_b,n,n,slk_processor,istwf_k_)
-   call init_matrix_scalapack(sca_ev,n,n,slk_processor,istwf_k_)
+   call sca_a%init(n,n,slk_processor,istwf_k_)
+   call sca_b%init(n,n,slk_processor,istwf_k_)
+   call sca_ev%init(n,n,slk_processor,istwf_k_)
 #ifdef HAVE_LINALG_ELPA
    call matrix_from_global_sym(sca_a,a,istwf_k_)
    call matrix_from_global_sym(sca_b,b,istwf_k_)

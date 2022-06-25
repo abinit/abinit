@@ -418,18 +418,15 @@ end function get_cache_kb
 pure subroutine ngfft_seq(ngfft, n123)
 
 !Arguments ------------------------------------
-!scalars
-!arrays
  integer,intent(in) :: n123(3)
  integer,intent(out) :: ngfft(18)
 
 !Local variables-------------------------------
-!scalars
  integer :: fftalg
 
 ! *************************************************************************
 
- ! Default  for the sequential case.
+ ! Default for sequential case.
  fftalg = 112
 #ifdef HAVE_FFTW3
  fftalg = 312
