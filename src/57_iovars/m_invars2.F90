@@ -600,6 +600,10 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwgmcorr',tread,'INT')
  if(tread==1) dtset%gwgmcorr=intarr(1)
 
+ narr = size(dtset%gwr_np_gtks)
+ call intagm(dprarr, intarr, jdtset, marr, narr, string(1:lenstr), 'gwr_np_gtks', tread, 'INT')
+ if (tread==1) dtset%gwr_np_gtks = intarr(1:narr)
+
  ! RESPFN integer input variables (needed here to get the value of response)
  ! Warning: rfddk,rfelfd,rfmagn,rfphon,rfstrs,rfsrs_ref,rfuser,rf2_dkdk and rf2_dkde are also read in invars1
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rfasr',tread,'INT')
@@ -2608,10 +2612,10 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nctime',tread,'INT')
  if(tread==1) dtset%nctime=intarr(1)
- 
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nucefg',tread,'INT')
  if(tread==1) dtset%nucefg=intarr(1)
- 
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nucfc',tread,'INT')
  if(tread==1) dtset%nucfc=intarr(1)
 

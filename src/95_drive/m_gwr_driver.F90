@@ -55,7 +55,7 @@ module m_gwr_driver
  use m_pawrhoij,        only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy, pawrhoij_free, pawrhoij_symrhoij
  use m_pawfgr,          only : pawfgr_type, pawfgr_init, pawfgr_destroy
  use m_pspini,          only : pspini
- use m_gwr,             only : gwr_new, gwr_t
+ use m_gwr,             only : gwr_t
  !use m_ephtk,          only : ephtk_update_ebands
 
  implicit none
@@ -278,7 +278,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  ! ===========================================
  call pspini(dtset, dtfil, ecore, psp_gencond, gsqcutc_eff, gsqcutf_eff, pawrad, pawtab, psps, cryst%rprimd, comm_mpi=comm)
 
- gwr = gwr_new(dtset, dtfil, cryst, psps, pawtab, ebands, mpi_enreg, comm)
+ call gwr%init(dtset, dtfil, cryst, psps, pawtab, ebands, mpi_enreg, comm)
 
  if (use_wfk) then
    call gwr%build_gtau_from_wfk(wfk0_path)

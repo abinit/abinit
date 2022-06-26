@@ -1326,9 +1326,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  ! ==== Deallocate memory ====
  ! ===========================
  if (Psps%usepaw==1) then
-   if (allocated(gw_gfft)) then
-     ABI_FREE(gw_gfft)
-   end if
+   ABI_SFREE(gw_gfft)
    call pawcprj_free(Cprj_ksum)
    ABI_FREE(Cprj_ksum)
    if (allocated(Pwij_fft)) then
@@ -1356,46 +1354,20 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  ABI_FREE(sigc)
  ABI_FREE(w_maxval)
 
- if (allocated(sigc_ket)) then
-   ABI_FREE(sigc_ket)
- endif
- if (allocated(ket1)) then
-   ABI_FREE(ket1)
- endif
- if (allocated(ket2)) then
-   ABI_FREE(ket2)
- endif
- if (allocated(epsm1_qbz)) then
-   ABI_FREE(epsm1_qbz)
- end if
- if (allocated(epsm1_trcc_qbz)) then
-   ABI_FREE(epsm1_trcc_qbz)
- end if
- if (allocated(epsm1_tmp)) then
-   ABI_FREE(epsm1_tmp)
- end if
- if (allocated(degtab)) then
-   ABI_FREE(degtab)
- end if
- if (allocated(ac_epsm1cqwz2)) then
-   ABI_FREE(ac_epsm1cqwz2)
- end if
- if (allocated(rhotw_epsm1_rhotw)) then
-   ABI_FREE(rhotw_epsm1_rhotw)
- end if
- if (allocated(aherm_sigc_ket)) then
-   ABI_FREE(aherm_sigc_ket)
- end if
- if (allocated(herm_sigc_ket)) then
-   ABI_FREE(herm_sigc_ket)
- end if
- if (Sigp%gwcomp==1) then
-   ABI_FREE(wf1swf2_g)
- end if
- if (Sigp%gwcomp==1) then
-   ABI_FREE(extrapolar_distrb)
- end if
- ABI_FREE(proc_distrb)
+ ABI_SFREE(sigc_ket)
+ ABI_SFREE(ket1)
+ ABI_SFREE(ket2)
+ ABI_SFREE(epsm1_qbz)
+ ABI_SFREE(epsm1_trcc_qbz)
+ ABI_SFREE(epsm1_tmp)
+ ABI_SFREE(degtab)
+ ABI_SFREE(ac_epsm1cqwz2)
+ ABI_SFREE(rhotw_epsm1_rhotw)
+ ABI_SFREE(aherm_sigc_ket)
+ ABI_SFREE(herm_sigc_ket)
+ ABI_SFREE(wf1swf2_g)
+ ABI_SFREE(extrapolar_distrb)
+ ABI_SFREE(proc_distrb)
 
  call timab(431,2,tsec)
  call timab(424,2,tsec) ! calc_sigc_me

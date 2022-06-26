@@ -918,9 +918,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
    ! Spectral method.
    call hilbert_transform(Ep%npwe,Ep%nomega,Ep%nomegasf,my_wl,my_wr,kkweight,sf_chi0,chi0,Ep%spmeth)
 
-   if (allocated(sf_chi0)) then
-     ABI_FREE(sf_chi0)
-   end if
+   ABI_SFREE(sf_chi0)
 
    ! Sum contributions from each proc ===
    ! Looping on frequencies to avoid problems with the size of the MPI packet
@@ -1011,37 +1009,17 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
    ABI_FREE(gboundf)
  end if
 
- if (allocated(green_enhigh_w))  then
-   ABI_FREE(green_enhigh_w)
- end if
- if (allocated(gw_gfft))  then
-   ABI_FREE(gw_gfft)
- end if
- if (allocated(wfwfg))  then
-   ABI_FREE(wfwfg)
- end if
- if (allocated(kkweight))  then
-   ABI_FREE(kkweight)
- end if
- if (allocated(omegasf))  then
-   ABI_FREE(omegasf)
- end if
- if (allocated(green_w))  then
-   ABI_FREE(green_w)
- end if
+ ABI_SFREE(green_enhigh_w)
+ ABI_SFREE(gw_gfft)
+ ABI_SFREE(wfwfg)
+ ABI_SFREE(kkweight)
+ ABI_SFREE(omegasf)
+ ABI_SFREE(green_w)
 
- if (allocated(sf_head))  then
-   ABI_FREE(sf_head)
- end if
- if (allocated(sf_lwing))  then
-   ABI_FREE(sf_lwing)
- end if
- if (allocated(sf_uwing))  then
-   ABI_FREE(sf_uwing)
- end if
- if (allocated(gspfft_igfft))  then
-   ABI_FREE(gspfft_igfft)
- end if
+ ABI_SFREE(sf_head)
+ ABI_SFREE(sf_lwing)
+ ABI_SFREE(sf_uwing)
+ ABI_SFREE(gspfft_igfft)
 
  call gsph_free(Gsph_FFT)
 
@@ -1842,15 +1820,10 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
    ABI_FREE(rhotwg)
    ABI_FREE(tabr_k)
    ABI_FREE(tabr_kmq)
-   if (allocated(green_w)) then
-     ABI_FREE(green_w)
-   end if
-   if (allocated(wfwfg)) then
-     ABI_FREE(wfwfg)
-   end if
-   if (allocated(green_enhigh_w)) then
-     ABI_FREE(green_enhigh_w)
-   end if
+
+   ABI_SFREE(green_w)
+   ABI_SFREE(wfwfg)
+   ABI_SFREE(green_enhigh_w)
    if (Psps%usepaw==1) then
      call pawcprj_free(Cprj2_k)
      ABI_FREE(Cprj2_k)
@@ -1887,9 +1860,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
    call hilbert_transform(Ep%npwe,Ep%nomega,Ep%nomegasf,my_wl,my_wr,kkweight,sf_chi0,chi0,Ep%spmeth)
 
    ! Deallocate here before xmpi_sum
-   if (allocated(sf_chi0)) then
-     ABI_FREE(sf_chi0)
-   end if
+   ABI_SFREE(sf_chi0)
 
    ! Collective sum of the contributions.
    ! Looping over frequencies to avoid problems with the size of the MPI packet
@@ -1941,18 +1912,10 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
  ! =====================
  ABI_FREE(bbp_ks_distrb)
 
- if (allocated(gw_gfft)) then
-   ABI_FREE(gw_gfft)
- end if
- if (allocated(kkweight)) then
-   ABI_FREE(kkweight)
- end if
- if (allocated(omegasf)) then
-   ABI_FREE(omegasf)
- end if
- if (allocated(gspfft_igfft)) then
-   ABI_FREE(gspfft_igfft)
- end if
+ ABI_SFREE(gw_gfft)
+ ABI_SFREE(kkweight)
+ ABI_SFREE(omegasf)
+ ABI_SFREE(gspfft_igfft)
 
  call gsph_free(Gsph_FFT)
 
