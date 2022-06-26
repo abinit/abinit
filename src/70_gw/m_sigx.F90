@@ -828,9 +828,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
  ABI_FREE(sigx)
  ABI_FREE(proc_distrb)
 
- if (allocated(degtab)) then
-   ABI_FREE(degtab)
- end if
+ ABI_SFREE(degtab)
 
  call timab(430,2,tsec) ! csigme (SigX)
  call cwtime(cpu_time,wall_time,gflops,"stop")

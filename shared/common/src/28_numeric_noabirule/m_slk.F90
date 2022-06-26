@@ -246,13 +246,13 @@ module m_slk
  public :: slk_bsize_and_type                ! Returns the byte size and the MPI datatype associated to the matrix elements
                                              ! that are stored in the ScaLAPACK_matrix
 
- public :: slk_free_array                    !  Deallocate array of matrix_scalapack elements
- interface slk_free_array
-   module procedure slk_free_array1
-   module procedure slk_free_array2
-   module procedure slk_free_array3
-   module procedure slk_free_array4
- end interface slk_free_array
+ public :: slk_array_free                     !  Deallocate array of matrix_scalapack elements
+ interface slk_array_free
+   module procedure slk_array1_free
+   module procedure slk_array2_free
+   module procedure slk_array3_free
+   module procedure slk_array4_free
+ end interface slk_array_free
 
 CONTAINS  !==============================================================================
 !!***
@@ -647,32 +647,19 @@ type(matrix_scalapack) function matrix_scalapack_copy(in_mat) result(new_mat)
 
 ! *********************************************************************
 
- call in_mat%print(header="in_mat")
-
- istwfk = 1
+ istwfk = -1
+ if (allocated(in_mat%buffer_cplx)) istwfk = 1
  if (allocated(in_mat%buffer_real)) istwfk = 2
-
- print *, "in_mat%processor%grid%dims", in_mat%processor%grid%dims
+ ABI_CHECK(istwfk /= -1, "istwfk -1, no buffer allocated!")
 
  call new_mat%init(in_mat%sizeb_global(1), in_mat%sizeb_global(2), in_mat%processor, istwfk, &
                    size_blocs=in_mat%sizeb_blocs)
 
- if (istwfk == 2) then
-   new_mat%buffer_real = in_mat%buffer_real
- else
+ if (istwfk == 1) then
    new_mat%buffer_cplx = in_mat%buffer_cplx
+ else
+   new_mat%buffer_real = in_mat%buffer_real
  end if
-
- !new_mat%sizeb_local  = in_mat%sizeb_local
- !new_mat%sizeb_global = in_mat%sizeb_global
- !new_mat%sizeb_blocs  = in_mat%sizeb_blocs
- !if (allocated(in_mat%buffer_real)) call alloc_copy(in_mat%buffer_real, new_mat%buffer_real)
- !if (allocated(in_mat%buffer_cplx)) call alloc_copy(in_mat%buffer_cplx, new_mat%buffer_cplx)
- !new_mat%processor => in_mat%processor
- !new_mat%descript = in_mat%descript
- print *, "in matrix copy witn new/in_mat grid%dims"
- print *, new_mat%processor%grid%dims, in_mat%processor%grid%dims
- print *, "end in matrix copy"
 
 end function matrix_scalapack_copy
 !!***
@@ -714,9 +701,9 @@ end subroutine matrix_scalapack_free
 
 !----------------------------------------------------------------------
 
-!!****f* m_slk/slk_free_array1
+!!****f* m_slk/slk_array1_free
 !! NAME
-!!  slk_free_array1
+!!  slk_array1_free
 !!
 !! FUNCTION
 !!  Deallocate 1d array of matrix_scalapack elements
@@ -727,20 +714,20 @@ end subroutine matrix_scalapack_free
 !!
 !! SOURCE
 
-subroutine slk_free_array1(slk_arr1)
+subroutine slk_array1_free(slk_arr1)
   class(matrix_scalapack),intent(inout) :: slk_arr1(:)
   integer :: i1
   do i1=1,size(slk_arr1, dim=1)
     call slk_arr1(i1)%free()
   end do
-end subroutine slk_free_array1
+end subroutine slk_array1_free
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_slk/slk_free_array2
+!!****f* m_slk/slk_array2_free
 !! NAME
-!!  slk_free_array2
+!!  slk_array2_free
 !!
 !! FUNCTION
 !!  Deallocate 2d array of matrix_scalapack elements
@@ -751,7 +738,7 @@ end subroutine slk_free_array1
 !!
 !! SOURCE
 
-subroutine slk_free_array2(slk_arr2)
+subroutine slk_array2_free(slk_arr2)
   class(matrix_scalapack),intent(inout) :: slk_arr2(:,:)
   integer :: i1, i2
   do i2=1,size(slk_arr2, dim=2)
@@ -759,14 +746,14 @@ subroutine slk_free_array2(slk_arr2)
       call slk_arr2(i1, i2)%free()
     end do
   end do
-end subroutine slk_free_array2
+end subroutine slk_array2_free
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_slk/slk_free_array3
+!!****f* m_slk/slk_array3_free
 !! NAME
-!!  slk_free_array3
+!!  slk_array3_free
 !!
 !! FUNCTION
 !!  Deallocate 3d array of matrix_scalapack elements
@@ -777,7 +764,7 @@ end subroutine slk_free_array2
 !!
 !! SOURCE
 
-subroutine slk_free_array3(slk_arr3)
+subroutine slk_array3_free(slk_arr3)
   class(matrix_scalapack),intent(inout) :: slk_arr3(:,:,:)
   integer :: i1, i2, i3
   do i3=1,size(slk_arr3, dim=3)
@@ -787,14 +774,14 @@ subroutine slk_free_array3(slk_arr3)
       end do
     end do
   end do
-end subroutine slk_free_array3
+end subroutine slk_array3_free
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_slk/slk_free_array4
+!!****f* m_slk/slk_array4_free
 !! NAME
-!!  slk_free_array4
+!!  slk_array4_free
 !!
 !! FUNCTION
 !!  Deallocate 4d array of matrix_scalapack elements
@@ -805,7 +792,7 @@ end subroutine slk_free_array3
 !!
 !! SOURCE
 
-subroutine slk_free_array4(slk_arr4)
+subroutine slk_array4_free(slk_arr4)
   class(matrix_scalapack),intent(inout) :: slk_arr4(:,:,:,:)
   integer :: i1, i2, i3, i4
   do i4=1,size(slk_arr4, dim=4)
@@ -817,7 +804,7 @@ subroutine slk_free_array4(slk_arr4)
       end do
     end do
   end do
-end subroutine slk_free_array4
+end subroutine slk_array4_free
 !!***
 
 !----------------------------------------------------------------------
@@ -1372,7 +1359,7 @@ subroutine matrix_to_global(matrix, reference, istwf_k)
      if (ind <= matrix%sizeb_global(2)*(matrix%sizeb_global(2)+1)) then
         if (istwf_k/=2) then
          reference(ind)   = real(matrix_get_local_cplx(matrix,i,j))
-         reference(ind+1) = IMAG(matrix_get_local_cplx(matrix,i,j))
+         reference(ind+1) = aimag(matrix_get_local_cplx(matrix,i,j))
        else
           ind=(ind+1)/2 !real packed storage
           reference(ind) = matrix_get_local_real(matrix,i,j)
@@ -1520,7 +1507,7 @@ subroutine matrix_to_reference(matrix, reference, istwf_k)
      if (istwf_k/=2) then
        ind=(iglob-1)*2+1
        reference(ind,jglob)   = real(matrix_get_local_cplx(matrix,i,j))
-       reference(ind+1,jglob) = IMAG(matrix_get_local_cplx(matrix,i,j))
+       reference(ind+1,jglob) = aimag(matrix_get_local_cplx(matrix,i,j))
      else
         ind=iglob
         reference(ind,jglob)   = matrix_get_local_real(matrix,i,j)
@@ -3565,8 +3552,10 @@ end subroutine slk_zdhp_invert
 
 !!****f* m_slk/slk_ptrans
 !! NAME
+!!  slk_ptrans
 !!
 !! FUNCTION
+!!  Transpose matrix
 !!
 !! INPUTS
 !!
@@ -3599,26 +3588,19 @@ subroutine slk_ptrans(in_mat, trans, out_mat)
  ! prototype
  !call pdtran(m, n, alpha, a, ia, ja, desca, beta, c, ic, jc, descc)
 
+#ifdef HAVE_LINALG_SCALAPACK
  if (allocated(in_mat%buffer_cplx)) then
    ! Transposes a complex distributed matrix, conjugated
    ! sub(C):=beta*sub(C) + alpha*conjg(sub(A)'),
    select case (trans)
    case ("C")
-#ifdef HAVE_LINALG_SCALAPACK
+
      call pztranc(in_mat%sizeb_global(2), in_mat%sizeb_global(1), cone, in_mat%buffer_cplx, 1, 1, &
                   in_mat%descript%tab, czero, out_mat%buffer_cplx, 1, 1, out_mat%descript%tab)
-#else
-     out_mat%buffer_cplx = transpose(conjg(in_mat%buffer_cplx))
-#endif
-
    case ("N")
      ! sub(C):=beta*sub(C) + alpha*sub(A)',
-#ifdef HAVE_LINALG_SCALAPACK
      call pztranu(in_mat%sizeb_global(2), in_mat%sizeb_global(1), cone, in_mat%buffer_cplx, 1, 1, &
                   in_mat%descript%tab, czero, out_mat%buffer_cplx, 1, 1, out_mat%descript%tab)
-#else
-     out_mat%buffer_cplx = transpose(in_mat%buffer_cplx)
-#endif
 
    case default
      ABI_ERROR(sjoin("Invalid value for trans:", trans))
@@ -3626,13 +3608,9 @@ subroutine slk_ptrans(in_mat, trans, out_mat)
 
  else if (allocated(in_mat%buffer_real)) then
 
-#ifdef HAVE_LINALG_SCALAPACK
      call pdtran(in_mat%sizeb_global(2), in_mat%sizeb_global(1), one, in_mat%buffer_real, 1, 1, &
                  in_mat%descript%tab, zero, out_mat%buffer_real, 1, 1, out_mat%descript%tab)
-#else
-     out_mat%buffer_real = transpose(in_mat%buffer_real)
 #endif
-
  else
    ABI_ERROR("Neither buffer_cplx nor buffer_real are allocated!")
  end if

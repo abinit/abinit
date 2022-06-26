@@ -38,20 +38,18 @@ MODULE m_vcoul
 
  use m_fstrings,        only : sjoin, itoa
  use m_special_funcs,   only : abi_derf
- use m_gwdefs,          only : GW_TOLQ0
+ !use m_gwdefs,          only : GW_TOLQ0
  use m_io_tools,        only : open_file
  use m_numeric_tools,   only : arth, geop, imin_loc, llsfit_svd, l2norm, OPERATOR(.x.), quadrature, isdiagmat
- use m_bessel,          only : CALJY0, CALJY1, CALCK0, CALCK1
  use m_hide_lapack,     only : matrginv
  use m_geometry,        only : normv, metric
  use m_qplusg,          only : cmod_qpg
  use m_crystal,         only : crystal_t
  use m_bz_mesh,         only : kmesh_t, get_BZ_item
  use m_gsphere,         only : gsphere_t
- use m_paw_numeric,     only : paw_jbessel
  use m_dtfil,           only : isfile
 
-! Cut-off methods modules 
+! Cut-off methods modules
  use m_cutoff_sphere,   only : cutoff_sphere
  use m_cutoff_surface,  only : cutoff_surface
  use m_cutoff_cylinder, only : cutoff_cylinder, K0cos
@@ -75,16 +73,16 @@ MODULE m_vcoul
  type,public :: vcoul_t
 
   ! TODO: Remove it
-  integer  :: nfft
+  integer :: nfft
   ! Number of points in FFT grid
 
-  integer  :: ng
+  integer :: ng
    ! Number of G-vectors
 
-  integer  :: nqibz
+  integer :: nqibz
    ! Number of irreducible q-points
 
-  integer  :: nqlwl
+  integer :: nqlwl
    ! Number of small q-points around Gamma
 
   real(dp) :: alpha(3)
@@ -115,44 +113,50 @@ MODULE m_vcoul
 
   ! TODO: Remove it
   integer :: ngfft(18)
-    ! Information on the FFT grid
+   ! Information on the FFT grid
 
   real(dp) :: boxcenter(3)
    ! 1 if the point in inside the cutoff region 0 otherwise
    ! Reduced coordinates of the center of the box (input variable)
 
   real(dp) :: vcutgeo(3)
-    ! For each reduced direction gives the length of the finite system
-    ! 0 if the system is infinite along that particular direction
-    ! negative value to indicate that a finite size has to be used
+   ! For each reduced direction gives the length of the finite system
+   ! 0 if the system is infinite along this direction.
+   ! negative values indicate that a finite size has to be used.
 
   real(dp) :: rprimd(3,3)
-    ! Lattice vectors in real space.
+   ! Lattice vectors in real space.
 
   real(dp),allocatable :: qibz(:,:)
-   ! qibz(3,nqibz)
+   ! (3, nqibz)
    ! q-points in the IBZ.
 
   real(dp),allocatable :: qlwl(:,:)
-   ! qibz(3,nqlwl)
+   ! (3, nqlwl)
    ! q-points for the treatment of the Coulomb singularity.
 
   complex(gwpc),allocatable :: vc_sqrt(:,:)
-    ! vc_sqrt(ng,nqibz)
-    ! Square root of the Coulomb interaction in reciprocal space.
-    ! A cut might be applied.
+   ! (ng, nqibz)
+   ! Square root of the Coulomb interaction in reciprocal space.
+   ! A cutoff might be applied.
 
   complex(gwpc),allocatable :: vcqlwl_sqrt(:,:)
-    ! vcqs_sqrt(ng,nqlwl)
-    ! Square root of the Coulomb term calculated for small q-points
+   ! (ng, nqlwl)
+   ! Square root of the Coulomb term calculated for small q-points
 
   complex(gwpc),allocatable :: vc_sqrt_resid(:,:)
-    ! vc_sqrt_resid(ng,nqibz)
-    ! Square root of the residual difference between the Coulomb interaction in the sigma self-energy for exchange,
-    ! and the Coulomb interaction already present in the generalized Kohn-Sham eigenenergies (when they come from an hybrid)
-    ! Given in reciprocal space. At the call to vcoul_init, it is simply initialized at the value of vc_sqrt(:,:),
-    ! and only later modified.
-    ! A cut might be applied.
+   ! (ng, nqibz)
+   ! Square root of the residual difference between the Coulomb interaction in the sigma self-energy for exchange,
+   ! and the Coulomb interaction already present in the generalized Kohn-Sham eigenenergies (when they come from an hybrid)
+   ! Given in reciprocal space. At the call to vcoul_init, it is simply initialized at the value of vc_sqrt(:,:),
+   ! and only later modified.
+   ! A cutoff might be applied.
+
+ !contains
+ !  procedure :: init => vcoul_init
+ !  procedure :: plot => vcoul_plot
+ !  procedure :: print => vcoul_print
+ !  procedure :: print => vcoul_free
 
  end type vcoul_t
 
@@ -161,7 +165,7 @@ MODULE m_vcoul
  public ::  vcoul_plot           ! Plot vc in real and reciprocal space.
  public ::  vcoul_print          ! Report info on the object.
  public ::  vcoul_free           ! Destruction method.
-! public ::  cmod_qpg             ! FT of the long ranged Coulomb interaction.
+! public :: cmod_qpg             ! FT of the long ranged Coulomb interaction.
 !!***
 
 ! private variables used for the integration needed by the cylindrical case.
@@ -211,7 +215,7 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,gw_icutcoul,vcutgeo,ecut,ng,nqlwl,qlwl,ngfft,comm)
+subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo, ecut, ng, nqlwl, qlwl, ngfft, comm)
 
 !Arguments ------------------------------------
 !scalars
@@ -246,8 +250,7 @@ subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,gw_icutcoul,vcutgeo,ecut,n
  real(dp),allocatable :: cov(:,:),par(:),qfit(:,:),sigma(:),var(:),qcart(:,:)
  real(dp),allocatable :: vcfit(:,:),vcoul(:,:),vcoul_lwl(:,:),xx(:),yy(:)
  real(dp),allocatable :: qran(:,:)
- real(dp) :: lmin,vlength,qpg2,rcut2
- real(dp) :: q0sph
+ real(dp) :: lmin,vlength,qpg2,rcut2, q0sph
  real(dp) :: qtmp(3),qmin(3),qmin_cart(3),qpg(3)
  real(dp) :: rprimd_sc(3,3),gprimd_sc(3,3),gmet_sc(3,3),rmet_sc(3,3),ucvol_sc
  real(dp) :: qcart2red(3,3)
@@ -314,7 +317,7 @@ subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,gw_icutcoul,vcutgeo,ecut,n
 
  SELECT CASE (TRIM(Vcp%mode))
 
- CASE ('MINIBZ','MINIBZ-ERFC','MINIBZ-ERF')
+ CASE ('MINIBZ', 'MINIBZ-ERFC', 'MINIBZ-ERF')
 
    ! Mimicking the BerkeleyGW technique
    ! A Monte-Carlo sampling of each miniBZ surrounding each (q+G) point
@@ -323,13 +326,12 @@ subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,gw_icutcoul,vcutgeo,ecut,n
 
    !
    ! Supercell defined by the k-points
-   rprimd_sc(:,:) = MATMUL(Cryst%rprimd,Kmesh%kptrlatt)
+   rprimd_sc(:,:) = MATMUL(Cryst%rprimd, Kmesh%kptrlatt)
    call metric(gmet_sc,gprimd_sc,-1,rmet_sc,rprimd_sc,ucvol_sc)
 
    qcart2red(:,:) = two_pi * Cryst%gprimd(:,:)
-   call matrginv(qcart2red,3,3)
+   call matrginv(qcart2red, 3, 3)
 
-   !
    ! Find the largest sphere inside the miniBZ
    ! in order to integrate the divergence analytically
    q0sph = HUGE(1.0_dp)
@@ -348,10 +350,7 @@ subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,gw_icutcoul,vcutgeo,ecut,n
      enddo
    enddo
 
-
-   !
-   ! Setup the random vectors for the Monte Carlo sampling of the miniBZ
-   ! at q=0
+   ! Setup the random vectors for the Monte Carlo sampling of the miniBZ at q=0
    ABI_MALLOC(qran,(3,nmc_max))
    call random_seed(size=nseed)
    ABI_MALLOC(seed,(nseed))
@@ -388,25 +387,21 @@ subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,gw_icutcoul,vcutgeo,ecut,n
      qran(1,imc) = qmin(1)
      qran(2,imc) = qmin(2)
      qran(3,imc) = qmin(3)
-
    enddo
-
 
    rcut2 = Vcp%rcut**2
    vcoul(:,:) = zero
 
-   !
-   ! Admittedly, it's a lot of duplication of code hereafter,
-   ! but I think it's the clearest and fastest way
-   !
-   select case( TRIM(Vcp%mode) )
+   ! FB: Admittedly, it's a lot of duplication of code hereafter,
+   !     but I think it's the clearest and fastest way
+   select case( TRIM(Vcp%mode))
    case('MINIBZ')
 
      do iq_ibz=1,Vcp%nqibz
        do ig=1,ng
-         if( iq_ibz==1 .AND. ig==1 ) cycle
+         if (iq_ibz==1 .AND. ig==1) cycle
 
-         qpg(:) =  Vcp%qibz(:,iq_ibz) +  Gsph%gvec(:,ig)
+         qpg(:) = Vcp%qibz(:,iq_ibz) + Gsph%gvec(:,ig)
          qpg2 = normv(qpg,gmet,'G')**2
          nmc = adapt_nmc(nmc_max,qpg2)
          do imc=1,nmc
@@ -420,9 +415,9 @@ subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,gw_icutcoul,vcutgeo,ecut,n
      ! Override q=1, ig=1
      vcoul(1,1) = four_pi**2 * Kmesh%nbz * ucvol / ( 8.0_dp * pi**3 ) * q0sph
      do imc=1,nmc_max
-       qpg(:) =  Vcp%qibz(:,1) +  Gsph%gvec(:,1) + qran(:,imc)
+       qpg(:) =  Vcp%qibz(:,1) + Gsph%gvec(:,1) + qran(:,imc)
        qpg2 = normv(qpg,gmet,'G')**2
-       if( qpg2 > q0sph**2 ) then
+       if (qpg2 > q0sph**2) then
          vcoul(1,1) = vcoul(1,1) + four_pi / qpg2 / REAL(nmc_max,dp)
        end if
      end do
@@ -430,23 +425,22 @@ subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,gw_icutcoul,vcutgeo,ecut,n
      vcoul_lwl(:,:) = zero
      do iq_ibz=1,Vcp%nqlwl
        do ig=1,ng
-         qpg(:) =  Vcp%qlwl(:,iq_ibz) +  Gsph%gvec(:,ig)
+         qpg(:) =  Vcp%qlwl(:,iq_ibz) + Gsph%gvec(:,ig)
          qpg2 = normv(qpg,gmet,'G')**2
          nmc = adapt_nmc(nmc_max,qpg2)
          do imc=1,nmc
-           qpg(:) =  Vcp%qlwl(:,iq_ibz) +  Gsph%gvec(:,ig) + qran(:,imc)
+           qpg(:) = Vcp%qlwl(:,iq_ibz) + Gsph%gvec(:,ig) + qran(:,imc)
            qpg2 = normv(qpg,gmet,'G')**2
            vcoul_lwl(ig,iq_ibz) = vcoul_lwl(ig,iq_ibz) + four_pi / qpg2 / REAL(nmc,dp)
          end do
        end do
      end do
 
-
    case('MINIBZ-ERFC')
 
      do iq_ibz=1,Vcp%nqibz
        do ig=1,ng
-         if( iq_ibz==1 .AND. ig==1 ) cycle
+         if (iq_ibz == 1 .AND. ig == 1) cycle
 
          qpg(:) =  Vcp%qibz(:,iq_ibz) +  Gsph%gvec(:,ig)
          qpg2 = normv(qpg,gmet,'G')**2
@@ -455,34 +449,34 @@ subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,gw_icutcoul,vcutgeo,ecut,n
            qpg(:) =  Vcp%qibz(:,iq_ibz) +  Gsph%gvec(:,ig) + qran(:,imc)
            qpg2 = normv(qpg,gmet,'G')**2
            vcoul(ig,iq_ibz) = vcoul(ig,iq_ibz) + four_pi / qpg2 / REAL(nmc,dp) &
-&                  * (  one - EXP( -0.25d0 * rcut2 * qpg2 ) )
+                  * (  one - EXP( -0.25d0 * rcut2 * qpg2 ) )
          end do
        end do
      end do
 
      ! Override q=1, ig=1
      vcoul(1,1) = four_pi**2 * Kmesh%nbz * ucvol / ( 8.0_dp * pi**3 ) &
-&        * ( q0sph - SQRT(pi/rcut2) * abi_derf(0.5_dp*SQRT(rcut2)*q0sph) )
+        * ( q0sph - SQRT(pi/rcut2) * abi_derf(0.5_dp*SQRT(rcut2)*q0sph) )
      do imc=1,nmc_max
-       qpg(:) =  Vcp%qibz(:,1) +  Gsph%gvec(:,1) + qran(:,imc)
+       qpg(:) = Vcp%qibz(:,1) + Gsph%gvec(:,1) + qran(:,imc)
        qpg2 = normv(qpg,gmet,'G')**2
        if( qpg2 > q0sph**2 ) then
          vcoul(1,1) = vcoul(1,1) + four_pi / qpg2 / REAL(nmc_max,dp) &
-&                      * (  one - EXP( -0.25d0 * rcut2 * qpg2 ) )
+                      * (  one - EXP( -0.25d0 * rcut2 * qpg2 ) )
        end if
      end do
 
      vcoul_lwl(:,:) = zero
      do iq_ibz=1,Vcp%nqlwl
        do ig=1,ng
-         qpg(:) =  Vcp%qlwl(:,iq_ibz) +  Gsph%gvec(:,ig)
+         qpg(:) =  Vcp%qlwl(:,iq_ibz) + Gsph%gvec(:,ig)
          qpg2 = normv(qpg,gmet,'G')**2
          nmc = adapt_nmc(nmc_max,qpg2)
          do imc=1,nmc
-           qpg(:) =  Vcp%qlwl(:,iq_ibz) +  Gsph%gvec(:,ig) + qran(:,imc)
+           qpg(:) =  Vcp%qlwl(:,iq_ibz) + Gsph%gvec(:,ig) + qran(:,imc)
            qpg2 = normv(qpg,gmet,'G')**2
            vcoul_lwl(ig,iq_ibz) = vcoul_lwl(ig,iq_ibz) + four_pi / qpg2 / REAL(nmc,dp) &
-&                  * (  one - EXP( -0.25d0 * rcut2 * qpg2 ) )
+                  * (  one - EXP( -0.25d0 * rcut2 * qpg2 ) )
          end do
        end do
      end do
@@ -494,24 +488,24 @@ subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,gw_icutcoul,vcutgeo,ecut,n
        do ig=1,ng
          if( iq_ibz==1 .AND. ig==1 ) cycle
 
-         qpg(:) =  Vcp%qibz(:,iq_ibz) +  Gsph%gvec(:,ig)
+         qpg(:) = Vcp%qibz(:,iq_ibz) + Gsph%gvec(:,ig)
          qpg2 = normv(qpg,gmet,'G')**2
          nmc = adapt_nmc(nmc_max,qpg2)
          do imc=1,nmc
-           qpg(:) =  Vcp%qibz(:,iq_ibz) +  Gsph%gvec(:,ig) + qran(:,imc)
+           qpg(:) =  Vcp%qibz(:,iq_ibz) + Gsph%gvec(:,ig) + qran(:,imc)
            qpg2 = normv(qpg,gmet,'G')**2
            vcoul(ig,iq_ibz) = vcoul(ig,iq_ibz) + four_pi / qpg2 / REAL(nmc,dp) &
-&                  * EXP( -0.25d0 * rcut2 * qpg2 )
+                  * EXP( -0.25d0 * rcut2 * qpg2 )
          end do
        end do
      end do
 
      ! Override q=1, ig=1
      vcoul(1,1) = four_pi**2 * Kmesh%nbz * ucvol / ( 8.0_dp * pi**3 ) &
-&                  * SQRT(pi/rcut2) * abi_derf(0.5_dp*SQRT(rcut2)*q0sph)
+                  * SQRT(pi/rcut2) * abi_derf(0.5_dp*SQRT(rcut2)*q0sph)
 
      do imc=1,nmc_max
-       qpg(:) =  Vcp%qibz(:,1) +  Gsph%gvec(:,1) + qran(:,imc)
+       qpg(:) =  Vcp%qibz(:,1) + Gsph%gvec(:,1) + qran(:,imc)
        qpg2 = normv(qpg,gmet,'G')**2
        if( qpg2 > q0sph**2 ) then
          vcoul(1,1) = vcoul(1,1) + four_pi / qpg2 / REAL(nmc_max,dp) *  EXP( -0.25d0 * rcut2 * qpg2 )
@@ -521,14 +515,14 @@ subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,gw_icutcoul,vcutgeo,ecut,n
      vcoul_lwl(:,:) = zero
      do iq_ibz=1,Vcp%nqlwl
        do ig=1,ng
-         qpg(:) =  Vcp%qlwl(:,iq_ibz) +  Gsph%gvec(:,ig)
+         qpg(:) =  Vcp%qlwl(:,iq_ibz) + Gsph%gvec(:,ig)
          qpg2 = normv(qpg,gmet,'G')**2
          nmc = adapt_nmc(nmc_max,qpg2)
          do imc=1,nmc
            qpg(:) =  Vcp%qlwl(:,iq_ibz) +  Gsph%gvec(:,ig) + qran(:,imc)
            qpg2 = normv(qpg,gmet,'G')**2
            vcoul_lwl(ig,iq_ibz) = vcoul_lwl(ig,iq_ibz) + four_pi / qpg2 / REAL(nmc,dp) &
-&                  * EXP( -0.25d0 * rcut2 * qpg2 )
+                  * EXP( -0.25d0 * rcut2 * qpg2 )
          end do
        end do
      end do
@@ -542,19 +536,19 @@ subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,gw_icutcoul,vcutgeo,ecut,n
 
  CASE ('SPHERE')
    ! TODO check that L-d > R_c > d
-   ! * A non-positive value of rcut imposes the recipe of Spencer & Alavi, PRB 77, 193110 (2008) [[cite:Spencer2008]].
+   ! A non-positive value of rcut imposes the recipe of Spencer & Alavi, PRB 77, 193110 (2008) [[cite:Spencer2008]].
    if (Vcp%rcut<tol12) then
      Vcp%rcut = (ucvol*Kmesh%nbz*3.d0/four_pi)**third
      write(msg,'(2a,2x,f8.4,a)')ch10,&
-&     ' Using a calculated value for rcut = ',Vcp%rcut, ' to have the same volume as the BvK crystal '
-     call wrtout(std_out,msg,'COLL')
+      ' Using a calculated value for rcut = ',Vcp%rcut, ' to have the same volume as the BvK crystal '
+     call wrtout(std_out, msg)
    end if
 
    Vcp%vcutgeo=zero
-   call cutoff_sphere(Qmesh%nibz,Qmesh%ibz,ng,Gsph%gvec,gmet,Vcp%rcut,vcoul)
+   call cutoff_sphere(Qmesh%nibz, Qmesh%ibz, ng, Gsph%gvec, gmet, Vcp%rcut, vcoul)
 
    ! q-points for optical limit.
-   call cutoff_sphere(Vcp%nqlwl,Vcp%qlwl,ng,Gsph%gvec,gmet,Vcp%rcut,vcoul_lwl)
+   call cutoff_sphere(Vcp%nqlwl, Vcp%qlwl, ng, Gsph%gvec, gmet, Vcp%rcut, vcoul_lwl)
    !
    ! === Treat the limit q--> 0 ===
    ! * The small cube is approximated by a sphere, while vc(q=0)=2piR**2.
@@ -578,7 +572,7 @@ subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,gw_icutcoul,vcutgeo,ecut,n
          opt_cylinder=2
          !Check to enter the infinite Rozzi treatment
          if(Vcp%vcutgeo(3).le.-tol999) then
-           Vcp%hcyl=tol12 
+           Vcp%hcyl=tol12
          end if
        end if
      end if
@@ -591,15 +585,15 @@ subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,gw_icutcoul,vcutgeo,ecut,n
    end if
 
    call cutoff_cylinder(Qmesh%nibz,Qmesh%ibz,ng,Gsph%gvec,Vcp%rcut,Vcp%hcyl,Vcp%pdir,&
-&    Vcp%boxcenter,Cryst%rprimd,vcoul,opt_cylinder,comm)
+                        Vcp%boxcenter,Cryst%rprimd,vcoul,opt_cylinder,comm)
 
    ! q-points for optical limit.
    call cutoff_cylinder(Vcp%nqlwl,Vcp%qlwl,ng,Gsph%gvec,Vcp%rcut,Vcp%hcyl,Vcp%pdir,&
-&    Vcp%boxcenter,Cryst%rprimd,vcoul_lwl,opt_cylinder,comm)
-   !
+                        Vcp%boxcenter,Cryst%rprimd,vcoul_lwl,opt_cylinder,comm)
+
    ! === If Beigi, treat the limit q--> 0 ===
    if (opt_cylinder==1) then
-     npar=8; npt=100 ; gamma_pt=RESHAPE((/0,0,0/),(/3,1/))
+     npar=8; npt=100 ; gamma_pt = RESHAPE(([0, 0, 0]), [3, 1])
      ABI_MALLOC(qfit,(3,npt))
      ABI_MALLOC(vcfit,(1,npt))
      if (Qmesh%nibz==1) then
@@ -617,7 +611,7 @@ subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,gw_icutcoul,vcutgeo,ecut,n
      ABI_MALLOC(var,(npar))
      ABI_MALLOC(cov,(npar,npar))
      do ii=1,npt
-      xx(ii)=normv(qfit(:,ii),gmet,'G')
+       xx(ii)=normv(qfit(:,ii),gmet,'G')
      end do
      ABI_FREE(qfit)
      sigma=one ; yy(:)=vcfit(1,:)
@@ -641,7 +635,7 @@ subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,gw_icutcoul,vcutgeo,ecut,n
      end do
      integ=integ+yy(npt-1)*dx*3.0/2.0
      write(std_out,*)' simple integral',integ
-     q0_volsph=(two_pi)**3/(Kmesh%nbz*ucvol)
+     q0_volsph=(two_pi)**3 / (Kmesh%nbz * ucvol)
      q0_vol=bz_plane*two*xx(npt)
      write(std_out,*)' q0 sphere : ',q0_volsph,' q0_vol cyl ',q0_vol
      Vcp%i_sz=bz_plane*two*integ/q0_vol
@@ -659,13 +653,13 @@ subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,gw_icutcoul,vcutgeo,ecut,n
      Vcp%i_sz=vcoul(1,1)
    end if
 
-   call vcoul_print(Vcp,unit=ab_out )
+   call vcoul_print(Vcp, unit=ab_out)
 
  CASE ('SURFACE')
 
    test=COUNT(Vcp%vcutgeo/=zero)
    ABI_CHECK(test==2,"Wrong vcutgeo")
-   !
+
    ! === Default is Beigi"s method ===
    opt_surface=1; Vcp%alpha(:)=zero
    if (ANY(Vcp%vcutgeo<zero)) opt_surface=2
@@ -685,13 +679,13 @@ subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,gw_icutcoul,vcutgeo,ecut,n
      Vcp%rcut = half*SQRT(DOT_PRODUCT(a3,a3))
    end if
 
-   call cutoff_surface(Qmesh%nibz,Qmesh%ibz,ng,Gsph%gvec,gprimd,Vcp%rcut,&
-&    Vcp%boxcenter,Vcp%pdir,Vcp%alpha,vcoul,opt_surface)
+   call cutoff_surface(Qmesh%nibz, Qmesh%ibz, ng, Gsph%gvec, gprimd, Vcp%rcut, &
+                       Vcp%boxcenter, Vcp%pdir, Vcp%alpha, vcoul, opt_surface)
 
    ! q-points for optical limit.
-   call cutoff_surface(Vcp%nqlwl,Vcp%qlwl,ng,Gsph%gvec,gprimd,Vcp%rcut,&
-&    Vcp%boxcenter,Vcp%pdir,Vcp%alpha,vcoul_lwl,opt_surface)
-   !
+   call cutoff_surface(Vcp%nqlwl, Vcp%qlwl, ng, Gsph%gvec, gprimd, Vcp%rcut, &
+                       Vcp%boxcenter, Vcp%pdir, Vcp%alpha, vcoul_lwl, opt_surface)
+
    ! === If Beigi, treat the limit q--> 0 ===
    if (opt_surface==1) then
      ! Integrate numerically in the plane close to 0
@@ -707,7 +701,7 @@ subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,gw_icutcoul,vcutgeo,ecut,n
      qcart(:,:)=zero
      ! Size of the third vector
      bz_plane=l2norm(b3)
-     q0_volsph=(two_pi)**3/(Kmesh%nbz*ucvol)
+     q0_volsph=(two_pi)**3 / (Kmesh%nbz * ucvol)
      ! radius that gives the same volume as q0_volsph
      ! Let's assume that c is perpendicular to the plane
      ! We also assume isotropic BZ around gamma
@@ -718,11 +712,11 @@ subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,gw_icutcoul,vcutgeo,ecut,n
      qcart(1,:)=arth(tol6,step,npt)
 
      do ii = 1,npt
-       qfit(:,ii) = MATMUL(TRANSPOSE(Cryst%rprimd),qcart(:,ii))/(2*pi)
+       qfit(:,ii) = MATMUL(TRANSPOSE(Cryst%rprimd),qcart(:,ii)) / (2*pi)
      end do
 
-     call cutoff_surface(npt,qfit,1,gamma_pt,gprimd,Vcp%rcut,&
-&       Vcp%boxcenter,Vcp%pdir,Vcp%alpha,vcfit,opt_surface)
+     call cutoff_surface(npt, qfit, 1, gamma_pt, gprimd, Vcp%rcut, &
+                         Vcp%boxcenter, Vcp%pdir, Vcp%alpha, vcfit, opt_surface)
 
      ABI_MALLOC(xx,(npt))
      ABI_MALLOC(yy,(npt))
@@ -781,7 +775,7 @@ subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,gw_icutcoul,vcutgeo,ecut,n
    !
    ! === Integration of 1/q^2 singularity ===
    ! * We use the auxiliary function from PRB 75, 205126 (2007) [[cite:Carrier2007]]
-   q0_vol=(two_pi)**3/(Kmesh%nbz*ucvol) ; bz_geometry_factor=zero
+   q0_vol=(two_pi)**3/ (Kmesh%nbz * ucvol); bz_geometry_factor=zero
 
    ! It might be useful to perform the integration using the routine quadrature
    ! so that we can control the accuracy of the integral and improve the
@@ -795,13 +789,12 @@ subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,gw_icutcoul,vcutgeo,ecut,n
    bz_geometry_factor = bz_geometry_factor + integratefaux()*Qmesh%nbz
 
    write(msg,'(2a,2x,f8.4)')ch10,&
-&    ' integrate q->0 : numerical BZ geometry factor = ',bz_geometry_factor*q0_vol**(2./3.)
-   call wrtout(std_out,msg,'COLL')
+     ' integrate q->0 : numerical BZ geometry factor = ',bz_geometry_factor*q0_vol**(2./3.)
+   call wrtout(std_out, msg)
 
    Vcp%i_sz=four_pi*bz_geometry_factor  ! Final result stored here
 
  CASE ('AUX_GB')
-   !
    do iq_ibz=1,Vcp%nqibz
      call cmod_qpg(Vcp%nqibz,iq_ibz,Vcp%qibz,ng,Gsph%gvec,gprimd,vcoul(:,iq_ibz))
 
@@ -821,7 +814,7 @@ subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,gw_icutcoul,vcutgeo,ecut,n
    !
    ! === Integration of 1/q^2 singularity ===
    ! * We use the auxiliary function of a Gygi-Baldereschi variant [[cite:Gigy1986]]
-   q0_vol=(two_pi)**3/(Kmesh%nbz*ucvol) ; bz_geometry_factor=zero
+   q0_vol = (two_pi)**3 / (Kmesh%nbz*ucvol) ; bz_geometry_factor=zero
    ! * the choice of alfa (the width of gaussian) is somehow empirical
    alfa = 150.0/ecut
 
@@ -838,13 +831,13 @@ subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,gw_icutcoul,vcutgeo,ecut,n
    intfauxgb = ucvol/four_pi/SQRT(0.5*two_pi*alfa)
    !write(msg,'(2a,2x,f12.4,2x,f12.4)')ch10, ' bz_geometry_factor, f(q) integral = ', &
    !&    bz_geometry_factor, intfauxgb
-   !call wrtout(std_out,msg,'COLL')
+   !call wrtout(std_out,msg)
 
    bz_geometry_factor = bz_geometry_factor + intfauxgb*Qmesh%nbz
 
    write(msg,'(2a,2x,f8.4)')ch10,&
-&    ' integrate q->0 : numerical BZ geometry factor = ',bz_geometry_factor*q0_vol**(2./3.)
-   call wrtout(std_out,msg,'COLL')
+     ' integrate q->0 : numerical BZ geometry factor = ',bz_geometry_factor*q0_vol**(2./3.)
+   call wrtout(std_out, msg)
 
    Vcp%i_sz=four_pi*bz_geometry_factor
 
@@ -869,7 +862,7 @@ subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,gw_icutcoul,vcutgeo,ecut,n
    !
    ! === Integration of 1/q^2 singularity ===
    ! * We use the auxiliary function from PRB 75, 205126 (2007) [[cite:Carrier2007]]
-   q0_vol=(two_pi)**3/(Kmesh%nbz*ucvol) ; bz_geometry_factor=zero
+   q0_vol=(two_pi) **3 / (Kmesh%nbz*ucvol); bz_geometry_factor=zero
 
    ! $$ MG: this is to restore the previous implementation, it will facilitate the merge
    ! Analytic integration of 4pi/q^2 over the volume element:
@@ -901,10 +894,9 @@ subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,gw_icutcoul,vcutgeo,ecut,n
    end do
    vcoul_lwl = four_pi/(vcoul_lwl**2) *  EXP( -0.25d0 * (Vcp%rcut*vcoul_lwl)**2 )
 
-   !
    ! === Treat 1/q^2 singularity ===
    ! * We use the auxiliary function from PRB 75, 205126 (2007) [[cite:Carrier2007]]
-   q0_vol=(two_pi)**3/(Kmesh%nbz*ucvol) ; bz_geometry_factor=zero
+   q0_vol=(two_pi)**3/(Kmesh%nbz*ucvol); bz_geometry_factor=zero
    do iq_bz=1,Qmesh%nbz
      qbz_cart(:)=Qmesh%bz(1,iq_bz)*b1(:)+Qmesh%bz(2,iq_bz)*b2(:)+Qmesh%bz(3,iq_bz)*b3(:)
      qbz_norm=SQRT(SUM(qbz_cart(:)**2))
@@ -914,8 +906,8 @@ subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,gw_icutcoul,vcutgeo,ecut,n
    bz_geometry_factor = bz_geometry_factor + integratefaux()*Qmesh%nbz
 
    write(msg,'(2a,2x,f12.4)')ch10,&
-&    ' integrate q->0 : numerical BZ geometry factor = ',bz_geometry_factor*q0_vol**(2./3.)
-   call wrtout(std_out,msg,'COLL')
+     ' integrate q->0 : numerical BZ geometry factor = ',bz_geometry_factor*q0_vol**(2./3.)
+   call wrtout(std_out, msg)
    Vcp%i_sz=four_pi*bz_geometry_factor  ! Final result stored here
 
  CASE ('ERFC')
@@ -933,7 +925,7 @@ subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,gw_icutcoul,vcutgeo,ecut,n
        vcoul(:, iq_ibz) = four_pi/(vcoul(:, iq_ibz)**2) * ( one - EXP( -0.25d0 * (Vcp%rcut*vcoul(:, iq_ibz))**2 ) )
      end if
    end do
-   !
+
    ! q-points for optical limit.
    do iqlwl=1,Vcp%nqlwl
      call cmod_qpg(Vcp%nqlwl,iqlwl,Vcp%qlwl,ng,Gsph%gvec,gprimd,vcoul_lwl(:,iqlwl))
@@ -945,9 +937,9 @@ subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,gw_icutcoul,vcutgeo,ecut,n
    Vcp%i_sz=pi*Vcp%rcut**2 ! Final result stored here
 
  CASE DEFAULT
-   ABI_BUG(sjoin('Unknown cutoff mode:',Vcp%mode))
+   ABI_BUG(sjoin('Unknown cutoff mode:', Vcp%mode))
  END SELECT
- !
+
  ! === Store final results in complex array ===
  ! * Rozzi"s cutoff can give real negative values
 
@@ -961,11 +953,11 @@ subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,gw_icutcoul,vcutgeo,ecut,n
  ABI_FREE(vcoul)
 
  ABI_MALLOC(Vcp%vcqlwl_sqrt,(ng,Vcp%nqlwl))
- Vcp%vcqlwl_sqrt=CMPLX(vcoul_lwl,zero)
+ Vcp%vcqlwl_sqrt=CMPLX(vcoul_lwl, zero)
  Vcp%vcqlwl_sqrt=SQRT(Vcp%vcqlwl_sqrt)
  ABI_FREE(vcoul_lwl)
 
- call vcoul_print(Vcp,unit=std_out)
+ call vcoul_print(Vcp, unit=std_out)
 
  DBG_EXIT("COLL")
 
@@ -974,8 +966,7 @@ contains !===============================================================
  real(dp) function integratefaux()
 
 !Local variables-------------------------------
-  integer,parameter :: nref=3
-  integer,parameter :: nq=50
+  integer,parameter :: nref = 3, nq = 50
   integer :: ierr,iq,iqx1,iqy1,iqz1,iqx2,iqy2,iqz2,miniqy1,maxiqy1,nqhalf
   real(dp) :: invnq,invnq3,qq,weightq,weightxy,weightxyz
   real(dp) :: qq1(3),qq2(3),bb4sinpiqq_2(3,nq),sin2piqq(nq),bb4sinpiqq2_2(3,0:nq),sin2piqq2(3,0:nq)
@@ -1060,8 +1051,7 @@ contains !===============================================================
  function faux(qq)
 
   real(dp),intent(in) :: qq(3)
-  real(dp) :: faux
-  real(dp) :: bb4sinpiqq1_2,bb4sinpiqq2_2,bb4sinpiqq3_2,sin2piqq1,sin2piqq2,sin2piqq3
+  real(dp) :: faux, bb4sinpiqq1_2, bb4sinpiqq2_2, bb4sinpiqq3_2, sin2piqq1, sin2piqq2, sin2piqq3
 
   bb4sinpiqq1_2=b1b1*four*SIN(pi*qq(1))**2
   bb4sinpiqq2_2=b2b2*four*SIN(pi*qq(2))**2
@@ -1074,11 +1064,10 @@ contains !===============================================================
 
  end function faux
 
- function faux_fast(qq,bb4sinpiqq1_2,bb4sinpiqq2_2,bb4sinpiqq3_2,sin2piqq1,sin2piqq2,sin2piqq3)
+ function faux_fast(qq, bb4sinpiqq1_2, bb4sinpiqq2_2, bb4sinpiqq3_2, sin2piqq1, sin2piqq2,sin2piqq3)
 
   real(dp),intent(in) :: qq(3)
-  real(dp) :: faux_fast
-  real(dp) :: bb4sinpiqq1_2,bb4sinpiqq2_2,bb4sinpiqq3_2,sin2piqq1,sin2piqq2,sin2piqq3
+  real(dp) :: faux_fast, bb4sinpiqq1_2, bb4sinpiqq2_2, bb4sinpiqq3_2, sin2piqq1, sin2piqq2, sin2piqq3
 
   faux_fast= bb4sinpiqq1_2 + bb4sinpiqq2_2 + bb4sinpiqq3_2 &
 &       +two*( b1b2 * sin2piqq1*sin2piqq2 &
@@ -1108,7 +1097,6 @@ contains !===============================================================
 
  end function adapt_nmc
 
-
 end subroutine vcoul_init
 !!***
 
@@ -1133,7 +1121,7 @@ end subroutine vcoul_init
 !!
 !! SOURCE
 
-subroutine vcoul_plot(Vcp,Qmesh,Gsph,ng,vc,comm)
+subroutine vcoul_plot(Vcp, Qmesh, Gsph, ng, vc, comm)
 
 !Arguments ------------------------------------
 !scalars
@@ -1159,7 +1147,7 @@ subroutine vcoul_plot(Vcp,Qmesh,Gsph,ng,vc,comm)
 
 !************************************************************************
 
- if (TRIM(Vcp%mode)/='CYLINDER') RETURN
+ if (TRIM(Vcp%mode) /= 'CYLINDER') RETURN
 
  rank = xmpi_comm_rank(comm)
 
@@ -1184,12 +1172,12 @@ subroutine vcoul_plot(Vcp,Qmesh,Gsph,ng,vc,comm)
    call sort_dp(nqibz*ng,qpg_mod,insort,tol14)
 
    filnam='_VCoulFT_'
-   call isfile(filnam,'new')
-   if (open_file(filnam,msg,newunit=unt,status='new',form='formatted') /=0) then
+   call isfile(filnam, 'new')
+   if (open_file(filnam, msg, newunit=unt, status='new', form='formatted') /= 0) then
      ABI_ERROR(msg)
    end if
    write(unt,'(a,i3,a,i6,a)')&
-&    '#   |q+G|       q-point (Tot no.',nqibz,')        Gvec (',ng,')     vc_bare(q,G)    vc_cutoff(q,G) '
+    '#   |q+G|       q-point (Tot no.',nqibz,')        Gvec (',ng,')     vc_bare(q,G)    vc_cutoff(q,G) '
 
    do iqg=1,nqibz*ng
      iq_ibz=(insort(iqg)-1)/ng +1
@@ -1197,7 +1185,7 @@ subroutine vcoul_plot(Vcp,Qmesh,Gsph,ng,vc,comm)
      vc_bare=zero
      if (qpg_mod(iqg)>tol16) vc_bare=four_pi/qpg_mod(iqg)**2
      write(unt,'(f12.6,2x,3f8.4,2x,3i6,2x,2es14.6)')&
-&      qpg_mod(iqg),Qmesh%ibz(:,iq_ibz),Gsph%gvec(:,ig),vc_bare,vc(ig,iq_ibz)
+       qpg_mod(iqg),Qmesh%ibz(:,iq_ibz),Gsph%gvec(:,ig),vc_bare,vc(ig,iq_ibz)
    end do
 
    close(unt)
@@ -1216,7 +1204,7 @@ subroutine vcoul_plot(Vcp,Qmesh,Gsph,ng,vc,comm)
  nr=50
  lmax=MAX(l1,l2,l3) ; step=lmax/(nr-1)
  fact=one/(Vcp%ucvol*nqbz)
- !
+
  ! numb coding
  ABI_MALLOC(rr,(3,nr,3))
  rr=zero
@@ -1258,7 +1246,7 @@ subroutine vcoul_plot(Vcp,Qmesh,Gsph,ng,vc,comm)
 
  if (rank==master) then
    filnam='_VCoulR_'
-   call isfile(filnam,'new')
+   call isfile(filnam, 'new')
    if (open_file(filnam,msg,newunit=unt,status='new',form='formatted') /= 0) then
      ABI_ERROR(msg)
    end if
@@ -1299,7 +1287,7 @@ end subroutine vcoul_plot
 !!
 !! SOURCE
 
-subroutine vcoul_print(Vcp,unit,prtvol,mode_paral)
+subroutine vcoul_print(Vcp, unit, prtvol, mode_paral)
 
 !Arguments ------------------------------------
 !scalars
@@ -1329,37 +1317,37 @@ subroutine vcoul_print(Vcp,unit,prtvol,mode_paral)
    write(msg,'(3a)')ch10,' vcoul_init : cutoff-mode = ',TRIM(Vcp%mode)
    call wrtout(my_unt,msg,my_mode)
    write(msg,'(5a,f10.4,3a,f10.2,3a,3f10.5,2a)')ch10,&
-&    ' === Error function cutoff === ',ch10,ch10,&
-&    '  Cutoff radius ......... ',Vcp%rcut,' [Bohr] ',ch10
+     ' === Error function cutoff === ',ch10,ch10,&
+     '  Cutoff radius ......... ',Vcp%rcut,' [Bohr] ',ch10
    call wrtout(my_unt,msg,my_mode)
 
  CASE ('MINIBZ-ERFC')
    write(msg,'(3a)')ch10,' vcoul_init : cutoff-mode = ',TRIM(Vcp%mode)
    call wrtout(my_unt,msg,my_mode)
    write(msg,'(5a,f10.4,3a,f10.2,3a,3f10.5,2a)')ch10,&
-&    ' === Complement Error function cutoff === ',ch10,ch10,&
-&    '  Cutoff radius ......... ',Vcp%rcut,' [Bohr] ',ch10
+     ' === Complement Error function cutoff === ',ch10,ch10,&
+     '  Cutoff radius ......... ',Vcp%rcut,' [Bohr] ',ch10
    call wrtout(my_unt,msg,my_mode)
 
  CASE ('SPHERE')
    write(msg,'(5a,f10.4,3a,f10.2,3a,3f10.5,2a)')ch10,&
-&    ' === Spherical cutoff === ',ch10,ch10,&
-&    '  Cutoff radius ......... ',Vcp%rcut,' [Bohr] ',ch10,&
-&    '  Volume of the sphere .. ',four_pi/three*Vcp%rcut**3,' [Bohr^3] '
-!FB: This has no meaning here! &  '  Sphere centered at .... ',Vcp%boxcenter,' (r.l.u) ',ch10
-!MG It might be useful if the system is not centered on the origin because in this case the
-!   matrix elements of the Coulomb have to be multiplied by a phase depending on boxcenter.
-!   I still have to decide if it is useful to code this possibility and which variable use to
-!   define the center (boxcenter is used in the tddft part).
+    ' === Spherical cutoff === ',ch10,ch10,&
+    '  Cutoff radius ......... ',Vcp%rcut,' [Bohr] ',ch10,&
+    '  Volume of the sphere .. ',four_pi/three*Vcp%rcut**3,' [Bohr^3] '
+    !FB: This has no meaning here! &  '  Sphere centered at .... ',Vcp%boxcenter,' (r.l.u) ',ch10
+    !MG It might be useful if the system is not centered on the origin because in this case the
+    !   matrix elements of the Coulomb have to be multiplied by a phase depending on boxcenter.
+    !   I still have to decide if it is useful to code this possibility and which variable use to
+    !   define the center (boxcenter is used in the tddft part).
    call wrtout(my_unt,msg,my_mode)
 
  CASE ('CYLINDER')
    ii=imin_loc(ABS(Vcp%pdir-1))
    write(msg,'(5a,f10.4,3a,i2,2a,3f10.2,a)')ch10,&
-&    ' === Cylindrical cutoff === ',ch10,ch10,&
-&    '  Cutoff radius ............... ',Vcp%rcut,' [Bohr] ',ch10,&
-&    '  Axis parallel to direction... ',ii,ch10,&
-&    '  Passing through point ....... ',Vcp%boxcenter,' (r.l.u) '
+     ' === Cylindrical cutoff === ',ch10,ch10,&
+     '  Cutoff radius ............... ',Vcp%rcut,' [Bohr] ',ch10,&
+     '  Axis parallel to direction... ',ii,ch10,&
+     '  Passing through point ....... ',Vcp%boxcenter,' (r.l.u) '
    call wrtout(my_unt,msg,my_mode)
 
    write(msg,'(2a)')'  Infinite length  ....... ',ch10
@@ -1368,9 +1356,9 @@ subroutine vcoul_print(Vcp,unit,prtvol,mode_paral)
 
  CASE ('SURFACE')
    write(msg,'(5a,f10.4,3a,3f10.2,2a)')ch10,&
-&    ' === Surface cutoff === ',ch10,ch10,&
-&    '  Cutoff radius .................... ',Vcp%rcut,' [Bohr] ',ch10,&
-&    '  Central plane passing through .... ',Vcp%boxcenter,' (r.l.u) ',ch10
+     ' === Surface cutoff === ',ch10,ch10,&
+     '  Cutoff radius .................... ',Vcp%rcut,' [Bohr] ',ch10,&
+     '  Central plane passing through .... ',Vcp%boxcenter,' (r.l.u) ',ch10
    call wrtout(my_unt,msg,my_mode)
    !write(msg,'(a)')'  Infinite length  .......'
    !if (Vcp%hcyl/=zero) write(msg,'(a,f8.5,a)')'  Finite length of .......',Vcp%hcyl,' [Bohr] '
@@ -1390,14 +1378,14 @@ subroutine vcoul_print(Vcp,unit,prtvol,mode_paral)
 
  CASE ('ERF')
    write(msg,'(5a,f10.4,3a,f10.2,3a,3f10.5,2a)')ch10,&
-&    ' === Error function cutoff === ',ch10,ch10,&
-&    '  Cutoff radius ......... ',Vcp%rcut,' [Bohr] ',ch10
+     ' === Error function cutoff === ',ch10,ch10,&
+     '  Cutoff radius ......... ',Vcp%rcut,' [Bohr] ',ch10
    call wrtout(my_unt,msg,my_mode)
 
  CASE ('ERFC')
    write(msg,'(5a,f10.4,3a,f10.2,3a,3f10.5,2a)')ch10,&
-&    ' === Complement Error function cutoff === ',ch10,ch10,&
-&    '  Cutoff radius ......... ',Vcp%rcut,' [Bohr] ',ch10
+     ' === Complement Error function cutoff === ',ch10,ch10,&
+     '  Cutoff radius ......... ',Vcp%rcut,' [Bohr] ',ch10
    call wrtout(my_unt,msg,my_mode)
 
  CASE DEFAULT
@@ -1554,13 +1542,14 @@ function K0fit(mq,nn) result(vals)
  integer,intent(in) :: nn
  real(dp),intent(in) :: mq
  real(dp) :: vals(nn)
+
 !Local variables-------------------------------
 !scalars
  integer :: ii
  real(dp) :: mqh
 !arrays
- real(dp),parameter :: cc(7)=(/-0.57721566,0.42278420,0.23069756,&
-&                               0.03488590,0.00262698,0.00010750,0.00000740/)
+ real(dp),parameter :: cc(7)=(/-0.57721566,0.42278420,0.23069756, &
+                                0.03488590,0.00262698,0.00010750,0.00000740/)
  ! *************************************************************************
 
  if (nn>8.or.nn<1) then

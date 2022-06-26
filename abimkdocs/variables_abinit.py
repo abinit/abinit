@@ -22081,7 +22081,7 @@ allocated for the wavefunctions, especially when we have to sum over empty state
 
     The total number of MPI processes must be equal to the product of the different entries.
 
-    Note also that the EPH code implements its own MPI-algorithm and this [[eph_np_pqbks]] is
+    Note also that the EPH code implements its own MPI-algorithm and [[eph_np_pqbks]] is
     the **only variable** that should be used to change the default behaviour.
     Other variables such as [[nppert]], [[npband]], [[npfft]], [[npkpt]] and [[paral_kgb]]
     are **not used** in the EPH subdriver.
@@ -23182,6 +23182,32 @@ Note that [[gstore_erange]] is not compatible with [[gstore_brange]].
         gstore_erange 0.0 0.5 eV
 
     to specify the energy intervals in eV units. meV is supported as well.
+""",
+),
+
+Variable(
+    abivarname="gwr_np_gtks",
+    varset="gw",
+    vartype="integer",
+    topics=['GWR_expert'],
+    dimensions=[4],
+    defaultval=0,
+    mnemonics="GWR Number of Processors for G-vectors, Tau-points, K-points, Spin.",
+    requires="[[optdriver]] == 6",
+    added_in_version="9.6.2",
+    text=r"""
+This variable defines the Cartesian grid of MPI processors used for GWR calculations.
+If not specified in the input, the code will generate this grid automatically using the total number of processors
+and the basic dimensions of the job computed at runtime.
+
+!!! important
+
+    The total number of MPI processes must be equal to the product of the different entries.
+
+    Note also that the GWR code implements its own MPI-algorithm and [[gwr_np_gtks]] is
+    the **only variable** that should be used to change the default behaviour.
+    Other variables such as [[npband]], [[npfft]], [[npkpt]] and [[paral_kgb]]
+    are **not used** in the GWR subdriver.
 """,
 ),
 

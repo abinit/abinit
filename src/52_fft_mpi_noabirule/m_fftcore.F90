@@ -1563,7 +1563,7 @@ end subroutine sphereboundary
 !! cg(2,npw*ndat)= contains values for npw G vectors in basis sphere
 !! ndat=number of FFT to do in //
 !! npw=number of G vectors in basis at this k point
-!! cfft(2,n4,n5,n6) = fft box
+!! cfft(2,n4,n5,n6*ndat) = fft box
 !! n1,n2,n3=physical dimension of the box (cfft)
 !! n4,n5,n6=memory dimension of cfft
 !! kg_k(3,npw)=integer coordinates of G vectors in basis sphere
@@ -1583,8 +1583,7 @@ end subroutine sphereboundary
 !! cg and cfft are assumed to be of type COMPLEX, although this routine treats
 !! them as real of twice the length to avoid nonstandard complex*16.
 !! If istwf_k differs from 1, then special storage modes must be taken
-!! into account, for symmetric wavefunctions coming from k=(0 0 0) or other
-!! special k points.
+!! into account, for symmetric wavefunctions coming from k=(0 0 0) or other special k points.
 !!
 !! TODO
 !! 1) Order arguments
