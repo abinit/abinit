@@ -40,7 +40,7 @@ module m_invars2
 
  use defs_datatypes, only : pspheader_type
  use m_time,      only : timab
- use m_fstrings,  only : sjoin, itoa, ltoa, tolower
+ use m_fstrings,  only : sjoin, itoa, ltoa, tolower, toupper
  use m_symtk,     only : matr3inv
  use m_parser,    only : intagm, intagm_img
  use m_geometry,   only : mkrdim, metric
@@ -602,7 +602,13 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  narr = size(dtset%gwr_np_gtks)
  call intagm(dprarr, intarr, jdtset, marr, narr, string(1:lenstr), 'gwr_np_gtks', tread, 'INT')
- if (tread==1) dtset%gwr_np_gtks = intarr(1:narr)
+ if (tread == 1) dtset%gwr_np_gtks = intarr(1:narr)
+
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gwr_ntau', tread,'INT')
+ if (tread == 1) dtset%gwr_ntau = intarr(1)
+
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "wfk_task", tread, 'KEY', key_value=key_value)
+ if (tread == 1) dtset%gwr_task = toupper(trim(key_value))
 
  ! RESPFN integer input variables (needed here to get the value of response)
  ! Warning: rfddk,rfelfd,rfmagn,rfphon,rfstrs,rfsrs_ref,rfuser,rf2_dkdk and rf2_dkde are also read in invars1
@@ -3676,7 +3682,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    end if
  end if
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),"wfk_task",tread,'KEY',key_value=key_value)
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "wfk_task", tread, 'KEY', key_value=key_value)
  if (tread==1) dtset%wfk_task = str2wfktask(tolower(key_value))
  if (dtset%optdriver == RUNL_WFK .and. dtset%wfk_task == WFK_TASK_NONE) then
    ABI_ERROR(sjoin("A valid wfk_task must be specified when optdriver= ", itoa(dtset%optdriver), ", Received:", key_value))

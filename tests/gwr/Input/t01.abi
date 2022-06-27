@@ -3,10 +3,7 @@
 # Dataset 1: ground state calculation to get the density
 # Dataset 2: NSCF run to produce the WFK file.
 # Dataset 3: GWR calculation
-
 ndtset      3
-#ndtset      1
-#jdtset      3
 
 ############
 # Dataset 1
@@ -28,53 +25,28 @@ tolwfr2  1.0d-12     # Will stop when this tolerance is achieved
 ############
 # Dataset 3
 ############
-# Calculation of the screening (epsilon^-1 matrix)
-optdriver3  6        # GWR
-boxcutmin   1.3
-getwfk3     2       # Obtain WFK file from previous dataset
-nband3      60       # Bands to be used in the screening calculation
-ecuteps3    3.6      # Cut-off energy of the planewave set to represent the dielectric matrix.
-                     # It is important to adjust this parameter.
-ppmfrq3    16.7 eV   # Imaginary frequency where to calculate the screening
+optdriver3  6        # Activate GWR code
+gwr_task3 "G0W0"     # One-shot calculation
+gwr_ntau3   2        # Number of tau points along the imaginary axis
 
+boxcutmin3  1.1
+getwfk3     2        # Obtain WFK file from previous dataset
+nband3      60       # Bands to be used in the screening calculation
+ecuteps3    2        # Cut-off energy of the planewave set to represent the dielectric matrix.
+                     # It is important to adjust this parameter.
 ecutsigx3    8.0     # Dimension of the G sum in Sigma_x.
                      # ecutsigx = ecut is usually a wise choice
                      # (the dimension in Sigma_c is controlled by ecuteps)
-
 
 nkptgw3      1       # number of k-point where to calculate the GW correction
 kptgw3               # k-points in reduced coordinates
    0.000    0.000    0.000
 bdgw3       4  5     # calculate GW corrections for bands from 4 to 5
 
-# Data common to the three different datasets
-
-# Definition of the unit cell: fcc
-acell  3*10.26         # Experimental lattice constants
-rprim  0.0  0.5  0.5   # FCC primitive vectors (to be scaled by acell)
-       0.5  0.0  0.5
-       0.5  0.5  0.0
-
-# Definition of the atom types
-ntypat  1         # There is only one type of atom
-znucl 14          # The keyword "znucl" refers to the atomic number of the
-                  # possible type(s) of atom. The pseudopotential(s)
-                  # mentioned in the "files" file must correspond
-                  # to the type(s) of atom. Here, the only type is Silicon.
-
-# Definition of the atoms
-natom  2          # There are two atoms
-typat  1 1        # They both are of type 1, that is, Silicon.
-xred              # Reduced coordinate of atoms
-      0.0  0.0  0.0
-      0.25 0.25 0.25
-
-
 # Definition of the k-point grid (Gamma-centered)
 ngkpt   2 2 2
 nshiftk 1
 shiftk  0.0 0.0 0.0
-#istwfk  *1           # This is mandatory in all the GW steps.
 
 ecut 8.0          # Maximal kinetic energy cut-off, in Hartree
 
@@ -86,23 +58,38 @@ diemac  12.0      # Although this is not mandatory, it is worth to
                   # is described in the "dielng" input variable section.
                   # Here, we follow the prescription for bulk silicon.
 
+# Definition of the unit cell: fcc
+acell  3*10.26         # Experimental lattice constants
+rprim  0.0  0.5  0.5   # FCC primitive vectors (to be scaled by acell)
+       0.5  0.0  0.5
+       0.5  0.5  0.0
+
+# Definition of the atom types
+ntypat  1
+znucl 14
+
+# Definition of the atoms
+natom  2
+typat  1 1
+xred
+      0.0  0.0  0.0
+      0.25 0.25 0.25
 
  pp_dirpath "$ABI_PSPDIR"
  pseudos "Pseudodojo_nc_sr_04_pbe_standard_psp8/Si.psp8"
-
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t01.abo, tolnlines = 12, tolabs = 1.1e-3, tolrel = 3.0e-3, fld_options = -medium
 #%% [paral_info]
 #%% max_nprocs = 12
 #%% [extra_info]
 #%% authors = M. Giantomassi
 #%% keywords = NC, GWR
-#%% description = 
+#%% description =
 #%%  Crystalline silicon
 #%%  Calculation of the GW corrections with GWR code.
 #%%<END TEST_INFO>

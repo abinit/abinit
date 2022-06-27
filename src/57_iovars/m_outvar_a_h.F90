@@ -1184,6 +1184,12 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  end do
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,narrm,ncid,ndtset_alloc,'gwr_np_gtks','INT',0, firstchar="-")
 
+ intarr(1,:) = dtsets(:)%gwr_ntau
+ call prttagm(dprarr, intarr, iout, jdtset_, 2, marr, 1, narrm, ncid, ndtset_alloc, 'gwr_ntau', 'INT', 0)
+
+ ! TODO
+ !call prttagm(dprarr, intarr, iout, jdtset_, 2, marr, 1, narrm, ncid, ndtset_alloc, 'gwr_task', 'INT', 0)
+
 !grchrg
  print_constraint=0
  do idtset=1,ndtset_alloc
