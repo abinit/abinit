@@ -22,7 +22,7 @@ dtion =  30       # Delta Time for IONs (default 100 , one atomic time unit is 2
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = multibinit
-#%% input_ddb = tmulti6_DDB
+#%% input_ddb = tmulti_l_6_DDB
 #%% need_cpp_vars = HAVE_XML
 #%% exclude_builders = .*_nag_7.0_.*
 #%% coeff_xml = tmulti_l_8_1.xml
