@@ -4598,8 +4598,9 @@ end subroutine d3sym
 !!  mpert =maximum number of ipert
 !!  natom= number of atoms
 !!  nsym=number of space group symmetries
-!!  symrec(3,3,nsym)=3x3 matrices of the group symmetries (reciprocal space)
-!!  symrel(3,3,nsym)=3x3 matrices of the group symmetries (real space)
+!!  symrec(3,3,nsym)=3x3 matrices of the group symmetries (reciprocal reduced space)
+!!  symrel(3,3,nsym)=3x3 matrices of the group symmetries (real reduced space)
+!!  symrel_cart(3,3,nsym)=3x3 matrices of the group symmetries (real cartesian space)
 !!
 !! SIDE EFFECTS
 !!  Input/Output
@@ -4614,7 +4615,7 @@ end subroutine d3sym
 !!
 !! SOURCE
 
-subroutine d3lwsym(blkflg,d3,has_strain,indsym,mpert,natom,nsym,symrec,symrel)
+subroutine d3lwsym(blkflg,d3,has_strain,indsym,mpert,natom,nsym,symrec,symrel,symrel_cart)
 
 !Arguments -------------------------------
 !scalars
@@ -4624,6 +4625,7 @@ subroutine d3lwsym(blkflg,d3,has_strain,indsym,mpert,natom,nsym,symrec,symrel)
  integer,intent(in) :: indsym(4,nsym,natom),symrec(3,3,nsym),symrel(3,3,nsym)
  integer,intent(inout) :: blkflg(3,mpert,3,mpert,3,mpert)
  real(dp),intent(inout) :: d3(2,3,mpert,3,mpert,3,mpert)
+ real(dp),intent(in) :: symrel_cart(3,3,nsym)
 
 !Local variables -------------------------
 !scalars
@@ -4743,16 +4745,16 @@ subroutine d3lwsym(blkflg,d3,has_strain,indsym,mpert,natom,nsym,symrec,symrel)
                    if (i2pert <= natom) then
                      ipesy2 = indsym(4,isym,i2pert)
                      sym2(:,:) = symrec(:,:,isym)
-                   else if (i2pert == natom + 2.or.i2pert == natom + 3 &
-                   & .or. i2pert == natom + 4) then
+                   else if (i2pert == natom + 2) then
                      ipesy2 = i2pert
                      sym2(:,:) = symrel(:,:,isym)
-                     if (i2pert == natom + 3.or. i2pert == natom + 4) then
-                       is_strain=.true.
-                       if (i2pert==natom+3) istr=i2dir
-                       if (i2pert==natom+4) istr=3+i2dir
-                       i2dir_a=idx(2*istr-1); i2dir_b=idx(2*istr)
-                     end if
+                   else if (i2pert == natom + 3.or. i2pert == natom + 4) then
+                     ipesy2 = i2pert
+                     sym2(:,:) = NINT(symrel_cart(:,:,isym))
+                     is_strain=.true.
+                     if (i2pert==natom+3) istr=i2dir
+                     if (i2pert==natom+4) istr=3+i2dir
+                     i2dir_a=idx(2*istr-1); i2dir_b=idx(2*istr)
                    else
                      found = 0
                    end if
@@ -5220,7 +5222,7 @@ subroutine sylwtens(has_strain,indsym,mpert,natom,nsym,rfpert,symrec,symrel,symr
                    sym2(:,:) = symrel(:,:,isym)
                  else if (i2pert == natom + 3.or. i2pert == natom + 4) then
                    ipesy2 = i2pert
-                   sym2_dp(:,:) = symrel_cart(:,:,isym)
+                   sym2(:,:) = NINT(symrel_cart(:,:,isym))
                    is_strain=.true.
                    if (i2pert==natom+3) istr=i2dir
                    if (i2pert==natom+4) istr=3+i2dir
