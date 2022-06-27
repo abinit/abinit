@@ -214,7 +214,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
    write(ab_out,"(a,i0)")"    nsppol: ",dtset%nsppol
    write(ab_out,"(a,i0)")"    nspinor: ",dtset%nspinor
    write(ab_out,"(a,i0)")"    mband: ",dtset%mband
-   write(ab_out,"(a,i0)")"    eph_task: ",dtset%eph_task
+   write(ab_out,"(a,i0)")"    gwr_task: ",trim(dtset%gwr_task)
 
    work_size = dtset%nkpt * dtset%nsppol
    ! Non-scalable memory in Mb i.e. memory that is not distributed with MPI.
@@ -279,25 +279,28 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  call pspini(dtset, dtfil, ecore, psp_gencond, gsqcutc_eff, gsqcutf_eff, pawrad, pawtab, psps, cryst%rprimd, comm_mpi=comm)
 
  call gwr%init(dtset, dtfil, cryst, psps, pawtab, ebands, mpi_enreg, comm)
+ if (my_rank == master) then
+   call gwr%print(unit=ab_out)
+   call gwr%print(unit=std_out)
+ end if
 
  if (use_wfk) then
    call gwr%build_gtau_from_wfk(wfk0_path)
  else
  end if
 
-
  ! ====================================================
  ! === This is the real GWR stuff once all is ready ===
  ! ====================================================
 
- !select case (dtset%gwr_task)
- !case ("RPA_ENERGY")
- !  call gwr%rpa_energy()
- !case ("G0W0")
+ select case (dtset%gwr_task)
+ case ("G0W0")
    call gwr%run_g0w0()
- !case default
- !  ABI_ERROR(sjoin("Invalid value of gwr_task:", itoa(dtset%gwr_task)))
- !end select
+ case ("RPA_ENERGY")
+   call gwr%rpa_energy()
+ case default
+   ABI_ERROR(sjoin("Invalid value of gwr_task:", dtset%gwr_task))
+ end select
 
  !=====================
  !==== Free memory ====

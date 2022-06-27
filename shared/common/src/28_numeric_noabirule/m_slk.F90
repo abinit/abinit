@@ -190,6 +190,9 @@ module m_slk
    procedure :: ptrans => slk_ptrans
     ! Transpose matrix
 
+   procedure :: get_trace => slk_get_trace
+    ! Compute the trace of an N-by-N distributed matrix.
+
  end type matrix_scalapack
 
  public :: matrix_get_local_cplx           ! Returns a local matrix coefficient of complex type.
@@ -3616,6 +3619,58 @@ subroutine slk_ptrans(in_mat, trans, out_mat)
  end if
 
 end subroutine slk_ptrans
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_slk/slk_get_trace
+!! NAME
+!!  slk_get_trace
+!!
+!! FUNCTION
+!!  Compute the trace of an N-by-N distributed matrix.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+complex(dp) function slk_get_trace(mat) result(ctrace)
+
+!Arguments ------------------------------------
+ class(matrix_scalapack), intent(in) :: mat
+
+!Local variables-------------------------------
+#ifdef HAVE_LINALG_SCALAPACK
+ real(dp) :: rtrace
+ real(dp),external :: PDLATRA
+ complex(dp),external :: PZLATRA
+#endif
+
+! *************************************************************************
+
+ ABI_CHECK(mat%sizeb_global(1) == mat%sizeb_global(2), "get_trace assumes square matrix!")
+
+ ! prototype for complex version.
+ ! COMPLEX*16 FUNCTION PZLATRA( N, A, IA, JA, DESCA )
+
+#ifdef HAVE_LINALG_SCALAPACK
+ if (allocated(mat%buffer_cplx)) then
+   ctrace = PZLATRA(mat%sizeb_global(1), mat%buffer_cplx, 1, 1, mat%descript%tab)
+ else if (allocated(mat%buffer_real)) then
+   rtrace = PDLATRA(mat%sizeb_global(1), mat%buffer_real, 1, 1, mat%descript%tab)
+   ctrace = rtrace
+#endif
+ else
+   ABI_ERROR("Neither buffer_cplx nor buffer_real are allocated!")
+ end if
+
+end function slk_get_trace
 !!***
 
 !----------------------------------------------------------------------

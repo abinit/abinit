@@ -43,7 +43,7 @@ module m_gwr
  use defs_abitypes,   only : mpi_type
  use m_time,          only : cwtime, cwtime_report, sec2str
  use m_io_tools,      only : iomode_from_fname !, file_exists, is_open, open_file
- use m_numeric_tools, only : get_diag, isdiagmat
+ use m_numeric_tools, only : get_diag, isdiagmat, arth, print_arr
  use m_copy,          only : alloc_copy
  use m_fstrings,      only : sjoin, itoa, strcat
  use m_krank,         only : krank_t, krank_new, krank_from_kptrlatt, get_ibz2bz, star_from_ibz_idx
@@ -339,7 +339,9 @@ module m_gwr
    ! Free memory.
 
    procedure :: print => gwr_print
-   ! Print info on the gwr object.
+   ! Print info on the object.
+
+   procedure :: print_trace => gwr_print_trace
 
    procedure :: build_gtau_from_wfk => gwr_build_gtau_from_wfk
    ! Build the Green's function in imaginary time for k-points in the IBZ from the WFK file
@@ -499,15 +501,22 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  ! ====================
  ! Setup tau/omega mesh
  ! ====================
- gwr%ntau = 1
+ gwr%ntau = dtset%gwr_ntau
  ABI_MALLOC(gwr%tau_mesh, (gwr%ntau))
  ABI_MALLOC(gwr%iw_mesh, (gwr%ntau))
+ gwr%tau_mesh = arth(zero, one, gwr%ntau)
+ gwr%iw_mesh = arth(zero, one, gwr%ntau)
+
  ABI_MALLOC(gwr%t2w_cos_wgs, (gwr%ntau, gwr%ntau))
  ABI_MALLOC(gwr%t2w_sin_wgs, (gwr%ntau, gwr%ntau))
+ gwr%t2w_cos_wgs = one
+ gwr%t2w_sin_wgs = one
 
- ! ====================
- ! Planewave basis set
- ! ====================
+ ! ==========================
+ ! Setup k-points in Sigma_nk
+ ! ==========================
+ ! TODO:
+
 
  ! ========================
  ! === MPI DISTRIBUTION ===
@@ -526,6 +535,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
    ! Automatic grid generation.
    ! TODO: for the time being use all procs for tau.
    gwr%tau_comm%nproc = all_nproc
+   !gwr%g_comm%nproc = all_nproc
  end if
 
  ! Consistency check.
@@ -879,8 +889,7 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk0_path)
  dtset => gwr%dtset
 
  ks_ebands = wfk_read_ebands(wfk0_path, gwr%comm, out_hdr=wfk0_hdr)
-
- call wfk0_hdr%vs_dtset(gwr%dtset)
+ call wfk0_hdr%vs_dtset(dtset)
  ! TODO: More consistency checks e.g. nkibz,...
 
  !cryst = wfk0_hdr%get_crystal()
@@ -1132,14 +1141,12 @@ subroutine gwr_get_green_gpr(gwr, my_it, my_is, desc_kbz, gt_gpr)
 
    do ioe=1,2
      ggp => gt_kbz(ioe)
-     !call ggp%print(header="ggp pointer")
 
      ! Allocate rgp scalapack matrix to store G(r, g')
      npwsp = desc_k%npw * gwr%nspinor
      col_bsize = npwsp / gwr%g_comm%nproc; if (mod(npwsp, gwr%g_comm%nproc) /= 0) col_bsize = col_bsize + 1
      call rgp%init(gwr%nfft * gwr%nspinor, npwsp, gwr%g_slkproc, desc_k%istwfk, &
                    size_blocs=[gwr%nfft * gwr%nspinor, col_bsize])
-     !call rgp%print(header="rgp matrix")
 
      ! FFT. Results stored in rgp
      do ig2=1,ggp%sizeb_local(2)
@@ -1202,6 +1209,7 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
 
 ! *************************************************************************
 
+ !return
  call cwtime(cpu, wall, gflops, "start")
  sum_spins_ = .False.; if (present(sum_spins)) sum_spins_ = sum_spins
 
@@ -1366,30 +1374,29 @@ end subroutine desc_free
 !!
 !! SOURCE
 
-subroutine gwr_print(gwr, header, unit, prtvol)
+subroutine gwr_print(gwr, header, unit)
 
 !Arguments ------------------------------------
  class(gwr_t),target,intent(in) :: gwr
  character(len=*),optional,intent(in) :: header
- integer,optional,intent(in) :: prtvol, unit
+ integer,optional,intent(in) :: unit
 
 !Local variables-------------------------------
 !scalars
- integer :: my_is, spin, my_it, itau, my_iki, ik_ibz
- integer :: unt, my_prtvol
+ integer :: my_is, spin, my_it, itau, my_iki, ik_ibz, unt
  character(len=500) :: msg
  type(yamldoc_t) :: ydoc
 
 ! *********************************************************************
 
  unt = std_out; if (present(unit)) unt =unit
- my_prtvol = 0; if (present(prtvol)) my_prtvol = prtvol
 
  msg = ' ==== Info on the GWR object ==== '
  if (present(header)) msg=' ==== '//trim(adjustl(header))//' ==== '
  call wrtout(unt, msg)
 
- ydoc = yamldoc_open('GWR') !, width=11, real_fmt='(3f8.3)')
+ ydoc = yamldoc_open('GWR_params') !, width=11, real_fmt='(3f8.3)')
+ call ydoc%add_string("gwr_task", gwr%dtset%gwr_task)
  call ydoc%add_int("ntau", gwr%ntau)
  call ydoc%add_int1d("ngkpt", gwr%ngkpt)
  call ydoc%add_int("nkbz", gwr%nkbz)
@@ -1403,7 +1410,7 @@ subroutine gwr_print(gwr, header, unit, prtvol)
  call ydoc%add_int1d("P gwr_np_gtks", [gwr%g_comm%nproc, gwr%tau_comm%nproc, gwr%kpt_comm%nproc, gwr%spin_comm%nproc])
  call ydoc%write_and_free(unt)
 
- !if (my_prtvol > 10) then
+ if (gwr%dtset%prtvol > 10) then
    do my_is=1,gwr%my_nspins
      spin = gwr%my_spins(my_is)
      do my_it=1,gwr%my_ntau
@@ -1415,7 +1422,7 @@ subroutine gwr_print(gwr, header, unit, prtvol)
        end do
      end do
    end do
- !end if
+ end if
 
 end subroutine gwr_print
 !!***
@@ -1448,31 +1455,29 @@ subroutine gwr_build_chi(gwr)
  integer,parameter :: ndat1 = 1, istwfk1 = 1
  integer :: my_is, my_it, my_ikf, ig, my_ir, my_nr, npwsp, ncol_glob, col_bsize, my_iqi, my_iki ! my_iqf,
  integer :: ig1, ig2, sc_nfft, spin, ik_ibz, ik_bz, iq_ibz, ierr, ioe, itau
- real(dp) :: cpu, wall, gflops
- !character(len=5000) :: msg
+ real(dp) :: cpu_tau, wall_tau, gflops_tau, cpu_all, wall_all, gflops_all
+ character(len=5000) :: msg
  type(desc_t),pointer :: desc_k, desc_q
- type(matrix_scalapack) :: chi_r_gp
+ type(matrix_scalapack) :: chi_rgp
 !arrays
  integer :: sc_ngfft(18)
  integer,allocatable :: green_scg(:,:), chi_scg(:,:)
  real(dp) :: kk_bz(3), kpq_bz(3), qq_ibz(3) ! kk_ibz(3), qq_bz(3)
  complex(dp),allocatable :: gt_scbox(:,:), chit_scbox(:)
- type(matrix_scalapack),allocatable :: chiq_gpr(:)
- type(matrix_scalapack) :: gt_gpr(2, gwr%my_nkbz)
+ type(matrix_scalapack) :: gt_gpr(2, gwr%my_nkbz), chiq_gpr(gwr%my_nqibz)
  type(desc_t), target :: desc_kbz(gwr%my_nkbz)
  type(fftbox_plan3_t) :: plan_gp2rp, plan_rp2gp
 
 ! *************************************************************************
 
- call cwtime(cpu, wall, gflops, "start")
-
- call wrtout(std_out, " Building chi...")
+ call cwtime(cpu_all, wall_all, gflops_all, "start")
  call gwr%print(header="In build_chi")
 
  if (gwr%use_supercell) then
    ! ============================
    ! GWr algorithm with supercell
    ! ============================
+   call wrtout(std_out, " Building chi with FFTs in the supercell...")
 
    ! Set FFT mesh in the supercell
    ! Be careful when using the FFT plan with ndat as ndat can change inside the loop if we start to block.
@@ -1493,9 +1498,8 @@ subroutine gwr_build_chi(gwr)
    ! The g-vectors in the supercell for G and chi.
    ABI_MALLOC(green_scg, (3, gwr%green_mpw))
    ABI_MALLOC(chi_scg, (3, gwr%chi_mpw))
-   ABI_MALLOC(chiq_gpr, (gwr%my_nqibz))
 
-   ! Allocate memory for chi_q(g',r) for all q in the IBZ treated by this MPI rank.
+   ! Allocate Scalapack arrays for chi_q(g',r) for all q in the IBZ treated by this MPI rank.
    do my_iqi=1,gwr%my_nqibz
      iq_ibz = gwr%my_qibz_inds(my_iqi)
      npwsp = gwr%chi_desc_qibz(iq_ibz)%npw * gwr%nspinor
@@ -1509,7 +1513,7 @@ subroutine gwr_build_chi(gwr)
      spin = gwr%my_spins(my_is)
      do my_it=1,gwr%my_ntau
        itau = gwr%my_itaus(my_it)
-       !tau = gwr%tau_mesh(itau)
+       call cwtime(cpu_tau, wall_tau, gflops_tau, "start")
 
        ! G_k(g,g') --> G_k(g',r) for each k in the BZ treated by me.
        call gwr%get_green_gpr(my_it, my_is, desc_kbz, gt_gpr)
@@ -1537,7 +1541,7 @@ subroutine gwr_build_chi(gwr)
            end do
          end do ! my_ikf
 
-         ! Should block using nproc in kpt_comm, scatter data and perform multiple FFTs in parallel.
+         ! TODO: Should block using nproc in kpt_comm, scatter data and perform multiple FFTs in parallel.
          call xmpi_sum(gt_scbox, gwr%kpt_comm%value, ierr)
 
          !  G(G',r) --> G(R',r)
@@ -1565,7 +1569,7 @@ subroutine gwr_build_chi(gwr)
            call scbox2gsph(sc_ngfft, desc_q%npw, gwr%nspinor * ndat1, chi_scg, &
                            chit_scbox, &                            ! in
                            chiq_gpr(my_iqi)%buffer_cplx(:, my_ir))  ! out
-         end do
+         end do ! my_iqi
        end do ! my_ir
 
        ! Free scalapack matrices
@@ -1578,19 +1582,20 @@ subroutine gwr_build_chi(gwr)
          iq_ibz = gwr%my_qibz_inds(my_iqi)
          desc_q => gwr%chi_desc_qibz(iq_ibz)
 
-         call chiq_gpr(my_iqi)%ptrans("C", chi_r_gp)
-         call chiq_gpr(my_iqi)%free()
+         call chiq_gpr(my_iqi)%ptrans("C", chi_rgp)
 
          ! FFT r --> g along the first dimension: chi_q(r,g') --> chi_q(g,g')
-         do ig2=1,chi_r_gp%sizeb_local(2)
+         do ig2=1,chi_rgp%sizeb_local(2)
            call fft_ur(desc_q%npw, gwr%nfft, gwr%nspinor, ndat1, gwr%mgfft, gwr%ngfft, &
                        istwfk1, desc_q%gvec, desc_q%gbound, &
-                       chi_r_gp%buffer_cplx(:, ig2),        &                  ! ur(in)
+                       chi_rgp%buffer_cplx(:, ig2),        &                   ! ur(in)
                        gwr%chit_qibz(iq_ibz, itau, spin)%buffer_cplx(:, ig2))  ! ug(out)
          end do
-         call chi_r_gp%free()
+         call chi_rgp%free()
        end do
 
+       write(msg,'(2(a,i0),a)')" My itau [", my_it, "/", gwr%my_ntau, "]"
+       call cwtime_report(msg, cpu_tau, wall_tau, gflops_tau)
      end do ! my_it
    end do ! spin
 
@@ -1599,7 +1604,6 @@ subroutine gwr_build_chi(gwr)
    ABI_FREE(green_scg)
    ABI_FREE(chi_scg)
    call slk_array_free(chiq_gpr)
-   ABI_FREE(chiq_gpr)
 
   else
     ! ===================================================================
@@ -1611,6 +1615,7 @@ subroutine gwr_build_chi(gwr)
       do my_it=1,gwr%my_ntau
         itau = gwr%my_itaus(my_it)
         !tau = gwr%tau_mesh(itau)
+        call cwtime(cpu_tau, wall_tau, gflops_tau, "start")
 
         !need_kibz(gwr%nkibz)
         !got_kibz(gwr%nkibz)
@@ -1683,19 +1688,86 @@ subroutine gwr_build_chi(gwr)
           end do ! my_ikf
         end do ! iq_ibz
 
+       write(msg,'(2(a,i0),a)')" My itau [", my_it, "/", gwr%my_ntau, "]"
+       call cwtime_report(msg, cpu_tau, wall_tau, gflops_tau)
      end do ! my_it
    end do ! spin
  end if
+
+ ! Print trace for testing purposes.
+ call gwr%print_trace("chit_qibz")
 
  ! Transform irreducible chi from imaginary tau to imaginary omega.
  ! Also sum over spins to get total chi if collinear spins.
  call gwr%cos_transform("chi", "t2w", sum_spins=.True.)
 
- call gwr%print(header="GWR before leaving build_chi")
-
- call cwtime_report(" gwr_build_chi:", cpu, wall, gflops)
+ !call gwr%print(header="GWR before leaving build_chi")
+ call cwtime_report(" gwr_build_chi:", cpu_all, wall_all, gflops_all)
 
 end subroutine gwr_build_chi
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_gwr/gwr_print_trace
+!! NAME
+!!  gwr_print_trace
+!!
+!! FUNCTION
+!!  This is a global routine that should be called by all procs in gwr%comm.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine gwr_print_trace(gwr, what)
+
+!Arguments ------------------------------------
+ class(gwr_t),target,intent(in) :: gwr
+ character(len=*),intent(in) :: what
+
+!Local variables-------------------------------
+ integer :: my_is, spin, my_it, itau, iq_ibz, ierr, my_iqi
+ complex(dp),allocatable :: ctrace(:,:,:)
+
+! *************************************************************************
+
+ select case (what)
+ case ("chit_qibz")
+   ABI_CALLOC(ctrace, (gwr%nqibz, gwr%ntau, gwr%nsppol))
+
+   do my_is=1,gwr%my_nspins
+     spin = gwr%my_spins(my_is)
+     do my_it=1,gwr%my_ntau
+       itau = gwr%my_itaus(my_it)
+       do my_iqi=1,gwr%my_nqibz
+         iq_ibz = gwr%my_qibz_inds(my_iqi)
+         ctrace(iq_ibz, itau, spin) = gwr%chit_qibz(iq_ibz, itau, spin)%get_trace()
+       end do
+     end do
+   end do
+
+ case default
+   ABI_ERROR(sjoin("Invalid value of what:", what))
+ end select
+
+ call xmpi_sum(ctrace, gwr%comm, ierr)
+ if (xmpi_comm_rank(gwr%comm) == 0) then
+   call wrtout(ab_out, sjoin("Trace of", what, "matrix for testing purposes:"))
+   do spin=1,gwr%nsppol
+     call print_arr(ctrace(:,:,spin), unit=ab_out)
+   end do
+ end if
+
+ ABI_FREE(ctrace)
+
+end subroutine gwr_print_trace
 !!***
 
 !----------------------------------------------------------------------
@@ -1962,11 +2034,10 @@ subroutine gwr_run_g0w0(gwr)
 
 ! *************************************************************************
 
- call gwr%print(header="Before build_chi")
  call gwr%build_chi()
  !call gwr%build_wc()
  !call gwr%build_sigmac()
- call gwr%print(header="Before returning from run_g0w0")
+ !call gwr%print(header="Before returning from run_g0w0")
 
 end subroutine gwr_run_g0w0
 !!***

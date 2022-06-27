@@ -400,9 +400,9 @@ pure function linspace(start, stop, nn)
 
  select case (nn)
  case (1:)
-   length = stop-start
+   length = stop - start
    do ii=1,nn
-     linspace(ii)=start+length*(ii-1)/(nn-1)
+     linspace(ii) = start + length * (ii-1) / (nn-1)
    end do
 
  case (0)
@@ -3866,11 +3866,11 @@ end subroutine print_arr1d_spc
 !!
 !! SOURCE
 
-subroutine print_arr1d_dpc(arr,max_r,unit,mode_paral)
+subroutine print_arr1d_dpc(arr, max_r, unit, mode_paral)
 
 !Arguments ------------------------------------
 !scalars
- integer,optional,intent(in) :: unit,max_r
+ integer,optional,intent(in) :: unit, max_r
  character(len=4),optional,intent(in) :: mode_paral
 !arrays
  complex(dpc),intent(in) :: arr(:)
@@ -3891,7 +3891,7 @@ subroutine print_arr1d_dpc(arr,max_r,unit,mode_paral)
   write(msg,'(2a)')' Wrong value of mode_paral ',mode
   ABI_BUG(msg)
  end if
- !
+
  ! === Print out matrix ===
  nr=SIZE(arr,DIM=1) ; if (mr>nr) mr=nr
 
@@ -3926,11 +3926,11 @@ end subroutine print_arr1d_dpc
 !!
 !! SOURCE
 
-subroutine print_arr2d_spc(arr,max_r,max_c,unit,mode_paral)
+subroutine print_arr2d_spc(arr, max_r, max_c, unit, mode_paral)
 
 !Arguments ------------------------------------
 !scalars
- integer,optional,intent(in) :: unit,max_r,max_c
+ integer,optional,intent(in) :: unit, max_r, max_c
  character(len=4),optional,intent(in) :: mode_paral
 !arrays
  complex(spc),intent(in) :: arr(:,:)

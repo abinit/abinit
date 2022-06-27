@@ -23211,4 +23211,39 @@ and the basic dimensions of the job computed at runtime.
 """,
 ),
 
+Variable(
+    abivarname="gwr_task",
+    varset="gw",
+    vartype="string",
+    topics=['GWR_basic'],
+    dimensions=[1],
+    defaultval="G0W0",
+    mnemonics="GWR TASK",
+    requires="[[optdriver]] == 6",
+    added_in_version="9.6.2",
+    text=r"""
+This variable defines ...
+""",
+),
+
+Variable(
+    abivarname="gwr_ntau",
+    varset="gw",
+    vartype="integer",
+    topics=['GWR_basic'],
+    dimensions=[1],
+    defaultval=12,
+    mnemonics="GWR Number of TAU points.",
+    requires="[[optdriver]] == 6",
+    added_in_version="9.6.2",
+    text=r"""
+This variable defines the number of imaginary-time points
+
+!!! important
+
+    To avoid load imbalance the the total number of MPI processes should be a divisor/multiple of
+    [[gwr_ntau]] * [[nsppol]]
+""",
+),
+
 ]
