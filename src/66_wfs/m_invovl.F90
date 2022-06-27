@@ -272,6 +272,7 @@ CONTAINS
       & /)
 
   end function make_invovl_kpt_gpu
+!!***
 #endif
 
 !!****f* m_invovl/init_invovl
