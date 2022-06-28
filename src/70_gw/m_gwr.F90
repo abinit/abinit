@@ -1247,7 +1247,7 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
  type(desc_t),pointer :: desc_q
 !arrays
  real(dp),allocatable :: my_weights(:,:)
- complex(dp):: cwork_t(gwr%my_ntau), cwork_wglb(gwr%my_ntau)
+ complex(dp):: cwork_t(gwr%my_ntau), cwork_wglb(gwr%ntau)
  type(matrix_scalapack), pointer :: mats(:)
 
 ! *************************************************************************
