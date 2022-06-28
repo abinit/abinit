@@ -73,17 +73,18 @@ module m_chebfiwf
  real(dp), parameter :: inv_sqrt2 = 1/sqrt2
 
 ! For use in getghc_gsc1
- integer,save  :: l_cpopt
- integer,save  :: l_icplx
- integer,save  :: l_istwf
- integer,save  :: l_npw
- integer,save  :: l_nband_filter
- integer,save  :: l_nspinor
- logical,save  :: l_paw
- integer,save  :: l_prtvol
- integer,save  :: l_sij_opt
+ integer, save :: l_cpopt
+ integer, save :: l_icplx
+ integer, save :: l_istwf
+ integer, save :: l_npw
+ integer, save :: l_nband_filter
+ integer, save :: l_nspinor
+ logical, save :: l_paw
+ integer, save :: l_prtvol
+ integer, save :: l_sij_opt
  integer, save :: l_paral_kgb
  integer, save :: l_useria
+ integer, save :: l_block_sliced
  real(dp), allocatable,save ::  l_pcon(:)
  type(mpi_type),pointer,save :: l_mpi_enreg
  type(gs_hamiltonian_type),pointer,save :: l_gs_hamk
@@ -186,6 +187,7 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  l_gs_hamk => gs_hamk
  l_nband_filter = nband
  l_paral_kgb = dtset%paral_kgb
+ l_block_sliced = dtset%diago_apply_block_sliced
 
 !Variables
  nline=dtset%nline
@@ -534,7 +536,7 @@ subroutine getBm1X(X,Bm1X,transposer)
    ABI_MALLOC(cwaveprj_next, (l_gs_hamk%natom,l_nspinor*blockdim))
    call pawcprj_alloc(cwaveprj_next,0,l_gs_hamk%dimcprj)
    call apply_invovl(l_gs_hamk, ghc_filter(:,:), gsm1hc_filter(:,:), cwaveprj_next(:,:), &
-&       spacedim, blockdim, l_mpi_enreg, l_nspinor)
+&       spacedim, blockdim, l_mpi_enreg, l_nspinor, l_block_sliced)
  else
    gsm1hc_filter(:,:) = ghc_filter(:,:)
  end if
