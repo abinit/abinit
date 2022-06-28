@@ -1108,6 +1108,7 @@ subroutine gwr_rotate_gt(gwr, my_ikf, my_it, my_is, desc_kbz, gt_kbz)
        gt_kbz(ioe)%buffer_cplx(il_g1, il_g2) = gt_kbz(ioe)%buffer_cplx(il_g1, il_g2) ! * ??
      end do
    end do
+   call gt_kbz(ioe)%print(header=sjoin("not isirr_k with gt_kibz:", itoa(ik_ibz)))
  end do
 
 end subroutine gwr_rotate_gt

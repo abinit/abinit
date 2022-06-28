@@ -44,6 +44,7 @@
  ldxy = ldx*ldy
 
  if (option/=3) then
+   print *, "npwin", npwin
    ABI_MALLOC(indpw_kin,(4,npwin))
    call indfftrisc(gboundin(3:3+2*mgfft+4,1),indpw_kin,kg_kin,mgfft,ngbin,ngfft,npwin)
  end if
