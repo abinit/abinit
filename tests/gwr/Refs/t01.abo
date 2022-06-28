@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Mon 27 Jun 2022.
-- ( at 02h53 )
+- ( at 14h47 )
   
 - input  file    -> /Users/gmatteo/git_repos/abinit_gwr/_build/tests/Test_suite/gwr_t01/t01.abi
 - output file    -> t01.abo
@@ -571,6 +571,12 @@ meta: {optdriver: 6, }
 
 --------------------------------------------------------------------------------
 
+
+ ==== FFT mesh for GWR ====
+  FFT mesh divisions ........................    12   12   12
+  Augmented FFT divisions ...................    13   13   12
+  FFT algorithm .............................   312
+  FFT cache size ............................    16
  ==== Info on the GWR object ====
 
 --- !GWR_params
@@ -846,13 +852,13 @@ P           mkmem           3
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          5.6  wall=          5.8
+- Proc.   0 individual time (sec): cpu=          7.1  wall=          8.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered   2 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          5.6  wall=          5.8
++Overall time at end (sec) : cpu=          7.1  wall=          8.4
 - [ALL OK] MEMORY CONSUMPTION REPORT FOR C CODE:
 -   There were 161 allocations and 161 deallocations in C code
 - [ALL OK] MEMORY CONSUMPTION REPORT FOR FORTRAN CODE:
