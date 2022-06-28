@@ -3617,8 +3617,9 @@ subroutine slk_ptrans(in_mat, trans, out_mat)
  ! prototype
  !call pdtran(m, n, alpha, a, ia, ja, desca, beta, c, ic, jc, descc)
 
-#ifdef HAVE_LINALG_SCALAPACK
+
  if (allocated(in_mat%buffer_cplx)) then
+#ifdef HAVE_LINALG_SCALAPACK
    ! Transposes a complex distributed matrix, conjugated
    ! sub(C) := beta * sub(C) + alpha * conjg(sub(A)')
    select case (trans)
@@ -3689,8 +3690,8 @@ subroutine slk_change_size_blocs(in_mat, out_mat, size_blocs)
  ! prototype
  !call pzgemr2d(m, n, a, ia, ja, desca, b, ib, jb, descb, ictxt)
 
-#ifdef HAVE_LINALG_SCALAPACK
  if (allocated(in_mat%buffer_cplx)) then
+#ifdef HAVE_LINALG_SCALAPACK
    call pzgemr2d(in_mat%sizeb_global(1), in_mat%sizeb_global(2),  &
                  in_mat%buffer_cplx, 1, 1, in_mat%descript%tab,   &
                  out_mat%buffer_cplx, 1, 1, out_mat%descript%tab, &
@@ -3747,8 +3748,8 @@ subroutine slk_take_from(mat, source)
  ! prototype
  !call pzgemr2d(m, n, a, ia, ja, desca, b, ib, jb, descb, ictxt)
 
-#ifdef HAVE_LINALG_SCALAPACK
  if (allocated(mat%buffer_cplx)) then
+#ifdef HAVE_LINALG_SCALAPACK
    call pzgemr2d(mat%sizeb_global(1), mat%sizeb_global(2),  &
                  source%buffer_cplx, 1, 1, source%descript%tab,   &
                  mat%buffer_cplx, 1, 1, mat%descript%tab, &
@@ -3805,8 +3806,8 @@ complex(dp) function slk_get_trace(mat) result(ctrace)
  ! prototype for complex version.
  ! COMPLEX*16 FUNCTION PZLATRA( N, A, IA, JA, DESCA )
 
-#ifdef HAVE_LINALG_SCALAPACK
  if (allocated(mat%buffer_cplx)) then
+#ifdef HAVE_LINALG_SCALAPACK
    ctrace = PZLATRA(mat%sizeb_global(1), mat%buffer_cplx, 1, 1, mat%descript%tab)
  else if (allocated(mat%buffer_real)) then
    rtrace = PDLATRA(mat%sizeb_global(1), mat%buffer_real, 1, 1, mat%descript%tab)

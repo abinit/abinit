@@ -360,8 +360,6 @@ module m_gwr
    procedure :: run_g0w0 => gwr_run_g0w0
 
  end type gwr_t
-
- !public :: gwr_new
 !!***
 
 contains
@@ -371,8 +369,10 @@ contains
 
 !!****f* m_gwr/gwr_init
 !! NAME
+!! gwr_init
 !!
 !! FUNCTION
+!!  Initialize the object.
 !!
 !! INPUTS
 !!
@@ -770,10 +770,6 @@ end subroutine gwr_init
 !! FUNCTION
 !!  Free memory
 !!
-!! INPUTS
-!!
-!! OUTPUT
-!!
 !! PARENTS
 !!
 !! CHILDREN
@@ -1042,6 +1038,7 @@ end subroutine gwr_build_gtau_from_wfk
 !!  gwr_rotate_gt
 !!
 !! FUNCTION
+!!  Reconstruct the Green's functions in the kBZ from the IBZ.
 !!
 !! INPUTS
 !!
@@ -1117,11 +1114,14 @@ end subroutine gwr_rotate_gt
 !!  gwr_get_green_gpr
 !!
 !! FUNCTION
+!!  Use FFTs to compute:
 !!
-!! G_k(g,g') --> G_k(g',r) for each k in the BZ treated by me for given spin and tau.
+!!      G_k(g,g') --> G_k(g',r)
 !!
-!!   1) FFT Transform the first index (local): G(g,g',it) --> G(r,g',it)
-!!   2) MPI transposition: G(r,g',it) --> G^*(g',r,it)
+!!  for each k in the BZ treated by me for given spin and tau.
+!!
+!!  1) FFT Transform the first index (local): G(g,g',it) --> G(r,g',it)
+!!  2) MPI transposition: G(r,g',it) --> G^*(g',r,it)
 !!
 !! INPUTS
 !!
@@ -1210,6 +1210,7 @@ end subroutine gwr_get_green_gpr
 !!  gwr_cos_transform
 !!
 !! FUNCTION
+!!  Perform cosine transform.
 !!
 !! INPUTS
 !!
@@ -1477,6 +1478,7 @@ end subroutine gwr_print
 !!  gwr_build_chi
 !!
 !! FUNCTION
+!!  Compute polarizability.
 !!
 !! INPUTS
 !!
@@ -1765,7 +1767,8 @@ end subroutine gwr_build_chi
 !!  gwr_print_trace
 !!
 !! FUNCTION
-!!  This is a global routine that should be called by all procs inside gwr%comm.
+!!  Print traces of scalapack matrices to std_out and ab_out.
+!!  NB: This is a global routine that should be called by all procs inside gwr%comm.
 !!
 !! INPUTS
 !!
@@ -1914,7 +1917,6 @@ subroutine gwr_build_wc(gwr)
 
        ! Build W(q, iw) = e^{-1}_q(g,g',iw) v_q(g,g')
        ! Remove bare vc
-#if 1
        do ig2=1,wc%sizeb_local(2)
          do ig1=1,wc%sizeb_local(1)
            call wc%loc2glob(ig1, ig2, ig1_glob, ig2_glob)
@@ -1923,7 +1925,6 @@ subroutine gwr_build_wc(gwr)
            !wc%buffer_cplx(ig1, ig2) = wc%buffer_cplx(ig1, ig2) ! * vc_qg1 * vc_qg2
          end do ! ig1
        end do ! ig2
-#endif
 
      end do  ! my_it
    end do ! my_is
@@ -1947,7 +1948,7 @@ end subroutine gwr_build_wc
 !!  gwr_build_sigmac
 !!
 !! FUNCTION
-!!  Compute Sigma(i tau)
+!!  Compute Sigma_c(i tau)
 !!
 !! INPUTS
 !!
