@@ -2144,7 +2144,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  endif
 endif
 
- ! Do not store it for  rdm_update because it might be too large!
+ ! Do not store it for rdm_update because it might be too large!
  if(.not.rdm_update) then
    ABI_MALLOC(sigcme,(nomega_sigc,ib1:ib2,ib1:ib2,Sigp%nkptgw,Sigp%nsppol*Sigp%nsig_ab))
    sigcme=czero
@@ -2940,12 +2940,8 @@ endif
    ABI_FREE(sigcme)
  end if
 
- if (allocated(kxc)) then
-   ABI_FREE(kxc)
- end if
- if (allocated(qp_vtrial)) then
-   ABI_FREE(qp_vtrial)
- end if
+ ABI_SFREE(kxc)
+ ABI_SFREE(qp_vtrial)
 
  ABI_FREE(ks_nhat)
  ABI_FREE(ks_nhatgr)

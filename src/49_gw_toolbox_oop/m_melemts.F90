@@ -447,7 +447,7 @@ end subroutine my_select_melements
 !!
 !! SOURCE
 
-subroutine melements_init(Mels,Mflags_in,nsppol,nspden,nspinor,nkibz,kibz,bands_idx)
+subroutine melements_init(Mels, Mflags_in, nsppol, nspden, nspinor, nkibz, kibz, bands_idx)
 
 !Arguments ------------------------------------
 !scalars
@@ -733,7 +733,7 @@ end subroutine melements_mpisum
 !!
 !! SOURCE
 
-subroutine melements_print(Mels,names_list,header,unit,prtvol,mode_paral)
+subroutine melements_print(Mels, names_list, header, unit, prtvol, mode_paral)
 
 !Arguments ------------------------------------
 !scalars
