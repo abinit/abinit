@@ -662,7 +662,7 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
      !LOOP OVER q1q2 SECOND ORDER GRADIENT
      do iq1q2grad=1,nq1q2grad
 
-       !Read dkdk wf1
+       ! Read dkdk wf1
        if (dtset%rf2_dkdk==2 .or. dtset%rf2_dkdk==3) then
          call wfk_t_dkdk(iq1q2grad)%read_bks( iband, indkpt1(ikpt), &
        & isppol, xmpio_single, cg_bks=cg1_dkdk)
