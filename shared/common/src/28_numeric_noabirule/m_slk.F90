@@ -190,6 +190,10 @@ module m_slk
    procedure :: ptrans => slk_ptrans
     ! Transpose matrix
 
+   procedure :: change_size_blocs => slk_change_size_blocs
+
+   procedure :: take_from => slk_take_from
+
    procedure :: get_trace => slk_get_trace
     ! Compute the trace of an N-by-N distributed matrix.
 
@@ -522,7 +526,7 @@ subroutine init_matrix_scalapack(matrix, nbli_global, nbco_global, processor, is
 
 #ifdef HAVE_LINALG_ELPA
  if(matrix%sizeb_blocs(1) .ne. matrix%sizeb_blocs(2)) then
-    matrix%sizeb_blocs(1) = MIN(matrix%sizeb_blocs(1),matrix%sizeb_blocs(2))
+    matrix%sizeb_blocs(1) = MIN(matrix%sizeb_blocs(1), matrix%sizeb_blocs(2))
     matrix%sizeb_blocs(2) = matrix%sizeb_blocs(1)
  end if
 #endif
@@ -640,10 +644,11 @@ end subroutine slkmat_print
 !!
 !! SOURCE
 
-type(matrix_scalapack) function matrix_scalapack_copy(in_mat) result(new_mat)
+type(matrix_scalapack) function matrix_scalapack_copy(in_mat, free) result(new_mat)
 
 !Arguments ------------------------------------
- class(matrix_scalapack),target,intent(in) :: in_mat
+ class(matrix_scalapack),target,intent(inout) :: in_mat
+ logical,optional,intent(in) :: free
 
 !Local variables-------------------------------
  integer :: istwfk
@@ -662,6 +667,10 @@ type(matrix_scalapack) function matrix_scalapack_copy(in_mat) result(new_mat)
    new_mat%buffer_cplx = in_mat%buffer_cplx
  else
    new_mat%buffer_real = in_mat%buffer_real
+ end if
+
+ if (present(free)) then
+   if (free) call in_mat%free()
  end if
 
 end function matrix_scalapack_copy
@@ -3430,7 +3439,6 @@ end subroutine slk_pzhegvx
 subroutine slk_zinvert(Slk_mat)
 
 !Arguments ------------------------------------
-!scalars
  class(matrix_scalapack),intent(inout) :: Slk_mat
 
 #ifdef HAVE_LINALG_SCALAPACK
@@ -3466,7 +3474,7 @@ subroutine slk_zinvert(Slk_mat)
 
  call PZGETRI(Slk_mat%sizeb_global(1), Slk_mat%buffer_cplx, 1, 1, Slk_mat%descript%tab, ipiv, &
               work, lwork, iwork, liwork, info)
- ABI_CHECK(info == 0, "PZGETRI: Error during compuation of workspace size")
+ ABI_CHECK(info == 0, "PZGETRI: Error while computing workspace size")
 
  lwork = nint(real(work(1))); liwork=iwork(1)
  ABI_FREE(work)
@@ -3558,7 +3566,19 @@ end subroutine slk_zdhp_invert
 !!  slk_ptrans
 !!
 !! FUNCTION
-!!  Transpose matrix
+!! Transposes a matrix
+!!
+!!    sub( C ) := beta*sub( C ) + alpha*op( sub( A ) )
+!!
+!! where
+!!
+!!    sub( C ) denotes C(IC:IC+M-1,JC:JC+N-1),
+!!
+!!    sub( A ) denotes A(IA:IA+N-1,JA:JA+M-1), and, op( X ) = X'.
+!!
+!! Thus, op( sub( A ) ) denotes A(IA:IA+N-1,JA:JA+M-1)'.
+!!
+!! Beta is a scalar, sub( C ) is an m by n submatrix, and sub( A ) is an n by m submatrix.
 !!
 !! INPUTS
 !!
@@ -3578,15 +3598,21 @@ subroutine slk_ptrans(in_mat, trans, out_mat)
  class(matrix_scalapack), intent(inout) :: out_mat
 
 !Local variables-------------------------------
- integer :: istwf_k
+ integer :: istwf_k, sb, size_blocs(2)
 
 ! *************************************************************************
 
  istwf_k = merge(1, 2, allocated(in_mat%buffer_cplx))
+ size_blocs(1) = in_mat%sizeb_global(2)
+ sb = in_mat%sizeb_global(1) / in_mat%processor%grid%dims(2)
+ if (mod(sb, in_mat%processor%grid%dims(2)) /= 0) sb = sb + 1
+ size_blocs(2) = sb
+ !size_blocs = in_mat%sizeb_blocs(2:1:-1)
 
  ! TODO: To be tested.
- call out_mat%free()
- call out_mat%init(in_mat%sizeb_global(2), in_mat%sizeb_global(1), in_mat%processor, istwf_k)
+ !call out_mat%free()
+ call out_mat%init(in_mat%sizeb_global(2), in_mat%sizeb_global(1), in_mat%processor, istwf_k, &
+                   size_blocs=size_blocs)
 
  ! prototype
  !call pdtran(m, n, alpha, a, ia, ja, desca, beta, c, ic, jc, descc)
@@ -3594,7 +3620,7 @@ subroutine slk_ptrans(in_mat, trans, out_mat)
 #ifdef HAVE_LINALG_SCALAPACK
  if (allocated(in_mat%buffer_cplx)) then
    ! Transposes a complex distributed matrix, conjugated
-   ! sub(C):=beta*sub(C) + alpha*conjg(sub(A)'),
+   ! sub(C) := beta * sub(C) + alpha * conjg(sub(A)')
    select case (trans)
    case ("C")
 
@@ -3619,6 +3645,126 @@ subroutine slk_ptrans(in_mat, trans, out_mat)
  end if
 
 end subroutine slk_ptrans
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_slk/slk_change_size_blocs
+!! NAME
+!!  slk_change_size_blocs
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine slk_change_size_blocs(in_mat, out_mat, size_blocs)
+
+!Arguments ------------------------------------
+ class(matrix_scalapack),intent(in) :: in_mat
+ class(matrix_scalapack),intent(out) :: out_mat
+ integer,optional,intent(in) :: size_blocs(2)
+
+!Local variables-------------------------------
+ integer :: istwf_k
+
+! *************************************************************************
+
+ istwf_k = merge(1, 2, allocated(in_mat%buffer_cplx))
+
+ if (present(size_blocs)) then
+   call out_mat%init(in_mat%sizeb_global(1), in_mat%sizeb_global(1), in_mat%processor, istwf_k, size_blocs=size_blocs)
+ else
+   call out_mat%init(in_mat%sizeb_global(1), in_mat%sizeb_global(1), in_mat%processor, istwf_k)
+ end if
+ !return
+
+ ! prototype
+ !call pzgemr2d(m, n, a, ia, ja, desca, b, ib, jb, descb, ictxt)
+
+#ifdef HAVE_LINALG_SCALAPACK
+ if (allocated(in_mat%buffer_cplx)) then
+   call pzgemr2d(in_mat%sizeb_global(1), in_mat%sizeb_global(2),  &
+                 in_mat%buffer_cplx, 1, 1, in_mat%descript%tab,   &
+                 out_mat%buffer_cplx, 1, 1, out_mat%descript%tab, &
+                 in_mat%processor%grid%ictxt)
+
+ else if (allocated(in_mat%buffer_real)) then
+   call pdgemr2d(in_mat%sizeb_global(1), in_mat%sizeb_global(2),  &
+                 in_mat%buffer_real, 1, 1, in_mat%descript%tab,   &
+                 out_mat%buffer_real, 1, 1, out_mat%descript%tab, &
+                 in_mat%processor%grid%ictxt)
+#endif
+ else
+   ABI_ERROR("Neither buffer_cplx nor buffer_real are allocated!")
+ end if
+
+end subroutine slk_change_size_blocs
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_slk/slk_take_from
+!! NAME
+!!  slk_take_from
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine slk_take_from(mat, source)
+
+!Arguments ------------------------------------
+ class(matrix_scalapack),intent(inout) :: mat
+ class(matrix_scalapack),intent(in) :: source
+
+!Local variables-------------------------------
+ integer :: istwfk_1, istwfk_2
+
+! *************************************************************************
+
+ istwfk_1 = merge(1, 2, allocated(mat%buffer_cplx))
+ istwfk_2 = merge(1, 2, allocated(source%buffer_cplx))
+
+ ABI_CHECK(istwfk_1 == istwfk_2, "istwfk_1 /= istwfk_2")
+ ABI_CHECK(all(mat%sizeb_global == source%sizeb_global), "Matrices should have the same global shape!")
+
+ ! prototype
+ !call pzgemr2d(m, n, a, ia, ja, desca, b, ib, jb, descb, ictxt)
+
+#ifdef HAVE_LINALG_SCALAPACK
+ if (allocated(mat%buffer_cplx)) then
+   call pzgemr2d(mat%sizeb_global(1), mat%sizeb_global(2),  &
+                 source%buffer_cplx, 1, 1, source%descript%tab,   &
+                 mat%buffer_cplx, 1, 1, mat%descript%tab, &
+                 mat%processor%grid%ictxt)
+
+ else if (allocated(mat%buffer_real)) then
+   call pdgemr2d(mat%sizeb_global(1), mat%sizeb_global(2),  &
+                 source%buffer_real, 1, 1, source%descript%tab,   &
+                 mat%buffer_real, 1, 1, mat%descript%tab, &
+                 mat%processor%grid%ictxt)
+#endif
+ else
+   ABI_ERROR("Neither buffer_cplx nor buffer_real are allocated!")
+ end if
+
+end subroutine slk_take_from
 !!***
 
 !----------------------------------------------------------------------
@@ -4172,7 +4318,6 @@ subroutine slk_single_fview_read_mask(Slk_mat,mask_of_glob,offset_of_glob,nsbloc
 !************************************************************************
 
 #ifdef HAVE_MPI_IO
-!@matrix_scalapack
  bsize_frm = xmpio_bsize_frm  ! Byte size of the Fortran record marker.
  if (PRESENT(is_fortran_file)) then
    if (.not.is_fortran_file) bsize_frm = 0

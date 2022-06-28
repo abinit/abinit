@@ -245,7 +245,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  end if
 
  call cwtime(cpu, wall, gflops, "start")
- call cwtime_report(" eph%init", cpu, wall, gflops)
+ call cwtime_report(" gwr%init", cpu, wall, gflops)
 
  if (use_wfk) then
    ! Construct crystal and ebands from the GS WFK file.
@@ -279,10 +279,6 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  call pspini(dtset, dtfil, ecore, psp_gencond, gsqcutc_eff, gsqcutf_eff, pawrad, pawtab, psps, cryst%rprimd, comm_mpi=comm)
 
  call gwr%init(dtset, dtfil, cryst, psps, pawtab, ebands, mpi_enreg, comm)
- if (my_rank == master) then
-   call gwr%print(unit=ab_out)
-   call gwr%print(unit=std_out)
- end if
 
  if (use_wfk) then
    call gwr%build_gtau_from_wfk(wfk0_path)
@@ -305,12 +301,12 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  !=====================
  !==== Free memory ====
  !=====================
- call gwr%free()
  call cryst%free()
  call wfk0_hdr%free()
  call ebands_free(ebands)
  call pawfgr_destroy(pawfgr)
  call destroy_mpi_enreg(mpi_enreg)
+ call gwr%free()
 
  ! Deallocation for PAW.
  if (dtset%usepaw == 1) then
