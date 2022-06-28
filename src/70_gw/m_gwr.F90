@@ -1190,8 +1190,14 @@ subroutine gwr_get_green_gpr(gwr, my_it, my_is, desc_kbz, gt_gpr)
      call rgp%init(gwr%nfft * gwr%nspinor, npwsp, gwr%g_slkproc, desc_k%istwfk, &
                    size_blocs=[gwr%nfft * gwr%nspinor, col_bsize])
 
+     ABI_CHECK(size(ggp%buffer_cplx, dim=2) == size(rgp%buffer_cplx, dim=2), "len2")
+
      ! FFT. Results stored in rgp
      do ig2=1,ggp%sizeb_local(2)
+
+       ABI_CHECK(size(ggp%buffer_cplx(:, ig2)) == desc_k%npw, "npw")
+       ABI_CHECK(size(rgp%buffer_cplx(:, ig2)) == gwr%nfft * gwr%nspinor, "gwr%nfft * gwr%nspinor")
+
        call fft_ug(desc_k%npw, gwr%nfft, gwr%nspinor, ndat1, &
                    gwr%mgfft, gwr%ngfft, desc_k%istwfk, desc_k%gvec, desc_k%gbound, &
                    ggp%buffer_cplx(:, ig2), rgp%buffer_cplx(:, ig2))
@@ -1640,14 +1646,20 @@ subroutine gwr_build_chi(gwr)
 
          call chiq_gpr(my_iqi)%ptrans("C", chi_rgp)
 
-         ! DEBUG SECTION
+         call wrtout(std_out, "DEBUG")
          call chiq_gpr(my_iqi)%print(header="chiq_gpr(my_iqi)")
-         call chi_rgp%print(header="chi_rgp")
          call gwr%chi_qibz(iq_ibz, itau, spin)%print(header="chi_qibz")
-         ! END DEBUG SECTION
+         call chi_rgp%print(header="chi_rgp")
+         call wrtout(std_out, "END DEBUG")
+
+         ABI_CHECK(size(gwr%chi_qibz(iq_ibz, itau, spin)%buffer_cplx, dim=2) == size(chi_rgp%buffer_cplx, dim=2), "len2")
 
          ! FFT r --> g along the first dimension: chi_q(r,g') --> chi_q(g,g')
          do ig2=1,chi_rgp%sizeb_local(2)
+
+           ABI_CHECK(size(chi_rgp%buffer_cplx(:, ig2)) == gwr%nfft * gwr%nspinor, "gwr%nfft * gwr%nspinor")
+           ABI_CHECK(size(gwr%chi_qibz(iq_ibz, itau, spin)%buffer_cplx(:, ig2)) == desc_q%npw, "npw")
+
            call fft_ur(desc_q%npw, gwr%nfft, gwr%nspinor, ndat1, gwr%mgfft, gwr%ngfft, &
                        istwfk1, desc_q%gvec, desc_q%gbound, &
                        chi_rgp%buffer_cplx(:, ig2),         &                  ! ur(in)

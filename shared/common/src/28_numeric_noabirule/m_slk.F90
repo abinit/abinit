@@ -3604,11 +3604,11 @@ subroutine slk_ptrans(in_mat, trans, out_mat)
 ! *************************************************************************
 
  istwf_k = merge(1, 2, allocated(in_mat%buffer_cplx))
+
  size_blocs(1) = in_mat%sizeb_global(2)
  sb = in_mat%sizeb_global(1) / in_mat%processor%grid%dims(2)
- if (mod(sb, in_mat%processor%grid%dims(2)) /= 0) sb = sb + 1
+ if (mod(in_mat%sizeb_global(1), in_mat%processor%grid%dims(2)) /= 0) sb = sb + 1
  size_blocs(2) = sb
- !size_blocs = in_mat%sizeb_blocs(2:1:-1)
 
  ! TODO: To be tested.
  !call out_mat%free()
