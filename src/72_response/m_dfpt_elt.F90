@@ -29,7 +29,6 @@ module m_dfpt_elt
  use m_abicore
  use m_errors
  use m_xmpi
- use m_mpinfo
  use m_dtset
 
  use defs_datatypes, only : pseudopotential_type
@@ -46,10 +45,10 @@ module m_dfpt_elt
  use m_atm2fft,     only : atm2fft, dfpt_atm2fft
  use m_mkcore,      only : dfpt_mkcore
  use m_dfpt_mkvxcstr, only : dfpt_mkvxcstr
- use m_paral_atom, only : get_my_atmtab, free_my_atmtab
- use m_mpinfo,  only : ptabs_fourdp, proc_distrb_cycle
+ use m_paral_atom,   only : get_my_atmtab, free_my_atmtab
+ use m_mpinfo,       only : ptabs_fourdp, proc_distrb_cycle, proc_distrb_nband
  use m_fftcore,      only : sphereboundary
- use m_fft,             only : fourdp
+ use m_fft,          only : fourdp
 
  implicit none
 
@@ -2685,8 +2684,6 @@ end subroutine dfpt_ewald
 subroutine dfpt_ewalddq(dyewdq,gmet,my_natom,natom,qphon,rmet,sumg0,typat,ucvol,xred,zion, &
 &                 mpi_atmtab,comm_atom ) ! optional arguments (parallelism))
 
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: my_natom,natom,sumg0
@@ -2784,7 +2781,7 @@ subroutine dfpt_ewalddq(dyewdq,gmet,my_natom,natom,qphon,rmet,sumg0,typat,ucvol,
                    arg=arga-argb
                    c1r=cos(arg)*term
                    c1i=sin(arg)*term
-  
+
                    do iq=1,3
                      gpqdq=gmet(iq,1)*gpq(1)+gmet(iq,2)*gpq(2)+gmet(iq,3)*gpq(3)
                      do mu=1,3
@@ -2801,7 +2798,7 @@ subroutine dfpt_ewalddq(dyewdq,gmet,my_natom,natom,qphon,rmet,sumg0,typat,ucvol,
                        end do
                      end do
                    end do
-  
+
                  end do
                end do
              end if
@@ -2841,7 +2838,7 @@ subroutine dfpt_ewalddq(dyewdq,gmet,my_natom,natom,qphon,rmet,sumg0,typat,ucvol,
  do
    nr=nr+1
    newr=0
- 
+
    do ir3=-nr,nr
      do ir2=-nr,nr
        do ir1=-nr,nr
@@ -2883,7 +2880,7 @@ subroutine dfpt_ewalddq(dyewdq,gmet,my_natom,natom,qphon,rmet,sumg0,typat,ucvol,
                    rq(1)=rmet(1,1)*r1+rmet(1,2)*r2+rmet(1,3)*r3
                    rq(2)=rmet(2,1)*r1+rmet(2,2)*r2+rmet(2,3)*r3
                    rq(3)=rmet(3,1)*r1+rmet(3,2)*r2+rmet(3,3)*r3
-                   do iq=1,3               
+                   do iq=1,3
                      do mu=1,3
 !                       do nu=1,3
                        do nu=1,mu
@@ -2921,7 +2918,7 @@ subroutine dfpt_ewalddq(dyewdq,gmet,my_natom,natom,qphon,rmet,sumg0,typat,ucvol,
  do ia0=1,my_natom
    ia=ia0;if(paral_atom)ia=my_atmtab(ia0)
    do ib=1,ia
-     do iq=1,3               
+     do iq=1,3
        do mu=1,3
          do nu=1,mu
            do ii=1,2
@@ -3022,8 +3019,6 @@ end subroutine dfpt_ewalddq
 
 subroutine dfpt_ewalddqdq(dyewdqdq,gmet,my_natom,natom,qphon,rmet,sumg0,typat,ucvol,xred,zion, &
 &                 mpi_atmtab,comm_atom ) ! optional arguments (parallelism))
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -3161,11 +3156,11 @@ subroutine dfpt_ewalddqdq(dyewdqdq,gmet,my_natom,natom,qphon,rmet,sumg0,typat,uc
                            term1=term1+gpq(mu)*gpq(nu)*gmet(iq1,iq2)
                            term1=-term1*(fac2+2.0_dp/gsq)
 
-                           term2=delag*delbd + delbg*delad 
+                           term2=delag*delbd + delbg*delad
 
                            term3=gpqdq1*gpqdq2*gpq(mu)*gpq(nu)
                            term3=term3*(fac8/gsq + fac2sqr + 8.0_dp/gsqsq)
-   
+
                            gterms=term1+term2+term3
                            work(re,mu,ia,nu,ib,iq1,iq2)=work(re,mu,ia,nu,ib,iq1,iq2)+gterms*c1r
                            work(im,mu,ia,nu,ib,iq1,iq2)=work(im,mu,ia,nu,ib,iq1,iq2)+gterms*c1i
@@ -3256,8 +3251,8 @@ subroutine dfpt_ewalddqdq(dyewdqdq,gmet,my_natom,natom,qphon,rmet,sumg0,typat,uc
                    rq(1)=rmet(1,1)*r1+rmet(1,2)*r2+rmet(1,3)*r3
                    rq(2)=rmet(2,1)*r1+rmet(2,2)*r2+rmet(2,3)*r3
                    rq(3)=rmet(3,1)*r1+rmet(3,2)*r2+rmet(3,3)*r3
-                   do iq2=1,3               
-                     do iq1=1,3               
+                   do iq2=1,3
+                     do iq1=1,3
                        do mu=1,3
 !                         do nu=1,3
                          do nu=1,mu
@@ -3296,8 +3291,8 @@ subroutine dfpt_ewalddqdq(dyewdqdq,gmet,my_natom,natom,qphon,rmet,sumg0,typat,uc
  do ia0=1,my_natom
    ia=ia0;if(paral_atom)ia=my_atmtab(ia0)
    do ib=1,ia
-     do iq2=1,3               
-       do iq1=1,3               
+     do iq2=1,3
+       do iq1=1,3
          do mu=1,3
            do nu=1,mu
              do ii=1,2
@@ -3370,7 +3365,7 @@ subroutine dfpt_ewalddqdq(dyewdqdq,gmet,my_natom,natom,qphon,rmet,sumg0,typat,uc
    end do
  end do
  ABI_FREE(work)
- 
+
 !Destroy atom table used for parallelism
  call free_my_atmtab(my_atmtab,my_atmtab_allocated)
 
