@@ -1081,11 +1081,11 @@ subroutine gwr_rotate_gt(gwr, my_ikf, my_it, my_is, desc_kbz, gt_kbz)
  !tsign = merge(1, -1, trev_k == 0)
 
  ! Copy descriptor from IBZ, rotate gvec and recompute gbound.
- desc_kbz = gwr%green_desc_kibz(ik_ibz)%copy()
+ call gwr%green_desc_kibz(ik_ibz)%copy(desc_kbz)
 
  if (isirr_k) then
    do ioe=1,2
-     gt_kbz(ioe) = gwr%gt_kibz(ioe, ik_ibz, itau, spin)%copy()
+     call gwr%gt_kibz(ioe, ik_ibz, itau, spin)%copy(gt_kbz(ioe))
      call gt_kbz(ioe) %print(header=sjoin("isirr_k with gt_kibz:", itoa(ik_ibz)))
    end do
    return
@@ -1100,7 +1100,7 @@ subroutine gwr_rotate_gt(gwr, my_ikf, my_it, my_is, desc_kbz, gt_kbz)
 
  ! Get G_k with k in the BZ.
  do ioe=1,2
-   gt_kbz(ioe) = gwr%gt_kibz(ioe, ik_ibz, itau, spin)%copy()
+   call gwr%gt_kibz(ioe, ik_ibz, itau, spin)%copy(gt_kbz(ioe))
    do il_g2=1, gt_kbz(ioe)%sizeb_local(2)
      do il_g1=1, gt_kbz(ioe)%sizeb_local(1)
        ! TODO: factorize call for efficiency reasons.
@@ -1361,20 +1361,21 @@ end subroutine gwr_cos_transform
 !!
 !! SOURCE
 
-type(desc_t) function desc_copy(desc) result(new_desc)
+subroutine desc_copy(in_desc, new_desc)
 
 !Arguments ------------------------------------
- class(desc_t),intent(in) :: desc
+ class(desc_t),intent(in) :: in_desc
+ class(desc_t),intent(out) :: new_desc
 
 ! *************************************************************************
 
- new_desc%istwfk = desc%istwfk
- new_desc%npw = desc%npw
+ new_desc%istwfk = in_desc%istwfk
+ new_desc%npw = in_desc%npw
 
- call alloc_copy(desc%gvec, new_desc%gvec)
- call alloc_copy(desc%gbound, new_desc%gbound)
+ call alloc_copy(in_desc%gvec, new_desc%gvec)
+ call alloc_copy(in_desc%gbound, new_desc%gbound)
 
-end function desc_copy
+end subroutine desc_copy
 !!***
 
 !----------------------------------------------------------------------
@@ -1900,7 +1901,7 @@ subroutine gwr_build_wc(gwr)
        !col_bsize = npwsp / gwr%g_comm%nproc; if (mod(npwsp, gwr%g_comm%nproc) /= 0) col_bsize = col_bsize + 1
        !call gwr%wc_qibz(iq_ibz, itau, spin)%init(npwsp, npwsp, gwr%g_slkproc, 1, size_blocs=[npwsp, col_bsize])
 
-       gwr%wc_qibz(iq_ibz, itau, spin) = gwr%chi_qibz(iq_ibz, itau, spin)%copy(free=free_chi)
+       call gwr%chi_qibz(iq_ibz, itau, spin)%copy(gwr%wc_qibz(iq_ibz, itau, spin), free=free_chi)
        wc => gwr%wc_qibz(iq_ibz, itau, spin)
        call wc%print(header="wc")
 

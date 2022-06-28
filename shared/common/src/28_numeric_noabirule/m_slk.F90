@@ -644,10 +644,11 @@ end subroutine slkmat_print
 !!
 !! SOURCE
 
-type(matrix_scalapack) function matrix_scalapack_copy(in_mat, free) result(new_mat)
+subroutine matrix_scalapack_copy(in_mat, new_mat, free)
 
 !Arguments ------------------------------------
  class(matrix_scalapack),target,intent(inout) :: in_mat
+ class(matrix_scalapack),target,intent(out) :: new_mat
  logical,optional,intent(in) :: free
 
 !Local variables-------------------------------
@@ -673,7 +674,7 @@ type(matrix_scalapack) function matrix_scalapack_copy(in_mat, free) result(new_m
    if (free) call in_mat%free()
  end if
 
-end function matrix_scalapack_copy
+end subroutine matrix_scalapack_copy
 !!***
 
 !----------------------------------------------------------------------
