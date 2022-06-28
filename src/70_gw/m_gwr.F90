@@ -1612,7 +1612,7 @@ subroutine gwr_build_chi(gwr)
          ! Compute chi(R',r) for this r
          chit_scbox = gt_scbox(:, 1) * gt_scbox(:, 2)
 
-         ! Go back to G'=q + g' space immediately.
+         ! Go back to G'= q + g' space immediately.
          call plan_rp2gp%execute(chit_scbox)
 
          ! Extract chi_q(g', r) on the g-sphere from the FFT box in the supercell.
@@ -1646,11 +1646,11 @@ subroutine gwr_build_chi(gwr)
 
          call chiq_gpr(my_iqi)%ptrans("C", chi_rgp)
 
-         call wrtout(std_out, "DEBUG")
-         call chiq_gpr(my_iqi)%print(header="chiq_gpr(my_iqi)")
-         call gwr%chi_qibz(iq_ibz, itau, spin)%print(header="chi_qibz")
-         call chi_rgp%print(header="chi_rgp")
-         call wrtout(std_out, "END DEBUG")
+         !call wrtout(std_out, "DEBUG")
+         !call chiq_gpr(my_iqi)%print(header="chiq_gpr(my_iqi)")
+         !call gwr%chi_qibz(iq_ibz, itau, spin)%print(header="chi_qibz")
+         !call chi_rgp%print(header="chi_rgp")
+         !call wrtout(std_out, "END DEBUG")
 
          ABI_CHECK(size(gwr%chi_qibz(iq_ibz, itau, spin)%buffer_cplx, dim=2) == size(chi_rgp%buffer_cplx, dim=2), "len2")
 
@@ -1915,9 +1915,8 @@ subroutine gwr_build_wc(gwr)
 
        call gwr%chi_qibz(iq_ibz, itau, spin)%copy(gwr%wc_qibz(iq_ibz, itau, spin), free=free_chi)
        wc => gwr%wc_qibz(iq_ibz, itau, spin)
-       call wc%print(header="wc")
+       !call wc%print(header="wc")
 
-#if 1
        ! Build epsilon(q,iw) = delta_{g,g'} - v_q(g,g') chi_q(g,g,iw).
        wc%buffer_cplx = zero
        do ig2=1,wc%sizeb_local(2)
@@ -1929,10 +1928,9 @@ subroutine gwr_build_wc(gwr)
            if (ig1_glob == ig2_glob) wc%buffer_cplx(ig1, ig2) = one ! - ceps
          end do ! ig1
        end do ! ig2
-#endif
 
        ! IMPORTANT: PZGETRF requires square block decomposition i.e., MB_A = NB_A.
-       ! This means here I need to redistribute the data before calling zinvert.
+       ! This means I need to redistribute the data before calling zinvert.
        call wc%change_size_blocs(tmp_mat)
        call tmp_mat%zinvert()
        call wc%take_from(tmp_mat)
@@ -2143,9 +2141,10 @@ subroutine gwr_run_g0w0(gwr)
  call gwr%build_chi()
  call gwr%build_wc()
  !call gwr%build_sigmac()
- gwr%dtset%prtvol = 100
- call gwr%print(header="Before returning from run_g0w0")
- call xmpi_barrier(gwr%comm)
+
+ !gwr%dtset%prtvol = 100
+ !call gwr%print(header="Before returning from run_g0w0")
+ !call xmpi_barrier(gwr%comm)
 
 end subroutine gwr_run_g0w0
 !!***
