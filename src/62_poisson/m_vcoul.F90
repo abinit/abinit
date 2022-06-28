@@ -38,7 +38,7 @@ MODULE m_vcoul
 
  use m_fstrings,        only : sjoin, itoa
  use m_special_funcs,   only : abi_derf
- !use m_gwdefs,          only : GW_TOLQ0
+ use m_bessel,          only : calck0
  use m_io_tools,        only : open_file
  use m_numeric_tools,   only : arth, geop, imin_loc, llsfit_svd, l2norm, OPERATOR(.x.), quadrature, isdiagmat
  use m_hide_lapack,     only : matrginv
