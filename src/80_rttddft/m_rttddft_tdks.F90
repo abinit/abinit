@@ -380,7 +380,7 @@ subroutine tdks_free(tdks,dtset,mpi_enreg,psps)
    !Destroy hidden save variables
    call bandfft_kpt_destroy_array(bandfft_kpt,mpi_enreg)
    if (psps%usepaw ==1) then
-      call destroy_invovl(dtset%nkpt)
+      call destroy_invovl(dtset%nkpt,dtset%use_gpu_cuda)
    end if
    if(tdks%gemm_nonlop_use_gemm) then
       call destroy_gemm_nonlop(dtset%nkpt)
