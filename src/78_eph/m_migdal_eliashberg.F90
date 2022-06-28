@@ -272,7 +272,7 @@ subroutine migdal_eliashberg_iso(gstore, dtset, dtfil)
  !integer :: ik_ibz, ik_bz, ebands_timrev
  !integer :: iq_bz, iq_ibz !, ikq_ibz, ikq_bz
  !integer :: ncid, spin_ncid, ncerr, gstore_fform
- integer :: phmesh_size, iw
+ integer :: phmesh_size !, iw
  real(dp) :: kt, wmax, cpu, wall, gflops
  real(dp) :: edos_step, edos_broad !, sigma, ecut, eshift, eig0nk
  !character(len=5000) :: msg
