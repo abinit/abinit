@@ -667,6 +667,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 !But there are several restrictions
 
  use_gemm_nonlop=.false.
+ use_gemm_nonlop_gpu=.false.
  if (gemm_nonlop_use_gemm) then
    use_gemm_nonlop=gemm_nonlop_kpt(gemm_nonlop_ikpt_this_proc_being_treated)%nprojs>0
    use_gemm_nonlop= ( use_gemm_nonlop .or. &
@@ -683,22 +684,40 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
    & cpopt < 3 .and. hamk%useylm /= 0 .and. &
    & (choice < 2 .or. choice == 7) )
 
- if(gemm_nonlop_use_gemm_gpu) then
-   call wrtout(std_out, "Calling gemm_nonlop with GPU activated")
- else
-   call wrtout(std_out, "Calling gemm_nonlop with GPU not activated")
- end if
+ ! if(gemm_nonlop_use_gemm_gpu) then
+ !   call wrtout(std_out, "Calling gemm_nonlop with GPU activated")
+ ! else
+ !   call wrtout(std_out, "Calling gemm_nonlop with GPU not activated")
+ ! end if
 
  if(use_gemm_nonlop) then
-   !call wrtout(std_out, "Calling gemm_nonlop")
-   call gemm_nonlop(atindx1_,choice,cpopt,cprjin_,dimenl1,dimenl2_,dimekbq,&
-&   dimffnlin,dimffnlout,enl_,enlout,ffnlin_,ffnlout_,hamk%gmet,hamk%gprimd,&
-&   idir,indlmn_,istwf_k,kgin,kgout,kpgin,kpgout,kptin,kptout,lambda,&
-&   hamk%lmnmax,matblk_,hamk%mgfft,mpi_enreg,hamk%mpsang,hamk%mpssoang,&
-&   natom_,nattyp_,ndat,hamk%ngfft,nkpgin,nkpgout,nloalg_,&
-&   nnlout,npwin,npwout,my_nspinor,hamk%nspinor,ntypat_,only_SO_,paw_opt,&
-&   phkxredin_,phkxredout_,ph1d_,ph3din_,ph3dout_,signs,sij_,svectout,&
-&   tim_nonlop,hamk%ucvol,hamk%useylm,vectin,vectout,hamk%use_gpu_cuda)
+
+   if ( .not. use_gemm_nonlop_gpu) then
+
+     !call wrtout(std_out, "Calling gemm_nonlop")
+     call gemm_nonlop(atindx1_,choice,cpopt,cprjin_,dimenl1,dimenl2_,dimekbq,&
+       &   dimffnlin,dimffnlout,enl_,enlout,ffnlin_,ffnlout_,hamk%gmet,hamk%gprimd,&
+       &   idir,indlmn_,istwf_k,kgin,kgout,kpgin,kpgout,kptin,kptout,lambda,&
+       &   hamk%lmnmax,matblk_,hamk%mgfft,mpi_enreg,hamk%mpsang,hamk%mpssoang,&
+       &   natom_,nattyp_,ndat,hamk%ngfft,nkpgin,nkpgout,nloalg_,&
+       &   nnlout,npwin,npwout,my_nspinor,hamk%nspinor,ntypat_,only_SO_,paw_opt,&
+       &   phkxredin_,phkxredout_,ph1d_,ph3din_,ph3dout_,signs,sij_,svectout,&
+       &   tim_nonlop,hamk%ucvol,hamk%useylm,vectin,vectout,hamk%use_gpu_cuda)
+
+   else
+
+     !call wrtout(std_out, "Calling gemm_nonlop_gpu")
+     call gemm_nonlop_gpu(atindx1_, choice, cpopt, cprjin_, dimenl1, dimenl2_, dimekbq, &
+       &                  dimffnlin,dimffnlout, &
+       &                  enl_,indlmn_,istwf_k, &
+       &                  lambda, hamk%lmnmax, matblk_, &
+       &                  mpi_enreg, natom_, nattyp_, ndat, nkpgin, nkpgout, &
+       &                  nnlout, npwin, npwout, my_nspinor, hamk%nspinor, ntypat_, paw_opt, &
+       &                  sij_,svectout, &
+       &                  hamk%useylm, vectin, vectout, &
+       &                  hamk%use_gpu_cuda)
+
+   end if
 
  else
    !$omp parallel do default(shared), &

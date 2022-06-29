@@ -423,7 +423,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    call init_invovl(dtset%nkpt)
  end if
 
- if(dtset%use_gemm_nonlop == 1 .and. dtset%use_gpu_cuda/=1) then
+ if(dtset%use_gemm_nonlop == 1) then
    ! set global variable
    gemm_nonlop_use_gemm = .true.
    call init_gemm_nonlop(dtset%nkpt)
@@ -431,10 +431,10 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    gemm_nonlop_use_gemm = .false.
  end if
 
- if(dtset%use_gemm_nonlop_gpu == 1 .and. dtset%use_gpu_cuda==1) then
+ if(dtset%use_gemm_nonlop_gpu == 1 .and. dtset%use_gpu_cuda ==1 ) then
    ! set global variable
    gemm_nonlop_use_gemm_gpu = .true.
-   !!call init_gemm_nonlop_gpu(dtset%nkpt) - TODO
+   call init_gemm_nonlop_gpu(dtset%nkpt)
  else
    gemm_nonlop_use_gemm_gpu = .false.
  end if
