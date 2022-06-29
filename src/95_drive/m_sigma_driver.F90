@@ -44,7 +44,6 @@ module m_sigma_driver
 #endif
  use m_hdr
  use libxc_functionals
-
  use m_dtfil
  use m_crystal
  use m_cgtools
@@ -70,10 +69,10 @@ module m_sigma_driver
                              kmesh_init, has_BZ_item, isamek, get_ng0sh, kmesh_print, &
                              get_bz_item, has_IBZ_item, find_qmesh
  use m_gsphere,       only : gsphere_t, gsph_init, gsph_free, merge_and_sort_kg, gsph_extend, setshells
- use m_kg,            only : getph,getcut
+ use m_kg,            only : getph, getcut
  use m_xcdata,        only : get_xclevel
  use m_wfd,           only : wfd_init, wfdgw_t, wfdgw_copy, test_charge, wave_t
- use m_vcoul,         only : vcoul_t, vcoul_init, vcoul_free
+ use m_vcoul,         only : vcoul_t
  use m_qparticles,    only : wrqps, rdqps, rdgw, show_QP, updt_m_ks_to_qp
  use m_screening,     only : mkdump_er, em1results_free, epsilonm1_results, init_er_from_file
  use m_ppmodel,       only : ppm_init, ppm_free, setup_ppmodel, getem1_from_PPm, ppmodel_t
@@ -81,7 +80,7 @@ module m_sigma_driver
                              mels_get_haene, mels_get_kiene, sigma_get_excene, write_sigma_header, write_sigma_results
  use m_dyson_solver,  only : solve_dyson
  use m_esymm,         only : esymm_t, esymm_free, esymm_failed
- use m_melemts,       only : melflags_reset, melements_print, melements_free, melflags_t, melements_t, melements_zero
+ use m_melemts,       only : melflags_t, melements_t
  use m_pawang,        only : pawang_type
  use m_pawrad,        only : pawrad_type
  use m_pawtab,        only : pawtab_type, pawtab_print, pawtab_get_lsize
@@ -102,7 +101,7 @@ module m_sigma_driver
  use m_paw_nhat,      only : nhatgrid,pawmknhat
  use m_paw_tools,     only : chkpawovlp,pawprt
  use m_paw_denpot,    only : pawdenpot
- use m_paw_init,      only : pawinit,paw_gencond
+ use m_paw_init,      only : pawinit, paw_gencond
  use m_classify_bands,only : classify_bands
  use m_wfk,           only : wfk_read_eigenvalues
  use m_io_kss,        only : make_gvec_kss
@@ -118,10 +117,10 @@ module m_sigma_driver
  use m_paw_correlations,only : pawpuxinit
  use m_spacepar,      only : hartre
  use m_gwrdm,         only : calc_rdmx,calc_rdmc,natoccs,update_hdr_bst,print_tot_occ,get_chkprdm,&
-                         &print_chkprdm,change_matrix,print_total_energy,print_band_energies,quadrature_sigma_cw
- use m_plowannier,only : operwan_realspace_type,plowannier_type,init_plowannier,get_plowannier,&
-                         &fullbz_plowannier,init_operwan_realspace,reduce_operwan_realspace,&
-                         destroy_operwan_realspace,destroy_plowannier,zero_operwan_realspace
+                             print_chkprdm,change_matrix,print_total_energy,print_band_energies,quadrature_sigma_cw
+ use m_plowannier,    only : operwan_realspace_type,plowannier_type,init_plowannier,get_plowannier,&
+                             fullbz_plowannier,init_operwan_realspace,reduce_operwan_realspace,&
+                             destroy_operwan_realspace,destroy_plowannier,zero_operwan_realspace
 
  implicit none
 
@@ -244,7 +243,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  type(gsphere_t) :: Gsph_Max,Gsph_x,Gsph_c
  type(hdr_type) :: Hdr_wfk,Hdr_sigma,Hdr_rhor
  type(melflags_t) :: KS_mflags,QP_mflags
- type(melements_t) :: KS_me,QP_me,GW1RDM_me
+ type(melements_t) :: KS_me, QP_me, GW1RDM_me
  type(MPI_type) :: MPI_enreg_seq
  type(paw_dmft_type) :: Paw_dmft
  type(pawfgr_type) :: Pawfgr
@@ -569,7 +568,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    !  * 0 if Vloc in atomic data is Vbare    (Blochl s formulation)
    !  * 1 if Vloc in atomic data is VH(tnzc) (Kresse s formulation)
    write(msg,'(a,i2)')' sigma : using usexcnhat = ',usexcnhat
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(std_out, msg)
    !
    ! Identify parts of the rectangular grid where the density has to be calculated ===
    optcut=0; optgr0=Dtset%pawstgylm; optgr1=0; optgr2=0; optrad=1-Dtset%pawstgylm
@@ -1013,7 +1012,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  !  * Note that vH matrix elements are calculated using the true uncutted interaction.
  call timab(407,1,tsec) ! vHxc_me
 
- call melflags_reset(KS_mflags)
+ call KS_mflags%reset()
  if (rdm_update) then
    KS_mflags%has_hbare=1
    KS_mflags%has_kinetic=1
@@ -1080,12 +1079,12 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
        end if
      end do
    end do
-   call melements_zero(KS_me,ks_irreptab)
+   call KS_me%zero(ks_irreptab)
    ABI_FREE(ks_irreptab)
  end if
 !#endif
 
- call melements_print(KS_me,header="Matrix elements in the KS basis set",prtvol=Dtset%prtvol)
+ call KS_me%print(header="Matrix elements in the KS basis set", prtvol=Dtset%prtvol)
  !
  ! If possible, calculate the EXX energy between the frozen core
  ! and the valence electrons using KS wavefunctions
@@ -1106,7 +1105,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      end do
    end do
    write(msg,'(a,2(es16.6,a))')' CORE Exchange energy with KS wavefunctions: ',ex_energy,' Ha ,',ex_energy*Ha_eV,' eV'
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(std_out, msg)
  end if
 
  call timab(407,2,tsec) ! vHxc_me
@@ -1117,7 +1116,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  ! the diagonalization. Therefore, we have to correctly assign the matrix elements to the corresponding
  ! bands and we cannot skip the following even though it looks unuseful.
  if (gwcalctyp>=10) then
-   call wrtout(std_out,ch10//' *************** KS Energies *******************','COLL')
+   call wrtout(std_out,ch10//' *************** KS Energies *******************')
  end if
 
  !=== QP_BSt stores energies and occ. used for the calculation ===
@@ -1201,7 +1200,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    if (.False.) call wfd%test_ortho(Cryst, Pawtab, unit=std_out)
 
    ! Compute QP occupation numbers.
-   call wrtout(std_out,'sigma: calculating QP occupation numbers:','COLL')
+   call wrtout(std_out,'sigma: calculating QP occupation numbers:')
    call ebands_update_occ(QP_BSt,Dtset%spinmagntarget,prtvol=0)
    qp_vbik(:,:) = ebands_get_valence_idx(QP_BSt)
 
@@ -1273,7 +1272,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    ! Simple mixing of the PW density to damp oscillations in the Hartree potential.
    if (nscf>0 .and. (ABS(Dtset%rhoqpmix-one)>tol12) ) then
      write(msg,'(2a,f6.3)')ch10,' sigma: mixing QP densities using rhoqpmix= ',Dtset%rhoqpmix
-     call wrtout(std_out,msg,'COLL')
+     call wrtout(std_out, msg)
      qp_rhor = prev_rhor + Dtset%rhoqpmix*(qp_rhor-prev_rhor)
      if(Dtset%usekden==1)qp_taur = prev_taur + Dtset%rhoqpmix*(qp_taur-prev_taur) ! mix taur.
    end if
@@ -1388,15 +1387,15 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    ehartree=half*SUM(qp_rhor(:,1)*qp_vhartr(:))/DBLE(nfftf)*Cryst%ucvol
 
    write(msg,'(a,80a)')ch10,('-',ii=1,80)
-   call wrtout(ab_out,msg,'COLL')
+   call wrtout(ab_out,msg)
    write(msg,'(5a,f9.4,3a,es21.14,2a,es21.14)')ch10,&
     ' QP results after the unitary transformation in the KS subspace: ',ch10,ch10,&
     '  Number of electrons    = ',qp_rhog(1,1)*Cryst%ucvol,ch10,ch10,&
     '  QP Band energy    [Ha] = ',ebands_get_bandenergy(QP_BSt),ch10,&
     '  QP Hartree energy [Ha] = ',ehartree
-   call wrtout(ab_out,msg,'COLL')
+   call wrtout(ab_out,msg)
    write(msg,'(a,80a)')ch10,('-',ii=1,80)
-   call wrtout(ab_out,msg,'COLL')
+   call wrtout(ab_out,msg)
 !
 !  TODO Since plasmonpole model 2-3-4 depend on the Fourier components of the density
 !  in case of self-consistency we might calculate here the ppm coefficients using qp_rhor
@@ -1526,9 +1525,9 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    ! Calculate the QP matrix elements
    ! This part is parallelized within MPI_COMM_WORD since each node has all GW wavefunctions.
    ! For PAW, we have to construct the new bare Hamiltonian.
-   call wrtout(std_out,ch10//' *************** QP Energies *******************','COLL')
+   call wrtout(std_out,ch10//' *************** QP Energies *******************')
 
-   call melflags_reset(QP_mflags)
+   call QP_mflags%reset()
 !  if (gwcalctyp<20) QP_mflags%only_diago=1 ! For e-only, no need of off-diagonal elements.
    QP_mflags%has_vhartree=1
    if (Dtset%usepaw==1) then
@@ -1579,16 +1578,16 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
          end if
        end do
      end do
-     call melements_zero(QP_me,qp_irreptab)
+     call QP_me%zero(qp_irreptab)
      ABI_FREE(qp_irreptab)
    end if
 !  #endif
 
-   call melements_print(QP_me,header="Matrix elements in the QP basis set",prtvol=Dtset%prtvol)
+   call QP_me%print(header="Matrix elements in the QP basis set", prtvol=Dtset%prtvol)
 
    ! * Output the QP pseudopotential strengths Dij and the augmentation occupancies Rhoij.
    if (Dtset%usepaw==1) then
-     call wrtout(std_out," *** After calc_vHxc_braket *** ",'COLL')
+     call wrtout(std_out," *** After calc_vHxc_braket *** ")
 !    TODO terminate the implementation of this routine.
      call paw_ij_print(QP_Paw_ij,unit=std_out,pawprtvol=Dtset%pawprtvol,pawspnorb=Dtset%pawspnorb,mode_paral="COLL")
      call pawprt(Dtset,Cryst%natom,QP_paw_ij,QP_Pawrhoij,Pawtab)
@@ -1651,16 +1650,12 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    ABI_FREE(qp_vxc)
    ABI_FREE(qp_nhat)
    ABI_FREE(qp_nhatgr)
-   call melements_free(QP_me)
+   call QP_me%free()
  end if ! gwcalctyp<10
 
  ! Free some memory
- if (allocated(hbare)) then
-   ABI_FREE(hbare)
- end if
- if (allocated(hdft )) then
-   ABI_FREE(hdft)
- end if
+ ABI_SFREE(hbare)
+ ABI_SFREE(hdft)
 
  ! Prepare the storage of QP amplitudes and energies ===
  ! Initialize with KS wavefunctions and energies.
@@ -1698,11 +1693,10 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 !FIXME To me it makes more sense if we apply the scissor to KS_BS but I have to RECHECK csigme
  if (ABS(Sigp%mbpt_sciss)>tol6) then
    write(msg,'(6a,f10.5,2a)')ch10,&
-&   ' sigma : performing a first self-consistency',ch10,&
-&   '  update of the energies in G by a scissor operator',ch10, &
-&   '  applying a scissor operator of ',Sigp%mbpt_sciss*Ha_eV,' [eV] ',ch10
-   call wrtout(std_out,msg,'COLL')
-   call wrtout(ab_out,msg,'COLL')
+   ' sigma : performing a first self-consistency',ch10,&
+   '  update of the energies in G by a scissor operator',ch10, &
+   '  applying a scissor operator of ',Sigp%mbpt_sciss*Ha_eV,' [eV] ',ch10
+   call wrtout([std_out, ab_out], msg)
    do spin=1,Sigp%nsppol
      do ik=1,Kmesh%nibz
        ks_iv=ks_vbik(ik,spin)
@@ -1717,8 +1711,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    write(msg,'(4a)')ch10,&
 &   ' sigma : performing a first self-consistency',ch10,&
 &   '  update of the energies in G by a previous GW calculation'
-   call wrtout(std_out,msg,'COLL')
-   call wrtout(ab_out,msg,'COLL')
+   call wrtout([std_out, ab_out], msg)
 !  TODO Recheck this part, is not clear to me!
    ABI_MALLOC(igwene,(QP_Bst%mband,QP_Bst%nkpt,QP_Bst%nsppol))
    call rdgw(QP_BSt,'__in.gw__',igwene,extrapolate=.TRUE.)
@@ -1786,7 +1779,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
        if (Dtset%getpawden==0 .and. Dtset%irdpawden==0) then
          ABI_ERROR("Must use get/irdpawden to provide a _PAWDEN file!")
        end if
-       call wrtout(std_out,sjoin('Checking for existence of: ',Dtfil%filpawdensin),"COLL")
+       call wrtout(std_out,sjoin('Checking for existence of: ',Dtfil%filpawdensin))
        if (.not. file_exists(dtfil%filpawdensin)) then
          ABI_ERROR(sjoin("Missing file:", dtfil%filpawdensin))
        end if
@@ -1827,7 +1820,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
        if (Dtset%getpawden==0.and.Dtset%irdpawden==0) then
          ABI_ERROR("Must use get/irdpawden to provide a _PAWDEN file!")
        end if
-       call wrtout(std_out,sjoin('Checking for existence of: ',Dtfil%filpawdensin),"COLL")
+       call wrtout(std_out,sjoin('Checking for existence of: ',Dtfil%filpawdensin))
        if (.not. file_exists(dtfil%filpawdensin)) then
          ABI_ERROR(sjoin("Missing file:", dtfil%filpawdensin))
        end if
@@ -1882,7 +1875,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
        if (Dtset%getpawden==0.and.Dtset%irdpawden==0) then
          ABI_ERROR("Must use get/irdpawden to provide a _PAWDEN file!")
        end if
-       call wrtout(std_out,sjoin('Checking for existence of: ',Dtfil%filpawdensin),"COLL")
+       call wrtout(std_out,sjoin('Checking for existence of: ',Dtfil%filpawdensin))
        if (.not. file_exists(dtfil%filpawdensin)) then
          ABI_ERROR(sjoin("Missing file:", dtfil%filpawdensin))
        end if
@@ -1923,7 +1916,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
        if (Dtset%getpawden==0.and.Dtset%irdpawden==0) then
          ABI_ERROR("Must use get/irdpawden to provide a _PAWDEN file!")
        end if
-       call wrtout(std_out,sjoin('Checking for existence of: ',Dtfil%filpawdensin),"COLL")
+       call wrtout(std_out,sjoin('Checking for existence of: ',Dtfil%filpawdensin))
        if (.not. file_exists(dtfil%filpawdensin)) then
          ABI_ERROR(sjoin("Missing file:", dtfil%filpawdensin))
        end if
@@ -2092,7 +2085,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
  call wfd%print(mode_paral='PERS')
 
- call wrtout(std_out,sigma_type_from_key(mod10),'COLL')
+ call wrtout(std_out,sigma_type_from_key(mod10))
 
  if (gwcalctyp<10) then
    msg = " Perturbative Calculation"
@@ -2104,9 +2097,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  else
    msg = " Self-Consistent on Energies and Wavefunctions"
  end if
- if(Dtset%ucrpa==0) then
-   call wrtout(std_out,msg,'COLL')
- end if
+ if (Dtset%ucrpa==0) call wrtout(std_out,msg)
 !
 !=================================================
 !==== Calculate the matrix elements of Sigma =====
@@ -2179,7 +2170,7 @@ endif
 
  if(Dtset%ucrpa>=1) then
 !  !Calculation of the Rho_n for calc_ucrpa
-   call wrtout(std_out,sjoin("begin of Ucrpa calc for a nb of kpoints of: ",itoa(Sigp%nkptgw)),"COLL")
+   call wrtout(std_out, sjoin("begin of Ucrpa calc for a nb of kpoints of: ",itoa(Sigp%nkptgw)))
 !   Wannier basis: rhot1_q_m will need an atom index in the near future.
    ic=0
    do  itypat=1,cryst%ntypat
@@ -2204,8 +2195,7 @@ endif
 !^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
    if (dtset%plowan_compute>=10)then
      write(msg,'(a)')" cRPA calculations using wannier weights from data.plowann"
-     call wrtout(std_out,msg,'COLL')
-     call wrtout(ab_out,msg,'COLL')
+     call wrtout([std_out, ab_out], msg)
      call init_plowannier(dtset%plowan_bandf,dtset%plowan_bandi,dtset%plowan_compute,dtset%plowan_iatom,&
        &dtset%plowan_it,dtset%plowan_lcalc,dtset%plowan_natom,dtset%plowan_nbl,dtset%plowan_nt,&
        &dtset%plowan_projcalc,dtset%acell_orig,dtset%kptns,dtset%nimage,dtset%nkpt,dtset%nspinor,&
@@ -2447,8 +2437,7 @@ endif
      ABI_MALLOC(nat_occs,(Wfd%mband,Wfd%nkibz))
      ABI_MALLOC(xrdm_k_full,(b1gw:b2gw,b1gw:b2gw,Wfd%nkibz))
      write(msg,'(a34,2i9)')' Bands used for the GW 1RDM arrays',b1gw,b2gw
-     call wrtout(std_out,msg,'COLL')
-     call wrtout(ab_out,msg,'COLL')
+     call wrtout([std_out, ab_out], msg)
      xrdm_k_full=czero; nat_occs=zero; nateigv=czero;
      do ik_ibz=1,Wfd%nkibz
        do ib=b1gw,b2gw
@@ -2500,11 +2489,11 @@ endif
        end if
      else
        write(msg,'(a1)')  ' '
-       call wrtout(std_out,msg,'COLL')
+       call wrtout(std_out,msg)
        write(msg,'(a64,i5)')  ' Skipping the calc. of Sigma_x - ( Vxc + hyb*Fock) for k-point: ',ik_ibz
-       call wrtout(std_out,msg,'COLL')
+       call wrtout(std_out,msg)
        write(msg,'(a1)')  ' '
-       call wrtout(std_out,msg,'COLL')
+       call wrtout(std_out,msg)
      end if
    end do
    ! for the time being, do not remove this barrier!
@@ -2536,11 +2525,11 @@ endif
 &            gwc_ngfft,ngfftf,nfftf,ks_rhor,use_aerhor,ks_aepaw_rhor,sigcme_k)
           else
             write(msg,'(a1)')  ' '
-            call wrtout(std_out,msg,'COLL')
+            call wrtout(std_out, msg)
             write(msg,'(a44,i5)')  ' Skipping the calc. of Sigma_c for k-point: ',ik_ibz
-            call wrtout(std_out,msg,'COLL')
+            call wrtout(std_out, msg)
             write(msg,'(a1)')  ' '
-            call wrtout(std_out,msg,'COLL')
+            call wrtout(std_out, msg)
           end if
        end if
        ! MRM: compute density matrix numerical correction (freq. integration G0 Sigma_c(iw) G0).
@@ -2634,7 +2623,7 @@ endif
        ecutf=dtset%ecut
        if (psps%usepaw==1) then
          ecutf=dtset%pawecutdg
-         call wrtout(std_out,ch10//' FFT (fine) grid used in GW update:','COLL')
+         call wrtout(std_out,ch10//' FFT (fine) grid used in GW update:')
        end if
        call getcut(boxcut,ecutf,gmet,gsqcut,dtset%iboxcut,std_out,k0,ngfftf)
        call hartre(1,gsqcut,dtset%icutcoul,Psps%usepaw,MPI_enreg_seq,nfftf,ngfftf,dtset%nkpt,dtset%rcut,gw_rhog,&
@@ -2686,7 +2675,7 @@ endif
          end do
        endif
        call xmpi_barrier(Wfd%comm)
-       call vcoul_free(Vcp_ks)
+       call Vcp_ks%free()
        !
        ! Use the Wfd with 'new name' (Wfd_nato_all) because it will contain the GW 1RDM nat. orbs. (bands)
        !
@@ -2724,7 +2713,7 @@ endif
        end do
        tol_empty=0.01 ! Recover standard value for tolerance on the occ numbers
        call xmpi_barrier(Wfd%comm)
-       call vcoul_free(Vcp_full)
+       call Vcp_full%free()
        ex_energy=sigma_get_exene(Sr,Kmesh,QP_BSt)         ! Save the new total exchange energy Ex = Ex[GW.1RDM]
        exc_mbb_energy=sigma_get_excene(Sr,Kmesh,QP_BSt)   ! Save the new total exchange-correlation MBB energy Exc = Exc^MBB[GW.1RDM]
        !
@@ -2752,7 +2741,7 @@ endif
        ! Clean GW1RDM_me and allocated arrays
        !
        call xmpi_barrier(Wfd%comm) ! Wait for all Sigma_x to be ready before deallocating data
-       call melements_free(GW1RDM_me) ! Deallocate GW1RD_me
+       call GW1RDM_me%free() ! Deallocate GW1RD_me
        ABI_FREE(old_ks_purex)
        ABI_FREE(new_hartr)
      else
@@ -2829,8 +2818,7 @@ endif
      qp_vbik(:,:) = ebands_get_valence_idx(QP_BSt)
 
      write(msg,'(2a,3x,2(es16.6,a))')ch10,' New Fermi energy : ',QP_BSt%fermie,' Ha ,',QP_BSt%fermie*Ha_eV,' eV'
-     call wrtout(std_out,msg,'COLL')
-     call wrtout(ab_out,msg,'COLL')
+     call wrtout([std_out, ab_out], msg)
 
      ! === If all k-points and all occupied bands are calculated, output EXX ===
      ! FIXME here be careful about the check on  ks_vbik in case of metals
@@ -2840,8 +2828,7 @@ endif
 
        ex_energy = sigma_get_exene(Sr,Kmesh,QP_BSt)
        write(msg,'(a,2(es16.6,a))')' New Exchange energy : ',ex_energy,' Ha ,',ex_energy*Ha_eV,' eV'
-       call wrtout(std_out,msg,'COLL')
-       call wrtout(ab_out,msg,'COLL')
+       call wrtout([std_out, ab_out], msg)
      end if
 
      ! Report the QP gaps (Fundamental and direct)
@@ -2866,18 +2853,18 @@ endif
      end if
 
      ! Report the MAX variation for each kptgw and spin
-     call wrtout(ab_out,ch10//' Convergence of QP corrections ','COLL')
+     call wrtout(ab_out,ch10//' Convergence of QP corrections ')
      converged=.TRUE.
      do spin=1,Sigp%nsppol
        write(msg,'(a,i2,a)')' >>>>> For spin ',spin,' <<<<< '
-       call wrtout(ab_out,msg,'COLL')
+       call wrtout(ab_out, msg)
        do ikcalc=1,Sigp%nkptgw
          ib1 = Sigp%minbnd(ikcalc,spin); ib2 = Sigp%maxbnd(ikcalc,spin)
          ik_bz = Sigp%kptgw2bz(ikcalc); ik_ibz = Kmesh%tab(ik_bz)
          ii = imax_loc(ABS(Sr%degw(ib1:ib2,ik_ibz,spin)))
          max_degw = Sr%degw(ii,ik_ibz,spin)
          write(msg,('(a,i3,a,2f8.3,a,i3)'))'.  kptgw no:',ikcalc,'; Maximum DeltaE = (',max_degw*Ha_eV,') for band index:',ii
-         call wrtout(ab_out,msg,'COLL')
+         call wrtout(ab_out, msg)
          converged = (converged .and. ABS(max_degw) < Dtset%gw_toldfeig)
        end do
      end do
@@ -2987,7 +2974,7 @@ endif
  call gsph_free(Gsph_Max)
  call gsph_free(Gsph_x)
  call gsph_free(Gsph_c)
- call vcoul_free(Vcp)
+ call Vcp%free()
  call cryst%free()
  call sigma_free(Sr)
  if(.not.rdm_update) then
@@ -2998,7 +2985,7 @@ endif
  call Hdr_wfk%free()
  call ebands_free(KS_BSt)
  call ebands_free(QP_BSt)
- call melements_free(KS_me)
+ call KS_me%free()
  call esymm_free(KS_sym)
  ABI_FREE(KS_sym)
 
@@ -3170,7 +3157,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 &    '  number of imaginary frequencies for sigma =  ',Sigp%nomegasi,ch10,&
 &    '  min frequency for sigma on imag axis [eV] =  ',Sigp%omegasimin*Ha_eV,ch10,&
 &    '  max frequency for sigma on imag axis [eV] =  ',Sigp%omegasimax*Ha_eV,ch10
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(std_out, msg)
 
    !TODO this should not be done here but in init_sigma_t
    ABI_MALLOC(Sigp%omegasi,(Sigp%nomegasi))
@@ -3195,12 +3182,10 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
     write(msg,'(4a)')ch10,&
 &    ' setup_sigma : calculating Sigma(iw)',&
 &    ' at imaginary frequencies [eV] (Fermi Level set to 0) ',ch10
-    call wrtout(std_out,msg,'COLL')
-    call wrtout(ab_out,msg,'COLL')
+    call wrtout([std_out, ab_out], msg)
     do io=1,Sigp%nomegasi
       write(msg,'(2(f10.3,2x))')Sigp%omegasi(io)*Ha_eV
-      call wrtout(std_out,msg,'COLL')
-      call wrtout(ab_out,msg,'COLL')
+      call wrtout([std_out, ab_out], msg)
     end do
    endif
 
@@ -3252,7 +3237,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 &      '  Min frequency  [eV] = ',Sigp%minomega_r*Ha_eV,ch10,&
 &      '  Max frequency  [eV] = ',Sigp%maxomega_r*Ha_eV,ch10,&
 &      '  Frequency step [eV] = ',domegas*Ha_eV,ch10
-     call wrtout(std_out,msg,'COLL')
+     call wrtout(std_out, msg)
    else
      Sigp%minomega_r = MINVAL(Dtset%gw_freqsp(:))
      Sigp%maxomega_r = MAXVAL(Dtset%gw_freqsp(:))
@@ -3267,7 +3252,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 &      '  Min frequency  [eV] = ',Sigp%minomega_r*Ha_eV,ch10,&
 &      '  Max frequency  [eV] = ',Sigp%maxomega_r*Ha_eV,ch10,&
 &      '  A custom set of frequencies is used! See the input file for values.',ch10
-     call wrtout(std_out,msg,'COLL')
+     call wrtout(std_out, msg)
    end if
  else
    !In indefo all these quantities are set to zero
@@ -3682,7 +3667,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
     " COMMENT: In a self-consistent GW run, the QP corrections should be calculated for all the k-points of the KSS file ",ch10,&
     " but nkptgw= ",Sigp%nkptgw," and WFK nkpt= ",Hdr_wfk%nkpt,ch10,&
     " Assuming expert user. Execution will continue. "
-   call wrtout(ab_out,msg,"COLL")
+   call wrtout(ab_out, msg)
  end if
 
  ! Setup of the table used in the case of SCGW on wavefunctions to reduce the number
@@ -3768,7 +3753,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  ! * -one is used because we loop over all the possibile differences, unlike screening
 
  call get_ng0sh(Sigp%nkptgw,Sigp%kptgw,Kmesh%nbz,Kmesh%bz,Qmesh%nbz,Qmesh%bz,-one,ng0sh_opt)
- call wrtout(std_out, sjoin(' Optimal value for ng0sh ', ltoa(ng0sh_opt)), "COLL")
+ call wrtout(std_out, sjoin(' Optimal value for ng0sh ', ltoa(ng0sh_opt)))
  Sigp%mG0=ng0sh_opt
 
 ! G-sphere for W and Sigma_c is initialized from the SCR file.
@@ -3859,10 +3844,10 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
    if(ivcoul_init==1)then
 
      if (Gsph_x%ng > Gsph_c%ng) then
-       call vcoul_init(Vcp,Gsph_x,Cryst,Qmesh,Kmesh,rcut,icutcoul_eff,Dtset%vcutgeo,&
+       call Vcp%init(Gsph_x,Cryst,Qmesh,Kmesh,rcut,icutcoul_eff,Dtset%vcutgeo,&
         Dtset%ecutsigx,Gsph_x%ng,nqlwl,qlwl,ngfftf,comm)
      else
-       call vcoul_init(Vcp,Gsph_c,Cryst,Qmesh,Kmesh,rcut,icutcoul_eff,Dtset%vcutgeo,&
+       call Vcp%init(Gsph_c,Cryst,Qmesh,Kmesh,rcut,icutcoul_eff,Dtset%vcutgeo,&
         Dtset%ecutsigx,Gsph_c%ng,nqlwl,qlwl,ngfftf,comm)
      end if
 
@@ -3870,10 +3855,10 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 
 !    Use a temporary Vcp_ks to compute the Coulomb interaction already present in the Fock part of the Kohn-Sham Hamiltonian
      if (Gsph_x%ng > Gsph_c%ng) then
-       call vcoul_init(Vcp_ks,Gsph_x,Cryst,Qmesh,Kmesh,rcut,icutcoul_eff,Dtset%vcutgeo,&
+       call Vcp_ks%init(Gsph_x,Cryst,Qmesh,Kmesh,rcut,icutcoul_eff,Dtset%vcutgeo,&
         Dtset%ecutsigx,Gsph_x%ng,nqlwl,qlwl,ngfftf,comm)
      else
-       call vcoul_init(Vcp_ks,Gsph_c,Cryst,Qmesh,Kmesh,rcut,icutcoul_eff,Dtset%vcutgeo,&
+       call Vcp_ks%init(Gsph_c,Cryst,Qmesh,Kmesh,rcut,icutcoul_eff,Dtset%vcutgeo,&
         Dtset%ecutsigx,Gsph_c%ng,nqlwl,qlwl,ngfftf,comm)
      end if
 
@@ -3882,7 +3867,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
      Vcp%i_sz_resid=Vcp%i_sz-Sigp%sigma_mixing*Vcp_ks%i_sz
 !    The mixing factor has already been accounted for, so set it back to one
      Sigp%sigma_mixing=one
-     call vcoul_free(Vcp_ks)
+     call Vcp_ks%free()
 
 !DEBUG
      write(std_out,'(a)')' setup_sigma : the residual Coulomb interaction has been computed'
@@ -3890,7 +3875,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 
    endif
 !#else
-!   call vcoul_init(Vcp,Gsph_Max,Cryst,Qmesh,Kmesh,rcut,icutcoul_eff,ivcoul_init,Dtset%vcutgeo,&
+!   call Vcp%init(Gsph_Max,Cryst,Qmesh,Kmesh,rcut,icutcoul_eff,ivcoul_init,Dtset%vcutgeo,&
 !&    Dtset%ecutsigx,Sigp%npwx,nqlwl,qlwl,ngfftf,comm)
 !#endif
 
@@ -3981,7 +3966,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
     'Using the extrapolar approximation to accelerate convergence',ch10,&
     'with respect to the number of bands included',ch10,&
     'with gwencomp: ',Sigp%gwencomp*Ha_eV,' [eV]'
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(std_out, msg)
  end if
  !
  ! ===================================
@@ -4041,7 +4026,6 @@ end subroutine setup_sigma
 !!      m_sigma_driver
 !!
 !! CHILDREN
-!!      get_xclevel,vcoul_init
 !!
 !! SOURCE
 
@@ -4226,7 +4210,6 @@ end subroutine sigma_tables
 !!      m_sigma_driver
 !!
 !! CHILDREN
-!!      get_xclevel,vcoul_init
 !!
 !! SOURCE
 
@@ -4376,7 +4359,6 @@ end subroutine sigma_bksmask
 !!      m_sigma_driver
 !!
 !! CHILDREN
-!!      get_xclevel,vcoul_init
 !!
 !! SOURCE
 
@@ -4469,7 +4451,7 @@ subroutine paw_qpscgw(Wfd,nscf,nfftf,ngfftf,Dtset,Cryst,Kmesh,Psps,QP_BSt,&
  ! =====================================================
  if (nscf>0 .and. (ABS(Dtset%rhoqpmix-one)>tol12) ) then
    write(msg,'(a,f6.3)')' sigma: mixing on-site QP rho_ij densities using rhoqpmix= ',Dtset%rhoqpmix
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(std_out, msg)
    ! qp_rhor = prev_rhor + Dtset%rhoqpmix*(qp_rhor-prev_rhor)
 
    call pawrhoij_unpack(QP_Pawrhoij)   ! Unpack new QP %rhoijp
@@ -4572,10 +4554,10 @@ subroutine setup_vcp(Vcp_ks,Vcp_full,Dtset,Gsph_x,Gsph_c,Cryst,Qmesh,Kmesh,coef_
  icsing_eff=Dtset%gw_icutcoul
  ! 1st part: Use a Vcp_full to compute the full Coulomb interaction for NOs
  if (Gsph_x%ng > Gsph_c%ng) then
-   call vcoul_init(Vcp_full,Gsph_x,Cryst,Qmesh,Kmesh,rcut,icsing_eff,Dtset%vcutgeo,&
+   call Vcp_full%init(Gsph_x,Cryst,Qmesh,Kmesh,rcut,icsing_eff,Dtset%vcutgeo,&
     Dtset%ecutsigx,Gsph_x%ng,nqlwl,qlwl,ngfftf,comm)
  else
-   call vcoul_init(Vcp_full,Gsph_c,Cryst,Qmesh,Kmesh,rcut,icsing_eff,Dtset%vcutgeo,&
+   call Vcp_full%init(Gsph_c,Cryst,Qmesh,Kmesh,rcut,icsing_eff,Dtset%vcutgeo,&
     Dtset%ecutsigx,Gsph_c%ng,nqlwl,qlwl,ngfftf,comm)
  end if
  ! 2nd part: Use a Vcp_ks to compute the Coulomb interaction already present in the Fock part of the Kohn-Sham Hamiltonian
@@ -4596,10 +4578,10 @@ subroutine setup_vcp(Vcp_ks,Vcp_full,Dtset,Gsph_x,Gsph_c,Cryst,Qmesh,Kmesh,coef_
    end if
  end if
  if (Gsph_x%ng > Gsph_c%ng) then
-   call vcoul_init(Vcp_ks,Gsph_x,Cryst,Qmesh,Kmesh,rcut,icsing_eff,Dtset%vcutgeo,&
+   call Vcp_ks%init(Gsph_x,Cryst,Qmesh,Kmesh,rcut,icsing_eff,Dtset%vcutgeo,&
     Dtset%ecutsigx,Gsph_x%ng,nqlwl,qlwl,ngfftf,comm)
  else
-   call vcoul_init(Vcp_ks,Gsph_c,Cryst,Qmesh,Kmesh,rcut,icsing_eff,Dtset%vcutgeo,&
+   call Vcp_ks%init(Gsph_c,Cryst,Qmesh,Kmesh,rcut,icsing_eff,Dtset%vcutgeo,&
     Dtset%ecutsigx,Gsph_c%ng,nqlwl,qlwl,ngfftf,comm)
  end if
  ABI_FREE(qlwl)

@@ -77,7 +77,7 @@ program mrgscr
  use m_geometry,            only : normv, metric
  use m_gsphere,             only : gsph_init, gsph_free, gsphere_t
  use m_bz_mesh,             only : kmesh_t, find_qmesh, kmesh_init, kmesh_print, kmesh_free
- use m_vcoul,               only : vcoul_t, vcoul_init, vcoul_free
+ use m_vcoul,               only : vcoul_t
  use m_ioarr,               only : read_rhor
  use m_io_screening,        only : hscr_print, read_screening, hscr_free, hscr_t, hscr_from_file,&
                                    ioscr_qmerge, ioscr_qrecover, ioscr_wmerge, ioscr_wremove
@@ -403,7 +403,7 @@ program mrgscr
          end if
          dtset%ecutsigx = -one
 
-         call vcoul_init(Vcp,Gsphere,Cryst,Qmesh,Kmesh,Dtset%rcut,Dtset%gw_icutcoul,&
+         call  Vcp%init(Gsphere,Cryst,Qmesh,Kmesh,Dtset%rcut,Dtset%gw_icutcoul,&
            Dtset%vcutgeo,Dtset%ecutsigx,Hscr0%npwe,nqlwl,qlwl,ngfft,comm)
          ABI_FREE(qlwl)
 
@@ -633,7 +633,7 @@ program mrgscr
        qlwl(:,:)=Er%Hscr%qlwl(:,1:nqlwl)
      end if
 
-     call vcoul_init(Vcp,Gsphere,Cryst,Qmesh,Kmesh,Dtset%rcut,Dtset%gw_icutcoul,Dtset%vcutgeo,Dtset%ecutsigx,Hscr0%npwe,nqlwl,&
+     call Vcp%init(Gsphere,Cryst,Qmesh,Kmesh,Dtset%rcut,Dtset%gw_icutcoul,Dtset%vcutgeo,Dtset%ecutsigx,Hscr0%npwe,nqlwl,&
        qlwl,ngfft,comm)
      ABI_FREE(qlwl)
 
@@ -1103,7 +1103,7 @@ program mrgscr
      ABI_FREE(rhog)
      ABI_FREE(nhat)
 
-     call vcoul_free(Vcp)
+     call Vcp%free()
      call em1results_free(Er)
      call gsph_free(Gsphere)
 

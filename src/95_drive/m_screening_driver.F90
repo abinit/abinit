@@ -63,7 +63,7 @@ module m_screening_driver
                              get_ng0sh, kmesh_print, find_qmesh, get_BZ_item
  use m_kg,            only : getph
  use m_gsphere,       only : gsph_free, gsphere_t, gsph_init, merge_and_sort_kg, setshells
- use m_vcoul,         only : vcoul_t, vcoul_free, vcoul_init
+ use m_vcoul,         only : vcoul_t
  use m_qparticles,    only : rdqps, rdgw, show_QP
  use m_screening,     only : make_epsm1_driver, lwl_write, chi_t, chi_free, chi_new
  use m_io_screening,  only : hscr_new, hscr_io, write_screening, hscr_free, hscr_t
@@ -1540,7 +1540,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  call cryst%free()
  call gsph_free(Gsph_epsG0)
  call gsph_free(Gsph_wfn)
- call vcoul_free(Vcp)
+ call Vcp%free()
  call em1params_free(Ep)
  call Hdr_wfk%free()
  call Hdr_local%free()
@@ -1911,7 +1911,7 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,Dtset,Psps,Pawtab
  ABI_FREE(gvec_kss)
 
  ! FIXME this wont work if nqptdm/=0
- call vcoul_init(Vcp,Gsph_epsG0,Cryst,Qmesh,Kmesh,Dtset%rcut,Dtset%gw_icutcoul,Dtset%vcutgeo,Dtset%ecuteps,Ep%npwe,Ep%nqlwl,&
+ call Vcp%init(Gsph_epsG0,Cryst,Qmesh,Kmesh,Dtset%rcut,Dtset%gw_icutcoul,Dtset%vcutgeo,Dtset%ecuteps,Ep%npwe,Ep%nqlwl,&
 &  Ep%qlwl,ngfftf,comm)
 
 #if 0

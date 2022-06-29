@@ -607,7 +607,7 @@ subroutine slkmat_print(mat, header, unit, prtvol)
  integer,optional,intent(in) :: prtvol, unit
 
 !Local variables-------------------------------
- integer :: spin, ikpt, unt, my_prtvol, ii
+ integer :: unt, my_prtvol !, ii
  character(len=500) :: msg
 
 ! *********************************************************************
@@ -3816,6 +3816,7 @@ complex(dp) function slk_get_trace(mat) result(ctrace)
 #endif
  else
    ABI_ERROR("Neither buffer_cplx nor buffer_real are allocated!")
+   ctrace = zero
  end if
 
 end function slk_get_trace

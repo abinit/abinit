@@ -949,7 +949,7 @@ subroutine time_fftbox(Ftest,isign,inplace,header,Ftprof)
  call cwtime(cpu_time,wall_time,gflops,"start")
 
  ! No augmentation here.
- call fftbox_plan3_many(plan,ndat,Ftest%ngfft(1:3),Ftest%ngfft(1:3),Ftest%ngfft(7),isign)
+ call plan%many(ndat, Ftest%ngfft(1:3), Ftest%ngfft(1:3), Ftest%ngfft(7), isign)
 
  select case (inplace)
  case (0)

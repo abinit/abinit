@@ -1247,9 +1247,9 @@ subroutine paw_cross_rho_tw_g(nspinor,npwvec,nr,ngfft,map2sphere,use_padfft,igff
 
    SELECT CASE (map2sphere)
 
-   CASE (0) ! Need results on the full FFT box thus cannot use zero-padded FFT.
-
-     call fftbox_plan3_many(plan,ndat1,ngfft(1:3),ngfft(1:3),ngfft(7),-1)
+   CASE (0)
+     ! Need results on the full FFT box thus cannot use zero-padded FFT.
+     call plan%many(ndat1, ngfft(1:3), ngfft(1:3), ngfft(7), -1)
      call plan%execute(rho)
 
      rhotwg=rhotwg + rho
@@ -1262,7 +1262,7 @@ subroutine paw_cross_rho_tw_g(nspinor,npwvec,nr,ngfft,map2sphere,use_padfft,igff
        call fftpad(rho,ngfft,nx,ny,nz,ldx,ldy,ldz,ndat1,mgfft,-1,gbound)
      else
 
-       call fftbox_plan3_many(plan,ndat1,ngfft(1:3),ngfft(1:3),ngfft(7),-1)
+       call plan%many(ndat1, ngfft(1:3), ngfft(1:3), ngfft(7), -1)
        call plan%execute(rho)
      end if
 

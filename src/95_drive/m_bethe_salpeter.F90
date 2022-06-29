@@ -63,7 +63,7 @@ module m_bethe_salpeter
                                ebands_update_occ, ebands_get_valence_idx, ebands_apply_scissors, ebands_report_gap
  use m_kg,              only : getph
  use m_gsphere,         only : gsphere_t, gsph_free, gsph_init, print_gsphere, gsph_extend
- use m_vcoul,           only : vcoul_t, vcoul_init, vcoul_free
+ use m_vcoul,           only : vcoul_t
  use m_qparticles,      only : rdqps, rdgw  !, show_QP , rdgw
  use m_wfd,             only : wfd_init, wfdgw_t, test_charge
  use m_wfk,             only : wfk_read_eigenvalues
@@ -171,10 +171,6 @@ contains
 !!      For compatibility reasons, (nfftf,ngfftf,mgfftf) are set equal to (nfft,ngfft,mgfft) in that case.
 !!
 !! CHILDREN
-!!      double_grid_init,ebands_apply_scissors,ebands_copy,ebands_init
-!!      ebands_print,ebands_report_gap,ebands_update_occ,find_qmesh,gsph_extend
-!!      gsph_init,init_transitions,kmesh_init,kmesh_print,make_mesh
-!!      print_gsphere,vcoul_init,wfk_read_eigenvalues,wrtout
 !!
 !! SOURCE
 
@@ -989,7 +985,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  call Hdr_bse%free()
  call ebands_free(KS_BSt)
  call ebands_free(QP_BSt)
- call vcoul_free(Vcp)
+ call Vcp%free()
  call pawhur_free(Hur)
  ABI_FREE(Hur)
  call bs_parameters_free(BSp)
@@ -1007,7 +1003,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
    call kmesh_free(Qmesh_dense)
    call ebands_free(KS_BSt_dense)
    call ebands_free(QP_BSt_dense)
-   call vcoul_free(Vcp_dense)
+   call Vcp_dense%free()
    call Hdr_wfk_dense%free()
  end if
 
@@ -1072,10 +1068,6 @@ end subroutine bethe_salpeter
 !!      m_bethe_salpeter
 !!
 !! CHILDREN
-!!      double_grid_init,ebands_apply_scissors,ebands_copy,ebands_init
-!!      ebands_print,ebands_report_gap,ebands_update_occ,find_qmesh,gsph_extend
-!!      gsph_init,init_transitions,kmesh_init,kmesh_print,make_mesh
-!!      print_gsphere,vcoul_init,wfk_read_eigenvalues,wrtout
 !!
 !! SOURCE
 
@@ -1517,10 +1509,10 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
 
  ! Compute Coulomb term on the largest G-sphere.
  if (Gsph_x%ng > Gsph_c%ng ) then
-   call vcoul_init(Vcp,Gsph_x,Cryst,Qmesh,Kmesh,Dtset%rcut,Dtset%gw_icutcoul,Dtset%vcutgeo,Dtset%ecutsigx,Gsph_x%ng,&
+   call Vcp%init(Gsph_x,Cryst,Qmesh,Kmesh,Dtset%rcut,Dtset%gw_icutcoul,Dtset%vcutgeo,Dtset%ecutsigx,Gsph_x%ng,&
      nqlwl,qlwl,ngfftf,comm)
  else
-   call vcoul_init(Vcp,Gsph_c,Cryst,Qmesh,Kmesh,Dtset%rcut,Dtset%gw_icutcoul,Dtset%vcutgeo,Dtset%ecutsigx,Gsph_c%ng,&
+   call Vcp%init(Gsph_c,Cryst,Qmesh,Kmesh,Dtset%rcut,Dtset%gw_icutcoul,Dtset%vcutgeo,Dtset%ecutsigx,Gsph_c%ng,&
      nqlwl,qlwl,ngfftf,comm)
  end if
 
@@ -2018,10 +2010,6 @@ end subroutine setup_bse
 !!      m_bethe_salpeter
 !!
 !! CHILDREN
-!!      double_grid_init,ebands_apply_scissors,ebands_copy,ebands_init
-!!      ebands_print,ebands_report_gap,ebands_update_occ,find_qmesh,gsph_extend
-!!      gsph_init,init_transitions,kmesh_init,kmesh_print,make_mesh
-!!      print_gsphere,vcoul_init,wfk_read_eigenvalues,wrtout
 !!
 !! SOURCE
 
@@ -2162,11 +2150,11 @@ subroutine setup_bse_interp(Dtset,Dtfil,BSp,Cryst,Kmesh,&
 
  ! Compute Coulomb term on the largest G-sphere.
  if (Gsph_x%ng > Gsph_c%ng ) then
-   call vcoul_init(Vcp_dense,Gsph_x,Cryst,Qmesh_dense,Kmesh_dense,Dtset%rcut,Dtset%gw_icutcoul,&
-&    Dtset%vcutgeo,Dtset%ecutsigx,Gsph_x%ng,nqlwl,qlwl,ngfftf,comm)
+   call Vcp_dense%init(Gsph_x,Cryst,Qmesh_dense,Kmesh_dense,Dtset%rcut,Dtset%gw_icutcoul,&
+                       Dtset%vcutgeo,Dtset%ecutsigx,Gsph_x%ng,nqlwl,qlwl,ngfftf,comm)
  else
-   call vcoul_init(Vcp_dense,Gsph_c,Cryst,Qmesh_dense,Kmesh_dense,Dtset%rcut,Dtset%gw_icutcoul,&
-&    Dtset%vcutgeo,Dtset%ecutsigx,Gsph_c%ng,nqlwl,qlwl,ngfftf,comm)
+   call Vcp_dense%init(Gsph_c,Cryst,Qmesh_dense,Kmesh_dense,Dtset%rcut,Dtset%gw_icutcoul,&
+                       Dtset%vcutgeo,Dtset%ecutsigx,Gsph_c%ng,nqlwl,qlwl,ngfftf,comm)
  end if
 
  ABI_FREE(qlwl)
