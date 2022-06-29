@@ -98,6 +98,11 @@ module m_vtorho
  use m_nvtx_data
 #endif
 
+#ifdef HAVE_FC_ISO_C_BINDING
+ use, intrinsic :: iso_c_binding
+#endif
+
+
  implicit none
 
  private
@@ -396,6 +401,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 #if defined HAVE_BIGDFT
  integer :: occopt_bigdft
 #endif
+
+ type(gemm_nonlop_gpu_type) :: gemm_nonlop_gpu_obj
+ integer(kind=c_int32_t) :: kk1 = 10
+ integer(kind=c_int32_t) :: kk2 = 100
 
 ! *********************************************************************
 
@@ -906,7 +915,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
            !Init the arrays
            call make_gemm_nonlop(my_ikpt,gs_hamk%npw_fft_k,gs_hamk%lmnmax, &
 &           gs_hamk%ntypat, gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%istwf_k, gs_hamk%ucvol, gs_hamk%ffnl_k,&
-&           gs_hamk%ph3d_k,gs_hamk%kpt_k,gs_hamk%kg_k,gs_hamk%kpg_k,compute_grad_atom=(optforces>0))
+&           gs_hamk%ph3d_k,gs_hamk%kpt_k,gs_hamk%kg_k,gs_hamk%kpg_k,dtset%use_gemm_nonlop_gpu,compute_grad_atom=(optforces>0))
          end if
        end if
 

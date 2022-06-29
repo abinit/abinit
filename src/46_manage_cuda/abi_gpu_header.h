@@ -20,6 +20,7 @@
 #include "cuda_header.h"
 
 #include "gpu_apply_invovl_inner.h"
+#include "gpu_gemm_nonlop.h"
 
 #define BLOCK_SIZE 128  // CUDA block size
 #define MAX_GRID_SIZE 65535  // CUDA max grid size by dimension
@@ -97,12 +98,17 @@ extern "C" {
                                    );
   void gpu_mkkpg_(int *kg_gpu,double *kpg_gpu,double *kpt,int *npw);
 
-  // headers for inverse overlap matrix application
+  // prototypes for inverse overlap matrix application
   void gpu_apply_invovl_inner_alloc(int32_t proj_dim[3], int32_t ntypat, int32_t realloc);
   void gpu_apply_invovl_inner_dealloc();
 
   void gpu_apply_invovl_matrix_alloc(int32_t cplx, int32_t nprojs, int32_t ntypat, int32_t lmnmax, int32_t realloc);
   void gpu_apply_invovl_matrix_dealloc();
+
+
+  // prototypes for gemm_nonlop on GPU
+  void cuda_gemm_nonlop_gpu_allocate(gemm_nonlop_gpu_t *data, int32_t npw, int32_t nprojs);
+  void cuda_gemm_nonlop_gpu_deallocate(gemm_nonlop_gpu_t *data);
 
 #ifdef __cplusplus
 }
