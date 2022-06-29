@@ -94,9 +94,15 @@ module m_gemm_nonlop
 
  integer, save, public :: gemm_nonlop_ikpt_this_proc_being_treated
  !! This is oh so very crude, but I can't find any other way to do it without passing ikpt deep down to nonlop
+
  logical, save, public :: gemm_nonlop_use_gemm = .false.
  ! Public variable indicating whether we should call gemm_nonlop or fall back to the usual nonlop. Set to false
  ! in order not to interfere with non-GS calls to nonlop.
+
+ logical, save, public :: gemm_nonlop_use_gemm_gpu = .false.
+ ! Public variable controlled by input dataset var named use_gemm_nonlop_cuda (0 or 1).
+ ! When 0, nonlop is computed by calling the regular nonlop_gpu
+ ! When 1, nonlop is computed by calling gemm_nonlop_gpu
 
 contains
 
