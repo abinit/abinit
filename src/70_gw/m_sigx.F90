@@ -184,8 +184,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: tim_fourdp=2,ndat1=1
- integer,parameter :: use_pawnhat=0,ider0=0
+ integer,parameter :: ndat1 = 1, use_pawnhat0 = 0, ider0 = 0
  integer :: gwcalctyp,izero,iab,ib_sum,ib,ib1,ib2,ierr,ig,ig_rot,ii,iik,itim_q,i2
  integer :: ik_bz,ik_ibz,isym_q,iq_bz,iq_ibz,spin,isym,jb,is_idx
  integer :: jik,jk_bz,jk_ibz,kb,nspinor,nsppol,ifft
@@ -260,9 +259,9 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
  !%call get_IBZ_item(Kmesh,jk_ibz,kibz,wtk)
  spinrot_kgw(:)=Cryst%spinrot(:,isym_kgw)
  write(msg,'(2a,3f8.3,2a,2(i3,a))')ch10,&
-&  ' Calculating <nk|Sigma_x|nk> at k= ',kgw,ch10,&
-&  ' bands from ',ib1,' to ',ib2,ch10
- call wrtout(std_out,msg,'COLL')
+  ' Calculating <nk|Sigma_x|nk> at k= ',kgw,ch10,&
+  ' bands from ',ib1,' to ',ib2,ch10
+ call wrtout(std_out, msg)
 
  if (ANY(gwx_ngfft(1:3) /= Wfd%ngfft(1:3)) ) call wfd%change_ngfft(Cryst,Psps,gwx_ngfft)
  gwx_mgfft = MAXVAL(gwx_ngfft(1:3))
@@ -378,9 +377,9 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
    call pawcprj_alloc(Cprj_ksum,0,Wfd%nlmn_atm)
 
    nhat12_grdim=0
-   if (use_pawnhat==1) then
+   if (use_pawnhat0 == 1) then
      ! Compensation charge for \phi_a^*\phi_b
-     call wrtout(std_out,"Using nhat12","COLL")
+     call wrtout(std_out, "Using nhat12")
      ABI_MALLOC(nhat12  ,(2,gwx_nfftot,nspinor**2))
      ABI_MALLOC(grnhat12,(2,gwx_nfftot,nspinor**2,3*nhat12_grdim))
    end if
@@ -393,7 +392,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
 
  nq_summed=Kmesh%nbz
  if (Sigp%symsigma > 0) then
-   call littlegroup_print(Ltg_k,std_out,prtvol,'COLL')
+   call littlegroup_print(Ltg_k,std_out,prtvol, 'COLL')
    nq_summed=SUM(Ltg_k%ibzq(:))
 
    ! Find number of degenerates subspaces and number of bands in each subspace.
@@ -411,7 +410,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
  end if !symsigma
 
  write(msg,'(2a,i0,a)')ch10,' calc_sigx_me: calculation status (', nq_summed, ' to be completed):'
- call wrtout(std_out,msg,'COLL')
+ call wrtout(std_out, msg)
 
  ABI_MALLOC(ur_ibz,(gwx_nfftot*nspinor))
  if (pawcross==1) then
@@ -517,7 +516,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
        end if
      end if
 
-     if (Psps%usepaw==1 .and. use_pawnhat==0) then
+     if (Psps%usepaw==1 .and. use_pawnhat0 == 0) then
        ! Evaluate oscillator matrix elements
        ! $ <phj/r|e^{-i(q+G)}|phi/r> - <tphj/r|e^{-i(q+G)}|tphi/r> $ in packed form
        q0 = qbz !;if (q_is_gamma) q0 = (/0.00001_dp,0.00001_dp,0.00001_dp/) ! GW_Q0_DEFAULT
@@ -559,7 +558,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
        ! Get all <k-q,ib_sum,s|e^{-i(q+G).r}|s,jb,k>
        do jb=ib1,ib2
 
-         if (Psps%usepaw==1 .and. use_pawnhat==1) then
+         if (Psps%usepaw==1 .and. use_pawnhat0 == 1) then
            ABI_ERROR("use_pawnhat is disabled")
            i2=jb; if (nspinor==2) i2=(2*jb-1)
            spad=(nspinor-1)
@@ -575,7 +574,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
 &            wfr_bdgw(:,jb),jik,ktabr(:,jk_bz),ph_mkgwt,spinrot_kgw, &
 &            nspinor,rhotwg_ki(:,jb))
 
-           if (Psps%usepaw==1.and.use_pawnhat==0) then
+           if (Psps%usepaw==1.and. use_pawnhat0 == 0) then
              ! Add on-site contribution, projectors are already in BZ.
              i2=jb; if (nspinor==2) i2=(2*jb-1)
              spad=(nspinor-1)
@@ -674,7 +673,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
        ABI_FREE(gboundf)
      end if
 
-     if (Psps%usepaw==1.and.use_pawnhat==0) then
+     if (Psps%usepaw==1 .and. use_pawnhat0 == 0) then
        call pawpwij_free(Pwij_qg)
        ABI_FREE(Pwij_qg)
      end if
@@ -807,7 +806,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
      call pawpwij_free(Pwij_fft)
      ABI_FREE(Pwij_fft)
    end if
-   if (use_pawnhat==1) then
+   if (use_pawnhat0 == 1) then
      ABI_FREE(nhat12)
      ABI_FREE(grnhat12)
    end if

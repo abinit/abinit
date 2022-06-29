@@ -37,6 +37,7 @@ module m_gwr
  use m_nctk
  use m_dtfil
  use m_yaml
+ use m_sigtk
 
  use defs_datatypes,  only : pseudopotential_type, ebands_t
  use defs_abitypes,   only : mpi_type
@@ -166,6 +167,33 @@ module m_gwr
    ! Number of imaginary time/frequency points treated by this MPI rank.
 
    !integer :: nomega = -1, my_nomega = -1
+
+  integer :: nkcalc
+   ! Number of Sigma_nk k-points computed
+
+  integer :: max_nbcalc
+   ! Maximum number of bands computed (max over nkcalc and spin).
+
+  real(dp),allocatable :: kcalc(:,:)
+   ! kcalc(3, nkcalc)
+   ! List of k-points where the self-energy is computed.
+
+  integer,allocatable :: bstart_ks(:,:)
+   ! bstart_ks(nkcalc, nsppol)
+   ! Initial KS band index included in self-energy matrix elements for each k-point in kcalc.
+   ! Depends on spin because all degenerate states should be included when symmetries are used.
+
+  integer,allocatable :: bstop_ks(:,:)
+   ! bstop_ks(nkcalc, nsppol)
+
+  integer,allocatable :: nbcalc_ks(:,:)
+   ! nbcalc_ks(nkcalc, nsppol)
+   ! Number of bands included in self-energy matrix elements for each k-point in kcalc.
+   ! Depends on spin because all degenerate states should be included when symmetries are used.
+
+  !integer,allocatable :: kcalc2ibz(:,:)
+   !kcalc2ibz(6, nkcalc))
+   ! Mapping ikcalc --> IBZ as reported by listkk.
 
    logical :: use_supercell = .True.
    ! True if we are using the supercell formalism.
@@ -404,13 +432,14 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  integer,parameter :: qptopt1 = 1, timrev1 = 1, master = 0, ndims = 4
  integer :: my_is, my_it, my_ikf, my_iqf, ii, npwsp, col_bsize, ebands_timrev, my_iki, my_iqi, itau, spin
  integer :: my_nshiftq, ik_ibz, ik_bz, iq_bz, iq_ibz, npw_, ncid ! ig1, ig2,
- integer :: comm_cart, me_cart, ierr, all_nproc, my_rank
+ integer :: comm_cart, me_cart, ierr, all_nproc, nps, my_rank, qprange_, gap_err
  real(dp) :: ecut_eff
  real(dp) :: cpu, wall, gflops
  character(len=5000) :: msg
  logical :: reorder
  type(desc_t),pointer :: desc_k, desc_q
  type(krank_t) :: qrank, krank_ibz
+ type(gaps_t) :: gaps
 !arrays
  integer :: qptrlatt(3,3), dims(ndims)
  integer,allocatable :: kbz2ibz(:,:), qbz2ibz(:,:), gvec_(:,:)
@@ -524,8 +553,61 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  ! ==========================
  ! Setup k-points in Sigma_nk
  ! ==========================
- ! TODO:
+ gaps = ebands_get_gaps(ks_ebands, gap_err)
+ if (my_rank == master) then
+   msg = "Kohn-Sham gaps and band edges from IBZ mesh"
+   call gaps%print(unit=std_out, header=msg)
+   call gaps%print(unit=ab_out, header=msg)
+ end if
 
+ ! TODO: nkcalc should be spin dependent.
+ ! This piece of code is taken from m_sigmaph.
+ ! In principle one should use the same algorithm in setup_sigma (legacy GW code).
+ if (dtset%nkptgw /= 0) then
+
+   ! Treat the k-points and bands specified in the input file via kptgw and bdgw.
+   call sigtk_kcalc_from_nkptgw(dtset, dtset%mband, gwr%nkcalc, gwr%kcalc, gwr%bstart_ks, gwr%nbcalc_ks)
+
+ else
+
+   if (any(abs(dtset%sigma_erange) > zero)) then
+     ! Use sigma_erange and (optionally) sigma_ngkpt
+     call sigtk_kcalc_from_erange(dtset, cryst, ks_ebands, gaps, gwr%nkcalc, gwr%kcalc, gwr%bstart_ks, gwr%nbcalc_ks, comm)
+
+   else
+     ! Use qp_range to select the interesting k-points and the corresponding bands.
+     !
+     !    0 --> Compute the QP corrections only for the fundamental and the direct gap.
+     ! +num --> Compute the QP corrections for all the k-points in the irreducible zone and include `num`
+     !          bands above and below the Fermi level.
+     ! -num --> Compute the QP corrections for all the k-points in the irreducible zone.
+     !          Include all occupied states and `num` empty states.
+
+     qprange_ = dtset%gw_qprange
+     if (gap_err /= 0 .and. qprange_ == 0) then
+       ABI_WARNING("Cannot compute fundamental and direct gap (likely metal). Will replace qprange 0 with qprange 1")
+       qprange_ = 1
+     end if
+
+     if (qprange_ /= 0) then
+       call sigtk_kcalc_from_qprange(dtset, cryst, ks_ebands, qprange_, gwr%nkcalc, gwr%kcalc, gwr%bstart_ks, gwr%nbcalc_ks)
+     else
+       ! qprange is not specified in the input.
+       ! Include direct and fundamental KS gap or include states depending on the position wrt band edges.
+       call sigtk_kcalc_from_gaps(dtset, ks_ebands, gaps, gwr%nkcalc, gwr%kcalc, gwr%bstart_ks, gwr%nbcalc_ks)
+     end if
+   end if
+
+ end if ! nkptgw /= 0
+
+ ! TODO: Copy additional section in sigmaph to include all degenerate states and map kcalc to ibz
+
+ ! Now we can finally compute max_nbcalc
+ gwr%max_nbcalc = maxval(gwr%nbcalc_ks)
+
+ ABI_MALLOC(gwr%bstop_ks, (gwr%nkcalc, gwr%nsppol))
+ gwr%bstop_ks = gwr%bstart_ks + gwr%nbcalc_ks - 1
+ call gaps%free()
 
  ! ========================
  ! === MPI DISTRIBUTION ===
@@ -542,9 +624,54 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
    !ABI_CHECK(mod(natom3, gwr%tau_comm%nproc) == 0, "pert_comm_nproc must divide 3 * natom.")
  else
    ! Automatic grid generation.
-   ! TODO: for the time being use all procs for tau.
-   gwr%tau_comm%nproc = all_nproc
-   !gwr%g_comm%nproc = all_nproc
+   ! Priorities:
+   !   - spin (if any)
+   !   - tau
+   !   - kbz
+   !   - g/r (Scalapack)
+   !
+   gwr%spin_comm%nproc = 1
+   if (gwr%nsppol == 2 .and. all_nproc > 1) then
+     ABI_CHECK(mod(all_nproc, 2) == 0, "when nsppol == 2, nprocs should be even!")
+     gwr%spin_comm%nproc = 2
+   end if
+
+   nps = all_nproc / gwr%spin_comm%nproc
+   do ii=nps,1,-1
+     if (mod(gwr%ntau, ii) == 0 .and. mod(nps, ii) == 0) exit
+   end do
+
+   if (ii == 1 .and. nps > 1) then
+     if (gwr%nkbz > 1) then
+       call xmpi_distrib_2d(nps, "12", gwr%ntau, gwr%nkbz, gwr%tau_comm%nproc, gwr%kpt_comm%nproc, ierr)
+       ABI_CHECK(ierr == 0, sjoin("Cannot distribute nprocs:", itoa(nps), " with priority: tau/kbz"))
+     else
+       call xmpi_distrib_2d(nps, "12", gwr%ntau, gwr%green_mpw, gwr%tau_comm%nproc, gwr%g_comm%nproc, ierr)
+       ABI_CHECK(ierr == 0, sjoin("Cannot distribute nprocs:", itoa(nps), " with priority: tau/g"))
+     end if
+   else
+     ! ii divides ntau and nps.
+     gwr%tau_comm%nproc  = ii
+     nps = nps / gwr%tau_comm%nproc
+
+     gwr%kpt_comm%nproc = 1  ! Init values assuming Gamma-only sampling.
+     gwr%g_comm%nproc = nps
+
+     if (gwr%nkbz > 1) then
+       do ii=nps,1,-1
+         if (mod(gwr%nkbz, ii) == 0 .and. mod(nps, ii) == 0) exit
+       end do
+       if (ii == 1 .and. nps > 1) then
+         call xmpi_distrib_2d(nps, "12", gwr%nkbz, gwr%green_mpw, gwr%kpt_comm%nproc, gwr%g_comm%nproc, ierr)
+         ABI_CHECK(ierr == 0, sjoin("Cannot distribute nprocs:", itoa(nps), " with priority: k/g"))
+       else
+         ! ii divides nkbz and nps.
+         gwr%kpt_comm%nproc = ii
+         gwr%g_comm%nproc = nps / ii
+       end if
+     end if
+
+   end if
  end if
 
  ! Consistency check.
@@ -606,7 +733,6 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
 
  call xmpi_split_block(gwr%nkbz, gwr%kpt_comm%value, gwr%my_nkbz, gwr%my_kbz_inds)
  ABI_CHECK(gwr%my_nkbz > 0, "my_nkbz == 0, decrease number of procs for k-point level")
-
 
  ABI_MALLOC(gwr%my_kbz2ibz, (6, gwr%my_nkbz))
  gwr%my_kbz2ibz = kbz2ibz(:, gwr%my_kbz_inds(:))
@@ -813,6 +939,12 @@ subroutine gwr_free(gwr)
  ABI_SFREE(gwr%t2w_cos_wgs)
  ABI_SFREE(gwr%t2w_sin_wgs)
 
+ ABI_SFREE(gwr%kcalc)
+ ABI_SFREE(gwr%bstart_ks)
+ ABI_SFREE(gwr%bstop_ks)
+ ABI_SFREE(gwr%nbcalc_ks)
+ !ABI_SFREE(gwr%kcalc2ibz)
+
  call ebands_free(gwr%qp_ebands)
 
  ! Free descriptors
@@ -892,7 +1024,7 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk0_path)
 !scalars
  integer :: mband, nkibz, nsppol, my_is, my_it, my_iki, spin, ik_ibz
  integer :: my_nb, band, ib, npw_k, istwf_k, itau, ioe, ig1, ig2, il_g1, il_g2
- real(dp) :: f_nk, eig_nk, tau, ef, fact
+ real(dp) :: f_nk, eig_nk, tau, ef, gt_fact
  real(dp) :: cpu, wall, gflops
  character(len=5000) :: msg
  type(wfd_t),target :: wfd
@@ -904,7 +1036,7 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk0_path)
  type(matrix_scalapack),pointer :: gt
 !arrays
  integer,allocatable :: nband(:,:), wfd_istwfk(:), my_bands(:)
- real(dp),allocatable :: cgwork(:,:)
+ !real(dp),allocatable :: cgwork(:,:)
  logical,allocatable :: bks_mask(:,:,:), keep_ur(:,:,:)
 
 ! *************************************************************************
@@ -991,12 +1123,13 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk0_path)
      ABI_CHECK(npw_k == desc_k%npw, "npw_k != desc_k%npw")
      ABI_CHECK(all(wfd%kdata(ik_ibz)%kg_k == desc_k%gvec), "kg_k != desc_k%gvec")
 
-     ABI_MALLOC(cgwork, (2, npw_k * wfd%nspinor))
+     !ABI_MALLOC(cgwork, (2, npw_k * wfd%nspinor))
 
      do ib=1,my_nb
        band = my_bands(ib)
        f_nk = gwr%ks_ebands%occ(band, ik_ibz, spin)
        eig_nk = gwr%ks_ebands%eig(band, ik_ibz, spin) - ef
+       ! Select occupied or empty G
        if (eig_nk < tol6) then
          ioe = 1
        else if (eig_nk > tol6) then
@@ -1005,32 +1138,34 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk0_path)
          ABI_WARNING("Metallic system of semiconductor with Fermi level inside bands!!!!")
        end if
 
-       call wfd%copy_cg(band, ik_ibz, spin, cgwork)
        ABI_CHECK(wfd%get_wave_ptr(band, ik_ibz, spin, wave, msg) == 0, msg)
+
+       !call wfd%copy_cg(band, ik_ibz, spin, cgwork)
        !call ddkop%setup_spin_kpoint(dtset, cryst, psps, spin, kk_ibz, istwf_k, npw_k, wfd%kdata(ik_ibz)%kg_k)
+
+       ! TODO: spinor and use BLAS2 but take into account scalapack distribution
+       ! or rewrite everythin with Scalapack routines.
 
        do my_it=1,gwr%my_ntau
          itau = gwr%my_itaus(my_it)
          tau = gwr%tau_mesh(itau)
-         fact = exp(-tau * eig_nk)
+         gt_fact = exp(-tau * eig_nk)
          gt => gwr%gt_kibz(ioe, ik_ibz, itau, spin)
          !call wave%outer_prod()
          do il_g2=1, gt%sizeb_local(2)
            ig2 = gt%loc2gcol(il_g2)
-           !ig2 = gt%glob_col(il_g2)
            do il_g1=1, gt%sizeb_local(1)
-             ! TODO: spinor and use BLAS2 but take into account scalapack distribution
              ig1 = gt%loc2grow(il_g1)
              !cgwork(ig1) x cgwork(ig2) *
              !gt%buffer_cplx(il_g1, il_g2) = gt%buffer_cplx(il_g1, il_g2) + &
-             !  fact * wave%ug(ig1) * wave%ug(ig2)
+             !  gt_fact * GWPC_CONJG(wave%ug(ig1)) * wave%ug(ig2)
            end do
          end do
 
        end do ! my_it
 
      end do ! ib
-     ABI_FREE(cgwork)
+     !ABI_FREE(cgwork)
 
    end do ! my_ikf
  end do ! my_is
@@ -1111,7 +1246,6 @@ subroutine gwr_rotate_gt(gwr, my_ikf, my_it, my_is, desc_kbz, gt_kbz)
      ig2 = gt_kbz(ioe)%loc2gcol(il_g2)
      do il_g1=1, gt_kbz(ioe)%sizeb_local(1)
        ig1 = gt_kbz(ioe)%loc2grow(il_g1)
-       !call gt_kbz(ioe)%loc2glob(il_g1, il_g2, ig1, ig2)
        !gt_kbz(ioe)%buffer_cplx(il_g1, il_g2) = gt_kbz(ioe)%buffer_cplx(il_g1, il_g2) ! * ??
      end do
    end do
@@ -1191,9 +1325,6 @@ subroutine gwr_get_green_gpr(gwr, my_it, my_is, desc_kbz, gt_gpr)
      ! Allocate rgp scalapack matrix to store G(r, g')
      npwsp = desc_k%npw * gwr%nspinor
      col_bsize = npwsp / gwr%g_comm%nproc; if (mod(npwsp, gwr%g_comm%nproc) /= 0) col_bsize = col_bsize + 1
-     !print *, "desc_k%npw", desc_k%npw
-     !print *, "npw", size(desc_k%gvec, dim=2)
-     !print *, "desc_k%istwfk", desc_k%istwfk
      call rgp%init(gwr%nfft * gwr%nspinor, npwsp, gwr%g_slkproc, desc_k%istwfk, &
                    size_blocs=[gwr%nfft * gwr%nspinor, col_bsize])
 

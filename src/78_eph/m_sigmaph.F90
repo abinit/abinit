@@ -2641,7 +2641,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
        ! Include direct and fundamental KS gap or include states depending on the position wrt band edges.
        call sigtk_kcalc_from_gaps(dtset, ebands, gaps, new%nkcalc, new%kcalc, new%bstart_ks, new%nbcalc_ks)
      end if
-    end if
+   end if
 
  end if ! nkptgw /= 0
 

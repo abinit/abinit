@@ -572,6 +572,14 @@ meta: {optdriver: 6, }
 --------------------------------------------------------------------------------
 
 
+ === Kohn-Sham gaps and band edges ===
+ Indirect band gap semiconductor
+ Fundamental gap:     0.620 (eV)
+   VBM:     4.665 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     5.285 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
+ Direct gap:         2.443 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+
+
  ==== FFT mesh for GWR ====
   FFT mesh divisions ........................    12   12   12
   Augmented FFT divisions ...................    13   13   12
@@ -595,7 +603,7 @@ ngfft: [12, 12, 12, 13, 13, 12, 312, 16, ]
 P gwr_np_gtks: [1, 1, 1, 1, ]
 ...
 
-Trace of chit_qibz matrix for testing purposes:
+Trace of chi_qibz matrix for testing purposes:
        1       2
     1   0.000   0.000
         0.000   0.000
