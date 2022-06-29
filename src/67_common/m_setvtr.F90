@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2021 ABINIT group (XG, GMR, FJ, MT, EB, SPr)
+!!  Copyright (C) 1998-2022 ABINIT group (XG, GMR, FJ, MT, EB, SPr)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -196,7 +196,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
 &  nattyp,nfft,ngfft,ngrvdw,nhat,nhatgr,nhatgrdim,nkxc,ntypat,n1xccc,n3xccc,&
 &  optene,pawrad,pawtab,ph1d,psps,rhog,rhor,rmet,rprimd,strsxc,&
 &  ucvol,usexcnhat,vhartr,vpsp,vtrial,vxc,vxcavg,wvl,xccc3d,xred,&
-&  electronpositron,taur,vxc_hybcomp,vxctau,add_tfw,xcctau3d) ! optionals arguments
+&  electronpositron,taur,vxc_hybcomp,vxctau,add_tfw,xcctau3d,calc_ewald) ! optionals arguments
 
 !Arguments ------------------------------------
 !scalars
@@ -204,6 +204,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
  integer,intent(in) :: optene,usexcnhat
  integer,intent(inout) :: moved_atm_inside,moved_rhor
  logical,intent(in),optional :: add_tfw
+ logical,intent(in),optional :: calc_ewald
  real(dp),intent(in) :: gsqcut,ucvol
  real(dp),intent(out) :: vxcavg
  type(MPI_type),intent(in) :: mpi_enreg
@@ -239,7 +240,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
  integer :: iatom,ifft,ipositron,ispden,nfftot
  integer :: optatm,optdyfr,opteltfr,optgr,option,option_eff,optn,optn2,optstr,optv,vloc_method
  real(dp) :: doti,e_xcdc_vxctau,ebb,ebn,evxc,ucvol_local,rpnrm
- logical :: add_tfw_,is_hybrid_ncpp,non_magnetic_xc,with_vxctau,wvlbigdft
+ logical :: add_tfw_,is_hybrid_ncpp,non_magnetic_xc,with_vxctau,wvlbigdft,lewald
  real(dp), allocatable :: xcart(:,:)
  character(len=500) :: message
  type(constrained_dft_t) :: constrained_dft
@@ -287,27 +288,31 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
 !-------------------------------------------------------------------------------------------------------------------
  call timab(5,1,tsec)
  if (ipositron/=1) then
-   if (dtset%icoulomb == 0 .or. (dtset%usewvl == 0 .and. dtset%icoulomb == 2)) then
-!    Periodic system, need to compute energy and forces due to replica and
-!    to correct the shift in potential calculation.
-     call ewald(energies%e_ewald,gmet,grewtn,gsqcut,dtset%icutcoul,dtset%natom,ngfft,dtset%nkpt,ntypat,&
-                &dtset%rcut,rmet,rprimd,dtset%typat,ucvol,dtset%vcutgeo,xred,psps%ziontypat)
-!    For a periodic system bearing a finite charge, the monopole correction to the
-!    energy is relevant.
-!    See Leslie and Gillan, JOURNAL OF PHYSICS C-SOLID STATE PHYSICS 18, 973 (1985)
-     if(abs(dtset%cellcharge(1))>tol8) then
-       call ewald(energies%e_monopole,gmet,grewtn_fake,gsqcut,dtset%icutcoul,1,ngfft,dtset%nkpt,1,&
-            &dtset%rcut,rmet,rprimd,(/1/),ucvol,dtset%vcutgeo,(/0.0_dp,0.0_dp,0.0_dp/),(/dtset%cellcharge(1)/))
-       energies%e_monopole=-energies%e_monopole
-     end if
-   else if (dtset%icoulomb == 1) then
-!    In a non periodic system (real space computation), the G=0 divergence
-!    doesn't occur and ewald is not needed. Only the ion/ion interaction
-!    energy is relevant and used as Ewald energy and gradient.
-     call ionion_realSpace(dtset, energies%e_ewald, grewtn, rprimd, xred, psps%ziontypat)
-   else if (dtset%icoulomb == 2) then
-     call ionion_surface(dtset, energies%e_ewald, grewtn, mpi_enreg%me_wvl, mpi_enreg%nproc_wvl, rprimd, &
-&     wvl%descr, wvl%den, xred)
+   lewald = .true.
+   if (present(calc_ewald)) lewald=calc_ewald
+   if (lewald) then 
+      if (dtset%icoulomb == 0 .or. (dtset%usewvl == 0 .and. dtset%icoulomb == 2)) then
+!       Periodic system, need to compute energy and forces due to replica and
+!       to correct the shift in potential calculation.
+        call ewald(energies%e_ewald,gmet,grewtn,gsqcut,dtset%icutcoul,dtset%natom,ngfft,dtset%nkpt,ntypat,&
+                   &dtset%rcut,rmet,rprimd,dtset%typat,ucvol,dtset%vcutgeo,xred,psps%ziontypat)
+!       For a periodic system bearing a finite charge, the monopole correction to the
+!       energy is relevant.
+!       See Leslie and Gillan, JOURNAL OF PHYSICS C-SOLID STATE PHYSICS 18, 973 (1985)
+        if(abs(dtset%cellcharge(1))>tol8) then
+          call ewald(energies%e_monopole,gmet,grewtn_fake,gsqcut,dtset%icutcoul,1,ngfft,dtset%nkpt,1,&
+               &dtset%rcut,rmet,rprimd,(/1/),ucvol,dtset%vcutgeo,(/0.0_dp,0.0_dp,0.0_dp/),(/dtset%cellcharge(1)/))
+          energies%e_monopole=-energies%e_monopole
+        end if
+      else if (dtset%icoulomb == 1) then
+!       In a non periodic system (real space computation), the G=0 divergence
+!       doesn't occur and ewald is not needed. Only the ion/ion interaction
+!       energy is relevant and used as Ewald energy and gradient.
+        call ionion_realSpace(dtset, energies%e_ewald, grewtn, rprimd, xred, psps%ziontypat)
+      else if (dtset%icoulomb == 2) then
+        call ionion_surface(dtset, energies%e_ewald, grewtn, mpi_enreg%me_wvl, mpi_enreg%nproc_wvl, rprimd, &
+&        wvl%descr, wvl%den, xred)
+      end if
    end if
    if (dtset%nzchempot>0) then
      call spatialchempot(energies%e_chempot,dtset%chempot,grchempottn,dtset%natom,ntypat,dtset%nzchempot,dtset%typat,xred)

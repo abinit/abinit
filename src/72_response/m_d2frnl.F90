@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2021 ABINIT group (DCA, XG, GM, AR, MB, MT, AM)
+!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GM, AR, MB, MT, AM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -802,6 +802,9 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
                  gh2c=zero; gs2c=zero
                  call nonlop(choice_efmas,cpopt,cwaveprj,enlout_efmas,gs_ham,idir,(/eig_k/),mpi_enreg,&
                  1,nnlout_efmas,paw_opt_efmas,signs,gs2c,tim_nonlop,cwavef,gh2c)
+!DEBUG
+!                gh2c=zero; gs2c=zero
+!ENDDEBUG
                  do ispinor=1,dtset%nspinor
                    ii = 1+(ispinor-1)*npw_k
                    do icplx=1,2
@@ -810,6 +813,9 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
                    end do
                  end do
                  gh2c = gh2c - eig_k*gs2c
+!DEBUG
+!                gh2c=zero; gs2c=zero
+!ENDDEBUG
                end if
                ideg = efmasdeg(ikpt)%ideg(iband)
                ABI_MALLOC( ch2c_tmp, (size(efmasval(ideg,ikpt)%ch2c, dim=3)) )

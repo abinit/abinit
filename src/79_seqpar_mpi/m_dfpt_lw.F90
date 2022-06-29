@@ -8,7 +8,7 @@
 !!  flexoelectric tensor) from the DFPT long-wave approach.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2018-2021 ABINIT group (MR,MS)
+!!  Copyright (C) 2018-2022 ABINIT group (MR,MS)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -228,7 +228,7 @@ subroutine dfpt_qdrpole(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
  real(dp),allocatable :: qdrpwf_t5(:,:,:,:),qdrpwf_t5_k(:,:,:,:)
  real(dp),allocatable :: rhog1_atdis(:,:,:)
  real(dp),allocatable :: rhog1_tmp(:,:)
- real(dp),allocatable :: rhor1_atdis(:,:,:),rhor1_efield(:,:,:) 
+ real(dp),allocatable :: rhor1_atdis(:,:,:),rhor1_efield(:,:,:)
  real(dp),allocatable :: rhor1_cplx(:,:),rhor1_tmp(:,:),rhor1_real(:,:)
  real(dp),allocatable :: tnons1(:,:)
  real(dp),allocatable :: vhartr1(:),vhxc1_atdis(:,:),vhxc1_efield(:,:)
@@ -508,7 +508,7 @@ subroutine dfpt_qdrpole(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
        call dfpt_mkvxcggadq(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,nkxc,nspden,qcar,rhor1_tmp,vxc1dq)
        vxc1dqc(:,:,iatpert,qcar)=vxc1dq(:,:)
      end do
-   end do 
+   end do
    ABI_FREE(rhor1_tmp)
  end if
 
@@ -531,13 +531,13 @@ subroutine dfpt_qdrpole(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
 !     call fftdatar_write_from_hdr("first_order_potential",fi1o,dtset%iomode,hdr_den,&
 !     & ngfft,2,nfft,nspden,vqgradhart,mpi_enreg)
 
-     !If GGA convert the gradient of xc kernel to reduced coordinates and incorporate it to the Hartree part  
+     !If GGA convert the gradient of xc kernel to reduced coordinates and incorporate it to the Hartree part
      if (nkxc == 7) then
        vxc1dq=zero
        do qcar=1,3
          vxc1dq(:,:)=vxc1dq(:,:) + gprimd(qcar,qdir) * &
        & vxc1dqc(:,:,iatpert,qcar)
-       end do 
+       end do
        vqgradhart(:)=vqgradhart(:)+vxc1dq(:,1)
      end if
 
@@ -2130,7 +2130,7 @@ end if
      ABI_MALLOC(vxc1dqc,(2*nfft,nspden,nefipert,3))
      do qcar=1,3
        do iefipert=1,nefipert
-         rhor1_tmp(:,:)=rhor1_efield(iefipert,:,:) 
+         rhor1_tmp(:,:)=rhor1_efield(iefipert,:,:)
          call dfpt_mkvxcggadq(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,nkxc,nspden,qcar,rhor1_tmp,vxc1dq)
          vxc1dqc(:,:,iefipert,qcar)=vxc1dq(:,:)
        end do
@@ -2153,13 +2153,13 @@ end if
        !call fftdatar_write_from_hdr("first_order_potential",fi1o,dtset%iomode,hdr_den,&
        ! & ngfft,cplex,nfft,nspden,vqgradhart,mpi_enreg)
 
-       !If GGA convert the gradient of xc kernel to reduced coordinates and incorporate it to the Hartree part  
+       !If GGA convert the gradient of xc kernel to reduced coordinates and incorporate it to the Hartree part
        if (nkxc == 7) then
          vxc1dq=zero
          do qcar=1,3
            vxc1dq(:,:)=vxc1dq(:,:) + gprimd(qcar,qdir) * &
          & vxc1dqc(:,:,iefipert,qcar)
-         end do 
+         end do
          vqgradhart(:)=vqgradhart(:)+vxc1dq(:,1)
        end if
 
@@ -2200,7 +2200,7 @@ end if
          call dfpt_mkvxcggadq(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,nkxc,nspden,qcar,rhor1_tmp,vxc1dq)
          vxc1dqc(:,:,iatpert,qcar)=vxc1dq(:,:)
        end do
-     end do 
+     end do
      ABI_FREE(rhor1_tmp)
    end if
  end if
@@ -2217,13 +2217,13 @@ end if
        rhog1_tmp(:,:)=rhog1_atdis(iatpert,:,:)
        call hartredq(2,gmet,gsqcut,mpi_enreg,nfft,ngfft,qdir,rhog1_tmp,vqgradhart)
 
-       !If GGA convert the gradient of xc kernel to reduced coordinates and incorporate it to the Hartree part  
+       !If GGA convert the gradient of xc kernel to reduced coordinates and incorporate it to the Hartree part
        if (nkxc == 7) then
          vxc1dq=zero
          do qcar=1,3
            vxc1dq(:,:)=vxc1dq(:,:) + gprimd(qcar,qdir) * &
          & vxc1dqc(:,:,iatpert,qcar)
-         end do 
+         end do
          vqgradhart(:)=vqgradhart(:)+vxc1dq(:,1)
        end if
 
@@ -2264,13 +2264,13 @@ end if
        rhog1_tmp(:,:)=rhog1_atdis(iatpert,:,:)
        call hartredq(2,gmet,gsqcut,mpi_enreg,nfft,ngfft,qdir,rhog1_tmp,vqgradhart)
 
-       !If GGA convert the gradient of xc kernel to reduced coordinates and incorporate it to the Hartree part  
+       !If GGA convert the gradient of xc kernel to reduced coordinates and incorporate it to the Hartree part
        if (nkxc == 7) then
          vxc1dq=zero
          do qcar=1,3
            vxc1dq(:,:)=vxc1dq(:,:) + gprimd(qcar,qdir) * &
          & vxc1dqc(:,:,iatpert,qcar)
-         end do 
+         end do
          vqgradhart(:)=vqgradhart(:)+vxc1dq(:,1)
        end if
 
@@ -2313,11 +2313,13 @@ end if
    ABI_FREE(rhog1_atdis)
    ABI_FREE(rhor1_atdis)
  end if
- if (lw_flexo==1.or.lw_flexo==2) then 
+ if (lw_flexo==1.or.lw_flexo==2) then
    ABI_FREE(rhog1_efield)
    ABI_FREE(rhor1_efield)
  end if
- if (lw_flexo==1.or.lw_flexo==2.or.lw_flexo==4) ABI_FREE(rhor1_strain)
+ if (lw_flexo==1.or.lw_flexo==2.or.lw_flexo==4) then
+     ABI_FREE(rhor1_strain)
+ end if
 
 !################# WAVE FUNCTION CONTRIBUTIONS  #######################################
 

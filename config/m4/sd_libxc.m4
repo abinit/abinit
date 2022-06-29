@@ -1,4 +1,4 @@
-## Copyright (C) 2019-2021 ABINIT group (Yann Pouillon)
+## Copyright (C) 2019-2022 ABINIT group (Yann Pouillon)
 
 #
 # Exchange-Correlation functionals library (LibXC)
@@ -54,6 +54,10 @@ AC_DEFUN([SD_LIBXC_INIT], [
         ;;
       no-fortran)
         sd_libxc_enable_fc="no"
+        ;;
+      mandatory)
+        sd_libxc_enable="yes"
+        sd_libxc_enable_def="yes"
         ;;
       *)
         AC_MSG_ERROR([invalid Steredeg LibXC option: '${kwd}'])

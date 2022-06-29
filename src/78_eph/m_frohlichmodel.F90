@@ -7,7 +7,7 @@
 !!  using the Frohlich model
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2018-2021 ABINIT group (XG)
+!!  Copyright (C) 2018-2022 ABINIT group (XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -105,6 +105,7 @@ subroutine frohlichmodel(cryst, dtset, efmasdeg, efmasval, ifc)
  real(dp), allocatable :: frohlich_phononfactor_qdir(:)
  real(dp), allocatable :: phfrq_qdir(:,:)
  real(dp), allocatable :: dielt_qdir(:)
+ real(dp), allocatable :: dielt_avg(:)
  real(dp), allocatable :: zpr_frohlich_avg(:)
  complex(dpc), allocatable :: eigenvec(:,:), work(:)
  complex(dpc), allocatable :: eig2_diag_cart(:,:,:,:)
@@ -160,6 +161,7 @@ subroutine frohlichmodel(cryst, dtset, efmasdeg, efmasval, ifc)
  ABI_MALLOC(frohlich_phononfactor_qdir,(nqdir))
  ABI_MALLOC(phfrq_qdir,(3*cryst%natom,nqdir))
  ABI_MALLOC(dielt_qdir,(nqdir))
+ ABI_MALLOC(dielt_avg,(3*cryst%natom))
 
  !Compute phonon frequencies and mode-polarity for each qdir
  call ifc%calcnwrite_nana_terms(cryst, nqdir, unit_qdir, phfrq2l=phfrq_qdir, polarity2l=polarity_qdir)
@@ -174,6 +176,8 @@ subroutine frohlichmodel(cryst, dtset, efmasdeg, efmasval, ifc)
  zpr_q0_phononfactor_qdir=zero
  zpr_q0_avg=zero
  frohlich_phononfactor_qdir=zero
+ dielt_avg=zero
+ 
  do iqdir=1,nqdir
    do imode=4,3*cryst%natom
      proj_polarity_qdir(imode,iqdir)=DOT_PRODUCT(unit_qdir(:,iqdir),polarity_qdir(:,imode,iqdir))
@@ -181,12 +185,26 @@ subroutine frohlichmodel(cryst, dtset, efmasdeg, efmasval, ifc)
 &      proj_polarity_qdir(imode,iqdir)**2 / phfrq_qdir(imode,iqdir) **2
      frohlich_phononfactor_qdir(iqdir)=frohlich_phononfactor_qdir(iqdir)+&
 &      proj_polarity_qdir(imode,iqdir)**2 / phfrq_qdir(imode,iqdir) **(three*half)
-   enddo
+     dielt_avg(imode)=dielt_avg(imode)+&
+&      weight_qdir(iqdir)*frohlich_phononfactor_qdir(iqdir)/dielt_qdir(iqdir)**2
+   enddo   
    zpr_q0_avg=zpr_q0_avg+&
 &    weight_qdir(iqdir)*zpr_q0_phononfactor_qdir(iqdir)/dielt_qdir(iqdir)**2
  enddo
+ dielt_avg=dielt_avg*two**(-half)*cryst%ucvol**(-one)
  zpr_q0_avg=zpr_q0_avg*quarter*piinv
  zpr_q0_fact=zpr_q0_avg*eight*pi*(three*quarter*piinv)**third*cryst%ucvol**(-four*third)
+
+ write(ab_out,'(a)')'--------------------------------------------------------------------------------'
+ write(ab_out,'(a)')' Dielectric average (EQ. 25 Melo2022)'
+ write(ab_out,'(a)')'--------------------------------------------------------------------------------'
+ write(ab_out,'(a)')' Mode    <1/epsilon*SQRT(w_LO/2)>              Cumulative sum'
+ do imode=4,3*cryst%natom
+  write(ab_out,'(i5,f28.12,f28.12)') &
+        !Reversed cummulative sum to avoid rewriting the spherical intergration from above
+&       imode,dielt_avg(imode)-dielt_avg(abs(mod(imode-1,3*cryst%natom))),dielt_avg(imode)
+ enddo
+ write(ab_out,'(a)')'--------------------------------------------------------------------------------'
 
 !DEBUG
 ! do iqdir=1,nqdir,513
@@ -454,11 +472,36 @@ subroutine frohlichmodel(cryst, dtset, efmasdeg, efmasval, ifc)
  ABI_FREE(proj_polarity_qdir)
  ABI_FREE(phfrq_qdir)
  ABI_FREE(dielt_qdir)
+ ABI_FREE(dielt_avg)
  ABI_FREE(zpr_q0_phononfactor_qdir)
  ABI_FREE(frohlich_phononfactor_qdir)
 
  end subroutine frohlichmodel
  
+!!***
+
+!!****f* m_frohlichmodel/polaronmass
+!! NAME
+!!  polaronmass
+!!
+!! FUNCTION
+!! Improved routine to compute properties based on the Frohlich model, including effective masses in the cubic case.
+!!
+!! INPUTS
+!! cryst<crystal_t>=Structure defining the unit cell
+!! dtset<dataset_type>=All input variables for this dataset.
+!! efmasdeg(nkpt_rbz) <type(efmasdeg_type)>= information about the band degeneracy at each k point
+!! efmasval(mband,nkpt_rbz) <type(efmasdeg_type)>= double tensor datastructure
+!!   efmasval(:,:)%eig2_diag band curvature double tensor
+!! ifc<ifc_type>=contains the dynamical matrix and the IFCs.
+!!
+!! PARENTS
+!!      m_eph_driver
+!!
+!! CHILDREN
+!!      cgqf,ifc%calcnwrite_nana_terms,zheev
+!!
+!! SOURCE
 
 subroutine polaronmass(cryst, dtset, efmasdeg, efmasval, ifc)
 
@@ -473,13 +516,13 @@ subroutine polaronmass(cryst, dtset, efmasdeg, efmasval, ifc)
 
 !Local variables ------------------------------
 !scalars
- integer  :: deg_dim, counter, signpm
+ integer  :: deg_dim, signpm
  integer  :: i, iband, jband, ideg, idir, iqdir, ieig
  integer  :: ikpt, ixi, ipar, iphi, iphon, imode, itheta, ik
- integer  :: nqdir, ntheta, nphi, nxi, nphonons, nkgrid
+ integer  :: nkdir, nqdir, ntheta, nphi, nxi, nkgrid
  integer  :: info, lwork
  real(dp) :: angle_phi,cosph,costh,sinph,sinth,weight,weight_phi
- real(dp) :: costheta, phi, qpt, krange, nq_factor
+ real(dp) :: qpt, krange, nq_factor
  !character(len=500) :: msg
 !arrays
 !Electronic
@@ -489,7 +532,8 @@ subroutine polaronmass(cryst, dtset, efmasdeg, efmasval, ifc)
  complex(dpc), allocatable :: eig2_diag_cart(:,:,:,:)
 !Luttinger
  logical  :: lutt_found(3), lutt_warn(3)
- real(dp) :: lutt_params(3), lutt_unit_kdir(3,3), kpoint(3)
+ real(dp) :: lutt_params(3)
+ real(dp) :: kpoint(3)
  real(dp), allocatable :: lutt_dij(:,:), lutt_eigenval(:,:), leigenval(:)
 !Dielectric
  real(dp), allocatable :: dielt_qdir(:)
@@ -504,32 +548,41 @@ subroutine polaronmass(cryst, dtset, efmasdeg, efmasval, ifc)
  real(dp) :: temporary1(3,3), temporary2(3), temporary3
  real(dp) :: unitary_33(3,3)
  real(dp) :: minelecmass,eham(3,3)
- real(dp) :: kpt(3), q_vector(3), k_plus_q(3)
+ real(dp) :: kpt(3), k_plus_q(3)
+ real(dp), allocatable :: lutt_unit_kdir(:,:)
  real(dp), allocatable :: omega_zero(:)
  real(dp), allocatable :: intsum(:,:,:,:)
  real(dp), allocatable :: sigma(:,:,:), d2sigmadk2(:,:)
  real(dp), allocatable :: invepsilonstar(:)
- real(dp), allocatable :: invemass(:,:), invpolmass(:,:)
+ real(dp), allocatable :: invemass(:,:), invemass_ieig(:,:),invpolmass(:,:)
+
+!************************************************************************
 
 !Define Luttinger and Phonon integration parameters
 !Based solely solely one value - ntheta
-ntheta   = dtset%efmas_ntheta
-nphi     = 2*ntheta
-nqdir    = nphi*ntheta
+ ntheta   = dtset%efmas_ntheta
+ nphi     = 2*ntheta
+ nqdir    = nphi*ntheta
 
 !Define constants
 ! 3x3 Unitary matrix
-unitary_33  = 0.0_dp
-do i=1,3
- unitary_33(i,i) = 1.0_dp
-enddo
+ unitary_33  = 0.0_dp
+ do i=1,3
+  unitary_33(i,i) = 1.0_dp
+ enddo
 
-!test
-!write(ab_out,'(1a)') 'print this'
-!write(ab_out,'(6f14.3)') unitary_33(:,:)
+!Define unit_kdir for Luttinger parameters
+ nkdir=3
+ ABI_MALLOC(lutt_unit_kdir,(3,nkdir))
+ lutt_unit_kdir(:,1) = (/1,0,0/)
+ lutt_unit_kdir(:,2) = 1/sqrt(2.0)*(/1,1,0/)
+ lutt_unit_kdir(:,3) = 1/sqrt(3.0)*(/1,1,1/)
+!These are for testing purpose only
+! lutt_unit_kdir(:,4) = (/0,1,0/)
+! lutt_unit_kdir(:,5) = (/0,0,1/)
 
 !Compute effective masses, and integrate the Frohlich model
-do ikpt=1,dtset%nkpt
+ do ikpt=1,dtset%nkpt
 
    kpt(:)=dtset%kptns(:,ikpt)
    do ideg=efmasdeg(ikpt)%deg_range(1),efmasdeg(ikpt)%deg_range(2)
@@ -540,39 +593,34 @@ do ikpt=1,dtset%nkpt
 
      !Convert eig2_diag to cartesian coordinates
      do iband=1,deg_dim
-        do jband=1,deg_dim
-          eig2_diag_cart(:,:,iband,jband)=efmasval(ideg,ikpt)%eig2_diag(:,:,iband,jband)
-          eig2_diag_cart(:,:,iband,jband)=&
+       do jband=1,deg_dim
+         eig2_diag_cart(:,:,iband,jband)=efmasval(ideg,ikpt)%eig2_diag(:,:,iband,jband)
+         eig2_diag_cart(:,:,iband,jband)=&
 &           matmul(matmul(cryst%rprimd,eig2_diag_cart(:,:,iband,jband)),transpose(cryst%rprimd))/two_pi**2
-        enddo
-     enddo
+       enddo ! jband
+    enddo ! iband
 
-     ABI_MALLOC(leigenval,(deg_dim))
+    ABI_MALLOC(leigenval,(deg_dim))
 
-     !Initializations for the diagonalization routine
-     if(deg_dim>1)then
+    !Initializations for the diagonalization routine
+    if(deg_dim>1)then
 
-       ABI_MALLOC(leigenvec,(deg_dim,deg_dim))
-       lwork=-1
-       ABI_MALLOC(rwork,(3*deg_dim-2))
-       ABI_MALLOC(work,(1))
-       call zheev('V','U',deg_dim,leigenvec,deg_dim,leigenval,work,lwork,rwork,info)
-       lwork=int(work(1))
-       ABI_FREE(work)
-       ABI_MALLOC(work,(lwork))
+      ABI_MALLOC(leigenvec,(deg_dim,deg_dim))
+      lwork=-1
+      ABI_MALLOC(rwork,(3*deg_dim-2))
+      ABI_MALLOC(work,(1))
+      call zheev('V','U',deg_dim,leigenvec,deg_dim,leigenval,work,lwork,rwork,info)
+      lwork=int(work(1))
+      ABI_FREE(work)
+      ABI_MALLOC(work,(lwork))
 
-     endif
+    endif
 
-     !Compute the Luttinger parameters for the cubic case (deg_dim=3)
+    !Compute the Luttinger parameters for the cubic case (deg_dim=3)
      if(deg_dim==3) then
 
        ABI_MALLOC(lutt_eigenval, (3,deg_dim))
        ABI_MALLOC(lutt_dij, (deg_dim, deg_dim))
-
-       !Define unit_kdir for Luttinger parameters
-       lutt_unit_kdir(:,1) = (/1,0,0/)
-       lutt_unit_kdir(:,2) = 1/sqrt(2.0)*(/1,1,0/)
-       lutt_unit_kdir(:,3) = 1/sqrt(3.0)*(/1,1,1/)
 
        !Degeneracy problems warning
        lutt_warn=(/.false.,.false.,.false./)
@@ -594,10 +642,10 @@ do ikpt=1,dtset%nkpt
 
        !Check degeneracies in (100) direction, and evaluate A and B.
        !Eigenvalues are 2*A (d=1), 2*B (d=2)
-       if(abs(lutt_eigenval(1,2)-lutt_eigenval(1,3))<tol5) then
+       if(abs(lutt_eigenval(1,2)-lutt_eigenval(1,3))<tol3) then
          lutt_params(2)=0.5*((lutt_eigenval(1,2)+lutt_eigenval(1,3))/2)
          lutt_params(1)=0.5*lutt_eigenval(1,1)
-       else if(abs(lutt_eigenval(1,2)-lutt_eigenval(1,1))<tol5) then
+       else if(abs(lutt_eigenval(1,2)-lutt_eigenval(1,1))<tol3) then
          lutt_params(2)=0.5*((lutt_eigenval(1,2)+lutt_eigenval(1,1))/2)
          lutt_params(1)=0.5*lutt_eigenval(1,3)
        else
@@ -606,9 +654,9 @@ do ikpt=1,dtset%nkpt
 
        !Check degeneracies in (111) direction and evaluate C
        !Eigenvalues are 2/3*(A+2B-C) (d=2), 2/3*(A+2B+2C) (d=1)
-       if(abs(lutt_eigenval(3,2)-lutt_eigenval(3,3))<tol5) then
+       if(abs(lutt_eigenval(3,2)-lutt_eigenval(3,3))<tol3) then
          lutt_params(3)=lutt_params(1)+2*lutt_params(2)-1.5*(0.5*(lutt_eigenval(3,2)+lutt_eigenval(3,3)))
-       else if(abs(lutt_eigenval(3,2)-lutt_eigenval(3,1))<tol5) then
+       else if(abs(lutt_eigenval(3,2)-lutt_eigenval(3,1))<tol3) then
          lutt_params(3)=lutt_params(1)+2*lutt_params(2)-1.5*(0.5*(lutt_eigenval(3,2)+lutt_eigenval(3,1)))
        else
          lutt_warn(2)=.true.
@@ -618,11 +666,11 @@ do ikpt=1,dtset%nkpt
        !Eigenvalues are 2B, A+B-C, A+B+C
        lutt_found=(/.false.,.false.,.false./)
        do ipar=1,deg_dim
-         if(abs(lutt_eigenval(2,ipar)-2*lutt_params(2))<tol4) then
+         if(abs(lutt_eigenval(2,ipar)-2*lutt_params(2))<tol3) then
            lutt_found(1)=.true.
-         else if(abs(lutt_eigenval(2,ipar)-(lutt_params(1)+lutt_params(2)-lutt_params(3)))<tol4) then
+         else if(abs(lutt_eigenval(2,ipar)-(lutt_params(1)+lutt_params(2)-lutt_params(3)))<tol3) then
            lutt_found(2)=.true.
-         else if(abs(lutt_eigenval(2,ipar)-(lutt_params(1)+lutt_params(2)+lutt_params(3)))<tol4) then
+         else if(abs(lutt_eigenval(2,ipar)-(lutt_params(1)+lutt_params(2)+lutt_params(3)))<tol3) then
            lutt_found(3)=.true.
          endif
        enddo
@@ -666,49 +714,51 @@ do ikpt=1,dtset%nkpt
      ABI_FREE(leigenval)
 
    enddo ! ideg
-enddo ! ikpt
+ enddo ! ikpt
 
 !Build inverse electronic effective mass for different directions from Luttinger params
-deg_dim = 3
-ABI_MALLOC(invemass,(deg_dim,deg_dim))
+ deg_dim = 3
+ ABI_MALLOC(invemass,(deg_dim,nkdir))
+ ABI_MALLOC(invemass_ieig,(deg_dim,nkdir))
+
 ! 100 -direction
-invemass(1,1) = two*lutt_params(1) ! 2A
-invemass(2,1) = two*lutt_params(2) ! 2B
-invemass(3,1) = two*lutt_params(2) ! 2B
+ invemass(1,1) = two*lutt_params(1) ! 2A
+ invemass(2,1) = two*lutt_params(2) ! 2B
+ invemass(3,1) = two*lutt_params(2) ! 2B
 ! 110 -direction
-invemass(1,2) = lutt_params(1) + lutt_params(2) + lutt_params(3) ! A + B + C
-invemass(2,2) = MIN(two*lutt_params(2), lutt_params(1) + lutt_params(2) - lutt_params(3) ) ! 2B
-invemass(3,2) = MAX(two*lutt_params(2), lutt_params(1) + lutt_params(2) - lutt_params(3) ) ! A + B - C
+ invemass(1,2) = lutt_params(1) + lutt_params(2) + lutt_params(3) ! A + B + C
+ invemass(2,2) = MIN(two*lutt_params(2), lutt_params(1) + lutt_params(2) - lutt_params(3) ) ! 2B
+ invemass(3,2) = MAX(two*lutt_params(2), lutt_params(1) + lutt_params(2) - lutt_params(3) ) ! A + B - C
 ! 111 -direction
-invemass(1,3) = two*( lutt_params(1) + two*lutt_params(2) + two*lutt_params(3) ) / three ! 2(A + 2B + 2C)/3
-invemass(2,3) = two*( lutt_params(1) + two*lutt_params(2) -     lutt_params(3) ) / three ! 2(A + 2B - 2C)/3
-invemass(3,3) = two*( lutt_params(1) + two*lutt_params(2) -     lutt_params(3) ) / three ! 2(A + 2B - 2C)/3
+ invemass(1,3) = two*( lutt_params(1) + two*lutt_params(2) + two*lutt_params(3) ) / three ! 2(A + 2B + 2C)/3
+ invemass(2,3) = two*( lutt_params(1) + two*lutt_params(2) -     lutt_params(3) ) / three ! 2(A + 2B - 2C)/3
+ invemass(3,3) = two*( lutt_params(1) + two*lutt_params(2) -     lutt_params(3) ) / three ! 2(A + 2B - 2C)/3
 
 !END Diagonalize 3x3 Luttinger-Kohn Hamiltonian 
 
-ABI_MALLOC(unit_qdir,(3,nqdir))
-ABI_MALLOC(polarity_qdir,(3,3*cryst%natom,nqdir))
-ABI_MALLOC(phfrq_qdir,(3*cryst%natom,nqdir))
-ABI_MALLOC(dielt_qdir,(nqdir))
+ ABI_MALLOC(unit_qdir,(3,nqdir))
+ ABI_MALLOC(polarity_qdir,(3,3*cryst%natom,nqdir))
+ ABI_MALLOC(phfrq_qdir,(3*cryst%natom,nqdir))
+ ABI_MALLOC(dielt_qdir,(nqdir))
 
-ABI_MALLOC(gq_points_th,(ntheta))
-ABI_MALLOC(gq_weights_th,(ntheta))
-ABI_MALLOC(gq_points_cosph,(nphi))
-ABI_MALLOC(gq_points_sinph,(nphi))
-ABI_MALLOC(weight_qdir,(nqdir))
+ ABI_MALLOC(gq_points_th,(ntheta))
+ ABI_MALLOC(gq_weights_th,(ntheta))
+ ABI_MALLOC(gq_points_cosph,(nphi))
+ ABI_MALLOC(gq_points_sinph,(nphi))
+ ABI_MALLOC(weight_qdir,(nqdir))
 
-call cgqf(ntheta,1,zero,zero,zero,pi,gq_points_th,gq_weights_th)
-weight_phi=two*pi/real(nphi,dp)
-do iphi=1,nphi
+ call cgqf(ntheta,1,zero,zero,-one,one,gq_points_th,gq_weights_th)
+ weight_phi=two*pi/real(nphi,dp)
+ do iphi=1,nphi
    angle_phi=weight_phi*(iphi-1)
    gq_points_cosph(iphi)=cos(angle_phi)
    gq_points_sinph(iphi)=sin(angle_phi)
-enddo
-nqdir=0
-do itheta=1,ntheta
-   costh=cos(gq_points_th(itheta))
-   sinth=sin(gq_points_th(itheta))
-   weight=gq_weights_th(itheta)*weight_phi*sinth
+ enddo
+ nqdir=0
+ do itheta=1,ntheta
+   costh=gq_points_th(itheta)
+   sinth=sqrt(one-costh**2)
+   weight=gq_weights_th(itheta)*weight_phi
    do iphi=1,nphi
      cosph=gq_points_cosph(iphi) ; sinph=gq_points_sinph(iphi)
      nqdir=nqdir+1
@@ -719,252 +769,219 @@ do itheta=1,ntheta
      weight_qdir(nqdir)=weight
 
    enddo
-enddo
+ enddo
 
-ABI_FREE(gq_points_th)
-ABI_FREE(gq_weights_th)
-ABI_FREE(gq_points_cosph)
-ABI_FREE(gq_points_sinph)
+ ABI_FREE(gq_points_th)
+ ABI_FREE(gq_weights_th)
+ ABI_FREE(gq_points_cosph)
+ ABI_FREE(gq_points_sinph)
 
+!In the following, compute invepsilonstar(imode) benefiting from the cubic symmetry.
 !Retrieve IR active phonon frequencies
-!Compute phonon frequencies and mode-polarity for each qdir
-call ifc%calcnwrite_nana_terms(cryst, nqdir, unit_qdir, phfrq2l=phfrq_qdir, polarity2l=polarity_qdir)
-
-!Compute dielectric tensor for each qdir
-do iqdir=1,nqdir
-  dielt_qdir(iqdir)=DOT_PRODUCT(unit_qdir(:,iqdir),MATMUL(ifc%dielt(:,:),unit_qdir(:,iqdir)))
-enddo
+!Compute phonon frequencies and mode-polarity for each qdir (actually, only the first would suffice)
+ call ifc%calcnwrite_nana_terms(cryst, nqdir, unit_qdir, phfrq2l=phfrq_qdir, polarity2l=polarity_qdir)
 
 !Calculate inverse epsilon* for each optical phonon mode
 ! (epsilon*)**(-1) = 4Pi/Omega_0 (p_j0/(dielt_qdir*omeja_j0))**2
-ABI_MALLOC(invepsilonstar,(3*cryst%natom))
-ABI_MALLOC(omega_zero,(3*cryst%natom))
-invepsilonstar = zero
+ ABI_MALLOC(invepsilonstar,(3*cryst%natom))
+ ABI_MALLOC(omega_zero,(3*cryst%natom))
+ invepsilonstar = zero
 
-do imode = 1,3*cryst%natom
- do iqdir = 1,nqdir
-  !For ease of treatment loop over all phonon branches but...
-  !Avoid the acoustic branches 
-  if(imode > 3) then
-    invepsilonstar(imode) = &
-      four*pi/cryst%ucvol*(dot_product(unit_qdir(:,iqdir),polarity_qdir(:,imode,iqdir)) &
-      /( dielt_qdir(iqdir)*phfrq_qdir(imode,iqdir)) )**two
-  endif
- enddo
-enddo
+ do imode = 1,3*cryst%natom
+   !For ease of treatment loop over all phonon branches but...
+   !Avoid the acoustic branches
+   if(imode > 3) then
+     invepsilonstar(imode) = &
+       four*pi/cryst%ucvol*(dot_product(unit_qdir(:,1),polarity_qdir(:,imode,1)) &
+       /( ifc%dielt(1,1)*phfrq_qdir(imode,1)) )**two
+   endif
+ enddo ! imode
 
 !Set nkgrid and krange
-!For the time being we need 2 points for the finite difference
-!krange = 1E-4 - will be improved
-nkgrid = 2
-!Set material depedent length scale for the finite difference
+!For the time being we need 3 points for the finite difference
+ nkgrid = 3
+!Set material dependent length scale for the finite difference
 !Lowest optical phonon frequency to be used
-minelecmass=1.0_dp/maxval(abs(invemass))
-krange = sqrt(two*minelecmass*phfrq_qdir(4,1)/100000.0)
+ minelecmass=1.0_dp/maxval(abs(invemass))
+ krange = sqrt(two*minelecmass*phfrq_qdir(4,1)/1000.0)
 
 !Diagonalize 3x3 Luttinger-Kohn Hamiltonian 
 
 !Initializations for the diagonalization routine
-ABI_MALLOC(eigenval,(deg_dim,nkgrid,3))
-ABI_MALLOC(eigenvec,(deg_dim,deg_dim,nkgrid,3))
-lwork=-1
-ABI_MALLOC(rwork,(3*deg_dim-2))
-ABI_MALLOC(work,(1))
+ ABI_MALLOC(eigenval,(deg_dim,nkgrid,nkdir))
+ ABI_MALLOC(eigenvec,(deg_dim,deg_dim,nkgrid,nkdir))
+ lwork=-1
+ ABI_MALLOC(rwork,(3*deg_dim-2))
+ ABI_MALLOC(work,(1))
 
 !Initialize eigenval
-eigenval = zero
-do idir = 1,3
- do ik = 1, nkgrid
-   kpoint(:) = (ik -1.0_dp)*krange*lutt_unit_kdir(:,idir)
-   eham = hamiltonian(lutt_params, kpoint)
-   call dsyev('V','U',3,eham,3,eigenval(1:3,ik,idir),work,lwork,info)
-   eigenvec(:,:,ik,idir) = eham
-   !eigenvec(:,:,1,idir) = eigenvec(:,:,2,idir)
-   lwork=int(work(1))
-   ABI_FREE(work)
-   ABI_MALLOC(work,(lwork))
+ eigenval = zero
+ do idir = 1,nkdir
+   do ik = 1, nkgrid
+     kpoint(:) = (ik -1.0_dp)*krange*lutt_unit_kdir(:,idir)
+     eham = hamiltonian(lutt_params, kpoint)
+     call dsyev('V','U',3,eham,3,eigenval(1:3,ik,idir),work,lwork,info)
+     eigenvec(:,:,ik,idir) = eham
+     lwork=int(work(1))
+     ABI_FREE(work)
+     ABI_MALLOC(work,(lwork))
+   enddo
  enddo
-enddo
 
-ABI_FREE(rwork)
-ABI_FREE(work)
+ ABI_FREE(rwork)
+ ABI_FREE(work)
 
-ABI_MALLOC(intsum,(deg_dim,deg_dim,nkgrid,deg_dim))
-ABI_MALLOC(sigma,(nkgrid,deg_dim,deg_dim))
+ ABI_MALLOC(intsum,(deg_dim,deg_dim,nkgrid,nkdir))
+ ABI_MALLOC(sigma,(nkgrid,deg_dim,nkdir))
 
 !main loop
-!Summation over phonon eigenmodes - to be added
-nphonons = 1
 !Dummy value for omega_zero
-omega_zero  = phfrq_qdir(:,1)
-!inv_epsilon = 1.0/3.77-1.0/16.76
+ omega_zero  = phfrq_qdir(:,1)
 !Establish VB or CB sign 
-signpm = 1
-if(lutt_params(1) .LT. zero) then
-  signpm = -1
-endif
+ signpm = 1
+ if(lutt_params(1) .LT. zero) then
+   signpm = -1
+ endif
 
 !Define Luttinger and Phonon integration parameters
 !One value input - effmass_ntheta input variable
-!ntheta   = dtset%efmas_ntheta
-nphi     = ntheta
-nxi      = ntheta
+ nxi      = ntheta
 
 !Normalization factor for the integral
-nq_factor = ntheta*nphi*nxi*two/pi
+ nq_factor = nxi*two/pi*(four*pi)
 
 !Initialize self-energy
-sigma = zero
+ sigma = zero
 
 !Summation over IR active phonon modes
-do iphon = 1, 3*cryst%natom
- !if( iphon > 3 ) then
- if( invepsilonstar(iphon) > 1E-10 ) then
-    !Summation over relevant directions (100,110,111)
-    do idir=1,3
-     !Summation over electronic eigenvalues 
-     do ieig=1,3
-       !Summation over k-range 
-       !Here consider a small BZ region around Gamma
-       !A convergene study might be performed around this value
-       do ik = 1,nkgrid
-         !Define k-point vector around which one integrates
-         !Needs at least 2 considering TRS and finite difference employed later
-         kpoint(:) = ( ik - 1.0_dp) * krange*lutt_unit_kdir(:,idir)
-         !Perform hyperbolic tangent integration for the semi-infinite q domain
-         !Use a mapping to a tangent function - faster convergence wrt qpt sampling
-         !Enforce one sampling parameter nxi = ntheta = nphi
-         counter = 0
-         do ixi = 0,nxi
-           xi = ixi*pi/( 2.0_dp * nxi)
-           if ( ixi .EQ. nxi ) xi = xi - tol8
-           !Wave-vector length
-           qpt = ( omega_zero(iphon)/abs(lutt_params(1)) )**half*tan(xi)
-           do itheta = 0,ntheta
-             !theta = (itheta - 1.0_dp)/ntheta
-             !Remap theta points on the sphere instead of a linear f(x) = x mapping
-             !Use f(x) = 2x - 1 mapping              
-             costheta = 2.0_dp * itheta /ntheta - 1.0_dp
-             do iphi = 0,nphi
-               phi = iphi*two*pi/nphi
-               !build q vector
-               q_vector(1) = qpt*(1.0_dp - costheta**2.0_dp)**0.5_dp*cos(phi)
-               q_vector(2) = qpt*(1.0_dp - costheta**2.0_dp)**0.5_dp*sin(phi)
-               q_vector(3) = qpt*costheta
-               !build k+q vector
-               k_plus_q = kpoint + q_vector
-               !write(ab_out,'(a,3x,3f10.6,3x,i5.2,3x,i5.2)')'k+q',k_plus_q, ieig, counter
+ do iphon = 1, 3*cryst%natom
+   if( invepsilonstar(iphon) > 1E-10 ) then
+     !Summation over relevant directions (100,110,111)
+     do idir=1,nkdir
+       !Summation over electronic eigenvalues 
+       do ieig=1,3
+         !Summation over k-range 
+         !Here consider a small BZ region around Gamma
+         !A convergene study might be performed around this value
+         do ik = 1,nkgrid
+           !Define k-point vector around which one integrates
+           !Needs at least 2 considering TRS and finite difference employed later
+           !A three point formula is implemented later.
+           kpoint(:) = ( ik - 1.0_dp) * krange*lutt_unit_kdir(:,idir)
+           !Perform hyperbolic tangent integration for the semi-infinite q domain
+           !Use a mapping to a tangent function - faster convergence wrt qpt sampling
+           do ixi = 0,nxi
+             xi = ixi*pi/( two * nxi)
+             if ( ixi .EQ. nxi ) xi = xi - tol8
+             !Wave-vector length
+             qpt = ( omega_zero(iphon)/abs(lutt_params(1)) )**half*tan(xi)
+!            XG 20211106 : the best integration scheme for a finite interval is based on Gauss-Legendre approach,
+!            which was set up previously with nqdir point. So replaced the itheta and iphi loop by the loop over nqdir
+             do iqdir=1,nqdir
+               k_plus_q = kpoint + qpt*unit_qdir(:,iqdir)
                intsum(:,:,ik, idir) = &
                       abs(eigenval(ieig,ik,idir))*unitary_33 - &
                       ( signpm*hamiltonian(lutt_params, k_plus_q ) + omega_zero(iphon)*unitary_33 )
                temporary1 = invmat3( intsum(:,:,ik, idir) )
-               !ABI_MALLOC(work,(deg_dim))
-               !call dgetri(deg_dim,intsum(:,:,ik, idir),deg_dim,deg_dim,work,lwork,info)
-               !if( info .EQ. 0 ) then
-               !temporary1 = intsum(:,:,ik, idir)
-               !else
-               !   write(ab_out,'(a)')'Matrix inversion failed!'
-	           !endif
-               !ABI_FREE(work)
-               temporary2 = matmul( temporary1(1:3,1:3), eigenvec(1:3,ieig,nkgrid,idir) )
-               temporary3 = dot_product( eigenvec(1:3,ieig,nkgrid,idir), temporary2(1:3) )
-               if( ( iphi .EQ. 0 ) .OR. ( iphi .EQ. nphi )  ) then
-                 temporary3 = temporary3/2.0_dp
-               endif
-               if( ( itheta .EQ. 0 ) .OR. ( itheta .EQ. ntheta ) ) then
-                 temporary3 = temporary3/2.0_dp
-               endif
-               if( (ixi .EQ. 0) .OR. (ixi .EQ. nxi) ) then
-                 temporary3 = temporary3/2.0_dp
-               endif
+               !Use the eigenvector from the second k point along the direction.
+               temporary2 = matmul( temporary1(1:3,1:3), eigenvec(1:3,ieig,2,idir) )
+               temporary3 = dot_product( eigenvec(1:3,ieig,2,idir), temporary2(1:3) )
                sigma(ik,ieig,idir) = sigma(ik,ieig,idir) &
                    + signpm*piinv*invepsilonstar(iphon)*omega_zero(iphon) &
-                   *temporary3*(omega_zero(iphon)/abs(lutt_params(1)))**half/(cos(xi))**two
-             enddo
-           enddo
-        enddo
-     enddo   
-    enddo  
-   enddo
- endif
-enddo
+                   *temporary3*(omega_zero(iphon)/abs(lutt_params(1)))**half/(cos(xi))**two * weight_qdir(iqdir)
+             enddo  ! iqdir
+           enddo ! ixi
+         enddo ! ik  
+       enddo ! ieig 
+     enddo ! idir
+   endif
+ enddo ! iphon
 
 !Normalize self-energy integral
-sigma = sigma/nq_factor
+ sigma = sigma/nq_factor
 
-ABI_MALLOC(d2sigmadk2,(deg_dim,deg_dim))
+ ABI_MALLOC(d2sigmadk2,(deg_dim,nkdir))
 
-d2sigmadk2 = zero
+ d2sigmadk2 = zero
 
-do idir = 1,3
+ do idir = 1,nkdir
    do ieig=1,3
-   !Summation over k-range 
-   !Here consider a small BZ region around Gamma
-   !A convergene study might be performed around this value
-   !Finite difference for the 2nd derivative of the self energy         
-   d2sigmadk2(ieig,idir) = 2.0_dp/krange**2.0_dp*( sigma(nkgrid,ieig,idir) - sigma(1,ieig,idir) )
+     !Compute effective mass for the correct eigenvector
+     invemass_ieig(ieig,idir)=2.0_dp*eigenval(ieig,2,idir)/krange**2.0_dp
+     !Summation over k-range 
+     !Here consider a small BZ region around Gamma
+     !A convergene study might be performed around this value
+     !Finite difference for the 2nd derivative of the self energy         
+     d2sigmadk2(ieig,idir) = 2.0_dp/krange**2.0_dp* (four/three)* &
+&      ( sigma(2,ieig,idir) - sigma(1,ieig,idir) - (sigma(3,ieig,idir) - sigma(1,ieig,idir))/16.0_dp )
    enddo
-enddo
-
-ABI_MALLOC(invpolmass,(deg_dim,deg_dim))
-
-do idir = 1,3
- do ieig=1,3
-  !Calculate the inverse polaron mass
-  invpolmass(ieig,idir) =  invemass(ieig,idir) + d2sigmadk2( ieig, idir)
  enddo
-enddo
+
+ ABI_MALLOC(invpolmass,(deg_dim,nkdir))
+
+ do idir = 1,nkdir
+   do ieig=1,3
+    !Calculate the inverse polaron mass
+    invpolmass(ieig,idir) =  invemass_ieig(ieig,idir) + d2sigmadk2( ieig, idir)
+!DEBUG
+!     write(std_out,*)' idir, ieig, invemass(ieig,idir),invemass_ieig(ieig,idir), d2sigmadk2( ieig, idir), invpolmass(ieig,idir)=',&
+!&     idir, ieig, invemass(ieig,idir), invemass_ieig(ieig,idir), d2sigmadk2( ieig, idir), invpolmass(ieig,idir)
+!ENDDEBUG
+   enddo
+ enddo
 
 !Print inverse electronic effective masses in the output
-write(ab_out,'(a)')'--------------------------------------------------------------------------------'
-write(ab_out,'(a)')'   Polaron properties from the generalized Froehlich model'
-write(ab_out,'(a)')'--------------------------------------------------------------------------------'
-write(ab_out,'(a)')'   Polar modes'
-write(ab_out,'(a)')'   ##      Frequency(meV)            Epsilon*'
-do imode = 1,3*cryst%natom
-  if(invepsilonstar(imode) > tol10) then
+ write(ab_out,'(a)')'--------------------------------------------------------------------------------'
+ write(ab_out,'(a)')'   Polaron properties from the generalized Froehlich model'
+ write(ab_out,'(a)')'--------------------------------------------------------------------------------'
+ write(ab_out,'(a)')'   Polar modes'
+ write(ab_out,'(a)')'   ##      Frequency(meV)            Epsilon*'
+ do imode = 1,3*cryst%natom
+   if(invepsilonstar(imode) > tol10) then
     write(ab_out,'(2x,i3,5x,f15.6,5x,f15.6)')imode,omega_zero(imode)*Ha_eV*1000.0_dp,1.0_dp/invepsilonstar(imode)
-  endif
-enddo
-write(ab_out,'(a)')' '
-write(ab_out,'(a,f10.2)')'   ZPR (meV): ',sigma(1,1,1)*Ha_eV*1000.0_dp
-write(ab_out,'(a)')' '
-write(ab_out,'(a)')'   Electronic effective mass (a.u.) along 3 directions'
-write(ab_out,'(a, 3f15.6)')'    Direction 100:         ',one/invemass(:,1)
-write(ab_out,'(a, 3f15.6)')'    Direction 110:         ',one/invemass(:,2)
-write(ab_out,'(a, 3f15.6)')'    Direction 111:         ',one/invemass(:,3)
+   endif
+ enddo
+ write(ab_out,'(a)')' '
+ write(ab_out,'(a,f10.2)')'   ZPR (meV): ',sigma(1,1,1)*Ha_eV*1000.0_dp
+ write(ab_out,'(a)')' '
+ write(ab_out,'(a)')'   Electronic effective mass (a.u.) along 3 directions'
+ write(ab_out,'(a, 3f15.6)')'    Direction 100:         ',one/invemass_ieig(:,1)
+ write(ab_out,'(a, 3f15.6)')'    Direction 110:         ',one/invemass_ieig(:,2)
+ write(ab_out,'(a, 3f15.6)')'    Direction 111:         ',one/invemass_ieig(:,3)
 
 !Print inverse polaron effective masses in the output
-write(ab_out,'(a)')' '
-write(ab_out,'(a)')'   Polaron effective mass (a.u.) along 3 directions'
-write(ab_out,'(a, 3f15.6)')'    Direction 100:         ',one/invpolmass(:,1)
-write(ab_out,'(a, 3f15.6)')'    Direction 110:         ',one/invpolmass(:,2)
-write(ab_out,'(a, 3f15.6)')'    Direction 111:         ',one/invpolmass(:,3)
-write(ab_out,'(a)')' '
-write(ab_out,'(a)')'   Sum rule of inverse polaron masses check-up(for convergence purposes):'
-write(ab_out,'(a, 3f15.6)')'    Direction 100:         ',SUM(invpolmass(:,1))
-write(ab_out,'(a, 3f15.6)')'    Direction 110:         ',SUM(invpolmass(:,2))
-write(ab_out,'(a, 3f15.6)')'    Direction 111:         ',SUM(invpolmass(:,3))
+ write(ab_out,'(a)')' '
+ write(ab_out,'(a)')'   Polaron effective mass (a.u.) along 3 directions'
+ write(ab_out,'(a, 3f15.6)')'    Direction 100:         ',one/invpolmass(:,1)
+ write(ab_out,'(a, 3f15.6)')'    Direction 110:         ',one/invpolmass(:,2)
+ write(ab_out,'(a, 3f15.6)')'    Direction 111:         ',one/invpolmass(:,3)
+ write(ab_out,'(a)')' '
+ write(ab_out,'(a)')'   Sum rule of inverse polaron masses check-up (for convergence purposes):'
+ write(ab_out,'(a, 3f15.6)')'    Direction 100:         ',SUM(invpolmass(:,1))
+ write(ab_out,'(a, 3f15.6)')'    Direction 110:         ',SUM(invpolmass(:,2))
+ write(ab_out,'(a, 3f15.6)')'    Direction 111:         ',SUM(invpolmass(:,3))
+ 
 
+ ABI_FREE(lutt_unit_kdir)
+ ABI_FREE(eigenvec)
+ ABI_FREE(eigenval)
 
-ABI_FREE(eigenvec)
-ABI_FREE(eigenval)
+ ABI_FREE(weight_qdir)
+ ABI_FREE(unit_qdir)
+ ABI_FREE(polarity_qdir)
+ ABI_FREE(phfrq_qdir)
+ ABI_FREE(dielt_qdir)
+ ABI_FREE(invepsilonstar)
+ ABI_FREE(omega_zero)
 
-ABI_FREE(weight_qdir)
-ABI_FREE(unit_qdir)
-ABI_FREE(polarity_qdir)
-ABI_FREE(phfrq_qdir)
-ABI_FREE(dielt_qdir)
-ABI_FREE(invepsilonstar)
-ABI_FREE(omega_zero)
+ ABI_FREE(intsum)
+ ABI_FREE(sigma)
+ ABI_FREE(d2sigmadk2)
+ ABI_FREE(invpolmass)
+ ABI_FREE(invemass)
+ ABI_FREE(invemass_ieig)
 
-ABI_FREE(intsum)
-ABI_FREE(sigma)
-ABI_FREE(d2sigmadk2)
-ABI_FREE(invpolmass)
-ABI_FREE(invemass)
-
-end subroutine polaronmass
+ end subroutine polaronmass
 !!***
 
 function invmat3(A) result(B)

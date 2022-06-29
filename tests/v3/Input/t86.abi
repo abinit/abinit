@@ -19,9 +19,7 @@ tolwfr2  1.0d-20
 #Dataset 3
 getwfq3  2
 qpt3     1 0 0
-rfatpol3 1 2
 rfphon3  1
-rfdir3   1 1 1
 tolvrs3  1.0d-12
 
 getwfk 1

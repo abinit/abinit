@@ -3,7 +3,7 @@
 !!  m_symkpt
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2021 ABINIT group (XG,LSI,HM)
+!!  Copyright (C) 1999-2022 ABINIT group (XG,LSI,HM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

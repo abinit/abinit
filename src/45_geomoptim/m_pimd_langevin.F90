@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2011-2021 ABINIT group (GG,MT)
+!!  Copyright (C) 2011-2022 ABINIT group (GG,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -69,7 +69,7 @@ contains
 !!  rprimd_prev(3,3)=dimensionless unit cell vectors (common to all images) at time t-dt (previous time step)
 !!  stressin(3,3,trotter)=electronic stress tensor for each image
 !!  trotter=Trotter number (total number of images)
-!!  volume=voume of unit cell (common to all images)
+!!  volume=volume of unit cell (common to all images)
 !!  xred(3,natom,trotter)=reduced coordinates of atoms for all images at time t (present time step)
 !!  xred_prev(3,natom,trotter)=reduced coordinates of atoms for all images at time t-dt (previous time step)
 !!
@@ -84,7 +84,7 @@ contains
 !!  vel(3,natom,trotter)=velocies of atoms for all images
 !!    at input,  values at time t
 !!    at output, values at time t+dt
-!!  vel_cell(3,3,trotter)=time derivative of cell parameters
+!!  vel_cell(3,3)=time derivative of cell parameters
 !!    at input,  values at time t
 !!    at output, values at time t+dt
 !!
@@ -120,7 +120,7 @@ subroutine pimd_langevin_npt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,
  real(dp),intent(in) :: etotal(trotter),rprimd(3,3),rprimd_prev(3,3),stressin(3,3,trotter)
  real(dp),intent(in),target :: xred(3,natom,trotter),xred_prev(3,natom,trotter)
  real(dp),intent(out) :: rprimd_next(3,3),xred_next(3,natom,trotter)
- real(dp),intent(inout) :: forces(3,natom,trotter),vel(3,natom,trotter),vel_cell(3,3,trotter)
+ real(dp),intent(inout) :: forces(3,natom,trotter),vel(3,natom,trotter),vel_cell(3,3)
 
 !Local variables-------------------------------
 !Options
@@ -131,7 +131,7 @@ subroutine pimd_langevin_npt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,
 !         If it is zero, no constraint on mass center is applied
  integer,parameter :: zeroforce=1
 !        Tolerance for the SC cycle
- real(dp),parameter :: tolerance=tol7
+ real(dp),parameter :: tolerance=tol9
 
 !scalars
  integer :: idum=-5
@@ -176,6 +176,7 @@ subroutine pimd_langevin_npt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,
  frictionbar=pimd_param%friction      ! friction coeff of barostat
  scalebar=sqrt(two*frictionbar*wg*kt/dtion)
  forces_orig=forces
+ constraint=0
 
 !Masses and spring constants
  ABI_MALLOC(mass,(natom,1))
@@ -210,7 +211,7 @@ subroutine pimd_langevin_npt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,
    call pimd_initvel(idum,mass,natom,initemp,trotter,vel,pimd_param%constraint,pimd_param%wtatcon)
  end if
 !vel_cell does not depend on Trotter...
- ddh=vel_cell(:,:,1);if (irestart<10) ddh=zero
+ ddh(:,:)=vel_cell(:,:);if (irestart<10) ddh=zero
 
  if (itimimage<=1) then
 
@@ -282,12 +283,27 @@ subroutine pimd_langevin_npt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,
 !  Compute temperature at current step
    temperature1=pimd_temperature(mass,vel)*rescale_temp
 
-!  Estimate the velocities at t+dt/2
-   vel=(xcart_next-xcart)/dtion
-   ddh=(rprimd_next-rprimd)/dtion
+!  Estimate the velocities at t+dt
+   do iimage=1,trotter
+     do iatom=1,natom
+       xredpoint(:,iatom,iimage)=xredpoint(:,iatom,iimage)+(forces_pimd_red(:,iatom)-two*inertmass(iatom)*fsup(:,iatom)- &
+            (tracepg*inertmass(iatom)*xredpoint(:,iatom,iimage)/(wg*dble(ndof))))*dtion/inertmass(iatom)
+     end do
+   end do
+   ddh(:,:)=ddh(:,:)+( fg(:,:)-wg*frictionbar*ddh(:,:)+langev_bar(:,:) )*dtion/wg
+   do iimage=1,trotter
+     call xred2xcart(natom,rprimd_next,hxredpoint(:,:,iimage),xredpoint(:,:,iimage))
+   end do
+   do iimage=1,trotter
+     do iatom=1,natom
+       vel(:,iatom,iimage)=hxredpoint(:,iatom,iimage)+matmul(ddh(:,:),xred(:,iatom,iimage))
+     end do
+   end do
 
 !  Compute new temperature
    temperature2=pimd_temperature(mass,vel)*rescale_temp
+
+   vel=xredpoint !scaled velocities transmitted to step 2
 
    ABI_FREE(hxredpoint)
    ABI_FREE(xredpoint)
@@ -304,20 +320,21 @@ subroutine pimd_langevin_npt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,
    ABI_MALLOC(forces_pimd_red,(3,natom))
    ABI_MALLOC(fsup,(3,natom))
 
+   ddh=vel_cell(:,:)
+
+   do iimage=1,trotter
+     hxredpoint(:,:,iimage)=vel(:,:,iimage) - matmul(ddh(:,:),xred(:,:,iimage))
+   end do
+
 !  first estimation of ddh, pg and its trace:
    call matr3inv(rprimd,invrprimd)
    pg=wg*matmul(ddh,invrprimd)
    tracepg=pg(1,1)+pg(2,2)+pg(3,3)
 
 !  Momenta hxredpoint = H ds/dt: estimation
-   if (itimimage==2) then
-     hxredpoint=vel
-   else
-     do iimage=1,trotter
-       hxredpoint(:,:,iimage)=matmul(rprimd,vel(:,:,iimage))
-!      because vel in entrance is a scaled velocity (ds/dt)
-     end do
-   end if
+   do iimage=1,trotter
+     hxredpoint(:,:,iimage)=matmul(rprimd,vel(:,:,iimage))
+   end do
 
 !  Compute temperature at t
    temperature1=pimd_temperature(mass,hxredpoint)*rescale_temp
@@ -398,7 +415,7 @@ subroutine pimd_langevin_npt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,
 !    Recompute "force" on supercell vectors
      dstrhh=matmul(diffstress,rprimd)
      pgdh=matmul(pg,ddh)
-     fg(:,:)=volume*diffstress(:,:)+pgdh(:,:)+temperature2*kb_HaK*rprimd(:,:)
+     fg(:,:)=volume*dstrhh(:,:)+pgdh(:,:)+temperature2*kb_HaK*rprimd(:,:)
 !    Evolve the supercell (better estimation)
      rprimd_next=two*rprimd-rprimd_prev+(fg-wg*frictionbar*ddh+langev_bar)*dtion*dtion/wg
 
@@ -412,7 +429,7 @@ subroutine pimd_langevin_npt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,
          xred_next(:,iatom,iimage)= &
 &         two*xred(:,iatom,iimage) - xred_prev(:,iatom,iimage) &
 &         +(forces_pimd_red(:,iatom)-two*inertmass(iatom)*fsup(:,iatom) &
-&         -tracepg*inertmass(iatom)*xredpoint(:,iatom,iimage)/(wg*dble(ndof))) &
+&         -(tracepg*inertmass(iatom)*xredpoint(:,iatom,iimage)/(wg*dble(ndof)))) &
 &         *dtion*dtion/inertmass(iatom)
        end do
      end do
@@ -452,22 +469,13 @@ subroutine pimd_langevin_npt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,
 & pimd_param%traj_unit,trotter,vel,ddh,xcart,xred)
 
  if (itimimage>1) then
-!  Estimation of ds/dt at t+dt
-   vel = (three*xred_next - four*xred + xred_prev)/(two * dtion)
+!  Estimation of ds/dt and ddh at t+dt
+   vel = (three*xred_next   - four*xred   + xred_prev)/(two * dtion)
    ddh = (three*rprimd_next - four*rprimd + rprimd_prev)/(two * dtion)
  end if
 
-!Come back to reduced coordinates
- if(itimimage<=1) then
-   do iimage=1,trotter
-     call xcart2xred(natom,rprimd,xcart_next(:,:,iimage),xred_next(:,:,iimage))
-   end do
- end if
-
 !Return cell velocities (does not depend on Trotter)
- do iimage=1,trotter
-   vel_cell(:,:,iimage)=ddh(:,:)
- end do
+ vel_cell(:,:)=ddh(:,:)
 
 !Free memory
  ABI_FREE(xcart)
@@ -506,7 +514,7 @@ end subroutine pimd_langevin_npt
 !!  rprimd(3,3)=dimensionless unit cell vectors (common to all images)
 !!  stressin(3,3,trotter)=electronic stress tensor for each image
 !!  trotter=Trotter number (total number of images)
-!!  volume=voume of unit cell (common to all images)
+!!  volume=volume of unit cell (common to all images)
 !!  xred(3,natom,trotter)=reduced coordinates of atoms for all images at time t (present time step)
 !!  xred_prev(3,natom,trotter)=reduced coordinates of atoms for all images at time t-dt (previous time step)
 !!

@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, MM)
+!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, MM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -125,7 +125,7 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  integer :: defo,idtset,ii,iimage,ga_n_rules,nn
  integer :: lpawu1,narr,mxnsp
  integer :: natom,nimfrqs,nimage
- integer :: ntypalch,ntypat,print_constraint,size1,size2,tmpimg0
+ integer :: ntypalch,ntypat,print_constraint,size1,size2,test_write,tmpimg0
  logical :: compute_static_images
  real(dp) :: cpus
  character(len=1) :: firstchar_fftalg,firstchar_gpu
@@ -713,9 +713,16 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,narrm,ncid,ndtset_alloc,'dynimage','INT',multivals%nimage)
 
 !Variables for nonlinear response
- intarr(1,:)=dtsets(:)%d3e_pert1_atpol(1)
- intarr(2,:)=dtsets(:)%d3e_pert1_atpol(2)
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,2,narrm,ncid,ndtset_alloc,'d3e_pert1_atpol','INT',0)
+ test_write=0
+ do idtset=1,ndtset_alloc
+   if(dtsets(idtset)%d3e_pert1_atpol(1)/=1 .or. dtsets(idtset)%d3e_pert1_atpol(2)/=dtsets(idtset)%natom)test_write=1
+ enddo
+ if(test_write==1)then
+   intarr(1,:)=dtsets(:)%d3e_pert1_atpol(1)
+   intarr(2,:)=dtsets(:)%d3e_pert1_atpol(2)
+   call prttagm(dprarr,intarr,iout,jdtset_,2,marr,2,narrm,ncid,ndtset_alloc,'d3e_pert1_atpol','INT',0)
+ endif
+
 
  intarr(1,:)=dtsets(:)%d3e_pert1_dir(1)
  intarr(2,:)=dtsets(:)%d3e_pert1_dir(2)
@@ -728,9 +735,15 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  intarr(1,:)=dtsets(:)%d3e_pert1_phon
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'d3e_pert1_phon','INT',0)
 
- intarr(1,:)=dtsets(:)%d3e_pert2_atpol(1)
- intarr(2,:)=dtsets(:)%d3e_pert2_atpol(2)
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,2,narrm,ncid,ndtset_alloc,'d3e_pert2_atpol','INT',0)
+ test_write=0
+ do idtset=1,ndtset_alloc
+   if(dtsets(idtset)%d3e_pert2_atpol(1)/=1 .or. dtsets(idtset)%d3e_pert2_atpol(2)/=dtsets(idtset)%natom)test_write=1
+ enddo
+ if(test_write==1)then
+   intarr(1,:)=dtsets(:)%d3e_pert2_atpol(1)
+   intarr(2,:)=dtsets(:)%d3e_pert2_atpol(2)
+   call prttagm(dprarr,intarr,iout,jdtset_,2,marr,2,narrm,ncid,ndtset_alloc,'d3e_pert2_atpol','INT',0)
+ endif
 
  intarr(1,:)=dtsets(:)%d3e_pert2_dir(1)
  intarr(2,:)=dtsets(:)%d3e_pert2_dir(2)
@@ -746,9 +759,15 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  intarr(1,:)=dtsets(:)%d3e_pert2_strs
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'d3e_pert2_strs','INT',0)
 
- intarr(1,:)=dtsets(:)%d3e_pert3_atpol(1)
- intarr(2,:)=dtsets(:)%d3e_pert3_atpol(2)
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,2,narrm,ncid,ndtset_alloc,'d3e_pert3_atpol','INT',0)
+ test_write=0
+ do idtset=1,ndtset_alloc
+   if(dtsets(idtset)%d3e_pert3_atpol(1)/=1 .or. dtsets(idtset)%d3e_pert3_atpol(2)/=dtsets(idtset)%natom)test_write=1
+ enddo
+ if(test_write==1)then
+   intarr(1,:)=dtsets(:)%d3e_pert3_atpol(1)
+   intarr(2,:)=dtsets(:)%d3e_pert3_atpol(2)
+   call prttagm(dprarr,intarr,iout,jdtset_,2,marr,2,narrm,ncid,ndtset_alloc,'d3e_pert3_atpol','INT',0)
+ endif
 
  intarr(1,:)=dtsets(:)%d3e_pert3_dir(1)
  intarr(2,:)=dtsets(:)%d3e_pert3_dir(2)

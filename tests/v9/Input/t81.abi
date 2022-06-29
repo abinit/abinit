@@ -21,6 +21,7 @@ spin_temperature = 0
 spin_ntime =1
 spin_nctime=1
 spin_dt=1e-16 s
+randomseed=111111 # for testing purpose only
 
 
 
@@ -28,8 +29,9 @@ spin_dt=1e-16 s
 #%% [setup]
 #%% executable = multibinit
 #%% need_cpp_vars = HAVE_XML
-#%% exclude_builders = .*_nag_7.0_.*
-#%% system_xml = t81.xml
+#%% exclude_builders = .*_nag_7.[01]_.*
+#%% spin_pot = t81.xml
+#%% exec_args = --F03
 #%% [files]
 #%% files_to_test = 
 #%%   t81.abo, tolnlines = 0, tolabs = 1e-6, tolrel = 0.000001, fld_options = -medium;
@@ -37,7 +39,7 @@ spin_dt=1e-16 s
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = X. He 
-#%% keywords = Effective potential, multibinit
+#%% keywords = Effective potential, multibinit, spinpot
 #%% description = 
 #%%   This is to test the spin_init_state 3 option for spin dynamics in Multibinit.
 #%%   The initial spin state is set using three variables spin_init_*.

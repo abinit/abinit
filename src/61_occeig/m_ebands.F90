@@ -7,7 +7,7 @@
 !!  This module contains utilities to analyze and retrieve information from the ebands_t.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2021 ABINIT group (MG, MJV, BXu)
+!! Copyright (C) 2008-2022 ABINIT group (MG, MJV, BXu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -6469,7 +6469,7 @@ subroutine ebands_get_carriers(self, ntemp, kTmesh, mu_e, n_ehst)
            n_ehst(1, spin, itemp) = n_ehst(1, spin, itemp) + &
                                     wtk * occ_fd(eig_nk, kTmesh(itemp), mu_e(itemp)) * max_occ
          else
-           ! electron
+           ! holes
            n_ehst(2, spin, itemp) = n_ehst(2, spin, itemp) + &
                                     wtk * (one - occ_fd(eig_nk, kTmesh(itemp), mu_e(itemp))) * max_occ
          end if

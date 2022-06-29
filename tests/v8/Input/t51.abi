@@ -29,7 +29,6 @@
 
   rfphon3   0          # Cancel default
   rfelfd3   3          # Response to electric field only
-   rfdir3   1 1 1      # Do all directions (symmetry will be used)
   getwfk3   1          # Use GS wave functions from dataset 1
   getddk3   2          # Use DDK wave functions from dataset 2
   kptopt3   2          # Use time-reversal symmetry for k-points
@@ -37,8 +36,6 @@
 #Set 4 : Response function calculation of Q=0 phonons
 
   rfphon4   1          # Do phonon response
- rfatpol4   1 2        # Treat displacements of all atoms
-   rfdir4   1 1 1      # Do all directions (symmetry will be used)
   getwfk4   1          # Use GS wave functions from dataset 1
   getddk4   2          # Use DDK wave functions from dataset 2
   kptopt4   2          # Use time-reversal symmetry for k-points
@@ -46,8 +43,6 @@
 #Sets 5-6 : Finite-wave-vector phonon calculations (defaults for all datasets)
 
    rfphon   1          # Do phonon response
-  rfatpol   1 2        # Treat displacements of all atoms
-    rfdir   1 1 1      # Do all directions (symmetry will be used)
    getwfk   1          # Use GS wave functions from dataset 1
    kptopt   3          # Need full k-point set for finite-Q response
     prtwf   0          # Do not print WF

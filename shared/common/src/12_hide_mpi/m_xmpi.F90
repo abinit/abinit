@@ -7,7 +7,7 @@
 !!  and a set of generic interfaces wrapping the most commonly used MPI primitives.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2021 ABINIT group (MG, MB, XG, YP, MT)
+!! Copyright (C) 2009-2022 ABINIT group (MG, MB, XG, YP, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -31,7 +31,7 @@ MODULE m_xmpi
  use defs_basis
  use m_profiling_abi
  !use m_errors
- use iso_c_binding
+ use, intrinsic :: iso_c_binding
 #ifdef HAVE_FC_ISO_FORTRAN_2008
  use ISO_FORTRAN_ENV, only : int16, int32, int64
 #endif
@@ -444,16 +444,16 @@ end interface xmpi_ibcast
 !----------------------------------------------------------------------
 
 interface xmpi_exch
-  module procedure xmpi_exch_intn
+  module procedure xmpi_exch_int1d
   module procedure xmpi_exch_int2d
-  module procedure xmpi_exch_dpn
+  module procedure xmpi_exch_dp1d
   module procedure xmpi_exch_dp2d
   module procedure xmpi_exch_dp3d
-  module procedure xmpi_exch_dp4d_tag
-  module procedure xmpi_exch_dp5d_tag
-  module procedure xmpi_exch_spc_1d
-  module procedure xmpi_exch_dpc_1d
-  module procedure xmpi_exch_dpc_2d
+  module procedure xmpi_exch_dp4d
+  module procedure xmpi_exch_dp5d
+  module procedure xmpi_exch_spc1d
+  module procedure xmpi_exch_dpc1d
+  module procedure xmpi_exch_dpc2d
 end interface xmpi_exch
 
 !----------------------------------------------------------------------
@@ -496,6 +496,7 @@ end interface xmpi_max
 interface xmpi_min
   module procedure xmpi_min_intv
   module procedure xmpi_min_dpv
+  module procedure xmpi_min_dp
 end interface xmpi_min
 
 !----------------------------------------------------------------------
@@ -639,7 +640,8 @@ interface xmpi_sum
   module procedure xmpi_sum_c4cplx
   module procedure xmpi_sum_c5cplx
   module procedure xmpi_sum_c6cplx
-end interface xmpi_sum
+  module procedure xmpi_sum_coeff5d1
+ end interface xmpi_sum
 !!***
 
 ! Non-blocking version
@@ -3661,7 +3663,11 @@ subroutine xmpio_create_fstripes(ncount,sizes,types,new_type,my_offpad,mpierr)
  stride = nx*bsize_x + 2*bsize_frm  + ny*bsize_y + 2*bsize_frm
 
  ! ncount colum_type separated by stride bytes
- call MPI_Type_create_hvector(ncount,1,stride,column_type,new_type,mpierr)
+ if (ncount>0) then
+   call MPI_Type_create_hvector(ncount,1,stride,column_type,new_type,mpierr)
+ else
+   call MPI_Type_create_hvector(1,1,stride,column_type,new_type,mpierr)
+ end if
  ABI_HANDLE_MPIERR(mpierr)
 
  call MPI_TYPE_COMMIT(new_type,mpierr)

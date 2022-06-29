@@ -6,7 +6,7 @@
 !!  First-order response function contributions to the quadrupole and flexoelectric tensors
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2018-2021 ABINIT group (MR,MS)
+!!  Copyright (C) 2018-2022 ABINIT group (MR,MS)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

@@ -6,7 +6,7 @@
 !! This module produces inputs for the DMFT calculation
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2021 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2022 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1239,6 +1239,8 @@ subroutine psichi_renormalization(cryst_struc,paw_dmft,pawang,opt)
 
      call normalizepsichi(cryst_struc,1,paw_dmft,pawang,temp_wtk,jkpt)
    end do ! jkpt
+   write(message,'(2a)') ch10,'  ===== K-points all renormalized'
+   call wrtout(std_out,message,'COLL')
    ABI_FREE(temp_wtk)
 
  else if(option==3)  then  ! option==3
@@ -1262,6 +1264,8 @@ subroutine psichi_renormalization(cryst_struc,paw_dmft,pawang,opt)
 !===============================================
 !==  Compute norm with new psichi
 !===============================================
+ write(message,'(2a)') ch10,'  ===== Compute norm with new psichi'
+ call wrtout(std_out,message,'COLL')
  call init_oper(paw_dmft,norm,nkpt=paw_dmft%nkpt,wtk=paw_dmft%wtk)
 !== Build identity for norm%ks (option=1)
  call identity_oper(norm,1)
@@ -1282,7 +1286,11 @@ subroutine psichi_renormalization(cryst_struc,paw_dmft,pawang,opt)
    enddo
    call destroy_oper(oper_temp)
  else !dmft_kspectralfunc
-   call loc_oper(norm,paw_dmft,1)
+   write(message,'(2a)') ch10,'  ===== Calling loc_oper'
+   call wrtout(std_out,message,'COLL')
+   call loc_oper(norm,paw_dmft,option)
+   write(message,'(2a)') ch10,'  ===== Finished loc_oper'
+   call wrtout(std_out,message,'COLL')
 
 
 !== Print norm%matlu unsymetrized with new psichi
@@ -1309,7 +1317,7 @@ subroutine psichi_renormalization(cryst_struc,paw_dmft,pawang,opt)
    call init_oper(paw_dmft,oper_temp)
    call identity_oper(oper_temp,2)
    call diff_oper('Overlap after renormalization','Identity',&
-&   norm,oper_temp,1,tol6)
+&   norm,oper_temp,option,tol6)
    call destroy_oper(oper_temp)
 
    call destroy_oper(norm)
