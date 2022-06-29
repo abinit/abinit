@@ -157,7 +157,7 @@ subroutine rho_tw_g(nspinor,npwvec,nr,ndat,ngfft,map2sphere,use_padfft,igfftg0,g
      SELECT CASE (map2sphere)
      CASE (0)
        ! Need results on the full FFT box thus cannot use zero-padded FFT.
-       call fftbox_plan3_many(plan,ndat,ngfft(1:3),ngfft(1:3),ngfft(7),-1)
+       call plan%many(ndat, ngfft(1:3), ngfft(1:3), ngfft(7), -1)
        call plan%execute(u12prod)
        if (dim_rtwg == 1) then
          rhotwg(1:npwvec) = rhotwg(1:npwvec) + u12prod
@@ -172,7 +172,7 @@ subroutine rho_tw_g(nspinor,npwvec,nr,ndat,ngfft,map2sphere,use_padfft,igfftg0,g
          ldx = nx; ldy = ny; ldz = nz
          call fftpad(u12prod, ngfft, nx, ny, nz, ldx, ldy, ldz, ndat, mgfft, -1, gbound)
        else
-         call fftbox_plan3_many(plan, ndat, ngfft(1:3), ngfft(1:3), ngfft(7), -1)
+         call plan%many(ndat, ngfft(1:3), ngfft(1:3), ngfft(7), -1)
          call plan%execute(u12prod)
        end if
 
@@ -282,7 +282,7 @@ subroutine ts_usug_kkp_bz(npw,nr,ndat,ngfft,map2sphere,use_padfft,igfftg0,gbound
  SELECT CASE (map2sphere)
  CASE (0)
    ! Need results on the full FFT box thus cannot use zero-padded FFT.
-   call fftbox_plan3_many(plan,ndat,ngfft(1:3),ngfft(1:3),ngfft(7),-1)
+   call plan%many(ndat, ngfft(1:3), ngfft(1:3), ngfft(7), -1)
    call plan%execute(u12prod)
    call xcopy(nr*ndat,u12prod,1,usug,1)
 
@@ -293,7 +293,7 @@ subroutine ts_usug_kkp_bz(npw,nr,ndat,ngfft,map2sphere,use_padfft,igfftg0,gbound
      ldx=nx; ldy=ny; ldz=nz
      call fftpad(u12prod,ngfft,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,-1,gbound)
    else
-     call fftbox_plan3_many(plan,ndat,ngfft(1:3),ngfft(1:3),ngfft(7),-1)
+     call plan%many(ndat, ngfft(1:3), ngfft(1:3), ngfft(7), -1)
      call plan%execute(u12prod)
    end if
 
@@ -623,7 +623,7 @@ subroutine calc_wfwfg(ktabr_k,ktabi_k,spinrot,nr,nspinor,ngfft_gw,wfr_jb,wfr_kb,
  end if
 
  ! Transform to Fourier space (result in wfg2_jk)
- call fftbox_plan3_many(plan, nspinor, ngfft_gw(1:3), ngfft_gw(1:3), ngfft_gw(7), -1)
+ call plan%many(nspinor, ngfft_gw(1:3), ngfft_gw(1:3), ngfft_gw(7), -1)
  call plan%execute(wfr2_dpcplx, wfg2_jk)
  ABI_FREE(wfr2_dpcplx)
 

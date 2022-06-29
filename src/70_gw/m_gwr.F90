@@ -50,7 +50,7 @@ module m_gwr
  use m_crystal,       only : crystal_t
  use m_dtset,         only : dataset_type
  use m_fftcore,       only : get_kg, sphereboundary, ngfft_seq, getng, print_ngfft !, kgindex
- use m_fft,           only : fft_ug, fft_ur, fftbox_plan3, fftbox_plan3_init, fftbox_plan3_t
+ use m_fft,           only : fft_ug, fft_ur, fftbox_plan3_t
  use m_fft_mesh,      only : times_eikr !, times_eigr, ig2gfft, get_gftt, calc_ceikr, calc_eigr
  use m_kpts,          only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, kpts_map, kpts_sort, kpts_pack_in_stars
  use m_wfk,           only : wfk_read_ebands
@@ -1151,7 +1151,7 @@ subroutine gwr_get_green_gpr(gwr, my_it, my_is, desc_kbz, gt_gpr)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: ndat1 = 1
- integer :: my_ikf, ig2, ioe, npwsp, ncol_glob, col_bsize
+ integer :: my_ikf, ig2, ioe, npwsp, col_bsize !, ncol_glob,
  !integer :: ik_ibz, isym_k, trev_k, g0_k(3)
  real(dp) :: cpu, wall, gflops
  !logical :: isirr_k
@@ -1184,9 +1184,9 @@ subroutine gwr_get_green_gpr(gwr, my_it, my_is, desc_kbz, gt_gpr)
      ! Allocate rgp scalapack matrix to store G(r, g')
      npwsp = desc_k%npw * gwr%nspinor
      col_bsize = npwsp / gwr%g_comm%nproc; if (mod(npwsp, gwr%g_comm%nproc) /= 0) col_bsize = col_bsize + 1
-     print *, "desc_k%npw", desc_k%npw
-     print *, "npw", size(desc_k%gvec, dim=2)
-     print *, "desc_k%istwfk", desc_k%istwfk
+     !print *, "desc_k%npw", desc_k%npw
+     !print *, "npw", size(desc_k%gvec, dim=2)
+     !print *, "desc_k%istwfk", desc_k%istwfk
      call rgp%init(gwr%nfft * gwr%nspinor, npwsp, gwr%g_slkproc, desc_k%istwfk, &
                    size_blocs=[gwr%nfft * gwr%nspinor, col_bsize])
 
@@ -1515,8 +1515,8 @@ subroutine gwr_build_chi(gwr)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: ndat1 = 1, istwfk1 = 1
- integer :: my_is, my_it, my_ikf, ig, my_ir, my_nr, npwsp, ncol_glob, col_bsize, my_iqi, my_iki ! my_iqf,
- integer :: ig1, ig2, sc_nfft, spin, ik_ibz, ik_bz, iq_ibz, ierr, ioe, itau
+ integer :: my_is, my_it, my_ikf, ig, my_ir, my_nr, npwsp, ncol_glob, col_bsize, my_iqi !, my_iki ! my_iqf,
+ integer :: sc_nfft, spin, ik_ibz, ik_bz, iq_ibz, ierr, ioe, itau, ig2 ! ig1
  real(dp) :: cpu_tau, wall_tau, gflops_tau, cpu_all, wall_all, gflops_all
  character(len=5000) :: msg
  type(desc_t),pointer :: desc_k, desc_q
@@ -1550,12 +1550,12 @@ subroutine gwr_build_chi(gwr)
    sc_nfft = product(sc_ngfft(1:3))
    !sc_augsize = product(sc_ngfft(4:6))
 
-   ABI_MALLOC(gt_scbox, (sc_nfft * gwr%nspinor * ndat1, 2))
-   ABI_MALLOC(chit_scbox, (sc_nfft * gwr%nspinor * ndat1))
+   ABI_CALLOC(gt_scbox, (sc_nfft * gwr%nspinor * ndat1, 2))
+   ABI_CALLOC(chit_scbox, (sc_nfft * gwr%nspinor * ndat1))
 
-   ! (ndat, dims, embed, fftalg, fftcache, isign)
-   call fftbox_plan3_init(plan_gp2rp, gwr%nspinor * ndat1 * 2, sc_ngfft(1:3), sc_ngfft(4:6), sc_ngfft(7), sc_ngfft(8), +1)
-   call fftbox_plan3_init(plan_rp2gp, gwr%nspinor * ndat1, sc_ngfft(1:3), sc_ngfft(4:6), sc_ngfft(7), sc_ngfft(8), -1)
+   ! (ngfft, ndat, isign)
+   call plan_gp2rp%from_ngfft(sc_ngfft, gwr%nspinor * ndat1 * 2, +1)
+   call plan_rp2gp%from_ngfft(sc_ngfft, gwr%nspinor * ndat1,     -1)
 
    ! The g-vectors in the supercell for G and chi.
    ABI_MALLOC(green_scg, (3, gwr%green_mpw))
@@ -1875,7 +1875,7 @@ subroutine gwr_build_wc(gwr)
 !Local variables-------------------------------
 !scalars
  integer :: my_iqi, my_it, ig1, ig2, ig1_glob, ig2_glob, my_is, iq_ibz, spin, itau
- integer :: npwsp, col_bsize ! ierr,
+ !integer :: npwsp !, col_bsize ! ierr,
  real(dp) :: cpu_all, wall_all, gflops_all, cpu_q, wall_q, gflops_q
  logical :: is_gamma, free_chi
  character(len=500) :: msg
@@ -2009,7 +2009,6 @@ subroutine gwr_build_sigmac(gwr)
  ! ================================================
  ! Allocate scalapack arrays for sigmac_kibz(g,g')
  ! ================================================
-
  ABI_MALLOC(gwr%sigc_kibz, (2, gwr%nkibz, gwr%ntau, gwr%nsppol))
 
  do my_is=1,gwr%my_nspins
