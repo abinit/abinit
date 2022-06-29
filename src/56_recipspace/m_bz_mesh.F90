@@ -43,7 +43,7 @@
 
 #include "abi_common.h"
 
-MODULE m_bz_mesh
+module m_bz_mesh
 
  use defs_basis
  use m_errors
@@ -175,26 +175,33 @@ MODULE m_bz_mesh
   ! to non-symmorphic operations, i.e., e^{-i2\pi k_IBZ.R{^-1}t}=e^{-i2\pi k_BZ cdot t}
   ! where \transpose R{-1}=S and  (S k_IBZ)=\pm k_BZ (depending on tabi)
 
+ contains
+
+   ! Methods
+   procedure :: init => kmesh_init            ! Main creation method.
+   procedure :: free => kmesh_free            ! Free memory
+   procedure :: print => kmesh_print          ! Printout of basic info on the object.
+   procedure :: get_bz_item => get_bz_item    ! Get point in the BZ and other useful quantities.
+   procedure :: get_ibz_item => get_IBZ_item  ! Get point in the IBZ and other useful quantities.
+   procedure :: get_bz_diff => get_BZ_diff    ! Get the difference k1-k2 in the BZ (if any).
+
+
+   procedure :: has_bz_item => has_BZ_item    ! Check if a point belongs to the BZ mesh.
+   procedure :: has_ibz_item => has_IBZ_item  ! Check if a point is in the IBZ
+   procedure :: isirred => bz_mesh_isirred    ! TRUE if ik_bz is in the IBZ (a non-zero umklapp is not allowed)
+
  end type kmesh_t
 
- public :: kmesh_init            ! Main creation method.
- public :: kmesh_free            ! Free memory
- public :: kmesh_print           ! Printout of basic info on the object.
- public :: get_bz_item           ! Get point in the  BZ as well as useful quantities.
- public :: get_IBZ_item          ! Get point in the IBZ as well as useful quantities.
- public :: get_BZ_diff           ! Get the difference k1-k2 in the BZ (if any).
+ public :: make_mesh             ! Initialize the mesh starting from kptrlatt and shift.
+ public :: find_qmesh            ! Find the Q-mesh defined as the set of all possible k1-k2 differences.
+
  public :: isamek                ! Check whether two points are equal within an umklapp G0.
  public :: isequalk              ! Check whether two points are equal within an umklapp G0 (does not report G0)
- public :: has_BZ_item           ! Check if a point belongs to the BZ mesh.
- public :: has_IBZ_item          ! Check if a point is in the IBZ
- public :: bz_mesh_isirred       ! TRUE. if ikbz is in the IBZ (a non-zero umklapp is not allowed)
- public :: make_mesh             ! Initialize the mesh starting from kptrlatt and shift.
+ public :: findqg0               ! Identify q + G0 = k1-k2.
+ public :: findq                 ! Helper routine returning the list of q-points.
+ public :: findnq                ! Helper routine returning the number of q-points.
  public :: identk                ! Find the BZ starting from the irreducible k-points.
  public :: get_ng0sh             ! Calculate the smallest box in RSpace able to treat all possible umklapp processes.
- public :: find_qmesh            ! Find the Q-mesh defined as the set of all possible k1-k2 differences.
- public :: findnq                ! Helper routine returning the number of q-points.
- public :: findq                 ! Helper routine returning the list of q-points.
- public :: findqg0               ! Identify q + G0 = k1-k2.
  public :: box_len               ! Return the length of the vector connecting the origin with one the faces of the unit cell.
 !!***
 
@@ -402,9 +409,9 @@ subroutine kmesh_init(Kmesh,Cryst,nkibz,kibz,kptopt,wrap_1zone,ref_bz,break_symm
 
 !Arguments ------------------------------------
 !scalars
+ class(kmesh_t),intent(inout) :: Kmesh
  integer,intent(in) :: nkibz,kptopt
  logical,optional,intent(in) :: wrap_1zone,break_symmetry
- type(kmesh_t),intent(inout) :: Kmesh
  type(crystal_t),intent(in) :: Cryst
 !arrays
  real(dp),intent(in) :: kibz(3,nkibz)
@@ -565,8 +572,7 @@ end subroutine kmesh_init
 subroutine kmesh_free(Kmesh)
 
 !Arguments ------------------------------------
-!scalars
- type(kmesh_t),intent(inout) :: Kmesh
+ class(kmesh_t),intent(inout) :: Kmesh
 
 ! *********************************************************************
 
@@ -622,10 +628,10 @@ subroutine kmesh_print(Kmesh,header,unit,prtvol,mode_paral)
 
 !Arguments ------------------------------------
 !scalars
+ class(kmesh_t),intent(in) :: Kmesh
  integer,optional,intent(in) :: prtvol,unit
  character(len=4),optional,intent(in) :: mode_paral
  character(len=*),optional,intent(in) :: header
- type(kmesh_t),intent(in) :: Kmesh
 
 !Local variables-------------------------------
 !scalars
@@ -646,8 +652,8 @@ subroutine kmesh_print(Kmesh,header,unit,prtvol,mode_paral)
  call wrtout(my_unt,msg,my_mode)
 
  write(msg,'(a,i5,3a)')&
-&  ' Number of points in the irreducible wedge : ',Kmesh%nibz,ch10,&
-&  ' Reduced coordinates and weights : ',ch10
+  ' Number of points in the irreducible wedge : ',Kmesh%nibz,ch10,&
+  ' Reduced coordinates and weights : ',ch10
  call wrtout(my_unt,msg,my_mode)
 
  write(fmt,*)'(1x,i5,a,2x,3es16.8,3x,f11.5)'
@@ -659,13 +665,13 @@ subroutine kmesh_print(Kmesh,header,unit,prtvol,mode_paral)
  SELECT CASE (Kmesh%timrev)
  CASE (1)
    write(msg,'(2a,i2,3a,i5,a)')ch10,&
-&    ' Together with ',Kmesh%nsym,' symmetry operations (time-reversal symmetry not used) ',ch10,&
-&    ' yields ',Kmesh%nbz,' points in the full Brillouin Zone.'
+    ' Together with ',Kmesh%nsym,' symmetry operations (time-reversal symmetry not used) ',ch10,&
+    ' yields ',Kmesh%nbz,' points in the full Brillouin Zone.'
 
  CASE (2)
    write(msg,'(2a,i2,3a,i5,a)')ch10,&
-&    ' Together with ',Kmesh%nsym,' symmetry operations and time-reversal symmetry ',ch10,&
-&    ' yields ',Kmesh%nbz,' points in the full Brillouin Zone.'
+    ' Together with ',Kmesh%nsym,' symmetry operations and time-reversal symmetry ',ch10,&
+    ' yields ',Kmesh%nbz,' points in the full Brillouin Zone.'
 
  CASE DEFAULT
    ABI_BUG(sjoin('Wrong value for timrev:', itoa(Kmesh%timrev)))
@@ -688,7 +694,7 @@ subroutine kmesh_print(Kmesh,header,unit,prtvol,mode_paral)
  ! === Additional printing ===
  if (my_prtvol>=10) then
    write(msg,'(2a)')ch10,&
-&   '                  Full point  ------->    Irred point -->            through:  Symrec  Time-Rev (1=No,-1=Yes) G0(1:3) '
+   '                  Full point  ------->    Irred point -->            through:  Symrec  Time-Rev (1=No,-1=Yes) G0(1:3) '
    call wrtout(my_unt,msg,my_mode)
    write(fmt,*)'(2x,i5,2x,2(3(f7.4,2x)),i3,2x,i2,3(i3))'
    do ik=1,Kmesh%nbz
@@ -890,11 +896,11 @@ subroutine get_bz_item(Kmesh,ik_bz,kbz,ik_ibz,isym,itim,ph_mkbzt,umklp,isirred)
 
 !Arguments ------------------------------------
 !scalars
+ class(kmesh_t),intent(in) :: Kmesh
  integer,intent(in) :: ik_bz
  integer,intent(out) :: ik_ibz,isym,itim
  complex(dpc),optional,intent(out) :: ph_mkbzt
  logical,optional,intent(out) :: isirred
- type(kmesh_t),intent(in) :: Kmesh
 !arrays
  integer,optional,intent(out) :: umklp(3)
  real(dp),intent(out) :: kbz(3)
@@ -954,9 +960,9 @@ subroutine get_IBZ_item(Kmesh,ik_ibz,kibz,wtk)
 
 !Arguments ------------------------------------
 !scalars
+ class(kmesh_t),intent(in) :: Kmesh
  integer,intent(in) :: ik_ibz
  real(dp),intent(out) :: wtk
- type(kmesh_t),intent(in) :: Kmesh
 !arrays
  real(dp),intent(out) :: kibz(3)
 
@@ -1003,8 +1009,8 @@ subroutine get_BZ_diff(Kmesh,k1,k2,idiff_bz,g0,nfound)
 
 !Arguments ------------------------------------
 !scalars
+ class(kmesh_t),intent(in) :: Kmesh
  integer,intent(out) :: idiff_bz,nfound
- type(kmesh_t),intent(in) :: Kmesh
 !arrays
  integer,intent(out) :: g0(3)
  real(dp),intent(in) :: k1(3),k2(3)
@@ -1080,7 +1086,7 @@ end subroutine get_BZ_diff
 !!
 !! SOURCE
 
-logical function isamek(k1,k2,g0)
+logical function isamek(k1, k2, g0)
 
 !Arguments ------------------------------------
 !arrays
@@ -1120,7 +1126,7 @@ end function isamek
 !!
 !! SOURCE
 
-logical function isequalk(q1,q2)
+logical function isequalk(q1, q2)
 
 !Arguments ------------------------------------
  real(dp),intent(in) :: q1(3),q2(3)
@@ -1164,12 +1170,12 @@ end function isequalk
 !!
 !! SOURCE
 
-logical function has_BZ_item(Kmesh,item,ikbz,g0)
+logical function has_BZ_item(Kmesh, item, ikbz, g0)
 
 !Arguments ------------------------------------
 !scalars
+ class(kmesh_t),intent(in) :: Kmesh
  integer,intent(out) :: ikbz
- type(kmesh_t),intent(in) :: Kmesh
 !arrays
  integer,intent(out) :: g0(3)
  real(dp),intent(in) :: item(3)
@@ -1228,8 +1234,8 @@ logical function has_IBZ_item(Kmesh,item,ikibz,g0)
 
 !Arguments ------------------------------------
 !scalars
+ class(kmesh_t),intent(in) :: Kmesh
  integer,intent(out) :: ikibz
- type(kmesh_t),intent(in) :: Kmesh
 !arrays
  integer,intent(out) :: g0(3)
  real(dp),intent(in) :: item(3)
@@ -1282,13 +1288,12 @@ end function has_IBZ_item
 !!
 !! SOURCE
 
-pure logical function bz_mesh_isirred(Kmesh,ik_bz)
+pure logical function bz_mesh_isirred(Kmesh, ik_bz)
 
 !Arguments ------------------------------------
 !scalars
+ class(kmesh_t),intent(in) :: Kmesh
  integer,intent(in) :: ik_bz
- type(kmesh_t),intent(in) :: Kmesh
-!arrays
 
 !Local variables-------------------------------
 !scalars
@@ -3133,5 +3138,5 @@ end subroutine kpath_print
 
 !----------------------------------------------------------------------
 
-END MODULE m_bz_mesh
+end module m_bz_mesh
 !!***

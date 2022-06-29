@@ -65,9 +65,7 @@ module m_sigma_driver
                              ebands_free, ebands_init, ebands_ncwrite, ebands_interpolate_kpath, get_eneocc_vect, &
                              ebands_enclose_degbands, ebands_get_gaps, gaps_t
  use m_energies,      only : energies_type, energies_init
- use m_bz_mesh,       only : kmesh_t, kmesh_free, littlegroup_t, littlegroup_init, littlegroup_free, &
-                             kmesh_init, has_BZ_item, isamek, get_ng0sh, kmesh_print, &
-                             get_bz_item, has_IBZ_item, find_qmesh
+ use m_bz_mesh,       only : kmesh_t, littlegroup_t, littlegroup_init, littlegroup_free, isamek, get_ng0sh, find_qmesh
  use m_gsphere,       only : gsphere_t, merge_and_sort_kg, setshells
  use m_kg,            only : getph, getcut
  use m_xcdata,        only : get_xclevel
@@ -2959,8 +2957,8 @@ endif
  call destroy_mpi_enreg(MPI_enreg_seq)
  call littlegroup_free(Ltg_k)
  ABI_FREE(Ltg_k)
- call kmesh_free(Kmesh)
- call kmesh_free(Qmesh)
+ call Kmesh%free()
+ call Qmesh%free()
  call Gsph_Max%free()
  call Gsph_x%free()
  call Gsph_c%free()
@@ -2984,7 +2982,7 @@ endif
    ABI_FREE(QP_sym)
  end if
 
- call sigparams_free(Sigp)
+ call Sigp%free()
 
  call timab(426,2,tsec) ! finalize
  call timab(401,2,tsec)
@@ -3066,7 +3064,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 !scalars
  integer,parameter :: pertcase0=0,master=0
  integer :: bantot,enforce_sym,gwcalctyp,ib,ibtot,icutcoul_eff,ii,ikcalc,ikibz,io,isppol,itypat,jj,method
- integer :: mod10,mqmem,mband,ng_kss,nsheps,ikcalc2bz,ierr,gap_err,ng
+ integer :: mod10,mqmem,mband,ng_kss,nsheps,ikcalc2bz,ierr,gap_err,ng, nsppol
  integer :: gwc_nfftot,gwx_nfftot,nqlwl,test_npwkss,my_rank,nprocs,ik,nk_found,ifo,timrev,usefock_ixc
  integer :: iqbz,isym,iq_ibz,itim,ic,pinv,ig1,ng_sigx,spin,gw_qprange,ivcoul_init,nvcoul_init,xclevel_ixc
  real(dp),parameter :: OMEGASIMIN=0.01d0,tol_enediff=0.001_dp*eV_Ha
@@ -3093,7 +3091,8 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  DBG_ENTER('COLL')
 
  ! Check for calculations that are not implemented
- ltest=ALL(Dtset%nband(1:Dtset%nkpt*Dtset%nsppol)==Dtset%nband(1))
+ nsppol = dtset%nsppol
+ ltest = ALL(Dtset%nband(1:Dtset%nkpt*nsppol) == Dtset%nband(1))
  ABI_CHECK(ltest,'Dtset%nband(:) must be constant')
 
  my_rank = xmpi_comm_rank(comm); nprocs  = xmpi_comm_size(comm)
@@ -3290,14 +3289,14 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  ABI_FREE(test_gvec_kss)
 
  ! Get important dimensions from the WFK header
- Sigp%nsppol =Hdr_wfk%nsppol
- Sigp%nspinor=Hdr_wfk%nspinor
- Sigp%nsig_ab=Hdr_wfk%nspinor**2  ! TODO Is it useful calculating only diagonal terms?
+ Sigp%nsppol = Hdr_wfk%nsppol
+ Sigp%nspinor = Hdr_wfk%nspinor
+ Sigp%nsig_ab = Hdr_wfk%nspinor**2  ! TODO Is it useful calculating only diagonal terms?
 
- if (Sigp%nbnds>mband) then
-   Sigp%nbnds    =mband
-   Dtset%nband(:)=mband
-   Dtset%mband   =MAXVAL(Dtset%nband)
+ if (Sigp%nbnds > mband) then
+   Sigp%nbnds     = mband
+   Dtset%nband(:) = mband
+   Dtset%mband    = MAXVAL(Dtset%nband)
    write(msg,'(3a,i4,a)')&
     'Number of bands found less then required',ch10,&
     'calculation will proceed with nbnds = ',mband,ch10
@@ -3358,8 +3357,8 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 
  ! Set up of the k-points and tables in the whole BZ ===
  ! TODO Recheck symmorphy and inversion
- call kmesh_init(Kmesh,Cryst,Hdr_wfk%nkpt,Hdr_wfk%kptns,Dtset%kptopt,wrap_1zone=.FALSE.)
- !call kmesh_init(Kmesh,Cryst,Hdr_wfk%nkpt,Hdr_wfk%kptns,Dtset%kptopt,wrap_1zone=.TRUE.)
+ call Kmesh%init(Cryst,Hdr_wfk%nkpt,Hdr_wfk%kptns,Dtset%kptopt,wrap_1zone=.FALSE.)
+ !call Kmesh%init(Cryst,Hdr_wfk%nkpt,Hdr_wfk%kptns,Dtset%kptopt,wrap_1zone=.TRUE.)
 
  ! Some required information are not filled up inside kmesh_init
  ! So doing it here, even though it is not clean
@@ -3368,19 +3367,19 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  ABI_MALLOC(Kmesh%shift,(3,Kmesh%nshift))
  Kmesh%shift(:,:)    =Dtset%shiftk(:,1:Dtset%nshiftk)
 
- call kmesh_print(Kmesh,"K-mesh for the wavefunctions",std_out,Dtset%prtvol,"COLL")
- call kmesh_print(Kmesh,"K-mesh for the wavefunctions",ab_out, 0,           "COLL")
+ call Kmesh%print("K-mesh for the wavefunctions",std_out,Dtset%prtvol,"COLL")
+ call Kmesh%print("K-mesh for the wavefunctions",ab_out, 0,           "COLL")
 
  ! === Initialize the band structure datatype ===
  ! * Copy WFK energies and occupations up to Sigp%nbnds==Dtset%nband(:)
- bantot=SUM(Dtset%nband(1:Dtset%nkpt*Dtset%nsppol))
+ bantot = SUM(Dtset%nband(1:Dtset%nkpt*nsppol))
  ABI_MALLOC(doccde,(bantot))
  ABI_MALLOC(eigen,(bantot))
  ABI_MALLOC(occfact,(bantot))
  doccde(:)=zero; eigen(:)=zero; occfact(:)=zero
 
  jj=0; ibtot=0
- do isppol=1,Dtset%nsppol
+ do isppol=1,nsppol
    do ikibz=1,Dtset%nkpt
      do ib=1,Hdr_wfk%nband(ikibz+(isppol-1)*Dtset%nkpt)
        ibtot=ibtot+1
@@ -3404,7 +3403,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 
  call ebands_init(bantot,ks_ebands,Dtset%nelect,Dtset%ne_qFD,Dtset%nh_qFD,Dtset%ivalence,&
    doccde,eigen,Dtset%istwfk,Kmesh%ibz,Dtset%nband,&
-   Kmesh%nibz,npwarr,Dtset%nsppol,Dtset%nspinor,Dtset%tphysel,Dtset%tsmear,Dtset%occopt,occfact,Kmesh%wt,&
+   Kmesh%nibz,npwarr,nsppol,Dtset%nspinor,Dtset%tphysel,Dtset%tsmear,Dtset%occopt,occfact,Kmesh%wt,&
    dtset%cellcharge(1), dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig,&
    dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
 
@@ -3412,7 +3411,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  ABI_FREE(eigen)
  ABI_FREE(npwarr)
 
- ! Calculate KS occupation numbers and ks_vbk(nkibz,nsppol) ====
+ ! Calculate KS occupation numbers and ks_vbk(nkibz, nsppol) ====
  ! ks_vbk gives the (valence|last Fermi band) index for each k and spin.
  ! spinmagntarget is passed to fermi.F90 to fix the problem with newocc in case of magnetic metals
  call ebands_update_occ(ks_ebands,Dtset%spinmagntarget,prtvol=0)
@@ -3421,7 +3420,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  call gaps%print(unit=std_out)
  call ebands_report_gap(ks_ebands, unit=std_out)
 
- ABI_MALLOC(val_indeces,(ks_ebands%nkpt, ks_ebands%nsppol))
+ ABI_MALLOC(val_indeces,(ks_ebands%nkpt, nsppol))
  val_indeces = ebands_get_valence_idx(ks_ebands)
 
  ! Create Sigma header
@@ -3431,7 +3430,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  ! Get Pawrhoij from the header of the WFK file
  ABI_MALLOC(Pawrhoij,(Cryst%natom*Dtset%usepaw))
  if (Dtset%usepaw==1) then
-   call pawrhoij_alloc(Pawrhoij,1,Dtset%nspden,Dtset%nspinor,Dtset%nsppol,Cryst%typat,pawtab=Pawtab)
+   call pawrhoij_alloc(Pawrhoij,1,Dtset%nspden,Dtset%nspinor, nsppol,Cryst%typat,pawtab=Pawtab)
    call pawrhoij_copy(Hdr_wfk%Pawrhoij,Pawrhoij)
  end if
 
@@ -3470,8 +3469,8 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
      dtset%nkptgw = Kmesh%nbz
      Sigp%nkptgw = dtset%nkptgw
      ABI_MALLOC(Sigp%kptgw, (3, Sigp%nkptgw))
-     ABI_MALLOC(Sigp%minbnd, (Sigp%nkptgw, Sigp%nsppol))
-     ABI_MALLOC(Sigp%maxbnd, (Sigp%nkptgw, Sigp%nsppol))
+     ABI_MALLOC(Sigp%minbnd, (Sigp%nkptgw, nsppol))
+     ABI_MALLOC(Sigp%maxbnd, (Sigp%nkptgw, nsppol))
      Sigp%kptgw(:,:) = Kmesh%bz(:,:)
      Sigp%minbnd = 1
      Sigp%maxbnd = Sigp%nbnds
@@ -3483,27 +3482,27 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
      dtset%nkptgw = Kmesh%nibz
      Sigp%nkptgw  = dtset%nkptgw
      ABI_MALLOC(Sigp%kptgw, (3, Sigp%nkptgw))
-     ABI_MALLOC(Sigp%minbnd, (Sigp%nkptgw,Sigp%nsppol))
-     ABI_MALLOC(Sigp%maxbnd, (Sigp%nkptgw,Sigp%nsppol))
+     ABI_MALLOC(Sigp%minbnd, (Sigp%nkptgw, nsppol))
+     ABI_MALLOC(Sigp%maxbnd, (Sigp%nkptgw, nsppol))
      Sigp%kptgw(:,:) = Kmesh%ibz(:,:)
      Sigp%minbnd = 1
      Sigp%maxbnd = Sigp%nbnds
 
      if (gw_qprange > 0) then
        ! All k-points: Add buffer of bands above and below the Fermi level.
-       do spin=1,Sigp%nsppol
+       do spin=1,nsppol
          do ik=1,Sigp%nkptgw
-           Sigp%minbnd(ik,spin) = MAX(val_indeces(ik,spin) - gw_qprange, 1)
-           Sigp%maxbnd(ik,spin) = MIN(val_indeces(ik,spin) + gw_qprange + 1, Sigp%nbnds)
+           Sigp%minbnd(ik, spin) = MAX(val_indeces(ik,spin) - gw_qprange, 1)
+           Sigp%maxbnd(ik, spin) = MIN(val_indeces(ik,spin) + gw_qprange + 1, Sigp%nbnds)
          end do
        end do
 
      else
        ! All k-points: include all occupied states and -gw_qprange empty states.
        Sigp%minbnd = 1
-       do spin=1,Sigp%nsppol
+       do spin=1,nsppol
          do ik=1,Sigp%nkptgw
-           Sigp%maxbnd(ik,spin) = MIN(val_indeces(ik,spin) - gw_qprange, Sigp%nbnds)
+           Sigp%maxbnd(ik, spin) = MIN(val_indeces(ik,spin) - gw_qprange, Sigp%nbnds)
          end do
        end do
      end if
@@ -3518,7 +3517,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
      ABI_CHECK(gap_err == 0, "gw_qprange 0 cannot be used because I cannot find the gap (gap_err !=0)")
      nk_found = 1; kpos(1) = gaps%fo_kpos(1,1)
 
-     do spin=1,Sigp%nsppol
+     do spin=1,nsppol
        do ifo=1,3
          ik = gaps%fo_kpos(ifo, spin)
          found = .FALSE.; jj = 0
@@ -3536,15 +3535,15 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
      Sigp%nkptgw = dtset%nkptgw
 
      ABI_MALLOC(Sigp%kptgw,(3, Sigp%nkptgw))
-     ABI_MALLOC(Sigp%minbnd,(Sigp%nkptgw, Sigp%nsppol))
-     ABI_MALLOC(Sigp%maxbnd,(Sigp%nkptgw, Sigp%nsppol))
+     ABI_MALLOC(Sigp%minbnd,(Sigp%nkptgw, nsppol))
+     ABI_MALLOC(Sigp%maxbnd,(Sigp%nkptgw, nsppol))
 
      do ii=1,Sigp%nkptgw
        ik = kpos(ii)
        Sigp%kptgw(:,ii) = Kmesh%ibz(:,ik)
-       do spin=1,Sigp%nsppol
-         Sigp%minbnd(ii,spin) = val_indeces(ik,spin)
-         Sigp%maxbnd(ii,spin) = val_indeces(ik,spin) + 1
+       do spin=1,nsppol
+         Sigp%minbnd(ii,spin) = val_indeces(ik, spin)
+         Sigp%maxbnd(ii,spin) = val_indeces(ik, spin) + 1
        end do
      end do
    end if
@@ -3553,10 +3552,10 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
    ! Treat only the k-points and bands specified in the input file.
    Sigp%nkptgw = dtset%nkptgw
    ABI_MALLOC(Sigp%kptgw, (3, Sigp%nkptgw))
-   ABI_MALLOC(Sigp%minbnd,(Sigp%nkptgw, Sigp%nsppol))
-   ABI_MALLOC(Sigp%maxbnd,(Sigp%nkptgw, Sigp%nsppol))
+   ABI_MALLOC(Sigp%minbnd, (Sigp%nkptgw, nsppol))
+   ABI_MALLOC(Sigp%maxbnd, (Sigp%nkptgw, nsppol))
 
-   do spin=1,Sigp%nsppol
+   do spin=1,nsppol
      Sigp%minbnd(:,spin)= dtset%bdgw(1,:,spin)
      Sigp%maxbnd(:,spin)= dtset%bdgw(2,:,spin)
    end do
@@ -3567,7 +3566,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
      end do
    end do
 
-   do spin=1,Sigp%nsppol
+   do spin=1,nsppol
      do ikcalc=1,Sigp%nkptgw
        if (Dtset%bdgw(2,ikcalc,spin) > Sigp%nbnds) then
          write(msg,'(a,2i0,2(a,i0),2a,i0)')&
@@ -3585,10 +3584,10 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  ! * We will have to average the GW corrections over degenerate states if symsigma=1 is used.
  ! * KS states belonging to the same irreducible representation should be included in the basis set used for SCGW.
  if (Sigp%symsigma /=0 .or. gwcalctyp >= 10) then
-   do isppol=1,Sigp%nsppol
+   do isppol=1,nsppol
      do ikcalc=1,Sigp%nkptgw
 
-       if (has_IBZ_item(Kmesh, Sigp%kptgw(:,ikcalc), ikibz, G0)) then
+       if (kmesh%has_IBZ_item(Sigp%kptgw(:,ikcalc), ikibz, G0)) then
          call ebands_enclose_degbands(ks_ebands,ikibz,isppol, &
                Sigp%minbnd(ikcalc,isppol),Sigp%maxbnd(ikcalc,isppol),changed,tol_enediff)
 
@@ -3609,25 +3608,8 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
    end do
  end if
 
- Sigp%minbdgw=MINVAL(Sigp%minbnd)
- Sigp%maxbdgw=MAXVAL(Sigp%maxbnd)
-
- ABI_MALLOC(Sigp%kptgw2bz,(Sigp%nkptgw))
- !
- !=== Check if the k-points are in the BZ ===
- ! FB TODO Honestly the code is not able to treat k-points, which are not in the input list of points in the IBZ.
- ! This extension should require to change the code in different places.
- ! Therefore, one should by now prevent the user from calculating sigma for a k-point not in the IBZ.
-
- do ikcalc=1,Sigp%nkptgw
-   if (has_BZ_item(Kmesh,Sigp%kptgw(:,ikcalc),ikcalc2bz,G0)) then
-     Sigp%kptgw2bz(ikcalc) = ikcalc2bz
-   else
-     write(msg,'(3a)')&
-      ' not in the list of k points treated in the preparatory SCF run.',ch10,' Change kptgw, or shiftk of previous run.'
-     ABI_ERROR(sjoin('k-point:', ktoa(Sigp%kptgw(:,ikcalc)),trim(msg)))
-   end if
- end do
+ Sigp%minbdgw = MINVAL(Sigp%minbnd)
+ Sigp%maxbdgw = MAXVAL(Sigp%maxbnd)
 
  ! Check if there are duplicated k-point in Sigp%
  do ii=1,Sigp%nkptgw
@@ -3640,6 +3622,22 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
        ABI_ERROR(msg)
      end if
    end do
+ end do
+
+ !=== Check if the k-points are in the BZ ===
+ ! FB: Honestly the code is not able to treat k-points, which are not in the input list of points in the IBZ.
+ ! This extension should require to change the code in different places.
+ ! Therefore, one should by now prevent the user from calculating sigma for a k-point not in the IBZ.
+ ABI_MALLOC(Sigp%kptgw2bz, (Sigp%nkptgw))
+
+ do ikcalc=1,Sigp%nkptgw
+   if (kmesh%has_BZ_item(Sigp%kptgw(:,ikcalc), ikcalc2bz, G0)) then
+     Sigp%kptgw2bz(ikcalc) = ikcalc2bz
+   else
+     write(msg,'(3a)')&
+      ' not in the list of k points treated in the preparatory SCF run.',ch10,' Change kptgw, or shiftk of previous run.'
+     ABI_ERROR(sjoin('k-point:', ktoa(Sigp%kptgw(:,ikcalc)),trim(msg)))
+   end if
  end do
 
  ! Warn the user if SCGW run and not all the k-points are included.
@@ -3700,7 +3698,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
    end if
    Er%npwe=Sigp%npwc
    Dtset%npweps=Er%npwe
-   call kmesh_init(Qmesh,Cryst,Er%nqibz,Er%qibz,Dtset%kptopt)
+   call Qmesh%init(Cryst,Er%nqibz,Er%qibz,Dtset%kptopt)
 
  else
    Er%npwe     =1
@@ -3711,11 +3709,11 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
    Er%gvec(:,1) = [0, 0, 0]
  end if
 
- call kmesh_print(Qmesh,"Q-mesh for screening function",std_out,Dtset%prtvol,"COLL")
- call kmesh_print(Qmesh,"Q-mesh for screening function",ab_out ,0           ,"COLL")
+ call Qmesh%print("Q-mesh for screening function",std_out,Dtset%prtvol,"COLL")
+ call Qmesh%print("Q-mesh for screening function",ab_out ,0           ,"COLL")
 
  do iqbz=1,Qmesh%nbz
-   call get_BZ_item(Qmesh,iqbz,q_bz,iq_ibz,isym,itim,umklp=q_umklp)
+   call qmesh%get_BZ_item(iqbz,q_bz,iq_ibz,isym,itim,umklp=q_umklp)
 
    if (ANY(q_umklp/=0)) then
      sq = (3-2*itim)*MATMUL(Cryst%symrec(:,:,isym),Qmesh%ibz(:,iq_ibz))
@@ -3787,11 +3785,11 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
    qlwl(:,:)=Dtset%gw_qlwl(:,1:nqlwl)
  end if
 
-!The Coulomb interaction used here might have two terms :
-!the first term generates the usual sigma self-energy, but possibly, one should subtract
-!from it the Coulomb interaction already present in the Kohn-Sham basis,
-!if the usefock associated to ixc is one.
-!The latter excludes (in the present implementation) mod(Dtset%gwcalctyp,10)==5
+ ! The Coulomb interaction used here might have two terms:
+ ! the first term generates the usual sigma self-energy, but possibly, one should subtract
+ ! from it the Coulomb interaction already present in the Kohn-Sham basis,
+ ! if the usefock associated to ixc is one.
+ ! The latter excludes (in the present implementation) mod(Dtset%gwcalctyp,10)==5
  nvcoul_init=1
  call get_xclevel(Dtset%ixc,xclevel_ixc,usefock_ixc)
 

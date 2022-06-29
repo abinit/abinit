@@ -175,6 +175,10 @@ module m_slk
    procedure :: loc2glob => slk_matrix_loc2glob
     ! Return global indices of a matrix element from the local indices.
 
+   procedure :: loc2grow => slk_matrix_loc2grow
+   procedure :: loc2gcol => slk_matrix_loc2gcol
+    ! Determine the global (row|column) index from the local index
+
    procedure :: copy => matrix_scalapack_copy
     ! Copy object
 
@@ -1076,6 +1080,62 @@ pure subroutine slk_matrix_loc2glob(matrix, iloc, jloc, i, j)
 end subroutine slk_matrix_loc2glob
 !!***
 
+!!****f* m_slk/slk_matrix_loc2grow
+!! NAME
+!!  slk_matrix_loc2grow
+!!
+!! FUNCTION
+!!  Determine the global row index from the local index
+!!
+!! INPUTS
+!!  matrix= the matrix to process.
+!!  iloc= local row index.
+!!
+!! PARENTS
+!!
+!! SOURCE
+
+integer pure function slk_matrix_loc2grow(matrix, iloc) result(iglob)
+
+!Arguments ------------------------------------
+ class(matrix_scalapack),intent(in) :: matrix
+ integer, intent(in) :: iloc
+
+! *********************************************************************
+
+ iglob = loc_glob(matrix, matrix%processor, iloc, 1)
+
+end function slk_matrix_loc2grow
+!!***
+
+!!****f* m_slk/slk_matrix_loc2gcol
+!! NAME
+!!  slk_matrix_loc2gcol
+!!
+!! FUNCTION
+!!  Determine the global column index of an element from the local index
+!!
+!! INPUTS
+!!  matrix= the matrix to process.
+!!  jloc= local column index.
+!!
+!! PARENTS
+!!
+!! SOURCE
+
+integer pure function slk_matrix_loc2gcol(matrix, jloc) result(jglob)
+
+!Arguments ------------------------------------
+ class(matrix_scalapack),intent(in) :: matrix
+ integer, intent(in) :: jloc
+
+! *********************************************************************
+
+ jglob = loc_glob(matrix, matrix%processor, jloc, 2)
+
+end function slk_matrix_loc2gcol
+!!***
+
 !----------------------------------------------------------------------
 
 !!****f* m_slk/loc_glob
@@ -1089,7 +1149,7 @@ end subroutine slk_matrix_loc2glob
 !!  matrix= the matrix to process
 !!  proc= descriptor of a processor
 !!  idx= number of rows in the distributed matrix
-!!  lico= block size index
+!!  lico= block size index. 1 for rows. 2 for columns
 !!
 !! PARENTS
 !!

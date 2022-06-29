@@ -31,7 +31,6 @@ module m_gwr
  use m_xmpi
  use m_xomp
  use m_slk
-
  use m_hdr
  use m_ebands
  use netcdf
@@ -261,6 +260,7 @@ module m_gwr
    type(crystal_t), pointer  :: cryst => null()
 
    type(ebands_t), pointer  :: ks_ebands => null()
+   type(ebands_t) :: qp_ebands
 
    type(pseudopotential_type), pointer :: psps => null()
 
@@ -436,6 +436,9 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  gwr%kibz => ks_ebands%kptns
  gwr%wtk => ks_ebands%wtk
  gwr%mpi_enreg => mpi_enreg
+
+ ! Initialize qp_ebands with KS values.
+ call ebands_copy(ks_ebands, gwr%qp_ebands)
 
  gwr%comm = comm
  gwr%nspinor = dtset%nspinor
@@ -810,6 +813,8 @@ subroutine gwr_free(gwr)
  ABI_SFREE(gwr%t2w_cos_wgs)
  ABI_SFREE(gwr%t2w_sin_wgs)
 
+ call ebands_free(gwr%qp_ebands)
+
  ! Free descriptors
  if (allocated(gwr%green_desc_kibz)) then
    call desc_array_free(gwr%green_desc_kibz)
@@ -1011,10 +1016,11 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk0_path)
          gt => gwr%gt_kibz(ioe, ik_ibz, itau, spin)
          !call wave%outer_prod()
          do il_g2=1, gt%sizeb_local(2)
+           ig2 = gt%loc2gcol(il_g2)
+           !ig2 = gt%glob_col(il_g2)
            do il_g1=1, gt%sizeb_local(1)
-             ! TODO: factorize call for efficiency reasons.
-             ! FIX spinor and use BLAS2 but take into account scalapack distribution
-             call gt%loc2glob(il_g1, il_g2, ig1, ig2)
+             ! TODO: spinor and use BLAS2 but take into account scalapack distribution
+             ig1 = gt%loc2grow(il_g1)
              !cgwork(ig1) x cgwork(ig2) *
              !gt%buffer_cplx(il_g1, il_g2) = gt%buffer_cplx(il_g1, il_g2) + &
              !  fact * wave%ug(ig1) * wave%ug(ig2)
@@ -1101,14 +1107,15 @@ subroutine gwr_rotate_gt(gwr, my_ikf, my_it, my_is, desc_kbz, gt_kbz)
  ! Get G_k with k in the BZ.
  do ioe=1,2
    call gwr%gt_kibz(ioe, ik_ibz, itau, spin)%copy(gt_kbz(ioe))
-   do il_g2=1, gt_kbz(ioe)%sizeb_local(2)
+   do il_g2=1,gt_kbz(ioe)%sizeb_local(2)
+     ig2 = gt_kbz(ioe)%loc2gcol(il_g2)
      do il_g1=1, gt_kbz(ioe)%sizeb_local(1)
-       ! TODO: factorize call for efficiency reasons.
-       call gt_kbz(ioe)%loc2glob(il_g1, il_g2, ig1, ig2)
-       gt_kbz(ioe)%buffer_cplx(il_g1, il_g2) = gt_kbz(ioe)%buffer_cplx(il_g1, il_g2) ! * ??
+       ig1 = gt_kbz(ioe)%loc2grow(il_g1)
+       !call gt_kbz(ioe)%loc2glob(il_g1, il_g2, ig1, ig2)
+       !gt_kbz(ioe)%buffer_cplx(il_g1, il_g2) = gt_kbz(ioe)%buffer_cplx(il_g1, il_g2) ! * ??
      end do
    end do
-   call gt_kbz(ioe)%print(header=sjoin("not isirr_k with gt_kibz:", itoa(ik_ibz)))
+   !call gt_kbz(ioe)%print(header=sjoin("not isirr_k with gt_kibz:", itoa(ik_ibz)))
  end do
 
 end subroutine gwr_rotate_gt
@@ -1874,7 +1881,7 @@ subroutine gwr_build_wc(gwr)
 
 !Local variables-------------------------------
 !scalars
- integer :: my_iqi, my_it, ig1, ig2, ig1_glob, ig2_glob, my_is, iq_ibz, spin, itau
+ integer :: my_iqi, my_it, il_g1, il_g2, ig1_glob, ig2_glob, my_is, iq_ibz, spin, itau
  !integer :: npwsp !, col_bsize ! ierr,
  real(dp) :: cpu_all, wall_all, gflops_all, cpu_q, wall_q, gflops_q
  logical :: is_gamma, free_chi
@@ -1919,15 +1926,16 @@ subroutine gwr_build_wc(gwr)
 
        ! Build epsilon(q,iw) = delta_{g,g'} - v_q(g,g') chi_q(g,g,iw).
        wc%buffer_cplx = zero
-       do ig2=1,wc%sizeb_local(2)
-         do ig1=1,wc%sizeb_local(1)
-           call wc%loc2glob(ig1, ig2, ig1_glob, ig2_glob)
+       do il_g2=1,wc%sizeb_local(2)
+         ig2_glob = wc%loc2gcol(il_g2)
+         do il_g1=1,wc%sizeb_local(1)
+           ig1_glob = wc%loc2grow(il_g1)
            !vc_qg1 = ??
            !vc_qg2 = ??
            !ceps = - wc%buffer_cplx(ig1, ig2) ! * vc_qg1 * vc_qg2
-           if (ig1_glob == ig2_glob) wc%buffer_cplx(ig1, ig2) = one ! - ceps
-         end do ! ig1
-       end do ! ig2
+           if (ig1_glob == ig2_glob) wc%buffer_cplx(il_g1, il_g2) = one ! - ceps
+         end do ! il_g1
+       end do ! il_g2
 
        ! IMPORTANT: PZGETRF requires square block decomposition i.e., MB_A = NB_A.
        ! This means I need to redistribute the data before calling zinvert.
@@ -1938,14 +1946,15 @@ subroutine gwr_build_wc(gwr)
 
        ! Build W(q, iw) = e^{-1}_q(g,g',iw) v_q(g,g')
        ! Remove bare vc
-       do ig2=1,wc%sizeb_local(2)
-         do ig1=1,wc%sizeb_local(1)
-           call wc%loc2glob(ig1, ig2, ig1_glob, ig2_glob)
+       do il_g2=1,wc%sizeb_local(2)
+         ig2_glob = wc%loc2gcol(il_g2)
+         do il_g1=1,wc%sizeb_local(1)
+           ig1_glob = wc%loc2grow(il_g1)
            !vc_qg1 = ??
            !vc_qg2 = ??
-           !wc%buffer_cplx(ig1, ig2) = wc%buffer_cplx(ig1, ig2) ! * vc_qg1 * vc_qg2
-         end do ! ig1
-       end do ! ig2
+           !wc%buffer_cplx(il_g1, il_g2) = wc%buffer_cplx(il_g1, il_g2) ! * vc_qg1 * vc_qg2
+         end do ! il_g1
+       end do ! il_g2
 
      end do  ! my_it
    end do ! my_is

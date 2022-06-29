@@ -38,7 +38,7 @@ MODULE m_ppmodel
  use m_hide_lapack,    only : xhegv
  use m_gwdefs,         only : GW_Q0_DEFAULT, czero_gw
  use m_crystal,        only : crystal_t
- use m_bz_mesh,        only : kmesh_t, get_bz_item
+ use m_bz_mesh,        only : kmesh_t
  use m_gsphere,        only : gsphere_t
  use m_vcoul,          only : vcoul_t
  use m_qplusg,         only : cmod_qpg
@@ -253,7 +253,7 @@ subroutine ppm_get_qbz(PPm,Gsph,Qmesh,iq_bz,botsq,otq,eig)
  isym_q=Qmesh%tabo(iq_bz)
  itim_q=(3-Qmesh%tabi(iq_bz))/2
 
- !call get_bz_item(Qmesh,iq_bz,qbz,iq_ibz,isym_q,itim_q,isirred=q_isirred)
+ !call Qmesh%get_bz_item(iq_bz,qbz,iq_ibz,isym_q,itim_q,isirred=q_isirred)
 
  iq_curr=iq_ibz; if (PPm%mqmem==0) iq_curr=1
 
@@ -2405,7 +2405,7 @@ subroutine ppm_symmetrizer(PPm,iq_bz,Cryst,Qmesh,Gsph,npwe,nomega,omega,epsm1_gg
  !isym_q=Qmesh%tabo(iq_bz)
  !itim_q=(3-Qmesh%tabi(iq_bz))/2
 
- call get_bz_item(Qmesh,iq_bz,qbz,iq_ibz,isym_q,itim_q,isirred=q_isirred)
+ call qmesh%get_bz_item(iq_bz,qbz,iq_ibz,isym_q,itim_q,isirred=q_isirred)
  iq_curr=iq_ibz; if (PPm%mqmem==0) iq_curr=1
  !
  ! =======================================================

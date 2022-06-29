@@ -54,7 +54,7 @@ module m_wfd
  use m_gsphere,        only : kg_map, make_istwfk_table
  use m_fftcore,        only : kpgsph, get_kg
  use m_mpinfo,         only : nullify_mpi_enreg, destroy_mpi_enreg, copy_mpi_enreg, initmpi_seq
- use m_bz_mesh,        only : kmesh_t, get_bz_item
+ use m_bz_mesh,        only : kmesh_t
  use m_pawrad,         only : pawrad_type
  use m_pawtab,         only : pawtab_type, pawtab_get_lsize
  use m_pawfgrtab,      only : pawfgrtab_type, pawfgrtab_init, pawfgrtab_free, pawfgrtab_print
@@ -4177,7 +4177,7 @@ subroutine wfd_sym_ur(Wfd,Cryst,Kmesh,band,ik_bz,spin,ur_kbz,trans,with_umklp,ur
  !           =e^{+2i\pi kibz.(R^{-1}t} u*({R^-1}(r-t),b,kibz) for time-reversal
  !
  ! Get ik_ibz, non-symmorphic phase, ph_mkt, and symmetries from ik_bz.
- call get_BZ_item(Kmesh,ik_bz,kbz,ik_ibz,isym_k,itim_k,ph_mkt,umklp,isirred)
+ call Kmesh%get_BZ_item(ik_bz,kbz,ik_ibz,isym_k,itim_k,ph_mkt,umklp,isirred)
  gwpc_ph_mkt = ph_mkt
 
  if (isirred) then

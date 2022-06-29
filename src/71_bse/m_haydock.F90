@@ -48,7 +48,7 @@ MODULE m_haydock
  use m_numeric_tools,     only : print_arr, symmetrize, hermitianize, continued_fract, wrap2_pmhalf, iseven
  use m_kpts,              only : listkk
  use m_crystal,           only : crystal_t
- use m_bz_mesh,           only : kmesh_t, findqg0, get_bz_item
+ use m_bz_mesh,           only : kmesh_t, findqg0
  use m_double_grid,       only : double_grid_t, get_kpt_from_indices_coarse, compute_corresp
  use m_paw_hr,            only : pawhur_t
  use m_wfd,               only : wfdgw_t

@@ -144,7 +144,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  character(len=fnlen) :: wfk0_path !, path
  type(hdr_type) :: wfk0_hdr
  type(crystal_t) :: cryst
- type(ebands_t) :: ebands
+ type(ebands_t) :: ks_ebands
  type(pawfgr_type) :: pawfgr
  type(mpi_type) :: mpi_enreg
  type(gwr_t) :: gwr
@@ -160,7 +160,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  ! This part performs the initialization of the basic objects used to perform e-ph calculations:
  !
  !     1) Crystal structure `cryst`
- !     2) Ground state band energies: `ebands`
+ !     2) Ground state band energies: `ks_ebands`
  !     5) Pseudos and PAW basic objects.
  !
  ! Once we have these objects, we can call specialized routines for e-ph calculations.
@@ -248,8 +248,8 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  call cwtime_report(" gwr%init", cpu, wall, gflops)
 
  if (use_wfk) then
-   ! Construct crystal and ebands from the GS WFK file.
-   ebands = wfk_read_ebands(wfk0_path, comm, out_hdr=wfk0_hdr)
+   ! Construct crystal and ks_ebands from the GS WFK file.
+   ks_ebands = wfk_read_ebands(wfk0_path, comm, out_hdr=wfk0_hdr)
    call wfk0_hdr%vs_dtset(dtset)
 
    cryst = wfk0_hdr%get_crystal()
@@ -257,7 +257,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
 
    ! Here we change the GS bands (Fermi level, scissors operator ...)
    ! All the modifications to ebands should be done here.
-   !call ephtk_update_ebands(dtset, ebands, "Ground state energies")
+   !call ephtk_update_ebands(dtset, ks_ebands, "Ground state energies")
 
    ! TODO: Make sure that ef is inside the gap if semiconductor.
  end if
@@ -278,7 +278,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  ! ===========================================
  call pspini(dtset, dtfil, ecore, psp_gencond, gsqcutc_eff, gsqcutf_eff, pawrad, pawtab, psps, cryst%rprimd, comm_mpi=comm)
 
- call gwr%init(dtset, dtfil, cryst, psps, pawtab, ebands, mpi_enreg, comm)
+ call gwr%init(dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg, comm)
 
  if (use_wfk) then
    call gwr%build_gtau_from_wfk(wfk0_path)
@@ -303,7 +303,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  !=====================
  call cryst%free()
  call wfk0_hdr%free()
- call ebands_free(ebands)
+ call ebands_free(ks_ebands)
  call pawfgr_destroy(pawfgr)
  call destroy_mpi_enreg(mpi_enreg)
  call gwr%free()

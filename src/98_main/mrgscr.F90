@@ -76,7 +76,7 @@ program mrgscr
  use m_mpinfo,              only : destroy_mpi_enreg, initmpi_seq
  use m_geometry,            only : normv, metric
  use m_gsphere,             only : gsphere_t
- use m_bz_mesh,             only : kmesh_t, find_qmesh, kmesh_init, kmesh_print, kmesh_free
+ use m_bz_mesh,             only : kmesh_t, find_qmesh
  use m_vcoul,               only : vcoul_t
  use m_ioarr,               only : read_rhor
  use m_io_screening,        only : hscr_print, read_screening, hscr_free, hscr_t, hscr_from_file,&
@@ -276,11 +276,11 @@ program mrgscr
  cryst = HScr0%Hdr%get_crystal(remove_inv=.FALSE.)
 
  kptopt=1
- call kmesh_init(Kmesh,Cryst,HScr0%Hdr%nkpt,Hscr0%Hdr%kptns,kptopt)
- call kmesh_print(Kmesh,"K-mesh for the wavefunctions",prtvol=prtvol)
+ call Kmesh%init(Cryst,HScr0%Hdr%nkpt,Hscr0%Hdr%kptns,kptopt)
+ call Kmesh%print("K-mesh for the wavefunctions",prtvol=prtvol)
 
  call find_qmesh(Qmesh,Cryst,Kmesh)
- call kmesh_print(Qmesh,"Q-mesh for the screening function",prtvol=prtvol)
+ call qmesh%print("Q-mesh for the screening function",prtvol=prtvol)
 
  ABI_MALLOC(foundq,(Qmesh%nibz))
  foundq(:)=0
@@ -1285,8 +1285,8 @@ program mrgscr
  ABI_SFREE(foundq)
 
  call cryst%free()
- call kmesh_free(Kmesh)
- call kmesh_free(Qmesh)
+ call Kmesh%free()
+ call Qmesh%free()
  call destroy_mpi_enreg(MPI_enreg)
 
  nullify(Hscr0)
