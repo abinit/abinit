@@ -43,7 +43,7 @@
 
 #include "abi_common.h"
 
-MODULE m_melemts
+module m_melemts
 
  use defs_basis
  use m_errors
@@ -667,7 +667,7 @@ subroutine melements_mpisum(Mels, comm, aname)
  integer :: iname,ierr
  integer,pointer :: flag_p
  character(len=NAMELEN) :: key
- character(len=500) :: msg
+ !character(len=500) :: msg
 !arrays
  complex(dpc),ABI_CONTIGUOUS pointer :: arr_p(:,:,:,:)
 
@@ -992,5 +992,5 @@ end subroutine melements_zero
 !end function mels_get_exene_core
 !!!***
 
-END MODULE m_melemts
+end module m_melemts
 !!***

@@ -1436,10 +1436,9 @@ end subroutine vcoul_free
 
 !----------------------------------------------------------------------
 
-function K0cos_dy_r0(xx)
+real(dp) function K0cos_dy_r0(xx)
 
  real(dp),intent(in) :: xx
- real(dp) :: K0cos_dy_r0
 
 !Local variables-------------------------------
 !scalars
@@ -1470,10 +1469,9 @@ end function K0cos_dy_r0
 
 !----------------------------------------------------------------------
 
-function K0cos_dth_r0(rho)
+real(dp) function K0cos_dth_r0(rho)
 
  real(dp),intent(in) :: rho
- real(dp) :: K0cos_dth_r0
 
 !Local variables-------------------------------
 !scalars
@@ -1505,10 +1503,9 @@ end function K0cos_dth_r0
 
 !----------------------------------------------------------------------
 
-pure function Fcos_th(theta)
+pure real(dp) function Fcos_th(theta)
 
  real(dp),intent(in) :: theta
- real(dp) :: Fcos_th
 
 !************************************************************************
 
@@ -1555,11 +1552,10 @@ function K0fit(mq,nn) result(vals)
 
 end function K0fit
 
-function K0fit_int(mq,par,nn) result(integ)
+real(dp) function K0fit_int(mq,par,nn) result(integ)
 
  integer,intent(in) :: nn
  real(dp),intent(in) :: mq
- real(dp) :: integ
  real(dp),intent(in) :: par(nn)
 
 !Local variables-------------------------------
@@ -1585,10 +1581,9 @@ function K0fit_int(mq,par,nn) result(integ)
 
 end function K0fit_int
 
-function I0(xx)
+real(dp) function I0(xx)
 
  real(dp),intent(in) :: xx
- real(dp) :: I0
 
 !Local variables-------------------------------
  real(dp) :: tt
@@ -1603,11 +1598,10 @@ function I0(xx)
 end function I0
 
 ! Primitive of x^m Ln(x) for m/=-1
-function int_xmln(xx,mm)  result(res)
+real(dp) function int_xmln(xx,mm)  result(res)
 
  integer,intent(in) :: mm
  real(dp),intent(in) :: xx
- real(dp) :: res
 
 ! *********************************************************************
 
@@ -1625,11 +1619,11 @@ end function int_xmln
 
 ! Primitive function of ln(x/2)*I0(x) = sum_0^{N/2} 2^{2s+1} c_{2s} T(x/2,2s)
 ! where T(x,s)=\int x^s ln(x)dx
-function int_I0ln(xx) result(res)
+real(dp) function int_I0ln(xx) result(res)
 
 !Arguments ------------------------------------
  real(dp),intent(in) :: xx
- real(dp) :: res
+
 !Local variables-------------------------------
  real(dp) :: yy
 ! *********************************************************************
