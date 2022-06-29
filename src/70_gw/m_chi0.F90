@@ -44,8 +44,7 @@ module m_chi0
  use m_fft_mesh,        only : rotate_FFT_mesh, get_gftt
  use m_occ,             only : getnel
  use m_ebands,          only : pack_eneocc, unpack_eneocc, ebands_has_metal_scheme
- use m_bz_mesh,         only : kmesh_t, kmesh_init, kmesh_free, get_BZ_item, get_BZ_diff, &
-&                              littlegroup_t, littlegroup_print, littlegroup_free, littlegroup_init
+ use m_bz_mesh,         only : kmesh_t, littlegroup_t, littlegroup_print, littlegroup_free, littlegroup_init
  use m_gsphere,         only : gsphere_t
  use m_io_tools,        only : flush_unit
  use m_oscillators,     only : rho_tw_g, calc_wfwfg
@@ -271,6 +270,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
 !************************************************************************
 
  DBG_ENTER("COLL")
+
  call cwtime(cpu_time,wall_time,gflops,"start")
 
  ! Change FFT mesh if needed
@@ -567,7 +567,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
      call wrtout(std_out,msg,'PERS')
 
      ! Get ik_ibz, non-symmorphic phase and symmetries from ik_bz.
-     call get_BZ_item(Kmesh,ik_bz,kbz,ik_ibz,isym_k,itim_k,ph_mkt)
+     call kmesh%get_BZ_item(ik_bz,kbz,ik_ibz,isym_k,itim_k,ph_mkt)
      tabr_k=ktabr(:,ik_bz) ! Table for rotated FFT points
      spinrot_kbz(:)=Cryst%spinrot(:,isym_k)
      if (Dtset%pawcross==1) tabrf_k(:) = ktabrf(:,ik_bz)
@@ -1343,14 +1343,14 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
      end if
 
      ! Get ik_ibz, non-symmorphic phase, ph_mkt, and symmetries from ik_bz.
-     call get_BZ_item(Kmesh,ik_bz,kbz,ik_ibz,isym_k,itim_k)
+     call kmesh%get_BZ_item(ik_bz,kbz,ik_ibz,isym_k,itim_k)
 
      ! Get index of k-q in the BZ, stop if not found as the weight=one/nkbz is not correct.
-     call get_BZ_diff(Kmesh,kbz,qpoint,ikmq_bz,g0,nfound)
+     call kmesh%get_BZ_diff(kbz,qpoint,ikmq_bz,g0,nfound)
      ABI_CHECK(nfound==1,"Check kmesh")
 
      ! Get ikmq_ibz, non-symmorphic phase, ph_mkmqt, and symmetries from ikmq_bz.
-     call get_BZ_item(Kmesh,ikmq_bz,kmq_bz,ikmq_ibz,isym_kmq,itim_kmq)
+     call kmesh%get_BZ_item(ikmq_bz,kmq_bz,ikmq_ibz,isym_kmq,itim_kmq)
 
      call chi0_bbp_mask(Ep,use_tr,QP_BSt,mband,ikmq_ibz,ik_ibz,spin,spin_fact,bbp_mask)
 
@@ -1477,15 +1477,15 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
      call wrtout(std_out,msg,'PERS')
 
      ! Get ik_ibz, non-symmorphic phase, ph_mkt, and symmetries from ik_bz.
-     call get_BZ_item(Kmesh,ik_bz,kbz,ik_ibz,isym_k,itim_k,ph_mkt,umklp_k,isirred_k)
+     call kmesh%get_BZ_item(ik_bz,kbz,ik_ibz,isym_k,itim_k,ph_mkt,umklp_k,isirred_k)
 
-     call get_BZ_diff(Kmesh,kbz,qpoint,ikmq_bz,G0,nfound)
+     call kmesh%get_BZ_diff(kbz,qpoint,ikmq_bz,G0,nfound)
      if (nfound==0) then
        ABI_ERROR("Cannot find kbz - qpoint in Kmesh")
      end if
 
      ! Get ikmq_ibz, non-symmorphic phase, ph_mkmqt, and symmetries from ikmq_bz.
-     call get_BZ_item(Kmesh,ikmq_bz,kmq_bz,ikmq_ibz,isym_kmq,itim_kmq,ph_mkmqt,umklp_kmq,isirred_kmq)
+     call kmesh%get_BZ_item(ikmq_bz,kmq_bz,ikmq_ibz,isym_kmq,itim_kmq,ph_mkmqt,umklp_kmq,isirred_kmq)
 
 !BEGIN DEBUG
      !if (ANY(umklp_k /=0)) then
@@ -2255,7 +2255,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
 
  ! TODO take into account the case of random k-meshes.
  kptopt=3
- call kmesh_init(Kmesh,Cryst,Wfd%nkibz,Wfd%kibz,kptopt)
+ call Kmesh%init(Cryst,Wfd%nkibz,Wfd%kibz,kptopt)
  !
  !=== Get the FFT index of $ (R^{-1}(r-\tau)) $ ===
  !* S= $\transpose R^{-1}$ and k_BZ = S k_IBZ
@@ -2352,7 +2352,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
      end if
 
      ! Get ik_ibz, non-symmorphic phase and symmetries from ik_bz.
-     call get_BZ_item(Kmesh,ik_bz,kbz,ik_ibz,isym_k,itim_k,ph_mkt)
+     call kmesh%get_BZ_item(ik_bz,kbz,ik_ibz,isym_k,itim_k,ph_mkt)
      tabr_k=ktabr(:,ik_bz) ! Table for rotated FFT points
      spinrot_kbz(:)=Cryst%spinrot(:,isym_k)
      nband_k=Wfd%nband(ik_ibz,spin)
@@ -2491,7 +2491,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
  end if
 
  call littlegroup_free(Ltg_q)
- call kmesh_free(Kmesh)
+ call Kmesh%free()
 
  DBG_EXIT("COLL")
 

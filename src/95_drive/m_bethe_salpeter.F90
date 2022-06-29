@@ -57,7 +57,7 @@ module m_bethe_salpeter
  use m_fftcore,         only : print_ngfft
  use m_fft_mesh,        only : rotate_FFT_mesh, get_gftt, setmesh
  use m_fft,             only : fourdp
- use m_bz_mesh,         only : kmesh_t, kmesh_init, kmesh_free, get_ng0sh, kmesh_print, get_BZ_item, find_qmesh, make_mesh
+ use m_bz_mesh,         only : kmesh_t, get_ng0sh, find_qmesh, make_mesh
  use m_double_grid,     only : double_grid_t, double_grid_init, double_grid_free
  use m_ebands,          only : ebands_init, ebands_print, ebands_copy, ebands_free, &
                                ebands_update_occ, ebands_get_valence_idx, ebands_apply_scissors, ebands_report_gap
@@ -92,7 +92,7 @@ module m_bethe_salpeter
  use m_paw_dmft,        only : paw_dmft_type
  use m_paw_mkrho,       only : denfgr
  use m_paw_nhat,        only : nhatgrid,pawmknhat
- use m_paw_tools,       only : chkpawovlp,pawprt
+ use m_paw_tools,       only : chkpawovlp, pawprt
  use m_paw_correlations,only : pawpuxinit
  use m_exc_build,       only : exc_build_ham
  use m_setvtr,          only : setvtr
@@ -979,8 +979,8 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  call cryst%free()
  call Gsph_x%free()
  call Gsph_c%free()
- call kmesh_free(Kmesh)
- call kmesh_free(Qmesh)
+ call Kmesh%free()
+ call Qmesh%free()
  call Hdr_wfk%free()
  call Hdr_bse%free()
  call ebands_free(KS_BSt)
@@ -999,8 +999,8 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
    call wfd_dense%free()
    call Gsph_x_dense%free()
    call Gsph_c_dense%free()
-   call kmesh_free(Kmesh_dense)
-   call kmesh_free(Qmesh_dense)
+   call Kmesh_dense%free()
+   call Qmesh_dense%free()
    call ebands_free(KS_BSt_dense)
    call ebands_free(QP_BSt_dense)
    call Vcp_dense%free()
@@ -1170,12 +1170,12 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
    ! TODO
    !Check if kibz from KSS file corresponds to the one returned by make_mesh.
  else
-   call kmesh_init(Kmesh,Cryst,Hdr_wfk%nkpt,Hdr_wfk%kptns,Dtset%kptopt)
+   call Kmesh%init(Cryst,Hdr_wfk%nkpt,Hdr_wfk%kptns,Dtset%kptopt)
  end if
  BSp%nkibz = Kmesh%nibz  !We might allow for a smaller number of points....
 
- call kmesh_print(Kmesh,"K-mesh for the wavefunctions",std_out,Dtset%prtvol,"COLL")
- call kmesh_print(Kmesh,"K-mesh for the wavefunctions",ab_out, 0,           "COLL")
+ call Kmesh%print("K-mesh for the wavefunctions",std_out,Dtset%prtvol,"COLL")
+ call Kmesh%print("K-mesh for the wavefunctions",ab_out, 0,           "COLL")
 
  nqlwl = 0
  w_fname = ABI_NOFILE
@@ -1228,7 +1228,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
    end if
    !
    ! Init Qmesh from the SCR file.
-   call kmesh_init(Qmesh,Cryst,Hscr%nqibz,Hscr%qibz,Dtset%kptopt)
+   call Qmesh%init(Cryst,Hscr%nqibz,Hscr%qibz,Dtset%kptopt)
 
    ! The G-sphere for W and Sigma_c is initialized from the gvectors found in the SCR file.
    call Gsph_c%init(Cryst, Dtset%npweps, gvec=Hscr%gvec)
@@ -1261,11 +1261,11 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
  ! * Stop if a nonzero umklapp is needed to reconstruct the BZ. In this case, indeed,
  !   epsilon^-1(Sq) should be symmetrized in csigme using a different expression (G-G_o is needed)
  !
- call kmesh_print(Qmesh,"Q-mesh for the screening function",std_out,Dtset%prtvol,"COLL")
- call kmesh_print(Qmesh,"Q-mesh for the screening function",ab_out ,0           ,"COLL")
+ call Qmesh%print("Q-mesh for the screening function",std_out,Dtset%prtvol,"COLL")
+ call Qmesh%print("Q-mesh for the screening function",ab_out ,0           ,"COLL")
 
  do iq_bz=1,Qmesh%nbz
-   call get_BZ_item(Qmesh,iq_bz,qpt_bz,iq_ibz,isym,itim)
+   call qmesh%get_BZ_item(iq_bz,qpt_bz,iq_ibz,isym,itim)
    sq = (3-2*itim)*MATMUL(Cryst%symrec(:,:,isym),Qmesh%ibz(:,iq_ibz))
    if (ANY(ABS(Qmesh%bz(:,iq_bz)-sq )>1.0d-4)) then
      write(std_out,*) sq,Qmesh%bz(:,iq_bz)
@@ -2108,7 +2108,7 @@ subroutine setup_bse_interp(Dtset,Dtfil,BSp,Cryst,Kmesh,&
      ABI_FREE(shiftk)
    else
      !Initialize Kmesh with no wrapping inside ]-0.5;0.5]
-     call kmesh_init(Kmesh_dense,Cryst,Hdr_wfk_dense%nkpt,Hdr_wfk_dense%kptns,Dtset%kptopt)
+     call Kmesh_dense%init(Cryst,Hdr_wfk_dense%nkpt,Hdr_wfk_dense%kptns,Dtset%kptopt)
    end if
  CASE DEFAULT
    ABI_ERROR("Not yet implemented")
@@ -2123,8 +2123,8 @@ subroutine setup_bse_interp(Dtset,Dtfil,BSp,Cryst,Kmesh,&
 
  BSp%nkibz_interp = Kmesh_dense%nibz  !We might allow for a smaller number of points....
 
- call kmesh_print(Kmesh_dense,"Interpolated K-mesh for the wavefunctions",std_out,Dtset%prtvol,"COLL")
- call kmesh_print(Kmesh_dense,"Interpolated K-mesh for the wavefunctions",ab_out, 0,           "COLL")
+ call Kmesh_dense%print("Interpolated K-mesh for the wavefunctions",std_out,Dtset%prtvol,"COLL")
+ call Kmesh_dense%print("Interpolated K-mesh for the wavefunctions",ab_out, 0,           "COLL")
 
  if (nbnds_kss_dense < Dtset%nband(1)) then
    write(msg,'(2(a,i0),3a,i0)')&

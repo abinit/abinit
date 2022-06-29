@@ -38,7 +38,7 @@ module m_sigc
  use m_fstrings,      only : sjoin, itoa
  use m_geometry,      only : normv
  use m_crystal,       only : crystal_t
- use m_bz_mesh,       only : kmesh_t, get_BZ_item, findqg0, littlegroup_t, littlegroup_print
+ use m_bz_mesh,       only : kmesh_t, findqg0, littlegroup_t, littlegroup_print
  use m_gsphere,       only : gsphere_t
  use m_fft_mesh,      only : get_gftt, rotate_fft_mesh, cigfft
  use m_vcoul,         only : vcoul_t
@@ -279,8 +279,8 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 
  ! Index of the GW point in the BZ array, its image in IBZ and time-reversal ===
  jk_bz=Sigp%kptgw2bz(ikcalc)
- call get_BZ_item(Kmesh,jk_bz,kgw,jk_ibz,isym_kgw,jik,ph_mkgwt)
- !%call get_IBZ_item(Kmesh,jk_ibz,kibz,wtk)
+ call kmesh%get_BZ_item(jk_bz,kgw,jk_ibz,isym_kgw,jik,ph_mkgwt)
+ !%call kmesh%get_IBZ_item(jk_ibz,kibz,wtk)
 
  ! TODO: the new version based of get_uug won't suppporte kptgw vectors that are not in
  ! the IBZ since one should perform the rotation before entering the band loop
@@ -656,7 +656,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
      call timab(434,1,tsec) ! initq
 
      ! Find the corresponding irreducible k-point
-     call get_BZ_item(Kmesh,ik_bz,ksum,ik_ibz,isym_ki,iik,ph_mkt)
+     call kmesh%get_BZ_item(ik_bz,ksum,ik_ibz,isym_ki,iik,ph_mkt)
      spinrot_kbz(:)=Cryst%spinrot(:,isym_ki)
 
      ! Identify q and G0 where q + G0 = k_GW - k_i
@@ -680,7 +680,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
      call wrtout(std_out,msg,'PERS')
 
      ! Find the corresponding irred q-point.
-     call get_BZ_item(Qmesh,iq_bz,qbz,iq_ibz,isym_q,itim_q)
+     call qmesh%get_BZ_item(iq_bz,qbz,iq_ibz,isym_q,itim_q)
      q_is_gamma = (normv(qbz,Cryst%gmet,"G") < GW_TOL_W0)
 
      !q_is_gamma = (normv(qbz,Cryst%gmet,"G") < 0.7)

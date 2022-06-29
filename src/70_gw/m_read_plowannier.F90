@@ -36,7 +36,7 @@ MODULE m_read_plowannier
 
  use m_io_tools,      only : open_file
  use m_crystal,       only : crystal_t
- use m_bz_mesh,       only : kmesh_t, get_BZ_item
+ use m_bz_mesh,       only : kmesh_t
  use m_pawang,        only : pawang_type
 
  implicit none
@@ -199,7 +199,7 @@ subroutine read_plowannier(cryst,bandinf,bandsup,coeffW_BZ,itypatcor,Kmesh,lcor,
    call wrtout(std_out,message,'COLL')
    do ik_bz=1,Kmesh%nbz
    !write(6,*) ik_bz,Kmesh%nbz
-     call get_BZ_item(Kmesh,ik_bz,kbz,ik_ibz,isym,itim)
+     call kmesh%get_BZ_item(ik_bz,kbz,ik_ibz,isym,itim)
      do indx=1,cryst%nattyp(itypatcor)
        iat=cryst%atindx1(indx) ! correct index for the full atom list
        at_indx=cryst%indsym(4,isym,iat) !! see eg sym_matlu and m_crystal

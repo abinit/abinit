@@ -49,7 +49,7 @@ use m_hamiltonian,      only : gs_hamiltonian_type, copy_hamiltonian
 use m_pawcprj,          only : pawcprj_type
 use m_vcoul,            only : vcoul_t
 use m_gsphere,          only : gsphere_t
-use m_bz_mesh,          only : kmesh_t, kmesh_init, kmesh_free, kmesh_print, find_qmesh
+use m_bz_mesh,          only : kmesh_t, find_qmesh
 use m_fft,              only : fftpac, fourwf
 use m_getghc,           only : getghc
 use m_io_kss,           only : make_gvec_kss
@@ -1473,8 +1473,8 @@ call dtset%free()
 call gs_hamk%free()
 
 call cryst%free()
-call kmesh_free(Kmesh)
-call kmesh_free(Qmesh)
+call Kmesh%free()
+call Qmesh%free()
 call Gsphere%free()
 call Vcp%free()
 
@@ -1998,10 +1998,10 @@ call Cryst%print()
 if(dtset%optdriver==66) then
 
   !Set up of the k-points and tables in the whole BZ
-  call kmesh_init(Kmesh,Cryst,dtset%nkpt,dtset%kptns,dtset%kptopt,wrap_1zone=.false.)
-  call kmesh_print(Kmesh,"K-mesh for the wavefunctions",std_out)
+  call Kmesh%init(Cryst,dtset%nkpt,dtset%kptns,dtset%kptopt,wrap_1zone=.false.)
+  call Kmesh%print("K-mesh for the wavefunctions",std_out)
   call find_qmesh(Qmesh,Cryst,Kmesh)
-  call kmesh_print(Qmesh,"Q-mesh for the screening function",std_out)
+  call Qmesh%print("Q-mesh for the screening function",std_out)
 
 
   !------------------------------

@@ -54,12 +54,11 @@ module m_screening_driver
  use m_energies,      only : energies_type, energies_init
  use m_numeric_tools, only : print_arr, iseven, coeffs_gausslegint
  use m_geometry,      only : normv, vdotw, mkrdim, metric
- use m_gwdefs,        only : GW_TOLQ0, GW_TOLQ, em1params_free, em1params_t, GW_Q0_DEFAULT
+ use m_gwdefs,        only : GW_TOLQ0, GW_TOLQ, em1params_t, GW_Q0_DEFAULT
  use m_mpinfo,        only : destroy_mpi_enreg, initmpi_seq
  use m_ebands,        only : ebands_update_occ, ebands_copy, ebands_get_valence_idx, ebands_get_occupied, &
                              ebands_apply_scissors, ebands_free, ebands_has_metal_scheme, ebands_ncwrite, ebands_init
- use m_bz_mesh,       only : kmesh_t, kmesh_init, kmesh_free, littlegroup_t, littlegroup_free, littlegroup_init, &
-                             get_ng0sh, kmesh_print, find_qmesh, get_BZ_item
+ use m_bz_mesh,       only : kmesh_t, littlegroup_t, littlegroup_free, littlegroup_init, get_ng0sh, find_qmesh
  use m_kg,            only : getph
  use m_gsphere,       only : gsphere_t, setshells
  use m_vcoul,         only : vcoul_t
@@ -1521,13 +1520,13 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  ABI_FREE(Paw_onsite)
 
  call wfd%free()
- call kmesh_free(Kmesh)
- call kmesh_free(Qmesh)
+ call Kmesh%free()
+ call Qmesh%free()
  call cryst%free()
  call Gsph_epsG0%free()
  call Gsph_wfn%free()
  call Vcp%free()
- call em1params_free(Ep)
+ call Ep%free()
  call Hdr_wfk%free()
  call Hdr_local%free()
  call ebands_free(ks_ebands)
@@ -1692,7 +1691,7 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,Dtset,Psps,Pawtab
 
  test_npwkss = 0
  call make_gvec_kss(Dtset%nkpt,Dtset%kptns,Hdr_wfk%ecut_eff,Dtset%symmorphi,Dtset%nsym,Dtset%symrel,Dtset%tnons,&
-&   gprimd,Dtset%prtvol,test_npwkss,test_gvec_kss,ierr)
+                    gprimd,Dtset%prtvol,test_npwkss,test_gvec_kss,ierr)
  ABI_CHECK(ierr==0,"Fatal error in make_gvec_kss")
 
  ABI_MALLOC(gvec_kss,(3,test_npwkss))
@@ -1704,10 +1703,10 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,Dtset,Psps,Pawtab
    if (Ep%npwwfn> ng_kss) Ep%npwwfn=ng_kss
    if (Ep%npwe  > ng_kss) Ep%npwe  =ng_kss
    write(msg,'(3a,3(a,i6,a))')ch10,&
-&    ' Number of G-vectors found less then required. Calculation will proceed with ',ch10,&
-&    '  npwvec = ',Ep%npwvec,ch10,&
-&    '  npweps = ',Ep%npwe  ,ch10,&
-&    '  npwwfn = ',Ep%npwwfn,ch10
+    ' Number of G-vectors found less then required. Calculation will proceed with ',ch10,&
+    '  npwvec = ',Ep%npwvec,ch10,&
+    '  npweps = ',Ep%npwe  ,ch10,&
+    '  npwwfn = ',Ep%npwwfn,ch10
    ABI_WARNING(msg)
  end if
 
@@ -1744,8 +1743,8 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,Dtset,Psps,Pawtab
  ! * Qmesh defines the q-point sampling for chi0, all possible differences k1-k2 reduced to the IBZ.
  ! TODO Kmesh%bz should be [-half,half[ but this modification will be painful!
 
- call kmesh_init(Kmesh,Cryst,Ep%nkibz,Hdr_wfk%kptns,Dtset%kptopt,wrap_1zone=.FALSE.)
- !call kmesh_init(Kmesh,Cryst,Ep%nkibz,Hdr_wfk%kptns,Dtset%kptopt,wrap_1zone=.TRUE.)
+ call Kmesh%init(Cryst,Ep%nkibz,Hdr_wfk%kptns,Dtset%kptopt,wrap_1zone=.FALSE.)
+ !call Kmesh%init(Cryst,Ep%nkibz,Hdr_wfk%kptns,Dtset%kptopt,wrap_1zone=.TRUE.)
  ! Some required information are not filled up inside kmesh_init
  ! So doing it here, even though it is not clean
  Kmesh%kptrlatt(:,:) =Dtset%kptrlatt(:,:)
@@ -1753,25 +1752,25 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,Dtset,Psps,Pawtab
  ABI_MALLOC(Kmesh%shift,(3,Kmesh%nshift))
  Kmesh%shift(:,:)    =Dtset%shiftk(:,1:Dtset%nshiftk)
 
- call kmesh_print(Kmesh,"K-mesh for the wavefunctions",std_out,Dtset%prtvol,"COLL")
- call kmesh_print(Kmesh,"K-mesh for the wavefunctions",ab_out, 0,           "COLL")
+ call Kmesh%print("K-mesh for the wavefunctions",std_out,Dtset%prtvol,"COLL")
+ call Kmesh%print("K-mesh for the wavefunctions",ab_out, 0,           "COLL")
 
  ! === Find Q-mesh, and do setup for long wavelength limit ===
  ! * Stop if a nonzero umklapp is needed to reconstruct the BZ. In this case, indeed,
  !   epsilon^-1(Sq) should be symmetrized in csigme using a different expression (G-G_o is needed)
  call find_qmesh(Qmesh,Cryst,Kmesh)
 
- call kmesh_print(Qmesh,"Q-mesh for the screening function",std_out,Dtset%prtvol,"COLL")
- call kmesh_print(Qmesh,"Q-mesh for the screening function",ab_out ,0           ,"COLL")
+ call Qmesh%print("Q-mesh for the screening function",std_out,Dtset%prtvol,"COLL")
+ call Qmesh%print("Q-mesh for the screening function",ab_out ,0           ,"COLL")
 
  do iqbz=1,Qmesh%nbz
-   call get_BZ_item(Qmesh,iqbz,qbz,iq_ibz,isym,itim)
+   call qmesh%get_BZ_item(iqbz,qbz,iq_ibz,isym,itim)
    sq = (3-2*itim)*MATMUL(Cryst%symrec(:,:,isym),Qmesh%ibz(:,iq_ibz))
    if (ANY(ABS(qbz-sq )>1.0d-4)) then
      write(msg,'(a,3f6.3,a,3f6.3,2a,9i3,a,i2,2a)')&
-&      ' qpoint ',qbz,' is the symmetric of ',Qmesh%ibz(:,iq_ibz),ch10,&
-&      ' through operation ',Cryst%symrec(:,:,isym),' and itim ',itim,ch10,&
-&      ' however a non zero umklapp G_o vector is required and this is not yet allowed'
+      ' qpoint ',qbz,' is the symmetric of ',Qmesh%ibz(:,iq_ibz),ch10,&
+      ' through operation ',Cryst%symrec(:,:,isym),' and itim ',itim,ch10,&
+      ' however a non zero umklapp G_o vector is required and this is not yet allowed'
      ABI_ERROR(msg)
    end if
  end do
@@ -2427,7 +2426,7 @@ subroutine random_stopping_power(iqibz,npvel,pvelmax,Ep,Gsph_epsG0,Qmesh,Vcp,Cry
  do iq_bz=1,Qmesh%nbz
 
    ! Perform the check and obtain the symmetry information
-   call get_BZ_item(Qmesh,iq_bz,qbz,iq_ibz,isym_q,itim_q)
+   call qmesh%get_BZ_item(iq_bz,qbz,iq_ibz,isym_q,itim_q)
    if( iqibz /= iq_ibz ) cycle
 
    ! Apply the symmetry operation to the diagonal of epsm1

@@ -48,7 +48,7 @@ module m_exc_build
  use m_crystal,      only : crystal_t
  use m_gsphere,      only : gsphere_t
  use m_vcoul,        only : vcoul_t
- use m_bz_mesh,      only : kmesh_t, get_BZ_item, get_BZ_diff, has_BZ_item, isamek, findqg0
+ use m_bz_mesh,      only : kmesh_t, findqg0
  use m_pawpwij,      only : pawpwff_t, pawpwij_t, pawpwij_init, pawpwij_free, paw_rho_tw_g
  use m_pawang,       only : pawang_type
  use m_pawtab,       only : pawtab_type
@@ -624,7 +624,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
        call wrtout(std_out,msg,"PERS",do_flush=.True.)
 
        ! * Get ikp_ibz, non-symmorphic phase, ph_mkpt, and symmetries from ikp_bz.
-       call get_BZ_item(Kmesh,ikp_bz,kpbz,ikp_ibz,isym_kp,itim_kp,ph_mkpt,isirred=isirred)
+       call kmesh%get_BZ_item(ikp_bz,kpbz,ikp_ibz,isym_kp,itim_kp,ph_mkpt,isirred=isirred)
        !ABI_CHECK(isirred,"not irred!")
        !ABI_CHECK(ph_mkpt == cone, "Wrong phase!")
 
@@ -635,7 +635,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
        do ik_bz=1,ikp_bz ! Loop over k
          !
          ! * Get ik_ibz, non-symmorphic phase, ph_mkt, and symmetries from ik_bz
-         call get_BZ_item(Kmesh,ik_bz,kbz,ik_ibz,isym_k,itim_k,ph_mkt,isirred=isirred)
+         call kmesh%get_BZ_item(ik_bz,kbz,ik_ibz,isym_k,itim_k,ph_mkt,isirred=isirred)
          !ABI_CHECK(isirred,"not irred!")
          !ABI_CHECK(ph_mkt == cone, "Wrong phase!")
 
@@ -666,7 +666,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
          end if
          !
          ! * Get iq_ibz, and symmetries from iq_bz
-         call get_BZ_item(Qmesh,iq_bz,qbz,iq_ibz,isym_q,itim_q)
+         call qmesh%get_BZ_item(iq_bz,qbz,iq_ibz,isym_q,itim_q)
          is_qeq0 = (normv(qbz,Cryst%gmet,'G')<GW_TOLQ0)
 
          ! Symmetrize em1(omega=0)
@@ -1010,7 +1010,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
 
      ! * Get iq_ibz, and symmetries from iq_bz.
      iq_bz = iqbz0 ! q = 0 -> iqbz0
-     call get_BZ_item(Qmesh,iq_bz,qbz,iq_ibz,isym_q,itim_q)
+     call qmesh%get_BZ_item(iq_bz,qbz,iq_ibz,isym_q,itim_q)
 
      ! * Set up table of |q(BZ)+G|
      if (iq_ibz==1) then
@@ -1449,7 +1449,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
      !
      ! * Get iq_ibz, and symmetries from iq_bz.
      iq_bz = iqbz0 ! q = 0 -> iqbz0
-     call get_BZ_item(Qmesh,iq_bz,qbz,iq_ibz,isym_q,itim_q)
+     call qmesh%get_BZ_item(iq_bz,qbz,iq_ibz,isym_q,itim_q)
      !
      ! * Set up table of |q(BZ)+G|
      if (iq_ibz==1) then
@@ -1889,7 +1889,7 @@ subroutine exc_build_v(spin1,spin2,nsppol,npweps,Bsp,Cryst,Kmesh,Qmesh,Gsph_x,Gs
 
    ! * Get iq_ibz, and symmetries from iq_bz.
    iq_bz = iqbz0 ! q = 0 -> iqbz0
-   call get_BZ_item(Qmesh,iq_bz,qbz,iq_ibz,isym_q,itim_q)
+   call qmesh%get_BZ_item(iq_bz,qbz,iq_ibz,isym_q,itim_q)
 
    ! * Set up table of |q(BZ)+G|
    if (iq_ibz==1) then
@@ -2008,7 +2008,7 @@ if (nsppol==2) then
    !
    ! * Get iq_ibz, and symmetries from iq_bz.
    iq_bz = iqbz0 ! q = 0 -> iqbz0
-   call get_BZ_item(Qmesh,iq_bz,qbz,iq_ibz,isym_q,itim_q)
+   call qmesh%get_BZ_item(iq_bz,qbz,iq_ibz,isym_q,itim_q)
    !
    ! * Set up table of |q(BZ)+G|
    if (iq_ibz==1) then
@@ -2339,7 +2339,7 @@ subroutine wfd_all_mgq0(Wfd,Cryst,Qmesh,Gsph_x,Vcp,&
  ABI_CHECK(iqbz0/=0,"q=0 not found in q-point list!")
 
  ! * Get iq_ibz, and symmetries from iqbz0.
- call get_BZ_item(Qmesh,iqbz0,qbz,iq_ibz,isym_q,itim_q)
+ call qmesh%get_BZ_item(iqbz0,qbz,iq_ibz,isym_q,itim_q)
 
  if (Wfd%usepaw==1) then ! Prepare onsite contributions at q==0
    ABI_MALLOC(Pwij_q0,(Cryst%ntypat))

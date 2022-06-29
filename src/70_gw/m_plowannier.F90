@@ -2548,7 +2548,7 @@ end subroutine get_plowannier
    use m_abicore
    use m_specialmsg, only : wrtout
    use defs_abitypes
-   use m_bz_mesh, only : kmesh_t, get_BZ_item
+   use m_bz_mesh, only : kmesh_t
    use m_crystal, only : crystal_t
    use m_pawang, only  : pawang_type
    implicit none
@@ -2601,7 +2601,7 @@ end subroutine get_plowannier
      enddo
    else if (cryst%nsym>1) then
     do ik_bz=1,kmesh%nbz
-      call get_BZ_item(kmesh,ik_bz,kbz,ik_ibz,isym,itim)
+      call kmesh%get_BZ_item(ik_bz,kbz,ik_ibz,isym,itim)
       do iatom=1,wanbz%natom_wan
         indx=cryst%indsym(4,isym,wanibz%iatom_wan(iatom))
 !Link beetween full list and wan list of atom

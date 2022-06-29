@@ -43,7 +43,7 @@ MODULE m_prep_calc_ucrpa
  use m_geometry,      only : normv
  use m_crystal,       only : crystal_t
  use m_fft_mesh,      only : rotate_FFT_mesh
- use m_bz_mesh,       only : kmesh_t, get_BZ_item, findqg0, has_IBZ_item
+ use m_bz_mesh,       only : kmesh_t, findqg0
  use m_gsphere,       only : gsphere_t
  use m_io_tools,      only : flush_unit, open_file
  use m_vcoul,         only : vcoul_t
@@ -303,7 +303,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
  !write(6,*) "ikcalc",Kmesh%bz(:,ikcalc)
  !write(6,*) "jk_bz",Kmesh%bz(:,jk_bz)
 ! jk_bz=ikcalc
- call get_BZ_item(Kmesh,jk_bz,kgw,jk_ibz,isym_kgw,jik,ph_mkgwt)
+ call kmesh%get_BZ_item(jk_bz,kgw,jk_ibz,isym_kgw,jik,ph_mkgwt)
 ! write(6,*) "jk_ibz",Kmesh%ibz(:,jk_ibz)
 ! write(6,*) "jk_bz,jk_ibz",jk_bz,jk_ibz,isym_kgw,itim
  !%call get_IBZ_item(Kmesh,jk_ibz,kibz,wtk)
@@ -574,7 +574,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
 !     write(6,*) "BB",Wfd%my_rank,spin,ik_bz
      !
      ! * Find the corresponding irreducible k-point
-     call get_BZ_item(Kmesh,ik_bz,ksum,ik_ibz,isym_ki,iik,ph_mkt)
+     call kmesh%get_BZ_item(ik_bz,ksum,ik_ibz,isym_ki,iik,ph_mkt)
      spinrot_kbz(:)=Cryst%spinrot(:,isym_ki)
 !     write(6,'(a,6i4)')"indices" ,jk_bz,jk_ibz,ik_bz,ik_ibz,spin
 
@@ -605,7 +605,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
 
      !
      ! * Find the corresponding irreducible q-point.
-     call get_BZ_item(Qmesh,iq_bz,qbz,iq_ibz,isym_q,itim_q)
+     call qmesh%get_BZ_item(iq_bz,qbz,iq_ibz,isym_q,itim_q)
      q_is_gamma = (normv(qbz,Cryst%gmet,"G") < GW_TOL_W0)
 
 !!*******************************************
@@ -615,7 +615,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
 !!*******************************************
 !      write(6,*) "kkk1",ik_bz,jk_bz,iq_ibz
 
-      if (.NOT.has_IBZ_item(Qmesh,qbz,iq_ibz_dump,g0_dump)) then
+      if (.NOT. qmesh%has_IBZ_item(qbz,iq_ibz_dump,g0_dump)) then
         cycle
       end if
 

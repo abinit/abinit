@@ -45,7 +45,7 @@ module m_mlwfovlp_qp
  use m_geometry,       only : metric
  use m_crystal,        only : crystal_t
  use m_kpts,           only : listkk
- use m_bz_mesh,        only : kmesh_t, kmesh_init, kmesh_free
+ use m_bz_mesh,        only : kmesh_t
  use m_ebands,         only : ebands_init, ebands_free
  use m_qparticles,     only : rdqps, rdgw
  use m_sort,           only : sort_dp
@@ -223,10 +223,10 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
 
  !different conventions are used in GW and abinit!!
  cryst = hdr%get_crystal(gw_timrev=timrev+1)
- call kmesh_init(Kibz_mesh,Cryst,nkibz,kibz,Dtset%kptopt)
+ call Kibz_mesh%init(Cryst,nkibz,kibz,Dtset%kptopt)
  wtk_ibz=Kibz_mesh%wt
  call cryst%free()
- call kmesh_free(Kibz_mesh)
+ call Kibz_mesh%free()
 
  ABI_MALLOC(ibz2bz,(nkibz,6))
  call listkk(dksqmax,gmet,ibz2bz,dtset%kpt,dtset%kptgw,nkpt,dtset%nkptgw,&

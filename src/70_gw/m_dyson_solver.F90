@@ -37,7 +37,7 @@ MODULE m_dyson_solver
  use m_io_tools,      only : open_file
  use m_fstrings,      only : int2char10
  use m_hide_lapack,   only : xheev
- use m_bz_mesh,       only : kmesh_t, get_BZ_item
+ use m_bz_mesh,       only : kmesh_t
  use m_sigma,         only : sigma_t
 
  implicit none
@@ -161,7 +161,7 @@ subroutine solve_dyson(ikcalc,minbnd,maxbnd,nomega_sigc,Sigp,Kmesh,sigcme_tmp,qp
 
  ! Find the index of the k-point for sigma in the IBZ array.
  ikbz_gw=Sigp%kptgw2bz(ikcalc)
- call get_BZ_item(Kmesh,ikbz_gw,kbz_gw,sk_ibz,isym,itim,phase)
+ call kmesh%get_BZ_item(ikbz_gw,kbz_gw,sk_ibz,isym,itim,phase)
 
  sigc=czero; dsigc=czero
 

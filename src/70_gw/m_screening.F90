@@ -49,7 +49,7 @@ MODULE m_screening
  use m_geometry,        only : normv, vdotw, metric
  use m_hide_lapack,     only : xginv
  use m_crystal,         only : crystal_t
- use m_bz_mesh,         only : kmesh_t, get_BZ_item, box_len
+ use m_bz_mesh,         only : kmesh_t, box_len
  use m_fft_mesh,        only : g2ifft
  use m_fftcore,         only : kgindex
  use m_fft,             only : fourdp
@@ -547,8 +547,8 @@ subroutine Epsm1_symmetrizer(iq_bz,nomega,npwc,Er,Gsph,Qmesh,remove_exchange,eps
  ABI_CHECK(Er%nomega>=nomega,'Too many frequencies required')
  ABI_CHECK(Er%npwe  >=npwc , 'Too many G-vectors required')
 
- ! * Get iq_ibz, and symmetries from iq_ibz.
- call get_BZ_item(Qmesh,iq_bz,qbz,iq_ibz,isym_q,itim_q)
+ ! Get iq_ibz, and symmetries from iq_ibz.
+ call Qmesh%get_BZ_item(iq_bz,qbz,iq_ibz,isym_q,itim_q)
 
  ! If out-of-memory, only Er%espm1(:,:,:,1) has been allocated and filled.
  iq_loc=iq_ibz; if (Er%mqmem==0) iq_loc=1
@@ -674,7 +674,7 @@ subroutine Epsm1_symmetrizer_inplace(iq_bz,nomega,npwc,Er,Gsph,Qmesh,remove_exch
  ABI_MALLOC(work,(npwc,npwc))
 
  ! * Get iq_ibz, and symmetries from iq_ibz.
- call get_BZ_item(Qmesh,iq_bz,qbz,iq_ibz,isym_q,itim_q)
+ call qmesh%get_BZ_item(iq_bz,qbz,iq_ibz,isym_q,itim_q)
 
  ! If out-of-memory, only Er%espm1(:,:,:,1) has been allocated and filled.
  iq_loc=iq_ibz; if (Er%mqmem==0) iq_loc=1
@@ -1010,7 +1010,7 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
          ABI_MALLOC(dummy_uwing,(npwe*Er%nJ,Er%nomega,dim_wing))
          ABI_MALLOC(dummy_head,(dim_wing,dim_wing,Er%nomega))
 
-         if (approx_type<2 .or. approx_type>3) then 
+         if (approx_type<2 .or. approx_type>3) then
            ABI_WARNING('Entering out-of core RPA or Kxc branch')
            call make_epsm1_driver(iqibz,dim_wing,npwe,Er%nI,Er%nJ,Er%nomega,Er%omega,&
 &                    approx_type,option_test,Vcp,nfftot,ngfft,nkxc,kxcg,gvec,dummy_head,&
@@ -1662,11 +1662,11 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
    if (istep <= nstep) then
      write(msg,'(a,i4,a)') ' => bootstrap fxc converged after ', istep, ' iterations'
      call wrtout(std_out,msg,'COLL')
-   else 
+   else
      write(msg,'(a,i4,a)') ' -> bootstrap fxc not converged after ', nstep, ' iterations'
      ABI_WARNING(msg)
    end if
-   ! 
+   !
    chi0 = chi0_save
    do io=1,nomega
      if (omega_distrb(io) == my_rank) then
@@ -1852,13 +1852,13 @@ CASE(6)
      vc_sqrt => Vcp%vc_sqrt(:,iqibz)
    end if
 
-   Zr = 0.78 
+   Zr = 0.78
    chi00_head = chi0(1,1,1)*vc_sqrt(1)**2
    fxc_head = czero; vfxc_lr = czero; vfxc_tmp = czero
    epsm_lf = czero; epsm_nlf = czero; eelf = zero
    write(msg,'(a,2f10.6)') ' -> chi0_dft(head): ', chi00_head
    call wrtout(std_out,msg,'COLL')
-   ! 
+   !
    chi0_tmp = chi0(:,:,1)
    call xginv(chi0_tmp,npwe,comm=comm)
    vfxc_lr = (one-Zr)*chi0_tmp(:,:)
@@ -1871,14 +1871,14 @@ CASE(6)
        qpg2_nrm = normv(qpg2,gmet,"G")
        qpg2 =  Vcp%qibz(:,iqibz) + gvec(:,ig2)
        qpg2_nrm = SQRT(qpg2_nrm * normv(qpg2,gmet,"G"))
-       vfxc_tmp(ig1,ig2) = vfxc_lr(ig1,ig2)*exp(-(qpg2_nrm/k_thfermi(rhor))**2) + & 
+       vfxc_tmp(ig1,ig2) = vfxc_lr(ig1,ig2)*exp(-(qpg2_nrm/k_thfermi(rhor))**2) + &
 &        kxcg_mat(ig1,ig2)*(one - exp(-(qpg2_nrm/k_thfermi(rhor))**2))
        !write(std_out,*) ig1, qpg2_nrm, k_thfermi(rhor), vfxc_lr(ig1,ig1), kxcg_mat(ig1,ig1), vfxc_tmp(ig1,ig1)
       end do
    end do
    !
    vfxc_lr = vfxc_tmp
-   
+
    do io=1,nomega
      if (omega_distrb(io) == my_rank) then
        call atddft_hyb_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0(:,:,io),vfxc_lr,kxcg_mat,option_test,my_nqlwl,dim_wing,omega(io),&
@@ -3011,7 +3011,7 @@ subroutine screen_mdielf(iq_bz,npw,nomega,model_type,eps_inf,Cryst,Qmesh,Vcp,Gsp
  nprocs = xmpi_comm_size(comm)
  call xmpi_split_work(npw,comm,my_gstart,my_gstop)
 
- call get_bz_item(Qmesh,iq_bz,qpt_bz,iq_ibz,isym_q,itim_q,ph_mqbzt,umklp,isirred)
+ call qmesh%get_bz_item(iq_bz,qpt_bz,iq_ibz,isym_q,itim_q,ph_mqbzt,umklp,isirred)
 
  !if (itim_q/=1.or.isym_q/=1.or.ANY(umklp/=0) ) then
  !  ABI_ERROR("Bug in mdielf_bechstedt")

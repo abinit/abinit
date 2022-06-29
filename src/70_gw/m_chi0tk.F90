@@ -38,7 +38,7 @@ MODULE m_chi0tk
  use m_hide_blas,only : xgerc, xgemm, xherk, xher
  use m_crystal,  only : crystal_t
  use m_gsphere,  only : gsphere_t
- use m_bz_mesh,  only : littlegroup_t, kmesh_t, has_BZ_item
+ use m_bz_mesh,  only : littlegroup_t, kmesh_t
  use m_wfd,      only : wfdgw_t
 
  implicit none
@@ -2191,7 +2191,7 @@ subroutine make_transitions(Wfd,chi0alg,nbnds,nbvw,nsppol,symchi,timrev,TOL_DELT
      end if
 
      ! Find kp=k-q-G0 and also G0 where kp is in the first BZ
-     if (.not.has_BZ_item(Kmesh,kmq,ikmq_bz,g0)) then ! Stop as the weight 1.0/nkbz is wrong.
+     if (.not. kmesh%has_BZ_item(kmq,ikmq_bz,g0)) then ! Stop as the weight 1.0/nkbz is wrong.
        write(msg,'(4a,2(2a,3f12.6),2a)')ch10,&
 &        ' make_transitions : ERROR - ',ch10,&
 &        ' kp  = k-q-G0 not found in the BZ mesh',ch10,&

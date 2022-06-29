@@ -45,7 +45,7 @@ module m_vcoul
  use m_geometry,        only : normv, metric
  use m_qplusg,          only : cmod_qpg
  use m_crystal,         only : crystal_t
- use m_bz_mesh,         only : kmesh_t, get_BZ_item
+ use m_bz_mesh,         only : kmesh_t
  use m_gsphere,         only : gsphere_t
  use m_dtfil,           only : isfile
 
@@ -1209,7 +1209,7 @@ subroutine vcoul_plot(Vcp, Qmesh, Gsph, ng, vc, comm)
  vcr=zero; vcr_cut=zero
 
  do iq_bz=1,nqbz
-   call get_BZ_item(Qmesh,iq_bz,qbz,iq_ibz,isym,itim)
+   call Qmesh%get_BZ_item(iq_bz, qbz, iq_ibz, isym, itim)
    if (ABS(qbz(1))<0.01) qbz(1)=zero
    if (ABS(qbz(2))<0.01) qbz(2)=zero
    if (ABS(qbz(3))<0.01) qbz(3)=zero

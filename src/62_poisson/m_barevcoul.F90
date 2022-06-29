@@ -26,21 +26,19 @@
 module m_barevcoul
 
  use defs_basis
+ use m_abicore
  use m_dtset
  use m_errors
  use m_xmpi
- use m_fstrings,        only : sjoin, itoa
- use m_profiling_abi,   only : abimem_record
+
+ !use m_fstrings,        only : sjoin, itoa
  use defs_abitypes,     only : MPI_type
- use m_numeric_tools,   only : arth, l2norm, OPERATOR(.x.),quadrature
-
- use m_geometry,        only : normv, metric
-
+ use m_numeric_tools,   only : arth, l2norm, OPERATOR(.x.)
+ use m_geometry,        only : normv
  use m_crystal,         only : crystal_t
  use m_gsphere,         only : gsphere_t
- use m_bz_mesh,         only : kmesh_t,kmesh_init
 
-! Cut-off methods modules 
+! Cut-off methods modules
  use m_cutoff_sphere,   only : cutoff_sphere
  use m_cutoff_surface,  only : cutoff_surface
  use m_cutoff_cylinder, only : cutoff_cylinder, K0cos
@@ -111,8 +109,8 @@ module m_barevcoul
  end type vcut_t
 
  public :: barevcoul
-!!*** 
- 
+!!***
+
 contains
 !!***
 
@@ -210,10 +208,10 @@ subroutine barevcoul(rcut,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev,short
  vcut%mode='NONE'
  !icutcoul_local=dtset%icutcoul
 
-! BG: Temporary to circumvent the tests 
- if(shortrange) then 
+! BG: Temporary to circumvent the tests
+ if(shortrange) then
     icutcoul_local=5
- else 
+ else
     icutcoul_local=0
  end if
 ! -------------------------------------
@@ -235,11 +233,11 @@ subroutine barevcoul(rcut,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev,short
 
 !In order to speed the routine, precompute the components of g+q
 !Also check if the booked space was large enough...
- 
+
  ABI_MALLOC(gq,(3,max(n1,n2,n3)))
  ABI_MALLOC(gpq,(nfft))
  ABI_MALLOC(gpq2,(nfft))
- 
+
  do ii=1,3
    id(ii)=ngfft(ii)/2+2
    do ing=1,ngfft(ii)
@@ -265,16 +263,16 @@ subroutine barevcoul(rcut,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev,short
      do i1=1,n1
         ii=i1+i23
         gpq(ii)=gs2+ gq(1,i1)*(gq(1,i1)*gmet(1,1)+gqg2p3)
-        if(gpq(ii)>=tol4) then 
+        if(gpq(ii)>=tol4) then
           gpq2(ii) = piinv/gpq(ii)
-        end if 
+        end if
      end do
    end do
  end do
 
 ! Old version of the code extracted from m_Fock
-! do ig=1,nfft 
-!     if(abs(gpq(ig))<tol4) then 
+! do ig=1,nfft
+!     if(abs(gpq(ig))<tol4) then
 !        barev(ig)=barev(ig)+divgq0
 !     else if(gpq(ig)<=cutoff) then
 !       if(shortrange) then
@@ -478,9 +476,9 @@ subroutine barevcoul(rcut,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev,short
      ! In Rozzi"s method the lim q+G --> 0 is finite.
      vcut%i_sz=barev(1)
    end if
-  
+
  CASE('ERF')
-   
+
    do ig=1,nfft
      if(abs(gpq(ig))<tol4) then
         barev(ig)=barev(ig)+divgq0
@@ -490,7 +488,7 @@ subroutine barevcoul(rcut,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev,short
        end if
     end if
    end do
- 
+
  CASE('ERFC')
 
    do ig=1,nfft
@@ -504,15 +502,15 @@ subroutine barevcoul(rcut,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev,short
    end do
 
  CASE DEFAULT
-   write(msg,'(a,i3)')'No cut-off applied to the Coulomb Potential.' //&
-&                     'Either icutcoul value not allowed or not defined.'
+   write(msg,'(3a)')'No cut-off applied to the Coulomb Potential.', ch10, &
+                    'Either icutcoul value not allowed or not defined.'
    ABI_WARNING(msg)
  END SELECT
 
  ABI_FREE(gq)
  ABI_FREE(gpq)
  ABI_FREE(gpq2)
-  
+
 end subroutine barevcoul
 !!***
 

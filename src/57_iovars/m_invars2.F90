@@ -43,14 +43,14 @@ module m_invars2
  use m_fstrings,  only : sjoin, itoa, ltoa, tolower, toupper
  use m_symtk,     only : matr3inv
  use m_parser,    only : intagm, intagm_img
- use m_geometry,   only : mkrdim, metric
- use m_gsphere,    only : setshells
+ use m_geometry,  only : mkrdim, metric
+ use m_gsphere,   only : setshells
  use m_xcdata,    only : get_auxc_ixc, get_xclevel
  use m_inkpts,    only : inkpts
  use m_ingeo,     only : invacuum
  use m_ipi,       only : ipi_check_initial_consistency
  use m_crystal,   only : crystal_t
- use m_bz_mesh,   only : kmesh_init, kmesh_t, find_qmesh
+ use m_bz_mesh,   only : kmesh_t, find_qmesh
 
  implicit none
 
@@ -3716,7 +3716,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  if (dtset%nqptdm == -1) then
    cryst = dtset%get_crystal(1)
    !call cryst%print(mode_paral='COLL')
-   call kmesh_init(Kmesh, Cryst, dtset%nkpt, dtset%kptns, Dtset%kptopt, wrap_1zone=.FALSE.)
+   call Kmesh%init(Cryst, dtset%nkpt, dtset%kptns, Dtset%kptopt, wrap_1zone=.FALSE.)
 
    ! Some required information are not filled up inside kmesh_init
    ! So doing it here, even though it is not clean

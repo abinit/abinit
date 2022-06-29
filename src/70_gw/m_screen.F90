@@ -39,7 +39,7 @@ MODULE m_screen
  use m_numeric_tools,  only : print_arr
  use m_geometry,       only : normv
  use m_crystal,        only : crystal_t
- use m_bz_mesh,        only : kmesh_t, get_BZ_item, has_bz_item
+ use m_bz_mesh,        only : kmesh_t
  use m_gsphere,        only : gsphere_t
  use m_vcoul,          only : vcoul_t
  use m_io_screening,   only : hscr_free, hscr_io, read_screening, write_screening, hscr_print, &
@@ -687,7 +687,6 @@ end function screen_ihave_fgg
 !!      m_bethe_salpeter,m_screen
 !!
 !! CHILDREN
-!!      get_bz_item,sqmat_itranspose
 !!
 !! SOURCE
 
@@ -727,7 +726,6 @@ end subroutine screen_nullify
 !!      m_bethe_salpeter
 !!
 !! CHILDREN
-!!      get_bz_item,sqmat_itranspose
 !!
 !! SOURCE
 
@@ -836,7 +834,6 @@ end subroutine screen_free
 !!      m_bethe_salpeter
 !!
 !! CHILDREN
-!!      get_bz_item,sqmat_itranspose
 !!
 !! SOURCE
 
@@ -1107,7 +1104,7 @@ subroutine screen_init(W,W_Info,Cryst,Qmesh,Gsph,Vcp,ifname,mqmem,npw_asked,&
      nqlwl=0; is_qeq0= (normv(W%qibz(:,iq_ibz),Cryst%gmet,'G')<GW_TOLQ0)
      !
      ! Calculate the model. Note that mdielf awaits an index in the BZ.
-     found = has_bz_item(Qmesh,Qmesh%ibz(:,iq_ibz),iq_bz,g0)
+     found = qmesh%has_bz_item(Qmesh%ibz(:,iq_ibz),iq_bz,g0)
      if (.not.found.or.ANY(g0/=0)) then
        ABI_ERROR("Problem in retrieving ibz point")
      end if
@@ -1199,7 +1196,6 @@ end subroutine screen_init
 !!      m_exc_build
 !!
 !! CHILDREN
-!!      get_bz_item,sqmat_itranspose
 !!
 !! SOURCE
 
@@ -1230,7 +1226,7 @@ subroutine screen_symmetrizer(W,iq_bz,Cryst,Gsph,Qmesh,Vcp)
 
  npw = W%npw; nqibz = W%nqibz; nomega = W%nomega
 
- call get_bz_item(Qmesh,iq_bz,qbz,iq_ibz,isym_q,itim_q,isirred=q_isirred)
+ call qmesh%get_bz_item(iq_bz,qbz,iq_ibz,isym_q,itim_q,isirred=q_isirred)
  !
  ! ========================================================
  ! ==== Branching for in-core or out-of-core solutions ====
@@ -1350,7 +1346,6 @@ end subroutine screen_symmetrizer
 !!      m_exc_build
 !!
 !! CHILDREN
-!!      get_bz_item,sqmat_itranspose
 !!
 !! SOURCE
 
@@ -1457,7 +1452,6 @@ end subroutine screen_w0gemv
 !!      m_screen
 !!
 !! CHILDREN
-!!      get_bz_item,sqmat_itranspose
 !!
 !! SOURCE
 
@@ -1484,7 +1478,7 @@ subroutine em1_symmetrize_ip(iq_bz,npwc,nomega,Gsph,Qmesh,epsm1)
 ! *********************************************************************
 
  ! * Get iq_ibz, and symmetries from iq_ibz.
- call get_BZ_item(Qmesh,iq_bz,qbz,iq_ibz,isym_q,itim_q,isirred=q_isirred)
+ call qmesh%get_BZ_item(iq_bz,qbz,iq_ibz,isym_q,itim_q,isirred=q_isirred)
 
  if (q_isirred) RETURN ! Nothing to do
 
@@ -1556,7 +1550,6 @@ end subroutine em1_symmetrize_ip
 !!      m_screen
 !!
 !! CHILDREN
-!!      get_bz_item,sqmat_itranspose
 !!
 !! SOURCE
 
@@ -1581,8 +1574,8 @@ subroutine em1_symmetrize_op(iq_bz,npwc,nomega,Gsph,Qmesh,in_epsm1,out_epsm1)
 
 ! *********************************************************************
 
- ! * Get iq_ibz, and symmetries from iq_ibz.
- call get_BZ_item(Qmesh,iq_bz,qbz,iq_ibz,isym_q,itim_q,isirred=q_isirred)
+ ! Get iq_ibz, and symmetries from iq_ibz.
+ call qmesh%get_BZ_item(iq_bz,qbz,iq_ibz,isym_q,itim_q,isirred=q_isirred)
 
  if (q_isirred) then
    out_epsm1 = in_epsm1; return
