@@ -154,9 +154,7 @@ subroutine calc_vhxc_me(Wfd, Mflags, Mels, Cryst, Dtset, nfftf, ngfftf, &
 !scalars
  integer :: auxc_ixc,iat,ikc,ik_ibz,ib,jb,is,b_start,b_stop,istwf_k
  integer :: itypat,lmn_size,j0lmn,jlmn,ilmn,klmn,klmn1,lmn2_size_max
- integer :: isppol,cplex_dij,npw_k
- integer :: nspinor,nsppol,nspden,nk_calc
- integer :: rank
+ integer :: isppol,cplex_dij,npw_k,nspinor,nsppol,nspden,nk_calc,rank
  integer :: iab,isp1,isp2,ixc_sigma,nsploop,nkxc,option,n3xccc_,nk3xc,my_nbbp,my_nmels
  real(dp) :: nfftfm1,fact,DijH,enxc_val,enxc_hybrid_val,vxcval_avg,vxcval_hybrid_avg,h0dij,vxc1,vxc1_val,re_p,im_p,dijsigcx
  complex(dpc) :: cdot
@@ -225,7 +223,7 @@ subroutine calc_vhxc_me(Wfd, Mflags, Mels, Cryst, Dtset, nfftf, ngfftf, &
  end if
 
  ! Evaluate $v_\xc$ using only the valence charge.
- call wrtout(std_out," calc_vhxc_braket : calculating v_xc[n_val] (excluding non-linear core corrections)")
+ call wrtout(std_out," calc_vhxc_braket: calculating v_xc[n_val] (excluding non-linear core corrections)")
 
  do isppol=1,nsppol
    write(msg,'(a,i2,a,e16.6)')' For spin ',isppol,' Min density rhor = ',MINVAL(rhor(:,isppol))
@@ -244,7 +242,7 @@ subroutine calc_vhxc_me(Wfd, Mflags, Mels, Cryst, Dtset, nfftf, ngfftf, &
  nkxc   = 0 ! No computation of XC kernel
  n3xccc_= 0 ! No core
  nk3xc  = 0 ! k3xc not needed
- nmxc=(Dtset%usepaw==1.and.mod(abs(Dtset%usepawu),10)==4)
+ nmxc = Dtset%usepaw==1 .and. mod(abs(Dtset%usepawu),10) == 4
 
  ABI_MALLOC(xccc3d_,(n3xccc_))
  ABI_MALLOC(kxc_,(nfftf,nkxc))
