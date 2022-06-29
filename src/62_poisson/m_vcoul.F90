@@ -225,8 +225,7 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0, ncell=3, nmc_max=2500000
- integer :: nmc,nseed
- integer :: i1,i2,i3,ig,imc
+ integer :: nmc,nseed, i1,i2,i3,ig,imc
  integer :: ii,iqlwl,iq_bz,iq_ibz,npar,npt
  integer :: opt_cylinder,opt_surface,test,rank,nprocs
  integer, allocatable :: seed(:)
@@ -234,19 +233,17 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
  real(dp) :: b1b1,b2b2,b3b3,b1b2,b2b3,b3b1
  real(dp) :: bz_geometry_factor,bz_plane,check,dx,integ,q0_vol,q0_volsph
  real(dp) :: qbz_norm,step,ucvol,intfauxgb, alfa
+ real(dp) :: lmin,vlength,qpg2,rcut2, q0sph, ucvol_sc
  character(len=500) :: msg
 !arrays
  integer :: gamma_pt(3,1)
  integer, contiguous, pointer :: gvec(:,:)
  real(dp) :: a1(3),a2(3),a3(3),bb(3),b1(3),b2(3),b3(3),gmet(3,3),gprimd(3,3)
  real(dp) :: qbz_cart(3),rmet(3,3)
- real(dp),allocatable :: cov(:,:),par(:),qfit(:,:),sigma(:),var(:),qcart(:,:)
- real(dp),allocatable :: vcfit(:,:),vcoul(:,:),vcoul_lwl(:,:),xx(:),yy(:)
- real(dp),allocatable :: qran(:,:)
- real(dp) :: lmin,vlength,qpg2,rcut2, q0sph
  real(dp) :: qtmp(3),qmin(3),qmin_cart(3),qpg(3)
- real(dp) :: rprimd_sc(3,3),gprimd_sc(3,3),gmet_sc(3,3),rmet_sc(3,3),ucvol_sc
- real(dp) :: qcart2red(3,3)
+ real(dp) :: rprimd_sc(3,3),gprimd_sc(3,3),gmet_sc(3,3),rmet_sc(3,3), qcart2red(3,3)
+ real(dp),allocatable :: cov(:,:),par(:),qfit(:,:),sigma(:),var(:),qcart(:,:)
+ real(dp),allocatable :: vcfit(:,:),vcoul(:,:),vcoul_lwl(:,:),xx(:),yy(:),qran(:,:)
  !real(dp) :: qqgg(3)
 
 ! *************************************************************************
@@ -292,16 +289,16 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
  !
  ! === Calculate Fourier coefficient of Coulomb interaction ===
  ! * For the limit q-->0 we consider ng vectors due to a possible anisotropy in case of a cutoff interaction
- ABI_MALLOC(Vcp%qibz, (3,Vcp%nqibz))
+ ABI_MALLOC(Vcp%qibz, (3, Vcp%nqibz))
  Vcp%qibz = Qmesh%ibz(:,:)
- ABI_MALLOC(Vcp%qlwl, (3,Vcp%nqlwl))
+ ABI_MALLOC(Vcp%qlwl, (3, Vcp%nqlwl))
  Vcp%qlwl = qlwl(:,:)
 
  ! ===============================================
  ! == Calculation of the FT of the Coulomb term ==
  ! ===============================================
- ABI_MALLOC(vcoul    ,(ng, Vcp%nqibz))
- ABI_MALLOC(vcoul_lwl,(ng, Vcp%nqlwl))
+ ABI_MALLOC(vcoul    , (ng, Vcp%nqibz))
+ ABI_MALLOC(vcoul_lwl, (ng, Vcp%nqlwl))
 
  a1=Cryst%rprimd(:,1); b1=two_pi*gprimd(:,1)
  a2=Cryst%rprimd(:,2); b2=two_pi*gprimd(:,2)
@@ -370,7 +367,7 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
            vlength = normv(qtmp, gmet_sc, 'G')
            if (vlength < lmin) then
              lmin = vlength
-             ! Get the q-vector in cartersian coordinates
+             ! Get the q-vector in cartesian coordinates
              qmin_cart(:) = two_pi * MATMUL( gprimd_sc(:,:) , qtmp )
              ! Transform it back to the reciprocal space
              qmin(:) = MATMUL( qcart2red , qmin_cart )
@@ -475,7 +472,6 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
          end do
        end do
      end do
-
 
    case('MINIBZ-ERF')
 
@@ -1044,10 +1040,10 @@ contains !===============================================================
 
  end function integratefaux
 
- function faux(qq)
+ real(dp) function faux(qq)
 
   real(dp),intent(in) :: qq(3)
-  real(dp) :: faux, bb4sinpiqq1_2, bb4sinpiqq2_2, bb4sinpiqq3_2, sin2piqq1, sin2piqq2, sin2piqq3
+  real(dp) :: bb4sinpiqq1_2, bb4sinpiqq2_2, bb4sinpiqq3_2, sin2piqq1, sin2piqq2, sin2piqq3
 
   bb4sinpiqq1_2=b1b1*four*SIN(pi*qq(1))**2
   bb4sinpiqq2_2=b2b2*four*SIN(pi*qq(2))**2
@@ -1060,10 +1056,10 @@ contains !===============================================================
 
  end function faux
 
- function faux_fast(qq, bb4sinpiqq1_2, bb4sinpiqq2_2, bb4sinpiqq3_2, sin2piqq1, sin2piqq2,sin2piqq3)
+ real(dp) function faux_fast(qq, bb4sinpiqq1_2, bb4sinpiqq2_2, bb4sinpiqq3_2, sin2piqq1, sin2piqq2,sin2piqq3)
 
   real(dp),intent(in) :: qq(3)
-  real(dp) :: faux_fast, bb4sinpiqq1_2, bb4sinpiqq2_2, bb4sinpiqq3_2, sin2piqq1, sin2piqq2, sin2piqq3
+  real(dp) :: bb4sinpiqq1_2, bb4sinpiqq2_2, bb4sinpiqq3_2, sin2piqq1, sin2piqq2, sin2piqq3
 
   faux_fast= bb4sinpiqq1_2 + bb4sinpiqq2_2 + bb4sinpiqq3_2 &
 &       +two*( b1b2 * sin2piqq1*sin2piqq2 &
@@ -1078,12 +1074,10 @@ contains !===============================================================
 
  end function faux_fast
 
-
- function adapt_nmc(nmc_max,qpg2) result(nmc)
+ integer function adapt_nmc(nmc_max, qpg2) result(nmc)
 
  real(dp),intent(in) :: qpg2
  integer,intent(in)  :: nmc_max
- integer :: nmc
 
  ! Empirical law to decrease the Monte Carlo sampling
  ! for large q+G, for which the accuracy is not an issue
