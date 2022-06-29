@@ -348,7 +348,8 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
  integer :: dimenl1,dimenl2,dimenl2_,dimekbq,dimffnlin,dimffnlout,dimsij,iatm,iatom_only_,idat
  integer :: ii,ispden,ispinor,istwf_k,itypat,jspinor,matblk_,my_nspinor,n1,n2,n3,natom_,ncpgr_atm,ndat_left_
  integer :: nkpgin,nkpgout,npwin,npwout,ntypat_,only_SO_,select_k_,shift1,shift2,shift3
- logical :: atom_pert,force_recompute_ph3d,kpgin_allocated,kpgout_allocated,use_gemm_nonlop
+ logical :: atom_pert,force_recompute_ph3d,kpgin_allocated,kpgout_allocated
+ logical :: use_gemm_nonlop,use_gemm_nonlop_gpu
  character(len=500) :: msg
 !arrays
  integer :: nlmn_atm(1),nloalg_(3)
@@ -675,6 +676,17 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
    use_gemm_nonlop= ( use_gemm_nonlop .or. &
 &      ( choice==2.and.signs==1 .and. hamk%useylm/=0 .and. &
 &        gemm_nonlop_kpt(gemm_nonlop_ikpt_this_proc_being_treated)%ngrads>0) )
+ end if
+
+ use_gemm_nonlop_gpu = ( gemm_nonlop_use_gemm_gpu .and. &
+   & signs == 2 .and. paw_opt /= 2 .and. &
+   & cpopt < 3 .and. hamk%useylm /= 0 .and. &
+   & (choice < 2 .or. choice == 7) )
+
+ if(gemm_nonlop_use_gemm_gpu) then
+   call wrtout(std_out, "Calling gemm_nonlop with GPU activated")
+ else
+   call wrtout(std_out, "Calling gemm_nonlop with GPU not activated")
  end if
 
  if(use_gemm_nonlop) then

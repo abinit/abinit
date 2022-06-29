@@ -556,6 +556,15 @@ subroutine first_setup(codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad,pawtab,psps,
    tdks%gemm_nonlop_use_gemm = .false.
  end if
 
+ !** TODO: uncomment when gemm_nonlop can be used on GPU
+ ! if(dtset%use_gemm_nonlop == 1 .and. dtset%use_gpu_cuda=1) then
+ !   ! set global variable
+ !   tdks%gemm_nonlop_use_gemm_gpu = .true.
+ !   !call init_gemm_nonlop_gpu(dtset%nkpt)
+ ! else
+ !   tdks%gemm_nonlop_use_gemm_gpu = .false.
+ ! end if
+
  !** Setup the Ylm for each k point
  if (psps%useylm==1) then
    ABI_MALLOC(tdks%ylm,(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm))
