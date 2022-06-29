@@ -31,7 +31,7 @@ MODULE m_xmpi
  use defs_basis
  use m_profiling_abi
  !use m_errors
- use iso_c_binding
+ use, intrinsic :: iso_c_binding
 #ifdef HAVE_FC_ISO_FORTRAN_2008
  use ISO_FORTRAN_ENV, only : int16, int32, int64
 #endif
