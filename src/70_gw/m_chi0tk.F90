@@ -31,15 +31,15 @@ MODULE m_chi0tk
  use m_xmpi
  use m_xomp
  use m_sort
- use m_wfd,      only : wfdgw_t
 
  use defs_datatypes, only : ebands_t
  use m_gwdefs,   only : GW_TOL_DOCC, czero_gw, cone_gw, one_gw, em1params_t, j_gw
  use m_fstrings, only : sjoin, itoa
  use m_hide_blas,only : xgerc, xgemm, xherk, xher
  use m_crystal,  only : crystal_t
- use m_gsphere,  only : gsphere_t, gsph_gmg_idx, gsph_gmg_fftidx
+ use m_gsphere,  only : gsphere_t
  use m_bz_mesh,  only : littlegroup_t, kmesh_t, has_BZ_item
+ use m_wfd,      only : wfdgw_t
 
  implicit none
 
@@ -1871,7 +1871,7 @@ subroutine completechi0_deltapart(ik_bz,qzero,symchi,npwe,npwvec,nomega,nspinor,
    ! MODULO wraps G1-G2 in the FFT box but the Fourier components are not periodic!
    do igp=igstart,npwe
      do ig=igstart,npwe
-       gmg_fft = gsph_gmg_fftidx(Gsph_FFT,ig,igp,ngfft)
+       gmg_fft = Gsph_FFT%gmg_fftidx(ig,igp,ngfft)
        if (gmg_fft==0) then
          outofbox_wfn=outofbox_wfn+1; CYCLE
        end if
@@ -1892,7 +1892,7 @@ subroutine completechi0_deltapart(ik_bz,qzero,symchi,npwe,npwvec,nomega,nspinor,
      do ig=igstart,npwe
 
       ! Get the index of G1-G2.
-      gmg_sph = gsph_gmg_idx(Gsph_FFT,ig,igp)
+      gmg_sph = Gsph_FFT%gmg_idx(ig,igp)
       if (gmg_sph==0) then
         outofbox_wfn=outofbox_wfn+1; CYCLE
       end if

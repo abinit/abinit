@@ -27,7 +27,7 @@
 
 #include "abi_common.h"
 
-MODULE m_vcoul
+module m_vcoul
 
  use defs_basis
  use m_abicore
@@ -468,7 +468,7 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
          qpg2 = normv(qpg, gmet, 'G')**2
          nmc = adapt_nmc(nmc_max,qpg2)
          do imc=1,nmc
-           qpg(:) =  Vcp%qlwl(:,iq_ibz) + gvec(:,ig) + qran(:,imc)
+           qpg(:) = Vcp%qlwl(:,iq_ibz) + gvec(:,ig) + qran(:,imc)
            qpg2 = normv(qpg, gmet, 'G')**2
            vcoul_lwl(ig,iq_ibz) = vcoul_lwl(ig,iq_ibz) + four_pi / qpg2 / REAL(nmc,dp) &
                   * (  one - EXP( -0.25d0 * rcut2 * qpg2 ) )
@@ -1652,5 +1652,5 @@ function int_I0ln(xx) result(res)
 
 end function int_I0ln
 
-END MODULE m_vcoul
+end module m_vcoul
 !!***

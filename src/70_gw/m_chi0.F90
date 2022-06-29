@@ -46,7 +46,7 @@ module m_chi0
  use m_ebands,          only : pack_eneocc, unpack_eneocc, ebands_has_metal_scheme
  use m_bz_mesh,         only : kmesh_t, kmesh_init, kmesh_free, get_BZ_item, get_BZ_diff, &
 &                              littlegroup_t, littlegroup_print, littlegroup_free, littlegroup_init
- use m_gsphere,         only : gsphere_t, gsph_fft_tabs, gsph_in_fftbox, gsph_free, print_gsphere
+ use m_gsphere,         only : gsphere_t
  use m_io_tools,        only : flush_unit
  use m_oscillators,     only : rho_tw_g, calc_wfwfg
  use m_vkbr,            only : vkbr_t, vkbr_free, vkbr_init, nc_ihr_comm
@@ -330,14 +330,14 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
    ABI_MALLOC(wfwfg,(nfft*nspinor**2))
 
    ! Init the largest G-sphere contained in the FFT box for the wavefunctions.
-   call gsph_in_fftbox(Gsph_FFT,Cryst,Wfd%ngfft)
-   call print_gsphere(Gsph_FFT,unit=std_out,prtvol=10)
+   call Gsph_FFT%in_fftbox(Cryst,Wfd%ngfft)
+   call Gsph_FFT%print(unit=std_out, prtvol=10)
 
    ABI_MALLOC(gspfft_igfft,(Gsph_FFT%ng))
    ABI_MALLOC(dummy_gbound,(2*gw_mgfft+8,2))
 
    ! Mapping between G-sphere and FFT box.
-   call gsph_fft_tabs(Gsph_FFT, [0, 0, 0],Wfd%mgfft,Wfd%ngfft,dummy,dummy_gbound,gspfft_igfft)
+   call Gsph_FFT%fft_tabs([0, 0, 0],Wfd%mgfft,Wfd%ngfft,dummy,dummy_gbound,gspfft_igfft)
    ABI_FREE(dummy_gbound)
 
    if (Psps%usepaw==1) then
@@ -439,7 +439,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
  !  b) gw_gbound table for the zero-padded FFT performed in rhotwg.
  ABI_MALLOC(igffteps0,(Gsph_epsG0%ng))
  ABI_MALLOC(gw_gbound,(2*gw_mgfft+8,2))
- call gsph_fft_tabs(Gsph_epsG0, [0, 0, 0], gw_mgfft,ngfft_gw,use_padfft,gw_gbound,igffteps0)
+ call Gsph_epsG0%fft_tabs([0, 0, 0], gw_mgfft,ngfft_gw,use_padfft,gw_gbound,igffteps0)
  if ( ANY(gw_fftalga == [2, 4]) ) use_padfft=0 ! Pad-FFT is not coded in rho_tw_g
 #ifdef FC_IBM
  ! XLF does not deserve this optimization (problem with [v67mbpt][t03])
@@ -451,7 +451,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
  end if
  if (Dtset%pawcross==1) then
     ABI_MALLOC(gboundf,(2*mgfftf+8,2))
-   call gsph_fft_tabs(Gsph_epsG0,(/0,0,0/),mgfftf,ngfftf,use_padfftf,gboundf,igfftepsG0f)
+   call Gsph_epsG0%fft_tabs((/0,0,0/),mgfftf,ngfftf,use_padfftf,gboundf,igfftepsG0f)
    if ( ANY(gw_fftalga == (/2,4/)) ) use_padfftf=0
    if (use_padfftf==0) then
      ABI_FREE(gboundf)
@@ -1015,13 +1015,12 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
  ABI_SFREE(kkweight)
  ABI_SFREE(omegasf)
  ABI_SFREE(green_w)
-
  ABI_SFREE(sf_head)
  ABI_SFREE(sf_lwing)
  ABI_SFREE(sf_uwing)
  ABI_SFREE(gspfft_igfft)
 
- call gsph_free(Gsph_FFT)
+ call Gsph_FFT%free()
 
  if (Psps%usepaw==1) then ! deallocation for PAW.
    call pawcprj_free(Cprj1_bz )
@@ -1271,15 +1270,15 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
 
    ! Allocation of wfwfg and green_enhigh_w moved inside openmp loop
    ! Init the largest G-sphere contained in the FFT box for the wavefunctions.
-   call gsph_in_fftbox(Gsph_FFT,Cryst,Wfd%ngfft)
+   call Gsph_FFT%in_fftbox(Cryst,Wfd%ngfft)
 
-   !call print_gsphere(Gsph_FFT,unit=std_out,prtvol=10)
+   !call Gsph_FFT%print(unit=std_out,prtvol=10)
 
    ABI_MALLOC(gspfft_igfft,(Gsph_FFT%ng))
    ABI_MALLOC(dummy_gbound,(2*gw_mgfft+8,2))
 
    ! Mapping between G-sphere and FFT box.
-   call gsph_fft_tabs(Gsph_FFT,(/0,0,0/),Wfd%mgfft,Wfd%ngfft,dummy,dummy_gbound,gspfft_igfft)
+   call Gsph_FFT%fft_tabs((/0,0,0/),Wfd%mgfft,Wfd%ngfft,dummy,dummy_gbound,gspfft_igfft)
    ABI_FREE(dummy_gbound)
 
    if (Psps%usepaw==1) then  ! * Prepare the onsite contributions on the GW FFT mesh.
@@ -1522,7 +1521,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
      !  a) FFT index of G-G0.
      !  b) gw_gbound table for the zero-padded FFT performed in rhotwg.
      ABI_MALLOC(gw_gbound,(2*gw_mgfft+8,2))
-     call gsph_fft_tabs(Gsph_epsG0,g0,gw_mgfft,ngfft_gw,use_padfft,gw_gbound,igfftepsG0)
+     call Gsph_epsG0%fft_tabs(g0,gw_mgfft,ngfft_gw,use_padfft,gw_gbound,igfftepsG0)
      if ( ANY(gw_fftalga == [2, 4]) ) use_padfft=0 ! Pad-FFT is not coded in rho_tw_g
 #ifdef FC_IBM
  ! XLF does not deserve this optimization (problem with [v67mbpt][t03])
@@ -1535,7 +1534,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
 
      if (Dtset%pawcross==1) then
         ABI_MALLOC(gboundf,(2*mgfftf+8,2))
-       call gsph_fft_tabs(Gsph_epsG0,g0,mgfftf,ngfftf,use_padfftf,gboundf,igfftepsG0f)
+       call Gsph_epsG0%fft_tabs(g0,mgfftf,ngfftf,use_padfftf,gboundf,igfftepsG0f)
        if (ANY(gw_fftalga == [2, 4])) use_padfftf=0
        if (use_padfftf==0) then
          ABI_FREE(gboundf)
@@ -1917,7 +1916,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
  ABI_SFREE(omegasf)
  ABI_SFREE(gspfft_igfft)
 
- call gsph_free(Gsph_FFT)
+ call Gsph_FFT%free()
 
  ! deallocation for PAW.
  if (Psps%usepaw==1) then
@@ -2320,7 +2319,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
  ABI_MALLOC(gw_gbound,(2*gw_mgfft+8,2))
  ABI_MALLOC(igffteps0,(Gsph_epsG0%ng))
 
- call gsph_fft_tabs(Gsph_epsG0, [0, 0, 0], gw_mgfft,ngfft_gw,use_padfft,gw_gbound,igffteps0)
+ call Gsph_epsG0%fft_tabs([0, 0, 0], gw_mgfft,ngfft_gw,use_padfft,gw_gbound,igffteps0)
  if ( ANY(gw_fftalga == [2, 4]) ) use_padfft=0 ! Pad-FFT is not coded in rho_tw_g
  if (use_padfft==0) then
    ABI_FREE(gw_gbound)

@@ -62,7 +62,7 @@ module m_screening_driver
  use m_bz_mesh,       only : kmesh_t, kmesh_init, kmesh_free, littlegroup_t, littlegroup_free, littlegroup_init, &
                              get_ng0sh, kmesh_print, find_qmesh, get_BZ_item
  use m_kg,            only : getph
- use m_gsphere,       only : gsph_free, gsphere_t, gsph_init, merge_and_sort_kg, setshells
+ use m_gsphere,       only : gsphere_t, setshells
  use m_vcoul,         only : vcoul_t
  use m_qparticles,    only : rdqps, rdgw, show_QP
  use m_screening,     only : make_epsm1_driver, lwl_write, chi_t, chi_free, chi_new
@@ -1494,9 +1494,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 !=====================
  ABI_FREE(chi0_sumrule)
  ABI_FREE(chi0)
- if (allocated(rhor_kernel)) then
-   ABI_FREE(rhor_kernel)
- end if
+ ABI_SFREE(rhor_kernel)
 
  ABI_FREE(rhor)
  ABI_FREE(rhog)
@@ -1538,8 +1536,8 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  call kmesh_free(Kmesh)
  call kmesh_free(Qmesh)
  call cryst%free()
- call gsph_free(Gsph_epsG0)
- call gsph_free(Gsph_wfn)
+ call Gsph_epsG0%free()
+ call Gsph_wfn%free()
  call Vcp%free()
  call em1params_free(Ep)
  call Hdr_wfk%free()
@@ -1854,7 +1852,7 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,Dtset,Psps,Pawtab
  ! === Create structure describing the G-sphere used for chi0/espilon and Wfns ===
  ! * The cutoff is >= ecuteps to allow for umklapp
 #if 0
- call gsph_init(Gsph_wfn,Cryst,0,ecut=Dtset%ecutwfn)
+ call Gsph_wfn%init(Cryst, 0, ecut=Dtset%ecutwfn)
  Dtset%npwwfn = Gsph_wfn%ng
  Ep%npwwfn = Gsph_wfn%ng
  ierr = 0
@@ -1865,11 +1863,11 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,Dtset,Psps,Pawtab
  end do
  ABI_CHECK(ierr==0,"Wrong gvec_wfn")
 #else
- call gsph_init(Gsph_wfn,Cryst,Ep%npwvec,gvec=gvec_kss)
+ call Gsph_wfn%init(Cryst, Ep%npwvec, gvec=gvec_kss)
 #endif
 
 #if 0
- call gsph_init(Gsph_epsG0,Cryst,0,ecut=ecutepspG0)
+ call Gsph_epsG0%init(Cryst, 0, ecut=ecutepspG0)
  Ep%npwepG0 = Gsph_epsG0%ng
  ierr = 0
  do ig=1,MIN(Gsph_epsG0%ng, ng_kss)
@@ -1879,7 +1877,7 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,Dtset,Psps,Pawtab
  end do
  ABI_CHECK(ierr==0,"Wrong gvec_epsG0")
 #else
- call gsph_init(Gsph_epsG0,Cryst,Ep%npwepG0,gvec=gvec_kss)
+ call Gsph_epsG0%init(Cryst, Ep%npwepG0, gvec=gvec_kss)
 #endif
  !
  ! =======================================================================

@@ -48,7 +48,7 @@ use m_io_tools,         only : get_unit
 use m_hamiltonian,      only : gs_hamiltonian_type, copy_hamiltonian
 use m_pawcprj,          only : pawcprj_type
 use m_vcoul,            only : vcoul_t
-use m_gsphere,          only : gsphere_t, gsph_init, gsph_free, print_gsphere
+use m_gsphere,          only : gsphere_t
 use m_bz_mesh,          only : kmesh_t, kmesh_init, kmesh_free, kmesh_print, find_qmesh
 use m_fft,              only : fftpac, fourwf
 use m_getghc,           only : getghc
@@ -1475,7 +1475,7 @@ call gs_hamk%free()
 call cryst%free()
 call kmesh_free(Kmesh)
 call kmesh_free(Qmesh)
-call gsph_free(Gsphere)
+call Gsphere%free()
 call Vcp%free()
 
 call bandfft_kpt_destroy_array(bandfft_kpt,mpi_enreg)
@@ -2019,9 +2019,9 @@ if(dtset%optdriver==66) then
   call make_gvec_kss(dtset%nkpt,dtset%kptns,ecut_eff,dtset%symmorphi,dtset%nsym,dtset%symrel,dtset%tnons,Cryst%gprimd,&
   &                      dtset%prtvol,npw_serial,gvec,ierr)
 
-  call gsph_init(Gsphere,Cryst,npw_serial,gvec=gvec)
+  call Gsphere%init(Cryst,npw_serial,gvec=gvec)
 
-  call print_gsphere(Gsphere)
+  call Gsphere%print()
 
   call Vcp%init(Gsphere,Cryst,Qmesh,Kmesh,dtset%rcut,dtset%gw_icutcoul,dtset%vcutgeo,dtset%ecutsigx,npw_serial,&
                 dtset%nkpt,dtset%kptns,dtset%ngfft,mpi_enreg%comm_world)

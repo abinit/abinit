@@ -1597,9 +1597,9 @@ subroutine gwr_build_chi(gwr)
            end do
 
            do ioe=1,2
-             call gsph2scbox(sc_ngfft, desc_k%npw, gwr%nspinor * ndat1, green_scg, &
-                             gt_gpr(ioe, my_ikf)%buffer_cplx(:, my_ir), &  ! in
-                             gt_scbox(:, ioe))                             ! inout
+             call gsph2box(sc_ngfft, desc_k%npw, gwr%nspinor * ndat1, green_scg, &
+                           gt_gpr(ioe, my_ikf)%buffer_cplx(:, my_ir), &  ! in
+                           gt_scbox(:, ioe))                             ! inout
            end do
          end do ! my_ikf
 
@@ -1628,9 +1628,9 @@ subroutine gwr_build_chi(gwr)
              chi_scg(:,ig) = nint(qq_ibz * gwr%ngqpt) + gwr%ngqpt * desc_q%gvec(:,ig)
            end do
 
-           call scbox2gsph(sc_ngfft, desc_q%npw, gwr%nspinor * ndat1, chi_scg, &
-                           chit_scbox, &                            ! in
-                           chiq_gpr(my_iqi)%buffer_cplx(:, my_ir))  ! out
+           call box2gsph(sc_ngfft, desc_q%npw, gwr%nspinor * ndat1, chi_scg, &
+                         chit_scbox, &                            ! in
+                         chiq_gpr(my_iqi)%buffer_cplx(:, my_ir))  ! out
          end do ! my_iqi
        end do ! my_ir
 
@@ -2150,9 +2150,9 @@ end subroutine gwr_run_g0w0
 
 !----------------------------------------------------------------------
 
-!!****f* m_gwr/gsph2scbox
+!!****f* m_gwr/gsph2box
 !! NAME
-!! gsph2scbox
+!! gsph2box
 !!
 !! FUNCTION
 !! Insert cg_k array defined on the k-centered g-sphere with npw points inside supercell FFT box.
@@ -2176,7 +2176,7 @@ end subroutine gwr_run_g0w0
 !!
 !! SOURCE
 
-subroutine gsph2scbox(ngfft, npw, ndat, kg_k, cg, cfft)
+subroutine gsph2box(ngfft, npw, ndat, kg_k, cg, cfft)
 
 !Arguments ------------------------------------
 !scalars
@@ -2206,14 +2206,14 @@ subroutine gsph2scbox(ngfft, npw, ndat, kg_k, cg, cfft)
    end do
  end do
 
-end subroutine gsph2scbox
+end subroutine gsph2box
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_gwr/scbox2gsph
+!!****f* m_gwr/box2gsph
 !! NAME
-!! scbox2gsph
+!! box2gsph
 !!
 !! FUNCTION
 !! Extract cg_k array defined on the k-centered g-sphere with npw points from the supercell FFT box.
@@ -2236,7 +2236,7 @@ end subroutine gsph2scbox
 !!
 !! SOURCE
 
-subroutine scbox2gsph(ngfft, npw, ndat, kg_k, cfft, cg)
+subroutine box2gsph(ngfft, npw, ndat, kg_k, cfft, cg)
 
 !Arguments ------------------------------------
 !scalars
@@ -2268,7 +2268,7 @@ subroutine scbox2gsph(ngfft, npw, ndat, kg_k, cfft, cg)
    end do
  end do
 
-end subroutine scbox2gsph
+end subroutine box2gsph
 !!***
 
 end module m_gwr
