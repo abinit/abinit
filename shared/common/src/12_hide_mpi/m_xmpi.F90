@@ -26,7 +26,7 @@
 
 #include "abi_common.h"
 
-MODULE m_xmpi
+module m_xmpi
 
  use defs_basis
  use m_profiling_abi
@@ -210,6 +210,7 @@ MODULE m_xmpi
  public :: xmpi_split_list            ! Splits list of indices inside communicator using block distribution.
  public :: xmpi_distab                ! Fill table defining the distribution of the tasks according to the # of processors
  public :: xmpi_distrib_with_replicas ! Distribute tasks among MPI ranks (replicas are allowed)
+ public :: xmpi_distrib_2d            ! Try to optimally distribute nprocs in a 2d grid of shape (n1, n2)
 
 ! Private procedures.
  private :: xmpi_largetype_create      ! Build a large-count contiguous datatype (to handle a very large # of data)
@@ -5035,6 +5036,110 @@ end subroutine xmpio_create_coldistr_from_fp3blocks
 !!***
 #endif
 
+!!****f* m_xmpi/xmpi_distrib_2d
+!! NAME
+!! xmpi_distrib_2d
+!!
+!! FUNCTION
+!!  Try to optimally distribute nprocs in a 2d grid of shape (n1, n2)
+!!  given a problem of dimension (n1, n2).
+!!  Use order string to define priorities:
+!!      "12" or "21" if both dimensions should be optimized (if not possibile the first one gets optimized)
+!!      "1" or "2" to optimize only one dimension.
+!!  Return: exit status in ierr.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine xmpi_distrib_2d(nprocs, order, size1, size2, n1, n2, ierr)
+
+!Arguments ------------------------------------
+ integer,intent(in) :: nprocs, size1, size2
+ character(len=*),intent(in) :: order
+ integer,intent(out) :: n1, n2, ierr
+
+!Local variables-------------------------------
+ integer :: ii
+
+!----------------------------------------------------------------------
+
+ ierr = 1; n1 = -1; n2 = -1
+
+ select case (order)
+ case ("12")
+   call balance_12()
+   if (ierr /= 0) call balance_1()
+ case ("21")
+   call balance_21()
+   if (ierr /= 0) call balance_2()
+ case ("1")
+   call balance_1()
+ case ("2")
+   call balance_2()
+ case default
+   ! Wrong order
+   ierr = -1
+ end select
+
+contains
+
+subroutine balance_12()
+ ! Try to find n1 x n2 = nprocs so that (size1, size2) are multiple of (n1, n2)
+ do ii=nprocs,1,-1
+   if (mod(size1, ii) == 0 .and. mod(nprocs, ii) == 0 .and. mod(size2, nprocs / ii) == 0) then
+     n1 = ii; n2 = nprocs / ii; ierr = 0; exit
+   end if
+ end do
+
+end subroutine balance_12
+
+subroutine balance_21()
+ ! Try to find n1 x n2 = nprocs so that (size1, size2) are multiple of (n1, n2)
+ do ii=nprocs,1,-1
+   if (mod(size2, ii) == 0 .and. mod(nprocs, ii) == 0 .and. mod(size1, nprocs / ii) == 0) then
+     n2 = ii; n1 = nprocs / ii; ierr = 0; exit
+   end if
+ end do
+end subroutine balance_21
+
+subroutine balance_1()
+ integer :: imod1
+ ! Try to find n1 x n2 = nprocs so that only size1 is multiple of n1
+ ! Allow for some load imbalance.
+ do ii=nprocs,1,-1
+   imod1 = mod(size1, ii)
+   if ((imod1 == 0 .or. imod1 >= nprocs / 2) .and. mod(nprocs, ii) == 0) then
+     n1 = ii; n2 = nprocs / ii; ierr = 0; exit
+   end if
+ end do
+
+ if (ierr /= 0 .and. nprocs <= size1) then
+   n1 = nprocs; n2 = 1; ierr = 0; return
+ end if
+end subroutine balance_1
+
+subroutine balance_2()
+ integer :: imod2
+ ! Try to find n1 x n2 = nprocs so that only size2 is multiple of n2
+ ! Allow for some load imbalance.
+ do ii=nprocs,1,-1
+   imod2 = mod(size2, ii)
+   if ((imod2 == 0 .or. imod2 >= nprocs / 2) .and. mod(nprocs, ii) == 0) then
+     n2 = ii; n1 = nprocs / ii; ierr = 0; exit
+   end if
+ end do
+
+ if (ierr /= 0 .and. nprocs <= size2) then
+   n2 = nprocs; n1 = 1; ierr = 0; return
+ end if
+end subroutine balance_2
+
+end subroutine xmpi_distrib_2d
+!!***
+
 type(xcomm_t) function xcomm_from_mpi_int(comm_int) result(new)
    integer,intent(in) :: comm_int
    integer :: newcomm, ierr
@@ -5069,5 +5174,5 @@ end function xcomm_from_mpi_int
    self%me = -1; self%nproc = 0
  end subroutine xcomm_free
 
-END MODULE m_xmpi
+end module m_xmpi
 !!***
