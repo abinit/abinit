@@ -46,7 +46,7 @@ module m_exc_build
  use m_hide_blas,    only : xdotc, xgemv
  use m_geometry,     only : normv
  use m_crystal,      only : crystal_t
- use m_gsphere,      only : gsphere_t, gsph_fft_tabs
+ use m_gsphere,      only : gsphere_t
  use m_vcoul,        only : vcoul_t
  use m_bz_mesh,      only : kmesh_t, get_BZ_item, get_BZ_diff, has_BZ_item, isamek, findqg0
  use m_pawpwij,      only : pawpwff_t, pawpwij_t, pawpwij_init, pawpwij_free, paw_rho_tw_g
@@ -300,7 +300,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
  ABI_MALLOC(rhxtwg_cpc,(npweps))
 
  if (BSp%prep_interp) then
-   call wrtout(std_out,"Preparing BSE interpolation","COLL")
+   call wrtout(std_out,"Preparing BSE interpolation")
    ABI_MALLOC(aa_vpv,(npweps))
    ABI_MALLOC(bb_vpv1,(npweps))
    ABI_MALLOC(bb_vpv2,(npweps))
@@ -393,8 +393,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
 &      ". Writing coupling excitonic Hamiltonian on file "//TRIM(fname),"; file size= ",two*dpc*tot_nels*b2Gb," [Gb]."
    end if
  end if
- call wrtout(std_out,msg,"COLL",do_flush=.True.)
- call wrtout(ab_out,msg,"COLL",do_flush=.True.)
+ call wrtout([std_out, ab_out], msg, do_flush=.True.)
  !
  ! Master writes the BSE header with Fortran IO.
  if (my_rank==master) then
@@ -571,7 +570,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
    else
      write(msg,'(a,f8.1,a)')' Calculating coupling blocks. Memory required: ',bsize_my_block*b2Mb,' [Mb] <<< MEM'
    end if
-   call wrtout(std_out,msg,"COLL")
+   call wrtout(std_out, msg)
 
    ! Allocate big (scalable) buffer to store the BS matrix on this node.
    ABI_MALLOC_OR_DIE(my_bsham,(t_start(my_rank):t_stop(my_rank)), ierr)
@@ -579,9 +578,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
    if (BSp%prep_interp) then
      ! Allocate big (scalable) buffers to store a,b,c coeffients
      ABI_MALLOC_OR_DIE(acoeffs,(t_start (my_rank):t_stop(my_rank)), ierr)
-
      ABI_MALLOC_OR_DIE(bcoeffs,(t_start(my_rank):t_stop(my_rank)), ierr)
-
      ABI_MALLOC_OR_DIE(ccoeffs,(t_start(my_rank):t_stop(my_rank)), ierr)
    end if
 
@@ -594,7 +591,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
         write(msg,'(a,2i2,a)')&
 &        " Calculating direct Coulomb term for (spin1, spin2) ",spin1,spin2," using diagonal approximation for W_{GG'} ..."
      end if
-     call wrtout(std_out,msg,"COLL")
+     call wrtout(std_out, msg)
 
      ABI_MALLOC(ctccp,(npweps))
 
@@ -657,7 +654,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
          ! * Get the G-G0 shift for the FFT of the oscillators.
          !
          ABI_MALLOC(gbound,(2*mgfft_osc+8,2))
-         call gsph_fft_tabs(Gsph_c,g0,mgfft_osc,ngfft_osc,use_padfft,gbound,igfftg0)
+         call Gsph_c%fft_tabs(g0,mgfft_osc,ngfft_osc,use_padfft,gbound,igfftg0)
 #ifdef FC_IBM
  ! XLF does not deserve this optimization (problem with [v67mbpt][t03])
  use_padfft = 0
@@ -985,7 +982,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
      end if
 
      ABI_FREE(vc_sqrt_qbz)
-     call wrtout(std_out,' Coulomb term completed',"COLL")
+     call wrtout(std_out,' Coulomb term completed')
 
      call timab(682,2,tsec) ! exc_build_ham(Coulomb)
    end if ! do_coulomb_term
@@ -1003,7 +1000,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
      call timab(683,1,tsec) ! exc_build_ham(exchange)
 
      write(msg,'(a,2i2,a)')" Calculating exchange term for (spin1,spin2) ",spin1,spin2," ..."
-     call wrtout(std_out,msg,"COLL")
+     call wrtout(std_out, msg)
 
      ABI_MALLOC(rhotwg1,(npweps))
      ABI_MALLOC(rhotwg2,(npweps))
@@ -1089,7 +1086,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
    ! =====================
    if (is_resonant .and. spin1==spin2) then
      write(msg,'(a,2i2,a)')" Adding diagonal term for (spin1,spin2) ",spin1,spin2," ..."
-     call wrtout(std_out,msg,"COLL")
+     call wrtout(std_out, msg)
      do it=1,BSp%nreh(block)
        ir = it + it*(it-1_i8b)/2
        if (ir>=t_start(my_rank) .and. ir<=t_stop(my_rank)) my_bsham(ir) = my_bsham(ir) + Bsp%Trans(it,spin1)%en
@@ -1386,7 +1383,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
 
      call cwtime(cputime,walltime,gflops,"stop")
      write(msg,'(2(a,f9.1),a)')" Fortran-IO completed. cpu_time: ",cputime,"[s], walltime: ",walltime," [s]"
-     call wrtout(std_out,msg,"COLL",do_flush=.True.)
+     call wrtout(std_out, msg, do_flush=.True.)
    end if ! use_mpiio
    call timab(685,2,tsec) ! exc_build_ham(write_ham)
    !
@@ -1442,7 +1439,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
    if (do_exchange_term) then
      spin1=1; spin2=2
      write(msg,'(a,2i2,a)')" Calculating exchange term for (spin1,spin2) ",spin1,spin2," ..."
-     call wrtout(std_out,msg,"COLL")
+     call wrtout(std_out, msg)
 
      ABI_MALLOC(rhotwg1,(npweps))
      ABI_MALLOC(rhotwg2,(npweps))
@@ -1787,7 +1784,7 @@ subroutine exc_build_v(spin1,spin2,nsppol,npweps,Bsp,Cryst,Kmesh,Qmesh,Gsph_x,Gs
  DBG_ENTER("COLL")
 
  write(msg,'(a,2i2,a)')" Calculating exchange term for (spin1,spin2) ",spin1,spin2," ..."
- call wrtout(std_out,msg,"COLL")
+ call wrtout(std_out, msg)
 
  ! Basic constants.
  dim_rtwg=1; faq = one/(Cryst%ucvol*Kmesh%nbz)
@@ -2169,19 +2166,19 @@ subroutine exc_build_ham(BSp,BS_files,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,
 
  if (BSp%use_coupling == 0) then
    if (.not.do_resonant) then
-     call wrtout(std_out,"Will skip the calculation of resonant block (will use BSR file)","COLL")
+     call wrtout(std_out,"Will skip the calculation of resonant block (will use BSR file)")
      goto 100
    end if
  else
    if (.not. do_resonant .and. .not. do_coupling) then
-     call wrtout(std_out,"Will skip the calculation of both resonant and coupling block (will use BSR and BSC files)","COLL")
+     call wrtout(std_out,"Will skip the calculation of both resonant and coupling block (will use BSR and BSC files)")
      goto 100
    end if
  end if
 
  ! Compute M_{k,q=0}^{b,b}(G) for all k-points in the IBZ and each pair b, b'
  ! used for the exchange part and part of the Coulomb term.
- call wrtout(std_out," Calculating all matrix elements for q=0 to save CPU time","COLL")
+ call wrtout(std_out," Calculating all matrix elements for q=0 to save CPU time")
 
  call wfd_all_mgq0(Wfd,Cryst,Qmesh,Gsph_x,Vcp,Psps,Pawtab,Paw_pwff,&
 &  Bsp%lomo_spin,Bsp%homo_spin,Bsp%humo_spin,nfftot_osc,ngfft_osc,Bsp%npweps,all_mgq0)
@@ -2354,7 +2351,7 @@ subroutine wfd_all_mgq0(Wfd,Cryst,Qmesh,Gsph_x,Vcp,&
  !  b) gbound table for the zero-padded FFT performed in rhotwg.
  ABI_MALLOC(igfftg0,(Gsph_x%ng))
  ABI_MALLOC(gbound,(2*mgfft_osc+8,2))
- call gsph_fft_tabs(Gsph_x,(/0,0,0/),mgfft_osc,ngfft_osc,use_padfft,gbound,igfftg0)
+ call Gsph_x%fft_tabs((/0,0,0/),mgfft_osc,ngfft_osc,use_padfft,gbound,igfftg0)
  if ( ANY(fftalga_osc == (/2,4/)) ) use_padfft=0 ! Pad-FFT is not coded in rho_tw_g
 #ifdef FC_IBM
  ! XLF does not deserve this optimization (problem with [v67mbpt][t03])

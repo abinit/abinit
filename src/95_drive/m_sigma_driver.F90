@@ -68,7 +68,7 @@ module m_sigma_driver
  use m_bz_mesh,       only : kmesh_t, kmesh_free, littlegroup_t, littlegroup_init, littlegroup_free, &
                              kmesh_init, has_BZ_item, isamek, get_ng0sh, kmesh_print, &
                              get_bz_item, has_IBZ_item, find_qmesh
- use m_gsphere,       only : gsphere_t, gsph_init, gsph_free, merge_and_sort_kg, gsph_extend, setshells
+ use m_gsphere,       only : gsphere_t, merge_and_sort_kg, setshells
  use m_kg,            only : getph, getcut
  use m_xcdata,        only : get_xclevel
  use m_wfd,           only : wfd_init, wfdgw_t, wfdgw_copy, test_charge, wave_t
@@ -2971,9 +2971,9 @@ endif
  ABI_FREE(Ltg_k)
  call kmesh_free(Kmesh)
  call kmesh_free(Qmesh)
- call gsph_free(Gsph_Max)
- call gsph_free(Gsph_x)
- call gsph_free(Gsph_c)
+ call Gsph_Max%free()
+ call Gsph_x%free()
+ call Gsph_c%free()
  call Vcp%free()
  call cryst%free()
  call sigma_free(Sr)
@@ -3757,14 +3757,14 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  Sigp%mG0=ng0sh_opt
 
 ! G-sphere for W and Sigma_c is initialized from the SCR file.
- call gsph_init(Gsph_c,Cryst,Er%npwe,gvec=Er%gvec)
- call gsph_init(Gsph_x,Cryst,Sigp%npwx,gvec=gvec_kss)
+ call Gsph_c%init(Cryst, Er%npwe, gvec=Er%gvec)
+ call Gsph_x%init(Cryst, Sigp%npwx, gvec=gvec_kss)
  Sigp%ecuteps = Gsph_c%ecut
  Dtset%ecuteps = Sigp%ecuteps
 
 ! === Make biggest G-sphere of Sigp%npwvec vectors ===
  Sigp%npwvec=MAX(Sigp%npwwfn,Sigp%npwx)
- call gsph_init(Gsph_Max,Cryst,Sigp%npwvec,gvec=gvec_kss)
+ call Gsph_Max%init(Cryst, Sigp%npwvec, gvec=gvec_kss)
 !BEGINDEBUG
  ! Make sure that the two G-spheres are equivalent.
  ierr=0

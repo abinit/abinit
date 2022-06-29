@@ -44,7 +44,7 @@ MODULE m_prep_calc_ucrpa
  use m_crystal,       only : crystal_t
  use m_fft_mesh,      only : rotate_FFT_mesh
  use m_bz_mesh,       only : kmesh_t, get_BZ_item, findqg0, has_IBZ_item
- use m_gsphere,       only : gsphere_t, gsph_fft_tabs
+ use m_gsphere,       only : gsphere_t
  use m_io_tools,      only : flush_unit, open_file
  use m_vcoul,         only : vcoul_t
  use m_pawpwij,       only : pawpwff_t, pawpwij_t, pawpwij_init, pawpwij_free, paw_rho_tw_g, paw_cross_rho_tw_g
@@ -641,7 +641,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
      ! Tables for the FFT of the oscillators.
      !  a) FFT index of the G-G0.
      ABI_MALLOC(gwx_gbound,(2*gwx_mgfft+8,2))
-     call gsph_fft_tabs(Gsph_x,g0,gwx_mgfft,gwx_ngfft,use_padfft,gwx_gbound,igfftxg0)
+     call Gsph_x%fft_tabs(g0,gwx_mgfft,gwx_ngfft,use_padfft,gwx_gbound,igfftxg0)
 
      if ( ANY(gwx_fftalga == (/2,4/)) ) use_padfft=0 ! Pad-FFT is not coded in rho_tw_g
 #ifdef FC_IBM
@@ -656,7 +656,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
      if (pawcross==1) then
        ABI_MALLOC(gboundf,(2*mgfftf+8,2))
        ABI_MALLOC(igfftfxg0,(Gsph_x%ng))
-       call gsph_fft_tabs(Gsph_x,g0,mgfftf,ngfftf,use_padfftf,gboundf,igfftfxg0)
+       call Gsph_x%fft_tabs(g0,mgfftf,ngfftf,use_padfftf,gboundf,igfftfxg0)
        if ( ANY(gwx_fftalga == (/2,4/)) ) use_padfftf=0
        if (use_padfftf==0) then
          ABI_FREE(gboundf)

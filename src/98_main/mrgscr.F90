@@ -75,7 +75,7 @@ program mrgscr
  use m_numeric_tools,       only : iseven, cspint
  use m_mpinfo,              only : destroy_mpi_enreg, initmpi_seq
  use m_geometry,            only : normv, metric
- use m_gsphere,             only : gsph_init, gsph_free, gsphere_t
+ use m_gsphere,             only : gsphere_t
  use m_bz_mesh,             only : kmesh_t, find_qmesh, kmesh_init, kmesh_print, kmesh_free
  use m_vcoul,               only : vcoul_t
  use m_ioarr,               only : read_rhor
@@ -364,7 +364,7 @@ program mrgscr
      write(std_out,'(a)') ' 2 => Extraction of file contents'
 
      ! Initialize the G-sphere.
-     call gsph_init(Gsphere,Cryst,Hscr0%npwe,gvec=Hscr0%gvec)
+     call Gsphere%init(Cryst,Hscr0%npwe,gvec=Hscr0%gvec)
 
      ABI_MALLOC_OR_DIE(epsm1,(Hscr0%npwe,Hscr0%npwe,Hscr0%nomega,1), ierr)
 
@@ -594,7 +594,7 @@ program mrgscr
      end do !iqibz
 
      ABI_FREE(epsm1)
-     call gsph_free(Gsphere)
+     call Gsphere%free()
 
    case(3)
        ! Extract dielectric function and plasmon-pole stuff --------------------------
@@ -605,7 +605,7 @@ program mrgscr
      call init_Er_from_file(Er,fname,mqmem,npwe_asked,comm)
 
      ! Initialize the G-sphere ===
-     call gsph_init(Gsphere,Cryst,Hscr0%npwe,gvec=Hscr0%gvec)
+     call Gsphere%init(Cryst,Hscr0%npwe,gvec=Hscr0%gvec)
 
      boxcutmin=two; igmax=Gsphere%shlim(Gsphere%nsh)
      ecut=Er%Hscr%Hdr%ecutdg
@@ -1105,7 +1105,7 @@ program mrgscr
 
      call Vcp%free()
      call em1results_free(Er)
-     call gsph_free(Gsphere)
+     call Gsphere%free()
 
    case(4)
      ! Remove real frequencies ----------------------------------------------------------

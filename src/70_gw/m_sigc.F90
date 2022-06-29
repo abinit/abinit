@@ -39,7 +39,7 @@ module m_sigc
  use m_geometry,      only : normv
  use m_crystal,       only : crystal_t
  use m_bz_mesh,       only : kmesh_t, get_BZ_item, findqg0, littlegroup_t, littlegroup_print
- use m_gsphere,       only : gsphere_t, gsph_fft_tabs
+ use m_gsphere,       only : gsphere_t
  use m_fft_mesh,      only : get_gftt, rotate_fft_mesh, cigfft
  use m_vcoul,         only : vcoul_t
  use m_wfd,           only : wfdgw_t, wave_t
@@ -692,7 +692,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
      !  a) FFT index of the G-G0.
      !  b) gw_gbound table for the zero-padded FFT performed in rhotwg.
      ABI_MALLOC(gw_gbound,(2*gwc_mgfft+8,2))
-     call gsph_fft_tabs(Gsph_c,g0,gwc_mgfft,gwc_ngfft,use_padfft,gw_gbound,igfftcg0)
+     call Gsph_c%fft_tabs(g0,gwc_mgfft,gwc_ngfft,use_padfft,gw_gbound,igfftcg0)
 
      if (ANY(gwc_fftalga == [2, 4])) use_padfft=0 ! Pad-FFT is not coded in rho_tw_g
 #ifdef FC_IBM
@@ -706,7 +706,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 
      if (Dtset%pawcross==1) then
        ABI_MALLOC(gboundf,(2*mgfftf+8,2))
-       call gsph_fft_tabs(Gsph_c,g0,mgfftf,rho_ngfft,use_padfftf,gboundf,igfftfcg0)
+       call Gsph_c%fft_tabs(g0,mgfftf,rho_ngfft,use_padfftf,gboundf,igfftfcg0)
        if ( ANY(gwc_fftalga == (/2,4/)) ) use_padfftf=0
        if (use_padfftf==0) then
          ABI_FREE(gboundf)

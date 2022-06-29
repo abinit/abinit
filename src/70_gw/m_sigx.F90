@@ -40,7 +40,7 @@ module m_sigx
  use m_crystal,       only : crystal_t
  use m_fft_mesh,      only : rotate_FFT_mesh, cigfft
  use m_bz_mesh,       only : kmesh_t, get_BZ_item, findqg0, littlegroup_t, littlegroup_print
- use m_gsphere,       only : gsphere_t, gsph_fft_tabs
+ use m_gsphere,       only : gsphere_t
  use m_vcoul,         only : vcoul_t
  use m_pawpwij,       only : pawpwff_t, pawpwij_t, pawpwij_init, pawpwij_free, paw_rho_tw_g, paw_cross_rho_tw_g
  use m_paw_pwaves_lmn,only : paw_pwaves_lmn_t
@@ -493,7 +493,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
      !  a) FFT index of the G-G0.
      !  b) gwx_gbound table for the zero-padded FFT performed in rhotwg.
      ABI_MALLOC(gwx_gbound,(2*gwx_mgfft+8,2))
-     call gsph_fft_tabs(Gsph_x,g0,gwx_mgfft,gwx_ngfft,use_padfft,gwx_gbound,igfftxg0)
+     call Gsph_x%fft_tabs(g0,gwx_mgfft,gwx_ngfft,use_padfft,gwx_gbound,igfftxg0)
 
      if (ANY(gwx_fftalga == [2, 4])) use_padfft=0 ! Pad-FFT is not coded in rho_tw_g
      !use_padfft=0
@@ -509,7 +509,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
      if (pawcross==1) then
        ABI_MALLOC(gboundf,(2*mgfftf+8,2))
        ABI_MALLOC(igfftfxg0,(Gsph_x%ng))
-       call gsph_fft_tabs(Gsph_x,g0,mgfftf,ngfftf,use_padfftf,gboundf,igfftfxg0)
+       call Gsph_x%fft_tabs(g0,mgfftf,ngfftf,use_padfftf,gboundf,igfftfxg0)
        if ( ANY(gwx_fftalga == [2, 4]) ) use_padfftf=0
        if (use_padfftf==0) then
          ABI_FREE(gboundf)

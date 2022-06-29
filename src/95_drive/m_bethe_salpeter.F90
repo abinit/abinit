@@ -62,7 +62,7 @@ module m_bethe_salpeter
  use m_ebands,          only : ebands_init, ebands_print, ebands_copy, ebands_free, &
                                ebands_update_occ, ebands_get_valence_idx, ebands_apply_scissors, ebands_report_gap
  use m_kg,              only : getph
- use m_gsphere,         only : gsphere_t, gsph_free, gsph_init, print_gsphere, gsph_extend
+ use m_gsphere,         only : gsphere_t
  use m_vcoul,           only : vcoul_t
  use m_qparticles,      only : rdqps, rdgw  !, show_QP , rdgw
  use m_wfd,             only : wfd_init, wfdgw_t, test_charge
@@ -977,8 +977,8 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  ! Free local data structures.
  call destroy_mpi_enreg(MPI_enreg_seq)
  call cryst%free()
- call gsph_free(Gsph_x)
- call gsph_free(Gsph_c)
+ call Gsph_x%free()
+ call Gsph_c%free()
  call kmesh_free(Kmesh)
  call kmesh_free(Qmesh)
  call Hdr_wfk%free()
@@ -997,8 +997,8 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  if (BSp%use_interp) then
    call double_grid_free(grid)
    call wfd_dense%free()
-   call gsph_free(Gsph_x_dense)
-   call gsph_free(Gsph_c_dense)
+   call Gsph_x_dense%free()
+   call Gsph_c_dense%free()
    call kmesh_free(Kmesh_dense)
    call kmesh_free(Qmesh_dense)
    call ebands_free(KS_BSt_dense)
@@ -1231,7 +1231,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
    call kmesh_init(Qmesh,Cryst,Hscr%nqibz,Hscr%qibz,Dtset%kptopt)
 
    ! The G-sphere for W and Sigma_c is initialized from the gvectors found in the SCR file.
-   call gsph_init(Gsph_c,Cryst,Dtset%npweps,gvec=Hscr%gvec)
+   call Gsph_c%init(Cryst, Dtset%npweps, gvec=Hscr%gvec)
 
    call hscr_free(Hscr)
  else
@@ -1239,7 +1239,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
    call find_qmesh(Qmesh,Cryst,Kmesh)
 
    ! The G-sphere for W and Sigma_c is initialized from ecuteps.
-   call gsph_init(Gsph_c,Cryst,0,ecut=Dtset%ecuteps)
+   call Gsph_c%init(Cryst, 0, ecut=Dtset%ecuteps)
    Dtset%npweps = Gsph_c%ng
  end if
 
@@ -1498,8 +1498,8 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
 !TODO add new dim for exchange part and consider the possibility of having npwsigx > npwwfn (see setup_sigma).
 
  ! === Build enlarged G-sphere for the exchange part ===
- call gsph_extend(Gsph_c,Cryst,Dtset%ecutwfn,Gsph_x)
- call print_gsphere(Gsph_x,unit=std_out,prtvol=Dtset%prtvol)
+ call Gsph_c%extend(Cryst, Dtset%ecutwfn, Gsph_x)
+ call Gsph_x%print(unit=std_out,prtvol=Dtset%prtvol)
 
  ! NPWVEC as the biggest between npweps and npwwfn. MG RECHECK this part.
  !BSp%npwwfn = Dtset%npwwfn
@@ -2117,7 +2117,7 @@ subroutine setup_bse_interp(Dtset,Dtfil,BSp,Cryst,Kmesh,&
  ! Init Qmesh
  call find_qmesh(Qmesh_dense,Cryst,Kmesh_dense)
 
- call gsph_init(Gsph_c,Cryst,0,ecut=Dtset%ecuteps)
+ call Gsph_c%init(Cryst, 0, ecut=Dtset%ecuteps)
 
  call double_grid_init(Kmesh,Kmesh_dense,Dtset%kptrlatt,BSp%interp_kmult,grid)
 
@@ -2141,8 +2141,8 @@ subroutine setup_bse_interp(Dtset,Dtfil,BSp,Cryst,Kmesh,&
    end do
  end do
 
- call gsph_extend(Gsph_c,Cryst,Dtset%ecutwfn,Gsph_x)
- call print_gsphere(Gsph_x,unit=std_out,prtvol=Dtset%prtvol)
+ call Gsph_c%extend(Cryst, Dtset%ecutwfn, Gsph_x)
+ call Gsph_x%print(unit=std_out,prtvol=Dtset%prtvol)
 
  nqlwl=1
  ABI_MALLOC(qlwl,(3,nqlwl))
