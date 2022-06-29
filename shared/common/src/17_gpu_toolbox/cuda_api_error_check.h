@@ -38,6 +38,11 @@
 #include <cuda.h>
 #include <string>
 #include <stdio.h> // for fflush
+#include <cassert>
+
+#ifndef assertm
+#define assertm(exp, msg) assert(((void)msg, exp))
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -62,12 +67,12 @@ extern "C" {
 #endif
 
 
-/* 
+/*
  * If symbol ALWAYS_SYNC_GPU is defined in your build system
  * then we will always call cudaDeviceSynchronize, before checking
  * last error from a cuda kernel call.
  *
- * It may help in case of debugging to define ALWAYS_SYNC_GPU, but for a 
+ * It may help in case of debugging to define ALWAYS_SYNC_GPU, but for a
  * regular run, it should remains to 0.
  *
  * Note: you can also enforce syncing CPU/GPU by set environment variable CUDA_LAUNCH_BLOCKING to 1
@@ -143,10 +148,10 @@ static const char *_cudaGetErrorEnum(cufftResult error) {
   switch (error) {
     case CUFFT_SUCCESS:
       return "CUFFT_SUCCESS";
-  
+
     case CUFFT_INVALID_PLAN:
       return "CUFFT_INVALID_PLAN";
-  
+
     case CUFFT_ALLOC_FAILED:
       return "CUFFT_ALLOC_FAILED";
 
@@ -185,14 +190,14 @@ static const char *_cudaGetErrorEnum(cufftResult error) {
 
     case CUFFT_NOT_IMPLEMENTED:
       return "CUFFT_NOT_IMPLEMENTED";
-  
+
     case CUFFT_LICENSE_ERROR:
       return "CUFFT_LICENSE_ERROR";
 
     case CUFFT_NOT_SUPPORTED:
       return "CUFFT_NOT_SUPPORTED";
   }
-  
+
   return "<unknown>";
 }
 #endif
@@ -375,7 +380,7 @@ inline void __printLastCudaError(const char *errorMessage, const char *file,
 
 
 /**
- * enum used below; can be used as the second argument of macro 
+ * enum used below; can be used as the second argument of macro
  * CUDA_KERNEL_CHECK
  */
 enum device_sync_t {
@@ -403,7 +408,7 @@ enum device_sync_t {
 #define CUDA_KERNEL_CHECK(...) GET_KERNEL_CHECK_MACRO(__VA_ARGS__, CUDA_KERNEL_CHECK2, CUDA_KERNEL_CHECK1)(__VA_ARGS__)
 
 /**
- * Preprocessor macro helping to retrieve the exact code 
+ * Preprocessor macro helping to retrieve the exact code
  * location where the error was emitted.
  *
  * Default behavior, don't synchronize device
@@ -443,7 +448,7 @@ static void cuda_kernel_check(const char* errstr,
             " %s : (%d) %s.\n",
             file, line, errstr, static_cast<int>(status),
             cudaGetErrorString(status));
-    
+
     //cudaDeviceReset();
     //exit(EXIT_FAILURE);
   }
@@ -453,7 +458,7 @@ static void cuda_kernel_check(const char* errstr,
 inline const char* _ConvertSMVer2ArchName(int major, int minor) {
   // Defines for GPU Architecture types (using the SM version to determine
   // the GPU Arch name)
-  typedef struct { 
+  typedef struct {
     int SM;  // 0xMm (hexidecimal notation), M = SM Major version,
     // and m = SM minor version
     const char* name;
@@ -486,7 +491,7 @@ inline const char* _ConvertSMVer2ArchName(int major, int minor) {
 
     index++;
   }
-  
+
   // If we don't find the values, we default use the previous one
   // to run properly
   printf(
@@ -494,7 +499,7 @@ inline const char* _ConvertSMVer2ArchName(int major, int minor) {
       "  Default to use %s\n",
       major, minor, nGpuArchNameSM[index - 1].name);
   return nGpuArchNameSM[index - 1].name;
-} 
+}
 
 
 #ifdef __CUDA_RUNTIME_H__

@@ -32,6 +32,10 @@ module m_alloc_hamilt_gpu
  use m_gpu_toolbox
 #endif
 
+#ifdef HAVE_FC_ISO_C_BINDING
+ use, intrinsic :: iso_c_binding
+#endif
+
  use defs_datatypes, only : pseudopotential_type
  use defs_abitypes, only : MPI_type
 
@@ -71,10 +75,12 @@ contains
 !!  (no output - only allocation on GPU)
 !!
 !! PARENTS
-!!      m_gstate,m_respfn_driver
+!!      m_gstate
+!!      m_respfn_driver
 !!
 !! CHILDREN
-!!      free_gpu_fourwf,free_nonlop_gpu
+!!      alloc_gpu_fourwf
+!!      alloc_nonlop_gpu
 !!
 !! SOURCE
 
@@ -95,13 +101,15 @@ subroutine alloc_hamilt_gpu(atindx1,dtset,gprimd,mpi_enreg,nattyp,npwarr,option,
 #if defined HAVE_GPU_CUDA
  integer :: dimekb1_max,dimekb2_max,dimffnl_max,ierr,ikpt,npw_max_loc,npw_max_nonloc
  integer ::npwarr_tmp(dtset%nkpt)
+
+ integer(kind=c_int32_t) :: proj_dim(3)
 #endif
 
 ! *************************************************************************
 
  if (use_gpu_cuda==0) return
 
-#if defined HAVE_GPU_CUDA
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_FC_ISO_C_BINDING)
 !=== Local Hamiltonian ===
  if (option==0.or.option==2) then
 !  Compute max of total planes waves
@@ -170,10 +178,12 @@ end subroutine alloc_hamilt_gpu
 !!  (no output - only deallocation on GPU)
 !!
 !! PARENTS
-!!      m_gstate,m_respfn_driver
+!!      m_gstate
+!!      m_respfn_driver
 !!
 !! CHILDREN
-!!      free_gpu_fourwf,free_nonlop_gpu
+!!      free_gpu_fourwf
+!!      free_nonlop_gpu
 !!
 !! SOURCE
 
@@ -190,7 +200,7 @@ subroutine dealloc_hamilt_gpu(option,use_gpu_cuda)
 
  if (use_gpu_cuda==0) return
 
-#if defined HAVE_GPU_CUDA
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_FC_ISO_C_BINDING)
  if (option==0.or.option==2) then
    call free_gpu_fourwf()
  end if

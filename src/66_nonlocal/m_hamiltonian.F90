@@ -59,7 +59,7 @@ module m_hamiltonian
 #endif
 
 #if defined HAVE_FC_ISO_C_BINDING
- use iso_c_binding, only : c_ptr,c_loc,c_f_pointer
+ use iso_c_binding, only : c_ptr,c_loc,c_f_pointer,c_int32_t
 #endif
 
  implicit none
@@ -219,7 +219,7 @@ module m_hamiltonian
    ! gbound_k(2*mgfft+8,2)
    ! G sphere boundary, for each plane wave at k
 
-  integer, allocatable :: indlmn(:,:,:)
+  integer(kind=c_int32_t), allocatable :: indlmn(:,:,:)
    ! indlmn(6,lmnmax,ntypat)
    ! For each type of psp,
    ! array giving l,m,n,lm,ln,spin for i=ln  (if useylm=0)
@@ -506,7 +506,7 @@ module m_hamiltonian
   real(dp), pointer :: vectornd(:,:,:,:) => null()
    ! vectornd(n4,n5,n6,nvloc)
    ! vector potential of nuclear magnetic dipoles
-   ! in real space, on the augmented fft grid, in direction idir 
+   ! in real space, on the augmented fft grid, in direction idir
    ! (the ddk pert direction)
 
   real(dp), pointer :: vlocal1(:,:,:,:) => null()
@@ -1694,7 +1694,7 @@ end subroutine init_rf_hamiltonian
 !!
 !! INPUTS
 !!  isppol=index of current spin
-!!  [vectornd(n4,n5,n6,nvloc)]=optional, vector potential of nuclear magnetic dipoles in real space in 
+!!  [vectornd(n4,n5,n6,nvloc)]=optional, vector potential of nuclear magnetic dipoles in real space in
 !!   ddk direction idir
 !!  [vlocal1(cplex*n4,n5,n6,nvloc)]=optional, 1st-order local potential in real space
 !!  [with_nonlocal]=optional, true if non-local factors have to be loaded

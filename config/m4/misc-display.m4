@@ -81,6 +81,7 @@ Core build parameters
   * LINALG flavor     : ${sd_linalg_flavor} (libs: ${tmp_rep_linalg_libs})
   * SCALAPACK enabled : ${sd_linalg_has_scalapack}
   * ELPA enabled      : ${sd_linalg_has_elpa}
+  * MAGMA enabled     : ${sd_linalg_has_magma} (magma version >= 1.5 ? ${sd_linalg_has_magma_15})
 
   * FCFLAGS           : ${FCFLAGS}
   * NVCC_CFLAGS       : ${NVCC_CFLAGS}
@@ -215,7 +216,7 @@ AC_DEFUN([ABI_MSG_NOTICE_L],[
     echo "  +------------------------------------------------------------------+"
     echo "  | ${abi_msg_title} |"
     echo "  +------------------------------------------------------------------+"
-  
+
     dnl Format and write message
 
     while read abi_msg_line; do
@@ -232,10 +233,10 @@ AC_DEFUN([ABI_MSG_NOTICE_L],[
       let Fill=spacer-linel+tput_spacer
       dnl test "$linel" -gt "64" || echo "too long... : $linel, Fill = $Fill"
       abi_msg_line=`printf "${abi_msg_line}";printf ' %.0s' $(seq 1 $Fill)`
-    
+
       echo "  | ${abi_msg_line} |"
     done <"${abi_msg_file}"
-      
+
     dnl Print footer
     echo "  +------------------------------------------------------------------+"
     echo ""
