@@ -431,6 +431,14 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    gemm_nonlop_use_gemm = .false.
  end if
 
+ if(dtset%use_gemm_nonlop_gpu == 1 .and. dtset%use_gpu_cuda==1) then
+   ! set global variable
+   gemm_nonlop_use_gemm_gpu = .true.
+   !!call init_gemm_nonlop_gpu(dtset%nkpt) - TODO
+ else
+   gemm_nonlop_use_gemm_gpu = .false.
+ end if
+
 !Set up the Ylm for each k point
  if ( dtset%tfkinfunc /= 2) then
    ABI_MALLOC(ylm,(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm))

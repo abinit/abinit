@@ -19743,6 +19743,22 @@ PAW already uses 1 for [[useylm]]).
 ),
 
 Variable(
+    abivarname="use_gemm_nonlop_gpu",
+    varset="dev",
+    vartype="integer",
+    topics=['parallelism_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="USE the GEMM routine for the application of the NON-Local OPerator on GPU",
+    characteristics=['[[DEVELOP]]'],
+    commentdefault="because it is not usually worth using it unless bandpp is large and it requires additional memory",
+    added_in_version="9.7.5",
+    text=r"""
+This variable has the same meaning as [[use_gemm_nonlop]], but triggers execution on GPU.
+""",
+),
+
+Variable(
     abivarname="use_gpu_cuda",
     varset="paral",
     vartype="integer",

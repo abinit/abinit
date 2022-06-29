@@ -2699,6 +2699,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%usefock=0
    dtsets(idtset)%usekden=0
    dtsets(idtset)%use_gemm_nonlop=0
+   dtsets(idtset)%use_gemm_nonlop_gpu=0
    dtsets(idtset)%use_nonscf_gkk=0 !1 ! deactivate by default, for now 6 Oct 2013
    dtsets(idtset)%userec=0
    dtsets(idtset)%usexcnhat_orig=-1
