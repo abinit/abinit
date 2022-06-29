@@ -119,20 +119,21 @@ subroutine cutoff_surface(nq,qpt,ng,gvec,gprimd,rcut,boxcenter,pdir,alpha,vc_cut
 
  SELECT CASE (method)
 
- CASE (1) ! Beigi's expression.
-   ! * q-points with non-zero component along the z-axis are not allowed if
-   !   the simplified Eq.1 for the Coulomb interaction is used.
+ CASE (1)
+   ! Beigi's expression.
+   ! q-points with non-zero component along the z-axis are not allowed if
+   ! the simplified Eq.1 for the Coulomb interaction is used.
    if (ANY(ABS(qcart(3,:))>SMALL)) then
      write(std_out,*)qcart(:,:)
      write(msg,'(5a)')&
-&      'Found q-points with non-zero component along non-periodic direction ',ch10,&
-&      'This is not allowed, see Notes in cutoff_surface.F90 ',ch10,&
-&      'ACTION : Modify the q-point sampling '
+      'Found q-points with non-zero component along non-periodic direction ',ch10,&
+      'This is not allowed, see Notes in cutoff_surface.F90 ',ch10,&
+      'ACTION : Modify the q-point sampling '
      ABI_ERROR(msg)
    end if
    !
    ! === Calculate truncated Coulomb interaction for a infinite surface ===
-   ! * Here I suppose that all the input q-points are different from zero
+   ! Here I suppose that all the input q-points are different from zero
    do iq=1,nq
      qc(:)=qcart(:,iq)
      igs=1; if (SQRT(DOT_PRODUCT(qc,qc))<tol16) igs=2 ! avoid (q=0, G=0)
@@ -146,7 +147,8 @@ subroutine cutoff_surface(nq,qpt,ng,gvec,gprimd,rcut,boxcenter,pdir,alpha,vc_cut
      end do
    end do
 
- CASE (2) ! Rozzi"s method
+ CASE (2)
+   ! Rozzi"s method
    ABI_ERROR("Work in progress")
    ABI_UNUSED(alpha) ! just to keep alpha as an argument
    !alpha=?? ; ap1sqrt=SQRT(one+alpha**2)
