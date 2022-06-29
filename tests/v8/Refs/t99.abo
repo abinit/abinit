@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of MULTIBINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 9.5.3 of MULTIBINIT 
+.(MPI version, prepared for a x86_64_linux_gnu7.5 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  MULTIBINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,15 +14,15 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h36 )
+.Starting date : Tue 20 Jul 2021.
+- ( at 11h36 )
   
 -  nproc =    1
 
 ================================================================================
 
  Read the information in the reference structure in 
--/home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/v8/Input/t98_model.xml
+-/home/marcus/CODES/DEVELOP-MULTIBINIT/abinit/tests/v8/Input/t98_model.xml
  to initialize the multibinit input
 
 ================================================================================
@@ -57,8 +57,8 @@ dipdip_range         2         2         2
 
 ================================================================================
 
--Opening the file /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/v8/Input/t98_model.xml
--Reading the file /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/v8/Input/t98_model.xml with Fortran
+-Opening the file /home/marcus/CODES/DEVELOP-MULTIBINIT/abinit/tests/v8/Input/t98_model.xml
+-Reading the file /home/marcus/CODES/DEVELOP-MULTIBINIT/abinit/tests/v8/Input/t98_model.xml with LibXML library
 
  Bound for ifc SR:
 
@@ -81,8 +81,8 @@ dipdip_range         2         2         2
 
  Read the coefficients of the polynomial fit from XML and perform some checks
 
--Opening the file /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/v8/Input/t98_model.xml
--Reading the file /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/v8/Input/t98_model.xml with Fortran
+-Opening the file /home/marcus/CODES/DEVELOP-MULTIBINIT/abinit/tests/v8/Input/t98_model.xml
+-Reading the file /home/marcus/CODES/DEVELOP-MULTIBINIT/abinit/tests/v8/Input/t98_model.xml with LibXML library
 
 ================================================================================
 
@@ -91,7 +91,7 @@ dipdip_range         2         2         2
 ================================================================================
 
 -Reading the training-set file :
--/home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/v8/Input/t98.nc
+-/home/marcus/CODES/DEVELOP-MULTIBINIT/abinit/tests/v8/Input/t98.nc
 
 
 ================================================================================
@@ -101,41 +101,41 @@ Optimizing Effective Potential
 
  Mean Standard Deviation values of the effective-potential
  with respect to the training-set before optimization (meV^2/atm):
-   Energy          :   1.1581196256185512E+01
+   Energy          :   1.0217083522426139E-01
  Goal function values of the effective.potential
  with respect to the test-set (eV^2/A^2):
-   Forces+Stresses :   1.5633997907362172E-03
-   Forces          :   5.7262029535544413E-04
-   Stresses        :   9.9077949538077287E-04
+   Forces+Stresses :   8.3648035769898514E-04
+   Forces          :   5.7262029535544727E-04
+   Stresses        :   2.6386006234353787E-04
 
 
  Mean Standard Deviation values of the effective-potential
  with respect to the training-set after deleting selected terms (meV^2/atm):
-   Energy          :   1.2738740394185962E+01
+   Energy          :   1.1239465854858535E-01
  Goal function values of the effective.potential
  with respect to the test-set (eV^2/A^2):
-   Forces+Stresses :   1.7524994686471946E-03
-   Forces          :   7.6089189702714763E-04
-   Stresses        :   9.9160757162004734E-04
+   Forces+Stresses :   1.0247762887075004E-03
+   Forces          :   7.6089189702714958E-04
+   Stresses        :   2.6388439168035079E-04
 
 
  Mean Standard Deviation values of the effective-potential
  with respect to the training-set after optimizing selected terms (meV^2/atm):
-   Energy          :   1.0519571773190103E+01
+   Energy          :   9.3130721904624875E-02
  Goal function values of the effective.potential
  with respect to the test-set (eV^2/A^2):
-   Forces+Stresses :   1.5256288198381130E-03
-   Forces          :   5.3584404219031163E-04
-   Stresses        :   9.8978477764780147E-04
+   Forces+Stresses :   7.9986081646627415E-04
+   Forces          :   5.3582775816215925E-04
+   Stresses        :   2.6403305830411484E-04
 
 
 ================================================================================
 
 -
-- Proc.   0 individual time (sec): cpu=         11.2  wall=         11.3
+- Proc.   0 individual time (sec): cpu=         48.5  wall=         48.7
 
 ================================================================================
 
-+Total cpu time     11.221  and wall time     11.255 sec
++Total cpu time     48.471  and wall time     48.714 sec
 
  multibinit : the run completed succesfully.

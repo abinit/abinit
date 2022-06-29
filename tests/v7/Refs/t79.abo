@@ -2,7 +2,7 @@
 .Version 9.3.1 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -131,31 +131,6 @@ _ WF disk file :      0.210 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
             acell      6.7605000000E+00  6.7605000000E+00  6.7605000000E+00 Bohr
               amu      5.09415000E+01  8.76200000E+01  1.59994000E+01
         dmatpuopt           1
-        dmftbandf1          0
-        dmftbandf2          0
-        dmftbandf3         25
-        dmftbandf4          0
-        dmftbandf5          0
-        dmftbandi1          0
-        dmftbandi2          0
-        dmftbandi3         12
-        dmftbandi4          0
-        dmftbandi5          0
-        dmft_nwli1          0
-        dmft_nwli2          0
-        dmft_nwli3      20000
-        dmft_nwli4          0
-        dmft_nwli5          0
-        dmft_nwlo1          0
-        dmft_nwlo2          0
-        dmft_nwlo3         10
-        dmft_nwlo4          0
-        dmft_nwlo5          0
-        dmft_solv1          5
-        dmft_solv2          5
-        dmft_solv3          2
-        dmft_solv4          5
-        dmft_solv5          5
              ecut      4.00000000E+00 Hartree
           ecuteps      3.00000000E+00 Hartree
          ecutsigx1     0.00000000E+00 Hartree
@@ -304,11 +279,6 @@ P           mkmem           4
         optdriver3          0
         optdriver4          3
         optdriver5          4
-        optforces1          2
-        optforces2          2
-        optforces3          0
-        optforces4          2
-        optforces5          2
         pawecutdg      4.10000000E+00 Hartree
         pawoptosc           2
         pawprtdos1          0
@@ -317,16 +287,8 @@ P           mkmem           4
         pawprtdos4          0
         pawprtdos5          0
         pawprtvol           3
-     plowan_bandi1          0
-     plowan_bandi2          0
-     plowan_bandi3         12
-     plowan_bandi4          0
-     plowan_bandi5          0
-     plowan_bandf1          0
-     plowan_bandf2          0
-     plowan_bandf3         25
-     plowan_bandf4          0
-     plowan_bandf5          0
+     plowan_bandi          12
+     plowan_bandf          25
    plowan_compute1          0
    plowan_compute2          0
    plowan_compute3          1
@@ -355,11 +317,11 @@ P           mkmem           4
      plowan_lcalc3       2
      plowan_lcalc4       2
      plowan_lcalc5       2
-  plowan_projcalc1      -2
-  plowan_projcalc2      -2
-  plowan_projcalc3      -2
-  plowan_projcalc4      -2
-  plowan_projcalc5      -2
+  plowan_projcalc1       7
+  plowan_projcalc2       7
+  plowan_projcalc3       7
+  plowan_projcalc4       7
+  plowan_projcalc5       7
           ppmodel           2
            prtdos1          0
            prtdos2          3
@@ -1332,7 +1294,7 @@ lattice_vectors:
 lattice_lengths: [   6.76050,    6.76050,    6.76050, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   3.0898433E+02
-convergence: {deltae:  4.832E-13, res2:  4.255E-14, residm:  9.823E-12, diffor:  0.000E+00, }
+convergence: {deltae:  2.274E-13, res2:  4.254E-14, residm:  9.823E-12, diffor: null, }
 etotal    :  -1.43107510E+02
 entropy   :   0.00000000E+00
 fermie    :   5.75649577E-01
@@ -1347,8 +1309,13 @@ xred      :
 - [  5.0000E-01,   0.0000E+00,   0.0000E+00,  O]
 - [  0.0000E+00,   5.0000E-01,   0.0000E+00,  O]
 - [  0.0000E+00,   0.0000E+00,   5.0000E-01,  O]
-cartesian_forces: null
-force_length_stats: {min: null, max: null, mean: null, }
+cartesian_forces: # hartree/bohr
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -1458,7 +1425,7 @@ force_length_stats: {min: null, max: null, mean: null, }
  == Atoms selected                                1
  == Nb of angular momenta used for each atom      1
  == Value of the angular momenta for atom 1 is :  2
- == Value of the projectors      for atom 1 is : -2
+ == Value of the projectors      for atom 1 is :  7
 
  == For each k-point of the path, gives the eigenvalues (in eV) of the Hamiltonian in the Wannier basis
 
@@ -1524,6 +1491,22 @@ force_length_stats: {min: null, max: null, mean: null, }
     3      1.78875125933635     0.00000000000000     0.00000000000000
     4      0.00000000000000     1.78875125933635     0.00000000000000
     5      0.00000000000000     0.00000000000000     1.78875125933635
+
+ cartesian forces (hartree/bohr) at end:
+    1     -0.00000000000000    -0.00000000000000    -0.00000000000000
+    2     -0.00000000000000    -0.00000000000000    -0.00000000000000
+    3     -0.00000000000000    -0.00000000000000    -0.00000000000000
+    4     -0.00000000000000    -0.00000000000000    -0.00000000000000
+    5     -0.00000000000000    -0.00000000000000    -0.00000000000000
+ frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 h/b
+
+ cartesian forces (eV/Angstrom) at end:
+    1     -0.00000000000000    -0.00000000000000    -0.00000000000000
+    2     -0.00000000000000    -0.00000000000000    -0.00000000000000
+    3     -0.00000000000000    -0.00000000000000    -0.00000000000000
+    4     -0.00000000000000    -0.00000000000000    -0.00000000000000
+    5     -0.00000000000000    -0.00000000000000    -0.00000000000000
+ frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  6.760500000000  6.760500000000  6.760500000000 bohr
               =  3.577502518673  3.577502518673  3.577502518673 angstroms
  prteigrs : about to open file t79o_DS3_EIG
@@ -1937,19 +1920,19 @@ meta: {optdriver: 3, gwcalctyp: 2, }
   3    4.000000E+00    0.000000E+00
   4    6.000000E+00    0.000000E+00
 
- == Lower and upper values of the selected bands    0    0
+ == Lower and upper values of the selected bands   12   25
  == Number of atoms                                      1
  == Atoms selected                                1
  == Nb of angular momenta used for each atom      1
  == Value of the angular momenta for atom 1 is :  2
- == Value of the projectors      for atom 1 is : -2
+ == Value of the projectors      for atom 1 is :  7
 
  == Lower and upper values of the selected bands   12   25
  == Number of atoms                                      1
  == Atoms selected                                1
  == Nb of angular momenta used for each atom      1
  == Value of the angular momenta for atom 1 is :  2
- == Value of the projectors      for atom 1 is : -2
+ == Value of the projectors      for atom 1 is :  7
 Reading of the Wannier weights from data.plowann
 
  == Lower and upper values of the selected bands   12   25
@@ -1957,7 +1940,7 @@ Reading of the Wannier weights from data.plowann
  == Atoms selected                                1
  == Nb of angular momenta used for each atom      1
  == Value of the angular momenta for atom 1 is :  2
- == Value of the projectors      for atom 1 is : -2
+ == Value of the projectors      for atom 1 is :  7
  Reconstruction of the full Brillouin Zone using data.plowann in the IBZ
 
 
@@ -2563,19 +2546,19 @@ meta: {optdriver: 4, gwcalctyp: 2, }
 
  cRPA calculations using wannier weights from data.plowann
 
- == Lower and upper values of the selected bands    0    0
+ == Lower and upper values of the selected bands   12   25
  == Number of atoms                                      1
  == Atoms selected                                1
  == Nb of angular momenta used for each atom      1
  == Value of the angular momenta for atom 1 is :  2
- == Value of the projectors      for atom 1 is : -2
+ == Value of the projectors      for atom 1 is :  7
 
  == Lower and upper values of the selected bands   12   25
  == Number of atoms                                      1
  == Atoms selected                                1
  == Nb of angular momenta used for each atom      1
  == Value of the angular momenta for atom 1 is :  2
- == Value of the projectors      for atom 1 is : -2
+ == Value of the projectors      for atom 1 is :  7
 Reading of the Wannier weights from data.plowann
 
  == Lower and upper values of the selected bands   12   25
@@ -2583,7 +2566,7 @@ Reading of the Wannier weights from data.plowann
  == Atoms selected                                1
  == Nb of angular momenta used for each atom      1
  == Value of the angular momenta for atom 1 is :  2
- == Value of the projectors      for atom 1 is : -2
+ == Value of the projectors      for atom 1 is :  7
  Reconstruction of the full Brillouin Zone using data.plowann in the IBZ
  
 ==== Calculation of the screened interaction ====
@@ -2827,31 +2810,6 @@ Reading of the Wannier weights from data.plowann
             acell      6.7605000000E+00  6.7605000000E+00  6.7605000000E+00 Bohr
               amu      5.09415000E+01  8.76200000E+01  1.59994000E+01
         dmatpuopt           1
-        dmftbandf1          0
-        dmftbandf2          0
-        dmftbandf3         25
-        dmftbandf4          0
-        dmftbandf5          0
-        dmftbandi1          0
-        dmftbandi2          0
-        dmftbandi3         12
-        dmftbandi4          0
-        dmftbandi5          0
-        dmft_nwli1          0
-        dmft_nwli2          0
-        dmft_nwli3      20000
-        dmft_nwli4          0
-        dmft_nwli5          0
-        dmft_nwlo1          0
-        dmft_nwlo2          0
-        dmft_nwlo3         10
-        dmft_nwlo4          0
-        dmft_nwlo5          0
-        dmft_solv1          5
-        dmft_solv2          5
-        dmft_solv3          2
-        dmft_solv4          5
-        dmft_solv5          5
              ecut      4.00000000E+00 Hartree
           ecuteps      3.00000000E+00 Hartree
          ecutsigx1     0.00000000E+00 Hartree
@@ -2879,11 +2837,11 @@ Reading of the Wannier weights from data.plowann
                       -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
-            fcart3     9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
-                       9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
-                       9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
-                       9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
-                       9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
+            fcart3    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
+                      -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
+                      -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
+                      -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
+                      -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart4     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -3110,11 +3068,6 @@ P           mkmem           4
         optdriver3          0
         optdriver4          3
         optdriver5          4
-        optforces1          2
-        optforces2          2
-        optforces3          0
-        optforces4          2
-        optforces5          2
         pawecutdg      4.10000000E+00 Hartree
         pawoptosc           2
         pawprtdos1          0
@@ -3123,16 +3076,8 @@ P           mkmem           4
         pawprtdos4          0
         pawprtdos5          0
         pawprtvol           3
-     plowan_bandi1          0
-     plowan_bandi2          0
-     plowan_bandi3         12
-     plowan_bandi4          0
-     plowan_bandi5          0
-     plowan_bandf1          0
-     plowan_bandf2          0
-     plowan_bandf3         25
-     plowan_bandf4          0
-     plowan_bandf5          0
+     plowan_bandi          12
+     plowan_bandf          25
    plowan_compute1          0
    plowan_compute2          0
    plowan_compute3          1
@@ -3161,11 +3106,11 @@ P           mkmem           4
      plowan_lcalc3       2
      plowan_lcalc4       2
      plowan_lcalc5       2
-  plowan_projcalc1      -2
-  plowan_projcalc2      -2
-  plowan_projcalc3      -2
-  plowan_projcalc4      -2
-  plowan_projcalc5      -2
+  plowan_projcalc1       7
+  plowan_projcalc2       7
+  plowan_projcalc3       7
+  plowan_projcalc4       7
+  plowan_projcalc5       7
           ppmodel           2
            prtdos1          0
            prtdos2          3

@@ -85,8 +85,6 @@ ndtset 13 jdtset 1 2 3 4 5 6  22 23 24 25 26 12 13
 #Dataset 12 : response function strain perturbation calculation
   rfstrs12  3
   rfphon12  1
- rfatpol12  1 4
-   rfdir12  1 1 1
     nqpt12  1
      qpt12  0 0 0
   kptopt12  3
@@ -96,8 +94,6 @@ ndtset 13 jdtset 1 2 3 4 5 6  22 23 24 25 26 12 13
  usexcnhat13  0
     rfstrs13  3
     rfphon13  1
-   rfatpol13  1 4
-     rfdir13  1 1 1
       nqpt13  1
        qpt13  0 0 0
     kptopt13  3

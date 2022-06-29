@@ -21,4 +21,10 @@ Please, see the README file in the tests directory (above this one) to get help.
 
 * Tests 90-99 concern ground state
 
+* Tests 90-99 concern ground state
+
+* Tests 105-108 concern paw+u
+
+* Tests 110-119 concern lattice Wannier function
+
 ------------------------------------------------------------------

@@ -44,18 +44,15 @@ ndtset 3     jdtset 1 2 3
    tolwfr2   1.0d-22
     nband2   4
  berryopt2  -3
-    rfdir2   1 1 1
 
 #DATASET3 : ddE on the MP grid of k-points
 #*****************************************
    getwfk3   2
    getddk3   2
-    rfdir3   1 1 1
    tolvrs3   1.0d-16
     nstep3   10
    rfelfd3   3
    rfphon3   1
-  rfatpol3   1 2
    rfstrs3   3
     nband3   4
    kptopt3   2

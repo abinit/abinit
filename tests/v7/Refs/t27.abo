@@ -2,7 +2,7 @@
 .Version 9.3.1 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -959,34 +959,34 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
    1.00000    1.00000    1.00000    1.00000    1.00000    1.00000    1.00000    1.00000
    1.00000    1.00000    1.00000    1.00000    0.00000    0.00000    0.00000
  Total charge density [el/Bohr^3]
-      Maximum=    1.5049E+00  at reduced coord.    0.0000    0.0000    0.0000
- Next maximum=    1.4876E+00  at reduced coord.    0.0000    0.0000    0.9815
-      Minimum=    5.6623E-03  at reduced coord.    0.5000    0.5000    0.0000
- Next minimum=    5.6623E-03  at reduced coord.    0.5000    0.0000    0.5000
+)     Maximum=    1.5049E+00  at reduced coord.    0.0000    0.0000    0.0000
+)Next maximum=    1.4876E+00  at reduced coord.    0.0000    0.0000    0.9815
+)     Minimum=    5.6623E-03  at reduced coord.    0.5000    0.5000    0.0000
+)Next minimum=    5.6623E-03  at reduced coord.    0.5000    0.0000    0.5000
    Integrated=    4.1000E+01
  Spin up density      [el/Bohr^3]
-      Maximum=    7.5245E-01  at reduced coord.    0.0000    0.0000    0.0000
- Next maximum=    7.4382E-01  at reduced coord.    0.0000    0.0000    0.9815
-      Minimum=    2.8311E-03  at reduced coord.    0.5000    0.5000    0.0000
- Next minimum=    2.8311E-03  at reduced coord.    0.5000    0.0000    0.5000
+)     Maximum=    7.5245E-01  at reduced coord.    0.0000    0.0000    0.0000
+)Next maximum=    7.4382E-01  at reduced coord.    0.0000    0.0000    0.9815
+)     Minimum=    2.8311E-03  at reduced coord.    0.5000    0.5000    0.0000
+)Next minimum=    2.8311E-03  at reduced coord.    0.5000    0.0000    0.5000
    Integrated=    2.0500E+01
  Spin down density    [el/Bohr^3]
-      Maximum=    7.5245E-01  at reduced coord.    0.0000    0.0000    0.0000
- Next maximum=    7.4382E-01  at reduced coord.    0.0000    0.0000    0.9815
-      Minimum=    2.8311E-03  at reduced coord.    0.5000    0.5000    0.0000
- Next minimum=    2.8311E-03  at reduced coord.    0.5000    0.0000    0.5000
+)     Maximum=    7.5245E-01  at reduced coord.    0.0000    0.0000    0.0000
+)Next maximum=    7.4382E-01  at reduced coord.    0.0000    0.0000    0.9815
+)     Minimum=    2.8311E-03  at reduced coord.    0.5000    0.5000    0.0000
+)Next minimum=    2.8311E-03  at reduced coord.    0.5000    0.0000    0.5000
    Integrated=    2.0500E+01
  Magnetization (spin up - spin down) [el/Bohr^3]
-      Maximum=    0.0000E+00  at reduced coord.    0.9815    0.9815    0.9815
- Next maximum=    0.0000E+00  at reduced coord.    0.9630    0.9815    0.9815
-      Minimum=    0.0000E+00  at reduced coord.    0.0000    0.0000    0.0000
- Next minimum=    0.0000E+00  at reduced coord.    0.0185    0.0000    0.0000
+)     Maximum=    0.0000E+00  at reduced coord.    0.9815    0.9815    0.9815
+)Next maximum=    0.0000E+00  at reduced coord.    0.9630    0.9815    0.9815
+)     Minimum=    0.0000E+00  at reduced coord.    0.0000    0.0000    0.0000
+)Next minimum=    0.0000E+00  at reduced coord.    0.0185    0.0000    0.0000
    Integrated=    0.0000E+00
  Relative magnetization (=zeta, between -1 and 1)
-      Maximum=    0.0000E+00  at reduced coord.    0.9815    0.9815    0.9815
- Next maximum=    0.0000E+00  at reduced coord.    0.9630    0.9815    0.9815
-      Minimum=    0.0000E+00  at reduced coord.    0.0000    0.0000    0.0000
- Next minimum=    0.0000E+00  at reduced coord.    0.0185    0.0000    0.0000
+)     Maximum=    0.0000E+00  at reduced coord.    0.9815    0.9815    0.9815
+)Next maximum=    0.0000E+00  at reduced coord.    0.9630    0.9815    0.9815
+)     Minimum=    0.0000E+00  at reduced coord.    0.0000    0.0000    0.0000
+)Next minimum=    0.0000E+00  at reduced coord.    0.0185    0.0000    0.0000
 
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
@@ -1639,34 +1639,34 @@ force_length_stats: {min: null, max: null, mean: null, }
    1.00000    1.00000    1.00000    1.00000    1.00000    1.00000    1.00000    1.00000
    1.00000    1.00000    1.00000    1.00000    0.02449    0.02449    0.02449
  Total charge density [el/Bohr^3]
-      Maximum=    1.5058E+00  at reduced coord.    0.0000    0.0000    0.0000
- Next maximum=    1.4885E+00  at reduced coord.    0.0000    0.0000    0.9815
-      Minimum=    5.7049E-03  at reduced coord.    0.5000    0.5000    0.0000
- Next minimum=    5.7049E-03  at reduced coord.    0.5000    0.0000    0.5000
+)     Maximum=    1.5058E+00  at reduced coord.    0.0000    0.0000    0.0000
+)Next maximum=    1.4885E+00  at reduced coord.    0.0000    0.0000    0.9815
+)     Minimum=    5.7049E-03  at reduced coord.    0.5000    0.5000    0.0000
+)Next minimum=    5.7049E-03  at reduced coord.    0.5000    0.0000    0.5000
    Integrated=    4.1000E+01
  Spin up density      [el/Bohr^3]
-      Maximum=    7.5290E-01  at reduced coord.    0.0000    0.0000    0.0000
- Next maximum=    7.4426E-01  at reduced coord.    0.0000    0.0000    0.9815
-      Minimum=    2.8524E-03  at reduced coord.    0.5000    0.5000    0.0000
- Next minimum=    2.8524E-03  at reduced coord.    0.5000    0.0000    0.5000
+)     Maximum=    7.5290E-01  at reduced coord.    0.0000    0.0000    0.0000
+)Next maximum=    7.4426E-01  at reduced coord.    0.0000    0.0000    0.9815
+)     Minimum=    2.8524E-03  at reduced coord.    0.5000    0.5000    0.0000
+)Next minimum=    2.8524E-03  at reduced coord.    0.5000    0.0000    0.5000
    Integrated=    2.0500E+01
  Spin down density    [el/Bohr^3]
-      Maximum=    7.5292E-01  at reduced coord.    0.0000    0.0000    0.0000
- Next maximum=    7.4428E-01  at reduced coord.    0.0000    0.0000    0.9815
-      Minimum=    2.8525E-03  at reduced coord.    0.5000    0.5000    0.0000
- Next minimum=    2.8525E-03  at reduced coord.    0.5000    0.0000    0.5000
+)     Maximum=    7.5292E-01  at reduced coord.    0.0000    0.0000    0.0000
+)Next maximum=    7.4428E-01  at reduced coord.    0.0000    0.0000    0.9815
+)     Minimum=    2.8525E-03  at reduced coord.    0.5000    0.5000    0.0000
+)Next minimum=    2.8525E-03  at reduced coord.    0.5000    0.0000    0.5000
    Integrated=    2.0500E+01
  Magnetization (spin up - spin down) [el/Bohr^3]
-      Maximum=    9.3268E-07  at reduced coord.    0.0000    0.0000    0.6111
- Next maximum=    9.3268E-07  at reduced coord.    0.0000    0.0000    0.3889
-      Minimum=   -2.0210E-05  at reduced coord.    0.0000    0.0000    0.0000
- Next minimum=   -1.9912E-05  at reduced coord.    0.0185    0.0000    0.0000
+)     Maximum=    9.3268E-07  at reduced coord.    0.0000    0.0000    0.6111
+)Next maximum=    9.3268E-07  at reduced coord.    0.0000    0.0000    0.3889
+)     Minimum=   -2.0210E-05  at reduced coord.    0.0000    0.0000    0.0000
+)Next minimum=   -1.9912E-05  at reduced coord.    0.0185    0.0000    0.0000
    Integrated=   -1.6892E-04
  Relative magnetization (=zeta, between -1 and 1)
-      Maximum=    1.9887E-05  at reduced coord.    0.7593    0.7778    0.7778
- Next maximum=    1.9887E-05  at reduced coord.    0.2407    0.7778    0.7778
-      Minimum=   -3.2981E-05  at reduced coord.    0.5000    0.5000    0.0000
- Next minimum=   -3.2981E-05  at reduced coord.    0.5000    0.0000    0.5000
+)     Maximum=    1.9887E-05  at reduced coord.    0.7593    0.7778    0.7778
+)Next maximum=    1.9887E-05  at reduced coord.    0.2407    0.7778    0.7778
+)     Minimum=   -3.2981E-05  at reduced coord.    0.5000    0.5000    0.0000
+)Next minimum=   -3.2981E-05  at reduced coord.    0.5000    0.0000    0.5000
 
 --- !EnergyTerms
 iteration_state     : {dtset: 2, }

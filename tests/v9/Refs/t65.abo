@@ -1,8 +1,8 @@
 
-.Version 9.3.4 of ABINIT 
+.Version 9.7.4 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 16 Jan 2021.
-- ( at 17h00 )
+.Starting date : Wed  4 May 2022.
+- ( at 01h27 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/Olivier7017_develop/tests/TestBot_MPI1/v9_t62-t63-t64-t65/t65.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/v9_t62-t63-t64-t65/t65.abi
 - output file    -> t65.abo
 - root for input  files -> t65i
 - root for output files -> t65o
@@ -34,7 +34,7 @@
 -    mband =          20        mffmem =           1         mkmem =          10
        mpw =         348          nfft =        8000          nkpt =          10
 ================================================================================
-P This job should need less than                       3.743 Mbytes of memory.
+P This job should need less than                       3.971 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      1.064 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
@@ -51,7 +51,7 @@ _ WF disk file :      1.064 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 -    mband =          20        mffmem =           1         mkmem =         145
        mpw =         360          nfft =        8000          nkpt =         145
 ================================================================================
-P This job should need less than                      20.498 Mbytes of memory.
+P This job should need less than                      20.726 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :     15.932 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
@@ -84,7 +84,7 @@ _ WF disk file :     15.932 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
           getdvdb2         20
            getwfk1         20
            getwfk2          1
-     ibte_abs_tol1     1.0000000000E-04
+     ibte_abs_tol1    -1.0000000000E+00
      ibte_abs_tol2     1.0000000000E-03
    ibte_alpha_mix1     7.0000000000E-01
    ibte_alpha_mix2     6.0000000000E-01
@@ -470,8 +470,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.05308
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/Olivier7017_develop/tests/Psps_for_tests/PseudosHGH_pwteter/29cu.1.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/Olivier7017_develop/tests/Psps_for_tests/PseudosHGH_pwteter/29cu.1.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosHGH_pwteter/29cu.1.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosHGH_pwteter/29cu.1.hgh
 - Hartwigsen-Goedecker-Hutter psp for Cu,  from PRB58, 3641 (1998)
 - 29.00000   1.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -510,7 +510,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   1.0374E+00  1.1744E+00  1.5735E+00  1.6173E+00  1.7226E+00  1.8093E+00
   1.8931E+00  1.9703E+00  2.3203E+00  2.4201E+00  2.5310E+00  2.5496E+00
   2.6202E+00  2.6366E+00
-  prteigrs : nnsclo,ikpt=   30    1 max resid (incl. the buffer)=  1.28810E-09
  Non-SCF case, kpt    2 ( -0.43750  0.12500  0.00000), residuals and eigenvalues=
   1.47E-12  4.22E-11  2.80E-11  5.62E-11  1.39E-13  1.58E-11  6.28E-13  3.07E-12
   2.12E-11  3.92E-12  1.74E-11  4.67E-11  9.34E-12  8.81E-12  9.04E-11  1.60E-11
@@ -519,7 +518,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   1.1403E+00  1.2538E+00  1.5184E+00  1.5586E+00  1.6729E+00  1.9308E+00
   1.9497E+00  2.0315E+00  2.2594E+00  2.4946E+00  2.5164E+00  2.5223E+00
   2.6744E+00  2.6809E+00
-  prteigrs : nnsclo,ikpt=   30    2 max resid (incl. the buffer)=  1.26241E-05
  Non-SCF case, kpt    3 (  0.43750  0.31250  0.00000), residuals and eigenvalues=
   3.98E-13  2.86E-12  3.28E-12  9.28E-12  1.02E-11  3.86E-12  7.50E-13  2.84E-11
   1.11E-12  5.61E-11  8.17E-11  1.96E-12  2.49E-11  1.05E-11  6.53E-12  5.27E-11
@@ -528,7 +526,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   1.4439E+00  1.5248E+00  1.6831E+00  1.8356E+00  1.8487E+00  1.8744E+00
   1.9082E+00  1.9139E+00  1.9983E+00  2.1050E+00  2.2964E+00  2.3139E+00
   2.5111E+00  2.7190E+00
-  prteigrs : nnsclo,ikpt=   30    3 max resid (incl. the buffer)=  1.62634E-08
  Non-SCF case, kpt    4 (  0.37500  0.37500  0.00000), residuals and eigenvalues=
   8.12E-13  1.05E-11  8.48E-12  2.50E-11  2.51E-11  5.25E-11  6.14E-11  6.14E-11
   8.00E-12  6.43E-11  4.58E-11  4.58E-11  6.42E-12  3.40E-12  7.17E-11  7.17E-11
@@ -537,7 +534,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   1.6389E+00  1.6389E+00  1.6425E+00  1.7569E+00  1.8737E+00  1.8737E+00
   1.8851E+00  1.9001E+00  2.0647E+00  2.0647E+00  2.0797E+00  2.1644E+00
   2.6680E+00  2.7993E+00
-  prteigrs : nnsclo,ikpt=   30    4 max resid (incl. the buffer)=  3.84742E-02
  Non-SCF case, kpt    5 ( -0.43750  0.12500  0.06250), residuals and eigenvalues=
   1.86E-11  3.94E-12  1.39E-12  1.27E-11  6.29E-13  1.84E-11  2.76E-11  2.23E-13
   5.16E-12  5.77E-12  3.78E-12  8.09E-12  4.92E-13  7.62E-11  5.70E-12  2.62E-11
@@ -554,7 +550,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   1.2497E+00  1.2934E+00  1.4156E+00  1.5737E+00  1.7536E+00  1.8341E+00
   2.0166E+00  2.1662E+00  2.2696E+00  2.3265E+00  2.4664E+00  2.5456E+00
   2.6694E+00  2.7587E+00
-  prteigrs : nnsclo,ikpt=   30    6 max resid (incl. the buffer)=  3.75705E-04
  Non-SCF case, kpt    7 ( -0.37500  0.18750  0.06250), residuals and eigenvalues=
   1.05E-13  8.57E-11  2.04E-11  1.03E-13  1.18E-13  3.08E-13  2.41E-12  4.04E-12
   3.96E-12  7.74E-11  1.65E-11  3.52E-11  1.98E-11  1.03E-11  7.58E-12  4.22E-11
@@ -563,7 +558,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   1.2324E+00  1.3172E+00  1.4269E+00  1.5380E+00  1.6774E+00  1.9364E+00
   2.0408E+00  2.1252E+00  2.1710E+00  2.4377E+00  2.4605E+00  2.5673E+00
   2.6532E+00  2.7696E+00
-  prteigrs : nnsclo,ikpt=   30    7 max resid (incl. the buffer)=  3.16039E-04
  Non-SCF case, kpt    8 ( -0.31250  0.25000  0.06250), residuals and eigenvalues=
   9.07E-13  4.62E-13  5.58E-11  4.03E-13  8.90E-12  5.84E-13  2.72E-11  5.06E-11
   1.94E-12  6.80E-13  1.15E-11  8.43E-11  4.43E-11  5.69E-11  1.65E-11  4.92E-11
@@ -572,7 +566,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   1.2669E+00  1.3390E+00  1.4720E+00  1.4799E+00  1.6384E+00  1.9243E+00
   2.1017E+00  2.1450E+00  2.3154E+00  2.3396E+00  2.5301E+00  2.5342E+00
   2.5481E+00  2.7357E+00
-  prteigrs : nnsclo,ikpt=   30    8 max resid (incl. the buffer)=  7.30282E-05
  Non-SCF case, kpt    9 ( -0.25000  0.31250  0.06250), residuals and eigenvalues=
   3.92E-12  3.92E-11  5.05E-11  7.19E-13  6.61E-13  1.02E-11  5.68E-12  1.23E-12
   7.12E-11  4.49E-11  3.46E-12  6.80E-12  9.41E-12  5.81E-11  3.59E-11  6.07E-11
@@ -581,7 +574,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   1.2100E+00  1.3744E+00  1.4156E+00  1.5483E+00  1.6876E+00  1.7748E+00
   2.1965E+00  2.2345E+00  2.3071E+00  2.3371E+00  2.5190E+00  2.5254E+00
   2.5443E+00  2.6189E+00
-  prteigrs : nnsclo,ikpt=   30    9 max resid (incl. the buffer)=  1.68610E-07
  Non-SCF case, kpt   10 (  0.43750  0.37500  0.06250), residuals and eigenvalues=
   7.37E-11  3.55E-12  3.91E-13  7.45E-12  1.16E-13  2.06E-11  9.11E-11  5.32E-13
   3.39E-12  2.60E-12  5.48E-11  6.39E-11  7.62E-12  8.23E-11  4.41E-11  5.35E-11
@@ -590,7 +582,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   1.4707E+00  1.6425E+00  1.7070E+00  1.7719E+00  1.7911E+00  1.8560E+00
   1.9305E+00  1.9885E+00  1.9985E+00  2.0712E+00  2.1366E+00  2.3002E+00
   2.5912E+00  2.7277E+00
-  prteigrs : nnsclo,ikpt=   30   10 max resid (incl. the buffer)=  1.26332E-03
 
 
 --- !ResultsGS
@@ -935,7 +926,7 @@ K-point: [ 5.0000E-01,  3.1250E-01,  1.2500E-01], T:  300.0 [K], mu_e:   -4.054
           getdvdb2         20
            getwfk1         20
            getwfk2          1
-     ibte_abs_tol1     1.0000000000E-04
+     ibte_abs_tol1    -1.0000000000E+00
      ibte_abs_tol2     1.0000000000E-03
    ibte_alpha_mix1     7.0000000000E-01
    ibte_alpha_mix2     6.0000000000E-01
@@ -1294,10 +1285,10 @@ P           mkmem2        145
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         14.2  wall=         14.4
+- Proc.   0 individual time (sec): cpu=         16.7  wall=         17.0
 
 ================================================================================
 
  Calculation completed.
-.Delivered   4 WARNINGs and  12 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         14.2  wall=         14.4
+.Delivered   3 WARNINGs and  13 COMMENTs to log file.
++Overall time at end (sec) : cpu=         16.7  wall=         17.0

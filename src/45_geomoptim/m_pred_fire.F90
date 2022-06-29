@@ -9,7 +9,7 @@
 !! Michael Moseler, and Peter Gumbsch, Phys. Rev. Lett. 97, 170201 [[cite:Bitzek2006]]
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2021 ABINIT group (hexu)
+!!  Copyright (C) 1998-2022 ABINIT group (hexu)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -173,23 +173,18 @@ real(dp),allocatable,save :: vel_ioncell(:)
    return
  end if
 
- !write(std_out,*) 'FIRE 01'
+write(std_out,*) 'FIRE 01'
 !##########################################################
 !### 01. Compute the dimension of vectors (ndim)
 
  ndim=3*ab_mover%natom
- if(ab_mover%optcell==1 .or.&
-& ab_mover%optcell==4 .or.&
-& ab_mover%optcell==5 .or.&
-& ab_mover%optcell==6) ndim=ndim+1
+ if(ab_mover%optcell==1) ndim=ndim+1
  if(ab_mover%optcell==2 .or.&
 & ab_mover%optcell==3) ndim=ndim+6
- if(ab_mover%optcell==7 .or.&
-& ab_mover%optcell==8 .or.&
-& ab_mover%optcell==9) ndim=ndim+3
+ if(ab_mover%optcell>=4) ndim=ndim+3
 
-!write(std_out,*) 'FIRE: ndim=', ndim
-! write(std_out,*) 'FIRE 02'
+write(std_out,*) 'FIRE: ndim=', ndim
+write(std_out,*) 'FIRE 02'
 !##########################################################
 !### 02. Allocate the vectors vin
 
@@ -216,7 +211,7 @@ real(dp),allocatable,save :: vel_ioncell(:)
    vel_ioncell(:)=0.0
  end if
 
- !write(std_out,*) 'FIRE 03'
+ write(std_out,*) 'FIRE 03'
 !##########################################################
 !### 03. Obtain the present values from the history
 
@@ -286,13 +281,13 @@ real(dp),allocatable,save :: vel_ioncell(:)
    end do
  end if
 
- !write(std_out,*) 'FIRE 04'
+ write(std_out,*) 'FIRE 04'
 !##########################################################
 !### 04. Fill the vectors vin and vout
 
 !Initialize input vectors : first vin, then vout
 ! transfer xred, acell, and rprim to vin
-call xfpack_x2vin(acell, acell0, ab_mover%natom, ndim,&
+call xfpack_x2vin(acell, ab_mover%natom, ndim,&
 & ab_mover%nsym, ab_mover%optcell, rprim, rprimd0,&
 & ab_mover%symrel, ucvol, ucvol0, vin, xred)
 !end if
@@ -307,7 +302,7 @@ call xfpack_x2vin(acell, acell0, ab_mover%natom, ndim,&
 ! Now vout -> -dE/dx
 vout(:) = -1.0*vout(:)
 
- !write(std_out,*) 'FIRE 05'
+ write(std_out,*) 'FIRE 05'
 !##########################################################
 !### 05. iniialize FIRE
 if ( itime==1 ) then
@@ -318,7 +313,7 @@ if ( itime==1 ) then
    end if
 end if
 
- !write(std_out,*) 'FIRE 06'
+ write(std_out,*) 'FIRE 06'
 !##########################################################
 !### 06. update timestep
 ! Note that vin & vout are in reduced coordinates.
@@ -341,7 +336,7 @@ else
     dtratio = dtratio*dtdec
 endif
 
- !write(std_out,*) 'FIRE 07'
+ write(std_out,*) 'FIRE 07'
 !##########################################################
 !### 07. MD step. update vel_ioncell
 
@@ -400,7 +395,6 @@ end if
 & ab_mover%nsym, ab_mover%optcell, rprim, rprimd0,&
 & ab_mover%symrel, ucvol, ucvol0,&
 & vin, xred)
-
 
  if(ab_mover%optcell/=0)then
    call mkrdim(acell,rprim,rprimd)

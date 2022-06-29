@@ -7,7 +7,7 @@
 !! and their related ini and free routines
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2021 ABINIT group (DCA, XG, GMR, SE, Mver, JJ)
+!! Copyright (C) 2001-2022 ABINIT group (DCA, XG, GMR, SE, Mver, JJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -768,6 +768,7 @@ case (15)
    specs%crit4xml='none'
 !  Name of specs%method
    specs%method = 'Hybrid Monte Carlo'
+   specs%nhist = 3
 !  This is the initialization for ionmov==27
 !  -------------------------------------------
  case (27)                ! Generation of the training set for effective potential

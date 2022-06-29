@@ -1,6 +1,6 @@
 # -*- Python -*-
 #
-# Copyright (C) 2005-2021 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2022 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -40,9 +40,9 @@ sources = [
  "m_eprenorms.F90",
  "m_sigtk.F90",
  "m_odamix.F90",
+ "m_optic_tools.F90",
  "m_optics_vloc.F90",
  "m_rot_cg.F90",
- "m_orbmag.F90",
  "m_rhotov.F90",
  "m_common.F90",
  "m_positron.F90",

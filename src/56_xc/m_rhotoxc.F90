@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, MF, GZ, DRH, MT, SPr)
+!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, MF, GZ, DRH, MT, SPr)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -309,7 +309,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
  real(dp),pointer :: rhocorval(:,:),rhor_(:,:),taucorval(:,:),taur_(:,:)
  real(dp),ABI_CONTIGUOUS pointer :: rhonow_ptr(:,:,:)
  real(dp) :: deltae_vdw,exc_vdw
- real(dp) :: decdrho_vdw(xcdata%nspden),decdgrho_vdw(3,xcdata%nspden)
+ real(dp) :: decdrho_vdw(nfft,xcdata%nspden),decdgrho_vdw(nfft,3,xcdata%nspden)
  real(dp) :: strsxc_vdw(3,3)
  type(libxc_functional_type) :: xc_funcs_auxc(2)
 
@@ -463,8 +463,8 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
  end if
  deltae_vdw = zero
  exc_vdw = zero
- decdrho_vdw(:) = zero
- decdgrho_vdw(:,:) = zero
+ decdrho_vdw(:,:) = zero
+ decdgrho_vdw(:,:,:) = zero
  strsxc_vdw(:,:) = zero
 
 
@@ -1310,9 +1310,9 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 !Add van der Waals terms
 #if defined DEV_YP_VDWXC
  if ( (xcdata%vdw_xc > 0) .and. (xcdata%vdw_xc < 10) .and. (xc_vdw_status()) ) then
-   enxc = enxc + exc_vdw
+   enxc = enxc + exc_vdw + deltae_vdw
    do ispden=1,nspden
-     vxc(:,ispden) = vxc(:,ispden) + decdrho_vdw(ispden)
+     vxc(:,ispden) = vxc(:,ispden) + decdrho_vdw(:,ispden)
    end do
    strsxc(1) = strsxc(1) + strsxc_vdw(1,1)
    strsxc(2) = strsxc(2) + strsxc_vdw(2,2)
