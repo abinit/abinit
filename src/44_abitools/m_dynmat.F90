@@ -4645,35 +4645,33 @@ subroutine d3lwsym(blkflg,d3,has_strain,indsym,mpert,natom,nsym,symrec,symrel,sy
 
 !First, take into account the permutations symmetry of
 !(i1pert,i1dir) and (i2pert,i2dir)
- if (.not.has_strain) then
-   do i1pert = 1, mpert
-     do i2pert = 1, mpert
-       do i3pert = 1, mpert
+ do i1pert = 1, mpert
+   do i2pert = 1, mpert
+     do i3pert = 1, mpert
 
-         do i1dir = 1, 3
-           do i2dir = 1, 3
-             do i3dir = 1, 3
+       do i1dir = 1, 3
+         do i2dir = 1, 3
+           do i3dir = 1, 3
 
-               if ((blkflg(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1).and. &
-&               (blkflg(i2dir,i2pert,i1dir,i1pert,i3dir,i3pert)/=1)) then
+             if ((blkflg(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1).and. &
+              (blkflg(i2dir,i2pert,i1dir,i1pert,i3dir,i3pert)/=1)) then
 
-                 d3(1,i2dir,i2pert,i1dir,i1pert,i3dir,i3pert) = &
-&                d3(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
-                 d3(2,i2dir,i2pert,i1dir,i1pert,i3dir,i3pert) = &
-&               -d3(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
+               d3(1,i2dir,i2pert,i1dir,i1pert,i3dir,i3pert) = &
+               d3(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
+               d3(2,i2dir,i2pert,i1dir,i1pert,i3dir,i3pert) = &
+              -d3(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
 
-                 blkflg(i2dir,i2pert,i1dir,i1pert,i3dir,i3pert) = 1
+               blkflg(i2dir,i2pert,i1dir,i1pert,i3dir,i3pert) = 1
 
-               end if
+             end if
 
-             end do
            end do
          end do
-
        end do
+
      end do
    end do
- end if
+ end do
 
 !For strain perturbation we need an array with the two strain indexes
 ! if (has_strain) then
@@ -5135,12 +5133,11 @@ end subroutine sytens
 !!
 !! SOURCE
 
-subroutine sylwtens(has_strain,indsym,mpert,natom,nsym,rfpert,symrec,symrel,symrel_cart)
+subroutine sylwtens(indsym,mpert,natom,nsym,rfpert,symrec,symrel,symrel_cart)
 
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: mpert,natom,nsym
- logical,intent(in) :: has_strain
 !arrays
  integer,intent(in) :: indsym(4,nsym,natom),symrec(3,3,nsym),symrel(3,3,nsym)
  integer,intent(inout) :: rfpert(3,mpert,3,mpert,3,mpert)
@@ -5167,8 +5164,6 @@ subroutine sylwtens(has_strain,indsym,mpert,natom,nsym,rfpert,symrec,symrel,symr
 
  ABI_MALLOC(pertsy,(3,mpert,3,mpert,3,mpert))
  pertsy(:,:,:,:,:,:) = 0
-
- print *, "ENTRA"
 
 !Loop over perturbations
 
@@ -5350,34 +5345,31 @@ subroutine sylwtens(has_strain,indsym,mpert,natom,nsym,rfpert,symrec,symrel,symr
 !Now, take into account the permutation of (i1pert,i1dir)
 !and (i2pert,i2dir)
 
- if (.not.has_strain) then
-   do i1pert = 1, mpert
-     do i2pert = 1, mpert
-       do i3pert = 1, mpert
+ do i1pert = 1, mpert
+   do i2pert = 1, mpert
+     do i3pert = 1, mpert
 
-         do i1dir = 1, 3
-           do i2dir = 1, 3
-             do i3dir = 1, 3
+       do i1dir = 1, 3
+         do i2dir = 1, 3
+           do i3dir = 1, 3
 
-               if ((i1pert /= i2pert).or.(i1dir /= i2dir)) then
+             if ((i1pert /= i2pert).or.(i1dir /= i2dir)) then
 
-                 if ((pertsy(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) == 1).and.&
-&                 (pertsy(i2dir,i2pert,i1dir,i1pert,i3dir,i3pert) == 1)) then
-                   pertsy(i2dir,i2pert,i1dir,i1pert,i3dir,i3pert) = -1
-                 end if
-
+               if ((pertsy(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) == 1).and.&
+                (pertsy(i2dir,i2pert,i1dir,i1pert,i3dir,i3pert) == 1)) then
+                 pertsy(i2dir,i2pert,i1dir,i1pert,i3dir,i3pert) = -1
                end if
 
-             end do
+             end if
+
            end do
          end do
-
        end do
+
      end do
    end do
- end if
+ end do
 
- print *, "ABANS DE SORTIR"
  rfpert(:,:,:,:,:,:) = pertsy(:,:,:,:,:,:)
 
  ABI_FREE(pertsy)
