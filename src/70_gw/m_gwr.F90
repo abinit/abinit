@@ -619,9 +619,6 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
    gwr%tau_comm%nproc  = dtset%gwr_np_gtks(2)
    gwr%kpt_comm%nproc  = dtset%gwr_np_gtks(3)
    gwr%spin_comm%nproc = dtset%gwr_np_gtks(4)
-   !gwr%my_npert = natom3 / gwr%tau_comm%nproc
-   !ABI_CHECK(gwr%my_npert > 0, "pert_comm_nproc cannot be greater than 3 * natom.")
-   !ABI_CHECK(mod(natom3, gwr%tau_comm%nproc) == 0, "pert_comm_nproc must divide 3 * natom.")
  else
    ! Automatic grid generation.
    ! Priorities:
@@ -790,7 +787,6 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
 
  do ik_bz=1,gwr%nkbz
    kk_bz = gwr%kbz(:, ik_bz)
-   !ik_bz = gwr%my_kbz_inds(my_ikf)
    call get_kg(kk_bz, istwfk1, ecut_eff, gwr%cryst%gmet, npw_, gvec_)
    ABI_FREE(gvec_)
    call getng(dtset%boxcutmin, dtset%chksymtnons, ecut_eff, cryst%gmet, &
@@ -1144,7 +1140,7 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk0_path)
        !call ddkop%setup_spin_kpoint(dtset, cryst, psps, spin, kk_ibz, istwf_k, npw_k, wfd%kdata(ik_ibz)%kg_k)
 
        ! TODO: spinor and use BLAS2 but take into account scalapack distribution
-       ! or rewrite everythin with Scalapack routines.
+       ! or rewrite everything with Scalapack routines.
 
        do my_it=1,gwr%my_ntau
          itau = gwr%my_itaus(my_it)
@@ -1227,7 +1223,7 @@ subroutine gwr_rotate_gt(gwr, my_ikf, my_it, my_is, desc_kbz, gt_kbz)
  if (isirr_k) then
    do ioe=1,2
      call gwr%gt_kibz(ioe, ik_ibz, itau, spin)%copy(gt_kbz(ioe))
-     call gt_kbz(ioe) %print(header=sjoin("isirr_k with gt_kibz:", itoa(ik_ibz)))
+     !call gt_kbz(ioe) %print(header=sjoin("isirr_k with gt_kibz:", itoa(ik_ibz)))
    end do
    return
  end if

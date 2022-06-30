@@ -161,7 +161,6 @@ contains
 !!
 !!  The gradient of Vnl(K,Kp) for the k-point in the BZ should be:
 !!   gradvnl(SG,SGp,Sk)=S gradvnl(G,Gp,kibz)
-!! /***********************************************************************/
 !!
 !! TODO
 !!  Check npwepG0 before Switching on umklapp
@@ -326,7 +325,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
  if (Ep%gwcomp==1) then
    en_high=MAXVAL(qp_energy(Ep%nbnds,:,:))+Ep%gwencomp
    write(msg,'(a,f8.2,a)')' Using completeness correction with energy ',en_high*Ha_eV,' [eV] '
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(std_out, msg)
    ABI_MALLOC(wfwfg,(nfft*nspinor**2))
 
    ! Init the largest G-sphere contained in the FFT box for the wavefunctions.
@@ -385,12 +384,12 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
    write(msg_tmp,'(1x,i5,a,2x,3f12.6,a)') iqlwl,')',Ep%qlwl(:,iqlwl),ch10
    msg=TRIM(msg)//msg_tmp
  end do
- call wrtout(std_out,msg,'COLL')
+ call wrtout(std_out, msg)
 
  write(msg,'(a,i2,2a,i2)')&
   ' Using spectral method for the imaginary part = ',Ep%spmeth,ch10,&
   ' Using symmetries to sum only over the IBZ_q  = ',Ep%symchi
- call wrtout(std_out,msg,'COLL')
+ call wrtout(std_out, msg)
 
  if (use_tr) then
    ! Special care has to be taken in metals and/or spin dependent systems
@@ -488,11 +487,11 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
 
  SELECT CASE (Ep%spmeth)
  CASE (0)
-   call wrtout(std_out,' Calculating chi0(q=(0,0,0),omega,G,G")',"COLL")
+   call wrtout(std_out,' Calculating chi0(q=(0,0,0),omega,G,G")')
    ABI_MALLOC(green_w,(Ep%nomega))
 
  CASE (1, 2)
-   call wrtout(std_out,' Calculating Im chi0(q=(0,0,0),omega,G,G")','COLL')
+   call wrtout(std_out,' Calculating Im chi0(q=(0,0,0),omega,G,G")')
    !
    ! === Find max and min resonant transitions for this q, report values for this processor ===
    call make_transitions(Wfd,1,Ep%nbnds,nbvw,nsppol,Ep%symchi,Cryst%timrev,GW_TOL_DOCC,&
@@ -537,14 +536,14 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
  nkpt_summed=Kmesh%nbz
  if (Ep%symchi/=0) then
    nkpt_summed=Ltg_q%nibz_ltg
-   call littlegroup_print(Ltg_q,std_out,Dtset%prtvol,'COLL')
+   call littlegroup_print(Ltg_q,std_out,Dtset%prtvol,mode_paral='COLL')
  end if
 
  ABI_MALLOC(vkbr,(Kmesh%nibz))
  gradk_not_done=.TRUE.
 
  write(msg,'(a,i6,a)')' Calculation status ( ',nkpt_summed,' to be completed):'
- call wrtout(std_out,msg,'COLL')
+ call wrtout(std_out, msg)
  !
  ! ============================================
  ! === Begin big fat loop over transitions ====
@@ -1070,7 +1069,7 @@ end subroutine cchi0q0
 !! cchi0
 !!
 !! FUNCTION
-!! Main calculation of the independent-particle susceptibility chi0 for qpoint!=0
+!! Main calculation of the independent-particle susceptibility chi0 for qpoint != 0
 !!
 !! INPUTS
 !! use_tr=If .TRUE. valence states are stored in Wfs_val and only resonant transitions are calculated
@@ -1266,7 +1265,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
  if (Ep%gwcomp==1) then
    en_high=MAXVAL(qp_energy(Ep%nbnds,:,:)) + Ep%gwencomp
    write(msg,'(a,f8.2,a)')' Using completeness correction with the energy ',en_high*Ha_eV,' [eV]'
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(std_out, msg)
 
    ! Allocation of wfwfg and green_enhigh_w moved inside openmp loop
    ! Init the largest G-sphere contained in the FFT box for the wavefunctions.
@@ -1318,14 +1317,14 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
  end if
 
  write(msg,'(a,i2,2a,i2)')&
-&  ' Using spectral method for the imaginary part = ',Ep%spmeth,ch10,&
-&  ' Using symmetries to sum only over the IBZ_q  = ',Ep%symchi
- call wrtout(std_out,msg,'COLL')
+  ' Using spectral method for the imaginary part = ',Ep%spmeth,ch10,&
+  ' Using symmetries to sum only over the IBZ_q  = ',Ep%symchi
+ call wrtout(std_out, msg)
 
  if (use_tr) then
    ! Special care has to be taken in metals and/or spin dependent systems
    ! as Wfs_val might contain unoccupied states.
-   call wrtout(std_out,' Using faster algorithm based on time reversal symmetry.','COLL')
+   call wrtout(std_out,' Using faster algorithm based on time reversal symmetry.')
  else
    call wrtout(std_out,' Using slow algorithm without time reversal symmetry.')
  end if
@@ -1372,11 +1371,11 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
 
  SELECT CASE (Ep%spmeth)
  CASE (0)
-   call wrtout(std_out,' Calculating chi0(q,omega,G,G")','COLL')
+   call wrtout(std_out,' Calculating chi0(q,omega,G,G")')
    ! Allocation of green_w moved inside openmp loop
 
  CASE (1, 2)
-   call wrtout(std_out,' Calculating Im chi0(q,omega,G,G")','COLL')
+   call wrtout(std_out,' Calculating Im chi0(q,omega,G,G")')
 
    ! Find Max and min resonant transitions for this q, report also treated by this proc.
    call make_transitions(Wfd,1,Ep%nbnds,nbvw,nsppol,Ep%symchi,Cryst%timrev,GW_TOL_DOCC,&
@@ -1411,11 +1410,11 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
  nkpt_summed=Kmesh%nbz
  if (Ep%symchi==1) then
    nkpt_summed=Ltg_q%nibz_ltg
-   call littlegroup_print(Ltg_q,std_out,Dtset%prtvol,'COLL')
+   call littlegroup_print(Ltg_q,std_out,Dtset%prtvol,mode_paral='COLL')
  end if
 
  write(msg,'(a,i6,a)')' Calculation status : ',nkpt_summed,' to be completed '
- call wrtout(std_out,msg,'COLL')
+ call wrtout(std_out, msg)
 
  ! ============================================
  ! === Begin big fat loop over transitions ===
@@ -2167,7 +2166,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
    write(msg_tmp,'(1x,i5,a,2x,3f12.6,a)') iqlwl,')',qlwl(:,iqlwl),ch10
    msg=TRIM(msg)//msg_tmp
  end do
- call wrtout(std_out,msg,'COLL')
+ call wrtout(std_out, msg)
  !
  ! delta_ene =  e_{b,k-q} - e_{b,k} = -q. <b,k| i[H,r] |b,k> + O(q^2).
  delta_ene = zero
@@ -2296,7 +2295,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
  call littlegroup_init(q0,Kmesh,Cryst,use_umklp,Ltg_q,Ep%npwepG0,gvec=Gsph_epsG0%gvec)
 
  write(msg,'(a,i2)')' Using symmetries to sum only over the IBZ_q  = ',Ep%symchi
- call wrtout(std_out,msg,'COLL')
+ call wrtout(std_out, msg)
  !
  ! === Evaluate oscillator matrix elements btw partial waves. Note that q=Gamma is used.
  if (Psps%usepaw==1) then
@@ -2329,7 +2328,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
  nkpt_summed=Kmesh%nbz
  if (Ep%symchi/=0) then
    nkpt_summed=Ltg_q%nibz_ltg
-   call littlegroup_print(Ltg_q,std_out,Wfd%prtvol,'COLL')
+   call littlegroup_print(Ltg_q,std_out,Wfd%prtvol,mode_paral='COLL')
  end if
  !
  ! ============================================
@@ -2466,7 +2465,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
 
  do iomega=1,MIN(Ep%nomega,NOMEGA_PRINTED)
    write(msg,'(1x,a,i4,a,2f9.4,a)')' chi0_intra(G,G'') at the ',iomega,' th omega',Ep%omega(iomega)*Ha_eV,' [eV]'
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(std_out, msg)
    call print_arr(chi0(:,:,iomega),unit=std_out)
  end do
 
