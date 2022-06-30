@@ -4408,14 +4408,14 @@ end subroutine wfd_sym_ug_kg
 !!
 !! SOURCE
 
-subroutine wfdgw_write_wfk(Wfd,Hdr,Bands,wfk_fname,wfknocheck)
+subroutine wfdgw_write_wfk(Wfd,Hdr,ebands,wfk_fname,wfknocheck)
 
 !Arguments ------------------------------------
 !scalars
  character(len=*),intent(in) :: wfk_fname
  class(wfdgw_t),intent(in) :: Wfd
  type(Hdr_type),intent(in) :: Hdr
- type(ebands_t),intent(in) :: Bands
+ type(ebands_t),intent(in) :: ebands
  logical,intent(in),optional :: wfknocheck
 
 !Local variables ------------------------------
@@ -4549,7 +4549,7 @@ subroutine wfdgw_write_wfk(Wfd,Hdr,Bands,wfk_fname,wfknocheck)
          ! Write also kg_k, eig_k and occ_k
          call wfkfile%write_band_block(band_block,ik_ibz,spin,xmpio_single,&
             kg_k=Wfd%Kdata(ik_ibz)%kg_k,cg_k=cg_k, &
-            eig_k=Bands%eig(:,ik_ibz,spin),occ_k=Bands%occ(:,ik_ibz,spin))                   ! occs extracted from Bands (i.e. QP_BSt)
+            eig_k=ebands%eig(:,ik_ibz,spin),occ_k=ebands%occ(:,ik_ibz,spin))                   ! occs extracted from Bands (i.e. QP_BSt)
                                                                                              ! kg_k obtained from Wfd so OK! It is
                                                                                              ! how Gs are ordered.
        else
@@ -5675,21 +5675,21 @@ end subroutine wfdgw_get_nl_me
 !!
 !! SOURCE
 
-subroutine wfdgw_mkrho(Wfd,Cryst,Psps,Kmesh,Bands,ngfftf,nfftf,rhor,&
-                     optcalc) ! optional arguments
+subroutine wfdgw_mkrho(Wfd, Cryst, Psps, Kmesh, ebands, ngfftf, nfftf, rhor, &
+                      optcalc) ! optional arguments
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfftf
  integer,intent(in),optional :: optcalc
- type(ebands_t),intent(in) :: Bands
+ type(ebands_t),intent(in) :: ebands
  type(kmesh_t),intent(in) :: Kmesh
  type(crystal_t),intent(in) :: Cryst
  type(Pseudopotential_type),intent(in) :: Psps
  class(wfdgw_t),intent(inout) :: Wfd
 !arrays
  integer,intent(in) :: ngfftf(18)
- real(dp),intent(out) :: rhor(nfftf,Wfd%nspden)
+ real(dp),intent(out) :: rhor(nfftf, Wfd%nspden)
 
 !Local variables ------------------------------
 !scalars
@@ -5711,7 +5711,7 @@ subroutine wfdgw_mkrho(Wfd,Cryst,Psps,Kmesh,Bands,ngfftf,nfftf,rhor,&
 !*************************************************************************
 
  ! Consistency check.
- ABI_CHECK(Wfd%nsppol == Bands%nsppol, "Mismatch in nsppol")
+ ABI_CHECK(Wfd%nsppol == ebands%nsppol, "Mismatch in nsppol")
 
  if (ANY(ngfftf(1:3) /= Wfd%ngfft(1:3))) call wfd%change_ngfft(Cryst,Psps,ngfftf)
 
@@ -5739,14 +5739,14 @@ subroutine wfdgw_mkrho(Wfd,Cryst,Psps,Kmesh,Bands,ngfftf,nfftf,rhor,&
  end if
 
  ! Build the iterator that will distribute the states in an automated way.
- Iter_bks = wfd%iterator_bks(bks_mask=ABS(Bands%occ)>=tol8)
+ Iter_bks = wfd%iterator_bks(bks_mask=ABS(ebands%occ)>=tol8)
 
  do alpha=1,nalpha
    do is=1,Wfd%nsppol
      do ik=1,Wfd%nkibz
        do ib_iter=1,iter_len(Iter_bks,ik,is)
          ib = iter_yield(Iter_bks,ib_iter,ik,is)
-         bks_weight = Bands%occ(ib,ik,is) * Kmesh%wt(ik) / Cryst%ucvol
+         bks_weight = ebands%occ(ib,ik,is) * Kmesh%wt(ik) / Cryst%ucvol
 
          call wfd%get_ur(ib,ik,is,wfr)
 

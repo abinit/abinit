@@ -5130,7 +5130,7 @@ subroutine hdr_vs_dtset(Hdr,Dtset)
  ! Check istwfk storage
  if (allocated(dtset%istwfk)) then
    if ((any(Hdr%istwfk(:) /= Dtset%istwfk(1:Dtset%nkpt))) ) then
-     ABI_COMMENT('istwfk read from Header differs from the values specified in the input file (this is not critical)')
+     ABI_COMMENT('istwfk from header differs from the values specified in the input file (not critical)')
      !call wrtout(std_out, "  Hdr | input ")
      !do ik=1,Dtset%nkpt
      !  write(msg,'(i5,3x,i5)')Hdr%istwfk(ik),Dtset%istwfk(ik)
