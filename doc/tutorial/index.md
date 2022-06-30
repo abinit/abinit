@@ -203,6 +203,10 @@ the tutorial on non-linear optics, and the group of electron-phonon tutorials:**
   * [The second tutorial on MULTIBINIT](spin_model) presents how to build a spin model 
     and run spin dynamics in MULTIBINIT.
 
+  * [The third tutorial on MULTIBINIT](lwf_model) presents how to run a lattice Wannier function (LWF) dynamics 
+    in MULTIBINIT.
+
+
   * [The tutorial on static non-linear properties](nlo) presents the computation of responses beyond
     the linear order, within Density-Functional Perturbation Theory (beyond the simple Sum-Over-State approximation):
     Raman scattering efficiencies (non-resonant case), non-linear electronic susceptibility, electro-optic effect.
@@ -234,6 +238,15 @@ Their prerequisite is also tutorials DFPT1 and DFPT2 (Optic not needed):**
   * [The obsolete tutorial on temperature dependence of the electronic structure](tdepes) presents the computation
     of the temperature dependence of the electronic structure,
     the zero-point motion effect, the lifetime/broadening of eigenenergies.
+### MULTIBINIT
+
+  * [The first tutorial on MULTIBINIT](multibinit) presents the MULTIBINIT project 
+  * [The first tutorial on MULTIBINIT](lattice_model) presents the basic use of the MULTIBINIT application,
+    how to build a harmonic model by using a second-principles approach for lattice dynamics
+    simulations based on atomic potentials fitted on first-principles calculations.
+
+  * [The second tutorial on MULTIBINIT](spin_model) presents how to build a spin model 
+    and run spin dynamics in MULTIBINIT.
 
 ### MBPT-related tutorials
 **There is another additional group of tutorials on many-body perturbation

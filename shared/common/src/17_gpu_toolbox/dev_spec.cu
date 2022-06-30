@@ -9,7 +9,7 @@
  */
 
 #include <stdio.h>
-#include <abi_gpu_header.h>
+#include <abi_gpu_header_common.h>
 
 static __host__ int version_2_cores(int major, int minor);
 
@@ -222,6 +222,9 @@ int version_2_cores(int major, int minor)
         { 0x70, 64 }, // Volta Generation (SM 7.0) GV100 class
         { 0x72, 64 }, // Volta Generation (SM 7.2) AGX class
         { 0x75, 64 }, // Turing Generation (SM 7.5) RTX class
+        { 0x80, 64 }, // Ampere Generation (SM 8.0) A100 class
+        { 0x86, 128}, // Ampere Generation (SM 8.6)
+        { 0x87, 128}, // Ampere Generation (SM 8.7)
         {   -1, -1 }
     };
     int index = 0;

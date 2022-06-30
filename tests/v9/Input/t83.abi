@@ -11,6 +11,7 @@ ntime = 10
 nctime = 1
 dtion = 10
 latt_friction=0.1
+randomseed=111111 # for testing only
 
 #-------------------------------------------------------------
 #Spin dynamics
@@ -22,16 +23,16 @@ latt_friction=0.1
 #%% [setup]
 #%% executable = multibinit
 #%% exclude_builders = .*_nag_7.[01]_.*
-#%% system_xml = t83.nc
+#%% latt_pot = t83.nc
 #%% exec_args = --F03
 #%% [files]
 #%% files_to_test = 
-#%%   t83.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
+#%%   t83.abo, tolnlines = 2, tolabs = 0.001, tolrel = 0.00001, fld_options = -medium;
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = X. He 
-#%% keywords = Effective potential, multibinit
+#%% keywords = Effective potential, multibinit, spinpot
 #%% description = 
 #%%   Read netcdf and run lattice dynamics using Langevin NVT (dynamics=102)
 #%%   need to run multibinit --F03 to use the new implementation.

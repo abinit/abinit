@@ -1784,7 +1784,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  end if
 
  if((dtset%wfoptalg == 1 .or. dtset%wfoptalg == 111)  .and. psps%usepaw == 1) then
-   call destroy_invovl(dtset%nkpt)
+   call destroy_invovl(dtset%nkpt,dtset%use_gpu_cuda)
  end if
 
  if(gemm_nonlop_use_gemm) then
