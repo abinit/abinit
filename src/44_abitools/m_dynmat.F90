@@ -4676,35 +4676,35 @@ subroutine d3lwsym(blkflg,d3,has_strain,indsym,mpert,natom,nsym,symrec,symrel,sy
  end if
 
 !For strain perturbation we need an array with the two strain indexes
- if (has_strain) then
-   strflg=0
-   d3str=zero
-   do i3pert=1, mpert
-     do i3dir=1,3
-       do i2pert=natom+3,natom+4
-         do i2dir=1,3
-           if (i2pert==natom+3) istr=i2dir
-           if (i2pert==natom+4) istr=3+i2dir
-           i2dir_a=idx(2*istr-1); i2dir_b=idx(2*istr)
-           do i1pert=1,mpert
-             do i1dir=1,3
-               if (blkflg(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1) then
-                 strflg(i1dir,i1pert,i2dir_a,i2dir_b,i3dir,i3pert)=1
-                 d3str(:,i1dir,i1pert,i2dir_a,i2dir_b,i3dir,i3pert)= &
-               & d3(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)          
-                 if (i2pert==natom+4) then
-                   strflg(i1dir,i1pert,i2dir_b,i2dir_a,i3dir,i3pert)=1
-                   d3str(:,i1dir,i1pert,i2dir_b,i2dir_a,i3dir,i3pert)= &
-                 & d3(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)          
-                 end if
-               end if
-             end do
-           end do
-         end do
-       end do
-     end do
-   end do
- end if
+! if (has_strain) then
+!   strflg=0
+!   d3str=zero
+!   do i3pert=1, mpert
+!     do i3dir=1,3
+!       do i2pert=natom+3,natom+4
+!         do i2dir=1,3
+!           if (i2pert==natom+3) istr=i2dir
+!           if (i2pert==natom+4) istr=3+i2dir
+!           i2dir_a=idx(2*istr-1); i2dir_b=idx(2*istr)
+!           do i1pert=1,mpert
+!             do i1dir=1,3
+!               if (blkflg(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1) then
+!                 strflg(i1dir,i1pert,i2dir_a,i2dir_b,i3dir,i3pert)=1
+!                 d3str(:,i1dir,i1pert,i2dir_a,i2dir_b,i3dir,i3pert)= &
+!               & d3(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)          
+!                 if (i2pert==natom+4) then
+!                   strflg(i1dir,i1pert,i2dir_b,i2dir_a,i3dir,i3pert)=1
+!                   d3str(:,i1dir,i1pert,i2dir_b,i2dir_a,i3dir,i3pert)= &
+!                 & d3(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)          
+!                 end if
+!               end if
+!             end do
+!           end do
+!         end do
+!       end do
+!     end do
+!   end do
+! end if
 
 !Big Big Loop : symmetrize three times, because
 !of some cases in which one element is not yet available
@@ -4749,12 +4749,15 @@ subroutine d3lwsym(blkflg,d3,has_strain,indsym,mpert,natom,nsym,symrec,symrel,sy
                      ipesy2 = i2pert
                      sym2(:,:) = symrel(:,:,isym)
                    else if (i2pert == natom + 3.or. i2pert == natom + 4) then
-                     ipesy2 = i2pert
-                     sym2(:,:) = NINT(symrel_cart(:,:,isym))
+                     !TODO: Symmetries on strain perturbation do not work yet.
+                     found = 0
                      is_strain=.true.
-                     if (i2pert==natom+3) istr=i2dir
-                     if (i2pert==natom+4) istr=3+i2dir
-                     i2dir_a=idx(2*istr-1); i2dir_b=idx(2*istr)
+
+!                     ipesy2 = i2pert
+!                     sym2(:,:) = NINT(symrel_cart(:,:,isym))
+!                     if (i2pert==natom+3) istr=i2dir
+!                     if (i2pert==natom+4) istr=3+i2dir
+!                     i2dir_a=idx(2*istr-1); i2dir_b=idx(2*istr)
                    else
                      found = 0
                    end if
@@ -4797,39 +4800,39 @@ subroutine d3lwsym(blkflg,d3,has_strain,indsym,mpert,natom,nsym,symrec,symrel,sy
                        end do
                      end do
                    else 
-                     do idisy1 = 1, 3
-                       !do idisy2_a = 1, 3
-                       !  do idisy2_b = 1, 3
-                       do idisy2 = 1, 3
-                         if (ipesy2==natom+3) istr=idisy2
-                         if (ipesy2==natom+4) istr=3+idisy2
-                         idisy2_a=idx(2*istr-1); idisy2_b=idx(2*istr)
-                           do idisy3 = 1, 3
-
-                             if ((sym1(i1dir,idisy1) /=0).and.(sym2(i2dir_a,idisy2_a) /=0) &
-&                             .and.(sym2(i2dir_b,idisy2_b) /=0).and.(sym3(i3dir,idisy3) /=0)) then
-
-                               if (strflg(idisy1,ipesy1,idisy2_a,idisy2_b,idisy3,ipesy3) == 1) then
-
-                                 sumr = sumr + sym1(i1dir,idisy1)*sym2(i2dir_a,idisy2_a)* &
-&                                sym2(i2dir_b,idisy2_b)*sym3(i3dir,idisy3)*& 
-&                                d3str(1,idisy1,ipesy1,idisy2_a,idisy2_b,idisy3,ipesy3)
-                                 sumi = sumi + sym1(i1dir,idisy1)*sym2(i2dir_a,idisy2_b)*&
-&                                sym2(i2dir_b,idisy2_b)*sym3(i3dir,idisy3)*& 
-&                                d3str(2,idisy1,ipesy1,idisy2_a,idisy2_b,idisy3,ipesy3)
-
-                               else
-
-                                 found = 0
-
-                               end if
-
-                             end if
-
-                           end do
-                         !end do
-                       end do
-                     end do
+!                     do idisy1 = 1, 3
+!                       !do idisy2_a = 1, 3
+!                       !  do idisy2_b = 1, 3
+!                       do idisy2 = 1, 3
+!                         if (ipesy2==natom+3) istr=idisy2
+!                         if (ipesy2==natom+4) istr=3+idisy2
+!                         idisy2_a=idx(2*istr-1); idisy2_b=idx(2*istr)
+!                           do idisy3 = 1, 3
+!
+!                             if ((sym1(i1dir,idisy1) /=0).and.(sym2(i2dir_a,idisy2_a) /=0) &
+!&                             .and.(sym2(i2dir_b,idisy2_b) /=0).and.(sym3(i3dir,idisy3) /=0)) then
+!
+!                               if (strflg(idisy1,ipesy1,idisy2_a,idisy2_b,idisy3,ipesy3) == 1) then
+!
+!                                 sumr = sumr + sym1(i1dir,idisy1)*sym2(i2dir_a,idisy2_a)* &
+!&                                sym2(i2dir_b,idisy2_b)*sym3(i3dir,idisy3)*& 
+!&                                d3str(1,idisy1,ipesy1,idisy2_a,idisy2_b,idisy3,ipesy3)
+!                                 sumi = sumi + sym1(i1dir,idisy1)*sym2(i2dir_a,idisy2_b)*&
+!&                                sym2(i2dir_b,idisy2_b)*sym3(i3dir,idisy3)*& 
+!&                                d3str(2,idisy1,ipesy1,idisy2_a,idisy2_b,idisy3,ipesy3)
+!
+!                               else
+!
+!                                 found = 0
+!
+!                               end if
+!
+!                             end if
+!
+!                           end do
+!                         !end do
+!                       end do
+!                     end do
                    end if        
 
                    if (found == 1) then
@@ -5165,6 +5168,8 @@ subroutine sylwtens(has_strain,indsym,mpert,natom,nsym,rfpert,symrec,symrel,symr
  ABI_MALLOC(pertsy,(3,mpert,3,mpert,3,mpert))
  pertsy(:,:,:,:,:,:) = 0
 
+ print *, "ENTRA"
+
 !Loop over perturbations
 
  do i1pert_ = 1, mpert
@@ -5221,12 +5226,15 @@ subroutine sylwtens(has_strain,indsym,mpert,natom,nsym,rfpert,symrec,symrel,symr
                    ipesy2 = i2pert
                    sym2(:,:) = symrel(:,:,isym)
                  else if (i2pert == natom + 3.or. i2pert == natom + 4) then
-                   ipesy2 = i2pert
-                   sym2(:,:) = NINT(symrel_cart(:,:,isym))
+!                  !TODO: Symmetries on strain perturbation do not work yet.
+                   found = 0
                    is_strain=.true.
-                   if (i2pert==natom+3) istr=i2dir
-                   if (i2pert==natom+4) istr=3+i2dir
-                   i2dir_a=idx(2*istr-1); i2dir_b=idx(2*istr)
+!
+!                   ipesy2 = i2pert
+!                   sym2(:,:) = NINT(symrel_cart(:,:,isym))
+!                   if (i2pert==natom+3) istr=i2dir
+!                   if (i2pert==natom+4) istr=3+i2dir
+!                   i2dir_a=idx(2*istr-1); i2dir_b=idx(2*istr)
                  else
                    found = 0
                  end if
@@ -5238,10 +5246,10 @@ subroutine sylwtens(has_strain,indsym,mpert,natom,nsym,rfpert,symrec,symrel,symr
                    found = 0
                  end if
 
+
 !                See if the symmetric element is available and check if some
 !                of the elements may be zero. In the latter case, they do not need
 !                to be computed.
-
 
                  if (.not.is_strain) then
                    if ((flag /= -1).and.&
@@ -5273,40 +5281,40 @@ subroutine sylwtens(has_strain,indsym,mpert,natom,nsym,rfpert,symrec,symrel,symr
                        end do
                      end do
                    end do
-                 else 
-                   if ((flag_dp /= -1).and.&
-&                   (ipesy1==i1pert).and.(ipesy2==i2pert).and.(ipesy3==i3pert)) then
-                     flag = sym1(i1dir,i1dir)*sym2(i2dir_a,i2dir_a)* &
-                   & sym2(i2dir_b,i2dir_b)*sym3(i3dir,i3dir)
-                   end if
-
-                   do idisy1 = 1, 3
-                     do idisy2 = 1, 3
-                       if (ipesy2==natom+3) istr=idisy2
-                       if (ipesy2==natom+4) istr=3+idisy2
-                       idisy2_a=idx(2*istr-1); idisy2_b=idx(2*istr)
-                       do idisy3 = 1, 3
-
-                         if ((sym1(i1dir,idisy1) /= 0).and.(sym2(i2dir_a,idisy2_a) /= 0).and.&
-&                          (sym2(i2dir_b,idisy2_b) /= 0).and.(sym3(i3dir,idisy3) /= 0)) then
-                           if (pertsy(idisy1,ipesy1,idisy2,ipesy2,idisy3,ipesy3) == 0) then
-                             found = 0
-!                            exit      ! exit loop over symmetries
-                           end if
-                         end if
-
-
-                         if ((flag == -1).and.&
-&                         ((idisy1/=i1dir).or.(idisy2_a/=i2dir_a).or.(idisy2_b/=i2dir_b).or.(idisy3/=i3dir))) then
-                           if ((sym1(i1dir,idisy1)/=0).and.(sym2(i2dir_a,idisy2_a)/=0).and.&
-&                           (sym2(i2dir_b,idisy2_b)/=0).and.(sym3(i3dir,idisy3)/=0)) then
-                             flag = 0
-                           end if
-                         end if
-
-                       end do
-                     end do
-                   end do
+!                 else 
+!                   if ((flag_dp /= -1).and.&
+!&                   (ipesy1==i1pert).and.(ipesy2==i2pert).and.(ipesy3==i3pert)) then
+!                     flag = sym1(i1dir,i1dir)*sym2(i2dir_a,i2dir_a)* &
+!                   & sym2(i2dir_b,i2dir_b)*sym3(i3dir,i3dir)
+!                   end if
+!
+!                   do idisy1 = 1, 3
+!                     do idisy2 = 1, 3
+!                       if (ipesy2==natom+3) istr=idisy2
+!                       if (ipesy2==natom+4) istr=3+idisy2
+!                       idisy2_a=idx(2*istr-1); idisy2_b=idx(2*istr)
+!                       do idisy3 = 1, 3
+!
+!                         if ((sym1(i1dir,idisy1) /= 0).and.(sym2(i2dir_a,idisy2_a) /= 0).and.&
+!&                          (sym2(i2dir_b,idisy2_b) /= 0).and.(sym3(i3dir,idisy3) /= 0)) then
+!                           if (pertsy(idisy1,ipesy1,idisy2,ipesy2,idisy3,ipesy3) == 0) then
+!                             found = 0
+!!                            exit      ! exit loop over symmetries
+!                           end if
+!                         end if
+!
+!
+!                         if ((flag == -1).and.&
+!&                         ((idisy1/=i1dir).or.(idisy2_a/=i2dir_a).or.(idisy2_b/=i2dir_b).or.(idisy3/=i3dir))) then
+!                           if ((sym1(i1dir,idisy1)/=0).and.(sym2(i2dir_a,idisy2_a)/=0).and.&
+!&                           (sym2(i2dir_b,idisy2_b)/=0).and.(sym3(i3dir,idisy3)/=0)) then
+!                             flag = 0
+!                           end if
+!                         end if
+!
+!                       end do
+!                     end do
+!                   end do
                  end if
 
                  if (found == 1) then
@@ -5369,6 +5377,7 @@ subroutine sylwtens(has_strain,indsym,mpert,natom,nsym,rfpert,symrec,symrel,symr
    end do
  end if
 
+ print *, "ABANS DE SORTIR"
  rfpert(:,:,:,:,:,:) = pertsy(:,:,:,:,:,:)
 
  ABI_FREE(pertsy)
