@@ -323,7 +323,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  call sylwtens(has_strain,indsym,mpert,natom,dtset%nsym,rfpert,symrec,dtset%symrel,symrel_cart)
 
  write(msg,'(a,a,a,a,a)') ch10, &
-& ' The list of irreducible elements of the spatial-dispersion tensors is: ', ch10,& 
+& ' The list of irreducible elements of the spatial-dispersion third-order energy derivatives is: ', ch10,& 
 & ' (in reduced coordinates except for strain pert.) ', ch10
  call wrtout(ab_out,msg,'COLL')
  call wrtout(std_out,msg,'COLL')
