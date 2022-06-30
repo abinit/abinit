@@ -36,7 +36,7 @@ rfphon4   1
 rfatpol4  1 2
 rfdir4   1 1 1
 tolvrs4   1.0d-8
-prepalw4  1
+prepalw4  2
 
 #Set 5 : Dynamic Quadrupoles calculation
 #***************************************

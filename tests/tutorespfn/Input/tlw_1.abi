@@ -32,6 +32,7 @@ rfphon4   1
 rfatpol4  1 2     
 rfdir4   1 1 1   
 rfstrs4   3      
+rfstrs_ref4   1      
 tolvrs4   1.0d-8 
 prepalw4  1      
 
