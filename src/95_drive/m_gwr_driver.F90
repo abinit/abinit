@@ -142,7 +142,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  logical :: use_wfk
  character(len=500) :: msg
  character(len=fnlen) :: wfk0_path !, path
- type(hdr_type) :: wfk0_hdr
+ type(hdr_type) :: wfk_hdr
  type(crystal_t) :: cryst
  type(ebands_t) :: ks_ebands
  type(pawfgr_type) :: pawfgr
@@ -249,10 +249,10 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
 
  if (use_wfk) then
    ! Construct crystal and ks_ebands from the GS WFK file.
-   ks_ebands = wfk_read_ebands(wfk0_path, comm, out_hdr=wfk0_hdr)
-   call wfk0_hdr%vs_dtset(dtset)
+   ks_ebands = wfk_read_ebands(wfk0_path, comm, out_hdr=wfk_hdr)
+   call wfk_hdr%vs_dtset(dtset)
 
-   cryst = wfk0_hdr%get_crystal()
+   cryst = wfk_hdr%get_crystal()
    call cryst%print(header="crystal structure from WFK file")
 
    ! Here we change the GS bands (Fermi level, scissors operator ...)
@@ -302,7 +302,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  !==== Free memory ====
  !=====================
  call cryst%free()
- call wfk0_hdr%free()
+ call wfk_hdr%free()
  call ebands_free(ks_ebands)
  call pawfgr_destroy(pawfgr)
  call destroy_mpi_enreg(mpi_enreg)

@@ -50,12 +50,16 @@ module m_gwr
  use m_crystal,       only : crystal_t
  use m_dtset,         only : dataset_type
  use m_fftcore,       only : get_kg, sphereboundary, ngfft_seq, getng, print_ngfft !, kgindex
- use m_fft,           only : fft_ug, fft_ur, fftbox_plan3_t
+ use m_fft,           only : fft_ug, fft_ur, fftbox_plan3_t, fourdp
  use m_fft_mesh,      only : times_eikr !, times_eigr, ig2gfft, get_gftt, calc_ceikr, calc_eigr
  use m_kpts,          only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, kpts_map, kpts_sort, kpts_pack_in_stars
+ use m_ioarr,         only : read_rhor
  use m_wfk,           only : wfk_read_ebands
  use m_wfd,           only : wfd_t, wfd_init, wave_t
  use m_pawtab,        only : pawtab_type
+ use m_pawrhoij,      only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy, pawrhoij_free, &
+                             pawrhoij_inquire_dim, pawrhoij_symrhoij, pawrhoij_unpack
+ !use m_vhxc_me,       only : calc_vhxc_me
 
  implicit none
 
@@ -123,8 +127,13 @@ module m_gwr
 
  type, public :: gwr_t
 
-   integer :: nsppol = 1, nspinor = -1
-   ! Number of independent spin polarizations and number of spinor components.
+   integer :: nsppol = 1, nspinor = -1, nspden = -1
+   ! Number of independent spin polarizations, number of spinor components and spin density.
+
+   integer :: natom = -1
+    ! Number of atoms
+
+   integer :: usepaw = -1
 
    integer :: my_nspins = -1
    ! Number of independent spin polarizations treated by this MPI proc
@@ -240,11 +249,15 @@ module m_gwr
    !integer :: sigma_mpw = -1
    ! Max number of g-vectors for Sigma over q-points.
 
-   integer :: ngfft(18) = -1
-   integer :: mgfft = -1, nfft = -1
+   integer :: g_ngfft(18) = -1, g_mgfft = -1, g_nfft = -1
+   ! FFT mesh for the Green's function.
 
-   !integer :: chi_ngfft(18) = -1
-   !integer :: sigma_ngfft(18) = -1
+   !integer :: chi_ngfft(18) = -1, chi_mgfft = -1, chi_nfft = -1
+   !integer :: sig_ngfft(18) = -1, sig_mgfft = -1, sig_nfft = -1
+
+   integer :: ngfftf(18) = -1, mgfftf = -1, nfftf = -1
+   ! FFT mesh for densities and potentials.
+   ! These quantities are initialized from the DEN file (gwr_load_data_from_files).
 
    type(desc_t),allocatable :: green_desc_kibz(:)
    ! (nkibz)
@@ -357,13 +370,24 @@ module m_gwr
    ! (3, nqibz)
    ! Reduced coordinates of the q-points in the IBZ (full simmetry of the system).
 
-    real(dp),allocatable :: wtq(:)
+   real(dp),allocatable :: wtq(:)
    ! (nqibz)
    ! Weights of the q-points in the IBZ (normalized to one).
+
+   real(dp),allocatable :: ks_rhog(:,:), ks_rhor(:,:)
+   ! (nfftf, nspden)
+   ! KS density in G/r space.
+
+   !real(dp),allocatable :: ks_vhartr(:), ks_vtrial(:,:), ks_vxc(:,:), ks_nhat(:,:), ks_nhatgr(:,:,:)
+
+   type(pawrhoij_type), allocatable :: ks_pawrhoij(:)
+   ! (natom)
 
  contains
 
    procedure :: init => gwr_init
+
+   procedure :: load_data_from_files => gwr_load_data_from_files
 
    procedure :: get_green_gpr => gwr_get_green_gpr
 
@@ -432,7 +456,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  integer,parameter :: qptopt1 = 1, timrev1 = 1, master = 0, ndims = 4
  integer :: my_is, my_it, my_ikf, my_iqf, ii, npwsp, col_bsize, ebands_timrev, my_iki, my_iqi, itau, spin
  integer :: my_nshiftq, ik_ibz, ik_bz, iq_bz, iq_ibz, npw_, ncid ! ig1, ig2,
- integer :: comm_cart, me_cart, ierr, all_nproc, nps, my_rank, qprange_, gap_err
+ integer :: comm_cart, me_cart, ierr, all_nproc, nps, my_rank, qprange_, gap_err, den_fform
  real(dp) :: ecut_eff
  real(dp) :: cpu, wall, gflops
  character(len=5000) :: msg
@@ -461,7 +485,8 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  gwr%psps => psps
  gwr%pawtab => pawtab
  gwr%ks_ebands => ks_ebands
- ! TODO Make sure fermie is inside the gap if semiconductor. perhaps this shoud be delegated to gwr_driver
+ ! TODO Make sure fermie is inside the gap if semiconductor.
+ ! perhaps this shoud be delegated to gwr_driver
  gwr%kibz => ks_ebands%kptns
  gwr%wtk => ks_ebands%wtk
  gwr%mpi_enreg => mpi_enreg
@@ -472,7 +497,12 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  gwr%comm = comm
  gwr%nspinor = dtset%nspinor
  gwr%nsppol = dtset%nsppol
+ gwr%nspden = dtset%nspden
+ gwr%natom = dtset%natom
+ gwr%usepaw = dtset%usepaw
  gwr%use_supercell = .True.
+
+ call gwr%load_data_from_files()
 
  ! =======================
  ! Setup k-mesh and q-mesh
@@ -783,14 +813,14 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  ! =========================================
 
  ecut_eff = dtset%ecut * dtset%dilatmx ** 2
- call ngfft_seq(gwr%ngfft, [0, 0, 0])
+ call ngfft_seq(gwr%g_ngfft, [0, 0, 0])
 
  do ik_bz=1,gwr%nkbz
    kk_bz = gwr%kbz(:, ik_bz)
    call get_kg(kk_bz, istwfk1, ecut_eff, gwr%cryst%gmet, npw_, gvec_)
    ABI_FREE(gvec_)
    call getng(dtset%boxcutmin, dtset%chksymtnons, ecut_eff, cryst%gmet, &
-              kk_bz, me_fft0, gwr%mgfft, gwr%nfft, gwr%ngfft, nproc_fft1, cryst%nsym, paral_fft0, &
+              kk_bz, me_fft0, gwr%g_mgfft, gwr%g_nfft, gwr%g_ngfft, nproc_fft1, cryst%nsym, paral_fft0, &
               cryst%symrel, cryst%tnons, unit=dev_null)
    gwr%green_mpw = max(gwr%green_mpw, npw_)
  end do
@@ -800,17 +830,17 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
    call get_kg(qq_bz, istwfk1, dtset%ecuteps, gwr%cryst%gmet, npw_, gvec_)
    ABI_FREE(gvec_)
    call getng(dtset%boxcutmin, dtset%chksymtnons, dtset%ecuteps, cryst%gmet, &
-              qq_bz, me_fft0, gwr%mgfft, gwr%nfft, gwr%ngfft, nproc_fft1, cryst%nsym, &
+              qq_bz, me_fft0, gwr%g_mgfft, gwr%g_nfft, gwr%g_ngfft, nproc_fft1, cryst%nsym, &
               paral_fft0, cryst%symrel, cryst%tnons, unit=dev_null)
    gwr%chi_mpw = max(gwr%chi_mpw, npw_)
  end do
 
  if (my_rank == master) then
-   call print_ngfft(gwr%ngfft, header="FFT mesh for GWR", unit=std_out)
-   call print_ngfft(gwr%ngfft, header="FFT mesh for GWR", unit=ab_out)
+   call print_ngfft(gwr%g_ngfft, header="FFT mesh for GWR", unit=std_out)
+   call print_ngfft(gwr%g_ngfft, header="FFT mesh for GWR", unit=ab_out)
  end if
 
- ! Now we know the value of ngfft. Setup tables for zero-padded FFTs.
+ ! Now we know the value of g_ngfft. Setup tables for zero-padded FFTs.
  ! Build FFT descriptors for Green's functions and chi.
  ! and setup tables for zero-padded FFTs.
  ABI_MALLOC(gwr%green_desc_kibz, (gwr%nkibz))
@@ -821,8 +851,8 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
    desc_k => gwr%green_desc_kibz(ik_ibz)
    desc_k%istwfk = istwfk1
    call get_kg(kk_ibz, desc_k%istwfk, ecut_eff, gwr%cryst%gmet, desc_k%npw, desc_k%gvec)
-   ABI_MALLOC(desc_k%gbound, (2 * gwr%mgfft + 8, 2))
-   call sphereboundary(desc_k%gbound, desc_k%istwfk, desc_k%gvec, gwr%mgfft, desc_k%npw)
+   ABI_MALLOC(desc_k%gbound, (2 * gwr%g_mgfft + 8, 2))
+   call sphereboundary(desc_k%gbound, desc_k%istwfk, desc_k%gvec, gwr%g_mgfft, desc_k%npw)
  end do
 
  ABI_MALLOC(gwr%chi_desc_qibz, (gwr%nqibz))
@@ -833,8 +863,8 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
    desc_q => gwr%chi_desc_qibz(iq_ibz)
    desc_q%istwfk = istwfk1
    call get_kg(qq_ibz, desc_q%istwfk, dtset%ecuteps, gwr%cryst%gmet, desc_q%npw, desc_q%gvec)
-   ABI_MALLOC(desc_q%gbound, (2 * gwr%mgfft + 8, 2))
-   call sphereboundary(desc_q%gbound, desc_q%istwfk, desc_q%gvec, gwr%mgfft, desc_q%npw)
+   ABI_MALLOC(desc_q%gbound, (2 * gwr%g_mgfft + 8, 2))
+   call sphereboundary(desc_q%gbound, desc_q%istwfk, desc_q%gvec, gwr%g_mgfft, desc_q%npw)
  end do
 
  ! =============================================================
@@ -874,13 +904,87 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
 
  ! Create netcdf file to store results.
  gwr%gwrnc_path = strcat(dtfil%filnam_ds(4), "_GWR.nc")
+
  if (my_rank == master) then
    NCF_CHECK(nctk_open_create(ncid, gwr%gwrnc_path, xmpi_comm_self))
    NCF_CHECK(cryst%ncwrite(ncid))
    NCF_CHECK(ebands_ncwrite(ks_ebands, ncid))
+
+   ! Add dimensions.
+   !ncerr = nctk_def_dims(ncid, [ &
+   !  nctkdim_t("nkcalc", gwr%nkcalc), nctkdim_t("max_nbcalc", gwr%max_nbcalc), &
+   !  nctkdim_t("nsppol", gwr%nsppol), nctkdim_t("ntemp", gwr%ntemp), nctkdim_t("natom3", 3 * cryst%natom), &
+   !  nctkdim_t("nqibz", gwr%nqibz), nctkdim_t("nqbz", gwr%nqbz)], &
+   !  defmode=.True.)
+   !NCF_CHECK(ncerr)
+
+   !ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: &
+   !  "eph_task", "symsigma", "nbsum", "bsum_start", "bsum_stop", "symdynmat", &
+   !  "ph_intmeth", "eph_intmeth", "qint_method", "eph_transport", &
+   !  "imag_only", "symv1scf", "dvdb_add_lr", "mrta", "ibte_prep", "eph_prtscratew"])
+   !NCF_CHECK(ncerr)
+   !ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: &
+   !  "eta", "wr_step", "eph_fsewin", "eph_fsmear", "eph_extrael", "eph_fermie", &
+   !  "ph_wstep", "ph_smear", "eph_phwinfact"])
+   !NCF_CHECK(ncerr)
+
+   ! Define arrays with results.
+   !ncerr = nctk_def_arrays(ncid, [ &
+   !  nctkarr_t("ngqpt", "int", "three"), &
+   !  nctkarr_t("ddb_ngqpt", "int", "three"), &
+   !  nctkarr_t("ph_ngqpt", "int", "three"), &
+   !  nctkarr_t("sigma_ngkpt", "int", "three"), &
+   !  nctkarr_t("sigma_erange", "dp", "two"), &
+   !  nctkarr_t("bstart_ks", "int", "nkcalc, nsppol"), &
+   !  !nctkarr_t("bstop_ks", "int", "nkcalc, nsppol"), &
+   !  nctkarr_t("nbcalc_ks", "int", "nkcalc, nsppol"), &
+   !  nctkarr_t("kcalc", "dp", "three, nkcalc"), &
+   !  nctkarr_t("kcalc2ibz", "int", "nkcalc, six"), &
+   !  nctkarr_t("qp_done", "int", "nkcalc, nsppol"), &
+   !  nctkarr_t("vals_e0ks", "dp", "two, ntemp, max_nbcalc, nkcalc, nsppol"), &
+   !  nctkarr_t("dvals_de0ks", "dp", "two, ntemp, max_nbcalc, nkcalc, nsppol"), &
+   !  nctkarr_t("qpoms_enes", "dp", "two, ntemp, max_nbcalc, nkcalc, nsppol"), &
+   !  nctkarr_t("qp_enes", "dp", "two, ntemp, max_nbcalc, nkcalc, nsppol"), &
+   !  nctkarr_t("ze0_vals", "dp", "ntemp, max_nbcalc, nkcalc, nsppol"), &
+   !  nctkarr_t("ks_enes", "dp", "max_nbcalc, nkcalc, nsppol"), &
+   !  nctkarr_t("ks_gaps", "dp", "nkcalc, nsppol"), &
+   !  nctkarr_t("qpoms_gaps", "dp", "ntemp, nkcalc, nsppol"), &
+   !  nctkarr_t("qp_gaps", "dp", "ntemp, nkcalc, nsppol"), &
+   !  nctkarr_t("vcar_calc", "dp", "three, max_nbcalc, nkcalc, nsppol") &
+   !])
+   !NCF_CHECK(ncerr)
+
+   ! ======================================================
+   ! Write data that do not depend on the (kpt, spin) loop.
+   ! ======================================================
    !NCF_CHECK(nctk_set_datamode(ncid))
+   !ii = 0; if (gwr%imag_only) ii = 1
+   !ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: &
+   !  "eph_task", "symsigma", "nbsum", "bsum_start", "bsum_stop", &
+   !  "symdynmat", "ph_intmeth", "eph_intmeth", "qint_method", &
+   !  "eph_transport", "imag_only", "symv1scf", "dvdb_add_lr", "mrta", "ibte_prep", "eph_prtscratew"], &
+   !  [dtset%eph_task, gwr%symsigma, gwr%nbsum, gwr%bsum_start, gwr%bsum_stop, &
+   !  dtset%symdynmat, dtset%ph_intmeth, dtset%eph_intmeth, gwr%qint_method, &
+   !  dtset%eph_transport, ii, dtset%symv1scf, dtset%dvdb_add_lr, gwr%mrta, dtset%ibte_prep, dtset%eph_prtscratew])
+   !NCF_CHECK(ncerr)
+   !ncerr = nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: &
+   !  "eta", "wr_step", "eph_fsewin", "eph_fsmear", "eph_extrael", "eph_fermie", "ph_wstep", "ph_smear", "eph_phwinfact"], &
+   !  [aimag(gwr%ieta), gwr%wr_step, dtset%eph_fsewin, dtset%eph_fsmear, dtset%eph_extrael, dtset%eph_fermie, &
+   !  dtset%ph_wstep, dtset%ph_smear, dtset%eph_phwinfact])
+   !NCF_CHECK(ncerr)
+
+   !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ngqpt"), gwr%ngqpt))
+   !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ph_ngqpt"), dtset%ph_ngqpt))
+
    NCF_CHECK(nf90_close(ncid))
  end if
+
+ ! Now reopen the file inside ncwrite_comm to perform parallel-IO
+ !call xmpi_barrier(comm)
+ !if (gwr%ncwrite_comm%value /= xmpi_comm_null) then
+ !  NCF_CHECK(nctk_open_modify(gwr%ncid, path, gwr%ncwrite_comm%value))
+ !  NCF_CHECK(nctk_set_datamode(gwr%ncid))
+ !end if
 
  if (my_rank == master) then
    call gwr%print(unit=ab_out)
@@ -890,6 +994,93 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  call cwtime_report(" gwr_init:", cpu, wall, gflops)
 
 end subroutine gwr_init
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_gwr/gwr_load_data_from_files
+!! NAME
+!! gwr_load_data_from_files
+!!
+!! FUNCTION
+!!  Load densities from external files, set ngfftf, mgfftf and nfftf
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine gwr_load_data_from_files(gwr)
+
+!Arguments ------------------------------------
+ class(gwr_t), intent(inout) :: gwr
+
+!Local variables-------------------------------
+ integer, parameter :: master = 0, cplex1 = 1, pawread1 = 1
+ integer :: all_nproc, my_rank, den_fform, ierr, unts(2)
+ character(len=500) :: msg
+ character(len=fnlen) :: path
+ type(hdr_type) :: den_hdr
+ type(crystal_t) :: den_cryst
+ type(mpi_type) :: mpi_enreg
+
+! *************************************************************************
+
+ all_nproc = xmpi_comm_size(gwr%comm); my_rank = xmpi_comm_rank(gwr%comm)
+ unts = [std_out, ab_out]
+
+ if (my_rank == master) then
+   ! Read header, perform consistencty check and set gwr%ngfftf
+   path = gwr%dtfil%fildensin
+   if (nctk_try_fort_or_ncfile(path, msg) /= 0) then
+     ABI_ERROR(sjoin("Cannot find DEN file:", path, ". Error:", msg))
+   end if
+
+   call wrtout(unts, sjoin(" Reading GS density from: ", path))
+
+   call hdr_read_from_fname(den_hdr, gwr%dtfil%fildensin, den_fform, xmpi_comm_self)
+   ABI_CHECK(den_fform /= 0, "Error while reading header from DEN file!")
+
+   den_cryst = den_hdr%get_crystal()
+   if (gwr%cryst%compare(den_cryst, header=" Comparing input crystal with DEN crystal") /= 0) then
+     ABI_ERROR("Crystal structure from input and from DEN file do not agree! Check messages above!")
+   end if
+   call den_cryst%free()
+   call den_hdr%free()
+
+   ! Init ngfft (no augmentation).
+   call ngfft_seq(gwr%ngfftf, den_hdr%ngfft(1:3))
+   gwr%ngfftf(4:6) = gwr%ngfftf(1:3)
+ end if
+
+ call xmpi_bcast(gwr%ngfftf, master, gwr%comm, ierr)
+ gwr%nfftf = product(gwr%ngfftf(1:3))
+ gwr%mgfftf = maxval(gwr%ngfftf(1:3))
+
+ ABI_MALLOC(gwr%ks_rhor, (gwr%nfftf, gwr%nspden))
+ if (gwr%usepaw == 1) then
+   ABI_MALLOC(gwr%ks_pawrhoij, (gwr%natom)) ! MG: I know this is not enough.
+ end if
+
+ call read_rhor(path, cplex1, gwr%nspden, gwr%nfftf, gwr%ngfftf, pawread1, gwr%mpi_enreg, gwr%ks_rhor, &
+                den_hdr, gwr%ks_pawrhoij, gwr%comm)
+
+ call den_hdr%free()
+
+ ! n(r) --> n(g)
+ ! Fake MPI_type for the sequential part.
+ !call initmpi_seq(mpi_enreg)
+ !call init_distribfft_seq(mpi_enreg%distribfft, 'c', ngfftc(2), ngfftc(3), 'all')
+ !call init_distribfft_seq(mpi_enreg%distribfft, 'f', ngfftf(2), ngfftf(3), 'all')
+
+ ABI_MALLOC(gwr%ks_rhog, (2, gwr%nfftf))
+ !call fourdp(cplex1, gwr%ks_rhog, gwr%ks_rhor(:, 1), -1, gwr%mpi_enreg, gwr%nfftf, 1, gwr%ngfftf, 0)
+ !call destroy_mpi_enreg(mpi_enreg)
+
+ ! TODO: MetaGGA.
+
+end subroutine gwr_load_data_from_files
 !!***
 
 !----------------------------------------------------------------------
@@ -927,6 +1118,8 @@ subroutine gwr_free(gwr)
  ABI_SFREE(gwr%qbz)
  ABI_SFREE(gwr%qibz)
  ABI_SFREE(gwr%wtq)
+ ABI_SFREE(gwr%ks_rhog)
+ ABI_SFREE(gwr%ks_rhor)
  ABI_SFREE(gwr%qbz2ibz)
  ABI_SFREE(gwr%my_spins)
  ABI_SFREE(gwr%my_itaus)
@@ -934,7 +1127,6 @@ subroutine gwr_free(gwr)
  ABI_SFREE(gwr%iw_mesh)
  ABI_SFREE(gwr%t2w_cos_wgs)
  ABI_SFREE(gwr%t2w_sin_wgs)
-
  ABI_SFREE(gwr%kcalc)
  ABI_SFREE(gwr%bstart_ks)
  ABI_SFREE(gwr%bstop_ks)
@@ -969,6 +1161,16 @@ subroutine gwr_free(gwr)
  if (allocated(gwr%sigc_kibz)) then
    call slk_array_free(gwr%sigc_kibz)
    ABI_FREE(gwr%sigc_kibz)
+ end if
+
+ ! Deallocation for PAW.
+ if (gwr%usepaw == 1) then
+   call pawrhoij_free(gwr%ks_pawrhoij)
+   ABI_FREE(gwr%ks_pawrhoij)
+   !call pawfgrtab_free(Pawfgrtab)
+   !call paw_ij_free(KS_paw_ij)
+   !call paw_an_free(KS_paw_an)
+   !call pawpwff_free(Paw_pwff)
  end if
 
  ! Free MPI communicators
@@ -1029,7 +1231,7 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk0_path)
  type(hdr_type) :: wfk0_hdr
  type(dataset_type), pointer :: dtset
  type(desc_t),pointer :: desc_k
- type(matrix_scalapack),pointer :: gt
+ !type(matrix_scalapack),pointer :: gt
 !arrays
  integer,allocatable :: nband(:,:), wfd_istwfk(:), my_bands(:)
  !real(dp),allocatable :: cgwork(:,:)
@@ -1078,7 +1280,7 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk0_path)
  wfd_istwfk = 1
 
  call wfd_init(wfd, gwr%cryst, gwr%pawtab, gwr%psps, keep_ur, mband, nband, nkibz, dtset%nsppol, bks_mask, &
-   dtset%nspden, dtset%nspinor, dtset%ecut, dtset%ecutsm, dtset%dilatmx, wfd_istwfk, ks_ebands%kptns, gwr%ngfft, &
+   dtset%nspden, dtset%nspinor, dtset%ecut, dtset%ecutsm, dtset%dilatmx, wfd_istwfk, ks_ebands%kptns, gwr%g_ngfft, &
    dtset%nloalg, dtset%prtvol, dtset%pawprtvol, gwr%comm)
 
  call wfd%print(header="Wavefunctions for GWR calculation")
@@ -1146,7 +1348,7 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk0_path)
          itau = gwr%my_itaus(my_it)
          tau = gwr%tau_mesh(itau)
          gt_fact = exp(-tau * eig_nk)
-         gt => gwr%gt_kibz(ioe, ik_ibz, itau, spin)
+         associate (gt => gwr%gt_kibz(ioe, ik_ibz, itau, spin))
          !call wave%outer_prod()
          do il_g2=1, gt%sizeb_local(2)
            ig2 = gt%loc2gcol(il_g2)
@@ -1157,7 +1359,7 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk0_path)
              !  gt_fact * GWPC_CONJG(wave%ug(ig1)) * wave%ug(ig2)
            end do
          end do
-
+         end associate
        end do ! my_it
 
      end do ! ib
@@ -1233,7 +1435,7 @@ subroutine gwr_rotate_gt(gwr, my_ikf, my_it, my_is, desc_kbz, gt_kbz)
    desc_kbz%gvec(:,ig1) = matmul(gwr%cryst%symrec(:,:,isym_k), gwr%green_desc_kibz(ik_ibz)%gvec(:,ig1)) ! - g0_k
  end do
 
- call sphereboundary(desc_kbz%gbound, desc_kbz%istwfk, desc_kbz%gvec, gwr%mgfft, desc_kbz%npw)
+ call sphereboundary(desc_kbz%gbound, desc_kbz%istwfk, desc_kbz%gvec, gwr%g_mgfft, desc_kbz%npw)
 
  ! Get G_k with k in the BZ.
  do ioe=1,2
@@ -1292,7 +1494,7 @@ subroutine gwr_get_green_gpr(gwr, my_it, my_is, desc_kbz, gt_gpr)
  !integer :: ik_ibz, isym_k, trev_k, g0_k(3)
  real(dp) :: cpu, wall, gflops
  !logical :: isirr_k
- type(matrix_scalapack), pointer :: ggp
+ !type(matrix_scalapack), pointer :: ggp
  type(matrix_scalapack) :: rgp
  type(matrix_scalapack),target :: gt_kbz(2)
  type(desc_t),pointer :: desc_k
@@ -1300,10 +1502,6 @@ subroutine gwr_get_green_gpr(gwr, my_it, my_is, desc_kbz, gt_gpr)
 ! *************************************************************************
 
  call cwtime(cpu, wall, gflops, "start")
-
- !call wrtout(std_out, " in gwr_green_gpr")
- !call gwr%print(header="GWR_GREEN_GPR")
- !print *, "gwr%g_slkproc%grid%dims", gwr%g_slkproc%grid%dims
 
  do my_ikf=1,gwr%my_nkbz
    !ik_ibz = gwr%my_kbz2ibz(1, my_ikf); isym_k = gwr%my_kbz2ibz(2, my_ikf)
@@ -1316,13 +1514,13 @@ subroutine gwr_get_green_gpr(gwr, my_it, my_is, desc_kbz, gt_gpr)
    desc_k => desc_kbz(my_ikf)
 
    do ioe=1,2
-     ggp => gt_kbz(ioe)
+     associate (ggp => gt_kbz(ioe))
 
      ! Allocate rgp scalapack matrix to store G(r, g')
      npwsp = desc_k%npw * gwr%nspinor
      col_bsize = npwsp / gwr%g_comm%nproc; if (mod(npwsp, gwr%g_comm%nproc) /= 0) col_bsize = col_bsize + 1
-     call rgp%init(gwr%nfft * gwr%nspinor, npwsp, gwr%g_slkproc, desc_k%istwfk, &
-                   size_blocs=[gwr%nfft * gwr%nspinor, col_bsize])
+     call rgp%init(gwr%g_nfft * gwr%nspinor, npwsp, gwr%g_slkproc, desc_k%istwfk, &
+                   size_blocs=[gwr%g_nfft * gwr%nspinor, col_bsize])
 
      ABI_CHECK(size(ggp%buffer_cplx, dim=2) == size(rgp%buffer_cplx, dim=2), "len2")
 
@@ -1330,19 +1528,20 @@ subroutine gwr_get_green_gpr(gwr, my_it, my_is, desc_kbz, gt_gpr)
      do ig2=1,ggp%sizeb_local(2)
 
        ABI_CHECK(size(ggp%buffer_cplx(:, ig2)) == desc_k%npw, "npw")
-       ABI_CHECK(size(rgp%buffer_cplx(:, ig2)) == gwr%nfft * gwr%nspinor, "gwr%nfft * gwr%nspinor")
+       ABI_CHECK(size(rgp%buffer_cplx(:, ig2)) == gwr%g_nfft * gwr%nspinor, "gwr%g_nfft * gwr%nspinor")
 
-       call fft_ug(desc_k%npw, gwr%nfft, gwr%nspinor, ndat1, &
-                   gwr%mgfft, gwr%ngfft, desc_k%istwfk, desc_k%gvec, desc_k%gbound, &
+       call fft_ug(desc_k%npw, gwr%g_nfft, gwr%nspinor, ndat1, &
+                   gwr%g_mgfft, gwr%g_ngfft, desc_k%istwfk, desc_k%gvec, desc_k%gbound, &
                    ggp%buffer_cplx(:, ig2), rgp%buffer_cplx(:, ig2))
 
        ! Multiply by e^{ik.r}
-       !call times_eikr(desc%point, desc%ngfft, desc%nfft, ndat1, rgp%buffer_cplx(:, ig2)
+       !call times_eikr(desc%point, desc%g_ngfft, desc%g_nfft, ndat1, rgp%buffer_cplx(:, ig2)
      end do ! ig2
 
      ! Transpose: G(r, g') -> G(g', r) and take complex conjugate.
      call rgp%ptrans("C", gt_gpr(ioe, my_ikf))
      call rgp%free()
+     end associate
    end do ! ioe
 
    call slk_array_free(gt_kbz)
@@ -1601,7 +1800,7 @@ subroutine gwr_print(gwr, header, unit)
  call ydoc%add_int("nqibz", gwr%nqibz)
  call ydoc%add_int("green_mpw", gwr%green_mpw)
  call ydoc%add_int("chi_mpw", gwr%chi_mpw)
- call ydoc%add_int1d("ngfft", gwr%ngfft(1:8))
+ call ydoc%add_int1d("g_ngfft", gwr%g_ngfft(1:8))
  call ydoc%add_int1d("P gwr_np_gtks", [gwr%g_comm%nproc, gwr%tau_comm%nproc, gwr%kpt_comm%nproc, gwr%spin_comm%nproc])
  call ydoc%write_and_free(unt)
 
@@ -1678,8 +1877,8 @@ subroutine gwr_build_chi(gwr)
    ! Set FFT mesh in the supercell
    ! Be careful when using the FFT plan with ndat as ndat can change inside the loop if we start to block.
    ! Perhaps the safest approach would be to generate the plan on the fly.
-   sc_ngfft = gwr%ngfft
-   sc_ngfft(1:3) = gwr%ngkpt * gwr%ngfft(1:3)
+   sc_ngfft = gwr%g_ngfft
+   sc_ngfft(1:3) = gwr%ngkpt * gwr%g_ngfft(1:3)
    sc_ngfft(4:6) = sc_ngfft(1:3)
    sc_nfft = product(sc_ngfft(1:3))
    !sc_augsize = product(sc_ngfft(4:6))
@@ -1699,9 +1898,9 @@ subroutine gwr_build_chi(gwr)
    do my_iqi=1,gwr%my_nqibz
      iq_ibz = gwr%my_qibz_inds(my_iqi)
      npwsp = gwr%chi_desc_qibz(iq_ibz)%npw * gwr%nspinor
-     ncol_glob = gwr%nfft * gwr%nspinor
+     ncol_glob = gwr%g_nfft * gwr%nspinor
      col_bsize = ncol_glob / gwr%g_comm%nproc; if (mod(ncol_glob, gwr%g_comm%nproc) /= 0) col_bsize = col_bsize + 1
-     call chiq_gpr(my_iqi)%init(npwsp, gwr%nfft * gwr%nspinor, gwr%g_slkproc, 1, size_blocs=[npwsp, col_bsize])
+     call chiq_gpr(my_iqi)%init(npwsp, gwr%g_nfft * gwr%nspinor, gwr%g_slkproc, 1, size_blocs=[npwsp, col_bsize])
    end do
 
    ! Loop over my spins and my taus.
@@ -1791,10 +1990,10 @@ subroutine gwr_build_chi(gwr)
          ! FFT r --> g along the first dimension: chi_q(r,g') --> chi_q(g,g')
          do ig2=1,chi_rgp%sizeb_local(2)
 
-           ABI_CHECK(size(chi_rgp%buffer_cplx(:, ig2)) == gwr%nfft * gwr%nspinor, "gwr%nfft * gwr%nspinor")
+           ABI_CHECK(size(chi_rgp%buffer_cplx(:, ig2)) == gwr%g_nfft * gwr%nspinor, "gwr%g_nfft * gwr%nspinor")
            ABI_CHECK(size(gwr%chi_qibz(iq_ibz, itau, spin)%buffer_cplx(:, ig2)) == desc_q%npw, "npw")
 
-           call fft_ur(desc_q%npw, gwr%nfft, gwr%nspinor, ndat1, gwr%mgfft, gwr%ngfft, &
+           call fft_ur(desc_q%npw, gwr%g_nfft, gwr%nspinor, ndat1, gwr%g_mgfft, gwr%g_ngfft, &
                        istwfk1, desc_q%gvec, desc_q%gbound, &
                        chi_rgp%buffer_cplx(:, ig2),         &                  ! ur(in)
                        gwr%chi_qibz(iq_ibz, itau, spin)%buffer_cplx(:, ig2))   ! ug(out)
@@ -1860,8 +2059,8 @@ subroutine gwr_build_chi(gwr)
             !gwr%gt_kibz(1, ik_ibz, itau, spin)%buffer_cplx(:,ig2)
 
             !do ig2=1,ggp%sizeb_local(2)
-            !  call fft_ug(desc_k%npw, gwr%nfft, gwr%nspinor, ndat1, &
-            !              gwr%mgfft, gwr%ngfft, desc_k%istwfk, desc_k%gvec, desc_k%gbound, &
+            !  call fft_ug(desc_k%npw, gwr%g_nfft, gwr%nspinor, ndat1, &
+            !              gwr%g_mgfft, gwr%g_ngfft, desc_k%istwfk, desc_k%gvec, desc_k%gbound, &
             !              ggp%buffer_cplx(:, ig2),
             !              rgp%buffer_cplx(:, ig2))
             !end do ! ig2
@@ -1869,8 +2068,8 @@ subroutine gwr_build_chi(gwr)
             !call rgp%free()
 
             !do ir1=1,ggp%sizeb_local(2)
-            !  call fft_ug(desc_k%npw, gwr%nfft, gwr%nspinor, ndat1, &
-            !              gwr%mgfft, gwr%ngfft, desc_k%istwfk, desc_k%gvec, desc_k%gbound, &
+            !  call fft_ug(desc_k%npw, gwr%g_nfft, gwr%nspinor, ndat1, &
+            !              gwr%g_mgfft, gwr%g_ngfft, desc_k%istwfk, desc_k%gvec, desc_k%gbound, &
             !              gpr%buffer_cplx(:, ir1),
             !              rpr%buffer_cplx(:, ir1))
             !end do ! ir1

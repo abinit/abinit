@@ -376,7 +376,7 @@ subroutine calc_vhxc_me(Wfd, Mflags, Mels, Cryst, Dtset, nfftf, ngfftf, &
  ABI_FREE(bbp_mask)
 
  write(msg,'(a,i0,a)')" Will calculate ",my_nmels," <b,k,s|O|b',k,s> matrix elements in calc_vhxc_me."
- call wrtout(std_out,msg,'PERS')
+ call wrtout(std_out, msg)
 
  ! =====================================
  ! ==== Loop over required k-points ====
@@ -589,15 +589,15 @@ subroutine calc_vhxc_me(Wfd, Mflags, Mels, Cryst, Dtset, nfftf, ngfftf, &
    ! ====================================
    ! === Assemble PAW matrix elements ===
    ! ====================================
-   ABI_MALLOC(dimlmn,(Cryst%natom))
+   ABI_MALLOC(dimlmn, (Cryst%natom))
    do iat=1,Cryst%natom
      dimlmn(iat)=Pawtab(Cryst%typat(iat))%lmn_size
    end do
 
-   ABI_MALLOC(Cprj_b1ks,(Cryst%natom,nspinor))
-   ABI_MALLOC(Cprj_b2ks,(Cryst%natom,nspinor))
-   call pawcprj_alloc(Cprj_b1ks,0,dimlmn)
-   call pawcprj_alloc(Cprj_b2ks,0,dimlmn)
+   ABI_MALLOC(Cprj_b1ks, (Cryst%natom,nspinor))
+   ABI_MALLOC(Cprj_b2ks, (Cryst%natom,nspinor))
+   call pawcprj_alloc(Cprj_b1ks, 0, dimlmn)
+   call pawcprj_alloc(Cprj_b2ks, 0, dimlmn)
 
    do is=1,nsppol
      if (ALL(bbp_ks_distrb(:,:,:,is)/=rank)) CYCLE
