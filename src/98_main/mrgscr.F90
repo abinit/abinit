@@ -175,7 +175,7 @@ program mrgscr
     ' Running single-file mode:',ch10,&
     ' Checking the integrity of file: ',TRIM(filenames(1)),ch10,&
     ' reporting the list of q-points that are missing. '
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(std_out, msg)
 
    if (nctk_try_fort_or_ncfile(filenames(1), msg) /= 0) then
      ABI_ERROR(msg)
@@ -262,7 +262,7 @@ program mrgscr
  ! Now check if the list of q-points is complete
  ! Here we assume that the k-mesh reported in the header is the same as that used during the sigma calculation.
  write(msg,'(3a)') ch10,' Checking if the list of q-points is complete. ',ch10
- call wrtout(std_out,msg,'COLL')
+ call wrtout(std_out, msg)
 
  !call hscr_check_qpoints(hscr0)
 
@@ -295,13 +295,13 @@ program mrgscr
    write(msg,'(6a)')ch10,&
     ' File ',TRIM(fname),' is not complete ',ch10,&
     ' The following q-points are missing:'
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(std_out, msg)
    ii=0
    do iqibz=1,Qmesh%nibz
      if (foundq(iqibz)==0) then
        ii=ii+1
        write(msg,'(i3,a,3f12.6)')ii,') ',Qmesh%ibz(:,iqibz)
-       call wrtout(std_out,msg,'COLL')
+       call wrtout(std_out, msg)
      end if
    end do
  end if
@@ -310,13 +310,13 @@ program mrgscr
    write(msg,'(6a)')ch10,&
     ' File ',TRIM(fname),' is overcomplete ',ch10,&
     ' The following q-points are present more than once:'
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(std_out, msg)
    ii=0
    do iqibz=1,Qmesh%nibz
      if (foundq(iqibz)>1) then
        ii=ii+1
        write(msg,'(i3,a,3f12.6)')ii,') ',Qmesh%ibz(:,iqibz)
-       call wrtout(std_out,msg,'COLL')
+       call wrtout(std_out, msg)
      end if
    end do
  end if
@@ -324,7 +324,7 @@ program mrgscr
  if (ALL(foundq==1)) then
    write(msg,'(5a)')ch10,&
     '.File ',TRIM(fname),' contains a complete list of q-points ',ch10
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(std_out, msg)
  end if
 
  !=====================

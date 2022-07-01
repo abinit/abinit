@@ -201,17 +201,18 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: tim_fourdp5=5,master=0,cplex1=1
- integer :: approx_type,b1gw,b2gw,choice,cplex,cplex_dij,cplex_rhoij !,band
+ integer,parameter :: tim_fourdp5 = 5, master = 0, cplex1 = 1
+ integer,parameter :: ipert0 = 0, idir0 = 0,  optrhoij1 = 1
+ integer :: approx_type,b1gw,b2gw,cplex,cplex_dij,cplex_rhoij !,band
  integer :: dim_kxcg,gwcalctyp,gnt_option,has_dijU,has_dijso,iab,bmin,bmax,irr_idx1,irr_idx2
- integer :: iat,ib,ib1,ib2,ic,id_required,ider,idir,ii,ik,ierr,ount
- integer :: ik_bz,ikcalc,ik_ibz,ikxc,ipert,npw_k,omp_ncpus,pwx,ibz
+ integer :: iat,ib,ib1,ib2,ic,id_required,ider,ii,ik,ierr,ount
+ integer :: ik_bz,ikcalc,ik_ibz,ikxc,npw_k,omp_ncpus,pwx,ibz
  integer :: isp,is_idx,istep,itypat,itypatcor,izero,jj,first_band,last_band
  integer :: ks_iv,lcor,lmn2_size_max,mband,my_nband
  integer :: mgfftf,mod10,moved_atm_inside,moved_rhor,n3xccc !,mgfft
  integer :: nbsc,ndij,ndim,nfftf,nfftf_tot,nkcalc,gwc_nfft,gwc_nfftot,gwx_nfft,gwx_nfftot
  integer :: ngrvdw,nhatgrdim,nkxc,nkxc1,nprocs,nscf,nspden_rhoij,nzlmopt,optene
- integer :: optcut,optgr0,optgr1,optgr2,option,option_test,option_dij,optrad,optrhoij,psp_gencond
+ integer :: optcut,optgr0,optgr1,optgr2,option,option_test,option_dij,optrad,psp_gencond
  integer :: my_rank,rhoxsp_method,comm,use_aerhor,use_umklp,usexcnhat
  integer :: ioe0j,spin,io,jb,nomega_sigc
  integer :: temp_unt,ncid
@@ -263,8 +264,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  real(dp),allocatable :: weights(:),nat_occs(:,:),gw_rhor(:,:),gw_rhog(:,:),gw_vhartr(:)
  real(dp),allocatable :: grchempottn(:,:),grewtn(:,:),grvdw(:,:),qmax(:)
  real(dp),allocatable :: ks_nhat(:,:),ks_nhatgr(:,:,:),ks_rhog(:,:)
- real(dp),allocatable :: ks_rhor(:,:),ks_vhartr(:),ks_vtrial(:,:),ks_vxc(:,:)
- real(dp),allocatable :: ks_taur(:,:)
+ real(dp),allocatable :: ks_rhor(:,:),ks_vhartr(:),ks_vtrial(:,:),ks_vxc(:,:), ks_taur(:,:)
  real(dp),allocatable :: kxc(:,:),qp_kxc(:,:),ph1d(:,:),ph1df(:,:)
  real(dp),allocatable :: prev_rhor(:,:),prev_taur(:,:),qp_nhat(:,:)
  real(dp),allocatable :: qp_nhatgr(:,:,:),qp_rhog(:,:),qp_rhor_paw(:,:)
@@ -321,7 +321,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  end if
 
 #if defined HAVE_GW_DPC
- if (gwpc/=8) then
+ if (gwpc /= 8) then
    write(msg,'(6a)')ch10,&
     'Number of bytes for double precision complex /=8 ',ch10,&
     'Cannot continue due to kind mismatch in BLAS library ',ch10,&
@@ -347,9 +347,9 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
  ! Perform some additional checks for hybrid functional calculations
  if (mod10 == 5) then
-   if (Dtset%ixc_sigma<0 .and. .not.libxc_functionals_check()) then
-     ABI_ERROR('Hybrid functional calculations require the compilation with LIBXC library')
-   end if
+   !if (Dtset%ixc_sigma<0 .and. .not.libxc_functionals_check()) then
+   !  ABI_ERROR('Hybrid functional calculations require the compilation with LIBXC library')
+   !end if
    !XG 20171116 : I do not agree with this condition, as one might like to do a one-shot hybrid functional calculation
    !on top of a LDA/GGA calculation ... give the power (and risks) to the user !
    !if(gwcalctyp<10) then
@@ -361,9 +361,9 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  end if
 
  !=== Initialize MPI variables, and parallelization level ===
- !* gwpara 0--> sequential run, 1--> parallelism over k-points, 2--> parallelism over bands.
- !* In case of gwpara==1 memory is not parallelized.
- !* If gwpara==2, bands are divided among processors but each proc has all the states where GW corrections are required.
+ ! gwpara: 1--> parallelism over k-points, 2--> parallelism over bands.
+ ! In case of gwpara==1 memory is not parallelized.
+ ! If gwpara==2, bands are divided among processors but each proc has all the states where GW corrections are required.
  comm = xmpi_world; my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
  converged = .FALSE.
 
@@ -383,13 +383,13 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  ucvol_local = ucvol
  !
  ! === Define FFT grid(s) sizes ===
- ! * Be careful! This mesh is only used for densities, potentials and the matrix elements of v_Hxc. It is NOT the
+ ! Be careful! This mesh is only used for densities, potentials and the matrix elements of v_Hxc. It is NOT the
  ! (usually coarser) GW FFT mesh employed for the oscillator matrix elements that is defined in setmesh.F90.
  ! See also NOTES in the comments at the beginning of this file.
  ! NOTE: This mesh is defined in invars2m using ecutwfn, in GW Dtset%ecut is forced to be equal to Dtset%ecutwfn.
 
- call pawfgr_init(Pawfgr,Dtset,mgfftf,nfftf,ecut_eff,ecutdg_eff,ngfftc,ngfftf,&
-                  gsqcutc_eff=gsqcutc_eff,gsqcutf_eff=gsqcutf_eff,gmet=gmet,k0=k0)
+ call pawfgr_init(Pawfgr, Dtset, mgfftf, nfftf, ecut_eff, ecutdg_eff, ngfftc, ngfftf, &
+                  gsqcutc_eff=gsqcutc_eff, gsqcutf_eff=gsqcutf_eff, gmet=gmet, k0=k0)
 
  ! Fake MPI_type for the sequential part.
  call initmpi_seq(MPI_enreg_seq)
@@ -399,8 +399,10 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  call print_ngfft(ngfftf,header='Dense FFT mesh used for densities and potentials')
  nfftf_tot=PRODUCT(ngfftf(1:3))
 
- ! Open and read pseudopotential files ===
- call pspini(Dtset,Dtfil,ecore,psp_gencond,gsqcutc_eff,gsqcutf_eff,Pawrad,Pawtab,Psps,rprimd,comm_mpi=comm)
+ ! ===========================================
+ ! === Open and read pseudopotential files ===
+ ! ===========================================
+ call pspini(dtset, dtfil, ecore, psp_gencond, gsqcutc_eff, gsqcutf_eff, pawrad, pawtab, psps, cryst%rprimd, comm_mpi=comm)
 
  call timab(402,2,tsec) ! Init1
  !
@@ -454,48 +456,45 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  ! ============================
  ! ==== PAW initialization ====
  ! ============================
- if (Dtset%usepaw==1) then
-   call chkpawovlp(Cryst%natom, Cryst%ntypat, Dtset%pawovlp, Pawtab, Cryst%rmet, Cryst%typat, Cryst%xred)
+ if (dtset%usepaw==1) then
+   call chkpawovlp(cryst%natom, cryst%ntypat, dtset%pawovlp, pawtab, cryst%rmet, cryst%typat, cryst%xred)
 
-   cplex_dij = Dtset%nspinor; cplex = 1; ndij = 1
+   cplex_dij = dtset%nspinor; cplex = 1; ndij = 1
 
-   ABI_MALLOC(KS_Pawrhoij, (Cryst%natom))
-   call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,nspden_rhoij=nspden_rhoij,&
-                             nspden=Dtset%nspden,spnorb=Dtset%pawspnorb,cpxocc=Dtset%pawcpxocc)
-   call pawrhoij_alloc(KS_Pawrhoij,cplex_rhoij,nspden_rhoij,Dtset%nspinor,Dtset%nsppol,Cryst%typat,pawtab=Pawtab)
-
-   ! Initialize values for several basic arrays
-   gnt_option = 1; if (dtset%pawxcdev == 2 .or. (dtset%pawxcdev == 1 .and. dtset%positron /= 0)) gnt_option = 2
+   ABI_MALLOC(ks_pawrhoij, (cryst%natom))
+   call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij, nspden_rhoij=nspden_rhoij, &
+                             nspden=dtset%nspden, spnorb=dtset%pawspnorb, cpxocc=Dtset%pawcpxocc)
+   call pawrhoij_alloc(ks_pawrhoij, cplex_rhoij, nspden_rhoij, dtset%nspinor, dtset%nsppol, cryst%typat, pawtab=pawtab)
 
    ! Test if we have to call pawinit
-   call paw_gencond(Dtset, gnt_option, "test", call_pawinit)
+   gnt_option = 1; if (dtset%pawxcdev == 2 .or. (dtset%pawxcdev == 1 .and. dtset%positron /= 0)) gnt_option = 2
+   call paw_gencond(dtset, gnt_option, "test", call_pawinit)
 
    if (psp_gencond == 1 .or. call_pawinit) then
      call timab(553,1,tsec)
-     gsqcut_shp=two*abs(dtset%diecut)*dtset%dilatmx**2/pi**2
-     call pawinit(Dtset%effmass_free,gnt_option,gsqcut_shp,zero,Dtset%pawlcutd,Dtset%pawlmix,&
-                  Psps%mpsang,Dtset%pawnphi,Cryst%nsym,Dtset%pawntheta,Pawang,Pawrad,&
-                  Dtset%pawspnorb,Pawtab,Dtset%pawxcdev,Dtset%ixc,Dtset%usepotzero)
+     gsqcut_shp = two * abs(dtset%diecut) * dtset%dilatmx**2 / pi**2
+     call pawinit(dtset%effmass_free, gnt_option, gsqcut_shp, zero, dtset%pawlcutd, dtset%pawlmix, &
+                  psps%mpsang, dtset%pawnphi, cryst%nsym, dtset%pawntheta, pawang, pawrad, &
+                  dtset%pawspnorb, pawtab, dtset%pawxcdev, dtset%ixc, dtset%usepotzero)
      call timab(553,2,tsec)
 
      ! Update internal values
-     call paw_gencond(Dtset, gnt_option, "save", call_pawinit)
-
+     call paw_gencond(dtset, gnt_option, "save", call_pawinit)
    else
-     if (Pawtab(1)%has_kij  ==1) Pawtab(1:Cryst%ntypat)%has_kij   = 2
-     if (Pawtab(1)%has_nabla==1) Pawtab(1:Cryst%ntypat)%has_nabla = 2
+     if (pawtab(1)%has_kij  ==1) pawtab(1:cryst%ntypat)%has_kij   = 2
+     if (pawtab(1)%has_nabla==1) pawtab(1:cryst%ntypat)%has_nabla = 2
    end if
 
-   Psps%n1xccc=MAXVAL(Pawtab(1:Cryst%ntypat)%usetcore)
+   psps%n1xccc = MAXVAL(pawtab(1:cryst%ntypat)%usetcore)
 
    ! Initialize optional flags in Pawtab to zero
-   ! (Cannot be done in Pawinit since the routine is called only if some pars. are changed)
-   Pawtab(:)%has_nabla = 0
+   ! Cannot be done in Pawinit since the routine is called only if some pars. are changed
+   pawtab(:)%has_nabla = 0
 
-   call setsym_ylm(gprimd,Pawang%l_max-1,Cryst%nsym,Dtset%pawprtvol,Cryst%rprimd,Cryst%symrec,Pawang%zarot)
+   call setsym_ylm(gprimd, pawang%l_max-1, cryst%nsym, dtset%pawprtvol, cryst%rprimd, cryst%symrec, pawang%zarot)
 
    ! Initialize and compute data for DFT+U
-   Paw_dmft%use_dmft=Dtset%usedmft
+   Paw_dmft%use_dmft = Dtset%usedmft
    call pawpuxinit(Dtset%dmatpuopt,Dtset%exchmix,Dtset%f4of2_sla,Dtset%f6of2_sla, &
                    is_dfpt,Dtset%jpawu,Dtset%lexexch,Dtset%lpawu,dtset%nspinor,Cryst%ntypat,Pawang,Dtset%pawprtvol, &
                    Pawrad,Pawtab,Dtset%upawu,Dtset%usedmft,Dtset%useexexch,Dtset%usepawu,dtset%ucrpa)
@@ -505,15 +504,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    ! Get Pawrhoij from the header of the WFK file.
    call pawrhoij_copy(Hdr_wfk%pawrhoij, KS_Pawrhoij)
 
-   ! Re-symmetrize rhoij.
-   ! FIXME this call leads to a SIGFAULT, likely some pointer is not initialized correctly
-   choice = 1; optrhoij = 1; ipert = 0; idir = 0
-   !call pawrhoij_symrhoij(KS_Pawrhoij,KS_Pawrhoij,choice,Cryst%gprimd,Cryst%indsym,ipert,&
-   !&                      Cryst%natom,Cryst%nsym,Cryst%ntypat,optrhoij,Pawang,Dtset%pawprtvol,&
-   !&                      Pawtab,Cryst%rprimd,Cryst%symafm,Cryst%symrec,Cryst%typat)
-
    !  Evaluate form factor of radial part of phi.phj-tphi.tphj.
-   rhoxsp_method = 1  ! Arnaud-Alouani
+   rhoxsp_method = 1  ! Arnaud-Alouani (default in sigma)
    !rhoxsp_method = 2 ! Shiskin-Kresse
    if (Dtset%pawoptosc /= 0) rhoxsp_method = Dtset%pawoptosc
 
@@ -573,7 +565,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  ! Consistency check and additional stuff done only for GW with PAW.
  ABI_MALLOC(Paw_onsite, (0))
 
- if (Dtset%usepaw==1) then
+ if (Dtset%usepaw == 1) then
    if (Dtset%ecutwfn < Dtset%ecut) then
      write(msg,"(3a)")&
      "  It is highly recommended to use ecutwfn = ecut for GW calculations with PAW since ",ch10,&
@@ -744,7 +736,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  call timab(402,2,tsec) ! sigma(Init1)
  call timab(404,1,tsec) ! rdkss
 
- call wfd%read_wfk(wfk_fname,iomode_from_fname(wfk_fname))
+ call wfd%read_wfk(wfk_fname, iomode_from_fname(wfk_fname))
 
  if (Dtset%pawcross==1) then
    call wfdgw_copy(Wfd, Wfdf)
@@ -763,7 +755,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  ! * The little group is calculated only if sys_sigma.
  ! * If use_umklp==1 then also symmetries requiring an umklapp to preserve k_gw are included.
  !
- ABI_MALLOC(Ltg_k,(Sigp%nkptgw))
+ ABI_MALLOC(Ltg_k, (Sigp%nkptgw))
  use_umklp=1
  do ikcalc=1,Sigp%nkptgw
    if (Sigp%symsigma/=0) then
@@ -844,7 +836,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      ABI_MALLOC(ks_nhatgr,(0,0,0))
    end if
 
-   call pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,Cryst%gprimd,&
+   call pawmknhat(compch_fft,cplex,ider,idir0,ipert0,izero,Cryst%gprimd,&
                   Cryst%natom,Cryst%natom,nfftf,ngfftf,nhatgrdim,Dtset%nspden,Cryst%ntypat,Pawang,&
                   Pawfgrtab,ks_nhatgr,ks_nhat,KS_Pawrhoij,KS_Pawrhoij,Pawtab,k0,Cryst%rprimd,&
                   Cryst%ucvol,dtset%usewvl,Cryst%xred)
@@ -852,9 +844,9 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    ! === Evaluate onsite energies, potentials, densities ===
    !  * Initialize variables/arrays related to the PAW spheres.
    !  * Initialize also lmselect (index of non-zero LM-moments of densities).
-   ABI_MALLOC(KS_paw_ij,(Cryst%natom))
-   ! cplex=1; cplex_dij = Dtset%nspinor
+   ABI_MALLOC(KS_paw_ij, (Cryst%natom))
    has_dijso = Dtset%pawspnorb; has_dijU = merge(0, 1, Dtset%usepawu == 0)
+
    call paw_ij_nullify(KS_paw_ij)
    call paw_ij_init(KS_paw_ij,cplex,Dtset%nspinor,Dtset%nsppol,&
      Dtset%nspden,Dtset%pawspnorb,Cryst%natom,Cryst%ntypat,Cryst%typat,Pawtab,&
@@ -862,14 +854,14 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      has_dijso=has_dijso,has_dijU=has_dijU,has_exexch_pot=1,has_pawu_occ=1)
 
    nkxc1 = 0
-   ABI_MALLOC(KS_paw_an,(Cryst%natom))
+   ABI_MALLOC(KS_paw_an, (Cryst%natom))
    call paw_an_nullify(KS_paw_an)
    call paw_an_init(KS_paw_an,Cryst%natom,Cryst%ntypat,nkxc1,0,Dtset%nspden,&
      cplex,Dtset%pawxcdev,Cryst%typat,Pawang,Pawtab,has_vxc=1,has_vxcval=1)
 
    !  Calculate onsite vxc with and without core charge.
    nzlmopt=-1; option=0; compch_sph=greatest_real
-   call pawdenpot(compch_sph,KS_energies%e_paw,KS_energies%e_pawdc,ipert,&
+   call pawdenpot(compch_sph,KS_energies%e_paw,KS_energies%e_pawdc,ipert0,&
      Dtset%ixc,Cryst%natom,Cryst%natom,Dtset%nspden,&
      Cryst%ntypat,Dtset%nucdipmom,nzlmopt,option,KS_Paw_an,KS_Paw_an,KS_paw_ij,&
      Pawang,Dtset%pawprtvol,Pawrad,KS_Pawrhoij,Dtset%pawspnorb,&
@@ -890,8 +882,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  call prtrhomxmn(std_out,MPI_enreg_seq,nfftf,ngfftf,Dtset%nspden,1,ks_rhor,ucvol=ucvol)
  if (Dtset%usekden==1) call prtrhomxmn(std_out,MPI_enreg_seq,nfftf,ngfftf,Dtset%nspden,1,ks_taur,optrhor=1,ucvol=ucvol)
 
- ABI_MALLOC(ks_rhog, (2,nfftf))
- call fourdp(1,ks_rhog,ks_rhor(:,1),-1,MPI_enreg_seq,nfftf,1,ngfftf,tim_fourdp5)
+ ABI_MALLOC(ks_rhog, (2, nfftf))
+ call fourdp(1, ks_rhog, ks_rhor(:,1),-1, MPI_enreg_seq, nfftf, 1, ngfftf, tim_fourdp5)
 
  ! The following steps have been gathered in the setvtr routine:
  !  - get Ewald energy and Ewald forces
@@ -940,8 +932,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    call timab(561,1,tsec)
 
    ! Calculate the unsymmetrized Dij.
-   ipert=0; idir=0
-   call pawdij(cplex,Dtset%enunit,Cryst%gprimd,ipert,&
+   call pawdij(cplex,Dtset%enunit,Cryst%gprimd,ipert0,&
                Cryst%natom,Cryst%natom,nfftf,ngfftf(1)*ngfftf(2)*ngfftf(3),&
                Dtset%nspden,Cryst%ntypat,KS_paw_an,KS_paw_ij,Pawang,Pawfgrtab,&
                Dtset%pawprtvol,Pawrad,KS_Pawrhoij,Dtset%pawspnorb,Pawtab,Dtset%pawxcdev,&
@@ -949,15 +940,10 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
                nucdipmom=Dtset%nucdipmom)
 
     !  Symmetrize KS Dij
-#if 0
-   call symdij(Cryst%gprimd,Cryst%indsym,ipert,&
-              Cryst%natom,Cryst%natom,Cryst%nsym,Cryst%ntypat,0,KS_paw_ij,Pawang,&
-              Dtset%pawprtvol,Pawtab,Cryst%rprimd,Cryst%symafm,Cryst%symrec)
-#else
-   call symdij_all(Cryst%gprimd,Cryst%indsym,ipert,&
+   call symdij_all(Cryst%gprimd,Cryst%indsym,ipert0,&
                    Cryst%natom,Cryst%natom,Cryst%nsym,Cryst%ntypat,KS_paw_ij,Pawang,&
                    Dtset%pawprtvol,Pawtab,Cryst%rprimd,Cryst%symafm,Cryst%symrec)
-#endif
+
    ! Output the pseudopotential strengths Dij and the augmentation occupancies Rhoij.
    call pawprt(Dtset,Cryst%natom,KS_paw_ij,KS_Pawrhoij,Pawtab)
    call timab(561,2,tsec)
@@ -1001,7 +987,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    ABI_FREE(dij_hf)
 
    !option_dij=3
-   !call symdij(Cryst%gprimd,Cryst%indsym,ipert,&
+   !call symdij(Cryst%gprimd,Cryst%indsym,ipert0,&
    !&   Cryst%natom,Cryst%nsym,Cryst%ntypat,option_dij,&
    !&   KS_paw_ij,Pawang,Dtset%pawprtvol,Pawtab,Cryst%rprimd,&
    !&   Cryst%symafm,Cryst%symrec)
@@ -1017,9 +1003,9 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    end do
  end do
 
- call calc_vhxc_me(Wfd,KS_mflags,KS_me,Cryst,Dtset,nfftf,ngfftf,&
-                   ks_vtrial,ks_vhartr,ks_vxc,Psps,Pawtab,KS_paw_an,Pawang,Pawfgrtab,KS_paw_ij,dijexc_core,&
-                   ks_rhor,usexcnhat,ks_nhat,ks_nhatgr,nhatgrdim,tmp_kstab,taur=ks_taur)
+ call calc_vhxc_me(Wfd, KS_mflags, KS_me, Cryst, Dtset, nfftf, ngfftf, &
+                   ks_vtrial, ks_vhartr, ks_vxc, Psps, Pawtab, KS_paw_an, Pawang, Pawfgrtab, KS_paw_ij, dijexc_core, &
+                   ks_rhor, usexcnhat, ks_nhat, ks_nhatgr, nhatgrdim, tmp_kstab, taur=ks_taur)
  ABI_FREE(tmp_kstab)
 
 !#ifdef DEV_HAVE_SCGW_SYM
@@ -1207,14 +1193,14 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
        Pawang,Pawrad,Pawtab,Pawfgrtab,prev_Pawrhoij,&
        QP_pawrhoij,QP_paw_ij,QP_paw_an,QP_energies,qp_nhat,nhatgrdim,qp_nhatgr,compch_sph,compch_fft)
    else
-     ABI_MALLOC(qp_nhat,(0,0))
-     ABI_MALLOC(qp_nhatgr,(0,0,0))
-     ABI_MALLOC(QP_pawrhoij,(0))
-     ABI_MALLOC(QP_paw_ij,(0))
-     ABI_MALLOC(QP_paw_an,(0))
+     ABI_MALLOC(qp_nhat, (0, 0))
+     ABI_MALLOC(qp_nhatgr, (0, 0, 0))
+     ABI_MALLOC(QP_pawrhoij, (0))
+     ABI_MALLOC(QP_paw_ij, (0))
+     ABI_MALLOC(QP_paw_an, (0))
    end if
 
-!  here I should renormalize the density
+   ! here I should renormalize the density
    call test_charge(nfftf,ks_ebands%nelect,Dtset%nspden,qp_rhor,Cryst%ucvol,&
                     Dtset%usepaw,usexcnhat,Pawfgr%usefinegrid,compch_sph,compch_fft,drude_plsmf)
 
@@ -1312,8 +1298,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      call timab(561,1,tsec)
 
      ! Compute QP Dij
-     ipert=0; idir=0
-     call pawdij(cplex,Dtset%enunit,Cryst%gprimd,ipert,&
+     call pawdij(cplex,Dtset%enunit,Cryst%gprimd,ipert0,&
                  Cryst%natom,Cryst%natom,nfftf,ngfftf(1)*ngfftf(2)*ngfftf(3),&
                  Dtset%nspden,Cryst%ntypat,QP_paw_an,QP_paw_ij,Pawang,Pawfgrtab,&
                  Dtset%pawprtvol,Pawrad,QP_pawrhoij,Dtset%pawspnorb,Pawtab,Dtset%pawxcdev,&
@@ -1323,17 +1308,10 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      ! Symmetrize total Dij
      option_dij=0
 
-#if 0
-     call symdij(Cryst%gprimd,Cryst%indsym,ipert,&
-                 Cryst%natom,Cryst%natom,Cryst%nsym,Cryst%ntypat,option_dij,&
-                 QP_paw_ij,Pawang,Dtset%pawprtvol,Pawtab,Cryst%rprimd,&
-                 Cryst%symafm,Cryst%symrec)
-#else
-     call symdij_all(Cryst%gprimd,Cryst%indsym,ipert,&
+     call symdij_all(Cryst%gprimd,Cryst%indsym,ipert0,&
                      Cryst%natom,Cryst%natom,Cryst%nsym,Cryst%ntypat,&
                      QP_paw_ij,Pawang,Dtset%pawprtvol,Pawtab,Cryst%rprimd,&
                      Cryst%symafm,Cryst%symrec)
-#endif
 
      ! Output the QP pseudopotential strengths Dij and the augmentation occupancies Rhoij.
      call pawprt(Dtset,Cryst%natom,QP_paw_ij,QP_Pawrhoij,Pawtab)
@@ -1494,9 +1472,9 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    !  QP_mflags%has_vxcval  =1
    !  if (Sigp%gwcalctyp >100) QP_mflags%has_vxcval_hybrid=1
    if (mod10==5 .and. &
-&   (Dtset%ixc_sigma==-402 .or. Dtset%ixc_sigma==-406 .or. Dtset%ixc_sigma==-427 .or. Dtset%ixc_sigma==-428 .or.&
-&   Dtset%ixc_sigma==-456 .or. Dtset%ixc_sigma==41 .or. Dtset%ixc_sigma==42)) then
-     QP_mflags%has_vxcval_hybrid=1
+       (Dtset%ixc_sigma==-402 .or. Dtset%ixc_sigma==-406 .or. Dtset%ixc_sigma==-427 .or. Dtset%ixc_sigma==-428 .or. &
+       Dtset%ixc_sigma==-456 .or. Dtset%ixc_sigma==41 .or. Dtset%ixc_sigma==42)) then
+     QP_mflags%has_vxcval_hybrid = 1
    end if
 
    !if (Sigp%use_sigxcore==1) QP_mflags%has_sxcore =1
@@ -1541,10 +1519,10 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
    call QP_me%print(header="Matrix elements in the QP basis set", prtvol=Dtset%prtvol)
 
-   ! * Output the QP pseudopotential strengths Dij and the augmentation occupancies Rhoij.
+   ! Output the QP pseudopotential strengths Dij and the augmentation occupancies Rhoij.
    if (Dtset%usepaw==1) then
      call wrtout(std_out," *** After calc_vHxc_braket *** ")
-!    TODO terminate the implementation of this routine.
+     ! TODO terminate the implementation of this routine.
      call paw_ij_print(QP_Paw_ij,unit=std_out,pawprtvol=Dtset%pawprtvol,pawspnorb=Dtset%pawspnorb,mode_paral="COLL")
      call pawprt(Dtset,Cryst%natom,QP_paw_ij,QP_Pawrhoij,Pawtab)
    end if
@@ -1642,11 +1620,11 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      if (Sigp%nbnds>=ks_iv+1) Sr%e0gap(ik,spin)=Sr%e0(ks_iv+1,ik,spin)-Sr%e0(ks_iv,ik,spin)
    end do
  end do
-!
-!=== If required apply a scissor operator or update the energies ===
-!TODO check if other Sr entries have to be updated
-!moreover this part should be done only in case of semiconductors
-!FIXME To me it makes more sense if we apply the scissor to ks_ebands but I have to RECHECK csigme
+ !
+ !=== If required apply a scissor operator or update the energies ===
+ !TODO check if other Sr entries have to be updated
+ !moreover this part should be done only in case of semiconductors
+ !FIXME To me it makes more sense if we apply the scissor to ks_ebands but I have to RECHECK csigme
  if (ABS(Sigp%mbpt_sciss)>tol6) then
    write(msg,'(6a,f10.5,2a)')ch10,&
    ' sigma : performing a first self-consistency',ch10,&
@@ -1678,9 +1656,9 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    call ebands_update_occ(qp_ebands, Dtset%spinmagntarget, prtvol=0)
  end if
 
- !In case of AC refer all the energies wrt to the fermi level
- !Take care because results from ppmodel cannot be used for AC
- !FIXME check ks_energy or qp_energy (in case of SCGW?)
+ ! In case of AC refer all the energies wrt to the fermi level
+ ! Be careful because results from ppmodel cannot be used for AC
+ ! FIXME check ks_energy or qp_energy (in case of SCGW?)
 
  if (mod10==SIG_GW_AC) then
    ! All these quantities will be passed to csigme
@@ -1716,7 +1694,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  ! Get epsilon^{-1} either from the _SCR or the _SUSC file and store it in Er%epsm1
  ! If Er%mqmem==0, allocate and read a single q-slice inside csigme.
  ! TODO Er%nomega should be initialized so that only the frequencies really needed are stored in memory
- ! TODO: The same piece of code is present in screening.
+ ! TODO The same piece of code is present in screening.
  if (sigma_needs_w(Sigp)) then
    select case (dtset%gwgamma)
    case (0)
@@ -2023,14 +2001,14 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    end if
  end if
 
-!=======================================================================
-!==== Calculate self-energy and output the results for each k-point ====
-!=======================================================================
-!* Here it would be possible to calculate the QP correction for the same k-point using a PPmodel
-!in the first iteration just to improve the initial guess and CD or AC in the second step. Useful
-!if the KS level is far from the expected QP results. Previously it was possible to do such
-!calculation by simply listing the same k-point twice in kptgw. Now this trick is not allowed anymore.
-!Everything, indeed, should be done in a clean and transparent way inside csigme.
+  !=======================================================================
+  !==== Calculate self-energy and output the results for each k-point ====
+  !=======================================================================
+  ! Here it would be possible to calculate the QP correction for the same k-point using a PPmodel
+  ! in the first iteration just to improve the initial guess and CD or AC in the second step. Useful
+  ! if the KS level is far from the expected QP results. Previously it was possible to do such
+  ! calculation by simply listing the same k-point twice in kptgw. Now this trick is not allowed anymore.
+  ! Everything, indeed, should be done in a clean and transparent way inside csigme.
 
  call wfd%print(mode_paral='PERS')
 
@@ -4330,8 +4308,9 @@ subroutine paw_qpscgw(Wfd,nscf,nfftf,ngfftf,Dtset,Cryst,Kmesh,Psps,qp_ebands, &
 
 !Local variables ------------------------------
 !scalars
- integer :: choice,cplex,cplex_rhoij,has_dijU,has_dijso,iat,ider,idir,ipert
- integer :: izero,nkxc1,nspden_rhoij,nzlmopt, option,optrhoij,usexcnhat
+ integer,parameter :: ipert0 = 0, idir0 = 0, optrhoij1 = 1
+ integer :: choice,cplex,cplex_rhoij,has_dijU,has_dijso,iat,ider
+ integer :: izero,nkxc1,nspden_rhoij,nzlmopt, option,usexcnhat
  character(len=500) :: msg
 !arrays
  real(dp) :: k0(3)
@@ -4353,18 +4332,18 @@ subroutine paw_qpscgw(Wfd,nscf,nfftf,ngfftf,Dtset,Cryst,Kmesh,Psps,qp_ebands, &
  ! FIXME kptop should be passed via Kmesh, in GW time reversal is always assumed.
  call wfd%pawrhoij(Cryst,qp_ebands,Dtset%kptopt,QP_pawrhoij,Dtset%pawprtvol)
  !
- ! * Symmetrize QP $\rho_{ij}$.
- choice=1; optrhoij=1; ipert=0
- call pawrhoij_symrhoij(QP_pawrhoij,QP_pawrhoij,choice,Cryst%gprimd,Cryst%indsym,ipert,&
-               Cryst%natom,Cryst%nsym,Cryst%ntypat,optrhoij,Pawang,Dtset%pawprtvol,&
+ ! Symmetrize QP $\rho_{ij}$.
+ choice=1
+ call pawrhoij_symrhoij(QP_pawrhoij,QP_pawrhoij,choice,Cryst%gprimd,Cryst%indsym,ipert0,&
+               Cryst%natom,Cryst%nsym,Cryst%ntypat,optrhoij1,Pawang,Dtset%pawprtvol,&
                Pawtab,Cryst%rprimd,Cryst%symafm,Cryst%symrec,Cryst%typat)
 
  ! ======================
  ! ==== Make QP nhat ====
  ! ======================
- cplex=1; ider=2*nhatgrdim; idir=0; ipert=0; izero=0; k0(:)=zero
+ cplex=1; ider=2*nhatgrdim; izero=0; k0(:)=zero
 
- call pawmknhat(qp_compch_fft,cplex,ider,idir,ipert,izero,Cryst%gprimd,&
+ call pawmknhat(qp_compch_fft,cplex,ider,idir0,ipert0,izero,Cryst%gprimd,&
    Cryst%natom,Cryst%natom,nfftf,ngfftf,nhatgrdim,Dtset%nspden,Cryst%ntypat,Pawang,&
    Pawfgrtab,qp_nhatgr,qp_nhat,QP_Pawrhoij,QP_Pawrhoij,Pawtab,k0,Cryst%rprimd,&
    Cryst%ucvol,Dtset%usewvl,Cryst%xred)
@@ -4401,11 +4380,11 @@ subroutine paw_qpscgw(Wfd,nscf,nfftf,ngfftf,Dtset,Cryst,Kmesh,Psps,qp_ebands, &
      prev_pawrhoij(iat)%use_rhoij_=0
      ABI_FREE(prev_pawrhoij(iat)%rhoij_)
    end do
-   !
-   ! * Re-Symmetrize mixed QP $\rho_{ij}$.
-   choice=1; optrhoij=1; ipert=0
-   call pawrhoij_symrhoij(QP_pawrhoij,QP_pawrhoij,choice,Cryst%gprimd,Cryst%indsym,ipert,&
-                Cryst%natom,Cryst%nsym,Cryst%ntypat,optrhoij,Pawang,Dtset%pawprtvol,&
+
+   ! Re-Symmetrize mixed QP $\rho_{ij}$.
+   choice=1
+   call pawrhoij_symrhoij(QP_pawrhoij,QP_pawrhoij,choice,Cryst%gprimd,Cryst%indsym,ipert0,&
+                Cryst%natom,Cryst%nsym,Cryst%ntypat,optrhoij1,Pawang,Dtset%pawprtvol,&
                 Pawtab,Cryst%rprimd,Cryst%symafm,Cryst%symrec,Cryst%typat)
  end if
 
@@ -4422,7 +4401,7 @@ subroutine paw_qpscgw(Wfd,nscf,nfftf,ngfftf,Dtset,Cryst,Kmesh,Psps,qp_ebands, &
  nzlmopt=-1; option=0; qp_compch_sph=greatest_real
 
  call pawdenpot(qp_compch_sph,QP_energies%e_paw,QP_energies%e_pawdc,&
-   ipert,Dtset%ixc,Cryst%natom,Cryst%natom,Dtset%nspden,&
+   ipert0,Dtset%ixc,Cryst%natom,Cryst%natom,Dtset%nspden,&
    Cryst%ntypat,Dtset%nucdipmom,nzlmopt,option,QP_paw_an,QP_paw_an,&
    QP_paw_ij,Pawang,Dtset%pawprtvol,Pawrad,QP_pawrhoij,Dtset%pawspnorb,&
    Pawtab,Dtset%pawxcdev,Dtset%spnorbscl,Dtset%xclevel,Dtset%xc_denpos,Cryst%ucvol,Psps%znuclpsp)

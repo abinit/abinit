@@ -956,8 +956,8 @@ end subroutine fftdatar_write_from_hdr
 !!  is delegated to the caller.
 !!
 !! INPUTS
-!! fname=Name of the density file
-!! cplex=1 if density is real, 2 if complex e.g. DFPT density.
+!! fname=Name of the file
+!! cplex=1 if array is real, 2 if complex e.g. DFPT density.
 !! nspden=Number of spin density components.
 !! nfft=Number of FFT points (treated by this processor)
 !! ngfft(18)=Info on the FFT mesh.
@@ -999,7 +999,7 @@ end subroutine fftdatar_write_from_hdr
 !! SOURCE
 
 subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orhor, ohdr, pawrhoij, comm, &
-  check_hdr, allow_interp) ! Optional
+                     check_hdr, allow_interp) ! Optional
 
 !Arguments ------------------------------------
 !scalars
