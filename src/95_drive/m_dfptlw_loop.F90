@@ -437,20 +437,20 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
              ABI_MALLOC(d3etot_t4,(2,n2dq))
              ABI_MALLOC(d3etot_tgeom,(2,n2dq))
 
-             !Allocate the first-order gradient local potential that enters the geometric term
+             !Calculate the first-order gradient local potential that enters the geometric term
+             ABI_MALLOC(vpsp1_i1pertdq_geom,(2*nfftf,dtset%nspden,3))
              if (i1pert <= natom .and. (i2pert == natom+3.or.i2pert == natom+4)) then
                
                !calculate the second of the two first-gradient directions
-               ABI_MALLOC(vpsp1_i1pertdq_geom,(2*nfftf,dtset%nspden,3))
                do ii=1,3
                  call dfpt_vlocaldq(atindx,2,gmet,gsqcut,i1dir,i1pert,mpi_enreg, &
                  & psps%mqgrid_vl,dtset%natom,nattyp,dtset%nfft,dtset%ngfft,dtset%ntypat,n1,n2,n3, &
                  & ph1d,ii,psps%qgrid_vl,dtset%qptn,ucvol,psps%vlspl,vpsp1_i1pertdq_geom(:,1,ii))
                end do
-                
-               !Allocate the second-gradient array
-               ABI_MALLOC(vpsp1_i1pertdqdq,(2*nfftf,dtset%nspden,n2dq))
              end if 
+
+             !Allocate the second-gradient array
+             ABI_MALLOC(vpsp1_i1pertdqdq,(2*nfftf,dtset%nspden,n2dq))
 
              do i3pert = 1, mpert
                do i3dir = 1, 3
@@ -670,10 +670,8 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
              end do     ! ir3pert
              
              if (i2pert/=natom+2) ABI_FREE(vpsp1_i2pertdq)
-             if (i1pert <= natom .and. (i2pert == natom+3.or.i2pert == natom+4)) then 
-                ABI_FREE(vpsp1_i1pertdq_geom)
-                ABI_FREE(vpsp1_i1pertdqdq)
-             end if
+             ABI_FREE(vpsp1_i1pertdq_geom)
+             ABI_FREE(vpsp1_i1pertdqdq)
              ABI_FREE(d3etot_t4)
              ABI_FREE(d3etot_tgeom)
 
