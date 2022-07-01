@@ -98,8 +98,8 @@ contains
 !!  d3e_pert2(mpert)=array with the i2pert cases to calculate
 !!  dtfil <type(datafiles_type)>=variables related to files
 !!  dtset <type(dataset_type)>=all input variables for this dataset
-!!  eigen1(2*mband*mband*nkpt_rbz*nsppol)=1st-order eigenvalues for i1pert,i1dir (hartree)
-!!  eigen2(2*mband*mband*nkpt_rbz*nsppol)=1st-order eigenvalues for i2pert,i2dir (hartree)
+!!  eigen1(2*mband*mband*nkpt*nsppol)=1st-order eigenvalues for i1pert,i1dir (hartree)
+!!  eigen2(2*mband*mband*nkpt*nsppol)=1st-order eigenvalues for i2pert,i2dir (hartree)
 !!  ffnl(dtset%mkmem,dtset%mpw,dimffnl,psps%lmnmax,psps%ntypat)= Nonlocal projectors and their derivatives
 !!  gmet(3,3)=reciprocal space metric tensor in bohr**-2
 !!  gs_hamkq <type(gs_hamiltonian_type)>=all data for the Hamiltonian at k+q
@@ -201,8 +201,8 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3e_pert1,d3e_pert2,d3etot,d3etot
 !arrays
  integer,intent(in) :: atindx(natom),kg(3,mpw*mkmem_rbz),nattyp(psps%ntypat),ngfft(18),npwarr(nkpt)
  integer,intent(in) :: d3e_pert1(mpert),d3e_pert2(mpert)
- real(dp),intent(in) :: eigen1(2*mband*mband*mk1mem*nsppol)
- real(dp),intent(in) :: eigen2(2*mband*mband*mk1mem*nsppol)
+ real(dp),intent(in) :: eigen1(2*mband*mband*nkpt*nsppol)
+ real(dp),intent(in) :: eigen2(2*mband*mband*nkpt*nsppol)
  real(dp),intent(in) :: ffnl(mkmem_rbz,mpw,dimffnl,psps%lmnmax,psps%ntypat)
  real(dp),intent(in) :: cg(2,mpw*nspinor*mband*mkmem_rbz*nsppol)
  real(dp),intent(in) :: cg1(2,mpw*nspinor*mband*mk1mem*nsppol)
