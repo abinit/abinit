@@ -74,8 +74,9 @@ module m_gwr_driver
  use m_paw_denpot,    only : pawdenpot
  use m_paw_init,      only : pawinit, paw_gencond
  use m_mkrho,         only : prtrhomxmn
- use m_melemts,       only : melflags_t, melements_t
+ use m_melemts,       only : melflags_t !, melements_t
  use m_setvtr,        only : setvtr
+ use m_vhxc_me,       only : calc_vhxc_me
  use m_gwr,           only : gwr_t
  !use m_ephtk,          only : ephtk_update_ebands
 
@@ -154,13 +155,14 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: master = 0, cplex1 = 1, ipert0 = 0, idir0 = 0,  optrhoij1 = 1
+ integer,parameter :: master = 0, cplex1 = 1, ipert0 = 0, idir0 = 0, optrhoij1 = 1
  integer :: ii, comm, nprocs, my_rank, mgfftf, nfftf
  integer :: omp_ncpus, work_size, nks_per_proc, ierr
  real(dp):: eff, mempercpu_mb, max_wfsmem_mb, nonscal_mem
  real(dp) :: ecore, ecut_eff, ecutdg_eff
  real(dp) :: cpu, wall, gflops
  logical :: use_wfk
+ logical, parameter :: is_dfpt=.false.
  character(len=500) :: msg
  character(len=fnlen) :: wfk_path, den_path
  type(hdr_type) :: wfk_hdr, den_hdr
@@ -190,29 +192,26 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  real(dp) :: compch_fft,compch_sph,r_s,rhoav,alpha
  !real(dp) :: drude_plsmf,my_plsmf,ecore,ecut_eff,ecutdg_eff,ehartree
  real(dp) :: gsqcutc_eff, gsqcutf_eff, gsqcut_shp
- real(dp) :: eh_energy,ekin_energy,evext_energy,den_int,coef_hyb,exc_mbb_energy,tol_empty
+ !real(dp) :: eh_energy,ekin_energy,evext_energy,den_int,coef_hyb,exc_mbb_energy,tol_empty
  real(dp) :: ucvol,vxcavg,vxcavg_qp
  real(dp) :: gwc_gsq,gwx_gsq,gw_gsq, gsqcut,boxcut,ecutf
  !real(dp) :: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem,ug_mem,ur_mem,cprj_mem
- logical :: use_paw_aeur,dbg_mode,pole_screening,call_pawinit,is_dfpt=.false.
+ logical :: call_pawinit !use_paw_aeur,dbg_mode,pole_screening,
  !character(len=500) :: msg
- !character(len=fnlen) :: wfk_fname,pawden_fname,gw1rdm_fname
  !type(kmesh_t) :: Kmesh,Qmesh
  !type(ebands_t) :: ks_ebands, qp_ebands
  type(energies_type) :: KS_energies !,QP_energies
  !type(gsphere_t) :: Gsph_Max,Gsph_x,Gsph_c
  !type(hdr_type) :: Hdr_wfk,Hdr_sigma,Hdr_rhor
  type(melflags_t) :: KS_mflags !,QP_mflags
- type(melements_t) :: KS_me !, QP_me
- type(MPI_type) :: MPI_enreg_seq
+ !type(melements_t) :: KS_me !, QP_me
  type(paw_dmft_type) :: Paw_dmft
- !type(wfdgw_t),target :: Wfd
  !type(wave_t),pointer :: wave
 !arrays
  integer :: gwc_ngfft(18),ngfftc(18),ngfftf(18),gwx_ngfft(18),unts(2)
  integer,allocatable :: nq_spl(:)
- integer,allocatable :: tmp_gfft(:,:),ks_vbik(:,:),nband(:,:),l_size_atm(:),qp_vbik(:,:)
- integer,allocatable :: tmp_kstab(:,:,:),ks_irreptab(:,:,:),qp_irreptab(:,:,:),my_band_list(:)
+ integer,allocatable :: l_size_atm(:) !,qp_vbik(:,:),tmp_gfft(:,:),ks_vbik(:,:),nband(:,:),
+ integer,allocatable :: tmp_kstab(:,:,:) !,ks_irreptab(:,:,:),qp_irreptab(:,:,:),my_band_list(:)
  !real(dp),parameter ::  k0(3)=zero
  real(dp) :: strsxc(6),tsec(2)
  !real(dp),allocatable :: weights(:),nat_occs(:,:),gw_rhor(:,:),gw_rhog(:,:),gw_vhartr(:)
@@ -396,7 +395,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
 
    ABI_MALLOC(ks_pawrhoij, (cryst%natom))
    call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij, nspden_rhoij=nspden_rhoij, &
-                             nspden=dtset%nspden, spnorb=dtset%pawspnorb, cpxocc=Dtset%pawcpxocc)
+                             nspden=dtset%nspden, spnorb=dtset%pawspnorb, cpxocc=dtset%pawcpxocc)
    call pawrhoij_alloc(ks_pawrhoij, cplex_rhoij, nspden_rhoij, dtset%nspinor, dtset%nsppol, cryst%typat, pawtab=pawtab)
 
    ! Test if we have to call pawinit
@@ -505,7 +504,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  ABI_MALLOC(ks_rhor, (nfftf, dtset%nspden))
 
  call read_rhor(den_path, cplex1, dtset%nspden, nfftf, ngfftf, dtset%usepaw, mpi_enreg, ks_rhor, &
-                den_hdr, ks_pawrhoij, comm, allow_interp=.True.)
+                den_hdr, ks_pawrhoij, comm) !, allow_interp=.True.)
 
  den_cryst = den_hdr%get_crystal()
  if (cryst%compare(den_cryst, header=" Comparing input crystal with DEN crystal") /= 0) then
@@ -626,22 +625,14 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  !if (gwcalctyp<10        )  KS_mflags%only_diago = 1 ! off-diagonal elements only for SC on wavefunctions.
  KS_mflags%only_diago = 1 ! off-diagonal elements only for SC on wavefunctions.
 
-#if 0
- ABI_MALLOC(tmp_kstab, (2, Wfd%nkibz, Wfd%nsppol))
- tmp_kstab=0
- do spin=1,Sigp%nsppol
-   do ikcalc=1,Sigp%nkptgw ! No spin dependent!
-     ik_ibz = Kmesh%tab(Sigp%kptgw2bz(ikcalc))
-     tmp_kstab(1, ik_ibz, spin) = Sigp%minbnd(ikcalc, spin)
-     tmp_kstab(2, ik_ibz, spin) = Sigp%maxbnd(ikcalc, spin)
-   end do
- end do
+ call gwr%load_kcalc_wfd(wfk_path, tmp_kstab)
 
- call calc_vhxc_me(Wfd, KS_mflags, KS_me, Cryst, Dtset, nfftf, ngfftf, &
-                   ks_vtrial, ks_vhartr, ks_vxc, Psps, Pawtab, KS_paw_an, Pawang, Pawfgrtab, KS_paw_ij, dijexc_core, &
+ call calc_vhxc_me(gwr%kcalc_wfd, ks_mflags, gwr%ks_me, cryst, dtset, nfftf, ngfftf, &
+                   ks_vtrial, ks_vhartr, ks_vxc, psps, pawtab, ks_paw_an, pawang, pawfgrtab, ks_paw_ij, dijexc_core, &
                    ks_rhor, usexcnhat, ks_nhat, ks_nhatgr, nhatgrdim, tmp_kstab, taur=ks_taur)
+
+ if (my_rank == master) call gwr%ks_me%print(header="KS matrix elements", unit=std_out)
  ABI_FREE(tmp_kstab)
-#endif
 
  select case (dtset%gwr_task)
  case ("G0W0")
@@ -691,7 +682,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  call wfk_hdr%free()
  call ebands_free(ks_ebands)
  call destroy_mpi_enreg(mpi_enreg)
- call KS_me%free()
+
  call gwr%free()
 
 end subroutine gwr_driver

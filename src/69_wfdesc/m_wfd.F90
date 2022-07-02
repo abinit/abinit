@@ -1019,7 +1019,7 @@ subroutine wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,mband,nband,nkibz,nsppol,bks_m
 
  ABI_MALLOC(Wfd%nband, (nkibz,nsppol))
  Wfd%nband=nband; Wfd%mband = mband
- ABI_CHECK(MAXVAL(Wfd%nband)==mband,"wrong mband")
+ ABI_CHECK(MAXVAL(Wfd%nband) == mband, "Wrong mband")
 
  ! Allocate u(g) and, if required, also u(r)
  ug_size = one*nspinor*mpw*COUNT(bks_mask)

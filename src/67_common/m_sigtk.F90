@@ -57,6 +57,19 @@ module m_sigtk
  public :: sigtk_kpts_in_erange
 !!***
 
+
+ ! Tables for degenerated KS states.
+ type, public :: bids_t
+   integer, allocatable :: vals(:)
+ end type bids_t
+
+ type, public :: degtab_t
+   type(bids_t), allocatable :: bids(:)
+ end type degtab_t
+
+ public :: degtab_array_free   ! Free array of degtab_t objects.
+!!***
+
 contains  !=====================================================
 !!***
 
@@ -811,5 +824,23 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
 end subroutine sigtk_kpts_in_erange
 !!***
 
+subroutine degtab_array_free(degtab)
+ type(degtab_t),intent(inout) :: degtab(:,:)
+
+ integer :: jj, ii, ideg
+
+ do jj=1,size(degtab, dim=2)
+   do ii=1,size(degtab, dim=1)
+     do ideg=1,size(degtab(ii, jj)%bids)
+       ABI_FREE(degtab(ii, jj)%bids(ideg)%vals)
+     end do
+     ABI_FREE(degtab(ii, jj)%bids)
+   end do
+ end do
+
+end subroutine degtab_array_free
+!!***
+
 end module m_sigtk
 !!***
+
