@@ -91,13 +91,13 @@ module m_sigmaph
 !!***
 
  ! Tables for degenerated KS states.
- type bids_t
-   integer, allocatable :: vals(:)
- end type bids_t
+ !type bids_t
+ !  integer, allocatable :: vals(:)
+ !end type bids_t
 
- type degtab_t
-   type(bids_t), allocatable :: bids(:)
- end type degtab_t
+ !type degtab_t
+ !  type(bids_t), allocatable :: bids(:)
+ !end type degtab_t
 
  ! Store the weights in single or double precision
  integer,private,parameter :: DELTAW_KIND = dp
@@ -2607,7 +2607,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
 
  call cwtime_report(" sigmaph_new: k-points", cpu, wall, gflops)
 
- ! TODO: nkcalc should be spin dependent.
+ ! TODO: nkcalc should be spin dependent (similar piece of code in m_gwr).
  if (dtset%nkptgw /= 0) then
 
    ! Treat the k-points and bands specified in the input file via kptgw and bdgw.
@@ -4041,14 +4041,7 @@ subroutine sigmaph_free(self)
 
  ! datatypes.
  if (allocated(self%degtab)) then
-   do jj=1,size(self%degtab, dim=2)
-     do ii=1,size(self%degtab, dim=1)
-       do ideg=1,size(self%degtab(ii, jj)%bids)
-         ABI_FREE(self%degtab(ii, jj)%bids(ideg)%vals)
-       end do
-       ABI_FREE(self%degtab(ii, jj)%bids)
-     end do
-   end do
+   call degtab_array_free(self%degtab)
    ABI_FREE(self%degtab)
  end if
 

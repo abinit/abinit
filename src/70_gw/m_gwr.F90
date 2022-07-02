@@ -45,7 +45,7 @@ module m_gwr
  use m_io_tools,      only : iomode_from_fname !, file_exists, is_open, open_file
  use m_numeric_tools, only : get_diag, isdiagmat, arth, print_arr
  use m_copy,          only : alloc_copy
- use m_fstrings,      only : sjoin, itoa, strcat
+ use m_fstrings,      only : sjoin, itoa, strcat, ktoa
  use m_krank,         only : krank_t, krank_new, krank_from_kptrlatt, get_ibz2bz, star_from_ibz_idx
  use m_crystal,       only : crystal_t
  use m_dtset,         only : dataset_type
@@ -55,13 +55,13 @@ module m_gwr
  use m_fft,           only : fft_ug, fft_ur, fftbox_plan3_t, fourdp
  use m_fft_mesh,      only : times_eikr !, times_eigr, ig2gfft, get_gftt, calc_ceikr, calc_eigr
  use m_kpts,          only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, kpts_map, kpts_sort, kpts_pack_in_stars
+ use m_melemts,       only : melements_t
  use m_ioarr,         only : read_rhor
  use m_wfk,           only : wfk_read_ebands
- use m_wfd,           only : wfd_t, wfd_init, wave_t
+ use m_wfd,           only : wfd_init, wfd_t, wfdgw_t, wave_t
  use m_pawtab,        only : pawtab_type
  use m_pawrhoij,      only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy, pawrhoij_free, &
                              pawrhoij_inquire_dim, pawrhoij_symrhoij, pawrhoij_unpack
- !use m_vhxc_me,       only : calc_vhxc_me
 
  implicit none
 
@@ -202,8 +202,8 @@ module m_gwr
    ! Number of bands included in self-energy matrix elements for each k-point in kcalc.
    ! Depends on spin because all degenerate states should be included when symmetries are used.
 
-  !integer,allocatable :: kcalc2ibz(:,:)
-   !kcalc2ibz(6, nkcalc))
+   integer,allocatable :: kcalc2ibz(:,:)
+   !kcalc2ibz(nkcalc, 6))
    ! Mapping ikcalc --> IBZ as reported by listkk.
 
    logical :: use_supercell = .True.
@@ -376,14 +376,14 @@ module m_gwr
    ! (nqibz)
    ! Weights of the q-points in the IBZ (normalized to one).
 
-   !real(dp),allocatable :: ks_rhog(:,:), ks_rhor(:,:)
-   ! (nfftf, nspden)
-   ! KS density in G/r space.
+   type(wfdgw_t) :: kcalc_wfd
+   ! wavefunction descriptors with the KS states where QP corrections are wanted
 
-   !real(dp),allocatable :: ks_vhartr(:), ks_vtrial(:,:), ks_vxc(:,:), ks_nhat(:,:), ks_nhatgr(:,:,:)
+   type(melements_t) :: ks_me !, QP_me
 
-   !type(pawrhoij_type), allocatable :: ks_pawrhoij(:)
-   ! (natom)
+   type(degtab_t),allocatable :: degtab(:,:)
+   ! (nkcalc, nsppol)
+   ! Table used to average QP results in the degenerate subspace if symsigma == 1
 
  contains
 
@@ -401,6 +401,8 @@ module m_gwr
 
    procedure :: print_trace => gwr_print_trace
 
+   procedure :: load_kcalc_wfd => gwr_load_kcalc_wfd
+
    procedure :: build_gtau_from_wfk => gwr_build_gtau_from_wfk
    ! Build the Green's function in imaginary time for k-points in the IBZ from the WFK file
 
@@ -413,6 +415,8 @@ module m_gwr
 
  end type gwr_t
 !!***
+
+ real(dp),private,parameter :: TOL_EDIFF = 0.001_dp * eV_Ha
 
 contains
 !!***
@@ -455,8 +459,11 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  integer,parameter :: me_fft0 = 0, paral_fft0 = 0, nproc_fft1 = 1, istwfk1 = 1
  integer,parameter :: qptopt1 = 1, timrev1 = 1, master = 0, ndims = 4
  integer :: my_is, my_it, my_ikf, my_iqf, ii, npwsp, col_bsize, ebands_timrev, my_iki, my_iqi, itau, spin
- integer :: my_nshiftq, ik_ibz, ik_bz, iq_bz, iq_ibz, npw_, ncid ! ig1, ig2,
+ integer :: my_nshiftq, iq_bz, iq_ibz, npw_, ncid ! ig1, ig2,
  integer :: comm_cart, me_cart, ierr, all_nproc, nps, my_rank, qprange_, gap_err, den_fform
+ integer :: jj, cnt, ikcalc, ndeg, mband, bstop
+ integer :: ik_ibz, ik_bz, isym_k, trev_k, g0_k(3)
+ logical :: isirr_k, changed
  real(dp) :: ecut_eff
  real(dp) :: cpu, wall, gflops
  character(len=5000) :: msg
@@ -466,10 +473,12 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  type(gaps_t) :: gaps
 !arrays
  integer :: qptrlatt(3,3), dims(ndims)
+ integer :: indkk_k(6,1) !, band_block(2)
  integer,allocatable :: kbz2ibz(:,:), qbz2ibz(:,:), gvec_(:,:)
  !integer,allocatable :: kibz2bz(:), qibz2bz(:), qglob2bz(:,:), kglob2bz(:,:)
  integer,allocatable :: count_ibz(:)
- real(dp) :: my_shiftq(3,1), kk_ibz(3), kk_bz(3), qq_bz(3), qq_ibz(3)
+ integer,allocatable :: degblock(:,:), degblock_all(:,:,:,:), ndeg_all(:,:)
+ real(dp) :: my_shiftq(3,1), kk_ibz(3), kk_bz(3), qq_bz(3), qq_ibz(3), kk(3)
  real(dp),allocatable :: wtk(:), kibz(:,:)
  logical :: periods(ndims), keepdim(ndims)
 
@@ -502,6 +511,8 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  gwr%usepaw = dtset%usepaw
  gwr%use_supercell = .True.
 
+ mband = ks_ebands%mband
+
  ! =======================
  ! Setup k-mesh and q-mesh
  ! =======================
@@ -532,7 +543,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  if (kpts_map("symrec", ebands_timrev, cryst, krank_ibz, gwr%nkbz, gwr%kbz, kbz2ibz) /= 0) then
    ABI_ERROR("Cannot map kBZ to IBZ!")
  end if
- call krank_ibz%free()
+ !call krank_ibz%free()
 
  !call get_ibz2bz(gwr%nkibz, gwr%nkbz, kbz2ibz, kibz2bz, ierr)
  !ABI_CHECK(ierr == 0, "Something wrong in symmetry tables for k-points")
@@ -594,7 +605,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  if (dtset%nkptgw /= 0) then
 
    ! Treat the k-points and bands specified in the input file via kptgw and bdgw.
-   call sigtk_kcalc_from_nkptgw(dtset, dtset%mband, gwr%nkcalc, gwr%kcalc, gwr%bstart_ks, gwr%nbcalc_ks)
+   call sigtk_kcalc_from_nkptgw(dtset, mband, gwr%nkcalc, gwr%kcalc, gwr%bstart_ks, gwr%nbcalc_ks)
 
  else
 
@@ -630,12 +641,126 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
 
  ! TODO: Copy additional section in sigmaph to include all degenerate states and map kcalc to ibz
 
+ ! The k-point and the symmetries connecting the BZ k-point to the IBZ.
+ ABI_MALLOC(gwr%kcalc2ibz, (gwr%nkcalc, 6))
+ if (abs(gwr%dtset%symsigma) == 1) then
+   ABI_MALLOC(gwr%degtab, (gwr%nkcalc, gwr%nsppol))
+ end if
+
+ ! Workspace arrays used to compute degeneracy tables.
+ ABI_ICALLOC(degblock_all, (2, mband, gwr%nkcalc, gwr%nsppol))
+ ABI_ICALLOC(ndeg_all, (gwr%nkcalc, gwr%nsppol))
+
+ !krank = krank_from_kptrlatt(ebands%nkpt, ebands%kptns, ebands%kptrlatt, compute_invrank=.False.)
+ ierr = 0
+
+ do ikcalc=1,gwr%nkcalc
+   !if (mod(ikcalc, nprocs) /= my_rank) then
+   !  gwr%kcalc2ibz(ikcalc, :) = 0
+   !  gwr%bstart_ks(ikcalc, :) = 0
+   !  gwr%nbcalc_ks(ikcalc, :) = 0
+   !  cycle ! MPI parallelism inside comm
+   !end if
+
+
+   ! Note symrel and use_symrel.
+   ! These are the conventions for the symmetrization of the wavefunctions used in cgtk_rotate.
+   kk = gwr%kcalc(:, ikcalc)
+
+   if (kpts_map("symrel", ebands_timrev, cryst, krank_ibz, 1, kk, indkk_k) /= 0) then
+      write(msg, '(5a)' )&
+       "The WFK file cannot be used to compute self-energy corrections at k-point: ",ktoa(kk),ch10,&
+       "The k-point cannot be generated from a symmetrical one.", ch10
+      ABI_ERROR(msg)
+   end if
+
+
+   ! TODO: Invert dims and update abipy
+   gwr%kcalc2ibz(ikcalc, :) = indkk_k(:, 1)
+
+   ik_ibz = indkk_k(1,1); isym_k = indkk_k(2,1)
+   trev_k = indkk_k(6, 1); g0_k = indkk_k(3:5,1)
+   isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
+   !kk_ibz = ks_ebands%kptns(:,ik_ibz)
+   if (.not. isirr_k) then
+     ABI_WARNING(sjoin("The k-point in Sigma_{nk} must be in the IBZ but got:", ktoa(kk)))
+     ierr = ierr + 1
+   end if
+
+   ! We will have to average the QP corrections over degenerate states if symsigma=1 is used.
+   ! Here we make sure that all the degenerate states are included.
+   ! Store also band indices of the degenerate sets, used to average final results.
+   if (abs(gwr%dtset%symsigma) == 1) then
+     cnt = 0
+     do spin=1,gwr%nsppol
+       bstop = gwr%bstart_ks(ikcalc, spin) + gwr%nbcalc_ks(ikcalc, spin) - 1
+       call ebands_enclose_degbands(ks_ebands, ik_ibz, spin, gwr%bstart_ks(ikcalc, spin), bstop, changed, TOL_EDIFF, &
+                                    degblock=degblock)
+       if (changed) then
+         gwr%nbcalc_ks(ikcalc, spin) = bstop - gwr%bstart_ks(ikcalc, spin) + 1
+         cnt = cnt + 1
+         if (cnt < 5) then
+           write(msg,'(2(a,i0),2a,2(1x,i0))') &
+             "Not all the degenerate states for ikcalc: ",ikcalc,", spin: ",spin,ch10, &
+             "were included in the bdgw set. bdgw has been automatically changed to: ",gwr%bstart_ks(ikcalc, spin), bstop
+           ABI_COMMENT(msg)
+         end if
+         write(msg,'(2(a,i0),2a)') &
+           "The number of included states: ", bstop, &
+           " is larger than the number of bands in the input ",dtset%nband(ik_ibz + (spin-1)*ks_ebands%nkpt),ch10,&
+           "Action: Increase nband."
+         ABI_CHECK(bstop <= dtset%nband(ik_ibz + (spin-1)*ks_ebands%nkpt), msg)
+       end if
+
+       ! Store band indices used for averaging (shifted by bstart_ks)
+       ndeg = size(degblock, dim=2)
+       ndeg_all(ikcalc, spin) = ndeg
+       degblock_all(:, 1:ndeg, ikcalc, spin) = degblock(:, 1:ndeg)
+
+       ABI_FREE(degblock)
+
+     end do
+   end if ! symsigma
+ end do ! ikcalc
+
+ !call krank%free()
+ ABI_CHECK(ierr == 0, "kptgw wavevectors must be in the IBZ read from the WFK file.")
+
+ ! Collect data
+ !call xmpi_sum(gwr%kcalc2ibz, comm, ierr)
+ !call xmpi_sum(gwr%bstart_ks, comm, ierr)
+ !call xmpi_sum(gwr%nbcalc_ks, comm, ierr)
+
+ ! Build degtab tables.
+ if (abs(gwr%dtset%symsigma) == 1) then
+   call xmpi_sum(ndeg_all, comm, ierr)
+   call xmpi_sum(degblock_all, comm, ierr)
+   do ikcalc=1,gwr%nkcalc
+     do spin=1,gwr%nsppol
+       ndeg = ndeg_all(ikcalc, spin)
+       ABI_MALLOC(gwr%degtab(ikcalc, spin)%bids, (ndeg))
+       do ii=1,ndeg
+         cnt = degblock_all(2, ii, ikcalc, spin) - degblock_all(1, ii, ikcalc, spin) + 1
+         ABI_MALLOC(gwr%degtab(ikcalc, spin)%bids(ii)%vals, (cnt))
+         gwr%degtab(ikcalc, spin)%bids(ii)%vals = [(jj, jj= &
+           degblock_all(1, ii, ikcalc, spin) - gwr%bstart_ks(ikcalc, spin) + 1, &
+           degblock_all(2, ii, ikcalc, spin) - gwr%bstart_ks(ikcalc, spin) + 1)]
+       end do
+     end do
+   end do
+ end if
+
+ ABI_FREE(degblock_all)
+ ABI_FREE(ndeg_all)
+
  ! Now we can finally compute max_nbcalc
  gwr%max_nbcalc = maxval(gwr%nbcalc_ks)
 
  ABI_MALLOC(gwr%bstop_ks, (gwr%nkcalc, gwr%nsppol))
  gwr%bstop_ks = gwr%bstart_ks + gwr%nbcalc_ks - 1
+
  call gaps%free()
+ call krank_ibz%free()
 
  ! ========================
  ! === MPI DISTRIBUTION ===
@@ -883,9 +1008,11 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
        ik_ibz = gwr%my_kibz_inds(my_iki)
        npwsp = gwr%green_desc_kibz(ik_ibz)%npw * gwr%nspinor
        col_bsize = npwsp / gwr%g_comm%nproc; if (mod(npwsp, gwr%g_comm%nproc) /= 0) col_bsize = col_bsize + 1
-       call gwr%gt_kibz(1, ik_ibz, itau, spin)%init(npwsp, npwsp, gwr%g_slkproc, 1, size_blocs=[npwsp, col_bsize])
-       call gwr%gt_kibz(2, ik_ibz, itau, spin)%init(npwsp, npwsp, gwr%g_slkproc, 1, size_blocs=[npwsp, col_bsize])
-       !call gwr%gt_kibz(1, ik_ibz, itau, spin)%print(header=sjoin("gt_kibz(1) for ik_ibz:", itoa(ik_ibz)))
+       associate (gt => gwr%gt_kibz(:, ik_ibz, itau, spin))
+       call gt(1)%init(npwsp, npwsp, gwr%g_slkproc, 1, size_blocs=[npwsp, col_bsize])
+       call gt(2)%init(npwsp, npwsp, gwr%g_slkproc, 1, size_blocs=[npwsp, col_bsize])
+       !call gt(1)%print(header=sjoin("gt_kibz(1) for ik_ibz:", itoa(ik_ibz)))
+       end associate
      end do
 
     ! Allocate chi_q(g,g') for q in my IBZ, MPI distributed over g' in blocks
@@ -893,8 +1020,10 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
       iq_ibz = gwr%my_qibz_inds(my_iqi)
       npwsp = gwr%chi_desc_qibz(iq_ibz)%npw * gwr%nspinor
       col_bsize = npwsp / gwr%g_comm%nproc; if (mod(npwsp, gwr%g_comm%nproc) /= 0) col_bsize = col_bsize + 1
-      call gwr%chi_qibz(iq_ibz, itau, spin)%init(npwsp, npwsp, gwr%g_slkproc, 1, size_blocs=[npwsp, col_bsize])
-      !call gwr%chi_qibz(iq_ibz, itau, spin)%print(header=sjoin("chi_qibz for iq_ibz:", itoa(iq_ibz)))
+      associate (chi => gwr%chi_qibz(iq_ibz, itau, spin))
+      call chi%init(npwsp, npwsp, gwr%g_slkproc, 1, size_blocs=[npwsp, col_bsize])
+      !call chi%print(header=sjoin("chi_qibz for iq_ibz:", itoa(iq_ibz)))
+      end associate
     end do
 
    end do ! my_it
@@ -1042,9 +1171,10 @@ subroutine gwr_free(gwr)
  ABI_SFREE(gwr%bstart_ks)
  ABI_SFREE(gwr%bstop_ks)
  ABI_SFREE(gwr%nbcalc_ks)
- !ABI_SFREE(gwr%kcalc2ibz)
+ ABI_SFREE(gwr%kcalc2ibz)
 
  call ebands_free(gwr%qp_ebands)
+ call gwr%kcalc_wfd%free()
 
  ! Free descriptors
  if (allocated(gwr%green_desc_kibz)) then
@@ -1072,6 +1202,14 @@ subroutine gwr_free(gwr)
  if (allocated(gwr%sigc_kibz)) then
    call slk_array_free(gwr%sigc_kibz)
    ABI_FREE(gwr%sigc_kibz)
+ end if
+
+ call gwr%ks_me%free()
+
+ ! datatypes.
+ if (allocated(gwr%degtab)) then
+   call degtab_array_free(gwr%degtab)
+   ABI_FREE(gwr%degtab)
  end if
 
  ! Deallocation for PAW.
@@ -1103,6 +1241,108 @@ subroutine desc_array1_free(desc_array1)
     call desc_array1(ii)%free()
   end do
 end subroutine desc_array1_free
+
+!----------------------------------------------------------------------
+
+!!****f* m_gwr/gwr_load_kcalc_wfd
+!! NAME
+!! gwr_load_kcalc_wfd
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine gwr_load_kcalc_wfd(gwr, wfk_path, tmp_kstab)
+
+!Arguments ------------------------------------
+ class(gwr_t),target,intent(inout) :: gwr
+ character(len=fnlen),intent(in) :: wfk_path
+ integer,allocatable,intent(out) :: tmp_kstab(:,:,:)
+
+!Local variables-------------------------------
+!scalars
+ integer :: mband, nkibz, nsppol, spin, ik_ibz, ikcalc, npw_k, istwf_k ! band, ib,
+ real(dp) :: cpu, wall, gflops
+ character(len=5000) :: msg
+ type(ebands_t) :: ks_ebands
+ type(hdr_type) :: wfk_hdr
+!arrays
+ integer,allocatable :: nband(:,:), wfd_istwfk(:)
+ logical,allocatable :: bks_mask(:,:,:), keep_ur(:,:,:)
+
+! *************************************************************************
+
+ call cwtime(cpu, wall, gflops, "start")
+
+ associate (wfd=> gwr%kcalc_wfd, dtset => gwr%dtset)
+
+ ks_ebands = wfk_read_ebands(wfk_path, gwr%comm, out_hdr=wfk_hdr)
+ call wfk_hdr%vs_dtset(dtset)
+ ! TODO: More consistency checks e.g. nkibz,...
+
+ !cryst = wfk_hdr%get_crystal()
+ !call cryst%print(header="crystal structure from WFK file")
+
+ nkibz = ks_ebands%nkpt; nsppol = ks_ebands%nsppol !; mband = ks_ebands%mband
+
+ ! Don't take mband from ks_ebands but compute it from gwr%bstop_ks
+ mband = maxval(gwr%bstop_ks)
+
+ ! Initialize the wave function descriptor.
+ ! Only wavefunctions for the symmetrical imagine of the k wavevectors
+ ! treated by this MPI rank are stored.
+ ABI_MALLOC(nband, (nkibz, nsppol))
+ ABI_MALLOC(bks_mask, (mband, nkibz, nsppol))
+ ABI_MALLOC(keep_ur, (mband, nkibz, nsppol))
+ nband = mband; bks_mask = .False.; keep_ur = .False.
+
+ ABI_ICALLOC(tmp_kstab, (2, nkibz, nsppol))
+
+ do spin=1,gwr%nsppol
+   do ikcalc=1,gwr%nkcalc ! No spin dependent!
+     ik_ibz = gwr%kcalc2ibz(ikcalc, 1)
+     associate (b1 => gwr%bstart_ks(ikcalc, spin), b2 => gwr%bstop_ks(ikcalc, spin))
+     tmp_kstab(:, ik_ibz, spin) = [b1, b2]
+     bks_mask(b1:b2, ik_ibz, spin) = .True.
+     end associate
+   end do
+ end do
+
+ ! Impose istwfk = 1 for all k-points.
+ ! wfd_read_wfk will handle a possible conversion if the WFK contains istwfk /= 1.
+ ABI_MALLOC(wfd_istwfk, (nkibz))
+ wfd_istwfk = 1
+
+ call wfd_init(wfd, gwr%cryst, gwr%pawtab, gwr%psps, keep_ur, mband, nband, nkibz, dtset%nsppol, bks_mask, &
+   dtset%nspden, dtset%nspinor, dtset%ecut, dtset%ecutsm, dtset%dilatmx, wfd_istwfk, ks_ebands%kptns, gwr%g_ngfft, &
+   dtset%nloalg, dtset%prtvol, dtset%pawprtvol, gwr%comm)
+
+ call wfd%print(header="Wavefunctions for GWR calculation")
+
+ ABI_FREE(nband)
+ ABI_FREE(keep_ur)
+ ABI_FREE(wfd_istwfk)
+ ABI_FREE(bks_mask)
+
+ call ebands_free(ks_ebands)
+ call wfk_hdr%free()
+
+ ! Read KS wavefunctions.
+ call wfd%read_wfk(wfk_path, iomode_from_fname(wfk_path))
+
+ call cwtime_report(" gwr_load_kcalc_from_wfk:", cpu, wall, gflops)
+ end associate
+
+end subroutine gwr_load_kcalc_wfd
+!!***
 
 !----------------------------------------------------------------------
 
@@ -1139,8 +1379,8 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
  type(wfd_t),target :: wfd
  type(wave_t),pointer :: wave
  type(ebands_t) :: ks_ebands
- type(hdr_type) :: wfk0_hdr
- type(dataset_type), pointer :: dtset
+ type(hdr_type) :: wfk_hdr
+ !type(dataset_type), pointer :: dtset
  type(desc_t),pointer :: desc_k
  !type(matrix_scalapack),pointer :: gt
 !arrays
@@ -1152,13 +1392,13 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
 
  call cwtime(cpu, wall, gflops, "start")
 
- dtset => gwr%dtset
+ associate (dtset => gwr%dtset)
 
- ks_ebands = wfk_read_ebands(wfk_path, gwr%comm, out_hdr=wfk0_hdr)
- call wfk0_hdr%vs_dtset(dtset)
+ ks_ebands = wfk_read_ebands(wfk_path, gwr%comm, out_hdr=wfk_hdr)
+ call wfk_hdr%vs_dtset(dtset)
  ! TODO: More consistency checks e.g. nkibz,...
 
- !cryst = wfk0_hdr%get_crystal()
+ !cryst = wfk_hdr%get_crystal()
  !call cryst%print(header="crystal structure from WFK file")
 
  ! Initialize the wave function descriptor.
@@ -1186,7 +1426,7 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
  end do
 
  ! Impose istwfk = 1 for all k-points.
- ! wfd_read_wfk will handle a possible conversion if WFK contains istwfk /= 1.
+ ! wfd_read_wfk will handle a possible conversion if the WFK contains istwfk /= 1.
  ABI_MALLOC(wfd_istwfk, (nkibz))
  wfd_istwfk = 1
 
@@ -1200,8 +1440,9 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
  ABI_FREE(keep_ur)
  ABI_FREE(wfd_istwfk)
  ABI_FREE(bks_mask)
+
  call ebands_free(ks_ebands)
- call wfk0_hdr%free()
+ call wfk_hdr%free()
 
  ! Read KS wavefunctions.
  call wfd%read_wfk(wfk_path, iomode_from_fname(wfk_path))
@@ -1278,6 +1519,8 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
    end do ! my_ikf
  end do ! my_is
 
+ end associate
+
  call wfd%free()
  ABI_FREE(my_bands)
 
@@ -1350,14 +1593,16 @@ subroutine gwr_rotate_gt(gwr, my_ikf, my_it, my_is, desc_kbz, gt_kbz)
  ! Get G_k with k in the BZ.
  do ioe=1,2
    call gwr%gt_kibz(ioe, ik_ibz, itau, spin)%copy(gt_kbz(ioe))
-   do il_g2=1,gt_kbz(ioe)%sizeb_local(2)
-     ig2 = gt_kbz(ioe)%loc2gcol(il_g2)
-     do il_g1=1, gt_kbz(ioe)%sizeb_local(1)
-       ig1 = gt_kbz(ioe)%loc2grow(il_g1)
-       !gt_kbz(ioe)%buffer_cplx(il_g1, il_g2) = gt_kbz(ioe)%buffer_cplx(il_g1, il_g2) ! * ??
+   associate (gk => gt_kbz(ioe))
+   do il_g2=1, gk%sizeb_local(2)
+     ig2 = gk%loc2gcol(il_g2)
+     do il_g1=1, gk%sizeb_local(1)
+       ig1 = gk%loc2grow(il_g1)
+       !gk%buffer_cplx(il_g1, il_g2) = gk%buffer_cplx(il_g1, il_g2) ! * ??
      end do
    end do
-   !call gt_kbz(ioe)%print(header=sjoin("not isirr_k with gt_kibz:", itoa(ik_ibz)))
+   !call gk%print(header=sjoin("not isirr_k with gt_kibz:", itoa(ik_ibz)))
+   end associate
  end do
 
 end subroutine gwr_rotate_gt
@@ -2145,7 +2390,7 @@ subroutine gwr_build_wc(gwr)
    iq_ibz = gwr%my_qibz_inds(my_iqi)
    qq_ibz = gwr%qibz(:, iq_ibz)
    desc_q => gwr%chi_desc_qibz(iq_ibz)
-   is_gamma = all(abs(qq_ibz) < tol12) ! Handle q --> 0 limit
+   is_gamma = all(abs(qq_ibz) < tol12) ! To handle q --> 0 limit
 
    do my_is=1,gwr%my_nspins  ! This loop is needed so that procs in the spin pool can operate on their matrix.
      spin = gwr%my_spins(my_is)
@@ -2157,6 +2402,8 @@ subroutine gwr_build_wc(gwr)
        !call gwr%wc_qibz(iq_ibz, itau, spin)%init(npwsp, npwsp, gwr%g_slkproc, 1, size_blocs=[npwsp, col_bsize])
 
        call gwr%chi_qibz(iq_ibz, itau, spin)%copy(gwr%wc_qibz(iq_ibz, itau, spin), free=free_chi)
+       !associate (wc => gwr%wc_qibz(iq_ibz, itau, spin))
+       !end associate
        wc => gwr%wc_qibz(iq_ibz, itau, spin)
        !call wc%print(header="wc")
 
@@ -2265,9 +2512,11 @@ subroutine gwr_build_sigmac(gwr)
        ik_ibz = gwr%my_kibz_inds(my_iki)
        npwsp = gwr%green_desc_kibz(ik_ibz)%npw * gwr%nspinor
        col_bsize = npwsp / gwr%g_comm%nproc; if (mod(npwsp, gwr%g_comm%nproc) /= 0) col_bsize = col_bsize + 1
-       call gwr%sigc_kibz(1, ik_ibz, itau, spin)%init(npwsp, npwsp, gwr%g_slkproc, 1, size_blocs=[npwsp, col_bsize])
-       call gwr%sigc_kibz(2, ik_ibz, itau, spin)%init(npwsp, npwsp, gwr%g_slkproc, 1, size_blocs=[npwsp, col_bsize])
-       !call gwr%sigc_kibz(1, ik_ibz, itau, spin)%print(header=sjoin("sigc_kibz(1) for ik_ibz:", itoa(ik_ibz)))
+       associate (sigc => gwr%sigc_kibz(:, ik_ibz, itau, spin))
+       call sigc(1)%init(npwsp, npwsp, gwr%g_slkproc, 1, size_blocs=[npwsp, col_bsize])
+       call sigc(2)%init(npwsp, npwsp, gwr%g_slkproc, 1, size_blocs=[npwsp, col_bsize])
+       !call sigc(1)%print(header=sjoin("sigc_kibz(1) for ik_ibz:", itoa(ik_ibz)))
+       end associate
      end do
 
    end do ! my_it
