@@ -543,12 +543,15 @@ meta: {optdriver: 6, }
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   2.
 
+ mkfilename: getden from: t01o_DS1_DEN
+
  Exchange-correlation functional for the present dataset will be:
   GGA: Perdew-Burke-Ernzerhof functional - ixc=11
  Citation for XC functional:
   J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
 
 - Reading GS states from WFK file: t01o_DS2_WFK
+- Reading GS density from: t01o_DS1_DEN
 
 
 
@@ -572,7 +575,7 @@ meta: {optdriver: 6, }
 --------------------------------------------------------------------------------
 
 
- === Kohn-Sham gaps and band edges ===
+ === Kohn-Sham gaps and band edges from IBZ mesh ===
  Indirect band gap semiconductor
  Fundamental gap:     0.620 (eV)
    VBM:     4.665 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
@@ -599,7 +602,7 @@ nqbz: 8
 nqibz: 3
 green_mpw: 302
 chi_mpw: 40
-ngfft: [12, 12, 12, 13, 13, 12, 312, 16, ]
+g_ngfft: [12, 12, 12, 13, 13, 12, 312, 16, ]
 P gwr_np_gtks: [1, 1, 1, 1, ]
 ...
 
@@ -860,7 +863,7 @@ P           mkmem           3
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          7.1  wall=          8.4
+- Proc.   0 individual time (sec): cpu=          5.6  wall=          5.7
 
 ================================================================================
 

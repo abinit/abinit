@@ -168,8 +168,6 @@ CONTAINS
 subroutine pawfgr_init(Pawfgr,Dtset,mgfftf,nfftf,ecut_eff,ecutdg_eff,ngfftc,ngfftf,&
 &                      gsqcutc_eff,gsqcutf_eff,gmet,k0) ! optional
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(out) :: nfftf,mgfftf
@@ -302,8 +300,6 @@ end subroutine pawfgr_init
 
 subroutine pawfgr_destroy(Pawfgr)
 
- implicit none
-
 !Arguments ------------------------------------
 !arrays
  type(Pawfgr_type),intent(inout) :: Pawfgr
@@ -350,8 +346,6 @@ end subroutine pawfgr_destroy
 !! SOURCE
 
 subroutine pawfgr_nullify(Pawfgr)
-
- implicit none
 
 !Arguments ------------------------------------
 !arrays
@@ -410,8 +404,6 @@ end subroutine pawfgr_nullify
 !! SOURCE
 
 subroutine indgrid(coatofin,fintocoa,nfftc,nfftf,ngfftc,ngfftf)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

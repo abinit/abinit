@@ -96,8 +96,8 @@ module m_sigma_driver
  use m_paw_dmft,      only : paw_dmft_type
  use m_paw_sphharm,   only : setsym_ylm
  use m_paw_mkrho,     only : denfgr
- use m_paw_nhat,      only : nhatgrid,pawmknhat
- use m_paw_tools,     only : chkpawovlp,pawprt
+ use m_paw_nhat,      only : nhatgrid, pawmknhat
+ use m_paw_tools,     only : chkpawovlp, pawprt
  use m_paw_denpot,    only : pawdenpot
  use m_paw_init,      only : pawinit, paw_gencond
  use m_classify_bands,only : classify_bands
@@ -201,8 +201,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: tim_fourdp5 = 5, master = 0, cplex1 = 1
- integer,parameter :: ipert0 = 0, idir0 = 0,  optrhoij1 = 1
+ integer,parameter :: tim_fourdp5 = 5, master = 0, cplex1 = 1, ipert0 = 0, idir0 = 0,  optrhoij1 = 1
  integer :: approx_type,b1gw,b2gw,cplex,cplex_dij,cplex_rhoij !,band
  integer :: dim_kxcg,gwcalctyp,gnt_option,has_dijU,has_dijso,iab,bmin,bmax,irr_idx1,irr_idx2
  integer :: iat,ib,ib1,ib2,ic,id_required,ider,ii,ik,ierr,ount
@@ -224,9 +223,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  real(dp) :: etot_sd,etot_mbb,evextnl_energy,ex_energy,gsqcutc_eff,gsqcutf_eff,gsqcut_shp,norm,oldefermi
  real(dp) :: eh_energy,ekin_energy,evext_energy,den_int,coef_hyb,exc_mbb_energy,tol_empty
  real(dp) :: ucvol,ucvol_local,vxcavg,vxcavg_qp
- real(dp) :: gwc_gsq,gwx_gsq,gw_gsq
- real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem,ug_mem,ur_mem,cprj_mem
- real(dp):: gsqcut,boxcut,ecutf
+ real(dp) :: gwc_gsq,gwx_gsq,gw_gsq, gsqcut,boxcut,ecutf
+ real(dp) :: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem,ug_mem,ur_mem,cprj_mem
  complex(dpc) :: max_degw,cdummy
  logical :: wfknocheck,rdm_update,readchkprdm,prtchkprdm
  logical :: use_paw_aeur,dbg_mode,pole_screening,call_pawinit,is_dfpt=.false.
@@ -456,7 +454,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  ! ============================
  ! ==== PAW initialization ====
  ! ============================
- if (dtset%usepaw==1) then
+ if (dtset%usepaw == 1) then
    call chkpawovlp(cryst%natom, cryst%ntypat, dtset%pawovlp, pawtab, cryst%rmet, cryst%typat, cryst%xred)
 
    cplex_dij = dtset%nspinor; cplex = 1; ndij = 1
@@ -552,8 +550,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    if (Dtset%pawcross==1) optrad=1
    if (Dtset%xclevel==2.and.usexcnhat>0) optgr1=Dtset%pawstgylm
 
-   call nhatgrid(Cryst%atindx1,gmet,Cryst%natom,Cryst%natom,Cryst%nattyp,ngfftf,Cryst%ntypat,&
-    optcut,optgr0,optgr1,optgr2,optrad,Pawfgrtab,Pawtab,Cryst%rprimd,Cryst%typat,Cryst%ucvol,Cryst%xred)
+   call nhatgrid(Cryst%atindx1, gmet, Cryst%natom, Cryst%natom, Cryst%nattyp, ngfftf, Cryst%ntypat,&
+    optcut, optgr0, optgr1, optgr2, optrad, Pawfgrtab, Pawtab, Cryst%rprimd, Cryst%typat, Cryst%ucvol, Cryst%xred)
 
    call pawfgrtab_print(Pawfgrtab,Cryst%natom,unit=std_out,prtvol=Dtset%pawprtvol)
 
@@ -903,8 +901,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  nkxc = 0
  if (Dtset%nspden == 1) nkxc = 2
  if (Dtset%nspden >= 2) nkxc = 3 ! check GGA and spinor, quite a messy part!!!
- ! In case of MGGA, fxc and kxc are not available and we dont need them
- ! for the screening part (for now ...)
+ ! In case of MGGA, fxc and kxc are not available and we dont need them in sigma (for now ...)
  if (Dtset%ixc < 0 .and. libxc_functionals_ismgga()) nkxc = 0
  if (nkxc /= 0) then
    ABI_MALLOC(kxc, (nfftf, nkxc))
@@ -939,7 +936,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
                k0,Dtset%spnorbscl,Cryst%ucvol,dtset%cellcharge(1),ks_vtrial,ks_vxc,Cryst%xred,&
                nucdipmom=Dtset%nucdipmom)
 
-    !  Symmetrize KS Dij
+   ! Symmetrize KS Dij
    call symdij_all(Cryst%gprimd,Cryst%indsym,ipert0,&
                    Cryst%natom,Cryst%natom,Cryst%nsym,Cryst%ntypat,KS_paw_ij,Pawang,&
                    Dtset%pawprtvol,Pawtab,Cryst%rprimd,Cryst%symafm,Cryst%symrec)
@@ -951,9 +948,9 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
  call timab(406,2,tsec) ! make_vhxc
 
- !=== Calculate Vxc(b1,b2,k,s)=<b1,k,s|v_{xc}|b2,k,s>  for all the states included in GW ===
+ !=== Calculate Vxc(b1,b2,k,s)=<b1,k,s|v_{xc}|b2,k,s> for all the states included in GW ===
  !  * ks_vxcvalme is calculated without NLCC, ks_vxcme contains NLCC (if any)
- !  * This part is parallelized within MPI_COMM_WORD since each node has all GW wavefunctions.
+ !  * This part is parallelized within wfd%comm since each node has all GW wavefunctions.
  !  * ks_vUme is zero unless we are using DFT+U as starting point, see calc_vHxc_braket
  !  * Note that vH matrix elements are calculated using the true uncutted interaction.
  call timab(407,1,tsec) ! vHxc_me
@@ -1719,7 +1716,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
        ABI_MALLOC(tmp_pawrhoij,(cryst%natom*wfd%usepaw))
        call read_rhor(Dtfil%filpawdensin, cplex1, nfftf_tot, Wfd%nspden, ngfftf, 1, MPI_enreg_seq, &
-       ks_aepaw_rhor, Hdr_rhor, tmp_pawrhoij, wfd%comm)
+                      ks_aepaw_rhor, Hdr_rhor, tmp_pawrhoij, wfd%comm)
 
        call Hdr_rhor%free()
        call pawrhoij_free(tmp_pawrhoij)
@@ -1761,7 +1758,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
        ABI_MALLOC(tmp_pawrhoij,(cryst%natom*wfd%usepaw))
 
        call read_rhor(Dtfil%filpawdensin, cplex1, nfftf_tot, Wfd%nspden, ngfftf, 1, MPI_enreg_seq, &
-       ks_aepaw_rhor, Hdr_rhor, tmp_pawrhoij, wfd%comm)
+                      ks_aepaw_rhor, Hdr_rhor, tmp_pawrhoij, wfd%comm)
 
        call Hdr_rhor%free()
        call pawrhoij_free(tmp_pawrhoij)
@@ -1816,7 +1813,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
        ABI_MALLOC(tmp_pawrhoij,(cryst%natom*wfd%usepaw))
 
        call read_rhor(Dtfil%filpawdensin, cplex1, nfftf_tot, Wfd%nspden, ngfftf, 1, MPI_enreg_seq, &
-       ks_aepaw_rhor, Hdr_rhor, tmp_pawrhoij, wfd%comm)
+                      ks_aepaw_rhor, Hdr_rhor, tmp_pawrhoij, wfd%comm)
 
        call Hdr_rhor%free()
        call pawrhoij_free(tmp_pawrhoij)
@@ -1857,7 +1854,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
        ABI_MALLOC(tmp_pawrhoij,(cryst%natom*wfd%usepaw))
 
        call read_rhor(Dtfil%filpawdensin, cplex1, nfftf_tot, Wfd%nspden, ngfftf, 1, MPI_enreg_seq, &
-       ks_aepaw_rhor, hdr_rhor, tmp_pawrhoij, wfd%comm)
+                      ks_aepaw_rhor, hdr_rhor, tmp_pawrhoij, wfd%comm)
 
        call hdr_rhor%free()
        call pawrhoij_free(tmp_pawrhoij)
@@ -1923,7 +1920,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
        ABI_MALLOC(tmp_pawrhoij,(cryst%natom*wfd%usepaw))
 
        call read_rhor(pawden_fname, cplex1, nfftf_tot, Wfd%nspden, ngfftf, 1, MPI_enreg_seq, &
-       ks_aepaw_rhor, Hdr_rhor, tmp_pawrhoij, wfd%comm)
+                      ks_aepaw_rhor, Hdr_rhor, tmp_pawrhoij, wfd%comm)
 
        call Hdr_rhor%free()
        call pawrhoij_free(tmp_pawrhoij)
