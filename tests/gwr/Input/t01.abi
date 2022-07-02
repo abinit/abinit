@@ -29,6 +29,8 @@ optdriver3  6        # Activate GWR code
 gwr_task3 "G0W0"     # One-shot calculation
 gwr_ntau3   2        # Number of tau points along the imaginary axis
 
+getden_filepath3 "t01o_DS1_DEN"
+
 boxcutmin3  1.1
 getwfk3     2        # Obtain WFK file from previous dataset
 nband3      60       # Bands to be used in the screening calculation

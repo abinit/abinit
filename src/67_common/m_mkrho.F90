@@ -1241,8 +1241,7 @@ end subroutine initro
 !! prtrhomxmn
 !!
 !! FUNCTION
-!! If option==1, compute the maximum and minimum of the density (and spin-polarization
-!! if nspden==2), and print it.
+!! If option==1, compute the maximum and minimum of the density (and spin-polarization if nspden==2), and print it.
 !! If option==2, also compute and print the second maximum or minimum
 !!
 !! INPUTS
@@ -1260,8 +1259,6 @@ end subroutine initro
 !!  rhor(nfft,nspden)=electron density (electrons/bohr^3)
 !!
 !! OUTPUT
-!!
-!! SIDE EFFECTS
 !!
 !! NOTES
 !!  The tolerance tol12 aims at giving a machine-independent ordering.

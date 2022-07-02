@@ -50,6 +50,8 @@ module m_gwr
  use m_crystal,       only : crystal_t
  use m_dtset,         only : dataset_type
  use m_fftcore,       only : get_kg, sphereboundary, ngfft_seq, getng, print_ngfft !, kgindex
+ use m_mpinfo,        only : destroy_mpi_enreg, initmpi_seq
+ use m_distribfft,    only : init_distribfft_seq
  use m_fft,           only : fft_ug, fft_ur, fftbox_plan3_t, fourdp
  use m_fft_mesh,      only : times_eikr !, times_eigr, ig2gfft, get_gftt, calc_ceikr, calc_eigr
  use m_kpts,          only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, kpts_map, kpts_sort, kpts_pack_in_stars
@@ -255,7 +257,7 @@ module m_gwr
    !integer :: chi_ngfft(18) = -1, chi_mgfft = -1, chi_nfft = -1
    !integer :: sig_ngfft(18) = -1, sig_mgfft = -1, sig_nfft = -1
 
-   integer :: ngfftf(18) = -1, mgfftf = -1, nfftf = -1
+   !integer :: ngfftf(18) = -1, mgfftf = -1, nfftf = -1
    ! FFT mesh for densities and potentials.
    ! These quantities are initialized from the DEN file (gwr_load_data_from_files).
 
@@ -332,7 +334,7 @@ module m_gwr
 
    !character(len=10) :: sigc_space = "itau"
 
-   !character(len=fnlen) :: wfk0_path = ABI_NOFILE
+   !character(len=fnlen) :: wfk_path = ABI_NOFILE
    ! Path to the WFK file with the KS wavefunctions.
 
    character(len=fnlen) :: gwrnc_path = ABI_NOFILE
@@ -374,20 +376,18 @@ module m_gwr
    ! (nqibz)
    ! Weights of the q-points in the IBZ (normalized to one).
 
-   real(dp),allocatable :: ks_rhog(:,:), ks_rhor(:,:)
+   !real(dp),allocatable :: ks_rhog(:,:), ks_rhor(:,:)
    ! (nfftf, nspden)
    ! KS density in G/r space.
 
    !real(dp),allocatable :: ks_vhartr(:), ks_vtrial(:,:), ks_vxc(:,:), ks_nhat(:,:), ks_nhatgr(:,:,:)
 
-   type(pawrhoij_type), allocatable :: ks_pawrhoij(:)
+   !type(pawrhoij_type), allocatable :: ks_pawrhoij(:)
    ! (natom)
 
  contains
 
    procedure :: init => gwr_init
-
-   procedure :: load_data_from_files => gwr_load_data_from_files
 
    procedure :: get_green_gpr => gwr_get_green_gpr
 
@@ -501,8 +501,6 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  gwr%natom = dtset%natom
  gwr%usepaw = dtset%usepaw
  gwr%use_supercell = .True.
-
- call gwr%load_data_from_files()
 
  ! =======================
  ! Setup k-mesh and q-mesh
@@ -998,93 +996,6 @@ end subroutine gwr_init
 
 !----------------------------------------------------------------------
 
-!!****f* m_gwr/gwr_load_data_from_files
-!! NAME
-!! gwr_load_data_from_files
-!!
-!! FUNCTION
-!!  Load densities from external files, set ngfftf, mgfftf and nfftf
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-subroutine gwr_load_data_from_files(gwr)
-
-!Arguments ------------------------------------
- class(gwr_t), intent(inout) :: gwr
-
-!Local variables-------------------------------
- integer, parameter :: master = 0, cplex1 = 1, pawread1 = 1
- integer :: all_nproc, my_rank, den_fform, ierr, unts(2)
- character(len=500) :: msg
- character(len=fnlen) :: path
- type(hdr_type) :: den_hdr
- type(crystal_t) :: den_cryst
- type(mpi_type) :: mpi_enreg
-
-! *************************************************************************
-
- all_nproc = xmpi_comm_size(gwr%comm); my_rank = xmpi_comm_rank(gwr%comm)
- unts = [std_out, ab_out]
-
- if (my_rank == master) then
-   ! Read header, perform consistencty check and set gwr%ngfftf
-   path = gwr%dtfil%fildensin
-   if (nctk_try_fort_or_ncfile(path, msg) /= 0) then
-     ABI_ERROR(sjoin("Cannot find DEN file:", path, ". Error:", msg))
-   end if
-
-   call wrtout(unts, sjoin(" Reading GS density from: ", path))
-
-   call hdr_read_from_fname(den_hdr, gwr%dtfil%fildensin, den_fform, xmpi_comm_self)
-   ABI_CHECK(den_fform /= 0, "Error while reading header from DEN file!")
-
-   den_cryst = den_hdr%get_crystal()
-   if (gwr%cryst%compare(den_cryst, header=" Comparing input crystal with DEN crystal") /= 0) then
-     ABI_ERROR("Crystal structure from input and from DEN file do not agree! Check messages above!")
-   end if
-   call den_cryst%free()
-   call den_hdr%free()
-
-   ! Init ngfft (no augmentation).
-   call ngfft_seq(gwr%ngfftf, den_hdr%ngfft(1:3))
-   gwr%ngfftf(4:6) = gwr%ngfftf(1:3)
- end if
-
- call xmpi_bcast(gwr%ngfftf, master, gwr%comm, ierr)
- gwr%nfftf = product(gwr%ngfftf(1:3))
- gwr%mgfftf = maxval(gwr%ngfftf(1:3))
-
- ABI_MALLOC(gwr%ks_rhor, (gwr%nfftf, gwr%nspden))
- if (gwr%usepaw == 1) then
-   ABI_MALLOC(gwr%ks_pawrhoij, (gwr%natom)) ! MG: I know this is not enough.
- end if
-
- call read_rhor(path, cplex1, gwr%nspden, gwr%nfftf, gwr%ngfftf, pawread1, gwr%mpi_enreg, gwr%ks_rhor, &
-                den_hdr, gwr%ks_pawrhoij, gwr%comm)
-
- call den_hdr%free()
-
- ! n(r) --> n(g)
- ! Fake MPI_type for the sequential part.
- !call initmpi_seq(mpi_enreg)
- !call init_distribfft_seq(mpi_enreg%distribfft, 'c', ngfftc(2), ngfftc(3), 'all')
- !call init_distribfft_seq(mpi_enreg%distribfft, 'f', ngfftf(2), ngfftf(3), 'all')
-
- ABI_MALLOC(gwr%ks_rhog, (2, gwr%nfftf))
- !call fourdp(cplex1, gwr%ks_rhog, gwr%ks_rhor(:, 1), -1, gwr%mpi_enreg, gwr%nfftf, 1, gwr%ngfftf, 0)
- !call destroy_mpi_enreg(mpi_enreg)
-
- ! TODO: MetaGGA.
-
-end subroutine gwr_load_data_from_files
-!!***
-
-!----------------------------------------------------------------------
-
 !!****f* m_gwr/gwr_free
 !! NAME
 !! gwr_free
@@ -1118,8 +1029,8 @@ subroutine gwr_free(gwr)
  ABI_SFREE(gwr%qbz)
  ABI_SFREE(gwr%qibz)
  ABI_SFREE(gwr%wtq)
- ABI_SFREE(gwr%ks_rhog)
- ABI_SFREE(gwr%ks_rhor)
+ !ABI_SFREE(gwr%ks_rhog)
+ !ABI_SFREE(gwr%ks_rhor)
  ABI_SFREE(gwr%qbz2ibz)
  ABI_SFREE(gwr%my_spins)
  ABI_SFREE(gwr%my_itaus)
@@ -1164,14 +1075,14 @@ subroutine gwr_free(gwr)
  end if
 
  ! Deallocation for PAW.
- if (gwr%usepaw == 1) then
-   call pawrhoij_free(gwr%ks_pawrhoij)
-   ABI_FREE(gwr%ks_pawrhoij)
-   !call pawfgrtab_free(Pawfgrtab)
-   !call paw_ij_free(KS_paw_ij)
-   !call paw_an_free(KS_paw_an)
-   !call pawpwff_free(Paw_pwff)
- end if
+ !if (gwr%usepaw == 1) then
+ !  !call pawrhoij_free(gwr%ks_pawrhoij)
+ !  !ABI_FREE(gwr%ks_pawrhoij)
+ !  !call pawfgrtab_free(Pawfgrtab)
+ !  !call paw_ij_free(KS_paw_ij)
+ !  !call paw_an_free(KS_paw_an)
+ !  !call pawpwff_free(Paw_pwff)
+ !end if
 
  ! Free MPI communicators
  call gwr%spin_comm%free()
@@ -1212,11 +1123,11 @@ end subroutine desc_array1_free
 !!
 !! SOURCE
 
-subroutine gwr_build_gtau_from_wfk(gwr, wfk0_path)
+subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
 
 !Arguments ------------------------------------
  class(gwr_t),target,intent(inout) :: gwr
- character(len=fnlen),intent(in) :: wfk0_path
+ character(len=fnlen),intent(in) :: wfk_path
 
 !Local variables-------------------------------
 !scalars
@@ -1243,7 +1154,7 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk0_path)
 
  dtset => gwr%dtset
 
- ks_ebands = wfk_read_ebands(wfk0_path, gwr%comm, out_hdr=wfk0_hdr)
+ ks_ebands = wfk_read_ebands(wfk_path, gwr%comm, out_hdr=wfk0_hdr)
  call wfk0_hdr%vs_dtset(dtset)
  ! TODO: More consistency checks e.g. nkibz,...
 
@@ -1293,7 +1204,7 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk0_path)
  call wfk0_hdr%free()
 
  ! Read KS wavefunctions.
- call wfd%read_wfk(wfk0_path, iomode_from_fname(wfk0_path))
+ call wfd%read_wfk(wfk_path, iomode_from_fname(wfk_path))
 
  ! ==================================
  ! Build Green's functions in g-space
@@ -1349,7 +1260,6 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk0_path)
          tau = gwr%tau_mesh(itau)
          gt_fact = exp(-tau * eig_nk)
          associate (gt => gwr%gt_kibz(ioe, ik_ibz, itau, spin))
-         !call wave%outer_prod()
          do il_g2=1, gt%sizeb_local(2)
            ig2 = gt%loc2gcol(il_g2)
            do il_g1=1, gt%sizeb_local(1)
