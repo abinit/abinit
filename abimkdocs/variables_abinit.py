@@ -23261,4 +23261,19 @@ This variable defines the number of imaginary-time points
 """,
 ),
 
+Variable(
+    abivarname="gwr_boxcutmin",
+    varset="gw",
+    vartype="real",
+    topics=['GWR_useful'],
+    dimensions=[1],
+    defaultval=2.0,
+    mnemonics="GWR BOX CUT-off MINimum",
+    requires="[[optdriver]] == 6",
+    added_in_version="9.6.2",
+    text=r"""
+This variable ...
+""",
+),
+
 ]

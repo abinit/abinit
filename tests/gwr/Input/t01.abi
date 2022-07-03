@@ -1,38 +1,38 @@
-# Crystalline silicon
-# Calculation of the GW corrections
+# Crystalline silicon. Calculation of the G0W0 corrections with the GWR code
 # Dataset 1: ground state calculation to get the density
-# Dataset 2: NSCF run to produce the WFK file.
-# Dataset 3: GWR calculation
+# Dataset 2: NSCF run to produce the WFK file with empty states.
+# Dataset 3: one-shot G0W0 calculation in real-space and imaginary-time.
+
 ndtset      3
 
-############
-# Dataset 1
-############
-# SCF-GS run
+####################
+# Dataset 1: SCF run
+####################
 nband1  6
-tolvrs1 1.0e-10
+tolvrs1 1.e-8
 
-############
-# Dataset 2
-############
-# Definition of parameters for the calculation of the WFK file
-nband2     100       # Number of (occ and empty) bands to be computed
-nbdbuf2     20       # Do not apply the convergence criterium to the last 20 bands (faster)
-iscf2       -2
-getden2     -1
-tolwfr2  1.0d-12     # Will stop when this tolerance is achieved
+#######################################
+# Dataset 2: NSCF run with empty states
+#######################################
+iscf2       -2       # NSCF run
+getden_filepath2 "t01o_DS1_DEN"
+tolwfr2  1.0e-12     # Will stop when this tolerance is achieved
+nband2     100       # Number of (occ + empty) bands
+nbdbuf2     20       # Do not apply the tolwfr criterium to the last 20 bands (faster)
 
-############
-# Dataset 3
-############
+################################
+# Dataset 3: G0W0 with GWR code
+################################
 optdriver3  6        # Activate GWR code
 gwr_task3 "G0W0"     # One-shot calculation
-gwr_ntau3   2        # Number of tau points along the imaginary axis
-
 getden_filepath3 "t01o_DS1_DEN"
+getwfk_filepath3 "t01o_DS2_WFK"   # WFK file with empty states
+gwr_ntau3   2        # Number of imaginary-time points
+#gwr_np_gtks
 
-boxcutmin3  1.1
-getwfk3     2        # Obtain WFK file from previous dataset
+#boxcutmin3  1.1
+gwr_boxcutmin3  1.1
+
 nband3      60       # Bands to be used in the screening calculation
 ecuteps3    2        # Cut-off energy of the planewave set to represent the dielectric matrix.
                      # It is important to adjust this parameter.
@@ -45,7 +45,8 @@ kptgw3               # k-points in reduced coordinates
    0.000    0.000    0.000
 bdgw3       4  5     # calculate GW corrections for bands from 4 to 5
 
-# Definition of the k-point grid (Gamma-centered)
+# Definition of the k-point grid
+# IMPORTANT: GWR requires Gamma-centered k-meshes
 ngkpt   2 2 2
 nshiftk 1
 shiftk  0.0 0.0 0.0
@@ -61,7 +62,7 @@ diemac  12.0      # Although this is not mandatory, it is worth to
                   # Here, we follow the prescription for bulk silicon.
 
 # Definition of the unit cell: fcc
-acell  3*10.26         # Experimental lattice constants
+acell  3*10.26         # Experimental lattice constants in Bohr
 rprim  0.0  0.5  0.5   # FCC primitive vectors (to be scaled by acell)
        0.5  0.0  0.5
        0.5  0.5  0.0
@@ -77,8 +78,8 @@ xred
       0.0  0.0  0.0
       0.25 0.25 0.25
 
- pp_dirpath "$ABI_PSPDIR"
- pseudos "Pseudodojo_nc_sr_04_pbe_standard_psp8/Si.psp8"
+pp_dirpath "$ABI_PSPDIR"
+pseudos "Pseudodojo_nc_sr_04_pbe_standard_psp8/Si.psp8"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

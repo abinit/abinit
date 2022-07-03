@@ -282,6 +282,7 @@ type, public :: dataset_type
  integer :: gw_sigxcore = 0
 
  integer :: gwr_ntau = 12
+ real(dp) :: gwr_boxcutmin = two
  character(len=fnlen) :: gwr_task = "G0W0"
 !H
  integer :: hmcsst
@@ -1644,6 +1645,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%gwls_recycle         = dtin%gwls_recycle
 
  dtout%gwr_ntau = dtin%gwr_ntau
+ dtout%gwr_boxcutmin = dtin%gwr_boxcutmin
  dtout%gwr_task = dtin%gwr_task
 
  dtout%hyb_mixing         = dtin%hyb_mixing
@@ -3368,7 +3370,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' fit_nfixcoeff fit_rangePower fit_SPCoupling fit_SPC_maxS fit_tolMSDE fit_tolMSDF fit_tolMSDFS'
  list_vars=trim(list_vars)//' fit_nimposecoeff fit_imposecoeff fit_tolMSDS fit_tolGF'
  list_vars=trim(list_vars)//' fockoptmix focktoldfe fockdownsampling fock_icutcoul'
- list_vars=trim(list_vars)//' gwr_np_gtks gwr_ntau gwr_task'
+ list_vars=trim(list_vars)//' gwr_np_gtks gwr_ntau gwr_boxcutmin gwr_task'
  list_vars=trim(list_vars)//' freqim_alpha freqremax freqremin freqspmax'
  list_vars=trim(list_vars)//' freqspmin friction frzfermi fxcartfactor'
  list_vars=trim(list_vars)//' freqspmin friction frzfermi fxcartfactor'

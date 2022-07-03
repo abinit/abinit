@@ -826,6 +826,7 @@ end subroutine gaps_print
 subroutine ebands_init(bantot, ebands, nelect, ne_qFD, nh_qFD, ivalence, doccde, eig, istwfk, kptns, &
   nband, nkpt, npwarr, nsppol, nspinor, tphysel, tsmear, occopt, occ, wtk, &
   cellcharge, kptopt, kptrlatt_orig, nshiftk_orig, shiftk_orig, kptrlatt, nshiftk, shiftk)
+
 ! CP modified input list: added ne_qFD, nh_qFD, ivalence.
 !Arguments ------------------------------------
 !scalars
