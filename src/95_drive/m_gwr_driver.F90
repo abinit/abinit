@@ -159,10 +159,9 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  integer :: ii, comm, nprocs, my_rank, mgfftf, nfftf
  integer :: omp_ncpus, work_size, nks_per_proc, ierr
  real(dp):: eff, mempercpu_mb, max_wfsmem_mb, nonscal_mem
- real(dp) :: ecore, ecut_eff, ecutdg_eff
- real(dp) :: cpu, wall, gflops
+ real(dp) :: ecore, ecut_eff, ecutdg_eff, cpu, wall, gflops
+ logical, parameter :: is_dfpt = .false.
  logical :: use_wfk
- logical, parameter :: is_dfpt=.false.
  character(len=500) :: msg
  character(len=fnlen) :: wfk_path, den_path
  type(hdr_type) :: wfk_hdr, den_hdr
@@ -174,74 +173,37 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  type(gwr_t) :: gwr
 !arrays
  real(dp),parameter :: k0(3) = zero
- !type(pawfgrtab_type),allocatable :: pawfgrtab(:)
- !type(paw_ij_type),allocatable :: paw_ij(:)
- !type(paw_an_type),allocatable :: ks_paw_an(:)
- integer :: den_fform
- integer :: approx_type,b1gw,b2gw,cplex,cplex_dij,cplex_rhoij !,band
- integer :: dim_kxcg,gwcalctyp,gnt_option,has_dijU,has_dijso,iab,bmin,bmax,irr_idx1,irr_idx2
- !integer :: iat,ib,ib1,ib2,ic,id_required,ider,ik,ierr,ount
- !integer :: ik_bz,ikcalc,ik_ibz,ikxc,npw_k,pwx,ibz
- integer :: istep !,itypat,itypatcor,izero,jj,first_band,last_band
- !integer :: ks_iv,lcor,lmn2_size_max,mband,my_nband
- integer :: moved_atm_inside, moved_rhor, n3xccc
+ integer :: den_fform, cplex, cplex_dij, cplex_rhoij !,band
+ integer :: gnt_option !,has_dijU,has_dijso,iab,bmin,bmax,irr_idx1,irr_idx2
+ integer :: istep, moved_atm_inside, moved_rhor, n3xccc
  integer :: ndij !,ndim,nfftf,nfftf_tot,nkcalc,gwc_nfft,gwc_nfftot,gwx_nfft,gwx_nfftot
  integer :: ngrvdw,nhatgrdim,nkxc,nkxc1,nscf,nspden_rhoij,nzlmopt,optene
  integer :: optcut,optgr0,optgr1,optgr2,option,option_test,option_dij,optrad,psp_gencond
- integer :: rhoxsp_method,use_aerhor,use_umklp,usexcnhat
- real(dp) :: compch_fft,compch_sph,r_s,rhoav,alpha
- !real(dp) :: drude_plsmf,my_plsmf,ecore,ecut_eff,ecutdg_eff,ehartree
+ integer :: rhoxsp_method,usexcnhat !, use_aerhor,use_umklp
+ !real(dp) :: compch_fft, compch_sph !,r_s,rhoav,alpha
  real(dp) :: gsqcutc_eff, gsqcutf_eff, gsqcut_shp
- !real(dp) :: eh_energy,ekin_energy,evext_energy,den_int,coef_hyb,exc_mbb_energy,tol_empty
- real(dp) :: ucvol,vxcavg,vxcavg_qp
- real(dp) :: gwc_gsq,gwx_gsq,gw_gsq, gsqcut,boxcut,ecutf
- !real(dp) :: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem,ug_mem,ur_mem,cprj_mem
- logical :: call_pawinit !use_paw_aeur,dbg_mode,pole_screening,
- !character(len=500) :: msg
- !type(kmesh_t) :: Kmesh,Qmesh
- !type(ebands_t) :: ks_ebands, qp_ebands
- type(energies_type) :: KS_energies !,QP_energies
- !type(gsphere_t) :: Gsph_Max,Gsph_x,Gsph_c
- !type(hdr_type) :: Hdr_wfk,Hdr_sigma,Hdr_rhor
+ real(dp) :: vxcavg !,vxcavg_qp ucvol,
+ real(dp) :: gwc_gsq, gwx_gsq,gw_gsq !, gsqcut
+ logical :: call_pawinit
+ type(energies_type) :: KS_energies
  type(melflags_t) :: KS_mflags !,QP_mflags
- !type(melements_t) :: KS_me !, QP_me
  type(paw_dmft_type) :: Paw_dmft
- !type(wave_t),pointer :: wave
 !arrays
  integer :: gwc_ngfft(18),ngfftc(18),ngfftf(18),gwx_ngfft(18),unts(2)
- integer,allocatable :: nq_spl(:)
- integer,allocatable :: l_size_atm(:) !,qp_vbik(:,:),tmp_gfft(:,:),ks_vbik(:,:),nband(:,:),
- integer,allocatable :: tmp_kstab(:,:,:) !,ks_irreptab(:,:,:),qp_irreptab(:,:,:),my_band_list(:)
- !real(dp),parameter ::  k0(3)=zero
- real(dp) :: strsxc(6),tsec(2)
- !real(dp),allocatable :: weights(:),nat_occs(:,:),gw_rhor(:,:),gw_rhog(:,:),gw_vhartr(:)
+ integer,allocatable :: nq_spl(:), l_size_atm(:) !,qp_vbik(:,:),tmp_gfft(:,:),ks_vbik(:,:),nband(:,:),
+ integer,allocatable :: tmp_kstab(:,:,:)
+ real(dp) :: strsxc(6) !,tsec(2)
  real(dp),allocatable :: grchempottn(:,:),grewtn(:,:),grvdw(:,:),qmax(:)
  real(dp),allocatable :: ks_nhat(:,:),ks_nhatgr(:,:,:),ks_rhog(:,:)
  real(dp),allocatable :: ks_rhor(:,:),ks_vhartr(:), ks_vtrial(:,:), ks_vxc(:,:), ks_taur(:,:)
- real(dp),allocatable :: kxc(:,:),qp_kxc(:,:),ph1d(:,:),ph1df(:,:)
- !real(dp),allocatable :: prev_rhor(:,:),prev_taur(:,:),qp_nhat(:,:)
- !real(dp),allocatable :: qp_nhatgr(:,:,:),qp_rhog(:,:),qp_rhor_paw(:,:)
- !real(dp),allocatable :: qp_rhor_n_one(:,:),qp_rhor_nt_one(:,:)
- !real(dp),allocatable :: qp_rhor(:,:),qp_vhartr(:),qp_vtrial(:,:),qp_vxc(:,:)
- !real(dp),allocatable :: qp_taur(:,:),igwene(:,:,:)
- real(dp),allocatable :: vpsp(:),xccc3d(:),dijexc_core(:,:,:),dij_hf(:,:,:)
- real(dp),allocatable :: ks_aepaw_rhor(:,:) !,ks_n_one_rhor(:,:),ks_nt_one_rhor(:,:)
- complex(dpc) :: ovlp(2)
- complex(dpc),allocatable :: ctmp(:,:),hbare(:,:,:,:)
- complex(dpc),target,allocatable :: sigcme(:,:,:,:,:)
- complex(dpc),allocatable :: hdft(:,:,:,:),htmp(:,:,:,:),uks2qp(:,:)
- !complex(gwpc),allocatable :: kxcg(:,:),fxc_ADA(:,:,:)
- !complex(gwpc),ABI_CONTIGUOUS pointer :: ug1(:)
- !complex(dpc),allocatable :: sigcme_k(:,:,:,:)
- !complex(dpc), allocatable :: rhot1_q_m(:,:,:,:,:,:,:)
- !complex(dpc), allocatable :: M1_q_m(:,:,:,:,:,:,:)
- logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:),bmask(:)
- type(Paw_an_type),allocatable :: KS_paw_an(:),QP_paw_an(:)
- type(Paw_ij_type),allocatable :: KS_paw_ij(:),QP_paw_ij(:)
+ real(dp),allocatable :: kxc(:,:), ph1d(:,:), ph1df(:,:) !qp_kxc(:,:),
+ real(dp),allocatable :: vpsp(:), xccc3d(:), dijexc_core(:,:,:), dij_hf(:,:,:)
+ !logical,allocatable :: bks_mask(:,:,:), keep_ur(:,:,:), bmask(:)
+ type(Paw_an_type),allocatable :: KS_paw_an(:) !,QP_paw_an(:)
+ type(Paw_ij_type),allocatable :: KS_paw_ij(:) !,QP_paw_ij(:)
  type(Pawfgrtab_type),allocatable :: Pawfgrtab(:)
- type(Pawrhoij_type),allocatable :: KS_Pawrhoij(:),QP_pawrhoij(:),prev_Pawrhoij(:),tmp_pawrhoij(:)
+ type(Pawrhoij_type),allocatable :: KS_Pawrhoij(:) !,QP_pawrhoij(:),prev_Pawrhoij(:),tmp_pawrhoij(:)
  type(pawpwff_t),allocatable :: Paw_pwff(:)
- type(paw_pwaves_lmn_t),allocatable :: Paw_onsite(:)
 
 !************************************************************************
 
@@ -369,6 +331,9 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
    ! TODO: Make sure that ef is inside the gap if semiconductor.
  end if
 
+ ! TODO: FFT meshes for DEN/POT should be initialized from the DEN file instead of the dtset.
+ ! Interpolating the DEN indeed breaks degeneracies in the vxc matrix elements.
+
  call pawfgr_init(pawfgr, dtset, mgfftf, nfftf, ecut_eff, ecutdg_eff, ngfftc, ngfftf, &
                   gsqcutc_eff=gsqcutc_eff, gsqcutf_eff=gsqcutf_eff, gmet=cryst%gmet, k0=k0)
 
@@ -471,7 +436,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
    cplex = 1
    call pawfgrtab_init(Pawfgrtab,cplex,l_size_atm,Dtset%nspden,Dtset%typat)
    ABI_FREE(l_size_atm)
-   compch_fft=greatest_real
+   !compch_fft=greatest_real
    usexcnhat = MAXVAL(Pawtab(:)%usexcnhat)
    ! * 0 if Vloc in atomic data is Vbare    (Blochl's formulation)
    ! * 1 if Vloc in atomic data is VH(tnzc) (Kresse's formulation)
@@ -522,6 +487,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
 
  if (dtset%usekden == 1) then
    ! TODO
+   NOT_IMPLEMENTED_ERROR()
    call prtrhomxmn(std_out, MPI_enreg, nfftf, ngfftf, dtset%nspden, 1, ks_taur, optrhor=1, ucvol=cryst%ucvol)
  end if
 
@@ -538,13 +504,13 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  end if ! PAW
 
  ! Compute structure factor phases and large sphere cut-off
- ABI_MALLOC(ph1d,(2, 3 * (2 * Dtset%mgfft + 1) * Cryst%natom))
- ABI_MALLOC(ph1df,(2, 3 * (2 * mgfftf + 1) * Cryst%natom))
+ ABI_MALLOC(ph1d, (2, 3 * (2 * Dtset%mgfft + 1) * Cryst%natom))
+ ABI_MALLOC(ph1df, (2, 3 * (2 * mgfftf + 1) * Cryst%natom))
 
- call getph(Cryst%atindx,Cryst%natom, ngfftc(1),ngfftc(2),ngfftc(3), ph1d,Cryst%xred)
+ call getph(Cryst%atindx, Cryst%natom, ngfftc(1), ngfftc(2), ngfftc(3), ph1d, Cryst%xred)
 
- if (Psps%usepaw == 1.and. Pawfgr%usefinegrid == 1) then
-   call getph(Cryst%atindx,Cryst%natom,ngfftf(1),ngfftf(2),ngfftf(3),ph1df,Cryst%xred)
+ if (psps%usepaw == 1 .and. pawfgr%usefinegrid == 1) then
+   call getph(Cryst%atindx, Cryst%natom, ngfftf(1), ngfftf(2), ngfftf(3), ph1df, Cryst%xred)
  else
    ph1df(:,:)=ph1d(:,:)
  end if
@@ -567,7 +533,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  nkxc = 0
  if (Dtset%nspden == 1) nkxc = 2
  if (Dtset%nspden >= 2) nkxc = 3 ! check GGA and spinor, quite a messy part!!!
- ! In case of MGGA, fxc and kxc are not available and we dont need them in sigma (for now ...)
+ ! In case of MGGA, fxc and kxc are not available and we dont need them (for now ...)
  if (Dtset%ixc < 0 .and. libxc_functionals_ismgga()) nkxc = 0
  if (nkxc /= 0) then
    ABI_MALLOC(kxc, (nfftf, nkxc))
@@ -646,11 +612,9 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  !=====================
  !==== Free memory ====
  !=====================
-
  ABI_FREE(ks_nhat)
  ABI_FREE(ks_nhatgr)
  ABI_FREE(dijexc_core)
- !ABI_FREE(ks_aepaw_rhor)
  call pawfgr_destroy(pawfgr)
 
  if (dtset%usepaw == 1) then
@@ -682,7 +646,6 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  call wfk_hdr%free()
  call ebands_free(ks_ebands)
  call destroy_mpi_enreg(mpi_enreg)
-
  call gwr%free()
 
 end subroutine gwr_driver

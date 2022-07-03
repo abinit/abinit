@@ -830,7 +830,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
  ABI_SFREE(degtab)
 
  call timab(430,2,tsec) ! csigme (SigX)
- call cwtime(cpu_time,wall_time,gflops,"stop")
+ call cwtime(cpu_time, wall_time, gflops, "stop")
  write(std_out,'(2(a,f9.1))')" cpu_time = ",cpu_time,", wall_time = ",wall_time
 
  DBG_EXIT("COLL")

@@ -1178,6 +1178,9 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  !dprarr(1,:)  =dtsets(:)%gstore_gstore_erange
  !call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gstore_erange','ENE',0)
 
+ dprarr(1,:) = dtsets(:)%gwr_boxcutmin
+ call prttagm(dprarr, intarr, iout, jdtset_, 1, marr, narr, narrm, ncid, ndtset_alloc, 'gwr_boxcutmin', 'DPR', 0)
+
  narr = size(dtsets(0)%gwr_np_gtks)
  do idtset=0,ndtset_alloc
    intarr(1:narr,idtset) = dtsets(idtset)%gwr_np_gtks

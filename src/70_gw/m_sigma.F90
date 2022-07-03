@@ -1062,7 +1062,6 @@ end subroutine sigma_init
 subroutine sigma_free(Sr)
 
 !Arguments ------------------------------------
-!scalars
  type(sigma_t),intent(inout) :: Sr
 
 ! *************************************************************************
