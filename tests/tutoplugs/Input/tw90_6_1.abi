@@ -88,6 +88,6 @@ pseudos          "Pseudodojo_paw_pw_standard/La.xml, Pseudodojo_paw_pw_standard/
 #%% max_nprocs = 4                                                              
 #%% [extra_info]                                                                
 #%% authors = O. Gingras                                                           
-#%% keywords = wannier90, la2cuo4, fatbands, paw
+#%% keywords = PAW
 #%% description = Test interface with Wannier90 (PAW pseudopotentials)           
 #%%<END TEST_INFO> 

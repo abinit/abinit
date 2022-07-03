@@ -102,7 +102,7 @@ pseudos          "Pseudodojo_paw_pw_standard/La.xml, Pseudodojo_paw_pw_standard/
 #%% [setup]                                                                     
 #%% executable = abinit                                                         
 #%% [shell]                                                                     
-#%% pre_commands = iw_cp tw90_6_2o_DS3_w90.win
+#%% pre_commands = iw_cp tw90_6_2o_DS3_w90.win tw90_6_2o_DS3_w90.win
 #%% [files]                                                                     
 #%% files_to_test =                                                             
 #%%    tw90_6_2.abo, tolnlines=5, tolabs=7.00e-05, tolrel=1.10e+00, fld_options=-medium

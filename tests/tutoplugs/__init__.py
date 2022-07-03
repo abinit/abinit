@@ -20,5 +20,6 @@ inp_files = [
 "tw90_3.abi",
 "tw90_4.abi",
 "tw90_6_1.abi",
-"tw90_6_2.abi"
+"tw90_6_2.abi",
+"tz2_2.abi",
 ]
