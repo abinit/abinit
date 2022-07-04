@@ -64,7 +64,7 @@ module m_wann_netcdf
     character(len=*), intent(in):: filename
 #if defined HAVE_NETCDF
     integer:: ncerr
-    ncerr = nf90_create(path = trim(filename), cmode = NF90_CLOBBER, ncid = self%ncid)
+    ncerr = nf90_create(path = trim(filename), cmode = NF90_NETCDF4, ncid = self%ncid)
     NCF_CHECK_MSG(ncerr, "Error when creating wannier netcdf  file")
 #else
     NETCDF_NOTENABLED_ERROR()
@@ -159,11 +159,11 @@ module m_wann_netcdf
 
   end subroutine close_file
 
-  subroutine write_Amnk(self, nkpt, nband, nwann, kpoints, eigvals, Amnk)
+  subroutine write_Amnk(self, nkpt, nband, nwann, kpoints, Amnk)
     class(IOwannNC), intent(inout):: self
     real(dp), intent(in):: kpoints(:, :)
     integer, intent(in):: nkpt, nband, nwann
-    real(dp),  intent(in):: eigvals(:,:)
+    !real(dp),  intent(in):: eigvals(:,:)
     complex(dp),  intent(in):: Amnk(:,:, :)
     integer:: ncerr
 #if defined HAVE_NETCDF
@@ -180,9 +180,9 @@ module m_wann_netcdf
          & self%i_kpts, NF90_DOUBLE, "kpoints", &
          &"KPOINTS" , "dimensionless")
 
-    call ab_define_var(self%ncid, [self%d_nband, self%d_nkpt], &
-         & self%i_eigvals, NF90_DOUBLE, "eigvals", &
-         &"EIGen VALueS" , "eV")
+    !call ab_define_var(self%ncid, [self%d_nband, self%d_nkpt], &
+    !     & self%i_eigvals, NF90_DOUBLE, "eigvals", &
+    !     &"EIGen VALueS" , "eV")
 
     call ab_define_var(self%ncid, [self%d_nband, self%d_nwann,  self%d_nkpt], &
          & self%i_Amnk_real, NF90_DOUBLE, "Amnk_real", &
@@ -198,8 +198,8 @@ module m_wann_netcdf
     ncerr = nf90_put_var(self%ncid, self%i_kpts, kpoints, start=[1, 1], count=[3, nkpt])
     NCF_CHECK_MSG(ncerr, "Error when writting kpoints in wannier netcdf file.")
 
-    ncerr = nf90_put_var(self%ncid, self%i_eigvals, eigvals, start=[1, 1], count=[nband, nkpt])
-    NCF_CHECK_MSG(ncerr, "Error when writting eigvals in wannier netcdf file.")
+    !ncerr = nf90_put_var(self%ncid, self%i_eigvals, eigvals, start=[1, 1], count=[nband, nkpt])
+    !NCF_CHECK_MSG(ncerr, "Error when writting eigvals in wannier netcdf file.")
 
     ncerr = nf90_put_var(self%ncid, self%i_Amnk_real, real(real(Amnk)), &
          & start=[1, 1], count=[nband, nwann, nkpt])
@@ -269,8 +269,8 @@ module m_wann_netcdf
     ncerr = nf90_put_var(self%ncid, self%i_xred, xred, start=[1, 1], count=[3, natom])
     NCF_CHECK_MSG(ncerr, "Error when writting atomic_xred in wannier netcdf file.")
 
-    ncerr = nf90_put_var(self%ncid, self%i_xcart, xcart, start=[1, 1], count=[3, natom])
-    NCF_CHECK_MSG(ncerr, "Error when writting atomic_xred in wannier netcdf file.")
+    !ncerr = nf90_put_var(self%ncid, self%i_xcart, xcart, start=[1, 1], count=[3, natom])
+    !NCF_CHECK_MSG(ncerr, "Error when writting atomic_xcart in wannier netcdf file.")
 #else
     NETCDF_NOTENABLED_ERROR()
     ABI_UNUSED(natom)

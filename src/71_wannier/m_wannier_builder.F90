@@ -49,12 +49,13 @@ module m_wannier_builder
   use m_wann_netcdf, only: IOWannNC
   implicit none
   public:: WannierBuilder_t
+  public :: WannierBuilder_witheigen_t
   public:: Amn_to_H
   private
 
 
   !===============================================================
-  ! scdmk type:
+  ! WannierBuilder_t type:
   !> @ description: the class for scdmk method.
   !===============================================================
   type::  WannierBuilder_t
@@ -145,7 +146,7 @@ contains
   !> disentangle_func_type: the type of the disentanglement function. 1: unity function. 2. Fermi. 3. Gauss
   !> project_to_anchor: whether to multiply the weight function by the projection to the anchor states. 
   !===============================================================
-  subroutine initialize(self,kpts, kweights, Rlist, nwann, nbasis, nband &
+  subroutine initialize(self,kpts, kweights, Rlist, nwann, nbasis, nband, &
        &  disentangle_func_type, mu, sigma, exclude_bands, project_to_anchor, method)
     class(WannierBuilder_t), intent(inout):: self
     integer, intent(in):: nwann, nbasis, nband
@@ -739,7 +740,8 @@ contains
          & wannR = self%wannR, HwannR = self%HwannR, &
          & wannR_unit = wannR_unit, HwannR_unit = HwannR_unit)
     call ncfile%write_Amnk(nkpt = self%nkpt, nband = self%nband, nwann = self%nwann, &
-         & kpoints = self%kpts, eigvals = self%evals, Amnk = self%Amnk)
+         & kpoints = self%kpts, Amnk = self%Amnk)
+    !TODO: add write_eigenvalues
   end subroutine write_wann_netcdf
 
   subroutine get_wannier_eigen(self, kpoint, evals, evecs)
@@ -780,7 +782,6 @@ contains
     end do
   end subroutine get_wannier_eigen_klist
 
-end module m_wannier_builder
 
 !============================   WannierBuilder_witheigen_t   =========================
 
@@ -808,4 +809,5 @@ function get_psi_k_from_eigen(self, ikpt) result(psik)
 end function get_psi_k_from_eigen
 
 
+end module m_wannier_builder
 !!***

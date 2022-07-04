@@ -66,6 +66,8 @@ module m_wfk_analyze
  use m_pspini,          only : pspini
  use m_sigtk,           only : sigtk_kpts_in_erange
 
+ use m_wfd_wannier,     only : wfd_run_wannier
+
  implicit none
 
  private
@@ -404,6 +406,13 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
    ABI_FREE(paw_onsite)
 
  !case ("paw_aeden")
+
+case (WFK_TASK_WANNIER)
+
+   call wfd_run_wannier(cryst, ebands, wfk0_hdr, mpi_enreg, &
+        & wfd%nfft, ngfftc, ngfftf,  wfd, dtset, dtfil,  &
+        & pawang,  pawrad, pawtab, psps )
+
 
  case default
    ABI_ERROR(sjoin("Wrong task:", itoa(dtset%wfk_task)))

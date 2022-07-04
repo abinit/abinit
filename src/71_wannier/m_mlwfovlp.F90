@@ -349,6 +349,7 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
  if(leig) then
+    ! TODO use subroutine
 !
 !  Assign file unit numbers
    if(rank==master) then
@@ -479,6 +480,7 @@ contains
 !    In the PAW case we also need to write out cprj into files
 !
      if(psps%usepaw==1) then
+        ! TODO: move this into a subroutine or use wfd
 !
 !      big loop on atoms, kpts, bands and lmn
 !
@@ -489,17 +491,20 @@ contains
 !          MPI:cycle over k-points not treated by this node
 !
            if (nprocs>1 ) then !sometimes we can have just one processor
-             if ( ABS(MPI_enreg%proc_distrb(ikpt,1,isppol)-MPI_enreg%me)  /=0) CYCLE
+             if ( ABS(MPI_enreg%proc_distrb(ikpt,1,isppol)-MPI_enreg%me)  /=0)&
+                  & CYCLE
            end if
 
            ikpt2=ikpt2+1 !sums just on the k-points treated by this node
 !
-           write(wfnname,'(a,I5.5,".",I1)') trim(dtfil%fnametmp_cprj),ikpt,isppol
+           write(wfnname,'(a,I5.5,".",I1)') trim(dtfil%fnametmp_cprj),ikpt&
+                &,isppol
            iun_plot=1000+ikpt
            open (unit=iun_plot, file=wfnname,form='unformatted')
 !
            do iband=1,mband*dtset%nspinor
-             ig=iband+(ikpt2-1)*mband*dtset%nspinor +(isppol-1)*nkpt*mband*dtset%nspinor !index for cprj(:,ig)
+             ig=iband+(ikpt2-1)*mband*dtset%nspinor +(isppol-1)*nkpt*mband&
+                  &*dtset%nspinor !index for cprj(:,ig)
 !
              do iatom=1,natom
                itypat=dtset%typat(iatom)
@@ -525,11 +530,9 @@ contains
 !
    ABI_MALLOC(cm1,(2,mband,mband,nntot,nkpt,nsppol))
    ! this loops over spin internally
-   call mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,&
-&   mkmem,mpi_enreg,mpw,nfft,ngfft,nkpt,nntot,&
-&   npwarr,dtset%nspinor,nsppol,ovikp,dtfil%fnametmp_cg)
-   write(message, '(a,a)' ) ch10,&
-&   '   mlwfovlp : PW part of overlap computed   '
+   call mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband, mkmem,mpi_enreg,mpw,nfft,ngfft&
+        &,nkpt,nntot, npwarr,dtset%nspinor,nsppol,ovikp,dtfil%fnametmp_cg)
+   write(message, '(a,a)' ) ch10, '   mlwfovlp : PW part of overlap computed   '
    call wrtout(std_out,  message,'COLL')
 !
 !  compute PAW Contribution and add it to PW contribution
@@ -816,6 +819,8 @@ contains
 !
 !  write      projections  to a file
 !
+
+! TODO  hexu: replace this with subroutine call
    if(rank==master) then
      if(dtset%w90iniprj==1) then
        do isppol=1,nsppol
@@ -832,7 +837,7 @@ contains
          write(iun(isppol),*) num_bands(isppol),nkpt,nwan(isppol)
        end do
      end if
-!
+
      do isppol=1,nsppol
        do ikpt=1,nkpt
          do iwan=1,nwan(isppol)
@@ -1994,6 +1999,10 @@ subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nk
 !
 !    MPI:cycle over k-points not treated by this node
 !
+
+      ! TODO: use sphere in fftcore to replace this.
+      ! m_cgtk: 62, cgtk_rotate ug  
+
      if ( ABS(MPI_enreg%proc_distrb(ikpt,1,isppol)-me)  /=0) CYCLE
 
 !
