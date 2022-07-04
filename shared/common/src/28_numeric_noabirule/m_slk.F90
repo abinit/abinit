@@ -1330,6 +1330,8 @@ subroutine matrix_from_realmatrix(matrix, reference, istwf_k)
 
 ! *********************************************************************
 
+ ABI_UNUSED(istwf_k)
+
  do i=1,matrix%sizeb_local(1)
    do j=1,matrix%sizeb_local(2)
      call matrix%loc2glob(i, j, iglob, jglob)
@@ -1377,6 +1379,8 @@ subroutine matrix_from_complexmatrix(matrix, reference, istwf_k)
  complex(dpc) :: val
 
 ! *********************************************************************
+
+ ABI_UNUSED(istwf_k)
 
  do i=1,matrix%sizeb_local(1)
    do j=1,matrix%sizeb_local(2)
@@ -1481,6 +1485,8 @@ subroutine matrix_to_realmatrix(matrix, reference, istwf_k)
 
 ! *********************************************************************
 
+ ABI_UNUSED(istwf_k)
+
  do i=1,matrix%sizeb_local(1)
    do j=1,matrix%sizeb_local(2)
      call matrix%loc2glob(i, j, iglob, jglob)
@@ -1527,6 +1533,8 @@ subroutine matrix_to_complexmatrix(matrix, reference, istwf_k)
  !real(dp) :: err
 
 ! *********************************************************************
+
+ ABI_UNUSED(istwf_k)
 
  do i=1,matrix%sizeb_local(1)
    do j=1,matrix%sizeb_local(2)
@@ -2113,7 +2121,7 @@ subroutine compute_eigen_problem(processor,matrix,results,eigen,comm,istwf_k)
   DOUBLE PRECISION            :: ABSTOL,ORFAC
   integer,          parameter :: IZERO=0
 
-  integer ::  M,NZ,IA,JA,IZ,JZ,ierr,TWORK_tmp(3),TWORK(3)
+  integer ::  M,NZ,ierr,TWORK_tmp(3),TWORK(3) ! IA,JA,IZ,JZ,
 
   DOUBLE PRECISION, external :: PDLAMCH
 
@@ -2447,7 +2455,7 @@ subroutine compute_generalized_eigen_problem(processor,matrix1,matrix2,results,e
   DOUBLE PRECISION, allocatable :: GAP(:)
   DOUBLE PRECISION            :: ABSTOL,ORFAC
   integer         , parameter :: IZERO=0
-  integer ::  M,NZ,IA,JA,IZ,JZ,ierr,TWORK_tmp(3),TWORK(3)
+  integer ::  M,NZ,ierr,TWORK_tmp(3),TWORK(3) ! IA,JA,IZ,JZ,
   DOUBLE PRECISION, external :: PDLAMCH
 
 ! *************************************************************************
@@ -2876,7 +2884,7 @@ subroutine slk_pzheev(jobz, uplo, Slk_mat, Slk_vec, w)
 !Local variables ------------------------------
 !scalars
  integer :: lwork,lrwork,info,nn
- character(len=500) :: msg
+ !character(len=500) :: msg
 !arrays
  real(dp),allocatable :: rwork(:)
  complex(dpc),allocatable :: work(:)
@@ -3017,11 +3025,11 @@ subroutine slk_pzheevx(jobz,range,uplo,Slk_mat,vl,vu,il,iu,abstol,Slk_vec,mene_f
 #ifdef HAVE_LINALG_SCALAPACK
 !Local variables-------------------------------
 !scalars
- integer  :: lwork,lrwork,liwork,info,nvec_calc,ierr
+ integer  :: lwork,lrwork,liwork,info,nvec_calc !,ierr
  real(dp) :: orfac
  character(len=500) :: msg
 !arrays
- integer :: ibuff(3),max_ibuff(3)
+ !integer :: ibuff(3),max_ibuff(3)
  integer,allocatable  :: iwork(:),iclustr(:),ifail(:)
  real(dp),allocatable  :: rwork(:),gap(:)
  complex(dpc),allocatable :: work(:)
@@ -3296,12 +3304,12 @@ subroutine slk_pzhegvx(ibtype,jobz,range,uplo,Slk_matA,Slk_matB,vl,vu,il,iu,abst
 #ifdef HAVE_LINALG_SCALAPACK
 !Local variables-------------------------------
 !scalars
- integer  :: lwork,lrwork,liwork,info,nvec_calc,ierr
+ integer  :: lwork,lrwork,liwork,info,nvec_calc !,ierr
  real(dp) :: orfac
  logical :: ltest
  character(len=500) :: msg
 !arrays
- integer :: ibuff(3),max_ibuff(3)
+ !integer :: ibuff(3),max_ibuff(3)
  integer :: desca(DLEN_),descb(DLEN_),descz(DLEN_)
  integer,allocatable  :: iwork(:),iclustr(:),ifail(:)
  real(dp),allocatable  :: rwork(:),gap(:)
@@ -3506,7 +3514,7 @@ subroutine slk_zinvert(Slk_mat)
 !Local variables ------------------------------
 !scalars
  integer :: lwork,info,ipiv_size,liwork
- character(len=500) :: msg
+ !character(len=500) :: msg
 !array
  integer,allocatable :: ipiv(:), iwork(:)
  complex(dpc),allocatable :: work(:)
@@ -3946,12 +3954,12 @@ subroutine slk_write(Slk_mat, uplo, is_fortran_file, fname,mpi_fh, offset, flags
 !Local variables ------------------------------
 !scalars
 #if defined HAVE_LINALG_SCALAPACK && defined HAVE_MPI_IO
- integer :: jloc,iloc,iglob,jglob,nrows_glob,ncols_glob,elw,nrows_w,ncols_w
+ integer :: jloc,iloc,nrows_glob,ncols_glob,elw,nrows_w,ncols_w ! iglob,jglob,
  integer :: slk_type,offset_err,etype,nfrec,bsize_elm,mpi_type_elm
  integer(XMPI_OFFSET_KIND) :: my_offset
  logical :: do_open
  integer :: comm,my_flags,my_fh,buffer_size
- integer :: ierr,ij_loc,nelw,col_glob
+ integer :: ierr,nelw,col_glob ! ij_loc,
 !arrays
  integer(XMPI_OFFSET_KIND),allocatable :: bsize_frecord(:)
  integer,pointer :: elw2slk(:,:)
@@ -4172,7 +4180,7 @@ subroutine slk_read(Slk_mat,uplo,symtype,is_fortran_file,fname,mpi_fh,offset,fla
  logical :: do_open
  integer :: comm,my_flags,my_fh,buffer_size,ierr,col_glob
  integer :: nfrec,bsize_elm,mpi_type_elm
- complex(dpc) :: ctest
+ !complex(dpc) :: ctest
  logical,parameter :: check_frm=.TRUE.
  integer(XMPI_OFFSET_KIND),allocatable :: bsize_frecord(:)
 !arrays

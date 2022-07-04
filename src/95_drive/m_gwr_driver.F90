@@ -178,7 +178,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  integer :: istep, moved_atm_inside, moved_rhor, n3xccc
  integer :: ndij !,ndim,nfftf,nfftf_tot,nkcalc,gwc_nfft,gwc_nfftot,gwx_nfft,gwx_nfftot
  integer :: ngrvdw,nhatgrdim,nkxc,nspden_rhoij,optene !nzlmopt,
- integer :: optcut,optgr0,optgr1,optgr2,option,optrad,psp_gencond
+ integer :: optcut,optgr0,optgr1,optgr2,optrad,psp_gencond !option,
  integer :: rhoxsp_method,usexcnhat !, use_aerhor,use_umklp
  !real(dp) :: compch_fft, compch_sph !,r_s,rhoav,alpha
  real(dp) :: gsqcutc_eff, gsqcutf_eff, gsqcut_shp

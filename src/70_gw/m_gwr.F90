@@ -1844,7 +1844,7 @@ subroutine gwr_get_wc_gpr(gwr, my_it, my_is, desc_qbz, wct_gpr)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: ndat1 = 1
- integer :: my_iqf, ig2, ioe, npwsp, col_bsize
+ integer :: my_iqf, ig2, npwsp, col_bsize
  !integer :: iq_ibz, isym_q, trev_q, g0_q(3)
  real(dp) :: cpu, wall, gflops
  !logical :: isirr_q
@@ -2710,18 +2710,18 @@ subroutine gwr_build_sigmac(gwr)
 !Local variables-------------------------------
 !scalars
  integer, parameter :: ndat1 = 1
- integer :: my_is, my_it, my_iki, spin, ik_ibz, sc_nfft, my_ir, my_nr
- integer :: my_iqi, my_iqf, iq_ibz, iq_bz, itau, col_bsize, npwsp, ierr, jb, ib1, ib2, bmin, bmax
- integer :: my_ikf, ioe, ik_bz, ig, ikcalc
+ integer :: my_is, my_it, spin, ik_ibz, sc_nfft, my_ir, my_nr !my_iki,
+ integer :: my_iqf, iq_ibz, iq_bz, itau, ierr, jb, ib1, ib2, bmin, bmax ! col_bsize, npwsp,
+ integer :: my_ikf, ioe, ik_bz, ig, ikcalc ! my_iqi,
  real(dp) :: cpu_tau, wall_tau, gflops_tau, cpu_all, wall_all, gflops_all !, spin_fact
- logical :: q_is_gamma
+ !logical :: q_is_gamma
  type(desc_t), pointer :: desc_q, desc_k
  character(len=500) :: msg
  !type(matrix_scalapack),pointer :: wc
 !arrays
  integer :: sc_ngfft(18)
  integer,allocatable :: green_scg(:,:), wc_scg(:,:)
- real(dp) :: qq_ibz(3) ! kk_ibz(3),
+ !real(dp) :: qq_ibz(3) ! kk_ibz(3),
  complex(dp),allocatable :: gt_scbox(:,:), wt_scbox(:)
  type(matrix_scalapack) :: gt_gpr(2, gwr%my_nkbz), wc_gpr(gwr%my_nqbz)
  type(desc_t), target :: desc_kbz(gwr%my_nkbz), desc_qbz(gwr%my_nqbz)

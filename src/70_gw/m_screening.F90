@@ -1516,9 +1516,9 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
    do io=1,nomega
      if (omega_distrb(io) == my_rank) then
        !write(std_out,*)"dim_wing",dim_wing
-       call rpa_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0(:,:,io),my_nqlwl,dim_wing,&
-&        chi0_head(:,:,io),chi0_lwing(:,io,:),chi0_uwing(:,io,:),&
-&        tmp_lf,tmp_nlf,tmp_eelf,comm_self)
+       call rpa_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0(:,:,io),my_nqlwl,dim_wing, &
+                         chi0_head(:,:,io),chi0_lwing(:,io,:),chi0_uwing(:,io,:), &
+                         tmp_lf,tmp_nlf,tmp_eelf,comm_self)
 
          ! Store results.
          epsm_lf(io,:) = tmp_lf
@@ -1986,11 +1986,9 @@ end subroutine make_epsm1_driver
 !!  chi0_uwing(npwe*nJ,dim_wing)=Upper wings of chi0 (only for q-->0)
 !!  comm=MPI communicator.
 !!
-!! OUTPUT
-!!
 !! SIDE EFFECTS
-!!  chi0(npwe*nI,npwe*nJ): in input the irreducible polarizability, in output
-!!   the symmetrized inverse dielectric matrix.
+!!  chi0(npwe*nI,npwe*nJ): in input the irreducible polarizability,
+!!                         in output the symmetrized inverse dielectric matrix.
 !!
 !! PARENTS
 !!      m_screening
@@ -2039,20 +2037,20 @@ subroutine rpa_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0,my_nqlwl,dim_wing,chi0_head,ch
 
  is_qeq0 = (normv(Vcp%qibz(:,iqibz),gmet,'G')<GW_TOLQ0)
  if (is_qeq0) then
-   ABI_CHECK(iqibz==1,"q is 0 but iq_ibz /= 1")
+   ABI_CHECK(iqibz==1, "q is 0 but iq_ibz /= 1")
  end if
- !
+
  if (my_nqlwl>1) then
    ABI_MALLOC(chi0_save,(npwe*nI,npwe*nJ))
    chi0_save = chi0
  end if
  !
- ! Symmetrized RPA epsilon = 1 - Vc^{1/2} chi0 Vc^{1/2}
- !   * vc_sqrt contains vc^{1/2}(q,G), complex-valued to allow for a possible cutoff.
+ ! Symmetrized RPA epsilon: 1 - Vc^{1/2} chi0 Vc^{1/2}
+ ! vc_sqrt contains vc^{1/2}(q, G)
  !
- ! * Loop over small q"s (if any) to treat the nonanalytical behavior.
+ ! Loop over small q"s (if any) to treat the nonanalytical behavior.
  do iqlwl=my_nqlwl,1,-1
-   !
+
    if (my_nqlwl>1) then
      chi0(:,:) = chi0_save           ! restore pristine polarizability
      chi0(:,1) = chi0_lwing(:,iqlwl) ! change the wings
@@ -2067,12 +2065,13 @@ subroutine rpa_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0,my_nqlwl,dim_wing,chi0_head,ch
 
    do ig2=1,npwe*nJ
      do ig1=1,npwe*nI
-       chi0(ig1,ig2)=-vc_sqrt(ig1)*chi0(ig1,ig2)*vc_sqrt(ig2)
+       chi0(ig1,ig2) = -vc_sqrt(ig1) * chi0(ig1,ig2) * vc_sqrt(ig2)
      end do
-     chi0(ig2,ig2)=one+chi0(ig2,ig2)
+     chi0(ig2,ig2) = one + chi0(ig2,ig2)
    end do
+   ! chi0, now contains \tepsilon.
 
-   epsm_nlf(iqlwl)=chi0(1,1) ! * chi0, now contains \tepsilon.
+   epsm_nlf(iqlwl)=chi0(1,1)
 
    if (prtvol > 0) then
      call wrtout(std_out,' Symmetrical epsilon(G,G'') ')
@@ -2080,9 +2079,9 @@ subroutine rpa_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0,my_nqlwl,dim_wing,chi0_head,ch
    end if
    !
    ! === Invert tepsilon and calculate macroscopic dielectric constant ===
-   ! * epsm_lf(w)=1/epsm1(G=0,Gp=0,w).
-   ! * Since G=Gp=0 there is no difference btw symmetrical and not symmetrical.
-   !
+   ! * epsm_lf(w) = 1 / epsm1(G=0,Gp=0,w).
+   ! * Since G=Gp=0, there is no difference btw symmetrical and not symmetrical.
+
    call xginv(chi0,npwe,comm=comm)
 
    epsm_lf(iqlwl) = one/chi0(1,1)
@@ -2210,11 +2209,11 @@ subroutine atddft_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0,kxcg_mat,option_test,my_nql
  end if
 
  write(msg,'(a,f8.2,a)')" chitmp requires: ",npwe**2*gwpc*b2Mb," Mb"
- ABI_MALLOC_OR_DIE(chitmp,(npwe,npwe), ierr)
+ ABI_MALLOC_OR_DIE(chitmp, (npwe,npwe), ierr)
  !
- ! * Calculate chi0*fxc.
+ ! Calculate chi0*fxc.
  chitmp = MATMUL(chi0,kxcg_mat)
- ! * First calculate the NLF contribution
+ ! First calculate the NLF contribution
  do ig1=1,npwe
    do ig2=1,npwe
      chitmp(ig1,ig2)=-chitmp(ig1,ig2)
