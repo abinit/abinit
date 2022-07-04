@@ -209,7 +209,42 @@ module m_abi_linalg
  public :: ortho_reim
  !----------------------------------------------------------------------
 
-#ifndef HAVE_GPU_CUDA
+#ifdef HAVE_GPU_CUDA
+
+  interface
+
+    subroutine alloc_on_gpu(gpu_ptr,size) bind(c, name="alloc_on_gpu_")
+      use, intrinsic :: iso_c_binding
+      implicit none
+      type(c_ptr),                    intent(inout)  :: gpu_ptr
+      integer(kind=c_int32_t),        intent(in)     :: size
+    end subroutine alloc_on_gpu
+
+    subroutine dealloc_on_gpu(gpu_ptr) bind(c, name="dealloc_on_gpu_")
+      use, intrinsic :: iso_c_binding
+      implicit none
+      type(c_ptr),                    intent(inout)  :: gpu_ptr
+    end subroutine dealloc_on_gpu
+
+    subroutine copy_on_gpu(ptr, gpu_ptr, size) bind(c, name="copy_on_gpu_")
+      use, intrinsic :: iso_c_binding
+      implicit none
+      type(c_ptr),             value, intent(in)    :: ptr
+      type(c_ptr),                    intent(inout) :: gpu_ptr
+      integer(kind=c_int32_t),        intent(in)    :: size
+    end subroutine copy_on_gpu
+
+    subroutine copy_from_gpu(ptr, gpu_ptr, size) bind(c, name="copy_from_gpu_")
+      use, intrinsic :: iso_c_binding
+      implicit none
+      type(c_ptr),             value, intent(in)    :: ptr
+      type(c_ptr),                    intent(inout) :: gpu_ptr
+      integer(kind=c_int32_t),        intent(in)    :: size
+    end subroutine copy_from_gpu
+
+  end interface
+
+#else
  !dummy routines replace gpu helper routines
  public :: alloc_on_gpu
  public :: copy_from_gpu

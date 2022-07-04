@@ -265,7 +265,7 @@ extern "C" void check_gpu_mem_(){
 /* OUTPUT gpu_ptr= C_PTR on gpu memory location that has been allocated       */
 /*============================================================================*/
 
-extern "C" void alloc_on_gpu_(void **gpu_ptr,int* size){
+extern "C" void alloc_on_gpu_(void **gpu_ptr, int* size){
 
   if(cudaMalloc(gpu_ptr,*size)!=cudaSuccess){
     printf("ERROR: alloc_on_gpu failed:%s\n",cudaGetErrorString(cudaGetLastError()));
@@ -303,7 +303,7 @@ extern "C" void dealloc_on_gpu_(void **gpu_ptr){
 /*            the correct one is in xx_gpu_toolbox/dev_spec.cu                */
 /*============================================================================*/
 
-extern "C" void copy_on_gpu_(void *ptr, void **gpu_ptr,int* size){
+extern "C" void copy_on_gpu_(void *ptr, void **gpu_ptr, int* size){
   if(cudaMemcpy(*gpu_ptr,ptr,*size,cudaMemcpyHostToDevice)!=cudaSuccess){
     printf("ERROR: copy_on_gpu failed : %s\n",cudaGetErrorString(cudaGetLastError()));
     fflush(stdout);
@@ -320,7 +320,7 @@ extern "C" void copy_on_gpu_(void *ptr, void **gpu_ptr,int* size){
 /*  dtab = fortran tab which will contains data                               */
 /*============================================================================*/
 
-extern "C" void copy_from_gpu_(void *ptr,void **gpu_ptr,int* size){
+extern "C" void copy_from_gpu_(void *ptr, void **gpu_ptr, int* size){
   if(cudaMemcpy(ptr,*gpu_ptr,*size,cudaMemcpyDeviceToHost)!=cudaSuccess){
     printf("ERROR: copy_from_gpu failed : %s\n",cudaGetErrorString(cudaGetLastError()));
     fflush(stdout);
