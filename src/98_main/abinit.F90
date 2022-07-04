@@ -492,18 +492,14 @@ program abinit
 !------------------------------------------------------------------------------
 
  ! 18) Bibliographical recommendations
- if(me==0) then
-   if(test_exit)then
+ if (me == 0) then
+   if (test_exit) then
      write(msg,'(a,a,i0,a)')ch10,' abinit : before driver, prtvol=',prtvol,', debugging mode => will skip acknowledgments'
      call wrtout([std_out, ab_out], msg)
    else
-     do ii=1,2
-       if(ii==1)iounit=ab_out
-       if(ii==2)iounit=std_out
-       call out_acknowl(dtsets,iounit,ndtset_alloc,npsp,pspheads)
-     end do
+     call out_acknowl(dtsets, ab_out, ndtset_alloc, npsp, pspheads)
    end if
- end if ! me==0
+ end if
 
 !------------------------------------------------------------------------------
 

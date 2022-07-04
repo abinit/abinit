@@ -33,11 +33,10 @@ module m_kpts
  use m_htetra
  use m_xmpi
 
- use m_time,           only : timab
- use m_time,           only : cwtime, cwtime_report
+ use m_time,           only : timab, cwtime, cwtime_report
  use m_copy,           only : alloc_copy
  use m_symtk,          only : mati3inv, mati3det, matr3inv, smallprim
- use m_fstrings,       only : sjoin, itoa, ltoa, ktoa
+ use m_fstrings,       only : sjoin, itoa, ftoa, ltoa, ktoa
  use m_numeric_tools,  only : wrap2_pmhalf
  use m_geometry,       only : metric
  use m_symkpt,         only : symkpt, symkpt_new
@@ -48,9 +47,12 @@ module m_kpts
 
  public :: kpts_timrev_from_kptopt   ! Returns the value of timrev from kptopt
  public :: kpts_ibz_from_kptrlatt    ! Determines the IBZ, the weights and the BZ from kptrlatt
- public :: tetra_from_kptrlatt       ! Create an instance from kptrlatt and shiftk
+ public :: tetra_from_kptrlatt       ! Create an instance of htetra_t from kptrlatt and shiftk
  public :: symkchk                   ! Checks that the set of k points has the full space group symmetry,
                                      ! modulo time reversal if appropriate.
+ public :: kpts_sort                 ! Order list of k-points according to the norm.
+ public :: kpts_pack_in_stars        !
+ public :: kpts_map
  public :: listkk                    ! Find correspondence between two set of k-points.
  public :: getkgrid                  ! Compute the grid of k points in the irreducible Brillouin zone.
  !FIXME: Deprecated
@@ -206,7 +208,7 @@ end subroutine kpts_ibz_from_kptrlatt
 !! tetra_from_kptrlatt
 !!
 !! FUNCTION
-!!  Create an instance from kptrlatt and shiftk
+!!  Helper function to to create an instance and htetra from kptrlatt and shiftk
 !!
 !! INPUTS
 !!  cryst<cryst_t>=Crystalline structure.
@@ -299,13 +301,15 @@ type(htetra_t) function tetra_from_kptrlatt( &
 
  rlatt = new_kptrlatt; call matr3inv(rlatt, klatt)
 
- ABI_MALLOC(indkk,(nkfull))
- indkk(:) = bz2ibz(1,:)
+ ABI_MALLOC(indkk, (nkfull))
+ indkk(:) = bz2ibz(1, :)
  ABI_SFREE(bz2ibz)
+
  call htetra_init(htetra, indkk, cryst%gprimd, klatt, kfull, nkfull, my_kibz, my_nkibz, ierr, errorstring, comm)
  if (ierr /= 0) msg = errorstring
 
  10 continue
+
  ABI_SFREE(my_kibz)
  ABI_SFREE(indkk)
  ABI_SFREE(kfull)
@@ -458,6 +462,228 @@ integer function symkchk(kptns,nkpt,nsym,symrec,timrev,errmsg) result(ierr)
  end if
 
 end function symkchk
+!!***
+
+!!****f* m_kpts/kpts_sort
+!! NAME
+!! kpts_sort
+!!
+!! FUNCTION
+!!  Order list of k-points according to the norm.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine kpts_sort(gprimd, nkpt, kpts)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nkpt
+!arrays
+ real(dp),intent(in) :: gprimd(3, 3)
+ real(dp),intent(inout) :: kpts(3, nkpt)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ikpt
+!arrays
+ integer,allocatable :: iperm(:)
+ real(dp),allocatable :: knorm2(:), kpts_ord(:,:)
+
+! *************************************************************************
+
+ ABI_MALLOC(knorm2, (nkpt))
+ do ikpt=1,nkpt
+   knorm2(ikpt) = dot_product(kpts(:,ikpt), matmul(gprimd, kpts(:, ikpt)))
+ end do
+
+ ABI_MALLOC(iperm, (nkpt))
+ iperm = [(ikpt, ikpt=1, nkpt)]
+ call sort_dp(nkpt, knorm2, iperm, tol12)
+ ABI_FREE(knorm2)
+
+ ABI_MALLOC(kpts_ord, (3, nkpt))
+ do ikpt=1,nkpt
+   kpts_ord(:, ikpt) = kpts(:, iperm(ikpt))
+ end do
+ kpts = kpts_ord
+
+ ABI_FREE(iperm)
+ ABI_FREE(kpts_ord)
+
+end subroutine kpts_sort
+!!***
+
+!!****f* m_kpts/kpts_pack_in_stars
+!! NAME
+!! kpts_pack_in_stars
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine kpts_pack_in_stars(nkpt, kpts, kmap)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nkpt
+!arrays
+ real(dp),intent(inout) :: kpts(3, nkpt)
+ integer,intent(inout) :: kmap(6, nkpt)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ikpt, seen_ibz, ik_start, ik0, nkibz
+ integer :: ik_ibz, isym_k, trev_k, tsign, g0_k(3)
+ logical :: isirr_k
+!arrays
+ integer,allocatable :: iperm(:), ibz_ids(:), kmap_ord(:,:), star_pos(:,:)
+ real(dp) :: swap_kpt(3), swap_kmap(6)
+ real(dp),allocatable :: kpts_ord(:,:)
+
+! *************************************************************************
+
+ ! Order according to ik_ibz index
+ ABI_MALLOC(ibz_ids, (nkpt))
+ ABI_MALLOC(iperm, (nkpt))
+ ibz_ids = kmap(1, :)
+ iperm = [(ikpt, ikpt=1, nkpt)]
+
+ call sort_int(nkpt, ibz_ids, iperm)
+ ABI_FREE(ibz_ids)
+
+ ! Rearrange items in _ord arrays.
+ ABI_MALLOC(kpts_ord, (3, nkpt))
+ ABI_MALLOC(kmap_ord, (6, nkpt))
+ do ikpt=1,nkpt
+   kpts_ord(:, ikpt) = kpts(:, iperm(ikpt))
+   kmap_ord(:, ikpt) = kmap(:, iperm(ikpt))
+ end do
+
+ ! We want each star group to start with the point in the IBZ so an extra shuffle is needed.
+ ! star_pos stores the beginning of the star group and the position of the base k0 for each star.
+ nkibz = maxval(kmap(1,:))
+ ABI_ICALLOC(star_pos, (2, nkibz))
+
+ seen_ibz = -1
+ do ikpt=1,nkpt
+   ik_ibz = kmap_ord(1, ikpt); isym_k = kmap_ord(2, ikpt)
+   trev_k = kmap_ord(6, ikpt); g0_k = kmap_ord(3:5, ikpt)
+   isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
+   tsign = 1; if (trev_k == 1) tsign = -1
+   if (ik_ibz /= seen_ibz) then
+     star_pos(1, ik_ibz) = ikpt
+     seen_ibz = ik_ibz
+   end if
+   if (isirr_k) star_pos(2, ik_ibz) = ikpt
+ end do
+
+ ! Now put ik0 in the ik_start slot if needed.
+ do ik_ibz=1, nkibz
+   ik_start = star_pos(1, ik_ibz)
+   ik0 = star_pos(2, ik_ibz)
+   if (ik_start == ik0) cycle
+
+   swap_kpt = kpts_ord(:, ik_start)
+   swap_kmap = kmap_ord(:, ik_start)
+
+   kpts_ord(:, ik_start) = kpts_ord(:, ik0)
+   kmap_ord(:, ik_start) = kmap_ord(:, ik0)
+   kpts_ord(:, ik0) = swap_kpt
+   kmap_ord(:, ik0) = swap_kmap
+ end do
+
+ kpts = kpts_ord
+ kmap = kmap_ord
+
+ ABI_FREE(star_pos)
+ ABI_FREE(iperm)
+ ABI_FREE(kpts_ord)
+ ABI_FREE(kmap_ord)
+
+end subroutine kpts_pack_in_stars
+!!***
+
+!!****f* m_kpts/kpts_map
+!! NAME
+!! kpts_map
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+integer function kpts_map(mode, timrev, cryst, krank, nkpt2, kpt2, map, qpt, dksqmax_tol) result(ierr)
+
+!Arguments ------------------------------------
+!scalars
+ character(len=*),intent(in) :: mode
+ integer,intent(in) :: timrev, nkpt2
+ class(crystal_t),intent(in) :: cryst
+ class(krank_t),intent(inout) :: krank
+ real(dp),optional,intent(in) :: dksqmax_tol
+!arrays
+ real(dp),intent(in) :: kpt2(3, nkpt2)
+ real(dp),optional,intent(in) :: qpt(3)
+ integer,intent(out) :: map(6, nkpt2)
+
+!Local variables-------------------------------
+!scalars
+ real(dp) :: dksqmax, my_tol
+!arrays
+ real(dp) :: my_qpt(3)
+
+! *************************************************************************
+
+ my_qpt = zero; if (present(qpt)) my_qpt = qpt
+
+ select case (mode)
+ case("symrel")
+   ! Note symrel and use_symrec = .False.
+   ! These are the conventions for the symmetrization of the wavefunctions used in cgtk_rotate.
+   call krank%get_mapping(nkpt2, kpt2, dksqmax, cryst%gmet, map, &
+                          cryst%nsym, cryst%symafm, cryst%symrel, timrev, use_symrec=.False., qpt=my_qpt)
+
+ case("symrec")
+   ! Note symrec and use_symrec = .True.
+   ! These are the conventions for the symmetrization of the DVDB as well as the conventions
+   ! used in several BZ routines. We should always use this convention.
+
+   call krank%get_mapping(nkpt2, kpt2, dksqmax, cryst%gmet, map, &
+                          cryst%nsym, cryst%symafm, cryst%symrec, timrev, use_symrec=.True., qpt=my_qpt)
+
+ case default
+   ABI_ERROR(sjoin("Invalid mode:", mode))
+ end select
+
+ my_tol = tol12; if (present(dksqmax_tol)) my_tol = dksqmax_tol
+
+ ierr = merge(1, 0, dksqmax > my_tol)
+ if (ierr /= 0) call wrtout(std_out, sjoin(" CRITICAL WARNING: dksqmax ", ftoa(dksqmax), " > ", ftoa(my_tol)))
+
+end function kpts_map
 !!***
 
 !!****f* m_kpts/listkk
@@ -2964,12 +3190,6 @@ end subroutine testkgrid
 !!  The first call reports the total number of divisions in the normalized path, dimension
 !!  that is required to correctly allocate the array.
 !!  The second call calculates the reduced coordinates of the circuit.
-!!
-!! COPYRIGHT
-!!  Copyright (C) 2007-2022 ABINIT group (MG)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !! nbounds=number of points defining the path

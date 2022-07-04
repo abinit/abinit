@@ -1,6 +1,7 @@
-# MgB2: Computation of the isotropic Migdal-Eliashberg Tc 
+# MgB2: Generation of GSTORE.nc file
+#
 optdriver 7
-eph_task  1
+eph_task  11   # Generate GSTORE.nc file
 
 getddb_filepath  "MgB2_eph4isotc/flow_mgb2_phonons/w1/outdata/out_DDB"
 getwfk_filepath  "teph4isotc_4o_DS1_WFK"
@@ -12,12 +13,19 @@ ddb_ngqpt 4 4 4
 eph_ngqpt_fine 6 6 6
 dipdip 0         # No treatment of the dipole-dipole part. OK for metals
 
+#gstore_cplex 2
+gstore_kzone "ibz"; gstore_qzone "bz"
+#gstore_kzone "bz"; gstore_qzone "ibz"
+gstore_kfilter "fs_tetra"
+#gstore_brange 3 4
+#gstore_erange -0.5 -0.5 eV
+gstore_with_vk 1
+#getgstore_filepath "outdata/_GSTORE.nc"
+
 #eph_intmeth 2   # Tetrahedron method
-eph_intmeth 1
-eph_fsewin 0.3 eV
 #eph_intmeth 1
-#eph_fsmear -1.0
-eph_fsmear 0.1 eV
+#eph_fsewin 0.3 eV
+#eph_fsmear 0.1 eV
 
 # Tricks to make EPH calculations faster.
 mixprec 1
@@ -26,23 +34,25 @@ boxcutmin 1.1
 # K-mesh: must be consistent with the one used to generate the WFK file
 ngkpt   18 18 18
 nshiftk 1
-shiftk  0.0 0.0 0.0 
+shiftk  0.0 0.0 0.0
 
+prtphbands 0
+prtphdos   0
 # Compute phonon bands along this q-path.
-ph_nqpath 8
-ph_qpath
-    0.0 0.0 0.0   # Gamma
-    1/3 1/3 0.0   # K
-    0.5 0.0 0.0   # M
-    0.0 0.0 0.0   # Gamma
-    0.0 0.0 0.5   # A
-    1/3 1/3 0.5   # H
-    0.5 0.0 0.5   # L
-    0.0 0.0 0.5   # A
+#ph_nqpath 8
+#ph_qpath
+#    0.0 0.0 0.0   # Gamma
+#    1/3 1/3 0.0   # K
+#    0.5 0.0 0.0   # M
+#    0.0 0.0 0.0   # Gamma
+#    0.0 0.0 0.5   # A
+#    1/3 1/3 0.5   # H
+#    0.5 0.0 0.5   # L
+#    0.0 0.0 0.5   # A
 
 
 #COMMON INPUT DATA###########################################################
-ecut    38.0  
+ecut    38.0
 nband   8
 occopt  4              # Marzari smearing
 tsmear 0.02
@@ -61,11 +71,11 @@ pseudos "Mg-low.psp8, B.psp8"
 #%% [files]
 #%% use_git_submodule = MgB2_eph4isotc
 #%% files_to_test =
-#%%   teph4isotc_5.abo, tolnlines= 200, tolabs=  3.000e-02, tolrel=  6.000e-03
+#%%   teph4isotc_6.abo, tolnlines= 5, tolabs=  3.000e-02, tolrel=  6.000e-03
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]
 #%% authors = M. Giantomassi
 #%% keywords = NC, DFPT, EPH
-#%% description = Computation of the isotropic Migdal-Eliashberg Tc
+#%% description = Generation of GSTORE.nc file
 #%%<END TEST_INFO>

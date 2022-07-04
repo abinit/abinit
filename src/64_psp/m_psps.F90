@@ -980,11 +980,16 @@ subroutine psps_ncwrite(psps, path)
  NCF_CHECK(nctk_open_create(ncid, path, xmpi_comm_self))
 
  ! Define dimensions
- ncerr = nctk_def_dims(ncid, [&
-     nctkdim_t("fnlen", fnlen+1), nctkdim_t("md5_slen", md5_slen+1), nctkdim_t("ntypat", psps%ntypat), &
-     nctkdim_t("npsp", psps%npsp), nctkdim_t("lnmax", psps%lnmax), &
-     nctkdim_t("lmnmax", psps%lnmax), nctkdim_t("dimekb", psps%dimekb), &
-     nctkdim_t("mqgrid_vl", psps%mqgrid_vl), nctkdim_t("mqgrid_ff", psps%mqgrid_ff) &
+ ncerr = nctk_def_dims(ncid, [ &
+     nctkdim_t("fnlen", fnlen + 1), &
+     nctkdim_t("md5_slen", md5_slen + 1), &
+     nctkdim_t("ntypat", psps%ntypat), &
+     nctkdim_t("npsp", psps%npsp), &
+     nctkdim_t("lnmax", psps%lnmax), &
+     nctkdim_t("lmnmax", psps%lnmax), &
+     nctkdim_t("dimekb", psps%dimekb), &
+     nctkdim_t("mqgrid_vl", psps%mqgrid_vl), &
+     nctkdim_t("mqgrid_ff", psps%mqgrid_ff) &
  ])
  NCF_CHECK(ncerr)
 
@@ -1223,13 +1228,13 @@ subroutine psp2params_free(gth_params)
  ABI_SFREE(gth_params%set)
  ABI_SFREE(gth_params%hasGeometry)
 
-!Coefficients for local part and projectors
+ ! Coefficients for local part and projectors
  ABI_SFREE(gth_params%psppar)
 
-!Coefficients for spin orbit part
+ ! Coefficients for spin orbit part
  ABI_SFREE(gth_params%psp_k_par)
 
-!Different radii
+ ! Different radii
  ABI_SFREE(gth_params%radii_cf)
 
 end subroutine psp2params_free
