@@ -384,8 +384,8 @@ subroutine gpu_xorthonormalize(blockvectorx_gpu,blockvectorbx_gpu,blocksize,spac
 !Local variables-------------------------------
 #if defined HAVE_GPU_CUDA
  integer :: ierr,info
- real(dp),dimension(:,:),allocatable :: d_sqgram
- complex(dpc),dimension(:,:),allocatable :: z_sqgram
+ real(dp),dimension(:,:),allocatable, target :: d_sqgram
+ complex(dpc),dimension(:,:),allocatable, target :: z_sqgram
  character :: tr
  real(dp) :: tsec(2)
 #else
@@ -413,15 +413,15 @@ subroutine gpu_xorthonormalize(blockvectorx_gpu,blockvectorbx_gpu,blocksize,spac
 & cone,blockvectorx_gpu,vectsize,blockvectorbx_gpu,vectsize,czero,sqgram_gpu,blocksize)
 
  if ( x_cplx == 1 ) then
-   call copy_from_gpu(d_sqgram,sqgram_gpu,x_cplx*dp*blocksize*blocksize)
+   call copy_from_gpu(C_LOC(d_sqgram(1,1)),sqgram_gpu,x_cplx*dp*blocksize*blocksize)
    call xmpi_sum(d_sqgram,spaceComm,ierr)
    call abi_xpotrf('u',blocksize,d_sqgram,blocksize,info)
-   call copy_on_gpu(d_sqgram,sqgram_gpu,x_cplx*dp*blocksize*blocksize)
+   call copy_on_gpu(C_LOC(d_sqgram(1,1)),sqgram_gpu,x_cplx*dp*blocksize*blocksize)
  else
-   call copy_from_gpu(z_sqgram,sqgram_gpu,x_cplx*dp*blocksize*blocksize)
+   call copy_from_gpu(C_LOC(z_sqgram(1,1)),sqgram_gpu,x_cplx*dp*blocksize*blocksize)
    call xmpi_sum(z_sqgram,spaceComm,ierr)
    call abi_xpotrf('u',blocksize,z_sqgram,blocksize,info)
-   call copy_on_gpu(z_sqgram,sqgram_gpu,x_cplx*dp*blocksize*blocksize)
+   call copy_on_gpu(C_LOC(z_sqgram(1,1)),sqgram_gpu,x_cplx*dp*blocksize*blocksize)
  end if
 
  if (info /= 0 ) then
@@ -457,4 +457,3 @@ subroutine gpu_xorthonormalize(blockvectorx_gpu,blockvectorbx_gpu,blocksize,spac
 
 end subroutine gpu_xorthonormalize
 !!***
-
