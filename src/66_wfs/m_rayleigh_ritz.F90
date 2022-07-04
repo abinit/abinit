@@ -323,7 +323,7 @@ subroutine rayleigh_ritz_distributed(cg,ghc,gsc,gvnlxc,eig,has_fock,istwf_k,mpi_
  real(dp), allocatable :: ham_iproc(:,:), ovl_iproc(:,:), evec_iproc(:,:), left_temp(:,:), right_temp(:,:)
  real(dp) :: tsec(2)
  type(matrix_scalapack) :: sca_ham, sca_ovl, sca_evec
- character(len=500) :: message
+ !character(len=500) :: message
  character :: blas_transpose
 
  integer, parameter :: timer_chebfi = 1600, timer_alltoall = 1601, timer_apply_inv_ovl = 1602, timer_rotation = 1603

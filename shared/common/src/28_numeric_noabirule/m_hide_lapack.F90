@@ -502,10 +502,10 @@ subroutine xheev_cplex(jobz, uplo, cplex, n, a, w, msg, ierr, comm)
  real(dp),allocatable :: work_real(:)
  complex(dpc),allocatable :: work_cplx(:)
 #ifdef HAVE_LINALG_SCALAPACK
- integer :: istwf_k
- logical :: want_eigenvectors
- type(matrix_scalapack)    :: Slk_mat,Slk_vec
- type(processor_scalapack) :: Slk_processor
+ !integer :: istwf_k
+ !logical :: want_eigenvectors
+ !type(matrix_scalapack)    :: Slk_mat,Slk_vec
+ !type(processor_scalapack) :: Slk_processor
 #endif
 !************************************************************************
 
@@ -1159,9 +1159,9 @@ subroutine xhegv_cplex(itype, jobz, uplo, cplex, n, a, b, w, msg, ierr, comm)
  real(dp),allocatable :: rwork(:), work_real(:)
  complex(dpc),allocatable :: work_cplx(:)
 #ifdef HAVE_LINALG_SCALAPACK
- integer :: istwf_k
- type(matrix_scalapack)    :: Slk_matA,Slk_matB
- type(processor_scalapack) :: Slk_processor
+ !integer :: istwf_k
+ !type(matrix_scalapack)    :: Slk_matA,Slk_matB
+ !type(processor_scalapack) :: Slk_processor
 #endif
 !************************************************************************
 
@@ -1659,10 +1659,10 @@ subroutine xheevx_cplex(jobz, range, uplo, cplex, n, a, vl, vu, il, iu, &
  real(dp),allocatable :: work_real(:)
  complex(dpc),allocatable :: work_cplx(:)
 #ifdef HAVE_LINALG_SCALAPACK
- integer :: istwf_k
- logical :: want_eigenvectors
- type(matrix_scalapack)    :: Slk_mat,Slk_vec
- type(processor_scalapack) :: Slk_processor
+ !integer :: istwf_k
+ !logical :: want_eigenvectors
+ !type(matrix_scalapack)    :: Slk_mat,Slk_vec
+ !type(processor_scalapack) :: Slk_processor
 #endif
 
 !************************************************************************
@@ -2191,10 +2191,10 @@ subroutine xhegvx_cplex(itype, jobz, range, uplo, cplex, n, a, b, &
  real(dp),allocatable :: work_real(:)
  complex(dpc),allocatable :: work_cplx(:)
 #ifdef HAVE_LINALG_SCALAPACK
- integer :: istwf_k
- logical :: want_eigenvectors
- type(matrix_scalapack)    :: Slk_matA,Slk_matB,Slk_vec
- type(processor_scalapack) :: Slk_processor
+ !integer :: istwf_k
+ !logical :: want_eigenvectors
+ !type(matrix_scalapack)    :: Slk_matA,Slk_matB,Slk_vec
+ !type(processor_scalapack) :: Slk_processor
 #endif
 
 !************************************************************************
@@ -2623,10 +2623,10 @@ subroutine cginv(a, n, comm)
  integer,allocatable :: ipiv(:)
  complex(spc),allocatable :: work(:)
 #ifdef HAVE_LINALG_SCALAPACK
- integer :: ierr,istwf_k,ipiv_size,liwork
- integer,allocatable :: iwork(:)
- type(matrix_scalapack)    :: Slk_mat
- type(processor_scalapack) :: Slk_processor
+ !integer :: ierr,istwf_k,ipiv_size,liwork
+ !integer,allocatable :: iwork(:)
+ !type(matrix_scalapack)    :: Slk_mat
+ !type(processor_scalapack) :: Slk_processor
 #endif
 
 ! *************************************************************************

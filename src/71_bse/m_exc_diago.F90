@@ -241,8 +241,7 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst
  real(dp),allocatable :: exc_ene(:)
  complex(dpc),allocatable :: exc_mat(:,:),exc_vec(:,:)
 #if defined HAVE_LINALG_SCALAPACK && defined HAVE_MPI_IO
- integer :: amode,mpi_fh,istwf_k,tmp_unt,tbloc
- integer :: itloc,jj,jtloc,itglob,jtglob
+ integer :: amode,mpi_fh,istwf_k,tbloc
  integer(XMPI_OFFSET_KIND) :: ehdr_offset,fmarker
  integer :: block_sizes(2,3),array_of_sizes(2),gsub(2,2)
  logical,parameter :: is_fortran_file=.TRUE.
@@ -1120,9 +1119,9 @@ subroutine exc_diago_coupling_hegv(Bsp,BS_files,Hdr_bse,prtvol,comm)
  complex(dpc),allocatable :: exc_ham(:,:),exc_rvect(:,:),fmat(:,:),ovlp(:,:)
 #if defined HAVE_LINALG_SCALAPACK && defined HAVE_MPI_IO
  integer,parameter :: istwfk1=1
- integer :: amode,mpi_fh,tbloc,tmp_unt,mene_found,mpi_err,my_nel,nsblocks
- integer :: iloc,jj,jloc,iglob,jglob,etype,slk_mask_type,offset_err,el,rrs_kind,ccs_kind
- integer :: max_r,max_c
+ integer :: amode,mpi_fh,tbloc,mene_found,mpi_err,my_nel,nsblocks
+ integer :: iloc,jloc,iglob,jglob,etype,slk_mask_type,offset_err,el,rrs_kind,ccs_kind
+ !integer :: max_r,max_c
  integer(XMPI_OFFSET_KIND) :: ehdr_offset,fmarker,my_offset
  integer :: gsub(2,2)
  logical,parameter :: is_fortran_file=.TRUE.
@@ -1132,7 +1131,7 @@ subroutine exc_diago_coupling_hegv(Bsp,BS_files,Hdr_bse,prtvol,comm)
  complex(dpc),allocatable :: tmp_cbuffer(:)
  character(50) :: uplo
  real(dp),external :: PDLAMCH
- type(matrix_scalapack)    :: Slk_F,Slk_Hbar,Slk_vec,Slk_ovlp,Slk_tmp
+ type(matrix_scalapack)    :: Slk_F,Slk_Hbar,Slk_vec,Slk_ovlp !,Slk_tmp
  type(processor_scalapack) :: Slk_processor
 #endif
 

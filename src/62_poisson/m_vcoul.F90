@@ -138,7 +138,7 @@ module m_vcoul
   complex(gwpc),allocatable :: vc_sqrt(:,:)
    ! (ng, nqibz)
    ! Square root of the Coulomb interaction in reciprocal space.
-   ! A cutoff might be applied.
+   ! complex-valued to allow for a possible cutoff (Rozzi's method)
 
   complex(gwpc),allocatable :: vcqlwl_sqrt(:,:)
    ! (ng, nqlwl)
