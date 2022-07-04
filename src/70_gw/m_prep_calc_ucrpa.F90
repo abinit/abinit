@@ -606,7 +606,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
      !
      ! * Find the corresponding irreducible q-point.
      call qmesh%get_BZ_item(iq_bz,qbz,iq_ibz,isym_q,itim_q)
-     q_is_gamma = (normv(qbz,Cryst%gmet,"G") < GW_TOL_W0)
+     q_is_gamma = (normv(qbz,Cryst%gmet,"G") < GW_TOLQ0)
 
 !!*******************************************
 !!    Check if qbz belongs to IBZ.

@@ -275,9 +275,6 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
 
  ! === Define geometry and cutoff radius (if used) ===
  Vcp%mode='NONE'
- if (gw_icutcoul==14) Vcp%mode='MINIBZ-ERF'
- if (gw_icutcoul==15) Vcp%mode='MINIBZ-ERFC'
- if (gw_icutcoul==16) Vcp%mode='MINIBZ'
  if (gw_icutcoul==0) Vcp%mode='SPHERE'
  if (gw_icutcoul==1) Vcp%mode='CYLINDER'
  if (gw_icutcoul==2) Vcp%mode='SURFACE'
@@ -286,7 +283,10 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
  if (gw_icutcoul==5) Vcp%mode='ERFC'
  if (gw_icutcoul==6) Vcp%mode='AUXILIARY_FUNCTION'
  if (gw_icutcoul==7) Vcp%mode='AUX_GB'
- !
+ if (gw_icutcoul==14) Vcp%mode='MINIBZ-ERF'
+ if (gw_icutcoul==15) Vcp%mode='MINIBZ-ERFC'
+ if (gw_icutcoul==16) Vcp%mode='MINIBZ'
+
  ! === Calculate Fourier coefficient of Coulomb interaction ===
  ! * For the limit q-->0 we consider ng vectors due to a possible anisotropy in case of a cutoff interaction
  ABI_MALLOC(Vcp%qibz, (3, Vcp%nqibz))

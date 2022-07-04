@@ -681,7 +681,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 
      ! Find the corresponding irred q-point.
      call qmesh%get_BZ_item(iq_bz,qbz,iq_ibz,isym_q,itim_q)
-     q_is_gamma = (normv(qbz,Cryst%gmet,"G") < GW_TOL_W0)
+     q_is_gamma = (normv(qbz,Cryst%gmet,"G") < GW_TOLQ0)
 
      !q_is_gamma = (normv(qbz,Cryst%gmet,"G") < 0.7)
      !if (iq_ibz/=2.and.iq_ibz/=1) CYCLE

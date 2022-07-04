@@ -3983,7 +3983,7 @@ subroutine sigmaph_free(self)
  class(sigmaph_t),intent(inout) :: self
 
 !Local variables-------------------------------
- integer :: ii, jj, ideg
+ !integer :: ii, jj
 
 ! *************************************************************************
 
