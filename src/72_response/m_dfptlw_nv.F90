@@ -470,7 +470,7 @@ subroutine dfptlw_geom(atindx,cg,d3etot_tgeom_k,dimffnl,dtset,ffnl_k, &
 
 !Definitions
  tim_getgh1c=0
- useylmgr1=1;optlocal=1;optnl=1
+ useylmgr1=useylmgr;optlocal=1;optnl=1
  nylmgrpart=3
  nkpg=3
  d3etot_tgeom_k(:,:)=zero
