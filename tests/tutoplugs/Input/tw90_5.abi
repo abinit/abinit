@@ -75,19 +75,21 @@ pp_dirpath       "$ABI_PSPDIR"
 pseudos          "Pseudodojo_paw_pw_standard/La.xml, Pseudodojo_paw_pw_standard/Cu.xml, Pseudodojo_paw_pw_standard/O.xml"
 
 
-##############################################################                  
-## This section is used only for regression testing of ABINIT #                  
-###############################################################                  
-#%%<BEGIN TEST_INFO>                                                            
-#%% [setup]                                                                     
-#%% executable = abinit                                                         
-#%% [files]                                                                     
-#%% files_to_test =                                                             
-#%%    tw90_6_1.abo, tolnlines=5, tolabs=7.00e-05, tolrel=1.10e+00, fld_options=-medium
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
 #%% [paral_info]                                                                
 #%% max_nprocs = 4                                                              
-#%% [extra_info]                                                                
-#%% authors = O. Gingras                                                           
+#%% nprocs_to_test = 4                                                          
+#%% [NCPU_4]
+#%% files_to_test =
+#%%    tw90_5_MPI4.abo, tolnlines=5, tolabs=7.00e-05, tolrel=1.10e+00, fld_options=-medium
+#%% [extra_info]
+#%% authors = O. Gingras
 #%% keywords = PAW
-#%% description = Test interface with Wannier90 (PAW pseudopotentials)           
-#%%<END TEST_INFO> 
+#%% description = Test interface with Wannier90 (PAW pseudopotentials)
+#%%<END TEST_INFO>
+#
