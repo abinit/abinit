@@ -3851,7 +3851,7 @@ end subroutine wfd_get_cprj
 !!
 !! SOURCE
 
-subroutine wfd_change_ngfft(Wfd,Cryst,Psps,new_ngfft)
+subroutine wfd_change_ngfft(Wfd, Cryst, Psps, new_ngfft)
 
 !Arguments ------------------------------------
 !scalars
