@@ -95,21 +95,23 @@ pp_dirpath       "$ABI_PSPDIR"
 pseudos          "Pseudodojo_paw_pw_standard/La.xml, Pseudodojo_paw_pw_standard/Cu.xml, Pseudodojo_paw_pw_standard/O.xml"
 
 
-##############################################################                  
-### This section is used only for regression testing of ABINIT #                  
-################################################################                  
-#%%<BEGIN TEST_INFO>                                                            
-#%% [setup]                                                                     
-#%% executable = abinit                                                         
-#%% [shell]                                                                     
-#%% pre_commands = iw_cp tw90_6_2o_DS3_w90.win tw90_6_2o_DS3_w90.win
-#%% [files]                                                                     
-#%% files_to_test =                                                             
-#%%    tw90_6_2.abo, tolnlines=5, tolabs=7.00e-05, tolrel=1.10e+00, fld_options=-medium
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [shell]
+#%% pre_commands = iw_cp tw90_6o_DS3_w90.win tw90_6_MPI4o_DS3_w90.win
 #%% [paral_info]                                                                
 #%% max_nprocs = 4                                                              
-#%% [extra_info]                                                                
-#%% authors = O. Gingras                                                           
-#%% keywords = wannier90, la2cuo4, paw                               
-#%% description = Test interface with Wannier90 (PAW pseudopotentials)           
+#%% nprocs_to_test = 4                                                          
+#%% [NCPU_4]                                                                    
+#%% files_to_test =
+#%%    tw90_6_MPI4.abo, tolnlines=5, tolabs=7.00e-05, tolrel=1.10e+00, fld_options=-medium
+#%% [extra_info]
+#%% authors = O. Gingras
+#%% keywords = wannier90, la2cuo4, paw
+#%% description = Test interface with Wannier90 (PAW pseudopotentials)
 #%%<END TEST_INFO>
+#
