@@ -142,27 +142,13 @@ real(dp) :: xred(3,ab_mover%natom),strten(6)
 !***************************************************************************
 
  if(iexit/=0)then
-   if (allocated(vin))        then
-     ABI_FREE(vin)
-   end if
-   if (allocated(vout))       then
-     ABI_FREE(vout)
-   end if
-   if (allocated(vin_prev))   then
-     ABI_FREE(vin_prev)
-   end if
-   if (allocated(vout_prev))  then
-     ABI_FREE(vout_prev)
-   end if
-   if (allocated(vinres))  then
-     ABI_FREE(vinres)
-   end if
-   if (allocated(vin1))  then
-     ABI_FREE(vin1)
-   end if
-   if (allocated(hessin))     then
-     ABI_FREE(hessin)
-   end if
+   ABI_SFREE(vin)
+   ABI_SFREE(vout)
+   ABI_SFREE(vin_prev)
+   ABI_SFREE(vout_prev)
+   ABI_SFREE(vinres)
+   ABI_SFREE(vin1)
+   ABI_SFREE(hessin)
    return
  end if
 
@@ -171,8 +157,7 @@ real(dp) :: xred(3,ab_mover%natom),strten(6)
 !### 01. Debugging and Verbose
 
  if(zDEBUG)then
-   write(std_out,'(a,3a,35a,42a)') ch10,('-',kk=1,3),&
-&   'Debugging and Verbose for pred_bfgs',('-',kk=1,42)
+   write(std_out,'(a,3a,35a,42a)') ch10,('-',kk=1,3),'Debugging and Verbose for pred_bfgs',('-',kk=1,42)
    write(std_out,*) 'ionmov: ',ionmov
    write(std_out,*) 'itime:  ',itime
  end if
@@ -196,27 +181,13 @@ real(dp) :: xred(3,ab_mover%natom),strten(6)
 !Notice that vin, vout, etc could be allocated
 !From a previous dataset with a different ndim
  if(itime==1)then
-   if (allocated(vin))        then
-     ABI_FREE(vin)
-   end if
-   if (allocated(vout))       then
-     ABI_FREE(vout)
-   end if
-   if (allocated(vin_prev))   then
-     ABI_FREE(vin_prev)
-   end if
-   if (allocated(vout_prev))  then
-     ABI_FREE(vout_prev)
-   end if
-   if (allocated(vinres))  then
-     ABI_FREE(vinres)
-   end if
-   if (allocated(vin1))  then
-     ABI_FREE(vin1)
-   end if
-   if (allocated(hessin))     then
-     ABI_FREE(hessin)
-   end if
+   ABI_SFREE(vin)
+   ABI_SFREE(vout)
+   ABI_SFREE(vin_prev)
+   ABI_SFREE(vout_prev)
+   ABI_SFREE(vinres)
+   ABI_SFREE(vin1)
+   ABI_SFREE(hessin)
    if(npul>1) then
      ABI_MALLOC(vinres,(npul+1,ndim))
      ABI_MALLOC(vin1,(npul+1,ndim))
@@ -634,28 +605,13 @@ real(dp) :: strten(6)
 
  if(iexit/=0)then
    call lbfgs_destroy()
-
-   if (allocated(vin))        then
-     ABI_FREE(vin)
-   end if
-   if (allocated(vout))       then
-     ABI_FREE(vout)
-   end if
-   if (allocated(vin_prev))   then
-     ABI_FREE(vin_prev)
-   end if
-   if (allocated(vout_prev))  then
-     ABI_FREE(vout_prev)
-   end if
-   if (allocated(vinres))  then
-     ABI_FREE(vinres)
-   end if
-   if (allocated(vin1))  then
-     ABI_FREE(vin1)
-   end if
-   if (allocated(hessin))     then
-     ABI_FREE(hessin)
-   end if
+   ABI_SFREE(vin)
+   ABI_SFREE(vout)
+   ABI_SFREE(vin_prev)
+   ABI_SFREE(vout_prev)
+   ABI_SFREE(vinres)
+   ABI_SFREE(vin1)
+   ABI_SFREE(hessin)
    return
  end if
 
@@ -664,8 +620,7 @@ real(dp) :: strten(6)
 !### 01. Debugging and Verbose
 
  if(zDEBUG)then
-   write(std_out,'(a,3a,35a,42a)') ch10,('-',kk=1,3),&
-&   'Debugging and Verbose for pred_bfgs',('-',kk=1,42)
+   write(std_out,'(a,3a,35a,42a)') ch10,('-',kk=1,3),'Debugging and Verbose for pred_bfgs',('-',kk=1,42)
    write(std_out,*) 'ionmov: ',ionmov
    write(std_out,*) 'itime:  ',itime
  end if
@@ -689,27 +644,13 @@ real(dp) :: strten(6)
 !Notice that vin, vout, etc could be allocated
 !From a previous dataset with a different ndim
  if(itime==1)then
-   if (allocated(vin))        then
-     ABI_FREE(vin)
-   end if
-   if (allocated(vout))       then
-     ABI_FREE(vout)
-   end if
-   if (allocated(vin_prev))   then
-     ABI_FREE(vin_prev)
-   end if
-   if (allocated(vout_prev))  then
-     ABI_FREE(vout_prev)
-   end if
-   if (allocated(vinres))  then
-     ABI_FREE(vinres)
-   end if
-   if (allocated(vin1))  then
-     ABI_FREE(vin1)
-   end if
-   if (allocated(hessin))     then
-     ABI_FREE(hessin)
-   end if
+   ABI_SFREE(vin)
+   ABI_SFREE(vout)
+   ABI_SFREE(vin_prev)
+   ABI_SFREE(vout_prev)
+   ABI_SFREE(vinres)
+   ABI_SFREE(vin1)
+   ABI_SFREE(hessin)
    if(npul>1) then
      ABI_MALLOC(vinres,(npul+1,ndim))
      ABI_MALLOC(vin1,(npul+1,ndim))
@@ -804,25 +745,26 @@ real(dp) :: strten(6)
 
    ABI_MALLOC(diag,(ndim))
    do ii=1,3*ab_mover%natom
-!      diag(ii) = 1.00_dp / rprimd(MODULO(ii-1,3)+1,MODULO(ii-1,3)+1)**2
+     !diag(ii) = 1.00_dp / rprimd(MODULO(ii-1,3)+1,MODULO(ii-1,3)+1)**2
      diag(ii) = gmet(MODULO(ii-1,3)+1,MODULO(ii-1,3)+1)
    end do
    if(ab_mover%optcell/=0)then
-!     These values might lead to too large changes in some cases ...
+     ! These values might lead to too large changes in some cases ...
      do ii=3*ab_mover%natom+1,ndim
        diag(ii) = ab_mover%strprecon*30.0_dp/ucvol
        if(ab_mover%optcell==1) diag(ii) = diag(ii) / three
      end do
    end if
 
+   !call lbfgs_destroy()
    call lbfgs_init(ndim,5,diag)
    ABI_FREE(diag)
 
    if (ab_mover%restartxf/=0) then
 
      call xfh_recover_new(ab_xfh,ab_mover,acell,cycl_main,residual,&
-&     hessin,ndim,rprim,rprimd0,strten,ucvol,ucvol0,vin,&
-&     vin_prev,vout,vout_prev,xred)
+       hessin,ndim,rprim,rprimd0,strten,ucvol,ucvol0,vin,&
+       vin_prev,vout,vout_prev,xred)
 
    end if
 

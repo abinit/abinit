@@ -1123,7 +1123,7 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
    need_interp = any(ohdr%ngfft(1:3) /= ngfft(1:3))
    if (need_interp .and. allow_interp__) then
      msg = sjoin("Different FFT meshes. Caller:", ltoa(ngfft(1:3)), &
-                 ". File: ", ltoa(ohdr%ngfft(1:3)), ". Will interpolate rhor(r).")
+                 ". File: ", ltoa(ohdr%ngfft(1:3)), ". Need to perform interpolation.")
      ABI_COMMENT(msg)
 
      ABI_MALLOC(rhor_tmp, (cplex*product(ngfft(1:3)), ohdr%nspden))

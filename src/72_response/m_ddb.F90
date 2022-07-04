@@ -80,7 +80,7 @@ MODULE m_ddb
 !! ddb_type
 !!
 !! FUNCTION
-!!  Provides methods to extract and postoprocess the results in the derivative database (DDB)
+!!  Provides methods to extract and post-process the results in the derivative database (DDB)
 !!
 !! SOURCE
 

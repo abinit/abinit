@@ -319,8 +319,8 @@ integer function nctk_idname(ncid, varname) result(varid)
  ncerr = nf90_inq_varid(ncid, varname, varid)
 
  if (ncerr /= nf90_noerr) then
-   write(msg,'(5a)')&
-     "NetCDF library returned: ",trim(nf90_strerror(ncerr)),ch10,&
+   write(msg,'(6a)')&
+     "NetCDF library returned: `",trim(nf90_strerror(ncerr)), "`", ch10,&
      "while trying to get the ncid of variable: ",trim(varname)
    ABI_ERROR(msg)
  end if
@@ -541,7 +541,7 @@ end function nctk_try_fort_or_ncfile
 subroutine nctk_test_mpiio(print_warning)
 
  logical,intent(in),optional :: print_warning
- 
+
 !Local variables-------------------------------
 !scalars
  logical :: my_print_warning
@@ -858,7 +858,7 @@ integer function nctk_open_modify(ncid, path, comm) result(ncerr)
 ! *********************************************************************
 
  if (.not. nctk_has_mpiio .and. xmpi_comm_size(comm) > 1) then
-   ABI_ERROR("netcdf without MPI-IO support with nprocs > 1!")
+   ABI_ERROR("netcdf without MPI-IO support and nprocs > 1!")
  end if
 
  if (xmpi_comm_size(comm) > 1 .or. nctk_has_mpiio) then
@@ -1144,9 +1144,9 @@ integer function nctk_def_one_dim(ncid, nctkdim, defmode, prefix) result(ncerr)
  if (ncerr == nf90_noerr) then
    NCF_CHECK(nf90_inquire_dimension(ncid, dimid, len=dimlen))
    if (dimlen /= nctkdim%value) then
-     write(msg, "(2a,2(a,i0))")&
-        "dimension already exists with a different value",ch10,&
-        "file = ", dimlen, "; write = ", nctkdim%value
+     write(msg, "(4a,2(a,i0))")&
+        "dimension ", trim(dname)," already exists but with a different value",ch10,&
+        "from file: ", dimlen, "; about to write: ", nctkdim%value
      ABI_ERROR(msg)
    end if
  else
@@ -1295,14 +1295,17 @@ integer function nctk_def_basedims(ncid, defmode) result(ncerr)
  ncerr = nctk_def_dims(ncid, [&
    nctkdim_t("complex", 2), nctkdim_t("symbol_length", 2), nctkdim_t("character_string_length", etsfio_charlen),&
    nctkdim_t("number_of_cartesian_directions", 3), nctkdim_t("number_of_reduced_dimensions", 3),&
-   nctkdim_t("number_of_vectors", 3)])
+   nctkdim_t("number_of_vectors", 3) &
+ ])
  NCF_CHECK(ncerr)
 
  ! Useful integers.
- ncerr = nctk_def_dims(ncid, [&
+ ncerr = nctk_def_dims(ncid, [ &
    nctkdim_t("one", 1), nctkdim_t("two", 2), nctkdim_t("three", 3), &
    nctkdim_t("four", 4), nctkdim_t("five", 5), nctkdim_t("six", 6), &
-   nctkdim_t("seven", 7), nctkdim_t("eight", 8), nctkdim_t("nine", 9), nctkdim_t("ten", 10)])
+   nctkdim_t("seven", 7), nctkdim_t("eight", 8), nctkdim_t("nine", 9), nctkdim_t("ten", 10), &
+   nctkdim_t("fnlen", fnlen + 1) &
+ ])
  NCF_CHECK(ncerr)
 
 end function nctk_def_basedims
