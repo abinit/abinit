@@ -69,21 +69,21 @@ module m_lwf
  use m_sort,            only : sort_dp
  use m_symfind,         only : symanal
  use m_scdm_math,       only : build_Rgrid
- use m_wannier_builder,            only : WannierBuilder_t
+ use m_wannier_builder,            only : WannierBuilder_witheigen_t
  use m_wann_netcdf,     only : IOWannNC
 
 
  implicit none
 
  type LatticeWannier
-    type(WannierBuilder_t):: scdm
+    type(WannierBuilder_witheigen_t):: scdm
     type(ifc_type), pointer:: ifc
     type(crystal_t), pointer:: crystal
     integer:: qptrlatt(3, 3)
     real(dp):: shiftq(3)
     integer:: nqibz
     real(dp), allocatable:: qibz(:, :), qweights(:)
-    integer:: nR
+    integer:: nR, natom
     integer, allocatable:: Rlist(:, :)
     real(dp), allocatable:: eigenvalues(:, :)         ! iband, iqpt
     complex(dp), allocatable:: eigenvectors(:,:, :)  ! ibasis, iband, iqpt
@@ -118,7 +118,7 @@ contains
     ! TODO: add exclude_bands
     integer:: exclude_bands(0)
     
-    character(len = 500):: msg
+    character(len = 500+dtset%lwf_nwann*10):: msg
     real(dp):: mu, sigma
 
     self%ifc => ifc
@@ -149,11 +149,12 @@ contains
 
     ! set up scdm 
 
-    call self%scdm%initialize(evals = self%eigenvalues,  psi = self%eigenvectors, &
+    call self%scdm%initialize(  &
          & kpts = self%qibz, kweights = self%qweights, Rlist = self%Rlist, &
-         & nwann = dtset%lwf_nwann, disentangle_func_type = dtset%lwf_disentangle, &
+         & nwann = dtset%lwf_nwann, nbasis=self%natom*3, nband=self%natom*3, disentangle_func_type = dtset%lwf_disentangle, &
          & mu = mu, sigma = sigma, exclude_bands = exclude_bands, &
          & project_to_anchor = (dtset%lwf_anchor_proj > 0 ), method = dtset%lwfflag)
+    call self%scdm%set_eigen(evals = self%eigenvalues,  psi = self%eigenvectors)
 
      if(dtset%lwfflag == 1) then
         write(msg, '(a)')  ' Constructing LWF with SCDM-k method.'
@@ -343,6 +344,7 @@ contains
     integer:: iatom, iband, i3
     complex(dp):: phase
     natom = crystal%natom
+    self%natom = natom
     natom3 = natom*3
     ABI_MALLOC(self%eigenvalues, (natom3, self%nqibz))
     ABI_MALLOC(self%eigenvectors, (natom3, natom3, self%nqibz))

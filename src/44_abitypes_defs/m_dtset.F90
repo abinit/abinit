@@ -33,7 +33,7 @@ module m_dtset
  use m_geometry,     only : mkrdim, metric, littlegroup_pert, irreducible_set_pert
  use m_parser,       only : intagm, chkvars_in_string
  use m_crystal,      only : crystal_t, crystal_init
-
+ 
  implicit none
 
  private
