@@ -486,7 +486,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
 
      ! Find the corresponding irreducible q-point.
      call qmesh%get_BZ_item(iq_bz,qbz,iq_ibz,isym_q,itim_q)
-     q_is_gamma = (normv(qbz,Cryst%gmet,"G") < GW_TOL_W0)
+     q_is_gamma = (normv(qbz,Cryst%gmet,"G") < GW_TOLQ0)
 
      ! Tables for the FFT of the oscillators.
      !  a) FFT index of the G-G0.
@@ -497,8 +497,8 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
      if (ANY(gwx_fftalga == [2, 4])) use_padfft=0 ! Pad-FFT is not coded in rho_tw_g
      !use_padfft=0
 #ifdef FC_IBM
- ! XLF does not deserve this optimization (problem with [v67mbpt][t03])
- use_padfft = 0
+     ! XLF does not deserve this optimization (problem with [v67mbpt][t03])
+     use_padfft = 0
 #endif
      if (use_padfft==0) then
        ABI_FREE(gwx_gbound)

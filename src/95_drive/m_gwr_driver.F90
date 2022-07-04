@@ -163,8 +163,8 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  logical, parameter :: is_dfpt = .false.
  logical :: use_wfk
  character(len=500) :: msg
- character(len=fnlen) :: wfk_path, den_path
- type(hdr_type) :: wfk_hdr, den_hdr
+ character(len=fnlen) :: wfk_path, den_path, kden_path
+ type(hdr_type) :: wfk_hdr, den_hdr, kden_hdr
  type(crystal_t) :: cryst, den_cryst, wfk_cryst
  type(ebands_t) :: ks_ebands
  type(pawfgr_type) :: pawfgr
@@ -173,12 +173,12 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  type(gwr_t) :: gwr
 !arrays
  real(dp),parameter :: k0(3) = zero
- integer :: den_fform, cplex, cplex_dij, cplex_rhoij !,band
+ integer :: cplex, cplex_dij, cplex_rhoij !,band den_fform,
  integer :: gnt_option !,has_dijU,has_dijso,iab,bmin,bmax,irr_idx1,irr_idx2
  integer :: istep, moved_atm_inside, moved_rhor, n3xccc
  integer :: ndij !,ndim,nfftf,nfftf_tot,nkcalc,gwc_nfft,gwc_nfftot,gwx_nfft,gwx_nfftot
- integer :: ngrvdw,nhatgrdim,nkxc,nkxc1,nscf,nspden_rhoij,nzlmopt,optene
- integer :: optcut,optgr0,optgr1,optgr2,option,option_test,option_dij,optrad,psp_gencond
+ integer :: ngrvdw,nhatgrdim,nkxc,nspden_rhoij,optene !nzlmopt,
+ integer :: optcut,optgr0,optgr1,optgr2,option,optrad,psp_gencond
  integer :: rhoxsp_method,usexcnhat !, use_aerhor,use_umklp
  !real(dp) :: compch_fft, compch_sph !,r_s,rhoav,alpha
  real(dp) :: gsqcutc_eff, gsqcutf_eff, gsqcut_shp
@@ -189,7 +189,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  type(melflags_t) :: KS_mflags !,QP_mflags
  type(paw_dmft_type) :: Paw_dmft
 !arrays
- integer :: gwc_ngfft(18),ngfftc(18),ngfftf(18),gwx_ngfft(18),unts(2)
+ integer :: ngfftc(18),ngfftf(18),unts(2) ! gwc_ngfft(18),gwx_ngfft(18),
  integer,allocatable :: nq_spl(:), l_size_atm(:) !,qp_vbik(:,:),tmp_gfft(:,:),ks_vbik(:,:),nband(:,:),
  integer,allocatable :: tmp_kstab(:,:,:)
  real(dp) :: strsxc(6) !,tsec(2)
@@ -197,7 +197,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  real(dp),allocatable :: ks_nhat(:,:),ks_nhatgr(:,:,:),ks_rhog(:,:)
  real(dp),allocatable :: ks_rhor(:,:),ks_vhartr(:), ks_vtrial(:,:), ks_vxc(:,:), ks_taur(:,:)
  real(dp),allocatable :: kxc(:,:), ph1d(:,:), ph1df(:,:) !qp_kxc(:,:),
- real(dp),allocatable :: vpsp(:), xccc3d(:), dijexc_core(:,:,:), dij_hf(:,:,:)
+ real(dp),allocatable :: vpsp(:), xccc3d(:), dijexc_core(:,:,:) !, dij_hf(:,:,:)
  !logical,allocatable :: bks_mask(:,:,:), keep_ur(:,:,:), bmask(:)
  type(Paw_an_type),allocatable :: KS_paw_an(:) !,QP_paw_an(:)
  type(Paw_ij_type),allocatable :: KS_paw_ij(:) !,QP_paw_ij(:)
@@ -286,31 +286,39 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  usexcnhat = 0
  call energies_init(KS_energies)
 
+ den_path = dtfil%fildensin
+ wfk_path = dtfil%fnamewffk
+ kden_path = dtfil%filkdensin
+
  if (my_rank == master) then
-   ! Initialize filenames
+   ! Initialize filenames. Accept files in Fortran or in netcdf format.
+   ! Accept DEN file in Fortran or in netcdf format.
+   if (nctk_try_fort_or_ncfile(den_path, msg) /= 0) then
+     ABI_ERROR(sjoin("Cannot find DEN file:", den_path, ". Error:", msg))
+   end if
+   call wrtout(unts, sjoin("- Reading GS density from: ", den_path))
 
    if (use_wfk) then
-     ! Accept WFK file in Fortran or in netcdf format.
-     wfk_path = dtfil%fnamewffk
      if (nctk_try_fort_or_ncfile(wfk_path, msg) /= 0) then
        ABI_ERROR(sjoin("Cannot find GS WFK file:", wfk_path, ". Error:", msg))
      end if
      call wrtout(unts, sjoin("- Reading GS states from WFK file:", wfk_path))
    end if
 
-   ! Accept DEN file in Fortran or in netcdf format.
-   den_path = dtfil%fildensin
-   if (nctk_try_fort_or_ncfile(den_path, msg) /= 0) then
-     ABI_ERROR(sjoin("Cannot find DEN file:", den_path, ". Error:", msg))
+   if (dtset%usekden == 1) then
+     if (nctk_try_fort_or_ncfile(kden_path, msg) /= 0) then
+       ABI_ERROR(sjoin("Cannot find KDEN file:", kden_path, ". Error:", msg))
+     end if
+     call wrtout(unts, sjoin("- Reading KDEN kinetic energy density from: ", kden_path))
    end if
-   call wrtout(unts, sjoin("- Reading GS density from: ", den_path))
 
    call wrtout(ab_out, ch10//ch10)
  end if ! master
 
  ! Broadcast filenames (needed because they might have been changed if we are using netcdf files)
- if (use_wfk) call xmpi_bcast(wfk_path, master, comm, ierr)
+ call xmpi_bcast(wfk_path, master, comm, ierr)
  call xmpi_bcast(den_path, master, comm, ierr)
+ call xmpi_bcast(kden_path, master, comm, ierr)
 
  if (use_wfk) then
    ! Construct crystal and ks_ebands from the GS WFK file.
@@ -471,6 +479,8 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  call read_rhor(den_path, cplex1, dtset%nspden, nfftf, ngfftf, dtset%usepaw, mpi_enreg, ks_rhor, &
                 den_hdr, ks_pawrhoij, comm) !, allow_interp=.True.)
 
+ call prtrhomxmn(std_out, MPI_enreg, nfftf, ngfftf, dtset%nspden, 1, ks_rhor, ucvol=cryst%ucvol)
+
  den_cryst = den_hdr%get_crystal()
  if (cryst%compare(den_cryst, header=" Comparing input crystal with DEN crystal") /= 0) then
    ABI_ERROR("Crystal structure from input and from DEN file do not agree! Check messages above!")
@@ -483,11 +493,11 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  call fourdp(cplex1, ks_rhog, ks_rhor(:, 1), -1, mpi_enreg, nfftf, 1, ngfftf, 0)
 
  ABI_MALLOC(ks_taur, (nfftf, dtset%nspden * dtset%usekden))
- call prtrhomxmn(std_out, MPI_enreg, nfftf, ngfftf, dtset%nspden, 1, ks_rhor, ucvol=cryst%ucvol)
-
  if (dtset%usekden == 1) then
-   ! TODO
-   NOT_IMPLEMENTED_ERROR()
+   call read_rhor(kden_path, cplex1, dtset%nspden, nfftf, ngfftf, 0, mpi_enreg, ks_taur, &
+                  kden_hdr, ks_pawrhoij, comm) !, allow_interp=.True.)
+   call kden_hdr%free()
+
    call prtrhomxmn(std_out, MPI_enreg, nfftf, ngfftf, dtset%nspden, 1, ks_taur, optrhor=1, ucvol=cryst%ucvol)
  end if
 
@@ -566,11 +576,6 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
 
  call gwr%init(dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg, comm)
 
- if (use_wfk) then
-   call gwr%build_gtau_from_wfk(wfk_path)
- else
- end if
-
  !=== Calculate Vxc(b1,b2,k,s)=<b1,k,s|v_{xc}|b2,k,s> for all the states included in GW ===
  !  * ks_vxcvalme is calculated without NLCC, ks_vxcme contains NLCC (if any)
  !  * This part is parallelized within wfd%comm since each node has all GW wavefunctions.
@@ -591,6 +596,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  !if (gwcalctyp<10        )  KS_mflags%only_diago = 1 ! off-diagonal elements only for SC on wavefunctions.
  KS_mflags%only_diago = 1 ! off-diagonal elements only for SC on wavefunctions.
 
+ ! Load wavefunctions for Sigma_nk in kcalc_wfd
  call gwr%load_kcalc_wfd(wfk_path, tmp_kstab)
 
  call calc_vhxc_me(gwr%kcalc_wfd, ks_mflags, gwr%ks_me, cryst, dtset, nfftf, ngfftf, &
@@ -599,6 +605,12 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
 
  if (my_rank == master) call gwr%ks_me%print(header="KS matrix elements", unit=std_out)
  ABI_FREE(tmp_kstab)
+
+ ! Build Green's function in imaginary-time.
+ if (use_wfk) then
+   call gwr%build_gtau_from_wfk(wfk_path)
+ else
+ end if
 
  select case (dtset%gwr_task)
  case ("G0W0")
