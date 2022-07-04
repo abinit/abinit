@@ -242,6 +242,14 @@ module m_abi_linalg
       integer(kind=c_int32_t),        intent(in)    :: size
     end subroutine copy_from_gpu
 
+    subroutine gpu_memset(gpu_ptr, val, size) bind(c, name="gpu_memset_")
+      use, intrinsic :: iso_c_binding
+      implicit none
+      type(c_ptr),                    intent(inout) :: gpu_ptr
+      integer(kind=c_int32_t), value, intent(in)    :: val
+      integer(kind=c_int32_t), value, intent(in)    :: size
+    end subroutine gpu_memset
+
   end interface
 
 #else
@@ -250,6 +258,7 @@ module m_abi_linalg
  public :: copy_from_gpu
  public :: copy_on_gpu
  public :: dealloc_on_gpu
+ public :: gpu_memset
  public :: gpu_linalg_init
  public :: gpu_linalg_shutdown
  public :: gpu_xgemm

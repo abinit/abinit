@@ -327,3 +327,23 @@ extern "C" void copy_from_gpu_(void *ptr, void **gpu_ptr, int* size){
     abi_cabort();
   }
 }
+
+/*============================================================================*/
+/* Reset array (just wrapping cudaMemset)                                     */
+/*                                                                            */
+/* INPUTS                                                                     */
+/*  gpu_ptr = C_PTR on gpu memory location                                    */
+/*  value = integer used to initialize each bytes (should be in range [0,255])*/
+/*  size = size in bytes of the region to be set
+/*                                                                            */
+/* OUTPUT                                                                     */
+/*  None                                                                      */
+/*============================================================================*/
+
+extern "C" void gpu_memset_(void **gpu_ptr, int value, size_t count){
+  if(cudaMemset(*gpu_ptr,value,count)!=cudaSuccess){
+    printf("ERROR: gpu_memset failed : %s\n",cudaGetErrorString(cudaGetLastError()));
+    fflush(stdout);
+    abi_cabort();
+  }
+}
