@@ -203,7 +203,7 @@ subroutine solve_dyson(ikcalc,minbnd,maxbnd,nomega_sigc,Sigp,Kmesh,sigcme_tmp,qp
            ABI_WARNING(msg)
            do io=1,Sr%nomega4sd
              write(msg,'(2f8.4)')e0pde(io)*Ha_eV,scme(io)*Ha_eV
-             call wrtout(std_out,msg,"COLL")
+             call wrtout(std_out,msg)
            end do
          end if
 
@@ -554,69 +554,69 @@ subroutine print_sigma_melems(ikcalc,ib1,ib2,nsp,htotal,hhartree,sigxme,sigcme,p
 ! First print to screen
  do isp=1,nsp
    write(msg,'(a)') ''
-   call wrtout(ount,msg,'COLL')
+   call wrtout(ount,msg)
    write(msg,fmthh) ch10,' Hermitianised matrix elements of Sigma (spin ',isp,' of ',nsp,'):'
-   call wrtout(ount,msg,'COLL')
+   call wrtout(ount,msg)
    write(msg,fmth)(jj,jj=1,mc)
-   call wrtout(ount,msg,'COLL') !header
+   call wrtout(ount,msg) !header
    do ii=ib1,ib1+mr-1
      write(msg,fmt1)ii-ib1+1,DBLE(htotal(ii,ib1:(ib1+mc-1),isp))
-     call wrtout(ount,msg,'COLL') !real part
+     call wrtout(ount,msg) !real part
      write(msg,fmt2)  AIMAG(htotal(ii,ib1:(ib1+mc-1),isp)),ch10
-     call wrtout(ount,msg,'COLL') !imag part
+     call wrtout(ount,msg) !imag part
    end do
  end do !nsp
 
  write(msg,'(a,i2,a)')" Max. ",MAX_NCOLS," elements printed. Full matrix output in _HTOTAL files"
- call wrtout(ount,msg,'COLL')
+ call wrtout(ount,msg)
 
  do isp=1,nsp
    write(msg,fmthh) ch10,' H_Hartree matrix elements (spin ',isp,' of ',nsp,'):'
-   call wrtout(ount,msg,'COLL')
+   call wrtout(ount,msg)
    write(msg,fmth)(jj,jj=1,mc)
-   call wrtout(ount,msg,'COLL') !header
+   call wrtout(ount,msg) !header
    do ii=ib1,ib1+mr-1
      write(msg,fmt1)ii-ib1+1,DBLE(hhartree(ii,ib1:(ib1+mc-1),isp))
-     call wrtout(ount,msg,'COLL') !real part
+     call wrtout(ount,msg) !real part
      write(msg,fmt2)  AIMAG(hhartree(ii,ib1:(ib1+mc-1),isp)),ch10
-     call wrtout(ount,msg,'COLL') !imag part
+     call wrtout(ount,msg) !imag part
    end do
  end do !nsp
 
  write(msg,'(a,i2,a)')" Max. ",MAX_NCOLS," elements printed. Full matrix output in _HHARTREE files"
- call wrtout(ount,msg,'COLL')
+ call wrtout(ount,msg)
 
  do isp=1,nsp
    write(msg,fmthh) ch10,' Sigma_x matrix elements (spin ',isp,' of ',nsp,'):'
-   call wrtout(ount,msg,'COLL')
+   call wrtout(ount,msg)
    write(msg,fmth)(jj,jj=1,mc)
-   call wrtout(ount,msg,'COLL') !header
+   call wrtout(ount,msg) !header
    do ii=ib1,ib1+mr-1
      write(msg,fmt1)ii-ib1+1,DBLE(sigxme(ii,ib1:(ib1+mc-1),isp))
-     call wrtout(ount,msg,'COLL') !real part
+     call wrtout(ount,msg) !real part
      write(msg,fmt2)  AIMAG(sigxme(ii,ib1:(ib1+mc-1),isp)),ch10
-     call wrtout(ount,msg,'COLL') !imag part
+     call wrtout(ount,msg) !imag part
    end do
  end do !nsp
 
  write(msg,'(a,i2,a)')" Max. ",MAX_NCOLS," elements printed. Full matrix output _SIGX files"
- call wrtout(ount,msg,'COLL')
+ call wrtout(ount,msg)
 
  do isp=1,nsp
    write(msg,fmthh) ch10,' Sigma_c matrix elements (spin ',isp,' of ',nsp,'):'
-   call wrtout(ount,msg,'COLL')
+   call wrtout(ount,msg)
    write(msg,fmth)(jj,jj=1,mc)
-   call wrtout(ount,msg,'COLL') !header
+   call wrtout(ount,msg) !header
    do ii=ib1,ib1+mr-1
      write(msg,fmt1)ii-ib1+1,DBLE(sigcme(ii,ib1:(ib1+mc-1),isp))
-     call wrtout(ount,msg,'COLL') !real part
+     call wrtout(ount,msg) !real part
      write(msg,fmt2)  AIMAG(sigcme(ii,ib1:(ib1+mc-1),isp)),ch10
-     call wrtout(ount,msg,'COLL') !imag part
+     call wrtout(ount,msg) !imag part
    end do
  end do !nsp
 
  write(msg,'(a,i2,a)')" Max ",MAX_NCOLS," elements printed. Full matrix output _SIGC files"
- call wrtout(ount,msg,'COLL')
+ call wrtout(ount,msg)
 
  ! Then print to file
  ! Format is: row, column, value; with a blank space for each full
@@ -633,13 +633,13 @@ subroutine print_sigma_melems(ikcalc,ib1,ib2,nsp,htotal,hhartree,sigxme,sigcme,p
  end if
 
  msg = '#   row    col.      Re(htotal(r,c)) Im(htotal(r,c))  for spin11   ... spin22 ... spin12 ... spin13'
- call wrtout(temp_unit,msg,'COLL')
+ call wrtout(temp_unit,msg)
  do ii=ib1,ib2
    do jj=ib1,ib2
      write(msg,fmtfile) ii,jj,(htotal(jj,ii,isp),isp=1,nsp)
-     call wrtout(temp_unit,msg,'COLL')
+     call wrtout(temp_unit,msg)
    end do
-   call wrtout(temp_unit,"",'COLL')
+   call wrtout(temp_unit,"")
  end do
  close(temp_unit)
 
@@ -649,13 +649,13 @@ subroutine print_sigma_melems(ikcalc,ib1,ib2,nsp,htotal,hhartree,sigxme,sigcme,p
  end if
 
  msg = '#   row    col.      Re(hhartree(r,c))  Im(hhartree(r,c)  for spin11   ... spin22 ... spin12 ... spin13'
- call wrtout(temp_unit,msg,'COLL')
+ call wrtout(temp_unit,msg)
  do ii=ib1,ib2
    do jj=ib1,ib2
      write(msg,fmtfile) ii,jj,(hhartree(jj,ii,isp),isp=1,nsp)
-     call wrtout(temp_unit,msg,'COLL')
+     call wrtout(temp_unit,msg)
    end do
-   call wrtout(temp_unit,"",'COLL')
+   call wrtout(temp_unit,"")
  end do
  close(temp_unit)
 
@@ -665,13 +665,13 @@ subroutine print_sigma_melems(ikcalc,ib1,ib2,nsp,htotal,hhartree,sigxme,sigcme,p
  end if
 
  write(msg,'(a)')'#   row    col.      Re(Sigx(r,c)) Im(Sigx(r,c) for spin11   ... spin22 ... spin12 ... spin13'
- call wrtout(temp_unit,msg,'COLL')
+ call wrtout(temp_unit,msg)
  do ii=ib1,ib2
    do jj=ib1,ib2
      write(msg,fmtfile) ii,jj,(sigxme(jj,ii,isp),isp=1,nsp)
-     call wrtout(temp_unit,msg,'COLL')
+     call wrtout(temp_unit,msg)
    end do
-   call wrtout(temp_unit,"",'COLL')
+   call wrtout(temp_unit,"")
  end do
  close(temp_unit)
 
@@ -681,13 +681,13 @@ subroutine print_sigma_melems(ikcalc,ib1,ib2,nsp,htotal,hhartree,sigxme,sigcme,p
  end if
 
  write(msg,'(a)')'#   row    col.      Re(Sigc(r,c)) Im(Sigc(r,c) for spin11   ... spin22 ... spin12 ... spin21'
- call wrtout(temp_unit,msg,'COLL')
+ call wrtout(temp_unit,msg)
  do ii=ib1,ib2
    do jj=ib1,ib2
      write(msg,fmtfile) ii,jj,(sigcme(jj,ii,isp),isp=1,nsp)
-     call wrtout(temp_unit,msg,'COLL')
+     call wrtout(temp_unit,msg)
    end do
-   call wrtout(temp_unit,"",'COLL')
+   call wrtout(temp_unit,"")
  end do
 
  close(temp_unit)

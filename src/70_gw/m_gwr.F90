@@ -2711,11 +2711,12 @@ subroutine gwr_build_sigmac(gwr)
 !scalars
  integer, parameter :: ndat1 = 1
  integer :: my_is, my_it, my_iki, spin, ik_ibz, sc_nfft, my_ir, my_nr
- integer :: my_iqi, my_iqf, iq_ibz, iq_bz, itau, col_bsize, npwsp, ierr
- integer :: my_ikf, ioe, ik_bz, ig
- real(dp) :: cpu_all, wall_all, gflops_all
+ integer :: my_iqi, my_iqf, iq_ibz, iq_bz, itau, col_bsize, npwsp, ierr, jb, ib1, ib2, bmin, bmax
+ integer :: my_ikf, ioe, ik_bz, ig, ikcalc
+ real(dp) :: cpu_tau, wall_tau, gflops_tau, cpu_all, wall_all, gflops_all !, spin_fact
  logical :: q_is_gamma
  type(desc_t), pointer :: desc_q, desc_k
+ character(len=500) :: msg
  !type(matrix_scalapack),pointer :: wc
 !arrays
  integer :: sc_ngfft(18)
@@ -2725,6 +2726,7 @@ subroutine gwr_build_sigmac(gwr)
  type(matrix_scalapack) :: gt_gpr(2, gwr%my_nkbz), wc_gpr(gwr%my_nqbz)
  type(desc_t), target :: desc_kbz(gwr%my_nkbz), desc_qbz(gwr%my_nqbz)
  type(fftbox_plan3_t) :: gt_plan_gp2rp, wt_plan_gp2rp !, plan_rp2gp
+ complex(gwpc),allocatable :: wfr_bdgw(:,:,:)
 
 ! *************************************************************************
 
@@ -2760,11 +2762,6 @@ subroutine gwr_build_sigmac(gwr)
 
  !if (gwr%use_supercell) then
 
- ! Compute self-energy matrix elements in the KS basis set using kcalc_wfd
- !gwr%kcalc_wfd%
- ! Multiply by e^{ik.r}
- !call times_eikr(desc%point, desc%g_ngfft, desc%g_nfft, ndat1, rgp%buffer_cplx(:, ig2)
-
  ! Set FFT mesh in the supercell
  ! Be careful when using the FFT plan with ndat as ndat can change inside the loop if we start to block.
  ! Perhaps the safest approach would be to generate the plan on the fly.
@@ -2786,10 +2783,27 @@ subroutine gwr_build_sigmac(gwr)
  ABI_MALLOC(green_scg, (3, gwr%green_mpw))
  ABI_MALLOC(wc_scg, (3, gwr%chi_mpw))
 
+ ! Set FFT mesh used to compute u(r) in the unit cell.
+ call gwr%kcalc_wfd%change_ngfft(gwr%cryst, gwr%psps, gwr%g_ngfft)
+
  do my_is=1,gwr%my_nspins
    spin = gwr%my_spins(my_is)
 
+   ! Load u(r) for GW corrections in the unit cell.
+   bmin = minval(gwr%bstart_ks(:, spin))
+   bmax = maxval(gwr%bstop_ks(:, spin))
+   ABI_MALLOC_OR_DIE(wfr_bdgw, (gwr%g_nfft * gwr%nspinor, bmin:bmax, gwr%nkcalc), ierr)
+
+   do ikcalc=1,gwr%nkcalc
+      ik_ibz = gwr%kcalc2ibz(ikcalc, 1)
+      ib1 = gwr%bstart_ks(ikcalc, spin)
+      ib2 = gwr%bstop_ks(ikcalc, spin)
+      !gwr%nbcalc_ks(ikcalc, spin)
+      call gwr%kcalc_wfd%get_many_ur([(jb, jb=ib1, ib2)], ik_ibz, spin, wfr_bdgw(:, ib1:ib2, ikcalc))
+   end do
+
    do my_it=1,gwr%my_ntau
+     call cwtime(cpu_tau, wall_tau, gflops_tau, "start")
      itau = gwr%my_itaus(my_it)
 
      ! G_k(g,g') --> G_k(g',r) for each k in the BZ treated by me.
@@ -2858,6 +2872,16 @@ subroutine gwr_build_sigmac(gwr)
        gt_scbox(:, 2) = gt_scbox(:, 2) * wt_scbox
 
        ! Accumulate self-energy matrix elements.
+       do ikcalc=1,gwr%nkcalc
+          ik_ibz = gwr%kcalc2ibz(ikcalc, 1)
+          do jb=gwr%bstart_ks(ikcalc, spin), gwr%bstop_ks(ikcalc, spin)
+            !wfr_bdgw(:, jb, ikcalc))
+            !gt_scbox(:, 1)
+            ! Multiply by e^{ik.r}
+            !call times_eikr(desc%point, gwr%g_ngfft, gwr%g_nfft, ndat1, rgp%buffer_cplx(:, ig2)
+          end do
+       end do ! ikcalc
+
      end do ! my_ir
 
      ! Free descriptors and scalapack matrices in kBZ and qBZ.
@@ -2865,9 +2889,18 @@ subroutine gwr_build_sigmac(gwr)
      call slk_array_free(gt_gpr)
      call desc_array_free(desc_qbz)
      call slk_array_free(wc_gpr)
+
+     write(msg,'(2(a,i0),a)')" My itau [", my_it, "/", gwr%my_ntau, "]"
+     call cwtime_report(msg, cpu_tau, wall_tau, gflops_tau)
    end do ! my_it
 
+   ABI_FREE(wfr_bdgw)
  end do ! my_is
+
+ ! TODO:
+ ! Store matrix elements of Sigma_c(it), separate even and odd part then
+ ! use sine/cosine transform to get Sigmc_c(i omega).
+ ! Finally, perform analytic continuation with Pade' to go to the real-axis.
 
  !do my_iqi=1,gwr%my_nqibz
  !  iq_ibz = gwr%my_qibz_inds(my_iqi)
