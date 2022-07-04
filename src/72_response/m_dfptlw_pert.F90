@@ -625,6 +625,7 @@ subroutine lw_elecstic(cplex,d3etot_telec,gmet,gprimd,gsqcut,&
  
 !If GGA xc first calculate the Cartesian q gradient of the xc kernel
  if (nkxc == 7) then
+   ABI_MALLOC(vxc1dq,(2*nfft,nspden))
    ABI_MALLOC(vxc1dq_car,(2*nfft,nspden,3))
    do qcar=1,3
      call dfpt_mkvxcggadq(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,nkxc,nspden,qcar,rho1r1,vxc1dq)
@@ -638,7 +639,6 @@ subroutine lw_elecstic(cplex,d3etot_telec,gmet,gprimd,gsqcut,&
 
 !If GGA convert the gradient of xc kernel to reduced coordinates and incorporate it to the Hartree part
  if (nkxc == 7) then
-   ABI_MALLOC(vxc1dq,(2*nfft,nspden))
    vxc1dq=zero
    do qcar=1,3
      vxc1dq(:,:)=vxc1dq(:,:) + gprimd(qcar,i3dir) * vxc1dq_car(:,:,qcar)

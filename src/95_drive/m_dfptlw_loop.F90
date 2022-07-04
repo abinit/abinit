@@ -368,7 +368,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
        ABI_FREE(work)
 
        !Allocate the first-order gradient local potential
-       if (i1pert <= natom .or. i1pert == natom+3) then
+       if (i1pert <= natom .or. i1pert == natom+2 .or. i1pert == natom+3) then
          n1dq=1
          ABI_MALLOC(vpsp1_i1pertdq,(2*nfftf,dtset%nspden,n1dq))
        else if (i1pert == natom+4) then
@@ -679,7 +679,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
          end do    ! i2dir
        end do     ! i2pert
 
-       if (i1pert/=natom+2) ABI_FREE(vpsp1_i1pertdq)
+       ABI_FREE(vpsp1_i1pertdq)
        ABI_FREE(d3etot_t5)
 
      end if   ! rfpert

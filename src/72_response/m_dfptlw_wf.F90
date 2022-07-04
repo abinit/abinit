@@ -223,7 +223,7 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,&
  
 !Additional definitions
  tim_getgh1c=0
- useylmgr1=1
+ useylmgr1=useylmgr
  usepaw=dtset%usepaw
  size_wf= dtset%nspinor*npw_k
  with_nonlocal_i1pert=.true. ; if (i1pert==natom+2) with_nonlocal_i1pert=.false.
