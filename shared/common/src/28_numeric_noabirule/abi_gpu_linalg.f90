@@ -166,6 +166,42 @@ subroutine dealloc_on_gpu(gpu_ptr)
 end subroutine dealloc_on_gpu
 !!***
 
+!!****f* m_abi_gpu_linalg/gpu_memset
+!! NAME
+!!  gpu_memset
+!!
+!! FUNCTION
+!!  Initializes or sets device memory to a value.
+!!
+!! INPUTS
+!!  gpu_ptr= C_PTR on gpu memory location
+!!  val= value used to initialized each bytes
+!!  size= number of bytes to initialize
+!!
+!! OUTPUT
+!!  gpu_ptr= C_PTR on gpu memory location
+!!
+!! SIDE EFFECTS
+!!   WARNING! : this routine is a dummy one when HAVE_GPU_CUDA is not enabled
+!!   the correct one is in 17_gpu_toolbox/dev_spec.cu
+!!
+!! PARENTS
+!!      lobpcgwf
+!!
+!! SOURCE
+
+subroutine gpu_memset(gpu_ptr, val, size)
+
+  !Arguments ------------------------------------
+  type(c_ptr),                    intent(inout) :: gpu_ptr
+  integer(kind=c_int32_t), value, intent(in)    :: val
+  integer(kind=c_int32_t), value, intent(in)    :: size
+
+  ABI_UNUSED(/gpu_ptr,val,size/)
+
+end subroutine gpu_memset
+!!***
+
 !!****f* m_abi_gpu_linalg/gpu_linalg_init
 !! NAME
 !!  gpu_linalg_init
