@@ -205,6 +205,9 @@
 
 #endif
 
+#define ABI_MALLOC_CUDA(array,size) call alloc_on_gpu(array,size)
+#define ABI_FREE_CUDA(array) call dealloc_on_gpu(array)
+
 /* Macros to allocate zero-initialized arrays. */
 #define ABI_CALLOC(ARR, SIZE) ABI_MALLOC(ARR, SIZE) NEWLINE ARR = zero
 #define ABI_ICALLOC(ARR, SIZE) ABI_MALLOC(ARR, SIZE) NEWLINE ARR = 0
