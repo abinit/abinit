@@ -80,7 +80,7 @@ subroutine copy_from_gpu(dtab,gpu_ptr,size)
 
 !Arguments ------------------------------------
  integer :: size ! taille en octet a transferer
- real(dp),dimension(*),optional :: dtab
+ real(dp),dimension(*) :: dtab
  type(c_ptr) :: gpu_ptr
 
 !Local variables ------------------------------
@@ -119,7 +119,7 @@ subroutine copy_on_gpu(dtab,gpu_ptr,size)
 
 !Arguments ------------------------------------
  integer :: size ! size in byte (to be transfered)
- real(dp), dimension(*),optional :: dtab
+ real(dp), dimension(*) :: dtab
  type(c_ptr) :: gpu_ptr
 !Local variables ------------------------------
  type(c_ptr) :: cptr
