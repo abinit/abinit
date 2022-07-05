@@ -305,18 +305,18 @@ end function ncname_from_id
 !!
 !! SOURCE
 
-subroutine hscr_from_file(hscr,path,fform,comm)
+subroutine hscr_from_file(hscr, path, fform, comm)
 
 !Arguments ------------------------------------
 !scalars
+ class(hscr_t),intent(out) :: hscr
  character(len=*),intent(in) :: path
  integer,intent(in) :: comm
  integer,intent(out) :: fform
- type(hscr_t),intent(out) :: hscr
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: rdwr5=5,master=0
+ integer,parameter :: rdwr5 = 5, master = 0
  integer :: unt,my_rank,ierr
  character(len=500) :: msg
 
@@ -408,13 +408,13 @@ end subroutine hscr_from_file
 !!
 !! SOURCE
 
-subroutine hscr_io(hscr,fform,rdwr,unt,comm,master,iomode)
+subroutine hscr_io(hscr, fform, rdwr, unt, comm, master, iomode)
 
 !Arguments ------------------------------------
 !scalars
+ class(hscr_t),target,intent(inout) :: hscr
  integer,intent(inout) :: fform
  integer,intent(in) :: rdwr,unt,iomode,comm,master
- type(hscr_t),target,intent(inout) :: hscr
 
 !Local variables-------------------------------
 !scalars
@@ -711,10 +711,6 @@ end subroutine hscr_io
 !! FUNCTION
 !!  Prints info on the header of the SCR|SUSC file.
 !!
-!! INPUTS
-!!
-!! OUTPUT
-!!
 !! PARENTS
 !!      m_bethe_salpeter,m_io_screening,m_screen,m_screening,mrgscr
 !!
@@ -723,14 +719,14 @@ end subroutine hscr_io
 !!
 !! SOURCE
 
-subroutine hscr_print(Hscr,header,unit,prtvol,mode_paral)
+subroutine hscr_print(Hscr, header, unit, prtvol, mode_paral)
 
 !Arguments ------------------------------------
 !scalars
+ class(hscr_t),intent(in) :: hscr
  integer,intent(in),optional :: prtvol,unit
  character(len=4),intent(in),optional :: mode_paral
  character(len=*),intent(in),optional :: header
- type(hscr_t),intent(in) :: hscr
 
 !Local variables-------------------------------
 !scalars
@@ -962,11 +958,11 @@ end function hscr_new
 !!
 !! SOURCE
 
-subroutine hscr_bcast(hscr,master,my_rank,comm)
+subroutine hscr_bcast(hscr, master, my_rank, comm)
 
 !Arguments ------------------------------------
- integer, intent(in) :: master,my_rank,comm
- type(hscr_t),intent(inout) :: hscr
+ class(hscr_t),intent(inout) :: hscr
+ integer, intent(in) :: master, my_rank, comm
 
 !Local variables-------------------------------
  integer :: ierr
@@ -1052,8 +1048,8 @@ subroutine hscr_malloc(hscr, npwe, nqibz, nomega, nqlwl)
 
 !Arguments ------------------------------------
 !scalars
+ class(hscr_t),intent(inout) :: Hscr
  integer,intent(in) :: npwe, nqibz, nomega, nqlwl
- type(hscr_t),intent(inout) :: Hscr
 
 ! *************************************************************************
 
@@ -1086,15 +1082,13 @@ end subroutine hscr_malloc
 !!      mrgscr
 !!
 !! CHILDREN
-!!      hscr_copy,hscr_io,hscr_print,read_screening,write_screening,wrtout
 !!
 !! SOURCE
 
 subroutine hscr_free(hscr)
 
 !Arguments ------------------------------------
-!scalars
- type(hscr_t),intent(inout) :: hscr
+ class(hscr_t),intent(inout) :: hscr
 
 ! *************************************************************************
 
@@ -1132,16 +1126,13 @@ end subroutine hscr_free
 !!
 !! SOURCE
 
-subroutine hscr_copy(Hscr_in,Hscr_cp)
+subroutine hscr_copy(Hscr_in, Hscr_cp)
 
 !Arguments ------------------------------------
 !scalars
- type(hscr_t),intent(in) :: Hscr_in
- type(hscr_t),intent(inout) :: Hscr_cp
+ class(hscr_t),intent(in) :: Hscr_in
+ class(hscr_t),intent(inout) :: Hscr_cp
 
-!Local variables-------------------------------
-!scalars
- !character(len=500) :: msg
 ! *************************************************************************
 
  !@hscr_t
@@ -1216,7 +1207,7 @@ end subroutine hscr_copy
 !!
 !! SOURCE
 
-subroutine hscr_merge(Hscr_in,Hscr_out)
+subroutine hscr_merge(Hscr_in, Hscr_out)
 
 !Arguments ------------------------------------
 !scalars
@@ -1374,7 +1365,7 @@ end subroutine hscr_merge
 !!
 !! SOURCE
 
-subroutine write_screening(varname,unt,iomode,npwe,nomega,iqibz,epsm1)
+subroutine write_screening(varname, unt, iomode, npwe, nomega, iqibz, epsm1)
 
 !Arguments ------------------------------------
 !scalars
@@ -1484,7 +1475,7 @@ end subroutine write_screening
 !!
 !! SOURCE
 
-subroutine read_screening(varname,fname,npweA,nqibzA,nomegaA,epsm1,iomode,comm,&
+subroutine read_screening(varname,fname,npweA,nqibzA,nomegaA,epsm1,iomode,comm, &
 & iqiA) ! Optional
 
 !Arguments ------------------------------------
@@ -1497,7 +1488,7 @@ subroutine read_screening(varname,fname,npweA,nqibzA,nomegaA,epsm1,iomode,comm,&
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: master=0
+ integer,parameter :: master = 0
  integer :: ipwe,fform,iomega,iqibz,unt,rdwr,my_rank,nprocs,my_iomode
 #ifdef HAVE_NETCDF
  integer :: varid,ncerr
@@ -1810,7 +1801,7 @@ end subroutine read_screening
 !!
 !! SOURCE
 
-subroutine hscr_mpio_skip(mpio_fh,fform,offset)
+subroutine hscr_mpio_skip(mpio_fh, fform, offset)
 
 !Arguments ------------------------------------
  integer,intent(in) :: mpio_fh

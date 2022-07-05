@@ -949,9 +949,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  call timab(406,2,tsec) ! make_vhxc
 
  !=== Calculate Vxc(b1,b2,k,s)=<b1,k,s|v_{xc}|b2,k,s> for all the states included in GW ===
- !  * ks_vxcvalme is calculated without NLCC, ks_vxcme contains NLCC (if any)
  !  * This part is parallelized within wfd%comm since each node has all GW wavefunctions.
- !  * ks_vUme is zero unless we are using DFT+U as starting point, see calc_vHxc_braket
  !  * Note that vH matrix elements are calculated using the true uncutted interaction.
  call timab(407,1,tsec) ! vHxc_me
 
