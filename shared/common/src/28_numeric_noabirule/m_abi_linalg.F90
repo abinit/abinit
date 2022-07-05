@@ -696,7 +696,7 @@ CONTAINS  !===========================================================
 
 #ifdef HAVE_LINALG_MAGMA
 #ifdef HAVE_LINALG_MAGMA_15
- if (ABI_LINALG_PLASMA_ISON) then
+ if (ABI_LINALG_MAGMA_ISON) then
    call magmaf_finalize()
  end if
 #endif

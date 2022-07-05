@@ -211,6 +211,7 @@ nav:
         - Many-Body: tutorial/paral_mbt.md
         - Moldyn: tutorial/paral_moldyn.md
     - Multibinit:
+        - Introduction: tutorial/multibinit.md
         - Lattice Model: tutorial/lattice_model.md
         #- Fit Process: tutorial/fit_process.md
         - Spin Model: tutorial/spin_model.md
