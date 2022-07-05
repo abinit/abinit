@@ -47,9 +47,7 @@ module m_phgamma
  use m_fstab
  use iso_c_binding
  use m_nctk
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
  use m_wfk
  use m_ddb
  use m_ddk
@@ -680,7 +678,6 @@ subroutine phgamma_ncwrite(gams, cryst, ifc, ncid)
        lambda_tot = lambda_tot + lambda_ph(mu) * gams%wtq(iq_ibz)
      end do
 
-#ifdef HAVE_NETCDF
      ! Write data to netcdf file
      if (ncid /= nctk_noid) then
        if (spin == 1) then
@@ -690,7 +687,6 @@ subroutine phgamma_ncwrite(gams, cryst, ifc, ncid)
        NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'phgamma_qibz'), gamma_ph, start=[1, iq_ibz, spin]))
        NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'phlambda_qibz'), lambda_ph, start=[1, iq_ibz, spin]))
      end if
-#endif
 
      ! Output to the main output file
      if (gams%nsppol == 2) then
@@ -1524,9 +1520,7 @@ subroutine phgamma_linwid(gams, cryst, ifc, ndivsm, nvert, qverts, basename, nci
  integer,parameter :: master = 0
  integer :: natom,ii,mu,iqpt,natom3,nsppol,ierr
  integer :: spin,unt,nqpt,nrpt,cnt,nproc,my_rank
-#ifdef HAVE_NETCDF
  integer :: ncerr
-#endif
  real(dp) :: omega_min,omega_max,wtmp,omega
  character(len=500) :: msg
  type(kpath_t) :: qpath
@@ -1636,7 +1630,6 @@ subroutine phgamma_linwid(gams, cryst, ifc, ndivsm, nvert, qverts, basename, nci
 
    ! Write data to netcdf file
    if (ncid /= nctk_noid) then
-#ifdef HAVE_NETCDF
      ncerr = nctk_def_dims(ncid, [&
        nctkdim_t("natom3", 3*natom), nctkdim_t("nqpath", nqpt), nctkdim_t("number_of_spins", nsppol) &
      ], defmode=.True.)
@@ -1656,7 +1649,6 @@ subroutine phgamma_linwid(gams, cryst, ifc, ndivsm, nvert, qverts, basename, nci
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "phdispl_cart_qpath"), all_displ_cart))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "phgamma_qpath"), all_gammaq))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "phlambda_qpath"), all_lambdaq))
-#endif
    end if
  end if ! master
 
@@ -2371,10 +2363,8 @@ subroutine a2fw_write(a2f, basename, post, ncid)
 !Local variables -------------------------
 !scalars
  integer :: iw,spin,unt,ii,mu
-#ifdef HAVE_NETCDF
  integer :: ncerr
  character(len=500) :: dim1_name
-#endif
  character(len=500) :: msg
  character(len=fnlen) :: path
 
@@ -2439,7 +2429,6 @@ subroutine a2fw_write(a2f, basename, post, ncid)
  close(unt)
 
  if (ncid /= nctk_noid) then
-#ifdef HAVE_NETCDF
    ! Define dimensions.
    dim1_name = strcat("a2f_nomega", post)
    ncerr = nctk_def_dims(ncid, [ &
@@ -2459,7 +2448,6 @@ subroutine a2fw_write(a2f, basename, post, ncid)
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, strcat("a2f_mesh", post)), a2f%omega))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, strcat("a2f_values", post)), a2f%vals))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, strcat("a2f_lambdaw", post)), a2f%lambdaw))
-#endif
  end if
 
 contains
@@ -3016,10 +3004,8 @@ subroutine a2fw_tr_write(a2f_tr, basename, post, ncid)
 !Local variables -------------------------
 !scalars
  integer :: iw,spin,unt,ii,mu,idir, jdir
-#ifdef HAVE_NETCDF
  integer :: ncerr
  character(len=500) :: dim1_name
-#endif
  character(len=500) :: msg
  character(len=fnlen) :: path
 
@@ -3110,7 +3096,6 @@ subroutine a2fw_tr_write(a2f_tr, basename, post, ncid)
  close(unt)
 
  if (ncid /= nctk_noid) then
-#ifdef HAVE_NETCDF
    ! Define dimensions.
    dim1_name = strcat("a2ftr_nomega", post)
    ncerr = nctk_def_dims(ncid, [ &
@@ -3130,7 +3115,6 @@ subroutine a2fw_tr_write(a2f_tr, basename, post, ncid)
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, strcat("a2ftr_mesh", post)), a2f_tr%omega))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, strcat("a2ftr_values", post)), a2f_tr%vals_tr))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, strcat("a2ftr_lambdaw", post)), a2f_tr%lambdaw_tr))
-#endif
  end if
 
 contains
@@ -3228,9 +3212,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1
  integer :: nfft,nfftf,mgfft,mgfftf,kq_count,nkpg,nkpg1,edos_intmeth
  integer :: jene, iene, comm_rpt, nesting, my_npert, imyp, imyq
-#ifdef HAVE_NETCDF
  integer :: ncerr
-#endif
  real(dp) :: cpu, wall, gflops, cpu_q, wall_q, gflops_q, cpu_k, wall_k, gflops_k, cpu_all, wall_all, gflops_all
  real(dp) :: edos_step, edos_broad, sigma, ecut, eshift, eig0nk
  logical :: gen_eigenpb, need_velocities, isirr_k, isirr_kq
@@ -3481,7 +3463,6 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
 
  path = strcat(dtfil%filnam_ds(4), "_A2F.nc")
  ncid = nctk_noid
-#ifdef HAVE_NETCDF
  if (my_rank == master) then
 
    write(std_out, "(/,a)")" === MPI parallelism ==="
@@ -3562,7 +3543,6 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  !  NCF_CHECK(nctk_open_modify(self%ncid, path, self%ncwrite_comm%value))
  !  NCF_CHECK(nctk_set_datamode(self%ncid))
  !end if
-#endif
  call edos%free()
 
  ! Open the DVDB file
@@ -3816,11 +3796,9 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  ABI_FREE(bks_mask)
 
  ! Write v_nk to disk.
-!#ifdef HAVE_NETCDF
 ! if (my_rank == master) then
 !   NCF_CHECK(nf90_put_var(sigma%ncid, nctk_idname(sigma%ncid, "vcar_ibz"), vcar_ibz))
 ! end if
-!#endif
 
  if (dtset%eph_transport > 0) then
    ABI_MALLOC(tgamvv_in, (2, 9, natom3, natom3))
@@ -4329,7 +4307,6 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  end if
  if (dtset%prteliash == 3) call xmpi_sum(gams%vals_ee, qs_comm%value, ierr)
 
-#ifdef HAVE_NETCDF
  ! Close the netcdf file then master reopens it
  !if (ncwrite_comm%value /= xmpi_comm_null) then
  !  NCF_CHECK(nf90_close(ncid))
@@ -4341,7 +4318,6 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  !  NCF_CHECK(nctk_open_modify(ncid, path, xmpi_comm_self))
  !  NCF_CHECK(nctk_set_datamode(ncid))
  !end if
-#endif
 
  ! Deallocate MPI communicators.
  call pert_comm%free()
@@ -4417,11 +4393,9 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
    !call a2fw_tr%free()
  end if
 
-#ifdef HAVE_NETCDF
  if (my_rank == master) then
    NCF_CHECK(nf90_close(ncid))
  end if
-#endif
 
  call gams%free()
 

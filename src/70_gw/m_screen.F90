@@ -42,8 +42,7 @@ MODULE m_screen
  use m_bz_mesh,        only : kmesh_t
  use m_gsphere,        only : gsphere_t
  use m_vcoul,          only : vcoul_t
- use m_io_screening,   only : hscr_free, hscr_io, read_screening, write_screening, hscr_print, &
-&                             hscr_copy, hscr_t, hscr_bcast, hscr_from_file, ncname_from_id, em1_ncname, chi0_ncname
+ use m_io_screening,   only : read_screening, hscr_t, ncname_from_id, em1_ncname
  use m_ppmodel,        only : ppmodel_t, ppm_init, ppm_free, ppm_nullify, PPM_NONE, new_setup_ppmodel, ppm_symmetrizer
 
  implicit none
@@ -969,9 +968,9 @@ subroutine screen_init(W,W_Info,Cryst,Qmesh,Gsph,Vcp,ifname,mqmem,npw_asked,&
    ! Open file and check its content.
    if (endswith(W%fname, ".nc")) W%iomode = IO_MODE_ETSF
 
-   call hscr_from_file(hscr,W%fname,fform,comm)
+   call hscr%from_file(W%fname, fform, comm)
    ! Echo of the header
-   if (my_rank == master .and. W%prtvol>0) call hscr_print(hscr)
+   if (my_rank == master .and. W%prtvol>0) call hscr%print()
 
    ! Communicate the header and copy basic parameters.
    !call hscr_bcast(Hscr,master,my_rank,comm)
@@ -1155,7 +1154,7 @@ subroutine screen_init(W,W_Info,Cryst,Qmesh,Gsph,Vcp,ifname,mqmem,npw_asked,&
    call fgg_free(W%Fgg,keep_q=W%keep_q)
  end if
 
- if (from_file) call hscr_free(Hscr)
+ if (from_file) call Hscr%free()
 
  DBG_EXIT("COLL")
 

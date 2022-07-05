@@ -34,12 +34,12 @@ MODULE m_exc_diago
  use m_hdr
  use m_sort
  use m_slk
- !use m_slk, only : matrix_scalapack, processor_scalapack
 
  use defs_datatypes,    only : pseudopotential_type, ebands_t
  use m_io_tools,        only : open_file
  use m_fstrings,        only : int2char4
  use m_numeric_tools,   only : print_arr, hermitianize
+ !use m_slk,             only : matrix_scalapack, processor_scalapack
  use m_crystal,         only : crystal_t
  use m_kpts,            only : listkk
  use m_bz_mesh,         only : kmesh_t
@@ -533,7 +533,7 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst
    call wrtout(std_out, msg)
    !
    ! Init scaLAPACK environment.
-   call init_scalapack(Slk_processor,comm)
+   call Slk_processor%init(comm)
    !
    ! Init scaLAPACK matrices
    call Slk_mat%init(exc_size,exc_size,Slk_processor,istwf_k)
@@ -612,7 +612,7 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst
    ABI_CHECK_MPI(ierr,"FILE_CLOSE")
 
    call Slk_vec%free()
-   call end_scalapack(Slk_processor)
+   call Slk_processor%free()
    call xmpi_barrier(comm)
 #else
    ABI_BUG("You should not be here!")
@@ -1357,7 +1357,7 @@ subroutine exc_diago_coupling_hegv(Bsp,BS_files,Hdr_bse,prtvol,comm)
    call wrtout([std_out, ab_out], msg, do_flush=.True.)
    !
    ! Init scaLAPACK environment.
-   call init_scalapack(Slk_processor,comm)
+   call Slk_processor%init(comm)
    !
    ! Open the Resonant file with MPI-IO and skip the record.
    amode=MPI_MODE_RDONLY
@@ -1674,7 +1674,7 @@ subroutine exc_diago_coupling_hegv(Bsp,BS_files,Hdr_bse,prtvol,comm)
    ABI_CHECK_MPI(mpi_err,"FILE_CLOSE")
 
    call Slk_ovlp%free()
-   call end_scalapack(Slk_processor)
+   call Slk_processor%free()
 #else
    ABI_BUG("You should not be here!")
 #endif

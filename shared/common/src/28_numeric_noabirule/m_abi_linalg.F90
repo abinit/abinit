@@ -367,7 +367,7 @@ CONTAINS  !===========================================================
    call MPI_CART_SUB(commcart, keepdim, slk_communicator,abi_info1)
    keepdim = (/.false., .true./)
    call MPI_CART_SUB(commcart, keepdim, slk_complement_communicator,abi_info1)
-   call init_scalapack(slk_processor,slk_communicator)
+   call slk_processor%init(slk_communicator)
    slk_minsize=maxval(slk_processor%grid%dims(1:2))
    need_work_space=(use_slk/=1) ! In this case we never use the work arrays
    ABI_LINALG_SCALAPACK_ISON = .true.
@@ -675,7 +675,7 @@ CONTAINS  !===========================================================
 
 #ifdef HAVE_LINALG_SCALAPACK
  if (ABI_LINALG_SCALAPACK_ISON) then
-   call end_scalapack(slk_processor)
+   call slk_processor%free()
    call xmpi_comm_free(slk_communicator)
    call xmpi_comm_free(slk_complement_communicator)
    slk_communicator=xmpi_comm_null

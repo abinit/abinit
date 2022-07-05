@@ -33,7 +33,7 @@
 !!      decompose_epsm1,destroy_mpi_enreg,em1results_free,em1results_print
 !!      find_qmesh,flush_unit,fourdp,get_ppm_eigenvalues
 !!      getem1_from_ppm_one_ggp,getng,gsph_free,gsph_init,hdr_rhor%free,herald
-!!      hscr_free,hscr_from_file,hscr_print,init_er_from_file,initmpi_seq
+!!      init_er_from_file,initmpi_seq
 !!      int2char4,ioscr_qmerge,ioscr_qrecover,ioscr_wmerge,ioscr_wremove
 !!      kmesh_free,kmesh_init,kmesh_print,metric,mkdump_er,pawrhoij_free
 !!      ppm_free,ppm_init,prompt,read_rhor,read_screening,remove_phase
@@ -55,9 +55,7 @@ program mrgscr
  use m_build_info
  use m_errors
  use m_nctk
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
  use m_hdr
  use m_crystal
  use m_pawrhoij
@@ -79,8 +77,7 @@ program mrgscr
  use m_bz_mesh,             only : kmesh_t, find_qmesh
  use m_vcoul,               only : vcoul_t
  use m_ioarr,               only : read_rhor
- use m_io_screening,        only : hscr_print, read_screening, hscr_free, hscr_t, hscr_from_file,&
-                                   ioscr_qmerge, ioscr_qrecover, ioscr_wmerge, ioscr_wremove
+ use m_io_screening,        only : read_screening, hscr_t, ioscr_qmerge, ioscr_qrecover, ioscr_wmerge, ioscr_wremove
  use m_ppmodel,             only : ppm_init, ppm_free, setup_ppmodel, getem1_from_PPm_one_ggp, &
                                    get_PPm_eigenvalues, ppmodel_t, cqratio
  use m_model_screening,     only : remove_phase
@@ -200,7 +197,7 @@ program mrgscr
  do ifile=1,nfiles
    iomode = IO_MODE_FORTRAN; if (endswith(filenames(ifile), ".nc")) iomode = IO_MODE_ETSF
 
-   call hscr_from_file(Hscr_file(ifile), filenames(ifile), fform1, comm)
+   call Hscr_file(ifile)%from_file(filenames(ifile), fform1, comm)
    ABI_CHECK(fform1 /= 0, sjoin("fform == 0 in", filenames(ifile)))
 
    abifile = abifile_from_fform(fform1)
@@ -213,7 +210,7 @@ program mrgscr
    is_scr = abifile%class == "epsm1"
    is_sus = abifile%class == "polariz"
 
-   call hscr_print(Hscr_file(ifile),unit=std_out,prtvol=1)
+   call Hscr_file(ifile)%print(unit=std_out,prtvol=1)
 
    if (ifile == 1) call metric(gmet,gprimd,-1,rmet,Hscr_file(ifile)%Hdr%rprimd,ucvol)
  end do !ifile
@@ -1290,10 +1287,10 @@ program mrgscr
  call destroy_mpi_enreg(MPI_enreg)
 
  nullify(Hscr0)
- call hscr_free(Hscr_merge)
+ call Hscr_merge%free()
 
  do ifile=1,nfiles
-   call hscr_free(Hscr_file(ifile))
+   call Hscr_file(ifile)%free()
  end do
  ABI_FREE(Hscr_file)
 

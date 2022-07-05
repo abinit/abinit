@@ -56,11 +56,12 @@ MODULE m_hide_lapack
  use m_xmpi
  use m_errors
  use m_slk
- !use m_slk, only : matrix_scalapack, processor_scalapack
+
  use m_linalg_interfaces
 
  use m_time,       only : cwtime
  use m_fstrings,   only : firstchar
+ !use m_slk,        only : matrix_scalapack, processor_scalapack
 
  implicit none
 
@@ -389,7 +390,7 @@ subroutine wrap_ZHEEV(jobz, uplo, n, a, w, comm)
 
  CASE (.TRUE.)
 #ifdef HAVE_LINALG_SCALAPACK
-   call init_scalapack(Slk_processor,comm)
+   call Slk_processor%init(comm)
    istwf_k=1
 
    ! Initialize and fill Scalapack matrix from the global one.
@@ -413,7 +414,7 @@ subroutine wrap_ZHEEV(jobz, uplo, n, a, w, comm)
     call xmpi_sum(a,comm,ierr)                        ! Fill the remaing entries of the global matrix
    end if
 
-   call end_scalapack(Slk_processor)
+   call Slk_processor%free()
    RETURN
 #endif
 
@@ -573,7 +574,7 @@ subroutine xheev_cplex(jobz, uplo, cplex, n, a, w, msg, ierr, comm)
 #ifdef HAVE_LINALG_SCALAPACK
    ABI_ERROR("Not coded yet")
 
-   !call init_scalapack(Slk_processor,comm)
+   !call Slk_processor%init(comm)
    !istwf_k=1
    !
    !! Initialize and fill Scalapack matrix from the global one.
@@ -597,7 +598,7 @@ subroutine xheev_cplex(jobz, uplo, cplex, n, a, w, msg, ierr, comm)
    ! call xmpi_sum(a,comm,ierr)                        ! Fill the remaing entries of the global matrix
    !end if
    !
-   !call end_scalapack(Slk_processor)
+   !call Slk_processor%free()
 
    RETURN
 #endif
@@ -843,7 +844,7 @@ subroutine wrap_ZHPEV(jobz, uplo, n, ap, w, z, ldz, comm)
  CASE (.TRUE.)
 
 #ifdef HAVE_LINALG_SCALAPACK
-   call init_scalapack(Slk_processor,comm)
+   call Slk_processor%init(comm)
    istwf_k=1
 
    ! Initialize and fill Scalapack matrix from the global one.
@@ -867,7 +868,7 @@ subroutine wrap_ZHPEV(jobz, uplo, n, ap, w, z, ldz, comm)
     call xmpi_sum(z,comm,ierr)                        ! Fill the remaing entries of the global matrix
    end if
 
-   call end_scalapack(Slk_processor)
+   call Slk_processor%free()
 
    RETURN
 #endif
@@ -1018,7 +1019,7 @@ subroutine wrap_ZHEGV(itype, jobz, uplo, n, a, b, w, comm)
  CASE (.TRUE.)
 
 #ifdef HAVE_LINALG_SCALAPACK
-   call init_scalapack(Slk_processor,comm)
+   call Slk_processor%init(comm)
    istwf_k=1
 
    ! Initialize and fill Scalapack matrix from the global one.
@@ -1042,7 +1043,7 @@ subroutine wrap_ZHEGV(itype, jobz, uplo, n, a, b, w, comm)
    end if
 
    call Slk_matA%free()
-   call end_scalapack(Slk_processor)
+   call Slk_processor%free()
    RETURN
 #endif
 
@@ -1244,7 +1245,7 @@ subroutine xhegv_cplex(itype, jobz, uplo, cplex, n, a, b, w, msg, ierr, comm)
 #ifdef HAVE_LINALG_SCALAPACK
 
   ABI_ERROR("Not coded yet")
-  ! call init_scalapack(Slk_processor,comm)
+  ! call Slk_processor%init(comm)
   ! istwf_k=1
 
   ! ! Initialize and fill Scalapack matrix from the global one.
@@ -1269,7 +1270,7 @@ subroutine xhegv_cplex(itype, jobz, uplo, cplex, n, a, b, w, msg, ierr, comm)
 
   ! call Slk_matA%free()
 
-  ! call end_scalapack(Slk_processor)
+  ! call Slk_processor%free()
 
   RETURN
 #endif
@@ -1470,7 +1471,7 @@ subroutine wrap_ZHEEVX(jobz,range,uplo,n,a,vl,vu,il,iu,abstol,m,w,z,ldz,comm)
  CASE (.TRUE.)
 
 #ifdef HAVE_LINALG_SCALAPACK
-   call init_scalapack(Slk_processor,comm)
+   call Slk_processor%init(comm)
    istwf_k=1
 
    ! Initialize and fill Scalapack matrix from the global one.
@@ -1494,7 +1495,7 @@ subroutine wrap_ZHEEVX(jobz,range,uplo,n,a,vl,vu,il,iu,abstol,m,w,z,ldz,comm)
     call xmpi_sum(z,comm,ierr)                        ! Fill the remaing entries of the global matrix
    end if
 
-   call end_scalapack(Slk_processor)
+   call Slk_processor%free()
    RETURN
 #endif
 
@@ -1734,7 +1735,7 @@ subroutine xheevx_cplex(jobz, range, uplo, cplex, n, a, vl, vu, il, iu, &
 
 #ifdef HAVE_LINALG_SCALAPACK
   ABI_ERROR("Not coded yet")
-  ! call init_scalapack(Slk_processor,comm)
+  ! call Slk_processor%init(comm)
   ! istwf_k=1
 
   ! ! Initialize and fill Scalapack matrix from the global one.
@@ -1757,7 +1758,7 @@ subroutine xheevx_cplex(jobz, range, uplo, cplex, n, a, vl, vu, il, iu, &
   !  call xmpi_sum(z,comm,ierr)                        ! Fill the remaing entries of the global matrix
   ! end if
 
-  ! call end_scalapack(Slk_processor)
+  ! call Slk_processor%free()
 
   RETURN
 #endif
@@ -1978,7 +1979,7 @@ subroutine wrap_ZHEGVX(itype,jobz,range,uplo,n,a,b,vl,vu,il,iu,abstol,m,w,z,ldz,
  CASE (.TRUE.)
 
 #ifdef HAVE_LINALG_SCALAPACK
-   call init_scalapack(Slk_processor,comm)
+   call Slk_processor%init(comm)
    istwf_k=1
 
    ! Initialize and fill Scalapack matrix from the global one.
@@ -2008,7 +2009,7 @@ subroutine wrap_ZHEGVX(itype,jobz,range,uplo,n,a,b,vl,vu,il,iu,abstol,m,w,z,ldz,
      call xmpi_sum(z,comm,ierr)                        ! Fill the remaing entries of the global matrix
    end if
 
-   call end_scalapack(Slk_processor)
+   call Slk_processor%free()
 
    RETURN
 #endif
@@ -2282,7 +2283,7 @@ subroutine xhegvx_cplex(itype, jobz, range, uplo, cplex, n, a, b, &
 
 #ifdef HAVE_LINALG_SCALAPACK
   ABI_ERROR("not coded yet")
-  ! call init_scalapack(Slk_processor,comm)
+  ! call Slk_processor%init(comm)
   ! istwf_k=1
 
   ! ! Initialize and fill Scalapack matrix from the global one.
@@ -2312,7 +2313,7 @@ subroutine xhegvx_cplex(itype, jobz, range, uplo, cplex, n, a, b, &
   !  call xmpi_sum(z,comm,ierr)                        ! Fill the remaing entries of the global matrix
   ! end if
 
-  ! call end_scalapack(Slk_processor)
+  ! call Slk_processor%free()
 
   ! RETURN
 #endif
@@ -2684,7 +2685,7 @@ subroutine cginv(a, n, comm)
 ! FIXME matrix_scalapack does not have a single precision complex buffer
 
 #ifdef HAVE_LINALG_SCALAPACK
-  call init_scalapack(Slk_processor,comm)
+  call Slk_processor%init(comm)
   istwf_k=1
 
   ! Initialize and fill Scalapack matrix from the global one.
@@ -2745,7 +2746,7 @@ subroutine cginv(a, n, comm)
   call Slk_mat%free()
 
   call xmpi_sum(a,comm,ierr)                         ! Fill the remaing entries of the global matrix
-  call end_scalapack(Slk_processor)
+  call Slk_processor%free()
 
   RETURN
 #endif
@@ -2863,7 +2864,7 @@ subroutine zginv(a, n, comm)
  CASE (.TRUE.)
 
 #ifdef HAVE_LINALG_SCALAPACK
-   call init_scalapack(Slk_processor,comm)
+   call Slk_processor%init(comm)
    istwf_k=1
 
    ! Initialize and fill Scalapack matrix from the global one.
@@ -2879,7 +2880,7 @@ subroutine zginv(a, n, comm)
    call Slk_mat%free()
 
    call xmpi_sum(a,comm,ierr)                         ! Fill the remaing entries of the global matrix
-   call end_scalapack(Slk_processor)
+   call Slk_processor%free()
 
    return
 #endif
@@ -3000,7 +3001,7 @@ subroutine zhpd_invert(uplo, a, n, comm)
  CASE (.TRUE.)
 
 #ifdef HAVE_LINALG_SCALAPACK
-   call init_scalapack(Slk_processor,comm)
+   call Slk_processor%init(comm)
    istwf_k=1
 
    ! Initialize and fill Scalapack matrix from the global one.
@@ -3016,7 +3017,7 @@ subroutine zhpd_invert(uplo, a, n, comm)
    call Slk_mat%free()
 
    call xmpi_sum(a,comm,ierr)                         ! Fill the remaing entries of the global matrix
-   call end_scalapack(Slk_processor)
+   call Slk_processor%free()
 
    RETURN
 #endif

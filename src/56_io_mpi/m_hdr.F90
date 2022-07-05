@@ -48,9 +48,7 @@ module m_hdr
 #ifdef HAVE_MPI2
  use mpi
 #endif
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
  use m_nctk
  use m_dtset
 
@@ -1555,14 +1553,10 @@ subroutine hdr_read_from_fname(Hdr, fname, fform, comm)
 
    else
      ! Use Netcdf to open the file and read the header.
-#ifdef HAVE_NETCDF
      NCF_CHECK(nctk_open_read(fh, my_fname, xmpi_comm_self))
      call hdr_ncread(Hdr,fh, fform)
      ABI_CHECK(fform /= 0, sjoin("Error while reading:", my_fname))
      NCF_CHECK(nf90_close(fh))
-#else
-     ABI_ERROR("netcdf support not enabled")
-#endif
    end if
  end if
 
@@ -1624,7 +1618,6 @@ subroutine hdr_write_to_fname(Hdr,fname,fform)
 
  else
    ! Use Netcdf to open the file and write the header.
-#ifdef HAVE_NETCDF
    if (file_exists(fname)) then
      NCF_CHECK(nctk_open_modify(fh,fname, xmpi_comm_self))
    else
@@ -1633,9 +1626,6 @@ subroutine hdr_write_to_fname(Hdr,fname,fform)
 
    NCF_CHECK(hdr%ncwrite(fh, fform, nc_define=.True.))
    NCF_CHECK(nf90_close(fh))
-#else
-   ABI_ERROR("netcdf support not enabled")
-#endif
  end if
 
 end subroutine hdr_write_to_fname
@@ -3118,7 +3108,6 @@ subroutine hdr_ncread(Hdr, ncid, fform)
  integer,intent(out) :: fform
  type(hdr_type),target,intent(out) :: hdr
 
-#ifdef HAVE_NETCDF
 !Local variables-------------------------------
 !scalars
  integer :: nresolution, itypat, ii, varid, ncerr ! CP added varid, ncerr
@@ -3298,10 +3287,6 @@ subroutine hdr_ncread(Hdr, ncid, fform)
 
  endif
  ! End CP added
-
-#else
- ABI_ERROR("netcdf support not activated")
-#endif
 
 contains
  integer function vid(vname)
@@ -3517,7 +3502,6 @@ integer function hdr_ncwrite(hdr, ncid, fform, spinat, nc_define) result(ncerr)
  class(hdr_type),target,intent(in) :: hdr
  real(dp),optional,intent(in) :: spinat(3, hdr%natom)
 
-#ifdef HAVE_NETCDF
 !Local variables-------------------------------
 !scalars
  logical :: my_define
@@ -3832,11 +3816,6 @@ integer function hdr_ncwrite(hdr, ncid, fform, spinat, nc_define) result(ncerr)
   ncerr = nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: "ne_qFD", "nh_qFD"],[hdr%ne_qFD, hdr%nh_qFD])
  end if
  ! End CP added
-
-
-#else
- ABI_ERROR("netcdf support not activated")
-#endif
 
 contains
  integer function vid(vname)

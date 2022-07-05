@@ -50,9 +50,7 @@ module m_sigmaph
  use m_sigtk
  use m_ephtk
  use m_eph_double_grid
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
  use m_nctk
  use m_rf2
  use m_dtset
@@ -775,10 +773,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  else
    ! Open file inside ncwrite_comm to perform parallel IO if kpt parallelism.
    if (sigma%ncwrite_comm%value /= xmpi_comm_null) then
-#ifdef HAVE_NETCDF
      NCF_CHECK(nctk_open_modify(sigma%ncid, sigeph_filepath, sigma%ncwrite_comm%value))
      NCF_CHECK(nctk_set_datamode(sigma%ncid))
-#endif
    end if
  end if
 
@@ -987,11 +983,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  endif
 
  ! Write v_nk to disk.
-#ifdef HAVE_NETCDF
  if (my_rank == master) then
    NCF_CHECK(nf90_put_var(sigma%ncid, nctk_idname(sigma%ncid, "vcar_calc"), sigma%vcar_calc))
  end if
-#endif
 
  ABI_FREE(cgwork)
  call ddkop%free()
@@ -3344,9 +3338,7 @@ subroutine sigmaph_write(self, dtset, cryst, ebands, wfk_hdr, dtfil, comm)
 !scalars
  integer,parameter :: master = 0
  integer :: my_rank, ii, edos_intmeth, spin, ikcalc
-#ifdef HAVE_NETCDF
  integer :: ncid, ncerr, grp_ncid
-#endif
  !character(len=5000) :: msg
  real(dp) :: edos_broad, edos_step,  cpu_all, wall_all, gflops_all, cpu, wall, gflops
  character(len=fnlen) :: path
@@ -3378,7 +3370,6 @@ subroutine sigmaph_write(self, dtset, cryst, ebands, wfk_hdr, dtfil, comm)
 
  ! Create netcdf file (only master works, HDF5 + MPI-IO is handled afterwards by reopening the file inside ncwrite_comm)
  path = strcat(dtfil%filnam_ds(4), "_SIGEPH.nc")
-#ifdef HAVE_NETCDF
  if (my_rank == master) then
    ! Master creates the netcdf file used to store the results of the calculation.
    NCF_CHECK(nctk_open_create(self%ncid, path, xmpi_comm_self))
@@ -3556,7 +3547,6 @@ subroutine sigmaph_write(self, dtset, cryst, ebands, wfk_hdr, dtfil, comm)
    NCF_CHECK(nctk_open_modify(self%ncid, path, self%ncwrite_comm%value))
    NCF_CHECK(nctk_set_datamode(self%ncid))
  end if
-#endif
 
  call edos%free()
  call cwtime_report(" sigmaph_new: netcdf", cpu_all, wall_all, gflops_all)
@@ -3610,9 +3600,7 @@ type(sigmaph_t) function sigmaph_read(path, dtset, comm, msg, ierr, keep_open, &
 !Local variables ------------------------------
 !scalars
  integer :: imag_only, eph_task, symdynmat, ph_intmeth, eph_intmeth, eph_transport
-#ifdef HAVE_NETCDF
  integer :: ncid !, varid !, ncerr
-#endif
  real(dp) :: eph_fermie, eph_fsewin, ph_wstep, ph_smear, eta, eph_extrael, eph_fsmear, cpu, wall, gflops
  character(len=fnlen) :: path
 !arrays
@@ -3624,7 +3612,6 @@ type(sigmaph_t) function sigmaph_read(path, dtset, comm, msg, ierr, keep_open, &
  ! Open netcdf file
  msg = "Netcdf not activated at configure time!"
  ierr = 1
-#ifdef HAVE_NETCDF
  ierr = 0
 
  if (.not. file_exists(path)) then
@@ -3759,8 +3746,6 @@ contains
    vid = nctk_idname(ncid, vname)
 end function vid
 
-#endif
-
 end function sigmaph_read
 !!***
 
@@ -3799,9 +3784,7 @@ type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, brange, kcalc2eb
  integer,parameter :: master = 0
  integer :: spin, ikpt, ikcalc, iband, itemp, nsppol, nkpt, timrev, band_ks, bstart_ks, nbcalc_ks, mband
  integer :: bmin, bmax, my_rank, ierr
-#ifdef HAVE_NETCDF
  integer :: ncerr
-#endif
  type(krank_t) :: krank
  character(len=5000) :: msg
 !arrays
@@ -3844,7 +3827,6 @@ type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, brange, kcalc2eb
  !bmin = 1; bmax = mband
  bmin = brange(1); bmax = brange(2)
 
-#ifdef HAVE_NETCDF
  ! Read linewidths from sigmaph file.
  ! Use global array (mband, nkpt, nsppol) but keep in mind that results in SIGPEPH are packed
  ! so that only the relevant k-points are stored on file.
@@ -3887,7 +3869,6 @@ type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, brange, kcalc2eb
      end do
    end do
  end if
-#endif
 
  !ABI_FREE(indkk)
 
@@ -4059,11 +4040,9 @@ subroutine sigmaph_free(self)
  call self%ncwrite_comm%free()
 
  ! Close netcdf file.
-#ifdef HAVE_NETCDF
  if (self%ncid /= nctk_noid) then
    NCF_CHECK(nf90_close(self%ncid))
  end if
-#endif
 
 end subroutine sigmaph_free
 !!***
@@ -4616,9 +4595,7 @@ subroutine sigmaph_gather_and_write(self, dtset, ebands, ikcalc, spin, comm)
  real(dp) :: cpu, wall, gflops, invsig2fmts, tau
  complex(dpc) :: sig0c,zc,qpe,qpe_prev,qpe_val,qpe_cond,cavg1,cavg2
  !character(len=5000) :: msg
-#ifdef HAVE_NETCDF
  integer :: grp_ncid, ncerr
-#endif
 !arrays
  integer, allocatable :: recvcounts(:), displs(:), nq_rank(:), kq_symtab(:,:), my_kq_symtab(:,:)
  integer, ABI_CONTIGUOUS pointer :: bids(:)
@@ -4943,7 +4920,6 @@ subroutine sigmaph_gather_and_write(self, dtset, ebands, ikcalc, spin, comm)
    end if
  end if
 
-#ifdef HAVE_NETCDF
  ! Write self-energy matrix elements for this (kpt, spin)
  ! NB: Only master writes
  ! (use iso_c_binding to associate a real pointer to complex data because netcdf does not support complex types).
@@ -5050,7 +5026,6 @@ subroutine sigmaph_gather_and_write(self, dtset, ebands, ikcalc, spin, comm)
 
  ! Dump the cache to file. This is necessary to ensure we can restart.
  NCF_CHECK(nf90_sync(self%ncid))
-#endif
 
  call cwtime_report(" Sigma_nk netcdf output", cpu, wall, gflops)
 
