@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.7.4 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h25 )
+.Starting date : Wed  4 May 2022.
+- ( at 01h23 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v3_t16/t16.in
-- output file    -> t16.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/v3_t16/t16.abi
+- output file    -> t16.abo
 - root for input  files -> t16i
 - root for output files -> t16o
 
@@ -242,16 +242,16 @@ P          mk1mem5          5
         optdriver3          1
         optdriver4          0
         optdriver5          0
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          1       2
-          rfatpol4          1       1
-          rfatpol5          1       1
-            rfdir1          0       0       0
+           prtpot1          0
+           prtpot2          1
+           prtpot3          1
+           prtpot4          0
+           prtpot5          0
+            rfdir1          1       1       1
             rfdir2          1       0       0
             rfdir3          1       1       1
-            rfdir4          0       0       0
-            rfdir5          0       0       0
+            rfdir4          1       1       1
+            rfdir5          1       1       1
            rfelfd1          0
            rfelfd2          2
            rfelfd3          3
@@ -546,8 +546,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.00008
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -729,7 +729,6 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.00008
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t16o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -746,7 +745,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t16o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -821,7 +819,7 @@ tolerances: {tolwfr: 1.00E-28, }
 
  WARNING : Localization tensor calculation (this does not apply to other properties).
   Not all d/dk perturbations were computed. So the localization tensor in reciprocal space is incomplete,
-  and transformation to cartesian coordinates may be wrong.
+  and transformation to cartesian coordinates may be wrong. Check input variable rfdir.
 
  respfn : d/dk was computed, but no 2DTE, so no DDB output.
 
@@ -858,7 +856,6 @@ meta: {optdriver: 1, rfelfd: 3, rfphon: 1, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.00008
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t16o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -912,7 +909,6 @@ meta: {optdriver: 1, rfelfd: 3, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t16o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -971,7 +967,6 @@ tolerances: {tolwfr: 1.00E-12, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t16o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1736,16 +1731,16 @@ P          mk1mem5          5
         optdriver3          1
         optdriver4          0
         optdriver5          0
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          1       2
-          rfatpol4          1       1
-          rfatpol5          1       1
-            rfdir1          0       0       0
+           prtpot1          0
+           prtpot2          1
+           prtpot3          1
+           prtpot4          0
+           prtpot5          0
+            rfdir1          1       1       1
             rfdir2          1       0       0
             rfdir3          1       1       1
-            rfdir4          0       0       0
-            rfdir5          0       0       0
+            rfdir4          1       1       1
+            rfdir5          1       1       1
            rfelfd1          0
            rfelfd2          2
            rfelfd3          3
@@ -2092,10 +2087,10 @@ P          mk1mem5          5
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          2.9  wall=          2.9
+- Proc.   0 individual time (sec): cpu=          3.6  wall=          3.9
 
 ================================================================================
 
  Calculation completed.
-.Delivered  15 WARNINGs and  27 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.9  wall=          2.9
+.Delivered  13 WARNINGs and  13 COMMENTs to log file.
++Overall time at end (sec) : cpu=          3.6  wall=          3.9

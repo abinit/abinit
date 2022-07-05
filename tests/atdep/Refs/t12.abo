@@ -1,0 +1,3043 @@
+  
+.Version    3.0 of PHONONS
+.Copyright (C) 1998-2022 ABINIT group (FB,JB).
+ ABINIT comes with ABSOLUTELY NO WARRANTY.
+ It is free software, and you are welcome to redistribute it
+ under certain conditions (GNU General Public License,
+ see ~abinit/COPYING or http://www.gnu.org/copyleft/gpl.txt).
+  
+ ABINIT is a project of the Universite Catholique de Louvain,
+ Corning Inc. and other collaborators, see
+ ~abinit/doc/developers/contributors.txt .
+ Please read https://docs.abinit.org/theory/acknowledgments for suggested
+ acknowledgments of the ABINIT effort.
+ For more information, see http://www.abinit.org .
+
+.Starting date : 13 Apr 2021.
+  
+ #############################################################################
+ ######################### ECHO OF INPUT FILE ################################
+ #############################################################################
+ ======================= Define the unitcell =================================
+ brav                    6    0
+ natom_unitcell          2
+ xred_unitcell       
+                        -0.3333333333    0.0000000000    0.0000000000
+                         0.3333333333    0.3333333333    0.5000000000
+ typat_unitcell          1    1
+ ntypat                  1
+ amu                    47.8800000000
+ ======================= Define the supercell ================================
+ rprimd              
+                        44.6224640000    0.0000000000    0.0000000000
+                       -22.3112320000   38.6441874035    0.0000000000
+                         0.0000000000    0.0000000000   35.2724960000
+ multiplicity        
+                         8.0000000000    0.0000000000    0.0000000000
+                         0.0000000000    8.0000000000    0.0000000000
+                         0.0000000000    0.0000000000    4.0000000000
+ natom                 512
+ typat               
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1
+ temperature           300.0000000000
+ ======================= Define computational details ========================
+ nstep_max               20
+ nstep_min                1
+ rcut                   17.5000000000
+ ======================= Optional input variables ============================
+ readifc                 1    0.0001000000
+ enunit                  2 (Phonon frequencies in mHa)
+ bzpath                  4
+ Special q-points:  G -K -M -G -
+ use_ideal_positions     1
+ ngqpt1                  6    6    6
+ tolmotif               0.05000
+ tolinbox               0.03000
+ tolmatch               0.05000
+ USE IDEAL POSITIONS TO COMPUTE SPECTRUM
+-Number of processors    1    1
+ 
+ All quantities are computed from nstep_min=    1
+                               to nstep_max=   20
+ So, the real number of time steps is nstep=   20
+ 
+ The positions, forces and energies are extracted from the ASCII files: xred.dat, fcart.dat & etot.dat
+  
+ #############################################################################
+ ########################## Computed quantities ##############################
+ #############################################################################
+ acell_unitcell=     5.5778080000     5.5778080000     8.8181240000
+ rprimd_md=    44.6224640000     0.0000000000     0.0000000000
+ rprimd_md=   -22.3112320000    38.6441874035     0.0000000000
+ rprimd_md=     0.0000000000     0.0000000000    35.2724960000
+ bravais=    6    0    1    0    0    0    1    0    0    0    1
+ See the sym.dat file
+  
+ #############################################################################
+ ########################## Q points generation  #############################
+ #############################################################################
+ Generate the BZ path using the Q points given in the input file
+ See the qpt.dat file
+  
+ #############################################################################
+ ###### Find the matching between ideal and average positions  ###############
+ #############################################################################
+  Determine ideal positions and distances...
+  Compute average positions...
+  Search the unitcell basis of atoms in the MD trajectory...
+  Compare ideal and average positions using PBC...
+  Write the xred_average.xyz file with ideal and average positions...
+  Compute cartesian coordinates and forces...
+  
+ #############################################################################
+ ###################### Find the symetry operations ##########################
+ #################### (connecting the atoms together) ########################
+ #############################################################################
+ Search the matrix transformation going from (k) to (i)...
+ Search the matrix transformation going from (k,l) to (i,j)...
+ See the Indsym*.dat files (if debug)
+  
+ #############################################################################
+ ####### FIRST ORDER : find the number of coefficients #######################
+ #############################################################################
+  Build the ref1at and Isym1at tables...
+  Build the Shell1at datatype...
+  Number of shells=           1
+ ============================================================================
+ Shell number:           1
+  For atom    1:
+   Number of independant coefficients in this shell=           0
+   Number of interactions in this shell=           0
+ ============================================================================
+   >>>>>> Total number of coefficients at the first order=           0
+  
+ #############################################################################
+ ###### SECOND ORDER : find the number of coefficients #######################
+ #############################################################################
+  Build the ref2at and Isym2at tables...
+  Build the Shell2at datatype...
+  Number of shells=          21
+ ============================================================================
+ Shell number:           1
+  Between atom    1 and     1 the distance is=    0.0000000000
+   Number of independant coefficients in this shell=           0
+   Number of interactions in this shell=           1
+ ============================================================================
+ Shell number:           2
+  Between atom    1 and     2 the distance is=    5.4598969845
+   Number of independant coefficients in this shell=           4
+   Number of interactions in this shell=           6
+ ============================================================================
+ Shell number:           3
+  Between atom    1 and     3 the distance is=    8.8181240000
+   Number of independant coefficients in this shell=           2
+   Number of interactions in this shell=           2
+ ============================================================================
+ Shell number:           4
+  Between atom    1 and     4 the distance is=   13.6135629737
+   Number of independant coefficients in this shell=           4
+   Number of interactions in this shell=           6
+ ============================================================================
+ Shell number:           5
+  Between atom    1 and     9 the distance is=    5.5778080000
+   Number of independant coefficients in this shell=           4
+   Number of interactions in this shell=           6
+ ============================================================================
+ Shell number:           6
+  Between atom    1 and    10 the distance is=    7.8052813637
+   Number of independant coefficients in this shell=           4
+   Number of interactions in this shell=           6
+ ============================================================================
+ Shell number:           7
+  Between atom    1 and    11 the distance is=   10.4341388224
+   Number of independant coefficients in this shell=           6
+   Number of interactions in this shell=          12
+ ============================================================================
+ Shell number:           8
+  Between atom    1 and    12 the distance is=   14.7119352542
+   Number of independant coefficients in this shell=           4
+   Number of interactions in this shell=           6
+ ============================================================================
+ Shell number:           9
+  Between atom    1 and    17 the distance is=   11.1556160000
+   Number of independant coefficients in this shell=           4
+   Number of interactions in this shell=           6
+ ============================================================================
+ Shell number:          10
+  Between atom    1 and    18 the distance is=   12.4200742116
+   Number of independant coefficients in this shell=           6
+   Number of interactions in this shell=          12
+ ============================================================================
+ Shell number:          11
+  Between atom    1 and    19 the distance is=   14.2199535590
+   Number of independant coefficients in this shell=           6
+   Number of interactions in this shell=          12
+ ============================================================================
+ Shell number:          12
+  Between atom    1 and    25 the distance is=   16.7334240000
+   Number of independant coefficients in this shell=           4
+   Number of interactions in this shell=           6
+ ============================================================================
+ Shell number:          13
+  Between atom    1 and    66 the distance is=    9.5934539792
+   Number of independant coefficients in this shell=           6
+   Number of interactions in this shell=          12
+ ============================================================================
+ Shell number:          14
+  Between atom    1 and    68 the distance is=   15.7338164795
+   Number of independant coefficients in this shell=           6
+   Number of interactions in this shell=          12
+ ============================================================================
+ Shell number:          15
+  Between atom    1 and    81 the distance is=    9.6610468509
+   Number of independant coefficients in this shell=           3
+   Number of interactions in this shell=           6
+ ============================================================================
+ Shell number:          16
+  Between atom    1 and    83 the distance is=   13.0803339840
+   Number of independant coefficients in this shell=           5
+   Number of interactions in this shell=          12
+ ============================================================================
+ Shell number:          17
+  Between atom    1 and    89 the distance is=   14.7574928289
+   Number of independant coefficients in this shell=           5
+   Number of interactions in this shell=          12
+ ============================================================================
+ Shell number:          18
+  Between atom    1 and    90 the distance is=   16.6944904612
+   Number of independant coefficients in this shell=           4
+   Number of interactions in this shell=           6
+ ============================================================================
+ Shell number:          19
+  Between atom    1 and    91 the distance is=   17.1913613618
+   Number of independant coefficients in this shell=           9
+   Number of interactions in this shell=          24
+ ============================================================================
+ Shell number:          20
+  Between atom    1 and   130 the distance is=   14.7133316278
+   Number of independant coefficients in this shell=           6
+   Number of interactions in this shell=          12
+ ============================================================================
+ Shell number:          21
+  Between atom    1 and   138 the distance is=   13.6150719978
+   Number of independant coefficients in this shell=           4
+   Number of interactions in this shell=           6
+ ============================================================================
+   >>>>>> Total number of coefficients at the second order=          96
+  
+ #############################################################################
+ ################ Read IFCs from input file ##################################
+ #############################################################################
+ Read the IFC from ifc_in.dat
+ ------- achieved
+ Write in ifc_check.dat (and ifc_check.nc) the IFC read previously
+ ------- achieved
+  
+ #############################################################################
+ ###################### Compute the constraints ##############################
+ ########################## At the 1st order #################################
+ ########################## At the 2nd order #################################
+ ################## Reduce the number of constraints #########################
+ ############### (Solve simultaneously all the orders) #######################
+  
+ #############################################################################
+ #### For each shell, list of coefficients (IFC), number of neighbours... ####
+ #############################################################################
+ ############# List of (first order) IFC for the reference atom=   1
+   0.000000  0.000000  0.000000
+  
+ ############# List of (first order) IFC for the reference atom=   2
+   0.000000  0.000000  0.000000
+  
+  
+ #############################################################################
+ #### For each shell, list of coefficients (IFC), number of neighbours... ####
+ #############################################################################
+ ############# List of (second order) IFC for the reference atom=   1
+ ======== NEW SHELL (ishell=   1): There are   1 atoms on this shell at distance= 0.000000
+  For jatom=   1 ,with type=   1
+   0.057246  0.000000  0.000000
+   0.000000  0.057246  0.000000
+   0.000000  0.000000  0.057936
+  The components of the vector are:    0.000000    0.000000    0.000000
+  Trace=  0.172428
+  
+ ======== NEW SHELL (ishell=   2): There are   6 atoms on this shell at distance= 5.459897
+  For jatom=   2 ,with type=   2
+  -0.005860 -0.003737 -0.007130
+  -0.003737 -0.001545 -0.004116
+  -0.007129 -0.004116 -0.006271
+  The components of the vector are:    2.788904    1.610174    4.409062
+  Trace= -0.013676
+  
+  For jatom=   8 ,with type=   2
+  -0.005860 -0.003737  0.007129
+  -0.003737 -0.001545  0.004116
+   0.007129  0.004116 -0.006271
+  The components of the vector are:    2.788904    1.610174   -4.409062
+  Trace= -0.013676
+  
+  For jatom= 450 ,with type=   2
+  -0.005860  0.003737  0.007130
+   0.003737 -0.001545 -0.004116
+   0.007129 -0.004116 -0.006271
+  The components of the vector are:   -2.788904    1.610174    4.409062
+  Trace= -0.013676
+  
+  For jatom= 456 ,with type=   2
+  -0.005860  0.003737 -0.007130
+   0.003737 -0.001545  0.004116
+  -0.007129  0.004116 -0.006271
+  The components of the vector are:   -2.788904    1.610174   -4.409062
+  Trace= -0.013676
+  
+  For jatom= 506 ,with type=   2
+   0.000613  0.000000  0.000000
+   0.000000 -0.008018  0.008232
+   0.000000  0.008232 -0.006271
+  The components of the vector are:    0.000000   -3.220349    4.409062
+  Trace= -0.013676
+  
+  For jatom= 512 ,with type=   2
+   0.000613  0.000000  0.000000
+   0.000000 -0.008018 -0.008232
+   0.000000 -0.008232 -0.006271
+  The components of the vector are:    0.000000   -3.220349   -4.409062
+  Trace= -0.013676
+  
+ ======== NEW SHELL (ishell=   5): There are   6 atoms on this shell at distance= 5.577808
+  For jatom=   9 ,with type=   1
+  -0.004093 -0.001580  0.000000
+   0.008932 -0.008337  0.000000
+   0.000000  0.000000 -0.002785
+  The components of the vector are:   -2.788904    4.830523    0.000000
+  Trace= -0.015216
+  
+  For jatom=  57 ,with type=   1
+  -0.004093  0.008932  0.000000
+  -0.001580 -0.008337  0.000000
+   0.000000  0.000000 -0.002785
+  The components of the vector are:    2.788904   -4.830523    0.000000
+  Trace= -0.015216
+  
+  For jatom=  65 ,with type=   1
+  -0.010460 -0.005256  0.000000
+   0.005256 -0.001971  0.000000
+   0.000000  0.000000 -0.002785
+  The components of the vector are:    5.577808    0.000000    0.000000
+  Trace= -0.015216
+  
+  For jatom=  73 ,with type=   1
+  -0.004093  0.001580  0.000000
+  -0.008932 -0.008337  0.000000
+   0.000000  0.000000 -0.002785
+  The components of the vector are:    2.788904    4.830523    0.000000
+  Trace= -0.015216
+  
+  For jatom= 449 ,with type=   1
+  -0.010460  0.005256  0.000000
+  -0.005256 -0.001971  0.000000
+   0.000000  0.000000 -0.002785
+  The components of the vector are:   -5.577808    0.000000    0.000000
+  Trace= -0.015216
+  
+  For jatom= 505 ,with type=   1
+  -0.004093 -0.008932  0.000000
+   0.001580 -0.008337  0.000000
+   0.000000  0.000000 -0.002785
+  The components of the vector are:   -2.788904   -4.830523    0.000000
+  Trace= -0.015216
+  
+ ======== NEW SHELL (ishell=   6): There are   6 atoms on this shell at distance= 7.805281
+  For jatom=  10 ,with type=   2
+   0.001145  0.000000  0.000000
+   0.000000  0.001607  0.001843
+   0.000000  0.001843  0.002016
+  The components of the vector are:    0.000000    6.440698    4.409062
+  Trace=  0.004769
+  
+  For jatom=  16 ,with type=   2
+   0.001145  0.000000  0.000000
+   0.000000  0.001607 -0.001843
+   0.000000 -0.001843  0.002016
+  The components of the vector are:    0.000000    6.440698   -4.409062
+  Trace=  0.004769
+  
+  For jatom=  58 ,with type=   2
+   0.001492 -0.000200  0.001596
+  -0.000200  0.001261 -0.000922
+   0.001596 -0.000922  0.002016
+  The components of the vector are:    5.577808   -3.220349    4.409062
+  Trace=  0.004769
+  
+  For jatom=  64 ,with type=   2
+   0.001492 -0.000200 -0.001596
+  -0.000200  0.001261  0.000922
+  -0.001596  0.000922  0.002016
+  The components of the vector are:    5.577808   -3.220349   -4.409062
+  Trace=  0.004769
+  
+  For jatom= 442 ,with type=   2
+   0.001492  0.000200 -0.001596
+   0.000200  0.001261 -0.000922
+  -0.001596 -0.000921  0.002016
+  The components of the vector are:   -5.577808   -3.220349    4.409062
+  Trace=  0.004769
+  
+  For jatom= 448 ,with type=   2
+   0.001492  0.000200  0.001596
+   0.000200  0.001261  0.000922
+   0.001596  0.000922  0.002016
+  The components of the vector are:   -5.577808   -3.220349   -4.409062
+  Trace=  0.004769
+  
+ ======== NEW SHELL (ishell=   3): There are   2 atoms on this shell at distance= 8.818124
+  For jatom=   3 ,with type=   1
+   0.001811  0.000000  0.000000
+   0.000000  0.001811  0.000000
+   0.000000  0.000000 -0.008682
+  The components of the vector are:    0.000000    0.000000    8.818124
+  Trace= -0.005060
+  
+  For jatom=   7 ,with type=   1
+   0.001811  0.000000  0.000000
+   0.000000  0.001811  0.000000
+   0.000000  0.000000 -0.008682
+  The components of the vector are:    0.000000    0.000000   -8.818124
+  Trace= -0.005060
+  
+ ======== NEW SHELL (ishell=  13): There are  12 atoms on this shell at distance= 9.593454
+  For jatom=  66 ,with type=   2
+  -0.000203  0.000119 -0.000741
+   0.000120 -0.000071  0.000109
+  -0.000741  0.000109 -0.000024
+  The components of the vector are:    8.366712    1.610174    4.409062
+  Trace= -0.000298
+  
+  For jatom=  72 ,with type=   2
+  -0.000203  0.000119  0.000741
+   0.000120 -0.000071 -0.000109
+   0.000741 -0.000109 -0.000024
+  The components of the vector are:    8.366712    1.610174   -4.409062
+  Trace= -0.000298
+  
+  For jatom=  74 ,with type=   2
+  -0.000001  0.000003 -0.000276
+   0.000002 -0.000274 -0.000696
+  -0.000276 -0.000697 -0.000024
+  The components of the vector are:    5.577808    6.440698    4.409062
+  Trace= -0.000298
+  
+  For jatom=  80 ,with type=   2
+  -0.000001  0.000003  0.000276
+   0.000002 -0.000274  0.000696
+   0.000276  0.000697 -0.000024
+  The components of the vector are:    5.577808    6.440698   -4.409062
+  Trace= -0.000298
+  
+  For jatom= 386 ,with type=   2
+  -0.000203 -0.000119  0.000741
+  -0.000120 -0.000071  0.000109
+   0.000741  0.000109 -0.000024
+  The components of the vector are:   -8.366712    1.610174    4.409062
+  Trace= -0.000298
+  
+  For jatom= 392 ,with type=   2
+  -0.000203 -0.000119 -0.000741
+  -0.000120 -0.000071 -0.000109
+  -0.000741 -0.000109 -0.000024
+  The components of the vector are:   -8.366712    1.610174   -4.409062
+  Trace= -0.000298
+  
+  For jatom= 434 ,with type=   2
+  -0.000208 -0.000117  0.000465
+  -0.000117 -0.000067  0.000587
+   0.000465  0.000587 -0.000024
+  The components of the vector are:   -2.788904   -8.050872    4.409062
+  Trace= -0.000298
+  
+  For jatom= 440 ,with type=   2
+  -0.000208 -0.000117 -0.000465
+  -0.000117 -0.000067 -0.000587
+  -0.000465 -0.000587 -0.000024
+  The components of the vector are:   -2.788904   -8.050872   -4.409062
+  Trace= -0.000298
+  
+  For jatom= 458 ,with type=   2
+  -0.000001 -0.000003  0.000276
+  -0.000002 -0.000274 -0.000696
+   0.000276 -0.000697 -0.000024
+  The components of the vector are:   -5.577808    6.440698    4.409062
+  Trace= -0.000298
+  
+  For jatom= 464 ,with type=   2
+  -0.000001 -0.000003 -0.000276
+  -0.000002 -0.000274  0.000696
+  -0.000276  0.000697 -0.000024
+  The components of the vector are:   -5.577808    6.440698   -4.409062
+  Trace= -0.000298
+  
+  For jatom= 498 ,with type=   2
+  -0.000208  0.000117 -0.000465
+   0.000117 -0.000067  0.000587
+  -0.000465  0.000587 -0.000024
+  The components of the vector are:    2.788904   -8.050872    4.409062
+  Trace= -0.000298
+  
+  For jatom= 504 ,with type=   2
+  -0.000208  0.000117  0.000465
+   0.000117 -0.000067 -0.000587
+   0.000465 -0.000587 -0.000024
+  The components of the vector are:    2.788904   -8.050872   -4.409062
+  Trace= -0.000298
+  
+ ======== NEW SHELL (ishell=  15): There are   6 atoms on this shell at distance= 9.661047
+  For jatom=  81 ,with type=   1
+   0.000021  0.000000  0.000000
+   0.000000 -0.000694  0.000000
+   0.000000  0.000000 -0.000263
+  The components of the vector are:    0.000000    9.661047    0.000000
+  Trace= -0.000936
+  
+  For jatom= 121 ,with type=   1
+  -0.000515  0.000310  0.000000
+   0.000310 -0.000158  0.000000
+   0.000000  0.000000 -0.000263
+  The components of the vector are:    8.366712   -4.830523    0.000000
+  Trace= -0.000936
+  
+  For jatom= 137 ,with type=   1
+  -0.000515 -0.000310  0.000000
+  -0.000310 -0.000158  0.000000
+   0.000000  0.000000 -0.000263
+  The components of the vector are:    8.366712    4.830523    0.000000
+  Trace= -0.000936
+  
+  For jatom= 441 ,with type=   1
+  -0.000515 -0.000310  0.000000
+  -0.000310 -0.000158  0.000000
+   0.000000  0.000000 -0.000263
+  The components of the vector are:   -8.366712   -4.830523    0.000000
+  Trace= -0.000936
+  
+  For jatom= 457 ,with type=   1
+  -0.000515  0.000310  0.000000
+   0.000310 -0.000158  0.000000
+   0.000000  0.000000 -0.000263
+  The components of the vector are:   -8.366712    4.830523    0.000000
+  Trace= -0.000936
+  
+  For jatom= 497 ,with type=   1
+   0.000021  0.000000  0.000000
+   0.000000 -0.000694  0.000000
+   0.000000  0.000000 -0.000263
+  The components of the vector are:    0.000000   -9.661047    0.000000
+  Trace= -0.000936
+  
+ ======== NEW SHELL (ishell=   7): There are  12 atoms on this shell at distance=10.434139
+  For jatom=  11 ,with type=   1
+  -0.000046  0.000741  0.000447
+  -0.000040 -0.000451 -0.000155
+  -0.000090 -0.000464  0.000042
+  The components of the vector are:   -2.788904    4.830523    8.818124
+  Trace= -0.000456
+  
+  For jatom=  15 ,with type=   1
+  -0.000046  0.000741 -0.000447
+  -0.000040 -0.000451  0.000155
+   0.000090  0.000464  0.000042
+  The components of the vector are:   -2.788904    4.830523   -8.818124
+  Trace= -0.000456
+  
+  For jatom=  59 ,with type=   1
+  -0.000046 -0.000040  0.000089
+   0.000741 -0.000451  0.000464
+  -0.000447  0.000154  0.000042
+  The components of the vector are:    2.788904   -4.830523    8.818124
+  Trace= -0.000456
+  
+  For jatom=  63 ,with type=   1
+  -0.000046 -0.000040 -0.000089
+   0.000741 -0.000451 -0.000464
+   0.000447 -0.000154  0.000042
+  The components of the vector are:    2.788904   -4.830523   -8.818124
+  Trace= -0.000456
+  
+  For jatom=  67 ,with type=   1
+  -0.000654  0.000390 -0.000357
+  -0.000390  0.000156 -0.000309
+  -0.000357  0.000310  0.000042
+  The components of the vector are:    5.577808    0.000000    8.818124
+  Trace= -0.000456
+  
+  For jatom=  71 ,with type=   1
+  -0.000654  0.000390  0.000357
+  -0.000390  0.000156  0.000309
+   0.000357 -0.000310  0.000042
+  The components of the vector are:    5.577808    0.000000   -8.818124
+  Trace= -0.000456
+  
+  For jatom=  75 ,with type=   1
+  -0.000046 -0.000741 -0.000447
+   0.000040 -0.000451 -0.000155
+   0.000090 -0.000464  0.000042
+  The components of the vector are:    2.788904    4.830523    8.818124
+  Trace= -0.000456
+  
+  For jatom=  79 ,with type=   1
+  -0.000046 -0.000741  0.000447
+   0.000040 -0.000451  0.000155
+  -0.000090  0.000464  0.000042
+  The components of the vector are:    2.788904    4.830523   -8.818124
+  Trace= -0.000456
+  
+  For jatom= 451 ,with type=   1
+  -0.000654 -0.000390  0.000357
+   0.000390  0.000156 -0.000309
+   0.000357  0.000310  0.000042
+  The components of the vector are:   -5.577808    0.000000    8.818124
+  Trace= -0.000456
+  
+  For jatom= 455 ,with type=   1
+  -0.000654 -0.000390 -0.000357
+   0.000390  0.000156  0.000309
+  -0.000357 -0.000310  0.000042
+  The components of the vector are:   -5.577808    0.000000   -8.818124
+  Trace= -0.000456
+  
+  For jatom= 507 ,with type=   1
+  -0.000046  0.000040 -0.000089
+  -0.000741 -0.000451  0.000464
+   0.000447  0.000154  0.000042
+  The components of the vector are:   -2.788904   -4.830523    8.818124
+  Trace= -0.000456
+  
+  For jatom= 511 ,with type=   1
+  -0.000046  0.000040  0.000089
+  -0.000741 -0.000451 -0.000464
+  -0.000447 -0.000154  0.000042
+  The components of the vector are:   -2.788904   -4.830523   -8.818124
+  Trace= -0.000456
+  
+ ======== NEW SHELL (ishell=   9): There are   6 atoms on this shell at distance=11.155616
+  For jatom=  17 ,with type=   1
+  -0.000273  0.000650  0.000000
+   0.000548 -0.000965  0.000000
+   0.000000  0.000000  0.000252
+  The components of the vector are:   -5.577808    9.661047    0.000000
+  Trace= -0.000987
+  
+  For jatom=  49 ,with type=   1
+  -0.000274  0.000548  0.000000
+   0.000650 -0.000965  0.000000
+   0.000000  0.000000  0.000252
+  The components of the vector are:    5.577808   -9.661047    0.000000
+  Trace= -0.000987
+  
+  For jatom= 129 ,with type=   1
+  -0.001311  0.000051  0.000000
+  -0.000051  0.000072  0.000000
+   0.000000  0.000000  0.000252
+  The components of the vector are:   11.155616    0.000000    0.000000
+  Trace= -0.000987
+  
+  For jatom= 145 ,with type=   1
+  -0.000273 -0.000650  0.000000
+  -0.000548 -0.000965  0.000000
+   0.000000  0.000000  0.000252
+  The components of the vector are:    5.577808    9.661047    0.000000
+  Trace= -0.000987
+  
+  For jatom= 385 ,with type=   1
+  -0.001311 -0.000051  0.000000
+   0.000051  0.000072  0.000000
+   0.000000  0.000000  0.000252
+  The components of the vector are:  -11.155616    0.000000    0.000000
+  Trace= -0.000987
+  
+  For jatom= 433 ,with type=   1
+  -0.000274 -0.000548  0.000000
+  -0.000650 -0.000965  0.000000
+   0.000000  0.000000  0.000252
+  The components of the vector are:   -5.577808   -9.661047    0.000000
+  Trace= -0.000987
+  
+ ======== NEW SHELL (ishell=  10): There are  12 atoms on this shell at distance=12.420074
+  For jatom=  18 ,with type=   2
+   0.000155 -0.000217 -0.000042
+  -0.000217  0.000439 -0.000162
+  -0.000042 -0.000161 -0.000275
+  The components of the vector are:   -2.788904   11.271221    4.409062
+  Trace=  0.000318
+  
+  For jatom=  24 ,with type=   2
+   0.000155 -0.000217  0.000042
+  -0.000217  0.000439  0.000162
+   0.000042  0.000161 -0.000275
+  The components of the vector are:   -2.788904   11.271221   -4.409062
+  Trace=  0.000318
+  
+  For jatom=  50 ,with type=   2
+   0.000179 -0.000232 -0.000161
+  -0.000231  0.000414  0.000044
+  -0.000161  0.000045 -0.000275
+  The components of the vector are:    8.366712   -8.050872    4.409062
+  Trace=  0.000318
+  
+  For jatom=  56 ,with type=   2
+   0.000179 -0.000232  0.000161
+  -0.000231  0.000414 -0.000044
+   0.000161 -0.000045 -0.000275
+  The components of the vector are:    8.366712   -8.050872   -4.409062
+  Trace=  0.000318
+  
+  For jatom=  82 ,with type=   2
+   0.000155  0.000217  0.000042
+   0.000217  0.000439 -0.000162
+   0.000042 -0.000161 -0.000275
+  The components of the vector are:    2.788904   11.271221    4.409062
+  Trace=  0.000318
+  
+  For jatom=  88 ,with type=   2
+   0.000155  0.000217 -0.000042
+   0.000217  0.000439  0.000162
+  -0.000042  0.000161 -0.000275
+  The components of the vector are:    2.788904   11.271221   -4.409062
+  Trace=  0.000318
+  
+  For jatom= 122 ,with type=   2
+   0.000556 -0.000014 -0.000119
+  -0.000014  0.000038  0.000117
+  -0.000119  0.000117 -0.000275
+  The components of the vector are:   11.155616   -3.220349    4.409062
+  Trace=  0.000318
+  
+  For jatom= 128 ,with type=   2
+   0.000556 -0.000014  0.000119
+  -0.000014  0.000038 -0.000117
+   0.000119 -0.000117 -0.000275
+  The components of the vector are:   11.155616   -3.220349   -4.409062
+  Trace=  0.000318
+  
+  For jatom= 370 ,with type=   2
+   0.000179  0.000232  0.000161
+   0.000231  0.000414  0.000044
+   0.000161  0.000045 -0.000275
+  The components of the vector are:   -8.366712   -8.050872    4.409062
+  Trace=  0.000318
+  
+  For jatom= 376 ,with type=   2
+   0.000179  0.000232 -0.000161
+   0.000231  0.000414 -0.000044
+  -0.000161 -0.000045 -0.000275
+  The components of the vector are:   -8.366712   -8.050872   -4.409062
+  Trace=  0.000318
+  
+  For jatom= 378 ,with type=   2
+   0.000556  0.000014  0.000119
+   0.000014  0.000038  0.000117
+   0.000119  0.000117 -0.000275
+  The components of the vector are:  -11.155616   -3.220349    4.409062
+  Trace=  0.000318
+  
+  For jatom= 384 ,with type=   2
+   0.000556  0.000014 -0.000119
+   0.000014  0.000038 -0.000117
+  -0.000119 -0.000117 -0.000275
+  The components of the vector are:  -11.155616   -3.220349   -4.409062
+  Trace=  0.000318
+  
+ ======== NEW SHELL (ishell=  16): There are  12 atoms on this shell at distance=13.080334
+  For jatom=  83 ,with type=   1
+  -0.000019  0.000000  0.000000
+   0.000000  0.000074  0.000079
+   0.000000 -0.000042  0.000068
+  The components of the vector are:    0.000000    9.661047    8.818124
+  Trace=  0.000123
+  
+  For jatom=  87 ,with type=   1
+  -0.000019  0.000000  0.000000
+   0.000000  0.000074 -0.000079
+   0.000000  0.000042  0.000068
+  The components of the vector are:    0.000000    9.661047   -8.818124
+  Trace=  0.000123
+  
+  For jatom= 123 ,with type=   1
+   0.000051 -0.000040  0.000069
+  -0.000040  0.000004 -0.000040
+  -0.000036  0.000021  0.000068
+  The components of the vector are:    8.366712   -4.830523    8.818124
+  Trace=  0.000123
+  
+  For jatom= 127 ,with type=   1
+   0.000051 -0.000040 -0.000069
+  -0.000040  0.000004  0.000040
+   0.000036 -0.000021  0.000068
+  The components of the vector are:    8.366712   -4.830523   -8.818124
+  Trace=  0.000123
+  
+  For jatom= 139 ,with type=   1
+   0.000051  0.000040 -0.000036
+   0.000040  0.000004 -0.000021
+   0.000069  0.000040  0.000068
+  The components of the vector are:    8.366712    4.830523    8.818124
+  Trace=  0.000123
+  
+  For jatom= 143 ,with type=   1
+   0.000051  0.000040  0.000036
+   0.000040  0.000004  0.000021
+  -0.000069 -0.000040  0.000068
+  The components of the vector are:    8.366712    4.830523   -8.818124
+  Trace=  0.000123
+  
+  For jatom= 443 ,with type=   1
+   0.000051  0.000040 -0.000069
+   0.000040  0.000004 -0.000040
+   0.000036  0.000021  0.000068
+  The components of the vector are:   -8.366712   -4.830523    8.818124
+  Trace=  0.000123
+  
+  For jatom= 447 ,with type=   1
+   0.000051  0.000040  0.000069
+   0.000040  0.000004  0.000040
+  -0.000036 -0.000021  0.000068
+  The components of the vector are:   -8.366712   -4.830523   -8.818124
+  Trace=  0.000123
+  
+  For jatom= 459 ,with type=   1
+   0.000051 -0.000040  0.000036
+  -0.000040  0.000004 -0.000021
+  -0.000069  0.000040  0.000068
+  The components of the vector are:   -8.366712    4.830523    8.818124
+  Trace=  0.000123
+  
+  For jatom= 463 ,with type=   1
+   0.000051 -0.000040 -0.000036
+  -0.000040  0.000004  0.000021
+   0.000069 -0.000040  0.000068
+  The components of the vector are:   -8.366712    4.830523   -8.818124
+  Trace=  0.000123
+  
+  For jatom= 499 ,with type=   1
+  -0.000019  0.000000  0.000000
+   0.000000  0.000074  0.000042
+   0.000000 -0.000079  0.000068
+  The components of the vector are:    0.000000   -9.661047    8.818124
+  Trace=  0.000123
+  
+  For jatom= 503 ,with type=   1
+  -0.000019  0.000000  0.000000
+   0.000000  0.000074 -0.000042
+   0.000000  0.000079  0.000068
+  The components of the vector are:    0.000000   -9.661047   -8.818124
+  Trace=  0.000123
+  
+ ======== NEW SHELL (ishell=   4): There are   6 atoms on this shell at distance=13.613563
+  For jatom=   4 ,with type=   2
+  -0.000065 -0.000041  0.000290
+  -0.000041 -0.000018  0.000167
+   0.000290  0.000168  0.000443
+  The components of the vector are:    2.788904    1.610174   13.227186
+  Trace=  0.000361
+  
+  For jatom=   6 ,with type=   2
+  -0.000065 -0.000041 -0.000290
+  -0.000041 -0.000018 -0.000168
+  -0.000290 -0.000167  0.000443
+  The components of the vector are:    2.788904    1.610174  -13.227186
+  Trace=  0.000361
+  
+  For jatom= 452 ,with type=   2
+  -0.000065  0.000041 -0.000290
+   0.000041 -0.000018  0.000167
+  -0.000290  0.000168  0.000443
+  The components of the vector are:   -2.788904    1.610174   13.227186
+  Trace=  0.000361
+  
+  For jatom= 454 ,with type=   2
+  -0.000065  0.000041  0.000290
+   0.000041 -0.000018 -0.000167
+   0.000290 -0.000168  0.000443
+  The components of the vector are:   -2.788904    1.610174  -13.227186
+  Trace=  0.000361
+  
+  For jatom= 508 ,with type=   2
+   0.000006  0.000000  0.000000
+   0.000000 -0.000088 -0.000335
+   0.000000 -0.000335  0.000443
+  The components of the vector are:    0.000000   -3.220349   13.227186
+  Trace=  0.000361
+  
+  For jatom= 510 ,with type=   2
+   0.000006  0.000000  0.000000
+   0.000000 -0.000088  0.000335
+   0.000000  0.000335  0.000443
+  The components of the vector are:    0.000000   -3.220349  -13.227186
+  Trace=  0.000361
+  
+ ======== NEW SHELL (ishell=  21): There are   6 atoms on this shell at distance=13.615072
+  For jatom= 138 ,with type=   2
+  -0.000216 -0.000133 -0.000028
+  -0.000133 -0.000062 -0.000016
+  -0.000028 -0.000016  0.000057
+  The components of the vector are:   11.155616    6.440698    4.409062
+  Trace= -0.000221
+  
+  For jatom= 144 ,with type=   2
+  -0.000216 -0.000133  0.000028
+  -0.000133 -0.000062  0.000016
+   0.000028  0.000016  0.000057
+  The components of the vector are:   11.155616    6.440698   -4.409062
+  Trace= -0.000221
+  
+  For jatom= 394 ,with type=   2
+  -0.000216  0.000133  0.000028
+   0.000133 -0.000062 -0.000016
+   0.000028 -0.000016  0.000057
+  The components of the vector are:  -11.155616    6.440698    4.409062
+  Trace= -0.000221
+  
+  For jatom= 400 ,with type=   2
+  -0.000216  0.000133 -0.000028
+   0.000133 -0.000062  0.000016
+  -0.000028  0.000016  0.000057
+  The components of the vector are:  -11.155616    6.440698   -4.409062
+  Trace= -0.000221
+  
+  For jatom= 426 ,with type=   2
+   0.000015  0.000000  0.000000
+   0.000000 -0.000293  0.000033
+   0.000000  0.000033  0.000057
+  The components of the vector are:    0.000000  -12.881396    4.409062
+  Trace= -0.000221
+  
+  For jatom= 432 ,with type=   2
+   0.000015  0.000000  0.000000
+   0.000000 -0.000293 -0.000033
+   0.000000 -0.000033  0.000057
+  The components of the vector are:    0.000000  -12.881396   -4.409062
+  Trace= -0.000221
+  
+ ======== NEW SHELL (ishell=  11): There are  12 atoms on this shell at distance=14.219954
+  For jatom=  19 ,with type=   1
+  -0.000046 -0.000038  0.000032
+   0.000178 -0.000127 -0.000094
+   0.000065 -0.000074 -0.000094
+  The components of the vector are:   -5.577808    9.661047    8.818124
+  Trace= -0.000266
+  
+  For jatom=  23 ,with type=   1
+  -0.000046 -0.000038 -0.000032
+   0.000178 -0.000127  0.000094
+  -0.000065  0.000074 -0.000094
+  The components of the vector are:   -5.577808    9.661047   -8.818124
+  Trace= -0.000266
+  
+  For jatom=  51 ,with type=   1
+  -0.000045  0.000178 -0.000065
+  -0.000038 -0.000127  0.000074
+  -0.000032  0.000094 -0.000094
+  The components of the vector are:    5.577808   -9.661047    8.818124
+  Trace= -0.000266
+  
+  For jatom=  55 ,with type=   1
+  -0.000045  0.000178  0.000065
+  -0.000038 -0.000127 -0.000074
+   0.000032 -0.000094 -0.000094
+  The components of the vector are:    5.577808   -9.661047   -8.818124
+  Trace= -0.000266
+  
+  For jatom= 131 ,with type=   1
+  -0.000167 -0.000108 -0.000097
+   0.000108 -0.000005  0.000019
+  -0.000097 -0.000019 -0.000094
+  The components of the vector are:   11.155616    0.000000    8.818124
+  Trace= -0.000266
+  
+  For jatom= 135 ,with type=   1
+  -0.000167 -0.000108  0.000097
+   0.000108 -0.000005 -0.000019
+   0.000097  0.000019 -0.000094
+  The components of the vector are:   11.155616    0.000000   -8.818124
+  Trace= -0.000266
+  
+  For jatom= 147 ,with type=   1
+  -0.000046  0.000038 -0.000032
+  -0.000178 -0.000127 -0.000094
+  -0.000065 -0.000074 -0.000094
+  The components of the vector are:    5.577808    9.661047    8.818124
+  Trace= -0.000266
+  
+  For jatom= 151 ,with type=   1
+  -0.000046  0.000038  0.000032
+  -0.000178 -0.000127  0.000094
+   0.000065  0.000074 -0.000094
+  The components of the vector are:    5.577808    9.661047   -8.818124
+  Trace= -0.000266
+  
+  For jatom= 387 ,with type=   1
+  -0.000167  0.000108  0.000097
+  -0.000108 -0.000005  0.000019
+   0.000097 -0.000019 -0.000094
+  The components of the vector are:  -11.155616    0.000000    8.818124
+  Trace= -0.000266
+  
+  For jatom= 391 ,with type=   1
+  -0.000167  0.000108 -0.000097
+  -0.000108 -0.000005 -0.000019
+  -0.000097  0.000019 -0.000094
+  The components of the vector are:  -11.155616    0.000000   -8.818124
+  Trace= -0.000266
+  
+  For jatom= 435 ,with type=   1
+  -0.000045 -0.000178  0.000065
+   0.000038 -0.000127  0.000074
+   0.000032  0.000094 -0.000094
+  The components of the vector are:   -5.577808   -9.661047    8.818124
+  Trace= -0.000266
+  
+  For jatom= 439 ,with type=   1
+  -0.000045 -0.000178 -0.000065
+   0.000038 -0.000127 -0.000074
+  -0.000032 -0.000094 -0.000094
+  The components of the vector are:   -5.577808   -9.661047   -8.818124
+  Trace= -0.000266
+  
+ ======== NEW SHELL (ishell=   8): There are   6 atoms on this shell at distance=14.711935
+  For jatom=  12 ,with type=   2
+  -0.000087  0.000000  0.000000
+   0.000000  0.000092  0.000107
+   0.000000  0.000107 -0.000041
+  The components of the vector are:    0.000000    6.440698   13.227186
+  Trace= -0.000036
+  
+  For jatom=  14 ,with type=   2
+  -0.000087  0.000000  0.000000
+   0.000000  0.000092 -0.000107
+   0.000000 -0.000107 -0.000041
+  The components of the vector are:    0.000000    6.440698  -13.227186
+  Trace= -0.000036
+  
+  For jatom=  60 ,with type=   2
+   0.000047 -0.000078  0.000093
+  -0.000078 -0.000042 -0.000054
+   0.000093 -0.000053 -0.000041
+  The components of the vector are:    5.577808   -3.220349   13.227186
+  Trace= -0.000036
+  
+  For jatom=  62 ,with type=   2
+   0.000047 -0.000078 -0.000093
+  -0.000078 -0.000042  0.000054
+  -0.000093  0.000053 -0.000041
+  The components of the vector are:    5.577808   -3.220349  -13.227186
+  Trace= -0.000036
+  
+  For jatom= 444 ,with type=   2
+   0.000047  0.000078 -0.000093
+   0.000078 -0.000042 -0.000053
+  -0.000093 -0.000054 -0.000041
+  The components of the vector are:   -5.577808   -3.220349   13.227186
+  Trace= -0.000036
+  
+  For jatom= 446 ,with type=   2
+   0.000047  0.000078  0.000093
+   0.000078 -0.000042  0.000054
+   0.000093  0.000053 -0.000041
+  The components of the vector are:   -5.577808   -3.220349  -13.227186
+  Trace= -0.000036
+  
+ ======== NEW SHELL (ishell=  20): There are  12 atoms on this shell at distance=14.713332
+  For jatom= 130 ,with type=   2
+  -0.000148 -0.000018  0.000077
+  -0.000018  0.000061 -0.000010
+   0.000077 -0.000010 -0.000026
+  The components of the vector are:   13.944520    1.610174    4.409062
+  Trace= -0.000113
+  
+  For jatom= 136 ,with type=   2
+  -0.000148 -0.000018 -0.000077
+  -0.000018  0.000061  0.000010
+  -0.000077  0.000010 -0.000026
+  The components of the vector are:   13.944520    1.610174   -4.409062
+  Trace= -0.000113
+  
+  For jatom= 146 ,with type=   2
+  -0.000007 -0.000100  0.000030
+  -0.000099 -0.000080  0.000072
+   0.000030  0.000071 -0.000026
+  The components of the vector are:    8.366712   11.271221    4.409062
+  Trace= -0.000113
+  
+  For jatom= 152 ,with type=   2
+  -0.000007 -0.000100 -0.000030
+  -0.000099 -0.000080 -0.000072
+  -0.000030 -0.000071 -0.000026
+  The components of the vector are:    8.366712   11.271221   -4.409062
+  Trace= -0.000113
+  
+  For jatom= 322 ,with type=   2
+  -0.000148  0.000018 -0.000077
+   0.000018  0.000061 -0.000010
+  -0.000077 -0.000010 -0.000026
+  The components of the vector are:  -13.944520    1.610174    4.409062
+  Trace= -0.000113
+  
+  For jatom= 328 ,with type=   2
+  -0.000148  0.000018  0.000077
+   0.000018  0.000061  0.000010
+   0.000077  0.000010 -0.000026
+  The components of the vector are:  -13.944520    1.610174   -4.409062
+  Trace= -0.000113
+  
+  For jatom= 362 ,with type=   2
+   0.000024 -0.000081 -0.000047
+  -0.000082 -0.000111 -0.000062
+  -0.000047 -0.000062 -0.000026
+  The components of the vector are:   -5.577808  -12.881396    4.409062
+  Trace= -0.000113
+  
+  For jatom= 368 ,with type=   2
+   0.000024 -0.000081  0.000047
+  -0.000082 -0.000111  0.000062
+   0.000047  0.000062 -0.000026
+  The components of the vector are:   -5.577808  -12.881396   -4.409062
+  Trace= -0.000113
+  
+  For jatom= 466 ,with type=   2
+  -0.000007  0.000100 -0.000030
+   0.000099 -0.000080  0.000072
+  -0.000030  0.000071 -0.000026
+  The components of the vector are:   -8.366712   11.271221    4.409062
+  Trace= -0.000113
+  
+  For jatom= 472 ,with type=   2
+  -0.000007  0.000100  0.000030
+   0.000099 -0.000080 -0.000072
+   0.000030 -0.000071 -0.000026
+  The components of the vector are:   -8.366712   11.271221   -4.409062
+  Trace= -0.000113
+  
+  For jatom= 490 ,with type=   2
+   0.000024  0.000081  0.000047
+   0.000082 -0.000111 -0.000062
+   0.000047 -0.000062 -0.000026
+  The components of the vector are:    5.577808  -12.881396    4.409062
+  Trace= -0.000113
+  
+  For jatom= 496 ,with type=   2
+   0.000024  0.000081 -0.000047
+   0.000082 -0.000111  0.000062
+  -0.000047  0.000062 -0.000026
+  The components of the vector are:    5.577808  -12.881396   -4.409062
+  Trace= -0.000113
+  
+ ======== NEW SHELL (ishell=  17): There are  12 atoms on this shell at distance=14.757493
+  For jatom=  89 ,with type=   1
+   0.000016  0.000110  0.000000
+  -0.000028 -0.000063  0.000000
+   0.000000  0.000000  0.000035
+  The components of the vector are:   -2.788904   14.491570    0.000000
+  Trace= -0.000013
+  
+  For jatom= 113 ,with type=   1
+  -0.000008 -0.000014  0.000000
+   0.000123 -0.000040  0.000000
+   0.000000  0.000000  0.000035
+  The components of the vector are:   11.155616   -9.661047    0.000000
+  Trace= -0.000013
+  
+  For jatom= 153 ,with type=   1
+   0.000016 -0.000110  0.000000
+   0.000028 -0.000063  0.000000
+   0.000000  0.000000  0.000035
+  The components of the vector are:    2.788904   14.491570    0.000000
+  Trace= -0.000013
+  
+  For jatom= 185 ,with type=   1
+  -0.000079  0.000082  0.000000
+  -0.000055  0.000031  0.000000
+   0.000000  0.000000  0.000035
+  The components of the vector are:   13.944520   -4.830523    0.000000
+  Trace= -0.000013
+  
+  For jatom= 201 ,with type=   1
+  -0.000079  0.000055  0.000000
+  -0.000082  0.000031  0.000000
+   0.000000  0.000000  0.000035
+  The components of the vector are:   13.944520    4.830523    0.000000
+  Trace= -0.000013
+  
+  For jatom= 209 ,with type=   1
+  -0.000008 -0.000123  0.000000
+   0.000014 -0.000040  0.000000
+   0.000000  0.000000  0.000035
+  The components of the vector are:   11.155616    9.661047    0.000000
+  Trace= -0.000013
+  
+  For jatom= 369 ,with type=   1
+  -0.000008  0.000014  0.000000
+  -0.000123 -0.000040  0.000000
+   0.000000  0.000000  0.000035
+  The components of the vector are:  -11.155616   -9.661047    0.000000
+  Trace= -0.000013
+  
+  For jatom= 377 ,with type=   1
+  -0.000079 -0.000082  0.000000
+   0.000055  0.000031  0.000000
+   0.000000  0.000000  0.000035
+  The components of the vector are:  -13.944520   -4.830523    0.000000
+  Trace= -0.000013
+  
+  For jatom= 393 ,with type=   1
+  -0.000079 -0.000055  0.000000
+   0.000082  0.000031  0.000000
+   0.000000  0.000000  0.000035
+  The components of the vector are:  -13.944520    4.830523    0.000000
+  Trace= -0.000013
+  
+  For jatom= 425 ,with type=   1
+   0.000016  0.000028  0.000000
+  -0.000110 -0.000063  0.000000
+   0.000000  0.000000  0.000035
+  The components of the vector are:   -2.788904  -14.491570    0.000000
+  Trace= -0.000013
+  
+  For jatom= 465 ,with type=   1
+  -0.000008  0.000123  0.000000
+  -0.000014 -0.000040  0.000000
+   0.000000  0.000000  0.000035
+  The components of the vector are:  -11.155616    9.661047    0.000000
+  Trace= -0.000013
+  
+  For jatom= 489 ,with type=   1
+   0.000016 -0.000028  0.000000
+   0.000110 -0.000063  0.000000
+   0.000000  0.000000  0.000035
+  The components of the vector are:    2.788904  -14.491570    0.000000
+  Trace= -0.000013
+  
+ ======== NEW SHELL (ishell=  14): There are  12 atoms on this shell at distance=15.733816
+  For jatom=  68 ,with type=   2
+   0.000032  0.000001  0.000009
+   0.000001  0.000017  0.000084
+   0.000009  0.000083  0.000123
+  The components of the vector are:    8.366712    1.610174   13.227186
+  Trace=  0.000172
+  
+  For jatom=  70 ,with type=   2
+   0.000032  0.000001 -0.000009
+   0.000001  0.000017 -0.000084
+  -0.000009 -0.000083  0.000123
+  The components of the vector are:    8.366712    1.610174  -13.227186
+  Trace=  0.000172
+  
+  For jatom=  76 ,with type=   2
+   0.000021  0.000007  0.000077
+   0.000007  0.000027 -0.000034
+   0.000077 -0.000034  0.000123
+  The components of the vector are:    5.577808    6.440698   13.227186
+  Trace=  0.000172
+  
+  For jatom=  78 ,with type=   2
+   0.000021  0.000007 -0.000077
+   0.000007  0.000027  0.000034
+  -0.000077  0.000034  0.000123
+  The components of the vector are:    5.577808    6.440698  -13.227186
+  Trace=  0.000172
+  
+  For jatom= 388 ,with type=   2
+   0.000032 -0.000001 -0.000009
+  -0.000001  0.000017  0.000084
+  -0.000009  0.000083  0.000123
+  The components of the vector are:   -8.366712    1.610174   13.227186
+  Trace=  0.000172
+  
+  For jatom= 390 ,with type=   2
+   0.000032 -0.000001  0.000009
+  -0.000001  0.000017 -0.000084
+   0.000009 -0.000083  0.000123
+  The components of the vector are:   -8.366712    1.610174  -13.227186
+  Trace=  0.000172
+  
+  For jatom= 436 ,with type=   2
+   0.000020  0.000006  0.000068
+   0.000006  0.000029 -0.000050
+   0.000067 -0.000050  0.000123
+  The components of the vector are:   -2.788904   -8.050872   13.227186
+  Trace=  0.000172
+  
+  For jatom= 438 ,with type=   2
+   0.000020  0.000006 -0.000068
+   0.000006  0.000029  0.000050
+  -0.000067  0.000050  0.000123
+  The components of the vector are:   -2.788904   -8.050872  -13.227186
+  Trace=  0.000172
+  
+  For jatom= 460 ,with type=   2
+   0.000021 -0.000007 -0.000077
+  -0.000007  0.000027 -0.000034
+  -0.000077 -0.000034  0.000123
+  The components of the vector are:   -5.577808    6.440698   13.227186
+  Trace=  0.000172
+  
+  For jatom= 462 ,with type=   2
+   0.000021 -0.000007  0.000077
+  -0.000007  0.000027  0.000034
+   0.000077  0.000034  0.000123
+  The components of the vector are:   -5.577808    6.440698  -13.227186
+  Trace=  0.000172
+  
+  For jatom= 500 ,with type=   2
+   0.000020 -0.000006 -0.000068
+  -0.000006  0.000029 -0.000050
+  -0.000067 -0.000050  0.000123
+  The components of the vector are:    2.788904   -8.050872   13.227186
+  Trace=  0.000172
+  
+  For jatom= 502 ,with type=   2
+   0.000020 -0.000006  0.000068
+  -0.000006  0.000029  0.000050
+   0.000067  0.000050  0.000123
+  The components of the vector are:    2.788904   -8.050872  -13.227186
+  Trace=  0.000172
+  
+ ======== NEW SHELL (ishell=  18): There are   6 atoms on this shell at distance=16.694490
+  For jatom=  90 ,with type=   2
+   0.000053  0.000000  0.000000
+   0.000000 -0.000056  0.000061
+   0.000000  0.000061  0.000007
+  The components of the vector are:    0.000000   16.101745    4.409062
+  Trace=  0.000004
+  
+  For jatom=  96 ,with type=   2
+   0.000053  0.000000  0.000000
+   0.000000 -0.000056 -0.000061
+   0.000000 -0.000061  0.000007
+  The components of the vector are:    0.000000   16.101745   -4.409062
+  Trace=  0.000004
+  
+  For jatom= 114 ,with type=   2
+  -0.000028  0.000047  0.000053
+   0.000047  0.000026 -0.000031
+   0.000053 -0.000031  0.000007
+  The components of the vector are:   13.944520   -8.050872    4.409062
+  Trace=  0.000004
+  
+  For jatom= 120 ,with type=   2
+  -0.000028  0.000047 -0.000053
+   0.000047  0.000026  0.000031
+  -0.000053  0.000031  0.000007
+  The components of the vector are:   13.944520   -8.050872   -4.409062
+  Trace=  0.000004
+  
+  For jatom= 306 ,with type=   2
+  -0.000028 -0.000047 -0.000053
+  -0.000047  0.000026 -0.000031
+  -0.000053 -0.000031  0.000007
+  The components of the vector are:  -13.944520   -8.050872    4.409062
+  Trace=  0.000004
+  
+  For jatom= 312 ,with type=   2
+  -0.000028 -0.000047  0.000053
+  -0.000047  0.000026  0.000031
+   0.000053  0.000031  0.000007
+  The components of the vector are:  -13.944520   -8.050872   -4.409062
+  Trace=  0.000004
+  
+ ======== NEW SHELL (ishell=  12): There are   6 atoms on this shell at distance=16.733424
+  For jatom=  25 ,with type=   1
+   0.000005 -0.000012  0.000000
+  -0.000012  0.000020  0.000000
+   0.000000  0.000000  0.000043
+  The components of the vector are:   -8.366712   14.491570    0.000000
+  Trace=  0.000068
+  
+  For jatom=  41 ,with type=   1
+   0.000005 -0.000012  0.000000
+  -0.000012  0.000020  0.000000
+   0.000000  0.000000  0.000043
+  The components of the vector are:    8.366712  -14.491570    0.000000
+  Trace=  0.000068
+  
+  For jatom= 193 ,with type=   1
+   0.000027  0.000000  0.000000
+   0.000000 -0.000002  0.000000
+   0.000000  0.000000  0.000043
+  The components of the vector are:   16.733424    0.000000    0.000000
+  Trace=  0.000068
+  
+  For jatom= 217 ,with type=   1
+   0.000005  0.000012  0.000000
+   0.000012  0.000020  0.000000
+   0.000000  0.000000  0.000043
+  The components of the vector are:    8.366712   14.491570    0.000000
+  Trace=  0.000068
+  
+  For jatom= 321 ,with type=   1
+   0.000027  0.000000  0.000000
+   0.000000 -0.000002  0.000000
+   0.000000  0.000000  0.000043
+  The components of the vector are:  -16.733424    0.000000    0.000000
+  Trace=  0.000068
+  
+  For jatom= 361 ,with type=   1
+   0.000005  0.000012  0.000000
+   0.000012  0.000020  0.000000
+   0.000000  0.000000  0.000043
+  The components of the vector are:   -8.366712  -14.491570    0.000000
+  Trace=  0.000068
+  
+ ======== NEW SHELL (ishell=  19): There are  24 atoms on this shell at distance=17.191361
+  For jatom=  91 ,with type=   1
+  -0.000040  0.000009  0.000035
+   0.000002 -0.000009 -0.000020
+  -0.000015  0.000015  0.000021
+  The components of the vector are:   -2.788904   14.491570    8.818124
+  Trace= -0.000028
+  
+  For jatom=  95 ,with type=   1
+  -0.000040  0.000009 -0.000035
+   0.000002 -0.000009  0.000020
+   0.000015 -0.000015  0.000021
+  The components of the vector are:   -2.788904   14.491570   -8.818124
+  Trace= -0.000028
+  
+  For jatom= 115 ,with type=   1
+  -0.000012 -0.000014  0.000000
+  -0.000007 -0.000037  0.000040
+   0.000006 -0.000020  0.000021
+  The components of the vector are:   11.155616   -9.661047    8.818124
+  Trace= -0.000028
+  
+  For jatom= 119 ,with type=   1
+  -0.000012 -0.000014  0.000000
+  -0.000007 -0.000037 -0.000040
+  -0.000006  0.000020  0.000021
+  The components of the vector are:   11.155616   -9.661047   -8.818124
+  Trace= -0.000028
+  
+  For jatom= 155 ,with type=   1
+  -0.000040 -0.000009 -0.000035
+  -0.000002 -0.000009 -0.000020
+   0.000015  0.000015  0.000021
+  The components of the vector are:    2.788904   14.491570    8.818124
+  Trace= -0.000028
+  
+  For jatom= 159 ,with type=   1
+  -0.000040 -0.000009  0.000035
+  -0.000002 -0.000009  0.000020
+  -0.000015 -0.000015  0.000021
+  The components of the vector are:    2.788904   14.491570   -8.818124
+  Trace= -0.000028
+  
+  For jatom= 187 ,with type=   1
+  -0.000022 -0.000013 -0.000035
+  -0.000019 -0.000027 -0.000020
+   0.000021  0.000005  0.000021
+  The components of the vector are:   13.944520   -4.830523    8.818124
+  Trace= -0.000028
+  
+  For jatom= 191 ,with type=   1
+  -0.000022 -0.000013  0.000035
+  -0.000019 -0.000027  0.000020
+  -0.000021 -0.000005  0.000021
+  The components of the vector are:   13.944520   -4.830523   -8.818124
+  Trace= -0.000028
+  
+  For jatom= 203 ,with type=   1
+  -0.000022  0.000019  0.000021
+   0.000013 -0.000027 -0.000005
+  -0.000035  0.000020  0.000021
+  The components of the vector are:   13.944520    4.830523    8.818124
+  Trace= -0.000028
+  
+  For jatom= 207 ,with type=   1
+  -0.000022  0.000019 -0.000021
+   0.000013 -0.000027  0.000005
+   0.000035 -0.000020  0.000021
+  The components of the vector are:   13.944520    4.830523   -8.818124
+  Trace= -0.000028
+  
+  For jatom= 211 ,with type=   1
+  -0.000012  0.000007  0.000006
+   0.000014 -0.000037  0.000020
+   0.000000 -0.000040  0.000021
+  The components of the vector are:   11.155616    9.661047    8.818124
+  Trace= -0.000028
+  
+  For jatom= 215 ,with type=   1
+  -0.000012  0.000007 -0.000006
+   0.000014 -0.000037 -0.000020
+   0.000000  0.000040  0.000021
+  The components of the vector are:   11.155616    9.661047   -8.818124
+  Trace= -0.000028
+  
+  For jatom= 371 ,with type=   1
+  -0.000012  0.000014  0.000000
+   0.000007 -0.000037  0.000040
+  -0.000006 -0.000020  0.000021
+  The components of the vector are:  -11.155616   -9.661047    8.818124
+  Trace= -0.000028
+  
+  For jatom= 375 ,with type=   1
+  -0.000012  0.000014  0.000000
+   0.000007 -0.000037 -0.000040
+   0.000006  0.000020  0.000021
+  The components of the vector are:  -11.155616   -9.661047   -8.818124
+  Trace= -0.000028
+  
+  For jatom= 379 ,with type=   1
+  -0.000022  0.000013  0.000035
+   0.000019 -0.000027 -0.000020
+  -0.000021  0.000005  0.000021
+  The components of the vector are:  -13.944520   -4.830523    8.818124
+  Trace= -0.000028
+  
+  For jatom= 383 ,with type=   1
+  -0.000022  0.000013 -0.000035
+   0.000019 -0.000027  0.000020
+   0.000021 -0.000005  0.000021
+  The components of the vector are:  -13.944520   -4.830523   -8.818124
+  Trace= -0.000028
+  
+  For jatom= 395 ,with type=   1
+  -0.000022 -0.000019 -0.000021
+  -0.000013 -0.000027 -0.000005
+   0.000035  0.000020  0.000021
+  The components of the vector are:  -13.944520    4.830523    8.818124
+  Trace= -0.000028
+  
+  For jatom= 399 ,with type=   1
+  -0.000022 -0.000019  0.000021
+  -0.000013 -0.000027  0.000005
+  -0.000035 -0.000020  0.000021
+  The components of the vector are:  -13.944520    4.830523   -8.818124
+  Trace= -0.000028
+  
+  For jatom= 427 ,with type=   1
+  -0.000040 -0.000002 -0.000015
+  -0.000009 -0.000009 -0.000015
+   0.000035  0.000020  0.000021
+  The components of the vector are:   -2.788904  -14.491570    8.818124
+  Trace= -0.000028
+  
+  For jatom= 431 ,with type=   1
+  -0.000040 -0.000002  0.000015
+  -0.000009 -0.000009  0.000015
+  -0.000035 -0.000020  0.000021
+  The components of the vector are:   -2.788904  -14.491570   -8.818124
+  Trace= -0.000028
+  
+  For jatom= 467 ,with type=   1
+  -0.000012 -0.000007 -0.000006
+  -0.000014 -0.000037  0.000020
+   0.000000 -0.000040  0.000021
+  The components of the vector are:  -11.155616    9.661047    8.818124
+  Trace= -0.000028
+  
+  For jatom= 471 ,with type=   1
+  -0.000012 -0.000007  0.000006
+  -0.000014 -0.000037 -0.000020
+   0.000000  0.000040  0.000021
+  The components of the vector are:  -11.155616    9.661047   -8.818124
+  Trace= -0.000028
+  
+  For jatom= 491 ,with type=   1
+  -0.000040  0.000002  0.000015
+   0.000009 -0.000009 -0.000015
+  -0.000035  0.000020  0.000021
+  The components of the vector are:    2.788904  -14.491570    8.818124
+  Trace= -0.000028
+  
+  For jatom= 495 ,with type=   1
+  -0.000040  0.000002 -0.000015
+   0.000009 -0.000009  0.000015
+   0.000035 -0.000020  0.000021
+  The components of the vector are:    2.788904  -14.491570   -8.818124
+  Trace= -0.000028
+  
+ ############# List of (second order) IFC for the reference atom=   2
+ ======== NEW SHELL (ishell=   1): There are   1 atoms on this shell at distance= 0.000000
+  For jatom=   2 ,with type=   2
+   0.057246  0.000000  0.000000
+   0.000000  0.057246  0.000000
+   0.000000  0.000000  0.057936
+  The components of the vector are:    0.000000    0.000000    0.000000
+  Trace=  0.172428
+  
+ ======== NEW SHELL (ishell=   2): There are   6 atoms on this shell at distance= 5.459897
+  For jatom=   1 ,with type=   1
+  -0.005860 -0.003737 -0.007129
+  -0.003737 -0.001545 -0.004116
+  -0.007130 -0.004116 -0.006271
+  The components of the vector are:   -2.788904   -1.610174   -4.409062
+  Trace= -0.013676
+  
+  For jatom=   3 ,with type=   1
+  -0.005860 -0.003737  0.007129
+  -0.003737 -0.001545  0.004116
+   0.007129  0.004116 -0.006271
+  The components of the vector are:   -2.788904   -1.610174    4.409062
+  Trace= -0.013676
+  
+  For jatom=  65 ,with type=   1
+  -0.005860  0.003737  0.007130
+   0.003737 -0.001545 -0.004116
+   0.007129 -0.004116 -0.006271
+  The components of the vector are:    2.788904   -1.610174   -4.409062
+  Trace= -0.013676
+  
+  For jatom=  67 ,with type=   1
+  -0.005860  0.003737 -0.007130
+   0.003737 -0.001545  0.004116
+  -0.007129  0.004116 -0.006271
+  The components of the vector are:    2.788904   -1.610174    4.409062
+  Trace= -0.013676
+  
+  For jatom=  73 ,with type=   1
+   0.000613  0.000000  0.000000
+   0.000000 -0.008018  0.008232
+   0.000000  0.008232 -0.006271
+  The components of the vector are:    0.000000    3.220349   -4.409062
+  Trace= -0.013676
+  
+  For jatom=  75 ,with type=   1
+   0.000613  0.000000  0.000000
+   0.000000 -0.008018 -0.008232
+   0.000000 -0.008232 -0.006271
+  The components of the vector are:    0.000000    3.220349    4.409062
+  Trace= -0.013676
+  
+ ======== NEW SHELL (ishell=   5): There are   6 atoms on this shell at distance= 5.577808
+  For jatom=  10 ,with type=   2
+  -0.004093  0.008932  0.000000
+  -0.001580 -0.008337  0.000000
+   0.000000  0.000000 -0.002785
+  The components of the vector are:   -2.788904    4.830523    0.000000
+  Trace= -0.015216
+  
+  For jatom=  58 ,with type=   2
+  -0.004093 -0.001580  0.000000
+   0.008932 -0.008337  0.000000
+   0.000000  0.000000 -0.002785
+  The components of the vector are:    2.788904   -4.830523    0.000000
+  Trace= -0.015216
+  
+  For jatom=  66 ,with type=   2
+  -0.010460  0.005256  0.000000
+  -0.005256 -0.001971  0.000000
+   0.000000  0.000000 -0.002785
+  The components of the vector are:    5.577808    0.000000    0.000000
+  Trace= -0.015216
+  
+  For jatom=  74 ,with type=   2
+  -0.004093 -0.008932  0.000000
+   0.001580 -0.008337  0.000000
+   0.000000  0.000000 -0.002785
+  The components of the vector are:    2.788904    4.830523    0.000000
+  Trace= -0.015216
+  
+  For jatom= 450 ,with type=   2
+  -0.010460 -0.005256  0.000000
+   0.005256 -0.001971  0.000000
+   0.000000  0.000000 -0.002785
+  The components of the vector are:   -5.577808    0.000000    0.000000
+  Trace= -0.015216
+  
+  For jatom= 506 ,with type=   2
+  -0.004093  0.001580  0.000000
+  -0.008932 -0.008337  0.000000
+   0.000000  0.000000 -0.002785
+  The components of the vector are:   -2.788904   -4.830523    0.000000
+  Trace= -0.015216
+  
+ ======== NEW SHELL (ishell=   6): There are   6 atoms on this shell at distance= 7.805281
+  For jatom=   9 ,with type=   1
+   0.001492 -0.000200  0.001596
+  -0.000200  0.001261 -0.000922
+   0.001596 -0.000922  0.002016
+  The components of the vector are:   -5.577808    3.220349   -4.409062
+  Trace=  0.004769
+  
+  For jatom=  11 ,with type=   1
+   0.001492 -0.000200 -0.001596
+  -0.000200  0.001261  0.000922
+  -0.001596  0.000922  0.002016
+  The components of the vector are:   -5.577808    3.220349    4.409062
+  Trace=  0.004769
+  
+  For jatom=  57 ,with type=   1
+   0.001145  0.000000  0.000000
+   0.000000  0.001607  0.001843
+   0.000000  0.001843  0.002016
+  The components of the vector are:    0.000000   -6.440698   -4.409062
+  Trace=  0.004769
+  
+  For jatom=  59 ,with type=   1
+   0.001145  0.000000  0.000000
+   0.000000  0.001607 -0.001843
+   0.000000 -0.001843  0.002016
+  The components of the vector are:    0.000000   -6.440698    4.409062
+  Trace=  0.004769
+  
+  For jatom= 137 ,with type=   1
+   0.001492  0.000200 -0.001596
+   0.000200  0.001261 -0.000922
+  -0.001596 -0.000921  0.002016
+  The components of the vector are:    5.577808    3.220349   -4.409062
+  Trace=  0.004769
+  
+  For jatom= 139 ,with type=   1
+   0.001492  0.000200  0.001596
+   0.000200  0.001261  0.000922
+   0.001596  0.000922  0.002016
+  The components of the vector are:    5.577808    3.220349    4.409062
+  Trace=  0.004769
+  
+ ======== NEW SHELL (ishell=   3): There are   2 atoms on this shell at distance= 8.818124
+  For jatom=   4 ,with type=   2
+   0.001811  0.000000  0.000000
+   0.000000  0.001811  0.000000
+   0.000000  0.000000 -0.008682
+  The components of the vector are:    0.000000    0.000000    8.818124
+  Trace= -0.005060
+  
+  For jatom=   8 ,with type=   2
+   0.001811  0.000000  0.000000
+   0.000000  0.001811  0.000000
+   0.000000  0.000000 -0.008682
+  The components of the vector are:    0.000000    0.000000   -8.818124
+  Trace= -0.005060
+  
+ ======== NEW SHELL (ishell=  13): There are  12 atoms on this shell at distance= 9.593454
+  For jatom=  81 ,with type=   1
+  -0.000208  0.000117 -0.000465
+   0.000117 -0.000067  0.000587
+  -0.000465  0.000587 -0.000024
+  The components of the vector are:   -2.788904    8.050872   -4.409062
+  Trace= -0.000298
+  
+  For jatom=  83 ,with type=   1
+  -0.000208  0.000117  0.000465
+   0.000117 -0.000067 -0.000587
+   0.000465 -0.000587 -0.000024
+  The components of the vector are:   -2.788904    8.050872    4.409062
+  Trace= -0.000298
+  
+  For jatom= 121 ,with type=   1
+  -0.000001 -0.000003  0.000276
+  -0.000002 -0.000274 -0.000696
+   0.000276 -0.000697 -0.000024
+  The components of the vector are:    5.577808   -6.440698   -4.409062
+  Trace= -0.000298
+  
+  For jatom= 123 ,with type=   1
+  -0.000001 -0.000003 -0.000276
+  -0.000002 -0.000274  0.000696
+  -0.000276  0.000697 -0.000024
+  The components of the vector are:    5.577808   -6.440698    4.409062
+  Trace= -0.000298
+  
+  For jatom= 129 ,with type=   1
+  -0.000203 -0.000119  0.000741
+  -0.000120 -0.000071  0.000109
+   0.000741  0.000109 -0.000024
+  The components of the vector are:    8.366712   -1.610174   -4.409062
+  Trace= -0.000298
+  
+  For jatom= 131 ,with type=   1
+  -0.000203 -0.000119 -0.000741
+  -0.000120 -0.000071 -0.000109
+  -0.000741 -0.000109 -0.000024
+  The components of the vector are:    8.366712   -1.610174    4.409062
+  Trace= -0.000298
+  
+  For jatom= 145 ,with type=   1
+  -0.000208 -0.000117  0.000465
+  -0.000117 -0.000067  0.000587
+   0.000465  0.000587 -0.000024
+  The components of the vector are:    2.788904    8.050872   -4.409062
+  Trace= -0.000298
+  
+  For jatom= 147 ,with type=   1
+  -0.000208 -0.000117 -0.000465
+  -0.000117 -0.000067 -0.000587
+  -0.000465 -0.000587 -0.000024
+  The components of the vector are:    2.788904    8.050872    4.409062
+  Trace= -0.000298
+  
+  For jatom= 449 ,with type=   1
+  -0.000203  0.000119 -0.000741
+   0.000120 -0.000071  0.000109
+  -0.000741  0.000109 -0.000024
+  The components of the vector are:   -8.366712   -1.610174   -4.409062
+  Trace= -0.000298
+  
+  For jatom= 451 ,with type=   1
+  -0.000203  0.000119  0.000741
+   0.000120 -0.000071 -0.000109
+   0.000741 -0.000109 -0.000024
+  The components of the vector are:   -8.366712   -1.610174    4.409062
+  Trace= -0.000298
+  
+  For jatom= 505 ,with type=   1
+  -0.000001  0.000003 -0.000276
+   0.000002 -0.000274 -0.000696
+  -0.000276 -0.000697 -0.000024
+  The components of the vector are:   -5.577808   -6.440698   -4.409062
+  Trace= -0.000298
+  
+  For jatom= 507 ,with type=   1
+  -0.000001  0.000003  0.000276
+   0.000002 -0.000274  0.000696
+   0.000276  0.000697 -0.000024
+  The components of the vector are:   -5.577808   -6.440698    4.409062
+  Trace= -0.000298
+  
+ ======== NEW SHELL (ishell=  15): There are   6 atoms on this shell at distance= 9.661047
+  For jatom=  82 ,with type=   2
+   0.000021  0.000000  0.000000
+   0.000000 -0.000694  0.000000
+   0.000000  0.000000 -0.000263
+  The components of the vector are:    0.000000    9.661047    0.000000
+  Trace= -0.000936
+  
+  For jatom= 122 ,with type=   2
+  -0.000515  0.000310  0.000000
+   0.000310 -0.000158  0.000000
+   0.000000  0.000000 -0.000263
+  The components of the vector are:    8.366712   -4.830523    0.000000
+  Trace= -0.000936
+  
+  For jatom= 138 ,with type=   2
+  -0.000515 -0.000310  0.000000
+  -0.000310 -0.000158  0.000000
+   0.000000  0.000000 -0.000263
+  The components of the vector are:    8.366712    4.830523    0.000000
+  Trace= -0.000936
+  
+  For jatom= 442 ,with type=   2
+  -0.000515 -0.000310  0.000000
+  -0.000310 -0.000158  0.000000
+   0.000000  0.000000 -0.000263
+  The components of the vector are:   -8.366712   -4.830523    0.000000
+  Trace= -0.000936
+  
+  For jatom= 458 ,with type=   2
+  -0.000515  0.000310  0.000000
+   0.000310 -0.000158  0.000000
+   0.000000  0.000000 -0.000263
+  The components of the vector are:   -8.366712    4.830523    0.000000
+  Trace= -0.000936
+  
+  For jatom= 498 ,with type=   2
+   0.000021  0.000000  0.000000
+   0.000000 -0.000694  0.000000
+   0.000000  0.000000 -0.000263
+  The components of the vector are:    0.000000   -9.661047    0.000000
+  Trace= -0.000936
+  
+ ======== NEW SHELL (ishell=   7): There are  12 atoms on this shell at distance=10.434139
+  For jatom=  12 ,with type=   2
+  -0.000046 -0.000040 -0.000089
+   0.000741 -0.000451 -0.000464
+   0.000447 -0.000154  0.000042
+  The components of the vector are:   -2.788904    4.830523    8.818124
+  Trace= -0.000456
+  
+  For jatom=  16 ,with type=   2
+  -0.000046 -0.000040  0.000089
+   0.000741 -0.000451  0.000464
+  -0.000447  0.000154  0.000042
+  The components of the vector are:   -2.788904    4.830523   -8.818124
+  Trace= -0.000456
+  
+  For jatom=  60 ,with type=   2
+  -0.000046  0.000741 -0.000447
+  -0.000040 -0.000451  0.000155
+   0.000090  0.000464  0.000042
+  The components of the vector are:    2.788904   -4.830523    8.818124
+  Trace= -0.000456
+  
+  For jatom=  64 ,with type=   2
+  -0.000046  0.000741  0.000447
+  -0.000040 -0.000451 -0.000155
+  -0.000090 -0.000464  0.000042
+  The components of the vector are:    2.788904   -4.830523   -8.818124
+  Trace= -0.000456
+  
+  For jatom=  68 ,with type=   2
+  -0.000654 -0.000390 -0.000357
+   0.000390  0.000156  0.000309
+  -0.000357 -0.000310  0.000042
+  The components of the vector are:    5.577808    0.000000    8.818124
+  Trace= -0.000456
+  
+  For jatom=  72 ,with type=   2
+  -0.000654 -0.000390  0.000357
+   0.000390  0.000156 -0.000309
+   0.000357  0.000310  0.000042
+  The components of the vector are:    5.577808    0.000000   -8.818124
+  Trace= -0.000456
+  
+  For jatom=  76 ,with type=   2
+  -0.000046  0.000040  0.000089
+  -0.000741 -0.000451 -0.000464
+  -0.000447 -0.000154  0.000042
+  The components of the vector are:    2.788904    4.830523    8.818124
+  Trace= -0.000456
+  
+  For jatom=  80 ,with type=   2
+  -0.000046  0.000040 -0.000089
+  -0.000741 -0.000451  0.000464
+   0.000447  0.000154  0.000042
+  The components of the vector are:    2.788904    4.830523   -8.818124
+  Trace= -0.000456
+  
+  For jatom= 452 ,with type=   2
+  -0.000654  0.000390  0.000357
+  -0.000390  0.000156  0.000309
+   0.000357 -0.000310  0.000042
+  The components of the vector are:   -5.577808    0.000000    8.818124
+  Trace= -0.000456
+  
+  For jatom= 456 ,with type=   2
+  -0.000654  0.000390 -0.000357
+  -0.000390  0.000156 -0.000309
+  -0.000357  0.000310  0.000042
+  The components of the vector are:   -5.577808    0.000000   -8.818124
+  Trace= -0.000456
+  
+  For jatom= 508 ,with type=   2
+  -0.000046 -0.000741  0.000447
+   0.000040 -0.000451  0.000155
+  -0.000090  0.000464  0.000042
+  The components of the vector are:   -2.788904   -4.830523    8.818124
+  Trace= -0.000456
+  
+  For jatom= 512 ,with type=   2
+  -0.000046 -0.000741 -0.000447
+   0.000040 -0.000451 -0.000155
+   0.000090 -0.000464  0.000042
+  The components of the vector are:   -2.788904   -4.830523   -8.818124
+  Trace= -0.000456
+  
+ ======== NEW SHELL (ishell=   9): There are   6 atoms on this shell at distance=11.155616
+  For jatom=  18 ,with type=   2
+  -0.000274  0.000548  0.000000
+   0.000650 -0.000965  0.000000
+   0.000000  0.000000  0.000252
+  The components of the vector are:   -5.577808    9.661047    0.000000
+  Trace= -0.000987
+  
+  For jatom=  50 ,with type=   2
+  -0.000273  0.000650  0.000000
+   0.000548 -0.000965  0.000000
+   0.000000  0.000000  0.000252
+  The components of the vector are:    5.577808   -9.661047    0.000000
+  Trace= -0.000987
+  
+  For jatom= 130 ,with type=   2
+  -0.001311 -0.000051  0.000000
+   0.000051  0.000072  0.000000
+   0.000000  0.000000  0.000252
+  The components of the vector are:   11.155616    0.000000    0.000000
+  Trace= -0.000987
+  
+  For jatom= 146 ,with type=   2
+  -0.000274 -0.000548  0.000000
+  -0.000650 -0.000965  0.000000
+   0.000000  0.000000  0.000252
+  The components of the vector are:    5.577808    9.661047    0.000000
+  Trace= -0.000987
+  
+  For jatom= 386 ,with type=   2
+  -0.001311  0.000051  0.000000
+  -0.000051  0.000072  0.000000
+   0.000000  0.000000  0.000252
+  The components of the vector are:  -11.155616    0.000000    0.000000
+  Trace= -0.000987
+  
+  For jatom= 434 ,with type=   2
+  -0.000273 -0.000650  0.000000
+  -0.000548 -0.000965  0.000000
+   0.000000  0.000000  0.000252
+  The components of the vector are:   -5.577808   -9.661047    0.000000
+  Trace= -0.000987
+  
+ ======== NEW SHELL (ishell=  10): There are  12 atoms on this shell at distance=12.420074
+  For jatom=  17 ,with type=   1
+   0.000179 -0.000232 -0.000161
+  -0.000231  0.000414  0.000044
+  -0.000161  0.000045 -0.000275
+  The components of the vector are:   -8.366712    8.050872   -4.409062
+  Trace=  0.000318
+  
+  For jatom=  19 ,with type=   1
+   0.000179 -0.000232  0.000161
+  -0.000231  0.000414 -0.000044
+   0.000161 -0.000045 -0.000275
+  The components of the vector are:   -8.366712    8.050872    4.409062
+  Trace=  0.000318
+  
+  For jatom=  49 ,with type=   1
+   0.000155 -0.000217 -0.000042
+  -0.000217  0.000439 -0.000162
+  -0.000042 -0.000161 -0.000275
+  The components of the vector are:    2.788904  -11.271221   -4.409062
+  Trace=  0.000318
+  
+  For jatom=  51 ,with type=   1
+   0.000155 -0.000217  0.000042
+  -0.000217  0.000439  0.000162
+   0.000042  0.000161 -0.000275
+  The components of the vector are:    2.788904  -11.271221    4.409062
+  Trace=  0.000318
+  
+  For jatom= 201 ,with type=   1
+   0.000556  0.000014  0.000119
+   0.000014  0.000038  0.000117
+   0.000119  0.000117 -0.000275
+  The components of the vector are:   11.155616    3.220349   -4.409062
+  Trace=  0.000318
+  
+  For jatom= 203 ,with type=   1
+   0.000556  0.000014 -0.000119
+   0.000014  0.000038 -0.000117
+  -0.000119 -0.000117 -0.000275
+  The components of the vector are:   11.155616    3.220349    4.409062
+  Trace=  0.000318
+  
+  For jatom= 209 ,with type=   1
+   0.000179  0.000232  0.000161
+   0.000231  0.000414  0.000044
+   0.000161  0.000045 -0.000275
+  The components of the vector are:    8.366712    8.050872   -4.409062
+  Trace=  0.000318
+  
+  For jatom= 211 ,with type=   1
+   0.000179  0.000232 -0.000161
+   0.000231  0.000414 -0.000044
+  -0.000161 -0.000045 -0.000275
+  The components of the vector are:    8.366712    8.050872    4.409062
+  Trace=  0.000318
+  
+  For jatom= 457 ,with type=   1
+   0.000556 -0.000014 -0.000119
+  -0.000014  0.000038  0.000117
+  -0.000119  0.000117 -0.000275
+  The components of the vector are:  -11.155616    3.220349   -4.409062
+  Trace=  0.000318
+  
+  For jatom= 459 ,with type=   1
+   0.000556 -0.000014  0.000119
+  -0.000014  0.000038 -0.000117
+   0.000119 -0.000117 -0.000275
+  The components of the vector are:  -11.155616    3.220349    4.409062
+  Trace=  0.000318
+  
+  For jatom= 497 ,with type=   1
+   0.000155  0.000217  0.000042
+   0.000217  0.000439 -0.000162
+   0.000042 -0.000161 -0.000275
+  The components of the vector are:   -2.788904  -11.271221   -4.409062
+  Trace=  0.000318
+  
+  For jatom= 499 ,with type=   1
+   0.000155  0.000217 -0.000042
+   0.000217  0.000439  0.000162
+  -0.000042  0.000161 -0.000275
+  The components of the vector are:   -2.788904  -11.271221    4.409062
+  Trace=  0.000318
+  
+ ======== NEW SHELL (ishell=  16): There are  12 atoms on this shell at distance=13.080334
+  For jatom=  84 ,with type=   2
+  -0.000019  0.000000  0.000000
+   0.000000  0.000074 -0.000042
+   0.000000  0.000079  0.000068
+  The components of the vector are:    0.000000    9.661047    8.818124
+  Trace=  0.000123
+  
+  For jatom=  88 ,with type=   2
+  -0.000019  0.000000  0.000000
+   0.000000  0.000074  0.000042
+   0.000000 -0.000079  0.000068
+  The components of the vector are:    0.000000    9.661047   -8.818124
+  Trace=  0.000123
+  
+  For jatom= 124 ,with type=   2
+   0.000051 -0.000040 -0.000036
+  -0.000040  0.000004  0.000021
+   0.000069 -0.000040  0.000068
+  The components of the vector are:    8.366712   -4.830523    8.818124
+  Trace=  0.000123
+  
+  For jatom= 128 ,with type=   2
+   0.000051 -0.000040  0.000036
+  -0.000040  0.000004 -0.000021
+  -0.000069  0.000040  0.000068
+  The components of the vector are:    8.366712   -4.830523   -8.818124
+  Trace=  0.000123
+  
+  For jatom= 140 ,with type=   2
+   0.000051  0.000040  0.000069
+   0.000040  0.000004  0.000040
+  -0.000036 -0.000021  0.000068
+  The components of the vector are:    8.366712    4.830523    8.818124
+  Trace=  0.000123
+  
+  For jatom= 144 ,with type=   2
+   0.000051  0.000040 -0.000069
+   0.000040  0.000004 -0.000040
+   0.000036  0.000021  0.000068
+  The components of the vector are:    8.366712    4.830523   -8.818124
+  Trace=  0.000123
+  
+  For jatom= 444 ,with type=   2
+   0.000051  0.000040  0.000036
+   0.000040  0.000004  0.000021
+  -0.000069 -0.000040  0.000068
+  The components of the vector are:   -8.366712   -4.830523    8.818124
+  Trace=  0.000123
+  
+  For jatom= 448 ,with type=   2
+   0.000051  0.000040 -0.000036
+   0.000040  0.000004 -0.000021
+   0.000069  0.000040  0.000068
+  The components of the vector are:   -8.366712   -4.830523   -8.818124
+  Trace=  0.000123
+  
+  For jatom= 460 ,with type=   2
+   0.000051 -0.000040 -0.000069
+  -0.000040  0.000004  0.000040
+   0.000036 -0.000021  0.000068
+  The components of the vector are:   -8.366712    4.830523    8.818124
+  Trace=  0.000123
+  
+  For jatom= 464 ,with type=   2
+   0.000051 -0.000040  0.000069
+  -0.000040  0.000004 -0.000040
+  -0.000036  0.000021  0.000068
+  The components of the vector are:   -8.366712    4.830523   -8.818124
+  Trace=  0.000123
+  
+  For jatom= 500 ,with type=   2
+  -0.000019  0.000000  0.000000
+   0.000000  0.000074 -0.000079
+   0.000000  0.000042  0.000068
+  The components of the vector are:    0.000000   -9.661047    8.818124
+  Trace=  0.000123
+  
+  For jatom= 504 ,with type=   2
+  -0.000019  0.000000  0.000000
+   0.000000  0.000074  0.000079
+   0.000000 -0.000042  0.000068
+  The components of the vector are:    0.000000   -9.661047   -8.818124
+  Trace=  0.000123
+  
+ ======== NEW SHELL (ishell=   4): There are   6 atoms on this shell at distance=13.613563
+  For jatom=   5 ,with type=   1
+  -0.000065 -0.000041 -0.000290
+  -0.000041 -0.000018 -0.000168
+  -0.000290 -0.000167  0.000443
+  The components of the vector are:   -2.788904   -1.610174   13.227186
+  Trace=  0.000361
+  
+  For jatom=   7 ,with type=   1
+  -0.000065 -0.000041  0.000290
+  -0.000041 -0.000018  0.000167
+   0.000290  0.000168  0.000443
+  The components of the vector are:   -2.788904   -1.610174  -13.227186
+  Trace=  0.000361
+  
+  For jatom=  69 ,with type=   1
+  -0.000065  0.000041  0.000290
+   0.000041 -0.000018 -0.000167
+   0.000290 -0.000168  0.000443
+  The components of the vector are:    2.788904   -1.610174   13.227186
+  Trace=  0.000361
+  
+  For jatom=  71 ,with type=   1
+  -0.000065  0.000041 -0.000290
+   0.000041 -0.000018  0.000167
+  -0.000290  0.000168  0.000443
+  The components of the vector are:    2.788904   -1.610174  -13.227186
+  Trace=  0.000361
+  
+  For jatom=  77 ,with type=   1
+   0.000006  0.000000  0.000000
+   0.000000 -0.000088  0.000335
+   0.000000  0.000335  0.000443
+  The components of the vector are:    0.000000    3.220349   13.227186
+  Trace=  0.000361
+  
+  For jatom=  79 ,with type=   1
+   0.000006  0.000000  0.000000
+   0.000000 -0.000088 -0.000335
+   0.000000 -0.000335  0.000443
+  The components of the vector are:    0.000000    3.220349  -13.227186
+  Trace=  0.000361
+  
+ ======== NEW SHELL (ishell=  21): There are   6 atoms on this shell at distance=13.615072
+  For jatom= 153 ,with type=   1
+   0.000015  0.000000  0.000000
+   0.000000 -0.000293  0.000033
+   0.000000  0.000033  0.000057
+  The components of the vector are:    0.000000   12.881396   -4.409062
+  Trace= -0.000221
+  
+  For jatom= 155 ,with type=   1
+   0.000015  0.000000  0.000000
+   0.000000 -0.000293 -0.000033
+   0.000000 -0.000033  0.000057
+  The components of the vector are:    0.000000   12.881396    4.409062
+  Trace= -0.000221
+  
+  For jatom= 185 ,with type=   1
+  -0.000216  0.000133  0.000028
+   0.000133 -0.000062 -0.000016
+   0.000028 -0.000016  0.000057
+  The components of the vector are:   11.155616   -6.440698   -4.409062
+  Trace= -0.000221
+  
+  For jatom= 187 ,with type=   1
+  -0.000216  0.000133 -0.000028
+   0.000133 -0.000062  0.000016
+  -0.000028  0.000016  0.000057
+  The components of the vector are:   11.155616   -6.440698    4.409062
+  Trace= -0.000221
+  
+  For jatom= 441 ,with type=   1
+  -0.000216 -0.000133 -0.000028
+  -0.000133 -0.000062 -0.000016
+  -0.000028 -0.000016  0.000057
+  The components of the vector are:  -11.155616   -6.440698   -4.409062
+  Trace= -0.000221
+  
+  For jatom= 443 ,with type=   1
+  -0.000216 -0.000133  0.000028
+  -0.000133 -0.000062  0.000016
+   0.000028  0.000016  0.000057
+  The components of the vector are:  -11.155616   -6.440698    4.409062
+  Trace= -0.000221
+  
+ ======== NEW SHELL (ishell=  11): There are  12 atoms on this shell at distance=14.219954
+  For jatom=  20 ,with type=   2
+  -0.000045  0.000178  0.000065
+  -0.000038 -0.000127 -0.000074
+   0.000032 -0.000094 -0.000094
+  The components of the vector are:   -5.577808    9.661047    8.818124
+  Trace= -0.000266
+  
+  For jatom=  24 ,with type=   2
+  -0.000045  0.000178 -0.000065
+  -0.000038 -0.000127  0.000074
+  -0.000032  0.000094 -0.000094
+  The components of the vector are:   -5.577808    9.661047   -8.818124
+  Trace= -0.000266
+  
+  For jatom=  52 ,with type=   2
+  -0.000046 -0.000038 -0.000032
+   0.000178 -0.000127  0.000094
+  -0.000065  0.000074 -0.000094
+  The components of the vector are:    5.577808   -9.661047    8.818124
+  Trace= -0.000266
+  
+  For jatom=  56 ,with type=   2
+  -0.000046 -0.000038  0.000032
+   0.000178 -0.000127 -0.000094
+   0.000065 -0.000074 -0.000094
+  The components of the vector are:    5.577808   -9.661047   -8.818124
+  Trace= -0.000266
+  
+  For jatom= 132 ,with type=   2
+  -0.000167  0.000108 -0.000097
+  -0.000108 -0.000005 -0.000019
+  -0.000097  0.000019 -0.000094
+  The components of the vector are:   11.155616    0.000000    8.818124
+  Trace= -0.000266
+  
+  For jatom= 136 ,with type=   2
+  -0.000167  0.000108  0.000097
+  -0.000108 -0.000005  0.000019
+   0.000097 -0.000019 -0.000094
+  The components of the vector are:   11.155616    0.000000   -8.818124
+  Trace= -0.000266
+  
+  For jatom= 148 ,with type=   2
+  -0.000045 -0.000178 -0.000065
+   0.000038 -0.000127 -0.000074
+  -0.000032 -0.000094 -0.000094
+  The components of the vector are:    5.577808    9.661047    8.818124
+  Trace= -0.000266
+  
+  For jatom= 152 ,with type=   2
+  -0.000045 -0.000178  0.000065
+   0.000038 -0.000127  0.000074
+   0.000032  0.000094 -0.000094
+  The components of the vector are:    5.577808    9.661047   -8.818124
+  Trace= -0.000266
+  
+  For jatom= 388 ,with type=   2
+  -0.000167 -0.000108  0.000097
+   0.000108 -0.000005 -0.000019
+   0.000097  0.000019 -0.000094
+  The components of the vector are:  -11.155616    0.000000    8.818124
+  Trace= -0.000266
+  
+  For jatom= 392 ,with type=   2
+  -0.000167 -0.000108 -0.000097
+   0.000108 -0.000005  0.000019
+  -0.000097 -0.000019 -0.000094
+  The components of the vector are:  -11.155616    0.000000   -8.818124
+  Trace= -0.000266
+  
+  For jatom= 436 ,with type=   2
+  -0.000046  0.000038  0.000032
+  -0.000178 -0.000127  0.000094
+   0.000065  0.000074 -0.000094
+  The components of the vector are:   -5.577808   -9.661047    8.818124
+  Trace= -0.000266
+  
+  For jatom= 440 ,with type=   2
+  -0.000046  0.000038 -0.000032
+  -0.000178 -0.000127 -0.000094
+  -0.000065 -0.000074 -0.000094
+  The components of the vector are:   -5.577808   -9.661047   -8.818124
+  Trace= -0.000266
+  
+ ======== NEW SHELL (ishell=   8): There are   6 atoms on this shell at distance=14.711935
+  For jatom=  13 ,with type=   1
+   0.000047 -0.000078 -0.000093
+  -0.000078 -0.000042  0.000054
+  -0.000093  0.000053 -0.000041
+  The components of the vector are:   -5.577808    3.220349   13.227186
+  Trace= -0.000036
+  
+  For jatom=  15 ,with type=   1
+   0.000047 -0.000078  0.000093
+  -0.000078 -0.000042 -0.000054
+   0.000093 -0.000053 -0.000041
+  The components of the vector are:   -5.577808    3.220349  -13.227186
+  Trace= -0.000036
+  
+  For jatom=  61 ,with type=   1
+  -0.000087  0.000000  0.000000
+   0.000000  0.000092 -0.000107
+   0.000000 -0.000107 -0.000041
+  The components of the vector are:    0.000000   -6.440698   13.227186
+  Trace= -0.000036
+  
+  For jatom=  63 ,with type=   1
+  -0.000087  0.000000  0.000000
+   0.000000  0.000092  0.000107
+   0.000000  0.000107 -0.000041
+  The components of the vector are:    0.000000   -6.440698  -13.227186
+  Trace= -0.000036
+  
+  For jatom= 141 ,with type=   1
+   0.000047  0.000078  0.000093
+   0.000078 -0.000042  0.000054
+   0.000093  0.000053 -0.000041
+  The components of the vector are:    5.577808    3.220349   13.227186
+  Trace= -0.000036
+  
+  For jatom= 143 ,with type=   1
+   0.000047  0.000078 -0.000093
+   0.000078 -0.000042 -0.000053
+  -0.000093 -0.000054 -0.000041
+  The components of the vector are:    5.577808    3.220349  -13.227186
+  Trace= -0.000036
+  
+ ======== NEW SHELL (ishell=  20): There are  12 atoms on this shell at distance=14.713332
+  For jatom=  89 ,with type=   1
+   0.000024  0.000081  0.000047
+   0.000082 -0.000111 -0.000062
+   0.000047 -0.000062 -0.000026
+  The components of the vector are:   -5.577808   12.881396   -4.409062
+  Trace= -0.000113
+  
+  For jatom=  91 ,with type=   1
+   0.000024  0.000081 -0.000047
+   0.000082 -0.000111  0.000062
+  -0.000047  0.000062 -0.000026
+  The components of the vector are:   -5.577808   12.881396    4.409062
+  Trace= -0.000113
+  
+  For jatom= 113 ,with type=   1
+  -0.000007  0.000100 -0.000030
+   0.000099 -0.000080  0.000072
+  -0.000030  0.000071 -0.000026
+  The components of the vector are:    8.366712  -11.271221   -4.409062
+  Trace= -0.000113
+  
+  For jatom= 115 ,with type=   1
+  -0.000007  0.000100  0.000030
+   0.000099 -0.000080 -0.000072
+   0.000030 -0.000071 -0.000026
+  The components of the vector are:    8.366712  -11.271221    4.409062
+  Trace= -0.000113
+  
+  For jatom= 193 ,with type=   1
+  -0.000148  0.000018 -0.000077
+   0.000018  0.000061 -0.000010
+  -0.000077 -0.000010 -0.000026
+  The components of the vector are:   13.944520   -1.610174   -4.409062
+  Trace= -0.000113
+  
+  For jatom= 195 ,with type=   1
+  -0.000148  0.000018  0.000077
+   0.000018  0.000061  0.000010
+   0.000077  0.000010 -0.000026
+  The components of the vector are:   13.944520   -1.610174    4.409062
+  Trace= -0.000113
+  
+  For jatom= 217 ,with type=   1
+   0.000024 -0.000081 -0.000047
+  -0.000082 -0.000111 -0.000062
+  -0.000047 -0.000062 -0.000026
+  The components of the vector are:    5.577808   12.881396   -4.409062
+  Trace= -0.000113
+  
+  For jatom= 219 ,with type=   1
+   0.000024 -0.000081  0.000047
+  -0.000082 -0.000111  0.000062
+   0.000047  0.000062 -0.000026
+  The components of the vector are:    5.577808   12.881396    4.409062
+  Trace= -0.000113
+  
+  For jatom= 385 ,with type=   1
+  -0.000148 -0.000018  0.000077
+  -0.000018  0.000061 -0.000010
+   0.000077 -0.000010 -0.000026
+  The components of the vector are:  -13.944520   -1.610174   -4.409062
+  Trace= -0.000113
+  
+  For jatom= 387 ,with type=   1
+  -0.000148 -0.000018 -0.000077
+  -0.000018  0.000061  0.000010
+  -0.000077  0.000010 -0.000026
+  The components of the vector are:  -13.944520   -1.610174    4.409062
+  Trace= -0.000113
+  
+  For jatom= 433 ,with type=   1
+  -0.000007 -0.000100  0.000030
+  -0.000099 -0.000080  0.000072
+   0.000030  0.000071 -0.000026
+  The components of the vector are:   -8.366712  -11.271221   -4.409062
+  Trace= -0.000113
+  
+  For jatom= 435 ,with type=   1
+  -0.000007 -0.000100 -0.000030
+  -0.000099 -0.000080 -0.000072
+  -0.000030 -0.000071 -0.000026
+  The components of the vector are:   -8.366712  -11.271221    4.409062
+  Trace= -0.000113
+  
+ ======== NEW SHELL (ishell=  17): There are  12 atoms on this shell at distance=14.757493
+  For jatom=  90 ,with type=   2
+   0.000016 -0.000028  0.000000
+   0.000110 -0.000063  0.000000
+   0.000000  0.000000  0.000035
+  The components of the vector are:   -2.788904   14.491570    0.000000
+  Trace= -0.000013
+  
+  For jatom= 114 ,with type=   2
+  -0.000008  0.000123  0.000000
+  -0.000014 -0.000040  0.000000
+   0.000000  0.000000  0.000035
+  The components of the vector are:   11.155616   -9.661047    0.000000
+  Trace= -0.000013
+  
+  For jatom= 154 ,with type=   2
+   0.000016  0.000028  0.000000
+  -0.000110 -0.000063  0.000000
+   0.000000  0.000000  0.000035
+  The components of the vector are:    2.788904   14.491570    0.000000
+  Trace= -0.000013
+  
+  For jatom= 186 ,with type=   2
+  -0.000079 -0.000055  0.000000
+   0.000082  0.000031  0.000000
+   0.000000  0.000000  0.000035
+  The components of the vector are:   13.944520   -4.830523    0.000000
+  Trace= -0.000013
+  
+  For jatom= 202 ,with type=   2
+  -0.000079 -0.000082  0.000000
+   0.000055  0.000031  0.000000
+   0.000000  0.000000  0.000035
+  The components of the vector are:   13.944520    4.830523    0.000000
+  Trace= -0.000013
+  
+  For jatom= 210 ,with type=   2
+  -0.000008  0.000014  0.000000
+  -0.000123 -0.000040  0.000000
+   0.000000  0.000000  0.000035
+  The components of the vector are:   11.155616    9.661047    0.000000
+  Trace= -0.000013
+  
+  For jatom= 370 ,with type=   2
+  -0.000008 -0.000123  0.000000
+   0.000014 -0.000040  0.000000
+   0.000000  0.000000  0.000035
+  The components of the vector are:  -11.155616   -9.661047    0.000000
+  Trace= -0.000013
+  
+  For jatom= 378 ,with type=   2
+  -0.000079  0.000055  0.000000
+  -0.000082  0.000031  0.000000
+   0.000000  0.000000  0.000035
+  The components of the vector are:  -13.944520   -4.830523    0.000000
+  Trace= -0.000013
+  
+  For jatom= 394 ,with type=   2
+  -0.000079  0.000082  0.000000
+  -0.000055  0.000031  0.000000
+   0.000000  0.000000  0.000035
+  The components of the vector are:  -13.944520    4.830523    0.000000
+  Trace= -0.000013
+  
+  For jatom= 426 ,with type=   2
+   0.000016 -0.000110  0.000000
+   0.000028 -0.000063  0.000000
+   0.000000  0.000000  0.000035
+  The components of the vector are:   -2.788904  -14.491570    0.000000
+  Trace= -0.000013
+  
+  For jatom= 466 ,with type=   2
+  -0.000008 -0.000014  0.000000
+   0.000123 -0.000040  0.000000
+   0.000000  0.000000  0.000035
+  The components of the vector are:  -11.155616    9.661047    0.000000
+  Trace= -0.000013
+  
+  For jatom= 490 ,with type=   2
+   0.000016  0.000110  0.000000
+  -0.000028 -0.000063  0.000000
+   0.000000  0.000000  0.000035
+  The components of the vector are:    2.788904  -14.491570    0.000000
+  Trace= -0.000013
+  
+ ======== NEW SHELL (ishell=  14): There are  12 atoms on this shell at distance=15.733816
+  For jatom=  85 ,with type=   1
+   0.000020 -0.000006  0.000068
+  -0.000006  0.000029  0.000050
+   0.000067  0.000050  0.000123
+  The components of the vector are:   -2.788904    8.050872   13.227186
+  Trace=  0.000172
+  
+  For jatom=  87 ,with type=   1
+   0.000020 -0.000006 -0.000068
+  -0.000006  0.000029 -0.000050
+  -0.000067 -0.000050  0.000123
+  The components of the vector are:   -2.788904    8.050872  -13.227186
+  Trace=  0.000172
+  
+  For jatom= 125 ,with type=   1
+   0.000021 -0.000007  0.000077
+  -0.000007  0.000027  0.000034
+   0.000077  0.000034  0.000123
+  The components of the vector are:    5.577808   -6.440698   13.227186
+  Trace=  0.000172
+  
+  For jatom= 127 ,with type=   1
+   0.000021 -0.000007 -0.000077
+  -0.000007  0.000027 -0.000034
+  -0.000077 -0.000034  0.000123
+  The components of the vector are:    5.577808   -6.440698  -13.227186
+  Trace=  0.000172
+  
+  For jatom= 133 ,with type=   1
+   0.000032 -0.000001  0.000009
+  -0.000001  0.000017 -0.000084
+   0.000009 -0.000083  0.000123
+  The components of the vector are:    8.366712   -1.610174   13.227186
+  Trace=  0.000172
+  
+  For jatom= 135 ,with type=   1
+   0.000032 -0.000001 -0.000009
+  -0.000001  0.000017  0.000084
+  -0.000009  0.000083  0.000123
+  The components of the vector are:    8.366712   -1.610174  -13.227186
+  Trace=  0.000172
+  
+  For jatom= 149 ,with type=   1
+   0.000020  0.000006 -0.000068
+   0.000006  0.000029  0.000050
+  -0.000067  0.000050  0.000123
+  The components of the vector are:    2.788904    8.050872   13.227186
+  Trace=  0.000172
+  
+  For jatom= 151 ,with type=   1
+   0.000020  0.000006  0.000068
+   0.000006  0.000029 -0.000050
+   0.000067 -0.000050  0.000123
+  The components of the vector are:    2.788904    8.050872  -13.227186
+  Trace=  0.000172
+  
+  For jatom= 453 ,with type=   1
+   0.000032  0.000001 -0.000009
+   0.000001  0.000017 -0.000084
+  -0.000009 -0.000083  0.000123
+  The components of the vector are:   -8.366712   -1.610174   13.227186
+  Trace=  0.000172
+  
+  For jatom= 455 ,with type=   1
+   0.000032  0.000001  0.000009
+   0.000001  0.000017  0.000084
+   0.000009  0.000083  0.000123
+  The components of the vector are:   -8.366712   -1.610174  -13.227186
+  Trace=  0.000172
+  
+  For jatom= 509 ,with type=   1
+   0.000021  0.000007 -0.000077
+   0.000007  0.000027  0.000034
+  -0.000077  0.000034  0.000123
+  The components of the vector are:   -5.577808   -6.440698   13.227186
+  Trace=  0.000172
+  
+  For jatom= 511 ,with type=   1
+   0.000021  0.000007  0.000077
+   0.000007  0.000027 -0.000034
+   0.000077 -0.000034  0.000123
+  The components of the vector are:   -5.577808   -6.440698  -13.227186
+  Trace=  0.000172
+  
+ ======== NEW SHELL (ishell=  18): There are   6 atoms on this shell at distance=16.694490
+  For jatom= 273 ,with type=   1
+  -0.000028 -0.000047 -0.000053
+  -0.000047  0.000026 -0.000031
+  -0.000053 -0.000031  0.000007
+  The components of the vector are:   13.944520    8.050872   -4.409062
+  Trace=  0.000004
+  
+  For jatom= 275 ,with type=   1
+  -0.000028 -0.000047  0.000053
+  -0.000047  0.000026  0.000031
+   0.000053  0.000031  0.000007
+  The components of the vector are:   13.944520    8.050872    4.409062
+  Trace=  0.000004
+  
+  For jatom= 465 ,with type=   1
+  -0.000028  0.000047  0.000053
+   0.000047  0.000026 -0.000031
+   0.000053 -0.000031  0.000007
+  The components of the vector are:  -13.944520    8.050872   -4.409062
+  Trace=  0.000004
+  
+  For jatom= 467 ,with type=   1
+  -0.000028  0.000047 -0.000053
+   0.000047  0.000026  0.000031
+  -0.000053  0.000031  0.000007
+  The components of the vector are:  -13.944520    8.050872    4.409062
+  Trace=  0.000004
+  
+  For jatom= 489 ,with type=   1
+   0.000053  0.000000  0.000000
+   0.000000 -0.000056  0.000061
+   0.000000  0.000061  0.000007
+  The components of the vector are:    0.000000  -16.101745   -4.409062
+  Trace=  0.000004
+  
+  For jatom= 491 ,with type=   1
+   0.000053  0.000000  0.000000
+   0.000000 -0.000056 -0.000061
+   0.000000 -0.000061  0.000007
+  The components of the vector are:    0.000000  -16.101745    4.409062
+  Trace=  0.000004
+  
+ ======== NEW SHELL (ishell=  12): There are   6 atoms on this shell at distance=16.733424
+  For jatom=  26 ,with type=   2
+   0.000005 -0.000012  0.000000
+  -0.000012  0.000020  0.000000
+   0.000000  0.000000  0.000043
+  The components of the vector are:   -8.366712   14.491570    0.000000
+  Trace=  0.000068
+  
+  For jatom=  42 ,with type=   2
+   0.000005 -0.000012  0.000000
+  -0.000012  0.000020  0.000000
+   0.000000  0.000000  0.000043
+  The components of the vector are:    8.366712  -14.491570    0.000000
+  Trace=  0.000068
+  
+  For jatom= 194 ,with type=   2
+   0.000027  0.000000  0.000000
+   0.000000 -0.000002  0.000000
+   0.000000  0.000000  0.000043
+  The components of the vector are:   16.733424    0.000000    0.000000
+  Trace=  0.000068
+  
+  For jatom= 218 ,with type=   2
+   0.000005  0.000012  0.000000
+   0.000012  0.000020  0.000000
+   0.000000  0.000000  0.000043
+  The components of the vector are:    8.366712   14.491570    0.000000
+  Trace=  0.000068
+  
+  For jatom= 322 ,with type=   2
+   0.000027  0.000000  0.000000
+   0.000000 -0.000002  0.000000
+   0.000000  0.000000  0.000043
+  The components of the vector are:  -16.733424    0.000000    0.000000
+  Trace=  0.000068
+  
+  For jatom= 362 ,with type=   2
+   0.000005  0.000012  0.000000
+   0.000012  0.000020  0.000000
+   0.000000  0.000000  0.000043
+  The components of the vector are:   -8.366712  -14.491570    0.000000
+  Trace=  0.000068
+  
+ ======== NEW SHELL (ishell=  19): There are  24 atoms on this shell at distance=17.191361
+  For jatom=  92 ,with type=   2
+  -0.000040  0.000002 -0.000015
+   0.000009 -0.000009  0.000015
+   0.000035 -0.000020  0.000021
+  The components of the vector are:   -2.788904   14.491570    8.818124
+  Trace= -0.000028
+  
+  For jatom=  96 ,with type=   2
+  -0.000040  0.000002  0.000015
+   0.000009 -0.000009 -0.000015
+  -0.000035  0.000020  0.000021
+  The components of the vector are:   -2.788904   14.491570   -8.818124
+  Trace= -0.000028
+  
+  For jatom= 116 ,with type=   2
+  -0.000012 -0.000007  0.000006
+  -0.000014 -0.000037 -0.000020
+   0.000000  0.000040  0.000021
+  The components of the vector are:   11.155616   -9.661047    8.818124
+  Trace= -0.000028
+  
+  For jatom= 120 ,with type=   2
+  -0.000012 -0.000007 -0.000006
+  -0.000014 -0.000037  0.000020
+   0.000000 -0.000040  0.000021
+  The components of the vector are:   11.155616   -9.661047   -8.818124
+  Trace= -0.000028
+  
+  For jatom= 156 ,with type=   2
+  -0.000040 -0.000002  0.000015
+  -0.000009 -0.000009  0.000015
+  -0.000035 -0.000020  0.000021
+  The components of the vector are:    2.788904   14.491570    8.818124
+  Trace= -0.000028
+  
+  For jatom= 160 ,with type=   2
+  -0.000040 -0.000002 -0.000015
+  -0.000009 -0.000009 -0.000015
+   0.000035  0.000020  0.000021
+  The components of the vector are:    2.788904   14.491570   -8.818124
+  Trace= -0.000028
+  
+  For jatom= 188 ,with type=   2
+  -0.000022 -0.000019  0.000021
+  -0.000013 -0.000027  0.000005
+  -0.000035 -0.000020  0.000021
+  The components of the vector are:   13.944520   -4.830523    8.818124
+  Trace= -0.000028
+  
+  For jatom= 192 ,with type=   2
+  -0.000022 -0.000019 -0.000021
+  -0.000013 -0.000027 -0.000005
+   0.000035  0.000020  0.000021
+  The components of the vector are:   13.944520   -4.830523   -8.818124
+  Trace= -0.000028
+  
+  For jatom= 204 ,with type=   2
+  -0.000022  0.000013 -0.000035
+   0.000019 -0.000027  0.000020
+   0.000021 -0.000005  0.000021
+  The components of the vector are:   13.944520    4.830523    8.818124
+  Trace= -0.000028
+  
+  For jatom= 208 ,with type=   2
+  -0.000022  0.000013  0.000035
+   0.000019 -0.000027 -0.000020
+  -0.000021  0.000005  0.000021
+  The components of the vector are:   13.944520    4.830523   -8.818124
+  Trace= -0.000028
+  
+  For jatom= 212 ,with type=   2
+  -0.000012  0.000014  0.000000
+   0.000007 -0.000037 -0.000040
+   0.000006  0.000020  0.000021
+  The components of the vector are:   11.155616    9.661047    8.818124
+  Trace= -0.000028
+  
+  For jatom= 216 ,with type=   2
+  -0.000012  0.000014  0.000000
+   0.000007 -0.000037  0.000040
+  -0.000006 -0.000020  0.000021
+  The components of the vector are:   11.155616    9.661047   -8.818124
+  Trace= -0.000028
+  
+  For jatom= 372 ,with type=   2
+  -0.000012  0.000007 -0.000006
+   0.000014 -0.000037 -0.000020
+   0.000000  0.000040  0.000021
+  The components of the vector are:  -11.155616   -9.661047    8.818124
+  Trace= -0.000028
+  
+  For jatom= 376 ,with type=   2
+  -0.000012  0.000007  0.000006
+   0.000014 -0.000037  0.000020
+   0.000000 -0.000040  0.000021
+  The components of the vector are:  -11.155616   -9.661047   -8.818124
+  Trace= -0.000028
+  
+  For jatom= 380 ,with type=   2
+  -0.000022  0.000019 -0.000021
+   0.000013 -0.000027  0.000005
+   0.000035 -0.000020  0.000021
+  The components of the vector are:  -13.944520   -4.830523    8.818124
+  Trace= -0.000028
+  
+  For jatom= 384 ,with type=   2
+  -0.000022  0.000019  0.000021
+   0.000013 -0.000027 -0.000005
+  -0.000035  0.000020  0.000021
+  The components of the vector are:  -13.944520   -4.830523   -8.818124
+  Trace= -0.000028
+  
+  For jatom= 396 ,with type=   2
+  -0.000022 -0.000013  0.000035
+  -0.000019 -0.000027  0.000020
+  -0.000021 -0.000005  0.000021
+  The components of the vector are:  -13.944520    4.830523    8.818124
+  Trace= -0.000028
+  
+  For jatom= 400 ,with type=   2
+  -0.000022 -0.000013 -0.000035
+  -0.000019 -0.000027 -0.000020
+   0.000021  0.000005  0.000021
+  The components of the vector are:  -13.944520    4.830523   -8.818124
+  Trace= -0.000028
+  
+  For jatom= 428 ,with type=   2
+  -0.000040 -0.000009  0.000035
+  -0.000002 -0.000009  0.000020
+  -0.000015 -0.000015  0.000021
+  The components of the vector are:   -2.788904  -14.491570    8.818124
+  Trace= -0.000028
+  
+  For jatom= 432 ,with type=   2
+  -0.000040 -0.000009 -0.000035
+  -0.000002 -0.000009 -0.000020
+   0.000015  0.000015  0.000021
+  The components of the vector are:   -2.788904  -14.491570   -8.818124
+  Trace= -0.000028
+  
+  For jatom= 468 ,with type=   2
+  -0.000012 -0.000014  0.000000
+  -0.000007 -0.000037 -0.000040
+  -0.000006  0.000020  0.000021
+  The components of the vector are:  -11.155616    9.661047    8.818124
+  Trace= -0.000028
+  
+  For jatom= 472 ,with type=   2
+  -0.000012 -0.000014  0.000000
+  -0.000007 -0.000037  0.000040
+   0.000006 -0.000020  0.000021
+  The components of the vector are:  -11.155616    9.661047   -8.818124
+  Trace= -0.000028
+  
+  For jatom= 492 ,with type=   2
+  -0.000040  0.000009 -0.000035
+   0.000002 -0.000009  0.000020
+   0.000015 -0.000015  0.000021
+  The components of the vector are:    2.788904  -14.491570    8.818124
+  Trace= -0.000028
+  
+  For jatom= 496 ,with type=   2
+  -0.000040  0.000009  0.000035
+   0.000002 -0.000009 -0.000020
+  -0.000015  0.000015  0.000021
+  The components of the vector are:    2.788904  -14.491570   -8.818124
+  Trace= -0.000028
+  
+  
+ #############################################################################
+ ############## Compute the phonon spectrum, the DOS, ########################
+ ##############  the dynamical matrix and write them  ########################
+ #############################################################################
+ 
+ #############################################################################
+ ################### vibrational Density OF States (vDOS) ####################
+ #############################################################################
+ See the vdos.dat and TDEP_PHDOS* files
+ Write the IFC of TDEP in ifc_out.dat (and ifc_out.nc)
+ ------- achieved
+ Compute the vDOS
+ ------- achieved
+ (Please, pay attention to convergency wrt the BZ mesh : the ngqpt2 input variable)
+ See the dij.dat, omega.dat and eigenvectors files
+ See also the DDB file
+ 
+ #############################################################################
+ ######################### Elastic constants #################################
+ ################ Bulk and Shear modulus--Sound velocities ###################
+ #############################################################################
+ 
+ ========== Using the formulation proposed by Wallace (using the IFC) =========
+ Cijkl [in GPa]=
+ | C11 C12 C13 C14 C15 C16 |    184.029   75.687   70.562    0.000    0.000   -0.000
+ | C21 C22 C23 C24 C25 C26 |     75.689  184.029   70.563   -0.000   -0.000   -0.003
+ | C31 C32 C33 C34 C35 C36 |     78.248   78.247  146.214   -0.006    0.004    0.000
+ | C41 C42 C43 C44 C45 C46 | =    0.000    0.000    0.000   37.336    0.004    0.000
+ | C51 C52 C53 C54 C55 C56 |     -0.000    0.000    0.000   -0.004   37.337   -0.000
+ | C61 C62 C63 C64 C65 C66 |     -0.002    0.000    0.004   -0.000   -0.000   54.172
+ 
+ ========== For an Anisotropic Material =======================================
+ Sijkl [in GPa-1]=
+ | S11 S12 S13 S14 S15 S16 |      0.007   -0.002   -0.003   -0.000    0.000   -0.000
+ | S21 S22 S23 S24 S25 S26 |     -0.002    0.007   -0.003   -0.000    0.000    0.000
+ | S31 S32 S33 S34 S35 S36 |     -0.003   -0.003    0.010    0.000   -0.000   -0.000
+ | S41 S42 S43 S44 S45 S46 | =   -0.000   -0.000    0.000    0.027   -0.000   -0.000
+ | S51 S52 S53 S54 S55 S56 |      0.000   -0.000   -0.000    0.000    0.027    0.000
+ | S61 S62 S63 S64 S65 S66 |      0.000    0.000   -0.000    0.000    0.000    0.018
+ 
+ ========== For an Orthotropic Material (see B. M. Lempriere (1968)) ==========
+ Young modulus E1, E2 and E3 [in GPa]= 136.378  136.378  103.582
+ Poisson ratio Nu21, Nu31, Nu23, Nu12, Nu13 and Nu32=   0.259    0.286    0.377    0.259    0.377    0.286
+ Shear modulus G23, G13 and G12 [in GPa]=  37.336   37.337   54.172
+ Sijkl [in GPa-1]=
+ | S11 S12 S13 S14 S15 S16 |      0.007   -0.002   -0.003    0.000    0.000    0.000
+ | S21 S22 S23 S24 S25 S26 |     -0.002    0.007   -0.003    0.000    0.000    0.000
+ | S31 S32 S33 S34 S35 S36 |     -0.003   -0.003    0.010    0.000    0.000    0.000
+ | S41 S42 S43 S44 S45 S46 | =    0.000    0.000    0.000    0.027    0.000    0.000
+ | S51 S52 S53 S54 S55 S56 |      0.000    0.000    0.000    0.000    0.027    0.000
+ | S61 S62 S63 S64 S65 S66 |      0.000    0.000    0.000    0.000    0.000    0.018
+ For density rho [in kg.m-3]= 4516.541
+ 
+ ========================= Voigt average (constant strain) ===================
+ ISOTHERMAL modulus [in GPa]: Bulk Kt=  107.030 and Shear G=   45.087
+ Average of Young modulus E [in GPa]=  118.607 Lame modulus Lambda [in GPa]=   76.972 and Poisson ratio Nu=    0.315
+ Velocities [in m.s-1]: compressional Vp= 6083.381  shear Vs= 3159.539  and bulk Vphi= 4867.984
+ Debye velocity [in m.s-1]= 3536.060  and temperature [in K]=  404.694
+ 
+ ========================= Reuss average (constant stress) ===================
+ ISOTHERMAL modulus [in GPa]: Bulk Kt=  105.695 and Shear G=   43.722
+ Average of Young modulus E [in GPa]=  115.272 Lame modulus Lambda [in GPa]=   76.547 and Poisson ratio Nu=    0.318
+ Velocities [in m.s-1]: compressional Vp= 6025.703  shear Vs= 3111.349  and bulk Vphi= 4837.538
+ Debye velocity [in m.s-1]= 3483.448  and temperature [in K]=  398.672
+ 
+ ============================== Hill average =================================
+ ISOTHERMAL modulus [in GPa]: Bulk Kt=  106.362 and Shear G=   44.405
+ Average of Young modulus E [in GPa]=  116.941 Lame modulus Lambda [in GPa]=   76.759 and Poisson ratio Nu=    0.317
+ Velocities [in m.s-1]: compressional Vp= 6054.610  shear Vs= 3135.537  and bulk Vphi= 4852.785
+ Debye velocity [in m.s-1]= 3509.857  and temperature [in K]=  401.695
+ 
+ ========================= Elastic anisotropy =================================
+ Elastic anisotropy index : A_U= 5*G_V/G_R + K_V/K_R - 6 =    0.169
+ Bulk anisotropy ratio : A_B= (B_V-B_R)/(B_V+B_R) =    0.006
+ Shear anisotropy ratio : A_G= (G_V-G_R)/(G_V+G_R) =    0.015
+  
+ #############################################################################
+ ######################### Energies, errors,...  #############################
+ #############################################################################
+ Thermodynamic quantities and convergence parameters of THE MODEL,
+      as a function of the step number (energies in eV/atom and forces in Ha/bohr) :
+ <U_TDEP> = U_0 + U_1 + U_2
+       with U_0 = < U_MD - sum_i Phi1 ui - 1/2 sum_ij Phi2 ui uj >
+        and U_1 = <      sum_i    Phi1 ui >
+        and U_2 = < 1/2  sum_ij   Phi2 ui uj >
+  Delta_U =   < U_MD - U_TDEP > 
+  Delta_U2= (< (U_MD - U_TDEP)^2 >)**0.5 
+  Delta_F2= (< (F_MD - F_TDEP)^2 >)**0.5 
+  Sigma   = (< (F_MD - F_TDEP)^2 >/<F_MD**2>)**0.5 
+     <U_MD>            U_0              U_1              U_2            Delta_U          Delta_U2          Delta_F2          Sigma
+ -1591.93342      -1591.93342          0.00000          0.00000          0.00000          0.00000          0.00000          0.00000
+ NOTE : in the harmonic and classical limit (T>>T_Debye), U_2=3/2*kB*T=      0.03878
+ 
+ See the etotMDvsTDEP.dat & fcartMDvsTDEP.dat files
+ 
+ #############################################################################
+ ################# Thermodynamic quantities: Free energy,...##################
+ #############################################################################
+ See the thermo.dat file
+  
+ #############################################################################
+ ######################### CALCULATION COMPLETED #############################
+ #############################################################################
+ Suggested references for the acknowledgment of ABINIT usage.
+ 
+ The users of ABINIT have little formal obligations with respect to the ABINIT group
+ (those specified in the GNU General Public License, http://www.gnu.org/copyleft/gpl.txt).
+ However, it is common practice in the scientific literature,
+ to acknowledge the efforts of people that have made the research possible.
+ In this spirit, please find below suggested citations of work written by ABINIT developers,
+ corresponding to implementations inside of ABINIT that you have used in the present run.
+ Note also that it will be of great value to readers of publications presenting these results,
+ to read papers enabling them to understand the theoretical formalism and details
+ of the ABINIT implementation.
+ For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
+ 
+ [1] a-TDEP: Temperature Dependent Effective Potential for Abinit 
+ -- Lattice dynamic properties including anharmonicity
+ F. Bottin, J. Bieder and J. Bouchet, Comput. Phys. Comm. 254, 107301 (2020).
+ Strong suggestion to cite this paper in your publications.
+ 
+ [2] Thermal evolution of vibrational properties of alpha-U
+ J. Bouchet and F. Bottin, Phys. Rev. B 92, 174108 (2015).
+ Strong suggestion to cite this paper in your publications.
+ 
+ [3] Lattice dynamics of anharmonic solids from first principles
+ O. Hellman, I.A. Abrikosov and S.I. Simak, Phys. Rev. B 84, 180301(R) (2011).
+ 
+ [4] Temperature dependent effective potential method for accurate free energy calculations of solids
+ O. Hellman, P. Steneteg, I.A. Abrikosov and S.I. Simak, Phys. Rev. B 87, 104111 (2013).

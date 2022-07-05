@@ -2,7 +2,7 @@
 .Version 9.3.1 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -376,10 +376,10 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
   -5.95662   -1.59690   -1.59690   -1.51259   -0.81684   -0.81684    7.08915    8.06650
    8.06650
  Total charge density [el/Bohr^3]
-      Maximum=    3.3160E-01  at reduced coord.    0.6667    0.5333    0.6667
- Next maximum=    3.3160E-01  at reduced coord.    0.3333    0.5333    0.6667
-      Minimum=    1.3773E-03  at reduced coord.    0.0000    0.0000    0.0000
- Next minimum=    1.6010E-03  at reduced coord.    0.0000    0.0667    0.0000
+)     Maximum=    3.3160E-01  at reduced coord.    0.6667    0.5333    0.6667
+)Next maximum=    3.3160E-01  at reduced coord.    0.3333    0.5333    0.6667
+)     Minimum=    1.3773E-03  at reduced coord.    0.0000    0.0000    0.0000
+)Next minimum=    1.6010E-03  at reduced coord.    0.0000    0.0667    0.0000
    Integrated=    1.4000E+01
 
 --- !EnergyTerms

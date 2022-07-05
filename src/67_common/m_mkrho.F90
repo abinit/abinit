@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, LSI, AR, MB, MT)
+!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, LSI, AR, MB, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -174,6 +174,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
  integer :: me,my_nspinor,n1,n2,n3,n4,n5,n6,nalpha,nband_k,nbandc1,nbdblock,nbeta
  integer :: ndat,nfftot,npw_k,spaceComm,tim_fourwf
  integer :: iband_me
+ integer :: mband_mem
  real(dp) :: kpt_cart,kg_k_cart,gp2pi1,gp2pi2,gp2pi3,cwftmp
  real(dp) :: weight,weight_i
  !character(len=500) :: message
@@ -212,6 +213,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
    nbandc1=1
  end if
  use_nondiag_occup_dmft=0
+
 
 !if(dtset%nspinor==2.and.paw_dmft%use_sc_dmft==1) then
 !write(message, '(a,a,a,a)' )ch10,&
@@ -313,6 +315,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
        do ikpt=1,dtset%nkpt
 
          nband_k = dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
+         mband_mem = nband_k
          npw_k=npwarr(ikpt)
          istwf_k = dtset%istwfk(ikpt)
 
@@ -331,6 +334,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 !        Shoulb be changed to treat bands by batch always
 
          if(mpi_enreg%paral_kgb /= 1) then  ! Not yet parallelized on spinors
+           mband_mem = nband_k/mpi_enreg%nproc_band
            iband_me = 0
            do iband=1,nband_k
 !            if(paw_dmft%use_sc_dmft==1) then
@@ -631,7 +635,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
          bdtot_index=bdtot_index+nband_k
 
          if (dtset%mkmem/=0) then
-           icg=icg+npw_k*my_nspinor*nband_k
+           icg=icg+npw_k*my_nspinor*mband_mem !iband_me
            ikg=ikg+npw_k
          end if
 
@@ -1652,19 +1656,19 @@ subroutine prtrhomxmn(iout,mpi_enreg,nfft,ngfft,nspden,option,rhor,optrhor,ucvol
 
        call wrtout(iout,message,'COLL')
 
-       write(message,'(a,es13.4,a,3f10.4)') '      Maximum= ',&
+       write(message,'(a,es13.4,a,3f10.4)')   ')     Maximum= ',&
 &       value(1,1,iitems),'  at reduced coord.',coord(:,1,1,iitems)
        call wrtout(iout,message,'COLL')
        if(option==2)then
-         write(message,'(a,es13.4,a,3f10.4)')' Next maximum= ',&
+         write(message,'(a,es13.4,a,3f10.4)') ')Next maximum= ',&
 &         value(2,1,iitems),'  at reduced coord.',coord(:,2,1,iitems)
          call wrtout(iout,message,'COLL')
        end if
-       write(message,'(a,es13.4,a,3f10.4)') '      Minimum= ',&
+       write(message,'(a,es13.4,a,3f10.4)')   ')     Minimum= ',&
 &       value(1,2,iitems),'  at reduced coord.',coord(:,1,2,iitems)
        call wrtout(iout,message,'COLL')
        if(option==2)then
-         write(message,'(a,es13.4,a,3f10.4)')' Next minimum= ',&
+         write(message,'(a,es13.4,a,3f10.4)') ')Next minimum= ',&
 &         value(2,2,iitems),'  at reduced coord.',coord(:,2,2,iitems)
          call wrtout(iout,message,'COLL')
        end if
@@ -1886,7 +1890,7 @@ end subroutine prtrhomxmn
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2021 ABINIT group (SM,VR,FJ,MT)
+!! Copyright (C) 2005-2022 ABINIT group (SM,VR,FJ,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2097,7 +2101,7 @@ end subroutine read_atomden
 !! Units are atomic.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2021 ABINIT group (SM,VR,FJ,MT)
+!! Copyright (C) 2005-2022 ABINIT group (SM,VR,FJ,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

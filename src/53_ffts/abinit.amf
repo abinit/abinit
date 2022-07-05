@@ -1,5 +1,9 @@
-EXTRA_DIST += \
+finc_list = \
   fftug_driver.finc \
   fftur_driver.finc \
   fftbox_ip_driver.finc \
   fftbox_op_driver.finc
+
+EXTRA_DIST += $(finc_list)
+
+lib53_ffts_a_DEPENDENCIES = $(finc_list)

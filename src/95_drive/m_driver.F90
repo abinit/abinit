@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2021 ABINIT group ()
+!!  Copyright (C) 2008-2022 ABINIT group ()
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -67,6 +67,7 @@ module m_driver
  use m_gwls_sternheimer, only : gwls_sternheimer
  use m_nonlinear,        only : nonlinear
  use m_drivexc,          only : echo_xc_name
+ use m_rttddft_driver,   only : rttddft
 
 #if defined HAVE_BIGDFT
  use BigDFT_API,   only: xc_init, xc_end, XC_MIXED, XC_ABINIT,&
@@ -100,7 +101,7 @@ contains
 !! selected big arrays are allocated, then the gstate, respfn, ...  subroutines are called.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2021 ABINIT group (XG,MKV,MM,MT,FJ)
+!! Copyright (C) 1999-2022 ABINIT group (XG,MKV,MM,MT,FJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -361,6 +362,10 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
          [dtset%optdriver, dtset%eph_task] , dict_key="meta")
 
      case(RUNL_LONGWAVE)
+       call ydoc%add_ints("optdriver", [dtset%optdriver], &
+         dict_key="meta")
+
+     case(RUNL_RTTDDFT)
        call ydoc%add_ints("optdriver", [dtset%optdriver], &
          dict_key="meta")
 
@@ -689,7 +694,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 
 !  ****************************************************************************
 !  Exchange-correlation
-   
+
    call echo_xc_name(dtset%ixc)
 
    if (dtset%ixc<0) then
@@ -792,7 +797,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 
    case(RUNL_SIGMA)
      call sigma(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,converged)
-   
+
    case(RUNL_NONLINEAR)
      call nonlinear(codvsn,dtfil,dtset,etotal,mpi_enregs(idtset),npwtot,occ,pawang,pawrad,pawtab,psps,xred)
 
@@ -831,6 +836,9 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 
      call longwave(codvsn,dtfil,dtset,etotal,mpi_enregs(idtset),npwtot,occ,&
 &     pawrad,pawtab,psps,xred)
+
+   case(RUNL_RTTDDFT)
+     call rttddft(codvsn,dtfil,dtset,mpi_enregs(idtset),pawang,pawrad,pawtab,psps)
 
    case default
      ! Bad value for optdriver

@@ -2,7 +2,7 @@
 .Version 9.7.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -385,8 +385,6 @@ P          mk1mem5         64
               qpt3     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt4     5.00000000E-01  0.00000000E+00  0.00000000E+00
               qpt5     5.00000000E-01  5.00000000E-01  0.00000000E+00
-          rfatpol           1       2
-            rfdir           1       1       1
            rfphon1          0
            rfphon2          0
            rfphon3          1
@@ -1881,8 +1879,6 @@ P          mk1mem5         64
               qpt3     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt4     5.00000000E-01  0.00000000E+00  0.00000000E+00
               qpt5     5.00000000E-01  5.00000000E-01  0.00000000E+00
-          rfatpol           1       2
-            rfdir           1       1       1
            rfphon1          0
            rfphon2          0
            rfphon3          1

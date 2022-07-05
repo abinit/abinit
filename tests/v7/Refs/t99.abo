@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.7.4 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h33 )
+.Starting date : Wed  4 May 2022.
+- ( at 01h25 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v7_t99/t99.in
-- output file    -> t99.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/v7_t99/t99.abi
+- output file    -> t99.abo
 - root for input  files -> t99i
 - root for output files -> t99o
 
@@ -34,7 +34,7 @@
 -    mband =           6        mffmem =           1         mkmem =           2
        mpw =          39          nfft =        1500          nkpt =           2
 ================================================================================
-P This job should need less than                       1.032 Mbytes of memory.
+P This job should need less than                       1.045 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.009 Mbytes ; DEN or POT disk file :      0.013 Mbytes.
 ================================================================================
@@ -113,10 +113,8 @@ P          mk1mem2          4
               occ2     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
         optdriver1          0
         optdriver2          1
-          rfatpol1          1       1
-          rfatpol2          1       2
-            rfdir1          0       0       0
-            rfdir2          1       1       1
+           prtpot1          0
+           prtpot2          1
            rfphon1          0
            rfphon2          1
            rfstrs1          0
@@ -181,8 +179,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      5.513   => boxcut(ratio)=   2.00903
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/B-q3
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/B-q3
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/B-q3
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/B-q3
 - Goedecker pseudopotential for B
 -  5.00000   3.00000     70301                znucl, zion, pspdat
    10   11    1    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -212,8 +210,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              1    0.000000
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/7n.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/7n.5.hgh
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosHGH_pwteter/7n.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosHGH_pwteter/7n.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for N,  from PRB58, 3641 (1998)
 -  7.00000   5.00000     10605                znucl, zion, pspdat
     3    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -401,7 +399,6 @@ meta: {optdriver: 1, rfphon: 1, rfstrs: 3, }
          ecut(hartree)=      5.513   => boxcut(ratio)=   2.00903
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t99o_DS1_WFK
  symkchk : k-point set has full space-group symmetry.
 
  ==>  initialize data related to q vector <== 
@@ -438,7 +435,6 @@ meta: {optdriver: 1, rfphon: 1, rfstrs: 3, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t99o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -453,14 +449,14 @@ tolerances: {tolvrs: 1.00E-16, }
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1 -0.33849634356209     -2.130E+01 2.668E-02 6.447E+01
  ETOT  2 -0.87049918387568     -5.320E-01 1.869E-04 5.465E+00
- ETOT  3 -0.93863797139426     -6.814E-02 2.680E-05 2.787E-01
+ ETOT  3 -0.93863797139425     -6.814E-02 2.680E-05 2.787E-01
  ETOT  4 -0.94187951030696     -3.242E-03 1.247E-06 3.374E-04
- ETOT  5 -0.94188081747300     -1.307E-06 3.473E-09 2.537E-06
- ETOT  6 -0.94188083376659     -1.629E-08 1.272E-11 1.654E-08
- ETOT  7 -0.94188083387209     -1.055E-10 9.923E-14 1.212E-10
- ETOT  8 -0.94188083387262     -5.258E-13 3.929E-16 6.007E-13
- ETOT  9 -0.94188083387260      2.487E-14 2.890E-18 3.461E-15
- ETOT 10 -0.94188083387263     -3.197E-14 2.273E-20 5.142E-18
+ ETOT  5 -0.94188081747299     -1.307E-06 3.473E-09 2.537E-06
+ ETOT  6 -0.94188083376657     -1.629E-08 1.272E-11 1.654E-08
+ ETOT  7 -0.94188083387210     -1.055E-10 9.923E-14 1.212E-10
+ ETOT  8 -0.94188083387261     -5.116E-13 3.929E-16 6.007E-13
+ ETOT  9 -0.94188083387261      1.066E-14 2.890E-18 3.461E-15
+ ETOT 10 -0.94188083387262     -1.421E-14 2.273E-20 5.142E-18
 
  At SCF step   10       vres2   =  5.14E-18 < tolvrs=  1.00E-16 =>converged.
 ================================================================================
@@ -499,7 +495,6 @@ tolerances: {tolvrs: 1.00E-16, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t99o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -517,12 +512,12 @@ tolerances: {tolvrs: 1.00E-16, }
  ETOT  3   9.0406270827809     -1.150E-01 1.854E-04 3.629E-01
  ETOT  4   9.0395860034006     -1.041E-03 5.852E-07 6.417E-03
  ETOT  5   9.0395696040002     -1.640E-05 4.086E-09 1.406E-05
- ETOT  6   9.0395695608875     -4.311E-08 5.537E-11 3.538E-07
+ ETOT  6   9.0395695608876     -4.311E-08 5.537E-11 3.538E-07
  ETOT  7   9.0395695592772     -1.610E-09 2.237E-12 3.553E-09
- ETOT  8   9.0395695592619     -1.538E-11 1.992E-14 2.395E-11
- ETOT  9   9.0395695592617     -1.208E-13 1.089E-16 1.307E-13
- ETOT 10   9.0395695592618      5.684E-14 4.644E-19 1.125E-15
- ETOT 11   9.0395695592617     -7.105E-14 1.380E-21 1.058E-17
+ ETOT  8   9.0395695592619     -1.537E-11 1.992E-14 2.395E-11
+ ETOT  9   9.0395695592617     -1.279E-13 1.089E-16 1.307E-13
+ ETOT 10   9.0395695592618      7.105E-14 4.644E-19 1.125E-15
+ ETOT 11   9.0395695592617     -1.137E-13 1.380E-21 1.058E-17
 
  At SCF step   11       vres2   =  1.06E-17 < tolvrs=  1.00E-16 =>converged.
 ================================================================================
@@ -560,7 +555,6 @@ tolerances: {tolvrs: 1.00E-16, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t99o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -575,14 +569,14 @@ tolerances: {tolvrs: 1.00E-16, }
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   18.819063714465     -9.165E+01 4.866E-01 1.586E+03
  ETOT  2   3.4513428469000     -1.537E+01 1.221E-02 3.399E+02
- ETOT  3 -0.77778952485125     -4.229E+00 1.970E-03 1.985E-01
- ETOT  4 -0.77895490163133     -1.165E-03 1.908E-06 4.398E-03
- ETOT  5 -0.77899038058025     -3.548E-05 4.674E-08 1.773E-05
- ETOT  6 -0.77899050067692     -1.201E-07 1.242E-10 1.914E-07
- ETOT  7 -0.77899050193052     -1.254E-09 8.423E-13 5.360E-10
- ETOT  8 -0.77899050193214     -1.634E-12 2.145E-15 2.240E-12
- ETOT  9 -0.77899050193222     -8.527E-14 9.406E-18 5.058E-15
- ETOT 10 -0.77899050193211      1.279E-13 2.699E-20 2.759E-17
+ ETOT  3 -0.77778952485122     -4.229E+00 1.970E-03 1.985E-01
+ ETOT  4 -0.77895490163136     -1.165E-03 1.908E-06 4.398E-03
+ ETOT  5 -0.77899038058010     -3.548E-05 4.674E-08 1.773E-05
+ ETOT  6 -0.77899050067686     -1.201E-07 1.242E-10 1.914E-07
+ ETOT  7 -0.77899050193037     -1.254E-09 8.423E-13 5.360E-10
+ ETOT  8 -0.77899050193205     -1.677E-12 2.145E-15 2.240E-12
+ ETOT  9 -0.77899050193222     -1.847E-13 9.406E-18 5.058E-15
+ ETOT 10 -0.77899050193208      1.563E-13 2.699E-20 2.759E-17
 
  At SCF step   10       vres2   =  2.76E-17 < tolvrs=  1.00E-16 =>converged.
 ================================================================================
@@ -621,7 +615,6 @@ tolerances: {tolvrs: 1.00E-16, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t99o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -636,15 +629,15 @@ tolerances: {tolvrs: 1.00E-16, }
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   114.30320746681     -1.195E+02 6.714E-01 2.734E+04
  ETOT  2   10.160109440543     -1.041E+02 7.766E-02 1.947E+02
- ETOT  3   9.0506850868193     -1.109E+00 1.807E-03 2.655E+00
+ ETOT  3   9.0506850868194     -1.109E+00 1.807E-03 2.655E+00
  ETOT  4   9.0433901569685     -7.295E-03 3.237E-06 3.719E-02
- ETOT  5   9.0432898283776     -1.003E-04 6.890E-08 2.290E-04
+ ETOT  5   9.0432898283775     -1.003E-04 6.890E-08 2.290E-04
  ETOT  6   9.0432889740281     -8.543E-07 1.260E-09 5.684E-06
- ETOT  7   9.0432889507478     -2.328E-08 3.281E-11 2.782E-08
- ETOT  8   9.0432889506280     -1.198E-10 2.006E-13 7.361E-11
- ETOT  9   9.0432889506283      2.558E-13 3.109E-16 5.173E-13
- ETOT 10   9.0432889506260     -2.331E-12 1.663E-18 2.530E-15
- ETOT 11   9.0432889506267      7.674E-13 3.224E-21 4.113E-17
+ ETOT  7   9.0432889507476     -2.328E-08 3.281E-11 2.782E-08
+ ETOT  8   9.0432889506283     -1.194E-10 2.006E-13 7.361E-11
+ ETOT  9   9.0432889506282     -1.137E-13 3.109E-16 5.173E-13
+ ETOT 10   9.0432889506261     -2.018E-12 1.663E-18 2.530E-15
+ ETOT 11   9.0432889506268      6.821E-13 3.224E-21 4.113E-17
 
  At SCF step   11       vres2   =  4.11E-17 < tolvrs=  1.00E-16 =>converged.
 ================================================================================
@@ -682,7 +675,6 @@ tolerances: {tolvrs: 1.00E-16, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t99o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -696,16 +688,16 @@ tolerances: {tolvrs: 1.00E-16, }
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   1.6256207964284     -1.879E+02 7.769E-01 1.404E+02
- ETOT  2  0.89389453646513     -7.317E-01 1.098E-03 1.042E+01
- ETOT  3  0.85130922575599     -4.259E-02 3.661E-05 2.285E-01
- ETOT  4  0.84962901590567     -1.680E-03 1.351E-06 1.880E-02
- ETOT  5  0.84942591005333     -2.031E-04 7.532E-08 5.408E-04
+ ETOT  2  0.89389453646510     -7.317E-01 1.098E-03 1.042E+01
+ ETOT  3  0.85130922575604     -4.259E-02 3.661E-05 2.285E-01
+ ETOT  4  0.84962901590561     -1.680E-03 1.351E-06 1.880E-02
+ ETOT  5  0.84942591005330     -2.031E-04 7.532E-08 5.408E-04
  ETOT  6  0.84942281005803     -3.100E-06 1.695E-09 9.427E-07
  ETOT  7  0.84942280655946     -3.499E-09 3.832E-12 8.440E-09
- ETOT  8  0.84942280652857     -3.089E-11 2.366E-14 6.702E-11
- ETOT  9  0.84942280652843     -1.421E-13 1.689E-16 8.676E-13
- ETOT 10  0.84942280652817     -2.558E-13 1.771E-18 5.600E-15
- ETOT 11  0.84942280652831      1.421E-13 1.249E-20 9.194E-17
+ ETOT  8  0.84942280652851     -3.095E-11 2.366E-14 6.702E-11
+ ETOT  9  0.84942280652837     -1.421E-13 1.689E-16 8.676E-13
+ ETOT 10  0.84942280652817     -1.990E-13 1.771E-18 5.600E-15
+ ETOT 11  0.84942280652834      1.705E-13 1.249E-20 9.194E-17
 
  At SCF step   11       vres2   =  9.19E-17 < tolvrs=  1.00E-16 =>converged.
 ================================================================================
@@ -745,7 +737,6 @@ tolerances: {tolvrs: 1.00E-16, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t99o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -761,15 +752,15 @@ tolerances: {tolvrs: 1.00E-16, }
 -ETOT  1   1.6401601393155     -1.879E+02 8.616E-01 1.424E+02
  ETOT  2  0.89813316326507     -7.420E-01 8.081E-04 1.133E+01
  ETOT  3  0.85135743993152     -4.678E-02 3.895E-05 2.377E-01
- ETOT  4  0.84963174992115     -1.726E-03 8.033E-07 1.911E-02
+ ETOT  4  0.84963174992106     -1.726E-03 8.033E-07 1.911E-02
  ETOT  5  0.84942598248566     -2.058E-04 5.188E-08 5.440E-04
- ETOT  6  0.84942272010463     -3.262E-06 2.134E-09 1.040E-06
+ ETOT  6  0.84942272010457     -3.262E-06 2.134E-09 1.040E-06
  ETOT  7  0.84942271600176     -4.103E-09 2.329E-12 1.139E-08
- ETOT  8  0.84942271595895     -4.280E-11 3.023E-14 1.550E-10
- ETOT  9  0.84942271595836     -5.969E-13 5.065E-16 1.315E-12
- ETOT 10  0.84942271595841      5.684E-14 1.802E-18 8.995E-15
- ETOT 11  0.84942271595838     -2.842E-14 1.909E-20 1.426E-16
- ETOT 12  0.84942271595824     -1.421E-13 3.118E-22 7.513E-19
+ ETOT  8  0.84942271595884     -4.292E-11 3.023E-14 1.550E-10
+ ETOT  9  0.84942271595833     -5.116E-13 5.065E-16 1.315E-12
+ ETOT 10  0.84942271595844      1.137E-13 1.802E-18 8.995E-15
+ ETOT 11  0.84942271595836     -8.527E-14 1.909E-20 1.426E-16
+ ETOT 12  0.84942271595819     -1.705E-13 3.118E-22 7.513E-19
 
  At SCF step   12       vres2   =  7.51E-19 < tolvrs=  1.00E-16 =>converged.
 ================================================================================
@@ -809,7 +800,6 @@ tolerances: {tolvrs: 1.00E-16, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t99o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -829,10 +819,10 @@ tolerances: {tolvrs: 1.00E-16, }
  ETOT  5   8.5662087988351     -5.175E-07 9.604E-10 2.061E-06
  ETOT  6   8.5662087940576     -4.778E-09 3.166E-12 1.471E-08
  ETOT  7   8.5662087940227     -3.489E-11 2.107E-14 1.876E-10
- ETOT  8   8.5662087940221     -6.430E-13 5.463E-16 1.639E-12
- ETOT  9   8.5662087940221      1.243E-14 4.990E-18 1.642E-14
- ETOT 10   8.5662087940221     -3.553E-15 2.465E-20 1.200E-16
- ETOT 11   8.5662087940221      8.882E-15 2.699E-22 4.193E-19
+ ETOT  8   8.5662087940221     -6.306E-13 5.463E-16 1.639E-12
+ ETOT  9   8.5662087940221      7.105E-15 4.990E-18 1.642E-14
+ ETOT 10   8.5662087940221      0.000E+00 2.465E-20 1.200E-16
+ ETOT 11   8.5662087940221      7.105E-15 2.699E-22 4.193E-19
 
  At SCF step   11       vres2   =  4.19E-19 < tolvrs=  1.00E-16 =>converged.
 ================================================================================
@@ -872,7 +862,6 @@ tolerances: {tolvrs: 1.00E-16, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t99o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -892,10 +881,10 @@ tolerances: {tolvrs: 1.00E-16, }
  ETOT  5   8.5403128376405     -8.845E-06 2.451E-09 5.067E-07
  ETOT  6   8.5403128343102     -3.330E-09 1.137E-11 7.143E-09
  ETOT  7   8.5403128342652     -4.501E-11 1.721E-14 2.391E-10
- ETOT  8   8.5403128342641     -1.062E-12 1.082E-15 1.230E-12
- ETOT  9   8.5403128342641      1.066E-14 7.766E-18 3.215E-14
- ETOT 10   8.5403128342641     -3.553E-15 8.389E-20 3.009E-16
- ETOT 11   8.5403128342641     -1.066E-14 1.026E-21 1.980E-18
+ ETOT  8   8.5403128342641     -1.069E-12 1.082E-15 1.230E-12
+ ETOT  9   8.5403128342641      7.105E-15 7.766E-18 3.215E-14
+ ETOT 10   8.5403128342641      1.066E-14 8.389E-20 3.009E-16
+ ETOT 11   8.5403128342641     -2.132E-14 1.026E-21 1.980E-18
 
  At SCF step   11       vres2   =  1.98E-18 < tolvrs=  1.00E-16 =>converged.
 ================================================================================
@@ -934,7 +923,6 @@ tolerances: {tolvrs: 1.00E-16, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t99o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -953,10 +941,10 @@ tolerances: {tolvrs: 1.00E-16, }
  ETOT  4   8.5403215362552     -8.417E-05 3.609E-08 7.472E-04
  ETOT  5   8.5403128420497     -8.694E-06 3.928E-09 4.055E-07
  ETOT  6   8.5403128400875     -1.962E-09 2.401E-12 4.290E-09
- ETOT  7   8.5403128400624     -2.516E-11 7.626E-15 2.236E-11
- ETOT  8   8.5403128400622     -1.812E-13 2.370E-16 3.351E-14
- ETOT  9   8.5403128400622      0.000E+00 2.020E-19 3.067E-16
- ETOT 10   8.5403128400621     -2.132E-14 1.718E-21 2.872E-18
+ ETOT  7   8.5403128400623     -2.517E-11 7.626E-15 2.236E-11
+ ETOT  8   8.5403128400622     -1.776E-13 2.370E-16 3.351E-14
+ ETOT  9   8.5403128400622     -3.553E-15 2.020E-19 3.067E-16
+ ETOT 10   8.5403128400622     -1.066E-14 1.718E-21 2.872E-18
 
  At SCF step   10       vres2   =  2.87E-18 < tolvrs=  1.00E-16 =>converged.
 ================================================================================
@@ -995,7 +983,6 @@ tolerances: {tolvrs: 1.00E-16, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t99o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1008,16 +995,16 @@ tolerances: {tolvrs: 1.00E-16, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  7.36475584202613E-02 -6.597E+01 2.160E-01 3.687E+01
+-ETOT  1  7.36475584202755E-02 -6.597E+01 2.160E-01 3.687E+01
  ETOT  2 -0.15943577945272     -2.331E-01 4.076E-04 1.093E+00
- ETOT  3 -0.16943837848250     -1.000E-02 9.018E-06 1.501E-01
- ETOT  4 -0.17131377363401     -1.875E-03 7.949E-07 9.338E-04
- ETOT  5 -0.17131974890012     -5.975E-06 9.700E-09 7.492E-07
- ETOT  6 -0.17131975283833     -3.938E-09 3.517E-12 6.571E-09
- ETOT  7 -0.17131975288601     -4.768E-11 1.941E-14 1.155E-10
- ETOT  8 -0.17131975288679     -7.816E-13 6.062E-16 1.466E-12
- ETOT  9 -0.17131975288682     -2.842E-14 7.424E-18 2.542E-15
- ETOT 10 -0.17131975288683     -1.421E-14 5.135E-20 3.804E-18
+ ETOT  3 -0.16943837848251     -1.000E-02 9.018E-06 1.501E-01
+ ETOT  4 -0.17131377363400     -1.875E-03 7.949E-07 9.338E-04
+ ETOT  5 -0.17131974890010     -5.975E-06 9.700E-09 7.492E-07
+ ETOT  6 -0.17131975283837     -3.938E-09 3.517E-12 6.571E-09
+ ETOT  7 -0.17131975288602     -4.765E-11 1.941E-14 1.155E-10
+ ETOT  8 -0.17131975288679     -7.674E-13 6.062E-16 1.466E-12
+ ETOT  9 -0.17131975288680     -1.421E-14 7.424E-18 2.542E-15
+ ETOT 10 -0.17131975288683     -2.842E-14 5.135E-20 3.804E-18
 
  At SCF step   10       vres2   =  3.80E-18 < tolvrs=  1.00E-16 =>converged.
 ================================================================================
@@ -1405,10 +1392,8 @@ P          mk1mem2          4
               occ2     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
         optdriver1          0
         optdriver2          1
-          rfatpol1          1       1
-          rfatpol2          1       2
-            rfdir1          0       0       0
-            rfdir2          1       1       1
+           prtpot1          0
+           prtpot2          1
            rfphon1          0
            rfphon2          1
            rfstrs1          0
@@ -1538,10 +1523,10 @@ P          mk1mem2          4
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          2.9  wall=          2.9
+- Proc.   0 individual time (sec): cpu=          3.7  wall=          3.8
 
 ================================================================================
 
  Calculation completed.
-.Delivered   3 WARNINGs and  40 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.9  wall=          2.9
+.Delivered   1 WARNINGs and   5 COMMENTs to log file.
++Overall time at end (sec) : cpu=          3.7  wall=          3.8

@@ -8,7 +8,7 @@
 !! Calculate the matrix elements of the self-energy operator.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2021 ABINIT group (MG, GMR, VO, LR, RWG, MT)
+!!  Copyright (C) 1999-2022 ABINIT group (MG, GMR, VO, LR, RWG, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -44,13 +44,13 @@ module m_sigma_driver
 #endif
  use m_hdr
  use libxc_functionals
- use m_wfd
+
  use m_dtfil
  use m_crystal
  use m_cgtools
 
  use defs_datatypes, only : pseudopotential_type, ebands_t
- use defs_abitypes, only : MPI_type
+ use defs_abitypes,  only : MPI_type
  use m_time,          only : timab
  use m_numeric_tools, only : imax_loc
  use m_fstrings,      only : strcat, sjoin, itoa, basename, ktoa, ltoa
@@ -72,6 +72,7 @@ module m_sigma_driver
  use m_gsphere,       only : gsphere_t, gsph_init, gsph_free, merge_and_sort_kg, gsph_extend, setshells
  use m_kg,            only : getph,getcut
  use m_xcdata,        only : get_xclevel
+ use m_wfd,           only : wfd_init, wfdgw_t, wfdgw_copy, test_charge, wave_t
  use m_vcoul,         only : vcoul_t, vcoul_init, vcoul_free
  use m_qparticles,    only : wrqps, rdqps, rdgw, show_QP, updt_m_ks_to_qp
  use m_screening,     only : mkdump_er, em1results_free, epsilonm1_results, init_er_from_file
@@ -250,8 +251,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  type(ppmodel_t) :: PPm
  type(sigparams_t) :: Sigp
  type(sigma_t) :: Sr
- type(wfd_t),target :: Wfd,Wfdf,Wfd_nato_master
- type(wfd_t),pointer :: Wfd_nato_all
+ type(wfdgw_t),target :: Wfd,Wfdf,Wfd_nato_master
+ type(wfdgw_t),pointer :: Wfd_nato_all
  type(wave_t),pointer :: wave
  type(wvl_data) :: Wvl
 !arrays
@@ -333,8 +334,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 #else
  write(msg,'(a,i2,a)')'.Using single precision arithmetic ; gwpc = ',gwpc,ch10
 #endif
- call wrtout(std_out,msg,'COLL')
- call wrtout(ab_out,msg,'COLL')
+ call wrtout([std_out, ab_out], msg)
 
  tol_empty=0.01                            ! Initialize the tolerance used to decide if a band is empty (passed to m_sigx.F90)
  gwcalctyp=Dtset%gwcalctyp
@@ -762,7 +762,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  call wfd%read_wfk(wfk_fname,iomode_from_fname(wfk_fname))
 
  if (Dtset%pawcross==1) then
-   call wfd_copy(Wfd,Wfdf)
+   call wfdgw_copy(Wfd, Wfdf)
    call wfdf%change_ngfft(Cryst,Psps,ngfftf)
  end if
 
@@ -2608,7 +2608,6 @@ endif
        ABI_ERROR("Error distributing the GW density")
      endif
      ! We no longer need Wfd_nato_master.
-     Wfd_nato_master%bks_comm = xmpi_comm_null
      call Wfd_nato_master%free()
      call xmpi_barrier(Wfd%comm)
      ABI_FREE(bdm_mask) ! The master already used bdm_mask
@@ -2969,7 +2968,6 @@ endif
    end if
    if (Dtset%pawcross==1) then
      call paw_pwaves_lmn_free(Paw_onsite)
-     Wfdf%bks_comm = xmpi_comm_null
      call wfdf%free()
    end if
  end if
@@ -4348,7 +4346,7 @@ end subroutine sigma_bksmask
 !!  using the QP amplitudes read from the QPS file.
 !!
 !! INPUTS
-!!  Wfd<wfd_t>=Datatype gathering data on QP amplitudes.
+!!  Wfd<wfdgw_t>=Datatype gathering data on QP amplitudes.
 !!  nscf=Number of QPSCGW iterations done so far (read from the QPS file).
 !!  nfftf=Number of points in the fine FFT grid.
 !!  ngfft(18)=information on the fine FFT grid used for densities and potentials.
@@ -4401,7 +4399,7 @@ subroutine paw_qpscgw(Wfd,nscf,nfftf,ngfftf,Dtset,Cryst,Kmesh,Psps,QP_BSt,&
  type(Pawang_type),intent(in) :: Pawang
  type(ebands_t),intent(in) :: QP_BSt
  type(Energies_type),intent(inout) :: QP_energies
- type(wfd_t),intent(inout) :: Wfd
+ type(wfdgw_t),intent(inout) :: Wfd
 !arrays
  integer,intent(in) :: ngfftf(18)
  real(dp),intent(out) :: qp_nhat(nfftf,Dtset%nspden)

@@ -6,7 +6,7 @@
 !!  Module to read PAW atomic data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2021 ABINIT group (MT, FJ,TR, GJ, FB, FrD, AF, GMR, DRH)
+!!  Copyright (C) 2012-2022 ABINIT group (MT, FJ,TR, GJ, FB, FrD, AF, GMR, DRH)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1370,20 +1370,22 @@ end subroutine pawpsp_read
 !!
 !! SOURCE
 subroutine pawpsp_read_corewf(energy_cor,indlmn_core,lcor,lmncmax,ncor,nphicor,radmesh,phi_cor,&
-&                             filename) ! optional argument
+&                             filename,kappacor) ! optional arguments
 
 !Arguments ------------------------------------
  integer,intent(out) :: lmncmax,nphicor
  character(len=*),optional :: filename
 !arrays
  integer,allocatable,intent(inout) :: indlmn_core(:,:),lcor(:),ncor(:)
+ integer,allocatable,intent(inout),optional :: kappacor(:)
  real(dp),allocatable,intent(inout) :: phi_cor(:,:),energy_cor(:)
  type(pawrad_type),intent(in) :: radmesh
 
 !Local variables-------------------------------
- integer :: ib,i1,i2,il,ilm,ilmn,iln,ios,jln,nmesh,npts,unt
+ integer :: ib,i1,i2,il,im,ilm,ilmn,iln,ios,jln
+ integer :: nmesh,npts,unt,flagrel,tmp1,tmp2,tmp3,kappa,spinor,i2j,i2mj
  real(dp) :: noccor,r1,r2
- logical :: ex,oldformat,usexml
+ logical :: ex,oldformat,usexml,diracrel
  character(len=8) :: dum,dum1,dum2,dum3,dum4
  character(len=80) :: fline
  character(len=500) :: msg
@@ -1442,27 +1444,49 @@ subroutine pawpsp_read_corewf(energy_cor,indlmn_core,lcor,lmncmax,ncor,nphicor,r
          LIBPAW_ERROR(msg)
        end if
        oldformat=ex
+       if (.not.ex) then
+!        No core WF file found
+         write(msg, '(3a)' )&
+&         'Checks for existence of files corewf.abinit[.xml] or corewf.dat',ch10,&
+&         'but INQUIRE finds file does not exist!'
+         LIBPAW_ERROR(msg)
+       end if
      end if
-   end if
-   if (.not.ex) then
-     write(msg, '(3a)' )&
-&      'Checks for existence of file psp-name.corewf[.xml][.abinit] or corewf.dat',ch10,&
-&       'but INQUIRE finds file does not exist!'
-     LIBPAW_ERROR(msg)
    end if
  end if
 
 !Core WF file is in new XML format
  if ((.not.oldformat).and.(usexml)) then
-   call rdpawpsxml_core(energy_cor,filename_,lcor,ncor,nphicor,radmesh,phi_cor)
+   if(present(kappacor)) then
+     call rdpawpsxml_core(energy_cor,trim(filename_),lcor,ncor,nphicor,radmesh,phi_cor, &
+&                         kappacor=kappacor)
+   else
+     call rdpawpsxml_core(energy_cor,trim(filename_),lcor,ncor,nphicor,radmesh,phi_cor)
+   endif
  endif
 
-!Core WF file is in new (proprietary) format
+!Core WF file is in (proprietary) format
  if ((.not.oldformat).and.(.not.usexml)) then
    unt = libpaw_get_free_unit()
    open(unt,file=trim(filename_),form='formatted',action="read")
    read(unt,*) ! skip title
-   read(unt,*) ! skip relativism,method,nspinor,nsppol
+
+   diracrel=.false.
+   read(unit=unt,fmt=*,err=23,end=23) flagrel,tmp1,tmp2,tmp3
+   if (flagrel==2) diracrel=.true.
+   23 continue
+   
+   if(present(kappacor).and.(.not.diracrel)) then
+     write(msg,'(3a)') 'Error in pawpsp_read_core:',ch10, &
+&     '  Diracrel corewf file has to be provided!'
+     LIBPAW_ERROR(msg)
+   endif
+   if((.not.present(kappacor)).and.diracrel) then
+     write(msg,'(3a)') 'Error in pawpsp_read_core:',ch10, &
+&     '  Cannot use diracrelativistic corewf file!'
+     ABI_ERROR(msg)
+   endif
+
    read(unt,*) ! skip zatom,zcore,pspdat
    read(unt,*) ! skip pspcod,pspxc,lmax
    read(unt,*) ! skip pspfmt,creatorID
@@ -1487,10 +1511,17 @@ subroutine pawpsp_read_corewf(energy_cor,indlmn_core,lcor,lmncmax,ncor,nphicor,r
    LIBPAW_ALLOCATE(lcor,(nphicor))
    LIBPAW_ALLOCATE(energy_cor,(nphicor))
    LIBPAW_ALLOCATE(phi_cor,(radmesh%mesh_size,nphicor))
+   if(present(kappacor).and.diracrel) then
+     LIBPAW_ALLOCATE(kappacor,(nphicor))
+   endif
    do iln=1,nphicor
      read(unt,*) ! skip comment
      read(unt,*) i1
-     read(unt,*) ncor(iln),lcor(iln)
+     if(present(kappacor).and.diracrel) then
+       read(unt,*) ncor(iln),lcor(iln),kappacor(iln)
+     else
+       read(unt,*) ncor(iln),lcor(iln)
+     endif
      read(unt,*) energy_cor(iln)
      energy_cor(iln)=energy_cor(iln)*half ! For consistency reasons (in the legacy coreWF format, energies are in Ry)
      LIBPAW_ALLOCATE(phitmp,(meshsz(i1)))
@@ -1519,8 +1550,9 @@ subroutine pawpsp_read_corewf(energy_cor,indlmn_core,lcor,lmncmax,ncor,nphicor,r
    LIBPAW_DEALLOCATE(meshtp)
    LIBPAW_DEALLOCATE(radstp)
    LIBPAW_DEALLOCATE(logstp)
-   close(unt)
  end if
+
+ close(unt)
 
 !Core WF file is in old (proprietary) format
  if ((oldformat).and.(.not.usexml)) then
@@ -1550,30 +1582,79 @@ subroutine pawpsp_read_corewf(energy_cor,indlmn_core,lcor,lmncmax,ncor,nphicor,r
  end if
 
 !Set an array 'a la' indlmn
- lmncmax=0
- do ib=1,nphicor
-   il=lcor(ib)
-   lmncmax=lmncmax+2*il+1
- end do
- LIBPAW_ALLOCATE(indlmn_core,(6,lmncmax))
- indlmn_core=0;ilmn=0;iln=0
- do ib=1,nphicor
-   il=lcor(ib)
-   iln=iln+1
-   do ilm=1,2*il+1
-     indlmn_core(1,ilmn+ilm)=il
-     indlmn_core(2,ilmn+ilm)=ilm-(il+1)
-     indlmn_core(3,ilmn+ilm)=1
-     indlmn_core(4,ilmn+ilm)=il*il+ilm
-     indlmn_core(5,ilmn+ilm)=iln
-     indlmn_core(6,ilmn+ilm)=1
+
+
+!===== DIRAC-RELATIVISTIC CASE =====
+!Warning due to the nature of the dirac-relativistic solution used:
+!  These corewf have complex spherical harmonics, which need to be converted later!
+ if(present(kappacor)) then
+
+   lmncmax=0
+   do ib=1,nphicor
+     il=lcor(ib)
+     kappa=sign(1,kappacor(ib))
+     i2j=2*il-kappa!j=l-sgn(kappa)/2
+     lmncmax=lmncmax+i2j+1
    end do
-   ilmn=ilmn+2*il+1
- end do
+   lmncmax=lmncmax*2
+   LIBPAW_ALLOCATE(indlmn_core,(8,lmncmax))
+   indlmn_core=0;ilmn=0;iln=0
+   do ib=1,2*nphicor
+     iln=iln+modulo(ib,2)
+     il=lcor(iln)
+     kappa=sign(1,kappacor(iln)) ! sgn(kappa)=+1 or -1
+     spinor=2-modulo(ib,2)       ! spinor= 1 or 2
+     i2j=2*il-kappa              ! j=l-sgn(kappa)/2 = l-1/2 or l+1/2 
+     do ilm=1,i2j+1
+       !mj= -j,...,j
+       i2mj=-i2j+2*(ilm-1)       ! 2m_j= -jc ... +jc
+       im=(i2mj-3+2*spinor)/2    ! m=m_j-1/2 (spinor=1) or m_j+1/2 (spinor=2)
+       if(abs(im)<=il) then
+         !Valid value for sph. harm., i.e. abs(m)<=l
+         indlmn_core(1,ilmn+ilm)=il !l
+         indlmn_core(2,ilmn+ilm)=im !m
+         indlmn_core(3,ilmn+ilm)=kappa !sign of kappa
+         indlmn_core(4,ilmn+ilm)=il*il+im+il+1 !lm
+         indlmn_core(5,ilmn+ilm)=iln !ln also includes the two kappa values here
+         indlmn_core(6,ilmn+ilm)=spinor !spinor index (1 up, 2 down)
+         indlmn_core(7,ilmn+ilm)=i2j !2*j (times 2 to make it an integer)
+         indlmn_core(8,ilmn+ilm)=i2mj !2*m_j (times 2 to make it an integer)
+       else
+         !Invalid value for sph. harm. ; will be multiplied by zero later
+         indlmn_core(1,ilmn+ilm)=-1 !Invalid value that should be checked later
+         indlmn_core(2:8,ilmn+ilm)=-1 ; indlmn_core(3,ilmn+ilm)=0
+       endif
+     end do
+     ilmn=ilmn+i2j+1
+   end do
+
+!===== NON OR SCALAR-RELATIVISTIC CASE =====
+ else
+   lmncmax=0
+   do ib=1,nphicor
+     il=lcor(ib)
+     lmncmax=lmncmax+2*il+1
+   end do
+   LIBPAW_ALLOCATE(indlmn_core,(6,lmncmax))
+   indlmn_core=0;ilmn=0;iln=0
+   do ib=1,nphicor
+     il=lcor(ib)
+     iln=iln+1
+     do ilm=1,2*il+1
+       indlmn_core(1,ilmn+ilm)=il
+       indlmn_core(2,ilmn+ilm)=ilm-(il+1)
+       indlmn_core(3,ilmn+ilm)=1
+       indlmn_core(4,ilmn+ilm)=il*il+ilm
+       indlmn_core(5,ilmn+ilm)=iln
+       indlmn_core(6,ilmn+ilm)=1
+     end do
+     ilmn=ilmn+2*il+1
+   end do
+
+ endif ! Relativistic?
 
 end subroutine pawpsp_read_corewf
 !!***
-
 
 !-------------------------------------------------------------------------
 

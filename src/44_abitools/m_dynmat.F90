@@ -6,7 +6,7 @@
 !!  This module provides low-level tools to operate on the dynamical matrix
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2021 ABINIT group (XG, JCC, MJV, NH, RC, MVeithen, MM, MG, MT, DCA)
+!!  Copyright (C) 2014-2022 ABINIT group (XG, JCC, MJV, NH, RC, MVeithen, MM, MG, MT, DCA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1169,8 +1169,7 @@ subroutine chkph3(carflg,idir,mpert,natom)
  if(send==1)then
    write(msg, '(a,a,a,a)' )&
    ' chkph3 : WARNING -',ch10,&
-   '  The dynamical matrix was incomplete :',&
-   ' phonon frequencies may be wrong ...'
+   '  Dynamical matrix incomplete, phonon frequencies may be wrong, check input variables rfatpol and rfdir.'
    call wrtout([std_out, ab_out],msg)
  end if
 

@@ -7,7 +7,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, MF, AR, MM, MT, FJ, MB, MT, TR)
+!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, MF, AR, MM, MT, FJ, MB, MT, TR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -23,6 +23,9 @@
 #endif
 
 #include "abi_common.h"
+
+! nvtx related macro definition
+#include "nvtx_macros.h"
 
 module m_vtorho
 
@@ -92,6 +95,10 @@ module m_vtorho
 
 #if defined HAVE_BIGDFT
  use BigDFT_API,           only : last_orthon, evaltoocc, write_energies, eigensystem_info
+#endif
+
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
+ use m_nvtx_data
 #endif
 
  implicit none
@@ -895,7 +902,9 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
 !      Build inverse of overlap matrix for chebfi
        if(psps%usepaw == 1 .and. (dtset%wfoptalg == 1 .or. dtset%wfoptalg == 111) .and. istep <= 1) then
-         call make_invovl(gs_hamk, dimffnl, ffnl, ph3d, mpi_enreg)
+          ABI_NVTX_START_RANGE(NVTX_INVOVL)
+          call make_invovl(gs_hamk, dimffnl, ffnl, ph3d, mpi_enreg)
+          ABI_NVTX_END_RANGE()
        end if
 
        ! Setup gemm_nonlop
@@ -924,6 +933,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          if ((fock%fock_common%optfor).and.(usefock_ACE==0)) fock%fock_common%forces_ikpt=zero
        end if
 
+       ABI_NVTX_START_RANGE(NVTX_VTOWFK)
 !      Compute the eigenvalues, wavefunction, residuals,
 !      contributions to kinetic energy, nuclear dipole energy,
 !      nonlocal energy, forces,
@@ -934,6 +944,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &       mpi_enreg,dtset%mpw,natom,nband_k,dtset%nkpt,istep,nnsclo_now,npw_k,npwarr,&
 &       occ_k,optforces,prtvol,pwind,pwind_alloc,pwnsfac,pwnsfacq,resid_k,&
 &       rhoaug,paw_dmft,dtset%wtk(ikpt),zshift, rmm_diis_status(:,ikpt,isppol))
+       ABI_NVTX_END_RANGE()
 
        call timab(985,1,tsec)
 
@@ -1028,6 +1039,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
      call timab(986,1,tsec)
 
+     !ABI_NVTX_START_RANGE(NVTX_FFTPAC)
      if (fixed_occ .and. mpi_enreg%paral_kgb==1) then
        call xmpi_sum(rhoaug,mpi_enreg%comm_bandspinorfft,ierr) !Sum the contributions over bands/FFT/spinors
      end if
@@ -1051,6 +1063,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          end if
        end if
      end if
+
+     !ABI_NVTX_END_RANGE()
 
      call timab(986,2,tsec)
 
@@ -1208,8 +1222,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      if(associated(extfpmd)) then
        extfpmd%nelect=zero
        call extfpmd%compute_nelect(energies%e_fermie,extfpmd%nelect,dtset%tsmear)
-       call extfpmd%compute_e_kinetic(energies%e_fermie,nfftf,dtset%nspden,&
-&       dtset%tsmear,vtrial)
+       call extfpmd%compute_e_kinetic(energies%e_fermie,dtset%tsmear)
        call extfpmd%compute_entropy(energies%e_fermie,dtset%tsmear)
      end if
 
@@ -1467,6 +1480,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !       if(paw_dmft%use_dmft==1.and.mpi_enreg%paral_kgb==1) paw_dmft%use_dmft=0
      end if
 
+     ABI_NVTX_START_RANGE(NVTX_MKRHO)
      if (psps%usepaw==0) then
        call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,&
 &       rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,&
@@ -1475,7 +1489,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,&
 &       rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,&
 &       extfpmd=extfpmd)
-     end if
+    end if
+    ABI_NVTX_END_RANGE()
      call timab(992,2,tsec)
 
 !    Treat fixed occupation numbers or non-self-consistent case

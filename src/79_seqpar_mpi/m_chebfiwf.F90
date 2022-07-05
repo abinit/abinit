@@ -10,7 +10,7 @@
 !! it will also update the matrix elements of the hamiltonian.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2021 ABINIT group (BS)
+!! Copyright (C) 2018-2022 ABINIT group (BS)
 !! This file is distributed under the terms of the
 !! gnu general public license, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -23,6 +23,9 @@
 #endif
 
 #include "abi_common.h"
+
+! nvtx related macro definition
+#include "nvtx_macros.h"
 
 module m_chebfiwf
 
@@ -50,6 +53,10 @@ module m_chebfiwf
  use m_xg
  use m_xgTransposer
 
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
+ use m_nvtx_data
+#endif
+
  use iso_c_binding, only: c_associated,c_loc,c_ptr,c_f_pointer
 
  use m_xmpi
@@ -66,17 +73,18 @@ module m_chebfiwf
  real(dp), parameter :: inv_sqrt2 = 1/sqrt2
 
 ! For use in getghc_gsc1
- integer,save  :: l_cpopt
- integer,save  :: l_icplx
- integer,save  :: l_istwf
- integer,save  :: l_npw
- integer,save  :: l_nband_filter
- integer,save  :: l_nspinor
- logical,save  :: l_paw
- integer,save  :: l_prtvol
- integer,save  :: l_sij_opt
+ integer, save :: l_cpopt
+ integer, save :: l_icplx
+ integer, save :: l_istwf
+ integer, save :: l_npw
+ integer, save :: l_nband_filter
+ integer, save :: l_nspinor
+ logical, save :: l_paw
+ integer, save :: l_prtvol
+ integer, save :: l_sij_opt
  integer, save :: l_paral_kgb
  integer, save :: l_useria
+ integer, save :: l_block_sliced
  real(dp), allocatable,save ::  l_pcon(:)
  type(mpi_type),pointer,save :: l_mpi_enreg
  type(gs_hamiltonian_type),pointer,save :: l_gs_hamk
@@ -179,6 +187,7 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  l_gs_hamk => gs_hamk
  l_nband_filter = nband
  l_paral_kgb = dtset%paral_kgb
+ l_block_sliced = dtset%diago_apply_block_sliced
 
 !Variables
  nline=dtset%nline
@@ -293,9 +302,11 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
    ABI_MALLOC(l_gvnlxc,(0,0))
    !end if
 
+   ABI_NVTX_START_RANGE(NVTX_CHEBFI2_NONLOP)
    !Call nonlop
    call nonlop(choice,l_cpopt,cprj_dum,enl_out,l_gs_hamk,0,eig,mpi_enreg,nband,1,paw_opt,&
-&            signs,gsc_dummy,l_tim_getghc,cg,l_gvnlxc)
+        &            signs,gsc_dummy,l_tim_getghc,cg,l_gvnlxc)
+   ABI_NVTX_END_RANGE()
    ABI_FREE(l_gvnlxc)
  end if
 
@@ -375,6 +386,8 @@ subroutine getghc_gsc1(X,AX,BX,transposer)
 
 ! *********************************************************************
 
+ ABI_NVTX_START_RANGE(NVTX_GETGHC)
+
  call xgBlock_getSize(X,spacedim,blockdim)
 
  spacedim = spacedim/l_icplx
@@ -437,6 +450,8 @@ subroutine getghc_gsc1(X,AX,BX,transposer)
  end if
 
  if ( .not. l_paw ) call xgBlock_copy(X,BX)
+
+ ABI_NVTX_END_RANGE()
 
 end subroutine getghc_gsc1
 !!***
@@ -521,7 +536,7 @@ subroutine getBm1X(X,Bm1X,transposer)
    ABI_MALLOC(cwaveprj_next, (l_gs_hamk%natom,l_nspinor*blockdim))
    call pawcprj_alloc(cwaveprj_next,0,l_gs_hamk%dimcprj)
    call apply_invovl(l_gs_hamk, ghc_filter(:,:), gsm1hc_filter(:,:), cwaveprj_next(:,:), &
-&       spacedim, blockdim, l_mpi_enreg, l_nspinor)
+&       spacedim, blockdim, l_mpi_enreg, l_nspinor, l_block_sliced)
  else
    gsm1hc_filter(:,:) = ghc_filter(:,:)
  end if

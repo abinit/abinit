@@ -11,8 +11,6 @@ tolvrs1 1.0d-18
 # Set 2 : response-function strain calculation
 
 rfphon2 1
-rfatpol2 1 2
-rfdir2 1 1 1
 nqpt2 1
 qpt2 0 0 0
 rfstrs2  3

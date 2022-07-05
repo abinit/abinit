@@ -8,7 +8,7 @@
 !!  Subdriver for DFPT calculations.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2021 ABINIT group (XG, DRH, MT, MKV)
+!!  Copyright (C) 1999-2022 ABINIT group (XG, DRH, MT, MKV)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2062,7 +2062,7 @@ subroutine wrtloctens(blkflg,d2bbb,d2nl,mband,mpert,natom,prtbbb,rprimd,usepaw)
    write(message,'(6a)')ch10,&
 &   ' WARNING : Localization tensor calculation (this does not apply to other properties).',ch10,&
 &   '  Not all d/dk perturbations were computed. So the localization tensor in reciprocal space is incomplete,',ch10,&
-&   '  and transformation to cartesian coordinates may be wrong.'
+&   '  and transformation to cartesian coordinates may be wrong. Check input variable rfdir.'
    call wrtout(std_out,message,'COLL')
    call wrtout(ab_out,message,'COLL')
  end if
