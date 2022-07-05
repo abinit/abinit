@@ -915,14 +915,24 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &      ipert==dtset%natom+5.or.dtset%prtfull1wf==1) timrev_pert=0
      timrev_kpt = timrev_pert
 
-     !MR: Modified to agree with quadrupole and flexoelectrics routines
-     if(dtset%prepalw==1) then
+     !MR: Modified to agree with longwave driver
+     if(dtset%prepalw/=0) then
        if (dtset%kptopt==2) timrev_pert=1
        if (dtset%kptopt==3) timrev_pert=0
        timrev_kpt = timrev_pert
        !MR tmp: this has to be removed if perturbation-dependent spatial symmetries are
        !implemented in the quadrupole and flexoelectrics routines
        nsym1=1
+
+       if (dtset%rfstrs/=0.and.dtset%rfstrs_ref==0) then
+         write(msg,'(9a)')&
+         'If the outputs of this strain response function calculation are to be',ch10,&
+         'subsequently used as inputs of a longwave calculation the same energy',ch10,&
+         'reference has to be used in both cases. Otherwise wrong spatial-dispersion',ch10,&
+         'coefficients will be obtained',ch10,&
+         'Action: Put rfstrs_ref=1 '
+         ABI_WARNING(msg)
+       end if
      end if
 
 !    The time reversal symmetry is not used for the BZ sampling when kptopt=3 or 4

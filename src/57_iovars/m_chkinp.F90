@@ -1006,6 +1006,10 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    ! fermie_nest
    call chkdpr(0,0,cond_string,cond_values,ierr,'fermie_nest',dt%fermie_nest,1,0.0_dp,iout)
 
+!  ffnl_lw
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'ffnl_lw',dt%ffnl_lw,2,(/0,1/),iout)
+
+
    ! fftgw
    call chkint_eq(0,0,cond_string,cond_values,ierr,'fftgw',dt%fftgw,8, [00,01,10,11,20,21,30,31],iout)
 

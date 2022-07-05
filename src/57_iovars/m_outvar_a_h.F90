@@ -964,6 +964,9 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  dprarr(1,:)=dtsets(:)%fermie_nest
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'fermie_nest','DPR',0)
 
+ intarr(1,:)=dtsets(:)%ffnl_lw
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'ffnl_lw','INT',0)
+
  firstchar_fftalg = "_"
  intarr(1,:)=dtsets(:)%ngfft(7)
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'fftalg','INT',0,firstchar="-",forceprint=3)
