@@ -37,9 +37,7 @@ module m_bethe_salpeter
  use m_screen
  use m_nctk
  use m_distribfft
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
  use m_hdr
  use m_dtset
  use m_dtfil
@@ -68,7 +66,7 @@ module m_bethe_salpeter
  use m_wfd,             only : wfd_init, wfdgw_t, test_charge
  use m_wfk,             only : wfk_read_eigenvalues
  use m_energies,        only : energies_type, energies_init
- use m_io_screening,    only : hscr_t, hscr_free, hscr_io, hscr_bcast, hscr_from_file, hscr_print
+ use m_io_screening,    only : hscr_t, hscr_io
  use m_haydock,         only : exc_haydock_driver
  use m_exc_diago,       only : exc_diago_driver
  use m_exc_analyze,     only : exc_den
@@ -1197,9 +1195,9 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
      ! Master reads npw and nqlwl from SCR file.
      call wrtout(std_out,sjoin('Testing file: ', w_fname))
 
-     call hscr_from_file(hscr,w_fname,fform,xmpi_comm_self)
+     call hscr%from_file(w_fname, fform, xmpi_comm_self)
      ! Echo the header.
-     if (Dtset%prtvol>0) call hscr_print(Hscr)
+     if (Dtset%prtvol>0) call Hscr%print()
 
      npwe_file = Hscr%npwe ! Have to change %npweps if it was larger than dim on disk.
      nqlwl     = Hscr%nqlwl
@@ -1218,7 +1216,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
      end if
    end if
 
-   call hscr_bcast(Hscr,master,my_rank,comm)
+   call Hscr%bcast(master, my_rank, comm)
    call xmpi_bcast(Dtset%npweps,master,comm,ierr)
    call xmpi_bcast(nqlwl,master,comm,ierr)
 
@@ -1233,7 +1231,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
    ! The G-sphere for W and Sigma_c is initialized from the gvectors found in the SCR file.
    call Gsph_c%init(Cryst, Dtset%npweps, gvec=Hscr%gvec)
 
-   call hscr_free(Hscr)
+   call Hscr%free()
  else
    ! Init Qmesh from the K-mesh reported in the WFK file.
    call find_qmesh(Qmesh,Cryst,Kmesh)

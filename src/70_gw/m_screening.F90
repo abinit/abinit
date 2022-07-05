@@ -25,20 +25,18 @@
 MODULE m_screening
 
  use defs_basis
+ use m_abicore
  use m_hide_blas
  use m_linalg_interfaces
  use m_xmpi
  use m_errors
  use m_copy
  use m_splines
- use m_abicore
  use m_lebedev
  use m_spectra
  use m_nctk
  use m_distribfft
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
 
  use defs_abitypes,     only : MPI_type
  use m_gwdefs,          only : GW_TOLQ0, czero_gw, GW_Q0_DEFAULT
@@ -55,8 +53,8 @@ MODULE m_screening
  use m_fft,             only : fourdp
  use m_gsphere,         only : gsphere_t
  use m_vcoul,           only : vcoul_t
- use m_io_screening,    only : hscr_free, hscr_io, hscr_print, hscr_from_file, read_screening, write_screening, &
-&                              hscr_copy, HSCR_LATEST_HEADFORM, hscr_t, ncname_from_id, em1_ncname
+ use m_io_screening,    only : hscr_io, read_screening, write_screening, &
+                               HSCR_LATEST_HEADFORM, hscr_t, ncname_from_id, em1_ncname
  use m_paw_sphharm,     only : ylmc
  use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq
 
@@ -310,7 +308,7 @@ subroutine em1results_free(Er)
  end if
 
  !datatypes
- call hscr_free(Er%Hscr)
+ call Er%Hscr%free()
 
 end subroutine em1results_free
 !!***
@@ -767,10 +765,10 @@ subroutine init_Er_from_file(Er,fname,mqmem,npwe_asked,comm)
 
  ! Read header from file.
  call wrtout(std_out,sjoin('init_Er_from_file- testing file: ',fname))
- call hscr_from_file(Er%hscr, fname, fform, comm)
+ call Er%hscr%from_file(fname, fform, comm)
 
  ! Master echoes the header.
- if (my_rank==master) call hscr_print(er%hscr)
+ if (my_rank==master) call er%hscr%print()
 
  ! Generic Info
  Er%ID         =0       ! Not yet initialized as epsm1 is calculated in mkdump_Er.F90
@@ -966,10 +964,8 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
 
      if (my_rank==master) then
        if (iomode == IO_MODE_ETSF) then
-#ifdef HAVE_NETCDF
           ofname = nctk_ncify(ofname)
           NCF_CHECK(nctk_open_create(unt_dump, ofname, xmpi_comm_self))
-#endif
        else
          if (open_file(ofname,msg,newunit=unt_dump,form="unformatted",status="unknown",action="write") /= 0) then
            ABI_ERROR(msg)
@@ -979,7 +975,7 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
 
        ! Update the entries in the header that have been modified.
        ! TODO, write function to return title, just for info
-       call hscr_copy(Er%Hscr,Hscr_cp)
+       call Er%Hscr%copy(Hscr_cp)
        Hscr_cp%ID = id_required
        Hscr_cp%ikxc = ikxc_required
        Hscr_cp%test_type = option_test
@@ -990,7 +986,7 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
 
        rdwr=2; fform=Hscr_cp%fform
        call hscr_io(hscr_cp,fform,rdwr,unt_dump,comm_self,master,iomode)
-       call hscr_free(Hscr_cp)
+       call Hscr_cp%free()
 
        ABI_MALLOC_OR_DIE(epsm1,(npwe,npwe,Er%nomega), ierr)
 
@@ -1036,9 +1032,7 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
        end do
 
        if (iomode == IO_MODE_ETSF) then
-#ifdef HAVE_NETCDF
          NCF_CHECK(nf90_close(unt_dump))
-#endif
        else
          close(unt_dump)
        endif
@@ -3350,9 +3344,7 @@ subroutine lwl_write(path, cryst, vcp, npwe, nomega, gvec, chi0, chi0_head, chi0
    if (iomode == IO_MODE_FORTRAN) then
      close(unt)
    else
-#ifdef HAVE_NETCDF
      NCF_CHECK(nf90_close(unt))
-#endif
    end if
  end if
 

@@ -88,135 +88,135 @@ MODULE m_sigma
   real(dp) :: scissor_ene  ! Scissor energy value. zero for None.
 
   integer,allocatable :: maxbnd(:,:)
-  ! maxbnd(nkptgw,nsppol)
+  ! (nkptgw,nsppol)
   ! Max band index considered in GW for this k-point.
 
   integer,allocatable :: minbnd(:,:)
-  ! minbnd(nkptgw,nsppol)
+  ! (nkptgw,nsppol)
   ! Min band index considered in GW for this k-point.
 
   !real(dp),allocatable :: ame(:,:,:)
-  ! ame(nbnds,nkibz,nomega))
+  ! (nbnds,nkibz,nomega))
   ! Diagonal matrix elements of the spectral function.
   ! Commented out, it can be calculated from the other quantities
 
   real(dp),allocatable :: degwgap(:,:)
-  ! degwgap(nkibz,nsppol)
+  ! (nkibz, nsppol)
   ! Difference btw the QP and the KS optical gap.
 
   real(dp),allocatable :: egwgap(:,:)
-  ! egwgap(nkibz,nsppol))
+  ! (nkibz,nsppol))
   ! QP optical gap at each k-point and spin.
 
   real(dp),allocatable :: en_qp_diago(:,:,:)
-  ! en_qp_diago(nbnds,nkibz,nsppol))
+  ! (nbnds,nkibz, nsppol))
   ! QP energies obtained from the diagonalization of the Hermitian approximation to Sigma (QPSCGW)
 
   real(dp),allocatable :: e0(:,:,:)
-  ! e0(nbnds,nkibz,nsppol)
+  ! (nbnds,nkibz,nsppol)
   ! KS eigenvalues for each band, k-point and spin. In case of self-consistent?
 
   real(dp),allocatable :: e0gap(:,:)
-  ! e0gap(nkibz,nsppol),
+  ! (nkibz,nsppol),
   ! KS gap at each k-point, for each spin.
 
   real(dp),allocatable :: omega_r(:)
-  ! omega_r(nomega_r)
+  ! (nomega_r)
   ! real frequencies used for the self energy.
 
   real(dp),allocatable :: kptgw(:,:)
-  ! kptgw(3,nkptgw)
+  ! (3,nkptgw)
   ! ! TODO there is a similar array in sigparams_t
   ! List of calculated k-points.
 
   real(dp),allocatable :: sigxme(:,:,:)
-  ! sigxme(b1gw:b2gw,nkibz,nsppol*nsig_ab))
+  ! (b1gw:b2gw,nkibz,nsppol*nsig_ab))
   ! Diagonal matrix elements $\<nks|\Sigma_x|nks\>$
 
   real(dp),allocatable :: sigxcnofme(:,:,:)
-  ! sigxcnofme(b1gw:b2gw,nkibz,nsppol*nsig_ab))
+  ! (b1gw:b2gw,nkibz,nsppol*nsig_ab))
   ! Diagonal matrix elements $\<nks|\Sigma_xc|nks\>$ taking sqrt(occs) in \Sigma_x, occs in [0,1]
 
   complex(dp),allocatable :: x_mat(:,:,:,:)
-  ! x_mat(b1gw:b2gw,b1gw:b2gw,nkibz,nsppol*nsig_ab))
+  ! (b1gw:b2gw,b1gw:b2gw,nkibz,nsppol*nsig_ab))
   ! Matrix elements of $\<nks|\Sigma_x|nk's\>$
 
   real(dp),allocatable :: vxcme(:,:,:)
-  ! vxcme(b1gw:b2gw,nkibz,nsppol*nsig_ab))
+  ! (b1gw:b2gw,nkibz,nsppol*nsig_ab))
   ! $\<nks|v_{xc}[n_val]|nks\>$ matrix elements of vxc (valence-only contribution).
 
   real(dp),allocatable :: vUme(:,:,:)
-  ! vUme(b1gw:b2gw,nkibz,nsppol*nsig_ab))
+  ! (b1gw:b2gw,nkibz,nsppol*nsig_ab))
   ! $\<nks|v_{U}|nks\>$ for DFT+U.
 
   complex(dpc),allocatable :: degw(:,:,:)
-  ! degw(b1gw:b2gw,nkibz,nsppol))
+  ! (b1gw:b2gw,nkibz,nsppol))
   ! Difference between the QP and the KS energies.
 
   complex(dpc),allocatable :: dsigmee0(:,:,:)
-  ! dsigmee0(b1gw:b2gw,nkibz,nsppol*nsig_ab))
+  ! (b1gw:b2gw,nkibz,nsppol*nsig_ab))
   ! Derivative of $\Sigma_c(E)$ calculated at the KS eigenvalue.
 
   complex(dpc),allocatable :: egw(:,:,:)
-  ! degw(nbnds,nkibz,nsppol))
+  ! (nbnds,nkibz,nsppol))
   ! QP energies, $\epsilon_{nks}^{QP}$.
 
   complex(dpc),allocatable :: eigvec_qp(:,:,:,:)
-  ! eigvec_qp(nbnds,nbnds,nkibz,nsppol))
+  ! (nbnds,nbnds,nkibz,nsppol))
   ! Expansion of the QP amplitudes in the QP basis set of the previous iteration.
 
   complex(dpc),allocatable :: m_ks_to_qp(:,:,:,:)
-  ! (%nbnds,%nbnds,%nibz,%nsppol))
+  ! (nbnds,nbnds,nkibz,nsppol))
   !  m_ks_to_qp(ib,jb,k,s) := <\psi_{ib,k,s}^{KS}|\psi_{jb,k,s}^{QP}>
 
   complex(dpc),allocatable :: hhartree(:,:,:,:)
-  ! hhartree(b1gw:b2gw,b1gw:b2gw,nkibz,nsppol*nsig_ab)
+  ! (b1gw:b2gw,b1gw:b2gw,nkibz,nsppol*nsig_ab)
   ! $\<nks|T+v_H+v_{loc}+v_{nl}|mks\>$
 
   complex(dpc),allocatable :: sigcme(:,:,:,:)
-  ! sigcme(b1gw:b2gw,nkibz,nomega_r,nsppol*nsig_ab))
+  ! (b1gw:b2gw,nkibz,nomega_r,nsppol*nsig_ab))
   ! $\<nks|\Sigma_{c}(E)|nks\>$ at each nomega_r frequency
 
   complex(dpc),allocatable :: sigmee(:,:,:)
-  ! sigmee(b1gw:b2gw,nkibz,nsppol*nsig_ab))
+  ! (b1gw:b2gw,nkibz,nsppol*nsig_ab))
   ! $\Sigma_{xc}E_{KS} + (E_{QP}- E_{KS})*dSigma/dE_KS
 
   complex(dpc),allocatable :: sigcmee0(:,:,:)
-  ! sigcmee0(b1gw:b2gw,nkibz,nsppol*nsig_ab))
-  ! Diagonal mat. elements of $\Sigma_c(E)$ calculated at the KS energy $E_{KS}$
+  ! (b1gw:b2gw,nkibz,nsppol*nsig_ab))
+  ! Diagonal matrix elements of $\Sigma_c(E)$ calculated at the KS energy $E_{KS}$
 
   complex(dpc),allocatable :: sigcmesi(:,:,:,:)
-  ! sigcmesi(b1gw:b2gw,nkibz,nomega_i,nsppol*nsig_ab))
+  ! (b1gw:b2gw,nkibz,nomega_i,nsppol*nsig_ab))
   ! Matrix elements of $\Sigma_c$ along the imaginary axis.
   ! Only used in case of analytical continuation.
 
   complex(dpc),allocatable :: sigcme4sd(:,:,:,:)
-  ! sigcme4sd(b1gw:b2gw,nkibz,nomega4sd,nsppol*nsig_ab))
+  ! (b1gw:b2gw,nkibz,nomega4sd,nsppol*nsig_ab))
   ! Diagonal matrix elements of \Sigma_c around the zeroth order eigenvalue (usually KS).
 
   complex(dpc),allocatable :: sigxcme(:,:,:,:)
-  ! sigxcme(b1gw:b2gw,nkibz,nomega_r,nsppol*nsig_ab))
+  ! (b1gw:b2gw,nkibz,nomega_r,nsppol*nsig_ab))
   ! $\<nks|\Sigma_{xc}(E)|nks\>$ at each real frequency frequency.
 
   complex(dpc),allocatable :: sigxcmesi(:,:,:,:)
-  ! sigxcmesi(b1gw:b2gw,nkibz,nomega_i,nsppol*nsig_ab))
+  ! (b1gw:b2gw,nkibz,nomega_i,nsppol*nsig_ab))
   ! Matrix elements of $\Sigma_{xc}$ along the imaginary axis.
   ! Only used in case of analytical continuation.
 
   complex(dpc),allocatable :: sigxcme4sd(:,:,:,:)
-  ! sigxcme4sd(b1gw:b2gw,nkibz,nomega4sd,nsppol*nsig_ab))
+  ! (b1gw:b2gw,nkibz,nomega4sd,nsppol*nsig_ab))
   ! Diagonal matrix elements of \Sigma_xc for frequencies around the zeroth order eigenvalues.
 
   complex(dpc),allocatable :: ze0(:,:,:)
-  ! ze0(b1gw:b2gw,nkibz,nsppol))
+  ! (b1gw:b2gw,nkibz,nsppol))
   ! renormalization factor. $(1-\dfrac{\partial\Sigma_c} {\partial E_{KS}})^{-1}$
 
   complex(dpc),allocatable :: omega_i(:)
-  ! omegasi(nomega_i)
+  ! (nomega_i)
   ! Frequencies along the imaginary axis used for the analytical continuation.
 
   complex(dpc),allocatable :: omega4sd(:,:,:,:)
-  ! omega4sd(b1gw:b2gw,nkibz,nomega4sd,nsppol).
+  ! (b1gw:b2gw,nkibz,nomega4sd,nsppol).
   ! Frequencies used to evaluate the Derivative of Sigma.
 
  end type sigma_t

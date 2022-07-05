@@ -37,9 +37,7 @@ module m_screening_driver
  use m_ab7_mixing
  use m_kxc
  use m_nctk
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
  use libxc_functionals
  use m_hdr
  use m_dtfil
@@ -64,7 +62,7 @@ module m_screening_driver
  use m_vcoul,         only : vcoul_t
  use m_qparticles,    only : rdqps, rdgw, show_QP
  use m_screening,     only : make_epsm1_driver, lwl_write, chi_t, chi_free, chi_new
- use m_io_screening,  only : hscr_new, hscr_io, write_screening, hscr_free, hscr_t
+ use m_io_screening,  only : hscr_new, hscr_io, write_screening, hscr_t
  use m_spectra,       only : spectra_t, W_EM_LF, W_EM_NLF, W_EELF
  use m_fftcore,       only : print_ngfft
  use m_fft_mesh,      only : rotate_FFT_mesh, cigfft, get_gftt, setmesh
@@ -1197,11 +1195,9 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
        ikxc=0; test_type=0; tordering=1
        hchi0 = hscr_new("polarizability",dtset,ep,hdr_local,ikxc,test_type,tordering,title,Ep%npwe,Gsph_epsG0%gvec)
        if (dtset%iomode == IO_MODE_ETSF) then
-#ifdef HAVE_NETCDF
          NCF_CHECK(nctk_open_create(unt_susc, nctk_ncify(dtfil%fnameabo_sus), xmpi_comm_self))
          NCF_CHECK(cryst%ncwrite(unt_susc))
          NCF_CHECK(ebands_ncwrite(qp_ebands, unt_susc))
-#endif
        else
          unt_susc=Dtfil%unchi0
          if (open_file(dtfil%fnameabo_sus,msg,unit=unt_susc,status='unknown',form='unformatted') /= 0) then
@@ -1210,7 +1206,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
        end if
        fform_chi0 = hchi0%fform
        call hscr_io(hchi0,fform_chi0,2,unt_susc,xmpi_comm_self,0,Dtset%iomode)
-       call hscr_free(Hchi0)
+       call Hchi0%free()
      end if
      call write_screening("polarizability",unt_susc,Dtset%iomode,Ep%npwe,Ep%nomega,iqcalc,chi0)
    end if
@@ -1436,11 +1432,9 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 &       Ep%npwe,Gsph_epsG0%gvec)
        fform_em1 = hem1%fform
        if (dtset%iomode == IO_MODE_ETSF) then
-#ifdef HAVE_NETCDF
          NCF_CHECK(nctk_open_create(unt_em1, nctk_ncify(dtfil%fnameabo_scr), xmpi_comm_self))
          NCF_CHECK(cryst%ncwrite(unt_em1))
          NCF_CHECK(ebands_ncwrite(qp_ebands, unt_em1))
-#endif
        else
          unt_em1=Dtfil%unscr
          if (open_file(dtfil%fnameabo_scr,msg,unit=unt_em1,status='unknown',form='unformatted') /= 0) then
@@ -1448,7 +1442,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
          end if
        end if
        call hscr_io(hem1,fform_em1,2,unt_em1,xmpi_comm_self,0,Dtset%iomode)
-       call hscr_free(Hem1)
+       call Hem1%free()
      end if
 
      call write_screening("inverse_dielectric_function",unt_em1,Dtset%iomode,Ep%npwe,Ep%nomega,iqcalc,epsm1)
@@ -1464,12 +1458,10 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  ! Close Files.
  if (my_rank==master) then
    if (dtset%iomode == IO_MODE_ETSF) then
-#ifdef HAVE_NETCDF
      NCF_CHECK(nf90_close(unt_em1))
      if (dtset%prtsuscep>0) then
        NCF_CHECK(nf90_close(unt_susc))
      end if
-#endif
    else
      close(unt_em1)
      if (dtset%prtsuscep>0) close(unt_susc)
@@ -1780,10 +1772,8 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,Dtset,Psps,Pawtab
  ! This file is used by abipy to generate multiple input files.
 ! if (Dtset%nqptdm == -1) then
 !   if (my_rank==master) then
-!#ifdef HAVE_NETCDF
 !      ncerr = nctk_write_ibz(strcat(dtfil%filnam_ds(4), "_qptdms.nc"), qmesh%ibz, qmesh%wt)
 !      NCF_CHECK(ncerr)
-!#endif
 !   end if
 !   ABI_ERROR_NODUMP("Aborting now")
 ! end if

@@ -109,11 +109,15 @@ module m_slk
    type(grid_scalapack) :: grid
    ! the grid to which the processor is associated to.
 
+ contains
+
+   procedure :: init => init_scalapack        ! Initializes an instance of processor ScaLAPACK from an MPI communicator.
+   procedure :: free => end_scalapack            ! Removes a processor from the ScaLAPACK grid.
+
  end type processor_scalapack
 
- public :: build_processor_scalapack     ! Builds a processor descriptor for ScaLAPACK.
- public :: init_scalapack                ! Initializes an instance of processor ScaLAPACK from an MPI communicator.
- public :: end_scalapack                 ! Removes a processor from the ScaLAPACK grid.
+ private :: build_processor_scalapack     ! Builds a processor descriptor for ScaLAPACK.
+
 !!***
 
 !----------------------------------------------------------------------
@@ -416,8 +420,8 @@ end subroutine build_processor_scalapack
 subroutine init_scalapack(processor, comm, grid_dims)
 
 !Arguments ------------------------------------
+ class(processor_scalapack),intent(out) :: processor
  integer, intent(in) :: comm
- type(processor_scalapack),intent(out) :: processor
  integer,optional,intent(in) :: grid_dims(2)
 
 !Local variables-------------------------------
@@ -468,7 +472,7 @@ end subroutine init_scalapack
 subroutine end_scalapack(processor)
 
 !Arguments ------------------------------------
- type(processor_scalapack),intent(inout) :: processor
+ class(processor_scalapack),intent(inout) :: processor
 
 ! *********************************************************************
 

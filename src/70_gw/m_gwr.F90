@@ -69,7 +69,7 @@ module m_gwr
  use m_errors
  use m_xmpi
  use m_xomp
- use m_slk
+ !use m_slk
  use m_hdr
  use m_ebands
  use netcdf
@@ -84,6 +84,7 @@ module m_gwr
  use m_time,          only : cwtime, cwtime_report, sec2str
  use m_io_tools,      only : iomode_from_fname !, file_exists, is_open, open_file
  use m_numeric_tools, only : get_diag, isdiagmat, arth, print_arr
+
  use m_copy,          only : alloc_copy
  use m_geometry,      only : normv
  use m_fstrings,      only : sjoin, itoa, strcat, ktoa
@@ -98,6 +99,7 @@ module m_gwr
  use m_kpts,          only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, kpts_map, kpts_sort, kpts_pack_in_stars
  use m_melemts,       only : melements_t
  use m_ioarr,         only : read_rhor
+ use m_slk,           only : matrix_scalapack, processor_scalapack, slk_array_free
  use m_wfk,           only : wfk_read_ebands
  use m_wfd,           only : wfd_init, wfd_t, wfdgw_t, wave_t
  use m_pawtab,        only : pawtab_type
@@ -483,6 +485,8 @@ module m_gwr
    procedure :: rpa_energy => gwr_rpa_energy
 
    procedure :: run_g0w0 => gwr_run_g0w0
+
+   !procedure :: ncwrite_chi_scr => gwr_ncwrite_chi_scr
 
  end type gwr_t
 !!***
@@ -1077,7 +1081,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  ABI_MALLOC(gwr%gt_kibz, (2, gwr%nkibz, gwr%ntau, gwr%nsppol))
  ABI_MALLOC(gwr%chi_qibz, (gwr%nqibz, gwr%ntau, gwr%nsppol))
 
- call init_scalapack(gwr%g_slkproc, gwr%g_comm%value, grid_dims=[1, gwr%g_comm%nproc])
+ call gwr%g_slkproc%init(gwr%g_comm%value, grid_dims=[1, gwr%g_comm%nproc])
 
  do my_is=1,gwr%my_nspins
    spin = gwr%my_spins(my_is)
@@ -1282,7 +1286,7 @@ subroutine gwr_free(gwr)
    call slk_array_free(gwr%sigc_kibz)
    ABI_FREE(gwr%sigc_kibz)
  end if
- call end_scalapack(gwr%g_slkproc)
+ call gwr%g_slkproc%free()
 
  call gwr%ks_me%free()
 
@@ -2049,7 +2053,6 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
      ABI_CHECK(associated(mats), sjoin("Invalid value for what:", what))
 
      it0 = gwr%my_itaus(1)
-
      do ig2=1,mats(it0)%sizeb_local(2)
        do ig1=1,mats(it0)%sizeb_local(1)
          ! Extract matrix elements as a function of tau
@@ -2964,17 +2967,6 @@ subroutine gwr_build_sigmac(gwr)
  ! use sine/cosine transform to get Sigmc_c(i omega).
  ! Finally, perform analytic continuation with Pade' to go to the real-axis.
 
- !do my_iqi=1,gwr%my_nqibz
- !  iq_ibz = gwr%my_qibz_inds(my_iqi)
- !  qq_ibz = gwr%qibz(:, iq_ibz)
- !  q_is_gamma = (normv(qq_ibz, gwr%cryst%gmet, "G") < GW_TOLQ0)
- !  desc_q => gwr%chi_desc_qibz(iq_ibz)
- !  do my_is=1,gwr%my_nspins
- !    do my_it=1,gwr%my_ntau
- !    end do  ! my_it
- !  end do ! my_is
- !end do ! my_iqi
-
  ABI_FREE(gt_scbox)
  ABI_FREE(wt_scbox)
  ABI_FREE(green_scg)
@@ -3051,7 +3043,7 @@ subroutine gwr_rpa_energy(gwr)
        end do
 
        !call xheev('V', 'U', Ep%npwe, chitmp, eig)
-       !call chi_tmp%pzheev("N", "U", Slk_mat, dummy_vec, eig)
+       call chi_tmp%pzheev("N", "U", dummy_vec, eig)
 
        if (my_it == gwr%my_ntau) then
          ! Free workspace
@@ -3075,7 +3067,7 @@ end subroutine gwr_rpa_energy
 
 !!****f* m_gwr/gwr_run_g0w0
 !! NAME
-!!  gwr_rpa_energy
+!!  gwr_run_g0w0
 !!
 !! FUNCTION
 !!
@@ -3106,6 +3098,61 @@ subroutine gwr_run_g0w0(gwr)
  call gwr%build_sigmac()
 
 end subroutine gwr_run_g0w0
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_gwr/gwr_write_chi_scr
+!! NAME
+!!  gwr_ncwrite_chi_scr
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine gwr_ncwrite_chi_scr(gwr, what, filepath)
+
+!Arguments ------------------------------------
+ class(gwr_t),target,intent(in) :: gwr
+ character(len=*),intent(in) :: what, filepath
+
+!Local variables-------------------------------
+!scalars
+ integer,parameter :: master = 0
+ integer :: my_is, my_iqi, my_it, itau, spin, iq_ibz
+!arrays
+ type(matrix_scalapack), pointer :: mats(:)
+
+! *************************************************************************
+
+ ! TODO
+ ! 1) hscr_new requires ep%
+ ! 2) file format assumes Gamma-centered gvectors.
+
+ do my_is=1,gwr%my_nspins
+   spin = gwr%my_spins(my_is)
+   do my_iqi=1,gwr%my_nqibz
+     iq_ibz = gwr%my_qibz_inds(my_iqi)
+     associate (desc_q => gwr%chi_desc_qibz(iq_ibz))
+     mats => null()
+     if (what == "chi") mats => gwr%chi_qibz(iq_ibz, :, spin)
+     if (what =="wc")   mats => gwr%wc_qibz(iq_ibz, :, spin)
+     ABI_CHECK(associated(mats), sjoin("Invalid value for what:", what))
+     do my_it=1,gwr%my_ntau
+     end do
+     end associate
+   end do ! my_iqi
+ end do ! my_is
+
+end subroutine gwr_ncwrite_chi_scr
 !!***
 
 !----------------------------------------------------------------------

@@ -44,9 +44,7 @@ module m_eph_driver
  use m_nctk
  use m_wfk
  use m_distribfft
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
 
  use defs_datatypes,    only : pseudopotential_type, ebands_t
  use defs_abitypes,     only : MPI_type
@@ -169,9 +167,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  integer :: omp_ncpus, work_size, nks_per_proc, mtyp, mpert, lwsym !msize,
  integer :: iatdir, iq2dir, iq1dir, quad_unt, iatom, jj
  real(dp):: eff, mempercpu_mb, max_wfsmem_mb, nonscal_mem
-#ifdef HAVE_NETCDF
  integer :: ncid,ncerr
-#endif
  real(dp) :: ecore,ecut_eff,ecutdg_eff,gsqcutc_eff,gsqcutf_eff
  real(dp) :: cpu,wall,gflops
  logical :: use_wfk, use_wfq, use_dvdb
@@ -555,7 +551,6 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
        call phdos%print(path)
      end if
 
-#ifdef HAVE_NETCDF
      path = strcat(dtfil%filnam_ds(4), "_PHDOS.nc")
      call wrtout(ab_out, sjoin("- Writing phonon DOS to netcdf file:", path))
      ncerr = nctk_open_create(ncid, path, xmpi_comm_self)
@@ -563,7 +558,6 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
      NCF_CHECK(cryst%ncwrite(ncid))
      call phdos%ncwrite(ncid)
      NCF_CHECK(nf90_close(ncid))
-#endif
    end if
    call phdos%free()
  end if ! prtphdos
@@ -657,13 +651,9 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  ! I am not sure yet the EFMAS file will be needed as soon as eph_frohlichm/=0. To be decided later.
  if (dtset%eph_frohlichm /= 0) then
-#ifdef HAVE_NETCDF
    NCF_CHECK(nctk_open_read(ncid, dtfil%fnameabi_efmas, xmpi_comm_self))
    call efmas_ncread(efmasdeg, efmasval, kpt_efmas, ncid)
    NCF_CHECK(nf90_close(ncid))
-#else
-   ABI_ERROR("netcdf support not enabled")
-#endif
  end if
 
  ! ===========================================

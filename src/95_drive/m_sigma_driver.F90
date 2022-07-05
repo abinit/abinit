@@ -39,9 +39,7 @@ module m_sigma_driver
  use m_nctk
  use m_kxc
  use m_distribfft
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
  use m_hdr
  use libxc_functionals
  use m_dtfil
@@ -2795,7 +2793,6 @@ endif
    ! ============================================
    ! ==== Save the GW results in NETCDF file ====
    ! ============================================
-#ifdef HAVE_NETCDF
    if (wfd%my_rank == master) then
      NCF_CHECK(nctk_open_create(ncid, strcat(dtfil%filnam_ds(4), '_SIGRES.nc'), xmpi_comm_self))
      NCF_CHECK(nctk_defnwrite_ivars(ncid, ["sigres_version"], [1]))
@@ -2807,7 +2804,6 @@ endif
      !                          comm_fft,fftn3_distrib,ffti3_local,datar,action)
      NCF_CHECK(nf90_close(ncid))
    end if
-#endif
   end if ! MRM skipped if GW density matrix update
  end if ! ucrpa
 

@@ -41,9 +41,7 @@ MODULE m_ioarr
 #ifdef HAVE_MPI2
  use mpi
 #endif
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
 
  use defs_abitypes,   only : mpi_type
  use defs_datatypes,  only : ebands_t
@@ -154,10 +152,8 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
  type(pawrhoij_type),intent(inout) :: pawrhoij(:)
 
 !Local variables-------------------------------
-#ifdef HAVE_NETCDF
  integer :: ncid,ncerr
  character(len=fnlen) :: file_etsf
-#endif
 #ifdef HAVE_BIGDFT
  integer :: i,i1,i2,i3,ia,ind,n1,n2,n3
  integer :: zindex,zstart,zstop
@@ -213,12 +209,10 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
 
  call wrtout(std_out, 'ioarr: file name is: '//TRIM(fildata))
 
-#ifdef HAVE_NETCDF
  if (accessfil == IO_MODE_ETSF) then ! Initialize filename in case of ETSF file.
    file_etsf = nctk_ncify(fildata)
    call wrtout(std_out,sjoin('file name for ETSF access: ', file_etsf))
  end if
-#endif
 
 !Some definitions for MPI-IO access
  spaceComm = mpi_enreg%comm_cell
@@ -414,7 +408,6 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
        close (unit=unt, err=10, iomsg=errmsg)
      end if
 
-#ifdef HAVE_NETCDF
    else if (accessfil == 3) then
 
      ! Read the header and broadcast it in comm_cell
@@ -455,7 +448,6 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
        ncerr = nctk_read_datar(file_etsf,varname,ngfft,cplex,nfft,hdr0%nspden,comm_fft,fftn3_distrib,ffti3_local,arr)
        NCF_CHECK(ncerr)
      end if
-#endif
 
    else
      write(msg,'(a,i0,a)')'Bad value for accessfil', accessfil, ' on read '
@@ -577,7 +569,6 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
        close(unt, err=10, iomsg=errmsg)
      end if
 
-#ifdef HAVE_NETCDF
    else if ( accessfil == 3 ) then
 
      ! Master in comm_fft creates the file and writes the header.
@@ -611,7 +602,6 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
 
        NCF_CHECK(nf90_close(ncid))
      end if
-#endif
 
    else
      write(msg,'(a,i0,a)')'Bad value for accessfil', accessfil, ' on write '
@@ -712,10 +702,8 @@ subroutine fftdatar_write(varname,path,iomode,hdr,crystal,ngfft,cplex,nfft,nspde
  integer :: n1,n2,n3,comm_fft,nproc_fft,me_fft,iarr,ierr,ispden,unt,mpierr,fform
  integer :: i3_glob,my_iomode
  integer(kind=XMPI_OFFSET_KIND) :: hdr_offset,my_offset,nfft_tot
-#ifdef HAVE_NETCDF
  integer :: ncid,ncerr
  character(len=fnlen) :: file_etsf
-#endif
  real(dp) :: cputime,walltime,gflops
  character(len=500) :: msg,errmsg
  type(abifile_t) :: abifile
@@ -826,7 +814,6 @@ subroutine fftdatar_write(varname,path,iomode,hdr,crystal,ngfft,cplex,nfft,nspde
    !end if
 #endif
 
-#ifdef HAVE_NETCDF
  case (IO_MODE_ETSF)
    file_etsf = nctk_ncify(path)
 
@@ -853,7 +840,6 @@ subroutine fftdatar_write(varname,path,iomode,hdr,crystal,ngfft,cplex,nfft,nspde
 
      NCF_CHECK(nf90_close(ncid))
    end if
-#endif
 
  case default
    ABI_ERROR(sjoin("Wrong iomode:",itoa(my_iomode)))
@@ -1022,9 +1008,7 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
  integer :: ispden,ifft,nfftot_file,nprocs,ierr,i1,i2,i3,i3_local,n1,n2,n3
  integer,parameter :: fform_den=52
  integer :: restart, restartpaw
-#ifdef HAVE_NETCDF
  integer :: ncerr
-#endif
  real(dp) :: ratio,ucvol
  real(dp) :: cputime,walltime,gflops
  logical :: need_interp,have_mpifft,allow_interp__
@@ -1088,7 +1072,6 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
      end do
      close(unt)
 
-#ifdef HAVE_NETCDF
    case (IO_MODE_ETSF)
      NCF_CHECK(nctk_open_read(unt, my_fname, xmpi_comm_self))
      call hdr_ncread(ohdr, unt, fform)
@@ -1115,7 +1098,7 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
                         count=[cplex, ohdr%ngfft(1), ohdr%ngfft(2), ohdr%ngfft(3), ohdr%nspden])
      NCF_CHECK(ncerr)
      NCF_CHECK(nf90_close(unt))
-#endif
+
    case default
      ABI_ERROR(sjoin("Wrong iomode:", itoa(iomode)))
    end select
