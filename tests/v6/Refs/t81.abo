@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ANADDB 
+.Version 9.7.4 of ANADDB 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h29 )
+.Starting date : Wed  4 May 2022.
+- ( at 01h24 )
   
 
 ================================================================================
@@ -83,7 +83,7 @@
 
  Calculation of the interatomic forces 
 
--begin at tcpu      0.039  and twall      0.040 sec
+-begin at tcpu      0.042  and twall      0.050 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :       16
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -468,8 +468,8 @@
  Symmetry characters of vibration mode #   1
        degenerate with vibration modes #   2 to    3
   3.0 -3.0 -1.0  1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0
- -0.0  0.0  0.0 -0.0 -0.0  0.0  0.0 -0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
- -0.0  0.0 -0.0  0.0  0.0 -0.0  0.0 -0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
+  0.0 -0.0  0.0 -0.0 -0.0  0.0  0.0 -0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
+  0.0 -0.0  0.0 -0.0  0.0 -0.0 -0.0  0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
 
   Phonon wavevector (reduced coordinates) :  0.10000  0.10000  0.00000
  Phonon energies in Hartree :
@@ -663,8 +663,8 @@
  Symmetry characters of vibration mode #   1
        degenerate with vibration modes #   2 to    3
   3.0 -3.0 -1.0  1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0
- -0.0  0.0  0.0 -0.0 -0.0  0.0  0.0 -0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
- -0.0  0.0 -0.0  0.0  0.0 -0.0  0.0 -0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
+  0.0 -0.0  0.0 -0.0 -0.0  0.0  0.0 -0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
+  0.0 -0.0  0.0 -0.0  0.0 -0.0 -0.0  0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
 
   Phonon wavevector (reduced coordinates) :  0.12500  0.12500  0.12500
  Phonon energies in Hartree :
@@ -739,6 +739,6 @@
 
 ================================================================================
 
-+Total cpu time      0.072  and wall time      0.074 sec
++Total cpu time      0.080  and wall time      0.100 sec
 
  anaddb : the run completed succesfully.

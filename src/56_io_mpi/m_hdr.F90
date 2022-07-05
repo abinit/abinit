@@ -11,7 +11,7 @@
 !!   hdr_mpio_skip, hdr_fort_read, hdr_fort_write, hdr_ncread, hdr_ncwrite
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2021 ABINIT group (XG, MB, MT, DC, MG)
+!! Copyright (C) 2008-2022 ABINIT group (XG, MB, MT, DC, MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3085,7 +3085,11 @@ subroutine hdr_fort_read(Hdr,unit,fform,rewind)
  hdr%nh_qFD   = zero
  hdr%fermih   = zero
  if (hdr%occopt == 9) then
-    write(unit,err=10, iomsg=errmsg) hdr%ivalence, hdr%ne_qFD, hdr%nh_qFD, hdr%fermie, hdr%fermih
+!   This was erroneous
+!   write(unit,err=10, iomsg=errmsg) hdr%ivalence, hdr%ne_qFD, hdr%nh_qFD, hdr%fermie, hdr%fermih
+!   But this induced problems on bob_gnu_7.5_openmp
+    read(unit,err=10, iomsg=errmsg) hdr%ivalence, hdr%ne_qFD, hdr%nh_qFD, hdr%fermie, hdr%fermih
+!
  end if
  ! End CP added
 
@@ -3521,6 +3525,9 @@ end function hdr_backspace
 !! INPUTS
 !!  fform=kind of the array in the file
 !!  ncid=the unit of the open NetCDF file.
+!!  [spinat(3, natom)]= Spinat input variable. In principle it should be stored in the hdr
+!!    as it actually affects the real space group but this requires changing hdr_type and fform and dealing
+!!    with backward compatibility issues especially in Fortran-IO.
 !!  [nc_define]=Optional flag. If True, the basic dimensions required by the ETSF specification
 !!    are written. Default: False.
 !!
@@ -3534,13 +3541,14 @@ end function hdr_backspace
 !!
 !! SOURCE
 
-integer function hdr_ncwrite(hdr, ncid, fform, nc_define) result(ncerr)
+integer function hdr_ncwrite(hdr, ncid, fform, spinat, nc_define) result(ncerr)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ncid,fform
  logical,optional,intent(in) :: nc_define
  class(hdr_type),target,intent(in) :: hdr
+ real(dp),optional,intent(in) :: spinat(3, hdr%natom)
 
 #ifdef HAVE_NETCDF
 !Local variables-------------------------------
@@ -3605,9 +3613,14 @@ integer function hdr_ncwrite(hdr, ncid, fform, nc_define) result(ncerr)
    NCF_CHECK(nf90_put_att(ncid, vid("reduced_symmetry_translations"), "symmorphic", symmorphic))
 
    ! At this point we have an ETSF-compliant file. Add additional data for internal use in abinit.
-   ! TODO add spinat.
    ncerr = nctk_def_arrays(ncid, nctkarr_t('symafm', "int", "number_of_symmetry_operations"))
    NCF_CHECK(ncerr)
+
+   ! TODO spinat should be added to the header
+   if (present(spinat)) then
+     ncerr = nctk_def_arrays(ncid, nctkarr_t("spinat", "dp", "three, number_of_atoms"))
+     NCF_CHECK(ncerr)
+   end if
 
    ! Define k-points. Note: monkhorst_pack_folding is replaced by kptrlatt and shiftk
    ncerr = nctk_def_arrays(ncid, [ &
@@ -3667,7 +3680,7 @@ integer function hdr_ncwrite(hdr, ncid, fform, nc_define) result(ncerr)
      nctkarr_t("pspxc", "i", "npsp"),&
      nctkarr_t("qptn", "dp", "number_of_reduced_dimensions"),&
      nctkarr_t("so_psp", "i", "npsp"),&
-     nctkarr_t("symafm", "i", "number_of_symmetry_operations"),&
+     !nctkarr_t("symafm", "i", "number_of_symmetry_operations"),&
      nctkarr_t("title", "c", "psptitlen, npsp"),&
      nctkarr_t("zionpsp", "dp", "npsp"),&
      nctkarr_t("znuclpsp", "dp", "npsp"),&
@@ -3807,6 +3820,10 @@ integer function hdr_ncwrite(hdr, ncid, fform, nc_define) result(ncerr)
  NCF_CHECK(nf90_put_var(ncid, vid("zionpsp"), hdr%zionpsp))
  NCF_CHECK(nf90_put_var(ncid, vid("lmn_size"), hdr%lmn_size))
  NCF_CHECK(nf90_put_var(ncid, vid("usewvl"), hdr%usewvl))
+
+ if (present(spinat)) then
+   NCF_CHECK(nf90_put_var(ncid, vid("spinat"), spinat))
+ end if
 
  ! Write hdr%pawrhoij.
  if (hdr%usepaw == 1) then

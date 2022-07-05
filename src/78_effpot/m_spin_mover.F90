@@ -19,7 +19,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2021 ABINIT group (hexu)
+!! Copyright (C) 2001-2022 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -80,7 +80,7 @@ module m_spin_mover
 
 
   type, public, extends(abstract_mover_t) :: spin_mover_t
-     integer :: nspin, method
+     integer :: nspin, method=0
      real(dp), allocatable :: gyro_ratio(:), damping(:), gamma_L(:), H_lang_coeff(:), ms(:), Stmp(:,:), Stmp2(:,:)
      real(dp), allocatable :: Heff_tmp(:,:), Htmp(:,:), Hrotate(:,:), H_lang(:,:), buffer(:,:)
      real(dp) :: init_qpoint(3), init_rotate_axis(3) ! qpoint and rotation axis to set up initial spin configuration
@@ -133,12 +133,11 @@ contains
   !! CHILDREN
   !!
   !! SOURCE
-  subroutine initialize(self, params, supercell, rng, restart_hist_fname)
+  subroutine initialize(self, params, supercell, rng)
     class(spin_mover_t), intent(inout) :: self
     type(multibinit_dtset_type), target :: params
     type(mbsupercell_t), target :: supercell
     type(rng_t), target, intent(in) :: rng
-    character(len=fnlen), optional, intent(in) :: restart_hist_fname
     integer ::  nspin
 
     integer :: master, my_rank, comm, nproc, ierr
@@ -218,11 +217,7 @@ contains
             &     spin_temperature=params%spin_temperature)
     endif
 
-    if(present(restart_hist_fname)) then 
-      call self%set_initial_state(mode=params%spin_init_state, restart_hist_fname=restart_hist_fname)
-    else
-      call self%set_initial_state(mode=params%spin_init_state)
-    endif
+    call self%set_initial_state(mode=params%spin_init_state)
 
     ! observable
     if(iam_master) then
@@ -308,10 +303,9 @@ contains
   !   3. spin configuration using qpoint and rotation axis (e.g. for FM or AFM)
   !   4. Restart from last entry of hist netcdf file
   !----------------------------------------------------------------------------!
-  subroutine set_initial_state(self, mode, restart_hist_fname)
+  subroutine set_initial_state(self, mode)
     class(spin_mover_t),            intent(inout) :: self
     integer,              optional, intent(in)    :: mode
-    character(len=*), optional, intent(in)    :: restart_hist_fname
 
     integer :: i, init_mode
     character(len=500) :: msg
@@ -374,13 +368,10 @@ contains
          case (4)
           ! read from last step of hist file
           write(msg,'(a,a,a)') "Initial spins set to input spin hist file ",&
-             &  trim(restart_hist_fname), '.'  
+             &  trim(self%params%spin_init_hist_fname), '.'  
           call wrtout(ab_out,msg,'COLL')
           call wrtout(std_out,msg,'COLL')
-          if (.not. present(restart_hist_fname)) then
-             ABI_ERROR("Spin initialize mode set to 4, but restart_hist_fname is not used.")
-           end if
-           call self%read_hist_spin_state(fname=restart_hist_fname)
+           call self%read_hist_spin_state(fname=self%params%spin_init_hist_fname)
 
        end select
 
@@ -962,6 +953,18 @@ contains
     end if
 
     call xmpi_bcast(T_nstep, 0, comm, ierr)
+
+    ! write header of varT file
+    if(iam_master) then
+       write(Tmsg, "(A1, 1X, A11, 3X, A13, 3X, A13, 3X, A13, 3X, A13, 3X, *(I13, 3X) )" ) &
+            "#", "Temperature (K)", "Cv (1)", "chi (1)",  "BinderU4 (1)", "Mst/Ms(1)", (ii, ii=1, self%spin_ob%nsublatt)
+       call wrtout(Tfile, Tmsg, "COLL")
+       flush(Tfile)
+    endif
+
+
+
+
     do i=1, T_nstep
        if(iam_master) then
           T=T_start+(i-1)*T_step
@@ -984,8 +987,8 @@ contains
                &     spin_temperature=T)
           call self%spin_ob%reset(self%params)
           ! uncomment if then to use spin initializer at every temperature. otherwise use last temperature
-          if(i==0) then
-             call self%set_initial_state()
+          if(i==1) then
+             call self%set_initial_state(mode=self%params%spin_init_state)
           else
              call self%hist%inc1()
           endif
@@ -1010,7 +1013,16 @@ contains
           !Mst_sub_list(:,:,i)=self%spin_ob%Mst_sub(:,:)  ! not useful
           Mst_sub_norm_list(:,i)=self%spin_ob%Avg_Mst_sub_norm(:)
           Mst_norm_total_list(i)=self%spin_ob%Avg_Mst_norm_total
+
+          ! write to varT file
+          write(Tmsg, "(2X, F11.5, 3X, ES13.5, 3X, ES13.5, 3X, E13.5, 3X, ES13.5, 3X, *(ES13.5, 3X) )" ) &
+                  Tlist(i)*Ha_K, Cv_list(i), chi_list(i),  binderU4_list(i), Mst_norm_total_list(i)/self%spin_ob%snorm_total,&
+                  & (Mst_sub_norm_list(ii,i)/mu_B, ii=1, self%spin_ob%nsublatt)
+          call wrtout(Tfile, Tmsg, "COLL")
+          flush(Tfile)
+
        endif
+
     end do
 
 
@@ -1041,17 +1053,7 @@ contains
        call wrtout(ab_out, msg, "COLL")
 
 
-       ! write to .varT file
-       write(Tmsg, "(A1, 1X, A11, 3X, A13, 3X, A13, 3X, A13, 3X, A13, 3X, *(I13, 3X) )" ) &
-            "#", "Temperature (K)", "Cv (1)", "chi (1)",  "BinderU4 (1)", "Mst/Ms(1)", (ii, ii=1, self%spin_ob%nsublatt)
-       call wrtout(Tfile, Tmsg, "COLL")
-
-       do i = 1, T_nstep
-          write(Tmsg, "(2X, F11.5, 3X, ES13.5, 3X, ES13.5, 3X, E13.5, 3X, ES13.5, 3X, *(ES13.5, 3X) )" ) &
-               Tlist(i)*Ha_K, Cv_list(i), chi_list(i),  binderU4_list(i), Mst_norm_total_list(i)/self%spin_ob%snorm_total,&
-               & (Mst_sub_norm_list(ii,i)/mu_B, ii=1, self%spin_ob%nsublatt)
-          call wrtout(Tfile, Tmsg, "COLL")
-       end do
+       ! close varT file
        iostat= close_unit(unit=Tfile, iomsg=iomsg)
 
        ABI_FREE(Tlist)

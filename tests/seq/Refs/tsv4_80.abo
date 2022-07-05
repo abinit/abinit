@@ -2,7 +2,7 @@
 .Version 9.3.1 of ABINIT 
 .(sequential version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -231,15 +231,15 @@ P          mk1mem30        64
         optdriver12         0
         optdriver20         0
         optdriver30         1
+           prtpot12         0
+           prtpot20         0
+           prtpot30         1
               qpt12    0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt20    0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt30    5.00000000E-01  0.00000000E+00  0.00000000E+00
           rfatpol12         1       1
           rfatpol20         1       1
           rfatpol30         1       2
-            rfdir12         1       1       1
-            rfdir20         0       0       0
-            rfdir30         1       1       1
            rfphon12         0
            rfphon20         0
            rfphon30         1
@@ -1592,15 +1592,15 @@ P          mk1mem30        64
         optdriver12         0
         optdriver20         0
         optdriver30         1
+           prtpot12         0
+           prtpot20         0
+           prtpot30         1
               qpt12    0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt20    0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt30    5.00000000E-01  0.00000000E+00  0.00000000E+00
           rfatpol12         1       1
           rfatpol20         1       1
           rfatpol30         1       2
-            rfdir12         1       1       1
-            rfdir20         0       0       0
-            rfdir30         1       1       1
            rfphon12         0
            rfphon20         0
            rfphon30         1

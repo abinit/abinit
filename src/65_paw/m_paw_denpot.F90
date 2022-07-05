@@ -6,7 +6,7 @@
 !!  This module contains routines related to PAW on-site densities and on-site potentials.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2021 ABINIT group (FJ, MT)
+!! Copyright (C) 2018-2022 ABINIT group (FJ, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -136,7 +136,7 @@ CONTAINS  !=====================================================================
 !!
 !! NOTES
 !!  Response function calculations:
-!!    In order to compute first- or second-order qunatities, paw_an (resp. paw_ij) datastructures
+!!    In order to compute first- or second-order quantities, paw_an (resp. paw_ij) datastructures
 !!    must contain first-order quantities, namely paw_an1 (resp. paw_ij1).
 !!
 !! PARENTS

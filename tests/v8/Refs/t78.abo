@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.7.4 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h39 )
+.Starting date : Wed  4 May 2022.
+- ( at 01h16 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v8_t71-t72-t73-t74-t75-t76-t77-t78-t79-t80/t78.in
-- output file    -> t78.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/v8_t71-t72-t73-t74-t75-t76-t77-t78-t79-t80/t78.abi
+- output file    -> t78.abo
 - root for input  files -> t78i
 - root for output files -> t78o
 
@@ -96,6 +96,7 @@ P          mk1mem           8
            prtden           0
            prteig           0
             prtwf           0
+          rfatpol           1       1        
             rfdir           1       0       0
            rfphon           1
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
@@ -160,8 +161,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.15099
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Mn-sp-r_LDA_1012_dojov0.4.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Mn-sp-r_LDA_1012_dojov0.4.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Mn-sp-r_LDA_1012_dojov0.4.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Mn-sp-r_LDA_1012_dojov0.4.psp8
 - Mn    ONCVPSP-3.3.0  r_core=   1.41250   1.20960   1.61055
 - 25.00000  15.00000    171221                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -178,8 +179,8 @@ meta: {optdriver: 1, rfphon: 1, }
   spin-orbit 2    0.007940    0.003946
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/O-r_LDA_1012_dojov0.4.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/O-r_LDA_1012_dojov0.4.psp8
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/O-r_LDA_1012_dojov0.4.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/O-r_LDA_1012_dojov0.4.psp8
 - O     ONCVPSP-3.3.0  r_core=   1.35509   1.45563   1.35509
 -  8.00000   6.00000    171117                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -199,7 +200,6 @@ meta: {optdriver: 1, rfphon: 1, }
    1.90016938E+03                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t78i_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -216,7 +216,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t78i_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -231,16 +230,16 @@ tolerances: {tolvrs: 1.00E-08, }
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   246.44103509486     -1.406E+03 1.082E-01 1.451E+05
  ETOT  2   24.567180060719     -2.219E+02 1.028E-01 2.110E+03
- ETOT  3   21.188696350984     -3.378E+00 1.914E-02 5.172E+01
+ ETOT  3   21.188696350983     -3.378E+00 1.914E-02 5.172E+01
  ETOT  4   20.971372988663     -2.173E-01 7.960E-03 7.711E+00
  ETOT  5   20.894469887615     -7.690E-02 4.043E-03 1.116E+00
- ETOT  6   20.864420953077     -3.005E-02 2.051E-03 1.123E-01
+ ETOT  6   20.864420953076     -3.005E-02 2.051E-03 1.123E-01
  ETOT  7   20.850410367780     -1.401E-02 1.200E-03 3.044E-01
  ETOT  8   20.842732156632     -7.678E-03 6.180E-04 5.507E-03
- ETOT  9   20.839055260415     -3.677E-03 3.639E-04 9.981E-02
+ ETOT  9   20.839055260413     -3.677E-03 3.639E-04 9.981E-02
  ETOT 10   20.836881458304     -2.174E-03 1.943E-04 3.651E-03
- ETOT 11   20.835841237916     -1.040E-03 1.158E-04 4.838E-02
- ETOT 12   20.835193213413     -6.480E-04 6.170E-05 8.153E-03
+ ETOT 11   20.835841237915     -1.040E-03 1.158E-04 4.838E-02
+ ETOT 12   20.835193213414     -6.480E-04 6.170E-05 8.153E-03
 
  scprqt:  WARNING -
   nstep=   12 was not enough SCF cycles to converge;
@@ -335,7 +334,7 @@ tolerances: {tolvrs: 1.00E-08, }
 -  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
 -  0.000000E+00  0.000000E+00
  chkph3 : WARNING -
-  The dynamical matrix was incomplete : phonon frequencies may be wrong ...
+  Dynamical matrix incomplete, phonon frequencies may be wrong, check input variables rfatpol and rfdir.
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -391,6 +390,7 @@ P          mk1mem           8
            prtden           0
            prteig           0
             prtwf           0
+          rfatpol           1       1        
             rfdir           1       0       0
            rfphon           1
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
@@ -513,10 +513,10 @@ P          mk1mem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         29.3  wall=         29.4
+- Proc.   0 individual time (sec): cpu=         21.9  wall=         22.0
 
 ================================================================================
 
  Calculation completed.
-.Delivered  16 WARNINGs and  19 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         29.3  wall=         29.4
+.Delivered   6 WARNINGs and   2 COMMENTs to log file.
++Overall time at end (sec) : cpu=         21.9  wall=         22.0

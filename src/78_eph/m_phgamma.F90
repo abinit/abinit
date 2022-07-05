@@ -6,7 +6,7 @@
 !!  and transport properties in metals within the LOVA approximation to the linearized Boltzmann equation.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2021 ABINIT group (MG)
+!!  Copyright (C) 2008-2022 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

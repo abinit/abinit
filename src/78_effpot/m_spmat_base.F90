@@ -13,7 +13,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2021 ABINIT group (hexu)
+!! Copyright (C) 2001-2022 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -49,7 +49,7 @@ module m_spmat_base
   end type base_mat_t
 
   type, public, extends(base_mat_t) ::  base_mat2d_t
-     integer :: nrow, ncol           ! number of rows and columns 
+     integer :: nrow, ncol           ! number of rows and columns
    contains
      procedure :: initialize => base_mat2d_t_initialize
      procedure :: mv => base_mat2d_t_mv         ! matrix vector multiplication

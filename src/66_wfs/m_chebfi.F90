@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2021 ABINIT group (AL)
+!!  Copyright (C) 2014-2022 ABINIT group (AL)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -383,7 +383,7 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
    if(paw) then
      call timab(timer_apply_inv_ovl, 1, tsec)
      call apply_invovl(gs_hamk, ghc_filter(:,shift:), gsm1hc_filter(:,shift:), cwaveprj_next(:,iactive:), &
-&     npw_filter, nactive, mpi_enreg, nspinor)
+&     npw_filter, nactive, mpi_enreg, nspinor, dtset%diago_apply_block_sliced)
      call timab(timer_apply_inv_ovl, 2, tsec)
    else
      gsm1hc_filter(:,shift:) = ghc_filter(:,shift:)

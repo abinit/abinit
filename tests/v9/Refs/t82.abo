@@ -1,8 +1,8 @@
 
-.Version 9.1.2 of MULTIBINIT 
-.(sequential version, prepared for a x86_64_linux_gnu9.2 computer) 
+.Version 9.3.3 of MULTIBINIT 
+.(MPI version, prepared for a x86_64_linux_gnu10.2 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  MULTIBINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,16 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat  4 Apr 2020.
-- ( at 14h24 )
+.Starting date : Wed 16 Dec 2020.
+- ( at 16h30 )
   
 -  nproc =    1
 
 ================================================================================
 
- Read the information in the reference structure in 
--/home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/xuhe_Multibinit-slc/tests/v9/Input/t81.xml
- to initialize the multibinit input
 
 ================================================================================
 
@@ -59,8 +56,6 @@
 dipdip_range         6         6         6
       ifcana         0
       ifcout   2000000
-      natifc         1
-       atifc         1
  Description of grid 1 :
         brav         1
        ngqpt         1         1         1
@@ -109,10 +104,10 @@ Measurement run:
 ================================================================================
 
 -
-- Proc.   0 individual time (sec): cpu=          0.1  wall=          0.1
+- Proc.   0 individual time (sec): cpu=          0.2  wall=          0.2
 
 ================================================================================
 
-+Total cpu time      0.138  and wall time      0.139 sec
++Total cpu time      0.160  and wall time      0.174 sec
 
  multibinit : the run completed succesfully.

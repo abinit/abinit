@@ -13,7 +13,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2021 ABINIT group (hexu)
+!! Copyright (C) 2001-2022 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -47,6 +47,8 @@ module m_spmat_COO
    contains
      procedure :: initialize
      procedure :: mv
+     procedure :: mv_left
+     procedure :: diag
   end type COO_mat_t
 
 
@@ -65,6 +67,20 @@ contains
     call self%ndcoo_mat_t%initialize(mshape)
   end subroutine initialize
 
+  subroutine diag(self, d)
+    class(coo_mat_t), intent(inout) :: self
+    real(dp), intent(out) :: d(:)
+    integer :: ind, ind_i, ind_j
+    d(:)=0.0_dp
+    do ind=1, self%nnz
+       ind_i=self%ind%data(1, ind)
+       ind_j=self%ind%data(2, ind)
+       if (ind_i==ind_j) then
+          d(ind_i)=d(ind_i)+self%val%data(ind)
+       endif
+    end do
+  end subroutine diag
+
   !-----------------------------------------------------------------------
   !> @brief COO sparse matrix-vector multiplication. naive implementation.
   !> @param [in] x    Mx=b
@@ -76,14 +92,17 @@ contains
     real(dp), intent(out) :: b(self%mshape(2))
     integer:: ind, ind_i, ind_j
     b(:)=0.0D0
-!!!    !$OMP PARALLEL DO private(ind, ind_i, ind_j)
+    !!$OMP PARALLEL DO private(ind, ind_i, ind_j)
     do ind = 1, self%nnz
        ind_i=self%ind%data(1, ind)
        ind_j=self%ind%data(2, ind)
        b(ind_i)=b(ind_i)+self%val%data(ind)*x(ind_j)
     end do
-!!!   !$OMP END PARALLEL DO
+   !!$OMP END PARALLEL DO
   end subroutine  mv
+
+  
+
 
   !-----------------------------------------------------------------------
   !> @brief COO sparse matrix-vector multiplication. naive implementation.
@@ -106,6 +125,30 @@ contains
     !call mpi_reduce(my_b, b, self%nrow, MPI_DOUBLE_PRECISION, MPI_SUM, 0, MPI_COMM_WORLD, ierr)
     call xmpi_sum_master(b, 0, xmpi_world, ierr )
   end subroutine COO_mat_t_mv_mpi
+
+
+  !-----------------------------------------------------------------------
+  !> @brief COO sparse matrix-vector left multiplication. naive implementation.
+  !> @param [in] x    xM=b
+  !> @param [out] b   xM=b
+  !-----------------------------------------------------------------------
+  subroutine mv_left(self, x, b)
+    class(COO_mat_t), intent(in) :: self
+    real(dp), intent(in) :: x(self%mshape(2))
+    real(dp), intent(out) :: b(self%mshape(1))
+    integer:: ind, ind_i, ind_j
+    b(:)=0.0D0
+    !$OMP PARALLEL DO private(ind, ind_i, ind_j)
+    do ind = 1, self%nnz
+       ind_i=self%ind%data(1, ind)
+       ind_j=self%ind%data(2, ind)
+       b(ind_j)=b(ind_j)+self%val%data(ind)*x(ind_i)
+    end do
+    !$OMP END PARALLEL DO
+  end subroutine  mv_left
+
+
+
 
   subroutine test_COO_mv()
     type(coo_mat_t) :: mat

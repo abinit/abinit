@@ -6,7 +6,7 @@
 !! Compute <G|H|C> for input vector |C> expressed in reciprocal space;
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, LSI, MT, JB, JWZ)
+!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, LSI, MT, JB, JWZ)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -488,7 +488,17 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
            end do
          end do
        else
-         vlocal_tmp(:,:,:)=gs_ham%vlocal(:,:,:,1)
+         ! LB,07/22:
+         ! Weird segmentation fault encountered here if called with multithreaded_getghc for big systems.
+         ! Using an explicit loop instead of fortran syntax seems to solve the problem, I don't understand why...
+         !vlocal_tmp(:,:,:)=gs_ham%vlocal(:,:,:,1)
+         do i3=1,n6
+           do i2=1,n5
+             do i1=1,n4
+               vlocal_tmp(i1,i2,i3) = gs_ham%vlocal(i1,i2,i3,1)
+             end do
+           end do
+         end do
        end if
        call fourwf(1,vlocal_tmp,cwavef1,ghc1,work,gbound_k1,gbound_k2,&
 &       gs_ham%istwf_k,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
@@ -507,7 +517,17 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
            end do
          end do
        else
-         vlocal_tmp(:,:,:)=gs_ham%vlocal(:,:,:,2)
+         ! LB,07/22:
+         ! Weird segmentation fault encountered here if called with multithreaded_getghc for big systems.
+         ! Using an explicit loop instead of fortran syntax seems to solve the problem, I don't understand why...
+         !vlocal_tmp(:,:,:)=gs_ham%vlocal(:,:,:,2)
+         do i3=1,n6
+           do i2=1,n5
+             do i1=1,n4
+               vlocal_tmp(i1,i2,i3) = gs_ham%vlocal(i1,i2,i3,2)
+             end do
+           end do
+         end do
        end if
        call fourwf(1,vlocal_tmp,cwavef2,ghc2,work,gbound_k1,gbound_k2,&
 &       gs_ham%istwf_k,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&

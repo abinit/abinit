@@ -23,7 +23,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2021 ABINIT group (hexu)
+!! Copyright (C) 2001-2022 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -229,7 +229,6 @@ contains
 !!***
 
   subroutine reset(self, array_to_zero)
-
     implicit none
     class(spin_hist_t), intent(inout) :: self
     logical :: array_to_zero

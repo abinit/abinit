@@ -9,7 +9,7 @@
 !! a detailed analysis of the time-consuming routines.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2021 ABINIT group (XG, GMR)
+!!  Copyright (C) 1998-2022 ABINIT group (XG, GMR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

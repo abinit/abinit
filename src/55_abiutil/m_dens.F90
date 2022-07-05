@@ -7,7 +7,7 @@
 !! and also includes the computation of integrated atomic charge and magnetization, as well as Hirshfeld charges.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2021 ABINIT group (MT,ILuk,MVer,EB,SPr)
+!! Copyright (C) 1998-2022 ABINIT group (MT,ILuk,MVer,EB,SPr)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -468,7 +468,7 @@ end subroutine dens_hirsh
 !! SOURCE
 
 subroutine add_atomic_fcts(natom,nspden,rprimd,mpi_enreg,nfft,ngfft,ntypat,option,ratsph, &
-  typat,coeffs_constr_dft,nv_constr_dft_r,xred)
+  ratsm, typat,coeffs_constr_dft,nv_constr_dft_r,xred)
 
 !Arguments ------------------------------------
 !scalars
@@ -480,6 +480,7 @@ subroutine add_atomic_fcts(natom,nspden,rprimd,mpi_enreg,nfft,ngfft,ntypat,optio
  real(dp),intent(in) :: coeffs_constr_dft(nspden,natom)
  real(dp),intent(inout) :: nv_constr_dft_r(nfft,nspden)
  real(dp),intent(in) :: ratsph(ntypat)
+ real(dp),intent(in) :: ratsm ! Ben change
  real(dp),intent(in) :: rprimd(3,3)
  real(dp),intent(in) :: xred(3,natom)
 
@@ -491,7 +492,7 @@ subroutine add_atomic_fcts(natom,nspden,rprimd,mpi_enreg,nfft,ngfft,ntypat,optio
  integer :: n1, n2, n3
  integer :: ifft_local
  integer ::  i1,i2,i3,ix,iy,iz,izloc
- real(dp) :: dfsm,dify,difz,fsm,r2atsph,rr1,rr2,rr3,ratsm,ratsm2,rx23,ry23,rz23
+ real(dp) :: dfsm,dify,difz,fsm,r2atsph,rr1,rr2,rr3,ratsm2,rx23,ry23,rz23 !Ben change: remove ratsm
  real(dp) :: r2,r2_11,r2_123,r2_23
  real(dp) :: ucvol
  real(dp),parameter :: delta=0.99_dp
@@ -511,7 +512,8 @@ subroutine add_atomic_fcts(natom,nspden,rprimd,mpi_enreg,nfft,ngfft,ntypat,optio
  n2 = ngfft(2)
  n3 = ngfft(3)
 
- ratsm = 0.05_dp ! default value for the smearing region radius - may become input variable later
+ !Ben change: comment out ratsm line
+ !ratsm = 0.05_dp ! default value for the smearing region radius - may become input variable later
 
  if(option==0)then
    nv_constr_dft_r = zero
@@ -1187,7 +1189,7 @@ end subroutine constrained_dft_free
 !Now compute the new residual, by adding the spherical functions
  option=1
  call add_atomic_fcts(natom,nspden,c_dft%rprimd,mpi_enreg,nfftf,c_dft%ngfftf,ntypat,option,&
-&  c_dft%ratsph,c_dft%typat,coeffs_constr_dft,vresid,xred)
+&  c_dft%ratsph,c_dft%ratsm,c_dft%typat,coeffs_constr_dft,vresid,xred) ! Ben change: add ratsm
 
  ABI_FREE(coeffs_constr_dft)
  ABI_FREE(intgden)
@@ -1250,7 +1252,7 @@ subroutine mag_penalty(c_dft,mpi_enreg,rhor,nv_constr_dft_r,xred)
 
 !Local variables-------------------------------
 !scalars
- integer :: iatom,magconon,natom,nfft,nspden,ntypat,option
+ integer :: iatom,magconon,natom,nfftf,nspden,ntypat,option
  integer :: cplex1=1
  real(dp):: cmm_x,cmm_y,cmm_z
  real(dp) :: intgden_proj,norm
@@ -1263,7 +1265,7 @@ subroutine mag_penalty(c_dft,mpi_enreg,rhor,nv_constr_dft_r,xred)
 
  magconon=c_dft%magconon
  natom=c_dft%natom
- nfft=c_dft%nfftf
+ nfftf=c_dft%nfftf
  nspden=c_dft%nspden
  ntypat=c_dft%ntypat
 
@@ -1271,7 +1273,7 @@ subroutine mag_penalty(c_dft,mpi_enreg,rhor,nv_constr_dft_r,xred)
  ABI_MALLOC(intgden,(nspden,natom))
 
 !We need the integrated magnetic moments and the smoothing function
- call calcdenmagsph(mpi_enreg,natom,nfft,c_dft%ngfftf,nspden,ntypat,&
+ call calcdenmagsph(mpi_enreg,natom,nfftf,c_dft%ngfftf,nspden,ntypat,&
 &  c_dft%ratsm,c_dft%ratsph,rhor,c_dft%rprimd,c_dft%typat,xred,1,cplex1,intgden=intgden,rhomag=rhomag)
  call prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,std_out,1,c_dft%ratsm,c_dft%ratsph,rhomag,c_dft%typat)
 
@@ -1357,8 +1359,8 @@ subroutine mag_penalty(c_dft,mpi_enreg,rhor,nv_constr_dft_r,xred)
 
 !Now compute the potential in real space
  option=0
- call add_atomic_fcts(natom,nspden,c_dft%rprimd,mpi_enreg,nfft,c_dft%ngfftf,ntypat,option,c_dft%ratsph, &
-   c_dft%typat,coeffs_constr_dft,nv_constr_dft_r,xred)
+ call add_atomic_fcts(natom,nspden,c_dft%rprimd,mpi_enreg,nfftf,c_dft%ngfftf,ntypat,option,c_dft%ratsph, &
+   c_dft%ratsm,c_dft%typat,coeffs_constr_dft,nv_constr_dft_r,xred) ! Ben change: add ratsm
 
  ABI_FREE(coeffs_constr_dft)
  ABI_FREE(intgden)

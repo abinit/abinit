@@ -3,8 +3,6 @@
 
 #Response-function calculation, with q=0
   rfphon   1            # Will consider phonon-type perturbation
- rfatpol   1 2          # All the atoms will be displaced
-   rfdir   1 1 1        # Along all reduced coordinate axis
     nqpt   1            # One wavevector is to be considered
      qpt   0 0 0        # This wavevector is q=0 (Gamma)
   kptopt   2            # Automatic generation of k points, taking
