@@ -135,3 +135,5 @@ inp_files = [
     # projWF method for lattice wannier function in anaddb (disentangle option 2)
     "t111.abi",
 ]
+    # More DFPT (longwave)
+    "t112.abi", # test quadrupole calculation with all negative KB energies As PSP
