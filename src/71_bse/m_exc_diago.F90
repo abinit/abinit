@@ -34,6 +34,7 @@ MODULE m_exc_diago
  use m_hdr
  use m_sort
  use m_slk
+ !use m_slk, only : matrix_scalapack, processor_scalapack
 
  use defs_datatypes,    only : pseudopotential_type, ebands_t
  use m_io_tools,        only : open_file
@@ -536,7 +537,6 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst
    !
    ! Init scaLAPACK matrices
    call Slk_mat%init(exc_size,exc_size,Slk_processor,istwf_k)
-
    call Slk_vec%init(exc_size,exc_size,Slk_processor,istwf_k)
    !
    ! Open the file with MPI-IO and skip the record.
@@ -566,11 +566,11 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst
    if (do_full_diago) then
      call wrtout(std_out," Performing full diagonalization with scaLAPACK...")
 
-     call slk_pzheev("Vectors","Upper",Slk_mat,Slk_vec,exc_ene)
+     call slk_mat%pzheev("Vectors","Upper",Slk_vec,exc_ene)
    else
      call wrtout(std_out," Performing partial diagonalization with scaLAPACK...")
      il=1; iu=nstates; abstol=zero !ABSTOL = PDLAMCH(comm,'U')
-     call slk_pzheevx("Vectors","Index","Upper",Slk_mat,vl,vu,il,iu,abstol,Slk_vec,mene_found,exc_ene)
+     call slk_mat%pzheevx("Vectors","Index","Upper",vl,vu,il,iu,abstol,Slk_vec,mene_found,exc_ene)
    end if
 
    exc_ene_c(:) = exc_ene(:)
@@ -1525,10 +1525,10 @@ subroutine exc_diago_coupling_hegv(Bsp,BS_files,Hdr_bse,prtvol,comm)
 
 !#if 1
    if (do_full_diago) then
-     call slk_pzhegvx(itype,"Vectors","All","Upper",Slk_F,Slk_Hbar,vl,vu,il,iu,abstol,Slk_vec,mene_found,exc_ene)
+     call slk_F%pzhegvx(itype,"Vectors","All","Upper",Slk_Hbar,vl,vu,il,iu,abstol,Slk_vec,mene_found,exc_ene)
    else
      ABI_WARNING("Partial diago is still under testing")
-     call slk_pzhegvx(itype,"Vectors","Index","Upper",Slk_F,Slk_Hbar,vl,vu,il,iu,abstol,Slk_vec,mene_found,exc_ene)
+     call slk_F%pzhegvx(itype,"Vectors","Index","Upper",Slk_Hbar,vl,vu,il,iu,abstol,Slk_vec,mene_found,exc_ene)
    end if
 !#else
 !   call xhegv(itype,"Vectors","Upper",exc_size,Slk_F%buffer_cplx,Slk_Hbar%buffer_cplx,exc_ene)

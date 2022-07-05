@@ -577,9 +577,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  call gwr%init(dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg, comm)
 
  !=== Calculate Vxc(b1,b2,k,s)=<b1,k,s|v_{xc}|b2,k,s> for all the states included in GW ===
- !  * ks_vxcvalme is calculated without NLCC, ks_vxcme contains NLCC (if any)
  !  * This part is parallelized within wfd%comm since each node has all GW wavefunctions.
- !  * ks_vUme is zero unless we are using DFT+U as starting point, see calc_vHxc_braket
  !  * Note that vH matrix elements are calculated using the true uncutted interaction.
 
  call KS_mflags%reset()
@@ -610,13 +608,16 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  if (use_wfk) then
    call gwr%build_gtau_from_wfk(wfk_path)
  else
+   !call gwr%build_gtau_from_vtrial(wfk_path, ngfftf, ks_vtrial)
  end if
 
  select case (dtset%gwr_task)
  case ("G0W0")
    call gwr%run_g0w0()
+
  case ("RPA_ENERGY")
    call gwr%rpa_energy()
+
  case default
    ABI_ERROR(sjoin("Invalid value of gwr_task:", dtset%gwr_task))
  end select

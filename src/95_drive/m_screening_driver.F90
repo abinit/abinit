@@ -1215,8 +1215,8 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      call write_screening("polarizability",unt_susc,Dtset%iomode,Ep%npwe,Ep%nomega,iqcalc,chi0)
    end if
 
-!  Calculate the Galitskii-Migdal and RPA functionals for the correlation energy if the polarizability on a
-!  Gauss-Legendre mesh along imaginary axis is available
+   ! Calculate the Galitskii-Migdal and RPA functionals for the correlation energy if the polarizability on a
+   ! Gauss-Legendre mesh along imaginary axis is available
    if (Ep%analytic_continuation .and. Dtset%gwrpacorr>0 ) then
      if (is_first_qcalc) then
        ABI_MALLOC(ec_rpa,(Dtset%gwrpacorr))
@@ -1229,9 +1229,9 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      end if
    end if
 
-!  ==========================================================
-!  === Calculate RPA \tilde\epsilon^{-1} overwriting chi0 ===
-!  ==========================================================
+   !  ==========================================================
+   !  === Calculate RPA \tilde\epsilon^{-1} overwriting chi0 ===
+   !  ==========================================================
    approx_type=0 ! RPA
    option_test=0 ! TESTPARTICLE
    dim_wing=0; if (is_qeq0==1) dim_wing=3
@@ -1251,8 +1251,8 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    end if
 
 #if 0
-!  Using the random q for the optical limit is one of the reasons
-!  why sigma breaks the initial energy degeneracies.
+   ! Using the random q for the optical limit is one of the reasons
+   ! why sigma breaks the initial energy degeneracies.
    chi0_lwing=czero
    chi0_uwing=czero
    chi0_head=czero

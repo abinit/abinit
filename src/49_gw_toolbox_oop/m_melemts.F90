@@ -159,7 +159,7 @@ module m_melemts
 
   complex(dpc), allocatable :: vxc(:,:,:,:)
   ! (b1:b2, b1:b2, nkibz, nsppol*nspinor**2)
-  ! Matrix elements of XC potential, including core if present.
+  ! Matrix elements of XC potential, including model core if present.
 
   complex(dpc), allocatable :: vxcval(:,:,:,:)
   ! (b1:b2, b1:b2, nkibz, nsppol*nspinor**2)

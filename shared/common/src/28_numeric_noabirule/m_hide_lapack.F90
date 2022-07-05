@@ -56,6 +56,7 @@ MODULE m_hide_lapack
  use m_xmpi
  use m_errors
  use m_slk
+ !use m_slk, only : matrix_scalapack, processor_scalapack
  use m_linalg_interfaces
 
  use m_time,       only : cwtime
@@ -402,8 +403,7 @@ subroutine wrap_ZHEEV(jobz, uplo, n, a, w, comm)
    end if
 
    ! Solve the problem with scaLAPACK.
-   call slk_pzheev(jobz,uplo,Slk_mat,Slk_vec,w)
-
+   call slk_mat%pzheev(jobz, uplo, Slk_vec, w)
    call Slk_mat%free()
 
    if (want_eigenvectors) then ! A is overwritten with the eigenvectors
@@ -587,8 +587,7 @@ subroutine xheev_cplex(jobz, uplo, cplex, n, a, w, msg, ierr, comm)
    !end if
    !
    !! Solve the problem with scaLAPACK.
-   !call slk_pzheev(jobz,uplo,Slk_mat,Slk_vec,w)
-   !
+   !call slk_mat%pzheev(jobz,uplo,Slk_vec,w)
    !call Slk_mat%free()
    !
    !if (want_eigenvectors) then ! A is overwritten with the eigenvectors
@@ -858,8 +857,7 @@ subroutine wrap_ZHPEV(jobz, uplo, n, ap, w, z, ldz, comm)
    end if
 
    ! Solve the problem with scaLAPACK.
-   call slk_pzheev(jobz,uplo,Slk_mat,Slk_vec,w)
-
+   call slk_mat%pzheev(jobz,uplo,Slk_vec,w)
    call Slk_mat%free()
 
    if (want_eigenvectors) then ! Collect the eigenvectors.
@@ -1486,8 +1484,7 @@ subroutine wrap_ZHEEVX(jobz,range,uplo,n,a,vl,vu,il,iu,abstol,m,w,z,ldz,comm)
    end if
 
    ! Solve the problem.
-   call slk_pzheevx(jobz,range,uplo,Slk_mat,vl,vu,il,iu,abstol,Slk_vec,m,w)
-
+   call slk_mat%pzheevx(jobz,range,uplo,vl,vu,il,iu,abstol,Slk_vec,m,w)
    call Slk_mat%free()
 
    if (want_eigenvectors) then ! A is overwritten with the eigenvectors
@@ -1750,8 +1747,7 @@ subroutine xheevx_cplex(jobz, range, uplo, cplex, n, a, vl, vu, il, iu, &
   ! end if
 
   ! ! Solve the problem.
-  ! call slk_pzheevx(jobz,range,uplo,Slk_mat,vl,vu,il,iu,abstol,Slk_vec,m,w)
-
+  ! call slk_mat%pzheevx(jobz,range,uplo,vl,vu,il,iu,abstol,Slk_vec,m,w)
   ! call Slk_mat%free()
   !
   ! if (want_eigenvectors) then ! A is overwritten with the eigenvectors

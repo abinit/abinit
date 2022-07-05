@@ -201,6 +201,21 @@ module m_slk
    procedure :: get_trace => slk_get_trace
     ! Compute the trace of an N-by-N distributed matrix.
 
+   procedure :: pzheev => slk_pzheev
+    ! Eigenvalues and, optionally, eigenvectors of an Hermitian matrix A. A * X = lambda * X
+
+   procedure :: pzheevx => slk_pzheevx
+    ! Eigenvalues and, optionally, eigenvectors of a complex hermitian matrix A. ! A * X = lambda *  X
+
+   procedure :: pzhegvx => slk_pzhegvx
+     ! Eigenvalues and, optionally, eigenvectors of a complex
+     ! generalized Hermitian-definite eigenproblem, of the form
+     ! sub( A )*x=(lambda)*sub( B )*x,  sub( A )*sub( B )x=(lambda)*x,
+     ! or sub( B )*sub( A )*x=(lambda)*x.
+
+   procedure :: symmetrize => slk_symmetrize
+     ! Symmetrizes a square scaLAPACK matrix.
+
  end type matrix_scalapack
 
  public :: matrix_get_local_cplx           ! Returns a local matrix coefficient of complex type.
@@ -235,21 +250,13 @@ module m_slk
  public :: compute_eigen1                    ! Compute eigenvalues and eigenvectors.  complex and real cases.
  public :: compute_eigen2                    ! Compute eigenvalues and eigenvectors: A * X = lambda * B * X
                                              ! complex and real cases.
- public :: slk_pzheev                        ! Eigenvalues and, optionally, eigenvectors of an Hermitian matrix A.
-                                             ! A * X = lambda * X
- public :: slk_pzheevx                       ! Eigenvalues and, optionally, eigenvectors of a complex hermitian matrix A.
-                                             ! A * X = lambda *  X
- public :: slk_pzhegvx                       ! Eigenvalues and, optionally, eigenvectors of a complex
-                                             ! generalized Hermitian-definite eigenproblem, of the form
-                                             ! sub( A )*x=(lambda)*sub( B )*x,  sub( A )*sub( B )x=(lambda)*x,
-                                             ! or sub( B )*sub( A )*x=(lambda)*x.
 
  public :: slk_write                         ! Writes a square scaLAPACK distributed matrix on an external file using MPI-IO.
  public :: slk_read                          ! Read a square scaLAPACK distributed matrix from an external file using MPI-IO.
  public :: slk_single_fview_read_mask        ! Returns an MPI datatype that can be used to read a scaLAPACK matrix from
                                              ! a binary file using MPI-IO.
                                              ! The view is created using the user-defined mask function
- public :: slk_symmetrize                    ! Symmetrizes a square scaLAPACK matrix.
+
  public :: slk_single_fview_read             ! Returns an MPI datatype to read a scaLAPACK distributed matrix
                                              ! from a binary file using MPI-IO.
  public :: slk_single_fview_write            ! Returns an MPI datatype to write a scaLAPACK distributed matrix
@@ -2863,6 +2870,9 @@ end subroutine compute_eigen2
 !! SIDE EFFECTS
 !!  If JOBZ="V", the local buffer Slk_vec%buffer_cplx will contain part of the distributed eigenvectors.
 !!
+!!  On exit, the lower triangle (if UPLO='L') or the upper triangle (if UPLO='U') of A, including the diagonal, is
+!!  destroyed.
+!!
 !! PARENTS
 !!      m_exc_diago,m_hide_lapack
 !!
@@ -2870,13 +2880,13 @@ end subroutine compute_eigen2
 !!
 !! SOURCE
 
-subroutine slk_pzheev(jobz, uplo, Slk_mat, Slk_vec, w)
+subroutine slk_pzheev(Slk_mat, jobz, uplo, Slk_vec, w)
 
 !Arguments ------------------------------------
 !scalars
- character(len=*),intent(in) :: jobz,uplo
- type(matrix_scalapack),intent(inout) :: Slk_mat
- type(matrix_scalapack),intent(inout) :: Slk_vec
+ class(matrix_scalapack),intent(inout) :: Slk_mat
+ character(len=*),intent(in) :: jobz, uplo
+ class(matrix_scalapack),intent(inout) :: Slk_vec
 !arrays
  real(dp),intent(out) :: w(:)
 
@@ -3010,15 +3020,15 @@ end subroutine slk_pzheev
 !!
 !! SOURCE
 
-subroutine slk_pzheevx(jobz,range,uplo,Slk_mat,vl,vu,il,iu,abstol,Slk_vec,mene_found,eigen)
+subroutine slk_pzheevx(Slk_mat, jobz, range, uplo, vl, vu, il, iu, abstol, Slk_vec, mene_found, eigen)
 
 !Arguments ------------------------------------
- integer,intent(in) :: il,iu
+ class(matrix_scalapack),intent(inout) :: Slk_mat
+ integer,intent(in) :: il, iu
  integer,intent(out) :: mene_found
  real(dp),intent(in) :: abstol,vl,vu
  character(len=*),intent(in) :: jobz,range,uplo
- type(matrix_scalapack),intent(inout) :: Slk_mat
- type(matrix_scalapack),intent(inout) :: Slk_vec
+ class(matrix_scalapack),intent(inout) :: Slk_vec
 !arrays
  real(dp),intent(out) :: eigen(*)
 
@@ -3288,16 +3298,16 @@ end subroutine slk_pzheevx
 !!
 !! SOURCE
 
-subroutine slk_pzhegvx(ibtype,jobz,range,uplo,Slk_matA,Slk_matB,vl,vu,il,iu,abstol,Slk_vec,mene_found,eigen)
+subroutine slk_pzhegvx(Slk_matA, ibtype, jobz, range, uplo, Slk_matB, vl, vu, il, iu, abstol, Slk_vec, mene_found, eigen)
 
 !Arguments ------------------------------------
+ class(matrix_scalapack),intent(inout) :: Slk_matA
  integer,intent(in) :: il,iu,ibtype
  integer,intent(out) :: mene_found
  real(dp),intent(in) :: abstol,vl,vu
  character(len=*),intent(in) :: jobz,range,uplo
- type(matrix_scalapack),intent(inout) :: Slk_matA
- type(matrix_scalapack),intent(inout) :: Slk_matB
- type(matrix_scalapack),intent(inout) :: Slk_vec
+ class(matrix_scalapack),intent(inout) :: Slk_matB
+ class(matrix_scalapack),intent(inout) :: Slk_vec
 !arrays
  real(dp),intent(out) :: eigen(*)
 
@@ -4642,7 +4652,7 @@ subroutine slk_single_fview_read(Slk_mat,uplo,etype,slk_type,offset_err,is_fortr
  integer,intent(out) :: offset_err,slk_type,etype
  character(len=*),intent(in) :: uplo
  logical,optional,intent(in) :: is_fortran_file
- type(matrix_scalapack),intent(in) :: Slk_mat
+ class(matrix_scalapack),intent(in) :: Slk_mat
 
 !Local variables ------------------------------
 !scalars
@@ -4840,10 +4850,10 @@ subroutine slk_single_fview_write(Slk_mat,uplo,nelw,elw2slk,etype,slk_type,offse
 
 !Arguments ------------------------------------
 !scalars
+ class(matrix_scalapack),intent(in) :: Slk_mat
  integer,intent(out) :: offset_err,slk_type,etype,nelw
  character(len=*),intent(in) :: uplo
  logical,optional,intent(in) :: is_fortran_file
- type(matrix_scalapack),intent(in) :: Slk_mat
 !arrays
  integer,pointer :: elw2slk(:,:)
  integer,optional,intent(in) :: glob_subarray(2,2)
@@ -5031,7 +5041,7 @@ subroutine slk_bsize_and_type(Slk_mat,bsize_elm,mpi_type_elm)
 
 !Arguments ------------------------------------
 !scalars
- type(matrix_scalapack),intent(in) :: Slk_mat
+ class(matrix_scalapack),intent(in) :: Slk_mat
  integer,intent(out) :: bsize_elm,mpi_type_elm
 
 !Local variables ------------------------------
@@ -5100,9 +5110,9 @@ subroutine slk_my_rclist(Slk_mat,rc_str,how_many,rc_list)
 
 !Arguments ------------------------------------
 !scalars
+ class(matrix_scalapack),intent(in) :: Slk_mat
  integer,intent(out) :: how_many
  character(len=*),intent(in) :: rc_str
- type(matrix_scalapack),intent(in) :: Slk_mat
 !scalars
  integer,pointer :: rc_list(:)
 
