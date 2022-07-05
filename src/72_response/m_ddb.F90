@@ -4214,13 +4214,11 @@ subroutine lwcart(blkflg,carflg,d3,d3cart,gprimd,mpert,natom,rprimd)
        do i2dir = 1, 3
          do i3dir = 1, 3
            do ii= 1, 2
-
              vec1(:) = d3cart(ii,:,i1pert,i2dir,i2pert,i3dir,i3pert)
              flg1(:) = blkflg(:,i1pert,i2dir,i2pert,i3dir,i3pert)
              call cart39(flg1,flg2,gprimd,i1pert,natom,rprimd,vec1,vec2)
              d3cart(ii,:,i1pert,i2dir,i2pert,i3dir,i3pert) = vec2(:)
              carflg(:,i1pert,i2dir,i2pert,i3dir,i3pert) = flg2(:)
-
            end do
          end do
        end do
@@ -4313,18 +4311,18 @@ subroutine dtqdrp(blkval,lwsym,mpert,natom,lwtens)
      do elfd = 1,3
        do qvecd = 1,elfd-1
          if (lwsym==1) then
-           lwtens(elfd,qvecd,iatd,iatom) = -two* &
+           lwtens(elfd,qvecd,iatd,iatom) = &
          (d3cart(2,elfd,natom+2,iatd,iatom,qvecd,natom+8)+d3cart(2,qvecd,natom+2,iatd,iatom,elfd,natom+8))
            lwtens(qvecd,elfd,iatd,iatom) = lwtens(elfd,qvecd,iatd,iatom)
          else if (lwsym==0) then
-           lwtens(elfd,qvecd,iatd,iatom) = -two*d3cart(2,elfd,natom+2,iatd,iatom,qvecd,natom+8)
-           lwtens(qvecd,elfd,iatd,iatom) = -two*d3cart(2,qvecd,natom+2,iatd,iatom,elfd,natom+8)
+           lwtens(elfd,qvecd,iatd,iatom) = d3cart(2,elfd,natom+2,iatd,iatom,qvecd,natom+8)
+           lwtens(qvecd,elfd,iatd,iatom) = d3cart(2,qvecd,natom+2,iatd,iatom,elfd,natom+8)
          end if
        end do
        if (lwsym==1) then
-         lwtens(elfd,elfd,iatd,iatom) = -four*d3cart(2,elfd,natom+2,iatd,iatom,elfd,natom+8)
+         lwtens(elfd,elfd,iatd,iatom) = two*d3cart(2,elfd,natom+2,iatd,iatom,elfd,natom+8)
        else if (lwsym==0) then
-         lwtens(elfd,elfd,iatd,iatom) = -two*d3cart(2,elfd,natom+2,iatd,iatom,elfd,natom+8)
+         lwtens(elfd,elfd,iatd,iatom) = d3cart(2,elfd,natom+2,iatd,iatom,elfd,natom+8)
        end if
      end do
    end do

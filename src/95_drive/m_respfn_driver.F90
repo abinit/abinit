@@ -50,8 +50,8 @@ module m_respfn_driver
  use m_symtk,       only : matr3inv, littlegroup_q, symmetrize_xred
  use m_fft,         only : zerosym, fourdp
  use m_kpts,        only : symkchk
- use m_geometry,    only : irreducible_set_pert
- use m_dynmat,      only : chkph3, d2sym3, q0dy3_apply, q0dy3_calc, wings3, dfpt_phfrq, sytens, dfpt_prtph, &
+ use m_geometry,    only : irreducible_set_pert, symredcart
+ use m_dynmat,      only : chkph3, d2sym3, q0dy3_apply, q0dy3_calc, wings3, dfpt_phfrq, sytens, sylwtens, dfpt_prtph, &
                            asria_calc, asria_corr, cart29, cart39, chneu9, dfpt_sydy
  use m_ddb,         only : DDB_VERSION
  use m_ddb_hdr,     only : ddb_hdr_type, ddb_hdr_init
@@ -228,7 +228,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  integer :: dim_eig2nkq,dim_eigbrd,dyfr_cplex,dyfr_nondiag,gnt_option
  integer :: gscase,has_dijnd,has_diju,has_kxc,iatom,iatom_tot,iband,idir,ider,ierr,ifft,ii,ikpt,indx
  integer :: i1dir,i1pert,i2dir,i2pert,i3dir,i3pert
- integer :: initialized,ipert,ipert2,ireadwf0,iscf,iscf_eff,ispden,isppol
+ integer :: initialized,ipert,ipert2,ireadwf0,iscf,iscf_eff,ispden,isppol,isym
  integer :: itypat,izero,mcg,me,mgfftf,mk1mem,mkqmem,mpert,mu
  integer :: my_natom,n1,natom,n3xccc,nband_k,nfftf,nfftot,nfftotf,nhatdim,nhatgrdim
  integer :: nkpt_eff,nkpt_max,nkpt_rbz,nkxc,nkxc1,nspden_rhoij,ntypat,nzlmopt,openexit
@@ -238,7 +238,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  integer :: rfasr,rfddk,rfelfd,rfphon,rfstrs,rfuser,rf2_dkdk,rf2_dkde,rfmagn
  integer :: spaceworld,sumg0,sz1,sz2,tim_mkrho,timrev,usecprj,usevdw
  integer :: usexcnhat,use_sym,vloc_method,zero_by_symm
- logical :: has_full_piezo,has_allddk,is_dfpt=.true.,non_magnetic_xc
+ logical :: has_full_piezo,has_allddk,has_strain,is_dfpt=.true.,non_magnetic_xc
  logical :: paral_atom,qeq0,use_nhat_gga,call_pawinit
  real(dp) :: boxcut,compch_fft,compch_sph,cpus,ecore,ecut_eff,ecutdg_eff,ecutf
  real(dp) :: eei,eew,ehart,eii,ek,enl,entropy,enxc
@@ -259,7 +259,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  integer,allocatable :: atindx(:),atindx1(:),blkflg(:,:,:,:),blkflgfrx1(:,:,:,:),blkflg1(:,:,:,:)
  integer,allocatable :: blkflg2(:,:,:,:),carflg(:,:,:,:),clflg(:,:),indsym(:,:,:)
  integer,allocatable :: irrzon(:,:,:),kg(:,:),l_size_atm(:),nattyp(:),npwarr(:)
- integer,allocatable :: pertsy(:,:),rfpert(:),rfpert_nl(:,:,:,:,:,:),symq(:,:,:),symrec(:,:,:)
+ integer,allocatable :: pertsy(:,:),rfpert(:)
+ integer,allocatable :: rfpert_lw(:,:,:,:,:,:),rfpert_nl(:,:,:,:,:,:),symq(:,:,:),symrec(:,:,:)
  logical,allocatable :: distrb_flags(:,:,:)
  real(dp) :: dum_gauss(0),dum_dyfrn(0),dum_dyfrv(0),dum_eltfrxc(0)
  real(dp) :: dum_grn(0),dum_grv(0),dum_rhog(0),dum_vg(0)
@@ -283,6 +284,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  real(dp),allocatable :: grxc(:,:),kxc(:,:),nhat(:,:),nhatgr(:,:,:)
  real(dp),allocatable :: ph1d(:,:),ph1df(:,:),phfrq(:),phnons(:,:,:),piezofrnl(:,:)
  real(dp),allocatable :: rhog(:,:),rhor(:,:),rhowfg(:,:),rhowfr(:,:)
+ real(dp),allocatable :: symrel_cart(:,:,:)
  real(dp),allocatable :: vhartr(:),vpsp(:),vtrial(:,:)
  real(dp),allocatable :: vxc(:,:),work(:),xccc3d(:),ylm(:,:),ylmgr(:,:,:)
  real(dp),pointer :: eigenq_fine(:,:,:),eigen1_pert(:,:,:)
@@ -1154,16 +1156,6 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  ABI_MALLOC(pertsy,(3,natom+6))
  call irreducible_set_pert(indsym,natom+6,natom,dtset%nsym,pertsy,rfdir,rfpert,symq,symrec,dtset%symrel)
 
-!MR: Deactivate perturbation symmetries temporarily for a longwave calculation
-!The same has been done in 51_manage_mpi/get_npert_rbz.F90
- if (dtset%prepalw==1) then
-   do ipert=1,natom+6
-     do idir=1,3
-       if( pertsy(idir,ipert)==-1 ) pertsy(idir,ipert)=1
-     end do
-   end do
- endif
-
  write(message,'(a)') ' The list of irreducible perturbations for this q vector is:'
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,message,'COLL')
@@ -1244,6 +1236,64 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
        call wrtout(std_out,message,'COLL')
      end do
    end do
+ end if
+
+!For longwave calculation:
+ !Get symmetries in cartesian coordinates
+ ABI_MALLOC(symrel_cart, (3, 3, dtset%nsym))
+ do isym =1,dtset%nsym
+   call symredcart(rprimd, gprimd, symrel_cart(:,:,isym), dtset%symrel(:,:,isym))
+   ! purify operations in cartesian coordinates.
+   where (abs(symrel_cart(:,:,isym)) < tol14)
+     symrel_cart(:,:,isym) = zero
+   end where
+ end do
+
+  if (dtset%prepalw/=0) then
+   ABI_MALLOC(rfpert_lw,(3,natom+8,3,natom+8,3,natom+8))
+   rfpert_lw=0
+   if (dtset%prepalw==1) then
+     rfpert_lw(:,1:natom+2,:,1:natom,:,natom+8)=1
+     rfpert_lw(:,1:natom+2,:,natom+3:natom+4,:,natom+8)=1
+   else if (dtset%prepalw==2) then
+     rfpert_lw(:,natom+2,:,1:natom,:,natom+8)=1
+   else if (dtset%prepalw==3) then
+     rfpert_lw(:,1:natom+2,:,1:natom,:,natom+8)=1
+   end if
+   call sylwtens(indsym,natom+8,natom,dtset%nsym,rfpert_lw,symrec,dtset%symrel,symrel_cart)
+   write(message,'(7a)') ch10, ' The following reducible perturbations will also be ', ch10, &
+                             & ' explicitly calculated for a correct subsequent ', ch10, &
+                             & ' execution of the longwave driver:', ch10
+   call wrtout(ab_out,message,'COLL')
+   call wrtout(std_out,message,'COLL')
+   do i3pert = 1,natom+8
+     do i3dir = 1, 3
+       do i2pert = 1, natom+8
+         do i2dir = 1,3
+           do i1pert = 1,natom+8
+             do i1dir = 1, 3
+               if (rfpert_lw(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1) then
+                 if (pertsy(i1dir,i1pert)==-1) then 
+                   pertsy(i1dir,i1pert)=1
+                   write(message,'(a,i2,a,i4)' )'    idir=',i1dir,'    ipert=',i1pert
+                   call wrtout(ab_out,message,'COLL')
+                   call wrtout(std_out,message,'COLL')
+                 end if
+                 if (pertsy(i2dir,i2pert)==-1) then
+                   pertsy(i2dir,i2pert)=1
+                   write(message,'(a,i2,a,i4)' )'    idir=',i2dir,'    ipert=',i2pert
+                   call wrtout(ab_out,message,'COLL')
+                   call wrtout(std_out,message,'COLL')
+                 end if
+               end if
+             end do
+           end do
+         end do
+       end do
+     end do
+   end do
+   write(message,'(a,a)') ch10,ch10
+   call wrtout(std_out,message,'COLL')
  end if
 
 !Contribution to the dynamical matrix from ion-ion energy
@@ -1812,6 +1862,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  ABI_FREE(rhor)
  ABI_FREE(symq)
  ABI_FREE(symrec)
+ ABI_FREE(symrel_cart)
  ABI_FREE(vtrial)
  ABI_FREE(ylm)
  ABI_FREE(ylmgr)

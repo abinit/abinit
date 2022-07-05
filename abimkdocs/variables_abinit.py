@@ -4534,6 +4534,31 @@ The energy is relative to the calculated Fermi energy.
 ),
 
 Variable(
+    abivarname="ffnl_lw",
+    varset="dfpt",
+    vartype="integer",
+    topics=['longwave_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="NonLocal Form Factors in LongWave calculation",
+    characteristics=['[[DEVELOP]]'],
+    added_in_version="v9",
+    text=r"""
+In a longwave calculation, the nonlocal form factors and their derivatives are
+by default computed for all k points and atom types at an initial step and then 
+specifically used for each type of perturbation. Depending on the calculation 
+parameters --in particular for dense k-point grids, large ecut and pseudopotentials
+with large l and n values-- such approach might lead to high virtual memory usage.
+
+With [[ffnl_lw]] = 1 the form factors and derivatives are instead calculated 
+on-the-fly for each type of perturbation and k point when they are required. 
+This option saves virtual memory but makes the computation of spatial-dispersion 
+tensors slower. 
+""",
+),
+
+
+Variable(
     abivarname="fftalg",
     varset="dev",
     vartype="integer",
@@ -9836,7 +9861,7 @@ At present ( |today| ), all the elements of the spatial dispersion tensors are n
 calculated. This **requires** the precalculation of the ground-state wave-functions and
 density as well as response functions and densities to a set of perturbations as specified below.
 All perturbations and directions need to be explicitly computed, and the linear response calculations
-have to be performed with [[prepalw]] = 1.
+have to be performed with [[prepalw]] /= 0.
 
   * 0 --> No flexoelectric spatial dispersion tensors are calculated.
   * 1 --> Four tensors required to build all the contributions to the bulk flexoelectric tensor
@@ -9884,7 +9909,7 @@ At present ( |today| ), all the elements of the dynamical quadrupoles tensor are
 calculated. This **requires** the precalculation of the ground-state wave functions and
 density as well as response functions and densities to the following perturbations:
 ddk, d2_dkdk, atomic displacements and electric fields. All perturbations and directions need
-to be explicitly computed, and the linear response calculations have to be performed with [[prepalw]] = 1.
+to be explicitly computed, and the linear response calculations have to be performed with [[prepalw]] /= 0.
 """,
 ),
 
@@ -15052,7 +15077,7 @@ Variable(
     characteristics=['[[DEVELOP]]'],
     added_in_version="v9",
     text=r"""
-The computation of spatial dispersion quantities from the longwave DFPT
+The computation of spatial-dispersion quantities from the longwave DFPT
 approach requires the first-order wavefunctions and densities obtained from
 a linear response calculation. The standard approach in a linear response calculation is:
 
@@ -15062,9 +15087,26 @@ a linear response calculation. The standard approach in a linear response calcul
 This approach cannot be applied, presently (v9.0), if the first-order
 wavefunctions are to be used to compute spatial dispersion properties.
 During the linear response calculation, in order to prepare a longwave
-calculation, one should put [[prepalw]] to 1 in order to force ABINIT to
-compute all the perturbations explicitly, and to keep the full number of k-points
-in half the BZ (kptopt=2), or the full BZ (kptopt=3).
+calculation, one should use [[prepalw]] /= 0 in order to force ABINIT to keep 
+the full number of k-points in half the BZ (kptopt=2), or the full BZ (kptopt=3).
+Different options can then be used to set the reducible perturbations that 
+are enforced to be explicitly calculated:
+
+  * 1 --> Activates the calculation of perturbations required to build spatial-
+          dispersion tensors which depend on strain. It is therefore the option
+          to choose if one intends to run subsequent longwave calculations with 
+          [[lw_flexo]] = 1, 2, or 4.
+
+  * 2 --> Activates the calculation of perturbations required to build spatial-
+          dispersion tensors which combine electric field and atomic displacement
+          perturbations. It is therefore the option to choose if one intends to 
+          run subsequent longwave calculations with [[lw_qdrpl]] = 1.
+
+  * 3 --> Activates the calculation of perturbations required to build spatial-
+          dispersion tensors which combine electric field and atomic displacement
+          perturbations as well as two atomic displacements. It is therefore the 
+          option to choose if one intends to run subsequent longwave calculations 
+          with [[lw_flexo]] = 3.
 """,
 ),
 
@@ -17460,7 +17502,13 @@ Variable(
     mnemonics="Response Function with respect to STRainS with the energy REFerence at the average electrostatic potential",
     added_in_version="v9",
     text=r"""
-If equal to 1 and [[rfstrs]] /= 0 the strain response-function calculations are performed with the reference energy placed at the average electrostatic potential. The later is the reference adopted in the longwave driver. First-order energies calculated with [[rfstrs_ref]] = 1 are useful, for instance, in the calculation of absolute deformation potentials [[cite:Stengel2015]].
+If equal to 1 and [[rfstrs]] /= 0 the strain response-function calculations are performed with the 
+reference energy placed at the average electrostatic potential. The later is the reference adopted 
+in the longwave driver. Since v9.x, [[rfstrs_ref]] = 1 is warned if [[prepalw]]/=0 because first-order 
+energies are no longer recomputed by the longwave driver but read from the 1WF files. 
+
+Strain first-order energies calculated with [[rfstrs_ref]] = 1 are useful, for instance, 
+in the calculation of absolute deformation potentials [[cite:Stengel2015]].
 """,
 ),
 

@@ -188,6 +188,7 @@ type, public :: dataset_type
  integer :: extrapwf
  integer :: expert_user
 !F
+ integer :: ffnl_lw = 0
  integer :: fftgw = 21
  integer :: fft_count = 0
  integer :: fockoptmix
@@ -1519,6 +1520,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%extrapwf           = dtin%extrapwf
  dtout%pawfatbnd          = dtin%pawfatbnd
  dtout%fermie_nest        = dtin%fermie_nest
+ dtout%ffnl_lw            = dtin%ffnl_lw
  dtout%fftgw              = dtin%fftgw
  dtout%fft_count          = dtin%fft_count
  dtout%fockdownsampling   = dtin%fockdownsampling
@@ -2552,13 +2554,13 @@ subroutine dtset_get_npert_rbz(dtset, nband_rbz, nkpt_rbz, npert)
  call irreducible_set_pert(indsym,mpert,dtset%natom,dtset%nsym,pertsy,dtset%rfdir,rfpert,symq,symrec,dtset%symrel)
 
 !MR: Deactivate perturbation symmetries for a longwave calculation (TODO)
- if (dtset%prepalw==1) then
-   do ipert=1,dtset%natom+6
-     do idir=1,3
-       if( pertsy(idir,ipert)==-1 ) pertsy(idir,ipert)=1
-     end do
-   end do
- end if
+! if (dtset%prepalw/=0) then
+!   do ipert=1,dtset%natom+6
+!     do idir=1,3
+!       if( pertsy(idir,ipert)==-1 ) pertsy(idir,ipert)=1
+!     end do
+!   end do
+! end if
 
  npert=0
 ! ABI_MALLOC(pert_tmp,(3*mpert))
@@ -3290,7 +3292,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' eph_restart eph_stern eph_task eph_transport eph_use_ftinterp'
  list_vars=trim(list_vars)//' eshift esmear exchmix exchn2n3d expert_user extfpmd_nbcut extrapwf'
 !F
- list_vars=trim(list_vars)//' fband fermie_nest'
+ list_vars=trim(list_vars)//' fband fermie_nest ffnl_lw'
  list_vars=trim(list_vars)//' fftalg fftcache fftgw fft_count'
  list_vars=trim(list_vars)//' fit_anhaStrain fit_bancoeff fit_coeff fit_cutoff fit_dispterms fit_fixcoeff'
  list_vars=trim(list_vars)//' fit_EFS fit_factors'
