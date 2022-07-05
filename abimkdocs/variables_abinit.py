@@ -2458,6 +2458,21 @@ Typical use is for response to electric field ([[rfelfd]] = 3), but NOT for d/dk
 ),
 
 Variable(
+    abivarname="diago_apply_block_sliced",
+    varset="rlx",
+    vartype="integer",
+    topics=['parallelism_expert'],
+    dimensions="scalar",
+    defaultval=1,
+    mnemonics="Inverse Overlapp block matrix applied in a sliced fashion",
+    added_in_version="9.7.2",
+    text=r"""
+In the Chebyshev-filtered subspace method, one need to apply inverse overlapp matrix.
+This parameter allows to choose between two variants, sliced (1) or non-sliced (0).
+""",
+),
+
+Variable(
     abivarname="diecut",
     varset="gstate",
     vartype="real",
@@ -9652,8 +9667,8 @@ input as an array of values, one for each type, see [[ntypat]]. In calculations
 where the orbital magnetic moment is requested in the presence of a nuclear magnetic
 dipole moment (see [[orbmag]] and [[nucdipmom]]), the effect of this shielding
 will be included. Because the PAW input files do not include the core orbitals,
-the user must compute this value separately, from the Lamb formula [[cite:Abragam1961Principles]], 
-and input it here. 
+the user must compute this value separately, from the Lamb formula [[cite:Abragam1961Principles]],
+and input it here.
 """,
 ),
 
@@ -12719,10 +12734,10 @@ Variable(
     requires="[[usepaw]] == 1",
     added_in_version="before_v9",
     text=r"""
-  * If set to 1, print the Fermi contact interaction at each nuclear site, that 
-  is, the electron density at each site. The result appears in the main output file 
-  (search for FC). Note that this calculation is different than what is done by cut3d, 
-  because it also computes the PAW on-site corrections in addition to the 
+  * If set to 1, print the Fermi contact interaction at each nuclear site, that
+  is, the electron density at each site. The result appears in the main output file
+  (search for FC). Note that this calculation is different than what is done by cut3d,
+  because it also computes the PAW on-site corrections in addition to the
   contribution from the valence pseudo-wavefunctions.
 """,
 ),
@@ -13400,7 +13415,7 @@ Compute quantities related to orbital magnetic moment. The
     insulators have orbital magnetization zero, except in the presence
     of nonzero nuclear dipole moments, see [[nucdipmom]].  [[orbmag]]
     is parallelized over k points only. The implementation follows the
-    theory outlined in [[cite:Ceresoli2010]], [[cite:Ceresoli2006]], 
+    theory outlined in [[cite:Ceresoli2010]], [[cite:Ceresoli2006]],
     and [[cite:Gonze2011a]] extended to the PAW case.
     The computed results are returned in the
     standard output file, search for "Orbital magnetic moment". This calculation requires
@@ -16458,7 +16473,7 @@ Variable(
   such a case oxygen almost always would have a point charge of -2. The present
   variable taken together with [[nucefg]] performs a full PAW computation of
   the electric field gradient and also a simple point charge computation. The
-  user inputs whatever point charges he/she wishes for each atom type.  
+  user inputs whatever point charges he/she wishes for each atom type.
 """,
 ),
 
@@ -16756,11 +16771,11 @@ Variable(
     requires="[[usepaw]] == 1 and [[nucefg]]>=1",
     added_in_version="before_v9",
     text=r"""
-  * Array of quadrupole moments, in barns, of the nuclei. These values are used 
-  in conjunction with the electric field gradients computed with [[nucefg]] to 
-  calculate the quadrupole couplings in MHz, as well as the asymmetries. Note that 
-  the electric field gradient at a nuclear site is independent of the nuclear 
-  quadrupole moment, thus the quadrupole moment of a nucleus can be input as 0, 
+  * Array of quadrupole moments, in barns, of the nuclei. These values are used
+  in conjunction with the electric field gradients computed with [[nucefg]] to
+  calculate the quadrupole couplings in MHz, as well as the asymmetries. Note that
+  the electric field gradient at a nuclear site is independent of the nuclear
+  quadrupole moment, thus the quadrupole moment of a nucleus can be input as 0,
   and the option [[nucefg]] = 2 used to determine the electric field gradient at the site.
 """,
 ),
@@ -17272,7 +17287,7 @@ The atoms to be moved will be defined by the do-loop variable iatpol:
   - do iatpol=[[rfatpol]](1),[[rfatpol]](2)
 
 For the calculation of a full dynamical matrix, use [[rfatpol]](1)=1 and
-[[rfatpol]](2)=[[natom]], together with [[rfdir]] 1 1 1, both being the default values. 
+[[rfatpol]](2)=[[natom]], together with [[rfdir]] 1 1 1, both being the default values.
 For selected
 elements of the dynamical matrix, use different values of [[rfatpol]] and/or
 [[rfdir]]. The name 'iatpol' is used for the part of the internal variable
@@ -17326,7 +17341,7 @@ electric field, homogeneous magnetic field calculations). So, they generate a
 basis for the generation of the dynamical matrix or the macroscopic dielectric
 tensor or magnetic susceptibility and magnetic shielding, or the effective charge tensors.
 If equal to 1, response functions, as defined by [[rfdir]], [[rfddk]], [[rfelfd]],
-[[rfphon]], [[rfstrs]], [[rfmagn]], [[rfatpol]], and possibly other response-function activating 
+[[rfphon]], [[rfstrs]], [[rfmagn]], [[rfatpol]], and possibly other response-function activating
 input variables, but also [[berryopt]] are to be computed for the
 corresponding direction. If 0, this direction should not be considered.
 """,
