@@ -59,34 +59,36 @@ module m_wfd_wannier
   use m_dtfil,          only : datafiles_type
 
   use m_mlwfovlp,        only : mlwfovlp
-
+  use m_wannier_io,      only : write_Amn, compute_and_write_unk, write_eigenvalues
   implicit none
   private
   integer,  parameter :: master=0
-
   public :: wfd_run_wannier
 
 contains
 
+  ! fix mpi_enreg for nproc=1
+  subroutine mpi_enreg_init_seq(mpi_enreg)
+    type(mpi_type), intent(inout) :: mpi_enreg
+  end subroutine mpi_enreg_init_seq
+
   subroutine wfd_run_wannier(cryst, ebands, hdr, mpi_enreg, &
-       & nfft, ngfftc, ngfftf,  wfd, dtset, dtfil,  &
+       & ngfftc, ngfftf,  wfd, dtset, dtfil,  &
        & pawang,  pawrad, pawtab, psps )
-    type(crystal_t) :: cryst
-    type(ebands_t) :: ebands
-    type(hdr_type) :: hdr
-
-    integer :: nfft
-    integer :: ngfftc(18),ngfftf(18)
-    type(wfd_t), intent(in) :: wfd
-
+    type(crystal_t), intent(in) :: cryst
+    type(ebands_t), intent(in) :: ebands
+    type(hdr_type), intent(in) :: hdr
+    integer, intent(in) :: ngfftc(18),ngfftf(18)
+    type(wfd_t), intent(inout) :: wfd
     type(dataset_type), intent(in) :: dtset
     type(datafiles_type),intent(in) :: dtfil
     type(mpi_type), intent(in) :: mpi_enreg
-    type(pseudopotential_type),intent(inout) :: psps
-    type(pawang_type),intent(inout) :: pawang
-    type(pawrad_type),intent(inout) :: pawrad(psps%ntypat*psps%usepaw)
-    type(pawtab_type),intent(inout) :: pawtab(psps%ntypat*psps%usepaw)
+    type(pseudopotential_type),intent(in) :: psps
+    type(pawang_type),intent(in) :: pawang
+    type(pawrad_type),intent(in) :: pawrad(psps%ntypat*psps%usepaw)
+    type(pawtab_type),intent(in) :: pawtab(psps%ntypat*psps%usepaw)
 
+    integer :: nfft
     integer :: mcg, mcprj, mgfftc
     real(dp), allocatable :: cg(:, :)
     integer, allocatable :: kg(:, :)
@@ -99,39 +101,96 @@ contains
     ! TODO: mgfftc: is it ngfft. NO
     ! TODO: ngfft: is it ngfftc, or ngfftf
     ! TODO: check mpw in wfd
-    ! TODO: mkmem
+    ! TODO: mkmem: note: the mkmem in mpi_enreg is not used.
     ! TODO: gather kg from wfd
     ! TODO: mcg
     ! TODO: mcprj
 
-    integer :: ikpt
+    integer :: ik_ibz, spin, npw_k, ikg, iblk
+    integer :: my_nbands,my_band_list(wfd%mband)
 
-    mcg=hdr%npwarr(ikpt)*hdr%nspinor*hdr%mband* mpi_enreg%mkmem(ikpt)*hdr%nsppol
-    mcprj = hdr%nspinor*hdr%mband* mpi_enreg%mkmem(ikpt)*hdr%nsppol
-    mkmem = mpi_enreg%mkmem(ikpt)
+    print *, "============================================================"
+    print *, "Starting WFD Wannier"
+    print *, "============================================================"
 
-    ABI_MALLOC(cg, (2, mcg))
-    ABI_MALLOC(cprj, (cryst%natom, mcprj))
-    ABI_MALLOC(kg, (hdr%npwarr(ikpt), mpi_enreg%mkmem(ikpt)))
+    mpw=MAXVAL(wfd%npwarr)
+    nspinor=hdr%nspinor
+    mband=hdr%mband
+    mkmem= hdr%nkpt ! FIXME: this is not right in parallel mode
+    nsppol = hdr%nsppol
+    mcg=mpw*nspinor*mband* mkmem *nsppol
+    mcprj = nspinor*mband* mkmem*nsppol
+    nfft=wfd%nfft
 
-    !FIXME fill cg and cprj
+    print *, "mpw:", mpw
+    print *, "nspinor:", nspinor
+    print *, "mband:", mband
+    print *, "mkmem:", mkmem
+    print *, "nsppol", nsppol
+    print *, "mcg", mcg
+    print *, "mcprj", mcprj
+    print *, "nfft", nfft
 
-    ! gather kg
-    !kg(3,mpw*mkmem)
+    !gather kg.
+    !do ik_ibz = 1, mkmem
+    !   print *, "npw ik_ibz=", ik_ibz, "npw:", wfd%npwarr(ik_ibz)
+    !end do
 
+       ABI_MALLOC(cg, (2, mcg))
+       ABI_MALLOC(cprj, (cryst%natom, mcprj))
+       ABI_MALLOC(kg, (3, mpw*mkmem))
+
+       ikg=0
+       do ik_ibz = 1, mkmem
+          npw_k = wfd%npwarr(ik_ibz)
+          !kg(:, (ik_ibz-1)*mpw+1:ik_ibz*mpw) = wfd%Kdata(ik_ibz)%kg_k(:,:)
+          kg(:,1+ikg:npw_k+ikg)=wfd%Kdata(ik_ibz)%kg_k(:,:)
+          ikg=ikg+ npw_k
+       end do
+
+   iblk=0
+   do spin =1, nsppol
+       !FIXME fill cg and cprj
+      do ik_ibz=1, mkmem
+         npw_k=wfd%npwarr(ik_ibz)
+         call wfd%mybands(ik_ibz, spin, my_nbands, my_band_list(ik_ibz))
+         !mcg=mpw*nspinor*mband* mkmem *nsppol
+         print *, size(cg, dim=1)
+         print *, size(my_band_list, dim=1)
+         print *, wfd%mband
+         print *, mpw*nspinor*wfd%mband
+         call wfd%extract_cgblock(band_list=my_band_list, ik_ibz=ik_ibz, &
+            & spin=spin, cgblock=cg(:,iblk+1: iblk+npw_k*nspinor*wfd%mband))
+         iblk = iblk + mpw*nspinor*my_nbands
+    end do
+ end do
 
     call mlwfovlp(crystal=cryst, ebands=ebands, hdr=hdr, atindx1=cryst%atindx1  &
          &,cg=cg,cprj=cprj,dtset=dtset,dtfil=dtfil, &
          &eigen=ebands%eig,gprimd=cryst%gprimd,kg=kg,&
          & mband=wfd%mband,mcg=mcg,mcprj=mcprj,mgfftc=mgfftc, &
-         &mkmem=mkmem,mpi_enreg=mpi_enreg,mpw=hdr%npwarr(ikpt),natom=cryst%natom,&
+         &mkmem=mkmem,mpi_enreg=mpi_enreg,mpw=mpw,natom=cryst%natom,&
          & nattyp=cryst%nattyp,nfft=nfft,ngfft=ngfftf,nkpt=hdr%nkpt,npwarr= hdr%npwarr , &
          &nsppol=dtset%nsppol,ntypat=cryst%ntypat,occ=ebands%occ,&
          &pawang=pawang,pawrad=pawrad,pawtab=pawtab,prtvol=dtset%prtvol,psps=psps, &
          &rprimd=cryst%rprimd,ucvol=cryst%ucvol,xred=cryst%xred)
-
   end subroutine wfd_run_wannier
 
+
+  subroutine mlwfovlp_wfd(cryst, ebands, hdr, wfd, dtset, dtfil, mpi_enreg, pawang, pawrad, pawtab, psps, ngfftc, ngfftf)
+    type(crystal_t), intent(in) :: cryst
+    type(ebands_t), intent(in) :: ebands
+    type(hdr_type), intent(in) :: hdr
+    integer, intent(in) :: ngfftc(18),ngfftf(18)
+    type(wfd_t), intent(inout) :: wfd
+    type(dataset_type), intent(in) :: dtset
+    type(datafiles_type),intent(in) :: dtfil
+    type(mpi_type), intent(in) :: mpi_enreg
+    type(pseudopotential_type),intent(in) :: psps
+    type(pawang_type),intent(in) :: pawang
+    type(pawrad_type),intent(in) :: pawrad(psps%ntypat*psps%usepaw)
+    type(pawtab_type),intent(in) :: pawtab(psps%ntypat*psps%usepaw)
+  end subroutine mlwfovlp_wfd
 
 
   !subroutine prepare_fft_grid(cryst, dtset)
