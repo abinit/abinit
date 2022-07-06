@@ -263,6 +263,8 @@ module m_abi_linalg
  public :: gpu_linalg_shutdown
  public :: gpu_xgemm
  public :: gpu_xtrsm
+ public :: gpu_xaxpy
+ public :: gpu_xscal
 #endif
 
  public :: gpu_xorthonormalize
