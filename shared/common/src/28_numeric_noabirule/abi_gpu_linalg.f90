@@ -372,6 +372,67 @@ subroutine gpu_xtrsm(cplx,side,uplo,transa,diag,m,n,alpha,a_gpu,lda,b_gpu,ldb)
 
 end subroutine gpu_xtrsm
 !!***
+
+!!****f* m_abi_gpu_linalg/gpu_xaxpy
+!! NAME
+!!  gpu_xaxpy
+!!
+!! FUNCTION
+!!  Compute a BLAS-1 AXPY operation on GPU
+!!  y = alpha * x + y
+!!
+!! INPUTS
+!!  cplx  = 1 if real 2 if complex
+!!  size  = vector size
+!!  alpha = scalar complex value
+!!  x_gpu = pointer to gpu memory location of array x
+!! incrx  = stride between consecutive elements of x
+!!  y_gpu = pointer to gpu memory location of array y
+!! incry  = stride between consecutive elements of y
+!!
+!! SOURCE
+subroutine gpu_xaxpy(cplx, size, alpha, x_gpu, incrx, y_gpu, incry)
+
+  ! !Arguments ------------------------------------
+  integer,      intent(in)    :: cplx
+  integer,      intent(in)    :: size
+  complex(dpc), intent(in)    :: alpha
+  type(c_ptr),  intent(in)    :: x_gpu
+  integer,      intent(in)    :: incrx
+  type(c_ptr),  intent(inout) :: y_gpu
+  integer,      intent(in)    :: incry
+
+end subroutine gpu_xaxpy
+!!***
+
+!!****f* m_abi_gpu_linalg/gpu_xscal
+!! NAME
+!!  gpu_xscal
+!!
+!! FUNCTION
+!!  Compute a BLAS-1 SCAL operation on GPU
+!!  x = alpha * x
+!!
+!! INPUTS
+!!  cplx  = 1 if real 2 if complex
+!!  size  = vector size
+!!  alpha = scalar complex value
+!!  x_gpu = pointer to gpu memory location of array x
+!! incrx  = stride between consecutive elements of x
+!!
+!! SOURCE
+subroutine gpu_xscal(cplx, size, alpha, x_gpu, incrx)
+
+  ! !Arguments ------------------------------------
+  integer,      intent(in)    :: cplx
+  integer,      intent(in)    :: size
+  complex(dpc), intent(in)    :: alpha
+  type(c_ptr),  intent(in)    :: x_gpu
+  integer,      intent(in)    :: incrx
+
+end subroutine gpu_xscal
+!!***
+
 #endif
 
 

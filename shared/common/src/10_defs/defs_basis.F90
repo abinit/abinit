@@ -264,11 +264,13 @@ module defs_basis
  !double precision
  complex(dpc), parameter :: czero = (0._dp,0._dp)
  complex(dpc), parameter :: cone  = (1._dp,0._dp)
+ complex(dpc), parameter :: ctwo  = (2._dp,0._dp)
  complex(dpc), parameter :: j_dpc = (0._dp,1.0_dp)
 
  ! single-precision
  complex(spc), parameter :: czero_sp = (0._sp,0._sp)
  complex(spc), parameter :: cone_sp  = (1._sp,0._sp)
+ complex(spc), parameter :: ctwo_sp  = (2._sp,0._sp)
  complex(spc), parameter :: j_sp     = (0._sp,1.0_sp)
 
 !Pauli matrix

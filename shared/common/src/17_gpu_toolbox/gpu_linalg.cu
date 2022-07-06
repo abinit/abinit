@@ -160,7 +160,8 @@ extern "C" void gpu_xgemm_(int* cplx, char *transA, char *transB, int *N, int *M
                 (cuDoubleComplex *)(*B_ptr), *ldb,
                 beta,
                 (cuDoubleComplex *)(*C_ptr), *ldc);
-}
+
+} // gpu_xgemm
 
 /*=========================================================================*/
 // NAME
@@ -229,4 +230,72 @@ extern "C" void gpu_xtrsm_(int* cplx, char *side, char *uplo, char *transA, char
                 *N, *M, alpha,
                 (cuDoubleComplex *)(*A_ptr), *ldA,
                 (cuDoubleComplex *)(*B_ptr), *ldB);
-}
+} // gpu_xtrsm_
+
+/*=========================================================================*/
+// NAME
+//  gpu_xaxpy
+//
+// FUNCTION
+//  Compute blas-1 AXPY on GPU
+//  y = alpha * x + y
+//
+// INPUTS
+//  cplx  = 1 if real 2 if complex
+//  alpha = scalar complex value (when doing computation with real value, only the real part is used)
+//  x =     input vector
+//  incrx = increment between two consecutive values of x
+//  y =     in/out vector
+//  incry = increment between two consecutive values of y
+//
+// OUTPUT
+//  y
+/*=========================================================================*/
+
+extern "C" void gpu_xaxpy_(int* cplx, int *N,
+                           cuDoubleComplex *alpha,
+                           void **X_ptr, int *incrx, void** Y_ptr, int *incry)
+{
+
+  CUDA_API_CHECK( (*cplx==1) ?
+                  cublasDaxpy(cublas_handle,*N,
+                              &((*alpha).x),
+                              (double *)(*X_ptr), *incrx,
+                              (double *)(*Y_ptr), *incry) :
+                  cublasZaxpy(cublas_handle, *N,
+                              alpha,
+                              (cuDoubleComplex *)(*X_ptr), *incrx,
+                              (cuDoubleComplex *)(*Y_ptr), *incry) );
+} // gpu_xaxpy_
+
+/*=========================================================================*/
+// NAME
+//  gpu_xscal
+//
+// FUNCTION
+//  Compute blas-1 SCAL on GPU
+//  x = alpha * x
+//
+// INPUTS
+//  cplx  = 1 if real 2 if complex
+//  alpha = scalar complex value (when doing computation with real value, only the real part is used)
+//  x =     input/output vector
+//  incrx = increment between two consecutive values of x
+//
+// OUTPUT
+//  x
+/*=========================================================================*/
+
+extern "C" void gpu_xscal_(int* cplx, int *N,
+                           cuDoubleComplex *alpha,
+                           void **X_ptr, int *incrx)
+{
+
+  CUDA_API_CHECK( (*cplx==1) ?
+                  cublasDscal(cublas_handle,*N,
+                              &((*alpha).x),
+                              (double *)(*X_ptr), *incrx) :
+                  cublasZscal(cublas_handle, *N,
+                              alpha,
+                              (cuDoubleComplex *)(*X_ptr), *incrx) );
+} // gpu_xscal_
