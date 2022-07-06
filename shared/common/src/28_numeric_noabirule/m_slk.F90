@@ -112,7 +112,7 @@ module m_slk
  contains
 
    procedure :: init => init_scalapack        ! Initializes an instance of processor ScaLAPACK from an MPI communicator.
-   procedure :: free => end_scalapack            ! Removes a processor from the ScaLAPACK grid.
+   procedure :: free => end_scalapack         ! Removes a processor from the ScaLAPACK grid.
 
  end type processor_scalapack
 
@@ -172,6 +172,9 @@ module m_slk
 
    procedure :: init => init_matrix_scalapack
     ! Initialisation of a SCALAPACK matrix
+
+   procedure :: locmem_mb => locmem_mb
+    ! Return memory allocated for the local buffer in Mb.
 
    procedure :: print => slkmat_print
     !  Print info on scalapack matrix.
@@ -275,6 +278,15 @@ module m_slk
    module procedure slk_array3_free
    module procedure slk_array4_free
  end interface slk_array_free
+
+ public :: slk_array_locmem_mb                 ! Compute memory allocated for an array of matrix_scalapack elements
+ interface slk_array_locmem_mb
+   !module procedure slk_array1_locmem_mb
+   !module procedure slk_array2_locmem_mb
+   module procedure slk_array3_locmem_mb
+   module procedure slk_array4_locmem_mb
+ end interface slk_array_locmem_mb
+
 
 CONTAINS  !==============================================================================
 !!***
@@ -593,6 +605,32 @@ end subroutine init_matrix_scalapack
 
 !----------------------------------------------------------------------
 
+!!****f* m_slk/locmem_mb
+!! NAME
+!!  locmem_mb
+!!
+!! FUNCTION
+!!  Return memory allocated for the local buffer in Mb.
+!!
+!! SOURCE
+
+pure real(dp) function locmem_mb(mat)
+
+!Arguments ------------------------------------
+ class(matrix_scalapack),intent(in) :: mat
+
+! *********************************************************************
+
+ locmem_mb = zero
+ if (allocated(mat%buffer_real)) locmem_mb = product(int(shape(mat%buffer_real))) * dp ! * storage_size(arr, kind=8)
+ if (allocated(mat%buffer_cplx)) locmem_mb = product(int(shape(mat%buffer_cplx))) * two * dp
+ locmem_mb = locmem_mb * b2Mb
+
+end function locmem_mb
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_slk/slkmat_print
 !! NAME
 !!  slkmat_print
@@ -833,6 +871,66 @@ subroutine slk_array4_free(slk_arr4)
     end do
   end do
 end subroutine slk_array4_free
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_slk/slk_array3_locmem_mb
+!! NAME
+!!  slk_array3_locmem_mb
+!!
+!! FUNCTION
+!!  Compute memory allocated for an array of matrix_scalapack elements
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+real(dp) function slk_array3_locmem_mb(slk_arr3) result(mem_mb)
+  class(matrix_scalapack),intent(in) :: slk_arr3(:,:,:)
+  integer :: i1, i2, i3
+  mem_mb = zero
+  do i3=1,size(slk_arr3, dim=3)
+    do i2=1,size(slk_arr3, dim=2)
+      do i1=1,size(slk_arr3, dim=1)
+        mem_mb = mem_mb + slk_arr3(i1, i2, i3)%locmem_mb()
+      end do
+    end do
+  end do
+end function slk_array3_locmem_mb
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_slk/slk_array4_locmem_mb
+!! NAME
+!!  slk_array4_locmem_mb
+!!
+!! FUNCTION
+!!  Compute memory allocated for an array of matrix_scalapack elements
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+real(dp) function slk_array4_locmem_mb(slk_arr4) result(mem_mb)
+  class(matrix_scalapack),intent(in) :: slk_arr4(:,:,:,:)
+  integer :: i1, i2, i3, i4
+  mem_mb = zero
+  do i4=1,size(slk_arr4, dim=4)
+    do i3=1,size(slk_arr4, dim=3)
+      do i2=1,size(slk_arr4, dim=2)
+        do i1=1,size(slk_arr4, dim=1)
+          mem_mb = mem_mb + slk_arr4(i1, i2, i3, i4)%locmem_mb()
+        end do
+      end do
+    end do
+  end do
+end function slk_array4_locmem_mb
 !!***
 
 !----------------------------------------------------------------------
@@ -4815,7 +4913,8 @@ end subroutine slk_single_fview_read
 !!    with record marker. In this case etype is set xmpio_mpi_type_frm provided that
 !!    the mpi_type of the matrix element is commensurate with xmpio_mpi_type_frm. Defaults to .TRUE.
 !!  glob_subarray(2,2) = Used to select the subarray of the global matrix. Used only when uplo="All"
-!!     glob_subarray(:,1)=starting global coordinates of the subarray in each dimension (array of nonnegative integers >=1, <=array_of_sizes)
+!!     glob_subarray(:,1)=starting global coordinates of the subarray in each dimension
+!!     (array of nonnegative integers >=1, <=array_of_sizes)
 !!     glob_subarray(:,2)=Number of elements in each dimension of the subarray (array of positive integers)
 !!
 !! OUTPUT

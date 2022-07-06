@@ -43,6 +43,41 @@
 !!              |         |         |
 !!              |--------------------
 !!
+!! Differences with respect to the GW code in frequency-domain:
+!!
+!!  - in GWR, the k-mesh for G must be Gamma-centered.
+!!  - All the two-point functions are defined on k/q-centered g-spheres while GW uses a single Gamma-centered sphere.
+!!  - At present only one-shot GW is supported.
+!!  - It's not clear if it makes sense to support all the options of the GW code, e.g. COHSEX, SEX, etc.
+!!  - No plasmopole model in GWR. In principle it's possible but where is the point?
+!!  - The frequency/tau meshes are automatically defined by ntau and the KS spectrum (minmax meshes)
+!!
+!! Technical properties:
+!!
+!!   - Integration of vcoul_t is not easy (q-centered gvec vs single sphere, memory is not MPI distributed)
+!!     Solution: extract reusabe components from vcoul_t that can be called inside the loop over q in IBZ.
+!!
+!!   - Computation of Sigma_x = Gv must be done in Fourier space using the Lehmann representation so
+!!     that we can handle the long-range behavior in q-space. Unfortunately, we cannot simply call calc_sigx_me
+!!     from GWR so we have to implement a new routine.
+!!
+!!   - Treatment of the anisotropic behaviour of Wc. This part is badly coded in GW, in the sense that
+!!     we use a finite small q when computing Wc for q --> 0. This breaks the symmetry of the system
+!!     and QP degeneracies. The equations needed to express the angular dependency of W(q) for q --> 0
+!!     are well known but one has to pass through the Adler-Wiser expression.
+!!     Solution: Compute heads and wings using a WFK_fine wavefunction file with dense k-mesh and less bands.
+!!     The dipole matrix elements are computed with the DFPT routines, still we need to
+!!     recode a lot of stuff that is already done in cchi0q0, especially symmetries.
+!!     Note, however, that chi is Hermitian along the imaginary axis, expect for omega = 0 in metals
+!!     but I don't think the minmax grids contain omega = 0.
+!!
+!!  - In principle, it's possible to compute QP correction along a k-path provided a new WFK file is provided.
+!!    The correlated part is evaluated in real-space in the super-cell.
+!!    For Sigma_x, we need a specialized routine that can handle arbitrary q, especially at the level of v(q, G)
+!!    but I don't know if this approach will work as we don't have q --> 0 when k does not belong to the k-mesh.
+!!
+!!  - New routine for direct diagonalization of the KS Hamiltonian based on Scalapack?
+!!
 !!
 !! COPYRIGHT
 !! Copyright (C) 1999-2021 ABINIT group (MG)
@@ -69,7 +104,6 @@ module m_gwr
  use m_errors
  use m_xmpi
  use m_xomp
- !use m_slk
  use m_hdr
  use m_ebands
  use netcdf
@@ -99,7 +133,7 @@ module m_gwr
  use m_kpts,          only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, kpts_map, kpts_sort, kpts_pack_in_stars
  use m_melemts,       only : melements_t
  use m_ioarr,         only : read_rhor
- use m_slk,           only : matrix_scalapack, processor_scalapack, slk_array_free
+ use m_slk,           only : matrix_scalapack, processor_scalapack, slk_array_free, slk_array_locmem_mb
  use m_wfk,           only : wfk_read_ebands
  use m_wfd,           only : wfd_init, wfd_t, wfdgw_t, wave_t
  use m_pawtab,        only : pawtab_type
@@ -174,7 +208,6 @@ module m_gwr
 !!
 !! FUNCTION
 !!  This object provides the API high-level to perform the different steps of the GWR algorithm.
-!!
 !!
 !! SOURCE
 
@@ -432,7 +465,7 @@ module m_gwr
    type(wfdgw_t) :: kcalc_wfd
    ! wavefunction descriptors with the KS states where QP corrections are wanted.
 
-   type(melements_t) :: ks_me !, QP_me
+   type(melements_t) :: ks_me !, qp_me
    ! Matrix elements of the different potentials in the KS basis set.
 
    type(degtab_t),allocatable :: degtab(:,:)
@@ -539,8 +572,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  integer :: jj, cnt, ikcalc, ndeg, mband, bstop
  integer :: ik_ibz, ik_bz, isym_k, trev_k, g0_k(3)
  logical :: isirr_k, changed, q_is_gamma
- real(dp) :: ecut_eff
- real(dp) :: cpu, wall, gflops
+ real(dp) :: ecut_eff, cpu, wall, gflops, mem_mb
  character(len=5000) :: msg
  logical :: reorder
  type(krank_t) :: qrank, krank_ibz
@@ -847,11 +879,12 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
    gwr%spin_comm%nproc = dtset%gwr_np_gtks(4)
  else
    ! Automatic grid generation.
-   !   Priorities        |  MPI Scalability
-   !   spin (if any)     |  excellent, memory scales
-   !   tau               |  excellent, memory scales
-   !   kbz               |  good, requires communication
-   !   g/r (Scalapack)   |
+   !   Priorities        |  MPI Scalability                | Memory
+   ! ==================================================================================================
+   !   spin (if any)     |  excellent                      | scales
+   !   tau               |  excellent                      | scales
+   !   kbz               |  good?, requires communication  | scales (depending on BZ -> IBZ mapping)
+   !   g/r (Scalapack)   |  network intesive               ! scales
    !
    gwr%spin_comm%nproc = 1
    if (gwr%nsppol == 2 .and. all_nproc > 1) then
@@ -1113,6 +1146,10 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
 
    end do ! my_it
  end do ! my_is
+
+ mem_mb = slk_array_locmem_mb(gwr%gt_kibz) + slk_array_locmem_mb(gwr%chi_qibz)
+ write(msg,'(a,f8.1,a)')' Local memory needed for G + chi scalapack matrices: ', mem_mb, ' [Mb] <<< MEM'
+ call wrtout(std_out, msg)
 
  ! Create netcdf file to store results.
  gwr%gwrnc_path = strcat(dtfil%filnam_ds(4), "_GWR.nc")
@@ -2359,6 +2396,7 @@ subroutine gwr_build_chi(gwr)
            ik_bz = gwr%my_kbz_inds(my_ikf)
            ik_ibz = gwr%my_kbz2ibz(1, my_ikf)
 
+           ! Compute k + g
            desc_k => desc_kbz(my_ikf)
            do ig=1,desc_k%npw
              green_scg(:,ig) = nint(gwr%kbz(:, ik_bz) * gwr%ngkpt) + gwr%ngkpt * desc_k%gvec(:,ig)
@@ -2392,6 +2430,7 @@ subroutine gwr_build_chi(gwr)
            qq_ibz = gwr%qibz(:, iq_ibz)
            desc_q => gwr%chi_desc_qibz(iq_ibz)
 
+           ! Compute q + g
            do ig=1,desc_q%npw
              chi_scg(:,ig) = nint(qq_ibz * gwr%ngqpt) + gwr%ngqpt * desc_q%gvec(:,ig)
            end do
@@ -2446,17 +2485,18 @@ subroutine gwr_build_chi(gwr)
     ! ===================================================================
     ! Mixed-space algorithm in the unit cell with convolutions in k-space
     ! ===================================================================
-    ! Each MPI proc has all the G_k in the IBZ thus we only need to rotate to get the BZ on the fly.
+
     do my_is=1,gwr%my_nspins
       spin = gwr%my_spins(my_is)
       do my_it=1,gwr%my_ntau
         call cwtime(cpu_tau, wall_tau, gflops_tau, "start")
         itau = gwr%my_itaus(my_it)
 
+        ! Redistribute G_k in the IBZ so that each MPI proc can recostruct G in the BZ on the fly.
         !need_kibz(gwr%nkibz)
         !got_kibz(gwr%nkibz)
-        !call gwr%green_redistribute(my_it, my_is, need_kibz, got_kibz)
-        !call gwr%green_free(my_it, my_is, got_kibz)
+        !call gwr%green_redistribute(my_it, my_is, need_kibz, got_kibz, "allocate')
+        !call gwr%green_redistribute(my_it, my_is, need_kibz, got_kibz, "free")
 
         do my_ikf=1,gwr%my_nkbz
           !ik_ibz = gwr%my_kbz2ibz(1, my_ikf); isym_k = gwr%my_kbz2ibz(2, my_ikf)
@@ -2556,7 +2596,6 @@ subroutine gwr_build_chi(gwr)
  ! Also sum over spins to get total chi if collinear spin.
  call gwr%cos_transform("chi", "it2w", sum_spins=.True.)
 
- !call gwr%print(header="GWR before leaving build_chi")
  call cwtime_report(" gwr_build_chi:", cpu_all, wall_all, gflops_all)
 
 end subroutine gwr_build_chi
@@ -2589,6 +2628,7 @@ subroutine gwr_print_trace(gwr, what)
  character(len=*),intent(in) :: what
 
 !Local variables-------------------------------
+ integer,parameter :: master = 0
  integer :: my_is, spin, my_it, itau, iq_ibz, ierr, my_iqi
  complex(dp),allocatable :: ctrace(:,:,:)
 
@@ -2613,9 +2653,9 @@ subroutine gwr_print_trace(gwr, what)
    ABI_ERROR(sjoin("Invalid value of what:", what))
  end select
 
- call xmpi_sum(ctrace, gwr%comm, ierr)
+ call xmpi_sum_master(ctrace, master, gwr%comm, ierr)
 
- if (xmpi_comm_rank(gwr%comm) == 0) then
+ if (xmpi_comm_rank(gwr%comm) == master) then
    call wrtout(ab_out, sjoin("Trace of", what, "matrix for testing purposes:"))
    do spin=1,gwr%nsppol
      call print_arr(ctrace(:,:,spin), unit=ab_out)
@@ -2890,6 +2930,7 @@ subroutine gwr_build_sigmac(gwr)
          ik_bz = gwr%my_kbz_inds(my_ikf)
          ik_ibz = gwr%my_kbz2ibz(1, my_ikf)
 
+         ! Compute k + g
          desc_k => desc_kbz(my_ikf)
          do ig=1,desc_k%npw
            green_scg(:,ig) = nint(gwr%kbz(:, ik_bz) * gwr%ngkpt) + gwr%ngkpt * desc_k%gvec(:,ig)
@@ -2916,6 +2957,7 @@ subroutine gwr_build_sigmac(gwr)
          iq_bz = gwr%my_qbz_inds(my_iqf)
          iq_ibz = gwr%my_qbz2ibz(1, my_iqf)
 
+         ! Compute q + g
          desc_q => desc_qbz(my_iqf)
          do ig=1,desc_q%npw
            wc_scg(:,ig) = nint(gwr%qbz(:, iq_bz) * gwr%ngqpt) + gwr%ngqpt * desc_q%gvec(:,ig)
@@ -3127,7 +3169,7 @@ subroutine gwr_ncwrite_chi_scr(gwr, what, filepath)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0
- integer :: my_is, my_iqi, my_it, itau, spin, iq_ibz
+ integer :: my_is, my_iqi, my_it, spin, iq_ibz ! itau,
 !arrays
  type(matrix_scalapack), pointer :: mats(:)
 
@@ -3136,6 +3178,8 @@ subroutine gwr_ncwrite_chi_scr(gwr, what, filepath)
  ! TODO
  ! 1) hscr_new requires ep%
  ! 2) file format assumes Gamma-centered gvectors.
+
+ call wrtout(std_out, sjoin(" Writing to:", filepath))
 
  do my_is=1,gwr%my_nspins
    spin = gwr%my_spins(my_is)
