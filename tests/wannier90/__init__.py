@@ -5,7 +5,7 @@ need_cpp_vars = [
 "HAVE_WANNIER90",
 ]
 
-#: List of keywords that are automatically added to all the tests of this suite. 
+#: List of keywords that are automatically added to all the tests of this suite.
 keywords = [
 ]
 
@@ -19,4 +19,5 @@ inp_files = [
 "t11.abi",
 "t12.abi",
 "t13.abi",
+"t14.abi",  # test wfd wannier interface
 ]

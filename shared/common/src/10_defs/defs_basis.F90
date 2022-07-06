@@ -589,7 +589,6 @@ integer pure function str2wfktask(str) result(wfk_task)
    wfk_task = WFK_TASK_OPTICS_FULLBZ
 case ("wannier")
    wfk_task = WFK_TASK_WANNIER
-
  case default
    wfk_task = WFK_TASK_NONE
  end select

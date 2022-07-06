@@ -21568,8 +21568,8 @@ Possible values are:
      Write KERANGE.nc file with all the tables required by the code to automate NSCF band structure calculations
      inside the pocket(s) and electron lifetime computation in the EPH code when [[eph_task]] = -4.
 
-  * "wfk_wannier" --> Read WFK file and run Wannierization. It has the similar effect of 
-      [[prtwant]] = 2, which uses the **ABINIT- Wannier90** interface. The difference is that with wfk_wannier,
+  * "wannier" --> Read WFK file and run Wannierization. It has the similar effect of 
+      [[prtwant]] = 2, which uses the **ABINIT- Wannier90** interface. The difference is that with wfk_task "wannier",
       the $\kk$-points in the full BZ is not necessary. Instead, the wavefunctions with the $\kk$-points not in 
       the IBZ will be reconstructed by symmetry. This functionality does not yet work with PAW. 
     

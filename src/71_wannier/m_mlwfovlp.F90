@@ -63,6 +63,7 @@ module m_mlwfovlp
  use m_evdw_wannier, only : evdw_wannier
  use m_fft,            only : fourwf
 
+
  implicit none
 
  private
@@ -349,7 +350,6 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
  if(leig) then
-    ! TODO use subroutine
 !
 !  Assign file unit numbers
    if(rank==master) then
@@ -491,20 +491,17 @@ contains
 !          MPI:cycle over k-points not treated by this node
 !
            if (nprocs>1 ) then !sometimes we can have just one processor
-             if ( ABS(MPI_enreg%proc_distrb(ikpt,1,isppol)-MPI_enreg%me)  /=0)&
-                  & CYCLE
+                 if ( ABS(MPI_enreg%proc_distrb(ikpt,1,isppol)-MPI_enreg%me)  /=0) CYCLE
            end if
 
            ikpt2=ikpt2+1 !sums just on the k-points treated by this node
 !
-           write(wfnname,'(a,I5.5,".",I1)') trim(dtfil%fnametmp_cprj),ikpt&
-                &,isppol
+           write(wfnname,'(a,I5.5,".",I1)') trim(dtfil%fnametmp_cprj),ikpt,isppol
            iun_plot=1000+ikpt
            open (unit=iun_plot, file=wfnname,form='unformatted')
 !
            do iband=1,mband*dtset%nspinor
-             ig=iband+(ikpt2-1)*mband*dtset%nspinor +(isppol-1)*nkpt*mband&
-                  &*dtset%nspinor !index for cprj(:,ig)
+             ig=iband+(ikpt2-1)*mband*dtset%nspinor +(isppol-1)*nkpt*mband*dtset%nspinor !index for cprj(:,ig)
 !
              do iatom=1,natom
                itypat=dtset%typat(iatom)
@@ -530,9 +527,11 @@ contains
 !
    ABI_MALLOC(cm1,(2,mband,mband,nntot,nkpt,nsppol))
    ! this loops over spin internally
-   call mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband, mkmem,mpi_enreg,mpw,nfft,ngfft&
-        &,nkpt,nntot, npwarr,dtset%nspinor,nsppol,ovikp,dtfil%fnametmp_cg)
-   write(message, '(a,a)' ) ch10, '   mlwfovlp : PW part of overlap computed   '
+   call mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,&
+&   mkmem,mpi_enreg,mpw,nfft,ngfft,nkpt,nntot,&
+&   npwarr,dtset%nspinor,nsppol,ovikp,dtfil%fnametmp_cg)
+   write(message, '(a,a)' ) ch10,&
+&   '   mlwfovlp : PW part of overlap computed   '
    call wrtout(std_out,  message,'COLL')
 !
 !  compute PAW Contribution and add it to PW contribution
@@ -1999,11 +1998,10 @@ subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nk
 !
 !    MPI:cycle over k-points not treated by this node
 !
+      if (nprocs>1 ) then !sometimes we can have just one processor
+         if ( ABS(MPI_enreg%proc_distrb(ikpt,1,isppol)-MPI_enreg%me)  /=0) CYCLE
+      end if
 
-      ! TODO: use sphere in fftcore to replace this.
-      ! m_cgtk: 62, cgtk_rotate ug  
-
-     if ( ABS(MPI_enreg%proc_distrb(ikpt,1,isppol)-me)  /=0) CYCLE
 
 !
 !    write(std_out,*)'me',me,'ikpt',ikpt,'isppol',isppol
@@ -2101,8 +2099,10 @@ subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nk
 !
 !    MPI:cycle over k-points not treated by this node
 !
-     if ( ABS(MPI_enreg%proc_distrb(ikpt1,1,isppol)-me)  /=0) CYCLE
-!
+      if (nprocs>1 ) then !sometimes we can have just one processor
+         if ( ABS(MPI_enreg%proc_distrb(ikpt,1,isppol)-me)  /=0) CYCLE
+      end if
+
      write(message, '(a,i6,a,i6,a,i6)' ) &
 &     '     Processor',me,' computes k-point',ikpt1,' and spin=',isppol
      call wrtout(std_out,  message,'COLL')
@@ -2118,6 +2118,7 @@ subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nk
 !      MPI: if ikpt2 not found in this processor then
 !      read info from an unformatted file
 !
+       if(nprocs>1) then
        if ( ABS(MPI_enreg%proc_distrb(ikpt2,1,isppol)-me)  /=0) then
          lfile=.true.
          write(cg_file,'(a,I5.5,".",I1)') trim(seed_name),ikpt2,isppol
@@ -2138,6 +2139,7 @@ subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nk
            end do
          end do
          close(iunit)
+       end if
        end if
 !
        npw_k=npwarr(ikpt1)
@@ -2374,7 +2376,11 @@ subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nk
 !
 !      MPI: cycle over kpts not treated by this node
 !
-       if (ABS(MPI_enreg%proc_distrb(ikpt,1,isppol)-rank)/=0) CYCLE
+        if (nprocs>1 ) then !sometimes we can have just one processor
+           if ( ABS(MPI_enreg%proc_distrb(ikpt,1,isppol)-rank)  /=0) CYCLE
+        end if
+
+
 !      write(std_out,'("kpt loop2: ikpt",i3," rank ",i3)') ikpt,rank
 
 !
@@ -2400,7 +2406,11 @@ subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nk
 !
 !      MPI: cycle over kpts not treated by this node
 !
-       if (ABS(MPI_enreg%proc_distrb(ikpt,1,isppol)-rank)/=0) CYCLE
+        if (nprocs>1 ) then !sometimes we can have just one processor
+           if ( ABS(MPI_enreg%proc_distrb(ikpt,1,isppol)-rank)  /=0) CYCLE
+        end if
+
+
 !
        do iband2=1,nwan(isppol)
          jband=0
@@ -2469,8 +2479,11 @@ subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nk
 !
 !      MPI: cycle over kpts not treated by this node
 !
-       if (ABS(MPI_enreg%proc_distrb(ikpt,1,isppol)-rank)/=0) CYCLE
-!
+        if (nprocs>1 ) then !sometimes we can have just one processor
+           if ( ABS(MPI_enreg%proc_distrb(ikpt,1,isppol)-rank)  /=0) CYCLE
+        end if
+
+
        write(message, '(a,i6,a,2i6)' ) &
 &       '   processor',rank,' will compute k-point,spin=',ikpt,isppol
        call wrtout(std_out,  message,'COLL')

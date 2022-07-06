@@ -408,11 +408,12 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
  !case ("paw_aeden")
 
 case (WFK_TASK_WANNIER)
+   ! Construct Wannier function.
 
+   call read_wfd()
    call wfd_run_wannier(cryst, ebands, wfk0_hdr, mpi_enreg, &
-        & wfd%nfft, ngfftc, ngfftf,  wfd, dtset, dtfil,  &
+        & ngfftc, ngfftf,  wfd, dtset, dtfil,  &
         & pawang,  pawrad, pawtab, psps )
-
 
  case default
    ABI_ERROR(sjoin("Wrong task:", itoa(dtset%wfk_task)))
