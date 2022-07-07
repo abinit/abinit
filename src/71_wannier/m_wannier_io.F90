@@ -47,12 +47,18 @@ module m_wannier_io
   use m_io_tools,        only : open_file
 
   use m_fftcore,  only : sphereboundary
+  use m_dtfil
+  use m_pawtab,   only : pawtab_type
+  use m_pawcprj,  only : pawcprj_type
+
 
   implicit none
   private
   public :: write_Amn
   public :: compute_and_write_unk
   public :: write_eigenvalues
+  public :: write_Mmn
+  public :: write_cg_and_cprj
   !!***
 
 contains
@@ -357,5 +363,218 @@ contains
 
   end subroutine write_eigenvalues
 
+
+  subroutine write_Mmn(filew90_mmn, band_in, cm1, ovikp, g1, M_matrix, &
+       &  nkpt, nsppol,  nntot, mband, num_bands,  message, iam_master)
+    ! input and output vars
+    integer, intent(in) :: nsppol,  nntot, nkpt
+    integer, intent(in) :: mband, num_bands(:)
+    character(len=fnlen), intent(in) :: filew90_mmn(nsppol)
+    logical, intent(in) :: band_in(mband, nsppol)
+    integer,intent(in):: ovikp(:,:)
+    integer, intent(in) :: g1(:, :, :)
+    real(dp), intent(in) :: cm1(:,:,:,:,:,:)
+    logical, intent(in) :: iam_master
+    complex(dpc),intent(inout) :: M_matrix(:,:,:,:,:)
+
+
+    ! temporary vars
+    integer :: isppol, ikpt1, intot,ii, jj,jband1, iband1, jband2, iband2
+    integer :: iun(nsppol)
+    character(len=1000) :: message
+
+     do isppol=1,nsppol !we write separate output files for each isppol
+       iun(isppol)=220+isppol
+       if( iam_master) then
+          open(unit=iun(isppol),file=filew90_mmn(isppol),form='formatted',status='unknown')
+          write(iun(isppol),*) "nnkp version 90"
+          write(iun(isppol),*) num_bands(isppol),nkpt,nntot
+       end if
+     end do
+
+   do isppol=1,nsppol
+     do ikpt1=1,nkpt
+       do intot=1,nntot
+          if( iam_master) then
+             write(iun(isppol),'(2i6,3x,3x,3i5)') ikpt1,ovikp(ikpt1,intot),(g1(jj,ikpt1,intot),jj=1,3)
+          end if
+         jband2=0
+         do iband2=1,mband ! the first index is faster
+           if(band_in(iband2,isppol)) then
+             jband2=jband2+1
+             jband1=0
+             do iband1=1,mband
+               if(band_in(iband1,isppol)) then
+                 jband1=jband1+1
+                 if(iam_master) write(iun(isppol),*) &
+&                 cm1(1,iband1,iband2,intot,ikpt1,isppol),cm1(2,iband1,iband2,intot,ikpt1,isppol)
+                 M_matrix(jband1,jband2,intot,ikpt1,isppol)=&
+&                 cmplx(cm1(1,iband1,iband2,intot,ikpt1,isppol),cm1(2,iband1,iband2,intot,ikpt1,isppol), kind=dpc )
+!                write(2211,*) ikpt1,intot,iband1,iband2
+!                write(2211,*) cm1(1,iband1,iband2,intot,ikpt1,isppol),cm1(2,iband1,iband2,intot,ikpt1,isppol)
+               end if ! band_in(iband1)
+             end do ! iband1
+           end if ! band_in(iband2)
+         end do ! iband2
+       end do !intot
+     end do !ikpt
+     if( iam_master ) then
+       close(iun(isppol))
+       write(message, '(3a)' )  '   ',trim(filew90_mmn(isppol)),' written'
+       call wrtout(std_out,  message,'COLL')
+     end if !rank==master
+   end do !isppol
+
+
+   if(iam_master) then
+     write(message, '(4a)' ) ch10,&
+&     '   Writing top of the overlap matrix: M_mn(ikb,ik)',ch10,&
+&     '   m=n=1:3, ikb=1, ik=1'
+     call wrtout(ab_out,message,'COLL')
+     call wrtout(std_out,  message,'COLL')
+!
+!    just write down the first 3 elements
+!
+     do isppol=1,nsppol
+       write(message, '( " " )')
+       if (nsppol>1 ) then
+         if (isppol==1) write(message,'(2a)')trim(message),'   spin up:'
+         if (isppol==2) write(message,'(2a)')trim(message),'   spin down:'
+       end if
+       do ii=1,3
+         if(ii>num_bands(isppol)) cycle
+         write(message,'(3a)') trim(message),ch10,';   ( '
+         do jj=1,3
+           if(jj>num_bands(isppol))cycle
+           write(message, '(a,2f11.6,a)') trim(message),&
+&           M_matrix(ii,jj,1,1,isppol),' , '
+         end do
+         write(message,'(2a)') trim(message),'    ) '
+       end do
+       call wrtout(ab_out,message,'COLL')
+       call wrtout(std_out,  message,'COLL')
+     end do
+!
+!    Now write down bottom of the matrix
+!
+     write(message, '(4a)' ) ch10,&
+&     '   Writing bottom of the overlap matrix: M_mn(ikb,ik)',ch10,&
+&     '   m=n=num_bands-2:num_bands, ikb=nntot, ik=nkpt'
+     call wrtout(ab_out,message,'COLL')
+     call wrtout(std_out,  message,'COLL')
+!
+     do isppol=1,nsppol
+       write(message, '( " " )')
+       if (nsppol>1 ) then
+         if (isppol==1) write(message,'(2a)')trim(message),'   spin up:'
+         if (isppol==2) write(message,'(2a)')trim(message),'   spin down:'
+       end if
+       do ii=num_bands(isppol)-2,num_bands(isppol)
+         if(ii<1) cycle
+         write(message,'(3a)') trim(message),ch10,';   ( '
+         do jj=num_bands(isppol)-2,num_bands(isppol)
+           if(jj<1)cycle
+           write(message, '(a,2f11.6,a)') trim(message),&
+&           M_matrix(ii,jj,nntot,nkpt,isppol),' , '
+         end do !j
+         write(message,'(2a)') trim(message),'    ) '
+       end do !ii
+       call wrtout(ab_out,message,'COLL')
+       call wrtout(std_out,  message,'COLL')
+     end do !isppol
+   end if !rank==master
+!
+ end subroutine write_Mmn
+
+
+ subroutine write_cg_and_cprj(dtset, cg, cprj, dtfil, iwav, npwarr, mband, natom, &
+      &nsppol, nkpt,  MPI_enreg, rank, psps, pawtab)
+
+   type(dataset_type),intent(in) :: dtset
+   type(MPI_type),intent(in) :: mpi_enreg
+   type(datafiles_type),intent(in) :: dtfil
+   integer,intent(in):: iwav(:,:,:)
+   real(dp),intent(in) :: cg(:, :)
+   type(pawcprj_type), intent(in) :: cprj(:, :)
+   integer, intent(in) :: rank, nsppol, nkpt, mband, natom
+   integer, intent(in) :: npwarr(nkpt)
+   type(pseudopotential_type),intent(in) :: psps
+   type(pawtab_type),intent(in) :: pawtab(psps%ntypat*psps%usepaw)
+
+   integer :: ikpt, ikpt2, isppol, iun_plot, npw_k, iband, ig, i
+   integer :: iatom,  itypat, lmn_size, ilmn
+   character(len=fnlen) :: wfnname
+   character(len=1000) :: message
+
+     if(dtset%prtvol>0) then
+       write(message, '(3a)' ) ch10,&
+&       '   mlwfovlp :  Creating temporary files with cg and cprj (PAW)',ch10
+       call wrtout(ab_out,message,'COLL')
+       call wrtout(std_out,  message,'COLL')
+     end if
+!
+     do isppol=1,nsppol
+       do ikpt=1,nkpt
+!
+!        MPI:cycle over k-points not treated by this node
+!
+          if ( ABS(MPI_enreg%proc_distrb(ikpt,1,isppol)-rank)  /=0) CYCLE
+
+!        write(std_out,*)'writing kpt ',ikpt,'isppol',isppol,' by node ', rank
+         write(wfnname,'(a,I5.5,".",I1)') trim(dtfil%fnametmp_cg),ikpt,isppol
+         iun_plot=1000+ikpt+ikpt*(isppol-1)
+
+         open (unit=iun_plot, file=wfnname,form='unformatted')
+         npw_k=npwarr(ikpt)
+         do iband=1,mband
+           do ig=1,npw_k*dtset%nspinor
+             write(iun_plot) (cg(i,ig+iwav(iband,ikpt,isppol)),i=1,2)
+           end do
+         end do
+         close(iun_plot)
+       end do !ikpt
+     end do !isppol
+!
+!    In the PAW case we also need to write out cprj into files
+!
+     if(psps%usepaw==1) then
+!
+!      big loop on atoms, kpts, bands and lmn
+        print *, "nsppol", nsppol
+        print *, "nkpt", nkpt
+        print *, "mkmem", dtset%mkmem
+!
+       ikpt2=0
+       do isppol=1,nsppol
+         do ikpt=1,nkpt
+!
+!          MPI:cycle over k-points not treated by this node
+!
+            if ( ABS(MPI_enreg%proc_distrb(ikpt,1,isppol)-MPI_enreg%me)  /=0) CYCLE
+
+           ikpt2=ikpt2+1 !sums just on the k-points treated by this node
+!
+           write(wfnname,'(a,I5.5,".",I1)') trim(dtfil%fnametmp_cprj),ikpt,isppol
+           iun_plot=1000+ikpt
+           open (unit=iun_plot, file=wfnname,form='unformatted')
+!
+           do iband=1,mband*dtset%nspinor
+             ig=iband+(ikpt2-1)*mband*dtset%nspinor +(isppol-1)*nkpt*mband*dtset%nspinor !index for cprj(:,ig)
+                           !
+             do iatom=1,natom
+               itypat=dtset%typat(iatom)
+               lmn_size=pawtab(itypat)%lmn_size
+!
+               do ilmn=1,lmn_size
+                 write(iun_plot) (( cprj(iatom,ig)%cp(i,ilmn)),i=1,2)
+               end do !ilmn
+             end do !iatom
+           end do !iband
+
+           close(iun_plot)
+         end do !ikpt
+       end do !isppol
+     end if !usepaw==1
+ end subroutine write_cg_and_cprj
 
 end module m_wannier_io

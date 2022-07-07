@@ -62,7 +62,7 @@ module m_mlwfovlp
  use m_paw_overlap, only : smatrix_pawinit
  use m_evdw_wannier, only : evdw_wannier
  use m_fft,            only : fourwf
- use m_wannier_io,   only: write_eigenvalues, write_Amn, compute_and_write_unk
+ use m_wannier_io,   only: write_eigenvalues, write_Amn, compute_and_write_unk, write_Mmn, write_cg_and_cprj
 
 
  implicit none
@@ -363,6 +363,7 @@ contains
 !First calculate indices and shift
 !
 !write(std_out,*) "Computes shift for cg"
+
  write(message, '(a,a)' ) ch10,&
 & '   mlwfovlp : compute shifts for g-points '
  call wrtout(std_out,  message,'COLL')
@@ -371,16 +372,14 @@ contains
 !(here mband is not used, because shifts are internal variables of abinit)
 !----------------------------------------------------------------------
 !write(std_out,*) mpw*dtset%nspinor*mband*mkmem*nsppol
+ BLOCK 
  ABI_MALLOC(icg,(nsppol,nkpt))
  icg=0
  icgtemp=0
  iwav(:,:,:)=0
  do isppol=1,nsppol
    do ikpt=1,nkpt
-!
 !    MPI:cycle over k-points not treated by this node
-!
-
      if (nprocs>1 ) then !sometimes we can have just one processor
        if ( ABS(MPI_enreg%proc_distrb(ikpt,1,isppol)-rank)  /=0) CYCLE
      end if
@@ -404,6 +403,7 @@ contains
  end do   ! isppol
 !write(std_out,*) "shift for cg computed"
  ABI_FREE(icg)
+ END BLOCK
 !
 !Shifts computed.
 !
@@ -412,81 +412,8 @@ contains
 !  In case of parallelization write out cg for all k-points
 !
    if (nprocs > 1) then
-!
-     if(prtvol>0) then
-       write(message, '(3a)' ) ch10,&
-&       '   mlwfovlp :  Creating temporary files with cg and cprj (PAW)',ch10
-       call wrtout(ab_out,message,'COLL')
-       call wrtout(std_out,  message,'COLL')
-     end if
-!
-     do isppol=1,nsppol
-       do ikpt=1,nkpt
-!
-!        MPI:cycle over k-points not treated by this node
-!
-         if (nprocs>1 ) then !sometimes we can have just one processor
-           if ( ABS(MPI_enreg%proc_distrb(ikpt,1,isppol)-rank)  /=0) CYCLE
-         end if
-
-!        write(std_out,*)'writing kpt ',ikpt,'isppol',isppol,' by node ', rank
-         write(wfnname,'(a,I5.5,".",I1)') trim(dtfil%fnametmp_cg),ikpt,isppol
-         iun_plot=1000+ikpt+ikpt*(isppol-1)
-
-         open (unit=iun_plot, file=wfnname,form='unformatted')
-         npw_k=npwarr(ikpt)
-         do iband=1,mband
-           do ig=1,npw_k*dtset%nspinor
-             write(iun_plot) (cg(i,ig+iwav(iband,ikpt,isppol)),i=1,2)
-           end do
-         end do
-         close(iun_plot)
-       end do !ikpt
-     end do !isppol
-!
-!    In the PAW case we also need to write out cprj into files
-!
-     if(psps%usepaw==1) then
-        ! TODO: move this into a subroutine or use wfd
-!
-!      big loop on atoms, kpts, bands and lmn
-!
-       ikpt2=0
-       do isppol=1,nsppol
-         do ikpt=1,nkpt
-!
-!          MPI:cycle over k-points not treated by this node
-!
-           if (nprocs>1 ) then !sometimes we can have just one processor
-                 if ( ABS(MPI_enreg%proc_distrb(ikpt,1,isppol)-MPI_enreg%me)  /=0) CYCLE
-           end if
-
-           ikpt2=ikpt2+1 !sums just on the k-points treated by this node
-!
-           write(wfnname,'(a,I5.5,".",I1)') trim(dtfil%fnametmp_cprj),ikpt,isppol
-           iun_plot=1000+ikpt
-           open (unit=iun_plot, file=wfnname,form='unformatted')
-!
-           do iband=1,mband*dtset%nspinor
-             ig=iband+(ikpt2-1)*mband*dtset%nspinor +(isppol-1)*nkpt*mband*dtset%nspinor !index for cprj(:,ig)
-!
-             do iatom=1,natom
-               itypat=dtset%typat(iatom)
-               lmn_size=pawtab(itypat)%lmn_size
-!
-               do ilmn=1,lmn_size
-                 write(iun_plot) (( cprj(iatom,ig)%cp(i,ilmn)),i=1,2)
-               end do !ilmn
-             end do !iatom
-           end do !iband
-
-           close(iun_plot)
-         end do !ikpt
-       end do !isppol
-     end if !usepaw==1
-
-!
-!
+      call write_cg_and_cprj(dtset, cg, cprj, dtfil, iwav, npwarr, mband, natom, &
+           &nsppol, nkpt,  MPI_enreg, rank, psps, pawtab)
    end if !MPI nprocs>1
 !
 !  End of MPI preliminarities
@@ -548,116 +475,15 @@ contains
 !
    call xmpi_barrier(spaceComm)
    call xmpi_sum(cm1,spaceComm,ierr)
-!
-!  write overlap for separate calculation of wannier functions
-!
-   if(rank==master) then
-     do isppol=1,nsppol !we write separate output files for each isppol
-       iun(isppol)=220+isppol
-       open(unit=iun(isppol),file=filew90_mmn(isppol),form='formatted',status='unknown')
-       write(iun(isppol),*) "nnkp version 90"
-       write(iun(isppol),*) num_bands(isppol),nkpt,nntot
-     end do
-   end if ! rank==master
 
-   do isppol=1,nsppol
-     do ikpt1=1,nkpt
-       do intot=1,nntot
-         if( rank==master) write(iun(isppol),'(2i6,3x,3x,3i5)') ikpt1,ovikp(ikpt1,intot),(g1(jj,ikpt1,intot),jj=1,3)
-         jband2=0
-         do iband2=1,mband ! the first index is faster
-           if(band_in(iband2,isppol)) then
-             jband2=jband2+1
-             jband1=0
-             do iband1=1,mband
-               if(band_in(iband1,isppol)) then
-                 jband1=jband1+1
-                 if(rank==master) write(iun(isppol),*) &
-&                 cm1(1,iband1,iband2,intot,ikpt1,isppol),cm1(2,iband1,iband2,intot,ikpt1,isppol)
-                 M_matrix(jband1,jband2,intot,ikpt1,isppol)=&
-&                 cmplx(cm1(1,iband1,iband2,intot,ikpt1,isppol),cm1(2,iband1,iband2,intot,ikpt1,isppol))
-!                write(2211,*) ikpt1,intot,iband1,iband2
-!                write(2211,*) cm1(1,iband1,iband2,intot,ikpt1,isppol),cm1(2,iband1,iband2,intot,ikpt1,isppol)
-               end if ! band_in(iband1)
-             end do ! iband1
-           end if ! band_in(iband2)
-         end do ! iband2
-       end do !intot
-     end do !ikpt
-     if( rank==master ) then
-       close(iun(isppol))
-       write(message, '(3a)' )  '   ',trim(filew90_mmn(isppol)),' written'
-       call wrtout(std_out,  message,'COLL')
-     end if !rank==master
-   end do !isppol
-!
+
+   call write_Mmn(filew90_mmn, band_in, cm1, ovikp, g1, M_matrix, &
+        &  nkpt, nsppol, nntot, mband, num_bands,  message,&
+        & iam_master=(rank==master))
+
    ABI_FREE(cm1)
-!
-!  Write down part of the matrix to the output file
-!  This is for the automatic tests
-!
-   if(rank==master) then
-     write(message, '(4a)' ) ch10,&
-&     '   Writing top of the overlap matrix: M_mn(ikb,ik)',ch10,&
-&     '   m=n=1:3, ikb=1, ik=1'
-     call wrtout(ab_out,message,'COLL')
-     call wrtout(std_out,  message,'COLL')
-!
-!    just write down the first 3 elements
-!
-     do isppol=1,nsppol
-       write(message, '( " " )')
-       if (nsppol>1 ) then
-         if (isppol==1) write(message,'(2a)')trim(message),'   spin up:'
-         if (isppol==2) write(message,'(2a)')trim(message),'   spin down:'
-       end if
-       do ii=1,3
-         if(ii>num_bands(isppol)) cycle
-         write(message,'(3a)') trim(message),ch10,';   ( '
-         do jj=1,3
-           if(jj>num_bands(isppol))cycle
-           write(message, '(a,2f11.6,a)') trim(message),&
-&           M_matrix(ii,jj,1,1,isppol),' , '
-         end do
-         write(message,'(2a)') trim(message),'    ) '
-       end do
-       call wrtout(ab_out,message,'COLL')
-       call wrtout(std_out,  message,'COLL')
-     end do
-!
-!    Now write down bottom of the matrix
-!
-     write(message, '(4a)' ) ch10,&
-&     '   Writing bottom of the overlap matrix: M_mn(ikb,ik)',ch10,&
-&     '   m=n=num_bands-2:num_bands, ikb=nntot, ik=nkpt'
-     call wrtout(ab_out,message,'COLL')
-     call wrtout(std_out,  message,'COLL')
-!
-     do isppol=1,nsppol
-       write(message, '( " " )')
-       if (nsppol>1 ) then
-         if (isppol==1) write(message,'(2a)')trim(message),'   spin up:'
-         if (isppol==2) write(message,'(2a)')trim(message),'   spin down:'
-       end if
-       do ii=num_bands(isppol)-2,num_bands(isppol)
-         if(ii<1) cycle
-         write(message,'(3a)') trim(message),ch10,';   ( '
-         do jj=num_bands(isppol)-2,num_bands(isppol)
-           if(jj<1)cycle
-           write(message, '(a,2f11.6,a)') trim(message),&
-&           M_matrix(ii,jj,nntot,nkpt,isppol),' , '
-         end do !j
-         write(message,'(2a)') trim(message),'    ) '
-       end do !ii
-       call wrtout(ab_out,message,'COLL')
-       call wrtout(std_out,  message,'COLL')
-     end do !isppol
-   end if !rank==master
-!
-!  erase temporary files created for parallel runs
-!
+
    if (nprocs > 1) then
-!
      if(prtvol>0) then
        write(message, '(3a)' ) ch10,&
 &       '   mlwfovlp :  Removing temporary files with cg and cprj (PAW)',ch10
@@ -695,8 +521,6 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
  if(dtset%w90iniprj/=0 )  then
-
-
 !
 !  Set value for lproj (type of projections to be computed)
 !  In PAW, options 5 and 6 are not in use.
@@ -787,9 +611,9 @@ contains
 !
    if(rank==master) then
       if(dtset%w90iniprj==1) then
-         call write_Amn(A_matrix, filew90_amn, nsppol, mband, nkpt, num_bands, nwan, band_in)
-      else
          call write_Amn(A_matrix, filew90_ramn, nsppol, mband, nkpt, num_bands, nwan, band_in)
+      else
+         call write_Amn(A_matrix, filew90_amn, nsppol, mband, nkpt, num_bands, nwan, band_in)
       end if
    end if
 
@@ -811,113 +635,12 @@ contains
 !6) write files for wannier function plot
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  if( dtset%w90prtunk>0) then
-   if(psps%usepaw==1) then
-     write(message, '( a,a,a,a,a,a,a,a,a)')ch10,&
-&     "   WARNING: The UNK matrices will not contain the correct wavefunctions ",ch10,&
-&     "   since we are just writing the plane wave contribution.",ch10,&
-&     "   The contribution from inside the spheres is missing. ",ch10,&
-&     "   However, these files can be used for plotting purposes",ch10
-     call wrtout(std_out,  message,'COLL')
-   end if
-!
-   spacing = dtset%w90prtunk
-   write(message, '( 8a,i3,2a)')ch10,&
-&   "   UNK files will be written.",ch10,&
-&   "   According to the chosen value of w90prtunk",ch10,&
-&   "   the wavefunctions are to be written ",ch10, &
-&   "   at every ", spacing," records.",ch10
-   call wrtout(std_out,  message,'COLL')
-!
-   ABI_MALLOC(kg_k,(3,mpw))
-   n1=ngfft(1)
-   n2=ngfft(2)
-   n3=ngfft(3)
-   n4=ngfft(4)
-   n5=ngfft(5)
-   n6=ngfft(6)
-   cplex=1
-   mgfft=mgfftc ! error
-   do isppol=1,nsppol
-     ikg=0
-     do ikpt=1,nkpt
-!
-!      MPI:cycle over k-points not treated by this node
-!
-       if (nprocs>1 ) then !sometimes we can have just one processor
-         if ( ABS(MPI_enreg%proc_distrb(ikpt,1,isppol)-rank)  /=0) CYCLE
-       end if
-!
-       npw_k=npwarr(ikpt)
-       kg_k(:,1:npw_k)=kg(:,1+ikg:npw_k+ikg)
-       ABI_MALLOC(denpot,(cplex*n4,n5,n6))
-       ABI_MALLOC(cwavef,(2,npw_k))
-       ABI_MALLOC(fofr,(2,n4,n5,n6))
-       ABI_MALLOC(gbound,(2*mgfft+8,2))
-       ABI_MALLOC(fofgout,(2,npw_k))
-       iun_plot=1000+ikpt+ikpt*(isppol-1)
-       write(wfnname,'("UNK",I5.5,".",I1)') ikpt, isppol
-!      open (unit=iun_plot, file=wfnname,form='formatted')
-       open(unit=iun_plot, file=wfnname,form='unformatted')
-!      optimizing grid for UNK files
-       n1tmp = n1/spacing
-       n2tmp = n2/spacing
-       n3tmp = n3/spacing
-       if( mod(n1,spacing) /= 0) then
-         n1tmp = n1tmp + 1
-       end if
-       if( mod(n2,spacing) /= 0) then
-         n2tmp = n2tmp + 1
-       end if
-       if( mod(n3,spacing) /= 0) then
-         n3tmp = n3tmp + 1
-       end if
-!      write(iun_plot,*) n1tmp,n2tmp,n3tmp,ikpt,nband_inc
-       write(iun_plot) n1tmp,n2tmp,n3tmp,ikpt,nband_inc(isppol)
-!      gbound=zero
-       call sphereboundary(gbound,dtset%istwfk(ikpt),kg_k,mgfft,npw_k)
-       write(std_out,*) "  writes UNK file for ikpt, spin=",ikpt,isppol
-       denpot(:,:,:)=zero
-       weight = one
-       do iband=1,mband
-         if(band_in(iband,isppol)) then
-           do ig=1,npw_k*dtset%nspinor
-             cwavef(1,ig)=cg(1,ig+iwav(iband,ikpt,isppol))
-             cwavef(2,ig)=cg(2,ig+iwav(iband,ikpt,isppol))
-           end do
-           tim_fourwf=0
-           call fourwf(cplex,denpot,cwavef,fofgout,fofr,&
-&           gbound,gbound,dtset%istwfk(ikpt),kg_k,kg_k,mgfft,&
-&           mpi_enreg,1,ngfft,npw_k,npw_k,n4,n5,n6,0,&
-&           tim_fourwf,weight,weight,use_gpu_cuda=dtset%use_gpu_cuda)
-!          do jj3=1,n3,spacing
-!          do jj2=1,n2,spacing
-!          do jj1=1,n1,spacing
-!          write(iun_plot,*) fofr(1,jj1,jj2,jj3),&
-!          & fofr(2,jj1,jj2,jj3)
-!          end do !jj1
-!          end do !jj2
-!          end do !jj3
-!          unformatted (must be one record)
-           write(iun_plot) (((fofr(1,jj1,jj2,jj3),fofr(2,jj1,jj2,jj3),&
-&           jj1=1,n1,spacing),jj2=1,n2,spacing),jj3=1,n3,spacing)
-         end if !iband
-       end do ! iband
-       ABI_FREE(cwavef)
-       ABI_FREE(fofr)
-       ABI_FREE(gbound)
-       ABI_FREE(denpot)
-       ABI_FREE(fofgout)
-       ikg=ikg+npw_k
-       close(iun_plot)
-     end do  ! ikpt
-   end do  ! nsppol
-   ABI_FREE(kg_k)
-!
-   write(message, '(4a)' )ch10, &
-&   '   ','UNK files written',ch10
-   call wrtout(std_out,  message,'COLL')
+    call compute_and_write_unk(wfnname, psps%usepaw, dtset%w90prtunk, &
+         & mpi_enreg, ngfft, nsppol, dtset%nspinor,  &
+         & nkpt, mband,  mpw, mgfftc, mkmem,  nprocs, rank, npwarr, &
+         & band_in,  dtset, kg, cg)
  end if !dtset%w90prtunk
-!
+
  ABI_FREE(iwav)
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1963,7 +1686,7 @@ subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nk
 !    MPI:cycle over k-points not treated by this node
 !
       if (nprocs>1 ) then !sometimes we can have just one processor
-         if ( ABS(MPI_enreg%proc_distrb(ikpt,1,isppol)-me)  /=0) CYCLE
+         if ( ABS(MPI_enreg%proc_distrb(ikpt1,1,isppol)-me)  /=0) CYCLE
       end if
 
      write(message, '(a,i6,a,i6,a,i6)' ) &
