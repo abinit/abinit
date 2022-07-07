@@ -559,8 +559,10 @@ contains
            open (unit=iun_plot, file=wfnname,form='unformatted')
 !
            do iband=1,mband*dtset%nspinor
-             ig=iband+(ikpt2-1)*mband*dtset%nspinor +(isppol-1)*nkpt*mband*dtset%nspinor !index for cprj(:,ig)
-                           !
+             !ig=iband+(ikpt2-1)*mband*dtset%nspinor +(isppol-1)*nkpt*mband*dtset%nspinor !index for cprj(:,ig)
+              ! cprj: only mkmem k-points are stored in this node.
+             ig=iband+(ikpt2-1)*mband*dtset%nspinor +(isppol-1)*dtset%mkmem*mband*dtset%nspinor !index for cprj(:,ig)
+              !
              do iatom=1,natom
                itypat=dtset%typat(iatom)
                lmn_size=pawtab(itypat)%lmn_size
