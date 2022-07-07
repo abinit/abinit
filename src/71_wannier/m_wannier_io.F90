@@ -46,7 +46,7 @@ module m_wannier_io
   use m_fft, only: fourwf
   use m_io_tools,        only : open_file
 
-
+  use m_fftcore,  only : sphereboundary
 
   implicit none
   private
@@ -59,26 +59,16 @@ contains
 
 
   ! Write amn file
-  subroutine write_Amn(A_matrix, w90iniprj, fname, nsppol, mband, nkpt, num_bands, nwan, band_in)
+  subroutine write_Amn(A_matrix, fname, nsppol, mband, nkpt, num_bands, nwan, band_in)
     ! TODO use the A_matrix sizes instead of the nsppol, mband, nkpt, nwan
     complex(dpc),pointer :: A_matrix(:,:,:,:)
     !type(dataset_type),intent(in) :: dtset
-    integer, intent(in) :: w90iniprj
     logical, intent(in) :: band_in(:, :)
     integer, intent(in) :: nsppol, num_bands(nsppol), nwan(nsppol), mband, nkpt
     character(len=fnlen), intent(in) :: fname(nsppol)
     character(len=1000) :: message
     integer :: iun(nsppol)
     integer :: isppol, ikpt, iband, iwan, jband,  ii, jj
-
-
-    !TODO mv this to outside of this subroutine
-    !       do isppol = 1, nsppol
-    !           !if(w90iniprj==1) then
-    !            fname(isppol)= '.amn'
-    !           else
-    !            fname(isppol)= '.ramn'
-    !       end do
 
     ! below is copied/modified from m_mlwfovlp.F90
     do isppol=1,nsppol
@@ -319,7 +309,8 @@ contains
   end subroutine compute_and_write_unk
 
 
-  subroutine write_eigenvalues(filew90_eig,eigen, band_in,  eigenvalues_w,  nsppol, nkpt, mband,  dtset, rank, master )
+  subroutine write_eigenvalues(filew90_eig,eigen, band_in,  eigenvalues_w, &
+       & nsppol, nkpt, mband,  dtset, rank, master )
     integer, intent(in) ::  nsppol, nkpt, mband, rank, master
     logical, intent(in) :: band_in(:, :)
     real(dp), intent(in) :: eigen(:)
@@ -328,18 +319,14 @@ contains
     character(len=fnlen) :: filew90_eig(nsppol)
     integer :: iun(nsppol), isppol, band_index, iband, jband, nband_k, ikpt
     character(len=1000) :: message
-
-
     !  Assign file unit numbers
     if(rank==master) then
        do isppol=1,nsppol
-
           if (open_file(trim(filew90_eig(isppol)), message, newunit=iun(isppol), & 
                & form="formatted", status="unknown", action="write") /= 0) then
              ABI_ERROR(message)
           endif
        end do
-
     end if !rank==master
     !  Loop to write eigenvalues
     band_index=0
