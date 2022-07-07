@@ -353,7 +353,7 @@ subroutine hscr_from_file(hscr, path, fform, comm)
 
  ! Broadcast data.
  if (xmpi_comm_size(comm) > 1) then
-   call hscr_bcast(hscr,master,my_rank,comm)
+   call hscr%bcast(master, my_rank, comm)
    call xmpi_bcast(fform,master,comm,ierr)
  end if
 
@@ -482,7 +482,7 @@ subroutine hscr_io(hscr, fform, rdwr, unt, comm, master, iomode)
          ABI_BUG(sjoin('Wrong fform read:', itoa(fform)))
        end select
 
-     else if (iomode==IO_MODE_ETSF) then
+     else if (iomode == IO_MODE_ETSF) then
        ncid = unt
 
        select case (fform)
@@ -546,10 +546,10 @@ subroutine hscr_io(hscr, fform, rdwr, unt, comm, master, iomode)
 
    end if ! master
 
-   !call hscr_bcast(hscr, master, my_rank, comm)
+   !call hscr%bcast(master, my_rank, comm)
    !call hscr_mpio_skip(mpio_fh,fform,offset)
 
- else if (rdwr==2.or.rdwr==6) then
+ else if (rdwr == 2 .or. rdwr == 6) then
    ! Writing the header of an unformatted file.
    ! Always use the latest version.
 
@@ -804,9 +804,6 @@ subroutine hscr_print(Hscr, header, unit, prtvol, mode_paral)
    end do
  end if
 
-! HSCR_NEW
-! HSCR_NEW
-
  ! Echo the abinit header.
  !if (prtvol>0) call hdr_echo(hscr%hdr,fform,rdwr,unit=unt)
 
@@ -860,9 +857,9 @@ type(hscr_t) function hscr_new(varname,dtset,ep,hdr_abinit,ikxc,test_type,torder
 ! *************************************************************************
 
  !@hscr_t
- ABI_CHECK(ngvec==Ep%npwe,'ngvec/=Ep%npwe')
+ ABI_CHECK(ngvec == Ep%npwe, 'ngvec/=Ep%npwe')
 
- ! ID=Identifier used to define the type of Response function (e^-1, chi0)
+ ! Identifier used to define the type of Response function (e^-1, chi0)
  id = 0
  if (varname == "polarizability") id = 1
  if (varname == "inverse_dielectric_function") id = 4
@@ -875,7 +872,7 @@ type(hscr_t) function hscr_new(varname,dtset,ep,hdr_abinit,ikxc,test_type,torder
  end if
 
  ! Copy the abinit header.
- call hdr_copy(hdr_abinit,Hscr%Hdr)
+ call hdr_copy(hdr_abinit, Hscr%Hdr)
 
  ! Initialize quantities related to the screening file
  hscr%id         =id
@@ -968,8 +965,7 @@ subroutine hscr_bcast(hscr, master, my_rank, comm)
  DBG_ENTER("COLL")
  if (xmpi_comm_size(comm) == 1) return ! Nothing to do
 
- !@hscr_t
-! integer
+ ! integer
  call xmpi_bcast(hscr%id,         master,comm,ierr)
  call xmpi_bcast(hscr%ikxc,       master,comm,ierr)
  call xmpi_bcast(hscr%inclvkb,    master,comm,ierr)
@@ -996,9 +992,7 @@ subroutine hscr_bcast(hscr, master, my_rank, comm)
  ! arrays
  call xmpi_bcast(hscr%titles, master,comm,ierr)
 
- if (my_rank /= master) then
-   call hscr_malloc(hscr, hscr%npwe, hscr%nqibz, hscr%nomega, hscr%nqlwl)
- end if
+ if (my_rank /= master) call hscr_malloc(hscr, hscr%npwe, hscr%nqibz, hscr%nomega, hscr%nqlwl)
 
  call xmpi_bcast(hscr%gvec, master,comm,ierr)
  call xmpi_bcast(hscr%qibz, master,comm,ierr)
@@ -1008,7 +1002,7 @@ subroutine hscr_bcast(hscr, master, my_rank, comm)
  ! Communicate the Abinit header.
  call hscr%Hdr%bcast(master, my_rank, comm)
 
-! HSCR_NEW
+ ! HSCR_NEW
  call xmpi_bcast(hscr%awtr, master, comm, ierr)
  call xmpi_bcast(hscr%icutcoul, master, comm, ierr)
  call xmpi_bcast(hscr%vcutgeo, master, comm, ierr)
@@ -1016,7 +1010,7 @@ subroutine hscr_bcast(hscr, master, my_rank, comm)
  call xmpi_bcast(hscr%gwgamma, master, comm, ierr)
  call xmpi_bcast(hscr%gwencomp, master, comm, ierr)
  call xmpi_bcast(hscr%kind_cdata, master, comm, ierr)
-! HSCR_NEW
+ ! HSCR_NEW
 
  DBG_EXIT("COLL")
 
@@ -1087,17 +1081,12 @@ subroutine hscr_free(hscr)
 
 ! *************************************************************************
 
- !@hscr_t
- DBG_ENTER("COLL")
-
  ABI_SFREE(hscr%gvec)
  ABI_SFREE(hscr%qibz)
  ABI_SFREE(hscr%qlwl)
  ABI_SFREE(hscr%omega)
 
  call hscr%Hdr%free()
-
- DBG_EXIT("COLL")
 
 end subroutine hscr_free
 !!***
@@ -1572,8 +1561,8 @@ subroutine read_screening(varname,fname,npweA,nqibzA,nomegaA,epsm1,iomode,comm, 
  ! Do some check
  if (Hscr%npwe>npweA) then
    write(msg,'(a,i0,2a,i0)')&
-&    'Total number of G-vectors reported on file = ',Hscr%npwe,ch10,&
-&    'Reading a smaller matrix of dimension      = ',npweA
+    'Total number of G-vectors reported on file = ',Hscr%npwe,ch10,&
+    'Reading a smaller matrix of dimension      = ',npweA
    ABI_COMMENT(msg)
  end if
 
@@ -1734,14 +1723,10 @@ subroutine read_screening(varname,fname,npweA,nqibzA,nomegaA,epsm1,iomode,comm, 
  end select
 
  ! Free memory
- if (allocated(bufdc2d)) then
-   ABI_FREE(bufdc2d)
- end if
- if (allocated(bufdc3d)) then
-   ABI_FREE(bufdc3d)
- end if
+ ABI_SFREE(bufdc2d)
+ ABI_SFREE(bufdc3d)
 
- call hscr_free(Hscr)
+ call Hscr%free()
 
  DBG_EXIT("COLL")
 
@@ -2083,8 +2068,8 @@ subroutine ioscr_qrecover(ipath, nqrec, fname_out)
  end if
 
  ABI_FREE(epsm1)
- call hscr_free(hscr)
- call hscr_free(hscr_recov)
+ call hscr%free()
+ call hscr_recov%free()
 
  call wrtout(std_out, "Recovery completed")
 

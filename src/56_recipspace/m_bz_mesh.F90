@@ -2851,10 +2851,10 @@ subroutine littlegroup_print(Ltg,unit,prtvol,mode_paral)
  my_mode  ='COLL' ; if (PRESENT(mode_paral)) my_mode  =mode_paral
 
  write(msg,'(4a,3es16.8,2a,i5,a,i5,2a,i3,a,i3)')ch10,&
-&  ' ==== Little Group Info ==== ',ch10,&
-&  '  External point ',Ltg%ext_pt,ch10,&
-&  '  Number of points in the IBZ defined by little group  ',Ltg%nibz_Ltg,'/',Ltg%nbz,ch10,&
-&  '  Number of operations in the little group : ',Ltg%nsym_Ltg,'/',Ltg%nsym_sg
+  ' ==== Little Group Info ==== ',ch10,&
+  '  External point ',Ltg%ext_pt,ch10,&
+  '  Number of points in the IBZ defined by little group  ',Ltg%nibz_Ltg,'/',Ltg%nbz,ch10,&
+  '  Number of operations in the little group : ',Ltg%nsym_Ltg,'/',Ltg%nsym_sg
  call wrtout(my_unt,msg,my_mode)
 
  nop=0 ; nopg0=0

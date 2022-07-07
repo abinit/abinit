@@ -70,7 +70,7 @@ MODULE m_sigma
 
  type,public :: sigma_t
 
-  integer :: b1gw,b2gw      ! min and Max gw band indeces over spin and k-points (used to dimension arrays)
+  integer :: b1gw, b2gw     ! min and Max gw band indeces over spin and k-points (used to dimension arrays)
   integer :: gwcalctyp      ! Flag defining the calculation type.
   integer :: nkptgw         ! No. of points calculated
   integer :: nkibz          ! No. of irreducible k-points.
@@ -1062,7 +1062,7 @@ end subroutine sigma_init
 subroutine sigma_free(Sr)
 
 !Arguments ------------------------------------
- type(sigma_t),intent(inout) :: Sr
+ class(sigma_t),intent(inout) :: Sr
 
 ! *************************************************************************
 
@@ -1125,12 +1125,10 @@ end subroutine sigma_free
 !!
 !! SOURCE
 
-pure function sigma_get_exene(sigma,kmesh,bands) result(ex_energy)
+real(dp) pure function sigma_get_exene(sigma, kmesh, bands) result(ex_energy)
 
 !Arguments ------------------------------------
-!scalars
- real(dp) :: ex_energy
- type(sigma_t),intent(in) :: sigma
+ class(sigma_t),intent(in) :: sigma
  type(kmesh_t),intent(in) :: kmesh
  type(ebands_t),intent(in) :: bands
 
@@ -1178,12 +1176,10 @@ end function sigma_get_exene
 !!
 !! SOURCE
 
-pure function sigma_get_excene(sigma,kmesh,bands) result(exc_energy)
+real(dp) pure function sigma_get_excene(sigma, kmesh, bands) result(exc_energy)
 
 !Arguments ------------------------------------
-!scalars
- real(dp) :: exc_energy
- type(sigma_t),intent(in) :: sigma
+ class(sigma_t),intent(in) :: sigma
  type(kmesh_t),intent(in) :: kmesh
  type(ebands_t),intent(in) :: bands
 
@@ -1244,15 +1240,15 @@ end function sigma_get_excene
 !!
 !! SOURCE
 
-pure function mels_get_haene(sigma,Mels,kmesh,bands) result(eh_energy)
+real(dp) pure function mels_get_haene(sigma,Mels,kmesh,bands) result(eh_energy)
 
 !Arguments ------------------------------------
 !scalars
- real(dp) :: eh_energy
- type(sigma_t),intent(in) :: sigma
+ class(sigma_t),intent(in) :: sigma
  type(kmesh_t),intent(in) :: kmesh
  type(ebands_t),intent(in) :: bands
  type(melements_t),intent(in) :: Mels
+
 !Local variables-------------------------------
 !scalars
  integer :: ik,ib,spin
@@ -1306,15 +1302,15 @@ end function mels_get_haene
 !!
 !! SOURCE
 
-pure function mels_get_kiene(sigma,Mels,kmesh,bands) result(ek_energy)
+real(dp) pure function mels_get_kiene(sigma,Mels,kmesh,bands) result(ek_energy)
 
 !Arguments ------------------------------------
 !scalars
- real(dp) :: ek_energy
  type(sigma_t),intent(in) :: sigma
  type(kmesh_t),intent(in) :: kmesh
  type(ebands_t),intent(in) :: bands
  type(melements_t),intent(in) :: Mels
+
 !Local variables-------------------------------
 !scalars
  integer :: ik,ib,spin
