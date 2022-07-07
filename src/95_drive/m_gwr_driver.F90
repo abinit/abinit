@@ -63,21 +63,21 @@ module m_gwr_driver
  use m_pawfgr,          only : pawfgr_type, pawfgr_init, pawfgr_destroy
  use m_paw_pwaves_lmn,  only : paw_pwaves_lmn_t, paw_pwaves_lmn_init, paw_pwaves_lmn_free
  use m_pawpwij,         only : pawpwff_t, pawpwff_init, pawpwff_free
- use m_kg,            only : getph !, getcut
+ use m_kg,              only : getph !, getcut
  use m_pspini,          only : pspini
  use m_paw_correlations,only : pawpuxinit
- use m_paw_dmft,      only : paw_dmft_type
- use m_paw_sphharm,   only : setsym_ylm
- use m_paw_mkrho,     only : denfgr
- use m_paw_nhat,      only : nhatgrid, pawmknhat
- use m_paw_tools,     only : chkpawovlp, pawprt
- use m_paw_denpot,    only : pawdenpot
- use m_paw_init,      only : pawinit, paw_gencond
- use m_mkrho,         only : prtrhomxmn
- use m_melemts,       only : melflags_t !, melements_t
- use m_setvtr,        only : setvtr
- use m_vhxc_me,       only : calc_vhxc_me
- use m_gwr,           only : gwr_t
+ use m_paw_dmft,        only : paw_dmft_type
+ use m_paw_sphharm,     only : setsym_ylm
+ use m_paw_mkrho,       only : denfgr
+ use m_paw_nhat,        only : nhatgrid, pawmknhat
+ use m_paw_tools,       only : chkpawovlp, pawprt
+ use m_paw_denpot,      only : pawdenpot
+ use m_paw_init,        only : pawinit, paw_gencond
+ use m_mkrho,           only : prtrhomxmn
+ use m_melemts,         only : melflags_t !, melements_t
+ use m_setvtr,          only : setvtr
+ use m_vhxc_me,         only : calc_vhxc_me
+ use m_gwr,             only : gwr_t
  !use m_ephtk,          only : ephtk_update_ebands
 
  implicit none

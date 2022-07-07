@@ -326,6 +326,11 @@ subroutine solve_dyson(ikcalc,minbnd,maxbnd,nomega_sigc,Sigp,Kmesh,sigcme_tmp,qp
         Sr%ze0(jb,sk_ibz,1)=one/(one-SUM(Sr%dsigmee0(jb,sk_ibz,:)))
       end if
 
+      ! MG FIXME: Here we are solving the non-linear QP equation using the Pade' continuation + root finding
+      ! but this is very misleading because in the output file we are still reporting the Z factor
+      ! and there's no mention that the QP energies have been obtained from the non-linear equation!!
+      ! One should change the format used to print the results or at least warn the user!
+
       ! Find roots of E^0-V_xc-V_U+Sig_x+Sig_c(z)-z, i.e E^qp.
       ! using Newton-Raphson method and starting point E^0
       zz=CMPLX(Sr%e0(jb,sk_ibz,spin),zero)
