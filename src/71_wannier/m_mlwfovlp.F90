@@ -62,6 +62,7 @@ module m_mlwfovlp
  use m_paw_overlap, only : smatrix_pawinit
  use m_evdw_wannier, only : evdw_wannier
  use m_fft,            only : fourwf
+ use m_wannier_io,   only: write_eigenvalues, write_Amn, compute_and_write_unk
 
 
  implicit none
@@ -350,44 +351,10 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
  if(leig) then
-!
-!  Assign file unit numbers
-   if(rank==master) then
-     iun(1)=444
-     if(nsppol==2) iun(2)=455
-     do isppol=1,nsppol
-       open(unit=iun(isppol),file=filew90_eig(isppol),form='formatted',status='unknown')
-     end do
-   end if !rank==master
-!  Loop to write eigenvalues
-   band_index=0
-   do isppol=1,nsppol
-     do ikpt=1,nkpt
-       nband_k=dtset%nband(ikpt+(isppol-1)*nkpt)
-       jband=0
-       do iband=1,mband
-         if(band_in(iband,isppol)) then
-           jband=jband+1
-!          Writing data
-           if(rank==master) write(iun(isppol), '(2i6,4x,f10.5)' ) jband,ikpt,Ha_eV*eigen(iband+band_index)
-!          Finish writing, now save eigenvalues
-           eigenvalues_w(jband,ikpt,isppol)=Ha_eV*eigen(iband+band_index)
-         end if
-       end do !iband
-       band_index=band_index+nband_k
-     end do !ikpt
-   end do  !nsppol
-   if(rank==master) then
-     do isppol=1,nsppol
-       close(iun(isppol))
-     end do
-     write(message, '(a,a)' ) ch10,&
-&     '   mlwfovlp :  eigenvalues written'
-     call wrtout(std_out,  message,'COLL')
-   end if !master
+    call write_eigenvalues(filew90_eig,eigen, band_in,  eigenvalues_w, &
+         &  nsppol, nkpt, mband,  dtset, rank, master )
  end if !leig
-!else if( leig . and. lwannierun) then
-!read .eig file
+
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !4) Calculate overlaps (file seed_name.mmn)
@@ -818,6 +785,13 @@ contains
 !
 !  write      projections  to a file
 !
+   !if(rank==master) then
+      !if(dtset%w90iniprj==1) then
+      !   call write_Amn(A_matrix, filew90_amn, nsppol, mband, nkpt, num_bands, nwan, band_in)
+      !else
+      !   call write_Amn(A_matrix, filew90_ramn, nsppol, mband, nkpt, num_bands, nwan, band_in)
+      !end if
+   !end if
 
 ! TODO  hexu: replace this with subroutine call
    if(rank==master) then
