@@ -785,125 +785,14 @@ contains
 !
 !  write      projections  to a file
 !
-   !if(rank==master) then
-      !if(dtset%w90iniprj==1) then
-      !   call write_Amn(A_matrix, filew90_amn, nsppol, mband, nkpt, num_bands, nwan, band_in)
-      !else
-      !   call write_Amn(A_matrix, filew90_ramn, nsppol, mband, nkpt, num_bands, nwan, band_in)
-      !end if
-   !end if
-
-! TODO  hexu: replace this with subroutine call
    if(rank==master) then
-     if(dtset%w90iniprj==1) then
-       do isppol=1,nsppol
-         iun(isppol)=219+isppol
-         open(unit=iun(isppol),file=trim(filew90_ramn(isppol)),form='formatted',status='unknown')
-         write(iun(isppol),*) 'Projections from Abinit : mband,nkpt,nwan. indices: iband1,iwan,ikpt'
-         write(iun(isppol),*) num_bands(isppol),nkpt,nwan(isppol)
-       end do
-     else
-       do isppol=1,nsppol
-         iun(isppol)=220+isppol
-         open(unit=iun(isppol),file=trim(filew90_amn(isppol)),form='formatted',status='unknown')
-         write(iun(isppol),*) 'Projections from Abinit : mband,nkpt,nwan. indices: iband1,iwan,ikpt'
-         write(iun(isppol),*) num_bands(isppol),nkpt,nwan(isppol)
-       end do
-     end if
+      if(dtset%w90iniprj==1) then
+         call write_Amn(A_matrix, filew90_amn, nsppol, mband, nkpt, num_bands, nwan, band_in)
+      else
+         call write_Amn(A_matrix, filew90_ramn, nsppol, mband, nkpt, num_bands, nwan, band_in)
+      end if
+   end if
 
-     do isppol=1,nsppol
-       do ikpt=1,nkpt
-         do iwan=1,nwan(isppol)
-           jband=0
-           do iband=1,mband
-             if(band_in(iband,isppol)) then
-               jband=jband+1
-               write(iun(isppol),'(3i6,13x,3x,2f18.14)')jband,iwan,ikpt,A_matrix(jband,iwan,ikpt,isppol)
-             end if !band_in
-           end do !iband
-         end do !iwan
-       end do !ikpt
-     end do !isppol
-!
-     if(dtset%w90iniprj==1) then
-       do isppol=1,nsppol
-         close(iun(isppol))
-         write(message, '(3a)' ) &
-&         '   ',trim(filew90_ramn(isppol)),' written'
-         call wrtout(std_out,  message,'COLL')
-       end do
-     else
-       do isppol=1,nsppol
-         close(iun(isppol))
-         write(message, '(3a)' ) &
-&         '   ',trim(filew90_amn(isppol)),' written'
-         call wrtout(std_out,  message,'COLL')
-       end do
-     end if
-   end if !rank==master
-
-!
-!
-!  Write down part of the matrix to the output file
-!  This is for the automatic tests
-!
-   if(rank==master) then
-     write(message, '(4a)' ) ch10,&
-&     '   Writing top of the initial projections matrix: A_mn(ik)',ch10,&
-&     '   m=1:3, n=1:3, ik=1'
-     call wrtout(ab_out,message,'COLL')
-     call wrtout(std_out,  message,'COLL')
-!
-!    just write down the first 3 elements
-!
-     do isppol=1,nsppol
-       write(message, '( " " )')
-       if (nsppol>1 ) then
-         if (isppol==1) write(message,'(2a)')trim(message),'   spin up:'
-         if (isppol==2) write(message,'(2a)')trim(message),'   spin down:'
-       end if
-       do ii=1,3
-         if(ii>num_bands(isppol)) cycle
-         write(message,'(3a)') trim(message),ch10,';   ( '
-         do jj=1,3
-           if(jj>nwan(isppol))cycle
-           write(message, '(a,2f11.6,a)') trim(message),&
-&           A_matrix(ii,jj,1,isppol),' , '
-         end do
-         write(message,'(2a)') trim(message),'    ) '
-       end do
-       call wrtout(ab_out,message,'COLL')
-       call wrtout(std_out,  message,'COLL')
-     end do
-!
-!    Now write down bottom of the matrix
-!
-     write(message, '(4a)' ) ch10,&
-&     '   Writing bottom of the initial projections matrix: A_mn(ik)',ch10,&
-&     '   m=num_bands-2:num_bands, n=nwan-2:nwan, ik=nkpt'
-     call wrtout(ab_out,message,'COLL')
-     call wrtout(std_out,  message,'COLL')
-!
-     do isppol=1,nsppol
-       write(message, '( " " )')
-       if (nsppol>1 ) then
-         if (isppol==1) write(message,'(2a)')trim(message),'   spin up:'
-         if (isppol==2) write(message,'(2a)')trim(message),'   spin down:'
-       end if
-       do ii=num_bands(isppol)-2,num_bands(isppol)
-         if(ii<1) cycle
-         write(message,'(3a)') trim(message),ch10,';   ( '
-         do jj=nwan(isppol)-2,nwan(isppol)
-           if(jj<1)cycle
-           write(message, '(a,2f11.6,a)') trim(message),&
-&           A_matrix(ii,jj,nkpt,isppol),' , '
-         end do
-         write(message,'(2a)') trim(message),'    ) '
-       end do
-       call wrtout(ab_out,message,'COLL')
-       call wrtout(std_out,  message,'COLL')
-     end do !isppol
-   end if !rank==master
  end if !dtset%w90iniprj/=0
 !
 !Deallocations
