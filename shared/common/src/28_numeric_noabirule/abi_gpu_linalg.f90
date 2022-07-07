@@ -202,6 +202,39 @@ subroutine gpu_memset(gpu_ptr, val, size)
 end subroutine gpu_memset
 !!***
 
+!!****f* m_abi_gpu_linalg/gpu_allocated_impl
+!! NAME
+!!  gpu_allocated_impl
+!!
+!! FUNCTION
+!!  Check if pointer points to allocated gpu device memory.
+!!
+!! INPUTS
+!!  gpu_ptr= C_PTR on gpu memory location
+!!
+!! OUTPUT
+!!  is_allocate= logical(c_bool) : true (if allocated), false (if not allocated)
+!!
+!! SIDE EFFECTS
+!!   WARNING! : this routine is a dummy one when HAVE_GPU_CUDA is not enabled
+!!   the correct one is in 17_gpu_toolbox/dev_spec.cu
+!!
+!! PARENTS
+!!      lobpcgwf
+!!
+!! SOURCE
+
+subroutine gpu_allocated_impl(gpu_ptr, is_allocated)
+
+  !Arguments ------------------------------------
+  type(c_ptr),                    intent(in)  :: gpu_ptr
+  logical(kind=c_bool)            intent(out) :: is_allocated = .false.
+
+  ABI_UNUSED(/gpu_ptr/)
+
+end subroutine gpu_allocated_impl
+!!***
+
 !!****f* m_abi_gpu_linalg/gpu_linalg_init
 !! NAME
 !!  gpu_linalg_init

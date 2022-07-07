@@ -250,6 +250,19 @@ module m_abi_linalg
       integer(kind=c_int32_t), value, intent(in)    :: size
     end subroutine gpu_memset
 
+    ! logical(kind=c_bool) function gpu_allocated(gpu_ptr) bind(c, name="gpu_allocated_")
+    !   use, intrinsic :: iso_c_binding
+    !   implicit none
+    !   type(c_ptr),                    intent(in) :: gpu_ptr
+    ! end function gpu_allocated
+
+    subroutine gpu_allocated_impl(gpu_ptr, is_allocated) bind(c, name="gpu_allocated_impl_")
+      use, intrinsic :: iso_c_binding
+      implicit none
+      type(c_ptr),                    intent(in)  :: gpu_ptr
+      logical(kind=c_bool),           intent(out) :: is_allocated
+    end subroutine gpu_allocated_impl
+
   end interface
 
 #else
@@ -259,6 +272,7 @@ module m_abi_linalg
  public :: copy_on_gpu
  public :: dealloc_on_gpu
  public :: gpu_memset
+ public :: gpu_allocated_cuda
  public :: gpu_linalg_init
  public :: gpu_linalg_shutdown
  public :: gpu_xgemm
@@ -266,6 +280,8 @@ module m_abi_linalg
  public :: gpu_xaxpy
  public :: gpu_xscal
 #endif
+
+ public :: gpu_allocated
 
  public :: gpu_xorthonormalize
 
@@ -1029,6 +1045,20 @@ end function jobz_plasma
 !!***
 
 #endif
+
+!!
+!! this is just a wrapper arround gpu_allocated_cuda, because (strangely)
+!! I can't manage to bind a function (not a subroutine) through iso_c_binding
+!!
+function gpu_allocated(gpu_ptr) result(is_allocated)
+
+  !Arguments ------------------------------------
+  type(c_ptr),                    intent(in) :: gpu_ptr
+  logical(kind=c_bool)                       :: is_allocated
+
+  call gpu_allocated_impl(gpu_ptr, is_allocated)
+
+end function gpu_allocated
 
 ! Include files providing wrappers for some of the most commonly used BLAS & LAPACK routines
 
