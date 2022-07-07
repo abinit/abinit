@@ -10,6 +10,7 @@
 
 #include <stdio.h>
 #include <abi_gpu_header_common.h>
+#include "cuda_api_error_check.h"
 
 static __host__ int version_2_cores(int major, int minor);
 
@@ -347,3 +348,33 @@ extern "C" void gpu_memset_(void **gpu_ptr, int value, size_t count){
     abi_cabort();
   }
 }
+
+/*============================================================================*/
+/* Kind of equivalent of fortran "allocated". Check if a gpu pointer          */
+/* actually points to device allocated memory.                                */
+/*                                                                            */
+/* This is void function becaus I can't manage to bind it via iso_c_binding   */
+/* as a fortran function; binding as a subroutine is ok though (?!)           */
+/*                                                                            */
+/* INPUTS                                                                     */
+/*  gpu_ptr = C_PTR on gpu memory location                                    */
+/*                                                                            */
+/* OUTPUT                                                                     */
+/*  boolean/logical (false = not allocated, true = allocated)                 */
+/*============================================================================*/
+
+extern "C" void gpu_allocated_impl_(void **gpu_ptr, bool* is_allocated)
+{
+
+  *is_allocated = false;
+
+  cudaPointerAttributes attributes;
+
+  CHECK_CUDA_ERROR(cudaPointerGetAttributes(&attributes, *gpu_ptr));
+
+  if(attributes.devicePointer != NULL)
+  {
+    *is_allocated = true;
+  }
+
+} // gpu_allocated_impl_
