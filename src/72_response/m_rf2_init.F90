@@ -417,7 +417,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
    ! define dkdk factors
    antisym_factor = one
    total_factor = one
-   if (total) total_factor = two
+   if (total) total_factor = one !two
 
    ! define zero factors instead of exiting the loop: we need to compute dsusdu
    if (antisymmetric .and. rf2%ndir==1) antisym_factor = zero
@@ -671,15 +671,21 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
              ipert2 = natom+2
            end if
            call rf2_getidirs(idir,idir1,idir2)
+           !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+           total_factor = one
+           if (total) total_factor = half
+           !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
            call rf2_accumulate_bands(rf2,3,gs_hamkq,mpi_enreg,iband,idir1,idir2,ipert1,ipert2,&
-           jband,debug_mode,cwave_i,h_cwave,s_cwave,one)
+           jband,debug_mode,cwave_i,h_cwave,s_cwave,total_factor)
          end if
        end do
 
 !      Add d^2H/(dk_dir1 dk_dir2)|u^(0)> to RHS_Stern :
        if (gs_hamkq%usepaw==1) h_cwave(:,:)=h_cwave(:,:)-eig0_k(jband)*s_cwave(:,:) ! if PAW : we add H^(2)-eps^(0) S^(2)
        rhs_j => rf2%RHS_Stern(:,1+shift_band1:size_wf+shift_band1)
-       call cg_zaxpy(size_wf,(/one,zero/),h_cwave,rhs_j)
+       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+       call cg_zaxpy(size_wf,(/total_factor,zero/),h_cwave,rhs_j)
+       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
      end if ! empty band test
    end do ! jband
@@ -689,7 +695,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
  ! define dkdk factors
  antisym_factor = one
  total_factor = one
- if (total) total_factor = two
+ if (total) total_factor = one !two
 
 !Computation of terms containing H^(1)
  do kdir1=1,rf2%ndir
