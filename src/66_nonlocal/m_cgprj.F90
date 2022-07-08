@@ -474,7 +474,7 @@ contains
  type(MPI_type),intent(in) :: mpi_enreg
  type(pseudopotential_type),target,intent(in) :: psps
 !arrays
- integer,intent(in) :: istwfk(nkpt),nband(nkpt*nsppol)
+ integer,intent(in) :: istwfk(nkpt),nband(:)
  integer,intent(in) :: ngfft(18),nloalg(3),npwarr(nkpt),kg(3,mpw*mkmem),typat(natom)
  integer,intent(in),target :: atindx(natom),nattyp(ntypat)
  real(dp),intent(in) :: cg(2,mcg)
@@ -488,8 +488,8 @@ contains
  integer :: blocksz,cg_bandpp,counter,cpopt,cprj_bandpp,dimffnl,ia,iatm,iatom1,iatom2
  integer :: iband_max,iband_min,iband_start,ibg,ibgb,iblockbd,ibp,icg,icgb,icp1,icp2
  integer :: ider,idir0,iend,ierr,ig,ii,ikg,ikpt,ilm,ipw,isize,isppol,istart,istwf_k,itypat,iwf1,iwf2,jdir
- integer :: matblk,mband_cprj,me_distrb,my_nspinor,n1,n1_2p1,n2,n2_2p1,n3,n3_2p1,kk,nlmn
- integer :: mband_cg, npband_dfpt
+ integer :: matblk,me_distrb,my_nspinor,n1,n1_2p1,n2,n2_2p1,n3,n3_2p1,kk,nlmn
+ integer :: mband,mband_cg,mband_cprj,npband_dfpt,my_nsppol,my_nsppol_cprj
  integer :: nband_k,nband_cprj_k,nblockbd,ncpgr,nkpg,npband_bandfft,npws,npw_k,npw_nk,ntypat0
  integer :: nband_cg_k
  integer :: shift1,shift1b,shift2,shift2b,shift3,shift3b
@@ -552,7 +552,8 @@ contains
    cprj_bandpp=mpi_enreg%bandpp
    spaceComm_band=mpi_enreg%comm_band
    cg_band_distributed=.true.
-   cprj_band_distributed=(mcprj/=mcg/mpw)
+   cprj_band_distributed=(mpi_enreg%nproc_band>1)
+   npband_dfpt=1
  else
    me_distrb=mpi_enreg%me_kpt
    spaceComm=mpi_enreg%comm_cell
@@ -560,24 +561,44 @@ contains
    npband_bandfft=1
    cg_bandpp=1
    cprj_bandpp=1
-   cg_band_distributed=.false.
-   cprj_band_distributed=.false.
-   spaceComm_band=xmpi_comm_self
-
    if (mpi_enreg%paralbd==1) then
+     spaceComm_band=mpi_enreg%comm_band ! not actually used as npband_bandfft=1
      cg_band_distributed=.true.
      cprj_band_distributed=.true.
-     spaceComm_band=mpi_enreg%comm_band ! not actually used as npband_bandfft=1
-     npband_dfpt=mpi_enreg%nproc_band
+     npband_dfpt=1
+   else
+     spaceComm_band=xmpi_comm_self
+     cg_band_distributed=.false.
+     cprj_band_distributed=.false.
    end if
  end if
  if (cg_bandpp/=cprj_bandpp) then
-   ABI_BUG('cg_bandpp must be equal to cprj_bandpp !')
+   ABI_BUG('cg_bandpp must be equal to cprj_bandpp!')
  end if
+
+!Manage parallelization over spins
+ my_nsppol=size(nband)/size(istwfk)
+ if (my_nsppol/=1.and.my_nsppol/=2) then
+   ABI_BUG('Impossible to determine My_nsppol!')
+ end if
+
+!Manage parallelization over bands
+ mband=maxval(nband(1:nkpt*my_nsppol))
+ mband_cg=mband/npband_bandfft/npband_dfpt
+ mband_cprj=mband_cg
 
 !Manage parallelization over spinors
  my_nspinor=max(1,nspinor/mpi_enreg%nproc_spinor)
-!Check sizes for cprj (distribution is tricky)
+
+!Check sizes
+ if (mpw*mband_cg*my_nspinor*mkmem*my_nsppol>mcg) then
+   ABI_BUG('Bad mcg value!')
+ end if
+ if (mband_cprj*my_nspinor*mkmem*my_nsppol>mcprj) then
+   ABI_BUG('Bad mcprj value!')
+ end if
+
+ !Check sizes for cprj (distribution is tricky)
  one_atom=(iatom>0)
  if (one_atom.and.ncprj/=1) then
    ABI_BUG('Bad value for ncprj dimension (should be 1) !')
@@ -587,8 +608,6 @@ contains
  end if
 
 !Initialize some variables
- mband_cprj=mcprj/(my_nspinor*mkmem*nsppol)
- mband_cg=mcg/(mpw*my_nspinor*mkmem*nsppol)
  n1=ngfft(1);n2=ngfft(2);n3=ngfft(3)
  n1_2p1=2*n1+1;n2_2p1=2*n2+1;n3_2p1=2*n3+1
  ibg=0;icg=0;cpopt=0
@@ -705,7 +724,7 @@ contains
  call pawcprj_set_zero(cprj)
 
 !LOOP OVER SPINS
- do isppol=1,nsppol
+ do isppol=1,my_nsppol
    ikg=0
 
 !  BIG FAT k POINT LOOP
