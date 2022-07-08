@@ -247,7 +247,7 @@ contains
           !iun_plot=1000+ikpt+ikpt*(isppol-1)
           write(wfnname,'("UNK",I5.5,".",I1)') ikpt, isppol
           if (open_file(trim(wfnname), message, newunit=iun_plot, &
-               & form="formatted", status="unknown", action="write") /= 0) then
+               & form="unformatted", status="unknown", action="write") /= 0) then
              ABI_ERROR(message)
           endif
 
