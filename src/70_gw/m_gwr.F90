@@ -114,6 +114,7 @@ module m_gwr
  use m_dtfil
  use m_yaml
  use m_sigtk
+ use iso_c_binding
 
  use defs_datatypes,  only : pseudopotential_type, ebands_t
  use defs_abitypes,   only : mpi_type
@@ -265,6 +266,7 @@ module m_gwr
 
   integer :: nkcalc
    ! Number of Sigma_nk k-points computed
+   ! TODO: Should be spin dependent + max_nkcalc
 
   integer :: max_nbcalc
    ! Maximum number of bands computed (max over nkcalc and spin).
@@ -524,7 +526,8 @@ module m_gwr
 
    procedure :: run_g0w0 => gwr_run_g0w0
 
-   procedure :: ncwrite_chi_scr => gwr_ncwrite_tchi_scr
+   procedure :: ncwrite_tchi_wc => gwr_ncwrite_tchi_wc
+   !procedure :: ncread_tchi_wc => gwr_ncread_tchi_wc
 
  end type gwr_t
 !!***
@@ -1167,8 +1170,8 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
 
    ! Add dimensions.
    !ncerr = nctk_def_dims(ncid, [ &
-   !  nctkdim_t("nkcalc", gwr%nkcalc), nctkdim_t("max_nbcalc", gwr%max_nbcalc), &
-   !  nctkdim_t("nsppol", gwr%nsppol), nctkdim_t("ntemp", gwr%ntemp), nctkdim_t("natom3", 3 * cryst%natom), &
+   !  nctkdim_t("nsppol", gwr%nsppol), &
+   !  !nctkdim_t("nkcalc", gwr%nkcalc), nctkdim_t("max_nbcalc", gwr%max_nbcalc), &
    !  nctkdim_t("nqibz", gwr%nqibz), nctkdim_t("nqbz", gwr%nqbz)], &
    !  defmode=.True.)
    !NCF_CHECK(ncerr)
@@ -2603,6 +2606,14 @@ subroutine gwr_build_tchi(gwr)
  ! Also sum over spins to get total tchi if collinear spin.
  call gwr%cos_transform("tchi", "it2w", sum_spins=.True.)
 
+ call gwr%ncwrite_tchi_wc("tchi", "foo.nc")
+
+ ! When reading, we have to perform consistency checks handle possible difference in:
+ !   - input ecuteps and the value found on disk
+ ! Changing q-mesh or time/imaginary mesh is not possible.
+
+ !call gwr%ncread_tchi_wc("tchi", "foo.nc")
+
  call cwtime_report(" gwr_build_tchi:", cpu_all, wall_all, gflops_all)
 
 end subroutine gwr_build_tchi
@@ -3141,15 +3152,16 @@ subroutine gwr_run_g0w0(gwr)
  call gwr%build_tchi()
  call gwr%build_wc()
  call gwr%build_sigmac()
+ call xmpi_barrier(gwr%comm)
 
 end subroutine gwr_run_g0w0
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_gwr/gwr_ncwrite_tchi_scr
+!!****f* m_gwr/gwr_ncwrite_tchi_wc
 !! NAME
-!!  gwr_ncwrite_tchi_scr
+!!  gwr_ncwrite_tchi_wc
 !!
 !! FUNCTION
 !!
@@ -3163,7 +3175,7 @@ end subroutine gwr_run_g0w0
 !!
 !! SOURCE
 
-subroutine gwr_ncwrite_tchi_scr(gwr, what, filepath)
+subroutine gwr_ncwrite_tchi_wc(gwr, what, filepath)
 
 !Arguments ------------------------------------
  class(gwr_t),target,intent(in) :: gwr
@@ -3172,8 +3184,13 @@ subroutine gwr_ncwrite_tchi_scr(gwr, what, filepath)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0
- integer :: my_is, my_iqi, my_it, spin, iq_ibz, itau
+ integer :: my_is, my_iqi, my_it, spin, iq_ibz, itau, npwtot_q, my_ncols, my_gcol_start
+ integer :: all_nproc, my_rank, ncid, ncerr, mats_id, ierr
+ real(dp) :: cpu, wall, gflops
+ type(c_ptr) :: cptr
 !arrays
+ integer :: dist_qibz(gwr%nqibz)
+ real(dp),ABI_CONTIGUOUS pointer :: fptr(:,:,:)
  type(matrix_scalapack), pointer :: mats(:)
 
 ! *************************************************************************
@@ -3182,27 +3199,87 @@ subroutine gwr_ncwrite_tchi_scr(gwr, what, filepath)
  ! 1) hscr_new requires ep%
  ! 2) file format assumes Gamma-centered gvectors.
 
- call wrtout(std_out, sjoin(" Writing", what, " to:", filepath))
+ all_nproc = xmpi_comm_size(gwr%comm); my_rank = xmpi_comm_rank(gwr%comm)
+ call cwtime(cpu, wall, gflops, "start")
+
+ if (my_rank == master) then
+   call wrtout(std_out, sjoin(" Writing", what, " to:", filepath))
+   NCF_CHECK(nctk_open_create(ncid, filepath, xmpi_comm_self))
+   NCF_CHECK(gwr%cryst%ncwrite(ncid))
+
+   ! Add dimensions.
+   ncerr = nctk_def_dims(ncid, [ &
+     nctkdim_t("nsppol", gwr%nsppol), nctkdim_t("mpw", gwr%tchi_mpw), nctkdim_t("ntau", gwr%ntau), &
+     nctkdim_t("nqibz", gwr%nqibz), nctkdim_t("nqbz", gwr%nqbz)], &
+     defmode=.True.)
+   NCF_CHECK(ncerr)
+
+   ! TODO: Add metadata for mats: gvec(q), spin sum, vc cutoff, handle nspinor 2
+
+   ! Define arrays with results.
+   ncerr = nctk_def_arrays(ncid, [ &
+     nctkarr_t("ngqpt", "int", "three"), &
+     nctkarr_t("mats", "dp", "two, mpw, mpw, ntau, nqibz, nsppol") &
+   ])
+   NCF_CHECK(ncerr)
+
+   NCF_CHECK(nf90_close(ncid))
+ end if
+
+ call xmpi_barrier(gwr%comm)
+
+ ! The same q-point in the IBZ might be stored on different pools.
+ ! To avoid writing the same array multiple times, we used dist_qibz
+ ! to select the procs in gwr%kpt_comm who are gonna write each iq_ibz.
+ dist_qibz = huge(1)
+ do my_iqi=1,gwr%my_nqibz
+   iq_ibz = gwr%my_qibz_inds(my_iqi)
+   dist_qibz(iq_ibz) = gwr%kpt_comm%me
+ end do
+ call xmpi_min_ip(dist_qibz, gwr%kpt_comm%value, ierr)
+ ABI_CHECK(all(dist_qibz /= huge(1)), "Wrong distribution of qibz points in gwr%kpt_comm")
+
+ ! Reopen the file in gwr%comm.
+ NCF_CHECK(nctk_open_modify(ncid, filepath, gwr%comm))
+ mats_id = nctk_idname(ncid, "mats")
 
  do my_is=1,gwr%my_nspins
    spin = gwr%my_spins(my_is)
    do my_iqi=1,gwr%my_nqibz
      iq_ibz = gwr%my_qibz_inds(my_iqi)
+     if (dist_qibz(iq_ibz) /= gwr%kpt_comm%me) cycle
+
      associate (desc_q => gwr%tchi_desc_qibz(iq_ibz))
+     npwtot_q = desc_q%npw
+
      mats => null()
      if (what == "tchi") mats => gwr%tchi_qibz(iq_ibz, :, spin)
      if (what == "wc")   mats => gwr%wc_qibz(iq_ibz, :, spin)
      ABI_CHECK(associated(mats), sjoin("Invalid value for what:", what))
+
      do my_it=1,gwr%my_ntau
        itau = gwr%my_itaus(my_it)
-       !mats(itau)%buffer_cplx(:,:)
-       !NCF_CHECK(nf90_put_var(ncid, vid("gstore_with_vk"), gstore%with_vk))
+
+       ! NB: Assuming matrix is distributed in contigous blocks along the column index.
+       my_ncols = mats(itau)%sizeb_local(2)
+       my_gcol_start = mats(itau)%loc2gcol(1)
+       cptr = c_loc(mats(itau)%buffer_cplx)
+       call c_f_pointer(cptr, fptr, shape=[2, npwtot_q, my_ncols])
+
+       ncerr = nf90_put_var(ncid, mats_id, fptr, &
+                            start=[1, 1, my_gcol_start, itau, iq_ibz, spin], &
+                            count=[2, npwtot_q, my_ncols, 1, 1, 1])
+       NCF_CHECK(ncerr)
      end do
      end associate
    end do ! my_iqi
  end do ! my_is
 
-end subroutine gwr_ncwrite_tchi_scr
+ NCF_CHECK(nf90_close(ncid))
+
+ call cwtime_report(" gwr_ncwrite_tchi_wc:", cpu, wall, gflops)
+
+end subroutine gwr_ncwrite_tchi_wc
 !!***
 
 !----------------------------------------------------------------------
@@ -3212,7 +3289,7 @@ end subroutine gwr_ncwrite_tchi_scr
 !! gsph2box
 !!
 !! FUNCTION
-!! Insert cg_k array defined on the k-centered g-sphere with npw points inside supercell FFT box.
+!! Insert cg_k array defined on the k-centered g-sphere with npw points inside the FFT box.
 !!
 !! INPUTS
 !! ngfft:
@@ -3273,7 +3350,7 @@ end subroutine gsph2box
 !! box2gsph
 !!
 !! FUNCTION
-!! Extract cg_k array defined on the k-centered g-sphere with npw points from the supercell FFT box.
+!! Extract cg_k array defined on the k-centered g-sphere with npw points from the FFT box.
 !!
 !! INPUTS
 !! ngfft:
