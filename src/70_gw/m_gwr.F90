@@ -144,6 +144,8 @@ module m_gwr
  use m_pawrhoij,      only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy, pawrhoij_free, &
                              pawrhoij_inquire_dim, pawrhoij_symrhoij, pawrhoij_unpack
 
+ use mp2_grids,      only : get_minimax_grid
+
  implicit none
 
  private
@@ -596,6 +598,12 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  real(dp),allocatable :: wtk(:), kibz(:,:)
  logical :: periods(ndims), keepdim(ndims)
 
+ real(dp), allocatable :: tau_tj, tau_wj(:)
+ real(dp), allocatable :: tj(:), wj(:)
+ real(dp), allocatable :: weights_cos_tf_t_to_w(:,:), weights_cos_tf_w_to_t(:,:), weights_sin_tf_t_to_w(:,:)
+ !real(dp), INTENT(IN), OPTIONAL :: a_scaling
+ !real(dp), INTENT(OUT), OPTIONAL :: e_fermi
+
 ! *************************************************************************
 
  all_nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
@@ -702,6 +710,13 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  ABI_MALLOC(gwr%t2w_sin_wgs, (gwr%ntau, gwr%ntau))
  gwr%t2w_cos_wgs = one
  gwr%t2w_sin_wgs = one
+
+ !call get_minimax_grid(gwr%ntau, &
+ !                      tau_tj=tau_tj,
+ !                      tau_wj=tau_wj, tj=tj, wj=wj,
+ !                      weights_cos_tf_t_to_w, &
+ !                      weights_cos_tf_w_to_t,
+ !                      weights_sin_tf_t_to_w, ounit=std_out)
 
  ! ==========================
  ! Setup k-points in Sigma_nk
