@@ -1827,7 +1827,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            ! Compute v_kq
            ! If k+q is not in the IBZ, we need to recostruct the value by symmetry using v(Sq) = S v(q).
            ! Use transpose(R) because we are using the tables for the wavefunctions
-           ! In this case listkk has been called with symrec and use_symrec=False
+           ! In this case listkk has been called with symrel and use_symrec=False
            ! so q_bz = S^T q_ibz where S is the isym_kq symmetry
            vkq = vcar_ibz(:, ibsum_kq, ikq_ibz, spin)
            if (.not. isirr_kq) then

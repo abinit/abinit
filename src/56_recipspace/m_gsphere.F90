@@ -247,9 +247,9 @@ subroutine setup_G_rotation(nsym,symrec,timrev,npw,gvec,g2sh,nsh,shlim,grottb,gr
        end do
        if (.not.found) then
          write(msg,'(3a,i5,a,i5,1x,2(3i5,a),a,i3,a,i3)')&
-&         'G-shell not closed',ch10,&
-&         '  Initial G vector ',ig1,'/',npw,gbase(:),' Rotated G vector ',grot(:),ch10,&
-&         '  Through sym ',isym,' and itim ',itim
+          'G-shell not closed',ch10,&
+          '  Initial G vector ',ig1,'/',npw,gbase(:),' Rotated G vector ',grot(:),ch10,&
+          '  Through sym ',isym,' and itim ',itim
          ABI_ERROR(msg)
        end if
      end do
