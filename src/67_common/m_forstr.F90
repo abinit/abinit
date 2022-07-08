@@ -74,6 +74,7 @@ module m_forstr
  use m_psolver,          only : psolver_hartree
  use m_wvl_psi,          only : wvl_nl_gradient
  use m_fft,              only : fourdp
+ use iso_c_binding,      only : c_loc,c_f_pointer
 
  implicit none
 
@@ -315,12 +316,12 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
  real(dp) ::dum,dum1,ucvol_
  logical :: apply_residual
 !arrays
+ integer, ABI_CONTIGUOUS pointer :: nbandocc_bz(:)
  real(dp),parameter :: k0(3)=(/zero,zero,zero/)
  real(dp) :: kinstr(6),nlstr(6),tsec(2),strdum(6),gmet(3,3),gprimd(3,3),rmet(3,3)
  real(dp) :: dummy(0)
  real(dp),allocatable :: grnl(:),vlocal(:,:),vxc_hf(:,:),xcart(:,:),ylmbz(:,:),ylmgrbz(:,:,:)
  real(dp), ABI_CONTIGUOUS pointer :: resid(:,:)
-
 
 ! *************************************************************************
 
@@ -381,23 +382,27 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
          ABI_MALLOC(ylmbz,(dtset%mpw*fock%fock_BZ%mkpt,psps%mpsang*psps%mpsang*psps%useylm))
          ABI_MALLOC(ylmgrbz,(dtset%mpw*fock%fock_BZ%mkpt,3,psps%mpsang*psps%mpsang*psps%useylm))
          option=1; mcgbz=dtset%mpw*fock%fock_BZ%mkptband*fock%fock_common%my_nsppol
+         call c_f_pointer(c_loc(fock%fock_BZ%nbandocc_bz),nbandocc_bz,[size(fock%fock_BZ%nbandocc_bz)])
          call initylmg(gprimd,fock%fock_BZ%kg_bz,fock%fock_BZ%kptns_bz,fock%fock_BZ%mkpt,fock%fock_BZ%mpi_enreg,&
 &         psps%mpsang,dtset%mpw,fock%fock_BZ%nbandocc_bz,fock%fock_BZ%mkpt,&
 &         fock%fock_BZ%npwarr,dtset%nsppol,option,rprimd,ylmbz,ylmgrbz)
          call ctocprj(fock%fock_common%atindx,fock%fock_BZ%cgocc,ctocprj_choice,fock%fock_BZ%cwaveocc_prj,gmet,gprimd,iatom,idir,&
 &         iorder_cprj,fock%fock_BZ%istwfk_bz,fock%fock_BZ%kg_bz,fock%fock_BZ%kptns_bz,mcgbz,&
 &         fock%fock_BZ%mcprj,dtset%mgfft,fock%fock_BZ%mkpt,fock%fock_BZ%mpi_enreg,psps%mpsang,&
-&         dtset%mpw,dtset%natom,nattyp,fock%fock_BZ%nbandocc_bz,dtset%natom,dtset%ngfft,fock%fock_BZ%mkpt,&
+&         dtset%mpw,dtset%natom,nattyp,nbandocc_bz,dtset%natom,dtset%ngfft,fock%fock_BZ%mkpt,&
+!&         dtset%mpw,dtset%natom,nattyp,fock%fock_BZ%nbandocc_bz,dtset%natom,dtset%ngfft,fock%fock_BZ%mkpt,&
 &         dtset%nloalg,fock%fock_BZ%npwarr,dtset%nspinor,&
 &         dtset%nsppol,dtset%ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,ucvol,unpaw,&
 &         xred,ylmbz,ylmgrbz)
          ABI_FREE(ylmbz)
          ABI_FREE(ylmgrbz)
        else
+         call c_f_pointer(c_loc(fock%fock_BZ%nbandocc_bz),nbandocc_bz,[size(fock%fock_BZ%nbandocc_bz)])
          call ctocprj(fock%fock_common%atindx,fock%fock_BZ%cgocc,ctocprj_choice,fock%fock_BZ%cwaveocc_prj,gmet,gprimd,iatom,idir,&
 &         iorder_cprj,fock%fock_BZ%istwfk_bz,fock%fock_BZ%kg_bz,fock%fock_BZ%kptns_bz,mcg,&
 &         fock%fock_BZ%mcprj,dtset%mgfft,fock%fock_BZ%mkpt,mpi_enreg,psps%mpsang,&
-&         dtset%mpw,dtset%natom,nattyp,fock%fock_BZ%nbandocc_bz,dtset%natom,dtset%ngfft,fock%fock_BZ%mkpt,&
+&         dtset%mpw,dtset%natom,nattyp,nbandocc_bz,dtset%natom,dtset%ngfft,fock%fock_BZ%mkpt,&
+!&         dtset%mpw,dtset%natom,nattyp,fock%fock_BZ%nbandocc_bz,dtset%natom,dtset%ngfft,fock%fock_BZ%mkpt,&
 &         dtset%nloalg,fock%fock_BZ%npwarr,dtset%nspinor,&
 &         dtset%nsppol,dtset%ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,ucvol,unpaw,&
 &         xred,ylm,ylmgr)
