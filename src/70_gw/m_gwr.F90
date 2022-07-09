@@ -683,7 +683,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  !call get_ibz2bz(gwr%nkibz, gwr%nkbz, kbz2ibz, kibz2bz, ierr)
  !ABI_CHECK(ierr == 0, "Something wrong in symmetry tables for k-points")
 
- ABI_FREE(kibz)
+
 
  ! Setup qIBZ, weights and BZ.
  ! Always use q --> -q symmetry even in systems without inversion
@@ -788,18 +788,17 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
    kk = gwr%kcalc(:, ikcalc)
 
    if (kpts_map("symrel", ebands_timrev, cryst, krank_ibz, 1, kk, indkk_k) /= 0) then
-      write(msg, '(5a)' )&
-       "The WFK file cannot be used to compute self-energy corrections at k-point: ",ktoa(kk),ch10,&
+      write(msg, '(5a)' ) &
+       "The WFK file cannot be used to compute self-energy corrections at k-point: ",trim(ktoa(kk)),ch10,&
        "The k-point cannot be generated from a symmetrical one.", ch10
       ABI_ERROR(msg)
    end if
-
 
    ! TODO: Invert dims and update abipy
    gwr%kcalc2ibz(ikcalc, :) = indkk_k(:, 1)
 
    ik_ibz = indkk_k(1,1); isym_k = indkk_k(2,1)
-   trev_k = indkk_k(6, 1); g0_k = indkk_k(3:5,1)
+   trev_k = indkk_k(6,1); g0_k = indkk_k(3:5,1)
    isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
    !kk_ibz = ks_ebands%kptns(:,ik_ibz)
    if (.not. isirr_k) then
@@ -880,6 +879,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  gwr%bstop_ks = gwr%bstart_ks + gwr%nbcalc_ks - 1
 
  call krank_ibz%free()
+ ABI_FREE(kibz) ! Deallocate kibz here because krank keeps a reference to this array.
 
  ! ================================
  ! Setup tau/omega mesh and weights

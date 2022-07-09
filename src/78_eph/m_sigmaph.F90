@@ -2666,7 +2666,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
 
    if (kpts_map("symrel", new%timrev, cryst, krank, 1, kk, indkk_k) /= 0) then
       write(msg, '(11a)' )&
-       "The WFK file cannot be used to compute self-energy corrections at k-point: ",ktoa(kk),ch10,&
+       "The WFK file cannot be used to compute self-energy corrections at k-point: ",trim(ktoa(kk)),ch10,&
        "The k-point cannot be generated from a symmetrical one.", ch10,&
        "q-mesh: ",trim(ltoa(new%ngqpt)),", k-mesh (from kptrlatt): ",trim(ltoa(get_diag(dtset%kptrlatt))),ch10, &
        'Action: check your WFK file and the (k, q) point input variables.'
