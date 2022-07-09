@@ -49,6 +49,7 @@ ecutsigx3   12       # Dimension of the G sum in Sigma_x.
                      # ecutsigx = ecut is usually a wise choice
                      # (the dimension in Sigma_c is controlled by ecuteps)
 
+#gw_qprange3 0
 nkptgw3  2
 kptgw3   0.0  0.0  0.0    
          0.5  0.0  0.0
