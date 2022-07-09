@@ -608,10 +608,12 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  real(dp),allocatable :: wtk(:), kibz(:,:)
  logical :: periods(ndims), keepdim(ndims)
 
+#ifdef __HAVE_GREENX
  real(dp), allocatable :: tau_tj(:), tau_wj(:), tj(:), wj(:)
  real(dp), allocatable :: weights_cos_tf_t_to_w(:,:), weights_cos_tf_w_to_t(:,:), weights_sin_tf_t_to_w(:,:)
  !real(dp), INTENT(IN), OPTIONAL :: a_scaling
  !real(dp), INTENT(OUT), OPTIONAL :: e_fermi
+#endif
 
 ! *************************************************************************
 
@@ -1706,6 +1708,8 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
 
  call cwtime_report(" gwr_build_gtau_from_wfk:", cpu, wall, gflops)
  end associate
+
+ RETURN
 
  call wfk_open_read(wfk, wfk_path, formeig0, iomode_from_fname(wfk_path), get_unit(), gwr%comm, hdr_out=wfk_hdr)
 
@@ -3291,7 +3295,7 @@ subroutine gwr_ncwrite_tchi_wc(gwr, what, filepath)
 !scalars
  integer,parameter :: master = 0
  integer :: my_is, my_iqi, my_it, spin, iq_ibz, itau, npwtot_q, my_ncols, my_gcol_start
- integer :: all_nproc, my_rank, ncid, ncerr,  gvec_id, ierr
+ integer :: all_nproc, my_rank, ncid, ncerr, ierr
  real(dp) :: cpu, wall, gflops
 !arrays
  integer :: dist_qibz(gwr%nqibz)
