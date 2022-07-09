@@ -1600,7 +1600,8 @@ subroutine exc_diago_coupling_hegv(Bsp,BS_files,Hdr_bse,prtvol,comm)
 
    ! Calculate the overlap matrix.
    ! FIXME
-   ! The ESLL manual says that "matrices matrix1 and matrix2 must have no common elements; otherwise, results are unpredictable."
+   ! The ESLL manual says that "matrices matrix1 and matrix2 must have no common elements;
+   ! otherwise, results are unpredictable."
    ! However the official scaLAPACK documentation does not report this (severe) limitation.
 
    !call Slk_tmp%init(exc_size,exc_size,Slk_processor,istwfk1)

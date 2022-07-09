@@ -513,7 +513,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
    ABI_MALLOC(ks_paw_an, (0))
  end if ! PAW
 
- ! Compute structure factor phases and large sphere cut-off
+ ! Compute structure factor phases and large sphere cutoff
  ABI_MALLOC(ph1d, (2, 3 * (2 * Dtset%mgfft + 1) * Cryst%natom))
  ABI_MALLOC(ph1df, (2, 3 * (2 * mgfftf + 1) * Cryst%natom))
 

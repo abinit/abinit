@@ -343,7 +343,7 @@ subroutine build_grid_scalapack(grid, nbprocs, comm, grid_dims)
    grid%dims = grid_dims
  end if
 
- ABI_CHECK(product(grid%dims) == nbprocs, "grid%dims does not agree with nbprocs!")
+ ABI_CHECK(product(grid%dims) == nbprocs, sjoin("grid%dims:", ltoa(grid%dims), "does not agree with nprocs:", itoa(nbprocs)))
 
  grid%ictxt = comm
 
@@ -2094,11 +2094,10 @@ end function my_locc
 !!  slk_pzgemm
 !!
 !! FUNCTION
-!!  Extended matrix*matrix product
-!!  C := alpha*A*B - beta*C
+!!  Extended matrix * matrix product: C := alpha*A*B + beta*C
 !!
 !!  For a simple matrix vector product, one can simply pass
-!!  alpha = (1.,0.) and beta (0.,0.)
+!!  alpha = cone and beta = czero
 !!
 !! INPUTS
 !!  matrix1= first ScaLAPACK matrix (matrix A)
@@ -2107,13 +2106,12 @@ end function my_locc
 !!  beta= scalar multiplicator for the C matrix
 !!
 !! OUTPUT
-!!  None
+!!  results= ScaLAPACK matrix coming out of the operation
 !!
 !! NOTES
-!! The matrices matrix1 and matrix2 must have no common elements; otherwise, results are unpredictable.
-!!
-!! SIDE EFFECTS
-!!  results= ScaLAPACK matrix coming out of the operation
+!! The ESLL manual says that "matrices matrix1 and matrix2 must have no common elements;
+!! otherwise, results are unpredictable."
+!! However the official scaLAPACK documentation does not report this (severe) limitation.
 !!
 !! PARENTS
 !!      m_exc_diago
@@ -2133,10 +2131,10 @@ subroutine slk_pzgemm(transa, transb, matrix1, alpha, matrix2, beta, results)
 !************************************************************************
 
 #ifdef HAVE_LINALG_SCALAPACK
- call PZGEMM(transa,transb,matrix1%sizeb_global(1),matrix2%sizeb_global(2), &
-             matrix1%sizeb_global(2),alpha,matrix1%buffer_cplx,1,1, &
-             matrix1%descript%tab,matrix2%buffer_cplx,1,1,          &
-             matrix2%descript%tab,beta,results%buffer_cplx,1,1,     &
+ call PZGEMM(transa, transb, matrix1%sizeb_global(1), matrix2%sizeb_global(2), &
+             matrix1%sizeb_global(2), alpha, matrix1%buffer_cplx, 1, 1, &
+             matrix1%descript%tab, matrix2%buffer_cplx, 1, 1,           &
+             matrix2%descript%tab, beta, results%buffer_cplx, 1, 1,     &
              results%descript%tab)
 #endif
 

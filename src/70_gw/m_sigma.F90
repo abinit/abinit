@@ -1493,18 +1493,19 @@ integer function sigma_ncwrite(Sigp,Er,Sr,ncid) result (ncerr)
  cplex=2; b1gw=Sr%b1gw; b2gw=Sr%b2gw; nbgw=b2gw-b1gw+1
  ndim_sig=Sr%nsppol*Sr%nsig_ab
 
- ncerr = nctk_def_dims(ncid, [nctkdim_t("cplex", cplex), nctkdim_t("b1gw", sr%b1gw), nctkdim_t("b2gw", sr%b2gw),&
+ ncerr = nctk_def_dims(ncid, [&
+   nctkdim_t("cplex", cplex), nctkdim_t("b1gw", sr%b1gw), nctkdim_t("b2gw", sr%b2gw),&
    nctkdim_t("nbgw", nbgw), nctkdim_t("nkptgw", sr%nkptgw), nctkdim_t("ndim_sig", ndim_sig), &
    nctkdim_t("nomega4sd", sr%nomega4sd), nctkdim_t("nsig_ab", sr%nsig_ab)], defmode=.True.)
  NCF_CHECK(ncerr)
 
  ! No. of real frequencies, might be zero.
- if (Sr%nomega_r>0) then
+ if (Sr%nomega_r > 0) then
    NCF_CHECK(nctk_def_dims(ncid, nctkdim_t("nomega_r", Sr%nomega_r)))
  end if
 
  ! No. of imaginary frequencies, might be zero.
- if (Sr%nomega_i>0) then
+ if (Sr%nomega_i > 0) then
    NCF_CHECK(nctk_def_dims(ncid, nctkdim_t("nomega_i", Sr%nomega_i)))
  end if
 
@@ -1551,7 +1552,7 @@ integer function sigma_ncwrite(Sigp,Er,Sr,ncid) result (ncerr)
    NCF_CHECK(ncerr)
  end if
 
- if (Sr%nomega_r>0) then
+ if (Sr%nomega_r > 0) then
    ncerr = nctk_def_arrays(ncid, [&
      nctkarr_t('omega_r', "dp", "nomega_r"),&
      nctkarr_t('sigcme', "dp", 'cplex, nbgw, number_of_kpoints, nomega_r, ndim_sig'),&
@@ -1559,7 +1560,7 @@ integer function sigma_ncwrite(Sigp,Er,Sr,ncid) result (ncerr)
    NCF_CHECK(ncerr)
  end if
 
- if (Sr%nomega_i>0) then
+ if (Sr%nomega_i > 0) then
    ncerr = nctk_def_arrays(ncid, [&
      nctkarr_t('sigxcmesi', "dp", 'cplex, nbgw, number_of_kpoints, nomega_i, ndim_sig'),&
      nctkarr_t('sigcmesi', "dp",'cplex, nbgw, number_of_kpoints, nomega_i, ndim_sig'),&
@@ -1569,14 +1570,13 @@ integer function sigma_ncwrite(Sigp,Er,Sr,ncid) result (ncerr)
 
  if (allocated(sr%m_ks_to_qp)) then
    ncerr = nctk_def_arrays(ncid, [nctkarr_t('m_ks_to_qp', "dp", &
-&       "cplex, max_number_of_states, max_number_of_states, number_of_kpoints, number_of_spins")])
+       "cplex, max_number_of_states, max_number_of_states, number_of_kpoints, number_of_spins")])
    NCF_CHECK(ncerr)
  end if
 
  ! =====================
  ! === Start writing ===
  ! =====================
- ! vid is a small helper function to get the varid from ncid
  NCF_CHECK(nctk_set_datamode(ncid))
  NCF_CHECK(nf90_put_var(ncid, vid('ecutwfn'), Sigp%ecutwfn))
  NCF_CHECK(nf90_put_var(ncid, vid('ecuteps'), Sigp%ecuteps))
@@ -1588,7 +1588,6 @@ integer function sigma_ncwrite(Sigp,Er,Sr,ncid) result (ncerr)
  NCF_CHECK(nf90_put_var(ncid, vid('kptgw'), Sr%kptgw))
  NCF_CHECK(nf90_put_var(ncid, vid('minbnd'), Sr%minbnd))
  NCF_CHECK(nf90_put_var(ncid, vid('maxbnd'),Sr%maxbnd))
-
  NCF_CHECK(nf90_put_var(ncid, vid('omegasrdmax'), Sr%maxomega4sd*Ha_eV))
  NCF_CHECK(nf90_put_var(ncid, vid('deltae'), Sr%deltae*Ha_eV))
  NCF_CHECK(nf90_put_var(ncid, vid('omegasrmax'), Sr%maxomega_r*Ha_eV))
@@ -1607,7 +1606,7 @@ integer function sigma_ncwrite(Sigp,Er,Sr,ncid) result (ncerr)
  NCF_CHECK(nf90_put_var(ncid, vid('vxcme'), Sr%vxcme*Ha_eV))
  NCF_CHECK(nf90_put_var(ncid, vid('vUme'), Sr%vUme*Ha_eV))
 
- ! * Have to transfer complex arrays
+ ! Have to transfer complex arrays
  ABI_MALLOC(rdata4,(cplex,b1gw:b2gw,Sr%nkibz,Sr%nsppol))
  rdata4=c2r(Sr%degw)
  NCF_CHECK(nf90_put_var(ncid, vid('degw'), rdata4*Ha_eV))
@@ -1693,7 +1692,7 @@ integer function sigma_ncwrite(Sigp,Er,Sr,ncid) result (ncerr)
  NCF_CHECK(nf90_put_var(ncid, vid('ze0'), rdata4))
  ABI_FREE(rdata4)
 
- if (Sr%nomega_i>0) then
+ if (Sr%nomega_i > 0) then
    ABI_MALLOC(rdata2,(cplex,Sr%nomega_i))
    rdata2=c2r(Sr%omega_i)
    NCF_CHECK(nf90_put_var(ncid, vid('omega_i'), rdata2*Ha_eV))
@@ -1735,7 +1734,7 @@ end function sigma_ncwrite
 !! Kmesh<kmesh_t>
 !! Qmesh<kmesh_t>
 !! Ltg_kgw<littlegroup_t>
-!! Wfd(wfdgw_t),intent(inout) ::
+!! Wfd(wfdgw_t)
 !! mg0(3)
 !! kptgw(3)
 !! [bks_mask(Wfd%mband,Kmesh%nbz,nsppol)]

@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  3 Jul 2022.
-- ( at 03h06 )
+.Starting date : Sat  9 Jul 2022.
+- ( at 15h18 )
   
 - input  file    -> /Users/gmatteo/git_repos/abinit_gwr/_build/tests/Test_suite/gwr_t01/t01.abi
 - output file    -> t01.abo
@@ -86,12 +86,12 @@ _ WF disk file :      0.417 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
  -outvars: echo values of preprocessed input variables --------
             acell      1.0260000000E+01  1.0260000000E+01  1.0260000000E+01 Bohr
               amu      2.80855000E+01
-             bdgw3          4       5
+             bdgw3          4       5       4       5
            diemac      1.20000000E+01
              ecut      8.00000000E+00 Hartree
           ecuteps1     0.00000000E+00 Hartree
           ecuteps2     0.00000000E+00 Hartree
-          ecuteps3     2.00000000E+00 Hartree
+          ecuteps3     6.00000000E+00 Hartree
          ecutsigx1     0.00000000E+00 Hartree
          ecutsigx2     0.00000000E+00 Hartree
          ecutsigx3     8.00000000E+00 Hartree
@@ -112,6 +112,7 @@ _ WF disk file :      0.417 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
                        5.00000000E-01  0.00000000E+00  0.00000000E+00
                        5.00000000E-01  5.00000000E-01  0.00000000E+00
             kptgw3     0.00000000E+00  0.00000000E+00  0.00000000E+00
+                       5.00000000E-01  0.00000000E+00  0.00000000E+00
          kptrlatt        2    0    0      0    2    0      0    0    2
           kptrlen      1.45098311E+01
 P           mkmem           3
@@ -127,7 +128,7 @@ P           mkmem           3
              nkpt           3
            nkptgw1          0
            nkptgw2          0
-           nkptgw3          1
+           nkptgw3          2
             nstep          20
              nsym          48
            ntypat           1
@@ -540,8 +541,8 @@ meta: {optdriver: 6, }
  Citation for XC functional:
   J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
 
-- Reading GS states from WFK file: t01o_DS2_WFK
 - Reading GS density from: t01o_DS1_DEN
+- Reading GS states from WFK file: t01o_DS2_WFK
 
 
 
@@ -574,12 +575,12 @@ ngqpt: [2, 2, 2, ]
 nqbz: 8
 nqibz: 3
 green_mpw: 302
-chi_mpw: 40
+tchi_mpw: 190
 g_ngfft: [12, 12, 12, 13, 13, 12, 312, 16, ]
 P gwr_np_gtks: [1, 1, 1, 1, ]
 ...
 
-Trace of chi_qibz matrix for testing purposes:
+Trace of tchi_qibz matrix for testing purposes:
        1       2
     1   0.000   0.000
         0.000   0.000
@@ -597,12 +598,12 @@ Trace of chi_qibz matrix for testing purposes:
  -outvars: echo values of variables after computation  --------
             acell      1.0260000000E+01  1.0260000000E+01  1.0260000000E+01 Bohr
               amu      2.80855000E+01
-             bdgw3          4       5
+             bdgw3          4       5       4       5
            diemac      1.20000000E+01
              ecut      8.00000000E+00 Hartree
           ecuteps1     0.00000000E+00 Hartree
           ecuteps2     0.00000000E+00 Hartree
-          ecuteps3     2.00000000E+00 Hartree
+          ecuteps3     6.00000000E+00 Hartree
          ecutsigx1     0.00000000E+00 Hartree
          ecutsigx2     0.00000000E+00 Hartree
          ecutsigx3     8.00000000E+00 Hartree
@@ -629,6 +630,7 @@ Trace of chi_qibz matrix for testing purposes:
                        5.00000000E-01  0.00000000E+00  0.00000000E+00
                        5.00000000E-01  5.00000000E-01  0.00000000E+00
             kptgw3     0.00000000E+00  0.00000000E+00  0.00000000E+00
+                       5.00000000E-01  0.00000000E+00  0.00000000E+00
          kptrlatt        2    0    0      0    2    0      0    0    2
           kptrlen      1.45098311E+01
 P           mkmem           3
@@ -644,7 +646,7 @@ P           mkmem           3
              nkpt           3
            nkptgw1          0
            nkptgw2          0
-           nkptgw3          1
+           nkptgw3          2
             nstep          20
              nsym          48
            ntypat           1
@@ -828,13 +830,13 @@ P           mkmem           3
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         13.7  wall=         18.9
+- Proc.   0 individual time (sec): cpu=          9.2  wall=          9.3
 
 ================================================================================
 
  Calculation completed.
-.Delivered   1 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         13.7  wall=         18.9
+.Delivered   1 WARNINGs and   6 COMMENTs to log file.
++Overall time at end (sec) : cpu=          9.2  wall=          9.3
 - [ALL OK] MEMORY CONSUMPTION REPORT FOR C CODE:
 -   There were 159 allocations and 159 deallocations in C code
 - [ALL OK] MEMORY CONSUMPTION REPORT FOR FORTRAN CODE:

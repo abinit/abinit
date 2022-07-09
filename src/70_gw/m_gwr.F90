@@ -120,9 +120,8 @@ module m_gwr
  use defs_abitypes,   only : mpi_type
  use m_gwdefs,        only : GW_TOLQ0
  use m_time,          only : cwtime, cwtime_report, sec2str
- use m_io_tools,      only : iomode_from_fname !, file_exists, is_open, open_file
+ use m_io_tools,      only : iomode_from_fname, get_unit !, file_exists, open_file
  use m_numeric_tools, only : get_diag, isdiagmat, arth, print_arr
-
  use m_copy,          only : alloc_copy
  use m_geometry,      only : normv
  use m_fstrings,      only : sjoin, itoa, strcat, ktoa
@@ -138,13 +137,18 @@ module m_gwr
  use m_melemts,       only : melements_t
  use m_ioarr,         only : read_rhor
  use m_slk,           only : matrix_scalapack, processor_scalapack, slk_array_free, slk_array_locmem_mb
- use m_wfk,           only : wfk_read_ebands
+ use m_wfk,           only : wfk_read_ebands, wfk_t, wfk_open_read
  use m_wfd,           only : wfd_init, wfd_t, wfdgw_t, wave_t
  use m_pawtab,        only : pawtab_type
  use m_pawrhoij,      only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy, pawrhoij_free, &
                              pawrhoij_inquire_dim, pawrhoij_symrhoij, pawrhoij_unpack
 
+#define __HAVE_GREENX
+#undef __HAVE_GREENX
+
+#ifdef __HAVE_GREENX
  use mp2_grids,      only : get_minimax_grid
+#endif
 
  implicit none
 
@@ -324,11 +328,15 @@ module m_gwr
 
    real(dp),allocatable :: t2w_cos_wgs(:,:)
    ! (ntau, ntau)
-   ! weights for cosine transform.
+   ! weights for cosine transform. (i tau --> i omega)
+
+   real(dp),allocatable :: w2t_cos_wgs(:,:)
+   ! (ntau, ntau)
+   ! weights for sine transform (i iomega --> i tau)
 
    real(dp),allocatable :: t2w_sin_wgs(:,:)
    ! (ntau, ntau)
-   ! weights for sine transform.
+   ! weights for sine transform (i tau --> i omega)
 
    integer :: green_mpw = -1
    ! Max number of g-vectors for Green's function over k-points.
@@ -382,9 +390,6 @@ module m_gwr
    type(xcomm_t) :: gtau_comm
    ! MPI communicator for g/tau 2D subgrid.
 
-   !type(xcomm_t) :: omega_comm
-   ! MPI communicator for imag frequency distribution
-
    type(dataset_type), pointer :: dtset => null()
 
    type(datafiles_type), pointer :: dtfil => null()
@@ -404,6 +409,7 @@ module m_gwr
    type(mpi_type),pointer :: mpi_enreg => null()
 
    type(processor_scalapack) :: g_slkproc
+   !type(processor_scalapack) :: gtau_slkproc
 
    type(matrix_scalapack),allocatable :: gt_kibz(:,:,:,:)
    ! (2, nkibz, ntau, nsppol)
@@ -527,9 +533,13 @@ module m_gwr
    procedure :: rpa_energy => gwr_rpa_energy
 
    procedure :: run_g0w0 => gwr_run_g0w0
+   ! Compute QP corrections at the G0W0 level
 
    procedure :: ncwrite_tchi_wc => gwr_ncwrite_tchi_wc
+   ! Write tchi or wc to netcdf file
+
    !procedure :: ncread_tchi_wc => gwr_ncread_tchi_wc
+   ! Read tchi or wc to netcdf file
 
  end type gwr_t
 !!***
@@ -579,10 +589,10 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  integer :: my_is, my_it, my_ikf, my_iqf, ii, npwsp, col_bsize, ebands_timrev, my_iki, my_iqi, itau, spin
  integer :: my_nshiftq, iq_bz, iq_ibz, npw_, ncid, ig, ig_start !, ig2,
  integer :: comm_cart, me_cart, ierr, all_nproc, nps, my_rank, qprange_, gap_err !, den_fform
- integer :: jj, cnt, ikcalc, ndeg, mband, bstop
+ integer :: jj, cnt, ikcalc, ndeg, mband, bstop, nbsum
  integer :: ik_ibz, ik_bz, isym_k, trev_k, g0_k(3)
  logical :: isirr_k, changed, q_is_gamma
- real(dp) :: ecut_eff, cpu, wall, gflops, mem_mb
+ real(dp) :: ecut_eff, cpu, wall, gflops, mem_mb, erange, te_min, te_max
  character(len=5000) :: msg
  logical :: reorder
  type(krank_t) :: qrank, krank_ibz
@@ -598,8 +608,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  real(dp),allocatable :: wtk(:), kibz(:,:)
  logical :: periods(ndims), keepdim(ndims)
 
- real(dp), allocatable :: tau_tj, tau_wj(:)
- real(dp), allocatable :: tj(:), wj(:)
+ real(dp), allocatable :: tau_tj(:), tau_wj(:), tj(:), wj(:)
  real(dp), allocatable :: weights_cos_tf_t_to_w(:,:), weights_cos_tf_w_to_t(:,:), weights_sin_tf_t_to_w(:,:)
  !real(dp), INTENT(IN), OPTIONAL :: a_scaling
  !real(dp), INTENT(OUT), OPTIONAL :: e_fermi
@@ -634,6 +643,8 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  gwr%use_supercell = .True.
 
  mband = ks_ebands%mband
+ nbsum = dtset%nband(1)
+ ABI_CHECK_IRANGE(nbsum, 1, mband, "Invalid nbsum")
 
  ! =======================
  ! Setup k-mesh and q-mesh
@@ -696,27 +707,6 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
 
  ! Order qbz by stars and rearrange entries in qbz2ibz table.
  call kpts_pack_in_stars(gwr%nqbz, gwr%qbz, qbz2ibz)
-
- ! ================================
- ! Setup tau/omega mesh and weights
- ! ================================
- gwr%ntau = dtset%gwr_ntau
- ABI_MALLOC(gwr%tau_mesh, (gwr%ntau))
- ABI_MALLOC(gwr%iomega_mesh, (gwr%ntau))
- gwr%tau_mesh = arth(zero, one, gwr%ntau)
- gwr%iomega_mesh = arth(zero, one, gwr%ntau)
-
- ABI_MALLOC(gwr%t2w_cos_wgs, (gwr%ntau, gwr%ntau))
- ABI_MALLOC(gwr%t2w_sin_wgs, (gwr%ntau, gwr%ntau))
- gwr%t2w_cos_wgs = one
- gwr%t2w_sin_wgs = one
-
- !call get_minimax_grid(gwr%ntau, &
- !                      tau_tj=tau_tj,
- !                      tau_wj=tau_wj, tj=tj, wj=wj,
- !                      weights_cos_tf_t_to_w, &
- !                      weights_cos_tf_w_to_t,
- !                      weights_sin_tf_t_to_w, ounit=std_out)
 
  ! ==========================
  ! Setup k-points in Sigma_nk
@@ -887,8 +877,44 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  ABI_MALLOC(gwr%bstop_ks, (gwr%nkcalc, gwr%nsppol))
  gwr%bstop_ks = gwr%bstart_ks + gwr%nbcalc_ks - 1
 
- call gaps%free()
  call krank_ibz%free()
+
+ ! ================================
+ ! Setup tau/omega mesh and weights
+ ! ================================
+ ! Compute erange from gaps taking into account nsppol if any.
+ te_min = minval(gaps%cb_min - gaps%vb_max)
+ te_max = maxval(ks_ebands%eig(nbsum,:,:) - ks_ebands%eig(1,:,:))
+ if (te_min <= tol6) then
+   te_min = tol6
+   ABI_WARNING("System is metallic or with a very small fundamental gap!")
+ end if
+ erange = te_max / te_min
+
+ gwr%ntau = dtset%gwr_ntau
+ ABI_MALLOC(gwr%tau_mesh, (gwr%ntau))
+ ABI_MALLOC(gwr%iomega_mesh, (gwr%ntau))
+ gwr%tau_mesh = arth(zero, one, gwr%ntau)
+ gwr%iomega_mesh = arth(zero, one, gwr%ntau)
+
+ ABI_MALLOC(gwr%w2t_cos_wgs, (gwr%ntau, gwr%ntau))
+ ABI_MALLOC(gwr%t2w_cos_wgs, (gwr%ntau, gwr%ntau))
+ ABI_MALLOC(gwr%t2w_sin_wgs, (gwr%ntau, gwr%ntau))
+ gwr%w2t_cos_wgs = one; gwr%t2w_cos_wgs = one; gwr%t2w_sin_wgs = one
+
+#ifdef __HAVE_GREENX
+ call get_minimax_grid(gwr%ntau, &
+                       tau_tj=tau_tj, &
+                       tau_wj=tau_wj, &
+                       tj=tj, &
+                       wj=wj, &
+                       weights_cos_tf_t_to_w=gwr%t2w_cos_wgs, &
+                       weights_cos_tf_w_to_t=gwr%w2t_cos_wgs, &
+                       weights_sin_tf_t_to_w=gwr%t2w_sin_wgs, &
+                       ounit=std_out)
+#endif
+
+ call gaps%free()
 
  ! ========================
  ! === MPI DISTRIBUTION ===
@@ -906,8 +932,8 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
    ! ==================================================================================================
    !   spin (if any)     |  excellent                      | scales
    !   tau               |  excellent                      | scales
-   !   kbz               |  good?, requires communication  | scales (depending on BZ -> IBZ mapping)
-   !   g/r (Scalapack)   |  network intesive               ! scales
+   !   kbz               |  good?, requires communication  | scales (depends on BZ -> IBZ mapping)
+   !   g/r (PBLAS)       |  network intesive               ! scales
    !
    gwr%spin_comm%nproc = 1
    if (gwr%nsppol == 2 .and. all_nproc > 1) then
@@ -1139,6 +1165,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
 
  ! 1d grid block-distributed along columns.
  call gwr%g_slkproc%init(gwr%g_comm%value, grid_dims=[1, gwr%g_comm%nproc])
+ !call gwr%gtau_slkproc%init(gwr%gtau_comm%value, grid_dims=[1, gwr%g_comm%nproc])
 
  do my_is=1,gwr%my_nspins
    spin = gwr%my_spins(my_is)
@@ -1309,6 +1336,7 @@ subroutine gwr_free(gwr)
  ABI_SFREE(gwr%my_itaus)
  ABI_SFREE(gwr%tau_mesh)
  ABI_SFREE(gwr%iomega_mesh)
+ ABI_SFREE(gwr%w2t_cos_wgs)
  ABI_SFREE(gwr%t2w_cos_wgs)
  ABI_SFREE(gwr%t2w_sin_wgs)
  ABI_SFREE(gwr%kcalc)
@@ -1505,8 +1533,10 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
 
 !Local variables-------------------------------
 !scalars
+ integer,parameter :: formeig0 = 0, istwfk1 = 1
  integer :: mband, nkibz, nsppol, my_is, my_it, my_iki, spin, ik_ibz
- integer :: my_nb, band, ib, npw_k, istwf_k, itau, ioe, ig1, ig2, il_g1, il_g2
+ integer :: my_nb, band, ib, npw_k, mpw, istwf_k, itau, ioe, ig1, ig2, il_g1, il_g2
+ integer :: nbsum, npwsp, col_bsize, nband_k, my_bstart, my_bstop, nb
  real(dp) :: f_nk, eig_nk, tau, ef, gt_fact
  real(dp) :: cpu, wall, gflops
  character(len=5000) :: msg
@@ -1514,13 +1544,14 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
  type(wave_t),pointer :: wave
  type(ebands_t) :: ks_ebands
  type(hdr_type) :: wfk_hdr
- !type(dataset_type), pointer :: dtset
- !type(desc_t),pointer :: desc_k
- !type(matrix_scalapack),pointer :: gt
+ type(wfk_t) :: wfk
+ type(processor_scalapack) :: gtau_slkproc
+ type(matrix_scalapack), target :: cg_mat
 !arrays
- integer,allocatable :: nband(:,:), wfd_istwfk(:), my_bands(:)
+ integer,allocatable :: nband(:,:), wfd_istwfk(:), my_bands(:), kg_k(:,:)
  real(dp) :: kk_ibz(3)
  !real(dp),allocatable :: cgwork(:,:)
+ real(dp),ABI_CONTIGUOUS pointer :: cg_k(:,:)
  logical,allocatable :: bks_mask(:,:,:), keep_ur(:,:,:)
 
 ! *************************************************************************
@@ -1538,7 +1569,7 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
 
  ! Initialize the wave function descriptor.
  ! Only wavefunctions for the symmetrical imagine of the k wavevectors
- ! treated by this MPI rank are stored.
+ ! treated by this MPI rank are stored in memory.
 
  nkibz = ks_ebands%nkpt; nsppol = ks_ebands%nsppol; mband = ks_ebands%mband
 
@@ -1547,10 +1578,17 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
  ABI_MALLOC(keep_ur, (mband, nkibz, nsppol))
  nband = mband; bks_mask = .False.; keep_ur = .False.
 
+ nbsum = dtset%nband(1)
+ if (nbsum > mband) then
+   ABI_WARNING(sjoin("WFK file contains", itoa(mband), "states while you want to use:", itoa(nbsum)))
+   nbsum = mband
+ end if
+ call wrtout(std_out, sjoin(" Computing Green's function with nbsum:", itoa(nbsum)))
+
  ! Init bks_mask: each MPI proc reads only the (k-points, spin).
  ! Distribute bands inside g_comm
  ! FIXME: Smart algo to make memory scale.
- call xmpi_split_block(mband, gwr%g_comm%value, my_nb, my_bands)
+ call xmpi_split_block(nbsum, gwr%g_comm%value, my_nb, my_bands)
 
  do my_is=1,gwr%my_nspins
    spin = gwr%my_spins(my_is)
@@ -1596,16 +1634,17 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
 
  ef = ks_ebands%fermie
 
- !ddkop = ddkop_new(dtset, cryst, pawtab, psps, wfd%mpi_enreg, mpw, wfd%ngfft)
+ mpw = maxval(wfd%npwarr)
+ ! TODO: Mv m_ddk in 72_repsonse below 70_gw or move gwr to higher level.
+ !ddkop = ddkop_new(dtset, gwr%cryst, gwr%pawtab, gwr%psps, wfd%mpi_enreg, mpw, wfd%ngfft)
 
  do my_is=1,gwr%my_nspins
    spin = gwr%my_spins(my_is)
-
    do my_iki=1,gwr%my_nkibz
      ik_ibz = gwr%my_kibz_inds(my_iki)
      kk_ibz = gwr%kibz(:, ik_ibz)
-     npw_k = wfd%npwarr(ik_ibz); istwf_k = wfd%istwfk(ik_ibz)
-     !ik_bz = gwr%kibz2bz(ik_ibz)
+     npw_k = wfd%npwarr(ik_ibz)
+     istwf_k = wfd%istwfk(ik_ibz)
      associate (desc_k => gwr%green_desc_kibz(ik_ibz))
 
      ABI_CHECK(npw_k == desc_k%npw, "npw_k != desc_k%npw")
@@ -1667,6 +1706,57 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
 
  call cwtime_report(" gwr_build_gtau_from_wfk:", cpu, wall, gflops)
  end associate
+
+ call wfk_open_read(wfk, wfk_path, formeig0, iomode_from_fname(wfk_path), get_unit(), gwr%comm, hdr_out=wfk_hdr)
+
+ mpw = maxval(wfk_hdr%npwarr)
+ ABI_MALLOC(kg_k, (3, mpw))
+
+ call gtau_slkproc%init(gwr%gtau_comm%value, grid_dims=[1, gwr%gtau_comm%nproc])
+
+ do my_is=1,gwr%my_nspins
+   spin = gwr%my_spins(my_is)
+   do my_iki=1,gwr%my_nkibz
+     ik_ibz = gwr%my_kibz_inds(my_iki)
+     npw_k = wfk_hdr%npwarr(ik_ibz)
+     istwf_k = wfk_hdr%istwfk(ik_ibz)
+     nband_k = wfk_hdr%nband(ik_ibz)
+     npwsp = npw_k * gwr%nspinor
+
+     ! Init CG(npw_k * nspinor, nband) scalapack matrix within gtau communicator.
+     ! and distribute it over bands so that each proc reads a subset of bands in read_band_block
+     col_bsize = nband_k / gwr%gtau_comm%nproc; if (mod(nband_k, gwr%gtau_comm%nproc) /= 0) col_bsize = col_bsize + 1
+     call cg_mat%init(npwsp, nband_k, gtau_slkproc, istwfk1, size_blocs=[npwsp, col_bsize])
+
+     my_bstart = cg_mat%loc2gcol(1)
+     my_bstop = cg_mat%loc2gcol(cg_mat%sizeb_local(2))
+     nb = my_bstop - my_bstart + 1
+     ABI_CHECK(nb > 0, "nb == 0, decrease number of procs for G and tau parallelism.")
+
+     call c_f_pointer(c_loc(cg_mat%buffer_cplx), cg_k, shape=[2, npwsp * nb])
+     call wfk%read_band_block([my_bstart, my_bstop], ik_ibz, spin, xmpio_single, kg_k=kg_k, cg_k=cg_k)
+
+     !do my_it=1,gwr%my_ntau
+     do itau=1,gwr%ntau
+       tau = gwr%tau_mesh(itau)
+       !itau = gwr%my_itaus(my_it)
+       !gt_fact = exp(-tau * eig_nk)
+       !call slk_pzgemm(transa, transb, matrix1, cone, matrix2, czero, results)
+       !my_it = gwr%myit_from_itau(itau)
+       !if (my_it == -1) cycle
+       !associate (gt => gwr%gt_kibz(ioe, ik_ibz, itau, spin))
+     end do
+
+
+     call cg_mat%free()
+   end do ! my_iki
+ end do ! my_is
+
+ call gtau_slkproc%free()
+ ABI_FREE(kg_k)
+
+ call wfk%close()
+ call wfk_hdr%free()
 
 end subroutine gwr_build_gtau_from_wfk
 !!***
@@ -3179,6 +3269,7 @@ end subroutine gwr_run_g0w0
 !!  gwr_ncwrite_tchi_wc
 !!
 !! FUNCTION
+!!  Write tchi or wc to netcdf file
 !!
 !! INPUTS
 !!
@@ -3200,9 +3291,8 @@ subroutine gwr_ncwrite_tchi_wc(gwr, what, filepath)
 !scalars
  integer,parameter :: master = 0
  integer :: my_is, my_iqi, my_it, spin, iq_ibz, itau, npwtot_q, my_ncols, my_gcol_start
- integer :: all_nproc, my_rank, ncid, ncerr, mats_id, ierr
+ integer :: all_nproc, my_rank, ncid, ncerr,  gvec_id, ierr
  real(dp) :: cpu, wall, gflops
- type(c_ptr) :: cptr
 !arrays
  integer :: dist_qibz(gwr%nqibz)
  real(dp),ABI_CONTIGUOUS pointer :: fptr(:,:,:)
@@ -3224,20 +3314,27 @@ subroutine gwr_ncwrite_tchi_wc(gwr, what, filepath)
 
    ! Add dimensions.
    ncerr = nctk_def_dims(ncid, [ &
-     nctkdim_t("nsppol", gwr%nsppol), nctkdim_t("mpw", gwr%tchi_mpw), nctkdim_t("ntau", gwr%ntau), &
+     nctkdim_t("nsppol", gwr%nsppol), nctkdim_t("mpw", gwr%tchi_mpw), &
+     nctkdim_t("ntau", gwr%ntau), &
      nctkdim_t("nqibz", gwr%nqibz), nctkdim_t("nqbz", gwr%nqbz)], &
      defmode=.True.)
    NCF_CHECK(ncerr)
 
-   ! TODO: Add metadata for mats: gvec(q), spin sum, vc cutoff, handle nspinor 2
-
    ! Define arrays with results.
+   ! TODO: Add metadata for mats: spin sum, vc cutoff, t/w mesh, handle nspinor 2
    ncerr = nctk_def_arrays(ncid, [ &
      nctkarr_t("ngqpt", "int", "three"), &
+     nctkarr_t("qibz", "dp", "three, nqibz"), &
+     nctkarr_t("wtq", "dp", "nqibz"), &
+     nctkarr_t("gvec", "int", "three, mpw, nqibz"), &
      nctkarr_t("mats", "dp", "two, mpw, mpw, ntau, nqibz, nsppol") &
    ])
    NCF_CHECK(ncerr)
 
+   ! Write global arrays.
+   NCF_CHECK(nctk_set_datamode(ncid))
+   NCF_CHECK(nf90_put_var(ncid, vid("qibz"), gwr%qibz))
+   NCF_CHECK(nf90_put_var(ncid, vid("wtq"), gwr%wtq))
    NCF_CHECK(nf90_close(ncid))
  end if
 
@@ -3256,7 +3353,6 @@ subroutine gwr_ncwrite_tchi_wc(gwr, what, filepath)
 
  ! Reopen the file in gwr%comm.
  NCF_CHECK(nctk_open_modify(ncid, filepath, gwr%comm))
- mats_id = nctk_idname(ncid, "mats")
 
  do my_is=1,gwr%my_nspins
    spin = gwr%my_spins(my_is)
@@ -3266,6 +3362,11 @@ subroutine gwr_ncwrite_tchi_wc(gwr, what, filepath)
 
      associate (desc_q => gwr%tchi_desc_qibz(iq_ibz))
      npwtot_q = desc_q%npw
+
+     if (spin == 1 .and. gwr%gtau_comm%me == 0) then
+       ! Write all G-vectors for this q
+       NCF_CHECK(nf90_put_var(ncid, vid("gvec"), desc_q%gvec, start=[1,1,iq_ibz], count=[3,npwtot_q,1]))
+     end if
 
      mats => null()
      if (what == "tchi") mats => gwr%tchi_qibz(iq_ibz, :, spin)
@@ -3278,10 +3379,9 @@ subroutine gwr_ncwrite_tchi_wc(gwr, what, filepath)
        ! NB: Assuming matrix is distributed in contigous blocks along the column index.
        my_ncols = mats(itau)%sizeb_local(2)
        my_gcol_start = mats(itau)%loc2gcol(1)
-       cptr = c_loc(mats(itau)%buffer_cplx)
-       call c_f_pointer(cptr, fptr, shape=[2, npwtot_q, my_ncols])
+       call c_f_pointer(c_loc(mats(itau)%buffer_cplx), fptr, shape=[2, npwtot_q, my_ncols])
 
-       ncerr = nf90_put_var(ncid, mats_id, fptr, &
+       ncerr = nf90_put_var(ncid, vid("mats"), fptr, &
                             start=[1, 1, my_gcol_start, itau, iq_ibz, spin], &
                             count=[2, npwtot_q, my_ncols, 1, 1, 1])
        NCF_CHECK(ncerr)
@@ -3293,6 +3393,12 @@ subroutine gwr_ncwrite_tchi_wc(gwr, what, filepath)
  NCF_CHECK(nf90_close(ncid))
 
  call cwtime_report(" gwr_ncwrite_tchi_wc:", cpu, wall, gflops)
+
+contains
+ integer function vid(vname)
+   character(len=*),intent(in) :: vname
+   vid = nctk_idname(ncid, vname)
+end function vid
 
 end subroutine gwr_ncwrite_tchi_wc
 !!***
