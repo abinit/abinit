@@ -926,7 +926,7 @@ end subroutine hdr_malloc
 !!
 !! SOURCE
 
-subroutine hdr_init(ebands, codvsn, dtset, hdr, pawtab, pertcase, psps,wvl, &
+subroutine hdr_init(ebands, codvsn, dtset, hdr, pawtab, pertcase, psps, wvl, &
                     mpi_atmtab, comm_atom) ! optional arguments (parallelism)
 
 !Arguments ------------------------------------

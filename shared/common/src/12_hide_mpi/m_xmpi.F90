@@ -159,7 +159,7 @@ module m_xmpi
 !! xcomm_t
 !!
 !! FUNCTION
-!!  A small object storing the MPI communicator, the rank of the processe and the size of the communicator.
+!!  A small object storing the MPI communicator, the rank of the process and the size of the communicator.
 !!  Provides helper functions to perform typical operations and parallelize loops.
 !!  The datatype is initialized with xmpi_comm_self
 !!
@@ -2262,9 +2262,9 @@ subroutine xmpi_split_work_i4b(ntasks, comm, my_start, my_stop)
 
  nprocs  = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
 
- block   = ntasks/nprocs
- res     = MOD(ntasks,nprocs)
- block_p1= block+1
+ block   = ntasks / nprocs
+ res     = MOD(ntasks, nprocs)
+ block_p1= block + 1
 
  if (my_rank < res) then
    my_start =  my_rank   *block_p1+1
@@ -3071,7 +3071,8 @@ end subroutine xmpi_largetype_free
 !!  The routine will abort if the displacement cannot be represented with a default integer.
 !!
 !! INPUTS
-!! ncount= number of blocks (integer) --- also number of entries in arrays array_of_types, array_of_displacements and array_of_blocklengths
+!! ncount= number of blocks (integer) --- also number of entries in arrays
+!!         array_of_types, array_of_displacements and array_of_blocklengths
 !! array_of_blocklength(ncount)=number of elements in each block (array of integer)
 !! array_of_displacements(ncount)=byte displacement of each block (array of integer)
 !! array_of_types(ncount)=type of elements in each block (array of handles to datatype objects)

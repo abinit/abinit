@@ -340,9 +340,9 @@ subroutine wfk_open_read(Wfk, fname, formeig, iomode, funt, comm, Hdr_out)
 
 !Arguments ------------------------------------
 !scalars
+ class(wfk_t),intent(inout) :: Wfk
  integer,intent(in) :: iomode,comm,formeig,funt
  character(len=*),intent(in) :: fname
- class(wfk_t),intent(inout) :: Wfk
  type(hdr_type),optional,intent(inout) :: Hdr_out  ! should be intent(out), but psc miscompiles the call!
 
 !Local variables-------------------------------
@@ -361,39 +361,42 @@ subroutine wfk_open_read(Wfk, fname, formeig, iomode, funt, comm, Hdr_out)
 
  DBG_ENTER("COLL")
 
- !Initialize the mandatory data of the Wfk datastructure
- !@wfk_t
- Wfk%rw_mode     = WFK_READMODE
- Wfk%chunk_bsize = WFK_CHUNK_BSIZE
-
- Wfk%fname     = fname
-!Checking the existence of data file
- if (.not.file_exists(fname)) then
-   ! Trick needed to run Abinit test suite in netcdf mode.
-   if (file_exists(nctk_ncify(fname))) then
-     write(std_out,"(3a)")"- File: ",trim(fname)," does not exist but found netcdf file with similar name."
-     Wfk%fname = nctk_ncify(fname)
-   end if
-   if (.not. file_exists(Wfk%fname)) then
-     ABI_ERROR('Missing data file: '//TRIM(Wfk%fname))
-   end if
- end if
-
- Wfk%formeig   = formeig
- Wfk%iomode    = iomode;
- if (endswith(fname, ".nc")) wfk%iomode = IO_MODE_ETSF
- ! This is to test the different versions.
- !wfk%iomode    = IO_MODE_MPI
- !if (.not. endswith(fname, ".nc") .and. xmpi_comm_size == 1) wfk%iomode == IO_MODE_FORTRAN
-
  Wfk%comm      = comm
  Wfk%master    = 0
  Wfk%my_rank   = xmpi_comm_rank(comm)
  Wfk%nproc     = xmpi_comm_size(comm)
 
+ !Initialize the mandatory data of the Wfk datastructure
+ !@wfk_t
+ Wfk%rw_mode     = WFK_READMODE
+ Wfk%chunk_bsize = WFK_CHUNK_BSIZE
+ Wfk%fname = fname
+
+ ! Master checks the existence of data file
+ if (wfk%my_rank == wfk%master) then
+   if (.not. file_exists(fname)) then
+     ! Trick needed to run Abinit test suite in netcdf mode.
+     if (file_exists(nctk_ncify(fname))) then
+       write(std_out,"(3a)")"- File: ",trim(fname)," does not exist but found netcdf file with similar name."
+       Wfk%fname = nctk_ncify(fname)
+     end if
+     if (.not. file_exists(Wfk%fname)) then
+       ABI_ERROR('Missing data file: '//TRIM(Wfk%fname))
+     end if
+   end if
+ end if
+ call xmpi_bcast(wfk%fname, wfk%master, comm, ierr)
+
+ Wfk%formeig = formeig
+ Wfk%iomode = iomode
+ if (endswith(fname, ".nc")) wfk%iomode = IO_MODE_ETSF
+ ! This is to test the different versions.
+ !wfk%iomode    = IO_MODE_MPI
+ !if (.not. endswith(fname, ".nc") .and. xmpi_comm_size == 1) wfk%iomode == IO_MODE_FORTRAN
+
  ! Reads fform and the Header.
  call hdr_read_from_fname(Wfk%Hdr,fname,Wfk%fform,comm)
- ABI_CHECK(Wfk%fform/=0,"fform ==0")
+ ABI_CHECK(Wfk%fform /= 0, "fform == 0")
 
  if (Wfk%debug) call Wfk%Hdr%echo(Wfk%fform, 4, unit=std_out)
 
@@ -643,8 +646,7 @@ subroutine wfk_open_write(Wfk,Hdr,fname,formeig,iomode,funt,comm,write_hdr,write
    if (nctk_has_mpiio) then
 #ifdef HAVE_NETCDF_MPI
      ncerr = nf90_create(wfk%fname, cmode=ior(ior(nf90_netcdf4, nf90_mpiio), nf90_write), &
-         comm=wfk%comm, info=xmpio_info, ncid=wfk%fh)
-
+                         comm=wfk%comm, info=xmpio_info, ncid=wfk%fh)
      NCF_CHECK_MSG(ncerr, sjoin("nf90_create: ", wfk%fname))
 #else
      ABI_ERROR("You should not be here")
@@ -1158,8 +1160,8 @@ subroutine wfk_read_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg_
  class(wfk_t),intent(inout) :: Wfk
 !arrays
  integer,intent(in) :: band_block(2)
- integer,intent(out), DEV_CONTARRD  optional :: kg_k(:,:) !(3,npw_k)
- real(dp),intent(out), DEV_CONTARRD optional :: cg_k(:,:) !(2,npw_k*nspinor*nband)
+ integer,intent(out), DEV_CONTARRD  optional :: kg_k(:,:) ! (3,npw_k)
+ real(dp),intent(out), DEV_CONTARRD optional :: cg_k(:,:) ! (2,npw_k*nspinor*nband)
  real(dp),intent(inout),optional :: eig_k((2*Wfk%mband)**Wfk%formeig*Wfk%mband)
  real(dp),intent(out),optional :: occ_k(Wfk%mband)
 
@@ -1184,7 +1186,7 @@ subroutine wfk_read_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg_
 
  DBG_ENTER("COLL")
 
- ABI_CHECK(Wfk%rw_mode==WFK_READMODE, "Wfk must be in READMODE")
+ ABI_CHECK(Wfk%rw_mode == WFK_READMODE, "Wfk must be in READMODE")
 
  if (wfk_validate_ks(wfk, ik_ibz, spin) /= 0) then
    ABI_ERROR("Wrong (ik_ibz, spin) args, Aborting now")
@@ -1196,8 +1198,8 @@ subroutine wfk_read_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg_
 
  nband_disk   = Wfk%nband(ik_ibz,spin)
  ! there are several cases here, reading in fewer than mband bands,
- !   or possibly more than you have allocated, and truncating
- !   nband_disk_keep could be used to distinguish these cases
+ ! or possibly more than you have allocated, and truncating
+ ! nband_disk_keep could be used to distinguish these cases
  nband_disk_keep = nband_disk
  if (present(occ_k)) then
    nband_disk_keep = min(nband_disk, size(occ_k))
@@ -3000,8 +3002,6 @@ end subroutine wfk_read_eigenvalues
 !!  occ = occupations of all bands at my k
 !!  pawrhoij = PAW matrix elements in projectors
 !!
-!! NOTES
-!!
 !! PARENTS
 !!      m_dfpt_looppert,m_respfn_driver
 !!
@@ -3009,10 +3009,10 @@ end subroutine wfk_read_eigenvalues
 !!
 !! SOURCE
 
-subroutine wfk_read_my_kptbands(inpath_, distrb_flags, comm, ecut_eff_in,&
-&          formeig, istwfk_in, kptns_in, mcg, mband_in, mband_mem_in, mkmem_in, mpw_in,&
-&          natom_in, nkpt_in, npwarr, nspinor_in, nsppol_in, usepaw_in,&
-&          cg, kg, eigen, occ, pawrhoij, ask_accurate_)
+subroutine wfk_read_my_kptbands(inpath_, distrb_flags, comm, ecut_eff_in, &
+           formeig, istwfk_in, kptns_in, mcg, mband_in, mband_mem_in, mkmem_in, mpw_in, &
+           natom_in, nkpt_in, npwarr, nspinor_in, nsppol_in, usepaw_in, &
+           cg, kg, eigen, occ, pawrhoij, ask_accurate_)
 
 !Arguments ------------------------------------
 !scalars
@@ -3027,7 +3027,6 @@ subroutine wfk_read_my_kptbands(inpath_, distrb_flags, comm, ecut_eff_in,&
  character(len=fnlen), intent(in) :: inpath_
  logical, intent(in) :: distrb_flags(nkpt_in,mband_in,nsppol_in)
  real(dp), intent(in),target :: kptns_in(3,nkpt_in)
-
  real(dp), intent(out) :: cg(2,mcg)
  integer, intent(out), optional :: kg(3,mpw_in*mkmem_in)
  real(dp), intent(out), optional :: eigen(mband_in*(2*mband_in)**formeig*nkpt_in*nsppol_in)
@@ -3037,12 +3036,12 @@ subroutine wfk_read_my_kptbands(inpath_, distrb_flags, comm, ecut_eff_in,&
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: formeig0=0
+ integer,parameter :: formeig0 = 0, master = 0
  integer :: spin,ikf,ik_disk,nband_k,mpw_disk,mband,nspinor
  integer :: iomode,nsppol,isym,itimrev
  integer :: npw_disk,npw_kf,istwf_disk,istwf_kf
  integer :: ikpt,ii,jj,kk,ll,iqst,nqst
- integer :: ibdoff
+ integer :: ibdoff, ierr, my_rank
  integer :: wfk_unt, iband, nband_me, nband_me_disk
  integer :: nband_me_saved, iband_saved
  integer :: spin_saved, spin_sym
@@ -3070,18 +3069,24 @@ subroutine wfk_read_my_kptbands(inpath_, distrb_flags, comm, ecut_eff_in,&
 
  call cwtime(cpu, wall, gflops, "start")
 
- inpath = inpath_
- !Checking the existence of data file
- if (.not.file_exists(inpath)) then
-   ! Trick needed to run Abinit test suite in netcdf mode.
-   if (file_exists(nctk_ncify(inpath))) then
-     write(std_out,"(3a)")"- File: ",trim(inpath)," does not exist but found netcdf file with similar name."
-     inpath = nctk_ncify(inpath)
-   end if
+ my_rank = xmpi_comm_rank(comm)
+
+ ! Master checks the existence of data file
+ if (my_rank == master) then
+   inpath = inpath_
    if (.not. file_exists(inpath)) then
-     ABI_ERROR('Missing data file: '//TRIM(inpath))
+     ! Trick needed to run Abinit test suite in netcdf mode.
+     if (file_exists(nctk_ncify(inpath))) then
+       write(std_out,"(3a)")"- File: ",trim(inpath)," does not exist but found netcdf file with similar name."
+       inpath = nctk_ncify(inpath)
+     end if
+     if (.not. file_exists(inpath)) then
+       ABI_ERROR('Missing data file: '//TRIM(inpath))
+     end if
    end if
  end if
+
+ call xmpi_bcast(inpath, master, comm, ierr)
 
  ! now attack the cg reading
  iomode = iomode_from_fname(inpath)
