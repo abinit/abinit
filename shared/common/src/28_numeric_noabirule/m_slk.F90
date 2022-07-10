@@ -34,6 +34,7 @@ module m_slk
 
  use m_fstrings,      only : firstchar, toupper, itoa, sjoin, ltoa
  use m_copy,          only : alloc_copy
+ use m_time,          only : cwtime, cwtime_report
  !use m_numeric_tools, only : print_arr
 
  implicit none
@@ -3778,8 +3779,11 @@ subroutine slk_ptrans(in_mat, trans, out_mat)
 
 !Local variables-------------------------------
  integer :: istwf_k, sb, size_blocs(2)
+ real(dp) :: cpu, wall, gflops
 
 ! *************************************************************************
+
+ call cwtime(cpu, wall, gflops, "start")
 
  istwf_k = merge(1, 2, allocated(in_mat%buffer_cplx))
 
@@ -3823,6 +3827,8 @@ subroutine slk_ptrans(in_mat, trans, out_mat)
  else
    ABI_ERROR("Neither buffer_cplx nor buffer_real are allocated!")
  end if
+
+ call cwtime_report(" slk_ptrans:", cpu, wall, gflops)
 
 end subroutine slk_ptrans
 !!***
