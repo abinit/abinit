@@ -124,7 +124,7 @@ module m_gwr
  use m_numeric_tools, only : get_diag, isdiagmat, arth, print_arr
  use m_copy,          only : alloc_copy
  use m_geometry,      only : normv
- use m_fstrings,      only : sjoin, itoa, strcat, ktoa
+ use m_fstrings,      only : sjoin, itoa, strcat, ktoa, ltoa
  use m_krank,         only : krank_t, krank_new, krank_from_kptrlatt, get_ibz2bz, star_from_ibz_idx
  use m_crystal,       only : crystal_t
  use m_dtset,         only : dataset_type
@@ -1570,7 +1570,7 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
  !call cryst%print(header="crystal structure from WFK file")
 
  ! Initialize the wave function descriptor.
- ! Only wavefunctions for the symmetrical imagine of the k wavevectors
+ ! Only wavefunctions for the symmetrical imagine of the k-points
  ! treated by this MPI rank are stored in memory.
 
  nkibz = ks_ebands%nkpt; nsppol = ks_ebands%nsppol; mband = ks_ebands%mband
@@ -1711,6 +1711,7 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
 
  RETURN
 
+ ! Scalapack-based version.
  call wfk_open_read(wfk, wfk_path, formeig0, iomode_from_fname(wfk_path), get_unit(), gwr%comm, hdr_out=wfk_hdr)
 
  mpw = maxval(wfk_hdr%npwarr)
@@ -1750,7 +1751,6 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
        !if (my_it == -1) cycle
        !associate (gt => gwr%gt_kibz(ioe, ik_ibz, itau, spin))
      end do
-
 
      call cg_mat%free()
    end do ! my_iki
@@ -1918,7 +1918,7 @@ subroutine gwr_get_green_gpr(gwr, my_it, my_is, desc_kbz, gt_gpr)
 
      ABI_CHECK(size(ggp%buffer_cplx, dim=2) == size(rgp%buffer_cplx, dim=2), "len2")
 
-     ! FFT. Results stored in rgp
+     ! Perform FFT and store results in rgp.
      do ig2=1,ggp%sizeb_local(2)
 
        ABI_CHECK(size(ggp%buffer_cplx(:, ig2)) == desc_k%npw, "npw")
@@ -2147,13 +2147,13 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
 
 !Local variables-------------------------------
 !scalars
- integer :: my_iqi, my_is, ig1, ig2, my_it, it, ierr, iq_ibz, itau, spin, it0, idx
- real(dp) :: cpu, wall, gflops
+ integer :: my_iqi, my_is, ig1, ig2, my_it, it, ierr, iq_ibz, itau, spin, it0
+ real(dp) :: cpu, wall, gflops, tau
  logical :: sum_spins_
- type(desc_t),pointer :: desc_q
 !arrays
+ real(dp),pointer :: weights(:,:)
  real(dp),allocatable :: my_weights(:,:)
- complex(dp):: cwork_t(gwr%my_ntau), cwork_wglb(gwr%ntau)
+ complex(dp):: cwork(gwr%my_ntau), cwork_wglb(gwr%ntau)
  type(matrix_scalapack), pointer :: mats(:)
 
 ! *************************************************************************
@@ -2161,10 +2161,9 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
  call cwtime(cpu, wall, gflops, "start")
  sum_spins_ = .False.; if (present(sum_spins)) sum_spins_ = sum_spins
 
- ! Extract my weights from the global array according to mode.
+ ! Targer weights according to mode.
  select case(mode)
  case ("iw2t")
-   idx = 1
    if (what == "tchi") then
      ABI_CHECK(gwr%tchi_space == "iomega", sjoin("mode:", mode, "with what:", what, "and tchi_space:", gwr%tchi_space))
      gwr%tchi_space = "itau"
@@ -2173,9 +2172,9 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
      ABI_CHECK(gwr%wc_space == "iomega", sjoin("mode:", mode, "with what:", what, "and wc_space:", gwr%wc_space))
      gwr%wc_space = "itau"
    end if
+   weights => gwr%w2t_cos_wgs
 
  case ("it2w")
-   idx = 2
    if (what == "tchi") then
      ABI_CHECK(gwr%tchi_space == "itau", sjoin("mode:", mode, " with what:", what, "and tchi_space:", gwr%tchi_space))
      gwr%tchi_space = "iomega"
@@ -2184,23 +2183,25 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
      ABI_CHECK(gwr%wc_space == "itau", sjoin("mode:", mode, " with what:", what, "and wc_space:", gwr%wc_space))
      gwr%wc_space = "iomega"
    end if
+   weights => gwr%t2w_cos_wgs
 
  case default
    ABI_ERROR(sjoin("Wrong mode:", mode))
  end select
 
+ ! Extract my weights from the global array.
  ABI_MALLOC(my_weights, (gwr%ntau, gwr%my_ntau))
  do my_it=1,gwr%my_ntau
    itau = gwr%my_itaus(my_it)
-   !tau = gwr%tau_mesh(itau)
-   !my_weights(:, my_it) = cos(omega * tau) * gwr%global_weighs(:, itau, idx)
+   tau = gwr%tau_mesh(itau)
+   my_weights(:, my_it) = weights(:, itau) ! * cos(omega * tau)
  end do
 
  do my_is=1,gwr%my_nspins
    spin = gwr%my_spins(my_is)
    do my_iqi=1,gwr%my_nqibz
      iq_ibz = gwr%my_qibz_inds(my_iqi)
-     desc_q => gwr%tchi_desc_qibz(iq_ibz)
+     associate (desc_q => gwr%tchi_desc_qibz(iq_ibz))
 
      mats => null()
      if (what == "tchi") mats => gwr%tchi_qibz(iq_ibz, :, spin)
@@ -2210,16 +2211,17 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
      it0 = gwr%my_itaus(1)
      do ig2=1,mats(it0)%sizeb_local(2)
        do ig1=1,mats(it0)%sizeb_local(1)
+
          ! Extract matrix elements as a function of tau
-         ! TODO: Here we can block over ig1 and call zgemm
-         ! to reduced the number of MPI communications.
+         ! TODO: Here we can block over ig1 and call zgemv
+         ! to reduce the number of MPI communications.
          do my_it=1,gwr%my_ntau
            itau = gwr%my_itaus(my_it)
-           cwork_t(my_it) = mats(itau)%buffer_cplx(ig1, ig2)
+           cwork(my_it) = mats(itau)%buffer_cplx(ig1, ig2)
          end do
 
          do it=1,gwr%ntau
-           cwork_wglb(it) = dot_product(my_weights(it, :), cwork_t)
+           cwork_wglb(it) = dot_product(my_weights(it, :), cwork)
          end do
 
          call xmpi_sum(cwork_wglb, gwr%tau_comm%value, ierr)
@@ -2233,6 +2235,7 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
        end do ! ig1
      end do ! ig2
 
+     end associate
    end do ! my_iqi
  end do ! my_is
 
@@ -2240,7 +2243,7 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
    ! Sum over spins
    do my_iqi=1,gwr%my_nqibz
       iq_ibz = gwr%my_qibz_inds(my_iqi)
-      desc_q => gwr%tchi_desc_qibz(iq_ibz)
+      associate (desc_q => gwr%tchi_desc_qibz(iq_ibz))
 
       do my_is=1,gwr%my_nspins
         spin = gwr%my_spins(my_is)
@@ -2254,6 +2257,7 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
           call xmpi_sum(mats(itau)%buffer_cplx, gwr%spin_comm%value, ierr)
         end do ! my_it
       end do ! my_is
+      end associate
    end do ! my_iqi
  end if
 
@@ -2463,7 +2467,6 @@ subroutine gwr_build_tchi(gwr)
    ! ============================
    ! GWr algorithm with supercell
    ! ============================
-   call wrtout(std_out, " Building chi0 = G0G0 with FFTs in the supercell ...")
 
    ! Set FFT mesh in the supercell
    ! Be careful when using the FFT plan with ndat as ndat can change inside the loop if we start to block.
@@ -2473,6 +2476,7 @@ subroutine gwr_build_tchi(gwr)
    sc_ngfft(4:6) = sc_ngfft(1:3)
    sc_nfft = product(sc_ngfft(1:3))
    !sc_augsize = product(sc_ngfft(4:6))
+   call wrtout(std_out, sjoin(" Building chi0 = iG0G0 with FFTs in the supercell:", ltoa(sc_ngfft(1:3))))
 
    ABI_CALLOC(gt_scbox, (sc_nfft * gwr%nspinor * ndat1, 2))
    ABI_CALLOC(chit_scbox, (sc_nfft * gwr%nspinor * ndat1))
@@ -2618,20 +2622,18 @@ subroutine gwr_build_tchi(gwr)
         !call gwr%green_redistribute(my_it, my_is, need_kibz, got_kibz, "free")
 
         do my_ikf=1,gwr%my_nkbz
-          !ik_ibz = gwr%my_kbz2ibz(1, my_ikf); isym_k = gwr%my_kbz2ibz(2, my_ikf)
-          !trev_k = gwr%my_kbz2ibz(6, my_ikf); g0_k = gwr%my_kbz2ibz(3:5, my_ikf)
-          !isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
           ik_bz = gwr%my_kbz_inds(my_ikf)
           kk_bz = gwr%kbz(:, ik_bz)
 
           ! Use symmetries to get G_k from the corresponding image in the IBZ.
           ! G_k(g,g') --> G_k(r,r')
-          !call gwr%gk_rrp(my_ikf, my_it, my_is, gk_rrp)
+          !call gwr%gk_rrp(my_ikf, my_it, my_is, "C", gk_rrp)
+          !call gk_rrp%free()
 
           do my_iqi=1,gwr%my_nqibz
             iq_ibz = gwr%my_qibz_inds(my_iqi)
             qq_ibz = gwr%qibz(:, iq_ibz)
-            desc_q => gwr%tchi_desc_qibz(iq_ibz)
+            !desc_q => gwr%tchi_desc_qibz(iq_ibz)
             !iq_bz = gwr%my_qbz_inds(my_iqf)
             !qq_bz = gwr%qbz(:, iq_bz)
 
@@ -2640,7 +2642,10 @@ subroutine gwr_build_tchi(gwr)
 
             ! Use symmetries to get G_kq from the corresponding image in the IBZ.
             ! G_kq(g,g') --> G_kq(r,r')
-            !call gwr%gk_rrp(my_ikqf, my_it, my_is, gkq_rrp)
+            !call gwr%gk_rrp(my_ikqf, my_it, my_is, "N", gkq_rrp)
+            !call gkq_rrp%free()
+
+            !tchi_rrp(my_iqi)%buffer_cplx = tchi(my_iqi)%buffer_cplx + gk_rrp%buffer_cplx * gkq_rrp%buffer_cplx
 
             !desc_k = gwr%green_desc_kibz(ik_ibz)%rotate(symtab_k)
             !desc_kpq = gwr%green_desc_kibz(ikpq_ibz)%rotate(symtab_kpq)
@@ -2715,13 +2720,16 @@ subroutine gwr_build_tchi(gwr)
  ! Also sum over spins to get total tchi if collinear spin.
  call gwr%cos_transform("tchi", "it2w", sum_spins=.True.)
 
- call gwr%ncwrite_tchi_wc("tchi", "foo.nc")
+ ! Write file with chi0(i omega)
+ if (dtset%prtsuscep > 0) then
+   call gwr%ncwrite_tchi_wc("tchi", trim(gwr%dtfil%filnam_ds(4))//'_TCHI.nc')
+ end if
 
  ! When reading, we have to perform consistency checks handle possible difference in:
  !   - input ecuteps and the value found on disk
  ! Changing q-mesh or time/imaginary mesh is not possible.
 
- !call gwr%ncread_tchi_wc("tchi", "foo.nc")
+ !call gwr%ncread_tchi_wc("tchi", trim(gwr%dtfil%filnam_ds(4))//'_TCHI.nc'))
 
  call cwtime_report(" gwr_build_tchi:", cpu_all, wall_all, gflops_all)
 
@@ -2831,7 +2839,7 @@ subroutine gwr_build_wc(gwr)
 ! *************************************************************************
 
  call cwtime(cpu_all, wall_all, gflops_all, "start")
- call wrtout(std_out, " Building correlated screening Wc ...")
+ call wrtout(std_out, " Building correlated screening Wc from irreducible chi ...")
 
  ABI_CHECK(gwr%tchi_space == "iomega", sjoin("tchi_space: ", gwr%tchi_space, " != iomega"))
  ABI_CHECK(gwr%wc_space == "none", sjoin("wc_space: ", gwr%wc_space, " != none"))
@@ -2953,13 +2961,12 @@ subroutine gwr_build_sigmac(gwr)
  complex(dp),allocatable :: gt_scbox(:,:), wct_scbox(:)
  type(matrix_scalapack) :: gt_gpr(2, gwr%my_nkbz), wc_gpr(gwr%my_nqbz)
  type(desc_t), target :: desc_kbz(gwr%my_nkbz), desc_qbz(gwr%my_nqbz)
- type(fftbox_plan3_t) :: gt_plan_gp2rp, wt_plan_gp2rp !, plan_rp2gp
+ type(fftbox_plan3_t) :: gt_plan_gp2rp, wt_plan_gp2rp
  complex(gwpc),allocatable :: ur_bk(:,:,:)
 
 ! *************************************************************************
 
  call cwtime(cpu_all, wall_all, gflops_all, "start")
- call wrtout(std_out, " Building Sigma_c with FFTs in the supercell ...")
 
  ABI_CHECK(gwr%wc_space == "itau", sjoin("wc_space: ", gwr%wc_space, " != itau"))
 
@@ -2999,6 +3006,7 @@ subroutine gwr_build_sigmac(gwr)
  sc_ngfft(4:6) = sc_ngfft(1:3)
  sc_nfft = product(sc_ngfft(1:3))
  !sc_augsize = product(sc_ngfft(4:6))
+ call wrtout(std_out, sjoin(" Building Sigma_c = i GWc with FFTs in the supercell:", ltoa(sc_ngfft(1:3))))
 
  ABI_CALLOC(gt_scbox, (sc_nfft * gwr%nspinor * ndat1, 2))
  ABI_CALLOC(wct_scbox, (sc_nfft * gwr%nspinor * ndat1))
@@ -3006,7 +3014,6 @@ subroutine gwr_build_sigmac(gwr)
  ! (ngfft, ndat, isign)
  call gt_plan_gp2rp%from_ngfft(sc_ngfft, gwr%nspinor * ndat1 * 2, +1)
  call wt_plan_gp2rp%from_ngfft(sc_ngfft, gwr%nspinor * ndat1, +1)
- !call plan_rp2gp%from_ngfft(sc_ngfft, gwr%nspinor * ndat1, -1)
 
  ! The g-vectors in the supercell for G and tchi.
  ABI_MALLOC(green_scg, (3, gwr%green_mpw))
@@ -3094,7 +3101,7 @@ subroutine gwr_build_sigmac(gwr)
        ! TODO: Should block using nproc in kpt_comm, scatter data and perform multiple FFTs in parallel.
        call xmpi_sum(wct_scbox, gwr%kpt_comm%value, ierr)
 
-       ! Wc(G',r) --> W(R',r)
+       ! Wc(G',r) --> Wc(R',r)
        call wt_plan_gp2rp%execute_ip_dpc(wct_scbox)
 
        ! Use gt_scbox to store GW (R',r, +/- i tau) for this r (imaginary unit is included outside the loops)
@@ -3312,7 +3319,7 @@ subroutine gwr_ncwrite_tchi_wc(gwr, what, filepath)
  call cwtime(cpu, wall, gflops, "start")
 
  if (my_rank == master) then
-   call wrtout(std_out, sjoin(" Writing", what, " to:", filepath))
+   call wrtout(std_out, sjoin(" Writing", what, "to:", filepath))
    NCF_CHECK(nctk_open_create(ncid, filepath, xmpi_comm_self))
    NCF_CHECK(gwr%cryst%ncwrite(ncid))
 
