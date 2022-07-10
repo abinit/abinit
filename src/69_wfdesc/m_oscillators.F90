@@ -23,7 +23,7 @@
 
 #include "abi_common.h"
 
-MODULE m_oscillators
+module m_oscillators
 
  use defs_basis
  use m_errors
@@ -43,9 +43,9 @@ MODULE m_oscillators
 
 !----------------------------------------------------------------------
 
- public :: rho_tw_g           ! Calculate rhotwg(G) = <wfn1| exp(-i(q+G).r) |wfn2>
- public :: calc_wfwfg         ! Calculate the Fourier transform of the product u_{bk}^*(r).u_{b"k}(r) at an arbitrary k in the BZ.
- public :: sym_rhotwgq0       ! Symmetrize the oscillator matrix elements in the BZ in the special case of q=0.
+ public :: rho_tw_g       ! Calculate rhotwg(G) = <wfn1| exp(-i(q+G).r) |wfn2>
+ public :: calc_wfwfg     ! Calculate the Fourier transform of the product u_{bk}^*(r).u_{b"k}(r) at an arbitrary k in the BZ.
+ public :: sym_rhotwgq0   ! Symmetrize the oscillator matrix elements in the BZ in the special case of q=0.
 !!***
 
 !----------------------------------------------------------------------
@@ -96,10 +96,10 @@ CONTAINS
 !!
 !! SOURCE
 
-subroutine rho_tw_g(nspinor,npwvec,nr,ndat,ngfft,map2sphere,use_padfft,igfftg0,gbound,&
-& wfn1,i1,ktabr1,ktabp1,spinrot1,&
-& wfn2,i2,ktabr2,ktabp2,spinrot2,&
-& dim_rtwg,rhotwg) !& nhat12)
+subroutine rho_tw_g(nspinor, npwvec, nr, ndat, ngfft, map2sphere, use_padfft, igfftg0, gbound, &
+                    wfn1, i1, ktabr1, ktabp1, spinrot1, &
+                    wfn2, i2, ktabr2, ktabp2, spinrot2, &
+                    dim_rtwg, rhotwg) !& nhat12)
 
 !Arguments ------------------------------------
 !scalars
@@ -245,9 +245,9 @@ end subroutine rho_tw_g
 !!
 !! SOURCE
 
-subroutine ts_usug_kkp_bz(npw,nr,ndat,ngfft,map2sphere,use_padfft,igfftg0,gbound,&
-& u1,time1,ktabr1,ktabp1,&
-& u2,time2,ktabr2,ktabp2,usug) !& nhat12)
+subroutine ts_usug_kkp_bz(npw, nr, ndat, ngfft, map2sphere, use_padfft, igfftg0, gbound, &
+                          u1, time1, ktabr1, ktabp1, &
+                          u2, time2, ktabr2, ktabp2, usug) !& nhat12)
 
 !Arguments ------------------------------------
 !scalars
@@ -338,7 +338,7 @@ end subroutine ts_usug_kkp_bz
 !!
 !! SOURCE
 
-subroutine usur_kkp_bz(nr,ndat,time1,ktabr1,ktabp1,u1,time2,ktabr2,ktabp2,u2,u12prod)
+subroutine usur_kkp_bz(nr, ndat, time1, ktabr1, ktabp1, u1, time2, ktabr2, ktabp2, u2, u12prod)
 
 !Arguments ------------------------------------
 !scalars
@@ -503,7 +503,7 @@ end subroutine usur_kkp_bz
 !!
 !! SOURCE
 
-subroutine gw_box2gsph(nr,ndat,npw,igfftg0,iarrbox,oarrsph)
+subroutine gw_box2gsph(nr, ndat, npw, igfftg0, iarrbox, oarrsph)
 
 !Arguments ------------------------------------
 !scalars
@@ -574,7 +574,7 @@ end subroutine gw_box2gsph
 !!
 !! SOURCE
 
-subroutine calc_wfwfg(ktabr_k,ktabi_k,spinrot,nr,nspinor,ngfft_gw,wfr_jb,wfr_kb,wfg2_jk)
+subroutine calc_wfwfg(ktabr_k, ktabi_k, spinrot, nr, nspinor, ngfft_gw, wfr_jb, wfr_kb, wfg2_jk)
 
 !Arguments ------------------------------------
 !scalars
@@ -666,7 +666,7 @@ end subroutine calc_wfwfg
 !!
 !! SOURCE
 
-function sym_rhotwgq0(itim_k,isym_k,dim_rtwg,npw,rhxtwg_in,Gsph) result(rhxtwg_sym)
+function sym_rhotwgq0(itim_k, isym_k, dim_rtwg, npw, rhxtwg_in, Gsph) result(rhxtwg_sym)
 
 !Arguments ------------------------------------
 !scalars
@@ -797,5 +797,5 @@ subroutine rotate_spinor(itim_kbz, ktabr_kbz, ktabp_kbz, spinrot, nr, nspinor, n
 end subroutine rotate_spinor
 !!***
 
-END MODULE m_oscillators
+end module m_oscillators
 !!***

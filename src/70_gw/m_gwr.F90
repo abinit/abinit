@@ -1796,8 +1796,11 @@ subroutine gwr_rotate_gt(gwr, my_ikf, my_it, my_is, desc_kbz, gt_kbz)
 !scalars
  integer :: ig1, ig2, il_g1, il_g2, ioe, spin, itau, ik_ibz, isym_k, trev_k, g0_k(3)
  logical :: isirr_k
+ real(dp) :: cpu, wall, gflops
 
 ! *************************************************************************
+
+ call cwtime(cpu, wall, gflops, "start")
 
  spin = gwr%my_spins(my_is)
  itau = gwr%my_itaus(my_it)
@@ -1816,7 +1819,7 @@ subroutine gwr_rotate_gt(gwr, my_ikf, my_it, my_is, desc_kbz, gt_kbz)
    do ioe=1,2
      call gwr%gt_kibz(ioe, ik_ibz, itau, spin)%copy(gt_kbz(ioe))
    end do
-   return
+   goto 10
  end if
 
  ! Rotate gvec, recompute gbound and rotate vc_sqrt
@@ -1843,6 +1846,9 @@ subroutine gwr_rotate_gt(gwr, my_ikf, my_it, my_is, desc_kbz, gt_kbz)
  end do
 
  end associate
+
+10 continue
+ call cwtime_report(" gwr_rotate_gt:", cpu, wall, gflops)
 
 end subroutine gwr_rotate_gt
 !!***
@@ -1885,12 +1891,8 @@ subroutine gwr_get_green_gpr(gwr, my_it, my_is, desc_kbz, gt_gpr)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: ndat1 = 1
- integer :: my_ikf, ig2, ioe, npwsp, col_bsize !, ncol_glob,
- !integer :: ik_ibz, isym_k, trev_k, g0_k(3)
+ integer :: my_ikf, ig2, ioe, npwsp, col_bsize
  real(dp) :: cpu, wall, gflops
- !logical :: isirr_k
- !type(matrix_scalapack), pointer :: ggp
- !type(desc_t),pointer :: desc_k
  type(matrix_scalapack) :: rgp
  type(matrix_scalapack),target :: gt_kbz(2)
 
@@ -1899,11 +1901,6 @@ subroutine gwr_get_green_gpr(gwr, my_it, my_is, desc_kbz, gt_gpr)
  call cwtime(cpu, wall, gflops, "start")
 
  do my_ikf=1,gwr%my_nkbz
-   !ik_ibz = gwr%my_kbz2ibz(1, my_ikf); isym_k = gwr%my_kbz2ibz(2, my_ikf)
-   !trev_k = gwr%my_kbz2ibz(6, my_ikf); g0_k = gwr%my_kbz2ibz(3:5, my_ikf)
-   !isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
-   !ik_bz = gwr%my_kbz_inds(my_ikf)
-
    ! Get G_k in the BZ.
    call gwr%rotate_gt(my_ikf, my_it, my_is, desc_kbz(my_ikf), gt_kbz)
 
@@ -1918,10 +1915,10 @@ subroutine gwr_get_green_gpr(gwr, my_it, my_is, desc_kbz, gt_gpr)
 
      ABI_CHECK(size(ggp%buffer_cplx, dim=2) == size(rgp%buffer_cplx, dim=2), "len2")
 
-     ! Perform FFT and store results in rgp.
+     ! Perform FFT G_k(g,g') -> G_k(r,g') and store results in rgp.
      do ig2=1,ggp%sizeb_local(2)
 
-       ABI_CHECK(size(ggp%buffer_cplx(:, ig2)) == desc_k%npw, "npw")
+       ABI_CHECK(size(ggp%buffer_cplx(:, ig2)) == desc_k%npw * gwr%nspinor, "npw")
        ABI_CHECK(size(rgp%buffer_cplx(:, ig2)) == gwr%g_nfft * gwr%nspinor, "gwr%g_nfft * gwr%nspinor")
 
        call fft_ug(desc_k%npw, gwr%g_nfft, gwr%nspinor, ndat1, &
@@ -1929,7 +1926,7 @@ subroutine gwr_get_green_gpr(gwr, my_it, my_is, desc_kbz, gt_gpr)
                    ggp%buffer_cplx(:, ig2), rgp%buffer_cplx(:, ig2))
      end do ! ig2
 
-     ! MPI transpose: G(r, g') -> G(g', r) and take complex conjugate.
+     ! MPI transpose: G_k(r,g') -> G_k(g',r) and take complex conjugate.
      call rgp%ptrans("C", gt_gpr(ioe, my_ikf))
      call rgp%free()
      end associate
