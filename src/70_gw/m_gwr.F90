@@ -2721,7 +2721,7 @@ subroutine gwr_build_tchi(gwr)
  call gwr%cos_transform("tchi", "it2w", sum_spins=.True.)
 
  ! Write file with chi0(i omega)
- if (dtset%prtsuscep > 0) then
+ if (gwr%dtset%prtsuscep > 0) then
    call gwr%ncwrite_tchi_wc("tchi", trim(gwr%dtfil%filnam_ds(4))//'_TCHI.nc')
  end if
 
