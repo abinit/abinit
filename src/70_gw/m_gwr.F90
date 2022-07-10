@@ -143,11 +143,11 @@ module m_gwr
  use m_pawrhoij,      only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy, pawrhoij_free, &
                              pawrhoij_inquire_dim, pawrhoij_symrhoij, pawrhoij_unpack
 
-#define __HAVE_GREENX
 #undef __HAVE_GREENX
+#define __HAVE_GREENX
 
 #ifdef __HAVE_GREENX
- use mp2_grids,      only : get_minimax_grid
+ use mp2_grids,      only : gx_minimax_grid
 #endif
 
  implicit none
@@ -317,14 +317,13 @@ module m_gwr
    ! (my_ntau)
    ! Indirect table giving the tau indices treated by this MPI rank.
 
-   real(dp),allocatable :: tau_mesh(:)
+   real(dp),allocatable :: tau_mesh(:), tau_wgs(:)
    ! (ntau)
-   ! Imaginary tau mesh
-   ! PS: The mesh deepends on the quantity we want to compute e.g. RPA or Sigma.
+   ! Imaginary tau mesh and integration weights.
 
-   real(dp),allocatable :: iomega_mesh(:)
+   real(dp),allocatable :: iw_mesh(:), iw_wgs(:)
    ! (ntau)
-   ! Imaginary frequency mesh.
+   ! Imaginary frequency mesh and integration weights
 
    real(dp),allocatable :: t2w_cos_wgs(:,:)
    ! (ntau, ntau)
@@ -592,7 +591,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  integer :: jj, cnt, ikcalc, ndeg, mband, bstop, nbsum
  integer :: ik_ibz, ik_bz, isym_k, trev_k, g0_k(3)
  logical :: isirr_k, changed, q_is_gamma
- real(dp) :: ecut_eff, cpu, wall, gflops, mem_mb, erange, te_min, te_max
+ real(dp) :: ecut_eff, cpu, wall, gflops, mem_mb, te_min, te_max
  character(len=5000) :: msg
  logical :: reorder
  type(krank_t) :: qrank, krank_ibz
@@ -604,16 +603,9 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  !integer,allocatable :: kibz2bz(:), qibz2bz(:), qglob2bz(:,:), kglob2bz(:,:)
  integer,allocatable :: count_ibz(:)
  integer,allocatable :: degblock(:,:), degblock_all(:,:,:,:), ndeg_all(:,:)
- real(dp) :: my_shiftq(3,1), kk_ibz(3), kk_bz(3), qq_bz(3), qq_ibz(3), kk(3)
+ real(dp) :: my_shiftq(3,1), kk_ibz(3), kk_bz(3), qq_bz(3), qq_ibz(3), kk(3), max_error_min(3)
  real(dp),allocatable :: wtk(:), kibz(:,:)
  logical :: periods(ndims), keepdim(ndims)
-
-#ifdef __HAVE_GREENX
- real(dp), allocatable :: tau_tj(:), tau_wj(:), tj(:), wj(:)
- real(dp), allocatable :: weights_cos_tf_t_to_w(:,:), weights_cos_tf_w_to_t(:,:), weights_sin_tf_t_to_w(:,:)
- !real(dp), INTENT(IN), OPTIONAL :: a_scaling
- !real(dp), INTENT(OUT), OPTIONAL :: e_fermi
-#endif
 
 ! *************************************************************************
 
@@ -884,20 +876,23 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  ! ================================
  ! Setup tau/omega mesh and weights
  ! ================================
- ! Compute erange from gaps taking into account nsppol if any.
+ ! Compute min/max transition energy taking into account nsppol if any.
  te_min = minval(gaps%cb_min - gaps%vb_max)
  te_max = maxval(ks_ebands%eig(nbsum,:,:) - ks_ebands%eig(1,:,:))
  if (te_min <= tol6) then
    te_min = tol6
    ABI_WARNING("System is metallic or with a very small fundamental gap!")
  end if
- erange = te_max / te_min
 
  gwr%ntau = dtset%gwr_ntau
  ABI_MALLOC(gwr%tau_mesh, (gwr%ntau))
- ABI_MALLOC(gwr%iomega_mesh, (gwr%ntau))
+ ABI_MALLOC(gwr%tau_wgs, (gwr%ntau))
+ ABI_MALLOC(gwr%iw_mesh, (gwr%ntau))
+ ABI_MALLOC(gwr%iw_wgs, (gwr%ntau))
  gwr%tau_mesh = arth(zero, one, gwr%ntau)
- gwr%iomega_mesh = arth(zero, one, gwr%ntau)
+ gwr%tau_wgs = one / gwr%ntau
+ gwr%iw_mesh = arth(zero, one, gwr%ntau)
+ gwr%iw_wgs = one / gwr%ntau
 
  ABI_MALLOC(gwr%w2t_cos_wgs, (gwr%ntau, gwr%ntau))
  ABI_MALLOC(gwr%t2w_cos_wgs, (gwr%ntau, gwr%ntau))
@@ -905,15 +900,14 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  gwr%w2t_cos_wgs = one; gwr%t2w_cos_wgs = one; gwr%t2w_sin_wgs = one
 
 #ifdef __HAVE_GREENX
- call get_minimax_grid(gwr%ntau, &
-                       tau_tj=tau_tj, &
-                       tau_wj=tau_wj, &
-                       tj=tj, &
-                       wj=wj, &
-                       weights_cos_tf_t_to_w=gwr%t2w_cos_wgs, &
-                       weights_cos_tf_w_to_t=gwr%w2t_cos_wgs, &
-                       weights_sin_tf_t_to_w=gwr%t2w_sin_wgs, &
-                       ounit=std_out)
+ call gx_minimax_grid(gwr%ntau, te_min, te_max,  &  ! in, other args are out and allocated by the routine.
+                      gwr%tau_mesh, gwr%tau_wgs, &
+                      gwr%iw_mesh, gwr%iw_wgs,   &
+                      gwr%t2w_cos_wgs, gwr%w2t_cos_wgs, gwr%t2w_sin_wgs, &
+                      max_error_min)
+
+ call wrtout(std_out, sjoin("max_error_min", ltoa(max_error_min)))
+ stop
 #endif
 
  call gaps%free()
@@ -1337,7 +1331,9 @@ subroutine gwr_free(gwr)
  ABI_SFREE(gwr%my_spins)
  ABI_SFREE(gwr%my_itaus)
  ABI_SFREE(gwr%tau_mesh)
- ABI_SFREE(gwr%iomega_mesh)
+ ABI_SFREE(gwr%tau_wgs)
+ ABI_SFREE(gwr%iw_mesh)
+ ABI_SFREE(gwr%iw_wgs)
  ABI_SFREE(gwr%w2t_cos_wgs)
  ABI_SFREE(gwr%t2w_cos_wgs)
  ABI_SFREE(gwr%t2w_sin_wgs)
@@ -2950,16 +2946,17 @@ subroutine gwr_build_sigmac(gwr)
  !logical :: q_is_gamma
  type(desc_t), pointer :: desc_q, desc_k
  character(len=500) :: msg
- !type(matrix_scalapack),pointer :: wc
 !arrays
  integer :: sc_ngfft(18)
  integer,allocatable :: green_scg(:,:), wc_scg(:,:)
- !real(dp) :: qq_ibz(3) ! kk_ibz(3),
+ real(dp) :: vals(2) !, qq_ibz(3) ! kk_ibz(3),
+ complex(dp),allocatable :: cit_me(:,:,:,:,:), ciw_me(:,:,:,:,:)
  complex(dp),allocatable :: gt_scbox(:,:), wct_scbox(:)
+ complex(gwpc),allocatable :: ur_bk(:,:,:)
  type(matrix_scalapack) :: gt_gpr(2, gwr%my_nkbz), wc_gpr(gwr%my_nqbz)
  type(desc_t), target :: desc_kbz(gwr%my_nkbz), desc_qbz(gwr%my_nqbz)
  type(fftbox_plan3_t) :: gt_plan_gp2rp, wt_plan_gp2rp
- complex(gwpc),allocatable :: ur_bk(:,:,:)
+
 
 ! *************************************************************************
 
@@ -3018,6 +3015,8 @@ subroutine gwr_build_sigmac(gwr)
 
  ! Set FFT mesh used to compute u(r) in the unit cell.
  call gwr%kcalc_wfd%change_ngfft(gwr%cryst, gwr%psps, gwr%g_ngfft)
+
+ ABI_CALLOC(cit_me, (2, gwr%ntau, gwr%max_nbcalc, gwr%nkcalc, gwr%nsppol))
 
  do my_is=1,gwr%my_nspins
    spin = gwr%my_spins(my_is)
@@ -3113,6 +3112,10 @@ subroutine gwr_build_sigmac(gwr)
             ! Multiply the periodic part by e^{ik.r}
             !call times_eikr(desc%point, gwr%g_ngfft, gwr%g_nfft, ndat1, rgp%buffer_cplx(:, ig2)
             !gt_scbox(:, 1)
+            !gt_scbox(:, 2)
+            !vals = zero
+            !ib = jb - gwr%bstart_ks(ikcalc, spin) + 1
+            !cit_me(:, itau, ib, ikcalc, spin) = cit_me(:, itau, ib, ikcalc, spin) + vals(:)
           end do
        end do ! ikcalc
 
@@ -3131,17 +3134,60 @@ subroutine gwr_build_sigmac(gwr)
    ABI_FREE(ur_bk)
  end do ! my_is
 
- ! TODO:
- ! Store matrix elements of Sigma_c(it), separate even and odd part then
- ! use sine/cosine transform to get Sigma_c(i omega).
- ! Finally, perform analytic continuation with Pade' to go to the real-axis.
-
  ABI_FREE(gt_scbox)
  ABI_FREE(wct_scbox)
  ABI_FREE(green_scg)
  ABI_FREE(wc_scg)
 
+ ! TODO:
+ ! Store matrix elements of Sigma_c(it), separate even and odd part then
+ ! use sine/cosine transform to get Sigma_c(i omega).
+ ! Finally, perform analytic continuation with Pade' to go to the real-axis.
+
+ call xmpi_sum(cit_me, gwr%comm, ierr)
+ ABI_CALLOC(ciw_me, (2, gwr%ntau, gwr%max_nbcalc, gwr%nkcalc, gwr%nsppol))
+
+ do spin=1,gwr%nsppol
+   do ikcalc=1,gwr%nkcalc
+      ik_ibz = gwr%kcalc2ibz(ikcalc, 1)
+      do jb=gwr%bstart_ks(ikcalc, spin), gwr%bstop_ks(ikcalc, spin)
+        !call ft_t2w(cit_me(:,:, ib, ikcalc, spin), ciw_me(:,:, ib, ikcalc, spin))
+      end do
+   end do
+ end do
+
+ ABI_FREE(cit_me)
+ ABI_FREE(ciw_me)
+
  call cwtime_report(" gwr_build_sigmac:", cpu_all, wall_all, gflops_all)
+
+contains
+
+subroutine ft_t2w(t_vals, w_vals)
+
+!Arguments ------------------------------------
+ complex(dp),intent(in) :: t_vals(2, gwr%ntau)
+ complex(dp),intent(out) :: w_vals(2, gwr%ntau)
+
+!Local variables-------------------------------
+ integer :: itau, iw
+ complex(dp) :: t_odd(gwr%ntau), t_even(gwr%ntau)
+
+! *************************************************************************
+
+ ! f(t) = O(t) + E(t) = (f(t) + f(-t)) / 2  + (f(t) - f(-t)) / 2
+
+ t_odd = (t_vals(1,:) + t_vals(2,:)) / two
+ t_even = (t_vals(1,:) - t_vals(2,:)) / two
+
+ do iw=1,gwr%ntau
+  !gwr%t2w_cos_wgs(iw,:)
+  !gwr%t2w_sin_wgs(iw,:)
+  !w_vals(1, iw)
+  !w_vals(2, iw)
+ end do
+
+end subroutine ft_t2w
 
 end subroutine gwr_build_sigmac
 !!***

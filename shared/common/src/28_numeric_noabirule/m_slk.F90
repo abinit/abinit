@@ -3779,11 +3779,11 @@ subroutine slk_ptrans(in_mat, trans, out_mat)
 
 !Local variables-------------------------------
  integer :: istwf_k, sb, size_blocs(2)
- real(dp) :: cpu, wall, gflops
+ !real(dp) :: cpu, wall, gflops
 
 ! *************************************************************************
 
- call cwtime(cpu, wall, gflops, "start")
+ !call cwtime(cpu, wall, gflops, "start")
 
  istwf_k = merge(1, 2, allocated(in_mat%buffer_cplx))
 
@@ -3799,7 +3799,6 @@ subroutine slk_ptrans(in_mat, trans, out_mat)
 
  ! prototype
  !call pdtran(m, n, alpha, a, ia, ja, desca, beta, c, ic, jc, descc)
-
 
  if (allocated(in_mat%buffer_cplx)) then
 #ifdef HAVE_LINALG_SCALAPACK
@@ -3828,7 +3827,7 @@ subroutine slk_ptrans(in_mat, trans, out_mat)
    ABI_ERROR("Neither buffer_cplx nor buffer_real are allocated!")
  end if
 
- call cwtime_report(" slk_ptrans:", cpu, wall, gflops)
+ !call cwtime_report(" slk_ptrans:", cpu, wall, gflops)
 
 end subroutine slk_ptrans
 !!***
