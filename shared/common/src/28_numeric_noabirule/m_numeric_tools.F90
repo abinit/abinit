@@ -4204,15 +4204,13 @@ end subroutine calculate_pade_a
 !!
 !! SOURCE
 
-function newrap_step(z,f,df)
+complex(dp) function newrap_step(z,f,df)
 
 !Arguments ------------------------------------
 !scalars
  complex(dpc),intent(in) :: z,f,df
- complex(dpc) :: newrap_step
 
 !Local variables-------------------------------
-!scalars
  real(dp) :: dfm2
 ! *************************************************************************
 

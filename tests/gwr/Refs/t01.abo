@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat  9 Jul 2022.
-- ( at 15h18 )
+.Starting date : Mon 11 Jul 2022.
+- ( at 15h04 )
   
 - input  file    -> /Users/gmatteo/git_repos/abinit_gwr/_build/tests/Test_suite/gwr_t01/t01.abi
 - output file    -> t01.abo
@@ -578,6 +578,12 @@ green_mpw: 302
 tchi_mpw: 190
 g_ngfft: [12, 12, 12, 13, 13, 12, 312, 16, ]
 P gwr_np_gtks: [1, 1, 1, 1, ]
+ft_max_err_t2w_cos:  -1.00000000E+00
+ft_max_err_w2t_cos:  -1.00000000E+00
+ft_max_err_t2w_sin:  -1.00000000E+00
+MinMax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(omega)
+    1 0.00000E+00   5.00000E-01   0.00000E+00   5.00000E-01
+    2 1.00000E+00   5.00000E-01   1.00000E+00   5.00000E-01
 ...
 
 Trace of tchi_qibz matrix for testing purposes:

@@ -156,9 +156,8 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
 !Local variables ------------------------------
 !scalars
  integer,parameter :: master = 0, cplex1 = 1, ipert0 = 0, idir0 = 0, optrhoij1 = 1
- integer :: ii, comm, nprocs, my_rank, mgfftf, nfftf
- integer :: omp_ncpus, work_size, nks_per_proc, ierr
- real(dp):: eff, mempercpu_mb, max_wfsmem_mb, nonscal_mem
+ integer :: ii, comm, nprocs, my_rank, mgfftf, nfftf, omp_ncpus, work_size, nks_per_proc, ierr
+ real(dp) :: eff, mempercpu_mb, max_wfsmem_mb, nonscal_mem
  real(dp) :: ecore, ecut_eff, ecutdg_eff, cpu, wall, gflops
  logical, parameter :: is_dfpt = .false.
  logical :: use_wfk
@@ -172,21 +171,21 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  type(mpi_type) :: mpi_enreg
  type(gwr_t) :: gwr
 !arrays
- real(dp),parameter :: k0(3) = zero
- integer :: cplex, cplex_dij, cplex_rhoij !,band den_fform,
+ real(dp), parameter :: k0(3) = zero
+ integer :: cplex, cplex_dij, cplex_rhoij
  integer :: gnt_option !,has_dijU,has_dijso,iab,bmin,bmax,irr_idx1,irr_idx2
  integer :: istep, moved_atm_inside, moved_rhor, n3xccc
  integer :: ndij !,ndim,nfftf,nfftf_tot,nkcalc,gwc_nfft,gwc_nfftot,gwx_nfft,gwx_nfftot
- integer :: ngrvdw,nhatgrdim,nkxc,nspden_rhoij,optene !nzlmopt,
- integer :: optcut,optgr0,optgr1,optgr2,optrad,psp_gencond !option,
- integer :: rhoxsp_method,usexcnhat !, use_aerhor,use_umklp
+ integer :: ngrvdw, nhatgrdim, nkxc, nspden_rhoij, optene !nzlmopt,
+ integer :: optcut, optgr0, optgr1, optgr2, optrad, psp_gencond !option,
+ integer :: rhoxsp_method, usexcnhat !, use_aerhor,use_umklp
  !real(dp) :: compch_fft, compch_sph !,r_s,rhoav,alpha
  real(dp) :: gsqcutc_eff, gsqcutf_eff, gsqcut_shp
  real(dp) :: vxcavg !,vxcavg_qp ucvol,
  real(dp) :: gwc_gsq, gwx_gsq,gw_gsq !, gsqcut
  logical :: call_pawinit
  type(energies_type) :: KS_energies
- type(melflags_t) :: KS_mflags !,QP_mflags
+ type(melflags_t) :: KS_mflags
  type(paw_dmft_type) :: Paw_dmft
 !arrays
  integer :: ngfftc(18),ngfftf(18),unts(2) ! gwc_ngfft(18),gwx_ngfft(18),
@@ -198,11 +197,10 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  real(dp),allocatable :: ks_rhor(:,:),ks_vhartr(:), ks_vtrial(:,:), ks_vxc(:,:), ks_taur(:,:)
  real(dp),allocatable :: kxc(:,:), ph1d(:,:), ph1df(:,:) !qp_kxc(:,:),
  real(dp),allocatable :: vpsp(:), xccc3d(:), dijexc_core(:,:,:) !, dij_hf(:,:,:)
- !logical,allocatable :: bks_mask(:,:,:), keep_ur(:,:,:), bmask(:)
- type(Paw_an_type),allocatable :: KS_paw_an(:) !,QP_paw_an(:)
- type(Paw_ij_type),allocatable :: KS_paw_ij(:) !,QP_paw_ij(:)
+ type(Paw_an_type),allocatable :: KS_paw_an(:)
+ type(Paw_ij_type),allocatable :: KS_paw_ij(:)
  type(Pawfgrtab_type),allocatable :: Pawfgrtab(:)
- type(Pawrhoij_type),allocatable :: KS_Pawrhoij(:) !,QP_pawrhoij(:),prev_Pawrhoij(:),tmp_pawrhoij(:)
+ type(Pawrhoij_type),allocatable :: KS_Pawrhoij(:)
  type(pawpwff_t),allocatable :: Paw_pwff(:)
 
 !************************************************************************
@@ -282,7 +280,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  cryst = dtset%get_crystal(img=1)
  use_wfk = .True.
 
- ! === Some variables need to be initialized/nullify at start ===
+ ! Some variables need to be initialized/nullify at start
  usexcnhat = 0
  call energies_init(KS_energies)
 
@@ -588,9 +586,9 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  KS_mflags%has_vhartree=1
  KS_mflags%has_vxc     =1
  KS_mflags%has_vxcval  =1
- if (Dtset%usepawu /= 0  )  KS_mflags%has_vu     = 1
- if (Dtset%useexexch /= 0)  KS_mflags%has_lexexch= 1
- if (Dtset%usepaw==1.and.Dtset%gw_sigxcore==1) KS_mflags%has_sxcore = 1
+ if (Dtset%usepawu /= 0  )  KS_mflags%has_vu      = 1
+ if (Dtset%useexexch /= 0)  KS_mflags%has_lexexch = 1
+ if (Dtset%usepaw==1 .and. Dtset%gw_sigxcore == 1) KS_mflags%has_sxcore = 1
  !if (gwcalctyp<10        )  KS_mflags%only_diago = 1 ! off-diagonal elements only for SC on wavefunctions.
  KS_mflags%only_diago = 1 ! off-diagonal elements only for SC on wavefunctions.
 
@@ -604,8 +602,8 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  if (my_rank == master) call gwr%ks_me%print(header="KS matrix elements", unit=std_out)
  ABI_FREE(tmp_kstab)
 
- ! Build Green's function in imaginary-time.
  if (use_wfk) then
+   ! Build Green's function in imaginary-time from WFK file
    call gwr%build_gtau_from_wfk(wfk_path)
  else
    !call gwr%build_gtau_from_vtrial(wfk_path, ngfftf, ks_vtrial)

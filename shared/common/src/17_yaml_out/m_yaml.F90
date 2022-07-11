@@ -1236,7 +1236,7 @@ end subroutine yamldoc_add_dictlist
 !!
 !! INPUTS
 !!  label = key name
-!!  tag <character(len=*)>=optional  add a tag to the field
+!!  [tag] <character(len=*)>=optional add a tag to the field
 !!  [newline] = set to false to prevent adding newlines after fields
 !!  [indent] = optional number of spaces to add to the header
 !!  [comment]: optional Yaml comment added after the value

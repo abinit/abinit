@@ -144,7 +144,7 @@ module m_gwr
                              pawrhoij_inquire_dim, pawrhoij_symrhoij, pawrhoij_unpack
 
 #undef __HAVE_GREENX
-#define __HAVE_GREENX
+!#define __HAVE_GREENX
 
 #ifdef __HAVE_GREENX
  use mp2_grids,      only : gx_minimax_grid
@@ -336,6 +336,9 @@ module m_gwr
    real(dp),allocatable :: t2w_sin_wgs(:,:)
    ! (ntau, ntau)
    ! weights for sine transform (i tau --> i omega)
+
+   real(dp) :: ft_max_error(3) = -one
+   ! Max error due to inhomogenous FT.
 
    integer :: green_mpw = -1
    ! Max number of g-vectors for Green's function over k-points.
@@ -603,7 +606,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  !integer,allocatable :: kibz2bz(:), qibz2bz(:), qglob2bz(:,:), kglob2bz(:,:)
  integer,allocatable :: count_ibz(:)
  integer,allocatable :: degblock(:,:), degblock_all(:,:,:,:), ndeg_all(:,:)
- real(dp) :: my_shiftq(3,1), kk_ibz(3), kk_bz(3), qq_bz(3), qq_ibz(3), kk(3), max_error_min(3)
+ real(dp) :: my_shiftq(3,1), kk_ibz(3), kk_bz(3), qq_bz(3), qq_ibz(3), kk(3)
  real(dp),allocatable :: wtk(:), kibz(:,:)
  logical :: periods(ndims), keepdim(ndims)
 
@@ -674,8 +677,6 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
 
  !call get_ibz2bz(gwr%nkibz, gwr%nkbz, kbz2ibz, kibz2bz, ierr)
  !ABI_CHECK(ierr == 0, "Something wrong in symmetry tables for k-points")
-
-
 
  ! Setup qIBZ, weights and BZ.
  ! Always use q --> -q symmetry even in systems without inversion
@@ -900,14 +901,13 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  gwr%w2t_cos_wgs = one; gwr%t2w_cos_wgs = one; gwr%t2w_sin_wgs = one
 
 #ifdef __HAVE_GREENX
- call gx_minimax_grid(gwr%ntau, te_min, te_max,  &  ! in, other args are out and allocated by the routine.
-                      gwr%tau_mesh, gwr%tau_wgs, &
+ call gx_minimax_grid(gwr%ntau, te_min, te_max,  &  ! in
+                      gwr%tau_mesh, gwr%tau_wgs, &  ! all these args are out and allocated by the routine.
                       gwr%iw_mesh, gwr%iw_wgs,   &
                       gwr%t2w_cos_wgs, gwr%w2t_cos_wgs, gwr%t2w_sin_wgs, &
-                      max_error_min)
+                      gwr%ft_max_error)
 
- call wrtout(std_out, sjoin("max_error_min", ltoa(max_error_min)))
- stop
+ call wrtout(std_out, sjoin("ft_max_error", ltoa(gwr%ft_max_error)))
 #endif
 
  call gaps%free()
@@ -1424,7 +1424,7 @@ subroutine gwr_load_kcalc_wfd(gwr, wfk_path, tmp_kstab)
 
 !Arguments ------------------------------------
  class(gwr_t),intent(inout) :: gwr
- character(len=fnlen),intent(in) :: wfk_path
+ character(len=*),intent(in) :: wfk_path
  integer,allocatable,intent(out) :: tmp_kstab(:,:,:)
 
 !Local variables-------------------------------
@@ -1527,7 +1527,7 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
 
 !Arguments ------------------------------------
  class(gwr_t),intent(inout) :: gwr
- character(len=fnlen),intent(in) :: wfk_path
+ character(len=*),intent(in) :: wfk_path
 
 !Local variables-------------------------------
 !scalars
@@ -1684,8 +1684,8 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
            do il_g1=1, gt%sizeb_local(1)
              ig1 = gt%loc2grow(il_g1)
              !cgwork(ig1) x cgwork(ig2) *
-             !gt%buffer_cplx(il_g1, il_g2) = gt%buffer_cplx(il_g1, il_g2) + &
-             !  gt_fact * GWPC_CONJG(wave%ug(ig1)) * wave%ug(ig2)
+             !gt%buffer_cplx(il_g1, il_g2) = gt%buffer_cplx(il_g1, il_g2) ! &
+             !  + gt_fact * GWPC_CONJG(wave%ug(ig1)) * wave%ug(ig2)
            end do
          end do
          end associate
@@ -1792,11 +1792,11 @@ subroutine gwr_rotate_gt(gwr, my_ikf, my_it, my_is, desc_kbz, gt_kbz)
 !scalars
  integer :: ig1, ig2, il_g1, il_g2, ioe, spin, itau, ik_ibz, isym_k, trev_k, g0_k(3)
  logical :: isirr_k
- real(dp) :: cpu, wall, gflops
+ !real(dp) :: cpu, wall, gflops
 
 ! *************************************************************************
 
- call cwtime(cpu, wall, gflops, "start")
+ !call cwtime(cpu, wall, gflops, "start")
 
  spin = gwr%my_spins(my_is)
  itau = gwr%my_itaus(my_it)
@@ -1844,7 +1844,7 @@ subroutine gwr_rotate_gt(gwr, my_ikf, my_it, my_is, desc_kbz, gt_kbz)
  end associate
 
 10 continue
- call cwtime_report(" gwr_rotate_gt:", cpu, wall, gflops)
+ !call cwtime_report(" gwr_rotate_gt:", cpu, wall, gflops)
 
 end subroutine gwr_rotate_gt
 !!***
@@ -2065,17 +2065,13 @@ subroutine gwr_get_wc_gpr(gwr, my_it, my_is, desc_qbz, wct_gpr)
  !integer :: iq_ibz, isym_q, trev_q, g0_q(3)
  real(dp) :: cpu, wall, gflops
  !logical :: isirr_q
- type(matrix_scalapack) :: rgp
- type(matrix_scalapack) wct_qbz
+ type(matrix_scalapack) :: rgp, wct_qbz
 
 ! *************************************************************************
 
  call cwtime(cpu, wall, gflops, "start")
 
  do my_iqf=1,gwr%my_nkbz
-   !iq_ibz = gwr%my_kbz2ibz(1, my_iqf); isym_q = gwr%my_kbz2ibz(2, my_iqf)
-   !trev_q = gwr%my_kbz2ibz(6, my_iqf); g0_q = gwr%my_kbz2ibz(3:5, my_iqf)
-   !isirr_q = (isym_q == 1 .and. trev_q == 0 .and. all(g0_q == 0))
 
    ! Get W_q in the BZ.
    call gwr%rotate_wct(my_iqf, my_it, my_is, desc_qbz(my_iqf), wct_qbz)
@@ -2361,7 +2357,7 @@ subroutine gwr_print(gwr, header, unit)
 
 !Local variables-------------------------------
 !scalars
- integer :: my_is, spin, my_it, itau, my_iki, ik_ibz, unt
+ integer :: my_is, spin, my_it, itau, my_iki, ik_ibz, unt, ii
  character(len=500) :: msg
  type(yamldoc_t) :: ydoc
 
@@ -2386,6 +2382,19 @@ subroutine gwr_print(gwr, header, unit)
  call ydoc%add_int("tchi_mpw", gwr%tchi_mpw)
  call ydoc%add_int1d("g_ngfft", gwr%g_ngfft(1:8))
  call ydoc%add_int1d("P gwr_np_gtks", [gwr%g_comm%nproc, gwr%tau_comm%nproc, gwr%kpt_comm%nproc, gwr%spin_comm%nproc])
+
+ ! Print Max error for the inhomogeneous FT.
+ call ydoc%add_real("ft_max_err_t2w_cos", gwr%ft_max_error(1))
+ call ydoc%add_real("ft_max_err_w2t_cos", gwr%ft_max_error(2))
+ call ydoc%add_real("ft_max_err_t2w_sin", gwr%ft_max_error(3))
+
+ ! Print imaginary time/frequency mesh with weights.
+ call ydoc%open_tabular("MinMax imaginary tau/omega mesh", comment="tau, weight(tau), omega, weight(omega)")
+ do ii=1,gwr%ntau
+   write(msg, "(i0, 4(es12.5,2x))")ii, gwr%tau_mesh(ii), gwr%tau_wgs(ii), gwr%iw_mesh(ii), gwr%iw_wgs(ii)
+   call ydoc%add_tabular_line(msg)
+ end do
+
  call ydoc%write_and_free(unt)
 
  if (gwr%dtset%prtvol > 10) then
@@ -3142,7 +3151,8 @@ subroutine gwr_build_sigmac(gwr)
  ! TODO:
  ! Store matrix elements of Sigma_c(it), separate even and odd part then
  ! use sine/cosine transform to get Sigma_c(i omega).
- ! Finally, perform analytic continuation with Pade' to go to the real-axis.
+ ! Finally, perform analytic continuation with Pade' to go to the real-axis
+ ! and compute QP corrections and spectral function.
 
  call xmpi_sum(cit_me, gwr%comm, ierr)
  ABI_CALLOC(ciw_me, (2, gwr%ntau, gwr%max_nbcalc, gwr%nkcalc, gwr%nsppol))
@@ -3181,10 +3191,10 @@ subroutine ft_t2w(t_vals, w_vals)
  t_even = (t_vals(1,:) - t_vals(2,:)) / two
 
  do iw=1,gwr%ntau
-  !gwr%t2w_cos_wgs(iw,:)
-  !gwr%t2w_sin_wgs(iw,:)
-  !w_vals(1, iw)
-  !w_vals(2, iw)
+   !gwr%t2w_cos_wgs(iw,:)
+   !gwr%t2w_sin_wgs(iw,:)
+   !w_vals(1, iw)
+   !w_vals(2, iw)
  end do
 
 end subroutine ft_t2w
@@ -3259,6 +3269,9 @@ subroutine gwr_rpa_energy(gwr)
        end do
 
        call chi_tmp%pzheev("N", "U", dummy_vec, eig)
+
+       ! Integration
+       !gwr%iw_wgs(itau)
 
        if (my_it == gwr%my_ntau) then
          ! Free workspace
