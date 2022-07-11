@@ -700,6 +700,12 @@ green_mpw: 1540
 tchi_mpw: 1540
 g_ngfft: [16, 16, 18, 17, 17, 18, 312, 16, ]
 P gwr_np_gtks: [2, 2, 2, 1, ]
+ft_max_err_t2w_cos:  -1.00000000E+00
+ft_max_err_w2t_cos:  -1.00000000E+00
+ft_max_err_t2w_sin:  -1.00000000E+00
+MinMax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(omega)
+    1 0.00000E+00   5.00000E-01   0.00000E+00   5.00000E-01
+    2 1.00000E+00   5.00000E-01   1.00000E+00   5.00000E-01
 ...
 
 Trace of tchi_qibz matrix for testing purposes:
