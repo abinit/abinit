@@ -41,17 +41,10 @@
 subroutine alloc_on_gpu(gpu_ptr,size)
 
 !Arguments ------------------------------------
- integer :: size ! size in bytes to allocate
- type(c_ptr) :: gpu_ptr
+ type(c_ptr), intent(inout) :: gpu_ptr
+ integer    , intent(in)    :: size ! size in bytes to allocate
 
-!Local variables ------------------------------
- type(c_ptr) :: cptr
-
-! *********************************************************************
-
- if (.false.) then
-    cptr=gpu_ptr;write(std_out,*) size
- end if
+ ABI_UNUSED(/gpu_ptr,size_in_bytes/)
 
 end subroutine alloc_on_gpu
 !!***
@@ -61,14 +54,14 @@ end subroutine alloc_on_gpu
 !!  copy_from_gpu
 !!
 !! FUNCTION
-!!  copy size byte from gpu memory pointed by gpu_ptr to dtab
+!!  copy size byte from gpu memory (pointed by gpu_ptr) to cpu memory (pointed by cpu_ptr)
 !!
 !! INPUTS
-!!  size= size in byte to allocate
-!!  gpu_ptr= C_PTR on gpu memory location that has been allocated
+!!  size_in_bytes = size in bytes to allocate
+!!  gpu_ptr = C_PTR on gpu memory location that has been allocated
 !!
 !! OUTPUT
-!!  dtab = fortran tab which will contains data
+!!  cpu_ptr = C_PTR on cpu memory (obtained by c_loc)
 !!
 !! SIDE EFFECTS
 !!   WARNING! : this routine is a dummy one when HAVE_GPU_CUDA is not enabled
@@ -76,21 +69,14 @@ end subroutine alloc_on_gpu
 !!
 !! SOURCE
 
-subroutine copy_from_gpu(dtab,gpu_ptr,size)
+subroutine copy_from_gpu(cpu_ptr,gpu_ptr,size_in_bytes)
 
 !Arguments ------------------------------------
- integer :: size ! taille en octet a transferer
- real(dp),dimension(*) :: dtab
- type(c_ptr) :: gpu_ptr
+ type(c_ptr),             intent(in)    :: cpu_ptr
+ type(c_ptr),             intent(inout) :: gpu_ptr
+ integer(kind=c_int32_t), intent(in)    :: size_in_bytes ! size in byte (to be transfered)
 
-!Local variables ------------------------------
- type(c_ptr) :: cptr
-
-! *********************************************************************
-
- if (.false.) then
-   cptr=gpu_ptr;write(std_out,*) size,dtab(1)
- end if
+ ABI_UNUSED(/cpu_ptr,gpu_ptr,size_in_bytes/)
 
 end subroutine copy_from_gpu
 !!***
@@ -100,11 +86,11 @@ end subroutine copy_from_gpu
 !!  copy_on_gpu
 !!
 !! FUNCTION
-!!  copy size byte from  dtab to gpu memory pointed by gpu_ptr
+!!  copy size byte from cpu (pointed by cpu_ptr) to gpu memory (pointed by gpu_ptr)
 !!
 !! INPUTS
-!!  size= size in byte to allocate
-!!  dtab = fortran tab to copy
+!!  size_in_bytes = size in bytes to allocate
+!!  cpu_ptr = C_PTR on cpu memory (obtained by c_loc)
 !!
 !! OUTPUT
 !!  gpu_ptr= C_PTR on gpu memory location
@@ -115,20 +101,14 @@ end subroutine copy_from_gpu
 !!
 !! SOURCE
 
-subroutine copy_on_gpu(dtab,gpu_ptr,size)
+subroutine copy_on_gpu(cpu_ptr,gpu_ptr,size_in_bytes)
 
-!Arguments ------------------------------------
- integer :: size ! size in byte (to be transfered)
- real(dp), dimension(*) :: dtab
- type(c_ptr) :: gpu_ptr
-!Local variables ------------------------------
- type(c_ptr) :: cptr
+  !Arguments ------------------------------------
+  type(c_ptr),             intent(in)    :: cpu_ptr
+  type(c_ptr),             intent(inout) :: gpu_ptr
+  integer(kind=c_int32_t), intent(in)    :: size_in_bytes ! size in byte (to be transfered)
 
-! *********************************************************************
-
- if (.false.) then
-   cptr=gpu_ptr;write(std_out,*) size,dtab(1)
- end if
+  ABI_UNUSED(/cpu_ptr,gpu_ptr,size_in_bytes/)
 
 end subroutine copy_on_gpu
 !!***
@@ -153,15 +133,10 @@ end subroutine copy_on_gpu
 
 subroutine dealloc_on_gpu(gpu_ptr)
 
-!Arguments ------------------------------------
- type(c_ptr) :: gpu_ptr
+  !Arguments ------------------------------------
+  type(c_ptr), intent(inout) :: gpu_ptr
 
-!Local variables ------------------------------
- type(c_ptr) :: cptr
-
-! *********************************************************************
-
- if (.false.) cptr=gpu_ptr
+  ABI_UNUSED(/gpu_ptr/)
 
 end subroutine dealloc_on_gpu
 !!***
@@ -194,8 +169,8 @@ subroutine gpu_memset(gpu_ptr, val, array_size)
 
   !Arguments ------------------------------------
   type(c_ptr),                    intent(inout) :: gpu_ptr
-  integer(kind=c_int32_t), value, intent(in)    :: val
-  integer(kind=c_int32_t), value, intent(in)    :: array_size
+  integer(kind=c_int32_t),        intent(in)    :: val
+  integer(kind=c_int32_t),        intent(in)    :: array_size
 
   ABI_UNUSED(/gpu_ptr,val,array_size/)
 

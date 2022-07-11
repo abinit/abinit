@@ -213,11 +213,11 @@ module m_abi_linalg
 
   interface
 
-    subroutine alloc_on_gpu(gpu_ptr,size) bind(c, name="alloc_on_gpu_")
+    subroutine alloc_on_gpu(gpu_ptr,size_in_bytes) bind(c, name="alloc_on_gpu_")
       use, intrinsic :: iso_c_binding
       implicit none
       type(c_ptr),                    intent(inout)  :: gpu_ptr
-      integer(kind=c_int32_t),        intent(in)     :: size
+      integer(kind=c_int32_t),        intent(in)     :: size_in_bytes
     end subroutine alloc_on_gpu
 
     subroutine dealloc_on_gpu(gpu_ptr) bind(c, name="dealloc_on_gpu_")
@@ -226,28 +226,28 @@ module m_abi_linalg
       type(c_ptr),                    intent(inout)  :: gpu_ptr
     end subroutine dealloc_on_gpu
 
-    subroutine copy_on_gpu(ptr, gpu_ptr, size) bind(c, name="copy_on_gpu_")
+    subroutine copy_on_gpu(cpu_ptr, gpu_ptr, size_in_bytes) bind(c, name="copy_on_gpu_")
       use, intrinsic :: iso_c_binding
       implicit none
-      type(c_ptr),             value, intent(in)    :: ptr
+      type(c_ptr),                    intent(in)    :: cpu_ptr
       type(c_ptr),                    intent(inout) :: gpu_ptr
-      integer(kind=c_int32_t),        intent(in)    :: size
+      integer(kind=c_int32_t),        intent(in)    :: size_in_bytes
     end subroutine copy_on_gpu
 
-    subroutine copy_from_gpu(ptr, gpu_ptr, size) bind(c, name="copy_from_gpu_")
+    subroutine copy_from_gpu(cpu_ptr, gpu_ptr, size_in_bytes) bind(c, name="copy_from_gpu_")
       use, intrinsic :: iso_c_binding
       implicit none
-      type(c_ptr),             value, intent(in)    :: ptr
+      type(c_ptr),                    intent(in)    :: cpu_ptr
       type(c_ptr),                    intent(inout) :: gpu_ptr
-      integer(kind=c_int32_t),        intent(in)    :: size
+      integer(kind=c_int32_t),        intent(in)    :: size_in_bytes
     end subroutine copy_from_gpu
 
-    subroutine gpu_memset(gpu_ptr, val, size) bind(c, name="gpu_memset_")
+    subroutine gpu_memset(gpu_ptr, val, size_in_bytes) bind(c, name="gpu_memset_")
       use, intrinsic :: iso_c_binding
       implicit none
       type(c_ptr),                    intent(inout) :: gpu_ptr
-      integer(kind=c_int32_t), value, intent(in)    :: val
-      integer(kind=c_int32_t), value, intent(in)    :: size
+      integer(kind=c_int32_t),        intent(in)    :: val
+      integer(kind=c_int32_t),        intent(in)    :: size_in_bytes
     end subroutine gpu_memset
 
     ! logical(kind=c_bool) function gpu_allocated(gpu_ptr) bind(c, name="gpu_allocated_")
