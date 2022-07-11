@@ -304,8 +304,8 @@ extern "C" void dealloc_on_gpu_(void **gpu_ptr){
 /*            the correct one is in xx_gpu_toolbox/dev_spec.cu                */
 /*============================================================================*/
 
-extern "C" void copy_on_gpu_(void *ptr, void **gpu_ptr, int* size){
-  if(cudaMemcpy(*gpu_ptr,ptr,*size,cudaMemcpyHostToDevice)!=cudaSuccess){
+extern "C" void copy_on_gpu_(void **cpu_ptr, void **gpu_ptr, int* size){
+  if(cudaMemcpy(*gpu_ptr, *cpu_ptr, *size, cudaMemcpyHostToDevice)!=cudaSuccess){
     printf("ERROR: copy_on_gpu failed : %s\n",cudaGetErrorString(cudaGetLastError()));
     fflush(stdout);
     abi_cabort();
@@ -321,8 +321,8 @@ extern "C" void copy_on_gpu_(void *ptr, void **gpu_ptr, int* size){
 /*  dtab = fortran tab which will contains data                               */
 /*============================================================================*/
 
-extern "C" void copy_from_gpu_(void *ptr, void **gpu_ptr, int* size){
-  if(cudaMemcpy(ptr,*gpu_ptr,*size,cudaMemcpyDeviceToHost)!=cudaSuccess){
+extern "C" void copy_from_gpu_(void **cpu_ptr, void **gpu_ptr, int* size){
+  if(cudaMemcpy(*cpu_ptr, *gpu_ptr, *size, cudaMemcpyDeviceToHost)!=cudaSuccess){
     printf("ERROR: copy_from_gpu failed : %s\n",cudaGetErrorString(cudaGetLastError()));
     fflush(stdout);
     abi_cabort();
@@ -341,9 +341,9 @@ extern "C" void copy_from_gpu_(void *ptr, void **gpu_ptr, int* size){
 /*  None                                                                      */
 /*============================================================================*/
 
-extern "C" void gpu_memset_(void **gpu_ptr, int value, size_t count){
-  if(cudaMemset(*gpu_ptr,value,count)!=cudaSuccess){
-    printf("ERROR: gpu_memset failed : %s\n",cudaGetErrorString(cudaGetLastError()));
+extern "C" void gpu_memset_(void **gpu_ptr, const int32_t* value, const int32_t* size_in_bytes){
+  if(cudaMemset(*gpu_ptr, *value, *size_in_bytes)!=cudaSuccess){
+    printf("ERROR: gpu_memset at address %p failed : %s\n",*gpu_ptr,cudaGetErrorString(cudaGetLastError()));
     fflush(stdout);
     abi_cabort();
   }
