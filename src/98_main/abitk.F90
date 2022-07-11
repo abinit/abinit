@@ -174,7 +174,7 @@ program abitk
    ABI_CHECK(any(kptrlatt /= 0), "kptrlatt or ngkpt must be specified")
 
    call kpts_ibz_from_kptrlatt(cryst, kptrlatt, kptopt, nshiftk, shiftk, nkibz, kibz, wtk, nkbz, kbz, &
-      new_kptrlatt=new_kptrlatt, new_shiftk=new_shiftk) !, bz2ibz)  ! Optional
+      new_kptrlatt=new_kptrlatt, new_shiftk=new_shiftk)
    new_nshiftk = size(new_shiftk, dim=2)
 
    write(std_out, "(/, a)")" Input_kptrlatt | New_kptrlatt"

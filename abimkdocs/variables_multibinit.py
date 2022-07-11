@@ -380,8 +380,8 @@ Variable(
     added_in_version="v9",
     text=r"""
 * 0 --> do nothing (Default)
-* 1 --> Print the Goal-Function Values (GF) for all coefficients on a given processor 
-        at a given fit iteration into a csv file. Each iteration each processor 
+* 1 --> Print the Goal-Function Values (GF) for all coefficients on a given processor
+        at a given fit iteration into a csv file. Each iteration each processor
         prints a csv file. The colums are the GF on Energy, Force+Stresses, Forces, Stresses.
 """,
 ),
@@ -478,9 +478,9 @@ Variable(
     added_in_version="v9",
     text=r"""
 Specifies three factors for Energy, Forces and Stresses in the calcluation of the Goal Function which is to be minimized during the
-fit process allowing to change the relative weight of the three quantities. 
+fit process allowing to change the relative weight of the three quantities.
 
-Default value is 1 1 1, equally balancing energy, forces and stresses. 
+Default value is 1 1 1, equally balancing energy, forces and stresses.
 """,
 ),
 
@@ -509,7 +509,7 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 Give the number of anharmonic coefficients per symmetric irreducible atoms to add during fit process.
-[[multibinit:fit_ncoeff]]/(nirred_atoms*fit_ncoeff_per_iatom) gives the number of fitting loops performed during the fit process, where in each loop fit_ncoeff_per_iatom coefficients for each irreducible atom will be added to the anharmonic potential. 
+[[multibinit:fit_ncoeff]]/(nirred_atoms*fit_ncoeff_per_iatom) gives the number of fitting loops performed during the fit process, where in each loop fit_ncoeff_per_iatom coefficients for each irreducible atom will be added to the anharmonic potential.
 """,
 ),
 
@@ -624,7 +624,7 @@ Variable(
     mnemonics="FIT anharmonic Strain-Phonon COUPLING coefficients",
     added_in_version="before_v9",
     text=r"""
-Flag to activate the generation of pure displacement coefficients. This option will generate coefficients like (Sr-Ti)^2*(Sr-O), where only atomic displacements occur.  
+Flag to activate the generation of pure displacement coefficients. This option will generate coefficients like (Sr-Ti)^2*(Sr-O), where only atomic displacements occur.
 
 Default value: 1 -> displacement terms are generated.
 """,
@@ -828,9 +828,9 @@ Variable(
     added_in_version="v9",
     text=r"""
 Specifies three factors for Energy, Forces and Stresses in the calcluation of the Goal Function which is to be minimized during the
-bounding process allowing to change the relative weight of the three quantities. 
+bounding process allowing to change the relative weight of the three quantities.
 
-Default value is 1 1 1, equally balancing energy, forces and stresses. 
+Default value is 1 1 1, equally balancing energy, forces and stresses.
 """,
 ),
 
@@ -882,7 +882,7 @@ Variable(
     mnemonics="Goal Function penalty for determination of bounding coefficients",
     added_in_version="v9",
     text=r"""
-Relative penalty for the determination of bounding coefficient values. The penalty defines the ration of the goal function before and after adding the coefficient. If the optimum value of the coefficient (-one that decreases the value of the goal function-) is negative a positive value that .   
+Relative penalty for the determination of bounding coefficient values. The penalty defines the ration of the goal function before and after adding the coefficient. If the optimum value of the coefficient (-one that decreases the value of the goal function-) is negative a positive value that .
 """,
 ),
 
@@ -2050,9 +2050,9 @@ Variable(
     added_in_version="v9",
     text=r"""
 Specifies three factors for Energy, Forces and Stresses in the calcluation of the Goal Function which is to be minimized during the
-optimization process allowing to change the relative weight of the three quantities. 
+optimization process allowing to change the relative weight of the three quantities.
 
-Default value is 1 1 1, equally balancing energy, forces and stresses. 
+Default value is 1 1 1, equally balancing energy, forces and stresses.
 """,
 ),
 
