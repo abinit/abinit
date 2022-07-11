@@ -44,7 +44,7 @@ module m_sigtk
  use defs_datatypes, only : ebands_t, pseudopotential_type
  use defs_wvltypes,  only : wvl_internal_type
  use m_pawtab,       only : pawtab_type
- use m_kpts,         only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt
+ use m_kpts,         only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, kpts_map
 
  implicit none
 
@@ -81,9 +81,6 @@ contains  !=====================================================
 !!      m_sigmaph
 !!
 !! CHILDREN
-!!      ebands_free,ebands_print,ebands_update_occ,fine_gaps%free
-!!      fine_gaps%print,fine_hdr%free,gaps%free,gaps%print,hdr_init_lowlvl
-!!      wrtout
 !!
 !! SOURCE
 
@@ -164,9 +161,6 @@ end subroutine sigtk_kcalc_from_nkptgw
 !!      m_sigmaph
 !!
 !! CHILDREN
-!!      ebands_free,ebands_print,ebands_update_occ,fine_gaps%free
-!!      fine_gaps%print,fine_hdr%free,gaps%free,gaps%print,hdr_init_lowlvl
-!!      wrtout
 !!
 !! SOURCE
 
@@ -265,9 +259,6 @@ end subroutine sigtk_kcalc_from_qprange
 !!      m_sigmaph
 !!
 !! CHILDREN
-!!      ebands_free,ebands_print,ebands_update_occ,fine_gaps%free
-!!      fine_gaps%print,fine_hdr%free,gaps%free,gaps%print,hdr_init_lowlvl
-!!      wrtout
 !!
 !! SOURCE
 
@@ -364,9 +355,6 @@ end subroutine sigtk_kcalc_from_gaps
 !!      m_sigmaph
 !!
 !! CHILDREN
-!!      ebands_free,ebands_print,ebands_update_occ,fine_gaps%free
-!!      fine_gaps%print,fine_hdr%free,gaps%free,gaps%print,hdr_init_lowlvl
-!!      wrtout
 !!
 !! SOURCE
 
@@ -389,7 +377,7 @@ subroutine sigtk_kcalc_from_erange(dtset, cryst, ebands, gaps, nkcalc, kcalc, bs
  integer,parameter :: master = 0
  integer :: spin, ik, band, ii, ic, nsppol, tmp_nkpt, timrev, sigma_nkbz, my_rank
  logical :: found
- real(dp) :: cmin, vmax, ee, dksqmax
+ real(dp) :: cmin, vmax, ee
  logical :: assume_gap
  character(len=500) :: msg
  type(krank_t) :: krank
@@ -431,16 +419,15 @@ subroutine sigtk_kcalc_from_erange(dtset, cryst, ebands, gaps, nkcalc, kcalc, bs
     ABI_MALLOC(indkk, (6, tmp_nkpt))
 
     krank = krank_from_kptrlatt(ebands%nkpt, ebands%kptns, ebands%kptrlatt, compute_invrank=.False.)
-    call krank%get_mapping(tmp_nkpt, tmp_kcalc, dksqmax, cryst%gmet, indkk, &
-                           cryst%nsym, cryst%symafm, cryst%symrec, timrev, use_symrec=.True.)
-    call krank%free()
 
-    if (dksqmax > tol12) then
-      write(msg, '(a,es16.6,2a)' )&
-        "At least one of the k-points could not be generated from a symmetrical one in the WFK. dksqmax: ",dksqmax, ch10,&
+    if (kpts_map("symrec", timrev, cryst, krank, tmp_nkpt, tmp_kcalc, indkk) /= 0) then
+      write(msg, '(3a)' )&
+        "At least one of the k-points could not be generated from a symmetrical one in the WFK.",ch10,&
         'Action: check your WFK file and the value of sigma_nkpt, sigma_shiftk in the input file.'
       ABI_ERROR(msg)
     end if
+
+    call krank%free()
 
     ABI_MALLOC(sigmak2ebands, (tmp_nkpt))
     sigmak2ebands = indkk(1, :)

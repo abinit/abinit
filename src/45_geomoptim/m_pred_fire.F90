@@ -5,7 +5,7 @@
 !! FUNCTION
 !! Ionmov predictors (15) FIRE algorithm
 !! The fast inertial relaxation engine (FIRE) method for relaxation.
-!! The method is described in  Erik Bitzek, Pekka Koskinen, Franz G"ahler, 
+!! The method is described in  Erik Bitzek, Pekka Koskinen, Franz G"ahler,
 !! Michael Moseler, and Peter Gumbsch, Phys. Rev. Lett. 97, 170201 [[cite:Bitzek2006]]
 !!
 !! COPYRIGHT
@@ -158,18 +158,10 @@ real(dp),allocatable,save :: vel_ioncell(:)
 !***************************************************************************
 
  if(iexit/=0)then
-   if (allocated(vin))           then
-     ABI_FREE(vin)
-   end if
-   if (allocated(vout))          then
-     ABI_FREE(vout)
-   end if
-   if (allocated(vin_prev))           then
-     ABI_FREE(vin_prev)
-   end if
-   if (allocated(vel_ioncell))          then
-     ABI_FREE(vel_ioncell)
-   end if
+   ABI_SFREE(vin)
+   ABI_SFREE(vout)
+   ABI_SFREE(vin_prev)
+   ABI_SFREE(vel_ioncell)
    return
  end if
 
@@ -191,18 +183,10 @@ write(std_out,*) 'FIRE 02'
 !Notice that vin, vout, etc could be allocated
 !From a previous dataset with a different ndim
  if(itime==1)then
-   if (allocated(vin))           then
-     ABI_FREE(vin)
-   end if
-   if (allocated(vout))          then
-     ABI_FREE(vout)
-   end if
-   if (allocated(vin_prev))           then
-     ABI_FREE(vin_prev)
-   end if
-   if (allocated(vel_ioncell))          then
-     ABI_FREE(vel_ioncell)
-   end if
+   ABI_SFREE(vin)
+   ABI_SFREE(vout)
+   ABI_SFREE(vin_prev)
+   ABI_SFREE(vel_ioncell)
 
    ABI_MALLOC(vin,(ndim))
    ABI_MALLOC(vout,(ndim))
@@ -292,7 +276,7 @@ call xfpack_x2vin(acell, ab_mover%natom, ndim,&
 & ab_mover%symrel, ucvol, ucvol0, vin, xred)
 !end if
 
-!transfer gred and strten to vout. 
+!transfer gred and strten to vout.
 !Note: gred is not f in reduced co.
 !but dE/dx
 
@@ -349,7 +333,7 @@ vel_ioncell = vel_ioncell + dtratio*ab_mover%dtion* vout
 ! update x
 vin = vin + dtratio*ab_mover%dtion* vel_ioncell
 !write(std_out,*) 'FIRE vin: ', vin
-   
+
 !   write(std_out,*) 'FIRE vout: ', vout
 !   write(std_out,*) 'FIRE vf: ', vf
 !   write(std_out,*) 'FIRE etotal: ', etotal
@@ -377,7 +361,7 @@ if ( etotal - etotal_prev >0.0 ) then
     vin= vin*(1-mixold)+vin_prev*mixold
 end if
 
-! only set vin to vin_prev when energy decreased, so it's 
+! only set vin to vin_prev when energy decreased, so it's
 ! possible to go back.
 ! if (etotal - etotal_prev <0.0 ) then
  vin_prev(:)=vin(:)

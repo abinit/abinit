@@ -26,7 +26,7 @@
 
 #include "abi_common.h"
 
-MODULE m_xmpi
+module m_xmpi
 
  use defs_basis
  use m_profiling_abi
@@ -170,12 +170,13 @@ MODULE m_xmpi
    integer :: nproc = 1
    integer :: me = 0
  contains
-   ! procedure :: iam_master => xcomm_iam_master
    procedure :: skip => xcomm_skip
    procedure :: set_to_null => xcomm_set_to_null
    procedure :: set_to_self => xcomm_set_to_self
    procedure :: free => xcomm_free
  end type xcomm_t
+
+ public :: xcomm_from_mpi_int
 !!***
 
 ! Public procedures.
@@ -209,6 +210,7 @@ MODULE m_xmpi
  public :: xmpi_split_list            ! Splits list of indices inside communicator using block distribution.
  public :: xmpi_distab                ! Fill table defining the distribution of the tasks according to the # of processors
  public :: xmpi_distrib_with_replicas ! Distribute tasks among MPI ranks (replicas are allowed)
+ public :: xmpi_distrib_2d            ! Try to optimally distribute nprocs in a 2d grid of shape (n1, n2)
 
 ! Private procedures.
  private :: xmpi_largetype_create      ! Build a large-count contiguous datatype (to handle a very large # of data)
@@ -692,7 +694,6 @@ CONTAINS  !===========================================================
 !!      mrgscr,multibinit,optic,testtransposer,ujdet,vdw_kernelgen
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -789,7 +790,6 @@ end subroutine xmpi_init
 !!      m_argparse
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -853,7 +853,6 @@ end function xmpi_get_unit
 !!      macroave,mrggkk,testtransposer,ujdet,vdw_kernelgen
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -897,7 +896,6 @@ end subroutine xmpi_end
 !!      m_errors,m_initcuda,m_libpaw_tools,m_mpinfo,m_xmpi
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -989,7 +987,6 @@ end subroutine xmpi_abort
 !!      m_xmpi
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -1033,7 +1030,6 @@ end subroutine sys_exit
 !!      abinit,m_argparse,m_errors
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -1136,7 +1132,7 @@ end function xmpi_comm_rank
 !!  comm=MPI communicator.
 !!
 !! OUTPUT
-!!  xmpi_comm_size=The number of processors inside comm.
+!!  xmpi_comm_size=The number of processors inside comm. Return 0 if comm = xmpi_comm_null
 !!
 !! PARENTS
 !!
@@ -1156,9 +1152,8 @@ function xmpi_comm_size(comm)
 
  mpierr=0; xmpi_comm_size=1
 #ifdef HAVE_MPI
- if (comm/=xmpi_comm_null) then
-   call MPI_COMM_SIZE(comm,xmpi_comm_size,mpierr)
- end if
+ xmpi_comm_size = 0
+ if (comm /= xmpi_comm_null) call MPI_COMM_SIZE(comm,xmpi_comm_size,mpierr)
 #endif
 
 end function xmpi_comm_size
@@ -1180,7 +1175,6 @@ end function xmpi_comm_size
 !! PARENTS
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -1235,7 +1229,6 @@ end subroutine xmpi_comm_free_0D
 !! PARENTS
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -1285,7 +1278,6 @@ end subroutine xmpi_comm_free_1D
 !! PARENTS
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -1338,7 +1330,6 @@ end subroutine xmpi_comm_free_2D
 !! PARENTS
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -1394,7 +1385,6 @@ end subroutine xmpi_comm_free_3D
 !!      m_paw_tools,m_wfd,m_xmpi
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -1452,7 +1442,6 @@ end subroutine xmpi_group_free
 !!      m_wfd
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -1498,7 +1487,6 @@ end subroutine xmpi_group_incl
 !!      m_wfd
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -1613,7 +1601,6 @@ end function xmpi_subcomm
 !!      m_paw_tools,m_wfd,m_xmpi
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -1658,7 +1645,6 @@ end subroutine xmpi_comm_group
 !!      m_sigmaph
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -1705,7 +1691,6 @@ end subroutine xmpi_comm_split
 !!      m_paw_tools,m_xmpi
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -1757,7 +1742,6 @@ end subroutine xmpi_group_translate_ranks
 !!      m_paral_pert
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -1814,7 +1798,6 @@ end subroutine xmpi_comm_translate_ranks
 !!      m_wfk,m_wfk_analyze,testtransposer
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -1859,7 +1842,6 @@ end subroutine xmpi_barrier
 !!      m_gpu_detect
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -1913,7 +1895,6 @@ end subroutine xmpi_name
 !!      m_paw_an,m_paw_ij,m_pawfgrtab,m_pawrhoij
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -1961,7 +1942,6 @@ end subroutine xmpi_iprobe
 !!      m_pawfgrtab,m_pawrhoij,m_scfcv_core,m_sg2002,m_sigmaph
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -2008,7 +1988,6 @@ end subroutine xmpi_wait
 !!      m_xmpi
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -2054,7 +2033,6 @@ end subroutine xmpi_waitall_1d
 !! PARENTS
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -2097,7 +2075,6 @@ end subroutine xmpi_waitall_2d
 !! PARENTS
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -2142,7 +2119,6 @@ end subroutine xmpi_request_free
 !! PARENTS
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -2263,7 +2239,6 @@ end subroutine xmpi_comm_set_errhandler
 !! PARENTS
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -2302,7 +2277,7 @@ end subroutine xmpi_split_work_i4b
 !!  xmpi_split_block
 !!
 !! FUNCTION
-!!  Splits tasks inside communicator using cyclic distribution.
+!!  Splits tasks inside communicator using block distribution.
 !!  Used for the MPI parallelization of simple loops.
 !!
 !! INPUTS
@@ -2317,7 +2292,6 @@ end subroutine xmpi_split_work_i4b
 !!      m_sigmaph
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -2363,7 +2337,6 @@ end subroutine xmpi_split_block
 !!      m_phgamma,m_sigmaph
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -2405,7 +2378,7 @@ end subroutine xmpi_split_cyclic
 !!  xmpi_split_list
 !!
 !! FUNCTION
-!!  Splits list of itmes inside communicator using block distribution.
+!!  Splits list of items inside communicator using block distribution.
 !!  Used for the MPI parallelization of simple loops.
 !!
 !! INPUTS
@@ -2421,7 +2394,6 @@ end subroutine xmpi_split_cyclic
 !!      m_phgamma
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -2490,7 +2462,6 @@ end subroutine xmpi_split_list
 !!      m_exc_build,m_phonons,m_screening,m_screening_driver,m_skw
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -2542,7 +2513,6 @@ end subroutine xmpi_split_work2_i4b
 !!      m_exc_build
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -2595,7 +2565,6 @@ end subroutine xmpi_split_work2_i8b
 !! PARENTS
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -2748,7 +2717,6 @@ end function xmpi_distrib_with_replicas
 !! PARENTS
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -3026,7 +2994,6 @@ end subroutine xmpi_largetype_create
 !! PARENTS
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -3110,7 +3077,6 @@ end subroutine xmpi_largetype_free
 !!      m_slk,m_wffile,m_wfk,m_xmpi
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -3343,7 +3309,6 @@ end subroutine xmpio_get_info_frm
 !!      m_bse_io,m_exc_diago,m_exc_itdiago,m_hdr,m_io_screening,m_xmpi
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -3474,7 +3439,6 @@ end subroutine xmpio_read_frm
 !!      m_ioarr
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -3613,7 +3577,6 @@ end subroutine xmpio_write_frm
 !!      m_wfk
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -3708,7 +3671,6 @@ end subroutine xmpio_create_fstripes
 !!      m_exc_build,m_exc_itdiago,m_mpiotk,m_wfk
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -3798,7 +3760,6 @@ end subroutine xmpio_create_fsubarray_2D
 !!      m_mpiotk
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -3900,7 +3861,6 @@ end subroutine xmpio_create_fsubarray_3D
 !!      m_mpiotk
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -4011,7 +3971,6 @@ end subroutine xmpio_create_fsubarray_4D
 !!      m_bse_io,m_exc_itdiago,m_slk,m_wfk
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -4197,7 +4156,6 @@ end subroutine xmpio_check_frmarkers
 !! PARENTS
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -4294,7 +4252,6 @@ end subroutine xmpio_read_int
 !! PARENTS
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -4415,7 +4372,6 @@ end function xmpio_max_address
 !!      m_exc_build,m_exc_itdiago,m_ioarr,m_slk,m_wfk
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -4615,7 +4571,6 @@ end subroutine xmpio_write_frmarkers
 !!      m_exc_build
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -4769,7 +4724,6 @@ end subroutine xmpio_create_fherm_packed
 !!      m_bse_io
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -4901,7 +4855,6 @@ end subroutine xmpio_create_coldistr_from_fpacked
 !!      m_bse_io
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -5083,15 +5036,123 @@ end subroutine xmpio_create_coldistr_from_fp3blocks
 !!***
 #endif
 
- !type(xcomm_t) function from_mpi_int(comm_value) result(new)
- !  new%value = comm_value
- !  new%nproc  xmpi_comm_size(comm_value)
- !  new%me  xmpi_comm_rank(comm_value)
- !end function from_mpi_int
- !pure logical function xcomm_iam_master(self)
- !  class(xcomm_t),intent(in) :: self
- !  xcomm_iam_master = self%me == 0
- !end function xcomm_iam_master
+!!****f* m_xmpi/xmpi_distrib_2d
+!! NAME
+!! xmpi_distrib_2d
+!!
+!! FUNCTION
+!!  Try to optimally distribute nprocs in a 2d grid of shape (n1, n2)
+!!  given a problem of dimension (n1, n2).
+!!  Use order string to define priorities:
+!!      "12" or "21" if both dimensions should be optimized (if not possibile the first one gets optimized)
+!!      "1" or "2" to optimize only one dimension.
+!!  Return: exit status in ierr.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine xmpi_distrib_2d(nprocs, order, size1, size2, n1, n2, ierr)
+
+!Arguments ------------------------------------
+ integer,intent(in) :: nprocs, size1, size2
+ character(len=*),intent(in) :: order
+ integer,intent(out) :: n1, n2, ierr
+
+!Local variables-------------------------------
+ integer :: ii
+
+!----------------------------------------------------------------------
+
+ ierr = 1; n1 = -1; n2 = -1
+
+ select case (order)
+ case ("12")
+   call balance_12()
+   if (ierr /= 0) call balance_1()
+ case ("21")
+   call balance_21()
+   if (ierr /= 0) call balance_2()
+ case ("1")
+   call balance_1()
+ case ("2")
+   call balance_2()
+ case default
+   ! Wrong order
+   ierr = -1
+ end select
+
+contains
+
+subroutine balance_12()
+ ! Try to find n1 x n2 = nprocs so that (size1, size2) are multiple of (n1, n2)
+ do ii=nprocs,1,-1
+   if (mod(size1, ii) == 0 .and. mod(nprocs, ii) == 0 .and. mod(size2, nprocs / ii) == 0) then
+     n1 = ii; n2 = nprocs / ii; ierr = 0; exit
+   end if
+ end do
+
+end subroutine balance_12
+
+subroutine balance_21()
+ ! Try to find n1 x n2 = nprocs so that (size1, size2) are multiple of (n1, n2)
+ do ii=nprocs,1,-1
+   if (mod(size2, ii) == 0 .and. mod(nprocs, ii) == 0 .and. mod(size1, nprocs / ii) == 0) then
+     n2 = ii; n1 = nprocs / ii; ierr = 0; exit
+   end if
+ end do
+end subroutine balance_21
+
+subroutine balance_1()
+ integer :: imod1
+ ! Try to find n1 x n2 = nprocs so that only size1 is multiple of n1
+ ! Allow for some load imbalance.
+ do ii=nprocs,1,-1
+   imod1 = mod(size1, ii)
+   if ((imod1 == 0 .or. imod1 >= nprocs / 2) .and. mod(nprocs, ii) == 0) then
+     n1 = ii; n2 = nprocs / ii; ierr = 0; exit
+   end if
+ end do
+
+ if (ierr /= 0 .and. nprocs <= size1) then
+   n1 = nprocs; n2 = 1; ierr = 0; return
+ end if
+end subroutine balance_1
+
+subroutine balance_2()
+ integer :: imod2
+ ! Try to find n1 x n2 = nprocs so that only size2 is multiple of n2
+ ! Allow for some load imbalance.
+ do ii=nprocs,1,-1
+   imod2 = mod(size2, ii)
+   if ((imod2 == 0 .or. imod2 >= nprocs / 2) .and. mod(nprocs, ii) == 0) then
+     n2 = ii; n1 = nprocs / ii; ierr = 0; exit
+   end if
+ end do
+
+ if (ierr /= 0 .and. nprocs <= size2) then
+   n2 = nprocs; n1 = 1; ierr = 0; return
+ end if
+end subroutine balance_2
+
+end subroutine xmpi_distrib_2d
+!!***
+
+type(xcomm_t) function xcomm_from_mpi_int(comm_int) result(new)
+   integer,intent(in) :: comm_int
+   integer :: newcomm, ierr
+
+   new%value = comm_int; new%me = 0; new%nproc = 1
+#ifdef HAVE_MPI
+   call MPI_Comm_dup(comm_int, newcomm, ierr)
+   new%value = newcomm
+   new%nproc = xmpi_comm_size(newcomm)
+   new%me = xmpi_comm_rank(newcomm)
+#endif
+end function xcomm_from_mpi_int
+
  pure logical function xcomm_skip(self, iter)
    class(xcomm_t),intent(in) :: self
    integer,intent(in) :: iter
@@ -5113,5 +5174,5 @@ end subroutine xmpio_create_coldistr_from_fp3blocks
    self%me = -1; self%nproc = 0
  end subroutine xcomm_free
 
-END MODULE m_xmpi
+end module m_xmpi
 !!***

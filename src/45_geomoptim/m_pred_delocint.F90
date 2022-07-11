@@ -147,24 +147,12 @@ subroutine pred_delocint(ab_mover,ab_xfh,deloc,forstr,hist,ionmov,itime,zDEBUG,i
 !***************************************************************************
 
  if(iexit/=0)then
-   if (allocated(vin))        then
-     ABI_FREE(vin)
-   end if
-   if (allocated(vout))       then
-     ABI_FREE(vout)
-   end if
-   if (allocated(vin_prev))   then
-     ABI_FREE(vin_prev)
-   end if
-   if (allocated(vout_prev))  then
-     ABI_FREE(vout_prev)
-   end if
-   if (allocated(hessin))     then
-     ABI_FREE(hessin)
-   end if
-   if (allocated(u_matrix))     then
-     ABI_FREE(u_matrix)
-   end if
+   ABI_SFREE(vin)
+   ABI_SFREE(vout)
+   ABI_SFREE(vin_prev)
+   ABI_SFREE(vout_prev)
+   ABI_SFREE(hessin)
+   ABI_SFREE(u_matrix)
    return
  end if
 
@@ -173,8 +161,7 @@ subroutine pred_delocint(ab_mover,ab_xfh,deloc,forstr,hist,ionmov,itime,zDEBUG,i
 !### 01. Debugging and Verbose
 
  if(DEBUG)then
-   write(std_out,'(a,3a,38a,39a)') ch10,('-',kk=1,3),&
-&   'Debugging and Verbose for pred_deloint',('-',kk=1,39)
+   write(std_out,'(a,3a,38a,39a)') ch10,('-',kk=1,3),'Debugging and Verbose for pred_deloint',('-',kk=1,39)
    write(std_out,*) 'ionmov: ',ionmov
    write(std_out,*) 'itime:  ',itime
  end if
@@ -202,27 +189,17 @@ subroutine pred_delocint(ab_mover,ab_xfh,deloc,forstr,hist,ionmov,itime,zDEBUG,i
 !Notice thqt vin, vout, etc could be allocated
 !From a previous dataset with a different ndim
  if(itime==1)then
-   if (allocated(vin))        then
-     ABI_FREE(vin)
-   end if
-   if (allocated(vout))       then
-     ABI_FREE(vout)
-   end if
-   if (allocated(vin_prev))   then
-     ABI_FREE(vin_prev)
-   end if
-   if (allocated(vout_prev))  then
-     ABI_FREE(vout_prev)
-   end if
-   if (allocated(hessin))     then
-     ABI_FREE(hessin)
-   end if
+   ABI_SFREE(vin)
+   ABI_SFREE(vout)
+   ABI_SFREE(vin_prev)
+   ABI_SFREE(vout_prev)
+   ABI_SFREE(hessin)
+
    ABI_MALLOC(vin,(ndim))
    ABI_MALLOC(vout,(ndim))
    ABI_MALLOC(vin_prev,(ndim))
    ABI_MALLOC(vout_prev,(ndim))
    ABI_MALLOC(hessin,(ndim,ndim))
-
  end if
 
 

@@ -54,7 +54,7 @@ CONTAINS  !===========================================================
 !! hessinit
 !!
 !! FUNCTION
-!! Initiliase an Hessian matrix, either from disk or using init_matrix.
+!! Initialize the Hessian matrix, either from disk or using init_matrix.
 !! The size ndim must be greater or equal than 3 * ab_mover%natom.
 !!
 !! INPUTS

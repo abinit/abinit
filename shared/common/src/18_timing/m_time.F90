@@ -518,32 +518,32 @@ subroutine cwtime(cpu, wall, gflops, start_or_stop, msg, comm)
 
  if (present(msg)) call wrtout(std_out, msg)
 
- SELECT CASE (start_or_stop)
- CASE ("start")
- if (use_papi) then
-   call xpapi_flops(real_time,proc_time,flops,mflops,check)
-   cpu = proc_time; wall = real_time; gflops = mflops / 1000
- else
-   cpu = abi_cpu_time(); wall = abi_wtime(); gflops = -one
- end if
+ select case (start_or_stop)
+ case ("start")
+   if (use_papi) then
+     call xpapi_flops(real_time,proc_time,flops,mflops,check)
+     cpu = proc_time; wall = real_time; gflops = mflops / 1000
+   else
+     cpu = abi_cpu_time(); wall = abi_wtime(); gflops = -one
+   end if
 
- CASE ("stop")
- if (use_papi) then
-   call xpapi_flops(real_time,proc_time,flops,mflops,check)
-   cpu = proc_time - cpu; wall = real_time - wall; gflops = mflops / 1000
- else
-   cpu = abi_cpu_time() - cpu; wall = abi_wtime() - wall; gflops = -one
- end if
- if (present(comm)) then
-   vals = [cpu, wall, gflops]
-   call xmpi_sum(vals, comm, ierr)
-   vals = vals / xmpi_comm_size(comm)
-   cpu = vals(1); wall = vals(2); gflops = vals(3)
- end if
+ case ("stop")
+   if (use_papi) then
+     call xpapi_flops(real_time,proc_time,flops,mflops,check)
+     cpu = proc_time - cpu; wall = real_time - wall; gflops = mflops / 1000
+   else
+     cpu = abi_cpu_time() - cpu; wall = abi_wtime() - wall; gflops = -one
+   end if
+   if (present(comm)) then
+     vals = [cpu, wall, gflops]
+     call xmpi_sum(vals, comm, ierr)
+     vals = vals / xmpi_comm_size(comm)
+     cpu = vals(1); wall = vals(2); gflops = vals(3)
+   end if
 
- CASE DEFAULT
-   ABI_ERROR("Wrong option for start_or_stop: "//TRIM(start_or_stop))
- END SELECT
+ case default
+   ABI_ERROR("Wrong option for start_or_stop: "//trim(start_or_stop))
+ end select
 
 end subroutine cwtime
 !!***
@@ -566,6 +566,9 @@ end subroutine cwtime
 !!  wall= wall clock time in seconds
 !!  gflops = Gigaflops
 !!
+!! OUTPUT
+!!  [out_wall]= Output wall-time.
+!!
 !! PARENTS
 !!      m_ddk,m_dvdb,m_ebands,m_eph_driver,m_ephwg,m_fstab,m_gruneisen,m_ifc
 !!      m_ioarr,m_iowf,m_phgamma,m_phonons,m_rmm_diis,m_rta,m_sigmaph,m_skw
@@ -576,7 +579,7 @@ end subroutine cwtime
 !!
 !! SOURCE
 
-subroutine cwtime_report(tag, cpu, wall, gflops, pre_str, end_str, comm)
+subroutine cwtime_report(tag, cpu, wall, gflops, pre_str, end_str, out_wall, comm)
 
 !Arguments ------------------------------------
 !scalars
@@ -585,6 +588,7 @@ subroutine cwtime_report(tag, cpu, wall, gflops, pre_str, end_str, comm)
  integer,intent(in),optional :: comm
  character(len=*),intent(in) :: tag
  character(len=*),optional,intent(in) :: pre_str, end_str
+ real(dp),optional,intent(out) :: out_wall
 
 !Local variables-------------------------------
 !scalars
@@ -604,6 +608,8 @@ subroutine cwtime_report(tag, cpu, wall, gflops, pre_str, end_str, comm)
  call wrtout(std_out, sjoin(tag, "completed. cpu:", sec2str(cpu), ", wall:", sec2str(wall), avg_type), &
      do_flush=.True.)
  if (present(end_str)) call wrtout(std_out, end_str)
+ if (present(out_wall)) out_wall = wall
+
  call cwtime(cpu, wall, gflops, "start")
 
  ! Activate this line to get mallinfo section for each checkpoint
