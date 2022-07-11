@@ -190,14 +190,14 @@ end subroutine dealloc_on_gpu
 !!
 !! SOURCE
 
-subroutine gpu_memset(gpu_ptr, val, size)
+subroutine gpu_memset(gpu_ptr, val, array_size)
 
   !Arguments ------------------------------------
   type(c_ptr),                    intent(inout) :: gpu_ptr
   integer(kind=c_int32_t), value, intent(in)    :: val
-  integer(kind=c_int32_t), value, intent(in)    :: size
+  integer(kind=c_int32_t), value, intent(in)    :: array_size
 
-  ABI_UNUSED(/gpu_ptr,val,size/)
+  ABI_UNUSED(/gpu_ptr,val,array_size/)
 
 end subroutine gpu_memset
 !!***
