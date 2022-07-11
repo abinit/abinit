@@ -424,6 +424,7 @@ contains
 !!  mpi_enreg=information about MPI parallelization
 !!  mpsang=1+maximum angular momentum for nonlocal pseudopotentials
 !!  mpw=maximum dimensioned size of npw
+!!  my_nsppol=number of spin components in memory for current MPI process
 !!  natom=number of atoms in cell
 !!  nattyp(ntypat)= # atoms of each type
 !!  nband(nkpt*nsppol)=number of bands at this k point for that spin polarization
@@ -463,18 +464,18 @@ contains
  subroutine ctocprj(atindx,cg,choice,cprj,gmet,gprimd,iatom,idir,&
 & iorder_cprj,istwfk,kg,kpt,mcg,mcprj,mgfft,mkmem,mpi_enreg,mpsang,&
 & mpw,natom,nattyp,nband,ncprj,ngfft,nkpt,nloalg,npwarr,nspinor,&
-& nsppol,ntypat,paral_kgb,ph1d,psps,rmet,typat,ucvol,uncp,xred,ylm,ylmgr)
+& nsppol,my_nsppol,ntypat,paral_kgb,ph1d,psps,rmet,typat,ucvol,uncp,xred,ylm,ylmgr)
 
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: choice,iatom,idir,iorder_cprj,mcg,mcprj,mgfft,mkmem,mpsang,mpw
- integer,intent(in) :: natom,ncprj,nkpt,nspinor,nsppol,ntypat,paral_kgb,uncp
+ integer,intent(in) :: my_nsppol,natom,ncprj,nkpt,nspinor,nsppol,ntypat,paral_kgb,uncp
 !TODO : distribute cprj over bands as well
  real(dp),intent(in) :: ucvol
  type(MPI_type),intent(in) :: mpi_enreg
  type(pseudopotential_type),target,intent(in) :: psps
 !arrays
- integer,intent(in) :: istwfk(nkpt),nband(:)
+ integer,intent(in) :: istwfk(nkpt),nband(nkpt*nsppol)
  integer,intent(in) :: ngfft(18),nloalg(3),npwarr(nkpt),kg(3,mpw*mkmem),typat(natom)
  integer,intent(in),target :: atindx(natom),nattyp(ntypat)
  real(dp),intent(in) :: cg(2,mcg)
@@ -489,7 +490,7 @@ contains
  integer :: iband_max,iband_min,iband_start,ibg,ibgb,iblockbd,ibp,icg,icgb,icp1,icp2
  integer :: ider,idir0,iend,ierr,ig,ii,ikg,ikpt,ilm,ipw,isize,isppol,istart,istwf_k,itypat,iwf1,iwf2,jdir
  integer :: matblk,me_distrb,my_nspinor,n1,n1_2p1,n2,n2_2p1,n3,n3_2p1,kk,nlmn
- integer :: mband,mband_cg,mband_cprj,npband_dfpt,my_nsppol,my_nsppol_cprj
+ integer :: mband,mband_cg,mband_cprj,npband_dfpt
  integer :: nband_k,nband_cprj_k,nblockbd,ncpgr,nkpg,npband_bandfft,npws,npw_k,npw_nk,ntypat0
  integer :: nband_cg_k
  integer :: shift1,shift1b,shift2,shift2b,shift3,shift3b
@@ -574,12 +575,6 @@ contains
  end if
  if (cg_bandpp/=cprj_bandpp) then
    ABI_BUG('cg_bandpp must be equal to cprj_bandpp!')
- end if
-
-!Manage parallelization over spins
- my_nsppol=size(nband)/size(istwfk)
- if (my_nsppol/=1.and.my_nsppol/=2) then
-   ABI_BUG('Impossible to determine My_nsppol!')
  end if
 
 !Manage parallelization over bands

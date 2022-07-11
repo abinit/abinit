@@ -1159,7 +1159,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        call ctocprj(atindx,cg,choice,cprj,gmet,gprimd,-1,idir0,iorder_cprj,istwfk_rbz,&
 &       kg,kpt_rbz,mcg,mcprj,dtset%mgfft,mkmem_rbz,mpi_enreg,psps%mpsang,mpw,&
 &       dtset%natom,nattyp,nband_rbz,dtset%natom,dtset%ngfft,nkpt_rbz,dtset%nloalg,&
-&       npwarr,dtset%nspinor,dtset%nsppol,ntypat,dtset%paral_kgb,ph1d,psps,&
+&       npwarr,dtset%nspinor,dtset%nsppol,dtset%nsppol,ntypat,dtset%paral_kgb,ph1d,psps,&
 &       rmet,dtset%typat,ucvol,dtfil%unpaw,xred,ylm,ylmgr)
      end if
    end if
@@ -1338,7 +1338,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
          call ctocprj(atindx,cgq,choice,cprjq,gmet,gprimd,-1,idir0,0,istwfk_rbz,&
 &         kg1,kpq_rbz,mcgq,mcprjq,dtset%mgfft,mkqmem_rbz,mpi_enreg,psps%mpsang,mpw1,&
 &         dtset%natom,nattyp,nband_rbz,dtset%natom,dtset%ngfft,nkpt_rbz,dtset%nloalg,&
-&         npwar1,dtset%nspinor,dtset%nsppol,ntypat,dtset%paral_kgb,ph1d,&
+&         npwar1,dtset%nspinor,dtset%nsppol,dtset%nsppol,ntypat,dtset%paral_kgb,ph1d,&
 &         psps,rmet,dtset%typat,ucvol,dtfil%unpawq,xred,ylm1,ylmgr1)
        else if (mcprjq>0) then
          call pawcprj_copy(cprj,cprjq)
