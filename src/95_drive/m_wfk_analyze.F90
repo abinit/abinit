@@ -66,7 +66,7 @@ module m_wfk_analyze
  use m_pspini,          only : pspini
  use m_sigtk,           only : sigtk_kpts_in_erange
 
- use m_wfd_wannier,     only : wfd_run_wannier
+ use m_wfd_wannier,     only : wfd_run_wannier, wfd_mlwfovlp
 
  implicit none
 
@@ -410,11 +410,16 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
 case (WFK_TASK_WANNIER)
    ! Construct Wannier function.
 
-   call read_wfd()
-   call wfd_run_wannier(cryst, ebands, wfk0_hdr, mpi_enreg, &
+   if (.False.) then
+      call read_wfd()
+      call wfd_run_wannier(cryst, ebands, wfk0_hdr, mpi_enreg, &
         & ngfftc, ngfftf,  wfd, dtset, dtfil,  &
         & pawang,  pawrad, pawtab, psps )
-
+   else
+      call wfd_mlwfovlp(cryst, ebands, wfk0_hdr, mpi_enreg, &
+           & ngfftc, ngfftf,  dtset, dtfil,  &
+           & pawang,  pawrad, pawtab, psps, comm, my_rank,nprocs )
+   endif
  case default
    ABI_ERROR(sjoin("Wrong task:", itoa(dtset%wfk_task)))
  end select

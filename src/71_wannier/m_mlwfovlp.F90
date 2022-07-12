@@ -372,7 +372,6 @@ contains
 !(here mband is not used, because shifts are internal variables of abinit)
 !----------------------------------------------------------------------
 !write(std_out,*) mpw*dtset%nspinor*mband*mkmem*nsppol
- BLOCK 
  ABI_MALLOC(icg,(nsppol,nkpt))
  icg=0
  icgtemp=0
@@ -403,7 +402,6 @@ contains
  end do   ! isppol
 !write(std_out,*) "shift for cg computed"
  ABI_FREE(icg)
- END BLOCK
 !
 !Shifts computed.
 !
