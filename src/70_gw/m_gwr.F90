@@ -2958,7 +2958,7 @@ subroutine gwr_build_sigmac(gwr)
 !arrays
  integer :: sc_ngfft(18)
  integer,allocatable :: green_scg(:,:), wc_scg(:,:)
- real(dp) :: vals(2) !, qq_ibz(3) ! kk_ibz(3),
+ !real(dp) :: vals(2) !, qq_ibz(3) ! kk_ibz(3),
  complex(dp),allocatable :: cit_me(:,:,:,:,:), ciw_me(:,:,:,:,:)
  complex(dp),allocatable :: gt_scbox(:,:), wct_scbox(:)
  complex(gwpc),allocatable :: ur_bk(:,:,:)
@@ -3180,7 +3180,7 @@ subroutine ft_t2w(t_vals, w_vals)
  complex(dp),intent(out) :: w_vals(2, gwr%ntau)
 
 !Local variables-------------------------------
- integer :: itau, iw
+ integer :: iw ! itau,
  complex(dp) :: t_odd(gwr%ntau), t_even(gwr%ntau)
 
 ! *************************************************************************

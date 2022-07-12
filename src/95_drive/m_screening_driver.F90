@@ -1372,12 +1372,8 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    if (is_qeq0==1) call chi_free(chihw)
 
    call spectra%free()
-   if (allocated(kxcg)) then
-     ABI_FREE(kxcg)
-   end if
-   if (allocated(fxc_ADA)) then
-     ABI_FREE(fxc_ADA)
-   end if
+   ABI_SFREE(kxcg)
+   ABI_SFREE(fxc_ADA)
    !
    ! Output the sum rule evaluation.
    ! Vcp%vc_sqrt(:,iqibz) Contains vc^{1/2}(q,G), complex-valued due to a possible cutoff
