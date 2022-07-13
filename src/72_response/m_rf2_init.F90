@@ -386,7 +386,10 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
    ABI_MALLOC(cprj_jband,(natom,0))
  end if
 
- sym_factor=one
+ ! define dkdk factors
+ sym_factor = one
+ antisym_factor = one
+ total_factor = one
  if(ipert==natom+10 .and. idir<=3 .and. symmetric) sym_factor=two ! in order to not compute same terms twice
 
  do kdir1=1,rf2%ndir
@@ -414,19 +417,13 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
      if (kdir1==2) rf_hamk_idir => rf_hamk_dir2
    end if
 
-   ! define dkdk factors
-   antisym_factor = one
-   total_factor = one
-
    ! define zero factors instead of exiting the loop: we need to compute dsusdu
    if (antisymmetric .and. rf2%ndir==1) antisym_factor = zero
-   if (total .and. rf2%ndir==2 .and. kdir1==1) total_factor = zero
+   if (total .and. rf2%ndir==2 .and. kdir1==2) total_factor = zero
 
    ! determine antisym_factor
-   if (rf2%ndir==2 .and. kdir1==1 .and. antisymmetric) then
-     antisym_factor = -one
    else if (rf2%ndir==2 .and. kdir1==2 .and. antisymmetric) then
-     antisym_factor = one
+     antisym_factor = -one
    endif
 
    ! define factor_in for accumulate_bands
@@ -689,8 +686,6 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
    endif ! check antisymmetric dkdk
  end if ! H^(2) exists
 
- ! define dkdk factors
- antisym_factor = one
 
 !Computation of terms containing H^(1)
  do kdir1=1,rf2%ndir
@@ -722,13 +717,13 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
 
    ! determine when we need to compute terms according to dkdk option
    if (antisymmetric .and. rf2%ndir==1) exit
-   if (total .and. rf2%ndir==2 .and. kdir1==1) cycle
+   if (total .and. rf2%ndir==2 .and. kdir1==2) cycle
 
    ! determine antisym_factor
    if (rf2%ndir==2 .and. kdir1==1 .and. antisymmetric) then
-     antisym_factor = -one
-   else if (rf2%ndir==2 .and. kdir1==2 .and. antisymmetric) then
      antisym_factor = one
+   else if (rf2%ndir==2 .and. kdir1==2 .and. antisymmetric) then
+     antisym_factor = -one
    endif
 
    ! define factor_in for accumulate_bands
