@@ -113,6 +113,41 @@ subroutine copy_on_gpu(cpu_ptr,gpu_ptr,size_in_bytes)
 end subroutine copy_on_gpu
 !!***
 
+!!****f* m_abi_gpu_linalg/copy_gpu_to_gpu
+!! NAME
+!!  copy_gpu_to_gpu
+!!
+!! FUNCTION
+!!  copy size byte from gpu (src) to gpu (dest)
+!!
+!! INPUTS
+!!  size_in_bytes = size in bytes to copy
+!!  src_gpu_ptr = C_PTR on gpu memory
+!!
+!! OUTPUT
+!!  dest_gpu_ptr = C_PTR on gpu memory
+!!
+!! SIDE EFFECTS
+!!   WARNING! : this routine is a dummy one when HAVE_GPU_CUDA is not enabled
+!!   the correct one is in 17_gpu_toolbox/dev_spec.cu
+!!
+!! PARENTS
+!!      lobpcgwf,m_abi_gpu_linalg
+!!
+!! SOURCE
+
+subroutine copy_gpu_to_gpu(cpu_ptr,gpu_ptr,size_in_bytes)
+
+  !Arguments ------------------------------------
+  type(c_ptr)                         :: dest_cpu_ptr
+  type(c_ptr)                         :: src_gpu_ptr
+  integer(kind=c_int32_t), intent(in) :: size_in_bytes ! size in byte (to be transfered)
+
+  ABI_UNUSED(/dest_gpu_ptr,src_gpu_ptr,size_in_bytes/)
+
+end subroutine copy_gpu_to_gpu
+!!***
+
 !!****f* m_abi_gpu_linalg/dealloc_on_gpu
 !! NAME
 !!  dealloc_on_gpu
