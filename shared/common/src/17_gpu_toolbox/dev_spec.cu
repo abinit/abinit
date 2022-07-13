@@ -294,12 +294,12 @@ extern "C" void dealloc_on_gpu_(void **gpu_ptr){
 }
 
 /*============================================================================*/
-/* Copy size byte from  dtab to gpu memory pointed by gpu_ptr                 */
+/* Copy size byte from cpu pointer to gpu pointer.                            */
 /* INPUTS                                                                     */
-/*  size= size in byte to allocate                                            */
-/*  dtab = fortran tab to copy                                                */
+/*  size = size in byte to copy                                               */
+/*  cpu_ptr = host memory location (LOC)                                      */
 /* OUTPUT                                                                     */
-/*  gpu_ptr= C_PTR on gpu memory location                                     */
+/*  gpu_ptr = C_PTR : gpu memory location                                     */
 /* WARNING! : this routine is a dummy one when HAVE_GPU_CUDA is not enabled   */
 /*            the correct one is in xx_gpu_toolbox/dev_spec.cu                */
 /*============================================================================*/
@@ -313,17 +313,36 @@ extern "C" void copy_on_gpu_(void **cpu_ptr, void **gpu_ptr, int* size){
 }
 
 /*============================================================================*/
-/* Copy size byte from gpu memory pointed by gpu_ptr to dtab                  */
+/* Copy size byte from gpu pointer to cpu pointer.                            */
 /* INPUTS                                                                     */
-/*  size= size in byte to allocate                                            */
-/*  gpu_ptr= C_PTR on gpu memory location that has been allocated             */
+/*  size = size in byte to copy                                               */
+/*  gpu_ptr = C_PTR : gpu memory location                                     */
 /* OUTPUT                                                                     */
-/*  dtab = fortran tab which will contains data                               */
+/*  cpu_ptr = host memory location (LOC of an allocated array)                */
 /*============================================================================*/
 
 extern "C" void copy_from_gpu_(void **cpu_ptr, void **gpu_ptr, int* size){
   if(cudaMemcpy(*cpu_ptr, *gpu_ptr, *size, cudaMemcpyDeviceToHost)!=cudaSuccess){
     printf("ERROR: copy_from_gpu failed : %s\n",cudaGetErrorString(cudaGetLastError()));
+    fflush(stdout);
+    abi_cabort();
+  }
+}
+
+/*============================================================================*/
+/* Copy size byte from gpu to gpu memory.                                     */
+/* INPUTS                                                                     */
+/*  size = size in byte to copy                                               */
+/*  src_gpu_ptr                                                               */
+/* OUTPUT                                                                     */
+/*  dest_gpu_ptr = C_PTR on gpu memory location                               */
+/* WARNING! : this routine is a dummy one when HAVE_GPU_CUDA is not enabled   */
+/*            the correct one is in xx_gpu_toolbox/dev_spec.cu                */
+/*============================================================================*/
+
+extern "C" void copy_gpu_to_gpu_(void **dest_gpu_ptr, void **src_gpu_ptr, int* size){
+  if(cudaMemcpy(*dest_gpu_ptr, *src_gpu_ptr, *size, cudaMemcpyDeviceToDevice)!=cudaSuccess){
+    printf("ERROR: copy_gpu_to_gpu failed : %s\n",cudaGetErrorString(cudaGetLastError()));
     fflush(stdout);
     abi_cabort();
   }
