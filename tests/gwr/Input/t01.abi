@@ -28,6 +28,7 @@ gwr_task3 "G0W0"     # One-shot calculation
 getden_filepath3 "t01o_DS1_DEN"
 getwfk_filepath3 "t01o_DS2_WFK"   # WFK file with empty states
 gwr_ntau3   2        # Number of imaginary-time points
+#gwr_ntau3   6        # Number of imaginary-time points
 
 gwr_boxcutmin3  1.1
 
