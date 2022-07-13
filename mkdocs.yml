@@ -227,6 +227,7 @@ nav:
     - tutorial/positron.md
     - tutorial/tddft.md
     - tutorial/wannier90.md
+    - tutorial/z2pack.md
 - FAQ:
     - Configuration and compilation: faq/configuration_and_compilation.md
     - General questions: faq/general_questions.md
