@@ -563,7 +563,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
                    !Prepare d2_dkdk wf file
                    if (i1pert==natom+2) then
                      call rf2_getidir(i1dir,i3dir,idir_dkdk)
-                     if (idir_dkdk>6) idir_dkdk=idir_dkdk-3
+                     !if (idir_dkdk>6) idir_dkdk=idir_dkdk-3
                      dkdk_index=idir_dkdk+(dtset%natom+6)*3
                      call appdig(dkdk_index,dtfil%fnamewffdkdk,fiwfdkdk)
                      !Check that d2_ddk file exists and open it
