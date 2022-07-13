@@ -322,8 +322,8 @@ contains
 
  !
  call mlwfovlp_setup(atom_symbols,band_in,dtset,filew90_win,gamma_only,&
-&  g1,lwanniersetup,mband,natom,nband_inc,nkpt,&
-&  nntot,num_bands,num_nnmax,nsppol,nwan,ovikp,&
+      &  g1,lwanniersetup,mband,natom,nband_inc,nkpt,&
+      &  nntot,num_bands,num_nnmax,nsppol,nwan,ovikp,&
 &  proj_l,proj_m,proj_radial,proj_site,proj_s_loc, proj_s_qaxis_loc, proj_x,proj_z,proj_zona,&
 &  real_lattice,recip_lattice,rprimd,seed_name,spinors,xcart,xred)
 
@@ -356,6 +356,7 @@ contains
  end if !leig
 
 
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !4) Calculate overlaps (file seed_name.mmn)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -364,46 +365,7 @@ contains
 !
 !write(std_out,*) "Computes shift for cg"
 
- write(message, '(a,a)' ) ch10,&
-& '   mlwfovlp : compute shifts for g-points '
- call wrtout(std_out,  message,'COLL')
-!----------------------------------------------------------------------
-!Compute shifts for g points (icg,iwav)
-!(here mband is not used, because shifts are internal variables of abinit)
-!----------------------------------------------------------------------
-!write(std_out,*) mpw*dtset%nspinor*mband*mkmem*nsppol
- ABI_MALLOC(icg,(nsppol,nkpt))
- icg=0
- icgtemp=0
- iwav(:,:,:)=0
- do isppol=1,nsppol
-   do ikpt=1,nkpt
-!    MPI:cycle over k-points not treated by this node
-     if (nprocs>1 ) then !sometimes we can have just one processor
-       if ( ABS(MPI_enreg%proc_distrb(ikpt,1,isppol)-rank)  /=0) CYCLE
-     end if
-
-!    write(std_out,*)'rank',rank,'ikpt',ikpt,'isppol',isppol
-     nband_k=dtset%nband(ikpt+(isppol-1)*nkpt)
-!    write(std_out,*) ikpt+(isppol-1)*nkpt,nkpt
-     npw_k=npwarr(ikpt)
-     do iband=1,nband_k
-       if(iband.gt.mband) then
-         write(message,'(a,3i0)')" mband",iband,mband,nband_k
-         ABI_ERROR(message)
-       end if
-       iwav(iband,ikpt,isppol)= &
-&       (iband-1)*npw_k*dtset%nspinor+icgtemp
-     end do ! iband
-     icgtemp=icgtemp+ npw_k*dtset%nspinor*nband_k
-!    icg(isppol,ikpt)=icgtemp
-!    write(std_out,*) "icg", isppol,ikpt,icg(isppol,ikpt)
-   end do  ! ikpt
- end do   ! isppol
-!write(std_out,*) "shift for cg computed"
- ABI_FREE(icg)
-!
-!Shifts computed.
+ call compute_shift_gpoints()
 !
  if( lmmn) then
 !
@@ -513,7 +475,7 @@ contains
 !
  ABI_FREE(ovikp)
  ABI_FREE(g1)
-
+ ABI_FREE(iwav)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !5) Calculate initial projections
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -639,7 +601,6 @@ contains
          & band_in,  dtset, kg, cg)
  end if !dtset%w90prtunk
 
- ABI_FREE(iwav)
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !7) Call to  Wannier90
@@ -916,6 +877,51 @@ contains
 
 contains
 !!***
+
+
+  subroutine compute_shift_gpoints()
+    write(message, '(a,a)' ) ch10,&
+         & '   mlwfovlp : compute shifts for g-points '
+    call wrtout(std_out,  message,'COLL')
+    !----------------------------------------------------------------------
+    !Compute shifts for g points (icg,iwav)
+    !(here mband is not used, because shifts are internal variables of abinit)
+    !----------------------------------------------------------------------
+    !write(std_out,*) mpw*dtset%nspinor*mband*mkmem*nsppol
+    ABI_MALLOC(icg,(nsppol,nkpt))
+    icg=0
+    icgtemp=0
+    iwav(:,:,:)=0
+    do isppol=1,nsppol
+       do ikpt=1,nkpt
+          !    MPI:cycle over k-points not treated by this node
+          if (nprocs>1 ) then !sometimes we can have just one processor
+             if ( ABS(MPI_enreg%proc_distrb(ikpt,1,isppol)-rank)  /=0) CYCLE
+          end if
+
+          !    write(std_out,*)'rank',rank,'ikpt',ikpt,'isppol',isppol
+          nband_k=dtset%nband(ikpt+(isppol-1)*nkpt)
+          !    write(std_out,*) ikpt+(isppol-1)*nkpt,nkpt
+          npw_k=npwarr(ikpt)
+          do iband=1,nband_k
+             if(iband.gt.mband) then
+                write(message,'(a,3i0)')" mband",iband,mband,nband_k
+                ABI_ERROR(message)
+             end if
+             iwav(iband,ikpt,isppol)= &
+                  &       (iband-1)*npw_k*dtset%nspinor+icgtemp
+          end do ! iband
+          icgtemp=icgtemp+ npw_k*dtset%nspinor*nband_k
+          !    icg(isppol,ikpt)=icgtemp
+          !    write(std_out,*) "icg", isppol,ikpt,icg(isppol,ikpt)
+       end do  ! ikpt
+    end do   ! isppol
+    !write(std_out,*) "shift for cg computed"
+    ABI_FREE(icg)
+    !
+    !Shifts computed.
+
+  end subroutine compute_shift_gpoints
 
 
 !!****f* mlwfovlp/read_chkunit

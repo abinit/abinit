@@ -319,8 +319,8 @@ contains
        & nsppol, nkpt, mband,  dtset, rank, master )
     integer, intent(in) ::  nsppol, nkpt, mband, rank, master
     logical, intent(in) :: band_in(:, :)
-    real(dp), intent(in) :: eigen(:)
-    real(dp), intent(inout) :: eigenvalues_w(:,:,:)
+    real(dp), intent(in) :: eigen(mband,nkpt,nsppol)
+    real(dp), intent(inout) :: eigenvalues_w(mband,nkpt,nsppol)
     type(dataset_type),intent(in) :: dtset
     character(len=fnlen) :: filew90_eig(nsppol)
     integer :: iun(nsppol), isppol, band_index, iband, jband, nband_k, ikpt
@@ -344,9 +344,11 @@ contains
              if(band_in(iband,isppol)) then
                 jband=jband+1
                 !          Writing data
-                if(rank==master) write(iun(isppol), '(2i6,4x,f10.5)' ) jband,ikpt,Ha_eV*eigen(iband+band_index)
+                if(rank==master) write(iun(isppol), '(2i6,4x,f10.5)' ) jband,ikpt,Ha_eV*eigen(iband, ikpt, isppol)
+                !eigen(iband+band_index)
                 !          Finish writing, now save eigenvalues
-                eigenvalues_w(jband,ikpt,isppol)=Ha_eV*eigen(iband+band_index)
+                eigenvalues_w(jband,ikpt,isppol)=Ha_eV*eigen(iband, ikpt, isppol)
+                !eigen(iband+band_index)
              end if
           end do !iband
           band_index=band_index+nband_k
