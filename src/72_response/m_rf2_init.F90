@@ -422,9 +422,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
    if (total .and. rf2%ndir==2 .and. kdir1==2) total_factor = zero
 
    ! determine antisym_factor
-   else if (rf2%ndir==2 .and. kdir1==2 .and. antisymmetric) then
-     antisym_factor = -one
-   endif
+   if (rf2%ndir==2 .and. kdir1==2 .and. antisymmetric) antisym_factor = -one
 
    ! define factor_in for accumulate_bands
    factor_in = sym_factor*antisym_factor*total_factor
@@ -686,6 +684,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
    endif ! check antisymmetric dkdk
  end if ! H^(2) exists
 
+ antisym_factor = one
 
 !Computation of terms containing H^(1)
  do kdir1=1,rf2%ndir
