@@ -402,9 +402,8 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
  call cwtime(cpu, wall, gflops, "start")
 
- ! TODO: This dimension should be encapsulated somewhere. We don't want to
- ! change the entire code if someone adds a new kind of perturbation.
- mpert = Crystal%natom + MPERT_MAX; iout = ab_out
+ mpert = ddb%mpert
+ iout = ab_out
 
  rprim = ddb%rprim; gprim = ddb%gprim
 
@@ -770,8 +769,6 @@ subroutine ifc_init_fromFile(dielt,filename,Ifc,natom,ngqpt,nqshift,qshift,ucell
  character(len=500) :: msg
  type(ddb_type) :: ddb
  type(ddb_hdr_type) :: ddb_hdr
-!arrays
- integer,allocatable :: atifc(:)
 
 !******************************************************************
 
@@ -780,16 +777,12 @@ subroutine ifc_init_fromFile(dielt,filename,Ifc,natom,ngqpt,nqshift,qshift,ucell
 
  if (file_exists .eqv. .true.)then
    !Reading the ddb
-   call ddb_hdr_open_read(ddb_hdr,filename,2,DDB_VERSION,comm,dimonly=1)
+   call ddb_hdr%open_read(filename,2,comm,dimonly=1)
 
    natom = ddb_hdr%natom
-   ABI_MALLOC(atifc,(ddb_hdr%natom))
-   do i=1,ddb_hdr%natom
-     atifc(i)=i
-   end do
    call ddb_hdr%free()
 
-   call ddb_from_file(ddb,filename,1,natom,natom,atifc, ddb_hdr, ucell_ddb,comm)
+   call ddb%from_file(filename,1, ddb_hdr, ucell_ddb,comm)
 
  else
    ABI_ERROR(sjoin("File:", filename, "is not present in the directory"))
@@ -820,7 +813,6 @@ subroutine ifc_init_fromFile(dielt,filename,Ifc,natom,ngqpt,nqshift,qshift,ucell
  call ifc_init(Ifc,ucell_ddb,ddb,1,1,1,dipdip,1,ngqpt,nqshift,qshift,dielt,zeff,qdrp_cart,0,0.0_dp,0,1,comm)
 
  ! Free them all
- ABI_FREE(atifc)
  call ddb%free()
  call ddb_hdr%free()
 

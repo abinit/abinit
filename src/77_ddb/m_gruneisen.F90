@@ -131,12 +131,11 @@ type(gruns_t) function gruns_new(ddb_filepaths, inp, comm) result(new)
  character(len=*),intent(in) :: ddb_filepaths(:)
 
 !Local variables-------------------------------
- integer,parameter :: natifc0=0,master=0
+ integer,parameter :: master=0
  integer :: ivol,iblock,natom,ddbun, nprocs,my_rank,ierr
  character(len=500) :: msg
  type(ddb_hdr_type) :: ddb_hdr
 !arrays
- integer,allocatable :: atifc0(:)
  real(dp) :: dielt(3,3)
  real(dp),allocatable :: zeff(:,:,:), qdrp_cart(:,:,:,:)
 
@@ -154,17 +153,12 @@ type(gruns_t) function gruns_new(ddb_filepaths, inp, comm) result(new)
  ddbun = get_unit()
  do ivol=1,new%nvols
    call wrtout(ab_out, sjoin(" Reading DDB file:", ddb_filepaths(ivol)))
-   call ddb_hdr_open_read(ddb_hdr, ddb_filepaths(ivol), ddbun, DDB_VERSION, dimonly=1)
-   natom = ddb_hdr%natom
 
-   call ddb_hdr%free()
-
-   ABI_MALLOC(atifc0, (natom))
-   atifc0 = 0
-   call ddb_from_file(new%ddb_vol(ivol), ddb_filepaths(ivol), inp%brav, natom, natifc0, atifc0, &
+   call new%ddb_vol(ivol)%from_file(ddb_filepaths(ivol), inp%brav, &
                       ddb_hdr, new%cryst_vol(ivol), comm)
+   natom = ddb_hdr%natom
    call ddb_hdr%free()
-   ABI_FREE(atifc0)
+
    if (my_rank == master) then
      call new%cryst_vol(ivol)%print(header=sjoin("Structure for ivol:", itoa(ivol)), unit=ab_out, prtvol=-1)
    end if

@@ -23,7 +23,7 @@
 !! CHILDREN
 !!      abi_io_redirect, abimem_init, abinit_doctor, anaddb_dtset_free, anaddb_init
 !!      asrq0%apply, asrq0%free, crystal%free, ddb%free, ddb%get_block, ddb_diel
-!!      ddb_elast, ddb_flexo, ddb_from_file, ddb_hdr%free, ddb_hdr_open_read
+!!      ddb_elast, ddb_flexo, ddb%from_file, ddb_hdr%free, ddb_hdr%open_read
 !!      ddb_internalstr, ddb_interpolate, ddb_lw%free, ddb_lw_copy, ddb_piezo
 !!      dfpt_phfrq, dfpt_prtph, electrooptic, elphon, flush_unit, gruns_anaddb
 !!      gtdyn9, harmonic_thermo, herald, ifc%free, ifc%outphbtrap, ifc%print
@@ -186,7 +186,7 @@ program anaddb
 !******************************************************************
 
  ! Must read natom from the DDB before being able to allocate some arrays needed for invars9
- call ddb_hdr_open_read(ddb_hdr, filnam(3), ddbun, DDB_VERSION, comm = comm, dimonly = 1)
+ call ddb_hdr%open_read(filnam(3), ddbun, comm = comm, dimonly = 1)
 
  natom = ddb_hdr%natom
  ntypat = ddb_hdr%ntypat
@@ -241,13 +241,16 @@ program anaddb
    ab_out = dev_null
  end if
 
+ ! Check the value and transform the meaning of atifc (1 and 0 only)
+ call chkin9(inp%atifc,inp%natifc,natom)
+
 !******************************************************************
 !******************************************************************
 ! Read the DDB information, also perform some checks, and symmetrize partially the DDB
  write(msg, '(a, a)' )' read the DDB information and perform some checks',ch10
  call wrtout([std_out, ab_out], msg)
 
- call ddb_from_file(ddb, filnam(3), inp%brav, natom, inp%natifc, inp%atifc, ddb_hdr, Crystal, comm, prtvol = inp%prtvol)
+ call ddb%from_file(filnam(3), inp%brav, ddb_hdr, Crystal, comm, prtvol = inp%prtvol)
  call ddb_hdr%free()
  nsym = Crystal%nsym
 
@@ -637,8 +640,10 @@ program anaddb
 
  ! Interpolate the DDB onto the first list of vectors and write the file.
  if (inp%prtddb == 1 .and. inp%ifcflag == 1) then
-   call ddb_hdr_open_read(ddb_hdr, filnam(3), ddbun, DDB_VERSION)
+   call ddb_hdr%open_read(filnam(3), ddbun, comm)
    close(ddbun)
+   ddb_hdr%crystal%space_group = Crystal%space_group  ! GA: the space group is not written in the DDB text file.
+
    call ddb_interpolate(Ifc, Crystal, inp, ddb, ddb_hdr, asrq0, filnam(8), comm)
    call ddb_hdr%free()
  end if
