@@ -379,7 +379,7 @@ module m_gwdefs
   ! Frequencies used to evaluate the spectral function.
 
   type(sigijtab_t),allocatable :: Sigcij_tab(:,:)
-  ! (nkptgw, nsppol)%col(kb)%bidx(ii)  gived the index of the left wavefunction.
+  ! (nkptgw, nsppol)%col(kb)%bidx(ii) gives the index of the left wavefunction.
   ! in the <i,kgw,s|\Sigma_c|j,kgw,s> matrix elements that has to be calculated in cisgme.
   ! in the case of self-consistent GW on wavefunctions.
 
