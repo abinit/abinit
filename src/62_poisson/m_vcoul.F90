@@ -4,9 +4,9 @@
 !!
 !! FUNCTION
 !!  This module contains the definition of the vcoul_t as well
-!!  as procedures to calculate the Coulomb interaction in reciprocal
-!!  space taking into account a possible cutoff in real space.
-!!  Procedures to deal with the singularity for q-->0 are also provided.
+!!  as procedures to calculate the Coulomb interaction in reciprocal space
+!!  taking into account a possible cutoff in real space.
+!!  Procedures to deal with the singularity for q --> 0 are also provided.
 !!
 !! COPYRIGHT
 !! Copyright (C) 1999-2022 ABINIT group (MG, FB)
@@ -229,7 +229,7 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
  integer :: ii,iqlwl,iq_bz,iq_ibz,npar,npt
  integer :: opt_cylinder,opt_surface,test,rank,nprocs
  integer, allocatable :: seed(:)
- real(dp),parameter :: tolq0=1.d-3, tol999=999.0
+ real(dp),parameter :: tolq0 = 1.d-3, tol999 = 999.0
  real(dp) :: b1b1,b2b2,b3b3,b1b2,b2b3,b3b1
  real(dp) :: bz_geometry_factor,bz_plane,check,dx,integ,q0_vol,q0_volsph
  real(dp) :: qbz_norm,step,ucvol,intfauxgb, alfa
@@ -542,7 +542,7 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
    call cutoff_sphere(Vcp%nqlwl, Vcp%qlwl, ng, gvec, gmet, Vcp%rcut, vcoul_lwl)
    !
    ! === Treat the limit q--> 0 ===
-   ! * The small cube is approximated by a sphere, while vc(q=0)=2piR**2.
+   ! * The small cube is approximated by a sphere, while vc(q=0) = 2piR**2.
    ! * if a single q-point is used, the expression for the volume is exact.
    Vcp%i_sz = two_pi * Vcp%rcut**2
    call Vcp%print(unit=ab_out)
@@ -561,10 +561,8 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
        if (check<zero) then  ! use Rozzi's method.
          Vcp%hcyl=ABS(check)*SQRT(SUM(Cryst%rprimd(:,ii)**2))
          opt_cylinder=2
-         !Check to enter the infinite Rozzi treatment
-         if(Vcp%vcutgeo(3).le.-tol999) then
-           Vcp%hcyl=tol12
-         end if
+         ! Check to enter the infinite Rozzi treatment
+         if(Vcp%vcutgeo(3) <= -tol999) Vcp%hcyl=tol12
        end if
      end if
    end do
@@ -649,9 +647,9 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
  CASE ('SURFACE')
 
    test=COUNT(Vcp%vcutgeo/=zero)
-   ABI_CHECK(test==2,"Wrong vcutgeo")
+   ABI_CHECK(test == 2, "Wrong vcutgeo")
 
-   ! === Default is Beigi"s method ===
+   ! Default is Beigi"s method
    opt_surface=1; Vcp%alpha(:)=zero
    if (ANY(Vcp%vcutgeo<zero)) opt_surface=2
    Vcp%pdir(:)=zero
@@ -665,7 +663,7 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
 
    ! Beigi's method: the surface must be along x-y and R must be L_Z/2.
    if (opt_surface==1) then
-     msg="2D geometry, Beigi method, the periodicity must be in the x-y plane. Modify vcutgeo or your geometry."
+     msg = "2D geometry, Beigi method, the periodicity must be in the x-y plane. Modify vcutgeo or your geometry."
      ABI_CHECK(ALL(Vcp%pdir == (/1,1,0/)), msg)
      Vcp%rcut = half*SQRT(DOT_PRODUCT(a3,a3))
    end if
@@ -677,8 +675,8 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
    call cutoff_surface(Vcp%nqlwl, Vcp%qlwl, ng, gvec, gprimd, Vcp%rcut, &
                        Vcp%boxcenter, Vcp%pdir, Vcp%alpha, vcoul_lwl, opt_surface)
 
-   ! === If Beigi, treat the limit q--> 0 ===
-   if (opt_surface==1) then
+   ! If Beigi, treat the limit q--> 0.
+   if (opt_surface == 1) then
      ! Integrate numerically in the plane close to 0
      npt=100 ! Number of points in 1D
      gamma_pt=RESHAPE((/0,0,0/),(/3,1/)) ! Gamma point
@@ -766,18 +764,18 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
    !
    ! === Integration of 1/q^2 singularity ===
    ! * We use the auxiliary function from PRB 75, 205126 (2007) [[cite:Carrier2007]]
-   q0_vol=(two_pi)**3/ (Kmesh%nbz * ucvol); bz_geometry_factor=zero
+   q0_vol = (two_pi)**3 / (Kmesh%nbz * ucvol); bz_geometry_factor = zero
 
    ! It might be useful to perform the integration using the routine quadrature
    ! so that we can control the accuracy of the integral and improve the
    ! numerical stability of the GW results.
    do iq_bz=1,Qmesh%nbz
-     qbz_cart(:)=Qmesh%bz(1,iq_bz)*b1(:)+Qmesh%bz(2,iq_bz)*b2(:)+Qmesh%bz(3,iq_bz)*b3(:)
-     qbz_norm=SQRT(SUM(qbz_cart(:)**2))
-     if (qbz_norm>tolq0) bz_geometry_factor=bz_geometry_factor-faux(Qmesh%bz(:,iq_bz))
+     qbz_cart(:) = Qmesh%bz(1,iq_bz)*b1(:)+Qmesh%bz(2,iq_bz)*b2(:)+Qmesh%bz(3,iq_bz)*b3(:)
+     qbz_norm = SQRT(SUM(qbz_cart(:)**2))
+     if (qbz_norm > tolq0) bz_geometry_factor = bz_geometry_factor - faux(Qmesh%bz(:,iq_bz))
    end do
 
-   bz_geometry_factor = bz_geometry_factor + integratefaux()*Qmesh%nbz
+   bz_geometry_factor = bz_geometry_factor + integratefaux() * Qmesh%nbz
 
    write(msg,'(2a,2x,f8.4)')ch10,&
      ' integrate q->0 : numerical BZ geometry factor = ',bz_geometry_factor*q0_vol**(2./3.)
@@ -789,11 +787,12 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
    do iq_ibz=1,Vcp%nqibz
      call cmod_qpg(Vcp%nqibz, iq_ibz, Vcp%qibz, ng, gvec, gprimd, vcoul(:,iq_ibz))
 
-     if (iq_ibz==1) then ! The singularity is treated using vcoul_lwl.
+     if (iq_ibz == 1) then
+       ! The singularity is treated using vcoul_lwl.
        vcoul(1, iq_ibz) = zero
-       vcoul(2:,iq_ibz) = four_pi/vcoul(2:,iq_ibz)**2
+       vcoul(2:,iq_ibz) = four_pi / vcoul(2:,iq_ibz)**2
      else
-       vcoul(:,iq_ibz) = four_pi/vcoul(:,iq_ibz)**2
+       vcoul(:,iq_ibz) = four_pi / vcoul(:,iq_ibz)**2
      end if
    end do
 
@@ -813,16 +812,15 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
      do ig = 1,ng
        qpg(:) = Qmesh%bz(:,iq_bz) + gvec(:,ig)
        qpg2 = normv(qpg, gmet, 'G')**2
-     if (qpg2>tolq0) then
+     if (qpg2 > tolq0) then
        bz_geometry_factor = bz_geometry_factor - EXP(-alfa*qpg2)/qpg2
      end if
      end do
    end do
 
    intfauxgb = ucvol/four_pi/SQRT(0.5*two_pi*alfa)
-   !write(msg,'(2a,2x,f12.4,2x,f12.4)')ch10, ' bz_geometry_factor, f(q) integral = ', &
-   !&    bz_geometry_factor, intfauxgb
-   !call wrtout(std_out,msg)
+   !write(msg,'(2a,2x,f12.4,2x,f12.4)')ch10, ' bz_geometry_factor, f(q) integral = ', bz_geometry_factor, intfauxgb
+   !call wrtout(std_out, msg)
 
    bz_geometry_factor = bz_geometry_factor + intfauxgb*Qmesh%nbz
 
@@ -830,18 +828,19 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
      ' integrate q->0 : numerical BZ geometry factor = ',bz_geometry_factor*q0_vol**(2./3.)
    call wrtout(std_out, msg)
 
-   Vcp%i_sz=four_pi*bz_geometry_factor
+   Vcp%i_sz = four_pi*bz_geometry_factor
 
  CASE ('CRYSTAL')
 
    do iq_ibz=1,Vcp%nqibz
      call cmod_qpg(Vcp%nqibz, iq_ibz, Vcp%qibz, ng, gvec, gprimd, vcoul(:,iq_ibz))
 
-     if (iq_ibz==1) then ! The singularity is treated using vcoul_lwl.
+     if (iq_ibz == 1) then
+       ! The singularity is treated using vcoul_lwl.
        vcoul(1, iq_ibz) = zero
-       vcoul(2:,iq_ibz) = four_pi/vcoul(2:,iq_ibz)**2
+       vcoul(2:,iq_ibz) = four_pi / vcoul(2:,iq_ibz)**2
      else
-       vcoul(:,iq_ibz) = four_pi/vcoul(:,iq_ibz)**2
+       vcoul(:,iq_ibz) = four_pi / vcoul(:,iq_ibz)**2
      end if
    end do
 
@@ -870,7 +869,7 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
    do iq_ibz=1,Qmesh%nibz
      call cmod_qpg(Qmesh%nibz, iq_ibz, Qmesh%ibz, ng, gvec, gprimd, vcoul(:,iq_ibz))
 
-     ! * The Fourier transform of the error function reads
+     ! The Fourier transform of the error function reads
      if (iq_ibz==1) then
        vcoul(1, iq_ibz) = zero
        vcoul(2:,iq_ibz) = four_pi/(vcoul(2:,iq_ibz)**2) *  EXP( -0.25d0 * (Vcp%rcut*vcoul(2:,iq_ibz))**2 )
@@ -889,17 +888,17 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
    ! * We use the auxiliary function from PRB 75, 205126 (2007) [[cite:Carrier2007]]
    q0_vol=(two_pi)**3/(Kmesh%nbz*ucvol); bz_geometry_factor=zero
    do iq_bz=1,Qmesh%nbz
-     qbz_cart(:)=Qmesh%bz(1,iq_bz)*b1(:)+Qmesh%bz(2,iq_bz)*b2(:)+Qmesh%bz(3,iq_bz)*b3(:)
-     qbz_norm=SQRT(SUM(qbz_cart(:)**2))
-     if (qbz_norm>tolq0) bz_geometry_factor=bz_geometry_factor-faux(Qmesh%bz(:,iq_bz))
+     qbz_cart(:) = Qmesh%bz(1,iq_bz)*b1(:)+Qmesh%bz(2,iq_bz)*b2(:)+Qmesh%bz(3,iq_bz)*b3(:)
+     qbz_norm = SQRT(SUM(qbz_cart(:)**2))
+     if (qbz_norm > tolq0) bz_geometry_factor=bz_geometry_factor-faux(Qmesh%bz(:,iq_bz))
    end do
 
-   bz_geometry_factor = bz_geometry_factor + integratefaux()*Qmesh%nbz
+   bz_geometry_factor = bz_geometry_factor + integratefaux() * Qmesh%nbz
 
    write(msg,'(2a,2x,f12.4)')ch10,&
      ' integrate q->0 : numerical BZ geometry factor = ',bz_geometry_factor*q0_vol**(2./3.)
    call wrtout(std_out, msg)
-   Vcp%i_sz=four_pi*bz_geometry_factor  ! Final result stored here
+   Vcp%i_sz = four_pi * bz_geometry_factor  ! Final result stored here
 
  CASE ('ERFC')
    ! * Use a modified short-range only Coulomb interaction thanks to the complementar error function:
@@ -925,7 +924,7 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
    !
    ! === Treat 1/q^2 singularity ===
    ! * There is NO singularity in this case.
-   Vcp%i_sz=pi*Vcp%rcut**2 ! Final result stored here
+   Vcp%i_sz = pi * Vcp%rcut**2 ! Final result stored here
 
  CASE DEFAULT
    ABI_BUG(sjoin('Unknown cutoff mode:', Vcp%mode))
@@ -971,16 +970,17 @@ contains !===============================================================
   invnq3=invnq**3
   nqhalf=nq/2
 
-  !In order to speed up the calculation, precompute the sines
+  ! In order to speed up the calculation, precompute the sines
   do iq=1,nq
     qq=DBLE(iq)*invnq-half
     bb4sinpiqq_2(:,iq)=bb(:)*four*SIN(pi*qq)**2 ; sin2piqq(iq)=SIN(two_pi*qq)
   end do
 
   do iqx1=1,nq
-    if(modulo(iqx1,nprocs)/=rank) cycle
+    if(modulo(iqx1, nprocs) /= rank) cycle
     qq1(1)=DBLE(iqx1)*invnq-half
-    !Here take advantage of the q <=> -q symmetry : arrange the sampling of qx, qy space to avoid duplicating calculations.
+    !Here take advantage of the q <=> -q symmetry:
+    ! arrange the sampling of qx, qy space to avoid duplicating calculations.
     !Need weights to do this ...
     !do iqy1=1,nq
     miniqy1=nqhalf+1 ; maxiqy1=nq
@@ -1036,7 +1036,7 @@ contains !===============================================================
     end do
   end do
 
-  call xmpi_sum(integratefaux,comm,ierr)
+  call xmpi_sum(integratefaux, comm, ierr)
 
  end function integratefaux
 
@@ -1062,11 +1062,11 @@ contains !===============================================================
   real(dp) :: bb4sinpiqq1_2, bb4sinpiqq2_2, bb4sinpiqq3_2, sin2piqq1, sin2piqq2, sin2piqq3
 
   faux_fast= bb4sinpiqq1_2 + bb4sinpiqq2_2 + bb4sinpiqq3_2 &
-&       +two*( b1b2 * sin2piqq1*sin2piqq2 &
-&             +b2b3 * sin2piqq2*sin2piqq3 &
-&             +b3b1 * sin2piqq3*sin2piqq1 &
-&            )
-  if(Vcp%rcut>tol6)then
+       +two*( b1b2 * sin2piqq1*sin2piqq2 &
+             +b2b3 * sin2piqq2*sin2piqq3 &
+             +b3b1 * sin2piqq3*sin2piqq1 &
+            )
+  if (Vcp%rcut > tol6) then
     faux_fast=two_pi*two_pi/faux_fast * exp( -0.25d0*Vcp%rcut**2* sum( ( qq(1)*b1(:)+qq(2)*b2(:)+qq(3)*b3(:) )**2 ) )
   else
     faux_fast=two_pi*two_pi/faux_fast
