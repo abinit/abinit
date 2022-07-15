@@ -7,7 +7,7 @@
 !!  to handle the header of the DDB files.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2022 ABINIT group (MJV, XG, MT, MM, MVeithen, MG, PB, JCC, GA)
+!! Copyright (C) 2011-2022 ABINIT group (GA, MJV, XG, MT, MM, MVeithen, MG, PB, JCC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,14 +29,16 @@ MODULE m_ddb_hdr
  use m_abicore
  use m_xmpi
  use m_dtset
+ use m_crystal
 
  use defs_datatypes, only : pseudopotential_type
  use m_copy,      only : alloc_copy
- use m_pawtab,    only : pawtab_type, pawtab_nullify, pawtab_free !, pawtab_copy
+ use m_pawtab,    only : pawtab_type, pawtab_nullify, pawtab_free, pawtab_bcast !, pawtab_copy
  use m_psps,      only : psps_copy, psps_free
- use m_io_tools,  only : open_file
+ use m_io_tools,  only : open_file, get_unit
  use m_copy,      only : alloc_copy
  use m_fstrings,  only : sjoin
+ use m_geometry,  only : mkrdim
 
  implicit none
 
@@ -45,6 +47,12 @@ MODULE m_ddb_hdr
  public :: ddb_getdims      ! Open a DDB file and read basic dimensions and variables.
  public :: ioddb8_in        ! Temporary
  public :: psddb8           ! Temporary
+
+ integer,public,parameter :: DDB_VERSION=100401
+ ! DDB Version number.
+ ! 6 digit integer giving date, in form yymmdd for month=mm(1-12),
+ !  day=dd(1-31), and year=yy(90-99 for 1990 to 1999,00-89 for 2000 to 2089),
+ !  of current DDB version.
 
  type,public :: ddb_hdr_type
 
@@ -141,7 +149,12 @@ MODULE m_ddb_hdr
 
    type(pseudopotential_type) :: psps
 
+   type(crystal_t) :: crystal
+
  contains
+
+   procedure :: init => ddb_hdr_init
+    ! Initialize object
 
    procedure :: malloc => ddb_hdr_malloc
     ! Allocate dynamic memory.
@@ -149,16 +162,28 @@ MODULE m_ddb_hdr
    procedure :: free => ddb_hdr_free
     ! Free dynamic memory.
 
-   procedure :: open_write => ddb_hdr_open_write
-    ! Open the DDB file and write the header.
+   procedure :: bcast => ddb_hdr_bcast
+    ! Master broadcasts header data.
+
+   procedure :: print => ddb_hdr_print
+    ! Print out the content of the header.
 
    procedure :: compare => ddb_hdr_compare
     ! Compare two DDB headers.
 
- end type ddb_hdr_type
+   procedure :: open_write_txt => ddb_hdr_open_write_txt
+    ! Open the DDB text file and write the header.
 
- public :: ddb_hdr_init            ! Construct object
- public :: ddb_hdr_open_read       ! Open the DDB file and read the header.
+   procedure :: open_write => ddb_hdr_open_write
+    ! Open the DDB file and write the header.
+
+   procedure :: open_read => ddb_hdr_open_read
+    ! Open the DDB file and read the header.
+
+   procedure :: open_read_txt => ddb_hdr_open_read_txt
+    ! Open the DDB text file and read the header.
+
+ end type ddb_hdr_type
 
 CONTAINS  !===========================================================
 !!***
@@ -173,27 +198,35 @@ CONTAINS  !===========================================================
 !!   Initialize a ddb_hdr object from a dataset.
 !!
 !! INPUTS
+!!   ddb_hdr=the new ddb_hdr object
+!!   dtset=dtset object of the current calculation
+!!   psps=the pseudopotential objects
+!!   pawtab=pawtab object
+!!   dscrpt=string description of the ddb
+!!   nblok=number of blocks
+!!   xred=reduced coordinate positions of the atoms
+!!   occ=occupation number of the bands
+!!   ngfft=fft grid
 !!
 !! OUTPUT
 !!
 !! PARENTS
-!!      m_dfpt_looppert,m_eig2d,m_gstate,m_longwave,m_nonlinear,m_respfn_driver
+!!      dfpt_looppert,gstate,longwave,nonlinear,respfn,eig2tot
 !!
 !! CHILDREN
 !!      wrtout
 !!
 !! SOURCE
 
-subroutine ddb_hdr_init(ddb_hdr, dtset, psps, pawtab, ddb_version, dscrpt, &
+subroutine ddb_hdr_init(ddb_hdr, dtset, psps, pawtab, dscrpt, &
                         nblok, xred, occ, ngfft)
 
 !Arguments ------------------------------------
- type(ddb_hdr_type),intent(out) :: ddb_hdr
+ class(ddb_hdr_type),intent(inout) :: ddb_hdr
  type(dataset_type),intent(in) :: dtset
  type(pseudopotential_type),intent(in) :: psps
  type(pawtab_type),intent(in) :: pawtab(psps%ntypat*psps%usepaw)
  character(len=*),intent(in) :: dscrpt
- integer,intent(in) :: ddb_version
  integer,intent(in) :: nblok
  integer,intent(in),optional :: ngfft(18)
  real(dp),intent(in),optional :: xred(3,dtset%natom)
@@ -205,7 +238,7 @@ subroutine ddb_hdr_init(ddb_hdr, dtset, psps, pawtab, ddb_version, dscrpt, &
 ! ************************************************************************
 
  ddb_hdr%nblok = nblok
- ddb_hdr%ddb_version = ddb_version
+ ddb_hdr%ddb_version = DDB_VERSION
  ddb_hdr%dscrpt = trim(dscrpt)
  if (present(ngfft)) then
    ddb_hdr%ngfft = ngfft
@@ -298,8 +331,17 @@ subroutine ddb_hdr_init(ddb_hdr, dtset, psps, pawtab, ddb_version, dscrpt, &
    end do
  end if
 
+ call crystal_init(dtset%amu_orig(:,1), ddb_hdr%crystal, &
+& dtset%spgroup, dtset%natom, dtset%npsp, psps%ntypat, &
+& dtset%nsym, dtset%rprimd_orig(:,:,1), dtset%typat, &
+& dtset%xred_orig(1:3,1:ddb_hdr%matom,1), dtset%ziontypat, dtset%znucl, 1, &
+& dtset%nspden==2.and.dtset%nsppol==1, .false., '', &
+& dtset%symrel, dtset%tnons, dtset%symafm)
+
 end subroutine ddb_hdr_init
 !!***
+
+!----------------------------------------------------------------------
 
 !!****f* m_ddb_hdr/ddb_hdr_malloc
 !! NAME
@@ -309,6 +351,7 @@ end subroutine ddb_hdr_init
 !!  Allocate dynamic memory.
 !!
 !! PARENTS
+!!  ddb_hdr_init, ddb_hdr_open_read_txt
 !!
 !! CHILDREN
 !!      wrtout
@@ -353,9 +396,10 @@ end subroutine ddb_hdr_malloc
 !! ddb_hdr_free
 !!
 !! FUNCTION
-!!  Free memory
+!!  Free memory.
 !!
 !! PARENTS
+!!  anaddb,dfpt_looppert,gstate,longwave,nonlinear,respfn,eig2tot
 !!
 !! CHILDREN
 !!      wrtout
@@ -387,6 +431,7 @@ subroutine ddb_hdr_free(ddb_hdr)
  ABI_SFREE(ddb_hdr%znucl)
 
  ! types
+ call ddb_hdr%crystal%free()
  call psps_free(ddb_hdr%psps)
 
  if (allocated(ddb_hdr%pawtab)) then
@@ -399,6 +444,59 @@ end subroutine ddb_hdr_free
 
 !----------------------------------------------------------------------
 
+!!****f* m_ddb_hdr/ddb_hdr_open_write_txt
+!! NAME
+!! ddb_hdr_open_write_txt
+!!
+!! FUNCTION
+!!  Open the DDB text file and write the header.
+!!
+!! INPUTS
+!!  filename=name of the file being written (abo_DS*_DDB)
+!!  unddb=unit to open the ddb file in text format.
+!!  fullinit
+!!      1-> include information on pseudopoentials
+!!      0-> do not include information on pseudopoentials
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!  ddb_hdr_open_write
+!!
+!! CHILDREN
+!!      wrtout
+!!
+!! SOURCE
+
+subroutine ddb_hdr_open_write_txt(ddb_hdr, filename, unddb, fullinit)
+
+!Arguments ------------------------------------
+ class(ddb_hdr_type),intent(inout) :: ddb_hdr
+ character(len=*),intent(in) :: filename
+ integer,intent(in) :: unddb
+ integer,intent(in),optional :: fullinit
+
+!Local variables -------------------------
+ character(len=500) :: message
+ integer :: ierr
+
+! ************************************************************************
+
+ if (present(fullinit)) ddb_hdr%fullinit = fullinit
+
+ ! Open the output derivative database.
+ ierr = open_file(filename,message,unit=unddb,status='unknown',form='formatted')
+ if (ierr /= 0) then
+   ABI_ERROR(message)
+ end if
+
+ call ddb_hdr%print(unddb)
+
+end subroutine ddb_hdr_open_write_txt
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_ddb_hdr/ddb_hdr_open_write
 !! NAME
 !! ddb_hdr_open_write
@@ -407,6 +505,11 @@ end subroutine ddb_hdr_free
 !!  Open the DDB file and write the header.
 !!
 !! INPUTS
+!!  unddb=unit to open the ddb file in text format or netcdf identifier.
+!!  filename=name of the file being written
+!!  fullinit
+!!      1-> include information on pseudopoentials
+!!      0-> do not include information on pseudopoentials
 !!
 !! OUTPUT
 !!
@@ -417,39 +520,18 @@ end subroutine ddb_hdr_free
 !!
 !! SOURCE
 
-subroutine ddb_hdr_open_write(ddb_hdr, filnam, unddb, fullinit)
+subroutine ddb_hdr_open_write(ddb_hdr, filename, unddb, fullinit)
 
 !Arguments ------------------------------------
  class(ddb_hdr_type),intent(inout) :: ddb_hdr
- character(len=*),intent(in) :: filnam
+ character(len=*),intent(in) :: filename
  integer,intent(in) :: unddb
  integer,intent(in),optional :: fullinit
 
-!Local variables -------------------------
- integer :: choice
-
 ! ************************************************************************
 
- if (present(fullinit)) ddb_hdr%fullinit = fullinit
-
- call ddb_io_out(ddb_hdr%dscrpt,filnam,ddb_hdr%matom,ddb_hdr%mband,&
-&  ddb_hdr%mkpt,ddb_hdr%msym,ddb_hdr%mtypat,unddb,ddb_hdr%ddb_version,&
-&  ddb_hdr%acell,ddb_hdr%amu,ddb_hdr%dilatmx,ddb_hdr%ecut,ddb_hdr%ecutsm,&
-&  ddb_hdr%intxc,ddb_hdr%iscf,ddb_hdr%ixc,ddb_hdr%kpt,ddb_hdr%kptnrm,&
-&  ddb_hdr%natom,ddb_hdr%nband,ddb_hdr%ngfft,ddb_hdr%nkpt,ddb_hdr%nspden,&
-&  ddb_hdr%nspinor,ddb_hdr%nsppol,ddb_hdr%nsym,ddb_hdr%ntypat,ddb_hdr%occ,&
-&  ddb_hdr%occopt,ddb_hdr%pawecutdg,ddb_hdr%rprim,ddb_hdr%dfpt_sciss,&
-&  ddb_hdr%spinat,ddb_hdr%symafm,ddb_hdr%symrel,ddb_hdr%tnons,ddb_hdr%tolwfr,&
-&  ddb_hdr%tphysel,ddb_hdr%tsmear,ddb_hdr%typat,ddb_hdr%usepaw,ddb_hdr%wtk,&
-&  ddb_hdr%xred,ddb_hdr%zion,ddb_hdr%znucl)
-
-
- choice=2  ! Write
- call psddb8(choice,ddb_hdr%psps%dimekb,ddb_hdr%psps%ekb,ddb_hdr%fullinit,&
-&  ddb_hdr%psps%indlmn,ddb_hdr%psps%lmnmax,ddb_hdr%nblok,ddb_hdr%ntypat,unddb,&
-&  ddb_hdr%pawtab,ddb_hdr%psps%pspso,ddb_hdr%psps%usepaw,ddb_hdr%psps%useylm,&
-&  ddb_hdr%ddb_version)
-
+  ! TODO: check file extension and call netcdf version
+  call ddb_hdr%open_write_txt(filename, unddb, fullinit)
 
 end subroutine ddb_hdr_open_write
 !!***
@@ -464,6 +546,73 @@ end subroutine ddb_hdr_open_write
 !!  Open the DDB file and read the header.
 !!
 !! INPUTS
+!!  filename=name of the file being written (abo_DS*_DDB)
+!!  unddb=unit to open ddb file in text format or netcdf identifier.
+!!  comm=MPI communicator
+!!  matom,mtypat,mband,mkpt,msym,dimekb,lmnmax,usepaw=dimensions to be set.
+!!  dimonly
+!!   1-> only read dimensions and close the file
+!!   0-> leave the file open
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!      anaddb,m_effective_potential_file,m_ifc,m_thmeig,m_ddb
+!!
+!! CHILDREN
+!!      wrtout
+!!
+!! SOURCE
+
+subroutine ddb_hdr_open_read(ddb_hdr, filename, unddb, comm, &
+&        matom,mtypat,mband,mkpt,msym,dimekb,lmnmax,usepaw,dimonly)
+
+!Arguments ------------------------------------
+ class(ddb_hdr_type),intent(inout) :: ddb_hdr
+ character(len=*),intent(in) :: filename
+ integer,intent(in) :: unddb
+ integer,intent(in) :: comm
+ integer,intent(in),optional :: matom,mtypat,mband,mkpt,msym
+ integer,intent(in),optional :: dimekb,lmnmax,usepaw
+ integer,intent(in),optional :: dimonly
+
+!Local variables-------------------------------
+!scalars
+ integer,parameter :: master=0
+
+! ************************************************************************
+
+ if (xmpi_comm_rank(comm) == master) then
+   call wrtout(std_out, sjoin(" Opening DDB file:", filename), 'COLL')
+ end if
+
+  ! TODO: check file extension and call netcdf version
+ call ddb_hdr%open_read_txt(filename, unddb, comm, &
+&        matom,mtypat,mband,mkpt,msym,dimekb,lmnmax,usepaw,dimonly)
+
+end subroutine ddb_hdr_open_read
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ddb_hdr/ddb_hdr_open_read_txt
+!! NAME
+!! ddb_hdr_open_read_txt
+!!
+!! FUNCTION
+!!  Open the DDB text file and read the header.
+!!  If dimonly, only read dimensions and close the file,
+!!  otherwise leave the file open.
+!!
+!! INPUTS
+!!  filename=name of the file being written (abo_DS*_DDB)
+!!  unddb=unit to open ddb file in text format.
+!!  comm=MPI communicator
+!!  matom,mtypat,mband,mkpt,msym,dimekb,lmnmax,usepaw=dimensions to be set.
+!!  dimonly
+!!   1-> only read dimensions and close the file
+!!   0-> leave the file open
+!!
 !!
 !! OUTPUT
 !!
@@ -476,25 +625,27 @@ end subroutine ddb_hdr_open_write
 !!
 !! SOURCE
 
-subroutine ddb_hdr_open_read(ddb_hdr, filnam, unddb, ddb_version, comm, &
+subroutine ddb_hdr_open_read_txt(ddb_hdr, filename, unddb, comm, &
 &        matom,mtypat,mband,mkpt,msym,dimekb,lmnmax,usepaw,dimonly)
 
 !Arguments ------------------------------------
- type(ddb_hdr_type),intent(inout) :: ddb_hdr
- character(len=*),intent(in) :: filnam
+ class(ddb_hdr_type),intent(inout) :: ddb_hdr
+ character(len=*),intent(in) :: filename
  integer,intent(in) :: unddb
- integer,intent(in) :: ddb_version
  integer,intent(in),optional :: comm
  integer,intent(in),optional :: matom,mtypat,mband,mkpt,msym
  integer,intent(in),optional :: dimekb,lmnmax,usepaw
  integer,intent(in),optional :: dimonly
 
 !Local variables -------------------------
+ integer,parameter :: master=0
+ integer :: spgroup, npsp
  integer :: choice
  integer :: mblktyp,nblok
- integer :: matom_l,mtypat_l,mband_l,mkpt_l,msym_l
+ integer :: matom_l,mtypat_l,mband_l,mkpt_l,msym_l,nsppol_l
  integer :: dimekb_l,lmnmax_l,usepaw_l
  integer :: comm_l
+ real(dp):: rprimd(3,3)
 
 ! ************************************************************************
 
@@ -504,12 +655,14 @@ subroutine ddb_hdr_open_read(ddb_hdr, filnam, unddb, ddb_version, comm, &
    comm_l = xmpi_comm_self
  end if
 
- ! Read the dimensions from the DDB
- call ddb_getdims(dimekb_l,filnam,lmnmax_l,mband_l,mblktyp, &
-&       msym_l,matom_l,nblok,mkpt_l,mtypat_l,unddb,usepaw_l, &
-&       ddb_version,comm_l)
 
- close(unddb)
+ ! =====================================================
+ ! Open the DDB once and read the dimensions from header
+ ! =====================================================
+
+ call ddb_getdims(filename,comm_l,dimekb_l,lmnmax_l,mband_l,mblktyp, &
+&       msym_l,matom_l,nblok,mkpt_l,nsppol_l,mtypat_l,usepaw_l)
+
 
  if (present(matom)) matom_l = matom
  if (present(mtypat)) mtypat_l = mtypat
@@ -520,14 +673,14 @@ subroutine ddb_hdr_open_read(ddb_hdr, filnam, unddb, ddb_version, comm, &
  if (present(lmnmax)) lmnmax_l = lmnmax
  if (present(usepaw)) usepaw_l = usepaw
 
- ddb_hdr%ddb_version = ddb_version
+ ddb_hdr%ddb_version = DDB_VERSION
  ddb_hdr%usepaw = usepaw_l
  ddb_hdr%mband = mband_l
  ddb_hdr%matom = matom_l
  ddb_hdr%msym = msym_l
  ddb_hdr%mtypat = mtypat_l
  ddb_hdr%mkpt = mkpt_l
- ddb_hdr%nsppol = 1     ! GA: Is nsppol not read?? Have to fix this...
+ ddb_hdr%nsppol = nsppol_l
 
  ddb_hdr%nblok = nblok
  ddb_hdr%mblktyp = mblktyp
@@ -547,49 +700,84 @@ subroutine ddb_hdr_open_read(ddb_hdr, filnam, unddb, ddb_version, comm, &
    if (dimonly==1) return
  end if
 
- ! Allocate the memory
- call ddb_hdr%malloc()
 
- ABI_MALLOC(ddb_hdr%psps%indlmn,(6,ddb_hdr%psps%lmnmax,ddb_hdr%mtypat))
- ABI_MALLOC(ddb_hdr%psps%pspso,(ddb_hdr%mtypat))
- ABI_MALLOC(ddb_hdr%psps%ekb,(ddb_hdr%psps%dimekb,ddb_hdr%mtypat))
+ ! =========================================
+ ! Open the DDB a second time to read header
+ ! =========================================
 
- ! This is needed to read the DDBs in the old format
- ! GA : Not sure why this is required
- ddb_hdr%symafm(:)=1
- if(ddb_hdr%mtypat>=1)then
-   ddb_hdr%psps%pspso(:)=0
-   ddb_hdr%znucl(:)=zero
-   ddb_hdr%psps%ekb(:,:)=zero
- end if
- if(ddb_hdr%matom>=1)then
-   ddb_hdr%spinat(:,:)=zero
- end if
+ if (xmpi_comm_rank(comm) == master) then
 
-
- ! Note: the maximum parameters (matom, mkpt, etc.) are inputs to ioddb8_in
- !       wile the actual parameters (natom, nkpt, etc.) are outputs
- call ioddb8_in(filnam,ddb_hdr%matom,ddb_hdr%mband,&
-&       ddb_hdr%mkpt,ddb_hdr%msym,ddb_hdr%mtypat,unddb,ddb_version,&
-&       ddb_hdr%acell,ddb_hdr%amu,ddb_hdr%dilatmx,ddb_hdr%ecut,ddb_hdr%ecutsm,&
-&       ddb_hdr%intxc,ddb_hdr%iscf,ddb_hdr%ixc,ddb_hdr%kpt,ddb_hdr%kptnrm,&
-&       ddb_hdr%natom,ddb_hdr%nband,ddb_hdr%ngfft,ddb_hdr%nkpt,ddb_hdr%nspden,&
-&       ddb_hdr%nspinor,ddb_hdr%nsppol,ddb_hdr%nsym,ddb_hdr%ntypat,&
-&       ddb_hdr%occ,ddb_hdr%occopt,ddb_hdr%pawecutdg,ddb_hdr%rprim,&
-&       ddb_hdr%dfpt_sciss,ddb_hdr%spinat,ddb_hdr%symafm,ddb_hdr%symrel,&
-&       ddb_hdr%tnons,ddb_hdr%tolwfr,ddb_hdr%tphysel,ddb_hdr%tsmear,&
-&       ddb_hdr%typat,ddb_hdr%usepaw,ddb_hdr%wtk,ddb_hdr%xred,ddb_hdr%zion,&
-&       ddb_hdr%znucl)
-
-
-!  Read the psp information of the input DDB
+   ! Allocate the memory
+   call ddb_hdr%malloc()
+  
+   ABI_MALLOC(ddb_hdr%psps%indlmn,(6,ddb_hdr%psps%lmnmax,ddb_hdr%mtypat))
+   ABI_MALLOC(ddb_hdr%psps%pspso,(ddb_hdr%mtypat))
+   ABI_MALLOC(ddb_hdr%psps%ekb,(ddb_hdr%psps%dimekb,ddb_hdr%mtypat))
+  
+  
+   ! This is needed to read the DDBs in the old format
+   ! GA : Not sure if we really need this.
+   ddb_hdr%symafm(:)=1
+   if(ddb_hdr%mtypat>=1)then
+     ddb_hdr%psps%pspso(:)=0
+     ddb_hdr%psps%ekb(:,:)=zero
+     ddb_hdr%znucl(:)=zero
+   end if
+   if(ddb_hdr%matom>=1)then
+     ddb_hdr%spinat(:,:)=zero
+   end if
+  
+  
+   ! Note: the maximum parameters (matom, mkpt, etc.) are inputs to ioddb8_in
+   !       wile the actual parameters (natom, nkpt, etc.) are outputs
+   call ioddb8_in(filename,ddb_hdr%matom,ddb_hdr%mband,&
+  &       ddb_hdr%mkpt,ddb_hdr%msym,ddb_hdr%mtypat,unddb,&
+  &       ddb_hdr%acell,ddb_hdr%amu,ddb_hdr%dilatmx,ddb_hdr%ecut,ddb_hdr%ecutsm,&
+  &       ddb_hdr%intxc,ddb_hdr%iscf,ddb_hdr%ixc,ddb_hdr%kpt,ddb_hdr%kptnrm,&
+  &       ddb_hdr%natom,ddb_hdr%nband,ddb_hdr%ngfft,ddb_hdr%nkpt,ddb_hdr%nspden,&
+  &       ddb_hdr%nspinor,ddb_hdr%nsppol,ddb_hdr%nsym,ddb_hdr%ntypat,&
+  &       ddb_hdr%occ,ddb_hdr%occopt,ddb_hdr%pawecutdg,ddb_hdr%rprim,&
+  &       ddb_hdr%dfpt_sciss,ddb_hdr%spinat,ddb_hdr%symafm,ddb_hdr%symrel,&
+  &       ddb_hdr%tnons,ddb_hdr%tolwfr,ddb_hdr%tphysel,ddb_hdr%tsmear,&
+  &       ddb_hdr%typat,ddb_hdr%usepaw,ddb_hdr%wtk,ddb_hdr%xred,ddb_hdr%zion,&
+  &       ddb_hdr%znucl)
+  
+  
+  !  Read the psp information of the input DDB
    choice=1  ! Read
    call psddb8(choice,ddb_hdr%psps%dimekb,ddb_hdr%psps%ekb,ddb_hdr%fullinit,&
-&       ddb_hdr%psps%indlmn,ddb_hdr%psps%lmnmax,&
-&       ddb_hdr%nblok,ddb_hdr%ntypat,unddb,ddb_hdr%pawtab,ddb_hdr%psps%pspso,&
-&       ddb_hdr%psps%usepaw,ddb_hdr%psps%useylm,ddb_version)
+  &       ddb_hdr%psps%indlmn,ddb_hdr%psps%lmnmax,&
+  &       ddb_hdr%nblok,ddb_hdr%ntypat,unddb,ddb_hdr%pawtab,ddb_hdr%psps%pspso,&
+  &       ddb_hdr%psps%usepaw,ddb_hdr%psps%useylm)
 
-end subroutine ddb_hdr_open_read
+  ddb_hdr%dscrpt = ''
+
+ end if
+
+ ! Master broadcasts data
+ call ddb_hdr%bcast(comm_l)
+
+ ! ===============================
+ ! Finally, initialize the crystal
+ ! ===============================
+
+ spgroup = 1  ! GA: One would need to recover the space group from the list
+              !     of symmetries. No easy way to do this. 
+              !     spgroup should really be written in the ddb.
+              !     Not really an issue for now.
+
+
+ call mkrdim(ddb_hdr%acell,ddb_hdr%rprim,rprimd)
+
+ npsp = ddb_hdr%mtypat
+ call crystal_init(ddb_hdr%amu, ddb_hdr%crystal, &
+& spgroup, ddb_hdr%natom, npsp, ddb_hdr%ntypat, &
+& ddb_hdr%nsym, rprimd, ddb_hdr%typat, &
+& ddb_hdr%xred, ddb_hdr%zion, ddb_hdr%znucl, 1, &
+& ddb_hdr%nspden==2.and.ddb_hdr%nsppol==1, .false., '', &
+& ddb_hdr%symrel, ddb_hdr%tnons, ddb_hdr%symafm)
+
+end subroutine ddb_hdr_open_read_txt
 !!***
 
 !----------------------------------------------------------------------
@@ -603,6 +791,7 @@ end subroutine ddb_hdr_open_read
 !!  Also, complete psps information if one has more info than the other.
 !!
 !! INPUTS
+!!   ddb_hdr2: ddb header to compare with.
 !!
 !! OUTPUT
 !!
@@ -616,7 +805,8 @@ end subroutine ddb_hdr_open_read
 subroutine ddb_hdr_compare(ddb_hdr1, ddb_hdr2)
 
 !Arguments ------------------------------------
- class(ddb_hdr_type),intent(inout) :: ddb_hdr1, ddb_hdr2
+ class(ddb_hdr_type),intent(inout) :: ddb_hdr1
+ type(ddb_hdr_type),intent(inout) :: ddb_hdr2
 
 !Local variables -------------------------
 
@@ -668,6 +858,153 @@ end subroutine ddb_hdr_compare
 
 !----------------------------------------------------------------------
 
+!!****f* m_ddb_hdr/ddb_hdr_bcast
+!! NAME
+!! ddb_hdr_compare
+!!
+!! FUNCTION
+!!  Master broadcasts the data and others allocate their arrays
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!      wrtout
+!!
+!! SOURCE
+
+subroutine ddb_hdr_bcast(ddb_hdr, comm)
+
+!Arguments ------------------------------------
+ class(ddb_hdr_type),intent(inout) :: ddb_hdr
+ integer, intent(in) :: comm
+
+!Local variables -------------------------
+ integer, parameter :: master=0
+ integer :: ierr
+ integer :: ii,nn
+
+! ************************************************************************
+
+ if (xmpi_comm_size(comm) == 1) return
+
+ DBG_ENTER("COLL")
+
+ ! Integers
+ call xmpi_bcast(ddb_hdr%ddb_version, master, comm, ierr)
+
+ call xmpi_bcast(ddb_hdr%matom, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%mband, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%mkpt, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%msym, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%mtypat, master, comm, ierr)
+
+ call xmpi_bcast(ddb_hdr%natom, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%nkpt, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%nsym, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%ntypat, master, comm, ierr)
+
+ call xmpi_bcast(ddb_hdr%nsppol, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%nspinor, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%nspden, master, comm, ierr)
+
+ call xmpi_bcast(ddb_hdr%nblok, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%mblktyp, master, comm, ierr)
+
+ call xmpi_bcast(ddb_hdr%iscf, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%ixc, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%intxc, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%occopt, master, comm, ierr)
+
+ call xmpi_bcast(ddb_hdr%fullinit, master, comm, ierr)
+
+ call xmpi_bcast(ddb_hdr%usepaw, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%psps%dimekb, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%psps%ntypat, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%psps%lmnmax, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%psps%usepaw, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%psps%useylm, master, comm, ierr)
+ 
+ ! Allocate arrays on the other nodes.
+ if (xmpi_comm_rank(comm) /= master) then
+
+    call ddb_hdr%free()
+    call ddb_hdr%malloc()
+
+    ABI_MALLOC(ddb_hdr%psps%indlmn,(6,ddb_hdr%psps%lmnmax,ddb_hdr%mtypat))
+    ABI_MALLOC(ddb_hdr%psps%pspso,(ddb_hdr%mtypat))
+    ABI_MALLOC(ddb_hdr%psps%ekb,(ddb_hdr%psps%dimekb,ddb_hdr%mtypat))
+    
+ end if
+
+ ! Floats
+ call xmpi_bcast(ddb_hdr%dilatmx, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%ecut, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%kptnrm, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%pawecutdg, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%dfpt_sciss, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%tolwfr, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%tphysel, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%tsmear, master, comm, ierr)
+
+ ! Arrays
+ call xmpi_bcast(ddb_hdr%ngfft, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%acell, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%rprim, master, comm, ierr)
+
+ call xmpi_bcast(ddb_hdr%nband, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%symafm, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%symrel, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%typat, master, comm, ierr)
+
+ call xmpi_bcast(ddb_hdr%amu, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%kpt, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%occ, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%spinat, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%tnons, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%wtk, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%xred, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%zion, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%znucl, master, comm, ierr)
+
+ call xmpi_bcast(ddb_hdr%psps%indlmn, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%psps%pspso, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%psps%ekb, master, comm, ierr)
+
+ nn = ddb_hdr%psps%ntypat * ddb_hdr%psps%usepaw
+ if (nn.gt.0) then
+   do ii=1,nn
+    call pawtab_bcast(ddb_hdr%pawtab(ii), comm)
+   end do
+ end if
+
+ ! Strings
+ call xmpi_bcast(ddb_hdr%dscrpt, master, comm, ierr)
+
+
+ ! GA: There is no crystal_bcast at the moment
+ !     and I think this is not needed for now.
+ !
+ !if (xmpi_comm_rank(comm) /= master) then
+ !    spgroup = 1
+ !    npsp = ddb_hdr%mtypat
+ !    call crystal_init(ddb_hdr%amu, ddb_hdr%crystal, &
+ !   & spgroup, ddb_hdr%natom, npsp, ddb_hdr%ntypat, &
+ !   & ddb_hdr%nsym, rprimd, ddb_hdr%typat, &
+ !   & ddb_hdr%xred, ddb_hdr%zion, ddb_hdr%znucl, 1, &
+ !   & ddb_hdr%nspden==2.and.ddb_hdr%nsppol==1, .false., '', &
+ !   & ddb_hdr%symrel, ddb_hdr%tnons, ddb_hdr%symafm)
+ !end if
+
+
+end subroutine ddb_hdr_bcast
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_ddb_hdr/psddb8
 !!
 !! NAME
@@ -690,7 +1027,6 @@ end subroutine ddb_hdr_compare
 !!  usepaw= 0 for non paw calculation; =1 for paw calculation
 !!  useylm=governs the way the nonlocal operator is to be applied:
 !!         1=using Ylm, 0=using Legendre polynomials
-!!  vrsddb=Derivative Database version, for check of compatibility.
 !!
 !! OUTPUT
 !!  (see side effects)
@@ -718,12 +1054,11 @@ end subroutine ddb_hdr_compare
 !! SOURCE
 
 subroutine psddb8 (choice,dimekb,ekb,fullinit,indlmn,lmnmax,&
-&          nblok,ntypat,nunit,pawtab,pspso,usepaw,useylm,vrsddb)
+&          nblok,ntypat,nunit,pawtab,pspso,usepaw,useylm)
 
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: choice,dimekb,lmnmax,ntypat,nunit,usepaw,useylm
- integer,intent(in) :: vrsddb
  integer,intent(inout) :: fullinit,nblok
 !arrays
  integer,intent(in) :: pspso(ntypat)
@@ -746,14 +1081,6 @@ subroutine psddb8 (choice,dimekb,ekb,fullinit,indlmn,lmnmax,&
  real(dp),allocatable :: dij0(:),ekb0(:,:)
 
 ! *********************************************************************
-
-!Check psddb8 version number (vrsio8) against DDB version number (vrsddb)
- if (vrsio8/=vrsddb) then
-   write(message, '(a,i10,a,a,i10,a)' )&
-    'the psddb8 DDB version number=',vrsio8,ch10,&
-    'is not equal to the calling code DDB version number=',vrsddb,'.'
-   ABI_WARNING(message)
- end if
 
 !Check the value of choice
  if (choice<=0.or.choice>=3) then
@@ -1115,9 +1442,6 @@ end subroutine psddb8
 !! msym=maximum number of symetries
 !! mtypat=maximum number of atom types
 !! unddb=unit number for input
-!! vrsddb=6 digit integer giving date, in form yymmdd for month=mm(1-12),
-!!  day=dd(1-31), and year=yy(90-99 for 1990 to 1999,00-89 for 2000 to 2089),
-!!  of current DDB version.
 !!
 !! OUTPUT
 !! acell(3)=length scales of primitive translations (bohr)
@@ -1166,7 +1490,7 @@ end subroutine psddb8
 !!
 !! SOURCE
 
-subroutine ioddb8_in(filnam,matom,mband,mkpt,msym,mtypat,unddb,vrsddb,&
+subroutine ioddb8_in(filename,matom,mband,mkpt,msym,mtypat,unddb,&
 &  acell,amu,dilatmx,ecut,ecutsm,intxc,iscf,ixc,kpt,kptnrm,&
 &  natom,nband,ngfft,nkpt,nspden,nspinor,nsppol,nsym,ntypat,occ,occopt,&
 &  pawecutdg,rprim,dfpt_sciss,spinat,symafm,symrel,tnons,tolwfr,tphysel,tsmear,&
@@ -1174,10 +1498,10 @@ subroutine ioddb8_in(filnam,matom,mband,mkpt,msym,mtypat,unddb,vrsddb,&
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: matom,mband,mkpt,msym,mtypat,unddb,vrsddb,usepaw
+ integer,intent(in) :: matom,mband,mkpt,msym,mtypat,unddb,usepaw
  integer,intent(out) :: intxc,iscf,ixc,natom,nkpt,nspden,nspinor,nsppol,nsym,ntypat,occopt
  real(dp),intent(out) :: dilatmx,ecut,ecutsm,pawecutdg,kptnrm,dfpt_sciss,tolwfr,tphysel,tsmear
- character(len=*),intent(in) :: filnam
+ character(len=*),intent(in) :: filename
 !arrays
  integer,intent(out) :: nband(mkpt),ngfft(18),symafm(msym),symrel(3,3,msym),typat(matom)
  real(dp),intent(out) :: acell(3),amu(mtypat),kpt(3,mkpt),occ(mband*mkpt)
@@ -1197,18 +1521,10 @@ subroutine ioddb8_in(filnam,matom,mband,mkpt,msym,mtypat,unddb,vrsddb,&
 
 ! *********************************************************************
 
-!Check ioddb8 version number (vrsio8) against mkddb version number (vrsddb)
- if (vrsio8/=vrsddb) then
-   write(message, '(a,i10,a,a,i10,a)' )&
-    'The input/output DDB version number=',vrsio8,ch10,&
-    'is not equal to the DDB version number=',vrsddb,'.'
-   ABI_WARNING(message)
- end if
-
 !Open the input derivative database.
- write(message,'(a,a)')' About to open file ',TRIM(filnam)
- call wrtout(std_out,message,'COLL')
- if (open_file(filnam,message,unit=unddb,form="formatted",status="old",action="read") /= 0) then
+ !write(message,'(a,a)')' About to open file ',TRIM(filename)
+ !call wrtout(std_out,message,'COLL')
+ if (open_file(filename,message,unit=unddb,form="formatted",status="old",action="read") /= 0) then
    ABI_ERROR(message)
  end if
 
@@ -1726,14 +2042,11 @@ end subroutine ioddb8_in
 !!
 !! FUNCTION
 !! Open Derivative DataBase, then reads the variables that
-!! must be known in order to dimension the arrays before complete reading
+!! must be known in order to dimension the arrays, and close the file.
 !!
 !! INPUTS
-!! character(len=*) filnam: name of input or output file
+!! character(len=*) filename: name of input or output file
 !! unddb=unit number for input or output
-!! vrsddb=6 digit integer giving date, in form yymmdd for month=mm(1-12),
-!!  day=dd(1-31), and year=yy(90-99 for 1990 to 1999,00-89 for 2000 to 2089),
-!!  of current DDB version.
 !!
 !! OUTPUT
 !! dimekb=dimension of ekb (only used for norm-conserving psps)
@@ -1750,32 +2063,33 @@ end subroutine ioddb8_in
 !! comm=MPI communicator.
 !!
 !! PARENTS
-!!      m_ddb_hdr
+!!      ddb_hdr_open_read_txt
 !!
 !! CHILDREN
 !!      wrtout
 !!
 !! SOURCE
 
-subroutine ddb_getdims(dimekb,filnam,lmnmax,mband,mblktyp,msym,natom,nblok,nkpt,ntypat,unddb,usepaw,vrsddb,comm)
+subroutine ddb_getdims(filename,comm,dimekb,lmnmax,mband,mblktyp,msym,natom,nblok,nkpt,nsppol,ntypat,usepaw)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: unddb,vrsddb,comm
- integer,intent(out) :: msym,dimekb,lmnmax,mband,mblktyp,natom,nblok,nkpt,ntypat,usepaw
- character(len=*),intent(in) :: filnam
+ character(len=*),intent(in) :: filename
+ integer,intent(in) :: comm
+ integer,intent(out) :: msym,dimekb,lmnmax,mband,mblktyp,natom,nblok,nkpt,ntypat,nsppol,usepaw
 
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0
- integer :: ierr
- !integer :: mpert,msize
+ integer :: ierr,unddb
 
 ! *********************************************************************
 
  ! Master node reads dims from file and then broadcast.
  if (xmpi_comm_rank(comm) == master) then
-   call inprep8(dimekb,filnam,lmnmax,mband,mblktyp,msym,natom,nblok,nkpt,ntypat,unddb,usepaw,vrsddb)
+   unddb = get_unit()
+   call inprep8(filename,unddb,dimekb,lmnmax,mband,mblktyp,msym,natom,nblok,nkpt,nsppol,ntypat,usepaw)
+   close(unddb)
  end if
 
  if (xmpi_comm_size(comm) > 1) then
@@ -1788,6 +2102,7 @@ subroutine ddb_getdims(dimekb,filnam,lmnmax,mband,mblktyp,msym,natom,nblok,nkpt,
    call xmpi_bcast(nblok, master, comm, ierr)
    call xmpi_bcast(nkpt, master, comm, ierr)
    call xmpi_bcast(ntypat, master, comm, ierr)
+   call xmpi_bcast(nsppol, master, comm, ierr)
    call xmpi_bcast(usepaw, master, comm, ierr)
  end if
 
@@ -1810,10 +2125,8 @@ end subroutine ddb_getdims
 !! Note: only one processor read or write the DDB.
 !!
 !! INPUTS
-!! character(len=*) filnam: name of input or output file
+!! character(len=*) filename: name of input or output file
 !! unddb=unit number for input or output
-!! vrsddb=6 digit integer giving date, in form yymmdd for month=mm(1-12),
-!!  day=dd(1-31), and year=yy(90-99 for 1990 to 1999,00-89 for 2000 to 2089), of current DDB version.
 !!
 !! OUTPUT
 !! dimekb=dimension of ekb (only used for norm-conserving psps)
@@ -1829,7 +2142,7 @@ end subroutine ddb_getdims
 !! usepaw= 0 for non paw calculation; =1 for paw calculation
 !!
 !! PARENTS
-!!      m_ddb_hdr
+!!      ddb_getdims
 !!
 !! CHILDREN
 !!      wrtout
@@ -1837,22 +2150,22 @@ end subroutine ddb_getdims
 !! SOURCE
 
 
-subroutine inprep8 (dimekb,filnam,lmnmax,mband,mblktyp,msym,natom,nblok,nkpt,&
-& ntypat,unddb,usepaw,vrsddb)
+subroutine inprep8 (filename,unddb,dimekb,lmnmax,mband,mblktyp,msym,natom,nblok,nkpt,&
+& nsppol,ntypat,usepaw)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: unddb,vrsddb
+ integer,intent(in) :: unddb
  integer, intent(out) :: msym
- integer,intent(out) :: dimekb,lmnmax,mband,mblktyp,natom,nblok,nkpt,ntypat,usepaw
- character(len=*),intent(in) :: filnam
+ integer,intent(out) :: dimekb,lmnmax,mband,mblktyp,natom,nblok,nkpt,ntypat,nsppol,usepaw
+ character(len=*),intent(in) :: filename
 
 !Local variables -------------------------
 !scalars
 !Set routine version number here:
  integer,parameter :: vrsio8=100401,vrsio8_old=010929,vrsio8_old_old=990527
  integer :: bantot,basis_size0,blktyp,ddbvrs,iband,iblok,iekb,ii,ikpt,iline,im,ios,iproj
- integer :: itypat,itypat0,jekb,lmn_size0,mproj,mpsang,nekb,nelmts,nsppol
+ integer :: itypat,itypat0,jekb,lmn_size0,mproj,mpsang,nekb,nelmts
  integer :: occopt,pspso0,nsym
  logical :: ddbvrs_is_current_or_old,testn,testv
  character(len=12) :: string
@@ -1866,17 +2179,8 @@ subroutine inprep8 (dimekb,filnam,lmnmax,mband,mblktyp,msym,natom,nblok,nkpt,&
 
 ! *********************************************************************
 
-!Check inprep8 version number (vrsio8) against mkddb version number (vrsddb)
- if (vrsio8/=vrsddb) then
-   write(message, '(a,i0,2a,i0)' )&
-&   'The input/output DDB version number= ',vrsio8,ch10,&
-&   'is not equal to the DDB version number= ',vrsddb
-   ABI_BUG(message)
- end if
-
 !Open the input derivative database.
- call wrtout(std_out, sjoin(" Opening DDB file:", filnam), 'COLL')
- if (open_file(filnam,message,unit=unddb,form="formatted",status="old",action="read") /= 0) then
+ if (open_file(filename,message,unit=unddb,form="formatted",status="old",action="read") /= 0) then
    ABI_ERROR(message)
  end if
 
@@ -2075,12 +2379,12 @@ subroutine inprep8 (dimekb,filnam,lmnmax,mband,mblktyp,msym,natom,nblok,nkpt,&
      read (unddb,*)
    end do
  else
-   write(message,*)' inprep8 : nband(1)=',nband(1)
-   call wrtout(std_out,message,'COLL')
+   !write(message,*)' inprep8 : nband(1)=',nband(1)
+   !call wrtout(std_out,message,'COLL')
    do iline=1,(nband(1)+2)/3
      read (unddb,'(a80)')rdstring
-     write(message,*)trim(rdstring)
-     call wrtout(std_out,message,'COLL')  ! GA: why are we printing this?
+     !write(message,*)trim(rdstring)
+     !call wrtout(std_out,message,'COLL')  ! GA: why are we printing this?
    end do
  end if
 !23. rprim
@@ -2755,6 +3059,56 @@ end subroutine compare_ddb_variables
 
 !----------------------------------------------------------------------
 
+!!****f* m_ddb_hdr/ddb_hdr_print
+!! NAME
+!! ddb_hdr_print
+!!
+!! FUNCTION
+!!  Print out the content of the header.
+!!
+!! INPUTS
+!!  unddb=unit to print out the content.
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!      wrtout
+!!
+!! SOURCE
+
+subroutine ddb_hdr_print(ddb_hdr, unddb)
+
+!Arguments ------------------------------------
+ class(ddb_hdr_type),intent(inout) :: ddb_hdr
+ integer,intent(in) :: unddb
+
+!Local variables -------------------------
+ integer,parameter :: choice=2
+
+! ************************************************************************
+
+ call ddb_io_out(unddb,ddb_hdr%dscrpt,ddb_hdr%matom,ddb_hdr%mband,&
+&  ddb_hdr%mkpt,ddb_hdr%msym,ddb_hdr%mtypat,&
+&  ddb_hdr%acell,ddb_hdr%amu,ddb_hdr%dilatmx,ddb_hdr%ecut,ddb_hdr%ecutsm,&
+&  ddb_hdr%intxc,ddb_hdr%iscf,ddb_hdr%ixc,ddb_hdr%kpt,ddb_hdr%kptnrm,&
+&  ddb_hdr%natom,ddb_hdr%nband,ddb_hdr%ngfft,ddb_hdr%nkpt,ddb_hdr%nspden,&
+&  ddb_hdr%nspinor,ddb_hdr%nsppol,ddb_hdr%nsym,ddb_hdr%ntypat,ddb_hdr%occ,&
+&  ddb_hdr%occopt,ddb_hdr%pawecutdg,ddb_hdr%rprim,ddb_hdr%dfpt_sciss,&
+&  ddb_hdr%spinat,ddb_hdr%symafm,ddb_hdr%symrel,ddb_hdr%tnons,ddb_hdr%tolwfr,&
+&  ddb_hdr%tphysel,ddb_hdr%tsmear,ddb_hdr%typat,ddb_hdr%usepaw,ddb_hdr%wtk,&
+&  ddb_hdr%xred,ddb_hdr%zion,ddb_hdr%znucl)
+
+ call psddb8(choice,ddb_hdr%psps%dimekb,ddb_hdr%psps%ekb,ddb_hdr%fullinit,&
+&  ddb_hdr%psps%indlmn,ddb_hdr%psps%lmnmax,ddb_hdr%nblok,ddb_hdr%ntypat,unddb,&
+&  ddb_hdr%pawtab,ddb_hdr%psps%pspso,ddb_hdr%psps%usepaw,ddb_hdr%psps%useylm)
+
+end subroutine ddb_hdr_print
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_ddb_hdr/chkr8
 !!
 !! NAME
@@ -2875,13 +3229,14 @@ subroutine chki8(inti,intt,name)
 !! Note: only one processor writes the DDB.
 !!
 !! INPUTS
+!! unddb=unit number for output
 !! acell(3)=length scales of primitive translations (bohr)
 !! amu(mtypat)=mass of the atoms (atomic mass unit)
 !! dilatmx=the maximal dilatation factor
 !! character(len=fnlen) dscrpt:string that describe the output database
 !! ecut=kinetic energy planewave cutoff (hartree)
 !! ecutsm=smearing energy for plane wave kinetic energy (Ha)
-!! character(len=fnlen) filnam: name of output file
+!! character(len=fnlen) filename: name of output file
 !! intxc=control xc quadrature
 !! iscf=parameter controlling scf or non-scf choice
 !! ixc=exchange-correlation choice parameter
@@ -2915,11 +3270,7 @@ subroutine chki8(inti,intt,name)
 !! tphysel="physical" electronic temperature with FD occupations
 !! tsmear=smearing width (or temperature) in Hartree
 !! typat(matom)=type of each atom
-!! unddb=unit number for output
 !! usepaw=flag for PAW
-!! vrsddb=6 digit integer giving date, in form yymmdd for month=mm(1-12),
-!!  day=dd(1-31), and year=yy(90-99 for 1990 to 1999,00-89 for 2000 to 2089),
-!!  of current DDB version.
 !! wtk(mkpt)=weight assigned to each k point
 !! xred(3,matom)=reduced atomic coordinates
 !! zion(mtypat)=valence charge of each type of atom
@@ -2936,8 +3287,8 @@ subroutine chki8(inti,intt,name)
 !!
 !! SOURCE
 
-subroutine ddb_io_out (dscrpt,filnam,matom,mband,&
-&  mkpt,msym,mtypat,unddb,vrsddb,&
+subroutine ddb_io_out (unddb,dscrpt,matom,mband,&
+&  mkpt,msym,mtypat,&
 &  acell,amu,dilatmx,ecut,ecutsm,intxc,iscf,ixc,kpt,kptnrm,&
 &  natom,nband,ngfft,nkpt,nspden,nspinor,nsppol,nsym,ntypat,occ,occopt,&
 &  pawecutdg,rprim,dfpt_sciss,spinat,symafm,symrel,tnons,tolwfr,tphysel,tsmear,&
@@ -2945,12 +3296,12 @@ subroutine ddb_io_out (dscrpt,filnam,matom,mband,&
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: matom,mband,mkpt,msym,mtypat,unddb,vrsddb
+ integer,intent(in) :: unddb,matom,mband,mkpt,msym,mtypat
  integer,intent(in) :: intxc,iscf,ixc,natom,nkpt,nspden,nspinor,nsppol,nsym
  integer,intent(in) :: ntypat,occopt,usepaw
  real(dp),intent(in) :: dilatmx,ecut,ecutsm,kptnrm,pawecutdg,dfpt_sciss,tolwfr,tphysel
  real(dp),intent(in) :: tsmear
- character(len=fnlen),intent(in) :: dscrpt,filnam
+ character(len=fnlen),intent(in) :: dscrpt
 !arrays
  integer,intent(in) :: nband(mkpt*nsppol),ngfft(18),symafm(msym),symrel(3,3,msym)
  integer,intent(in) :: typat(matom)
@@ -2962,8 +3313,7 @@ subroutine ddb_io_out (dscrpt,filnam,matom,mband,&
 !Set routine version number here:
 !scalars
  integer,parameter :: vrsio8=100401,vrsio8_old=010929,vrsio8_old_old=990527
- integer :: bantot,ii,ij,ikpt,iline,im,ierr
- character(len=500) :: message
+ integer :: bantot,ii,ij,ikpt,iline,im
 !arrays
  character(len=9) :: name(9)
 
@@ -2972,29 +3322,10 @@ subroutine ddb_io_out (dscrpt,filnam,matom,mband,&
  DBG_ENTER("COLL")
 
 
-!Check ioddb8 version number (vrsio8) against mkddb version number
-!(vrsddb)
- if (vrsio8/=vrsddb) then
-   write(message, '(a,a,a,i10,a,a,i10,a)' )&
-   ' ddb_io_out: WARNING -',ch10,&
-   '  The input/output DDB version number=',vrsio8,ch10,&
-   '  is not equal to the DDB version number=',vrsddb,'.'
-   call wrtout(std_out,message,'COLL')
- end if
-
-!Open the output derivative database.
-!(version 2.1. : changed because of a bug in a Perl script
-!should set up a name checking procedure, with change of name
-!like for the output file)
- ierr = open_file(filnam,message,unit=unddb,status='unknown',form='formatted')
- if (ierr /= 0) then
-   ABI_ERROR(message)
- end if
-
 !Write the heading
  write(unddb, '(/,a,/,a,i10,/,/,a,a,/)' ) &
  ' **** DERIVATIVE DATABASE ****    ',&
- '+DDB, Version number',vrsddb,' ',trim(dscrpt)
+ '+DDB, Version number',DDB_VERSION,' ',trim(dscrpt)
 
 !Write the descriptive data
 !1. usepaw

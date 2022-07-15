@@ -50,7 +50,6 @@ MODULE m_eig2d
  use m_fstrings,   only : strcat
  use m_crystal,    only : crystal_init,  crystal_t
  use m_pawtab,     only : pawtab_type
- use m_ddb,        only : DDB_VERSION
  use m_double_grid,only : kptfine_av
  use m_mpinfo,     only : distrb2, proc_distrb_cycle
 
@@ -859,14 +858,6 @@ subroutine eig2stern(occ,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eigen0,ei
  master =0
  spaceworld=mpi_enreg%comm_cell
  me=mpi_enreg%me_kpt
-!DEBUG
-!write(std_out,*)' eig2stern : enter '
-!write(std_out,*)' mpw1=',mpw1
-!write(std_out,*)' mband=',mband
-!write(std_out,*)' nsppol=',nsppol
-!write(std_out,*)' nkpt_rbz=',nkpt_rbz
-!write(std_out,*)' npert=',npert
-!ENDDEBUG
 
 !Init interpolation method
  if(present(eigenq_fine))then
@@ -1349,13 +1340,6 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
  master =0
  spaceworld=mpi_enreg%comm_cell
  me=mpi_enreg%me_kpt
-!DEBUG
-!write(std_out,*)' eig2tot : enter '
-!write(std_out,*)' mband=',mband
-!write(std_out,*)' nsppol=',nsppol
-!write(std_out,*)' nkpt_rbz=',nkpt_rbz
-!write(std_out,*)' npert=',npert
-!ENDDEBUG
 
 !Init interpolation method
  if(present(eigenq_fine))then
@@ -1680,7 +1664,7 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
      dscrpt=' Note : temporary (transfer) database '
      unitout = dtfil%unddb
 
-     call ddb_hdr_init(ddb_hdr,dtset,psps,pawtab,DDB_VERSION,dscrpt,&
+     call ddb_hdr%init(dtset,psps,pawtab,dscrpt,&
 &     1,xred=xred,occ=occ_rbz)
 
      call ddb_hdr%open_write(dtfil%fnameabo_eigr2d, unitout)
@@ -1779,7 +1763,7 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
        unitout = dtfil%unddb
        dscrpt=' Note : temporary (transfer) database '
 
-       call ddb_hdr_init(ddb_hdr,dtset,psps,pawtab,DDB_VERSION,dscrpt,&
+       call ddb_hdr%init(dtset,psps,pawtab,dscrpt,&
 &       1,xred=xred,occ=occ_rbz)
 
        call ddb_hdr%open_write(dtfil%fnameabo_eigi2d, unitout)
@@ -1868,10 +1852,6 @@ subroutine outbsd(bdeigrf,dtset,eig2nkq,mpert,nkpt_rbz,unitout)
 
 ! *********************************************************************
 
-!DEBUG
-!write(std_out,*)' outbsd : enter'
-!write(std_out,*)' eig2nkq(1,1,1,1,1,1)=',eig2nkq(1,1,1,1,1,1,1)
-!ENDDEBUG
 
 !output information in this file
  write(unitout,*)
@@ -2077,10 +2057,6 @@ subroutine elph2_fanddw(dim_eig2nkq,displ,eig2nkq,eigen_corr,gprimd,mband,natom,
 
 ! *********************************************************************
 
-!DEBUG
-!write(std_out,*)' elph2_fanddw : enter '
-!write(std_out,*)' option=',option
-!ENDDEBUG
 
  if(option/=1 .and. option/=2)then
    write(message,'(a,i0)')' The argument option should be 1 or 2, while it is found that option=',option
@@ -2109,17 +2085,9 @@ subroutine elph2_fanddw(dim_eig2nkq,displ,eig2nkq,eigen_corr,gprimd,mband,natom,
  do imode=1,3*natom
    eigen_corr_mode(:)=zero
 
-!  DEBUG
-!  write(std_out,*)' Contribution of mode ',imode,' with frequency=',phfrq(imode),' and displacements :'
-!  write(std_out,'(2f14.7)' ) displ(1+2*3*natom*(imode-1):2*3*natom*imode)
-!  ENDDEBUG
-
    if (phfrq(imode)>tol6) then
      do iatom1=1,natom
        do iatom2=1,natom
-!        DEBUG
-!        write(std_out,*)' iatom1,iatom2=',iatom1,iatom2
-!        ENDDEBUG
 
          do idir1=1,3
            do idir2=1,3
@@ -2128,11 +2096,6 @@ subroutine elph2_fanddw(dim_eig2nkq,displ,eig2nkq,eigen_corr,gprimd,mband,natom,
              d_at1_dir1_im=displ(2 + 2*(idir1-1 +3*(iatom1-1 +natom*(imode-1))))
              d_at2_dir2_re=displ(1 + 2*(idir2-1 +3*(iatom2-1 +natom*(imode-1))))
              d_at2_dir2_im=displ(2 + 2*(idir2-1 +3*(iatom2-1 +natom*(imode-1))))
-
-!            DEBUG
-!            write(std_out,*)' idir1,idir2=',iatom1,iatom2,idir1,idir2
-!            write(std_out,'(a,4f12.5)' )' d_at1_dir1 re,d_at2_dir2 re=',d_at1_dir1_re,d_at2_dir2_re
-!            ENDDEBUG
 
              if(option==1)then
 !              Compute the mean displacement correlation at T=0.
@@ -2232,11 +2195,6 @@ subroutine elph2_fanddw(dim_eig2nkq,displ,eig2nkq,eigen_corr,gprimd,mband,natom,
  end if
 
  ABI_FREE(eigen_corr_mode)
-
-!DEBUG
-!write(std_out,*)' elph2_fanddw : exit'
-!write(std_out,*)' eigen_corr(1)=',eigen_corr(1)
-!ENDDEBUG
 
 end subroutine elph2_fanddw
 !!***

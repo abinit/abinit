@@ -15,62 +15,77 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Mon 11 Jul 2022.
-- ( at 05h42 )
+- ( at 05h44 )
   
   Give name for output derivative database : 
- t62o_DDB
+ t63_out_DDB
   Give short description of the derivative database :
- C in diamond structure; Very rough 2x2x2 special point grid; low ecut.
+ Cu; Very rough 2x2x2 special point grid; low ecut.
   Give number of input ddbs
-           3
+           4
   Give name for derivative database number           1  : 
- t61o_DS3_DDB
+ t62o_DS3_DDB
   Give name for derivative database number           2  : 
- t61o_DS4_DDB
+ t62o_DS4_DDB
   Give name for derivative database number           3  : 
- t61o_DS5_DDB
+ t62o_DS5_DDB
+  Give name for derivative database number           4  : 
+ t62o_DS6_DDB
 
   merge_ddb: Reading all headers.
- Opening DDB file: t61o_DS3_DDB
- Opening DDB file: t61o_DS4_DDB
- Opening DDB file: t61o_DS5_DDB
- Opening DDB file: t61o_DS3_DDB
+ Opening DDB file: t62o_DS3_DDB
+ Opening DDB file: t62o_DS4_DDB
+ Opening DDB file: t62o_DS5_DDB
+ Opening DDB file: t62o_DS6_DDB
+ Opening DDB file: t62o_DS3_DDB
 
  read the input derivative database number     1
- Opening DDB file: t61o_DS3_DDB
+ Opening DDB file: t62o_DS3_DDB
  compare the current and input DDB information
- Opening DDB file: t61o_DS3_DDB
- Unit cell volume ucvol=  7.5307571E+01 bohr^3
+ Opening DDB file: t62o_DS3_DDB
+ Unit cell volume ucvol=  8.0115525E+01 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 
  rdddb9: read 1 blocks from the input DDB
  Now the whole DDB is in central memory
- add block #    1 from file t61o_DS3_DDB
+ add block #    1 from file t62o_DS3_DDB
 
  read the input derivative database number     2
- Opening DDB file: t61o_DS4_DDB
+ Opening DDB file: t62o_DS4_DDB
  compare the current and input DDB information
- Opening DDB file: t61o_DS4_DDB
- Unit cell volume ucvol=  7.5307571E+01 bohr^3
+ Opening DDB file: t62o_DS4_DDB
+ Unit cell volume ucvol=  8.0115525E+01 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 
  rdddb9: read 1 blocks from the input DDB
  Now the whole DDB is in central memory
- add block #    1 from file t61o_DS4_DDB
+ add block #    1 from file t62o_DS4_DDB
 
  read the input derivative database number     3
- Opening DDB file: t61o_DS5_DDB
+ Opening DDB file: t62o_DS5_DDB
  compare the current and input DDB information
- Opening DDB file: t61o_DS5_DDB
- Unit cell volume ucvol=  7.5307571E+01 bohr^3
+ Opening DDB file: t62o_DS5_DDB
+ Unit cell volume ucvol=  8.0115525E+01 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 
  rdddb9: read 1 blocks from the input DDB
  Now the whole DDB is in central memory
- add block #    1 from file t61o_DS5_DDB
+ merge block #    1 from file t62o_DS5_DDB
+
+ read the input derivative database number     4
+ Opening DDB file: t62o_DS6_DDB
+ compare the current and input DDB information
+ Opening DDB file: t62o_DS6_DDB
+ Unit cell volume ucvol=  8.0115525E+01 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+
+
+ rdddb9: read 1 blocks from the input DDB
+ Now the whole DDB is in central memory
+ add block #    1 from file t62o_DS6_DDB
  Final ddb DDB has      3 blocks.
 -
 - Proc.   0 individual time (sec): cpu=          0.0  wall=          0.0
