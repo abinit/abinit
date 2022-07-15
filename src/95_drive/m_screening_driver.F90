@@ -50,13 +50,13 @@ module m_screening_driver
  use m_io_tools,      only : open_file, file_exists, iomode_from_fname
  use m_fstrings,      only : int2char10, sjoin, strcat, itoa, ltoa, itoa
  use m_energies,      only : energies_type, energies_init
- use m_numeric_tools, only : print_arr, iseven, coeffs_gausslegint
+ use m_numeric_tools, only : print_arr, coeffs_gausslegint
  use m_geometry,      only : normv, vdotw, mkrdim, metric
  use m_gwdefs,        only : GW_TOLQ0, GW_TOLQ, em1params_t, GW_Q0_DEFAULT
  use m_mpinfo,        only : destroy_mpi_enreg, initmpi_seq
  use m_ebands,        only : ebands_update_occ, ebands_copy, ebands_get_valence_idx, ebands_get_occupied, &
                              ebands_apply_scissors, ebands_free, ebands_has_metal_scheme, ebands_ncwrite, ebands_init
- use m_bz_mesh,       only : kmesh_t, littlegroup_t, littlegroup_free, littlegroup_init, get_ng0sh, find_qmesh
+ use m_bz_mesh,       only : kmesh_t, littlegroup_t, littlegroup_free, get_ng0sh, find_qmesh
  use m_kg,            only : getph
  use m_gsphere,       only : gsphere_t, setshells
  use m_vcoul,         only : vcoul_t
@@ -85,9 +85,9 @@ module m_screening_driver
  use m_pawfgr,        only : pawfgr_type, pawfgr_init, pawfgr_destroy
  use m_paw_sphharm,   only : setsym_ylm
  use m_paw_onsite,    only : pawnabla_init
- use m_paw_nhat,      only : nhatgrid,pawmknhat
+ use m_paw_nhat,      only : nhatgrid, pawmknhat
  use m_paw_denpot,    only : pawdenpot
- use m_paw_init,      only : pawinit,paw_gencond
+ use m_paw_init,      only : pawinit, paw_gencond
  use m_paw_tools,     only : chkpawovlp,pawprt
  use m_chi0,          only : cchi0, cchi0q0, chi0q0_intraband
  use m_setvtr,        only : setvtr
@@ -157,7 +157,6 @@ contains
 !!      m_driver
 !!
 !! CHILDREN
-!!      coeffs_gausslegint,wrtout,xginv,xheev,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -1144,12 +1143,9 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    else
      ! Calculate cchi0 for q/=0.
      call timab(308,1,tsec)
-
      call cchi0(use_tr,Dtset,Cryst,Qmesh%ibz(:,iqibz),Ep,Psps,Kmesh,qp_ebands,Gsph_epsG0,&
-&     Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,nbvw,ngfft_gw,nfftgw,ngfftf,nfftf_tot,chi0,ktabr,ktabrf,&
-&     Ltg_q(iqibz),chi0_sumrule,Wfd,Wfdf,wanbz)
-
-
+                Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,nbvw,ngfft_gw,nfftgw,ngfftf,nfftf_tot,chi0,ktabr,ktabrf,&
+                Ltg_q(iqibz),chi0_sumrule,Wfd,Wfdf,wanbz)
      call timab(308,2,tsec)
    end if
 
@@ -1446,27 +1442,25 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
    call timab(310,2,tsec)
  end do ! Loop over q-points
- if (Dtset%plowan_compute >=10)then
-   call destroy_plowannier(wanbz)
- endif
-!----------------------------- END OF THE CALCULATION ------------------------
+
+ if (Dtset%plowan_compute >= 10) call destroy_plowannier(wanbz)
 
  ! Close Files.
- if (my_rank==master) then
+ if (my_rank == master) then
    if (dtset%iomode == IO_MODE_ETSF) then
      NCF_CHECK(nf90_close(unt_em1))
-     if (dtset%prtsuscep>0) then
+     if (dtset%prtsuscep > 0) then
        NCF_CHECK(nf90_close(unt_susc))
      end if
    else
      close(unt_em1)
-     if (dtset%prtsuscep>0) close(unt_susc)
+     if (dtset%prtsuscep > 0) close(unt_susc)
    end if
  end if
-!
-!=====================
-!==== Free memory ====
-!=====================
+ !
+ !=====================
+ !==== Free memory ====
+ !=====================
  ABI_FREE(chi0_sumrule)
  ABI_FREE(chi0)
  ABI_SFREE(rhor_kernel)
@@ -1519,8 +1513,8 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  call Hdr_local%free()
  call ebands_free(ks_ebands)
  call ebands_free(qp_ebands)
- call littlegroup_free(Ltg_q)
  call destroy_mpi_enreg(MPI_enreg_seq)
+ call littlegroup_free(ltg_q)
  ABI_FREE(Ltg_q)
 
  call timab(301,2,tsec)
@@ -1571,12 +1565,11 @@ end subroutine screening
 !!      m_screening_driver
 !!
 !! CHILDREN
-!!      coeffs_gausslegint,wrtout,xginv,xheev,xmpi_sum_master
 !!
 !! SOURCE
 
 subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,Dtset,Psps,Pawtab,&
-& ngfft_gw,Hdr_wfk,Hdr_out,Cryst,Kmesh,Qmesh,ks_ebands,Ltg_q,Gsph_epsG0,Gsph_wfn,Vcp,Ep,comm)
+                           ngfft_gw,Hdr_wfk,Hdr_out,Cryst,Kmesh,Qmesh,ks_ebands,Ltg_q,Gsph_epsG0,Gsph_wfn,Vcp,Ep,comm)
 
 !Arguments ------------------------------------
 !scalars
@@ -1802,8 +1795,8 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,Dtset,Psps,Pawtab
  ABI_MALLOC(Ltg_q,(Qmesh%nibz))
 
  do iq=1,Qmesh%nibz
-   qtmp(:)=Qmesh%ibz(:,iq); if (normv(qtmp,gmet,'G')<GW_TOLQ0) qtmp(:)=zero; use_umklp=0
-   call littlegroup_init(qtmp,Kmesh,Cryst,use_umklp,Ltg_q(iq),Ep%npwe,gvec=gvec_kss)
+   qtmp = Qmesh%ibz(:,iq); if (normv(qtmp,gmet,'G') < GW_TOLQ0) qtmp(:) = zero; use_umklp = 0
+   call Ltg_q(iq)%init(qtmp,Kmesh,Cryst,use_umklp,Ep%npwe,gvec=gvec_kss)
  end do
 
  ecutepspG0 = Dtset%ecuteps
@@ -2194,7 +2187,6 @@ end subroutine setup_screening
 !!      m_screening_driver
 !!
 !! CHILDREN
-!!      coeffs_gausslegint,wrtout,xginv,xheev,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -2330,7 +2322,6 @@ end subroutine chi0_bksmask
 !!      m_screening_driver
 !!
 !! CHILDREN
-!!      coeffs_gausslegint,wrtout,xginv,xheev,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -2544,7 +2535,6 @@ end subroutine random_stopping_power
 !!      m_screening_driver
 !!
 !! CHILDREN
-!!      coeffs_gausslegint,wrtout,xginv,xheev,xmpi_sum_master
 !!
 !! SOURCE
 

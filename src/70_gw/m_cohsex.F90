@@ -39,7 +39,7 @@ module m_cohsex
  use m_numeric_tools, only : hermitianize, imin_loc
  use m_geometry,      only : normv
  use m_crystal,       only : crystal_t
- use m_bz_mesh,       only : kmesh_t, findqg0, littlegroup_t, littlegroup_print
+ use m_bz_mesh,       only : kmesh_t, findqg0, littlegroup_t
  use m_gsphere,       only : gsphere_t
  use m_fft_mesh,      only : get_gftt, rotate_fft_mesh, cigfft
  use m_vcoul,         only : vcoul_t
@@ -421,8 +421,8 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
  ! Here we divide the states where the QP energies are required into complexes. Note however that this approach is not
  ! based on group theory, and it might lead to spurious results in case of accidental degeneracies.
  nq_summed=Kmesh%nbz
- if (Sigp%symsigma>0) then
-   call littlegroup_print(Ltg_k,std_out,prtvol,'COLL')
+ if (Sigp%symsigma > 0) then
+   call Ltg_k%print(std_out, prtvol, mode_paral='COLL')
    nq_summed=SUM(Ltg_k%ibzq(:))
    !
    ! Find number of degenerate states and number of bands in each subspace

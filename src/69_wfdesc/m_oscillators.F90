@@ -45,7 +45,7 @@ module m_oscillators
 
  public :: rho_tw_g       ! Calculate rhotwg(G) = <wfn1| exp(-i(q+G).r) |wfn2>
  public :: calc_wfwfg     ! Calculate the Fourier transform of the product u_{bk}^*(r).u_{b"k}(r) at an arbitrary k in the BZ.
- public :: sym_rhotwgq0   ! Symmetrize the oscillator matrix elements in the BZ in the special case of q=0.
+ public :: sym_rhotwgq0   ! Symmetrize the oscillator matrix elements in the BZ in the special case of q = 0.
 !!***
 
 !----------------------------------------------------------------------
@@ -104,7 +104,7 @@ subroutine rho_tw_g(nspinor, npwvec, nr, ndat, ngfft, map2sphere, use_padfft, ig
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: i1,i2,npwvec,nr,nspinor,dim_rtwg,map2sphere,use_padfft,ndat
- complex(dpc),intent(in) :: ktabp1,ktabp2
+ complex(dpc),intent(in) :: ktabp1, ktabp2
 !arrays
  integer,intent(in) :: gbound(:,:) !gbound(2*mgfft+8,2)
  integer,intent(in) :: igfftg0(npwvec*map2sphere),ngfft(18)
