@@ -46,8 +46,8 @@ module m_sigma_driver
  use m_crystal
  use m_cgtools
 
- use defs_datatypes, only : pseudopotential_type, ebands_t
- use defs_abitypes,  only : MPI_type
+ use defs_datatypes,  only : pseudopotential_type, ebands_t
+ use defs_abitypes,   only : MPI_type
  use m_time,          only : timab
  use m_numeric_tools, only : imax_loc
  use m_fstrings,      only : strcat, sjoin, itoa, basename, ktoa, ltoa
@@ -63,7 +63,7 @@ module m_sigma_driver
                              ebands_free, ebands_init, ebands_ncwrite, ebands_interpolate_kpath, get_eneocc_vect, &
                              ebands_enclose_degbands, ebands_get_gaps, gaps_t
  use m_energies,      only : energies_type, energies_init
- use m_bz_mesh,       only : kmesh_t, littlegroup_t, littlegroup_init, littlegroup_free, isamek, get_ng0sh, find_qmesh
+ use m_bz_mesh,       only : kmesh_t, littlegroup_t, littlegroup_free, isamek, get_ng0sh, find_qmesh
  use m_gsphere,       only : gsphere_t, merge_and_sort_kg, setshells
  use m_kg,            only : getph, getcut
  use m_xcdata,        only : get_xclevel
@@ -122,7 +122,6 @@ module m_sigma_driver
 
  private
 !!***
-
 
  public :: sigma
 !!***
@@ -754,8 +753,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  ABI_MALLOC(Ltg_k, (Sigp%nkptgw))
  use_umklp=1
  do ikcalc=1,Sigp%nkptgw
-   if (Sigp%symsigma/=0) then
-     call littlegroup_init(Sigp%kptgw(:,ikcalc),Qmesh,Cryst,use_umklp,Ltg_k(ikcalc),0)
+   if (Sigp%symsigma /= 0) then
+     call Ltg_k(ikcalc)%init(Sigp%kptgw(:,ikcalc),Qmesh,Cryst,use_umklp,0)
    end if
  end do
 
@@ -2386,8 +2385,8 @@ endif
        ib1=MINVAL(Sigp%minbnd(ikcalc,:)) ! min and max band indices for GW corrections (for this k-point)
        ib2=MAXVAL(Sigp%maxbnd(ikcalc,:))
        call calc_sigx_me(ik_ibz,ikcalc,ib1,ib2,Cryst,qp_ebands,Sigp,Sr,Gsph_x,Vcp,Kmesh,Qmesh,Ltg_k(ikcalc),&
-&       Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd,Wfdf,QP_sym,&
-&       gwx_ngfft,ngfftf,Dtset%prtvol,Dtset%pawcross,tol_empty)
+                         Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd,Wfdf,QP_sym,&
+                         gwx_ngfft,ngfftf,Dtset%prtvol,Dtset%pawcross,tol_empty)
        if (rdm_update) then ! Only recompute exchange update to the 1-RDM if the point read was broken or not precomputed
          ABI_MALLOC(pot_k,(ib1:ib2,ib1:ib2))
          ABI_MALLOC(rdm_k,(ib1:ib2,ib1:ib2))
@@ -2432,15 +2431,16 @@ endif
        if (any(mod10 == [SIG_SEX, SIG_COHSEX])) then
          ! Calculate static COHSEX or SEX using the coarse gwc_ngfft mesh.
          call cohsex_me(ik_ibz,ikcalc,nomega_sigc,ib1,ib2,Cryst,qp_ebands,Sigp,Sr,Er,Gsph_c,Vcp,Kmesh,Qmesh,&
-&         Ltg_k(ikcalc),Pawtab,Pawang,Paw_pwff,Psps,Wfd,QP_sym,&
-&         gwc_ngfft,Dtset%iomode,Dtset%prtvol,sigcme_k)
+                        Ltg_k(ikcalc),Pawtab,Pawang,Paw_pwff,Psps,Wfd,QP_sym,&
+                        gwc_ngfft,Dtset%iomode,Dtset%prtvol,sigcme_k)
        else
           ! Compute correlated part using the coarse gwc_ngfft mesh.
           if (x1rdm/=1 .and. sigmak_todo(ik_ibz)==1) then ! Do not compute correlation MELS if the k-point was read from the checkpoint file
                                                           ! this IF only affects GW density matrix update
-            call calc_sigc_me(ik_ibz,ikcalc,nomega_sigc,ib1,ib2,Dtset,Cryst,qp_ebands,Sigp,Sr,Er,Gsph_Max,Gsph_c,Vcp,Kmesh,Qmesh,&
-&            Ltg_k(ikcalc),PPm,Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd,Wfdf,QP_sym,&
-&            gwc_ngfft,ngfftf,nfftf,ks_rhor,use_aerhor,ks_aepaw_rhor,sigcme_k)
+            call calc_sigc_me(ik_ibz,ikcalc,nomega_sigc,ib1,ib2,Dtset,Cryst,qp_ebands, &
+                              Sigp,Sr,Er,Gsph_Max,Gsph_c,Vcp,Kmesh,Qmesh,&
+                              Ltg_k(ikcalc),PPm,Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd,Wfdf,QP_sym,&
+                              gwc_ngfft,ngfftf,nfftf,ks_rhor,use_aerhor,ks_aepaw_rhor,sigcme_k)
           else
             write(msg,'(a1)')  ' '
             call wrtout(std_out, msg)
@@ -2627,9 +2627,10 @@ endif
          ik_ibz=Kmesh%tab(Sigp%kptgw2bz(ikcalc)) ! Index of the irreducible k-point for GW
          ib1=MINVAL(Sigp%minbnd(ikcalc,:))       ! min and max band indices for GW corrections (for this k-point)
          ib2=MAXVAL(Sigp%maxbnd(ikcalc,:))
+         ! Build <NO_i|Sigma_x[NO]|NO_j> matrix
          call calc_sigx_me(ik_ibz,ikcalc,ib1,ib2,Cryst,qp_ebands,Sigp,Sr,Gsph_x,Vcp_full,Kmesh,Qmesh,Ltg_k(ikcalc),&
-         & Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd_nato_all,Wfdf,QP_sym,&     ! Build <NO_i|Sigma_x[NO]|NO_j> matrix
-         & gwx_ngfft,ngfftf,Dtset%prtvol,Dtset%pawcross,tol_empty)
+                            Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd_nato_all,Wfdf,QP_sym,&
+                            gwx_ngfft,ngfftf,Dtset%prtvol,Dtset%pawcross,tol_empty)
        end do
        tol_empty=0.01 ! Recover standard value for tolerance on the occ numbers
        call xmpi_barrier(Wfd%comm)

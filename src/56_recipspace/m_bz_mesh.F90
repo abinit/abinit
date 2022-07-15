@@ -360,11 +360,15 @@ module m_bz_mesh
   real(dp) :: ext_pt(3)
   ! The external point defining the little group.
 
+ contains
+
+   procedure :: init => littlegroup_init
+   procedure :: print => littlegroup_print
+   procedure :: free => littlegroup_free_0D
+
  end type littlegroup_t
 
- public :: littlegroup_init
  public :: littlegroup_free
- public :: littlegroup_print
 !!***
 
  interface littlegroup_free
@@ -2414,17 +2418,16 @@ end subroutine findqg0
 !!
 !! SOURCE
 
-subroutine littlegroup_init(ext_pt,Kmesh,Cryst,use_umklp,Ltg,npwe,gvec)
+subroutine littlegroup_init(Ltg, ext_pt, Kmesh, Cryst, use_umklp, npwe, gvec)
 
 !Arguments ------------------------------------
 !scalars
+ class(littlegroup_t),intent(inout) :: Ltg
  integer,intent(in) :: npwe,use_umklp
  type(crystal_t),target,intent(in) :: Cryst
  type(kmesh_t),intent(in) :: Kmesh
- type(littlegroup_t),intent(inout) :: Ltg
 !arrays
- !integer,optional,intent(in) :: gvec(3,npwvec)
- integer,optional,intent(in) :: gvec(:,:)
+ integer,optional,intent(in) :: gvec(:,:) ! (3,npwvec)
  real(dp),intent(in) :: ext_pt(3)
 
 !Local variables-------------------------------
@@ -2491,14 +2494,14 @@ subroutine littlegroup_init(ext_pt,Kmesh,Cryst,use_umklp,Ltg,npwe,gvec)
  end do
  if (.not.found_identity) then
    write(msg,'(5a)')&
-&    'Only the inversion was found in the set of symmetries read from the KSS file ',ch10,&
-&    'Likely you are using a KSS file generated with an old version of Abinit, ',ch10,&
-&    'To run a GW calculation with an old KSS file, use version < 5.5 '
+     'Only the inversion was found in the set of symmetries read from the KSS file ',ch10,&
+     'Likely you are using a KSS file generated with an old version of Abinit, ',ch10,&
+     'To run a GW calculation with an old KSS file, use version < 5.5 '
    ABI_ERROR(msg)
  end if
 
  ! Find operations in the little group as well as umklapp vectors G0 ===
- call littlegroup_q(nsym,ext_pt,symxpt,symrec,symafm,dummy_timrev,prtvol=0)
+ call littlegroup_q(nsym, ext_pt, symxpt, symrec, symafm, dummy_timrev, prtvol=0)
 
  Ltg%preserve(:,:)=0; Ltg%g0(:,:,:)=0; Ltg%flag_umklp(:,:)=0; mG0len=zero
 
@@ -2557,7 +2560,7 @@ subroutine littlegroup_init(ext_pt,Kmesh,Cryst,use_umklp,Ltg,npwe,gvec)
  wtk=one; iout=0; dummy_timrev=0
 
  call symkpt(0,Cryst%gmet,indkpt1,iout,Kmesh%bz,nbz,nkibzq,Ltg%nsym_Ltg,symrec_Ltg,dummy_timrev,wtk,wtk_folded, &
-     bz2ibz_smap, xmpi_comm_self)
+             bz2ibz_smap, xmpi_comm_self)
 
  ABI_FREE(bz2ibz_smap)
  ABI_FREE(indkpt1)
@@ -2680,10 +2683,10 @@ subroutine littlegroup_init(ext_pt,Kmesh,Cryst,use_umklp,Ltg,npwe,gvec)
            end do
            if (.not.found) then
              write(msg,'(5a,f8.3,2a,3i5)')&
-&              'Not able to found G-G0 in the largest G-spere ',ch10,&
-&              'Decrease the size of epsilon or, if possible, increase ecutwfn (>ecuteps) ',ch10,&
-&              'Minimum required cutoff energy for G-G0 sphere= ',kin,ch10,&
-&              'G0 = ',g0(:)
+              'Not able to found G-G0 in the largest G-spere ',ch10,&
+              'Decrease the size of epsilon or, if possible, increase ecutwfn (>ecuteps) ',ch10,&
+              'Minimum required cutoff energy for G-G0 sphere= ',kin,ch10,&
+              'G0 = ',g0(:)
              ABI_ERROR(msg)
            end if
          end do
@@ -2694,24 +2697,23 @@ subroutine littlegroup_init(ext_pt,Kmesh,Cryst,use_umklp,Ltg,npwe,gvec)
  end if
  ABI_FREE(symrec_Ltg)
 
-#ifdef DEBUG_MODE
- do ik=1,nbz
-   if (ABS(SUM(Ltg%wtksym(1,:,ik)+Ltg%wtksym(2,:,ik))-wtk_folded(ik))>tol6) then
-     write(std_out,*)' sum(Ltg%wtksym,ik)-wtk_folded(ik) = ',sum(Ltg%wtksym(1,:,ik)+Ltg%wtksym(2,:,ik))-wtk_folded(ik)
-     write(std_out,*)Ltg%wtksym(1,:,ik),Ltg%wtksym(2,:,ik),wtk_folded(ik)
-     write(std_out,*)ik,Kmesh%bz(:,ik)
-     ABI_BUG("Wrong weight")
-   end if
- end do
- do ik=1,nbz
-   knew = Ltg%tabi(ik) * MATMUL(symrec(:,:,Ltg%tabo(ik)),Kmesh%bz(:,Ltg%tab(ik)))
-   if (.not.isamek(knew,Kmesh%bz(:,ik),gg)) then
-     write(std_out,*)knew,Kmesh%bz(:,ik)
-     write(std_out,*)Ltg%tabo(ik),Ltg%tabi(ik),Ltg%tab(ik)
-     ABI_BUG("Wrong tables")
-   end if
- end do
-#endif
+ ! DEBUG SECTION
+ !do ik=1,nbz
+ !  if (ABS(SUM(Ltg%wtksym(1,:,ik)+Ltg%wtksym(2,:,ik))-wtk_folded(ik))>tol6) then
+ !    write(std_out,*)' sum(Ltg%wtksym,ik)-wtk_folded(ik) = ',sum(Ltg%wtksym(1,:,ik)+Ltg%wtksym(2,:,ik))-wtk_folded(ik)
+ !    write(std_out,*)Ltg%wtksym(1,:,ik),Ltg%wtksym(2,:,ik),wtk_folded(ik)
+ !    write(std_out,*)ik,Kmesh%bz(:,ik)
+ !    ABI_BUG("Wrong weight")
+ !  end if
+ !end do
+ !do ik=1,nbz
+ !  knew = Ltg%tabi(ik) * MATMUL(symrec(:,:,Ltg%tabo(ik)),Kmesh%bz(:,Ltg%tab(ik)))
+ !  if (.not.isamek(knew,Kmesh%bz(:,ik),gg)) then
+ !    write(std_out,*)knew,Kmesh%bz(:,ik)
+ !    write(std_out,*)Ltg%tabo(ik),Ltg%tabi(ik),Ltg%tab(ik)
+ !    ABI_BUG("Wrong tables")
+ !  end if
+ !end do
 
  ABI_FREE(wtk_folded)
 
@@ -2744,8 +2746,7 @@ end subroutine littlegroup_init
 subroutine littlegroup_free_0D(Ltg)
 
 !Arguments ------------------------------------
-!scalars
- type(littlegroup_t),intent(inout) :: Ltg
+ class(littlegroup_t),intent(inout) :: Ltg
 
 ! *********************************************************************
 
@@ -2788,8 +2789,7 @@ end subroutine littlegroup_free_0D
 subroutine littlegroup_free_1D(Ltg)
 
 !Arguments ------------------------------------
-!scalars
- type(littlegroup_t),intent(inout) :: Ltg(:)
+ class(littlegroup_t),intent(inout) :: Ltg(:)
 
 !Local variables-------------------------------
  integer :: ipt
@@ -2828,13 +2828,12 @@ end subroutine littlegroup_free_1D
 !!
 !! SOURCE
 
-subroutine littlegroup_print(Ltg,unit,prtvol,mode_paral)
+subroutine littlegroup_print(Ltg,unit, prtvol, mode_paral)
 
 !Arguments ------------------------------------
-!scalars
+ class(littlegroup_t),intent(in) :: Ltg
  integer,optional,intent(in) :: prtvol,unit
  character(len=4),optional,intent(in) :: mode_paral
- type(littlegroup_t),intent(in) :: Ltg
 
 !Local variables-------------------------------
 !scalars

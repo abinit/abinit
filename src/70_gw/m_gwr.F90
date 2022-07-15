@@ -11,10 +11,10 @@
 !!
 !! Inside the g/r communicator, we use Scalapack matrices to store G, tchi and W.
 !! using a 1D processor grid with block distribution either along columns or rows.
-!! A 2D grid would indeed require MPI-FFT.
+!! A 2D grid would require MPI-FFT.
 !!
 !! Let's assume for simplicity that we have only two MPI procs in the g/r communicator.
-!! Matrices in (g,g')-space are distributed along columns so that the g-index is local
+!! Matrices in (g,g') space are distributed along columns so that the g-index is local
 !! and we can use sequential zero-padded FFTs to transform from g to r in the unit cell:
 !!
 !!                     g'-axis
@@ -48,16 +48,16 @@
 !!  - in GWR, the k-mesh for G must be Gamma-centered.
 !!  - All the two-point functions are defined on k/q-centered g-spheres while GW uses a single Gamma-centered sphere.
 !!  - At present only one-shot GW is supported.
-!!  - It's not clear if it makes sense to support all the options of the GW code, e.g. COHSEX, SEX, etc.
-!!  - No plasmopole model in GWR. In principle it's possible but where is the point?
-!!  - The frequency/tau meshes are automatically defined by ntau and the KS spectrum (minmax meshes)
+!!  - It is not clear if it makes sense to support all the options of the GW code, e.g. COHSEX, SEX, etc.
+!!  - No plasmopole model in GWR. In principle it is possible but where is the point?
+!!  - The frequency/tau meshes are automatically defined by ntau and the KS spectrum (minimax meshes)
 !!
 !! Technical properties:
 !!
 !!   - Integration of vcoul_t is not easy (q-centered gvec vs single sphere, memory is not MPI distributed)
 !!     Solution: extract reusabe components from vcoul_t that can be called inside the loop over q in IBZ.
 !!
-!!   - Computation of Sigma_x = Gv must be done in Fourier space using the Lehmann representation so
+!!   - Computation of Sigma_x = iGv must be done in Fourier space using the Lehmann representation so
 !!     that we can handle the long-range behavior in q-space. Unfortunately, we cannot simply call calc_sigx_me
 !!     from GWR so we have to implement a new routine.
 !!
@@ -753,7 +753,8 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
 
  end if ! nkptgw /= 0
 
- ! TODO: Copy additional section in sigmaph to include all degenerate states and map kcalc to ibz
+ ! Include all degenerate states and map kcalc to ibz.
+ ! NB: This part is copied from sigmaph.
 
  ! The k-point and the symmetries connecting the BZ k-point to the IBZ.
  ABI_MALLOC(gwr%kcalc2ibz, (gwr%nkcalc, 6))
@@ -917,7 +918,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  ! ========================
 
  if (any(dtset%gwr_np_gtks /= 0)) then
-   ! Use parameters from input file.
+   ! Use MPI parameters from input file.
    gwr%g_comm%nproc    = dtset%gwr_np_gtks(1)
    gwr%tau_comm%nproc  = dtset%gwr_np_gtks(2)
    gwr%kpt_comm%nproc  = dtset%gwr_np_gtks(3)
@@ -1887,8 +1888,10 @@ subroutine gwr_get_green_gpr(gwr, my_it, my_is, desc_kbz, gt_gpr)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: ndat1 = 1
- integer :: my_ikf, ig2, ioe, npwsp, col_bsize
+ integer :: my_ikf, ik_bz, ig2, ioe, npwsp, col_bsize
  real(dp) :: cpu, wall, gflops
+ real(dp) :: kk_bz(3)
+ character(len=1) :: trans
  type(matrix_scalapack) :: rgp
  type(matrix_scalapack),target :: gt_kbz(2)
 
@@ -1897,6 +1900,9 @@ subroutine gwr_get_green_gpr(gwr, my_it, my_is, desc_kbz, gt_gpr)
  call cwtime(cpu, wall, gflops, "start")
 
  do my_ikf=1,gwr%my_nkbz
+   ik_bz = gwr%my_kbz_inds(my_ikf)
+   kk_bz = gwr%kbz(:, ik_bz)
+
    ! Get G_k in the BZ.
    call gwr%rotate_gt(my_ikf, my_it, my_is, desc_kbz(my_ikf), gt_kbz)
 
@@ -1920,10 +1926,14 @@ subroutine gwr_get_green_gpr(gwr, my_it, my_is, desc_kbz, gt_gpr)
        call fft_ug(desc_k%npw, gwr%g_nfft, gwr%nspinor, ndat1, &
                    gwr%g_mgfft, gwr%g_ngfft, desc_k%istwfk, desc_k%gvec, desc_k%gbound, &
                    ggp%buffer_cplx(:, ig2), rgp%buffer_cplx(:, ig2))
+
+       ! Multiply by e^{ik.r}
+       !call times_eikr(kk_bz, gwr%g_ngfft, gwr%g_nfft, ndat1, rgp%buffer_cplx(:, ig2)
      end do ! ig2
 
      ! MPI transpose: G_k(r,g') -> G_k(g',r) and take complex conjugate.
-     call rgp%ptrans("C", gt_gpr(ioe, my_ikf))
+     trans = merge("N", "C", ioe == 1)
+     call rgp%ptrans(trans, gt_gpr(ioe, my_ikf))
      call rgp%free()
      end associate
    end do ! ioe
@@ -2136,7 +2146,7 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
 
 !Local variables-------------------------------
 !scalars
- integer :: my_iqi, my_is, ig1, ig2, my_it, it, ierr, iq_ibz, itau, spin, it0
+ integer :: my_iqi, my_is, ig1, ig2, my_it, it, ierr, iq_ibz, itau, spin, it0, iw
  real(dp) :: cpu, wall, gflops, tau
  logical :: sum_spins_
 !arrays
@@ -2150,7 +2160,9 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
  call cwtime(cpu, wall, gflops, "start")
  sum_spins_ = .False.; if (present(sum_spins)) sum_spins_ = sum_spins
 
- ! Targer weights according to mode.
+ ! Compute weights
+ ABI_MALLOC(my_weights, (gwr%ntau, gwr%my_ntau))
+
  select case(mode)
  case ("iw2t")
    if (what == "tchi") then
@@ -2178,12 +2190,12 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
    ABI_ERROR(sjoin("Wrong mode:", mode))
  end select
 
- ! Extract my weights from the global array.
- ABI_MALLOC(my_weights, (gwr%ntau, gwr%my_ntau))
  do my_it=1,gwr%my_ntau
    itau = gwr%my_itaus(my_it)
    tau = gwr%tau_mesh(itau)
-   my_weights(:, my_it) = weights(:, itau) ! * cos(omega * tau)
+   do iw=1,gwr%ntau
+     my_weights(iw, my_it) = weights(iw, itau) * cos(gwr%iw_mesh(iw) * tau)
+   end do
  end do
 
  do my_is=1,gwr%my_nspins
@@ -3113,7 +3125,7 @@ subroutine gwr_build_sigmac(gwr)
        gt_scbox(:, 1) = gt_scbox(:, 1) * wct_scbox
        gt_scbox(:, 2) = gt_scbox(:, 2) * wct_scbox
 
-       ! Integrate self-energy matrix elements in the supercell at fixed r.
+       ! Integrate self-energy matrix elements in the R-supercell at fixed r.
        do ikcalc=1,gwr%nkcalc
           ik_ibz = gwr%kcalc2ibz(ikcalc, 1)
           do jb=gwr%bstart_ks(ikcalc, spin), gwr%bstop_ks(ikcalc, spin)
@@ -3409,7 +3421,7 @@ subroutine gwr_ncwrite_tchi_wc(gwr, what, filepath)
 
  ! The same q-point in the IBZ might be stored on different pools.
  ! To avoid writing the same array multiple times, we used dist_qibz
- ! to select the procs in gwr%kpt_comm who are gonna write each iq_ibz.
+ ! to select the procs in gwr%kpt_comm who are gonna write the iq_ibz q-point.
  dist_qibz = huge(1)
  do my_iqi=1,gwr%my_nqibz
    iq_ibz = gwr%my_qibz_inds(my_iqi)

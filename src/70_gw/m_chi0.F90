@@ -44,7 +44,7 @@ module m_chi0
  use m_fft_mesh,        only : rotate_FFT_mesh, get_gftt
  use m_occ,             only : getnel
  use m_ebands,          only : pack_eneocc, unpack_eneocc, ebands_has_metal_scheme
- use m_bz_mesh,         only : kmesh_t, littlegroup_t, littlegroup_print, littlegroup_free, littlegroup_init
+ use m_bz_mesh,         only : kmesh_t, littlegroup_t
  use m_gsphere,         only : gsphere_t
  use m_io_tools,        only : flush_unit
  use m_oscillators,     only : rho_tw_g, calc_wfwfg
@@ -169,19 +169,12 @@ contains
 !!      m_screening_driver
 !!
 !! CHILDREN
-!!      assemblychi0_sym,get_bz_item,getnel,gsph_fft_tabs,kmesh_free,kmesh_init
-!!      littlegroup_free,littlegroup_init,littlegroup_print,pack_eneocc
-!!      paw_rho_tw_g,paw_symcprj,pawcprj_alloc,pawcprj_copy,pawcprj_free
-!!      pawhur_free,pawhur_init,pawpwij_free,pawpwij_init,print_arr,rho_tw_g
-!!      rotate_fft_mesh,symmetrize_afm_chi0,unpack_eneocc,vkbr_free,vkbr_init
-!!      wfd%change_ngfft,wfd%distribute_bands,wfd%get_cprj,wfd%get_ur,wrtout
-!!      xmpi_sum
 !!
 !! SOURCE
 
 subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
-&  Pawang,Pawrad,Pawtab,Paw_ij,Paw_pwff,Pawfgrtab,Paw_onsite,ktabr,ktabrf,nbvw,ngfft_gw,&
-&  nfftot_gw,ngfftf,nfftf_tot,chi0,chi0_head,chi0_lwing,chi0_uwing,Ltg_q,chi0_sumrule,Wfd,Wfdf,wan)
+                  Pawang,Pawrad,Pawtab,Paw_ij,Paw_pwff,Pawfgrtab,Paw_onsite,ktabr,ktabrf,nbvw,ngfft_gw,&
+                  nfftot_gw,ngfftf,nfftf_tot,chi0,chi0_head,chi0_lwing,chi0_uwing,Ltg_q,chi0_sumrule,Wfd,Wfdf,wan)
 
 !Arguments ------------------------------------
 !scalars
@@ -533,10 +526,10 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
    ABI_BUG("Wrong spmeth")
  END SELECT
 
- nkpt_summed=Kmesh%nbz
- if (Ep%symchi/=0) then
+ nkpt_summed = Kmesh%nbz
+ if (Ep%symchi /= 0) then
    nkpt_summed=Ltg_q%nibz_ltg
-   call littlegroup_print(Ltg_q,std_out,Dtset%prtvol,mode_paral='COLL')
+   call Ltg_q%print(std_out, Dtset%prtvol, mode_paral='COLL')
  end if
 
  ABI_MALLOC(vkbr,(Kmesh%nibz))
@@ -1137,19 +1130,12 @@ end subroutine cchi0q0
 !!      m_screening_driver
 !!
 !! CHILDREN
-!!      assemblychi0_sym,get_bz_item,getnel,gsph_fft_tabs,kmesh_free,kmesh_init
-!!      littlegroup_free,littlegroup_init,littlegroup_print,pack_eneocc
-!!      paw_rho_tw_g,paw_symcprj,pawcprj_alloc,pawcprj_copy,pawcprj_free
-!!      pawhur_free,pawhur_init,pawpwij_free,pawpwij_init,print_arr,rho_tw_g
-!!      rotate_fft_mesh,symmetrize_afm_chi0,unpack_eneocc,vkbr_free,vkbr_init
-!!      wfd%change_ngfft,wfd%distribute_bands,wfd%get_cprj,wfd%get_ur,wrtout
-!!      xmpi_sum
 !!
 !! SOURCE
 
 subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
-& Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,nbvw,ngfft_gw,nfftot_gw,ngfftf,nfftf_tot,&
-& chi0,ktabr,ktabrf,Ltg_q,chi0_sumrule,Wfd,Wfdf,wan)
+                 Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,nbvw,ngfft_gw,nfftot_gw,ngfftf,nfftf_tot,&
+                 chi0,ktabr,ktabrf,Ltg_q,chi0_sumrule,Wfd,Wfdf,wan)
 
 !Arguments ------------------------------------
 !scalars
@@ -1408,9 +1394,9 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
  END SELECT
 
  nkpt_summed=Kmesh%nbz
- if (Ep%symchi==1) then
-   nkpt_summed=Ltg_q%nibz_ltg
-   call littlegroup_print(Ltg_q,std_out,Dtset%prtvol,mode_paral='COLL')
+ if (Ep%symchi == 1) then
+   nkpt_summed = Ltg_q%nibz_ltg
+   call Ltg_q%print(std_out, Dtset%prtvol, mode_paral='COLL')
  end if
 
  write(msg,'(a,i6,a)')' Calculation status : ',nkpt_summed,' to be completed '
@@ -1997,13 +1983,6 @@ end subroutine cchi0
 !!      m_screening_driver
 !!
 !! CHILDREN
-!!      assemblychi0_sym,get_bz_item,getnel,gsph_fft_tabs,kmesh_free,kmesh_init
-!!      littlegroup_free,littlegroup_init,littlegroup_print,pack_eneocc
-!!      paw_rho_tw_g,paw_symcprj,pawcprj_alloc,pawcprj_copy,pawcprj_free
-!!      pawhur_free,pawhur_init,pawpwij_free,pawpwij_init,print_arr,rho_tw_g
-!!      rotate_fft_mesh,symmetrize_afm_chi0,unpack_eneocc,vkbr_free,vkbr_init
-!!      wfd%change_ngfft,wfd%distribute_bands,wfd%get_cprj,wfd%get_ur,wrtout
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -2291,8 +2270,8 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
    ABI_BUG("Wrong nsppol")
  END SELECT
 
- use_umklp=0
- call littlegroup_init(q0,Kmesh,Cryst,use_umklp,Ltg_q,Ep%npwepG0,gvec=Gsph_epsG0%gvec)
+ use_umklp = 0
+ call Ltg_q%init(q0, Kmesh, Cryst, use_umklp, Ep%npwepG0, gvec=Gsph_epsG0%gvec)
 
  write(msg,'(a,i2)')' Using symmetries to sum only over the IBZ_q  = ',Ep%symchi
  call wrtout(std_out, msg)
@@ -2328,7 +2307,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
  nkpt_summed=Kmesh%nbz
  if (Ep%symchi/=0) then
    nkpt_summed=Ltg_q%nibz_ltg
-   call littlegroup_print(Ltg_q,std_out,Wfd%prtvol,mode_paral='COLL')
+   call Ltg_q%print(std_out, Wfd%prtvol, mode_paral='COLL')
  end if
  !
  ! ============================================
@@ -2489,7 +2468,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
    ABI_FREE(Pwij)
  end if
 
- call littlegroup_free(Ltg_q)
+ call Ltg_q%free()
  call Kmesh%free()
 
  DBG_EXIT("COLL")

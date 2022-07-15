@@ -1485,7 +1485,7 @@ end subroutine calc_ceikr
 !!
 !! SOURCE
 
-pure subroutine times_eigr(gg,ngfft,nfft,ndat,ur)
+pure subroutine times_eigr(gg, ngfft, nfft, ndat, ur)
 
 !Arguments ------------------------------------
 !scalars
@@ -1553,7 +1553,7 @@ end subroutine times_eigr
 !!
 !! SOURCE
 
-pure subroutine times_eikr(kk,ngfft,nfft,ndat,ur)
+pure subroutine times_eikr(kk, ngfft, nfft, ndat, ur)
 
 !Arguments ------------------------------------
 !scalars
