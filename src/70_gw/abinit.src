@@ -19,7 +19,7 @@ ABI_SRC_DEP = 2     # The file depends on other files
 # Source files
 sources = [
  "m_calc_ucrpa.F90",
- #"m_mg.F90",
+ #"m_sigmax.F90",
  "m_sigc.F90",
  "m_sigx.F90",
  "m_vhxc_me.F90",

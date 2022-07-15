@@ -2221,9 +2221,9 @@ end subroutine findq
 !!
 !! INPUTS
 !!  kmkp(3)= k - kp input vector
-!!  nqbz=number of q points
-!!  qbz(3,nqbz)=coordinates of q points
-!!  mG0(3)= For each reduced direction gives the max G0 component to account for umklapp processes
+!!  nqbz=number of q points in the BZ
+!!  qbz(3,nqbz)=coordinates of q-points in the BZ
+!!  mG0(3)= For each reduced direction gives the maximum G0 component to account for umklapp processes
 !!
 !! OUTPUT
 !!  iq=index of q vector in BZ table
@@ -2238,7 +2238,7 @@ end subroutine findq
 !! SOURCE
 
 
-subroutine findqg0(iq,g0,kmkp,nqbz,qbz,mG0)
+subroutine findqg0(iq, g0, kmkp, nqbz, qbz, mG0)
 
 !Arguments ------------------------------------
 !scalars
@@ -2279,7 +2279,7 @@ subroutine findqg0(iq,g0,kmkp,nqbz,qbz,mG0)
  else
    ! q is not zero, find q such as k-kp=q+G0.
 
-   ! Try with G0=0 first.
+   ! Try with G0 = 0 first.
    !do iqbz=1,nqbz
    !  if (ALL(ABS(qbz(:,iqbz)-kmkp)<TOL_KDIFF)) then
    !    iq=iqbz
@@ -2287,7 +2287,7 @@ subroutine findqg0(iq,g0,kmkp,nqbz,qbz,mG0)
    !  end if
    !end do
 
-#if 1
+   ! Init G0 lists to accelerate search below (small |G0| first)
    glist1(1) = 0
    ig = 2
    do jg01=1,mG0(1)
@@ -2312,6 +2312,7 @@ subroutine findqg0(iq,g0,kmkp,nqbz,qbz,mG0)
      ig = ig + 2
    end do
 
+  ! Search algorithm.
   g1loop: do jg01=1,2*mG0(1)+1
     rg(1) = glist1(jg01)
     do jg02=1,2*mG0(2)+1
@@ -2319,10 +2320,10 @@ subroutine findqg0(iq,g0,kmkp,nqbz,qbz,mG0)
       do jg03=1,2*mG0(3)+1
          rg(3) = glist3(jg03)
          !
-         ! * Form q+G0 and check if it is the one.
+         ! Form q+G0 and check if it is the one.
          do iqbz=1,nqbz
           qpg0= qbz(:,iqbz) + rg
-          if (ALL(ABS(qpg0-kmkp)<TOL_KDIFF)) then
+          if (ALL(ABS(qpg0-kmkp) < TOL_KDIFF)) then
             iq = iqbz
             g0 = NINT(rg)
             EXIT g1loop
@@ -2333,33 +2334,10 @@ subroutine findqg0(iq,g0,kmkp,nqbz,qbz,mG0)
     end do
   end do g1loop
 
-#else
-   g1loop: do jg01=-mG0(1),mG0(1)
-     rg(1) = DBLE(jg01)
-     do jg02=-mG0(2),mG0(2)
-       rg(2) = DBLE(jg02)
-       do jg03=-mG0(3),mG0(3)
-          rg(3) = DBLE(jg03)
-          !
-          ! * Form q+G0 and check if it is the one.
-          do iqbz=1,nqbz
-           qpg0= qbz(:,iqbz) + rg
-           if (ALL(ABS(qpg0-kmkp)<TOL_KDIFF)) then
-             iq = iqbz
-             g0 = (/jg01,jg02,jg03/)
-             EXIT g1loop
-           end if
-         end do
-
-       end do
-     end do
-   end do g1loop
-#endif
-
-   if (iq==0) then
-     write(msg,'(a,3f9.5)')' q = k-kp+G0 not found. kmkp = ',kmkp
-     ABI_ERROR(msg)
-   end if
+  if (iq == 0) then
+    write(msg,'(a,3f9.5)')' q = k-kp+G0 not found. kmkp = ',kmkp
+    ABI_ERROR(msg)
+  end if
 
  end if
 

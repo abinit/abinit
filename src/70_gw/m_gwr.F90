@@ -507,6 +507,7 @@ module m_gwr
    ! W_q(g,g') --> W_q(g',r) for each q in the BZ treated by this MPI procs for given spin and tau.
 
    procedure :: cos_transform  => gwr_cos_transform
+   ! Inhomogeneous cosine transform.
 
    procedure :: free => gwr_free
    ! Free memory.
@@ -533,9 +534,10 @@ module m_gwr
    ! and compute matrix elements in the KS representation.
 
    procedure :: rpa_energy => gwr_rpa_energy
+   ! Compute RPA energy.
 
    procedure :: run_g0w0 => gwr_run_g0w0
-   ! Compute QP corrections at the G0W0 level
+   ! Compute QP corrections with G0W0.
 
    procedure :: ncwrite_tchi_wc => gwr_ncwrite_tchi_wc
    ! Write tchi or wc to netcdf file
@@ -1498,9 +1500,9 @@ subroutine gwr_load_kcalc_wfd(gwr, wfk_path, tmp_kstab)
 
  ! Read KS wavefunctions.
  call wfd%read_wfk(wfk_path, iomode_from_fname(wfk_path))
+ end associate
 
  call cwtime_report(" gwr_load_kcalc_from_wfk:", cpu, wall, gflops)
- end associate
 
 end subroutine gwr_load_kcalc_wfd
 !!***
@@ -3203,10 +3205,10 @@ subroutine ft_t2w(t_vals, w_vals)
  t_even = (t_vals(1,:) - t_vals(2,:)) / two
 
  do iw=1,gwr%ntau
-   !gwr%t2w_cos_wgs(iw,:)
-   !gwr%t2w_sin_wgs(iw,:)
    !w_vals(1, iw)
    !w_vals(2, iw)
+   !matmul(gwr%t2w_cos_wgs(iw,:), t_odd)
+   !matmul(gwr%t2w_sin_wgs(iw,:), t_even)
  end do
 
 end subroutine ft_t2w
