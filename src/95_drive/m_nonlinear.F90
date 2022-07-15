@@ -44,8 +44,8 @@ module m_nonlinear
  use m_time,     only : timab
  use m_symtk,    only : symmetrize_xred, littlegroup_q
  use m_dynmat,   only : d3sym, sytens
- use m_ddb,      only : nlopt, DDB_VERSION, dfptnl_doutput
- use m_ddb_hdr,  only : ddb_hdr_type, ddb_hdr_init
+ use m_ddb,      only : ddb_type, nlopt
+ use m_ddb_hdr,  only : ddb_hdr_type
  use m_ioarr,    only : read_rhor
  use m_kg,       only : getcut, kpgio, getph
  use m_fft,      only : fourdp
@@ -91,6 +91,7 @@ module m_nonlinear
 !!***
 
  public :: nonlinear
+ public :: dfptnl_doutput   ! Write the matrix of third-order derivatives to the output file
 !!***
 
 contains
@@ -198,6 +199,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,pawang,pawra
  type(ebands_t) :: bstruct
  type(hdr_type) :: hdr,hdr_den
  type(ddb_hdr_type) :: ddb_hdr
+ type(ddb_type) :: ddb
  type(wffile_type) :: wffgs,wfftgs
  type(wvl_data) :: wvl
  type(xcdata_type) :: xcdata
@@ -1067,22 +1069,23 @@ end if
  !Complete missing elements using symmetry operations
  call d3sym(blkflg,d3etot,indsym,mpert,natom,dtset%nsym,symrec,dtset%symrel)
 
-!Open the formatted derivative database file, and write the
-!preliminary information
  if (mpi_enreg%me == 0) then
+
+!  Write 3rd order derivatives in the output file
+   call dfptnl_doutput(blkflg,d3etot,mpert)
+
+! Write the DDB file
    dscrpt=' Note : temporary (transfer) database '
+   call ddb_hdr%init(dtset,psps,pawtab,dscrpt,1,xred=xred,occ=occ)
 
-   call ddb_hdr_init(ddb_hdr,dtset,psps,pawtab,DDB_VERSION,dscrpt,1,xred=xred,occ=occ)
+   call ddb%init(dtset, 1, mpert, 27*mpert*mpert*mpert)
 
-   call ddb_hdr%open_write(dtfil%fnameabo_ddb, dtfil%unddb)
+   call ddb%set_d3matr(d3etot, blkflg, iblok=1)
+
+   call ddb%write_txt(ddb_hdr, dtfil%fnameabo_ddb)
 
    call ddb_hdr%free()
-
-!  Call main output routine
-   call dfptnl_doutput(blkflg,d3etot,dtset%mband,mpert,dtset%nkpt,dtset%natom,dtset%ntypat,dtfil%unddb)
-
-!  Close DDB
-   close(dtfil%unddb)
+   call ddb%free()
 
 !  Compute tensors related to third-order derivatives
    call nlopt(blkflg,carflg,d3etot,d3cart,gprimd,mpert,natom,rprimd,ucvol)
@@ -1716,6 +1719,85 @@ subroutine initmv(cgindex,dtset,gmet,kg,kneigh,kg_neigh,kptindex,&
  ABI_FREE(npwtot)
 
 end subroutine initmv
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_nonlinear/dfptnl_doutput
+!! NAME
+!! dfptnl_doutput
+!!
+!! FUNCTION
+!! Write the matrix of third-order derivatives to the output file
+!!
+!! INPUTS
+!!  blkflg(3,mpert,3,mpert,3,mpert)= ( 1 if the element of the 3dte
+!!   has been calculated ; 0 otherwise )
+!!  d3(2,3,mpert,3,mpert,3,mpert)= matrix of the 3DTE
+!!  mpert =maximum number of ipert
+!!  natom=Number of atoms
+!!  ntypat=Number of type of atoms
+!!  unddb = unit number for DDB output
+!!
+!! NOTES
+!!  d3 holds the third-order derivatives before computing
+!!  the permutations of the perturbations.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!      wrtout,xmpi_sum
+!!
+!! SOURCE
+
+subroutine dfptnl_doutput(blkflg,d3,mpert)
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: mpert
+!arrays
+ integer,intent(in) :: blkflg(3,mpert,3,mpert,3,mpert)
+ real(dp),intent(in) :: d3(2,3,mpert,3,mpert,3,mpert)
+
+!Local variables -------------------------
+!scalars
+ integer :: i1dir,i1pert,i2dir,i2pert,i3dir,i3pert
+ character(len=500) :: msg
+
+!*************************************************************************
+
+ ! Write blok of third-order derivatives to ouput file
+
+ write(msg,'(a,a,a,a,a)')ch10,&
+  ' Matrix of third-order derivatives (reduced coordinates)',ch10,&
+  ' before computing the permutations of the perturbations',ch10
+ call wrtout(ab_out,msg)
+
+ write(ab_out,*)'    j1       j2       j3              matrix element'
+ write(ab_out,*)' dir pert dir pert dir pert           real part           imaginary part'
+
+ do i1pert=1,mpert
+   do i1dir=1,3
+     do i2pert=1,mpert
+       do i2dir=1,3
+         do i3pert=1,mpert
+           do i3dir=1,3
+
+             if (blkflg(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)/=0) then
+
+               write(ab_out,'(3(i4,i5),2f22.10)')&
+                 i1dir,i1pert,i2dir,i2pert,i3dir,i3pert,&
+                 d3(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
+             end if
+
+           end do
+         end do
+       end do
+     end do
+   end do
+ end do
+
+end subroutine dfptnl_doutput
 !!***
 
 end module m_nonlinear

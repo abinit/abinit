@@ -208,7 +208,7 @@ contains
       call wrtout(std_out,message,'COLL')
     end if
 
-    call effective_potential_file_getDimSystem(sys_fname,natom,ntypat,nph1l,nrpt)
+    call effective_potential_file_getDimSystem(sys_fname,comm,natom,ntypat,nph1l,nrpt)
     !call effective_potential_file_getDimSystem(filnam(3),natom,ntypat,nph1l,nrpt)
 
 

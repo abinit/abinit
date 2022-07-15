@@ -308,7 +308,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  type(wvl_data) :: wvl
 !arrays
  integer :: eq_symop(3,3),ngfftf(18),file_index(4),rfdir(9),rf2dir(9),rf2_dir1(3),rf2_dir2(3)
- integer,allocatable :: blkflg_save(:,:,:,:),dimcprj_srt(:),dummy(:),dyn(:),indkpt1(:),indkpt1_tmp(:)
+ integer,allocatable :: blkflg_save(:,:,:,:),dimcprj_srt(:),dyn(:),indkpt1(:),indkpt1_tmp(:)
  integer,allocatable :: indsy1(:,:,:),irrzon1(:,:,:),istwfk_rbz(:),istwfk_pert(:,:,:)
  integer,allocatable :: kg(:,:),kg1(:,:),nband_rbz(:),npwar1(:),npwarr(:),npwtot(:)
  integer,allocatable :: kg1_mq(:,:),npwar1_mq(:),npwtot1_mq(:) !+q/-q duplicates
@@ -625,15 +625,13 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  ABI_MALLOC(zeff,(3,3,dtset%natom))
  if (dtset%getddb .ne. 0 .or. dtset%irdddb .ne. 0 ) then
    filnam = dtfil%filddbsin
-   ABI_MALLOC(dummy,(dtset%natom))
-   call ddb_from_file(ddb, filnam, 1, dtset%natom, 0, dummy, tmp_ddb_hdr, ddb_crystal, mpi_enreg%comm_world)
+   call ddb%from_file(filnam, 1, tmp_ddb_hdr, ddb_crystal, mpi_enreg%comm_world)
    call tmp_ddb_hdr%free()
    ! Get Dielectric Tensor and Effective Charges
    ! (initialized to one_3D and zero if the derivatives are not available in the DDB file)
    iblok = ddb%get_dielt_zeff(ddb_crystal,1,0,0,dielt,zeff)
    call ddb_crystal%free()
    call ddb%free()
-   ABI_FREE(dummy)
  end if
 
 !%%%% Parallelization over perturbations %%%%%
@@ -2415,7 +2413,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
          unitout = dtfil%unddb
          vrsddb=100401
 
-         call ddb_hdr_init(ddb_hdr,dtset,psps,pawtab,DDB_VERSION,dscrpt,&
+         call ddb_hdr%init(dtset,psps,pawtab,dscrpt,&
 &         1,xred=xred,occ=occ_pert)
 
          call ddb_hdr%open_write(dtfil%fnameabo_eigr2d, dtfil%unddb)
