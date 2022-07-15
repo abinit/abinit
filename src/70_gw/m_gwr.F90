@@ -317,6 +317,10 @@ module m_gwr
    ! (my_ntau)
    ! Indirect table giving the tau indices treated by this MPI rank.
 
+   integer,allocatable :: tau_master(:)
+   ! (ntau)
+   ! The rank of the MPI proc in tau_comm treating itau.
+
    real(dp),allocatable :: tau_mesh(:), tau_wgs(:)
    ! (ntau)
    ! Imaginary tau mesh and integration weights.
@@ -1029,6 +1033,15 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  call xmpi_split_block(gwr%ntau, gwr%tau_comm%value, gwr%my_ntau, gwr%my_itaus)
  ABI_CHECK(gwr%my_ntau > 0, "my_ntau == 0, decrease number of procs for tau level")
 
+ ! Store the rank of the MPI proc in tau_comm treating itau.
+ ABI_MALLOC(gwr%tau_master, (gwr%ntau))
+ gwr%tau_master = -1
+ do my_it=1,gwr%my_ntau
+   itau = gwr%my_itaus(my_it)
+   gwr%tau_master(itau) = gwr%tau_comm%me
+ end do
+ call xmpi_max_ip(gwr%tau_master, gwr%tau_comm%value, ierr)
+
  call xmpi_split_block(gwr%nsppol, gwr%spin_comm%value, gwr%my_nspins, gwr%my_spins)
  ABI_CHECK(gwr%my_nspins > 0, "my_nspins == 0, decrease number of procs for spin level")
 
@@ -1333,6 +1346,7 @@ subroutine gwr_free(gwr)
  ABI_SFREE(gwr%qbz2ibz)
  ABI_SFREE(gwr%my_spins)
  ABI_SFREE(gwr%my_itaus)
+ ABI_SFREE(gwr%tau_master)
  ABI_SFREE(gwr%tau_mesh)
  ABI_SFREE(gwr%tau_wgs)
  ABI_SFREE(gwr%iw_mesh)
@@ -1536,8 +1550,8 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
 !scalars
  integer,parameter :: formeig0 = 0, istwfk1 = 1
  integer :: mband, nkibz, nsppol, my_is, my_it, my_iki, spin, ik_ibz
- integer :: my_nb, band, ib, npw_k, mpw, istwf_k, itau, ioe, ig1, ig2, il_g1, il_g2
- integer :: nbsum, npwsp, col_bsize, nband_k, my_bstart, my_bstop, nb
+ integer :: my_ib, my_nb, band, npw_k, mpw, istwf_k, itau, ioe, ig1, ig2, il_g1, il_g2
+ integer :: nbsum, npwsp, col_bsize, nband_k, my_bstart, my_bstop, nb, ierr
  real(dp) :: f_nk, eig_nk, tau, ef, gt_fact
  real(dp) :: cpu, wall, gflops
  character(len=5000) :: msg
@@ -1549,10 +1563,12 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
  type(processor_scalapack) :: gtau_slkproc
  type(matrix_scalapack), target :: cg_mat
 !arrays
+ integer :: lsize(2)
  integer,allocatable :: nband(:,:), wfd_istwfk(:), my_bands(:), kg_k(:,:)
  real(dp) :: kk_ibz(3)
  !real(dp),allocatable :: cgwork(:,:)
  real(dp),ABI_CONTIGUOUS pointer :: cg_k(:,:)
+ complex(dp),allocatable :: loc_cwork(:,:,:)
  logical,allocatable :: bks_mask(:,:,:), keep_ur(:,:,:)
 
 ! *************************************************************************
@@ -1586,10 +1602,19 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
  end if
  call wrtout(std_out, sjoin(" Computing Green's function with nbsum:", itoa(nbsum)))
 
- ! Init bks_mask: each MPI proc reads only the (k-points, spin).
- ! Distribute bands inside g_comm
- ! FIXME: Smart algo to make memory scale.
- call xmpi_split_block(nbsum, gwr%g_comm%value, my_nb, my_bands)
+ ! Init bks_mask:
+ !
+ !  - each MPI proc reads only the (k-points, spin) it needs.
+ !  - For given (k, s), bands are distributed inside tau_comm
+ !    This means that bands are replicated across g_comm.
+ !
+ ! TODO: Use (g_comm x tau_comm) 2D grid to distribute bands
+ !       Requires PBLAS redistribuution though.
+
+ !call xmpi_split_block(nbsum, gwr%g_comm%value, my_nb, my_bands)
+ call xmpi_split_block(nbsum, gwr%tau_comm%value, my_nb, my_bands)
+ !call xmpi_split_block(nbsum, gwr%gtau_comm%value, my_nb, my_bands)
+ ABI_CHECK(my_nb > 0, "my_nb == 0")
 
  do my_is=1,gwr%my_nspins
    spin = gwr%my_spins(my_is)
@@ -1636,7 +1661,7 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
  ef = ks_ebands%fermie
 
  mpw = maxval(wfd%npwarr)
- ! TODO: Mv m_ddk in 72_repsonse below 70_gw or move gwr to higher level.
+ ! TODO: Mv m_ddk in 72_response below 70_gw or move gwr to higher level.
  !ddkop = ddkop_new(dtset, gwr%cryst, gwr%pawtab, gwr%psps, wfd%mpi_enreg, mpw, wfd%ngfft)
 
  do my_is=1,gwr%my_nspins
@@ -1650,12 +1675,12 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
 
      ABI_CHECK(npw_k == desc_k%npw, "npw_k != desc_k%npw")
      ABI_CHECK(all(wfd%kdata(ik_ibz)%kg_k == desc_k%gvec), "kg_k != desc_k%gvec")
-
      !ABI_MALLOC(cgwork, (2, npw_k * wfd%nspinor))
      !call ddkop%setup_spin_kpoint(dtset, gwr%cryst, gwr%psps, spin, kk_ibz, istwf_k, npw_k, wfd%kdata(ik_ibz)%kg_k)
 
-     do ib=1,my_nb
-       band = my_bands(ib)
+     ! Sum over bands treated by me.
+     do my_ib=1,my_nb
+       band = my_bands(my_ib)
        f_nk = gwr%ks_ebands%occ(band, ik_ibz, spin)
        eig_nk = gwr%ks_ebands%eig(band, ik_ibz, spin) - ef
 
@@ -1679,8 +1704,7 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
 
        do my_it=1,gwr%my_ntau
          itau = gwr%my_itaus(my_it)
-         tau = gwr%tau_mesh(itau)
-         gt_fact = exp(-tau * eig_nk)
+         gt_fact = exp(-gwr%tau_mesh(itau) * eig_nk)
          associate (gt => gwr%gt_kibz(ioe, ik_ibz, itau, spin))
          do il_g2=1, gt%sizeb_local(2)
            ig2 = gt%loc2gcol(il_g2)
@@ -1694,16 +1718,72 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
          end associate
        end do ! my_it
 
-     end do ! ib
-     !ABI_FREE(cgwork)
+     end do ! my_ib
 
-   end associate
+     !end do ! itau
+     end associate
+
+     ! Loop over global set of taus.
+     ! For each tau, sum local set of bands distributed inside tau_comm.
+     ! Each pric store partial results in loc_cwork dimensioned as PBLAS matrix.
+     ! Finally, reduce PBLAS data on the processor treating tau inside tau_comm.
+
+     ! This just to get the dimension of the local buffer from the first PBLAS matrix I treat.
+     itau = gwr%my_itaus(1)
+     associate (gt0 => gwr%gt_kibz(1, ik_ibz, itau, spin))
+     lsize = gt0%sizeb_local
+     ABI_MALLOC(loc_cwork, (lsize(1), lsize(2), 2))
+
+     do itau=1,gwr%ntau
+
+       loc_cwork = zero
+       do my_ib=1,my_nb
+         band = my_bands(my_ib)
+         f_nk = gwr%ks_ebands%occ(band, ik_ibz, spin)
+         eig_nk = gwr%ks_ebands%eig(band, ik_ibz, spin) - ef
+
+         ! Select occupied or empty G
+         if (eig_nk < tol6) then
+           ioe = 1
+         else if (eig_nk > tol6) then
+           ioe = 2
+         else
+           ABI_WARNING("Metallic system of semiconductor with Fermi level inside bands!!!!")
+         end if
+         gt_fact = exp(-gwr%tau_mesh(itau) * eig_nk)
+
+         ABI_CHECK(wfd%get_wave_ptr(band, ik_ibz, spin, wave, msg) == 0, msg)
+
+         do il_g2=1, gt0%sizeb_local(2)
+           ig2 = gt0%loc2gcol(il_g2)
+           do il_g1=1, gt0%sizeb_local(1)
+             ig1 = gt0%loc2grow(il_g1)
+             loc_cwork(il_g1, il_g2, ioe) = loc_cwork(il_g1, il_g2, ioe) ! &
+             !  + gt_fact * GWPC_CONJG(wave%ug(ig1)) * wave%ug(ig2)
+           end do
+         end do
+       end do  ! my_ib
+
+       call xmpi_sum_master(loc_cwork, gwr%tau_master(itau), gwr%tau_comm%value, ierr)
+       if (gwr%tau_comm%me == gwr%tau_master(itau)) then
+         do ioe=1,2
+           gwr%gt_kibz(ioe, ik_ibz, itau, spin)%buffer_cplx = loc_cwork(:,:,ioe)
+         end do
+       end if
+
+     end do ! itau
+
+     ABI_FREE(loc_cwork)
+     end associate
+
    end do ! my_ikf
  end do ! my_is
 
  !call ddkop%free()
  call wfd%free()
  ABI_FREE(my_bands)
+
+ call gwr_print_trace(gwr, "gt_kibz")
 
  call cwtime_report(" gwr_build_gtau_from_wfk:", cpu, wall, gflops)
  end associate
@@ -1737,14 +1817,15 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
      nb = my_bstop - my_bstart + 1
      ABI_CHECK(nb > 0, "nb == 0, decrease number of procs for G and tau parallelism.")
 
+     ! Read my bands
      call c_f_pointer(c_loc(cg_mat%buffer_cplx), cg_k, shape=[2, npwsp * nb])
      call wfk%read_band_block([my_bstart, my_bstop], ik_ibz, spin, xmpio_single, kg_k=kg_k, cg_k=cg_k)
 
-     !do my_it=1,gwr%my_ntau
+     !call cg_mat%copy(cg_work)
+     !call cg_work%free()
+
      do itau=1,gwr%ntau
-       tau = gwr%tau_mesh(itau)
-       !itau = gwr%my_itaus(my_it)
-       !gt_fact = exp(-tau * eig_nk)
+       !gt_fact = exp(-gwr%tau_mesh(itau)  * eig_nk)
        !call slk_pzgemm(transa, transb, matrix1, cone, matrix2, czero, results)
        !my_it = gwr%myit_from_itau(itau)
        !if (my_it == -1) cycle
@@ -2780,7 +2861,7 @@ subroutine gwr_print_trace(gwr, what)
 
 !Local variables-------------------------------
  integer,parameter :: master = 0
- integer :: my_is, spin, my_it, itau, iq_ibz, ierr, my_iqi
+ integer :: my_is, spin, my_it, itau, iq_ibz, ierr, my_iqi, my_iki, ik_ibz
  complex(dp),allocatable :: ctrace(:,:,:)
 
 ! *************************************************************************
@@ -2800,6 +2881,21 @@ subroutine gwr_print_trace(gwr, what)
      end do
    end do
 
+ case ("gt_kibz")
+   ABI_CALLOC(ctrace, (gwr%nkibz, gwr%ntau, gwr%nsppol))
+
+   do my_is=1,gwr%my_nspins
+     spin = gwr%my_spins(my_is)
+     do my_it=1,gwr%my_ntau
+       itau = gwr%my_itaus(my_it)
+       do my_iki=1,gwr%my_nkibz
+         ik_ibz = gwr%my_kibz_inds(my_iqi)
+         ctrace(ik_ibz, itau, spin) = gwr%gt_kibz(1, ik_ibz, itau, spin)%get_trace() + &
+                                      gwr%gt_kibz(2, ik_ibz, itau, spin)%get_trace()
+       end do
+     end do
+   end do
+
  case default
    ABI_ERROR(sjoin("Invalid value of what:", what))
  end select
@@ -2808,9 +2904,17 @@ subroutine gwr_print_trace(gwr, what)
 
  if (xmpi_comm_rank(gwr%comm) == master) then
    call wrtout(ab_out, sjoin("Trace of", what, "matrix for testing purposes:"))
+
    do spin=1,gwr%nsppol
      call print_arr(ctrace(:,:,spin), unit=ab_out)
+     call print_arr(ctrace(:,:,spin), unit=std_out)
    end do
+
+   !ydoc = yamldoc_open(sjoin("Trace of", what, "matrix for testing purposes:")) !, width=11, real_fmt='(3f8.3)')
+   !call ydoc%open_tabular("MinMax imaginary tau/omega mesh", comment="tau, weight(tau), omega, weight(omega)")
+   !write(msg, "(i0, 4(es12.5,2x))")ii, gwr%tau_mesh(ii), gwr%tau_wgs(ii), gwr%iw_mesh(ii), gwr%iw_wgs(ii)
+   !call ydoc%add_tabular_line(msg)
+   !call ydoc%write_units_and_free([std_out, ab_out])
  end if
 
  ABI_FREE(ctrace)
@@ -2899,7 +3003,7 @@ subroutine gwr_build_wc(gwr)
          end do ! il_g1
        end do ! il_g2
 
-       ! Inver epsilon.
+       ! Invert epsilon.
        ! NB: PZGETRF requires square block cyclic decomposition i.e., MB_A = NB_A.
        ! hence we neeed to redistribute the data before calling zinvert.
        call wc%change_size_blocs(tmp_mat)

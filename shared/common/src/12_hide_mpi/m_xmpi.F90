@@ -261,6 +261,7 @@ module m_xmpi
  public :: xmpi_gather
  public :: xmpi_gatherv
  public :: xmpi_max
+ public :: xmpi_max_ip
  public :: xmpi_min         ! Out-of-place version
  public :: xmpi_min_ip      ! In-place version
  public :: xmpi_recv
@@ -493,6 +494,11 @@ interface xmpi_max
   module procedure xmpi_max_dpv
   module procedure xmpi_max_dp0d_ip
 end interface xmpi_max
+
+interface xmpi_max_ip
+  module procedure xmpi_max_dp0d_ip
+  module procedure xmpi_max_int1d_ip
+end interface xmpi_max_ip
 
 !----------------------------------------------------------------------
 

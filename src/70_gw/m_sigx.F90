@@ -597,8 +597,8 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, minbnd, maxbnd, Cryst, QP_BSt, Sigp,
            ! Treat analytically the case q --> 0
            !   * The oscillator is evaluated at q = 0 as it is considered constant in the small cube around Gamma
            !     while the Colulomb term is integrated out.
-           !   * If nspinor == 1 we have nonzero contribution only if ib_sum == jb
-           !   * If nspinor == 2,we evaluate <ib_sum,up|jb,up> and <ib_sum,dwn|jb,dwn>,
+           !   * If nspinor == 1, we have nonzero contribution only if ib_sum == jb
+           !   * If nspinor == 2, we evaluate <ib_sum,up|jb,up> and <ib_sum,dwn|jb,dwn>,
            !     and impose orthonormalization since npwwfn might be < npwvec.
            !   * Note the use of i_sz_resid and not i_sz, to account for the possibility
            !     to have generalized KS basis set from hybrid
