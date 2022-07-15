@@ -134,7 +134,7 @@ contains
 !!
 !! CHILDREN
 !!      cryst%free,cryst%print,cryst_ddb%free,cwtime,cwtime_report,ddb%free
-!!      ddb_from_file,ddb_hdr%free,destroy_mpi_enreg,dtset%free_nkpt_arrays
+!!      ddb%from_file,ddb_hdr%free,destroy_mpi_enreg,dtset%free_nkpt_arrays
 !!      dvdb%free,dvdb%interpolate_and_write,dvdb%list_perts,dvdb%open_read
 !!      dvdb%print,dvdb%write_v1qavg,ebands_free,ebands_prtbltztrp,ebands_write
 !!      efmas_ncread,efmasdeg_free_array,efmasval_free_array,eph_gkk
@@ -163,7 +163,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: master = 0, natifc0 = 0, selectz0 = 0, nsphere0 = 0, prtsrlr0 = 0, with_cplex1 = 1
+ integer,parameter :: master = 0, selectz0 = 0, nsphere0 = 0, prtsrlr0 = 0, with_cplex1 = 1
  integer :: ii,comm,nprocs,my_rank,psp_gencond,mgfftf,nfftf
  integer :: iblock_dielt_zeff, iblock_dielt, iblock_quadrupoles, ddb_nqshift, ierr, npert_miss
  integer :: omp_ncpus, work_size, nks_per_proc, mtyp, mpert, lwsym !msize,
@@ -190,7 +190,6 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  type(gstore_t) :: gstore
 !arrays
  integer :: ngfftc(18), ngfftf(18), count_wminmax(2)
- integer,allocatable :: dummy_atifc(:)
  real(dp),parameter :: k0(3)=zero
  real(dp) :: wminmax(2), dielt(3,3), zeff(3,3,dtset%natom), zeff_raw(3,3,dtset%natom)
  real(dp) :: qdrp_cart(3,3,3,dtset%natom)
@@ -403,10 +402,8 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  call cwtime_report(" eph%ebands_postprocess:", cpu, wall, gflops)
 
  ! Read the DDB file.
- ABI_CALLOC(dummy_atifc, (dtset%natom))
-
  if (use_wfk) then
-   call ddb_from_file(ddb, ddb_filepath, dtset%brav, dtset%natom, natifc0, dummy_atifc, ddb_hdr, cryst_ddb, comm, &
+   call ddb%from_file(ddb_filepath, dtset%brav, ddb_hdr, cryst_ddb, comm, &
                       prtvol=dtset%prtvol)
 
    ! DDB cryst comes from DFPT --> no time-reversal if q /= 0
@@ -419,11 +416,8 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  else
    ! Get crystal from DDB.
    ! Warning: We may loose precision in rprimd and xred because DDB does not have enough significant digits.
-   call ddb_from_file(ddb, ddb_filepath, dtset%brav, dtset%natom, natifc0, dummy_atifc, ddb_hdr, cryst, comm, &
-                      prtvol=dtset%prtvol)
+   call ddb%from_file(ddb_filepath, dtset%brav, ddb_hdr, cryst, comm, prtvol=dtset%prtvol)
  end if
-
- ABI_FREE(dummy_atifc)
 
  ! Set the q-shift for the DDB (well we mainly use gamma-centered q-meshes)
  ddb_nqshift = 1

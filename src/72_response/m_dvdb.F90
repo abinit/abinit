@@ -6698,7 +6698,7 @@ subroutine dvdb_load_ddb(dvdb, chneut, prtvol, comm, ddb_filepath, ddb)
  type(ddb_type),optional,target,intent(in) :: ddb
 
 !Local variables ------------------------------
- integer,parameter :: master = 0, natifc0 = 0, rfmeth1 = 1, selectz0 = 0
+ integer,parameter :: master = 0, rfmeth1 = 1, selectz0 = 0
  integer :: my_rank, iblock_dielt, iblock_dielt_zeff, iblock_quadrupoles
  logical :: free_ddb
  type(crystal_t) :: cryst_ddb
@@ -6706,7 +6706,6 @@ subroutine dvdb_load_ddb(dvdb, chneut, prtvol, comm, ddb_filepath, ddb)
  type(ddb_type),target :: this_ddb
  type(ddb_hdr_type) :: ddb_hdr
 !arrays
- integer,allocatable :: dummy_atifc(:)
  real(dp) :: dielt(3,3)
  real(dp),allocatable :: zeff(:,:,:), zeff_raw(:,:,:)
 
@@ -6717,11 +6716,8 @@ subroutine dvdb_load_ddb(dvdb, chneut, prtvol, comm, ddb_filepath, ddb)
  if (present(ddb_filepath)) then
    ! Build ddb object from file. Will release memory before returning.
    ABI_CHECK(.not. present(ddb), "ddb argument cannot be present when ddb_filepath is used")
-   ABI_CALLOC(dummy_atifc, (dvdb%natom))
-   call ddb_from_file(this_ddb, ddb_filepath, dvdb%brav, dvdb%natom, natifc0, dummy_atifc, ddb_hdr, cryst_ddb, comm, &
-                      prtvol=prtvol)
+   call this_ddb%from_file(ddb_filepath, dvdb%brav, ddb_hdr, cryst_ddb, comm, prtvol=prtvol)
    call ddb_hdr%free()
-   ABI_FREE(dummy_atifc)
    call cryst_ddb%free()
    ddb_ptr => this_ddb
    free_ddb = .True.
