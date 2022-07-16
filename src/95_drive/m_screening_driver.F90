@@ -1876,7 +1876,7 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,Dtset,Psps,Pawtab
 
  ! FIXME this wont work if nqptdm/=0
  call Vcp%init(Gsph_epsG0,Cryst,Qmesh,Kmesh,Dtset%rcut,Dtset%gw_icutcoul,Dtset%vcutgeo,Dtset%ecuteps,Ep%npwe,Ep%nqlwl,&
-&  Ep%qlwl,ngfftf,comm)
+               Ep%qlwl,comm)
 
 #if 0
  ! Using the random q for the optical limit is one of the reasons

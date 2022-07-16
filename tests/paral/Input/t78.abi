@@ -36,6 +36,10 @@ nbdbuf2     20       # Do not apply the tolwfr criterium to the last 20 bands (f
 optdriver3  6        # Activate GWR code
 gwr_task3 "G0W0"     # One-shot calculation
 
+prtvol3 1            # Write additional stuff to abo file for  testing purposes.
+                     # DO NOT USE this option for production runs!
+prtsuscep3 1         # Write TCHI file.
+
 getden3 1
 getwfk3 2
 gwr_ntau3   2        # Number of imaginary-time points
@@ -44,7 +48,7 @@ gwr_np_gtks 2 2 2 1
 gwr_boxcutmin3  1.1
 
 nband3      80       # Bands to be used in the screening calculation
-ecuteps3    12       # Cut-off energy of the planewave set to represent the dielectric matrix.
+ecuteps3    8        # Cut-off energy of the planewave set to represent the dielectric matrix.
 ecutsigx3   12       # Dimension of the G sum in Sigma_x.
                      # ecutsigx = ecut is usually a wise choice
                      # (the dimension in Sigma_c is controlled by ecuteps)

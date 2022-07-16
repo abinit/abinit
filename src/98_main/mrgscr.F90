@@ -115,10 +115,10 @@ program mrgscr
  type(MPI_type) :: MPI_enreg
  type(kmesh_t) :: Kmesh,Qmesh
  type(crystal_t) :: Cryst
- type(gsphere_t)  :: Gsphere
+ type(gsphere_t) :: Gsphere
  type(ppmodel_t) :: PPm
  type(Epsilonm1_results) :: Er
- type(vcoul_t),target :: Vcp
+ type(vcoul_t), target :: Vcp
  type(Dataset_type) :: Dtset
 !arrays
  integer :: ngfft(18)
@@ -400,8 +400,8 @@ program mrgscr
          end if
          dtset%ecutsigx = -one
 
-         call  Vcp%init(Gsphere,Cryst,Qmesh,Kmesh,Dtset%rcut,Dtset%gw_icutcoul,&
-           Dtset%vcutgeo,Dtset%ecutsigx,Hscr0%npwe,nqlwl,qlwl,ngfft,comm)
+         call Vcp%init(Gsphere,Cryst,Qmesh,Kmesh,Dtset%rcut,Dtset%gw_icutcoul,&
+                        Dtset%vcutgeo,Dtset%ecutsigx,Hscr0%npwe,nqlwl,qlwl,comm)
          ABI_FREE(qlwl)
 
          calc_epsilon = .TRUE.
@@ -630,8 +630,8 @@ program mrgscr
        qlwl(:,:)=Er%Hscr%qlwl(:,1:nqlwl)
      end if
 
-     call Vcp%init(Gsphere,Cryst,Qmesh,Kmesh,Dtset%rcut,Dtset%gw_icutcoul,Dtset%vcutgeo,Dtset%ecutsigx,Hscr0%npwe,nqlwl,&
-       qlwl,ngfft,comm)
+     call Vcp%init(Gsphere,Cryst,Qmesh,Kmesh,Dtset%rcut,Dtset%gw_icutcoul,Dtset%vcutgeo,Dtset%ecutsigx,&
+                  Hscr0%npwe,nqlwl,qlwl,comm)
      ABI_FREE(qlwl)
 
      ! Get the density from an external file ===

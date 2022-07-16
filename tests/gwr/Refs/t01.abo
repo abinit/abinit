@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 11 Jul 2022.
-- ( at 15h04 )
+.Starting date : Sat 16 Jul 2022.
+- ( at 15h17 )
   
 - input  file    -> /Users/gmatteo/git_repos/abinit_gwr/_build/tests/Test_suite/gwr_t01/t01.abi
 - output file    -> t01.abo
@@ -146,6 +146,12 @@ P           mkmem           3
         optdriver1          0
         optdriver2          0
         optdriver3          6
+        prtsuscep1          0
+        prtsuscep2          0
+        prtsuscep3          1
+           prtvol1          0
+           prtvol2          0
+           prtvol3          1
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
@@ -578,6 +584,8 @@ green_mpw: 302
 tchi_mpw: 190
 g_ngfft: [12, 12, 12, 13, 13, 12, 312, 16, ]
 P gwr_np_gtks: [1, 1, 1, 1, ]
+P np_kibz: [1, 1, 1, ]
+P np_qibz: [1, 1, 1, ]
 ft_max_err_t2w_cos:  -1.00000000E+00
 ft_max_err_w2t_cos:  -1.00000000E+00
 ft_max_err_t2w_sin:  -1.00000000E+00
@@ -586,16 +594,31 @@ MinMax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(om
     2 1.00000E+00   5.00000E-01   1.00000E+00   5.00000E-01
 ...
 
-Trace of tchi_qibz matrix for testing purposes:
+Trace of gt_kibz matrices for testing purposes:
+(ik_ibz, itau) matrix
+
        1       2
     1   0.000   0.000
-        0.000   0.000
+        4.000   3.643
 
     2   0.000   0.000
-        0.000   0.000
+        4.000   3.384
 
     3   0.000   0.000
-        0.000   0.000
+        4.000   3.293
+
+Trace of tchi_qibz matrices for testing purposes:
+(iq_ibz, itau) matrix
+
+       1       2
+    1 345.374 120.313
+       -1.524  -0.903
+
+    2 166.672  70.628
+        5.081   1.935
+
+    3 -30.182  13.648
+       11.195   4.283
 
 
 == END DATASET(S) ==============================================================
@@ -670,6 +693,12 @@ P           mkmem           3
         optdriver1          0
         optdriver2          0
         optdriver3          6
+        prtsuscep1          0
+        prtsuscep2          0
+        prtsuscep3          1
+           prtvol1          0
+           prtvol2          0
+           prtvol3          1
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
@@ -836,7 +865,7 @@ P           mkmem           3
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          9.2  wall=          9.3
+- Proc.   0 individual time (sec): cpu=          9.6  wall=          9.7
 
 ================================================================================
 

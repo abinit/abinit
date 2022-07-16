@@ -1623,7 +1623,7 @@ subroutine wfd_copy_cg(wfd, band, ik_ibz, spin, cg)
  ABI_CHECK(wfd%get_wave_ptr(band, ik_ibz, spin, wave, msg) == 0, msg)
 
  if (.not. wave%has_ug == WFD_STORED) then
-   write(msg,'(a,3(i0,1x),a)')" ug for (band, ik_ibz, spin): ",band,ik_ibz,spin," is not stored in memory!"
+   write(msg,'(a,3(i0,1x),a)')" ug for (band, ik_ibz, spin): ",band, ik_ibz, spin," is not stored in memory!"
    ABI_ERROR(msg)
  end if
 

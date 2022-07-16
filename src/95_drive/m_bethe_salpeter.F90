@@ -221,7 +221,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  type(Hdr_type) :: Hdr_wfk,Hdr_bse
  type(ebands_t) :: KS_BSt,QP_BSt,KS_BSt_dense,QP_BSt_dense
  type(Energies_type) :: KS_energies
- type(vcoul_t) :: Vcp
+ type(vcoul_t) :: Vcp, Vcp_dense
  type(wfdgw_t) :: Wfd, Wfd_dense
  type(screen_t) :: W
  type(screen_info_t) :: W_info
@@ -229,7 +229,6 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  type(kmesh_t) :: Kmesh_dense,Qmesh_dense
  type(Hdr_type) :: Hdr_wfk_dense
  type(double_grid_t) :: grid
- type(vcoul_t) :: Vcp_dense
  type(eprenorms_t) :: Epren
 !arrays
  integer :: ngfft_osc(18),ngfftc(18),ngfftf(18),nrcell(3)
@@ -1508,10 +1507,10 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
  ! Compute Coulomb term on the largest G-sphere.
  if (Gsph_x%ng > Gsph_c%ng ) then
    call Vcp%init(Gsph_x,Cryst,Qmesh,Kmesh,Dtset%rcut,Dtset%gw_icutcoul,Dtset%vcutgeo,Dtset%ecutsigx,Gsph_x%ng,&
-     nqlwl,qlwl,ngfftf,comm)
+     nqlwl,qlwl,comm)
  else
    call Vcp%init(Gsph_c,Cryst,Qmesh,Kmesh,Dtset%rcut,Dtset%gw_icutcoul,Dtset%vcutgeo,Dtset%ecutsigx,Gsph_c%ng,&
-     nqlwl,qlwl,ngfftf,comm)
+     nqlwl,qlwl,comm)
  end if
 
  ABI_FREE(qlwl)
@@ -1554,17 +1553,11 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
  ABI_MALLOC(npwarr,(Dtset%nkpt))
  npwarr=BSP%npwwfn
 
- ! CP modified
- !call ebands_init(bantot,KS_BSt,Dtset%nelect,doccde,eigen,Dtset%istwfk,Kmesh%ibz,Dtset%nband,&
-!&  Kmesh%nibz,npwarr,Dtset%nsppol,Dtset%nspinor,Dtset%tphysel,Dtset%tsmear,Dtset%occopt,occfact,Kmesh%wt,&
-!&  dtset%cellcharge(1), dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
-!&  dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
  call ebands_init(bantot,KS_BSt,Dtset%nelect,Dtset%ne_qFD,Dtset%nh_qFD,Dtset%ivalence,&
-&  doccde,eigen,Dtset%istwfk,Kmesh%ibz,Dtset%nband,&
-&  Kmesh%nibz,npwarr,Dtset%nsppol,Dtset%nspinor,Dtset%tphysel,Dtset%tsmear,Dtset%occopt,occfact,Kmesh%wt,&
-&  dtset%cellcharge(1), dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
-&  dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
- ! End CP modified
+   doccde,eigen,Dtset%istwfk,Kmesh%ibz,Dtset%nband,&
+   Kmesh%nibz,npwarr,Dtset%nsppol,Dtset%nspinor,Dtset%tphysel,Dtset%tsmear,Dtset%occopt,occfact,Kmesh%wt,&
+   dtset%cellcharge(1), dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
+   dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
 
  ABI_FREE(doccde)
  ABI_FREE(eigen)
@@ -2011,8 +2004,8 @@ end subroutine setup_bse
 !!
 !! SOURCE
 
-subroutine setup_bse_interp(Dtset,Dtfil,BSp,Cryst,Kmesh,&
-& Kmesh_dense,Qmesh_dense,KS_BSt_dense,QP_bst_dense,Gsph_x,Gsph_c,Vcp_dense,Hdr_wfk_dense,ngfftf,grid,comm)
+subroutine setup_bse_interp(Dtset,Dtfil,BSp,Cryst,Kmesh, &
+   Kmesh_dense,Qmesh_dense,KS_BSt_dense,QP_bst_dense,Gsph_x,Gsph_c,Vcp_dense,Hdr_wfk_dense,ngfftf,grid,comm)
 
 !Arguments ------------------------------------
 !scalars
@@ -2149,10 +2142,10 @@ subroutine setup_bse_interp(Dtset,Dtfil,BSp,Cryst,Kmesh,&
  ! Compute Coulomb term on the largest G-sphere.
  if (Gsph_x%ng > Gsph_c%ng ) then
    call Vcp_dense%init(Gsph_x,Cryst,Qmesh_dense,Kmesh_dense,Dtset%rcut,Dtset%gw_icutcoul,&
-                       Dtset%vcutgeo,Dtset%ecutsigx,Gsph_x%ng,nqlwl,qlwl,ngfftf,comm)
+                       Dtset%vcutgeo,Dtset%ecutsigx,Gsph_x%ng,nqlwl,qlwl,comm)
  else
    call Vcp_dense%init(Gsph_c,Cryst,Qmesh_dense,Kmesh_dense,Dtset%rcut,Dtset%gw_icutcoul,&
-                       Dtset%vcutgeo,Dtset%ecutsigx,Gsph_c%ng,nqlwl,qlwl,ngfftf,comm)
+                       Dtset%vcutgeo,Dtset%ecutsigx,Gsph_c%ng,nqlwl,qlwl,comm)
  end if
 
  ABI_FREE(qlwl)
