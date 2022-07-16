@@ -2024,7 +2024,7 @@ if(dtset%optdriver==66) then
   call Gsphere%print()
 
   call Vcp%init(Gsphere,Cryst,Qmesh,Kmesh,dtset%rcut,dtset%gw_icutcoul,dtset%vcutgeo,dtset%ecutsigx,npw_serial,&
-                dtset%nkpt,dtset%kptns,dtset%ngfft,mpi_enreg%comm_world)
+                dtset%nkpt,dtset%kptns,mpi_enreg%comm_world)
 
   ! Since Vcp%vc_sqrt is sorted according to the KSS convention for G vectors
   ! BUT will be applied to GS wavefunctions (where G vectors are sorted otherwise)

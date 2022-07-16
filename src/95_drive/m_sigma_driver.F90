@@ -229,8 +229,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  character(len=fnlen) :: wfk_fname,pawden_fname,gw1rdm_fname
  type(kmesh_t) :: Kmesh,Qmesh
  type(ebands_t) :: ks_ebands, qp_ebands
- type(vcoul_t) :: Vcp
- type(vcoul_t) :: Vcp_ks,Vcp_full
+ type(vcoul_t) :: Vcp, Vcp_ks, Vcp_full
  type(crystal_t) :: Cryst
  type(Energies_type) :: KS_energies,QP_energies
  type(Epsilonm1_results) :: Er
@@ -1873,12 +1872,12 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    ! if(dtset%ucrpa==0) then
    if (Dtset%gwgamma<3) then
      call mkdump_Er(Er,Vcp,Er%npwe,Gsph_c%gvec,dim_kxcg,kxcg,id_required,&
-&     approx_type,ikxc,option_test,Dtfil%fnameabo_scr,Dtset%iomode,&
-&     nfftf_tot,ngfftf,comm)
+                    approx_type,ikxc,option_test,Dtfil%fnameabo_scr,Dtset%iomode,&
+                    nfftf_tot,ngfftf,comm)
    else
      call mkdump_Er(Er,Vcp,Er%npwe,Gsph_c%gvec,dim_kxcg,kxcg,id_required,&
-&     approx_type,ikxc,option_test,Dtfil%fnameabo_scr,Dtset%iomode,&
-&     nfftf_tot,ngfftf,comm,fxc_ADA)
+                    approx_type,ikxc,option_test,Dtfil%fnameabo_scr,Dtset%iomode,&
+                    nfftf_tot,ngfftf,comm,fxc_ADA)
    end if
 !   end if
    ABI_SFREE(kxcg)
@@ -3752,10 +3751,10 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 
      if (Gsph_x%ng > Gsph_c%ng) then
        call Vcp%init(Gsph_x,Cryst,Qmesh,Kmesh,rcut,icutcoul_eff,Dtset%vcutgeo,&
-        Dtset%ecutsigx,Gsph_x%ng,nqlwl,qlwl,ngfftf,comm)
+        Dtset%ecutsigx,Gsph_x%ng,nqlwl,qlwl,comm)
      else
        call Vcp%init(Gsph_c,Cryst,Qmesh,Kmesh,rcut,icutcoul_eff,Dtset%vcutgeo,&
-        Dtset%ecutsigx,Gsph_c%ng,nqlwl,qlwl,ngfftf,comm)
+        Dtset%ecutsigx,Gsph_c%ng,nqlwl,qlwl,comm)
      end if
 
    else
@@ -3764,10 +3763,10 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
      ! in the Fock part of the Kohn-Sham Hamiltonian
      if (Gsph_x%ng > Gsph_c%ng) then
        call Vcp_ks%init(Gsph_x,Cryst,Qmesh,Kmesh,rcut,icutcoul_eff,Dtset%vcutgeo,&
-        Dtset%ecutsigx,Gsph_x%ng,nqlwl,qlwl,ngfftf,comm)
+                        Dtset%ecutsigx,Gsph_x%ng,nqlwl,qlwl,comm)
      else
        call Vcp_ks%init(Gsph_c,Cryst,Qmesh,Kmesh,rcut,icutcoul_eff,Dtset%vcutgeo,&
-        Dtset%ecutsigx,Gsph_c%ng,nqlwl,qlwl,ngfftf,comm)
+                        Dtset%ecutsigx,Gsph_c%ng,nqlwl,qlwl,comm)
      end if
 
      ! Now compute the residual Coulomb interaction.
@@ -3831,9 +3830,6 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  ! FFT mesh for sigma_c.
  call setmesh(gmet,Gsph_Max%gvec,gwc_ngfft,Sigp%npwvec,Er%npwe,Sigp%npwwfn,&
               gwc_nfftot,method,Sigp%mG0,Cryst,enforce_sym,unit=dev_null)
-
- !call new_setmesh(Cryst,ecut_osc,ecutwfn,nkpt,kpoints,method,Sigp%mG0,enforce_sym,gwx_ngfft,gwx_nfftot)
- !call new_setmesh(Cryst,ecut_osc,ecutwfn,nkpt,kpoints,method,Sigp%mG0,enforce_sym,gwc_ngfft,gwc_nfftot)
 
  ! ======================================================================
  ! ==== Check for presence of files with core orbitals, for PAW only ====
@@ -4470,10 +4466,10 @@ subroutine setup_vcp(Vcp_ks,Vcp_full,Dtset,Gsph_x,Gsph_c,Cryst,Qmesh,Kmesh,coef_
  ! 1st part: Use a Vcp_full to compute the full Coulomb interaction for NOs
  if (Gsph_x%ng > Gsph_c%ng) then
    call Vcp_full%init(Gsph_x,Cryst,Qmesh,Kmesh,rcut,icsing_eff,Dtset%vcutgeo,&
-    Dtset%ecutsigx,Gsph_x%ng,nqlwl,qlwl,ngfftf,comm)
+                      Dtset%ecutsigx,Gsph_x%ng,nqlwl,qlwl,comm)
  else
    call Vcp_full%init(Gsph_c,Cryst,Qmesh,Kmesh,rcut,icsing_eff,Dtset%vcutgeo,&
-    Dtset%ecutsigx,Gsph_c%ng,nqlwl,qlwl,ngfftf,comm)
+                      Dtset%ecutsigx,Gsph_c%ng,nqlwl,qlwl,comm)
  end if
  ! 2nd part: Use a Vcp_ks to compute the Coulomb interaction already present in the Fock part of the Kohn-Sham Hamiltonian
  coef_hyb=zero
@@ -4494,10 +4490,10 @@ subroutine setup_vcp(Vcp_ks,Vcp_full,Dtset,Gsph_x,Gsph_c,Cryst,Qmesh,Kmesh,coef_
  end if
  if (Gsph_x%ng > Gsph_c%ng) then
    call Vcp_ks%init(Gsph_x,Cryst,Qmesh,Kmesh,rcut,icsing_eff,Dtset%vcutgeo,&
-    Dtset%ecutsigx,Gsph_x%ng,nqlwl,qlwl,ngfftf,comm)
+                    Dtset%ecutsigx,Gsph_x%ng,nqlwl,qlwl,comm)
  else
    call Vcp_ks%init(Gsph_c,Cryst,Qmesh,Kmesh,rcut,icsing_eff,Dtset%vcutgeo,&
-    Dtset%ecutsigx,Gsph_c%ng,nqlwl,qlwl,ngfftf,comm)
+                    Dtset%ecutsigx,Gsph_c%ng,nqlwl,qlwl,comm)
  end if
  ABI_FREE(qlwl)
  ! Now compute the "residual" Coulomb interactions

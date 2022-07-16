@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat  9 Jul 2022.
-- ( at 16h33 )
+.Starting date : Sat 16 Jul 2022.
+- ( at 17h11 )
   
 - input  file    -> /Users/gmatteo/git_repos/abinit_gwr/_build/tests/Test_suite/paral_t78_MPI8/t78.abi
 - output file    -> t78_MPI8.abo
@@ -97,7 +97,7 @@ _ WF disk file :      7.522 Mbytes ; DEN or POT disk file :      0.222 Mbytes.
              ecut      1.20000000E+01 Hartree
           ecuteps1     0.00000000E+00 Hartree
           ecuteps2     0.00000000E+00 Hartree
-          ecuteps3     1.20000000E+01 Hartree
+          ecuteps3     8.00000000E+00 Hartree
          ecutsigx1     0.00000000E+00 Hartree
          ecutsigx2     0.00000000E+00 Hartree
          ecutsigx3     1.20000000E+01 Hartree
@@ -181,6 +181,12 @@ P           mkmem           1
         paral_kgb1          1
         paral_kgb2          1
         paral_kgb3          0
+        prtsuscep1          0
+        prtsuscep2          0
+        prtsuscep3          1
+           prtvol1          0
+           prtvol2          0
+           prtvol3          1
             rprim      5.0000000000E-01 -8.6602540378E-01  0.0000000000E+00
                        5.0000000000E-01  8.6602540378E-01  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
@@ -697,9 +703,11 @@ ngqpt: [2, 2, 2, ]
 nqbz: 8
 nqibz: 4
 green_mpw: 1540
-tchi_mpw: 1540
+tchi_mpw: 832
 g_ngfft: [16, 16, 18, 17, 17, 18, 312, 16, ]
 P gwr_np_gtks: [2, 2, 2, 1, ]
+P np_kibz: [1, 1, 1, 1, ]
+P np_qibz: [1, 1, 1, 1, ]
 ft_max_err_t2w_cos:  -1.00000000E+00
 ft_max_err_w2t_cos:  -1.00000000E+00
 ft_max_err_t2w_sin:  -1.00000000E+00
@@ -708,19 +716,37 @@ MinMax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(om
     2 1.00000E+00   5.00000E-01   1.00000E+00   5.00000E-01
 ...
 
-Trace of tchi_qibz matrix for testing purposes:
+Trace of gt_kibz matrices for testing purposes:
+(ik_ibz, itau) matrix
+
        1       2
-    1   0.000   0.000
-        0.000   0.000
+    1   0.000  -0.000
+       24.000  18.791
 
     2   0.000   0.000
-        0.000   0.000
+       24.000  18.724
 
     3   0.000   0.000
-        0.000   0.000
+       24.000  18.729
 
     4   0.000   0.000
-        0.000   0.000
+       24.000  18.751
+
+Trace of tchi_qibz matrices for testing purposes:
+(iq_ibz, itau) matrix
+
+       1       2
+    1 -17.361  -9.025
+       10.211   3.440
+
+    2 -46.902 -16.877
+        2.545   1.215
+
+    3 -57.606 -19.115
+        1.936   2.308
+
+    4-103.174 -32.392
+       -8.732  -4.546
 
 
 == END DATASET(S) ==============================================================
@@ -740,7 +766,7 @@ Trace of tchi_qibz matrix for testing purposes:
              ecut      1.20000000E+01 Hartree
           ecuteps1     0.00000000E+00 Hartree
           ecuteps2     0.00000000E+00 Hartree
-          ecuteps3     1.20000000E+01 Hartree
+          ecuteps3     8.00000000E+00 Hartree
          ecutsigx1     0.00000000E+00 Hartree
          ecutsigx2     0.00000000E+00 Hartree
          ecutsigx3     1.20000000E+01 Hartree
@@ -844,6 +870,12 @@ P           mkmem           1
         paral_kgb1          1
         paral_kgb2          1
         paral_kgb3          0
+        prtsuscep1          0
+        prtsuscep2          0
+        prtsuscep3          1
+           prtvol1          0
+           prtvol2          0
+           prtvol3          1
             rprim      5.0000000000E-01 -8.6602540378E-01  0.0000000000E+00
                        5.0000000000E-01  8.6602540378E-01  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
@@ -984,13 +1016,13 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=        140.0  wall=        326.2
+- Proc.   0 individual time (sec): cpu=         85.9  wall=        209.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=       1118.4  wall=       2608.4
++Overall time at end (sec) : cpu=        686.9  wall=       1675.3
 - [ALL OK] MEMORY CONSUMPTION REPORT FOR C CODE:
 -   There were 159 allocations and 159 deallocations in C code
 - [ALL OK] MEMORY CONSUMPTION REPORT FOR FORTRAN CODE:
