@@ -65,6 +65,11 @@ MODULE m_fft_mesh
    module procedure calc_ceigr_spc
    module procedure calc_ceigr_dpc
  end interface calc_ceigr
+
+ !interface times_eikr
+ !  module procedure times_eikr_dp
+ !  module procedure times_eikr_dpc
+ !end interface times_eikr
 !!***
 
 !----------------------------------------------------------------------
@@ -1222,7 +1227,7 @@ end subroutine get_gftt
 !!
 !! SOURCE
 
-subroutine calc_ceigr_spc(gg,nfft,nspinor,ngfft,ceigr)
+subroutine calc_ceigr_spc(gg, nfft, nspinor, ngfft, ceigr)
 
 !Arguments ------------------------------------
 !scalars
@@ -1249,8 +1254,8 @@ subroutine calc_ceigr_spc(gg,nfft,nspinor,ngfft,ceigr)
    do iy=0,ngfft(2)-1
      do ix=0,ngfft(1)-1
        gdotr= two_pi*( gg(1)*(ix/DBLE(ngfft(1))) &
-&                     +gg(2)*(iy/DBLE(ngfft(2))) &
-&                     +gg(3)*(iz/DBLE(ngfft(3))) )
+                      +gg(2)*(iy/DBLE(ngfft(2))) &
+                      +gg(3)*(iz/DBLE(ngfft(3))) )
        fft_idx = fft_idx+1
        ceigr(fft_idx)=CMPLX(DCOS(gdotr),DSIN(gdotr), KIND=spc)
      end do
@@ -1292,7 +1297,7 @@ end subroutine calc_ceigr_spc
 !!
 !! SOURCE
 
-subroutine calc_ceigr_dpc(gg,nfft,nspinor,ngfft,ceigr)
+subroutine calc_ceigr_dpc(gg, nfft, nspinor, ngfft, ceigr)
 
 !Arguments ------------------------------------
 !scalars
@@ -1318,8 +1323,8 @@ subroutine calc_ceigr_dpc(gg,nfft,nspinor,ngfft,ceigr)
    do iy=0,ngfft(2)-1
      do ix=0,ngfft(1)-1
        gdotr= two_pi*( gg(1)*(ix/DBLE(ngfft(1))) &
-&                     +gg(2)*(iy/DBLE(ngfft(2))) &
-&                     +gg(3)*(iz/DBLE(ngfft(3))) )
+                      +gg(2)*(iy/DBLE(ngfft(2))) &
+                      +gg(3)*(iz/DBLE(ngfft(3))) )
        fft_idx = fft_idx+1
        ceigr(fft_idx)=DCMPLX(DCOS(gdotr),DSIN(gdotr))
      end do
@@ -1360,7 +1365,7 @@ end subroutine calc_ceigr_dpc
 !!
 !! SOURCE
 
-pure subroutine calc_eigr(gg,nfft,ngfft,eigr)
+pure subroutine calc_eigr(gg, nfft, ngfft, eigr)
 
 !Arguments ------------------------------------
 !scalars
@@ -1388,11 +1393,11 @@ pure subroutine calc_eigr(gg,nfft,ngfft,eigr)
    do iy=0,ngfft(2)-1
      do ix=0,ngfft(1)-1
        gdotr= two_pi*( gg(1)*(ix/DBLE(ngfft(1))) &
-&                     +gg(2)*(iy/DBLE(ngfft(2))) &
-&                     +gg(3)*(iz/DBLE(ngfft(3))) )
+                      +gg(2)*(iy/DBLE(ngfft(2))) &
+                      +gg(3)*(iz/DBLE(ngfft(3))) )
        eigr(fft_idx  )=DCOS(gdotr)
        eigr(fft_idx+1)=DSIN(gdotr)
-       fft_idx = fft_idx+2
+       fft_idx = fft_idx + 2
      end do
    end do
  end do
@@ -1413,6 +1418,7 @@ end subroutine calc_eigr
 !!  kk(3)=k-point in reduced coordinates.
 !!  nfft=Total number of points in the FFT mesh.
 !!  ngfft(18)=information about 3D FFT,
+!!  nspinor=Number of spinor components.
 !!
 !! OUTPUT
 !!  ceikr(nfft)=e^{ik.r} on the FFT mesh.
@@ -1424,15 +1430,15 @@ end subroutine calc_eigr
 !!
 !! SOURCE
 
-pure subroutine calc_ceikr(kk,nfft,ngfft,ceikr)
+pure subroutine calc_ceikr(kk, ngfft, nfft, nspinor, ceikr)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: nfft
+ integer,intent(in) :: nfft, nspinor
 !arrays
  real(dp),intent(in) :: kk(3)
  integer,intent(in) :: ngfft(18)
- complex(dpc),intent(out) :: ceikr(nfft)
+ complex(dpc),intent(out) :: ceikr(nfft, nspinor)
 
 !Local variables-------------------------------
 !scalars
@@ -1441,22 +1447,28 @@ pure subroutine calc_ceikr(kk,nfft,ngfft,ceikr)
 
 ! *************************************************************************
 
- !if (ALL(ABS(kk<tol12)) then
- !  ceikr=cone; RETURN
- !end if
+ if (all(abs(kk) < tol12)) then
+   ceikr = cone; return
+ end if
 
- fft_idx=0
+ fft_idx = 0
  do iz=0,ngfft(3)-1
    do iy=0,ngfft(2)-1
      do ix=0,ngfft(1)-1
        kdotr= two_pi*( kk(1)*(ix/DBLE(ngfft(1))) &
-&                     +kk(2)*(iy/DBLE(ngfft(2))) &
-&                     +kk(3)*(iz/DBLE(ngfft(3))) )
-       fft_idx = fft_idx+1
-       ceikr(fft_idx)=DCMPLX(DCOS(kdotr),DSIN(kdotr))
+                      +kk(2)*(iy/DBLE(ngfft(2))) &
+                      +kk(3)*(iz/DBLE(ngfft(3))) )
+       fft_idx = fft_idx + 1
+       ceikr(fft_idx, 1) = DCMPLX(DCOS(kdotr), DSIN(kdotr))
      end do
    end do
  end do
+
+ if (nspinor > 1) then
+   do ix=2,nspinor
+     ceikr(fft_idx, ix) = ceikr(fft_idx, 1)
+   end do
+ end if
 
 end subroutine calc_ceikr
 !!***
@@ -1535,7 +1547,8 @@ end subroutine times_eigr
 !! times_eikr
 !!
 !! FUNCTION
-!!  Multiply an array on the real-space mesh by e^{ik.r} where k is a real(dp) vector in reduced coordinates
+!!  Multiply an array on the real-space mesh by e^{ik.r} where k
+!!  is a real(dp) vector in reduced coordinates
 !!
 !! INPUTS
 !!  kk(3)=k-vector in reduced coordinates.
@@ -1623,7 +1636,7 @@ end subroutine times_eikr
 !!
 !! SOURCE
 
-subroutine phase(ngfft,ph)
+subroutine phase(ngfft, ph)
 
 !Arguments ------------------------------------
 !scalars

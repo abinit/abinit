@@ -5031,10 +5031,9 @@ subroutine wfd_paw_get_aeur(Wfd,band,ik_ibz,spin,Cryst,Paw_onsite,Psps,Pawtab,Pa
  call wfd%get_ur(band,ik_ibz,spin,ur_ae)
 
  kpoint = Wfd%kibz(:,ik_ibz)
+ ABI_MALLOC(ceikr, (Wfd%nfftot * wfd%nspinor))
 
- ABI_MALLOC(ceikr,(Wfd%nfftot))
-
- call calc_ceikr(kpoint,Wfd%nfftot,Wfd%ngfft,ceikr)
+ call calc_ceikr(kpoint, wfd%ngfft, Wfd%nfftot, wfd%nspinor, ceikr)
  ur_ae = ur_ae * ceikr
 
  ABI_MALLOC(Cp1,(Wfd%natom,Wfd%nspinor))

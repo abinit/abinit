@@ -1233,7 +1233,7 @@ subroutine ebands_print(ebands, header, unit, prtvol)
 
 !Arguments ------------------------------------
  class(ebands_t),intent(in) :: ebands
- integer,optional,intent(in) :: prtvol,unit
+ integer,optional,intent(in) :: prtvol, unit
  character(len=*),optional,intent(in) :: header
 
 !Local variables-------------------------------

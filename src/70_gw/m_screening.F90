@@ -287,25 +287,15 @@ subroutine em1results_free(Er)
 
  !@Epsilonm1_results
  !integer
- if (allocated(Er%gvec)) then
-   ABI_FREE(Er%gvec)
- end if
+ ABI_SFREE(Er%gvec)
 
  !real
- if (allocated(Er%qibz)) then
-   ABI_FREE(Er%qibz)
- end if
- if (allocated(Er%qlwl)) then
-   ABI_FREE(Er%qlwl)
- end if
+ ABI_SFREE(Er%qibz)
+ ABI_SFREE(Er%qlwl)
 
  !complex
- if (allocated(Er%epsm1)) then
-   ABI_FREE(Er%epsm1)
- end if
- if (allocated(Er%omega)) then
-   ABI_FREE(Er%omega)
- end if
+ ABI_SFREE(Er%epsm1)
+ ABI_SFREE(Er%omega)
 
  !datatypes
  call Er%Hscr%free()
@@ -504,12 +494,14 @@ end subroutine em1results_print
 !!  to reconstruct the BZ.
 !!
 !!  * Remember the symmetry properties of \tilde\espilon^{-1}
-!!    If q_bz=Sq_ibz+G0:
 !!
-!!    $\epsilon^{-1}_{SG1-G0,SG2-G0}(q_bz) = e^{+iS(G2-G1).\tau}\epsilon^{-1}_{G1,G2)}(q)
+!!    If q_bz = S q_ibz + G0:
 !!
-!!    If time-reversal symmetry can be used then :
-!!    $\epsilon^{-1}_{G1,G2}(-q_bz) = e^{+i(G1-G2).\tau}\epsilon^{-1}_{-S^{-1}(G1+Go),-S^{-1}(G2+G0)}^*(q)
+!!      $\epsilon^{-1}_{SG1-G0, SG2-G0}(q_bz) = e^{+iS(G2-G1).\tau} \epsilon^{-1}_{G1, G2)}(q)
+!!
+!!    If time-reversal symmetry can be used then:
+!!
+!!      $\epsilon^{-1}_{G1,G2}(-q_bz) = e^{+i(G1-G2).\tau} \epsilon^{-1}_{-S^{-1}(G1+Go), -S^{-1}(G2+G0)}^*(q)
 !!
 !! TODO
 !!  Symmetrization can be skipped if iq_bz correspond to a point in the IBZ
@@ -542,11 +534,11 @@ subroutine Epsm1_symmetrizer(iq_bz,nomega,npwc,Er,Gsph,Qmesh,remove_exchange,eps
 
 ! *********************************************************************
 
- ABI_CHECK(Er%nomega>=nomega,'Too many frequencies required')
- ABI_CHECK(Er%npwe  >=npwc , 'Too many G-vectors required')
+ ABI_CHECK(Er%nomega >= nomega, 'Too many frequencies required')
+ ABI_CHECK(Er%npwe >= npwc, 'Too many G-vectors required')
 
  ! Get iq_ibz, and symmetries from iq_ibz.
- call Qmesh%get_BZ_item(iq_bz,qbz,iq_ibz,isym_q,itim_q)
+ call Qmesh%get_BZ_item(iq_bz, qbz, iq_ibz, isym_q, itim_q)
 
  ! If out-of-memory, only Er%espm1(:,:,:,1) has been allocated and filled.
  iq_loc=iq_ibz; if (Er%mqmem==0) iq_loc=1
@@ -558,8 +550,8 @@ subroutine Epsm1_symmetrizer(iq_bz,nomega,npwc,Er,Gsph,Qmesh,remove_exchange,eps
 !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(sg2,sg1,phmsg1t,phmsg2t_star)
  do iw=1,nomega
    do jj=1,npwc
-     sg2 = Gsph%rottb(jj,itim_q,isym_q)
-     phmsg2t_star = CONJG(Gsph%phmSGt(jj,isym_q))
+     sg2 = Gsph%rottb(jj, itim_q, isym_q)
+     phmsg2t_star = CONJG(Gsph%phmSGt(jj, isym_q))
      do ii=1,npwc
        sg1 = Gsph%rottb(ii,itim_q,isym_q)
        phmsg1t = Gsph%phmSGt(ii,isym_q)

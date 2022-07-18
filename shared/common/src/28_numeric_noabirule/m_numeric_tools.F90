@@ -3892,14 +3892,14 @@ subroutine print_arr1d_dpc(arr, max_r, unit, mode_paral)
   ABI_BUG(msg)
  end if
 
- ! === Print out matrix ===
+ ! Print out matrix.
  nr=SIZE(arr,DIM=1) ; if (mr>nr) mr=nr
 
  write(fmth,*)'(6x,',mr,'(i2,6x))'
  write(fmt1,*)'(3x,',mr,'f8.3)'
 
  write(msg,fmth)(ii,ii=1,mr)
- call wrtout(unt,msg,mode) !header
+ call wrtout(unt,msg,mode) ! header
  write(msg,fmt1)REAL (arr(1:mr))
  call wrtout(unt,msg,mode) !real part
  write(msg,fmt1)AIMAG(arr(1:mr))

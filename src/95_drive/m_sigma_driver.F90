@@ -407,7 +407,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  ! * Er is only initialized with dimensions, (SCR|SUSC) file is read in mkdump_Er
  call timab(403,1,tsec) ! setup_sigma
 
- call setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawtab,&
+ call setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
   gwx_ngfft,gwc_ngfft,Hdr_wfk,Hdr_sigma,Cryst,Kmesh,Qmesh,ks_ebands,Gsph_Max,Gsph_x,Gsph_c,Vcp,Er,Sigp,comm)
 
  call timab(403,2,tsec) ! setup_sigma
@@ -2935,7 +2935,6 @@ end subroutine sigma
 !! Dtset<type(dataset_type)>=all input variables for this dataset
 !! Dtfil<type(datafiles_type)>=variables related to files
 !! rprim(3,3)=dimensionless real space primitive translations
-!! ngfft(18)=information on the (fine) FFT grid used for the density.
 !! Psps <Pseudopotential_type)>=Info on pseudopotential, only for consistency check of the WFK file
 !!
 !! OUTPUT
@@ -2963,7 +2962,7 @@ end subroutine sigma
 !!
 !! SOURCE
 
-subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawtab,&
+subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
 & gwx_ngfft,gwc_ngfft,Hdr_wfk,Hdr_out,Cryst,Kmesh,Qmesh,ks_ebands,Gsph_Max,Gsph_x,Gsph_c,Vcp,Er,Sigp,comm)
 
 !Arguments ------------------------------------
@@ -2984,7 +2983,6 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  type(Hdr_type),intent(out) :: Hdr_wfk,Hdr_out
  type(vcoul_t),intent(out) :: Vcp
 !arrays
- integer,intent(in) :: ngfftf(18)
  integer,intent(out) :: gwc_ngfft(18),gwx_ngfft(18)
  real(dp),intent(in) :: acell(3),rprim(3,3)
 
@@ -3640,8 +3638,12 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  call Qmesh%print("Q-mesh for screening function",std_out,Dtset%prtvol,"COLL")
  call Qmesh%print("Q-mesh for screening function",ab_out ,0           ,"COLL")
 
+
  do iqbz=1,Qmesh%nbz
-   call qmesh%get_BZ_item(iqbz,q_bz,iq_ibz,isym,itim,umklp=q_umklp)
+   call qmesh%get_BZ_item(iqbz, q_bz, iq_ibz, isym, itim, umklp=q_umklp)
+
+   !print *, "iqbz, q_bz, iq_ibz, isym, itim, umklp"
+   !print *, iqbz, q_bz, iq_ibz, isym, itim, q_umklp
 
    if (ANY(q_umklp/=0)) then
      sq = (3-2*itim)*MATMUL(Cryst%symrec(:,:,isym),Qmesh%ibz(:,iq_ibz))
@@ -3653,6 +3655,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
      ABI_ERROR(msg)
    end if
  end do
+ !stop
  !
  ! === Find optimal value for G-sphere enlargment due to oscillator matrix elements ===
  ! * Here I have to be sure that Qmesh%bz is always inside the BZ, not always true size bz is buggy

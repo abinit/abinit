@@ -118,7 +118,6 @@ module m_slk
  end type processor_scalapack
 
  private :: build_processor_scalapack     ! Builds a processor descriptor for ScaLAPACK.
-
 !!***
 
 !----------------------------------------------------------------------
@@ -540,6 +539,8 @@ subroutine init_matrix_scalapack(matrix, nbli_global, nbco_global, processor, is
  character(len=500) :: msg
 
 ! *********************************************************************
+
+ !call matrix%free()
 
 #ifdef HAVE_LINALG_ELPA
  sizeb  = 1
@@ -3792,8 +3793,6 @@ subroutine slk_ptrans(in_mat, trans, out_mat)
  if (mod(in_mat%sizeb_global(1), in_mat%processor%grid%dims(2)) /= 0) sb = sb + 1
  size_blocs(2) = sb
 
- ! TODO: To be tested.
- !call out_mat%free()
  call out_mat%init(in_mat%sizeb_global(2), in_mat%sizeb_global(1), in_mat%processor, istwf_k, &
                    size_blocs=size_blocs)
 
@@ -3805,13 +3804,13 @@ subroutine slk_ptrans(in_mat, trans, out_mat)
    ! Transposes a complex distributed matrix, conjugated
    ! sub(C) := beta * sub(C) + alpha * conjg(sub(A)')
    select case (trans)
-   case ("C")
-
-     call pztranc(in_mat%sizeb_global(2), in_mat%sizeb_global(1), cone, in_mat%buffer_cplx, 1, 1, &
-                  in_mat%descript%tab, czero, out_mat%buffer_cplx, 1, 1, out_mat%descript%tab)
    case ("N")
      ! sub(C):=beta*sub(C) + alpha*sub(A)',
      call pztranu(in_mat%sizeb_global(2), in_mat%sizeb_global(1), cone, in_mat%buffer_cplx, 1, 1, &
+                  in_mat%descript%tab, czero, out_mat%buffer_cplx, 1, 1, out_mat%descript%tab)
+
+   case ("C")
+     call pztranc(in_mat%sizeb_global(2), in_mat%sizeb_global(1), cone, in_mat%buffer_cplx, 1, 1, &
                   in_mat%descript%tab, czero, out_mat%buffer_cplx, 1, 1, out_mat%descript%tab)
 
    case default

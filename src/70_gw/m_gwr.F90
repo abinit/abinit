@@ -9,7 +9,7 @@
 !!
 !! Memory and workload are distributed using a 4D cartesian grid: (g/r, tau, k-points, spin).
 !!
-!! Inside the g/r communicator, we use Scalapack matrices to store G, tchi and W.
+!! Inside the g/r communicator, we use PBLAS matrices to store G, tchi and W.
 !! using a 1D processor grid with block distribution either along columns or rows.
 !! A 2D grid would require MPI-FFT.
 !!
@@ -24,7 +24,7 @@
 !!              |         |         |
 !!              |--------------------
 !!
-!! The results of the FFT transform along g are stored in another scalapack matrix with the same layout:
+!! The results of the FFT transform along g are stored in another PBLAS matrix with the same layout:
 !!
 !!                     g'-axis
 !!              |--------------------
@@ -55,7 +55,10 @@
 !! Technical properties:
 !!
 !!   - Integration of vcoul_t is not easy (q-centered gvec vs single sphere, memory is not MPI distributed)
-!!     Solution: extract reusabe components from vcoul_t that can be called inside the loop over q in IBZ.
+!!     Solution: extract reusable components from vcoul_t that can be called inside the loop over q in IBZ.
+!!     Also it's not clear to me that one can use vc(Sq, SG) when a cutoff is used as the cutoff breaks
+!!     the spherical symmetri of vc(r). Besides, when symmetries are used to reconstruct the term for q in the BZ,
+!!     one might have to take into account umklapps. Use cache?
 !!
 !!   - Computation of Sigma_x = iGv must be done in Fourier space using the Lehmann representation so
 !!     that we can handle the long-range behavior in q-space. Unfortunately, we cannot simply call calc_sigx_me
@@ -74,13 +77,23 @@
 !!  - In principle, it's possible to compute QP correction along a k-path is a new WFK file is provided.
 !!    The correlated part is evaluated in real-space in the super-cell.
 !!    For Sigma_x, we need a specialized routine that can handle arbitrary q, especially at the level of v(q, G)
-!!    but I don't know if this approach will work as we don't have q --> 0 when k does not belong to the k-mesh.
+!!    but I don't know if this approach will give smooth bands
+!!    as we don't have q --> 0 when k does not belong to the k-mesh.
 !!
-!!  - New routine for direct diagonalization of the KS Hamiltonian based on Scalapack?
+!!  - New routine for direct diagonalization of the KS Hamiltonian based on PBLAS?
 !!
-!!  - New routine to compute oscillator matrix elements with NC/PAW and scalapack matrices.
+!!  - New routine to compute oscillator matrix elements with NC/PAW and PBLAS matrices.
 !!    It can be used to compute tchi head/wings as well as Sigma_x + interface with coupled-cluster codes.
 !!
+!!  - Decide whether we should use VASP conventions for G and the analytic continuation
+!!    or the "standard" ones by Godby.
+!!    The standard ones are consistent with Hedin's notations and correspond to the ones used in the legacy GW code.
+!!    On the other hand, VASP notations make life easier if one has to implement PAW.
+!!
+!!  - Address nspinor = 2 and PBLAS distribution as MPI proc can have both spinors in memory
+!!    In other words, we should store the first/last index in gvec for each spinor
+!!
+!!  - Optimization for Gamma-only. Memory and c -> r FFTs
 !!
 !! COPYRIGHT
 !! Copyright (C) 1999-2021 ABINIT group (MG)
@@ -132,8 +145,8 @@ module m_gwr
  use m_mpinfo,        only : destroy_mpi_enreg, initmpi_seq
  use m_distribfft,    only : init_distribfft_seq
  use m_fft,           only : fft_ug, fft_ur, fftbox_plan3_t, fourdp
- use m_fft_mesh,      only : times_eikr !, times_eigr, ig2gfft, get_gftt, calc_ceikr, calc_eigr
- use m_kpts,          only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, kpts_map, kpts_sort, kpts_pack_in_stars
+ use m_fft_mesh,      only : calc_ceikr !, times_eikr !, times_eigr, ig2gfft, get_gftt, calc_eigr
+ use m_kpts,          only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, kpts_map, kpts_map_print, kpts_pack_in_stars
  use m_melemts,       only : melements_t
  use m_ioarr,         only : read_rhor
  use m_slk,           only : matrix_scalapack, processor_scalapack, slk_array_free, slk_array_locmem_mb
@@ -165,9 +178,6 @@ module m_gwr
 !!  Parameters related to a two-point function such as
 !!  gvectors, tables used for zero padded FFTs and matrix elements of the coulomb interaction.
 !!
-!!  TODO: Address nspinor = 2 and scalapack distribution as MPI proc can have both spinors in memory
-!!  In other words we should store the first/last index in gvec for each spinor
-!!
 !! SOURCE
 
  type,public :: desc_t
@@ -178,12 +188,10 @@ module m_gwr
    integer :: npw = -1
    ! Total number of plane-waves for this k/q-point.
 
-   !integer :: npwsp = -1
-
    integer,allocatable :: gvec(:,:)
    ! gvec(3, npw)
    ! G vectors in reduced coordinates.
-   ! Note that this array is global i.e. it is not MPI-distributed in G-space.
+   ! Note that this array is global i.e. it is not MPI-distributed in the PBLAS communicator.
 
    integer,allocatable :: gbound(:,:)
    ! gbound(2*mgfft+8, 2)
@@ -367,10 +375,6 @@ module m_gwr
    !integer :: chi_ngfft(18) = -1, chi_mgfft = -1, chi_nfft = -1
    !integer :: sig_ngfft(18) = -1, sig_mgfft = -1, sig_nfft = -1
 
-   !integer :: ngfftf(18) = -1, mgfftf = -1, nfftf = -1
-   ! FFT mesh for densities and potentials.
-   ! These quantities are initialized from the DEN file (gwr_load_data_from_files).
-
    type(desc_t),allocatable :: green_desc_kibz(:)
    ! (nkibz)
    ! Descriptor for Green's functions
@@ -408,10 +412,13 @@ module m_gwr
    ! MPI communicator for t/k/s 3D grid
 
    type(dataset_type), pointer :: dtset => null()
+   ! Input variables.
 
    type(datafiles_type), pointer :: dtfil => null()
+   ! Names of input/output files and prefixes.
 
    type(crystal_t), pointer  :: cryst => null()
+   ! Crystal structure.
 
    type(ebands_t), pointer  :: ks_ebands => null()
    ! KS energies
@@ -420,8 +427,10 @@ module m_gwr
    ! QP energies
 
    type(pseudopotential_type), pointer :: psps => null()
+   ! NC Pseudos data
 
    type(pawtab_type), pointer :: pawtab(:) => null()
+   ! PAW data
 
    type(mpi_type),pointer :: mpi_enreg => null()
 
@@ -531,6 +540,7 @@ module m_gwr
    ! Print info on the object.
 
    procedure :: print_trace => gwr_print_trace
+    ! Print trace of matrices for testing purposes.
 
    procedure :: load_kcalc_wfd => gwr_load_kcalc_wfd
    !  Load the KS states for Sigma_nk from the WFK file
@@ -606,8 +616,8 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  integer,parameter :: me_fft0 = 0, paral_fft0 = 0, nproc_fft1 = 1, istwfk1 = 1
  integer,parameter :: qptopt1 = 1, timrev1 = 1, master = 0, ndims = 4
  integer :: my_is, my_it, my_ikf, my_iqf, ii, npwsp, col_bsize, ebands_timrev, my_iki, my_iqi, itau, spin
- integer :: my_nshiftq, iq_bz, iq_ibz, npw_, ncid, ig, ig_start !, ig2,
- integer :: comm_cart, me_cart, ierr, all_nproc, nps, my_rank, qprange_, gap_err !, den_fform
+ integer :: my_nshiftq, iq_bz, iq_ibz, npw_, ncid, ig, ig_start
+ integer :: comm_cart, me_cart, ierr, all_nproc, nps, my_rank, qprange_, gap_err
  integer :: jj, cnt, ikcalc, ndeg, mband, bstop, nbsum
  integer :: ik_ibz, ik_bz, isym_k, trev_k, g0_k(3)
  logical :: isirr_k, changed, q_is_gamma
@@ -618,10 +628,8 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  type(gaps_t) :: gaps
 !arrays
  integer :: qptrlatt(3,3), dims(ndims)
- integer :: indkk_k(6,1) !, band_block(2)
+ integer :: indkk_k(6,1)
  integer,allocatable :: kbz2ibz(:,:), qbz2ibz(:,:), gvec_(:,:)
- !integer,allocatable :: kibz2bz(:), qibz2bz(:), qglob2bz(:,:), kglob2bz(:,:)
- !integer,allocatable :: count_ibz(:)
  integer,allocatable :: degblock(:,:), degblock_all(:,:,:,:), ndeg_all(:,:)
  real(dp) :: my_shiftq(3,1), kk_ibz(3), kk_bz(3), qq_bz(3), qq_ibz(3), kk(3)
  real(dp),allocatable :: wtk(:), kibz(:,:)
@@ -690,7 +698,13 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  if (kpts_map("symrec", ebands_timrev, cryst, krank_ibz, gwr%nkbz, gwr%kbz, kbz2ibz) /= 0) then
    ABI_ERROR("Cannot map kBZ to IBZ!")
  end if
- !call krank_ibz%free()
+
+ ! Order kbz by stars and rearrange entries in kbz2ibz table.
+ call kpts_pack_in_stars(gwr%nkbz, gwr%kbz, kbz2ibz)
+
+ if (my_rank == master) then
+   call kpts_map_print([std_out, ab_out], "Mapping kBZ --> kIBZ", "symrec", gwr%kbz, kibz, kbz2ibz, gwr%dtset%prtvol)
+ end if
 
  !call get_ibz2bz(gwr%nkibz, gwr%nkbz, kbz2ibz, kibz2bz, ierr)
  !ABI_CHECK(ierr == 0, "Something wrong in symmetry tables for k-points")
@@ -719,12 +733,16 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
 
  ! Order qbz by stars and rearrange entries in qbz2ibz table.
  call kpts_pack_in_stars(gwr%nqbz, gwr%qbz, qbz2ibz)
+ if (my_rank == master) then
+   call kpts_map_print([std_out, ab_out], "Mapping qBZ --> qIBZ", "symrec", gwr%qbz, gwr%qibz, qbz2ibz, gwr%dtset%prtvol)
+ end if
 
  ! ==========================
  ! Setup k-points in Sigma_nk
  ! ==========================
  gaps = ebands_get_gaps(ks_ebands, gap_err)
  if (my_rank == master) then
+   !call ebands_print(ks_ebands, header="KS band structure", unit=std_out, prtvol=gwr%dtset%prtvol)
    msg = "Kohn-Sham gaps and band edges from IBZ mesh"
    call gaps%print(unit=std_out, header=msg)
    call gaps%print(unit=ab_out, header=msg)
@@ -783,7 +801,6 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  ABI_ICALLOC(degblock_all, (2, mband, gwr%nkcalc, gwr%nsppol))
  ABI_ICALLOC(ndeg_all, (gwr%nkcalc, gwr%nsppol))
 
- !krank = krank_from_kptrlatt(ebands%nkpt, ebands%kptns, ebands%kptrlatt, compute_invrank=.False.)
  ierr = 0
 
  do ikcalc=1,gwr%nkcalc
@@ -853,7 +870,6 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
    end if ! symsigma
  end do ! ikcalc
 
- !call krank%free()
  ABI_CHECK(ierr == 0, "kptgw wavevectors must be in the IBZ read from the WFK file.")
 
  ! Collect data
@@ -890,7 +906,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  gwr%bstop_ks = gwr%bstart_ks + gwr%nbcalc_ks - 1
 
  call krank_ibz%free()
- ABI_FREE(kibz) ! Deallocate kibz here because krank keeps a reference to this array.
+ ABI_FREE(kibz) ! Deallocate kibz here because krank_ibz keeps a reference to this array.
 
  ! ================================
  ! Setup tau/omega mesh and weights
@@ -947,7 +963,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
    !   spin (if any)     |  excellent                      | scales
    !   tau               |  excellent                      | scales
    !   kbz               |  good?, requires communication  | scales (depends on BZ -> IBZ mapping)
-   !   g/r (PBLAS)       |  network intesive               ! scales
+   !   g/r (PBLAS)       |  network intensive              ! scales
    !
    gwr%spin_comm%nproc = 1
    if (gwr%nsppol == 2 .and. all_nproc > 1) then
@@ -1148,7 +1164,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  end if
 
  ! Now we know the value of g_ngfft. Setup tables for zero-padded FFTs.
- ! Build FFT descriptors for Green's functions and tchi and setup tables for zero-padded FFTs.
+ ! Build descriptors for Green's functions and tchi and setup tables for zero-padded FFTs.
  ABI_MALLOC(gwr%green_desc_kibz, (gwr%nkibz))
 
  do my_iki=1,gwr%my_nkibz
@@ -1185,15 +1201,14 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
    end associate
  end do
 
- ! =============================================================
- ! Allocate scalapack arrays for G_kibz(g,g') and tchi_qibz(g,g')
- ! =============================================================
+ ! ==========================================================
+ ! Allocate PBLAS arrays for G_kibz(g,g') and tchi_qibz(g,g')
+ ! ==========================================================
  ABI_MALLOC(gwr%gt_kibz, (2, gwr%nkibz, gwr%ntau, gwr%nsppol))
  ABI_MALLOC(gwr%tchi_qibz, (gwr%nqibz, gwr%ntau, gwr%nsppol))
 
- ! 1d grid block-distributed along columns.
+ ! 1D grid block-distributed along columns.
  call gwr%g_slkproc%init(gwr%g_comm%value, grid_dims=[1, gwr%g_comm%nproc])
- !call gwr%gtau_slkproc%init(gwr%gtau_comm%value, grid_dims=[1, gwr%g_comm%nproc])
 
  do my_is=1,gwr%my_nspins
    spin = gwr%my_spins(my_is)
@@ -1227,7 +1242,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  end do ! my_is
 
  mem_mb = slk_array_locmem_mb(gwr%gt_kibz) + slk_array_locmem_mb(gwr%tchi_qibz)
- write(msg,'(a,f8.1,a)')' Local memory needed for G + tchi scalapack matrices: ', mem_mb, ' [Mb] <<< MEM'
+ write(msg,'(a,f8.1,a)')' Local memory needed for G + tchi PBLAS matrices: ', mem_mb, ' [Mb] <<< MEM'
  call wrtout(std_out, msg)
 
  ! Create netcdf file to store results.
@@ -1391,7 +1406,7 @@ subroutine gwr_free(gwr)
    ABI_FREE(gwr%tchi_desc_qibz)
  end if
 
- ! Free scalapack matrices
+ ! Free PBLAS matrices
  if (allocated(gwr%gt_kibz)) then
    call slk_array_free(gwr%gt_kibz)
    ABI_FREE(gwr%gt_kibz)
@@ -1503,7 +1518,7 @@ subroutine gwr_load_kcalc_wfd(gwr, wfk_path, tmp_kstab)
  ABI_ICALLOC(tmp_kstab, (2, nkibz, nsppol))
 
  do spin=1,gwr%nsppol
-   do ikcalc=1,gwr%nkcalc ! No spin dependent!
+   do ikcalc=1,gwr%nkcalc ! TODO: Should be spin dependent!
      ik_ibz = gwr%kcalc2ibz(ikcalc, 1)
      associate (b1 => gwr%bstart_ks(ikcalc, spin), b2 => gwr%bstop_ks(ikcalc, spin))
      tmp_kstab(:, ik_ibz, spin) = [b1, b2]
@@ -1568,10 +1583,10 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: formeig0 = 0, istwfk1 = 1
- integer :: mband, nkibz, nsppol, my_is, my_it, my_iki, spin, ik_ibz
+ integer :: mband, nkibz, nsppol, my_is, my_iki, spin, ik_ibz ! my_it,
  integer :: my_ib, my_nb, band, npw_k, mpw, istwf_k, itau, ioe, ig1, ig2, il_g1, il_g2
  integer :: nbsum, npwsp, col_bsize, nband_k, my_bstart, my_bstop, nb, ierr
- real(dp) :: f_nk, eig_nk, tau, ef
+ real(dp) :: f_nk, eig_nk, ef ! tau,
  real(dp) :: cpu, wall, gflops
  complex(dp) :: gt_cfact
  character(len=5000) :: msg
@@ -1631,9 +1646,7 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
  ! TODO: Use (g_comm x tau_comm) 2D grid to distribute bands
  !       Requires PBLAS redistribuution though.
 
- !call xmpi_split_block(nbsum, gwr%g_comm%value, my_nb, my_bands)
  call xmpi_split_block(nbsum, gwr%tau_comm%value, my_nb, my_bands)
- !call xmpi_split_block(nbsum, gwr%gtau_comm%value, my_nb, my_bands)
  ABI_CHECK(my_nb > 0, "my_nb == 0")
 
  do my_is=1,gwr%my_nspins
@@ -1680,13 +1693,14 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
 
 
  ! NB: G_k is constructed for k in the IBZ, then we rotate the k-point to obtain G_k in the BZ.
+ !
  ! TODO:
- ! 1) Make sure that gvec in gwr and wfd agree with each other.
- ! 2) May implement the following trick to accelerate convergence wrt nband:
- !     - Init nb states with random numbers and orthogonalize wrt the nband states found in the WFK file
- !     - Compute <i|H|j> in the subspace spanned by the perp states
- !     - Diagonalize H in the subspace to get variational approximation to the KS states
- !     - Add these approximated eigenstats to G.
+ !     1) Make sure that gvec in gwr and wfd agree with each other.
+ !     2) May implement the following trick to accelerate convergence wrt nband:
+ !         - Init nb states with random numbers and orthogonalize wrt the nband states found in the WFK file
+ !         - Compute <i|H|j> in the subspace spanned by the perp states
+ !         - Diagonalize H in the subspace to get variational approximation to the KS states
+ !         - Add these approximated eigenstats to G.
 
  ef = ks_ebands%fermie
 
@@ -1717,8 +1731,8 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
      !call wfd%copy_cg(band_ks, ik_ibz, spin, cgwork)
      !eig0nk = ebands%eig(band_ks, ik_ibz, spin)
      !sigma%vcar_calc(:, ib_k, ikcalc, spin) = ddkop%get_vdiag(eig0nk, istwf_k, npw_k, wfd%nspinor, cgwork, cwaveprj0)
-     ! TODO: spinor and use BLAS2 but take into account scalapack distribution
-     ! or rewrite everything with Scalapack routines.
+     ! TODO: spinor and use BLAS2 but take into account PBLAS distribution
+     ! or rewrite everything with PBLAS routines.
 
      ! This just to get the dimension of the local buffer from the first PBLAS matrix I treat.
      itau = gwr%my_itaus(1)
@@ -1789,7 +1803,7 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
 
  RETURN
 
- ! Scalapack-based version.
+ ! PBLAS-based version.
  call wfk_open_read(wfk, wfk_path, formeig0, iomode_from_fname(wfk_path), get_unit(), gwr%comm, hdr_out=wfk_hdr)
 
  mpw = maxval(wfk_hdr%npwarr)
@@ -1806,7 +1820,7 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
      nband_k = wfk_hdr%nband(ik_ibz)
      npwsp = npw_k * gwr%nspinor
 
-     ! Init CG(npw_k * nspinor, nband) scalapack matrix within gtau communicator.
+     ! Init CG(npw_k * nspinor, nband) PBLAS matrix within gtau communicator.
      ! and distribute it over bands so that each proc reads a subset of bands in read_band_block
      col_bsize = nband_k / gwr%gtau_comm%nproc; if (mod(nband_k, gwr%gtau_comm%nproc) /= 0) col_bsize = col_bsize + 1
      call cg_mat%init(npwsp, nband_k, gtau_slkproc, istwfk1, size_blocs=[npwsp, col_bsize])
@@ -1857,6 +1871,23 @@ end subroutine gwr_build_gtau_from_wfk
 !!
 !! OUTPUT
 !!
+!! NOTES
+!!
+!!  * Remember the symmetry properties of \tilde\espilon^{-1}
+!!
+!!    If q_bz = S q_ibz + G0:
+!!
+!!      $\epsilon^{-1}_{SG1-G0, SG2-G0}(q_bz) = e^{+iS(G2-G1).\tau} \epsilon^{-1}_{G1, G2)}(q)
+!!
+!!    If time-reversal symmetry can be used then:
+!!
+!!      $\epsilon^{-1}_{G1,G2}(-q_bz) = e^{+i(G1-G2).\tau} \epsilon^{-1}_{-S^{-1}(G1+Go), -S^{-1}(G2+G0)}^*(q)
+!!
+!!  In the present implementation we are not considering a possible umklapp vector G0 in the
+!!  expression Sq = q+G0. Treating this case would require some changes in the G-sphere
+!!  since we have to consider G - G0. The code however stops in sigma if a nonzero G0 is required
+!!  to reconstruct the BZ.
+!!
 !! PARENTS
 !!
 !! CHILDREN
@@ -1873,8 +1904,13 @@ subroutine gwr_rotate_gt(gwr, my_ikf, my_it, my_is, desc_kbz, gt_kbz)
 
 !Local variables-------------------------------
 !scalars
- integer :: ig1, ig2, il_g1, il_g2, ioe, spin, itau, ik_ibz, isym_k, trev_k, g0_k(3)
+ integer :: ig1, ig2, il_g1, il_g2, ioe, spin, itau, ik_ibz, isym_k, trev_k, g0_k(3), ik_bz
  logical :: isirr_k
+ real(dp) :: tsign
+!arrays
+ integer :: g1(3), g2(3)
+ real(dp) :: tnon(3)
+ complex(dp) :: ph2, ph1
  !real(dp) :: cpu, wall, gflops
 
 ! *************************************************************************
@@ -1883,11 +1919,13 @@ subroutine gwr_rotate_gt(gwr, my_ikf, my_it, my_is, desc_kbz, gt_kbz)
 
  spin = gwr%my_spins(my_is)
  itau = gwr%my_itaus(my_it)
+ ik_bz = gwr%my_kbz_inds(my_ikf)
 
  ik_ibz = gwr%my_kbz2ibz(1, my_ikf); isym_k = gwr%my_kbz2ibz(2, my_ikf)
  trev_k = gwr%my_kbz2ibz(6, my_ikf); g0_k = gwr%my_kbz2ibz(3:5, my_ikf)
  isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
- !tsign = merge(1, -1, trev_k == 0)
+ tsign = merge(1, -1, trev_k == 0)
+ !ABI_CHECK(all(g0_k == 0), sjoin("For kbz:", ktoa(gwr%kbz(:, ik_bz)), "g0_k:", ltoa(g0_k), " != 0"))
 
  ! Copy descriptor from IBZ
  associate (desc_kibz => gwr%green_desc_kibz(ik_ibz))
@@ -1902,24 +1940,32 @@ subroutine gwr_rotate_gt(gwr, my_ikf, my_it, my_is, desc_kbz, gt_kbz)
  end if
 
  ! Rotate gvec, recompute gbound and rotate vc_sqrt
- ! TODO: Handle TR and routine to rotate tchi/W including vc_sqrt
+ ! TODO: 1) Handle TR and routine to rotate tchi/W including vc_sqrt
+ !       2) Make sure that FFT box is large enough to accomodate umklapps
  do ig1=1,desc_kbz%npw
-   desc_kbz%gvec(:,ig1) = matmul(gwr%cryst%symrec(:,:,isym_k), desc_kibz%gvec(:,ig1)) ! - g0_k
+   desc_kbz%gvec(:,ig1) = matmul(gwr%cryst%symrec(:,:,isym_k), desc_kibz%gvec(:,ig1)) - g0_k
  end do
 
  call sphereboundary(desc_kbz%gbound, desc_kbz%istwfk, desc_kbz%gvec, gwr%g_mgfft, desc_kbz%npw)
 
  ! Get G_k in the BZ.
+ tnon = gwr%cryst%tnons(:, isym_k)
  do ioe=1,2
-   call gwr%gt_kibz(ioe, ik_ibz, itau, spin)%copy(gt_kbz(ioe))
-   associate (gk => gt_kbz(ioe))
-   do il_g2=1, gk%sizeb_local(2)
-     ig2 = gk%loc2gcol(il_g2)
-     do il_g1=1, gk%sizeb_local(1)
-       ig1 = gk%loc2grow(il_g1)
-       !gk%buffer_cplx(il_g1, il_g2) = gk%buffer_cplx(il_g1, il_g2) ! * ??
+   associate (gki => gwr%gt_kibz(ioe, ik_ibz, itau, spin), gkf => gt_kbz(ioe))
+   call gki%copy(gkf)
+   do il_g2=1, gkf%sizeb_local(2)
+     ig2 = mod(gkf%loc2gcol(il_g2), desc_kbz%npw) + 1
+     g2 = desc_kbz%gvec(:,ig2)
+     ph2 = exp(-j_dpc * two_pi * dot_product(g2, tnon))
+     do il_g1=1, gkf%sizeb_local(1)
+       ig1 = mod(gkf%loc2grow(il_g1), desc_kbz%npw) + 1
+       g1 = desc_kbz%gvec(:,ig1)
+       ph1 = exp(+j_dpc * two_pi * dot_product(g1, tnon))
+       gkf%buffer_cplx(il_g1, il_g2) = gki%buffer_cplx(il_g1, il_g2) * ph1 * ph2
      end do
    end do
+   !if (trev_k == 1) then ! TR
+   !call gkf%ptrans_ip("C", -cone)
    !call gk%print(header=sjoin("not isirr_k with gt_kibz:", itoa(ik_ibz)))
    end associate
  end do
@@ -1945,9 +1991,11 @@ end subroutine gwr_rotate_gt
 !!
 !!  for each k in the BZ treated by this MPI proc for given spin and tau.
 !!
-!!  1) FFT Transform the first index: G(g,g',it) --> G(r,g',it)  (local operation)
+!!  1) FFT Transform the first index: G_k(g,g') --> G_k(r,g') and multiply by e^{ik.r}
+!!     This is a local operation.
 !!
-!!  2) MPI transposition: G(r,g',it) --> G^*(g',r,it)
+!!  2) MPI transpose the matrix to go from (r,g') to (g',r) distribution.
+!!     Take complex conjugate for negative tau.
 !!
 !! INPUTS
 !!
@@ -1976,14 +2024,19 @@ subroutine gwr_get_green_gpr(gwr, my_it, my_is, desc_kbz, gt_gpr)
  character(len=1) :: trans
  type(matrix_scalapack) :: rgp
  type(matrix_scalapack),target :: gt_kbz(2)
+ complex(dp),allocatable :: ceikr(:)
 
 ! *************************************************************************
 
  call cwtime(cpu, wall, gflops, "start")
 
+ ABI_MALLOC(ceikr, (gwr%g_nfft * gwr%nspinor))
+
  do my_ikf=1,gwr%my_nkbz
    ik_bz = gwr%my_kbz_inds(my_ikf)
    kk_bz = gwr%kbz(:, ik_bz)
+
+   call calc_ceikr(kk_bz, gwr%g_ngfft, gwr%g_nfft, gwr%nspinor, ceikr)
 
    ! Get G_k in the BZ.
    call gwr%rotate_gt(my_ikf, my_it, my_is, desc_kbz(my_ikf), gt_kbz)
@@ -1991,7 +2044,7 @@ subroutine gwr_get_green_gpr(gwr, my_it, my_is, desc_kbz, gt_gpr)
    do ioe=1,2
      associate (ggp => gt_kbz(ioe), desc_k => desc_kbz(my_ikf))
 
-     ! Allocate rgp scalapack matrix to store G(r, g')
+     ! Allocate rgp PBLAS matrix to store G(r, g')
      npwsp = desc_k%npw * gwr%nspinor
      col_bsize = npwsp / gwr%g_comm%nproc; if (mod(npwsp, gwr%g_comm%nproc) /= 0) col_bsize = col_bsize + 1
      call rgp%init(gwr%g_nfft * gwr%nspinor, npwsp, gwr%g_slkproc, desc_k%istwfk, &
@@ -1999,21 +2052,21 @@ subroutine gwr_get_green_gpr(gwr, my_it, my_is, desc_kbz, gt_gpr)
 
      ABI_CHECK(size(ggp%buffer_cplx, dim=2) == size(rgp%buffer_cplx, dim=2), "len2")
 
-     ! Perform FFT G_k(g,g') -> G_k(r,g') and store results in rgp.
      do ig2=1,ggp%sizeb_local(2)
 
        ABI_CHECK(size(ggp%buffer_cplx(:, ig2)) == desc_k%npw * gwr%nspinor, "npw")
        ABI_CHECK(size(rgp%buffer_cplx(:, ig2)) == gwr%g_nfft * gwr%nspinor, "gwr%g_nfft * gwr%nspinor")
 
+       ! Perform FFT G_k(g,g') -> G_k(r,g') and store results in rgp.
        call fft_ug(desc_k%npw, gwr%g_nfft, gwr%nspinor, ndat1, &
                    gwr%g_mgfft, gwr%g_ngfft, desc_k%istwfk, desc_k%gvec, desc_k%gbound, &
                    ggp%buffer_cplx(:, ig2), rgp%buffer_cplx(:, ig2))
 
        ! Multiply by e^{ik.r}
-       !call times_eikr(kk_bz, gwr%g_ngfft, gwr%g_nfft, ndat1, rgp%buffer_cplx(:, ig2)
+       rgp%buffer_cplx(:, ig2) = ceikr * rgp%buffer_cplx(:, ig2)
      end do ! ig2
 
-     ! MPI transpose: G_k(r,g') -> G_k(g',r) and take complex conjugate.
+     ! MPI transpose: G_k(r,g') -> G_k(g',r) and take complex conjugate if tau < 0
      trans = merge("N", "C", ioe == 1)
      call rgp%ptrans(trans, gt_gpr(ioe, my_ikf))
      call rgp%free()
@@ -2022,6 +2075,8 @@ subroutine gwr_get_green_gpr(gwr, my_it, my_is, desc_kbz, gt_gpr)
 
    call slk_array_free(gt_kbz)
  end do ! my_ikf
+
+ ABI_FREE(ceikr)
 
  call cwtime_report(" gwr_get_green_gpr:", cpu, wall, gflops)
 
@@ -2057,8 +2112,13 @@ subroutine gwr_rotate_wct(gwr, my_iqf, my_it, my_is, desc_qbz, wct_qbz)
 
 !Local variables-------------------------------
 !scalars
- integer :: ig1, ig2, il_g1, il_g2, spin, itau, iq_ibz, isym_q, trev_q, g0_q(3)
+ integer :: ig1, ig2, il_g1, il_g2, spin, itau, iq_ibz, isym_q, trev_q, g0_q(3), iq_bz
  logical :: isirr_q
+ real(dp) :: tsign
+!arrays
+ integer :: g1(3), g2(3)
+ real(dp) :: tnon(3) !, qq_bz(3)
+ complex(dp) :: ph2, ph1
 
 ! *************************************************************************
 
@@ -2066,11 +2126,14 @@ subroutine gwr_rotate_wct(gwr, my_iqf, my_it, my_is, desc_qbz, wct_qbz)
 
  spin = gwr%my_spins(my_is)
  itau = gwr%my_itaus(my_it)
+ iq_bz = gwr%my_qbz_inds(my_iqf)
 
  iq_ibz = gwr%my_qbz2ibz(1, my_iqf); isym_q = gwr%my_qbz2ibz(2, my_iqf)
  trev_q = gwr%my_qbz2ibz(6, my_iqf); g0_q = gwr%my_qbz2ibz(3:5, my_iqf)
  isirr_q = (isym_q == 1 .and. trev_q == 0 .and. all(g0_q == 0))
- !tsign = merge(1, -1, trev_q == 0)
+ tsign = merge(1, -1, trev_q == 0)
+ ! TODO: Understand why legacy GW does not need umklapp
+ !ABI_CHECK(all(g0_q == 0), sjoin("For qbz:", ktoa(gwr%qbz(:, iq_bz)), "g0_q:", ltoa(g0_q), " != 0"))
 
  ! Copy descriptor from IBZ
  associate (desc_qibz => gwr%tchi_desc_qibz(iq_ibz))
@@ -2083,33 +2146,40 @@ subroutine gwr_rotate_wct(gwr, my_iqf, my_it, my_is, desc_qbz, wct_qbz)
  end if
 
  ! rotate gvec, recompute gbound and rotate vc_sqrt.
- ! TODO: Handle TR
+ ! TODO: 1) Handle TR and routine to rotate tchi/W including vc_sqrt
+ !       2) Make sure that FFT box is large enough to accomodate umklapps
  do ig1=1,desc_qbz%npw
-   desc_qbz%gvec(:,ig1) = matmul(gwr%cryst%symrec(:,:,isym_q), desc_qibz%gvec(:,ig1)) ! - g0_q
+   desc_qbz%gvec(:,ig1) = matmul(gwr%cryst%symrec(:,:,isym_q), desc_qibz%gvec(:,ig1)) - g0_q
  end do
 
  call sphereboundary(desc_qbz%gbound, desc_qbz%istwfk, desc_qbz%gvec, gwr%g_mgfft, desc_qbz%npw)
 
- ! Get Wc_q with q in the BZ.
- call gwr%wc_qibz(iq_ibz, itau, spin)%copy(wct_qbz)
+ ! TODO: rotate vc_sqrt
+ ! vc(Sq, Sg) = vc(q, g)
+ ! vc(-q, -g) = vc(q, g)
+ do ig1=1,desc_qbz%npw
+   !desc_qbz%vc_sqrt(ig1) = desc_qbz%vc_sqrt(ig1)
+ end do
 
- associate (wq => wct_qbz)
- do il_g2=1, wq%sizeb_local(2)
-   ig2 = wq%loc2gcol(il_g2)
-   do il_g1=1, wq%sizeb_local(1)
-     ig1 = wq%loc2grow(il_g1)
-     !wq%buffer_cplx(il_g1, il_g2) = wq%buffer_cplx(il_g1, il_g2) ! * ??
+ ! Get Wc_q with q in the BZ.
+ tnon = gwr%cryst%tnons(:, isym_q)
+ associate (wqi => gwr%wc_qibz(iq_ibz, itau, spin), wqf => wct_qbz)
+ call wqi%copy(wct_qbz)
+ do il_g2=1, wqf%sizeb_local(2)
+   ig2 = mod(wqf%loc2gcol(il_g2), desc_qbz%npw) + 1
+   g2 = desc_qbz%gvec(:,ig2)
+   ph2 = exp(-j_dpc * two_pi * dot_product(g2, tnon))
+   do il_g1=1, wqf%sizeb_local(1)
+     ig1 = mod(wqf%loc2grow(il_g1), desc_qbz%npw) + 1
+     g1 = desc_qbz%gvec(:,ig1)
+     ph1 = exp(+j_dpc * two_pi * dot_product(g1, tnon))
+     wqf%buffer_cplx(il_g1, il_g2) = wqi%buffer_cplx(il_g1, il_g2) * ph1 * ph2
    end do
  end do
- !call wq%print(header=sjoin("not isirr_q with gt_kibz:", itoa(iq_ibz)))
+ !call wqf%print(header=sjoin("not isirr_q with gt_kibz:", itoa(iq_ibz)))
  end associate
 
- ! TODO: rotate vc_sqrt
- !do ig1=1,
- ! desc_qbz)
- ! gwr%tchi_desc_qibz(iq_ibz)%
- !end do
-
+ !if (trev_q == 1)
  end associate
 
 end subroutine gwr_rotate_wct
@@ -2163,13 +2233,13 @@ subroutine gwr_get_wc_gpr(gwr, my_it, my_is, desc_qbz, wct_gpr)
 
  call cwtime(cpu, wall, gflops, "start")
 
- do my_iqf=1,gwr%my_nkbz
+ do my_iqf=1,gwr%my_nqbz
 
    ! Get W_q in the BZ.
    call gwr%rotate_wct(my_iqf, my_it, my_is, desc_qbz(my_iqf), wct_qbz)
    associate (desc_q => desc_qbz(my_iqf))
 
-   ! Allocate rgp scalapack matrix to store Wc(r, g')
+   ! Allocate rgp PBLAS matrix to store Wc(r, g')
    npwsp = desc_q%npw * gwr%nspinor
    col_bsize = npwsp / gwr%g_comm%nproc; if (mod(npwsp, gwr%g_comm%nproc) /= 0) col_bsize = col_bsize + 1
    call rgp%init(gwr%g_nfft * gwr%nspinor, npwsp, gwr%g_slkproc, desc_q%istwfk, &
@@ -2234,7 +2304,7 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
 !arrays
  real(dp),pointer :: weights(:,:)
  real(dp),allocatable :: my_weights(:,:)
- complex(dp):: cwork(gwr%my_ntau), cwork_wglb(gwr%ntau)
+ complex(dp):: my_cwork(gwr%my_ntau), glob_cwork(gwr%ntau)
  type(matrix_scalapack), pointer :: mats(:)
 
 ! *************************************************************************
@@ -2242,11 +2312,12 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
  call cwtime(cpu, wall, gflops, "start")
  sum_spins_ = .False.; if (present(sum_spins)) sum_spins_ = sum_spins
 
- ! Compute weights
+ ! Extract my weights depending on mode.
  ABI_MALLOC(my_weights, (gwr%ntau, gwr%my_ntau))
 
  select case(mode)
  case ("iw2t")
+   ! From omega to tau
    if (what == "tchi") then
      ABI_CHECK(gwr%tchi_space == "iomega", sjoin("mode:", mode, "with what:", what, "and tchi_space:", gwr%tchi_space))
      gwr%tchi_space = "itau"
@@ -2258,6 +2329,7 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
    weights => gwr%w2t_cos_wgs
 
  case ("it2w")
+   ! From tau to omega
    if (what == "tchi") then
      ABI_CHECK(gwr%tchi_space == "itau", sjoin("mode:", mode, " with what:", what, "and tchi_space:", gwr%tchi_space))
      gwr%tchi_space = "iomega"
@@ -2280,6 +2352,7 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
    end do
  end do
 
+ ! And now perform inhomegenous FFT in parallel.
  do my_is=1,gwr%my_nspins
    spin = gwr%my_spins(my_is)
    do my_iqi=1,gwr%my_nqibz
@@ -2296,23 +2369,22 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
        do ig1=1,mats(it0)%sizeb_local(1)
 
          ! Extract matrix elements as a function of tau
-         ! TODO: Here we can block over ig1 and call zgemv
-         ! to reduce the number of MPI communications.
+         ! TODO: Here we can block over ig1 and call zgemv to reduce the number of MPI communications.
          do my_it=1,gwr%my_ntau
            itau = gwr%my_itaus(my_it)
-           cwork(my_it) = mats(itau)%buffer_cplx(ig1, ig2)
+           my_cwork(my_it) = mats(itau)%buffer_cplx(ig1, ig2)
          end do
 
          do it=1,gwr%ntau
-           cwork_wglb(it) = dot_product(my_weights(it, :), cwork)
+           glob_cwork(it) = dot_product(my_weights(it, :), my_cwork)
          end do
 
-         call xmpi_sum(cwork_wglb, gwr%tau_comm%value, ierr)
+         call xmpi_sum(glob_cwork, gwr%tau_comm%value, ierr)
 
-         ! update values for this (g1, g2), now we have a slice of (g, g') in frequency space.
+         ! update this (g1, g2) entry to have it in frequency space.
          do my_it=1,gwr%my_ntau
            itau = gwr%my_itaus(my_it)
-           mats(itau)%buffer_cplx(ig1, ig2) = cwork_wglb(itau)
+           mats(itau)%buffer_cplx(ig1, ig2) = glob_cwork(itau)
          end do
 
        end do ! ig1
@@ -2322,12 +2394,10 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
    end do ! my_iqi
  end do ! my_is
 
- if (gwr%nsppol == 2 .and. sum_spins_ .and. gwr%spin_comm%nproc > 1) then
+ if (sum_spins_ .and. gwr%nspinor /= 2) then  ! gwr%nsppol == 2 .and.
    ! Sum over spins
    do my_iqi=1,gwr%my_nqibz
       iq_ibz = gwr%my_qibz_inds(my_iqi)
-      associate (desc_q => gwr%tchi_desc_qibz(iq_ibz))
-
       do my_is=1,gwr%my_nspins
         spin = gwr%my_spins(my_is)
         mats => null()
@@ -2337,10 +2407,24 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
 
         do my_it=1,gwr%my_ntau
           itau = gwr%my_itaus(my_it)
-          call xmpi_sum(mats(itau)%buffer_cplx, gwr%spin_comm%value, ierr)
+
+          if (gwr%nsppol == 1) then
+            mats(itau)%buffer_cplx = two * mats(itau)%buffer_cplx
+
+          else if (gwr%nsppol == 2) then
+            if (gwr%spin_comm%nproc > 1) then
+              ! Spins are distributed and we have to sum them.
+              call xmpi_sum(mats(itau)%buffer_cplx, gwr%spin_comm%value, ierr)
+            else
+              ! Spins are not distributed (this should happen only in sequential execution.
+              if (spin == 1) then
+                mats(itau)%buffer_cplx = mats(itau)%buffer_cplx + gwr%tchi_qibz(iq_ibz,itau,spin+1)%buffer_cplx
+              end if
+            end if
+          end if
+
         end do ! my_it
       end do ! my_is
-      end associate
    end do ! my_iqi
  end if
 
@@ -2479,7 +2563,7 @@ subroutine gwr_print(gwr, header, unit)
  call ydoc%add_int1d("P np_kibz", gwr%np_kibz)
  call ydoc%add_int1d("P np_qibz", gwr%np_qibz)
 
- ! Print Max error for the inhomogeneous FT.
+ ! Print Max error due to inhomogeneous FT.
  call ydoc%add_real("ft_max_err_t2w_cos", gwr%ft_max_error(1))
  call ydoc%add_real("ft_max_err_w2t_cos", gwr%ft_max_error(2))
  call ydoc%add_real("ft_max_err_t2w_sin", gwr%ft_max_error(3))
@@ -2501,8 +2585,8 @@ subroutine gwr_print(gwr, header, unit)
        do my_iki=1,gwr%my_nkibz
          ik_ibz = gwr%my_kibz_inds(my_iki)
          associate (gt => gwr%gt_kibz(:, ik_ibz, itau, spin))
-         call gt(1)%print(header=sjoin("gt_kibz(1) for ik_ibz:", itoa(ik_ibz)))
-         call gt(2)%print(header=sjoin("gt_kibz(2) for ik_ibz:", itoa(ik_ibz)))
+         call gt(1)%print(header=sjoin("gt_kibz(1) for ik_ibz:", itoa(ik_ibz)), unit=unt)
+         call gt(2)%print(header=sjoin("gt_kibz(2) for ik_ibz:", itoa(ik_ibz)), unit=unt)
          end associate
        end do
      end do
@@ -2541,7 +2625,7 @@ subroutine gwr_build_tchi(gwr)
  integer,parameter :: ndat1 = 1, istwfk1 = 1
  integer :: my_is, my_it, my_ikf, ig, my_ir, my_nr, npwsp, ncol_glob, col_bsize, my_iqi !, my_iki ! my_iqf,
  integer :: sc_nfft, spin, ik_ibz, ik_bz, iq_ibz, ierr, ioe, itau, ig2 ! ig1
- real(dp) :: cpu_tau, wall_tau, gflops_tau, cpu_all, wall_all, gflops_all !, spin_fact
+ real(dp) :: cpu_tau, wall_tau, gflops_tau, cpu_all, wall_all, gflops_all, spin_fact
  character(len=5000) :: msg
  type(desc_t),pointer :: desc_k, desc_q
  type(matrix_scalapack) :: chi_rgp
@@ -2560,6 +2644,8 @@ subroutine gwr_build_tchi(gwr)
 
  ABI_CHECK(gwr%tchi_space == "none", sjoin("tchi_space: ", gwr%tchi_space, " != none"))
  gwr%tchi_space = "itau"
+
+ spin_fact = two / (gwr%nsppol * gwr%nspinor)
 
  if (gwr%use_supercell) then
    ! ============================
@@ -2580,14 +2666,14 @@ subroutine gwr_build_tchi(gwr)
    ABI_CALLOC(chit_scbox, (sc_nfft * gwr%nspinor * ndat1))
 
    ! (ngfft, ndat, isign)
-   call plan_gp2rp%from_ngfft(sc_ngfft, gwr%nspinor * ndat1 * 2, +1)
-   call plan_rp2gp%from_ngfft(sc_ngfft, gwr%nspinor * ndat1,     -1)
+   call plan_gp2rp%from_ngfft(sc_ngfft, gwr%nspinor * ndat1 * 2, -1)
+   call plan_rp2gp%from_ngfft(sc_ngfft, gwr%nspinor * ndat1,     +1)
 
    ! The g-vectors in the supercell for G and tchi.
    ABI_MALLOC(green_scg, (3, gwr%green_mpw))
    ABI_MALLOC(chi_scg, (3, gwr%tchi_mpw))
 
-   ! Allocate Scalapack arrays for tchi_q(g',r) for all q in the IBZ treated by this MPI rank.
+   ! Allocate PBLAS arrays for tchi_q(g',r) for all q in the IBZ treated by this MPI rank.
    do my_iqi=1,gwr%my_nqibz
      iq_ibz = gwr%my_qibz_inds(my_iqi)
      npwsp = gwr%tchi_desc_qibz(iq_ibz)%npw * gwr%nspinor
@@ -2603,7 +2689,7 @@ subroutine gwr_build_tchi(gwr)
        call cwtime(cpu_tau, wall_tau, gflops_tau, "start")
        itau = gwr%my_itaus(my_it)
 
-       ! G_k(g,g') --> G_k(g',r) for each k in the BZ treated by me.
+       ! G_k(g,g') --> G_k(g',r) e^{ik.r} for each k in the BZ treated by me.
        call gwr%get_green_gpr(my_it, my_is, desc_kbz, gt_gpr)
 
        ! Loop over the second index r (MPI-distributed in g_comm).
@@ -2635,11 +2721,12 @@ subroutine gwr_build_tchi(gwr)
 
          ! G(G',r) --> G(R',r)
          call plan_gp2rp%execute_ip_dpc(gt_scbox)
+         !gt_scbox = gt_scbox * sc_nfft
 
          ! Compute tchi(R',r) for this r
-         chit_scbox = gt_scbox(:, 1) * gt_scbox(:, 2)
+         chit_scbox = -j_dpc * gt_scbox(:, 1) * gt_scbox(:, 2) ! * spin_fact
 
-         ! Go back to G'= q + g' space immediately.
+         ! Back to tchi(G'=q+g',r) space immediately.
          call plan_rp2gp%execute(chit_scbox)
 
          ! Extract tchi_q(g', r) on the g-sphere from the FFT box in the supercell.
@@ -2662,18 +2749,20 @@ subroutine gwr_build_tchi(gwr)
          end do ! my_iqi
        end do ! my_ir
 
-       ! Free descriptors and scalapack matrices in kBZ.
+       ! Free descriptors and PBLAS matrices in kBZ.
        call desc_array_free(desc_kbz)
        call slk_array_free(gt_gpr)
 
-       ! tchi_q(g',r) --> tchi_q(r,g') --> tchi_q(g,g') stored in gwr%tchi_qibz
-       ! only for the q-points in the IBZ treated by this MPI proc.
+       ! Now we have tchi_q(g',r).
+       ! Fthe q-points in the IBZ treated by this MPI proc, dp:
+       !     1) MPI transpose to have tchi_q(r,g')
+       !     2) FFT along first dimension to have tchi_q(g,g') stored in gwr%tchi_qibz
        do my_iqi=1,gwr%my_nqibz
          iq_ibz = gwr%my_qibz_inds(my_iqi)
          desc_q => gwr%tchi_desc_qibz(iq_ibz)
 
          ! MPI-transposition
-         call chiq_gpr(my_iqi)%ptrans("C", chi_rgp)
+         call chiq_gpr(my_iqi)%ptrans("N", chi_rgp)
 
          ABI_CHECK(size(gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx, dim=2) == size(chi_rgp%buffer_cplx, dim=2), "len2")
 
@@ -2687,6 +2776,9 @@ subroutine gwr_build_tchi(gwr)
                        istwfk1, desc_q%gvec, desc_q%gbound, &
                        chi_rgp%buffer_cplx(:, ig2),         &                  ! ur(in)
                        gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx(:, ig2))  ! ug(out)
+
+           !gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx(:, ig2) = &
+           !gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx(:, ig2) * sc_nfft
          end do
          call chi_rgp%free()
        end do
@@ -2811,12 +2903,15 @@ subroutine gwr_build_tchi(gwr)
  !  end do
  !end do
 
- ! Print trace of chiq matrices for testing purposes.
+ ! Print trace of chi_q(i tau) matrices for testing purposes.
  if (gwr%dtset%prtvol > 0) call gwr%print_trace("tchi_qibz")
 
  ! Transform irreducible tchi from imaginary tau to imaginary omega.
  ! Also sum over spins to get total tchi if collinear spin.
  call gwr%cos_transform("tchi", "it2w", sum_spins=.True.)
+
+ ! Print trace of chi_q(i omega) matrices for testing purposes.
+ if (gwr%dtset%prtvol > 0) call gwr%print_trace("tchi_qibz")
 
  ! Write file with chi0(i omega)
  if (gwr%dtset%prtsuscep > 0) then
@@ -2841,7 +2936,7 @@ end subroutine gwr_build_tchi
 !!  gwr_print_trace
 !!
 !! FUNCTION
-!!  Print traces of scalapack matrices to std_out and ab_out.
+!!  Print traces of PBLAS matrices to std_out and ab_out.
 !!  NB: This is a global routine that should be called by all procs inside gwr%comm.
 !!
 !! INPUTS
@@ -2857,24 +2952,39 @@ end subroutine gwr_build_tchi
 subroutine gwr_print_trace(gwr, what)
 
 !Arguments ------------------------------------
- class(gwr_t),intent(in) :: gwr
+ class(gwr_t),target,intent(in) :: gwr
  character(len=*),intent(in) :: what
 
 !Local variables-------------------------------
  integer,parameter :: master = 0
- integer :: my_is, spin, my_it, itau, iq_ibz, ierr, my_iqi, my_iki, ik_ibz, ii
- character(len=5000) :: comment, msg
- !type(yamldoc_t) :: ydoc
- complex(dp),allocatable :: ctrace(:,:,:)
+ integer :: my_is, spin, my_it, itau, iq_ibz, ierr, my_iqi, my_iki, ik_ibz, ioe
+ character(len=5000) :: comment !, msg
+ integer :: units(2)
+ complex(dp),allocatable :: ctrace3(:,:,:), ctrace4(:,:,:,:)
+ type(matrix_scalapack),pointer :: mats(:,:,:)
 
 ! *************************************************************************
 
-! The same q/k point in the IBZ might be available on different procs in kpt_comm
-! thus we have to rescale the trace before summing the results in gwr%comm.
+ ! The same q/k point in the IBZ might be available on different procs in kpt_comm
+ ! thus we have to rescale the trace before summing the results in gwr%comm.
+
+ comment = "Invalid space!"
+ units = [std_out, ab_out]
 
  select case (what)
- case ("tchi_qibz")
-   ABI_CALLOC(ctrace, (gwr%nqibz, gwr%ntau, gwr%nsppol))
+ case ("tchi_qibz", "wc_qibz")
+   ! Trace of tchi or Wc
+   ABI_CALLOC(ctrace3, (gwr%nqibz, gwr%ntau, gwr%nsppol))
+
+   if (what == "tchi_qibz") then
+     mats => gwr%tchi_qibz
+     if (gwr%tchi_space == "iomega") comment = "(iq_ibz, iomega) table"
+     if (gwr%tchi_space == "itau") comment = "(iq_ibz, itau) table"
+   else if (what == "wc_qibz") then
+     mats => gwr%wc_qibz
+     if (gwr%wc_space == "iomega") comment = "(iq_ibz, iomega) table"
+     if (gwr%wc_space == "itau") comment = "(iq_ibz, itau) table"
+   end if
 
    do my_is=1,gwr%my_nspins
      spin = gwr%my_spins(my_is)
@@ -2882,14 +2992,26 @@ subroutine gwr_print_trace(gwr, what)
        itau = gwr%my_itaus(my_it)
        do my_iqi=1,gwr%my_nqibz
          iq_ibz = gwr%my_qibz_inds(my_iqi)
-         ctrace(iq_ibz, itau, spin) = gwr%tchi_qibz(iq_ibz, itau, spin)%get_trace() / gwr%np_qibz(iq_ibz)
+         ctrace3(iq_ibz, itau, spin) = mats(iq_ibz, itau, spin)%get_trace() / gwr%np_qibz(iq_ibz)
        end do
      end do
    end do
-   comment = "(iq_ibz, itau) matrix"
+
+   call xmpi_sum_master(ctrace3, master, gwr%tks_comm%value, ierr)
+
+   if (xmpi_comm_rank(gwr%comm) == master) then
+     do spin=1,gwr%nsppol
+       call wrtout(units, sjoin("Trace of", what, "for spin:", itoa(spin), "for testing purposes:"))
+       call wrtout(units, comment, newlines=1)
+       call print_arr(ctrace3(:,:,spin), unit=ab_out)
+       call print_arr(ctrace3(:,:,spin), unit=std_out)
+     end do
+   end if
+   ABI_FREE(ctrace3)
 
  case ("gt_kibz")
-   ABI_CALLOC(ctrace, (gwr%nkibz, gwr%ntau, gwr%nsppol))
+   ! Trace of Green's functions.
+   ABI_CALLOC(ctrace4, (gwr%nkibz, gwr%ntau, 2, gwr%nsppol))
 
    do my_is=1,gwr%my_nspins
      spin = gwr%my_spins(my_is)
@@ -2897,42 +3019,31 @@ subroutine gwr_print_trace(gwr, what)
        itau = gwr%my_itaus(my_it)
        do my_iki=1,gwr%my_nkibz
          ik_ibz = gwr%my_kibz_inds(my_iki)
-         ctrace(ik_ibz, itau, spin) = gwr%gt_kibz(1, ik_ibz, itau, spin)%get_trace() / gwr%np_kibz(ik_ibz)
-                                      !gwr%gt_kibz(2, ik_ibz, itau, spin)%get_trace()
+         do ioe=1,2
+           ctrace4(ik_ibz, itau, ioe, spin) = gwr%gt_kibz(ioe, ik_ibz, itau, spin)%get_trace() / gwr%np_kibz(ik_ibz)
+         end do
        end do
      end do
    end do
-   comment = "(ik_ibz, itau) matrix"
+   comment = "(ik_ibz, itau) table"
+
+   call xmpi_sum_master(ctrace4, master, gwr%tks_comm%value, ierr)
+
+   if (xmpi_comm_rank(gwr%comm) == master) then
+     do spin=1,gwr%nsppol
+       do ioe=1,2
+         call wrtout(units, sjoin("Trace of", what, "for ioe:", itoa(ioe), ", spin:", itoa(spin), "for testing purposes:"))
+         call wrtout(units, comment, newlines=1)
+         call print_arr(ctrace4(:,:,ioe, spin), unit=ab_out)
+         call print_arr(ctrace4(:,:,ioe, spin), unit=std_out)
+       end do
+     end do
+   end if
+   ABI_FREE(ctrace4)
 
  case default
    ABI_ERROR(sjoin("Invalid value of what:", what))
  end select
-
- call xmpi_sum_master(ctrace, master, gwr%tks_comm%value, ierr)
-
- if (xmpi_comm_rank(gwr%comm) == master) then
-   call wrtout(ab_out, sjoin("Trace of", what, "matrices for testing purposes:"))
-
-   do spin=1,gwr%nsppol
-     call wrtout([ab_out, std_out], comment, newlines=1)
-     call print_arr(ctrace(:,:,spin), unit=ab_out)
-     call print_arr(ctrace(:,:,spin), unit=std_out)
-   end do
-
-   !ydoc = yamldoc_open(sjoin("Trace of", what, "matrices for testing purposes:")) !, width=11, real_fmt='(3f8.3)')
-   !call ydoc%open_tabular("MinMax imaginary tau/omega mesh", comment=comment)
-   !do spin=1,gwr%nsppol
-   !  do ii=1,size(ctrace, dim=1)
-   !    write(msg, "(*(f8.3,1x))") real(ctrace(ii,:,spin))
-   !    call ydoc%add_tabular_line(msg)
-   !    write(msg, "(*(f8.3,1x))") aimag(ctrace(ii,:,spin))
-   !    call ydoc%add_tabular_line(msg)
-   !  end do
-   !end do
-   !call ydoc%write_units_and_free([std_out, ab_out])
- end if
-
- ABI_FREE(ctrace)
 
 end subroutine gwr_print_trace
 !!***
@@ -2963,10 +3074,11 @@ subroutine gwr_build_wc(gwr)
 
 !Local variables-------------------------------
 !scalars
- integer :: my_iqi, my_it, il_g1, il_g2, ig1_glob, ig2_glob, my_is, iq_ibz, spin, itau
+ integer :: my_iqi, my_it, il_g1, il_g2, ig1, ig2, my_is, iq_ibz, spin, itau
  real(dp) :: cpu_all, wall_all, gflops_all, cpu_q, wall_q, gflops_q
  logical :: q_is_gamma, free_chi
  character(len=500) :: msg
+ complex(dpc) :: vcs_g1, vcs_g2
  type(matrix_scalapack) :: tmp_mat
  !arrays
  real(dp) :: qq_ibz(3)
@@ -2980,9 +3092,9 @@ subroutine gwr_build_wc(gwr)
  ABI_CHECK(gwr%wc_space == "none", sjoin("wc_space: ", gwr%wc_space, " != none"))
  gwr%wc_space = "iomega"
 
- ! ============================================
- ! Allocate scalapack arrays for wc_qibz(g,g')
- ! ============================================
+ ! =======================================
+ ! Allocate PBLAS arrays for wc_qibz(g,g')
+ ! =======================================
  ! Note that we have already summed tchi over spin.
  ABI_MALLOC(gwr%wc_qibz, (gwr%nqibz, gwr%ntau, gwr%nsppol))
  free_chi = .False.
@@ -3008,13 +3120,13 @@ subroutine gwr_build_wc(gwr)
        ! Build epsilon(q,iw) = delta_{g,g'} - v_q(g,g') tchi_q(g,g,iw).
        wc%buffer_cplx = zero
        do il_g2=1,wc%sizeb_local(2)
-         ig2_glob = wc%loc2gcol(il_g2)
-         !vc_qg2 = desc_q%vc_sqrt(ig2_glob)
+         ig2 = mod(wc%loc2gcol(il_g2), desc_q%npw) + 1
+         vcs_g2 = desc_q%vc_sqrt(ig2)
          do il_g1=1,wc%sizeb_local(1)
-           ig1_glob = wc%loc2grow(il_g1)
-           !vc_qg1 = desc_q%vc_sqrt(ig1_glob)
-           !ceps = - wc%buffer_cplx(il_g1, il_g2) ! * vc_qg1 * vc_qg2
-           if (ig1_glob == ig2_glob) wc%buffer_cplx(il_g1, il_g2) = one ! - ceps
+           ig1 = mod(wc%loc2grow(il_g1), desc_q%npw) + 1
+           vcs_g1 = desc_q%vc_sqrt(ig1)
+           !ceps = - wc%buffer_cplx(il_g1, il_g2) * vcs_g1 * vcs_g2
+           if (ig1 == ig2) wc%buffer_cplx(il_g1, il_g2) = one ! - ceps
          end do ! il_g1
        end do ! il_g2
 
@@ -3028,12 +3140,13 @@ subroutine gwr_build_wc(gwr)
 
        ! Build W(q, iw) = e^{-1}_q(g,g',iw) v_q(g,g') and remove bare vc
        do il_g2=1,wc%sizeb_local(2)
-         ig2_glob = wc%loc2gcol(il_g2)
-         !vc_qg2 = desc_q%vc_sqrt(ig2_glob)
+         ig2 = mod(wc%loc2gcol(il_g2), desc_q%npw) + 1
+         vcs_g2 = desc_q%vc_sqrt(ig2)
          do il_g1=1,wc%sizeb_local(1)
-           ig1_glob = wc%loc2grow(il_g1)
-           !vc_qg1 = desc_q%vc_sqrt(ig1_glob)
-           !wc%buffer_cplx(il_g1, il_g2) = wc%buffer_cplx(il_g1, il_g2) ! * vc_qg1 * vc_qg2
+           ig1 = wc%loc2grow(il_g1)
+           ig1 = mod(wc%loc2grow(il_g1), desc_q%npw) + 1
+           vcs_g1 = desc_q%vc_sqrt(ig1)
+           !wc%buffer_cplx(il_g1, il_g2) = wc%buffer_cplx(il_g1, il_g2) * vcs_g1 * vcs_g2
          end do ! il_g1
        end do ! il_g2
 
@@ -3046,8 +3159,14 @@ subroutine gwr_build_wc(gwr)
    call cwtime_report(msg, cpu_q, wall_q, gflops_q)
  end do ! my_iqi
 
+ ! Print trace of wc_q(itau) matrices for testing purposes.
+ if (gwr%dtset%prtvol > 0) call gwr%print_trace("wc_qibz")
+
  ! Cosine transform from iomega to itau to get Wc(i tau)
  call gwr%cos_transform("wc", "iw2t")
+
+ ! Print trace of wc_q(iomega) matrices for testing purposes.
+ if (gwr%dtset%prtvol > 0) call gwr%print_trace("wc_qibz")
 
  call cwtime_report(" gwr_build_wc:", cpu_all, wall_all, gflops_all)
 
@@ -3099,16 +3218,15 @@ subroutine gwr_build_sigmac(gwr)
  type(desc_t), target :: desc_kbz(gwr%my_nkbz), desc_qbz(gwr%my_nqbz)
  type(fftbox_plan3_t) :: gt_plan_gp2rp, wt_plan_gp2rp
 
-
 ! *************************************************************************
 
  call cwtime(cpu_all, wall_all, gflops_all, "start")
 
  ABI_CHECK(gwr%wc_space == "itau", sjoin("wc_space: ", gwr%wc_space, " != itau"))
 
- ! ================================================
- ! Allocate scalapack arrays for sigmac_kibz(g,g')
- ! ================================================
+ ! ===========================================
+ ! Allocate PBLAS arrays for sigmac_kibz(g,g')
+ ! ===========================================
  ! TODO: This is not needed. Perhaps for self-consistent without KS/HF representation.
  !ABI_MALLOC(gwr%sigc_kibz, (2, gwr%nkibz, gwr%ntau, gwr%nsppol))
  !gwr%sigc_space = "itau"
@@ -3263,7 +3381,7 @@ subroutine gwr_build_sigmac(gwr)
 
      end do ! my_ir
 
-     ! Free descriptors and scalapack matrices in kBZ and qBZ.
+     ! Free descriptors and PBLAS matrices in kBZ and qBZ.
      call desc_array_free(desc_kbz)
      call slk_array_free(gt_gpr)
      call desc_array_free(desc_qbz)
@@ -3362,7 +3480,8 @@ subroutine gwr_rpa_energy(gwr)
 !scalars
  integer,parameter :: master = 0
  integer :: my_is, my_iqi, my_it, itau, spin, iq_ibz
- integer :: il_g1, il_g2, ig1_glob, ig2_glob, npw_q !, ierr
+ integer :: il_g1, il_g2, ig1, ig2, npw_q !, ierr
+ complex(dpc) :: vcs_g1, vcs_g2
 !arrays
  type(matrix_scalapack) :: chi_tmp, dummy_vec
  real(dp),allocatable :: eig(:)
@@ -3393,17 +3512,18 @@ subroutine gwr_rpa_energy(gwr)
        end if
 
        do il_g2=1,tchi%sizeb_local(2)
-         ig2_glob = tchi%loc2gcol(il_g2)
+         ig2 = mod(tchi%loc2gcol(il_g2), desc_q%npw) + 1
+         vcs_g2 = desc_q%vc_sqrt(ig2)
          do il_g1=1,tchi%sizeb_local(1)
-           ig1_glob = tchi%loc2grow(il_g1)
-           chi_tmp%buffer_cplx(il_g1, il_g2) = tchi%buffer_cplx(il_g1, il_g2) &
-             * desc_q%vc_sqrt(ig1_glob) * desc_q%vc_sqrt(ig2_glob)
+           ig1 = mod(tchi%loc2grow(il_g1), desc_q%npw) + 1
+           vcs_g1 = desc_q%vc_sqrt(ig1)
+           chi_tmp%buffer_cplx(il_g1, il_g2) = tchi%buffer_cplx(il_g1, il_g2) * vcs_g1 * vcs_g2
          end do
        end do
 
        call chi_tmp%pzheev("N", "U", dummy_vec, eig)
 
-       ! Integration
+       ! Perform integration in imaginary frequency.
        !gwr%iw_wgs(itau)
 
        if (my_it == gwr%my_ntau) then
