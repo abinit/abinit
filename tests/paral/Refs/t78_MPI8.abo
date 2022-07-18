@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 16 Jul 2022.
-- ( at 17h11 )
+.Starting date : Sun 17 Jul 2022.
+- ( at 01h23 )
   
 - input  file    -> /Users/gmatteo/git_repos/abinit_gwr/_build/tests/Test_suite/paral_t78_MPI8/t78.abi
 - output file    -> t78_MPI8.abo
@@ -676,6 +676,32 @@ meta: {optdriver: 6, }
 
 --------------------------------------------------------------------------------
 
+ Mapping kBZ --> kIBZ
+ Legend: bz = TS(ibz) + g0 where isym is the index of the symrec operation S and itim is 1 if TR is used.
+        BZ                                       IBZ                                       ibz  isym  itim  g0
+     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]     1     1     0  [0, 0, 0]
+     2  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]     2     1     0  [0, 0, 0]
+     3  [ 5.0000E-01,  5.0000E-01,  0.0000E+00]  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]     2     2     0  [0, 1, 0]
+     4  [ 0.0000E+00,  5.0000E-01,  0.0000E+00]  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]     2     4     0  [0, 0, 0]
+     5  [ 0.0000E+00,  0.0000E+00,  5.0000E-01]  [ 0.0000E+00,  0.0000E+00,  5.0000E-01]     3     1     0  [0, 0, 0]
+     6  [ 5.0000E-01,  0.0000E+00,  5.0000E-01]  [ 5.0000E-01,  0.0000E+00,  5.0000E-01]     4     1     0  [0, 0, 0]
+     7  [ 0.0000E+00,  5.0000E-01,  5.0000E-01]  [ 5.0000E-01,  0.0000E+00,  5.0000E-01]     4     4     0  [0, 0, 1]
+     8  [ 5.0000E-01,  5.0000E-01,  5.0000E-01]  [ 5.0000E-01,  0.0000E+00,  5.0000E-01]     4     2     0  [0, 1, 1]
+
+
+ Mapping qBZ --> qIBZ
+ Legend: bz = TS(ibz) + g0 where isym is the index of the symrec operation S and itim is 1 if TR is used.
+        BZ                                       IBZ                                       ibz  isym  itim  g0
+     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]     1     1     0  [0, 0, 0]
+     2  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]     2     1     0  [0, 0, 0]
+     3  [ 5.0000E-01,  5.0000E-01,  0.0000E+00]  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]     2     2     0  [0, 1, 0]
+     4  [ 0.0000E+00,  5.0000E-01,  0.0000E+00]  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]     2     4     0  [0, 0, 0]
+     5  [ 0.0000E+00,  0.0000E+00,  5.0000E-01]  [ 0.0000E+00,  0.0000E+00,  5.0000E-01]     3     1     0  [0, 0, 0]
+     6  [ 5.0000E-01,  0.0000E+00,  5.0000E-01]  [ 5.0000E-01,  0.0000E+00,  5.0000E-01]     4     1     0  [0, 0, 0]
+     7  [ 0.0000E+00,  5.0000E-01,  5.0000E-01]  [ 5.0000E-01,  0.0000E+00,  5.0000E-01]     4     4     0  [0, 0, 1]
+     8  [ 5.0000E-01,  5.0000E-01,  5.0000E-01]  [ 5.0000E-01,  0.0000E+00,  5.0000E-01]     4     2     0  [0, 1, 1]
+
+
 
  === Kohn-Sham gaps and band edges from IBZ mesh ===
  Indirect band gap semiconductor
@@ -716,8 +742,8 @@ MinMax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(om
     2 1.00000E+00   5.00000E-01   1.00000E+00   5.00000E-01
 ...
 
-Trace of gt_kibz matrices for testing purposes:
-(ik_ibz, itau) matrix
+Trace of gt_kibz for ioe: 1 , spin: 1 for testing purposes:
+(ik_ibz, itau) table
 
        1       2
     1   0.000  -0.000
@@ -732,21 +758,85 @@ Trace of gt_kibz matrices for testing purposes:
     4   0.000   0.000
        24.000  18.751
 
-Trace of tchi_qibz matrices for testing purposes:
-(iq_ibz, itau) matrix
+Trace of gt_kibz for ioe: 2 , spin: 1 for testing purposes:
+(ik_ibz, itau) table
 
        1       2
-    1 -17.361  -9.025
-       10.211   3.440
+    1   0.000  -0.000
+      -56.000 -26.831
 
-    2 -46.902 -16.877
-        2.545   1.215
+    2   0.000   0.000
+      -56.000 -26.781
 
-    3 -57.606 -19.115
-        1.936   2.308
+    3   0.000   0.000
+      -56.000 -26.816
 
-    4-103.174 -32.392
-       -8.732  -4.546
+    4   0.000  -0.000
+      -56.000 -26.749
+
+Trace of tchi_qibz for spin: 1 for testing purposes:
+(iq_ibz, itau) table
+
+       1       2
+    1   0.000   0.000
+       -0.002  -0.001
+
+    2   0.001   0.001
+       -0.001  -0.000
+
+    3   0.001   0.000
+        0.000   0.000
+
+    4   0.000   0.000
+        0.001   0.000
+
+Trace of tchi_qibz for spin: 1 for testing purposes:
+(iq_ibz, iomega) table
+
+       1       2
+    1   0.000   0.000
+       -0.005  -0.004
+
+    2   0.004   0.004
+       -0.002  -0.002
+
+    3   0.002   0.002
+        0.001   0.001
+
+    4   0.001   0.001
+        0.002   0.002
+
+Trace of wc_qibz for spin: 1 for testing purposes:
+(iq_ibz, iomega) table
+
+       1       2
+    1 811.000 811.000
+        0.000   0.000
+
+    2 832.000 832.000
+        0.000   0.000
+
+    3 818.000 818.000
+        0.000   0.000
+
+    4 812.000 812.000
+        0.000   0.000
+
+Trace of wc_qibz for spin: 1 for testing purposes:
+(iq_ibz, itau) table
+
+       1       2
+    11622.0001249.185
+        0.000   0.000
+
+    21664.0001281.532
+        0.000   0.000
+
+    31636.0001259.967
+        0.000   0.000
+
+    41624.0001250.725
+        0.000   0.000
 
 
 == END DATASET(S) ==============================================================
@@ -1016,7 +1106,7 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         85.9  wall=        209.5
+- Proc.   0 individual time (sec): cpu=         81.4  wall=        180.9
 
 ================================================================================
 

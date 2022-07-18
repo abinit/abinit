@@ -323,13 +323,13 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  call pspini(Dtset,Dtfil,ecore,psp_gencond,gsqcutc_eff,gsqcutf_eff,Pawrad,Pawtab,Psps,rprimd,comm_mpi=comm)
 
  ! === Initialization of basic objects including the BSp structure that defines the parameters of the run ===
- call setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Psps,Pawtab,BSp,&
+ call setup_bse(codvsn,acell,rprim,ngfft_osc,Dtset,Dtfil,BS_files,Psps,Pawtab,BSp,&
    Cryst,Kmesh,Qmesh,KS_BSt,QP_BSt,Hdr_wfk,Gsph_x,Gsph_c,Vcp,Hdr_bse,w_fname,Epren,comm,wvl%descr)
 
  if (BSp%use_interp) then
    call setup_bse_interp(Dtset,Dtfil,BSp,Cryst,Kmesh,Kmesh_dense,&
      Qmesh_dense,KS_BSt_dense,QP_BSt_dense,Gsph_x_dense,Gsph_c_dense,&
-     Vcp_dense,Hdr_wfk_dense,ngfftf,grid,comm)
+     Vcp_dense,Hdr_wfk_dense,grid,comm)
  end if
 
  !call timab(652,2,tsec) ! setup_bse
@@ -1068,7 +1068,7 @@ end subroutine bethe_salpeter
 !!
 !! SOURCE
 
-subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Psps,Pawtab,BSp,&
+subroutine setup_bse(codvsn,acell,rprim,ngfft_osc,Dtset,Dtfil,BS_files,Psps,Pawtab,BSp,&
 & Cryst,Kmesh,Qmesh,KS_BSt,QP_bst,Hdr_wfk,Gsph_x,Gsph_c,Vcp,Hdr_bse,w_fname,Epren,comm,Wvl)
 
 !Arguments ------------------------------------
@@ -1091,7 +1091,6 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
  type(wvl_internal_type), intent(in) :: Wvl
  type(eprenorms_t),intent(out) :: Epren
 !arrays
- integer,intent(in) :: ngfftf(18)
  integer,intent(out) :: ngfft_osc(18)
  real(dp),intent(in) :: acell(3),rprim(3,3)
 
@@ -2005,7 +2004,7 @@ end subroutine setup_bse
 !! SOURCE
 
 subroutine setup_bse_interp(Dtset,Dtfil,BSp,Cryst,Kmesh, &
-   Kmesh_dense,Qmesh_dense,KS_BSt_dense,QP_bst_dense,Gsph_x,Gsph_c,Vcp_dense,Hdr_wfk_dense,ngfftf,grid,comm)
+   Kmesh_dense,Qmesh_dense,KS_BSt_dense,QP_bst_dense,Gsph_x,Gsph_c,Vcp_dense,Hdr_wfk_dense,grid,comm)
 
 !Arguments ------------------------------------
 !scalars
@@ -2022,7 +2021,6 @@ subroutine setup_bse_interp(Dtset,Dtfil,BSp,Cryst,Kmesh, &
  type(vcoul_t),intent(out) :: Vcp_dense
  type(gsphere_t),intent(out) :: Gsph_x,Gsph_c
 !arrays
- integer,intent(in) :: ngfftf(18)
 
 !Local variables ------------------------------
 !scalars

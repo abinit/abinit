@@ -683,20 +683,20 @@ subroutine kmesh_print(Kmesh,header,unit,prtvol,mode_paral)
 
  call wrtout(my_unt,msg,my_mode)
 
- if (my_prtvol>0) then
+ if (my_prtvol > 0) then
    write(fmt,*)'(1x,i5,a,2x,3es16.8)'
    do ik=1,Kmesh%nbz
      if (my_prtvol==1 .and. ik>nmaxk) then
        write(msg,'(a)')' prtvol=1, do not print more points.'
-       call wrtout(my_unt,msg,my_mode) ; EXIT
+       call wrtout(my_unt,msg,my_mode); EXIT
      end if
      write(msg,fmt)ik,') ',(Kmesh%bz(ii,ik),ii=1,3)
      call wrtout(my_unt,msg,my_mode)
    end do
  end if
- !
- ! === Additional printing ===
- if (my_prtvol>=10) then
+
+ ! Additional printing
+ if (my_prtvol >= 10) then
    write(msg,'(2a)')ch10,&
    '                  Full point  ------->    Irred point -->            through:  Symrec  Time-Rev (1=No,-1=Yes) G0(1:3) '
    call wrtout(my_unt,msg,my_mode)
@@ -1543,8 +1543,7 @@ subroutine identk(kibz,nkibz,nkbzmx,nsym,timrev,symrec,symafm,kbz,ktab,ktabi,kta
  !call klist_isirred(nkibz,kibz,Cryst,nimg)
 
  if (.not.is_irred_set) then
-   msg = "Input array kibz does not constitute an irreducible set."
-   ABI_WARNING(msg)
+   ABI_WARNING("Input array kibz does not constitute an irreducible set.")
  end if
  !
  ! === Loop over k-points in IBZ ===

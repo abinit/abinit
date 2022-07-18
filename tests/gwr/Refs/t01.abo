@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 16 Jul 2022.
-- ( at 15h17 )
+.Starting date : Sun 17 Jul 2022.
+- ( at 01h22 )
   
 - input  file    -> /Users/gmatteo/git_repos/abinit_gwr/_build/tests/Test_suite/gwr_t01/t01.abi
 - output file    -> t01.abo
@@ -554,6 +554,32 @@ meta: {optdriver: 6, }
 
 --------------------------------------------------------------------------------
 
+ Mapping kBZ --> kIBZ
+ Legend: bz = TS(ibz) + g0 where isym is the index of the symrec operation S and itim is 1 if TR is used.
+        BZ                                       IBZ                                       ibz  isym  itim  g0
+     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]     1     1     0  [0, 0, 0]
+     2  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]     2     1     0  [0, 0, 0]
+     3  [ 5.0000E-01,  5.0000E-01,  5.0000E-01]  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]     2     5     0  [1, 1, 1]
+     4  [ 0.0000E+00,  0.0000E+00,  5.0000E-01]  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]     2     3     0  [0, 0, 0]
+     5  [ 0.0000E+00,  5.0000E-01,  0.0000E+00]  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]     2     7     0  [0, 0, 0]
+     6  [ 5.0000E-01,  5.0000E-01,  0.0000E+00]  [ 5.0000E-01,  5.0000E-01,  0.0000E+00]     3     1     0  [0, 0, 0]
+     7  [ 5.0000E-01,  0.0000E+00,  5.0000E-01]  [ 5.0000E-01,  5.0000E-01,  0.0000E+00]     3     9     0  [1, 0, 1]
+     8  [ 0.0000E+00,  5.0000E-01,  5.0000E-01]  [ 5.0000E-01,  5.0000E-01,  0.0000E+00]     3    17     0  [0, 0, 0]
+
+
+ Mapping qBZ --> qIBZ
+ Legend: bz = TS(ibz) + g0 where isym is the index of the symrec operation S and itim is 1 if TR is used.
+        BZ                                       IBZ                                       ibz  isym  itim  g0
+     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]     1     1     0  [0, 0, 0]
+     2  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]     2     1     0  [0, 0, 0]
+     3  [ 5.0000E-01,  5.0000E-01,  5.0000E-01]  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]     2     5     0  [1, 1, 1]
+     4  [ 0.0000E+00,  0.0000E+00,  5.0000E-01]  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]     2     3     0  [0, 0, 0]
+     5  [ 0.0000E+00,  5.0000E-01,  0.0000E+00]  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]     2     7     0  [0, 0, 0]
+     6  [ 5.0000E-01,  5.0000E-01,  0.0000E+00]  [ 5.0000E-01,  5.0000E-01,  0.0000E+00]     3     1     0  [0, 0, 0]
+     7  [ 5.0000E-01,  0.0000E+00,  5.0000E-01]  [ 5.0000E-01,  5.0000E-01,  0.0000E+00]     3     9     0  [1, 0, 1]
+     8  [ 0.0000E+00,  5.0000E-01,  5.0000E-01]  [ 5.0000E-01,  5.0000E-01,  0.0000E+00]     3    17     0  [0, 0, 0]
+
+
 
  === Kohn-Sham gaps and band edges from IBZ mesh ===
  Indirect band gap semiconductor
@@ -594,8 +620,8 @@ MinMax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(om
     2 1.00000E+00   5.00000E-01   1.00000E+00   5.00000E-01
 ...
 
-Trace of gt_kibz matrices for testing purposes:
-(ik_ibz, itau) matrix
+Trace of gt_kibz for ioe: 1 , spin: 1 for testing purposes:
+(ik_ibz, itau) table
 
        1       2
     1   0.000   0.000
@@ -607,18 +633,70 @@ Trace of gt_kibz matrices for testing purposes:
     3   0.000   0.000
         4.000   3.293
 
-Trace of tchi_qibz matrices for testing purposes:
-(iq_ibz, itau) matrix
+Trace of gt_kibz for ioe: 2 , spin: 1 for testing purposes:
+(ik_ibz, itau) table
 
        1       2
-    1 345.374 120.313
-       -1.524  -0.903
+    1   0.000  -0.000
+      -56.000 -19.147
 
-    2 166.672  70.628
-        5.081   1.935
+    2   0.000   0.000
+      -56.000 -18.649
 
-    3 -30.182  13.648
-       11.195   4.283
+    3   0.000   0.000
+      -56.000 -18.598
+
+Trace of tchi_qibz for spin: 1 for testing purposes:
+(iq_ibz, itau) table
+
+       1       2
+    1   0.000  -0.000
+        0.002   0.003
+
+    2  -0.001  -0.002
+        0.000   0.001
+
+    3  -0.001  -0.001
+       -0.000  -0.001
+
+Trace of tchi_qibz for spin: 1 for testing purposes:
+(iq_ibz, iomega) table
+
+       1       2
+    1   0.000   0.000
+        0.010   0.007
+
+    2  -0.005  -0.004
+        0.002   0.002
+
+    3  -0.003  -0.002
+       -0.002  -0.002
+
+Trace of wc_qibz for spin: 1 for testing purposes:
+(iq_ibz, iomega) table
+
+       1       2
+    1 169.000 169.000
+        0.000   0.000
+
+    2 180.000 180.000
+        0.000   0.000
+
+    3 190.000 190.000
+        0.000   0.000
+
+Trace of wc_qibz for spin: 1 for testing purposes:
+(iq_ibz, itau) table
+
+       1       2
+    1 338.000 260.311
+        0.000   0.000
+
+    2 360.000 277.254
+        0.000   0.000
+
+    3 380.000 292.657
+        0.000   0.000
 
 
 == END DATASET(S) ==============================================================
@@ -865,13 +943,13 @@ P           mkmem           3
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          9.6  wall=          9.7
+- Proc.   0 individual time (sec): cpu=          9.8  wall=         10.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          9.2  wall=          9.3
++Overall time at end (sec) : cpu=          9.9  wall=         10.3
 - [ALL OK] MEMORY CONSUMPTION REPORT FOR C CODE:
 -   There were 159 allocations and 159 deallocations in C code
 - [ALL OK] MEMORY CONSUMPTION REPORT FOR FORTRAN CODE:

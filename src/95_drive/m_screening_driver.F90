@@ -321,7 +321,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  call pspini(Dtset,Dtfil,ecore,psp_gencond,gsqcutc_eff,gsqcutf_eff,Pawrad,Pawtab,Psps,rprimd,comm_mpi=comm)
 
  ! === Initialize dimensions and basic objects ===
- call setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,Dtset,Psps,Pawtab,&
+ call setup_screening(codvsn,acell,rprim,wfk_fname,Dtset,Psps,Pawtab,&
    ngfft_gw,Hdr_wfk,Hdr_local,Cryst,Kmesh,Qmesh,ks_ebands,Ltg_q,Gsph_epsG0,Gsph_wfn,Vcp,Ep,comm)
 
  call timab(302,2,tsec) ! screening(init)
@@ -1536,7 +1536,6 @@ end subroutine screening
 !! wfk_fname=Name of the input WFK file.
 !! acell(3)=length scales of primitive translations (Bohr).
 !! rprim(3,3)=dimensionless real space primitive translations.
-!! ngfftf(18)=Contain all needed information about the 3D FFT for densities and potentials.
 !! dtfil <type(datafiles_type)>=variables related to files
 !!
 !! OUTPUT
@@ -1568,7 +1567,7 @@ end subroutine screening
 !!
 !! SOURCE
 
-subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,Dtset,Psps,Pawtab,&
+subroutine setup_screening(codvsn,acell,rprim,wfk_fname,Dtset,Psps,Pawtab,&
                            ngfft_gw,Hdr_wfk,Hdr_out,Cryst,Kmesh,Qmesh,ks_ebands,Ltg_q,Gsph_epsG0,Gsph_wfn,Vcp,Ep,comm)
 
 !Arguments ------------------------------------
@@ -1587,7 +1586,6 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,Dtset,Psps,Pawtab
  type(gsphere_t),intent(out) :: Gsph_epsG0,Gsph_wfn
  type(vcoul_t),intent(out) :: Vcp
 !arrays
- integer,intent(in) :: ngfftf(18)
  integer,intent(out) :: ngfft_gw(18)
  real(dp),intent(in) :: acell(3),rprim(3,3)
  type(littlegroup_t),pointer :: Ltg_q(:)
