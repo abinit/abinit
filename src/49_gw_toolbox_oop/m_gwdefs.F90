@@ -65,7 +65,7 @@ module m_gwdefs
  complex(gwpc),public,parameter :: j_gw    =(0._gwp,1._gwp)
 
 !arrays
- real(dp),public,parameter :: GW_Q0_DEFAULT(3) = (/0.00001_dp, 0.00002_dp, 0.00003_dp/)
+ real(dp),public,parameter :: GW_Q0_DEFAULT(3) = [0.00001_dp, 0.00002_dp, 0.00003_dp]
 
 ! Weights and nodes for Gauss-Kronrod integration rules
 ! Gauss 7 Kronrod 15

@@ -745,6 +745,8 @@ subroutine gaps_print(gaps, unit, header, kTmesh, mu_e)
    call wrtout(unt, msg)
    write(msg, "(a,f9.3,2a)")" Direct gap:     ", opt_gap * Ha_eV," (eV) at k: ", trim(ktoa(gaps%optical_kpoints(:,spin)))
    call wrtout(unt, msg)
+   write(msg, "((2(a, f9.3)))")" Fermi level:", gaps%fermie * Ha_eV, " (eV) with nelect:", gaps%nelect
+   call wrtout(unt, msg)
 
    if (present(mu_e) .and. present(kTmesh) .and. all(gaps%ierr == 0)) then
      ntemp = size(mu_e)

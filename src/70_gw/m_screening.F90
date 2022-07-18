@@ -1497,8 +1497,8 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
  SELECT CASE (approx_type)
 
  CASE (0)
-   ! * RPA: \tepsilon=1 - Vc^{1/2} chi0 Vc^{1/2}
-   ! * vc_sqrt contains vc^{1/2}(q,G), complex-valued to allow for a possible cutoff.
+   ! RPA: \tepsilon = 1 - Vc^{1/2} chi0 Vc^{1/2}
+   ! vc_sqrt contains vc^{1/2}(q,G), complex-valued to allow for a possible cutoff.
    do io=1,nomega
      if (omega_distrb(io) == my_rank) then
        !write(std_out,*)"dim_wing",dim_wing
