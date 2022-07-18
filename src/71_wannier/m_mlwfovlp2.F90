@@ -1,4 +1,4 @@
-!!****m* ABINIT/m_mlwfovlp
+!!****m* ABINIT/m_mlwfovwal
 !! NAME
 !!  m_mlwfovlp
 !!
@@ -23,7 +23,7 @@
 
 #include "abi_common.h"
 
-module m_mlwfovlp
+module m_mlwfovlp2
 
  use defs_basis
  use defs_wannier90
@@ -64,19 +64,228 @@ module m_mlwfovlp
  use m_fft,            only : fourwf
  use m_wannier_io,   only: write_eigenvalues, write_Amn, compute_and_write_unk, write_Mmn, write_cg_and_cprj
 
-
  implicit none
 
  private
 !!***
 
- public :: mlwfovlp
 
- public :: mlwfovlp_pw, mlwfovlp_proj, mlwfovlp_projpaw, mlwfovlp_setup, mlwfovlp_seedname
+ type, public ::  cg_cprj
+    real(dp), pointer :: cg(:, :)=>null()
+    type(pawcprj_type), pointer :: cprj(:,:)=>null()
+    type(datafiles_type),pointer :: dtfil => null()
+    type(dataset_type),pointer :: dtset => null()
+    type(hdr_type), pointer :: hdr => null()
+    integer, pointer :: iwav(:,:,:, :)=>null()
+    type(mpi_type), pointer :: MPI_enreg => null()
+    type(pseudopotential_type), pointer :: psps => null()
+    type(pawtab_type),pointer :: pawtab(:)
+    integer :: natom, nspinor, nsppol, mband, mkmem, nkpt, rank, nprocs
+    integer, allocatable :: icprj(:, :, :) ! mband, mkpt, msppol
+  contains
+    procedure :: init => cg_cprj_init
+    procedure :: free => cg_cprj_free
+    procedure :: compute_index_cprj
+    procedure :: cg_elem
+    procedure :: cg_elem_complex
+    procedure :: cprj_elem
+    procedure :: write_cg_and_cprj_tmpfile
+    procedure :: remove_tmpfile
+    procedure :: read_cg
+ end type cg_cprj
+
+
+
+ public :: mlwfovlp2
+ public :: compute_iwav
+! public :: mlwfovlp_pw, mlwfovlp_proj, mlwfovlp_projpaw, mlwfovlp_setup, mlwfovlp_seedname
 !!***
 
 contains
 !!***
+
+  subroutine cg_cprj_init(self, cg, cprj, dtset, dtfil, hdr, MPI_enreg, nprocs, psps, pawtab, rank)
+    class(cg_cprj), intent(inout) :: self
+    real(dp), target, optional, intent(in):: cg(:, :)
+    type(pawcprj_type), target, optional, intent(in):: cprj(:,:)
+    type(dataset_type),target, intent(in) :: dtset
+    type(datafiles_type),target, intent(in) :: dtfil
+    type(mpi_type), target, intent(in) :: MPI_enreg
+    type(pseudopotential_type), target, intent(in) :: psps
+    type(pawtab_type), target, intent(in) :: pawtab(:)
+    type(hdr_type), target, intent(in) :: hdr
+    integer, intent(in) :: nprocs, rank
+    if(present(cg))    self%cg=> cg
+    if(present(cprj))  self%cprj => cprj
+    self%dtset => dtset
+    self%dtfil => dtfil
+    self%hdr => hdr
+    self%MPI_enreg => MPI_enreg
+    self%psps => psps
+    self%pawtab => pawtab
+    self%natom = hdr%natom
+    self%nspinor = hdr%nspinor
+    self%nsppol = hdr%nsppol
+    self%mband= hdr%mband
+    self%mkmem = dtset%mkmem
+    self%nkpt = hdr%nkpt
+    self%rank = rank
+    self%nprocs = nprocs
+    ABI_MALLOC(self%iwav,(self%nspinor, self%mband,self%nkpt,self%nsppol))
+    call compute_iwav(MPI_enreg, dtset, hdr, self%iwav, nprocs, rank)
+    call self%compute_index_cprj()
+  end subroutine cg_cprj_init
+
+  subroutine cg_cprj_free(self)
+    class(cg_cprj), intent(inout) :: self
+    nullify(self%cg)
+    nullify(self%cprj)
+    nullify(self%dtfil)
+    nullify(self%hdr)
+    nullify(self%MPI_enreg)
+    ABI_FREE(self%iwav)
+    nullify(self%iwav)
+    ABI_FREE(self%icprj)
+  end subroutine cg_cprj_free
+
+  function cg_elem(self, icplx, ig, ispinor, iband, ikpt, isppol ) result(ret)
+    class(cg_cprj), intent(inout) :: self
+    integer, intent(in) :: icplx, ig, ispinor, iband, ikpt, isppol
+    integer :: ind
+    real(dp) :: ret
+    ind=ig+self%iwav(ispinor, iband,ikpt,isppol)
+    !print *, "ig", ig
+    !print *, "ispinor", ispinor
+    !print *, "iwav", self%iwav(iband, ikpt, isppol)
+    !print *, "npw_k", self%hdr%npwarr(ikpt)
+    !print *, size(self%cg, 2), ind
+    ret=self%cg(icplx,ind)
+  end function cg_elem
+
+
+
+  function cg_elem_complex(self, ig,ispinor, iband, ikpt, isppol) result(ret)
+    class(cg_cprj), intent(inout) :: self
+    integer, intent(in) ::  ig, ispinor, iband, ikpt, isppol
+    integer :: ind
+    complex(dp) :: ret
+    ind=ig+self%iwav(ispinor, iband,ikpt,isppol)
+    ret=CMPLX(self%cg(1,ind),  self%cg(2,ind), kind=dp)
+  end function cg_elem_complex
+
+
+  subroutine compute_index_cprj(self)
+    ! FIXME:hexu: this is modified from the m_mlwfovlp,
+    !     but I think it should be carefully checked.
+    ! mcprj=nspinor*mband*mkmem*nsppol
+    ! 1. nspinor=2 case seems to be wrong.
+    class(cg_cprj), intent(inout) :: self
+    integer :: ii, ikpt, isppol, iband
+    ABI_MALLOC(self%icprj, (self%mband,self%nkpt,self%nsppol))
+    ii=0
+    do isppol=1,self%nsppol
+       ! FIXME: check if it should be mkmem or nkpt.
+       do ikpt=1,self%nkpt
+          ! FIXME: nband has the shape of (nsppol*nkpt).
+          !nband_k=dtset%nband(ikpt+(isppol-1)*nkpt)
+          do iband=1,self%dtset%nband(ikpt)
+             ! FIXME: hexu: should cycle if the kpt is not in this node??
+             ii=ii+1
+             self%icprj(iband,ikpt,isppol)=ii
+          end do
+       end do
+    end do
+  end subroutine compute_index_cprj
+
+
+  ! get one element of cprj
+  function cprj_elem(self,icplx,ispinor, iband, ikpt, isppol, iatom, ilmn) result(ret)
+    class(cg_cprj), intent(inout) :: self
+    integer, intent(in) :: icplx, ispinor, iband, ikpt, isppol, ilmn, iatom
+    real(dp) :: ret
+    integer :: ig
+    ! TODO: this seems to be better than compute_index_cprj,
+    ! But should it be mband or nband(ikpt)
+
+    ! mcprj=nspinor*mband*mkmem*nsppol
+    ! this is the original version in m_mlwfovlp
+    !ig=iband+(ikpt-1)*self%mband*self%nspinor + &
+    !     &(isppol-1)*self%mkmem*self%mband*self%nspinor
+
+    ig=ispinor+(iband-1)*self%nspinor+(ikpt-1)*self%mband*self%nspinor + &
+         &(isppol-1)*self%mkmem*self%mband*self%nspinor
+    ret= self%cprj(iatom, ig)%cp(icplx, ilmn)
+  end function cprj_elem
+
+  subroutine write_cg_and_cprj_tmpfile(self)
+    class(cg_cprj), intent(inout) :: self
+    call write_cg_and_cprj(self%dtset, self%cg, self%cprj, self%dtfil, self%iwav, &
+         & self%hdr%npwarr, self%mband, self%natom, &
+         & self%nsppol, self%nkpt,  self%MPI_enreg, &
+         & self%rank, self%psps, self%pawtab)
+  end subroutine write_cg_and_cprj_tmpfile
+
+  subroutine remove_tmpfile(self, prtvol)
+    class(cg_cprj), intent(inout) :: self
+    integer, intent(in) :: prtvol
+    integer :: isppol, ikpt, ierr
+    integer :: master=1
+    character(len=fnlen) :: wfnname
+    character(len=500) :: message
+    if(prtvol>0) then
+       write(message, '(3a)' ) ch10,&
+            &       '   mlwfovlp :  Removing temporary files with cg and cprj (PAW)',ch10
+       call wrtout(ab_out,message,'COLL')
+       call wrtout(std_out,  message,'COLL')
+    end if
+    !
+    !    Just master  node will remove the files
+    !
+    if(self%rank==master) then
+       do isppol=1,self%nsppol
+          do ikpt=1,self%nkpt
+             write(wfnname,'(a,I5.5,".",I1)') trim(self%dtfil%fnametmp_cg),ikpt,isppol
+             call delete_file(wfnname,ierr)
+             if(self%psps%usepaw==1) then
+                write(wfnname,'(a,I5.5,".",I1)') trim(self%dtfil%fnametmp_cprj),ikpt,isppol
+                call delete_file(wfnname,ierr)
+             end if
+          end do !ikpt
+       end do !isppol
+    end if
+  end subroutine remove_tmpfile
+
+
+
+  subroutine read_cg(self, ikpt2, isppol, cg_read)
+    class(cg_cprj), intent(inout) :: self
+    integer, intent(in) :: ikpt2, isppol
+    real(dp), intent(inout) :: cg_read(:, :)
+    character(len=fnlen) :: cg_file
+    integer :: npw_k2, ios, ii
+    character(len=500) :: message
+
+    integer :: iunit , iband2, ipw, index
+    write(cg_file,'(a,I5.5,".",I1)') trim(self%dtfil%fnametmp_cg),ikpt2,isppol
+    iunit=1000+ikpt2+ikpt2*(isppol-1)
+    npw_k2=self%hdr%npwarr(ikpt2)
+
+    open (unit=iunit, file=cg_file,form='unformatted',status='old',iostat=ios)
+    if(ios /= 0) then
+       write(message,*) " mlwfovlp_pw: file",trim(cg_file), "not found"
+       ABI_ERROR(message)
+    end if
+    !
+    do iband2=1,self%mband
+       do ipw=1,npw_k2*self%nspinor
+          index=ipw+(iband2-1)*npw_k2*self%nspinor
+          read(iunit) (cg_read(ii,index),ii=1,2)
+          !            if(me==0 .and. ikpt2==4)write(300,*)'ipw,iband2,index',ipw,iband2,index,cg_read(:,index)
+          !            if(me==1 .and. ikpt2==4)write(301,*)'ipw,iband2,index',ipw,iband2,index,cg_read(:,index)
+       end do
+    end do
+    close(iunit)
+  end subroutine read_cg
 
 !!****f* m_mlwfovlp/mlwfovlp
 !! NAME
@@ -140,7 +349,7 @@ contains
 !!
 !! SOURCE
 
- subroutine mlwfovlp(crystal, ebands, hdr, atindx1,cg,cprj,dtset,dtfil,eigen,gprimd,kg,&
+ subroutine mlwfovlp2(crystal, ebands, hdr, atindx1,cg,cprj,dtset,dtfil,eigen,gprimd,kg,&
 & mband,mcg,mcprj,mgfftc,mkmem,mpi_enreg,mpw,natom,&
 & nattyp,nfft,ngfft,nkpt,npwarr,nsppol,ntypat,occ,&
 & pawang,pawrad,pawtab,prtvol,psps,rprimd,ucvol,xred)
@@ -204,7 +413,7 @@ contains
 !arrays
  integer :: g1temp(3),ngkpt(3)
  integer,allocatable :: g1(:,:,:),gbound(:,:),icg(:,:)
- integer,allocatable:: iwav(:, :,:,:),kg_k(:,:),ovikp(:,:)
+ integer,allocatable:: kg_k(:,:),ovikp(:,:)
  integer,allocatable :: proj_l(:,:),proj_m(:,:),proj_radial(:,:)
  integer,allocatable :: proj_s_loc(:)
  real(dp) :: real_lattice(3,3)
@@ -228,6 +437,8 @@ contains
  real(dpc),allocatable :: occ_arr(:,:,:),occ_wan(:,:,:)
  real(dp),allocatable :: tdocc_wan(:,:)
 #endif
+
+ type(cg_cprj) :: mywfc
 
 !************************************************************************
 
@@ -345,7 +556,6 @@ contains
  ABI_MALLOC(eigenvalues_w,(max_num_bands,nkpt,nsppol))
  ABI_MALLOC(M_matrix,(max_num_bands,max_num_bands,nntot,nkpt,nsppol))
  ABI_MALLOC(A_matrix,(max_num_bands,mwan,nkpt,nsppol))
- ABI_MALLOC(iwav,(dtset%nspinor, mband,nkpt,nsppol))
 
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -356,8 +566,8 @@ contains
     call write_eigenvalues(filew90_eig,eigen, band_in,  eigenvalues_w, &
          &  nsppol, nkpt, mband,  dtset, rank, master )
  end if !leig
-
-
+!else if( leig . and. lwannierun) then
+!read .eig file
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !4) Calculate overlaps (file seed_name.mmn)
@@ -366,16 +576,26 @@ contains
 !First calculate indices and shift
 !
 !write(std_out,*) "Computes shift for cg"
-
- call compute_shift_gpoints()
+ write(message, '(a,a)' ) ch10,&
+& '   mlwfovlp : compute shifts for g-points '
+ call wrtout(std_out,  message,'COLL')
+!----------------------------------------------------------------------
+!Compute shifts for g points (icg,iwav)
+!(here mband is not used, because shifts are internal variables of abinit)
+!----------------------------------------------------------------------
+ call mywfc%init(cg, cprj, dtset, dtfil, hdr, &
+      & MPI_enreg, nprocs, psps, pawtab, rank)
+!
+!Shifts computed.
 !
  if( lmmn) then
 !
 !  In case of parallelization write out cg for all k-points
 !
    if (nprocs > 1) then
-      call write_cg_and_cprj(dtset, cg, cprj, dtfil, iwav, npwarr, mband, natom, &
-           &nsppol, nkpt,  MPI_enreg, rank, psps, pawtab)
+     ! call write_cg_and_cprj(dtset, cg, cprj, dtfil, iwav, npwarr, mband, natom, &
+     !      &nsppol, nkpt,  MPI_enreg, rank, psps, pawtab)
+      call mywfc%write_cg_and_cprj_tmpfile()
    end if !MPI nprocs>1
 !
 !  End of MPI preliminarities
@@ -383,9 +603,17 @@ contains
 !
    ABI_MALLOC(cm1,(2,mband,mband,nntot,nkpt,nsppol))
    ! this loops over spin internally
-   call mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,&
-&   mkmem,mpi_enreg,mpw,nfft,ngfft,nkpt,nntot,&
-&   npwarr,dtset%nspinor,nsppol,ovikp,dtfil%fnametmp_cg)
+!   call mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,&
+!&   mkmem,mpi_enreg,mpw,nfft,ngfft,nkpt,nntot,&
+!&   npwarr,dtset%nspinor,nsppol,ovikp,dtfil%fnametmp_cg)
+      call mlwfovlp_pw(mywfc,cm1,g1,kg,mband,&
+   &   mkmem,mpi_enreg,mpw,nfft,ngfft,nkpt,nntot,&
+   &   npwarr,dtset%nspinor,nsppol,ovikp, seed_name(isppol))
+
+   !mlwfovlp_pw(mywfc,cm1,g1,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nkpt,nntot,&
+   !     &  npwarr,nspinor,nsppol,ovikp,seed_name)
+
+   
    write(message, '(a,a)' ) ch10,&
 &   '   mlwfovlp : PW part of overlap computed   '
    call wrtout(std_out,  message,'COLL')
@@ -413,6 +641,7 @@ contains
          do intot=1,nntot
            ikpt2= ovikp(ikpt1,intot)
            g1temp(:)=g1(:,ikpt1,intot)
+           ! TODO : smatrix_pawinit: use my_wfc
            call smatrix_pawinit(atindx1,cm2_paw,cprj,ikpt1,ikpt2,isppol,&
 &           g1temp,gprimd,dtset%kpt,mband,mband,mkmem,mpi_enreg,&
 &           natom,dtset%nband,nkpt,dtset%nspinor,nsppol,dtset%ntypat,pawang,pawrad,pawtab,rprimd,&
@@ -442,35 +671,13 @@ contains
    call write_Mmn(filew90_mmn, band_in, cm1, ovikp, g1, M_matrix, &
         &  nkpt, nsppol, nntot, mband, num_bands,  message,&
         & iam_master=(rank==master))
-
    ABI_FREE(cm1)
 
 !
 !  erase temporary files created for parallel runs
 !
    if (nprocs > 1) then
-!
-     if(prtvol>0) then
-       write(message, '(3a)' ) ch10,&
-&       '   mlwfovlp :  Removing temporary files with cg and cprj (PAW)',ch10
-       call wrtout(ab_out,message,'COLL')
-       call wrtout(std_out,  message,'COLL')
-     end if
-!
-!    Just master  node will remove the files
-!
-     if(rank==master) then
-       do isppol=1,nsppol
-         do ikpt=1,nkpt
-           write(wfnname,'(a,I5.5,".",I1)') trim(dtfil%fnametmp_cg),ikpt,isppol
-           call delete_file(wfnname,ierr)
-           if(psps%usepaw==1) then
-             write(wfnname,'(a,I5.5,".",I1)') trim(dtfil%fnametmp_cprj),ikpt,isppol
-             call delete_file(wfnname,ierr)
-           end if
-         end do !ikpt
-       end do !isppol
-     end if
+      call mywfc%remove_tmpfile(prtvol)
    end if !MPI nprocs>1
 !
  end if !lmmn
@@ -481,11 +688,14 @@ contains
 !
  ABI_FREE(ovikp)
  ABI_FREE(g1)
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !5) Calculate initial projections
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
  if(dtset%w90iniprj/=0 )  then
+
+
 !
 !  Set value for lproj (type of projections to be computed)
 !  In PAW, options 5 and 6 are not in use.
@@ -524,11 +734,17 @@ contains
 !  Call mlwfovlp_proj (plane waves part of projections)
 !
    if (dtset%w90iniprj/=6) then ! option 6 not yet in use
-     call mlwfovlp_proj(A_matrix,band_in,cg,cprj,dtset,gprimd,just_augmentation,kg,&
-&     lproj,max_num_bands,mband,mkmem,mpi_enreg,mpw,mwan,natom,&
-&     nattyp,nkpt,npwarr,&
-&     dtset%nspinor,nsppol,ntypat,num_bands,nwan,pawtab,proj_l,proj_m,&
-&     proj_radial,proj_site,proj_x,proj_z,proj_zona,psps,ucvol)
+!     call mlwfovlp_proj(A_matrix,band_in,cg,cprj,dtset,gprimd,just_augmentation,kg,&
+!&     lproj,max_num_bands,mband,mkmem,mpi_enreg,mpw,mwan,natom,&
+!&     nattyp,nkpt,npwarr,&
+!&     dtset%nspinor,nsppol,ntypat,num_bands,nwan,pawtab,proj_l,proj_m,&
+!&     proj_radial,proj_site,proj_x,proj_z,proj_zona,psps,ucvol)
+      call mlwfovlp_proj(A_matrix,band_in,mywfc,dtset,gprimd,just_augmentation,kg,&
+      &     lproj,max_num_bands,mband,mkmem,mpi_enreg,mpw,mwan,natom,&
+      &     nattyp,nkpt,npwarr,&
+      &     dtset%nspinor,nsppol,ntypat,num_bands,nwan,pawtab,proj_l,proj_m,&
+      &     proj_radial,proj_site,proj_x,proj_z,proj_zona,psps,ucvol)
+      
      write(message, '(a,a,a,a)' ) ch10,&
 &     '   mlwfovlp:  mlwfovlp_proj done -',ch10,&
 &     '   Projectors computed.'
@@ -539,7 +755,7 @@ contains
 !
    if (psps%usepaw ==1 .and. ( dtset%w90iniprj>4)) then
      ABI_MALLOC(A_paw,(max_num_bands,mwan,nkpt,nsppol))
-     call mlwfovlp_projpaw(A_paw,band_in,cprj,just_augmentation,max_num_bands,mband,mkmem,&
+     call mlwfovlp_projpaw(A_paw,band_in,mywfc,just_augmentation,max_num_bands,mband,mkmem,&
 &     mwan,natom,dtset%nband,nkpt,&
 &     dtset%nspinor,nsppol,dtset%ntypat,nwan,pawrad,pawtab,&
 &     proj_l,proj_m,proj_radial,proj_site,proj_x,proj_z,proj_zona,psps,&
@@ -582,6 +798,7 @@ contains
       end if
    end if
 
+
  end if !dtset%w90iniprj/=0
 !
 !Deallocations
@@ -603,10 +820,10 @@ contains
     call compute_and_write_unk(wfnname, psps%usepaw, dtset%w90prtunk, &
          & mpi_enreg, ngfft, nsppol, dtset%nspinor,  &
          & nkpt, mband,  mpw, mgfftc, mkmem,  nprocs, rank, npwarr, &
-         & band_in,  dtset, kg, cg, iwav)
+         & band_in,  dtset, kg, mywfc%cg, mywfc%iwav)
  end if !dtset%w90prtunk
+!
 
- ABI_FREE(iwav)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !7) Call to  Wannier90
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -880,56 +1097,9 @@ contains
  ABI_FREE(M_matrix)
  ABI_FREE(A_matrix)
 
+ call mywfc%free()
 contains
 !!***
-
-
-  subroutine compute_shift_gpoints()
-    integer :: ispinor
-    write(message, '(a,a)' ) ch10,&
-         & '   mlwfovlp : compute shifts for g-points '
-    call wrtout(std_out,  message,'COLL')
-    !----------------------------------------------------------------------
-    !Compute shifts for g points (icg,iwav)
-    !(here mband is not used, because shifts are internal variables of abinit)
-    !----------------------------------------------------------------------
-    !write(std_out,*) mpw*dtset%nspinor*mband*mkmem*nsppol
-    ABI_MALLOC(icg,(nsppol,nkpt))
-    icg=0
-    icgtemp=0
-    iwav(:, :,:,:)=0
-    do isppol=1,nsppol
-       do ikpt=1,nkpt
-          !    MPI:cycle over k-points not treated by this node
-          if (nprocs>1 ) then !sometimes we can have just one processor
-             if ( ABS(MPI_enreg%proc_distrb(ikpt,1,isppol)-rank)  /=0) CYCLE
-          end if
-
-          !    write(std_out,*)'rank',rank,'ikpt',ikpt,'isppol',isppol
-          nband_k=dtset%nband(ikpt+(isppol-1)*nkpt)
-          !    write(std_out,*) ikpt+(isppol-1)*nkpt,nkpt
-          npw_k=npwarr(ikpt)
-          do iband=1,nband_k
-             if(iband.gt.mband) then
-                write(message,'(a,3i0)')" mband",iband,mband,nband_k
-                ABI_ERROR(message)
-             end if
-             do ispinor=1, dtset%nspinor
-                iwav(ispinor, iband,ikpt,isppol)= &
-                     &   (ispinor-1)*npw_k + icgtemp
-             end do
-             icgtemp=icgtemp+ npw_k
-          end do ! iband
-          !    icg(isppol,ikpt)=icgtemp
-          !    write(std_out,*) "icg", isppol,ikpt,icg(isppol,ikpt)
-       end do  ! ikpt
-    end do   ! isppol
-    !write(std_out,*) "shift for cg computed"
-    ABI_FREE(icg)
-    !
-    !Shifts computed.
-    print *, "iwav", iwav
-  end subroutine compute_shift_gpoints
 
 
 !!****f* mlwfovlp/read_chkunit
@@ -998,7 +1168,7 @@ contains
 end subroutine read_chkunit
 !!***
 
-end subroutine mlwfovlp
+end subroutine mlwfovlp2
 !!***
 
 !!****f* m_mlwfovlp/mlwfovlp_seedname
@@ -1517,7 +1687,7 @@ end subroutine mlwfovlp_setup
 !!
 !! SOURCE
 
-subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nkpt,nntot,&
+subroutine mlwfovlp_pw(mywfc,cm1,g1,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nkpt,nntot,&
 &  npwarr,nspinor,nsppol,ovikp,seed_name)
 
 !Arguments ------------------------------------
@@ -1525,12 +1695,14 @@ subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nk
  integer,intent(in) :: mband,mkmem,mpw,nfft,nkpt,nntot
  integer,intent(in) :: nspinor,nsppol
  character(len=fnlen) ::  seed_name  !seed names of files containing cg info used in case of MPI
+ type(cg_cprj) :: mywfc
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: g1(3,nkpt,nntot),kg(3,mpw*mkmem),ngfft(18),npwarr(nkpt)
- integer,intent(in) :: iwav(mband,nkpt,nsppol)
+! integer,intent(in) :: iwav(mband,nkpt,nsppol)
  integer,intent(in) :: ovikp(nkpt,nntot)
- real(dp),intent(in) :: cg(2,mpw*nspinor*mband*mkmem*nsppol)
+! real(dp),intent(in) :: cg(2,mpw*nspinor*mband*mkmem*nsppol)
+
  real(dp),intent(out) :: cm1(2,mband,mband,nntot,nkpt,nsppol)
 
 !Local variables-------------------------------
@@ -1562,6 +1734,7 @@ subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nk
  if(nprocs>1) then
    ABI_MALLOC(cg_read,(2,nspinor*mpw*mband))
  end if
+
 
 
 !****************compute intermediate quantities  (index, shifts) ******
@@ -1697,10 +1870,11 @@ subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nk
 !
 !    MPI:cycle over k-points not treated by this node
 !
-      if (nprocs>1 ) then !sometimes we can have just one processor
+
+      if (nprocs>1) then
          if ( ABS(MPI_enreg%proc_distrb(ikpt1,1,isppol)-me)  /=0) CYCLE
       end if
-
+!
      write(message, '(a,i6,a,i6,a,i6)' ) &
 &     '     Processor',me,' computes k-point',ikpt1,' and spin=',isppol
      call wrtout(std_out,  message,'COLL')
@@ -1716,30 +1890,35 @@ subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nk
 !      MPI: if ikpt2 not found in this processor then
 !      read info from an unformatted file
 !
+!        if (nprocs>1) then
+!           if ( ABS(MPI_enreg%proc_distrb(ikpt2,1,isppol)-me)  /=0) then
+!          lfile=.true.
+!          write(cg_file,'(a,I5.5,".",I1)') trim(seed_name),ikpt2,isppol
+!          iunit=1000+ikpt2+ikpt2*(isppol-1)
+!          npw_k2=npwarr(ikpt2)
+!          open (unit=iunit, file=cg_file,form='unformatted',status='old',iostat=ios)
+!          if(ios /= 0) then
+!            write(message,*) " mlwfovlp_pw: file",trim(cg_file), "not found"
+!            ABI_ERROR(message)
+!          end if
+! !
+!          do iband2=1,mband
+!            do ipw=1,npw_k2*nspinor
+!              index=ipw+(iband2-1)*npw_k2*nspinor
+!              read(iunit) (cg_read(ii,index),ii=1,2)
+! !            if(me==0 .and. ikpt2==4)write(300,*)'ipw,iband2,index',ipw,iband2,index,cg_read(:,index)
+! !            if(me==1 .and. ikpt2==4)write(301,*)'ipw,iband2,index',ipw,iband2,index,cg_read(:,index)
+!            end do
+!          end do
+!          close(iunit)
+!        end if
+!     end if
+
        if(nprocs>1) then
-       if ( ABS(MPI_enreg%proc_distrb(ikpt2,1,isppol)-me)  /=0) then
-         lfile=.true.
-         write(cg_file,'(a,I5.5,".",I1)') trim(seed_name),ikpt2,isppol
-         iunit=1000+ikpt2+ikpt2*(isppol-1)
-         npw_k2=npwarr(ikpt2)
-         open (unit=iunit, file=cg_file,form='unformatted',status='old',iostat=ios)
-         if(ios /= 0) then
-           write(message,*) " mlwfovlp_pw: file",trim(cg_file), "not found"
-           ABI_ERROR(message)
-         end if
-!
-         do iband2=1,mband
-           do ipw=1,npw_k2*nspinor
-             index=ipw+(iband2-1)*npw_k2*nspinor
-             read(iunit) (cg_read(ii,index),ii=1,2)
-!            if(me==0 .and. ikpt2==4)write(300,*)'ipw,iband2,index',ipw,iband2,index,cg_read(:,index)
-!            if(me==1 .and. ikpt2==4)write(301,*)'ipw,iband2,index',ipw,iband2,index,cg_read(:,index)
-           end do
-         end do
-         close(iunit)
+          !call mywfc%read_cg(cg_read, ikpt2)
+          call mywfc%read_cg( ikpt2, isppol, cg_read)
        end if
-       end if
-!
+! !
        npw_k=npwarr(ikpt1)
        npw_k2=npwarr(ikpt2)
        do ig3=1,n3
@@ -1776,8 +1955,6 @@ subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nk
                do iband2=1,mband
                  do iband1=1,mband
                    do ispinor=1,nspinor
-!                    igks1= (igk1*nspinor)-(nspinor-ispinor)
-!                    igks2= (igk2*nspinor)-(nspinor-ispinor)
                      igks1= igk1+ (ispinor-1)*npw_k
                      igks2= igk2+ (ispinor-1)*npw_k2
 
@@ -1789,20 +1966,52 @@ subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nk
 !
 ! TODO: this filter should be outside, not inside 1000 loops!!!
                      if(lfile) then
-                       cm1(1,iband1,iband2,intot,ikpt1,isppol)=cm1(1,iband1,iband2,intot,ikpt1,isppol)+ &
-&                       cg(1,igks1+iwav(iband1,ikpt1,isppol))*cg_read(1,index)&
-&                       + cg(2,igks1+iwav(iband1,ikpt1,isppol))*cg_read(2,index)
-                       cm1(2,iband1,iband2,intot,ikpt1,isppol)=cm1(2,iband1,iband2,intot,ikpt1,isppol)+ &
-&                       cg(1,igks1+iwav(iband1,ikpt1,isppol))*cg_read(2,index)&
-&                       - cg(2,igks1+iwav(iband1,ikpt1,isppol))*cg_read(1,index)
-!
+                        ! TODO: hexu: It seems there is only ispinor1=ispinor2.
+                        ! the spinor off-diagonal is not inclucded??
+
+!                        cm1(1,iband1,iband2,intot,ikpt1,isppol)=cm1(1,iband1,iband2,intot,ikpt1,isppol)+ &
+! &                       cg(1,igks1+iwav(iband1,ikpt1,isppol))*cg_read(1,index)&
+! &                       + cg(2,igks1+iwav(iband1,ikpt1,isppol))*cg_read(2,index)
+!                        cm1(2,iband1,iband2,intot,ikpt1,isppol)=cm1(2,iband1,iband2,intot,ikpt1,isppol)+ &
+! &                       cg(1,igks1+iwav(iband1,ikpt1,isppol))*cg_read(2,index)&
+! &                       - cg(2,igks1+iwav(iband1,ikpt1,isppol))*cg_read(1,index)
+! !
+                        cm1(1,iband1,iband2,intot,ikpt1,isppol)=cm1(1,iband1,iband2,intot,ikpt1,isppol)+ &
+                             &   mywfc%cg_elem(1, igk1, ispinor, iband1, ikpt1, isppol) *cg_read(1,index)&
+                             & + mywfc%cg_elem(2, igk1, ispinor, iband1, ikpt1, isppol)*cg_read(2,index)
+                        cm1(2,iband1,iband2,intot,ikpt1,isppol)=cm1(2,iband1,iband2,intot,ikpt1,isppol)+ &
+                             &  mywfc%cg_elem(1, igk1, ispinor, iband1, ikpt1, isppol)*cg_read(2,index)&
+                             &- mywfc%cg_elem(2, igk1, ispinor, iband1, ikpt1, isppol)*cg_read(1,index)
+                              !
+
                      else
-                       cm1(1,iband1,iband2,intot,ikpt1,isppol)=cm1(1,iband1,iband2,intot,ikpt1,isppol)+ &
-&                       cg(1,igks1+iwav(iband1,ikpt1,isppol))*cg(1,igks2+iwav(iband2,ikpt2,isppol))&
-&                       + cg(2,igks1+iwav(iband1,ikpt1,isppol))*cg(2,igks2+iwav(iband2,ikpt2,isppol))
-                       cm1(2,iband1,iband2,intot,ikpt1,isppol)=cm1(2,iband1,iband2,intot,ikpt1,isppol)+ &
-&                       cg(1,igks1+iwav(iband1,ikpt1,isppol))*cg(2,igks2+iwav(iband2,ikpt2,isppol))&
-&                       - cg(2,igks1+iwav(iband1,ikpt1,isppol))*cg(1,igks2+iwav(iband2,ikpt2,isppol))
+!                       cm1(1,iband1,iband2,intot,ikpt1,isppol)=cm1(1,iband1,iband2,intot,ikpt1,isppol)+ &
+!&                       cg(1,igks1+iwav(iband1,ikpt1,isppol))*cg(1,igks2+iwav(iband2,ikpt2,isppol))&
+!&                       + cg(2,igks1+iwav(iband1,ikpt1,isppol))*cg(2,igks2+iwav(iband2,ikpt2,isppol))
+!                       cm1(2,iband1,iband2,intot,ikpt1,isppol)=cm1(2,iband1,iband2,intot,ikpt1,isppol)+ &
+!&                       cg(1,igks1+iwav(iband1,ikpt1,isppol))*cg(2,igks2+iwav(iband2,ikpt2,isppol))&
+!&                       - cg(2,igks1+iwav(iband1,ikpt1,isppol))*cg(1,igks2+iwav(iband2,ikpt2,isppol))
+
+                        cm1(1,iband1,iband2,intot,ikpt1,isppol)=&
+                             & cm1(1,iband1,iband2,intot,ikpt1,isppol) &
+                             & + mywfc%cg_elem(1,  igk1, ispinor,iband1, ikpt1, isppol) &
+                             & *mywfc%cg_elem(1, igk2,  ispinor,iband2, ikpt2, isppol) &
+                             & +mywfc%cg_elem(2, igk1,  ispinor,iband1, ikpt1, isppol) &
+                             & *mywfc%cg_elem(2,  igk2, ispinor,iband2, ikpt2, isppol) 
+                                !& +cg(1,igks1+iwav(iband1,ikpt1,isppol)) &
+                                !& *cg(1,igks2+iwav(iband2,ikpt2,isppol))&
+                                !& + cg(2,igks1+iwav(iband1,ikpt1,isppol)) &
+                                !& *cg(2,igks2+iwav(iband2,ikpt2,isppol))
+                        cm1(2,iband1,iband2,intot,ikpt1,isppol)= &
+                             & cm1(2,iband1,iband2,intot,ikpt1,isppol) &
+                             & + mywfc%cg_elem(1, igks1,  ispinor,iband1, ikpt1, isppol) &
+                             & *mywfc%cg_elem( 2, igks2,  ispinor,iband2, ikpt2, isppol) &
+                             & -mywfc%cg_elem( 2, igks1,  ispinor,iband1, ikpt1, isppol) &
+                             & *mywfc%cg_elem( 1, igks2,  ispinor,iband2, ikpt2, isppol) 
+
+                            ! &                       cg(1,igks1+iwav(iband1,ikpt1,isppol))*cg(2,igks2+iwav(iband2,ikpt2,isppol))&
+                            ! &                       - cg(2,igks1+iwav(iband1,ikpt1,isppol))*cg(1,igks2+iwav(iband2,ikpt2,isppol))
+
                      end if
                    end do !ispinor
                  end do ! iband1
@@ -1881,7 +2090,7 @@ subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nk
 !!
 !! SOURCE
 
- subroutine mlwfovlp_proj(A_matrix,band_in,cg,cprj,dtset,gprimd,just_augmentation,kg,&
+ subroutine mlwfovlp_proj(A_matrix,band_in,mywfc, dtset,gprimd,just_augmentation,kg,&
 &lproj,max_num_bands,mband,mkmem,mpi_enreg,mpw,mwan,natom,nattyp,&
 &nkpt,npwarr,nspinor,&
 &nsppol,ntypat,num_bands,nwan,pawtab,proj_l,proj_m,proj_radial,&
@@ -1900,15 +2109,16 @@ subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nk
  integer,intent(in) :: kg(3,mpw*mkmem),npwarr(nkpt),num_bands(nsppol),nwan(nsppol),proj_l(mband,nsppol)
  integer,intent(in) :: proj_m(mband,nsppol)
  integer,intent(inout)::proj_radial(mband,nsppol)
- real(dp),intent(in) :: cg(2,mpw*nspinor*mband*mkmem*nsppol)
+ !real(dp),intent(in) :: cg(2,mpw*nspinor*mband*mkmem*nsppol)
  real(dp),intent(in) :: gprimd(3,3),proj_site(3,mband,nsppol)
  real(dp),intent(in) :: proj_x(3,mband,nsppol),proj_z(3,mband,nsppol),proj_zona(mband,nsppol)
  complex(dpc),intent(out) :: A_matrix(max_num_bands,mwan,nkpt,nsppol)
 !character(len=fnlen),intent(in) :: filew90_win(nsppol)
  logical,intent(in) :: band_in(mband,nsppol)
  logical,intent(in)::just_augmentation(mwan,nsppol)
- type(pawcprj_type) :: cprj(natom,nspinor*mband*mkmem*nsppol)
+ !type(pawcprj_type) :: cprj(natom,nspinor*mband*mkmem*nsppol)
  type(pawtab_type),intent(in) :: pawtab(psps%ntypat*psps%usepaw)
+ type(cg_cprj), intent(inout) :: mywfc
 
 !Local variables-------------------------------
 !scalars
@@ -1933,6 +2143,7 @@ subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nk
  complex(dpc),allocatable :: gf(:,:),gft_lm(:)
  complex(dpc),allocatable :: ylmc_fac(:,:,:),ylmcp(:)
 
+
 !no_abirules
 !Tables 3.1 & 3.2, User guide
  integer,save :: orb_l_defs(-5:3)=(/2,2,1,1,1,0,1,2,3/)
@@ -1940,6 +2151,7 @@ subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nk
 !&  reshape((/1,0,0,0,0,0,0,1,1,1,0,0,0,0,0,-2,-1,2,1,0,0,0,-1,1,2,-2,-3,3/),(/4,7/))
 
 !************************************************************************
+
 
 !mpi initialization
  spaceComm=MPI_enreg%comm_cell
@@ -1974,11 +2186,7 @@ subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nk
 !
 !      MPI: cycle over kpts not treated by this node
 !
-        if (nprocs>1 ) then !sometimes we can have just one processor
-           if ( ABS(MPI_enreg%proc_distrb(ikpt,1,isppol)-rank)  /=0) CYCLE
-        end if
-
-
+       if (ABS(MPI_enreg%proc_distrb(ikpt,1,isppol)-rank)/=0) CYCLE
 !      write(std_out,'("kpt loop2: ikpt",i3," rank ",i3)') ikpt,rank
 
 !
@@ -2004,11 +2212,7 @@ subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nk
 !
 !      MPI: cycle over kpts not treated by this node
 !
-        if (nprocs>1 ) then !sometimes we can have just one processor
-           if ( ABS(MPI_enreg%proc_distrb(ikpt,1,isppol)-rank)  /=0) CYCLE
-        end if
-
-
+       if (ABS(MPI_enreg%proc_distrb(ikpt,1,isppol)-rank)/=0) CYCLE
 !
        do iband2=1,nwan(isppol)
          jband=0
@@ -2053,6 +2257,13 @@ subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nk
 !
 !  get ylmfac, factor used for rotations and hybrid orbitals
    do isppol=1,nsppol
+      print *, "nproj", nproj(isppol)
+      print *, "isppol", isppol
+      !print *, ylmc_fac(1:lmax2(isppol),1:nproj(isppol),isppol)
+      print *, "lmax, lmax2: ", lmax(isppol),lmax2(isppol)
+      !print *, nproj(isppol),proj_l(:,isppol),proj_m(:,isppol),proj_x(:,:,isppol)
+      !print *, proj_z(:,:,isppol)
+
      call mlwfovlp_ylmfac(ylmc_fac(1:lmax2(isppol),1:nproj(isppol),isppol),lmax(isppol),lmax2(isppol),&
 &     mband,nproj(isppol),proj_l(:,isppol),proj_m(:,isppol),proj_x(:,:,isppol),proj_z(:,:,isppol))
    end do
@@ -2077,11 +2288,10 @@ subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nk
 !
 !      MPI: cycle over kpts not treated by this node
 !
-        if (nprocs>1 ) then !sometimes we can have just one processor
-           if ( ABS(MPI_enreg%proc_distrb(ikpt,1,isppol)-rank)  /=0) CYCLE
+        if(nprocs>1) then
+           if (ABS(MPI_enreg%proc_distrb(ikpt,1,isppol)-rank)/=0) CYCLE
         end if
-
-
+!
        write(message, '(a,i6,a,2i6)' ) &
 &       '   processor',rank,' will compute k-point,spin=',ikpt,isppol
        call wrtout(std_out,  message,'COLL')
@@ -2176,15 +2386,15 @@ subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nk
              amn_tmp(:)=cmplx(0.d0,0.d0)
              do ispinor=1,nspinor
                do ipw=1,npw_k
-!
 !                The case of spinors is tricky, we have nproj =  nwan/2
 !                so we project to spin up and spin down separately, to have at
 !                the end an amn matrix with nwan projections.
 !
 !                idx=ipw*nspinor - (nspinor-ispinor)
-                 idx=ipw+(ispinor-1)*npw_k
-                 amn_tmp(ispinor)=amn_tmp(ispinor)+gf(ipw,iproj)*cmplx(cg(1,idx+icg_shift),-cg(2,idx+icg_shift))
-               end do !ipw
+                 !idx=ipw+(ispinor-1)*npw_k
+                 !amn_tmp(ispinor)=amn_tmp(ispinor)+gf(ipw,iproj)*cmplx(cg(1,idx+icg_shift),-cg(2,idx+icg_shift))
+                 amn_tmp(ispinor)=amn_tmp(ispinor)+gf(ipw,iproj)*conjg(mywfc%cg_elem_complex( ipw, ispinor, iband, ikpt, isppol))
+              end do !ipw
              end do !ispinor
              do ispinor=1,nspinor
                iwan=(iproj*nspinor)- (nspinor-ispinor)
@@ -2265,7 +2475,7 @@ subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nk
      amn2=zero
      ibg=0
      do isppol=1,nsppol
-       do ikpt=1,nkpt
+       do ikpt=1,nkpt   !TODO : hexu: check if it should be mkmem, or should skip if the kpt is not in this node. 
          nband_k=dtset%nband(ikpt+(isppol-1)*nkpt)
          do iband=1,nband_k
 !          write(std_out,*)"amn2",iband,ibg,ikpt
@@ -2290,8 +2500,15 @@ subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nk
                                write(std_out,*) jj1,nwan(isppol)
                                ABI_ERROR("Aborting now")
                              end if
-                             amn2(1,iatom,isppol,ikpt,iband,ispinor,jj1)=cprj(iatom,iband+ibg)%cp(1,ilmn)
-                             amn2(2,iatom,isppol,ikpt,iband,ispinor,jj1)=cprj(iatom,iband+ibg)%cp(2,ilmn)
+                             !amn2(1,iatom,isppol,ikpt,iband,ispinor,jj1)=cprj(iatom,iband+ibg)%cp(1,ilmn)
+                             !amn2(2,iatom,isppol,ikpt,iband,ispinor,jj1)=cprj(iatom,iband+ibg)%cp(2,ilmn)
+                             amn2(1,iatom,isppol,ikpt,iband,ispinor,jj1)= &
+                                  &mywfc%cprj_elem(1, ispinor, iband, ikpt, isppol, iatom, ilmn)
+                             amn2(2,iatom,isppol,ikpt,iband,ispinor,jj1)= &
+                                  &mywfc%cprj_elem(2, ispinor, iband, ikpt, isppol, iatom, ilmn)
+
+                             !amn2(2,iatom,isppol,ikpt,iband,ispinor,jj1)=cprj(iatom,iband+ibg)%cp(2,ilmn)
+
                            end if
                          end if
                        end if
@@ -2392,7 +2609,7 @@ end subroutine mlwfovlp_proj
 !!
 !! SOURCE
 
-subroutine mlwfovlp_projpaw(A_paw,band_in,cprj,just_augmentation,max_num_bands,mband,mkmem,&
+subroutine mlwfovlp_projpaw(A_paw,band_in,mywfc,just_augmentation,max_num_bands,mband,mkmem,&
 &mwan,natom,nband,nkpt,&
 &nspinor,nsppol,ntypat,nwan,pawrad,pawtab,&
 &proj_l,proj_m,proj_radial,proj_site,proj_x,proj_z,proj_zona,psps,&
@@ -2411,7 +2628,8 @@ subroutine mlwfovlp_projpaw(A_paw,band_in,cprj,just_augmentation,max_num_bands,m
  complex(dpc),intent(out) :: A_paw(max_num_bands,mwan,nkpt,nsppol)
  logical,intent(in) :: band_in(mband,nsppol)
  logical,intent(in)::just_augmentation(mwan,nsppol)
- type(pawcprj_type) :: cprj(natom,nspinor*mband*mkmem*nsppol)
+ !type(pawcprj_type) :: cprj(natom,nspinor*mband*mkmem*nsppol)
+ type(cg_cprj), intent(inout) :: mywfc
  type(pawrad_type),intent(in) :: pawrad(ntypat)
  type(pawtab_type),intent(in) :: pawtab(ntypat)
  type(pseudopotential_type),intent(in) :: psps
@@ -2466,6 +2684,7 @@ subroutine mlwfovlp_projpaw(A_paw,band_in,cprj,just_augmentation,max_num_bands,m
  ii=0
  do isppol=1,nsppol
    do ikpt=1,nkpt
+      ! 
      do iband=1,nband(ikpt)
        ii=ii+1
        index(iband,ikpt,isppol)=ii
@@ -2697,12 +2916,19 @@ subroutine mlwfovlp_projpaw(A_paw,band_in,cprj,just_augmentation,max_num_bands,m
              prod=cmplx(0.d0,0.d0)
              do ikpt=1,nkpt
                jband=0
+               ! NOTE: hexu: this doesn't seem right for nspinor=2
+               ! NOTE: also nband size is (nsppol*nkpt)
                do iband=1,nband(ikpt)
                  if(band_in(iband,isppol)) then
                    jband=jband+1
 
-                   prod_real= cprj(iatom,index(iband,ikpt,isppol))%cp(1,ilmn) * int_rad(ln) * wan_lm_fac
-                   prod_imag= cprj(iatom,index(iband,ikpt,isppol))%cp(2,ilmn) * int_rad(ln) * wan_lm_fac
+                   !prod_real= cprj(iatom,index(iband,ikpt,isppol))%cp(1,ilmn) * int_rad(ln) * wan_lm_fac
+                   !prod_imag= cprj(iatom,index(iband,ikpt,isppol))%cp(2,ilmn) * int_rad(ln) * wan_lm_fac
+                   ! FIXME: here ispinor is set to 1
+                   ! There should be a loop over ispinor
+                   prod_real= mywfc%cprj_elem(1, 1, iband, ikpt, isppol, iatom, ilmn ) * int_rad(ln) * wan_lm_fac
+                   prod_imag= mywfc%cprj_elem(2, 1, iband, ikpt, isppol, iatom, ilmn ) * int_rad(ln) * wan_lm_fac
+
                    prod=cmplx(prod_real,prod_imag)
 
                    A_paw(jband,iwan,ikpt,isppol)=A_paw(jband,iwan,ikpt,isppol)+prod
@@ -3369,5 +3595,64 @@ subroutine mlwfovlp_ylmfar(ylmr_fac,lmax,lmax2,mband,nwan,proj_l,proj_m,proj_x,p
 end subroutine mlwfovlp_ylmfar
 !!***
 
-end module m_mlwfovlp
+  subroutine compute_iwav(MPI_enreg, dtset, hdr, iwav, nprocs, rank)
+    type(mpi_type), intent(in) :: MPI_enreg
+    type(dataset_type), intent(in) :: dtset
+    type(hdr_type), intent(in) :: hdr
+    integer, intent(inout) :: iwav(:, :, :, :)
+    ! dimension: (nspinor, mband,nkpt,nsppol))
+    integer, intent(in) :: nprocs, rank
+    character(len=500) :: message
+    integer :: icg(hdr%nsppol, hdr%nkpt)
+    integer :: icgtemp, isppol, ikpt, nband_k, npw_k, iband, ispinor
+
+    write(message, '(a,a)' ) ch10,&
+         & '   mlwfovlp : compute shifts for g-points '
+    call wrtout(std_out,  message,'COLL')
+    !----------------------------------------------------------------------
+    !Compute shifts for g points (icg,iwav)
+    !(here mband is not used, because shifts are internal variables of abinit)
+    !----------------------------------------------------------------------
+    !write(std_out,*) mpw*dtset%nspinor*mband*mkmem*nsppol
+    !ABI_MALLOC(icg,(nsppol,nkpt))
+    icg=0
+    icgtemp=0
+    !ABI_MALLOC(iwav,(dtset%mband,nkpt,nsppol))
+    iwav(:,:,:, :)=0
+    do isppol=1,hdr%nsppol
+       do ikpt=1,hdr%nkpt
+          !    MPI:cycle over k-points not treated by this node
+          if (nprocs>1 ) then !sometimes we can have just one processor
+             if ( ABS(MPI_enreg%proc_distrb(ikpt,1,isppol)-rank)  /=0) CYCLE
+          end if
+
+          !    write(std_out,*)'rank',rank,'ikpt',ikpt,'isppol',isppol
+          nband_k=dtset%nband(ikpt+(isppol-1)*hdr%nkpt)
+          !    write(std_out,*) ikpt+(isppol-1)*nkpt,nkpt
+          npw_k=hdr%npwarr(ikpt)
+          do iband=1,nband_k
+             if(iband.gt. dtset%mband) then
+                write(message,'(a,3i0)')" mband",iband,dtset%mband,nband_k
+                ABI_ERROR(message)
+             end if
+             do ispinor =1, dtset%nspinor
+                iwav(ispinor, iband,ikpt,isppol)= &
+                     !&       (iband-1)*npw_k*dtset%nspinor+icgtemp &
+                     & (ispinor-1)*npw_k +icgtemp
+             end do
+             !icgtemp=icgtemp+ npw_k*dtset%nspinor*nband_k
+             icgtemp = icgtemp + npw_k
+          end do ! iband
+          !    icg(isppol,ikpt)=icgtemp
+          !    write(std_out,*) "icg", isppol,ikpt,icg(isppol,ikpt)
+       end do  ! ikpt
+    end do   ! isppol
+    !write(std_out,*) "shift for cg computed"
+    !
+    !Shifts computed.
+  end subroutine compute_iwav
+
+
+
+end module m_mlwfovlp2
 !!***

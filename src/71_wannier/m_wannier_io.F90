@@ -174,7 +174,7 @@ contains
   subroutine compute_and_write_unk(wfnname, usepaw, w90prtunk, &
        & mpi_enreg, ngfft, nsppol, nspinor,  &
        & nkpt, mband,  mpw, mgfftc, mkmem,  nprocs, rank, npwarr, &
-       & band_in,  dtset, kg, cg)
+       & band_in,  dtset, kg, cg, iwav)
     !TODO split the calculation of unk with writting.
     character(len=fnlen), intent(inout) :: wfnname
     integer ,intent(in) :: usepaw
@@ -184,7 +184,7 @@ contains
     integer, intent(in) :: nprocs, rank, npwarr(:)
     logical, intent(in) :: band_in(:, :)
     type(dataset_type),intent(in) :: dtset
-    integer, intent(in) :: kg(3,mpw*mkmem)
+    integer, intent(in) :: iwav(:, :,:,:),kg(3,mpw*mkmem)
     real(dp),intent(in) :: cg(2,mpw*nspinor*mband*mkmem*nsppol)
 
     integer :: iun_plot
@@ -193,10 +193,10 @@ contains
     integer :: tim_fourwf
     real(dp) :: weight
     integer :: spacing, nband_inc(nsppol)
-    integer,allocatable:: iwav(:,:,:),kg_k(:,:)
+    integer,allocatable:: kg_k(:,:)
     real(dp),allocatable :: denpot(:,:,:), cwavef(:,:), fofgout(:,:),fofr(:,:,:,:)
     integer,allocatable :: gbound(:,:)
-    integer :: n1tmp, n2tmp, n3tmp, jj1, jj2, jj3
+    integer :: n1tmp, n2tmp, n3tmp, jj1, jj2, jj3, ipw, ispinor
     character(len=1000) :: message
 
     if(usepaw==1) then
@@ -276,9 +276,13 @@ contains
           weight = one
           do iband=1,mband
              if(band_in(iband,isppol)) then
-                do ig=1,npw_k*dtset%nspinor
-                   cwavef(1,ig)=cg(1,ig+iwav(iband,ikpt,isppol))
-                   cwavef(2,ig)=cg(2,ig+iwav(iband,ikpt,isppol))
+                ! TODO: check if this is the right order.
+                do ispinor = 1, nsppol
+                   do ipw = 1, npw_k
+                      !do ig=1,npw_k*dtset%nspinor
+                      cwavef(1,ig)=cg(1,ipw+iwav(ispinor, iband,ikpt,isppol))
+                      cwavef(2,ig)=cg(2,ipw+iwav(ispinor, iband,ikpt,isppol))
+                   end do
                 end do
                 tim_fourwf=0
                 call fourwf(cplex,denpot,cwavef,fofgout,fofr,&
@@ -320,12 +324,14 @@ contains
     integer, intent(in) ::  nsppol, nkpt, mband, rank, master
     logical, intent(in) :: band_in(:, :)
     real(dp), intent(in) :: eigen(mband,nkpt,nsppol)
-    real(dp), intent(inout) :: eigenvalues_w(mband,nkpt,nsppol)
+    !real(dp), intent(in) :: eigen(:, :, :)
+    real(dp), intent(inout) :: eigenvalues_w(:, :, :)
     type(dataset_type),intent(in) :: dtset
     character(len=fnlen) :: filew90_eig(nsppol)
     integer :: iun(nsppol), isppol, band_index, iband, jband, nband_k, ikpt
     character(len=1000) :: message
     !  Assign file unit numbers
+    print *, "size:", size(eigen, 1), size(eigen, 2), size(eigen,3)
     if(rank==master) then
        do isppol=1,nsppol
           if (open_file(trim(filew90_eig(isppol)), message, newunit=iun(isppol), & 
@@ -344,7 +350,12 @@ contains
              if(band_in(iband,isppol)) then
                 jband=jband+1
                 !          Writing data
-                if(rank==master) write(iun(isppol), '(2i6,4x,f10.5)' ) jband,ikpt,Ha_eV*eigen(iband, ikpt, isppol)
+                if(rank==master) then
+                   print *, "iband, ikpt, isppol", iband, ikpt, isppol
+                   print *, "eigen:", eigen(iband, ikpt, isppol)
+                   write(iun(isppol), '(2i6,4x,f10.5)' ) &
+                        & jband,ikpt,Ha_eV*eigen(iband, ikpt, isppol)
+                end if
                 !eigen(iband+band_index)
                 !          Finish writing, now save eigenvalues
                 eigenvalues_w(jband,ikpt,isppol)=Ha_eV*eigen(iband, ikpt, isppol)
@@ -495,7 +506,7 @@ contains
    type(dataset_type),intent(in) :: dtset
    type(MPI_type),intent(in) :: mpi_enreg
    type(datafiles_type),intent(in) :: dtfil
-   integer,intent(in):: iwav(:,:,:)
+   integer,intent(in):: iwav(:,:,:,:)
    real(dp),intent(in) :: cg(:, :)
    type(pawcprj_type), intent(in) :: cprj(:, :)
    integer, intent(in) :: rank, nsppol, nkpt, mband, natom
@@ -503,7 +514,7 @@ contains
    type(pseudopotential_type),intent(in) :: psps
    type(pawtab_type),intent(in) :: pawtab(psps%ntypat*psps%usepaw)
 
-   integer :: ikpt, ikpt2, isppol, iun_plot, npw_k, iband, ig, i
+   integer :: ikpt, ikpt2, isppol, iun_plot, npw_k, iband,  i, ipw, ispinor, ig
    integer :: iatom,  itypat, lmn_size, ilmn
    character(len=fnlen) :: wfnname
    character(len=1000) :: message
@@ -529,8 +540,10 @@ contains
          open (unit=iun_plot, file=wfnname,form='unformatted')
          npw_k=npwarr(ikpt)
          do iband=1,mband
-           do ig=1,npw_k*dtset%nspinor
-             write(iun_plot) (cg(i,ig+iwav(iband,ikpt,isppol)),i=1,2)
+            do ispinor = 1, dtset%nspinor
+               do ipw=1,npw_k
+                  write(iun_plot) (cg(i,ipw+iwav(ispinor, iband,ikpt,isppol)),i=1,2)
+               end do
            end do
          end do
          close(iun_plot)

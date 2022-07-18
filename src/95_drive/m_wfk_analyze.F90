@@ -410,11 +410,14 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
 case (WFK_TASK_WANNIER)
    ! Construct Wannier function.
 
-   if (.False.) then
+   if (.True.) then
       call read_wfd()
-      call wfd_run_wannier(cryst, ebands, wfk0_hdr, mpi_enreg, &
-        & ngfftc, ngfftf,  wfd, dtset, dtfil,  &
-        & pawang,  pawrad, pawtab, psps )
+      call wfd_run_wannier(cryst=cryst, ebands=ebands,&
+           & hdr=wfk0_hdr, mpi_enreg=mpi_enreg, &
+           & ngfftc=ngfftc, ngfftf=ngfftf,  wfd=wfd, &
+           & dtset=dtset, dtfil=dtfil,  &
+           & pawang=pawang,  pawrad=pawrad, &
+           &pawtab=pawtab, psps=psps )
    else
       call wfd_mlwfovlp(cryst, ebands, wfk0_hdr, mpi_enreg, &
            & ngfftc, ngfftf,  dtset, dtfil,  &
