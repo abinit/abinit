@@ -681,6 +681,8 @@ subroutine slkmat_print(mat, header, unit, prtvol)
    '  grid dims ........ ', trim(ltoa(mat%processor%grid%dims)), ch10
  call wrtout(unt, msg)
 
+ !if (prtvol > 10) call mat%write(unit)
+
 end subroutine slkmat_print
 !!***
 
