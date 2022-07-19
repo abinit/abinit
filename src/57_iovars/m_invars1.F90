@@ -12,10 +12,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -93,11 +89,6 @@ contains
 !!  npsp=number of pseudopotentials
 !!  pseudo_paths(npsp): List of paths to pseudopotential files as read from input file.
 !!   List of empty strings if we are legacy "files file" mode. Allocated here, caller should free memory.
-!!
-!! PARENTS
-!!      m_common
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -706,11 +697,6 @@ end subroutine invars0
 !!   some of which are initialized here (see invars1.f for more details on the initialized records)
 !!  mx<ab_dimensions>=datatype storing the maximal dimensions. Partly initialized in input.
 !!
-!! PARENTS
-!!      m_common
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine invars1m(dmatpuflag, dtsets, iout, lenstr, mband_upper_, mx,&
@@ -924,11 +910,6 @@ end subroutine invars1m
 !!  dtset=<type datafiles_type>contains all input variables for one dataset,
 !!   some of which are given a default value here.
 !!
-!! PARENTS
-!!      m_invars1
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine indefo1(dtset)
@@ -1135,11 +1116,6 @@ end subroutine indefo1
 !!      mband_upper, occopt, fband, cellcharge
 !!
 !! They should be kept consistent with defaults of the same variables provided to the invars routines.
-!!
-!! PARENTS
-!!      m_invars1
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2082,11 +2058,6 @@ end subroutine invars1
 !!
 !! NOTE that Scalars and static arrays can be initialized directly at the level of the datatype declaration
 !! provided the value does not depend on runtime conditions.
-!!
-!! PARENTS
-!!      m_common
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

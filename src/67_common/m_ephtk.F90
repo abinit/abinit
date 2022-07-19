@@ -11,8 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -69,11 +67,6 @@ contains  !=====================================================
 !!
 !! OUTPUT
 !!   phmodes_skip(natom3) For each mode: 1 to skip the contribution given by this phonon branch else 0
-!!
-!! PARENTS
-!!      m_sigmaph
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -144,11 +137,6 @@ end subroutine ephtk_set_phmodes_skip
 !!     pert_table(1, npert): rank of the processor treating this atomic perturbation.
 !!     pert_table(2, npert): imyp index in my_pinfo table, -1 if this rank is not treating ipert.
 !!
-!! PARENTS
-!!      m_phgamma,m_sigmaph
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine ephtk_set_pertables(natom, my_npert, pert_table, my_pinfo, comm)
@@ -209,11 +197,6 @@ end subroutine ephtk_set_pertables
 !! OUTPUT
 !! qirredtofull(nqibz) = mapping irred to full qpoints
 !! qpttoqpt(2, cryst%nsym, nqbz)) = qpoint index mapping under symops.
-!!
-!! PARENTS
-!!      m_phgamma
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -298,11 +281,6 @@ end subroutine ephtk_mkqtabs
 !! OUTPUT
 !!   gam_now = output gamma matrices multiplied by displacement matrices
 !!
-!! PARENTS
-!!      m_phgamma
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine ephtk_gam_atm2qnu(natom3, displ_red, gam_atm, gam_qnu)
@@ -361,11 +339,6 @@ end subroutine ephtk_gam_atm2qnu
 !! OUTPUT
 !!  gkq_nu(2,nb1,nb2,3*natom)=EPH matrix elements in the phonon-mode basis.
 !!
-!! PARENTS
-!!      m_sigmaph
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine ephtk_gkknu_from_atm(nb1, nb2, nk, natom, gkq_atm, phfrq, displ_red, gkq_nu)
@@ -418,11 +391,6 @@ end subroutine ephtk_gkknu_from_atm
 !!
 !! INPUTS
 !!  dtset<dataset_type>=All input variables for this dataset.
-!!
-!! PARENTS
-!!      m_eph_driver,m_rta
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

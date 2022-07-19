@@ -267,10 +267,6 @@ contains  !=====================================================
 !! OUTPUT
 !!  Only writing.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine phdos_print(PHdos, fname)
@@ -393,10 +389,6 @@ end subroutine phdos_print
 !! OUTPUT
 !!  Only writing.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine phdos_print_debye(PHdos, ucvol)
@@ -495,10 +487,6 @@ end subroutine phdos_print_debye
 !!
 !! OUTPUT
 !!  Only writing.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -607,10 +595,6 @@ end subroutine phdos_print_thermo
 !! INPUTS
 !! PHdos= container object for phonon DOS
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine phdos_free(PHdos)
@@ -646,11 +630,6 @@ end subroutine phdos_free
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_phonons
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -741,11 +720,6 @@ end subroutine phdos_init
 !!   In input: min and max value of frequency mesh. Used only if minmax(2) > minmax(1)
 !!    else values are taken from ifc%omega_minmax (computed from ab-initio mesh + pad)
 !!   In output: min and max frequency obtained after interpolating the IFCs on the dense q-mesh dos_ngqpt
-!!
-!! PARENTS
-!!      anaddb,m_eph_driver,m_tdep_phdos
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1261,11 +1235,6 @@ end subroutine mkphdos
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      anaddb
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine zacharias_supercell_make(Crystal, Ifc, ntemper, rlatt, tempermin, temperinc, thm_scells)
@@ -1435,11 +1404,6 @@ end subroutine zacharias_supercell_make
 !!   thm_scells = array of configurations with thermalized supercells
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_generate_training_set
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1630,11 +1594,6 @@ end subroutine thermal_supercell_make
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      anaddb,m_generate_training_set
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine thermal_supercell_free(nscells, thm_scells)
@@ -1668,11 +1627,6 @@ end subroutine thermal_supercell_free
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      anaddb
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1717,10 +1671,6 @@ end subroutine zacharias_supercell_print
 !! OUTPUT
 !!
 !! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1768,10 +1718,6 @@ end subroutine thermal_supercell_print
 !!
 !! NOTES
 !!  Frequencies are in eV, DOS are in states/eV.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1856,11 +1802,6 @@ end subroutine phdos_ncwrite
 !!
 !! OUTPUT
 !!  Only writing.
-!!
-!! PARENTS
-!!      anaddb
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2159,11 +2100,6 @@ end subroutine mkphbs
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_phonons
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine phdos_calc_vsound(eigvec,gmet,natom,phfrq,qphon,speedofsound)
@@ -2226,11 +2162,6 @@ end subroutine phdos_calc_vsound
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_phonons
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine phdos_print_vsound(iunit,ucvol,speedofsound)
@@ -2290,10 +2221,6 @@ end subroutine phdos_print_vsound
 !!
 !! OUTPUT
 !!   to file only
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2451,11 +2378,6 @@ end subroutine phdos_print_msqd
 !! OUTPUT
 !!  Only writing
 !!
-!! PARENTS
-!!      m_phonons
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine phonons_ncwrite(ncid,natom,nqpts,qpoints,weights,phfreq,phdispl_cart)
@@ -2530,11 +2452,6 @@ end subroutine phonons_ncwrite
 !!
 !! OUTPUT
 !!  Only writing
-!!
-!! PARENTS
-!!      m_phonons
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2630,11 +2547,6 @@ end subroutine phonons_write_phfrq
 !!
 !! OUTPUT
 !!  Only writing
-!!
-!! PARENTS
-!!      m_phonons
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2756,11 +2668,6 @@ end subroutine phonons_write_xmgrace
 !! OUTPUT
 !!  Only writing
 !!
-!! PARENTS
-!!      m_phonons
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine phonons_write_gnuplot(prefix, natom, nqpts, qpts, phfreqs, qptbounds)
@@ -2881,11 +2788,6 @@ end subroutine phonons_write_gnuplot
 !!
 !! OUTPUT
 !!  Only writing.
-!!
-!! PARENTS
-!!      m_eph_driver
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3041,11 +2943,6 @@ end subroutine ifc_mkphbs
 !! symrel(3,3,nsym)=matrices of the group symmetries (real space)
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_phonons
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3265,11 +3162,6 @@ end subroutine dfpt_symph
 !! NOTES
 !! freeze_displ could be determined automatically from a temperature and the phonon frequency,
 !! as the average displacement of the mode with a Bose distribution.
-!!
-!! PARENTS
-!!      m_phonons
-!!
-!! CHILDREN
 !!
 !! SOURCE
 !!

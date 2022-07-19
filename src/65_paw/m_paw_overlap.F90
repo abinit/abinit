@@ -90,11 +90,6 @@ CONTAINS  !=====================================================================
 !! This routine assumes that the cprj are not explicitly ordered by
 !! atom type.
 !!
-!! PARENTS
-!!      m_orbmag
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine overlap_k1k2_paw(cprj_k1,cprj_k2,dk,gprimd,k1k2_paw,lmn2max,lmnsize,&
@@ -207,11 +202,6 @@ CONTAINS  !=====================================================================
 !!
 !! NOTES
 !!  The mpi part will work with mlwfovlp but not for berryphase_new
-!!
-!! PARENTS
-!!      m_mlwfovlp
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -620,11 +610,6 @@ CONTAINS  !=====================================================================
 !! This routine assumes that the cprj are not explicitly ordered by
 !! atom type.
 !!
-!! PARENTS
-!!      m_berryphase_new,m_cgwf
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine smatrix_k_paw(cprj_k,cprj_kb,dtefield,kdir,kfor,mband,natom,smat_k_paw,typat)
@@ -715,11 +700,6 @@ CONTAINS  !=====================================================================
 !! NOTES
 !! this function computes the on-site data for the PAW version of
 !! <u_nk|u_mk+b>, that is, two Bloch vectors at two different k points.
-!!
-!! PARENTS
-!!      m_berryphase_new,m_paw_overlap
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -856,11 +836,6 @@ CONTAINS  !=====================================================================
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_berryphase_new,m_paw_overlap
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

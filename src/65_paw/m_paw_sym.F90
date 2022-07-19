@@ -82,12 +82,6 @@ CONTAINS  !=====================================================================
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_chi0,m_cohsex,m_prep_calc_ucrpa,m_sigc,m_sigx
-!!
-!! CHILDREN
-!!      get_bz_item,get_ibz_item,pawcprj_copy
-!!
 !! SOURCE
 
 subroutine paw_symcprj(ik_bz,nspinor,nband_k,Cryst,Kmesh,Pawtab,Pawang,Cprj_bz)
@@ -259,12 +253,6 @@ end subroutine paw_symcprj
 !!
 !! NOTES
 !!  Derivatives are not symmetrized.
-!!
-!! PARENTS
-!!      m_exc_build
-!!
-!! CHILDREN
-!!      get_bz_item,get_ibz_item,pawcprj_copy
 !!
 !! SOURCE
 

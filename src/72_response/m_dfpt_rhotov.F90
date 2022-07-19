@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -106,11 +102,6 @@ contains
 !! SIDE EFFECTS
 !!  ==== if optres==1
 !!    vtrial1(cplex*nfft,nspden)= new value of 1st-order trial potential
-!!
-!! PARENTS
-!!      m_dfpt_lw,m_dfpt_scfcv,m_dfptnl_loop
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -409,11 +400,6 @@ end subroutine dfpt_rhotov
 !!  for nspden=4:
 !!  For cplex=1, the potential is defined as (V_upup,V_dndn,Re[V_updn],Im[V_updn])
 !!  For cplex=2, the definition is (V_upup,V_dndn,V_updn,i.V_updn)
-!!
-!! PARENTS
-!!      m_dfpt_rhotov
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

@@ -14,11 +14,6 @@
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!  dfpt_looppert
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -189,12 +184,6 @@ CONTAINS
 !! OUTPUT
 !! eigr2d<eigr2d_t>=the eigr2d_t datatype
 !!
-!! PARENTS
-!!      m_dfpt_looppert,m_eig2d
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine eigr2d_init(eig2nkq,eigr2d,mband,nsppol,nkpt,natom)
@@ -233,12 +222,6 @@ end subroutine eigr2d_init
 !!  ncid =NC file handle
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_dfpt_looppert,m_eig2d
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -321,12 +304,6 @@ end subroutine eigr2d_ncwrite
 !!  Deallocate the dynamic arrays in the ebands_t type.
 !!  (only deallocate)
 !!
-!! PARENTS
-!!      m_dfpt_looppert,m_eig2d
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine eigr2d_free(eigr2d)
@@ -367,12 +344,6 @@ end subroutine eigr2d_free
 !! fan2d<fan_t>=the fan_t datatype
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
-!!      m_eig2d
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -417,12 +388,6 @@ end subroutine fan_init
 !!
 !! SIDE EFFECTS
 !!
-!! PARENTS
-!!      m_dfpt_looppert,m_eig2d,m_gkk
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine gkk_init(gkk,gkk2d,mband,nsppol,nkpt,natom,ncart)
@@ -461,12 +426,6 @@ end subroutine gkk_init
 !!  ncid =NC file handle
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_eig2d
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -551,12 +510,6 @@ end subroutine fan_ncwrite
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_dfpt_looppert,m_eig2d,m_gkk
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine gkk_ncwrite(gkk2d,iqpt,wtq,ncid)
@@ -639,12 +592,6 @@ end subroutine gkk_ncwrite
 !!  Deallocate the dynamic arrays in the fan_t type.
 !!  (only deallocate)
 !!
-!! PARENTS
-!!      m_eig2d
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine fan_free(fan2d)
@@ -681,12 +628,6 @@ end subroutine fan_free
 !! OUTPUT
 !!  Deallocate the dynamic arrays in the gkk_t type.
 !!  (only deallocate)
-!!
-!! PARENTS
-!!      m_dfpt_looppert,m_eig2d,m_gkk
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -784,12 +725,6 @@ end subroutine gkk_free
 !!            second-order eigenvalues: E^{(2),diag}_{k,q,j}.
 !!  eigbrd(2,mband*nsppol,nkpt_rbz,3,npert,3,npert)= OPTIONAL, array containing the
 !!            electron lifetimes.
-!!
-!! PARENTS
-!!      m_dfpt_looppert
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1262,12 +1197,6 @@ end subroutine eig2stern
 !!            second-order eigenvalues: E^{(2),diag}_{k,q,j}.
 !!  eigbrd(2,mband*nsppol,nkpt_rbz,3,npert,3,npert)= OPTIONAL, array containing the
 !!            electron lifetimes.
-!!
-!! PARENTS
-!!      m_respfn_driver
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1829,12 +1758,6 @@ end subroutine eig2tot
 !! OUTPUTS
 !!  to file
 !!
-!! PARENTS
-!!      m_dfpt_looppert,m_eig2d
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine outbsd(bdeigrf,dtset,eig2nkq,mpert,nkpt_rbz,unitout)
@@ -1906,12 +1829,6 @@ end subroutine outbsd
 !!
 !! OUTPUT
 !! smdfunc(mband,mband) : Smeared delta function weight corresponding to \delta(\epsilon_{n,k} - \epsilon_{n',k+Q})
-!!
-!! PARENTS
-!!      m_eig2d
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -2018,12 +1935,6 @@ end subroutine smeared_delta
 !!
 !! OUTPUT
 !!  eigen_corr(mband*nkpt*nsppol)= T=0 correction to the electronic eigenvalues, due to the Fan term.
-!!
-!! PARENTS
-!!      m_respfn_driver
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 

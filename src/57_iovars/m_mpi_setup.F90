@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -82,13 +78,6 @@ contains
 !!
 !! SIDE EFFECTS
 !!   mpi_enregs=information about MPI parallelization
-!!
-!! PARENTS
-!!      abinit
-!!
-!! CHILDREN
-!!      abi_linalg_finalize,abi_linalg_init,abi_xhegv,abi_xorthonormalize
-!!      wrtout,xmpi_bcast,xmpi_comm_free
 !!
 !! SOURCE
 
@@ -1054,13 +1043,6 @@ end subroutine mpi_setup
 !!  dtset%np_slk   = number of processors used in ScaLapack routines
 !!  dtset%gpu_linalg_limit=threshold activating Linear Algebra on GPU
 !!
-!! PARENTS
-!!      m_mpi_setup
-!!
-!! CHILDREN
-!!      abi_linalg_finalize,abi_linalg_init,abi_xhegv,abi_xorthonormalize
-!!      wrtout,xmpi_bcast,xmpi_comm_free
-!!
 !! SOURCE
 
  subroutine finddistrproc(dtsets,filnam,idtset,iexit,mband,mpi_enreg,ndtset_alloc,tread)
@@ -2006,13 +1988,6 @@ end subroutine finddistrproc
 !!   This indicator is returned in acc_kgb
 !! This routine can be used to find the optimal values of np_slk parameter (ScaLapack)
 !!   and wheter or not we should use Magma for Linear Algebra in lobpcgwf
-!!
-!! PARENTS
-!!      m_mpi_setup
-!!
-!! CHILDREN
-!!      abi_linalg_finalize,abi_linalg_init,abi_xhegv,abi_xorthonormalize
-!!      wrtout,xmpi_bcast,xmpi_comm_free
 !!
 !! SOURCE
 

@@ -22,8 +22,6 @@
 !!  - Check spin and MPI-parallelism. Can we distributed nsppol?
 !!  - Rewrite qcache from scratch, keep only the IBZ of the present iteration
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -576,11 +574,6 @@ contains
 !!   path=DVDB Filename.
 !!   comm=MPI communicator.
 !!
-!! PARENTS
-!!      eph,m_dvdb,mrgdv
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 type(dvdb_t) function dvdb_new(path, comm) result(new)
@@ -805,11 +798,6 @@ end function dvdb_new
 !!     found in the file. In this case a Fourier interpolation is required.
 !!   comm=MPI communicator
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
-!!
 !! SOURCE
 
 subroutine dvdb_open_read(db, ngfft, comm)
@@ -892,10 +880,6 @@ end subroutine dvdb_open_read
 !! FUNCTION
 !! Close the file
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine dvdb_close(db)
@@ -926,10 +910,6 @@ end subroutine dvdb_close
 !!
 !! FUNCTION
 !! Close the file and release the memory allocated.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -994,10 +974,6 @@ end subroutine dvdb_free
 !!
 !! OUTPUT
 !!  Only printing.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1149,10 +1125,6 @@ end subroutine dvdb_print
 !!     pinfo(2, ip) gives the `ipert` index of the ip-th perturbation.
 !!     pinfo(3, ip) gives `pertcase`=idir + (ipert-1)*3
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 integer function dvdb_get_pinfo(db, iqpt, cplex, pinfo) result(nperts)
@@ -1211,10 +1183,6 @@ end function dvdb_get_pinfo
 !!  ierr=Non-zero if error.
 !!  v1scf(cplex*nfft, nspden)=DFT potential associated to (idir, ipert, iqpt).
 !!  msg=String with error message if ierr /= 0.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1352,10 +1320,6 @@ end function dvdb_read_onev1
 !!  cplex=1 if real, 2 if complex.
 !!  v1scf(cplex, nfft, nspden, 3*natom)= v1scf potentials on the real-space FFT mesh for the 3*natom perturbations.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine dvdb_readsym_allv1(db, iqpt, cplex, nfft, ngfft, v1scf, comm)
@@ -1468,10 +1432,6 @@ end subroutine dvdb_readsym_allv1
 !!  cplex=1 if real, 2 if complex.
 !!  v1scf(cplex, nfft, nspden, db%my_npert)= v1scf potentials on the real-space FFT mesh
 !!   for the db%my_npert perturbations treated by this MPI rank.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1668,10 +1628,6 @@ end subroutine dvdb_readsym_qbz
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 type(qcache_t) function qcache_new(nqpt, nfft, ngfft, mbsize, natom3, my_npert, nspden) result(qcache)
@@ -1749,10 +1705,6 @@ end function qcache_new
 !!  comm=MPI communicator
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1846,10 +1798,6 @@ end subroutine dvdb_qcache_read
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine dvdb_qcache_update_from_file(db, nfft, ngfft, ineed_qpt, comm)
@@ -1931,10 +1879,6 @@ end subroutine dvdb_qcache_update_from_file
 !! FUNCTION
 !!  Free dynamic memory.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine qcache_free(qcache)
@@ -1972,10 +1916,6 @@ end subroutine qcache_free
 !!
 !! FUNCTION
 !!  Print info on q-cache states and reset counters.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2023,10 +1963,6 @@ end subroutine qcache_report_stats
 !! FUNCTION
 !!  Return the (allocated) size of the cache in Mb.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 pure real(dp) function qcache_get_mbsize(qcache) result(mbsize)
@@ -2069,10 +2005,6 @@ end function qcache_get_mbsize
 !!
 !! OUTPUTS
 !!  msg=Warning message if ierr /= 0
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2152,11 +2084,6 @@ end function qcache_make_room
 !!  v1scf(cplex*nfft,nspden,3*cryst%natom)=Array with first order potentials.
 !!    in input: filled with the irreducible potentials (corresponding pflag set to 1)
 !!    output: Contains full set of perturbations.
-!!
-!! PARENTS
-!!      m_dvdb
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2397,11 +2324,6 @@ end subroutine v1phq_complete
 !!  itirev_eq
 !!  g0_qpt(3)
 !!
-!! PARENTS
-!!      m_dvdb
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine find_symeq(cryst, idir, ipert, symq, pflag, ipert_eq, isym_eq, itirev_eq, g0_qpt, allow_g0)
@@ -2487,11 +2409,6 @@ end subroutine find_symeq
 !!
 !! OUTPUT
 !!  v1r_qbz(cplex*nfft,nspden,3*cryst%natom)=Array with first order potentials in real space for the q-point in the BZ
-!!
-!! PARENTS
-!!      m_dvdb
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2640,11 +2557,6 @@ end subroutine v1phq_rotate
 !! OUTPUT
 !!  v1r_qbz(cplex*nfft,nspden,3*cryst%natom)=Array with first order potentials in real space for the q-point in the BZ
 !!
-!! PARENTS
-!!      m_dvdb
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine v1phq_rotate_myperts(cryst, qpt_ibz, isym, itimrev, g0q, ngfft, cplex, nfft, nspden, &
@@ -2772,11 +2684,6 @@ end subroutine v1phq_rotate_myperts
 !! SIDE EFFECTS
 !!  v1r(cplex*nfft,nspden)=Array with first order potentials in real space. Symmetrized in output.
 !!
-!! PARENTS
-!!      m_dvdb
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine v1phq_symmetrize(cryst, idir, ipert, symq, ngfft, cplex, nfft, nspden, nsppol ,mpi_enreg, v1r)
@@ -2849,11 +2756,6 @@ end subroutine v1phq_symmetrize
 !! FUNCTION
 !!
 !! INPUTS
-!!
-!! PARENTS
-!!      m_dvdb
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2983,10 +2885,6 @@ end subroutine rotate_fqg
 !!  nfft=Number of fft-points treated by this processors
 !!  ngfft(18)=contain all needed information about 3D FFT
 !!  comm_rpt = MPI communicator used to distribute R-lattice points.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3522,11 +3420,6 @@ end subroutine prepare_ftinterp
 !! OUTPUT
 !!  ov1r(2*nfft, nspden, my_npert)=Interpolated DFPT potentials at the given q-point (periodic part)
 !!
-!! PARENTS
-!!      m_dvdb
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
@@ -3730,10 +3623,6 @@ end subroutine dvdb_ftinterp_qpt
 !! OUTPUT
 !!  ov1r(2*nfft, nspden, my_npert)=Interpolated DFPT potentials at the given q-point.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine dvdb_get_ftqbz(db, cryst, qbz, qibz, indq2ibz, cplex, nfft, ngfft, v1scf, comm)
@@ -3932,10 +3821,6 @@ end subroutine dvdb_get_ftqbz
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine dvdb_ftqcache_build(db, nfft, ngfft, nqibz, qibz, mbsize, qselect_ibz, itreatq, comm)
@@ -4035,10 +3920,6 @@ end subroutine dvdb_ftqcache_build
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine dvdb_ftqcache_update_from_ft(db, nfft, ngfft, nqibz, qibz, ineed_qpt, comm)
@@ -4126,11 +4007,6 @@ end subroutine dvdb_ftqcache_update_from_ft
 !!
 !! OUTPUT
 !!  v1scf_rpt(2,nrpt,nfft,nspden)
-!!
-!! PARENTS
-!!      m_dvdb
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -4474,11 +4350,6 @@ end subroutine dvdb_get_v1scf_rpt
 !! OUTPUT
 !!  v1scf_qpt(2*nfft, nspden)=Interpolated DFPT potentials at the given q-point.
 !!
-!! PARENTS
-!!      m_dvdb
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine dvdb_get_v1scf_qpt(db, cryst, qpt, nfft, ngfft, nrpt, nspden, &
@@ -4595,10 +4466,6 @@ end subroutine dvdb_get_v1scf_qpt
 !! OUTPUT
 !!  v1scf(2, nfft, nspden, 3*natom)= v1scf potentials on the real-space FFT mesh for the 3*natom perturbations.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine dvdb_interpolate_v1scf(db, cryst, qpt, ngqpt, nqshift, qshift, &
@@ -4666,10 +4533,6 @@ end subroutine dvdb_interpolate_v1scf
 !!  [qtol]=Optional tolerance for q-point comparison.
 !!         For each reduced direction the absolute difference between the coordinates must be less that qtol
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 integer pure function dvdb_findq(db, qpt, qtol) result(iqpt)
@@ -4718,10 +4581,6 @@ end function dvdb_findq
 !! OUTPUT
 !!  iq2dvdb(nqpt): index of q-points in dvdb%qpts. Set to -1 if not found
 !!  ierr= Number of points **not** found
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -4774,10 +4633,6 @@ end function dvdb_find_qpts
 !!      pert_table(2, npert): imyp index in my_pinfo table, -1 if this rank is not treating ipert.
 !!  comm_pert=MPI communicator used to distribute the 3*natom perturbations
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine dvdb_set_pert_distrib(self, my_npert, natom3, my_pinfo, pert_table, comm_pert)
@@ -4824,11 +4679,6 @@ end subroutine dvdb_set_pert_distrib
 !!
 !! SIDE EFFECTS
 !!   db<type(dvdb_t)>: modifies db%current_fpos.
-!!
-!! PARENTS
-!!      m_dvdb
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -4918,11 +4768,6 @@ end subroutine dvdb_seek
 !!   Rewind the file and move to the first header. Needed only if dvdb%iomode==IO_MODE_FORTRAN
 !!   Return exit code and error message in msg if ierr != 0
 !!
-!! PARENTS
-!!      m_dvdb
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 integer function dvdb_rewind(db, msg) result(ierr)
@@ -4966,10 +4811,6 @@ end function dvdb_rewind
 !!
 !! NOTES
 !!  Because hdr_skip rewinds the file and I'm not gonna change that ugly code.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -5022,10 +4863,6 @@ end function my_hdr_skip
 !!
 !! OUTPUT
 !!  npert_miss = Number of missing perturbations.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -5194,11 +5031,6 @@ end subroutine dvdb_list_perts
 !!
 !! SIDE EFFECTS
 !!   v1files=List of file names to merge. This list could be changed if POT1 files in netcdf format are found.
-!!
-!! PARENTS
-!!      mrgdv
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -5377,11 +5209,6 @@ end subroutine dvdb_merge_files
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_dvdb
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 pure subroutine calc_eiqr(qpt, nrpt, rpt, eiqr)
@@ -5424,10 +5251,6 @@ end subroutine calc_eiqr
 !!
 !! OUTPUT
 !!   errmsg=String with error message if ierr /= 0
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -5489,11 +5312,6 @@ end function dvdb_check_fform
 !!
 !! OUTPUT
 !!  Only writing.
-!!
-!! PARENTS
-!!      mrgdv
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -5629,11 +5447,6 @@ end subroutine dvdb_test_v1rsym
 !!
 !! OUTPUT
 !!  Only writing.
-!!
-!! PARENTS
-!!      mrgdv
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -5869,10 +5682,6 @@ end subroutine dvdb_test_v1complete
 !!
 !! OUTPUT
 !!  Only writing.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -6253,11 +6062,6 @@ end subroutine dvdb_write_v1qavg
 !! OUTPUT
 !!  Only writing.
 !!
-!! PARENTS
-!!      mrgdv
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine dvdb_test_ftinterp(dvdb_filepath, rspace_cell, symv1, dvdb_ngqpt, dvdb_add_lr, dvdb_qdamp, &
@@ -6486,10 +6290,6 @@ end subroutine dvdb_test_ftinterp
 !!
 !! OUTPUT
 !!  v1r_lr = dipole potential
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -6847,10 +6647,6 @@ end subroutine dvdb_load_efield
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -7290,10 +7086,6 @@ end subroutine dvdb_interpolate_and_write
 !!
 !! OUTPUT
 !!  Only writing
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

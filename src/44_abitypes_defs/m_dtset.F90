@@ -1053,11 +1053,6 @@ CONTAINS  !=====================================================================
 !!   |   must be input for occopt==0 or 2,
 !!   |   will be an output for occopt==1 or 3 ... 8
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      chkvars_in_string,inupper
-!!
 !! SOURCE
 
 subroutine dtset_initocc_chkneu(dtset, nelectjell, occopt)
@@ -1352,11 +1347,6 @@ end subroutine dtset_initocc_chkneu
 !!
 !! OUTPUT
 !!  dtout <type(dataset_type)>
-!!
-!! PARENTS
-!!      chkinp,dfpt_looppert,driver,gwls_hamiltonian,m_io_kss
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2259,12 +2249,6 @@ end function dtset_copy
 !! SIDE EFFECTS
 !!  dtset <type(dataset_type)>=free all allocated allocatable.
 !!
-!! PARENTS
-!!      m_xchybrid
-!!
-!! CHILDREN
-!!      chkvars_in_string,inupper
-!!
 !! SOURCE
 
 subroutine dtset_free(dtset)
@@ -2370,11 +2354,6 @@ end subroutine dtset_free
 !!  treatment of BZ sampling and we don't want to waste memory with large and useless arrays
 !!  especially if very dense k-meshes are used.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      chkvars_in_string,inupper
-!!
 !! SOURCE
 
 subroutine dtset_free_nkpt_arrays(dtset)
@@ -2418,12 +2397,6 @@ end subroutine dtset_free_nkpt_arrays
 !! OUTPUT
 !! iget=number of the dataset from which the value must be get, 0 if the data should not be got from another dataset
 !! miximage(mxnimage,mxnimage)=coefficients of mixing of the images of the old dataset, to initialize the new dataset images
-!!
-!! PARENTS
-!!      m_driver
-!!
-!! CHILDREN
-!!      chkvars_in_string,inupper
 !!
 !! SOURCE
 
@@ -2501,11 +2474,6 @@ end subroutine find_getdtset
 !!  npert=number of effective pertubation done in looper3
 !!  nkpt_rbz= nkpt in the reduced brillouin zone
 !!  nband_rbz= nband in the reduced brillouin zone
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      chkvars_in_string,inupper
 !!
 !! SOURCE
 
@@ -2816,11 +2784,6 @@ end subroutine dtset_get_npert_rbz
 !!  * if (dtset%iprcel >= 140 and <=170) depends on the periodicity modulo 10 of istep and iprcel
 !!  * otherwise FALSE
 !!
-!! PARENTS
-!!      prcref,prcref_PMA,vtorho
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 logical function dtset_testsusmat(dtset, dielop, dielstrt, istep) result(compute)
@@ -2858,10 +2821,6 @@ end function dtset_testsusmat
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2909,10 +2868,6 @@ end function dtset_get_crystal
 !!  Build (linear) mesh of K * temperatures from tsmesh(1:3) = [start, step, num]
 !!  Return number of temperatures (ntemp) and ktmesh array.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine dtset_get_ktmesh(dtset, ntemp, ktmesh)
@@ -2958,12 +2913,6 @@ end subroutine dtset_get_ktmesh
 !! OUTPUT
 !!  dtsets(0:ndtset_alloc)=contains all input variables, some of which are given a value here.
 !!   The dataset with number 0 should NOT be modified in the present routine.
-!!
-!! PARENTS
-!!      m_common
-!!
-!! CHILDREN
-!!      chkvars_in_string,inupper
 !!
 !! SOURCE
 
@@ -3199,12 +3148,6 @@ end subroutine macroin
 !!  dtsets(0:ndtset_alloc)=contains all input variables, some of which are given a value here.
 !!   The dataset with number 0 should NOT be modified in the present routine.
 !!
-!! PARENTS
-!!      m_common
-!!
-!! CHILDREN
-!!      chkvars_in_string,inupper
-!!
 !! SOURCE
 
 subroutine macroin2(dtsets, ndtset_alloc)
@@ -3261,12 +3204,6 @@ end subroutine macroin2
 !!   the string (with upper case) from the input file, to which the XYZ data is (possibly) appended
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      abinit,m_multibinit_driver,m_multibinit_manager
-!!
-!! CHILDREN
-!!      chkvars_in_string,inupper
 !!
 !! SOURCE
 

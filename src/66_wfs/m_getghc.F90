@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -116,13 +112,6 @@ contains
 !!
 !! SIDE EFFECTS
 !!  cwaveprj(natom,my_nspinor*(1+cpopt)*ndat)= wave function projected on nl projectors (PAW only)
-!!
-!! PARENTS
-!!      m_cgwf,m_cgwf_cprj,m_chebfi,m_dfpt_cgwf,m_dft_energy,m_getghc
-!!      m_gwls_hamiltonian,m_ksdiago,m_lobpcgwf_old,m_orbmag,m_rf2,m_rmm_diis
-!!
-!! CHILDREN
-!!      getghc,mkl_set_num_threads,omp_set_nested
 !!
 !! SOURCE
 
@@ -929,12 +918,6 @@ end subroutine getghc
 !! this code is a copied, simplied version of getghc_mGGA (see below) and should eventually be
 !! integrated into that code, to simplify maintenance
 !!
-!! PARENTS
-!!      m_dfpt_vtowfk,m_getghc,m_vtowfk
-!!
-!! CHILDREN
-!!      getghc,mkl_set_num_threads,omp_set_nested
-!!
 !! SOURCE
 
 subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpt,mgfft,mpi_enreg,&
@@ -1170,12 +1153,6 @@ end subroutine getghc_nucdip
 !!  ghc_mGGA(2,npw_k*my_nspinor*ndat)=metaGGA contribution to <G|H|C>
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
-!!      m_getghc
-!!
-!! CHILDREN
-!!      getghc,mkl_set_num_threads,omp_set_nested
 !!
 !! SOURCE
 
@@ -1473,12 +1450,6 @@ end subroutine getghc_mGGA
 !! OUTPUT
 !!  gsc(2,mgsc)= <g|S|Cnk> or <g|S^(1)|Cnk> (S=overlap)
 !!
-!! PARENTS
-!!      m_dfpt_vtowfk,m_dfptnl_pert
-!!
-!! CHILDREN
-!!      getghc,mkl_set_num_threads,omp_set_nested
-!!
 !! SOURCE
 
 subroutine getgsc(cg,cprj,gs_ham,gsc,ibg,icg,igsc,ikpt,isppol,&
@@ -1652,12 +1623,6 @@ end subroutine getgsc
 !!
 !! SIDE EFFECTS
 !!  cwaveprj(natom,my_nspinor*(1+cpopt)*ndat)= wave function projected on nl projectors (PAW only)
-!!
-!! PARENTS
-!!      m_lobpcgwf,m_prep_kgb
-!!
-!! CHILDREN
-!!      getghc,mkl_set_num_threads,omp_set_nested
 !!
 !! SOURCE
 

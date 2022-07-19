@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -117,17 +113,6 @@ contains
 !!  Besides, in case of PAW, the matrix elements of V_hartree do not contain the onsite
 !!  contributions due to the coulombian potentials generate by ncore and tncore.
 !!  These quantities, as well as the onsite kinetic terms, are stored in Paw_ij%dij0.
-!!
-!! PARENTS
-!!      m_sigma_driver
-!!
-!! CHILDREN
-!!      destroy_mpi_enreg,get_auxc_ixc,init_distribfft_seq,initmpi_seq
-!!      libxc_functionals_end,libxc_functionals_init
-!!      libxc_functionals_set_hybridparams,melements_herm,melements_init
-!!      melements_mpisum,mkkin,paw_mknewh0,pawcprj_alloc,pawcprj_free,rhotoxc
-!!      wfd%change_ngfft,wfd%distribute_bbp,wfd%get_cprj,wfd%get_ur,wrtout
-!!      xcdata_init
 !!
 !! SOURCE
 

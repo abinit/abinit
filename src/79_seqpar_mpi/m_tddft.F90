@@ -12,10 +12,6 @@
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! NOTES
 !!
 !! SOURCE
@@ -119,14 +115,6 @@ contains
 !!     systems: Theory, Computational Methods, and Functionals'', by M.E. Casida,
 !!   in Recent Developments and Applications of Modern Density Functional
 !!   Theory, edited by J.M. Seminario (Elsevier, Amsterdam, 1996).
-!!
-!! PARENTS
-!!      m_vtorho
-!!
-!! CHILDREN
-!!      fourdp,fourwf,hartre,matr3inv,mpi_bcast,mpi_gatherv,mpi_reduce
-!!      mpi_scatterv,sort_dp,sphereboundary,timab,wrtout,xmpi_barrier
-!!      xmpi_bcast,xmpi_exch,xmpi_sum,zhpev
 !!
 !! SOURCE
 

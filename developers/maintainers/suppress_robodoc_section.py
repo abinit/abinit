@@ -13,8 +13,8 @@ import os
 import re
 
 #Define keystring
-#keystring='PARENTS'
-keystring='CHILDREN'
+keystring='PARENTS'
+#keystring='CHILDREN'
 
 re_srcfile = re.compile("\.([Ff]|[Ff]90|h)$")
 

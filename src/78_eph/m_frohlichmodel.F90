@@ -12,10 +12,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -61,12 +57,6 @@ contains
 !! efmasval(mband,nkpt_rbz) <type(efmasdeg_type)>= double tensor datastructure
 !!   efmasval(:,:)%eig2_diag band curvature double tensor
 !! ifc<ifc_type>=contains the dynamical matrix and the IFCs.
-!!
-!! PARENTS
-!!      m_eph_driver
-!!
-!! CHILDREN
-!!      cgqf,ifc%calcnwrite_nana_terms,zheev
 !!
 !! SOURCE
 
@@ -494,12 +484,6 @@ subroutine frohlichmodel(cryst, dtset, efmasdeg, efmasval, ifc)
 !! efmasval(mband,nkpt_rbz) <type(efmasdeg_type)>= double tensor datastructure
 !!   efmasval(:,:)%eig2_diag band curvature double tensor
 !! ifc<ifc_type>=contains the dynamical matrix and the IFCs.
-!!
-!! PARENTS
-!!      m_eph_driver
-!!
-!! CHILDREN
-!!      cgqf,ifc%calcnwrite_nana_terms,zheev
 !!
 !! SOURCE
 

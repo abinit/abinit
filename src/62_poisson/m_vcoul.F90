@@ -15,10 +15,6 @@
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -201,13 +197,6 @@ CONTAINS  !=====================================================================
 !!
 !! OUTPUT
 !!  Vcp=<vcoul_t>=Datatype gathering information on the Coulomb interaction.
-!!
-!! PARENTS
-!!      m_bethe_salpeter,m_gwls_hamiltonian,m_screening_driver,m_sigma_driver
-!!      mrgscr
-!!
-!! CHILDREN
-!!      calck0,quadrature
 !!
 !! SOURCE
 
@@ -1125,12 +1114,6 @@ end subroutine vcoul_init
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_vcoul
-!!
-!! CHILDREN
-!!      calck0,quadrature
-!!
 !! SOURCE
 
 subroutine vcoul_plot(Vcp,Qmesh,Gsph,ng,vc,comm)
@@ -1291,12 +1274,6 @@ end subroutine vcoul_plot
 !!  [prtvol]=Verbosity level
 !!  [mode_paral]=Either "COLL" or "PERS".
 !!
-!! PARENTS
-!!      m_vcoul
-!!
-!! CHILDREN
-!!      calck0,quadrature
-!!
 !! SOURCE
 
 subroutine vcoul_print(Vcp,unit,prtvol,mode_paral)
@@ -1429,13 +1406,6 @@ end subroutine vcoul_print
 !!
 !! SIDE EFFECTS
 !!  Vcp<vcoul_t>=the datatype to be destroyed
-!!
-!! PARENTS
-!!      m_bethe_salpeter,m_gwls_hamiltonian,m_screening_driver,m_sigma_driver
-!!      mrgscr
-!!
-!! CHILDREN
-!!      calck0,quadrature
 !!
 !! SOURCE
 

@@ -11,10 +11,6 @@
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -55,11 +51,6 @@ CONTAINS
 !!
 !! OUTPUT
 !! qplusg(npwvec)=Norm of q+G vector
-!!
-!! PARENTS
-!!      m_ppmodel,m_vcoul
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

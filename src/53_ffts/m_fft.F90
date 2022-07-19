@@ -12,10 +12,6 @@
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -179,12 +175,6 @@ CONTAINS  !===========================================================
 !!  Allow the use of non-blocking IALLOTOALL in MPI-FFTs algorithms
 !!  Mainly used for profiling purposes.
 !!
-!! PARENTS
-!!      m_argparse
-!!
-!! CHILDREN
-!!      wrtout,xmpi_sum
-!!
 !! SOURCE
 
 subroutine fft_allow_ialltoall(bool)
@@ -213,11 +203,6 @@ end subroutine fft_allow_ialltoall
 !!  Basic interface to construct fftbox_plan3_t
 !!
 !! INPUTS
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -254,12 +239,6 @@ end subroutine fftbox_plan3
 !! INPUTS
 !!  See fftbox_plan3_t
 !!
-!! PARENTS
-!!      m_fft,m_fft_prof,m_oscillators,m_pawpwij
-!!
-!! CHILDREN
-!!      wrtout,xmpi_sum
-!!
 !! SOURCE
 
 subroutine fftbox_plan3_many(plan,ndat,dims,embed,fftalg,isign)
@@ -295,12 +274,6 @@ end subroutine fftbox_plan3_many
 !!
 !! INPUTS
 !!  See fftbox_plan3_t for the meaning of the different arguments.
-!!
-!! PARENTS
-!!      m_fft
-!!
-!! CHILDREN
-!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -349,11 +322,6 @@ end subroutine fftbox_plan3_init
 !!    In input: the data to transform.
 !!    Changed in output, filled with the FFT results.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      wrtout,xmpi_sum
-!!
 !! SOURCE
 
 subroutine fftbox_execute_ip_spc(plan,ff)
@@ -391,11 +359,6 @@ end subroutine fftbox_execute_ip_spc
 !!    In input: the data to transform.
 !!    Changed in output, filled with the FFT results.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      wrtout,xmpi_sum
-!!
 !! SOURCE
 
 subroutine fftbox_execute_ip_dpc(plan,ff)
@@ -431,11 +394,6 @@ end subroutine fftbox_execute_ip_dpc
 !!
 !! OUTPUT
 !!  gg(plan%ldxyz*plan%ndat)= The FFT results.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -473,11 +431,6 @@ end subroutine fftbox_execute_op_spc
 !!
 !! OUTPUT
 !!  gg(plan%ldxyz*plan%ndat)= The FFT results.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -523,12 +476,6 @@ end subroutine fftbox_execute_op_dpc
 !!
 !! OUTPUT
 !!  ur(nfft*nspinor*ndat)=wavefunctions in real space.
-!!
-!! PARENTS
-!!      m_fft
-!!
-!! CHILDREN
-!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -577,11 +524,6 @@ end subroutine fft_ug_dp
 !! OUTPUT
 !!  ur(nfft*nspinor*ndat)=wavefunctions in real space.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      wrtout,xmpi_sum
-!!
 !! SOURCE
 
 subroutine fft_ug_spc(npw_k,nfft,nspinor,ndat,mgfft,ngfft,istwf_k,kg_k,gbound_k,ug,ur)
@@ -626,11 +568,6 @@ end subroutine fft_ug_spc
 !!
 !! OUTPUT
 !!  ur(nfft*nspinor*ndat)=wavefunctions in real space.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -681,12 +618,6 @@ end subroutine fft_ug_dpc
 !!
 !! OUTPUT
 !!  ug(npw_k*nspinor*ndat)=wavefunctions in reciprocal space given on the G-sphere.
-!!
-!! PARENTS
-!!      m_fft
-!!
-!! CHILDREN
-!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -741,11 +672,6 @@ end subroutine fft_ur_dp
 !! OUTPUT
 !!  ug(npw_k*nspinor*ndat)=wavefunctions in reciprocal space given on the G-sphere.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      wrtout,xmpi_sum
-!!
 !! SOURCE
 
 subroutine fft_ur_spc(npw_k,nfft,nspinor,ndat,mgfft,ngfft,istwf_k,kg_k,gbound_k,ur,ug)
@@ -796,11 +722,6 @@ end subroutine fft_ur_spc
 !! OUTPUT
 !!  ug(npw_k*nspinor*ndat)=wavefunctions in reciprocal space given on the G-sphere.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      wrtout,xmpi_sum
-!!
 !! SOURCE
 
 subroutine fft_ur_dpc(npw_k,nfft,nspinor,ndat,mgfft,ngfft,istwf_k,kg_k,gbound_k,ur,ug)
@@ -845,11 +766,6 @@ end subroutine fft_ur_dpc
 !!  ff(ldx*ldy*ldz*ndat)=
 !!    input: The array with the data to be transformed.
 !!    output: The results of the FFT.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -942,11 +858,6 @@ end subroutine fftpad_spc
 !!  ff(ldx*ldy*ldz*ndat)=
 !!    input: The array with the data to be transformed.
 !!    output: The results of the FFT.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -1052,11 +963,6 @@ end subroutine fftpad_dpc
 !!   vg is given on the FFT mesh instead of the augmented mesh [ldx,ldy,ldz]
 !!   in order to simplify the interface with the other routines operating of vg
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      wrtout,xmpi_sum
-!!
 !! SOURCE
 
 subroutine fft_poisson(ngfft,cplex,nx,ny,nz,ldx,ldy,ldz,ndat,vg,nr)
@@ -1110,12 +1016,6 @@ end subroutine fft_poisson
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      fftprof
-!!
-!! CHILDREN
-!!      wrtout,xmpi_sum
-!!
 !! SOURCE
 
 subroutine fft_use_lib_threads(logvar)
@@ -1150,9 +1050,6 @@ end subroutine fft_use_lib_threads
 !!
 !! OUTPUT
 !!  nfailed=number of failures.
-!!
-!! PARENTS
-!!      fftprof
 !!
 !! SOURCE
 
@@ -1391,9 +1288,6 @@ end function fftbox_utests
 !!
 !! OUTPUT
 !!  nfailed=number of failed tests.
-!!
-!! PARENTS
-!!      fftprof
 !!
 !! SOURCE
 
@@ -1637,9 +1531,6 @@ end function fftu_utests
 !! OUTPUT
 !!  nfailed=number of failures.
 !!
-!! PARENTS
-!!      fftprof
-!!
 !! SOURCE
 
 function fftbox_mpi_utests(fftalg,cplex,ndat,nthreads,comm_fft,unit) result(nfailed)
@@ -1799,9 +1690,6 @@ end function fftbox_mpi_utests
 !!
 !! OUTPUT
 !!  nfailed=number of failed tests.
-!!
-!! PARENTS
-!!      fftprof
 !!
 !! SOURCE
 
@@ -2257,15 +2145,6 @@ end function fftu_mpi_utests
 !!   a wrapper that uses fourwf to accomplish your task. This routine, indeed,
 !!   has already too many parameters and each change in the API requires a careful
 !!   modification of the different wrappers used for specialized FFTs such as FFTW3 and MKL-DFTI
-!!
-!! PARENTS
-!!      m_cgwf_cprj,m_cut3d,m_dfpt_mkrho,m_epjdos,m_fft_prof,m_fock
-!!      m_fock_getghc,m_getgh1c,m_getghc,m_gwls_hamiltonian,m_mkrho,m_mlwfovlp
-!!      m_paw_mkaewf,m_paw_nhat,m_pead_nl_loop,m_positron,m_prep_kgb
-!!      m_spin_current,m_suscep_stat,m_tddft,m_vtowfk
-!!
-!! CHILDREN
-!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -2917,20 +2796,6 @@ end subroutine fourwf
 !! fofg(2,nfft)=f(G), complex.
 !! fofr(cplex*nfft)=input function f(r) (real or complex)
 !!
-!! PARENTS
-!!      m_atm2fft,m_bethe_salpeter,m_dfpt_elt,m_dfpt_looppert,m_dfpt_lw
-!!      m_dfpt_scfcv,m_dfptnl_loop,m_dft_energy,m_dvdb,m_electronpositron
-!!      m_epjdos,m_fft,m_fft_prof,m_fock_getghc,m_forces,m_forstr
-!!      m_fourier_interpol,m_gstate,m_hidecudarec,m_jellium,m_kxc,m_longwave
-!!      m_mklocl,m_mklocl_realspace,m_mkrho,m_newrho,m_newvtr,m_nonlinear
-!!      m_nucprop,m_odamix,m_paw_mkrho,m_paw_nhat,m_pead_nl_loop,m_positron
-!!      m_ppmodel,m_prcref,m_respfn_driver,m_scfcv_core,m_screening
-!!      m_screening_driver,m_sigma_driver,m_spacepar,m_stress,m_tddft
-!!      m_vtorhorec,m_xctk,mrgscr
-!!
-!! CHILDREN
-!!      wrtout,xmpi_sum
-!!
 !! SOURCE
 
 subroutine fourdp(cplex, fofg, fofr, isign, mpi_enreg, nfft, ndat, ngfft, tim_fourdp)
@@ -3330,12 +3195,6 @@ end subroutine fourdp
 !! For all the other platforms, or if the CPP directive nolib is
 !! activated, one uses the fft routine from S. Goedecker.
 !!
-!! PARENTS
-!!      m_fft
-!!
-!! CHILDREN
-!!      wrtout,xmpi_sum
-!!
 !! SOURCE
 
 subroutine ccfft(ngfft,isign,n1,n2,n3,n4,n5,n6,ndat,option,work1,work2,comm_fft)
@@ -3437,12 +3296,6 @@ end subroutine ccfft
 !!
 !! TODO
 !!  Write simplified API for sequential version.
-!!
-!! PARENTS
-!!      m_fft
-!!
-!! CHILDREN
-!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -3570,12 +3423,6 @@ end subroutine fourdp_mpi
 !! for option==3, fofr(2,n4,n5,n6) contains the input real space wavefunction;
 !!                fofgout(2,npwout) contains its output Fourier transform;
 !!                no use of fofgin and npwin.
-!!
-!! PARENTS
-!!      m_fft
-!!
-!! CHILDREN
-!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -4033,12 +3880,6 @@ end subroutine fourwf_mpi
 !! OUTPUT
 !!  See fourwf_mpi
 !!
-!! PARENTS
-!!      m_fft
-!!
-!! CHILDREN
-!!      wrtout,xmpi_sum
-!!
 !! SOURCE
 
 ! The final interface should be:
@@ -4106,13 +3947,6 @@ end subroutine fftmpi_u
 !!
 !! SIDE EFFECTS
 !!  array(cplex,n1*n2*n3)=complex array to be symetrized
-!!
-!! PARENTS
-!!      m_atm2fft,m_fock,m_forces,m_fourier_interpol,m_mkrho,m_paw_nhat
-!!      m_prcref,m_respfn_driver,m_spacepar,m_stress
-!!
-!! CHILDREN
-!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -4289,12 +4123,6 @@ end subroutine zerosym
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_kxc
-!!
-!! CHILDREN
-!!      wrtout,xmpi_sum
-!!
 !! SOURCE
 
 subroutine fourdp_6d(cplex,matrix,isign,MPI_enreg,nfft,ngfft,tim_fourdp)
@@ -4417,14 +4245,6 @@ end subroutine fourdp_6d
 !!  option=2  aa(n1*n2*n3,ispden) --> bb(nd1,nd2,nd3) real case
 !!  option=10 aa(n1*n2*n3,ispden) <-- bb(nd1,nd2,nd3) complex case like option 1 real part
 !!  option=11 aa(n1*n2*n3,ispden) <-- bb(nd1,nd2,nd3) complex case like option 1 imag part
-!!
-!! PARENTS
-!!      m_dfpt_mkrho,m_dfpt_nstwf,m_dfpt_scfcv,m_dfpt_vtorho,m_epjdos
-!!      m_fock_getghc,m_getgh1c,m_gwls_hamiltonian,m_hamiltonian,m_mkrho
-!!      m_orbmag,m_pead_nl_loop,m_suscep_stat,m_vtorho
-!!
-!! CHILDREN
-!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -4565,12 +4385,6 @@ end subroutine fftpac
 !! NOTES
 !!  A lot of things to improve.
 !!
-!! PARENTS
-!!      m_fourier_interpol,m_prcref
-!!
-!! CHILDREN
-!!      wrtout,xmpi_sum
-!!
 !! SOURCE
 
 subroutine indirect_parallel_Fourier(index,left,mpi_enreg,ngleft,ngright,nleft,nright,paral_kgb,right,sizeindex)
@@ -4688,12 +4502,6 @@ end subroutine indirect_parallel_Fourier
 !!
 !! FUNCTION
 !!
-!! PARENTS
-!!      m_gstate
-!!
-!! CHILDREN
-!!      wrtout,xmpi_sum
-!!
 !! SOURCE
 
 subroutine fft_init_counters()
@@ -4710,11 +4518,6 @@ end subroutine fft_init_counters
 !!
 !! FUNCTION
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      wrtout,xmpi_sum
-!!
 !! SOURCE
 
 subroutine fft_stop_counters()
@@ -4730,12 +4533,6 @@ end subroutine fft_stop_counters
 !! fft_output_counters
 !!
 !! FUNCTION
-!!
-!! PARENTS
-!!      m_gstate
-!!
-!! CHILDREN
-!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 

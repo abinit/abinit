@@ -10,10 +10,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -241,16 +237,6 @@ contains
 !!   ..._apn --> in case of positrons are concerned.
 !!
 !!   for more details about notations please see pdf in /doc/theory/MGGA/
-!!
-!! PARENTS
-!!      m_dft_energy,m_forstr,m_kxc,m_longwave,m_nonlinear,m_odamix,m_prcref
-!!      m_respfn_driver,m_rhotov,m_scfcv_core,m_setvtr,m_vhxc_me,m_xchybrid
-!!
-!! CHILDREN
-!!      dotprod_vn,drivexc,libxc_functionals_end
-!!      libxc_functionals_get_hybridparams,libxc_functionals_init,mean_fftr
-!!      metric,mkdenpos,size_dvxc,timab,xc_vdw_aggregate,xcden,xcmult
-!!      xcpositron,xcpot,xctfw,xmpi_sum
 !!
 !! SOURCE
 

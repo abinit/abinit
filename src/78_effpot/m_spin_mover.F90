@@ -128,10 +128,6 @@ contains
   !!
   !! NOTES
   !!
-  !! PARENTS
-  !!
-  !! CHILDREN
-  !!
   !! SOURCE
   subroutine initialize(self, params, supercell, rng)
     class(spin_mover_t), intent(inout) :: self
@@ -460,12 +456,6 @@ contains
   !! OUTPUT
   !! etot: energy (scalar)
   !!
-  !! PARENTS
-!!
-  !! CHILDREN
-!!      self%hist%finalize,self%mps%finalize,self%spin_mc%finalize
-!!      self%spin_ob%finalize
-!!
   !! SOURCE
   subroutine spin_mover_t_run_one_step_HeunP(self, effpot, S_in, &
        & etot, displacement, strain, lwf, energy_table)
@@ -535,12 +525,6 @@ contains
   !! OUTPUT
   !! etot: energy (scalar)
   !!
-  !! PARENTS
-!!
-  !! CHILDREN
-!!      self%hist%finalize,self%mps%finalize,self%spin_mc%finalize
-!!      self%spin_ob%finalize
-!!
   !! SOURCE
   subroutine spin_mover_t_run_one_step_dummy(self, effpot, S_in, etot, &
        & displacement, strain, lwf, energy_table)
@@ -716,12 +700,6 @@ contains
   !! NOTES
   !!
   !!
-  !! PARENTS
-!!
-  !! CHILDREN
-!!      self%hist%finalize,self%mps%finalize,self%spin_mc%finalize
-!!      self%spin_ob%finalize
-!!
   !! SOURCE
   subroutine spin_mover_t_run_time(self, calculator, displacement, strain, spin, lwf, energy_table)
 
@@ -895,12 +873,6 @@ contains
   !u
   !! OUTPUT
   !!
-  !! PARENTS
-!!
-  !! CHILDREN
-!!      self%hist%finalize,self%mps%finalize,self%spin_mc%finalize
-!!      self%spin_ob%finalize
-!!
   !! SOURCE
   subroutine  run_MvT(self, pot, ncfile_prefix, displacement, strain, spin, lwf, energy_table)
     class(spin_mover_t), intent(inout) :: self
@@ -1080,10 +1052,6 @@ contains
   !!
   !! OUTPUT
   !!
-  !! PARENTS
-  !!
-  !!
-  !! CHILDREN
   !!
   !!
   !! SOURCE
@@ -1113,10 +1081,6 @@ contains
   !!
   !! NOTES
   !!   does nothing. But it's better to preserve initialize-finalize symmetry.
-  !!
-  !! PARENTS
-  !!
-  !! CHILDREN
   !!
   !! SOURCE
   subroutine finalize(self)

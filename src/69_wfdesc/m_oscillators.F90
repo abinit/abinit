@@ -11,10 +11,6 @@
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -88,11 +84,6 @@ CONTAINS
 !!
 !! OUTPUT
 !! rhotwg(npwvec)=density of a pair of states, in reciprocal space
-!!
-!! PARENTS
-!!      m_chi0,m_cohsex,m_exc_build,m_fft_prof,m_prep_calc_ucrpa,m_sigc,m_sigx
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -238,11 +229,6 @@ end subroutine rho_tw_g
 !! OUTPUT
 !! usug(npw*ndat)=density of a pair of states, in reciprocal space
 !!
-!! PARENTS
-!!      m_oscillators
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine ts_usug_kkp_bz(npw,nr,ndat,ngfft,map2sphere,use_padfft,igfftg0,gbound,&
@@ -330,11 +316,6 @@ end subroutine ts_usug_kkp_bz
 !!
 !! OUTPUT
 !!  u12prod(nr*dat) = u1_kbz^*(r) u2_kbz(r) for the ndat pairs.
-!!
-!! PARENTS
-!!      m_oscillators
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -496,11 +477,6 @@ end subroutine usur_kkp_bz
 !! OUTPUT
 !! oarrsph(npw*ndat)=output array on the sphere.
 !!
-!! PARENTS
-!!      m_oscillators
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine gw_box2gsph(nr,ndat,npw,igfftg0,iarrbox,oarrsph)
@@ -566,11 +542,6 @@ end subroutine gw_box2gsph
 !! spinrot(4)=components of the spinor rotation matrix
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_chi0,m_cohsex,m_sigc
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -660,10 +631,6 @@ end subroutine calc_wfwfg
 !!  1) M_{ SG}( Sk) = e^{-iSG.t} M_{G}   (k)
 !!  2) M_{-SG}(-Sk) = e^{+iSG.t} M_{G}^* (k)
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 function sym_rhotwgq0(itim_k,isym_k,dim_rtwg,npw,rhxtwg_in,Gsph) result(rhxtwg_sym)
@@ -733,11 +700,6 @@ end function sym_rhotwgq0
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_oscillators
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

@@ -13,8 +13,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -76,11 +74,6 @@ contains  !=====================================================
 !!  kcalc(3, nkcalc): List of k-points where the self-energy is computed.
 !!  bstart_ks(nkcalc, nsppol): Initial KS band index included in self-energy matrix elements for each k-point in kcalc.
 !!  nbcalc_ks(nkcalc, nsppol): Number of bands included in self-energy matrix elements for each k-point in kcalc.
-!!
-!! PARENTS
-!!      m_sigmaph
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -156,11 +149,6 @@ end subroutine sigtk_kcalc_from_nkptgw
 !!  kcalc(3, nkcalc): List of k-points where the self-energy is computed.
 !!  bstart_ks(nkcalc, nsppol): Initial KS band index included in self-energy matrix elements for each k-point in kcalc.
 !!  nbcalc_ks(nkcalc, nsppol): Number of bands included in self-energy matrix elements for each k-point in kcalc.
-!!
-!! PARENTS
-!!      m_sigmaph
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -255,11 +243,6 @@ end subroutine sigtk_kcalc_from_qprange
 !!  bstart_ks(nkcalc, nsppol): Initial KS band index included in self-energy matrix elements for each k-point in kcalc.
 !!  nbcalc_ks(nkcalc, nsppol): Number of bands included in self-energy matrix elements for each k-point in kcalc.
 !!
-!! PARENTS
-!!      m_sigmaph
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine sigtk_kcalc_from_gaps(dtset, ebands, gaps, nkcalc, kcalc, bstart_ks, nbcalc_ks)
@@ -350,11 +333,6 @@ end subroutine sigtk_kcalc_from_gaps
 !!  kcalc(3, nkcalc): List of k-points where the self-energy is computed.
 !!  bstart_ks(nkcalc, nsppol): Initial KS band index included in self-energy matrix elements for each k-point in kcalc.
 !!  nbcalc_ks(nkcalc, nsppol): Number of bands included in self-energy matrix elements for each k-point in kcalc.
-!!
-!! PARENTS
-!!      m_sigmaph
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -560,14 +538,6 @@ end subroutine sigtk_kcalc_from_erange
 !!  pawtab(ntypat*usepaw) <type(pawtab_type)>=paw tabulated starting data
 !!  prefix=Prefix for output file.
 !!  comm: MPI communicator.
-!!
-!! PARENTS
-!!      m_wfk_analyze
-!!
-!! CHILDREN
-!!      ebands_free,ebands_print,ebands_update_occ,fine_gaps%free
-!!      fine_gaps%print,fine_hdr%free,gaps%free,gaps%print,hdr_init_lowlvl
-!!      wrtout
 !!
 !! SOURCE
 

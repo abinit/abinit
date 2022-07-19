@@ -19,10 +19,6 @@
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -542,11 +538,6 @@ CONTAINS  !===========================================================
 !! SIDE EFFECTS
 !!  Ham<gs_hamiltonian_type>=All dynamic memory defined in the structure is deallocated.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fftpac,transgrid
-!!
 !! SOURCE
 
 subroutine destroy_hamiltonian(Ham)
@@ -666,15 +657,6 @@ end subroutine destroy_hamiltonian
 !!   * Basic variables and dimensions are transfered to the structure.
 !!   * All pointers are allocated with correct dimensions.
 !!   * Quantities that do not depend on the k-point or spin are initialized.
-!!
-!! PARENTS
-!!      m_d2frnl,m_ddk,m_dfpt_lw,m_dfpt_nstwf,m_dfpt_scfcv,m_dfpt_vtorho
-!!      m_dfptnl_loop,m_dft_energy,m_fock_getghc,m_forstr,m_gkk,m_ksdiago
-!!      m_nonlop_test,m_orbmag,m_pead_nl_loop,m_phgamma,m_phpi,m_sigmaph
-!!      m_vtorho,m_wfd
-!!
-!! CHILDREN
-!!      fftpac,transgrid
 !!
 !! SOURCE
 
@@ -929,11 +911,6 @@ end subroutine init_hamiltonian
 !!    [ham%gbound_k]=G sphere boundary, for each plane wave
 !!    [ham%ph3d_k]=3-dim structure factors, for each atom and plane wave
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fftpac,transgrid
-!!
 !! SOURCE
 
 subroutine load_k_hamiltonian(ham,ffnl_k,fockACE_k,gbound_k,istwf_k,kinpw_k,&
@@ -1102,11 +1079,6 @@ end subroutine load_k_hamiltonian
 !!    [ham%gbound_kp]=G sphere boundary, for each plane wave
 !!    [ham%ph3d_kp]=3-dim structure factors at k^prime at k, for each atom and plane wave
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fftpac,transgrid
-!!
 !! SOURCE
 
 subroutine load_kprime_hamiltonian(ham,ffnl_kp,gbound_kp,istwf_kp,kinpw_kp,&
@@ -1232,12 +1204,6 @@ end subroutine load_kprime_hamiltonian
 !! OUTPUT
 !!  gs_hamk_out<gs_hamiltonian_type>=Structured datatype containing separate
 !!                                   copies of all data of gs_hamk_in upon exit.
-!!
-!! PARENTS
-!!      m_gwls_hamiltonian
-!!
-!! CHILDREN
-!!      fftpac,transgrid
 !!
 !! SOURCE
 
@@ -1411,11 +1377,6 @@ end subroutine copy_hamiltonian
 !!  Ham<gs_hamiltonian_type>=Structured datatype initialization phase:
 !!   * Quantities that depend spin are initialized.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fftpac,transgrid
-!!
 !! SOURCE
 
 subroutine load_spin_hamiltonian(Ham,isppol,vectornd,vlocal,vxctaulocal,with_nonlocal)
@@ -1483,11 +1444,6 @@ end subroutine load_spin_hamiltonian
 !! SIDE EFFECTS
 !!  rf_Ham<rf_hamiltonian_type>=All dynamic memory defined in the structure is deallocated.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fftpac,transgrid
-!!
 !! SOURCE
 
 subroutine destroy_rf_hamiltonian(rf_Ham)
@@ -1550,13 +1506,6 @@ end subroutine destroy_rf_hamiltonian
 !!   * Basic variables and dimensions are transfered to the structure.
 !!   * All pointers are allocated with correct dimensions.
 !!   * Quantities that do not depend on the k-point or spin are initialized.
-!!
-!! PARENTS
-!!      m_ddk,m_dfpt_lwwf,m_dfpt_nstwf,m_dfpt_scfcv,m_dfpt_vtorho,m_dfptnl_pert
-!!      m_gkk,m_phgamma,m_phpi,m_sigmaph
-!!
-!! CHILDREN
-!!      fftpac,transgrid
 !!
 !! SOURCE
 
@@ -1703,11 +1652,6 @@ end subroutine init_rf_hamiltonian
 !!  rf_Ham<rf_hamiltonian_type>=Structured datatype initialization phase:
 !!   * Quantities that depend on spin are initialized.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fftpac,transgrid
-!!
 !! SOURCE
 
 subroutine load_spin_rf_hamiltonian(rf_Ham,isppol,vectornd,vlocal1,with_nonlocal)
@@ -1778,11 +1722,6 @@ end subroutine load_spin_rf_hamiltonian
 !!  rf_Ham<rf_hamiltonian_type>=structured datatype completed with k-dependent quantitites.
 !!          Quantities at k^prime are set equal to quantities at k.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fftpac,transgrid
-!!
 !! SOURCE
 
 subroutine load_k_rf_hamiltonian(rf_Ham,dkinpw_k,ddkinpw_k,npw_k)
@@ -1836,12 +1775,6 @@ end subroutine load_k_rf_hamiltonian
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_hamiltonian
-!!
-!! CHILDREN
-!!      fftpac,transgrid
 !!
 !! SOURCE
 
@@ -1920,12 +1853,6 @@ end subroutine pawdij2ekb
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_d2frnl,m_dfpt_nstwf,m_dfptnl_pert,m_hamiltonian
-!!
-!! CHILDREN
-!!      fftpac,transgrid
 !!
 !! SOURCE
 
@@ -2044,12 +1971,6 @@ end subroutine pawdij2e1kb
 !!  vlocal(n4,n5,n6,nvloc,ncomp): Potential on the coarse grid.
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
-!!      m_dft_energy,m_ksdiago,m_vtorho
-!!
-!! CHILDREN
-!!      fftpac,transgrid
 !!
 !! SOURCE
 
