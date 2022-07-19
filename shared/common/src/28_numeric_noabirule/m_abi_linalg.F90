@@ -282,11 +282,6 @@ CONTAINS  !===========================================================
 !! np_slk= max. number of processes to be used in Scalapack calls
 !! comm_scalapack= global communicator to be used in case of Scalapack
 !!
-!! PARENTS
-!!      m_driver,m_mpi_setup
-!!
-!! CHILDREN
-!!
 !! SOURCE
 !!
 
@@ -432,11 +427,6 @@ CONTAINS  !===========================================================
 !! FUNCTION
 !!
 !! INPUTS
-!!
-!! PARENTS
-!!      m_abi_linalg
-!!
-!! CHILDREN
 !!
 !! SOURCE
 !!
@@ -635,11 +625,6 @@ CONTAINS  !===========================================================
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!      m_driver,m_mpi_setup
-!!
-!! CHILDREN
-!!
 !! SOURCE
 !!
  subroutine abi_linalg_finalize()
@@ -763,8 +748,6 @@ end subroutine linalg_allow_gemm3m
 !! FUNCTION
 !!  Enable the use of ZGEMM3M
 !!
-!! PARENTS
-!!
 !! NOTES
 !!  The CGEMM3M and ZGEMM3M routines use an algorithm requiring 3 real matrix
 !!  multiplications and 5 real matrix additions to compute the complex matrix
@@ -809,8 +792,6 @@ end function use_zgemm3m
 !!
 !! FUNCTION
 !!  Enable the use of CGEMM3M
-!!
-!! PARENTS
 !!
 !! NOTES
 !!  See use_zgemm3m
@@ -899,8 +880,6 @@ end function uplo_plasma
 !! FUNCTION
 !!  Convert trans character to PLASMA integer
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 integer function trans_plasma(trans)
@@ -930,8 +909,6 @@ end function trans_plasma
 !! FUNCTION
 !!  Convert side character to PLASMA integer
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 integer function side_plasma(side)
@@ -959,8 +936,6 @@ end function side_plasma
 !! FUNCTION
 !!  Convert diag character to PLASMA integer
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 integer function diag_plasma(diag)
@@ -987,8 +962,6 @@ end function diag_plasma
 !!
 !! FUNCTION
 !!  Convert jobz character to PLASMA integer
-!!
-!! PARENTS
 !!
 !! SOURCE
 

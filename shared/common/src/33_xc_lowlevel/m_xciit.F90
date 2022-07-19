@@ -12,10 +12,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -60,11 +56,6 @@ contains
 !!  vxc(npt)=exchange-correlation potential
 !!  --- optional output ---
 !!  [dvxc(npt)]=partial second derivatives of the xc energy
-!!
-!! PARENTS
-!!      m_drivexc
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

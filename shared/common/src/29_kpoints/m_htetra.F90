@@ -16,10 +16,6 @@
 !!  1) Test more carefully the case of degenerate tethraedron
 !!  2) Add options to get only delta and/or theta ?
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -180,11 +176,6 @@ contains
 !! OUTPUT
 !!  tetra%ibz(4,24,nkibz)=for each k-point, the indexes in the IBZ
 !!  tetra%vv = tetrahedron volume divided by full BZ volume
-!!
-!! PARENTS
-!!      m_ephwg,m_fstab,m_kpts,m_phonons,m_unittests
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -903,11 +894,6 @@ end subroutine htetra_init
 !!  The mapping to the IBZ has its own allocation routine.
 !!  I will only allocate this memory if the htetra_get_onewk_* routines are called (lazy evaluation)
 !!
-!! PARENTS
-!!      m_htetra
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine htetra_init_mapping_ibz(tetra)
@@ -958,10 +944,6 @@ end subroutine htetra_init_mapping_ibz
 !! FUNCTION
 !!  Get the itetra tetrahedron contributing to the ikibz k-point
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 pure subroutine htetra_get_ibz(tetra, ikibz, itetra, tetra_mibz)
@@ -986,10 +968,6 @@ end subroutine htetra_get_ibz
 !!
 !! FUNCTION
 !!  write information about the tetrahedra object
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1028,10 +1006,6 @@ end subroutine htetra_print
 !! FUNCTION
 !! deallocate tetrahedra pointers if needed
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine htetra_free(tetra)
@@ -1069,10 +1043,6 @@ end subroutine htetra_free
 !! FUNCTION
 !! Private function to calculate the contributions to the weights due to a single tetrahedron.
 !! Extracted from get_tetra_weight
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1309,11 +1279,6 @@ end subroutine get_onetetra_blochl
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_htetra
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 !pure
@@ -1520,10 +1485,6 @@ end subroutine get_onetetra_lambinvigneron
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 pure subroutine get_onetetetra_lambinvigneron_imag(eig, energies, nene, wt)
@@ -1650,11 +1611,6 @@ end subroutine get_onetetetra_lambinvigneron_imag
 !!    Dirac delta (derivative of theta wrt energy) and Theta (Heaviside function)
 !!    for a given (band, k-point, spin).
 !!
-!! PARENTS
-!!      m_htetra
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine htetra_get_onewk_wvals(tetra, ik_ibz, opt, nw, wvals, max_occ, nkibz, eig_ibz, weights)
@@ -1738,10 +1694,6 @@ end subroutine htetra_get_onewk_wvals
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine htetra_get_onewk(tetra, ik_ibz, bcorr, nw, nkibz, eig_ibz, enemin, enemax, max_occ, weights)
@@ -1797,10 +1749,6 @@ end subroutine htetra_get_onewk
 !!    for a given (band, k-point, spin).
 !!  [erange(2)]: if present, weights are computed with an approximated asyntotic expression if
 !!   real(z) is outside of this interval and with tetra if inside.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1966,11 +1914,6 @@ end subroutine htetra_get_delta_mask
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_htetra
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine htetra_wvals_weights(tetra, eig_ibz, nw, wvals, max_occ, nkpt, opt, tweight, dweight, comm)
@@ -2063,10 +2006,6 @@ end subroutine htetra_wvals_weights
 !!  Same as above but computing only delta for performance and memory
 !!  HM: Should find a clean way to avoid copy paste routine
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine htetra_wvals_weights_delta(tetra, eig_ibz, nw, wvals, max_occ, nkpt, opt, dweight, comm)
@@ -2156,10 +2095,6 @@ end subroutine htetra_wvals_weights_delta
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine htetra_blochl_weights(tetra, eig_ibz, enemin, enemax, max_occ, nw, nkpt, bcorr, tweight, dweight, comm)
@@ -2207,10 +2142,6 @@ end subroutine htetra_blochl_weights
 !! comm=MPI communicator
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2368,11 +2299,6 @@ end subroutine htetra_weights_wvals_zinv
 !!  list(4) sorted list
 !!  perm(4) index of permutation given the right ascending order
 !!
-!! PARENTS
-!!      m_htetra
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 pure subroutine sort_4tetra(list, perm)
@@ -2508,10 +2434,6 @@ end subroutine sort_4tetra_int
 !!
 !! OUTPUT
 !!  rwg(nw, 4)
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

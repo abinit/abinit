@@ -28,8 +28,6 @@
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!
 !! SOURCE
 !!
   subroutine abi_dhpgv(itype,jobz,uplo,n,a,b,w,z,ldz,istwf_k,use_slk)
@@ -129,8 +127,6 @@ end subroutine abi_dhpgv
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!
 !! SOURCE
 !!
   subroutine abi_chpgv(itype,jobz,uplo,n,a,b,w,z,ldz)
@@ -187,8 +183,6 @@ end subroutine abi_chpgv
 !! FUNCTION
 !!
 !! INPUTS
-!!
-!! PARENTS
 !!
 !! SOURCE
 

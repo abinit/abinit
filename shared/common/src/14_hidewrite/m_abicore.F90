@@ -10,10 +10,6 @@
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -56,13 +52,6 @@ contains  !=====================================================
 !!
 !! OUTPUT
 !! strinn=string//nn
-!!
-!! PARENTS
-!!      m_berryphase_new,m_d2frnl,m_dfpt_looppert,m_dfpt_lw,m_dfpt_nstwf
-!!      m_dfpt_scfcv,m_dfptnl_loop,m_dtfil,m_elpolariz,m_gkk,m_ifc
-!!      m_io_redirect,m_outvar_o_z,m_parser,m_pead_nl_loop
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
