@@ -31,6 +31,9 @@ module m_initcuda
 
  use defs_basis
  use m_abicore
+#ifdef HAVE_OPENMP_OFFLOAD
+ use omp_lib
+#endif
  use m_xmpi, only: xmpi_world,xmpi_comm_rank,xmpi_comm_size,xmpi_abort
 
  implicit none
@@ -327,6 +330,9 @@ end subroutine Get_Mem_Dev
    end if
    call set_dev(device)
    call check_context(nb_devices,msg)
+#ifdef HAVE_OPENMP_OFFLOAD
+   call omp_set_default_device(device)
+#endif
    if(nb_devices==1) then !allocation succeed
      write(msg, '(4a,i1,2a)' ) ch10,&
 &     ' setdevice_cuda : COMMENT -',ch10,&
