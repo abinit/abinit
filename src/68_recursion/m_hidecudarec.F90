@@ -13,10 +13,6 @@
 !!
 !! NOTES
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -70,12 +66,6 @@ CONTAINS !===========================================================
 !! INPUTS
 !! nptrec=number of vectors allocated on device
 !! nfft=size of the grid (and so of a vector)
-!! PARENTS
-!!      m_hidecudarec
-!!
-!! CHILDREN
-!!      unset_dev
-!!
 !! SOURCE
 #if defined HAVE_GPU_CUDA
 subroutine prt_mem_usage(nptrec,nfft)
@@ -133,12 +123,6 @@ end subroutine prt_mem_usage
 !! OUTPUT
 !! recgpu=initialisation of GPU variables for recursion
 !!
-!! PARENTS
-!!      m_rec
-!!
-!! CHILDREN
-!!      unset_dev
-!!
 !! SOURCE
 #if defined HAVE_GPU_CUDA
 
@@ -177,12 +161,6 @@ end subroutine InitRecGPU_0
 !!
 !! OUTPUT
 !!  recgpuinfo<recGPU_type>=contains information of recursion with GPU
-!!
-!! PARENTS
-!!      m_rec
-!!
-!! CHILDREN
-!!      unset_dev
 !!
 !! SOURCE
 #if defined HAVE_GPU_CUDA
@@ -277,12 +255,6 @@ end subroutine InitRecGPU
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_vtorhorec
-!!
-!! CHILDREN
-!!      unset_dev
-!!
 !! SOURCE
 #if defined HAVE_GPU_CUDA
 
@@ -375,12 +347,6 @@ end subroutine cudarec
 !!
 !! OUTPUT
 !! nptrec(ndevice)=number of points for recursion on GPU
-!!
-!! PARENTS
-!!      m_rec
-!!
-!! CHILDREN
-!!      unset_dev
 !!
 !! SOURCE
 

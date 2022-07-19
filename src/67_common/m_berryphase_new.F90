@@ -10,10 +10,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -157,13 +153,6 @@ contains
 !! - In case of a ddk calculation, the eigenvalues are not computed.
 !! - The ddk computed by this routine should not be used to
 !!   compute the electronic dielectric tensor.
-!!
-!! PARENTS
-!!      m_berryphase_new,m_elpolariz
-!!
-!! CHILDREN
-!!      expibi,kpgsph,listkk,metric,pawcprj_alloc,pawcprj_getdim,qijb_kk
-!!      setsym_ylm,smpbz,symatm,timab,wrtout,xmpi_max,xmpi_sum
 !!
 !! SOURCE
 
@@ -1792,13 +1781,6 @@ end subroutine berryphase_new
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_scfcv_core
-!!
-!! CHILDREN
-!!      expibi,kpgsph,listkk,metric,pawcprj_alloc,pawcprj_getdim,qijb_kk
-!!      setsym_ylm,smpbz,symatm,timab,wrtout,xmpi_max,xmpi_sum
-!!
 !! SOURCE
 
 subroutine update_e_field_vars(atindx,atindx1,cg,dimcprj,dtefield,dtfil,dtset,&
@@ -2305,13 +2287,6 @@ end subroutine update_e_field_vars
 !! OUTPUT
 !!  (only writing)
 !!
-!! PARENTS
-!!      m_berryphase_new,m_gstate
-!!
-!! CHILDREN
-!!      expibi,kpgsph,listkk,metric,pawcprj_alloc,pawcprj_getdim,qijb_kk
-!!      setsym_ylm,smpbz,symatm,timab,wrtout,xmpi_max,xmpi_sum
-!!
 !! SOURCE
 
 subroutine prtefield(dtset,dtefield,iunit,rprimd)
@@ -2707,13 +2682,6 @@ end subroutine prtefield
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_gstate
-!!
-!! CHILDREN
-!!      expibi,kpgsph,listkk,metric,pawcprj_alloc,pawcprj_getdim,qijb_kk
-!!      setsym_ylm,smpbz,symatm,timab,wrtout,xmpi_max,xmpi_sum
-!!
 !! SOURCE
 
 subroutine init_e_field_vars(dtefield,dtset,gmet,gprimd,kg,&
@@ -2849,13 +2817,6 @@ end subroutine init_e_field_vars
 !!      but for k-points in the iBZ. Used by vtorho.f
 !!           nproc = number of cpus
 !!           nneighbour = number of neighbours for each k-point (= 6)
-!!
-!! PARENTS
-!!      m_berryphase_new
-!!
-!! CHILDREN
-!!      expibi,kpgsph,listkk,metric,pawcprj_alloc,pawcprj_getdim,qijb_kk
-!!      setsym_ylm,smpbz,symatm,timab,wrtout,xmpi_max,xmpi_sum
 !!
 !! SOURCE
 

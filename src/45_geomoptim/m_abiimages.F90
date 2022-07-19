@@ -110,11 +110,6 @@ contains
 !! OUTPUT
 !!  abiimages <type(abiimages)> = The abiimages to initialize
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      abihist_fin
-!!
 !! SOURCE
 
 subroutine abiimages_ini(images,nimages,natom,nrecord)
@@ -162,11 +157,6 @@ end subroutine abiimages_ini
 !!
 !! SIDE EFFECTS
 !!  images <type(abiimages)> = The abiimages to deallocate
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      abihist_fin
 !!
 !! NOTES
 !!

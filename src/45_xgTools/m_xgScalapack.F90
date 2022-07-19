@@ -90,12 +90,6 @@ module m_xgScalapack
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_lobpcg2
-!!
-!! CHILDREN
-!!      blacs_gridexit,mpi_comm_free,timab
-!!
 !! SOURCE
   subroutine  xgScalapack_init(xgScalapack,comm,maxDim,verbosity,usable)
 

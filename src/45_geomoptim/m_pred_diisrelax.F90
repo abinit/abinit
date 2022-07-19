@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -73,13 +69,6 @@ contains
 !!
 !! SIDE EFFECTS
 !! hist <type(abihist)> : History of positions,forces,acell, rprimd, stresses
-!!
-!! PARENTS
-!!      m_precpred_1geo
-!!
-!! CHILDREN
-!!      dcopy,dgemv,dsysv,hessinit,hessupdt,hist2var,var2hist,xcart2xred
-!!      xred2xcart
 !!
 !! SOURCE
 

@@ -11,10 +11,6 @@
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -78,17 +74,6 @@ contains
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gwls_ComputeCorrelationEnergy
-!!
-!! CHILDREN
-!!      cpu_time,diagonalize_lanczos_banded
-!!      driver_invert_positive_definite_hermitian_matrix
-!!      generateprintdielectriceigenvalues
-!!      matrix_function_epsilon_model_operator
-!!      set_dielectric_function_frequency,setup_pk_model,write_timing_log,zgemm
-!!      zheevd
 !!
 !! SOURCE
 
@@ -168,17 +153,6 @@ end subroutine driver_generate_dielectric_matrix
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gwls_GenerateEpsilon
-!!
-!! CHILDREN
-!!      cpu_time,diagonalize_lanczos_banded
-!!      driver_invert_positive_definite_hermitian_matrix
-!!      generateprintdielectriceigenvalues
-!!      matrix_function_epsilon_model_operator
-!!      set_dielectric_function_frequency,setup_pk_model,write_timing_log,zgemm
-!!      zheevd
 !!
 !! SOURCE
 
@@ -391,17 +365,6 @@ end subroutine GeneratePrintDielectricEigenvalues
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gwls_sternheimer
-!!
-!! CHILDREN
-!!      cpu_time,diagonalize_lanczos_banded
-!!      driver_invert_positive_definite_hermitian_matrix
-!!      generateprintdielectriceigenvalues
-!!      matrix_function_epsilon_model_operator
-!!      set_dielectric_function_frequency,setup_pk_model,write_timing_log,zgemm
-!!      zheevd
 !!
 !! SOURCE
 

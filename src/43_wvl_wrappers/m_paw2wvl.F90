@@ -11,12 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!      m_gstate
-!!
-!! CHILDREN
-!!      cprj_clean,cprj_paw_alloc
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -65,11 +59,6 @@ contains
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      gstate
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -347,12 +336,6 @@ end subroutine paw2wvl
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_scfcv_core
-!!
-!! CHILDREN
-!!      cprj_clean,cprj_paw_alloc
-!!
 !! SOURCE
 
 subroutine paw2wvl_ij(option,paw_ij,wvl)
@@ -463,12 +446,6 @@ end subroutine paw2wvl_ij
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_gstate
-!!
-!! CHILDREN
-!!      cprj_clean,cprj_paw_alloc
-!!
 !! SOURCE
 
 
@@ -538,12 +515,6 @@ end subroutine wvl_paw_free
 !!   From atom-sorted wvl%paw%cprj to unsorted wvl%paw%cprj (atm_indx=atindx1)
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_scfcv_core
-!!
-!! CHILDREN
-!!      cprj_clean,cprj_paw_alloc
 !!
 !! SOURCE
 

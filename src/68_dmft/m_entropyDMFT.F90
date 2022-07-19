@@ -13,12 +13,6 @@
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -138,11 +132,6 @@ contains
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_scfcv
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -323,11 +312,6 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_entropyDMFT
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
   subroutine entropyDMFT_allocateAll(e_t)
@@ -380,11 +364,6 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_entropyDMFT
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -528,11 +507,6 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_entropyDMFT
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
   subroutine entropyDMFT_dump(e_t)
@@ -648,12 +622,6 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
   function entropyDMFT_nextLambda(e_t,dt,pawtab,pawang,pawrad) result(nextstep)
@@ -749,11 +717,6 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_scfcv
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -905,11 +868,6 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_scfcv
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
   subroutine entropyDMFT_computeEntropy(e_t,entropy)
@@ -1053,11 +1011,6 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_entropyDMFT
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
   subroutine entropyDMFT_integrate(e_t,integrand,integral)
@@ -1148,11 +1101,6 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_scfcv
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

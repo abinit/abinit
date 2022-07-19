@@ -13,10 +13,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -188,13 +184,6 @@ contains
 !!      It is defined by nfft, ngfft, mgfft, ...
 !!      For compatibility reasons, (nfftf,ngfftf,mgfftf)
 !!      are set equal to (nfft,ngfft,mgfft) in that case.
-!!
-!! PARENTS
-!!      m_driver
-!!
-!! CHILDREN
-!!      dfpt_atm2fft,dfpt_mkcore,dfpt_mkvxc,dfpt_mkvxc_noncoll,dotprod_vn,timab
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -1866,13 +1855,6 @@ end subroutine respfn
 !! TODO
 !!  The localization tensor cannot be defined in the metallic case. It should not be computed.
 !!
-!! PARENTS
-!!      m_respfn_driver
-!!
-!! CHILDREN
-!!      dfpt_atm2fft,dfpt_mkcore,dfpt_mkvxc,dfpt_mkvxc_noncoll,dotprod_vn,timab
-!!      xmpi_sum
-!!
 !! SOURCE
 
 subroutine wrtloctens(blkflg,d2bbb,d2nl,mband,mpert,natom,prtbbb,rprimd,usepaw)
@@ -2101,13 +2083,6 @@ end subroutine wrtloctens
 !! NOTES
 !! This routine is called only by the processor me==0 .
 !! In consequence, no use of message and wrtout routine.
-!!
-!! PARENTS
-!!      m_respfn_driver
-!!
-!! CHILDREN
-!!      dfpt_atm2fft,dfpt_mkcore,dfpt_mkvxc,dfpt_mkvxc_noncoll,dotprod_vn,timab
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -3396,13 +3371,6 @@ end subroutine dfpt_dyout
 !! d2matr(2,3,mpert,3,mpert)=2nd-order matrix (masses non included,
 !!  no cartesian coordinates : simply second derivatives)
 !!
-!! PARENTS
-!!      m_respfn_driver
-!!
-!! CHILDREN
-!!      dfpt_atm2fft,dfpt_mkcore,dfpt_mkvxc,dfpt_mkvxc_noncoll,dotprod_vn,timab
-!!      xmpi_sum
-!!
 !! SOURCE
 
 subroutine dfpt_gatherdy(becfrnl,berryopt,blkflg,carflg,dyew,dyfrwf,dyfrx1,&
@@ -3897,13 +3865,6 @@ end subroutine dfpt_gatherdy
 !!                    If NCPP, it depends on one atom
 !!                    If PAW,  it depends on two atoms
 !!
-!! PARENTS
-!!      m_respfn_driver
-!!
-!! CHILDREN
-!!      dfpt_atm2fft,dfpt_mkcore,dfpt_mkvxc,dfpt_mkvxc_noncoll,dotprod_vn,timab
-!!      xmpi_sum
-!!
 !! SOURCE
 
 subroutine dfpt_dyfro(atindx1,dyfrnl,dyfrlo,dyfrwf,dyfrxc,dyfr_cplex,dyfr_nondiag,&
@@ -4113,13 +4074,6 @@ end subroutine dfpt_dyfro
 !!  blkflgfrx1(3,natom,3,natom)=flag to indicate whether an element has been computed or not
 !!  dyfrx1(2,3,natom,3,natom)=2nd-order non-linear xc
 !!    core-correction (part1) part of the dynamical matrix
-!!
-!! PARENTS
-!!      m_respfn_driver
-!!
-!! CHILDREN
-!!      dfpt_atm2fft,dfpt_mkcore,dfpt_mkvxc,dfpt_mkvxc_noncoll,dotprod_vn,timab
-!!      xmpi_sum
 !!
 !! SOURCE
 

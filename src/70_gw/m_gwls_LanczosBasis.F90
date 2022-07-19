@@ -11,10 +11,6 @@
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -91,12 +87,6 @@ contains
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_gwls_ComputeCorrelationEnergy
-!!
-!! CHILDREN
-!!      g_to_r,gr_to_g,sqrt_vc_k,wf_block_distribute
-!!
 !! SOURCE
 
 subroutine setup_Lanczos_basis(lmax,lmax_model)
@@ -127,12 +117,6 @@ end subroutine setup_Lanczos_basis
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gwls_ComputeCorrelationEnergy
-!!
-!! CHILDREN
-!!      g_to_r,gr_to_g,sqrt_vc_k,wf_block_distribute
 !!
 !! SOURCE
 
@@ -165,12 +149,6 @@ end subroutine cleanup_Lanczos_basis
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gwls_ComputeCorrelationEnergy
-!!
-!! CHILDREN
-!!      g_to_r,gr_to_g,sqrt_vc_k,wf_block_distribute
 !!
 !! SOURCE
 

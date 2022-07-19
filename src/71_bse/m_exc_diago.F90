@@ -10,8 +10,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -83,18 +81,6 @@ contains
 !!
 !! OUTPUT
 !!  Eigenvalues and eigenvectors are written on file.
-!!
-!! PARENTS
-!!      m_bethe_salpeter
-!!
-!! CHILDREN
-!!      end_scalapack,exc_fullh_from_blocks,exc_read_bshdr,exc_skip_bshdr_mpio
-!!      hermitianize,init_matrix_scalapack,init_scalapack,mpi_file_close
-!!      mpi_file_open,mpi_file_read_all,mpi_file_set_view,mpi_type_free
-!!      slk_f%free,slk_f%loc2glob,slk_hbar%free,slk_hbar%loc2glob,slk_ovlp%free
-!!      slk_ovlp%zinvert,slk_pzgemm,slk_pzhegvx,slk_single_fview_read_mask
-!!      slk_vec%free,slk_write,wrtout,xgemm,xhdp_invert,xhegv,xhegvx
-!!      xmpi_barrier,xmpio_read_frm
 !!
 !! SOURCE
 
@@ -212,18 +198,6 @@ end subroutine exc_diago_driver
 !!
 !! OUTPUT
 !!  Eigenvalues and eigenvectors are written on file bseig_fname
-!!
-!! PARENTS
-!!      m_exc_diago
-!!
-!! CHILDREN
-!!      end_scalapack,exc_fullh_from_blocks,exc_read_bshdr,exc_skip_bshdr_mpio
-!!      hermitianize,init_matrix_scalapack,init_scalapack,mpi_file_close
-!!      mpi_file_open,mpi_file_read_all,mpi_file_set_view,mpi_type_free
-!!      slk_f%free,slk_f%loc2glob,slk_hbar%free,slk_hbar%loc2glob,slk_ovlp%free
-!!      slk_ovlp%zinvert,slk_pzgemm,slk_pzhegvx,slk_single_fview_read_mask
-!!      slk_vec%free,slk_write,wrtout,xgemm,xhdp_invert,xhegv,xhegvx
-!!      xmpi_barrier,xmpio_read_frm
 !!
 !! SOURCE
 
@@ -690,18 +664,6 @@ end subroutine exc_diago_resonant
 !!  exc_gap=Excitonic direct gap.
 !!  Additional info on the Excitonic spectrum are reported on standard output.
 !!
-!! PARENTS
-!!      m_exc_diago
-!!
-!! CHILDREN
-!!      end_scalapack,exc_fullh_from_blocks,exc_read_bshdr,exc_skip_bshdr_mpio
-!!      hermitianize,init_matrix_scalapack,init_scalapack,mpi_file_close
-!!      mpi_file_open,mpi_file_read_all,mpi_file_set_view,mpi_type_free
-!!      slk_f%free,slk_f%loc2glob,slk_hbar%free,slk_hbar%loc2glob,slk_ovlp%free
-!!      slk_ovlp%zinvert,slk_pzgemm,slk_pzhegvx,slk_single_fview_read_mask
-!!      slk_vec%free,slk_write,wrtout,xgemm,xhdp_invert,xhegv,xhegvx
-!!      xmpi_barrier,xmpio_read_frm
-!!
 !! SOURCE
 
 subroutine exc_print_eig(BSp,bseig_fname,gw_gap,exc_gap)
@@ -842,18 +804,6 @@ end subroutine exc_print_eig
 !!
 !! OUTPUT
 !!  Excitonic eigenvectors and eigenvalues are written on file BS_files%out_eig.
-!!
-!! PARENTS
-!!      m_exc_diago
-!!
-!! CHILDREN
-!!      end_scalapack,exc_fullh_from_blocks,exc_read_bshdr,exc_skip_bshdr_mpio
-!!      hermitianize,init_matrix_scalapack,init_scalapack,mpi_file_close
-!!      mpi_file_open,mpi_file_read_all,mpi_file_set_view,mpi_type_free
-!!      slk_f%free,slk_f%loc2glob,slk_hbar%free,slk_hbar%loc2glob,slk_ovlp%free
-!!      slk_ovlp%zinvert,slk_pzgemm,slk_pzhegvx,slk_single_fview_read_mask
-!!      slk_vec%free,slk_write,wrtout,xgemm,xhdp_invert,xhegv,xhegvx
-!!      xmpi_barrier,xmpio_read_frm
 !!
 !! SOURCE
 
@@ -1112,18 +1062,6 @@ end subroutine exc_diago_coupling
 !!
 !! OUTPUT
 !!  Excitonic eigenvectors and eigenvalues are written to file BS_files%out_eig.
-!!
-!! PARENTS
-!!      m_exc_diago
-!!
-!! CHILDREN
-!!      end_scalapack,exc_fullh_from_blocks,exc_read_bshdr,exc_skip_bshdr_mpio
-!!      hermitianize,init_matrix_scalapack,init_scalapack,mpi_file_close
-!!      mpi_file_open,mpi_file_read_all,mpi_file_set_view,mpi_type_free
-!!      slk_f%free,slk_f%loc2glob,slk_hbar%free,slk_hbar%loc2glob,slk_ovlp%free
-!!      slk_ovlp%zinvert,slk_pzgemm,slk_pzhegvx,slk_single_fview_read_mask
-!!      slk_vec%free,slk_write,wrtout,xgemm,xhdp_invert,xhegv,xhegvx
-!!      xmpi_barrier,xmpio_read_frm
 !!
 !! SOURCE
 

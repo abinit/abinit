@@ -10,10 +10,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -80,11 +76,6 @@ contains
 !! vin(ndim)=vector that contains xred and some quantity derived
 !!   from acell and rprim, depending on the value of optcell.
 !! xred(3,natom)=reduced dimensionless atomic coordinates
-!!
-!! PARENTS
-!!      m_pred_bfgs,m_pred_delocint,m_pred_fire,m_pred_verlet
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -324,11 +315,6 @@ end subroutine xfpack_vin2x
 !!   from acell and rprim, depending on the value of optcell.
 !! xred(3,natom)=reduced dimensionless atomic coordinates
 !!
-!! PARENTS
-!!      m_pred_bfgs,m_pred_delocint,m_pred_fire,m_pred_verlet,m_xfpack
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine xfpack_x2vin(acell,natom,ndim,nsym,optcell,&
@@ -526,11 +512,6 @@ end subroutine xfpack_x2vin
 !! vout(ndim)=vector that contains gred and some quantity derived from
 !!   strten, depending on the value of optcell, and taking care ot strtarget
 !!
-!! PARENTS
-!!      m_pred_bfgs,m_pred_delocint,m_pred_fire,m_pred_verlet,m_xfpack
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine xfpack_f2vout(gred,natom,ndim,optcell,strtarget,strten,ucvol,vout)
@@ -649,11 +630,6 @@ end subroutine xfpack_f2vout
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_pred_bfgs
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -799,11 +775,6 @@ end subroutine xfh_recover_new
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_mover
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

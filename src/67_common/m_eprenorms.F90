@@ -118,12 +118,6 @@ CONTAINS  !=====================================================================
 !! OUTPUT
 !!  Epren<eprenorms_t>=Datatype gathering electron-phonon renormalizations
 !!
-!! PARENTS
-!!      m_eprenorms
-!!
-!! CHILDREN
-!!      listkk
-!!
 !! SOURCE
 
 subroutine eprenorms_init(Epren,nkpt,nsppol,mband,ntemp)
@@ -167,12 +161,6 @@ end subroutine eprenorms_init
 !! INPUTS
 !! Epren<eprenorms_t>=The datatype to be freed
 !!
-!! PARENTS
-!!      m_bethe_salpeter,optic
-!!
-!! CHILDREN
-!!      listkk
-!!
 !! SOURCE
 
 subroutine eprenorms_free(Epren)
@@ -207,12 +195,6 @@ end subroutine eprenorms_free
 !!
 !! SIDE EFFECTS
 !! Epren<eprenorms_t> = fields are initialized and filled with data from filename
-!!
-!! PARENTS
-!!      m_bethe_salpeter,optic
-!!
-!! CHILDREN
-!!      listkk
 !!
 !! SOURCE
 
@@ -272,12 +254,6 @@ end subroutine eprenorms_from_epnc
 !! SIDE EFFECTS
 !!  Epren<eprenorms_t> = Data broadcasted on every node from master
 !!
-!! PARENTS
-!!      m_bethe_salpeter,optic
-!!
-!! CHILDREN
-!!      listkk
-!!
 !! SOURCE
 
 subroutine eprenorms_bcast(Epren,master,comm)
@@ -331,12 +307,6 @@ end subroutine eprenorms_bcast
 !! SIDE EFFECTS
 !!  Bst<bands_t> : eigens are changed according to epren
 !!                 linewidth is allocated and filled with data if do_linewidth
-!!
-!! PARENTS
-!!      m_exc_spectra,m_haydock,optic
-!!
-!! CHILDREN
-!!      listkk
 !!
 !! SOURCE
 

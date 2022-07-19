@@ -12,14 +12,10 @@
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
 !! TODO
 !! 1) Remove npwarr, istwfk.
 !! 2) Use 3d arrays for ebands%nband
 !! 3) Solve issue with Hdr dependency
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -381,11 +377,6 @@ CONTAINS  !=====================================================================
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      abitk
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine ebands_print_gaps(ebands, unit, header)
@@ -437,10 +428,6 @@ end subroutine ebands_print_gaps
 !! OUTPUT
 !!  ierr=Return code (!=0 signals failure)
 !!  gaps<gaps_t>=object with info on the gaps (caller is responsible for freeing the object).
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -505,10 +492,6 @@ end function ebands_get_gaps
 !! OUTPUT
 !!  ierr=Return code (!=0 signals failure)
 !!  gaps<gaps_t>=object with info on the gaps (caller is responsible for freeing the object).
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -627,10 +610,6 @@ end function get_gaps_
 !! FUNCTION
 !!  Free the memory allocated in gaps_t
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine gaps_free(gaps)
@@ -675,10 +654,6 @@ end subroutine gaps_free
 !!
 !! OUTPUT
 !!  Only writing.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -815,12 +790,6 @@ end subroutine gaps_print
 !! OUTPUT
 !! ebands<ebands_t>=the ebands_t datatype
 !!
-!! PARENTS
-!!      m_bethe_salpeter,m_dfpt_looppert,m_dfpt_lw,m_ebands,m_eig2d,m_gstate
-!!      m_mlwfovlp_qp,m_outscfcv,m_screening_driver,m_sigma_driver,optic
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine ebands_init(bantot, ebands, nelect, ne_qFD, nh_qFD, ivalence, doccde, eig, istwfk, kptns, &
@@ -926,11 +895,6 @@ end subroutine ebands_init
 !! OUTPUT
 !!  ebands<ebands_t>=The ebands_t datatype completely initialized.
 !!
-!! PARENTS
-!!      elphon,eph,m_iowf,m_wfk,wfk_analyze
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 type(ebands_t) function ebands_from_hdr(hdr, mband, ene3d, nelect) result(ebands)
@@ -996,10 +960,6 @@ end function ebands_from_hdr
 !!  ebands<ebands_t>=The ebands_t datatype completely initialized.
 !!    The Fermi level and the entropy are set to zero.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 type(ebands_t) function ebands_from_dtset(dtset, npwarr) result(new)
@@ -1059,15 +1019,6 @@ end function ebands_from_dtset
 !! OUTPUT
 !!  Deallocate the dynamic arrays in the ebands_t type.
 !!
-!! PARENTS
-!!      abitk,fold2Bloch,m_bethe_salpeter,m_ddk,m_dfpt_looppert,m_dfpt_lw
-!!      m_ebands,m_eig2d,m_elphon,m_eph_double_grid,m_eph_driver,m_exc_spectra
-!!      m_gstate,m_haydock,m_ioarr,m_iowf,m_longwave,m_mlwfovlp_qp,m_nonlinear
-!!      m_outscfcv,m_respfn_driver,m_rta,m_screening_driver,m_sigma_driver
-!!      m_sigmaph,m_sigtk,m_wfk,m_wfk_analyze,optic
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine ebands_free(ebands)
@@ -1107,12 +1058,6 @@ end subroutine ebands_free
 !!
 !! OUTPUT
 !!  obands<ebands_t>=The copy.
-!!
-!! PARENTS
-!!      m_bethe_salpeter,m_ebands,m_eph_double_grid,m_exc_spectra,m_haydock
-!!      m_screening_driver,m_sigma_driver,optic
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1181,11 +1126,6 @@ end subroutine ebands_copy
 !!  Transfer allocate from `from_ebands` to `to_ebands`.
 !!  `from_ebands` is destroyed when the routine returns.
 !!
-!! PARENTS
-!!      m_rta
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine ebands_move_alloc(from_ebands, to_ebands)
@@ -1220,11 +1160,6 @@ end subroutine ebands_move_alloc
 !!
 !! OUTPUT
 !!  Only writing
-!!
-!! PARENTS
-!!      abitk,m_bethe_salpeter,m_ephtk,m_sigtk,m_wfk,m_wfk_analyze
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1325,11 +1260,6 @@ end subroutine ebands_print
 !!   Note that the first dimension is usually larger than the
 !!   number of bands really used for a particular k-point and spin.
 !!
-!! PARENTS
-!!      m_chi0,m_ebands,m_ioarr,m_iowf
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine unpack_eneocc(nkpt,nsppol,mband,nband,vect,array3d,val)
@@ -1389,11 +1319,6 @@ end subroutine unpack_eneocc
 !!  vect(bantot)=The input values stored in vector mode. Only the values really
 !!   considered at each k-point and spin are copied.
 !!
-!! PARENTS
-!!      m_chi0,m_ebands
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pack_eneocc(nkpt, nsppol, mband, nband, bantot, array3d, vect)
@@ -1444,11 +1369,6 @@ end subroutine pack_eneocc
 !!
 !! OUTPUT
 !!  vect(ebands%bantot)=The values required.
-!!
-!! PARENTS
-!!      m_ebands
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1506,11 +1426,6 @@ end subroutine get_eneocc_vect
 !! SIDE EFFECTS
 !!  ebands<ebands_t>=The object with updated values depending on the value of arr_name
 !!
-!! PARENTS
-!!      m_dfpt_looppert,m_ebands
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine put_eneocc_vect(ebands,arr_name,vect)
@@ -1562,10 +1477,6 @@ end subroutine put_eneocc_vect
 !!  One should use
 !!   band_energy = \int e N(e) de   for e<Ef , where N(e) is the e-DOS
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 pure real(dp) function ebands_get_bandenergy(ebands) result(band_energy)
@@ -1608,10 +1519,6 @@ end function ebands_get_bandenergy
 !!  tol_fermi[optional]
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1679,10 +1586,6 @@ end function ebands_get_valence_idx
 !! OUTPUT
 !!  bstart, bstop: Min and max band index. Initialized to bstart = huge(1); bstop = -huge(1)
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 pure subroutine ebands_get_bands_from_erange(ebands, elow, ehigh, bstart, bstop)
@@ -1732,10 +1635,6 @@ end subroutine ebands_get_bands_from_erange
 !!  band_lowhigh=min and Max band index.
 !!  [ks_range]: For each spin and k-point, the min and max band index included in the output set.
 !!     if (ik, spin) is not included then ib_work(1, ik, spin) > ib_work(2, ik, spin) = -huge(1)
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1829,11 +1728,6 @@ end function ebands_vcbm_range_from_gaps
 !!   %eig(mband,nkpt,nsppol)=The band structure after the application of the scissor operator
 !!   %fermi_energy
 !!
-!! PARENTS
-!!      m_bethe_salpeter,m_ephtk,m_screening_driver,m_sigmaph
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine ebands_apply_scissors(ebands, scissor_energy)
@@ -1911,10 +1805,6 @@ end subroutine ebands_apply_scissors
 !!  This is not always true for every smearing technique implemented in Abinit.
 !!  CP: this also not true for occopt 9
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 pure function ebands_get_occupied(ebands, tol_occ) result(occ_idx)
@@ -1981,11 +1871,6 @@ end function ebands_get_occupied
 !!  ibmin,ibmax=
 !!    Input: initial guess for the indeces
 !!    Output: All the denerate states are between ibmin and ibmax
-!!
-!! PARENTS
-!!      m_sigma_driver,m_sigmaph
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2070,10 +1955,6 @@ end subroutine ebands_enclose_degbands
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine ebands_get_bands_e0(ebands, e0, brange_spin, ierr)
@@ -2129,10 +2010,6 @@ end subroutine ebands_get_bands_e0
 !!
 !! OUTPUT
 !!  emin,emax=min and max energy
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2197,10 +2074,6 @@ end subroutine ebands_get_erange
 !! OUTPUT
 !!  nelect_per_spin(ebands%nsppol)=For each spin the number of electrons (eventually fractional)
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 pure function ebands_nelect_per_spin(ebands) result(nelect_per_spin)
@@ -2249,10 +2122,6 @@ end function ebands_nelect_per_spin
 !!
 !! OUTPUT
 !! minmax(2,ebands%nsppol)=For each spin the min and max value of the quantity specified by "arr_name"
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2315,10 +2184,6 @@ end function ebands_get_minmax
 !! INPUTS
 !! ebands<ebands_t>=The ebands_t datatype
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 pure logical function ebands_has_metal_scheme(ebands) result(ans)
@@ -2355,10 +2220,6 @@ end function ebands_has_metal_scheme
 !!
 !! SIDE EFFECTS
 !!  Produce BXSF file.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2427,12 +2288,6 @@ end function ebands_write_bxsf
 !!   All the quantitities in ebands are left unchanged with the exception of:
 !!   %fermie=Redefined so that it is in the middle of the gap
 !!   %entropy=Set to zero
-!!
-!! PARENTS
-!!      m_a2ftr,m_bethe_salpeter,m_ebands,m_elphon,m_ephtk,m_screening_driver
-!!      m_sigma_driver,m_sigtk,m_wfk,optic
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2600,11 +2455,6 @@ end subroutine ebands_update_occ
 !! [update_occ]=False to avoid recomputing occupation factors (mainly used when a call to set_scheme is followed
 !!  by another call to set_extrael (update_occ is expensive for large k-meshes). Default: True.
 !!
-!! PARENTS
-!!      m_ebands,m_ephtk
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine ebands_set_scheme(ebands, occopt, tsmear, spinmagntarget, prtvol, update_occ)
@@ -2663,11 +2513,6 @@ end subroutine ebands_set_scheme
 !! NOTES
 !! The routine assumes metallic occupation scheme and will abort it this condition is not satisfied.
 !! Use ebands_set_scheme before calling this routine, if you have a semiconductor.
-!!
-!! PARENTS
-!!      m_ephtk
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2764,11 +2609,6 @@ end subroutine ebands_set_fermie
 !! The routine assumes metallic occupation scheme and will abort it this condition is not satisfied.
 !! Use ebands_set_scheme before calling this routine, if you have a semiconductor.
 !!
-!! PARENTS
-!!      m_ephtk
-!!
-!! CHILDREN
-!!
 !! SOURCE
 ! CP modified for it to work with occopt 9
 subroutine ebands_set_extrael(ebands, nelect, nholes, spinmagntarget, msg, prtvol)
@@ -2849,11 +2689,6 @@ end subroutine ebands_set_extrael
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      abitk,m_rta,m_sigmaph
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine ebands_get_muT_with_fd(self, ntemp, kTmesh, spinmagntarget, prtvol, mu_e, comm)
@@ -2932,10 +2767,6 @@ end subroutine ebands_get_muT_with_fd
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 real(dp) pure function ebands_calc_nelect(self, kt, fermie) result(nelect)
@@ -2988,11 +2819,6 @@ end function ebands_calc_nelect
 !!      0.0dp if gaps were not computed (because there are only valence bands);
 !!     -1.0dp if the system (or spin-channel) is metallic;
 !!      1.0dp if the gap has been computed.
-!!
-!! PARENTS
-!!      m_bethe_salpeter,m_exc_diago,m_gstate,m_sigma_driver
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3104,13 +2930,6 @@ end subroutine ebands_report_gap
 !!
 !! INPUTS
 !!  ncid =NC file handle
-!!
-!! PARENTS
-!!      dfpt_looppert,eig2tot,ioarr,m_ebands,m_iowf,m_shirley,pawmkaewf,sigma
-!!
-!! CHILDREN
-!!      destroy_tetra,get_full_kgrid,init_tetra,matr3inv,tetra_blochl_weights
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -3302,10 +3121,6 @@ end function ebands_ncwrite
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 integer function ebands_ncwrite_path(ebands, cryst, path) result(ncerr)
@@ -3362,11 +3177,6 @@ end function ebands_ncwrite_path
 !!
 !! OUTPUT
 !!  edos<edos_t>=Electronic DOS and IDOS.
-!!
-!! PARENTS
-!!      eph
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3558,10 +3368,6 @@ end function ebands_get_edos
 !! FUNCTION
 !!  Free the memory allocated in edos_t
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine edos_free(edos)
@@ -3596,10 +3402,6 @@ end subroutine edos_free
 !!
 !! OUTPUT
 !!  Only writing.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3698,10 +3500,6 @@ end subroutine edos_write
 !! OUTPUT
 !!  ncerr= netcdf exit status.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 integer function edos_ncwrite(edos, ncid, prefix) result(ncerr)
@@ -3781,10 +3579,6 @@ end function edos_ncwrite
 !!
 !! OUTPUT
 !!  Only writing.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3877,10 +3671,6 @@ end subroutine edos_print
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine edos_get_carriers(edos, ntemp, kTmesh, mu_e, n_ehst)
@@ -3961,10 +3751,6 @@ end subroutine edos_get_carriers
 !!
 !! SIDE EFFECTS
 !!   Write data to file.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -4062,11 +3848,6 @@ end function ebands_write_nesting
 !!        to give kpt1b, that is the closest to kpt2.
 !!      bz2ibz(:,6)=1 if time-reversal was used to generate kpt1a from kpt1, 0 otherwise
 !!  outb<ebands_t>=band structure with energies in the BZ.
-!!
-!! PARENTS
-!!      m_wfk
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -4228,10 +4009,6 @@ end subroutine ebands_expandk
 !!  in_nshiftk= Number of shifts in the coarse k-mesh
 !!  in_shiftk(3, in_nshiftk) = Shifts of the coarse k-mesh
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 type(ebands_t) function ebands_downsample(self, cryst, in_kptrlatt, in_nshiftk, in_shiftk) result(new)
@@ -4362,10 +4139,6 @@ end function ebands_downsample
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 type(ebands_t) function ebands_chop(self, bstart, bstop) result(new)
@@ -4424,11 +4197,6 @@ end function ebands_chop
 !!
 !! SIDE EFFECTS
 !!  ebands<ebands_t> = Object with input energies sorted in output.
-!!
-!! PARENTS
-!!      m_ebands
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -4496,10 +4264,6 @@ end subroutine ebands_sort
 !! NOTES
 !!  Fermi level and occupation factors of the interpolate bands are not recomputed by this routine.
 !!  This operation is delegated to the caller.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -4676,10 +4440,6 @@ end function ebands_interp_kmesh
 !! OUTPUT
 !!  New ebands_t object with interpolated energies.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 type(ebands_t) function ebands_interp_kpath(ebands, cryst, kpath, params, band_block, comm) result(new)
@@ -4840,10 +4600,6 @@ end function ebands_interp_kpath
 !!   All these arrays are allocated by the routine. The number of points is available in edos%nw.
 !!   (nw, 1, ...) stores the weighted DOS (w-DOS)
 !!   (nw, 2, ...) stores the integrated w-DOS
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -5167,10 +4923,6 @@ end function ebands_get_edos_matrix_elements
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 type(jdos_t) function ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm, ierr) result (jdos)
@@ -5344,10 +5096,6 @@ end function ebands_get_jdos
 !!  [prefix]=String prepended to netcdf dimensions/variables (HDF5 poor-man groups)
 !!   Empty string if not specified.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 integer function jdos_ncwrite(jdos, ncid, prefix) result(ncerr)
@@ -5412,10 +5160,6 @@ end function jdos_ncwrite
 !! FUNCTION
 !!  Free memory
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine jdos_free(jdos)
@@ -5451,11 +5195,6 @@ end subroutine jdos_free
 !!
 !! OUTPUT
 !!  (only writing, printing)
-!!
-!! PARENTS
-!!      m_eph_driver,m_outscfcv
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -5674,11 +5413,6 @@ end subroutine ebands_prtbltztrp
 !! OUTPUT
 !!  (only writing, printing)
 !!
-!! PARENTS
-!!      m_a2ftr
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine ebands_prtbltztrp_tau_out (eigen, tempermin, temperinc, ntemper, fermie, fname_radix, kpt, &
@@ -5864,11 +5598,6 @@ end subroutine ebands_prtbltztrp_tau_out
 !! OUTPUT
 !!  Only writing.
 !!
-!! PARENTS
-!!      abitk,m_ebands,m_eph_driver,m_outscfcv
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine ebands_write(ebands, prtebands, prefix, kptbounds)
@@ -5922,11 +5651,6 @@ end subroutine ebands_write
 !!
 !! OUTPUT
 !!  Only writing
-!!
-!! PARENTS
-!!      m_ebands
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -6052,11 +5776,6 @@ end subroutine ebands_write_xmgrace
 !!
 !! OUTPUT
 !!  Only writing
-!!
-!! PARENTS
-!!      m_ebands
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -6187,11 +5906,6 @@ end subroutine ebands_write_gnuplot
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_outscfcv,m_sigma_driver,m_wfk_analyze
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine ebands_interpolate_kpath(ebands, dtset, cryst, band_block, prefix, comm)
@@ -6268,10 +5982,6 @@ end subroutine ebands_interpolate_kpath
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -6392,10 +6102,6 @@ end function klinterp_new
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine klinterp_free(self)
@@ -6422,10 +6128,6 @@ end subroutine klinterp_free
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -6487,11 +6189,6 @@ end subroutine klinterp_eval_bsd
 !!  Return n_ehst(2, nsppol, ntemp) where the first dimension if for electrons/holes.
 !!  If nsppol == 2, the second dimension is the number of e/h for spin else the total number of e/h summed over spins.
 !!  To discern between electrons and holes in semiconductors we assume that ef is inside the gap.
-!!
-!! PARENTS
-!!      abitk,m_rta
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -114,13 +110,6 @@ contains
 !!
 !! TODO
 !!  Spin-orbit
-!!
-!! PARENTS
-!!      m_cgprj,m_cgwf,m_cgwf_cprj,m_dfpt_mkrho,m_dfpt_nstwf,m_dfptnl_pert
-!!      m_ksdiago,m_orbmag,m_rf2_init,m_wfd
-!!
-!! CHILDREN
-!!      pawcprj_alloc,pawcprj_copy,pawcprj_free,pawcprj_lincom
 !!
 !! SOURCE
 
@@ -451,13 +440,6 @@ contains
 !! OUTPUT
 !!  cprj(ncprj,mcprj) <type(pawcprj_type)>= projected input wave functions <Proj_i|Cnk> with NL projectors
 !!                                       Usually ncprj=natom
-!!
-!! PARENTS
-!!      m_berryphase_new,m_dfpt_looppert,m_extraprho,m_forstr,m_gstate
-!!      m_positron,m_scfcv_core,m_vtorho
-!!
-!! CHILDREN
-!!      pawcprj_alloc,pawcprj_copy,pawcprj_free,pawcprj_lincom
 !!
 !! SOURCE
 
@@ -1013,12 +995,6 @@ contains
 !! INPUTS
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
-!!      m_vtowfk
-!!
-!! CHILDREN
-!!      pawcprj_alloc,pawcprj_copy,pawcprj_free,pawcprj_lincom
 !!
 !! SOURCE
 

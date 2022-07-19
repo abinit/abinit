@@ -12,10 +12,6 @@
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -148,12 +144,6 @@ CONTAINS
 !!
 !! OUTPUT
 !!  hcharge(natom), hden(natom), hweight(natom)= Hirshfeld charges, densities, weights.
-!!
-!! PARENTS
-!!      m_cut3d
-!!
-!! CHILDREN
-!!      xmpi_gather
 !!
 !! SOURCE
 
@@ -459,12 +449,6 @@ end subroutine dens_hirsh
 !! SIDE EFFECTS
 !!  nv_constr_dft_r=the constrained potential or density in real space
 !!
-!! PARENTS
-!!      m_dens
-!!
-!! CHILDREN
-!!      xmpi_gather
-!!
 !! SOURCE
 
 subroutine add_atomic_fcts(natom,nspden,rprimd,mpi_enreg,nfft,ngfft,ntypat,option,ratsph, &
@@ -643,12 +627,6 @@ end subroutine add_atomic_fcts
 !!  constrained_dft=datastructure that contain the needed information to enforce the density and magnetization constraints
 !!    Most of the data are simply copied from dtset, but also constrained_dft%intgf2(natom,natom) is computed from the available data.
 !!
-!! PARENTS
-!!      m_scfcv_core,m_setvtr
-!!
-!! CHILDREN
-!!      xmpi_gather
-!!
 !! SOURCE
 
  subroutine constrained_dft_ini(chrgat,constrained_dft,constraint_kind,&
@@ -743,12 +721,6 @@ end subroutine constrained_dft_ini
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_scfcv_core,m_setvtr
-!!
-!! CHILDREN
-!!      xmpi_gather
-!!
 !! SOURCE
 
  subroutine constrained_dft_free(constrained_dft)
@@ -819,12 +791,6 @@ end subroutine constrained_dft_free
 !!    At output it will be modified: projected onto the space orthogonal to the atomic spherical functions (if there is a related
 !!    constrained, and augmented by such atomic spherical functions multiplied by the difference between the actual
 !!    integrated charge or magnetization and the target ones.
-!!
-!! PARENTS
-!!      m_rhotov
-!!
-!! CHILDREN
-!!      xmpi_gather
 !!
 !! SOURCE
 
@@ -1227,12 +1193,6 @@ end subroutine constrained_dft_free
 !! OUTPUT
 !!  nv_constr_dft_r=the constrained potential
 !!
-!! PARENTS
-!!      m_dft_energy,m_rhotov,m_setvtr
-!!
-!! CHILDREN
-!!      xmpi_gather
-!!
 !! NOTES
 !!  based on html notes for the VASP implementation at
 !!  http://cms.mpi.univie.ac.at/vasp/vasp/Constraining_direction_magnetic_moments.html
@@ -1384,12 +1344,6 @@ end subroutine mag_penalty
 !!  Epen=penalty contribution to the total energy corresponding to the constrained potential
 !!  Econstr=???
 !!  Eexp=???
-!!
-!! PARENTS
-!!      m_outscfcv
-!!
-!! CHILDREN
-!!      xmpi_gather
 !!
 !! SOURCE
 
@@ -1557,12 +1511,6 @@ end subroutine mag_penalty_e
 !!    In non collinear case component 1 is total density, and 2:4 are the magnetization vector
 !!  strs_intgden(6,nspden,natom)=stress contribution due to constrained integrated density (magnetization...), due to each atom. Optional arg
 !!  Rest is printing
-!!
-!! PARENTS
-!!      m_dens,m_dfpt_scfcv,m_outscfcv
-!!
-!! CHILDREN
-!!      xmpi_gather
 !!
 !! SOURCE
 
@@ -2003,12 +1951,6 @@ end subroutine calcdenmagsph
 !! OUTPUT
 !!  Printing
 !!
-!! PARENTS
-!!      m_dens,m_dfpt_scfcv,m_outscfcv
-!!
-!! CHILDREN
-!!      xmpi_gather
-!!
 !! SOURCE
 
 subroutine prtdenmagsph(cplex,intgden,natom,nspden,ntypat,nunit,option,ratsm,ratsph,rhomag,typat,ziontypat)
@@ -2310,12 +2252,6 @@ end subroutine prtdenmagsph
 !! fsm=value of the function
 !! dfsm=derivative of the function with respect to xarg (zero, except in the smearing region).
 !!
-!! PARENTS
-!!      m_dens
-!!
-!! CHILDREN
-!!      xmpi_gather
-!!
 !! SOURCE
 
 subroutine radsmear(dfsm,fsm,xarg,xcut,xsmear)
@@ -2375,12 +2311,6 @@ end subroutine radsmear
 !!  IMPORTANT: implementation is thoroughly checked only for npspinor = 1,
 !!             for other case might need to change the part gathering
 !!             the FFT mesh info
-!!
-!! PARENTS
-!!      m_dens
-!!
-!! CHILDREN
-!!      xmpi_gather
 !!
 !! SOURCE
 

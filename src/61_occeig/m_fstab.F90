@@ -11,8 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -189,10 +187,6 @@ contains  !============================================================
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine fstab_free(fstab)
@@ -247,11 +241,6 @@ end subroutine fstab_free
 !! TODO
 !!  Use a different algorithm to select k-points if tetra. First compute tetra weights
 !!  then k-points contributing to FS integral are selected according to some threshold.
-!!
-!! PARENTS
-!!      m_phgamma
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -545,10 +534,6 @@ end subroutine fstab_init
 !! OUTPUT
 !!   g0=Reciprocal lattice vector such that kpt = fstab%kpts(:, ik_fs) + g0
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 integer function fstab_findkg0(fstab, kpt, g0) result(ik_fs)
@@ -590,10 +575,6 @@ end function fstab_findkg0
 !!
 !! OUTPUT
 !!   wtk(fs%maxnb, fs%maxnb)=Weights for FS integration.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -676,11 +657,6 @@ end subroutine fstab_get_dbldelta_weights
 !!
 !! OUTPUT
 !!  Only printing.
-!!
-!! PARENTS
-!!      m_phgamma
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

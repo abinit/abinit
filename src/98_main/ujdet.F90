@@ -16,13 +16,6 @@
 !! NOTES
 !! INPUTS
 !! OUTPUT
-!! PARENTS
-!!
-!! CHILDREN
-!!      abi_io_redirect,abimem_init,abinit_doctor,destroy_mpi_enreg,herald
-!!      initmpi_seq,intagm,isfile,parsefile,pawuj_det,pawuj_free,pawuj_ini
-!!      wrtout,xmpi_end,xmpi_init
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H

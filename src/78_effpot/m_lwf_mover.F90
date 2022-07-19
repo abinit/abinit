@@ -448,12 +448,6 @@ contains
   !u
   !! OUTPUT
   !!
-  !! PARENTS
-!!
-  !! CHILDREN
-!!      self%hist%finalize, self%mps%finalize, self%spin_mc%finalize
-!!      self%spin_ob%finalize
-!!
   !! SOURCE
   subroutine  run_varT(self, pot, ncfile_prefix, displacement, strain, spin, lwf, energy_table)
     class(lwf_mover_t), intent(inout):: self

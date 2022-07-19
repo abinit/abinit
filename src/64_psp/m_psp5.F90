@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -96,12 +92,6 @@ contains
 !!  vlspl(mqgrid,2)=q^2 Vloc(q) and second derivatives from spline fit
 !!  xcccrc=XC core correction cutoff radius (bohr) from psp file
 !!  xccc1d(n1xccc,6)=1D core charge function and five derivatives, from psp file
-!!
-!! PARENTS
-!!      m_pspini
-!!
-!! CHILDREN
-!!      psp1cc,psp5lo,psp5nl,spline,wrtout
 !!
 !! SOURCE
 

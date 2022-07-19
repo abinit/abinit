@@ -11,10 +11,6 @@
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -102,12 +98,6 @@ CONTAINS  !====================================================================
 !!     %sigcme4sd (ib1:ib2,jkibz,io,is)= Diagonal matrix elements of \Sigma_c  at frequencies around the KS eigenvalue
 !!     %sigxcme4sd(ib1:ib2,jkibz,io,is)= Diagonal matrix elements of \Sigma_xc at frequencies around the KS eigenvalue
 !!    where ib1 and ib2 are the band indeces included in the GW calculation for this k-point.
-!!
-!! PARENTS
-!!      m_sigma_driver
-!!
-!! CHILDREN
-!!      int2char10,wrtout
 !!
 !! SOURCE
 
@@ -509,12 +499,6 @@ end subroutine solve_dyson
 !!  prefil : prefix for output files.
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_dyson_solver
-!!
-!! CHILDREN
-!!      int2char10,wrtout
 !!
 !! SOURCE
 

@@ -15,10 +15,6 @@
 !!
 !! NOTES
 !!
-!! PARENTS
-!!
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -62,10 +58,6 @@ CONTAINS  !===========================================================
 !! SIDE EFFECTS
 !!
 !! OUTPUT
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine prtworksim(work_now)
@@ -103,10 +95,6 @@ end subroutine prtworksim
 !! SIDE EFFECTS
 !!
 !! OUTPUT
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine prtworksiRe(work_now)
@@ -145,10 +133,6 @@ end subroutine prtworksiRe
 !! SIDE EFFECTS
 !!
 !! OUTPUT
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine prtworkadv(work_now,adv)

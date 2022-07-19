@@ -12,10 +12,6 @@
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -66,12 +62,6 @@ CONTAINS  !===========================================================
 !!
 !! OUTPUT
 !!  hessin(ndim,ndim)=hessian matrix, initialised at output.
-!!
-!! PARENTS
-!!      m_pred_bfgs,m_pred_diisrelax
-!!
-!! CHILDREN
-!!      findmin
 !!
 !! SOURCE
 
@@ -195,12 +185,6 @@ end subroutine hessinit
 !!
 !! SIDE EFFECTS
 !!  hessin(ndim,ndim)=hessian matrix, updated at output.
-!!
-!! PARENTS
-!!      m_mep,m_pred_bfgs,m_pred_delocint,m_pred_diisrelax,m_xfpack
-!!
-!! CHILDREN
-!!      findmin
 !!
 !! SOURCE
 
@@ -348,12 +332,6 @@ end subroutine hessupdt
 !!  vin(ndim)=new input vector; updated at output
 !!  vin_prev(ndim)=previous input vector; contains input vin at output
 !!  vout_prev(ndim)=previous output vector; contains input vout at output
-!!
-!! PARENTS
-!!      m_pred_bfgs,m_pred_delocint
-!!
-!! CHILDREN
-!!      findmin
 !!
 !! SOURCE
 

@@ -31,13 +31,6 @@
 !! counting the final number of blocks, and second to merge
 !! the two DDBs. This would save memory.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      abi_io_redirect,abimem_init,abinit_doctor,ddb_hdr%free
-!!      get_command_argument,herald,mblktyp1,mblktyp5,timein
-!!      wrtout,xmpi_init
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H

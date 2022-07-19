@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -433,13 +429,6 @@ contains
 !! using another name. The name filstat will be needed beyond gstate to check
 !! the appearance of the "exit" flag, to make a hasty exit, as well as
 !! in order to output the status of the computation.
-!!
-!! PARENTS
-!!      m_driver,m_gstateimg
-!!
-!! CHILDREN
-!!      abi_log_status_state,int2char4,intagm,isfile,libpaw_log_flag_set
-!!      parsefile,xmpi_barrier,xmpi_bcast
 !!
 !! SOURCE
 
@@ -979,13 +968,6 @@ end subroutine dtfil_init
 !! dtfil=<type datafiles_type>infos about file names, file unit numbers
 !!  (part of which were initialized previously)
 !!
-!! PARENTS
-!!      m_gstate,m_mover
-!!
-!! CHILDREN
-!!      abi_log_status_state,int2char4,intagm,isfile,libpaw_log_flag_set
-!!      parsefile,xmpi_barrier,xmpi_bcast
-!!
 !! SOURCE
 
 subroutine dtfil_init_time(dtfil,iapp)
@@ -1083,13 +1065,6 @@ end subroutine dtfil_init_time
 !! OUTPUT
 !! filapp= filename with appended string
 !!
-!! PARENTS
-!!      m_dtfil
-!!
-!! CHILDREN
-!!      abi_log_status_state,int2char4,intagm,isfile,libpaw_log_flag_set
-!!      parsefile,xmpi_barrier,xmpi_bcast
-!!
 !! SOURCE
 
 subroutine fappnd(filapp,filnam,iapp,&
@@ -1170,13 +1145,6 @@ end subroutine fappnd
 !!
 !! SIDE EFFECTS
 !! dtfil=<type datafiles_type>= only getxxx_from_image flags are modified
-!!
-!! PARENTS
-!!      m_driver
-!!
-!! CHILDREN
-!!      abi_log_status_state,int2char4,intagm,isfile,libpaw_log_flag_set
-!!      parsefile,xmpi_barrier,xmpi_bcast
 !!
 !! SOURCE
 
@@ -1280,13 +1248,6 @@ end subroutine dtfil_init_img
 !! OUTPUT
 !! filnam_out=the new file name
 !! will_read=1 if the file must be read ; 0 otherwise (ird and get were zero)
-!!
-!! PARENTS
-!!      m_dtfil,m_mpi_setup
-!!
-!! CHILDREN
-!!      abi_log_status_state,int2char4,intagm,isfile,libpaw_log_flag_set
-!!      parsefile,xmpi_barrier,xmpi_bcast
 !!
 !! SOURCE
 
@@ -1423,14 +1384,6 @@ end subroutine mkfilename
 !! stops processing if old file does not exist; changes name
 !! and returns new name in redefined filnam if new file already exists.
 !!
-!! PARENTS
-!!      anaddb,m_dtfil,m_effective_potential,m_polynomial_coeff,m_vcoul
-!!      multibinit,ujdet
-!!
-!! CHILDREN
-!!      abi_log_status_state,int2char4,intagm,isfile,libpaw_log_flag_set
-!!      parsefile,xmpi_barrier,xmpi_bcast
-!!
 !! SOURCE
 
 subroutine isfile(filnam, status)
@@ -1558,13 +1511,6 @@ end subroutine isfile
 !!  (3) Root name for generic input files (wavefunctions, potential, density ...)
 !!  (4) Root name for generic output files (wavefunctions, potential, density, DOS, hessian ...)
 !!  (5) Root name for generic temporary files (wftmp1,wftmp2,kgunit,status ...)
-!!
-!! PARENTS
-!!      abinit
-!!
-!! CHILDREN
-!!      abi_log_status_state,int2char4,intagm,isfile,libpaw_log_flag_set
-!!      parsefile,xmpi_barrier,xmpi_bcast
 !!
 !! SOURCE
 
