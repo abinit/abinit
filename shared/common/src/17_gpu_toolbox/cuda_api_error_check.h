@@ -55,6 +55,10 @@ extern "C" {
 }
 #endif
 
+#ifndef CUDA_UNUSED
+#define CUDA_UNUSED(x) ((void)(x))
+#endif
+
 // when this header is used inside abinit, call abi_cabort when an error happens
 // otherwise, do a regular exit
 // we assume here that if config.h (from abinit is included first, then ABINIT_VERSION will be defined)
