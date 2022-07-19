@@ -1861,7 +1861,12 @@ subroutine update_e_field_vars(atindx,atindx1,cg,dimcprj,dtefield,dtfil,dtset,&
 
   usecprj=1; if (psps%usepaw==0)  usecprj = 0
   my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
-  mcprj=my_nspinor*dtset%mband*dtset%mkmem*dtset%nsppol
+  mcprj=my_nspinor*dtset%mband*dtset%mkmem*dtset%nsppol/mpi_enreg%nproc_band
+  !Just to be sure
+  if (efield.and.mpi_enreg%nproc_band/=1) then
+    message='Berry phase calculations are not designed for band parallelization!'
+    ABI_BUG(message)
+  end if
 
   ncpgr = 0
   ctocprj_choice = 1 ! no derivs
@@ -1884,7 +1889,7 @@ subroutine update_e_field_vars(atindx,atindx1,cg,dimcprj,dtefield,dtfil,dtset,&
           &   dtset%istwfk,kg,dtset%kptns,mcg,mcprj,dtset%mgfft,dtset%mkmem,&
           &   mpi_enreg,psps%mpsang,dtset%mpw,dtset%natom,nattyp,dtset%nband,&
           &   dtset%natom,ngfft,dtset%nkpt,dtset%nloalg,npwarr,dtset%nspinor,&
-          &   dtset%nsppol,dtset%ntypat,dtset%paral_kgb,ph1d,psps,rmet,&
+          &   dtset%nsppol,dtset%nsppol,dtset%ntypat,dtset%paral_kgb,ph1d,psps,rmet,&
           &   dtset%typat,ucvol,dtfil%unpaw,xred,ylm,ylmgr)
      ABI_FREE(ph1d)
   else

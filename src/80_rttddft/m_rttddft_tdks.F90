@@ -321,9 +321,9 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
                & dtset%istwfk,tdks%kg,dtset%kptns,tdks%mcg,tdks%mcprj,dtset%mgfft,      &
                & dtset%mkmem,mpi_enreg,psps%mpsang,dtset%mpw,dtset%natom,tdks%nattyp,   &
                & dtset%nband,dtset%natom,dtset%ngfft,dtset%nkpt,dtset%nloalg,           &
-               & tdks%npwarr,dtset%nspinor,dtset%nsppol,psps%ntypat,dtset%paral_kgb,    &
-               & tdks%ph1d,psps,tdks%rmet,dtset%typat,tdks%ucvol,tdks%unpaw,tdks%xred,  &
-               & tdks%ylm,tdks%ylmgr)
+               & tdks%npwarr,dtset%nspinor,dtset%nsppol,dtset%nsppol,psps%ntypat,       &
+               & dtset%paral_kgb,tdks%ph1d,psps,tdks%rmet,dtset%typat,tdks%ucvol,       &
+               & tdks%unpaw,tdks%xred,tdks%ylm,tdks%ylmgr)
  end if
  ABI_MALLOC(tdks%occ,(dtset%mband*dtset%nkpt*dtset%nsppol))
 
