@@ -157,9 +157,6 @@ CONTAINS  !===========================================================
 !! OUTPUT
 !!  clp= resulting function
 !!
-!! PARENTS
-!!      nhatgrid
-!!
 !! SOURCE
 
 pure function clp(x)
@@ -194,10 +191,6 @@ end function clp
 !!
 !! OUTPUT
 !!   factorial= n! (real)
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -240,11 +233,6 @@ end function factorial
 !!
 !! OUTPUT
 !!   permutations= n!/(n-k)! (real)
-!!
-!! PARENTS
-!!      green_atomic_hubbard
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -291,10 +279,6 @@ end function permutations
 !! OUTPUT
 !!   binomcoeff= n!/( k!* (n-k)!)  (real dp)
 !!
-!! PARENTS
-!!
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -329,11 +313,6 @@ end function binomcoeff
 !! OUTPUT
 !!   Laguerre(x,n,a) (dp)
 !!
-!! PARENTS
-!!
-!!
-!! CHILDREN
-!!   factorial
 !!
 !! SOURCE
 
@@ -394,12 +373,6 @@ end function laguerre
 !! OUTPUT
 !!  RadFnH(r,n,l,Z) (dp)
 !!
-!! PARENTS
-!!
-!!
-!! CHILDREN
-!!  Laguerre
-!!  factorial
 !!
 !! SOURCE
 
@@ -467,13 +440,6 @@ end function RadFnH
 !! OUTPUT
 !!  IRadFnH(a,b,n,l,Z) (dp)
 !!
-!! PARENTS
-!!
-!!
-!! CHILDREN
-!!  Laguerre
-!!  factorial
-!!  RadFnH
 !!
 !! SOURCE
 
@@ -549,10 +515,6 @@ end function IRadFnH
 !!   arg=Argument of the Gaussian.
 !!   sigma=Standard deviation
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 elemental function gaussian(arg, sigma)
@@ -587,10 +549,6 @@ end function gaussian
 !!   arg=Argument of the lorentzian.
 !!   sigma=Broadening factor
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 elemental function lorentzian(arg, sigma)
@@ -623,11 +581,6 @@ end function lorentzian
 !!
 !! OUTPUT
 !! derf_yy= error function of yy
-!!
-!! PARENTS
-!!      evdw_wannier,wvl_wfs_set
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -774,11 +727,6 @@ end function abi_derf
 !! OUTPUT
 !! derfc_yy=complementary error function of yy
 !!
-!! PARENTS
-!!      ewald,ewald2,dfpt_ewald,elt_ewald,ewald9,make_efg_ion,psp2lo,wvl_wfs_set
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 elemental function abi_derfc(yy) result(derfc_yy)
@@ -915,11 +863,6 @@ end function abi_derfc
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_rec,m_spin_current
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine GAMMA_FUNCTION(X,GA)
@@ -1054,11 +997,6 @@ end subroutine GAMMA_FUNCTION
 !! At small arg, the higher orders have so much cancellation that the
 !! analytic expression is very poor computationally.  In that case we
 !! use a rational polynomial approximation.
-!!
-!! PARENTS
-!!      m_mlwfovlp,m_psp1,m_special_funcs
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1267,11 +1205,6 @@ end subroutine besjm
 !! OUTPUT
 !!  sb_out(nm)=values of spherical bessel functions for l=0,nm-1
 !!
-!! PARENTS
-!!      m_forctqmc,m_paw_overlap,m_positron,m_psptk
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine sbf8(nm,xx,sb_out)
@@ -1346,8 +1279,6 @@ end subroutine sbf8
 !!  mu = chemical potential
 !!  temperature = T
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 function fermi_dirac(energy, mu, temperature)
@@ -1391,8 +1322,6 @@ end function fermi_dirac
 !! INPUTS
 !!  energy = electron energy level
 !!  temperature = T
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -1440,8 +1369,6 @@ end function bose_einstein
 !! INPUTS
 !!  rhor=Local density in real space.
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 elemental function k_fermi(rhor)
@@ -1474,8 +1401,6 @@ end function k_fermi
 !! INPUTS
 !!  rhor=Local density in real space.
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 elemental function k_thfermi(rhor)
@@ -1504,8 +1429,6 @@ end function k_thfermi
 !!
 !! FUNCTION
  !! Return Levi-Civita tensor of rank 3
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -1545,12 +1468,6 @@ end function levi_civita_3
 !!  bess_spl=array of integrals
 !!  bess_spl_der=array of derivatives of integrals
 !!  xx=coordinates of points belonging to the grid
-!!
-!! PARENTS
-!!      m_cut3d,partial_dos_fractions
-!!
-!! CHILDREN
-!!      besjm,spline
 !!
 !! SOURCE
 
@@ -1623,11 +1540,6 @@ end function jlspline_new
 !! FUNCTION
 !!  deallocate memory
 !!
-!! PARENTS
-!!      m_cut3d,m_epjdos
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine jlspline_free(jlspl)
@@ -1661,8 +1573,6 @@ end subroutine jlspline_free
 !! OUTPUT
 !!
 !! FUNCTION
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -1708,10 +1618,6 @@ end function jlspline_integral
 !!
 !! INPUTS
 !!  sigma=Broadening parameter.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1771,10 +1677,6 @@ end function gspline_new
 !! OUTPUT
 !!  weights(nx,2)=First slice contains the gaussian approximant on xmesh.
 !!   The second slice stores the primitive.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1840,10 +1742,6 @@ end subroutine gspline_eval
 !!
 !! INPUTS
 !!  self<gspline_t>=Object used to spline the gaussian approximant
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
