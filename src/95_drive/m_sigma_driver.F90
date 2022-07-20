@@ -2576,7 +2576,8 @@ endif
        !
        ! C) Exchange <KS_i|hyb*K^RANGE-SEP?[KS]|KS_j> and save it in old_ks_purex
        !
-       call setup_vcp(Vcp_ks,Vcp_full,Dtset,Gsph_x,Gsph_c,Cryst,Qmesh,Kmesh,coef_hyb,ngfftf,comm) ! Build Vcp_ks and Vcp_full
+       ! Build Vcp_ks and Vcp_full
+       call setup_vcp(Vcp_ks,Vcp_full,Dtset,Gsph_x,Gsph_c,Cryst,Qmesh,Kmesh,coef_hyb,comm)
        call xmpi_barrier(Wfd%comm)
        if(coef_hyb>tol8) then
          do ikcalc=1,Sigp%nkptgw
@@ -4417,7 +4418,6 @@ end subroutine paw_qpscgw
 !! Gsph_x<gsphere_t>=Info on the G-sphere for and Sigma_x
 !! Kmesh <kmesh_t>=Structure describing the k-point sampling.
 !! Qmesh <kmesh_t>=Structure describing the q-point sampling.
-!! ngfft(18)=information on the fine FFT grid used for densities and potentials.
 !! Cryst<crystal_t>=Info on unit cell and symmetries.
 !! comm=Information about the xmpi_world
 !!
@@ -4431,7 +4431,7 @@ end subroutine paw_qpscgw
 !!
 !! CHILDREN
 !!
-subroutine setup_vcp(Vcp_ks,Vcp_full,Dtset,Gsph_x,Gsph_c,Cryst,Qmesh,Kmesh,coef_hyb,ngfftf,comm)
+subroutine setup_vcp(Vcp_ks,Vcp_full,Dtset,Gsph_x,Gsph_c,Cryst,Qmesh,Kmesh,coef_hyb,comm)
 
 !Arguments ------------------------------------
 !scalars
@@ -4442,8 +4442,6 @@ subroutine setup_vcp(Vcp_ks,Vcp_full,Dtset,Gsph_x,Gsph_c,Cryst,Qmesh,Kmesh,coef_
  type(vcoul_t),intent(inout) :: Vcp_ks, Vcp_full
  integer,intent(in) :: comm
  real(dp),intent(inout) :: coef_hyb
-!arrays
- integer,intent(in) :: ngfftf(18)
 
 !Local variables-------------------------------
 !scalars

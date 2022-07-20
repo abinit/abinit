@@ -355,22 +355,22 @@ module m_gwr
    ! (ntau)
    ! Imaginary frequency mesh and integration weights
 
-   real(dp),allocatable :: t2w_cos_wgs(:,:)
+   real(dp),allocatable :: wt_cos_wgs(:,:)
    ! (ntau, ntau)
    ! weights for cosine transform. (i tau --> i omega)
 
-   real(dp),allocatable :: w2t_cos_wgs(:,:)
+   real(dp),allocatable :: tw_cos_wgs(:,:)
    ! (ntau, ntau)
    ! weights for sine transform (i iomega --> i tau)
 
-   real(dp),allocatable :: t2w_sin_wgs(:,:)
+   real(dp),allocatable :: wt_sin_wgs(:,:)
    ! (ntau, ntau)
    ! weights for sine transform (i tau --> i omega)
 
    real(dp) :: ft_max_error(3) = -one
    ! Max error due to inhomogenous FT.
 
-   real(dp) :: cosft_duality_err = -one
+   real(dp) :: cosft_duality_error = -one
    ! Max_{ij} |CT CT^{-1} - I|
 
    integer :: green_mpw = -1
@@ -715,7 +715,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  call kpts_pack_in_stars(gwr%nkbz, gwr%kbz, kbz2ibz)
 
  if (my_rank == master) then
-   call kpts_map_print([std_out, ab_out], "Mapping kBZ --> kIBZ", "symrec", gwr%kbz, kibz, kbz2ibz, gwr%dtset%prtvol)
+   call kpts_map_print([std_out, ab_out], " Mapping kBZ --> kIBZ", "symrec", gwr%kbz, kibz, kbz2ibz, gwr%dtset%prtvol)
  end if
 
  !call get_ibz2bz(gwr%nkibz, gwr%nkbz, kbz2ibz, kibz2bz, ierr)
@@ -746,7 +746,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  ! Order qbz by stars and rearrange entries in qbz2ibz table.
  call kpts_pack_in_stars(gwr%nqbz, gwr%qbz, qbz2ibz)
  if (my_rank == master) then
-   call kpts_map_print([std_out, ab_out], "Mapping qBZ --> qIBZ", "symrec", gwr%qbz, gwr%qibz, qbz2ibz, gwr%dtset%prtvol)
+   call kpts_map_print([std_out, ab_out], " Mapping qBZ --> qIBZ", "symrec", gwr%qbz, gwr%qibz, qbz2ibz, gwr%dtset%prtvol)
  end if
 
  ! ==========================
@@ -944,44 +944,39 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  gwr%tau_mesh = arth(zero, te_max, gwr%ntau)
  gwr%tau_wgs = one / gwr%ntau
 
- ABI_MALLOC(gwr%w2t_cos_wgs, (gwr%ntau, gwr%ntau))
- ABI_MALLOC(gwr%t2w_cos_wgs, (gwr%ntau, gwr%ntau))
- ABI_MALLOC(gwr%t2w_sin_wgs, (gwr%ntau, gwr%ntau))
- gwr%w2t_cos_wgs = one; gwr%t2w_cos_wgs = one; gwr%t2w_sin_wgs = one
+ ABI_MALLOC(gwr%tw_cos_wgs, (gwr%ntau, gwr%ntau))
+ ABI_MALLOC(gwr%wt_cos_wgs, (gwr%ntau, gwr%ntau))
+ ABI_MALLOC(gwr%wt_sin_wgs, (gwr%ntau, gwr%ntau))
+ gwr%tw_cos_wgs = one; gwr%wt_cos_wgs = one; gwr%wt_sin_wgs = one
 
 #else
+ !te_max = te_max * 10
+ !print *, "erange", te_max / te_min
  call gx_minimax_grid(gwr%ntau, te_min, te_max,  &  ! in
                       gwr%tau_mesh, gwr%tau_wgs, &  ! all these args are out and allocated by the routine.
                       gwr%iw_mesh, gwr%iw_wgs,   &
-                      gwr%t2w_cos_wgs, gwr%w2t_cos_wgs, gwr%t2w_sin_wgs, &
+                      gwr%wt_cos_wgs, gwr%tw_cos_wgs, gwr%wt_sin_wgs, &
                       gwr%ft_max_error)
 
  ! Compute the "real" weights used for the inhomogeneous cosine/sine FT and check whether
  ! the two matrices for the forward/backward cosine transforms are the inverse of each other.
  do it=1,gwr%ntau
    do iw=1,gwr%ntau
-     gwr%t2w_cos_wgs(iw, it) = gwr%t2w_cos_wgs(iw, it) * cos(gwr%tau_mesh(it) * gwr%iw_mesh(iw))
-     gwr%w2t_cos_wgs(it, iw) = gwr%w2t_cos_wgs(it, iw) * cos(gwr%tau_mesh(it) * gwr%iw_mesh(iw))
-
-     !gwr%t2w_cos_wgs(it, iw) = gwr%t2w_cos_wgs(it, iw) * cos(gwr%tau_mesh(it) * gwr%iw_mesh(iw))
-     !gwr%w2t_cos_wgs(iw, it) = gwr%w2t_cos_wgs(iw, it) * cos(gwr%tau_mesh(it) * gwr%iw_mesh(iw))
+     gwr%wt_cos_wgs(iw, it) = gwr%wt_cos_wgs(iw, it) * cos(gwr%tau_mesh(it) * gwr%iw_mesh(iw))
+     gwr%tw_cos_wgs(it, iw) = gwr%tw_cos_wgs(it, iw) * cos(gwr%tau_mesh(it) * gwr%iw_mesh(iw))
+     gwr%wt_sin_wgs(iw, it) = gwr%wt_sin_wgs(iw, it) * sin(gwr%tau_mesh(it) * gwr%iw_mesh(iw))
    end do
  end do
 
  ABI_MALLOC(mat, (gwr%ntau, gwr%ntau))
- mat = matmul(gwr%t2w_cos_wgs, gwr%w2t_cos_wgs)
- !mat = matmul(gwr%w2t_cos_wgs, gwr%t2w_cos_wgs)
+ mat = matmul(gwr%wt_cos_wgs, gwr%tw_cos_wgs)
  do it=1,gwr%ntau
    mat(it, it) = mat(it, it) - one
  end do
  !print *, "mat", mat
- !call print_arr(mat)
- !mat = matmul(transpose(gwr%t2w_cos_wgs), transpose(gwr%w2t_cos_wgs))
- !mat = matmul(gwr%t2w_cos_wgs, transpose(gwr%w2t_cos_wgs))
+ gwr%cosft_duality_error = maxval(abs(mat))
 
- gwr%cosft_duality_err = maxval(abs(mat))
-
- call wrtout(std_out, sjoin("Max_{ij} |CT CT^{-1} - I|", ftoa(gwr%cosft_duality_err)))
+ call wrtout(std_out, sjoin("Max_{ij} |CT CT^{-1} - I|", ftoa(gwr%cosft_duality_error)))
  call wrtout(std_out, sjoin("ft_max_error", ltoa(gwr%ft_max_error)))
 
  ABI_FREE(mat)
@@ -1431,9 +1426,9 @@ subroutine gwr_free(gwr)
  ABI_SFREE(gwr%tau_wgs)
  ABI_SFREE(gwr%iw_mesh)
  ABI_SFREE(gwr%iw_wgs)
- ABI_SFREE(gwr%w2t_cos_wgs)
- ABI_SFREE(gwr%t2w_cos_wgs)
- ABI_SFREE(gwr%t2w_sin_wgs)
+ ABI_SFREE(gwr%tw_cos_wgs)
+ ABI_SFREE(gwr%wt_cos_wgs)
+ ABI_SFREE(gwr%wt_sin_wgs)
  ABI_SFREE(gwr%kcalc)
  ABI_SFREE(gwr%bstart_ks)
  ABI_SFREE(gwr%bstop_ks)
@@ -1794,13 +1789,13 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
          if (eig_nk < tol6) then
            ipm = 1
            gt_cfact = j_dpc * exp(gwr%tau_mesh(itau) * eig_nk)
-           ! Vasp convention
+           !! Vasp convention
            !ipm = 2
            !gt_cfact = exp(gwr%tau_mesh(itau) * eig_nk)
          else if (eig_nk > tol6) then
            ipm = 2
            gt_cfact = -j_dpc * exp(-gwr%tau_mesh(itau) * eig_nk)
-           ! Vasp convention
+           !! Vasp convention
            !ipm = 1
            !gt_cfact = -exp(-gwr%tau_mesh(itau) * eig_nk)
          else
@@ -2061,7 +2056,7 @@ subroutine gwr_get_green_gpr(gwr, my_it, my_is, desc_kbz, gt_gpr)
 !scalars
  integer,parameter :: ndat1 = 1
  integer :: my_ikf, ik_bz, ig2, ipm, npwsp, col_bsize
- real(dp) :: cpu, wall, gflops
+ !real(dp) :: cpu, wall, gflops
  real(dp) :: kk_bz(3)
  type(matrix_scalapack) :: rgp
  type(matrix_scalapack),target :: gt_kbz(2)
@@ -2328,9 +2323,9 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
  real(dp) :: cpu, wall, gflops !, tau
  logical :: sum_spins_
 !arrays
- real(dp),pointer :: weights(:,:)
- real(dp),allocatable :: my_weights(:,:)
- complex(dp):: my_cwork(gwr%my_ntau), glob_cwork(gwr%ntau)
+ real(dp), pointer :: weights_ptr(:,:)
+ real(dp) :: wgt_globmy(gwr%ntau, gwr%my_ntau)
+ complex(dp):: cwork_myit(gwr%my_ntau), glob_cwork(gwr%ntau)
  type(matrix_scalapack), pointer :: mats(:)
 
 ! *************************************************************************
@@ -2350,7 +2345,7 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
      ABI_CHECK(gwr%wc_space == "iomega", sjoin("mode:", mode, "with what:", what, "and wc_space:", gwr%wc_space))
      gwr%wc_space = "itau"
    end if
-   weights => gwr%w2t_cos_wgs
+   weights_ptr => gwr%tw_cos_wgs
 
  case ("it2w")
    ! From tau to omega
@@ -2362,19 +2357,17 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
      ABI_CHECK(gwr%wc_space == "itau", sjoin("mode:", mode, " with what:", what, "and wc_space:", gwr%wc_space))
      gwr%wc_space = "iomega"
    end if
-   weights => gwr%t2w_cos_wgs
+   weights_ptr => gwr%wt_cos_wgs
 
  case default
    ABI_ERROR(sjoin("Wrong mode:", mode))
  end select
 
  ! Extract my weights.
- ABI_MALLOC(my_weights, (gwr%ntau, gwr%my_ntau))
-
  do my_it=1,gwr%my_ntau
    itau = gwr%my_itaus(my_it)
    do iw=1,gwr%ntau
-     my_weights(iw, my_it) = weights(iw, itau)
+     wgt_globmy(iw, my_it) = weights_ptr(iw, itau)
    end do
  end do
 
@@ -2398,11 +2391,11 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
          ! TODO: Here we can block over ig1 and call zgemv to reduce the number of MPI communications.
          do my_it=1,gwr%my_ntau
            itau = gwr%my_itaus(my_it)
-           my_cwork(my_it) = mats(itau)%buffer_cplx(ig1, ig2)
+           cwork_myit(my_it) = mats(itau)%buffer_cplx(ig1, ig2)
          end do
 
          do itau=1,gwr%ntau
-           glob_cwork(itau) = dot_product(my_weights(itau, :), my_cwork)
+           glob_cwork(itau) = dot_product(wgt_globmy(itau, :), cwork_myit)
          end do
 
          call xmpi_sum(glob_cwork, gwr%tau_comm%value, ierr)
@@ -2453,8 +2446,6 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
       end do ! my_is
    end do ! my_iqi
  end if
-
- ABI_FREE(my_weights)
 
  call cwtime_report(" gwr_cos_transform:", cpu, wall, gflops)
 
@@ -2624,9 +2615,8 @@ subroutine print_gsort_(mat, desc, cryst)
      cwork(is1, is2) = mat%buffer_cplx(il_g1, il_g2)
    end do
  end do
- !stop
 
- call print_arr(cwork)
+ call print_arr(cwork) ! * 22.218005295675198)
  ABI_FREE(cwork)
 
 end subroutine print_gsort_
@@ -2687,7 +2677,7 @@ subroutine gwr_print(gwr, header, unit)
  call ydoc%add_real("ft_max_err_t2w_cos", gwr%ft_max_error(1))
  call ydoc%add_real("ft_max_err_w2t_cos", gwr%ft_max_error(2))
  call ydoc%add_real("ft_max_err_t2w_sin", gwr%ft_max_error(3))
- call ydoc%add_real("cosft_duality_err", gwr%cosft_duality_err)
+ call ydoc%add_real("cosft_duality_error", gwr%cosft_duality_error)
 
  ! Print imaginary time/frequency mesh with weights.
  call ydoc%open_tabular("Minimax imaginary tau/omega mesh", comment="tau, weight(tau), omega, weight(omega)")
@@ -2778,7 +2768,7 @@ subroutine gwr_build_tchi(gwr)
    sc_ngfft(4:6) = sc_ngfft(1:3)
    sc_nfft = product(sc_ngfft(1:3))
    !sc_augsize = product(sc_ngfft(4:6))
-   call wrtout(std_out, sjoin(" Building chi0 = iG0G0 with FFTs in the supercell:", ltoa(sc_ngfft(1:3))))
+   call wrtout(std_out, sjoin(" Building chi0 = iG0G0 with FFTs in the supercell:", ltoa(sc_ngfft(1:3))), pre_newlines=2)
 
    ABI_CALLOC(gt_scbox, (sc_nfft * gwr%nspinor * ndat1, 2))
    ABI_CALLOC(chit_scbox, (sc_nfft * gwr%nspinor * ndat1))
@@ -2847,14 +2837,14 @@ subroutine gwr_build_tchi(gwr)
          call plan_gp2rp%execute_ip_dpc(gt_scbox)
          !gt_scbox = gt_scbox * sc_nfft / gwr%cryst%ucvol
 
-         ! Compute tchi(R',r) for this r
-         !chit_scbox = -j_dpc * gt_scbox(:, 1) * gt_scbox(:, 2) * spin_fact
+         ! Compute tchi(R',r) for this r.
+         !chit_scbox = -j_dpc * gt_scbox(:, 1) * conjg(gt_scbox(:, 2)) ! * spin_fact
          chit_scbox = gt_scbox(:, 1) * conjg(gt_scbox(:, 2)) ! * spin_fact
 
          ! Back to tchi(G'=q+g',r) space immediately.
          call plan_rp2gp%execute(chit_scbox)
 
-         ! Extract tchi_q(g', r) on the g-sphere from the FFT box in the supercell.
+         ! Extract tchi_q(g',r) on the g-sphere from the FFT box in the supercell.
          ! not necessarly equal to the one used for the Green's function.
          ! NB: For the time being I'm assuming k-mesh == q-mesh.
          ! Only q-points in the IBZ are considered.
@@ -2863,7 +2853,7 @@ subroutine gwr_build_tchi(gwr)
            qq_ibz = gwr%qibz(:, iq_ibz)
            desc_q => gwr%tchi_desc_qibz(iq_ibz)
 
-           ! Compute q + g
+           ! Compute q+g vectors.
            do ig=1,desc_q%npw
              chi_scg(:,ig) = nint(qq_ibz * gwr%ngqpt) + gwr%ngqpt * desc_q%gvec(:,ig)
            end do
@@ -2888,15 +2878,16 @@ subroutine gwr_build_tchi(gwr)
          iq_ibz = gwr%my_qibz_inds(my_iqi)
          desc_q => gwr%tchi_desc_qibz(iq_ibz)
 
-         ! Note minus sign in q
+         ! Note minus sign in q.
          call calc_ceikr(-gwr%qibz(:,iq_ibz), gwr%g_ngfft, gwr%g_nfft, gwr%nspinor, cemiqr)
 
-         ! MPI-transposition
+         ! MPI-transposition: tchi_q(g',r) => tchi_q(r,g')
          call chiq_gpr(my_iqi)%ptrans("N", chi_rgp)
 
          ABI_CHECK(size(gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx, dim=2) == size(chi_rgp%buffer_cplx, dim=2), "len2")
 
          ! FFT r --> g along the first dimension: tchi_q(r,g') --> tchi_q(g,g')
+         ! Results stored in gwr%tchi_qibz.
          do ig2=1,chi_rgp%sizeb_local(2)
 
            ABI_CHECK(size(chi_rgp%buffer_cplx(:, ig2)) == gwr%g_nfft * gwr%nspinor, "gwr%g_nfft * gwr%nspinor")
@@ -2908,13 +2899,13 @@ subroutine gwr_build_tchi(gwr)
                        gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx(:, ig2))  ! ug(out)
 
            gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx(:, ig2) = &
-           gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx(:, ig2) * cemiqr  * gwr%cryst%ucvol
+           gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx(:, ig2) * cemiqr * gwr%cryst%ucvol
            !gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx(:, ig2) * cemiqr  ! * gwr%g_nfft / gwr%cryst%ucvol
          end do
          call chi_rgp%free()
-       end do
+       end do ! my_iqi
 
-       write(msg,'(2(a,i0),a)')" My itau [", my_it, "/", gwr%my_ntau, "]"
+       write(msg,'(3(a,i0),a)')" My itau [", my_it, "/", gwr%my_ntau, "] (tot: ", gwr%ntau, ")"
        call cwtime_report(msg, cpu_tau, wall_tau, gflops_tau)
      end do ! my_it
    end do ! spin
@@ -3013,7 +3004,7 @@ subroutine gwr_build_tchi(gwr)
           end do ! my_ikf
         end do ! iq_ibz
 
-       write(msg,'(2(a,i0),a)')" My itau [", my_it, "/", gwr%my_ntau, "]"
+       write(msg,'(3(a,i0),a)')" My itau [", my_it, "/", gwr%my_ntau, "] (tot: ", gwr%ntau, ")"
        call cwtime_report(msg, cpu_tau, wall_tau, gflops_tau)
      end do ! my_it
    end do ! spin
@@ -3128,7 +3119,7 @@ subroutine gwr_print_trace(gwr, what)
    if (xmpi_comm_rank(gwr%comm) == master) then
      do spin=1,gwr%nsppol
        call wrtout(units, sjoin(" Trace of:", what, "for spin:", itoa(spin), "for testing purposes:"))
-       call wrtout(units, comment, newlines=1)
+       call wrtout(units, comment, pre_newlines=2)
        call print_arr(ctrace3(:,:,spin), unit=ab_out)
        call print_arr(ctrace3(:,:,spin), unit=std_out)
      end do
@@ -3151,7 +3142,7 @@ subroutine gwr_print_trace(gwr, what)
        end do
      end do
    end do
-   comment = "(ik_ibz, itau) table"
+   comment = " (ik_ibz, itau) table"
 
    call xmpi_sum_master(ctrace4, master, gwr%tks_comm%value, ierr)
 
@@ -3160,8 +3151,8 @@ subroutine gwr_print_trace(gwr, what)
        do ipm=1,2
          call wrtout(units, sjoin(" Trace of:", what, "for ipm:", itoa(ipm), ", spin:", itoa(spin), "for testing purposes:"))
          call wrtout(units, comment, newlines=1)
-         call print_arr(ctrace4(:,:,ipm, spin), unit=ab_out)
-         call print_arr(ctrace4(:,:,ipm, spin), unit=std_out)
+         call print_arr(ctrace4(:,:, ipm, spin), unit=ab_out)
+         call print_arr(ctrace4(:,:, ipm, spin), unit=std_out)
        end do
      end do
    end if
@@ -3211,7 +3202,7 @@ subroutine gwr_build_wc(gwr)
 ! *************************************************************************
 
  call cwtime(cpu_all, wall_all, gflops_all, "start")
- call wrtout(std_out, " Building correlated screening Wc from irreducible chi ...")
+ call wrtout(std_out, " Building correlated screening Wc from irreducible chi ...", pre_newlines=2)
 
  ABI_CHECK(gwr%tchi_space == "iomega", sjoin("tchi_space: ", gwr%tchi_space, " != iomega"))
  ABI_CHECK(gwr%wc_space == "none", sjoin("wc_space: ", gwr%wc_space, " != none"))
@@ -3432,7 +3423,7 @@ subroutine gwr_build_sigmac(gwr)
  sc_ngfft(4:6) = sc_ngfft(1:3)
  sc_nfft = product(sc_ngfft(1:3))
  !sc_augsize = product(sc_ngfft(4:6))
- call wrtout(std_out, sjoin(" Building Sigma_c = i GWc with FFTs in the supercell:", ltoa(sc_ngfft(1:3))))
+ call wrtout(std_out, sjoin(" Building Sigma_c = i GWc with FFTs in the supercell:", ltoa(sc_ngfft(1:3))), pre_newlines=2)
 
  ABI_CALLOC(gt_scbox, (sc_nfft * gwr%nspinor * ndat1, 2))
  ABI_CALLOC(wct_scbox, (sc_nfft * gwr%nspinor * ndat1))
@@ -3478,7 +3469,7 @@ subroutine gwr_build_sigmac(gwr)
      my_nr = gt_gpr(1, 1)%sizeb_local(2)
      ABI_CHECK(my_nr == wc_gpr(1)%sizeb_local(2), "my_nr != wc_gpr(1)%sizeb_local(2)")
 
-     ! Loop over the second index r (MPI-distributed in g_comm).
+     ! Loop over the second index r that is MPI-distributed in g_comm.
      do my_ir=1,my_nr
 
        ! Insert G_k(g',r) in G'-space in the supercell FFT box for fixed r.
@@ -3509,13 +3500,13 @@ subroutine gwr_build_sigmac(gwr)
 
        ! Insert Wc_q(g',r) in G'-space in the supercell FFT box for fixed r.
        ! Note that we need to take the union of (q,g') for q in the BZ.
-       ! Also, note ngpt instead of ngkpt.
+       ! Also, note the use ngqpt instead of ngkpt.
        wct_scbox = zero
        do my_iqf=1,gwr%my_nqbz
          iq_bz = gwr%my_qbz_inds(my_iqf)
          iq_ibz = gwr%my_qbz2ibz(1, my_iqf)
 
-         ! Compute q + g
+         ! Compute q + g vectors.
          desc_q => desc_qbz(my_iqf)
          do ig=1,desc_q%npw
            wc_scg(:,ig) = nint(gwr%qbz(:, iq_bz) * gwr%ngqpt) + gwr%ngqpt * desc_q%gvec(:,ig)
@@ -3559,7 +3550,7 @@ subroutine gwr_build_sigmac(gwr)
      call desc_array_free(desc_qbz)
      call slk_array_free(wc_gpr)
 
-     write(msg,'(2(a,i0),a)')" My itau [", my_it, "/", gwr%my_ntau, "]"
+     write(msg,'(3(a,i0),a)')" My itau [", my_it, "/", gwr%my_ntau, "] (tot: ", gwr%ntau, ")"
      call cwtime_report(msg, cpu_tau, wall_tau, gflops_tau)
    end do ! my_it
 
@@ -3616,8 +3607,8 @@ subroutine ft_t2w(t_vals, w_vals)
  do iw=1,gwr%ntau
    !w_vals(1, iw)
    !w_vals(2, iw)
-   !matmul(gwr%t2w_cos_wgs(iw,:), t_odd)
-   !matmul(gwr%t2w_sin_wgs(iw,:), t_even)
+   !matmul(gwr%wt_cos_wgs(iw,:), t_odd)
+   !matmul(gwr%wt_sin_wgs(iw,:), t_even)
  end do
 
 end subroutine ft_t2w
