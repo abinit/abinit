@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -148,12 +144,6 @@ contains
 !!     of the oscillator matrix elements. In case of G_oW_o and GW_o calculations, however,
 !!     it is possible to make an invariant by just including all the degenerate states and
 !!     averaging the final results over the degenerate subset.
-!!
-!! PARENTS
-!!      m_sigma_driver
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -875,12 +865,6 @@ end subroutine cohsex_me
 !! OUTPUT
 !! sigcohme=partial contribution to the matrix element of $<jb k \sigma|\Sigma_{COH} | kb k \sigma>$
 !!  coming from this single q-point
-!!
-!! PARENTS
-!!      m_cohsex
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 

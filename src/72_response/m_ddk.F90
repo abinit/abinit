@@ -14,8 +14,6 @@
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -207,10 +205,6 @@ CONTAINS
 !!
 !! INPUTS
 !!  prefix: Prefix for output EVK file. Empty if output files are not wanted
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -626,10 +620,6 @@ end subroutine ddkstore_compute_ddk
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine ddkstore_free(self)
@@ -659,10 +649,6 @@ end subroutine ddkstore_free
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -711,10 +697,6 @@ end subroutine ddk_red2car
 !! ngfft(18)=contain all needed information about 3D FFT
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -794,10 +776,6 @@ end function ddkop_new
 !!  istwkf_k: defines storage of wavefunctions for this k-point
 !!  npw_k: Number of planewaves.
 !!  kg_k(3,npw_k)=reduced planewave coordinates.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -892,10 +870,6 @@ end subroutine ddkop_setup_spin_kpoint
 !!  gh1c(2,npw1*nspinor)= <G|H^(1)|C> or  <G|H^(1)-lambda.S^(1)|C> on the k+q sphere
 !!                        (only kinetic+non-local parts if optlocal=0)
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine ddkop_apply(self, eig0nk, npw_k, nspinor, cwave, cwaveprj)
@@ -974,10 +948,6 @@ end subroutine ddkop_apply
 !!  nspinor: Number of spinor components.
 !!  brag(2,npw_k*nspinor)=input wavefunction in reciprocal space
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 function ddkop_get_braket(self, eig0mk, istwf_k, npw_k, nspinor, brag, mode) result(vk)
@@ -1050,10 +1020,6 @@ end function ddkop_get_braket
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 function ddkop_get_vdiag(self, eig0nk, istwf_k, npw_k, nspinor, cwave, cwaveprj, mode) result(vk)
@@ -1092,10 +1058,6 @@ end function ddkop_get_vdiag
 !!  Simplified interface to compute the off-diagonal matrix elemente of the velocity operator in cartesian coords.
 !!
 !! INPUTS
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1136,10 +1098,6 @@ end function ddkop_get_vnondiag
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine ddkop_free(self)
@@ -1176,10 +1134,6 @@ end subroutine ddkop_free
 !! FUNCTION
 !!
 !! INPUTS
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

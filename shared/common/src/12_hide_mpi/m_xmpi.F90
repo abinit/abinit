@@ -12,8 +12,6 @@
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
 !! TODO
 !!  Get rid of xmpi_paral. Sequential code is the **exception**. Developers should code parallel
 !!  code or code that is compatible both with MPI and seq (thanks to the wrappers provided by this module)
@@ -701,13 +699,6 @@ CONTAINS  !===========================================================
 !! INPUTS
 !!  None
 !!
-!! PARENTS
-!!      abinit,abitk,aim,anaddb,atdep,band2eps,conducti,cut3d,dummy_tests
-!!      fftprof,fold2Bloch,ioprof,lapackprof,macroave,mrgddb,mrgdv,mrggkk
-!!      mrgscr,multibinit,optic,testtransposer,ujdet,vdw_kernelgen
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine xmpi_init()
@@ -799,11 +790,6 @@ end subroutine xmpi_init
 !! FUNCTION
 !!  Set internal flag to use MPI_IN_PLACE whenever possible.
 !!
-!! PARENTS
-!!      m_argparse
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine xmpi_set_inplace_operations(bool)
@@ -827,10 +813,6 @@ end subroutine xmpi_set_inplace_operations
 !! FUNCTION
 !! Get free unit (emulate F2008 newunit for portability reasons)
 !! Return -1 if no unit is found.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -860,12 +842,6 @@ end function xmpi_get_unit
 !!
 !! INPUTS
 !!  None
-!!
-!! PARENTS
-!!      aim,atdep,band2eps,conducti,cut3d,fold2Bloch,m_multibinit_driver
-!!      macroave,mrggkk,testtransposer,ujdet,vdw_kernelgen
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -904,11 +880,6 @@ end subroutine xmpi_end
 !!  [mpierr]=Error code to return to invoking environment.
 !!  [msg]=User message
 !!  [exit_status]=optional, shell return code, default 1
-!!
-!! PARENTS
-!!      m_errors,m_initcuda,m_libpaw_tools,m_mpinfo,m_xmpi
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -996,11 +967,6 @@ end subroutine xmpi_abort
 !! NOTES
 !!  By default, it uses "call exit(1)", that is not completely portable.
 !!
-!! PARENTS
-!!      m_xmpi
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine sys_exit(exit_status)
@@ -1038,11 +1004,6 @@ end subroutine sys_exit
 !!
 !! INPUTS
 !!  unt=Unit number for formatted output.
-!!
-!! PARENTS
-!!      abinit,m_argparse,m_errors
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1104,8 +1065,6 @@ end subroutine xmpi_show_info
 !! OUTPUT
 !!  xmpi_comm_rank=The rank of the node inside comm
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 function xmpi_comm_rank(comm)
@@ -1147,8 +1106,6 @@ end function xmpi_comm_rank
 !! OUTPUT
 !!  xmpi_comm_size=The number of processors inside comm. Return 0 if comm = xmpi_comm_null
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 function xmpi_comm_size(comm)
@@ -1184,10 +1141,6 @@ end function xmpi_comm_size
 !!
 !! INPUTS
 !!  comm=MPI communicator.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1239,10 +1192,6 @@ end subroutine xmpi_comm_free_0D
 !! INPUTS
 !!  comms(:)=MPI communicators
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine xmpi_comm_free_1D(comms)
@@ -1287,10 +1236,6 @@ end subroutine xmpi_comm_free_1D
 !!
 !! INPUTS
 !!  comms=MPI communicator.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1339,10 +1284,6 @@ end subroutine xmpi_comm_free_2D
 !!
 !! INPUTS
 !!  comms=MPI communicator.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1393,11 +1334,6 @@ end subroutine xmpi_comm_free_3D
 !!
 !! INPUTS
 !!  spaceGroup=MPI group
-!!
-!! PARENTS
-!!      m_paw_tools,m_wfd,m_xmpi
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1451,11 +1387,6 @@ end subroutine xmpi_group_free
 !! OUTPUT
 !!  newgroup= new group derived from above, in the order defined by ranks
 !!
-!! PARENTS
-!!      m_wfd
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine xmpi_group_incl(group,nranks,ranks,newgroup,mpierr)
@@ -1495,11 +1426,6 @@ end subroutine xmpi_group_incl
 !!
 !! OUTPUT
 !!  newcomm=new communicator
-!!
-!! PARENTS
-!!      m_wfd
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1545,8 +1471,6 @@ end subroutine xmpi_comm_create
 !! OUTPUT
 !!  [my_rank_in_group]=optional: my rank in the group of new sub-communicator
 !!  xmpi_subcomm=new (sub-)communicator
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -1610,11 +1534,6 @@ end function xmpi_subcomm
 !!  spaceGroup=The group associated to comm.
 !!  mpierr=error code returned
 !!
-!! PARENTS
-!!      m_paw_tools,m_wfd,m_xmpi
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine xmpi_comm_group(comm,spaceGroup,mpierr)
@@ -1653,11 +1572,6 @@ end subroutine xmpi_comm_group
 !! OUTPUT
 !!  mpierr=error code returned
 !!  output_comm=new splitted communicator
-!!
-!! PARENTS
-!!      m_sigmaph
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1699,11 +1613,6 @@ end subroutine xmpi_comm_split
 !!  mpierr=error code returned
 !!  ranks2(nrank)=array of corresponding ranks in group2,
 !!                xmpi_undefined when no correspondence exists
-!!
-!! PARENTS
-!!      m_paw_tools,m_xmpi
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1751,11 +1660,6 @@ end subroutine xmpi_group_translate_ranks
 !!  to_ranks(nrank)=array of corresponding ranks in to_comm
 !!                xmpi_undefined when no correspondence exists
 !!
-!! PARENTS
-!!      m_paral_pert
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine xmpi_comm_translate_ranks(from_comm,nrank,from_ranks,to_comm,to_ranks)
@@ -1798,20 +1702,6 @@ end subroutine xmpi_comm_translate_ranks
 !! INPUTS
 !!  comm=MPI communicator
 !!
-!! PARENTS
-!!      m_Ctqmcoffdiag,m_abihist,m_alloc_hamilt_gpu,m_bse_io,m_calc_ucrpa
-!!      m_chebfi,m_datafordmft,m_ddk,m_dfpt_looppert,m_dfpt_nstwf,m_dfpt_scfcv
-!!      m_dtfil,m_dvdb,m_errors,m_exc_build,m_exc_diago,m_exc_itdiago
-!!      m_exc_spectra,m_fit_polynomial_coeff,m_forctqmc,m_green,m_gstateimg
-!!      m_gwrdm,m_haydock,m_hdr,m_io_kss,m_io_redirect,m_ioarr,m_iowf,m_ipi
-!!      m_ksdiago,m_mkrho,m_mlwfovlp,m_mover_effpot,m_paw_mkaewf,m_paw_mkrho
-!!      m_plowannier,m_polynomial_coeff,m_precpred_1geo
-!!      m_primitive_potential_list,m_rf2_init,m_sigma_driver,m_sigmaph,m_slk
-!!      m_spmat_csr,m_tddft,m_vtorho,m_vtorhorec,m_wfd,m_wfd_optic,m_wffile
-!!      m_wfk,m_wfk_analyze,testtransposer
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine xmpi_barrier(comm)
@@ -1850,11 +1740,6 @@ end subroutine xmpi_barrier
 !! OUTPUT
 !!  name= the host name transformed to integer variable.
 !!  mpierr=Status error.
-!!
-!! PARENTS
-!!      m_gpu_detect
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1904,11 +1789,6 @@ end subroutine xmpi_name
 !!  flag= True if a message with the specified source, tag, and communicator is available
 !!  mpierr= status error
 !!
-!! PARENTS
-!!      m_paw_an,m_paw_ij,m_pawfgrtab,m_pawrhoij
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine xmpi_iprobe(source,tag,mpicomm,flag,mpierr)
@@ -1949,12 +1829,6 @@ end subroutine xmpi_iprobe
 !!
 !! OUTPUT
 !!  mpierr= status error
-!!
-!! PARENTS
-!!      m_dfpt_scfcv,m_dvdb,m_fftw3,m_mover,m_paw_an,m_paw_ij,m_paw_occupancies
-!!      m_pawfgrtab,m_pawrhoij,m_scfcv_core,m_sg2002,m_sigmaph
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1997,11 +1871,6 @@ end subroutine xmpi_wait
 !! OUTPUT
 !!  mpierr= status error
 !!
-!! PARENTS
-!!      m_xmpi
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine xmpi_waitall_1d(array_of_requests, mpierr)
@@ -2043,10 +1912,6 @@ end subroutine xmpi_waitall_1d
 !! OUTPUT
 !!  mpierr= status error
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine xmpi_waitall_2d(array_of_requests, mpierr)
@@ -2084,10 +1949,6 @@ end subroutine xmpi_waitall_2d
 !!
 !! OUTPUT
 !!  mpierr= status error
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2128,10 +1989,6 @@ end subroutine xmpi_request_free
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2174,8 +2031,6 @@ end subroutine xmpi_error_string
 !! SIZE EFFECTS
 !!  comm= communicator (should be intent(in) but is intent(inout) in some
 !!             OMPI implementation ; known as a bug)
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -2249,10 +2104,6 @@ end subroutine xmpi_comm_set_errhandler
 !!
 !!  are not executed. Moreover allocation such as foo(my_start:my_stop) will generate a zero-sized array.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine xmpi_split_work_i4b(ntasks, comm, my_start, my_stop)
@@ -2301,11 +2152,6 @@ end subroutine xmpi_split_work_i4b
 !!  my_ntasks: Number of tasks received by this rank. May be zero if ntasks > nprocs.
 !!  my_inds(my_ntasks): List of tasks treated by this rank. Allocated by the routine. May be zero-sized.
 !!
-!! PARENTS
-!!      m_sigmaph
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine xmpi_split_block(ntasks, comm, my_ntasks, my_inds)
@@ -2345,11 +2191,6 @@ end subroutine xmpi_split_block
 !! OUTPUT
 !!  my_ntasks: Number of tasks received by this rank. May be zero if ntasks > nprocs.
 !!  my_inds(my_ntasks): List of tasks treated by this rank. Allocated by the routine. May be zero-sized.
-!!
-!! PARENTS
-!!      m_phgamma,m_sigmaph
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2402,11 +2243,6 @@ end subroutine xmpi_split_cyclic
 !! OUTPUT
 !!  my_ntasks: Number of tasks received by this rank. May be zero if ntasks > nprocs.
 !!  my_inds(my_ntasks): List of tasks treated by this rank. Allocated by the routine. May be zero-sized.
-!!
-!! PARENTS
-!!      m_phgamma
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2471,11 +2307,6 @@ end subroutine xmpi_split_list
 !! OUTPUT
 !!  istart(nprocs),istop(nprocs)= indices defining the initial and final task for each processor
 !!
-!! PARENTS
-!!      m_exc_build,m_phonons,m_screening,m_screening_driver,m_skw
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine xmpi_split_work2_i4b(ntasks, nprocs, istart, istop)
@@ -2521,11 +2352,6 @@ end subroutine xmpi_split_work2_i4b
 !!
 !! OUTPUT
 !!  istart(nprocs),istop(nprocs)= indices defining the initial and final task for each processor
-!!
-!! PARENTS
-!!      m_exc_build
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2574,10 +2400,6 @@ end subroutine xmpi_split_work2_i8b
 !! OUTPUT
 !!  task_distrib(:,:,:,:) = Contains the rank of the node that is taking care of this particular set of loop indeces.
 !!  Tasks are distributed across the nodes in column-major order.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2652,8 +2474,6 @@ end subroutine xmpi_distab_4D
 !! OUTPUT
 !!  True if this node will treat itask (replicas are possible if nprocs > ntasks)
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 pure function xmpi_distrib_with_replicas(itask,ntasks,rank,nprocs) result(bool)
@@ -2726,10 +2546,6 @@ end function xmpi_distrib_with_replicas
 !!
 !!  From MPI4 specification, this routine is useless as large-count MPI communications
 !!    can be called with the use of the MPI_count datatype (instead of INTEGER).
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3004,10 +2820,6 @@ end subroutine xmpi_largetype_create
 !!  largetype= (INTEGER) MPI type to release
 !!  largetype_op= (INTEGER) MPI user-defined operation associated to largetype type
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine xmpi_largetype_free(largetype,largetype_op)
@@ -3087,11 +2899,6 @@ end subroutine xmpi_largetype_free
 !! new_type=new datatype (handle)
 !! mpierr=MPI status error
 !!
-!! PARENTS
-!!      m_slk,m_wffile,m_wfk,m_xmpi
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #ifdef HAVE_MPI_IO
@@ -3150,8 +2957,6 @@ end subroutine xmpio_type_struct
 !! OUTPUT
 !!  bsize_frm=Byte size of the Fortran record marker.
 !!  mpi_type_frm=MPI type of the marker.
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -3319,11 +3124,6 @@ end subroutine xmpio_get_info_frm
 !!     input: file pointer used to access the Fortran marker.
 !!     output: new offset updated after the reading, depending on advance.
 !!
-!! PARENTS
-!!      m_bse_io,m_exc_diago,m_exc_itdiago,m_hdr,m_io_screening,m_xmpi
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #ifdef HAVE_MPI_IO
@@ -3448,11 +3248,6 @@ end subroutine xmpio_read_frm
 !!  offset=
 !!     input: offset of  the Fortran marker.
 !!     output: new offset updated after the writing, depending on advance.
-!!
-!! PARENTS
-!!      m_ioarr
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3587,11 +3382,6 @@ end subroutine xmpio_write_frm
 !!  new_type=New MPI type.
 !!  mpierr= MPI error code
 !!
-!! PARENTS
-!!      m_wfk
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #ifdef HAVE_MPI_IO
@@ -3681,11 +3471,6 @@ end subroutine xmpio_create_fstripes
 !!  new_type=New MPI type.
 !!  mpierr= MPI error code
 !!
-!! PARENTS
-!!      m_exc_build,m_exc_itdiago,m_mpiotk,m_wfk
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #ifdef HAVE_MPI_IO
@@ -3769,11 +3554,6 @@ end subroutine xmpio_create_fsubarray_2D
 !!    to make it more efficient) without having to change the client code.
 !!  new_type=New MPI type.
 !!  mpierr= MPI error code
-!!
-!! PARENTS
-!!      m_mpiotk
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3870,11 +3650,6 @@ end subroutine xmpio_create_fsubarray_3D
 !!    to make it more efficient) without having to change the client code.
 !!  new_type=New MPI type.
 !!  mpierr= MPI error code
-!!
-!! PARENTS
-!!      m_mpiotk
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3980,11 +3755,6 @@ end subroutine xmpio_create_fsubarray_4D
 !!
 !! OUTPUT
 !!  ierr=A non-zero error code signals failure.
-!!
-!! PARENTS
-!!      m_bse_io,m_exc_itdiago,m_slk,m_wfk
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -4167,10 +3937,6 @@ end subroutine xmpio_check_frmarkers
 !!     input: file pointer used to access the Fortran marker.
 !!     output: new offset updated after the reading, depending on advance.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #ifdef HAVE_MPI_IO
@@ -4263,10 +4029,6 @@ end subroutine xmpio_read_int
 !!     input: file pointer used to access the Fortran marker.
 !!     output: new offset updated after the reading, depending on advance.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #ifdef HAVE_MPI_IO
@@ -4336,8 +4098,6 @@ end subroutine xmpio_read_dp
 !! FUNCTION
 !!  Returns .TRUE. if offset cannot be stored in a Fortran integer of kind XMPI_ADDRESS_KIND.
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 #ifdef HAVE_MPI_IO
@@ -4381,11 +4141,6 @@ end function xmpio_max_address
 !!
 !! OUTPUT
 !!  ierr=A non-zero error code signals failure.
-!!
-!! PARENTS
-!!      m_exc_build,m_exc_itdiago,m_ioarr,m_slk,m_wfk
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -4581,11 +4336,6 @@ end subroutine xmpio_write_frmarkers
 !!
 !!  File views for C-streams is not optimal since one can use a single slice of contigous data.
 !!
-!! PARENTS
-!!      m_exc_build
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #ifdef HAVE_MPI_IO
@@ -4734,11 +4484,6 @@ end subroutine xmpio_create_fherm_packed
 !!     offset_err=1 so that the caller will know that several MPI-IO reads are nedded to
 !!     read the file.
 !!
-!! PARENTS
-!!      m_bse_io
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #ifdef HAVE_MPI_IO
@@ -4864,11 +4609,6 @@ end subroutine xmpio_create_coldistr_from_fpacked
 !!  1) block_displ is given in bytes due to the presence of the marker.
 !!     If the displacement of an element is too large, the routine returns
 !!     offset_err=1 so that the caller knows that several MPI-IO reads are required to (read| write) the file.
-!!
-!! PARENTS
-!!      m_bse_io
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -5061,10 +4801,6 @@ end subroutine xmpio_create_coldistr_from_fp3blocks
 !!      "12" or "21" if both dimensions should be optimized (if not possibile the first one gets optimized)
 !!      "1" or "2" to optimize only one dimension.
 !!  Return: exit status in ierr.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

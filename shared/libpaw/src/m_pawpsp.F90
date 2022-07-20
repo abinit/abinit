@@ -130,11 +130,6 @@ CONTAINS
 !!  j_l(q) is a spherical Bessel function;
 !!  f_l(q) = $ \int_0^{rmax}[j_l(2\pi q r) u_l(r)  r dr]$
 !!
-!! PARENTS
-!!      m_paw_init,m_pawpsp
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pawpsp_nl(ffspl,indlmn,lmnmax,lnmax,mqgrid,qgrid,radmesh,wfll)
@@ -294,11 +289,6 @@ end subroutine pawpsp_nl
 !!     + q^2 4\pi\int[(\frac{\sin(2\pi q r)}{2\pi q r})(r^2 V(r)+r Zv)dr].
 !!\end{equation} }}
 !!  yp1,ypn=derivatives of q^2 V(q) wrt q at q=0 and q=qmax (needed for spline fitter).
-!!
-!! PARENTS
-!!      m_pawpsp
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -462,11 +452,6 @@ end subroutine pawpsp_lo
 !!            = 4\pi\int[(\frac{\sin(2\pi q r)}{2\pi q r})(r^2 n(r))dr].
 !!\end{equation} }}
 !!  yp1,ypn=derivatives of n(q) wrt q at q=0 and q=qmax (needed for spline fitter).
-!!
-!! PARENTS
-!!      m_dfpt_elt,m_pawpsp,m_psps
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -733,11 +718,6 @@ end subroutine pawpsp_cg
 !!   shape_type= 1 ; gl(r)=k(r).r^l; k(r)=exp[-(r/sigma)**lambda]
 !!   shape_type= 2 ; gl(r)=k(r).r^l; k(r)=[sin(pi*r/rshp)/(pi*r/rshp)]**2 if r<=rshp
 !!   shape_type= 3 ; gl(r)=Alpha(1,l)*jl(q(1,l)*r)+Alpha(2,l)*jl(q(2,l)*r) for each l
-!!
-!! PARENTS
-!!      m_pawpsp
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1363,11 +1343,6 @@ end subroutine pawpsp_read
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_paw_optics,m_positron
-!!
-!! CHILDREN
-!!
 !! SOURCE
 subroutine pawpsp_read_corewf(energy_cor,indlmn_core,lcor,lmncmax,ncor,nphicor,radmesh,phi_cor,&
 &                             filename,kappacor) ! optional arguments
@@ -1672,11 +1647,6 @@ end subroutine pawpsp_read_corewf
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_pawpsp
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pawpsp_rw_atompaw(basis_size,filpsp,wvl)
@@ -1794,11 +1764,6 @@ end subroutine pawpsp_rw_atompaw
 !!
 !! NOTES
 !!
-!!
-!! PARENTS
-!!      m_pawpsp
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2742,11 +2707,6 @@ end subroutine pawpsp_calc
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_pawpsp
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pawpsp_calc_d5(mesh,mesh_size,tcoredens)
@@ -2823,11 +2783,6 @@ end subroutine pawpsp_calc_d5
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_pawpsp
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pawpsp_vhar2rho(radmesh,rho,vv)
@@ -2885,11 +2840,6 @@ end subroutine pawpsp_vhar2rho
 !!  pawtab <type(pawtab_type)>= objects are modified
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_pawpsp
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3041,11 +2991,6 @@ end subroutine pawpsp_wvl_calc
 !!  shape_type= 1 ; gl(r)=k(r).r^l; k(r)=exp[-(r/sigma)**lambda]
 !!  shape_type= 2 ; gl(r)=k(r).r^l; k(r)=[sin(pi*r/rshp)/(pi*r/rshp)]**2 if r<=rshp
 !!  shape_type= 3 ; gl(r)=Alpha(1,l)*jl(q(1,l)*r)+Alpha(2,l)*jl(q(2,l)*r) for each l
-!!
-!! PARENTS
-!!      m_pawpsp,m_pspini
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3976,11 +3921,6 @@ end subroutine pawpsp_17in
 !! NOTES
 !!  Spin-orbit not yet implemented (to be done)
 !!
-!! PARENTS
-!!      m_pawpsp,m_pspini
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pawpsp_7in(epsatm,ffspl,icoulomb,hyb_mixing,ixc,&
@@ -4099,11 +4039,6 @@ end subroutine pawpsp_7in
 !! On output wvl%pfac and wvl%parg are filled with complex parameters (e_i, f_i)
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_pawpsp
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -4251,11 +4186,6 @@ end subroutine pawpsp_7in
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_pawpsp
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 
@@ -4320,11 +4250,6 @@ end subroutine pawpsp_read_header
 !! NOTES
 !! Reads pspversion, basis_size and lmn_size
 !!
-!! PARENTS
-!!      m_pawpsp
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 
@@ -4381,11 +4306,6 @@ end subroutine pawpsp_read_header_2
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_pawpsp,m_pspini
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -4498,11 +4418,6 @@ end subroutine pawpsp_wvl
 !! since pspheads does not exist in PAW library.
 !! should we include it to avoid the following code replica?
 !! check pspheads commented out in pawpsp_17in, and routine pawpsp_read_xml_2
-!!
-!! PARENTS
-!!      m_pawpsp,m_pspheads
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -4684,11 +4599,6 @@ end subroutine pawpsp_read_header_xml
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_pawpsp,m_pspheads
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pawpsp_read_pawheader(basis_size,lmax,lmn_size,&
@@ -4776,11 +4686,6 @@ end subroutine pawpsp_read_pawheader
 !!  pawtab=<type pawtab_type>
 !!  vlspl(mqgrid_vl,2)=q^2 Vloc(q) and second derivatives from spline fit
 !!  xcccrc=XC core correction cutoff radius (bohr) from psp file
-!!
-!! PARENTS
-!!      m_pawpsp,m_pspini
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -4899,10 +4804,6 @@ end subroutine pawpsp_bcast
 !!
 !! NOTES
 !!
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -5069,10 +4970,6 @@ contains
 !!
 !! NOTES
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 
@@ -5135,11 +5032,6 @@ end subroutine pawpsp_check_xml_upf
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_pawpsp
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

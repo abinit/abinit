@@ -10,10 +10,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -114,13 +110,6 @@ contains
 !!  rhor(nfft,nspden)=the density from previous SCF cycle is input
 !!                    the extrapolated density is output
 !!  scf_history <type(scf_history_type)>=arrays obtained from previous SCF cycles
-!!
-!! PARENTS
-!!      m_scfcv_core
-!!
-!! CHILDREN
-!!      cgcprj_cholesky,dotprod_set_cgcprj,lincom_cgcprj,pawcprj_alloc
-!!      pawcprj_axpby,pawcprj_free,pawcprj_get,pawcprj_getdim,pawcprj_put,zgesv
 !!
 !! SOURCE
 
@@ -525,13 +514,6 @@ end subroutine extraprho
 !! NOTES
 !!  THIS ROUTINE IS NOT USEABLE AT PRESENT.
 !!  SHOULD BE CAREFULY TESTED AND DEBUGGED (ESPECIALLY WITHIN PAW).
-!!
-!! PARENTS
-!!      m_extraprho
-!!
-!! CHILDREN
-!!      cgcprj_cholesky,dotprod_set_cgcprj,lincom_cgcprj,pawcprj_alloc
-!!      pawcprj_axpby,pawcprj_free,pawcprj_get,pawcprj_getdim,pawcprj_put,zgesv
 !!
 !! SOURCE
 
@@ -1135,13 +1117,6 @@ end subroutine extrapwf
 !!                          Value from previous SCF cycle is input and stored in some form
 !!                          Extrapolated value is output
 !!  scf_history_wf <type(scf_history_type)>=arrays obtained from previous SCF cycles
-!!
-!! PARENTS
-!!      m_extraprho
-!!
-!! CHILDREN
-!!      cgcprj_cholesky,dotprod_set_cgcprj,lincom_cgcprj,pawcprj_alloc
-!!      pawcprj_axpby,pawcprj_free,pawcprj_get,pawcprj_getdim,pawcprj_put,zgesv
 !!
 !! SOURCE
 

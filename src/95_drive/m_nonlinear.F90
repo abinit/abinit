@@ -12,10 +12,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -145,12 +141,6 @@ contains
 !!      It is defined by nfft, ngfft, mgfft, ...
 !!      For compatibility reasons, (nfftf,ngfftf,mgfftf)
 !!      are set equal to (nfft,ngfft,mgfft) in that case.
-!!
-!! PARENTS
-!!      m_driver
-!!
-!! CHILDREN
-!!      kpgio,xmpi_sum
 !!
 !! SOURCE
 
@@ -1370,12 +1360,6 @@ end if
 !!
 !! SIDE EFFECTS
 !!
-!! PARENTS
-!!      m_nonlinear
-!!
-!! CHILDREN
-!!      kpgio,xmpi_sum
-!!
 !! SOURCE
 
    subroutine print_chi2(d3cart0,msg,theunit)
@@ -1416,12 +1400,6 @@ end if
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
-!!      m_nonlinear
-!!
-!! CHILDREN
-!!      kpgio,xmpi_sum
 !!
 !! SOURCE
 
@@ -1491,12 +1469,6 @@ end subroutine nonlinear
 !!        ikpt_rbz = index of a k-point in the reduced BZ
 !! pwind(mpw,nneigh,mkmem) = array used to compute the overlap matrix smat between k-points
 !!                           (see initberry.f for more explanations)
-!!
-!! PARENTS
-!!      m_nonlinear
-!!
-!! CHILDREN
-!!      kpgio,xmpi_sum
 !!
 !! SOURCE
 
@@ -1742,11 +1714,6 @@ end subroutine initmv
 !! NOTES
 !!  d3 holds the third-order derivatives before computing
 !!  the permutations of the perturbations.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 

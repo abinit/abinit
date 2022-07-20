@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -123,12 +119,6 @@ contains
 !! In many cases, this routine is also called just to write the psp line
 !! of the header, without reading again the psp. This psp line
 !! is constant throughout run.
-!!
-!! PARENTS
-!!      m_bethe_salpeter,m_eph_driver,m_gstate,m_longwave,m_nonlinear
-!!      m_respfn_driver,m_screening_driver,m_sigma_driver,m_wfk_analyze
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -667,11 +657,6 @@ end subroutine pspini
 !! OUTPUT
 !!  ecore=resulting psion-psion energy in Hartrees
 !!
-!! PARENTS
-!!      m_pspini
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pspcor(ecore,epsatm,natom,ntypat,typat,zion)
@@ -800,11 +785,6 @@ end subroutine pspcor
 !!  (3) pspcod,pspxc,lmax,lloc,mmax,r2well
 !!
 !!  Dimensions of form factors and Vloc q grids must be the same in Norm-Conserving case
-!!
-!! PARENTS
-!!      m_pspini
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1369,11 +1349,6 @@ end subroutine pspatm
 !!
 !! SIDE EFFECTS
 !! (to be filled)
-!!
-!! PARENTS
-!!      m_pspini
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

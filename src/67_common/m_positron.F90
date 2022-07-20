@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -179,13 +175,6 @@ contains
 !!  pawrhoij(my_natom) <type(pawrhoij_type)>= paw rhoij occupancies and related data
 !!  rhog(2,nfft)=Fourier transform of total electron/positron density
 !!  rhor(nfft,nspden)=total electron/positron density (el/bohr**3)
-!!
-!! PARENTS
-!!      m_scfcv_core
-!!
-!! CHILDREN
-!!      gammapositron,mkdenpos,nderiv_gen,pawdensities,pawxcsum,simp_gen
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -916,13 +905,6 @@ end subroutine setup_positron
 !!
 !! SIDE EFFECTS
 !!  electronpositron <type(electronpositron_type)>=quantities for the electron-positron annihilation
-!!
-!! PARENTS
-!!      m_outscfcv,m_positron
-!!
-!! CHILDREN
-!!      gammapositron,mkdenpos,nderiv_gen,pawdensities,pawxcsum,simp_gen
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -1845,13 +1827,6 @@ end subroutine poslifetime
 !! TODO
 !!  print a warning if the core wave function is not localized in the PAW sphere
 !!  implement PAW on-site contribution for state-independent scheme
-!!
-!! PARENTS
-!!      m_outscfcv
-!!
-!! CHILDREN
-!!      gammapositron,mkdenpos,nderiv_gen,pawdensities,pawxcsum,simp_gen
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -3344,13 +3319,6 @@ end subroutine posdoppler
 !!  rate= annihilation rate of a given core state needed for state dependent scheme for doppler broadening
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
-!!      m_positron
-!!
-!! CHILDREN
-!!      gammapositron,mkdenpos,nderiv_gen,pawdensities,pawxcsum,simp_gen
-!!      xmpi_sum
 !!
 !! SOURCE
 

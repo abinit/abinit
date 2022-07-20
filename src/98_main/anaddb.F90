@@ -18,23 +18,6 @@
 !! OUTPUT
 !!  (main routine)
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      abi_io_redirect, abimem_init, abinit_doctor, anaddb_dtset_free, anaddb_init
-!!      asrq0%apply, asrq0%free, crystal%free, ddb%free, ddb%get_block, ddb_diel
-!!      ddb_elast, ddb_flexo, ddb%from_file, ddb_hdr%free, ddb_hdr%open_read
-!!      ddb_internalstr, ddb_interpolate, ddb_lw%free, ddb_lw_copy, ddb_piezo
-!!      dfpt_phfrq, dfpt_prtph, electrooptic, elphon, flush_unit, gruns_anaddb
-!!      gtdyn9, harmonic_thermo, herald, ifc%free, ifc%outphbtrap, ifc%print
-!!      ifc%speedofsound, ifc%write, ifc_coarse%free, ifc_init, instrng, int2char4
-!!      inupper, invars9, isfile, mkphbs, mkphdos, nctk_defwrite_nonana_raman_terms
-!!      nctk_defwrite_nonana_terms, nctk_defwrite_raman_terms, outvars_anaddb
-!!      phdos%free, phdos%ncwrite, phdos%print, phdos%print_debye, phdos%print_msqd
-!!      phdos%print_thermo, ramansus, relaxpol, thermal_supercell_free, thmeig
-!!      timab, timein, wrtout, xmpi_bcast, xmpi_init, xmpi_sum
-!!      zacharias_supercell_make, zacharias_supercell_print
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H

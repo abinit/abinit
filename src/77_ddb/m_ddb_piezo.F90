@@ -10,10 +10,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -81,12 +77,6 @@ contains
 !! The elastic (compliance) tensors calculated here are under fixed D-field boundary
 !! condition, which include piezoelectric corrections to the elastic (compliance)
 !! tensors calculated in ddb_elast.F90 whose boundary condition is fixed E-field.
-!!
-!! PARENTS
-!!      anaddb
-!!
-!! CHILDREN
-!!      matrginv,wrtout,zhpev
 !!
 !! SOURCE
 

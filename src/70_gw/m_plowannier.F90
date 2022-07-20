@@ -10,8 +10,6 @@
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
 !! NOTES
 !!
 !! SOURCE
@@ -347,11 +345,6 @@ CONTAINS  !=====================================================================
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_outscfcv,m_plowannier,m_screening_driver,m_sigma_driver
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 
@@ -530,11 +523,6 @@ end subroutine init_plowannier
 !! OUTPUT
 !!  lorbital2
 !!
-!! PARENTS
-!!      m_plowannier
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 
@@ -586,11 +574,6 @@ end subroutine copy_orbital
 !! OUTPUT
 !!  lorbital2
 !!
-!! PARENTS
-!!      m_plowannier
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 
@@ -637,11 +620,6 @@ end subroutine allocate_orbital
 !!
 !! OUTPUT
 !!  lorbital2
-!!
-!! PARENTS
-!!      m_plowannier
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -714,11 +692,6 @@ end subroutine destroy_orbital
 !!  (only writing, printing)
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_outscfcv
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2356,11 +2329,6 @@ end subroutine compute_coeff_plowannier
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_outscfcv
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 
@@ -2434,11 +2402,6 @@ end subroutine compute_coeff_plowannier
 !!
 !! OUTPUT
 !! wan
-!!
-!! PARENTS
-!!      m_screening_driver,m_sigma_driver
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2535,11 +2498,6 @@ end subroutine get_plowannier
 !!
 !! OUTPUT
 !! wanbz
-!!
-!! PARENTS
-!!      m_screening_driver,m_sigma_driver
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2648,11 +2606,6 @@ end subroutine fullbz_plowannier
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_outscfcv,m_plowannier,m_screening_driver,m_sigma_driver
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 
@@ -2739,11 +2692,6 @@ end subroutine fullbz_plowannier
 !! OUTPUT
 !!  operwan
 !!
-!! PARENTS
-!!      m_plowannier
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine initialize_operwan(wan,operwan)
@@ -2788,11 +2736,6 @@ end subroutine fullbz_plowannier
 !! OUTPUT
 !!  operwan
 !!
-!! PARENTS
-!!      m_plowannier
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine destroy_operwan(wan,operwan)
@@ -2832,11 +2775,6 @@ end subroutine fullbz_plowannier
 !!
 !! OUTPUT
 !!  operwan
-!!
-!! PARENTS
-!!      m_plowannier
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2889,11 +2827,6 @@ end subroutine fullbz_plowannier
 !!
 !! OUTPUT
 !!  if option = ikpt, gives the wan operator in reciprocal space (for each k)
-!!
-!! PARENTS
-!!      m_plowannier
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2960,11 +2893,6 @@ end subroutine compute_oper_ks2wan
 !!
 !! OUTPUT
 !!  wan itself is modified
-!!
-!! PARENTS
-!!      m_plowannier
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3294,11 +3222,6 @@ end subroutine normalization_plowannier
 !! OUTPUT
 !!
 !!
-!! PARENTS
-!!      m_plowannier
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 
@@ -3433,11 +3356,6 @@ end subroutine print_operwan
 !! OUTPUT
 !! operwan_realspace
 !!
-!! PARENTS
-!!      m_plowannier,m_sigma_driver
-!!
-!! CHILDREN
-!!
 !! SOURCE
 subroutine init_operwan_realspace(wan,oprs)
 
@@ -3490,11 +3408,6 @@ end subroutine init_operwan_realspace
 !!
 !! OUTPUT
 !! rhot1
-!!
-!! PARENTS
-!!      m_sigma_driver
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3625,11 +3538,6 @@ end subroutine reduce_operwan_realspace
 !! OUTPUT
 !! operwan_realspace
 !!
-!! PARENTS
-!!      m_plowannier,m_sigma_driver
-!!
-!! CHILDREN
-!!
 !! SOURCE
 subroutine destroy_operwan_realspace(wan,operwan_realspace)
 
@@ -3674,11 +3582,6 @@ end subroutine destroy_operwan_realspace
 !!
 !! OUTPUT
 !! operwan_realspace
-!!
-!! PARENTS
-!!      m_plowannier,m_sigma_driver
-!!
-!! CHILDREN
 !!
 !! SOURCE
 subroutine zero_operwan_realspace(wan,operwan_realspace)
@@ -3733,11 +3636,6 @@ end subroutine zero_operwan_realspace
 !!
 !! OUTPUT
 !! operwan_realspace
-!!
-!! PARENTS
-!! m_plowannier
-!!
-!! CHILDREN
 !!
 !! SOURCE
 subroutine compute_oper_wank2realspace(wan,operwan,operwan_realspace)

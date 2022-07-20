@@ -12,10 +12,6 @@
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -255,12 +251,6 @@ CONTAINS  !===========================================================
 !! FUNCTION
 !!  Deallocate memory for the ifc_type structure
 !!
-!! PARENTS
-!!      m_ifc
-!!
-!! CHILDREN
-!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
-!!
 !! SOURCE
 
 subroutine ifc_free(ifc)
@@ -340,13 +330,6 @@ end subroutine ifc_free
 !!
 !! OUTPUT
 !! Ifc<ifc_type>=Object containing the dynamical matrix and the IFCs.
-!!
-!! PARENTS
-!!      anaddb,m_effective_potential_file,m_eph_driver,m_gruneisen,m_ifc
-!!      m_tdep_abitypes
-!!
-!! CHILDREN
-!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -738,12 +721,6 @@ end subroutine ifc_init
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_generate_training_set
-!!
-!! CHILDREN
-!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
-!!
 !! SOURCE
 
 subroutine ifc_init_fromFile(dielt,filename,Ifc,natom,ngqpt,nqshift,qshift,ucell_ddb,zeff,qdrp_cart,comm)
@@ -836,11 +813,6 @@ subroutine ifc_init_fromFile(dielt,filename,Ifc,natom,ngqpt,nqshift,qshift,ucell
 !! OUTPUT
 !!  Only printing
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
-!!
 !! SOURCE
 
 subroutine ifc_print(ifc, header, unit, prtvol)
@@ -931,12 +903,6 @@ end subroutine ifc_print
 !!  [out_eigvec(2*3*natom*3*natom) = The (interpolated) eigenvectors of the dynamical matrix in Cartesian coords.
 !!  [out_displ_red(2*3*natom*3*natom) = The (interpolated) displacement in reduced coordinates.
 !!  [dwdq(3,3*natom)] = Group velocities i.e. d(omega(q))/dq in Cartesian coordinates.
-!!
-!! PARENTS
-!!      m_ifc
-!!
-!! CHILDREN
-!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -1053,12 +1019,6 @@ end subroutine ifc_fourq
 !!
 !!    \nabla_q w(q, nu) = 1/(2 w(q, nu))  <u(q, nu)| \nabla_q D(q) | u(q, nu)>
 !!
-!! PARENTS
-!!      m_ifc
-!!
-!! CHILDREN
-!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
-!!
 !! SOURCE
 
 subroutine ifc_get_dwdq(ifc, cryst, qpt, phfrq, eigvec, dwdq, comm)
@@ -1161,10 +1121,6 @@ end subroutine ifc_get_dwdq
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine ifc_get_phmesh(ifc, ph_wstep, phmesh_size, phmesh)
@@ -1209,11 +1165,6 @@ end subroutine ifc_get_phmesh
 !! comm=MPI communicator.
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -1431,12 +1382,6 @@ end subroutine ifc_speedofsound
 !!    with the last cutoff found by the bisection algorithm applied.
 !!  ifc%atmfrc(2,3,natom,3,natom,nrpt)= ASR-imposed Interatomic Forces
 !!
-!! PARENTS
-!!      m_ifc
-!!
-!! CHILDREN
-!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
-!!
 !! SOURCE
 
 subroutine ifc_autocutoff(ifc, crystal, comm)
@@ -1583,12 +1528,6 @@ end subroutine ifc_autocutoff
 !!  with the required cutoff applied.
 !! rcut_min=Effective cutoff. Defined by the minimum cutoff radius over the natom sites.
 !!
-!! PARENTS
-!!      m_ifc
-!!
-!! CHILDREN
-!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
-!!
 !! SOURCE
 
 subroutine corsifc9(acell,gprim,natom,nrpt,nsphere,rifcsph,rcan,rprim,rpt,rcut_min,wghatm)
@@ -1715,11 +1654,6 @@ end subroutine corsifc9
 !!
 !!  2) the code is unreadable and horrible - 3/4 different file formats for the
 !!  same stuff. We should make different subroutines, even if it duplicates some code
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -2077,12 +2011,6 @@ end subroutine ifc_write
 !! NOTES
 !! This routine should be executed by one processor only
 !!
-!! PARENTS
-!!      m_ifc
-!!
-!! CHILDREN
-!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
-!!
 !! SOURCE
 
 subroutine ifc_getiaf(Ifc,ifcana,ifcout,iout,zeff,ia,ra,list,&
@@ -2396,12 +2324,6 @@ end subroutine ifc_getiaf
 !!
 !! SIDE EFFECTS
 !!
-!! PARENTS
-!!      m_ifc
-!!
-!! CHILDREN
-!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
-!!
 !! SOURCE
 
 subroutine omega_decomp(amu,natom,ntypat,typat,dynmatfl,dynmatsr,dynmatlr,iqpt,nqpt,eigenvec)
@@ -2590,11 +2512,6 @@ end subroutine omega_decomp
 !! OUTPUT
 !!  only write to file. This routine should be called by a single processor.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
-!!
 !! SOURCE
 
 subroutine ifc_outphbtrap(ifc, cryst, ngqpt, nqshft, qshft, basename)
@@ -2702,11 +2619,6 @@ end subroutine ifc_outphbtrap
 !! OUTPUT
 !!  Only write to file
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
-!!
 !! SOURCE
 
 subroutine ifc_printbxsf(ifc, cryst, ngqpt, nqshft, qshft, path, comm)
@@ -2792,11 +2704,6 @@ end subroutine ifc_printbxsf
 !!
 !! NOTES:
 !!  This routine should be called by master node and when ifcflag == 1.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 

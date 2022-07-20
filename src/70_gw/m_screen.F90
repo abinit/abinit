@@ -11,8 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -332,12 +330,6 @@ CONTAINS  !=====================================================================
 !! OUTPUT
 !!  Only printing
 !!
-!! PARENTS
-!!      m_screen
-!!
-!! CHILDREN
-!!      get_bz_item,sqmat_itranspose
-!!
 !! SOURCE
 
 subroutine screen_info_print(W_info,header,unit,mode_paral,prtvol)
@@ -404,12 +396,6 @@ end subroutine screen_info_print
 !! FUNCTION
 !!  Free memory.
 !!
-!! PARENTS
-!!      m_screen
-!!
-!! CHILDREN
-!!      get_bz_item,sqmat_itranspose
-!!
 !! SOURCE
 
 subroutine fgg_free_0D(Fgg)
@@ -440,11 +426,6 @@ end subroutine fgg_free_0D
 !!
 !! INPUT
 !!  [keep_q(:)]=Optional logical mask used to select the q-points that are deallocated.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      get_bz_item,sqmat_itranspose
 !!
 !! SOURCE
 
@@ -484,12 +465,6 @@ end subroutine fgg_free_1D
 !!
 !! SIDE EFFECTS
 !!  Fgg, See function description
-!!
-!! PARENTS
-!!      m_screen
-!!
-!! CHILDREN
-!!      get_bz_item,sqmat_itranspose
 !!
 !! SOURCE
 
@@ -537,12 +512,6 @@ end subroutine fgg_init
 !!
 !! NOTES
 !!  iq_bz and nqlwl are not used if how="Pointer".
-!!
-!! PARENTS
-!!      m_screen
-!!
-!! CHILDREN
-!!      get_bz_item,sqmat_itranspose
 !!
 !! SOURCE
 
@@ -625,10 +594,6 @@ end subroutine screen_fgg_qbz_set
 !! NOTES
 !!   A zero index can be used to inquire the status of the full set of q-points.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 pure function screen_ihave_fgg(W,iq_ibz,how)
@@ -682,11 +647,6 @@ end function screen_ihave_fgg
 !! SIDE EFFECTS
 !! W<screen_t>=The data structure to be nullified.
 !!
-!! PARENTS
-!!      m_bethe_salpeter,m_screen
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine screen_nullify(W)
@@ -720,11 +680,6 @@ end subroutine screen_nullify
 !! W<screen_t>=The data structure to be nullified.
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_bethe_salpeter
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -828,11 +783,6 @@ end subroutine screen_free
 !!
 !! OUTPUT
 !!  W<screen_t>=The structure initialized with basic dimensions and arrays.
-!!
-!! PARENTS
-!!      m_bethe_salpeter
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1191,11 +1141,6 @@ end subroutine screen_init
 !!  since we have to consider G-G0. The code however stops in sigma if a nonzero G0 is required
 !!  to reconstruct the BZ.
 !!
-!! PARENTS
-!!      m_exc_build
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine screen_symmetrizer(W,iq_bz,Cryst,Gsph,Qmesh,Vcp)
@@ -1341,11 +1286,6 @@ end subroutine screen_symmetrizer
 !!   *
 !!   *  where alpha and beta are scalars, x and y are vectors and A is an m by n matrix.
 !!
-!! PARENTS
-!!      m_exc_build
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine screen_w0gemv(W,trans,in_npw,nspinor,only_diago,alpha,beta,in_ket,out_ket)
@@ -1447,11 +1387,6 @@ end subroutine screen_w0gemv
 !!    The invariance under exchange of the real space position E(1,2) = E(2,1) leads to:
 !!    $ E_{-G2,-G1}(-q) = E_{G1,G2)
 !!
-!! PARENTS
-!!      m_screen
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine em1_symmetrize_ip(iq_bz,npwc,nomega,Gsph,Qmesh,epsm1)
@@ -1544,11 +1479,6 @@ end subroutine em1_symmetrize_ip
 !!
 !!    The invariance under exchange of the real space position E(1,2) = E(2,1) leads to:
 !!    $ E_{-G2,-G1}(-q) = E_{G1,G2)
-!!
-!! PARENTS
-!!      m_screen
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

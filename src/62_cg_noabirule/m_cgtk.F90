@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -76,14 +72,8 @@ contains
 !!  cg2(2,npw2,nspinor,ndat)
 !!  work(2,work_ngfft(4),work_ngfft(5),work_ngfft(6)) !*ndat),
 !!
-!! PARENTS
-!!      m_sigmaph,m_wfd,m_wfk
-!!
 !! NOTES
 !!  Inspired to wfconv.
-!!
-!! CHILDREN
-!!      pawcprj_zaxpby,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -239,12 +229,6 @@ end subroutine cgtk_rotate
 !!  cg2(2,npw2,ndat) = Output wavefunctions on kg2 sphere with istwf2 mode.
 !!  work(2,work_ngfft(4),work_ngfft(5),work_ngfft(6)) = Workspace array
 !!
-!! PARENTS
-!!      m_wfd
-!!
-!! CHILDREN
-!!      pawcprj_zaxpby,timab,xmpi_sum
-!!
 !! SOURCE
 
 subroutine cgtk_change_gsphere(ndat, npw1, istwf1, kg1, cg1, npw2, istwf2, kg2, cg2, work_ngfft, work)
@@ -312,12 +296,6 @@ end subroutine cgtk_change_gsphere
 !! OUTPUT
 !!  cg(2,mcg)=same array with altered phase.
 !!  gsc(2,mgsc)= same array with altered phase.
-!!
-!! PARENTS
-!!      m_vtowfk
-!!
-!! CHILDREN
-!!      pawcprj_zaxpby,timab,xmpi_sum
 !!
 !! SOURCE
 

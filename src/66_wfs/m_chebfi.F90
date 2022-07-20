@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -83,15 +79,6 @@ contains
 !!
 !! SIDE EFFECTS
 !!  cg(2,*)=updated wavefunctions
-!!
-!! PARENTS
-!!      m_vtowfk
-!!
-!! CHILDREN
-!!      apply_invovl,dotprod_g,getghc,pawcprj_alloc,pawcprj_axpby,pawcprj_copy
-!!      pawcprj_free,prep_getghc,prep_index_wavef_bandpp
-!!      rayleigh_ritz_distributed,rayleigh_ritz_subdiago,timab,wrtout
-!!      xmpi_alltoallv,xmpi_barrier,xmpi_max,xmpi_min,xmpi_sum
 !!
 !! NOTES
 !!  -- TODO --
@@ -608,11 +595,6 @@ end subroutine chebfi
 !! OUTPUT
 !! y= Tn(x)
 !!
-!! PARENTS
-!!      chebfi
-!!
-!! CHILDREN
-!!
 !! NOTES
 !!
 !! SOURCE
@@ -656,11 +638,6 @@ end function cheb_poly
 !!
 !! OUTPUT
 !! n= number of iterations needed to decrease residual by tol
-!!
-!! PARENTS
-!!      chebfi
-!!
-!! CHILDREN
 !!
 !! NOTES
 !!

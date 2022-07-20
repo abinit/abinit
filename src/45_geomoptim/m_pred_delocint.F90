@@ -10,10 +10,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -87,12 +83,6 @@ contains
 !!
 !! SIDE EFFECTS
 !! hist <type(abihist)> : History of positions,forces acell, rprimd, stresses
-!!
-!! PARENTS
-!!      m_precpred_1geo
-!!
-!! CHILDREN
-!!      gred2gdeloc,hessupdt,xcart2deloc,xfpack_f2vout,xfpack_x2vin,xred2xcart
 !!
 !! SOURCE
 
@@ -653,12 +643,6 @@ end subroutine pred_delocint
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_pred_delocint
-!!
-!! CHILDREN
-!!      gred2gdeloc,hessupdt,xcart2deloc,xfpack_f2vout,xfpack_x2vin,xred2xcart
-!!
 !! SOURCE
 
 subroutine deloc2xcart(deloc,natom,rprimd,xcart,deloc_int,btinv,u_matrix)
@@ -827,12 +811,6 @@ end subroutine deloc2xcart
 !! deloc_gred(3*(natom-1))=delocalized gradients from reduced coordinate ones
 !! gred(3,natom)=delocalized gradients in reduced coordinates
 !!
-!! PARENTS
-!!      m_pred_delocint
-!!
-!! CHILDREN
-!!      gred2gdeloc,hessupdt,xcart2deloc,xfpack_f2vout,xfpack_x2vin,xred2xcart
-!!
 !! SOURCE
 
 subroutine gred2gdeloc(btinv,deloc_gred,gred,natom,gprimd)
@@ -903,12 +881,6 @@ end subroutine gred2gdeloc
 !! OUTPUT
 !! b_matrix(ninternal,3*natom)=matrix of derivatives of internal coordinates
 !!   wrt cartesians
-!!
-!! PARENTS
-!!      m_pred_delocint
-!!
-!! CHILDREN
-!!      gred2gdeloc,hessupdt,xcart2deloc,xfpack_f2vout,xfpack_x2vin,xred2xcart
 !!
 !! SOURCE
 
@@ -1042,12 +1014,6 @@ end subroutine calc_b_matrix
 !!
 !! FUNCTION
 !!
-!! PARENTS
-!!      m_pred_delocint
-!!
-!! CHILDREN
-!!      gred2gdeloc,hessupdt,xcart2deloc,xfpack_f2vout,xfpack_x2vin,xred2xcart
-!!
 !! SOURCE
 !!
 
@@ -1075,12 +1041,6 @@ end subroutine dbond_length_d1
 !! dang_d1
 !!
 !! FUNCTION
-!!
-!! PARENTS
-!!      m_pred_delocint
-!!
-!! CHILDREN
-!!      gred2gdeloc,hessupdt,xcart2deloc,xfpack_f2vout,xfpack_x2vin,xred2xcart
 !!
 !! SOURCE
 !!
@@ -1140,12 +1100,6 @@ end subroutine dang_d1
 !!
 !! FUNCTION
 !!
-!! PARENTS
-!!      m_pred_delocint
-!!
-!! CHILDREN
-!!      gred2gdeloc,hessupdt,xcart2deloc,xfpack_f2vout,xfpack_x2vin,xred2xcart
-!!
 !! SOURCE
 !!
 
@@ -1203,12 +1157,6 @@ end subroutine dang_d2
 !! ddihedral_d1
 !!
 !! FUNCTION
-!!
-!! PARENTS
-!!      m_pred_delocint
-!!
-!! CHILDREN
-!!      gred2gdeloc,hessupdt,xcart2deloc,xfpack_f2vout,xfpack_x2vin,xred2xcart
 !!
 !! SOURCE
 !!
@@ -1308,12 +1256,6 @@ end subroutine ddihedral_d1
 !! ddihedral_d2
 !!
 !! FUNCTION
-!!
-!! PARENTS
-!!      m_pred_delocint
-!!
-!! CHILDREN
-!!      gred2gdeloc,hessupdt,xcart2deloc,xfpack_f2vout,xfpack_x2vin,xred2xcart
 !!
 !! SOURCE
 !!
@@ -1462,12 +1404,6 @@ end subroutine ddihedral_d2
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_pred_delocint
-!!
-!! CHILDREN
-!!      gred2gdeloc,hessupdt,xcart2deloc,xfpack_f2vout,xfpack_x2vin,xred2xcart
-!!
 !! SOURCE
 
 subroutine xcart2deloc(deloc,natom,rprimd,xcart,bt_inv_matrix,u_matrix,deloc_int,prim_int)
@@ -1536,15 +1472,9 @@ end subroutine xcart2deloc
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_pred_delocint
-!!
 !! NOTES
 !!   bt_inv_matrix is inverse transpose of the delocalized
 !!    coordinate B matrix. b_matrix is the primitive internal B matrix
-!!
-!! CHILDREN
-!!      gred2gdeloc,hessupdt,xcart2deloc,xfpack_f2vout,xfpack_x2vin,xred2xcart
 !!
 !! SOURCE
 
@@ -1635,12 +1565,6 @@ end subroutine calc_btinv_matrix
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_pred_delocint
-!!
-!! CHILDREN
-!!      gred2gdeloc,hessupdt,xcart2deloc,xfpack_f2vout,xfpack_x2vin,xred2xcart
-!!
 !! SOURCE
 
  subroutine align_u_matrices(natom,ninternal,u_matrix,u_matrix_old,s_matrix,f_eigs)
@@ -1719,12 +1643,6 @@ end subroutine align_u_matrices
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_pred_delocint
-!!
-!! CHILDREN
-!!      gred2gdeloc,hessupdt,xcart2deloc,xfpack_f2vout,xfpack_x2vin,xred2xcart
 !!
 !! SOURCE
 

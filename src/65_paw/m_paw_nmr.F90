@@ -88,12 +88,6 @@ CONTAINS  !=====================================================================
 !! Eq. 11 and 12 of Profeta et al., but note that their sum over occupied states times 2 for occupation number is
 !! replaced in the Kresse and Joubert formulation by the sum over $\rho_{ij}$ occupations for each basis element pair.
 !!
-!! PARENTS
-!!      m_nucprop
-!!
-!! CHILDREN
-!!      free_my_atmtab,get_my_atmtab,xmpi_sum
-!!
 !! SOURCE
 
 subroutine make_efg_onsite(efg,my_natom,natom,nsym,ntypat,paw_an,pawang,pawrhoij,pawrad,pawtab, &
@@ -294,12 +288,6 @@ subroutine make_efg_onsite(efg,my_natom,natom,nsym,ntypat,paw_an,pawang,pawrhoij
 !! procedure resulting from $\chi = sum_i (y_i - m*x_i)^2$ . This is more stable than
 !! computing the derivative of the whole function and extrapolating it to zero.
 !! See Zwanziger, J. Phys. Conden. Matt. 21, 15024-15036 (2009) [[cite:Zwanziger2009]].
-!!
-!! PARENTS
-!!      m_nucprop
-!!
-!! CHILDREN
-!!      free_my_atmtab,get_my_atmtab,xmpi_sum
 !!
 !! SOURCE
 

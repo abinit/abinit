@@ -12,10 +12,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -263,12 +259,6 @@ contains
 !!    cprj(natom,mcprj*usecprj)= wave functions projected with non-local projectors:
 !!                               cprj(n,k,i)=<p_i|Cnk> where p_i is a non-local projector.
 !!  rmm_diis_status= Status of the RMM-DIIS eigensolver. See m_rmm_diis
-!!
-!! PARENTS
-!!      m_scfcv_core
-!!
-!! CHILDREN
-!!      timab,xmpi_recv,xmpi_send
 !!
 !! NOTES
 !!  Be careful to the meaning of nfft (size of FFT grids):
@@ -1934,12 +1924,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_vtorho
-!!
-!! CHILDREN
-!!      timab,xmpi_recv,xmpi_send
-!!
 !! SOURCE
 
 subroutine wvl_nscf_loop()
@@ -2036,12 +2020,6 @@ subroutine wvl_nscf_loop()
 !! OUTPUT
 !!  argout(sizeout)=description
 !!
-!! PARENTS
-!!      m_vtorho
-!!
-!! CHILDREN
-!!      timab,xmpi_recv,xmpi_send
-!!
 !! SOURCE
 
 subroutine wvl_nscf_loop_bigdft()
@@ -2127,12 +2105,6 @@ subroutine wvl_nscf_loop_bigdft()
 !! OUTPUT
 !!  e_eigenvalues= eigenvalues energy
 !!
-!! PARENTS
-!!      m_vtorho
-!!
-!! CHILDREN
-!!      timab,xmpi_recv,xmpi_send
-!!
 !! SOURCE
 
 subroutine e_eigen(eigen,e_eigenvalues,mband,nband,nkpt,nsppol,occ,wtk)
@@ -2185,12 +2157,6 @@ subroutine e_eigen(eigen,e_eigenvalues,mband,nband,nkpt,nsppol,occ,wtk)
 !! NOTES
 !! for the wvlbigdft case, see the routine 'wvl_occ_bigdft'
 !!
-!! PARENTS
-!!      m_vtorho
-!!
-!! CHILDREN
-!!      timab,xmpi_recv,xmpi_send
-!!
 !! SOURCE
 
 subroutine wvl_occ()
@@ -2237,12 +2203,6 @@ subroutine wvl_occ()
 !! NOTES
 !! for the wvlbigdft case, see the routine 'wvl_occ_bigdft'
 !!
-!! PARENTS
-!!      m_vtorho
-!!
-!! CHILDREN
-!!      timab,xmpi_recv,xmpi_send
-!!
 !! SOURCE
 
 subroutine wvl_occ_bigdft()
@@ -2288,12 +2248,6 @@ subroutine wvl_occ_bigdft()
 !!
 !! NOTES
 !! for the wvlbigdft case, see the routine 'wvl_occ_bigdft'
-!!
-!! PARENTS
-!!      m_vtorho
-!!
-!! CHILDREN
-!!      timab,xmpi_recv,xmpi_send
 !!
 !! SOURCE
 
@@ -2383,12 +2337,6 @@ end subroutine vtorho
 !! TODO
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_vtorho
-!!
-!! CHILDREN
-!!      timab,xmpi_recv,xmpi_send
 !!
 !! SOURCE
 

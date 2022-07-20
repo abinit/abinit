@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -126,12 +122,6 @@ contains
 !! NOTES
 !!      Much of the code in versions of this routine prior to 4.4.5
 !!      has been transfered to its child eltxccore.
-!!
-!! PARENTS
-!!      m_respfn_driver
-!!
-!! CHILDREN
-!!      free_my_atmtab,get_my_atmtab,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -702,12 +692,6 @@ end subroutine dfpt_eltfrxc
 !! NOTES
 !! Note that this routine is related to the mkcore.f routine
 !!
-!! PARENTS
-!!      m_dfpt_elt
-!!
-!! CHILDREN
-!!      free_my_atmtab,get_my_atmtab,timab,xmpi_sum
-!!
 !! SOURCE
 
 subroutine eltxccore(eltfrxc,is2_in,my_natom,natom,nfft,ntypat,&
@@ -1042,12 +1026,6 @@ end subroutine eltxccore
 !! OUTPUT
 !!  eltfrloc(6+3*natom,6)=non-symmetrized local pseudopotenial contribution
 !!   to the elastic tensor and internal strain.
-!!
-!! PARENTS
-!!      m_respfn_driver
-!!
-!! CHILDREN
-!!      free_my_atmtab,get_my_atmtab,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1389,12 +1367,6 @@ end subroutine dfpt_eltfrloc
 !!  eltfrkin(6,6)=non-symmetrized kinetic energy contribution to the
 !!                    elastic tensor
 !!
-!! PARENTS
-!!      m_respfn_driver
-!!
-!! CHILDREN
-!!      free_my_atmtab,get_my_atmtab,timab,xmpi_sum
-!!
 !! SOURCE
 
 subroutine dfpt_eltfrkin(cg,eltfrkin,ecut,ecutsm,effmass_free,&
@@ -1582,12 +1554,6 @@ subroutine dfpt_eltfrkin(cg,eltfrkin,ecut,ecutsm,effmass_free,&
 !! cut-off energy). The smearing factor is $x^2 (3-2x)$, where
 !! x = (ecut- unmodified energy)/ecutsm.
 !!
-!! PARENTS
-!!      m_dfpt_elt
-!!
-!! CHILDREN
-!!      free_my_atmtab,get_my_atmtab,timab,xmpi_sum
-!!
 !! SOURCE
 
 subroutine d2kindstr2(cwavef,ecut,ecutsm,effmass_free,ekinout,gmet,gprimd,&
@@ -1746,12 +1712,6 @@ end subroutine dfpt_eltfrkin
 !!                    elastic tensor
 !! NOTES
 !! *based largely on hartre.f
-!!
-!! PARENTS
-!!      m_respfn_driver
-!!
-!! CHILDREN
-!!      free_my_atmtab,get_my_atmtab,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1956,12 +1916,6 @@ end subroutine dfpt_eltfrhar
 !!
 !! OUTPUT
 !! elteew(6+3*natom,6)=2nd derivatives of Ewald energy wrt strain
-!!
-!! PARENTS
-!!      m_respfn_driver
-!!
-!! CHILDREN
-!!      free_my_atmtab,get_my_atmtab,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -2378,12 +2332,6 @@ end subroutine elt_ewald
 !! dyew(2,3,natom,3,natom)= Ewald part of the dynamical matrix,
 !!    second energy derivative wrt xred(3,natom), Hartrees.
 !!
-!! PARENTS
-!!      m_respfn_driver
-!!
-!! CHILDREN
-!!      free_my_atmtab,get_my_atmtab,timab,xmpi_sum
-!!
 !! SOURCE
 
 subroutine dfpt_ewald(dyew,gmet,my_natom,natom,qphon,rmet,sumg0,typat,ucvol,xred,zion, &
@@ -2672,12 +2620,6 @@ end subroutine dfpt_ewald
 !! OUTPUT
 !! dyewdq(2,3,natom,3,natom,3)= First q-gradient of Ewald part of the dynamical matrix,
 !!    second energy derivative wrt xred(3,natom), Hartrees.
-!!
-!! PARENTS
-!!      m_longwave
-!!
-!! CHILDREN
-!!      free_my_atmtab,get_my_atmtab,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -3008,12 +2950,6 @@ end subroutine dfpt_ewalddq
 !! OUTPUT
 !! dyewdqdq(2,3,natom,3,3,3)= First q-gradient of Ewald part of the dynamical matrix,
 !!    sumed over second atomic sublattice.
-!!
-!! PARENTS
-!!      m_longwave
-!!
-!! CHILDREN
-!!      free_my_atmtab,get_my_atmtab,timab,xmpi_sum
 !!
 !! SOURCE
 

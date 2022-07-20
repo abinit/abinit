@@ -14,8 +14,6 @@
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -351,8 +349,6 @@ CONTAINS  !===========================================================
 !!
 !! PARENTS
 !!    respfn
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine ddb_init(ddb, dtset, nblok, mpert, msize)
@@ -394,9 +390,6 @@ end subroutine ddb_init
 !! PARENTS
 !!   gstate, respfn, dfpt_looppert, effective_potential_file_read,
 !!   ifc_init_fromFile, nonlinear, longwave, eph, anaddb, merge_ddb
-!! CHILDREN
-!!      wrtout,xmpi_sum
-!!
 !! SOURCE
 
 subroutine ddb_free(ddb)
@@ -429,12 +422,6 @@ end subroutine ddb_free
 !!
 !! FUNCTION
 !!  Create object and copy all types for the ddb_type structure
-!!
-!! PARENTS
-!!      m_ddb
-!!
-!! CHILDREN
-!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -491,12 +478,6 @@ end subroutine ddb_copy
 !!   nband=number of bands. Optional, indicates the use of eig2d.
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!   ddb_init, ddb_bcast, ddb_from_file_txt, ddb_lw_copy, ddb_interpolate, thmeig
-!!
-!! CHILDREN
-!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -557,11 +538,6 @@ end subroutine ddb_malloc
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!  respfn
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine ddb_set_qpt(ddb, iblok, qpt, qpt2, qpt3)
@@ -599,11 +575,6 @@ end subroutine ddb_set_qpt
 !!  iblok=index of the block being set.
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!  respfn
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -658,8 +629,6 @@ end subroutine ddb_set_d2matr
 !!
 !! PARENTS
 !!  gstate
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine ddb_set_gred(ddb, gred, iblok)
@@ -709,8 +678,6 @@ end subroutine ddb_set_gred
 !!
 !! PARENTS
 !!  gstate
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine ddb_set_pel(ddb, pel, flg, iblok)
@@ -758,8 +725,6 @@ end subroutine ddb_set_pel
 !!
 !! PARENTS
 !!  gstate
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine ddb_set_strten(ddb, strten, iblok)
@@ -804,8 +769,6 @@ end subroutine ddb_set_strten
 !!
 !! PARENTS
 !!  gstate
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine ddb_set_etotal(ddb, etotal, iblok)
@@ -847,8 +810,6 @@ end subroutine ddb_set_etotal
 !!
 !! PARENTS
 !!   ddb_from_file_txt
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine ddb_set_brav(ddb, brav)
@@ -901,11 +862,6 @@ end subroutine ddb_set_brav
 !!
 !! SIDE EFFECTS
 !!   Ddb<type(ddb_type)>= Input if node is master, other nodes returns with a completely initialized instance.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -1001,11 +957,6 @@ end subroutine ddb_bcast
 !!
 !! OUTPUT
 !! iblok= number of the block that corresponds to the specifications
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -1254,12 +1205,6 @@ end subroutine ddb_get_block
 !! OUTPUT
 !! gamma= if 1, means that the wavevector is indeed at Gamma otherwise 0.
 !!
-!! PARENTS
-!!      m_ddb
-!!
-!! CHILDREN
-!!      wrtout,xmpi_sum
-!!
 !! SOURCE
 
 
@@ -1324,11 +1269,6 @@ end subroutine gamma9
 !!
 !! NOTES
 !! only executed by one processor.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -1541,11 +1481,6 @@ end subroutine ddb_read_block
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_ddb
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 
@@ -1581,11 +1516,6 @@ end subroutine ddb_read_eig2d
 !!  iblok=
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_ddb
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1672,12 +1602,6 @@ end subroutine ddb_read_eig2d_txt
 !! xred(3,natom)=fractional dimensionless atomic coordinates
 !! zion(ntypat)=charge on each type of atom (real number)
 !! znucl(ntypat)=Nuclear charge for each type of pseudopotential
-!!
-!! PARENTS
-!!      m_ddb
-!!
-!! CHILDREN
-!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -1937,12 +1861,6 @@ end subroutine rdddb9
 !! NOTES
 !! Only for one processor (no use of wrtout)
 !!
-!! PARENTS
-!!      m_ddb,m_thmeig
-!!
-!! CHILDREN
-!!      wrtout,xmpi_sum
-!!
 !! SOURCE
 
 subroutine chkin9(atifc,natifc,natom)
@@ -2020,12 +1938,6 @@ end subroutine chkin9
 !! OUTPUT
 !! carflg(3,mpert,3,mpert,3,mpert)=1 if the element of d3cart has been calculated, 0 otherwise
 !! d3cart(2,3,mpert,3,mpert,3,mpert)=matrix of third-order energy derivatives in cartesian coordinates
-!!
-!! PARENTS
-!!      m_ddb,m_nonlinear
-!!
-!! CHILDREN
-!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -2165,13 +2077,6 @@ end subroutine nlopt
 !!  crystal<type(crystal_t)>=Crystal structure parameters
 !!  ddb_hdr= Header of the DDB file.
 !!
-!! PARENTS
-!!      anaddb,m_dfpt_looppert,m_dvdb,m_effective_potential_file,m_eph_driver
-!!      m_gruneisen,m_ifc
-!!
-!! CHILDREN
-!!      wrtout,xmpi_sum
-!!
 !! SOURCE
 
 subroutine ddb_from_file(ddb, filename, brav, ddb_hdr, crystal, comm, prtvol, raw)
@@ -2221,12 +2126,6 @@ end subroutine ddb_from_file
 !!  ddb<type(ddb_type)>=Object storing the DDB results.
 !!  crystal<type(crystal_t)>=Crystal structure parameters
 !!  ddb_hdr= Header of the DDB file.
-!!
-!! PARENTS
-!!      ddb_from_file
-!!
-!! CHILDREN
-!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -2409,12 +2308,6 @@ end subroutine ddb_from_file_txt
 !! blkval2(2,msize,mband,nkpt)=Second order eigenvalues (EIG2D)
 !! is transformed from reduced coordinates to cartesian coordinates
 !!
-!! PARENTS
-!!      m_thmeig
-!!
-!! CHILDREN
-!!      wrtout,xmpi_sum
-!!
 !! SOURCE
 
 subroutine carttransf(blkflg,blkval2,carflg,gprimd,iqpt,mband, mpert,msize,natom,nblok,nkpt,rprimd)
@@ -2515,12 +2408,6 @@ end subroutine carttransf
 !!    dynamical matrix, effective charges, dielectric tensor,....
 !!    all in cartesian coordinates
 !!
-!! PARENTS
-!!      m_ddb
-!!
-!! CHILDREN
-!!      wrtout,xmpi_sum
-!!
 !! SOURCE
 
 subroutine carteig2d(blkflg,blkval,carflg,d2cart,gprimd,iblok,mpert,natom,nblok,rprimd)
@@ -2618,12 +2505,6 @@ end subroutine carteig2d
 !!  zeff(electric field direction, atomic direction, atom index)
 !! dielt(3,3)=dielectric tensor
 !!
-!! PARENTS
-!!      m_ddb
-!!
-!! CHILDREN
-!!      wrtout,xmpi_sum
-!!
 !! SOURCE
 
 subroutine dtech9(blkval,dielt,iblok,mpert,natom,nblok,zeff,unit)
@@ -2706,12 +2587,6 @@ end subroutine dtech9
 !! dchide(3,3,3) = non-linear optical coefficients
 !! dchidt(natom,3,3,3) = first-order change of the electronic dielectric
 !!   tensor induced by an individual atomic displacement
-!!
-!! PARENTS
-!!      m_ddb
-!!
-!! CHILDREN
-!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -2882,10 +2757,6 @@ end subroutine dtchi
 !!  etotal=GS Total energy in Hartree
 !!  iblok=Index of the block in the DDB file. 0 if not found.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 integer function ddb_get_etotal(ddb, etotal) result(iblok)
@@ -2955,10 +2826,6 @@ end function ddb_get_etotal
 !!
 !! NOTES
 !!  dielt and zeff are initialized to one_3D and zero if the derivatives are not available in the DDB file.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3047,10 +2914,6 @@ end function ddb_get_dielt_zeff
 !! NOTES
 !!  dielt is initialized to one_3D if the derivatives are not available in the DDB file.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 integer function ddb_get_dielt(ddb, rftyp, dielt) result(iblok)
@@ -3136,10 +2999,6 @@ end function ddb_get_dielt
 !! NOTES
 !!  quadrupoles is initialized to zero if the derivatives are not available in the DDB file.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 integer function ddb_get_quadrupoles(ddb, lwsym, rftyp, quadrupoles) result(iblok)
@@ -3221,10 +3080,6 @@ end function ddb_get_quadrupoles
 !! iblok=Index of the block containing the data. 0 if block is not found.
 !!   The caller should check the returned value.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 integer function ddb_get_dchidet(ddb, ramansr, nlflag, dchide, dchidt) result(iblok)
@@ -3296,10 +3151,6 @@ end function ddb_get_dchidet
 !! OUTPUT
 !! asrq0<asrq0_t>
 !!   iblok= is set to 0 if the Gamma block is not found
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3411,11 +3262,6 @@ end function ddb_get_asrq0
 !!  [out_eigvec(2*3*natom*3*natom) = The igenvectors of the dynamical matrix.
 !!  [out_displ_red(2*3*natom*3*natom) = The displacement in reduced coordinates.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      wrtout,xmpi_sum
-!!
 !! SOURCE
 
 subroutine ddb_diagoq(ddb, crystal, qpt, asrq0, symdynmat, rftyp, phfrq, displ_cart, &
@@ -3502,11 +3348,6 @@ end subroutine ddb_diagoq
 !!   Input: Values stored in ddb%
 !!   Output: Changed to enforce ASR.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      wrtout,xmpi_sum
-!!
 !! SOURCE
 
 subroutine asrq0_apply(asrq0, natom, mpert, msize, xcart, d2cart)
@@ -3549,11 +3390,6 @@ end subroutine asrq0_apply
 !!
 !! FUNCTION
 !!   Free dynamic memory
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -3617,11 +3453,6 @@ end subroutine asrq0_free
 !!
 !! NOTES
 !! only executed by one processor.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -3806,11 +3637,6 @@ end subroutine ddb_write_block
 !!      0-> do not include information on pseudopoentials
 !!  comm=MPI communicator
 !!
-!! PARENTS
-!!  respfn, gstate, longwave, nonlinear, merge_ddb
-!! CHILDREN
-!!      
-!!
 !! SOURCE
 
 subroutine ddb_write(ddb, ddb_hdr, filename, fullinit, comm)
@@ -3845,11 +3671,6 @@ end subroutine ddb_write
 !!  fullinit
 !!      1-> include information on pseudopoentials
 !!      0-> do not include information on pseudopoentials
-!!
-!! PARENTS
-!!  ddb_write
-!! CHILDREN
-!!      
 !!
 !! SOURCE
 
@@ -3903,11 +3724,6 @@ end subroutine ddb_write_txt
 !!  ddb_hdr=ddb header object.
 !!  unddb=unit of the open ddb file in text format or netcdf identifier.
 !!
-!! PARENTS
-!!  merge_ddb
-!!
-!! CHILDREN
-!!      
 !!
 !! SOURCE
 
@@ -3951,10 +3767,6 @@ end subroutine ddb_write_eig2d
 !!  ddb_hdr=ddb header object.
 !!  unddb=unit of the open ddb file in text format.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      
 !!
 !! SOURCE
 
@@ -3989,10 +3801,6 @@ end subroutine ddb_write_eig2d_txt
 !! FUNCTION
 !!  Write the netndf file DDB.nc
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      
 !!
 !! SOURCE
 
@@ -4172,11 +3980,6 @@ end subroutine ddb_write_nc
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!  longwave, nonlinear
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine ddb_set_d3matr(ddb, d3matr, flg, iblok, lw)
@@ -4241,12 +4044,6 @@ end subroutine ddb_set_d3matr
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!  Orphan function. Might be removed
-!!
-!! CHILDREN
-!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -4395,11 +4192,6 @@ end subroutine ddb_to_dtset
 !!         (1 --> check header consistency between files)
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!  mrgddb
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -4712,12 +4504,6 @@ end subroutine merge_ddb
 !! carflg(3,mpert,3,mpert,3,mpert)=1 if the element of d3cart has been calculated, 0 otherwise
 !! d3cart(2,3,mpert,3,mpert,3,mpert)=matrix of third-order energy derivatives in cartesian coordinates
 !!
-!! PARENTS
-!!      m_ddb
-!!
-!! CHILDREN
-!!      wrtout,xmpi_sum
-!!
 !! SOURCE
 
 subroutine lwcart(blkflg,carflg,d3,d3cart,gprimd,mpert,natom,rprimd)
@@ -4816,12 +4602,6 @@ end subroutine lwcart
 !!
 !! OUTPUT
 !! lwtens(3,3,3,natom) = Dynamical Quadrupoles or P^(1) tensor
-!!
-!! PARENTS
-!!      m_ddb
-!!
-!! CHILDREN
-!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -4930,12 +4710,6 @@ subroutine dtqdrp(blkval,lwsym,mpert,natom,lwtens)
 !! OUTPUT
 !! ddb_lw= ddb block datastructure
 !!
-!! PARENTS
-!!      anaddb
-!!
-!! CHILDREN
-!!      wrtout,xmpi_sum
-!!
 !! SOURCE
 
  subroutine ddb_lw_copy(ddb,ddb_lw,mpert,natom,ntypat)
@@ -5037,12 +4811,6 @@ subroutine dtqdrp(blkval,lwsym,mpert,natom,lwtens)
 !!
 !! NOTES
 !!   Time-reversal symmetry is always assumed
-!!
-!! PARENTS
-!!      m_ifc
-!!
-!! CHILDREN
-!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 

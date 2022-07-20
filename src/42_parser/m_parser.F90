@@ -206,12 +206,6 @@ CONTAINS  !===========================================================
 !!  ndtset= the number of declared datasets.
 !!  string= contains on output the content of the file, ready for parsing.
 !!
-!! PARENTS
-!!      m_common,m_dtfil,ujdet
-!!
-!! CHILDREN
-!!      intagm,intagm_img
-!!
 !! SOURCE
 
 subroutine parsefile(filnamin, lenstr, ndtset, string, comm)
@@ -316,12 +310,6 @@ end subroutine parsefile
 !! OUTPUT
 !!  outi or outr (integer or real respectively)
 !!  errcod, =0 for success, 1,2 for ini, inr failure resp.
-!!
-!! PARENTS
-!!      m_bader,m_parser
-!!
-!! CHILDREN
-!!      intagm,intagm_img
 !!
 !! SOURCE
 
@@ -497,12 +485,6 @@ end subroutine inread
 !!  lenstr=actual number of character in string
 !!  string*(strln)=preprocessed string of character
 !!  raw_string=string without any preprocessine (comments are included.
-!!
-!! PARENTS
-!!      anaddb,importcml,localorb_S,lwf,parsefile
-!!
-!! CHILDREN
-!!      incomprs,instrng,wrtout
 !!
 !! SOURCE
 
@@ -874,12 +856,6 @@ end subroutine instrng
 !! SIDE EFFECTS
 !!  string=same character string with ASCII (decimal) 0-31 replaced by 32.
 !!
-!! PARENTS
-!!      m_parser
-!!
-!! CHILDREN
-!!      intagm,intagm_img
-!!
 !! SOURCE
 
 subroutine inreplsp(string)
@@ -936,12 +912,6 @@ end subroutine inreplsp
 !!  string=at input:  character string
 !!         at output: repeated blanks and tabs have been removed and
 !!                    remaining tabs have been replaced by blanks
-!!
-!! PARENTS
-!!      m_parser
-!!
-!! CHILDREN
-!!      intagm,intagm_img
 !!
 !! SOURCE
 
@@ -1128,14 +1098,6 @@ end subroutine incomprs
 !!  (3) if neither (1) nor (2) are found, search for the 'normal'
 !!       string, blank//'token'//blank
 !!
-!!
-!! PARENTS
-!!      m_anaddb_dataset,m_band2eps_dataset,m_dtfil,m_dtset,m_ingeo,m_inkpts
-!!      m_invars1,m_invars2,m_mpi_setup,m_multibinit_dataset,m_parser
-!!      m_scup_dataset,ujdet
-!!
-!! CHILDREN
-!!      intagm,intagm_img
 !!
 !! SOURCE
 
@@ -1714,11 +1676,6 @@ end subroutine intagm
 !! The routine is a generic interface calling subroutine according to the
 !! number of arguments of the variable to be read
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      intagm,intagm_img
-!!
 !! SOURCE
 
 subroutine intagm_img_1D(dp_data,iimage,jdtset,lenstr,nimage,size1,string,token,tread_ok,typevarphys)
@@ -1844,11 +1801,6 @@ end subroutine intagm_img_1D
 !!  Read input file variables according to images path definition (2D array)
 !!
 !! INPUTS
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      intagm,intagm_img
 !!
 !! SOURCE
 
@@ -2000,12 +1952,6 @@ end subroutine intagm_img_2D
 !!
 !! SIDE EFFECT
 !!   b1=absolute location in string of blank which follows the token (will be modified in the execution)
-!!
-!! PARENTS
-!!      m_parser
-!!
-!! CHILDREN
-!!      intagm,intagm_img
 !!
 !! SOURCE
 
@@ -2196,12 +2142,6 @@ end subroutine inarray
 !!  string_upper*(strln)=string of character
 !!   the string (with upper case) from the input file, to which the xyz data are appended to it
 !!
-!! PARENTS
-!!      m_parser
-!!
-!! CHILDREN
-!!      intagm,intagm_img
-!!
 !! SOURCE
 
 subroutine importxyz(lenstr,string_raw,string_upper,strln)
@@ -2317,12 +2257,6 @@ end subroutine importxyz
 !! SIDE EFFECTS
 !!  lenstr=actual number of characters in string
 !!  string*(strln)=string of characters  (upper case) to which the xyz data are appended
-!!
-!! PARENTS
-!!      m_parser
-!!
-!! CHILDREN
-!!      intagm,intagm_img
 !!
 !! SOURCE
 
@@ -2497,12 +2431,6 @@ end subroutine append_xyz
 !! must be between -99 and 999 to be printed correctly.
 !! for the time being, at most 3 conditions are allowed.
 !!
-!! PARENTS
-!!      m_chkinp
-!!
-!! CHILDREN
-!!      intagm,intagm_img
-!!
 !! SOURCE
 
 subroutine chkdpr(advice_change_cond,cond_number,cond_string,cond_values,&
@@ -2635,12 +2563,6 @@ end subroutine chkdpr
 !!
 !!  Conditional cases (examples to be provided - see chkinp.f for the time being)
 !!
-!! PARENTS
-!!      m_chkinp
-!!
-!! CHILDREN
-!!      intagm,intagm_img
-!!
 !! SOURCE
 
 subroutine chkint(advice_change_cond,cond_number,cond_string,cond_values,&
@@ -2721,12 +2643,6 @@ end subroutine chkint
 !!
 !! for the time being, at most 3 conditions are allowed.
 !!
-!! PARENTS
-!!      m_chkinp,m_psps
-!!
-!! CHILDREN
-!!      intagm,intagm_img
-!!
 !! SOURCE
 
 subroutine chkint_eq(advice_change_cond,cond_number,cond_string,cond_values,&
@@ -2805,12 +2721,6 @@ end subroutine chkint_eq
 !! must be between -99 and 999 to be printed correctly.
 !!
 !! for the time being, at most 3 conditions are allowed.
-!!
-!! PARENTS
-!!      m_chkinp,m_invars1
-!!
-!! CHILDREN
-!!      intagm,intagm_img
 !!
 !! SOURCE
 
@@ -2891,12 +2801,6 @@ end subroutine chkint_ge
 !! must be between -99 and 999 to be printed correctly.
 !!
 !! for the time being, at most 3 conditions are allowed.
-!!
-!! PARENTS
-!!      m_chkinp
-!!
-!! CHILDREN
-!!      intagm,intagm_img
 !!
 !! SOURCE
 
@@ -2979,12 +2883,6 @@ end subroutine chkint_le
 !! must be between -99 and 999 to be printed correctly.
 !!
 !! for the time being, at most 3 conditions are allowed.
-!!
-!! PARENTS
-!!      m_chkinp
-!!
-!! CHILDREN
-!!      intagm,intagm_img
 !!
 !! SOURCE
 
@@ -3085,12 +2983,6 @@ end subroutine chkint_ne
 !!   call chkint_prt(0,0,cond_string,cond_values,ierr,'nberry',nberry,1,(/limit/),-1,limit,iout)
 !!
 !!  Conditional cases (examples to be provided - see chkinp.f for the time being)
-!!
-!! PARENTS
-!!      m_parser
-!!
-!! CHILDREN
-!!      intagm,intagm_img
 !!
 !! SOURCE
 
@@ -3243,12 +3135,6 @@ end subroutine chkint_prt
 !!
 !! OUTPUT
 !!  (only writing)
-!!
-!! PARENTS
-!!      m_outvar_a_h,m_outvar_i_n,m_outvar_o_z,m_parser,m_paw_uj
-!!
-!! CHILDREN
-!!      intagm,intagm_img
 !!
 !! SOURCE
 
@@ -3588,12 +3474,6 @@ end subroutine prttagm
 !! OUTPUT
 !!  (only writing)
 !!
-!! PARENTS
-!!      m_outvar_a_h,m_outvar_i_n,m_outvar_o_z
-!!
-!! CHILDREN
-!!      intagm,intagm_img
-!!
 !! SOURCE
 
 subroutine prttagm_images(dprarr_images,iout,jdtset_,length,&
@@ -3775,12 +3655,6 @@ end subroutine prttagm_images
 !!
 !! OUTPUT
 !!  Abort if variable name is not recognized.
-!!
-!! PARENTS
-!!      m_anaddb_dataset,m_dtset
-!!
-!! CHILDREN
-!!      intagm,intagm_img
 !!
 !! SOURCE
 
@@ -4333,11 +4207,6 @@ end function geo_from_poscar_unit
 !! FUNCTION
 !!  Print Abinit variables corresponding to POSCAR
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      intagm,intagm_img
-!!
 !! SOURCE
 
 subroutine geo_print_abivars(self, unit)
@@ -4461,11 +4330,6 @@ end function geo_from_netcdf_path
 !! FUNCTION
 !!  Brodcast object
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      intagm,intagm_img
-!!
 !! SOURCE
 
 subroutine geo_bcast(self, master, comm)
@@ -4507,11 +4371,6 @@ end subroutine geo_bcast
 !! FUNCTION
 !!  Allocate memory once %natom and %ntypat are know
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      intagm,intagm_img
-!!
 !! SOURCE
 
 subroutine geo_malloc(self)
@@ -4534,11 +4393,6 @@ end subroutine geo_malloc
 !!
 !! FUNCTION
 !!  Free memory.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      intagm,intagm_img
 !!
 !! SOURCE
 
@@ -4575,12 +4429,6 @@ end subroutine geo_free
 !! rprim(3,3)=dimensionless real space primitive translations
 !!
 !! FUNCTION
-!!
-!! PARENTS
-!!      m_ingeo,m_parser
-!!
-!! CHILDREN
-!!      intagm,intagm_img
 !!
 !! SOURCE
 

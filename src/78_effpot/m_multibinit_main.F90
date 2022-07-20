@@ -55,12 +55,6 @@ contains
   !!
   !! OUTPUT
   !!
-  !! PARENTS
-!!      multibinit
-!!
-  !! CHILDREN
-!!      manager%run_all
-!!
   !! SOURCE
   subroutine multibinit_main2(input_path, filnam, dry_run)
     character(len=fnlen), intent(inout) :: input_path

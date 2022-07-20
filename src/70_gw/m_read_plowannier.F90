@@ -16,10 +16,6 @@
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -96,12 +92,6 @@ contains
 !! coeffW_BZ(nsppol,bandinf:bandsup,nvz,2*lcor+1)
 !! lcor : angular momentum for correlated orbitals
 !! itypatcor : correlated species
-!!
-!! PARENTS
-!!      m_chi0,m_prep_calc_ucrpa
-!!
-!! CHILDREN
-!!      get_bz_item,wrtout
 !!
 !! SOURCE
 

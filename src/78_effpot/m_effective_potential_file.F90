@@ -14,8 +14,6 @@
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -230,11 +228,6 @@ CONTAINS  !=====================================================================
 !! OUTPUT
 !! eff_pot<type(effective_potential_type)> = datatype with all the information for effective potential
 !!
-!! PARENTS
-!!      m_compute_anharmonics,m_multibinit_driver
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
@@ -427,11 +420,6 @@ end subroutine effective_potential_file_read
 !!             40 NetCDF file with history of MD or snapshot
 !!             41 ASCII file with history of MD or snapshot
 !!
-!! PARENTS
-!!      m_effective_potential_file,m_mover_effpot,m_multibinit_driver
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine effective_potential_file_getType(filename,filetype)
@@ -552,11 +540,6 @@ end subroutine effective_potential_file_getType
 !! nqpt  = number of q points
 !! nrpt  = number of rpt points
 !!
-!! PARENTS
-!!      m_effective_potential_file,m_multibinit_driver,m_multibinit_manager
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine effective_potential_file_getDimSystem(filename,comm,natom,ntypat,nqpt,nrpt)
@@ -667,11 +650,6 @@ end subroutine effective_potential_file_getDimSystem
 !! ncoeff = number of coefficient for the polynome
 !! nterm(ncoeff) = number terms per coefficient
 !! ndisp(nterm,ncoeff) = number displacement per term
-!!
-!! PARENTS
-!!      m_effective_potential_file
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -807,11 +785,6 @@ end subroutine effective_potential_file_getDimCoeff
 !! OUTPUT
 !! nrpt  = number of rpt points
 !!
-!! PARENTS
-!!      m_effective_potential_file
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine effective_potential_file_getDimStrainCoupling(filename,nrpt,voigt)
@@ -906,11 +879,6 @@ end subroutine effective_potential_file_getDimStrainCoupling
 !! OUTPUT
 !! natom = number of atoms
 !! nstep = number of MD steps
-!!
-!! PARENTS
-!!      m_effective_potential_file
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1062,11 +1030,6 @@ end subroutine effective_potential_file_getDimMD
 !! ntypat=number of atom types
 !! nrpt  =number of real space points used to integrate IFC
 !  nph1l =number of wavevectors for phonon
-!!
-!! PARENTS
-!!      m_effective_potential_file
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1243,11 +1206,6 @@ end subroutine system_getDimFromXML
 !!
 !! OUTPUT
 !! eff_pot<type(effective_potential_type)> = datatype with all the information for effective potential
-!!
-!! PARENTS
-!!      m_effective_potential_file
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2185,11 +2143,6 @@ end subroutine system_xml2effpot
 !! OUTPUT
 !! effective_potantial<type(effective_potential_type)> = effective_potential datatype to be initialized
 !!
-!! PARENTS
-!!      m_effective_potential_file
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
@@ -2865,11 +2818,6 @@ end subroutine system_ddb2effpot
 !! OUTPUT
 !! eff_pot<type(effective_potential_type)> = effective_potential datatype
 !!
-!! PARENTS
-!!      m_effective_potential_file
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine coeffs_xml2effpot(eff_pot,filename,comm)
@@ -3297,11 +3245,6 @@ end subroutine coeffs_xml2effpot
 !! OUTPUT
 !! hist<type(abihist)> = datatype with the  history of the MD
 !!
-!! PARENTS
-!!      m_effective_potential_file,m_multibinit_driver
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine effective_potential_file_readMDfile(filename,hist,option)
@@ -3409,12 +3352,6 @@ end subroutine effective_potential_file_readMDfile
 !!
 !! OUTPUT
 !! hist<type(abihist)> = The history of the MD
-!!
-!! PARENTS
-!!      m_fit_polynomial_coeff,m_mover,m_mover_effpot,m_multibinit_driver
-!!      m_opt_effpot
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3695,10 +3632,6 @@ end subroutine effective_potential_file_mapHistToRef
 !! OUTPUT
 !! disp(3,natom_sc) = atomics displacement between configuration and the reference
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine effective_potential_file_readDisplacement(filename,disp,nstep,natom)
@@ -3756,11 +3689,6 @@ end subroutine effective_potential_file_readDisplacement
 !! OUTPUT
 !!  nelement = number of element in the line
 !!
-!! PARENTS
-!!      m_effective_potential_file
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine elementfromline(line,nelement)
@@ -3807,11 +3735,6 @@ subroutine elementfromline(line,nelement)
 !! OUTPUT
 !!  output= (string) value of the keyword
 !!
-!! PARENTS
-!!      m_effective_potential_file
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine rdfromline(keyword,line,output)
@@ -3855,12 +3778,6 @@ subroutine elementfromline(line,nelement)
 !! OUTPUT
 !!  output= line without tab
 !!
-!! PARENTS
-!!    system_xml2effpot
-!!
-!! CHILDREN
-!!    rmtabfromline
-!!
 !! SOURCE
 
 recursive subroutine rmtabfromline(line)
@@ -3896,12 +3813,6 @@ recursive subroutine rmtabfromline(line)
 !!
 !! OUTPUT
 !!  output= (string) value of the keyword
-!!
-!! PARENTS
-!!      system_xml2effpot
-!!
-!! CHILDREN
-!!      paw_rdfromline
 !!
 !! SOURCE
 
@@ -3987,11 +3898,6 @@ end function char_f2c
 !!
 !! OUTPUT
 !!  f_string=Fortran string
-!!
-!! PARENTS
-!!      m_libpaw_libxc
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

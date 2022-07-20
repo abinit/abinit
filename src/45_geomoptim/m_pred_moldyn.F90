@@ -10,10 +10,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -86,12 +82,6 @@ contains
 !!   positions in 2 previous steps, those values are different
 !!   from the values store in the history, thats the reason why
 !!   we cannot simply use hist%xred to obtain those positions.
-!!
-!! PARENTS
-!!      m_precpred_1geo
-!!
-!! CHILDREN
-!!      hist2var,var2hist,xcart2xred,xred2xcart
 !!
 !! SOURCE
 

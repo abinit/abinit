@@ -13,10 +13,6 @@
 !!
 !! NOTES
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -100,16 +96,6 @@ contains
 !!  psps <type(pseudopotential_type)> = variables related to pseudopotentials
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_driver
-!!
-!! CHILDREN
-!!      check_kxc,ddb_hdr%free,ddb_hdr%open_write,ddb_hdr%init,dfpt_ewalddq
-!!      dfpt_ewalddqdq,dfpt_flexo,dfpt_qdrpole,ebands_free
-!!      fourdp,hdr%free,hdr%update,hdr_init,inwffil,kpgio,matr3inv,mkcore,mkrho
-!!      pawfgr_init,pspini,read_rhor,rhotoxc,setsym,setup1,symmetrize_xred
-!!      wffclose,xcdata_init
 !!
 !! SOURCE
 

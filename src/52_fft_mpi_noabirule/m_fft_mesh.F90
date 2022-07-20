@@ -13,10 +13,6 @@
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -126,11 +122,6 @@ CONTAINS  !=====================================================================
 !! OUTPUT
 !!  zpad<type(zpad_t)>
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xred2xcart
-!!
 !! SOURCE
 
 subroutine zpad_init(zpad,nx,ny,nz,ldx,ldy,ldz,mgfft,gbound)
@@ -210,11 +201,6 @@ end subroutine zpad_init
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xred2xcart
-!!
 !! SOURCE
 
 subroutine zpad_free(zpad)
@@ -274,12 +260,6 @@ end subroutine zpad_free
 !!               (even finer than method=2, roughly corresponds to method=1 with aliasing_factor=2).
 !!
 !!  See defs_fftdata for a list of allowed sizes of FFT.
-!!
-!! PARENTS
-!!      m_bethe_salpeter,m_screening_driver,m_sigma_driver
-!!
-!! CHILDREN
-!!      xred2xcart
 !!
 !! SOURCE
 
@@ -691,11 +671,6 @@ end function check_rot_fft
 !!  err(3,nsym)=The max error for each symmetry. (given in terms of the FFT vectors)
 !!  isok=.FALSE. if the FFT mesh does not fulfil all symmetry properties of the crystal.
 !!
-!! PARENTS
-!!      m_shirley
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 function fft_check_rotrans(nsym,symrel,tnons,ngfft,err) result(isok)
@@ -792,13 +767,6 @@ end function fft_check_rotrans
 !!  of the crystal, the array irottb will contain the index of the FFT point which
 !!  is the closest one to $R^{-1}(r-\tau)$. This might lead to inaccuracies in the
 !!  final results, in particular in the description of degenerate states.
-!!
-!! PARENTS
-!!      m_bethe_salpeter,m_chi0,m_classify_bands,m_cohsex,m_dvdb,m_fft_mesh
-!!      m_prep_calc_ucrpa,m_screening_driver,m_sigc,m_sigx,m_wfd
-!!
-!! CHILDREN
-!!      xred2xcart
 !!
 !! SOURCE
 
@@ -898,10 +866,6 @@ end subroutine rotate_fft_mesh
 !! OUTPUT
 !!  out_rhor(cplex * nfftot * nspden)=Output array
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine denpot_project(cplex,  ngfft, nspden, in_rhor, one_symrel, one_tnons, out_rhor)
@@ -965,11 +929,6 @@ end subroutine denpot_project
 !! igfft(npwvec,2*mG0(1)+1,2*mG0(2)+1,2*mG0(3)+1)=For each G, and each G0 vector,
 !!  it gives the FFT grid index of the G-G0 vector.
 !! ierr=Number of G-G0 vectors falling outside the inout FFT box.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xred2xcart
 !!
 !! SOURCE
 
@@ -1151,13 +1110,6 @@ end function g2ifft
 !!  gsq_max=Max value of (k+G)^2 for G in the FFT box
 !!  gfft(3,nfft_tot) = The reduced components of the G in the FFT mesh (nfft_tot=PRODUCT(ngfft(1:3))
 !!
-!! PARENTS
-!!      bethe_salpeter,calc_sigc_me,cchi0,cchi0q0,cohsex_me,screening,sigma
-!!      m_dvdb
-!!
-!! CHILDREN
-!!      xcopy
-!!
 !! SOURCE
 
 pure subroutine get_gftt(ngfft, kpt, gmet, gsq_max, gfft)
@@ -1219,11 +1171,6 @@ end subroutine get_gftt
 !!
 !! OUTPUT
 !!  ceigr(nfft*nspinor)=e^{ik.r} on the FFT mesh.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xred2xcart
 !!
 !! SOURCE
 
@@ -1290,11 +1237,6 @@ end subroutine calc_ceigr_spc
 !! OUTPUT
 !!  ceigr(nfft*nspinor)=e^{ik.r} on the FFT mesh.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xred2xcart
-!!
 !! SOURCE
 
 subroutine calc_ceigr_dpc(gg, nfft, nspinor, ngfft, ceigr)
@@ -1358,11 +1300,6 @@ end subroutine calc_ceigr_dpc
 !! OUTPUT
 !!  eigr(2*nfft)=e^{ig.r} on the FFT mesh.
 !!
-!! PARENTS
-!!      m_fft_prof
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 pure subroutine calc_eigr(gg, nfft, ngfft, eigr)
@@ -1422,11 +1359,6 @@ end subroutine calc_eigr
 !!
 !! OUTPUT
 !!  ceikr(nfft)=e^{ik.r} on the FFT mesh.
-!!
-!! PARENTS
-!!      m_wfd
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1490,10 +1422,6 @@ end subroutine calc_ceikr
 !!
 !! SIDE EFFECTS
 !!  ur(2,nfft,ndat)= contains u(r) in input. output: u(r) e^{ig.r} on the real-space FFT mesh.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1559,11 +1487,6 @@ end subroutine times_eigr
 !! SIDE EFFECTS
 !!  ur(2,nfft)= contains u(r) in input. output: u(r) e^{ig.r} on the real-space FFT mesh.
 !!
-!! PARENTS
-!!  m_dvdb
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 pure subroutine times_eikr(kk, ngfft, nfft, ndat, ur)
@@ -1628,12 +1551,6 @@ end subroutine times_eikr
 !! the invariance between n and -n, that was broken for n=ngfft/2 if ngfft even.
 !! Simply suppresses the corresponding sine.
 !!
-!! PARENTS
-!!      m_xctk
-!!
-!! CHILDREN
-!!      xred2xcart
-!!
 !! SOURCE
 
 subroutine phase(ngfft, ph)
@@ -1676,12 +1593,6 @@ end subroutine phase
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_mklocl_realspace
-!!
-!! CHILDREN
-!!      xred2xcart
 !!
 !! SOURCE
 

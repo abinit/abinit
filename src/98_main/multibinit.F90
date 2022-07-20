@@ -18,13 +18,6 @@
 !! OUTPUT
 !!  (main routine)
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      abi_io_redirect,abimem_init,abinit_doctor,flush_unit,herald,init10
-!!      isfile,multibinit_main,multibinit_main2,timein,wrtout,xmpi_init
-!!      xmpi_sum
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H

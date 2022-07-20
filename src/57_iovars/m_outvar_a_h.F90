@@ -10,10 +10,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -95,12 +91,6 @@ contains
 !!
 !!  Note that acell, occ, rprim, xred and vel might have been modified by the
 !!  computation, so that their values if choice=1 or choice=2 will differ.
-!!
-!! PARENTS
-!!      m_outvars
-!!
-!! CHILDREN
-!!      prttagm,prttagm_images
 !!
 !! SOURCE
 

@@ -14,10 +14,6 @@
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -82,11 +78,6 @@ contains
 !!
 !! SIDE EFFECTS
 !!
-!! PARENTS
-!!      m_pred_bfgs
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine lbfgs_init(ndim,history_record,diag_guess)
@@ -130,11 +121,6 @@ end subroutine lbfgs_init
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_pred_bfgs
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine lbfgs_destroy()
@@ -161,11 +147,6 @@ end subroutine lbfgs_destroy
 !!   gradf: gradient of the total energy (=negative forces)
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      pred_lbfgs
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -208,11 +189,6 @@ end function lbfgs_execute
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
-!!      m_lbfgs
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -378,11 +354,6 @@ end subroutine lbfgs
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
-!!      m_lbfgs
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -597,11 +568,6 @@ end subroutine mcsrch
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
-!!      m_lbfgs
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

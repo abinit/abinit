@@ -16,8 +16,6 @@
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -201,11 +199,6 @@ CONTAINS  !=====================================================================
 !!  I is either the identity or the inversion (time reversal in reciprocal space).
 !!  S is one of the symmetry operation in reciprocal space belonging to the Space group.
 !!
-!! PARENTS
-!!      m_gsphere
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine setup_G_rotation(nsym,symrec,timrev,npw,gvec,g2sh,nsh,shlim,grottb,grottbm1)
@@ -281,12 +274,6 @@ end subroutine setup_G_rotation
 !!
 !! NOTES
 !!  gvec are supposed to be ordered with increasing norm.
-!!
-!! PARENTS
-!!      m_bethe_salpeter,m_gsphere,m_gwls_hamiltonian,m_screening_driver
-!!      m_sigma_driver,mrgscr
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -480,11 +467,6 @@ end subroutine gsph_init
 !! NOTES
 !!  The routine will stop if any G-G0 happens to be outside the FFT box.
 !!
-!! PARENTS
-!!      m_chi0,m_cohsex,m_exc_build,m_prep_calc_ucrpa,m_sigc,m_sigx
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine gsph_fft_tabs(Gsph, g0, mgfft, ngfft, use_padfft, gmg0_gbound, gmg0_ifft)
@@ -569,11 +551,6 @@ end subroutine gsph_fft_tabs
 !! OUTPUT
 !!  Gsph<gsphere_t>=Data type containing information related to the set of G vectors
 !!   completetly initialized in output.
-!!
-!! PARENTS
-!!      m_chi0
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -670,11 +647,6 @@ end subroutine gsph_in_fftbox
 !! OUTPUT
 !!  Only writing.
 !!
-!! PARENTS
-!!      m_bethe_salpeter,m_chi0,m_gwls_hamiltonian
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine gsph_print(Gsph, unit, prtvol, mode_paral)
@@ -741,12 +713,6 @@ end subroutine gsph_print
 !! INPUTS
 !!   Gsph = datatype to be freed
 !!
-!! PARENTS
-!!      m_bethe_salpeter,m_chi0,m_gsphere,m_gwls_hamiltonian,m_screening_driver
-!!      m_sigma_driver,mrgscr
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine gsph_free(Gsph)
@@ -794,8 +760,6 @@ end subroutine gsph_free
 !!
 !! NOTES
 !!  The function assumes that the G-vectors are ordered with increasing length.
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -852,8 +816,6 @@ end function gsph_g_idx
 !!
 !! NOTES
 !!  The function assumes that the G-vectors are ordered with increasing length.
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -912,8 +874,6 @@ end function gsph_gmg_idx
 !!  Gsph<gsphere_t>=Info on the G-sphere
 !!  ig1,ig2 index of g1 and g2 in the G-sphere.
 !!  ngfft(18)=Info on the FFT mesh.
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -980,11 +940,6 @@ end function gsph_gmg_fftidx
 !!    in input : pointer to NULL
 !!    in output: shlim_p(nbase)=Cumulative number of G-vectors for each shell.
 !!               where nbase is the number of irreducible G"s found.
-!!
-!! PARENTS
-!!      m_gsphere,m_io_kss,m_sigma_driver
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1254,11 +1209,6 @@ end subroutine merge_and_sort_kg
 !!  cnorm is a bit redundant since it can be calculated from gbase. However this procedure
 !!  is called by outkss in which cnorm is already calculated and we dont want to do it twice
 !!
-!! PARENTS
-!!      m_gsphere
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine getfullg(nbase,nsym,pinv,sizepw,gbase,symrec,cnorm,maxpw,gbig,shlim,ierr)
@@ -1397,11 +1347,6 @@ end subroutine getfullg
 !! NOTES
 !!  The search can be optimized by looping over shells. See m_skw for a faster algo
 !!
-!! PARENTS
-!!      m_gsphere,m_skw
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine get_irredg(npw_k,nsym,pinv,gprimd,symrec,gcurr,nbasek,gbasek,cnormk)
@@ -1492,11 +1437,6 @@ end subroutine get_irredg
 !! gbase(3,sizepw)=irreducible G found in reciprocal coordinates
 !! cnorm(sizepw)=Norm of each irred G vector
 !! ierr= Exit status, if /=0 the number of G vectors found exceeds sizepw
-!!
-!! PARENTS
-!!      m_gsphere
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1595,11 +1535,6 @@ end subroutine merge_kgirr
 !!  ecut=cut-off energy for plane wave basis sphere (Ha)
 !!  npw=number of plane waves
 !!  nsh=number of shells
-!!
-!! PARENTS
-!!      m_invars2,m_screening_driver,m_sigma_driver
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1864,11 +1799,6 @@ end subroutine setshells
 !!                Set to 0 if kg2(:,ig) not in kg1
 !!   nmiss = Number of G-vectors in kg2 not found in kg1
 !!
-!! PARENTS
-!!      m_wfd
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine kg_map(npw1,kg1,npw2,kg2,g2g1,nmiss)
@@ -1941,10 +1871,6 @@ end subroutine kg_map
 !!     u_k(G) = u_{k+G0}(G-G0); u_{-k}(G) = u_k(G)^*
 !!   and therefore:
 !!     u_{G0/2}(G) = u_{G0/2}(-G-G0)^*.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2044,12 +1970,6 @@ end subroutine make_istwfk_table
 !!  ierr=Status error. It gives the number of G of kg_k not contained in gbig.
 !!  gamma2k(maxpw)=Mapping gbig -> kg_k
 !!
-!! PARENTS
-!!      m_io_kss
-!!
-!! CHILDREN
-!!      gsph_free,gsph_init
-!!
 !! SOURCE
 
 pure subroutine table_gbig2kg(npw_k,kg_k,maxpw,gbig,gamma2k,ierr)
@@ -2105,11 +2025,6 @@ end subroutine table_gbig2kg
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_bethe_salpeter
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2198,11 +2113,6 @@ end subroutine gsph_extend
 !! OUTPUT
 !!  kpgnorm(npw_k)=norms of the k+G vectors
 !!
-!! PARENTS
-!!      m_cut3d,m_epjdos
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine getkpgnorm(gprimd,kpt,kg_k,kpgnorm,npw_k)
@@ -2278,11 +2188,6 @@ end subroutine getkpgnorm
 !! (could save a bit of space by suppressing isym=1, since the
 !! corresponding symmetry is the identity)
 !! tmrev_g(npwdiel)=index list of inverted G vectors (time-reversed)
-!!
-!! PARENTS
-!!      m_suscep_stat
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

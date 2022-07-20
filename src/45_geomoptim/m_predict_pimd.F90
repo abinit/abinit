@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -94,14 +90,6 @@ contains
 !!   results_img(:,:)%xred(3,natom)
 !!    at input, history of the values of xred for all images
 !!    at output, the predicted values of xred for all images
-!!
-!! PARENTS
-!!      m_gstateimg
-!!
-!! CHILDREN
-!!      gather_array_img,mkradim,mkrdim,pimd_langevin_npt,pimd_langevin_nvt
-!!      pimd_nosehoover_npt,pimd_nosehoover_nvt,scatter_array_img,xmpi_bcast
-!!      xmpi_gather
 !!
 !! SOURCE
 

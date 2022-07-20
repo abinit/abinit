@@ -10,10 +10,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -87,13 +83,6 @@ contains
 !!
 !! SIDE EFFECTS
 !! hist <type(abihist)> : History of positions,forces acell, rprimd, stresses
-!!
-!! PARENTS
-!!      m_precpred_1geo
-!!
-!! CHILDREN
-!!      fcart2gred,hist2var,lbfgs_destroy,lbfgs_init,metric,mkrdim,var2hist
-!!      xfh_recover_new,xfpack_f2vout,xfpack_vin2x,xfpack_x2vin
 !!
 !! SOURCE
 
@@ -548,13 +537,6 @@ end subroutine pred_bfgs
 !!
 !! SIDE EFFECTS
 !! hist <type(abihist)> : History of positions,forces acell, rprimd, stresses
-!!
-!! PARENTS
-!!      m_precpred_1geo
-!!
-!! CHILDREN
-!!      fcart2gred,hist2var,lbfgs_destroy,lbfgs_init,metric,mkrdim,var2hist
-!!      xfh_recover_new,xfpack_f2vout,xfpack_vin2x,xfpack_x2vin
 !!
 !! SOURCE
 

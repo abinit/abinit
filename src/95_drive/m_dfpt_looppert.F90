@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -191,11 +187,6 @@ contains
 !!  d2nl(2,mpert,3,mpert)=non-local contributions to the 2DTEs
 !!  d2ovl(2,mpert,3,mpert*usepaw)=1st-order change of WF overlap contributions to the 2DTEs
 !!  etotal=total energy (sum of 8 contributions) (hartree)
-!!
-!! PARENTS
-!!      m_respfn_driver
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2621,10 +2612,6 @@ end subroutine dfpt_looppert
 !! OUTPUT
 !!  phasecg = phase of different wavefunction products <k,n | k+q,n'>
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine getcgqphase(dtset, timrev, cg,  mcg,  cgq, mcgq, mpi_enreg, nkpt_rbz, npwarr, npwar1, phasecg)
@@ -2828,11 +2815,6 @@ end subroutine getcgqphase
 !!
 !! NOTES
 !! all energies in Hartree
-!!
-!! PARENTS
-!!      m_dfpt_looppert
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3146,11 +3128,6 @@ end subroutine dfpt_prtene
 !! OUTPUT
 !!  eigenresp_mean(mband*nkpt*nsppol)= eigenresp, averaged over degenerate states
 !!
-!! PARENTS
-!!      m_dfpt_looppert,m_respfn_driver
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine eigen_meandege(eigen0,eigenresp,eigenresp_mean,mband,nband,nkpt,nsppol,option)
@@ -3244,11 +3221,6 @@ end subroutine eigen_meandege
 !!
 !! OUTPUT
 !!  rhor1(cplex*nfft) = first order density magnetization guess
-!!
-!! PARENTS
-!!      m_dfpt_looppert
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

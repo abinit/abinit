@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -85,12 +81,6 @@ contains
 !!  nproj= number of projectors for each channel
 !!  xccc1d(n1xccc*(1-usepaw),6)=1D core charge function and five derivatives,
 !!                              from psp file (used in NC only)
-!!
-!! PARENTS
-!!      m_pspini
-!!
-!! CHILDREN
-!!      ctrap
 !!
 !! SOURCE
 
@@ -315,12 +305,6 @@ end subroutine upf2abinit
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_upf2abinit
-!!
-!! CHILDREN
-!!      ctrap
-!!
 !! SOURCE
 
 subroutine psp11nl(ffspl,indlmn,mmax,lnmax,lmnmax,mqgrid,n_proj,&
@@ -446,12 +430,6 @@ end subroutine psp11nl
 !!\end{equation} }}
 !!  yp1,ypn=derivative of q^2 V(q) wrt q at q=0 and q=qmax
 !!   (needed for spline fitter).
-!!
-!! PARENTS
-!!      m_upf2abinit
-!!
-!! CHILDREN
-!!      ctrap
 !!
 !! SOURCE
 

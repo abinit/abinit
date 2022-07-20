@@ -116,10 +116,6 @@ contains  !===========================================================
 !!  inp<anaddb_dataset_type>=Anaddb dataset with input variables
 !!  comm=MPI communicator
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 type(gruns_t) function gruns_new(ddb_filepaths, inp, comm) result(new)
@@ -237,13 +233,6 @@ end function gruns_new
 !!
 !!  The derivative dD/dV is computed via central finite difference.
 !!
-!! PARENTS
-!!      m_gruneisen
-!!
-!! CHILDREN
-!!      cwtime,cwtime_report,gruns%ifc_vol,gruns_free,gruns_qmesh,gruns_qpath
-!!      qpath%free
-!!
 !! SOURCE
 
 subroutine gruns_fourq(gruns, qpt, wvols, gvals, dwdq, phdispl_cart)
@@ -329,13 +318,6 @@ end subroutine gruns_fourq
 !!
 !! OUTPUT
 !!  Only writing
-!!
-!! PARENTS
-!!      m_gruneisen
-!!
-!! CHILDREN
-!!      cwtime,cwtime_report,gruns%ifc_vol,gruns_free,gruns_qmesh,gruns_qpath
-!!      qpath%free
 !!
 !! SOURCE
 
@@ -460,13 +442,6 @@ end subroutine gruns_qpath
 !!  comm=MPI communicator
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gruneisen
-!!
-!! CHILDREN
-!!      cwtime,cwtime_report,gruns%ifc_vol,gruns_free,gruns_qmesh,gruns_qpath
-!!      qpath%free
 !!
 !! SOURCE
 
@@ -682,13 +657,6 @@ end subroutine gruns_qmesh
 !! FUNCTION
 !!  Free dynamic memory.
 !!
-!! PARENTS
-!!      m_gruneisen
-!!
-!! CHILDREN
-!!      cwtime,cwtime_report,gruns%ifc_vol,gruns_free,gruns_qmesh,gruns_qpath
-!!      qpath%free
-!!
 !! SOURCE
 
 subroutine gruns_free(gruns)
@@ -743,13 +711,6 @@ end subroutine gruns_free
 !!
 !! OUTPUT
 !!  Only writing.
-!!
-!! PARENTS
-!!      anaddb
-!!
-!! CHILDREN
-!!      cwtime,cwtime_report,gruns%ifc_vol,gruns_free,gruns_qmesh,gruns_qpath
-!!      qpath%free
 !!
 !! SOURCE
 

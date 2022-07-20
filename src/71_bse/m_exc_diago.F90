@@ -10,8 +10,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -84,11 +82,6 @@ contains
 !!
 !! OUTPUT
 !!  Eigenvalues and eigenvectors are written on file.
-!!
-!! PARENTS
-!!      m_bethe_salpeter
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -206,11 +199,6 @@ end subroutine exc_diago_driver
 !!
 !! OUTPUT
 !!  Eigenvalues and eigenvectors are written on file bseig_fname
-!!
-!! PARENTS
-!!      m_exc_diago
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -675,11 +663,6 @@ end subroutine exc_diago_resonant
 !!  exc_gap=Excitonic direct gap.
 !!  Additional info on the Excitonic spectrum are reported on standard output.
 !!
-!! PARENTS
-!!      m_exc_diago
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine exc_print_eig(BSp,bseig_fname,gw_gap,exc_gap)
@@ -820,11 +803,6 @@ end subroutine exc_print_eig
 !!
 !! OUTPUT
 !!  Excitonic eigenvectors and eigenvalues are written on file BS_files%out_eig.
-!!
-!! PARENTS
-!!      m_exc_diago
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1083,11 +1061,6 @@ end subroutine exc_diago_coupling
 !!
 !! OUTPUT
 !!  Excitonic eigenvectors and eigenvalues are written to file BS_files%out_eig.
-!!
-!! PARENTS
-!!      m_exc_diago
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

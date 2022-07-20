@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -110,9 +106,6 @@ contains
 !! rprim(3,3)=Dimensionless real space primitive translations.
 !! xred(3,natom)=Reduced atomic coordinates.
 !!
-!! PARENTS
-!!      m_driver
-!!
 !! NOTES
 !!
 !! ON THE USE OF FFT GRIDS:
@@ -129,19 +122,6 @@ contains
 !! ---------------------------
 !!    - Only the usual FFT grid (defined by ecut) is used. It is defined by nfft, ngfft, mgfft, ...
 !!      For compatibility reasons, (nfftf,ngfftf,mgfftf) are set equal to (nfft,ngfft,mgfft) in that case.
-!!
-!! CHILDREN
-!!      cryst%free,cryst%print,cryst_ddb%free,cwtime,cwtime_report,ddb%free
-!!      ddb%from_file,ddb_hdr%free,destroy_mpi_enreg,dtset%free_nkpt_arrays
-!!      dvdb%free,dvdb%interpolate_and_write,dvdb%list_perts,dvdb%open_read
-!!      dvdb%print,dvdb%write_v1qavg,ebands_free,ebands_prtbltztrp,ebands_write
-!!      efmas_ncread,efmasdeg_free_array,efmasval_free_array,eph_gkk
-!!      eph_phgamma,eph_phpi,ephtk_update_ebands,frohlichmodel,ibte_driver
-!!      ifc%free,ifc%outphbtrap,ifc%print,ifc%printbxsf,ifc_init,ifc_mkphbs
-!!      init_distribfft_seq,initmpi_seq,mkphdos,ncwrite_v1qnu,pawfgr_destroy
-!!      pawfgr_init,phdos%free,phdos%ncwrite,phdos%print,print_ngfft,pspini
-!!      rta_driver,sigmaph,test_phrotation,wfk0_hdr%free,wfk0_hdr%vs_dtset
-!!      wfq_hdr%free,wrtout,xmpi_bcast
 !!
 !! SOURCE
 

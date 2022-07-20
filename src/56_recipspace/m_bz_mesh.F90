@@ -31,10 +31,6 @@
 !!  * This module is deprecated and should be used only in the GW/BSE part.
 !!    Some of the routines will be gradually moved to m_kpts
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -401,12 +397,6 @@ CONTAINS  !=====================================================================
 !! OUTPUT
 !!  Kmesh<kmesh_t>=Datatype gathering information on the k point sampling.
 !!
-!! PARENTS
-!!      m_bethe_salpeter,m_bz_mesh,m_chi0,m_gwls_hamiltonian,m_mlwfovlp_qp
-!!      m_screening_driver,m_sigma_driver,mrgscr
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine kmesh_init(Kmesh,Cryst,nkibz,kibz,kptopt,wrap_1zone,ref_bz,break_symmetry)
@@ -565,12 +555,6 @@ end subroutine kmesh_init
 !! INPUTS
 !! Kmesh<kmesh_t>=The datatype to be freed.
 !!
-!! PARENTS
-!!      m_bethe_salpeter,m_chi0,m_gwls_hamiltonian,m_mlwfovlp_qp
-!!      m_screening_driver,m_sigma_driver,mrgscr
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine kmesh_free(Kmesh)
@@ -619,12 +603,6 @@ end subroutine kmesh_free
 !!
 !! OUTPUT
 !!  Only printing.
-!!
-!! PARENTS
-!!      m_bethe_salpeter,m_gwls_hamiltonian,m_screening_driver,m_sigma_driver
-!!      mrgscr
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -733,11 +711,6 @@ end subroutine kmesh_print
 !! OUTPUT
 !! krottb(k,I,S)=Index of (IS) k in the array bz
 !! krottbm1(k,I,S)=Index of IS^{-1} k
-!!
-!! PARENTS
-!!      m_bz_mesh
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -886,14 +859,6 @@ end subroutine setup_k_rotation
 !! [umklp(3)]=The umklapp G0 vector such as kbz + G0 = (IS) k_ibz, where kbz is in the BZ.
 !! [isirred]=.TRUE. if the k-point belongs to IBZ.
 !!
-!! PARENTS
-!!      m_bethe_salpeter,m_calc_ucrpa,m_chi0,m_cohsex,m_dyson_solver
-!!      m_exc_build,m_paw_sym,m_plowannier,m_ppmodel,m_prep_calc_ucrpa
-!!      m_read_plowannier,m_screen,m_screening,m_screening_driver,m_sigc
-!!      m_sigma_driver,m_sigx,m_vcoul,m_wfd,m_wfd_optic
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine get_bz_item(Kmesh,ik_bz,kbz,ik_ibz,isym,itim,ph_mkbzt,umklp,isirred)
@@ -953,11 +918,6 @@ end subroutine get_bz_item
 !! TODO
 !!  Add mapping ibz2bz, ibz2star
 !!
-!! PARENTS
-!!      m_paw_sym
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine get_IBZ_item(Kmesh,ik_ibz,kibz,wtk)
@@ -1001,11 +961,6 @@ end subroutine get_IBZ_item
 !!  idiff_bz=the idex of k1-k2 in the BZ
 !!  G0(3)=the umklapp G0 vector required to bring k1-k2 back to the BZ
 !!  nfound= the number of points in the BZ that are equal to k1-k2 (should be 1 if everything is OK)
-!!
-!! PARENTS
-!!      m_chi0
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1084,10 +1039,6 @@ end subroutine get_BZ_diff
 !!        .FALSE. if they are different.
 !! G0(3)=if .TRUE. G0(3) is the reciprocal lattice vector such as k1=k2+G0
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 logical function isamek(k1, k2, g0)
@@ -1123,10 +1074,6 @@ end function isamek
 !!  q1(3),q2(3)=The two points to be compared for equivalence.
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1164,13 +1111,9 @@ end function isequalk
 !!  ikbz=Index of the k-point in the Kmesh%bz array
 !!  g0(3)=Umklapp vector.
 !!
-!! PARENTS
-!!
 !! FIXME
 !!  Switch to routine version. Due to side-effects the present implementation
 !!  might be source of bugs in logical statements
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1228,10 +1171,6 @@ end function has_BZ_item
 !!  ikibz=The index of the k-point in the IBZ.
 !!  g0(3)=The reciprocal lattice vector.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 logical function has_IBZ_item(Kmesh,item,ikibz,g0)
@@ -1286,10 +1225,6 @@ end function has_IBZ_item
 !! OUTPUT
 !! bz_mesh_isirred=.TRUE. if the k-point is in the IBZ (a non-zero umklapp is not allowed)
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 pure logical function bz_mesh_isirred(Kmesh, ik_bz)
@@ -1334,11 +1269,6 @@ end function bz_mesh_isirred
 !!
 !! OUTPUT
 !! Kmesh<kmesh_t>=Object gathering info on the sampling of the Brillouin zone.
-!!
-!! PARENTS
-!!      m_bethe_salpeter
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1480,11 +1410,6 @@ end subroutine make_mesh
 !!  The logic of the routine relies on the assumption that kibz really represent an irreducible set.
 !!  If symmetrical points are present in the input list, indeed, some the output weights will turn out to be zero.
 !!  An initial check is done at the beginning of the routine to trap this possible error.
-!!
-!! PARENTS
-!!      m_bz_mesh
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1670,11 +1595,6 @@ end subroutine identk
 !! OUTPUT
 !!  opt_ng0(3)=Minimal reduced components of the G0 vectors to account for umklapps.
 !!
-!! PARENTS
-!!      m_bethe_salpeter,m_screening_driver,m_sigma_driver
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine get_ng0sh(nk1,kbz1,nk2,kbz2,nkfold,kfold,tolq0,opt_ng0)
@@ -1803,11 +1723,6 @@ end subroutine get_ng0sh
 !! OUTPUT
 !!  norm = value of the norm
 !!
-!! PARENTS
-!!      m_bz_mesh
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine getkptnorm_bycomponent(vect,factor,norm)
@@ -1862,11 +1777,6 @@ end subroutine getkptnorm_bycomponent
 !!  ndivs(nbounds-1)=Number of division for each segment
 !!  path: allocated inside the routine. When the subroutine returns, path(3,npts) will
 !!    contain the path in reduced coordinates.
-!!
-!! PARENTS
-!!      m_bz_mesh,m_elphon,m_nesting,m_phonons
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1972,12 +1882,6 @@ end subroutine make_path
 !! OUTPUT
 !!  Qmesh<kmesh_t>=datatype gathering information on the q point sampling.
 !!
-!! PARENTS
-!!      m_bethe_salpeter,m_gwls_hamiltonian,m_screening_driver,m_sigma_driver
-!!      mrgscr
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine find_qmesh(Qmesh,Cryst,Kmesh)
@@ -2033,11 +1937,6 @@ end subroutine find_qmesh
 !!
 !! OUTPUT
 !!  nqibz=number of q points
-!!
-!! PARENTS
-!!      m_bz_mesh
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2129,11 +2028,6 @@ end subroutine findnq
 !!
 !! OUTPUT
 !!  qibz(3,nqibz)=coordinates of q points by which k points differ
-!!
-!! PARENTS
-!!      m_bz_mesh
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2227,12 +2121,6 @@ end subroutine findq
 !! OUTPUT
 !!  iq=index of q vector in BZ table
 !!  g0(3)=reciprocal space vector, to be used in igfft
-!!
-!! PARENTS
-!!      m_cohsex,m_exc_build,m_gkk,m_phpi,m_prep_calc_ucrpa,m_sigc,m_sigma
-!!      m_sigx
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2387,11 +2275,6 @@ end subroutine findqg0
 !!  %preserve(2,nsym)= 1 if ISq=q, 0 otherwise, the first index is for the identity or the time reversal symmetry,
 !!  %wtksym(2,nsym,nbz)= for each kpoint is equal to 1 if the symmetry operation (with or without time reversal)
 !!   must be considered in the calculation of \chi_o, 0 otherwise
-!!
-!! PARENTS
-!!      m_chi0,m_screening_driver,m_sigma_driver
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2713,11 +2596,6 @@ end subroutine littlegroup_init
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_bz_mesh
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine littlegroup_free_0D(Ltg)
@@ -2757,10 +2635,6 @@ end subroutine littlegroup_free_0D
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine littlegroup_free_1D(Ltg)
@@ -2797,11 +2671,6 @@ end subroutine littlegroup_free_1D
 !!
 !! OUTPUT
 !!  Only printing
-!!
-!! PARENTS
-!!      m_chi0,m_cohsex,m_sigc,m_sigx
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2870,10 +2739,6 @@ end subroutine littlegroup_print
 !! INPUTS
 !!   qpt(3)=The reduced coordinates of the q-point defining the direction. Normalization is not mandatory.
 !!   gprimd(3,3)=Cartesian coordinates of the vectors defining the lattice.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2958,11 +2823,6 @@ end function box_len
 !!  ndivsm=Number of divisions to be used for the smallest segment.
 !!   A negative value activates a specialized mode if with bounds is suppose to supply the full list of k-points.
 !!
-!! PARENTS
-!!      wfk_analyze
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 type(kpath_t) function kpath_new(bounds, gprimd, ndivsm) result(kpath)
@@ -3029,10 +2889,6 @@ end function kpath_new
 !! FUNCTION
 !!  Free memory allocated in the object
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine kpath_free(Kpath)
@@ -3069,10 +2925,6 @@ end subroutine kpath_free
 !!
 !! OUTPUT
 !!  Only printing
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

@@ -13,8 +13,6 @@
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -257,12 +255,6 @@ CONTAINS  !=====================================================================
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_sigma_driver
-!!
-!! CHILDREN
-!!      findqg0,wfd%distribute_bands,wfd%update_bkstab,xmpi_sum
-!!
 !! SOURCE
 
 subroutine write_sigma_header(Sigp,Er,Cryst,Kmesh,Qmesh)
@@ -415,12 +407,6 @@ end subroutine write_sigma_header
 !!
 !! OUTPUT
 !!  (for writing routines, no output) otherwise, should be described
-!!
-!! PARENTS
-!!      m_sigma_driver
-!!
-!! CHILDREN
-!!      findqg0,wfd%distribute_bands,wfd%update_bkstab,xmpi_sum
 !!
 !! SOURCE
 !!
@@ -601,8 +587,6 @@ end subroutine write_sigma_results
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 function gw_spectral_function(Sr,io,ib,ikibz,is) result(aw)
@@ -634,12 +618,6 @@ end function gw_spectral_function
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_sigma
-!!
-!! CHILDREN
-!!      findqg0,wfd%distribute_bands,wfd%update_bkstab,xmpi_sum
 !!
 !! SOURCE
 
@@ -787,12 +765,6 @@ end subroutine print_Sigma_perturbative
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_sigma
-!!
-!! CHILDREN
-!!      findqg0,wfd%distribute_bands,wfd%update_bkstab,xmpi_sum
-!!
 !! SOURCE
 
 subroutine print_Sigma_QPSC(Sr,ik_ibz,iband,isp,KS_BSt,unit,prtvol,mode_paral,ydoc)
@@ -922,12 +894,6 @@ end subroutine print_Sigma_QPSC
 !! TODO
 !!  Write documentation.
 !!
-!! PARENTS
-!!      m_sigma_driver
-!!
-!! CHILDREN
-!!      findqg0,wfd%distribute_bands,wfd%update_bkstab,xmpi_sum
-!!
 !! SOURCE
 
 subroutine sigma_init(Sigp,nkibz,usepawu,Sr)
@@ -1051,12 +1017,6 @@ end subroutine sigma_init
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_sigma_driver
-!!
-!! CHILDREN
-!!      findqg0,wfd%distribute_bands,wfd%update_bkstab,xmpi_sum
-!!
 !! SOURCE
 
 subroutine sigma_free(Sr)
@@ -1121,8 +1081,6 @@ end subroutine sigma_free
 !!  kmesh<kmesh_t>=BZ sampling.
 !!  bands<band_t>=Bands with occupation factors
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 real(dp) pure function sigma_get_exene(sigma, kmesh, bands) result(ex_energy)
@@ -1171,8 +1129,6 @@ end function sigma_get_exene
 !!  sigma<sigma_t>=Sigma results
 !!  kmesh<kmesh_t>=BZ sampling.
 !!  bands<band_t>=Bands with occupation factors
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -1234,10 +1190,6 @@ end function sigma_get_excene
 !! OUTPUT
 !! Compute the Hartree energy on eh_energy
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 real(dp) pure function mels_get_haene(sigma,Mels,kmesh,bands) result(eh_energy)
@@ -1296,10 +1248,6 @@ end function mels_get_haene
 !! OUTPUT
 !! Compute the kinetic energy on ek_energy
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 real(dp) pure function mels_get_kiene(sigma,Mels,kmesh,bands) result(ek_energy)
@@ -1354,11 +1302,6 @@ end function mels_get_kiene
 !!  omega_max
 !!
 !! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      findqg0,wfd%distribute_bands,wfd%update_bkstab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1462,11 +1405,6 @@ end subroutine find_wpoles_for_cd
 !!  filename
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      sigma
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1749,12 +1687,6 @@ end function sigma_ncwrite
 !!
 !! SIDE EFFECTS
 !!  Wfd%bks_tab
-!!
-!! PARENTS
-!!      m_cohsex,m_sigc,m_sigx
-!!
-!! CHILDREN
-!!      findqg0,wfd%distribute_bands,wfd%update_bkstab,xmpi_sum
 !!
 !! SOURCE
 

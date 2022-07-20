@@ -92,10 +92,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -485,10 +481,6 @@ contains
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -920,10 +912,6 @@ end function gstore_new
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine priority_from_eph_task(eph_task, priority)
@@ -955,10 +943,6 @@ end subroutine priority_from_eph_task
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1027,10 +1011,6 @@ end subroutine gstore_distribute_spins
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1202,10 +1182,6 @@ end subroutine gstore_set_mpi_grid__
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine gstore_print(gstore, unit, header, prtvol)
@@ -1265,10 +1241,6 @@ end subroutine gstore_print
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1407,10 +1379,6 @@ end subroutine gstore_malloc__
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine gstore_filter_fs_tetra__(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, kbz2ibz, kibz2bz, &
@@ -1541,10 +1509,6 @@ end subroutine gstore_filter_fs_tetra__
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1682,10 +1646,6 @@ end subroutine gstore_filter_erange__
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine recompute_select_qbz_spin(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, kbz2ibz, kibz2bz, &
@@ -1783,10 +1743,6 @@ end subroutine recompute_select_qbz_spin
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 integer pure function gstore_spin2my_is(gstore, spin) result(my_is)
@@ -1818,10 +1774,6 @@ end function gstore_spin2my_is
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1896,10 +1848,6 @@ end subroutine gstore_fill_bks_mask
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1989,10 +1937,6 @@ end subroutine gstore_get_mpw_gmax
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine gstore_calc_my_phonons(gstore, store_phdispl)
@@ -2064,10 +2008,6 @@ end subroutine gstore_calc_my_phonons
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2151,10 +2091,6 @@ end subroutine gstore_get_lambda_iso_iw
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2247,10 +2183,6 @@ end subroutine gstore_get_a2fw
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine gstore_free(gstore)
@@ -2294,10 +2226,6 @@ end subroutine gstore_free
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2346,10 +2274,6 @@ end subroutine gqk_myqpt
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2587,10 +2511,6 @@ end subroutine gqk_dbldelta_qpt
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine gqk_free(gqk)
@@ -2647,10 +2567,6 @@ end subroutine gqk_free
 !! comm=MPI communicator.
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3404,10 +3320,6 @@ end subroutine gstore_compute
 !!  Reconstruct a gstore object from a GSTORE.nc netcdf file.
 !!
 !! INPUTS
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

@@ -11,10 +11,6 @@
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -192,11 +188,6 @@ contains
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_gwls_hamiltonian
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine DistributeValenceWavefunctions()
@@ -280,11 +271,6 @@ end subroutine DistributeValenceWavefunctions
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_gwls_hamiltonian
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine DistributeValenceKernel()
@@ -361,12 +347,6 @@ end subroutine DistributeValenceKernel
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gwls_DielectricArray,m_gwls_Projected_AT,m_gwls_hamiltonian
-!!      m_gwls_lineqsolver,m_gwls_model_polarisability,m_gwls_polarisability
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -451,13 +431,6 @@ end subroutine pc_k_valence_kernel
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gwls_DielectricArray,m_gwls_GWlanczos,m_gwls_LanczosBasis
-!!      m_gwls_Projected_AT,m_gwls_Projected_BT,m_gwls_hamiltonian
-!!      m_gwls_model_polarisability,m_gwls_polarisability
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -578,10 +551,6 @@ end subroutine wf_block_distribute
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!!
-!! CHILDREN
 !!
 !!
 !! SOURCE
@@ -719,10 +688,6 @@ end function exchange
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!!
-!! CHILDREN
 !!
 !!
 !! SOURCE
@@ -813,11 +778,6 @@ end function dft_xc_energy
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gwls_LanczosResolvents,m_gwls_lineqsolver
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -930,11 +890,6 @@ end subroutine set_precondition
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_gwls_lineqsolver
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine unset_precondition()
@@ -955,11 +910,6 @@ end subroutine unset_precondition
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gwls_lineqsolver
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -988,11 +938,6 @@ end subroutine precondition
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_gwls_lineqsolver
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine precondition_cplx(psi_out,psi_in)
@@ -1018,12 +963,6 @@ end subroutine precondition_cplx
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gwls_DielectricArray,m_gwls_GWlanczos,m_gwls_LanczosBasis
-!!      m_gwls_hamiltonian,m_gwls_model_polarisability,m_gwls_polarisability
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1055,12 +994,6 @@ end subroutine sqrt_vc_k
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gwls_DielectricArray,m_gwls_LanczosResolvents,m_gwls_hamiltonian
-!!      m_gwls_lineqsolver,m_gwls_polarisability
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1133,11 +1066,6 @@ end subroutine Hpsik
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_gwls_lineqsolver
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine Hpsikc(psi_out,psi_in,cte)
@@ -1171,12 +1099,6 @@ end subroutine Hpsikc
 !!! INPUTS
 !!!
 !!! OUTPUT
-!!!
-!!! PARENTS
-!!!      gwls_DielectricArray,gwls_GWDebugAlgorithms_3,gwls_ProjectedEpsilon
-!!!      gwls_Projected_AT,gwls_lineqsolver,gwls_model_polarisability
-!!!
-!!! CHILDREN
 !!!
 !!! SOURCE
 !
@@ -1248,13 +1170,6 @@ end subroutine Hpsikc
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_gwls_DielectricArray,m_gwls_GWlanczos,m_gwls_GenerateEpsilon
-!!      m_gwls_LanczosBasis,m_gwls_hamiltonian,m_gwls_model_polarisability
-!!      m_gwls_polarisability
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine g_to_r(psi_out,psi_in)
@@ -1316,12 +1231,6 @@ end subroutine g_to_r
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_gwls_DielectricArray,m_gwls_GWlanczos,m_gwls_LanczosBasis
-!!      m_gwls_hamiltonian,m_gwls_model_polarisability,m_gwls_polarisability
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine gr_to_g(psig_out,psir_in,psig_in)
@@ -1374,11 +1283,6 @@ end subroutine gr_to_g
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_gwls_hamiltonian
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine kbkb_to_kb(psik_out,psik_in_1,psik_in_2)
@@ -1426,11 +1330,6 @@ end subroutine kbkb_to_kb
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_scfcv_core
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine build_vxc(vxc2,nfft2,nspden2)
@@ -1459,11 +1358,6 @@ end subroutine build_vxc
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gwls_sternheimer
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1608,11 +1502,6 @@ end subroutine destroy_H
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_vtowfk
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
