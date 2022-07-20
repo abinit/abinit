@@ -335,6 +335,7 @@ type, public :: dataset_type
  integer :: lotf_version
  integer :: lw_flexo
  integer :: lw_qdrpl
+ integer :: lw_natopt
 !M
  integer :: magconon
  integer :: maxnsym
