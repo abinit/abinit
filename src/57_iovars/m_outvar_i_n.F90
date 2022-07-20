@@ -729,6 +729,9 @@ subroutine outvar_i_n (dtsets,iout,&
  intarr(1,:)=dtsets(:)%lw_qdrpl
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'lw_qdrpl','INT',0)
 
+ intarr(1,:)=dtsets(:)%lw_natopt
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'lw_natopt','INT',0)
+
 !write(ab_out,*)' outvar_i_n : M '
 !call flush(ab_out)
 !###########################################################

@@ -278,6 +278,11 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
    d3e_pert2(natom+3:natom+4)=1
  end if
 
+ if (dtset%lw_natopt==1) then
+   d3e_pert1(natom+2)=1
+   d3e_pert2(natom+2)=1  
+ end if
+
  perm(:)=0
  do i1pert = 1, mpert
    do i2pert = 1, mpert
@@ -695,7 +700,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
    ABI_MALLOC(blkflg_car,(3,mpert,3,mpert,3,mpert))
    ABI_MALLOC(d3etot_car,(2,3,mpert,3,mpert,3,mpert))
    call lwcart(blkflg,blkflg_car,d3etot,d3etot_car,gprimd,mpert,natom,rprimd)
-   call dfptlw_out(blkflg_car,d3etot_car,dtset%lw_flexo,dtset%lw_qdrpl,mpert,natom,ucvol)
+   call dfptlw_out(blkflg_car,d3etot_car,dtset%lw_flexo,dtset%lw_qdrpl,dtset%lw_natopt,mpert,natom,ucvol)
  end if
 
 !Deallocate arrays
@@ -774,7 +779,7 @@ end subroutine longwave
 #include "abi_common.h"
 
 
-subroutine dfptlw_out(blkflg_car,d3etot_car,lw_flexo,lw_qdrpl,mpert,natom,ucvol)
+subroutine dfptlw_out(blkflg_car,d3etot_car,lw_flexo,lw_qdrpl,lw_natopt,mpert,natom,ucvol)
 
  use defs_basis
  use m_errors
@@ -784,7 +789,7 @@ subroutine dfptlw_out(blkflg_car,d3etot_car,lw_flexo,lw_qdrpl,mpert,natom,ucvol)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: lw_flexo,lw_qdrpl,mpert,natom
+ integer,intent(in) :: lw_flexo,lw_qdrpl,lw_natopt,mpert,natom
  real(dp),intent(in) :: ucvol
 !arrays
  integer,intent(in) :: blkflg_car(3,mpert,3,mpert,3,mpert) 
@@ -1014,6 +1019,26 @@ subroutine dfptlw_out(blkflg_car,d3etot_car,lw_flexo,lw_qdrpl,mpert,natom,ucvol)
        end do
        write(ab_out,*)' '
      end do
+   end do
+ end if
+
+ if (lw_natopt==1) then
+   write(ab_out,'(a)')' Natural optical activity tensor, in cartesian coordinates,'
+   write(ab_out,'(a)')' (1/ucvol factor not included),'
+   write(ab_out,'(a)')' efidir1   efidir2   qgrdir          real part          imaginary part'
+   i1pert=natom+2
+   i2pert=natom+2
+   do i3dir=1,3
+     do i1dir=1,3
+       do i2dir=1,3
+         if (blkflg_car(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1) then
+           write(ab_out,'(3(i5,3x),2(1x,f20.10))') i1dir,i2dir,i3dir, &
+         & four*pi*d3etot_car(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert), &
+         & -four*pi*d3etot_car(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
+         end if
+       end do
+     end do
+     write(ab_out,*)' '
    end do
  end if
 
