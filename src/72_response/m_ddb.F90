@@ -347,8 +347,6 @@ CONTAINS  !===========================================================
 !!   msize=maximum size of one block of the ddb
 !!         (e.g. 3*mpert * 3*mpert)
 !!
-!! PARENTS
-!!    respfn
 !! SOURCE
 
 subroutine ddb_init(ddb, dtset, nblok, mpert, msize)
@@ -387,9 +385,6 @@ end subroutine ddb_init
 !! FUNCTION
 !!  Clean and deallocate types for the ddb_type structure
 !!
-!! PARENTS
-!!   gstate, respfn, dfpt_looppert, effective_potential_file_read,
-!!   ifc_init_fromFile, nonlinear, longwave, eph, anaddb, merge_ddb
 !! SOURCE
 
 subroutine ddb_free(ddb)
@@ -627,8 +622,6 @@ end subroutine ddb_set_d2matr
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!  gstate
 !! SOURCE
 
 subroutine ddb_set_gred(ddb, gred, iblok)
@@ -676,8 +669,6 @@ end subroutine ddb_set_gred
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!  gstate
 !! SOURCE
 
 subroutine ddb_set_pel(ddb, pel, flg, iblok)
@@ -723,8 +714,6 @@ end subroutine ddb_set_pel
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!  gstate
 !! SOURCE
 
 subroutine ddb_set_strten(ddb, strten, iblok)
@@ -767,8 +756,6 @@ end subroutine ddb_set_strten
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!  gstate
 !! SOURCE
 
 subroutine ddb_set_etotal(ddb, etotal, iblok)
@@ -808,8 +795,6 @@ end subroutine ddb_set_etotal
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!   ddb_from_file_txt
 !! SOURCE
 
 subroutine ddb_set_brav(ddb, brav)
