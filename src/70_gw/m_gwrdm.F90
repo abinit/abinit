@@ -139,7 +139,6 @@ end subroutine quadrature_sigma_cw
 !! Ec ^k = 1/(4*pi) * fact_spin * int _{ -Inf }^{ +Inf } dv Sigma_c ^k (iv) * G0(iv)
 !!       = 1/(4*pi) * fact_spin * int _{   0  }^{ +Inf } dv 2 * Re{ Sigma_c ^k (iv) * G0(iv) }
 !!
-!! CHILDREN
 !! SOURCE
 
 function calc_Ec_GM_k(ib1,ib2,ik_ibz,Sr,weights,sigcme_k,BSt) result(Ec_GM_k)
