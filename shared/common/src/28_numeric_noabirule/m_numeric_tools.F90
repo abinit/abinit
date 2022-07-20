@@ -56,7 +56,7 @@ MODULE m_numeric_tools
  public :: lfind                 ! Find the index of the first occurrence of .True. in a logical array.
  public :: list2blocks           ! Given a list of integers, find the number of contiguos groups of values.
  public :: mask2blocks           ! Find groups of .TRUE. elements in a logical mask.
- public :: linfit                ! Perform a linear fit, y=ax+b, of data
+ public :: linfit                ! Perform a linear fit, y = ax + b, of data
  public :: llsfit_svd            ! Linear least squares fit with SVD of an user-defined set of functions
  public :: polyn_interp          ! Polynomial interpolation with Nevilles"s algorithms, error estimate is reported
  public :: quadrature            ! Driver routine for performing quadratures in finite domains using different algorithms
@@ -4027,12 +4027,12 @@ subroutine print_arr2d_dpc(arr,max_r,max_c,unit,mode_paral)
  write(fmt2,*)'(5x   ,',mc,'f8.3,a)'
 
  write(msg,fmth)(jj,jj=1,mc)
- call wrtout(unt,msg,mode) !header
+ call wrtout(unt, msg, mode) ! header
  do ii=1,mr
    write(msg,fmt1)ii,REAL(arr(ii,1:mc))
-   call wrtout(unt,msg,mode) !real part
+   call wrtout(unt,msg,mode) ! real part
    write(msg,fmt2)  AIMAG(arr(ii,1:mc)),ch10
-   call wrtout(unt,msg,mode) !imag part
+   call wrtout(unt,msg,mode) ! imag part
  end do
 
 end subroutine print_arr2d_dpc
