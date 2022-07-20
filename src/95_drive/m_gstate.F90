@@ -55,7 +55,7 @@ module m_gstate
  use m_symtk,            only : matr3inv
  use m_io_tools,         only : open_file
  use m_occ,              only : newocc, getnel
- use m_ddb_hdr,          only : ddb_hdr_type, ddb_hdr_init
+ use m_ddb_hdr,          only : ddb_hdr_type
  use m_fstrings,         only : strcat, sjoin
  use m_geometry,         only : fixsym, mkradim, metric
  use m_kpts,             only : tetra_from_kptrlatt
@@ -1101,7 +1101,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
      call ctocprj(atindx,cg,choice,cprj,gmet,gprimd,iatom,idir,&
 &   iorder_cprj,dtset%istwfk,kg,dtset%kptns,mcg,mcprj,dtset%mgfft,dtset%mkmem,mpi_enreg,psps%mpsang,&
 &   dtset%mpw,dtset%natom,nattyp,dtset%nband,ncprj,ngfft,dtset%nkpt,dtset%nloalg,npwarr,dtset%nspinor,&
-&   dtset%nsppol,psps%ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,ucvol,dtfil%unpaw,xred,ylm,ylmgr)
+&   dtset%nsppol,dtset%nsppol,psps%ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,ucvol,dtfil%unpaw,&
+&   xred,ylm,ylmgr)
      call wrtout(std_out,' cprj is computed')
      ABI_FREE(ph1d)
    end if
@@ -1544,84 +1545,54 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  call timab(1229,2,tsec)
  call timab(1230,3,tsec)
 
-!Open the formatted derivative database file, and write the preliminary information
-!In the // case, only one processor writes the energy and the gradients to the DDB
-
+!In the // case, only master writes the energy and the gradients to the DDB
  if (me==0.and.dtset%nimage==1.and.((dtset%iscf > 0).or.&
 & (dtset%berryopt == -1).or.(dtset%berryopt) == -3)) then
 
+   ! DDB dimensions
    if (dtset%iscf > 0) then
-     nblok = 2          ! 1st blok = energy, 2nd blok = gradients
+     nblok = 2  ! 1st blok = gradients, 2nd blok = energy
    else
-     nblok = 1
+     nblok = 1  ! 1st blok = gradients
    end if
+   mpert = dtset%natom + 6
+   msize = 3*mpert
 
+   ! Create header and ddb objects
    dscrpt=' Note : temporary (transfer) database '
-   ddbnm=trim(dtfil%filnam_ds(4))//'_DDB'
+   call ddb_hdr%init(dtset,psps,pawtab,dscrpt,nblok,&
+&                    xred=xred,occ=occ,ngfft=ngfft)
 
-   call ddb_hdr_init(ddb_hdr,dtset,psps,pawtab,DDB_VERSION,dscrpt,&
-&   nblok,xred=xred,occ=occ,ngfft=ngfft)
+   call ddb%init(dtset, nblok, mpert, msize)
 
-   call ddb_hdr%open_write(ddbnm,dtfil%unddb,fullinit=0)
-
-   call ddb_hdr%free()
-
-   choice=2
-   mpert = dtset%natom + 6 ; msize = 3*mpert
-
-!  create a ddb structure with just one blok
-   call ddb%malloc(msize,1,dtset%natom,dtset%ntypat)
-
-   ddb%flg = 0
-   ddb%qpt = zero
-   ddb%nrm = one
-   ddb%val = zero
-
-!  Write total energy to the DDB
+   ! Write gradients to the DDB
    if (dtset%iscf > 0) then
-     ddb%typ(1) = 0
-     ddb%val(1,1,1) = results_gs%etotal
-     ddb%flg(1,1) = 1
-     call ddb%write_block(1,choice,dtset%mband,mpert,msize,dtset%nkpt,dtfil%unddb)
+     call ddb%set_gred(results_gs%gred, 1)
    end if
 
-!  Write gradients to the DDB
-   ddb%typ = 4
-   ddb%flg = 0
-   ddb%val = zero
-   indx = 0
-   if (dtset%iscf > 0) then
-     do iatom = 1, dtset%natom
-       do idir = 1, 3
-         indx = indx + 1
-         ddb%flg(indx,1) = 1
-         ddb%val(1,indx,1) = results_gs%gred(idir,iatom)
-       end do
-     end do
-   end if
-
-   indx = 3*dtset%natom + 3
+   ! Set the electronic polarization
    if ((abs(dtset%berryopt) == 1).or.(abs(dtset%berryopt) == 3)) then
-     do idir = 1, 3
-       indx = indx + 1
-       if (dtset%rfdir(idir) == 1) then
-         ddb%flg(indx,1) = 1
-         ddb%val(1,indx,1) = results_gs%pel(idir)
-       end if
-     end do
+     call ddb%set_pel(results_gs%pel, dtset%rfdir, 1)
    end if
 
-   indx = 3*dtset%natom + 6
+   ! Set the stress tensor
    if (dtset%iscf > 0) then
-     ddb%flg(indx+1:indx+6,1) = 1
-     ddb%val(1,indx+1:indx+6,1) = results_gs%strten(1:6)
+     call ddb%set_strten(results_gs%strten, 1)
    end if
 
-   call ddb%write_block(1,choice,dtset%mband,mpert,msize,dtset%nkpt,dtfil%unddb)
+   ! Set the total energy
+   if (dtset%iscf > 0) then
+     call ddb%set_etotal(results_gs%etotal, 2)
+   end if
+
+   ! Write the DDB
+   ddbnm=trim(dtfil%filnam_ds(4))//'_DDB'
+   call ddb%write_txt(ddb_hdr, ddbnm, fullinit=0)
+
+   ! Deallocate
+   call ddb_hdr%free()
    call ddb%free()
 
-!  Close DDB
-   close(dtfil%unddb)
  end if
 
  call timab(1230,2,tsec)
@@ -2601,9 +2572,6 @@ subroutine pawuj_drive(scfcv_args, dtset,electronpositron,rhog,rhor,rprimd, xred
  ABI_MALLOC(dtpawuj,(0:ndtpawuj))
  ABI_MALLOC(cgstart,(2,scfcv_args%mcg))
 
-!DEBUG
-!write(std_out,*)'pawuj_drive: before ini dtpawuj(:)%iuj ', dtpawuj(:)%iuj
-!END DEBUG
  call pawuj_ini(dtpawuj,ndtpawuj)
 
  cgstart=scfcv_args%cg
@@ -2621,10 +2589,6 @@ subroutine pawuj_drive(scfcv_args, dtset,electronpositron,rhog,rhor,rprimd, xred
 
  do iuj=1,2
    if (iuj>1) scfcv_args%cg(:,:)=cgstart(:,:)
-
-!  DEBUG
-!  write(std_out,*)'drive_pawuj before count dtpawuj(:)%iuj ', dtpawuj(:)%iuj
-!  END DEBUG
 
    dtpawuj(iuj*2-1)%iuj=iuj*2-1
 
@@ -2731,9 +2695,6 @@ subroutine outxfhist(ab_xfh,natom,option,wff2,ios)
 
 ! *************************************************************************
 
-!DEBUG
-!write(std_out,*)'outxfhist  : enter, option = ', option
-!ENDDEBUG
  ncid_hdr = wff2%unwff
  xfdim2 = natom+4
 

@@ -259,8 +259,6 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
   integer :: ii,filetype,natom,ntypat,nqpt,nrpt
   character(500) :: message
   type(ddb_hdr_type) :: ddb_hdr
-!array
-  integer,allocatable :: atifc(:)
 
 ! *************************************************************************
 
@@ -282,28 +280,10 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
       call wrtout(std_out,message,'COLL')
       call wrtout(ab_out,message,'COLL')
 
-      call effective_potential_file_getDimSystem(filename,natom,ntypat,nqpt,nrpt)!
+      call effective_potential_file_getDimSystem(filename,comm,natom,ntypat,nqpt,nrpt)!
 
-!     In anaddb, inp%atifc is set to 1 2 3 ... natom (see anaddb help).
-!     Then in the next routine inp%atifc is convert with 0 or 1 (inp%atifc is now 1 1 1 1 0).
-!     In multibinit the conversion is done directly in m_multibinit_dataset.
-!     So in the next routine, we set natifc to 0 to ignore the conversion.
-!     To keep the intent(in) of the inp parameters, we need to use local variables:
-      ABI_MALLOC(atifc,(inp%natom))
-      atifc = inp%atifc
-
-      call ddb_from_file(ddb,filename,inp%brav,natom,0,atifc, ddb_hdr, Crystal,comm)
+      call ddb%from_file(filename,inp%brav, ddb_hdr, Crystal,comm)
       call ddb_hdr%free()
-
-!     And finaly, we can check if the value of atifc is not change...
-      if (.not.all(atifc.EQ.inp%atifc)) then
-        write(message, '(3a)' )&
-&        ' effective_potential_file_read: problem with atifc input variables ',&
-&        'in ddb_from_file',ch10
-        ABI_BUG(message)
-      end if
-
-      ABI_FREE(atifc)
 
 !     Transfert the ddb to the effective potential
       call system_ddb2effpot(Crystal,ddb, eff_pot,inp,comm)
@@ -564,6 +544,7 @@ end subroutine effective_potential_file_getType
 !!
 !! INPUTS
 !! filename = names of the files
+!! comm = MPI communicator
 !!
 !! OUTPUT
 !! natom = number of atoms
@@ -578,12 +559,13 @@ end subroutine effective_potential_file_getType
 !!
 !! SOURCE
 
-subroutine effective_potential_file_getDimSystem(filename,natom,ntypat,nqpt,nrpt)
+subroutine effective_potential_file_getDimSystem(filename,comm,natom,ntypat,nqpt,nrpt)
 
 !Arguments ------------------------------------
 !scalars
  character(len=fnlen),intent(in) :: filename
  integer,intent(out) :: natom,ntypat,nqpt,nrpt
+ integer,intent(in) :: comm
 !arrays
 
 !Local variables-------------------------------
@@ -613,8 +595,7 @@ subroutine effective_potential_file_getDimSystem(filename,natom,ntypat,nqpt,nrpt
 &    'if you want to predic the number of cell (nrpt)',ch10,' use bigbx9 routines',ch10
    call wrtout(std_out,message,'COLL')
 
-   call ddb_hdr_open_read(ddb_hdr,filename,ddbun,DDB_VERSION,&
-&                         dimonly=1)
+   call ddb_hdr%open_read(filename,ddbun,comm,dimonly=1)
    natom = ddb_hdr%natom
    ntypat = ddb_hdr%ntypat
 
@@ -1339,7 +1320,7 @@ end subroutine system_getDimFromXML
  iam_master = (my_rank == master)
 
 !Get Dimention of system and allocation/initialisation of array
- call effective_potential_file_getDimSystem(filename,natom,ntypat,nph1l,nrpt)
+ call effective_potential_file_getDimSystem(filename,comm,natom,ntypat,nph1l,nrpt)
  gmet= zero; gprimd = zero; rmet = zero; rprimd = zero
  elastic_constants = zero; epsilon_inf = zero; ncoeff = 0
  ABI_MALLOC(all_amu,(ntypat))
@@ -2270,7 +2251,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 !Initialisation of usefull values
   natom = ddb%natom
   nblok = ddb%nblok
-  mpert=natom+MPERT_MAX
+  mpert= ddb%mpert
   msize=3*mpert*3*mpert;
 
 !Tranfert the ddb into usable array (ipert and idir format like in abinit)

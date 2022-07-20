@@ -160,7 +160,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
  integer :: ispin,itypalch,itypat,mtypalch,npsp,npspalch,ntypalch
  integer :: ntypat,ntyppure,paw_size
  logical :: has_coretau,has_kij,has_tproj,has_tvale,has_nabla,has_shapefncg,has_vminushalf,has_wvl
- real(dp),save :: ecore_old=zero,gsqcut_old=zero,gsqcutdg_old=zero, spnorbscl_old=-one
+ real(dp),save :: ecore_old=zero,gsqcut_old=zero,gsqcutdg_old=zero, spnorbscl_old=-one,hyb_mixing_old=-999.0_dp
  real(dp) :: dq,epsatm_psp,qmax,rmax,xcccrc
  character(len=500) :: msg
  type(pawrad_type) :: pawrad_dum
@@ -277,6 +277,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
 !Compute the general condition for new computation of pseudopotentials
  gencond=0
  if(   ixc_old /= dtset%ixc                &
+& .or. ABS(hyb_mixing_old - dtset%hyb_mixing)>tol8 &
 & .or. mqgridff_old /= psps%mqgrid_ff      &
 & .or. mqgridvl_old /= psps%mqgrid_vl      &
 & .or. mpssoang_old /= psps%mpssoang       &
@@ -608,6 +609,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
  mpssoang_old=psps%mpssoang
  spnorbscl_old = dtset%spnorbscl
  ixc_old=dtset%ixc
+ hyb_mixing_old=dtset%hyb_mixing
  gsqcut_old=gsqcut;if (psps%usepaw==1) gsqcutdg_old=gsqcutdg
  lmnmax_old=psps%lmnmax
  lnmax_old=psps%lnmax
@@ -1130,7 +1132,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
 
    else if (pspcod==7)then
      ! PAW "pseudopotentials"
-     call pawpsp_7in(epsatm,ffspl,dtset%icoulomb,dtset%ixc,&
+     call pawpsp_7in(epsatm,ffspl,dtset%icoulomb,ABS(dtset%hyb_mixing),dtset%ixc,&
        lmax,psps%lnmax,mmax,psps%mqgrid_ff,psps%mqgrid_vl,&
        pawrad,pawtab,dtset%pawxcdev,psps%qgrid_ff,psps%qgrid_vl,&
        dtset%usewvl,dtset%usexcnhat_orig,vlspl,xcccrc,dtset%xclevel,&
@@ -1177,7 +1179,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
      ! NB for pspcod 11 the reading has already been done above.
    else if (pspcod==17)then
      ! PAW XML pseudopotentials
-     call pawpsp_17in(epsatm,ffspl,dtset%icoulomb,ipsp,dtset%ixc,lmax,&
+     call pawpsp_17in(epsatm,ffspl,dtset%icoulomb,ipsp,ABS(dtset%hyb_mixing),dtset%ixc,lmax,&
       psps%lnmax,mmax,psps%mqgrid_ff,psps%mqgrid_vl,pawpsp_header,pawrad,pawtab,&
       dtset%pawxcdev,psps%qgrid_ff,psps%qgrid_vl,dtset%usewvl,&
       dtset%usexcnhat_orig,vlspl,xcccrc,&
