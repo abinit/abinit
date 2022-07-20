@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -75,13 +71,6 @@ contains
 !!
 !! OUTPUT
 !! opt_cvk(lomo_min:max_band,lomo_min:max_band,nkbz,nsppol)=Matrix elements <c k|e^{+iqr}|v k>
-!!
-!! PARENTS
-!!      m_exc_spectra,m_haydock
-!!
-!! CHILDREN
-!!      get_bz_item,matrginv,pawcprj_alloc,pawcprj_free,vkbr_free,vkbr_init
-!!      wfd%distribute_bbp,wfd%get_cprj,wrtout,xmpi_barrier,xmpi_sum
 !!
 !! SOURCE
 
@@ -274,8 +263,6 @@ contains
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
 !!
 !! SOURCE
 

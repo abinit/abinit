@@ -1,5 +1,3 @@
-! CP modified
-
 !!****m* ABINIT/m_sigma_driver
 !! NAME
 !!  m_sigma_driver
@@ -12,10 +10,6 @@
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -156,9 +150,6 @@ contains
 !!  Converged=.TRUE. if degw are within the user-specified tolerance.
 !!  Output is written on the main abinit output file. Some results are stored in external files
 !!
-!! PARENTS
-!!      m_driver
-!!
 !! NOTES
 !!
 !! ON THE USE OF FFT GRIDS:
@@ -175,9 +166,6 @@ contains
 !! ---------------------------
 !!    - Only the usual FFT grid (defined by ecut) is used. It is defined by nfft, ngfft, mgfft, ...
 !!      For compatibility reasons, (nfftf,ngfftf,mgfftf) are set equal to (nfft,ngfft,mgfft) in that case.
-!!
-!! CHILDREN
-!!      get_xclevel,vcoul_init
 !!
 !! SOURCE
 
@@ -2955,12 +2943,6 @@ end subroutine sigma
 !!   exchange part of the self-energy, respectively.
 !! comm=MPI communicator.
 !!
-!! PARENTS
-!!      m_sigma_driver
-!!
-!! CHILDREN
-!!      get_xclevel,vcoul_init
-!!
 !! SOURCE
 
 subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
@@ -3929,11 +3911,6 @@ end subroutine setup_sigma
 !!   %Sigxij_tab
 !!  that are used to select the matrix elements of the self-energy that have to be calculated.
 !!
-!! PARENTS
-!!      m_sigma_driver
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 
@@ -4117,11 +4094,6 @@ end subroutine sigma_tables
 !! keep_ur(Sigp%nbnds,Kmesh%nibz,Sigp%nsppol)=True if this node will store this state in real space.
 !! ierr=Exit status.
 !!
-!! PARENTS
-!!      m_sigma_driver
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine sigma_bksmask(Dtset,Sigp,Kmesh,my_rank,nprocs,my_spins,bks_mask,keep_ur,ierr)
@@ -4265,11 +4237,6 @@ end subroutine sigma_bksmask
 !!   on ANgular mesh or ANgular moments.
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
-!!      m_sigma_driver
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -4426,11 +4393,8 @@ end subroutine paw_qpscgw
 !! Vcp_ks<vcoul_t>= Datatype gathering information on the coulombian interaction and the cutoff technique.
 !! coef_hyb=real variable containing the amount of GLOBAL hybridization
 !!
-!! PARENTS
-!!      m_sigma_driver
 !!
-!! CHILDREN
-!!
+
 subroutine setup_vcp(Vcp_ks,Vcp_full,Dtset,Gsph_x,Gsph_c,Cryst,Qmesh,Kmesh,coef_hyb,comm)
 
 !Arguments ------------------------------------

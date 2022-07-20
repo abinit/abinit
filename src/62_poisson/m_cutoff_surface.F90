@@ -4,10 +4,6 @@
 !!
 !! FUNCTION
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -71,11 +67,6 @@ CONTAINS  !=====================================================================
 !!
 !!  which is always finite when G_z /=0 while it diverges as 4piR/(q+G)_xy as (q+G)_xy -->0
 !!  but only in the x-y plane.
-!!
-!! PARENTS
-!!      m_barevcoul,m_vcoul
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

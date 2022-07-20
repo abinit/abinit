@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -163,12 +159,6 @@ contains
 !!   where the columns of R and G are the dimensional primitive translations
 !!   in real and reciprocal space respectively.
 !! * Note the use of "symrec" in the symmetrization expression above.
-!!
-!! PARENTS
-!!      m_forstr,m_scfcv_core
-!!
-!! CHILDREN
-!!      dposv,prtxvf,wrtout,xred2xcart
 !!
 !! SOURCE
 
@@ -670,12 +660,6 @@ end subroutine forces
 !! in real and reciprocal space respectively.
 !! Note the use of "symrec" in the symmetrization expression above.
 !!
-!! PARENTS
-!!      m_forces
-!!
-!! CHILDREN
-!!      dposv,prtxvf,wrtout,xred2xcart
-!!
 !! SOURCE
 
 subroutine sygrad(gred,natom,dedt,nsym,symrec,indsym)
@@ -761,12 +745,6 @@ end subroutine sygrad
 !!
 !! OUTPUT
 !! gresid(3,natom)=forces due to the residual of the potential
-!!
-!! PARENTS
-!!      m_forces
-!!
-!! CHILDREN
-!!      dposv,prtxvf,wrtout,xred2xcart
 !!
 !! SOURCE
 
@@ -895,12 +873,6 @@ end subroutine fresidrsp
 !! At the end, each processor gets its part of the whole FFT grid.
 !! These modifications are not efficient when large FFT grids are used.
 !! So they have to be considered as a first step before a comprehensive parallelization of this routine.
-!!
-!! PARENTS
-!!      m_forces,m_prcref,m_scfcv_core
-!!
-!! CHILDREN
-!!      dposv,prtxvf,wrtout,xred2xcart
 !!
 !! SOURCE
 
@@ -1516,12 +1488,6 @@ end subroutine fresid
 !!  forold(3,natom)=cartesian forces of previous SCF cycle (hartree/bohr)
 !!
 !! TODO
-!!
-!! PARENTS
-!!      m_forces
-!!
-!! CHILDREN
-!!      dposv,prtxvf,wrtout,xred2xcart
 !!
 !! SOURCE
 

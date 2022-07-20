@@ -12,8 +12,6 @@
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -306,11 +304,6 @@ end function ncname_from_id
 !!  hscr<hscr_t>=The header.
 !!  fform=Kind of the array in the file (0 signals an error)
 !!
-!! PARENTS
-!!      m_bethe_salpeter,m_io_screening,m_screen,m_screening,mrgscr
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine hscr_from_file(hscr, path, fform, comm)
@@ -403,11 +396,6 @@ end subroutine hscr_from_file
 !!
 !! In writing mode, the routine is supposed to called by the master node.
 !! no check is done, it is up to the developer.
-!!
-!! PARENTS
-!!      m_io_screening,m_screening,m_screening_driver
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -710,10 +698,9 @@ end subroutine hscr_io
 !! FUNCTION
 !!  Prints info on the header of the SCR|SUSC file.
 !!
-!! PARENTS
-!!      m_bethe_salpeter,m_io_screening,m_screen,m_screening,mrgscr
+!! INPUTS
 !!
-!! CHILDREN
+!! OUTPUT
 !!
 !! SOURCE
 
@@ -831,11 +818,6 @@ end subroutine hscr_print
 !! OUTPUT
 !!  Hscr<type(hscr_t)>=the header, initialized.
 !!
-!! PARENTS
-!!      screening
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 type(hscr_t) function hscr_new(varname,dtset,ep,hdr_abinit,ikxc,test_type,tordering,titles,ngvec,gvec) result(hscr)
@@ -944,11 +926,6 @@ end function hscr_new
 !! NOTES
 !! This routine is called only in the case of MPI version of the code.
 !!
-!! PARENTS
-!!      m_bethe_salpeter,m_io_screening
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine hscr_bcast(hscr, master, my_rank, comm)
@@ -1026,11 +1003,6 @@ end subroutine hscr_bcast
 !! FUNCTION
 !! Allocate the components of the header structured datatype except for hscr%hdr
 !!
-!! PARENTS
-!!      m_io_screening
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine hscr_malloc(hscr, npwe, nqibz, nomega, nqlwl)
@@ -1066,12 +1038,6 @@ end subroutine hscr_malloc
 !! OUTPUT
 !!  (only deallocate)
 !!
-!! PARENTS
-!!      m_bethe_salpeter,m_io_screening,m_screen,m_screening,m_screening_driver
-!!      mrgscr
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine hscr_free(hscr)
@@ -1101,11 +1067,6 @@ end subroutine hscr_free
 !! Deep copy of the header of the _SCR or _SUSC file.
 !!
 !! INPUTS
-!!
-!! PARENTS
-!!      m_io_screening,m_screening
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1181,11 +1142,6 @@ end subroutine hscr_copy
 !!
 !! OUTPUT
 !!  Hscr_out<hscr_t>=The output merged header.
-!!
-!! PARENTS
-!!      m_io_screening
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1339,11 +1295,6 @@ end subroutine hscr_merge
 !! OUTPUT
 !!  (only writing on file)
 !!
-!! PARENTS
-!!      m_io_screening,m_screening,m_screening_driver
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine write_screening(varname, unt, iomode, npwe, nomega, iqibz, epsm1)
@@ -1443,11 +1394,6 @@ end subroutine write_screening
 !!    if it is smaller, an error will occur
 !!  * If the number of frequencies asked for is smaller than that reported in the file, the matrix
 !!    will be truncated. If nomegaA > Hscr%nomega an error will occur
-!!
-!! PARENTS
-!!      m_calc_ucrpa,m_io_screening,m_screen,m_screening,mrgscr
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1759,11 +1705,6 @@ end subroutine read_screening
 !!  fform=kind of the array in the file
 !!  offset=The offset of the Fortran record located immediately below the Abinit header.
 !!
-!! PARENTS
-!!      m_io_screening
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine hscr_mpio_skip(mpio_fh, fform, offset)
@@ -1842,11 +1783,6 @@ end subroutine hscr_mpio_skip
 !!
 !! OUTPUT
 !!  ohscr<hscr_t>=The header of the output file.
-!!
-!! PARENTS
-!!      mrgscr
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1976,11 +1912,6 @@ end subroutine ioscr_qmerge
 !! OUTPUT
 !!  Output is written to file.
 !!
-!! PARENTS
-!!      mrgscr
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine ioscr_qrecover(ipath, nqrec, fname_out)
@@ -2094,11 +2025,6 @@ end subroutine ioscr_qrecover
 !!
 !! OUTPUT
 !!  ohscr<hscr_t>=The header of the output file.
-!!
-!! PARENTS
-!!      mrgscr
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2380,11 +2306,6 @@ end subroutine ioscr_wmerge
 !!
 !! OUTPUT
 !!  ohscr<hscr_t>=The header of the output file.
-!!
-!! PARENTS
-!!      mrgscr
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

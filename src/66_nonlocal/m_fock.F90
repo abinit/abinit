@@ -13,10 +13,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -344,12 +340,6 @@ contains
 !!
 !!  The current version is restricted to the case nsym=1, nspinor=1 and mkmem/=0.
 !!
-!! PARENTS
-!!      m_fock
-!!
-!! CHILDREN
-!!      ptabs_fourdp,timab,xmpi_sum
-!!
 !! SOURCE
 
 subroutine fockbz_create(fockbz,mgfft,mpw,mkpt,mkptband,my_nsppol,n4,n5,n6,use_ACE)
@@ -467,12 +457,6 @@ end subroutine fockbz_create
 !!  ############################
 !!
 !!  The current version is restricted to the case nsym=1, nspinor=1 and mkmem/=0.
-!!
-!! PARENTS
-!!      m_scfcv_core
-!!
-!! CHILDREN
-!!      ptabs_fourdp,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1149,12 +1133,6 @@ end subroutine fock_init
 !! NOTES
 !!  May be improved to calculate the star of ikpt. => I think NO finally
 !!
-!! PARENTS
-!!      m_vtorho
-!!
-!! CHILDREN
-!!      ptabs_fourdp,timab,xmpi_sum
-!!
 !! SOURCE
 
 subroutine fock_updateikpt(fock,ikpt,isppol)
@@ -1198,12 +1176,6 @@ end subroutine fock_updateikpt
 !! OUTPUT
 !!  none
 !!
-!! PARENTS
-!!      m_cgwf
-!!
-!! CHILDREN
-!!      ptabs_fourdp,timab,xmpi_sum
-!!
 !! SOURCE
 
 subroutine fock_set_ieigen(fock,iband)
@@ -1238,12 +1210,6 @@ end subroutine fock_set_ieigen
 !!
 !! INPUTS
 !!  fock <type(fock_type)>= all the quantities to calculate Fock exact exchange
-!!
-!! PARENTS
-!!      m_scfcv_core
-!!
-!! CHILDREN
-!!      ptabs_fourdp,timab,xmpi_sum
 !!
 !! SOURCE
 subroutine fock_destroy(fock)
@@ -1371,12 +1337,6 @@ end subroutine fock_BZ_destroy
 !! INPUTS
 !!  fockACE <type(fock_ACE_type)>= all the quantities to calculate Fock exact exchange in the ACE context
 !!
-!! PARENTS
-!!      m_scfcv_core
-!!
-!! CHILDREN
-!!      ptabs_fourdp,timab,xmpi_sum
-!!
 !! SOURCE
 
 subroutine fock_ACE_destroy(fockACE)
@@ -1424,12 +1384,6 @@ end subroutine fock_ACE_destroy
 !! NOTES
 !! If the cgocc_bz are not updated at each iteration, be careful to calculate Fock energy at the same frequency.
 !! TO CHECK == CHANGE IN SOME DEFINTIONS
-!!
-!! PARENTS
-!!      m_vtorho
-!!
-!! CHILDREN
-!!      ptabs_fourdp,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1486,11 +1440,6 @@ end subroutine fock_calc_ene
 !!
 !! NOTES
 !!   If the cgocc_bz are not updated at each iteration, be careful to calculate Fock energy at the same frequency.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      ptabs_fourdp,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1549,12 +1498,6 @@ end subroutine fock_update_exc
 !!  ############################
 !!
 !! May be improved by selecting only the occupied states with the same spin isppol.
-!!
-!! PARENTS
-!!      m_scfcv_core
-!!
-!! CHILDREN
-!!      ptabs_fourdp,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1920,8 +1863,6 @@ end subroutine fock_updatecwaveocc
 !! FUNCTION
 !!  Set the value of fock%getghc_call, Returns the old value
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 integer function fock_set_getghc_call(fock, new) result(old)
@@ -1947,8 +1888,6 @@ end function fock_set_getghc_call
 !!
 !! FUNCTION
 !!  Returns the value of fock%getghc_call_
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -1983,12 +1922,6 @@ end function fock_get_getghc_call
 !!
 !! OUTPUT
 !!  Only printing
-!!
-!! PARENTS
-!!      m_fock
-!!
-!! CHILDREN
-!!      ptabs_fourdp,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -2068,12 +2001,6 @@ end subroutine fock_print
 !!  This routine operates on the full FFT mesh. DO NOT PASS MPI_TYPE
 !!  One can easily implemente MPI-FFT by just calling this routine and then
 !!  extracting the G-vectors treated by the node.
-!!
-!! PARENTS
-!!      m_fock_getghc
-!!
-!! CHILDREN
-!!      ptabs_fourdp,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -2277,12 +2204,6 @@ end subroutine bare_vqg
 !!   (Cartesian coordinates, symmetric tensor) in hartree/bohr^3
 !!   Definition of symmetric tensor storage: store 6 unique components
 !!   in the order 11, 22, 33, 32, 31, 21 (suggested by Xavier Gonze).
-!!
-!! PARENTS
-!!      m_fock_getghc
-!!
-!! CHILDREN
-!!      ptabs_fourdp,timab,xmpi_sum
 !!
 !! SOURCE
 

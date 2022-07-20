@@ -139,13 +139,6 @@ CONTAINS  !=====================================================================
 !!    In order to compute first- or second-order quantities, paw_an (resp. paw_ij) datastructures
 !!    must contain first-order quantities, namely paw_an1 (resp. paw_ij1).
 !!
-!! PARENTS
-!!      m_bethe_salpeter,m_dfpt_scfcv,m_dfptnl_loop,m_nonlinear,m_odamix
-!!      m_respfn_driver,m_scfcv_core,m_screening_driver,m_sigma_driver
-!!
-!! CHILDREN
-!!      free_my_atmtab,get_my_atmtab,pawgylm,symdij,symdij_all,wrtout
-!!
 !! SOURCE
 
 subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
@@ -1127,12 +1120,6 @@ end subroutine pawdenpot
 !!    compch_sph=compensation charge integral inside spheres computed over spherical meshes
 !!               updated with the contribution of current atom
 !!
-!! PARENTS
-!!      m_paw_denpot,m_paw_dfpt,m_paw_dfptnl,m_paw_nmr,m_positron
-!!
-!! CHILDREN
-!!      free_my_atmtab,get_my_atmtab,pawgylm,symdij,symdij_all,wrtout
-!!
 !! SOURCE
 
 subroutine pawdensities(compch_sph,cplex,iatom,lmselectin,lmselectout,lm_size,nhat1,nspden,nzlmopt,&
@@ -1520,12 +1507,6 @@ end subroutine pawdensities
 !!  tau1(cplex*mesh_size,lm_size,nspden)= on site kinetic energy density
 !!  ttau1(cplex*mesh_size,lm_size,nspden)]= pseudo on site kinetic energy density
 !!
-!! PARENTS
-!!      m_paw_denpot
-!!
-!! CHILDREN
-!!      free_my_atmtab,get_my_atmtab,pawgylm,symdij,symdij_all,wrtout
-!!
 !! SOURCE
 
 subroutine pawkindensities(cplex,lmselectin,lm_size,nspden,nzlmopt,&
@@ -1818,9 +1799,6 @@ end subroutine pawkindensities
 !!             This imaginary p    rt only exists in a few cases (f.i. non-stationnary
 !!             expression of 2nd-order energy)
 !!
-!! PARENTS
-!!      m_paw_denpot,m_paw_dfpt
-!!
 !! NOTES
 !! * The general form for Dij is:
 !!   D^{s1,s2}_ij = D1^{s1,s2}_ij.cos(qr) + i.D2^{s1,s2}_ij.sin(qr)
@@ -1841,9 +1819,6 @@ end subroutine pawkindensities
 !!   Note the order of s1/s2 indices, especially for Rho_ij.
 !!   The present implementation follows eq(15) in Hobbs et al, PRB 62, 11556(2000)
 !!     rho^{s1,s2}^_ij = Sum[<Psi^s2|pi><pj|Psi^s1]  (s1 and s2 exponents inverted)
-!!
-!! CHILDREN
-!!      free_my_atmtab,get_my_atmtab,pawgylm,symdij,symdij_all,wrtout
 !!
 !! SOURCE
 
@@ -2013,12 +1988,6 @@ end subroutine pawaccenergy
 !!             This imaginary part only exists in a few cases (f.i. non-stationnary
 !!             expression of 2nd-order energy)
 !!
-!! PARENTS
-!!      m_paw_denpot,m_paw_dfpt
-!!
-!! CHILDREN
-!!      free_my_atmtab,get_my_atmtab,pawgylm,symdij,symdij_all,wrtout
-!!
 !! SOURCE
 
 subroutine pawaccenergy_nospin(epaw,pawrhoij,dij,cplex_dij,qphase_dij,pawtab,epaw_im)
@@ -2097,12 +2066,6 @@ end subroutine pawaccenergy_nospin
 !! SIDE EFFECTS
 !!  Paw_ij(natom*usepaw)<Paw_ij_type)>=paw arrays given on (i,j) channels
 !!     At output: new value for Paw_ij()%dij
-!!
-!! PARENTS
-!!      m_vhxc_me
-!!
-!! CHILDREN
-!!      free_my_atmtab,get_my_atmtab,pawgylm,symdij,symdij_all,wrtout
 !!
 !! SOURCE
 

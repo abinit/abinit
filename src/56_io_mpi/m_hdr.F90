@@ -17,10 +17,6 @@
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -679,10 +675,6 @@ end function varname_from_fname
 !!  Return abifile_none if not found. This function is used to find the last
 !!  value of fform when we write data to file.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 type(abifile_t) function abifile_from_varname(varname) result(afile)
@@ -715,10 +707,6 @@ end function abifile_from_varname
 !!  find the name of the netcdf variable from the fform and
 !!  detect whether the file contains pawrhoij.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 type(abifile_t) function abifile_from_fform(fform) result(afile)
@@ -745,12 +733,6 @@ end function abifile_from_fform
 !! FUNCTION
 !!   This function is used ifdef DEBUG_MODE. It tests whether the value of fform
 !!   is registered in all_abifiles.
-!!
-!! PARENTS
-!!      m_hdr
-!!
-!! CHILDREN
-!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -792,12 +774,6 @@ end subroutine check_fform
 !!
 !! FUNCTION
 !!  Check the consistency of the internal abifiles table.
-!!
-!! PARENTS
-!!      m_hdr
-!!
-!! CHILDREN
-!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -843,12 +819,6 @@ end subroutine test_abifiles
 !! FUNCTION
 !!  Allocate memory from dimensions with the exception of pawrhoij.
 !!  This is a private routine. Client code should use hdr_init, hdr_fort_read.
-!!
-!! PARENTS
-!!      m_hdr
-!!
-!! CHILDREN
-!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -916,13 +886,6 @@ end subroutine hdr_malloc
 !! OUTPUT
 !! hdr <type(hdr_type)>=the header, initialized, and for most part of
 !!   it, contain its definite values, except for evolving variables
-!!
-!! PARENTS
-!!      m_bethe_salpeter,m_dfpt_looppert,m_dfpt_lw,m_gstate,m_longwave
-!!      m_nonlinear,m_respfn_driver,m_screening_driver,m_sigma_driver
-!!
-!! CHILDREN
-!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -1016,11 +979,6 @@ end subroutine hdr_init
 !! OUTPUT
 !!  (only deallocate)
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      crystal_init,wrtout
-!!
 !! SOURCE
 
 subroutine hdr_free(hdr)
@@ -1089,12 +1047,6 @@ end subroutine hdr_free
 !!
 !! NOTES
 !!  The present version deals with versions of the header up to 56.
-!!
-!! PARENTS
-!!      m_ddk,m_dfpt_looppert,m_io_kss,m_io_screening,m_wfd,m_wfk,optic
-!!
-!! CHILDREN
-!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -1234,10 +1186,6 @@ end subroutine hdr_copy
 !! OUTPUT
 !!  nelect=Number of electrons in the unit cell.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 real(dp) pure function hdr_get_nelect_from_occ(Hdr) result(nelect)
@@ -1290,12 +1238,6 @@ end function hdr_get_nelect_from_occ
 !! OUTPUT
 !! hdr <type(hdr_type)>=the header, initialized, and for most part of
 !!   it, contain its definite values, except for evolving variables
-!!
-!! PARENTS
-!!      m_hdr,m_sigtk,m_wfk
-!!
-!! CHILDREN
-!!      crystal_init,wrtout
 !!
 !! SOURCE
 ! CP modified argument list: added ne_qFD,nh_qFD,ivalence
@@ -1508,13 +1450,6 @@ end subroutine hdr_init_lowlvl
 !!  Hdr<hdr_type>=The abinit header.
 !!  fform=Kind of the array in the file (0 signals an error)
 !!
-!! PARENTS
-!!      abitk,cut3d,ioprof,m_common,m_conducti,m_ioarr,m_mpi_setup,m_paw_optics
-!!      m_wfk
-!!
-!! CHILDREN
-!!      crystal_init,wrtout
-!!
 !! SOURCE
 
 subroutine hdr_read_from_fname(Hdr, fname, fform, comm)
@@ -1586,11 +1521,6 @@ end subroutine hdr_read_from_fname
 !!
 !! OUTPUT
 !!  Only writing.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -1760,12 +1690,6 @@ end subroutine hdr_mpio_skip
 !!  nfrec = Number fof Fortran records
 !!  bsize_frecords(nfrec) = Byte size of each records. Allocated inside this routine.
 !!
-!! PARENTS
-!!      m_wfk
-!!
-!! CHILDREN
-!!      crystal_init,wrtout
-!!
 !! SOURCE
 
 subroutine hdr_bsize_frecords(Hdr,formeig,nfrec,bsize_frecords)
@@ -1891,11 +1815,6 @@ end subroutine hdr_bsize_frecords
 !! When echoing (rdwr=3) does not rewind the file.
 !! When reading (rdwr=5) or writing (rdwr=6), DOES NOT rewind the file
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      crystal_init,wrtout
-!!
 !! SOURCE
 
 subroutine hdr_io_wfftype(fform,hdr,rdwr,wff)
@@ -1999,12 +1918,6 @@ end subroutine hdr_io_wfftype
 !! When echoing (rdwr=3) does not rewind the file.
 !! When reading (rdwr=5) or writing (rdwr=6), DOES NOT rewind the file
 !!
-!! PARENTS
-!!      m_hdr
-!!
-!! CHILDREN
-!!      crystal_init,wrtout
-!!
 !! SOURCE
 
 subroutine hdr_io_int(fform,hdr,rdwr,unitfi)
@@ -2063,12 +1976,6 @@ end subroutine hdr_io_int
 !!
 !! TODO
 !!   Activate new header, avoid printing tons of lines with occupations.
-!!
-!! PARENTS
-!!      m_hdr
-!!
-!! CHILDREN
-!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -2235,11 +2142,6 @@ end subroutine hdr_echo
 !! on temporary wavefunction files.
 !! This initialize further reading and checking by rwwf
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      crystal_init,wrtout
-!!
 !! SOURCE
 
 subroutine hdr_skip_int(unitfi,ierr)
@@ -2284,12 +2186,6 @@ end subroutine hdr_skip_int
 !! No checking performed, since hdr_skip is assumed to be used only
 !! on temporary wavefunction files.
 !! This initialize further reading and checking by rwwf
-!!
-!! PARENTS
-!!      m_hdr
-!!
-!! CHILDREN
-!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -2446,11 +2342,6 @@ end subroutine hdr_skip_wfftype
 !! hdr <type(hdr_type)>=the header, initialized, and for most part of
 !!   it, contain its definite values, except for evolving variables
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      crystal_init,wrtout
-!!
 !! SOURCE
 ! CP added fermih to the list of arguments
 subroutine hdr_update(hdr,bantot,etot,fermie,fermih,residm,rprimd,occ,pawrhoij,xred,amu, &
@@ -2522,11 +2413,6 @@ end subroutine hdr_update
 !!
 !! NOTES
 !! This routine is called only in the case of MPI version of the code.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -2946,13 +2832,6 @@ end function read_first_record
 !! NOTES
 !! The file is supposed to be open already
 !!
-!! PARENTS
-!!      m_bader,m_bse_io,m_cut3d,m_dvdb,m_elphon,m_hdr,m_io_screening,m_ioarr
-!!      m_iogkk,macroave,mrggkk
-!!
-!! CHILDREN
-!!      crystal_init,wrtout
-!!
 !! SOURCE
 
 subroutine hdr_fort_read(Hdr,unit,fform,rewind)
@@ -3090,13 +2969,6 @@ end subroutine hdr_fort_read
 !!
 !! OUTPUT
 !!  fform=kind of the array in the file. if the reading fails, return fform=0
-!!
-!! PARENTS
-!!      m_bader,m_common,m_dvdb,m_hdr,m_inkpts,m_inwffil,m_io_screening,m_ioarr
-!!      m_wfk,macroave,optic
-!!
-!! CHILDREN
-!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -3319,11 +3191,6 @@ end subroutine hdr_ncread
 !! NOTES
 !! The file is supposed to be open already
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      crystal_init,wrtout
-!!
 !! SOURCE
 
 subroutine hdr_fort_write(Hdr,unit,fform,ierr,rewind)
@@ -3428,10 +3295,6 @@ end subroutine hdr_fort_write
 !!  Hdr<hdr_type>=The header of the file.
 !!  unit=unit number of the unformatted file
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 integer function hdr_backspace(hdr, unit, msg) result(ierr)
@@ -3485,11 +3348,6 @@ end function hdr_backspace
 !!
 !! OUTPUT
 !!  Only writing
-!!
-!! PARENTS
-!!      ioarr,m_hdr,m_wfk
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3833,12 +3691,6 @@ end function hdr_ncwrite
 !! FUNCTION
 !!  Set the occuations hdr%occ(:) from a 3d array with stride.
 !!
-!! PARENTS
-!!      m_hdr
-!!
-!! CHILDREN
-!!      crystal_init,wrtout
-!!
 !! SOURCE
 
 subroutine hdr_set_occ(hdr, occ3d)
@@ -3872,12 +3724,6 @@ end subroutine hdr_set_occ
 !!
 !! FUNCTION
 !!  Return occupations in a 3d array with stride.
-!!
-!! PARENTS
-!!      m_hdr
-!!
-!! CHILDREN
-!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -3983,12 +3829,6 @@ end subroutine hdr_get_occ3d
 !!   (G) the use of PAW method                            (tpaw)
 !!   (H) the number of lmn elements for the paw basis     (tlmn)
 !!   (I) the energy cutoff for the double (fine) grid     (tdg)
-!!
-!! PARENTS
-!!      m_inwffil,m_io_screening,m_ioarr,m_wfk
-!!
-!! CHILDREN
-!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -4799,10 +4639,6 @@ end subroutine hdr_check
 !! OUTPUT
 !!  ierr
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 integer function hdr_compare(hdr1, hdr2) result(ierr)
@@ -4886,11 +4722,6 @@ end function hdr_compare
 !!
 !! OUTPUT
 !!  Only check
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -5107,12 +4938,6 @@ subroutine hdr_vs_dtset(Hdr,Dtset)
 !! SIDE EFFECTS
 !!  ierr=increased by one if values differ
 !!
-!! PARENTS
-!!      m_hdr
-!!
-!! CHILDREN
-!!      crystal_init,wrtout
-!!
 !! SOURCE
 
  subroutine compare_int(vname, iexp, ifound, ierr)
@@ -5161,13 +4986,6 @@ end subroutine hdr_vs_dtset
 !!
 !! TODO
 !!  Add information on the use of time-reversal in the Abinit header.
-!!
-!! PARENTS
-!!      cut3d,eph,fold2Bloch,gstate,m_ddk,m_dvdb,m_ioarr,m_iowf,m_wfd,m_wfk
-!!      mlwfovlp_qp,mrgscr,setup_bse,setup_screening,setup_sigma,wfk_analyze
-!!
-!! CHILDREN
-!!      atomdata_from_znucl,crystal_init
 !!
 !! SOURCE
 

@@ -12,10 +12,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -84,11 +80,6 @@ contains
 !! paw_add_onsite=.TRUE. if the onsite contribution is taken into account.
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      wfd%get_ur,wrtout
 !!
 !! SOURCE
 
@@ -426,12 +417,6 @@ end subroutine exc_plot
 !!  filbseig=Name of the file containing the excitonic eigenvectors and eigenvalues.
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_bethe_salpeter
-!!
-!! CHILDREN
-!!      wfd%get_ur,wrtout
 !!
 !! SOURCE
 

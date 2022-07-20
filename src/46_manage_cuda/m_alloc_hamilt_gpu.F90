@@ -10,10 +10,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -73,14 +69,6 @@ contains
 !!
 !! OUTPUT
 !!  (no output - only allocation on GPU)
-!!
-!! PARENTS
-!!      m_gstate
-!!      m_respfn_driver
-!!
-!! CHILDREN
-!!      alloc_gpu_fourwf
-!!      alloc_nonlop_gpu
 !!
 !! SOURCE
 
@@ -176,14 +164,6 @@ end subroutine alloc_hamilt_gpu
 !!
 !! OUTPUT
 !!  (no output - only deallocation on GPU)
-!!
-!! PARENTS
-!!      m_gstate
-!!      m_respfn_driver
-!!
-!! CHILDREN
-!!      free_gpu_fourwf
-!!      free_nonlop_gpu
 !!
 !! SOURCE
 

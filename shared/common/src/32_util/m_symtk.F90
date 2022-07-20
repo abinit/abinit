@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -84,15 +80,6 @@ contains
 !! arrays.  Returned array is TRANSPOSE of inverse, as needed.
 !! Note use of integer arithmetic.
 !!
-!! PARENTS
-!!      m_ab7_symmetry,m_cgtk,m_classify_bands,m_crystal,m_ddb,m_dfpt_scfcv
-!!      m_dtset,m_dvdb,m_dynmat,m_fft_mesh,m_fock,m_geometry,m_ingeo,m_inwffil
-!!      m_iogkk,m_kpts,m_memeval,m_mover_effpot,m_ptgroups,m_spacepar,m_symtk
-!!      m_tdep_sym,m_thmeig,optic
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine mati3inv(mm, mit)
@@ -152,12 +139,6 @@ end subroutine mati3inv
 !! OUTPUT
 !! det = determinant of the matrix
 !!
-!! PARENTS
-!!      m_ab7_symmetry,m_anaddb_dataset,m_geometry,m_kpts,m_symtk
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine mati3det(mm, det)
@@ -190,19 +171,6 @@ end subroutine mati3det
 !!
 !! NOTES
 !! Returned array is TRANSPOSE of inverse, as needed to get g from r.
-!!
-!! PARENTS
-!!      m_berryphase,m_conducti,m_cut3d,m_ddb,m_dfpt_mkvxc,m_dfpt_mkvxcstr
-!!      m_double_grid,m_dvdb,m_dynmat,m_effective_potential,m_elpolariz
-!!      m_epweights,m_esymm,m_ewald,m_fock,m_fock_getghc,m_fstab,m_geometry
-!!      m_gstate,m_harmonic_thermo,m_ifc,m_inwffil,m_kpts,m_longwave,m_mover
-!!      m_mover_effpot,m_nucprop,m_outwant,m_phonons,m_pimd,m_pimd_langevin
-!!      m_psps,m_raman,m_relaxpol,m_respfn_driver,m_scup_dataset,m_spacepar
-!!      m_strain,m_supercell,m_supercell_maker,m_symfind,m_symtk,m_tddft
-!!      m_tdep_latt,m_thmeig,m_xfpack,optic
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -262,12 +230,6 @@ end subroutine matr3inv
 !! OUTPUT
 !! determinant(nsym)=determinant of each symmetry operation
 !!
-!! PARENTS
-!!      m_geometry,m_spacepar,m_spgdata,m_symfind
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine symdet(determinant, nsym, sym)
@@ -318,12 +280,6 @@ end subroutine symdet
 !!
 !! TODO
 !! SHOULD ALSO CHECK THE tnons !
-!!
-!! PARENTS
-!!      m_bz_mesh,m_chkinp,m_esymm,m_lgroup,m_spacepar,m_spgbuilder
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -449,12 +405,6 @@ end subroutine chkgrp
 !!
 !! TODO
 !!  This improved version should replace chkgrp.
-!!
-!! PARENTS
-!!      m_crystal,m_phonons,m_symfind
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -597,12 +547,6 @@ end subroutine sg_multable
 !! iexit= if 0 at input, will do the check, and stop if there is a problem, return 0 if no problem
 !!        if 1 at input, will always output, return 0 if no problem, -1 if there is a problem,
 !!                       also, suppresses printing of problem
-!!
-!! PARENTS
-!!      m_chkinp,m_ingeo,m_symtk
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -771,12 +715,6 @@ end subroutine chkorthsy
 !! OUTPUT
 !!  multi=multiplicity of the unit cell
 !!
-!! PARENTS
-!!      m_symfind
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine chkprimit(chkprim, multi, nsym, symafm, symrel)
@@ -854,12 +792,6 @@ end subroutine chkprimit
 !! Input/Output
 !! symrel(3,3,nsym)=symmetry operations in real space in terms
 !! of primitive translations rprimd at input and rprimd_new at output
-!!
-!! PARENTS
-!!      m_esymm,m_ingeo,m_symfind
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -963,13 +895,6 @@ end subroutine symrelrot
 !! TODO
 !! timrev is put to 1 only for Gamma.
 !! Better handling should be provided in further version.
-!!
-!! PARENTS
-!!      m_bz_mesh,m_ddb,m_dtset,m_dvdb,m_dynmat,m_esymm,m_gkk,m_iogkk,m_lgroup
-!!      m_memeval,m_nonlinear,m_phgamma,m_respfn_driver
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1096,12 +1021,6 @@ end subroutine littlegroup_q
 !! SIDE EFFECTS
 !! mat3(3,3) = matrix to be symmetrized, in cartesian frame
 !!
-!! PARENTS
-!!      m_nucprop,m_paw_nmr
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine matpointsym(iatom,mat3,natom,nsym,rprimd,symrel,tnons,xred)
@@ -1224,12 +1143,6 @@ end subroutine matpointsym
 !!
 !! SIDE EFFECTS
 !!  cell_base(3,3)=basis vectors of the conventional cell  (changed if enforce==1, otherwise unchanged)
-!!
-!! PARENTS
-!!      m_symfind,m_symtk
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1422,12 +1335,6 @@ end subroutine holocell
 !! SIDE EFFECTS
 !! rprimd(3,3)=dimensional primitive translations for real space (bohr)
 !!
-!! PARENTS
-!!      m_ingeo
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine symmetrize_rprimd(bravais,nsym,rprimd,symrel,tolsym)
@@ -1527,12 +1434,6 @@ end subroutine symmetrize_rprimd
 !!
 !! SIDE EFFECTS
 !! tnons(3,1:nsym)= non-symmorphic translation vectors
-!!
-!! PARENTS
-!!      m_ingeo
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1652,13 +1553,6 @@ end subroutine symmetrize_tnons
 !!  (input) atomic coordinates in terms of real space translations
 !!  (output) symmetrized atomic coordinates in terms
 !!    of real space translations
-!!
-!! PARENTS
-!!      m_chkinp,m_ingeo,m_longwave,m_mover,m_nonlinear,m_respfn_driver
-!!      m_scfcv_core
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1907,12 +1801,6 @@ end subroutine symmetrize_xred
 !!   cell translation ("equivalent atom")
 !! transl(3)=primitive cell translation to make iatom same as tratom (integers)
 !!
-!! PARENTS
-!!      m_polynomial_coeff,m_symtk
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine symchk(difmin,eatom,natom,tratom,transl,trtypat,typat,xred)
@@ -2061,14 +1949,6 @@ end subroutine symchk
 !!                      isym; first three elements are the primitive
 !!                      translations which must be subtracted after the
 !!                      transformation to get back to the original unit cell.
-!!
-!! PARENTS
-!!      m_ab7_symmetry,m_berryphase_new,m_crystal,m_ddb,m_dtset,m_ingeo
-!!      m_mover_effpot,m_orbmag,m_polynomial_coeff,m_spacepar,m_tdep_sym
-!!      m_thmeig
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -2231,12 +2111,6 @@ end subroutine symatm
 !! OUTPUT
 !! label=a human readable text for the characteristic of the symmetry
 !! type_axis=an identifier for the type of symmetry
-!!
-!! PARENTS
-!!      m_ab7_symmetry,m_symfind
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -2494,12 +2368,6 @@ end subroutine symcharac
 !!  tertiary 2 axis to the "tertiary 2-axis" set (there are always 6),
 !!  and attribute 2 and 2_1 primary axes to the corresponding sets.
 !!
-!! PARENTS
-!!      m_symtk
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine symaxes(center,iholohedry,isym,isymrelconv,label,ordersym,tnons_order,trialt,type_axis)
@@ -2751,12 +2619,6 @@ end subroutine symaxes
 !!  the tertiary m and g mirror planes are to be classified as "m" -> 15,
 !!  while n, a and c are to be classified as "n" -> 18. There is no need
 !!  to distinguish between primary, secondary or tertiary axes.
-!!
-!! PARENTS
-!!      m_symtk
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -3061,12 +2923,6 @@ end subroutine symplanes
 !! The routine might as well be defined without
 !! metmin as argument, but it is more convenient to have it
 !!
-!! PARENTS
-!!      m_kpts,m_symfind
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 
@@ -3284,12 +3140,6 @@ end subroutine smallprim
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_crystal,m_hdr,m_spgbuilder,m_symfind
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 

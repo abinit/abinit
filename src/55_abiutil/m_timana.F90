@@ -14,10 +14,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -130,12 +126,6 @@ contains
 !!
 !!    NOTE : the number of fourwf calls is equal to
 !!    the # of nonlop (choice=1) calls + the # of nonlop (choice=2) calls
-!!
-!! PARENTS
-!!      abinit
-!!
-!! CHILDREN
-!!      timab,time_accu,wrtout,xmpi_sum
 !!
 !! SOURCE
 

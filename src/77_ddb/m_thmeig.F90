@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -70,11 +66,6 @@ contains
 !!  comm=MPI communicator
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      anaddb
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1012,11 +1003,6 @@ end subroutine thmeig
 !!   FIXME
 !!   overcomplete inputs. Eliminate unit_phdos (just filnam) and deltaene (gotten from max-min/nene)
 !!
-!! PARENTS
-!!      m_thmeig
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine outphdos(deltaene,dos_phon,enemin,enemax,filnam,g2fsmear,nene,nqpt,ntetra,telphint,unit_phdos)
@@ -1103,11 +1089,6 @@ subroutine outphdos(deltaene,dos_phon,enemin,enemax,filnam,g2fsmear,nene,nqpt,nt
 !!
 !! OUTPUT
 !!  only write
-!!
-!! PARENTS
-!!      m_thmeig
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

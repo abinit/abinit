@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Wed 20 Jul 2022.
-- ( at 02h58 )
+- ( at 18h16 )
   
 - input  file    -> /Users/gmatteo/git_repos/abinit_gwr/_build/tests/Test_suite/gwr_t01/t01.abi
 - output file    -> t01.abo
@@ -554,7 +554,7 @@ meta: {optdriver: 6, }
 
 --------------------------------------------------------------------------------
 
- Mapping kBZ --> kIBZ
+  Mapping kBZ --> kIBZ
  Legend: bz = TS(ibz) + g0 where isym is the index of the symrec operation S and itim is 1 if TR is used.
         BZ                                       IBZ                                       ibz  isym  itim  g0
      1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]     1     1     0  [0, 0, 0]
@@ -567,7 +567,7 @@ meta: {optdriver: 6, }
      8  [ 0.0000E+00,  5.0000E-01,  5.0000E-01]  [ 5.0000E-01,  5.0000E-01,  0.0000E+00]     3    17     0  [0, 0, 0]
 
 
- Mapping qBZ --> qIBZ
+  Mapping qBZ --> qIBZ
  Legend: bz = TS(ibz) + g0 where isym is the index of the symrec operation S and itim is 1 if TR is used.
         BZ                                       IBZ                                       ibz  isym  itim  g0
      1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]     1     1     0  [0, 0, 0]
@@ -615,14 +615,14 @@ P np_qibz: [1, 1, 1, ]
 ft_max_err_t2w_cos:  -1.00000000E+00
 ft_max_err_w2t_cos:  -1.00000000E+00
 ft_max_err_t2w_sin:  -1.00000000E+00
-cosft_duality_err:  -1.00000000E+00
+cosft_duality_error:  -1.00000000E+00
 Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(omega)
     1 0.00000E+00   5.00000E-01   0.00000E+00   5.00000E-01
     2 1.00000E+00   5.00000E-01   1.00000E+00   5.00000E-01
 ...
 
  Trace of: gt_kibz for ipm: 1 , spin: 1 for testing purposes:
-(ik_ibz, itau) table
+ (ik_ibz, itau) table
 
        1       2
     1   0.000   0.000
@@ -635,7 +635,7 @@ Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(o
         4.000   3.256
 
  Trace of: gt_kibz for ipm: 2 , spin: 1 for testing purposes:
-(ik_ibz, itau) table
+ (ik_ibz, itau) table
 
        1       2
     1   0.000   0.000
@@ -648,8 +648,9 @@ Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(o
       -56.000 -18.810
 
  Trace of: tchi_qibz for spin: 1 for testing purposes:
- (iq_ibz, itau) table
 
+
+ (iq_ibz, itau) table
        1       2
     1 -37.650 -10.943
         0.000   0.000
@@ -661,8 +662,9 @@ Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(o
        -0.221  -0.247
 
  Trace of: tchi_qibz for spin: 1 for testing purposes:
- (iq_ibz, iomega) table
 
+
+ (iq_ibz, iomega) table
        1       2
     1 -97.185 -97.185
         0.000   0.000
@@ -934,7 +936,7 @@ P           mkmem           3
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         11.0  wall=         11.8
+- Proc.   0 individual time (sec): cpu=          9.8  wall=         10.0
 
 ================================================================================
 

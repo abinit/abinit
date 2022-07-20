@@ -78,12 +78,6 @@ CONTAINS
 !!  (here Cartesian coordinates run faster). Besides nabla_ij contains the matrix
 !!  elements of \nabla instead of the elements of the momentum operator p.
 !!
-!! PARENTS
-!!      m_bethe_salpeter,m_paw_optics,m_screening_driver
-!!
-!! CHILDREN
-!!      nderiv_gen,pawrad_deducer0,setnabla_ylm,simp_gen
-!!
 !! SOURCE
 
 subroutine pawnabla_init(mpsang,ntypat,pawrad,pawtab)
@@ -261,12 +255,6 @@ end subroutine pawnabla_init
 !!  reusable! Note however the storage mode of nabla_ij differs from optics_paw
 !!  (here Cartesian coordinates run faster). Besides nabla_ij contains the matrix
 !!  elements of \nabla instead of the elements of the momentum operator p.
-!!
-!! PARENTS
-!!      m_paw_optics
-!!
-!! CHILDREN
-!!      nderiv_gen,pawrad_deducer0,setnabla_ylm,simp_gen
 !!
 !! SOURCE
 

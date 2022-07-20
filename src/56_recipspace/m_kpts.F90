@@ -10,10 +10,6 @@
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -86,10 +82,6 @@ contains  !============================================================
 !!  kptopt=option for the generation of k points
 !!    (defines whether spatial symmetries and/or time-reversal can be used)
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 integer pure function kpts_timrev_from_kptopt(kptopt) result(timrev)
@@ -132,13 +124,6 @@ end function kpts_timrev_from_kptopt
 !!  [new_kptrlatt] = New value of kptrlatt returned by getkgrid
 !!  [new_shiftk(3,new_nshiftk)] = New set of shifts returned by getkgrid
 !!  [bz2ibz(6,nkbz)]=Mapping BZ --> IBZ
-!!
-!! PARENTS
-!!      abitk,m_dvdb,m_ebands,m_ephwg,m_gruneisen,m_ifc,m_kpts,m_phgamma
-!!      m_phonons,m_sigmaph,m_sigtk,m_unittests
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -225,12 +210,6 @@ end subroutine kpts_ibz_from_kptrlatt
 !!  tetra<htetra_t>=Tetrahedron object, fully initialized if ierr == 0.
 !!  msg=Error message if ierr /= 0
 !!  ierr=Exit status
-!!
-!! PARENTS
-!!      gstate,wfk_analyze
-!!
-!! CHILDREN
-!!      listkk,smpbz
 !!
 !! SOURCE
 
@@ -342,12 +321,6 @@ end function tetra_from_kptrlatt
 !!
 !! TODO
 !!  This version should scale badly with the number of k-points. Replace loops with listkk
-!!
-!! PARENTS
-!!      respfn
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -476,10 +449,6 @@ end function symkchk
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine kpts_sort(gprimd, nkpt, kpts)
@@ -531,10 +500,6 @@ end subroutine kpts_sort
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -630,10 +595,6 @@ end subroutine kpts_pack_in_stars
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -800,13 +761,6 @@ end subroutine kpts_map_print
 !!  The tolerance tol12 is used for each component of the k vectors,
 !!  and for the length of the vectors while the tolerance tol8 is used for
 !!  the comparison of the squared lengths of the separate vectors.
-!!
-!! PARENTS
-!!      m_berryphase_new,m_dvdb,m_ebands,m_eprenorms,m_exc_diago,m_fock
-!!      m_haydock,m_inwffil,m_lgroup,m_mlwfovlp_qp,m_orbmag,m_unittests,m_wfk
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1181,13 +1135,6 @@ end subroutine listkk
 !! shiftk(3,MAX_NSHIFTK)=shift vectors for k point generation
 !! [nkpthf] = number of k points in the full BZ, for the Fock operator.
 !!
-!! PARENTS
-!!      m_ab7_kpoints,m_bz_mesh,m_elphon,m_getshell,m_inkpts,m_kpts,m_nonlinear
-!!      m_thmeig
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine getkgrid(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
@@ -1278,12 +1225,6 @@ end subroutine getkgrid
 !! nshiftk=actual number of k-point shifts in shiftk
 !! shiftk(3,MAX_NSHIFTK)=shift vectors for k point generation
 !! [nkpthf] = number of k points in the full BZ, for the Fock operator.
-!!
-!! PARENTS
-!!      m_kpts
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1781,11 +1722,6 @@ end subroutine getkgrid_low
 !!
 !! TODO: This routine should be removed
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine get_full_kgrid(indkpt,kpt,kpt_fullbz,kptrlatt,nkpt,nkpt_fullbz,nshiftk,nsym,shiftk,symrel)
@@ -1865,12 +1801,6 @@ end subroutine get_full_kgrid
 !!
 !! OUTPUT
 !!  kpt_fullbz(3,nkpt_fullbz)=kpoints in full brillouin zone
-!!
-!! PARENTS
-!!      m_kpts
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -2035,13 +1965,6 @@ end subroutine get_kpt_fullbz
 !!  J.D. Pack and H.J. Monkhorst, Phys. Rev. B 16, 1748 (1977) [[cite:Pack1977]]
 !!  A.H. MacDonald, Phys. Rev. B 18, 5897 (1978) [[cite:MacDonald1978]]
 !!  R.A. Evarestov and V.P. Smirnov, Phys. Stat. Sol. (b) 119, 9 (1983) [[cite:Evarestov1983]]
-!!
-!! PARENTS
-!!      m_berryphase_new,m_elphon,m_fstab,m_harmonic_thermo,m_ifc,m_kpts
-!!      m_orbmag,m_tdep_abitypes
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -2597,12 +2520,6 @@ end subroutine smpbz
 !! NOTES
 !! Note that nkpt can be computed by calling this routine with input value nkpt=0
 !! Note that kptopt is always =1 in this routine.
-!!
-!! PARENTS
-!!      m_ab7_kpoints,m_inkpts
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -3270,12 +3187,6 @@ end subroutine testkgrid
 !!
 !! TODO
 !!  Do not use this routine, it is obsolete and should be replaced by make_path in m_bz_mesh.
-!!
-!! PARENTS
-!!      m_inkpts
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 

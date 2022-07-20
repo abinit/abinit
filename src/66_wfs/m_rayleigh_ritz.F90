@@ -13,10 +13,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -76,11 +72,6 @@ contains
 !!  ghc(2,*)=updated ghc
 !!  gsc(2,*)=updated gsc
 !!  gvnlxc(2,*)=updated gvnlxc
-!!
-!! PARENTS
-!!      m_chebfi
-!!
-!! CHILDREN
 !!
 !! NOTES
 !!  TODO choose generalized eigenproblem or ortho + diago (see #if 1)
@@ -291,11 +282,6 @@ end subroutine rayleigh_ritz_subdiago
 !!  ghc(2,*)=updated ghc
 !!  gsc(2,*)=updated gsc
 !!  gvnlxc(2,*)=updated gvnlxc
-!!
-!! PARENTS
-!!      m_chebfi
-!!
-!! CHILDREN
 !!
 !! NOTES
 !!  Should profile for large test cases and see where the bottleneck is.
@@ -576,11 +562,6 @@ end subroutine rayleigh_ritz_distributed
 !!
 !! SIDE EFFECTS
 !!
-!! PARENTS
-!!      m_rayleigh_ritz
-!!
-!! CHILDREN
-!!
 !! SOURCE
 subroutine from_mat_to_block_cyclic(full_mat, vectsize, nband, block_cyclic_mat, buffsize, blocksize, iproc, nprocs)
 
@@ -629,11 +610,6 @@ end subroutine from_mat_to_block_cyclic
 !! full_mat(2,vectsize*nband)=full matrix
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
-!!      m_rayleigh_ritz
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

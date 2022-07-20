@@ -12,8 +12,6 @@
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 
@@ -120,10 +118,6 @@ contains
 !!  By default, the object holds a reference to kpts so do not change/deallocate this array
 !!  while using krank.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 type(krank_t) function krank_from_kptrlatt(nkpt, kpts, kptrlatt, compute_invrank) result(new)
@@ -174,12 +168,6 @@ end function krank_from_kptrlatt
 !!  kpt = coordinates of kpoints
 !!  time_reversal = true or false to use time reversal symmetry.
 !!     Default is true, but only important if nsym and symrec are present
-!!
-!! PARENTS
-!!      get_full_kgrid,m_ddk,m_ebands,m_fstab,m_nesting,m_phgamma,m_pptools
-!!      m_tetrahedron,mkfskgrid,mkqptequiv,order_fs_kpts,outelph,read_el_veloc
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -298,13 +286,6 @@ end function krank_new
 !! OUTPUT
 !!  rank = rank of the kpoint
 !!
-!! PARENTS
-!!      elphon,get_full_kgrid,integrate_gamma,integrate_gamma_alt,k_neighbors
-!!      m_ddk,m_krank,m_nesting,m_pptools,m_tetrahedron,mkfskgrid,mkqptequiv
-!!      read_el_veloc,read_gkk
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 integer function get_rank(krank, kpt) result(rank)
@@ -380,10 +361,6 @@ end function get_rank
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 integer function krank_get_index(krank, kpt) result(ikpt)
@@ -421,11 +398,6 @@ end function krank_get_index
 !!
 !! OUTPUT
 !!  krank = object containing ranking and inverse ranking, to be deallocated
-!!
-!! PARENTS
-!!      defs_elphon,elphon
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -465,10 +437,6 @@ end function krank_copy
 !! INPUTS
 !!  krank = object containing ranking and inverse ranking, to be deallocated
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine krank_free(krank)
@@ -506,10 +474,6 @@ end subroutine krank_free
 !! INPUTS
 !!  krank = object containing ranking and inverse ranking
 !!  unout = unit for open file to print to
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -570,10 +534,6 @@ end subroutine krank_print
 !!    indkk(:,3:5)=shift in reciprocal space to be given to kpt1a,
 !!      to give kpt1b, that is the closest to kpt2.
 !!    indkk(:,6)=1 if time-reversal was used to generate kpt1a from kpt1, 0 otherwise
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -688,10 +648,6 @@ end subroutine krank_get_mapping
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine get_ibz2bz(nibz, nbz, bz2ibz, ibz2bz, ierr)
@@ -743,10 +699,6 @@ end subroutine get_ibz2bz
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

@@ -25,10 +25,6 @@
 !!    that all the strongly connected routines are changed accordingly to accommodate the modification of the data type
 !!    Typical examples of strongly connected routines are creation, destruction or reset methods.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -157,12 +153,6 @@ CONTAINS
 !!                        see ~abinit/doc/variables/vargs.htm#ngfft
 !!  Pawfgr<pawfgr_type>=For PAW, Fine rectangular GRid parameters and related data
 !!
-!! PARENTS
-!!      m_bethe_salpeter,m_eph_driver,m_gstate,m_longwave,m_nonlinear
-!!      m_respfn_driver,m_screening_driver,m_sigma_driver,m_wfk_analyze
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pawfgr_init(Pawfgr,Dtset,mgfftf,nfftf,ecut_eff,ecutdg_eff,ngfftc,ngfftf,&
@@ -290,12 +280,6 @@ end subroutine pawfgr_init
 !! SIDE EFFECTS
 !!  pawfgr<type(pawfgr_type)>= Fine GRid parameters and related data
 !!
-!! PARENTS
-!!      m_bethe_salpeter,m_eph_driver,m_fourier_interpol,m_gstate,m_nonlinear
-!!      m_rec,m_respfn_driver,m_screening_driver,m_sigma_driver,m_wfk_analyze
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pawfgr_destroy(Pawfgr)
@@ -337,11 +321,6 @@ end subroutine pawfgr_destroy
 !!
 !! SIDE EFFECTS
 !!  Pawfgr<type(pawfgr_type)>=Fine GRid parameters and related data. Nullified in output
-!!
-!! PARENTS
-!!      m_rec
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -395,11 +374,6 @@ end subroutine pawfgr_nullify
 !! fintocoa(nfftf)=index of the points of the fine grid on the
 !!   coarse grid (=0 if the point of the fine grid does not belong to
 !!   the coarse grid).
-!!
-!! PARENTS
-!!      m_fourier_interpol,m_pawfgr,m_rec
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

@@ -12,10 +12,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -164,11 +160,6 @@ contains
 !!
 !! TODO
 !!  Check npwepG0 before Switching on umklapp
-!!
-!! PARENTS
-!!      m_screening_driver
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1126,11 +1117,6 @@ end subroutine cchi0q0
 !!  chi0(Ep%npwe,Ep%npwe,Ep%nomega)=independent-particle susceptibility matrix at wavevector qpoint and
 !!   each frequeny defined by Ep%omega and Ep%nomega
 !!
-!! PARENTS
-!!      m_screening_driver
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
@@ -1978,11 +1964,6 @@ end subroutine cchi0
 !!
 !! TODO
 !!  Check npwepG0 before Switching on umklapp
-!!
-!! PARENTS
-!!      m_screening_driver
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

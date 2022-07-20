@@ -13,10 +13,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -75,13 +71,6 @@ contains
 !! SIDE EFFECTS
 !! hist<type abihist>=Historical record of positions
 !!
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      crystal%free,ifc%free,ifc_init_fromfile,random_number,random_seed
-!!      strain_apply,strain_init,thermal_supercell_free,thermal_supercell_make
-!!      var2hist,wrtout,xcart2xred
 !!
 !! SOURCE
 

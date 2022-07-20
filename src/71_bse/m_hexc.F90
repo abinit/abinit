@@ -11,11 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!      m_haydock
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -236,12 +231,6 @@ CONTAINS  !=====================================================================
 !! OUTPUT
 !! hexc<hexc_t>=Excitonic Hamiltonian
 !!
-!! PARENTS
-!!      m_haydock
-!!
-!! CHILDREN
-!!      timab
-!!
 !! SOURCE
 
 subroutine hexc_init(hexc, BSp, BS_files, Cryst, Kmesh_coarse, Wfd_coarse, KS_BSt, QP_BSt, comm)
@@ -432,12 +421,6 @@ end subroutine hexc_init
 !!   The memory might be modified by computing wavefunctions
 !!
 !!
-!! PARENTS
-!!      m_haydock
-!!
-!! CHILDREN
-!!      timab
-!!
 !! SOURCE
 
 subroutine hexc_interp_init(hexc_i, hexc, m3_width, method, Kmesh_dense, Vcp_dense, &
@@ -582,12 +565,6 @@ end subroutine hexc_interp_init
 !!   Pre-compute info to save CPU time when computing matmul
 !!
 !!
-!! PARENTS
-!!      m_haydock
-!!
-!! CHILDREN
-!!      timab
-!!
 !! SOURCE
 
 subroutine hexc_build_hinterp(hexc,hexc_i)
@@ -660,12 +637,6 @@ end subroutine hexc_build_hinterp
 !!
 !! OUTPUT
 !! Cmat(nbnd_coarse) = Interpolated coefficients
-!!
-!! PARENTS
-!!      m_hexc
-!!
-!! CHILDREN
-!!      timab
 !!
 !! SOURCE
 
@@ -788,12 +759,6 @@ end subroutine hexc_compute_subhinterp
 !!
 !! OUTPUT
 !!   hinterp = Interpolated hamiltonian
-!!
-!! PARENTS
-!!      m_hexc
-!!
-!! CHILDREN
-!!      timab
 !!
 !! SOURCE
 
@@ -1182,12 +1147,6 @@ end subroutine hexc_compute_hinterp
 !! FUNCTION
 !! Destroy the interpolator object in memory
 !!
-!! PARENTS
-!!      m_haydock
-!!
-!! CHILDREN
-!!      timab
-!!
 !! SOURCE
 
 subroutine hexc_free(hexc)
@@ -1232,12 +1191,6 @@ end subroutine hexc_free
 !!
 !! FUNCTION
 !!  Destroy the interpolator object in memory
-!!
-!! PARENTS
-!!      m_haydock
-!!
-!! CHILDREN
-!!      timab
 !!
 !! SOURCE
 
@@ -1316,12 +1269,6 @@ end subroutine hexc_interp_free
 !!
 !! OUTPUT
 !!  hphi(hsize_dense) = Interp(hmat)*phi
-!!
-!! PARENTS
-!!      m_hexc
-!!
-!! CHILDREN
-!!      timab
 !!
 !! SOURCE
 
@@ -1629,12 +1576,6 @@ end subroutine hexc_interp_matmul
 !! OUTPUT
 !! hphi = hreso * phi
 !!
-!! PARENTS
-!!      m_haydock
-!!
-!! CHILDREN
-!!      timab
-!!
 !! SOURCE
 
 subroutine hexc_matmul_tda(hexc, hexc_i, phi, hphi)
@@ -1696,12 +1637,6 @@ end subroutine hexc_matmul_tda
 !! OUTPUT
 !! hphi = hreso * phi + ep_renorm * phi
 !!
-!! PARENTS
-!!      m_haydock
-!!
-!! CHILDREN
-!!      timab
-!!
 !! SOURCE
 
 subroutine hexc_matmul_elphon(hexc, phi, hphi, op, ep_renorm)
@@ -1758,12 +1693,6 @@ end subroutine hexc_matmul_elphon
 !!
 !! OUTPUT
 !! hphi = hreso * phi + parity * hcoup * CONJ(phi)
-!!
-!! PARENTS
-!!      m_haydock
-!!
-!! CHILDREN
-!!      timab
 !!
 !! SOURCE
 

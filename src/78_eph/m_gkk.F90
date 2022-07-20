@@ -10,8 +10,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -94,13 +92,7 @@ contains  !=====================================================================
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_eph_driver
-!!
 !! NOTES
-!!
-!! CHILDREN
-!!      get_kg
 !!
 !! SOURCE
 
@@ -624,12 +616,6 @@ end subroutine eph_gkk
 !! OUTPUT
 !!  Only writing
 !!
-!! PARENTS
-!!      m_eph_driver
-!!
-!! CHILDREN
-!!      get_kg
-!!
 !! SOURCE
 
 subroutine ncwrite_v1qnu(dvdb, dtset, ifc, out_ncpath)
@@ -862,12 +848,6 @@ end subroutine ncwrite_v1qnu
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_gkk
-!!
-!! CHILDREN
-!!      get_kg
-!!
 !! SOURCE
 
 subroutine v1atm_to_vqnu(cplex, nfft, nspden, natom3, v1_atm, displ_red, v1_qnu)
@@ -923,13 +903,7 @@ end subroutine v1atm_to_vqnu
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_gkk
-!!
 !! NOTES
-!!
-!! CHILDREN
-!!      get_kg
 !!
 !! SOURCE
 

@@ -13,8 +13,6 @@
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -550,11 +548,6 @@ CONTAINS  !=====================================================================
 !! FUNCTION
 !!  Main creation method for the kdata_t datatype.
 !!
-!! PARENTS
-!!      m_wfd
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine kdata_init(Kdata, Cryst, Psps, kpoint, istwfk, ngfft, MPI_enreg, ecut, kg_k)
@@ -688,11 +681,6 @@ end subroutine kdata_init
 !! FUNCTION
 !!  Deallocate memory
 !!
-!! PARENTS
-!!      m_wfd
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine kdata_free_0D(Kdata)
@@ -721,10 +709,6 @@ end subroutine kdata_free_0D
 !!
 !! FUNCTION
 !!   Deallocate memory.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -755,11 +739,6 @@ end subroutine kdata_free_1D
 !!
 !! FUNCTION
 !!  Copy object
-!!
-!! PARENTS
-!!      m_wfd
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -796,10 +775,6 @@ end subroutine copy_kdata_0D
 !!
 !! FUNCTION
 !!   Deallocate memory.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -861,12 +836,6 @@ end subroutine copy_kdata_1D
 !!  Initialize the object with basic dimensions, allocate also memory for u(g) and u(r) according to keep_ur
 !!    %ug in G-space are always allocated.
 !!    %ur in r-space only if keep_ur.
-!!
-!! PARENTS
-!!      m_bethe_salpeter,m_ddk,m_gkk,m_phgamma,m_phpi,m_screening_driver
-!!      m_sigma_driver,m_sigmaph,m_wfk_analyze
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1132,10 +1101,6 @@ end subroutine wfd_init
 !! FUNCTION
 !!  Free the memory allocated in the wfd_t data type.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine wfd_free(Wfd)
@@ -1207,11 +1172,6 @@ end subroutine wfd_free
 !!
 !! FUNCTION
 !!  Copy a wfd_t data type.
-!!
-!! PARENTS
-!!      m_screening_driver,m_sigma_driver
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1328,8 +1288,6 @@ end subroutine wfdgw_copy
 !!  ik_bz=Index of the k-point in the BZ.
 !!  spin=Spin index
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 function wfd_norm2(Wfd,Cryst,Pawtab,band,ik_ibz,spin) result(norm2)
@@ -1414,8 +1372,6 @@ end function wfd_norm2
 !!  ik_bz=Index of the k-point in the BZ.
 !!  spin=Spin index
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 function wfd_xdotc(Wfd,Cryst,Pawtab,band1,band2,ik_ibz,spin)
@@ -1498,10 +1454,6 @@ end function wfd_xdotc
 !! FUNCTION
 !!  Reinitialize the storage mode of the ur treated by this node.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine wfd_reset_ur_cprj(Wfd)
@@ -1548,10 +1500,6 @@ end subroutine wfd_reset_ur_cprj
 !! OUTPUT
 !!  ur(Wfd%nfft*Wfd%nspinor*SIZE(bands))=The wavefunction in real space.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine wfd_get_many_ur(Wfd, bands, ik_ibz, spin, ur)
@@ -1597,10 +1545,6 @@ end subroutine wfd_get_many_ur
 !!
 !! OUTPUT
 !!  cg(npw_k*nspinor)=The wavefunction in real space in the Abinit cg convention.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1656,10 +1600,6 @@ end subroutine wfd_copy_cg
 !!
 !! OUTPUT
 !!  ur(Wfd%nfft*Wfd%nspinor)=The wavefunction in real space.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1743,10 +1683,6 @@ end subroutine wfd_get_ur
 !!
 !! OUTPUT
 !!  Only printing
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1877,10 +1813,6 @@ end subroutine wfd_print
 !! OUTPUT
 !!  cwaveprj
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine wfd_ug2cprj(Wfd,band,ik_ibz,spin,choice,idir,natom,Cryst,cwaveprj,sorted)
@@ -2010,11 +1942,6 @@ end subroutine wfd_ug2cprj
 !! OUTPUT
 !!  Wave<wave_t>=The structure fully initialized.
 !!
-!! PARENTS
-!!      m_wfd
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine wave_init(Wave, usepaw, npw, nfft, nspinor, natom, nlmn_size, cprj_order)
@@ -2074,10 +2001,6 @@ end subroutine wave_init
 !! SIDE EFFECTS
 !!  Memory in Wave is deallocated depending on what
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine wave_free(Wave, what)
@@ -2128,11 +2051,6 @@ end subroutine wave_free
 !!
 !! FUNCTION
 !!  Copy method for the wave_t datatype.
-!!
-!! PARENTS
-!!      m_wfd
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2193,11 +2111,6 @@ end function wave_copy
 !!   ik_ibz=k-point index
 !!   spin=Spin index.
 !!
-!! PARENTS
-!!      m_wfd
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 integer function wfd_get_wave_ptr(wfd, band, ik_ibz, spin, wave_ptr, msg) result(ierr)
@@ -2257,10 +2170,6 @@ end function wfd_get_wave_ptr
 !!
 !! SIDE EFFECTS
 !!   Wfd<wfd_t>=See above.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2358,11 +2267,6 @@ end subroutine wfd_push_ug
 !! OUTPUT
 !!   cgblock(nspinor*npw_k*num_bands)=A contiguous block of memory with the set of u(g)
 !!
-!! PARENTS
-!!      m_wfd
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine wfd_extract_cgblock(Wfd,band_list,ik_ibz,spin,cgblock)
@@ -2428,8 +2332,6 @@ end subroutine wfd_extract_cgblock
 !! NOTES
 !!   A zero index can be used to inquire the status of a bunch of states.
 !!   Thus (band,ik_ibz,spin) = (0,1,1) means: Do you have at least one band for the first k-point and the first spin.
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -2501,8 +2403,6 @@ end function wfdgw_rank_has_ug
 !!   A zero index can be used to inquire the status of a bunch of states.
 !!   Thus (band,ik_ibz,spin) = (0,1,1) means: Do you have at least one band for the first k-point and the first spin.
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 pure function wfd_ihave_ug(Wfd, band, ik_ibz, spin, how)
@@ -2556,10 +2456,6 @@ end function wfd_ihave_ug
 !!  how_manyb=The number of bands owned by this node
 !!  my_band_list(Wfd%mband)=The first how_manyb values are the bands treated by this node.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine wfd_mybands(Wfd, ik_ibz, spin, how_manyb, my_band_list, how)
@@ -2604,10 +2500,6 @@ end subroutine wfd_mybands
 !!
 !! FUNCTION
 !!  Print a table showing the distribution of the wavefunctions.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2672,11 +2564,6 @@ end subroutine wfdgw_show_bkstab
 !!  how_manyb=The number of bands owned by this node
 !!  rank_band_list(Wfd%mband)=The first how_manyb values are the bands treated by the node.
 !!
-!! PARENTS
-!!      m_wfd
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine wfdgw_bands_of_rank(Wfd,rank,ik_ibz,spin,how_manyb,rank_band_list)
@@ -2725,10 +2612,6 @@ end subroutine wfdgw_bands_of_rank
 !!
 !! OUTPUT
 !!  ug(npw_k*Wfd%nspinor)=The required wavefunction in G-space
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2782,10 +2665,6 @@ end subroutine wfd_get_ug
 !!
 !! SIDE EFFECTS
 !!  Wfd<wfd_t>=See above.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2852,11 +2731,6 @@ end subroutine wfd_wave_free
 !! OUTPUT
 !!  how_many=The number of nodes owing this ug state.
 !!  proc_ranks(1:how_many)=Gives the MPI rank of the nodes owing the state.
-!!
-!! PARENTS
-!!      m_wfd
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2934,10 +2808,6 @@ end subroutine wfdgw_who_has_ug
 !!
 !! SIDE EFFECTS
 !!  Wfd%bks_tab
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3034,10 +2904,6 @@ end subroutine wfdgw_update_bkstab
 !!   my_nband=The number of bands that will be treated by this node.
 !!   my_band_list(1:my_nband)=The band indices for this node
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine wfdgw_distribute_bands(Wfd,ik_ibz,spin,my_nband,my_band_list,got,bmask)
@@ -3120,10 +2986,6 @@ end subroutine wfdgw_distribute_bands
 !!
 !! SIDE EFFECTS
 !!   Wfd<wfd_t>=See above.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 !!
@@ -3248,8 +3110,6 @@ end subroutine wfdgw_rotate
 !! OUTPUT
 !!  iter_bks<iter2_t>=Iterator over the bands treated by this node for each k-point and spin.
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 type(iter2_t) function wfdgw_iterator_bks(Wfd, bks_mask) result(iter_bks)
@@ -3301,10 +3161,6 @@ end function wfdgw_iterator_bks
 !!
 !! OUTPUT
 !!  bks_distrbk(Wfd%mband,Wfd%nkibz,Wfd%nsppol)=Global table with the rank of the node treating (b,k,s)
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3382,10 +3238,6 @@ end subroutine wfdgw_bks_distrb
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine wfdgw_sanity_check(Wfd)
@@ -3461,10 +3313,6 @@ end subroutine wfdgw_sanity_check
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine wfd_dump_errinfo(Wfd,onfile)
@@ -3535,10 +3383,6 @@ end subroutine wfd_dump_errinfo
 !!  my_nbbp=The number of (b,b') indices treated by this node.
 !!  bbp_distrb(%mband%mband)=The rank of the node that will treat (b,b').
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine wfdgw_distribute_bbp(Wfd,ik_ibz,spin,allup,my_nbbp,bbp_distrb,got,bbp_mask)
@@ -3598,10 +3442,6 @@ end subroutine wfdgw_distribute_bbp
 !! OUTPUT
 !!  my_nbbp=The number of (b,b') indices treated by this node.
 !!  bbp_distrb(%mband%mband)=The rank of the node that will treat (b,b').
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3726,10 +3566,6 @@ end subroutine wfdgw_distribute_kb_kpbp
 !! OUTPUT
 !!  Cprj_out(Wfd%natom,Wfd%nspinor) <type(pawcprj_type)>=Unsorted matrix elements.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine wfd_get_cprj(Wfd, band, ik_ibz, spin, Cryst, Cprj_out, sorted)
@@ -3838,10 +3674,6 @@ end subroutine wfd_get_cprj
 !!  SIDE EFFECTS
 !!  Wfd<wfd_t>=Wavefunction descriptor with new internal tables for FFT defined by new_ngfft.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine wfd_change_ngfft(Wfd, Cryst, Psps, new_ngfft)
@@ -3937,10 +3769,6 @@ end subroutine wfd_change_ngfft
 !!
 !! OUTPUT
 !!   Only writing.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -4121,10 +3949,6 @@ end subroutine wfd_test_ortho
 !!  ur_kbz(Wfd%nfft*Wfd%nspinor)=The symmetrized wavefunction in real space.
 !!  [ur_kibz(Wfd%nfft*Wfd%nspinor)]= Optional output: u(r) in the IBZ.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine wfd_sym_ur(Wfd,Cryst,Kmesh,band,ik_bz,spin,ur_kbz,trans,with_umklp,ur_kibz)
@@ -4302,10 +4126,6 @@ end subroutine wfd_sym_ur
 !!  kg_kbz: G-vectors in reduced coordinates.
 !!  cgs_kbz: Periodic part of wavefunctions at kk_bz
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine wfd_sym_ug_kg(self, ecut, kk_bz, kk_ibz, bstart, nband, spin, mpw, indkk, cryst, &
@@ -4393,10 +4213,6 @@ end subroutine wfd_sym_ug_kg
 !!
 !! OUTPUT
 !!  Only writing
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -4583,10 +4399,6 @@ end subroutine wfdgw_write_wfk
 !!
 !! SIDE EFFECTS
 !!  Wfd<wfd_t>=All the states owned by this node whose status is (STORED|ALLOCATED) read.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -4987,10 +4799,6 @@ end subroutine wfd_read_wfk
 !!      atom in the first unit cell then the contribution has to be multiplied by a k- dependent
 !!      phase factor to account for the wrapping of the real-space point in the first unit cell.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine wfd_paw_get_aeur(Wfd,band,ik_ibz,spin,Cryst,Paw_onsite,Psps,Pawtab,Pawfgrtab,ur_ae,ur_ae_onsite,ur_ps_onsite)
@@ -5118,10 +4926,6 @@ end subroutine wfd_paw_get_aeur
 !!
 !! OUTPUT
 !!  Output is written on file.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -5293,10 +5097,6 @@ end subroutine wfdgw_plot_ur
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine wfdgw_get_nl_me(Wfd, cryst, psps, pawtab, bks_mask, nl_bks)
@@ -5445,10 +5245,6 @@ end subroutine wfdgw_get_nl_me
 !! paw_ij(natom)<type(paw_ij_type)>=data structure containing PAW arrays given on (i,j) channels.
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -5659,10 +5455,6 @@ end subroutine wfdgw_get_nl_me
 !!      they have to be stored on the fine FFT grid.
 !! In the case of norm-conserving calculations:
 !!    The mesh is the usual augmented FFT grid to treat correctly the convolution.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -5888,11 +5680,6 @@ end subroutine wfdgw_mkrho
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_bethe_salpeter,m_screening_driver,m_sigma_driver,mrgscr
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine test_charge(nfftf,nelectron_exp,nspden,rhor,ucvol,&
@@ -6001,10 +5788,6 @@ end subroutine test_charge
 !!  On output:
 !!    pawrhoij(:)%rhoij_(lmn2_size,nspden)=
 !!          Sum_{n,k} {occ(n,k)*conjugate[cprj_nk(ii)].cprj_nk(jj)} (non symetrized)
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

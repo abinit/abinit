@@ -9,8 +9,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -55,11 +53,6 @@ contains
 !!  Only deallocation
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_harmonic_thermo,m_phonons
-!!
-!! CHILDREN
 !!
 !! SOURCE
 subroutine end_sortph()
@@ -107,11 +100,6 @@ end subroutine end_sortph
 !!
 !! NOTES
 !! Called by one processor only
-!!
-!! PARENTS
-!!      m_harmonic_thermo,m_phonons
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

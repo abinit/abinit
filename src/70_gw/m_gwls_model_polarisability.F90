@@ -11,10 +11,6 @@
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -84,12 +80,6 @@ contains
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_gwls_model_polarisability
-!!
-!! CHILDREN
-!!      epsilon_k_model
-!!
 !! SOURCE
 
 subroutine epsilon_k_model(psi_out,psi_in)
@@ -122,13 +112,6 @@ end subroutine epsilon_k_model
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gwls_ComputeCorrelationEnergy,m_gwls_DielectricArray
-!!      m_gwls_GenerateEpsilon
-!!
-!! CHILDREN
-!!      epsilon_k_model
 !!
 !! SOURCE
 
@@ -273,12 +256,6 @@ end subroutine setup_Pk_model
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_gwls_ComputeCorrelationEnergy
-!!
-!! CHILDREN
-!!      epsilon_k_model
-!!
 !! SOURCE
 
 subroutine cleanup_Pk_model()
@@ -323,12 +300,6 @@ end subroutine cleanup_Pk_model
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_gwls_model_polarisability
-!!
-!! CHILDREN
-!!      epsilon_k_model
-!!
 !! SOURCE
 
 subroutine Pk_model(psi_out,psi_in)
@@ -361,12 +332,6 @@ end subroutine Pk_model
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gwls_model_polarisability
-!!
-!! CHILDREN
-!!      epsilon_k_model
 !!
 !! SOURCE
 
@@ -622,12 +587,6 @@ end subroutine Pk_model_implementation_1
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gwls_GenerateEpsilon
-!!
-!! CHILDREN
-!!      epsilon_k_model
 !!
 !! SOURCE
 

@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -241,13 +237,6 @@ contains
 !!     Two FFT grids are used; one with nfft points (coarse grid) for
 !!     the computation of wave functions ; one with nfftf points
 !!     (fine grid) for the computation of total density.
-!!
-!! PARENTS
-!!      m_afterscfloop,m_positron
-!!
-!! CHILDREN
-!!      dfpt_mkvxc,dfpt_mkvxc_noncoll,fourdp,hartre,metric,pawmknhat
-!!      psolver_hartree,rhotoxc,xcdata_init
 !!
 !! SOURCE
 
@@ -604,13 +593,6 @@ end subroutine forstr
 !!   11, 22, 33, 32, 31, 21
 !!   npsstr(6)=nonlocal pseudopotential energy part of stress tensor
 !!    (hartree/bohr^3)
-!!
-!! PARENTS
-!!      m_forstr
-!!
-!! CHILDREN
-!!      dfpt_mkvxc,dfpt_mkvxc_noncoll,fourdp,hartre,metric,pawmknhat
-!!      psolver_hartree,rhotoxc,xcdata_init
 !!
 !! SOURCE
 
@@ -1248,13 +1230,6 @@ end subroutine forstrnps
 !!
 !! OUTPUT
 !! vresid(nfft,nspden)= the output potential residual
-!!
-!! PARENTS
-!!      m_forstr,m_scfcv_core
-!!
-!! CHILDREN
-!!      dfpt_mkvxc,dfpt_mkvxc_noncoll,fourdp,hartre,metric,pawmknhat
-!!      psolver_hartree,rhotoxc,xcdata_init
 !!
 !! SOURCE
 

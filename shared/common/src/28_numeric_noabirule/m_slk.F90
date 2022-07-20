@@ -307,11 +307,6 @@ CONTAINS  !=====================================================================
 !! OUTPUT
 !!  grid= the grid of processors used by Scalapack
 !!
-!! PARENTS
-!!      m_slk,m_xgScalapack
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine build_grid_scalapack(grid, nbprocs, comm, grid_dims)
@@ -373,11 +368,6 @@ end subroutine build_grid_scalapack
 !! OUTPUT
 !!  processor= descriptor of a processor
 !!
-!! PARENTS
-!!      m_slk
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine build_processor_scalapack(processor, grid, myproc, comm)
@@ -421,11 +411,6 @@ end subroutine build_processor_scalapack
 !!
 !! OUTPUT
 !!  processor= descriptor of a processor
-!!
-!! PARENTS
-!!      m_abi_linalg,m_exc_diago,m_hide_lapack
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -474,11 +459,6 @@ end subroutine init_scalapack
 !! SIDE EFFECTS
 !!  processor= descriptor of a processor
 !!
-!! PARENTS
-!!      m_abi_linalg,m_exc_diago,m_hide_lapack
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine end_scalapack(processor)
@@ -514,11 +494,6 @@ end subroutine end_scalapack
 !!
 !! OUTPUT
 !!  matrix= the matrix to process
-!!
-!! PARENTS
-!!      m_exc_diago,m_hide_lapack,m_rayleigh_ritz,m_slk
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -743,10 +718,6 @@ end subroutine matrix_scalapack_copy
 !! FUNCTION
 !!  Destroys a matrix descriptor for ScaLAPACK.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine matrix_scalapack_free(matrix)
@@ -955,8 +926,6 @@ end function slk_array4_locmem_mb
 !! OUTPUT
 !!  The value of the local matrix.
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 pure complex(dpc) function matrix_get_local_cplx(matrix, i, j)
@@ -985,8 +954,6 @@ end function matrix_get_local_cplx
 !!  matrix= the matrix to process
 !!  i= row in the matrix
 !!  j= column in the matrix
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -1023,9 +990,6 @@ end function matrix_get_local_real
 !! SIDE EFFECTS
 !!  matrix%buffer_cplx(i,j) filled with value
 !!
-!! PARENTS
-!!      m_slk
-!!
 !! SOURCE
 
 pure subroutine matrix_set_local_cplx(matrix,i,j,value)
@@ -1058,9 +1022,6 @@ end subroutine matrix_set_local_cplx
 !!
 !! SIDE EFFECTS
 !!  matrix%buffer_real(i,j) set to value
-!!
-!! PARENTS
-!!      m_slk
 !!
 !! SOURCE
 
@@ -1096,11 +1057,6 @@ end subroutine matrix_set_local_real
 !!  iloc= local row of the coefficient
 !!  jloc= local column of the coefficient
 !!
-!! PARENTS
-!!      m_slk
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine idx_loc(matrix, i, j, iloc, jloc)
@@ -1131,8 +1087,6 @@ end subroutine idx_loc
 !!  matrix= the matrix to process
 !!  idx= number of rows in the distributed matrix
 !!  lico= block size index
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -1172,9 +1126,6 @@ end function glob_loc
 !! OUTPUT
 !!  i= row in the matrix
 !!  j= column in the matrix
-!!
-!! PARENTS
-!!      m_slk,exc_diago
 !!
 !! SOURCE
 
@@ -1264,8 +1215,6 @@ end function slk_matrix_loc2gcol
 !!  idx= number of rows in the distributed matrix
 !!  lico= block size index. 1 for rows. 2 for columns
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 integer pure function loc_glob(matrix, proc, idx, lico)
@@ -1304,10 +1253,6 @@ end function loc_glob
 !!
 !! SIDE EFFECTS
 !!  matrix= the matrix to process
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1359,10 +1304,6 @@ end subroutine matrix_from_global
 !!
 !! SIDE EFFECTS
 !!  matrix= the matrix to process
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1422,11 +1363,6 @@ end subroutine matrix_from_global_sym
 !! SIDE EFFECTS
 !!  matrix= the matrix to process
 !!
-!! PARENTS
-!!      m_slk
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine matrix_from_realmatrix(matrix, reference, istwf_k)
@@ -1471,11 +1407,6 @@ end subroutine matrix_from_realmatrix
 !!
 !! SIDE EFFECTS
 !!  matrix= the matrix to process
-!!
-!! PARENTS
-!!      m_slk
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1522,10 +1453,6 @@ end subroutine matrix_from_complexmatrix
 !!
 !! SIDE EFFECTS
 !!  reference= one-dimensional array
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1577,11 +1504,6 @@ end subroutine matrix_to_global
 !! SIDE EFFECTS
 !!  reference= the matrix to fill
 !!
-!! PARENTS
-!!      m_slk
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine matrix_to_realmatrix(matrix, reference, istwf_k)
@@ -1626,11 +1548,6 @@ end subroutine matrix_to_realmatrix
 !! SIDE EFFECTS
 !!  reference= the matrix to fill
 !!
-!! PARENTS
-!!      m_slk
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine matrix_to_complexmatrix(matrix, reference, istwf_k)
@@ -1674,10 +1591,6 @@ end subroutine matrix_to_complexmatrix
 !!
 !! SIDE EFFECTS
 !!  reference= one-dimensional array
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1734,11 +1647,6 @@ end subroutine matrix_to_reference
 !! SIDE EFFECTS
 !!  Slk_mat<matrix_scalapack>=The distributed matrix.
 !!    %buffer_cplx=Local buffer containg the value this node is dealing with.
-!!
-!! PARENTS
-!!      m_hide_lapack
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1825,11 +1733,6 @@ end subroutine slk_matrix_from_global_dpc_2D
 !! SIDE EFFECTS
 !!  Slk_mat<matrix_scalapack>=The distributed matrix.
 !!    %buffer_cplx=Local buffer containg the value this node is dealing with.
-!!
-!! PARENTS
-!!      m_hide_lapack
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1920,11 +1823,6 @@ end subroutine slk_matrix_from_global_dpc_1Dp
 !!  glob_mat=The global matrix where the entries owned by this processors have been overwritten.
 !!  Note that the remaing entries not treated by this node are not changed.
 !!
-!! PARENTS
-!!      m_hide_lapack
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine slk_matrix_to_global_dpc_2D(Slk_mat, uplo, glob_mat)
@@ -2005,8 +1903,6 @@ end subroutine slk_matrix_to_global_dpc_2D
 !!          LOCr( M ) <= ceil( ceil(M/MB_A)/NPROW )*MB_A
 !!          LOCc( N ) <= ceil( ceil(N/NB_A)/NPCOL )*NB_A
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 integer function my_locr(Slk_mat)
@@ -2062,8 +1958,6 @@ end function my_locr
 !!          LOCr( M ) <= ceil( ceil(M/MB_A)/NPROW )*MB_A
 !!          LOCc( N ) <= ceil( ceil(N/NB_A)/NPCOL )*NB_A
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 integer function my_locc(Slk_mat)
@@ -2117,11 +2011,6 @@ end function my_locc
 !! otherwise, results are unpredictable."
 !! However the official scaLAPACK documentation does not report this (severe) limitation.
 !!
-!! PARENTS
-!!      m_exc_diago
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine slk_pzgemm(transa, transb, matrix1, alpha, matrix2, beta, results)
@@ -2168,11 +2057,6 @@ end subroutine slk_pzgemm
 !! SIDE EFFECTS
 !!  results= ScaLAPACK matrix coming out of the operation
 !!  eigen= eigenvalues of the matrix
-!!
-!! PARENTS
-!!      m_slk
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2371,11 +2255,6 @@ end subroutine compute_eigen_problem
 !! SIDE EFFECTS
 !!  results= ScaLAPACK matrix coming out of the operation
 !!  eigen= eigenvalues of the matrix
-!!
-!! PARENTS
-!!      m_rayleigh_ritz,m_slk
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2709,11 +2588,6 @@ end subroutine compute_generalized_eigen_problem
 !!  results= ScaLAPACK matrix coming out of the operation
 !!  eigen= eigenvalues of the matrix
 !!
-!! PARENTS
-!!      m_xgScalapack
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine compute_eigen1(comm,processor,cplex,nbli_global,nbco_global,matrix,vector,istwf_k)
@@ -2833,11 +2707,6 @@ end subroutine compute_eigen1
 !! SIDE EFFECTS
 !!  results= ScaLAPACK matrix coming out of the operation
 !!  eigen= eigenvalues of the matrix
-!!
-!! PARENTS
-!!      m_xgScalapack
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2977,11 +2846,6 @@ end subroutine compute_eigen2
 !!  On exit, the lower triangle (if UPLO='L') or the upper triangle (if UPLO='U') of A, including the diagonal, is
 !!  destroyed.
 !!
-!! PARENTS
-!!      m_exc_diago,m_hide_lapack
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine slk_pzheev(Slk_mat, jobz, uplo, Slk_vec, w)
@@ -3116,11 +2980,6 @@ end subroutine slk_pzheev
 !!
 !!  Slk_mat<ScaLAPACK_matrix>=
 !!    %buffer_cplx is destroyed when the routine returns
-!!
-!! PARENTS
-!!      m_exc_diago,m_hide_lapack
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3395,11 +3254,6 @@ end subroutine slk_pzheevx
 !!      the Cholesky factorization sub( B ) = U**H*U or
 !!      sub( B ) = L*L**H.
 !!
-!! PARENTS
-!!      m_exc_diago
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine slk_pzhegvx(Slk_matA, ibtype, jobz, range, uplo, Slk_matB, vl, vu, il, iu, abstol, Slk_vec, mene_found, eigen)
@@ -3613,10 +3467,6 @@ end subroutine slk_pzhegvx
 !!    In input, the matrix to invert.
 !!    In output the matrix inverted and distributed among the nodes.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine slk_zinvert(Slk_mat)
@@ -3702,10 +3552,6 @@ end subroutine slk_zinvert
 !!    If UPLO = 'L', the leading N-by-N lower triangular part of sub( A ) contains the lower triangular part of the distribu-
 !!    ted matrix, and its strictly upper triangular part is not referenced.
 !!    On exit, the local pieces of the upper or lower triangle of the (Hermitian) inverse of sub( A )
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -4046,11 +3892,6 @@ end function slk_get_trace
 !! TODO
 !!  * Generalize the implementation adding the writing the real buffer.
 !!
-!! PARENTS
-!!      m_exc_diago
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine slk_write(Slk_mat, uplo, is_fortran_file, fname,mpi_fh, offset, flags, glob_subarray)
@@ -4270,11 +4111,6 @@ end subroutine slk_write
 !!
 !! FIXME: This routine should be removed and replaced by hdf5 + mpi-io
 !!
-!! PARENTS
-!!      m_exc_diago
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine slk_read(Slk_mat,uplo,symtype,is_fortran_file,fname,mpi_fh,offset,flags)
@@ -4453,11 +4289,6 @@ end subroutine slk_read
 !!    input: pointer to NULL
 !!    output: myel2loc(2,my_nel):  myel2loc(:,el) gives (iloc,jloc) for el=1,my_nel.
 !!
-!! PARENTS
-!!      m_exc_diago
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine slk_single_fview_read_mask(Slk_mat,mask_of_glob,offset_of_glob,nsblocks,sub_block,&
@@ -4609,11 +4440,6 @@ end subroutine slk_single_fview_read_mask
 !!    supposed to be allocated.
 !!    %buffer_cplx=Local buffer containg the distributed matrix stored on the external file.
 !!
-!! PARENTS
-!!      m_slk
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine slk_symmetrize(Slk_mat, uplo, symtype)
@@ -4743,11 +4569,6 @@ end subroutine slk_symmetrize
 !!  of kind XMPI_ADDRESS_KIND. If the displacement is too large, the routine returns
 !!  offset_err=1 so that the caller will know that several MPI-IO reads are needed to
 !!  read the local buffer.
-!!
-!! PARENTS
-!!      m_slk
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -4946,11 +4767,6 @@ end subroutine slk_single_fview_read
 !!  offset_err=1 so that the caller will know that several MPI-IO reads are needed to
 !!  write the local buffer.
 !!
-!! PARENTS
-!!      m_slk
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine slk_single_fview_write(Slk_mat,uplo,nelw,elw2slk,etype,slk_type,offset_err,is_fortran_file,glob_subarray)
@@ -5137,11 +4953,6 @@ end subroutine slk_single_fview_write
 !!  bsize_elm=Byte size of the matrix element.
 !!  mpi_type_elm=MPI datatype of the matrix element.
 !!
-!! PARENTS
-!!      m_slk
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine slk_bsize_and_type(Slk_mat,bsize_elm,mpi_type_elm)
@@ -5206,10 +5017,6 @@ end subroutine slk_bsize_and_type
 !!
 !! TODO
 !!  Likely there's a much faster way to retrieve the list of indices using scaLAPACK primitives.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

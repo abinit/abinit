@@ -15,10 +15,6 @@
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -81,12 +77,6 @@ contains
 !! OUTPUT
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_sigma_driver
-!!
-!! CHILDREN
-!!      print_orbitals,wrtout
 !!
 !! SOURCE
 

@@ -15,10 +15,6 @@
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -149,16 +145,6 @@ contains
 !!     averaging the final results over the degenerate subset. Here we divide the states
 !!     where the QP energies are required into complexes. Note however that this approach is not
 !!     based on group theory, and it might lead to spurious results in case of accidental degeneracies.
-!!
-!! PARENTS
-!!      m_sigma_driver
-!!
-!! CHILDREN
-!!      findqg0,flush_unit,get_bz_item,gsph_fft_tabs,paw_cross_rho_tw_g
-!!      paw_rho_tw_g,paw_symcprj,pawcprj_alloc,pawcprj_copy,pawcprj_free
-!!      pawmknhat_psipsi,pawpwij_free,pawpwij_init,read_plowannier,rho_tw_g
-!!      rotate_fft_mesh,timab,wfd%change_ngfft,wfd%get_cprj,wfd%get_ur
-!!      wfdf%paw_get_aeur,wrtout
 !!
 !! SOURCE
 

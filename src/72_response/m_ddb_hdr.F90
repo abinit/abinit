@@ -12,8 +12,6 @@
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -210,12 +208,6 @@ CONTAINS  !===========================================================
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      dfpt_looppert,gstate,longwave,nonlinear,respfn,eig2tot
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine ddb_hdr_init(ddb_hdr, dtset, psps, pawtab, dscrpt, &
@@ -350,12 +342,6 @@ end subroutine ddb_hdr_init
 !! FUNCTION
 !!  Allocate dynamic memory.
 !!
-!! PARENTS
-!!  ddb_hdr_init, ddb_hdr_open_read_txt
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine ddb_hdr_malloc(ddb_hdr)
@@ -397,12 +383,6 @@ end subroutine ddb_hdr_malloc
 !!
 !! FUNCTION
 !!  Free memory.
-!!
-!! PARENTS
-!!  anaddb,dfpt_looppert,gstate,longwave,nonlinear,respfn,eig2tot
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -460,12 +440,6 @@ end subroutine ddb_hdr_free
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!  ddb_hdr_open_write
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine ddb_hdr_open_write_txt(ddb_hdr, filename, unddb, fullinit)
@@ -513,11 +487,6 @@ end subroutine ddb_hdr_open_write_txt
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine ddb_hdr_open_write(ddb_hdr, filename, unddb, fullinit)
@@ -555,12 +524,6 @@ end subroutine ddb_hdr_open_write
 !!   0-> leave the file open
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      anaddb,m_effective_potential_file,m_ifc,m_thmeig,m_ddb
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -615,13 +578,6 @@ end subroutine ddb_hdr_open_read
 !!
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      anaddb,m_ddb,m_effective_potential_file,m_gruneisen,m_ifc,m_thmeig
-!!      mrgddb
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -795,11 +751,6 @@ end subroutine ddb_hdr_open_read_txt
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine ddb_hdr_compare(ddb_hdr1, ddb_hdr2)
@@ -868,11 +819,6 @@ end subroutine ddb_hdr_compare
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1044,12 +990,6 @@ end subroutine ddb_hdr_bcast
 !!
 !! NOTES
 !! Only executed by one processor
-!!
-!! PARENTS
-!!      m_ddb_hdr
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1481,12 +1421,6 @@ end subroutine psddb8
 !! xred(3,matom)=reduced atomic coordinates
 !! zion(mtypat)=valence charge of each type of atom
 !! znucl(mtypat)=atomic number of atom type
-!!
-!! PARENTS
-!!      m_ddb_hdr
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -2062,12 +1996,6 @@ end subroutine ioddb8_in
 !! usepaw= 0 for non paw calculation; =1 for paw calculation
 !! comm=MPI communicator.
 !!
-!! PARENTS
-!!      ddb_hdr_open_read_txt
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine ddb_getdims(filename,comm,dimekb,lmnmax,mband,mblktyp,msym,natom,nblok,nkpt,nsppol,ntypat,usepaw)
@@ -2140,12 +2068,6 @@ end subroutine ddb_getdims
 !! nkpt=number of k points
 !! ntypat=number of atom types
 !! usepaw= 0 for non paw calculation; =1 for paw calculation
-!!
-!! PARENTS
-!!      ddb_getdims
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -2629,12 +2551,6 @@ end subroutine inprep8
 !! TODO
 !! Describe the inputs
 !!
-!! PARENTS
-!!      m_ddb_hdr
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine ddb_chkname(nmfond,nmxpct,nmxpct2)
@@ -2736,12 +2652,6 @@ end subroutine ddb_chkname
 !!  acell, amu, dimekb, ecut, ekb, fullinit, iscf, ixc, kpt, kptnrm,
 !!  natom, nband, ngfft, nkpt, nsppol, nsym, ntypat, occ, occopt,
 !!  rprim, dfpt_sciss, symrel, tnons, tolwfr, typat, usepaw, wtk, xred, zion
-!!
-!! PARENTS
-!!      m_ddb_hdr
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -3071,11 +2981,6 @@ end subroutine compare_ddb_variables
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine ddb_hdr_print(ddb_hdr, unddb)
@@ -3129,12 +3034,6 @@ end subroutine ddb_hdr_print
 !! OUTPUT
 !!  (only checking)
 !!
-!! PARENTS
-!!      m_ddb_hdr
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine chkr8(reali,realt,name,tol)
@@ -3182,12 +3081,6 @@ subroutine chkr8(reali,realt,name,tol)
 !!
 !! OUTPUT
 !!  (only checking)
-!!
-!! PARENTS
-!!      m_ddb_hdr
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -3278,12 +3171,6 @@ subroutine chki8(inti,intt,name)
 !!
 !! OUTPUT
 !!  Only writing
-!!
-!! PARENTS
-!!      m_ddb_hdr
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 

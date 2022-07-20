@@ -13,10 +13,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -204,10 +200,6 @@ contains
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 type(ephwg_t) function ephwg_new( &
@@ -340,11 +332,6 @@ end function ephwg_from_ebands
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      self%lgk%free,self%tetra_k%free
-!!
 !! SOURCE
 
 subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm, skip_mapping)
@@ -464,10 +451,6 @@ end subroutine ephwg_setup_kpoint
 !!  comm: MPI communicator
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -597,11 +580,6 @@ end subroutine ephwg_double_grid_setup_kpoint
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      self%lgk%free,self%tetra_k%free
-!!
 !! SOURCE
 
 subroutine ephwg_report_stats(self)
@@ -653,11 +631,6 @@ end subroutine ephwg_report_stats
 !! OUTPUT
 !!  deltaw_pm(nene, nq_k, 2)  (plus, minus) including the weights for BZ integration.
 !   These arrays have the same order as the little group used in sigmaph.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      self%lgk%free,self%tetra_k%free
 !!
 !! SOURCE
 
@@ -752,11 +725,6 @@ end subroutine ephwg_get_deltas
 !!  deltaw_pm(nene, nq_k, 2)  (plus, minus) including the weights for BZ integration.
 !   These arrays have the same order as the little group used in sigmaph.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      self%lgk%free,self%tetra_k%free
-!!
 !! SOURCE
 
 subroutine ephwg_get_deltas_wvals(self, band, spin, nu, neig, eig, bcorr, deltaw_pm, comm, &
@@ -834,11 +802,6 @@ end subroutine ephwg_get_deltas_wvals
 !! OUTPUT
 !!  dt_weights(nene, nq_k, 2)  weights for BZ integration (delta and theta function)
 !   These arrays have the same order as the q-points in the little group of the k-point.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      self%lgk%free,self%tetra_k%free
 !!
 !! SOURCE
 
@@ -918,11 +881,6 @@ end subroutine ephwg_get_deltas_qibzk
 !! OUTPUT
 !!  cweights(nz, 2, nbcalc, %nq_k)  (plus, minus)
 !!  include weights for BZ integration.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      self%lgk%free,self%tetra_k%free
 !!
 !! SOURCE
 
@@ -1011,11 +969,6 @@ end subroutine ephwg_get_zinv_weights
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      self%lgk%free,self%tetra_k%free
 !!
 !! SOURCE
 

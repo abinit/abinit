@@ -11,10 +11,6 @@
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -141,12 +137,6 @@ contains
 !!  This routine operates on the full FFT mesh. DO NOT PASS MPI_TYPE
 !!  One can easily implemente MPI-FFT by just calling this routine and then
 !!  extracting the G-vectors treated by the node.
-!!
-!! PARENTS
-!!      m_fock
-!!
-!! CHILDREN
-!!      cutoff_cylinder,cutoff_surface
 !!
 !! SOURCE
 

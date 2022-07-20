@@ -84,12 +84,6 @@ CONTAINS  !=====================================================================
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_berryphase_new,m_dfpt_looppert,m_gstate
-!!
-!! CHILDREN
-!!      xmpi_sum_master
-!!
 !! SOURCE
 
 subroutine outresid(dtset,kptns,mband,&
@@ -211,12 +205,6 @@ end subroutine outresid
 !!
 !! NOTES
 !! * The name of the file wff2 might be the same as that of the file wff1.
-!!
-!! PARENTS
-!!      m_berryphase_new,m_gstate
-!!
-!! CHILDREN
-!!      xmpi_sum_master
 !!
 !! SOURCE
 
@@ -755,12 +743,6 @@ end subroutine outwf
 !!
 !! OUTPUT
 !!  done=.True if cg_ncwrite can handle the output of the WFK file in parallel.
-!!
-!! PARENTS
-!!      m_iowf
-!!
-!! CHILDREN
-!!      xmpi_sum_master
 !!
 !! SOURCE
 
@@ -1380,12 +1362,6 @@ end subroutine cg_ncwrite
 !!    occ and occ3d differ only if nband is k-dependent but you should never assume this, hence
 !!    remember to *convert* occ into occ3d before calling this routine.
 !!
-!! PARENTS
-!!      m_iowf
-!!
-!! CHILDREN
-!!      xmpi_sum_master
-!!
 !! SOURCE
 
 subroutine ncwrite_eigen1_occ(ncid, nband, mband, nkpt, nsppol, eigen, occ3d)
@@ -1473,11 +1449,6 @@ end subroutine ncwrite_eigen1_occ
 !!  count_pwblock
 !!  gblock(:,:)
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xmpi_sum_master
-!!
 !! SOURCE
 
 subroutine kg2seqblocks(npwtot_k,npw_k,kg_k,gmpi2seq,comm_fft,start_pwblock,count_pwblock,gblock)
@@ -1564,12 +1535,6 @@ end subroutine kg2seqblocks
 !! OUTPUT
 !!  bstart
 !!  bcount
-!!
-!! PARENTS
-!!      m_iowf
-!!
-!! CHILDREN
-!!      xmpi_sum_master
 !!
 !! SOURCE
 

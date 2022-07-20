@@ -66,11 +66,6 @@ CONTAINS !===========================================================
 !!  me,nproc =disabled parallel LOTF
 !!  classic=stick with the adaptable Glue model (rough version)
 !!
-!! PARENTS
-!!      m_gstate
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine lotfparam_init(natom,version,nstart,nitex,neeigx,&

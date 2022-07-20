@@ -11,8 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -595,11 +593,6 @@ contains  !=====================================================
 !! comm=MPI communicator.
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_eph_driver
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2463,10 +2456,6 @@ end subroutine sigmaph
 !!  dtfil<datafiles_type>=variables related to files.
 !!  comm=MPI communicator
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, comm) result(new)
@@ -3317,10 +3306,6 @@ end function sigmaph_new
 !!  dtfil<datafiles_type>=variables related to files.
 !!  comm=MPI communicator
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine sigmaph_write(self, dtset, cryst, ebands, wfk_hdr, dtfil, comm)
@@ -3578,10 +3563,6 @@ end subroutine sigmaph_write
 !!  [sigma_ngkpt] =  Value read from the ncfile (used in m_rta)
 !!  [sigma_erange] = Value read from the ncfile (used in m_rta)
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 type(sigmaph_t) function sigmaph_read(path, dtset, comm, msg, ierr, keep_open, &
@@ -3762,10 +3743,6 @@ end function sigmaph_read
 !!  ebands<ebands_t>=The GS KS band structure (energies, occupancies, k-weights...)
 !!  opt=integer option selecting what to read on the ebands object. 1-only mapping, 10+n-read n temperature linewidths
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, brange, kcalc2ebands, linewidths, velocity, comm) result(new)
@@ -3893,10 +3870,6 @@ end function sigmaph_get_ebands
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine sigmaph_compare(self, other)
@@ -3951,10 +3924,6 @@ end subroutine sigmaph_compare
 !!  Deallocate dynamic memory
 !!
 !! INPUTS
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -4062,10 +4031,6 @@ end subroutine sigmaph_free
 !!  ikcalc=Index of the k-point to compute.
 !!  prtvol= Verbosity level
 !!  comm= MPI communicator
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -4305,10 +4270,6 @@ end subroutine sigmaph_setup_kcalc
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 pure logical function sigmaph_skip_phmode(self, nu, wqnu, eph_phrange_w) result(skip)
@@ -4355,11 +4316,6 @@ end function sigmaph_skip_phmode
 !!  nfftf=Number of fft-points on the fine grid for interpolated potential
 !!  ngfftf(18)=information on 3D FFT for interpolated potential
 !!  comm= MPI communicator
-!!
-!! PARENTS
-!!      m_sigmaph
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -4571,10 +4527,6 @@ end subroutine sigmaph_setup_qloop
 !!  spin=Spin index.
 !!  prtvol= Verbosity level
 !!  comm=MPI communicator.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -5043,10 +4995,6 @@ end subroutine sigmaph_gather_and_write
 !!  dtset<dataset_type>=All input variables for this dataset.
 !!  unt=Fortran unit number
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine sigmaph_print(self, dtset, unt)
@@ -5166,11 +5114,6 @@ end subroutine sigmaph_print
 !!  comm: MPI communicator
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_sigmaph
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -5342,11 +5285,6 @@ end subroutine sigmaph_get_all_qweights
 !!
 !! OUTPUT
 !!  qselect(nqpt)
-!!
-!! PARENTS
-!!      m_sigmaph
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -179,14 +175,6 @@ contains
 !!  - correction of forces due to potential residual: optn=1, optn2=2 or 3, optgr=1
 !!                                                    vg=potential residual
 !!    etc...
-!!
-!! PARENTS
-!!      m_dfpt_elt,m_extraprho,m_forces,m_nonlinear,m_prcref,m_respfn_driver
-!!      m_setvtr,m_stress
-!!
-!! CHILDREN
-!!      destroy_distribfft,fourdp,init_distribfft_seq,initmpi_seq
-!!      set_mpi_enreg_fft,unset_mpi_enreg_fft,zerosym
 !!
 !! SOURCE
 
@@ -993,14 +981,6 @@ end subroutine atm2fft
 !! Computation of:
 !!  - 1st-order local potential: optv=1
 !!  - 1st-order PS core density: optn=1, optn2=1
-!!
-!! PARENTS
-!!      m_dfpt_elt,m_dfpt_looppert,m_dfpt_nstwf,m_dfptnl_loop,m_paw_dfpt
-!!      m_respfn_driver
-!!
-!! CHILDREN
-!!      destroy_distribfft,fourdp,init_distribfft_seq,initmpi_seq
-!!      set_mpi_enreg_fft,unset_mpi_enreg_fft,zerosym
 !!
 !! SOURCE
 

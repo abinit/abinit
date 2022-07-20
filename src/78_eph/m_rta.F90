@@ -25,8 +25,6 @@
 !!   [sigma] = Siemens/m  with S = Ampere/Volt = Ohm^-1
 !!   [mu] = S L^2 Q
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -280,12 +278,6 @@ contains  !=====================================================
 !! pawtab(ntypat*usepaw)<pawtab_type>=Paw tabulated starting data.
 !! psps<pseudopotential_type>=Variables related to pseudopotentials.
 !! comm=MPI communicator.
-!!
-!! PARENTS
-!!      m_eph_driver
-!!
-!! CHILDREN
-!!      safe_div
 !!
 !! SOURCE
 
@@ -674,11 +666,6 @@ end function rta_new
 !! dtset<dataset_type>=All input variables for this dataset.
 !! dtfil<datafiles_type>=variables related to files.
 !! comm=MPI communicator.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      safe_div
 !!
 !! SOURCE
 
@@ -1096,11 +1083,6 @@ end subroutine compute_rta
 !! cryst<crystal_t>=Crystalline structure
 !! comm=MPI communicator.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      safe_div
-!!
 !! SOURCE
 
 subroutine compute_rta_mobility(self, cryst, comm)
@@ -1225,11 +1207,6 @@ end subroutine compute_rta_mobility
 !! cryst<crystal_t>=Crystalline structure
 !! dtset<dataset_type>=All input variables for this dataset.
 !! ncid=Netcdf file handle.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      safe_div
 !!
 !! SOURCE
 
@@ -1359,11 +1336,6 @@ end subroutine rta_ncwrite
 !! cryst<crystal_t>=Crystalline structure
 !! dtset<dataset_type>=All input variables for this dataset.
 !! dtfil<datafiles_type>=variables related to files.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      safe_div
 !!
 !! SOURCE
 
@@ -1552,11 +1524,6 @@ end subroutine write_tensor
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      safe_div
-!!
 !! SOURCE
 
 subroutine rta_free(self)
@@ -1619,12 +1586,6 @@ end subroutine rta_free
 !! pawtab(ntypat*usepaw)<pawtab_type>=Paw tabulated starting data.
 !! psps<pseudopotential_type>=Variables related to pseudopotentials.
 !! comm=MPI communicator.
-!!
-!! PARENTS
-!!      m_eph_driver
-!!
-!! CHILDREN
-!!      safe_div
 !!
 !! SOURCE
 
@@ -2149,12 +2110,6 @@ end subroutine ibte_driver
 !! INPUTS
 !! cryst<crystal_t>=Crystalline structure
 !! comm=MPI communicator.
-!!
-!! PARENTS
-!!      m_rta
-!!
-!! CHILDREN
-!!      safe_div
 !!
 !! SOURCE
 

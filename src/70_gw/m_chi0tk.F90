@@ -11,10 +11,6 @@
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -105,11 +101,6 @@ CONTAINS  !=====================================================================
 !!
 !! SIDE EFFECTS
 !!  chi0(npwe,npwe,nomega)=independent-particle susceptibility matrix in reciprocal space
-!!
-!! PARENTS
-!!      m_chi0
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -256,10 +247,6 @@ end subroutine assemblychi0_sym
 !! OUTPUT
 !!  rhotwg_I(npw)=Required linear combination of the oscillator matrix elements.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine mkrhotwg_sigma(ii,nspinor,npw,rhotwg,rhotwg_I)
@@ -350,11 +337,6 @@ end subroutine mkrhotwg_sigma
 !! TODO
 !!  It is possible to symmetrize chi0 without any the extra allocation for afm_mat.
 !!  More CPU demanding but safer in case of a large chi0 matrix. One might loop over G1 and G2 shells ...
-!!
-!! PARENTS
-!!      m_chi0
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -631,11 +613,6 @@ end subroutine symmetrize_afm_chi0
 !!     where S is one of the symrec operation, R and \tau is the corresponding
 !!     operation in real space. The term involving the fractional translation is zero provided that b /= b'.
 !!
-!! PARENTS
-!!      m_chi0
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine accumulate_chi0_q0(is_metallic,ik_bz,isym_kbz,itim_kbz,gwcomp,nspinor,npwepG0,Ep,Cryst,Ltg_q,Gsph_epsG0,&
@@ -889,11 +866,6 @@ end subroutine accumulate_chi0_q0
 !!  sf_uwing(npwe,mw_wl:my_wr,3)=Updated upper wing of the spectral function.
 !!  sf_head(3,3,my_wl:my_wr)=Updated head of the spectral function.
 !!
-!! PARENTS
-!!      m_chi0
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine accumulate_sfchi0_q0(ikbz,isym_kbz,itim_kbz,nspinor,symchi,npwepG0,npwe,Cryst,Ltg_q,Gsph_epsG0,&
@@ -1127,11 +1099,6 @@ end subroutine accumulate_sfchi0_q0
 !! NOTES
 !!  Umklapp processes are not yet implemented
 !!
-!! PARENTS
-!!      m_chi0
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine assemblychi0sf(ik_bz,symchi,Ltg_q,npwepG0,npwe,rhotwg,Gsph_epsG0,&
@@ -1320,11 +1287,6 @@ end subroutine assemblychi0sf
 !!  iomegal= index in the array omegasf of the last frequency < egwdiff
 !!  iomegar= index in the array omegasf of the first frequency > egwdiff
 !!
-!! PARENTS
-!!      m_chi0
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine approxdelta(nomegasf,omegasf,egwdiff_re,smear,iomegal,iomegar,wl,wr,spmeth)
@@ -1403,11 +1365,6 @@ end subroutine approxdelta
 !!
 !! OUTPUT
 !! kkweight(nsp,ne)=frequency dependent weights Eq A1 PRB 74, 035101 (2006) [[cite:Shishkin2006]]
-!!
-!! PARENTS
-!!      m_chi0tk
-!!
-!! CHILDREN
 !!
 !! SOURCE
 !!
@@ -1504,11 +1461,6 @@ end subroutine calc_kkweight
 !! OUTPUT
 !!  kkweight(nomegasf,nomega)=Frequency dependent weight for Hilber transform.
 !!  omegasf(nomegasf+1)=frequencies for imaginary part.
-!!
-!! PARENTS
-!!      m_chi0
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1648,11 +1600,6 @@ end subroutine setup_spectral
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_chi0
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine hilbert_transform(npwe,nomega,nomegasf,my_wl,my_wr,kkweight,sf_chi0,chi0,spmeth)
@@ -1723,11 +1670,6 @@ end subroutine hilbert_transform
 !! my_max_rest,my_min_rest=max and min resonant transition energy treated by this processor
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_chi0
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1822,11 +1764,6 @@ end subroutine hilbert_transform_headwings
 !! SIDES EFFECTS
 !!  chi0(npwe,npwe,nomega)= In input chi0 calculated so far,
 !!  In output the "delta part" of the completeness correction is added.
-!!
-!! PARENTS
-!!      m_chi0
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1941,11 +1878,6 @@ end subroutine completechi0_deltapart
 !!  (for writing routines, no output)
 !!  otherwise, should be described
 !!
-!! PARENTS
-!!      m_screening_driver
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine output_chi0sumrule(qeq0,iq,npwe,omegaplasma,chi0sumrule,epsm1_w0,vc_sqrt)
@@ -2024,11 +1956,6 @@ end subroutine output_chi0sumrule
 !!  chi0sumrule(npwe)= In input the sum rule calculated so far,
 !!  In output the contribution of this transition is accounted for, and, eventually, symmetrized.
 !!  using the symmetry operations of the little group of the external q.
-!!
-!! PARENTS
-!!      m_chi0
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2119,11 +2046,6 @@ end subroutine accumulate_chi0sumrule
 !! OUTPUT
 !! my_max_rest,my_min_rest=Maximum and minimum resonant (posite) transition energy.
 !! max_rest,min_rest=Maximun and minimum resonant (posite) transition energy treated by this node.
-!!
-!! PARENTS
-!!      m_chi0
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2268,11 +2190,6 @@ end subroutine make_transitions
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_chi0
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

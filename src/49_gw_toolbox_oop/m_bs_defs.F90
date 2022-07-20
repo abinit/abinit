@@ -12,10 +12,6 @@
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -285,12 +281,6 @@ CONTAINS  !=====================================================================
 !! SIDE EFFECTS
 !!  Bsp<excparam>=All associated pointers are deallocated.
 !!
-!! PARENTS
-!!      m_bethe_salpeter
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine bs_parameters_free(BSp)
@@ -333,12 +323,6 @@ end subroutine bs_parameters_free
 !!
 !! OUTPUT
 !!  Only printing.
-!!
-!! PARENTS
-!!      m_bethe_salpeter
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -505,12 +489,6 @@ end subroutine print_bs_parameters
 !! FUNCTION
 !!  Returns a string with the calculation type.
 !!
-!! PARENTS
-!!      m_bethe_salpeter,m_bs_defs,m_exc_spectra
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine bsp_calctype2str(BSp, str)
@@ -566,12 +544,6 @@ end subroutine bsp_calctype2str
 !!  Trans(:,:)
 !!    input:  allocatable array
 !!    output: Trans(max_nreh,nsppol) stores the correspondence t -> (band,kbz,spin) and the transition energy.
-!!
-!! PARENTS
-!!      m_bethe_salpeter
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -677,8 +649,6 @@ end subroutine init_transitions
 !! OUTPUT
 !!  str(len=500)=The string representing the transition.
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 pure function repr_1trans(Trans, prtvol) result(str)
@@ -721,8 +691,6 @@ end function repr_1trans
 !! OUTPUT
 !!  string(len=500)=The string representing the transition.
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 pure function repr_2trans(Trans1,Trans2,prtvol) result(string)
@@ -763,12 +731,6 @@ end function repr_2trans
 !!
 !! OUTPUT
 !!  Only printing.
-!!
-!! PARENTS
-!!      m_bethe_salpeter
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 

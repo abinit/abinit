@@ -31,10 +31,6 @@
 !! TODO
 !!  This module can be moved to a higher level directory.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -213,11 +209,6 @@ CONTAINS  !=====================================================================
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!      m_melemts,m_sigma_driver
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine melflags_reset(Mflags)
@@ -256,12 +247,6 @@ end subroutine melflags_reset
 !! OUTPUT
 !!  Mflags_out=The new set of flags.
 !!
-!! PARENTS
-!!      m_melemts
-!!
-!! CHILDREN
-!!      my_select_melements
-!!
 !! SOURCE
 
 subroutine melflags_copy(Mflags_in, Mflags_out)
@@ -298,11 +283,11 @@ end subroutine melflags_copy
 !! FUNCTION
 !!  Free all dynamic memory of the database
 !!
-!! PARENTS
-!!      m_sigma_driver
+!! INPUTS
+!!  Mels<melements_t>=The database to be freed
 !!
-!! CHILDREN
-!!      my_select_melements
+!! OUTPUT
+!!  See side effects
 !!
 !! SOURCE
 
@@ -353,12 +338,6 @@ end subroutine melements_free
 !! OUTPUT
 !!  flag_p=Pointer to the integer defining the status of the array, see melflags_t.
 !!  arr_p=The pointer to the array.
-!!
-!! PARENTS
-!!      m_melemts
-!!
-!! CHILDREN
-!!      my_select_melements
 !!
 !! SOURCE
 
@@ -427,12 +406,6 @@ end subroutine my_select_melements
 !!
 !! OUTPUT
 !!  Mels=The initialized database with dimensions and allocated memory.
-!!
-!! PARENTS
-!!      m_vhxc_me
-!!
-!! CHILDREN
-!!      my_select_melements
 !!
 !! SOURCE
 
@@ -558,12 +531,6 @@ end subroutine melements_init
 !! SIDE EFFECTS
 !!  All arrays whose flag is 2, are filled assuming an Hermitian operator.
 !!
-!! PARENTS
-!!      m_vhxc_me
-!!
-!! CHILDREN
-!!      my_select_melements
-!!
 !! SOURCE
 
 subroutine melements_herm(Mels, aname)
@@ -647,12 +614,6 @@ end subroutine melements_herm
 !!  All arrays whose flag==1 are summed within the MPI communicator comm.
 !!  In output the corresponding flas is set to 2.
 !!
-!! PARENTS
-!!      m_vhxc_me
-!!
-!! CHILDREN
-!!      my_select_melements
-!!
 !! SOURCE
 
 subroutine melements_mpisum(Mels, comm, aname)
@@ -709,12 +670,6 @@ end subroutine melements_mpisum
 !!
 !! OUTPUT
 !!  Only writing
-!!
-!! PARENTS
-!!      m_sigma_driver
-!!
-!! CHILDREN
-!!      my_select_melements
 !!
 !! SOURCE
 
@@ -874,12 +829,6 @@ end subroutine melements_print
 !! SIDE EFFECTS
 !!  Mels= All arrays elements connecting states belonging to different irreps are set to zero.
 !!
-!! PARENTS
-!!      m_sigma_driver
-!!
-!! CHILDREN
-!!      my_select_melements
-!!
 !! SOURCE
 
 subroutine melements_zero(Mels, irrep_tab, aname)
@@ -952,8 +901,6 @@ end subroutine melements_zero
 !!  mels<melements_t>=Matrix elements.
 !!  kmesh<kmesh_t>=BZ sampling.
 !!  bands<band_t>=Bands with occupation factors
-!!
-!! PARENTS
 !!
 !! SOURCE
 

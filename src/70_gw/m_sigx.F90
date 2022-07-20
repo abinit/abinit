@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -141,12 +137,6 @@ contains
 !!     where the QP energies are required into complexes. Note however that this approach is not
 !!     based on group theory, and it might lead to spurious results in case of accidental degeneracies.
 !!
-!! PARENTS
-!!      m_sigma_driver
-!!
-!! CHILDREN
-!!
-!! SOURCE
 
 subroutine calc_sigx_me(sigmak_ibz, ikcalc, minbnd, maxbnd, Cryst, QP_BSt, Sigp, Sr, Gsph_x, Vcp, Kmesh, Qmesh, &
                         Ltg_k, Pawtab, Pawang, Paw_pwff, Pawfgrtab, Paw_onsite, Psps, Wfd, Wfdf, &

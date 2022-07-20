@@ -102,12 +102,6 @@ CONTAINS  !=====================================================================
 !! polynomial_conf <type(polynomial_conf)> = datatype with the information for the confinement
 !!                                           polynomial
 !!
-!! PARENTS
-!!      m_effective_potential
-!!
-!! CHILDREN
-!!      xmpi_sum
-!!
 !! SOURCE
 !!
 
@@ -171,12 +165,6 @@ end subroutine polynomial_conf_init
 !! OUTPUT
 !! polynomial_conf <type(polynomial_conf)> = polynomial_conf datatype to be free
 !!
-!! PARENTS
-!!      m_effective_potential,m_polynomial_conf
-!!
-!! CHILDREN
-!!      xmpi_sum
-!!
 !! SOURCE
 
 subroutine polynomial_conf_free(polynomial_conf)
@@ -234,12 +222,6 @@ end subroutine polynomial_conf_free
 !!   energy = contribution to the ifc to the energy
 !!   fcart(3,natom) = contribution to the ifc to the forces
 !!   strten(6) = contribution to the stress tensor
-!!
-!! PARENTS
-!!      m_effective_potential
-!!
-!! CHILDREN
-!!      xmpi_sum
 !!
 !! SOURCE
 

@@ -15,8 +15,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -124,11 +122,6 @@ CONTAINS  !=====================================================================
 !! etotal=total energy (Ha), returned for rdwr=1
 !! === if rdwrpaw/=0 ===
 !!  pawrhoij(my_natom*usepaw) <type(pawrhoij_type)>= paw rhoij occupancies and related data
-!!
-!! PARENTS
-!!      m_gstate,m_outscfcv
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -674,11 +667,6 @@ end subroutine ioarr
 !!
 !!   fform i.e. the integer specification for data type is automatically initialized from varname.
 !!
-!! PARENTS
-!!      cut3d,m_ioarr,m_outscfcv,m_sigma_driver
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine fftdatar_write(varname,path,iomode,hdr,crystal,ngfft,cplex,nfft,nspden,datar,mpi_enreg,ebands)
@@ -876,11 +864,6 @@ end subroutine fftdatar_write
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_dfpt_scfcv,m_scfcv_core
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine fftdatar_write_from_hdr(varname,path,iomode,hdr,ngfft,cplex,nfft,nspden,datar,mpi_enreg,eigen)
@@ -974,13 +957,6 @@ end subroutine fftdatar_write_from_hdr
 !!   if xmpi_comm_size(comm) > 1, nfft represents the number of FFT points treated by this processor,
 !!   and pawrhoij is dimensioned with my_natom
 !!   All the processors inside comm and comm_atom should call this routine.
-!!
-!! PARENTS
-!!      m_dfpt_looppert,m_dfpt_lw,m_dfptnl_loop,m_dvdb,m_gstate,m_longwave
-!!      m_nonlinear,m_pead_nl_loop,m_positron,m_respfn_driver,m_sigma_driver
-!!      m_sigmaph,mrgscr
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1268,10 +1244,6 @@ end subroutine read_rhor
 !!  unit=Fortran unit number (already opened in the caller).
 !!  msg=Error message if ierr /= 0
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 integer function fort_denpot_skip(unit, msg) result(ierr)
@@ -1331,11 +1303,6 @@ end function fort_denpot_skip
 !!  More explicitely:
 !!    We copy denpot_in(istar_in+1:istart_in+nelem,:)
 !!       into denpot_out(istart_out+1:istart_out+nelem,:)
-!!
-!! PARENTS
-!!      m_ioarr
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

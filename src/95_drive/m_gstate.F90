@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -225,13 +221,6 @@ contains
 !!
 !! TODO
 !! Not yet possible to use restartxf in parallel when localrdwf==0
-!!
-!! PARENTS
-!!      m_gstateimg
-!!
-!! CHILDREN
-!!      xderiveread,xderiverrecend,xderiverrecinit,xderivewrecend
-!!      xderivewrecinit,xderivewrite
 !!
 !! SOURCE
 
@@ -1805,13 +1794,6 @@ end subroutine gstate
 !! OUTPUT
 !!  start(3,natom)=copy of starting xred
 !!
-!! PARENTS
-!!      m_gstate
-!!
-!! CHILDREN
-!!      xderiveread,xderiverrecend,xderiverrecinit,xderivewrecend
-!!      xderivewrecinit,xderivewrite
-!!
 !! SOURCE
 
 subroutine setup2(dtset,npwtot,start,wfs,xred)
@@ -1933,13 +1915,6 @@ subroutine setup2(dtset,npwtot,start,wfs,xred)
 !!
 !! OUTPUT
 !!  (only print and write to disk)
-!!
-!! PARENTS
-!!      m_gstate
-!!
-!! CHILDREN
-!!      xderiveread,xderiverrecend,xderiverrecinit,xderivewrecend
-!!      xderivewrecinit,xderivewrite
 !!
 !! SOURCE
 ! CP added fermih to the list of arguments
@@ -2130,13 +2105,6 @@ end subroutine clnup1
 !! OUTPUT
 !!  (data written to unit iout)
 !!
-!! PARENTS
-!!      m_gstate
-!!
-!! CHILDREN
-!!      xderiveread,xderiverrecend,xderiverrecinit,xderivewrecend
-!!      xderivewrecinit,xderivewrite
-!!
 !! SOURCE
 
 subroutine prtxf(gred,iatfix,iout,iwfrc,natom,rprimd,xred)
@@ -2296,13 +2264,6 @@ end subroutine prtxf
 !!
 !! OUTPUT
 !!  (only print)
-!!
-!! PARENTS
-!!      m_gstate
-!!
-!! CHILDREN
-!!      xderiveread,xderiverrecend,xderiverrecinit,xderivewrecend
-!!      xderivewrecinit,xderivewrite
 !!
 !! SOURCE
 
@@ -2528,13 +2489,6 @@ end subroutine clnup2
 !!  xred_old(3,natom)= at input, previous reduced dimensionless atomic coordinates
 !!                     at output, current xred is transferred to xred_old
 !!
-!! PARENTS
-!!      m_gstate
-!!
-!! CHILDREN
-!!      xderiveread,xderiverrecend,xderiverrecinit,xderivewrecend
-!!      xderivewrecinit,xderivewrite
-!!
 !! SOURCE
 
 subroutine pawuj_drive(scfcv_args, dtset,electronpositron,rhog,rhor,rprimd, xred,xred_old)
@@ -2653,13 +2607,6 @@ end subroutine pawuj_drive
 !!  wff2 = structured info for wavefunctions
 !!  xfhist(3,natom+4,2,ab_xfh%mxfh) = (x,f) history array, also including
 !!   rprim and stress
-!!
-!! PARENTS
-!!      m_gstate
-!!
-!! CHILDREN
-!!      xderiveread,xderiverrecend,xderiverrecinit,xderivewrecend
-!!      xderivewrecinit,xderivewrite
 !!
 !! SOURCE
 

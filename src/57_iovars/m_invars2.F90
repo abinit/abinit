@@ -12,10 +12,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -102,15 +98,6 @@ contains
 !! The outputs of this routine are the values of input variables,
 !! their default value is stored at the index 0 of the last dimension
 !! of their multi-dataset representation.
-!!
-!! PARENTS
-!!      m_common
-!!
-!! CHILDREN
-!!      dtset%initocc_chkneu,get_auxc_ixc,get_xclevel,inkpts,intagm,intagm_img
-!!      invacuum,ipi_check_initial_consistency,libxc_functionals_end
-!!      libxc_functionals_get_hybridparams,libxc_functionals_init,sort_int
-!!      timab,wrtout
 !!
 !! SOURCE
 
@@ -227,15 +214,6 @@ end subroutine invars2m
 !! that contains all information from the input file,
 !! in a compressed, standardized, format
 !! At the input, they already contain a default value.
-!!
-!! PARENTS
-!!      m_invars2
-!!
-!! CHILDREN
-!!      dtset%initocc_chkneu,get_auxc_ixc,get_xclevel,inkpts,intagm,intagm_img
-!!      invacuum,ipi_check_initial_consistency,libxc_functionals_end
-!!      libxc_functionals_get_hybridparams,libxc_functionals_init,sort_int
-!!      timab,wrtout
 !!
 !! SOURCE
 

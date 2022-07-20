@@ -128,13 +128,6 @@ CONTAINS  !=====================================================================
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_outscfcv
-!!
-!! CHILDREN
-!!      destroy_mpi_enreg,hdr%free,hdr_fort_read,hdr%ncread
-!!      kramerskronig,matrginv,metric
-!!
 !! SOURCE
 
  subroutine optics_paw(atindx1,cg,cprj,dimcprj,dtfil,dtset,eigen0,gprimd,hdr,kg,&
@@ -826,13 +819,6 @@ CONTAINS  !=====================================================================
 !! OUTPUT
 !!  (only writing in a file)
 !!
-!! PARENTS
-!!      m_outscfcv
-!!
-!! CHILDREN
-!!      destroy_mpi_enreg,hdr%free,hdr_io,hdr_read_from_fname,initmpi_seq
-!!      kramerskronig,matrginv,metric
-!!
 !! SOURCE
 
  subroutine optics_paw_core(atindx1,cprj,dimcprj,dtfil,dtset,eigen0,filpsp,hdr,&
@@ -1516,13 +1502,6 @@ CONTAINS  !=====================================================================
 !! NOTES
 !!  This routine is not tested
 !!
-!! PARENTS
-!!      conducti
-!!
-!! CHILDREN
-!!      hdr%free,hdr_io,hdr_read_from_fname,initmpi_seq
-!!      kramerskronig,matrginv,metric,wffopen
-!!
 !! SOURCE
 
  subroutine linear_optics_paw(filnam,filnam_out)
@@ -1854,12 +1833,6 @@ CONTAINS  !=====================================================================
 !!    So, we store only 2 components.
 !! If Phi_j is polarized, the spin component is included in the last dimension of
 !!   phisocphj(iat)%value, i.e. lmn_size_cor=2*lmn_size
-!!
-!! PARENTS
-!! optics_paw,optics_paw_core
-!!
-!! CHILDREN
-!! nderiv_gen,simp_gen,pawrad_deducer0
 !!
 !! SOURCE
 

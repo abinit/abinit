@@ -13,10 +13,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -151,11 +147,6 @@ contains
 !! ---------------------------
 !!    - Only the usual FFT grid (defined by ecut) is used. It is defined by nfft, ngfft, mgfft, ...
 !!      For compatibility reasons, (nfftf,ngfftf,mgfftf) are set equal to (nfft,ngfft,mgfft) in that case.
-!!
-!! PARENTS
-!!      m_driver
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1579,11 +1570,6 @@ end subroutine screening
 !!  %ecuteps, %npweps
 !!   might be redefined in setshells in order to close the shell.
 !!
-!! PARENTS
-!!      m_screening_driver
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine setup_screening(codvsn,acell,rprim,wfk_fname,Dtset,Psps,Pawtab,&
@@ -2200,11 +2186,6 @@ end subroutine setup_screening
 !! keep_ur(Ep%nbnds,Kmesh%nibz,Sigp%nsppol)=True if this node will store this state in real space.
 !! ierr=Exit status.
 !!
-!! PARENTS
-!!      m_screening_driver
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine chi0_bksmask(Dtset,Ep,Kmesh,nbvw,nbcw,my_rank,nprocs,bks_mask,keep_ur,ierr)
@@ -2334,11 +2315,6 @@ end subroutine chi0_bksmask
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
-!!      m_screening_driver
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2547,11 +2523,6 @@ end subroutine random_stopping_power
 !!  spaceComm=MPI communicator.
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_screening_driver
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

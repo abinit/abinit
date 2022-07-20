@@ -170,10 +170,6 @@ contains
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine clib_print_mallinfo(unit)
@@ -211,11 +207,6 @@ end subroutine clib_print_mallinfo
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      isfile
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

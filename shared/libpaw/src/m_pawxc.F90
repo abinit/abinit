@@ -128,12 +128,6 @@ CONTAINS !===========================================================
 !!         [4] M.J. Puska, A.P. Seitsonen and R.M. Nieminen, Phys. Rev. B 52, 10947 (1994) [[cite:Puska1994]].
 !!         [5] B. Barbiellini, M.J. Puska, T. Torsti and R.M.Nieminen, Phys. Rev. B 51, 7341 (1995) [[cite:Barbiellini1995]]
 !!
-!! PARENTS
-!!      m_pawxc
-!!
-!! CHILDREN
-!!      rotate_back_mag_dfpt
-!!
 !! SOURCE
 
 subroutine pawxc_xcpositron_wrapper(fnxc,grhoe2,ixcpositron,ngr,npt,posdensity0_limit,&
@@ -171,12 +165,6 @@ contains
 !! FUNCTION
 !!  ABINIT version of electron-positron correlation
 !!
-!! PARENTS
-!!      m_pawxc
-!!
-!! CHILDREN
-!!      rotate_back_mag_dfpt
-!!
 !! SOURCE
 
 subroutine pawxc_xcpositron_abinit()
@@ -207,12 +195,6 @@ end subroutine pawxc_xcpositron_abinit
 !! FUNCTION
 !!  Local version of electron-positron correlation (to use outside ABINIT)
 !!  NOT AVAILABLE
-!!
-!! PARENTS
-!!      m_pawxc
-!!
-!! CHILDREN
-!!      rotate_back_mag_dfpt
 !!
 !! SOURCE
 
@@ -263,12 +245,6 @@ end subroutine pawxc_xcpositron_wrapper
 !!  [ndvxc]= size of the array dvxc(npts,ndvxc) (second derivatives of Exc wrt to density and gradient)
 !!  [nd2vxc]= size of the array d2vxc(npts,nd2vxc) (third derivatives of Exc wrt density)
 !!
-!! PARENTS
-!!      m_pawxc
-!!
-!! CHILDREN
-!!      rotate_back_mag_dfpt
-!!
 !! SOURCE
 
 subroutine pawxc_size_dvxc_wrapper(ixc,order,nspden,&
@@ -313,12 +289,6 @@ contains
 !!
 !! FUNCTION
 !!  Local version of size_dvxc routine (to use outside ABINIT)
-!!
-!! PARENTS
-!!      m_pawxc
-!!
-!! CHILDREN
-!!      rotate_back_mag_dfpt
 !!
 !! SOURCE
 
@@ -453,12 +423,6 @@ end subroutine pawxc_size_dvxc_wrapper
 !!    rhonow(:,:,2:4) has been multiplied by the proper factor,
 !!    described above.
 !!
-!! PARENTS
-!!      m_pawxc
-!!
-!! CHILDREN
-!!      rotate_back_mag_dfpt
-!!
 !! SOURCE
 
 subroutine pawxc_xcmult_wrapper(depsxc,nfft,ngrad,nspden,nspgrad,rhonow)
@@ -489,12 +453,6 @@ contains
 !!
 !! FUNCTION
 !!  Local version of xcmult routine (to use outside ABINIT)
-!!
-!! PARENTS
-!!      m_pawxc
-!!
-!! CHILDREN
-!!      rotate_back_mag_dfpt
 !!
 !! SOURCE
 
@@ -563,12 +521,6 @@ end subroutine pawxc_xcmult_wrapper
 !!     either on the unshifted grid (if ishift==0,
 !!     then equal to rhor),or on the shifted grid
 !!
-!! PARENTS
-!!      m_pawxc
-!!
-!! CHILDREN
-!!      rotate_back_mag_dfpt
-!!
 !! SOURCE
 
 subroutine pawxc_mkdenpos_wrapper(iwarn,nfft,nspden,option,rhonow,xc_denpos)
@@ -600,12 +552,6 @@ contains
 !!
 !! FUNCTION
 !!  Local version of mkdenpos routine (to use outside ABINIT)
-!!
-!! PARENTS
-!!      m_pawxc
-!!
-!! CHILDREN
-!!      rotate_back_mag_dfpt
 !!
 !! SOURCE
 
@@ -919,12 +865,6 @@ end function pawxc_get_uselaplacian
 !!                          k3xc(:,2)=d3Exc/drho_up drho_up drho_dn
 !!                          k3xc(:,3)=d3Exc/drho_up drho_dn drho_dn
 !!                          k3xc(:,4)=d3Exc/drho_dn drho_dn drho_dn
-!!
-!! PARENTS
-!!      m_paw_denpot,m_pawpsp
-!!
-!! CHILDREN
-!!      rotate_back_mag_dfpt
 !!
 !! SOURCE
 subroutine pawxc(corexc,enxc,enxcdc,hyb_mixing,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3xc,non_magnetic_xc,&
@@ -1813,12 +1753,6 @@ end subroutine pawxc
 !! SIDE EFFECTS
 !!  electronpositron <type(electronpositron_type)>=quantities for the electron-positron annihilation
 !!
-!! PARENTS
-!!      m_paw_denpot
-!!
-!! CHILDREN
-!!      rotate_back_mag_dfpt
-!!
 !! SOURCE
 
 subroutine pawxcpositron(calctype,corexc,enxc,enxcdc,ixcpositron,lm_size,lmselect,lmselect_ep,&
@@ -2122,12 +2056,6 @@ end subroutine pawxcpositron
 !!       kxc(:,19)=gradz(rho_dn)
 !!    if nspden==4:
 !!       kxc(:,20:22)= (m_x, m_y, m_z) (magnetization)
-!!
-!! PARENTS
-!!      m_paw_denpot,m_paw_dfpt
-!!
-!! CHILDREN
-!!      rotate_back_mag_dfpt
 !!
 !! SOURCE
 
@@ -2977,12 +2905,6 @@ end subroutine pawxc_dfpt
 !!                  kxc(:,2)=d2Exc/drho_up drho_dn
 !!                  kxc(:,3)=d2Exc/drho_dn drho_dn
 !!
-!! PARENTS
-!!      m_pawxc
-!!
-!! CHILDREN
-!!      rotate_back_mag_dfpt
-!!
 !! SOURCE
 
  subroutine pawxcsph(exc,exexch,hyb_mixing,ixc,kxc,nkxc,nrad,nspden,pawrad,rho_updn,vxc,xclevel)
@@ -3249,11 +3171,6 @@ end subroutine pawxcsph
 !!
 !! OUTPUT
 !!  vxc1((nrad,nspden)= XC 1st-order potential
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      rotate_back_mag_dfpt
 !!
 !! SOURCE
 
@@ -3562,12 +3479,6 @@ end subroutine pawxcsph_dfpt
 !!  vxce(nrad)= electron-positron XC potential for the electron
 !!  vxcp(nrad)= electron-positron XC potential for the positron
 !!
-!! PARENTS
-!!      m_pawxc
-!!
-!! CHILDREN
-!!      rotate_back_mag_dfpt
-!!
 !! SOURCE
 
  subroutine pawxcsphpositron(calctype,fxc,ixcpositron,nrad,pawrad,posdensity0_limit,rho,rho_ep,vxce,vxcp)
@@ -3682,12 +3593,6 @@ end subroutine pawxcsphpositron
 !!  sum1(cplexsum*nrad,nsums)=first order sums
 !!  === if option>=2
 !!    sum2(cplexsum*nrad,lm_size,nsums)=second order sums
-!!
-!! PARENTS
-!!      m_pawxc,m_positron
-!!
-!! CHILDREN
-!!      rotate_back_mag_dfpt
 !!
 !! SOURCE
 
@@ -4063,12 +3968,6 @@ end subroutine pawxcsphpositron
 !!       kxc(:,19)=gradz(rho_dn)
 !!    if nspden==4:
 !!       kxc(:,20:22)= (m_x, m_y, m_z) (magnetization)
-!!
-!! PARENTS
-!!      m_paw_denpot,m_pawpsp
-!!
-!! CHILDREN
-!!      rotate_back_mag_dfpt
 !!
 !! SOURCE
 
@@ -4856,12 +4755,6 @@ end subroutine pawxcsphpositron
 !!      Unused if option==2
 !!      Input  if option==3
 !!
-!! PARENTS
-!!      m_paw_denpot,m_paw_dfpt
-!!
-!! CHILDREN
-!!      rotate_back_mag_dfpt
-!!
 !! SOURCE
 
  subroutine pawxcm_dfpt(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselect,nhat1,&
@@ -5205,12 +5098,6 @@ end subroutine pawxcsphpositron
 !!       (spin up in 1st half and spin-down in 2nd half if nspden=2)
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_paw_denpot
-!!
-!! CHILDREN
-!!      rotate_back_mag_dfpt
 !!
 !! SOURCE
 
@@ -5706,12 +5593,6 @@ end subroutine pawxcmpositron
 !!    if nspden==4:
 !!       kxc(:,20:22)= (m_x, m_y, m_z) (magnetization)
 !!
-!! PARENTS
-!!      m_nonlinear,m_pawxc,m_respfn_driver
-!!
-!! CHILDREN
-!!      rotate_back_mag_dfpt
-!!
 !! SOURCE
 
  subroutine pawxc_get_nkxc(nkxc,nspden,xclevel)
@@ -5767,12 +5648,6 @@ end subroutine pawxcmpositron
 !! Probably use better interfaces of fortran 2003 to avoid
 !! numerous if/then sentences.
 !!
-!! PARENTS
-!!      m_pawxc
-!!
-!! CHILDREN
-!!      rotate_back_mag_dfpt
-!!
 !! SOURCE
 
  subroutine pawxc_drivexc_wrapper(hyb_mixing,ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
@@ -5826,12 +5701,6 @@ contains
 !!
 !! FUNCTION
 !!  ABINIT version of XC driving routine
-!!
-!! PARENTS
-!!      m_pawxc
-!!
-!! CHILDREN
-!!      rotate_back_mag_dfpt
 !!
 !! SOURCE
 
@@ -5901,12 +5770,6 @@ end subroutine pawxc_drivexc_abinit
 !!
 !! FUNCTION
 !!  LibXC version of XC driving routine
-!!
-!! PARENTS
-!!      m_pawxc
-!!
-!! CHILDREN
-!!      rotate_back_mag_dfpt
 !!
 !! SOURCE
 
@@ -6024,12 +5887,6 @@ end subroutine pawxc_drivexc_wrapper
 !! OUTPUT
 !!  rho_out(vectsize,2)=output (projected, collinear) density
 !!  [mag_norm_out(vectsize)]= --optional-- norm of mag(:) at each point of the grid
-!! PARENTS
-!!      m_pawxc
-!!
-!! CHILDREN
-!!      rotate_back_mag_dfpt
-!!
 !! SOURCE
 
  subroutine pawxc_rotate_mag(rho_in,rho_out,mag,vectsize,mag_norm_out,rho_out_format)
@@ -6114,12 +5971,6 @@ end subroutine pawxc_rotate_mag
 !! OUTPUT
 !!  vxc_out(vectsize,4)=output non-collinear XC potential
 !!
-!! PARENTS
-!!      m_pawxc
-!!
-!! CHILDREN
-!!      rotate_back_mag_dfpt
-!!
 !! SOURCE
 
  subroutine pawxc_rotate_back_mag(vxc_in,vxc_out,mag,vectsize)
@@ -6186,12 +6037,6 @@ end subroutine pawxc_rotate_back_mag
 !!
 !! OUTPUT
 !!  vxc1_out(vectsize,4)=output 1st-order non-collinear XC potential
-!!
-!! PARENTS
-!!      m_pawxc
-!!
-!! CHILDREN
-!!      rotate_back_mag_dfpt
 !!
 !! SOURCE
 

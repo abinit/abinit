@@ -22,8 +22,6 @@
 !!  8) Perform more benchmarks with dense meshes to detect hotspots and memory bottlenecks
 !!  9) Test spin and SOC
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -483,10 +481,6 @@ contains  !=====================================================
 !! FUNCTION
 !!  Free the dynamic memory in a <phgamma_t> datatype
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine phgamma_free(gams)
@@ -535,11 +529,6 @@ end subroutine phgamma_free
 !!
 !! OUTPUT
 !! gams<phgamma_t>
-!!
-!! PARENTS
-!!      m_phgamma
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -638,11 +627,6 @@ end subroutine phgamma_init
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_phgamma
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine phgamma_ncwrite(gams, cryst, ifc, ncid)
@@ -729,11 +713,6 @@ end subroutine phgamma_ncwrite
 !! qpt(3)=phonon wavevector in reduced coordinates.
 !! cryst<crystal_t>=Crystalline structure.
 !!
-!! PARENTS
-!!      m_phgamma
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine tgamma_symm(cryst, qpt, tgamma)
@@ -813,10 +792,6 @@ end subroutine tgamma_symm
 !!  If nsppol == 1 and nspinor == 1, lambda and gamma are already summed over the two equivalent spin channels.
 !!  If nsppol == 2, lambda and gamma are the particual contributions given by the input spin index.
 !!  Client code is responsible for assembling the final observables by summing over spins.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -913,10 +888,6 @@ end subroutine phgamma_eval_qibz
 !!  lamda_ph(3*natom)=Lambda coefficients for the different phonon modes.
 !!  phfrq(3*natom)=phonon frequencies at current q
 !!  displ_cart(2,3,natom,3*natom) = Phonon displacement in Cartesian coordinates
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1021,10 +992,6 @@ end subroutine phgamma_interp
 !!  This routines prepares the internal tables used to interpolate the linewidths in q-space
 !!
 !! INPUTS
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1148,11 +1115,6 @@ end subroutine phgamma_interp_setup
 !!  lambda_in_ph(gams%natom3)=Phonon linewidths.
 !!  lambda_out_ph(gams%natom3)=Phonon linewidths.
 !!
-!! PARENTS
-!!      m_phgamma
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine phgamma_vv_eval_qibz(gams, cryst, ifc, iq_ibz, spin, phfrq, gamma_in_ph, gamma_out_ph, lambda_in_ph, lambda_out_ph)
@@ -1247,10 +1209,6 @@ end subroutine phgamma_vv_eval_qibz
 !!  gamma_ph(gams%natom3)=Interpolated Phonon linewidths.
 !!  lamda_ph(3*natom)=Lambda coefficients for the different phonon modes.
 !!  phfrq(3*natom)=phonon frequencies at current q
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1369,11 +1327,6 @@ end subroutine phgamma_vv_interp
 !!
 !! SIDE EFFECTS
 !!  gams<phgamma_t>= gams%vals_in_rpt, etc... depending on action.
-!!
-!! PARENTS
-!!      m_phgamma
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1495,10 +1448,6 @@ end subroutine phgamma_vv_interp_setup
 !!
 !! OUTPUT
 !!  wminmax=Minimum and max phonon frequency obtained on the path (Hartree units)
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1676,10 +1625,6 @@ end subroutine phgamma_linwid
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine a2fw_free(a2f)
@@ -1731,11 +1676,6 @@ end subroutine a2fw_free
 !!
 !! OUTPUT
 !!  a2f<a2fw_t>=Structure storing the Eliashberg function a2F(w).
-!!
-!! PARENTS
-!!      m_phgamma
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2191,10 +2131,6 @@ end subroutine a2fw_init
 !!  a2fw_get_moment = \int dw [a2F(w)/w] w^n
 !!  [out_int(x)] = \int^{x} dw [a2F(w)/w] w^n
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 real(dp) function a2fw_get_moment(a2f, nn, spin, out_int)
@@ -2273,10 +2209,6 @@ end function a2fw_get_moment
 !!  a2fw_tr_moment = \int dw [a2F_tr(w)/w] w^n
 !!  [out_int(x)] = \int^{x} dw [a2F_tr(w)/w] w^n
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 function a2fw_tr_moment(a2f_tr, nn, spin, out_int)
@@ -2345,10 +2277,6 @@ end function a2fw_tr_moment
 !!
 !! OUTPUT
 !!  Output is written to file. This routine should be called by one MPI proc.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2489,11 +2417,6 @@ end subroutine a2fw_write
 !! OUTPUT
 !!  Output is written to file. This routine should be called by one MPI proc.
 !!
-!! PARENTS
-!!      m_phgamma
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine a2fw_ee_write(a2f, basename)
@@ -2591,10 +2514,6 @@ end subroutine a2fw_ee_write
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine a2fw_tr_free(a2f_tr)
@@ -2648,11 +2567,6 @@ end subroutine a2fw_tr_free
 !!
 !! OUTPUT
 !!  a2f_tr<a2fw_tr_t>=Structure storing the Eliashberg transport function a2F_tr(w).
-!!
-!! PARENTS
-!!      m_phgamma
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2987,10 +2901,6 @@ end subroutine a2fw_tr_init
 !! OUTPUT
 !!  Output is written to file. This routine should be called by one MPI proc.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine a2fw_tr_write(a2f_tr, basename, post, ncid)
@@ -3167,11 +3077,6 @@ end subroutine a2fw_tr_write
 !! comm=MPI communicator.
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_eph_driver
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -4410,11 +4315,6 @@ end subroutine eph_phgamma
 !!
 !! FUNCTION
 !!
-!! PARENTS
-!!      m_phgamma
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine phgamma_setup_qpoint(gams, fs, cryst, ebands, spin, ltetra, qpt, nesting, comm)
@@ -4676,11 +4576,6 @@ end subroutine phgamma_setup_qpoint
 !! FUNCTION
 !!  Use bisection to find the optimal energy window around the Fermi level
 !!
-!! PARENTS
-!!      abitk
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine find_ewin(nqibz, qibz, cryst, ebands, ltetra, fs_ewin, comm)
@@ -4802,11 +4697,6 @@ end subroutine find_ewin
 !!
 !! FUNCTION
 !!  Compute Tetrahedron weights for the double delta.
-!!
-!! PARENTS
-!!      m_phgamma
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

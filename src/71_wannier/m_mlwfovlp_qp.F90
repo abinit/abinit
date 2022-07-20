@@ -12,10 +12,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -103,12 +99,6 @@ contains
 !!   or inaccuracies may result.
 !!  This is at best a beta version of this code, with little consistency
 !!   checking, so the user must be very careful or the results may be invalid.
-!!
-!! PARENTS
-!!      m_outscfcv
-!!
-!! CHILDREN
-!!      pawcprj_alloc,pawcprj_free
 !!
 !! SOURCE
 
@@ -550,12 +540,6 @@ end subroutine mlwfovlp_qp
 !!
 !! TODO
 !! To be moved to cprj_utils, although here we use complex variables.
-!!
-!! PARENTS
-!!      m_mlwfovlp_qp
-!!
-!! CHILDREN
-!!      pawcprj_alloc,pawcprj_free
 !!
 !! SOURCE
 !!

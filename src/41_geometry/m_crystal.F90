@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -294,15 +290,6 @@ CONTAINS  !=====================================================================
 !!  5) constraints for the relaxation
 !!  6) Likely I will need also info on the electric field and berryopt
 !!
-!! PARENTS
-!!      m_crystal,m_ddb,m_dfpt_looppert,m_effective_potential
-!!      m_effective_potential_file,m_eig2d,m_gwls_hamiltonian,m_hdr,m_outscfcv
-!!      m_precpred_1geo,m_respfn_driver,m_tdep_abitypes,m_unittests,m_vtorho
-!!      optic
-!!
-!! CHILDREN
-!!      atomdata_from_znucl
-!!
 !! SOURCE
 
 subroutine crystal_init(amu,Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typat,xred,&
@@ -501,10 +488,6 @@ end subroutine crystal_init
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 type(crystal_t) function crystal_without_symmetries(self) result(new)
@@ -532,11 +515,6 @@ end function crystal_without_symmetries
 !!
 !! FUNCTION
 !!  Destroy the dynamic arrays in a crystal_t data type.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      atomdata_from_znucl
 !!
 !! SOURCE
 
@@ -588,10 +566,6 @@ end subroutine crystal_free
 !!  [header]=Optional header message.
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -694,11 +668,6 @@ end function crystal_compare
 !! OUTPUT
 !!  Only printing
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      atomdata_from_znucl
-!!
 !! SOURCE
 
 subroutine crystal_print(Cryst, header, unit, mode_paral, prtvol)
@@ -792,11 +761,6 @@ end subroutine crystal_print
 !! OUTPUT
 !!  Only printing
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      atomdata_from_znucl
-!!
 !! SOURCE
 
 subroutine crystal_print_abivars(cryst, unit)
@@ -865,13 +829,6 @@ end subroutine crystal_print_abivars
 !! OUTPUT
 !! symbols = array with the symbol of each atoms
 !!
-!! PARENTS
-!!      m_effective_potential_file,m_fit_polynomial_coeff,m_opt_effpot
-!!      m_polynomial_coeff
-!!
-!! CHILDREN
-!!      atomdata_from_znucl
-!!
 !! SOURCE
 
 subroutine symbols_crystal(natom,ntypat,npsp,symbols,typat,znucl)
@@ -926,10 +883,6 @@ end subroutine symbols_crystal
 !! FUNCTION
 !!  Return the index of the spatial inversion, 0 if not present
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 pure function idx_spatial_inversion(Cryst) result(inv_idx)
@@ -964,10 +917,6 @@ end function idx_spatial_inversion
 !! FUNCTION
 !!  Returns .TRUE. if space group is symmorphic, i.e. all fractional translations are zero.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 pure function isymmorphic(Cryst) result(ans)
@@ -993,10 +942,6 @@ end function isymmorphic
 !! FUNCTION
 !!  Returns .TRUE. if we are using alchemical pseudopotentials
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 pure logical function isalchemical(Cryst) result(ans)
@@ -1019,8 +964,6 @@ end function isalchemical
 !!
 !! FUNCTION
 !!  Return atomic data from the itypat index
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -1046,8 +989,6 @@ end function adata_type
 !!
 !! FUNCTION
 !!  Return the atomic symbol from the itypat index
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -1079,8 +1020,6 @@ end function symbol_type
 !!
 !! FUNCTION
 !!  Return the atomic symbol from the iatom index
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -1117,11 +1056,6 @@ end function symbol_iatom
 !!  ptg_symrel(3,3,ptg_nsym)=Rotations in real space
 !!  ptg_symrec(3,3,ptg_nsym)=Rotations in reciprocal space
 !!  has_inversion=True if spatial inversion is present in the point group.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      atomdata_from_znucl
 !!
 !! SOURCE
 
@@ -1219,13 +1153,6 @@ end subroutine crystal_point_group
 !!
 !! NOTES
 !!  Alchemy not treated, since crystal should be initialized at the beginning of the run.
-!!
-!! PARENTS
-!!      anaddb,eig2tot,exc_spectra,dfpt_looppert,m_haydock,m_phonons,m_shirley
-!!      outscfcv,sigma
-!!
-!! CHILDREN
-!!      atomdata_from_znucl
 !!
 !! SOURCE
 
@@ -1362,10 +1289,6 @@ end function crystal_ncwrite
 !! OUTPUT
 !!  Only writing
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 integer function crystal_ncwrite_path(crystal, path) result(ncerr)
@@ -1409,12 +1332,6 @@ end function crystal_ncwrite_path
 !! OUTPUT
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_outscfcv
-!!
-!! CHILDREN
-!!      atomdata_from_znucl
 !!
 !! SOURCE
 
@@ -1549,12 +1466,6 @@ end subroutine prt_cif
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_crystal
-!!
-!! CHILDREN
-!!      atomdata_from_znucl
-!!
 !! SOURCE
 
 subroutine symrel2string(symrel1, tnon, string)
@@ -1627,12 +1538,6 @@ end subroutine symrel2string
 !!
 !! OUTPUTS
 !!   Only files written
-!!
-!! PARENTS
-!!      m_afterscfloop
-!!
-!! CHILDREN
-!!      atomdata_from_znucl
 !!
 !! SOURCE
 
@@ -1751,10 +1656,6 @@ end subroutine prtposcar
 !!  time_opt=Prefactor that defines how the vectors transforms under TR. Usually +1 or -1
 !!      Note that TR is used only if cryst%timrev == 2. time_opt = 0 disables TR for testing purposes.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 function crystal_symmetrize_cart_vec3(cryst, v, time_opt) result(vsum)
@@ -1802,10 +1703,6 @@ end function crystal_symmetrize_cart_vec3
 !!  v(3)=Vector in Cartesian coordinates.
 !!  time_opt=Prefacator that defines how the vectors transforms under TR. Usually +1 or -1
 !!      Note that TR is used only if cryst%timrev == 2. time_opt = 0 disables TR for testing purposes.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

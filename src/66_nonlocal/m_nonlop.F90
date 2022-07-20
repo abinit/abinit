@@ -10,10 +10,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -323,15 +319,6 @@ contains
 !! NOTES
 !! * See nonlop_pl and nonlop_ylm to have more comments...
 !! * In the case signs=1, the array vectout is not used.
-!!
-!! PARENTS
-!!      m_cgwf,m_d2frnl,m_dfpt_scfcv,m_dfptnl_pert,m_dft_energy,m_fock_getghc
-!!      m_forstr,m_getchc,m_getgh1c,m_getgh2c,m_getghc,m_invovl,m_lobpcgwf
-!!      m_nonlop_test,m_orbmag,m_pead_nl_loop,m_prep_kgb,m_rf2,m_rmm_diis
-!!      m_vtowfk,m_wfd
-!!
-!! CHILDREN
-!!      dotprod_g,gpu_nonlop
 !!
 !! SOURCE
 
@@ -967,12 +954,6 @@ end subroutine nonlop
 !! TODO
 !! * Implementation for spinorial wave functions (nspinor=2)
 !! * Implementation for response function (phonons, ddk, elastic tensor, ...)
-!!
-!! PARENTS
-!!      m_nonlop
-!!
-!! CHILDREN
-!!      dotprod_g,gpu_nonlop
 !!
 !! SOURCE
 

@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -79,10 +75,6 @@ contains
 !!  tdks <type(tdks_type)> = the tdks object to initialize
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 subroutine rttddft_output(dtfil, dtset, istep, mpi_enreg, psps, tdks)
@@ -207,10 +199,6 @@ end subroutine rttddft_output
 !!
 !! SIDE EFFECTS
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 subroutine prt_eig(dtfil, dtset, istep, mpi_enreg, tdks)
 
@@ -273,10 +261,6 @@ end subroutine prt_eig
 !!  tdks <type(tdks_type)> = the tdks object to initialize
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 subroutine prt_occ(dtfil, dtset, istep, mpi_enreg, tdks)
@@ -383,10 +367,6 @@ end subroutine prt_occ
 !!  tdks <type(tdks_type)> = the tdks object to initialize
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 subroutine prt_den(dtfil, dtset, istep, mpi_enreg, psps, tdks)
@@ -499,10 +479,6 @@ end subroutine prt_den
 !!  tdks <type(tdks_type)> = the tdks object to initialize
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 subroutine prt_dos(dtfil, dtset, istep, mpi_enreg, psps, tdks)
@@ -640,10 +616,6 @@ end subroutine prt_dos
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 subroutine prt_wfk(dtfil, dtset, istep, mpi_enreg, psps, tdks, force_write)
 
@@ -708,10 +680,6 @@ end subroutine prt_wfk
 !!  tdks <type(tdks_type)> = the tdks object to initialize
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 subroutine prt_restart(dtfil, istep, mpi_enreg, tdks)
