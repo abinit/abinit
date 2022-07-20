@@ -745,8 +745,8 @@ subroutine gaps_print(gaps, unit, header, kTmesh, mu_e)
    call wrtout(unt, msg)
    write(msg, "(a,f9.3,2a)")" Direct gap:     ", opt_gap * Ha_eV," (eV) at k: ", trim(ktoa(gaps%optical_kpoints(:,spin)))
    call wrtout(unt, msg)
-   write(msg, "((2(a, f9.3)))")" Fermi level:", gaps%fermie * Ha_eV, " (eV) with nelect:", gaps%nelect
-   call wrtout(unt, msg)
+   !write(msg, "((2(a, f9.3)))")" Fermi level:", gaps%fermie * Ha_eV, " (eV) with nelect:", gaps%nelect
+   !call wrtout(unt, msg)
 
    if (present(mu_e) .and. present(kTmesh) .and. all(gaps%ierr == 0)) then
      ntemp = size(mu_e)
@@ -2476,14 +2476,9 @@ subroutine ebands_update_occ(ebands, spinmagntarget, stmbias, prtvol)
    ABI_MALLOC(occ, (mband*nkpt*nsppol))
    ABI_MALLOC(doccde, (mband*nkpt*nsppol))
 
-   ! CP modified
-   !call newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,ebands%nband,&
-   ! ebands%nelect,ebands%nkpt,ebands%nspinor,ebands%nsppol,occ,ebands%occopt,&
-   ! my_prtvol,stmbias_local,ebands%tphysel,ebands%tsmear,ebands%wtk)
    call newocc(doccde,eigen,entropy,fermie,fermih,ebands%ivalence,spinmagntarget,mband,ebands%nband,&
      ebands%nelect,ebands%ne_qFD,ebands%nh_qFD,ebands%nkpt,ebands%nspinor,ebands%nsppol,occ,ebands%occopt,&
      my_prtvol,stmbias_local,ebands%tphysel,ebands%tsmear,ebands%wtk)
-   !End CP modified
 
    ! Save output in ebands%.
    ebands%entropy = entropy
@@ -2513,7 +2508,6 @@ subroutine ebands_update_occ(ebands, spinmagntarget, stmbias, prtvol)
      ebands%occ(1:mband,:,:) = maxocc
      !ABI_ERROR("Occupation factors are not initialized, likely due to scf = -2")
    end if
-
 
    ! Calculate the valence index for each spin channel.
    do spin=1,ebands%nsppol
@@ -2548,7 +2542,7 @@ subroutine ebands_update_occ(ebands, spinmagntarget, stmbias, prtvol)
      end if
    end if
 
-   ! Save results. Here I dont know if it is better to be consistent with the abinit convention i.e fermi=vtop
+   ! Save results. Here I dont know if it is better to be consistent with the abinit convention i.e fermi = vtop
    ebands%entropy = zero
    ebands%fermie = (vtop + cbot) / 2
    if (ABS(cbot - vtop) < tol4) ebands%fermie = vtop ! To avoid error on the last digit
@@ -2574,7 +2568,7 @@ subroutine ebands_update_occ(ebands, spinmagntarget, stmbias, prtvol)
  end if
 
  if (ABS(ndiff) > 5.d-2*ebands%nelect) then
-   write(msg,'(2a,2(a,es12.4))')&
+   write(msg,'(2a,2(a,es12.4))') &
     'Too large difference in number of electrons:,',ch10,&
     'Expected = ',ebands%nelect,' Calculated = ',sum(nelect_spin)
    ABI_ERROR(msg)

@@ -350,15 +350,15 @@ subroutine em1results_print(Er,unit,prtvol,mode_paral)
  ! === chi0 or \epsilon^{-1} ? ===
  SELECT CASE (Er%ID)
  CASE (0)
-   rfname='Undefined'
+   rfname = 'Undefined'
  CASE (1)
-   rfname='Irreducible Polarizability'
+   rfname = 'Irreducible Polarizability'
  CASE (2)
-   rfname='Polarizability'
+   rfname = 'Polarizability'
  CASE (3)
-   rfname='Symmetrical Dielectric Matrix'
+   rfname = 'Symmetrical Dielectric Matrix'
  CASE (4)
-   rfname='Symmetrical Inverse Dielectric Matrix'
+   rfname = 'Symmetrical Inverse Dielectric Matrix'
  CASE DEFAULT
    ABI_BUG(sjoin('Wrong Er%ID:',itoa(Er%ID)))
  END SELECT
@@ -419,12 +419,12 @@ subroutine em1results_print(Er,unit,prtvol,mode_paral)
 &  '  Time-Ordering ................... ',TRIM(rforder),ch10
  call wrtout(unt,msg,mode)
  write(msg,'(a,2i4,a,3(a,i4,a),a,3i4,2a,i4,a)')&
-&  '  Number of components ............ ',Er%nI,Er%nJ,ch10,&
-&  '  Number of q-points in the IBZ ... ',Er%nqibz,ch10,&
-&  '  Number of q-points for q-->0 .... ',Er%nqlwl,ch10,&
-&  '  Number of G-vectors ............. ',Er%npwe,ch10,&
-&  '  Number of frequencies ........... ',Er%nomega,Er%nomega_r,Er%nomega_i,ch10,&
-&  '  Value of mqmem .................. ',Er%mqmem,ch10
+   '  Number of components ............ ',Er%nI,Er%nJ,ch10,&
+   '  Number of q-points in the IBZ ... ',Er%nqibz,ch10,&
+   '  Number of q-points for q-->0 .... ',Er%nqlwl,ch10,&
+   '  Number of G-vectors ............. ',Er%npwe,ch10,&
+   '  Number of frequencies ........... ',Er%nomega,Er%nomega_r,Er%nomega_i,ch10,&
+   '  Value of mqmem .................. ',Er%mqmem,ch10
  call wrtout(unt,msg,mode)
 
  if (Er%nqlwl/=0) then
@@ -436,7 +436,8 @@ subroutine em1results_print(Er,unit,prtvol,mode_paral)
    end do
  end if
 
- if (my_prtvol>0) then ! Print out head and wings in the long-wavelength limit.
+ if (my_prtvol>0) then
+   ! Print out head and wings in the long-wavelength limit.
    ! TODO add additional stuff.
    write(msg,'(a,i4)')' Calculated Frequencies: ',Er%nomega
    call wrtout(unt,msg,mode)

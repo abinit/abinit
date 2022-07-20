@@ -713,7 +713,7 @@ meta: {optdriver: 6, }
 
  ==== FFT mesh for GWR ====
   FFT mesh divisions ........................    16   16   18
-  Augmented FFT divisions ...................    17   17   18
+  Augmented FFT divisions ...................    16   16   18
   FFT algorithm .............................   312
   FFT cache size ............................    16
  ==== Info on the GWR object ====
@@ -730,113 +730,98 @@ nqbz: 8
 nqibz: 4
 green_mpw: 1540
 tchi_mpw: 832
-g_ngfft: [16, 16, 18, 17, 17, 18, 312, 16, ]
+g_ngfft: [16, 16, 18, 16, 16, 18, 312, 16, ]
 P gwr_np_gtks: [2, 2, 2, 1, ]
 P np_kibz: [1, 1, 1, 1, ]
 P np_qibz: [1, 1, 1, 1, ]
 ft_max_err_t2w_cos:  -1.00000000E+00
 ft_max_err_w2t_cos:  -1.00000000E+00
 ft_max_err_t2w_sin:  -1.00000000E+00
-MinMax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(omega)
+cosft_duality_err:  -1.00000000E+00
+Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(omega)
     1 0.00000E+00   5.00000E-01   0.00000E+00   5.00000E-01
     2 1.00000E+00   5.00000E-01   1.00000E+00   5.00000E-01
 ...
 
-Trace of gt_kibz for ioe: 1 , spin: 1 for testing purposes:
+ Trace of: gt_kibz for ipm: 1 , spin: 1 for testing purposes:
 (ik_ibz, itau) table
 
        1       2
-    1   0.000  -0.000
-       24.000  18.791
+    1   0.000   0.000
+       24.000  17.279
 
     2   0.000   0.000
-       24.000  18.724
+       24.000  17.217
 
     3   0.000   0.000
-       24.000  18.729
+       24.000  17.221
 
     4   0.000   0.000
-       24.000  18.751
+       24.000  17.242
 
-Trace of gt_kibz for ioe: 2 , spin: 1 for testing purposes:
+ Trace of: gt_kibz for ipm: 2 , spin: 1 for testing purposes:
 (ik_ibz, itau) table
 
        1       2
-    1   0.000  -0.000
-      -56.000 -26.831
-
-    2   0.000   0.000
-      -56.000 -26.781
-
-    3   0.000   0.000
-      -56.000 -26.816
-
-    4   0.000  -0.000
-      -56.000 -26.749
-
-Trace of tchi_qibz for spin: 1 for testing purposes:
-(iq_ibz, itau) table
-
-       1       2
     1   0.000   0.000
-       -0.002  -0.001
+      -56.000 -29.180
 
-    2   0.001   0.001
-       -0.001  -0.000
+    2   0.000  -0.000
+      -56.000 -29.125
 
-    3   0.001   0.000
-        0.000   0.000
+    3   0.000  -0.000
+      -56.000 -29.163
 
     4   0.000   0.000
-        0.001   0.000
+      -56.000 -29.090
 
-Trace of tchi_qibz for spin: 1 for testing purposes:
-(iq_ibz, iomega) table
-
-       1       2
-    1   0.000   0.000
-       -0.005  -0.004
-
-    2   0.004   0.004
-       -0.002  -0.002
-
-    3   0.002   0.002
-        0.001   0.001
-
-    4   0.001   0.001
-        0.002   0.002
-
-Trace of wc_qibz for spin: 1 for testing purposes:
-(iq_ibz, iomega) table
+ Trace of: tchi_qibz for spin: 1 for testing purposes:
+ (iq_ibz, itau) table
 
        1       2
-    1 811.000 811.000
-        0.000   0.000
+    1-278.455-106.209
+        0.000  -0.000
 
-    2 832.000 832.000
-        0.000   0.000
+    2-107.976 -41.145
+       -2.751  -1.083
 
-    3 818.000 818.000
-        0.000   0.000
+    3 -41.191 -15.677
+     -172.287 -65.737
 
-    4 812.000 812.000
-        0.000   0.000
+    4 -14.104  -5.276
+      -71.577 -27.259
 
-Trace of wc_qibz for spin: 1 for testing purposes:
-(iq_ibz, itau) table
+ Trace of: tchi_qibz for spin: 1 for testing purposes:
+ (iq_ibz, iomega) table
 
        1       2
-    11622.0001249.185
+    1-769.330-769.330
         0.000   0.000
 
-    21664.0001281.532
-        0.000   0.000
+    2-298.243-298.243
+       -7.669  -7.669
 
-    31636.0001259.967
-        0.000   0.000
+    3-113.737-113.737
+     -476.047-476.047
 
-    41624.0001250.725
-        0.000   0.000
+    4 -38.759 -38.759
+     -197.671-197.671
+
+
+--- !EMACRO_WITHOUT_LOCAL_FIELDS
+iteration_state: {dtset: 3, }
+'epsilon_{iw, q -> Gamma}(0,0)': !Tabular |
+      0.00000000E+00    9.99999319E-01   -1.53785921E-07
+      1.00000000E+00    9.99999319E-01   -1.53785921E-07
+...
+
+
+--- !EMACRO_WITH_LOCAL_FIELDS
+iteration_state: {dtset: 3, }
+'epsilon_{iw, q -> Gamma}(0,0)': !Tabular |
+      0.00000000E+00    1.00000068E+00    1.53786131E-07
+      1.00000000E+00    1.00000068E+00    1.53786131E-07
+...
 
 
 == END DATASET(S) ==============================================================
@@ -1106,7 +1091,7 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         81.4  wall=        180.9
+- Proc.   0 individual time (sec): cpu=         99.8  wall=        282.5
 
 ================================================================================
 

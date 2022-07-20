@@ -94,8 +94,7 @@ module m_screening_driver
  use m_mkrho,         only : prtrhomxmn
  use m_pspini,        only : pspini
  use m_paw_correlations, only : pawpuxinit
- use m_plowannier,    only : plowannier_type,init_plowannier,get_plowannier,&
-                             &fullbz_plowannier,destroy_plowannier
+ use m_plowannier,    only : plowannier_type,init_plowannier,get_plowannier, fullbz_plowannier,destroy_plowannier
 
  implicit none
 
@@ -374,18 +373,18 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    Pawtab(:)%usepawu   = 0
    Pawtab(:)%useexexch = 0
    Pawtab(:)%exchmix   =zero
-!
-!  * Evaluate <phi_i|nabla|phi_j>-<tphi_i|nabla|tphi_j> for the long wavelength limit.
-!  TODO solve problem with memory leak and clean this part as well as the associated flag
+
+   ! Evaluate <phi_i|nabla|phi_j>-<tphi_i|nabla|tphi_j> for the long wavelength limit.
+   ! TODO solve problem with memory leak and clean this part as well as the associated flag
    call pawnabla_init(Psps%mpsang,Cryst%ntypat,Pawrad,Pawtab)
 
    call setsym_ylm(gprimd,Pawang%l_max-1,Cryst%nsym,Dtset%pawprtvol,rprimd,Cryst%symrec,Pawang%zarot)
 
-!  * Initialize and compute data for DFT+U.
-!  paw_dmft%use_dmft=dtset%usedmft
+   ! Initialize and compute data for DFT+U.
+   ! paw_dmft%use_dmft=dtset%usedmft
    call pawpuxinit(Dtset%dmatpuopt,Dtset%exchmix,Dtset%f4of2_sla,Dtset%f6of2_sla,&
-&     is_dfpt,Dtset%jpawu,Dtset%lexexch,Dtset%lpawu,dtset%nspinor,Cryst%ntypat,Pawang,Dtset%pawprtvol,&
-&     Pawrad,Pawtab,Dtset%upawu,Dtset%usedmft,Dtset%useexexch,Dtset%usepawu,dtset%ucrpa)
+     is_dfpt,Dtset%jpawu,Dtset%lexexch,Dtset%lpawu,dtset%nspinor,Cryst%ntypat,Pawang,Dtset%pawprtvol,&
+     Pawrad,Pawtab,Dtset%upawu,Dtset%usedmft,Dtset%useexexch,Dtset%usepawu,dtset%ucrpa)
 
    if (my_rank == master) call pawtab_print(Pawtab)
 
@@ -395,10 +394,10 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    ! Re-symmetrize rhoij.
 !  this call leads to a SIGFAULT, likely some pointer is not initialized correctly
    choice=1; optrhoij=1; ipert=0; idir=0
-!  call pawrhoij_symrhoij(Pawrhoij,Pawrhoij,choice,Cryst%gprimd,Cryst%indsym,ipert,Cryst%natom,&
-!  &             Cryst%nsym,Cryst%ntypat,optrhoij,Pawang,Dtset%pawprtvol,Pawtab,&
-!  &             Cryst%rprimd,Cryst%symafm,Cryst%symrec,Cryst%typat)
-!
+   !call pawrhoij_symrhoij(Pawrhoij,Pawrhoij,choice,Cryst%gprimd,Cryst%indsym,ipert,Cryst%natom,&
+   !&             Cryst%nsym,Cryst%ntypat,optrhoij,Pawang,Dtset%pawprtvol,Pawtab,&
+   !&             Cryst%rprimd,Cryst%symafm,Cryst%symrec,Cryst%typat)
+   !
    ! Evaluate form factors for the radial part of phi.phj-tphi.tphj ===
    ! rhoxsp_method=1 ! Arnaud-Alouani
    ! rhoxsp_method=2 ! Shiskin-Kresse
@@ -412,7 +411,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    call get_gftt(ngfft_gw,(/zero,zero,zero/),gmet,gw_gsq,gw_gfft)
    ABI_FREE(gw_gfft)
 
-!  Set up q grids, make qmax 20% larger than largest expected:
+   ! Set up q grids, make qmax 20% larger than largest expected:
    ABI_MALLOC(nq_spl,(Psps%ntypat))
    ABI_MALLOC(qmax,(Psps%ntypat))
    nq_spl = Psps%mqgrid_ff
@@ -432,18 +431,18 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    ABI_FREE(l_size_atm)
    compch_fft=greatest_real
    usexcnhat=MAXVAL(Pawtab(:)%usexcnhat)
-!  * 0 --> Vloc in atomic data is Vbare    (Blochl s formulation)
-!  * 1 --> Vloc in atomic data is VH(tnzc) (Kresse s formulation)
+   ! * 0 --> Vloc in atomic data is Vbare    (Blochl s formulation)
+   ! * 1 --> Vloc in atomic data is VH(tnzc) (Kresse s formulation)
    write(msg,'(a,i3)')' screening : using usexcnhat = ',usexcnhat
    call wrtout(std_out, msg)
-!
-!  Identify parts of the rectangular grid where the density has to be calculated.
+
+   ! Identify parts of the rectangular grid where the density has to be calculated.
    optcut=0;optgr0=Dtset%pawstgylm; optgr1=0; optgr2=0; optrad=1-Dtset%pawstgylm
    if (Dtset%pawcross==1) optrad=1
    if (Dtset%xclevel==2.and.usexcnhat>0) optgr1=Dtset%pawstgylm
 
    call nhatgrid(Cryst%atindx1,gmet,Cryst%natom,Cryst%natom,Cryst%nattyp,ngfftf,Cryst%ntypat,&
-&   optcut,optgr0,optgr1,optgr2,optrad,Pawfgrtab,Pawtab,Cryst%rprimd,Cryst%typat,Cryst%ucvol,Cryst%xred)
+                 optcut,optgr0,optgr1,optgr2,optrad,Pawfgrtab,Pawtab,Cryst%rprimd,Cryst%typat,Cryst%ucvol,Cryst%xred)
 
    call timab(315,2,tsec) ! screening(pawin
  else
@@ -458,9 +457,9 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  if (Dtset%usepaw==1) then
    if (Dtset%ecutwfn < Dtset%ecut) then
      write(msg,"(5a)")&
-&     "WARNING - ",ch10,&
-&     "  It is highly recommended to use ecutwfn = ecut for GW calculations with PAW since ",ch10,&
-&     "  an excessive truncation of the planewave basis set can lead to unphysical results."
+     "WARNING - ",ch10,&
+     "  It is highly recommended to use ecutwfn = ecut for GW calculations with PAW since ",ch10,&
+     "  an excessive truncation of the planewave basis set can lead to unphysical results."
      call wrtout(ab_out, msg)
    end if
 
@@ -470,12 +469,12 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    if (Dtset%pawcross==1) then
      optgrad=1
      call paw_pwaves_lmn_init(Paw_onsite,Cryst%natom,Cryst%natom,Cryst%ntypat,Cryst%rprimd,&
-&     Cryst%xcart,Pawtab,Pawrad,Pawfgrtab,optgrad)
+                              Cryst%xcart,Pawtab,Pawrad,Pawfgrtab,optgrad)
    end if
  end if
 
-!Allocate these arrays anyway, since they are passed to subroutines.
- if (.not.allocated(nhat))  then
+ ! Allocate these arrays anyway, since they are passed to subroutines.
+ if (.not.allocated(nhat)) then
    ABI_MALLOC(nhat,(nfftf,0))
  end if
 
@@ -498,11 +497,11 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 !  Ideally nbvw should include only the states v such that the transition
 !  c-->v is taken into account in cchi0 (see GW_TOLDOCC). In the present implementation
 
- ABI_MALLOC(ks_occ_idx,(ks_ebands%nkpt,ks_ebands%nsppol))
- ABI_MALLOC(ks_vbik   ,(ks_ebands%nkpt,ks_ebands%nsppol))
- ABI_MALLOC(qp_vbik   ,(ks_ebands%nkpt,ks_ebands%nsppol))
+ ABI_MALLOC(ks_occ_idx,(ks_ebands%nkpt, ks_ebands%nsppol))
+ ABI_MALLOC(ks_vbik   ,(ks_ebands%nkpt, ks_ebands%nsppol))
+ ABI_MALLOC(qp_vbik   ,(ks_ebands%nkpt, ks_ebands%nsppol))
 
- call ebands_update_occ(ks_ebands,Dtset%spinmagntarget,prtvol=0)
+ call ebands_update_occ(ks_ebands, Dtset%spinmagntarget, prtvol=0)
  ks_occ_idx = ebands_get_occupied(ks_ebands,tol8) ! tol8 to be consistent when the density
  ks_vbik    = ebands_get_valence_idx(ks_ebands)
 
@@ -608,7 +607,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    call chi0_bksmask(Dtset,Ep,Kmesh,nbvw,nbcw,my_rank,nprocs,bks_mask,keep_ur,ierr)
  end if
 
-! Initialize the Wf_info object (allocate %ug and %ur if required).
+ ! Initialize the wf descriptor (allocate %ug and %ur if required).
 
  call wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,mband,nband,Ep%nkibz,Dtset%nsppol,bks_mask,&
   Dtset%nspden,Dtset%nspinor,Dtset%ecutwfn,Dtset%ecutsm,Dtset%dilatmx,Hdr_wfk%istwfk,Kmesh%ibz,ngfft_gw,&
@@ -649,11 +648,11 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    ABI_ERROR('Cryst%nsym/=Dtset%nsym, check pawinit and pawrhoij_symrhoij')
  end if
 
-! Get the FFT index of $ (R^{-1}(r-\tau)) $
-! S= $\transpose R^{-1}$ and k_BZ = S k_IBZ
-! irottb is the FFT index of $ R^{-1} (r-\tau) $ used to symmetrize u_Sk.
- ABI_MALLOC(irottb,(nfftgw,Cryst%nsym))
- call rotate_FFT_mesh(Cryst%nsym,Cryst%symrel,Cryst%tnons,ngfft_gw,irottb,iscompatibleFFT)
+ ! Get the FFT index of $ (R^{-1}(r-\tau)) $
+ ! S= $\transpose R^{-1}$ and k_BZ = S k_IBZ
+ ! irottb is the FFT index of $ R^{-1} (r-\tau) $ used to symmetrize u_Sk.
+ ABI_MALLOC(irottb, (nfftgw, Cryst%nsym))
+ call rotate_FFT_mesh(Cryst%nsym, Cryst%symrel, Cryst%tnons, ngfft_gw, irottb, iscompatibleFFT)
 
  ABI_MALLOC(ktabr,(nfftgw,Kmesh%nbz))
  do ikbz=1,Kmesh%nbz
@@ -932,22 +931,27 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    call pawprt(Dtset,Cryst%natom,Paw_ij,Pawrhoij,Pawtab)
    call timab(561,2,tsec)
  end if
-!
-!=== Calculate the frequency mesh ===
-!* First omega is always zero without broadening.
-!FIXME what about metals? I think we should add eta, this means we need to know if the system is metallic, for example using occopt
-!MS Modified to account for non-zero starting frequency (19-11-2010)
-!MS Modified for tangent grid (07-01-2011)
- ABI_MALLOC(Ep%omega,(Ep%nomega))
- Ep%omega(1)=CMPLX(Ep%omegaermin,zero,kind=dpc)
+ !
+ ! Calculate frequency mesh.
+ ! First omega is always zero without broadening.
+ ! FIXME what about metals? I think we should add eta,
+ ! this means we need to know if the system is metallic, for example using occopt
+ ! MS Modified to account for non-zero starting frequency (19-11-2010)
+ ! MS Modified for tangent grid (07-01-2011)
+ ABI_MALLOC(Ep%omega, (Ep%nomega))
+ Ep%omega(1) = CMPLX(Ep%omegaermin, zero, kind=dpc)
+ !Ep%omega(1) = j_dpc * 4.372035E-01 * eV_Ha
+ !Ep%omega(1) = j_dpc * 4.372035E-01 * eV_Ha * 2
 
- if (Ep%nomegaer>1) then ! Avoid division by zero.
-   if (Dtset%gw_frqre_tangrid==0.and.Dtset%gw_frqre_inzgrid==0) then
-     domegareal=(Ep%omegaermax-Ep%omegaermin)/(Ep%nomegaer-1)
+ if (Ep%nomegaer > 1) then
+   ! Avoid division by zero.
+   if (Dtset%gw_frqre_tangrid == 0 .and. Dtset%gw_frqre_inzgrid == 0) then
+     domegareal = (Ep%omegaermax -Ep%omegaermin) / (Ep%nomegaer -1)
      do iomega=2,Ep%nomegaer
        Ep%omega(iomega)=CMPLX(Ep%omegaermin+(iomega-1)*domegareal,zero,kind=dpc)
      end do
-   else if (Dtset%gw_frqre_tangrid==1.and.Dtset%gw_frqre_inzgrid==0) then ! We have tangent transformed grid
+   else if (Dtset%gw_frqre_tangrid == 1.and. Dtset%gw_frqre_inzgrid == 0) then
+     ! We have tangent transformed grid
      ABI_WARNING('EXPERIMENTAL - Using tangent transform grid for contour deformation.')
      Ep%omegaermax = Dtset%cd_max_freq
      Ep%omegaermin = zero
@@ -956,7 +960,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
        ifirst=Dtset%cd_subset_freq(1); ilast=Dtset%cd_subset_freq(2)
      end if
      factor = Dtset%cd_halfway_freq/TAN(pi*quarter)
-!    *Important*-here nfreqre is used because the step is set by the original grid
+     ! Important: here nfreqre is used because the step is set by the original grid
      domegareal=(ATAN(Ep%omegaermax/factor)*two*piinv)/(Dtset%nfreqre-1) ! Stepsize in transformed variable
      do iomega=1,Ep%nomegaer
        Ep%omega(iomega)=CMPLX(factor*TAN((iomega+ifirst-2)*domegareal*pi*half),zero,kind=dpc)
@@ -977,52 +981,66 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    end if
  end if
 
- if (Ep%plasmon_pole_model.and.Ep%nomega==2) then
-   e0=Dtset%ppmfrq; if (e0<0.1d-4) e0=omegaplasma
+ if (Ep%plasmon_pole_model .and. Ep%nomega == 2) then
+   e0= Dtset%ppmfrq; if (e0 < 0.1d-4) e0 = omegaplasma
    Ep%omega(2)=CMPLX(zero,e0,kind=dpc)
  end if
-!
-!=== For AC, use Gauss-Legendre quadrature method ===
-!* Replace $ \int_0^\infty dx f(x) $ with $ \int_0^1 dz f(1/z - 1)/z^2 $.
-!* Note that the grid is not log as required by CD, so we cannot use the same SCR file.
+
+ ! For AC, use Gauss-Legendre quadrature method.
+ !  - Replace $ \int_0^\infty dx f(x) $ with $ \int_0^1 dz f(1/z - 1)/z^2 $.
+ !  - Note that the grid is not log as required by CD thus we cannot use the same SCR file.
  if (Ep%analytic_continuation) then
-   ABI_MALLOC(z,(Ep%nomegaei))
-   ABI_MALLOC(zw,(Ep%nomegaei))
-   call coeffs_gausslegint(zero,one,z,zw,Ep%nomegaei)
+   ABI_MALLOC(z, (Ep%nomegaei))
+   ABI_MALLOC(zw, (Ep%nomegaei))
+   call coeffs_gausslegint(zero, one, z, zw, Ep%nomegaei)
    do iomega=1,Ep%nomegaei
-     Ep%omega(Ep%nomegaer+iomega)=CMPLX(zero,one/z(iomega)-one,kind=dpc)
+     Ep%omega(Ep%nomegaer + iomega) = CMPLX(zero, one/z(iomega) - one, kind=dpc)
    end do
    ABI_FREE(z)
    ABI_FREE(zw)
- else if (Ep%contour_deformation.and.(Dtset%cd_customnimfrqs/=0)) then
+
+  !if (dtset%gwr_ntau > 0) then
+  !  call wrtout(std_out, "Imaginary frequency mesh from minmax grid with ntau:", itoa(dtset%gwr_ntau))
+
+  !  call gx_minimax_grid(gwr%ntau, te_min, te_max,  &  ! in
+  !                       gwr%tau_mesh, gwr%tau_wgs, &  ! all these args are out and allocated by the routine.
+  !                       gwr%iw_mesh, gwr%iw_wgs,   &
+  !                       gwr%t2w_cos_wgs, gwr%w2t_cos_wgs, gwr%t2w_sin_wgs, &
+  !                       gwr%ft_max_error)
+  !end if
+
+ else if (Ep%contour_deformation .and. Dtset%cd_customnimfrqs /= 0) then
    Ep%omega(Ep%nomegaer+1)=CMPLX(zero,Dtset%cd_imfrqs(1))
    do iomega=2,Ep%nomegaei
-     if (Dtset%cd_imfrqs(iomega)<=Dtset%cd_imfrqs(iomega-1)) then
+     if (Dtset%cd_imfrqs(iomega) <= Dtset%cd_imfrqs(iomega-1)) then
        ABI_ERROR(' Specified imaginary frequencies need to be strictly increasing!')
      end if
-     Ep%omega(Ep%nomegaer+iomega)=CMPLX(zero,Dtset%cd_imfrqs(iomega))
+     Ep%omega(Ep%nomegaer+iomega) = CMPLX(zero, Dtset%cd_imfrqs(iomega))
    end do
- else if (Ep%contour_deformation.and.(Dtset%gw_frqim_inzgrid/=0)) then
-   e0=Dtset%ppmfrq; if (e0<0.1d-4) e0=omegaplasma
+
+ else if (Ep%contour_deformation .and. Dtset%gw_frqim_inzgrid /= 0) then
+   e0 = Dtset%ppmfrq; if (e0 < 0.1d-4) e0 = omegaplasma
    domegareal=one/(Ep%nomegaei+1)
    do iomega=1,Ep%nomegaei
      factor = iomega*domegareal
      Ep%omega(Ep%nomegaer+iomega)=CMPLX(zero,e0*factor/(one-factor),kind=dpc)
    end do
- else if (Ep%contour_deformation.and.(Ep%nomegaei/=0)) then
+
+ else if (Ep%contour_deformation.and. Ep%nomegaei /= 0) then
    e0=Dtset%ppmfrq; if (e0<0.1d-4) e0=omegaplasma
    do iomega=1,Ep%nomegaei
      Ep%omega(Ep%nomegaer+iomega)=CMPLX(zero,e0/(Dtset%freqim_alpha-two)&
-&     *(EXP(two/(Ep%nomegaei+1)*LOG(Dtset%freqim_alpha-one)*iomega)-one),kind=dpc)
+       * (EXP(two/(Ep%nomegaei+1)*LOG(Dtset%freqim_alpha-one)*iomega)-one),kind=dpc)
    end do
  end if
 
- if (Dtset%cd_full_grid/=0) then ! Full grid will be calculated
-!  Grid values are added after the last imaginary freq.
+ if (Dtset%cd_full_grid/=0) then
+   ! Full grid will be calculated
+   ! Grid values are added after the last imaginary freq.
    do ios=1,Ep%nomegaei
      do iomega=2,Ep%nomegaer
        Ep%omega(Ep%nomegaer+Ep%nomegaei+(ios-1)*(Ep%nomegaer-1)+(iomega-1)) = &
-&       CMPLX(REAL(Ep%omega(iomega)),AIMAG(Ep%omega(Ep%nomegaer+ios)))
+           CMPLX(REAL(Ep%omega(iomega)),AIMAG(Ep%omega(Ep%nomegaer+ios)))
      end do
    end do
  end if
@@ -1036,7 +1054,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  end do
 
  ! Allocate chi0, wings and array for chi0_sumrule check.
- ABI_MALLOC(chi0_sumrule,(Ep%npwe))
+ ABI_MALLOC(chi0_sumrule, (Ep%npwe))
 
  write(msg,'(a,f12.1,a)')' Memory required for chi0 matrix= ',two*gwpc*Ep%npwe**2*Ep%nI*Ep%nJ*Ep%nomega*b2Mb," [Mb]."
  call wrtout(std_out, msg)
@@ -1052,19 +1070,20 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  iqcalc = 0
  if(Dtset%plowan_compute >= 10) then
    call init_plowannier(Dtset%plowan_bandf,Dtset%plowan_bandi,Dtset%plowan_compute,&
-&Dtset%plowan_iatom,Dtset%plowan_it,Dtset%plowan_lcalc,Dtset%plowan_natom,&
-&Dtset%plowan_nbl,Dtset%plowan_nt,Dtset%plowan_projcalc,Dtset%acell_orig,&
-&Dtset%kptns,Dtset%nimage,Dtset%nkpt,Dtset%nspinor,Dtset%nsppol,Dtset%wtk,Dtset%dmft_t2g,wanibz_in)
+                        Dtset%plowan_iatom,Dtset%plowan_it,Dtset%plowan_lcalc,Dtset%plowan_natom,&
+                        Dtset%plowan_nbl,Dtset%plowan_nt,Dtset%plowan_projcalc,Dtset%acell_orig,&
+                        Dtset%kptns,Dtset%nimage,Dtset%nkpt,Dtset%nspinor,Dtset%nsppol,Dtset%wtk,Dtset%dmft_t2g,wanibz_in)
    call get_plowannier(wanibz_in,wanibz,Dtset)
    call fullbz_plowannier(Dtset,Kmesh,Cryst,Pawang,wanibz,wanbz)
- endif
+ end if
+
  do iqibz=1,Qmesh%nibz
    call timab(306,1,tsec)
    is_first_qcalc=(iqibz==1)
 
    ! Selective q-point calculation.
    found=.FALSE.; label=iqibz
-   if (Ep%nqcalc/=Ep%nqibz) then
+   if (Ep%nqcalc /= Ep%nqibz) then
      do ii=1,Ep%nqcalc
        qtmp(:)=Qmesh%ibz(:,iqibz)-Ep%qcalc(:,ii)
        found=(normv(qtmp,gmet,'G')<GW_TOLQ)

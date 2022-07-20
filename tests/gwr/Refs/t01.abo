@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun 17 Jul 2022.
-- ( at 01h22 )
+.Starting date : Wed 20 Jul 2022.
+- ( at 02h58 )
   
 - input  file    -> /Users/gmatteo/git_repos/abinit_gwr/_build/tests/Test_suite/gwr_t01/t01.abi
 - output file    -> t01.abo
@@ -591,7 +591,7 @@ meta: {optdriver: 6, }
 
  ==== FFT mesh for GWR ====
   FFT mesh divisions ........................    12   12   12
-  Augmented FFT divisions ...................    13   13   12
+  Augmented FFT divisions ...................    12   12   12
   FFT algorithm .............................   312
   FFT cache size ............................    16
  ==== Info on the GWR object ====
@@ -608,95 +608,86 @@ nqbz: 8
 nqibz: 3
 green_mpw: 302
 tchi_mpw: 190
-g_ngfft: [12, 12, 12, 13, 13, 12, 312, 16, ]
+g_ngfft: [12, 12, 12, 12, 12, 12, 312, 16, ]
 P gwr_np_gtks: [1, 1, 1, 1, ]
 P np_kibz: [1, 1, 1, ]
 P np_qibz: [1, 1, 1, ]
 ft_max_err_t2w_cos:  -1.00000000E+00
 ft_max_err_w2t_cos:  -1.00000000E+00
 ft_max_err_t2w_sin:  -1.00000000E+00
-MinMax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(omega)
+cosft_duality_err:  -1.00000000E+00
+Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(omega)
     1 0.00000E+00   5.00000E-01   0.00000E+00   5.00000E-01
     2 1.00000E+00   5.00000E-01   1.00000E+00   5.00000E-01
 ...
 
-Trace of gt_kibz for ioe: 1 , spin: 1 for testing purposes:
+ Trace of: gt_kibz for ipm: 1 , spin: 1 for testing purposes:
 (ik_ibz, itau) table
 
        1       2
     1   0.000   0.000
-        4.000   3.643
+        4.000   3.601
 
-    2   0.000   0.000
-        4.000   3.384
+    2   0.000  -0.000
+        4.000   3.345
 
     3   0.000   0.000
-        4.000   3.293
+        4.000   3.256
 
-Trace of gt_kibz for ioe: 2 , spin: 1 for testing purposes:
+ Trace of: gt_kibz for ipm: 2 , spin: 1 for testing purposes:
 (ik_ibz, itau) table
 
        1       2
-    1   0.000  -0.000
-      -56.000 -19.147
+    1   0.000   0.000
+      -56.000 -19.367
 
     2   0.000   0.000
-      -56.000 -18.649
+      -56.000 -18.863
 
     3   0.000   0.000
-      -56.000 -18.598
+      -56.000 -18.810
 
-Trace of tchi_qibz for spin: 1 for testing purposes:
-(iq_ibz, itau) table
-
-       1       2
-    1   0.000  -0.000
-        0.002   0.003
-
-    2  -0.001  -0.002
-        0.000   0.001
-
-    3  -0.001  -0.001
-       -0.000  -0.001
-
-Trace of tchi_qibz for spin: 1 for testing purposes:
-(iq_ibz, iomega) table
+ Trace of: tchi_qibz for spin: 1 for testing purposes:
+ (iq_ibz, itau) table
 
        1       2
-    1   0.000   0.000
-        0.010   0.007
+    1 -37.650 -10.943
+        0.000   0.000
 
-    2  -0.005  -0.004
-        0.002   0.002
+    2 -14.441  -4.101
+        4.794   1.607
 
-    3  -0.003  -0.002
-       -0.002  -0.002
+    3  -7.282  -2.269
+       -0.221  -0.247
 
-Trace of wc_qibz for spin: 1 for testing purposes:
-(iq_ibz, iomega) table
+ Trace of: tchi_qibz for spin: 1 for testing purposes:
+ (iq_ibz, iomega) table
 
        1       2
-    1 169.000 169.000
+    1 -97.185 -97.185
         0.000   0.000
 
-    2 180.000 180.000
-        0.000   0.000
+    2 -37.084 -37.084
+       12.802  12.802
 
-    3 190.000 190.000
-        0.000   0.000
+    3 -19.103 -19.103
+       -0.937  -0.937
 
-Trace of wc_qibz for spin: 1 for testing purposes:
-(iq_ibz, itau) table
 
-       1       2
-    1 338.000 260.311
-        0.000   0.000
+--- !EMACRO_WITHOUT_LOCAL_FIELDS
+iteration_state: {dtset: 3, }
+'epsilon_{iw, q -> Gamma}(0,0)': !Tabular |
+      0.00000000E+00    9.99997406E-01    2.37406118E-08
+      1.00000000E+00    9.99997406E-01    2.37406118E-08
+...
 
-    2 360.000 277.254
-        0.000   0.000
 
-    3 380.000 292.657
-        0.000   0.000
+--- !EMACRO_WITH_LOCAL_FIELDS
+iteration_state: {dtset: 3, }
+'epsilon_{iw, q -> Gamma}(0,0)': !Tabular |
+      0.00000000E+00    1.00000259E+00   -2.37407349E-08
+      1.00000000E+00    1.00000259E+00   -2.37407349E-08
+...
 
 
 == END DATASET(S) ==============================================================
@@ -943,7 +934,7 @@ P           mkmem           3
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          9.8  wall=         10.2
+- Proc.   0 individual time (sec): cpu=         11.0  wall=         11.8
 
 ================================================================================
 
