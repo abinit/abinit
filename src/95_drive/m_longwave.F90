@@ -280,7 +280,9 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 
  if (dtset%lw_natopt==1) then
    d3e_pert1(natom+2)=1
-   d3e_pert2(natom+2)=1  
+   !AZ*******************
+   d3e_pert2(1:natom)=1  
+   !AZ*******************
  end if
 
  perm(:)=0
