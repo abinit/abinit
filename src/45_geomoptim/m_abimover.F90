@@ -411,12 +411,6 @@ contains  !=============================================================
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_m1geo,m_mover
-!!
-!! CHILDREN
-!!      atomdata_from_znucl,bonds_free,print_bonds
-!!
 !! SOURCE
 
 subroutine abimover_ini(ab_mover,amu_curr,dtfil,dtset,specs)
@@ -814,12 +808,6 @@ end subroutine abimover_ini
 !! SIDE EFFECTS
 !!  ab_mover <type(abimover)> = The abimover structure to be destroyed
 !!
-!! PARENTS
-!!      m_m1geo,m_mover
-!!
-!! CHILDREN
-!!      atomdata_from_znucl,bonds_free,print_bonds
-!!
 !! SOURCE
 
 subroutine abimover_destroy(ab_mover)
@@ -868,11 +856,6 @@ end subroutine abimover_destroy
 !!
 !! SIDE EFFECTS
 !!  ab_mover <type(abimover)> = The ab_mover to nullify
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      atomdata_from_znucl,bonds_free,print_bonds
 !!
 !! NOTES
 !!  At present 29 variables are present in abimover
@@ -947,12 +930,6 @@ end subroutine abimover_print
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_m1geo,m_mover
-!!
-!! CHILDREN
-!!      atomdata_from_znucl,bonds_free,print_bonds
-!!
 !! SOURCE
 
 subroutine mttk_ini(mttk_vars,nnos)
@@ -982,12 +959,6 @@ end subroutine mttk_ini
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_m1geo,m_mover
-!!
-!! CHILDREN
-!!      atomdata_from_znucl,bonds_free,print_bonds
-!!
 !! SOURCE
 
 subroutine mttk_fin(mttk_vars)
@@ -1016,12 +987,6 @@ end subroutine mttk_fin
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_mover,m_precpred_1geo
-!!
-!! CHILDREN
-!!      atomdata_from_znucl,bonds_free,print_bonds
-!!
 !! SOURCE
 
 subroutine abiforstr_ini(forstr,natom)
@@ -1049,12 +1014,6 @@ end subroutine abiforstr_ini
 !! forstr
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_mover,m_precpred_1geo
-!!
-!! CHILDREN
-!!      atomdata_from_znucl,bonds_free,print_bonds
 !!
 !! SOURCE
 
@@ -1120,12 +1079,6 @@ end subroutine abiforstr_fin
 !!   Adds cartesian coordinates if the number of internals with a
 !!   given atom is < 4 the chosen coordinate could be optimized
 !!   to be less dependent of the internals already incorporated.
-!!
-!! PARENTS
-!!      m_pred_delocint
-!!
-!! CHILDREN
-!!      atomdata_from_znucl,bonds_free,print_bonds
 !!
 !! SOURCE
 
@@ -1282,12 +1235,6 @@ end subroutine make_prim_internals
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_abimover
-!!
-!! CHILDREN
-!!      atomdata_from_znucl,bonds_free,print_bonds
-!!
 !! SOURCE
 
 subroutine make_angles(deloc,natom)
@@ -1377,12 +1324,6 @@ end subroutine make_angles
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_abimover
-!!
-!! CHILDREN
-!!      atomdata_from_znucl,bonds_free,print_bonds
 !!
 !! SOURCE
 
@@ -1518,12 +1459,6 @@ end subroutine make_dihedrals
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_abimover
-!!
-!! CHILDREN
-!!      atomdata_from_znucl,bonds_free,print_bonds
-!!
 !! SOURCE
 
 subroutine make_bonds(deloc,natom,ntypat,rprimd,typat,xcart,znucl)
@@ -1649,12 +1584,6 @@ end subroutine make_bonds
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_pred_delocint
-!!
-!! CHILDREN
-!!      atomdata_from_znucl,bonds_free,print_bonds
 !!
 !! SOURCE
 
@@ -1952,12 +1881,6 @@ end function angle_dihedral
 !!         tolerance=    The tolerance is multiplied to the
 !!                       adition of covalent radius to decide if a bond is created
 !!
-!! PARENTS
-!!      m_pred_simple
-!!
-!! CHILDREN
-!!      atomdata_from_znucl,bonds_free,print_bonds
-!!
 !! SOURCE
 
 subroutine make_bonds_new(bonds,natom,ntypat,rprimd,typat,xcart,znucl)
@@ -2189,12 +2112,6 @@ end subroutine make_bonds_new
 !! FUNCTION
 !!  Free memory
 !!
-!! PARENTS
-!!      m_abimover,m_pred_simple
-!!
-!! CHILDREN
-!!      atomdata_from_znucl,bonds_free,print_bonds
-!!
 !! SOURCE
 
 subroutine bonds_free(bonds)
@@ -2237,12 +2154,6 @@ end subroutine bonds_free
 !!         indexij= Number of bonds between i and j
 !!         indexji= Number of bonds between j and i
 !!         tolerance
-!!
-!! PARENTS
-!!      m_abimover
-!!
-!! CHILDREN
-!!      atomdata_from_znucl,bonds_free,print_bonds
 !!
 !! SOURCE
 
@@ -2311,12 +2222,6 @@ end subroutine print_bonds
 !! SIDE EFFECTS
 !! deloc= container object for delocalized internal coordinates
 !!
-!! PARENTS
-!!      m_m1geo,m_mover
-!!
-!! CHILDREN
-!!      atomdata_from_znucl,bonds_free,print_bonds
-!!
 !! SOURCE
 
 subroutine delocint_ini(deloc)
@@ -2363,12 +2268,6 @@ end subroutine delocint_ini
 !! deloc= container object for delocalized internal coordinates
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_m1geo,m_mover
-!!
-!! CHILDREN
-!!      atomdata_from_znucl,bonds_free,print_bonds
 !!
 !! SOURCE
 
@@ -2425,11 +2324,6 @@ end subroutine delocint_fin
 !!          angle_value= Value of the angle in radians
 !!          angle_bonds=  Indices of the bonds
 !!          angle_vect=   Unitary vector perpendicular to the plane of the angle
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      atomdata_from_znucl,bonds_free,print_bonds
 !!
 !! SOURCE
 

@@ -13,10 +13,6 @@
 !!
 !! NOTES
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -57,8 +53,8 @@ module m_longwave
  use m_spacepar,    only : setsym
  use m_mkrho,       only : mkrho
  use m_fft,         only : fourdp
- use m_ddb,         only : DDB_VERSION,dfpt_lw_doutput
- use m_ddb_hdr,     only : ddb_hdr_type, ddb_hdr_init
+ use m_ddb,         only : ddb_type
+ use m_ddb_hdr,     only : ddb_hdr_type
  use m_dfpt_elt,    only : dfpt_ewalddq, dfpt_ewalddqdq
  use m_mkcore,      only : mkcore
 
@@ -101,16 +97,6 @@ contains
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_driver
-!!
-!! CHILDREN
-!!      check_kxc,ddb_hdr%free,ddb_hdr%open_write,ddb_hdr_init,dfpt_ewalddq
-!!      dfpt_ewalddqdq,dfpt_flexo,dfpt_lw_doutput,dfpt_qdrpole,ebands_free
-!!      fourdp,hdr%free,hdr%update,hdr_init,inwffil,kpgio,matr3inv,mkcore,mkrho
-!!      pawfgr_init,pspini,read_rhor,rhotoxc,setsym,setup1,symmetrize_xred
-!!      wffclose,xcdata_init
-!!
 !! SOURCE
 
 subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
@@ -152,6 +138,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  character(len=500) :: msg
  type(ebands_t) :: bstruct
  type(ddb_hdr_type) :: ddb_hdr
+ type(ddb_type) :: ddb
  type(paw_dmft_type) :: paw_dmft
  type(pawfgr_type) :: pawfgr
  type(hdr_type) :: hdr,hdr_den
@@ -533,22 +520,21 @@ ecore=zero
 &   timrev,ucvol,xred)
  end if
 
-!Open the formatted derivative database file, and write the
-!preliminary information
  if (mpi_enreg%me == 0) then
+
+! Write the DDB file
    dscrpt=' Note : temporary (transfer) database '
+   call ddb_hdr%init(dtset,psps,pawtab,dscrpt,1,xred=xred,occ=occ)
 
-   call ddb_hdr_init(ddb_hdr,dtset,psps,pawtab,DDB_VERSION,dscrpt,1,xred=xred,occ=occ)
+   call ddb%init(dtset, 1, mpert, 27*mpert*mpert*mpert)
 
-   call ddb_hdr%open_write(dtfil%fnameabo_ddb, dtfil%unddb)
+   call ddb%set_d3matr(d3etot, blkflg, iblok=1, lw=.true.)
+
+   call ddb%write_txt(ddb_hdr, dtfil%fnameabo_ddb)
 
    call ddb_hdr%free()
+   call ddb%free()
 
-!  Call main output routine
-   call dfpt_lw_doutput(blkflg,d3etot,mpert,dtset%natom,dtset%ntypat,dtfil%unddb)
-
-!  Close DDB
-   close(dtfil%unddb)
  end if
 
 !Deallocate arrays

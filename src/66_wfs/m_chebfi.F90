@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -83,15 +79,6 @@ contains
 !!
 !! SIDE EFFECTS
 !!  cg(2,*)=updated wavefunctions
-!!
-!! PARENTS
-!!      m_vtowfk
-!!
-!! CHILDREN
-!!      apply_invovl,dotprod_g,getghc,pawcprj_alloc,pawcprj_axpby,pawcprj_copy
-!!      pawcprj_free,prep_getghc,prep_index_wavef_bandpp
-!!      rayleigh_ritz_distributed,rayleigh_ritz_subdiago,timab,wrtout
-!!      xmpi_alltoallv,xmpi_barrier,xmpi_max,xmpi_min,xmpi_sum
 !!
 !! NOTES
 !!  -- TODO --
@@ -383,7 +370,7 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
    if(paw) then
      call timab(timer_apply_inv_ovl, 1, tsec)
      call apply_invovl(gs_hamk, ghc_filter(:,shift:), gsm1hc_filter(:,shift:), cwaveprj_next(:,iactive:), &
-&     npw_filter, nactive, mpi_enreg, nspinor)
+&     npw_filter, nactive, mpi_enreg, nspinor, dtset%diago_apply_block_sliced)
      call timab(timer_apply_inv_ovl, 2, tsec)
    else
      gsm1hc_filter(:,shift:) = ghc_filter(:,shift:)
@@ -608,11 +595,6 @@ end subroutine chebfi
 !! OUTPUT
 !! y= Tn(x)
 !!
-!! PARENTS
-!!      chebfi
-!!
-!! CHILDREN
-!!
 !! NOTES
 !!
 !! SOURCE
@@ -656,11 +638,6 @@ end function cheb_poly
 !!
 !! OUTPUT
 !! n= number of iterations needed to decrease residual by tol
-!!
-!! PARENTS
-!!      chebfi
-!!
-!! CHILDREN
 !!
 !! NOTES
 !!

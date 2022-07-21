@@ -10,10 +10,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -228,12 +224,6 @@ contains
 !! INPUTS
 !!  anaddb_dtset = anaddb datastructure
 !!
-!! PARENTS
-!!      anaddb
-!!
-!! CHILDREN
-!!      chkvars_in_string, inupper
-!!
 !! NOTES
 !!
 !! SOURCE
@@ -291,12 +281,6 @@ end subroutine anaddb_dtset_free
 !!  variables which need to be allocated depending on the dimensions read in.
 !!  Could be divided into two routines as in abinit.
 !!    FIXME: move checks to chkin9?
-!!
-!! PARENTS
-!!      anaddb
-!!
-!! CHILDREN
-!!      chkvars_in_string, inupper
 !!
 !! SOURCE
 
@@ -1905,12 +1889,6 @@ end subroutine invars9
 !! NOTES
 !! Should be executed by one processor only.
 !!
-!! PARENTS
-!!      anaddb
-!!
-!! CHILDREN
-!!      chkvars_in_string, inupper
-!!
 !! SOURCE
 
 subroutine outvars_anaddb (anaddb_dtset, nunit)
@@ -2243,12 +2221,6 @@ end subroutine outvars_anaddb
 !!     (6) Root name for electron-phonon file names
 !!     (7) Name of file containing the 3 ddk filenames and the GS wf file name
 !!
-!! PARENTS
-!!      anaddb
-!!
-!! CHILDREN
-!!      chkvars_in_string, inupper
-!!
 !! SOURCE
 
 subroutine anaddb_init(input_path, filnam)
@@ -2371,12 +2343,6 @@ end subroutine anaddb_init
 !!   the string (with upper case) from the input file, to which the XYZ data is (possibly) appended
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_anaddb_dataset
-!!
-!! CHILDREN
-!!      chkvars_in_string, inupper
 !!
 !! SOURCE
 

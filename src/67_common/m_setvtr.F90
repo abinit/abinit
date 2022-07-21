@@ -10,10 +10,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -180,14 +176,8 @@ contains
 !!    All variables (nfft,ngfft,mgfft) refer to this fine FFT grid.
 !!    All arrays (densities/potentials...) are computed on this fine FFT grid.
 !!  Developers have to be careful when introducing others arrays: they have to be stored on the fine FFT grid.
-
+!!
 !!  In case of norm-conserving calculations the FFT grid is the usual FFT grid.
-!!
-!! PARENTS
-!!      m_bethe_salpeter,m_scfcv_core,m_screening_driver,m_sigma_driver
-!!
-!! CHILDREN
-!!      ionicenergyandforces,xred2xcart
 !!
 !! SOURCE
 
@@ -831,12 +821,6 @@ end subroutine setvtr
 !! e_chempot=chemical potential energy in hartrees
 !! grchempottn(3,natom)=grads of e_chempot wrt xred(3,natom), hartrees.
 !!
-!! PARENTS
-!!      m_setvtr
-!!
-!! CHILDREN
-!!      ionicenergyandforces,xred2xcart
-!!
 !! SOURCE
 
 subroutine spatialchempot(e_chempot,chempot,grchempottn,natom,ntypat,nzchempot,typat,xred)
@@ -962,12 +946,6 @@ end subroutine spatialchempot
 !!  eew=final ion/ion energy in hartrees
 !!  grewtn(3,natom)=grads of ion/ion wrt xred(3,natom), hartrees.
 !!
-!! PARENTS
-!!      m_setvtr
-!!
-!! CHILDREN
-!!      ionicenergyandforces,xred2xcart
-!!
 !! SOURCE
 
 subroutine ionion_realSpace(dtset, eew, grewtn, rprimd, xred, zion)
@@ -1059,12 +1037,6 @@ end subroutine ionion_realSpace
 !! OUTPUT
 !!  eew=final ion/ion energy in hartrees
 !!  grewtn(3,natom)=grads of ion/ion wrt xred(3,natom), hartrees.
-!!
-!! PARENTS
-!!      m_setvtr
-!!
-!! CHILDREN
-!!      ionicenergyandforces,xred2xcart
 !!
 !! SOURCE
 

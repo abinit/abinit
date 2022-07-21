@@ -127,15 +127,6 @@ CONTAINS  !=====================================================================
 !!  They should be different only if pawrhoij is distributed over atomic sites
 !!  (in that case pawrhoij_unsym should not be distributed over atomic sites).
 !!
-!! PARENTS
-!!      m_afterscfloop,m_dfpt_nstwf,m_dfpt_scfcv,m_dfpt_vtorho,m_dfptnl_pert
-!!      m_scfcv_core,m_vtorho
-!!
-!! CHILDREN
-!!      free_my_atmtab,get_my_atmtab,initylmr,nhatgrid,pawfgrtab_free
-!!      pawfgrtab_init,pawrad_deducer0,pawtab_get_lsize,printxsf,sort_dp,spline
-!!      splint,wrtout,xmpi_barrier,xmpi_sum,xred2xcart
-!!
 !! SOURCE
 
 subroutine pawmkrho(compute_rhor_rhog,compch_fft,cplex,gprimd,idir,indsym,ipert,mpi_enreg,&
@@ -335,14 +326,6 @@ end subroutine pawmkrho
 !!   Notice that this formula is expressed on the fine grid, and requires
 !!   interpolating the PAW radial functions onto this grid, as well as calling
 !!   initylmr in order to get the angular functions on the grid points.
-!!
-!! PARENTS
-!!      m_bethe_salpeter,m_outscfcv,m_sigma_driver
-!!
-!! CHILDREN
-!!      free_my_atmtab,get_my_atmtab,initylmr,nhatgrid,pawfgrtab_free
-!!      pawfgrtab_init,pawrad_deducer0,pawtab_get_lsize,printxsf,sort_dp,spline
-!!      splint,wrtout,xmpi_barrier,xmpi_sum,xred2xcart
 !!
 !! SOURCE
 

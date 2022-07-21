@@ -20,12 +20,6 @@
 !! OUTPUT
 !!  (main routine)
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      abi_io_redirect,abimem_init,abinit_doctor,conducti_nc,conducti_paw
-!!      conducti_paw_core,emispec_paw,linear_optics_paw,timein,xmpi_end,xmpi_init
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H

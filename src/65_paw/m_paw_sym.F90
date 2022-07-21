@@ -77,22 +77,14 @@ CONTAINS  !=====================================================================
 !!     %zarot(2*lmax+1,2*lmax+1,lmax+1,nsym)=coefficients of the transformation of real spherical
 !!      harmonics under the symmetry operations.
 !!
-!! NOTES  
+!! NOTES
 !!  Derivatives are not symmetrized.
 !!
 !! OUTPUT
-!! 
-!! PARENTS
-!!      m_chi0,m_cohsex,m_prep_calc_ucrpa,m_sigc,m_sigx
-!!
-!! CHILDREN
-!!      get_bz_item,get_ibz_item,pawcprj_copy
 !!
 !! SOURCE
 
 subroutine paw_symcprj(ik_bz,nspinor,nband_k,Cryst,Kmesh,Pawtab,Pawang,Cprj_bz)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -135,7 +127,7 @@ subroutine paw_symcprj(ik_bz,nspinor,nband_k,Cryst,Kmesh,Pawtab,Pawang,Cprj_bz)
  do iatom=1,Cryst%natom
    nlmn_atom(iatom)=Pawtab(Cryst%typat(iatom))%lmn_size
  end do
- 
+
  call pawcprj_alloc(Cprjnk_kibz,ncpgr,nlmn_atom)
  call pawcprj_copy(Cprj_bz,Cprjnk_kibz)
 !
@@ -261,18 +253,10 @@ end subroutine paw_symcprj
 !!
 !! NOTES
 !!  Derivatives are not symmetrized.
-!! 
-!! PARENTS
-!!      m_exc_build
-!!
-!! CHILDREN
-!!      get_bz_item,get_ibz_item,pawcprj_copy
 !!
 !! SOURCE
 
 subroutine paw_symcprj_op(ik_bz,nspinor,nband_k,Cryst,Kmesh,Pawtab,Pawang,in_Cprj,out_Cprj)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -308,7 +292,7 @@ subroutine paw_symcprj_op(ik_bz,nspinor,nband_k,Cryst,Kmesh,Pawtab,Pawang,in_Cpr
 
  if (isirred) then  ! It is a point in the IBZ, Symmetrization is not needed.
    call pawcprj_copy(in_Cprj,out_Cprj)
-   RETURN  
+   RETURN
  end if
 !
 !The corresponding point kirr in the IBZ.

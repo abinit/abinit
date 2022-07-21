@@ -26,10 +26,6 @@
 !!   currently allocated, the actual argument is deallocated on procedure invocation so that the dummy
 !!   argument has an allocation status of not currently allocated.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -130,11 +126,6 @@ CONTAINS  !===========================================================
 !! FUNCTION
 !!  Performs a deep copy of a pointer.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
-!!
 !! SOURCE
 
 subroutine deep_copy_int0d(xval,copy)
@@ -157,11 +148,6 @@ end subroutine deep_copy_int0d
 !!
 !! FUNCTION
 !!  Performs a deep copy of a pointer.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
 !!
 !! SOURCE
 
@@ -194,11 +180,6 @@ end subroutine deep_copy_int1d
 !!
 !! FUNCTION
 !!  Performs a deep copy of a pointer.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
 !!
 !! SOURCE
 
@@ -233,11 +214,6 @@ end subroutine deep_copy_int2d
 !! FUNCTION
 !!  Performs a deep copy of a pointer.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
-!!
 !! SOURCE
 
 subroutine deep_copy_int3d(xval,copy)
@@ -271,11 +247,6 @@ end subroutine deep_copy_int3d
 !!
 !! FUNCTION
 !!  Performs a deep copy of a pointer.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
 !!
 !! SOURCE
 
@@ -312,11 +283,6 @@ end subroutine deep_copy_int4d
 !! FUNCTION
 !!  Performs a deep copy of a pointer.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
-!!
 !! SOURCE
 
 subroutine deep_copy_rdp0d(xval,copy)
@@ -338,11 +304,6 @@ end subroutine deep_copy_rdp0d
 
 !! FUNCTION
 !!  Performs a deep copy of a pointer.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
 !!
 !! SOURCE
 
@@ -375,11 +336,6 @@ end subroutine deep_copy_rdp1d
 !!
 !! FUNCTION
 !!  Performs a deep copy of a pointer.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
 !!
 !! SOURCE
 
@@ -414,11 +370,6 @@ end subroutine deep_copy_rdp2d
 !! FUNCTION
 !!  Performs a deep copy of a pointer.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
-!!
 !! SOURCE
 
 subroutine deep_copy_rdp3d(xval,copy)
@@ -452,11 +403,6 @@ end subroutine deep_copy_rdp3d
 !!
 !! FUNCTION
 !!  Performs a deep copy of a pointer.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
 !!
 !! SOURCE
 
@@ -493,11 +439,6 @@ end subroutine deep_copy_rdp4d
 !! FUNCTION
 !!  Performs a deep copy of a pointer.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
-!!
 !! SOURCE
 
 subroutine deep_copy_csp0d(xval,copy)
@@ -519,11 +460,6 @@ end subroutine deep_copy_csp0d
 !!
 !! FUNCTION
 !!  Performs a deep copy of a pointer.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
 !!
 !! SOURCE
 
@@ -556,11 +492,6 @@ end subroutine deep_copy_csp1d
 !!
 !! FUNCTION
 !!  Performs a deep copy of a pointer.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
 !!
 !! SOURCE
 
@@ -595,11 +526,6 @@ end subroutine deep_copy_csp2d
 !! FUNCTION
 !!  Performs a deep copy of a pointer.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
-!!
 !! SOURCE
 
 subroutine deep_copy_csp3d(xval,copy)
@@ -633,11 +559,6 @@ end subroutine deep_copy_csp3d
 !!
 !! FUNCTION
 !!  Performs a deep copy of a pointer.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
 !!
 !! SOURCE
 
@@ -674,11 +595,6 @@ end subroutine deep_copy_csp4d
 !! FUNCTION
 !!  Performs a deep copy of a pointer.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
-!!
 !! SOURCE
 
 subroutine deep_copy_cdp0d(xval,copy)
@@ -700,11 +616,6 @@ end subroutine deep_copy_cdp0d
 !!
 !! FUNCTION
 !!  Performs a deep copy of a pointer.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
 !!
 !! SOURCE
 
@@ -737,11 +648,6 @@ end subroutine deep_copy_cdp1d
 !!
 !! FUNCTION
 !!  Performs a deep copy of a pointer.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
 !!
 !! SOURCE
 
@@ -776,11 +682,6 @@ end subroutine deep_copy_cdp2d
 !! FUNCTION
 !!  Performs a deep copy of a pointer.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
-!!
 !! SOURCE
 
 subroutine deep_copy_cdp3d(xval,copy)
@@ -814,11 +715,6 @@ end subroutine deep_copy_cdp3d
 !!
 !! FUNCTION
 !!  Performs a deep copy of a pointer.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
 !!
 !! SOURCE
 
@@ -859,11 +755,6 @@ end subroutine deep_copy_cdp4d
 !!  This routine segfaults on XLF, disabled for the time being
 !!  Should test whether passing slen fixes the problem
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
-!!
 !! SOURCE
 
 subroutine deep_copy_ch1d(xval,copy,slen)
@@ -895,11 +786,6 @@ end subroutine deep_copy_ch1d
 !! FUNCTION
 !!  Performs a deep copy of a pointer.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
-!!
 !! SOURCE
 
 subroutine deep_copy_log0d(xval,copy)
@@ -922,11 +808,6 @@ end subroutine deep_copy_log0d
 !!
 !! FUNCTION
 !!  Performs a deep copy of a pointer.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
 !!
 !! SOURCE
 
@@ -959,11 +840,6 @@ end subroutine deep_copy_log1d
 !!
 !! FUNCTION
 !!  Performs a deep copy of a pointer.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
 !!
 !! SOURCE
 
@@ -998,11 +874,6 @@ end subroutine deep_copy_log2d
 !! FUNCTION
 !!  Performs a deep copy of a pointer.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
-!!
 !! SOURCE
 
 subroutine deep_copy_log3d(xval,copy)
@@ -1036,11 +907,6 @@ end subroutine deep_copy_log3d
 !!
 !! FUNCTION
 !!  Performs a deep copy of a pointer.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
 !!
 !! SOURCE
 
@@ -1077,11 +943,6 @@ end subroutine deep_copy_log4d
 !! FUNCTION
 !!  Performs a copy of an array.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
-!!
 !! SOURCE
 
 subroutine alloc_copy_int1d(xval,copy)
@@ -1109,11 +970,6 @@ end subroutine alloc_copy_int1d
 !!
 !! FUNCTION
 !!  Performs a copy of an array.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
 !!
 !! SOURCE
 
@@ -1144,11 +1000,6 @@ end subroutine alloc_copy_int2d
 !! FUNCTION
 !!  Performs a copy of an array.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
-!!
 !! SOURCE
 
 subroutine alloc_copy_int3d(xval,copy)
@@ -1178,11 +1029,6 @@ end subroutine alloc_copy_int3d
 !!
 !! FUNCTION
 !!  Performs a copy of an array.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
 !!
 !! SOURCE
 
@@ -1215,11 +1061,6 @@ end subroutine alloc_copy_int4d_1b
 !! FUNCTION
 !!  Performs a copy of an array.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
-!!
 !! SOURCE
 
 subroutine alloc_copy_int4d(xval, copy)
@@ -1251,11 +1092,6 @@ end subroutine alloc_copy_int4d
 !! FUNCTION
 !!  Performs a copy of an array.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
-!!
 !! SOURCE
 
 subroutine alloc_copy_rdp1d(xval,copy)
@@ -1283,11 +1119,6 @@ end subroutine alloc_copy_rdp1d
 !!
 !! FUNCTION
 !!  Performs a copy of an array.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
 !!
 !! SOURCE
 
@@ -1318,11 +1149,6 @@ end subroutine alloc_copy_rdp2d
 !! FUNCTION
 !!  Performs a copy of an array.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
-!!
 !! SOURCE
 
 subroutine alloc_copy_rdp3d(xval,copy)
@@ -1352,11 +1178,6 @@ end subroutine alloc_copy_rdp3d
 !!
 !! FUNCTION
 !!  Performs a copy of an array.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
 !!
 !! SOURCE
 
@@ -1389,11 +1210,6 @@ end subroutine alloc_copy_rdp4d
 !! FUNCTION
 !!  Performs a copy of an array.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
-!!
 !! SOURCE
 
 subroutine alloc_copy_rdp5d(xval,copy)
@@ -1425,11 +1241,6 @@ end subroutine alloc_copy_rdp5d
 !!
 !! FUNCTION
 !!  Performs a copy of an array.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
 !!
 !! SOURCE
 
@@ -1464,11 +1275,6 @@ end subroutine alloc_copy_rdp6d
 !! FUNCTION
 !!  Performs a copy of an array.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
-!!
 !! SOURCE
 
 subroutine alloc_copy_csp1d(xval,copy)
@@ -1496,11 +1302,6 @@ end subroutine alloc_copy_csp1d
 !!
 !! FUNCTION
 !!  Performs a copy of an array.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
 !!
 !! SOURCE
 
@@ -1531,11 +1332,6 @@ end subroutine alloc_copy_csp2d
 !! FUNCTION
 !!  Performs a copy of an array.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
-!!
 !! SOURCE
 
 subroutine alloc_copy_csp3d(xval,copy)
@@ -1565,11 +1361,6 @@ end subroutine alloc_copy_csp3d
 !!
 !! FUNCTION
 !!  Performs a copy of an array.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
 !!
 !! SOURCE
 
@@ -1602,11 +1393,6 @@ end subroutine alloc_copy_csp4d
 !! FUNCTION
 !!  Performs a copy of an array.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
-!!
 !! SOURCE
 
 subroutine alloc_copy_cdp1d(xval,copy)
@@ -1634,11 +1420,6 @@ end subroutine alloc_copy_cdp1d
 !!
 !! FUNCTION
 !!  Performs a copy of an array.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
 !!
 !! SOURCE
 
@@ -1669,11 +1450,6 @@ end subroutine alloc_copy_cdp2d
 !! FUNCTION
 !!  Performs a copy of an array.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
-!!
 !! SOURCE
 
 subroutine alloc_copy_cdp3d(xval,copy)
@@ -1703,11 +1479,6 @@ end subroutine alloc_copy_cdp3d
 !!
 !! FUNCTION
 !!  Performs a copy of an array.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
 !!
 !! SOURCE
 
@@ -1744,11 +1515,6 @@ end subroutine alloc_copy_cdp4d
 !!  This routine segfaults on XLF, disabled for the time being
 !!  Should test whether passing slen fixes the problem
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
-!!
 !! SOURCE
 
 subroutine alloc_copy_ch1d(xval,copy,slen)
@@ -1778,11 +1544,6 @@ end subroutine alloc_copy_ch1d
 !! FUNCTION
 !!  Performs a copy of an array.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
-!!
 !! SOURCE
 
 subroutine alloc_copy_log1d(xval,copy)
@@ -1810,11 +1571,6 @@ end subroutine alloc_copy_log1d
 !!
 !! FUNCTION
 !!  Performs a copy of an array.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
 !!
 !! SOURCE
 
@@ -1844,11 +1600,6 @@ end subroutine alloc_copy_log2d
 !!
 !! FUNCTION
 !!  Performs a copy of an array.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
 !!
 !! SOURCE
 
@@ -1880,11 +1631,6 @@ end subroutine alloc_copy_log3d
 !! FUNCTION
 !!  Performs a copy of an array.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
-!!
 !! SOURCE
 
 subroutine alloc_copy_log4d(xval,copy)
@@ -1915,11 +1661,6 @@ end subroutine alloc_copy_log4d
 !!
 !! FUNCTION
 !!  Performs a bitwise copy of a pointer.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
 !!
 !! SOURCE
 
@@ -1965,11 +1706,6 @@ end subroutine addr_copy_int1d
 !! FUNCTION
 !!  Performs a bitwise copy of a pointer.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
-!!
 !! SOURCE
 
 subroutine addr_copy_int2d(xval,copy)
@@ -2013,11 +1749,6 @@ end subroutine addr_copy_int2d
 !!
 !! FUNCTION
 !!  Performs a bitwise copy of a pointer.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
 !!
 !! SOURCE
 
@@ -2063,11 +1794,6 @@ end subroutine addr_copy_int3d
 !! FUNCTION
 !!  Performs a bitwise copy of a pointer.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
-!!
 !! SOURCE
 
 subroutine addr_copy_int4d(xval,copy)
@@ -2111,11 +1837,6 @@ end subroutine addr_copy_int4d
 !!
 !! FUNCTION
 !!  Performs a bitwise copy of a pointer.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
 !!
 !! SOURCE
 
@@ -2161,11 +1882,6 @@ end subroutine addr_copy_dp1d
 !! FUNCTION
 !!  Performs a bitwise copy of a pointer.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
-!!
 !! SOURCE
 
 subroutine addr_copy_dp2d(xval,copy)
@@ -2209,11 +1925,6 @@ end subroutine addr_copy_dp2d
 !!
 !! FUNCTION
 !!  Performs a bitwise copy of a pointer.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
 !!
 !! SOURCE
 
@@ -2259,11 +1970,6 @@ end subroutine addr_copy_dp3d
 !! FUNCTION
 !!  Performs a bitwise copy of a pointer.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
-!!
 !! SOURCE
 
 subroutine addr_copy_dp4d(xval,copy)
@@ -2307,11 +2013,6 @@ end subroutine addr_copy_dp4d
 !!
 !! FUNCTION
 !!  Performs a bitwise copy of a pointer.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
 !!
 !! SOURCE
 

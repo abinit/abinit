@@ -16,11 +16,11 @@ A.9 Run abilint (to avoid source files be updated by each separate developer)
 
 B. For all merges of a development version
 ------------------------------------------
-B.1 src/make parents , src/make abiauty  (obsolete - new scripts would be needed)
+B.1 src/make abiauty  (OBSOLETE - new scripts would be needed)
 
 C. For the final merge of a development version  
 -----------------------------------------------
-C.1 src/make abiauty  and perhaps at some point again abirules ...
+C.1 src/make abiauty  and perhaps at some point again abirules ...   (OBSOLETE)
 C.2 Update all reference files (optional, but definitely for major version number changes - see dev*/main*/update_refs.sh).
 
 D. For the first merge of a production version (possibly for the first release also)

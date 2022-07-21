@@ -11,8 +11,6 @@
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -407,12 +405,6 @@ CONTAINS  !=====================================================================
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_screening_driver
-!!
-!! CHILDREN
-!!      sigijtab_free
-!!
 !! SOURCE
 
 subroutine em1params_free(Ep)
@@ -448,12 +440,6 @@ end subroutine em1params_free
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gwdefs,m_sigma_driver
-!!
-!! CHILDREN
-!!      sigijtab_free
 !!
 !! SOURCE
 
@@ -496,12 +482,6 @@ end subroutine sigijtab_free
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_sigma_driver
-!!
-!! CHILDREN
-!!      sigijtab_free
 !!
 !! SOURCE
 
@@ -554,10 +534,6 @@ end subroutine sigparams_free
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 function sigma_type_from_key(key) result(sigma_type)
@@ -601,10 +577,6 @@ end function sigma_type_from_key
 !! INPUTS
 !!  Sigp<sigparams_t>=datatype gathering data and info on the self-energy run.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 pure logical function sigma_is_herm(Sigp)
@@ -637,10 +609,6 @@ end function sigma_is_herm
 !! INPUTS
 !!  Sigp<sigparams_t>=datatype gathering data and info on the self-energy run.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 pure logical function sigma_needs_w(Sigp)
@@ -671,10 +639,6 @@ end function sigma_needs_w
 !!
 !! INPUTS
 !!  Sigp<sigparams_t>=datatype gathering data and info on the self-energy run.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

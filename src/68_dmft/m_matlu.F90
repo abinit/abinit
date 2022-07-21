@@ -14,10 +14,6 @@
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! NOTES
 !!  subroutines in this module must never call
 !!   a subroutine of m_oper, m_green, m_self
@@ -135,11 +131,6 @@ CONTAINS  !=====================================================================
 !! OUTPUTS
 !!  maltu <type(matlu_type)>= density matrix in the local orbital basis and related variables
 !!
-!! PARENTS
-!!      m_datafordmft,m_forctqmc,m_green,m_hubbard_one,m_matlu,m_oper,m_self
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine init_matlu(natom,nspinor,nsppol,lpawu_natom,matlu)
@@ -193,11 +184,6 @@ end subroutine init_matlu
 !!
 !! OUTPUT
 !!  maltu <type(matlu_type)>= density matrix in the local orbital basis and related variables
-!!
-!! PARENTS
-!!      m_forctqmc,m_green,m_matlu,m_self
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -258,11 +244,6 @@ end subroutine zero_matlu
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_datafordmft,m_forctqmc,m_green,m_hubbard_one,m_matlu,m_oper,m_self
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine destroy_matlu(matlu,natom)
@@ -303,12 +284,6 @@ end subroutine destroy_matlu
 !!
 !! OUTPUT
 !!  maltu2 <type(matlu_type)>= density matrix matlu2 in the local orbital basis and related variables
-!!
-!! PARENTS
-!!      m_datafordmft,m_dmft,m_forctqmc,m_green,m_hubbard_one,m_matlu,m_oper
-!!      m_self
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -382,12 +357,6 @@ end subroutine copy_matlu
 !!             /=0  print matrix on ab_out
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_datafordmft,m_dmft,m_forctqmc,m_green,m_hubbard_one,m_matlu,m_oper
-!!      m_self
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -561,11 +530,6 @@ end subroutine print_matlu
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_datafordmft,m_forctqmc,m_green
-!!
-!! CHILDREN
 !!
 !! SOURCE
  subroutine sym_matlu(cryst_struc,gloc,pawang,paw_dmft)
@@ -830,11 +794,6 @@ end subroutine print_matlu
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_oper
-!!
-!! CHILDREN
-!!
 !! SOURCE
  subroutine inverse_matlu(matlu,natom,prtopt)
  use defs_basis
@@ -906,11 +865,6 @@ end subroutine print_matlu
 !!  toldiff = maximum value for the difference between matlu1 and matlu2
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_datafordmft,m_forctqmc,m_green,m_oper
-!!
-!! CHILDREN
 !!
 !! SOURCE
 subroutine diff_matlu(char1,char2,matlu1,matlu2,natom,option,toldiff,ierr,zero_or_one)
@@ -1020,11 +974,6 @@ end subroutine diff_matlu
 !! OUTPUT
 !!  maltu3 <type(matlu_type)>= density matrix matlu3, sum/substract matlu1 and matlu2
 !!
-!! PARENTS
-!!      m_datafordmft,m_dmft,m_forctqmc,m_green
-!!
-!! CHILDREN
-!!
 !! SOURCE
 subroutine add_matlu(matlu1,matlu2,matlu3,natom,sign_matlu2)
 
@@ -1078,11 +1027,6 @@ end subroutine add_matlu
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_matlu
-!!
-!! CHILDREN
 !!
 !! SOURCE
  subroutine chg_repr_matlu(glocspsp,glocnm,natom,option,prtopt)
@@ -1201,11 +1145,6 @@ end subroutine add_matlu
 !!  trace_loc(natom,nsppol+1)= trace for each atoms and each polarization,
 !!                             trace_loc(iatom,nsppol+1) is
 !!                             the full trace over polarization also.
-!!
-!! PARENTS
-!!      m_green,m_oper
-!!
-!! CHILDREN
 !!
 !! SOURCE
  subroutine trace_matlu(matlu,natom,trace_loc,itau)
@@ -1328,11 +1267,6 @@ end subroutine add_matlu
 !!
 !! SIDE EFFECTS
 !!
-!! PARENTS
-!!      m_datafordmft,m_matlu
-!!
-!! CHILDREN
-!!
 !! SOURCE
  subroutine gather_matlu(gloc,gathergloc,natom,option,prtopt)
  use defs_basis
@@ -1447,11 +1381,6 @@ end subroutine add_matlu
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_forctqmc,m_hubbard_one,m_self
-!!
-!! CHILDREN
 !!
 !! SOURCE
  subroutine diag_matlu(matlu,matlu_diag,natom,prtopt,eigvectmatlu,nsppol_imp,checkstop,optreal,test)
@@ -1935,11 +1864,6 @@ end subroutine add_matlu
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_forctqmc,m_hubbard_one,m_self
-!!
-!! CHILDREN
-!!
 !! SOURCE
  subroutine rotate_matlu(matlu,rot_mat,natom,prtopt,inverse)
  use defs_basis
@@ -2157,11 +2081,6 @@ end subroutine add_matlu
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_forctqmc,m_green,m_self
-!!
-!! CHILDREN
-!!
 !! SOURCE
  subroutine shift_matlu(matlu,natom,shift,signe)
  use defs_basis
@@ -2225,11 +2144,6 @@ end subroutine add_matlu
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_forctqmc
-!!
-!! CHILDREN
 !!
 !! SOURCE
  subroutine checkreal_matlu(matlu,natom,tol)
@@ -2332,11 +2246,6 @@ end subroutine add_matlu
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_datafordmft
-!!
-!! CHILDREN
-!!
 !! SOURCE
  subroutine checkdiag_matlu(matlu,natom,tol,nondiag)
  use defs_basis
@@ -2425,11 +2334,6 @@ end subroutine add_matlu
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_forctqmc,m_oper
-!!
-!! CHILDREN
-!!
 !! SOURCE
  subroutine prod_matlu(matlu1,matlu2,matlu3,natom)
  use defs_basis
@@ -2497,10 +2401,6 @@ end subroutine add_matlu
 !!
 !! NOTES
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
  subroutine conjg_matlu(matlu1,natom)
  use defs_basis
@@ -2558,10 +2458,6 @@ end subroutine add_matlu
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
  subroutine ln_matlu(matlu1,natom)
@@ -2625,11 +2521,6 @@ end subroutine add_matlu
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_forctqmc,m_hubbard_one
-!!
-!! CHILDREN
 !!
 !! SOURCE
  subroutine slm2ylm_matlu(matlu,natom,option,optprt)
@@ -2771,11 +2662,6 @@ end subroutine add_matlu
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_forctqmc
-!!
-!! CHILDREN
-!!
 !! SOURCE
  subroutine fac_matlu(matlu,natom,fac)
  use defs_basis
@@ -2839,11 +2725,6 @@ end subroutine add_matlu
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_forctqmc
-!!
-!! CHILDREN
 !!
 !! SOURCE
  subroutine printplot_matlu(matlu,natom,freq,char1,units,imre)
@@ -2916,11 +2797,6 @@ end subroutine add_matlu
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_forctqmc
-!!
-!! CHILDREN
 !!
 !! SOURCE
  subroutine identity_matlu(matlu,natom)
