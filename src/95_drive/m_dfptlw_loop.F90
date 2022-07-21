@@ -678,6 +678,8 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
              !AZ_ini********************************************
              ! comment this line...
              !if (i2pert/=natom+2) ABI_FREE(vpsp1_i2pertdq)
+             ! FREE vpsp1_i2pertdq always
+             ABI_FREE(vpsp1_i2pertdq) 
              !AZ_fin********************************************
              ABI_FREE(vpsp1_i1pertdq_geom)
              ABI_FREE(vpsp1_i1pertdqdq)
