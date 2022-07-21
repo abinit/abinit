@@ -559,7 +559,9 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 
 !Compute nonlocal form factors ffnl1, for all atoms and all k-points.
  if (dtset%ffnl_lw == 0) then 
-   if (dtset%lw_qdrpl==1.or.dtset%lw_flexo==3) ider=1; idir0=4; dimffnl=4
+   !AZ_ini**************************************************************************************
+   if (dtset%lw_qdrpl==1.or.dtset%lw_flexo==3.or.dtset%lw_natopt==1) ider=1; idir0=4; dimffnl=4
+   !AZ_fin**************************************************************************************
    if (dtset%lw_flexo==1.or.dtset%lw_flexo==2.or.dtset%lw_flexo==4) then
      ider=2; idir0=4; dimffnl=10
    end if
