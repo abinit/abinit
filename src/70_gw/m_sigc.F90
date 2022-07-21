@@ -5,10 +5,6 @@
 !! FUNCTION
 !!  Compute matrix elements of the correlated part of the e-h self-energy
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -158,11 +154,6 @@ contains
 !!     of the oscillator matrix elements. In case of G_oW_o and GW_o calculations, however,
 !!     it is possible to make an invariant by just including all the degenerate states and
 !!     averaging the final results over the degenerate subset.
-!!
-!! PARENTS
-!!      m_sigma_driver
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1443,11 +1434,6 @@ end subroutine calc_sigc_me
 !!
 !! SIDE EFFECTS
 !!
-!! PARENTS
-!!      m_sigc
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine calc_coh_comp(iqibz,i_sz,same_band,nspinor,nsig_ab,ediff,npwc,gvec,&
@@ -1560,11 +1546,6 @@ end subroutine calc_coh_comp
 !! SIDE EFFECTS
 !! npoles_missing=Incremented with the number of poles whose contribution has not been taken into account due to
 !!  limited frequency mesh used for W.
-!!
-!! PARENTS
-!!      m_sigc
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1982,11 +1963,6 @@ end subroutine calc_sigc_cd
 !!
 !! NOTES
 !! Taken from old routine
-!!
-!! PARENTS
-!!      m_sigc
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

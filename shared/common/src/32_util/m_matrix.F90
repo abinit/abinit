@@ -14,10 +14,6 @@
 !!
 !! NOTES
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -61,10 +57,6 @@ CONTAINS  !===========================================================
 !!  matrix= square root of the matrix
 !!  force_diag = 0 if it no 0 on diagonal
 !!             = nb of zeros found otherwise
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -232,10 +224,6 @@ end subroutine invsqrt_matrix
 !!
 !! OUTPUT
 !!  matrix= square root of the matrix
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -591,10 +579,6 @@ end subroutine blockdiago_fordsyev
 !!
 !! OUTPUT
 !!  matrix= square root of the matrix
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

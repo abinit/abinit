@@ -26,8 +26,6 @@
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!
 !! SOURCE
 !!
   subroutine abi_dheev(jobz,uplo,n,a,lda,w,&
@@ -209,8 +207,6 @@ end subroutine abi_cheev
 !! FUNCTION
 !!
 !! INPUTS
-!!
-!! PARENTS
 !!
 !! SOURCE
 

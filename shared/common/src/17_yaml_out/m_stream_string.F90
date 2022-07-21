@@ -21,8 +21,6 @@
 !! you already flushed it using stream%flush, stream%transfer, stream%to_string or stream%to_file.
 !! Unlike the last four methods, stream_copy and stream_debug do not modify the source stream
 !!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -148,10 +146,6 @@ end subroutine stream_flush_units
 !!  free stream. Most of the time this is not needed since
 !!  routines to access the content free the stream
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine stream_free(stream)
@@ -177,10 +171,6 @@ end subroutine stream_free
 !! FUNCTION
 !!  copy src content to dest without altering src
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine stream_copy(src, dest)
@@ -200,10 +190,6 @@ end subroutine stream_copy
 !!
 !! FUNCTION
 !!  Write string to stream, allocating memory if needed
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -251,10 +237,6 @@ end subroutine stream_push
 !! FUNCTION
 !!  Remove the last chunk of stream an put its content in string
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine stream_pop_chunk(stream, string)
@@ -287,10 +269,6 @@ end subroutine stream_pop_chunk
 !! FUNCTION
 !!  Copy the content of stream to string, freeing stream. String must be large enough
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine stream_to_string(stream, string)
@@ -319,10 +297,6 @@ end subroutine stream_to_string
 !! FUNCTION
 !!  Write the content of stream to the file, freeing stream
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine stream_to_file(stream, file_d)
@@ -350,10 +324,6 @@ end subroutine stream_to_file
 !!  Copy the content of src to dest, freeing src
 !!  If possible does not reallocate memory and just have
 !!  dest point to src content
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -387,10 +357,6 @@ end subroutine stream_transfer
 !!
 !! FUNCTION
 !!  Show the content of the chunks on stdout
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

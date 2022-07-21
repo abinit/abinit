@@ -12,10 +12,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -149,14 +145,6 @@ contains
 !!  C = -----------------------------------           and stored on file.
 !!      |     v-+      |    [-W+v]--      | (vc dwn)
 !!      -----------------------------------
-!!
-!! PARENTS
-!!      m_exc_build
-!!
-!! CHILDREN
-!!      cwtime,get_bz_item,gsph_fft_tabs,paw_rho_tw_g,pawcprj_alloc
-!!      pawcprj_free,pawpwij_free,pawpwij_init,rho_tw_g,timab,wfd%change_ngfft
-!!      wfd%get_cprj,wfd%get_ur,wrtout,xmpi_distab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1734,13 +1722,6 @@ end subroutine exc_build_block
 !!      |     v-+      |    [-W+v]--      | (vc dwn)
 !!      -----------------------------------
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      cwtime,get_bz_item,gsph_fft_tabs,paw_rho_tw_g,pawcprj_alloc
-!!      pawcprj_free,pawpwij_free,pawpwij_init,rho_tw_g,timab,wfd%change_ngfft
-!!      wfd%get_cprj,wfd%get_ur,wrtout,xmpi_distab,xmpi_sum
-!!
 !! SOURCE
 
 subroutine exc_build_v(spin1,spin2,nsppol,npweps,Bsp,Cryst,Kmesh,Qmesh,Gsph_x,Gsph_c,Vcp,&
@@ -2111,14 +2092,6 @@ end subroutine exc_build_v
 !! OUTPUT
 !!  The excitonic Hamiltonian is saved on an external binary file (see below).
 !!
-!! PARENTS
-!!      m_bethe_salpeter
-!!
-!! CHILDREN
-!!      cwtime,get_bz_item,gsph_fft_tabs,paw_rho_tw_g,pawcprj_alloc
-!!      pawcprj_free,pawpwij_free,pawpwij_init,rho_tw_g,timab,wfd%change_ngfft
-!!      wfd%get_cprj,wfd%get_ur,wrtout,xmpi_distab,xmpi_sum
-!!
 !! SOURCE
 
 subroutine exc_build_ham(BSp,BS_files,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,&
@@ -2239,14 +2212,6 @@ end subroutine exc_build_ham
 !! OUTPUT
 !!   mgq0(npweps,lomo_min:humo_max,lomo_min:humo_max,Wfd%nkibz,Wfd%nsppol)
 !!     Allocated here and filled with the matrix elements on each node.
-!!
-!! PARENTS
-!!      m_exc_build
-!!
-!! CHILDREN
-!!      cwtime,get_bz_item,gsph_fft_tabs,paw_rho_tw_g,pawcprj_alloc
-!!      pawcprj_free,pawpwij_free,pawpwij_init,rho_tw_g,timab,wfd%change_ngfft
-!!      wfd%get_cprj,wfd%get_ur,wrtout,xmpi_distab,xmpi_sum
 !!
 !! SOURCE
 

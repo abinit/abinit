@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -75,10 +71,6 @@ contains
 !!  tdks <type(tdks_type)> = Main RT-TDDFT object
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 subroutine rttddft_setup_ele_step(dtset, mpi_enreg, psps, tdks)
@@ -191,10 +183,6 @@ end subroutine rttddft_setup_ele_step
 !!
 !! OUTPUT
 !!  gs_hamk <type(gs_hamiltonian_type)> = Hamiltonian object
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 subroutine rttddft_init_hamiltonian(dtset, energies, gs_hamk, istep, mpi_enreg, psps, tdks)

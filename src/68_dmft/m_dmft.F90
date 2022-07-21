@@ -14,10 +14,6 @@
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -91,14 +87,6 @@ contains
 !!  paw_dmft <type(paw_dmft_type)> =  data for self-consistent DFT+DMFT calculations.
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_vtorho
-!!
-!! CHILDREN
-!!      compute_green,copy_green,copy_matlu,dc_self,destroy_green,destroy_self
-!!      dftu_self,dyson,hubbard_one,init_green,initialize_self,print_green
-!!      rw_self,wrtout
 !!
 !! SOURCE
 
@@ -577,14 +565,6 @@ end subroutine dmft_solve
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_dmft
-!!
-!! CHILDREN
-!!      compute_green,copy_green,copy_matlu,dc_self,destroy_green,destroy_self
-!!      dftu_self,dyson,hubbard_one,init_green,initialize_self,print_green
-!!      rw_self,wrtout
-!!
 !! SOURCE
 
 subroutine impurity_solve(cryst_struc,green,hu,paw_dmft,&
@@ -843,14 +823,6 @@ end subroutine impurity_solve
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_dmft
-!!
-!! CHILDREN
-!!      compute_green,copy_green,copy_matlu,dc_self,destroy_green,destroy_self
-!!      dftu_self,dyson,hubbard_one,init_green,initialize_self,print_green
-!!      rw_self,wrtout
-!!
 !! SOURCE
 
 subroutine dyson(green,paw_dmft,self,weiss,opt_weissself)
@@ -963,14 +935,6 @@ end subroutine dyson
 !!  paw_dmft = data for self-consistent DFT+DMFT calculations.
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_dmft
-!!
-!! CHILDREN
-!!      compute_green,copy_green,copy_matlu,dc_self,destroy_green,destroy_self
-!!      dftu_self,dyson,hubbard_one,init_green,initialize_self,print_green
-!!      rw_self,wrtout
 !!
 !! SOURCE
 

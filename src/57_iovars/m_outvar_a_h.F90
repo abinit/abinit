@@ -10,10 +10,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -95,12 +91,6 @@ contains
 !!
 !!  Note that acell, occ, rprim, xred and vel might have been modified by the
 !!  computation, so that their values if choice=1 or choice=2 will differ.
-!!
-!! PARENTS
-!!      m_outvars
-!!
-!! CHILDREN
-!!      prttagm,prttagm_images
 !!
 !! SOURCE
 
@@ -861,6 +851,13 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  intarr(2,:)=dtsets(:)%eph_phrange(2)
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,2,narrm,ncid,ndtset_alloc,'eph_phrange','INT',0)
 
+ dprarr(1,:)=dtsets(:)%eph_phrange_w(1)
+ dprarr(2,:)=dtsets(:)%eph_phrange_w(2)
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,2,narrm,ncid,ndtset_alloc,'eph_phrange_w','ENE',0)
+
+ intarr(1,:)=dtsets(:)%eph_prtscratew
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'eph_prtscratew','INT',0)
+
  intarr(1,:)=dtsets(:)%eph_restart
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'eph_restart','INT',0)
 
@@ -1158,6 +1155,18 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
 
  intarr(1,:)=dtsets(:)%gpu_linalg_limit
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gpu_linalg_limit','INT',0)
+
+ !intarr(1,:)  =dtsets(:)%gstore_cplex
+ !call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gstore_cplex','INT',0)
+
+ !intarr(1,:)  =dtsets(:)%gstore_with_vk
+ !call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gstore_with_vk','INT',0)
+
+ !intarr(1,:)  =dtsets(:)%gstore_gstore_brange
+ !call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gstore_brange','INT',0)
+
+ !dprarr(1,:)  =dtsets(:)%gstore_gstore_erange
+ !call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gstore_erange','ENE',0)
 
 !grchrg
  print_constraint=0

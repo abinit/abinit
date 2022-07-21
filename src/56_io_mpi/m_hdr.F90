@@ -17,10 +17,6 @@
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -380,7 +376,7 @@ module m_hdr
  !    Moreover the files produced by the DFPT code do not have a well-defined extension and, as a consequence,
  !    they require a special treatment. In python I would use regexp but Fortran is not python!
 
- type(abifile_t),private,parameter :: all_abifiles(50) = [ &
+ type(abifile_t),private,parameter :: all_abifiles(51) = [ &
 
     ! Files with wavefunctions:
     abifile_t(varname="coefficients_of_wavefunctions", fform=2, ext="WFK", class="wf_planewave"), &
@@ -436,7 +432,7 @@ module m_hdr
     abifile_t(varname="pawnabla_core", fform=611, ext="OPT2", class="data"), &
     abifile_t(varname="pawnabla_loc", fform=612, ext="OPT", class="data"), &
 
-   ! Data used in elphon
+   ! Data used in E-PH code
     abifile_t(varname="gkk_elements", fform=42, ext="GKK", class="data"), &
 
    ! DKK matrix elements in netcdf format (optic, eph)
@@ -461,7 +457,8 @@ module m_hdr
    abifile_t(varname="spectral_weights", fform=5000, ext="FOLD2BLOCH", class="data"), &
    abifile_t(varname="no_fftdatar_write", fform=6000, ext="ABIWAN", class="data"), &
    abifile_t(varname="None", fform=6001, ext="KERANGE", class="data"), &
-   abifile_t(varname="None", fform=6002, ext="SIGEPH", class="data") &
+   abifile_t(varname="None", fform=6002, ext="SIGEPH", class="data"), &
+   abifile_t(varname="None", fform=6003, ext="GSTORE", class="data") &
   ]
 
  type(abifile_t),public,parameter :: abifile_none = abifile_t(varname="None", fform=0, ext="None", class="None")
@@ -680,10 +677,6 @@ end function varname_from_fname
 !!  Return abifile_none if not found. This function is used to find the last
 !!  value of fform when we write data to file.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 type(abifile_t) function abifile_from_varname(varname) result(afile)
@@ -716,10 +709,6 @@ end function abifile_from_varname
 !!  find the name of the netcdf variable from the fform and
 !!  detect whether the file contains pawrhoij.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 type(abifile_t) function abifile_from_fform(fform) result(afile)
@@ -747,12 +736,6 @@ end function abifile_from_fform
 !! FUNCTION
 !!   This function is used ifdef DEBUG_MODE. It tests whether the value of fform
 !!   is registered in all_abifiles.
-!!
-!! PARENTS
-!!      m_hdr
-!!
-!! CHILDREN
-!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -794,12 +777,6 @@ end subroutine check_fform
 !!
 !! FUNCTION
 !!  Check the consistency of the internal abifiles table.
-!!
-!! PARENTS
-!!      m_hdr
-!!
-!! CHILDREN
-!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -845,12 +822,6 @@ end subroutine test_abifiles
 !! FUNCTION
 !!  Allocate memory from dimensions with the exception of pawrhoij.
 !!  This is a private routine. Client code should use hdr_init, hdr_fort_read.
-!!
-!! PARENTS
-!!      m_hdr
-!!
-!! CHILDREN
-!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -918,13 +889,6 @@ end subroutine hdr_malloc
 !! OUTPUT
 !! hdr <type(hdr_type)>=the header, initialized, and for most part of
 !!   it, contain its definite values, except for evolving variables
-!!
-!! PARENTS
-!!      m_bethe_salpeter,m_dfpt_looppert,m_dfpt_lw,m_gstate,m_longwave
-!!      m_nonlinear,m_respfn_driver,m_screening_driver,m_sigma_driver
-!!
-!! CHILDREN
-!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -1047,11 +1011,6 @@ end subroutine hdr_init
 !! OUTPUT
 !!  (only deallocate)
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      crystal_init,wrtout
-!!
 !! SOURCE
 
 subroutine hdr_free(hdr)
@@ -1061,8 +1020,6 @@ subroutine hdr_free(hdr)
  class(hdr_type),intent(inout) :: hdr
 
 ! *************************************************************************
-
- DBG_ENTER("COLL")
 
  !@hdr_type
 
@@ -1102,8 +1059,6 @@ subroutine hdr_free(hdr)
    ABI_FREE(hdr%pawrhoij)
  end if
 
- DBG_EXIT("COLL")
-
 end subroutine hdr_free
 !!***
 
@@ -1124,12 +1079,6 @@ end subroutine hdr_free
 !!
 !! NOTES
 !!  The present version deals with versions of the header up to 56.
-!!
-!! PARENTS
-!!      m_ddk,m_dfpt_looppert,m_io_kss,m_io_screening,m_wfd,m_wfk,optic
-!!
-!! CHILDREN
-!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -1269,10 +1218,6 @@ end subroutine hdr_copy
 !! OUTPUT
 !!  nelect=Number of electrons in the unit cell.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 real(dp) pure function hdr_get_nelect_from_occ(Hdr) result(nelect)
@@ -1325,12 +1270,6 @@ end function hdr_get_nelect_from_occ
 !! OUTPUT
 !! hdr <type(hdr_type)>=the header, initialized, and for most part of
 !!   it, contain its definite values, except for evolving variables
-!!
-!! PARENTS
-!!      m_hdr,m_sigtk,m_wfk
-!!
-!! CHILDREN
-!!      crystal_init,wrtout
 !!
 !! SOURCE
 ! CP modified argument list: added ne_qFD,nh_qFD,ivalence
@@ -1543,13 +1482,6 @@ end subroutine hdr_init_lowlvl
 !!  Hdr<hdr_type>=The abinit header.
 !!  fform=Kind of the array in the file (0 signals an error)
 !!
-!! PARENTS
-!!      abitk,cut3d,ioprof,m_common,m_conducti,m_ioarr,m_mpi_setup,m_paw_optics
-!!      m_wfk
-!!
-!! CHILDREN
-!!      crystal_init,wrtout
-!!
 !! SOURCE
 
 subroutine hdr_read_from_fname(Hdr,fname,fform,comm)
@@ -1625,11 +1557,6 @@ end subroutine hdr_read_from_fname
 !!
 !! OUTPUT
 !!  Only writing.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -1803,12 +1730,6 @@ end subroutine hdr_mpio_skip
 !!  nfrec = Number fof Fortran records
 !!  bsize_frecords(nfrec) = Byte size of each records. Allocated inside this routine.
 !!
-!! PARENTS
-!!      m_wfk
-!!
-!! CHILDREN
-!!      crystal_init,wrtout
-!!
 !! SOURCE
 
 subroutine hdr_bsize_frecords(Hdr,formeig,nfrec,bsize_frecords)
@@ -1934,11 +1855,6 @@ end subroutine hdr_bsize_frecords
 !! When echoing (rdwr=3) does not rewind the file.
 !! When reading (rdwr=5) or writing (rdwr=6), DOES NOT rewind the file
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      crystal_init,wrtout
-!!
 !! SOURCE
 
 subroutine hdr_io_wfftype(fform,hdr,rdwr,wff)
@@ -2042,12 +1958,6 @@ end subroutine hdr_io_wfftype
 !! When echoing (rdwr=3) does not rewind the file.
 !! When reading (rdwr=5) or writing (rdwr=6), DOES NOT rewind the file
 !!
-!! PARENTS
-!!      m_hdr
-!!
-!! CHILDREN
-!!      crystal_init,wrtout
-!!
 !! SOURCE
 
 subroutine hdr_io_int(fform,hdr,rdwr,unitfi)
@@ -2106,12 +2016,6 @@ end subroutine hdr_io_int
 !!
 !! TODO
 !!   Activate new header, avoid printing tons of lines with occupations.
-!!
-!! PARENTS
-!!      m_hdr
-!!
-!! CHILDREN
-!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -2278,11 +2182,6 @@ end subroutine hdr_echo
 !! on temporary wavefunction files.
 !! This initialize further reading and checking by rwwf
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      crystal_init,wrtout
-!!
 !! SOURCE
 
 subroutine hdr_skip_int(unitfi,ierr)
@@ -2327,12 +2226,6 @@ end subroutine hdr_skip_int
 !! No checking performed, since hdr_skip is assumed to be used only
 !! on temporary wavefunction files.
 !! This initialize further reading and checking by rwwf
-!!
-!! PARENTS
-!!      m_hdr
-!!
-!! CHILDREN
-!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -2489,11 +2382,6 @@ end subroutine hdr_skip_wfftype
 !! hdr <type(hdr_type)>=the header, initialized, and for most part of
 !!   it, contain its definite values, except for evolving variables
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      crystal_init,wrtout
-!!
 !! SOURCE
 ! CP added fermih to the list of arguments
 subroutine hdr_update(hdr,bantot,etot,fermie,fermih,residm,rprimd,occ,pawrhoij,xred,amu, &
@@ -2565,11 +2453,6 @@ end subroutine hdr_update
 !!
 !! NOTES
 !! This routine is called only in the case of MPI version of the code.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -2989,13 +2872,6 @@ end function read_first_record
 !! NOTES
 !! The file is supposed to be open already
 !!
-!! PARENTS
-!!      m_bader,m_bse_io,m_cut3d,m_dvdb,m_elphon,m_hdr,m_io_screening,m_ioarr
-!!      m_iogkk,macroave,mrggkk
-!!
-!! CHILDREN
-!!      crystal_init,wrtout
-!!
 !! SOURCE
 
 subroutine hdr_fort_read(Hdr,unit,fform,rewind)
@@ -3133,13 +3009,6 @@ end subroutine hdr_fort_read
 !!
 !! OUTPUT
 !!  fform=kind of the array in the file. if the reading fails, return fform=0
-!!
-!! PARENTS
-!!      m_bader,m_common,m_dvdb,m_hdr,m_inkpts,m_inwffil,m_io_screening,m_ioarr
-!!      m_wfk,macroave,optic
-!!
-!! CHILDREN
-!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -3367,11 +3236,6 @@ end subroutine hdr_ncread
 !! NOTES
 !! The file is supposed to be open already
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      crystal_init,wrtout
-!!
 !! SOURCE
 
 subroutine hdr_fort_write(Hdr,unit,fform,ierr,rewind)
@@ -3476,10 +3340,6 @@ end subroutine hdr_fort_write
 !!  Hdr<hdr_type>=The header of the file.
 !!  unit=unit number of the unformatted file
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 integer function hdr_backspace(hdr, unit, msg) result(ierr)
@@ -3534,11 +3394,6 @@ end function hdr_backspace
 !! OUTPUT
 !!  Only writing
 !!
-!! PARENTS
-!!      ioarr,m_hdr,m_wfk
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 integer function hdr_ncwrite(hdr, ncid, fform, spinat, nc_define) result(ncerr)
@@ -3576,6 +3431,7 @@ integer function hdr_ncwrite(hdr, ncid, fform, spinat, nc_define) result(ncerr)
    !call wrtout(std_out, "hdr_ncwrite: defining variables")
    NCF_CHECK(nctk_def_basedims(ncid, defmode=.True.))
 
+   ! Write ETSF-dims
    ncerr = nctk_def_dims(ncid, [ &
      nctkdim_t("max_number_of_states", hdr%mband), &
      nctkdim_t("number_of_atoms", hdr%natom), &
@@ -3741,7 +3597,7 @@ integer function hdr_ncwrite(hdr, ncid, fform, spinat, nc_define) result(ncerr)
  ! Switch to write mode.
  NCF_CHECK(nctk_set_datamode(ncid))
 
- ! Associate and write values to ETSF groups.
+ ! write ETSF variables.
  if (hdr%usewvl == 0) then
    ! Plane wave case.
    basis_set = "plane_waves"
@@ -3805,9 +3661,9 @@ integer function hdr_ncwrite(hdr, ncid, fform, spinat, nc_define) result(ncerr)
 &  [hdr%ecut_eff, hdr%ecutdg, hdr%ecutsm, hdr%etot, hdr%residm, hdr%stmbias, hdr%tphysel, hdr%tsmear])
  NCF_CHECK(ncerr)
 
-!Array variables.
+ ! Write Abinit array variables.
 
-! FIXME Be careful with zionpsp if alchemical mixing!
+ ! FIXME Be careful with zionpsp if alchemical mixing!
  NCF_CHECK(nf90_put_var(ncid, vid("istwfk"), hdr%istwfk))
  NCF_CHECK(nf90_put_var(ncid, vid("pspcod"), hdr%pspcod))
  NCF_CHECK(nf90_put_var(ncid, vid("pspdat"), hdr%pspdat))
@@ -3834,11 +3690,11 @@ integer function hdr_ncwrite(hdr, ncid, fform, spinat, nc_define) result(ncerr)
  end if
 
  ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: &
-   "kptopt", "pawcpxocc"],[hdr%kptopt, hdr%pawcpxocc])
+   "kptopt", "pawcpxocc"], [hdr%kptopt, hdr%pawcpxocc])
  NCF_CHECK(ncerr)
 
  ncerr = nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: &
-   "nelect", "charge"],[hdr%nelect, hdr%cellcharge])
+   "nelect", "charge"], [hdr%nelect, hdr%cellcharge])
  NCF_CHECK(ncerr)
 
  ! NB: In etsf_io the number of electrons is declared as integer.
@@ -3886,12 +3742,6 @@ end function hdr_ncwrite
 !! FUNCTION
 !!  Set the occuations hdr%occ(:) from a 3d array with stride.
 !!
-!! PARENTS
-!!      m_hdr
-!!
-!! CHILDREN
-!!      crystal_init,wrtout
-!!
 !! SOURCE
 
 subroutine hdr_set_occ(hdr, occ3d)
@@ -3925,12 +3775,6 @@ end subroutine hdr_set_occ
 !!
 !! FUNCTION
 !!  Return occupations in a 3d array with stride.
-!!
-!! PARENTS
-!!      m_hdr
-!!
-!! CHILDREN
-!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -4036,12 +3880,6 @@ end subroutine hdr_get_occ3d
 !!   (G) the use of PAW method                            (tpaw)
 !!   (H) the number of lmn elements for the paw basis     (tlmn)
 !!   (I) the energy cutoff for the double (fine) grid     (tdg)
-!!
-!! PARENTS
-!!      m_inwffil,m_io_screening,m_ioarr,m_wfk
-!!
-!! CHILDREN
-!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -4852,10 +4690,6 @@ end subroutine hdr_check
 !! OUTPUT
 !!  ierr
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 integer function hdr_compare(hdr1, hdr2) result(ierr)
@@ -4939,11 +4773,6 @@ end function hdr_compare
 !!
 !! OUTPUT
 !!  Only check
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -5030,10 +4859,10 @@ subroutine hdr_vs_dtset(Hdr,Dtset)
 
  if (.not.(tsymrel.and.ttnons.and.tsymafm)) then
    write(msg,'(a)')' Header '
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(std_out,msg)
    call print_symmetries(Hdr%nsym,Hdr%symrel,Hdr%tnons,Hdr%symafm)
    write(msg,'(a)')' Dtset  '
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(std_out,msg)
    call print_symmetries(Dtset%nsym,Dtset%symrel,Dtset%tnons,Dtset%symafm)
    ABI_ERROR('Check symmetry operations')
  end if
@@ -5044,13 +4873,13 @@ subroutine hdr_vs_dtset(Hdr,Dtset)
  end if
  ! CP added
  if (abs(Dtset%ne_qFD-hdr%ne_qFD)>tol6) then
-   write(msg,'(2(a,f8.2))')"File contains ", hdr%ne_qFD,&
-&  " electrons in the conduction bands but nelect initialized from input is ",Dtset%ne_qFD
+   write(msg,'(2(a,f8.2))')"File contains ", hdr%ne_qFD, &
+    " electrons in the conduction bands but nelect initialized from input is ",Dtset%ne_qFD
    ABI_ERROR(msg)
  end if
  if (abs(Dtset%nh_qFD-hdr%nh_qFD)>tol6) then
    write(msg,'(2(a,f8.2))')"File contains ", hdr%nh_qFD,&
-&  " electrons in the valence bands but nelect initialized from input is ",Dtset%nh_qFD
+     " electrons in the valence bands but nelect initialized from input is ",Dtset%nh_qFD
    ABI_ERROR(msg)
  end if
  ! End CP added
@@ -5067,7 +4896,7 @@ subroutine hdr_vs_dtset(Hdr,Dtset)
  end if
 
  if (any(hdr%kptrlatt /= dtset%kptrlatt)) then
-   write(msg,"(5a)")&
+   write(msg,"(5a)") &
    "hdr%kptrlatt: ",trim(ltoa(reshape(hdr%kptrlatt, [9]))),ch10,&
    "dtset%kptrlatt: ",trim(ltoa(reshape(dtset%kptrlatt, [9])))
    ABI_ERROR(msg)
@@ -5088,47 +4917,58 @@ subroutine hdr_vs_dtset(Hdr,Dtset)
  end if
 
  ! Check if the k-points from the input file agrees with that read from the WFK file
- if ((ANY(ABS(Hdr%kptns(:,:) - Dtset%kpt(:,1:Dtset%nkpt)) > tol6))) then
-   write(msg,'(9a)')ch10,&
-   ' hdr_vs_dtset: ERROR - ',ch10,&
-   '  k-points read from Header ',ch10,&
-   '  differ from the values specified in the input file',ch10,&
-   '  k-points from Hdr file                        | k-points from input file ',ch10
-   call wrtout(std_out,msg,'COLL')
-   do ik=1,Dtset%nkpt
-     if (any(abs(Hdr%kptns(:,ik) - Dtset%kpt(:,ik)) > tol6)) then
-       write(msg,'(3(3es16.6,3x))')Hdr%kptns(:,ik),Dtset%kpt(:,ik)
-       call wrtout(std_out,msg,'COLL')
-     end if
-   end do
-   ABI_ERROR('Modify the k-mesh in the input file')
+ !
+ ! Note that the EPH code frees several dtset arrays that depend on nkpt (see dtset_free_nkpt_arrays)
+ ! in order to reduce memory when large meshes are used (e.g. 200x200x200)
+ ! so we have to test whether the dtset array is allocated before testing.
+ !
+ if (allocated (dtset%kpt)) then
+   if ((any(abs(Hdr%kptns(:,:) - Dtset%kpt(:,1:Dtset%nkpt)) > tol6))) then
+     write(msg,'(9a)')ch10,&
+     ' hdr_vs_dtset: ERROR - ',ch10,&
+     '  k-points read from Header ',ch10,&
+     '  differ from the values specified in the input file',ch10,&
+     '  k-points from Hdr file                        | k-points from input file ',ch10
+     call wrtout(std_out,msg)
+     do ik=1,Dtset%nkpt
+       if (any(abs(Hdr%kptns(:,ik) - Dtset%kpt(:,ik)) > tol6)) then
+         write(msg,'(3(3es16.6,3x))')Hdr%kptns(:,ik),Dtset%kpt(:,ik)
+         call wrtout(std_out,msg)
+       end if
+     end do
+     ABI_ERROR('Modify the k-mesh in the input file')
+   end if
  end if
 
- if (ANY(ABS(Hdr%wtk(:) - Dtset%wtk(1:Dtset%nkpt)) > tol6)) then
-   write(msg,'(9a)')ch10,&
-   ' hdr_vs_dtset : ERROR - ',ch10,&
-   '  k-point weights read from Header ',ch10,&
-   '  differ from the values specified in the input file',ch10,&
-   '  Hdr file  |  File ',ch10
-   call wrtout(std_out,msg,'COLL')
-   do ik=1,Dtset%nkpt
-     if (abs(Hdr%wtk(ik) - Dtset%wtk(ik)) > tol6) then
-       write(msg,'(2(f11.5,1x))')Hdr%wtk(ik),Dtset%wtk(ik)
-       call wrtout(std_out,msg,'COLL')
-     end if
-   end do
-   ABI_ERROR('Check the k-mesh and the symmetries of the system. ')
+ if (allocated(dtset%wtk)) then
+   if (ANY(ABS(Hdr%wtk(:) - Dtset%wtk(1:Dtset%nkpt)) > tol6)) then
+     write(msg,'(9a)')ch10,&
+     ' hdr_vs_dtset : ERROR - ',ch10,&
+     '  k-point weights read from Header ',ch10,&
+     '  differ from the values specified in the input file',ch10,&
+     '  Hdr file  |  File ',ch10
+     call wrtout(std_out,msg)
+     do ik=1,Dtset%nkpt
+       if (abs(Hdr%wtk(ik) - Dtset%wtk(ik)) > tol6) then
+         write(msg,'(2(f11.5,1x))')Hdr%wtk(ik),Dtset%wtk(ik)
+         call wrtout(std_out,msg)
+       end if
+     end do
+     ABI_ERROR('Check the k-mesh and the symmetries of the system. ')
+   end if
  end if
 
  ! Check istwfk storage
- if ( (ANY(Hdr%istwfk(:)/=Dtset%istwfk(1:Dtset%nkpt))) ) then
-   ABI_COMMENT('istwfk read from Header differs from the values specified in the input file (this is not critical)')
-   !call wrtout(std_out, "  Hdr | input ")
-   !do ik=1,Dtset%nkpt
-   !  write(msg,'(i5,3x,i5)')Hdr%istwfk(ik),Dtset%istwfk(ik)
-   !  call wrtout(std_out,msg,'COLL')
-   !end do
-   !ABI_ERROR('Modify istwfk in the input file.')
+ if (allocated(dtset%istwfk)) then
+   if ((any(Hdr%istwfk(:) /= Dtset%istwfk(1:Dtset%nkpt))) ) then
+     ABI_COMMENT('istwfk read from Header differs from the values specified in the input file (this is not critical)')
+     !call wrtout(std_out, "  Hdr | input ")
+     !do ik=1,Dtset%nkpt
+     !  write(msg,'(i5,3x,i5)')Hdr%istwfk(ik),Dtset%istwfk(ik)
+     !  call wrtout(std_out,msg)
+     !end do
+     !ABI_ERROR('Modify istwfk in the input file.')
+   end if
  end if
 
  CONTAINS
@@ -5148,12 +4988,6 @@ subroutine hdr_vs_dtset(Hdr,Dtset)
 !!
 !! SIDE EFFECTS
 !!  ierr=increased by one if values differ
-!!
-!! PARENTS
-!!      m_hdr
-!!
-!! CHILDREN
-!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -5203,13 +5037,6 @@ end subroutine hdr_vs_dtset
 !!
 !! TODO
 !!  Add information on the use of time-reversal in the Abinit header.
-!!
-!! PARENTS
-!!      cut3d,eph,fold2Bloch,gstate,m_ddk,m_dvdb,m_ioarr,m_iowf,m_wfd,m_wfk
-!!      mlwfovlp_qp,mrgscr,setup_bse,setup_screening,setup_sigma,wfk_analyze
-!!
-!! CHILDREN
-!!      atomdata_from_znucl,crystal_init
 !!
 !! SOURCE
 

@@ -12,10 +12,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -62,14 +58,6 @@ contains
 !!
 !! INPUTS
 !!  ixc = internal code for xc functional
-!!
-!! PARENTS
-!!      m_driver
-!!
-!! CHILDREN
-!!      invcb,libxc_functionals_end,libxc_functionals_getvxc
-!!      libxc_functionals_init,size_dvxc,xchcth,xchelu,xciit,xclb,xcpbe,xcpzca
-!!      xcspol,xctetr,xcwign,xcxalp
 !!
 !! SOURCE
 
@@ -237,14 +225,6 @@ end subroutine echo_xc_name
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_longwave,m_respfn_driver,m_scfcv_core
-!!
-!! CHILDREN
-!!      invcb,libxc_functionals_end,libxc_functionals_getvxc
-!!      libxc_functionals_init,size_dvxc,xchcth,xchelu,xciit,xclb,xcpbe,xcpzca
-!!      xcspol,xctetr,xcwign,xcxalp
-!!
 !! SOURCE
 
 subroutine check_kxc(ixc,optdriver)
@@ -328,14 +308,6 @@ end subroutine check_kxc
 !!  [nvxctau]= size of the array dvxctau(npts,nvxctau) (derivative of Exc wrt to kin. ener. density)
 !!  [ndvxc]= size of the array dvxc(npts,ndvxc) (second derivatives of Exc wrt to density and gradient)
 !!  [nd2vxc]= size of the array d2vxc(npts,nd2vxc) (third derivatives of Exc wrt density)
-!!
-!! PARENTS
-!!      m_drivexc,m_pawxc,m_rhotoxc,m_xcdata
-!!
-!! CHILDREN
-!!      invcb,libxc_functionals_end,libxc_functionals_getvxc
-!!      libxc_functionals_init,size_dvxc,xchcth,xchelu,xciit,xclb,xcpbe,xcpzca
-!!      xcspol,xctetr,xcwign,xcxalp
 !!
 !! SOURCE
 
@@ -501,14 +473,6 @@ end subroutine size_dvxc
 !!    rhonow(:,:,2:4) has been multiplied by the proper factor,
 !!    described above.
 !!
-!! PARENTS
-!!      m_pawxc,m_rhotoxc
-!!
-!! CHILDREN
-!!      invcb,libxc_functionals_end,libxc_functionals_getvxc
-!!      libxc_functionals_init,size_dvxc,xchcth,xchelu,xciit,xclb,xcpbe,xcpzca
-!!      xcspol,xctetr,xcwign,xcxalp
-!!
 !! SOURCE
 
 subroutine xcmult (depsxc,nfft,ngrad,nspden,nspgrad,rhonow)
@@ -593,15 +557,6 @@ end subroutine xcmult
 !!  Fourier interpolated core charge can go < 0 due to Gibbs
 !!  oscillations; could avoid this by recomputing the model core
 !!  charge at the new real space grid points (future work).
-!!
-!! PARENTS
-!!      m_bethe_salpeter,m_electronpositron,m_pawxc,m_positron,m_psolver
-!!      m_rhotoxc,m_wvl_rho,mkcore_wvl
-!!
-!! CHILDREN
-!!      invcb,libxc_functionals_end,libxc_functionals_getvxc
-!!      libxc_functionals_init,size_dvxc,xchcth,xchelu,xciit,xclb,xcpbe,xcpzca
-!!      xcspol,xctetr,xcwign,xcxalp
 !!
 !! SOURCE
 
@@ -819,14 +774,6 @@ end subroutine mkdenpos
 !!    if nspden=1 d2vxc(npts,1)=second derivative of the XC potential=3rd order derivative of energy
 !!    if nspden=2 d2vxc(npts,1), d2vxc(npts,2), d2vxc(npts,3), d2vxc(npts,4) (3rd derivative of energy)
 !!  [fxcT(npts)]=XC free energy of the electron gaz at finite temperature (to be used for plasma systems)
-!!
-!! PARENTS
-!!      m_pawxc,m_rhotoxc
-!!
-!! CHILDREN
-!!      invcb,libxc_functionals_end,libxc_functionals_getvxc
-!!      libxc_functionals_init,size_dvxc,xchcth,xchelu,xciit,xclb,xcpbe,xcpzca
-!!      xcspol,xctetr,xcwign,xcxalp
 !!
 !! SOURCE
 

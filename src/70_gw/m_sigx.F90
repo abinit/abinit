@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -141,17 +137,6 @@ contains
 !!     averaging the final results over the degenerate subset. Here we divide the states
 !!     where the QP energies are required into complexes. Note however that this approach is not
 !!     based on group theory, and it might lead to spurious results in case of accidental degeneracies.
-!!
-!! PARENTS
-!!      m_sigma_driver
-!!
-!! CHILDREN
-!!      cwtime,esymm_symmetrize_mels,findqg0,get_bz_item,gsph_fft_tabs
-!!      hermitianize,littlegroup_print,paw_cross_rho_tw_g,paw_rho_tw_g
-!!      paw_symcprj,pawcprj_alloc,pawcprj_copy,pawcprj_free,pawmknhat_psipsi
-!!      pawpwij_free,pawpwij_init,rho_tw_g,rotate_fft_mesh,sigma_distribute_bks
-!!      timab,wfd%change_ngfft,wfd%get_cprj,wfd%get_many_ur,wfd%get_ur
-!!      wfdf%paw_get_aeur,wrtout,xmpi_sum
 !!
 !! SOURCE
 

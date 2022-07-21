@@ -10,10 +10,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -121,12 +117,6 @@ contains
 !! 2-Operate for one type of atom, and within this given type of atom,
 !!   for a subset of at most nincat atoms.
 !! 3-projector derivatives (abs(choice)>1) are not implemented yet
-!!
-!! PARENTS
-!!      m_nonlop_ylm
-!!
-!! CHILDREN
-!!      dgemv
 !!
 !! SOURCE
 

@@ -109,13 +109,6 @@ CONTAINS  !=====================================================================
 !!     %fk
 !!     %vex(2*lpawu+1,:,:,:)=matrix of the screened interaction for correlated orbitals
 !!
-!! PARENTS
-!!      m_bethe_salpeter,m_entropyDMFT,m_gstate,m_nonlinear,m_respfn_driver
-!!      m_screening_driver,m_sigma_driver
-!!
-!! CHILDREN
-!!      poisson,simp_gen,wrtout
-!!
 !! SOURCE
 
  subroutine pawpuxinit(dmatpuopt,exchmix,f4of2_sla,f6of2_sla,is_dfpt,jpawu,llexexch,llpawu,&
@@ -789,12 +782,6 @@ CONTAINS  !=====================================================================
 !! OUTPUT
 !!  vee(2*lpawu+1,:,:,:)=matrix of the screened interaction for correlated orbitals
 !!
-!! PARENTS
-!!      pawpuxinit
-!!
-!! CHILDREN
-!!      poisson,simp_gen,wrtout
-!!
 !! SOURCE
 
  subroutine calc_vee(f4of2_sla,f6of2_sla,jpawu,lpawu,pawang,upawu,vee)
@@ -958,12 +945,6 @@ CONTAINS  !=====================================================================
 !! OUTPUT
 !!  edftumdc= PAW+U contribution to total energy
 !!  edftumdcdc= PAW+U contribution to double-counting total energy
-!!
-!! PARENTS
-!!      m_energy,m_paw_denpot
-!!
-!! CHILDREN
-!!      poisson,simp_gen,wrtout
 !!
 !! SOURCE
 
@@ -1315,12 +1296,6 @@ CONTAINS  !=====================================================================
 !! SIDE EFFECTS
 !!  eexex=energy is updated with the contribution of the cuyrrent atom
 !!
-!! PARENTS
-!!      m_paw_denpot
-!!
-!! CHILDREN
-!!      poisson,simp_gen,wrtout
-!!
 !! SOURCE
 
  subroutine pawxenergy(eexex,pawprtvol,pawrhoij,pawtab)
@@ -1470,12 +1445,6 @@ CONTAINS  !=====================================================================
 !!    and then to the J, M_J basis (if cplex_dij==2)
 !!
 !!  Note that n_{m,mp}=<mp|hat(n)|m> because rhoij=<p_j|...|p_i>
-!!
-!! PARENTS
-!!      m_afterscfloop,m_paw_denpot,m_paw_tools,m_scfcv_core,m_vtorho
-!!
-!! CHILDREN
-!!      poisson,simp_gen,wrtout
 !!
 !! SOURCE
 
@@ -2356,12 +2325,6 @@ end subroutine setnoccmmp
 !! NOTES
 !!  Only valid for f electrons !!!
 !!
-!! PARENTS
-!!      m_scfcv_core
-!!
-!! CHILDREN
-!!      poisson,simp_gen,wrtout
-!!
 !! SOURCE
 
 subroutine setrhoijpbe0(dtset,initialized,istep,istep_mix,&
@@ -2702,12 +2665,6 @@ end subroutine setrhoijpbe0
 !! OUTPUT
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_paw_correlations
-!!
-!! CHILDREN
-!!      poisson,simp_gen,wrtout
 !!
 !! SOURCE
 

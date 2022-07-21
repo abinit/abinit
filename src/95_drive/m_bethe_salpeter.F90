@@ -14,10 +14,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -150,9 +146,6 @@ contains
 !!   * _EXC_MDF: macroscopic dielectric function with excitonic effects obtained by solving the
 !!              Bethe-Salpeter problem at different level of sophistication.
 !!
-!! PARENTS
-!!      m_driver
-!!
 !! NOTES
 !!
 !! ON THE USE OF FFT GRIDS:
@@ -169,12 +162,6 @@ contains
 !! ---------------------------
 !!    - Only the usual FFT grid (defined by ecut) is used. It is defined by nfft, ngfft, mgfft, ...
 !!      For compatibility reasons, (nfftf,ngfftf,mgfftf) are set equal to (nfft,ngfft,mgfft) in that case.
-!!
-!! CHILDREN
-!!      double_grid_init,ebands_apply_scissors,ebands_copy,ebands_init
-!!      ebands_print,ebands_report_gap,ebands_update_occ,find_qmesh,gsph_extend
-!!      gsph_init,init_transitions,kmesh_init,kmesh_print,make_mesh
-!!      print_gsphere,vcoul_init,wfk_read_eigenvalues,wrtout
 !!
 !! SOURCE
 
@@ -1067,15 +1054,6 @@ end subroutine bethe_salpeter
 !! Hdr_bse<Hdr_type>=Local header initialized from the parameters used for the Bethe-Salpeter calculation.
 !! BS_files<excfiles>=Files used in the calculation.
 !! w_file=File name used to construct W. Set to ABI_NOFILE if no external file is used.
-!!
-!! PARENTS
-!!      m_bethe_salpeter
-!!
-!! CHILDREN
-!!      double_grid_init,ebands_apply_scissors,ebands_copy,ebands_init
-!!      ebands_print,ebands_report_gap,ebands_update_occ,find_qmesh,gsph_extend
-!!      gsph_init,init_transitions,kmesh_init,kmesh_print,make_mesh
-!!      print_gsphere,vcoul_init,wfk_read_eigenvalues,wrtout
 !!
 !! SOURCE
 
@@ -2013,15 +1991,6 @@ end subroutine setup_bse
 !! Hdr_wfk<Hdr_type>=The header of the WFK file.
 !! Hdr_bse<Hdr_type>=Local header initialized from the parameters used for the Bethe-Salpeter calculation.
 !! w_file=File name used to construct W. Set to ABI_NOFILE if no external file is used.
-!!
-!! PARENTS
-!!      m_bethe_salpeter
-!!
-!! CHILDREN
-!!      double_grid_init,ebands_apply_scissors,ebands_copy,ebands_init
-!!      ebands_print,ebands_report_gap,ebands_update_occ,find_qmesh,gsph_extend
-!!      gsph_init,init_transitions,kmesh_init,kmesh_print,make_mesh
-!!      print_gsphere,vcoul_init,wfk_read_eigenvalues,wrtout
 !!
 !! SOURCE
 

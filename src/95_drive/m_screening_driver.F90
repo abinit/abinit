@@ -13,10 +13,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -156,12 +152,6 @@ contains
 !! ---------------------------
 !!    - Only the usual FFT grid (defined by ecut) is used. It is defined by nfft, ngfft, mgfft, ...
 !!      For compatibility reasons, (nfftf,ngfftf,mgfftf) are set equal to (nfft,ngfft,mgfft) in that case.
-!!
-!! PARENTS
-!!      m_driver
-!!
-!! CHILDREN
-!!      coeffs_gausslegint,wrtout,xginv,xheev,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -692,7 +682,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 !WARNING cannot use Dtset%mgfft, this has to be checked better
 !mgfft=MAXVAL(ngfftc(:))
 !allocate(ph1d(2,3*(2*mgfft+1)*Cryst%natom),ph1df(2,3*(2*mgfftf+1)*Cryst%natom))
- write(std_out,*)' CHECK ',Dtset%mgfftdg,mgfftf
+ !write(std_out,*)' CHECK ',Dtset%mgfftdg,mgfftf
  !if (Dtset%mgfftdg/=mgfftf) write(std_out,*)"WARNING Dtset%mgfftf /= mgfftf"
  ABI_MALLOC(ph1d,(2,3*(2*Dtset%mgfft+1)*Cryst%natom))
  ABI_MALLOC(ph1df,(2,3*(2*mgfftf+1)*Cryst%natom))
@@ -1594,12 +1584,6 @@ end subroutine screening
 !!  %ecuteps, %npweps
 !!   might be redefined in setshells in order to close the shell.
 !!
-!! PARENTS
-!!      m_screening_driver
-!!
-!! CHILDREN
-!!      coeffs_gausslegint,wrtout,xginv,xheev,xmpi_sum_master
-!!
 !! SOURCE
 
 subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,Dtset,Psps,Pawtab,&
@@ -1839,7 +1823,7 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,Dtset,Psps,Pawtab
  ABI_CHECK(ecutepspG0 > zero, "ecuteps must be > 0")
  if (Ep%symchi/=0) then
    ecutepspG0=MAXVAL(Ltg_q(:)%max_kin_gmG0)+tol6; npwepG0=0; nshepspG0=0
-   write(std_out,*)" Due to umklapp processes : ecutepspg0= ",ecutepspG0
+   if (my_rank == master) write(std_out,*)" Due to umklapp processes : ecutepspg0= ",ecutepspG0
    call setshells(ecutepspG0,npwepG0,nshepspG0,Cryst%nsym,gmet,gprimd,Cryst%symrel,'eps_pG0',Cryst%ucvol)
    Ep%npwepG0=npwepG0
  end if
@@ -2227,12 +2211,6 @@ end subroutine setup_screening
 !! keep_ur(Ep%nbnds,Kmesh%nibz,Sigp%nsppol)=True if this node will store this state in real space.
 !! ierr=Exit status.
 !!
-!! PARENTS
-!!      m_screening_driver
-!!
-!! CHILDREN
-!!      coeffs_gausslegint,wrtout,xginv,xheev,xmpi_sum_master
-!!
 !! SOURCE
 
 subroutine chi0_bksmask(Dtset,Ep,Kmesh,nbvw,nbcw,my_rank,nprocs,bks_mask,keep_ur,ierr)
@@ -2362,12 +2340,6 @@ end subroutine chi0_bksmask
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
-!!      m_screening_driver
-!!
-!! CHILDREN
-!!      coeffs_gausslegint,wrtout,xginv,xheev,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -2581,12 +2553,6 @@ end subroutine random_stopping_power
 !!  spaceComm=MPI communicator.
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_screening_driver
-!!
-!! CHILDREN
-!!      coeffs_gausslegint,wrtout,xginv,xheev,xmpi_sum_master
 !!
 !! SOURCE
 

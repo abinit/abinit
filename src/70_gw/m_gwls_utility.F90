@@ -11,10 +11,6 @@
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -71,10 +67,6 @@ contains
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!!
-!! CHILDREN
 !!
 !!
 !! SOURCE
@@ -105,12 +97,6 @@ end function complex_vector_product
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gwls_GWlanczos
-!!
-!! CHILDREN
-!!      matrix_function,xmpi_sum,zgemm
 !!
 !! SOURCE
 
@@ -196,12 +182,6 @@ end subroutine orthogonalize
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_gwls_DielectricArray,m_gwls_GenerateEpsilon
-!!
-!! CHILDREN
-!!      matrix_function,xmpi_sum,zgemm
-!!
 !! SOURCE
 
 subroutine driver_invert_positive_definite_hermitian_matrix(matrix,ldim)
@@ -256,12 +236,6 @@ end subroutine driver_invert_positive_definite_hermitian_matrix
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gwls_ComputePoles,m_gwls_GenerateEpsilon
-!!
-!! CHILDREN
-!!      matrix_function,xmpi_sum,zgemm
 !!
 !! SOURCE
 

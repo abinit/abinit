@@ -12,8 +12,6 @@
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -273,11 +271,6 @@ CONTAINS  !=====================================================================
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_screening,m_sigma_driver,mrgscr
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine em1results_free(Er)
@@ -333,11 +326,6 @@ end subroutine em1results_free
 !!
 !! OUTPUT
 !!  Only printing.
-!!
-!! PARENTS
-!!      m_screening,mrgscr
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -516,11 +504,6 @@ end subroutine em1results_print
 !! TODO
 !!  Symmetrization can be skipped if iq_bz correspond to a point in the IBZ
 !!
-!! PARENTS
-!!      m_cohsex,m_sigc
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine Epsm1_symmetrizer(iq_bz,nomega,npwc,Er,Gsph,Qmesh,remove_exchange,epsm1_qbz)
@@ -641,11 +624,6 @@ end subroutine Epsm1_symmetrizer
 !! TODO
 !!  Symmetrization can be skipped if iq_bz correspond to a point in the IBZ
 !!
-!! PARENTS
-!!      m_sigc
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine Epsm1_symmetrizer_inplace(iq_bz,nomega,npwc,Er,Gsph,Qmesh,remove_exchange)
@@ -736,11 +714,6 @@ end subroutine Epsm1_symmetrizer_inplace
 !!
 !! OUTPUT
 !!  Er<Epsilonm1_results>=The structure initialized with basic dimensions and arrays.
-!!
-!! PARENTS
-!!      m_screening,m_sigma_driver,mrgscr
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -869,11 +842,6 @@ end subroutine init_Er_from_file
 !!  comm=MPI communicator.
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_sigma_driver,mrgscr
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1150,11 +1118,6 @@ end subroutine mkdump_Er
 !! TODO
 !!  Remove this routine. Now everything should be done with mkdump_Er
 !!
-!! PARENTS
-!!      m_cohsex,m_sigc
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine get_epsm1(Er,Vcp,approx_type,option_test,iomode,comm,iqibzA)
@@ -1225,11 +1188,6 @@ end subroutine get_epsm1
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      mrgscr
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1390,11 +1348,6 @@ end subroutine decompose_epsm1
 !! SIDE EFFECTS
 !!  chi0(npwe*nI,npwe*nJ,nomega): in input the irreducible polarizability, in output
 !!   the symmetrized inverse dielectric matrix.
-!!
-!! PARENTS
-!!      m_screening,m_screening_driver
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1994,11 +1947,6 @@ end subroutine make_epsm1_driver
 !!  chi0(npwe*nI,npwe*nJ): in input the irreducible polarizability, in output
 !!   the symmetrized inverse dielectric matrix.
 !!
-!! PARENTS
-!!      m_screening
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine rpa_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0,my_nqlwl,dim_wing,chi0_head,chi0_lwing,chi0_uwing,epsm_lf,epsm_nlf,eelf,comm)
@@ -2147,11 +2095,6 @@ end subroutine rpa_symepsm1
 !! SIDE EFFECTS
 !!  chi0(npwe*nI,npwe*nJ): in input the irreducible polarizability, in output
 !!   the symmetrized inverse dielectric matrix.
-!!
-!! PARENTS
-!!      m_screening
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2327,11 +2270,6 @@ end subroutine atddft_symepsm1
 !! SIDE EFFECTS
 !!  chi0(npwe*nI,npwe*nJ): in input the irreducible polarizability, in output
 !!   the symmetrized inverse dielectric matrix.
-!!
-!! PARENTS
-!!      m_screening
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2547,11 +2485,6 @@ end subroutine atddft_hyb_symepsm1
 !!
 !!  For the inverse dielectric matrix we have to resort to a numerical integration
 !!
-!! PARENTS
-!!      m_screening
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine mkem1_q0(npwe,n1,n2,nomega,Cryst,Vcp,gvec,chi0_head,chi0_lwing,chi0_uwing,chi0,eps_head,comm)
@@ -2669,10 +2602,6 @@ end subroutine mkem1_q0
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine lebedev_laikov_int()
@@ -2789,8 +2718,6 @@ end subroutine lebedev_laikov_int
 !! OUTPUT
 !!  Value of Ylm(q)^*/(q.Tq)
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 function ylmstar_over_qTq(cart_vers,int_pars,real_pars,cplx_pars)
@@ -2848,8 +2775,6 @@ end function ylmstar_over_qTq
 !! OUTPUT
 !!  Value of Ylm(q)^* weigh(q)/(q.Tq)
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 function ylmstar_wtq_over_qTq(cart_vers,int_pars,real_pars,cplx_pars)
@@ -2904,8 +2829,6 @@ end function ylmstar_wtq_over_qTq
 !!  qnrm=The modulus of the q-point.
 !!  rhor=The local value of the density
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 elemental function mdielf_bechstedt(eps_inf,qnrm,rhor) result(mdielf)
@@ -2957,11 +2880,6 @@ end function mdielf_bechstedt
 !!   W_{G1,G2} =  1/2 {
 !!     v(q+G1) \int em1(|q+G1|,r) e^{-i(G1-G2).r} dr  +
 !!     v(q+G2) \int em1(|q+G2|,r) e^{-i(G1-G2).r} dr } / \Omega
-!!
-!! PARENTS
-!!      m_screen
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3132,10 +3050,6 @@ end subroutine screen_mdielf
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 type(chi_t) function chi_new(npwe, nomega) result(chi)
@@ -3167,11 +3081,6 @@ end function chi_new
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_screening_driver
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3210,11 +3119,6 @@ end subroutine chi_free
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_screening_driver
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3376,10 +3280,6 @@ end subroutine lwl_write
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine lwl_init(lwl, path, method, cryst, vcp, npwe, gvec, comm)
@@ -3447,10 +3347,6 @@ end subroutine lwl_init
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

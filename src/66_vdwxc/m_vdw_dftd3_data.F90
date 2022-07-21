@@ -31,11 +31,6 @@
 !!                 interpolation, ordered by reference number and by pair of chemical element
 !!  index_cnj: table containing the index of non-zero values of CNj coefficients
 !!
-!! PARENTS
-!!      m_vdw_dftd3
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H

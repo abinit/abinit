@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -128,12 +124,6 @@ contains
 !! with respect to one atomic displacement. The argument list
 !! and the internal loops to be considered were sufficiently different
 !! as to make the two routine different.
-!!
-!! PARENTS
-!!      m_forces,m_nonlinear,m_prcref,m_respfn_driver,m_setvtr
-!!
-!! CHILDREN
-!!      dfpt_mkvxcgga_n0met,fourdp,ptabs_fourdp,splfit
 !!
 !! SOURCE
 
@@ -277,12 +267,6 @@ end subroutine mklocl
 !! with respect to one atomic displacement. The argument list
 !! and the internal loops to be considered were sufficiently different
 !! as to make the two routine different.
-!!
-!! PARENTS
-!!      m_mklocl,m_respfn_driver,m_stress
-!!
-!! CHILDREN
-!!      dfpt_mkvxcgga_n0met,fourdp,ptabs_fourdp,splfit
 !!
 !! SOURCE
 
@@ -740,13 +724,6 @@ end subroutine mklocl_recipspace
 !!  vpsp1(cplex*nfft)=first-order local crystal pseudopotential in real space
 !!    (including the minus sign, forgotten in the paper non-linear..
 !!
-!! PARENTS
-!!      m_dfpt_looppert,m_dfpt_lwwf,m_dfpt_nstwf,m_dfpt_scfcv,m_dfptnl_loop
-!!      m_pead_nl_loop
-!!
-!! CHILDREN
-!!      dfpt_mkvxcgga_n0met,fourdp,ptabs_fourdp,splfit
-!!
 !! SOURCE
 
 subroutine dfpt_vlocal(atindx,cplex,gmet,gsqcut,idir,ipert,&
@@ -1004,12 +981,6 @@ end subroutine dfpt_vlocal
 !! and the internal loops to be considered were sufficiently different
 !! as to make the two routines different.
 !! * The routine was adapted from mklocl.F90
-!!
-!! PARENTS
-!!      m_dfpt_looppert,m_dfpt_lwwf,m_dfpt_nstwf,m_dfpt_scfcv
-!!
-!! CHILDREN
-!!      dfpt_mkvxcgga_n0met,fourdp,ptabs_fourdp,splfit
 !!
 !! SOURCE
 
@@ -1351,12 +1322,6 @@ end subroutine vlocalstr
 !!    q-gradient of the atomic displacement Hamiltonian. This is lately included 
 !!    in the matrix element calculation.
 !!
-!! PARENTS
-!!      m_dfpt_lwwf
-!!
-!! CHILDREN
-!!      dfpt_mkvxcgga_n0met,fourdp,ptabs_fourdp,splfit
-!!
 !! SOURCE
 
 subroutine dfpt_vlocaldq(atindx,cplex,gmet,gsqcut,idir,ipert,&
@@ -1613,12 +1578,6 @@ end subroutine dfpt_vlocaldq
 !!    2nd order energy wrt an atomic displacement and a strain:
 !!    \Delta E^{\tau_{\kappa\alpha}^* (\beta)}_{m\kvec,\gamma\delta}
 !!     
-!!
-!! PARENTS
-!!      m_dfpt_lwwf
-!!
-!! CHILDREN
-!!      dfpt_mkvxcgga_n0met,fourdp,ptabs_fourdp,splfit
 !!
 !! SOURCE
 
@@ -1908,12 +1867,6 @@ end subroutine dfpt_vlocaldqdq
 !!  **A -i factor has been factorized out in all the contributions of the second
 !!    q-gradient of the metric Hamiltonian. This is lately included in the contribution
 !!    of the corresponing term (T4) to the flexoelectric tensor in dfpt_flexoout.F90
-!!
-!! PARENTS
-!!      m_dfpt_lwwf
-!!
-!! CHILDREN
-!!      dfpt_mkvxcgga_n0met,fourdp,ptabs_fourdp,splfit
 !!
 !! SOURCE
 
