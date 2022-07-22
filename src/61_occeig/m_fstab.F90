@@ -11,8 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -39,7 +37,7 @@ module m_fstab
  use m_symtk,          only : matr3inv
  use defs_datatypes,   only : ebands_t
  use m_special_funcs,  only : gaussian
- use m_kpts,           only : kpts_timrev_from_kptopt, smpbz
+ use m_kpts,           only : kpts_timrev_from_kptopt, smpbz, kpts_map
 
  implicit none
 
@@ -51,8 +49,8 @@ module m_fstab
 !! fstab_t
 !!
 !! FUNCTION
-!!  Tables with the correspondence between points of the Fermi surface (FS) and the k-points in the
-!!  IBZ (k-points found in ebands_t).
+!!  Tables with the correspondence between k-points of the Fermi surface (FS) and k-points
+!!  in the IBZ (i.e. the k-points found in ebands_t).
 !!  We use `nsppol` fstab_t objects to account for spin polarization.
 !!
 !! SOURCE
@@ -66,7 +64,7 @@ module m_fstab
     ! Number of k-points on the Fermi-surface in the full BZ.
 
    integer :: nktot
-    ! Total number of k-points in the initial mesh.
+    ! Total number of k-points in the initial mesh. Used to compute integrals in the BZ.
 
    integer :: nkibz
     ! Number of points in the IBZ
@@ -81,14 +79,18 @@ module m_fstab
 
    integer :: eph_intmeth
    ! Integration method.
-   ! 1 for gaussian, 2 for tetrahedra, -2 for optmized tetrahedron
+   ! 1 for gaussian (incuding adaptive broadening)
+   ! |2| for tetrahedra.
+   !     2 for the optimized tetrahedron method.
+   !    -2 for the linear tetrahedron method.
+   !
 
    integer :: nene
    ! Number of chemical potential values used for inelastic integration
 
    real(dp) :: eph_fsmear
    ! Gaussian broadening. Negative value activates adaptive gaussian broadening.
-   ! https://journals.aps.org/prb/pdf/10.1103/PhysRevB.92.075405
+   ! See https://journals.aps.org/prb/pdf/10.1103/PhysRevB.92.075405
 
    real(dp) :: min_smear = tol9
    ! Used for the adaptive gaussian broadening: use min_smear if the broadening computed from the group velocity
@@ -134,7 +136,7 @@ module m_fstab
    real(dp),allocatable :: vk(:,:), vkq(:,:)
    ! (3, mnb)
    ! Velocities in cartesian coordinates. Used to implement the adaptive gaussian broadening
-   ! Values are filled by call (e.g. phgamma) inside the loop over k-points.
+   ! Values are filled by the caller (e.g. phgamma) inside the loop over k-points.
 
    real(dp),allocatable :: tetra_wtk(:,:)
    ! (maxnb, nkibz)
@@ -161,6 +163,7 @@ module m_fstab
    ! Find the index of the k-point on the FS
 
    procedure :: get_dbldelta_weights => fstab_get_dbldelta_weights
+   ! Compute weights for the integration of the double-delta.
 
  end type fstab_t
 
@@ -183,10 +186,6 @@ contains  !============================================================
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -243,11 +242,6 @@ end subroutine fstab_free
 !!  Use a different algorithm to select k-points if tetra. First compute tetra weights
 !!  then k-points contributing to FS integral are selected according to some threshold.
 !!
-!! PARENTS
-!!      m_phgamma
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine fstab_init(fstab, ebands, cryst, dtset, comm)
@@ -267,10 +261,10 @@ subroutine fstab_init(fstab, ebands, cryst, dtset, comm)
  integer :: nkfs,spin,band,nband_k,i1,i2,ib,blow,ik_bz,ik_ibz,nkibz,timrev
  integer :: ik,mkpt,nkbz,ierr, nene,ifermi
  real(dp),parameter :: max_occ1 = one
- real(dp) :: elow,ehigh,ebis,enemin,enemax,deltaene,dksqmax,cpu,wall,gflops
+ real(dp) :: elow,ehigh,ebis,enemin,enemax,deltaene,cpu,wall,gflops
  logical :: inwin
  character(len=80) :: errstr
- character(len=500) :: msg
+ character(len=5000) :: msg
  type(fstab_t),pointer :: fs
  type(htetra_t) :: tetra
  type(krank_t) :: krank
@@ -282,7 +276,6 @@ subroutine fstab_init(fstab, ebands, cryst, dtset, comm)
 
 ! *************************************************************************
 
- !@fstab_t
  call cwtime(cpu, wall, gflops, "start")
 
  if (any(cryst%symrel(:,:,1) /= identity_3d) .and. any(abs(cryst%tnons(:,1)) > tol10) ) then
@@ -314,22 +307,20 @@ subroutine fstab_init(fstab, ebands, cryst, dtset, comm)
  ABI_MALLOC(indkk, (6, nkbz))
 
  krank = krank_from_kptrlatt(ebands%nkpt, ebands%kptns, kptrlatt, compute_invrank=.False.)
- call krank%get_mapping(nkbz, kbz, dksqmax, cryst%gmet, indkk, &
-                        cryst%nsym, cryst%symafm, cryst%symrel, timrev, use_symrec=.False.)
- call krank%free()
 
- if (dksqmax > tol12) then
-   write(msg, '(7a,es16.6,4a)' ) &
+ if (kpts_map("symrel", timrev, cryst, krank, nkbz, kbz, indkk) /= 0) then
+   write(msg, '(10a)' ) &
    'The WFK file cannot be used to start the present calculation ',ch10, &
    'It was asked that the wavefunctions be accurate, but',ch10, &
    'at least one of the k points could not be generated from a symmetrical one.',ch10, &
-   'dksqmax= ',dksqmax,ch10, &
    'Action: check your WFK file and k-point input variables',ch10, &
    '        (e.g. kptopt or shiftk might be wrong in the present dataset or the preparatory one.'
    ABI_ERROR(msg)
  end if
 
- call cwtime_report(" fstab_init%listkk", cpu, wall, gflops)
+ call krank%free()
+
+ call cwtime_report(" fstab_init%krank", cpu, wall, gflops)
 
  ABI_MALLOC(full2ebands, (6, nkbz))
  full2ebands = 0
@@ -543,10 +534,6 @@ end subroutine fstab_init
 !! OUTPUT
 !!   g0=Reciprocal lattice vector such that kpt = fstab%kpts(:, ik_fs) + g0
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 integer function fstab_findkg0(fstab, kpt, g0) result(ik_fs)
@@ -577,7 +564,7 @@ end function fstab_findkg0
 !!  fstab_get_dbldelta_weights
 !!
 !! FUNCTION
-!!  Return the weights for the integration on the Fermi-surface
+!!  Return the weights for the integration of the double-delta on the Fermi-surface
 !!
 !! INPUTS
 !!  ebands<ebands_type>=GS band structure.
@@ -588,10 +575,6 @@ end function fstab_findkg0
 !!
 !! OUTPUT
 !!   wtk(fs%maxnb, fs%maxnb)=Weights for FS integration.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -608,6 +591,7 @@ subroutine fstab_get_dbldelta_weights(fs, ebands, ik_fs, ik_ibz, ikq_ibz, spin, 
 !Local variables-------------------------------
 !scalars
  integer :: bstart_k, nband_k, bstart_kq, nband_kq, ib1, band1, ib2, band2, ii
+ logical :: use_adaptive
  real(dp) :: g1, g2, sigma
 
 ! *************************************************************************
@@ -620,18 +604,19 @@ subroutine fstab_get_dbldelta_weights(fs, ebands, ik_fs, ik_ibz, ikq_ibz, spin, 
 
  wtk = zero
  if (fs%eph_intmeth == 1 .or. nesting /= 0) then
-   ! Gaussian method (constant or adaptive method from group velocities if eph_fsmear is negative)
+   ! Gaussian method: constant or adaptive method from group velocities if eph_fsmear is negative.
    sigma = fs%eph_fsmear
+   use_adaptive = fs%eph_fsmear < zero .or. abs(fs%eph_intmeth) == 2
    do ib2=1,nband_k
      band2 = ib2 + bstart_k - 1
-     if (fs%eph_fsmear < zero .or. abs(fs%eph_intmeth) == 2) then
+     if (use_adaptive) then
        sigma = max(maxval([(abs(dot_product(fs%vk(:, ib2), fs%kmesh_cartvec(:,ii))), ii=1,3)]), fs%min_smear)
        !write(std_out, *)"sigma:", sigma * Ha_eV
      end if
      g2 = gaussian(ebands%eig(band2, ik_ibz, spin) - ebands%fermie, sigma)
      do ib1=1,nband_kq
        band1 = ib1 + bstart_kq - 1
-       if (fs%eph_fsmear < zero .or. abs(fs%eph_intmeth) == 2) then
+       if (use_adaptive) then
          sigma = max(maxval([(abs(dot_product(fs%vkq(:, ib1), fs%kmesh_cartvec(:,ii))), ii=1,3)]), fs%min_smear)
        end if
        g1 = gaussian(ebands%eig(band1, ikq_ibz, spin) - ebands%fermie, sigma)
@@ -673,11 +658,6 @@ end subroutine fstab_get_dbldelta_weights
 !! OUTPUT
 !!  Only printing.
 !!
-!! PARENTS
-!!      m_phgamma
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine fstab_print(fstab, header, unit, prtvol)
@@ -692,8 +672,7 @@ subroutine fstab_print(fstab, header, unit, prtvol)
 !scalars
  integer :: my_unt,my_prtvol,spin
  class(fstab_t),pointer :: fs
-! type(fstab_t),pointer :: fs ! changed by NP from type() to class() based on fortran compile error message
- character(len=500) :: msg
+ character(len=5000) :: msg
 
 ! *************************************************************************
 

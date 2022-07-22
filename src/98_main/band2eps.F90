@@ -20,12 +20,6 @@
 !! OUTPUT
 !!  (main routine)
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      abi_io_redirect,abimem_init,band2eps_dtset_free,instrng,inupper
-!!      invars11,outvars_band2eps,xmpi_end,xmpi_init
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H

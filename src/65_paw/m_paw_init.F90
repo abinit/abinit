@@ -160,12 +160,6 @@ CONTAINS  !=====================================================================
 !!     %sij(lmn2_size)=nonlocal part of the overlap operator
 !!     %tphitphj(:,:)=useful product tPhi(:,i)*tPhi(:,j)
 !!
-!! PARENTS
-!!      m_bethe_salpeter,m_gstate,m_nonlinear,m_respfn_driver
-!!      m_screening_driver,m_sigma_driver,m_wfk_analyze
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pawinit(effmass_free,gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lmix,mpsang,&
@@ -736,12 +730,6 @@ end subroutine pawinit
 !! SIDE EFFECTS
 !!  mode=="save" updates the internal variables.
 !!        "reset" reset the internal variables to -1
-!!
-!! PARENTS
-!!      m_bethe_salpeter,m_gstate,m_nonlinear,m_respfn_driver
-!!      m_screening_driver,m_sigma_driver,m_wfk_analyze
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

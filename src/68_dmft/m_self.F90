@@ -10,10 +10,6 @@
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -125,11 +121,6 @@ CONTAINS  !=====================================================================
 !! OUTPUTS
 !!  self <type(self_type)>= variables related to self-energy
 !!
-!! PARENTS
-!!      m_self
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine alloc_self(self,paw_dmft,opt_oper,wtype)
@@ -202,11 +193,6 @@ end subroutine alloc_self
 !!  self <type(self_type)>= variables related to self-energy
 !!
 !!
-!! PARENTS
-!!      m_dmft,m_outscfcv
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine initialize_self(self,paw_dmft,wtype)
@@ -258,11 +244,6 @@ end subroutine initialize_self
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_dmft,m_outscfcv
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine destroy_self(self)
@@ -310,11 +291,6 @@ end subroutine destroy_self
 !!
 !! OUTPUT
 !!  self <type(self_type)>= variables related to self-energy
-!!
-!! PARENTS
-!!      m_dmft
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -369,11 +345,6 @@ end subroutine print_self
 !! OUTPUT
 !!  self <type(self_type)>= variables related to self-energy
 !!  hu <type(hu_type)>= variables related to the interaction between electrons
-!!
-!! PARENTS
-!!      m_dmft
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -481,11 +452,6 @@ end subroutine dc_self
 !!           3  Impose Self-Energy.
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_dmft,m_outscfcv
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1324,11 +1290,6 @@ end subroutine rw_self
 !! OUTPUT
 !!  self <type(self_type)>= variables related to mixed self-energy
 !!
-!! PARENTS
-!!      m_dmft
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine new_self(self,self_new,paw_dmft,opt_mix)
@@ -1422,11 +1383,6 @@ end subroutine new_self
 !! OUTPUT
 !!  self%qmc_shift in self <type(self_type)> = Self-energy
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine make_qmcshift_self(cryst_struc,hu,self,apply)
@@ -1513,11 +1469,6 @@ end subroutine make_qmcshift_self
 !!
 !! OUTPUT
 !!  self%qmc_shift in self <type(self_type)> = Self-energy
-!!
-!! PARENTS
-!!      m_self
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1666,11 +1617,6 @@ end subroutine kramerskronig_self
 !!
 !! OUTPUT
 !!  self%qmc_shift in self <type(self_type)> = Self-energy
-!!
-!! PARENTS
-!!      m_outscfcv
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

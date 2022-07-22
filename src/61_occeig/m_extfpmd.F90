@@ -13,13 +13,9 @@
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
 !! TODO
 !! 1) Add contribution to conductivity.
 !! 2) Smooth the contributions.
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -94,10 +90,6 @@ contains
   !! OUTPUT
   !!  this=extfpmd_type object concerned
   !!
-  !! PARENTS
-  !!
-  !! CHILDREN
-  !!
   !! SOURCE
   subroutine init(this,mband,nbcut,nfft,nspden,rprimd,version)
     ! Arguments -------------------------------
@@ -144,10 +136,6 @@ contains
   !!
   !! OUTPUT
   !!  this=extfpmd_type object concerned
-  !!
-  !! PARENTS
-  !!
-  !! CHILDREN
   !!
   !! SOURCE
   subroutine destroy(this)
@@ -197,10 +185,6 @@ contains
   !!
   !! OUTPUT
   !!  this=extfpmd_type object concerned
-  !!
-  !! PARENTS
-  !!
-  !! CHILDREN
   !!
   !! SOURCE
   subroutine compute_shiftfactor(this,eigen,eknk,mband,me,nband,nkpt,nsppol,wtk)
@@ -316,10 +300,6 @@ contains
   !! OUTPUT
   !!  this=extfpmd_type object concerned
   !!
-  !! PARENTS
-  !!
-  !! CHILDREN
-  !!
   !! SOURCE
   subroutine compute_nelect(this,fermie,nelect,tsmear)
     ! Arguments -------------------------------
@@ -388,10 +368,6 @@ contains
   !!
   !! OUTPUT
   !!  this=extfpmd_type object concerned
-  !!
-  !! PARENTS
-  !!
-  !! CHILDREN
   !!
   !! SOURCE
   subroutine compute_e_kinetic(this,fermie,tsmear)
@@ -476,10 +452,6 @@ contains
   !!
   !! OUTPUT
   !!  this=extfpmd_type object concerned
-  !!
-  !! PARENTS
-  !!
-  !! CHILDREN
   !!
   !! SOURCE
   subroutine compute_entropy(this,fermie,tsmear)
@@ -614,10 +586,6 @@ contains
   !! OUTPUT
   !!  dip12=resulting function
   !!
-  !! PARENTS
-  !!
-  !! CHILDREN
-  !!
   !! SOURCE
   function dip12(gamma)
     ! Arguments -------------------------------
@@ -690,10 +658,6 @@ contains
   !!
   !! OUTPUT
   !!  djp12=resulting function
-  !!
-  !! PARENTS
-  !!
-  !! CHILDREN
   !!
   !! SOURCE
   function djp12(xcut,gamma)
@@ -819,10 +783,6 @@ contains
   !! OUTPUT
   !!  dip32=resulting function
   !!
-  !! PARENTS
-  !!
-  !! CHILDREN
-  !!
   !! SOURCE
   function dip32(gamma)
     ! Arguments -------------------------------
@@ -900,10 +860,6 @@ contains
   !!
   !! OUTPUT
   !!  djp32=resulting function
-  !!
-  !! PARENTS
-  !!
-  !! CHILDREN
   !!
   !! SOURCE
   function djp32(xcut,gamma)
@@ -1037,10 +993,6 @@ contains
   !! OUTPUT
   !!  extfpmd_dos=value of free particle density of states at given energy
   !!
-  !! PARENTS
-  !!
-  !! CHILDREN
-  !!
   !! SOURCE
   function extfpmd_dos(energy,shiftfactor,ucvol)
     ! Arguments -------------------------------
@@ -1068,10 +1020,6 @@ contains
   !!
   !! OUTPUT
   !!  extfpmd_e_fg=energy of homogeneous electron gas for a given number of accessible states
-  !!
-  !! PARENTS
-  !!
-  !! CHILDREN
   !!
   !! SOURCE
   function extfpmd_e_fg(iband,ucvol)

@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -185,12 +181,6 @@ contains
 !!      It is defined by nfft, ngfft, mgfft, ...
 !!      For compatibility reasons, (nfftf,ngfftf,mgfftf)
 !!      are set equal to (nfft,ngfft,mgfft) in that case.
-!!
-!! PARENTS
-!!      m_gstate,m_mover_effpot
-!!
-!! CHILDREN
-!!      metric,wrtout,xcart2xred,xred2xcart
 !!
 !! SOURCE
 
@@ -374,9 +364,9 @@ real(dp),allocatable :: gred_corrected(:,:),xred_prev(:,:)
  ncycle=specs%ncycle
 
  if(ab_mover%ionmov==25.and.scfcv_args%dtset%hmctt>=0)then
-   ncycle=scfcv_args%dtset%hmctt   
+   ncycle=scfcv_args%dtset%hmctt
    if(scfcv_args%dtset%hmcsst>0.and.ab_mover%optcell/=0)then
-      ncycle=ncycle+scfcv_args%dtset%hmcsst 
+      ncycle=ncycle+scfcv_args%dtset%hmcsst
    endif
  endif
 
@@ -620,7 +610,7 @@ real(dp),allocatable :: gred_corrected(:,:),xred_prev(:,:)
            endif
 
 !DEBUG
- write(std_out,'(a,5i4)')' m_mover, before scfcv_run : itimes(1:2)=',itimes(1:2)
+! write(std_out,'(a,5i4)')' m_mover, before scfcv_run : itimes(1:2)=',itimes(1:2)
 !ENDDEBUG
            call scfcv_run(scfcv_args, electronpositron, itimes, rhog, rhor, rprimd, xred, xred_old, conv_retcode)
            if (conv_retcode == -1) then
@@ -797,6 +787,7 @@ real(dp),allocatable :: gred_corrected(:,:),xred_prev(:,:)
 &           scfcv_args%dtset%strfact,&
 &           scfcv_args%dtset%strtarget,&
 &           hist%strten(:,hist%ihist),&
+&           rprim,&
 &           scfcv_args%dtset%tolmxf)
          else
            call erlxconv(hist,iexit,itime,itime_hist,ntime,scfcv_args%dtset%tolmxde)
@@ -931,6 +922,7 @@ real(dp),allocatable :: gred_corrected(:,:),xred_prev(:,:)
 &       scfcv_args%dtset%strfact,&
 &       scfcv_args%dtset%strtarget,&
 &       hist%strten(:,ihist_prev),&
+&       rprim,&
 &       scfcv_args%dtset%tolmxf)
      else
        call erlxconv(hist,iexit,itime,itime_hist,ntime,scfcv_args%dtset%tolmxde)
@@ -1029,15 +1021,9 @@ contains
 !!  at input  : iexit=  0 if not the last itime,  1 if the last itime
 !!  at output : iexit=  0 if not below tolerance, 1 if below tolerance
 !!
-!! PARENTS
-!!      m_mover
-!!
-!! CHILDREN
-!!      metric,wrtout,xcart2xred,xred2xcart
-!!
 !! SOURCE
 
-subroutine fconv(fcart,iatfix,iexit,itime,natom,ntime,optcell,strfact,strtarget,strten,tolmxf)
+subroutine fconv(fcart,iatfix,iexit,itime,natom,ntime,optcell,strfact,strtarget,strten,rprim,tolmxf)
 
 !Arguments ------------------------------------
 !scalars
@@ -1047,11 +1033,12 @@ subroutine fconv(fcart,iatfix,iexit,itime,natom,ntime,optcell,strfact,strtarget,
 !arrays
  integer,intent(in) :: iatfix(3,natom)
  real(dp),intent(in) :: fcart(3,natom),strtarget(6),strten(6)
+ real(dp), intent(in) :: rprim(3,3)
 
 !Local variables-------------------------------
 !scalars
  integer :: iatom,idir,istr
- real(dp) :: fmax,strdiag
+ real(dp) :: fmax,strdiag,fcell
  character(len=500) :: msg
 !arrays
  real(dp) :: dstr(6)
@@ -1087,8 +1074,29 @@ subroutine fconv(fcart,iatfix,iexit,itime,natom,ntime,optcell,strfact,strtarget,
    do istr=4,6
      if(abs(dstr(istr))*strfact >= fmax ) fmax=abs(dstr(istr))*strfact
    end do
- else if(optcell==4 .or. optcell==5 .or. optcell==6)then
-   if(abs(dstr(optcell-3))*strfact >= fmax ) fmax=abs(dstr(optcell-3))*strfact
+!  else if(optcell==4 .or. optcell==5 .or. optcell==6)then
+!    if(abs(dstr(optcell-3))*strfact >= fmax ) fmax=abs(dstr(optcell-3))*strfact
+ else if(optcell==4) then
+   fcell = dstr(1) * rprim(1,1) + dstr(6) * rprim(2,1) + dstr(5) * rprim(3,1)
+   if (abs(fcell)*strfact >= fmax) fmax=abs(fcell)*strfact
+   fcell = dstr(6) * rprim(1,1) + dstr(2) * rprim(2,1) + dstr(4) * rprim(3,1)
+   if (abs(fcell)*strfact >= fmax) fmax=abs(fcell)*strfact
+   fcell = dstr(5) * rprim(1,1) + dstr(4) * rprim(2,1) + dstr(3) * rprim(3,1)
+   if (abs(fcell)*strfact >= fmax) fmax=abs(fcell)*strfact
+ else if(optcell==5) then
+    fcell = dstr(1) * rprim(1,2) + dstr(6) * rprim(2,2) + dstr(5) * rprim(3,2)
+    if (abs(fcell)*strfact >= fmax) fmax=abs(fcell)*strfact
+    fcell = dstr(6) * rprim(1,2) + dstr(2) * rprim(2,2) + dstr(4) * rprim(3,2)
+    if (abs(fcell)*strfact >= fmax) fmax=abs(fcell)*strfact
+    fcell = dstr(5) * rprim(1,2) + dstr(4) * rprim(2,2) + dstr(3) * rprim(3,2)
+    if (abs(fcell)*strfact >= fmax) fmax=abs(fcell)*strfact
+ else if(optcell==6) then
+    fcell = dstr(1) * rprim(1,3) + dstr(6) * rprim(2,3) + dstr(5) * rprim(3,3)
+    if (abs(fcell)*strfact >= fmax) fmax=abs(fcell)*strfact
+    fcell = dstr(6) * rprim(1,3) + dstr(2) * rprim(2,3) + dstr(4) * rprim(3,3)
+    if (abs(fcell)*strfact >= fmax) fmax=abs(fcell)*strfact
+    fcell = dstr(5) * rprim(1,3) + dstr(4) * rprim(2,3) + dstr(3) * rprim(3,3)
+    if (abs(fcell)*strfact >= fmax) fmax=abs(fcell)*strfact
  else if(optcell==7)then
    if(abs(dstr(2))*strfact >= fmax ) fmax=abs(dstr(2))*strfact
    if(abs(dstr(3))*strfact >= fmax ) fmax=abs(dstr(3))*strfact
@@ -1144,12 +1152,6 @@ end subroutine fconv
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_mover
-!!
-!! CHILDREN
-!!      metric,wrtout,xcart2xred,xred2xcart
 !!
 !! SOURCE
 
@@ -1238,12 +1240,6 @@ end subroutine mover
 !!
 !! OUTPUT
 !!  (only writing)
-!!
-!! PARENTS
-!!      m_mover
-!!
-!! CHILDREN
-!!      metric,wrtout,xcart2xred,xred2xcart
 !!
 !! SOURCE
 
@@ -1503,12 +1499,6 @@ subroutine prtxfase(ab_mover,hist,itime,iout,pos)
 !! OUTPUT
 !!  tag = The string to put for each atom
 !!
-!! PARENTS
-!!      m_mover
-!!
-!! CHILDREN
-!!      metric,wrtout,xcart2xred,xred2xcart
-!!
 !! SOURCE
 
 subroutine gettag(atlist,index,natom,prtallatoms,tag)
@@ -1557,12 +1547,6 @@ subroutine gettag(atlist,index,natom,prtallatoms,tag)
 !!
 !! OUTPUT
 !!  tag = The string to put for aech atom
-!!
-!! PARENTS
-!!      m_mover
-!!
-!! CHILDREN
-!!      metric,wrtout,xcart2xred,xred2xcart
 !!
 !! SOURCE
 
@@ -1632,12 +1616,6 @@ end subroutine prtxfase
 !!  -- only printing --
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
-!!      m_mover
-!!
-!! CHILDREN
-!!      metric,wrtout,xcart2xred,xred2xcart
 !!
 !! SOURCE
 

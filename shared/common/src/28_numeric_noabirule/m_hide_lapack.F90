@@ -29,10 +29,6 @@
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! TODO
 !!  1) Use a function to define the size of the Scalapack block according to some heuristic method.
 !!  2) Define a threshold below which Scalapack is not used although the MPI communicator is passed.
@@ -221,11 +217,6 @@ CONTAINS  !=====================================================================
 !!          or the upper triangle (if UPLO='U') of A, including the
 !!          diagonal, is destroyed.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      dsysv,zhesv
-!!
 !! SOURCE
 
 subroutine wrap_CHEEV(jobz, uplo, n, a, w)
@@ -318,11 +309,6 @@ end subroutine wrap_CHEEV
 !!          If JOBZ = 'N', then on exit the lower triangle (if UPLO='L')
 !!          or the upper triangle (if UPLO='U') of A, including the
 !!          diagonal, is destroyed.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      dsysv,zhesv
 !!
 !! SOURCE
 
@@ -475,12 +461,6 @@ end subroutine wrap_ZHEEV
 !!          If JOBZ = 'N', then on exit the lower triangle (if UPLO='L')
 !!          or the upper triangle (if UPLO='U') of A, including the
 !!          diagonal, is destroyed.
-!!
-!! PARENTS
-!!      m_ksdiago
-!!
-!! CHILDREN
-!!      dsysv,zhesv
 !!
 !! SOURCE
 
@@ -671,11 +651,6 @@ end subroutine xheev_cplex
 !!          diagonal and first subdiagonal of T overwrite the
 !!          corresponding elements of A.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      dsysv,zhesv
-!!
 !! SOURCE
 
 subroutine wrap_CHPEV(jobz, uplo, n, ap, w, z, ldz)
@@ -781,11 +756,6 @@ end subroutine wrap_CHPEV
 !!          the corresponding elements of A, and if UPLO = 'L', the
 !!          diagonal and first subdiagonal of T overwrite the
 !!          corresponding elements of A. Unchanged if ScaLAPACK is used.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      dsysv,zhesv
 !!
 !! SOURCE
 
@@ -954,11 +924,6 @@ end subroutine wrap_ZHPEV
 !!
 !!          On exit, if INFO <= N, the part of B containing the matrix is overwritten by the triangular
 !!          factor U or L from the Cholesky factorization B = U**H*U or B = L*L**H.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      dsysv,zhesv
 !!
 !! SOURCE
 
@@ -1146,12 +1111,6 @@ end subroutine wrap_ZHEGV
 !!          factor U or L from the Cholesky factorization
 !!          B = U**T*U or B = L*L**T if CPLEX=1
 !!          B = U**H*U or B = L*L**H if CPLEX=2
-!!
-!! PARENTS
-!!      m_ksdiago
-!!
-!! CHILDREN
-!!      dsysv,zhesv
 !!
 !! SOURCE
 
@@ -1416,11 +1375,6 @@ end subroutine xhegv_cplex
 !!          triangle (if UPLO='U') of A, including the diagonal, is
 !!          destroyed.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      dsysv,zhesv
-!!
 !! SOURCE
 
 subroutine wrap_ZHEEVX(jobz,range,uplo,n,a,vl,vu,il,iu,abstol,m,w,z,ldz,comm)
@@ -1648,12 +1602,6 @@ end subroutine wrap_ZHEEVX
 !!          On exit, the lower triangle (if UPLO='L') or the upper
 !!          triangle (if UPLO='U') of A, including the diagonal, is
 !!          destroyed.
-!!
-!! PARENTS
-!!      m_ksdiago
-!!
-!! CHILDREN
-!!      dsysv,zhesv
 !!
 !! SOURCE
 
@@ -1927,11 +1875,6 @@ end subroutine xheevx_cplex
 !!          On exit, if INFO <= N, the part of B containing the matrix is overwritten by the triangular factor
 !!          U or L from the Cholesky factorization B = U**H*U or B = L*L**H.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      dsysv,zhesv
-!!
 !! SOURCE
 
 subroutine wrap_ZHEGVX(itype,jobz,range,uplo,n,a,b,vl,vu,il,iu,abstol,m,w,z,ldz,comm)
@@ -2191,12 +2134,6 @@ end subroutine wrap_ZHEGVX
 !!          On exit, if INFO <= N, the part of B containing the matrix is overwritten by the triangular factor
 !!          U or L from the Cholesky factorization B = U**H*U or B = L*L**H.
 !!
-!! PARENTS
-!!      m_ksdiago
-!!
-!! CHILDREN
-!!      dsysv,zhesv
-!!
 !! SOURCE
 
 subroutine xhegvx_cplex(itype, jobz, range, uplo, cplex, n, a, b, &
@@ -2432,11 +2369,6 @@ end subroutine xhegvx_cplex
 !!           On entry, the N-by-N matrix A.
 !!           On exit, A has been overwritten.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      dsysv,zhesv
-!!
 !! SOURCE
 
 subroutine wrap_CGEEV(jobvl, jobvr, n, a, lda, w, vl, ldvl, vr, ldvr)
@@ -2551,11 +2483,6 @@ end subroutine wrap_CGEEV
 !!           On entry, the N-by-N matrix A.
 !!           On exit, A has been overwritten.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      dsysv,zhesv
-!!
 !! SOURCE
 
 subroutine wrap_ZGEEV(jobvl,jobvr,n,a,lda,w,vl,ldvl,vr,ldvr)
@@ -2638,11 +2565,6 @@ end subroutine wrap_ZGEEV
 !!
 !! TODO
 !!  Add Scalapack version, matrix_scalapack has to be modified by adding a single precision complex buffer.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      dsysv,zhesv
 !!
 !! SOURCE
 
@@ -2829,11 +2751,6 @@ end subroutine cginv
 !! SIDE EFFECTS
 !! a(n,n)= array of complex elements, input, inverted at output
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      dsysv,zhesv
-!!
 !! SOURCE
 
 subroutine zginv(a, n, comm)
@@ -2973,11 +2890,6 @@ end subroutine zginv
 !!    triangular part of A is not referenced.
 !!    On exit, the upper or lower triangle of the (Hermitian) inverse of A
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      dsysv,zhesv
-!!
 !! SOURCE
 
 subroutine zhpd_invert(uplo, a, n, comm)
@@ -3105,13 +3017,6 @@ end subroutine zhpd_invert
 !! SIDE EFFECTS
 !! a(lda,n)= array of real elements, input, inverted at output
 !!
-!! PARENTS
-!!      m_a2ftr,m_bethe_salpeter,m_ddb_elast,m_ddb_piezo,m_geometry,m_haydock
-!!      m_mlwfovlp,m_paw_optics,m_symtk,m_vcoul,m_wfd_optic
-!!
-!! CHILDREN
-!!      dsysv,zhesv
-!!
 !! SOURCE
 
 subroutine matrginv(a,lda,n)
@@ -3228,12 +3133,6 @@ end subroutine matrginv
 !! OUTPUT
 !!  eigval(3)=three eigenvalues
 !!
-!! PARENTS
-!!      m_geometry
-!!
-!! CHILDREN
-!!      dsysv,zhesv
-!!
 !! SOURCE
 
 subroutine matr3eigval(eigval,matr)
@@ -3285,12 +3184,6 @@ end subroutine matr3eigval
 !!
 !! NOTES
 !!  This routine is deprecated, use Lapack API
-!!
-!! PARENTS
-!!      m_bader,m_conducti
-!!
-!! CHILDREN
-!!      dsysv,zhesv
 !!
 !! SOURCE
 
@@ -3412,10 +3305,6 @@ end subroutine jacobi
 !! NOTES
 !!   This routine is depreacted, use lapack API
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 SUBROUTINE ludcmp(a,n,np,indx,id,info)
@@ -3517,10 +3406,6 @@ END SUBROUTINE ludcmp
 !! NOTES
 !!  This routine is deprecated, use lapack API
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 SUBROUTINE lubksb(a,n,np,indx,b)
@@ -3576,12 +3461,6 @@ END SUBROUTINE LUBKSB
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_berryphase,m_berrytk,m_dfpt_fef,m_elpolariz,m_pead_nl_loop,m_relaxpol
-!!
-!! CHILDREN
-!!      dsysv,zhesv
 !!
 !! SOURCE
 
@@ -3766,12 +3645,6 @@ end subroutine dzgedi
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_berryphase,m_berrytk,m_dfpt_fef,m_elpolariz,m_pead_nl_loop,m_relaxpol
-!!
-!! CHILDREN
-!!      dsysv,zhesv
 !!
 !! SOURCE
 
@@ -4028,11 +3901,6 @@ end subroutine test_xginv
 !!          > 0: if INFO = i, D(i,i) is exactly zero.  The factorization
 !!               has been completed, but the block diagonal matrix D is
 !!               exactly singular, so the solution could not be computed.
-!! PARENTS
-!!
-!! CHILDREN
-!!      dsysv,zhesv
-!!
 !! SOURCE
 
 subroutine xhesv_cplex(UPLO, cplex, N, NRHS, A, B, msg, info)

@@ -12,10 +12,6 @@
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! TODO
 !! One should replace the 'pointer' by 'allocatable'. This was tried, in October 2014,
 !! but Petrus_nag complained (test v67mbpt t31...t34), and also max2 (paral#08 np=10).
@@ -181,13 +177,6 @@ CONTAINS
 !! SIDE EFFECTS
 !!  results_out(:)=<type(results_out_type)>=results_out datastructure array
 !!
-!! PARENTS
-!!      abinit,m_results_out
-!!
-!! CHILDREN
-!!      copy_results_out,init_results_out,xmpi_allgather,xmpi_allgatherv
-!!      xmpi_gatherv
-!!
 !! SOURCE
 
 subroutine init_results_out(dtsets,option_alloc,option_size,mpi_enregs,&
@@ -350,13 +339,6 @@ end subroutine init_results_out
 !! SIDE EFFECTS
 !!  results_out(:)=<type(results_out_type)>=results_out datastructure array
 !!
-!! PARENTS
-!!      abinit,m_driver
-!!
-!! CHILDREN
-!!      copy_results_out,init_results_out,xmpi_allgather,xmpi_allgatherv
-!!      xmpi_gatherv
-!!
 !! SOURCE
 
 subroutine destroy_results_out(results_out)
@@ -444,13 +426,6 @@ end subroutine destroy_results_out
 !!
 !! OUTPUT
 !!  results_out_out=<type(results_out_type)>=output results_out datastructure
-!!
-!! PARENTS
-!!      m_results_out
-!!
-!! CHILDREN
-!!      copy_results_out,init_results_out,xmpi_allgather,xmpi_allgatherv
-!!      xmpi_gatherv
 !!
 !! SOURCE
 
@@ -596,13 +571,6 @@ end subroutine copy_results_out
 !! SIDE EFFECTS
 !!  === f use_results_all=true ===
 !!  results_out_all(:)=<type(results_out_type)>=global (gathered) results_out datastructure array
-!!
-!! PARENTS
-!!      abinit,m_driver
-!!
-!! CHILDREN
-!!      copy_results_out,init_results_out,xmpi_allgather,xmpi_allgatherv
-!!      xmpi_gatherv
 !!
 !! SOURCE
 

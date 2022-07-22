@@ -21,12 +21,6 @@
 !! WARNING
 !! ABINIT rules are not yet followed in the present routine.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      abi_io_redirect,abimem_init,adini,aim_shutdown,defad,drvaim,herald
-!!      inpar,int2char4,timein,xmpi_bcast,xmpi_end,xmpi_init
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H

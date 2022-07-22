@@ -13,8 +13,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
 !! TODO
 !!  1) Pass distribfft instead of MPI_enreg to simplify the API and facilitate code-reuse.
 !!
@@ -145,8 +143,6 @@ contains
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 integer function fftcore_set_mixprec(wp) result(old_wp)
@@ -183,8 +179,6 @@ end function fftcore_set_mixprec
 !!
 !! INPUTS
 !!  fftalg=Input variable.
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -230,8 +224,6 @@ end function fftalg_isavailable
 !! INPUTS
 !!  fftalg=Input variable.
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 pure function fftalg_has_mpi(fftalg) result(ans)
@@ -272,8 +264,6 @@ end function fftalg_has_mpi
 !!
 !! OUTPUT
 !!  fftalg=Integer used to select the FFT library.
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -322,12 +312,6 @@ end function fftalg_for_npfft
 !!  cplex_mode= String defining whether the FFT library supports real<-->complex transforms.
 !!  padding_mode=Padding mode.
 !!
-!! PARENTS
-!!      m_fft,m_fft_prof
-!!
-!! CHILDREN
-!!      xmpi_sum,xmpi_sum_master
-!!
 !! SOURCE
 
 subroutine fftalg_info(fftalg,library,cplex_mode,padding_mode)
@@ -371,8 +355,6 @@ end subroutine fftalg_info
 !!   Use C to get the real cache size.
 !!   See http://stackoverflow.com/questions/12594208/c-program-to-determine-levels-size-of-cache
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 pure function get_cache_kb()
@@ -406,12 +388,6 @@ end function get_cache_kb
 !!
 !! OUTPUT
 !!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft.
-!!
-!! PARENTS
-!!      m_dvdb,m_phgamma,m_wfk,mrgdv
-!!
-!! CHILDREN
-!!      xmpi_sum,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -470,13 +446,6 @@ end subroutine ngfft_seq
 !!
 !! OUTPUT
 !!  Only writing
-!!
-!! PARENTS
-!!      m_bethe_salpeter,m_eph_driver,m_fft,m_fft_prof,m_fftcore
-!!      m_screening_driver,m_sigma_driver,m_wfd,m_wfk_analyze
-!!
-!! CHILDREN
-!!      xmpi_sum,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -551,12 +520,6 @@ end subroutine print_ngfft
 !! Potential trouble: this routine was written assuming kpt lies inside
 !! first Brillouin zone.  No measure is taken to fold input kpt back
 !! into first zone.  Given arbitrary kpt, this will cause trouble.
-!!
-!! PARENTS
-!!      m_fftcore,m_kg
-!!
-!! CHILDREN
-!!      xmpi_sum,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -740,12 +703,6 @@ end subroutine bound
 !! ngfft(8)=size of the cache, in bytes (not used here presently).!!
 !!   other ngfft slots are used for parallelism see ~abinit/doc/variables/vargs.htm#ngfft
 !! [unit] = Output Unit number (DEFAULT std_out)
-!!
-!! PARENTS
-!!      fftprof,m_fft,m_fft_prof,m_memeval,m_mpi_setup,m_scfcv_core,mrgscr
-!!
-!! CHILDREN
-!!      xmpi_sum,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -949,7 +906,7 @@ subroutine getng(boxcutmin,chksymtnons,ecut,gmet,kpt,me_fft,mgfft,nfft,ngfft,&
 ! Moreover, to cope with the non-symmorphic translation vectors, at least the
 ! origin must be sent to a point of the FFT grid. Hence, the non-symmorphic
 ! translations tnons(i) multiplied by ngfft(i) must be an integer.
-! The latter condition is however imposed only when chksymtnons=3. 
+! The latter condition is however imposed only when chksymtnons=3.
 ! Indeed, ABINIT will be able to reimpose the symmetry at the level of the density and potential.
 ! This might be a problem for GW calculations, though ...
 
@@ -1007,11 +964,11 @@ subroutine getng(boxcutmin,chksymtnons,ecut,gmet,kpt,me_fft,mgfft,nfft,ngfft,&
 !  taking both the constraint on nproc_nfft and the constraint on tnons.
 !  First decompose nproc_fft, providing divisors of ngfft(2:3)
    nn=nproc_fft
-   npower(:,:)=0 
+   npower(:,:)=0
    do ipower=1,mpower
      valpow=power(ipower)
      do while (mod(nn,valpow)==0)
-       nn=nn/valpow 
+       nn=nn/valpow
        npower(3,ipower)=npower(3,ipower)+1
      end do
      if(nn/=1)then
@@ -1026,7 +983,7 @@ subroutine getng(boxcutmin,chksymtnons,ecut,gmet,kpt,me_fft,mgfft,nfft,ngfft,&
        do ifactor=1,nfactor
          testok=1
          do isym=1,nsym
-           tnscaled=factor(ifactor)*tnons(ii,isym) 
+           tnscaled=factor(ifactor)*tnons(ii,isym)
            if(abs(tnscaled-nint(tnscaled))>tol8)testok=0
          enddo
          if(testok==1)exit
@@ -1037,7 +994,7 @@ subroutine getng(boxcutmin,chksymtnons,ecut,gmet,kpt,me_fft,mgfft,nfft,ngfft,&
            if(ifactor==3)npower(ii,2)=max(npower(ii,2),1)  ! At least one power of 3
            if(ifactor==4)npower(ii,1)=max(npower(ii,1),2)  ! At least two powers of 2
            if(ifactor==5)npower(ii,3)=max(npower(ii,3),1)  ! At least one power of 5
-           if(ifactor==6)then 
+           if(ifactor==6)then
              npower(ii,1)=max(npower(ii,1),1)  ! At least one power of 2
              npower(ii,2)=max(npower(ii,2),1)  ! At least one power of 3
            endif
@@ -1047,7 +1004,7 @@ subroutine getng(boxcutmin,chksymtnons,ecut,gmet,kpt,me_fft,mgfft,nfft,ngfft,&
              npower(ii,1)=max(npower(ii,1),1)  ! At least one power of 2
              npower(ii,3)=max(npower(ii,3),1)  ! At least one power of 5
            end if
-           if(ifactor==10)then 
+           if(ifactor==10)then
              npower(ii,1)=max(npower(ii,1),2)  ! At least two powers of 2
              npower(ii,2)=max(npower(ii,2),1)  ! At least one power of 3
            end if
@@ -1074,7 +1031,7 @@ subroutine getng(boxcutmin,chksymtnons,ecut,gmet,kpt,me_fft,mgfft,nfft,ngfft,&
    end do
 
 !  Get maximal search indices : the ngtrial values must be identical (to fulfill the constraint induced by the
-!  off diagonal elements of symrel), but also must contain sufficient powers of basic primes (2, 3, 5, 7, 11), 
+!  off diagonal elements of symrel), but also must contain sufficient powers of basic primes (2, 3, 5, 7, 11),
 !  and be bigger than all current ngfft components. This should guarantee that such a triplet fulfills all constraints.
 !  Determine the divisor of allowed ngmax
    ngdiv=1
@@ -1307,15 +1264,6 @@ end subroutine getng
 !!
 !! OUTPUT
 !!  gbound(2*mgfft+8,2)=defined above
-!!
-!! PARENTS
-!!      m_bandfft_kpt,m_cut3d,m_dfpt_elt,m_dfpt_mkrho,m_epjdos,m_fft,m_fft_prof
-!!      m_fock,m_fock_getghc,m_gsphere,m_hamiltonian,m_inwffil,m_mkrho
-!!      m_mlwfovlp,m_paw_mkaewf,m_positron,m_scfcv_core,m_sigmaph
-!!      m_spin_current,m_suscep_stat,m_tddft,m_wfd
-!!
-!! CHILDREN
-!!      xmpi_sum,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -1597,12 +1545,6 @@ end subroutine sphereboundary
 !! 2) Split the two cases to avoid breaking intent: from and to sphere (merge with cg_box2gpsh and cg_gsph2box?)
 !! 3) If symmetries are used with or without shiftg, it might happen that the FFT mesh
 !!    is not large enough to accomodate the rotated G, in this case one should return ierr /= 0
-!!
-!! PARENTS
-!!      m_cgtk,m_fft,m_fftcore,m_fftw3,m_inwffil,m_io_kss
-!!
-!! CHILDREN
-!!      xmpi_sum,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -1993,12 +1935,6 @@ end subroutine sphere
 !! TODO
 !! Order arguments
 !!
-!! PARENTS
-!!      m_fft
-!!
-!! CHILDREN
-!!      xmpi_sum,xmpi_sum_master
-!!
 !! SOURCE
 
 subroutine sphere_fft(cg,ndat,npw,cfft,n1,n2,n3,n4,n5,kg_k,tab_fftwf2_local,nd2proc)
@@ -2093,12 +2029,6 @@ end subroutine sphere_fft
 !!   sphere_fft1 is similar to sphere_fft, the only difference being that ndat > 1 is not supported.
 !!   Why? Should merge the two APIs.
 !!
-!! PARENTS
-!!      m_fft
-!!
-!! CHILDREN
-!!      xmpi_sum,xmpi_sum_master
-!!
 !! SOURCE
 
 subroutine sphere_fft1(cg,ndat,npw,cfft,n1,n2,n3,n4,n5,n6,kg_k,tab_fftwf2_local)
@@ -2161,12 +2091,6 @@ end subroutine sphere_fft1
 !! OUTPUTS
 !! to_cg(2,to_npw*ndat)= Output u(g) defined on the list of vectors to_kg_k with time-reversal mode to_istwfk
 !!
-!! PARENTS
-!!      m_fft
-!!
-!! CHILDREN
-!!      xmpi_sum,xmpi_sum_master
-!!
 !! SOURCE
 
 subroutine change_istwfk(from_npw,from_kg,from_istwfk,to_npw,to_kg,to_istwfk,n1,n2,n3,ndat,from_cg,to_cg)
@@ -2220,8 +2144,6 @@ end subroutine change_istwfk
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 pure subroutine switch(n1dfft,n2,lot,n1,lzt,zt,zw)
@@ -2272,8 +2194,6 @@ end subroutine switch
 !!
 !! OUTPUT
 !!  zw(2,lot,n2)=Cache working array
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -2346,8 +2266,6 @@ end subroutine switch_cent
 !!
 !! OUTPUT
 !!  zw(2,lot,n2)
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -2433,8 +2351,6 @@ end subroutine switchreal
 !!
 !! OUTPUT
 !!  zw(2,lot,n2)
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -2535,8 +2451,6 @@ end subroutine switchreal_cent
 !! OUTPTU
 !! zmpi2(2,md1,md2proc,nnd3)
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 pure subroutine scramble(i1,j2,lot,n1dfft,md1,n3,md2proc,nnd3,zw,zmpi2)
@@ -2581,8 +2495,6 @@ end subroutine scramble
 !!
 !! OUTPUT
 !!  zw(2,lot,n3)=Cache work array with the z-lines.
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -2632,8 +2544,6 @@ end subroutine fill
 !! OUTPUT
 !!   zw(2,lot,n3)= Filled cache work array.
 !!     zw(:,1:n1dfft,n3) contains the lines to be transformed along.
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -2697,8 +2607,6 @@ end subroutine fill_cent
 !! OUTPUT
 !!  zf(2,nd1,nd3)= zf(:,1:n1dfft,:1:n3) is filled with the results stored in zw
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 pure subroutine unfill(nd1,nd3,lot,n1dfft,n3,zw,zf)
@@ -2745,8 +2653,6 @@ end subroutine unfill
 !! OUTPUT
 !!  zf(2,md1,md3)= zf(:,1:n1dfft,1:m3) is filled with the non-zero components.
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 pure subroutine unfill_cent(md1,md3,lot,n1dfft,max3,m3,n3,zw,zf)
@@ -2791,12 +2697,6 @@ end subroutine unfill_cent
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_fftw3,m_sg2002
-!!
-!! CHILDREN
-!!      xmpi_sum,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -2870,12 +2770,6 @@ end subroutine unmpiswitch
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_fftw3,m_sg2002
-!!
-!! CHILDREN
-!!      xmpi_sum,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -2975,8 +2869,6 @@ end subroutine unmpiswitch_cent
 !! OUTPUT
 !!  zw(2,lot,n3)= cache work array
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 pure subroutine unscramble(i1,j2,lot,n1dfft,md1,n3,md2proc,nnd3,zmpi2,zw)
@@ -3022,8 +2914,6 @@ end subroutine unscramble
 !! OUTPUT
 !!  zt(2,lzt,n1)
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 pure subroutine unswitch(n1dfft,n2,lot,n1,lzt,zw,zt)
@@ -3068,8 +2958,6 @@ end subroutine unswitch
 !!
 !! OUTPUT
 !!  zt(2,lzt,n1)
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -3126,8 +3014,6 @@ end subroutine unswitch_cent
 !! OUTPUT
 !!  zt(2,lzt,n1)
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 pure subroutine unswitchreal(n1dfft,n2,n2eff,lot,n1zt,lzt,zw,zt)
@@ -3181,8 +3067,6 @@ end subroutine unswitchreal
 !!
 !! OUTPUT
 !!  zt(2,lzt,n1)
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -3244,12 +3128,6 @@ end subroutine unswitchreal_cent
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_fftw3,m_sg2002
-!!
-!! CHILDREN
-!!      xmpi_sum,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -3334,12 +3212,6 @@ end subroutine mpiswitch
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_fftw3,m_sg2002
-!!
-!! CHILDREN
-!!      xmpi_sum,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -3458,8 +3330,6 @@ end subroutine mpiswitch_cent
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 pure subroutine mpifft_fg2dbox(nfft,ndat,fofg,n1,n2,n3,n4,nd2proc,n6,fftn2_distrib,ffti2_local,me_fft,workf)
@@ -3509,8 +3379,6 @@ end subroutine mpifft_fg2dbox
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 pure subroutine mpifft_fg2dbox_dpc(nfft,ndat,fofg,n1,n2,n3,n4,nd2proc,n6,fftn2_distrib,ffti2_local,me_fft,workf)
@@ -3558,8 +3426,6 @@ end subroutine mpifft_fg2dbox_dpc
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -3614,8 +3480,6 @@ end subroutine mpifft_dbox2fg
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 pure subroutine mpifft_dbox2fg_dpc(n1,n2,n3,n4,nd2proc,n6,ndat,fftn2_distrib,ffti2_local,me_fft,workf,nfft,fofg)
@@ -3668,8 +3532,6 @@ end subroutine mpifft_dbox2fg_dpc
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -3749,8 +3611,6 @@ end subroutine mpifft_dbox2fr
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 pure subroutine mpifft_dbox2fr_dpc(n1,n2,n3,n4,n5,nd3proc,ndat,fftn3_distrib,ffti3_local,me_fft,workr,cplex,nfft,fofr)
@@ -3824,8 +3684,6 @@ end subroutine mpifft_dbox2fr_dpc
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -3901,8 +3759,6 @@ end subroutine mpifft_fr2dbox
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -3987,12 +3843,6 @@ end subroutine mpifft_fr2dbox_dpc
 !! indpw_k(4,npw_k)=array which gives fft box index for given basis sphere
 !!   in a representation that is directly usable by sg_fftrisc.f
 !! ngb=number of FFTs along z
-!!
-!! PARENTS
-!!      m_sgfft
-!!
-!! CHILDREN
-!!      xmpi_sum,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -4119,13 +3969,6 @@ end subroutine indfftrisc
 !!
 !! NOTES
 !!  Must take into account the time-reversal symmetry when istwf_k is not 1.
-!!
-!! PARENTS
-!!      m_berryphase_new,m_fft,m_fftcore,m_gsphere,m_inwffil,m_kg,m_ksdiago
-!!      m_orbmag,m_wfd
-!!
-!! CHILDREN
-!!      xmpi_sum,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -4403,8 +4246,8 @@ subroutine kpgsph(ecut,exchn2n3d,gmet,ikg,ikpt,istwf_k,kg,kpt,mkmem,mpi_enreg,mp
      if(mpi_enreg%me_fft < npw_remain) npw=npw+1
      ig=npw
 #ifdef DEBUG_MODE
-     write(msg,*) 'New npw_fft = ', npw
-     call wrtout(std_out,msg)
+     !write(msg,*) 'New npw_fft = ', npw
+     !call wrtout(std_out,msg)
 #endif
      alloc_size = max(alloc_size,npw)
      if(mpw>0 ) then  !Step for requilibration between fft process
@@ -4512,12 +4355,6 @@ end subroutine kpgsph
 !! NOTES
 !!  This routine has been extracted from kpgsph...
 !!
-!! PARENTS
-!!      m_mpi_setup
-!!
-!! CHILDREN
-!!      xmpi_sum,xmpi_sum_master
-!!
 !! SOURCE
 
 subroutine kpgcount(ecut,exchn2n3d,gmet,istwfk,kpt,ngmax,ngmin,nkpt)
@@ -4617,13 +4454,6 @@ end subroutine kpgcount
 !!   allocated inside the routine.
 !!   output: kg_k(3,npw_k) contains the list of G-vectors.
 !!
-!! PARENTS
-!!      fftprof,m_ebands,m_fft,m_fft_prof,m_gkk,m_io_kss,m_phgamma,m_phpi
-!!      m_sigmaph,m_wfd,m_wfk
-!!
-!! CHILDREN
-!!      xmpi_sum,xmpi_sum_master
-!!
 !! SOURCE
 
 subroutine get_kg(kpoint, istwf_k, ecut, gmet, npw_k, kg_k)
@@ -4681,12 +4511,6 @@ end subroutine get_kg
 !!
 !! NOTES
 !!   mpi_enreg is not necessary in this case (the info is also in ngfft), but much more easy to read...
-!!
-!! PARENTS
-!!      m_fft_prof,m_gsphere,m_prcref,m_screening,m_sigmaph
-!!
-!! CHILDREN
-!!      xmpi_sum,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -4774,8 +4598,6 @@ end subroutine kgindex
 !! SIDE EFFECTS
 !!   rhopart(nd1,nd2)=density in the x-y plane, accumulated in output.
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 pure subroutine addrho(icplexwf,includelast,nd1,nd2,n2,lot,n1dfft,zw,rhopart,weight_r,weight_i)
@@ -4848,12 +4670,6 @@ end subroutine addrho
 !!  n1dfft
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_fftw3,m_sg2002
-!!
-!! CHILDREN
-!!      xmpi_sum,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -4967,11 +4783,6 @@ end subroutine multpot
 !!
 !! OUTPUT
 !!   rhor_glob(cplex*nfft_tot,nspden)=Global array
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xmpi_sum,xmpi_sum_master
 !!
 !! SOURCE
 

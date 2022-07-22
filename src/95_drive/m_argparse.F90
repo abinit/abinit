@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -121,9 +117,6 @@ contains
 !!
 !! FUNCTION
 !!  Simple command line argument parser for abinit.
-!!
-!! PARENTS
-!!      abinit
 !!
 !! SOURCE
 
@@ -919,11 +912,6 @@ end function get_arg_list_dp
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      abitk
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

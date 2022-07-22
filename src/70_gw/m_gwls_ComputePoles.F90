@@ -11,10 +11,6 @@
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -74,13 +70,6 @@ CONTAINS
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gwls_ComputeCorrelationEnergy
-!!
-!! CHILDREN
-!!      block_lanczos_algorithm,diagonalize_lanczos_banded
-!!      ritz_analysis_general,xmpi_sum
 !!
 !! SOURCE
 
@@ -262,13 +251,6 @@ end subroutine generate_degeneracy_table_for_poles
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_gwls_ComputeCorrelationEnergy
-!!
-!! CHILDREN
-!!      block_lanczos_algorithm,diagonalize_lanczos_banded
-!!      ritz_analysis_general,xmpi_sum
-!!
 !! SOURCE
 
 subroutine clean_degeneracy_table_for_poles()
@@ -296,10 +278,6 @@ end subroutine clean_degeneracy_table_for_poles
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!!
-!! CHILDREN
 !!
 !!
 !! SOURCE
@@ -610,10 +588,6 @@ end function compute_Poles
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!!
-!! CHILDREN
 !!
 !!
 !! SOURCE

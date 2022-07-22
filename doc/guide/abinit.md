@@ -403,7 +403,8 @@ At present, this applies to three types of
 variables: those that have the dimension of an energy, those that have a
 dimension of length, and those that have a dimension of magnetic field. The
 first class of variables have the characteristics **ENERGY**, and can be
-specified in atomic units (Hartree), or electron-volts, or Rydbergs, or even Kelvin. 
+specified in atomic units (Hartree), or electron-volts (eV), or milli electron-volts (meV)
+or Rydbergs (Ry), or even Kelvin (K). 
 
 The second class of variables have the characteristics **LENGTH**,
 and can be specified in atomic units (Bohr), nm (nanometer) and angstrom. 

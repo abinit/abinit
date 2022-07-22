@@ -89,10 +89,6 @@ contains
 !!
 !! NOTES
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 subroutine init_primcell_ddb_info (pcell,brav,dipdip,mpert,msym,natom,nrpt,nsym,ntypat,ucvol,&
 &    indsym,symrec,symrel,typat,&
@@ -212,10 +208,6 @@ subroutine init_primcell_ddb_info (pcell,brav,dipdip,mpert,msym,natom,nrpt,nsym,
 !!  t_primcell_ddb_info= structure to allocate and fill
 !!
 !! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 subroutine read_primcell_ddb_info (filename,pcell)
@@ -342,10 +334,6 @@ subroutine read_primcell_ddb_info (filename,pcell)
 !!
 !! NOTES
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 subroutine write_primcell_ddb_info (filename,pcell)
 
@@ -444,10 +432,6 @@ subroutine write_primcell_ddb_info (filename,pcell)
 !! OUTPUT
 !!
 !! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 subroutine destroy_primcell_ddb_info (pcell)

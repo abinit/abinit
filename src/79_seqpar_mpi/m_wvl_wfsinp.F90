@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -85,13 +81,6 @@ contains
 !!
 !! SIDE EFFECTS
 !!  wfs <type(wvl_projector_type)>=wavefunctions information for wavelets.
-!!
-!! PARENTS
-!!      m_inwffil
-!!
-!! CHILDREN
-!!      input_wf_diag,mklocl_wavelets,wrtout,wvl_occ_abi2big,wvl_occopt_abi2big
-!!      xred2xcart
 !!
 !! SOURCE
 
@@ -233,13 +222,6 @@ end subroutine wvl_wfsinp_disk
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_mover
-!!
-!! CHILDREN
-!!      input_wf_diag,mklocl_wavelets,wrtout,wvl_occ_abi2big,wvl_occopt_abi2big
-!!      xred2xcart
 !!
 !! SOURCE
 
@@ -441,13 +423,6 @@ end subroutine wvl_wfsinp_reformat
 !!
 !! SIDE EFFECTS
 !!  wvl <type(wvl_data)>=wavefunctions & projectors information for wavelets.
-!!
-!! PARENTS
-!!      m_inwffil
-!!
-!! CHILDREN
-!!      input_wf_diag,mklocl_wavelets,wrtout,wvl_occ_abi2big,wvl_occopt_abi2big
-!!      xred2xcart
 !!
 !! SOURCE
 

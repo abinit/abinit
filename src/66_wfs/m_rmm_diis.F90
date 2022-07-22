@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -160,13 +156,6 @@ contains
 !!  rmm_diis_status(2): Status of the eigensolver.
 !!    The first entry gives the previous accuracy.
 !!    The second entry gives the number of iterations already performed with this level.
-!!
-!! PARENTS
-!!      m_vtowfk
-!!
-!! CHILDREN
-!!      abi_zgemm_2r,cg_zcopy,cg_zdotg_zip,cg_zgemm,cwtime,cwtime_report,dgemm
-!!      getghc,my_pack_matrix,pack_matrix,prep_getghc,subdiago,xmpi_sum
 !!
 !! SOURCE
 
@@ -711,12 +700,6 @@ end subroutine rmm_diis
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      abi_zgemm_2r,cg_zcopy,cg_zdotg_zip,cg_zgemm,cwtime,cwtime_report,dgemm
-!!      getghc,my_pack_matrix,pack_matrix,prep_getghc,subdiago,xmpi_sum
-!!
 !! SOURCE
 
 subroutine rmm_diis_push_iter(diis, iter, ndat, eig_bk, resid_bk, enlx_bk, cg_bk, residv_bk, gsc_bk, tag)
@@ -766,10 +749,6 @@ end subroutine rmm_diis_push_iter
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -863,12 +842,6 @@ end function rmm_diis_exit_iter
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      abi_zgemm_2r,cg_zcopy,cg_zdotg_zip,cg_zgemm,cwtime,cwtime_report,dgemm
-!!      getghc,my_pack_matrix,pack_matrix,prep_getghc,subdiago,xmpi_sum
-!!
 !! SOURCE
 
 subroutine rmm_diis_print_block(diis, ib_start, ndat, istep, ikpt, isppol)
@@ -921,13 +894,6 @@ end subroutine rmm_diis_print_block
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_rmm_diis
-!!
-!! CHILDREN
-!!      abi_zgemm_2r,cg_zcopy,cg_zdotg_zip,cg_zgemm,cwtime,cwtime_report,dgemm
-!!      getghc,my_pack_matrix,pack_matrix,prep_getghc,subdiago,xmpi_sum
 !!
 !! SOURCE
 
@@ -1012,10 +978,6 @@ end subroutine getghc_eigresid
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 type(rmm_diis_t) function rmm_diis_new(accuracy_level, usepaw, istwf_k, npwsp, max_niter, bsize, prtvol) result(diis)
@@ -1057,12 +1019,6 @@ end function rmm_diis_new
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      abi_zgemm_2r,cg_zcopy,cg_zdotg_zip,cg_zgemm,cwtime,cwtime_report,dgemm
-!!      getghc,my_pack_matrix,pack_matrix,prep_getghc,subdiago,xmpi_sum
-!!
 !! SOURCE
 
 subroutine rmm_diis_free(diis)
@@ -1096,12 +1052,6 @@ end subroutine rmm_diis_free
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      abi_zgemm_2r,cg_zcopy,cg_zdotg_zip,cg_zgemm,cwtime,cwtime_report,dgemm
-!!      getghc,my_pack_matrix,pack_matrix,prep_getghc,subdiago,xmpi_sum
 !!
 !! SOURCE
 
@@ -1193,12 +1143,6 @@ end subroutine rmm_diis_update_block
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      abi_zgemm_2r,cg_zcopy,cg_zdotg_zip,cg_zgemm,cwtime,cwtime_report,dgemm
-!!      getghc,my_pack_matrix,pack_matrix,prep_getghc,subdiago,xmpi_sum
-!!
 !! SOURCE
 
 subroutine rmm_diis_eval_mats(diis, iter, ndat, me_g0, comm)
@@ -1260,13 +1204,6 @@ end subroutine rmm_diis_eval_mats
 !! OUTPUT
 !! mat_out(cplx*N*N+1/2)= packed matrix (upper triangle)
 !!
-!! PARENTS
-!!      m_rmm_diis
-!!
-!! CHILDREN
-!!      abi_zgemm_2r,cg_zcopy,cg_zdotg_zip,cg_zgemm,cwtime,cwtime_report,dgemm
-!!      getghc,my_pack_matrix,pack_matrix,prep_getghc,subdiago,xmpi_sum
-!!
 !! SOURCE
 
 subroutine my_pack_matrix(n, mat_in, mat_out)
@@ -1324,13 +1261,6 @@ end subroutine my_pack_matrix
 !! SIDE EFFECTS
 !!  cg(2,*)=updated wavefunctions
 !!  gsc(2,*)=update <G|S|C>
-!!
-!! PARENTS
-!!      m_rmm_diis
-!!
-!! CHILDREN
-!!      abi_zgemm_2r,cg_zcopy,cg_zdotg_zip,cg_zgemm,cwtime,cwtime_report,dgemm
-!!      getghc,my_pack_matrix,pack_matrix,prep_getghc,subdiago,xmpi_sum
 !!
 !! SOURCE
 

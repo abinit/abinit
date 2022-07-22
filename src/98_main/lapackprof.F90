@@ -14,16 +14,6 @@
 !! INPUTS
 !!  (main program)
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      abi_io_redirect,abimem_init,abinit_doctor,cg_set_imag0_to_zero,cg_zaxpy
-!!      cg_zcopy,cg_zgemm,cg_zgemv,cwtime,destroy_mpi_enreg
-!!      get_command_argument,herald,init_mpi_enreg,projbd,pw_orthon
-!!      random_number,sqmat_itranspose,sqmat_otranspose,wrtout,xgerc,xheevx
-!!      xhpev,xmpi_init,xomp_set_num_threads,xomp_show_info,ydoc%add_ints
-!!      ydoc%write_and_free,zgemm,zgemm3m,zgemmt,zherk
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H

@@ -29,8 +29,6 @@
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!
 !! SOURCE
 !!
 
@@ -138,8 +136,6 @@ end subroutine abi_dhegv
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!
 !! SOURCE
 !!
 subroutine abi_chegv(itype,jobz,uplo,n,a,lda,b,ldb,w)
@@ -220,8 +216,6 @@ end subroutine abi_chegv
 !! FUNCTION
 !!
 !! INPUTS
-!!
-!! PARENTS
 !!
 !!
 !! SOURCE

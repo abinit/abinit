@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -212,12 +208,6 @@ contains
 !!
 !!  There is a large amount of overhead in the way this routine do the computation of the energy !
 !!  For example, the density has already been precomputed, so why to compute it again here ??
-!!
-!! PARENTS
-!!      m_scfcv_core
-!!
-!! CHILDREN
-!!      dotprod_g,getghc,prep_getghc,sqnorm_g,timab
 !!
 !! SOURCE
 
@@ -943,12 +933,6 @@ end subroutine energy
 !!  eig_k(nband)$= \langle C_n \mid H \mid C_n \rangle $ for each band.
 !!  resid_k(nband)=residual for each band
 !!   $= \langle C_n \mid H H \mid C_n \rangle- \langle C_n \mid H \mid C_n \rangle^2 $.
-!!
-!! PARENTS
-!!      m_dft_energy
-!!
-!! CHILDREN
-!!      dotprod_g,getghc,prep_getghc,sqnorm_g,timab
 !!
 !! SOURCE
 

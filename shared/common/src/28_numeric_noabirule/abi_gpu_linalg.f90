@@ -34,9 +34,6 @@
 !!   WARNING! : this routine is a dummy one when HAVE_GPU_CUDA is not enabled
 !!   the correct one is in 17_gpu_toolbox/dev_spec.cu
 !!
-!! PARENTS
-!!      lobpcgwf
-!!
 !! SOURCE
 
 #ifndef HAVE_GPU_CUDA
@@ -77,9 +74,6 @@ end subroutine alloc_on_gpu
 !!   WARNING! : this routine is a dummy one when HAVE_GPU_CUDA is not enabled
 !!   the correct one is in 17_gpu_toolbox/dev_spec.cu
 !!
-!! PARENTS
-!!      lobpcgwf,m_abi_gpu_linalg
-!!
 !! SOURCE
 
 subroutine copy_from_gpu(dtab,gpu_ptr,size)
@@ -119,9 +113,6 @@ end subroutine copy_from_gpu
 !!   WARNING! : this routine is a dummy one when HAVE_GPU_CUDA is not enabled
 !!   the correct one is in 17_gpu_toolbox/dev_spec.cu
 !!
-!! PARENTS
-!!      lobpcgwf,m_abi_gpu_linalg
-!!
 !! SOURCE
 
 subroutine copy_on_gpu(dtab,gpu_ptr,size)
@@ -158,9 +149,6 @@ end subroutine copy_on_gpu
 !!   WARNING! : this routine is a dummy one when HAVE_GPU_CUDA is not enabled
 !!   the correct one is in 17_gpu_toolbox/dev_spec.cu
 !!
-!! PARENTS
-!!      lobpcgwf
-!!
 !! SOURCE
 
 subroutine dealloc_on_gpu(gpu_ptr)
@@ -193,9 +181,6 @@ end subroutine dealloc_on_gpu
 !!   WARNING! : this routine is a dummy one when HAVE_GPU_CUDA is not enabled
 !!   the correct one is in 17_gpu_toolbox/gpu_linalg.cu
 !!
-!! PARENTS
-!!      lobpcgwf
-!!
 !! SOURCE
 
 subroutine gpu_linalg_init()
@@ -218,11 +203,6 @@ end subroutine gpu_linalg_init
 !! SIDE EFFECTS
 !!   WARNING! : this routine is a dummy one when HAVE_GPU_CUDA is not enabled
 !!   the correct one is in 17_gpu_toolbox/gpu_linalg.cu
-!!
-!! PARENTS
-!!      lobpcgwf
-!!
-!! CHILDREN
 !!
 !! SOURCE
 subroutine gpu_linalg_shutdown()
@@ -261,11 +241,6 @@ end subroutine gpu_linalg_shutdown
 !! SIDE EFFECTS
 !!   WARNING! : this routine is a dummy one when HAVE_GPU_CUDA is not enabled
 !!   the correct one is in 17_gpu_toolbox/gpu_linalg.cu
-!!
-!! PARENTS
-!!      lobpcgwf,m_abi_gpu_linalg
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -340,11 +315,6 @@ end subroutine gpu_xgemm
 !!   WARNING! : this routine is a dummy one when HAVE_GPU_CUDA is not enabled
 !!   the correct one is in 17_gpu_toolbox/gpu_linalg.cu
 !!
-!! PARENTS
-!!      lobpcgwf,m_abi_gpu_linalg
-!!
-!! CHILDREN
-!!
 !! SOURCE
 subroutine gpu_xtrsm(cplx,side,uplo,transa,diag,m,n,alpha,a_gpu,lda,b_gpu,ldb)
 
@@ -398,11 +368,6 @@ end subroutine gpu_xtrsm
 !!                  (e.g block of wavefunction)
 !!  blockvectorx  = on output, orthonormalized wavefunction. as a GPU ptr
 !!
-!!
-!! PARENTS
-!!      lobpcgwf
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

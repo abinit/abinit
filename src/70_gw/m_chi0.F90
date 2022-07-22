@@ -12,10 +12,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -36,6 +32,7 @@ module m_chi0
  use m_dtset
 
  use defs_datatypes,    only : pseudopotential_type, ebands_t
+ use m_fstrings,        only : ftoa, sjoin
  use m_gwdefs,          only : GW_TOL_DOCC, GW_TOL_W0, czero_gw, em1params_t, g0g0w
  use m_numeric_tools,   only : imin_loc, print_arr
  use m_geometry,        only : normv, vdotw
@@ -165,18 +162,6 @@ contains
 !!
 !! TODO
 !!  Check npwepG0 before Switching on umklapp
-!!
-!! PARENTS
-!!      m_screening_driver
-!!
-!! CHILDREN
-!!      assemblychi0_sym,get_bz_item,getnel,gsph_fft_tabs,kmesh_free,kmesh_init
-!!      littlegroup_free,littlegroup_init,littlegroup_print,pack_eneocc
-!!      paw_rho_tw_g,paw_symcprj,pawcprj_alloc,pawcprj_copy,pawcprj_free
-!!      pawhur_free,pawhur_init,pawpwij_free,pawpwij_init,print_arr,rho_tw_g
-!!      rotate_fft_mesh,symmetrize_afm_chi0,unpack_eneocc,vkbr_free,vkbr_init
-!!      wfd%change_ngfft,wfd%distribute_bands,wfd%get_cprj,wfd%get_ur,wrtout
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -461,6 +446,8 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
  ! TODO this table can be calculated for each k-point
  my_nbbpks=0; allup="All"; got=0
  ABI_MALLOC(bbp_ks_distrb,(mband,mband,Kmesh%nbz,nsppol))
+ call wrtout(std_out, sjoin(' Memory needed for bbp_ks_distrb: ', ftoa(four*mband**2*Kmesh%nbz*nsppol*b2Mb), ' [Mb] <<< MEM'))
+
  ABI_MALLOC(bbp_mask,(mband,mband))
 
  do spin=1,nsppol
@@ -473,7 +460,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
 
      call chi0_bbp_mask(Ep,use_tr,QP_BSt,mband,ik_ibz,ik_ibz,spin,spin_fact,bbp_mask)
 
-     call wfd%distribute_bbp(ik_ibz,spin,allup,my_nbbp,bbp_ks_distrb(:,:,ik_bz,spin),got,bbp_mask)
+     call wfd%distribute_bbp(ik_ibz,spin,allup,my_nbbp,bbp_ks_distrb(:,:,ik_bz,spin),got=got,bbp_mask=bbp_mask)
      my_nbbpks = my_nbbpks + my_nbbp
    end do
  end do
@@ -1154,18 +1141,6 @@ end subroutine cchi0q0
 !!  chi0(Ep%npwe,Ep%npwe,Ep%nomega)=independent-particle susceptibility matrix at wavevector qpoint and
 !!   each frequeny defined by Ep%omega and Ep%nomega
 !!
-!! PARENTS
-!!      m_screening_driver
-!!
-!! CHILDREN
-!!      assemblychi0_sym,get_bz_item,getnel,gsph_fft_tabs,kmesh_free,kmesh_init
-!!      littlegroup_free,littlegroup_init,littlegroup_print,pack_eneocc
-!!      paw_rho_tw_g,paw_symcprj,pawcprj_alloc,pawcprj_copy,pawcprj_free
-!!      pawhur_free,pawhur_init,pawpwij_free,pawpwij_init,print_arr,rho_tw_g
-!!      rotate_fft_mesh,symmetrize_afm_chi0,unpack_eneocc,vkbr_free,vkbr_init
-!!      wfd%change_ngfft,wfd%distribute_bands,wfd%get_cprj,wfd%get_ur,wrtout
-!!      xmpi_sum
-!!
 !! SOURCE
 
 subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
@@ -1353,6 +1328,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
  ! TODO this table can be calculated for each k-point
  my_nbbpks=0; allup="All"; got=0
  ABI_MALLOC(bbp_ks_distrb,(mband,mband,Kmesh%nbz,nsppol))
+ call wrtout(std_out, sjoin(' Memory needed for bbp_ks_distrb: ', ftoa(four*mband**2*Kmesh%nbz*nsppol*b2Mb), ' [Mb] <<< MEM'))
  ABI_MALLOC(bbp_mask,(mband,mband))
 
  do spin=1,nsppol
@@ -1373,7 +1349,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
 
      call chi0_bbp_mask(Ep,use_tr,QP_BSt,mband,ikmq_ibz,ik_ibz,spin,spin_fact,bbp_mask)
 
-     call wfd%distribute_kb_kpbp(ikmq_ibz,ik_ibz,spin,allup,my_nbbp,bbp_ks_distrb(:,:,ik_bz,spin),got,bbp_mask)
+     call wfd%distribute_kb_kpbp(ikmq_ibz,ik_ibz,spin,allup,my_nbbp,bbp_ks_distrb(:,:,ik_bz,spin),got=got,bbp_mask=bbp_mask)
      my_nbbpks = my_nbbpks + my_nbbp
    end do
  end do
@@ -2027,18 +2003,6 @@ end subroutine cchi0
 !!
 !! TODO
 !!  Check npwepG0 before Switching on umklapp
-!!
-!! PARENTS
-!!      m_screening_driver
-!!
-!! CHILDREN
-!!      assemblychi0_sym,get_bz_item,getnel,gsph_fft_tabs,kmesh_free,kmesh_init
-!!      littlegroup_free,littlegroup_init,littlegroup_print,pack_eneocc
-!!      paw_rho_tw_g,paw_symcprj,pawcprj_alloc,pawcprj_copy,pawcprj_free
-!!      pawhur_free,pawhur_init,pawpwij_free,pawpwij_init,print_arr,rho_tw_g
-!!      rotate_fft_mesh,symmetrize_afm_chi0,unpack_eneocc,vkbr_free,vkbr_init
-!!      wfd%change_ngfft,wfd%distribute_bands,wfd%get_cprj,wfd%get_ur,wrtout
-!!      xmpi_sum
 !!
 !! SOURCE
 

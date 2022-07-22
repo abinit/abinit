@@ -10,10 +10,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -123,12 +119,6 @@ contains
 !!     This phase does not have to be included in the symmetry rule
 !!     For that reason, we first apply the real part (cos(qR).D^s1s2_ij)
 !!     then, we apply the imaginary part (-sin(qR).D^s1s2_ij)
-!!
-!! PARENTS
-!!      m_gemm_nonlop,m_nonlop_ylm
-!!
-!! CHILDREN
-!!      xmpi_sum
 !!
 !! SOURCE
 

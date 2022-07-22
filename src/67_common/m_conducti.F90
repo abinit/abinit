@@ -13,10 +13,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -124,14 +120,6 @@ contains
 !!  wtk(nkpt)=weight assigned to each k point.
 !!  znucl(natom)=atomic number of atoms
 !!  np_sum=noziere-pines sumrule
-!!
-!! PARENTS
-!!      conducti
-!!
-!! CHILDREN
-!!      close_unit,getnel,hdr_fort_read,hdr_ncread,hdr%bcast,hdr%free
-!!      metric,msig,nctk_fort_or_ncfile,nctk_open_read,nctk_set_collective
-!!      nf90_close,nf90_get_var,open_file,spline,splint,xmpi_bcast,xmpi_sum
 !!
 !! SOURCE
 
@@ -895,14 +883,6 @@ end subroutine conducti_paw
 !!  ucvol=unit cell volume in ($\textrm{bohr}^{3}$).
 !!  wind=frequency window for computations of sigma
 !!  wtk(nkpt)=weight assigned to each k point.
-!!
-!! PARENTS
-!!      conducti
-!!
-!! CHILDREN
-!!      close_unit,getnel,hdr_fort_read,hdr_ncread,hdr%bcast,hdr%free
-!!      metric,msig,nctk_fort_or_ncfile,nctk_get_dim,nctk_open_read,nctk_set_collective
-!!      nf90_close,nf90_get_var,open_file,spline,splint,xmpi_bcast,xmpi_sum
 !!
 !! SOURCE
 
@@ -1783,13 +1763,6 @@ end subroutine conducti_paw_core
 !!  np_sum=noziere-pines sumrule
 !!  cond_kg(mom)=kubo-greenwood conductivity
 !!
-!! PARENTS
-!!      conducti
-!!
-!! CHILDREN
-!!      ddk%close,ddk%compare,ddk%read_eigk,getnel,gswfk%read_eigk,gswfk%close
-!!      jacobi,msig,nctk_fort_or_ncfile,openfile,wfk_open_read
-!!
 !! SOURCE
 
 
@@ -2394,12 +2367,6 @@ subroutine conducti_nc(filnam,filnam_out)
 !!     two output files ppsigma.dat (energy,sigma_1,sigma_2,epsilon_1,epsilon_2)
 !!                      abs.dat     (energy,nomega,komega,romega,absomega)
 !!     march 2002 s.mazevet
-!!
-!! PARENTS
-!!      m_conducti
-!!
-!! CHILDREN
-!!      intrpl,open_file
 !!
 !! SOURCE
 

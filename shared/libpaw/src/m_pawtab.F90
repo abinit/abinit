@@ -646,11 +646,6 @@ CONTAINS !===========================================================
 !!  Pawtab<type(pawtab_type)>=PAW arrays tabulated.
 !!                            Nullified in output
 !!
-!! PARENTS
-!!      m_pawtab
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pawtab_nullify_0D(Pawtab)
@@ -722,10 +717,6 @@ end subroutine pawtab_nullify_0D
 !! FUNCTION
 !!  Nullify all pointers in an array of pawtab data structures
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pawtab_nullify_1D(Pawtab)
@@ -762,11 +753,6 @@ end subroutine pawtab_nullify_1D
 !! SIDE EFFECTS
 !!  Pawtab<type(pawtab_type)>=PAW arrays tabulated.
 !!  All allocated arrays in Pawtab are deallocated
-!!
-!! PARENTS
-!!      m_pawtab
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -994,10 +980,6 @@ end subroutine pawtab_free_0D
 !! FUNCTION
 !!  Destroy (deallocate) all pointers in an array of pawtab data structures
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pawtab_free_1D(Pawtab)
@@ -1030,10 +1012,6 @@ end subroutine pawtab_free_1D
 !!
 !! FUNCTION
 !!  Set flags controlling optional arrays in a pawtab datastructure
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1090,10 +1068,6 @@ end subroutine pawtab_set_flags_0D
 !!  Set flags controlling optional arrays in an array of pawtab datastructures
 !! if (present(has_tvale))    Pawtab%has_tvale=has_tvale
 
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pawtab_set_flags_1D(Pawtab,has_coretau,has_fock,has_kij,has_tproj,has_tvale,has_vhnzc,&
@@ -1158,11 +1132,6 @@ end subroutine pawtab_set_flags_1D
 !!
 !! OUTPUT
 !!  Only writing
-!!
-!! PARENTS
-!!      m_bethe_salpeter,m_screening_driver,m_sigma_driver,m_wfk_analyze
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1362,13 +1331,6 @@ end subroutine pawtab_print
 !! OUTPUT
 !!   l_size_atm(natom)=output array of l_size values (for each atom)
 !!
-!! PARENTS
-!!      m_bethe_salpeter,m_classify_bands,m_d2frnl,m_exc_analyze,m_nonlinear
-!!      m_paw_mkaewf,m_paw_mkrho,m_respfn_driver,m_scfcv_core
-!!      m_screening_driver,m_sigma_driver,m_wfd,m_wfk_analyze
-!!
-!! CHILDREN
-!!
 !! NOTES
 !!  This function returns an allocatable integer array which may be allocated
 !!  on the fly.
@@ -1452,11 +1414,6 @@ end subroutine pawtab_get_lsize
 !!
 !! SIDE EFFECTS
 !!  pawtab=<type pawtab_type>=a pawtab datastructure
-!!
-!! PARENTS
-!!      m_pawpsp
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2965,11 +2922,6 @@ end subroutine pawtab_bcast
 !! SIDE EFFECTS
 !!  wvlpaw<type(wvlpaw_type)>=datastructure to be allocated.
 !!
-!! PARENTS
-!!      m_pawpsp,m_pawtab
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine wvlpaw_allocate(wvlpaw)
@@ -3003,11 +2955,6 @@ end subroutine wvlpaw_allocate
 !! SIDE EFFECTS
 !!  wvlpaw<type(wvlpaw_type)>=datastructure to be destroyed.
 !!  All allocated arrays are deallocated.
-!!
-!! PARENTS
-!!      m_pawpsp,m_pawtab
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3054,11 +3001,6 @@ end subroutine wvlpaw_free
 !! SIDE EFFECTS
 !!  wvlpaw=datastructure to be nullified
 !!
-!! PARENTS
-!!      m_pawtab
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine wvlpaw_nullify(wvlpaw)
@@ -3091,11 +3033,6 @@ end subroutine wvlpaw_nullify
 !! SIDE EFFECTS
 !!  wvlpaw_rholoc<type(wvlpaw_rholoc_type)>=datastructure to be destroyed.
 !!  All allocated arrays are deallocated.
-!!
-!! PARENTS
-!!      m_pawpsp,m_pawtab
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3131,11 +3068,6 @@ end subroutine wvlpaw_rholoc_free
 !!
 !! SIDE EFFECTS
 !!  wvlpaw_rholoc<type(wvlpaw_rholoc_type)>=datastructure to be nullified.
-!!
-!! PARENTS
-!!      m_pawpsp,m_pawtab
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
