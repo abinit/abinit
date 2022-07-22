@@ -8,12 +8,8 @@
 !! COPYRIGHT
 !!  Copyright (C) 2021-2022 ABINIT group (MG)
 !!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
+!!  APACHE license version 2.0, see ~abinit/COPYING
+!!  or https://www.apache.org/licenses/LICENSE-2.0 .
 !!
 !! SOURCE
 
@@ -115,9 +111,6 @@ contains
 !! rprim(3,3)=Dimensionless real space primitive translations.
 !! xred(3,natom)=Reduced atomic coordinates.
 !!
-!! PARENTS
-!!      m_driver
-!!
 !! NOTES
 !!
 !! ON THE USE OF FFT GRIDS:
@@ -134,8 +127,6 @@ contains
 !! ---------------------------
 !!    - Only the usual FFT grid (defined by ecut) is used. It is defined by nfft, ngfft, mgfft, ...
 !!      For compatibility reasons, (nfftf,ngfftf,mgfftf) are set equal to (nfft,ngfft,mgfft) in that case.
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
