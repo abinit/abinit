@@ -1,5 +1,5 @@
 
-.Version 9.7.5 of ABINIT 
+.Version 9.9.0 of ABINIT 
 .(MPI version, prepared for a x86_64_darwin21.5.0_gnu12.1 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 20 Jul 2022.
-- ( at 18h17 )
+.Starting date : Fri 22 Jul 2022.
+- ( at 19h41 )
   
 - input  file    -> /Users/gmatteo/git_repos/abinit_gwr/_build/tests/Test_suite/paral_t78_MPI8/t78.abi
 - output file    -> t78_MPI8.abo
@@ -710,12 +710,6 @@ meta: {optdriver: 6, }
    CBM:     5.398 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
  Direct gap:         4.791 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 
-
- ==== FFT mesh for GWR ====
-  FFT mesh divisions ........................    16   16   18
-  Augmented FFT divisions ...................    16   16   18
-  FFT algorithm .............................   312
-  FFT cache size ............................    16
  ==== Info on the GWR object ====
 
 --- !GWR_params
@@ -730,7 +724,7 @@ nqbz: 8
 nqibz: 4
 green_mpw: 1540
 tchi_mpw: 832
-g_ngfft: [16, 16, 18, 16, 16, 18, 312, 16, ]
+g_ngfft: [16, 16, 18, 16, 16, 18, ]
 P gwr_np_gtks: [2, 2, 2, 1, ]
 P np_kibz: [1, 1, 1, 1, ]
 P np_qibz: [1, 1, 1, 1, ]
@@ -1093,7 +1087,7 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         82.0  wall=        187.4
+- Proc.   0 individual time (sec): cpu=         84.4  wall=        203.2
 
 ================================================================================
 
