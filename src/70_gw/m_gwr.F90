@@ -355,15 +355,15 @@ module m_gwr
    ! (ntau)
    ! Imaginary frequency mesh and integration weights
 
-   real(dp),allocatable :: wt_cos_wgs(:,:)
+   real(dp),allocatable :: cosft_wt(:,:)
    ! (ntau, ntau)
    ! weights for cosine transform. (i tau --> i omega)
 
-   real(dp),allocatable :: tw_cos_wgs(:,:)
+   real(dp),allocatable :: cosft_tw(:,:)
    ! (ntau, ntau)
    ! weights for sine transform (i iomega --> i tau)
 
-   real(dp),allocatable :: wt_sin_wgs(:,:)
+   real(dp),allocatable :: sinft_wt(:,:)
    ! (ntau, ntau)
    ! weights for sine transform (i tau --> i omega)
 
@@ -630,7 +630,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  integer :: my_is, my_it, my_ikf, my_iqf, ii, npwsp, col_bsize, ebands_timrev, my_iki, my_iqi, itau, spin
  integer :: my_nshiftq, iq_bz, iq_ibz, npw_, ncid, ig, ig_start
  integer :: comm_cart, me_cart, ierr, all_nproc, nps, my_rank, qprange_, gap_err
- integer :: jj, cnt, ikcalc, ndeg, mband, bstop, nbsum, it, iw
+ integer :: jj, cnt, ikcalc, ndeg, mband, bstop, nbsum !, it, iw
  integer :: ik_ibz, ik_bz, isym_k, trev_k, g0_k(3)
  logical :: isirr_k, changed, q_is_gamma
  real(dp) :: ecut_eff, cpu, wall, gflops, mem_mb, te_min, te_max
@@ -644,7 +644,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  integer,allocatable :: kbz2ibz(:,:), qbz2ibz(:,:), gvec_(:,:)
  integer,allocatable :: degblock(:,:), degblock_all(:,:,:,:), ndeg_all(:,:)
  real(dp) :: my_shiftq(3,1), kk_ibz(3), kk_bz(3), qq_bz(3), qq_ibz(3), kk(3)
- real(dp),allocatable :: wtk(:), kibz(:,:), mat(:,:)
+ real(dp),allocatable :: wtk(:), kibz(:,:) !, mat(:,:)
  logical :: periods(ndims), keepdim(ndims)
 
 ! *************************************************************************
@@ -944,37 +944,36 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  gwr%tau_mesh = arth(zero, te_max, gwr%ntau)
  gwr%tau_wgs = one / gwr%ntau
 
- ABI_MALLOC(gwr%tw_cos_wgs, (gwr%ntau, gwr%ntau))
- ABI_MALLOC(gwr%wt_cos_wgs, (gwr%ntau, gwr%ntau))
- ABI_MALLOC(gwr%wt_sin_wgs, (gwr%ntau, gwr%ntau))
- gwr%tw_cos_wgs = one; gwr%wt_cos_wgs = one; gwr%wt_sin_wgs = one
+ ABI_MALLOC(gwr%cosft_tw, (gwr%ntau, gwr%ntau))
+ ABI_MALLOC(gwr%cosft_wt, (gwr%ntau, gwr%ntau))
+ ABI_MALLOC(gwr%sinft_wt, (gwr%ntau, gwr%ntau))
+ gwr%cosft_tw = one; gwr%cosft_wt = one; gwr%sinft_wt = one
 
 #else
  !te_max = te_max * 10
  !print *, "erange", te_max / te_min
  call gx_minimax_grid(gwr%ntau, te_min, te_max,  &  ! in
-                      gwr%tau_mesh, gwr%tau_wgs, &  ! all these args are out and allocated by the routine.
-                      gwr%iw_mesh, gwr%iw_wgs,   &
-                      gwr%wt_cos_wgs, gwr%tw_cos_wgs, gwr%wt_sin_wgs, &
-                      gwr%ft_max_error)
+                      gwr%tau_mesh, gwr%tau_wgs, gwr%iw_mesh, gwr%iw_wgs, & ! out args allocated by the routine.
+                      gwr%cosft_wt, gwr%cosft_tw, gwr%sinft_wt, &
+                      gwr%ft_max_error, gwr%cosft_duality_error, ierr)
+ ABI_CHECK(ierr == 0, "gx_mimimax_grid returned ierr !=0")
 
  ! Compute the "real" weights used for the inhomogeneous cosine/sine FT and check whether
  ! the two matrices for the forward/backward cosine transforms are the inverse of each other.
- do it=1,gwr%ntau
-   do iw=1,gwr%ntau
-     gwr%wt_cos_wgs(iw, it) = gwr%wt_cos_wgs(iw, it) * cos(gwr%tau_mesh(it) * gwr%iw_mesh(iw))
-     gwr%tw_cos_wgs(it, iw) = gwr%tw_cos_wgs(it, iw) * cos(gwr%tau_mesh(it) * gwr%iw_mesh(iw))
-     gwr%wt_sin_wgs(iw, it) = gwr%wt_sin_wgs(iw, it) * sin(gwr%tau_mesh(it) * gwr%iw_mesh(iw))
-   end do
- end do
+ !do it=1,gwr%ntau
+ !  do iw=1,gwr%ntau
+ !    gwr%cosft_wt(iw, it) = gwr%cosft_wt(iw, it) * cos(gwr%tau_mesh(it) * gwr%iw_mesh(iw))
+ !    gwr%cosft_tw(it, iw) = gwr%cosft_tw(it, iw) * cos(gwr%tau_mesh(it) * gwr%iw_mesh(iw))
+ !    gwr%sinft_wt(iw, it) = gwr%sinft_wt(iw, it) * sin(gwr%tau_mesh(it) * gwr%iw_mesh(iw))
+ !  end do
+ !end do
 
- ABI_MALLOC(mat, (gwr%ntau, gwr%ntau))
- mat = matmul(gwr%wt_cos_wgs, gwr%tw_cos_wgs)
- do it=1,gwr%ntau
-   mat(it, it) = mat(it, it) - one
- end do
- !print *, "mat", mat
- gwr%cosft_duality_error = maxval(abs(mat))
+ !ABI_MALLOC(mat, (gwr%ntau, gwr%ntau))
+ !mat = matmul(gwr%cosft_wt, gwr%cosft_tw)
+ !do it=1,gwr%ntau
+ !  mat(it, it) = mat(it, it) - one
+ !end do
+ !gwr%cosft_duality_error = maxval(abs(mat))
 
  call wrtout(std_out, sjoin("Max_{ij} |CT CT^{-1} - I|", ftoa(gwr%cosft_duality_error)))
  call wrtout(std_out, sjoin("ft_max_error", ltoa(gwr%ft_max_error)))
@@ -1426,9 +1425,9 @@ subroutine gwr_free(gwr)
  ABI_SFREE(gwr%tau_wgs)
  ABI_SFREE(gwr%iw_mesh)
  ABI_SFREE(gwr%iw_wgs)
- ABI_SFREE(gwr%tw_cos_wgs)
- ABI_SFREE(gwr%wt_cos_wgs)
- ABI_SFREE(gwr%wt_sin_wgs)
+ ABI_SFREE(gwr%cosft_tw)
+ ABI_SFREE(gwr%cosft_wt)
+ ABI_SFREE(gwr%sinft_wt)
  ABI_SFREE(gwr%kcalc)
  ABI_SFREE(gwr%bstart_ks)
  ABI_SFREE(gwr%bstop_ks)
@@ -2345,7 +2344,7 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
      ABI_CHECK(gwr%wc_space == "iomega", sjoin("mode:", mode, "with what:", what, "and wc_space:", gwr%wc_space))
      gwr%wc_space = "itau"
    end if
-   weights_ptr => gwr%tw_cos_wgs
+   weights_ptr => gwr%cosft_tw
 
  case ("it2w")
    ! From tau to omega
@@ -2357,7 +2356,7 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
      ABI_CHECK(gwr%wc_space == "itau", sjoin("mode:", mode, " with what:", what, "and wc_space:", gwr%wc_space))
      gwr%wc_space = "iomega"
    end if
-   weights_ptr => gwr%wt_cos_wgs
+   weights_ptr => gwr%cosft_wt
 
  case default
    ABI_ERROR(sjoin("Wrong mode:", mode))
@@ -3607,8 +3606,8 @@ subroutine ft_t2w(t_vals, w_vals)
  do iw=1,gwr%ntau
    !w_vals(1, iw)
    !w_vals(2, iw)
-   !matmul(gwr%wt_cos_wgs(iw,:), t_odd)
-   !matmul(gwr%wt_sin_wgs(iw,:), t_even)
+   !matmul(gwr%cosft_wt(iw,:), t_odd)
+   !matmul(gwr%sinft_wt(iw,:), t_even)
  end do
 
 end subroutine ft_t2w
