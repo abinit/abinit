@@ -1204,7 +1204,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
 
  if (my_rank == master) then
    call print_ngfft(gwr%g_ngfft, header="FFT mesh for GWR", unit=std_out)
-   call print_ngfft(gwr%g_ngfft, header="FFT mesh for GWR", unit=ab_out)
+   !call print_ngfft(gwr%g_ngfft, header="FFT mesh for GWR", unit=ab_out)
  end if
 
  ! Now we know the value of g_ngfft. Setup tables for zero-padded FFTs.
@@ -2668,7 +2668,7 @@ subroutine gwr_print(gwr, header, unit)
  call ydoc%add_int("nqibz", gwr%nqibz)
  call ydoc%add_int("green_mpw", gwr%green_mpw)
  call ydoc%add_int("tchi_mpw", gwr%tchi_mpw)
- call ydoc%add_int1d("g_ngfft", gwr%g_ngfft(1:8))
+ call ydoc%add_int1d("g_ngfft", gwr%g_ngfft(1:6))
  call ydoc%add_int1d("P gwr_np_gtks", [gwr%g_comm%nproc, gwr%tau_comm%nproc, gwr%kpt_comm%nproc, gwr%spin_comm%nproc])
  call ydoc%add_int1d("P np_kibz", gwr%np_kibz)
  call ydoc%add_int1d("P np_qibz", gwr%np_qibz)

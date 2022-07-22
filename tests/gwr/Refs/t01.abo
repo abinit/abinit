@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 20 Jul 2022.
-- ( at 18h16 )
+.Starting date : Fri 22 Jul 2022.
+- ( at 19h40 )
   
 - input  file    -> /Users/gmatteo/git_repos/abinit_gwr/_build/tests/Test_suite/gwr_t01/t01.abi
 - output file    -> t01.abo
@@ -588,12 +588,6 @@ meta: {optdriver: 6, }
    CBM:     5.285 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
  Direct gap:         2.443 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 
-
- ==== FFT mesh for GWR ====
-  FFT mesh divisions ........................    12   12   12
-  Augmented FFT divisions ...................    12   12   12
-  FFT algorithm .............................   312
-  FFT cache size ............................    16
  ==== Info on the GWR object ====
 
 --- !GWR_params
@@ -608,7 +602,7 @@ nqbz: 8
 nqibz: 3
 green_mpw: 302
 tchi_mpw: 190
-g_ngfft: [12, 12, 12, 12, 12, 12, 312, 16, ]
+g_ngfft: [12, 12, 12, 12, 12, 12, ]
 P gwr_np_gtks: [1, 1, 1, 1, ]
 P np_kibz: [1, 1, 1, ]
 P np_qibz: [1, 1, 1, ]
