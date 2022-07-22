@@ -290,7 +290,7 @@ module m_dtfil
   character(len=fnlen) :: fnameabi_qps
   character(len=fnlen) :: fnameabi_scr            ! SCReening file (symmetrized inverse dielectric matrix)
   character(len=fnlen) :: fnameabi_sus            ! KS independent-particle polarizability file
-  character(len=fnlen) :: fnameabi_chkp_rdm       ! Checkpoint for GW@DFA to read     
+  character(len=fnlen) :: fnameabi_chkp_rdm       ! Checkpoint for GW@DFA to read
   character(len=fnlen) :: fnameabo_ddb
   character(len=fnlen) :: fnameabo_den
   character(len=fnlen) :: fnameabo_ks_den         ! KS DEN file at Sigma level
@@ -361,7 +361,6 @@ module m_dtfil
   character(len=fnlen) :: fnameabo_app_gden2
   character(len=fnlen) :: fnameabo_app_gden3
   character(len=fnlen) :: fnameabo_app_geo
-  character(len=fnlen) :: fnameabo_app_gsr
   character(len=fnlen) :: fnameabo_app_kden
   character(len=fnlen) :: fnameabo_app_lden
   character(len=fnlen) :: fnameabo_app_nesting
@@ -1019,7 +1018,6 @@ subroutine dtfil_init_time(dtfil,iapp)
  dtfil%fnameabo_app_gden2=trim(filapp)//'_GDEN2'
  dtfil%fnameabo_app_gden3=trim(filapp)//'_GDEN3'
  dtfil%fnameabo_app_geo=trim(filapp)//'_GEO'
- dtfil%fnameabo_app_gsr=trim(filapp)//'_GSR'
  dtfil%fnameabo_app_kden=trim(filapp)//'_KDEN'
  dtfil%fnameabo_app_lden=trim(filapp)//'_LDEN'
  dtfil%fnameabo_app_nesting=trim(filapp)//'_NEST'
