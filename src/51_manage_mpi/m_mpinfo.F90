@@ -10,10 +10,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! TODO
 !!  Change the name of the datatype: (MPI_|mpi_) is a reserved keyword
 !!  and should not be used in client code!
@@ -121,11 +117,6 @@ CONTAINS  !=====================================================================
 !! SIDE EFFECTS
 !!  MPI_enreg<MPI_type>=All pointer set to null().
 !!
-!! PARENTS
-!!      lapackprof,m_mpi_setup
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine init_mpi_enreg(mpi_enreg)
@@ -160,11 +151,6 @@ end subroutine init_mpi_enreg
 !! SIDE EFFECTS
 !!  MPI_enreg<MPI_type>=All pointer set to null().
 !!
-!! PARENTS
-!!      m_fft_prof,m_mpinfo
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine nullify_mpi_enreg(MPI_enreg)
@@ -194,17 +180,6 @@ subroutine nullify_mpi_enreg(MPI_enreg)
 !!
 !! SIDE EFFECTS
 !!  MPI_enreg<MPI_type>=Datatype gathering information on the parallelism.
-!!
-!! PARENTS
-!!      abinit,conducti,cut3d,fftprof,lapackprof,m_bethe_salpeter,m_cut3d,m_ddk
-!!      m_dfpt_nstwf,m_dvdb,m_eph_driver,m_epjdos,m_fft,m_fft_prof,m_fftcore
-!!      m_fock,m_gsphere,m_gwls_hamiltonian,m_inwffil,m_ioarr,m_ksdiago,m_kxc
-!!      m_mlwfovlp_qp,m_mover_effpot,m_paw_optics,m_pawpwij,m_positron
-!!      m_ppmodel,m_prcref,m_scfcv_core,m_screening,m_screening_driver
-!!      m_sigma_driver,m_suscep_stat,m_vhxc_me,m_wfd,m_wfk,m_wfk_analyze,mrgscr
-!!      ujdet
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -257,11 +232,6 @@ end subroutine destroy_mpi_enreg
 !!
 !! OUTPUT
 !!  MPI_enreg2<MPI_type>=output mpi_enreg datastructure
-!!
-!! PARENTS
-!!      m_fft_prof,m_fock,m_gwls_hamiltonian,m_inwffil,m_wfd
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -430,11 +400,6 @@ end subroutine copy_mpi_enreg
 !! SIDE EFFECTS
 !!  MPI_enreg<MPI_type>=FFT pointer/flags intialized
 !!
-!! PARENTS
-!!      m_atm2fft,m_paw_nhat,m_positron
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine set_mpi_enreg_fft(MPI_enreg,comm_fft,distribfft,me_g0,paral_kgb)
@@ -475,11 +440,6 @@ end subroutine set_mpi_enreg_fft
 !!
 !! SIDE EFFECTS
 !!  MPI_enreg<MPI_type>=FFT pointer/flags intialized
-!!
-!! PARENTS
-!!      m_atm2fft,m_paw_nhat,m_positron
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -526,13 +486,6 @@ end subroutine unset_mpi_enreg_fft
 !!  ffti2_local(:) = local i2 indices in fourdp
 !!  fftn3_distrib(:) = rank of the processor which own fft planes in 3rd dimension for fourdp
 !!  ffti3_local(:) = local i3 indices in fourdp
-!!
-!! PARENTS
-!!      m_dens,m_dfpt_elt,m_fft,m_fock,m_ioarr,m_mkcore,m_mklocl
-!!      m_mklocl_realspace,m_mkrho,m_multipoles,m_nucprop,m_positron,m_prcref
-!!      m_spacepar,m_stress,m_xctk
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -608,11 +561,6 @@ end subroutine ptabs_fourdp
 !!  fftn3_distrib(:) = rank of the processors which own fft planes in 3rd dimension for fourwf
 !!  ffti3_local(:) = local i3 indices in fourwf
 !!
-!! PARENTS
-!!      m_fft
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine ptabs_fourwf(MPI_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
@@ -682,11 +630,6 @@ end subroutine ptabs_fourwf
 !!                                       FALSE otherwise
 !!  [msg]= -optional- warning message to be printed out
 !!
-!! PARENTS
-!!  driver,mpi_setup
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 logical function mpi_distrib_is_ok(MPI_enreg,nband,nkpt,nkpt_current_proc,nsppol,msg)
@@ -739,10 +682,6 @@ end function mpi_distrib_is_ok
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 function proc_distrb_cycle(distrb,ikpt,iband1,iband2,isppol,me)
@@ -779,10 +718,6 @@ end function proc_distrb_cycle
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 function proc_distrb_nband(distrb,ikpt,nband_k,isppol,me)
@@ -816,11 +751,6 @@ end function proc_distrb_nband
 !!  return vector of logicals for each band being on present proc
 !!
 !! INPUTS
-!!
-!! PARENTS
-!!      m_dfpt_vtowfk
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -861,10 +791,6 @@ end subroutine proc_distrb_cycle_bands
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine proc_distrb_kptband(kpt_band_procs,distrb,ikpt,isppol)
@@ -902,11 +828,6 @@ end subroutine proc_distrb_kptband
 !!  return vector of processor me indices for each band, within the band communicator
 !!
 !! INPUTS
-!!
-!! PARENTS
-!!      m_d2frnl,m_dfpt_fef,m_dfpt_nstwf,m_dfpt_vtowfk
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -951,11 +872,6 @@ end subroutine proc_distrb_band
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_mpi_setup
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1007,16 +923,6 @@ end subroutine initmpi_world
 !!
 !! OUTPUT
 !!  mpi_enreg=information about MPI parallelization
-!!
-!! PARENTS
-!!      cut3d,fftprof,m_atm2fft,m_bethe_salpeter,m_cut3d,m_ddk,m_dfpt_nstwf
-!!      m_dvdb,m_eph_driver,m_epjdos,m_fft,m_fft_prof,m_fftcore,m_gsphere
-!!      m_ioarr,m_ksdiago,m_kxc,m_mlwfovlp_qp,m_mpinfo,m_paw_nhat,m_paw_optics
-!!      m_pawpwij,m_positron,m_ppmodel,m_prcref,m_scfcv_core,m_screening
-!!      m_screening_driver,m_sigma_driver,m_suscep_stat,m_vhxc_me,m_wfd,m_wfk
-!!      m_wfk_analyze,mrgscr,ujdet
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1114,11 +1020,6 @@ end subroutine initmpi_seq
 !!    nproc_atom                =size of the communicator over atoms
 !!    my_natom                  =number of atoms treated by current proc
 !!    my_atmtab(mpi_enreg%natom)=indexes of the atoms treated by current processor
-!!
-!! PARENTS
-!!      m_mpi_setup,m_paral_pert
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1222,11 +1123,6 @@ end subroutine initmpi_atom
 !! SIDE EFFECTS
 !!  mpi_enreg=information about MPI parallelization
 !!
-!! PARENTS
-!!      abinit
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine clnmpi_atom(mpi_enreg)
@@ -1270,11 +1166,6 @@ end subroutine clnmpi_atom
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_mpi_setup
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1553,11 +1444,6 @@ end subroutine initmpi_grid
 !! SIDE EFFECTS
 !!  mpi_enreg=information about MPI parallelization
 !!
-!! PARENTS
-!!      abinit
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine clnmpi_grid(mpi_enreg)
@@ -1646,11 +1532,6 @@ end subroutine clnmpi_grid
 !!    mpi_enreg%nproc_img=size of comm_img
 !!    mpi_enreg%me_img=my rank in comm_img
 !!    mpi_enreg%distrb_img(:)=index of processor treating each image (in comm_img communicator)
-!!
-!! PARENTS
-!!      m_mpi_setup
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1949,11 +1830,6 @@ end subroutine initmpi_img
 !! FUNCTION
 !!  Cleans-up the mpi information for parallelism over images of the cell (npimage>1).
 !!
-!! PARENTS
-!!      abinit
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine clnmpi_img(mpi_enreg)
@@ -2006,11 +1882,6 @@ end subroutine clnmpi_img
 !!
 !! SIDE EFFECTS
 !!  mpi_enreg=information about MPI parallelization
-!!
-!! PARENTS
-!!      m_mpi_setup
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2114,11 +1985,6 @@ end subroutine initmpi_pert
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!      abinit
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine clnmpi_pert(mpi_enreg)
@@ -2169,11 +2035,6 @@ end subroutine clnmpi_pert
 !! OUTPUT
 !!  mpi_enreg=information about MPI parallelization
 !!  mpi_enreg%comm_band=communicator of BAND set
-!!
-!! PARENTS
-!!      m_dfpt_looppert,m_dfpt_lw
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2306,11 +2167,6 @@ end subroutine initmpi_band
 !! SIDE EFFECTS
 !!  array_allgather= gathered data
 !!
-!! PARENTS
-!!      m_forces
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 
@@ -2351,11 +2207,6 @@ end subroutine pre_gather
 !! OUTPUT
 !!  array= scattered data
 !!
-!! PARENTS
-!!      m_forces
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pre_scatter(array,array_allgather,n1,n2,n3,n4,mpi_enreg)
@@ -2385,10 +2236,6 @@ end subroutine pre_scatter
 !!
 !! INPUTS
 !!  mpi_enreg<MPI_type>=Datatype gathering information on the parallelism
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2438,11 +2285,6 @@ end function iwrite_fftdatar
 !!  in the kpgio routine, where a different parallel repartition
 !!  of k points for spin up and spin down would conflict with the
 !!  present computation of k+G sphere, independent of the spin.
-!!
-!! PARENTS
-!!      m_dfpt_looppert,m_dfpt_lw,m_eig2d,m_mpi_setup
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2748,11 +2590,6 @@ end subroutine distrb2
 !!  in the kpgio routine, where a different parallel repartition
 !!  of k points for spin up and spin down would conflict with the
 !!  present computation of k+G sphere, independent of the spin.
-!!
-!! PARENTS
-!!      m_mpi_setup
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

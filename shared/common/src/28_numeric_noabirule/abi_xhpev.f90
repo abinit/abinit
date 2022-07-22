@@ -26,8 +26,6 @@
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!
 !! SOURCE
 
   subroutine abi_dhpev(jobz,uplo,n,a,w,z,ldz,istwf_k,use_slk)
@@ -108,8 +106,6 @@ end subroutine abi_dhpev
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!
 !! SOURCE
 
   subroutine abi_chpev(jobz,uplo,n,a,w,z,ldz)
@@ -164,8 +160,6 @@ end subroutine abi_chpev
 !! FUNCTION
 !!
 !! INPUTS
-!!
-!! PARENTS
 !!
 !! SOURCE
 

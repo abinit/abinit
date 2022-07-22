@@ -248,12 +248,6 @@ CONTAINS  !=====================================================================
 !!      $ F^{ilsl,ilc}_{klm} = \delta{li,lj}\delta{mi,mj} \times
 !!         \Gaunt^{lsl,0}_{lc,0;li,0} \sqrt{ \dfrac{(2*lc+1) (2*lsl+1)}{4\pi*(2*li+1)} } $
 !!
-!! PARENTS
-!!      m_paw_slater
-!!
-!! CHILDREN
-!!      klmn2ijlmn,pawio_print_ij,slatrad_free,slatrad_init,wrtout
-!!
 !! SOURCE
 
 subroutine slatang_cshell_init(Slatang3l,l_max,lm2_size,lc_max,klm2lm)
@@ -407,12 +401,6 @@ end subroutine slatang_cshell_init
 !! SIDE EFFECTS
 !!  Slatang3l(lm2_size) <type(slatang_cshell_t)> = Object containing radial integrals
 !!
-!! PARENTS
-!!      m_paw_slater
-!!
-!! CHILDREN
-!!      klmn2ijlmn,pawio_print_ij,slatrad_free,slatrad_init,wrtout
-!!
 !! SOURCE
 
 subroutine slatang_cshell_free(Slatang3l)
@@ -451,12 +439,6 @@ end subroutine slatang_cshell_free
 !!
 !! SIDE EFFECTS
 !!  Slatrad3l(ln2_size) <type(slarad3l_type)> = Object containing radial integrals
-!!
-!! PARENTS
-!!      m_paw_slater
-!!
-!! CHILDREN
-!!      klmn2ijlmn,pawio_print_ij,slatrad_free,slatrad_init,wrtout
 !!
 !! SOURCE
 
@@ -504,12 +486,6 @@ end subroutine slatrad_cshell_free
 !!
 !! OUTPUT
 !!  Slatrad3l<slatrad_cshell_t>=The object completely initialized.
-!!
-!! PARENTS
-!!      m_paw_slater
-!!
-!! CHILDREN
-!!      klmn2ijlmn,pawio_print_ij,slatrad_free,slatrad_init,wrtout
 !!
 !! SOURCE
 
@@ -712,12 +688,6 @@ end subroutine slatrad_cshell_init
 !! OUTPUT
 !!  dijexc_core(cplex_dij*lmn2_size,ndij)
 !!
-!! PARENTS
-!!      m_paw_slater
-!!
-!! CHILDREN
-!!      klmn2ijlmn,pawio_print_ij,slatrad_free,slatrad_init,wrtout
-!!
 !! SOURCE
 
 subroutine paw_sigxcore(cplex_dij,lmn2_size,ndij,Pawrad,Pawtab,Atm,Atmrad,dijexc_core)
@@ -856,12 +826,6 @@ end subroutine paw_sigxcore
 !!  dijexc_core(cplex_dij*lmn2_size_max,ndij,ntypat)= On-site matrix elements $ \<\phi_i|Sigma_x^\core|\phi_j\>
 !!    for each type of atom.
 !!
-!! PARENTS
-!!      m_sigma_driver
-!!
-!! CHILDREN
-!!      klmn2ijlmn,pawio_print_ij,slatrad_free,slatrad_init,wrtout
-!!
 !! SOURCE
 
 subroutine paw_mkdijexc_core(ndij,cplex_dij,lmn2_size_max,Cryst,Pawtab,Pawrad,dijexc_core,pawprtvol,filpsp)
@@ -963,12 +927,6 @@ end subroutine paw_mkdijexc_core
 !! FUNCTION
 !!  Free the dynamic memory allocated in a structure of type slatrad_t
 !!
-!! PARENTS
-!!      m_paw_slater
-!!
-!! CHILDREN
-!!      klmn2ijlmn,pawio_print_ij,slatrad_free,slatrad_init,wrtout
-!!
 !! SOURCE
 
 subroutine slatrad_free_0D(Slatrad)
@@ -1000,11 +958,6 @@ end subroutine slatrad_free_0D
 !!
 !! FUNCTION
 !!  Free the dynamic memory allocated in a structure of type slatrad_t
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      klmn2ijlmn,pawio_print_ij,slatrad_free,slatrad_init,wrtout
 !!
 !! SOURCE
 
@@ -1065,12 +1018,6 @@ end subroutine slatrad_free_1D
 !!  but the results reported by calc_slatradl are not due to numerical roundoff errors (err < 10^-9).
 !!  However this does not cause any problem since only the upper triangle of the S_ij matrix
 !!  is stored and used in the other routines.
-!!
-!! PARENTS
-!!      m_paw_slater
-!!
-!! CHILDREN
-!!      klmn2ijlmn,pawio_print_ij,slatrad_free,slatrad_init,wrtout
 !!
 !! SOURCE
 
@@ -1322,10 +1269,6 @@ end subroutine slatrad_init
 !!
 !!  tq_{ij}^L is defined in terms of q_{ij}^L via: q_{ij]^{LM} = tq_{ij}^L \Gaunt_{ij}^{LM}
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine paw_dijhf(ndij,cplex_dij,qphase,lmn2_size_max,my_natom,ntypat,Pawtab,Pawrad,Pawang,Pawrhoij,&
@@ -1490,10 +1433,6 @@ end subroutine paw_dijhf
 !!  ll_idx=Index for L (thus L+1).
 !!  Pawang<type(pawang_type)>=paw angular mesh and related data
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 function summ_2gaunt(Pawang,ij_lm,kl_lm,ll_idx)
@@ -1551,10 +1490,6 @@ end function summ_2gaunt
 !!    \int_\Omega \phi_i(1)\phi_j(1) \dfrac{1}{|1-2|} \phi_k(2)\phi_l(2) d1d2
 !!
 !! INPUTS
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

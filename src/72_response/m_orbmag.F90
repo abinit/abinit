@@ -18,10 +18,6 @@
 !!
 !! NOTES
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -136,12 +132,6 @@ CONTAINS  !=====================================================================
 !! NOTES
 !! See Ceresoli et al, PRB 74, 024408 (2006) [[cite:Ceresoli2006]],
 !! DDK wavefunctions are used for the derivatives.
-!!
-!! PARENTS
-!!      m_dfpt_looppert
-!!
-!! CHILDREN
-!!      pawcprj_alloc,pawcprj_free,pawcprj_get,pawcprj_getdim,xmpi_sum
 !!
 !! SOURCE
 
@@ -695,11 +685,6 @@ end subroutine orbmag_tt
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_orbmag
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine unitarity_checker(dtset,eigen0,eigen1,mpi_enreg)
@@ -797,11 +782,6 @@ end subroutine unitarity_checker
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_orbmag
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine regauge2(cg_k,cg1_k,eig_k,eig1_k,mcgk,nband_k,npw_k)
@@ -897,11 +877,6 @@ end subroutine regauge2
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_orbmag
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine regauge(cg_k,cg1_k,eig_k,eig1_k,mcgk,nband_k,npw_k)
@@ -976,11 +951,6 @@ end subroutine regauge
 !! TODO
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_orbmag
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1121,10 +1091,6 @@ end subroutine apply_pw_k
 !! NOTES
 !! Direct questions and comments to J Zwanziger
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine apply_dl_term_k(atindx,cprj_k,cprj1_k,dlij,dl_k,&
@@ -1258,10 +1224,6 @@ end subroutine apply_dl_term_k
 !!
 !! NOTES
 !! Direct questions and comments to J Zwanziger
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1401,12 +1363,6 @@ end subroutine apply_onsite_d0_k
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_orbmag
-!!
-!! CHILDREN
-!!      pawcprj_alloc,pawcprj_free,pawcprj_get,pawcprj_getdim,xmpi_sum
-!!
 !! SOURCE
 
 subroutine lamb_core(atindx,dtset,omlamb)
@@ -1461,12 +1417,6 @@ end subroutine lamb_core
 !!
 !! NOTES
 !! computed in Cart directions then transformed to xtal coords
-!!
-!! PARENTS
-!!      m_orbmag
-!!
-!! CHILDREN
-!!      pawcprj_alloc,pawcprj_free,pawcprj_get,pawcprj_getdim,xmpi_sum
 !!
 !! SOURCE
 
@@ -1633,12 +1583,6 @@ end subroutine dl_vha
 !! NOTES
 !! computed in Cart directions then transformed to xtal coords
 !!
-!! PARENTS
-!!      m_orbmag
-!!
-!! CHILDREN
-!!      pawcprj_alloc,pawcprj_free,pawcprj_get,pawcprj_getdim,xmpi_sum
-!!
 !! SOURCE
 
 subroutine dl_vhnzc(dlvhnzc,dtset,gntselect,gprimd,lmn2max,my_lmax,pawrad,pawtab,realgnt)
@@ -1735,12 +1679,6 @@ end subroutine dl_vhnzc
 !! computed in Cart directions from pawtab%qijl(dir,klmn)
 !! then transformed to xtal coords
 !!
-!! PARENTS
-!!      m_orbmag
-!!
-!! CHILDREN
-!!      pawcprj_alloc,pawcprj_free,pawcprj_get,pawcprj_getdim,xmpi_sum
-!!
 !! SOURCE
 
 subroutine dl_q(dlq,dtset,gprimd,lmn2max,pawtab)
@@ -1813,12 +1751,6 @@ end subroutine dl_q
 !! TODO
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_orbmag
-!!
-!! CHILDREN
-!!      pawcprj_alloc,pawcprj_free,pawcprj_get,pawcprj_getdim,xmpi_sum
 !!
 !! SOURCE
 
@@ -1927,12 +1859,6 @@ end subroutine dl_p2
 !! NOTES
 !! effectively a vector in Cart directions, similar to pawtab%qijl(dir,klmn)
 !! but for each atom rather than each type of atom, due to L.m term
-!!
-!! PARENTS
-!!      m_orbmag
-!!
-!! CHILDREN
-!!      pawcprj_alloc,pawcprj_free,pawcprj_get,pawcprj_getdim,xmpi_sum
 !!
 !! SOURCE
 
@@ -2048,12 +1974,6 @@ end subroutine dl_Anp
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_orbmag
-!!
-!! CHILDREN
-!!      pawcprj_alloc,pawcprj_free,pawcprj_get,pawcprj_getdim,xmpi_sum
-!!
 !! SOURCE
 
 subroutine d2lr_p2(dtset,gprimd,lmn2max,lr,pawrad,pawtab)
@@ -2150,12 +2070,6 @@ end subroutine d2lr_p2
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_orbmag
-!!
-!! CHILDREN
-!!      pawcprj_alloc,pawcprj_free,pawcprj_get,pawcprj_getdim,xmpi_sum
-!!
 !! SOURCE
 
 subroutine apply_d2lr_term_k(atindx,cprj_k,dtset,iterm,lmn2max,mterm,nband_k,omm,pawtab)
@@ -2239,12 +2153,6 @@ end subroutine apply_d2lr_term_k
 !! TODO
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_orbmag
-!!
-!! CHILDREN
-!!      pawcprj_alloc,pawcprj_free,pawcprj_get,pawcprj_getdim,xmpi_sum
 !!
 !! SOURCE
 
@@ -2376,13 +2284,6 @@ end subroutine d2lr_Anp
 !! TODO
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_orbmag
-!!
-!! CHILDREN
-!!      pawcprj_alloc,pawcprj_free,pawcprj_get,pawcprj_getdim,pawcprj_mpi_recv
-!!      pawcprj_mpi_send,xmpi_sum
 !!
 !! SOURCE
 
@@ -2563,10 +2464,6 @@ end subroutine orbmag_tt_output
 !! TODO
 !!
 !! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

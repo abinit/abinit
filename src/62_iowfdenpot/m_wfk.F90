@@ -21,8 +21,6 @@
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
 !!
-!! PARENTS
-!!
 !! NOTES
 !!  1) The wfk_t object supports random access also when plain Fortran-IO is used.
 !!     One can easily *read* the block of wavefunctions with a given (kpt,spin)
@@ -38,8 +36,6 @@
 !!     the documentation, the two APIs do not interfere and can be mixed. Calls to MPI_FILE_SEEK
 !!     to reset the pointer to the start of the file do not solve the problem. Don't know if it's
 !!     a feature or a bug (the problem showed up with MPICH2, I haven't tested other MPI libraries)
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -325,17 +321,6 @@ CONTAINS
 !!  Wfk<class(wfk_t)> = WFK handler initialized and set in read mode
 !!  [Hdr_out]=Copy of the abinit header
 !!
-!! PARENTS
-!!      fold2Bloch,ioprof,m_conducti,m_cut3d,m_d2frnl,m_dfpt_looppert,m_dfpt_lw
-!!      m_dfpt_nstwf,m_dfpt_scfcv,m_dfptnl_loop,m_inwffil,m_wfd,m_wfk,mrggkk
-!!      optic
-!!
-!! CHILDREN
-!!      cryst%free,cwtime,cwtime_report,delete_file,ebands_free,ebands_print
-!!      ebands_update_occ,fine_hdr%echo,fine_hdr%free,hdr_ncread,iwfk%close
-!!      iwfk%hdr%echo,iwfk%read_band_block,owfk%close,owfk%open_write
-!!      owfk%write_band_block,wfk_open_read
-!!
 !! NOTES TODO
 !!   it would be better if formeig and iomode could be determined from the file itself!
 !!   eg iomode from the file extension, and formeig from whether it is WFK or 1WF
@@ -487,14 +472,6 @@ end subroutine wfk_open_read
 !!
 !! OUTPUT
 !!  Wfk<class(wfk_t)> = WFK handler initialized and set in read mode
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      cryst%free,cwtime,cwtime_report,delete_file,ebands_free,ebands_print
-!!      ebands_update_occ,fine_hdr%echo,fine_hdr%free,hdr_ncread,iwfk%close
-!!      iwfk%hdr%echo,iwfk%read_band_block,owfk%close,owfk%open_write
-!!      owfk%write_band_block,wfk_open_read
 !!
 !! SOURCE
 
@@ -699,15 +676,6 @@ end subroutine wfk_open_write
 !!  Close the wavefunction file handler and release the memory allocated
 !!  Delete the file if `delete` is True. Default: False
 !!
-!! PARENTS
-!!      m_inwffil
-!!
-!! CHILDREN
-!!      cryst%free,cwtime,cwtime_report,delete_file,ebands_free,ebands_print
-!!      ebands_update_occ,fine_hdr%echo,fine_hdr%free,hdr_ncread,iwfk%close
-!!      iwfk%hdr%echo,iwfk%read_band_block,owfk%close,owfk%open_write
-!!      owfk%write_band_block,wfk_open_read
-!!
 !! SOURCE
 
 subroutine wfk_close(Wfk, delete)
@@ -799,14 +767,6 @@ end subroutine wfk_close
 !!  [unit]=Unit number for output. Defaults to std_out
 !!  [prtvol]=Verbosity level
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      cryst%free,cwtime,cwtime_report,delete_file,ebands_free,ebands_print
-!!      ebands_update_occ,fine_hdr%echo,fine_hdr%free,hdr_ncread,iwfk%close
-!!      iwfk%hdr%echo,iwfk%read_band_block,owfk%close,owfk%open_write
-!!      owfk%write_band_block,wfk_open_read
-!!
 !! SOURCE
 
 subroutine wfk_print(wfk,unit,header,prtvol)
@@ -852,10 +812,6 @@ end subroutine wfk_print
 !!  ik_ibz=k-point index.
 !!  spin=Spin index.
 !!  [band]=Band index.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -925,10 +881,6 @@ end function wfk_validate_ks
 !!  [ktol]=Optional tolerance for k-point comparison.
 !!         For each reduced direction the absolute difference between the coordinates must be less that ktol
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 integer pure function wfk_findk(wfk, kpt, ktol) result(ikpt)
@@ -975,15 +927,6 @@ end function wfk_findk
 !!  fform=File type format of the header
 !!  [write_hdr]=True if the header should be written (default)
 !!  [iskss]=True if this is a KSS file (activate kdependent=No)
-!!
-!! PARENTS
-!!      m_io_kss,m_iowf,m_wfk
-!!
-!! CHILDREN
-!!      cryst%free,cwtime,cwtime_report,delete_file,ebands_free,ebands_print
-!!      ebands_update_occ,fine_hdr%echo,fine_hdr%free,hdr_ncread,iwfk%close
-!!      iwfk%hdr%echo,iwfk%read_band_block,owfk%close,owfk%open_write
-!!      owfk%write_band_block,wfk_open_read
 !!
 !! SOURCE
 
@@ -1076,10 +1019,6 @@ end subroutine wfk_ncdef_dims_vars
 !!
 !! OUTPUT
 !!  ierr
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1178,15 +1117,6 @@ end function wfk_compare
 !!  The output arrays eig_k and occ_k contain the *full* set of eigenvalues and occupation
 !!  factors stored in the file and are dimensioned with wfk%mband.
 !!
-!! PARENTS
-!!      m_inwffil,m_wfk
-!!
-!! CHILDREN
-!!      cryst%free,cwtime,cwtime_report,delete_file,ebands_free,ebands_print
-!!      ebands_update_occ,fine_hdr%echo,fine_hdr%free,hdr_ncread,iwfk%close
-!!      iwfk%hdr%echo,iwfk%read_band_block,owfk%close,owfk%open_write
-!!      owfk%write_band_block,wfk_open_read
-!!
 !! SOURCE
 
 subroutine wfk_read_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg_k, eig_k, occ_k)
@@ -1274,7 +1204,7 @@ subroutine wfk_read_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg_
  end if
 
  if (present(occ_k)) then
-!   ABI_CHECK(SIZE(occ_k) <= nband_disk, "GS occ_k too large, not enough data on disk")
+   !ABI_CHECK(SIZE(occ_k) <= nband_disk, "GS occ_k too large, not enough data on disk")
    if (Wfk%formeig==1) then
      ABI_ERROR("occ_k cannot be used when formeig ==1")
    end if
@@ -1349,7 +1279,8 @@ subroutine wfk_read_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg_
        end do
      end if
 
-   case (1) !formeig 1 for DFPT WF file
+   case (1)
+     ! formeig 1 for DFPT WF file
      npwso = npw_disk*nspinor_disk
      my_bcount = 0
      do band=1,nband_disk
@@ -1598,14 +1529,6 @@ end subroutine wfk_read_band_block
 !!  cg_bks(2,npw_k*nspinor) = Fourier coefficients of the wavefunction
 !!  [eig1_bks(2*wfk%mband)] = Matrix elements of the DFPT H1 Hamiltonian at the specified (k, spin).
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      cryst%free,cwtime,cwtime_report,delete_file,ebands_free,ebands_print
-!!      ebands_update_occ,fine_hdr%echo,fine_hdr%free,hdr_ncread,iwfk%close
-!!      iwfk%hdr%echo,iwfk%read_band_block,owfk%close,owfk%open_write
-!!      owfk%write_band_block,wfk_open_read
-!!
 !! SOURCE
 
 subroutine wfk_read_bks(wfk, band, ik_ibz, spin, sc_mode, cg_bks, eig1_bks)
@@ -1849,14 +1772,6 @@ end subroutine wfk_read_bks
 !!  [cg_k(:,:)]  = Fourier coefficients
 !!  [eig_k(:)] = Eigenvectors
 !!  [occ_k(:)] = Eigenvectors
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      cryst%free,cwtime,cwtime_report,delete_file,ebands_free,ebands_print
-!!      ebands_update_occ,fine_hdr%echo,fine_hdr%free,hdr_ncread,iwfk%close
-!!      iwfk%hdr%echo,iwfk%read_band_block,owfk%close,owfk%open_write
-!!      owfk%write_band_block,wfk_open_read
 !!
 !! SOURCE
 
@@ -2304,14 +2219,6 @@ end subroutine wfk_write_band_block
 !! NOTES
 !!  The output arrays eig_k and occ_k contain the *full* set of eigenvalues and occupation
 !!  factors stored in the file and are dimensioned with wfk%mband.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      cryst%free,cwtime,cwtime_report,delete_file,ebands_free,ebands_print
-!!      ebands_update_occ,fine_hdr%echo,fine_hdr%free,hdr_ncread,iwfk%close
-!!      iwfk%hdr%echo,iwfk%read_band_block,owfk%close,owfk%open_write
-!!      owfk%write_band_block,wfk_open_read
 !!
 !! SOURCE
 
@@ -2833,10 +2740,6 @@ end subroutine wfk_read_bmask
 !!  ebands<ebands_t>=GS band-structure.
 !!  [out_hdr]=Abinit header.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 type(ebands_t) function wfk_read_ebands(path, comm, out_hdr) result(ebands)
@@ -2891,14 +2794,6 @@ end function wfk_read_ebands
 !!  will fill the first nband_k positions with data read from file where
 !!  nband_k is the number of bands on file i.e. wfk%nband(ik_ibz,spin)
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      cryst%free,cwtime,cwtime_report,delete_file,ebands_free,ebands_print
-!!      ebands_update_occ,fine_hdr%echo,fine_hdr%free,hdr_ncread,iwfk%close
-!!      iwfk%hdr%echo,iwfk%read_band_block,owfk%close,owfk%open_write
-!!      owfk%write_band_block,wfk_open_read
-!!
 !! SOURCE
 
 subroutine wfk_read_eigk(Wfk,ik_ibz,spin,sc_mode,eig_k,occ_k)
@@ -2945,16 +2840,6 @@ end subroutine wfk_read_eigk
 !!          In output: eigen(mband,nkpt,nsppol) contains the GS eigevalues.
 !!  Hdr_out<hdr_type>=The header of the file
 !!
-!! PARENTS
-!!      m_bethe_salpeter,m_common,m_dfpt_looppert,m_screening_driver
-!!      m_sigma_driver,m_wfk,m_wfk_analyze
-!!
-!! CHILDREN
-!!      cryst%free,cwtime,cwtime_report,delete_file,ebands_free,ebands_print
-!!      ebands_update_occ,fine_hdr%echo,fine_hdr%free,hdr_ncread,iwfk%close
-!!      iwfk%hdr%echo,iwfk%read_band_block,owfk%close,owfk%open_write
-!!      owfk%write_band_block,wfk_open_read
-!!
 !! SOURCE
 
 subroutine wfk_read_eigenvalues(fname, eigen, Hdr_out, comm, occ)
@@ -2973,7 +2858,7 @@ subroutine wfk_read_eigenvalues(fname, eigen, Hdr_out, comm, occ)
 !scalars
  integer,parameter :: master = 0, formeig0 = 0
  integer :: ik_ibz,spin,my_rank,ierr,iomode,funt,sc_mode,mband
- real(dp) :: cpu, wall, gflops
+ real(dp) :: cpu, wall, gflops, cpu_io, wall_io, gflops_io
  type(wfk_t) :: Wfk
 
 !************************************************************************
@@ -2982,9 +2867,16 @@ subroutine wfk_read_eigenvalues(fname, eigen, Hdr_out, comm, occ)
  my_rank = xmpi_comm_rank(comm)
  iomode = iomode_from_fname(fname)
 
+ ! Should not do this but it seems that read_eigk with IO_MODE_MPI is very inefficient when
+ ! we read files with lots of k-points.
+ if (iomode == IO_MODE_MPI) iomode = IO_MODE_FORTRAN
+
  call wrtout(std_out, sjoin(" Reading eigenvalues from:", fname, ", with iomode:", iomode2str(iomode)))
 
  if (my_rank == master) then
+   ! Master reads and broadcasts
+   call cwtime(cpu_io, wall_io, gflops_io, "start")
+
    ! Open the file.
    sc_mode = xmpio_single
    funt = get_unit()
@@ -3010,13 +2902,14 @@ subroutine wfk_read_eigenvalues(fname, eigen, Hdr_out, comm, occ)
 
    ! Close the file.
    call wfk%close()
+   call cwtime_report(" wfk_read_eigenvalues_io", cpu_io, wall_io, gflops_io)
  end if
 
  ! Broadcast data
  if (xmpi_comm_size(comm) > 1) then
    call Hdr_out%bcast(master, my_rank, comm)
    mband = MAXVAL(Hdr_out%nband)
-   if (my_rank/=master) then
+   if (my_rank /= master) then
      ABI_MALLOC(eigen, (mband, Hdr_out%nkpt, Hdr_out%nsppol))
      if (present(occ)) then
        ABI_MALLOC(occ, (mband, Hdr_out%nkpt, Hdr_out%nsppol))
@@ -3030,7 +2923,6 @@ subroutine wfk_read_eigenvalues(fname, eigen, Hdr_out, comm, occ)
 
 end subroutine wfk_read_eigenvalues
 !!***
-
 
 !----------------------------------------------------------------------
 
@@ -3068,15 +2960,6 @@ end subroutine wfk_read_eigenvalues
 !!  pawrhoij = PAW matrix elements in projectors
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_dfpt_looppert,m_respfn_driver
-!!
-!! CHILDREN
-!!      cryst%free,cwtime,cwtime_report,delete_file,ebands_free,ebands_print
-!!      ebands_update_occ,fine_hdr%echo,fine_hdr%free,hdr_ncread,iwfk%close
-!!      iwfk%hdr%echo,iwfk%read_band_block,owfk%close,owfk%open_write
-!!      owfk%write_band_block,wfk_open_read
 !!
 !! SOURCE
 
@@ -3496,15 +3379,6 @@ end subroutine wfk_read_my_kptbands
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_dfpt_looppert
-!!
-!! CHILDREN
-!!      cryst%free,cwtime,cwtime_report,delete_file,ebands_free,ebands_print
-!!      ebands_update_occ,fine_hdr%echo,fine_hdr%free,hdr_ncread,iwfk%close
-!!      iwfk%hdr%echo,iwfk%read_band_block,owfk%close,owfk%open_write
-!!      owfk%write_band_block,wfk_open_read
-!!
 !! SOURCE
 
 subroutine wfk_write_my_kptbands(outpath_, distrb_flags, comm, formeig, hdr,&
@@ -3677,14 +3551,6 @@ end subroutine wfk_write_my_kptbands
 !!
 !! OUTPUTS
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      cryst%free,cwtime,cwtime_report,delete_file,ebands_free,ebands_print
-!!      ebands_update_occ,fine_hdr%echo,fine_hdr%free,hdr_ncread,iwfk%close
-!!      iwfk%hdr%echo,iwfk%read_band_block,owfk%close,owfk%open_write
-!!      owfk%write_band_block,wfk_open_read
-!!
 !! SOURCE
 
 subroutine wfk_write_h1mat(Wfk,sc_mode,eigen)
@@ -3734,14 +3600,6 @@ end subroutine wfk_write_h1mat
 !!   packed in the first positions. The array is allocated by the procedure.
 !!
 !!  Hdr_out<hdr_type>=The header of the file
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      cryst%free,cwtime,cwtime_report,delete_file,ebands_free,ebands_print
-!!      ebands_update_occ,fine_hdr%echo,fine_hdr%free,hdr_ncread,iwfk%close
-!!      iwfk%hdr%echo,iwfk%read_band_block,owfk%close,owfk%open_write
-!!      owfk%write_band_block,wfk_open_read
 !!
 !! SOURCE
 
@@ -3811,14 +3669,6 @@ end subroutine wfk_read_h1mat
 !!  Rewind the file, skip the header and modifies Wfk%f90_fptr $
 !!  Mainly used for debugging purposes when IO_MODE_FORTRAN is used.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      cryst%free,cwtime,cwtime_report,delete_file,ebands_free,ebands_print
-!!      ebands_update_occ,fine_hdr%echo,fine_hdr%free,hdr_ncread,iwfk%close
-!!      iwfk%hdr%echo,iwfk%read_band_block,owfk%close,owfk%open_write
-!!      owfk%write_band_block,wfk_open_read
-!!
 !! SOURCE
 
 subroutine wfk_rewind(wfk)
@@ -3860,15 +3710,6 @@ end subroutine wfk_rewind
 !!
 !! SIDE EFFECTS
 !!   Wfk<class(wfk_t)> : modifies Wfk%f90_fptr and the internal F90 file pointer.
-!!
-!! PARENTS
-!!      m_wfk
-!!
-!! CHILDREN
-!!      cryst%free,cwtime,cwtime_report,delete_file,ebands_free,ebands_print
-!!      ebands_update_occ,fine_hdr%echo,fine_hdr%free,hdr_ncread,iwfk%close
-!!      iwfk%hdr%echo,iwfk%read_band_block,owfk%close,owfk%open_write
-!!      owfk%write_band_block,wfk_open_read
 !!
 !! SOURCE
 
@@ -3929,15 +3770,6 @@ end subroutine wfk_seek
 !!  ik_ibz=K-point index,
 !!  spin=Spin index.
 !!
-!! PARENTS
-!!      m_wfk
-!!
-!! CHILDREN
-!!      cryst%free,cwtime,cwtime_report,delete_file,ebands_free,ebands_print
-!!      ebands_update_occ,fine_hdr%echo,fine_hdr%free,hdr_ncread,iwfk%close
-!!      iwfk%hdr%echo,iwfk%read_band_block,owfk%close,owfk%open_write
-!!      owfk%write_band_block,wfk_open_read
-!!
 !! SOURCE
 
 subroutine wfk_update_f90ptr(wfk, ik_ibz, spin)
@@ -3971,15 +3803,6 @@ end subroutine wfk_update_f90ptr
 !! FUNCTION
 !!  Compute the offsets corresponding to the different sections of the file (G-vectors, eigenvalues, u(G).
 !!  Needed only for Fortran-IO or MPI-IO.
-!!
-!! PARENTS
-!!      m_wfk
-!!
-!! CHILDREN
-!!      cryst%free,cwtime,cwtime_report,delete_file,ebands_free,ebands_print
-!!      ebands_update_occ,fine_hdr%echo,fine_hdr%free,hdr_ncread,iwfk%close
-!!      iwfk%hdr%echo,iwfk%read_band_block,owfk%close,owfk%open_write
-!!      owfk%write_band_block,wfk_open_read
 !!
 !! SOURCE
 
@@ -4133,15 +3956,6 @@ end subroutine wfk_compute_offsets
 !! FUNCTION
 !!  Print the offsets.
 !!
-!! PARENTS
-!!      m_wfk
-!!
-!! CHILDREN
-!!      cryst%free,cwtime,cwtime_report,delete_file,ebands_free,ebands_print
-!!      ebands_update_occ,fine_hdr%echo,fine_hdr%free,hdr_ncread,iwfk%close
-!!      iwfk%hdr%echo,iwfk%read_band_block,owfk%close,owfk%open_write
-!!      owfk%write_band_block,wfk_open_read
-!!
 !! SOURCE
 
 subroutine wfk_show_offsets(Wfk)
@@ -4210,15 +4024,6 @@ end subroutine wfk_show_offsets
 !! OUTPUTS
 !!  kg_k=(3,npw_disk) = G-vectors
 !!  mpierr=MPI error status (error check is delegated to the caller)
-!!
-!! PARENTS
-!!      m_wfk
-!!
-!! CHILDREN
-!!      cryst%free,cwtime,cwtime_report,delete_file,ebands_free,ebands_print
-!!      ebands_update_occ,fine_hdr%echo,fine_hdr%free,hdr_ncread,iwfk%close
-!!      iwfk%hdr%echo,iwfk%read_band_block,owfk%close,owfk%open_write
-!!      owfk%write_band_block,wfk_open_read
 !!
 !! SOURCE
 
@@ -4290,15 +4095,6 @@ end subroutine mpio_read_kg_k
 !!
 !! OUTPUTS
 !!  mpierr=MPI error status (error check is delegated to the caller)
-!!
-!! PARENTS
-!!      m_wfk
-!!
-!! CHILDREN
-!!      cryst%free,cwtime,cwtime_report,delete_file,ebands_free,ebands_print
-!!      ebands_update_occ,fine_hdr%echo,fine_hdr%free,hdr_ncread,iwfk%close
-!!      iwfk%hdr%echo,iwfk%read_band_block,owfk%close,owfk%open_write
-!!      owfk%write_band_block,wfk_open_read
 !!
 !! SOURCE
 
@@ -4377,15 +4173,6 @@ end subroutine mpio_write_kg_k
 !! OUTPUTS
 !!  buffer(:)
 !!  mpierr=MPI error status.
-!!
-!! PARENTS
-!!      m_wfk
-!!
-!! CHILDREN
-!!      cryst%free,cwtime,cwtime_report,delete_file,ebands_free,ebands_print
-!!      ebands_update_occ,fine_hdr%echo,fine_hdr%free,hdr_ncread,iwfk%close
-!!      iwfk%hdr%echo,iwfk%read_band_block,owfk%close,owfk%open_write
-!!      owfk%write_band_block,wfk_open_read
 !!
 !! SOURCE
 
@@ -4507,15 +4294,6 @@ end subroutine mpio_read_eigocc_k
 !!  buffer(:)
 !!  mpierr=MPI error status.
 !!
-!! PARENTS
-!!      m_wfk
-!!
-!! CHILDREN
-!!      cryst%free,cwtime,cwtime_report,delete_file,ebands_free,ebands_print
-!!      ebands_update_occ,fine_hdr%echo,fine_hdr%free,hdr_ncread,iwfk%close
-!!      iwfk%hdr%echo,iwfk%read_band_block,owfk%close,owfk%open_write
-!!      owfk%write_band_block,wfk_open_read
-!!
 !! SOURCE
 
 #ifdef HAVE_MPI_IO
@@ -4635,15 +4413,6 @@ end subroutine mpio_write_eigocc_k
 !!  - This routine should be called by a single processor.
 !!  - Only GS WFK files are supported (formeig==0)
 !!
-!! PARENTS
-!!      m_gstate,m_wfk_analyze
-!!
-!! CHILDREN
-!!      cryst%free,cwtime,cwtime_report,delete_file,ebands_free,ebands_print
-!!      ebands_update_occ,fine_hdr%echo,fine_hdr%free,hdr_ncread,iwfk%close
-!!      iwfk%hdr%echo,iwfk%read_band_block,owfk%close,owfk%open_write
-!!      owfk%write_band_block,wfk_open_read
-!!
 !! SOURCE
 
 subroutine wfk_tofullbz(in_path, dtset, psps, pawtab, out_path)
@@ -4737,13 +4506,6 @@ subroutine wfk_tofullbz(in_path, dtset, psps, pawtab, out_path)
  kfull => ebands_full%kptns
 
  ! Build new header and update pawrhoij.
- ! CP modified
- !call hdr_init_lowlvl(hdr_kfull,ebands_full,psps,pawtab,dummy_wvl,abinit_version,&
- !  ihdr%pertcase,ihdr%natom,ihdr%nsym,ihdr%nspden,ihdr%ecut,dtset%pawecutdg,ihdr%ecutsm,dtset%dilatmx,&
- !  ihdr%intxc,ihdr%ixc,ihdr%stmbias,ihdr%usewvl,dtset%pawcpxocc,dtset%pawspnorb,dtset%ngfft,dtset%ngfftdg,ihdr%so_psp,&
- !  ihdr%qptn,cryst%rprimd,cryst%xred,ihdr%symrel,ihdr%tnons,ihdr%symafm,ihdr%typat,ihdr%amu,ihdr%icoulomb,&
- !  kptopt3,dtset%nelect,dtset%cellcharge(1),dtset%kptrlatt_orig,dtset%kptrlatt,&
- !  dtset%nshiftk_orig,dtset%nshiftk,dtset%shiftk_orig,dtset%shiftk)
  call hdr_init_lowlvl(hdr_kfull,ebands_full,psps,pawtab,dummy_wvl,abinit_version,&
    ihdr%pertcase,ihdr%natom,ihdr%nsym,ihdr%nspden,ihdr%ecut,dtset%pawecutdg,ihdr%ecutsm,dtset%dilatmx,&
    ihdr%intxc,ihdr%ixc,ihdr%stmbias,ihdr%usewvl,dtset%pawcpxocc,dtset%pawspnorb,dtset%ngfft,dtset%ngfftdg,ihdr%so_psp,&
@@ -4751,7 +4513,6 @@ subroutine wfk_tofullbz(in_path, dtset, psps, pawtab, out_path)
    kptopt3,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,dtset%cellcharge(1),&
    dtset%kptrlatt_orig,dtset%kptrlatt,&
    dtset%nshiftk_orig,dtset%nshiftk,dtset%shiftk_orig,dtset%shiftk)
- ! End CP modified
 
  if (psps%usepaw == 1) call pawrhoij_copy(iwfk%hdr%pawrhoij, hdr_kfull%pawrhoij)
 
@@ -4942,18 +4703,9 @@ end subroutine wfk_tofullbz
 !! FUNCTION
 !!  Convert a netcdf WFK file (nc_path) to a Fortran WFK file (fort_path).
 !!
-!! PARENTS
-!!      ioprof
-!!
 !! NOTES
 !!  - This routine should be called by a single processor.
 !!  - Only GS WFK files are supported (formeig==0)
-!!
-!! CHILDREN
-!!      cryst%free,cwtime,cwtime_report,delete_file,ebands_free,ebands_print
-!!      ebands_update_occ,fine_hdr%echo,fine_hdr%free,hdr_ncread,iwfk%close
-!!      iwfk%hdr%echo,iwfk%read_band_block,owfk%close,owfk%open_write
-!!      owfk%write_band_block,wfk_open_read
 !!
 !! SOURCE
 
@@ -5025,15 +4777,6 @@ end subroutine wfk_nc2fort
 !!  formeig=0 for GS file, 1 for DFPT file
 !!  nband=Number of bands to read.
 !!  comm=MPI communicator
-!!
-!! PARENTS
-!!      ioprof
-!!
-!! CHILDREN
-!!      cryst%free,cwtime,cwtime_report,delete_file,ebands_free,ebands_print
-!!      ebands_update_occ,fine_hdr%echo,fine_hdr%free,hdr_ncread,iwfk%close
-!!      iwfk%hdr%echo,iwfk%read_band_block,owfk%close,owfk%open_write
-!!      owfk%write_band_block,wfk_open_read
 !!
 !! SOURCE
 
@@ -5221,15 +4964,6 @@ end subroutine wfk_prof
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!      ioprof
-!!
-!! CHILDREN
-!!      cryst%free,cwtime,cwtime_report,delete_file,ebands_free,ebands_print
-!!      ebands_update_occ,fine_hdr%echo,fine_hdr%free,hdr_ncread,iwfk%close
-!!      iwfk%hdr%echo,iwfk%read_band_block,owfk%close,owfk%open_write
-!!      owfk%write_band_block,wfk_open_read
-!!
 !! SOURCE
 
 subroutine wfk_create_wfkfile(wfk_fname,Hdr,iomode,formeig,Kvars,cwtimes,comm)
@@ -5329,15 +5063,6 @@ end subroutine wfk_create_wfkfile
 !! FUNCTION
 !!
 !! INPUTS
-!!
-!! PARENTS
-!!      ioprof
-!!
-!! CHILDREN
-!!      cryst%free,cwtime,cwtime_report,delete_file,ebands_free,ebands_print
-!!      ebands_update_occ,fine_hdr%echo,fine_hdr%free,hdr_ncread,iwfk%close
-!!      iwfk%hdr%echo,iwfk%read_band_block,owfk%close,owfk%open_write
-!!      owfk%write_band_block,wfk_open_read
 !!
 !! SOURCE
 
@@ -5475,15 +5200,6 @@ end subroutine wfk_check_wfkfile
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!      m_wfk
-!!
-!! CHILDREN
-!!      cryst%free,cwtime,cwtime_report,delete_file,ebands_free,ebands_print
-!!      ebands_update_occ,fine_hdr%echo,fine_hdr%free,hdr_ncread,iwfk%close
-!!      iwfk%hdr%echo,iwfk%read_band_block,owfk%close,owfk%open_write
-!!      owfk%write_band_block,wfk_open_read
-!!
 !! SOURCE
 
 subroutine fill_or_check(task,Hdr,Kvars,ik_ibz,spin,formeig,kg_k,cg_k,eig_k,occ_k,ierr)
@@ -5620,14 +5336,6 @@ end subroutine fill_or_check
 !!  Compare two WFK file for binary equality
 !!
 !! INPUTS
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      cryst%free,cwtime,cwtime_report,delete_file,ebands_free,ebands_print
-!!      ebands_update_occ,fine_hdr%echo,fine_hdr%free,hdr_ncread,iwfk%close
-!!      iwfk%hdr%echo,iwfk%read_band_block,owfk%close,owfk%open_write
-!!      owfk%write_band_block,wfk_open_read
 !!
 !! SOURCE
 
@@ -5797,15 +5505,6 @@ end subroutine wfk_diff
 !!
 !! NOTES
 !!  Only GS WFK files are supported (formeig==0)
-!!
-!! PARENTS
-!!      m_gstate
-!!
-!! CHILDREN
-!!      cryst%free,cwtime,cwtime_report,delete_file,ebands_free,ebands_print
-!!      ebands_update_occ,fine_hdr%echo,fine_hdr%free,hdr_ncread,iwfk%close
-!!      iwfk%hdr%echo,iwfk%read_band_block,owfk%close,owfk%open_write
-!!      owfk%write_band_block,wfk_open_read
 !!
 !! SOURCE
 

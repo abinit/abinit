@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -63,12 +59,6 @@ CONTAINS  !=====================================================================
 !! OUTPUT
 !!  (only writing)
 !!
-!! PARENTS
-!!      abinit,fftprof,lapackprof
-!!
-!! CHILDREN
-!!      omp_set_num_threads
-!!
 !! SOURCE
 
 subroutine xomp_show_info(unit)
@@ -114,10 +104,6 @@ end subroutine xomp_show_info
 !!  Return the maximum number of threads used for the current parallel region that
 !!  does not use the clause num_threads. Return 1 if OMP is disabled.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 function xomp_get_max_threads()
@@ -149,10 +135,6 @@ end function xomp_get_max_threads
 !!  In a sequential parts of the program, omp_get_thread_num always returns 0.
 !!  In parallel regions the return value varies from 0 to omp_get_num_threads-1 inclusive.
 !!  The return value of the master thread of a team is always 0.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -192,10 +174,6 @@ end function xomp_get_thread_num
 !!  [open_parallel]= If .TRUE., a temporary OMP parallel region will be open and omp_get_num_threads
 !!                   will be called inside this region.
 !!                   Default to .FALSE. so that we have consistent with the OMP API.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -248,12 +226,6 @@ end function xomp_get_num_threads
 !! SIDE EFFECTS
 !!  See description.
 !!
-!! PARENTS
-!!      lapackprof,m_argparse,m_fft,m_fft_prof
-!!
-!! CHILDREN
-!!      omp_set_num_threads
-!!
 !! SOURCE
 
 subroutine xomp_set_num_threads(nthreads)
@@ -281,9 +253,6 @@ end subroutine xomp_set_num_threads
 !!
 !! FUNCTION
 !!  This function returns true if are currently running in parallel, false otherwise
-!!
-!! CHILDREN
-!!      omp_in_parallel
 !!
 !! SOURCE
 
@@ -315,11 +284,6 @@ end function xomp_in_parallel
 !! OUTPUT
 !!  Return the maximum number of cores in one shared memory system
 !!  Return 0 if OMP is disabled.
-!!
-!! PARENTS
-!!  m_abi_linalg
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

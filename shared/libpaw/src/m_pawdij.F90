@@ -155,13 +155,6 @@ CONTAINS
 !!    In order to compute first-order Dij, paw_an (resp. paw_ij) datastructures
 !!    must contain first-order quantities, namely paw_an1 (resp. paw_ij1).
 !!
-!! PARENTS
-!!      m_bethe_salpeter,m_dfpt_scfcv,m_dfptnl_loop,m_nonlinear,m_respfn_driver
-!!      m_scfcv_core,m_screening_driver,m_sigma_driver
-!!
-!! CHILDREN
-!!      pawio_print_ij,wrtout
-!!
 !! SOURCE
 
 subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,ntypat,&
@@ -1095,12 +1088,6 @@ end subroutine pawdij
 !!      dij(lmn2_size+1:2*lmn2_size,:)
 !!          contains the imaginary part of the phase, i.e. D_ij*sin(q.r)
 !!
-!! PARENTS
-!!      m_paw_denpot,m_paw_dfpt,m_pawdij
-!!
-!! CHILDREN
-!!      pawio_print_ij,wrtout
-!!
 !! SOURCE
 
 subroutine pawdijhartree(dijhartree,qphase,nspden,pawrhoij,pawtab)
@@ -1207,12 +1194,6 @@ end subroutine pawdijhartree
 !!
 !!  NOTES:
 !!   WARNING: What follows has been tested only for cases where nsppol=1 and 2, nspden=1 and 2 with nspinor=1.
-!!
-!! PARENTS
-!!      m_paw_denpot,m_pawdij
-!!
-!! CHILDREN
-!!      pawio_print_ij,wrtout
 !!
 !! SOURCE
 
@@ -1455,12 +1436,6 @@ end subroutine pawdijfock
 !!          contains the real part of the phase, i.e. D_ij*cos(q.r)
 !!      dij(cplex_dij*lmn2_size+1:2*cplex_dij*lmn2_size,:)
 !!          contains the imaginary part of the phase, i.e. D_ij*sin(q.r)
-!!
-!! PARENTS
-!!      m_pawdij
-!!
-!! CHILDREN
-!!      pawio_print_ij,wrtout
 !!
 !! SOURCE
 
@@ -1866,12 +1841,6 @@ end subroutine pawdijxc
 !!      dij(cplex_dij*lmn2_size+1:2*cplex_dij*lmn2_size,:)
 !!          contains the imaginary part of the phase, i.e. D_ij*sin(q.r)
 !!
-!! PARENTS
-!!      m_pawdij
-!!
-!! CHILDREN
-!!      pawio_print_ij,wrtout
-!!
 !! SOURCE
 
 subroutine pawdijxcm(dijxc,cplex_dij,qphase,lmselect,ndij,nspden,nsppol,&
@@ -2127,12 +2096,6 @@ end subroutine pawdijxcm
 !!          contains the real part of the phase, i.e. D_ij*cos(q.r)
 !!      dij(cplex_dij*lmn2_size+1:2*cplex_dij*lmn2_size,:)
 !!          contains the imaginary part of the phase, i.e. D_ij*sin(q.r)
-!!
-!! PARENTS
-!!      m_fock_getghc,m_pawdij
-!!
-!! CHILDREN
-!!      pawio_print_ij,wrtout
 !!
 !! SOURCE
 
@@ -2423,12 +2386,6 @@ end subroutine pawdijhat
 !!   is \alpha^2 L_R\cdot m/|r-R|^3, where \alpha is the fine structure constant.
 !!
 !!
-!! PARENTS
-!!      m_paw_denpot,m_pawdij
-!!
-!! CHILDREN
-!!      pawio_print_ij,wrtout
-!!
 !! SOURCE
 
 subroutine pawdijnd(dijnd,cplex_dij,ndij,nucdipmom,pawrad,pawtab)
@@ -2574,12 +2531,6 @@ end subroutine pawdijnd
 !!          contains the real part of the phase, i.e. D_ij*cos(q.r)
 !!      dij(cplex_dij*lmn2_size+1:2*cplex_dij*lmn2_size,:)
 !!          contains the imaginary part of the phase, i.e. D_ij*sin(q.r)
-!!
-!! PARENTS
-!!      m_paw_denpot,m_pawdij
-!!
-!! CHILDREN
-!!      pawio_print_ij,wrtout
 !!
 !! SOURCE
 
@@ -2775,12 +2726,6 @@ end subroutine pawdijso
 !!          contains the real part of the phase, i.e. D_ij*cos(q.r)
 !!      dij(cplex_dij*lmn2_size+1:2*cplex_dij*lmn2_size,:)
 !!          contains the imaginary part of the phase, i.e. D_ij*sin(q.r)
-!!
-!! PARENTS
-!!      m_pawdij
-!!
-!! CHILDREN
-!!      pawio_print_ij,wrtout
 !!
 !! SOURCE
 
@@ -3038,12 +2983,6 @@ end subroutine pawdiju
 !!        Im(D_kl^A) = -Im(D_lk^A)  ( using (b) and (c) )
 !!        Im(D_kl^B) =  Im(D_lk^B)  ( using (a) and (c) )
 !!
-!! PARENTS
-!!      m_paw_denpot,m_paw_dfpt,m_pawdij
-!!
-!! CHILDREN
-!!      pawio_print_ij,wrtout
-!!
 !! SOURCE
 
 subroutine pawdiju_euijkl(diju,cplex_dij,qphase,ndij,pawrhoij,pawtab)
@@ -3231,12 +3170,6 @@ end subroutine pawdiju_euijkl
 !!          contains the real part of the phase, i.e. D_ij*cos(q.r)
 !!      dij(cplex_dij*lmn2_size+1:2*cplex_dij*lmn2_size,:)
 !!          contains the imaginary part of the phase, i.e. D_ij*sin(q.r)
-!!
-!! PARENTS
-!!      m_pawdij
-!!
-!! CHILDREN
-!!      pawio_print_ij,wrtout
 !!
 !! SOURCE
 
@@ -3545,12 +3478,6 @@ end subroutine pawdijexxc
 !!          contains the real part of the phase, i.e. D_ij*cos(q.r)
 !!      dij(cplex_dij*lmn2_size+1:2*cplex_dij*lmn2_size,:)
 !!          contains the imaginary part of the phase, i.e. D_ij*sin(q.r)
-!!
-!! PARENTS
-!!      m_d2frnl,m_dfpt_nstwf,m_dfpt_scfcv,m_dfptnl_loop,m_dfptnl_pert
-!!
-!! CHILDREN
-!!      pawio_print_ij,wrtout
 !!
 !! SOURCE
 
@@ -4184,12 +4111,6 @@ end subroutine pawdijfr
 !!      vpawu(2*i-1,:) contains the real part
 !!      vpawu(2*i,:) contains the imaginary part
 !!
-!! PARENTS
-!!      m_dftu_self,m_paw_hr,m_pawdij
-!!
-!! CHILDREN
-!!      pawio_print_ij,wrtout
-!!
 !! SOURCE
 
  subroutine pawpupot(cplex_dij,ndij,noccmmp,nocctot,&
@@ -4473,12 +4394,6 @@ end subroutine pawdijfr
 !! OUTPUT
 !!  paw_ij%vpawx(pawtab%lexexch*2+1,pawtab%lexexch*2+1)=local exact-exchange potential
 !!
-!! PARENTS
-!!      m_paw_denpot,m_pawdij
-!!
-!! CHILDREN
-!!      pawio_print_ij,wrtout
-!!
 !! SOURCE
 
  subroutine pawxpot(ndij,pawprtvol,pawrhoij,pawtab,vpawx)
@@ -4629,13 +4544,6 @@ end subroutine pawdijfr
 !!
 !! SIDE EFFECTS
 !!  paw_ij(natom)%dij???(cplex_dij*lmn2_size,nspden)=symmetrized dij quantities as output
-!!
-!! PARENTS
-!!      m_bethe_salpeter,m_dfpt_scfcv,m_dfptnl_loop,m_nonlinear,m_paw_denpot
-!!      m_pawdij,m_respfn_driver,m_scfcv_core,m_screening_driver,m_sigma_driver
-!!
-!! CHILDREN
-!!      pawio_print_ij,wrtout
 !!
 !! SOURCE
 
@@ -5376,12 +5284,6 @@ end subroutine symdij
 !! SIDE EFFECTS
 !!  paw_ij(natom)%dij???(cplex_dij*qphase*lmn2_size,nspden)=symmetrized dij quantities as output
 !!
-!! PARENTS
-!!      m_paw_denpot,m_screening_driver,m_sigma_driver
-!!
-!! CHILDREN
-!!      pawio_print_ij,wrtout
-!!
 !! SOURCE
 
 subroutine symdij_all(gprimd,indsym,ipert,my_natom,natom,nsym,ntypat,&
@@ -5521,12 +5423,6 @@ end subroutine symdij_all
 !!
 !! OUTPUT
 !!  dij_out = coeff2d_type array containing the gathered Dij
-!!
-!! PARENTS
-!!      m_pawdij
-!!
-!! CHILDREN
-!!      pawio_print_ij,wrtout
 !!
 !! SOURCE
 
@@ -5682,12 +5578,6 @@ end subroutine pawdij_gather
 !!
 !! OUTPUT
 !! (Only writing)
-!!
-!! PARENTS
-!!      m_paw_tools,m_pawdij
-!!
-!! CHILDREN
-!!      pawio_print_ij,wrtout
 !!
 !! SOURCE
 

@@ -11,10 +11,6 @@
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -119,8 +115,6 @@ CONTAINS  !===========================================================
 !!   IO_NO_AVAILABLE_UNIT if no logical unit is free (!)
 !!   IO_FILE_NOT_ASSOCIATED if the file is not linked to a logical unit
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 integer function get_free_unit()
@@ -156,8 +150,6 @@ end function get_free_unit
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 integer function get_unit_from_fname(fname)
@@ -188,8 +180,6 @@ end function get_unit_from_fname
 !!
 !! INPUTS
 !!  fname=The name of the file.
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -225,11 +215,6 @@ end function file_exists
 !!
 !! SIDE EFFECTS
 !!  The specified file is deleted.
-!!
-!! PARENTS
-!!      abinit,ioprof,m_dvdb,m_io_redirect,m_mlwfovlp,m_nctk,m_wfk
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -284,8 +269,6 @@ end subroutine delete_file
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 logical function is_connected(unit, fname)
@@ -317,8 +300,6 @@ end function is_connected
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 logical function is_open_unit(unit)
@@ -344,8 +325,6 @@ end function is_open_unit
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 logical function is_open_fname(fname)
@@ -370,10 +349,6 @@ end function is_open_fname
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -413,10 +388,6 @@ end subroutine prompt_int0D
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine prompt_rdp0D(msg,rvalue)
@@ -455,10 +426,6 @@ end subroutine prompt_rdp0D
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -508,10 +475,6 @@ end subroutine prompt_string
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine prompt_int1D(msg,ivect)
@@ -551,10 +514,6 @@ end subroutine prompt_int1D
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine prompt_int2D(msg,iarr)
@@ -592,10 +551,6 @@ end subroutine prompt_int2D
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -635,10 +590,6 @@ end subroutine prompt_rdp1D
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine prompt_rdp2D(msg,rarr)
@@ -677,11 +628,6 @@ end subroutine prompt_rdp2D
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_io_tools
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine prompt_exit()
@@ -718,10 +664,6 @@ end subroutine prompt_exit
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -766,14 +708,6 @@ end function read_string
 !! NOTES
 !!  Available only if the compiler implements this intrinsic procedure.
 !!
-!! PARENTS
-!!      abinit,anaddb,cut3d,fftprof,m_chi0,m_common,m_dmft,m_errors,m_forctqmc
-!!      m_hdr,m_io_redirect,m_io_tools,m_matlu,m_mpi_setup,m_paw_mkaewf
-!!      m_prep_calc_ucrpa,m_specialmsg,m_tdep_shell,m_vtorho,m_xc_vdw,mrggkk
-!!      mrgscr,multibinit,optic,vdw_kernelgen
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine flush_unit(unit)
@@ -807,8 +741,6 @@ end subroutine flush_unit
 !!
 !! FUNCTION
 !!  Returns the name of a non-existent file to be used for temporary storage.
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -855,8 +787,6 @@ end function pick_aname
 !!  provided that we continue to append the ".nc" string to any NETCDF
 !!  file produced by abinit.
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 pure logical function isncfile(fname)
@@ -900,8 +830,6 @@ end function isncfile
 !!    IO_MODE_MPI if available
 !!    IO_MODE_FORTRAN if HAVE_MPI_IO is not defined.
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 pure integer function iomode_from_fname(fname) result(iomode)
@@ -936,11 +864,6 @@ end function iomode_from_fname
 !! FUNCTION
 !!  Set the value of the enforce_fortran__ global variable.
 !!
-!! PARENTS
-!!      abitk,m_argparse
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine enforce_fortran_io(bool)
@@ -964,8 +887,6 @@ end subroutine enforce_fortran_io
 !!
 !! FUNCTION
 !!  Convert iomode to string
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -1014,11 +935,6 @@ end function iomode2str
 !!
 !! TODO
 !! One should treat the possible errors of backspace
-!!
-!! PARENTS
-!!      m_wffile,m_wfk
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1072,8 +988,6 @@ end subroutine mvrecord
 !! OUTPUT
 !!  iostat=Exit status
 !!  iomsg=Error message
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -1151,8 +1065,6 @@ end function open_file
 !!  iostat=Exit status
 !!  iomsg=Error message
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 function close_unit(unit,iomsg,status) result(iostat)
@@ -1211,11 +1123,6 @@ end function close_unit
 !!
 !! OUTPUT
 !!  Only writing.
-!!
-!! PARENTS
-!!      m_io_tools,m_specialmsg
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1292,11 +1199,6 @@ end subroutine write_lines
 !!  string: Input string.
 !!  ierr: Exit status, 0 is string has been written to filename.
 !!
-!! PARENTS
-!!      m_errors
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine lock_and_write(filename, string, ierr)
@@ -1340,10 +1242,6 @@ end subroutine lock_and_write
 !!  Return the number of opened units.
 !!  Unit numbers listed in the optional argument `ignore` are not considered.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 integer function num_opened_units(ignore) result(nn)
@@ -1378,11 +1276,6 @@ end function num_opened_units
 !!
 !! FUNCTION
 !!  Print info on the logical units
-!!
-!! PARENTS
-!!      m_errors
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

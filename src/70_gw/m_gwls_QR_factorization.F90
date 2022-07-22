@@ -11,10 +11,6 @@
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -75,12 +71,6 @@ contains
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gwls_GWlanczos,m_gwls_QR_factorization
-!!
-!! CHILDREN
-!!      xmpi_allgather,xmpi_sum
 !!
 !! SOURCE
 
@@ -145,12 +135,6 @@ end subroutine extract_QR
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gwls_DielectricArray
-!!
-!! CHILDREN
-!!      xmpi_allgather,xmpi_sum
 !!
 !! SOURCE
 
@@ -242,12 +226,6 @@ end subroutine extract_SVD
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gwls_QR_factorization
-!!
-!! CHILDREN
-!!      xmpi_allgather,xmpi_sum
 !!
 !! SOURCE
 
@@ -390,12 +368,6 @@ end subroutine extract_SVD_lapack
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gwls_QR_factorization
-!!
-!! CHILDREN
-!!      xmpi_allgather,xmpi_sum
 !!
 !! SOURCE
 

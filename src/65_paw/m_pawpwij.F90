@@ -169,12 +169,6 @@ CONTAINS  !=====================================================================
 !! OUTPUT
 !!  Paw_pwff(%ntypat) <pawpwff_t>=Object storing the form factors
 !!                                    for the spline used in pawpwij_init.
-!! PARENTS
-!!      m_bethe_salpeter,m_screening_driver,m_sigma_driver
-!!
-!! CHILDREN
-!!      fftbox_execute,fftbox_plan3_many,fftpad
-!!
 !! SOURCE
 
 subroutine pawpwff_init(Paw_pwff,method,nq_spl,qmax,gmet,Pawrad,Pawtab,Psps)
@@ -254,12 +248,6 @@ end subroutine pawpwff_init
 !! SIDE EFFECTS
 !!  Paw_pwff(:)=<pawpwff_t>=Object storing form factors for the spline of wf into PAW spheres
 !!
-!! PARENTS
-!!      m_bethe_salpeter,m_screening_driver,m_sigma_driver
-!!
-!! CHILDREN
-!!      fftbox_execute,fftbox_plan3_many,fftpad
-!!
 !! SOURCE
 
 subroutine pawpwff_free(Paw_pwff)
@@ -316,12 +304,6 @@ end subroutine pawpwff_free
 !! OUTPUT
 !!  Pwij(%ntypat)<pawpwij_t>=Structure containing the onsite matrix elements of e^{-i(q+G).r}.
 !!   Completely initialized in output.
-!!
-!! PARENTS
-!!      m_chi0,m_cohsex,m_exc_build,m_prep_calc_ucrpa,m_sigc,m_sigx
-!!
-!! CHILDREN
-!!      fftbox_execute,fftbox_plan3_many,fftpad
 !!
 !! SOURCE
 
@@ -438,12 +420,6 @@ end subroutine pawpwij_init
 !! SIDE EFFECTS
 !!  Paw_pwij(:)=<pawpwij_t>=Structure containing the onsite matrix elements of e^{-i(q+G).r}
 !!
-!! PARENTS
-!!      m_pawpwij
-!!
-!! CHILDREN
-!!      fftbox_execute,fftbox_plan3_many,fftpad
-!!
 !! SOURCE
 
 subroutine pawpwij_free_d1(Pwij)
@@ -481,11 +457,6 @@ end subroutine pawpwij_free_d1
 !!
 !! SIDE EFFECTS
 !!  Paw_pwij(:)=<pawpwij_t>=Structure containing the onsite matrix elements of e^{-i(q+G).r}
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fftbox_execute,fftbox_plan3_many,fftpad
 !!
 !! SOURCE
 
@@ -555,12 +526,6 @@ end subroutine pawpwij_free_d2
 !!
 !! TODO
 !!  One might save CPU time taking into account Gaunt selection rules!
-!!
-!! PARENTS
-!!      m_pawpwij
-!!
-!! CHILDREN
-!!      fftbox_execute,fftbox_plan3_many,fftpad
 !!
 !! SOURCE
 
@@ -867,12 +832,6 @@ end subroutine paw_mkrhox_spl
 !!  paw_rhox(2,npw,lmn2_size): $<phj|e^{-i(q+G).r}|phi>-<tphj|e^{-i(q+G).r}|tphi>$ in packed form for
 !!    a type itypat (phase factor arising from atom position is not included)
 !!
-!! PARENTS
-!!      m_pawpwij
-!!
-!! CHILDREN
-!!      fftbox_execute,fftbox_plan3_many,fftpad
-!!
 !! SOURCE
 
 subroutine paw_mkrhox(itypat,lmn2_size,method,dim1,dim2,nq_spl,qgrid_spl,pwff_spl,&
@@ -1111,11 +1070,6 @@ end subroutine paw_mkrhox
 !! SIDE EFFECTS
 !!  rhotwg(npw*dim_rtwg)=Updated oscillator strengths with the on-site PAW contributions added.
 !!
-!! PARENTS
-!!      calc_sigc_me,calc_sigx_me,cchi0,cchi0q0,cchi0q0_intraband
-!!      check_completeness,cohsex_me,exc_build_block,exc_build_ham,m_shirley
-!!      prep_calc_ucrpa
-!!
 !! SOURCE
 
 
@@ -1216,12 +1170,6 @@ end subroutine paw_rho_tw_g
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_chi0,m_prep_calc_ucrpa,m_sigc,m_sigx
-!!
-!! CHILDREN
-!!      fftbox_execute,fftbox_plan3_many,fftpad
 !!
 !! SOURCE
 

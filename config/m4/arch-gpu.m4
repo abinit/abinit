@@ -110,23 +110,6 @@ AC_DEFUN([_ABI_GPU_INIT_CUDA],[
     abi_gpu_cuda_root="${CUDA_ROOT}"
   fi
 
-  # call this macro here to make sure variable `abi_gpu_cuda_version_10`
-  #
-  # check if we are using CUDA runtime version at least 10
-  # version 10 of CUDA is required for NVTX (header only)
-  #
-  AC_MSG_CHECKING([whether we have Cuda >= 10])
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM(
-    [[
-      #include <cuda_runtime_api.h>
-    ]],
-    [[
-      #if CUDART_VERSION < 10000
-      #error
-      #endif
-    ]])], [abi_gpu_cuda_version_10="yes"], [abi_gpu_cuda_version_10="no"])
-  AC_MSG_RESULT([${abi_gpu_cuda_version_10}])
-
   # Check whether to look for generic files
   if test "${abi_gpu_cuda_root}" = ""; then
 
@@ -155,6 +138,26 @@ AC_DEFUN([_ABI_GPU_INIT_CUDA],[
     else
       AC_MSG_RESULT([${NVCC}])
     fi
+
+    # call this macro here to make sure variable `abi_gpu_cuda_version_10`
+    #
+    # check if we are using CUDA runtime version at least 10
+    # version 10 of CUDA is required for NVTX (header only)
+    #
+    AC_MSG_CHECKING([whether we have Cuda >= 10])
+    ac_compile_old=${ac_compile}
+    ac_compile='$NVCC -c $CFLAGS conftest.$ac_ext >&5'
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM(
+        [[
+        #include <cuda_runtime_api.h>
+        ]],
+        [[
+        #if CUDART_VERSION < 10000
+        #error
+        #endif
+        ]])], [abi_gpu_cuda_version_10="yes"], [abi_gpu_cuda_version_10="no"])
+    AC_MSG_RESULT([${abi_gpu_cuda_version_10}])
+    ac_compile=${ac_compile_old}
 
     # Headers
     AC_MSG_CHECKING([for Cuda headers])
@@ -268,6 +271,9 @@ AC_DEFUN([_ABI_GPU_INIT_CUDA],[
     if test "${abi_gpu_cuda_has_common}" = "no"; then
       AC_MSG_WARN([could not find libcuda.${abi_so_ext}])
     fi
+
+    # add standart libc++ link flags
+    abi_gpu_cuda_libs="${abi_gpu_cuda_libs} -lstdc++"
 
     # C and C++ link flags
     AC_MSG_CHECKING([for Cuda link flags])

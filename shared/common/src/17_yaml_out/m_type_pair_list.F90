@@ -14,11 +14,6 @@
 !!
 !! NOTES
 !!
-!! PARENTS
-!!   m_pair_list
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H

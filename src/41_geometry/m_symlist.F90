@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -64,11 +60,6 @@ contains
 !! TODO
 !! For the time being there are several groups where uncertainties still exist
 !! This will be solved in the very next ABINIT version
-!!
-!! PARENTS
-!!      m_symfind
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -502,11 +493,6 @@ end subroutine symlist_prim
 !! For the time being there are several groups where uncertainties still exist
 !! This will be solved in the very next ABINIT version
 !!
-!! PARENTS
-!!      m_symfind
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine symlist_bcc(additional_info,nsym,n_axes,spgroup)
@@ -687,11 +673,6 @@ end subroutine symlist_bcc
 !! For the time being there are several groups where uncertainties still exist
 !! This will be solved in the very next ABINIT version
 !!
-!! PARENTS
-!!      m_symfind
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine symlist_fcc(nsym,n_axes,spgroup)
@@ -799,11 +780,6 @@ end subroutine symlist_fcc
 !! TODO
 !! For the time being there are several groups where uncertainties still exist
 !! This will be solved in the very next ABINIT version
-!!
-!! PARENTS
-!!      m_symfind
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

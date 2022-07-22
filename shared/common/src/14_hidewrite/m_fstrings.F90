@@ -11,10 +11,6 @@
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -281,11 +277,6 @@ end function toupper
 !! FUNCTION
 !!  Convert UPPER CASE letters to lower case.
 !!
-!! PARENTS
-!!      fftprof,ioprof,lapackprof
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 pure subroutine lower(str)
@@ -348,10 +339,6 @@ end function tolower
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -530,10 +517,6 @@ end function ljust
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 pure function lpad(istr, repeat, fillchar) result(ostr)
@@ -694,10 +677,6 @@ end function rmquotes
 !! FUNCTION
 !!  Writes a number to a string using format fmt.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine write_rdp_0d(rnum,str,fmt)
@@ -726,10 +705,6 @@ end subroutine write_rdp_0D
 !!
 !! FUNCTION
 !!  Writes a number to a string using format fmt.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -764,11 +739,6 @@ end subroutine write_int_0D
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_fstrings
-!!
-!! CHILDREN
 !!
 !! SOURCE
 ! NOT sure it will work
@@ -819,10 +789,6 @@ end subroutine trimzero
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 subroutine writeq_rdp_0D(unit,namestr,value,fmt)
 
@@ -854,10 +820,6 @@ end subroutine writeq_rdp_0D
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1229,10 +1191,6 @@ end function itoa_4b
 !! FUNCTION
 !!  Convert an float into a string using format fmt  (es16.6 if fmt is not given).
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 
 pure function ftoa(value,fmt)
 
@@ -1260,10 +1218,6 @@ end function ftoa
 !!
 !! FUNCTION
 !!  Convert an k-point into a string using format fmt  (es.16.6 if fmt is not given).
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 
 pure function ktoa(kpt, fmt)
@@ -1293,10 +1247,6 @@ end function ktoa
 !! FUNCTION
 !!  Convert a spin index into a string
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 
 character(len=4) pure function stoa(spin)
 
@@ -1324,8 +1274,6 @@ end function stoa
 !!
 !! FUNCTION
 !!  Convert a list of integers into a string.
-!!
-!! PARENTS
 !!
 !! CHILDREN
 
@@ -1381,8 +1329,6 @@ end function ltoa_int
 !! FUNCTION
 !!  Convert a list of double precision numbers into a string.
 !!  fmt specifies the format to be used ("es13.4" by default)
-!!
-!! PARENTS
 !!
 !! CHILDREN
 
@@ -1493,10 +1439,6 @@ end function basename
 !!  ch=Character
 !!  [csens]=.TRUE. if comparison is done regardless of case. Defaults to .FALSE.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !!
 !! SOURCE
 
@@ -1535,10 +1477,6 @@ end function firstchar_0d
 !!  string=The string whose first character has to be cheched
 !!  char_list=The list of characters.
 !!  [csens]=.TRUE. if comparison is done regardless of case. Defaults to .FALSE.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !!
 !! SOURCE
@@ -1651,10 +1589,6 @@ end function endswith
 !! INPUTS
 !!   istr=Input string
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 pure function indent(istr) result(ostr)
@@ -1700,10 +1634,6 @@ end function indent
 !!
 !! INPUTS
 !!   istr=Input string
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1756,13 +1686,6 @@ end function prep_char
 !!
 !! OUTPUT
 !!  string=character string ('####...' if error)
-!!
-!! PARENTS
-!!      aim,anaddb,dtfil_init1,gaus_dos,get_all_gkq,iofn1,m_atprj,m_green
-!!      m_io_redirect,m_phonon_supercell,m_self,mrgscr,optic,pawmkaewf
-!!      prtfatbands,read_wfrspa,scfcv,tetrahedron
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1829,12 +1752,6 @@ end subroutine int2char4
 !! OUTPUT
 !!  string=character string ('##########' if error)
 !!
-!! PARENTS
-!!      handle_ncerr,m_esymm,m_dfti,m_dyson_solver,m_qparticles,m_wfd
-!!      prt_cif,wffile
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 pure subroutine int2char10(iint,string)
@@ -1885,8 +1802,6 @@ end subroutine int2char10
 !! FUNCTION
 !!   Count the occurrences of a character in a string.
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 integer pure function char_count(string, char)
@@ -1918,8 +1833,6 @@ end function char_count
 !!  Find the next token starting from `start`, return it in `ostr` and update `start`
 !!  so that one can call the function inside a loop.
 !!  Return exit status.
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -1985,12 +1898,6 @@ end function next_token
 !! SIDE EFFECTS
 !!  string= (input) character string with arbitrary case
 !!          (output) same character string mapped to upper case
-!!
-!! PARENTS
-!!      anaddb,band2eps,m_anaddb_dataset,m_dtset,m_exit,m_invars1
-!!      m_multibinit_driver,m_multibinit_manager,m_parser
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

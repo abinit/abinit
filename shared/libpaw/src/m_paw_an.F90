@@ -233,12 +233,6 @@ CONTAINS
 !!  Paw_an(:)<type(paw_an_type)>=PAW arrays given on ANgular mesh or ANgular moments.
 !!                               Initialized in output
 !!
-!! PARENTS
-!!      m_bethe_salpeter,m_dfpt_scfcv,m_dfptnl_loop,m_nonlinear,m_respfn_driver
-!!      m_scfcv_core,m_screening_driver,m_sigma_driver
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine paw_an_init(Paw_an,natom,ntypat,nkxc1,nk3xc1,nspden,cplex,pawxcdev,typat,Pawang,Pawtab,&
@@ -402,12 +396,6 @@ end subroutine paw_an_init
 !!
 !!  All associated pointers in Paw_an(:) are deallocated
 !!
-!! PARENTS
-!!      m_bethe_salpeter,m_dfpt_scfcv,m_dfptnl_loop,m_nonlinear,m_paral_pert
-!!      m_paw_an,m_respfn_driver,m_scfcv_core,m_screening_driver,m_sigma_driver
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine paw_an_free(Paw_an)
@@ -497,12 +485,6 @@ end subroutine paw_an_free
 !!  Paw_an(:)<type(paw_an_type)>=PAW arrays given on ANgular mesh or ANgular moments.
 !!                               Nullified in output
 !!
-!! PARENTS
-!!      m_bethe_salpeter,m_dfpt_scfcv,m_dfptnl_loop,m_nonlinear,m_paw_an
-!!      m_respfn_driver,m_scfcv_core,m_screening_driver,m_sigma_driver
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine paw_an_nullify(Paw_an)
@@ -557,11 +539,6 @@ end subroutine paw_an_nullify
 !!
 !! NOTES
 !!  paw_an_cpy must have been allocated in the calling function.
-!!
-!! PARENTS
-!!      m_paw_an
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -766,10 +743,6 @@ subroutine paw_an_copy(paw_an_in,paw_an_cpy,&
 !! OUTPUT
 !! (only writing)
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine paw_an_print(Paw_an,unit,mode_paral, &
@@ -869,11 +842,6 @@ end subroutine paw_an_print
 !!
 !! OUTPUT
 !!  paw_an_gathered(:)<type(paw_an_type)>= output paw_an datastructure
-!!
-!! PARENTS
-!!      m_paw_an
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1475,11 +1443,6 @@ end subroutine paw_an_gather
 !! SIDE EFFECTS
 !!  paw_an(:)<type(paw_an_type)>= input (and eventually output) paw_an datastructures
 !!
-!! PARENTS
-!!      m_paral_pert
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine paw_an_redistribute(paw_an,mpi_comm_in,mpi_comm_out,&
@@ -1806,11 +1769,6 @@ end subroutine paw_an_redistribute
 !! SIDE EFFECTS
 !!  Paw_an<type(Paw_an_type)>=paw_an datastructure
 !!
-!! PARENTS
-!!      m_dfpt_nstwf,m_dfpt_scfcv,m_dfptnl_loop,m_scfcv_core
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine paw_an_reset_flags(Paw_an)
@@ -1861,11 +1819,6 @@ end subroutine paw_an_reset_flags
 !!
 !! OUTPUT
 !!  paw_an= output datastructure filled with buffers receive in a receive operation
-!!
-!! PARENTS
-!!      m_paw_an
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2083,11 +2036,6 @@ end subroutine paw_an_isendreceive_getbuffer
 !! buf_int_size : size of buffer of integers to be send in a send operation
 !! buf_dp : buffer of double precision numbers to be send in a send operation
 !! buf_dp_size : size of buffer of double precision numbers to be send in a send operation
-!!
-!! PARENTS
-!!      m_paw_an
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
