@@ -28,7 +28,7 @@ module m_wfd_optic
 
  use defs_datatypes,      only : ebands_t, pseudopotential_type
  use m_hide_lapack,       only : matrginv
- use m_bz_mesh,           only : kmesh_t, get_BZ_item
+ use m_bz_mesh,           only : kmesh_t
  use m_crystal,           only : crystal_t
  use m_vkbr,              only : vkbr_t, vkbr_free, vkbr_init, nc_ihr_comm
  use m_wfd,               only : wfdgw_t, wave_t
@@ -228,7 +228,7 @@ subroutine calc_optical_mels(Wfd,Kmesh,KS_Bst,Cryst,Psps,Pawtab,Hur,&
    do ik_bz=1,nkbz
     !
     ! Get ik_ibz, and symmetries index from ik_bz.
-    call get_BZ_item(Kmesh,ik_bz,kbz,ik_ibz,isym_k,itim_k)
+    call Kmesh%get_BZ_item(ik_bz,kbz,ik_ibz,isym_k,itim_k)
 
     mat_dp = DBLE(Cryst%symrec(:,:,isym_k))
     call matrginv(mat_dp,3,3) ! Invert

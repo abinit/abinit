@@ -36,7 +36,7 @@ MODULE m_pawpwij
  use m_paw_numeric,    only : paw_jbessel_4spline, paw_spline
  use m_splines,        only : splfit
  use m_pawang,         only : pawang_type
- use m_paw_sphharm,     only : realgaunt
+ use m_paw_sphharm,    only : realgaunt
  use m_pawrad,         only : pawrad_type, pawrad_init, pawrad_free, pawrad_copy, simp_gen
  use m_pawtab,         only : pawtab_type
  use m_pawcprj,        only : pawcprj_type
@@ -173,8 +173,6 @@ CONTAINS  !=====================================================================
 
 subroutine pawpwff_init(Paw_pwff,method,nq_spl,qmax,gmet,Pawrad,Pawtab,Psps)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: method
@@ -252,8 +250,6 @@ end subroutine pawpwff_init
 
 subroutine pawpwff_free(Paw_pwff)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(pawpwff_t),intent(inout) :: Paw_pwff(:)
@@ -308,8 +304,6 @@ end subroutine pawpwff_free
 !! SOURCE
 
 subroutine pawpwij_init(Pwij,npw,qpt_in,gvec,rprimd,Psps,Pawtab,Paw_pwff)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -424,8 +418,6 @@ end subroutine pawpwij_init
 
 subroutine pawpwij_free_d1(Pwij)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(pawpwij_t),intent(inout) :: Pwij(:)
@@ -461,8 +453,6 @@ end subroutine pawpwij_free_d1
 !! SOURCE
 
 subroutine pawpwij_free_d2(Pwij)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -530,8 +520,6 @@ end subroutine pawpwij_free_d2
 !! SOURCE
 
 subroutine paw_mkrhox_spl(itypat,ntypat,method,dim1,dim2,nq_spl,qgrid_spl,Pawrad,Pawtab,pwff_spl)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -837,8 +825,6 @@ end subroutine paw_mkrhox_spl
 subroutine paw_mkrhox(itypat,lmn2_size,method,dim1,dim2,nq_spl,qgrid_spl,pwff_spl,&
 &  gmet,qpt,npw,gvec,ylm_q,Psps,Pawtab,paw_rhox)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: itypat,dim1,dim2,method,npw,nq_spl,lmn2_size
@@ -1072,10 +1058,7 @@ end subroutine paw_mkrhox
 !!
 !! SOURCE
 
-
 pure subroutine paw_rho_tw_g(npw,dim_rtwg,nspinor,natom,ntypat,typat,xred,gvec,Cprj_kmqb1,Cprj_kb2,Pwij,rhotwg)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1178,8 +1161,6 @@ subroutine paw_cross_rho_tw_g(nspinor,npwvec,nr,ngfft,map2sphere,use_padfft,igff
 & ur_ae2,ur_ae_onsite2,ur_ps_onsite2,i2,ktabr2,ktabp2,spinrot2,&
 & dim_rtwg,rhotwg)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: i1,i2,npwvec,nr,nspinor,dim_rtwg,map2sphere,use_padfft
@@ -1222,10 +1203,10 @@ subroutine paw_cross_rho_tw_g(nspinor,npwvec,nr,ngfft,map2sphere,use_padfft,igff
 
    SELECT CASE (map2sphere)
 
-   CASE (0) ! Need results on the full FFT box thus cannot use zero-padded FFT.
-
-     call fftbox_plan3_many(plan,ndat1,ngfft(1:3),ngfft(1:3),ngfft(7),-1)
-     call fftbox_execute(plan,rho)
+   CASE (0)
+     ! Need results on the full FFT box thus cannot use zero-padded FFT.
+     call plan%many(ndat1, ngfft(1:3), ngfft(1:3), ngfft(7), -1)
+     call plan%execute(rho)
 
      rhotwg=rhotwg + rho
 
@@ -1237,8 +1218,8 @@ subroutine paw_cross_rho_tw_g(nspinor,npwvec,nr,ngfft,map2sphere,use_padfft,igff
        call fftpad(rho,ngfft,nx,ny,nz,ldx,ldy,ldz,ndat1,mgfft,-1,gbound)
      else
 
-       call fftbox_plan3_many(plan,ndat1,ngfft(1:3),ngfft(1:3),ngfft(7),-1)
-       call fftbox_execute(plan,rho)
+       call plan%many(ndat1, ngfft(1:3), ngfft(1:3), ngfft(7), -1)
+       call plan%execute(rho)
      end if
 
      do ig=1,npwvec       ! Have to map FFT to G-sphere.
