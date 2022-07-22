@@ -425,9 +425,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
              end if !samepert  
 
              !Allocate the first-order gradient local potential
-             !AZ_ini*****************************************************************
-             if (i2pert <= natom .or. i2pert == natom+3 .or. i2pert == natom+2) then
-             !AZ_fin*****************************************************************
+             if (i2pert <= natom .or. i2pert == natom+3) then
                n2dq=1
                ABI_MALLOC(vpsp1_i2pertdq,(2*nfftf,dtset%nspden,n2dq))
              else if (i2pert == natom+4) then
@@ -463,9 +461,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
 
                    !Calculate local potentials for first-order gradient Hamiltonians
                    !gradient of i1pert:
-                   !AZ_ini**************************************
-                   if (i1pert<=natom .or. i2pert==natom+2) then
-                   !AZ_fin**************************************
+                   if (i1pert<=natom) then
                      !Get q-gradient of first-order local part of the pseudopotential
                      call dfpt_vlocaldq(atindx,2,gmet,gsqcut,i1dir,i1pert,mpi_enreg, &
                      & psps%mqgrid_vl,dtset%natom,nattyp,dtset%nfft,dtset%ngfft,dtset%ntypat,n1,n2,n3, &
@@ -513,9 +509,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
 
                    if (.not.samepert) then
                      !gradient of i2pert:
-                     !AZ_ini**************************************
-                     if (i2pert<=natom .or. i2pert==natom+2) then
-                     !AZ_fin**************************************
+                     if (i2pert<=natom) then
                        !Get q-gradient of first-order local part of the pseudopotential
                        call dfpt_vlocaldq(atindx,2,gmet,gsqcut,i2dir,i2pert,mpi_enreg, &
                        & psps%mqgrid_vl,dtset%natom,nattyp,dtset%nfft,dtset%ngfft,dtset%ntypat,n1,n2,n3, &
@@ -675,12 +669,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
                end do    ! ir3dir
              end do     ! ir3pert
              
-             !AZ_ini********************************************
-             ! comment this line...
-             !if (i2pert/=natom+2) ABI_FREE(vpsp1_i2pertdq)
-             ! FREE vpsp1_i2pertdq always
-             ABI_FREE(vpsp1_i2pertdq) 
-             !AZ_fin********************************************
+             ABI_FREE(vpsp1_i2pertdq)
              ABI_FREE(vpsp1_i1pertdq_geom)
              ABI_FREE(vpsp1_i1pertdqdq)
              ABI_FREE(d3etot_t4)
