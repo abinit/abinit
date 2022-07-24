@@ -676,12 +676,11 @@ end subroutine slkmat_print
 !!
 !! SOURCE
 
-subroutine matrix_scalapack_copy(in_mat, new_mat, free)
+subroutine matrix_scalapack_copy(in_mat, new_mat)
 
 !Arguments ------------------------------------
- class(matrix_scalapack),target,intent(inout) :: in_mat
- class(matrix_scalapack),target,intent(out) :: new_mat
- logical,optional,intent(in) :: free
+ class(matrix_scalapack),intent(in) :: in_mat
+ class(matrix_scalapack),intent(out) :: new_mat
 
 !Local variables-------------------------------
  integer :: istwfk
@@ -700,10 +699,6 @@ subroutine matrix_scalapack_copy(in_mat, new_mat, free)
    new_mat%buffer_cplx = in_mat%buffer_cplx
  else
    new_mat%buffer_real = in_mat%buffer_real
- end if
-
- if (present(free)) then
-   if (free) call in_mat%free()
  end if
 
 end subroutine matrix_scalapack_copy
@@ -3654,10 +3649,12 @@ subroutine slk_ptrans(in_mat, trans, out_mat)
    select case (trans)
    case ("N")
      ! sub(C):=beta*sub(C) + alpha*sub(A)',
+     !out_mat%buffer_cplx = transpose(in_mat%buffer_cplx); return
      call pztranu(in_mat%sizeb_global(2), in_mat%sizeb_global(1), cone, in_mat%buffer_cplx, 1, 1, &
                   in_mat%descript%tab, czero, out_mat%buffer_cplx, 1, 1, out_mat%descript%tab)
 
    case ("C")
+     !out_mat%buffer_cplx = conjg(transpose(in_mat%buffer_cplx)); return
      call pztranc(in_mat%sizeb_global(2), in_mat%sizeb_global(1), cone, in_mat%buffer_cplx, 1, 1, &
                   in_mat%descript%tab, czero, out_mat%buffer_cplx, 1, 1, out_mat%descript%tab)
 

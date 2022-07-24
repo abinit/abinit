@@ -1359,10 +1359,11 @@ end subroutine calc_eigr
 !!
 !! OUTPUT
 !!  ceikr(nfft)=e^{ik.r} on the FFT mesh.
+!!  is_gamma=True if kk == 0
 !!
 !! SOURCE
 
-pure subroutine calc_ceikr(kk, ngfft, nfft, nspinor, ceikr)
+pure subroutine calc_ceikr(kk, ngfft, nfft, nspinor, ceikr, is_gamma)
 
 !Arguments ------------------------------------
 !scalars
@@ -1371,6 +1372,7 @@ pure subroutine calc_ceikr(kk, ngfft, nfft, nspinor, ceikr)
  real(dp),intent(in) :: kk(3)
  integer,intent(in) :: ngfft(18)
  complex(dpc),intent(out) :: ceikr(nfft, nspinor)
+ logical,intent(out) :: is_gamma
 
 !Local variables-------------------------------
 !scalars
@@ -1380,9 +1382,10 @@ pure subroutine calc_ceikr(kk, ngfft, nfft, nspinor, ceikr)
 ! *************************************************************************
 
  if (all(abs(kk) < tol12)) then
-   ceikr = cone; return
+   ceikr = cone; is_gamma = .True.; return
  end if
 
+ is_gamma = .False.
  fft_idx = 0
  do iz=0,ngfft(3)-1
    do iy=0,ngfft(2)-1
