@@ -1,6 +1,6 @@
-!!****m* ABINIT/m_mlwfovwal
+!!****m* ABINIT/m_mlwfovlp2
 !! NAME
-!!  m_mlwfovlp
+!!  m_mlwfovlp2
 !!
 !! FUNCTION
 !!  Interface with Wannier90
@@ -62,230 +62,20 @@ module m_mlwfovlp2
  use m_paw_overlap, only : smatrix_pawinit
  use m_evdw_wannier, only : evdw_wannier
  use m_fft,            only : fourwf
- use m_wannier_io,   only: write_eigenvalues, write_Amn, compute_and_write_unk, write_Mmn, write_cg_and_cprj
+ use m_wfd, only: wfd_t, wfd_init, wave_t
+ use m_abstract_wf, only: abstract_wf, cg_cprj, wfd_wf, init_mywfc
+ use m_wannier_io,   only: write_eigenvalues, write_Amn, compute_and_write_unk, write_Mmn
 
  implicit none
 
  private
-!!***
-
-
- type, public ::  cg_cprj
-    real(dp), pointer :: cg(:, :)=>null()
-    type(pawcprj_type), pointer :: cprj(:,:)=>null()
-    type(datafiles_type),pointer :: dtfil => null()
-    type(dataset_type),pointer :: dtset => null()
-    type(hdr_type), pointer :: hdr => null()
-    integer, pointer :: iwav(:,:,:, :)=>null()
-    type(mpi_type), pointer :: MPI_enreg => null()
-    type(pseudopotential_type), pointer :: psps => null()
-    type(pawtab_type),pointer :: pawtab(:)
-    integer :: natom, nspinor, nsppol, mband, mkmem, nkpt, rank, nprocs
-    integer, allocatable :: icprj(:, :, :) ! mband, mkpt, msppol
-  contains
-    procedure :: init => cg_cprj_init
-    procedure :: free => cg_cprj_free
-    procedure :: compute_index_cprj
-    procedure :: cg_elem
-    procedure :: cg_elem_complex
-    procedure :: cprj_elem
-    procedure :: write_cg_and_cprj_tmpfile
-    procedure :: remove_tmpfile
-    procedure :: read_cg
- end type cg_cprj
-
-
 
  public :: mlwfovlp2
- public :: compute_iwav
-! public :: mlwfovlp_pw, mlwfovlp_proj, mlwfovlp_projpaw, mlwfovlp_setup, mlwfovlp_seedname
+
+ 
+ contains
 !!***
 
-contains
-!!***
-
-  subroutine cg_cprj_init(self, cg, cprj, dtset, dtfil, hdr, MPI_enreg, nprocs, psps, pawtab, rank)
-    class(cg_cprj), intent(inout) :: self
-    real(dp), target, optional, intent(in):: cg(:, :)
-    type(pawcprj_type), target, optional, intent(in):: cprj(:,:)
-    type(dataset_type),target, intent(in) :: dtset
-    type(datafiles_type),target, intent(in) :: dtfil
-    type(mpi_type), target, intent(in) :: MPI_enreg
-    type(pseudopotential_type), target, intent(in) :: psps
-    type(pawtab_type), target, intent(in) :: pawtab(:)
-    type(hdr_type), target, intent(in) :: hdr
-    integer, intent(in) :: nprocs, rank
-    if(present(cg))    self%cg=> cg
-    if(present(cprj))  self%cprj => cprj
-    self%dtset => dtset
-    self%dtfil => dtfil
-    self%hdr => hdr
-    self%MPI_enreg => MPI_enreg
-    self%psps => psps
-    self%pawtab => pawtab
-    self%natom = hdr%natom
-    self%nspinor = hdr%nspinor
-    self%nsppol = hdr%nsppol
-    self%mband= hdr%mband
-    self%mkmem = dtset%mkmem
-    self%nkpt = hdr%nkpt
-    self%rank = rank
-    self%nprocs = nprocs
-    ABI_MALLOC(self%iwav,(self%nspinor, self%mband,self%nkpt,self%nsppol))
-    call compute_iwav(MPI_enreg, dtset, hdr, self%iwav, nprocs, rank)
-    call self%compute_index_cprj()
-  end subroutine cg_cprj_init
-
-  subroutine cg_cprj_free(self)
-    class(cg_cprj), intent(inout) :: self
-    nullify(self%cg)
-    nullify(self%cprj)
-    nullify(self%dtfil)
-    nullify(self%hdr)
-    nullify(self%MPI_enreg)
-    ABI_FREE(self%iwav)
-    nullify(self%iwav)
-    ABI_FREE(self%icprj)
-  end subroutine cg_cprj_free
-
-  function cg_elem(self, icplx, ig, ispinor, iband, ikpt, isppol ) result(ret)
-    class(cg_cprj), intent(inout) :: self
-    integer, intent(in) :: icplx, ig, ispinor, iband, ikpt, isppol
-    integer :: ind
-    real(dp) :: ret
-    ind=ig+self%iwav(ispinor, iband,ikpt,isppol)
-    !print *, "ig", ig
-    !print *, "ispinor", ispinor
-    !print *, "iwav", self%iwav(iband, ikpt, isppol)
-    !print *, "npw_k", self%hdr%npwarr(ikpt)
-    !print *, size(self%cg, 2), ind
-    ret=self%cg(icplx,ind)
-  end function cg_elem
-
-
-
-  function cg_elem_complex(self, ig,ispinor, iband, ikpt, isppol) result(ret)
-    class(cg_cprj), intent(inout) :: self
-    integer, intent(in) ::  ig, ispinor, iband, ikpt, isppol
-    integer :: ind
-    complex(dp) :: ret
-    ind=ig+self%iwav(ispinor, iband,ikpt,isppol)
-    ret=CMPLX(self%cg(1,ind),  self%cg(2,ind), kind=dp)
-  end function cg_elem_complex
-
-
-  subroutine compute_index_cprj(self)
-    ! FIXME:hexu: this is modified from the m_mlwfovlp,
-    !     but I think it should be carefully checked.
-    ! mcprj=nspinor*mband*mkmem*nsppol
-    ! 1. nspinor=2 case seems to be wrong.
-    class(cg_cprj), intent(inout) :: self
-    integer :: ii, ikpt, isppol, iband
-    ABI_MALLOC(self%icprj, (self%mband,self%nkpt,self%nsppol))
-    ii=0
-    do isppol=1,self%nsppol
-       ! FIXME: check if it should be mkmem or nkpt.
-       do ikpt=1,self%nkpt
-          ! FIXME: nband has the shape of (nsppol*nkpt).
-          !nband_k=dtset%nband(ikpt+(isppol-1)*nkpt)
-          do iband=1,self%dtset%nband(ikpt)
-             ! FIXME: hexu: should cycle if the kpt is not in this node??
-             ii=ii+1
-             self%icprj(iband,ikpt,isppol)=ii
-          end do
-       end do
-    end do
-  end subroutine compute_index_cprj
-
-
-  ! get one element of cprj
-  function cprj_elem(self,icplx,ispinor, iband, ikpt, isppol, iatom, ilmn) result(ret)
-    class(cg_cprj), intent(inout) :: self
-    integer, intent(in) :: icplx, ispinor, iband, ikpt, isppol, ilmn, iatom
-    real(dp) :: ret
-    integer :: ig
-    ! TODO: this seems to be better than compute_index_cprj,
-    ! But should it be mband or nband(ikpt)
-
-    ! mcprj=nspinor*mband*mkmem*nsppol
-    ! this is the original version in m_mlwfovlp
-    !ig=iband+(ikpt-1)*self%mband*self%nspinor + &
-    !     &(isppol-1)*self%mkmem*self%mband*self%nspinor
-
-    ig=ispinor+(iband-1)*self%nspinor+(ikpt-1)*self%mband*self%nspinor + &
-         &(isppol-1)*self%mkmem*self%mband*self%nspinor
-    ret= self%cprj(iatom, ig)%cp(icplx, ilmn)
-  end function cprj_elem
-
-  subroutine write_cg_and_cprj_tmpfile(self)
-    class(cg_cprj), intent(inout) :: self
-    call write_cg_and_cprj(self%dtset, self%cg, self%cprj, self%dtfil, self%iwav, &
-         & self%hdr%npwarr, self%mband, self%natom, &
-         & self%nsppol, self%nkpt,  self%MPI_enreg, &
-         & self%rank, self%psps, self%pawtab)
-  end subroutine write_cg_and_cprj_tmpfile
-
-  subroutine remove_tmpfile(self, prtvol)
-    class(cg_cprj), intent(inout) :: self
-    integer, intent(in) :: prtvol
-    integer :: isppol, ikpt, ierr
-    integer :: master=1
-    character(len=fnlen) :: wfnname
-    character(len=500) :: message
-    if(prtvol>0) then
-       write(message, '(3a)' ) ch10,&
-            &       '   mlwfovlp :  Removing temporary files with cg and cprj (PAW)',ch10
-       call wrtout(ab_out,message,'COLL')
-       call wrtout(std_out,  message,'COLL')
-    end if
-    !
-    !    Just master  node will remove the files
-    !
-    if(self%rank==master) then
-       do isppol=1,self%nsppol
-          do ikpt=1,self%nkpt
-             write(wfnname,'(a,I5.5,".",I1)') trim(self%dtfil%fnametmp_cg),ikpt,isppol
-             call delete_file(wfnname,ierr)
-             if(self%psps%usepaw==1) then
-                write(wfnname,'(a,I5.5,".",I1)') trim(self%dtfil%fnametmp_cprj),ikpt,isppol
-                call delete_file(wfnname,ierr)
-             end if
-          end do !ikpt
-       end do !isppol
-    end if
-  end subroutine remove_tmpfile
-
-
-
-  subroutine read_cg(self, ikpt2, isppol, cg_read)
-    class(cg_cprj), intent(inout) :: self
-    integer, intent(in) :: ikpt2, isppol
-    real(dp), intent(inout) :: cg_read(:, :)
-    character(len=fnlen) :: cg_file
-    integer :: npw_k2, ios, ii
-    character(len=500) :: message
-
-    integer :: iunit , iband2, ipw, index
-    write(cg_file,'(a,I5.5,".",I1)') trim(self%dtfil%fnametmp_cg),ikpt2,isppol
-    iunit=1000+ikpt2+ikpt2*(isppol-1)
-    npw_k2=self%hdr%npwarr(ikpt2)
-
-    open (unit=iunit, file=cg_file,form='unformatted',status='old',iostat=ios)
-    if(ios /= 0) then
-       write(message,*) " mlwfovlp_pw: file",trim(cg_file), "not found"
-       ABI_ERROR(message)
-    end if
-    !
-    do iband2=1,self%mband
-       do ipw=1,npw_k2*self%nspinor
-          index=ipw+(iband2-1)*npw_k2*self%nspinor
-          read(iunit) (cg_read(ii,index),ii=1,2)
-          !            if(me==0 .and. ikpt2==4)write(300,*)'ipw,iband2,index',ipw,iband2,index,cg_read(:,index)
-          !            if(me==1 .and. ikpt2==4)write(301,*)'ipw,iband2,index',ipw,iband2,index,cg_read(:,index)
-       end do
-    end do
-    close(iunit)
-  end subroutine read_cg
 
 !!****f* m_mlwfovlp/mlwfovlp
 !! NAME
@@ -352,7 +142,7 @@ contains
  subroutine mlwfovlp2(crystal, ebands, hdr, atindx1,cg,cprj,dtset,dtfil,eigen,gprimd,kg,&
 & mband,mcg,mcprj,mgfftc,mkmem,mpi_enreg,mpw,natom,&
 & nattyp,nfft,ngfft,nkpt,npwarr,nsppol,ntypat,occ,&
-& pawang,pawrad,pawtab,prtvol,psps,rprimd,ucvol,xred)
+& pawang,pawrad,pawtab,prtvol,psps,rprimd,ucvol,wfd, xred)
 
 !Arguments ------------------------------------
 !scalars
@@ -367,14 +157,15 @@ contains
  type(datafiles_type),intent(in) :: dtfil
  type(pawang_type),intent(in) :: pawang
  type(pseudopotential_type),intent(in) :: psps
+ type(wfd_t), optional,  intent(in) :: wfd
 !arrays
  integer,intent(in) :: atindx1(natom)
  integer :: kg(3,mpw*mkmem),nattyp(ntypat),ngfft(18),npwarr(nkpt)
- real(dp),intent(in) :: cg(2,mcg)
- real(dp),intent(in) :: eigen(mband*nkpt*nsppol),gprimd(3,3),rprimd(3,3)
+ real(dp), optional, intent(in) :: cg(2,mcg)
+ type(pawcprj_type), optional, intent(in) :: cprj(natom,mcprj)
+ real(dp),optional, intent(in) :: eigen(mband*nkpt*nsppol),gprimd(3,3),rprimd(3,3)
  real(dp),intent(in) :: occ(mband*nkpt*nsppol)
  real(dp),intent(in) :: xred(3,natom)
- type(pawcprj_type) :: cprj(natom,mcprj)
  type(pawrad_type),intent(in) :: pawrad(psps%ntypat*psps%usepaw)
  type(pawtab_type),intent(in) :: pawtab(psps%ntypat*psps%usepaw)
 
@@ -438,7 +229,7 @@ contains
  real(dp),allocatable :: tdocc_wan(:,:)
 #endif
 
- type(cg_cprj) :: mywfc
+ class(abstract_wf), pointer :: mywfc
 
 !************************************************************************
 
@@ -583,8 +374,10 @@ contains
 !Compute shifts for g points (icg,iwav)
 !(here mband is not used, because shifts are internal variables of abinit)
 !----------------------------------------------------------------------
- call mywfc%init(cg, cprj, dtset, dtfil, hdr, &
-      & MPI_enreg, nprocs, psps, pawtab, rank)
+ !call mywfc%init(cg, cprj, dtset, dtfil, hdr, &
+ !     & MPI_enreg, nprocs, psps, pawtab, rank)
+
+ call init_mywfc(mywfc, wfd,  cg, cprj, dtset, dtfil, hdr, MPI_enreg, nprocs, psps, pawtab, rank)
 !
 !Shifts computed.
 !
@@ -592,11 +385,11 @@ contains
 !
 !  In case of parallelization write out cg for all k-points
 !
-   if (nprocs > 1) then
+   !if (nprocs > 1) then
      ! call write_cg_and_cprj(dtset, cg, cprj, dtfil, iwav, npwarr, mband, natom, &
      !      &nsppol, nkpt,  MPI_enreg, rank, psps, pawtab)
-      call mywfc%write_cg_and_cprj_tmpfile()
-   end if !MPI nprocs>1
+     ! call mywfc%write_cg_and_cprj_tmpfile()
+   !end if !MPI nprocs>1
 !
 !  End of MPI preliminarities
 !  Calculate PW contribution of overlaps
@@ -676,9 +469,9 @@ contains
 !
 !  erase temporary files created for parallel runs
 !
-   if (nprocs > 1) then
-      call mywfc%remove_tmpfile(prtvol)
-   end if !MPI nprocs>1
+   !if (nprocs > 1) then
+   !   call mywfc%remove_tmpfile(prtvol)
+   !end if !MPI nprocs>1
 !
  end if !lmmn
 !if ( lmmn== .false. .and. lwannierun ) the
@@ -820,7 +613,7 @@ contains
     call compute_and_write_unk(wfnname, psps%usepaw, dtset%w90prtunk, &
          & mpi_enreg, ngfft, nsppol, dtset%nspinor,  &
          & nkpt, mband,  mpw, mgfftc, mkmem,  nprocs, rank, npwarr, &
-         & band_in,  dtset, kg, mywfc%cg, mywfc%iwav)
+         & band_in,  dtset, kg, mywfc)
  end if !dtset%w90prtunk
 !
 
@@ -1098,6 +891,8 @@ contains
  ABI_FREE(A_matrix)
 
  call mywfc%free()
+ ABI_FREE_SCALAR(mywfc)
+
 contains
 !!***
 
@@ -1695,7 +1490,7 @@ subroutine mlwfovlp_pw(mywfc,cm1,g1,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nkpt
  integer,intent(in) :: mband,mkmem,mpw,nfft,nkpt,nntot
  integer,intent(in) :: nspinor,nsppol
  character(len=fnlen) ::  seed_name  !seed names of files containing cg info used in case of MPI
- type(cg_cprj) :: mywfc
+ class(abstract_wf) :: mywfc
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: g1(3,nkpt,nntot),kg(3,mpw*mkmem),ngfft(18),npwarr(nkpt)
@@ -1916,7 +1711,8 @@ subroutine mlwfovlp_pw(mywfc,cm1,g1,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nkpt
 
        if(nprocs>1) then
           !call mywfc%read_cg(cg_read, ikpt2)
-          call mywfc%read_cg( ikpt2, isppol, cg_read)
+          !call mywfc%read_cg( ikpt2, isppol, cg_read)
+          call mywfc%load_cg( ikpt2, isppol, cg_read)
        end if
 ! !
        npw_k=npwarr(ikpt1)
@@ -2118,7 +1914,7 @@ subroutine mlwfovlp_pw(mywfc,cm1,g1,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nkpt
  logical,intent(in)::just_augmentation(mwan,nsppol)
  !type(pawcprj_type) :: cprj(natom,nspinor*mband*mkmem*nsppol)
  type(pawtab_type),intent(in) :: pawtab(psps%ntypat*psps%usepaw)
- type(cg_cprj), intent(inout) :: mywfc
+ class(abstract_wf), intent(inout) :: mywfc
 
 !Local variables-------------------------------
 !scalars
@@ -2629,7 +2425,7 @@ subroutine mlwfovlp_projpaw(A_paw,band_in,mywfc,just_augmentation,max_num_bands,
  logical,intent(in) :: band_in(mband,nsppol)
  logical,intent(in)::just_augmentation(mwan,nsppol)
  !type(pawcprj_type) :: cprj(natom,nspinor*mband*mkmem*nsppol)
- type(cg_cprj), intent(inout) :: mywfc
+ type(abstract_wf), intent(inout) :: mywfc
  type(pawrad_type),intent(in) :: pawrad(ntypat)
  type(pawtab_type),intent(in) :: pawtab(ntypat)
  type(pseudopotential_type),intent(in) :: psps
@@ -3594,65 +3390,6 @@ subroutine mlwfovlp_ylmfar(ylmr_fac,lmax,lmax2,mband,nwan,proj_l,proj_m,proj_x,p
 
 end subroutine mlwfovlp_ylmfar
 !!***
-
-  subroutine compute_iwav(MPI_enreg, dtset, hdr, iwav, nprocs, rank)
-    type(mpi_type), intent(in) :: MPI_enreg
-    type(dataset_type), intent(in) :: dtset
-    type(hdr_type), intent(in) :: hdr
-    integer, intent(inout) :: iwav(:, :, :, :)
-    ! dimension: (nspinor, mband,nkpt,nsppol))
-    integer, intent(in) :: nprocs, rank
-    character(len=500) :: message
-    integer :: icg(hdr%nsppol, hdr%nkpt)
-    integer :: icgtemp, isppol, ikpt, nband_k, npw_k, iband, ispinor
-
-    write(message, '(a,a)' ) ch10,&
-         & '   mlwfovlp : compute shifts for g-points '
-    call wrtout(std_out,  message,'COLL')
-    !----------------------------------------------------------------------
-    !Compute shifts for g points (icg,iwav)
-    !(here mband is not used, because shifts are internal variables of abinit)
-    !----------------------------------------------------------------------
-    !write(std_out,*) mpw*dtset%nspinor*mband*mkmem*nsppol
-    !ABI_MALLOC(icg,(nsppol,nkpt))
-    icg=0
-    icgtemp=0
-    !ABI_MALLOC(iwav,(dtset%mband,nkpt,nsppol))
-    iwav(:,:,:, :)=0
-    do isppol=1,hdr%nsppol
-       do ikpt=1,hdr%nkpt
-          !    MPI:cycle over k-points not treated by this node
-          if (nprocs>1 ) then !sometimes we can have just one processor
-             if ( ABS(MPI_enreg%proc_distrb(ikpt,1,isppol)-rank)  /=0) CYCLE
-          end if
-
-          !    write(std_out,*)'rank',rank,'ikpt',ikpt,'isppol',isppol
-          nband_k=dtset%nband(ikpt+(isppol-1)*hdr%nkpt)
-          !    write(std_out,*) ikpt+(isppol-1)*nkpt,nkpt
-          npw_k=hdr%npwarr(ikpt)
-          do iband=1,nband_k
-             if(iband.gt. dtset%mband) then
-                write(message,'(a,3i0)')" mband",iband,dtset%mband,nband_k
-                ABI_ERROR(message)
-             end if
-             do ispinor =1, dtset%nspinor
-                iwav(ispinor, iband,ikpt,isppol)= &
-                     !&       (iband-1)*npw_k*dtset%nspinor+icgtemp &
-                     & (ispinor-1)*npw_k +icgtemp
-             end do
-             !icgtemp=icgtemp+ npw_k*dtset%nspinor*nband_k
-             icgtemp = icgtemp + npw_k
-          end do ! iband
-          !    icg(isppol,ikpt)=icgtemp
-          !    write(std_out,*) "icg", isppol,ikpt,icg(isppol,ikpt)
-       end do  ! ikpt
-    end do   ! isppol
-    !write(std_out,*) "shift for cg computed"
-    !
-    !Shifts computed.
-  end subroutine compute_iwav
-
-
 
 end module m_mlwfovlp2
 !!***
