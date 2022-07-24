@@ -216,6 +216,7 @@
 #define ABI_MALLOC_NOCOUNT(arr, size) allocate(arr size)
 */
 #define ABI_FREE_NOCOUNT(arr) deallocate(arr)
+#define ABI_SFREE_NOCOUNT(arr) if (allocated(arr)) deallocate(arr)
 
 /*
  * Macros to allocate/deallocate depending on the allocation (association) status of the variable (pointer).
