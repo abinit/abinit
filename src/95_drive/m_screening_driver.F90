@@ -1163,25 +1163,25 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    ! Only master works but this part could be parallelized over frequencies.
    call timab(309,1,tsec)
 
-   do iomega=1,MIN(Ep%nomega,NOMEGA_PRINTED)
+   do iomega=1,MIN(Ep%nomega, NOMEGA_PRINTED)
      write(msg,'(1x,a,i4,a,2f9.4,a)')' chi0(G,G'') at the ',iomega,' th omega',Ep%omega(iomega)*Ha_eV,' [eV]'
      call wrtout([ab_out, std_out], msg)
      write(msg,'(1x,a,i3,a,i4,a)')' chi0(q =',iqibz, ', omega =',iomega,', G,G'')'
-     if (Ep%nqcalc/=Ep%nqibz) write(msg,'(a,i3,a,i4,a)')'  chi0(q=',iqcalc,', omega=',iomega,', G,G'')'
+     if (Ep%nqcalc /= Ep%nqibz) write(msg,'(a,i3,a,i4,a)')'  chi0(q=',iqcalc,', omega=',iomega,', G,G'')'
      call wrtout(std_out, msg)
      ! arr99 is needed to avoid the update of all the tests. Now chi0 is divided by ucvol inside (cchi0|cchi0q0).
      ! TODO should be removed but GW tests have to be updated.
-     ii = MIN(9,Ep%npwe)
-     ABI_MALLOC(arr_99,(ii,ii))
-     arr_99 = chi0(1:ii,1:ii,iomega)*ucvol
-     call print_arr(arr_99,max_r=2,unit=ab_out)
-     call print_arr(arr_99,unit=std_out)
+     ii = MIN(9, Ep%npwe)
+     ABI_MALLOC(arr_99,(ii, ii))
+     arr_99 = chi0(1:ii,1:ii,iomega) * ucvol
+     call print_arr(arr_99, max_r=2, unit=ab_out)
+     call print_arr(arr_99, unit=std_out)
      ABI_FREE(arr_99)
      !call print_arr(chi0(:,:,iomega),max_r=2,unit=ab_out)
      !call print_arr(chi0(:,:,iomega),unit=std_out)
    end do
 
-   if (Ep%nomega>NOMEGA_PRINTED) then
+   if (Ep%nomega > NOMEGA_PRINTED) then
      write(msg,'(a,i3,a)')' No. of calculated frequencies > ',NOMEGA_PRINTED,', stop printing '
      call wrtout([ab_out, std_out], msg)
    end if
