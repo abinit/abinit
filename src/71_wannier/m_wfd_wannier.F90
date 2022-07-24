@@ -66,9 +66,10 @@ module m_wfd_wannier
   use m_paw_overlap, only : smatrix_pawinit
   use m_evdw_wannier, only : evdw_wannier
 
+  use m_abstract_wf,     only : compute_iwav, write_cg_and_cprj
   use m_mlwfovlp,        only : mlwfovlp, mlwfovlp_pw, mlwfovlp_proj, mlwfovlp_projpaw, mlwfovlp_setup, mlwfovlp_seedname
-  use m_mlwfovlp2,        only : mlwfovlp2, compute_iwav
-  use m_wannier_io,      only : write_Amn, compute_and_write_unk, write_eigenvalues, write_mmn, write_cg_and_cprj
+  use m_mlwfovlp2,        only : mlwfovlp2
+  use m_wannier_io,      only : write_Amn, compute_and_write_unk, write_eigenvalues, write_mmn
   use m_io_tools,        only : delete_file, get_unit, open_file
 
   use defs_wannier90
@@ -335,7 +336,7 @@ contains
 
   subroutine wfd_run_wannier(cryst, ebands, hdr, mpi_enreg, &
        & ngfftc, ngfftf,  wfd, dtset, dtfil,  &
-       & pawang,  pawrad, pawtab, psps , kg, cg, cprj )
+       & pawang,  pawrad, pawtab, psps , kg, cg, cprj)
     type(crystal_t), intent(in) :: cryst
     type(ebands_t), intent(in) :: ebands
     type(hdr_type), intent(in) :: hdr
@@ -423,8 +424,8 @@ contains
              ! TODO: IBZ->BZ
              !call wfd%extract_cgblock(band_list=my_band_list, ik_ibz=ik_ibz, &
              !     & spin=spin, cgblock=ptr_cg(:,iblk+1: iblk+npw_k*nspinor*my_nbands))
-             !call wfd%extract_cgblock(band_list=my_band_list, ik_ibz=ik_ibz, &
-             !     & spin=spin, cgblock=ptr_cg(:,iblk+1: iblk+npw_k*nspinor*my_nbands))
+             call wfd%extract_cgblock(band_list=my_band_list, ik_ibz=ik_ibz, &
+                  & spin=spin, cgblock=ptr_cg(:,iblk+1: iblk+npw_k*nspinor*my_nbands))
              !iblk = iblk + npw_k*nspinor*my_nbands
              iblk = iblk + npw_k*nspinor*my_nbands
           end do
@@ -454,15 +455,28 @@ contains
     !print *, "kg=", kg
 
     if (.True.) then
-       call mlwfovlp2(crystal=cryst, ebands=ebands, hdr=hdr, atindx1=cryst%atindx1  &
-            &,cg=ptr_cg,cprj=ptr_cprj,dtset=dtset,dtfil=dtfil, &
-            & eigen=ebands%eig,gprimd=cryst%gprimd,kg=ptr_kg,&
-            & mband=hdr%mband,mcg=mcg,mcprj=mcprj,mgfftc=mgfftc, &
-            & mkmem=mkmem,mpi_enreg=mpi_enreg,mpw=mpw,natom=cryst%natom,&
-            & nattyp=cryst%nattyp,nfft=nfft,ngfft=ngfftf,nkpt=hdr%nkpt,npwarr= hdr%npwarr , &
-            &nsppol=dtset%nsppol,ntypat=cryst%ntypat,occ=ebands%occ,&
-            &pawang=pawang,pawrad=pawrad,pawtab=pawtab,prtvol=dtset%prtvol,psps=psps, &
-            &rprimd=cryst%rprimd,ucvol=cryst%ucvol,xred=cryst%xred)
+       if (present(cg)) then
+
+          call mlwfovlp2(crystal=cryst, ebands=ebands, hdr=hdr, atindx1=cryst%atindx1  &
+               &,cg=cg,cprj=cprj,dtset=dtset,dtfil=dtfil, &
+               & eigen=ebands%eig,gprimd=cryst%gprimd,kg=ptr_kg,&
+               & mband=hdr%mband,mcg=mcg,mcprj=mcprj,mgfftc=mgfftc, &
+               & mkmem=mkmem,mpi_enreg=mpi_enreg,mpw=mpw,natom=cryst%natom,&
+               & nattyp=cryst%nattyp,nfft=nfft,ngfft=ngfftf,nkpt=hdr%nkpt,npwarr= hdr%npwarr , &
+               &nsppol=dtset%nsppol,ntypat=cryst%ntypat,occ=ebands%occ,&
+               &pawang=pawang,pawrad=pawrad,pawtab=pawtab,prtvol=dtset%prtvol,psps=psps, &
+               &rprimd=cryst%rprimd,ucvol=cryst%ucvol, xred=cryst%xred)
+       else
+          call mlwfovlp2(crystal=cryst, ebands=ebands, hdr=hdr, atindx1=cryst%atindx1  &
+               &,dtset=dtset,dtfil=dtfil, &
+               & eigen=ebands%eig,gprimd=cryst%gprimd,kg=ptr_kg,&
+               & mband=hdr%mband,mcg=mcg,mcprj=mcprj,mgfftc=mgfftc, &
+               & mkmem=mkmem,mpi_enreg=mpi_enreg,mpw=mpw,natom=cryst%natom,&
+               & nattyp=cryst%nattyp,nfft=nfft,ngfft=ngfftf,nkpt=hdr%nkpt,npwarr= hdr%npwarr , &
+               &nsppol=dtset%nsppol,ntypat=cryst%ntypat,occ=ebands%occ,&
+               &pawang=pawang,pawrad=pawrad,pawtab=pawtab,prtvol=dtset%prtvol,psps=psps, &
+               &rprimd=cryst%rprimd,ucvol=cryst%ucvol, wfd=wfd, xred=cryst%xred)
+       end if
     else
        call mlwfovlp_wfd(cryst=cryst, ebands=ebands, hdr=hdr, wfd=wfd, &
             & dtset=dtset, dtfil=dtfil, mpi_enreg=mpi_enreg, &
@@ -1319,7 +1333,6 @@ end subroutine run_wannier_and_use_wannier
 
 end subroutine read_chkunit
 !!***
-
 
 
   end subroutine mlwfovlp_wfd

@@ -417,7 +417,7 @@ case (WFK_TASK_WANNIER)
            & ngfftc=ngfftc, ngfftf=ngfftf,  wfd=wfd, &
            & dtset=dtset, dtfil=dtfil,  &
            & pawang=pawang,  pawrad=pawrad, &
-           &pawtab=pawtab, psps=psps )
+           & pawtab=pawtab, psps=psps )
    else
       call wfd_mlwfovlp(cryst, ebands, wfk0_hdr, mpi_enreg, &
            & ngfftc, ngfftf,  dtset, dtfil,  &

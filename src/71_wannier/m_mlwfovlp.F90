@@ -62,7 +62,8 @@ module m_mlwfovlp
  use m_paw_overlap, only : smatrix_pawinit
  use m_evdw_wannier, only : evdw_wannier
  use m_fft,            only : fourwf
- use m_wannier_io,   only: write_eigenvalues, write_Amn, compute_and_write_unk, write_Mmn, write_cg_and_cprj
+ use m_wannier_io,   only: write_eigenvalues, write_Amn, compute_and_write_unk, write_Mmn
+ use m_abstract_wf,   only: write_cg_and_cprj
 
 
  implicit none
@@ -600,10 +601,11 @@ contains
 !6) write files for wannier function plot
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  if( dtset%w90prtunk>0) then
-    call compute_and_write_unk(wfnname, psps%usepaw, dtset%w90prtunk, &
-         & mpi_enreg, ngfft, nsppol, dtset%nspinor,  &
-         & nkpt, mband,  mpw, mgfftc, mkmem,  nprocs, rank, npwarr, &
-         & band_in,  dtset, kg, cg, iwav)
+    !FIXME : prtunk is disabled here.
+    !call compute_and_write_unk(wfnname, psps%usepaw, dtset%w90prtunk, &
+    !     & mpi_enreg, ngfft, nsppol, dtset%nspinor,  &
+    !     & nkpt, mband,  mpw, mgfftc, mkmem,  nprocs, rank, npwarr, &
+    !     & band_in,  dtset, kg, cg, iwav)
  end if !dtset%w90prtunk
 
  ABI_FREE(iwav)

@@ -50,6 +50,7 @@ module m_wannier_io
   use m_dtfil
   use m_pawtab,   only : pawtab_type
   use m_pawcprj,  only : pawcprj_type
+  use m_abstract_wf, only: abstract_wf, cg_cprj, wfd_wf
 
 
   implicit none
@@ -58,7 +59,6 @@ module m_wannier_io
   public :: compute_and_write_unk
   public :: write_eigenvalues
   public :: write_Mmn
-  public :: write_cg_and_cprj
   !!***
 
 contains
@@ -174,7 +174,7 @@ contains
   subroutine compute_and_write_unk(wfnname, usepaw, w90prtunk, &
        & mpi_enreg, ngfft, nsppol, nspinor,  &
        & nkpt, mband,  mpw, mgfftc, mkmem,  nprocs, rank, npwarr, &
-       & band_in,  dtset, kg, cg, iwav)
+       & band_in,  dtset, kg, mywfc)
     !TODO split the calculation of unk with writting.
     character(len=fnlen), intent(inout) :: wfnname
     integer ,intent(in) :: usepaw
@@ -184,8 +184,11 @@ contains
     integer, intent(in) :: nprocs, rank, npwarr(:)
     logical, intent(in) :: band_in(:, :)
     type(dataset_type),intent(in) :: dtset
-    integer, intent(in) :: iwav(:, :,:,:),kg(3,mpw*mkmem)
-    real(dp),intent(in) :: cg(2,mpw*nspinor*mband*mkmem*nsppol)
+
+    !integer, intent(in) :: iwav(:, :,:,:),kg(3,mpw*mkmem)
+    integer, intent(in) :: kg(3,mpw*mkmem)
+    !real(dp),intent(in) :: cg(2,mpw*nspinor*mband*mkmem*nsppol)
+    class(abstract_wf), intent(inout) ::  mywfc
 
     integer :: iun_plot
     integer :: isppol, ikpt, ikg, iband, ig 
@@ -280,8 +283,10 @@ contains
                 do ispinor = 1, nsppol
                    do ipw = 1, npw_k
                       !do ig=1,npw_k*dtset%nspinor
-                      cwavef(1,ig)=cg(1,ipw+iwav(ispinor, iband,ikpt,isppol))
-                      cwavef(2,ig)=cg(2,ipw+iwav(ispinor, iband,ikpt,isppol))
+                      !cwavef(1,ig)=cg(1,ipw+iwav(ispinor, iband,ikpt,isppol))
+                      !cwavef(2,ig)=cg(2,ipw+iwav(ispinor, iband,ikpt,isppol))
+                      cwavef(1,ig)=mywfc%cg_elem(1,ipw, ispinor, iband, ikpt, isppol)
+                      cwavef(2,ig)=mywfc%cg_elem(2,ipw, ispinor, iband, ikpt, isppol)
                    end do
                 end do
                 tim_fourwf=0
@@ -499,99 +504,5 @@ contains
 !
  end subroutine write_Mmn
 
-
- subroutine write_cg_and_cprj(dtset, cg, cprj, dtfil, iwav, npwarr, mband, natom, &
-      &nsppol, nkpt,  MPI_enreg, rank, psps, pawtab)
-
-   type(dataset_type),intent(in) :: dtset
-   type(MPI_type),intent(in) :: mpi_enreg
-   type(datafiles_type),intent(in) :: dtfil
-   integer,intent(in):: iwav(:,:,:,:)
-   real(dp),intent(in) :: cg(:, :)
-   type(pawcprj_type), intent(in) :: cprj(:, :)
-   integer, intent(in) :: rank, nsppol, nkpt, mband, natom
-   integer, intent(in) :: npwarr(nkpt)
-   type(pseudopotential_type),intent(in) :: psps
-   type(pawtab_type),intent(in) :: pawtab(psps%ntypat*psps%usepaw)
-
-   integer :: ikpt, ikpt2, isppol, iun_plot, npw_k, iband,  i, ipw, ispinor, ig
-   integer :: iatom,  itypat, lmn_size, ilmn
-   character(len=fnlen) :: wfnname
-   character(len=1000) :: message
-
-     if(dtset%prtvol>0) then
-       write(message, '(3a)' ) ch10,&
-&       '   mlwfovlp :  Creating temporary files with cg and cprj (PAW)',ch10
-       call wrtout(ab_out,message,'COLL')
-       call wrtout(std_out,  message,'COLL')
-     end if
-!
-     do isppol=1,nsppol
-       do ikpt=1,nkpt
-!
-!        MPI:cycle over k-points not treated by this node
-!
-          if ( ABS(MPI_enreg%proc_distrb(ikpt,1,isppol)-rank)  /=0) CYCLE
-
-!        write(std_out,*)'writing kpt ',ikpt,'isppol',isppol,' by node ', rank
-         write(wfnname,'(a,I5.5,".",I1)') trim(dtfil%fnametmp_cg),ikpt,isppol
-         iun_plot=1000+ikpt+ikpt*(isppol-1)
-
-         open (unit=iun_plot, file=wfnname,form='unformatted')
-         npw_k=npwarr(ikpt)
-         do iband=1,mband
-            do ispinor = 1, dtset%nspinor
-               do ipw=1,npw_k
-                  write(iun_plot) (cg(i,ipw+iwav(ispinor, iband,ikpt,isppol)),i=1,2)
-               end do
-           end do
-         end do
-         close(iun_plot)
-       end do !ikpt
-     end do !isppol
-!
-!    In the PAW case we also need to write out cprj into files
-!
-     if(psps%usepaw==1) then
-!
-!      big loop on atoms, kpts, bands and lmn
-        print *, "nsppol", nsppol
-        print *, "nkpt", nkpt
-        print *, "mkmem", dtset%mkmem
-!
-       ikpt2=0
-       do isppol=1,nsppol
-         do ikpt=1,nkpt
-!
-!          MPI:cycle over k-points not treated by this node
-!
-            if ( ABS(MPI_enreg%proc_distrb(ikpt,1,isppol)-MPI_enreg%me)  /=0) CYCLE
-
-           ikpt2=ikpt2+1 !sums just on the k-points treated by this node
-!
-           write(wfnname,'(a,I5.5,".",I1)') trim(dtfil%fnametmp_cprj),ikpt,isppol
-           iun_plot=1000+ikpt
-           open (unit=iun_plot, file=wfnname,form='unformatted')
-!
-           do iband=1,mband*dtset%nspinor
-             !ig=iband+(ikpt2-1)*mband*dtset%nspinor +(isppol-1)*nkpt*mband*dtset%nspinor !index for cprj(:,ig)
-              ! cprj: only mkmem k-points are stored in this node.
-             ig=iband+(ikpt2-1)*mband*dtset%nspinor +(isppol-1)*dtset%mkmem*mband*dtset%nspinor !index for cprj(:,ig)
-              !
-             do iatom=1,natom
-               itypat=dtset%typat(iatom)
-               lmn_size=pawtab(itypat)%lmn_size
-!
-               do ilmn=1,lmn_size
-                 write(iun_plot) (( cprj(iatom,ig)%cp(i,ilmn)),i=1,2)
-               end do !ilmn
-             end do !iatom
-           end do !iband
-
-           close(iun_plot)
-         end do !ikpt
-       end do !isppol
-     end if !usepaw==1
- end subroutine write_cg_and_cprj
 
 end module m_wannier_io

@@ -19,6 +19,7 @@ ABI_SRC_DEP = 2     # The file depends on other files
 # Source files
 sources = [
  "defs_wannier90.F90",
+ "m_abstract_wf.F90",
  "m_mlwfovlp.F90",
  "m_mlwfovlp2.F90",
  "m_mlwfovlp_qp.F90",
