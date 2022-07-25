@@ -216,6 +216,9 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,&
  real(dp),allocatable :: vpsp1(:)
  type(pawcprj_type),allocatable :: dum_cwaveprj(:,:)
 
+ !AZ_test_ini**************************************************************************
+ character(40) :: i1dir_text, i2dir_text, i3dir_text, iband_text, ikpt_text, file_name
+ !AZ_test_fin**************************************************************************
  
 ! *************************************************************************
 
@@ -302,6 +305,17 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,&
    d3etot_t1_k(1)=d3etot_t1_k(1)+occ_k(iband)*dotr
    d3etot_t1_k(2)=d3etot_t1_k(2)+occ_k(iband)*doti
 
+   !AZ_test_ini******************************************************************
+   write(i1dir_text) i1dir
+   write(i2dir_text) i2dir
+   write(i3dir_text) i3dir
+   file_name = 'T_1_i1dir_'//trim(adjustl(i1dir_text))//'_i2dir_'//&
+ & trim(adjustl(i2dir_text))//'_i3dir_'//trim(adjustl(i3dir_text))//'.dat'
+   open(unit=999,file=file_name,action='write',status='replace')
+   write(999,'(2f20.14)') occ_k(iband)*dotr, occ_k(iband)*doti
+   close(999)
+   !AZ_test_fin******************************************************************
+
  end do !iband
 
 !Clean rf_hamiltonian
@@ -367,6 +381,17 @@ if (.not.samepert) then
       cprodi=dotr*cj_h1_ci(2)+doti*cj_h1_ci(1)
       d3etot_t2_k(1)=d3etot_t2_k(1)-cprodr*occ_k(iband)
       d3etot_t2_k(2)=d3etot_t2_k(2)-cprodi*occ_k(iband)
+
+      !AZ_test_ini******************************************************************
+      write(i1dir_text) i1dir
+      write(i2dir_text) i2dir
+      write(i3dir_text) i3dir
+      file_name = 'T_2_i1dir_'//trim(adjustl(i1dir_text))//'_i2dir_'//&
+    & trim(adjustl(i2dir_text))//'_i3dir_'//trim(adjustl(i3dir_text))//'.dat'
+      open(unit=999,file=file_name,action='write',status='replace')
+      write(999,'(2f20.14)') -cprodr*occ_k(iband), -cprodi*occ_k(iband)
+      close(999)
+      !AZ_test_fin******************************************************************
   
     end do !jband 
   
@@ -414,6 +439,17 @@ end if !samepert
      cprodi=dotr*cj_h1_ci(2)+doti*cj_h1_ci(1)
      d3etot_t3_k(1)=d3etot_t3_k(1)-cprodr*occ_k(iband)
      d3etot_t3_k(2)=d3etot_t3_k(2)-cprodi*occ_k(iband)
+
+     !AZ_test_ini******************************************************************
+     write(i1dir_text) i1dir
+     write(i2dir_text) i2dir
+     write(i3dir_text) i3dir
+     file_name = 'T_3_i1dir_'//trim(adjustl(i1dir_text))//'_i2dir_'//&
+   & trim(adjustl(i2dir_text))//'_i3dir_'//trim(adjustl(i3dir_text))//'.dat'
+     open(unit=999,file=file_name,action='write',status='replace')
+     write(999,'(2f20.14)') -cprodr*occ_k(iband), -cprodi*occ_k(iband)
+     close(999)
+     !AZ_test_fin******************************************************************
 
    end do !jband
 
@@ -529,6 +565,17 @@ if (.not.samepert) then
        !Calculate the contribution to T4
        d3etot_t4_k(1,idq)=d3etot_t4_k(1,idq)+dotr*occ_k(iband)
        d3etot_t4_k(2,idq)=d3etot_t4_k(2,idq)+doti*occ_k(iband)
+
+       !AZ_test_ini******************************************************************
+       write(i1dir_text) i1dir
+       write(i2dir_text) i2dir
+       write(i3dir_text) i3dir
+       file_name = 'T_4_i1dir_'//trim(adjustl(i1dir_text))//'_i2dir_'//&
+     & trim(adjustl(i2dir_text))//'_i3dir_'//trim(adjustl(i3dir_text))//'.dat'
+       open(unit=999,file=file_name,action='write',status='replace')
+       write(999,'(2f20.14)') dotr*occ_k(iband), doti*occ_k(iband)
+       close(999)
+       !AZ_test_fin******************************************************************
   
      end do !iband
   
@@ -667,6 +714,17 @@ if (.not.samepert) then
      !Calculate the contribution to T5:
      d3etot_t5_k(1,idq)=d3etot_t5_k(1,idq)+dotr*occ_k(iband)
      d3etot_t5_k(2,idq)=d3etot_t5_k(2,idq)+doti*occ_k(iband)
+
+     !AZ_test_ini******************************************************************
+     write(i1dir_text) i1dir
+     write(i2dir_text) i2dir
+     write(i3dir_text) i3dir
+     file_name = 'T_4_i1dir_'//trim(adjustl(i1dir_text))//'_i2dir_'//&
+   & trim(adjustl(i2dir_text))//'_i3dir_'//trim(adjustl(i3dir_text))//'.dat'
+     open(unit=999,file=file_name,action='write',status='replace')
+     write(999,'(2f20.14)') dotr*occ_k(iband), doti*occ_k(iband)
+     close(999)
+     !AZ_test_fin******************************************************************
 
    end do !iband
 

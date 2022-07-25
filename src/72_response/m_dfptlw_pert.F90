@@ -251,6 +251,10 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3e_pert1,d3e_pert2,d3etot,d3etot
  real(dp),allocatable :: ylm_k(:,:),ylmgr_k(:,:,:)
  real(dp),allocatable :: ffnl_k(:,:,:,:)
  type(pawcprj_type),allocatable :: dum_cwaveprj(:,:)
+
+ !AZ_test_ini**************************************************************************
+ character(40) :: i1dir_text, i2dir_text, i3dir_text, iband_text, ikpt_text, file_name
+ !AZ_test_fin**************************************************************************
  
 ! *************************************************************************
 
@@ -294,7 +298,18 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3e_pert1,d3e_pert2,d3etot,d3etot
  call lw_elecstic(cplex,d3etot_telec,gmet,gs_hamkq%gprimd,gsqcut,&
 & i1dir,i2dir,i3dir,i1pert,i2pert,i3pert,&
 & kxc,mpi_enreg,nfft,ngfft,nkxc,nspden,rho1g1,rho1r1,rho2r1,ucvol)
-     
+    
+ !AZ_test_ini******************************************************************
+ write(i1dir_text) i1dir
+ write(i2dir_text) i2dir
+ write(i3dir_text) i3dir
+ file_name = 'T_elec_i1dir_'//trim(adjustl(i1dir_text))//'_i2dir_'//&
+ & trim(adjustl(i2dir_text))//'_i3dir_'//trim(adjustl(i3dir_text))//'.dat'
+ open(unit=999,file=file_name,action='write',status='replace')
+ write(999,'(2f20.14)') d3etot_telec(1), d3etot_telec(2)
+ close(999)
+ !AZ_test_fin******************************************************************
+ 
 !Loop over spins
  bandtot = 0
  bd2tot = 0
