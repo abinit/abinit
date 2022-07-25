@@ -10,8 +10,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -92,11 +90,6 @@ contains  !=====================================================================
 !! comm=MPI communicator.
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_eph_driver
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -607,12 +600,7 @@ end subroutine eph_phpi
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_phpi
-!!
 !! NOTES
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -661,12 +649,7 @@ end subroutine out_phpi
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_phpi
-!!
 !! NOTES
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

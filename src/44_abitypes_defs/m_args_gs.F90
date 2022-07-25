@@ -13,10 +13,6 @@
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -113,11 +109,6 @@ CONTAINS
 !! SIDE EFFECTS
 !!  args_gs=<type(args_gs_type)>=args_gs datastructure
 !!
-!! PARENTS
-!!      m_gstateimg
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine args_gs_init(args_gs,amu,cellcharge,mixalch,dmatpawu,upawu,jpawu,rprimd_orig)
@@ -159,11 +150,6 @@ end subroutine args_gs_init
 !!
 !! SIDE EFFECTS
 !!  args_gs(:)=<type(args_gs_type)>=args_gs datastructure
-!!
-!! PARENTS
-!!      m_gstateimg
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

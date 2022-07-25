@@ -30,11 +30,6 @@ module defs_PSolver
 !!
 !! FUNCTION
 !!
-!! PARENTS
-!!      m_mklocl_realspace
-!!
-!! CHILDREN
-!!
 !! SOURCE
    subroutine PSolver(geocode,datacode,iproc,nproc,n01,n02,n03,xc,hx,hy,hz,&
                       rhopot,karray,pot_ion,eh,exc,vxc,offset,sumpion,nspin)

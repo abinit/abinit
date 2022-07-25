@@ -10,10 +10,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -324,15 +320,6 @@ contains
 !! * See nonlop_pl and nonlop_ylm to have more comments...
 !! * In the case signs=1, the array vectout is not used.
 !!
-!! PARENTS
-!!      m_cgwf,m_d2frnl,m_dfpt_scfcv,m_dfptnl_pert,m_dft_energy,m_fock_getghc
-!!      m_forstr,m_getchc,m_getgh1c,m_getgh2c,m_getghc,m_invovl,m_lobpcgwf
-!!      m_nonlop_test,m_orbmag,m_pead_nl_loop,m_prep_kgb,m_rf2,m_rmm_diis
-!!      m_vtowfk,m_wfd
-!!
-!! CHILDREN
-!!      dotprod_g,gpu_nonlop
-!!
 !! SOURCE
 
 subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnlout,&
@@ -522,7 +509,14 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
  end if
 !This test is OK only because explicit sizes are passed to nonlop_* routines
  if (size(vectin)<2*npwin*my_nspinor*ndat) then
-   ABI_BUG('Incorrect size for vectin!')
+   !FB: Allow the usage of nonlop from the "linalg" representation where
+   !FB: the cg are distributed over the plane waves with npband > 1
+   !FB: in case signs=1 & choice=1
+   if (signs==1 .and. choice==1) then
+      npwin = size(vectin,2)/ndat/my_nspinor
+   else
+      ABI_BUG('Incorrect size for vectin!')
+   end if
  end if
  if(choice/=0.and.signs==2) then
    if(paw_opt/=3) then
@@ -960,12 +954,6 @@ end subroutine nonlop
 !! TODO
 !! * Implementation for spinorial wave functions (nspinor=2)
 !! * Implementation for response function (phonons, ddk, elastic tensor, ...)
-!!
-!! PARENTS
-!!      m_nonlop
-!!
-!! CHILDREN
-!!      dotprod_g,gpu_nonlop
 !!
 !! SOURCE
 

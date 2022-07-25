@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -132,12 +128,6 @@ contains
 !!  (only writing, printing)
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_outscfcv
-!!
-!! CHILDREN
-!!      initylmr,matrginv,rotmat
 !!
 !! SOURCE
 
@@ -945,11 +935,6 @@ contains
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      initylmr,matrginv,rotmat
-!!
 !! SOURCE
 
  subroutine read_chkunit(seed_name,nkpt,ndimwin,ierr)
@@ -1026,12 +1011,6 @@ end subroutine mlwfovlp
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_mlwfovlp
-!!
-!! CHILDREN
-!!      initylmr,matrginv,rotmat
 !!
 !! SOURCE
 
@@ -1213,12 +1192,6 @@ end subroutine mlwfovlp_seedname
 !!  (only writing, printing)
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_mlwfovlp
-!!
-!! CHILDREN
-!!      initylmr,matrginv,rotmat
 !!
 !! SOURCE
 
@@ -1510,12 +1483,6 @@ end subroutine mlwfovlp_setup
 !!  (only writing, printing)
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_mlwfovlp
-!!
-!! CHILDREN
-!!      initylmr,matrginv,rotmat
 !!
 !! SOURCE
 
@@ -1874,12 +1841,6 @@ subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nk
 !!  (only writing, printing)
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_mlwfovlp
-!!
-!! CHILDREN
-!!      initylmr,matrginv,rotmat
 !!
 !! SOURCE
 
@@ -2386,12 +2347,6 @@ end subroutine mlwfovlp_proj
 !! NOTES
 !! This routine is still under developement
 !!
-!! PARENTS
-!!      m_mlwfovlp
-!!
-!! CHILDREN
-!!      initylmr,matrginv,rotmat
-!!
 !! SOURCE
 
 subroutine mlwfovlp_projpaw(A_paw,band_in,cprj,just_augmentation,max_num_bands,mband,mkmem,&
@@ -2755,12 +2710,6 @@ end subroutine mlwfovlp_projpaw
 !!  Calculates the radial part of the initial functions given as an initial
 !!  guess by the user to construct the MLWF.
 !!
-!! PARENTS
-!!      m_mlwfovlp
-!!
-!! CHILDREN
-!!      initylmr,matrginv,rotmat
-!!
 !! SOURCE
 
 subroutine mlwfovlp_radial(alpha,lmax,lmax2,radial,rvalue,xx)
@@ -2895,12 +2844,6 @@ end subroutine mlwfovlp_radial
 !!  (only writing, printing)
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_mlwfovlp
-!!
-!! CHILDREN
-!!      initylmr,matrginv,rotmat
 !!
 !! SOURCE
 
@@ -3151,12 +3094,6 @@ end subroutine mlwfovlp_ylmfac
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_mlwfovlp
-!!
-!! CHILDREN
-!!      initylmr,matrginv,rotmat
 !!
 !! SOURCE
 

@@ -217,12 +217,6 @@ CONTAINS  !=====================================================================
 !! SIDE EFFECTS
 !!  Atm <type(atomorb_type)>=datastructure containing atomic orbitals for a given type of atom.
 !!
-!! PARENTS
-!!      m_paw_slater
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine destroy_atomorb(Atm)
@@ -292,12 +286,6 @@ end subroutine destroy_atomorb
 !!  ierr=Status error.
 !!   * 1 if error during the opening of the file.
 !!   * 2 for generic error during the reading.
-!!
-!! PARENTS
-!!      m_paw_slater
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -656,12 +644,6 @@ end subroutine init_atomorb
 !!  nele=core charge
 !!  raddens(mesh_size)=core density (optional)
 !!
-!! PARENTS
-!!      m_paw_atomorb
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine get_atomorb_charge(Atm,Radmesh,nele,radens)
@@ -733,12 +715,6 @@ end subroutine get_atomorb_charge
 !!
 !! OUTPUT
 !!  overlap(ln_size,nphi)=core-valence overlap matrix
-!!
-!! PARENTS
-!!      m_paw_slater
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -842,12 +818,6 @@ end subroutine get_overlap
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_paw_slater
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine print_atomorb(Atm,header,unit,prtvol,mode_paral)
@@ -930,10 +900,6 @@ end subroutine print_atomorb
 !!
 !! OUTPUT
 !!  str=mode. Either "Frozen", "Relazed Core", "Valence"
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -95,11 +91,6 @@ contains
 !!  nctab<nctab_t>=NC tables
 !!    %has_tvale=True if the pseudo contains the pseudo valence charge
 !!    %tvalespl(mqgrid_vl,2)=the pseudo valence density and 2nd derivative in reciprocal space on a regular grid
-!!
-!! PARENTS
-!!      m_pspini
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -506,11 +497,6 @@ end subroutine psp8in
 !!
 !! OUTPUT
 !!  xccc1d(n1xccc,6)= 1D core charge function and its four first derivatives
-!!
-!! PARENTS
-!!      m_psp8
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

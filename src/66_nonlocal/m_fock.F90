@@ -13,10 +13,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -344,12 +340,6 @@ contains
 !!
 !!  The current version is restricted to the case nsym=1, nspinor=1 and mkmem/=0.
 !!
-!! PARENTS
-!!      m_fock
-!!
-!! CHILDREN
-!!      ptabs_fourdp,timab,xmpi_sum
-!!
 !! SOURCE
 
 subroutine fockbz_create(fockbz,mgfft,mpw,mkpt,mkptband,my_nsppol,n4,n5,n6,use_ACE)
@@ -467,12 +457,6 @@ end subroutine fockbz_create
 !!  ############################
 !!
 !!  The current version is restricted to the case nsym=1, nspinor=1 and mkmem/=0.
-!!
-!! PARENTS
-!!      m_scfcv_core
-!!
-!! CHILDREN
-!!      ptabs_fourdp,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1149,12 +1133,6 @@ end subroutine fock_init
 !! NOTES
 !!  May be improved to calculate the star of ikpt. => I think NO finally
 !!
-!! PARENTS
-!!      m_vtorho
-!!
-!! CHILDREN
-!!      ptabs_fourdp,timab,xmpi_sum
-!!
 !! SOURCE
 
 subroutine fock_updateikpt(fock,ikpt,isppol)
@@ -1198,12 +1176,6 @@ end subroutine fock_updateikpt
 !! OUTPUT
 !!  none
 !!
-!! PARENTS
-!!      m_cgwf
-!!
-!! CHILDREN
-!!      ptabs_fourdp,timab,xmpi_sum
-!!
 !! SOURCE
 
 subroutine fock_set_ieigen(fock,iband)
@@ -1238,12 +1210,6 @@ end subroutine fock_set_ieigen
 !!
 !! INPUTS
 !!  fock <type(fock_type)>= all the quantities to calculate Fock exact exchange
-!!
-!! PARENTS
-!!      m_scfcv_core
-!!
-!! CHILDREN
-!!      ptabs_fourdp,timab,xmpi_sum
 !!
 !! SOURCE
 subroutine fock_destroy(fock)
@@ -1371,12 +1337,6 @@ end subroutine fock_BZ_destroy
 !! INPUTS
 !!  fockACE <type(fock_ACE_type)>= all the quantities to calculate Fock exact exchange in the ACE context
 !!
-!! PARENTS
-!!      m_scfcv_core
-!!
-!! CHILDREN
-!!      ptabs_fourdp,timab,xmpi_sum
-!!
 !! SOURCE
 
 subroutine fock_ACE_destroy(fockACE)
@@ -1424,12 +1384,6 @@ end subroutine fock_ACE_destroy
 !! NOTES
 !! If the cgocc_bz are not updated at each iteration, be careful to calculate Fock energy at the same frequency.
 !! TO CHECK == CHANGE IN SOME DEFINTIONS
-!!
-!! PARENTS
-!!      m_vtorho
-!!
-!! CHILDREN
-!!      ptabs_fourdp,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1486,11 +1440,6 @@ end subroutine fock_calc_ene
 !!
 !! NOTES
 !!   If the cgocc_bz are not updated at each iteration, be careful to calculate Fock energy at the same frequency.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      ptabs_fourdp,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1549,12 +1498,6 @@ end subroutine fock_update_exc
 !!  ############################
 !!
 !! May be improved by selecting only the occupied states with the same spin isppol.
-!!
-!! PARENTS
-!!      m_scfcv_core
-!!
-!! CHILDREN
-!!      ptabs_fourdp,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1724,7 +1667,9 @@ subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,indsym,mcg,mcprj,&
 
 !* Initialize the band counter
          my_jband=0
-         do iband=1,dtset%nband(ikpt)
+         !FBru: Here run over all the nbandhf bands instead of just the truly occupied states
+         ! this is a very tiny waste, but solves parallelization issues
+         do iband=1,dtset%nbandhf
 
 
            cgocc_tmp=zero
@@ -1732,136 +1677,132 @@ subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,indsym,mcg,mcprj,&
              call pawcprj_set_zero(cprj_tmp)
            end if
 
-           if(ABS(occ(iband+ibg))>tol8) then
-!* If the band is occupied
-
 !* To avoid segmentation fault, my_jband should not be greater than nbandhf
-             if ((my_jband+1)>mband) then
-               write(message,*) 'The number of occupied band',my_jband+1,' at k-point',&
-&                 ikpt,' is greater than the value of nbandhf ', mband
-               ABI_ERROR(message)
-             end if
+           !FBru: this error should never happen in practice since we now limit the loop to nbandhf
+           if ((my_jband+1)>mband) then
+             write(message,*) 'The number of occupied band',my_jband+1,' at k-point',&
+&               ikpt,' is greater than the value of nbandhf ', mband
+             ABI_ERROR(message)
+           end if
 
 !* If the processor does not calculate the exchange with the occupied state (jkpt,my_jband), cycle
-!             if (mpi_enreg%distrb_hf(jkpt,(my_jband+1),1)/=mpi_enreg%me_hf) cycle
-             if (mpi_enreg%distrb_hf(jkpt,iband,1)/=mpi_enreg%me_hf) cycle
-!                   if (mpi_enreg%proc_distrb(jkpt,jband,jsppol)==mpi_enreg%me_kpt) then
+!           if (mpi_enreg%distrb_hf(jkpt,(my_jband+1),1)/=mpi_enreg%me_hf) cycle
+           if (mpi_enreg%distrb_hf(jkpt,iband,1)/=mpi_enreg%me_hf) cycle
+!                 if (mpi_enreg%proc_distrb(jkpt,jband,jsppol)==mpi_enreg%me_kpt) then
 !* The state (jkpt,jband,jsppol) is stored in the array cg of this processor ; shift are incremented.
-!                     icg=icg+npwj
-!                   end if
-!                   ibg=ibg+1
-!* Skip the end of the loop
-!                   cycle
+!                   icg=icg+npwj
 !                 end if
+!                 ibg=ibg+1
+!* Skip the end of the loop
+!                 cycle
+!               end if
 
 !* increment the number of occupied bands treated on this processor
-             my_jband = my_jband+1
+           my_jband = my_jband+1
 
 !* In this case, the processor calculates the exchange with the occupied state (jkpt,my_jband).
-             if (mpi_enreg%proc_distrb(ikpt,iband,isppol)==mpi_enreg%me_kpt) then
+           if (mpi_enreg%proc_distrb(ikpt,iband,isppol)==mpi_enreg%me_kpt) then
 !* The state (ikpt,iband,isppol) is stored in the array cg of this processor and copied in cgocc_tmp.
-               if(icg==-1) then
-                 write(100,*) 'icg=-1',mpi_enreg%me,isppol,my_jsppol,jkpt,my_jkpt,ikpt,iband
-               end if
-             ! MG: Why packing re and im part?
-               cgocc_tmp(1)=occ(iband+ibg)
-               cgocc_tmp(2:npwj+1)=cg(1,1+(iband-1)*npwj+icg:iband*npwj+icg)
-               cgocc_tmp(npwj+2:2*npwj+1)=cg(2,1+(iband-1)*npwj+icg:iband*npwj+icg)
-               if (fockcommon%usepaw==1) then
-                 call pawcprj_copy(cprj(:,icp+iband:icp+iband+nspinor-1),cprj_tmp)
-               end if
+             if(icg==-1) then
+               write(100,*) 'icg=-1',mpi_enreg%me,isppol,my_jsppol,jkpt,my_jkpt,ikpt,iband
              end if
+             ! MG: Why packing re and im part?
+             cgocc_tmp(1)=occ(iband+ibg)
+             cgocc_tmp(2:npwj+1)=cg(1,1+(iband-1)*npwj+icg:iband*npwj+icg)
+             cgocc_tmp(npwj+2:2*npwj+1)=cg(2,1+(iband-1)*npwj+icg:iband*npwj+icg)
+             if (fockcommon%usepaw==1) then
+               call pawcprj_copy(cprj(:,icp+iband:icp+iband+nspinor-1),cprj_tmp)
+             end if
+           end if
 
 !* Broadcast the state (ikpt,iband,isppol) to all the processors of comm_kpt for cgocc
-             call timab(1503,1,tsec2)
-             call xmpi_bcast(cgocc_tmp,mpi_enreg%proc_distrb(ikpt,iband,isppol),mpi_enreg%comm_kpt,ier)
+           call timab(1503,1,tsec2)
+           call xmpi_bcast(cgocc_tmp,mpi_enreg%proc_distrb(ikpt,iband,isppol),mpi_enreg%comm_kpt,ier)
 
 !* Broadcast the state (ikpt,iband,isppol) to all the processors of comm_kpt for cprj
-             if (fockcommon%usepaw==1) then
-               call pawcprj_bcast(cprj_tmp,dtset%natom,nspinor,dimlmn,ncpgr,mpi_enreg%proc_distrb(ikpt,iband,isppol),&
-&               mpi_enreg%comm_kpt,ier)
-             end if
-             call timab(1503,2,tsec2)
+           if (fockcommon%usepaw==1) then
+             call pawcprj_bcast(cprj_tmp,dtset%natom,nspinor,dimlmn,ncpgr,mpi_enreg%proc_distrb(ikpt,iband,isppol),&
+&             mpi_enreg%comm_kpt,ier)
+           end if
+           call timab(1503,2,tsec2)
 !* Keep the processors in %comm_kpt which needs the values in cgocc_tmp to build their own %cwaveocc and %occ_bz.
-             if ((mpi_enreg%nproc_spkpt/=1).and.(nsppol==2)) then
-               if (fockbz%timerev(my_jkpt)==mpi_enreg%my_isppoltab(isppol)) cycle
+           if ((mpi_enreg%nproc_spkpt/=1).and.(nsppol==2)) then
+             if (fockbz%timerev(my_jkpt)==mpi_enreg%my_isppoltab(isppol)) cycle
 !* In the case of a parallel spin-polarized calculation
 !* when time reversal symmetry is applied at this k-point (timrev==1), only the processors with the opposite spin (my_isppoltab==0) are kept.
 !* when time reversal symmetry is not applied at this k-point (timrev==0), only the processors with the same spin (my_isppoltab==1) are kept.
 
-!             if (fock%timerev(my_jkpt)==1)) then
-!               if (mpi_enreg%my_isppoltab(isppol)==1) cycle
+!           if (fock%timerev(my_jkpt)==1)) then
+!             if (mpi_enreg%my_isppoltab(isppol)==1) cycle
 !* In the case of a parallel spin-polarized calculation and when time reversal symmetry is applied at this k-point,
 !* only the processors with the opposite spin are kept.
-!             else
-!               if (mpi_enreg%my_isppoltab(isppol)==0) cycle
+!           else
+!             if (mpi_enreg%my_isppoltab(isppol)==0) cycle
 !* only the processors with isppol are kept.
-!             end if
-             end if
+!           end if
+           end if
 
 !* Copy the values of cgocc_tmp in the arrays cgocc and %occ_bz
-             fockbz%occ_bz(my_jband+jbg,my_jsppol) = cgocc_tmp(1)
-             cgocc(1,1:npwj) = cgocc_tmp(2:npwj+1)
-             cgocc(2,1:npwj) = cgocc_tmp(npwj+2:2*npwj+1)
+           fockbz%occ_bz(my_jband+jbg,my_jsppol) = cgocc_tmp(1)
+           cgocc(1,1:npwj) = cgocc_tmp(2:npwj+1)
+           cgocc(2,1:npwj) = cgocc_tmp(npwj+2:2*npwj+1)
 
 !* calculate cg and store it in cgocc_bz
-             if (fockbz%calc_phase(my_jkpt)==1) then
-               do jpw=1,npwj
-                 cgre=cgocc(1,jpw) ; cgim=cgocc(2,jpw)
-                 cgocc(1,jpw) = phase_jkpt(1,jpw)*cgre - phase_jkpt(2,jpw)*cgim
-                 cgocc(2,jpw) = phase_jkpt(1,jpw)*cgim + phase_jkpt(2,jpw)*cgre
-               end do
-             end if ! phase
+           if (fockbz%calc_phase(my_jkpt)==1) then
+             do jpw=1,npwj
+               cgre=cgocc(1,jpw) ; cgim=cgocc(2,jpw)
+               cgocc(1,jpw) = phase_jkpt(1,jpw)*cgre - phase_jkpt(2,jpw)*cgim
+               cgocc(2,jpw) = phase_jkpt(1,jpw)*cgim + phase_jkpt(2,jpw)*cgre
+             end do
+           end if ! phase
 
 !* apply time reversal symmetry if necessary
-             if (fockbz%timerev(my_jkpt)==1) then
-               cgocc(2,:) = - cgocc(2,:)
-               if((mpi_enreg%nproc_spkpt==1).and.(nsppol==2)) my_jsppol=mod(my_jsppol,2)+1
+           if (fockbz%timerev(my_jkpt)==1) then
+             cgocc(2,:) = - cgocc(2,:)
+             if((mpi_enreg%nproc_spkpt==1).and.(nsppol==2)) my_jsppol=mod(my_jsppol,2)+1
 !* exchange spin (1 ->2 ; 2-> 1) in the sequential case.
-             end if
+           end if
 
 !* apply FFT to get cwaveocc in real space
 
-             if (allocated(fockbz%cwaveocc_bz)) then
+           if (allocated(fockbz%cwaveocc_bz)) then
 
-               ABI_MALLOC(dummytab2,(2,npwj))
-               call fourwf(1,dummytab3,cgocc(:,1:npwj),dummytab2,fockbz%cwaveocc_bz(:,:,:,:,my_jband+jbg,my_jsppol), &
-&               gbound_k,gbound_k,jstwfk,kg_k,kg_k,mgfft,mpi_enreg,1,ngfft,&
-&               npwj,npwj,n4,n5,n6,tim_fourwf0,0,weight1,weight1,use_gpu_cuda=dtset%use_gpu_cuda)
-               ABI_FREE(dummytab2)
+             ABI_MALLOC(dummytab2,(2,npwj))
+             call fourwf(1,dummytab3,cgocc(:,1:npwj),dummytab2,fockbz%cwaveocc_bz(:,:,:,:,my_jband+jbg,my_jsppol), &
+&             gbound_k,gbound_k,jstwfk,kg_k,kg_k,mgfft,mpi_enreg,1,ngfft,&
+&             npwj,npwj,n4,n5,n6,tim_fourwf0,0,weight1,weight1,use_gpu_cuda=dtset%use_gpu_cuda)
+             ABI_FREE(dummytab2)
 
-             else
-               fockbz%cgocc(:,jcg+1+(my_jband-1)*npwj:jcg+my_jband*npwj,my_jsppol)=cgocc(:,1:npwj)
-             end if
+           else
+             fockbz%cgocc(:,jcg+1+(my_jband-1)*npwj:jcg+my_jband*npwj,my_jsppol)=cgocc(:,1:npwj)
+           end if
 
 !* calculate cprj and store it in cwaveocc_prj
-             if (fockcommon%usepaw==1) then
-               iband_cprj=(my_jsppol-1)*fockbz%mkptband+jbg+my_jband
-               nband=1;mband0=1;iband0=1
-               call pawcprj_symkn(fockbz%cwaveocc_prj(:,iband_cprj:iband_cprj+nspinor-1),cprj_tmp(:,1:nspinor),&
-&               indsym_,dimlmn,iband0,indlmn,&
-&               fockbz%tab_symkpt(my_jkpt),fockbz%timerev(my_jkpt),dtset%kptns(:,ikpt),fockbz%pawang%l_max-1,lmnmax,&
-&               mband0,dtset%natom,nband,nspinor,dtset%nsym,dtset%ntypat,typat_srt,fockbz%pawang%zarot)
+           if (fockcommon%usepaw==1) then
+             iband_cprj=(my_jsppol-1)*fockbz%mkptband+jbg+my_jband
+             nband=1;mband0=1;iband0=1
+             call pawcprj_symkn(fockbz%cwaveocc_prj(:,iband_cprj:iband_cprj+nspinor-1),cprj_tmp(:,1:nspinor),&
+&             indsym_,dimlmn,iband0,indlmn,&
+&             fockbz%tab_symkpt(my_jkpt),fockbz%timerev(my_jkpt),dtset%kptns(:,ikpt),fockbz%pawang%l_max-1,lmnmax,&
+&             mband0,dtset%natom,nband,nspinor,dtset%nsym,dtset%ntypat,typat_srt,fockbz%pawang%zarot)
 
-               if(dtset%optforces==1) then
-                 do iatom=1,dtset%natom
-                   iatm=fockcommon%atindx(iatom)
-                   do ispinor=iband_cprj,iband_cprj+nspinor-1
-                     do ilmn=1,fockcommon%pawtab(dtset%typat(iatom))%lmn_size
-                       dcp(:)= MATMUL(TRANSPOSE(fockcommon%symrec(:,:,fockbz%tab_symkpt(my_jkpt))),&
-&                                               fockbz%cwaveocc_prj(iatm,ispinor)%dcp(1,:,ilmn))
-                       fockbz%cwaveocc_prj(iatm,ispinor)%dcp(1,:,ilmn)=dcp(:)
-                       dcp(:)= MATMUL(TRANSPOSE(fockcommon%symrec(:,:,fockbz%tab_symkpt(my_jkpt))),&
-&                                               fockbz%cwaveocc_prj(iatm,ispinor)%dcp(2,:,ilmn))
-                       fockbz%cwaveocc_prj(iatm,ispinor)%dcp(2,:,ilmn)=dcp(:)
-                     end do
+             if(dtset%optforces==1) then
+               do iatom=1,dtset%natom
+                 iatm=fockcommon%atindx(iatom)
+                 do ispinor=iband_cprj,iband_cprj+nspinor-1
+                   do ilmn=1,fockcommon%pawtab(dtset%typat(iatom))%lmn_size
+                     dcp(:)= MATMUL(TRANSPOSE(fockcommon%symrec(:,:,fockbz%tab_symkpt(my_jkpt))),&
+&                                             fockbz%cwaveocc_prj(iatm,ispinor)%dcp(1,:,ilmn))
+                     fockbz%cwaveocc_prj(iatm,ispinor)%dcp(1,:,ilmn)=dcp(:)
+                     dcp(:)= MATMUL(TRANSPOSE(fockcommon%symrec(:,:,fockbz%tab_symkpt(my_jkpt))),&
+&                                             fockbz%cwaveocc_prj(iatm,ispinor)%dcp(2,:,ilmn))
+                     fockbz%cwaveocc_prj(iatm,ispinor)%dcp(2,:,ilmn)=dcp(:)
                    end do
                  end do
-               end if
-
+               end do
              end if
 
-           end if ! band occupied
+           end if
 
 !* update the shift to apply to occ in all case because this array is not distributed among the proc.
 !               ibg=ibg+1
@@ -1922,8 +1863,6 @@ end subroutine fock_updatecwaveocc
 !! FUNCTION
 !!  Set the value of fock%getghc_call, Returns the old value
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 integer function fock_set_getghc_call(fock, new) result(old)
@@ -1949,8 +1888,6 @@ end function fock_set_getghc_call
 !!
 !! FUNCTION
 !!  Returns the value of fock%getghc_call_
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -1985,12 +1922,6 @@ end function fock_get_getghc_call
 !!
 !! OUTPUT
 !!  Only printing
-!!
-!! PARENTS
-!!      m_fock
-!!
-!! CHILDREN
-!!      ptabs_fourdp,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -2070,12 +2001,6 @@ end subroutine fock_print
 !!  This routine operates on the full FFT mesh. DO NOT PASS MPI_TYPE
 !!  One can easily implemente MPI-FFT by just calling this routine and then
 !!  extracting the G-vectors treated by the node.
-!!
-!! PARENTS
-!!      m_fock_getghc
-!!
-!! CHILDREN
-!!      ptabs_fourdp,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -2279,12 +2204,6 @@ end subroutine bare_vqg
 !!   (Cartesian coordinates, symmetric tensor) in hartree/bohr^3
 !!   Definition of symmetric tensor storage: store 6 unique components
 !!   in the order 11, 22, 33, 32, 31, 21 (suggested by Xavier Gonze).
-!!
-!! PARENTS
-!!      m_fock_getghc
-!!
-!! CHILDREN
-!!      ptabs_fourdp,timab,xmpi_sum
 !!
 !! SOURCE
 

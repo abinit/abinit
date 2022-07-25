@@ -14,10 +14,6 @@
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -361,11 +357,6 @@ CONTAINS  !=====================================================================
 !! OUTPUTS
 !! paw_dmft  = structure of data for dmft
 !!
-!! PARENTS
-!!      m_gstate
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine init_sc_dmft(bandkss,dmftbandi,dmftbandf,dmft_read_occnd,mband,nband,nkpt,nspden,&
@@ -557,11 +548,6 @@ end subroutine init_sc_dmft
 !!  nsppol     = number of spin polarisation
 !!  nspinor    = number of spinorial component
 !!
-!!
-!! PARENTS
-!!      m_outscfcv,m_vtorho
-!!
-!! CHILDREN
 !!
 !! SOURCE
 !!
@@ -929,11 +915,6 @@ end subroutine init_dmft
 !! OUTPUTS
 !!  omegali(1:nwli)=computed frequencies
 !!
-!! PARENTS
-!!      m_green,m_paw_dmft
-!!
-!! CHILDREN
-!!
 !! SOURCE
 !!
 
@@ -985,11 +966,6 @@ end subroutine construct_nwli_dmft
 !! INPUTS
 !!  paw_dmft=structure for dmft calculation
 !!
-!!
-!! PARENTS
-!!      m_paw_dmft
-!!
-!! CHILDREN
 !!
 !! SOURCE
 !!
@@ -1275,11 +1251,6 @@ end subroutine construct_nwlo_dmft
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_outscfcv,m_vtorho
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine destroy_dmft(paw_dmft)
@@ -1339,11 +1310,6 @@ end subroutine destroy_dmft
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_gstate
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine destroy_sc_dmft(paw_dmft)
@@ -1392,11 +1358,6 @@ end subroutine destroy_sc_dmft
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_outscfcv,m_vtorho
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1484,11 +1445,6 @@ end subroutine print_dmft
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_gstate
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine print_sc_dmft(paw_dmft,pawprtvol)
@@ -1549,11 +1505,6 @@ end subroutine print_sc_dmft
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_vtorho
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine saveocc_dmft(paw_dmft)
@@ -1610,11 +1561,6 @@ end subroutine saveocc_dmft
 !!
 !! OUTPUT
 !!  paw_dmft: occnd
-!!
-!! PARENTS
-!!      m_gstate
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1692,11 +1638,6 @@ end subroutine readocc_dmft
 !! OUTPUT
 !!  paw_dmft: bandc_proc, use_bandc
 !!
-!! PARENTS
-!!      m_paw_dmft
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine init_sc_dmft_paralkgb(paw_dmft,mpi_enreg)
@@ -1740,11 +1681,6 @@ end subroutine init_sc_dmft_paralkgb
 !!  paw_dmft   = data structure
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_paw_dmft
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

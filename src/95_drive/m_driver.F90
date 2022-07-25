@@ -10,10 +10,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -61,12 +57,14 @@ module m_driver
  use m_screening_driver, only : screening
  use m_sigma_driver,     only : sigma
  use m_bethe_salpeter,   only : bethe_salpeter
+ use m_gwr_driver,       only : gwr_driver
  use m_eph_driver,       only : eph
  use m_wfk_analyze,      only : wfk_analyze
  use m_gstateimg,        only : gstateimg
  use m_gwls_sternheimer, only : gwls_sternheimer
  use m_nonlinear,        only : nonlinear
  use m_drivexc,          only : echo_xc_name
+ use m_rttddft_driver,   only : rttddft
 
 #if defined HAVE_BIGDFT
  use BigDFT_API,   only: xc_init, xc_end, XC_MIXED, XC_ABINIT,&
@@ -138,24 +136,6 @@ contains
 !! using another name. The name filstat will be needed beyond gstate to check
 !! the appearance of the "exit" flag, to make a hasty exit, as well as
 !! in order to output the status of the computation.
-!!
-!! PARENTS
-!!      abinit
-!!
-!! CHILDREN
-!!      abi_io_redirect,abi_linalg_finalize,abi_linalg_init,bethe_salpeter
-!!      chkdilatmx,destroy_results_out,destroy_results_respfn,dtfil_init
-!!      dtfil_init_img,dtset%free,dtsets,echo_xc_name,eph,exit_check
-!!      f_malloc_set_status,fftw3_cleanup,fftw3_init_threads,find_getdtset
-!!      gather_results_out,gstateimg,gwls_sternheimer,init_results_respfn
-!!      libpaw_write_comm_set,libxc_functionals_end,libxc_functionals_init
-!!      longwave,mkrdim,mpi_environment_set,nonlinear,nullify_wvl_data
-!!      pawang_free,pawrad_free,pawtab_free,pawtab_nullify,psps_free
-!!      psps_init_from_dtset,psps_init_global,respfn,screening,sigma,timab
-!!      wfk_analyze,wrtout,xc_vdw_done,xc_vdw_init,xc_vdw_libxc_init
-!!      xc_vdw_memcheck,xc_vdw_read,xc_vdw_show,xc_vdw_trigger,xc_vdw_write
-!!      xcart2xred,xg_finalize,xgscalapack_config,xmpi_bcast,xred2xcart
-!!      yaml_iterstart,ydoc%add_ints,ydoc%add_reals,ydoc%write_and_free
 !!
 !! SOURCE
 
@@ -352,6 +332,10 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
        call ydoc%add_ints("optdriver, gwcalctyp", &
          [dtset%optdriver, dtset%gwcalctyp] , dict_key="meta")
 
+     case (RUNL_GWR)
+       call ydoc%add_ints("optdriver", [dtset%optdriver], &
+         dict_key="meta")
+
      case (RUNL_BSE)
        call ydoc%add_ints("optdriver, bs_calctype, bs_algorithm", &
          [dtset%optdriver, dtset%bs_calctype, dtset%bs_algorithm] , dict_key="meta")
@@ -361,6 +345,10 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
          [dtset%optdriver, dtset%eph_task] , dict_key="meta")
 
      case(RUNL_LONGWAVE)
+       call ydoc%add_ints("optdriver", [dtset%optdriver], &
+         dict_key="meta")
+
+     case(RUNL_RTTDDFT)
        call ydoc%add_ints("optdriver", [dtset%optdriver], &
          dict_key="meta")
 
@@ -796,6 +784,9 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
    case(RUNL_NONLINEAR)
      call nonlinear(codvsn,dtfil,dtset,etotal,mpi_enregs(idtset),npwtot,occ,pawang,pawrad,pawtab,psps,xred)
 
+   case (RUNL_GWR)
+     call gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim, xred)
+
    case (RUNL_BSE)
      call bethe_salpeter(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
@@ -831,6 +822,9 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 
      call longwave(codvsn,dtfil,dtset,etotal,mpi_enregs(idtset),npwtot,occ,&
 &     pawrad,pawtab,psps,xred)
+
+   case(RUNL_RTTDDFT)
+     call rttddft(codvsn,dtfil,dtset,mpi_enregs(idtset),pawang,pawrad,pawtab,psps)
 
    case default
      ! Bad value for optdriver

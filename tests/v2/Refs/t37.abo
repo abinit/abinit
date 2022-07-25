@@ -437,18 +437,6 @@ P          mk1mem6         32
               qpt4     2.50000000E-01  5.00000000E-01  4.98000000E-01
               qpt5     2.50000000E-01  5.00000000E-01  5.00000000E-01
               qpt6     2.50000000E-01  5.00000000E-01  5.00000000E-01
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          1       1
-          rfatpol4          1       2
-          rfatpol5          1       1
-          rfatpol6          1       2
-            rfdir1          0       0       0
-            rfdir2          0       0       0
-            rfdir3          0       0       0
-            rfdir4          1       1       1
-            rfdir5          0       0       0
-            rfdir6          1       1       1
            rfphon1          0
            rfphon2          0
            rfphon3          0
@@ -3957,18 +3945,6 @@ P          mk1mem6         32
               qpt4     2.50000000E-01  5.00000000E-01  4.98000000E-01
               qpt5     2.50000000E-01  5.00000000E-01  5.00000000E-01
               qpt6     2.50000000E-01  5.00000000E-01  5.00000000E-01
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          1       1
-          rfatpol4          1       2
-          rfatpol5          1       1
-          rfatpol6          1       2
-            rfdir1          0       0       0
-            rfdir2          0       0       0
-            rfdir3          0       0       0
-            rfdir4          1       1       1
-            rfdir5          0       0       0
-            rfdir6          1       1       1
            rfphon1          0
            rfphon2          0
            rfphon3          0

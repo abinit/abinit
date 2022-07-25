@@ -109,14 +109,6 @@ CONTAINS  !=====================================================================
 !!  === if ider=1 or 2
 !!    pawgrnhat(nfft,ispden,3)=derivatives of nhat on fine rectangular grid (and derivatives)
 !!
-!! PARENTS
-!!      m_bethe_salpeter,m_dfpt_scfcv,m_dfptnl_loop,m_dft_energy,m_forstr
-!!      m_nonlinear,m_odamix,m_paw_mkrho,m_positron,m_respfn_driver
-!!      m_scfcv_core,m_screening_driver,m_sigma_driver
-!!
-!! CHILDREN
-!!      pawgylm,pawrfgd_wvl,timab,xred2xcart
-!!
 !! SOURCE
 
 subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
@@ -667,12 +659,6 @@ end subroutine pawmknhat
 !!  === if ider=3
 !!    grnhat_12(nfft,nspinor**2,3,natom*(ider/3))=derivatives of nhat on fine rectangular grid versus R*exp(iqr)
 !!
-!! PARENTS
-!!      m_fock_getghc,m_prep_calc_ucrpa,m_sigx
-!!
-!! CHILDREN
-!!      pawgylm,pawrfgd_wvl,timab,xred2xcart
-!!
 !! SOURCE
 
 subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nhat12_grdim,&
@@ -1077,12 +1063,6 @@ end subroutine pawmknhat_psipsi
 !!                  gradients of frozen part of charge compensation density (inside PAW spheres)
 !!                  =Sum_ij,lm[rhoij_ij.q_ij^l . d/dr((g_l(r).Y_lm(r))^(1))]
 !!
-!! PARENTS
-!!      m_dfpt_nstwf,m_dfpt_scfcv,m_dfptnl_loop,m_dfptnl_pert,m_paw_nhat
-!!
-!! CHILDREN
-!!      pawgylm,pawrfgd_wvl,timab,xred2xcart
-!!
 !! SOURCE
 
 subroutine pawnhatfr(ider,idir,ipert,my_natom,natom,nspden,ntypat,&
@@ -1432,12 +1412,6 @@ end subroutine pawnhatfr
 !!  wfraug(2,ndiel4,ndiel5,ndiel6)=PAW contrib. to product of two wavefunctions (iband1,iband2)
 !!                                 is added (in real space)
 !!
-!! PARENTS
-!!      m_suscep_stat
-!!
-!! CHILDREN
-!!      pawgylm,pawrfgd_wvl,timab,xred2xcart
-!!
 !! SOURCE
 
 subroutine pawsushat(atindx,cprj_k,gbound_diel,gylmg_diel,iband1,iband2,ispinor1,ispinor2,istwf_k,kg_diel,&
@@ -1704,14 +1678,6 @@ end subroutine pawsushat
 !!  if (optrad==1)
 !!    pawfgrtab(natom)%rfgd(3,nfgd)= coordinates of r-r_atom around each atom
 !!
-!! PARENTS
-!!      m_afterscfloop,m_bethe_salpeter,m_classify_bands,m_exc_analyze
-!!      m_nonlinear,m_paw_mkaewf,m_paw_mkrho,m_respfn_driver,m_scfcv_core
-!!      m_screening_driver,m_sigma_driver,m_wfd,m_wfk_analyze
-!!
-!! CHILDREN
-!!      pawgylm,pawrfgd_wvl,timab,xred2xcart
-!!
 !! SOURCE
 
 subroutine nhatgrid(atindx1,gmet,my_natom,natom,nattyp,ngfft,ntypat,&
@@ -1945,12 +1911,6 @@ end subroutine nhatgrid
 !! NOTES
 !!   PENDING: ADD PARALELLISM OVER ATOMS:
 !!   COPY NHATGRID
-!!
-!! PARENTS
-!!      m_afterscfloop,m_scfcv_core
-!!
-!! CHILDREN
-!!      pawgylm,pawrfgd_wvl,timab,xred2xcart
 !!
 !! SOURCE
 

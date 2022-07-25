@@ -10,10 +10,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -77,12 +73,6 @@ contains
 !!  residm=max value for gradient in the minimisation process.
 !!  rhor(dtset%nfft)=electron density in r space
 !!  wfs <type(wvl_projector_type)>=wavefunctions information for wavelets.
-!!
-!! PARENTS
-!!      m_vtorho
-!!
-!! CHILDREN
-!!      calculatetailcorrection,dcopy,wrtout,xmpi_allgatherv
 !!
 !! SOURCE
 
@@ -212,12 +202,6 @@ end subroutine wvl_hpsitopsi
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_afterscfloop,m_rhotov,m_setvtr,m_vtorho
-!!
-!! CHILDREN
-!!      calculatetailcorrection,dcopy,wrtout,xmpi_allgatherv
-!!
 !! SOURCE
 
 
@@ -339,12 +323,6 @@ end subroutine wvl_psitohpsi
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_forstr,m_vtorho
-!!
-!! CHILDREN
-!!      calculatetailcorrection,dcopy,wrtout,xmpi_allgatherv
-!!
 !! SOURCE
 
 subroutine wvl_nl_gradient(grnl, mpi_enreg, natom, rprimd, wvl, xcart)
@@ -436,12 +414,6 @@ end subroutine wvl_nl_gradient
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_afterscfloop
-!!
-!! CHILDREN
-!!      calculatetailcorrection,dcopy,wrtout,xmpi_allgatherv
 !!
 !! SOURCE
 

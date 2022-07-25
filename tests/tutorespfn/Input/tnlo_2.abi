@@ -24,7 +24,6 @@ ndtset 5
    getwfk3    2        # use GS WF from dataset 2
    kptopt3    2        # use Half Brillouin Zone (only time-reversal symmetry taken into account)
    rfelfd3    2        # compute 1st-order WF derivatives (d/dk)
-    rfdir3    1 1 1    # compute all directions
    tolwfr3    1.0d-22  # convergence criteria on 1st-order WF
     prtwf3    1        # save 1st-order WF on disk, will be used in other datasets
 
@@ -36,8 +35,6 @@ ndtset 5
    kptopt4    2        # use Half Brillouin Zone (only time-reversal symmetry taken into account)
    getddk4    3        # use ddk WF from dataset 3 (needed for electric field)
    rfphon4    1        # compute 1st-order WF derivatives with respect to atomic displacements...
-  rfatpol4    1 2      # ...for all atoms (so here only 1 and 2)
-    rfdir4    1 1 1    # compute all directions
    rfelfd4    3        # compute 1st-order WF derivatives with respect to electric field
    rfstrs4    3        # compute 1st-order WF derivatives with respect to strains
    tolvrs4    1.0d-12  # SCF convergence criteria (could be tolwfr)
@@ -55,11 +52,8 @@ optdriver5           5     # compute 3rd order derivatives of the energy
   d3e_pert1_elfd5    1     # activate electric field for 1st perturbation...
   d3e_pert1_phon5    1     # ...and also atomic displacements...
  d3e_pert1_atpol5    1 2   # ...for all atoms (so here only 1 and 2)...
-   d3e_pert1_dir5    1 1 1 # ...for all directions (for both atomic displacements and electric fields)
   d3e_pert2_elfd5    1     # activate electric field for 2nd perturbation...
-   d3e_pert2_dir5    1 1 1 # ...for all directions
   d3e_pert3_elfd5    1     # activate electric field for 3rd perturbation...
-   d3e_pert3_dir5    1 1 1 # ...for all directions
 
 #Definition of the unit cell
 # these cell parameters were derived from a relaxation run done with the

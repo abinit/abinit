@@ -20,10 +20,6 @@
 !! in the root directory of the present distribution,
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 !
 !-------------------------------------------------------------------
@@ -205,11 +201,6 @@ CONTAINS
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      functionals_pwscf,m_pspheads
-!!
-!! CHILDREN
 !!
 !! SOURCE
   !-----------------------------------------------------------------------
@@ -404,11 +395,6 @@ CONTAINS
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      functionals_pwscf
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
   !-----------------------------------------------------------------------
@@ -442,11 +428,6 @@ CONTAINS
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      functionals_pwscf
-!!
-!! CHILDREN
-!!
 !! SOURCE
   !-----------------------------------------------------------------------
   subroutine set_dft_value (m, i)
@@ -477,10 +458,6 @@ CONTAINS
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -520,10 +497,6 @@ CONTAINS
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
   subroutine start_exx 
@@ -545,10 +518,6 @@ CONTAINS
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -573,10 +542,6 @@ CONTAINS
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
   function exx_is_active ()
@@ -596,10 +561,6 @@ CONTAINS
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
   !-----------------------------------------------------------------------
@@ -622,10 +583,6 @@ CONTAINS
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
   !-----------------------------------------------------------------------
   function get_icorr ()
@@ -646,10 +603,6 @@ CONTAINS
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
   !-----------------------------------------------------------------------
@@ -672,10 +625,6 @@ CONTAINS
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
   !-----------------------------------------------------------------------
   function get_igcc ()
@@ -696,10 +645,6 @@ CONTAINS
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
   !-----------------------------------------------------------------------
@@ -722,10 +667,6 @@ CONTAINS
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
   !-----------------------------------------------------------------------
   function get_dft_name ()
@@ -746,10 +687,6 @@ CONTAINS
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
   !-----------------------------------------------------------------------
@@ -772,10 +709,6 @@ CONTAINS
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
   !-----------------------------------------------------------------------
   function dft_is_meta ()
@@ -797,10 +730,6 @@ CONTAINS
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
   !-----------------------------------------------------------------------
   function dft_is_hybrid ()
@@ -821,11 +750,6 @@ CONTAINS
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_pspheads
-!!
-!! CHILDREN
 !!
 !! SOURCE
   !-----------------------------------------------------------------------
@@ -877,10 +801,6 @@ CONTAINS
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
   !---------------------------------------------------------------------
   subroutine dft_name(iexch_, icorr_, igcx_, igcc_, longname_, shortname_)
@@ -923,11 +843,6 @@ end subroutine dft_name
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      functionals_pwscf
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
