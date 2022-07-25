@@ -307,7 +307,7 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,&
 
    !AZ_test_ini******************************************************************
    write(i1dir_text,'(i8)') i1dir
-   write(i2dir_text.'(i8)') i2dir
+   write(i2dir_text,'(i8)') i2dir
    write(i3dir_text,'(i8)') i3dir
    file_name = 'T_1_i1dir_'//trim(adjustl(i1dir_text))//'_i2dir_'//&
  & trim(adjustl(i2dir_text))//'_i3dir_'//trim(adjustl(i3dir_text))//'.dat'
