@@ -17,8 +17,8 @@
 
 #Specific to the RF dataset
   rfphon3  1
- rfatpol3  2 2
-   rfdir3  1 0 0
+ rfatpol   2 2
+   rfdir   1 0 0
     nqpt3  1
      qpt3  0.0 0.0 0.5
   getwfk3  1

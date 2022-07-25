@@ -261,6 +261,8 @@ contains
 !! nqbz=number of blocks in the DDB
   mpert=Invar%natom_unitcell+6
   msize=3*mpert*3*mpert
+  DDB%mpert = mpert
+  DDB%msize = msize
   ABI_MALLOC(DDB%flg,(msize,nqbz))  ; DDB%flg(:,:)=1
   ABI_MALLOC(DDB%nrm,(3,nqbz))      ; DDB%nrm(:,:)  =zero
   ABI_MALLOC(DDB%qpt,(9,nqbz))      ; DDB%qpt(:,:)  =zero
@@ -320,6 +322,9 @@ contains
  end subroutine tdep_init_ddb
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+! GA: This routine uses the old way of writing DDB files.
+!     However, it is no longer called in the code.
+!     If you want to start using it again, please fix the writing of the DDB.
  subroutine tdep_write_ddb(Crystal,DDB,Eigen2nd,Invar,Lattice,MPIdata,Qbz,Sym)
 
   implicit none
@@ -480,16 +485,14 @@ contains
 
   if (MPIdata%iam_master) then
 !FB  write(Invar%stdlog,*) 'BEFORE OPEN DDB'
-!FB TO REMOVE    call ddb_hdr_open_write(ddb_hdr, filename, unddb)
     call ddb_hdr%open_write(filename, unddb)
-  call ddb_hdr%free()
+    call ddb_hdr%free()
 
 !FB  write(Invar%stdlog,*) 'BEFORE WRITE BLOK'
 ! Print each blok of the DDB
     do iq_ibz=1,Qbz%nqibz
 !FB  do iq_ibz=1,Qbz%nqbz
       call ddb%write_block(iq_ibz,choice,mband,mpert,msize,Qbz%nqibz,unddb)
-!FB    call ddb%write_block(iq_ibz,choice,mband,mpert,msize,Qbz%nqbz,unddb)
     end do
     close(unddb)
   end if  

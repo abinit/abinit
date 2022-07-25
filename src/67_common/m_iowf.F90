@@ -84,12 +84,6 @@ CONTAINS  !=====================================================================
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_berryphase_new,m_dfpt_looppert,m_gstate
-!!
-!! CHILDREN
-!!      xmpi_sum_master
-!!
 !! SOURCE
 
 subroutine outresid(dtset,kptns,mband,&
@@ -212,18 +206,12 @@ end subroutine outresid
 !! NOTES
 !! * The name of the file wff2 might be the same as that of the file wff1.
 !!
-!! PARENTS
-!!      m_berryphase_new,m_gstate
-!!
-!! CHILDREN
-!!      xmpi_sum_master
-!!
 !! SOURCE
 
 subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
 &                mpi_enreg,mpw,natom,nband,nkpt,npwarr,&
 &                nsppol,occ,response,unwff2,&
-&                wfs,wvl)
+&                wfs,wvl,force_write)
 
 !Arguments ------------------------------------
 !scalars
@@ -236,6 +224,7 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
  type(hdr_type), intent(inout) :: hdr
  type(wvl_wf_type),intent(in) :: wfs
  type(wvl_internal_type), intent(in) :: wvl
+ logical, intent(in), optional :: force_write
 !arrays
  integer, intent(in) :: kg(3,mpw*mkmem),nband(nkpt*nsppol),npwarr(nkpt)
  real(dp), intent(inout) :: cg(2,mcg)
@@ -251,7 +240,7 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
  integer :: ipwnbd
 #endif
  real(dp) :: cpu,wall,gflops
- logical :: ihave_data,iwrite,iam_master,done
+ logical :: ihave_data,iwrite,iam_master,done,prtwf
  character(len=500) :: msg
  type(wffile_type) :: wff2
  character(len=fnlen) :: path
@@ -330,7 +319,12 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
 !Will write the wavefunction file only when nstep>0
 !MT 07 2015: writing reactivated when nstep=0
 !if (nstep>0 .and. dtset%prtwf/=0) then
- if (dtset%prtwf/=0) then
+!FB 03/2022: Added an option to force writing (used in RT-TDDFT)
+ prtwf = dtset%prtwf/=0
+ if (present(force_write)) then
+    if (force_write) prtwf = .true.
+ end if
+ if (prtwf) then
 
    ! Only the master write the file, except if MPI I/O, but the
    ! full wff dataset should be provided to WffOpen in this case
@@ -749,12 +743,6 @@ end subroutine outwf
 !!
 !! OUTPUT
 !!  done=.True if cg_ncwrite can handle the output of the WFK file in parallel.
-!!
-!! PARENTS
-!!      m_iowf
-!!
-!! CHILDREN
-!!      xmpi_sum_master
 !!
 !! SOURCE
 
@@ -1374,12 +1362,6 @@ end subroutine cg_ncwrite
 !!    occ and occ3d differ only if nband is k-dependent but you should never assume this, hence
 !!    remember to *convert* occ into occ3d before calling this routine.
 !!
-!! PARENTS
-!!      m_iowf
-!!
-!! CHILDREN
-!!      xmpi_sum_master
-!!
 !! SOURCE
 
 subroutine ncwrite_eigen1_occ(ncid, nband, mband, nkpt, nsppol, eigen, occ3d)
@@ -1467,11 +1449,6 @@ end subroutine ncwrite_eigen1_occ
 !!  count_pwblock
 !!  gblock(:,:)
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xmpi_sum_master
-!!
 !! SOURCE
 
 subroutine kg2seqblocks(npwtot_k,npw_k,kg_k,gmpi2seq,comm_fft,start_pwblock,count_pwblock,gblock)
@@ -1558,12 +1535,6 @@ end subroutine kg2seqblocks
 !! OUTPUT
 !!  bstart
 !!  bcount
-!!
-!! PARENTS
-!!      m_iowf
-!!
-!! CHILDREN
-!!      xmpi_sum_master
 !!
 !! SOURCE
 

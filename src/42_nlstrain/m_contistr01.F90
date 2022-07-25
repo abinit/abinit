@@ -36,11 +36,6 @@
 !! contractions with other tensors of the same rank and form, i.e. the
 !! next contraction is then simply a dot product over the unique elements.
 !!
-!! PARENTS
-!!      m_nonlop_pl
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H

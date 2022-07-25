@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -109,9 +105,6 @@ contains
 !! rprim(3,3)=Dimensionless real space primitive translations.
 !! xred(3,natom)=Reduced atomic coordinates.
 !!
-!! PARENTS
-!!      m_driver
-!!
 !! NOTES
 !!
 !! ON THE USE OF FFT GRIDS:
@@ -128,9 +121,6 @@ contains
 !! ---------------------------
 !!    - Only the usual FFT grid (defined by ecut) is used. It is defined by nfft, ngfft, mgfft, ...
 !!      For compatibility reasons, (nfftf,ngfftf,mgfftf) are set equal to (nfft,ngfft,mgfft) in that case.
-!!
-!! CHILDREN
-!!      wfd%read_wfk,wfd_init
 !!
 !! SOURCE
 
@@ -458,12 +448,6 @@ case (WFK_TASK_WANNIER)
 !!
 !! FUNCTION
 !!  Initialize the wavefunction descriptor
-!!
-!! PARENTS
-!!      m_wfk_analyze
-!!
-!! CHILDREN
-!!      wfd%read_wfk,wfd_init
 !!
 !! SOURCE
 

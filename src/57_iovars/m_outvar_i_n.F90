@@ -10,10 +10,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -98,12 +94,6 @@ contains
 !! In consequence, no use of message and wrtout routine.
 !! The lines of code needed to output the defaults are preserved
 !! (see last section of the routine, but are presently disabled)
-!!
-!! PARENTS
-!!      m_outvars
-!!
-!! CHILDREN
-!!      prttagm,prttagm_images
 !!
 !! SOURCE
 
@@ -1135,6 +1125,12 @@ subroutine outvar_i_n (dtsets,iout,&
    if(sum(abs( dtsets(idtset)%nucdipmom(1:3,1:dtsets(idtset)%natom))) < tol12 ) narrm(idtset)=0
  end do
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,narr,narrm,ncid,ndtset_alloc,'nucdipmom','DPR',multivals%natom)
+ 
+ intarr(1,:)=dtsets(:)%nucefg
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nucefg','INT',0)
+
+ intarr(1,:)=dtsets(:)%nucfc
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nucfc','INT',0)
 
  intarr(1,:)=dtsets(:)%nwfshist
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nwfshist','INT',0)

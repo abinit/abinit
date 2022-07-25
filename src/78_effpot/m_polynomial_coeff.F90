@@ -134,12 +134,6 @@ CONTAINS  !=====================================================================
 !! OUTPUT
 !!   polynomial_coeff<type(polynomial_coeff)> = polynomial_coeff datatype to be initialized
 !!
-!! PARENTS
-!!      m_anharmonics_terms,m_effective_potential_file,m_fit_polynomial_coeff
-!!      m_mover_effpot,m_opt_effpot,m_polynomial_coeff
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine polynomial_coeff_init(coefficient,nterm,polynomial_coeff,terms,name,check)
@@ -249,12 +243,6 @@ end subroutine polynomial_coeff_init
 !! OUTPUT
 !! polynomial_coeff<type(polynomial_coeff)> = polynomial_coeff datatype
 !!
-!! PARENTS
-!!      m_anharmonics_terms,m_effective_potential_file,m_fit_polynomial_coeff
-!!      m_mover_effpot,m_opt_effpot,m_polynomial_coeff
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine polynomial_coeff_free(polynomial_coeff)
@@ -298,11 +286,6 @@ end subroutine polynomial_coeff_free
 !!
 !! OUTPUT
 !! polynomial_coeff<type(polynomial_coeff)> = polynomial_coeff datatype
-!!
-!! PARENTS
-!!      m_opt_effpot,m_polynomial_coeff
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -348,11 +331,6 @@ end subroutine polynomial_coeff_list_free
 !! OUTPUT
 !! polynomial_coeff<type(polynomial_coeff)> = polynomial_coeff datatype
 !!
-!! PARENTS
-!!      m_effective_potential_file,m_mover_effpot
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine polynomial_coeff_setCoefficient(coefficient,polynomial_coeff)
@@ -387,12 +365,6 @@ end subroutine polynomial_coeff_setCoefficient
 !!
 !! OUTPUT
 !! polynomial_coeff<type(polynomial_coeff)> = polynomial_coeff datatype
-!!
-!! PARENTS
-!!      m_effective_potential_file,m_fit_polynomial_coeff,m_opt_effpot
-!!      m_polynomial_coeff
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -433,12 +405,6 @@ end subroutine polynomial_coeff_setName
 !!
 !! OUTPUT
 !! name = name xof the coefficients
-!!
-!! PARENTS
-!!      m_effective_potential_file,m_fit_polynomial_coeff,m_opt_effpot
-!!      m_polynomial_coeff
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -575,11 +541,6 @@ end subroutine polynomial_coeff_getName
 !!  coefficients<type(polynomial_coefficent_type)>= Input if node is source,
 !!                              other nodes returns with a completely initialized instance.
 !!
-!! PARENTS
-!!      m_effective_potential_file,m_fit_polynomial_coeff,m_polynomial_coeff
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine polynomial_coeff_broadcast(coefficients, source, comm)
@@ -666,11 +627,6 @@ end subroutine polynomial_coeff_broadcast
 !! SIDE EFFECTS
 !!   polynomial_coeff<type(polynomial_coeff)> = polynomial_coeff datatype
 !!
-!! PARENTS
-!!      m_polynomial_coeff
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine polynomial_coeff_MPIsend(coefficients, tag, dest, comm)
@@ -732,11 +688,6 @@ end subroutine polynomial_coeff_MPIsend
 !!
 !! SIDE EFFECTS
 !!   coefficients<type(polynomial_coefficent_type)>=  polynomial_coeff datatype
-!!
-!! PARENTS
-!!      m_polynomial_coeff
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -830,11 +781,6 @@ end subroutine polynomial_coeff_MPIrecv
 !!                     FALSE, default not replace if filename exists
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_effective_potential,m_mover_effpot,m_polynomial_coeff
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1005,11 +951,6 @@ end subroutine polynomial_coeff_writeXML
 !!  energy_coeff(ncoeff) = energy contribution of each anharmonic term
 !!  fcart(3,natom) = contribution  to the forces
 !!  strten(6) = contribution to the stress tensor
-!!
-!! PARENTS
-!!      m_effective_potential
-!!
-!! CHILDREN
 !!
 !! SOURCE
 !!
@@ -1302,11 +1243,6 @@ end subroutine polynomial_coeff_evaluate
 !!               For example if you want to fit 2x2x2 cell the interation
 !!               Sr-Ti and Sr-Ti[2 0 0] will be identical for the fit process
 !!               If check_pbc is true we remove these kind of terms
-!!
-!! PARENTS
-!!      m_opt_effpot,m_polynomial_coeff
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1965,11 +1901,6 @@ end subroutine polynomial_coeff_getList
 !! polynomial_coeff<(type(polynomial_coeff_type)>(ncoeff) = array of datatype with the polynomial_coeff
 !! ncoeff = number of coefficients for this CPU if distributed == true, all otherwise
 !! ncoeff_tot = total number of coefficient over the CPU
-!!
-!! PARENTS
-!!      m_fit_polynomial_coeff,m_mover_effpot,m_opt_effpot,m_polynomial_coeff
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2806,10 +2737,6 @@ end subroutine polynomial_coeff_getNorder
 !! polynomial_coeff<(type(polynomial_coeff_type)>(ncoeff_out) = array of datatype with
 !!                                                              the polynomial_coeff
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 recursive subroutine computeNorder(cell,coeffs_out,compatibleCoeffs,list_coeff,list_str,&
@@ -3054,10 +2981,6 @@ end subroutine computeNorder
 !! nmodel_tot = current number of coefficients already computed (start we 0)
 !! list_combination = list of the possible combination of coefficients
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 recursive subroutine computeCombinationFromList(cell,compatibleCoeffs,list_coeff,list_str,&
@@ -3301,10 +3224,6 @@ end subroutine computeCombinationFromList
 !! list_combination = list of the possible combination of coefficients
 !! nmodel_tot = total combinations of terms possible
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 recursive subroutine computeSymmetricCombinations(ncombi,list_combination,list_symcoeff,list_symstr,isym_in,&
@@ -3471,11 +3390,6 @@ end subroutine computeSymmetricCombinations
 !! OUTPUT
 !! coeff = index of the coefficient
 !!
-!! PARENTS
-!!      m_polynomial_coeff
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 function getCoeffFromList(list_coeff,ia,ib,irpt,mu,ncoeff) result(coeff)
@@ -3541,11 +3455,6 @@ end function getCoeffFromList
 !! OUTPUT
 !! terms<(type(polynomial_term_type)>(nterm)  = list of terms
 !! nterm = number of ouput terms
-!!
-!! PARENTS
-!!      m_polynomial_coeff
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3646,11 +3555,6 @@ end subroutine generateTermsFromList
 !! polynomial_coeff<(type(polynomial_coeff_type)>(ncoeff_out) = array of datatype with
 !!                                                              the polynomial_coeff
 !! ncoeff_out = number of coefficients
-!!
-!! PARENTS
-!!      m_opt_effpot
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3832,11 +3736,6 @@ end subroutine polynomial_coeff_getOrder1
 !! polynomial_coeff<(type(polynomial_coeff_type)>(ncoeff_out) = array of datatype with
 !!                                                              the polynomial_coeff
 !! ncoeff_out = number of coefficients
-!!
-!! PARENTS
-!!      m_opt_effpot
-!!
-!! CHILDREN
 !!
 !! SOURCE
 subroutine polynomial_coeff_getEvenAnhaStrain(strain_terms,crystal,irred_ncoeff,power_strain,comm)
@@ -4080,11 +3979,6 @@ end subroutine coeffs_list_copy
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_polynomial_coeff
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine sort_combination(combination,n_int)
@@ -4134,11 +4028,6 @@ end subroutine sort_combination
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_polynomial_coeff
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -4295,11 +4184,6 @@ end function check_irreducibility
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_polynomial_coeff
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

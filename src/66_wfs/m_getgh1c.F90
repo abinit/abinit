@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -116,13 +112,6 @@ contains
 !!                       or part of <G|K^(1)+Vnl^(1)-lambda.S^(1)|C> not depending on VHxc^(1) (sij_opt==-1)
 !! if (sij_opt=1)
 !!  gs1c(2,npw1*nspinor)=<G|S^(1)|C> (S=overlap) on the k+q sphere.
-!!
-!! PARENTS
-!!      m_ddk,m_dfpt_cgwf,m_dfpt_lwwf,m_dfpt_nstwf,m_dfpt_scfcv,m_gkk,m_phgamma
-!!      m_phpi,m_rf2,m_sigmaph
-!!
-!! CHILDREN
-!!      fourwf
 !!
 !! SOURCE
 
@@ -855,13 +844,6 @@ end subroutine getgh1c
 !!  vlocal(n4,n5,n6,nvloc)= GS local potential in real space, on the augmented coarse fft grid
 !!  vlocal1(cplex*n4,n5,n6,nvloc)= RF local potential in real space, on the augmented coarse fft grid
 !!
-!! PARENTS
-!!      m_dfpt_lwwf,m_dfpt_vtorho,m_dfptnl_pert,m_gkk,m_phgamma,m_phpi
-!!      m_sigmaph
-!!
-!! CHILDREN
-!!      fourwf
-!!
 !! SOURCE
 
 subroutine rf_transgrid_and_pack(isppol,nspden,usepaw,cplex,nfftf,nfft,ngfft,nvloc,&
@@ -957,12 +939,6 @@ end subroutine rf_transgrid_and_pack
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_ddk,m_dfpt_lwwf,m_dfpt_vtorho,m_gkk,m_phgamma,m_phpi,m_sigmaph
-!!
-!! CHILDREN
-!!      fourwf
 !!
 !! SOURCE
 
@@ -1270,12 +1246,6 @@ end subroutine getgh1c_setup
 !!  === if optcprj=1 ===
 !!  dcwaveprj(natom,nspinor*optcprj)=change of wavefunction due to change of overlap PROJECTED ON NL-PROJECTORS:
 !!
-!! PARENTS
-!!      m_dfpt_cgwf,m_dfpt_nstwf
-!!
-!! CHILDREN
-!!      fourwf
-!!
 !! SOURCE
 
 subroutine getdc1(band,band_procs,bands_treated_now,cgq,cprjq,dcwavef,dcwaveprj,&
@@ -1439,12 +1409,6 @@ end subroutine getdc1
 !! 				    Which is equivalent (except for an i factor) to the first
 !!                                  q-derivative along cartesian coordinates of the strain
 !!                                  perturbation hamiltonian.
-!!
-!! PARENTS
-!!      m_dfpt_lwwf
-!!
-!! CHILDREN
-!!      fourwf
 !!
 !! SOURCE
 
@@ -1671,12 +1635,6 @@ end subroutine getgh1dqc
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_dfpt_lwwf
-!!
-!! CHILDREN
-!!      fourwf
-!!
 !! SOURCE
 
 subroutine getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,qdir1,&    ! In
@@ -1876,12 +1834,6 @@ end subroutine getgh1dqc_setup
 !! A.p=\alpha^2 m x (r-R)/(r-R)^3 . p. Here the components of A have been precomputed in real space
 !! by make_vectornd. The first-order DDK contribution is d A.p/dk = A_idir where idir is the
 !! direction of the DDK perturbation, or 2\pi A_idir when k is given in reduced coords as is usual
-!!
-!! PARENTS
-!!      m_dfpt_vtowfk,m_getgh1c
-!!
-!! CHILDREN
-!!      fourwf
 !!
 !! SOURCE
 

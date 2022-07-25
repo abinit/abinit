@@ -299,6 +299,21 @@ _ WF disk file :      0.123 Mbytes ; DEN or POT disk file :      0.100 Mbytes.
            diemac      1.00000000E+00
            diemix      3.33333333E-01
           dilatmx      1.05000000E+00
+  d3e_pert1_atpol11         1       2
+  d3e_pert1_atpol12         1       2
+  d3e_pert1_atpol13         1       2
+  d3e_pert1_atpol14         1       2
+  d3e_pert1_atpol15         1       1
+  d3e_pert1_atpol21         1       2
+  d3e_pert1_atpol22         1       2
+  d3e_pert1_atpol23         1       2
+  d3e_pert1_atpol24         1       2
+  d3e_pert1_atpol25         1       1
+  d3e_pert1_atpol31         1       2
+  d3e_pert1_atpol32         1       2
+  d3e_pert1_atpol33         1       2
+  d3e_pert1_atpol34         1       2
+  d3e_pert1_atpol35         1       1
     d3e_pert1_dir11         0       0       0
     d3e_pert1_dir12         0       0       0
     d3e_pert1_dir13         0       0       0
@@ -580,36 +595,6 @@ P          mk1mem           5
            prtpot33         1
            prtpot34         1
            prtpot35         0
-          rfatpol11         1       1
-          rfatpol12         1       1
-          rfatpol13         1       1
-          rfatpol14         1       2
-          rfatpol15         1       1
-          rfatpol21         1       1
-          rfatpol22         1       1
-          rfatpol23         1       1
-          rfatpol24         1       2
-          rfatpol25         1       1
-          rfatpol31         1       1
-          rfatpol32         1       1
-          rfatpol33         1       1
-          rfatpol34         1       2
-          rfatpol35         1       1
-            rfdir11         0       0       0
-            rfdir12         0       0       0
-            rfdir13         1       1       1
-            rfdir14         1       1       1
-            rfdir15         0       0       0
-            rfdir21         0       0       0
-            rfdir22         0       0       0
-            rfdir23         1       1       1
-            rfdir24         1       1       1
-            rfdir25         0       0       0
-            rfdir31         0       0       0
-            rfdir32         0       0       0
-            rfdir33         1       1       1
-            rfdir34         1       1       1
-            rfdir35         0       0       0
            rfelfd11         0
            rfelfd12         0
            rfelfd13         2
@@ -2317,7 +2302,7 @@ meta: {optdriver: 5, }
 
  dfptnl_doutput: WARNING -
   matrix of third-order energies incomplete,
-  non-linear optical coefficients may be wrong.
+  non-linear optical coefficients may be wrong, check input variables rfatpol and rfdir.
  
 
   First-order change in the electronic dielectric 
@@ -2347,7 +2332,7 @@ meta: {optdriver: 5, }
 
  dfptnl_doutput: WARNING -
   matrix of third-order energies incomplete,
-  changes in the dielectric susceptibility may be wrong.
+  changes in the dielectric susceptibility may be wrong, check input variables rfatpol and rfdir.
 
 ================================================================================
 == DATASET 21 ==================================================================
@@ -3846,7 +3831,7 @@ meta: {optdriver: 5, }
 
  dfptnl_doutput: WARNING -
   matrix of third-order energies incomplete,
-  non-linear optical coefficients may be wrong.
+  non-linear optical coefficients may be wrong, check input variables rfatpol and rfdir.
  
 
   First-order change in the electronic dielectric 
@@ -3876,7 +3861,7 @@ meta: {optdriver: 5, }
 
  dfptnl_doutput: WARNING -
   matrix of third-order energies incomplete,
-  changes in the dielectric susceptibility may be wrong.
+  changes in the dielectric susceptibility may be wrong, check input variables rfatpol and rfdir.
 
 ================================================================================
 == DATASET 31 ==================================================================
@@ -5370,7 +5355,7 @@ meta: {optdriver: 5, }
 
  dfptnl_doutput: WARNING -
   matrix of third-order energies incomplete,
-  non-linear optical coefficients may be wrong.
+  non-linear optical coefficients may be wrong, check input variables rfatpol and rfdir.
  
 
   First-order change in the electronic dielectric 
@@ -5400,7 +5385,7 @@ meta: {optdriver: 5, }
 
  dfptnl_doutput: WARNING -
   matrix of third-order energies incomplete,
-  changes in the dielectric susceptibility may be wrong.
+  changes in the dielectric susceptibility may be wrong, check input variables rfatpol and rfdir.
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -5411,6 +5396,21 @@ meta: {optdriver: 5, }
            diemac      1.00000000E+00
            diemix      3.33333333E-01
           dilatmx      1.05000000E+00
+  d3e_pert1_atpol11         1       2
+  d3e_pert1_atpol12         1       2
+  d3e_pert1_atpol13         1       2
+  d3e_pert1_atpol14         1       2
+  d3e_pert1_atpol15         1       1
+  d3e_pert1_atpol21         1       2
+  d3e_pert1_atpol22         1       2
+  d3e_pert1_atpol23         1       2
+  d3e_pert1_atpol24         1       2
+  d3e_pert1_atpol25         1       1
+  d3e_pert1_atpol31         1       2
+  d3e_pert1_atpol32         1       2
+  d3e_pert1_atpol33         1       2
+  d3e_pert1_atpol34         1       2
+  d3e_pert1_atpol35         1       1
     d3e_pert1_dir11         0       0       0
     d3e_pert1_dir12         0       0       0
     d3e_pert1_dir13         0       0       0
@@ -5728,36 +5728,6 @@ P          mk1mem           5
            prtpot33         1
            prtpot34         1
            prtpot35         0
-          rfatpol11         1       1
-          rfatpol12         1       1
-          rfatpol13         1       1
-          rfatpol14         1       2
-          rfatpol15         1       1
-          rfatpol21         1       1
-          rfatpol22         1       1
-          rfatpol23         1       1
-          rfatpol24         1       2
-          rfatpol25         1       1
-          rfatpol31         1       1
-          rfatpol32         1       1
-          rfatpol33         1       1
-          rfatpol34         1       2
-          rfatpol35         1       1
-            rfdir11         0       0       0
-            rfdir12         0       0       0
-            rfdir13         1       1       1
-            rfdir14         1       1       1
-            rfdir15         0       0       0
-            rfdir21         0       0       0
-            rfdir22         0       0       0
-            rfdir23         1       1       1
-            rfdir24         1       1       1
-            rfdir25         0       0       0
-            rfdir31         0       0       0
-            rfdir32         0       0       0
-            rfdir33         1       1       1
-            rfdir34         1       1       1
-            rfdir35         0       0       0
            rfelfd11         0
            rfelfd12         0
            rfelfd13         2

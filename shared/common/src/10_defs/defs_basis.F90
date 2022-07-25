@@ -302,8 +302,10 @@ module defs_basis
  integer, parameter, public :: RUNL_SCREENING  = 3
  integer, parameter, public :: RUNL_SIGMA      = 4
  integer, parameter, public :: RUNL_NONLINEAR  = 5
+ integer, parameter, public :: RUNL_GWR        = 6
  integer, parameter, public :: RUNL_EPH        = 7
  integer, parameter, public :: RUNL_WFK        = 8
+ integer, parameter, public :: RUNL_RTTDDFT    = 9
  integer, parameter, public :: RUNL_GWLS       = 66
  integer, parameter, public :: RUNL_BSE        = 99
  integer, parameter, public :: RUNL_LONGWAVE   = 10
@@ -423,11 +425,6 @@ CONTAINS  !=====================================================================
 !!  new_do_write_log=new value for do_write_log
 !!  new_do_write_status=new value for do_write_status
 !!
-!! PARENTS
-!!      m_argparse,m_dtfil
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine abi_log_status_state(new_do_write_log,new_do_write_status)
@@ -461,14 +458,6 @@ CONTAINS  !=====================================================================
 !!  new_std_out=new value for standard output unit
 !!  new_io_comm=new value for IO MPI communicator
 !!
-!! PARENTS
-!!      abinit,abitk,aim,anaddb,band2eps,conducti,cut3d,dummy_tests,fftprof
-!!      fold2Bloch,ioprof,lapackprof,m_driver,m_io_redirect,m_memeval
-!!      m_mpi_setup,m_mpinfo,macroave,mrgddb,mrgdv,mrggkk,mrgscr,multibinit
-!!      optic,ujdet,vdw_kernelgen
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine abi_io_redirect(new_ab_out,new_std_out,new_io_comm)
@@ -500,11 +489,6 @@ CONTAINS  !=====================================================================
 !!
 !! OUTPUT
 !!   Only printing.
-!!
-!! PARENTS
-!!      abinit,m_argparse,m_errors
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -556,10 +540,6 @@ end subroutine print_kinds
 !! FUNCTION
 !!  Convert a string into one of the integer flags WFK_TASK_*
 !!  Return WFK_TASK_NONE if string is invalid.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

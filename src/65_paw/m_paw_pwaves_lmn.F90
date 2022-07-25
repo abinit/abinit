@@ -23,10 +23,6 @@
 !!   that all the strongly connected routines are changed accordingly to accommodate the modification of the data type.
 !!   Typical examples of strongly connected routines are creation, destruction or reset methods.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -124,12 +120,6 @@ CONTAINS !===========================================================
 !!  comm_atom=--optional-- MPI communicator over atoms
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_classify_bands,m_exc_analyze,m_paw_mkaewf,m_screening_driver
-!!      m_sigma_driver,m_wfd,m_wfk_analyze
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -433,12 +423,6 @@ end subroutine paw_pwaves_lmn_init
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_classify_bands,m_exc_analyze,m_paw_mkaewf,m_paw_pwaves_lmn
-!!      m_screening_driver,m_sigma_driver,m_wfd,m_wfk_analyze
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

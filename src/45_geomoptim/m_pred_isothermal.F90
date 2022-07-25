@@ -15,10 +15,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -82,12 +78,6 @@ contains
 !! SIDE EFFECTS
 !! hist <type(abihist)> : History of positions,forces
 !!                               acell, rprimd, stresses
-!!
-!! PARENTS
-!!      m_precpred_1geo
-!!
-!! CHILDREN
-!!      dsyev
 !!
 !! SOURCE
 
@@ -618,12 +608,6 @@ end subroutine pred_isothermal
 !!  isotemp_data: updates the thermostat parameters
 !!  vel=update the velocities
 !!
-!! PARENTS
-!!      m_pred_isothermal
-!!
-!! CHILDREN
-!!      dsyev
-!!
 !! SOURCE
 
 subroutine isotemp(amass,dtion,ekin,iatfix,ktemp,mttk_vars,natom,nnos,qmass,vel)
@@ -756,12 +740,6 @@ end subroutine isotemp
 !! SIDE EFFECTS
 !!  isotemp_data: updates the thermostat parameters (saved variables: bouh !)
 !!  vel=update the velocities
-!!
-!! PARENTS
-!!      m_pred_isothermal
-!!
-!! CHILDREN
-!!      dsyev
 !!
 !! SOURCE
 
@@ -930,12 +908,6 @@ end subroutine isopress
 !! SIDE EFFECTS
 !!  isotemp_data: updates the thermostat parameters (saved variables: bouh !)
 !!  vel=update the velocities
-!!
-!! PARENTS
-!!      m_pred_isothermal
-!!
-!! CHILDREN
-!!      dsyev
 !!
 !! SOURCE
 

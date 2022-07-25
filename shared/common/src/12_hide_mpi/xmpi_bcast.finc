@@ -1522,7 +1522,7 @@ end subroutine xmpi_bcast_dc4d
 !!
 !! SOURCE
 
-subroutine xmpi_bcast_ch0d(xval,master,comm,ier)
+subroutine xmpi_bcast_ch0d(xval, master, comm, ier)
 
 !Arguments-------------------------
  character(len=*),intent(inout) :: xval

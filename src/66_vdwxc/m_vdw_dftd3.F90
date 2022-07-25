@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -105,11 +101,6 @@ contains
 !!  DFT-D3(BJ) S. Grimme, S. Ehrlich and L. Goerigk
 !!  Effect of the damping function in dispersion corrected density functional theory
 !!  Comput. Chem. 32, 1456 (2011) [[cite:Grimme2011]]
-!!
-!! PARENTS
-!!      m_respfn_driver,m_setvtr,m_stress
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1593,11 +1584,6 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
 !! FUNCTION
 !! Return the product of two complex numbers stored in rank 1 array
 !!
-!! PARENTS
-!!      m_vdw_dftd3
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
    subroutine comp_prod(a,b,c)
@@ -1622,11 +1608,6 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
 !!
 !! FUNCTION
 !! Convert gradients from cartesian to reduced coordinates
-!!
-!! PARENTS
-!!      m_vdw_dftd3
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

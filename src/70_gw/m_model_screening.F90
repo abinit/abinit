@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -78,10 +74,6 @@ CONTAINS  !=====================================================================
 !! OUTPUT
 !!
 !! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -151,10 +143,6 @@ end subroutine im_screening
 !!
 !! NOTES
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine re_screening(omega,fval,nomega,coeff,ncoeff)
@@ -222,11 +210,6 @@ end subroutine re_screening
 !! OUTPUT
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_model_screening
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -298,10 +281,6 @@ end subroutine re_and_im_screening
 !! OUTPUT
 !!
 !! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -379,10 +358,6 @@ end subroutine re_and_im_screening_with_phase
 !! OUTPUT
 !!
 !! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -465,10 +440,6 @@ end subroutine sequential_fitting
 !! OUTPUT
 !!
 !! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -588,11 +559,6 @@ end subroutine init_peaks_from_grid
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_model_screening
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine init_single_peak(omega,refval,imfval,nomega,nfreqre,coeff,prtvol)
@@ -662,10 +628,6 @@ end subroutine init_single_peak
 !! OUTPUT
 !!
 !! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -746,11 +708,6 @@ end subroutine init_peaks_even_dist
 !! OUTPUT
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_model_screening
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -883,11 +840,6 @@ end subroutine print_peaks
 !! OUTPUT
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_model_screening
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1062,11 +1014,6 @@ end subroutine find_peaks
 !! OUTPUT
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      mrgscr
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

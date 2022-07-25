@@ -11,10 +11,6 @@
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -56,7 +52,7 @@ MODULE m_numeric_tools
  public :: lfind                 ! Find the index of the first occurrence of .True. in a logical array.
  public :: list2blocks           ! Given a list of integers, find the number of contiguos groups of values.
  public :: mask2blocks           ! Find groups of .TRUE. elements in a logical mask.
- public :: linfit                ! Perform a linear fit, y=ax+b, of data
+ public :: linfit                ! Perform a linear fit, y = ax + b, of data
  public :: llsfit_svd            ! Linear least squares fit with SVD of an user-defined set of functions
  public :: polyn_interp          ! Polynomial interpolation with Nevilles"s algorithms, error estimate is reported
  public :: quadrature            ! Driver routine for performing quadratures in finite domains using different algorithms
@@ -400,9 +396,9 @@ pure function linspace(start, stop, nn)
 
  select case (nn)
  case (1:)
-   length = stop-start
+   length = stop - start
    do ii=1,nn
-     linspace(ii)=start+length*(ii-1)/(nn-1)
+     linspace(ii) = start + length * (ii-1) / (nn-1)
    end do
 
  case (0)
@@ -463,10 +459,6 @@ end function geop
 !! FUNCTION
 !!   Reverse a 1D array *IN PLACE*. Target: INT arrays
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine reverse_int(arr)
@@ -498,10 +490,6 @@ end subroutine reverse_int
 !!
 !! FUNCTION
 !!   Reverse a 1D array *IN PLACE*. Target: DP arrays
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -539,10 +527,6 @@ end subroutine reverse_rdp
 !! SIDE EFFECTS
 !!  matrix(:,:)=set to unit on exit
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 pure subroutine unit_matrix_int(matrix)
@@ -576,10 +560,6 @@ end subroutine unit_matrix_int
 !! SIDE EFFECTS
 !!  matrix(:,:)=set to unit on exit
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 pure subroutine unit_matrix_rdp(matrix)
@@ -612,10 +592,6 @@ end subroutine unit_matrix_rdp
 !!
 !! SIDE EFFECTS
 !!  matrix(:,:)=set to unit on exit
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1344,10 +1320,6 @@ end function cdp2rdp_5D
 !! FUNCTION
 !!  Return .TRUE. if the given integer is even
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 elemental function iseven(nn)
@@ -1438,10 +1410,6 @@ end function is_integer_1d
 !!  tol=tolerance
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1796,10 +1764,6 @@ end function imin_loc_rdp
 !! INPUTS
 !!  mask(:)=Input logical mask
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 integer pure function lfind(mask, back)
@@ -1860,11 +1824,6 @@ end function lfind
 !!    in output:
 !!       blocks(1,i) gives the start of the i-th block
 !!       blocks(2,i) gives the end of the i-th block
-!!
-!! PARENTS
-!!      m_wfd
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1932,11 +1891,6 @@ end subroutine list2blocks
 !! blocks(:,:)= Null pointer in input. blocks(2,nblocks) in output where
 !!   blocks(1,i) gives the start of the i-th block
 !!   blocks(2,i) gives the end of the i-th block
-!!
-!! PARENTS
-!!      m_wfk
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2186,10 +2140,6 @@ end function linfit_dpc
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine llsfit_svd(xx,yy,sigma,nfuncs,funcs,chisq,par,var,cov,info)
@@ -2300,11 +2250,6 @@ end subroutine llsfit_svd
 !! NOTES
 !!  Based on the polint routine reported in Numerical Recipies
 !!
-!! PARENTS
-!!      m_numeric_tools
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine polyn_interp(xa,ya,x,y,dy)
@@ -2373,10 +2318,6 @@ end subroutine polyn_interp
 !!
 !! SIDE EFFECTS
 !!  quad=the integral at the n-th stage.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! NOTES
 !!  When called with nn=1, the routine returns the crudest estimate of the integral
@@ -2478,10 +2419,6 @@ end subroutine trapezoidal_
 !! SIDE EFFECTS
 !!  quad=the integral at the n-th stage.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! NOTES
 !!  When called with nn=1, the routine returns as quad the crudest estimate of the integral
 !!  Subsequent calls with nn=2,3,... (in that sequential order) will improve the accuracy of quad by adding
@@ -2582,10 +2519,6 @@ end subroutine midpoint_
 !! OUTPUT
 !!  quad=the integral
 !!  ierr=0 if quadrature converged.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2790,11 +2723,6 @@ end subroutine quadrature
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_phonons,m_psp6,m_psptk,m_unittests,m_upf2abinit
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine ctrap(imax,ff,hh,ans)
@@ -2946,11 +2874,6 @@ end subroutine ctrap
 !!
 !!    Output, real (dp) RESULT, the estimated value of the integral.
 !!
-!!
-!! PARENTS
-!!      m_xc_vdw,mrgscr
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3106,11 +3029,6 @@ end subroutine cspint
 !! x(n)=array of support points
 !! weights(n)=array of integration weights
 !!
-!! PARENTS
-!!      m_bader,m_numeric_tools,m_screening_driver,m_sigc
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine coeffs_gausslegint(xmin,xmax,x,weights,n)
@@ -3184,10 +3102,6 @@ end subroutine coeffs_gausslegint
 !!  If npts is even, the last 4 four points are integrated separately via Simpson's 3/8 rule. Error = O(step^5)
 !!  while the first npts-3 points are integrared with the extended Simpson's rule.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 function simpson_cplx(npts,step,ff)
@@ -3253,10 +3167,6 @@ end function simpson_cplx
 !!
 !! SIDE EFFECTS
 !!  mat(:,:)=complex input matrix, hermitianized at output
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3342,10 +3252,6 @@ end subroutine hermitianize_spc
 !! SIDE EFFECTS
 !!  mat(:,:)=complex input matrix, hermitianized in output
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine hermitianize_dpc(mat,uplo)
@@ -3424,11 +3330,6 @@ end subroutine hermitianize_dpc
 !! SIDE EFFECTS
 !! array= hermitian matrix made by adding half of array to its hermitian conjugate
 !!
-!! PARENTS
-!!      anaddb,dfpt_phfrq,m_ddb,m_phgamma
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 pure subroutine mkherm(array,ndim)
@@ -3484,11 +3385,6 @@ end subroutine mkherm
 !! TODO
 !!  Name is misleading, perhaps hermit_force_diago?
 !!  Interface allows aliasing
-!!
-!! PARENTS
-!!      m_cgtools,m_extraprho
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3594,10 +3490,6 @@ end subroutine hermit
 !! SIDE EFFECTS
 !!  mat(:,:)=complex input matrix, symmetrized at output
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine symmetrize_spc(mat,uplo)
@@ -3673,10 +3565,6 @@ end subroutine symmetrize_spc
 !! SIDE EFFECTS
 !!  mat(:,:)=complex input matrix, symmetrized in output
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine symmetrize_dpc(mat,uplo)
@@ -3744,11 +3632,6 @@ end subroutine symmetrize_dpc
 !! OUTPUT
 !! mat_out(cplx*N*N+1/2)= packed matrix (upper triangle)
 !!
-!! PARENTS
-!!      m_rayleigh_ritz,m_rmm_diis
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pack_matrix(mat_in, mat_out, N, cplx)
@@ -3799,10 +3682,6 @@ end subroutine pack_matrix
 !!
 !! OUTPUT
 !!  (only printing)
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3860,17 +3739,13 @@ end subroutine print_arr1d_spc
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
-subroutine print_arr1d_dpc(arr,max_r,unit,mode_paral)
+subroutine print_arr1d_dpc(arr, max_r, unit, mode_paral)
 
 !Arguments ------------------------------------
 !scalars
- integer,optional,intent(in) :: unit,max_r
+ integer,optional,intent(in) :: unit, max_r
  character(len=4),optional,intent(in) :: mode_paral
 !arrays
  complex(dpc),intent(in) :: arr(:)
@@ -3891,15 +3766,15 @@ subroutine print_arr1d_dpc(arr,max_r,unit,mode_paral)
   write(msg,'(2a)')' Wrong value of mode_paral ',mode
   ABI_BUG(msg)
  end if
- !
- ! === Print out matrix ===
+
+ ! Print out matrix.
  nr=SIZE(arr,DIM=1) ; if (mr>nr) mr=nr
 
  write(fmth,*)'(6x,',mr,'(i2,6x))'
  write(fmt1,*)'(3x,',mr,'f8.3)'
 
  write(msg,fmth)(ii,ii=1,mr)
- call wrtout(unt,msg,mode) !header
+ call wrtout(unt,msg,mode) ! header
  write(msg,fmt1)REAL (arr(1:mr))
  call wrtout(unt,msg,mode) !real part
  write(msg,fmt1)AIMAG(arr(1:mr))
@@ -3920,17 +3795,13 @@ end subroutine print_arr1d_dpc
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
-subroutine print_arr2d_spc(arr,max_r,max_c,unit,mode_paral)
+subroutine print_arr2d_spc(arr, max_r, max_c, unit, mode_paral)
 
 !Arguments ------------------------------------
 !scalars
- integer,optional,intent(in) :: unit,max_r,max_c
+ integer,optional,intent(in) :: unit, max_r, max_c
  character(len=4),optional,intent(in) :: mode_paral
 !arrays
  complex(spc),intent(in) :: arr(:,:)
@@ -3985,10 +3856,6 @@ end subroutine print_arr2d_spc
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine print_arr2d_dpc(arr,max_r,max_c,unit,mode_paral)
@@ -4027,12 +3894,12 @@ subroutine print_arr2d_dpc(arr,max_r,max_c,unit,mode_paral)
  write(fmt2,*)'(5x   ,',mc,'f8.3,a)'
 
  write(msg,fmth)(jj,jj=1,mc)
- call wrtout(unt,msg,mode) !header
+ call wrtout(unt, msg, mode) ! header
  do ii=1,mr
    write(msg,fmt1)ii,REAL(arr(ii,1:mc))
-   call wrtout(unt,msg,mode) !real part
+   call wrtout(unt,msg,mode) ! real part
    write(msg,fmt2)  AIMAG(arr(ii,1:mc)),ch10
-   call wrtout(unt,msg,mode) !imag part
+   call wrtout(unt,msg,mode) ! imag part
  end do
 
 end subroutine print_arr2d_dpc
@@ -4153,11 +4020,6 @@ end function dpade
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_numeric_tools
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine calculate_pade_a(a,n,z,f)
@@ -4204,15 +4066,13 @@ end subroutine calculate_pade_a
 !!
 !! SOURCE
 
-function newrap_step(z,f,df)
+complex(dp) function newrap_step(z,f,df)
 
 !Arguments ------------------------------------
 !scalars
  complex(dpc),intent(in) :: z,f,df
- complex(dpc) :: newrap_step
 
 !Local variables-------------------------------
-!scalars
  real(dp) :: dfm2
 ! *************************************************************************
 
@@ -4318,11 +4178,6 @@ end function l2norm_rdp
 !! NOTES
 !! The routines only deals with arrays of 3D-vectors although generalizing the
 !! algorithm to nD-space is straightforward.
-!!
-!! PARENTS
-!!      m_io_screening
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -4510,11 +4365,6 @@ end function mincm
 !! OUTPUT
 !!  spectrum(nz)=Contains f(z) on the input mesh.
 !!
-!! PARENTS
-!!      m_haydock
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine continued_fract(nlev,term_type,aa,bb,nz,zpts,spectrum)
@@ -4619,11 +4469,6 @@ end subroutine continued_fract
 !!    input:  array with complex values in Cartesian form if from="C" or spherical form if from="S"
 !!    output: array with values converted to the new representation.
 !!
-!! PARENTS
-!!      m_ptgroups
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine cmplx_sphcart(carr, from, units)
@@ -4706,10 +4551,6 @@ end subroutine cmplx_sphcart
 !!  powers(nfactors+1)=
 !!   The first nfactors entries are the powers i in Eq.1. powers(nfactors+1) is alpha.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pfactorize(nn,nfactors,pfactors,powers)
@@ -4764,10 +4605,6 @@ end subroutine pfactorize
 !!  arr(nn)=The array with real values to be tested.
 !!  direction= ">" for ascending numerical order.
 !!             ">" for decreasing numerical order.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -4831,11 +4668,6 @@ end function isordered_rdp
 !!
 !! OUTPUT
 !!  stats<stats_t>=Data type storing the parameters of the data set.
-!!
-!! PARENTS
-!!      m_shirley
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -4903,12 +4735,6 @@ end function stats_eval
 !! red=reduced number of num in the interval [0,1[ where 1 is not included
 !! shift=num-red
 !!
-!! PARENTS
-!!      exc_plot,k_neighbors,lin_interpq_gam,m_nesting,m_paw_pwaves_lmn
-!!      pawmkaewf
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 elemental subroutine wrap2_zero_one(num, red, shift)
@@ -4948,14 +4774,6 @@ end subroutine wrap2_zero_one
 !! OUTPUT
 !! red=reduced number of num in the interval ]-1/2,1/2] where -1/2 is not included
 !! shift=num-red
-!!
-!! PARENTS
-!!      canat9,dist2,elphon,ep_setupqpt,get_full_kgrid,interpolate_gkk
-!!      m_bz_mesh,m_cprj_bspline,m_gamma,m_io_gkk,m_optic_tools,m_shirley
-!!      mkfskgrid,mkfsqgrid,mkph_linwid,mkphbs,order_fs_kpts,printvtk,read_gkk
-!!      smpbz,littlegroup_q
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -4999,12 +4817,6 @@ end subroutine wrap2_pmhalf
 !!
 !! OUTPUT
 !! res=Interpolated value
-!!
-!! PARENTS
-!!      integrate_gamma_alt,lin_interpq_gam,lineint,m_nesting,m_qparticles
-!!      planeint,pointint,volumeint
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -5067,12 +4879,6 @@ end function interpol3d_0d
 !! OUTPUT
 !! res(nd)=Interpolated value
 !!
-!! PARENTS
-!!      integrate_gamma_alt,lin_interpq_gam,lineint,m_nesting,m_qparticles
-!!      planeint,pointint,volumeint
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 pure function interpol3d_1d(r, nr1, nr2, nr3, grid, nd) result(res)
@@ -5134,11 +4940,6 @@ end function interpol3d_1d
 !! OUTPUT
 !! ir1,ir2,ir3 = bottom left neighbor
 !! pr1,pr2,pr3 = top right neighbor
-!!
-!! PARENTS
-!!      interpol3d,k_neighbors
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -5207,11 +5008,6 @@ end subroutine interpol3d_indices
 !! OUTPUT
 !!  outrhor(cplex * out_nfftot * nspden)=Output array with interpolated data.
 !!
-!! PARENTS
-!!      m_ioarr
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine interpolate_denpot(cplex, in_ngfft, nspden, in_rhor, out_ngfft, out_rhor)
@@ -5265,13 +5061,6 @@ end subroutine interpolate_denpot
 !!
 !! OUTPUT
 !!  int_values(npts)=integral of values.
-!!
-!! PARENTS
-!!      m_a2ftr,m_ebands,m_eliashberg_1d,m_elphon,m_evdw_wannier,m_exc_spectra
-!!      m_integrals,m_mlwfovlp,m_numeric_tools,m_outscfcv,m_phgamma,m_phonons
-!!      m_rta,m_tdep_psij,m_unittests,m_xc_vdw
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -5339,10 +5128,6 @@ end subroutine simpson_int
 !! OUTPUT
 !!  integral of values on the full mesh.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 function simpson(step, values) result(res)
@@ -5382,9 +5167,6 @@ end function simpson
 !! OUTPUT
 !!  phi = phase of cx fold into [-pi,pi]
 !!  rho = modul of cx
-!!
-!! PARENTS
-!!      berryphase_new,etheta,linemin
 !!
 !! SOURCE
 
@@ -5447,8 +5229,6 @@ end subroutine rhophi
 !!
 !! OUTPUT
 !!  vdiff_t object
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -5519,11 +5299,6 @@ end function vdiff_eval
 !! FUNCTION
 !!  Print vdiff_t to unit
 !!
-!! PARENTS
-!!      m_dvdb
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine vdiff_print(vd, unit)
@@ -5562,11 +5337,6 @@ end subroutine vdiff_print
 !!
 !! SIDE EFFECTS
 !!  a(mesh)=Input values, smoothed in output
-!!
-!! PARENTS
-!!      m_psp6,m_upf2abinit
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -5628,11 +5398,6 @@ end subroutine smooth
 !!
 !! OUTPUT
 !!  zz(ndim)= first or second derivative of y
-!!
-!! PARENTS
-!!      m_upf2abinit
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -5722,10 +5487,6 @@ end subroutine nderiv
 !! OUTPUT
 !!  coeffient for central finite difference
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 real(dp) function central_finite_diff(order, ipos, npts) result(fact)
@@ -5814,10 +5575,6 @@ end function central_finite_diff
 !! OUTPUT
 !!
 !! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -5922,11 +5679,6 @@ end function uniformrandom
 !! status= 0 if everything went normally ;
 !!         1 if negative second derivative
 !!         2 if some other problem
-!!
-!! PARENTS
-!!      m_bfgs
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -6106,11 +5858,6 @@ end subroutine findmin
 !! NOTES
 !! Inspired to check_kramerskronig of the DP code
 !!
-!! PARENTS
-!!      m_paw_optics
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine kramerskronig(nomega,omega,eps,method,only_check)
@@ -6262,11 +6009,6 @@ end subroutine kramerskronig
 !! MG: FIXME: Well, optized blas1 is for sure better than what you wrote!
 !! Now I dont' have time to update ref files
 !!
-!! PARENTS
-!! cgpr,brent
-!!
-!! CHILDREN
-!!
 !!
 !! SOURCE
 
@@ -6308,11 +6050,6 @@ end function dotproduct
 !!
 !! OUTPUT
 !!  rspts(npts)=inverse cubic root of rhoarr
-!!
-!! PARENTS
-!!      m_drivexc,m_gammapositron,m_xchcth,m_xclda,m_xcpbe,m_xcpositron
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -6396,10 +6133,6 @@ end subroutine invcb
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 elemental subroutine safe_div(n, d, altv, q)
@@ -6426,11 +6159,6 @@ end subroutine safe_div
 !!
 !! FUNCTION
 !!  Allocate and return array with the indices in the input boolean array `bool_list` that evaluates to .True.
-!!
-!! PARENTS
-!!      m_wfd
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

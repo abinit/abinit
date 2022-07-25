@@ -10,11 +10,6 @@
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      mkrho
-!!
-!! CHILDREN
-!!
 !! SOURCE
 !!
 !! TODO /!\ No parallel computing yet !
@@ -58,12 +53,6 @@ module m_rot_cg
 !! OUTPUT
 !!   occ_diag(2, nband) = diagonal occupation in the new band space
 !!   cwavef_rot(2, npw, nband) = fourier coefficient of wave functions for all bands rotated in the band space
-!!
-!! PARENTS
-!!      m_rot_cg
-!!
-!! CHILDREN
-!!      diag_occ
 !!
 !! SOURCE
 !!
@@ -167,12 +156,6 @@ end subroutine diag_occ
 !! SIDE EFFECT
 !!   cwavef is rotated with the unitary matrix obtained from the diagonalisation
 !!   of occupations (occ_nd)
-!! PARENTS
-!!      m_mkrho
-!!
-!! CHILDREN
-!!      diag_occ
-!!
 !! SOURCE
 !!
 !! TODO /!\ No parallel computing yet !
