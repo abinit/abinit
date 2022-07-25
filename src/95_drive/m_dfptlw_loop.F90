@@ -669,7 +669,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
                end do    ! ir3dir
              end do     ! ir3pert
              
-             ABI_FREE(vpsp1_i2pertdq)
+             if (i2pert/=natom+2) ABI_FREE(vpsp1_i2pertdq)
              ABI_FREE(vpsp1_i1pertdq_geom)
              ABI_FREE(vpsp1_i1pertdqdq)
              ABI_FREE(d3etot_t4)
