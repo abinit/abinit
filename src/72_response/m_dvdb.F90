@@ -39,9 +39,7 @@ module m_dvdb
  use m_distribfft
  use m_nctk
  use m_sort
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
  use m_hdr
  use m_ddb
  use m_ddb_hdr
@@ -5096,10 +5094,8 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_filepath, prtvol)
    write(std_out,"(a,i0,2a)")"- Reading header of file [",ii,"]: ",trim(v1files(ii))
 
    if (endswith(v1files(ii), ".nc")) then
-#ifdef HAVE_NETCDF
       NCF_CHECK(nctk_open_read(units(ii), v1files(ii), xmpi_comm_self))
       call hdr_ncread(hdr1_list(ii),units(ii),fform)
-#endif
    else
      if (open_file(v1files(ii), msg, newunit=units(ii), form="unformatted", action="read", status="old") /= 0) then
        ABI_ERROR(msg)
@@ -5146,7 +5142,6 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_filepath, prtvol)
       if (has_rhog1_g0(jj)) read(units(jj), err=10, iomsg=msg) rhog1_g0
       if (dvdb_last_version > 1) write(ount, err=10, iomsg=msg) rhog1_g0
    else
-#ifdef HAVE_NETCDF
       ! Netcdf IO
       ! netcdf array has shape [cplex, n1, n2, n3, nspden]
       NCF_CHECK(nf90_inq_varid(units(ii), "first_order_potential", v1_varid))
@@ -5160,15 +5155,12 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_filepath, prtvol)
         NCF_CHECK(nf90_get_var(units(ii), nctk_idname(units(ii), "rhog1_g0"), rhog1_g0))
       end if
       if (dvdb_last_version > 1) write(ount, err=10, iomsg=msg) rhog1_g0
-#endif
    end if
 
    if (.not. endswith(v1files(ii), ".nc")) then
      close(units(ii))
    else
-#ifdef HAVE_NETCDF
      NCF_CHECK(nf90_close(units(ii)))
-#endif
    end if
 
    ABI_FREE(v1)
@@ -5461,9 +5453,7 @@ subroutine dvdb_test_v1complete(dvdb_filepath, symv1scf, dump_path, comm)
  integer,parameter :: master = 0
  integer :: iqpt,pcase,idir,ipert,cplex,nfft,ispden,timerev_q,ifft,unt,my_rank, ncid
  integer :: i1,i2,i3,n1,n2,n3,id1,id2,id3,cnt, npert_miss
-#ifdef HAVE_NETCDF
  integer :: ncerr
-#endif
  character(len=500) :: msg
  type(crystal_t),pointer :: cryst
  type(dvdb_t),target :: dvdb
@@ -5508,7 +5498,6 @@ subroutine dvdb_test_v1complete(dvdb_filepath, symv1scf, dump_path, comm)
  if (len_trim(dump_path) /= 0 .and. my_rank == master) then
    write(std_out,"(a)")sjoin("Will write potentials to:", dump_path)
    if (endswith(dump_path, ".nc")) then
-#ifdef HAVE_NETCDF
      NCF_CHECK(nctk_open_create(ncid, dump_path, xmpi_comm_self))
      NCF_CHECK(dvdb%cryst%ncwrite(ncid))
      ncerr = nctk_def_dims(ncid, [&
@@ -5528,7 +5517,6 @@ subroutine dvdb_test_v1complete(dvdb_filepath, symv1scf, dump_path, comm)
      NCF_CHECK(ncerr)
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "qpts"), dvdb%qpts))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ngfft"), ngfft(1:3)))
-#endif
    else
      if (open_file(dump_path, msg, newunit=unt, action="write", status="unknown", form="formatted") /= 0) then
        ABI_ERROR(msg)
@@ -5567,7 +5555,6 @@ subroutine dvdb_test_v1complete(dvdb_filepath, symv1scf, dump_path, comm)
    ! Complete potentials
    call v1phq_complete(cryst,qpt,ngfft,cplex,nfft,dvdb%nspden,dvdb%nsppol,dvdb%mpi_enreg,dvdb%symv1,pflag,symm_v1scf)
 
-#ifdef HAVE_NETCDF
    if (ncid /= nctk_noid) then
      work2 = zero
      if (cplex == 1) work2(1,:,:,:) = file_v1scf(1,:,:,:)
@@ -5580,7 +5567,6 @@ subroutine dvdb_test_v1complete(dvdb_filepath, symv1scf, dump_path, comm)
      NCF_CHECK(ncerr)
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "pertsy_qpt"), pertsy, start=[1,1,iqpt]))
    end if
-#endif
 
    ! Compare values.
    do pcase=1,3*cryst%natom
@@ -5649,11 +5635,9 @@ subroutine dvdb_test_v1complete(dvdb_filepath, symv1scf, dump_path, comm)
  call dvdb%free()
 
  if (unt /= -1) close(unt)
-#ifdef HAVE_NETCDF
  if (ncid /= nctk_noid) then
    NCF_CHECK(nf90_close(ncid))
  end if
-#endif
 
 end subroutine dvdb_test_v1complete
 !!***
@@ -5698,9 +5682,7 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
  integer :: nfft, iq, cplex, ispden, comm_rpt, my_rank, idir, ipert, ipc, imyp
  integer :: n1, n2, n3, unt, this_nqpt, interpolated
  integer :: i1, i2, i3, ifft, ig, ngsmall, ii
-#ifdef HAVE_NETCDF
  integer :: ncid, ncerr
-#endif
  real(dp) :: gsq_max, g2
  !type(vdiff_t) :: vd_max
  logical :: write_v1r
@@ -5793,7 +5775,6 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
  call wrtout([std_out, ab_out], sjoin(ch10, "- Results stored in: ", out_ncpath))
  call wrtout([std_out, ab_out], " Use `abiopen.py out_V1QAVG.nc -e` to visualize results")
 
-#ifdef HAVE_NETCDF
  if (my_rank == master) then
    NCF_CHECK(nctk_open_create(ncid, out_ncpath, xmpi_comm_self))
    NCF_CHECK(dvdb%cryst%ncwrite(ncid))
@@ -5856,7 +5837,6 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
    NCF_CHECK(nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: "qdamp"], dvdb_qdamp))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "gsmall"), gsmall))
  end if
-#endif
 
  do iq=1,this_nqpt
 
@@ -5896,18 +5876,15 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
    ! Compute average and write to file.
    if (my_rank /= master) cycle
 
-#ifdef HAVE_NETCDF
    if (write_v1r .and. iq == 1) then
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "v1r_interpolated"), file_v1r))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "v1r_lrmodel"), long_v1r))
    end if
-#endif
 
    do imyp=1,dvdb%my_npert
      idir = dvdb%my_pinfo(1, imyp); ipert = dvdb%my_pinfo(2, imyp); ipc = dvdb%my_pinfo(3, imyp)
      do ispden=1,dvdb%nspden
 
-#ifdef HAVE_NETCDF
        vals2 = sum(file_v1r(:,:,ispden,imyp), dim=2) / nfft
        ncerr = nf90_put_var(ncid, nctk_idname(ncid, "v1scf_avg"), vals2, &
                             start=[1,ispden,idir,ipert,iq], count=[2,1,1,1,1])
@@ -5951,7 +5928,6 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
        ncerr = nf90_put_var(ncid, nctk_idname(ncid, "v1lr_gsmall"), work_gsmall, &
                             start=[1,1,ispden,idir,ipert,iq], count=[2,ngsmall,1,1,1,1])
        NCF_CHECK(ncerr)
-#endif
 
        ! Debugging section.
        !write(std_out, "(a)")"--- !DVDB_LONGRANGE_DIFF"
@@ -6017,13 +5993,11 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
    ! Compute max_r |W(R,r)| and write data to file.
    call dvdb%get_maxw(dtset%ddb_ngqpt, all_rpt, all_rmod, maxw)
    if (my_rank == master) then
-#ifdef HAVE_NETCDF
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ngqpt"), dtset%ddb_ngqpt))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "rpt"), all_rpt))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "rmod"), all_rmod))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ngfft"), ngfft(1:3)))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "maxw"), maxw))
-#endif
    end if
    ABI_FREE(all_rpt)
    ABI_FREE(all_rmod)
@@ -6031,9 +6005,7 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
  end if
 
  if (my_rank == master) then
-#ifdef HAVE_NETCDF
    NCF_CHECK(nf90_close(ncid))
-#endif
  end if
 
 end subroutine dvdb_write_v1qavg
@@ -6677,9 +6649,7 @@ subroutine dvdb_interpolate_and_write(dvdb, dtset, new_dvdb_fname, ngfft, ngfftf
  integer :: nqpt_read, nqpt_interpolate
  integer :: nfft,nfftf, dimv1
  integer :: ount, unt, fform
-#ifdef HAVE_NETCDF
  integer :: ncid, ncerr
-#endif
  logical :: use_netcdf
  real(dp) :: cpu, wall, gflops, cpu_all, wall_all, gflops_all
  character(len=500) :: msg
@@ -6933,7 +6903,6 @@ subroutine dvdb_interpolate_and_write(dvdb, dtset, new_dvdb_fname, ngfft, ngfftf
  ABI_MALLOC(v1, (cplex*nfftf))
 
  use_netcdf = .False.
-#ifdef HAVE_NETCDF
  ! Create temporary netcdf file used to write Fortran file with contiguous perturbations.
  use_netcdf = .True.
  if (my_rank == master) then
@@ -6950,7 +6919,6 @@ subroutine dvdb_interpolate_and_write(dvdb, dtset, new_dvdb_fname, ngfft, ngfftf
    !NCF_CHECK(nctk_def_arrays(ncid, nctkarr_t("v1scf_rpt", "dp", "two, nrpt, nfft, nspden, natom3")))
    NCF_CHECK(nctk_set_datamode(ncid))
  end if
-#endif
 
  do iat=1,natom
    do idir=1,3
@@ -6982,11 +6950,9 @@ subroutine dvdb_interpolate_and_write(dvdb, dtset, new_dvdb_fname, ngfft, ngfftf
        !call wrtout(std_out, sjoin("Writing q-point", itoa(iq)))
        if (my_rank == master) then
          if (use_netcdf) then
-#ifdef HAVE_NETCDF
            ncerr = nf90_put_var(ncid, nctk_idname(ncid, "v1"), v1scf, &
                start=[1,1,idir,iat,iq], count=[dimv1,nspden,1,1,1])
            NCF_CHECK(ncerr)
-#endif
          else
            ! Master writes the file (change also qpt and ipert in hdr%)
            hdr_ref%qptn = qpt
@@ -7018,11 +6984,9 @@ subroutine dvdb_interpolate_and_write(dvdb, dtset, new_dvdb_fname, ngfft, ngfftf
          hdr_ref%qptn = qpt
          hdr_ref%pertcase = ipert
          call hdr_ref%fort_write(ount, fform_pot, ierr)
-#ifdef HAVE_NETCDF
          ncerr = nf90_get_var(ncid, nctk_idname(ncid, "v1"), v1scf, &
              start=[1,1,idir,iat,iq], count=[dimv1,nspden,1,1,1])
          NCF_CHECK(ncerr)
-#endif
          do ispden=1,nspden
            v1 = reshape(v1scf(:,:,ispden), [cplex*nfftf])
            write(ount, err=10, iomsg=msg) (v1(ifft), ifft=1,cplex*nfftf)
@@ -7031,9 +6995,7 @@ subroutine dvdb_interpolate_and_write(dvdb, dtset, new_dvdb_fname, ngfft, ngfftf
        end do
     end do
    end do
-#ifdef HAVE_NETCDF
    NCF_CHECK(nf90_close(ncid))
-#endif
    call delete_file(tmp_fname, ierr)
  end if
 
