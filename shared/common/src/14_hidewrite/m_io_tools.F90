@@ -991,7 +991,7 @@ end subroutine mvrecord
 !!
 !! SOURCE
 
-function open_file(file,iomsg,unit,newunit,access,form,status,action,recl) result(iostat)
+function open_file(file, iomsg, unit, newunit, access, form, status, action, recl) result(iostat)
 
 !Arguments ------------------------------------
 !scalars

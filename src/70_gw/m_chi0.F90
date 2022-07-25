@@ -40,9 +40,8 @@ module m_chi0
  use m_fft_mesh,        only : rotate_FFT_mesh, get_gftt
  use m_occ,             only : getnel
  use m_ebands,          only : pack_eneocc, unpack_eneocc, ebands_has_metal_scheme
- use m_bz_mesh,         only : kmesh_t, kmesh_init, kmesh_free, get_BZ_item, get_BZ_diff, &
-&                              littlegroup_t, littlegroup_print, littlegroup_free, littlegroup_init
- use m_gsphere,         only : gsphere_t, gsph_fft_tabs, gsph_in_fftbox, gsph_free, print_gsphere
+ use m_bz_mesh,         only : kmesh_t, littlegroup_t
+ use m_gsphere,         only : gsphere_t
  use m_io_tools,        only : flush_unit
  use m_oscillators,     only : rho_tw_g, calc_wfwfg
  use m_vkbr,            only : vkbr_t, vkbr_free, vkbr_init, nc_ihr_comm
@@ -158,7 +157,6 @@ contains
 !!
 !!  The gradient of Vnl(K,Kp) for the k-point in the BZ should be:
 !!   gradvnl(SG,SGp,Sk)=S gradvnl(G,Gp,kibz)
-!! /***********************************************************************/
 !!
 !! TODO
 !!  Check npwepG0 before Switching on umklapp
@@ -166,8 +164,8 @@ contains
 !! SOURCE
 
 subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
-&  Pawang,Pawrad,Pawtab,Paw_ij,Paw_pwff,Pawfgrtab,Paw_onsite,ktabr,ktabrf,nbvw,ngfft_gw,&
-&  nfftot_gw,ngfftf,nfftf_tot,chi0,chi0_head,chi0_lwing,chi0_uwing,Ltg_q,chi0_sumrule,Wfd,Wfdf,wan)
+                  Pawang,Pawrad,Pawtab,Paw_ij,Paw_pwff,Pawfgrtab,Paw_onsite,ktabr,ktabrf,nbvw,ngfft_gw,&
+                  nfftot_gw,ngfftf,nfftf_tot,chi0,chi0_head,chi0_lwing,chi0_uwing,Ltg_q,chi0_sumrule,Wfd,Wfdf,wan)
 
 !Arguments ------------------------------------
 !scalars
@@ -255,6 +253,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
 !************************************************************************
 
  DBG_ENTER("COLL")
+
  call cwtime(cpu_time,wall_time,gflops,"start")
 
  ! Change FFT mesh if needed
@@ -310,18 +309,18 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
  if (Ep%gwcomp==1) then
    en_high=MAXVAL(qp_energy(Ep%nbnds,:,:))+Ep%gwencomp
    write(msg,'(a,f8.2,a)')' Using completeness correction with energy ',en_high*Ha_eV,' [eV] '
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(std_out, msg)
    ABI_MALLOC(wfwfg,(nfft*nspinor**2))
 
    ! Init the largest G-sphere contained in the FFT box for the wavefunctions.
-   call gsph_in_fftbox(Gsph_FFT,Cryst,Wfd%ngfft)
-   call print_gsphere(Gsph_FFT,unit=std_out,prtvol=10)
+   call Gsph_FFT%in_fftbox(Cryst,Wfd%ngfft)
+   call Gsph_FFT%print(unit=std_out, prtvol=10)
 
    ABI_MALLOC(gspfft_igfft,(Gsph_FFT%ng))
    ABI_MALLOC(dummy_gbound,(2*gw_mgfft+8,2))
 
    ! Mapping between G-sphere and FFT box.
-   call gsph_fft_tabs(Gsph_FFT, [0, 0, 0],Wfd%mgfft,Wfd%ngfft,dummy,dummy_gbound,gspfft_igfft)
+   call Gsph_FFT%fft_tabs([0, 0, 0],Wfd%mgfft,Wfd%ngfft,dummy,dummy_gbound,gspfft_igfft)
    ABI_FREE(dummy_gbound)
 
    if (Psps%usepaw==1) then
@@ -369,12 +368,12 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
    write(msg_tmp,'(1x,i5,a,2x,3f12.6,a)') iqlwl,')',Ep%qlwl(:,iqlwl),ch10
    msg=TRIM(msg)//msg_tmp
  end do
- call wrtout(std_out,msg,'COLL')
+ call wrtout(std_out, msg)
 
  write(msg,'(a,i2,2a,i2)')&
   ' Using spectral method for the imaginary part = ',Ep%spmeth,ch10,&
   ' Using symmetries to sum only over the IBZ_q  = ',Ep%symchi
- call wrtout(std_out,msg,'COLL')
+ call wrtout(std_out, msg)
 
  if (use_tr) then
    ! Special care has to be taken in metals and/or spin dependent systems
@@ -423,7 +422,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
  !  b) gw_gbound table for the zero-padded FFT performed in rhotwg.
  ABI_MALLOC(igffteps0,(Gsph_epsG0%ng))
  ABI_MALLOC(gw_gbound,(2*gw_mgfft+8,2))
- call gsph_fft_tabs(Gsph_epsG0, [0, 0, 0], gw_mgfft,ngfft_gw,use_padfft,gw_gbound,igffteps0)
+ call Gsph_epsG0%fft_tabs([0, 0, 0], gw_mgfft,ngfft_gw,use_padfft,gw_gbound,igffteps0)
  if ( ANY(gw_fftalga == [2, 4]) ) use_padfft=0 ! Pad-FFT is not coded in rho_tw_g
 #ifdef FC_IBM
  ! XLF does not deserve this optimization (problem with [v67mbpt][t03])
@@ -435,7 +434,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
  end if
  if (Dtset%pawcross==1) then
     ABI_MALLOC(gboundf,(2*mgfftf+8,2))
-   call gsph_fft_tabs(Gsph_epsG0,(/0,0,0/),mgfftf,ngfftf,use_padfftf,gboundf,igfftepsG0f)
+   call Gsph_epsG0%fft_tabs((/0,0,0/),mgfftf,ngfftf,use_padfftf,gboundf,igfftepsG0f)
    if ( ANY(gw_fftalga == (/2,4/)) ) use_padfftf=0
    if (use_padfftf==0) then
      ABI_FREE(gboundf)
@@ -472,11 +471,11 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
 
  SELECT CASE (Ep%spmeth)
  CASE (0)
-   call wrtout(std_out,' Calculating chi0(q=(0,0,0),omega,G,G")',"COLL")
+   call wrtout(std_out,' Calculating chi0(q=(0,0,0),omega,G,G")')
    ABI_MALLOC(green_w,(Ep%nomega))
 
  CASE (1, 2)
-   call wrtout(std_out,' Calculating Im chi0(q=(0,0,0),omega,G,G")','COLL')
+   call wrtout(std_out,' Calculating Im chi0(q=(0,0,0),omega,G,G")')
    !
    ! === Find max and min resonant transitions for this q, report values for this processor ===
    call make_transitions(Wfd,1,Ep%nbnds,nbvw,nsppol,Ep%symchi,Cryst%timrev,GW_TOL_DOCC,&
@@ -518,17 +517,17 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
    ABI_BUG("Wrong spmeth")
  END SELECT
 
- nkpt_summed=Kmesh%nbz
- if (Ep%symchi/=0) then
+ nkpt_summed = Kmesh%nbz
+ if (Ep%symchi /= 0) then
    nkpt_summed=Ltg_q%nibz_ltg
-   call littlegroup_print(Ltg_q,std_out,Dtset%prtvol,'COLL')
+   call Ltg_q%print(std_out, Dtset%prtvol, mode_paral='COLL')
  end if
 
  ABI_MALLOC(vkbr,(Kmesh%nibz))
  gradk_not_done=.TRUE.
 
  write(msg,'(a,i6,a)')' Calculation status ( ',nkpt_summed,' to be completed):'
- call wrtout(std_out,msg,'COLL')
+ call wrtout(std_out, msg)
  !
  ! ============================================
  ! === Begin big fat loop over transitions ====
@@ -551,7 +550,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
      call wrtout(std_out,msg,'PERS')
 
      ! Get ik_ibz, non-symmorphic phase and symmetries from ik_bz.
-     call get_BZ_item(Kmesh,ik_bz,kbz,ik_ibz,isym_k,itim_k,ph_mkt)
+     call kmesh%get_BZ_item(ik_bz,kbz,ik_ibz,isym_k,itim_k,ph_mkt)
      tabr_k=ktabr(:,ik_bz) ! Table for rotated FFT points
      spinrot_kbz(:)=Cryst%spinrot(:,isym_k)
      if (Dtset%pawcross==1) tabrf_k(:) = ktabrf(:,ik_bz)
@@ -902,9 +901,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
    ! Spectral method.
    call hilbert_transform(Ep%npwe,Ep%nomega,Ep%nomegasf,my_wl,my_wr,kkweight,sf_chi0,chi0,Ep%spmeth)
 
-   if (allocated(sf_chi0)) then
-     ABI_FREE(sf_chi0)
-   end if
+   ABI_SFREE(sf_chi0)
 
    ! Sum contributions from each proc ===
    ! Looping on frequencies to avoid problems with the size of the MPI packet
@@ -995,39 +992,18 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
    ABI_FREE(gboundf)
  end if
 
- if (allocated(green_enhigh_w))  then
-   ABI_FREE(green_enhigh_w)
- end if
- if (allocated(gw_gfft))  then
-   ABI_FREE(gw_gfft)
- end if
- if (allocated(wfwfg))  then
-   ABI_FREE(wfwfg)
- end if
- if (allocated(kkweight))  then
-   ABI_FREE(kkweight)
- end if
- if (allocated(omegasf))  then
-   ABI_FREE(omegasf)
- end if
- if (allocated(green_w))  then
-   ABI_FREE(green_w)
- end if
+ ABI_SFREE(green_enhigh_w)
+ ABI_SFREE(gw_gfft)
+ ABI_SFREE(wfwfg)
+ ABI_SFREE(kkweight)
+ ABI_SFREE(omegasf)
+ ABI_SFREE(green_w)
+ ABI_SFREE(sf_head)
+ ABI_SFREE(sf_lwing)
+ ABI_SFREE(sf_uwing)
+ ABI_SFREE(gspfft_igfft)
 
- if (allocated(sf_head))  then
-   ABI_FREE(sf_head)
- end if
- if (allocated(sf_lwing))  then
-   ABI_FREE(sf_lwing)
- end if
- if (allocated(sf_uwing))  then
-   ABI_FREE(sf_uwing)
- end if
- if (allocated(gspfft_igfft))  then
-   ABI_FREE(gspfft_igfft)
- end if
-
- call gsph_free(Gsph_FFT)
+ call Gsph_FFT%free()
 
  if (Psps%usepaw==1) then ! deallocation for PAW.
    call pawcprj_free(Cprj1_bz )
@@ -1077,7 +1053,7 @@ end subroutine cchi0q0
 !! cchi0
 !!
 !! FUNCTION
-!! Main calculation of the independent-particle susceptibility chi0 for qpoint!=0
+!! Main calculation of the independent-particle susceptibility chi0 for qpoint != 0
 !!
 !! INPUTS
 !! use_tr=If .TRUE. valence states are stored in Wfs_val and only resonant transitions are calculated
@@ -1144,8 +1120,8 @@ end subroutine cchi0q0
 !! SOURCE
 
 subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
-& Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,nbvw,ngfft_gw,nfftot_gw,ngfftf,nfftf_tot,&
-& chi0,ktabr,ktabrf,Ltg_q,chi0_sumrule,Wfd,Wfdf,wan)
+                 Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,nbvw,ngfft_gw,nfftot_gw,ngfftf,nfftf_tot,&
+                 chi0,ktabr,ktabrf,Ltg_q,chi0_sumrule,Wfd,Wfdf,wan)
 
 !Arguments ------------------------------------
 !scalars
@@ -1261,19 +1237,19 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
  if (Ep%gwcomp==1) then
    en_high=MAXVAL(qp_energy(Ep%nbnds,:,:)) + Ep%gwencomp
    write(msg,'(a,f8.2,a)')' Using completeness correction with the energy ',en_high*Ha_eV,' [eV]'
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(std_out, msg)
 
    ! Allocation of wfwfg and green_enhigh_w moved inside openmp loop
    ! Init the largest G-sphere contained in the FFT box for the wavefunctions.
-   call gsph_in_fftbox(Gsph_FFT,Cryst,Wfd%ngfft)
+   call Gsph_FFT%in_fftbox(Cryst,Wfd%ngfft)
 
-   !call print_gsphere(Gsph_FFT,unit=std_out,prtvol=10)
+   !call Gsph_FFT%print(unit=std_out,prtvol=10)
 
    ABI_MALLOC(gspfft_igfft,(Gsph_FFT%ng))
    ABI_MALLOC(dummy_gbound,(2*gw_mgfft+8,2))
 
    ! Mapping between G-sphere and FFT box.
-   call gsph_fft_tabs(Gsph_FFT,(/0,0,0/),Wfd%mgfft,Wfd%ngfft,dummy,dummy_gbound,gspfft_igfft)
+   call Gsph_FFT%fft_tabs((/0,0,0/),Wfd%mgfft,Wfd%ngfft,dummy,dummy_gbound,gspfft_igfft)
    ABI_FREE(dummy_gbound)
 
    if (Psps%usepaw==1) then  ! * Prepare the onsite contributions on the GW FFT mesh.
@@ -1313,14 +1289,14 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
  end if
 
  write(msg,'(a,i2,2a,i2)')&
-&  ' Using spectral method for the imaginary part = ',Ep%spmeth,ch10,&
-&  ' Using symmetries to sum only over the IBZ_q  = ',Ep%symchi
- call wrtout(std_out,msg,'COLL')
+  ' Using spectral method for the imaginary part = ',Ep%spmeth,ch10,&
+  ' Using symmetries to sum only over the IBZ_q  = ',Ep%symchi
+ call wrtout(std_out, msg)
 
  if (use_tr) then
    ! Special care has to be taken in metals and/or spin dependent systems
    ! as Wfs_val might contain unoccupied states.
-   call wrtout(std_out,' Using faster algorithm based on time reversal symmetry.','COLL')
+   call wrtout(std_out,' Using faster algorithm based on time reversal symmetry.')
  else
    call wrtout(std_out,' Using slow algorithm without time reversal symmetry.')
  end if
@@ -1338,14 +1314,14 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
      end if
 
      ! Get ik_ibz, non-symmorphic phase, ph_mkt, and symmetries from ik_bz.
-     call get_BZ_item(Kmesh,ik_bz,kbz,ik_ibz,isym_k,itim_k)
+     call kmesh%get_BZ_item(ik_bz,kbz,ik_ibz,isym_k,itim_k)
 
      ! Get index of k-q in the BZ, stop if not found as the weight=one/nkbz is not correct.
-     call get_BZ_diff(Kmesh,kbz,qpoint,ikmq_bz,g0,nfound)
+     call kmesh%get_BZ_diff(kbz,qpoint,ikmq_bz,g0,nfound)
      ABI_CHECK(nfound==1,"Check kmesh")
 
      ! Get ikmq_ibz, non-symmorphic phase, ph_mkmqt, and symmetries from ikmq_bz.
-     call get_BZ_item(Kmesh,ikmq_bz,kmq_bz,ikmq_ibz,isym_kmq,itim_kmq)
+     call kmesh%get_BZ_item(ikmq_bz,kmq_bz,ikmq_ibz,isym_kmq,itim_kmq)
 
      call chi0_bbp_mask(Ep,use_tr,QP_BSt,mband,ikmq_ibz,ik_ibz,spin,spin_fact,bbp_mask)
 
@@ -1367,11 +1343,11 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
 
  SELECT CASE (Ep%spmeth)
  CASE (0)
-   call wrtout(std_out,' Calculating chi0(q,omega,G,G")','COLL')
+   call wrtout(std_out,' Calculating chi0(q,omega,G,G")')
    ! Allocation of green_w moved inside openmp loop
 
  CASE (1, 2)
-   call wrtout(std_out,' Calculating Im chi0(q,omega,G,G")','COLL')
+   call wrtout(std_out,' Calculating Im chi0(q,omega,G,G")')
 
    ! Find Max and min resonant transitions for this q, report also treated by this proc.
    call make_transitions(Wfd,1,Ep%nbnds,nbvw,nsppol,Ep%symchi,Cryst%timrev,GW_TOL_DOCC,&
@@ -1404,13 +1380,13 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
  END SELECT
 
  nkpt_summed=Kmesh%nbz
- if (Ep%symchi==1) then
-   nkpt_summed=Ltg_q%nibz_ltg
-   call littlegroup_print(Ltg_q,std_out,Dtset%prtvol,'COLL')
+ if (Ep%symchi == 1) then
+   nkpt_summed = Ltg_q%nibz_ltg
+   call Ltg_q%print(std_out, Dtset%prtvol, mode_paral='COLL')
  end if
 
  write(msg,'(a,i6,a)')' Calculation status : ',nkpt_summed,' to be completed '
- call wrtout(std_out,msg,'COLL')
+ call wrtout(std_out, msg)
 
  ! ============================================
  ! === Begin big fat loop over transitions ===
@@ -1472,15 +1448,15 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
      call wrtout(std_out,msg,'PERS')
 
      ! Get ik_ibz, non-symmorphic phase, ph_mkt, and symmetries from ik_bz.
-     call get_BZ_item(Kmesh,ik_bz,kbz,ik_ibz,isym_k,itim_k,ph_mkt,umklp_k,isirred_k)
+     call kmesh%get_BZ_item(ik_bz,kbz,ik_ibz,isym_k,itim_k,ph_mkt,umklp_k,isirred_k)
 
-     call get_BZ_diff(Kmesh,kbz,qpoint,ikmq_bz,G0,nfound)
+     call kmesh%get_BZ_diff(kbz,qpoint,ikmq_bz,G0,nfound)
      if (nfound==0) then
        ABI_ERROR("Cannot find kbz - qpoint in Kmesh")
      end if
 
      ! Get ikmq_ibz, non-symmorphic phase, ph_mkmqt, and symmetries from ikmq_bz.
-     call get_BZ_item(Kmesh,ikmq_bz,kmq_bz,ikmq_ibz,isym_kmq,itim_kmq,ph_mkmqt,umklp_kmq,isirred_kmq)
+     call kmesh%get_BZ_item(ikmq_bz,kmq_bz,ikmq_ibz,isym_kmq,itim_kmq,ph_mkmqt,umklp_kmq,isirred_kmq)
 
 !BEGIN DEBUG
      !if (ANY(umklp_k /=0)) then
@@ -1516,7 +1492,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
      !  a) FFT index of G-G0.
      !  b) gw_gbound table for the zero-padded FFT performed in rhotwg.
      ABI_MALLOC(gw_gbound,(2*gw_mgfft+8,2))
-     call gsph_fft_tabs(Gsph_epsG0,g0,gw_mgfft,ngfft_gw,use_padfft,gw_gbound,igfftepsG0)
+     call Gsph_epsG0%fft_tabs(g0,gw_mgfft,ngfft_gw,use_padfft,gw_gbound,igfftepsG0)
      if ( ANY(gw_fftalga == [2, 4]) ) use_padfft=0 ! Pad-FFT is not coded in rho_tw_g
 #ifdef FC_IBM
  ! XLF does not deserve this optimization (problem with [v67mbpt][t03])
@@ -1529,7 +1505,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
 
      if (Dtset%pawcross==1) then
         ABI_MALLOC(gboundf,(2*mgfftf+8,2))
-       call gsph_fft_tabs(Gsph_epsG0,g0,mgfftf,ngfftf,use_padfftf,gboundf,igfftepsG0f)
+       call Gsph_epsG0%fft_tabs(g0,mgfftf,ngfftf,use_padfftf,gboundf,igfftepsG0f)
        if (ANY(gw_fftalga == [2, 4])) use_padfftf=0
        if (use_padfftf==0) then
          ABI_FREE(gboundf)
@@ -1814,15 +1790,10 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
    ABI_FREE(rhotwg)
    ABI_FREE(tabr_k)
    ABI_FREE(tabr_kmq)
-   if (allocated(green_w)) then
-     ABI_FREE(green_w)
-   end if
-   if (allocated(wfwfg)) then
-     ABI_FREE(wfwfg)
-   end if
-   if (allocated(green_enhigh_w)) then
-     ABI_FREE(green_enhigh_w)
-   end if
+
+   ABI_SFREE(green_w)
+   ABI_SFREE(wfwfg)
+   ABI_SFREE(green_enhigh_w)
    if (Psps%usepaw==1) then
      call pawcprj_free(Cprj2_k)
      ABI_FREE(Cprj2_k)
@@ -1859,9 +1830,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
    call hilbert_transform(Ep%npwe,Ep%nomega,Ep%nomegasf,my_wl,my_wr,kkweight,sf_chi0,chi0,Ep%spmeth)
 
    ! Deallocate here before xmpi_sum
-   if (allocated(sf_chi0)) then
-     ABI_FREE(sf_chi0)
-   end if
+   ABI_SFREE(sf_chi0)
 
    ! Collective sum of the contributions.
    ! Looping over frequencies to avoid problems with the size of the MPI packet
@@ -1913,20 +1882,12 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
  ! =====================
  ABI_FREE(bbp_ks_distrb)
 
- if (allocated(gw_gfft)) then
-   ABI_FREE(gw_gfft)
- end if
- if (allocated(kkweight)) then
-   ABI_FREE(kkweight)
- end if
- if (allocated(omegasf)) then
-   ABI_FREE(omegasf)
- end if
- if (allocated(gspfft_igfft)) then
-   ABI_FREE(gspfft_igfft)
- end if
+ ABI_SFREE(gw_gfft)
+ ABI_SFREE(kkweight)
+ ABI_SFREE(omegasf)
+ ABI_SFREE(gspfft_igfft)
 
- call gsph_free(Gsph_FFT)
+ call Gsph_FFT%free()
 
  ! deallocation for PAW.
  if (Psps%usepaw==1) then
@@ -2165,7 +2126,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
    write(msg_tmp,'(1x,i5,a,2x,3f12.6,a)') iqlwl,')',qlwl(:,iqlwl),ch10
    msg=TRIM(msg)//msg_tmp
  end do
- call wrtout(std_out,msg,'COLL')
+ call wrtout(std_out, msg)
  !
  ! delta_ene =  e_{b,k-q} - e_{b,k} = -q. <b,k| i[H,r] |b,k> + O(q^2).
  delta_ene = zero
@@ -2253,7 +2214,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
 
  ! TODO take into account the case of random k-meshes.
  kptopt=3
- call kmesh_init(Kmesh,Cryst,Wfd%nkibz,Wfd%kibz,kptopt)
+ call Kmesh%init(Cryst,Wfd%nkibz,Wfd%kibz,kptopt)
  !
  !=== Get the FFT index of $ (R^{-1}(r-\tau)) $ ===
  !* S= $\transpose R^{-1}$ and k_BZ = S k_IBZ
@@ -2290,11 +2251,11 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
    ABI_BUG("Wrong nsppol")
  END SELECT
 
- use_umklp=0
- call littlegroup_init(q0,Kmesh,Cryst,use_umklp,Ltg_q,Ep%npwepG0,gvec=Gsph_epsG0%gvec)
+ use_umklp = 0
+ call Ltg_q%init(q0, Kmesh, Cryst, use_umklp, Ep%npwepG0, gvec=Gsph_epsG0%gvec)
 
  write(msg,'(a,i2)')' Using symmetries to sum only over the IBZ_q  = ',Ep%symchi
- call wrtout(std_out,msg,'COLL')
+ call wrtout(std_out, msg)
  !
  ! === Evaluate oscillator matrix elements btw partial waves. Note that q=Gamma is used.
  if (Psps%usepaw==1) then
@@ -2317,7 +2278,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
  ABI_MALLOC(gw_gbound,(2*gw_mgfft+8,2))
  ABI_MALLOC(igffteps0,(Gsph_epsG0%ng))
 
- call gsph_fft_tabs(Gsph_epsG0, [0, 0, 0], gw_mgfft,ngfft_gw,use_padfft,gw_gbound,igffteps0)
+ call Gsph_epsG0%fft_tabs([0, 0, 0], gw_mgfft,ngfft_gw,use_padfft,gw_gbound,igffteps0)
  if ( ANY(gw_fftalga == [2, 4]) ) use_padfft=0 ! Pad-FFT is not coded in rho_tw_g
  if (use_padfft==0) then
    ABI_FREE(gw_gbound)
@@ -2327,7 +2288,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
  nkpt_summed=Kmesh%nbz
  if (Ep%symchi/=0) then
    nkpt_summed=Ltg_q%nibz_ltg
-   call littlegroup_print(Ltg_q,std_out,Wfd%prtvol,'COLL')
+   call Ltg_q%print(std_out, Wfd%prtvol, mode_paral='COLL')
  end if
  !
  ! ============================================
@@ -2350,7 +2311,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
      end if
 
      ! Get ik_ibz, non-symmorphic phase and symmetries from ik_bz.
-     call get_BZ_item(Kmesh,ik_bz,kbz,ik_ibz,isym_k,itim_k,ph_mkt)
+     call kmesh%get_BZ_item(ik_bz,kbz,ik_ibz,isym_k,itim_k,ph_mkt)
      tabr_k=ktabr(:,ik_bz) ! Table for rotated FFT points
      spinrot_kbz(:)=Cryst%spinrot(:,isym_k)
      nband_k=Wfd%nband(ik_ibz,spin)
@@ -2464,7 +2425,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
 
  do iomega=1,MIN(Ep%nomega,NOMEGA_PRINTED)
    write(msg,'(1x,a,i4,a,2f9.4,a)')' chi0_intra(G,G'') at the ',iomega,' th omega',Ep%omega(iomega)*Ha_eV,' [eV]'
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(std_out, msg)
    call print_arr(chi0(:,:,iomega),unit=std_out)
  end do
 
@@ -2488,8 +2449,8 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
    ABI_FREE(Pwij)
  end if
 
- call littlegroup_free(Ltg_q)
- call kmesh_free(Kmesh)
+ call Ltg_q%free()
+ call Kmesh%free()
 
  DBG_EXIT("COLL")
 

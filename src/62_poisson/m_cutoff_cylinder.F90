@@ -119,11 +119,11 @@ subroutine cutoff_cylinder(nq,qpt,ng,gvec,rcut,hcyl,pdir,boxcenter,rprimd,vccut,
  hcyl_    =hcyl      ! Lenght of cylinder along z, only if method==2
 
  write(msg,'(3a,2(a,i5,a),a,f8.5)')ch10,&
-&  ' cutoff_cylinder: Info on the quadrature method : ',ch10,&
-&  '  Quadrature scheme      = ',qopt_,ch10,&
-&  '  Max number of attempts = ',ntrial_,ch10,&
-&  '  Fractional accuracy    = ',accuracy_
- call wrtout(std_out,msg,'COLL')
+  ' cutoff_cylinder: Info on the quadrature method : ',ch10,&
+  '  Quadrature scheme      = ',qopt_,ch10,&
+  '  Max number of attempts = ',ntrial_,ch10,&
+  '  Fractional accuracy    = ',accuracy_
+ call wrtout(std_out, msg)
  !
  ! === From reduced to Cartesian coordinates ===
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
@@ -150,7 +150,7 @@ subroutine cutoff_cylinder(nq,qpt,ng,gvec,rcut,hcyl,pdir,boxcenter,rprimd,vccut,
    ! === Infinite cylinder, interaction is zeroed outside the Wigner-Seitz cell ===
    ! * Beigi"s expression holds only if the BZ is sampled only along z.
    write(msg,'(2(a,f8.4))')' cutoff_cylinder: Using Beigi''s Infinite cylinder '
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(std_out, msg)
    if (ANY(qcart(1:2,:)>SMALL)) then
      write(std_out,*)' qcart = ',qcart(:,:)
      write(msg,'(5a)')&
@@ -182,7 +182,7 @@ subroutine cutoff_cylinder(nq,qpt,ng,gvec,rcut,hcyl,pdir,boxcenter,rprimd,vccut,
      !if (q_is_zero) igs=2
      qc(:)=qcart(:,iq)
      write(msg,'(2(a,i3))')' entering loop iq: ',iq,' with igs = ',igs
-     call wrtout(std_out,msg,'COLL')
+     call wrtout(std_out, msg)
 
      do ig=igs,ng
        icount=ig+(iq-1)*ng; if (icount<my_start.or.icount>my_stop) CYCLE
@@ -241,13 +241,13 @@ subroutine cutoff_cylinder(nq,qpt,ng,gvec,rcut,hcyl,pdir,boxcenter,rprimd,vccut,
 
    if (ABS(hcyl_)>tol12) then
      write(msg,'(2(a,f8.4))')' cutoff_cylinder: using finite cylinder of length= ',hcyl_,' rcut= ',rcut_
-     call wrtout(std_out,msg,'COLL')
+     call wrtout(std_out, msg)
      hcyl2=hcyl_**2
      rcut2=rcut_**2
 
      do iq=1,nq
        write(msg,'(a,i3)')' entering loop iq: ',iq
-       call wrtout(std_out,msg,'COLL')
+       call wrtout(std_out, msg)
        qc(:)=qcart(:,iq)
        do ig=1,ng
          ! === No singularity occurs in finite cylinder, thus start from 1 ===
@@ -298,10 +298,10 @@ subroutine cutoff_cylinder(nq,qpt,ng,gvec,rcut,hcyl,pdir,boxcenter,rprimd,vccut,
 
    else
      ! === Infinite cylinder ===
-     call wrtout(std_out,' cutoff_cylinder: using Rozzi''s method with infinite cylinder ','COLL')
+     call wrtout(std_out,' cutoff_cylinder: using Rozzi''s method with infinite cylinder ')
      do iq=1,nq
        write(msg,'(a,i3)')' entering loop iq: ',iq
-       call wrtout(std_out,msg,'COLL')
+       call wrtout(std_out, msg)
        qc(:)=qcart(:,iq)
        do ig=1,ng
          icount=ig+(iq-1)*ng ; if (icount<my_start.or.icount>my_stop) CYCLE
@@ -338,7 +338,7 @@ subroutine cutoff_cylinder(nq,qpt,ng,gvec,rcut,hcyl,pdir,boxcenter,rprimd,vccut,
  END SELECT
  !
  ! === Collect vccut on each node ===
- call xmpi_sum(vccut,comm,ierr)
+ call xmpi_sum(vccut, comm, ierr)
 
  ABI_FREE(qcart)
 

@@ -52,7 +52,7 @@ MODULE m_numeric_tools
  public :: lfind                 ! Find the index of the first occurrence of .True. in a logical array.
  public :: list2blocks           ! Given a list of integers, find the number of contiguos groups of values.
  public :: mask2blocks           ! Find groups of .TRUE. elements in a logical mask.
- public :: linfit                ! Perform a linear fit, y=ax+b, of data
+ public :: linfit                ! Perform a linear fit, y = ax + b, of data
  public :: llsfit_svd            ! Linear least squares fit with SVD of an user-defined set of functions
  public :: polyn_interp          ! Polynomial interpolation with Nevilles"s algorithms, error estimate is reported
  public :: quadrature            ! Driver routine for performing quadratures in finite domains using different algorithms
@@ -396,9 +396,9 @@ pure function linspace(start, stop, nn)
 
  select case (nn)
  case (1:)
-   length = stop-start
+   length = stop - start
    do ii=1,nn
-     linspace(ii)=start+length*(ii-1)/(nn-1)
+     linspace(ii) = start + length * (ii-1) / (nn-1)
    end do
 
  case (0)
@@ -3741,11 +3741,11 @@ end subroutine print_arr1d_spc
 !!
 !! SOURCE
 
-subroutine print_arr1d_dpc(arr,max_r,unit,mode_paral)
+subroutine print_arr1d_dpc(arr, max_r, unit, mode_paral)
 
 !Arguments ------------------------------------
 !scalars
- integer,optional,intent(in) :: unit,max_r
+ integer,optional,intent(in) :: unit, max_r
  character(len=4),optional,intent(in) :: mode_paral
 !arrays
  complex(dpc),intent(in) :: arr(:)
@@ -3766,15 +3766,15 @@ subroutine print_arr1d_dpc(arr,max_r,unit,mode_paral)
   write(msg,'(2a)')' Wrong value of mode_paral ',mode
   ABI_BUG(msg)
  end if
- !
- ! === Print out matrix ===
+
+ ! Print out matrix.
  nr=SIZE(arr,DIM=1) ; if (mr>nr) mr=nr
 
  write(fmth,*)'(6x,',mr,'(i2,6x))'
  write(fmt1,*)'(3x,',mr,'f8.3)'
 
  write(msg,fmth)(ii,ii=1,mr)
- call wrtout(unt,msg,mode) !header
+ call wrtout(unt,msg,mode) ! header
  write(msg,fmt1)REAL (arr(1:mr))
  call wrtout(unt,msg,mode) !real part
  write(msg,fmt1)AIMAG(arr(1:mr))
@@ -3797,11 +3797,11 @@ end subroutine print_arr1d_dpc
 !!
 !! SOURCE
 
-subroutine print_arr2d_spc(arr,max_r,max_c,unit,mode_paral)
+subroutine print_arr2d_spc(arr, max_r, max_c, unit, mode_paral)
 
 !Arguments ------------------------------------
 !scalars
- integer,optional,intent(in) :: unit,max_r,max_c
+ integer,optional,intent(in) :: unit, max_r, max_c
  character(len=4),optional,intent(in) :: mode_paral
 !arrays
  complex(spc),intent(in) :: arr(:,:)
@@ -3894,12 +3894,12 @@ subroutine print_arr2d_dpc(arr,max_r,max_c,unit,mode_paral)
  write(fmt2,*)'(5x   ,',mc,'f8.3,a)'
 
  write(msg,fmth)(jj,jj=1,mc)
- call wrtout(unt,msg,mode) !header
+ call wrtout(unt, msg, mode) ! header
  do ii=1,mr
    write(msg,fmt1)ii,REAL(arr(ii,1:mc))
-   call wrtout(unt,msg,mode) !real part
+   call wrtout(unt,msg,mode) ! real part
    write(msg,fmt2)  AIMAG(arr(ii,1:mc)),ch10
-   call wrtout(unt,msg,mode) !imag part
+   call wrtout(unt,msg,mode) ! imag part
  end do
 
 end subroutine print_arr2d_dpc
@@ -4066,15 +4066,13 @@ end subroutine calculate_pade_a
 !!
 !! SOURCE
 
-function newrap_step(z,f,df)
+complex(dp) function newrap_step(z,f,df)
 
 !Arguments ------------------------------------
 !scalars
  complex(dpc),intent(in) :: z,f,df
- complex(dpc) :: newrap_step
 
 !Local variables-------------------------------
-!scalars
  real(dp) :: dfm2
 ! *************************************************************************
 
