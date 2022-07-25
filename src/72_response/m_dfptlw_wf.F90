@@ -306,9 +306,9 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,&
    d3etot_t1_k(2)=d3etot_t1_k(2)+occ_k(iband)*doti
 
    !AZ_test_ini******************************************************************
-   write(i1dir_text) i1dir
-   write(i2dir_text) i2dir
-   write(i3dir_text) i3dir
+   write(i1dir_text,'(i8)') i1dir
+   write(i2dir_text.'(i8)') i2dir
+   write(i3dir_text,'(i8)') i3dir
    file_name = 'T_1_i1dir_'//trim(adjustl(i1dir_text))//'_i2dir_'//&
  & trim(adjustl(i2dir_text))//'_i3dir_'//trim(adjustl(i3dir_text))//'.dat'
    open(unit=999,file=file_name,action='write',status='replace')
@@ -383,9 +383,9 @@ if (.not.samepert) then
       d3etot_t2_k(2)=d3etot_t2_k(2)-cprodi*occ_k(iband)
 
       !AZ_test_ini******************************************************************
-      write(i1dir_text) i1dir
-      write(i2dir_text) i2dir
-      write(i3dir_text) i3dir
+      write(i1dir_text,'(i8)') i1dir
+      write(i2dir_text,'(i8)') i2dir
+      write(i3dir_text,'(i8)') i3dir
       file_name = 'T_2_i1dir_'//trim(adjustl(i1dir_text))//'_i2dir_'//&
     & trim(adjustl(i2dir_text))//'_i3dir_'//trim(adjustl(i3dir_text))//'.dat'
       open(unit=999,file=file_name,action='write',status='replace')
@@ -441,9 +441,9 @@ end if !samepert
      d3etot_t3_k(2)=d3etot_t3_k(2)-cprodi*occ_k(iband)
 
      !AZ_test_ini******************************************************************
-     write(i1dir_text) i1dir
-     write(i2dir_text) i2dir
-     write(i3dir_text) i3dir
+     write(i1dir_text,'(i8)') i1dir
+     write(i2dir_text,'(i8)') i2dir
+     write(i3dir_text,'(i8)') i3dir
      file_name = 'T_3_i1dir_'//trim(adjustl(i1dir_text))//'_i2dir_'//&
    & trim(adjustl(i2dir_text))//'_i3dir_'//trim(adjustl(i3dir_text))//'.dat'
      open(unit=999,file=file_name,action='write',status='replace')
@@ -567,9 +567,9 @@ if (.not.samepert) then
        d3etot_t4_k(2,idq)=d3etot_t4_k(2,idq)+doti*occ_k(iband)
 
        !AZ_test_ini******************************************************************
-       write(i1dir_text) i1dir
-       write(i2dir_text) i2dir
-       write(i3dir_text) i3dir
+       write(i1dir_text,'(i8)') i1dir
+       write(i2dir_text,'(i8)') i2dir
+       write(i3dir_text,'(i8)') i3dir
        file_name = 'T_4_i1dir_'//trim(adjustl(i1dir_text))//'_i2dir_'//&
      & trim(adjustl(i2dir_text))//'_i3dir_'//trim(adjustl(i3dir_text))//'.dat'
        open(unit=999,file=file_name,action='write',status='replace')
@@ -716,9 +716,9 @@ if (.not.samepert) then
      d3etot_t5_k(2,idq)=d3etot_t5_k(2,idq)+doti*occ_k(iband)
 
      !AZ_test_ini******************************************************************
-     write(i1dir_text) i1dir
-     write(i2dir_text) i2dir
-     write(i3dir_text) i3dir
+     write(i1dir_text,'(i8)') i1dir
+     write(i2dir_text,'(i8)') i2dir
+     write(i3dir_text,'(i8)') i3dir
      file_name = 'T_4_i1dir_'//trim(adjustl(i1dir_text))//'_i2dir_'//&
    & trim(adjustl(i2dir_text))//'_i3dir_'//trim(adjustl(i3dir_text))//'.dat'
      open(unit=999,file=file_name,action='write',status='replace')

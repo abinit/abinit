@@ -300,9 +300,9 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3e_pert1,d3e_pert2,d3etot,d3etot
 & kxc,mpi_enreg,nfft,ngfft,nkxc,nspden,rho1g1,rho1r1,rho2r1,ucvol)
     
  !AZ_test_ini******************************************************************
- write(i1dir_text) i1dir
- write(i2dir_text) i2dir
- write(i3dir_text) i3dir
+ write(i1dir_text,'(i8)') i1dir
+ write(i2dir_text,'(i8)') i2dir
+ write(i3dir_text,'(i8)') i3dir
  file_name = 'T_elec_i1dir_'//trim(adjustl(i1dir_text))//'_i2dir_'//&
  & trim(adjustl(i2dir_text))//'_i3dir_'//trim(adjustl(i3dir_text))//'.dat'
  open(unit=999,file=file_name,action='write',status='replace')
