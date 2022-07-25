@@ -48,7 +48,8 @@ module m_kpts
                                      ! modulo time reversal if appropriate.
  public :: kpts_sort                 ! Order list of k-points according to the norm.
  public :: kpts_pack_in_stars        !
- public :: kpts_map
+ public :: kpts_map                  ! Compute symmetry table.
+ public :: kpts_map_print            ! Print the symmetry table bz2ibz to a list of units with header.
  public :: listkk                    ! Find correspondence between two set of k-points.
  public :: getkgrid                  ! Compute the grid of k points in the irreducible Brillouin zone.
  !FIXME: Deprecated
@@ -589,6 +590,7 @@ end subroutine kpts_pack_in_stars
 !! kpts_map
 !!
 !! FUNCTION
+!!  Compute symmetry table.
 !!
 !! INPUTS
 !!
@@ -645,6 +647,69 @@ integer function kpts_map(mode, timrev, cryst, krank, nkpt2, kpt2, map, qpt, dks
  if (ierr /= 0) call wrtout(std_out, sjoin(" CRITICAL WARNING: dksqmax ", ftoa(dksqmax), " > ", ftoa(my_tol)))
 
 end function kpts_map
+!!***
+
+!!****f* m_kpts/kpts_map_print
+!! NAME
+!! kpts_map_print
+!!
+!! FUNCTION
+!!  Print the symmetry table bz2ibz associated to the BZ bz and the IBZ ibz
+!!  to a list of units with header. Mode correspons to the value passed to kpts_map
+!!  If prtvol is 0, max 200 entries are printed.
+!!
+!! SOURCE
+
+subroutine kpts_map_print(units, header, mode, bz, ibz, bz2ibz, prtvol)
+
+!Arguments ------------------------------------
+!scalars
+ character(len=*),intent(in) :: header, mode
+ integer,intent(in) :: prtvol, units(:), bz2ibz(:,:)
+ real(dp),intent(in) :: bz(:,:), ibz(:,:)
+ !class(crystal_t),intent(in) :: cryst
+!arrays
+
+!Local variables-------------------------------
+!scalars
+ integer :: ik_ibz, ik_bz, isym_k, trev_k, g0_k(3)
+ logical :: isirr_k
+ character(len=5000) :: msg
+
+! *************************************************************************
+
+ call wrtout(units, " "//trim(header))
+
+ select case (mode)
+ case ("symrec")
+   call wrtout(units, &
+     " Legend: bz = TS(ibz) + g0 where isym is the index of the symrec operation S and itim is 1 if TR is used.")
+ case ("symrel")
+   call wrtout(units, &
+       " Legend: bz = TS^t(ibz) + g0 where isym is the index of the symrel operation S and itim is 1 if TR is used.")
+ case default
+   ABI_ERROR(sjoin("Invalid mode:", mode))
+ end select
+
+ ! yes, I'm a barbarian but Fortran string formatting is a pain.
+ msg = "        BZ                                       IBZ                                       ibz  isym  itim  g0"
+ call wrtout(units, msg)
+
+ do ik_bz=1,size(bz2ibz, dim=2)
+   if (prtvol == 0 .and. ik_bz > 200) then
+     call wrtout(units, "prtvol = 0, max 200 points are written"); exit
+   end if
+   ik_ibz = bz2ibz(1, ik_bz); isym_k = bz2ibz(2, ik_bz)
+   trev_k = bz2ibz(6, ik_bz); g0_k = bz2ibz(3:5, ik_bz)
+   isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
+   write(msg, '(i6, 2x, 2(a,2x), 3(i4,2x), a)' ) &
+     ik_bz, trim(ktoa(bz(:, ik_bz))), trim(ktoa(ibz(:,ik_ibz))), ik_ibz, isym_k, trev_k, trim(ltoa(g0_k))
+   call wrtout(units, msg)
+ end do
+
+ call wrtout(units, ch10)
+
+end subroutine kpts_map_print
 !!***
 
 !!****f* m_kpts/listkk

@@ -894,20 +894,20 @@ subroutine time_fftbox(Ftest,isign,inplace,header,Ftprof)
  call cwtime(cpu_time,wall_time,gflops,"start")
 
  ! No augmentation here.
- call fftbox_plan3_many(plan,ndat,Ftest%ngfft(1:3),Ftest%ngfft(1:3),Ftest%ngfft(7),isign)
+ call plan%many(ndat, Ftest%ngfft(1:3), Ftest%ngfft(1:3), Ftest%ngfft(7), isign)
 
  select case (inplace)
  case (0)
    do icall=1,NCALLS_FOR_TEST
      ifft = empty_cache(CACHE_KBSIZE)
-     call fftbox_execute(plan,ffc,ggc)
+     call plan%execute(ffc, ggc)
      ! Store results at the first call.
      if (icall==1) results = ggc
    end do
  case (1)
    do icall=1,NCALLS_FOR_TEST
      ifft = empty_cache(CACHE_KBSIZE)
-     call fftbox_execute(plan,ffc)
+     call plan%execute(ffc)
      ! Store results at the first call.
      if (icall==1) results = ffc
    end do
