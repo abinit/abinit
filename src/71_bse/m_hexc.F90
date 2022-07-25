@@ -39,7 +39,7 @@ MODULE m_hexc
  use m_hide_blas,         only : xdotc, xgemv
  use m_numeric_tools,     only : print_arr, symmetrize, hermitianize, wrap2_pmhalf
  use m_crystal,           only : crystal_t
- use m_bz_mesh,           only : kmesh_t, findqg0, get_bz_item
+ use m_bz_mesh,           only : kmesh_t, findqg0
  use m_double_grid,       only : double_grid_t, get_kpt_from_indices_coarse, compute_corresp
  use m_wfd,               only : wfdgw_t
  use m_bse_io,            only : exc_read_rcblock, exc_write_optme, exc_ham_ncwrite
@@ -882,7 +882,7 @@ subroutine hexc_compute_hinterp(BSp,hsize_coarse,hsize_dense,hmat,grid,nbnd_coar
        !call findqg0(iq_bz,g0,kmkp,Qmesh_dense%nbz,Qmesh_dense%bz,BSp%mG0)
 
        !! * Get iq_ibz, and symmetries from iq_bz
-       !call get_BZ_item(Qmesh_dense,iq_bz,qbz,iq_ibz,isym_q,itim_q)
+       !call qmesh_dense%get_BZ_item(Qmesh_dense,iq_bz,qbz,iq_ibz,isym_q,itim_q)
 
        !if(iq_ibz > 1 .and. ABS(vc_sqrt_qbz - Vcp_dense%vc_sqrt(1,iq_ibz)) > 1.e-3) then
        !   write(*,*) "vc_sqrt_qbz = ",vc_sqrt_qbz

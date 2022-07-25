@@ -210,6 +210,7 @@ ABI_TOPICS = [
     "Git",
     "GSintroduction",
     "GW",
+    "GWR",
     "GWls",
     "Hybrids",
     "k-points",

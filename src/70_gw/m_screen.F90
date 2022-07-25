@@ -37,11 +37,10 @@ MODULE m_screen
  use m_numeric_tools,  only : print_arr
  use m_geometry,       only : normv
  use m_crystal,        only : crystal_t
- use m_bz_mesh,        only : kmesh_t, get_BZ_item, has_bz_item
+ use m_bz_mesh,        only : kmesh_t
  use m_gsphere,        only : gsphere_t
  use m_vcoul,          only : vcoul_t
- use m_io_screening,   only : hscr_free, hscr_io, read_screening, write_screening, hscr_print, &
-&                             hscr_copy, hscr_t, hscr_bcast, hscr_from_file, ncname_from_id, em1_ncname, chi0_ncname
+ use m_io_screening,   only : read_screening, hscr_t, ncname_from_id, em1_ncname
  use m_ppmodel,        only : ppmodel_t, ppm_init, ppm_free, ppm_nullify, PPM_NONE, new_setup_ppmodel, ppm_symmetrizer
 
  implicit none
@@ -919,9 +918,9 @@ subroutine screen_init(W,W_Info,Cryst,Qmesh,Gsph,Vcp,ifname,mqmem,npw_asked,&
    ! Open file and check its content.
    if (endswith(W%fname, ".nc")) W%iomode = IO_MODE_ETSF
 
-   call hscr_from_file(hscr,W%fname,fform,comm)
+   call hscr%from_file(W%fname, fform, comm)
    ! Echo of the header
-   if (my_rank == master .and. W%prtvol>0) call hscr_print(hscr)
+   if (my_rank == master .and. W%prtvol>0) call hscr%print()
 
    ! Communicate the header and copy basic parameters.
    !call hscr_bcast(Hscr,master,my_rank,comm)
@@ -1054,7 +1053,7 @@ subroutine screen_init(W,W_Info,Cryst,Qmesh,Gsph,Vcp,ifname,mqmem,npw_asked,&
      nqlwl=0; is_qeq0= (normv(W%qibz(:,iq_ibz),Cryst%gmet,'G')<GW_TOLQ0)
      !
      ! Calculate the model. Note that mdielf awaits an index in the BZ.
-     found = has_bz_item(Qmesh,Qmesh%ibz(:,iq_ibz),iq_bz,g0)
+     found = qmesh%has_bz_item(Qmesh%ibz(:,iq_ibz),iq_bz,g0)
      if (.not.found.or.ANY(g0/=0)) then
        ABI_ERROR("Problem in retrieving ibz point")
      end if
@@ -1105,7 +1104,7 @@ subroutine screen_init(W,W_Info,Cryst,Qmesh,Gsph,Vcp,ifname,mqmem,npw_asked,&
    call fgg_free(W%Fgg,keep_q=W%keep_q)
  end if
 
- if (from_file) call hscr_free(Hscr)
+ if (from_file) call Hscr%free()
 
  DBG_EXIT("COLL")
 
@@ -1171,7 +1170,7 @@ subroutine screen_symmetrizer(W,iq_bz,Cryst,Gsph,Qmesh,Vcp)
 
  npw = W%npw; nqibz = W%nqibz; nomega = W%nomega
 
- call get_bz_item(Qmesh,iq_bz,qbz,iq_ibz,isym_q,itim_q,isirred=q_isirred)
+ call qmesh%get_bz_item(iq_bz,qbz,iq_ibz,isym_q,itim_q,isirred=q_isirred)
  !
  ! ========================================================
  ! ==== Branching for in-core or out-of-core solutions ====
@@ -1413,7 +1412,7 @@ subroutine em1_symmetrize_ip(iq_bz,npwc,nomega,Gsph,Qmesh,epsm1)
 ! *********************************************************************
 
  ! * Get iq_ibz, and symmetries from iq_ibz.
- call get_BZ_item(Qmesh,iq_bz,qbz,iq_ibz,isym_q,itim_q,isirred=q_isirred)
+ call qmesh%get_BZ_item(iq_bz,qbz,iq_ibz,isym_q,itim_q,isirred=q_isirred)
 
  if (q_isirred) RETURN ! Nothing to do
 
@@ -1504,8 +1503,8 @@ subroutine em1_symmetrize_op(iq_bz,npwc,nomega,Gsph,Qmesh,in_epsm1,out_epsm1)
 
 ! *********************************************************************
 
- ! * Get iq_ibz, and symmetries from iq_ibz.
- call get_BZ_item(Qmesh,iq_bz,qbz,iq_ibz,isym_q,itim_q,isirred=q_isirred)
+ ! Get iq_ibz, and symmetries from iq_ibz.
+ call qmesh%get_BZ_item(iq_bz,qbz,iq_ibz,isym_q,itim_q,isirred=q_isirred)
 
  if (q_isirred) then
    out_epsm1 = in_epsm1; return
