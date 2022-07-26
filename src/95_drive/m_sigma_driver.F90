@@ -1639,7 +1639,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  ! Be careful because results from ppmodel cannot be used for AC
  ! FIXME check ks_energy or qp_energy (in case of SCGW?)
 
- if (mod10==SIG_GW_AC) then
+ if (mod10 == SIG_GW_AC) then
    ! All these quantities will be passed to csigme
    ! if I skipped the self-consistent part then here I have to use fermi
    qp_ebands%eig = qp_ebands%eig -qp_ebands%fermie
@@ -3683,7 +3683,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
 
  ABI_FREE(gvec_kss)
  !
- ! === Get Fourier components of the Coulombian for all q-points in the IBZ ===
+ ! === Get Fourier components of the Coulomb term for all q-points in the IBZ ===
  ! * If required, use a cutoff in the interaction
  ! * Pcv%vc_sqrt contains Vc^{-1/2}
  ! * Setup also the analytical calculation of the q->0 component

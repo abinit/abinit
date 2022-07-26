@@ -202,11 +202,16 @@ module m_slk
     ! Transpose matrix
 
    procedure :: change_size_blocs => slk_change_size_blocs
+    ! Change the block sizes, return new matrix
 
    procedure :: take_from => slk_take_from
+    !  Take values from source
 
    procedure :: get_trace => slk_get_trace
     ! Compute the trace of an N-by-N distributed matrix.
+
+   procedure :: set_imag_diago_to_zero => slk_set_imag_diago_to_zero
+    ! Set the imaginary part of the diagonal to zero.
 
    procedure :: pzheev => slk_pzheev
     ! Eigenvalues and, optionally, eigenvectors of an Hermitian matrix A. A * X = lambda * X
@@ -3683,6 +3688,7 @@ end subroutine slk_ptrans
 !!  slk_change_size_blocs
 !!
 !! FUNCTION
+!!  Change the block sizes, return new matrix
 !!
 !! INPUTS
 !!
@@ -3745,6 +3751,7 @@ end subroutine slk_change_size_blocs
 !!  slk_take_from
 !!
 !! FUNCTION
+!!  Take values from source
 !!
 !! INPUTS
 !!
@@ -3847,6 +3854,56 @@ complex(dp) function slk_get_trace(mat) result(ctrace)
  end if
 
 end function slk_get_trace
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_slk/slk_set_imag_diago_to_zero
+!! NAME
+!!  slk_set_imag_diago_to_zero
+!!
+!! FUNCTION
+!!  Set the imaginary part of the diagonal to zero.
+!!  Return in local_max the max of the imaginar part in the local buffer.
+!!  No MPI communication is performed inside the routine. Client code can easily reduce
+!!  local_max within the PBLAS communicator if needed.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine slk_set_imag_diago_to_zero(mat, local_max)
+
+!Arguments ------------------------------------
+ class(matrix_scalapack), intent(inout) :: mat
+ real(dp),intent(out) :: local_max
+
+!Local variables-------------------------------
+ integer :: il1, iglob1, il2, iglob2
+
+! *************************************************************************
+
+ local_max = -huge(one)
+ if (allocated(mat%buffer_real)) return
+
+ do il2=1,mat%sizeb_local(2)
+   iglob2 = mat%loc2gcol(il2)
+   do il1=1,mat%sizeb_local(1)
+     iglob1 = mat%loc2grow(il1)
+     if (iglob1 == iglob2) then
+       local_max = max(local_max, mat%buffer_cplx(il1, il2)%im)
+       mat%buffer_cplx(il1, il2)%im = zero
+     end if
+   end do
+ end do
+
+end subroutine slk_set_imag_diago_to_zero
 !!***
 
 !----------------------------------------------------------------------
