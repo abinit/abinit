@@ -389,5 +389,7 @@ Use if statement instead of Fortran merge. See https://software.intel.com/en-us/
 #define _IBM6(message)
 #endif
 
+#define __HAVE_GREENX
+
 #endif
 /* _ABINIT_COMMON_H */

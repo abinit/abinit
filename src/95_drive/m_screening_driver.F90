@@ -1,5 +1,3 @@
-! CP modified
-
 !!****m* ABINIT/m_screening_driver
 !! NAME
 !!  m_screening_driver
@@ -51,7 +49,8 @@ module m_screening_driver
  use m_gwdefs,        only : GW_TOLQ0, GW_TOLQ, em1params_t, GW_Q0_DEFAULT
  use m_mpinfo,        only : destroy_mpi_enreg, initmpi_seq
  use m_ebands,        only : ebands_update_occ, ebands_copy, ebands_get_valence_idx, ebands_get_occupied, &
-                             ebands_apply_scissors, ebands_free, ebands_has_metal_scheme, ebands_ncwrite, ebands_init
+                             ebands_apply_scissors, ebands_free, ebands_has_metal_scheme, ebands_ncwrite, ebands_init, &
+                             gaps_t, ebands_get_gaps
  use m_bz_mesh,       only : kmesh_t, littlegroup_t, littlegroup_free, get_ng0sh, find_qmesh
  use m_kg,            only : getph
  use m_gsphere,       only : gsphere_t, setshells
@@ -91,6 +90,12 @@ module m_screening_driver
  use m_pspini,        only : pspini
  use m_paw_correlations, only : pawpuxinit
  use m_plowannier,    only : plowannier_type,init_plowannier,get_plowannier, fullbz_plowannier,destroy_plowannier
+#ifdef __HAVE_GREENX
+ use gx_api,          only : gx_minimax_grid, gx_get_error_message !, gx_check_ntau
+#endif
+
+
+
 
  implicit none
 
@@ -234,6 +239,15 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  type(pawpwff_t),allocatable :: Paw_pwff(:)
  type(paw_pwaves_lmn_t),allocatable :: Paw_onsite(:)
  type(plowannier_type) :: wanbz,wanibz,wanibz_in
+
+#ifdef __HAVE_GREENX
+ integer :: gap_err
+ real(dp) :: te_min, te_max
+ type(gaps_t) :: gaps
+ real(dp),allocatable :: tau_mesh(:), tau_wgs(:), iw_mesh(:), iw_wgs(:)
+ real(dp),allocatable :: t2w_cos_wgs(:,:), w2t_cos_wgs(:,:), t2w_sin_wgs(:,:)
+ real(dp) :: ft_max_error(3), cosft_duality_error
+#endif
 
 !************************************************************************
 
@@ -990,15 +1004,33 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    ABI_FREE(z)
    ABI_FREE(zw)
 
-  !if (dtset%gwr_ntau > 0) then
-  !  call wrtout(std_out, "Imaginary frequency mesh from minmax grid with ntau:", itoa(dtset%gwr_ntau))
+#ifdef __HAVE_GREENX
+   call wrtout(std_out, "Using minimax mesh with ntau:", itoa(dtset%nfreqim))
+   gaps = ebands_get_gaps(ks_ebands, gap_err)
+   ABI_CHECK(gap_err == 0, "gap_err")
+   ! ================================
+   ! Setup tau/omega mesh and weights
+   ! ================================
+   ! Compute min/max transition energy taking into account nsppol if any.
+   te_min = minval(gaps%cb_min - gaps%vb_max)
+   te_max = maxval(ks_ebands%eig(mband,:,:) - ks_ebands%eig(1,:,:))
+   if (te_min <= tol6) then
+     te_min = tol6
+     ABI_WARNING("System is metallic or with a very small fundamental gap!")
+   end if
 
-  !  call gx_minimax_grid(gwr%ntau, te_min, te_max,  &  ! in
-  !                       gwr%tau_mesh, gwr%tau_wgs, &  ! all these args are out and allocated by the routine.
-  !                       gwr%iw_mesh, gwr%iw_wgs,   &
-  !                       gwr%t2w_cos_wgs, gwr%w2t_cos_wgs, gwr%t2w_sin_wgs, &
-  !                       gwr%ft_max_error)
-  !end if
+   call gx_minimax_grid(dtset%nfreqim, te_min, te_max,  &  ! in
+                        tau_mesh, tau_wgs, &  ! all these args are out and allocated by the routine.
+                        iw_mesh, iw_wgs,   &
+                        t2w_cos_wgs, w2t_cos_wgs, t2w_sin_wgs, &
+                        ft_max_error, cosft_duality_error, ierr)
+   ABI_CHECK(ierr == 0, "Error calling gx_minimiax_grid")
+   call gaps%free()
+   do iomega=1,Ep%nomegaei
+     Ep%omega(Ep%nomegaer + iomega) = CMPLX(zero, iw_mesh(iomega), kind=dpc)
+     write(std_out, *)"iomega", Ep%omega(Ep%nomegaer + iomega)
+   end do
+#endif
 
  else if (Ep%contour_deformation .and. Dtset%cd_customnimfrqs /= 0) then
    Ep%omega(Ep%nomegaer+1)=CMPLX(zero,Dtset%cd_imfrqs(1))
@@ -2570,8 +2602,8 @@ subroutine calc_rpa_functional(gwrpacorr,gwgmcorr,iqcalc,iq,Ep,Pvc,Qmesh,Dtfil,g
  qeq0=(normv(Qmesh%ibz(:,iq),gmet,'G')<GW_TOLQ0)
 
  ! Calculate Gauss-Legendre quadrature knots and weights for the omega integration
- ABI_MALLOC(zw,(Ep%nomegaei))
- ABI_MALLOC(z,(Ep%nomegaei))
+ ABI_MALLOC(zw, (Ep%nomegaei))
+ ABI_MALLOC(z, (Ep%nomegaei))
  call coeffs_gausslegint(zero,one,z,zw,Ep%nomegaei)
 
  ! Calculate Gauss-Legendre quadrature knots and weights for the lambda integration

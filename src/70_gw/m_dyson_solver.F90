@@ -298,18 +298,18 @@ subroutine solve_dyson(ikcalc,minbnd,maxbnd,nomega_sigc,Sigp,Kmesh,sigcme_tmp,qp
       ! if zz in 2 or 3 quadrant, avoid poles in the complex plane using Sigma(-iw) = Sigma(iw)*.
       do iab=1,Sr%nsig_ab
         is_idx=spin; if (Sr%nsig_ab>1) is_idx=iab
-        if (REAL(zz) > zero) then
+        if (real(zz) > zero) then
           tmpcdp(:)=sigcme_tmp(:,jb,jb,is_idx)
           Sr%sigcmee0(jb,sk_ibz,is_idx) =  pade(Sr%nomega_i, Sr%omega_i, tmpcdp, zz)
           Sr%dsigmee0(jb,sk_ibz,is_idx) = dpade(Sr%nomega_i, Sr%omega_i, tmpcdp, zz)
         else
-          tmpcdp(:)=CONJG(sigcme_tmp(:,jb,jb,is_idx))
+          tmpcdp(:) = CONJG(sigcme_tmp(:,jb,jb,is_idx))
           Sr%sigcmee0(jb,sk_ibz,is_idx) =  pade(Sr%nomega_i, CONJG(Sr%omega_i), tmpcdp, zz)
           Sr%dsigmee0(jb,sk_ibz,is_idx) = dpade(Sr%nomega_i, CONJG(Sr%omega_i), tmpcdp, zz)
         end if
       end do !iab
 
-      ! Z = (1-dSigma/domega(E0))^-1
+      ! Z = (1 - dSigma/domega(E0))^{-1}
       if (Sr%nsig_ab == 1) then
         Sr%ze0(jb,sk_ibz,spin) = one / (one - Sr%dsigmee0(jb,sk_ibz,spin))
       else
@@ -375,7 +375,7 @@ subroutine solve_dyson(ikcalc,minbnd,maxbnd,nomega_sigc,Sigp,Kmesh,sigcme_tmp,qp
           tmpcdp(:) = CONJG(sigcme_tmp(:,jb,jb,spin))
           Sr%sigcme(jb,sk_ibz,io,spin) = pade(Sr%nomega_i, CONJG(Sr%omega_i), tmpcdp, zz)
         end if
-        Sr%sigxcme(jb,sk_ibz,io,spin)= Sr%sigxme(jb,sk_ibz,spin) + Sr%sigcme(jb,sk_ibz,io,spin)
+        Sr%sigxcme(jb,sk_ibz,io,spin) = Sr%sigxme(jb,sk_ibz,spin) + Sr%sigcme(jb,sk_ibz,io,spin)
       end do
 
       ! Save sigma values along the imaginary axis

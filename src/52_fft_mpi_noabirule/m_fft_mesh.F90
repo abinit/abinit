@@ -1349,7 +1349,7 @@ end subroutine calc_eigr
 !! calc_ceikr
 !!
 !! FUNCTION
-!!  Helper function to calculate e^{ik.r} on the FFT mesh.
+!!  Calculate e^{ik.r} on the FFT mesh.
 !!
 !! INPUTS
 !!  kk(3)=k-point in reduced coordinates.
@@ -1358,7 +1358,7 @@ end subroutine calc_eigr
 !!  nspinor=Number of spinor components.
 !!
 !! OUTPUT
-!!  ceikr(nfft)=e^{ik.r} on the FFT mesh.
+!!  ceikr(nfft, nspinor) = e^{ik.r} on the FFT mesh.
 !!  is_gamma=True if kk == 0
 !!
 !! SOURCE
@@ -1376,7 +1376,7 @@ pure subroutine calc_ceikr(kk, ngfft, nfft, nspinor, ceikr, is_gamma)
 
 !Local variables-------------------------------
 !scalars
- integer :: ix,iy,iz,fft_idx
+ integer :: ix, iy, iz, fft_idx
  real(dp) :: kdotr
 
 ! *************************************************************************
@@ -1390,18 +1390,18 @@ pure subroutine calc_ceikr(kk, ngfft, nfft, nspinor, ceikr, is_gamma)
  do iz=0,ngfft(3)-1
    do iy=0,ngfft(2)-1
      do ix=0,ngfft(1)-1
-       kdotr= two_pi*( kk(1)*(ix/DBLE(ngfft(1))) &
-                      +kk(2)*(iy/DBLE(ngfft(2))) &
-                      +kk(3)*(iz/DBLE(ngfft(3))) )
+       kdotr = two_pi*( kk(1) * (ix / dble(ngfft(1))) &
+                       +kk(2) * (iy / dble(ngfft(2))) &
+                       +kk(3) * (iz / dble(ngfft(3))) )
        fft_idx = fft_idx + 1
-       ceikr(fft_idx, 1) = DCMPLX(DCOS(kdotr), DSIN(kdotr))
+       ceikr(fft_idx, 1) = DCMPLX(cos(kdotr), sin(kdotr))
      end do
    end do
  end do
 
  if (nspinor > 1) then
    do ix=2,nspinor
-     ceikr(fft_idx, ix) = ceikr(fft_idx, 1)
+     ceikr(:, ix) = ceikr(fft_idx, 1)
    end do
  end if
 
