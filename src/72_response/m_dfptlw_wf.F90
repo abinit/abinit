@@ -719,7 +719,7 @@ if (.not.samepert) then
      write(i1dir_text,'(i8)') i1dir
      write(i2dir_text,'(i8)') i2dir
      write(i3dir_text,'(i8)') i3dir
-     file_name = 'T_4_i1dir_'//trim(adjustl(i1dir_text))//'_i2dir_'//&
+     file_name = 'T_5_i1dir_'//trim(adjustl(i1dir_text))//'_i2dir_'//&
    & trim(adjustl(i2dir_text))//'_i3dir_'//trim(adjustl(i3dir_text))//'.dat'
      open(unit=999,file=file_name,action='write',status='replace')
      write(999,'(2f20.14)') dotr*occ_k(iband), doti*occ_k(iband)
