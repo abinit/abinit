@@ -217,7 +217,9 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,&
  type(pawcprj_type),allocatable :: dum_cwaveprj(:,:)
 
  !AZ_test_ini**************************************************************************
- character(40) :: i1dir_text, i2dir_text, i3dir_text, iband_text, ikpt_text, file_name
+ character(40) :: i1dir_text, i2dir_text, i3dir_text, iband_text, ikpt_text
+ character(20) :: kpt_1_text, kpt_2_text, kpt_3_text
+ character(60) :: file_name
  real(dp) :: AZ_sum_re, AZ_sum_im
  !AZ_test_fin**************************************************************************
  
@@ -301,6 +303,43 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,&
    offset_cgi = (iband-1)*size_wf+icg
    cwavef1(:,:)= cg1(:,1+offset_cgi:size_wf+offset_cgi)
    cwavef2(:,:)= cg2(:,1+offset_cgi:size_wf+offset_cgi)
+
+   !AZ_try_ini*****************************************************
+   ! Print 1WF fro electric field perturbation
+   write(kpt_1_text,'(f6.3)') kpt(1)
+   write(kpt_2_text,'(f6.3)') kpt(2)
+   write(kpt_3_text,'(f6.3)') kpt(3)
+   write(iband_text,'(i5)') iband 
+   write(i1dir_text,'(i5)') i1dir
+   write(i2dir_text,'(i5)') i2dir
+
+   ! Write cg1 wavefunction
+   file_name = 'AZ_cg1_iband_'//trim(adjustl(iband_text))//&
+  & '_iq2grad_'//trim(adjustl(i1dir_text))//&
+  & '_x_'//trim(adjustl(kpt_1_text))//&
+  & '_y_'//trim(adjustl(kpt_2_text))//&
+  & '_z_'//trim(adjustl(kpt_3_text))//'.dat'   
+
+   open(unit=999,file=file_name,action='write',status='replace')
+   do ii=1,size(cwavef1(1,:))
+     write(999,'(i10,2f12.6)') ii, cwavef1(1,ii), cwavef1(2,ii)
+   enddo
+   close(999)
+
+   ! Write cg2 wavefunction
+   file_name = 'AZ_cg2_iband_'//trim(adjustl(iband_text))//&
+  & '_iq2grad_'//trim(adjustl(i2dir_text))//&
+  & '_x_'//trim(adjustl(kpt_1_text))//&
+  & '_y_'//trim(adjustl(kpt_2_text))//&
+  & '_z_'//trim(adjustl(kpt_3_text))//'.dat'
+  
+   open(unit=999,file=file_name,action='write',status='replace')
+   do ii=1,size(cwavef2(1,:))
+     write(999,'(i10,2f12.6)') ii, cwavef2(1,ii), cwavef2(2,ii)
+   enddo
+   close(999)
+
+   !AZ_try_fin*****************************************************
    
    !Compute < g |\partial_{gamma} H^{(0)} | u_{i,k}^{\lambda2} >
    call getgh1c(berryopt,cwavef2,dum_cwaveprj,gv1c,dum_grad_berry,&
