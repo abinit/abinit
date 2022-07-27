@@ -325,7 +325,10 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
    end where
  end do
 
- call sylwtens(indsym,mpert,natom,dtset%nsym,rfpert,symrec,dtset%symrel,symrel_cart)
+ !AZ_try_ini*************************************************************************
+ !deactivate symmetries...
+ !call sylwtens(indsym,mpert,natom,dtset%nsym,rfpert,symrec,dtset%symrel,symrel_cart)
+ !AZ_try_fin*************************************************************************
 
  write(msg,'(a,a,a,a,a)') ch10, &
 & ' The list of irreducible elements of the spatial-dispersion third-order energy derivatives is: ', ch10,& 
@@ -675,7 +678,10 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 !Complete missing elements using symmetry operations
  has_strain=.false.
  if (dtset%lw_flexo==1.or.dtset%lw_flexo==2.or.dtset%lw_flexo==4) has_strain=.true.
- call d3lwsym(blkflg,d3etot,has_strain,indsym,mpert,natom,dtset%nsym,symrec,dtset%symrel,symrel_cart)
+ !AZ_try_ini******************************************************************************************
+ !deactivate symmetries
+ !call d3lwsym(blkflg,d3etot,has_strain,indsym,mpert,natom,dtset%nsym,symrec,dtset%symrel,symrel_cart)
+ !AZ_try_fin******************************************************************************************
 
 !Deallocate global proc_distrib
  if(xmpi_paral==1) then
