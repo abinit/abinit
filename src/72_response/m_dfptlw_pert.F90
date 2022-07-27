@@ -306,7 +306,7 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3e_pert1,d3e_pert2,d3etot,d3etot
  file_name = 'T_elec_i1dir_'//trim(adjustl(i1dir_text))//'_i2dir_'//&
  & trim(adjustl(i2dir_text))//'_i3dir_'//trim(adjustl(i3dir_text))//'.dat'
  open(unit=999,file=file_name,action='write',status='replace')
- write(999,'(2f20.14)') d3etot_telec(1), d3etot_telec(2)
+ write(999,'(2f12.6)') d3etot_telec(1), d3etot_telec(2)
  close(999)
  !AZ_test_fin******************************************************************
  
