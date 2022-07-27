@@ -495,6 +495,7 @@ if (.not.samepert) then
            ffnl1(:,1:dimffnl1,:,:)=ffnl_k(:,1:dimffnl1,:,:)
          end if
        end if
+
        call getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpt,kpt,idir,i2pert,i3dir, &
      & dtset%natom,rmet,rprimd,gs_hamkq%gprimd,gs_hamkq%gmet,istwf_k,npw_k,npw_k,nylmgrtmp,useylmgr1,kg_k, &
      & ylm_k,kg_k,ylm_k,part_ylmgr_k,nkpg,nkpg1,kpg_k,kpg1_k,dkinpw,kinpw1,ffnlk,ffnl1,ph3d,ph3d1, &
@@ -525,11 +526,11 @@ if (.not.samepert) then
        !Calculate: < u_{j,k}^{\lambda1} | |H^{\lambda2}}_{\gamma} | u_{i,k}^{(0)} >
        call dotprod_g(dotr,doti,istwf_k,size_wf,2,cwavef1,gv1c, &
      & mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
-  
+
        !Calculate the contribution to T4
        d3etot_t4_k(1,idq)=d3etot_t4_k(1,idq)+dotr*occ_k(iband)
        d3etot_t4_k(2,idq)=d3etot_t4_k(2,idq)+doti*occ_k(iband)
-  
+
      end do !iband
   
      if (i2pert/=natom+2) then

@@ -1786,6 +1786,7 @@ subroutine getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,qd
  else
    ABI_CHECK(all(shape(ffnl1) == [npw1_k, dimffnl1, psps%lmnmax, ntypat]), "Wrong shape in input ffnl1")
  end if
+ 
 
 !Convert nonlocal form factors to cartesian coordinates.
 !For metric (strain) perturbation only.
@@ -1798,7 +1799,7 @@ subroutine getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,qd
    do mu=1,3
      do ig=1,npw1_k
        do nu=1,3
-         ffnl1(ig,1+mu,:,:)=ffnl1(ig,1+mu,:,:)+ffnl1_tmp(ig,1+nu,:,:)*rprimd(nu,mu)
+         ffnl1(ig,1+mu,:,:)=ffnl1(ig,1+mu,:,:)+ffnl1_tmp(ig,1+nu,:,:)*rprimd(mu,nu)
        end do
      end do
    end do
@@ -1812,7 +1813,7 @@ subroutine getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,qd
          do nub=1,3
            nu=gamma(nua,nub)
            ffnl1(ig,4+mu,:,:)=ffnl1(ig,4+mu,:,:)+ &
-         & ffnl1_tmp(ig,4+nu,:,:)*rprimd(nua,mua)*rprimd(nub,mub)
+         & ffnl1_tmp(ig,4+nu,:,:)*rprimd(mua,nua)*rprimd(mub,nub)
          end do
        end do
      end do
