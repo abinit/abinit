@@ -15112,33 +15112,6 @@ are enforced to be explicitly calculated:
 
 
 Variable(
-    abivarname="prepalw",
-    varset="dfpt",
-    vartype="integer",
-    topics=['longwave_compulsory'],
-    dimensions="scalar",
-    defaultval=0,
-    mnemonics="PREPAre LongWave calculation",
-    characteristics=['[[DEVELOP]]'],
-    added_in_version="9.2.0",
-    text=r"""
-The computation of spatial dispersion quantities from the longwave DFPT
-approach requires the first-order wavefunctions and densities obtained from
-a linear response calculation. The standard approach in a linear response calculation is:
-
-  * compute only the irreducible perturbations;
-  * use symmetries to reduce the number of k-points for the k-point integration.
-
-This approach cannot be applied, presently (v9.0), if the first-order
-wavefunctions are to be used to compute spatial dispersion properties.
-During the linear response calculation, in order to prepare a longwave
-calculation, one should put [[prepalw]] to 1 in order to force ABINIT to
-compute all the perturbations explicitly, and to keep the full number of k-points
-in half the BZ (kptopt=2), or the full BZ (kptopt=3).
-""",
-),
-
-Variable(
     abivarname="prepanl",
     varset="dfpt",
     vartype="integer",
