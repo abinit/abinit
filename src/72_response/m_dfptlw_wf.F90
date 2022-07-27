@@ -291,7 +291,7 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,&
    write(i3dir_text,'(i8)') i3dir
    file_name = 'T_1_i1dir_'//trim(adjustl(i1dir_text))//'_i2dir_'//&
  & trim(adjustl(i2dir_text))//'_i3dir_'//trim(adjustl(i3dir_text))//'.dat'
-   open(unit=999,file=file_name,action='write',status='replace')
+   open(unit=888,file=file_name,action='write',status='replace')
  !AZ_try_fin********************************************************
 
  !LOOP OVER BANDS
@@ -355,13 +355,13 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,&
    d3etot_t1_k(2)=d3etot_t1_k(2)+occ_k(iband)*doti
 
    !AZ_test_ini******************************************************************
-   write(999,'(i5,2f20.14)') iband, occ_k(iband)*dotr, occ_k(iband)*doti
+   write(888,'(i5,2f20.14)') iband, occ_k(iband)*dotr, occ_k(iband)*doti
    !AZ_test_fin******************************************************************
 
  end do !iband
 
  !AZ_try_ini******
- close(999)
+ close(888)
  !AZ_try_fin******
 
 !Clean rf_hamiltonian
