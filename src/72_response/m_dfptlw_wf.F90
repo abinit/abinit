@@ -430,29 +430,6 @@ if (.not.samepert) then
       cprodi=dotr*cj_h1_ci(2)+doti*cj_h1_ci(1)
       d3etot_t2_k(1)=d3etot_t2_k(1)-cprodr*occ_k(iband)
       d3etot_t2_k(2)=d3etot_t2_k(2)-cprodi*occ_k(iband)
-
-      !AZ_try_ini********************************************************
-      write(i1dir_text,'(i8)') i1dir
-      write(i2dir_text,'(i8)') i2dir
-      write(i3dir_text,'(i8)') i3dir
-      write(iband_text,'(i8)') iband
-      write(jband_text,'(i8)') jband
-      write(kpt_1_text,'(f6.3)') kpt(1)
-      write(kpt_2_text,'(f6.3)') kpt(2)
-      write(kpt_3_text,'(f6.3)') kpt(3)
-      file_name = 'AZ_T2_iband_'//trim(adjustl(iband_text))//&
-    & '_jband_'//trim(adjustl(jband_text))//&
-    & '_iq1grad_'//trim(adjustl(i1dir_text))//&
-    & '_iq2grad_'//trim(adjustl(i2dir_text))//&
-    & '_iq3grad_'//trim(adjustl(i3dir_text))//&
-    & '_x_'//trim(adjustl(kpt_1_text))//&
-    & '_y_'//trim(adjustl(kpt_2_text))//&
-    & '_z_'//trim(adjustl(kpt_3_text))//'.dat'
-      open(unit=888,file=file_name,action='write',status='replace')
-      write(888,'(2f12.6)') -cprodr, -cprodi
-      close(888)
-      !AZ_try_fin********************************************************
-      
   
     end do !jband 
   
@@ -500,6 +477,28 @@ end if !samepert
      cprodi=dotr*cj_h1_ci(2)+doti*cj_h1_ci(1)
      d3etot_t3_k(1)=d3etot_t3_k(1)-cprodr*occ_k(iband)
      d3etot_t3_k(2)=d3etot_t3_k(2)-cprodi*occ_k(iband)
+
+     !AZ_try_ini********************************************************
+      write(i1dir_text,'(i8)') i1dir
+      write(i2dir_text,'(i8)') i2dir
+      write(i3dir_text,'(i8)') i3dir
+      write(iband_text,'(i8)') iband
+      write(jband_text,'(i8)') jband
+      write(kpt_1_text,'(f6.3)') kpt(1)
+      write(kpt_2_text,'(f6.3)') kpt(2)
+      write(kpt_3_text,'(f6.3)') kpt(3)
+      file_name = 'AZ_T3_iband_'//trim(adjustl(iband_text))//&
+    & '_jband_'//trim(adjustl(jband_text))//&
+    & '_iq1grad_'//trim(adjustl(i1dir_text))//&
+    & '_iq2grad_'//trim(adjustl(i2dir_text))//&
+    & '_iq3grad_'//trim(adjustl(i3dir_text))//&
+    & '_x_'//trim(adjustl(kpt_1_text))//&
+    & '_y_'//trim(adjustl(kpt_2_text))//&
+    & '_z_'//trim(adjustl(kpt_3_text))//'.dat'
+      open(unit=888,file=file_name,action='write',status='replace')
+      write(888,'(2f12.6)') -cprodr, -cprodi
+      close(888)
+      !AZ_try_fin********************************************************
 
    end do !jband
 
