@@ -361,7 +361,7 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,&
  & '_y_'//trim(adjustl(kpt_2_text))//&
  & '_z_'//trim(adjustl(kpt_3_text))//'.dat'
    open(unit=888,file=file_name,action='write',status='replace')
-   write(888,'(i5,2f12.6)') dotr, doti
+   write(888,'(2f12.6)') dotr, doti
    close(888)
    !AZ_try_fin********************************************************
 
@@ -402,20 +402,20 @@ if (.not.samepert) then
   d3etot_t2_k=zero
 
   !AZ_try_ini**************************************************************
-  write(i1dir_text,'(i8)') i1dir
-  write(i2dir_text,'(i8)') i2dir
-  write(i3dir_text,'(i8)') i3dir
-  file_name = 'T_2_i1dir_'//trim(adjustl(i1dir_text))//'_i2dir_'//&
-& trim(adjustl(i2dir_text))//'_i3dir_'//trim(adjustl(i3dir_text))//'.dat'
-  open(unit=999,file=file_name,action='write',status='replace')
+  !write(i1dir_text,'(i8)') i1dir
+  !write(i2dir_text,'(i8)') i2dir
+  !write(i3dir_text,'(i8)') i3dir
+  !file_name = 'T_2_i1dir_'//trim(adjustl(i1dir_text))//'_i2dir_'//&
+& !trim(adjustl(i2dir_text))//'_i3dir_'//trim(adjustl(i3dir_text))//'.dat'
+  !open(unit=999,file=file_name,action='write',status='replace')
   !AZ_try_fin**************************************************************  
 
   !LOOP OVER BANDS
   do iband=1,nband_k
   
     !AZ_try_ini*****************
-    AZ_sum_re = zero
-    AZ_sum_im = zero
+    !AZ_sum_re = zero
+    !AZ_sum_im = zero
     !AZ_try_fin*****************
   
     if(mpi_enreg%proc_distrb(ikpt,iband,isppol) /= mpi_enreg%me_kpt) cycle
@@ -446,20 +446,20 @@ if (.not.samepert) then
       d3etot_t2_k(2)=d3etot_t2_k(2)-cprodi*occ_k(iband)
 
       !AZ_try_ini*******************************
-      AZ_sum_re = AZ_sum_re - cprodr*occ_k(iband)
-      AZ_sum_im = AZ_sum_im - cprodi*occ_k(iband)
+      !AZ_sum_re = AZ_sum_re - cprodr*occ_k(iband)
+      !AZ_sum_im = AZ_sum_im - cprodi*occ_k(iband)
       !AZ_try_fin*******************************
   
     end do !jband 
 
     !AZ_try_ini********************************************
-    write(999,'(i5,2f20.14)') iband, AZ_sum_re, AZ_sum_im
+    !write(999,'(i5,2f20.14)') iband, AZ_sum_re, AZ_sum_im
     !AZ_try_fin********************************************
   
   end do !iband
 
   !AZ_try_ini******
-  close(999)
+  !close(999)
   !AZ_try_fin******
   
 end if !samepert
@@ -476,20 +476,20 @@ end if !samepert
  d3etot_t3_k=zero
 
   !AZ_try_ini**************************************************************
-  write(i1dir_text,'(i8)') i1dir
-  write(i2dir_text,'(i8)') i2dir
-  write(i3dir_text,'(i8)') i3dir
-  file_name = 'T_3_i1dir_'//trim(adjustl(i1dir_text))//'_i2dir_'//&
-& trim(adjustl(i2dir_text))//'_i3dir_'//trim(adjustl(i3dir_text))//'.dat'
-  open(unit=999,file=file_name,action='write',status='replace')
+  !write(i1dir_text,'(i8)') i1dir
+  !write(i2dir_text,'(i8)') i2dir
+  !write(i3dir_text,'(i8)') i3dir
+  !file_name = 'T_3_i1dir_'//trim(adjustl(i1dir_text))//'_i2dir_'//&
+& !trim(adjustl(i2dir_text))//'_i3dir_'//trim(adjustl(i3dir_text))//'.dat'
+  !open(unit=999,file=file_name,action='write',status='replace')
   !AZ_try_fin**************************************************************
 
  !LOOP OVER BANDS
  do iband=1,nband_k
 
    !AZ_try_ini***************
-   AZ_sum_re = zero
-   AZ_sum_im = zero
+   !AZ_sum_re = zero
+   !AZ_sum_im = zero
    !AZ_try_fin***************
 
    if(mpi_enreg%proc_distrb(ikpt,iband,isppol) /= mpi_enreg%me_kpt) cycle
@@ -520,20 +520,20 @@ end if !samepert
      d3etot_t3_k(2)=d3etot_t3_k(2)-cprodi*occ_k(iband)
 
      !AZ_test_ini******************************************************************
-     AZ_sum_re = AZ_sum_re - cprodr*occ_k(iband)
-     AZ_sum_im = AZ_sum_im - cprodi*occ_k(iband)
+     !AZ_sum_re = AZ_sum_re - cprodr*occ_k(iband)
+     !AZ_sum_im = AZ_sum_im - cprodi*occ_k(iband)
      !AZ_test_fin******************************************************************
 
    end do !jband
 
    !AZ_try_ini********************************************
-   write(999,'(i5,2f20.14)') iband, AZ_sum_re, AZ_sum_im
+   !write(999,'(i5,2f20.14)') iband, AZ_sum_re, AZ_sum_im
    !AZ_try_fin********************************************
 
  end do !iband
 
  !AZ_try_ini*****
- close(999)
+ !close(999)
  !AZ_try_fin*****
 
  ABI_FREE(cg1_ddk)
@@ -556,12 +556,12 @@ end if
 if (.not.samepert) then
 
   !AZ_try_ini********************************************************************
-  write(i1dir_text,'(i8)') i1dir
-  write(i2dir_text,'(i8)') i2dir
-  write(i3dir_text,'(i8)') i3dir
-  file_name = 'T_4_i1dir_'//trim(adjustl(i1dir_text))//'_i2dir_'//&
-& trim(adjustl(i2dir_text))//'_i3dir_'//trim(adjustl(i3dir_text))//'.dat'
-  open(unit=999,file=file_name,action='write',status='replace')
+  !write(i1dir_text,'(i8)') i1dir
+  !write(i2dir_text,'(i8)') i2dir
+  !write(i3dir_text,'(i8)') i3dir
+  !file_name = 'T_4_i1dir_'//trim(adjustl(i1dir_text))//'_i2dir_'//&
+!& trim(adjustl(i2dir_text))//'_i3dir_'//trim(adjustl(i3dir_text))//'.dat'
+  !open(unit=999,file=file_name,action='write',status='replace')
   !AZ_try_fin********************************************************************
 
   !Specific definitions and allocations
@@ -657,13 +657,13 @@ if (.not.samepert) then
        d3etot_t4_k(2,idq)=d3etot_t4_k(2,idq)+doti*occ_k(iband)
 
        !AZ_test_ini******************************************************************
-       write(999,'(i5,2f20.14)') iband, dotr*occ_k(iband), doti*occ_k(iband)
+       !write(999,'(i5,2f20.14)') iband, dotr*occ_k(iband), doti*occ_k(iband)
        !AZ_test_fin******************************************************************
   
      end do !iband
 
      !AZ_try_ini*****
-     close(999)
+     !close(999)
      !AZ_try_fin*****
   
      if (i2pert/=natom+2) then
@@ -737,12 +737,12 @@ if (.not.samepert) then
  end if
 
  !AZ_try_ini**********************************************************
-  write(i1dir_text,'(i8)') i1dir
-  write(i2dir_text,'(i8)') i2dir
-  write(i3dir_text,'(i8)') i3dir
-  file_name = 'T_5_i1dir_'//trim(adjustl(i1dir_text))//'_i2dir_'//&
-& trim(adjustl(i2dir_text))//'_i3dir_'//trim(adjustl(i3dir_text))//'.dat'
-  open(unit=999,file=file_name,action='write',status='replace')
+  !write(i1dir_text,'(i8)') i1dir
+  !write(i2dir_text,'(i8)') i2dir
+  !write(i3dir_text,'(i8)') i3dir
+  !file_name = 'T_5_i1dir_'//trim(adjustl(i1dir_text))//'_i2dir_'//&
+!& trim(adjustl(i2dir_text))//'_i3dir_'//trim(adjustl(i3dir_text))//'.dat'
+  !open(unit=999,file=file_name,action='write',status='replace')
  !AZ_try_fin**********************************************************
 
 !Do loop to compute both extradiagonal shear-strain components
@@ -812,13 +812,13 @@ if (.not.samepert) then
      d3etot_t5_k(2,idq)=d3etot_t5_k(2,idq)+doti*occ_k(iband)
 
      !AZ_test_ini******************************************************************
-     write(999,'(i5,2f20.14)') iband, dotr*occ_k(iband), doti*occ_k(iband)
+     !write(999,'(i5,2f20.14)') iband, dotr*occ_k(iband), doti*occ_k(iband)
      !AZ_test_fin******************************************************************
 
    end do !iband
 
    !AZ_try_ini****
-   close(999)
+   !close(999)
    !AZ_try_fin****
 
    if (i1pert/=natom+2) then
