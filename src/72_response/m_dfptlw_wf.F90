@@ -787,7 +787,7 @@ if (.not.samepert) then
 
      !Perturbation-specific part
      if (i1pert==natom+2) then
-       call d2_dkdk_f2%read_bks(iband,ikpt,isppol,xmpio_single,cg_bks=gv1c)
+       call d2_dkdk_f%read_bks(iband,ikpt,isppol,xmpio_single,cg_bks=gv1c)
      else
        cwave0i(:,:)= cg(:,1+offset_cgi:size_wf+offset_cgi)
 
