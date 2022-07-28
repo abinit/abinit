@@ -705,6 +705,19 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 !  Close DDB
    close(dtfil%unddb)
 
+   !AZ_try_ini******************************************************************
+   open(unit=111,file='d3etot_from_longwave.dat',action='write',status='replace')
+   do i1dir=1,3
+     do i2dir=1,3
+       do i3dir=1,3
+         write(111,'(3i6,2f20.6)') i1dir, i2dir, i3dir, d3etot(1,i1dir,natom+2,i2dir,natom+2,i3dir,natom+8), &
+                                &  d3etot(2,i1dir,natom+2,i2dir,natom+2,i3dir,natom+8)
+       enddo
+     enddo
+   enddo 
+   close(111)
+   !AZ_try_fin******************************************************************
+
    !Calculate spatial-dispersion quantities in Cartesian coordinates and write
    !them in abi_out
    ABI_MALLOC(blkflg_car,(3,mpert,3,mpert,3,mpert))

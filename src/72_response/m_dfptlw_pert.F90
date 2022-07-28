@@ -471,6 +471,7 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3e_pert1,d3e_pert2,d3etot,d3etot
  d3etot_t5(:,:)=two*d3etot_t5(:,:)
  e3tot(:)=d3etot_t1(:)+d3etot_t2(:)+d3etot_t3(:)+d3etot_telec(:)
 
+
 !Before printing, set small contributions to zero
  !Real parts
  if (abs(d3etot_t1(1))<tol8) d3etot_t1(1)= zero
