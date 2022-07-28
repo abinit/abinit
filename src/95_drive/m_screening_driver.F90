@@ -94,9 +94,6 @@ module m_screening_driver
  use gx_api,          only : gx_minimax_grid, gx_get_error_message !, gx_check_ntau
 #endif
 
-
-
-
  implicit none
 
  private
@@ -1005,6 +1002,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    ABI_FREE(zw)
 
 #ifdef __HAVE_GREENX
+if (dtset%gwr_ntau /= 0) then
    call wrtout(std_out, "Using minimax mesh with ntau:", itoa(dtset%nfreqim))
    gaps = ebands_get_gaps(ks_ebands, gap_err)
    ABI_CHECK(gap_err == 0, "gap_err")
@@ -1030,6 +1028,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      Ep%omega(Ep%nomegaer + iomega) = CMPLX(zero, iw_mesh(iomega), kind=dpc)
      write(std_out, *)"iomega", Ep%omega(Ep%nomegaer + iomega)
    end do
+end if
 #endif
 
  else if (Ep%contour_deformation .and. Dtset%cd_customnimfrqs /= 0) then

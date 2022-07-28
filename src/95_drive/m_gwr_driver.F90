@@ -323,12 +323,14 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
 
    call ebands_update_occ(ks_ebands, dtset%spinmagntarget, prtvol=0)
 
+   ! TODO: Make sure that ef is inside the gap if semiconductor.
+   ks_ebands%eig = ks_ebands%eig - ks_ebands%fermie
+   ks_ebands%fermie = zero
+
    ! Here we change the GS bands (Fermi level, scissors operator ...)
    ! All the modifications to ebands should be done here.
    !call ephtk_update_ebands(dtset, ks_ebands, "Ground state energies")
    !ks_ebands%fermie = ks_ebands%fermie + (7.648 - 5.362) * eV_Ha / two
-
-   ! TODO: Make sure that ef is inside the gap if semiconductor.
  end if
 
  ! TODO: FFT meshes for DEN/POT should be initialized from the DEN file instead of the dtset.

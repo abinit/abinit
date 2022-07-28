@@ -1642,7 +1642,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  if (mod10 == SIG_GW_AC) then
    ! All these quantities will be passed to csigme
    ! if I skipped the self-consistent part then here I have to use fermi
-   qp_ebands%eig = qp_ebands%eig -qp_ebands%fermie
+   qp_ebands%eig = qp_ebands%eig - qp_ebands%fermie
    Sr%egw = Sr%egw - qp_ebands%fermie
    Sr%e0  = Sr%e0  - qp_ebands%fermie
    oldefermi = qp_ebands%fermie

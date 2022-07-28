@@ -2286,6 +2286,7 @@ end function ebands_write_bxsf
 !!   %entropy=the new entropy associated with the smearing.
 !!   %occ(mband,nkpt,nsppol)=occupation numbers
 !!   %doccde(mband,nkpt,nsppol)=derivative of occupancies wrt the energy for each band and k point
+!!
 !!  === In case of semiconductors ===
 !!   All the quantitities in ebands are left unchanged with the exception of:
 !!   %fermie=Redefined so that it is in the middle of the gap
@@ -2349,9 +2350,9 @@ subroutine ebands_update_occ(ebands, spinmagntarget, stmbias, prtvol)
    ! Semiconductor (non magnetic case)
    maxocc = two / (ebands%nsppol*ebands%nspinor)
    !
-   ! FIXME here there is an inconsistency btw GW and Abinit
-   ! In abinit Fermi is set to HOMO while in GW fermi is in the middle
-   ! of Gap. In case of crystal systems, the later convention should be preferable.
+   ! FIXME here there is an inconsistency btw the GW code and Abinit
+   ! In ABINIT, Fermi is set to the HOMO level while in GW fermi is at midgap
+   ! In case of crystal systems, the later convention should be preferable.
    ! Anyway we have to decide and follow a unique convention to avoid problems.
    !
    ! Occupation factors MUST be initialized
@@ -2531,11 +2532,9 @@ subroutine ebands_set_fermie(ebands, fermie, msg)
 
 ! *************************************************************************
 
- ! CP added
- if (ebands%occopt==9) then
+ if (ebands%occopt == 9) then
    ABI_ERROR("set_fermie unavailable when occopt 9")
  end if
- ! End CP added
  if (.not. ebands_has_metal_scheme(ebands)) then
    ABI_ERROR("set_fermie assumes a metallic occupation scheme. Use ebands_set_scheme before calling ebands_set_fermie!")
  end if
@@ -2548,19 +2547,15 @@ subroutine ebands_set_fermie(ebands, fermie, msg)
  nsppol = ebands%nsppol
  maxocc = two / (nsppol*ebands%nspinor)
 
- ABI_MALLOC(eigen,(mband*nkpt*nsppol))
+ ABI_MALLOC(eigen, (mband*nkpt*nsppol))
  call get_eneocc_vect(ebands, 'eig', eigen)
  ABI_MALLOC(occ, (mband*nkpt*nsppol))
  ABI_MALLOC(doccde, (mband*nkpt*nsppol))
 
  ! Get the total number of electrons nelect, given the new fermi energy.
- ! CP modified
- !call getnel(doccde,dosdeltae0,eigen,ebands%entropy,fermie,maxocc,mband,ebands%nband,&
- !  ebands%nelect,nkpt,nsppol,occ,ebands%occopt,option1,ebands%tphysel,ebands%tsmear,unitdos0,ebands%wtk)
  call getnel(doccde,dosdeltae0,eigen,ebands%entropy,fermie,fermie,maxocc,mband,ebands%nband,&
    ebands%nelect,nkpt,nsppol,occ,ebands%occopt,option1,ebands%tphysel,ebands%tsmear,unitdos0,&
    ebands%wtk,1,ebands%nband(1))
- ! End CP modified
 
  ! Save changes in ebands%.
  ebands%fermie = fermie
