@@ -3916,7 +3916,7 @@ end subroutine print_arr2d_dpc
 !!
 !! SOURCE
 
-function pade(n,z,f,zz)
+function pade(n, z, f, zz)
 
 !Arguments ------------------------------------
 !scalars
@@ -3924,7 +3924,7 @@ function pade(n,z,f,zz)
  complex(dpc),intent(in) :: zz
  complex(dpc) :: pade
 !arrays
- complex(dpc),intent(in) :: z(n),f(n)
+ complex(dpc),intent(in) :: z(n), f(n)
 
 !Local variables-------------------------------
 !scalars
@@ -3933,7 +3933,7 @@ function pade(n,z,f,zz)
  integer :: i
 ! *************************************************************************
 
- call calculate_pade_a(a,n,z,f)
+ call calculate_pade_a(a, n, z, f)
 
  Az(0)=czero
  Az(1)=a(1)
@@ -3963,7 +3963,7 @@ end function pade
 !!
 !! SOURCE
 
-function dpade(n,z,f,zz)
+function dpade(n, z, f, zz)
 
 !Arguments ------------------------------------
 !scalars
@@ -3982,7 +3982,7 @@ function dpade(n,z,f,zz)
  complex(dpc) :: dAz(0:n), dBz(0:n)
 ! *************************************************************************
 
- call calculate_pade_a(a,n,z,f)
+ call calculate_pade_a(a, n, z, f)
 
  Az(0)=czero
  Az(1)=a(1)
@@ -4022,7 +4022,7 @@ end function dpade
 !!
 !! SOURCE
 
-subroutine calculate_pade_a(a,n,z,f)
+subroutine calculate_pade_a(a, n, z, f)
 
 !Arguments ------------------------------------
 !scalars

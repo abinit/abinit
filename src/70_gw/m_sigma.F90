@@ -141,7 +141,8 @@ MODULE m_sigma
 
   real(dp),allocatable :: vxcme(:,:,:)
   ! (b1gw:b2gw,nkibz,nsppol*nsig_ab))
-  ! $\<nks|v_{xc}[n_val]|nks\>$ matrix elements of vxc (valence-only contribution).
+  ! $\<nks|v_{xc}[n_val]|nks\>$ matrix elements of vxc
+  ! NB: valence-only contribution i.e. computed without model core charge
 
   real(dp),allocatable :: vUme(:,:,:)
   ! (b1gw:b2gw,nkibz,nsppol*nsig_ab))
@@ -170,6 +171,7 @@ MODULE m_sigma
   complex(dpc),allocatable :: hhartree(:,:,:,:)
   ! (b1gw:b2gw,b1gw:b2gw,nkibz,nsppol*nsig_ab)
   ! $\<nks|T+v_H+v_{loc}+v_{nl}|mks\>$
+  ! Note that v_{loc} does not include the contribution to vxc(r) given by the model core charge.
 
   complex(dpc),allocatable :: sigcme(:,:,:,:)
   ! (b1gw:b2gw,nkibz,nomega_r,nsppol*nsig_ab))
@@ -434,11 +436,11 @@ subroutine write_sigma_results(ikcalc,ikibz,Sigp,Sr,KS_BSt)
  gwcalctyp=Sigp%gwcalctyp
  mod10=MOD(Sigp%gwcalctyp,10)
 
- !unt_gw  File with GW corrections.
- !unt_sig Self-energy as a function of frequency.
- !unt_sgr Derivative wrt omega of the Self-energy.
- !unt_sigc Sigma_c(eik) MRM
- !unt_sgm Sigma on the Matsubara axis.
+ !unt_gw:  File with GW corrections.
+ !unt_sig: Self-energy as a function of frequency.
+ !unt_sgr: Derivative wrt omega of the Self-energy.
+ !unt_sigc: Sigma_c(eik) MRM
+ !unt_sgm: Sigma on the Matsubara axis (imag axis)
 
  tag_spin=(/'            ','            '/); if (Sr%nsppol==2) tag_spin=(/',  SPIN UP  ',',  SPIN DOWN'/)
 

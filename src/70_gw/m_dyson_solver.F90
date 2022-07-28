@@ -295,7 +295,7 @@ subroutine solve_dyson(ikcalc,minbnd,maxbnd,nomega_sigc,Sigp,Kmesh,sigcme_tmp,qp
       end if
 
       ! Diagonal elements of sigcme_tmp
-      ! if zz in 2 or 3 quadrant, avoid poles in the complex plane using Sigma(-iw) = Sigma(iw)*.
+      ! if zz in 2 or 3 quadrant, avoid branch cut in the complex plane using Sigma(-iw) = Sigma(iw)*.
       do iab=1,Sr%nsig_ab
         is_idx=spin; if (Sr%nsig_ab>1) is_idx=iab
         if (real(zz) > zero) then
@@ -309,7 +309,7 @@ subroutine solve_dyson(ikcalc,minbnd,maxbnd,nomega_sigc,Sigp,Kmesh,sigcme_tmp,qp
         end if
       end do !iab
 
-      ! Z = (1 - dSigma/domega(E0))^{-1}
+      ! Z = (1 - dSigma / domega(E0))^{-1}
       if (Sr%nsig_ab == 1) then
         Sr%ze0(jb,sk_ibz,spin) = one / (one - Sr%dsigmee0(jb,sk_ibz,spin))
       else
@@ -370,7 +370,7 @@ subroutine solve_dyson(ikcalc,minbnd,maxbnd,nomega_sigc,Sigp,Kmesh,sigcme_tmp,qp
         zz=Sr%omega_r(io)
         if (REAL(zz) > zero) then
           tmpcdp(:) = sigcme_tmp(:,jb,jb,spin)
-          Sr%sigcme(jb,sk_ibz,io,spin) = pade(Sr%nomega_i, Sr%omega_i, tmpcdp,zz)
+          Sr%sigcme(jb,sk_ibz,io,spin) = pade(Sr%nomega_i, Sr%omega_i, tmpcdp, zz)
         else
           tmpcdp(:) = CONJG(sigcme_tmp(:,jb,jb,spin))
           Sr%sigcme(jb,sk_ibz,io,spin) = pade(Sr%nomega_i, CONJG(Sr%omega_i), tmpcdp, zz)
