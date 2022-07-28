@@ -72,7 +72,7 @@ module m_mlwfovlp2
 
  public :: mlwfovlp2
 
- 
+
  contains
 !!***
 
@@ -166,8 +166,10 @@ module m_mlwfovlp2
  real(dp),optional, intent(in) :: eigen(mband*nkpt*nsppol),gprimd(3,3),rprimd(3,3)
  real(dp),intent(in) :: occ(mband*nkpt*nsppol)
  real(dp),intent(in) :: xred(3,natom)
- type(pawrad_type),intent(in) :: pawrad(psps%ntypat*psps%usepaw)
- type(pawtab_type),intent(in) :: pawtab(psps%ntypat*psps%usepaw)
+ !type(pawrad_type),intent(in) :: pawrad(psps%ntypat*psps%usepaw)
+ !type(pawtab_type),intent(in) :: pawtab(psps%ntypat*psps%usepaw)
+ type(pawrad_type),intent(in) :: pawrad(:)
+ type(pawtab_type),intent(in) :: pawtab(:)
 
 !Local variables-------------------------------
 !scalars
@@ -332,6 +334,8 @@ module m_mlwfovlp2
 &  real_lattice,recip_lattice,rprimd,seed_name,spinors,xcart,xred)
 
  do isppol=1, nsppol
+
+
    write(message, '(6a)' ) ch10,&
 &   '   mlwfovlp :  mlwfovlp_setup done -',ch10,&
 &   '-  see ',trim(filew90_wout(isppol)),' for details.'
@@ -377,7 +381,9 @@ module m_mlwfovlp2
  !call mywfc%init(cg, cprj, dtset, dtfil, hdr, &
  !     & MPI_enreg, nprocs, psps, pawtab, rank)
 
- call init_mywfc(mywfc, wfd,  cg, cprj, dtset, dtfil, hdr, MPI_enreg, nprocs, psps, pawtab, rank)
+ call init_mywfc(mywfc=mywfc, wfd=wfd, cg=cg, cprj=cprj,  cryst=crystal,dtset=dtset, &
+   & dtfil=dtfil, hdr=hdr, MPI_enreg=MPI_enreg, nprocs=nprocs, psps=psps, &
+   & pawtab=pawtab, rank=rank)
 !
 !Shifts computed.
 !
@@ -401,12 +407,12 @@ module m_mlwfovlp2
 !&   npwarr,dtset%nspinor,nsppol,ovikp,dtfil%fnametmp_cg)
       call mlwfovlp_pw(mywfc,cm1,g1,kg,mband,&
    &   mkmem,mpi_enreg,mpw,nfft,ngfft,nkpt,nntot,&
-   &   npwarr,dtset%nspinor,nsppol,ovikp, seed_name(isppol))
+   &   npwarr,dtset%nspinor,nsppol,ovikp)
 
    !mlwfovlp_pw(mywfc,cm1,g1,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nkpt,nntot,&
    !     &  npwarr,nspinor,nsppol,ovikp,seed_name)
 
-   
+
    write(message, '(a,a)' ) ch10,&
 &   '   mlwfovlp : PW part of overlap computed   '
    call wrtout(std_out,  message,'COLL')
@@ -537,7 +543,7 @@ module m_mlwfovlp2
       &     nattyp,nkpt,npwarr,&
       &     dtset%nspinor,nsppol,ntypat,num_bands,nwan,pawtab,proj_l,proj_m,&
       &     proj_radial,proj_site,proj_x,proj_z,proj_zona,psps,ucvol)
-      
+
      write(message, '(a,a,a,a)' ) ch10,&
 &     '   mlwfovlp:  mlwfovlp_proj done -',ch10,&
 &     '   Projectors computed.'
@@ -1483,13 +1489,13 @@ end subroutine mlwfovlp_setup
 !! SOURCE
 
 subroutine mlwfovlp_pw(mywfc,cm1,g1,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nkpt,nntot,&
-&  npwarr,nspinor,nsppol,ovikp,seed_name)
+&  npwarr,nspinor,nsppol,ovikp)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mband,mkmem,mpw,nfft,nkpt,nntot
  integer,intent(in) :: nspinor,nsppol
- character(len=fnlen) ::  seed_name  !seed names of files containing cg info used in case of MPI
+! character(len=fnlen) ::  seed_name  !seed names of files containing cg info used in case of MPI
  class(abstract_wf) :: mywfc
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
@@ -1793,7 +1799,7 @@ subroutine mlwfovlp_pw(mywfc,cm1,g1,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nkpt
                              & + mywfc%cg_elem(1,  igk1, ispinor,iband1, ikpt1, isppol) &
                              & *mywfc%cg_elem(1, igk2,  ispinor,iband2, ikpt2, isppol) &
                              & +mywfc%cg_elem(2, igk1,  ispinor,iband1, ikpt1, isppol) &
-                             & *mywfc%cg_elem(2,  igk2, ispinor,iband2, ikpt2, isppol) 
+                             & *mywfc%cg_elem(2,  igk2, ispinor,iband2, ikpt2, isppol)
                                 !& +cg(1,igks1+iwav(iband1,ikpt1,isppol)) &
                                 !& *cg(1,igks2+iwav(iband2,ikpt2,isppol))&
                                 !& + cg(2,igks1+iwav(iband1,ikpt1,isppol)) &
@@ -1803,7 +1809,7 @@ subroutine mlwfovlp_pw(mywfc,cm1,g1,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nkpt
                              & + mywfc%cg_elem(1, igks1,  ispinor,iband1, ikpt1, isppol) &
                              & *mywfc%cg_elem( 2, igks2,  ispinor,iband2, ikpt2, isppol) &
                              & -mywfc%cg_elem( 2, igks1,  ispinor,iband1, ikpt1, isppol) &
-                             & *mywfc%cg_elem( 1, igks2,  ispinor,iband2, ikpt2, isppol) 
+                             & *mywfc%cg_elem( 1, igks2,  ispinor,iband2, ikpt2, isppol)
 
                             ! &                       cg(1,igks1+iwav(iband1,ikpt1,isppol))*cg(2,igks2+iwav(iband2,ikpt2,isppol))&
                             ! &                       - cg(2,igks1+iwav(iband1,ikpt1,isppol))*cg(1,igks2+iwav(iband2,ikpt2,isppol))
@@ -1913,7 +1919,8 @@ subroutine mlwfovlp_pw(mywfc,cm1,g1,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nkpt
  logical,intent(in) :: band_in(mband,nsppol)
  logical,intent(in)::just_augmentation(mwan,nsppol)
  !type(pawcprj_type) :: cprj(natom,nspinor*mband*mkmem*nsppol)
- type(pawtab_type),intent(in) :: pawtab(psps%ntypat*psps%usepaw)
+ !type(pawtab_type),intent(in) :: pawtab(psps%ntypat*psps%usepaw)
+ type(pawtab_type),intent(in) :: pawtab(:)
  class(abstract_wf), intent(inout) :: mywfc
 
 !Local variables-------------------------------
@@ -2271,7 +2278,7 @@ subroutine mlwfovlp_pw(mywfc,cm1,g1,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nkpt
      amn2=zero
      ibg=0
      do isppol=1,nsppol
-       do ikpt=1,nkpt   !TODO : hexu: check if it should be mkmem, or should skip if the kpt is not in this node. 
+       do ikpt=1,nkpt   !TODO : hexu: check if it should be mkmem, or should skip if the kpt is not in this node.
          nband_k=dtset%nband(ikpt+(isppol-1)*nkpt)
          do iband=1,nband_k
 !          write(std_out,*)"amn2",iband,ibg,ikpt
@@ -2480,7 +2487,7 @@ subroutine mlwfovlp_projpaw(A_paw,band_in,mywfc,just_augmentation,max_num_bands,
  ii=0
  do isppol=1,nsppol
    do ikpt=1,nkpt
-      ! 
+      !
      do iband=1,nband(ikpt)
        ii=ii+1
        index(iband,ikpt,isppol)=ii

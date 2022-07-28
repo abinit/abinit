@@ -285,6 +285,7 @@ contains
                       !do ig=1,npw_k*dtset%nspinor
                       !cwavef(1,ig)=cg(1,ipw+iwav(ispinor, iband,ikpt,isppol))
                       !cwavef(2,ig)=cg(2,ipw+iwav(ispinor, iband,ikpt,isppol))
+                      ig = ipw + (ispinor-1)*npw_k
                       cwavef(1,ig)=mywfc%cg_elem(1,ipw, ispinor, iband, ikpt, isppol)
                       cwavef(2,ig)=mywfc%cg_elem(2,ipw, ispinor, iband, ikpt, isppol)
                    end do
