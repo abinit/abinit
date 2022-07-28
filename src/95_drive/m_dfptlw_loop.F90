@@ -572,7 +572,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
                      !if (idir_dkdk>6) idir_dkdk=idir_dkdk-3
                      dkdk_index=idir_dkdk+(dtset%natom+6)*3
                      call appdig(dkdk_index,dtfil%fnamewffdkdk,fiwfdkdk)
-                     !Check that d2_ddk file exists and open it
+                     !Check that d2_dkdk file exists and open it
                      if (.not. file_exists(fiwfdkdk)) then
                        ! Trick needed to run Abinit test suite in netcdf mode. 
                        if (file_exists(nctk_ncify(fiwfdkdk))) then             
@@ -599,7 +599,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
                      !if (idir_dkdk>6) idir_dkdk=idir_dkdk-3
                      dkdk_index=idir_dkdk+(dtset%natom+6)*3
                      call appdig(dkdk_index,dtfil%fnamewffdkdk,fiwfdkdk)
-                     !Check that d2_ddk file exists and open it
+                     !Check that d2_dkdk file exists and open it
                      if (.not. file_exists(fiwfdkdk)) then
                        ! Trick needed to run Abinit test suite in netcdf mode. 
                        if (file_exists(nctk_ncify(fiwfdkdk))) then
@@ -612,7 +612,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
                          ABI_ERROR('Missing file: '//TRIM(fiwfdkdk))
                        end if
                      end if
-                     write(message,'(2a)')'-dfptlw_loop : read the d2_dkdk wavefunctions from file: ',trim(fiwfdkdk)
+                     write(message,'(2a)')'-dfptlw_loop : read the d2_dkdk (again!) wavefunctions from file: ',trim(fiwfdkdk)
                      call wrtout(std_out,message,'COLL')
                      !call wrtout(ab_out,message,'COLL') 
                      call wfk_open_read(d2_dkdk_f2,fiwfdkdk,1,dtset%iomode,dtfil%unddk+1,mpi_enreg%comm_cell)
