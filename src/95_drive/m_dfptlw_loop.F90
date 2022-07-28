@@ -570,28 +570,28 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
                    ! copy mpi_enreg in mpi_enreg_copy
                    mpi_enreg_copy = mpi_enreg
                    !AZ_try_fin**********************
-                   !if (i1pert==natom+2) then
-                   !  call rf2_getidir(i1dir,i3dir,idir_dkdk)
+                   if (i1pert==natom+2) then
+                     call rf2_getidir(i1dir,i3dir,idir_dkdk)
                      !if (idir_dkdk>6) idir_dkdk=idir_dkdk-3
-                   !  dkdk_index=idir_dkdk+(dtset%natom+6)*3
-                   !  call appdig(dkdk_index,dtfil%fnamewffdkdk,fiwfdkdk)
+                     dkdk_index=idir_dkdk+(dtset%natom+6)*3
+                     call appdig(dkdk_index,dtfil%fnamewffdkdk,fiwfdkdk)
                      !Check that d2_dkdk file exists and open it
-                   !  if (.not. file_exists(fiwfdkdk)) then
+                     if (.not. file_exists(fiwfdkdk)) then
                        ! Trick needed to run Abinit test suite in netcdf mode. 
-                   !    if (file_exists(nctk_ncify(fiwfdkdk))) then             
-                   !      write(message,"(3a)")"- File: ",trim(fiwfdkdk),& 
-                   !      " does not exist but found netcdf file with similar name."
-                   !      call wrtout(std_out,message,'COLL')
-                   !      fiwfdkdk = nctk_ncify(fiwfdkdk)
-                   !    end if
-                   !    if (.not. file_exists(fiwfdkdk)) then
-                   !      ABI_ERROR('Missing file: '//TRIM(fiwfdkdk))
-                   !    end if
-                   !  end if
-                   !  write(message,'(2a)')'-dfptlw_loop : read the d2_dkdk wavefunctions from file: ',trim(fiwfdkdk)
-                   !  call wrtout(std_out,message,'COLL')
+                       if (file_exists(nctk_ncify(fiwfdkdk))) then             
+                         write(message,"(3a)")"- File: ",trim(fiwfdkdk),& 
+                         " does not exist but found netcdf file with similar name."
+                         call wrtout(std_out,message,'COLL')
+                         fiwfdkdk = nctk_ncify(fiwfdkdk)
+                       end if
+                       if (.not. file_exists(fiwfdkdk)) then
+                         ABI_ERROR('Missing file: '//TRIM(fiwfdkdk))
+                       end if
+                     end if
+                     write(message,'(2a)')'-dfptlw_loop : read the d2_dkdk wavefunctions from file: ',trim(fiwfdkdk)
+                     call wrtout(std_out,message,'COLL')
                      !call wrtout(ab_out,message,'COLL') 
-                   !  call wfk_open_read(d2_dkdk_f,fiwfdkdk,1,dtset%iomode,dtfil%unddk+1,mpi_enreg%comm_cell)
+                     call wfk_open_read(d2_dkdk_f,fiwfdkdk,1,dtset%iomode,dtfil%unddk+1,mpi_enreg%comm_cell)
 
                    !end if
 
@@ -639,7 +639,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
                    call ddk_f%close()
 
                    !close d2_dkdk file
-                   !if (i1pert==natom+2) call d2_dkdk_f%close()
+                   if (i1pert==natom+2) call d2_dkdk_f%close()
 
                    !AZ_try_ini**********************************
                    ! Close d2_dkdk file
