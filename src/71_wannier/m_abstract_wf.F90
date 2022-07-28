@@ -74,6 +74,7 @@ module m_abstract_wf
 !!***
  type, public :: abstract_wf
     logical :: has_paw = .False.
+    type(crystal_t), pointer :: cryst => null()
     type(datafiles_type),pointer :: dtfil => null()
     type(dataset_type),pointer :: dtset => null()
     type(hdr_type), pointer :: hdr => null()
@@ -116,7 +117,7 @@ module m_abstract_wf
     logical :: is_fullbz = .False.
     type(wfd_t), pointer :: wfd => null()
     type(wave_t), pointer :: waveprt => null()
-    real(dp), allocatable :: cg_cache(:, :)
+    !real(dp), allocatable :: cg_cache(:, :)
     integer :: iband_c=-1, ikpt_c=-1, isppol_c=-1 !index for the cache
   contains
     procedure :: init => wfd_wf_init
@@ -124,7 +125,7 @@ module m_abstract_wf
     procedure :: cg_elem_complex => wfd_cg_elem_complex
     procedure :: cprj_elem =>wfd_cprj_elem
     procedure :: load_cg => wfd_load_cg
-    procedure :: build_cache => wfd_build_cache
+    !procedure :: build_cache => wfd_build_cache
  end type wfd_wf
 
 
@@ -136,8 +137,9 @@ module m_abstract_wf
 contains
 !!***
 
-  subroutine init_mywfc(mywfc, wfd,  cg, cprj, dtset, dtfil, hdr, MPI_enreg, nprocs, psps, pawtab, rank)
+  subroutine init_mywfc(mywfc, wfd,  cg, cprj, cryst, dtset, dtfil, hdr, MPI_enreg, nprocs, psps, pawtab, rank)
     class(abstract_wf), pointer, intent(inout) :: mywfc
+    type(crystal_t), target, intent(in) :: cryst
     type(wfd_t), target, optional, intent(in) :: wfd
     real(dp), target, optional, intent(in):: cg(:, :)
     type(pawcprj_type), target, optional, intent(in):: cprj(:,:)
@@ -156,14 +158,15 @@ contains
     end if
     select type(mywfc)
     type is(cg_cprj)
-       call mywfc%init( cg, cprj, dtset, dtfil, hdr, MPI_enreg, nprocs, psps, pawtab, rank)
+       call mywfc%init( cg, cprj, cryst, dtset, dtfil, hdr, MPI_enreg, nprocs, psps, pawtab, rank)
     type is(wfd_wf)
-       call mywfc%init( wfd, dtset, dtfil, hdr, MPI_enreg, nprocs, psps, pawtab, rank)
+       call mywfc%init( wfd, cryst, dtset, dtfil, hdr, MPI_enreg, nprocs, psps, pawtab, rank)
     end select
   end subroutine init_mywfc
 
-  subroutine abstract_init(self, dtset, dtfil, hdr, MPI_enreg, nprocs, psps, pawtab, rank)
+  subroutine abstract_init(self,cryst, dtset, dtfil, hdr, MPI_enreg, nprocs, psps, pawtab, rank)
     class(abstract_wf), intent(inout) :: self
+    type(crystal_t), target, intent(in) :: cryst
     type(dataset_type),target, intent(in) :: dtset
     type(datafiles_type),target, intent(in) :: dtfil
     type(mpi_type), target, intent(in) :: MPI_enreg
@@ -172,6 +175,7 @@ contains
     type(hdr_type), target, intent(in) :: hdr
     integer, intent(in) :: nprocs, rank
     if(present(pawtab)) self%pawtab => pawtab
+    self%cryst => cryst
     self%dtset => dtset
     self%dtfil => dtfil
     self%hdr => hdr
@@ -248,6 +252,8 @@ contains
 
   subroutine abstract_wf_free(self)
     class(abstract_wf), intent(inout) :: self
+
+    nullify(self%cryst)
     nullify(self%dtset)
     nullify(self%dtfil)
     nullify(self%hdr)
@@ -267,8 +273,9 @@ contains
   end subroutine show_info
 
 
-  subroutine wfd_wf_init(self, wfd, dtset, dtfil, hdr, MPI_enreg, nprocs, psps, pawtab, rank)
+  subroutine wfd_wf_init(self, wfd,cryst, dtset, dtfil, hdr, MPI_enreg, nprocs, psps, pawtab, rank)
     class(wfd_wf), intent(inout) :: self
+    type(crystal_t), target, intent(in) :: cryst
     type(wfd_t), target, intent(in) :: wfd
     type(dataset_type),target, intent(in) :: dtset
     type(datafiles_type),target, intent(in) :: dtfil
@@ -278,7 +285,7 @@ contains
     type(hdr_type), target, intent(in) :: hdr
     integer, intent(in) :: nprocs, rank
     self%wfd=> wfd
-    call self%abstract_wf%abstract_init(dtset, dtfil, hdr, MPI_enreg, nprocs, psps, pawtab, rank)
+    call self%abstract_wf%abstract_init(cryst, dtset, dtfil, hdr, MPI_enreg, nprocs, psps, pawtab, rank)
   end subroutine wfd_wf_init
 
 
@@ -287,29 +294,29 @@ contains
   subroutine wfd_free(self)
     class(wfd_wf), intent(inout) :: self
     nullify(self%wfd)
-    ABI_SFREE(self%cg_cache)
+    !ABI_SFREE(self%cg_cache)
     self%iband_c=-1
     self%ikpt_c=-1
     self%isppol_c=-1
     call self%abstract_wf%free()
   end subroutine wfd_free
 
-
-  subroutine wfd_build_cache(self, iband, ik, isppol)
-    class(wfd_wf), intent(inout) :: self
-    integer, intent(in) :: iband, ik, isppol
-    integer :: ik_ibz, size
-    ik_ibz=ik
-    size = self%wfd%npwarr(ik_ibz) * self%wfd%nspinor
-    if(allocated(self%cg_cache)) then
-       ABI_FREE(self%cg_cache)
-    end if
-    ABI_MALLOC(self%cg_cache, (2, size))
-    call self%wfd%copy_cg(iband, ik_ibz, isppol, self%cg_cache)
-    self%iband_c = iband
-    self%ikpt_c = ik
-    self%isppol_c = isppol
-  end subroutine wfd_build_cache
+!
+!  subroutine wfd_build_cache(self, iband, ik, isppol)
+!    class(wfd_wf), intent(inout) :: self
+!    integer, intent(in) :: iband, ik, isppol
+!    integer :: ik_ibz, size
+!    ik_ibz=ik
+!    size = self%wfd%npwarr(ik_ibz) * self%wfd%nspinor
+!    if(allocated(self%cg_cache)) then
+!       ABI_FREE(self%cg_cache)
+!    end if
+!    ABI_MALLOC(self%cg_cache, (2, size))
+!    call self%wfd%copy_cg(iband, ik_ibz, isppol, self%cg_cache)
+!    self%iband_c = iband
+!    self%ikpt_c = ik
+!    self%isppol_c = isppol
+!  end subroutine wfd_build_cache
 
   function wfd_cg_elem(self, icplx, ig, ispinor, iband, ikpt, isppol ) result(ret)
     class(wfd_Wf), intent(inout) :: self
@@ -320,7 +327,6 @@ contains
     integer :: npw_k
     type(wave_t),pointer :: wave
     character(len=500) :: msg
-
     ik_ibz=ikpt
     !if(.not. (iband==self%iband_c .and. ikpt==self%ikpt_c .and. isppol==self%isppol_c)) then
        !print *, "Building cache for : ", iband, ikpt, isppol
@@ -335,21 +341,33 @@ contains
     !call xcopy(npw_k*Wfd%nspinor, wave%ug, 1, ug, 1)
     !ret = self%cg_cache(icplx, ig+self%hdr%npwarr(ik_ibz)*(ispinor-1))
     t = wave%ug(ig+self%hdr%npwarr(ik_ibz)*(ispinor-1))
-    if(icplx==1) ret = real(t)
-    if(icplx==2) ret = aimag(t)
+    select case(icplx)
+       case(1)
+          ret = real(t)
+       case(2)
+          ret = aimag(t)
+       case default
+          ret=-999999.99_dp
+       end select
+
   end function wfd_cg_elem
 
   function wfd_cg_elem_complex(self,  ig, ispinor, iband, ikpt, isppol ) result(ret)
     class(wfd_wf), intent(inout) :: self
     integer, intent(in) ::  ig, ispinor, iband, ikpt, isppol
     complex(dp) :: ret
-    integer :: ik_ibz, ind
+    integer :: ik_ibz
+    integer :: npw_k
+    type(wave_t),pointer :: wave
+    character(len=500) :: msg
     ik_ibz=ikpt
-    if(.not. (iband==self%iband_c .and. ikpt==self%ikpt_c .and. isppol==self%isppol_c)) then
-       call self%build_cache(iband, ikpt, isppol)
+    ABI_CHECK(self%wfd%get_wave_ptr(iband, ik_ibz, isppol, wave, msg) == 0, msg)
+    if (.not. wave%has_ug == WFD_STORED) then
+       write(msg,'(a,i0,a,3i0)')" Node ",self%wfd%my_rank," doesn't have (band,ik_ibz,spin): ",iband,ik_ibz,isppol
+       ABI_BUG(msg)
     end if
-    ind=ig+self%hdr%npwarr(ik_ibz)*(ispinor-1)
-    ret = cmplx(self%cg_cache(1, ind),self%cg_cache(2, ind), kind=dp)
+    npw_k = self%Wfd%npwarr(ik_ibz)
+    ret = wave%ug(ig+self%hdr%npwarr(ik_ibz)*(ispinor-1))
   end function wfd_cg_elem_complex
 
   subroutine wfd_load_cg(self, ikpt2, isppol, cg_read)
@@ -371,12 +389,22 @@ contains
     class(wfd_wf), intent(inout) :: self
     integer, intent(in) :: icplx, ispinor, iband, ikpt, isppol, ilmn, iatom
     real(dp) :: ret
+    type(pawcprj_type) :: cprj_out(self%natom,self%nspinor)
+
+    integer :: ik_ibz
+    !TODO: 
+    ik_ibz = ikpt
+    !call self%wfd%ug2cprj(band=iband,ik_ibz=ik_ibz,spin=ispin,choice=1,idir=0,natom=self%natom,Cryst=self%Cryst ,cwaveprj,sorted=.False.)
+    call self%wfd%get_cprj( band=iband, ik_ibz=ik_ibz, spin=isppol, &
+         & Cryst=self%cryst, Cprj_out=cprj_out, sorted=.False.)
+    ret=cprj_out(iatom, ispinor)%cp(icplx, ilmn)
   end function wfd_cprj_elem
 
 
 
-  subroutine cg_cprj_init(self, cg, cprj, dtset, dtfil, hdr, MPI_enreg, nprocs, psps, pawtab, rank)
+  subroutine cg_cprj_init(self, cg, cprj, cryst, dtset, dtfil, hdr, MPI_enreg, nprocs, psps, pawtab, rank)
     class(cg_cprj), intent(inout) :: self
+    type(crystal_t), target, intent(in) :: cryst
     real(dp), target, optional, intent(in):: cg(:, :)
     type(pawcprj_type), target, optional, intent(in):: cprj(:,:)
     type(dataset_type),target, intent(in) :: dtset
@@ -386,7 +414,7 @@ contains
     type(pawtab_type), target, optional, intent(in) :: pawtab(:)
     type(hdr_type), target, intent(in) :: hdr
     integer, intent(in) :: nprocs, rank
-    call self%abstract_wf%abstract_init(dtset, dtfil, hdr, MPI_enreg, nprocs, psps, pawtab, rank)
+    call self%abstract_wf%abstract_init(cryst, dtset, dtfil, hdr, MPI_enreg, nprocs, psps, pawtab, rank)
     if(present(cg))    self%cg=> cg
     if(present(cprj) .and. present(pawtab)) then
        self%has_paw=.True.
@@ -404,7 +432,7 @@ contains
 
   subroutine cg_cprj_free(self)
     class(cg_cprj), intent(inout) :: self
-    call self%abstract_init%free()
+    call self%abstract_wf%free()
     if(self%nprocs>1) then
        call self%remove_tmpfile()
     end if

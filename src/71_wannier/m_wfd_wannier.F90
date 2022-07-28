@@ -346,8 +346,10 @@ contains
     type(mpi_type), intent(in) :: mpi_enreg
     type(pseudopotential_type),intent(in) :: psps
     type(pawang_type),intent(in) :: pawang
-    type(pawrad_type),intent(in) :: pawrad(psps%ntypat*psps%usepaw)
-    type(pawtab_type),intent(in) :: pawtab(psps%ntypat*psps%usepaw)
+    !type(pawrad_type),intent(in) :: pawrad(psps%ntypat*psps%usepaw)
+    type(pawrad_type),intent(in) :: pawrad(:)
+    !type(pawtab_type),intent(in) :: pawtab(psps%ntypat*psps%usepaw)
+    type(pawtab_type),intent(in) :: pawtab(:)
 
     type(wfd_t), optional, intent(inout) :: wfd
     real(dp), optional, target, intent(in) :: cg(:, :)
@@ -357,9 +359,9 @@ contains
     integer :: mgfftc
     integer :: nfft
     integer :: mcg, mcprj
-    real(dp), pointer:: ptr_cg(:, :)=>null()
+    !real(dp), pointer:: ptr_cg(:, :)=>null()
     integer, pointer:: ptr_kg(:, :)=>null()
-    type(pawcprj_type), pointer:: ptr_cprj(:, :)=>null()
+    !type(pawcprj_type), pointer:: ptr_cprj(:, :)=>null()
     integer :: mpw, nspinor, mband, mkmem, nsppol
     ! TODO: anything todo with nkpt: fullBZ
     ! TODO: ebands for fullBZ
@@ -404,40 +406,40 @@ contains
     !   print *, "npw ik_ibz=", ik_ibz, "npw:", wfd%npwarr(ik_ibz)
     !end do
 
-    if (present(cg)) then
-       ptr_cg => cg
-    else
-       ABI_MALLOC(ptr_cg, (2, mcg))
-       ptr_cg(:,:) = 0.1_dp
-       iblk=0
-       do spin =1, nsppol
-          !FIXME fill cg and cprj
-          do ik_ibz=1, mkmem
-             npw_k=hdr%npwarr(ik_ibz)
-             call wfd%mybands(ik_ibz, spin, my_nbands, my_band_list(ik_ibz))
-             !mcg=mpw*nspinor*mband* mkmem *nsppol
-             print *, size(ptr_cg, dim=1)
-             print *, size(my_band_list, dim=1)
-             print *, wfd%mband
-             print *, mpw*nspinor*wfd%mband
-             ! TODO: Parallel
-             ! TODO: IBZ->BZ
-             !call wfd%extract_cgblock(band_list=my_band_list, ik_ibz=ik_ibz, &
-             !     & spin=spin, cgblock=ptr_cg(:,iblk+1: iblk+npw_k*nspinor*my_nbands))
-             call wfd%extract_cgblock(band_list=my_band_list, ik_ibz=ik_ibz, &
-                  & spin=spin, cgblock=ptr_cg(:,iblk+1: iblk+npw_k*nspinor*my_nbands))
-             !iblk = iblk + npw_k*nspinor*my_nbands
-             iblk = iblk + npw_k*nspinor*my_nbands
-          end do
-       end do
-    end if
-
-    if (present(cprj)) then
-       ptr_cprj => cprj
-    else
-       ABI_MALLOC(ptr_cprj, (cryst%natom, mcprj))
-       ! FIXME initialize ptr_cprj
-    end if
+!    if (present(cg)) then
+!       ptr_cg => cg
+!    else
+!       ABI_MALLOC(ptr_cg, (2, mcg))
+!       ptr_cg(:,:) = 0.1_dp
+!       iblk=0
+!       do spin =1, nsppol
+!          !FIXME fill cg and cprj
+!          do ik_ibz=1, mkmem
+!             npw_k=hdr%npwarr(ik_ibz)
+!             call wfd%mybands(ik_ibz, spin, my_nbands, my_band_list(ik_ibz))
+!             !mcg=mpw*nspinor*mband* mkmem *nsppol
+!             print *, size(ptr_cg, dim=1)
+!             print *, size(my_band_list, dim=1)
+!             print *, wfd%mband
+!             print *, mpw*nspinor*wfd%mband
+!             ! TODO: Parallel
+!             ! TODO: IBZ->BZ
+!             !call wfd%extract_cgblock(band_list=my_band_list, ik_ibz=ik_ibz, &
+!             !     & spin=spin, cgblock=ptr_cg(:,iblk+1: iblk+npw_k*nspinor*my_nbands))
+!             call wfd%extract_cgblock(band_list=my_band_list, ik_ibz=ik_ibz, &
+!                  & spin=spin, cgblock=ptr_cg(:,iblk+1: iblk+npw_k*nspinor*my_nbands))
+!             !iblk = iblk + npw_k*nspinor*my_nbands
+!             iblk = iblk + npw_k*nspinor*my_nbands
+!          end do
+!       end do
+!    end if
+!
+!    if (present(cprj)) then
+!       ptr_cprj => cprj
+!    else
+!       ABI_MALLOC(ptr_cprj, (cryst%natom, mcprj))
+!       ! FIXME initialize ptr_cprj
+!    end if
 
     if (present(kg)) then
        ptr_kg=> kg
@@ -481,21 +483,21 @@ contains
        call mlwfovlp_wfd(cryst=cryst, ebands=ebands, hdr=hdr, wfd=wfd, &
             & dtset=dtset, dtfil=dtfil, mpi_enreg=mpi_enreg, &
             & pawang=pawang, pawrad=pawrad, pawtab=pawtab, psps=psps,&
-            & ngfftc=ngfftc, ngfftf=ngfftf, cg=ptr_cg, cprj=ptr_cprj,&
+            & ngfftc=ngfftc, ngfftf=ngfftf, cg=cg, cprj=cprj,&
             & kg=ptr_kg, occ=ebands%occ)
     end if
 
-    if (.not. present(cg)) then
-       ABI_FREE(ptr_cg)
-    end if
-    if (.not. present(cprj)) then
-       ABI_FREE(ptr_cprj)
-    end if
+    ! if (.not. present(cg)) then
+    !    ABI_FREE(ptr_cg)
+    ! end if
+    ! if (.not. present(cprj)) then
+    !    ABI_FREE(ptr_cprj)
+    ! end if
     if (.not. present(kg)) then
        ABI_FREE(ptr_kg)
     end if
-    nullify(ptr_cg)
-    nullify(ptr_cprj)
+    !nullify(ptr_cg)
+    !nullify(ptr_cprj)
     nullify(ptr_kg)
   end subroutine wfd_run_wannier
 
