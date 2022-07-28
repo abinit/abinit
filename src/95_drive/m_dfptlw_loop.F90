@@ -213,6 +213,9 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
  logical :: samepert
  character(len=500) :: message
  character(len=fnlen) :: fiden1i,fiwf1i,fiwf2i,fiwf3i,fiwfddk,fiwfdkdk
+ !AZ_try_ini************************
+ character(len=fnlen) :: fiwfdkdk_2
+ !AZ_try_fin************************
  type(gs_hamiltonian_type) :: gs_hamkq
  type(wffile_type) :: wff1,wff2,wff3,wfft1,wfft2,wfft3
  !AZ_try_ini**************************
@@ -598,24 +601,24 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
                      call rf2_getidir(i2dir,i3dir,idir_dkdk)
                      !if (idir_dkdk>6) idir_dkdk=idir_dkdk-3
                      dkdk_index=idir_dkdk+(dtset%natom+6)*3
-                     call appdig(dkdk_index,dtfil%fnamewffdkdk,fiwfdkdk)
+                     call appdig(dkdk_index,dtfil%fnamewffdkdk,fiwfdkdk_2)
                      !Check that d2_dkdk file exists and open it
-                     if (.not. file_exists(fiwfdkdk)) then
+                     if (.not. file_exists(fiwfdkdk_2)) then
                        ! Trick needed to run Abinit test suite in netcdf mode. 
-                       if (file_exists(nctk_ncify(fiwfdkdk))) then
-                         write(message,"(3a)")"- File: ",trim(fiwfdkdk),&
+                       if (file_exists(nctk_ncify(fiwfdkdk_2))) then
+                         write(message,"(3a)")"- File: ",trim(fiwfdkdk_2),&
                          " does not exist but found netcdf file with similar name."
                          call wrtout(std_out,message,'COLL')
-                         fiwfdkdk = nctk_ncify(fiwfdkdk)
+                         fiwfdkdk_2 = nctk_ncify(fiwfdkdk_2)
                        end if
-                       if (.not. file_exists(fiwfdkdk)) then
-                         ABI_ERROR('Missing file: '//TRIM(fiwfdkdk))
+                       if (.not. file_exists(fiwfdkdk_2)) then
+                         ABI_ERROR('Missing file: '//TRIM(fiwfdkdk_2))
                        end if
                      end if
-                     write(message,'(2a)')'-dfptlw_loop : read the d2_dkdk (again!) wavefunctions from file: ',trim(fiwfdkdk)
+                     write(message,'(2a)')'-dfptlw_loop : read the d2_dkdk (again!) wavefunctions from file: ',trim(fiwfdkdk_2)
                      call wrtout(std_out,message,'COLL')
                      !call wrtout(ab_out,message,'COLL') 
-                     call wfk_open_read(d2_dkdk_f2,fiwfdkdk,1,dtset%iomode,dtfil%unddk+1,mpi_enreg%comm_cell)
+                     call wfk_open_read(d2_dkdk_f2,fiwfdkdk_2,1,dtset%iomode,dtfil%unddk+1,mpi_enreg%comm_cell)
 
                    end if
                    !AZ_try_fin***************************************************************
