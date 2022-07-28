@@ -141,7 +141,7 @@ contains
 !!
 !! SOURCE
 
-subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,&
+subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,d2_dkdk_f2,&
      & d3etot_t1_k,d3etot_t2_k,d3etot_t3_k,&
      & d3etot_t4_k,d3etot_t5_k,dimffnl,dtset,eig1_k,eig2_k,ffnl_k,gs_hamkq,gsqcut,icg,&
      & i1dir,i2dir,i3dir,i1pert,i2pert,i3pert,ikpt,isppol,istwf_k,&
@@ -169,6 +169,10 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,&
  type(MPI_type),intent(in) :: mpi_enreg
  type(pseudopotential_type),intent(in) :: psps
  type(wfk_t),intent(inout) :: ddk_f,d2_dkdk_f
+ !AZ_try_ini********************************
+ ! Added a new variable d2_dkdk_f2
+ type(wfk_t),intent(inout) :: d2_dkdk_f2
+ !AZ_try_fin********************************
  type(pawfgr_type),intent(in) :: pawfgr
 
 !arrays
@@ -620,7 +624,10 @@ if (.not.samepert) then
   
        !Perturbation-specific part
        if (i2pert==natom+2) then
-         call d2_dkdk_f%read_bks(iband,ikpt,isppol,xmpio_single,cg_bks=gv1c)
+         !AZ_try_ini***********************************************************
+         ! Read from d2_dkdk_f2
+         call d2_dkdk_f2%read_bks(iband,ikpt,isppol,xmpio_single,cg_bks=gv1c)
+         !AZ_try_fin***********************************************************
        else
          cwave0i(:,:)= cg(:,1+offset_cgi:size_wf+offset_cgi)
   
