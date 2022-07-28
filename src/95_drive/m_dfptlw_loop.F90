@@ -593,7 +593,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
                      !call wrtout(ab_out,message,'COLL') 
                      call wfk_open_read(d2_dkdk_f,fiwfdkdk,1,dtset%iomode,dtfil%unddk+1,mpi_enreg%comm_cell)
 
-                   !end if
+                   end if
 
                    !AZ_try_ini***************************************************************
                    ! This is for i2pert
