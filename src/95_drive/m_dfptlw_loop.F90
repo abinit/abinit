@@ -217,6 +217,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
  type(wffile_type) :: wff1,wff2,wff3,wfft1,wfft2,wfft3
  !AZ_try_ini**************************
  type(wfk_t) :: d2_dkdk_f2
+ type(MPI_type) :: mpi_enreg_copy
  !AZ_try_fin**************************
  type(wfk_t) :: ddk_f,d2_dkdk_f
  type(wvl_data) :: wvl
@@ -566,6 +567,8 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
                    !Prepare d2_dkdk wf file
                    !AZ_try_ini********************** 
                    ! This is for i1pert
+                   ! copy mpi_enreg in mpi_enreg_copy
+                   mpi_enreg_copy = mpi_enreg
                    !AZ_try_fin**********************
                    !if (i1pert==natom+2) then
                    !  call rf2_getidir(i1dir,i3dir,idir_dkdk)
@@ -615,9 +618,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
                      write(message,'(2a)')'-dfptlw_loop : read the d2_dkdk (again!) wavefunctions from file: ',trim(fiwfdkdk)
                      call wrtout(std_out,message,'COLL')
                      !call wrtout(ab_out,message,'COLL') 
-                     call wfk_open_read(d2_dkdk_f2,fiwfdkdk,1,dtset%iomode,dtfil%unddk+1,mpi_enreg%comm_cell)
- 
-                     print*, i1dir, i2dir, i3dir, mpi_enreg%comm_cell
+                     call wfk_open_read(d2_dkdk_f2,fiwfdkdk,1,dtset%iomode,dtfil%unddk+1,mpi_enreg_copy%comm_cell)
 
                    end if
                    !AZ_try_fin***************************************************************
