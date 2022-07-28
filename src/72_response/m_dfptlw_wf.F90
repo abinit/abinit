@@ -361,7 +361,7 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,&
  & '_y_'//trim(adjustl(kpt_2_text))//&
  & '_z_'//trim(adjustl(kpt_3_text))//'.dat'
    open(unit=888,file=file_name,action='write',status='replace')
-   write(888,'(2f12.6)') dotr*occ(iband)*wtk_k*eight*pi, doti*occ(iband)*wtk_k*eight*pi
+   write(888,'(2f12.6)') dotr*occ_k(iband)*wtk_k*eight*pi, doti*occ_k(iband)*wtk_k*eight*pi
    close(888)
    !AZ_try_fin********************************************************
 
@@ -496,7 +496,7 @@ end if !samepert
     & '_y_'//trim(adjustl(kpt_2_text))//&
     & '_z_'//trim(adjustl(kpt_3_text))//'.dat'
       open(unit=888,file=file_name,action='write',status='replace')
-      write(888,'(2f12.6)') -cprodr*occ(iband)*wtk_k*eight*pi, -cprodi*occ(iband)*wtk_k*eight*pi
+      write(888,'(2f12.6)') -cprodr*occ_k(iband)*wtk_k*eight*pi, -cprodi*occ_k(iband)*wtk_k*eight*pi
       close(888)
       !AZ_try_fin********************************************************
 
@@ -769,7 +769,7 @@ if (.not.samepert) then
    & '_y_'//trim(adjustl(kpt_2_text))//&
    & '_z_'//trim(adjustl(kpt_3_text))//'.dat'
      open(unit=888,file=file_name,action='write',status='replace')
-     write(888,'(2f12.6)') -doti*occ(iband)*wtk_k*eight*pi, dotr*occ(iband)*wtk_k*eight*pi
+     write(888,'(2f12.6)') -doti*occ_k(iband)*wtk_k*eight*pi, dotr*occ_k(iband)*wtk_k*eight*pi
      close(888)
      !AZ_try_fin********************************************************
 
