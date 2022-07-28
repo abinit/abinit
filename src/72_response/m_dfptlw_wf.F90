@@ -769,7 +769,8 @@ if (.not.samepert) then
    & '_y_'//trim(adjustl(kpt_2_text))//&
    & '_z_'//trim(adjustl(kpt_3_text))//'.dat'
      open(unit=888,file=file_name,action='write',status='replace')
-     write(888,'(2f12.6)') -doti*occ_k(iband)*wtk_k*eight*pi, dotr*occ_k(iband)*wtk_k*eight*pi
+     ! I don't care about the real part...
+     write(888,'(2f12.6)') 0.0_dp, -doti*occ_k(iband)*wtk_k*eight*pi
      close(888)
      !AZ_try_fin********************************************************
 
