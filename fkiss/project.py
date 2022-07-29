@@ -64,6 +64,7 @@ EXTERNAL_MODS = {
     "scup_global",
     # GreenX library (temporary version)
     "mp2_grids",
+    "gx_api",
 }
 
 
