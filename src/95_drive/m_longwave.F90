@@ -1039,8 +1039,8 @@ subroutine dfptlw_out(blkflg_car,d3etot_car,lw_flexo,lw_qdrpl,lw_natopt,mpert,na
        do i2dir=1,3
          if (blkflg_car(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1) then
            write(ab_out,'(3(i5,3x),2(1x,f20.10))') i1dir,i2dir,i3dir, &
-         & four*pi*d3etot_car(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert), &
-         & -four*pi*d3etot_car(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
+         & -four*pi*d3etot_car(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert), &
+         &  four*pi*d3etot_car(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
          end if
        end do
      end do
