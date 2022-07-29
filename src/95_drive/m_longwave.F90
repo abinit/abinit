@@ -280,9 +280,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 
  if (dtset%lw_natopt==1) then
    d3e_pert1(natom+2)=1
-   !AZ*******************
-   d3e_pert2(natom+2)=1  
-   !AZ*******************
+   d3e_pert2(natom+2)=1 
  end if
 
  perm(:)=0
@@ -562,9 +560,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 
 !Compute nonlocal form factors ffnl1, for all atoms and all k-points.
  if (dtset%ffnl_lw == 0) then 
-   !AZ_ini**************************************************************************************
    if (dtset%lw_qdrpl==1.or.dtset%lw_flexo==3.or.dtset%lw_natopt==1) ider=1; idir0=4; dimffnl=4
-   !AZ_fin**************************************************************************************
    if (dtset%lw_flexo==1.or.dtset%lw_flexo==2.or.dtset%lw_flexo==4) then
      ider=2; idir0=4; dimffnl=10
    end if
@@ -704,19 +700,6 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 
 !  Close DDB
    close(dtfil%unddb)
-
-   !AZ_try_ini******************************************************************
-   open(unit=111,file='d3etot_from_longwave.dat',action='write',status='replace')
-   do i1dir=1,3
-     do i2dir=1,3
-       do i3dir=1,3
-         write(111,'(3i6,2f20.6)') i1dir, i2dir, i3dir, d3etot(1,i1dir,natom+2,i2dir,natom+2,i3dir,natom+8), &
-                                &  d3etot(2,i1dir,natom+2,i2dir,natom+2,i3dir,natom+8)
-       enddo
-     enddo
-   enddo 
-   close(111)
-   !AZ_try_fin******************************************************************
 
    !Calculate spatial-dispersion quantities in Cartesian coordinates and write
    !them in abi_out
