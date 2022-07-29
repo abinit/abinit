@@ -519,7 +519,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
 
  nkpt_summed = Kmesh%nbz
  if (Ep%symchi /= 0) then
-   nkpt_summed=Ltg_q%nibz_ltg
+   nkpt_summed = Ltg_q%nibz_ltg
    call Ltg_q%print(std_out, Dtset%prtvol, mode_paral='COLL')
  end if
 

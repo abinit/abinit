@@ -461,7 +461,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
    end do
 
    write(msg,'(a,i0,a)')" Will treat ",COUNT(extrapolar_distrb==Wfd%my_rank)," extrapolar terms."
-   call wrtout(std_out,msg,'PERS')
+   call wrtout(std_out, msg)
  end if
 
  ABI_MALLOC(rhotwg_ki, (npwc*nspinor, minbnd:maxbnd))
@@ -668,7 +668,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
      end if
 
      write(msg,'(3(a,i0),a,i0)')' Sigma_c: ik_bz ',ik_bz,'/',Kmesh%nbz,", spin: ",spin,' done by mpi-rank: ',Wfd%my_rank
-     call wrtout(std_out,msg,'PERS')
+     call wrtout(std_out, msg)
 
      ! Find the corresponding irred q-point.
      call qmesh%get_BZ_item(iq_bz,qbz,iq_ibz,isym_q,itim_q)

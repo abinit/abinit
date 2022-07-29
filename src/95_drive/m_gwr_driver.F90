@@ -601,6 +601,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  if (use_wfk) then
    ! Build Green's function in imaginary-time from WFK file
    call gwr%build_gtau_from_wfk(wfk_path)
+   !call gwr%calc_head_wings(wfk_path)
  else
    !call gwr%build_gtau_from_vtrial(wfk_path, ngfftf, ks_vtrial)
  end if
