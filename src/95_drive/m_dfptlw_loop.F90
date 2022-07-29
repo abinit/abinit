@@ -607,7 +607,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
                          ABI_ERROR('Missing file: '//TRIM(fiwfdkdk))
                        end if
                      end if
-                     write(message,'(2a)')'-dfptlw_loop : read the d2_dkdk (again...) wavefunctions from file: ',trim(fiwfdkdk)
+                     write(message,'(2a)')'-dfptlw_loop : read the d2_dkdk wavefunctions from file: ',trim(fiwfdkdk)
                      call wrtout(std_out,message,'COLL')
                      !call wrtout(ab_out,message,'COLL') 
                      call wfk_open_read(d2_dkdk_f2,fiwfdkdk,1,dtset%iomode,dtfil%unddk+2,mpi_enreg%comm_cell)
