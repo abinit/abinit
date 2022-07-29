@@ -168,11 +168,7 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,d2_dkdk_f2,&
  type(gs_hamiltonian_type),intent(inout) :: gs_hamkq
  type(MPI_type),intent(in) :: mpi_enreg
  type(pseudopotential_type),intent(in) :: psps
- type(wfk_t),intent(inout) :: ddk_f,d2_dkdk_f
- !AZ_try_ini********************************
- ! Added a new variable d2_dkdk_f2
- type(wfk_t),intent(inout) :: d2_dkdk_f2
- !AZ_try_fin********************************
+ type(wfk_t),intent(inout) :: ddk_f,d2_dkdk_f, d2_dkdk_f2
  type(pawfgr_type),intent(in) :: pawfgr
 
 !arrays
@@ -219,13 +215,6 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,d2_dkdk_f2,&
  real(dp),allocatable :: dum_vlocal(:,:,:,:),vlocal1(:,:,:,:),dum_vpsp(:)
  real(dp),allocatable :: vpsp1(:)
  type(pawcprj_type),allocatable :: dum_cwaveprj(:,:)
-
- !AZ_test_ini**************************************************************************
- character(40) :: i1dir_text, i2dir_text, i3dir_text, iband_text, ikpt_text
- character(20) :: kpt_1_text, kpt_2_text, kpt_3_text, jband_text
- character(100) :: file_name
- real(dp) :: AZ_sum_re, AZ_sum_im
- !AZ_test_fin**************************************************************************
  
 ! *************************************************************************
 
@@ -298,43 +287,6 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,d2_dkdk_f2,&
    offset_cgi = (iband-1)*size_wf+icg
    cwavef1(:,:)= cg1(:,1+offset_cgi:size_wf+offset_cgi)
    cwavef2(:,:)= cg2(:,1+offset_cgi:size_wf+offset_cgi)
-
-   !AZ_try_ini*****************************************************
-   ! Print 1WF fro electric field perturbation
-   !write(kpt_1_text,'(f6.3)') kpt(1)
-   !write(kpt_2_text,'(f6.3)') kpt(2)
-   !write(kpt_3_text,'(f6.3)') kpt(3)
-   !write(iband_text,'(i5)') iband 
-   !write(i1dir_text,'(i5)') i1dir
-   !write(i2dir_text,'(i5)') i2dir
-
-   !! Write cg1 wavefunction
-   !file_name = 'AZ_cg1_iband_'//trim(adjustl(iband_text))//&
-  !& '_iq2grad_'//trim(adjustl(i1dir_text))//&
-  !& '_x_'//trim(adjustl(kpt_1_text))//&
-  !& '_y_'//trim(adjustl(kpt_2_text))//&
-  !& '_z_'//trim(adjustl(kpt_3_text))//'.dat'   
-
-   !open(unit=999,file=file_name,action='write',status='replace')
-   !do ii=1,size(cwavef1(1,:))
-   !  write(999,'(i10,2f12.6)') ii, cwavef1(1,ii), cwavef1(2,ii)
-   !enddo
-   !close(999)
-
-   ! Write cg2 wavefunction
-   !file_name = 'AZ_cg2_iband_'//trim(adjustl(iband_text))//&
-  !& '_iq2grad_'//trim(adjustl(i2dir_text))//&
-  !& '_x_'//trim(adjustl(kpt_1_text))//&
-  !& '_y_'//trim(adjustl(kpt_2_text))//&
-  !& '_z_'//trim(adjustl(kpt_3_text))//'.dat'
-  
-   !open(unit=999,file=file_name,action='write',status='replace')
-   !do ii=1,size(cwavef2(1,:))
-   !  write(999,'(i10,2f12.6)') ii, cwavef2(1,ii), cwavef2(2,ii)
-   !enddo
-   !close(999)
-
-   !AZ_try_fin*****************************************************
    
    !Compute < g |\partial_{gamma} H^{(0)} | u_{i,k}^{\lambda2} >
    call getgh1c(berryopt,cwavef2,dum_cwaveprj,gv1c,dum_grad_berry,&
@@ -348,26 +300,6 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,d2_dkdk_f2,&
 
    d3etot_t1_k(1)=d3etot_t1_k(1)+occ_k(iband)*dotr
    d3etot_t1_k(2)=d3etot_t1_k(2)+occ_k(iband)*doti
-
-   !AZ_try_ini********************************************************
-   write(i1dir_text,'(i8)') i1dir
-   write(i2dir_text,'(i8)') i2dir
-   write(i3dir_text,'(i8)') i3dir
-   write(iband_text,'(i8)') iband
-   write(kpt_1_text,'(f6.3)') kpt(1)
-   write(kpt_2_text,'(f6.3)') kpt(2)
-   write(kpt_3_text,'(f6.3)') kpt(3)
-   file_name = 'AZ_T1_iband_'//trim(adjustl(iband_text))//&
- & '_iq1grad_'//trim(adjustl(i1dir_text))//&
- & '_iq2grad_'//trim(adjustl(i2dir_text))//&
- & '_iq3grad_'//trim(adjustl(i3dir_text))//&
- & '_x_'//trim(adjustl(kpt_1_text))//&
- & '_y_'//trim(adjustl(kpt_2_text))//&
- & '_z_'//trim(adjustl(kpt_3_text))//'.dat'
-   open(unit=888,file=file_name,action='write',status='replace')
-   write(888,'(2f12.6)') dotr*occ_k(iband)*wtk_k*eight*pi, doti*occ_k(iband)*wtk_k*eight*pi
-   close(888)
-   !AZ_try_fin********************************************************
 
  end do !iband
 
@@ -434,28 +366,6 @@ if (.not.samepert) then
       cprodi=dotr*cj_h1_ci(2)+doti*cj_h1_ci(1)
       d3etot_t2_k(1)=d3etot_t2_k(1)-cprodr*occ_k(iband)
       d3etot_t2_k(2)=d3etot_t2_k(2)-cprodi*occ_k(iband)
-
-      !AZ_try_ini********************************************************
-      write(i1dir_text,'(i8)') i1dir
-      write(i2dir_text,'(i8)') i2dir
-      write(i3dir_text,'(i8)') i3dir
-      write(iband_text,'(i8)') iband
-      write(jband_text,'(i8)') jband
-      write(kpt_1_text,'(f6.3)') kpt(1)
-      write(kpt_2_text,'(f6.3)') kpt(2)
-      write(kpt_3_text,'(f6.3)') kpt(3)
-      file_name = 'AZ_T2_iband_'//trim(adjustl(iband_text))//&
-    & '_jband_'//trim(adjustl(jband_text))//&
-    & '_iq1grad_'//trim(adjustl(i1dir_text))//&
-    & '_iq2grad_'//trim(adjustl(i2dir_text))//&
-    & '_iq3grad_'//trim(adjustl(i3dir_text))//&
-    & '_x_'//trim(adjustl(kpt_1_text))//&
-    & '_y_'//trim(adjustl(kpt_2_text))//&
-    & '_z_'//trim(adjustl(kpt_3_text))//'.dat'
-      open(unit=888,file=file_name,action='write',status='replace')
-      write(888,'(2f12.6)') -cprodr*occ_k(iband)*wtk_k*eight*pi, -cprodi*occ_k(iband)*wtk_k*eight*pi
-      close(888)
-      !AZ_try_fin********************************************************
   
     end do !jband 
   
@@ -503,28 +413,6 @@ end if !samepert
      cprodi=dotr*cj_h1_ci(2)+doti*cj_h1_ci(1)
      d3etot_t3_k(1)=d3etot_t3_k(1)-cprodr*occ_k(iband)
      d3etot_t3_k(2)=d3etot_t3_k(2)-cprodi*occ_k(iband)
-
-     !AZ_try_ini********************************************************
-      write(i1dir_text,'(i8)') i1dir
-      write(i2dir_text,'(i8)') i2dir
-      write(i3dir_text,'(i8)') i3dir
-      write(iband_text,'(i8)') iband
-      write(jband_text,'(i8)') jband
-      write(kpt_1_text,'(f6.3)') kpt(1)
-      write(kpt_2_text,'(f6.3)') kpt(2)
-      write(kpt_3_text,'(f6.3)') kpt(3)
-      file_name = 'AZ_T3_iband_'//trim(adjustl(iband_text))//&
-    & '_jband_'//trim(adjustl(jband_text))//&
-    & '_iq1grad_'//trim(adjustl(i1dir_text))//&
-    & '_iq2grad_'//trim(adjustl(i2dir_text))//&
-    & '_iq3grad_'//trim(adjustl(i3dir_text))//&
-    & '_x_'//trim(adjustl(kpt_1_text))//&
-    & '_y_'//trim(adjustl(kpt_2_text))//&
-    & '_z_'//trim(adjustl(kpt_3_text))//'.dat'
-      open(unit=888,file=file_name,action='write',status='replace')
-      write(888,'(2f12.6)') -cprodr*occ_k(iband)*wtk_k*eight*pi, -cprodi*occ_k(iband)*wtk_k*eight*pi
-      close(888)
-      !AZ_try_fin********************************************************
 
    end do !jband
 
@@ -624,10 +512,8 @@ if (.not.samepert) then
   
        !Perturbation-specific part
        if (i2pert==natom+2) then
-         !AZ_try_ini***********************************************************
          ! Read from d2_dkdk_f2
          call d2_dkdk_f2%read_bks(iband,ikpt,isppol,xmpio_single,cg_bks=gv1c)
-         !AZ_try_fin***********************************************************
        else
          cwave0i(:,:)= cg(:,1+offset_cgi:size_wf+offset_cgi)
   
@@ -643,28 +529,6 @@ if (.not.samepert) then
        !Calculate the contribution to T4
        d3etot_t4_k(1,idq)=d3etot_t4_k(1,idq)+dotr*occ_k(iband)
        d3etot_t4_k(2,idq)=d3etot_t4_k(2,idq)+doti*occ_k(iband)
-
-       !AZ_try_ini********************************************************
-       write(i1dir_text,'(i8)') i1dir
-       write(i2dir_text,'(i8)') i2dir
-       write(i3dir_text,'(i8)') i3dir
-       write(iband_text,'(i8)') iband
-       write(kpt_1_text,'(f6.3)') kpt(1)
-       write(kpt_2_text,'(f6.3)') kpt(2)
-       write(kpt_3_text,'(f6.3)') kpt(3)
-       file_name = 'AZ_T4_iband_'//trim(adjustl(iband_text))//&
-     & '_iq1grad_'//trim(adjustl(i1dir_text))//&
-     & '_iq2grad_'//trim(adjustl(i2dir_text))//&
-     & '_iq3grad_'//trim(adjustl(i3dir_text))//&
-     & '_x_'//trim(adjustl(kpt_1_text))//&
-     & '_y_'//trim(adjustl(kpt_2_text))//&
-     & '_z_'//trim(adjustl(kpt_3_text))//'.dat'
-       open(unit=888,file=file_name,action='write',status='replace')
-       ! I don't care about the real part...
-       write(888,'(2f12.6)') 0.0_dp, dotr*occ_k(iband)*wtk_k*eight*pi
-       close(888)
-       !AZ_try_fin********************************************************
-
   
      end do !iband
   
@@ -803,28 +667,6 @@ if (.not.samepert) then
      !Calculate the contribution to T5:
      d3etot_t5_k(1,idq)=d3etot_t5_k(1,idq)+dotr*occ_k(iband)
      d3etot_t5_k(2,idq)=d3etot_t5_k(2,idq)+doti*occ_k(iband)
-
-     !AZ_try_ini********************************************************
-     write(i1dir_text,'(i8)') i1dir
-     write(i2dir_text,'(i8)') i2dir
-     write(i3dir_text,'(i8)') i3dir
-     write(iband_text,'(i8)') iband
-     write(kpt_1_text,'(f6.3)') kpt(1)
-     write(kpt_2_text,'(f6.3)') kpt(2)
-     write(kpt_3_text,'(f6.3)') kpt(3)
-     file_name = 'AZ_T5_iband_'//trim(adjustl(iband_text))//&
-   & '_iq1grad_'//trim(adjustl(i1dir_text))//&
-   & '_iq2grad_'//trim(adjustl(i2dir_text))//&
-   & '_iq3grad_'//trim(adjustl(i3dir_text))//&
-   & '_x_'//trim(adjustl(kpt_1_text))//&
-   & '_y_'//trim(adjustl(kpt_2_text))//&
-   & '_z_'//trim(adjustl(kpt_3_text))//'.dat'
-     open(unit=888,file=file_name,action='write',status='replace')
-     ! I don't care about the real part...
-     write(888,'(2f12.6)') 0.0_dp, -dotr*occ_k(iband)*wtk_k*eight*pi
-     close(888)
-     !AZ_try_fin********************************************************
-
 
    end do !iband
 
