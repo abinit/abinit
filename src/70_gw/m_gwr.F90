@@ -149,9 +149,6 @@ module m_gwr
  use m_wfd,           only : wfd_init, wfd_t, wfdgw_t, wave_t, WFD_STORED
  use m_pawtab,        only : pawtab_type
 
-!#undef __HAVE_GREENX
-!#define __HAVE_GREENX
-
 #ifdef __HAVE_GREENX
  use gx_api,          only : gx_minimax_grid, gx_get_error_message !, gx_check_ntau
 #endif
@@ -291,6 +288,13 @@ module m_gwr
 
   integer :: max_nbcalc
    ! Maximum number of bands computed (max over nkcalc and spin).
+
+  integer :: nwr = -1
+   ! Number of frequency points along the real axis for Sigma(w) and spectral function A(w)
+   ! Odd number so that the mesh is centered on the KS energy.
+
+  real(dp) :: wr_step = -one
+   ! Step of the linear mesh along the real axis (Ha units).
 
   real(dp),allocatable :: kcalc(:,:)
    ! kcalc(3, nkcalc)
@@ -675,23 +679,14 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  nbsum = dtset%nband(1)
  ABI_CHECK_IRANGE(nbsum, 1, mband, "Invalid nbsum")
 
- ! Frequency mesh for sigma(w_real) and spectral functions.
+ ! Define Frequency mesh for sigma(w_real) and spectral functions.
  ! Note that in GWR computing quantities on the real-axis is really cheap
- ! so we use
- !wmax = dtset%freqspmax
- !if (abs(wmax) < tol6) wmax = 100 * eV_to_Ha
- !gwr%nwr = dtset%nfreqsp
- !if (gwr%nwr > 0) then
- !  if (mod(gwr%nwr, 2) == 0) gwr%nwr = gwr%nwr + 1
- !else
- ! gwr%nwr =
- !end if
- !gwr%wr_step = wmax / (gwr%nwr - 1)
- !if (dtset%freqspmax /= zero) gwr%wr_step = dtset%freqspmax / (gwr%nwr - 1)
-
- ! Build linear mesh **centered** around the KS energy.
- !eig0nk = ebands%eig(band_ks, ik_ibz, spin) - sigma%wr_step * (sigma%nwr / 2)
- !sigma%wrmesh_b(:,ib_k) = arth(eig0nk, sigma%wr_step, sigma%nwr)
+ ! so we can use very dense meshes without affecting performance.
+ wmax = dtset%freqspmax; if (abs(wmax) < tol6) wmax = 50 * eV_Ha
+ gwr%nwr = dtset%nfreqsp
+ if (gwr%nwr ==  0) gwr%nwr = nint(wmax / (0.05 * eV_Ha))
+ if (mod(gwr%nwr, 2) == 0) gwr%nwr = gwr%nwr + 1
+ gwr%wr_step = wmax / (gwr%nwr - 1)
 
  ! =======================
  ! Setup k-mesh and q-mesh
@@ -1244,11 +1239,11 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  ! ==========================================================
  ! Allocate PBLAS arrays for G_kibz(g,g') and tchi_qibz(g,g')
  ! ==========================================================
- ABI_MALLOC(gwr%gt_kibz, (2, gwr%nkibz, gwr%ntau, gwr%nsppol))
- ABI_MALLOC(gwr%tchi_qibz, (gwr%nqibz, gwr%ntau, gwr%nsppol))
-
  ! 1D grid block-distributed along columns.
  call gwr%g_slkproc%init(gwr%g_comm%value, grid_dims=[1, gwr%g_comm%nproc])
+
+ ABI_MALLOC(gwr%gt_kibz, (2, gwr%nkibz, gwr%ntau, gwr%nsppol))
+ ABI_MALLOC(gwr%tchi_qibz, (gwr%nqibz, gwr%ntau, gwr%nsppol))
 
  do my_is=1,gwr%my_nspins
    spin = gwr%my_spins(my_is)
@@ -1277,6 +1272,24 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
       !call tchi%print(header=sjoin("tchi_qibz for iq_ibz:", itoa(iq_ibz)))
       end associate
     end do
+
+    ! ===========================================
+    ! Allocate PBLAS arrays for sigmac_kibz(g,g')
+    ! ===========================================
+    ! TODO: This is not needed. Perhaps for self-consistent without KS/HF representation.
+    !ABI_MALLOC(gwr%sigc_kibz, (2, gwr%nkibz, gwr%ntau, gwr%nsppol))
+    !gwr%sigc_space = "itau"
+
+    !do my_iki=1,gwr%my_nkibz
+    !  ik_ibz = gwr%my_kibz_inds(my_iki)
+    !  npwsp = gwr%green_desc_kibz(ik_ibz)%npw * gwr%nspinor
+    !  col_bsize = npwsp / gwr%g_comm%nproc; if (mod(npwsp, gwr%g_comm%nproc) /= 0) col_bsize = col_bsize + 1
+    !  associate (sigc => gwr%sigc_kibz(:, ik_ibz, itau, spin))
+    !  call sigc(1)%init(npwsp, npwsp, gwr%g_slkproc, 1, size_blocs=[npwsp, col_bsize])
+    !  call sigc(2)%init(npwsp, npwsp, gwr%g_slkproc, 1, size_blocs=[npwsp, col_bsize])
+    !  !call sigc(1)%print(header=sjoin("sigc_kibz(1) for ik_ibz:", itoa(ik_ibz)))
+    !  end associate
+    !end do
 
    end do ! my_it
  end do ! my_is
@@ -3303,7 +3316,6 @@ subroutine gwr_build_wc(gwr)
        ! RPA: \tepsilon = 1 - Vc^{1/2} chi0 Vc^{1/2}
        ! vc_sqrt contains vc^{1/2}(q,G), complex-valued to allow for a possible cutoff.
 
-       !wc%buffer_cplx = zero
        do il_g2=1,wc%sizeb_local(2)
          iglob2 = wc%loc2gcol(il_g2)
          ig2 = mod(iglob2 - 1, desc_q%npw) + 1
@@ -3324,7 +3336,7 @@ subroutine gwr_build_wc(gwr)
        end do ! il_g2
 
        ! Invert tilde epsilon.
-       ! NB: PZGETRF requires square block cyclic decomposition i.e., MB_A = NB_A.
+       ! NB: PZGETRF requires square block cyclic decomposition along the two axis
        ! hence we neeed to redistribute the data before calling zinvert.
        ! TODO: Can call zhdp
        !call wrtout(std_out, "Printing wc%buffer_cplex before inversion")
@@ -3357,8 +3369,17 @@ subroutine gwr_build_wc(gwr)
              ! Subtract exchange part.
              wc%buffer_cplx(il_g1, il_g2) = wc%buffer_cplx(il_g1, il_g2) - cone
            end if
+!DEBUG
+           if (iglob1 == 1 .and. iglob2 == 1) then
+             !print *, "W(0,0)", wc%buffer_cplx(il_g1, il_g2)
+             wc%buffer_cplx(il_g1, il_g2) = zero
+           end if
+!END DEBUG
          end do ! il_g1
        end do ! il_g2
+
+       call wrtout(std_out, "Printing W")
+       call print_arr(wc%buffer_cplx, unit=std_out)
 
        end associate
      end do  ! my_it
@@ -3393,6 +3414,11 @@ subroutine gwr_build_wc(gwr)
 
  ! Print trace of wc_q(itau) matrices for testing purposes.
  !if (gwr%dtset%prtvol > 0) call gwr%print_trace("wc_qibz")
+
+ ! Write file with Wc(i omega)
+ !if (gwr%dtset%prtsuscep > 0) then
+ !  call gwr%ncwrite_tchi_wc("wc", trim(gwr%dtfil%filnam_ds(4))//'_WCIM.nc')
+ !end if
 
  ! Cosine transform from iomega to itau to get Wc(i tau)
  call gwr%cos_transform("wc", "iw2t")
@@ -3453,33 +3479,6 @@ subroutine gwr_build_sigmac(gwr)
  call cwtime(cpu_all, wall_all, gflops_all, "start")
 
  ABI_CHECK(gwr%wc_space == "itau", sjoin("wc_space: ", gwr%wc_space, " != itau"))
-
- ! ===========================================
- ! Allocate PBLAS arrays for sigmac_kibz(g,g')
- ! ===========================================
- ! TODO: This is not needed. Perhaps for self-consistent without KS/HF representation.
- !ABI_MALLOC(gwr%sigc_kibz, (2, gwr%nkibz, gwr%ntau, gwr%nsppol))
- !gwr%sigc_space = "itau"
-
- !do my_is=1,gwr%my_nspins
- !  spin = gwr%my_spins(my_is)
- !  do my_it=1,gwr%my_ntau
- !    itau = gwr%my_itaus(my_it)
-
- !    do my_iki=1,gwr%my_nkibz
- !      ik_ibz = gwr%my_kibz_inds(my_iki)
- !      npwsp = gwr%green_desc_kibz(ik_ibz)%npw * gwr%nspinor
- !      col_bsize = npwsp / gwr%g_comm%nproc; if (mod(npwsp, gwr%g_comm%nproc) /= 0) col_bsize = col_bsize + 1
- !      associate (sigc => gwr%sigc_kibz(:, ik_ibz, itau, spin))
- !      call sigc(1)%init(npwsp, npwsp, gwr%g_slkproc, 1, size_blocs=[npwsp, col_bsize])
- !      call sigc(2)%init(npwsp, npwsp, gwr%g_slkproc, 1, size_blocs=[npwsp, col_bsize])
- !      !call sigc(1)%print(header=sjoin("sigc_kibz(1) for ik_ibz:", itoa(ik_ibz)))
- !      end associate
- !    end do
-
- !  end do ! my_it
- !end do ! my_is
-
 
  ! NOTE:
  ! There are two possibilities here:
@@ -3662,18 +3661,21 @@ subroutine gwr_build_sigmac(gwr)
  ! Finally, perform analytic continuation with Pade' to go to the real-axis,
  ! compute QP corrections and spectral function.
 
- sigc_it_diag_kcalc = - sigc_it_diag_kcalc * (one / sc_nfft) * (one / gwr%g_nfft) / gwr%cryst%ucvol ** 2
+ sigc_it_diag_kcalc = - sigc_it_diag_kcalc * (one / sc_nfft) * (one / gwr%g_nfft)
+ !sigc_it_diag_kcalc = - sigc_it_diag_kcalc * (one / sc_nfft) * (one / gwr%g_nfft) / gwr%cryst%ucvol ** 2
  !sigc_it_diag_kcalc = - sigc_it_diag_kcalc * (sck_ucvol / sc_nfft) * (gwr%cryst%ucvol / gwr%g_nfft) ! * product(gwr%ngkpt)
  call xmpi_sum(sigc_it_diag_kcalc, gwr%comm, ierr)
 
- block
+ QP_SOLVER: block
+
  real(dp) :: e0, omega_sign
- complex(dp) :: z0, sigc_e0, dsigc_de0, z_e0
+ complex(dp) :: zz, sigc_e0, dsigc_de0, z_e0
  real(dp) :: e0_kcalc(gwr%max_nbcalc, gwr%nkcalc, gwr%nsppol)
  complex(dp) :: sigc_iw_diag_kcalc(gwr%ntau, gwr%max_nbcalc, gwr%nkcalc, gwr%nsppol)
- complex(dp) :: ze0_kcalc    (gwr%max_nbcalc, gwr%nkcalc, gwr%nsppol)
+ complex(dp) :: ze0_kcalc    (gwr%max_nbcalc, gwr%nkcalc, gwr%nsppol), wr_mesh(gwr%nwr)
  complex(dp) :: sigc_e0_kcalc(gwr%max_nbcalc, gwr%nkcalc, gwr%nsppol)
  complex(dp) :: qpe_zlin_kcalc(gwr%max_nbcalc, gwr%nkcalc, gwr%nsppol), imag_zmesh(gwr%ntau)
+ complex(dp) :: sigc_wr(gwr%nwr, gwr%max_nbcalc, gwr%nkcalc, gwr%nsppol)
  real(dp) :: sigx_kcalc(gwr%max_nbcalc, gwr%nkcalc, gwr%nsppol)
 
  ! TODO: Fake values for the exchange part.
@@ -3708,23 +3710,27 @@ subroutine gwr_build_sigmac(gwr)
         write(std_out, "(a, *(es12.5,2x))")" re sigc_iw_diag: ", sigc_iw_diag_kcalc(1:3, ibc, ikcalc, spin)%re
         write(std_out, "(a, *(es12.5,2x))")" im sigc_iw_diag: ", sigc_iw_diag_kcalc(1:3, ibc, ikcalc, spin)%im
 
-        z0 = cmplx(e0, zero)
+        zz = cmplx(e0, zero)
 
-        ! if z0 in 2 or 3 quadrant, avoid branch cut in the complex plane using Sigma(-iw) = Sigma(iw)*.
-        if (real(z0) > zero) then
+        ! if zz in 2 or 3 quadrant, avoid branch cut in the complex plane using Sigma(-iw) = Sigma(iw)*.
+        if (real(zz) > zero) then
           imag_zmesh = j_dpc * gwr%iw_mesh  !* omega_sign
-          sigc_e0 = pade(gwr%ntau, imag_zmesh, sigc_iw_diag_kcalc(:, ibc, ikcalc, spin), z0)
-          dsigc_de0 = dpade(gwr%ntau, imag_zmesh, sigc_iw_diag_kcalc(:, ibc, ikcalc, spin), z0)
+          sigc_e0 = pade(gwr%ntau, imag_zmesh, sigc_iw_diag_kcalc(:, ibc, ikcalc, spin), zz)
+          dsigc_de0 = dpade(gwr%ntau, imag_zmesh, sigc_iw_diag_kcalc(:, ibc, ikcalc, spin), zz)
         else
           imag_zmesh = -j_dpc * gwr%iw_mesh
-          sigc_e0 = pade(gwr%ntau, imag_zmesh, conjg(sigc_iw_diag_kcalc(:, ibc, ikcalc, spin)), z0)
-          dsigc_de0 = dpade(gwr%ntau, imag_zmesh, conjg(sigc_iw_diag_kcalc(:, ibc, ikcalc, spin)), z0)
+          sigc_e0 = pade(gwr%ntau, imag_zmesh, conjg(sigc_iw_diag_kcalc(:, ibc, ikcalc, spin)), zz)
+          dsigc_de0 = dpade(gwr%ntau, imag_zmesh, conjg(sigc_iw_diag_kcalc(:, ibc, ikcalc, spin)), zz)
         end if
 
+        ! Build linear mesh **centered** around e0
+        wr_mesh = arth(e0 - gwr%wr_step * (gwr%nwr / 2), gwr%wr_step, gwr%nwr)
+
         ! TODO
-        !call pade%init(gwr%ntau, dcmplx(zero, gwr%iw_mesh), sigc_iw_diag_kcalc(:, ibc, ikcalc, spin), fermie=zero)
-        !call pade%eval(z0, sigc_e0)
-        !call pade%eval_der1(z0, dsigc_de0)
+        !call pade%init(gwr%ntau, imag_zmesh, sigc_iw_diag_kcalc(:, ibc, ikcalc, spin), fermie=zero)
+        !call pade%eval(zz, sigc_e0)
+        !call pade%eval_der1(zz, dsigc_de0)
+        !call pade%eval(wr_mesh, sigc_wr(:, ibc, ikcalc, spin))
         !call pade%free()
 
         ! Z = (1 - dSigma / domega(E0))^{-1}
@@ -3791,8 +3797,9 @@ subroutine gwr_build_sigmac(gwr)
    !NCF_CHECK(nf90_put_var(ncid, vid("sigc_iw_diag_kcalc"), sigc_iw_diag_kcalc))
    NCF_CHECK(nf90_close(ncid))
  end if
- end block
- stop
+
+ end block QP_SOLVER
+ !stop
 
  ABI_FREE(sigc_it_diag_kcalc)
  call cwtime_report(" gwr_build_sigmac:", cpu_all, wall_all, gflops_all)
