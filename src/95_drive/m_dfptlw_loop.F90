@@ -588,7 +588,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
                    end if
 
                    !Prepare d2_dkdk wf file
-                   !For i1pert
+                   !For i2pert
                    if (i2pert==natom+2) then
                      call rf2_getidir(i2dir,i3dir,idir_dkdk)
                      !if (idir_dkdk>6) idir_dkdk=idir_dkdk-3
