@@ -196,11 +196,7 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3e_pert1,d3e_pert2,d3etot,d3etot
  type(pseudopotential_type),intent(in) :: psps
  type(gs_hamiltonian_type),intent(inout) :: gs_hamkq
  type(pawfgr_type),intent(in) :: pawfgr
- type(wfk_t),intent(inout) :: ddk_f,d2_dkdk_f
- !AZ_try_ini*******************************
- ! Add d2_dkdk_f2
- type(wfk_t), intent(inout) :: d2_dkdk_f2
- !AZ_try_fin*******************************
+ type(wfk_t),intent(inout) :: ddk_f,d2_dkdk_f, d2_dkdk_f2
 
 !arrays
  integer,intent(in) :: atindx(natom),kg(3,mpw*mkmem_rbz),nattyp(psps%ntypat),ngfft(18),npwarr(nkpt)
@@ -255,10 +251,6 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3e_pert1,d3e_pert2,d3etot,d3etot
  real(dp),allocatable :: ylm_k(:,:),ylmgr_k(:,:,:)
  real(dp),allocatable :: ffnl_k(:,:,:,:)
  type(pawcprj_type),allocatable :: dum_cwaveprj(:,:)
-
- !AZ_test_ini**************************************************************************
- character(40) :: i1dir_text, i2dir_text, i3dir_text, iband_text, ikpt_text, file_name
- !AZ_test_fin**************************************************************************
  
 ! *************************************************************************
 
@@ -302,17 +294,6 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3e_pert1,d3e_pert2,d3etot,d3etot
  call lw_elecstic(cplex,d3etot_telec,gmet,gs_hamkq%gprimd,gsqcut,&
 & i1dir,i2dir,i3dir,i1pert,i2pert,i3pert,&
 & kxc,mpi_enreg,nfft,ngfft,nkxc,nspden,rho1g1,rho1r1,rho2r1,ucvol)
-    
- !AZ_test_ini******************************************************************
- write(i1dir_text,'(i8)') i1dir
- write(i2dir_text,'(i8)') i2dir
- write(i3dir_text,'(i8)') i3dir
- file_name = 'T_elec_i1dir_'//trim(adjustl(i1dir_text))//'_i2dir_'//&
- & trim(adjustl(i2dir_text))//'_i3dir_'//trim(adjustl(i3dir_text))//'.dat'
- open(unit=999,file=file_name,action='write',status='replace')
- write(999,'(2f12.6)') d3etot_telec(1)*four*pi, d3etot_telec(2)*four*pi
- close(999)
- !AZ_test_fin******************************************************************
  
 !Loop over spins
  bandtot = 0
@@ -371,8 +352,6 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3e_pert1,d3e_pert2,d3etot,d3etot
      eig1_k(:)=eigen1(1+bd2tot:2*nband_k**2+bd2tot)
      eig2_k(:)=eigen2(1+bd2tot:2*nband_k**2+bd2tot)
 
-     !AZ_try_ini******************************************************************************** 
-     ! I added a new variable d2_dkdk_f2
      !Compute the stationary terms of d3etot depending on response functions
      call dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,d2_dkdk_f2,d3etot_t1_k,d3etot_t2_k,d3etot_t3_k,& 
      & d3etot_t4_k,d3etot_t5_k,dimffnl,dtset,eig1_k,eig2_k,ffnl_k,gs_hamkq,gsqcut,icg,&
@@ -382,7 +361,6 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3e_pert1,d3e_pert2,d3etot,d3etot
      & pawfgr,ph1d,psps,rhog,rhor,rmet,rprimd,samepert,ucvol,useylmgr,&
      & vpsp1_i1pertdq,vpsp1_i2pertdq,&
      & wtk_k,xred,ylm_k,ylmgr_k)
-     !AZ_try_fin******************************************************************************** 
 
 !    Add the contribution from each k-point. 
      d3etot_t1=d3etot_t1 + d3etot_t1_k
