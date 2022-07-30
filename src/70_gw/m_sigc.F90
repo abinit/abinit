@@ -470,7 +470,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  ABI_MALLOC(rhotwgp, (npwc*nspinor))
  ABI_MALLOC(vc_sqrt_qbz, (npwc))
 
- if (Er%mqmem==0) then ! Use out-of-core solution for epsilon.
+ if (Er%mqmem == 0) then ! Use out-of-core solution for epsilon.
    ABI_COMMENT('Reading q-slices from file. Slower but less memory.')
  end if                                                                                !
 
@@ -573,7 +573,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 
  ! Here we have a problem in case of CD since epsm1q might be huge
  ! TODO if single q (ex molecule) dont allocate epsm1q, avoid waste of memory
- if ( ANY(mod10== [SIG_GW_AC, SIG_GW_CD, SIG_QPGW_CD])) then
+ if ( ANY(mod10 == [SIG_GW_AC, SIG_GW_CD, SIG_QPGW_CD])) then
    if (.not.(mod10==SIG_GW_CD.and.Er%mqmem==0)) then
      ABI_MALLOC_OR_DIE(epsm1_qbz, (npwc, npwc, Er%nomega), ierr)
    end if

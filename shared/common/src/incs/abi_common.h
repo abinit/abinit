@@ -390,6 +390,7 @@ Use if statement instead of Fortran merge. See https://software.intel.com/en-us/
 #endif
 
 
+#define __HAVE_GREENX
 /* Temporary hack to use GREENX library 
 #define __HAVE_GREENX
 */

@@ -1801,7 +1801,7 @@ end subroutine setshells
 !!
 !! SOURCE
 
-subroutine kg_map(npw1,kg1,npw2,kg2,g2g1,nmiss)
+subroutine kg_map(npw1, kg1, npw2, kg2, g2g1, nmiss)
 
 !Arguments ------------------------------------
 !scalars

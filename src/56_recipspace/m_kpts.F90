@@ -655,7 +655,7 @@ end function kpts_map
 !!
 !! FUNCTION
 !!  Print the symmetry table bz2ibz associated to the BZ bz and the IBZ ibz
-!!  to a list of units with header. Mode correspons to the value passed to kpts_map
+!!  to a list of units with header. Mode corresponds to the value passed to kpts_map.
 !!  If prtvol is 0, max 200 entries are printed.
 !!
 !! SOURCE
@@ -668,7 +668,6 @@ subroutine kpts_map_print(units, header, mode, bz, ibz, bz2ibz, prtvol)
  integer,intent(in) :: prtvol, units(:), bz2ibz(:,:)
  real(dp),intent(in) :: bz(:,:), ibz(:,:)
  !class(crystal_t),intent(in) :: cryst
-!arrays
 
 !Local variables-------------------------------
 !scalars
@@ -691,7 +690,7 @@ subroutine kpts_map_print(units, header, mode, bz, ibz, bz2ibz, prtvol)
    ABI_ERROR(sjoin("Invalid mode:", mode))
  end select
 
- ! yes, I'm a barbarian but Fortran string formatting is a pain.
+ ! yes I know, I'm a barbarian but string formatting in Fortran is a pain!
  msg = "        BZ                                       IBZ                                       ibz  isym  itim  g0"
  call wrtout(units, msg)
 

@@ -44,7 +44,7 @@ module m_screening_driver
  use m_io_tools,      only : open_file, file_exists, iomode_from_fname
  use m_fstrings,      only : int2char10, sjoin, strcat, itoa, ltoa, itoa
  use m_energies,      only : energies_type, energies_init
- use m_numeric_tools, only : print_arr, coeffs_gausslegint
+ use m_numeric_tools, only : print_arr, coeffs_gausslegint, c2r
  use m_geometry,      only : normv, vdotw, mkrdim, metric
  use m_gwdefs,        only : GW_TOLQ0, GW_TOLQ, em1params_t, GW_Q0_DEFAULT
  use m_mpinfo,        only : destroy_mpi_enreg, initmpi_seq
@@ -182,8 +182,8 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  integer :: nfftf,nfftf_tot,nfftgw,nfftgw_tot,ngrvdw,nhatgrdim,nprocs,nspden_rhoij
  integer :: nscf,nzlmopt,mband
  integer :: optcut,optgr0,optgr1,optgr2,option,approx_type,option_test,optgrad
- integer :: optrad,optrhoij,psp_gencond,my_rank
- integer :: rhoxsp_method,comm,test_type,tordering,unt_em1,unt_susc,usexcnhat
+ integer :: optrad,optrhoij,psp_gencond,my_rank, ig
+ integer :: rhoxsp_method,comm,test_type,tordering,unt_em1,unt_susc,usexcnhat, ncerr
  real(dp) :: compch_fft,compch_sph,domegareal,e0,ecore,ecut_eff,ecutdg_eff
  real(dp) :: gsqcutc_eff,gsqcutf_eff,gsqcut_shp,omegaplasma,ucvol,vxcavg,gw_gsq,r_s
  real(dp) :: alpha,rhoav,factor,ec_gm
@@ -208,6 +208,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  type(spectra_t) :: spectra
  type(chi_t) :: chihw
  type(wvl_data) :: wvl_dummy
+ character(len=nctk_slen) :: wing_shape
 !arrays
  integer :: ibocc(Dtset%nsppol),ngfft_gw(18),ngfftc(18),ngfftf(18)
  integer,allocatable :: irottb(:,:),ktabr(:,:),ktabrf(:,:),l_size_atm(:)
@@ -221,7 +222,8 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  real(dp),allocatable :: ks_vhartr(:),vpsp(:),ks_vtrial(:,:),ks_vxc(:,:),xccc3d(:)
  complex(gwpc),allocatable :: arr_99(:,:),kxcg(:,:),fxc_ADA(:,:,:)
  complex(dpc),allocatable :: m_ks_to_qp(:,:,:,:)
- complex(dpc),allocatable :: chi0_lwing(:,:,:),chi0_uwing(:,:,:),chi0_head(:,:,:)
+ complex(dpc),allocatable :: chi0_head(:,:,:), chi0_lwing(:,:,:), chi0_uwing(:,:,:)
+ real(dp),allocatable :: rwork_wing(:,:,:,:)
  complex(dpc),allocatable :: chi0intra_lwing(:,:,:),chi0intra_uwing(:,:,:),chi0intra_head(:,:,:)
  complex(gwpc),allocatable,target :: chi0(:,:,:),chi0intra(:,:,:)
  complex(gwpc),ABI_CONTIGUOUS pointer :: epsm1(:,:,:)
@@ -1022,7 +1024,7 @@ if (dtset%gwr_ntau /= 0) then
                         iw_mesh, iw_wgs,   &
                         t2w_cos_wgs, w2t_cos_wgs, t2w_sin_wgs, &
                         ft_max_error, cosft_duality_error, ierr)
-   ABI_CHECK(ierr == 0, "Error calling gx_minimiax_grid")
+   ABI_CHECK(ierr == 0, "Error calling gx_minimax_grid")
    call gaps%free()
    do iomega=1,Ep%nomegaei
      Ep%omega(Ep%nomegaer + iomega) = CMPLX(zero, iw_mesh(iomega), kind=dpc)
@@ -1127,13 +1129,13 @@ end if
 
    call timab(306,2,tsec)
 
-   if (is_qeq0==1) then
+   if (is_qeq0 == 1) then
      ! Special treatment of the long wavelength limit.
      call timab(307,1,tsec)
 
-     ABI_MALLOC(chi0_lwing,(Ep%npwe*Ep%nI,Ep%nomega,3))
-     ABI_MALLOC(chi0_uwing,(Ep%npwe*Ep%nJ,Ep%nomega,3))
-     ABI_MALLOC(chi0_head,(3,3,Ep%nomega))
+     ABI_MALLOC(chi0_head, (3,3,Ep%nomega))
+     ABI_MALLOC(chi0_lwing, (Ep%npwe*Ep%nI, Ep%nomega,3))
+     ABI_MALLOC(chi0_uwing, (Ep%npwe*Ep%nJ, Ep%nomega,3))
 
      call cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,qp_ebands,ks_ebands,Gsph_epsG0,&
       Pawang,Pawrad,Pawtab,Paw_ij,Paw_pwff,Pawfgrtab,Paw_onsite,ktabr,ktabrf,nbvw,ngfft_gw,nfftgw,&
@@ -1219,10 +1221,10 @@ end if
 
    ! Write chi0 to _SUSC file
    ! Master creates and write the header if this is the first q-point calculated.
-   if (Dtset%prtsuscep>0 .and. my_rank==master) then
+   if (Dtset%prtsuscep > 0 .and. my_rank == master) then
      title(1)='CHI0 file: chi0'
      title(2)=' '
-     if (is_qeq0==1) then
+     if (is_qeq0 == 1) then
        string='0'; if (Dtset%usepaw==0.and.Ep%inclvkb/=0) call int2char10(Ep%inclvkb,string)
        title(1)=title(1)(1:21)//', calculated using inclvkb = '//string
      end if
@@ -1231,6 +1233,7 @@ end if
      if (is_first_qcalc) then
        ikxc=0; test_type=0; tordering=1
        hchi0 = hscr_new("polarizability",dtset,ep,hdr_local,ikxc,test_type,tordering,title,Ep%npwe,Gsph_epsG0%gvec)
+
        if (dtset%iomode == IO_MODE_ETSF) then
          NCF_CHECK(nctk_open_create(unt_susc, nctk_ncify(dtfil%fnameabo_sus), xmpi_comm_self))
          NCF_CHECK(cryst%ncwrite(unt_susc))
@@ -1241,12 +1244,47 @@ end if
            ABI_ERROR(msg)
          end if
        end if
+
        fform_chi0 = hchi0%fform
        call hscr_io(hchi0,fform_chi0,2,unt_susc,xmpi_comm_self,0,Dtset%iomode)
        call Hchi0%free()
      end if
-     call write_screening("polarizability",unt_susc,Dtset%iomode,Ep%npwe,Ep%nomega,iqcalc,chi0)
-   end if
+
+     call write_screening("polarizability", unt_susc, Dtset%iomode, Ep%npwe, Ep%nomega, iqcalc, chi0)
+
+     if (dtset%iomode == IO_MODE_ETSF .and. is_qeq0 == 1 .and. Ep%nI == 1 .and. Ep%nJ == 1) then
+       ! Write head and wings to file. See cchi0 for the equations neede to build chi0(q) for q--> 0.
+       wing_shape = "two, three, number_of_coefficients_dielectric_function, number_of_frequencies_dielectric_function"
+       ncerr = nctk_def_arrays(unt_susc, [ &
+         nctkarr_t("sus_head", "dp", "two, three, three, number_of_frequencies_dielectric_function"),   &
+         nctkarr_t("sus_upper_wing", "dp", wing_shape),  &
+         nctkarr_t("sus_lower_wing", "dp", wing_shape) &
+         ], defmode=.True.)
+       NCF_CHECK(ncerr)
+
+       NCF_CHECK(nctk_set_datamode(unt_susc))
+       NCF_CHECK(nf90_put_var(unt_susc, nctk_idname(unt_susc, "sus_head"), c2r(chi0_head)))
+       ABI_MALLOC(rwork_wing, (2, 3, Ep%npwe * Ep%nI, Ep%nomega))
+
+       do iomega=1,Ep%nomega
+         do ig=1, Ep%npwe * Ep%nI
+           rwork_wing(1, :,ig,iomega) = real(chi0_lwing(ig,iomega,:))
+           rwork_wing(2, :,ig,iomega) = aimag(chi0_lwing(ig,iomega,:))
+         end do
+       end do
+       NCF_CHECK(nf90_put_var(unt_susc, nctk_idname(unt_susc, "sus_lower_wing"), rwork_wing))
+
+       do iomega=1,Ep%nomega
+         do ig=1, Ep%npwe * Ep%nI
+           rwork_wing(1, :,ig,iomega) = real(chi0_uwing(ig,iomega,:))
+           rwork_wing(2, :,ig,iomega) = aimag(chi0_uwing(ig,iomega,:))
+         end do
+       end do
+       NCF_CHECK(nf90_put_var(unt_susc, nctk_idname(unt_susc, "sus_upper_wing"), rwork_wing))
+       ABI_FREE(rwork_wing)
+     end if
+
+   end if ! is_first_qcalc
 
    ! Calculate the Galitskii-Migdal and RPA functionals for the correlation energy if the polarizability on a
    ! Gauss-Legendre mesh along imaginary axis is available
@@ -1431,7 +1469,7 @@ end if
    end if
 
    ! Write heads and wings to main output file.
-   if (is_qeq0==1) then
+   if (is_qeq0 == 1) then
      write(msg,'(1x,2a)')' Heads and wings of the symmetrical epsilon^-1(G,G'') ',ch10
      call wrtout(ab_out,msg)
      do iomega=1,Ep%nomega
