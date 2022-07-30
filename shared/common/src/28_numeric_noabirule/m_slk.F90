@@ -1102,8 +1102,8 @@ integer function glob_loc(matrix, idx, lico)
 
 ! *********************************************************************
 
- glob_loc = NUMROC(idx,matrix%sizeb_blocs(lico), &
-                   matrix%processor%coords(lico),0, matrix%processor%grid%dims(lico))
+ glob_loc = NUMROC(idx, matrix%sizeb_blocs(lico), &
+                   matrix%processor%coords(lico), 0, matrix%processor%grid%dims(lico))
 #endif
 
 end function glob_loc
@@ -3897,8 +3897,8 @@ subroutine slk_set_imag_diago_to_zero(mat, local_max)
    do il1=1,mat%sizeb_local(1)
      iglob1 = mat%loc2grow(il1)
      if (iglob1 == iglob2) then
-       local_max = max(local_max, mat%buffer_cplx(il1, il2)%im)
-       mat%buffer_cplx(il1, il2)%im = zero
+       local_max = max(local_max, aimag(mat%buffer_cplx(il1, il2)))
+       mat%buffer_cplx(il1, il2)= real(mat%buffer_cplx(il1, il2))
      end if
    end do
  end do

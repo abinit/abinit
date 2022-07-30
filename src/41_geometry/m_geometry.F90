@@ -295,11 +295,9 @@ end function normv_rdp_vector_array
 !!
 !! SOURCE
 
-function vdotw_rr_vector(xv,xw,met,space) result(res)
+real(dp) function vdotw_rr_vector(xv,xw,met,space) result(res)
 
 !Arguments ------------------------------------
-!scalars
- real(dp) :: res
  character(len=1),intent(in) :: space
 !arrays
  real(dp),intent(in) :: met(3,3),xv(3),xw(3)
@@ -307,16 +305,16 @@ function vdotw_rr_vector(xv,xw,met,space) result(res)
 ! *************************************************************************
 
  res = (  met(1,1)* xv(1)*xw(1)                &
-&        +met(2,2)* xv(2)*xw(2)                &
-&        +met(3,3)* xv(3)*xw(3)                &
-&        +met(1,2)*(xv(1)*xw(2) + xv(2)*xw(1)) &
-&        +met(1,3)*(xv(1)*xw(3) + xv(3)*xw(1)) &
-&        +met(2,3)*(xv(2)*xw(3) + xv(3)*xw(2)) )
+         +met(2,2)* xv(2)*xw(2)                &
+         +met(3,3)* xv(3)*xw(3)                &
+         +met(1,2)*(xv(1)*xw(2) + xv(2)*xw(1)) &
+         +met(1,3)*(xv(1)*xw(3) + xv(3)*xw(1)) &
+         +met(2,3)*(xv(2)*xw(3) + xv(3)*xw(2)) )
 
  select case (space)
- case ('r','R')
+ case ('r', 'R')
    return
- case ('g','G')
+ case ('g', 'G')
    res= res * (two_pi**2)
  case default
    ABI_BUG('Wrong value for space')
@@ -347,11 +345,9 @@ end function vdotw_rr_vector
 !!
 !! SOURCE
 
-function vdotw_rc_vector(xv,xw,met,space) result(res)
+complex(dp) function vdotw_rc_vector(xv, xw, met, space) result(res)
 
 !Arguments ------------------------------------
-!scalars
- complex(dpc) :: res
  character(len=1),intent(in) :: space
 !arrays
  real(dp),intent(in) :: met(3,3),xv(3)
@@ -360,16 +356,16 @@ function vdotw_rc_vector(xv,xw,met,space) result(res)
 ! *************************************************************************
 
  res = (  met(1,1)* xv(1)*xw(1)                &
-&        +met(2,2)* xv(2)*xw(2)                &
-&        +met(3,3)* xv(3)*xw(3)                &
-&        +met(1,2)*(xv(1)*xw(2) + xv(2)*xw(1)) &
-&        +met(1,3)*(xv(1)*xw(3) + xv(3)*xw(1)) &
-&        +met(2,3)*(xv(2)*xw(3) + xv(3)*xw(2)) )
+         +met(2,2)* xv(2)*xw(2)                &
+         +met(3,3)* xv(3)*xw(3)                &
+         +met(1,2)*(xv(1)*xw(2) + xv(2)*xw(1)) &
+         +met(1,3)*(xv(1)*xw(3) + xv(3)*xw(1)) &
+         +met(2,3)*(xv(2)*xw(3) + xv(3)*xw(2)) )
 
  select case (space)
- case ('r','R')
+ case ('r', 'R')
    return
- case ('g','G')
+ case ('g', 'G')
    res= res * (two_pi**2)
  case default
    ABI_BUG('Wrong value for space')

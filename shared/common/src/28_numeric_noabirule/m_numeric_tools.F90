@@ -41,7 +41,7 @@ MODULE m_numeric_tools
  public :: get_diag              ! Return the diagonal of a matrix as a vector
  public :: isdiagmat             ! True if matrix is diagonal
  public :: l2int                 ! convert logical data to int array
- public :: r2c,c2r               ! Transfer complex data stored in a real array to a complex array and vice versa
+ public :: r2c, c2r              ! Transfer complex data stored in a real array to a complex array and vice versa
  public :: iseven                ! True if int is even
  public :: isinteger             ! True if all elements of rr differ from an integer by less than tol
  public :: is_zero               ! True if all elements of rr differ from zero by less than tol
