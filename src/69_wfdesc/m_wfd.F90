@@ -4822,7 +4822,6 @@ subroutine wfd_paw_get_aeur(Wfd,band,ik_ibz,spin,Cryst,Paw_onsite,Psps,Pawtab,Pa
  integer :: itypat,ln_size,lmn_size,iatom,spinor
  integer :: nfgd,ifgd,jlmn,jl,jm,ifftsph
  real(dp) :: phj,tphj,arg,re_cp,im_cp
- logical :: is_gamma
  complex(dpc) :: cp,cnorm
 !arrays
  real(dp) :: kpoint(3)
@@ -4841,7 +4840,7 @@ subroutine wfd_paw_get_aeur(Wfd,band,ik_ibz,spin,Cryst,Paw_onsite,Psps,Pawtab,Pa
  kpoint = Wfd%kibz(:,ik_ibz)
  ABI_MALLOC(ceikr, (Wfd%nfftot * wfd%nspinor))
 
- call calc_ceikr(kpoint, wfd%ngfft, Wfd%nfftot, wfd%nspinor, ceikr, is_gamma)
+ call calc_ceikr(kpoint, wfd%ngfft, Wfd%nfftot, wfd%nspinor, ceikr)
  ur_ae = ur_ae * ceikr
 
  ABI_MALLOC(Cp1,(Wfd%natom,Wfd%nspinor))
