@@ -11,10 +11,6 @@
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -60,11 +56,6 @@ contains
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gwls_sternheimer
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -136,11 +127,6 @@ end subroutine prepareValenceWavefunctions
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_gwls_sternheimer
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine cleanupValenceWavefunctions()
@@ -169,11 +155,6 @@ end subroutine cleanupValenceWavefunctions
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gwls_sternheimer
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

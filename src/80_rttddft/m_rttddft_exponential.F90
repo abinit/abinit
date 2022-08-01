@@ -3,7 +3,7 @@
 !!  m_rttddft_exponential
 !!
 !! FUNCTION
-!!  Contains subroutines to compute the exponential 
+!!  Contains subroutines to compute the exponential
 !!  part of the propagator using various approximations
 !!
 !! COPYRIGHT
@@ -11,10 +11,6 @@
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -71,15 +67,11 @@ contains
 !!  nspinor <integer> = dimension of spinors
 !!
 !! OUTPUT
-!!  cg <real(npw*nspinor*nband)> = the new cg after application 
+!!  cg <real(npw*nspinor*nband)> = the new cg after application
 !!  of the exponential propagator
-!!  enl <real(bandpp)> = non local contribution to the energy in the 
+!!  enl <real(bandpp)> = non local contribution to the energy in the
 !!                       NC case - optional
 !!  eig <real(bandpp)> = eigenvalues - optional
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
  subroutine rttddft_exp_taylor(cg,dtset,ham_k,mpi_enreg,nband_k,npw_k,nspinor,enl,eig)
@@ -98,7 +90,7 @@ contains
  real(dp), target,          intent(inout)           :: cg(2,npw_k*nband_k*nspinor)
  real(dp),                  intent(out),   optional :: enl(:)
  real(dp), pointer,         intent(inout), optional :: eig(:)
- 
+
  !Local variables-------------------------------
  !scalars
  integer                         :: cpopt
@@ -119,7 +111,7 @@ contains
  real(dp),           allocatable :: gsm1hc(:,:)
  real(dp),           allocatable :: gsc(:,:)
  real(dp),           allocatable :: tmp(:,:)
- 
+
 ! ***********************************************************************
 
  !Check what properties we need to compute
@@ -154,7 +146,7 @@ contains
  ABI_MALLOC(gsc,   (2, npw_t*nspinor*nband_t))
  ABI_MALLOC(gsm1hc,(2, npw_t*nspinor*nband_t))
  ABI_MALLOC(gvnlxc_dummy, (0, 0))
-      
+
  !*** Taylor expansion ***
  ABI_MALLOC(tmp,(2, npw_t*nspinor*nband_t))
  tmp(:,:) = cg_t(:,:)
@@ -174,7 +166,7 @@ contains
 
    !** Also apply S^-1 in PAW case
    if (l_paw) then
-      call apply_invovl(ham_k,ghc,gsm1hc,cwaveprj,npw_t,nband_t,mpi_enreg,nspinor)
+      call apply_invovl(ham_k,ghc,gsm1hc,cwaveprj,npw_t,nband_t,mpi_enreg,nspinor,dtset%diago_apply_block_sliced)
       tmp(1,:) =  dt*gsm1hc(2,:)/real(iorder,dp)
       tmp(2,:) = -dt*gsm1hc(1,:)/real(iorder,dp)
    else
@@ -216,7 +208,7 @@ contains
  ABI_FREE(cwaveprj)
 
  !Transpose back if paral_kgb
- if (dtset%paral_kgb == 1 .and. mpi_enreg%nproc_band > 1) then 
+ if (dtset%paral_kgb == 1 .and. mpi_enreg%nproc_band > 1) then
     call paral_kgb_transpose(cg,cg_trans,mpi_enreg,nband_t,npw_t,nspinor,-1,index_wavef_band)
  end if
 
@@ -233,17 +225,17 @@ contains
 !! FUNCTION
 !!  if option = 1: Forward transpose
 !!    Transpose cg_1 in linalg ((npw/npband),nband) distribution
-!!    into cg_2 in fft (npw,bandpp) distribution 
+!!    into cg_2 in fft (npw,bandpp) distribution
 !!
 !!  if option = -1: Backward transpose
-!!    Transpose back cg_2 in fft (npw,bandpp) distribution 
+!!    Transpose back cg_2 in fft (npw,bandpp) distribution
 !!    into cg_1 linakg (npw/npband),nband) distribution
 !!
 !! INPUTS
 !!  if option = 1:
-!!    cg_1 <real((npw/nband)*nspinor*nband)> 
+!!    cg_1 <real((npw/nband)*nspinor*nband)>
 !!  if option = -1:
-!!    cg_2 <real(npw*nspinor*bandpp)> 
+!!    cg_2 <real(npw*nspinor*bandpp)>
 !!    nband_t <integer> = number of bands after forward transpose (bandpp)
 !!    npw_t <integer> = number of pw after forward transpose (npw_k)
 !!  dtset <type(dataset_type)> = all input variables for this dataset
@@ -253,24 +245,20 @@ contains
 !!  index_wavef_band <integer> = order of the bands after transpose
 !!
 !! OUTPUT
-!!  if option = 1 : 
+!!  if option = 1 :
 !!    cg_2 <real(npw*nspinor*bandpp)>
 !!    nband_t <integer> = number of bands after forward transpose (bandpp)
 !!    npw_t <integer> = number of pw after forward transpose (npw_k)
-!!  if option = -1: 
+!!  if option = -1:
 !!    cg_1 <real((npw/nband)*nspinor*nband)>
 
 !! SIDE EFFECTS
-!!  if option = 1 : 
+!!  if option = 1 :
 !!    cg_2 has been allocated
 !!    index_wavef_band has been allocated
-!!  if option = -1: 
+!!  if option = -1:
 !!    cg_2 has been deallocated
 !!    index_wavef_band has been allocated
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 subroutine paral_kgb_transpose(cg_1,cg_2,mpi_enreg,nband_t,npw_t,nspinor,option,index_wavef_band)
@@ -312,7 +300,7 @@ real(dp), allocatable :: cg_work(:,:)
  sdisplsloc = bandfft_kpt(ikpt_this_proc)%sdispls*2*nspinor
 
  !Forward transpose: cg_1 -> cg_2
- if (option == 1) then 
+ if (option == 1) then
    nband_t = bandpp
    npw_t = bandfft_kpt(ikpt_this_proc)%ndatarecv
    ABI_MALLOC(cg_2,  (2, npw_t*nspinor*nband_t))
@@ -328,7 +316,7 @@ real(dp), allocatable :: cg_work(:,:)
    cg_2(:,:) = cg_work(:,index_wavef_band)
    ABI_FREE(cg_work)
  end if
- 
+
  !Transpose back: cg_2 -> cg_1
  if (option == -1) then
    ABI_MALLOC(cg_work, (2, npw_t*nspinor*nband_t))

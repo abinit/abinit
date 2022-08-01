@@ -1,0 +1,77 @@
+# ----------------------------------------
+# -          Input file for abinit       -
+# -                                      -
+# -         PbTiO3 in-plane strain                      -
+# ----------------------------------------
+
+# 2-Options for output:
+# ---------------------
+  prtden 0
+  prtwf 0
+
+# 3-Parameters governing the convergence:
+# ---------------------------------------
+  ecut 20.
+  nstep 20
+  toldff 1.d-5
+  diemac 8.5
+  iscf 7
+
+# 4-Options for the choice of calculation:
+# ----------------------------------------
+  ionmov 2
+  optcell 6
+  ntime 25
+  tolmxf 5.0d-4
+  dilatmx 1.1
+  ecutsm 0.5
+  strprecon 0.1
+# 5-Definition of the unit cell:
+# ------------------------------
+  rprim
+  7.35103462455809E+00  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00  7.35103462455809E+00  0.00000000000000E+00
+ -9.46006288924841E-02 -9.46006290919748E-02  7.38001506874896E+00
+  ntypat 3
+  natom 5
+  znucl 82 22 8
+  typat 1 2 3*3 # Pb Ti O
+
+  xred
+  1.01785440935507E-03  1.01785440935481E-03  1.31751847896796E-01
+  5.19313399341199E-01  5.19313399341199E-01  5.86037751484873E-01
+  5.25450093266034E-01  2.67190421223540E-02  5.67510432302492E-01
+  2.67190421223542E-02  5.25450093266034E-01  5.67510432302493E-01
+  5.27499610861060E-01  5.27499610861060E-01  6.71895360133991E-02
+# 6-Definition of special K-points:
+# ---------------------------------
+  kptopt 2
+  ngkpt 2 2 2
+  nband 32
+
+# 7-XC functional
+# ----------------------------
+
+  ixc 3
+
+  pp_dirpath "$ABI_PSPDIR"
+  pseudos "Pb_abi_LDA_1012.psp8, Ti_abi_LDA_1012.psp8, 08_O_r_LDA_1012_m.psp8"
+
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t104.abo, tolnlines = 0, tolabs = 1.000e-07, tolrel = 1.000e-06;
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = Ch. Paillard
+#%% keywords = 
+#%% description = 
+#%%   PbTiO3 with in-plane strain.
+#%%   Relaxing the third vector using optcell 6
+#%% topics = crystal  
+#%%<END TEST_INFO>
+

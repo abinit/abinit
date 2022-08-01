@@ -14,10 +14,6 @@
 !!
 !! NOTES
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -139,13 +135,6 @@ contains
 !!
 !! SIDE EFFECTS
 !!
-!! PARENTS
-!!      m_dft_energy,m_forstr,m_kxc,m_longwave,m_nonlinear,m_odamix,m_prcref
-!!      m_respfn_driver,m_rhotov,m_scfcv_core,m_setvtr,m_vhxc_me,m_xchybrid
-!!
-!! CHILDREN
-!!      get_xclevel
-!!
 !! SOURCE
 
 subroutine xcdata_init(xcdata,auxc_ixc,dtset,hyb_mixing,intxc,ixc,nelect,nspden,tphysel,&
@@ -226,12 +215,6 @@ end subroutine xcdata_init
 !!
 !! SIDE EFFECTS
 !!
-!! PARENTS
-!!      m_invars2,m_sigma_driver,m_xcdata
-!!
-!! CHILDREN
-!!      get_xclevel
-!!
 !! SOURCE
 
 subroutine get_xclevel(ixc,xclevel,usefock)
@@ -308,12 +291,6 @@ end subroutine get_xclevel
 !!  auxc_ixc= 0 if no need of an auxiliary functional, otherwise, returns the ixc of an auxiliary functional.
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
-!!      m_invars2,m_vhxc_me
-!!
-!! CHILDREN
-!!      get_xclevel
 !!
 !! SOURCE
 

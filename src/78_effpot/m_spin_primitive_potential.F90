@@ -43,7 +43,7 @@ module m_spin_primitive_potential
   use m_mpi_scheduler, only: init_mpi_info
   use m_multibinit_dataset, only: multibinit_dtset_type
   use m_multibinit_io_xml, only: xml_read_spin, xml_free_spin
-  use m_multibinit_cell, only: mbcell_t
+  use m_multibinit_cell, only: mbcell_t, mbsupercell_t
   use m_primitive_potential, only: primitive_potential_t
   use m_abstract_potential, only: abstract_potential_t
   use m_dynamic_array, only: int2d_array_type
@@ -158,8 +158,8 @@ contains
     character(len=500) :: message
     integer :: ii
     logical:: use_sia, use_exchange, use_dmi, use_bi
-
-    fname=fnames(3)
+    fname=params%spin_pot_fname
+    ABI_UNUSED(fnames)
     if (xmpi_comm_rank(xmpi_world)==0) then
        write(message,'(a,(80a),3a)') ch10,('=',ii=1,80),ch10,ch10,&
             &     'reading spin terms.'
@@ -797,6 +797,7 @@ contains
        else
          if(.not. usia) write(std_out,'(A34)') " SIA term in xml file not used."
        end if
+
        if(.not. present(use_bi)) then
           ubi=.True.
        else
@@ -830,11 +831,12 @@ contains
   !  scmaker: supercell maker helper class
   !  scpot: supercell potential (a pointer to a abstract potential)
   !-------------------------------------------------------------------!
-  subroutine fill_supercell(self, scmaker, params, scpot)
+  subroutine fill_supercell(self, scmaker, params, scpot, supercell)
     class(spin_primitive_potential_t) , intent(inout) :: self
     type(supercell_maker_t),            intent(inout) :: scmaker
     type(multibinit_dtset_type),        intent(inout) :: params
     class(abstract_potential_t), pointer, intent(inout) :: scpot
+    type(mbsupercell_t), target :: supercell
 
     integer :: nspin, sc_nspin, i, R(3), ind_Rij(3), iR, ii, ij, inz
     integer :: master, my_rank, comm, nproc, ierr
@@ -854,6 +856,7 @@ contains
     select type(scpot) ! use select type because properties only defined for spin_potential is used.
     type is (spin_potential_t)
       call scpot%initialize(sc_nspin)
+      call scpot%set_supercell(supercell)
       if (iam_master) then
         call self%coeff%sum_duplicates()
         do inz=1, self%coeff%nnz

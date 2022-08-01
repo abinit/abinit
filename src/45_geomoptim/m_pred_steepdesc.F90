@@ -10,10 +10,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -79,12 +75,6 @@ contains
 !! * This routine is a predictor, it only produces new positions
 !!   to be computed in the next iteration, this routine should
 !!   produce not output at all
-!!
-!! PARENTS
-!!      m_precpred_1geo
-!!
-!! CHILDREN
-!!      hist2var,mkradim,mkrdim,var2hist,xcart2xred,xred2xcart
 !!
 !! SOURCE
 

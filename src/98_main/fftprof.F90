@@ -54,17 +54,6 @@
 !!     symrel(3,3,nsym) = Symmetry operation in real space used to select the FFT mesh in the routine getng (default: Identity matrix)
 !!               NOTE that the real tnons is not taken into account anyhow: tnons is set to zero.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      abi_io_redirect,abimem_init,abinit_doctor,destroy_mpi_enreg
-!!      fft_test_free,fft_test_init,fft_test_nullify,fft_test_print
-!!      fft_use_lib_threads,fftprof_free,fftprof_ncalls_per_test,fftprof_print
-!!      fftw3_init_threads,flush_unit,get_kg,getng,herald,initmpi_seq,lower
-!!      metric,prof_fourdp,prof_fourwf,prof_rhotwg,time_fftbox,time_fftu
-!!      time_fourdp,time_fourwf,time_rhotwg,wrtout,xmpi_bcast,xmpi_init
-!!      xomp_show_info
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H

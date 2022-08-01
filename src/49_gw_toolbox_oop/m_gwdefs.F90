@@ -11,8 +11,6 @@
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -21,7 +19,7 @@
 
 #include "abi_common.h"
 
-MODULE m_gwdefs
+module m_gwdefs
 
  use defs_basis
  use m_abicore
@@ -65,7 +63,7 @@ MODULE m_gwdefs
  complex(gwpc),public,parameter :: j_gw    =(0._gwp,1._gwp)
 
 !arrays
- real(dp),public,parameter :: GW_Q0_DEFAULT(3) = (/0.00001_dp, 0.00002_dp, 0.00003_dp/)
+ real(dp),public,parameter :: GW_Q0_DEFAULT(3) = [0.00001_dp, 0.00002_dp, 0.00003_dp]
 
 ! Weights and nodes for Gauss-Kronrod integration rules
 ! Gauss 7 Kronrod 15
@@ -255,28 +253,28 @@ MODULE m_gwdefs
   ! For each reduced direction gives the max G0 component to account for umklapp processes
 
   real(dp),allocatable :: qcalc(:,:)
-  ! qcalc(3,nqcalc)
+  ! (3,nqcalc)
   ! q-points that are explicitely calculated (subset of qibz).
 
   real(dp),allocatable :: qibz(:,:)
-  ! qibz(3,nqibz)
+  ! (3,nqibz)
   ! q-points in the IBZ.
 
   real(dp),allocatable :: qlwl(:,:)
-  ! qlwl(3,nqlwl)
+  ! (3,nqlwl)
   ! q-points used for the long-wavelength limit.
 
   real(dp),allocatable :: omegasf(:)
-  ! omegasf(nomegasf)
+  ! (nomegasf)
   ! real frequencies used to calculate the imaginary part of chi0.
 
   complex(dpc),allocatable :: omega(:)
-  ! omega(nomegasf)
+  ! (nomegasf)
   ! real and imaginary frequencies in chi0,epsilon and epsilonm1.
 
+ contains
+   procedure :: free => em1params_free
  end type em1params_t
-
- public :: em1params_free
 !!***
 
  type,public :: sigij_col_t
@@ -356,39 +354,39 @@ MODULE m_gwdefs
   real(dp) :: zcut                       ! Value of $\delta$ used to avoid the divergences (see related input variable)
 
   integer,allocatable :: kptgw2bz(:)
-  ! kptgw2bz(nkptgw)
+  ! (nkptgw)
   ! For each k-point where GW corrections are calculated, the corresponding index in the BZ.
 
   integer,allocatable :: minbnd(:,:), maxbnd(:,:)
-  ! minbnd(nkptgw,nsppol), maxbnd(nkptgw,nsppol)
+  ! (nkptgw, nsppol)
   ! For each k-point at which GW corrections are calculated, the min and Max band index considered
   ! (see also input variable dtset%bdgw).
 
   real(dp),allocatable :: kptgw(:,:)
-  ! kptgw(3,nkptgw)
+  ! (3, nkptgw)
   ! k-points for the GW corrections in reduced coordinates.
 
   !TODO should be removed, everything should be in Sr%
 
   complex(dpc),allocatable :: omegasi(:)
-  ! omegasi(nomegasi)
+  ! (nomegasi)
   ! Frequencies along the imaginary axis used for the analytical continuation.
 
   complex(dpc),allocatable :: omega_r(:)
-  ! omega_r(nomegasr)
+  ! (nomegasr)
   ! Frequencies used to evaluate the spectral function.
 
   type(sigijtab_t),allocatable :: Sigcij_tab(:,:)
-  ! Sigcij_tab(nkptgw,nsppol)%col(kb)%bidx(ii)  gived the index of the left wavefunction.
+  ! (nkptgw, nsppol)%col(kb)%bidx(ii) gives the index of the left wavefunction.
   ! in the <i,kgw,s|\Sigma_c|j,kgw,s> matrix elements that has to be calculated in cisgme.
   ! in the case of self-consistent GW on wavefunctions.
 
   type(sigijtab_t),allocatable :: Sigxij_tab(:,:)
   ! Save as Sigcij_tab but for the Hermitian \Sigma_x where only the upper triangle is needed.
 
+  contains
+    procedure :: free => sigparams_free
  end type sigparams_t
-
- public :: sigparams_free
 !!***
 
 CONTAINS  !==============================================================================
@@ -407,19 +405,12 @@ CONTAINS  !=====================================================================
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_screening_driver
-!!
-!! CHILDREN
-!!      sigijtab_free
-!!
 !! SOURCE
 
 subroutine em1params_free(Ep)
 
 !Arguments ------------------------------------
-!scalars
- type(em1params_t),intent(inout) :: Ep
+ class(em1params_t),intent(inout) :: Ep
 
 ! *************************************************************************
 
@@ -448,12 +439,6 @@ end subroutine em1params_free
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gwdefs,m_sigma_driver
-!!
-!! CHILDREN
-!!      sigijtab_free
 !!
 !! SOURCE
 
@@ -497,19 +482,12 @@ end subroutine sigijtab_free
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_sigma_driver
-!!
-!! CHILDREN
-!!      sigijtab_free
-!!
 !! SOURCE
 
 subroutine sigparams_free(Sigp)
 
 !Arguments ------------------------------------
-!scalars
- type(sigparams_t),intent(inout) :: Sigp
+ class(sigparams_t),intent(inout) :: Sigp
 
 ! *************************************************************************
 
@@ -554,10 +532,6 @@ end subroutine sigparams_free
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 function sigma_type_from_key(key) result(sigma_type)
@@ -601,17 +575,12 @@ end function sigma_type_from_key
 !! INPUTS
 !!  Sigp<sigparams_t>=datatype gathering data and info on the self-energy run.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 pure logical function sigma_is_herm(Sigp)
 
 !Arguments ------------------------------
-!scalars
- type(sigparams_t),intent(in) :: Sigp
+ class(sigparams_t),intent(in) :: Sigp
 
 !Local variables ------------------------------
  integer :: mod10
@@ -637,17 +606,12 @@ end function sigma_is_herm
 !! INPUTS
 !!  Sigp<sigparams_t>=datatype gathering data and info on the self-energy run.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 pure logical function sigma_needs_w(Sigp)
 
 !Arguments ------------------------------
-!scalars
- type(sigparams_t),intent(in) :: Sigp
+ class(sigparams_t),intent(in) :: Sigp
 
 !Local variables ------------------------------
  integer :: mod10
@@ -672,17 +636,12 @@ end function sigma_needs_w
 !! INPUTS
 !!  Sigp<sigparams_t>=datatype gathering data and info on the self-energy run.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 pure logical function sigma_needs_ppm(Sigp)
 
 !Arguments ------------------------------
-!scalars
- type(sigparams_t),intent(in) :: Sigp
+ class(sigparams_t),intent(in) :: Sigp
 
 !Local variables ------------------------------
  integer :: mod10
@@ -690,9 +649,9 @@ pure logical function sigma_needs_ppm(Sigp)
 !************************************************************************
 
  mod10=MOD(Sigp%gwcalctyp,10)
- sigma_needs_ppm = ( ANY(mod10 == (/SIG_GW_PPM, SIG_QPGW_PPM/)) .or. &
-&                   Sigp%gwcomp==1                                   &
-&                  )
+ sigma_needs_ppm = (ANY(mod10 == (/SIG_GW_PPM, SIG_QPGW_PPM/)) .or.  &
+                    Sigp%gwcomp==1                                   &
+                   )
 
 end function sigma_needs_ppm
 !!***
@@ -759,5 +718,5 @@ function g0g0w(omega,numerator,delta_ene,zcut,TOL_W0,opt_poles)
 end function g0g0w
 !!***
 
-END MODULE m_gwdefs
+end module m_gwdefs
 !!***

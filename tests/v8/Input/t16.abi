@@ -1,6 +1,5 @@
 ##############################################################################
-#Test for multibinit, just read xml and generate the effective potential into XML file
-# without regeneration of dipole-dipole just reading xml
+#Test for multibinit, spin dynamics 
 ##############################################################################
 prt_model = 0
 
@@ -26,7 +25,8 @@ spin_dt=1e-16 s
 #%% executable = multibinit
 #%% need_cpp_vars = HAVE_XML
 #%% exclude_builders = .*_nag_7.[01]_.*
-#%% system_xml = t16.xml
+#%% spin_pot = t16.xml
+#%% exec_args = --F03
 #%% [files]
 #%% files_to_test = 
 #%%   t16.abo, tolnlines = 1, tolabs = 1e1, tolrel = 0.1, fld_options = -medium;

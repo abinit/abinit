@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -78,11 +74,6 @@ contains
 !!
 !! SIDE EFFECTS
 !! brvltt = input variable giving Bravais lattice
-!!
-!! PARENTS
-!!      m_ingeo
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -584,11 +575,6 @@ end subroutine gensymspgr
 !! genafm(3) = in case of shubnikov type IV, translation, generator of the
 !!  anti-ferromagnetic symmetry operations
 !! shubnikov = type of the shubnikov group
-!!
-!! PARENTS
-!!      m_ingeo
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1290,11 +1276,6 @@ end subroutine gensymshub
 !! tnons(3,msym)=nonsymmorphic translations for symmetry operations
 !!  without magnetic operations at input,
 !!  and with magnetic operations at output
-!!
-!! PARENTS
-!!      m_ingeo
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

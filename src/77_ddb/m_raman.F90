@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -70,12 +66,6 @@ contains
 !!     the induced electric field; in the latter case, if qphon is
 !!     zero, no non-analytical contribution is included.
 !!  rsus
-!!
-!! PARENTS
-!!      anaddb
-!!
-!! CHILDREN
-!!      matr3inv
 !!
 !! SOURCE
 
@@ -292,12 +282,6 @@ end subroutine ramansus
 !! 3. frdiel(3,3,nfreq)= frequency-dependent dielectric tensor
 !! mode effective charges for the different eigenmodes,
 !! for different direction of the electric field
-!!
-!! PARENTS
-!!      anaddb
-!!
-!! CHILDREN
-!!      matr3inv
 !!
 !! SOURCE
 

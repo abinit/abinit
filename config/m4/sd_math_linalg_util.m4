@@ -357,7 +357,7 @@ AC_DEFUN([_SD_LINALG_CHECK_ELPA], [
         [sd_linalg_has_elpa_legacy="yes";sd_linalg_has_elpa="yes"],
         [sd_linalg_has_elpa_legacy="no" ;sd_linalg_has_elpa="no"])
     fi
-  fi  
+  fi
   AC_LANG_POP([Fortran])
   AC_MSG_RESULT([${sd_linalg_has_elpa}])
 
@@ -388,7 +388,7 @@ AC_DEFUN([_SD_LINALG_CHECK_ELPA], [
             fi
           fi
         fi
-      fi  
+      fi
     fi
   fi
 
@@ -696,7 +696,7 @@ AC_DEFUN([_SD_LINALG_CHECK_MAGMA_15], [
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
     [[
       call magmaf_init
-      call magma_finalize
+      call magmaf_finalize
     ]])], [sd_linalg_has_magma_15="yes"], [sd_linalg_has_magma_15="no"])
   AC_LANG_POP([Fortran])
   AC_MSG_RESULT([${sd_linalg_has_magma_15}])

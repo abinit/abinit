@@ -119,20 +119,6 @@ CONTAINS
 !! SIDE EFFECTS
 !!  cprj(:,:) <type(pawcprj_type)>= cprj datastructure
 !!
-!! PARENTS
-!!      m_berryphase_new,m_cgcprj,m_cgprj,m_cgwf,m_cgwf_cprj,m_chebfi,m_chi0
-!!      m_classify_bands,m_cohsex,m_d2frnl,m_datafordmft,m_dfpt_cgwf
-!!      m_dfpt_looppert,m_dfpt_mkrho,m_dfpt_nstwf,m_dfpt_scfcv,m_dfpt_vtowfk
-!!      m_dfptnl_pert,m_dft_energy,m_electronpositron,m_epjdos,m_exc_analyze
-!!      m_exc_build,m_extraprho,m_fock,m_fock_getghc,m_forstr,m_getgh1c
-!!      m_getgh2c,m_getghc,m_gstate,m_invovl,m_io_kss,m_ksdiago,m_mlwfovlp_qp
-!!      m_nonlop,m_orbmag,m_paw_mkaewf,m_paw_occupancies,m_paw_optics
-!!      m_paw_overlap,m_paw_sym,m_pawcprj,m_plowannier,m_positron
-!!      m_prep_calc_ucrpa,m_rf2_init,m_scfcv_core,m_sigc,m_sigma_driver,m_sigx
-!!      m_suscep_stat,m_vhxc_me,m_vtorho,m_vtowfk,m_wfd,m_wfd_optic,m_wvl_psi
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine pawcprj_alloc(cprj,ncpgr,nlmn)
@@ -192,21 +178,6 @@ end subroutine pawcprj_alloc
 !! SIDE EFFECTS
 !!  cprj(:,:) <type(pawcprj_type)>= cprj datastructure
 !!
-!! PARENTS
-!!      m_berryphase_new,m_cgcprj,m_cgprj,m_cgwf,m_cgwf_cprj,m_chebfi,m_chi0
-!!      m_classify_bands,m_cohsex,m_d2frnl,m_datafordmft,m_dfpt_cgwf
-!!      m_dfpt_looppert,m_dfpt_mkrho,m_dfpt_nstwf,m_dfpt_scfcv,m_dfpt_vtowfk
-!!      m_dfptnl_pert,m_dft_energy,m_efield,m_electronpositron,m_epjdos
-!!      m_exc_analyze,m_exc_build,m_extraprho,m_fock,m_fock_getghc,m_forstr
-!!      m_getgh1c,m_getgh2c,m_getghc,m_gkk,m_gstate,m_invovl,m_io_kss,m_ksdiago
-!!      m_mlwfovlp_qp,m_nonlop,m_orbmag,m_paw_mkaewf,m_paw_occupancies
-!!      m_paw_optics,m_paw_overlap,m_paw_sym,m_pawcprj,m_phgamma,m_phpi
-!!      m_plowannier,m_positron,m_prep_calc_ucrpa,m_rf2_init,m_scf_history
-!!      m_scfcv_core,m_sigc,m_sigma_driver,m_sigmaph,m_sigx,m_suscep_stat
-!!      m_vhxc_me,m_vtorho,m_vtowfk,m_wfd,m_wfd_optic
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine pawcprj_free(cprj)
@@ -250,11 +221,6 @@ end subroutine pawcprj_free
 !!
 !! SIDE EFFECTS
 !!  cprj(:,:) <type(pawcprj_type)>= cprj datastructure
-!!
-!! PARENTS
-!!      m_cgprj,m_dfpt_cgwf,m_dfpt_vtowfk,m_fock,m_orbmag
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -304,15 +270,6 @@ end subroutine pawcprj_set_zero
 !!
 !! NOTES
 !!  MG: What about an option to report a pointer to cprj_in?
-!!
-!! PARENTS
-!!      m_berryphase_new,m_cgprj,m_cgwf,m_cgwf_cprj,m_chebfi,m_chi0
-!!      m_classify_bands,m_cohsex,m_dfpt_looppert,m_dfpt_nstwf,m_dfpt_scfcv
-!!      m_dfpt_vtowfk,m_electronpositron,m_extraprho,m_fock,m_getghc,m_io_kss
-!!      m_nonlop,m_paw_sym,m_pawcprj,m_positron,m_prep_calc_ucrpa,m_sigc,m_sigx
-!!      m_vtowfk,m_wfd
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -414,12 +371,6 @@ end subroutine pawcprj_copy
 !!
 !! SIDE EFFECTS
 !!  cprjy(:,:) <type(pawcprj_type)>= input/output cprjy datastructure
-!!
-!! PARENTS
-!!      m_cgtools,m_cgwf_cprj,m_chebfi,m_dfpt_cgwf,m_dfpt_scfcv,m_extraprho
-!!      m_getgh1c,m_invovl,m_scfcv_core
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -536,11 +487,6 @@ end subroutine pawcprj_axpby
 !!
 !! SIDE EFFECTS
 !!  cprjy(:,:) <type(pawcprj_type)>= input/output cprjy datastructure
-!!
-!! PARENTS
-!!      m_cgtk,m_cgtools,m_cgwf_cprj,m_dfpt_vtowfk,m_extraprho
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -721,11 +667,6 @@ end subroutine pawcprj_zaxpby
 !! SIDE EFFECTS
 !!  cprjy(:,:) <type(pawcprj_type)>= input/output cprjy datastructure
 !!
-!! PARENTS
-!!      m_cgwf_cprj
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine pawcprj_projbd(alpha,cprjx,cprjy)
@@ -834,11 +775,6 @@ end subroutine pawcprj_projbd
 !! NOTES
 !!  This routine is based on M. Giantomassi's doctoral dissertation, formula 7.77. It is not clear
 !!  whether it is implemented correctly for nonsymmorphic symmetries.
-!!
-!! PARENTS
-!!      m_berryphase_new,m_cgwf,m_fock
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -965,10 +901,6 @@ end subroutine pawcprj_projbd
 !! SIDE EFFECTS
 !!  cprj(:,:) <type(pawcprj_type)>= input/output cprj datastructure
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine pawcprj_conjg(cprj)
@@ -1031,11 +963,6 @@ end subroutine pawcprj_conjg
 !!
 !! NOTES
 !!  cprj_in and cprj_out must be dimensionned as cprj_in(n1,n2*nn) and cprj_in(n1,n2)
-!!
-!! PARENTS
-!!      m_cgcprj,m_cgprj,m_extraprho,m_getgh1c,m_scfcv_core
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1131,10 +1058,6 @@ end subroutine pawcprj_lincom
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine pawcprj_output(cprj)
@@ -1212,14 +1135,6 @@ end subroutine pawcprj_output
 !!
 !! OUTPUT
 !!  cprj_k(dimcp,nspinor*nband) <type(pawcprj_type)>= output cprj datastructure
-!!
-!! PARENTS
-!!      m_berryphase_new,m_cgcprj,m_cgwf,m_datafordmft,m_dfpt_nstwf
-!!      m_dfpt_scfcv,m_dfpt_vtowfk,m_extraprho,m_fock_getghc,m_forstr,m_orbmag
-!!      m_paw_occupancies,m_paw_optics,m_paw_overlap,m_plowannier,m_positron
-!!      m_rf2_init,m_scfcv_core,m_suscep_stat
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1440,12 +1355,6 @@ end subroutine pawcprj_get
 !! SIDE EFFECTS
 !!  cprj(dimcp,nspinor*mband*mkmem*nsppol)=output cprj (used if mkmem/=0)
 !!
-!! PARENTS
-!!      m_berryphase_new,m_cgprj,m_cgwf,m_dfpt_vtowfk,m_extraprho,m_orbmag
-!!      m_scfcv_core,m_vtowfk
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine pawcprj_put(atind,cprj_k,cprj,dimcp,iband1,ibg,ikpt,iorder,isppol,mband,&
@@ -1642,11 +1551,6 @@ end subroutine pawcprj_put
 !! SIDE EFFECTS
 !!  cprj(:,:) <type(pawcprj_type)>= cprj datastructure
 !!
-!! PARENTS
-!!      m_fock_getghc,m_forstr,m_ksdiago,m_scfcv_core
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine pawcprj_reorder(cprj,atm_indx)
@@ -1741,11 +1645,6 @@ end subroutine pawcprj_reorder
 !! NOTES
 !!  If sender==receiver, Cprj_send is copied into Cprj_recv.
 !!  It should be easy to avoid this additional copy in the calling routine.
-!!
-!! PARENTS
-!!      m_io_kss
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1871,11 +1770,6 @@ end subroutine pawcprj_mpi_exch
 !!   perhaps in general it is more efficient to use pawcprj_mpi_exch but it is
 !!   convenient for coding to have separate send and recieve routines.
 !!
-!! PARENTS
-!!      m_berryphase_new,m_orbmag,m_positron
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pawcprj_mpi_send(natom,n2dim,nlmn,ncpgr,cprj_out,receiver,spaceComm,ierr)
@@ -1982,11 +1876,6 @@ end subroutine pawcprj_mpi_send
 !!   Perhaps in general it is more efficient to use pawcprj_mpi_exch but it is
 !!   convenient for coding to have separate send and receive routines.
 !!
-!! PARENTS
-!!      m_berryphase_new,m_orbmag,m_positron
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pawcprj_mpi_recv(natom,n2dim,nlmn,ncpgr,cprj_in,sender,spaceComm,ierr)
@@ -2084,11 +1973,6 @@ end subroutine pawcprj_mpi_recv
 !!  cprj=the cprj datastructure
 !!  ierr=Error status.
 !!
-!! PARENTS
-!!      m_cgprj,m_dfpt_vtowfk,m_getgh1c
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pawcprj_mpi_sum(cprj,spaceComm,ierr)
@@ -2185,11 +2069,6 @@ end subroutine pawcprj_mpi_sum
 !! OUTPUT
 !!  cprj_gat=the gathered cprjs
 !!  ierr=Error status.
-!!
-!! PARENTS
-!!      m_berryphase_new,m_cgwf,m_paw_optics,m_suscep_stat
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2321,11 +2200,6 @@ end subroutine pawcprj_mpi_allgather
 !!  ierr=Error status.
 !!  Cprj(natom,n2dim)<pawcprj_type>=The datatype to be transmitted by master and received by the others nodes.
 !!
-!! PARENTS
-!!      m_fock,m_positron
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pawcprj_bcast(Cprj,natom,n2dim,nlmn,ncpgr,master,spaceComm,ierr)
@@ -2439,10 +2313,6 @@ end subroutine pawcprj_bcast
 !!   To transfer cprj from atom distribution to band distribution, dimensions should be:
 !!    n1indim =natom       n2indim =nband/nproc*nspinor
 !!    n1outdim=natom/nproc n2outdim=nband*nspinor
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2687,11 +2557,6 @@ end subroutine pawcprj_bcast
 !! These quantities were build only if treated by the current proc
 !! the inner quantities being nspinor
 !!
-!! PARENTS
-!!      m_dft_energy,m_paw_occupancies
-!!
-!! CHILDREN
-!!
 !! SOURCE
  subroutine pawcprj_gather_spin(cprj,cprj_gat,natom,n2size,nspinor,nspinortot,&
 &                            spaceComm_spin,ierr)
@@ -2804,13 +2669,6 @@ end subroutine pawcprj_bcast
 !! OUTPUT
 !!  dimcprj(natom)=Number of nlm elements in the <p_{lmn}^i|\psi> matrix elements for i=1,...,natom.
 !!
-!! PARENTS
-!!      m_afterscfloop,m_berryphase_new,m_dfpt_looppert,m_dfpt_scfcv
-!!      m_extraprho,m_fock,m_forstr,m_getghc,m_gstate,m_hamiltonian,m_io_kss
-!!      m_mlwfovlp_qp,m_orbmag,m_paw_overlap,m_scfcv_core
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pawcprj_getdim(dimcprj,natom,nattyp,ntypat,typat,Pawtab,sort_mode)
@@ -2871,11 +2729,6 @@ end subroutine pawcprj_getdim
 !!     Projected wave functions <Proj_i|Cnk> with all NL projectors for the left and the right wavefunction,respectively.
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!  xmpi_sum
 !!
 !! SOURCE
 
@@ -2963,11 +2816,6 @@ end function paw_overlap
 !!  buffer = the data packed, dim : (2, n2dim*sum(nlmn))
 !!  [buffer_gr] = if present the gradient data packed, dim : (2, ncpgr, n2dim*sum(nlmn))
 !!
-!! PARENTS
-!!      m_paw_occupancies
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pawcprj_pack(nlmn,cprj,buffer,buffer_gr)
@@ -3041,11 +2889,6 @@ end subroutine pawcprj_pack
 !!
 !! OUTPUT
 !!  cprj=The datatype unpacked
-!!
-!! PARENTS
-!!      m_paw_occupancies
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

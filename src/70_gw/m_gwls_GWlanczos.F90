@@ -11,10 +11,6 @@
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -73,12 +69,6 @@ contains
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gwls_ComputePoles,m_gwls_GenerateEpsilon
-!!
-!! CHILDREN
-!!      zgemm,zhbev
 !!
 !! SOURCE
 
@@ -175,12 +165,6 @@ end subroutine get_seeds
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gwls_ComputePoles,m_gwls_GenerateEpsilon,m_gwls_LanczosResolvents
-!!
-!! CHILDREN
-!!      zgemm,zhbev
 !!
 !! SOURCE
 
@@ -478,12 +462,6 @@ end subroutine block_lanczos_algorithm
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gwls_ComputePoles,m_gwls_GenerateEpsilon,m_gwls_LanczosResolvents
-!!
-!! CHILDREN
-!!      zgemm,zhbev
 !!
 !! SOURCE
 

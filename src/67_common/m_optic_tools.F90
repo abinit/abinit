@@ -82,12 +82,6 @@ contains
 !! OUTPUT
 !!  pmat(mband,mband,nkpt,3,nsppol) = matrix elements of momentum operator, in cartesian coordinates
 !!
-!! PARENTS
-!!      optic
-!!
-!! CHILDREN
-!!      xmpi_max,xmpi_min,xmpi_split_work,xmpi_sum
-!!
 !! SOURCE
 
 subroutine pmat2cart(eigen11, eigen12, eigen13, mband, nkpt, nsppol, pmat, rprimd)
@@ -148,12 +142,6 @@ end subroutine pmat2cart
 !!
 !! OUTPUT
 !!  pmat(mband,mband,nkpt,3,nsppol) = momentum matrix elements, renormalized by denominator change with scissor shift
-!!
-!! PARENTS
-!!      optic
-!!
-!! CHILDREN
-!!      xmpi_max,xmpi_min,xmpi_split_work,xmpi_sum
 !!
 !! SOURCE
 
@@ -236,12 +224,6 @@ end subroutine pmat_renorm
 !!
 !!  Comment:
 !!    Right now the routine sums over the kpoints. In future linear tetrahedron method should be useful.
-!!
-!! PARENTS
-!!      optic
-!!
-!! CHILDREN
-!!      xmpi_max,xmpi_min,xmpi_split_work,xmpi_sum
 !!
 !! SOURCE
 
@@ -622,12 +604,6 @@ end subroutine linopt
 !!  ChiAbs.out : abs\chi_{v1v2v3}(2\omega,\omega,-\omega). The headers in these files contain
 !!  information about the calculation.
 !!  See eqs. (A4)-A(11) of S. Sharma et al Phys. Rev. B 67, 165332 (2003)
-!!
-!! PARENTS
-!!      optic
-!!
-!! CHILDREN
-!!      xmpi_max,xmpi_min,xmpi_split_work,xmpi_sum
 !!
 !! SOURCE
 
@@ -1349,12 +1325,6 @@ end subroutine nlinopt
 !!    - This routine does not symmetrize the tensor (up to now)
 !!    - Sum over all the states and use occupation factors instead of looping only on resonant contributions
 !!
-!! PARENTS
-!!      optic
-!!
-!! CHILDREN
-!!      xmpi_max,xmpi_min,xmpi_split_work,xmpi_sum
-!!
 !! SOURCE
 
 subroutine linelop(icomp, itemp, nband_sum, cryst, ks_ebands, &
@@ -1882,12 +1852,6 @@ end subroutine linelop
 !!    - The routine has been written using notations of Ref. 2
 !!    - This routine does not symmetrize the tensor (up to now)
 !!    - Sum over all the states and use occupation factors instead of looping only on resonant contributions
-!!
-!! PARENTS
-!!      optic
-!!
-!! CHILDREN
-!!      xmpi_max,xmpi_min,xmpi_split_work,xmpi_sum
 !!
 !! SOURCE
 
