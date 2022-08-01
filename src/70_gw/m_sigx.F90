@@ -73,44 +73,21 @@ contains
 !! sigmak_ibz=Index of the k-point in the IBZ.
 !! minbnd, maxbnd= min and Max band index for GW correction (for this k-point)
 !! Gsph_x<gsphere_t>= Info on the G-sphere used for Sigma_x
-!!    %nsym=number of symmetry operations
-!!    %rottb(ng,timrev,nsym)=index of (IS) G where I is the identity or the inversion
-!!      operation and G is one of the ng vectors in reciprocal space
-!!    %timrev=2 if time-reversal symmetry is used, 1 otherwise
-!!    %gvec(3,ng)=integer coordinates of each plane wave in reciprocal space
 !! ikcalc=index in the array Sigp%kptgw2bz of the k-point where GW corrections are calculated
 !! Ltg_k datatype containing information on the little group
 !! Kmesh <kmesh_t>
-!!    %nbz=Number of points in the BZ
-!!    %nibz=Number of points in IBZ
-!!    %kibz(3,nibz)=k-point coordinates, irreducible Brillouin zone
-!!    %kbz(3,nbz)=k-point coordinates, full Brillouin zone
-!!    %ktab(nbz)= table giving for each k-point in the BZ (kBZ), the corresponding
-!!    %ktabi(nbz)= for each k-point in the BZ defines whether inversion has to be considered
-!!    %ktabp(nbz)= phase factor associated to tnons
 !! gwx_ngfft(18)=Information about 3D FFT for the oscillator strengths, see ~abinit/doc/variables/vargs.htm#ngfft
 !! gwx_nfftot=number of points of the FFT grid for GW wavefunctions
 !! Vcp <vcoul_t datatype> containing information on the cutoff technique
-!!    %vc_sqrt(npwx,nqibz)= square-root of the coulombian potential for q-points in the IBZ
 !! Pawtab(Psps%ntypat) <type(pawtab_type)>=paw tabulated starting data
 !! Pawang <type(pawang_type)>=paw angular mesh and related data
 !! Psps <type(pseudopotential_type)>=variables related to pseudopotentials
-!!    %usepaw=1 for PAW, 0 for NC pseudopotentials.
 !! Qmesh <kmesh_t> : datatype gathering information of the q-mesh used
-!!    %ibz=q points where $\tilde\epsilon^{-1}$ has been computed
-!!    %bz(3,nqbz)=coordinates of all q-points in BZ
 !! Sigp <sigparams_t> (see the definition of this structured datatype)
 !! Cryst<crystal_t>=Info on unit cell and symmetries
-!!    %natom=number of atoms in unit cell
-!!    %ucvol=unit cell volume
-!!    %nsym=number of symmetry operations
-!!    %typat(natom)=type of each atom
-!!  much slower but it requires less memory
 !! QP_BSt<ebands_t>=Datatype gathering info on the QP energies (KS if one shot)
-!!  eig(Sigp%nbnds,Kmesh%nibz,%nsppol)=KS or QP energies for k-points, bands and spin
-!!  occ(Sigp%nbnds,Kmesh%nibz,nsppol)=occupation numbers, for each k point in IBZ, each band and spin
-!!  Paw_pwff<pawpwff_t>=Form factor used to calculate the onsite mat. elements of a plane wave.
-!!  allQP_sym(%nkibz, %nsppol)<esymm_t>=Datatype collecting data on the irreducible representations of the
+!! Paw_pwff<pawpwff_t>=Form factor used to calculate the onsite mat. elements of a plane wave.
+!! allQP_sym(%nkibz, %nsppol)<esymm_t>=Datatype collecting data on the irreducible representations of the
 !!    little group of kcalc in the KS representation as well as the symmetry of the bdgw_k states.
 !! prtvol=Flags governing verbosity level.
 !!

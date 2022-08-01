@@ -293,8 +293,8 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
 subroutine crystal_init(amu,Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typat,xred,&
-   zion,znucl,timrev,use_antiferro,remove_inv,title,&
-   symrel,tnons,symafm) ! Optional
+                        zion,znucl,timrev,use_antiferro,remove_inv,title,&
+                        symrel,tnons,symafm) ! Optional
 
 !Arguments ------------------------------------
 !scalars
