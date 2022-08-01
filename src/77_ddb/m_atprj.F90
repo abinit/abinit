@@ -78,11 +78,6 @@ contains
 !! OUTPUT
 !! t_atprj = container object for atomic projections
 !!
-!! PARENTS
-!!      m_phonons
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine atprj_init(t_atprj, natom, natprj_bs, iatprj_bs, outfile_radix)
@@ -150,11 +145,6 @@ end subroutine atprj_init
 !! OUTPUT
 !!  writes to files
 !!
-!! PARENTS
-!!      m_phonons
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine atprj_print(t_atprj, iq, phfrq, eigvec)
@@ -206,11 +196,6 @@ end subroutine atprj_print
 !!
 !! OUTPUT
 !! t_atprj = container object for atomic projections
-!!
-!! PARENTS
-!!      m_phonons
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

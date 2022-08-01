@@ -12,10 +12,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -82,10 +78,6 @@ contains
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 subroutine rttddft_calc_density(dtset, mpi_enreg, psps, tdks)
 
@@ -133,9 +125,9 @@ subroutine rttddft_calc_density(dtset, mpi_enreg, psps, tdks)
               & dtset%istwfk,tdks%kg,dtset%kptns,tdks%mcg,tdks%mcprj,dtset%mgfft,      &
               & dtset%mkmem,mpi_enreg,psps%mpsang,dtset%mpw,dtset%natom,tdks%nattyp,   &
               & dtset%nband,dtset%natom,dtset%ngfft,dtset%nkpt,dtset%nloalg,           &
-              & tdks%npwarr,dtset%nspinor,dtset%nsppol,psps%ntypat,dtset%paral_kgb,    &
-              & tdks%ph1d,psps,tdks%rmet,dtset%typat,tdks%ucvol,tdks%unpaw,tdks%xred,  &
-              & tdks%ylm,tdks%ylmgr)
+              & tdks%npwarr,dtset%nspinor,dtset%nsppol,dtset%nsppol,psps%ntypat,       &
+              & dtset%paral_kgb,tdks%ph1d,psps,tdks%rmet,dtset%typat,tdks%ucvol,       &
+              & tdks%unpaw,tdks%xred,tdks%ylm,tdks%ylmgr)
 
    !paral atom
    if (my_natom/=dtset%natom) then
@@ -222,10 +214,6 @@ end subroutine rttddft_calc_density
 !!
 !! OUTPUT
 !!  etotal <real(dp)> = the total energy
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 subroutine rttddft_calc_etot(dtset, energies, etotal, occ)
@@ -315,10 +303,6 @@ end subroutine rttddft_calc_etot
 !! OUTPUT
 !!  eig <real(nband)> = the eigenvalues
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 subroutine rttddft_calc_eig(cg,eig,ghc,istwf_k,nband,npw,nspinor,me_g0,comm,gsc)
 
@@ -391,10 +375,6 @@ end subroutine rttddft_calc_eig
 !!  kin <real(nband)> = the non local part of the energy in NC case
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 subroutine rttddft_calc_kin(kin,cg,dtset,ham_k,nband,npw,nspinor,occ0,wk,mpi_enreg,bandfft)
@@ -482,10 +462,6 @@ end subroutine rttddft_calc_kin
 !!
 !! SIDE EFFECTS
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 subroutine rttddft_calc_enl(cg,enl,ham_k,nband,npw,nspinor,mpi_enreg)
 
@@ -561,10 +537,6 @@ end subroutine rttddft_calc_enl
 !!
 !! OUTPUT
 !!  occ <real(nband)> = the occupations at time t
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 subroutine rttddft_calc_occ(cg,cg0,dtset,ham_k,ikpt,ibg,isppol,mpi_enreg,nband_k,npw_k,nspinor,occ,occ0,tdks)
@@ -727,10 +699,6 @@ end subroutine rttddft_calc_occ
 !!
 !! OUTPUT
 !!  entropy <real>
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 subroutine rttddft_calc_ent(entropy,dtset,occ)

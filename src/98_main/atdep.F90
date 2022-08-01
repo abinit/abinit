@@ -26,22 +26,6 @@
 !! OUTPUT
 !!  (main routine)
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      tdep_calc_phi1,tdep_write_phi1
-!!      tdep_calc_phi2,tdep_write_phi2,tdep_calc_phi3ref,tdep_write_phi3
-!!      tdep_calc_phi4ref,tdep_write_phi4,tdep_calc_alpha_gamma
-!!      tdep_calc_constraints,tdep_calc_elastic,tdep_calc_model
-!!      tdep_calc_moorepenrose,tdep_calc_phdos,tdep_calc_phi2fcoeff
-!!      tdep_calc_phi3fcoeff,tdep_calc_phi4fcoeff,tdep_calc_thermo,tdep_destroy_shell
-!!      tdep_destroy_eigen2nd,tdep_init_crystal,tdep_init_ddb
-!!      tdep_init_eigen2nd,tdep_init_ifc,tdep_init_shell2at
-!!      tdep_init_shell3at,tdep_init_shell4at,tdep_make_latt,tdep_make_qptpath
-!!      tdep_make_sym,tdep_matchideal2average,tdep_print_aknowledgments
-!!      tdep_readecho,tdep_write_gruneisen
-!!      xmpi_end,xmpi_init
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H

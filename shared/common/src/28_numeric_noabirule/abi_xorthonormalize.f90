@@ -48,11 +48,6 @@
 !!  blockvectorx  = on output, orthonormalized wavefunction.
 !!
 !!
-!! PARENTS
-!!      lobpcgwf
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine xorthonormalize(blockvectorx,blockvectorbx,blocksize,spaceComm,sqgram,vectsize,&
@@ -142,12 +137,6 @@ end subroutine xorthonormalize
 !!                  (e.g block of wavefunction)
 !!  blockvectorx  = on output, orthonormalized wavefunction.
 !!
-!! PARENTS
-!!      lobpcgIIwf,m_lobpcg,m_lobpcgIIIwf,pw_orthon
-!!
-!! CHILDREN
-!!      abi_xgemm,abi_xpotrf,abi_xtrsm,wrtout,xmpi_sum
-!!
 !! SOURCE
 
 subroutine ortho_reim(blockvectorx,blockvectorbx,blocksize,spaceComm,sqgram,vectsize)
@@ -216,12 +205,6 @@ end subroutine ortho_reim
 !!                  (e.g block of wavefunction)
 !!  blockvectorx  = on output, orthonormalized wavefunction.
 !!
-!!
-!! PARENTS
-!!      lobpcgccIIIwf,lobpcgccIIwf,m_lobpcg,pw_orthon
-!!
-!! CHILDREN
-!!      wrtout,xmpi_sum,zgemm,zpotrf,ztrsm
 !!
 !! SOURCE
 

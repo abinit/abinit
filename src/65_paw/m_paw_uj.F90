@@ -140,11 +140,6 @@ CONTAINS  !=====================================================================
 !! SIDE EFFECTS
 !!  dtpawuj(0:ndtpawuj) (initialization of fields vsh, occ, iuj,nnat)
 !!
-!! PARENTS
-!!      m_gstate,ujdet
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pawuj_ini(dtpawuj,ndtset)
@@ -210,11 +205,6 @@ end subroutine pawuj_ini
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_gstate,ujdet
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pawuj_free(dtpawuj)
@@ -266,11 +256,6 @@ end subroutine pawuj_free
 !! OUTPUT
 !!  only printing
 !!  (among other things a section in the ab.out that can be used for input in ujdet)
-!!
-!! PARENTS
-!!      m_gstate,ujdet
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -799,11 +784,6 @@ end subroutine pawuj_det
 !! OUTPUT
 !!  dtpawuj(0:ndtpawuj) (initialization of fields vsh, occ, iuj,nnat)
 !!
-!! PARENTS
-!!      m_scfcv_core
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pawuj_red(dtset,dtpawuj,fatvshift,my_natom,natom,ntypat,paw_ij,pawrad,pawtab,ndtpawuj,&
@@ -1040,11 +1020,6 @@ end subroutine pawuj_red
 !!
 !! SIDE EFFECTS
 !!
-!! PARENTS
-!!      m_paw_uj
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine chiscwrt(chi_org,disv_org,nat_org,sdisv_org,smult_org,nsh_org,chi_sc,&
@@ -1140,11 +1115,6 @@ end subroutine chiscwrt
 !!
 !! OUTPUT
 !!  oumat(nnat,nnat)=inverse of inmat, nnat=nat+1 for option=1 or option=3; nnat=nat for option=2
-!!
-!! PARENTS
-!!      m_paw_uj
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1250,11 +1220,6 @@ end subroutine linvmat
 !! OUTPUT
 !!  oumat(nat+1,nat+1)=inverse of inmat
 !!
-!! PARENTS
-!!      m_paw_uj
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine lprtmat(commnt,chan,prtvol,mmat,nat)
@@ -1324,11 +1289,6 @@ end subroutine lprtmat
 !!
 !! OUTPUT
 !!  ures=resulting U (in eV) on atom pawujat
-!!
-!! PARENTS
-!!      m_paw_uj
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1418,11 +1378,6 @@ end subroutine lcalcu
 !!
 !! OUTPUT
 !!  matt(nj+1,nj+1) completed matrix
-!!
-!! PARENTS
-!!      m_paw_uj
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

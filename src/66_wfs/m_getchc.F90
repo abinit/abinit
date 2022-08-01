@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -106,12 +102,6 @@ contains
 !!   chc(2*ndat)=matrix elements <C_left|H|C> (if sij_opt>=0)
 !!                           or <C_left|H-lambda.S|C> (if sij_opt=-1)
 !! SIDE EFFECTS
-!!
-!! PARENTS
-!!      m_cgwf_cprj
-!!
-!! CHILDREN
-!!      dgemv,nonlop,timab,zgemv
 !!
 !! SOURCE
 
@@ -482,12 +472,6 @@ end subroutine getchc
 !!
 !! OUTPUT
 !!   csc(2*ndat)=matrix elements <C_left|S|C>
-!!
-!! PARENTS
-!!      m_cgwf_cprj
-!!
-!! CHILDREN
-!!      dgemv,nonlop,timab,zgemv
 !!
 !! SOURCE
 

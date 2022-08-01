@@ -12,10 +12,6 @@
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -42,6 +38,7 @@ MODULE m_ifc
 #endif
 
  use m_io_tools,    only : open_file
+ use m_numeric_tools, only : arth
  use m_fstrings,    only : ktoa, int2char4, sjoin, itoa, ltoa, ftoa
  use m_symtk,       only : matr3inv
  use m_special_funcs,  only : abi_derfc
@@ -216,6 +213,9 @@ MODULE m_ifc
     procedure :: fourq => ifc_fourq
      ! Use Fourier interpolation to compute interpolated frequencies w(q) and eigenvectors e(q)
 
+    procedure :: get_phmesh => ifc_get_phmesh
+     ! Build linear mesh for phonons.
+
     procedure :: speedofsound => ifc_speedofsound
      ! Compute the speed of sound by averaging phonon group velocities.
 
@@ -250,12 +250,6 @@ CONTAINS  !===========================================================
 !!
 !! FUNCTION
 !!  Deallocate memory for the ifc_type structure
-!!
-!! PARENTS
-!!      m_ifc
-!!
-!! CHILDREN
-!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -337,13 +331,6 @@ end subroutine ifc_free
 !! OUTPUT
 !! Ifc<ifc_type>=Object containing the dynamical matrix and the IFCs.
 !!
-!! PARENTS
-!!      anaddb,m_effective_potential_file,m_eph_driver,m_gruneisen,m_ifc
-!!      m_tdep_abitypes
-!!
-!! CHILDREN
-!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
-!!
 !! SOURCE
 
 subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
@@ -398,9 +385,8 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
  call cwtime(cpu, wall, gflops, "start")
 
- ! TODO: This dimension should be encapsulated somewhere. We don't want to
- ! change the entire code if someone adds a new kind of perturbation.
- mpert = Crystal%natom + MPERT_MAX; iout = ab_out
+ mpert = ddb%mpert
+ iout = ab_out
 
  rprim = ddb%rprim; gprim = ddb%gprim
 
@@ -431,7 +417,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  ! Check if the rprim are coherent with the choice used in the interatomic forces generation
  call chkrp9(Ifc%brav,rprim)
 
- ! Compute dyewq0, the correction to be applied to the Ewald, see Eq.(71) of PRB55, 10355 (1997). 
+ ! Compute dyewq0, the correction to be applied to the Ewald, see Eq.(71) of PRB55, 10355 (1997).
  dyewq0 = zero
  if ((Ifc%dipdip==1.or.Ifc%dipquad==1.or.Ifc%quadquad==1).and. (Ifc%asr==1.or.Ifc%asr==2)) then
    ! Calculation of the non-analytical part for q=0
@@ -735,12 +721,6 @@ end subroutine ifc_init
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_generate_training_set
-!!
-!! CHILDREN
-!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
-!!
 !! SOURCE
 
 subroutine ifc_init_fromFile(dielt,filename,Ifc,natom,ngqpt,nqshift,qshift,ucell_ddb,zeff,qdrp_cart,comm)
@@ -766,8 +746,6 @@ subroutine ifc_init_fromFile(dielt,filename,Ifc,natom,ngqpt,nqshift,qshift,ucell
  character(len=500) :: msg
  type(ddb_type) :: ddb
  type(ddb_hdr_type) :: ddb_hdr
-!arrays
- integer,allocatable :: atifc(:)
 
 !******************************************************************
 
@@ -776,16 +754,12 @@ subroutine ifc_init_fromFile(dielt,filename,Ifc,natom,ngqpt,nqshift,qshift,ucell
 
  if (file_exists .eqv. .true.)then
    !Reading the ddb
-   call ddb_hdr_open_read(ddb_hdr,filename,2,DDB_VERSION,comm,dimonly=1)
+   call ddb_hdr%open_read(filename,2,comm,dimonly=1)
 
    natom = ddb_hdr%natom
-   ABI_MALLOC(atifc,(ddb_hdr%natom))
-   do i=1,ddb_hdr%natom
-     atifc(i)=i
-   end do
    call ddb_hdr%free()
 
-   call ddb_from_file(ddb,filename,1,natom,natom,atifc, ddb_hdr, ucell_ddb,comm)
+   call ddb%from_file(filename,1, ddb_hdr, ucell_ddb,comm)
 
  else
    ABI_ERROR(sjoin("File:", filename, "is not present in the directory"))
@@ -816,7 +790,6 @@ subroutine ifc_init_fromFile(dielt,filename,Ifc,natom,ngqpt,nqshift,qshift,ucell
  call ifc_init(Ifc,ucell_ddb,ddb,1,1,1,dipdip,1,ngqpt,nqshift,qshift,dielt,zeff,qdrp_cart,0,0.0_dp,0,1,comm)
 
  ! Free them all
- ABI_FREE(atifc)
  call ddb%free()
  call ddb_hdr%free()
 
@@ -839,11 +812,6 @@ subroutine ifc_init_fromFile(dielt,filename,Ifc,natom,ngqpt,nqshift,qshift,ucell
 !!
 !! OUTPUT
 !!  Only printing
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -935,12 +903,6 @@ end subroutine ifc_print
 !!  [out_eigvec(2*3*natom*3*natom) = The (interpolated) eigenvectors of the dynamical matrix in Cartesian coords.
 !!  [out_displ_red(2*3*natom*3*natom) = The (interpolated) displacement in reduced coordinates.
 !!  [dwdq(3,3*natom)] = Group velocities i.e. d(omega(q))/dq in Cartesian coordinates.
-!!
-!! PARENTS
-!!      m_ifc
-!!
-!! CHILDREN
-!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -1057,12 +1019,6 @@ end subroutine ifc_fourq
 !!
 !!    \nabla_q w(q, nu) = 1/(2 w(q, nu))  <u(q, nu)| \nabla_q D(q) | u(q, nu)>
 !!
-!! PARENTS
-!!      m_ifc
-!!
-!! CHILDREN
-!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
-!!
 !! SOURCE
 
 subroutine ifc_get_dwdq(ifc, cryst, qpt, phfrq, eigvec, dwdq, comm)
@@ -1154,6 +1110,40 @@ end subroutine ifc_get_dwdq
 
 !----------------------------------------------------------------------
 
+!!****f* m_ifc/ifc_get_phmesh
+!! NAME
+!!  ifc_get_phmesh
+!!
+!! FUNCTION
+!!  Build linear mesh for phonons.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine ifc_get_phmesh(ifc, ph_wstep, phmesh_size, phmesh)
+
+!Arguments ------------------------------------
+!scalars
+ class(ifc_type),intent(in) :: ifc
+ real(dp),intent(in) :: ph_wstep
+ integer,intent(out) :: phmesh_size
+!arrays
+ real(dp),allocatable,intent(out) :: phmesh(:)
+
+!******************************************************************
+
+ phmesh_size = nint((ifc%omega_minmax(2) - ifc%omega_minmax(1) ) / ph_wstep) + 1
+ ABI_MALLOC(phmesh, (phmesh_size))
+ phmesh = arth(ifc%omega_minmax(1), ph_wstep, phmesh_size)
+
+end subroutine ifc_get_phmesh
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_ifc/ifc_speedofsound
 !!
 !! NAME
@@ -1175,11 +1165,6 @@ end subroutine ifc_get_dwdq
 !! comm=MPI communicator.
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -1397,12 +1382,6 @@ end subroutine ifc_speedofsound
 !!    with the last cutoff found by the bisection algorithm applied.
 !!  ifc%atmfrc(2,3,natom,3,natom,nrpt)= ASR-imposed Interatomic Forces
 !!
-!! PARENTS
-!!      m_ifc
-!!
-!! CHILDREN
-!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
-!!
 !! SOURCE
 
 subroutine ifc_autocutoff(ifc, crystal, comm)
@@ -1549,12 +1528,6 @@ end subroutine ifc_autocutoff
 !!  with the required cutoff applied.
 !! rcut_min=Effective cutoff. Defined by the minimum cutoff radius over the natom sites.
 !!
-!! PARENTS
-!!      m_ifc
-!!
-!! CHILDREN
-!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
-!!
 !! SOURCE
 
 subroutine corsifc9(acell,gprim,natom,nrpt,nsphere,rifcsph,rcan,rprim,rpt,rcut_min,wghatm)
@@ -1682,11 +1655,6 @@ end subroutine corsifc9
 !!  2) the code is unreadable and horrible - 3/4 different file formats for the
 !!  same stuff. We should make different subroutines, even if it duplicates some code
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
-!!
 !! SOURCE
 
 subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid, &
@@ -1721,7 +1689,7 @@ subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid, &
  iout = ab_out
  if (present(unit_out)) then
    iout = unit_out
- end if   
+ end if
  dielt = ifc%dielt
 
  ! Compute the distances between atoms
@@ -2043,12 +2011,6 @@ end subroutine ifc_write
 !! NOTES
 !! This routine should be executed by one processor only
 !!
-!! PARENTS
-!!      m_ifc
-!!
-!! CHILDREN
-!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
-!!
 !! SOURCE
 
 subroutine ifc_getiaf(Ifc,ifcana,ifcout,iout,zeff,ia,ra,list,&
@@ -2362,12 +2324,6 @@ end subroutine ifc_getiaf
 !!
 !! SIDE EFFECTS
 !!
-!! PARENTS
-!!      m_ifc
-!!
-!! CHILDREN
-!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
-!!
 !! SOURCE
 
 subroutine omega_decomp(amu,natom,ntypat,typat,dynmatfl,dynmatsr,dynmatlr,iqpt,nqpt,eigenvec)
@@ -2556,11 +2512,6 @@ end subroutine omega_decomp
 !! OUTPUT
 !!  only write to file. This routine should be called by a single processor.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
-!!
 !! SOURCE
 
 subroutine ifc_outphbtrap(ifc, cryst, ngqpt, nqshft, qshft, basename)
@@ -2668,11 +2619,6 @@ end subroutine ifc_outphbtrap
 !! OUTPUT
 !!  Only write to file
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
-!!
 !! SOURCE
 
 subroutine ifc_printbxsf(ifc, cryst, ngqpt, nqshft, qshft, path, comm)
@@ -2758,11 +2704,6 @@ end subroutine ifc_printbxsf
 !!
 !! NOTES:
 !!  This routine should be called by master node and when ifcflag == 1.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 

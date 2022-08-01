@@ -390,11 +390,6 @@ end subroutine abimem_get_info
 !!  At the end of the calculation a short report is printed on the screen,
 !!  some information can be also written on disk following the needs
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      date_and_time,mpi_abort
-!!
 !! SOURCE
 
 subroutine abimem_record(istat, vname, addr, act, isize, file, line)
@@ -515,11 +510,6 @@ end subroutine abimem_record
 !!  file=File name
 !!  line=Line number
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      date_and_time,mpi_abort
-!!
 !! SOURCE
 
 subroutine abimem_abort(msg, file, line)
@@ -616,10 +606,6 @@ end function abimem_basename
 !!
 !! OUTPUT
 !!  wall= wall clock time in seconds
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

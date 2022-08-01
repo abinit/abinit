@@ -12,10 +12,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -98,12 +94,6 @@ contains
 !!
 !! OUTPUT
 !!  (only writing, printing)
-!!
-!! PARENTS
-!!      m_outscfcv
-!!
-!! CHILDREN
-!!      fourdp,matpointsym,matr3inv,ptabs_fourdp,xmpi_sum,xred2xcart
 !!
 !! SOURCE
 
@@ -358,12 +348,6 @@ contains
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_outscfcv
-!!
-!! CHILDREN
-!!      fourdp,matpointsym,matr3inv,ptabs_fourdp,xmpi_sum,xred2xcart
-!!
 !! SOURCE
 
   subroutine calc_fc(my_natom,natom,nspden,ntypat,pawrad,pawrhoij,pawtab,typat,usepaw,&
@@ -483,12 +467,6 @@ contains
 !! these charges are given by the net core charges on the pseudoatoms. Due to otherwise slow convergence,
 !! the sum over atoms is carried out by an Ewald method as detailed in the Honma reference, specifically
 !! his Eq. 4.8.
-!!
-!! PARENTS
-!!      m_nucprop
-!!
-!! CHILDREN
-!!      fourdp,matpointsym,matr3inv,ptabs_fourdp,xmpi_sum,xred2xcart
 !!
 !! SOURCE
 
@@ -711,12 +689,6 @@ end subroutine make_efg_ion
 !! \left(\frac{\tilde{n}(G)}{\pi G^2}\right)e^{2\pi i G\cdot R}
 !! \end{displaymath}
 !!
-!!
-!! PARENTS
-!!      m_nucprop
-!!
-!! CHILDREN
-!!      fourdp,matpointsym,matr3inv,ptabs_fourdp,xmpi_sum,xred2xcart
 !!
 !! SOURCE
 

@@ -114,12 +114,6 @@ CONTAINS
 !! OUTPUT
 !! eff_pot<type(effective_potential)> = effective potential datatype with new fitted coefficients
 !!
-!! PARENTS
-!!      m_fit_polynomial_coeff,m_mover_effpot,m_multibinit_driver
-!!
-!! CHILDREN
-!!      destroy_supercell,generelist,init_supercell,xred2xcart
-!!
 !! SOURCE
 
 subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,power_disps,&
@@ -1449,12 +1443,6 @@ end subroutine fit_polynomial_coeff_fit
 !! OUTPUT
 !! eff_pot = effective potential datatype with new fitted coefficients
 !!
-!! PARENTS
-!!      m_mover_effpot
-!!
-!! CHILDREN
-!!      destroy_supercell,generelist,init_supercell,xred2xcart
-!!
 !! SOURCE
 
 subroutine fit_polynomial_coeff_getPositive(eff_pot,hist,coeff_values,isPositive,list_coeff,ncoeff,&
@@ -1656,11 +1644,6 @@ end subroutine fit_polynomial_coeff_getPositive
 !!
 !! OUTPUT
 !!
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      destroy_supercell,generelist,init_supercell,xred2xcart
 !!
 !! SOURCE
 
@@ -1923,12 +1906,6 @@ end subroutine fit_polynomial_coeff_getCoeffBound
 !!                could not be computed.  = 0:  successful exit
 !!          information from the subroutine dsgesv in LAPACK
 !!
-!! PARENTS
-!!      m_fit_polynomial_coeff,m_opt_effpot
-!!
-!! CHILDREN
-!!      destroy_supercell,generelist,init_supercell,xred2xcart
-!!
 !! SOURCE
 
 subroutine fit_polynomial_coeff_solve(coefficients,fcart_coeffs,fcart_diff,energy_coeffs,energy_diff,&
@@ -2133,12 +2110,6 @@ end subroutine fit_polynomial_coeff_solve
 !! OUTPUT
 !! gf_value(4) = Goal function
 !!
-!! PARENTS
-!!      m_fit_polynomial_coeff
-!!
-!! CHILDREN
-!!      destroy_supercell,generelist,init_supercell,xred2xcart
-!!
 !! SOURCE
 
 subroutine fit_polynomial_coeff_computeGF(coefficients,energy_coeffs,energy_diff,&
@@ -2253,12 +2224,6 @@ end subroutine fit_polynomial_coeff_computeGF
 !! strten_out(ncoeff,3,natom,ntime)= value of the stresses for each coefficient
 !!                                   (-1/ucvol factor is taking into acount) (Ha/Bohr^3)
 !! energy_out(ncoeff,ntime)        = value of the energy for each  coefficient (Ha)
-!!
-!! PARENTS
-!!      m_fit_polynomial_coeff,m_opt_effpot
-!!
-!! CHILDREN
-!!      destroy_supercell,generelist,init_supercell,xred2xcart
 !!
 !! SOURCE
 
@@ -2536,12 +2501,6 @@ end subroutine fit_polynomial_coeff_getFS
 !! mse  =  Mean square error of the energy   (Hatree)
 !! msef =  Mean square error of the forces   (Hatree/Bohr)**2
 !! mses =  Mean square error of the stresses (Hatree/Bohr)**2
-!!
-!! PARENTS
-!!      m_fit_polynomial_coeff,m_opt_effpot
-!!
-!! CHILDREN
-!!      destroy_supercell,generelist,init_supercell,xred2xcart
 !!
 !! SOURCE
 
@@ -2873,12 +2832,6 @@ end subroutine fit_polynomial_coeff_testEffPot
 !! hist<type(abihist)> = datatype with the  history of the MD
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_multibinit_driver
-!!
-!! CHILDREN
-!!      destroy_supercell,generelist,init_supercell,xred2xcart
 !!
 !! SOURCE
 

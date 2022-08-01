@@ -15,10 +15,6 @@
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -105,12 +101,6 @@ contains
 !!  (only writing, printing)
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_outscfcv,m_vtorho
-!!
-!! CHILDREN
-!!      add_matlu,copy_oper,destroy_oper,init_oper,loc_oper,prod_oper,sym_matlu
 !!
 !! SOURCE
 
@@ -764,12 +754,6 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,&
 !! SIDE EFFECTS
 !!  print psichi in forlb.ovlp
 !!
-!! PARENTS
-!!      m_datafordmft
-!!
-!! CHILDREN
-!!      add_matlu,copy_oper,destroy_oper,init_oper,loc_oper,prod_oper,sym_matlu
-!!
 !! SOURCE
 
 subroutine psichi_print(dtset,nattyp,ntypat,nkpt,my_nspinor,&
@@ -933,12 +917,6 @@ subroutine psichi_print(dtset,nattyp,ntypat,nkpt,my_nspinor,&
 !! SIDE EFFECTS
 !!  check psichi: compute norm and occupations
 !!
-!! PARENTS
-!!      m_datafordmft
-!!
-!! CHILDREN
-!!      add_matlu,copy_oper,destroy_oper,init_oper,loc_oper,prod_oper,sym_matlu
-!!
 !! SOURCE
 
 subroutine psichi_check(dtset,nattyp,nkpt,my_nspinor,&
@@ -1049,12 +1027,6 @@ end subroutine datafordmft
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_forctqmc,m_hubbard_one,m_self
-!!
-!! CHILDREN
-!!      add_matlu,copy_oper,destroy_oper,init_oper,loc_oper,prod_oper,sym_matlu
-!!
 !! SOURCE
 
  subroutine compute_levels(cryst_struc,energy_level,hdc,pawang,paw_dmft,nondiag)
@@ -1149,12 +1121,6 @@ end subroutine datafordmft
 !!  paw_dmft%psichi(nsppol,nkpt,mband,nspinor,dtset%natom,(2*maxlpawu+1))): projections <Psi|chi> are orthonormalized.
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_datafordmft,m_dmft
-!!
-!! CHILDREN
-!!      add_matlu,copy_oper,destroy_oper,init_oper,loc_oper,prod_oper,sym_matlu
 !!
 !! SOURCE
 
@@ -1342,12 +1308,6 @@ subroutine psichi_renormalization(cryst_struc,paw_dmft,pawang,opt)
 !!
 !! SIDE EFFECTS
 !!  change psichi: normalizepsichi it
-!!
-!! PARENTS
-!!      m_datafordmft
-!!
-!! CHILDREN
-!!      add_matlu,copy_oper,destroy_oper,init_oper,loc_oper,prod_oper,sym_matlu
 !!
 !! SOURCE
 
@@ -1732,12 +1692,6 @@ end subroutine psichi_renormalization
 !!  paw_dmft =  data for self-consistent DFT+DMFT calculations.
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_forctqmc
-!!
-!! CHILDREN
-!!      add_matlu,copy_oper,destroy_oper,init_oper,loc_oper,prod_oper,sym_matlu
 !!
 !! SOURCE
 

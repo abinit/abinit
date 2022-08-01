@@ -11,10 +11,6 @@
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -31,15 +27,15 @@ MODULE m_chi0tk
  use m_xmpi
  use m_xomp
  use m_sort
- use m_wfd,      only : wfdgw_t
 
  use defs_datatypes, only : ebands_t
  use m_gwdefs,   only : GW_TOL_DOCC, czero_gw, cone_gw, one_gw, em1params_t, j_gw
  use m_fstrings, only : sjoin, itoa
  use m_hide_blas,only : xgerc, xgemm, xherk, xher
  use m_crystal,  only : crystal_t
- use m_gsphere,  only : gsphere_t, gsph_gmg_idx, gsph_gmg_fftidx
- use m_bz_mesh,  only : littlegroup_t, kmesh_t, has_BZ_item
+ use m_gsphere,  only : gsphere_t
+ use m_bz_mesh,  only : littlegroup_t, kmesh_t
+ use m_wfd,      only : wfdgw_t
 
  implicit none
 
@@ -106,17 +102,10 @@ CONTAINS  !=====================================================================
 !! SIDE EFFECTS
 !!  chi0(npwe,npwe,nomega)=independent-particle susceptibility matrix in reciprocal space
 !!
-!! PARENTS
-!!      m_chi0
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 
 subroutine assemblychi0_sym(is_metallic,ik_bz,nspinor,Ep,Ltg_q,green_w,npwepG0,rhotwg,Gsph_epsG0,chi0)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -258,15 +247,9 @@ end subroutine assemblychi0_sym
 !! OUTPUT
 !!  rhotwg_I(npw)=Required linear combination of the oscillator matrix elements.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine mkrhotwg_sigma(ii,nspinor,npw,rhotwg,rhotwg_I)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -355,16 +338,9 @@ end subroutine mkrhotwg_sigma
 !!  It is possible to symmetrize chi0 without any the extra allocation for afm_mat.
 !!  More CPU demanding but safer in case of a large chi0 matrix. One might loop over G1 and G2 shells ...
 !!
-!! PARENTS
-!!      m_chi0
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine symmetrize_afm_chi0(Cryst,Gsph,Ltg_q,npwe,nomega,chi0,chi0_head,chi0_lwing,chi0_uwing)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -426,7 +402,7 @@ subroutine symmetrize_afm_chi0(Cryst,Gsph,Ltg_q,npwe,nomega,chi0,chi0_head,chi0_
  select case (shubnikov)
 
  case (4)
-   call wrtout(std_out,' Found Magnetic group Shubnikov type IV','COLL')
+   call wrtout(std_out,' Found Magnetic group Shubnikov type IV')
    ABI_CHECK(npairs==Cryst%nsym/2,'Wrong AFM space group')
 
    ABI_MALLOC(afm_mat,(npwe*(npwe+1)/2))
@@ -513,7 +489,7 @@ subroutine symmetrize_afm_chi0(Cryst,Gsph,Ltg_q,npwe,nomega,chi0,chi0_head,chi0_
    ABI_FREE(afm_mat)
 
  case (3)
-   call wrtout(std_out,' Found Magnetic group Shubnikov type III',"COLL")
+   call wrtout(std_out,' Found Magnetic group Shubnikov type III')
    ABI_ERROR('Shubnikov type III not implemented')
 
    ntest=0
@@ -636,11 +612,6 @@ end subroutine symmetrize_afm_chi0
 !!
 !!     where S is one of the symrec operation, R and \tau is the corresponding
 !!     operation in real space. The term involving the fractional translation is zero provided that b /= b'.
-!!
-!! PARENTS
-!!      m_chi0
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -895,11 +866,6 @@ end subroutine accumulate_chi0_q0
 !!  sf_uwing(npwe,mw_wl:my_wr,3)=Updated upper wing of the spectral function.
 !!  sf_head(3,3,my_wl:my_wr)=Updated head of the spectral function.
 !!
-!! PARENTS
-!!      m_chi0
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine accumulate_sfchi0_q0(ikbz,isym_kbz,itim_kbz,nspinor,symchi,npwepG0,npwe,Cryst,Ltg_q,Gsph_epsG0,&
@@ -1133,11 +1099,6 @@ end subroutine accumulate_sfchi0_q0
 !! NOTES
 !!  Umklapp processes are not yet implemented
 !!
-!! PARENTS
-!!      m_chi0
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine assemblychi0sf(ik_bz,symchi,Ltg_q,npwepG0,npwe,rhotwg,Gsph_epsG0,&
@@ -1326,11 +1287,6 @@ end subroutine assemblychi0sf
 !!  iomegal= index in the array omegasf of the last frequency < egwdiff
 !!  iomegar= index in the array omegasf of the first frequency > egwdiff
 !!
-!! PARENTS
-!!      m_chi0
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine approxdelta(nomegasf,omegasf,egwdiff_re,smear,iomegal,iomegar,wl,wr,spmeth)
@@ -1409,11 +1365,6 @@ end subroutine approxdelta
 !!
 !! OUTPUT
 !! kkweight(nsp,ne)=frequency dependent weights Eq A1 PRB 74, 035101 (2006) [[cite:Shishkin2006]]
-!!
-!! PARENTS
-!!      m_chi0tk
-!!
-!! CHILDREN
 !!
 !! SOURCE
 !!
@@ -1511,11 +1462,6 @@ end subroutine calc_kkweight
 !!  kkweight(nomegasf,nomega)=Frequency dependent weight for Hilber transform.
 !!  omegasf(nomegasf+1)=frequencies for imaginary part.
 !!
-!! PARENTS
-!!      m_chi0
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine setup_spectral(nomega,omega,nomegasf,omegasf,max_rest,min_rest,my_max_rest,my_min_rest,&
@@ -1546,11 +1492,11 @@ subroutine setup_spectral(nomega,omega,nomegasf,omegasf,max_rest,min_rest,my_max
  domegasf=(max_rest-min_rest+2*dd)/(nomegasf-1)
 
  write(msg,'(4a,f8.3,3a,i5,2a,f8.5,a)')ch10,&
-&  ' === Info on the real frequency mesh for spectral method === ',ch10,&
-&  '  maximum frequency = ',max_rest*Ha_eV,' [eV]',ch10,&
-&  '  nomegasf = ',nomegasf,ch10,&
-&  '  domegasf = ',domegasf*Ha_eV,' [eV]'
- call wrtout(std_out,msg,'COLL')
+  ' === Info on the real frequency mesh for spectral method === ',ch10,&
+  '  maximum frequency = ',max_rest*Ha_eV,' [eV]',ch10,&
+  '  nomegasf = ',nomegasf,ch10,&
+  '  domegasf = ',domegasf*Ha_eV,' [eV]'
+ call wrtout(std_out,msg)
 
  if (min_rest<tol6) then
    ABI_WARNING("System seems to be metallic")
@@ -1562,7 +1508,7 @@ subroutine setup_spectral(nomega,omega,nomegasf,omegasf,max_rest,min_rest,my_max
  SELECT CASE (method)
  CASE (0)
    ! Linear mesh.
-   call wrtout(std_out,' Using linear mesh for Im chi0','COLL')
+   call wrtout(std_out, ' Using linear mesh for Im chi0')
    do io=1,nomegasf
      omegasf(io)=(io-1)*domegasf+min_rest-dd
    end do
@@ -1571,7 +1517,7 @@ subroutine setup_spectral(nomega,omega,nomegasf,omegasf,max_rest,min_rest,my_max
    ! Non-homogeneous mesh densified around omega_plasma, do not improve results ===
    ! WARNING_ this part has to be checked since I modified omegasf
    write(msg,'(a,f7.4,a)')' Using mesh densified around ',omegaplasma*Ha_eV,' [eV] '
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(std_out, msg)
    wp=omegaplasma ; deltat=max_rest-min_rest
    nu_min=zero
    if (deltat<wp ) then
@@ -1624,7 +1570,7 @@ subroutine setup_spectral(nomega,omega,nomegasf,omegasf,max_rest,min_rest,my_max
  end do
 
  write(msg,'(a,2(1x,i0))')' my_wl and my_wr:',my_wl,my_wr
- call wrtout(std_out,msg,'PERS')
+ call wrtout(std_out, msg)
 
  if (my_wl==-999 .or. my_wr==-999) then
    write(msg,'(a,2i6)')' wrong value in my_wl and/or my_wr ',my_wl,my_wr
@@ -1653,11 +1599,6 @@ end subroutine setup_spectral
 !! my_max_rest,my_min_rest=max and min resonant transition energy treated by this processor
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_chi0
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1730,11 +1671,6 @@ end subroutine hilbert_transform
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_chi0
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine hilbert_transform_headwings(npwe,nomega,nomegasf,my_wl,my_wr,kkweight, &
@@ -1764,7 +1700,7 @@ subroutine hilbert_transform_headwings(npwe,nomega,nomegasf,my_wl,my_wr,kkweight
 #else
  write(msg,'(2a,i3,a)')ch10,' Performing Hilbert transform using method ',spmeth,' It might take some time...'
 #endif
- call wrtout(std_out,msg,'COLL',do_flush=.True.)
+ call wrtout(std_out,msg, do_flush=.True.)
 
  ! Hilbert transform of the head.
  do io=1,nomega
@@ -1829,11 +1765,6 @@ end subroutine hilbert_transform_headwings
 !!  chi0(npwe,npwe,nomega)= In input chi0 calculated so far,
 !!  In output the "delta part" of the completeness correction is added.
 !!
-!! PARENTS
-!!      m_chi0
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine completechi0_deltapart(ik_bz,qzero,symchi,npwe,npwvec,nomega,nspinor,&
@@ -1871,7 +1802,7 @@ subroutine completechi0_deltapart(ik_bz,qzero,symchi,npwe,npwvec,nomega,nspinor,
    ! MODULO wraps G1-G2 in the FFT box but the Fourier components are not periodic!
    do igp=igstart,npwe
      do ig=igstart,npwe
-       gmg_fft = gsph_gmg_fftidx(Gsph_FFT,ig,igp,ngfft)
+       gmg_fft = Gsph_FFT%gmg_fftidx(ig,igp,ngfft)
        if (gmg_fft==0) then
          outofbox_wfn=outofbox_wfn+1; CYCLE
        end if
@@ -1892,7 +1823,7 @@ subroutine completechi0_deltapart(ik_bz,qzero,symchi,npwe,npwvec,nomega,nspinor,
      do ig=igstart,npwe
 
       ! Get the index of G1-G2.
-      gmg_sph = gsph_gmg_idx(Gsph_FFT,ig,igp)
+      gmg_sph = Gsph_FFT%gmg_idx(ig,igp)
       if (gmg_sph==0) then
         outofbox_wfn=outofbox_wfn+1; CYCLE
       end if
@@ -1923,7 +1854,7 @@ subroutine completechi0_deltapart(ik_bz,qzero,symchi,npwe,npwvec,nomega,nspinor,
    if (enough<=50) then
      ABI_WARNING(sjoin(' Number of G1-G2 pairs outside the G-sphere for Wfns: ', itoa(outofbox_wfn)))
      if (enough==50) then
-       call wrtout(std_out,' ========== Stop writing Warnings ==========','COLL')
+       call wrtout(std_out,' ========== Stop writing Warnings ==========')
      end if
    end if
  end if
@@ -1946,11 +1877,6 @@ end subroutine completechi0_deltapart
 !! OUTPUT
 !!  (for writing routines, no output)
 !!  otherwise, should be described
-!!
-!! PARENTS
-!!      m_screening_driver
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1995,7 +1921,7 @@ subroutine output_chi0sumrule(qeq0,iq,npwe,omegaplasma,chi0sumrule,epsm1_w0,vc_s
    write(msg,'(1x,a,i4,a,f10.2,2x,a)')&
     ' Average fulfillment of the sum rule on Im[epsilon] for q-point ',&
     iq,' :',average/norm/(0.5_dp*omegaplasma**2*pi)*100.0_dp,'[%]'
-   call wrtout(std_out,msg,'COLL'); call wrtout(ab_out, msg,'COLL')
+   call wrtout([std_out, ab_out], msg)
  end if
 
 end subroutine output_chi0sumrule
@@ -2030,11 +1956,6 @@ end subroutine output_chi0sumrule
 !!  chi0sumrule(npwe)= In input the sum rule calculated so far,
 !!  In output the contribution of this transition is accounted for, and, eventually, symmetrized.
 !!  using the symmetry operations of the little group of the external q.
-!!
-!! PARENTS
-!!      m_chi0
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2126,11 +2047,6 @@ end subroutine accumulate_chi0sumrule
 !! my_max_rest,my_min_rest=Maximum and minimum resonant (posite) transition energy.
 !! max_rest,min_rest=Maximun and minimum resonant (posite) transition energy treated by this node.
 !!
-!! PARENTS
-!!      m_chi0
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine make_transitions(Wfd,chi0alg,nbnds,nbvw,nsppol,symchi,timrev,TOL_DELTA_OCC,&
@@ -2191,13 +2107,13 @@ subroutine make_transitions(Wfd,chi0alg,nbnds,nbvw,nsppol,symchi,timrev,TOL_DELT
      end if
 
      ! Find kp=k-q-G0 and also G0 where kp is in the first BZ
-     if (.not.has_BZ_item(Kmesh,kmq,ikmq_bz,g0)) then ! Stop as the weight 1.0/nkbz is wrong.
+     if (.not. kmesh%has_BZ_item(kmq,ikmq_bz,g0)) then ! Stop as the weight 1.0/nkbz is wrong.
        write(msg,'(4a,2(2a,3f12.6),2a)')ch10,&
-&        ' make_transitions : ERROR - ',ch10,&
-&        ' kp  = k-q-G0 not found in the BZ mesh',ch10,&
-&        ' k   = ',(Kmesh%bz(ii,ik_bz),ii=1,3),ch10,&
-&        ' k-q = ',(kmq(ii),ii=1,3),ch10,&
-&        ' weight in cchi0/cchi0q is wrong '
+         ' make_transitions : ERROR - ',ch10,&
+         ' kp  = k-q-G0 not found in the BZ mesh',ch10,&
+         ' k   = ',(Kmesh%bz(ii,ik_bz),ii=1,3),ch10,&
+         ' k-q = ',(kmq(ii),ii=1,3),ch10,&
+         ' weight in cchi0/cchi0q is wrong '
        ABI_ERROR(msg)
      end if
 
@@ -2245,17 +2161,17 @@ subroutine make_transitions(Wfd,chi0alg,nbnds,nbvw,nsppol,symchi,timrev,TOL_DELT
  end do !iloop
 
  write(msg,'(2a,i9,2a,f8.3,3a,f8.3,a)')ch10,&
-&  ' Total number of transitions = ',ntrans,ch10,&
-&  ' min resonant     = ',min_rest*Ha_eV,' [eV] ',ch10,&
-&  ' Max resonant     = ',max_rest*Ha_eV,' [eV] '
- call wrtout(std_out,msg,'COLL')
+  ' Total number of transitions = ',ntrans,ch10,&
+  ' min resonant     = ',min_rest*Ha_eV,' [eV] ',ch10,&
+  ' Max resonant     = ',max_rest*Ha_eV,' [eV] '
+ call wrtout(std_out, msg)
 
  if (Wfd%nproc/=1) then
    write(msg,'(2a,i9,2a,f8.3,3a,f8.3,a)')ch10,&
-&    ' Total number of transitions for this processor= ',my_ntrans,ch10,&
-&    ' min resonant     = ',my_min_rest*Ha_eV,' [eV] ',ch10,&
-&    ' Max resonant     = ',my_max_rest*Ha_eV,' [eV] '
-   call wrtout(std_out,msg,'PERS')
+    ' Total number of transitions for this processor= ',my_ntrans,ch10,&
+    ' min resonant     = ',my_min_rest*Ha_eV,' [eV] ',ch10,&
+    ' Max resonant     = ',my_max_rest*Ha_eV,' [eV] '
+   call wrtout(std_out, msg)
  end if
 
  DBG_EXIT("COLL")
@@ -2274,11 +2190,6 @@ end subroutine make_transitions
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_chi0
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

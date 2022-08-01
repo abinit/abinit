@@ -8,10 +8,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! TODO
 !!  Move it to m_kpts
 !!
@@ -91,13 +87,6 @@ contains
 !!
 !! TODO
 !!  Bad scaling wrt nkbz. Should try to MPI parallelize or implement more efficient algorithm
-!!
-!! PARENTS
-!!      m_bz_mesh,m_dfpt_looppert,m_dfpt_lw,m_dtset,m_elphon,m_harmonic_thermo
-!!      m_ifc,m_kpts,m_tdep_psij,m_unittests
-!!
-!! CHILDREN
-!!      krank%free
 !!
 !! SOURCE
 
@@ -430,12 +419,6 @@ end subroutine symkpt
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_kpts,m_lgroup,m_unittests
-!!
-!! CHILDREN
-!!      krank%free
-!!
 !! SOURCE
 
 subroutine symkpt_new(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev,bz2ibz_smap, comm)
@@ -681,12 +664,6 @@ end subroutine symkpt_new
 !! nkirred = number of irreducible k needed from list 1 (in)
 !! bz2ibz_smap = mapping of indices in list 2 with their irreducible origin in list 1,
 !!   symop and timrev needed to transform them
-!!
-!! PARENTS
-!!      m_wfk
-!!
-!! CHILDREN
-!!      krank%free
 !!
 !! SOURCE
 

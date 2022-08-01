@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -66,10 +62,6 @@ contains
 !!  tdks <type(tdks_type)> = the tdks object to initialize
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 subroutine rttddft_propagate_ele(dtset, istep, mpi_enreg, psps, tdks)
@@ -131,11 +123,6 @@ end subroutine rttddft_propagate_ele
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
-!!  m_rttddft_driver/rttddft
-!!
-!! CHILDREN
 !!
 !! SOURCE
 !subroutine rttddft_propagate_nuc(dtset, istep, mpi_enreg, psps, tdks)

@@ -125,12 +125,6 @@ CONTAINS  !=====================================================================
 !!  vkbr<vkbr_t>=Structure containing arrays needed for calculating <\psi_1|[Vnl,r]\psi_2>.
 !!    Completely initialized in output.
 !!
-!! PARENTS
-!!      m_chi0,m_ddk,m_wfd_optic
-!!
-!! CHILDREN
-!!      ylmcd
-!!
 !! SOURCE
 
 subroutine vkbr_init(vkbr,cryst,psps,inclvkb,istwfk,npw,kpoint,gvec)
@@ -208,12 +202,6 @@ end subroutine vkbr_init
 !! FUNCTION
 !!  Free all memory allocated in a structure of type vkbr_t
 !!
-!! PARENTS
-!!      m_vkbr
-!!
-!! CHILDREN
-!!      ylmcd
-!!
 !! SOURCE
 
 subroutine vkbr_free_0D(vkbr)
@@ -239,11 +227,6 @@ end subroutine vkbr_free_0D
 !!
 !! FUNCTION
 !!  Free all memory allocated in a structure of type vkbr_t
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      ylmcd
 !!
 !! SOURCE
 
@@ -300,12 +283,6 @@ end subroutine vkbr_free_1D
 !!
 !! TODO
 !!  *) Spinorial case is not implemented.
-!!
-!! PARENTS
-!!      m_vkbr
-!!
-!! CHILDREN
-!!      ylmcd
 !!
 !! SOURCE
 
@@ -406,12 +383,6 @@ end subroutine add_vnlr_commutator
 !!
 !! TODO
 !!  SOC not implemented.
-!!
-!! PARENTS
-!!      m_iowf,m_vkbr
-!!
-!! CHILDREN
-!!      ylmcd
 !!
 !! SOURCE
 
@@ -562,10 +533,6 @@ end subroutine calc_vkb
 !! TODO
 !!  *) Spinorial case is not implemented.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 function nc_ihr_comm(vkbr,cryst,psps,npw,nspinor,istwfk,inclvkb,kpoint,ug1,ug2,gvec) result(ihr_comm)
@@ -661,12 +628,6 @@ end function nc_ihr_comm
 !!  Subroutine taken from the EXC code
 !!  All the calculations are done in double precision, but the output arrays fnl and fnld
 !!  are in single precision, should use double precision after modification of the other subroutines
-!!
-!! PARENTS
-!!      m_vkbr
-!!
-!! CHILDREN
-!!      ylmcd
 !!
 !! SOURCE
 
