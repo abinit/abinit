@@ -181,7 +181,7 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3e_pert1,d3e_pert2,d3etot,d3etot
 & i1pert,i2pert,i3pert,kg,kxc,mband,mgfft,mkmem_rbz,mk1mem,mpert,mpi_enreg,mpsang,mpw,natom,nattyp,&
 & n1dq,n2dq,nfft,ngfft,nkpt,nkxc,&
 & nspden,nspinor,nsppol,npwarr,nylmgr,occ,pawfgr,ph1d,psps,rhog,rho1g1,rhor,rho1r1,rho2r1,rmet,rprimd,samepert,&
-& ucvol,useylmgr,vpsp1_i1pertdq,vpsp1_i1pertdqdq,vpsp1_i1pertdq_geom,vpsp1_i2pertdq,ddk_f,d2_dkdk_f,xccc3d1,xred,ylm,ylmgr)
+& ucvol,useylmgr,vpsp1_i1pertdq,vpsp1_i1pertdqdq,vpsp1_i1pertdq_geom,vpsp1_i2pertdq,ddk_f,d2_dkdk_f,d2_dkdk_f2,xccc3d1,xred,ylm,ylmgr)
 
 !Arguments ------------------------------------
 !scalars
@@ -196,7 +196,7 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3e_pert1,d3e_pert2,d3etot,d3etot
  type(pseudopotential_type),intent(in) :: psps
  type(gs_hamiltonian_type),intent(inout) :: gs_hamkq
  type(pawfgr_type),intent(in) :: pawfgr
- type(wfk_t),intent(inout) :: ddk_f,d2_dkdk_f
+ type(wfk_t),intent(inout) :: ddk_f,d2_dkdk_f, d2_dkdk_f2
 
 !arrays
  integer,intent(in) :: atindx(natom),kg(3,mpw*mkmem_rbz),nattyp(psps%ntypat),ngfft(18),npwarr(nkpt)
@@ -294,7 +294,7 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3e_pert1,d3e_pert2,d3etot,d3etot
  call lw_elecstic(cplex,d3etot_telec,gmet,gs_hamkq%gprimd,gsqcut,&
 & i1dir,i2dir,i3dir,i1pert,i2pert,i3pert,&
 & kxc,mpi_enreg,nfft,ngfft,nkxc,nspden,rho1g1,rho1r1,rho2r1,ucvol)
-     
+ 
 !Loop over spins
  bandtot = 0
  bd2tot = 0
@@ -352,9 +352,8 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3e_pert1,d3e_pert2,d3etot,d3etot
      eig1_k(:)=eigen1(1+bd2tot:2*nband_k**2+bd2tot)
      eig2_k(:)=eigen2(1+bd2tot:2*nband_k**2+bd2tot)
 
-     
      !Compute the stationary terms of d3etot depending on response functions
-     call dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,d3etot_t1_k,d3etot_t2_k,d3etot_t3_k,& 
+     call dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,d2_dkdk_f2,d3etot_t1_k,d3etot_t2_k,d3etot_t3_k,& 
      & d3etot_t4_k,d3etot_t5_k,dimffnl,dtset,eig1_k,eig2_k,ffnl_k,gs_hamkq,gsqcut,icg,&
      & i1dir,i2dir,i3dir,i1pert,i2pert,i3pert,ikpt,isppol,istwf_k,&
      & kg_k,kpt,kxc,mkmem_rbz,mpi_enreg,mpw,natom,nattyp,nband_k,&
@@ -455,6 +454,7 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3e_pert1,d3e_pert2,d3etot,d3etot
  d3etot_t4(:,:)=two*d3etot_t4(:,:)
  d3etot_t5(:,:)=two*d3etot_t5(:,:)
  e3tot(:)=d3etot_t1(:)+d3etot_t2(:)+d3etot_t3(:)+d3etot_telec(:)
+
 
 !Before printing, set small contributions to zero
  !Real parts
