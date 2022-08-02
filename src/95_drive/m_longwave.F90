@@ -189,6 +189,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 
  DBG_ENTER("COLL")
 
+
 !Not valid for PAW
  if (psps%usepaw==1) then
    msg='This routine cannot be used for PAW!'
