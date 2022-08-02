@@ -335,6 +335,7 @@ type, public :: dataset_type
  integer :: lotf_version
  integer :: lw_flexo
  integer :: lw_qdrpl
+ integer :: lw_natopt
 !M
  integer :: magconon
  integer :: maxnsym
@@ -1675,6 +1676,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%lotf_version       = dtin%lotf_version
 #endif
  dtout%lw_flexo           = dtin%lw_flexo
+ dtout%lw_natopt          = dtin%lw_natopt
  dtout%lw_qdrpl           = dtin%lw_qdrpl
  dtout%magconon           = dtin%magconon
  dtout%maxnsym            = dtin%maxnsym
@@ -3360,7 +3362,7 @@ subroutine chkvars(string)
 ! list_vars=trim(list_vars)//' latt_taup latt_compressibility latt_mask'
  list_vars=trim(list_vars)//' ldaminushalf lexexch localrdwf lpawu'
  list_vars=trim(list_vars)//' lotf_classic lotf_nitex lotf_nneigx lotf_version'
- list_vars=trim(list_vars)//' lw_flexo lw_qdrpl'
+ list_vars=trim(list_vars)//' lw_flexo lw_natopt lw_qdrpl'
  list_vars=trim(list_vars)//' lwf_constraint'
  list_vars=trim(list_vars)//' lwf_dt lwf_dynamics lwf_init_state lwf_init_hist_fname'
  list_vars=trim(list_vars)//' lwf_mc_avg_amp'

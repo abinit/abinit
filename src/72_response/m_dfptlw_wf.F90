@@ -141,7 +141,7 @@ contains
 !!
 !! SOURCE
 
-subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,&
+subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,d2_dkdk_f2,&
      & d3etot_t1_k,d3etot_t2_k,d3etot_t3_k,&
      & d3etot_t4_k,d3etot_t5_k,dimffnl,dtset,eig1_k,eig2_k,ffnl_k,gs_hamkq,gsqcut,icg,&
      & i1dir,i2dir,i3dir,i1pert,i2pert,i3pert,ikpt,isppol,istwf_k,&
@@ -168,7 +168,7 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,&
  type(gs_hamiltonian_type),intent(inout) :: gs_hamkq
  type(MPI_type),intent(in) :: mpi_enreg
  type(pseudopotential_type),intent(in) :: psps
- type(wfk_t),intent(inout) :: ddk_f,d2_dkdk_f
+ type(wfk_t),intent(inout) :: ddk_f,d2_dkdk_f, d2_dkdk_f2
  type(pawfgr_type),intent(in) :: pawfgr
 
 !arrays
@@ -215,7 +215,6 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,&
  real(dp),allocatable :: dum_vlocal(:,:,:,:),vlocal1(:,:,:,:),dum_vpsp(:)
  real(dp),allocatable :: vpsp1(:)
  type(pawcprj_type),allocatable :: dum_cwaveprj(:,:)
-
  
 ! *************************************************************************
 
@@ -337,7 +336,7 @@ if (.not.samepert) then
 
   !Specific definitions
   d3etot_t2_k=zero
-  
+
   !LOOP OVER BANDS
   do iband=1,nband_k
   
@@ -449,7 +448,7 @@ if (.not.samepert) then
      ABI_MALLOC(gvnl1dqc,(2,size_wf))
    end if
    if (i2pert<=natom) fac=-one
-   if (i2pert==natom+2) fac=half
+   if (i2pert==natom+2) fac=one
    if (i2pert==natom+3.or.i2pert==natom+4) fac=-half
    if (i2pert<=natom) then
      nylmgrtmp=3
@@ -514,7 +513,8 @@ if (.not.samepert) then
   
        !Perturbation-specific part
        if (i2pert==natom+2) then
-         call d2_dkdk_f%read_bks(iband,ikpt,isppol,xmpio_single,cg_bks=gv1c)
+         ! Read from d2_dkdk_f2
+         call d2_dkdk_f2%read_bks(iband,ikpt,isppol,xmpio_single,cg_bks=gv1c)
        else
          cwave0i(:,:)= cg(:,1+offset_cgi:size_wf+offset_cgi)
   
@@ -586,7 +586,7 @@ if (.not.samepert) then
    ABI_MALLOC(gvnl1dqc,(2,size_wf))
  end if
  if (i1pert<=natom) fac=-one
- if (i1pert==natom+2) fac=half
+ if (i1pert==natom+2) fac=one
  if (i1pert==natom+3.or.i1pert==natom+4) fac=-half
  if (i1pert<=natom) then
    nylmgrtmp=3

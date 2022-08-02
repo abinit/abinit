@@ -1260,7 +1260,9 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    else if (dtset%prepalw==3) then
      rfpert_lw(:,1:natom+2,:,1:natom,:,natom+8)=1
    end if
+
    call sylwtens(indsym,natom+8,natom,dtset%nsym,rfpert_lw,symrec,dtset%symrel,symrel_cart)
+
    write(message,'(7a)') ch10, ' The following reducible perturbations will also be ', ch10, &
                              & ' explicitly calculated for a correct subsequent ', ch10, &
                              & ' execution of the longwave driver:', ch10

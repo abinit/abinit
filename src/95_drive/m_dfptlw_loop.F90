@@ -215,7 +215,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
  character(len=fnlen) :: fiden1i,fiwf1i,fiwf2i,fiwf3i,fiwfddk,fiwfdkdk
  type(gs_hamiltonian_type) :: gs_hamkq
  type(wffile_type) :: wff1,wff2,wff3,wfft1,wfft2,wfft3
- type(wfk_t) :: ddk_f,d2_dkdk_f
+ type(wfk_t) :: ddk_f,d2_dkdk_f,d2_dkdk_f2
  type(wvl_data) :: wvl
  type(hdr_type) :: hdr_den
 !arrays
@@ -561,12 +561,13 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
                    call wfk_open_read(ddk_f,fiwfddk,1,dtset%iomode,dtfil%unddk,mpi_enreg%comm_cell)
 
                    !Prepare d2_dkdk wf file
+                   !For i1pert
                    if (i1pert==natom+2) then
                      call rf2_getidir(i1dir,i3dir,idir_dkdk)
-                     if (idir_dkdk>6) idir_dkdk=idir_dkdk-3
+                     !if (idir_dkdk>6) idir_dkdk=idir_dkdk-3
                      dkdk_index=idir_dkdk+(dtset%natom+6)*3
                      call appdig(dkdk_index,dtfil%fnamewffdkdk,fiwfdkdk)
-                     !Check that d2_ddk file exists and open it
+                     !Check that d2_dkdk file exists and open it
                      if (.not. file_exists(fiwfdkdk)) then
                        ! Trick needed to run Abinit test suite in netcdf mode. 
                        if (file_exists(nctk_ncify(fiwfdkdk))) then             
@@ -586,6 +587,33 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
 
                    end if
 
+                   !Prepare d2_dkdk wf file
+                   !For i2pert
+                   if (i2pert==natom+2) then
+                     call rf2_getidir(i2dir,i3dir,idir_dkdk)
+                     !if (idir_dkdk>6) idir_dkdk=idir_dkdk-3
+                     dkdk_index=idir_dkdk+(dtset%natom+6)*3
+                     call appdig(dkdk_index,dtfil%fnamewffdkdk,fiwfdkdk)
+                     !Check that d2_dkdk file exists and open it
+                     if (.not. file_exists(fiwfdkdk)) then
+                       ! Trick needed to run Abinit test suite in netcdf mode. 
+                       if (file_exists(nctk_ncify(fiwfdkdk))) then
+                         write(message,"(3a)")"- File: ",trim(fiwfdkdk),&
+                         " does not exist but found netcdf file with similar name."
+                         call wrtout(std_out,message,'COLL')
+                         fiwfdkdk = nctk_ncify(fiwfdkdk)
+                       end if
+                       if (.not. file_exists(fiwfdkdk)) then
+                         ABI_ERROR('Missing file: '//TRIM(fiwfdkdk))
+                       end if
+                     end if
+                     write(message,'(2a)')'-dfptlw_loop : read the d2_dkdk wavefunctions from file: ',trim(fiwfdkdk)
+                     call wrtout(std_out,message,'COLL')
+                     !call wrtout(ab_out,message,'COLL') 
+                     call wfk_open_read(d2_dkdk_f2,fiwfdkdk,1,dtset%iomode,dtfil%unddk+2,mpi_enreg%comm_cell)
+
+                   end if
+
                    !Perform the longwave DFPT part of the 3dte calculation
                    call dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3e_pert1,d3e_pert2,d3etot,d3etot_t4,d3etot_t5,d3etot_tgeom,dimffnl,dtfil,dtset, &
                    & eigen1,eigen2,ffnl,gmet,gs_hamkq,gsqcut,i1dir,&
@@ -593,13 +621,16 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
                    & mpsang,mpw,natom,nattyp,n1dq,n2dq,nfftf,ngfftf,nkpt,nkxc,nspden,nspinor,nsppol,npwarr,nylmgr,occ,&
                    & pawfgr,ph1d,psps,rhog,rho1g1,rhor,rho1r1,rho2r1,rmet,rprimd,samepert,ucvol,useylmgr,&
                    & vpsp1_i1pertdq,vpsp1_i1pertdqdq,vpsp1_i1pertdq_geom,vpsp1_i2pertdq,&
-                   & ddk_f,d2_dkdk_f,xccc3d1,xred,ylm,ylmgr)
+                   & ddk_f,d2_dkdk_f,d2_dkdk_f2,xccc3d1,xred,ylm,ylmgr)
 
                    !close ddk file
                    call ddk_f%close()
 
-                   !close d2_dkdk file
+                   !close d2_dkdk file (i1pert)
                    if (i1pert==natom+2) call d2_dkdk_f%close()
+
+                   ! Close d2_dkdk file (i2pert)
+                   if (i2pert==natom+2) call d2_dkdk_f2%close()
 
                    !Save the type-I terms
                    if (i2pert==natom+3.or.i2pert==natom+4) then

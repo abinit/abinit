@@ -1638,6 +1638,13 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
     call chkint_eq(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_LONGWAVE/),iout)
   end if
 
+! lw_natopt
+  call chkint_eq(0,0,cond_string,cond_values,ierr,'lw_natopt',dt%lw_natopt,2,(/0,1/),iout)
+  if(dt%lw_natopt/=0)then
+    cond_string(1)='lw_natopt' ; cond_values(1)=dt%lw_natopt
+    call chkint_eq(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_LONGWAVE/),iout)
+  end if
+
 !  magconon
    call chkint_eq(0,0,cond_string,cond_values,ierr,'magconon',dt%magconon,3,(/0,1,2/),iout)
 !!  impose nspden 4 for the moment and spinors
@@ -2417,7 +2424,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    end if
 
    !dkdk and dkde non-linear response only for occopt=1 (insulators)
-   if (dt%rf2_dkdk==1) then
+   if (dt%rf2_dkdk==1 .or. dt%rf2_dkdk==2 .or. dt%rf2_dkdk==3) then
      cond_string(1)='rf2_dkdk' ; cond_values(1)=dt%rf2_dkdk
      call chkint_eq(1,1,cond_string,cond_values,ierr,'occopt',dt%occopt,1,(/1/),iout)
    end if
