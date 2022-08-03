@@ -35,7 +35,10 @@ database that is subsequently used by ANADDB either to compute and print the dif
 to the flexoelectric tensor, or to consider quadrupolar fields within the Fourier interpolation procedure of 
 the dynamical matrix [[cite:Royo2020]].
 
-The underlying theory of the long-wave DFPT approach [[cite:Royo2019]] has been developed for its application on 
+The calculation of another spatial-dispersion tensor has been recently implemented. This is the natural optical activity 
+tensor, which is obtained from the third-order energy derivative with respect to two electric fields and to the wavevector **q**.
+
+The underlying theory of the long-wave DFPT approach [[cite:Royo2019]] [[cite:Royo2022]] has been developed for its application on 
 time-reversal symmetric insulating crystals only. Therefore, the usage of the longwave driver is restricted to materials
 of this kind. An extension of the theoretical framework and the ABINIT implementation to magnetic insulators 
 and/or metals will be hopefully pursued in the future. 
@@ -44,10 +47,10 @@ Regarding the flexoelectric tensor that ABINIT provides, a few remarks are in or
 this is the **bulk** flexoelectric tensor and that a surface counterpart is still missing in order to obtain 
 the total flexoelectric tensor of a system.[[cite:Stengel2016]] Even though the implementation can be applied
 to slabs or low-dimensional systems (such as 2D materials), via a supercell approach, the outcome of such a 
-calculation will not directly 
-produce the total (i.e., bulk+surface) flexoelectric tensor, neither the surface contribution can be readily estimated 
-from it. How to obtain the total flexoelectric tensor within the current capabilities of ABINIT will be the 
-subject of a future publication. 
+calculation will not directly produce the total (i.e., bulk+surface) flexoelectric response. The procedure to 
+incorporate surface effects from a set of quantities that are available as byproducs of the longwave calculation
+has been described in Ref. [[cite:Springolo2021]] for the spefic case of a flexural deformation of a 2D monolayer.
+The same approach can be directly applied to obtain the total flexoelectric response of a bent material slab. 
 
 The interested user must be likewise aware of the physical ambiguities existing in the definition of the bulk 
 flexoelectric tensor which inherently affect the longwave driver. One of them precludes its usage to obtain the 
@@ -66,7 +69,7 @@ The following steps are required to perform a longwave DFPT calculation of the b
 (see, e.g., tests [[test:lw_1]] to [[test:lw_3]]):
 
 * Perform ground-state calculation.
-* Perform ddk and d2_dkdk response function calculations.
+* Perform ddk and d2_dkdk ([[rf2_dkdk]]=3 is mandatory) response function calculations.
 * Perform response function calculations at **q** =Γ to atomic displacements, electric field and strain perturbations, 
 including the option [[prepalw]]=1.
 * Perform a longwave DFTP calculation of third-order energy derivatives ([[optdriver]]=10 and [[lw_flexo]]=1).
@@ -77,7 +80,7 @@ The following steps are required to perform a phonon dispersion calculation incl
 nonanalytical part of the dynamical matrix (see, e.g., tests [[test:lw_4]] to [[test:lw_6]]):
 
 * Perform ground-state calculation.
-* Perform ddk and d2_dkdk response function calculations.
+* Perform ddk and d2_dkdk ([[rf2_dkdk]]=3 is mandatory) response function calculations.
 * Perform response function calculations at **q** =Γ to atomic displacements and electric field, 
 including the option [[prepalw]]=1.
 * Perform a longwave DFTP calculation of third-order energy derivatives ([[optdriver]]=10 and [[lw_qdrpl]]=1).
