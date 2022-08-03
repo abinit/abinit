@@ -417,7 +417,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
 
    ! define zero factor instead of exiting the loop: we need to compute dsusdu
    if (antisymmetric .and. rf2%ndir==1) factor = zero
-   if (total .and. rf2%ndir==2 .and. kdir1==2) cycle !AZ_TRY!!!! !factor = zero
+   if (total .and. rf2%ndir==2 .and. kdir1==2) factor = zero
 
    ! define factor for antisymmetric dkdk case
    if (rf2%ndir==2 .and. kdir1==2 .and. antisymmetric) factor = -one
