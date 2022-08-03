@@ -287,8 +287,10 @@ AC_DEFUN([_SD_NETCDF_CHECK_USE], [
           MPI_Info info = MPI_INFO_NULL;
 
           int ierr, ncid;
-          ierr = nc_create_par("conftest.nc", NC_NETCDF4, comm, info, &ncid);
+          ierr = nc_create_par("conftest.nc", NC_MPIIO | NC_NETCDF4, comm, info, &ncid);
           printf("  nc_create_par : ierr= %d\n",ierr);
+          ierr = nc_close(ncid);
+          printf("  nc_close : ierr= %d\n",ierr);
           MPI_Finalize();
 
           if(ierr != 0) return 1;
