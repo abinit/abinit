@@ -297,7 +297,7 @@ AC_DEFUN([_SD_NETCDF_FORTRAN_CHECK_USE], [
           use netcdf
 
           integer :: process_Rank, size_Of_Cluster, ierror
-          integer :: ierr, ncid
+          integer :: ierr, ierr2, ncid
           size_Of_Cluster = 1
 
           call MPI_INIT(ierror)
@@ -308,7 +308,11 @@ AC_DEFUN([_SD_NETCDF_FORTRAN_CHECK_USE], [
                               ncid, comm=MPI_COMM_WORLD, info=MPI_INFO_NULL)
 
           ! DEBUG
-          !write(*,*) "JMB netcdf-f nfcreate -> ierr= ", ierr
+          write(*,*) "JMB netcdf-f nfcreate -> ierr= ", ierr
+
+          ierr2 = nf90_close(ncid)
+          ! DEBUG
+          write(*,*) "JMB netcdf-f nfclose -> ierr2= ", ierr2
 
           call MPI_FINALIZE(ierror)
 
