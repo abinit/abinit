@@ -334,13 +334,13 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 !For rf2 perturbation :
  if(ipert==natom+10.or.ipert==natom+11) then
    !AZ_init*********************************************************
-   if (rf2_dkdk/=2 .and. idir/=1 .and. idir/=2 .and. idir/=3) then
+   if (dtset%rf2_dkdk/=2 .and. idir/=1 .and. idir/=2 .and. idir/=3) then
    !AZ_fin**********************************************************
      call rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_hamkq,ibg,icg,idir,ikpt,ipert,isppol,mkmem,&
      mpi_enreg,mpw,nband_k,nsppol,rf_hamkq,rf_hamk_dir2,occ_k,rocceig,ddk_f)
    !AZ_try*************************************
    else
-     rf2 = zero
+      rf2%RHS_Stern = zero
    !AZ_fin*************************************
    end if
    !AZ_fin*************************************
