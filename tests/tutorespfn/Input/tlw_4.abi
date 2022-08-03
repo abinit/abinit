@@ -23,7 +23,7 @@ tolwfr2   1.0d-20
 kptopt3   2
 getddk3   2
 iscf3    -3
-rf2_dkdk3 1
+rf2_dkdk3 3
 tolwfr3   1.0d-20
 
 #Set 4 : Response function calculation of Q=0 phonons and electric field
