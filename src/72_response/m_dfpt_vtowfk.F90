@@ -334,15 +334,15 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 !For rf2 perturbation :
  if(ipert==natom+10.or.ipert==natom+11) then
    !AZ_init*************************************************************
-   if (dtset%rf2_dkdk==2 .and. (idir==1 .or. idir==2 .or. idir==3)) then
+   !if (dtset%rf2_dkdk==2 .and. (idir==1 .or. idir==2 .or. idir==3)) then
    !AZ_fin**************************************************************
-     rf2%RHS_Stern = zero
+     !rf2%RHS_Stern = zero
    !AZ_try*************************************
-   else
+   !else
      call rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_hamkq,ibg,icg,idir,ikpt,ipert,isppol,mkmem,&
      mpi_enreg,mpw,nband_k,nsppol,rf_hamkq,rf_hamk_dir2,occ_k,rocceig,ddk_f)
    !AZ_fin*************************************
-   end if
+   !end if
    !AZ_fin*************************************
  end if
 
@@ -449,14 +449,21 @@ unit_me = 6
        bands_treated_now = 0
        bands_treated_now(iband) = 1
        call xmpi_sum(bands_treated_now,mpi_enreg%comm_band,ierr)
-
-       call dfpt_cgwf(iband,iband_me,band_procs,bands_treated_now,dtset%berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,&
-&       rf2,dcwavef,&
-&       eig0_k,eig0_kq,eig1_k,gh0c1,gh1c_n,grad_berry,gsc,gscq,gs_hamkq,gvnlxc,gvnlx1,icgq,&
-&       idir,ipert,igscq,mcgq,mgscq,mpi_enreg,mpw1,natom,nband_k,nband_me,dtset%nbdbuf,dtset%nline,&
-&       npw_k,npw1_k,nspinor,opt_gvnlx1,prtvol,quit,resid,rf_hamkq,dtset%dfpt_sciss,dtset%tolrde,&
-&       dtset%tolwfr,usedcwavef,dtset%wfoptalg,nlines_done)
-       resid_k(iband)=resid
+       
+       !AZ_ini**************************************************************************************
+       if (dtset%rf2_dkdk==2 .and. (idir==1 .or. idir==2 .or. idir==3)) then
+         eig0_k = zero 
+         resid_k(iband) = zero
+       else
+         call dfpt_cgwf(iband,iband_me,band_procs,bands_treated_now,dtset%berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,&
+ &       rf2,dcwavef,&
+ &       eig0_k,eig0_kq,eig1_k,gh0c1,gh1c_n,grad_berry,gsc,gscq,gs_hamkq,gvnlxc,gvnlx1,icgq,&
+ &       idir,ipert,igscq,mcgq,mgscq,mpi_enreg,mpw1,natom,nband_k,nband_me,dtset%nbdbuf,dtset%nline,&
+ &       npw_k,npw1_k,nspinor,opt_gvnlx1,prtvol,quit,resid,rf_hamkq,dtset%dfpt_sciss,dtset%tolrde,&
+ &       dtset%tolwfr,usedcwavef,dtset%wfoptalg,nlines_done)
+         resid_k(iband)=resid
+       end if
+       !AZ_fin**************************************************************************************
      else
        resid_k(iband)=zero
      end if
