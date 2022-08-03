@@ -23,7 +23,7 @@ rfdir2   1 1 1
 #*************************************************************
 getddk3   2
 iscf3    -3
-rf2_dkdk3 1
+rf2_dkdk3 3
 tolwfr3   1.0d-4
 
 #Set 4 : Response function calculation of Q=0 phonons and electric field
@@ -34,7 +34,7 @@ rfphon4   1
 rfatpol4  1 2
 rfdir4   1 1 1
 tolvrs4   1.0d-3
-prepalw4  1
+prepalw4  2
 
 #Set 5 : Dynamic Quadrupoles calculation
 #***************************************
@@ -100,7 +100,7 @@ diemac 9.0
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t120.abo, tolnlines= 12, tolabs=  3.e-04, tolrel=  5.00e-04, fld_options= -easy
+#%%   t130.abo, tolnlines= 12, tolabs=  3.e-04, tolrel=  5.00e-04, fld_options= -easy
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
