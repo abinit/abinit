@@ -82,7 +82,6 @@ inp_files = [
     "t65.abi",
     "t66.abi",
     "t67.abi",
-    "t70.abi",  # Longwave : test quadrupole calculation with all negative KB energies As PSP
 
     # More ground state
     "t71.abi",  # test cprj_update_lvl and nloc_alg options, istwfk=1
@@ -136,5 +135,5 @@ inp_files = [
     "t111.abi",
 
     # More on DFPT
-    "t120.abi", # test quadrupole calculation with all negative KB energies As PSP
+    "t130.abi", # test quadrupole calculation with all negative KB energies As PSP
 ]
