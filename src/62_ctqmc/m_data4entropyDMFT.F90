@@ -13,12 +13,6 @@
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -98,11 +92,6 @@ contains
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_gstate
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -198,11 +187,6 @@ end subroutine data4entropyDMFT_init
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_forctqmc
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine data4entropyDMFT_setDocc(this,iatom,Docc,Nocc)
@@ -289,11 +273,6 @@ end subroutine data4entropyDMFT_setDocc
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_dmft
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine data4entropyDMFT_setHu(this,itypat,hu)
@@ -350,12 +329,6 @@ end subroutine data4entropyDMFT_setHu
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 subroutine data4entropyDMFT_setDc(this,dc)
@@ -403,11 +376,6 @@ end subroutine data4entropyDMFT_setDc
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_gstate
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

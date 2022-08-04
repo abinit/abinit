@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -107,12 +103,6 @@ contains
 !!
 !! In case no symmetry is used to reduce the number of k-points,
 !! the arrays kpt2 and kpt3 are equal.
-!!
-!! PARENTS
-!!      m_nonlinear
-!!
-!! CHILDREN
-!!      dgelss,getkgrid,wrtout,xmpi_max
 !!
 !! SOURCE
 

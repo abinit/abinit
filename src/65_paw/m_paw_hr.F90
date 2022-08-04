@@ -98,12 +98,6 @@ CONTAINS  !=====================================================================
 !! FUNCTION
 !!  Deallocate memory 
 !!
-!! PARENTS
-!!      m_bethe_salpeter,m_chi0
-!!
-!! CHILDREN
-!!      simp_gen
-!!
 !! SOURCE
 
 subroutine pawhur_free(Hur)
@@ -162,9 +156,6 @@ end subroutine pawhur_free
 !!
 !! OUTPUT
 !!  onsite(2,3)=Onsite contribution to  $i<ug1|\nabla|ug2>$
-!!
-!! PARENTS
-!!      cchi0q0,debug_tools,spectra
 !!
 !! SOURCE
 
@@ -325,12 +316,6 @@ end function paw_ihr
 !! SIDE EFFECTS
 !!  The cross-term contribution is added to the commutator 
 !!
-!! PARENTS
-!!      m_chi0
-!!
-!! CHILDREN
-!!      simp_gen
-!!
 !! SOURCE
 
 subroutine paw_cross_ihr_comm(ihr_comm,nspinor,nr,Cryst,Pawfgrtab,Paw_onsite,&
@@ -416,12 +401,6 @@ end subroutine paw_cross_ihr_comm
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_bethe_salpeter,m_chi0
-!!
-!! CHILDREN
-!!      simp_gen
 !!
 !! SOURCE
 
@@ -600,12 +579,6 @@ end subroutine pawhur_init
 !!
 !! OUTPUT
 !!  rcart_onsite(3,lmn2_size_max,natom)
-!!
-!! PARENTS
-!!      m_paw_hr
-!!
-!! CHILDREN
-!!      simp_gen
 !!
 !! SOURCE
 

@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! TODO
 !!  Can be merged with m_rf2
 !!
@@ -100,14 +96,6 @@ contains
 !!  rf2%RHS_Stern
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_dfpt_vtowfk
-!!
-!! CHILDREN
-!!      cg_zaxpy,ddk_f,dotprod_g,getcprj,pawcprj_alloc,pawcprj_free,pawcprj_get
-!!      rf2_accumulate_bands,rf2_apply_hamiltonian,rf2_getidirs,sqnorm_g,timab
-!!      wrtout,xmpi_allgather,xmpi_barrier
 !!
 !! SOURCE
 

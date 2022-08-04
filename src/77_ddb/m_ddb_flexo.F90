@@ -13,10 +13,6 @@
 !!
 !! NOTES
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -73,12 +69,6 @@ contains
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      anaddb
-!!
-!! CHILDREN
-!!      asria_corr,wrtout,zhpev
 !!
 !! SOURCE
 
@@ -351,12 +341,6 @@ end subroutine ddb_flexo
 !! OUTPUT
 !! ciflexo(3,3,3,3) = type-II Clamped Ion Flexoelectric Tensor
 !!
-!! PARENTS
-!!      m_ddb_flexo
-!!
-!! CHILDREN
-!!      asria_corr,wrtout,zhpev
-!!
 !! SOURCE
 
 subroutine dtciflexo(blkval,mpert,natom,ciflexo,ucvol)
@@ -462,12 +446,6 @@ subroutine dtciflexo(blkval,mpert,natom,ciflexo,ucvol)
 !! mixflexo(3,3,3,3) = type-II mixed contribution to the Flexoelectric Tensor
 !! intstrn(3,3,3,natom) = relaxed-ion internal strain tensor
 !! psinvdm(3*natom,3*natom) = pseudo inverse of dynamical matrix
-!!
-!! PARENTS
-!!      m_ddb_flexo
-!!
-!! CHILDREN
-!!      asria_corr,wrtout,zhpev
 !!
 !! SOURCE
 
@@ -696,12 +674,6 @@ subroutine dtmixflexo(asr,d2asr,blkval1d,blkval2d,blkval,gprimd,intstrn,intstrn_
 !!
 !! OUTPUT
 !! lattflexo(3,3,3,3) = type-II lattice contribution to the Flexoelectric Tensor
-!!
-!! PARENTS
-!!      m_ddb_flexo
-!!
-!! CHILDREN
-!!      asria_corr,wrtout,zhpev
 !!
 !! SOURCE
 
@@ -1247,12 +1219,6 @@ subroutine dtlattflexo(amu,blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,nato
 !! 
 !! OUTPUT
 !! kmatrix(3*natom,3*natom) = array with the pseudo-inverse of dynamical matrix
-!!
-!! PARENTS
-!!      m_ddb_flexo
-!!
-!! CHILDREN
-!!      asria_corr,wrtout,zhpev
 !!
 !! SOURCE
 

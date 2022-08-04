@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -237,12 +233,6 @@ contains
 !!   ksdiago is designed such that it is possible to diagonalize the Hamiltonian at an arbitrary k-point
 !!   or spin (not efficient but easy to code). Therefore ksdiago is useful non only for
 !!   the KSS generation but also for testing more advanced iterative algorithms as well as interpolation techniques.
-!!
-!! PARENTS
-!!      m_io_kss
-!!
-!! CHILDREN
-!!      destroy_mpi_enreg,initmpi_seq,kpgsph,wrtout
 !!
 !! SOURCE
 
@@ -631,12 +621,6 @@ end subroutine ksdiago
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_io_kss
-!!
-!! CHILDREN
-!!      destroy_mpi_enreg,initmpi_seq,kpgsph,wrtout
 !!
 !! SOURCE
 

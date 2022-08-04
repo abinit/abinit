@@ -20,11 +20,6 @@
 !! SIDE EFFECTS
 !!  used_arg = used argument
 !!
-!! PARENTS
-!!      dummy_tests
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  module m_dummy_tests
@@ -60,11 +55,6 @@
 
 !! SIDE EFFECTS
 !!  used_arg = used argument
-!!
-!! PARENTS
-!!      dummy_tests
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -113,11 +103,6 @@
 !! SIDE EFFECTS
 !!  used_arg = used argument
 !!
-!! PARENTS
-!!      dummy_tests
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine test_same_actual_arg(dummy_out1,dummy_out2,used_arg)
@@ -155,11 +140,6 @@
 !!
 !! OUTPUT
 !!  dummy_out1 = first output value
-!!
-!! PARENTS
-!!      dummy_tests
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

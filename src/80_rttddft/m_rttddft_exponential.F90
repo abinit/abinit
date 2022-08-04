@@ -12,10 +12,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -76,10 +72,6 @@ contains
 !!  enl <real(bandpp)> = non local contribution to the energy in the
 !!                       NC case - optional
 !!  eig <real(bandpp)> = eigenvalues - optional
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
  subroutine rttddft_exp_taylor(cg,dtset,ham_k,mpi_enreg,nband_k,npw_k,nspinor,enl,eig)
@@ -271,10 +263,6 @@ contains
 !!  if option = -1:
 !!    cg_2 has been deallocated
 !!    index_wavef_band has been allocated
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 subroutine paral_kgb_transpose(cg_1,cg_2,mpi_enreg,nband_t,npw_t,nspinor,option,index_wavef_band)

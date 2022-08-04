@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -193,25 +189,6 @@ contains
 !!   This function is used in cut3d so that we can immediately select the data to analyze without having
 !!   to prompt the user. Remember to update varname_from_fname if you add a new file or if you change the
 !!   name of the variable.
-!!
-!! PARENTS
-!!      m_scfcv_core
-!!
-!! CHILDREN
-!!      bonds_lgth_angles,bound_deriv,calc_efg,calc_fc,calcdenmagsph
-!!      compute_coeff_plowannier,compute_green,crystal%free,crystal_init
-!!      datafordmft,denfgr,destroy_dmft,destroy_green,destroy_oper
-!!      destroy_plowannier,destroy_self,dos%free,dos_calcnwrite,ebands_free
-!!      ebands_init,ebands_interpolate_kpath,ebands_prtbltztrp,ebands_write
-!!      fatbands_ncwrite,fftdatar_write,free_my_atmtab,get_my_atmtab,init_dmft
-!!      init_green,init_oper,init_plowannier,initialize_self,ioarr
-!!      mag_penalty_e,mlwfovlp,mlwfovlp_qp,multipoles_out,optics_paw
-!!      optics_paw_core,optics_vloc,out1dm,outkss,outwant,partial_dos_fractions
-!!      partial_dos_fractions_paw,pawmkaewf,pawprt,pawrhoij_copy,pawrhoij_free
-!!      pawrhoij_nullify,posdoppler,poslifetime,print_dmft,print_green
-!!      print_plowannier,prt_cif,prtdenmagsph,prtfatbands,read_atomden
-!!      results_gs%yaml_write,rw_self,selfreal2imag_self,simpson_int,sort_dp
-!!      spline,splint,timab,wrtout,xmpi_sum,xmpi_sum_master
 !!
 !! SOURCE
 

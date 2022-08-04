@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -68,12 +64,6 @@ contains
 !!     (5) Input for HIST Training-Set file (netcdf .nc format)
 !!     (6) Input for HIST Test-Set file (netcdf .nc format)
 !!     (7-18) Input Derivative Database (XML format)
-!!
-!! PARENTS
-!!      multibinit
-!!
-!! CHILDREN
-!!      xmpi_bcast
 !!
 !! SOURCE
 
