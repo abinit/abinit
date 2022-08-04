@@ -61,10 +61,12 @@ MODULE m_numeric_tools
  public :: coeffs_gausslegint    ! Compute the coefficients (supports and weights) for Gauss-Legendre integration.
  public :: simpson_cplx          ! Integrate a complex function via extended Simpson's rule.
  public :: hermitianize          ! Force a square matrix to be hermitian
- public :: mkherm                ! Make the complex array(2,ndim,ndim) hermitian, by adding half of it to its hermitian conjugate.
+ public :: mkherm                ! Make the complex array(2,ndim,ndim) hermitian, by adding half of it
+                                 ! to its hermitian conjugate.
  public :: hermit                ! Rdefine diagonal elements of packed matrix to impose Hermiticity.
  public :: symmetrize            ! Force a square matrix to be symmetric
  public :: pack_matrix           ! Packs a matrix into hermitian format
+ public :: check_vec_conjg       ! Test whether two complex vectors are the conjugate of each other.
  public :: print_arr             ! Print a vector/array
  public :: pade, dpade           ! Functions for Pade approximation (complex case)
  public :: newrap_step           ! Apply single step Newton-Raphson method to find root of a complex function
@@ -77,11 +79,14 @@ MODULE m_numeric_tools
  public :: cmplx_sphcart         ! Convert an array of cplx numbers from spherical to Cartesian coordinates or vice versa.
  public :: pfactorize            ! Factorize a number in terms of an user-specified set of prime factors.
  public :: isordered             ! Check the ordering of a sequence.
- public :: wrap2_zero_one        ! Transforms a real number in a reduced number in the interval [0,1[ where 1 is not included (tol12)
- public :: wrap2_pmhalf          ! Transforms a real number in areduced number in the interval ]-1/2,1/2] where -1/2 is not included (tol12)
+ public :: wrap2_zero_one        ! Transforms a real number in a reduced number in the interval [0,1[
+                                 ! where 1 is not included (tol12)
+ public :: wrap2_pmhalf          ! Transforms a real number in areduced number in the interval ]-1/2,1/2]
+                                 ! where -1/2 is not included (tol12)
  public :: interpol3d_0d         ! Linear interpolation in 3D
  public :: interpol3d_1d         ! Linear interpolation in 3D for an array
- public :: interpol3d_indices    ! Computes the indices in a cube which are neighbors to the point to be interpolated in interpol3d
+ public :: interpol3d_indices    ! Computes the indices in a cube which are neighbors to the point
+                                 ! to be interpolated in interpol3d
  public :: interpolate_denpot    ! Liner interpolation of scalar field e.g. density of potential
  public :: simpson_int           ! Simpson integral of a tabulated function. Returns arrays with integrated values
  public :: simpson               ! Simpson integral of a tabulated function. Returns scalar with the integral on the full mesh.
@@ -94,7 +99,8 @@ MODULE m_numeric_tools
  public :: kramerskronig         ! check or apply the Kramers Kronig relation
  public :: invcb                 ! Compute a set of inverse cubic roots as fast as possible.
  public :: safe_div              ! Performs 'save division' that is to prevent overflow, underflow, NaN or infinity errors
- public :: bool2index            ! Allocate and return array with the indices in the input boolean array that evaluates to .True.
+ public :: bool2index            ! Allocate and return array with the indices in the input boolean array
+                                 ! that evaluates to .True.
 
  !MG FIXME: deprecated: just to avoid updating refs while refactoring.
  public :: dotproduct
@@ -3567,7 +3573,7 @@ end subroutine symmetrize_spc
 !!
 !! SOURCE
 
-subroutine symmetrize_dpc(mat,uplo)
+subroutine symmetrize_dpc(mat, uplo)
 
 !Arguments ------------------------------------
 !scalars
@@ -3636,14 +3642,16 @@ end subroutine symmetrize_dpc
 
 subroutine pack_matrix(mat_in, mat_out, N, cplx)
 
+!Arguments ------------------------------------
+!scalars
  integer, intent(in) :: N, cplx
  real(dp), intent(in) :: mat_in(cplx, N*N)
  real(dp), intent(out) :: mat_out(cplx*N*(N+1)/2)
 
-!local variables
+!Local variables-------------------------------
  integer :: isubh, i, j
 
- ! *************************************************************************
+! *************************************************************************
 
  isubh = 1
  do j=1,N
@@ -3658,6 +3666,46 @@ subroutine pack_matrix(mat_in, mat_out, N, cplx)
  end do
 
 end subroutine pack_matrix
+!!***
+
+
+!!****f* m_numeric_tools/check_vec_conjg
+!! NAME
+!! check_vec_conjg
+!!
+!! FUNCTION
+!! Test whether two complex vectors `vec1` and `vec2` of size `nn` are conjugate of each other.
+!! within an optional tolerance abs_tol (default: 1e-6).
+!! Return max absolute difference for real and imag part in abs_diff(2) and exit status in ierr.
+!!
+!! SOURCE
+
+integer function check_vec_conjg(nn, vec1, vec2, abs_diff, abs_tol) result(ierr)
+
+!Arguments ------------------------------------
+ integer, intent(in) :: nn
+ complex(dp), intent(in) :: vec1(nn), vec2(nn)
+ real(dp),intent(out) :: abs_diff(2)
+ real(dp),optional,intent(in) :: abs_tol
+
+!Local variables-------------------------------
+ integer :: ii
+ real(dp) :: my_abs_tol
+
+ ! *************************************************************************
+
+ my_abs_tol = tol6; if (present(abs_tol)) my_abs_tol = abs_tol
+ ierr = 0
+ abs_diff = zero
+
+ do ii=1,nn
+   abs_diff(1) = max(abs_diff(1), abs(real(vec1(ii)) - real(vec2(ii))))
+   abs_diff(2) = max(abs_diff(2), abs(aimag(vec1(ii)) + aimag(vec2(ii))))
+ end do
+
+ if (any(abs_diff > abs_tol)) ierr = 1
+
+end function check_vec_conjg
 !!***
 
 !----------------------------------------------------------------------

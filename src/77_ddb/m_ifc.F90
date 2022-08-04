@@ -28,7 +28,7 @@ MODULE m_ifc
  use m_xmpi
  use m_sort
  use m_cgtools
- use m_lebedev
+
  use m_nctk
  use m_ddb
  use m_ddb_hdr
@@ -45,6 +45,7 @@ MODULE m_ifc
  use m_time,        only : cwtime, cwtime_report, timab
  use m_copy,        only : alloc_copy
  use m_pptools,     only : printbxsf
+ use m_lebedev,     only : lebedev_t, lebedev_ngrids
  use m_ewald,       only : ewald9
  use m_crystal,     only : crystal_t
  use m_geometry,    only : phdispl_cart2red, normv, mkrdim
@@ -1264,7 +1265,7 @@ subroutine ifc_speedofsound(ifc, crystal, qrad_tolkms, ncid, comm)
  ! Spherical average with Lebedev-Laikov grids.
  converged = 0
  do igrid=1,lebedev_ngrids
-   lgrid = lebedev_new(igrid)
+   call lgrid%from_index(igrid)
    npts = lgrid%npts; quad = zero; num_negw = 0; min_negw = zero
    do ii=1,npts
      if (mod(ii, nprocs) /= my_rank) cycle ! mpi-parallelism
@@ -1288,7 +1289,7 @@ subroutine ifc_speedofsound(ifc, crystal, qrad_tolkms, ncid, comm)
    quad = quad * Bohr_meter * 0.001_dp / Time_Sec
    call xmpi_sum(quad, comm, ierr)
    call xmpi_sum(num_negw, comm, ierr)
-   call lebedev_free(lgrid)
+   call lgrid%free()
 
    write(std_out,'(2(a,i6),a,3es12.4,a,es12.4)') &
      " Lebedev-Laikov grid: ",igrid,", npts: ", npts, " vs_sphavg(ac_modes): ",quad, " <vs>: ",sum(quad)/3
@@ -1423,7 +1424,8 @@ subroutine ifc_autocutoff(ifc, crystal, comm)
  save_wghatm = ifc%wghatm; save_atmfrc = ifc%atmfrc
 
  ABI_MALLOC(cut_phfrq, (3*natom, ifc%nqibz))
- qrad = 0.01; lgrid = lebedev_new(16)
+ qrad = 0.01
+ call lgrid%from_index(16)
 
  if (my_rank == master) then
    write(ab_out, "(a)")" Apply cutoff on IFCs. Using bisection algorithm to find initial guess for nsphere."
@@ -1496,7 +1498,7 @@ subroutine ifc_autocutoff(ifc, crystal, comm)
  ABI_FREE(cut_phfrq)
  ABI_FREE(save_wghatm)
  ABI_FREE(save_atmfrc)
- call lebedev_free(lgrid)
+ call lgrid%free()
 
 end subroutine ifc_autocutoff
 !!***

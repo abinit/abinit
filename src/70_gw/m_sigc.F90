@@ -1391,9 +1391,9 @@ end subroutine calc_sigc_me
 !! nsig_ab=Number of components in the self-energy operator (1 for collinear magnetism)
 !! npwc=number of plane waves in $\tilde epsilon^{-1}$
 !! nspinor=Number of spinorial components.
-!! i_sz=contribution arising from the integrable coulombian singularity at q==0
+!! i_sz=contribution arising from the integrable coulomb singularity at q==0
 !! (see csigme for the method used), note that in case of 3-D systems the factor
-!! 4pi in the coulombian potential is included in the definition of i_sz
+!! 4pi in the Coulomb potential is included in the definition of i_sz
 !! gvec(3,npwc)=G vectors in reduced coordinates
 !! vc_sqrt(npwc)= square root of the coulombian matrix elements for this q-point
 !! botsq = Plasmon-pole parameters

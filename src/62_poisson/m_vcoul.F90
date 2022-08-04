@@ -591,7 +591,7 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
      end do
      integ=integ+yy(npt-1)*dx*3.0/2.0
      write(std_out,*)' simple integral',integ
-     q0_volsph=(two_pi)**3 / (Kmesh%nbz * ucvol)
+     q0_volsph = (two_pi)**3 / (Kmesh%nbz * ucvol)
      q0_vol=bz_plane*two*xx(npt)
      write(std_out,*)' q0 sphere : ',q0_volsph,' q0_vol cyl ',q0_vol
      Vcp%i_sz=bz_plane*two*integ/q0_vol

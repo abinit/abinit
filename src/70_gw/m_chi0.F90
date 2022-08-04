@@ -962,8 +962,8 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
  end do
 
  ! Impose Hermiticity (valid only for zero or purely imaginary frequencies)
- ! MG what about metals, where we have poles around zero?
- ! FB because of the intraband term, chi0 is never hermitian in case of metals
+ ! MG: what about metals, where we have poles around zero?
+ ! FB: because of the intraband term, chi0 is never hermitian in case of metals
  if (.not. is_metallic) then
    do io=1,Ep%nomega
      if (ABS(REAL(Ep%omega(io)))<0.00001) then
