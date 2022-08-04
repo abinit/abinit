@@ -473,7 +473,7 @@ subroutine vdw_dftd2(e_vdw_dftd2,ixc,natom,ntypat,prtvol,typat,rprimd,vdw_tol,xr
 &   '      Damping parameter= ',vdw_d,ch10,&
 &   '      Cut-off radius   = ',rcut,' bohr'
    call wrtout(std_out,msg,'COLL')
-   write(msg,'(2a,i8,2a,es14.5,4a)') ch10,&
+   write(msg,'(2a,i14,2a,es14.5,4a)') ch10,&
 &   '      Number of pairs contributing = ',npairs,ch10,&
 &   '      DFT-D2 energy contribution   = ',e_vdw_dftd2,' Ha',ch10,&
 &   '  --------------------------------------------------------------',ch10
