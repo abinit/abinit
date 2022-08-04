@@ -11,10 +11,6 @@
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -91,12 +87,6 @@ contains
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_gwls_Projected_AT,m_gwls_Projected_BT
-!!
-!! CHILDREN
-!!      zgetrf,zgetri
-!!
 !! SOURCE
 
 subroutine setup_LanczosResolvents(kmax, prec)
@@ -161,12 +151,6 @@ end subroutine setup_LanczosResolvents
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_gwls_Projected_AT,m_gwls_Projected_BT
-!!
-!! CHILDREN
-!!      zgetrf,zgetri
-!!
 !! SOURCE
 
 subroutine cleanup_LanczosResolvents
@@ -202,11 +186,6 @@ end subroutine cleanup_LanczosResolvents
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      zgetrf,zgetri
 !!
 !! SOURCE
 
@@ -258,12 +237,6 @@ end subroutine matrix_function_preconditioned_Hamiltonian
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gwls_LanczosResolvents
-!!
-!! CHILDREN
-!!      zgetrf,zgetri
 !!
 !! SOURCE
 
@@ -326,12 +299,6 @@ end subroutine build_preconditioned_Hamiltonian_Lanczos_basis
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gwls_Projected_AT
-!!
-!! CHILDREN
-!!      zgetrf,zgetri
 !!
 !! SOURCE
 
@@ -441,12 +408,6 @@ end subroutine compute_resolvent_column_shift_lanczos
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_gwls_Projected_BT
-!!
-!! CHILDREN
-!!      zgetrf,zgetri
-!!
 !! SOURCE
 
 subroutine compute_resolvent_column_shift_lanczos_right_vectors(seed_vector, right_vec)
@@ -511,12 +472,6 @@ end subroutine compute_resolvent_column_shift_lanczos_right_vectors
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gwls_LanczosResolvents,m_gwls_Projected_BT
-!!
-!! CHILDREN
-!!      zgetrf,zgetri
 !!
 !! SOURCE
 

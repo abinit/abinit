@@ -28,11 +28,11 @@
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!
 !! SOURCE
 !!
   subroutine abi_dhpgv(itype,jobz,uplo,n,a,b,w,z,ldz,istwf_k,use_slk)
+
+    use m_fstrings,     only : sjoin, itoa
 
 !Arguments ------------------------------------
  integer :: itype
@@ -68,10 +68,9 @@
  if (ABI_LINALG_SCALAPACK_ISON.and.use_slk_==1.and.n>slk_minsize)  then
 #if defined HAVE_LINALG_SCALAPACK
    z = zero
-   ! MG: Tbloc is not used here
-   call init_matrix_scalapack(sca_a,n,n,slk_processor,istwf_k_, tbloc=10)
-   call init_matrix_scalapack(sca_b,n,n,slk_processor,istwf_k_, tbloc=10)
-   call init_matrix_scalapack(sca_ev,n,n,slk_processor,istwf_k_, tbloc=10)
+   call sca_a%init(n,n,slk_processor,istwf_k_)
+   call sca_b%init(n,n,slk_processor,istwf_k_)
+   call sca_ev%init(n,n,slk_processor,istwf_k_)
 #ifdef HAVE_LINALG_ELPA
    call matrix_from_global_sym(sca_a,a,istwf_k_)
    call matrix_from_global_sym(sca_b,b,istwf_k_)
@@ -98,6 +97,20 @@
    endif
  end if
 
+  if (info < 0) then
+    ABI_COMMENT(sjoin("argument #", itoa(-info), "had an illegal value"))
+ end if
+
+ if (info > 0) then
+    ABI_COMMENT("DSPEV failed to converge")
+    if (info <= n) then
+       ABI_COMMENT(sjoin("DSPEV failed to converge;", itoa(info), " off-diagonal elements of"))
+       ABI_COMMENT(" an intermediate tridiagonal form did not converge to zero.")
+    else
+       ABI_COMMENT("The factorization of B could not be completed and no eigenvalues or eigenvectors were computed.")
+    endif
+ end if
+
  ABI_CHECK(info==0,"abi_dhpgv returned info!=0!")
 
 end subroutine abi_dhpgv
@@ -112,8 +125,6 @@ end subroutine abi_dhpgv
 !! FUNCTION
 !!
 !! INPUTS
-!!
-!! PARENTS
 !!
 !! SOURCE
 !!
@@ -171,8 +182,6 @@ end subroutine abi_chpgv
 !! FUNCTION
 !!
 !! INPUTS
-!!
-!! PARENTS
 !!
 !! SOURCE
 

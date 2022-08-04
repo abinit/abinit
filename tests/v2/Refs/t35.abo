@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.7.4 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h25 )
+.Starting date : Wed  4 May 2022.
+- ( at 01h23 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v2_t35/t35.in
-- output file    -> t35.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/v2_t35/t35.abi
+- output file    -> t35.abo
 - root for input  files -> t35i
 - root for output files -> t35o
 
@@ -34,7 +34,7 @@
 -    mband =           8        mffmem =           1         mkmem =           1
        mpw =         180          nfft =        6144          nkpt =           1
 ================================================================================
-P This job should need less than                       2.059 Mbytes of memory.
+P This job should need less than                       2.239 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.024 Mbytes ; DEN or POT disk file :      0.049 Mbytes.
 ================================================================================
@@ -51,7 +51,7 @@ _ WF disk file :      0.024 Mbytes ; DEN or POT disk file :      0.049 Mbytes.
 -    mband =           8        mffmem =           1         mkmem =           1
        mpw =         180          nfft =        6144          nkpt =           1
 ================================================================================
-P This job should need less than                       2.059 Mbytes of memory.
+P This job should need less than                       2.239 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.024 Mbytes ; DEN or POT disk file :      0.049 Mbytes.
 ================================================================================
@@ -68,7 +68,7 @@ _ WF disk file :      0.024 Mbytes ; DEN or POT disk file :      0.049 Mbytes.
 -    mband =           8        mffmem =           1         mkmem =           1
        mpw =         180          nfft =        6144          nkpt =           1
 ================================================================================
-P This job should need less than                       2.059 Mbytes of memory.
+P This job should need less than                       2.239 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.024 Mbytes ; DEN or POT disk file :      0.049 Mbytes.
 ================================================================================
@@ -142,13 +142,17 @@ P          mk1mem           1
         optdriver2          0
         optdriver3          0
         optdriver4          1
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          1       1
+           prtpot1          0
+           prtpot2          0
+           prtpot3          0
+           prtpot4          1
+          rfatpol1          1       2
+          rfatpol2          1       2
+          rfatpol3          1       2
           rfatpol4          2       2
-            rfdir1          0       0       0
-            rfdir2          0       0       0
-            rfdir3          0       0       0
+            rfdir1          1       1       1
+            rfdir2          1       1       1
+            rfdir3          1       1       1
             rfdir4          0       0       1
            rfphon1          0
            rfphon2          0
@@ -222,8 +226,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      2.500   => boxcut(ratio)=   2.04358
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/13al.981214.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/13al.981214.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/13al.981214.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/13al.981214.fhi
 - Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
 - 13.00000   3.00000    981214                znucl, zion, pspdat
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -707,7 +711,6 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      2.500   => boxcut(ratio)=   2.04358
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t35o_DS2_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -724,7 +727,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t35o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -743,18 +745,18 @@ tolerances: {tolvrs: 1.00E-16, }
  ETOT  4   3.3370709413356     -7.003E-02 2.191E-04 1.934E+00
  ETOT  5   3.3294560960784     -7.615E-03 2.968E-05 6.729E-02
  ETOT  6   3.3292322177434     -2.239E-04 2.235E-07 1.876E-02
- ETOT  7   3.3291484649438     -8.375E-05 1.994E-08 2.351E-04
- ETOT  8   3.3291477236081     -7.413E-07 1.109E-09 5.353E-06
- ETOT  9   3.3291477155882     -8.020E-09 2.887E-12 1.177E-06
+ ETOT  7   3.3291484649441     -8.375E-05 1.994E-08 2.351E-04
+ ETOT  8   3.3291477236082     -7.413E-07 1.109E-09 5.353E-06
+ ETOT  9   3.3291477155881     -8.020E-09 2.887E-12 1.177E-06
  ETOT 10   3.3291477107079     -4.880E-09 2.512E-12 2.305E-08
  ETOT 11   3.3291477105953     -1.126E-10 2.130E-14 2.546E-09
- ETOT 12   3.3291477105877     -7.617E-12 3.104E-15 5.830E-11
- ETOT 13   3.3291477105881      4.832E-13 2.965E-16 1.426E-11
- ETOT 14   3.3291477105884      2.274E-13 9.412E-18 3.022E-12
- ETOT 15   3.3291477105884      1.421E-14 1.980E-17 2.257E-13
- ETOT 16   3.3291477105884      1.421E-14 3.467E-19 1.615E-14
- ETOT 17   3.3291477105880     -3.695E-13 2.539E-20 3.663E-15
- ETOT 18   3.3291477105875     -5.116E-13 1.639E-20 3.045E-17
+ ETOT 12   3.3291477105876     -7.645E-12 3.104E-15 5.830E-11
+ ETOT 13   3.3291477105882      5.258E-13 2.965E-16 1.426E-11
+ ETOT 14   3.3291477105883      1.705E-13 9.412E-18 3.022E-12
+ ETOT 15   3.3291477105884      1.137E-13 1.980E-17 2.257E-13
+ ETOT 16   3.3291477105883     -9.948E-14 3.467E-19 1.615E-14
+ ETOT 17   3.3291477105881     -2.842E-13 2.539E-20 3.663E-15
+ ETOT 18   3.3291477105875     -5.684E-13 1.639E-20 3.045E-17
 
  At SCF step   18       vres2   =  3.05E-17 < tolvrs=  1.00E-16 =>converged.
 ================================================================================
@@ -842,7 +844,7 @@ tolerances: {tolvrs: 1.00E-16, }
 -  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
 -  5.862068E+02
  chkph3 : WARNING -
-  The dynamical matrix was incomplete : phonon frequencies may be wrong ...
+  Dynamical matrix incomplete, phonon frequencies may be wrong, check input variables rfatpol and rfdir.
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -900,13 +902,17 @@ P          mk1mem           1
         optdriver2          0
         optdriver3          0
         optdriver4          1
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          1       1
+           prtpot1          0
+           prtpot2          0
+           prtpot3          0
+           prtpot4          1
+          rfatpol1          1       2
+          rfatpol2          1       2
+          rfatpol3          1       2
           rfatpol4          2       2
-            rfdir1          0       0       0
-            rfdir2          0       0       0
-            rfdir3          0       0       0
+            rfdir1          1       1       1
+            rfdir2          1       1       1
+            rfdir3          1       1       1
             rfdir4          0       0       1
            rfphon1          0
            rfphon2          0
@@ -1001,7 +1007,7 @@ P          mk1mem           1
 -
 - [4] Ab initio pseudopotentials for electronic structure calculations of poly-atomic systems, 
 - using density-functional theory.
-- M. Fuchs, M. Scheffler, Comput. Phys. Commun. 119, 67 (1999).
+- M. Fuchs and, M. Scheffler, Comput. Phys. Commun. 119, 67 (1999).
 - Comment: Some pseudopotential generated using the FHI code were used.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#fuchs1999
 -
@@ -1040,10 +1046,10 @@ P          mk1mem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          1.7  wall=          1.7
+- Proc.   0 individual time (sec): cpu=          2.1  wall=          2.4
 
 ================================================================================
 
  Calculation completed.
-.Delivered   2 WARNINGs and  16 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.7  wall=          1.7
+.Delivered   4 WARNINGs and  12 COMMENTs to log file.
++Overall time at end (sec) : cpu=          2.1  wall=          2.4

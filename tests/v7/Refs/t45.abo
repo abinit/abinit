@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.7.4 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h31 )
+.Starting date : Wed  4 May 2022.
+- ( at 01h25 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v7_t45/t45.in
-- output file    -> t45.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/v7_t45/t45.abi
+- output file    -> t45.abo
 - root for input  files -> t45i
 - root for output files -> t45o
 
@@ -165,8 +165,8 @@ P          mk1mem2        128
               occ2     2.000000  2.000000  2.000000  2.000000
         optdriver1          0
         optdriver2          1
-          rfatpol           1       2
-            rfdir           1       1       1
+           prtpot1          0
+           prtpot2          1
            rfphon1          0
            rfphon2          1
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
@@ -244,8 +244,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.18257
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Al-psval.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Al-psval.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Al-psval.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Al-psval.psp8
 - Al    ONCVPSP  r_core=  1.77  1.77  1.71
 - 13.00000   3.00000    150709                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -259,8 +259,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              2  -21.179474   -1.097800
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/As-psval.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/As-psval.psp8
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/As-psval.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/As-psval.psp8
 - As    ONCVPSP  r_core=  1.85  1.70  2.16
 - 33.00000   5.00000    150709                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -431,7 +431,6 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.18257
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t45o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -470,7 +469,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t45o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -527,7 +525,6 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t45o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -546,7 +543,7 @@ tolerances: {tolvrs: 1.00E-08, }
  ETOT  4   5.8425743693406     -1.789E-04 2.696E-07 6.506E-03
  ETOT  5   5.8425668453664     -7.524E-06 1.761E-08 4.857E-05
  ETOT  6   5.8425667976147     -4.775E-08 9.258E-11 1.016E-06
- ETOT  7   5.8425667968291     -7.856E-10 1.566E-12 2.337E-08
+ ETOT  7   5.8425667968291     -7.855E-10 1.566E-12 2.337E-08
  ETOT  8   5.8425667968012     -2.797E-11 5.065E-14 9.673E-10
 
  At SCF step    8       vres2   =  9.67E-10 < tolvrs=  1.00E-08 =>converged.
@@ -819,8 +816,8 @@ P          mk1mem2        128
               occ2     2.000000  2.000000  2.000000  2.000000
         optdriver1          0
         optdriver2          1
-          rfatpol           1       2
-            rfdir           1       1       1
+           prtpot1          0
+           prtpot2          1
            rfphon1          0
            rfphon2          1
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
@@ -957,10 +954,10 @@ P          mk1mem2        128
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         13.7  wall=         13.8
+- Proc.   0 individual time (sec): cpu=         15.6  wall=         15.8
 
 ================================================================================
 
  Calculation completed.
-.Delivered   7 WARNINGs and  11 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         13.7  wall=         13.8
+.Delivered   5 WARNINGs and   3 COMMENTs to log file.
++Overall time at end (sec) : cpu=         15.6  wall=         15.8

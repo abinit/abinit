@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -78,15 +74,6 @@ contains
 !!
 !! SIDE EFFECTS
 !!  cg(2,mcg)=updated wavefunctions
-!!
-!! PARENTS
-!!      m_vtowfk
-!!
-!! CHILDREN
-!!      abi_xcopy,abi_xgemm,abi_xheev,abi_xhegv,abi_xorthonormalize,abi_xtrsm
-!!      alloc_on_gpu,copy_from_gpu,copy_on_gpu,dealloc_on_gpu,getghc,gpu_xgemm
-!!      gpu_xorthonormalize,gpu_xtrsm,prep_getghc,setwfparameter,timab,wfcopy
-!!      wrtout,xmpi_sum,xprecon
 !!
 !! SOURCE
 

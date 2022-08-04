@@ -15,10 +15,6 @@
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -94,13 +90,6 @@ contains
 !!  green <type(green_type)>= green function
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_dmft
-!!
-!! CHILDREN
-!!      ctqmc_triqs_run,flush_unit,invoke_python_triqs,jbessel,sbf8
-!!      vee_ndim2tndim_hu_r,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -1759,13 +1748,6 @@ end subroutine qmc_prep_ctqmc
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_forctqmc
-!!
-!! CHILDREN
-!!      ctqmc_triqs_run,flush_unit,invoke_python_triqs,jbessel,sbf8
-!!      vee_ndim2tndim_hu_r,wrtout,xmpi_barrier
-!!
 !! SOURCE
 
 subroutine testcode_ctqmc_b(energy_level,hybri_coeff,weiss_for_rot,dmftqmc_l,fw1_nd,levels_ctqmc,&
@@ -1868,13 +1850,6 @@ end subroutine testcode_ctqmc_b
 !!  gw_tmp_nd
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_forctqmc
-!!
-!! CHILDREN
-!!      ctqmc_triqs_run,flush_unit,invoke_python_triqs,jbessel,sbf8
-!!      vee_ndim2tndim_hu_r,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -2150,13 +2125,6 @@ end subroutine testcode_ctqmc
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_forctqmc
-!!
-!! CHILDREN
-!!      ctqmc_triqs_run,flush_unit,invoke_python_triqs,jbessel,sbf8
-!!      vee_ndim2tndim_hu_r,wrtout,xmpi_barrier
-!!
 !! SOURCE
 
 subroutine ctqmcoutput_to_green(green,paw_dmft,gtmp_nd,gw_tmp_nd,gtmp,gw_tmp,iatom,leg_measure,opt_nondiag)
@@ -2287,13 +2255,6 @@ end subroutine ctqmcoutput_to_green
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_forctqmc
-!!
-!! CHILDREN
-!!      ctqmc_triqs_run,flush_unit,invoke_python_triqs,jbessel,sbf8
-!!      vee_ndim2tndim_hu_r,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -2466,13 +2427,6 @@ end subroutine ctqmcoutput_printgreen
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_forctqmc
-!!
-!! CHILDREN
-!!      ctqmc_triqs_run,flush_unit,invoke_python_triqs,jbessel,sbf8
-!!      vee_ndim2tndim_hu_r,wrtout,xmpi_barrier
-!!
 !! SOURCE
 
 subroutine ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_nd,fw1_nd,leg_measure,iatom)
@@ -2536,7 +2490,7 @@ subroutine ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_n
  integer(kind=4) :: varid
  logical :: file_exists
  complex :: i
- character(len=500) :: filename
+ character(len=100) :: filename
 
  real(dp), allocatable, target :: new_re_g_iw(:,:,:), new_im_g_iw(:,:,:)
  real(dp), allocatable, target :: new_g_tau(:,:,:), new_gl(:,:,:)
@@ -2681,8 +2635,10 @@ subroutine ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_n
   ABI_ERROR(message)
 #else
   ! Creating the NETCDF file
-  write(std_out, '(2a)') ch10, "    Creating NETCDF file: abinit_output_for_py.nc"
-  NCF_CHECK(nf90_create("abinit_output_for_py.nc", NF90_CLOBBER, ncid))
+  ! write(std_out, "(a)") trim(paw_dmft%filapp)
+  write(filename, '(a, a)') trim(paw_dmft%filnamei), "_abinit_output_for_py.nc"
+  write(std_out, '(3a)') ch10, "    Creating NETCDF file: ", trim(filename)
+  NCF_CHECK(nf90_create(filename, NF90_CLOBBER, ncid))
  
   ! Defining the dimensions of the variables to write in the NETCDF file
   NCF_CHECK(nf90_def_dim(ncid, "one", 1, dim_one_id))
@@ -2775,10 +2731,13 @@ subroutine ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_n
   NCF_CHECK(nf90_put_var(ncid, var_spacecomm_id,          paw_dmft%spacecomm))
   NCF_CHECK(nf90_close(ncid))
 
-  write(std_out, '(2a)') ch10, "    NETCDF file abinit_output_for_py.nc written; Launching python invocation"
+  write(std_out, '(4a)') ch10, "    NETCDF file ", trim(filename), " written; Launching python invocation"
  
   ! Invoking python to execute the script
+  ! call Invoke_python_triqs (paw_dmft%myproc, trim(paw_dmft%filnamei)//c_null_char, paw_dmft%spacecomm)
   call Invoke_python_triqs (paw_dmft%myproc, trim(paw_dmft%filnamei)//c_null_char)
+  call xmpi_barrier(paw_dmft%spacecomm)
+  call flush_unit(std_out)
  
   ! Allocating the fortran variables for the results
   ABI_MALLOC(new_re_g_iw,(nflavor,nflavor, paw_dmft%dmft_nwli))
@@ -2788,16 +2747,16 @@ subroutine ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_n
   i = (0, 1)
   
   ! Check if file exists
-  write(filename, '(a,i4.4,a)') "py_output_for_abinit_rank_", paw_dmft%myproc, ".nc"
+  write(filename, '(a, a)') trim(paw_dmft%filnamei), "_py_output_for_abinit.nc"
 
   INQUIRE(FILE=filename, EXIST=file_exists)
   if(.not. file_exists) then
-   write(message,'(4a)') ch10,' Cannot find file ', filename, '! Make sure the python script writes it with the right name and at the right place!'
+   write(message,'(4a)') ch10,' Cannot find file ', trim(filename), '! Make sure the python script writes it with the right name and at the right place!'
    call wrtout(std_out,message,'COLL')
    ABI_ERROR(message)
   endif
 
-  write(std_out, '(3a)') ch10, "    Reading NETCDF file ", filename
+  write(std_out, '(3a)') ch10, "    Reading NETCDF file ", trim(filename)
 
   ! Opening the NETCDF file
   NCF_CHECK(nf90_open(filename, nf90_nowrite, ncid))

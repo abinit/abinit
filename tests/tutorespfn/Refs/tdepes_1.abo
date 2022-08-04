@@ -1,5 +1,5 @@
 
-.Version 9.7.2 of ABINIT 
+.Version 9.7.4 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 10 Feb 2022.
-- ( at 14h09 )
+.Starting date : Wed  4 May 2022.
+- ( at 03h29 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/TestBot_MPI1/tutorespfn_tdepes_1/tdepes_1.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/tutorespfn_tdepes_1/tdepes_1.abi
 - output file    -> tdepes_1.abo
 - root for input  files -> tdepes_1i
 - root for output files -> tdepes_1o
@@ -142,12 +142,9 @@ P          mk1mem           8
         optdriver1          0
         optdriver2          0
         optdriver3          1
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          1       2
-            rfdir1          0       0       0
-            rfdir2          0       0       0
-            rfdir3          1       1       1
+           prtpot1          0
+           prtpot2          0
+           prtpot3          1
            rfphon1          0
            rfphon2          0
            rfphon3          1
@@ -207,8 +204,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     37.000   => boxcut(ratio)=   2.01471
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
 - C     ONCVPSP-3.3.0  r_core=   1.20440   1.26326
 -  6.00000   4.00000    171101                znucl, zion, pspdat
     8   -1012    1    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1120,12 +1117,9 @@ P          mk1mem           8
         optdriver1          0
         optdriver2          0
         optdriver3          1
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          1       2
-            rfdir1          0       0       0
-            rfdir2          0       0       0
-            rfdir3          1       1       1
+           prtpot1          0
+           prtpot2          0
+           prtpot3          1
            rfphon1          0
            rfphon2          0
            rfphon3          1
@@ -1266,10 +1260,10 @@ P          mk1mem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         26.6  wall=         26.8
+- Proc.   0 individual time (sec): cpu=         23.1  wall=         23.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   9 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         26.6  wall=         26.8
++Overall time at end (sec) : cpu=         23.1  wall=         23.3

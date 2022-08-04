@@ -81,11 +81,6 @@ CONTAINS
 !!  if (optgr2==1)
 !!    gylmgr2(6,nfgd,lm_size)= second derivatives of g_l(r-R)*Y_lm(r-R) wrt cart. coordinates
 !!
-!! PARENTS
-!!      m_paw_denpot,m_paw_dfpt,m_paw_nhat,m_pawdij
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pawgylm(gylm,gylmgr,gylmgr2,lm_size,nfgd,optgr0,optgr1,optgr2,pawtab,rfgd)
@@ -955,11 +950,6 @@ end subroutine pawgylm
 !! OUTPUT
 !!  gylmg(npw,lmax**2,ntypat)=Fourier transform of each g_l(r).Y_lm(r) function
 !!
-!! PARENTS
-!!      m_suscep_stat
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pawgylmg(gprimd,gylmg,kg,kpg,kpt,lmax,nkpg,npw,ntypat,pawtab,ylm)
@@ -1068,11 +1058,6 @@ end subroutine pawgylmg
 !!  ifftsph(nfgd)= FFT index (fine grid) of the points in the sphere around current atom
 !!  nfgd= number of points in the sphere around current atom
 !!  rfgd(3,nfgd)= cartesian coordinates of r-R.
-!!
-!! PARENTS
-!!      m_paw_dfpt,m_paw_nhat
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1225,11 +1210,6 @@ end subroutine pawrfgd_fft
 !!  ifftsph(nfgd)= FFT index (fine grid) of the points in the sphere around current atom
 !!  nfgd= number of points in the sphere around current atom
 !!  rfgd(3,nfgd)= cartesian coordinates of r-R.
-!!
-!! PARENTS
-!!      m_paw_nhat
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1391,11 +1371,6 @@ end subroutine pawrfgd_wvl
 !! OUTPUT
 !!  expiqr(2,nfgd)= exp(i.q.r) around the current atom
 !!                                 Not allocated if q=0 !
-!!
-!! PARENTS
-!!      m_paw_dfpt,m_paw_nhat,m_pawdij,m_respfn_driver
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

@@ -20,12 +20,6 @@
 !! psphead = psp information structure
 !! atmsymb = atomic symbol
 !!
-!! PARENTS
-!!      inpspheads,pspatm_abinit
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -398,10 +392,6 @@ end module m_psxml2ab
 !!   str = string with error message
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

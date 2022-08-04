@@ -12,10 +12,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -85,12 +81,6 @@ contains
 !!  usexml=1 if XML file
 !!  xmlpaw=1 if PAW file in XML format
 !!  useupf=1 if UPF file.
-!!
-!! PARENTS
-!!      m_pspini
-!!
-!! CHILDREN
-!!      nctab_free,nctab_init
 !!
 !! SOURCE
 
@@ -176,12 +166,6 @@ end subroutine test_xml_xmlpaw_upf
 !! SIDE EFFECTS
 !! psps=<type pseudopotential_type>the pseudopotentials description
 !!
-!! PARENTS
-!!      m_driver
-!!
-!! CHILDREN
-!!      nctab_free,nctab_init
-!!
 !! SOURCE
 
 subroutine psps_init_global(mtypalch, npsp, psps, pspheads)
@@ -262,12 +246,6 @@ end subroutine psps_init_global
 !!
 !! SIDE EFFECTS
 !! psps=<type pseudopotential_type>the pseudopotentials description
-!!
-!! PARENTS
-!!      m_driver
-!!
-!! CHILDREN
-!!      nctab_free,nctab_init
 !!
 !! SOURCE
 
@@ -528,12 +506,6 @@ end subroutine psps_init_from_dtset
 !! SIDE EFFECTS
 !! psps=<type pseudopotential_type>the pseudopotentials description
 !!
-!! PARENTS
-!!      m_ddb_hdr,m_driver
-!!
-!! CHILDREN
-!!      nctab_free,nctab_init
-!!
 !! SOURCE
 
 subroutine psps_free(psps)
@@ -597,12 +569,6 @@ end subroutine psps_free
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
-!!      m_ddb_hdr
-!!
-!! CHILDREN
-!!      nctab_free,nctab_init
 !!
 !! SOURCE
 
@@ -747,12 +713,6 @@ end subroutine psps_copy
 !!
 !! OUTPUT
 !!  Only writing
-!!
-!! PARENTS
-!!      m_pspini
-!!
-!! CHILDREN
-!!      nctab_free,nctab_init
 !!
 !! SOURCE
 
@@ -955,12 +915,6 @@ end subroutine psps_print
 !! INPUTS
 !!   path=File name.
 !!
-!! PARENTS
-!!      m_pspini
-!!
-!! CHILDREN
-!!      nctab_free,nctab_init
-!!
 !! SOURCE
 
 subroutine psps_ncwrite(psps, path)
@@ -980,11 +934,16 @@ subroutine psps_ncwrite(psps, path)
  NCF_CHECK(nctk_open_create(ncid, path, xmpi_comm_self))
 
  ! Define dimensions
- ncerr = nctk_def_dims(ncid, [&
-     nctkdim_t("fnlen", fnlen+1), nctkdim_t("md5_slen", md5_slen+1), nctkdim_t("ntypat", psps%ntypat), &
-     nctkdim_t("npsp", psps%npsp), nctkdim_t("lnmax", psps%lnmax), &
-     nctkdim_t("lmnmax", psps%lnmax), nctkdim_t("dimekb", psps%dimekb), &
-     nctkdim_t("mqgrid_vl", psps%mqgrid_vl), nctkdim_t("mqgrid_ff", psps%mqgrid_ff) &
+ ncerr = nctk_def_dims(ncid, [ &
+     nctkdim_t("fnlen", fnlen + 1), &
+     nctkdim_t("md5_slen", md5_slen + 1), &
+     nctkdim_t("ntypat", psps%ntypat), &
+     nctkdim_t("npsp", psps%npsp), &
+     nctkdim_t("lnmax", psps%lnmax), &
+     nctkdim_t("lmnmax", psps%lnmax), &
+     nctkdim_t("dimekb", psps%dimekb), &
+     nctkdim_t("mqgrid_vl", psps%mqgrid_vl), &
+     nctkdim_t("mqgrid_ff", psps%mqgrid_ff) &
  ])
  NCF_CHECK(ncerr)
 
@@ -1103,12 +1062,6 @@ end subroutine psps_ncwrite
 !! OUTPUT
 !!  gth_params <type (pseudopotential_gth_type)>=the values to allocate and initialise.
 !!
-!! PARENTS
-!!      m_psps
-!!
-!! CHILDREN
-!!      nctab_free,nctab_init
-!!
 !! SOURCE
 
 subroutine psp2params_init(gth_params, npsp)
@@ -1154,12 +1107,6 @@ end subroutine psp2params_init
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_psps
-!!
-!! CHILDREN
-!!      nctab_free,nctab_init
-!!
 !! SOURCE
 
 subroutine psp2params_copy(gth_paramsin, gth_paramsout)
@@ -1204,12 +1151,6 @@ end subroutine psp2params_copy
 !! SIDE EFFECTS
 !!  gth_params <type (pseudopotential_gth_type)>=the values to deallocate.
 !!
-!! PARENTS
-!!      m_psps
-!!
-!! CHILDREN
-!!      nctab_free,nctab_init
-!!
 !! SOURCE
 
 subroutine psp2params_free(gth_params)
@@ -1223,13 +1164,13 @@ subroutine psp2params_free(gth_params)
  ABI_SFREE(gth_params%set)
  ABI_SFREE(gth_params%hasGeometry)
 
-!Coefficients for local part and projectors
+ ! Coefficients for local part and projectors
  ABI_SFREE(gth_params%psppar)
 
-!Coefficients for spin orbit part
+ ! Coefficients for spin orbit part
  ABI_SFREE(gth_params%psp_k_par)
 
-!Different radii
+ ! Different radii
  ABI_SFREE(gth_params%radii_cf)
 
 end subroutine psp2params_free
@@ -1246,12 +1187,6 @@ end subroutine psp2params_free
 !!  mqgrid_vl=Number of q-points
 !!  has_tcore=True if the pseudo has NLCC.
 !!  has_tvale=True if the atomic valence density is available.
-!!
-!! PARENTS
-!!      m_pspini,m_psps
-!!
-!! CHILDREN
-!!      nctab_free,nctab_init
 !!
 !! SOURCE
 
@@ -1293,12 +1228,6 @@ end subroutine nctab_init
 !! FUNCTION
 !! Free memory allocated in nctab_t
 !!
-!! PARENTS
-!!      m_pspini,m_psps
-!!
-!! CHILDREN
-!!      nctab_free,nctab_init
-!!
 !! SOURCE
 
 subroutine nctab_free(nctab)
@@ -1323,12 +1252,6 @@ end subroutine nctab_free
 !!  nctab_copy
 !!
 !! FUNCTION
-!!
-!! PARENTS
-!!      m_psps
-!!
-!! CHILDREN
-!!      nctab_free,nctab_init
 !!
 !! SOURCE
 
@@ -1375,12 +1298,6 @@ end subroutine nctab_copy
 !! SIDE EFFECTS
 !!  nctabl%tvalspl(mqgrid_vl,2)
 !!  nctab%d2ncdq0
-!!
-!! PARENTS
-!!      m_psp8,m_psp9
-!!
-!! CHILDREN
-!!      nctab_free,nctab_init
 !!
 !! SOURCE
 
@@ -1446,12 +1363,6 @@ end subroutine nctab_eval_tvalespl
 !!  nctabl%tcorespl(mqgrid_vl,2)
 !!  nctab%d2ncdq0
 !!  nctab%dncdq0
-!!
-!! PARENTS
-!!      m_pspini
-!!
-!! CHILDREN
-!!      nctab_free,nctab_init
 !!
 !! SOURCE
 
@@ -1519,12 +1430,6 @@ end subroutine nctab_eval_tcorespl
 !!
 !! OUTPUT
 !! mixtabs(ntypalch)=NC tables describing the alchemical pseudos
-!!
-!! PARENTS
-!!      m_pspini
-!!
-!! CHILDREN
-!!      nctab_free,nctab_init
 !!
 !! SOURCE
 

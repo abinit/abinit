@@ -11,8 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -47,7 +45,7 @@ MODULE m_exc_spectra
  use m_eprenorms,       only : eprenorms_t, renorm_bst
  use m_pawtab,          only : pawtab_type
  use m_paw_hr,          only : pawhur_t
- use m_wfd,             only : wfd_t
+ use m_wfd,             only : wfdgw_t
  !use m_bse_io,          only : exc_amplitude
  use m_wfd_optic,       only : calc_optical_mels
 
@@ -85,19 +83,13 @@ contains
 !!  Psps <pseudopotential_type>=variables related to pseudopotentials.
 !!  Pawtab(Cryst%ntypat*usepaw)<pawtab_type>=PAW tabulated starting data
 !!  Hur(Cryst%natom*usepaw)<pawhur_t>=Only for PAW and DFT+U, quantities used to evaluate the commutator [H_u,r].
-!!  Wfd<wfd_t>=Handler for the wavefunctions.
+!!  Wfd<wfdgw_t>=Handler for the wavefunctions.
 !!    nsppol=Number of independent spin polarizations.
 !!    nspinor=Number of spinorial components.
 !!  comm=MPI communicator.
 !!
 !! OUTPUT
 !!  No output. The routine calls specialized routines where the computation and the output of the spectra is done.
-!!
-!! PARENTS
-!!      m_exc_diago
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -113,7 +105,7 @@ subroutine build_spectra(BSp,BS_files,Cryst,Kmesh,KS_BSt,QP_BSt,Psps,Pawtab,Wfd,
  type(kmesh_t),intent(in) :: Kmesh
  type(crystal_t),intent(in) :: Cryst
  type(ebands_t),intent(in) :: KS_BSt,QP_BSt
- type(wfd_t),intent(inout) :: Wfd
+ type(wfdgw_t),intent(inout) :: Wfd
  type(eprenorms_t),optional,intent(in) :: Epren
 !arrays
  type(pawtab_type),intent(in) :: Pawtab(Cryst%ntypat*Wfd%usepaw)
@@ -326,12 +318,6 @@ end subroutine build_spectra
 !! SIDE EFFECTS
 !!  eps(BSp%nomega,BSp%nq) = Macroscopic dielectric function to be written.
 !!
-!! PARENTS
-!!      m_exc_spectra,m_haydock
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine exc_write_data(BSp,BS_files,what,eps,prefix,dos)
@@ -498,12 +484,6 @@ end subroutine exc_write_data
 !!  eps_rpa(nomega)=RPA spectrum without local-field effects.
 !!  dos(nomega)=The DOS.
 !!
-!! PARENTS
-!!      m_exc_spectra,m_haydock
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine exc_eps_rpa(nbnds,lomo_spin,lomo_min,homo_spin,Kmesh,Bst,nq,nsppol,opt_cvk,ucvol,broad,nomega,omega,eps_rpa,dos)
@@ -626,12 +606,6 @@ end subroutine exc_eps_rpa
 !! OUTPUT
 !!  eps_exc(nomega,Bsp%nq)=Macroscopic dielectric function with excitonic effects.
 !!  dos_exc(nomega)=The DOS of the excitonic Hamiltonian
-!!
-!! PARENTS
-!!      m_exc_spectra
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -877,12 +851,6 @@ end subroutine exc_eps_resonant
 !!  eps_exc(nomega)=Macroscopic dielectric function with excitonic effects calculated including the COUPLING.
 !!  dos_exc(nomega)=The DOS of the excitonic Hamiltonian
 !!
-!! PARENTS
-!!      m_exc_spectra
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine exc_eps_coupling(Bsp,BS_files,lomo_min,max_band,nkbz,nsppol,opt_cvk,ucvol,nomega,omega,eps_exc,dos_exc)
@@ -1065,12 +1033,6 @@ end subroutine exc_eps_coupling
 !! SIDE EFFECTS
 !!  tensor(BSp%nomega,6) = Complex dielectric tensor to be written
 !!
-!! PARENTS
-!!      m_haydock
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine exc_write_tensor(BSp,BS_files,what,tensor)
@@ -1211,12 +1173,6 @@ end subroutine exc_write_tensor
 !! OUTPUT
 !!  Only writing.
 !!
-!! PARENTS
-!!      m_exc_spectra,m_haydock
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine mdfs_ncwrite(ncid,Bsp,eps_exc,eps_rpanlf,eps_gwnlf)
@@ -1319,12 +1275,6 @@ end subroutine mdfs_ncwrite
 !!
 !! OUTPUT
 !!  Only checking.
-!!
-!! PARENTS
-!!      m_exc_spectra
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1451,12 +1401,6 @@ end subroutine check_kramerskronig
 !!
 !! OUTPUT
 !!  Only checking.
-!!
-!! PARENTS
-!!      m_exc_spectra
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 

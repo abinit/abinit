@@ -11,10 +11,6 @@
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -117,12 +113,6 @@ contains
 !!  the cut-off part of the Coulomb potential, unlike what is done
 !!  in barevcoul module.
 !!  2. Fock term has its own legacy cut-off for the moment.
-!!
-!! PARENTS
-!!      m_atm2fft,m_ewald,m_mklocl,m_spacepar
-!!
-!! CHILDREN
-!!      calck0,calck1,caljy0,caljy1,metric,paw_jbessel,quadrature,wrtout
 !!
 !! SOURCE
 

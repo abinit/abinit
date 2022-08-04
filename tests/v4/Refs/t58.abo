@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.7.4 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h26 )
+.Starting date : Wed  4 May 2022.
+- ( at 01h23 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v4_t58/t58.in
-- output file    -> t58.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/v4_t58/t58.abi
+- output file    -> t58.abo
 - root for input  files -> t58i
 - root for output files -> t58o
 
@@ -121,7 +121,9 @@ P          mk1mem2         16
               occ2     2.000000  2.000000  2.000000  2.000000
         optdriver1          0
         optdriver2          1
-            rfdir1          0       0       0
+           prtpot1          0
+           prtpot2          1
+            rfdir1          1       1       1
             rfdir2          1       0       0
            rfstrs1          0
            rfstrs2          3
@@ -192,8 +194,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.08000
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -210,8 +212,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              1    1.353815
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
 -  Troullier-Martins psp for element  As        Thu Oct 27 17:37:14 EDT 1994
 - 33.00000   5.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -384,7 +386,6 @@ meta: {optdriver: 1, rfstrs: 3, }
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.08000
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t58o_DS1_WFK
  symkchk : k-point set has full space-group symmetry.
 
  ==>  initialize data related to q vector <== 
@@ -403,7 +404,6 @@ meta: {optdriver: 1, rfstrs: 3, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t58o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -462,7 +462,6 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t58o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -698,7 +697,9 @@ P          mk1mem2         16
               occ2     2.000000  2.000000  2.000000  2.000000
         optdriver1          0
         optdriver2          1
-            rfdir1          0       0       0
+           prtpot1          0
+           prtpot2          1
+            rfdir1          1       1       1
             rfdir2          1       0       0
            rfstrs1          0
            rfstrs2          3
@@ -832,10 +833,10 @@ P          mk1mem2         16
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          1.4  wall=          1.4
+- Proc.   0 individual time (sec): cpu=          1.6  wall=          1.6
 
 ================================================================================
 
  Calculation completed.
-.Delivered   9 WARNINGs and  11 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.4  wall=          1.4
+.Delivered   7 WARNINGs and   3 COMMENTs to log file.
++Overall time at end (sec) : cpu=          1.6  wall=          1.6

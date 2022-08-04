@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -126,13 +122,6 @@ contains
 !! rhor(nfft,nspden)=electron density in r space
 !!   (if spin polarized, array contains total density in first half and spin-up density in second half)
 !!   (for non-collinear magnetism, first element: total density, 3 next ones: mx,my,mz in units of hbar/2)
-!!
-!! PARENTS
-!!      m_afterscfloop,m_dft_energy,m_gstate,m_longwave,m_nonlinear
-!!      m_respfn_driver,m_scfcv_core,m_vtorho
-!!
-!! CHILDREN
-!!      sort_dp,spline,splint,wrtout,xmpi_barrier,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -826,12 +815,6 @@ end subroutine mkrho
 !! rhor(nfft,nspden)=initialized total density in real space.
 !!         as well as spin-up part if spin-polarized
 !!
-!! PARENTS
-!!      m_gstate,m_positron
-!!
-!! CHILDREN
-!!      sort_dp,spline,splint,wrtout,xmpi_barrier,xmpi_sum_master
-!!
 !! SOURCE
 
 subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,nattyp,&
@@ -1241,8 +1224,7 @@ end subroutine initro
 !! prtrhomxmn
 !!
 !! FUNCTION
-!! If option==1, compute the maximum and minimum of the density (and spin-polarization
-!! if nspden==2), and print it.
+!! If option==1, compute the maximum and minimum of the density (and spin-polarization if nspden==2), and print it.
 !! If option==2, also compute and print the second maximum or minimum
 !!
 !! INPUTS
@@ -1261,18 +1243,9 @@ end subroutine initro
 !!
 !! OUTPUT
 !!
-!! SIDE EFFECTS
-!!
 !! NOTES
 !!  The tolerance tol12 aims at giving a machine-independent ordering.
 !!  (this trick is used in bonds.f, listkk.f, prtrhomxmn.f and rsiaf9.f)
-!!
-!! PARENTS
-!!      m_afterscfloop,m_bethe_salpeter,m_gstate,m_mkrho,m_screening_driver
-!!      m_sigma_driver,m_vtorho
-!!
-!! CHILDREN
-!!      sort_dp,spline,splint,wrtout,xmpi_barrier,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -1656,19 +1629,19 @@ subroutine prtrhomxmn(iout,mpi_enreg,nfft,ngfft,nspden,option,rhor,optrhor,ucvol
 
        call wrtout(iout,message,'COLL')
 
-       write(message,'(a,es13.4,a,3f10.4)') '      Maximum= ',&
+       write(message,'(a,es13.4,a,3f10.4)')   ')     Maximum= ',&
 &       value(1,1,iitems),'  at reduced coord.',coord(:,1,1,iitems)
        call wrtout(iout,message,'COLL')
        if(option==2)then
-         write(message,'(a,es13.4,a,3f10.4)')' Next maximum= ',&
+         write(message,'(a,es13.4,a,3f10.4)') ')Next maximum= ',&
 &         value(2,1,iitems),'  at reduced coord.',coord(:,2,1,iitems)
          call wrtout(iout,message,'COLL')
        end if
-       write(message,'(a,es13.4,a,3f10.4)') '      Minimum= ',&
+       write(message,'(a,es13.4,a,3f10.4)')   ')     Minimum= ',&
 &       value(1,2,iitems),'  at reduced coord.',coord(:,1,2,iitems)
        call wrtout(iout,message,'COLL')
        if(option==2)then
-         write(message,'(a,es13.4,a,3f10.4)')' Next minimum= ',&
+         write(message,'(a,es13.4,a,3f10.4)') ')Next minimum= ',&
 &         value(2,2,iitems),'  at reduced coord.',coord(:,2,2,iitems)
          call wrtout(iout,message,'COLL')
        end if
@@ -1910,12 +1883,6 @@ end subroutine prtrhomxmn
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_outscfcv
-!!
-!! CHILDREN
-!!      sort_dp,spline,splint,wrtout,xmpi_barrier,xmpi_sum_master
-!!
 !! SOURCE
 
 subroutine read_atomden(MPI_enreg,natom,nfft,ngfft,nspden,ntypat, &
@@ -2145,12 +2112,6 @@ end subroutine read_atomden
 !! average, since there is no preferred direction without any
 !! external field (and it's simpler)
 !!
-!!
-!! PARENTS
-!!      m_mkrho
-!!
-!! CHILDREN
-!!      sort_dp,spline,splint,wrtout,xmpi_barrier,xmpi_sum_master
 !!
 !! SOURCE
 

@@ -10,10 +10,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -69,11 +65,6 @@ contains
 !! OUTPUT
 !!  wfs <type(wvl_projector_type)>=wavefunctions information for wavelets.
 !!   | keys=its access keys for compact storage.
-!!
-!! PARENTS
-!!      m_gstate,m_wvl_wfsinp
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -255,10 +246,6 @@ end subroutine wvl_wfs_set
 !!
 !! SIDE EFFECTS
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine derfcf(derfc_yy,yy)
@@ -290,11 +277,6 @@ end subroutine derfcf
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
-!!      m_mklocl_realspace
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -332,11 +314,6 @@ end subroutine derf_ab
 !!
 !! SIDE EFFECTS
 !!  wfs <type(wvl_wf_type)>=wavefunctions information in a wavelet basis.
-!!
-!! PARENTS
-!!      m_gstate,m_wvl_wfsinp
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -401,11 +378,6 @@ end subroutine wvl_wfs_free
 !!
 !! OUTPUT
 !! wfs <type(wvl_wf_type)> = output localistaion region
-!!
-!! PARENTS
-!!      m_gstate,m_wvl_wfsinp
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

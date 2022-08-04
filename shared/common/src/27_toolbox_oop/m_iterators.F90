@@ -40,10 +40,6 @@
 !!  Another important advantage is that the MPI implementation will continue to work even
 !!  if the data distribution is changed, only the iterator has to be modified.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -196,12 +192,6 @@ CONTAINS  !===========================================================
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_iterators
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine indices_free(Ids)
@@ -228,11 +218,6 @@ end subroutine indices_free
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -283,11 +268,6 @@ end subroutine iter2_alloc
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine iter2_push(Iter2,i1,i2,list)
@@ -329,11 +309,6 @@ end subroutine iter2_push
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -514,11 +489,6 @@ end function iter2_yield
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 

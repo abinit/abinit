@@ -238,8 +238,8 @@ tolerances: {toldfe: 1.00E-07, }
 
  Compute gradient of the electron density
  Electron Localization Function (ELF) [min:0;max:1]
-      Maximum=    1.0000E+00  at reduced coord.    0.5000    0.5000    0.5000
-      Minimum=    1.5384E-03  at reduced coord.    0.1667    0.1667    0.0333
+)     Maximum=    1.0000E+00  at reduced coord.    0.5000    0.5000    0.5000
+)     Minimum=    1.5384E-03  at reduced coord.    0.1667    0.1667    0.0333
    Integrated=    3.8016E+02
 
 --------------------------------------------------------------------------------
@@ -397,12 +397,12 @@ tolerances: {toldfe: 1.00E-07, }
 
  Compute gradient of the electron density
  Electron Localization Function (ELF) [min:0;max:1]
-      Maximum=    1.0000E+00  at reduced coord.    0.5000    0.5000    0.5000
-      Minimum=    1.5846E-03  at reduced coord.    0.1667    0.1667    0.0333
+)     Maximum=    1.0000E+00  at reduced coord.    0.5000    0.5000    0.5000
+)     Minimum=    1.5846E-03  at reduced coord.    0.1667    0.1667    0.0333
    Integrated=    3.7786E+02
  Spin up ELF      [min:0;max:1]
-      Maximum=    1.0000E+00  at reduced coord.    0.5000    0.5000    0.5000
-      Minimum=    9.7140E-03  at reduced coord.    0.1667    0.1667    0.0000
+)     Maximum=    1.0000E+00  at reduced coord.    0.5000    0.5000    0.5000
+)     Minimum=    9.7140E-03  at reduced coord.    0.1667    0.1667    0.0000
    Integrated=    6.6872E+02
 
 --------------------------------------------------------------------------------
@@ -568,12 +568,12 @@ tolerances: {toldfe: 1.00E-07, }
 
  Compute gradient of the electron density
  Electron Localization Function (ELF) [min:0;max:1]
-      Maximum=    1.0000E+00  at reduced coord.    0.5000    0.5000    0.5000
-      Minimum=    1.0227E-02  at reduced coord.    0.1667    0.1667    0.0000
+)     Maximum=    1.0000E+00  at reduced coord.    0.5000    0.5000    0.5000
+)     Minimum=    1.0227E-02  at reduced coord.    0.1667    0.1667    0.0000
    Integrated=    6.7180E+02
  Spin up ELF      [min:0;max:1]
-      Maximum=    1.0000E+00  at reduced coord.    0.5000    0.5000    0.5000
-      Minimum=    9.7140E-03  at reduced coord.    0.1667    0.1667    0.0000
+)     Maximum=    1.0000E+00  at reduced coord.    0.5000    0.5000    0.5000
+)     Minimum=    9.7140E-03  at reduced coord.    0.1667    0.1667    0.0000
    Integrated=    6.6872E+02
 
 --------------------------------------------------------------------------------

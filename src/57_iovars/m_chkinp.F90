@@ -12,10 +12,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -77,13 +73,6 @@ contains
 !!  comm: MPI communicator (MPI_COMM_WORLD)
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      abinit
-!!
-!! CHILDREN
-!!      chkdpr,chkgrp,chkint,chkint_eq,chkint_ge,chkint_le,chkint_ne,chkorthsy
-!!      dt%free,metric,symmetrize_xred,wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -506,6 +495,21 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 
    enddo
 
+!  d3e_pert1_atpol
+   call chkint_ge(0,0,cond_string,cond_values,ierr,'d3e_pert1_atpol(1)',dt%d3e_pert1_atpol(1),1,iout)
+   cond_string(1)='natom' ; cond_values(1)=natom
+   call chkint_le(1,1,cond_string,cond_values,ierr,'d3e_pert1_atpol(2)',dt%d3e_pert1_atpol(2),natom,iout)
+
+!  d3e_pert2_atpol
+   call chkint_ge(0,0,cond_string,cond_values,ierr,'d3e_pert2_atpol(1)',dt%d3e_pert2_atpol(1),1,iout)
+   cond_string(1)='natom' ; cond_values(1)=natom
+   call chkint_le(1,1,cond_string,cond_values,ierr,'d3e_pert2_atpol(2)',dt%d3e_pert2_atpol(2),natom,iout)
+
+!  d3e_pert3_atpol
+   call chkint_ge(0,0,cond_string,cond_values,ierr,'d3e_pert3_atpol(1)',dt%d3e_pert3_atpol(1),1,iout)
+   cond_string(1)='natom' ; cond_values(1)=natom
+   call chkint_le(1,1,cond_string,cond_values,ierr,'d3e_pert3_atpol(2)',dt%d3e_pert3_atpol(2),natom,iout)
+
 !  densfor_pred
    if(dt%iscf>0)then
      cond_string(1)='iscf';cond_values(1)=dt%iscf
@@ -882,7 +886,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    if (optdriver == RUNL_EPH) then
      cond_string(1)='optdriver'; cond_values(1)=optdriver
      call chkint_eq(1,1,cond_string,cond_values,ierr,'eph_task',dt%eph_task, &
-       16, [0, 1, 2, -2, 3, 4, -4, 5, -5, 6, 7, -7, 8, 10, 15, -15, 16], iout)
+       18, [0, 1, 2, -2, 3, 4, -4, 5, -5, 6, 7, -7, 8, 10, 11, -12, 15, -15, 16], iout)
 
      if (any(dt%ddb_ngqpt <= 0)) then
        ABI_ERROR_NOSTOP("ddb_ngqpt must be specified when performing EPH calculations.", ierr)
@@ -900,8 +904,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      if (dt%eph_task == 2 .and. dt%irdwfq == 0 .and. dt%getwfq == 0) then
        ABI_ERROR_NOSTOP('Either getwfq or irdwfq must be non-zero in order to compute the gkk', ierr)
      end if
-     if (any(dt%eph_task == [-5, -14])) then
-       ABI_CHECK(dt%ph_nqpath > 0, "ph_nqpath must be specified when eph_task in [-5, -14]")
+     if (any(dt%eph_task == [-5])) then
+       ABI_CHECK(dt%ph_nqpath > 0, "ph_nqpath must be specified when eph_task in [-5]")
      end if
      !if (dt%eph_task == -4 .and. dt%occopt /= 3) then
      !  ABI_ERROR_NOSTOP("eph_task -4 required occopt 3 in the input file (Fermi-Dirac with physical Temperature!", ierr)
@@ -932,7 +936,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      if (dt%ibte_prep /= 0 .and. any(dt%sigma_ngkpt /= 0)) then
        ABI_ERROR_NOSTOP("sigma_ngkpt cannot be used to downsample the k-mesh when ibte_prep is used.", ierr)
      end if
-
    end if ! RUNL_EPH
 
    if (any(dt%eph_np_pqbks /= 0)) then
@@ -976,7 +979,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    call chkdpr(0,0,cond_string,cond_values,ierr,'exchmix',dt%exchmix,1,0.0_dp,iout)
 
    ! extrapwf
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'extrapwf',dt%extrapwf,3,(/0,1,2/),iout)
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'extrapwf',dt%extrapwf,3, [0,1,2], iout)
    if (dt%extrapwf>0.and.dt%densfor_pred<5) then
      write(msg,'(3a)')&
      'extrapwf keyword (extrapolation of WF) is only compatible with',ch10,&
@@ -986,7 +989,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    end if
 
 !  expert_user
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'expert_user',dt%expert_user,4,(/0,1,2,3/),iout)
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'expert_user',dt%expert_user,4, [0,1,2,3],iout)
 
    ! fermie_nest
    call chkdpr(0,0,cond_string,cond_values,ierr,'fermie_nest',dt%fermie_nest,1,0.0_dp,iout)
@@ -996,7 +999,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 
    !  fockoptmix
    call chkint_eq(0,0,cond_string,cond_values,ierr,'fockoptmix',&
-     dt%fockoptmix,12,(/0,1,11,201,211,301,401,501,601,701,801,901/),iout)
+     dt%fockoptmix,12,[0,1,11,201,211,301,401,501,601,701,801,901],iout)
    if(dt%paral_kgb/=0)then
      cond_string(1)='paral_kgb' ; cond_values(1)=dt%paral_kgb
      ! Make sure that dt%fockoptmix is 0, 1 or 11 (wfmixalg==0)
@@ -1004,19 +1007,19 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    end if
 
    ! fock_icutcoul
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'fock_icutcoul',dt%fock_icutcoul,6,(/0,1,2,3,4,5/),iout)
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'fock_icutcoul',dt%fock_icutcoul,6,[0,1,2,3,4,5],iout)
 
    ! frzfermi
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'frzfermi',dt%frzfermi,2,(/0,1/),iout)
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'frzfermi',dt%frzfermi,2,[0,1],iout)
 
    ! fxcartfactor
    call chkdpr(0,0,cond_string,cond_values,ierr,'fxcartfactor',dt%fxcartfactor,1,zero,iout)
 
    ! ga_algor
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'ga_algor',dt%ga_algor,3,(/1,2,3/),iout)
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'ga_algor',dt%ga_algor,3,[1,2,3],iout)
 
    ! ga_fitness
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'ga_fitness',dt%ga_fitness,3,(/1,2,3/),iout)
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'ga_fitness',dt%ga_fitness,3,[1,2,3],iout)
 
    ! ga_opt_percent
    call chkdpr(0,0,cond_string,cond_values,ierr,'ga_opt_percent',dt%ga_opt_percent,1,tol8,iout)
@@ -1025,11 +1028,11 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    if(dt%getxcart/=0)then
      cond_string(1)='getxcart' ; cond_values(1)=dt%getxcart
      ! Make sure that dt%getxred is 0
-     call chkint_eq(1,1,cond_string,cond_values,ierr,'getxred',dt%getxred,1,(/0/),iout)
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'getxred',dt%getxred,1,[0],iout)
    end if
 
    ! goprecon
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'goprecon',dt%goprecon,4,(/0,1,2,3/),iout)
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'goprecon',dt%goprecon,4,[0,1,2,3],iout)
 
    ! gpu_devices
    if (dt%use_gpu_cuda==1) then
@@ -1042,6 +1045,69 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        ABI_ERROR_NOSTOP(msg, ierr)
      end if
    end if
+
+   ! RT-TDDFT
+   if (dt%optdriver == RUNL_RTTDDFT) then
+     ! getwfk / getwfk_filepath / irdwfk
+     if (dt%getwfk == 0 .and. dt%irdwfk == 0 .and. dt%getwfk_filepath==ABI_NOFILE .and. dt%td_restart==0) then
+       write(msg, '(3a)' ) &
+       & 'Initial KS orbitals need to be read in WFK file for RT-TDDFT runs!',ch10,&
+       & 'Action: set irdwfk or getwfk /= 0 or specify the WFK filename using getwfk_filepath.'
+       ABI_ERROR_NOSTOP(msg, ierr)
+     endif
+     ! usewvl
+     if (dt%usewvl /= 0) then
+        write(msg,'(a)') 'RT-TDDFT and wavelets are not compatible, set usewvl to 0.'
+        ABI_ERROR_NOSTOP(msg, ierr)
+     endif
+     ! nimage
+     if (dt%nimage > 1) then
+        write(msg,'(a)') 'RT-TDDFT and multiple images are not compatible, set nimage to 1.'
+        ABI_ERROR_NOSTOP(msg, ierr)
+     endif
+     ! tfkinfunc
+     if (dt%tfkinfunc == 2) then
+        write(msg,'(a)') 'RT-TDDFT and Thomas-Fermi functional using the recursion method &
+         & are not compatible, set tfkinfunc /= 2.'
+        ABI_ERROR_NOSTOP(msg, ierr)
+     endif
+     ! positron
+     if (dt%positron /= 0) then
+        write(msg,'(a)') 'RT-TDDFT and Positron are not compatible, set positron to 0.'
+        ABI_ERROR_NOSTOP(msg, ierr)
+     endif
+     ! usefock
+     if (dt%usefock==1) then
+        write(msg,'(a)') 'RT-TDDFT and Exact exchange are not compatible, set usefock to 0.'
+        ABI_ERROR_NOSTOP(msg, ierr)
+     end if
+     ! usedmft
+     if (dt%usedmft /= 0) then
+        write(msg,'(a)') 'RT-TDDFT and DFT+DMFT are not compatible, set usedmft to 0.'
+        ABI_ERROR_NOSTOP(msg, ierr)
+     endif
+     ! usepawu
+     if (dt%usepawu /= 0) then
+        write(msg,'(a)') 'RT-TDDFT with DFT+U has not been tested yet, set usepawu to 0.'
+        ABI_ERROR_NOSTOP(msg, ierr)
+     endif
+     ! usekden
+     if (dt%usekden==1) then
+        write(msg,'(a)') 'RT-TDDFT with mGGA has not been tested yet, set usekden to 0.'
+        ABI_ERROR_NOSTOP(msg, ierr)
+     end if
+     ! vdw_xc
+     if (dt%vdw_xc /= 0) then
+        write(msg,'(a)') 'RT-TDDFT with VDW corrected functionals has not been tested yet, set vdw_xc to 0.'
+        ABI_ERROR_NOSTOP(msg, ierr)
+     endif
+     !TODO FB: Should probably be made possible later
+     ! useextfpmd
+     if (dt%useextfpmd /= 0) then
+        write(msg,'(a)') 'RT-TDDFT and extFPMD has not been tested yet, set useextfpmd to 0.'
+        ABI_ERROR_NOSTOP(msg, ierr)
+     endif
+   endif
 
    ! gw_invalid_freq
    call chkint_eq(0,0,cond_string,cond_values,ierr,'gw_invalid_freq',dt%gw_invalid_freq,3,[0,1,2],iout)
@@ -1164,24 +1230,24 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    call chkint_le(0,0,cond_string,cond_values,ierr,'iatsph',maxiatsph,natom,iout)
 
    ! icoulomb
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'icoulomb',dt%icoulomb,3,(/0,1,2/),iout)
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'icoulomb',dt%icoulomb,3,[0,1,2],iout)
    if (dt%nspden > 2) then
      cond_string(1)='nspden' ; cond_values(1)=nspden
-     call chkint_eq(1,1,cond_string,cond_values,ierr,'icoulomb',dt%icoulomb,1,(/0/),iout)
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'icoulomb',dt%icoulomb,1,[0],iout)
    end if
 
    ! icutcoul
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'icutcoul',dt%icutcoul,11,(/0,1,2,3,4,5,6,7,14,15,16/),iout)
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'icutcoul',dt%icutcoul,11,[0,1,2,3,4,5,6,7,14,15,16],iout)
 
    ! ieig2rf
    if(optdriver==RUNL_RESPFN.and.usepaw==1)then
      cond_string(1)='optdriver' ; cond_values(1)=optdriver
      cond_string(2)='usepaw'    ; cond_values(2)=usepaw
-     call chkint_eq(1,2,cond_string,cond_values,ierr,'ieig2rf',dt%ieig2rf,1,(/0/),iout)
+     call chkint_eq(1,2,cond_string,cond_values,ierr,'ieig2rf',dt%ieig2rf,1,[0],iout)
    end if
    if(optdriver==RUNL_RESPFN.and.dt%paral_rf==1)then
      cond_string(1)='paral_rf' ; cond_values(1)=dt%paral_rf
-     call chkint_eq(1,1,cond_string,cond_values,ierr,'ieig2rf',dt%ieig2rf,1,(/0/),iout)
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'ieig2rf',dt%ieig2rf,1,[0],iout)
    end if
 
    ! imgmov
@@ -1304,7 +1370,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    end if
 !  Mixing on density is only allowed for GS calculations or for drivers where it is not used.
    if(optdriver /= RUNL_GSTATE .and. all(optdriver/=[RUNL_SCREENING,RUNL_SIGMA,RUNL_BSE,RUNL_EPH,&
-&     RUNL_WFK,RUNL_NONLINEAR])) then
+&     RUNL_WFK,RUNL_NONLINEAR,RUNL_RTTDDFT])) then
      cond_string(1)='optdriver' ; cond_values(1)=optdriver
      call chkint_le(1,1,cond_string,cond_values,ierr,'iscf',dt%iscf,9,iout)
    end if
@@ -2271,10 +2337,11 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !  call chkint_eq(1,1,cond_string,cond_values,ierr,'optcell',dt%optcell,1,(/0/),iout)
 !  end if
 
-!  optdriver
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'optdriver',optdriver,10,&
-&   [RUNL_GSTATE,RUNL_RESPFN,RUNL_SCREENING,RUNL_SIGMA,RUNL_NONLINEAR,RUNL_BSE,&
-&   RUNL_GWLS, RUNL_WFK,RUNL_EPH,RUNL_LONGWAVE],iout)
+   ! Check the value of optdriver
+   call chkint_eq(0, 0, cond_string, cond_values, ierr, 'optdriver', optdriver, 12,&
+                  [RUNL_GSTATE,RUNL_RESPFN,RUNL_SCREENING,RUNL_SIGMA,RUNL_NONLINEAR,RUNL_GWR, RUNL_BSE, &
+                   RUNL_GWLS, RUNL_WFK,RUNL_EPH,RUNL_LONGWAVE,RUNL_RTTDDFT], iout)
+
    if (response==1.and.all(dt%optdriver/=[RUNL_RESPFN,RUNL_NONLINEAR,RUNL_LONGWAVE])) then
      write(msg,'(a,i3,3a,14(a,i2),4a)' )&
 &     'The input variable optdriver=',dt%optdriver,ch10,&
@@ -2308,8 +2375,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    if(usepaw==1)then
      ! Is optdriver compatible with PAW?
      cond_string(1)='usepaw' ; cond_values(1)=usepaw
-     call chkint_eq(1,1,cond_string,cond_values,ierr,&
-&     'optdriver',optdriver,7,[RUNL_GSTATE,RUNL_RESPFN,RUNL_SCREENING,RUNL_SIGMA,RUNL_BSE,RUNL_WFK,RUNL_NONLINEAR],iout)
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'optdriver',optdriver,8,&
+&       [RUNL_GSTATE,RUNL_RESPFN,RUNL_SCREENING,RUNL_SIGMA,RUNL_BSE,RUNL_WFK,RUNL_NONLINEAR,RUNL_RTTDDFT],iout)
    end if
 
 !  Linear and Non-linear response calculations
@@ -2498,8 +2565,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    end if
 
   !  orbmag
-  ! only values of -3..+3 are allowed. 0 is the default.
-  call chkint_eq(0,0,cond_string,cond_values,ierr,'orbmag',dt%orbmag,7,(/-3,-2,-1,0,1,2,3/),iout)
+  ! only values of 0-3  are allowed. 0 is the default.
+  call chkint_eq(0,0,cond_string,cond_values,ierr,'orbmag',dt%orbmag,4,(/0,1,2,3/),iout)
   ! when orbmag /= 0, symmorphi must be 0 (no tnons)
   if(dt%orbmag .NE. 0) then
      cond_string(1)='orbmag';cond_values(1)=dt%orbmag
@@ -3036,10 +3103,17 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      cond_string(1)='prtden' ; cond_values(1)=dt%prtden
      call chkint_eq(1,1,cond_string,cond_values,ierr,'prtstm',dt%prtstm,1,(/0/),iout)
    end if
+
+!  prtnabla
    if(dt%prtnabla>0)then
      cond_string(1)='prtnabla' ; cond_values(1)=dt%prtnabla
      call chkint_eq(1,1,cond_string,cond_values,ierr,'prtstm',dt%prtstm,1,(/0/),iout)
+     if(dt%npspinor>1.and.(dt%prtnabla==1.or.dt%prtnabla==2).and.dt%pawspnorb==1)then
+       msg='Parallelization over spinorial components not allowed with prtnabla=(1 or 2) and SOC!'
+       ABI_ERROR_NOSTOP(msg, ierr)
+     end if
    end if
+
    if(dt%prtvxc>0)then
      cond_string(1)='prtvxc' ; cond_values(1)=dt%prtvxc
      call chkint_eq(1,1,cond_string,cond_values,ierr,'prtstm',dt%prtstm,1,(/0/),iout)
@@ -3146,17 +3220,17 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !  rprimd
 !  With optcell beyond 4, one has constraints on rprimd.
    cond_string(1)='optcell' ; cond_values(1)=dt%optcell
-   if(dt%optcell==4 .or. dt%optcell==7 )then
+   if( dt%optcell==7 )then
      call chkdpr(1,1,cond_string,cond_values,ierr,'rprimd(1,2)',rprimd(1,2),0,0.0_dp,iout)
      call chkdpr(1,1,cond_string,cond_values,ierr,'rprimd(1,3)',rprimd(1,3),0,0.0_dp,iout)
      call chkdpr(1,1,cond_string,cond_values,ierr,'rprimd(2,1)',rprimd(2,1),0,0.0_dp,iout)
      call chkdpr(1,1,cond_string,cond_values,ierr,'rprimd(3,1)',rprimd(3,1),0,0.0_dp,iout)
-   else if(dt%optcell==5 .or. dt%optcell==8 )then
+   else if( dt%optcell==8 )then
      call chkdpr(1,1,cond_string,cond_values,ierr,'rprimd(2,1)',rprimd(2,1),0,0.0_dp,iout)
      call chkdpr(1,1,cond_string,cond_values,ierr,'rprimd(2,3)',rprimd(2,3),0,0.0_dp,iout)
      call chkdpr(1,1,cond_string,cond_values,ierr,'rprimd(1,2)',rprimd(1,2),0,0.0_dp,iout)
      call chkdpr(1,1,cond_string,cond_values,ierr,'rprimd(3,2)',rprimd(3,2),0,0.0_dp,iout)
-   else if(dt%optcell==6 .or. dt%optcell==9 )then
+   else if( dt%optcell==9 )then
      call chkdpr(1,1,cond_string,cond_values,ierr,'rprimd(3,1)',rprimd(3,1),0,0.0_dp,iout)
      call chkdpr(1,1,cond_string,cond_values,ierr,'rprimd(3,2)',rprimd(3,2),0,0.0_dp,iout)
      call chkdpr(1,1,cond_string,cond_values,ierr,'rprimd(1,3)',rprimd(1,3),0,0.0_dp,iout)
@@ -3307,9 +3381,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        do isym=1,dt%nsym
          if(sum(dt%tnons(:,isym)**2)>tol6)then
            write(msg, '(3a,i3,a,3f8.4,3a)' )&
-&           'When nbandkss/=0, all the components of tnons must be zero.',ch10,&
-&           'However, for the symmetry operation number ',isym,', tnons =',dt%tnons(:,isym),'.',ch10,&
-&           'Action: use the symmetry finder (nsym=0) with symmorphi==0.'
+           'When nbandkss/=0, all the components of tnons must be zero.',ch10,&
+           'However, for the symmetry operation number ',isym,', tnons =',dt%tnons(:,isym),'.',ch10,&
+           'Action: use the symmetry finder (nsym=0) with symmorphi==0.'
            ABI_ERROR_NOSTOP(msg,ierr)
          end if
        end do

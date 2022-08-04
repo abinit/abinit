@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -183,15 +179,6 @@ contains
 !!    On-site occupancies (rhoij) are stored in (n,mx,my,mz)
 !!    This is compatible provided that the mixing factors for n and m are identical
 !!    and that the residual is not a combination of V_res and rhoij_res (pawoptmix=0).
-!!
-!! PARENTS
-!!      m_scfcv_core
-!!
-!! CHILDREN
-!!      ab7_mixing_copy_current_step,ab7_mixing_eval,ab7_mixing_eval_allocate
-!!      ab7_mixing_eval_deallocate,ab7_mixing_use_moving_atoms,fourdp,mean_fftr
-!!      metric,pawrhoij_filter,prcref_pma,timab,wvl_prcref,wvl_vtrial_abi2big
-!!      xcpot
 !!
 !! SOURCE
 

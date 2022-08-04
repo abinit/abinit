@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -103,12 +99,6 @@ CONTAINS  !===============================================================
 !!  Note that this routine has been written having in mind an homogeneous network of machines.
 !!  A network made of different CPU will lead to unpredictable results as each node has
 !!  to check for the converge of the calculation.
-!!
-!! PARENTS
-!!      m_exc_diago
-!!
-!! CHILDREN
-!!      xmpi_barrier,xmpi_exch,xmpi_sum
 !!
 !! SOURCE
 
@@ -643,12 +633,6 @@ CONTAINS  !===========================================================
 !! SIDE EFFECTS
 !!   phi_block(my_t1:my_t2,nstates)=Contains the trial eigenstates.
 !!
-!! PARENTS
-!!      m_exc_itdiago
-!!
-!! CHILDREN
-!!      xmpi_barrier,xmpi_exch,xmpi_sum
-!!
 !! SOURCE
 
 subroutine exc_init_phi_block(ihexc_fname,use_mpio,comm)
@@ -802,12 +786,6 @@ end subroutine exc_init_phi_block
 !!
 !! FUNCTION
 !!  Write phi_block on the Fortran file oeig_fname.
-!!
-!! PARENTS
-!!      m_exc_itdiago
-!!
-!! CHILDREN
-!!      xmpi_barrier,xmpi_exch,xmpi_sum
 !!
 !! SOURCE
 
@@ -963,12 +941,6 @@ end subroutine exc_write_phi_block
 !! SIDE EFFECTS
 !!   phi_block(my_t1:my_t2,nstates)=Contains the trial eigenstates.
 !!
-!! PARENTS
-!!      m_exc_itdiago
-!!
-!! CHILDREN
-!!      xmpi_barrier,xmpi_exch,xmpi_sum
-!!
 !! SOURCE
 
 subroutine exc_subspace_rotation()
@@ -1066,12 +1038,6 @@ end subroutine exc_subspace_rotation
 !! SIDE EFFECTS
 !!   phi_block(my_t1:my_t2,nstates)=Contains the trial eigenstates.
 !!
-!! PARENTS
-!!      m_exc_itdiago
-!!
-!! CHILDREN
-!!      xmpi_barrier,xmpi_exch,xmpi_sum
-!!
 !! SOURCE
 
 subroutine exc_cholesky_ortho()
@@ -1166,10 +1132,6 @@ end subroutine exc_cholesky_ortho
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 function convergence_degree(resid)
@@ -1203,12 +1165,6 @@ end function convergence_degree
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_exc_itdiago
-!!
-!! CHILDREN
-!!      xmpi_barrier,xmpi_exch,xmpi_sum
-!!
 !! SOURCE
 
 subroutine exc_check_phi_block(string)
@@ -1232,7 +1188,7 @@ subroutine exc_check_phi_block(string)
  ABI_MALLOC(lbuff,(hexc_size,nstates))
  err = -one
  do irank=1,nproc-1
-   call xmpi_exch(phi_block,hexc_size*nstates,irank,lbuff,master,comm,ierr)
+   call xmpi_exch(phi_block,hexc_size*nstates,irank,lbuff,master,comm,11,ierr)
    if (my_rank==master) then
      lbuff = lbuff-phi_block
      err = MAX(err,MAXVAL(MAXVAL(ABS(lbuff),DIM=1)))

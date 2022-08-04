@@ -230,15 +230,6 @@ CONTAINS
 !! One of the two optional arguments lmnsize(:) or pawtab(:) must be present !
 !! If both are present, only pawtab(:) is used.
 !!
-!! PARENTS
-!!      m_bethe_salpeter,m_dfpt_looppert,m_dfpt_nstwf,m_dfpt_scfcv
-!!      m_dfpt_vtorho,m_dfptnl_loop,m_dfptnl_pert,m_dft_energy
-!!      m_electronpositron,m_extraprho,m_hdr,m_ioarr,m_nonlinear
-!!      m_paw_occupancies,m_pawrhoij,m_positron,m_qparticles,m_respfn_driver
-!!      m_screening_driver,m_sigma_driver,m_vtorho,m_wfk_analyze
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pawrhoij_alloc(pawrhoij,cplex_rhoij,nspden,nspinor,nsppol,typat,&
@@ -390,16 +381,6 @@ end subroutine pawrhoij_alloc
 !! SIDE EFFECTS
 !! pawrhoij(:)<type(pawrhoij_type)>= rhoij datastructure
 !!
-!! PARENTS
-!!      m_bethe_salpeter,m_d2frnl,m_dfpt_looppert,m_dfpt_nstwf,m_dfpt_scfcv
-!!      m_dfpt_vtorho,m_dfptnl_loop,m_dfptnl_pert,m_dft_energy
-!!      m_electronpositron,m_gstate,m_hdr,m_ioarr,m_nonlinear,m_outscfcv
-!!      m_paral_pert,m_paw_dfpt,m_paw_mkrho,m_paw_occupancies,m_paw_tools
-!!      m_pawrhoij,m_positron,m_respfn_driver,m_scf_history,m_screening_driver
-!!      m_sigma_driver,m_vtorho,m_wfk_analyze,mrgscr
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pawrhoij_free(pawrhoij)
@@ -461,13 +442,6 @@ end subroutine pawrhoij_free
 !!
 !! SIDE EFFECTS
 !! pawrhoij(:)<type(pawrhoij_type)>= rhoij datastructure
-!!
-!! PARENTS
-!!      m_d2frnl,m_dfpt_looppert,m_dfptnl_loop,m_dfptnl_pert,m_ioarr
-!!      m_nonlinear,m_outscfcv,m_paw_dfpt,m_paw_mkrho,m_paw_tools,m_pawrhoij
-!!      m_positron,m_respfn_driver,m_scf_history
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -538,14 +512,6 @@ end subroutine pawrhoij_nullify
 !!
 !! NOTES
 !!  In case of a single copy operation pawrhoij_out must have been allocated.
-!!
-!! PARENTS
-!!      m_bethe_salpeter,m_dfpt_looppert,m_electronpositron,m_gstate,m_hdr
-!!      m_inwffil,m_ioarr,m_nonlinear,m_outscfcv,m_paw_mkrho,m_pawrhoij
-!!      m_positron,m_respfn_driver,m_screening_driver,m_sigma_driver,m_wfk
-!!      m_wfk_analyze
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1237,11 +1203,6 @@ end subroutine pawrhoij_copy
 !! NOTES
 !!  The gathered structure are ordered like in sequential mode.
 !!
-!! PARENTS
-!!      m_d2frnl,m_paw_dfpt,m_paw_tools,m_pawrhoij,m_positron
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 
@@ -1574,11 +1535,6 @@ end subroutine pawrhoij_gather
 !! OUTPUT
 !!  pawrhoij_out(:)<type(pawrhoij_type)>= output rhoij datastructure on every process
 !!    Eventually distributed according to comm_atom communicator
-!!
-!! PARENTS
-!!      m_nonlinear,m_respfn_driver
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1964,11 +1920,6 @@ end subroutine pawrhoij_bcast
 !! SIDE EFFECTS
 !!  pawrhoij(:)<type(pawrhoij_type)>= input (and eventually output) pawrhoij datastructures
 !!
-!! PARENTS
-!!      m_paral_pert
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine pawrhoij_redistribute(pawrhoij,mpi_comm_in,mpi_comm_out,&
@@ -2324,11 +2275,6 @@ end subroutine pawrhoij_redistribute
 !!      opened with form=form.
 !!   if rdwr_mode="E", the routines only echoes the content of the structure.
 !!
-!! PARENTS
-!!      m_hdr,m_qparticles
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,typat,&
@@ -2539,17 +2485,39 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
        if (ncerr /= nf90_noerr) then
          NCF_CHECK(nf90_def_dim(ncid, "number_of_atoms", natom, natom_id))
        end if
-       NCF_CHECK(nf90_def_var(ncid, "nrhoijsel_atoms", NF90_INT, natom_id, nsel56_id))
-
-       NCF_CHECK(nf90_def_dim(ncid, "pawrhoij_cplex", my_cplex, cplex_id))
-       NCF_CHECK(nf90_def_dim(ncid, "pawrhoij_nspden", my_nspden, nspden_id))
-       NCF_CHECK(nf90_def_dim(ncid, "pawrhoij_qphase", my_qphase, qphase_id))
+       ncerr = nf90_inq_varid(ncid, "nrhoijsel_atoms", nsel56_id)
+       if (ncerr /= nf90_noerr) then
+         NCF_CHECK(nf90_def_var(ncid, "nrhoijsel_atoms", NF90_INT, natom_id, nsel56_id))
+       end if
+       ncerr = nf90_inq_dimid(ncid, "pawrhoij_cplex", cplex_id)
+       if (ncerr /= nf90_noerr) then
+         NCF_CHECK(nf90_def_dim(ncid, "pawrhoij_cplex", my_cplex, cplex_id))
+       end if
+       ncerr = nf90_inq_dimid(ncid, "pawrhoij_nspden", nspden_id)
+       if (ncerr /= nf90_noerr) then
+         NCF_CHECK(nf90_def_dim(ncid, "pawrhoij_nspden", my_nspden, nspden_id))
+       end if
+       ncerr = nf90_inq_dimid(ncid, "pawrhoij_qphase", qphase_id)
+       if (ncerr /= nf90_noerr) then
+         NCF_CHECK(nf90_def_dim(ncid, "pawrhoij_qphase", my_qphase, qphase_id))
+       end if
        if (bsize > 0) then
-         NCF_CHECK(nf90_def_dim(ncid, "rhoijselect_atoms_dim", bsize, bsize_id))
-         NCF_CHECK(nf90_def_dim(ncid, "rhoijp_atoms_dim", bsize*my_nspden*my_qphase*my_cplex, bufsize_id))
-         ! Define variables.
-         NCF_CHECK(nf90_def_var(ncid, "rhoijselect_atoms", NF90_INT, bsize_id, ibuffer_id))
-         NCF_CHECK(nf90_def_var(ncid, "rhoijp_atoms", NF90_DOUBLE, bufsize_id, buffer_id))
+         ncerr = nf90_inq_dimid(ncid, "rhoijselect_atoms_dim", bsize_id)
+         if (ncerr /= nf90_noerr) then
+           NCF_CHECK(nf90_def_dim(ncid, "rhoijselect_atoms_dim", bsize, bsize_id))
+         end if
+         ncerr = nf90_inq_dimid(ncid, "rhoijp_atoms_dim", bufsize_id)
+         if (ncerr /= nf90_noerr) then
+           NCF_CHECK(nf90_def_dim(ncid, "rhoijp_atoms_dim", bsize*my_nspden*my_qphase*my_cplex, bufsize_id))
+         end if
+         ncerr = nf90_inq_varid(ncid, "rhoijselect_atoms", ibuffer_id)
+         if (ncerr /= nf90_noerr) then
+           NCF_CHECK(nf90_def_var(ncid, "rhoijselect_atoms", NF90_INT, bsize_id, ibuffer_id))
+         end if
+         ncerr = nf90_inq_varid(ncid, "rhoijp_atoms", buffer_id)
+         if (ncerr /= nf90_noerr) then
+           NCF_CHECK(nf90_def_var(ncid, "rhoijp_atoms", NF90_DOUBLE, bufsize_id, buffer_id))
+         end if
        else
          ! This happens in v5[40] and bsize == 0 corresponds to NC_UNLIMITED
          LIBPAW_COMMENT("All rhoij entries are zero. No netcdf entry produced")
@@ -2745,11 +2713,6 @@ end subroutine pawrhoij_io
 !!   * In output the rhoij_ array is filled with the values stored in the packed array rhoijp.
 !!   * If use_rhoij_/=1, rhoij_ is allocated and the corresponding flag is set to 1.
 !!
-!! PARENTS
-!!      m_sigma_driver
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pawrhoij_unpack(rhoij)
@@ -2816,12 +2779,6 @@ end subroutine pawrhoij_unpack
 !!  rhoij(:) <pawrhoij_type)>= input/output datastructure
 !!   * In output the rhoij_ array is allocated
 !!
-!! PARENTS
-!!      m_dfpt_nstwf,m_dfpt_scfcv,m_dfpt_vtorho,m_dfptnl_pert,m_dft_energy
-!!      m_paw_occupancies
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pawrhoij_init_unpacked(rhoij)
@@ -2869,11 +2826,6 @@ end subroutine pawrhoij_init_unpacked
 !! SIDE EFFECTS
 !!  rhoij(:) <pawrhoij_type)>= input/output datastructure
 !!   * In output the rhoij_ array is deallocated
-!!
-!! PARENTS
-!!      m_dfpt_scfcv,m_dft_energy,m_paw_mkrho
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2923,10 +2875,6 @@ end subroutine pawrhoij_free_unpacked
 !!  pawrhoij(:) <type(pawrhoij_type)>= paw rhoij occupancies and related data
 !!  Input: the data calculateed by this processor.
 !!  Output: the final MPI sum over comm1 and comm2.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3013,10 +2961,6 @@ end subroutine pawrhoij_mpisum_unpacked_1D
 !!  pawrhoij(:,:) <type(pawrhoij_type)>= paw rhoij occupancies and related data
 !!  Input: the data calculateed by this processor.
 !!  Output: the final MPI sum over comm1 and comm2.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3117,11 +3061,6 @@ end subroutine pawrhoij_mpisum_unpacked_2D
 !!     * Input: the array is filled with all rhoij values (only if rhoij_input is not present)
 !!     * Output: the nselect first elements contain the non-zero rhoij values,
 !!               next value are irrelevant
-!!
-!! PARENTS
-!!      m_dfpt_scfcv,m_extraprho,m_newrho,m_newvtr,m_odamix,m_pawrhoij
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3248,15 +3187,6 @@ end subroutine pawrhoij_filter
 !!  [qphase_rhoij]= value of qphase associated to pawrhoij
 !!  [nspden_rhoij]= value of nspden associated to pawrhoij
 !!
-!! PARENTS
-!!      m_bethe_salpeter,m_dfpt_looppert,m_dfpt_nstwf,m_dfpt_scfcv
-!!      m_dfpt_vtorho,m_dfptnl_loop,m_dfptnl_pert,m_dft_energy,m_extraprho
-!!      m_hdr,m_nonlinear,m_paw_occupancies,m_positron,m_qparticles
-!!      m_respfn_driver,m_screening_driver,m_sigma_driver,m_vtorho
-!!      m_wfk_analyze
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pawrhoij_inquire_dim(cplex,cpxocc,nspden,qpt,spnorb, &
@@ -3333,11 +3263,6 @@ end subroutine pawrhoij_inquire_dim
 !! (Only writing)
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_paw_tools,m_pawrhoij,m_wfd
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3542,11 +3467,6 @@ end subroutine pawrhoij_print_rhoij
 !!  pawrhoij and pawrhoij_unsym can be identical (refer to the same pawrhoij datastructure).
 !!  They should be different only if pawrhoij is distributed over atomic sites
 !!  (in that case pawrhoij_unsym should not be distributed over atomic sites).
-!!
-!! PARENTS
-!!      m_d2frnl,m_dft_energy,m_paw_mkrho,m_positron,m_sigma_driver
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -4393,11 +4313,6 @@ end subroutine pawrhoij_symrhoij
 !! OUTPUT
 !!  pawrhoij= output datastructure filled with buffers receive in a receive operation
 !!
-!! PARENTS
-!!      m_pawrhoij
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pawrhoij_isendreceive_getbuffer(pawrhoij,nrhoij_send,atm_indx_recv,buf_int,buf_dp)
@@ -4537,11 +4452,6 @@ end subroutine pawrhoij_isendreceive_getbuffer
 !!  buf_dp= buffer of double precision numbers to be sent
 !!  buf_dp_size= size of buffer of double precision numbers
 !!
-!! PARENTS
-!!      m_pawrhoij
-!!
-!! CHILDREN
-!!
 !! SOURCE
 !!
 subroutine pawrhoij_isendreceive_fillbuffer(pawrhoij,atmtab_send, atm_indx_send,nrhoij_send,&
@@ -4624,7 +4534,9 @@ subroutine pawrhoij_isendreceive_fillbuffer(pawrhoij,atmtab_send, atm_indx_send,
    nselect=pawrhoij1%nrhoijsel
    use_rhoijres=pawrhoij1%use_rhoijres
    use_rhoij_  =pawrhoij1%use_rhoij_
-   rhoij_size2 =size(pawrhoij1%rhoij_,dim=2)
+   if (use_rhoij_ > 0) then
+     rhoij_size2 =size(pawrhoij1%rhoij_,dim=2)
+   end if
    buf_int(indx_int)=atmtab_send(irhoij_send)        ;indx_int=indx_int+1
    buf_int(indx_int)=cplex                           ;indx_int=indx_int+1
    buf_int(indx_int)=qphase                          ;indx_int=indx_int+1

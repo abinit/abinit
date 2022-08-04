@@ -89,6 +89,8 @@ nav:
     - topics/Hybrids.md
     - topics/k-points.md
     - topics/LatticeModel.md
+    - topics/LatticeWannier.md
+    - topics/LWFModel.md
     - topics/LDAminushalf.md
     - topics/LOTF.md
     - topics/longwave.md
@@ -186,6 +188,7 @@ nav:
         - Elastic: tutorial/elastic.md
         - tutorial/ffield.md
         - tutorial/nlo.md
+        - tutorial/lattice_wannier.md
     - DMFT: tutorial/dmft.md
     - EPH:
         - tutorial/eph_intro.md
@@ -208,9 +211,11 @@ nav:
         - Many-Body: tutorial/paral_mbt.md
         - Moldyn: tutorial/paral_moldyn.md
     - Multibinit:
+        - Introduction: tutorial/multibinit.md
         - Lattice Model: tutorial/lattice_model.md
         #- Fit Process: tutorial/fit_process.md
         - Spin Model: tutorial/spin_model.md
+        - LWF Model: tutorial/lwf_model.md
     - aTDEP: 
         - ATDEP1: tutorial/atdep1.md
           #- ATDEP2: tutorial/atdep2.md
@@ -222,6 +227,7 @@ nav:
     - tutorial/positron.md
     - tutorial/tddft.md
     - tutorial/wannier90.md
+    - tutorial/z2pack.md
 - FAQ:
     - Configuration and compilation: faq/configuration_and_compilation.md
     - General questions: faq/general_questions.md
@@ -342,7 +348,7 @@ copyright: Copyright &copy; 2020-2021 The Abinit Group
 google_analytics: ['UA-116681470-1', 'docs.abinit.org']
 
 extra:
-    version: 9.7.3
+    version: 9.9.0
     previous_published_versions: [] #8.2.0
     social:
         - icon: fontawesome/brands/github

@@ -196,11 +196,6 @@ CONTAINS  !===========================================================
 !!  [msg]=User message
 !!  [exit_status]=optional, shell return code, default 1
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
-!!
 !! SOURCE
 
 subroutine xpaw_mpi_abort(comm,mpierr,msg,exit_status)
@@ -345,11 +340,6 @@ end function xpaw_mpi_comm_size
 !! INPUTS
 !!  comm=MPI communicator
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
-!!
 !! SOURCE
 
 subroutine xpaw_mpi_barrier(comm)
@@ -393,11 +383,6 @@ end subroutine xpaw_mpi_barrier
 !! OUTPUT
 !!  mpierr= status error
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
-!!
 !! SOURCE
 
 subroutine xpaw_mpi_wait(request,mpierr)
@@ -436,11 +421,6 @@ end subroutine xpaw_mpi_wait
 !!
 !! OUTPUT
 !!  mpierr= status error
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -483,11 +463,6 @@ end subroutine xpaw_mpi_waitall
 !! OUTPUT
 !!  flag= True if a message with the specified source, tag, and communicator is available
 !!  mpierr= status error
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -534,11 +509,6 @@ end subroutine xpaw_mpi_iprobe
 !! SIDE EFFECTS
 !!  recvbuf= received elements
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
-!!
 !! SOURCE
 
 subroutine xpaw_mpi_allgather_int1d(xval,nelem,recvbuf,spaceComm,ier)
@@ -580,11 +550,6 @@ end subroutine xpaw_mpi_allgather_int1d
 !!
 !! SIDE EFFECTS
 !!  recvbuf= received elements
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -628,11 +593,6 @@ end subroutine xpaw_mpi_allgather_dp1d
 !! SIDE EFFECTS
 !!  recvbuf= received elements
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
-!!
 !! SOURCE
 
 subroutine xpaw_mpi_allgather_dp2d(xval,nelem,recvbuf,spaceComm,ier)
@@ -674,11 +634,6 @@ end subroutine xpaw_mpi_allgather_dp2d
 !!
 !! SIDE EFFECTS
 !!  recvbuf= received elements
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -725,11 +680,6 @@ end subroutine xpaw_mpi_allgather_dp3d
 !!
 !! SIDE EFFECTS
 !!  recvbuf= received buffer
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -782,11 +732,6 @@ end subroutine xpaw_mpi_allgatherv_int1d
 !! SIDE EFFECTS
 !!  recvbuf= received buffer
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
-!!
 !! SOURCE
 
 subroutine xpaw_mpi_allgatherv_dp1d(xval,nelem,recvbuf,recvcounts,displs,spaceComm,ier)
@@ -837,11 +782,6 @@ end subroutine xpaw_mpi_allgatherv_dp1d
 !!
 !! SIDE EFFECTS
 !!  recvbuf= received buffer
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -898,11 +838,6 @@ end subroutine xpaw_mpi_allgatherv_dp2d
 !! SIDE EFFECTS
 !!  recvbuf= received buffer
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
-!!
 !! SOURCE
 
 subroutine xpaw_mpi_scatterv_int1d(xval,sendcounts,displs,recvbuf,recvcount,root,spaceComm,ier)
@@ -954,11 +889,6 @@ end subroutine xpaw_mpi_scatterv_int1d
 !! SIDE EFFECTS
 !!  recvbuf= received buffer
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
-!!
 !! SOURCE
 
 subroutine xpaw_mpi_scatterv_dp1d(xval,sendcounts,displs,recvbuf,recvcount,root,spaceComm,ier)
@@ -1009,11 +939,6 @@ end subroutine xpaw_mpi_scatterv_dp1d
 !!
 !! SIDE EFFECTS
 !!  recvbuf= received buffer
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -1067,11 +992,6 @@ end subroutine xpaw_mpi_scatterv_dp2d
 !! SIDE EFFECTS
 !!  recvbuf= received buffer
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
-!!
 !! SOURCE
 
 subroutine xpaw_mpi_alltoall_int1d(xval,sendsize,recvbuf,recvsize,spaceComm,ier)
@@ -1119,11 +1039,6 @@ end subroutine xpaw_mpi_alltoall_int1d
 !! SIDE EFFECTS
 !!  recvbuf= received buffer
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
-!!
 !! SOURCE
 
 subroutine xpaw_mpi_alltoall_dp1d(xval,sendsize,recvbuf,recvsize,spaceComm,ier)
@@ -1168,11 +1083,6 @@ end subroutine xpaw_mpi_alltoall_dp1d
 !!
 !! SIDE EFFECTS
 !!  recvbuf= received buffer
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -1222,11 +1132,6 @@ end subroutine xpaw_mpi_alltoall_dp2d
 !!
 !! SIDE EFFECTS
 !!  recvbuf= received buffer
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -1284,11 +1189,6 @@ end subroutine xpaw_mpi_alltoallv_int1d
 !! SIDE EFFECTS
 !!  recvbuf= received buffer
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
-!!
 !! SOURCE
 
 subroutine xpaw_mpi_alltoallv_dp1d(xval,sendcnts,sdispls,recvbuf,recvcnts,rdispls,comm,ier)
@@ -1342,11 +1242,6 @@ end subroutine xpaw_mpi_alltoallv_dp1d
 !! SIDE EFFECTS
 !!  recvbuf= received buffer
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
-!!
 !! SOURCE
 
 subroutine xpaw_mpi_alltoallv_dp2d(xval,sendcnts,sdispls,recvbuf,recvcnts,rdispls,comm,ier)
@@ -1399,11 +1294,6 @@ end subroutine xpaw_mpi_alltoallv_dp2d
 !! SIDE EFFECTS
 !!  xval= buffer
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
-!!
 !! SOURCE
 
 subroutine xpaw_mpi_bcast_int(xval,master,spaceComm,ier)
@@ -1441,11 +1331,6 @@ end subroutine xpaw_mpi_bcast_int
 !!
 !! SIDE EFFECTS
 !!  xval= buffer array
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -1486,11 +1371,6 @@ end subroutine xpaw_mpi_bcast_int1d
 !!
 !! SIDE EFFECTS
 !!  xval= buffer array
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 subroutine xpaw_mpi_bcast_dp1d(xval,master,spaceComm,ier)
@@ -1533,11 +1413,6 @@ end subroutine xpaw_mpi_bcast_dp1d
 !! SIDE EFFECTS
 !!  xval= buffer array
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
-!!
 !! SOURCE
 
 subroutine xpaw_mpi_bcast_dp2d(xval,master,spaceComm,ier)
@@ -1579,11 +1454,6 @@ end subroutine xpaw_mpi_bcast_dp2d
 !!
 !! SIDE EFFECTS
 !!  xval= buffer array
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -1632,11 +1502,6 @@ end subroutine xpaw_mpi_bcast_dp3d
 !! SIDE EFFECTS
 !!  recvbuf= received buffer
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
-!!
 !! SOURCE
 
 subroutine xpaw_mpi_gather_int1d(xval,sendcount,recvbuf,recvcount,root,spaceComm,ier)
@@ -1681,11 +1546,6 @@ end subroutine xpaw_mpi_gather_int1d
 !!
 !! SIDE EFFECTS
 !!  recvbuf= received buffer
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -1732,11 +1592,6 @@ end subroutine xpaw_mpi_gather_dp1d
 !!
 !! SIDE EFFECTS
 !!  recvbuf= received buffer
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -1786,11 +1641,6 @@ end subroutine xpaw_mpi_gather_dp2d
 !!
 !! SIDE EFFECTS
 !!  recvbuf= received buffer
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -1844,11 +1694,6 @@ end subroutine xpaw_mpi_gatherv_int1d
 !! SIDE EFFECTS
 !!  recvbuf= received buffer
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
-!!
 !! SOURCE
 
 subroutine xpaw_mpi_gatherv_dp1d(xval,nelem,recvbuf,recvcounts,displs,root,spaceComm,ier)
@@ -1900,11 +1745,6 @@ end subroutine xpaw_mpi_gatherv_dp1d
 !!
 !! SIDE EFFECTS
 !!  recvbuf= received buffer
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -1961,11 +1801,6 @@ end subroutine xpaw_mpi_gatherv_dp2d
 !! NOTES
 !!  status of MPI_RECV is explicitly ignored
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
-!!
 !! SOURCE
 
 subroutine xpaw_mpi_recv_int1d(xval,source,tag,spaceComm,ier)
@@ -2012,11 +1847,6 @@ subroutine xpaw_mpi_recv_int1d(xval,source,tag,spaceComm,ier)
 !!
 !! NOTES
 !!  status of MPI_RECV is explicitly ignored
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -2065,11 +1895,6 @@ end subroutine xpaw_mpi_recv_dp1d
 !! NOTES
 !!  status of MPI_RECV is explicitly ignored
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
-!!
 !! SOURCE
 
 subroutine xpaw_mpi_recv_dp2d(xval,source,tag,spaceComm,ier)
@@ -2116,11 +1941,6 @@ end subroutine xpaw_mpi_recv_dp2d
 !!
 !! NOTES
 !!  status of MPI_RECV is explicitly ignored
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -2171,11 +1991,6 @@ end subroutine xpaw_mpi_recv_dp3d
 !! NOTES
 !!  status of MPI_IRECV is explicitly ignored
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
-!!
 !! SOURCE
 
 subroutine xpaw_mpi_irecv_int1d(xval,source,tag,spaceComm,request,ierr)
@@ -2222,11 +2037,6 @@ subroutine xpaw_mpi_irecv_int1d(xval,source,tag,spaceComm,request,ierr)
 !!
 !! NOTES
 !!  status of MPI_IRECV is explicitly ignored
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -2276,11 +2086,6 @@ end subroutine xpaw_mpi_irecv_dp1d
 !! NOTES
 !!  status of MPI_IRECV is explicitly ignored
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
-!!
 !! SOURCE
 
 subroutine xpaw_mpi_irecv_dp2d(xval,source,tag,spaceComm,request,ierr)
@@ -2328,11 +2133,6 @@ end subroutine xpaw_mpi_irecv_dp2d
 !! SIDE EFFECTS
 !!  xval= buffer array
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
-!!
 !! SOURCE
 
 subroutine xpaw_mpi_send_int1d(xval,dest,tag,spaceComm,ier)
@@ -2376,11 +2176,6 @@ subroutine xpaw_mpi_send_int1d(xval,dest,tag,spaceComm,ier)
 !!
 !! SIDE EFFECTS
 !!  xval= buffer array
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -2426,11 +2221,6 @@ end subroutine xpaw_mpi_send_dp1d
 !! SIDE EFFECTS
 !!  xval= buffer array
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
-!!
 !! SOURCE
 
 subroutine xpaw_mpi_send_dp2d(xval,dest,tag,spaceComm,ier)
@@ -2474,11 +2264,6 @@ end subroutine xpaw_mpi_send_dp2d
 !!
 !! SIDE EFFECTS
 !!  xval= buffer array
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -2526,11 +2311,6 @@ end subroutine xpaw_mpi_send_dp3d
 !! SIDE EFFECTS
 !!  xval= buffer array
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
-!!
 !! SOURCE
 
 subroutine xpaw_mpi_isend_int1d(xval,dest,tag,spaceComm,request,ierr)
@@ -2575,11 +2355,6 @@ subroutine xpaw_mpi_isend_int1d(xval,dest,tag,spaceComm,request,ierr)
 !!
 !! SIDE EFFECTS
 !!  xval= buffer array
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -2626,11 +2401,6 @@ end subroutine xpaw_mpi_isend_dp1d
 !! SIDE EFFECTS
 !!  xval= buffer array
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
-!!
 !! SOURCE
 
 subroutine xpaw_mpi_isend_dp2d(xval,dest,tag,spaceComm,request,ierr)
@@ -2668,6 +2438,7 @@ end subroutine xpaw_mpi_isend_dp2d
 !!  MPI_SEND/MPI_RECV for 1D integer arrays
 !!
 !! INPUTS
+!!  mtag= message tag
 !!  n1= vector length
 !!  vsend= sent buffer
 !!  sender= node sending the data
@@ -2680,17 +2451,12 @@ end subroutine xpaw_mpi_isend_dp2d
 !! SIDE EFFECTS
 !!  vrecv= received buffer
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
-!!
 !! SOURCE
 
-subroutine xpaw_mpi_exch_int1d(vsend,n1,sender,vrecv,recever,spaceComm,ier)
+subroutine xpaw_mpi_exch_int1d(vsend,n1,sender,vrecv,recever,spaceComm,mtag,ier)
 
 !Arguments----------------
- integer, intent(in) :: n1
+ integer, intent(in) :: mtag,n1
  integer, intent(in) :: vsend(:)
  integer, intent(inout) :: vrecv(:)
  integer, intent(in) :: sender,recever,spaceComm
@@ -2707,7 +2473,7 @@ subroutine xpaw_mpi_exch_int1d(vsend,n1,sender,vrecv,recever,spaceComm,ier)
 #if defined HAVE_MPI
  if (sender==recever.or.spaceComm==xpaw_mpi_comm_null.or.(n1==0)) return
  call MPI_COMM_RANK(spaceComm,me,ier)
- tag = MOD(n1,xpaw_mpi_get_tag_ub(spaceComm))
+ tag = MOD(mtag,xpaw_mpi_get_tag_ub(spaceComm))
  if (recever==me) then
    call MPI_RECV(vrecv,n1,MPI_INTEGER,sender,tag,spaceComm,status,ier)
  end if
@@ -2726,6 +2492,7 @@ end subroutine xpaw_mpi_exch_int1d
 !!  MPI_SEND/MPI_RECV for 1D double precision arrays
 !!
 !! INPUTS
+!!  mtag= message tag
 !!  n1= first dimension of the array
 !!  vsend= send buffer
 !!  sender= node sending the data
@@ -2738,17 +2505,12 @@ end subroutine xpaw_mpi_exch_int1d
 !! SIDE EFFECTS
 !!  vrecv= receive buffer
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
-!!
 !! SOURCE
 
-subroutine xpaw_mpi_exch_dp1d(vsend,n1,sender,vrecv,recever,spaceComm,ier)
+subroutine xpaw_mpi_exch_dp1d(vsend,n1,sender,vrecv,recever,spaceComm,mtag,ier)
 
 !Arguments----------------
- integer,intent(in) :: n1
+ integer,intent(in) :: mtag,n1
  real(dp), intent(in) :: vsend(:)
  real(dp), intent(inout) :: vrecv(:)
  integer, intent(in) :: sender,recever,spaceComm
@@ -2765,7 +2527,7 @@ subroutine xpaw_mpi_exch_dp1d(vsend,n1,sender,vrecv,recever,spaceComm,ier)
 #if defined HAVE_MPI
  if (sender==recever.or.spaceComm==xpaw_mpi_comm_null.or.(n1==0)) return
  call MPI_COMM_RANK(spaceComm,me,ier)
- tag = MOD(n1,xpaw_mpi_get_tag_ub(spaceComm))
+ tag = MOD(mtag,xpaw_mpi_get_tag_ub(spaceComm))
  if (recever==me) then
    call MPI_RECV(vrecv,n1,MPI_DOUBLE_PRECISION,sender,tag,spaceComm,status,ier)
  end if
@@ -2784,6 +2546,7 @@ end subroutine xpaw_mpi_exch_dp1d
 !!  MPI_SEND/MPI_RECV for 2D double precision arrays
 !!
 !! INPUTS
+!!  mtag= message tag
 !!  nt= vector length
 !!  vsend= sent buffer
 !!  sender= node sending the data
@@ -2796,17 +2559,12 @@ end subroutine xpaw_mpi_exch_dp1d
 !! SIDE EFFECTS
 !!  vrecv= received buffer
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
-!!
 !! SOURCE
 
-subroutine xpaw_mpi_exch_dp2d(vsend,nt,sender,vrecv,recever,spaceComm,ier)
+subroutine xpaw_mpi_exch_dp2d(vsend,nt,sender,vrecv,recever,spaceComm,mtag,ier)
 
 !Arguments----------------
- integer,intent(in) :: nt
+ integer,intent(in) :: mtag,nt
  real(dp), intent(in) :: vsend(:,:)
  real(dp), intent(inout) :: vrecv(:,:)
  integer, intent(in) :: sender,recever,spaceComm
@@ -2823,7 +2581,7 @@ subroutine xpaw_mpi_exch_dp2d(vsend,nt,sender,vrecv,recever,spaceComm,ier)
 #if defined HAVE_MPI
  if (sender==recever.or.spaceComm==xpaw_mpi_comm_null.or.(nt==0)) return
  call MPI_COMM_RANK(spaceComm,me,ier)
- tag = MOD(nt,xpaw_mpi_get_tag_ub(spaceComm))
+ tag = MOD(mtag,xpaw_mpi_get_tag_ub(spaceComm))
  if (recever==me) then
    call MPI_RECV(vrecv,nt,MPI_DOUBLE_PRECISION,sender,tag,spaceComm,status,ier)
  end if
@@ -2836,12 +2594,14 @@ end subroutine xpaw_mpi_exch_dp2d
 
 !!****f* ABINIT/xpaw_mpi_exch_dp3d
 !! NAME
+!!  mtag= message tag
 !!  xpaw_mpi_exch_dp3d
 !!
 !! FUNCTION
 !!  MPI_SEND/MPI_RECV for 3D double precision arrays
 !!
 !! INPUTS
+!!  mtag= message tag
 !!  nt= vector length
 !!  vsend= sent buffer
 !!  sender= node sending the data
@@ -2854,17 +2614,12 @@ end subroutine xpaw_mpi_exch_dp2d
 !! SIDE EFFECTS
 !!  vrecv= received buffer
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
-!!
 !! SOURCE
 
-subroutine xpaw_mpi_exch_dp3d(vsend,nt,sender,vrecv,recever,spaceComm,ier)
+subroutine xpaw_mpi_exch_dp3d(vsend,nt,sender,vrecv,recever,spaceComm,mtag,ier)
 
 !Arguments----------------
- integer,intent(in) :: nt
+ integer,intent(in) :: mtag,nt
  real(dp), intent(in) :: vsend(:,:,:)
  real(dp), intent(inout) :: vrecv(:,:,:)
  integer, intent(in) :: sender,recever,spaceComm
@@ -2881,7 +2636,7 @@ subroutine xpaw_mpi_exch_dp3d(vsend,nt,sender,vrecv,recever,spaceComm,ier)
 #if defined HAVE_MPI
  if (sender==recever.or.spaceComm==xpaw_mpi_comm_null.or.(nt==0)) return
  call MPI_COMM_RANK(spaceComm,me,ier)
- tag = MOD(nt,xpaw_mpi_get_tag_ub(spaceComm))
+ tag = MOD(mtag,xpaw_mpi_get_tag_ub(spaceComm))
  if (recever==me) then
    call MPI_RECV(vrecv,nt,MPI_DOUBLE_PRECISION,sender,tag,spaceComm,status,ier)
  end if
@@ -2909,11 +2664,6 @@ end subroutine xpaw_mpi_exch_dp3d
 !!
 !! SIDE EFFECTS
 !!  xval= buffer
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -2965,11 +2715,6 @@ end subroutine xpaw_mpi_sum_int
 !!
 !! SIDE EFFECTS
 !!  xval= buffer array
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -3023,11 +2768,6 @@ end subroutine xpaw_mpi_sum_int1d
 !! SIDE EFFECTS
 !!  xval= buffer array
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
-!!
 !! SOURCE
 
 subroutine xpaw_mpi_sum_dp1d(xval,comm,ier)
@@ -3079,11 +2819,6 @@ end subroutine xpaw_mpi_sum_dp1d
 !!
 !! SIDE EFFECTS
 !!  xval= buffer array
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -3137,11 +2872,6 @@ end subroutine xpaw_mpi_sum_dp2d
 !! SIDE EFFECTS
 !!  xval= buffer array
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
-!!
 !! SOURCE
 
 subroutine xpaw_mpi_sum_dp3d(xval,comm,ier)
@@ -3192,11 +2922,6 @@ end subroutine xpaw_mpi_sum_dp3d
 !!
 !! OUTPUT
 !!  xpaw_mpi_get_tag_ub=value for the MPI_TAG_UB attribute attached to comm
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_attr_get
 !!
 !! SOURCE
 

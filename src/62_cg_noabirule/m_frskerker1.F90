@@ -18,10 +18,6 @@
 !! this is neither a function nor a subroutine. This is a module
 !! It is made of two functions and one init subroutine
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -65,12 +61,6 @@ contains
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_prcref
-!!
-!! CHILDREN
-!!      laplacian
 !!
 !! SOURCE
 
@@ -120,12 +110,6 @@ subroutine frskerker1__init(dtset_in,mpi_enreg_in,nfft_in,ngfft_in,nspden_in,die
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_prcref
-!!
-!! CHILDREN
-!!      laplacian
-!!
 !! SOURCE
 
 subroutine frskerker1__end()
@@ -156,11 +140,6 @@ subroutine frskerker1__end()
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      laplacian
-!!
 !! SOURCE
 
 subroutine frskerker1__newvres(nv1,nv2,x, grad, vrespc)
@@ -189,10 +168,6 @@ end subroutine frskerker1__newvres
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -234,10 +209,6 @@ function frskerker1__pf(nv1,nv2,vrespc)
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -124,16 +120,6 @@ CONTAINS  !=====================================================================
 !! Notice that this formula is expressed on the fine grid, and requires
 !! interpolating the PAW radial functions onto this grid, as well as calling
 !! initylmr in order to get the angular functions on the grid points.
-!!
-!! PARENTS
-!!      m_outscfcv
-!!
-!! CHILDREN
-!!      flush_unit,fourwf,free_my_atmtab,get_my_atmtab,nhatgrid
-!!      paw_pwaves_lmn_free,paw_pwaves_lmn_init,pawcprj_alloc,pawcprj_free
-!!      pawfgrtab_free,pawfgrtab_init,pawfgrtab_print,pawtab_get_lsize
-!!      sphereboundary,wrap2_zero_one,wrtout,xcart2xred,xmpi_barrier,xmpi_max
-!!      xmpi_sum
 !!
 !! SOURCE
 

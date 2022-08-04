@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.7.4 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h29 )
+.Starting date : Wed  4 May 2022.
+- ( at 01h24 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v6_t58-t59/t58.in
-- output file    -> t58.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/v6_t58-t59/t58.abi
+- output file    -> t58.abo
 - root for input  files -> t58i
 - root for output files -> t58o
 
@@ -34,7 +34,7 @@
 -    mband =          32        mffmem =           1         mkmem =           1
        mpw =         185          nfft =        8000          nkpt =           1
 ================================================================================
-P This job should need less than                       2.587 Mbytes of memory.
+P This job should need less than                       2.822 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.092 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
@@ -106,8 +106,8 @@ P          mk1mem           1
                        0.000000  0.000000
         optdriver1          0
         optdriver2          1
-          rfatpol           1       8
-            rfdir           1       1       1
+           prtpot1          0
+           prtpot2          1
            rfphon1          0
            rfphon2          1
             rprim     -5.0000000000E-01  5.0000000000E-01  5.0000000000E-01
@@ -181,8 +181,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.11434
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.fakesmooth
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.fakesmooth
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/02he.fakesmooth
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/02he.fakesmooth
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -408,7 +408,6 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.11434
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t58o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -448,7 +447,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t58o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -466,7 +464,7 @@ tolerances: {tolvrs: 1.00E-08, }
  ETOT  3   6.8270855789629     -1.040E+00 4.702E-04 2.572E-01
  ETOT  4   6.8265458668107     -5.397E-04 2.149E-07 1.021E-03
  ETOT  5   6.8265436741910     -2.193E-06 9.078E-10 3.919E-06
- ETOT  6   6.8265436680807     -6.110E-09 3.125E-12 7.110E-10
+ ETOT  6   6.8265436680808     -6.110E-09 3.125E-12 7.110E-10
 
  At SCF step    6       vres2   =  7.11E-10 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
@@ -503,7 +501,6 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t58o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -521,7 +518,7 @@ tolerances: {tolvrs: 1.00E-08, }
  ETOT  3   6.8270845524358     -1.040E+00 3.535E-04 2.569E-01
  ETOT  4   6.8265458630031     -5.387E-04 2.324E-07 1.020E-03
  ETOT  5   6.8265436741889     -2.189E-06 8.804E-10 3.889E-06
- ETOT  6   6.8265436681053     -6.084E-09 3.035E-12 8.262E-10
+ ETOT  6   6.8265436681054     -6.084E-09 3.035E-12 8.262E-10
 
  At SCF step    6       vres2   =  8.26E-10 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
@@ -558,7 +555,6 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t58o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -613,7 +609,6 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t58o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -631,7 +626,7 @@ tolerances: {tolvrs: 1.00E-08, }
  ETOT  3   6.8270862125937     -1.040E+00 4.697E-04 2.576E-01
  ETOT  4   6.8265458674222     -5.403E-04 2.214E-07 1.022E-03
  ETOT  5   6.8265436735043     -2.194E-06 9.280E-10 3.908E-06
- ETOT  6   6.8265436673996     -6.105E-09 3.219E-12 7.800E-10
+ ETOT  6   6.8265436673997     -6.105E-09 3.219E-12 7.800E-10
 
  At SCF step    6       vres2   =  7.80E-10 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
@@ -668,7 +663,6 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t58o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -723,7 +717,6 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t58o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -778,7 +771,6 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t58o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -833,7 +825,6 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t58o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -888,7 +879,6 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t58o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -904,7 +894,7 @@ tolerances: {tolvrs: 1.00E-08, }
 -ETOT  1   17.410961355937     -4.040E+01 5.091E-02 5.418E+03
  ETOT  2   7.8677833614970     -9.543E+00 5.922E-03 5.326E+02
  ETOT  3   6.8270812520876     -1.041E+00 4.697E-04 2.553E-01
- ETOT  4   6.8265458627876     -5.354E-04 2.224E-07 1.019E-03
+ ETOT  4   6.8265458627877     -5.354E-04 2.224E-07 1.019E-03
  ETOT  5   6.8265436740514     -2.189E-06 9.161E-10 3.952E-06
  ETOT  6   6.8265436678770     -6.174E-09 3.296E-12 1.327E-09
 
@@ -943,7 +933,6 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t58o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -959,7 +948,7 @@ tolerances: {tolvrs: 1.00E-08, }
 -ETOT  1   17.408485445543     -4.040E+01 5.091E-02 5.417E+03
  ETOT  2   7.8672792165049     -9.541E+00 6.715E-03 5.323E+02
  ETOT  3   6.8270839589065     -1.040E+00 4.699E-04 2.565E-01
- ETOT  4   6.8265458596812     -5.381E-04 2.098E-07 1.017E-03
+ ETOT  4   6.8265458596813     -5.381E-04 2.098E-07 1.017E-03
  ETOT  5   6.8265436739446     -2.186E-06 9.492E-10 3.905E-06
  ETOT  6   6.8265436678509     -6.094E-09 3.290E-12 7.432E-10
 
@@ -998,7 +987,6 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t58o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1053,7 +1041,6 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t58o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1070,7 +1057,7 @@ tolerances: {tolvrs: 1.00E-08, }
  ETOT  2   7.8678730269953     -9.543E+00 6.692E-03 5.326E+02
  ETOT  3   6.8270821839578     -1.041E+00 4.696E-04 2.557E-01
  ETOT  4   6.8265458632987     -5.363E-04 2.171E-07 1.017E-03
- ETOT  5   6.8265436742185     -2.189E-06 9.259E-10 3.889E-06
+ ETOT  5   6.8265436742186     -2.189E-06 9.259E-10 3.889E-06
  ETOT  6   6.8265436681285     -6.090E-09 3.275E-12 6.757E-10
 
  At SCF step    6       vres2   =  6.76E-10 < tolvrs=  1.00E-08 =>converged.
@@ -1108,7 +1095,6 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t58o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1163,7 +1149,6 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t58o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1218,7 +1203,6 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t58o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1273,7 +1257,6 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t58o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1288,7 +1271,7 @@ tolerances: {tolvrs: 1.00E-08, }
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   17.408430832183     -4.040E+01 5.091E-02 5.417E+03
  ETOT  2   7.8673097999349     -9.541E+00 6.410E-03 5.323E+02
- ETOT  3   6.8270848195527     -1.040E+00 4.702E-04 2.569E-01
+ ETOT  3   6.8270848195528     -1.040E+00 4.702E-04 2.569E-01
  ETOT  4   6.8265458637234     -5.390E-04 2.283E-07 1.020E-03
  ETOT  5   6.8265436741362     -2.190E-06 9.005E-10 3.914E-06
  ETOT  6   6.8265436680249     -6.111E-09 3.115E-12 7.642E-10
@@ -1328,7 +1311,6 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t58o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1383,7 +1365,6 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t58o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1397,10 +1378,10 @@ tolerances: {tolvrs: 1.00E-08, }
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   17.407900073763     -4.040E+01 5.091E-02 5.417E+03
- ETOT  2   7.8671732613664     -9.541E+00 6.423E-03 5.322E+02
+ ETOT  2   7.8671732613665     -9.541E+00 6.423E-03 5.322E+02
  ETOT  3   6.8270852025599     -1.040E+00 4.709E-04 2.572E-01
  ETOT  4   6.8265458638875     -5.393E-04 2.221E-07 1.020E-03
- ETOT  5   6.8265436745489     -2.189E-06 9.077E-10 3.901E-06
+ ETOT  5   6.8265436745490     -2.189E-06 9.077E-10 3.901E-06
  ETOT  6   6.8265436684448     -6.104E-09 3.089E-12 8.008E-10
 
  At SCF step    6       vres2   =  8.01E-10 < tolvrs=  1.00E-08 =>converged.
@@ -1438,7 +1419,6 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t58o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1493,7 +1473,6 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t58o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1548,7 +1527,6 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t58o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1603,7 +1581,6 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t58o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1619,7 +1596,7 @@ tolerances: {tolvrs: 1.00E-08, }
 -ETOT  1   17.407724782210     -4.040E+01 5.091E-02 5.417E+03
  ETOT  2   7.8671290622414     -9.541E+00 6.789E-03 5.322E+02
  ETOT  3   6.8270854034765     -1.040E+00 4.697E-04 2.572E-01
- ETOT  4   6.8265458659536     -5.395E-04 2.219E-07 1.022E-03
+ ETOT  4   6.8265458659535     -5.395E-04 2.219E-07 1.022E-03
  ETOT  5   6.8265436735005     -2.192E-06 9.222E-10 3.925E-06
  ETOT  6   6.8265436673713     -6.129E-09 3.254E-12 7.962E-10
 
@@ -1658,7 +1635,6 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t58o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1713,7 +1689,6 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t58o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -3115,8 +3090,8 @@ P          mk1mem           1
                        0.000000  0.000000
         optdriver1          0
         optdriver2          1
-          rfatpol           1       8
-            rfdir           1       1       1
+           prtpot1          0
+           prtpot2          1
            rfphon1          0
            rfphon2          1
             rprim     -5.0000000000E-01  5.0000000000E-01  5.0000000000E-01
@@ -3257,10 +3232,10 @@ P          mk1mem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          8.4  wall=          8.4
+- Proc.   0 individual time (sec): cpu=         10.8  wall=         11.0
 
 ================================================================================
 
  Calculation completed.
-.Delivered   0 WARNINGs and  63 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          8.4  wall=          8.4
+.Delivered   0 WARNINGs and  11 COMMENTs to log file.
++Overall time at end (sec) : cpu=         10.8  wall=         11.0

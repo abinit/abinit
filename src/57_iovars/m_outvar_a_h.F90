@@ -10,10 +10,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -96,12 +92,6 @@ contains
 !!  Note that acell, occ, rprim, xred and vel might have been modified by the
 !!  computation, so that their values if choice=1 or choice=2 will differ.
 !!
-!! PARENTS
-!!      m_outvars
-!!
-!! CHILDREN
-!!      prttagm,prttagm_images
-!!
 !! SOURCE
 
 subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
@@ -125,7 +115,7 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  integer :: defo,idtset,ii,iimage,ga_n_rules,nn
  integer :: lpawu1,narr,mxnsp
  integer :: natom,nimfrqs,nimage
- integer :: ntypalch,ntypat,print_constraint,size1,size2,tmpimg0
+ integer :: ntypalch,ntypat,print_constraint,size1,size2,test_write,tmpimg0
  logical :: compute_static_images
  real(dp) :: cpus
  character(len=1) :: firstchar_fftalg,firstchar_gpu
@@ -713,9 +703,16 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,narrm,ncid,ndtset_alloc,'dynimage','INT',multivals%nimage)
 
 !Variables for nonlinear response
- intarr(1,:)=dtsets(:)%d3e_pert1_atpol(1)
- intarr(2,:)=dtsets(:)%d3e_pert1_atpol(2)
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,2,narrm,ncid,ndtset_alloc,'d3e_pert1_atpol','INT',0)
+ test_write=0
+ do idtset=1,ndtset_alloc
+   if(dtsets(idtset)%d3e_pert1_atpol(1)/=1 .or. dtsets(idtset)%d3e_pert1_atpol(2)/=dtsets(idtset)%natom)test_write=1
+ enddo
+ if(test_write==1)then
+   intarr(1,:)=dtsets(:)%d3e_pert1_atpol(1)
+   intarr(2,:)=dtsets(:)%d3e_pert1_atpol(2)
+   call prttagm(dprarr,intarr,iout,jdtset_,2,marr,2,narrm,ncid,ndtset_alloc,'d3e_pert1_atpol','INT',0)
+ endif
+
 
  intarr(1,:)=dtsets(:)%d3e_pert1_dir(1)
  intarr(2,:)=dtsets(:)%d3e_pert1_dir(2)
@@ -728,9 +725,15 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  intarr(1,:)=dtsets(:)%d3e_pert1_phon
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'d3e_pert1_phon','INT',0)
 
- intarr(1,:)=dtsets(:)%d3e_pert2_atpol(1)
- intarr(2,:)=dtsets(:)%d3e_pert2_atpol(2)
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,2,narrm,ncid,ndtset_alloc,'d3e_pert2_atpol','INT',0)
+ test_write=0
+ do idtset=1,ndtset_alloc
+   if(dtsets(idtset)%d3e_pert2_atpol(1)/=1 .or. dtsets(idtset)%d3e_pert2_atpol(2)/=dtsets(idtset)%natom)test_write=1
+ enddo
+ if(test_write==1)then
+   intarr(1,:)=dtsets(:)%d3e_pert2_atpol(1)
+   intarr(2,:)=dtsets(:)%d3e_pert2_atpol(2)
+   call prttagm(dprarr,intarr,iout,jdtset_,2,marr,2,narrm,ncid,ndtset_alloc,'d3e_pert2_atpol','INT',0)
+ endif
 
  intarr(1,:)=dtsets(:)%d3e_pert2_dir(1)
  intarr(2,:)=dtsets(:)%d3e_pert2_dir(2)
@@ -746,9 +749,15 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  intarr(1,:)=dtsets(:)%d3e_pert2_strs
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'d3e_pert2_strs','INT',0)
 
- intarr(1,:)=dtsets(:)%d3e_pert3_atpol(1)
- intarr(2,:)=dtsets(:)%d3e_pert3_atpol(2)
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,2,narrm,ncid,ndtset_alloc,'d3e_pert3_atpol','INT',0)
+ test_write=0
+ do idtset=1,ndtset_alloc
+   if(dtsets(idtset)%d3e_pert3_atpol(1)/=1 .or. dtsets(idtset)%d3e_pert3_atpol(2)/=dtsets(idtset)%natom)test_write=1
+ enddo
+ if(test_write==1)then
+   intarr(1,:)=dtsets(:)%d3e_pert3_atpol(1)
+   intarr(2,:)=dtsets(:)%d3e_pert3_atpol(2)
+   call prttagm(dprarr,intarr,iout,jdtset_,2,marr,2,narrm,ncid,ndtset_alloc,'d3e_pert3_atpol','INT',0)
+ endif
 
  intarr(1,:)=dtsets(:)%d3e_pert3_dir(1)
  intarr(2,:)=dtsets(:)%d3e_pert3_dir(2)
@@ -841,6 +850,13 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  intarr(1,:)=dtsets(:)%eph_phrange(1)
  intarr(2,:)=dtsets(:)%eph_phrange(2)
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,2,narrm,ncid,ndtset_alloc,'eph_phrange','INT',0)
+
+ dprarr(1,:)=dtsets(:)%eph_phrange_w(1)
+ dprarr(2,:)=dtsets(:)%eph_phrange_w(2)
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,2,narrm,ncid,ndtset_alloc,'eph_phrange_w','ENE',0)
+
+ intarr(1,:)=dtsets(:)%eph_prtscratew
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'eph_prtscratew','INT',0)
 
  intarr(1,:)=dtsets(:)%eph_restart
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'eph_restart','INT',0)
@@ -1139,6 +1155,33 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
 
  intarr(1,:)=dtsets(:)%gpu_linalg_limit
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gpu_linalg_limit','INT',0)
+
+ !intarr(1,:)  =dtsets(:)%gstore_cplex
+ !call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gstore_cplex','INT',0)
+
+ !intarr(1,:)  =dtsets(:)%gstore_with_vk
+ !call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gstore_with_vk','INT',0)
+
+ !intarr(1,:)  =dtsets(:)%gstore_gstore_brange
+ !call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gstore_brange','INT',0)
+
+ !dprarr(1,:)  =dtsets(:)%gstore_gstore_erange
+ !call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gstore_erange','ENE',0)
+
+ dprarr(1,:) = dtsets(:)%gwr_boxcutmin
+ call prttagm(dprarr, intarr, iout, jdtset_, 1, marr, narr, narrm, ncid, ndtset_alloc, 'gwr_boxcutmin', 'DPR', 0)
+
+ narr = size(dtsets(0)%gwr_np_gtks)
+ do idtset=0,ndtset_alloc
+   intarr(1:narr,idtset) = dtsets(idtset)%gwr_np_gtks
+ end do
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,narrm,ncid,ndtset_alloc,'gwr_np_gtks','INT',0, firstchar="-")
+
+ intarr(1,:) = dtsets(:)%gwr_ntau
+ call prttagm(dprarr, intarr, iout, jdtset_, 2, marr, 1, narrm, ncid, ndtset_alloc, 'gwr_ntau', 'INT', 0)
+
+ ! TODO
+ !call prttagm(dprarr, intarr, iout, jdtset_, 2, marr, 1, narrm, ncid, ndtset_alloc, 'gwr_task', 'INT', 0)
 
 !grchrg
  print_constraint=0

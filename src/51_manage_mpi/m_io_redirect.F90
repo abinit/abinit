@@ -59,12 +59,6 @@ contains
 !!   nam= name of the extension of the files
 !!   nfil= number of files to be named
 !!
-!! PARENTS
-!!      m_dfpt_looppert,m_gstateimg
-!!
-!! CHILDREN
-!!      abi_io_redirect,libpaw_write_comm_set
-!!
 !! SOURCE
 !!
  subroutine localfilnam(commspace,commspace1,commworld,filnam,nam,nfil)
@@ -125,12 +119,6 @@ contains
 !!   nfil= number of files to be named
 !!   paral= flag to activate parallelisation
 !!   prtvol= flag to activate printing
-!!
-!! PARENTS
-!!      m_dfpt_looppert,m_gstateimg
-!!
-!! CHILDREN
-!!      abi_io_redirect,libpaw_write_comm_set
 !!
 !! SOURCE
 !!
@@ -197,12 +185,6 @@ contains
 !!   nfil= number of files to be named
 !!   paral= flag to activate parallelisation
 !!   prtvol= flag to activate printing
-!!
-!! PARENTS
-!!      m_dfpt_looppert,m_gstateimg
-!!
-!! CHILDREN
-!!      abi_io_redirect,libpaw_write_comm_set
 !!
 !! SOURCE
 !!
@@ -301,12 +283,6 @@ contains
 !!   nfil= number of files to be named
 !!   paral= flag to activate parallelisation
 !!   prtvol= flag to activate printing  
-!!
-!! PARENTS
-!!      m_dfpt_looppert,m_gstateimg
-!!
-!! CHILDREN
-!!      abi_io_redirect,libpaw_write_comm_set
 !!
 !! SOURCE
 !!

@@ -1,5 +1,5 @@
 
-.Version 9.7.2 of ABINIT 
+.Version 9.7.4 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 10 Feb 2022.
-- ( at 14h11 )
+.Starting date : Wed  4 May 2022.
+- ( at 03h29 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/TestBot_MPI1/tutorespfn_toptic_1-toptic_2/toptic_1.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/tutorespfn_toptic_1-toptic_2/toptic_1.abi
 - output file    -> toptic_1.abo
 - root for input  files -> toptic_1i
 - root for output files -> toptic_1o
@@ -470,15 +470,21 @@ P          mk1mem6        256
         optdriver4          1
         optdriver5          1
         optdriver6          1
+           prtpot1          0
+           prtpot2          0
+           prtpot3          0
+           prtpot4          1
+           prtpot5          1
+           prtpot6          1
             prtwf1          1
             prtwf2          1
             prtwf3          1
             prtwf4          3
             prtwf5          3
             prtwf6          3
-            rfdir1          0       0       0
-            rfdir2          0       0       0
-            rfdir3          0       0       0
+            rfdir1          1       1       1
+            rfdir2          1       1       1
+            rfdir3          1       1       1
             rfdir4          1       0       0
             rfdir5          0       1       0
             rfdir6          0       0       1
@@ -594,8 +600,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      2.000   => boxcut(ratio)=   2.11655
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_largecore_psp8/Ga-low.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_largecore_psp8/Ga-low.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_largecore_psp8/Ga-low.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_largecore_psp8/Ga-low.psp8
 - Ga    ONCVPSP-3.3.0  r_core=   1.85767   1.81388   2.62545
 - 31.00000   3.00000    171103                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -609,8 +615,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              2    1.406259    0.234121
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_largecore_psp8/As.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_largecore_psp8/As.psp8
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_largecore_psp8/As.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_largecore_psp8/As.psp8
 - As    ONCVPSP-3.3.0  r_core=   1.83037   1.80867   2.40819
 - 33.00000   5.00000    171103                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1050,7 +1056,7 @@ tolerances: {tolwfr: 1.00E-20, }
 
  WARNING : Localization tensor calculation (this does not apply to other properties).
   Not all d/dk perturbations were computed. So the localization tensor in reciprocal space is incomplete,
-  and transformation to cartesian coordinates may be wrong.
+  and transformation to cartesian coordinates may be wrong. Check input variable rfdir.
 
  respfn : d/dk was computed, but no 2DTE, so no DDB output.
 
@@ -1162,7 +1168,7 @@ tolerances: {tolwfr: 1.00E-20, }
 
  WARNING : Localization tensor calculation (this does not apply to other properties).
   Not all d/dk perturbations were computed. So the localization tensor in reciprocal space is incomplete,
-  and transformation to cartesian coordinates may be wrong.
+  and transformation to cartesian coordinates may be wrong. Check input variable rfdir.
 
  respfn : d/dk was computed, but no 2DTE, so no DDB output.
 
@@ -1274,7 +1280,7 @@ tolerances: {tolwfr: 1.00E-20, }
 
  WARNING : Localization tensor calculation (this does not apply to other properties).
   Not all d/dk perturbations were computed. So the localization tensor in reciprocal space is incomplete,
-  and transformation to cartesian coordinates may be wrong.
+  and transformation to cartesian coordinates may be wrong. Check input variable rfdir.
 
  respfn : d/dk was computed, but no 2DTE, so no DDB output.
 
@@ -1620,15 +1626,21 @@ P          mk1mem6        256
         optdriver4          1
         optdriver5          1
         optdriver6          1
+           prtpot1          0
+           prtpot2          0
+           prtpot3          0
+           prtpot4          1
+           prtpot5          1
+           prtpot6          1
             prtwf1          1
             prtwf2          1
             prtwf3          1
             prtwf4          3
             prtwf5          3
             prtwf6          3
-            rfdir1          0       0       0
-            rfdir2          0       0       0
-            rfdir3          0       0       0
+            rfdir1          1       1       1
+            rfdir2          1       1       1
+            rfdir3          1       1       1
             rfdir4          1       0       0
             rfdir5          0       1       0
             rfdir6          0       0       1
@@ -1804,10 +1816,10 @@ P          mk1mem6        256
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          5.0  wall=          5.2
+- Proc.   0 individual time (sec): cpu=          4.4  wall=          4.6
 
 ================================================================================
 
  Calculation completed.
 .Delivered  20 WARNINGs and  11 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          5.0  wall=          5.2
++Overall time at end (sec) : cpu=          4.4  wall=          4.6

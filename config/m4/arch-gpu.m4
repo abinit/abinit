@@ -102,6 +102,8 @@ AC_DEFUN([_ABI_GPU_INIT_CUDA],[
   abi_gpu_cuda_incs="${GPU_CPPFLAGS}"
   abi_gpu_cuda_libs="${GPU_LIBS}"
   abi_gpu_cuda_root="${abi_gpu_prefix}"
+  abi_gpu_cuda_version_10="unknown"
+  abi_gpu_nvtx_v3="unknown"
 
   # Make use of the CUDA_ROOT environment variable
   if test "${abi_gpu_cuda_root}" = ""; then
@@ -136,6 +138,26 @@ AC_DEFUN([_ABI_GPU_INIT_CUDA],[
     else
       AC_MSG_RESULT([${NVCC}])
     fi
+
+    # call this macro here to make sure variable `abi_gpu_cuda_version_10`
+    #
+    # check if we are using CUDA runtime version at least 10
+    # version 10 of CUDA is required for NVTX (header only)
+    #
+    AC_MSG_CHECKING([whether we have Cuda >= 10])
+    ac_compile_old=${ac_compile}
+    ac_compile='$NVCC -c $CFLAGS conftest.$ac_ext >&5'
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM(
+        [[
+        #include <cuda_runtime_api.h>
+        ]],
+        [[
+        #if CUDART_VERSION < 10000
+        #error
+        #endif
+        ]])], [abi_gpu_cuda_version_10="yes"], [abi_gpu_cuda_version_10="no"])
+    AC_MSG_RESULT([${abi_gpu_cuda_version_10}])
+    ac_compile=${ac_compile_old}
 
     # Headers
     AC_MSG_CHECKING([for Cuda headers])
@@ -214,6 +236,25 @@ AC_DEFUN([_ABI_GPU_INIT_CUDA],[
         abi_gpu_cuda_libs="-L${abi_gpu_cuda_libdir} ${abi_gpu_cuda_libs}"
       fi
     fi
+    if test "${abi_gpu_cuda_version_10}" = "yes"; then
+      if test -e "${abi_gpu_cuda_libdir}/libnvToolsExt.${abi_so_ext}"; then
+        # always add link flags to nvtx if available
+        if test "${GPU_LIBS}" = ""; then
+          abi_gpu_cuda_libs="-lnvToolsExt ${abi_gpu_cuda_libs}"
+        else
+          abi_gpu_cuda_libs="${abi_gpu_cuda_libs} -lnvToolsExt"
+        fi
+        abi_gpu_nvtx_v3="yes"
+        abi_result="${abi_result} nvtx_v3"
+      else
+        AC_MSG_NOTICE([Cuda Nvtx: ${abi_gpu_cuda_libdir}/libnvToolsExt.${abi_so_ext} not found])
+      fi
+    fi
+
+    if test "${abi_gpu_nvtx_v3}" = "yes"; then
+       AC_DEFINE([HAVE_GPU_NVTX_V3],1,[Define to 1 if you have library nvtx (v3).])
+    fi
+
     if test -s "${abi_gpu_cuda_root}/SDK/C/lib/libcutil.a"; then
       if test "${GPU_LIBS}" = ""; then
         abi_gpu_cuda_libs="-L${abi_gpu_cuda_root}/SDK/C/lib -lcutil ${abi_gpu_cuda_libs}"
@@ -230,6 +271,9 @@ AC_DEFUN([_ABI_GPU_INIT_CUDA],[
     if test "${abi_gpu_cuda_has_common}" = "no"; then
       AC_MSG_WARN([could not find libcuda.${abi_so_ext}])
     fi
+
+    # add standart libc++ link flags
+    abi_gpu_cuda_libs="${abi_gpu_cuda_libs} -lstdc++"
 
     # C and C++ link flags
     AC_MSG_CHECKING([for Cuda link flags])
@@ -253,6 +297,9 @@ AC_DEFUN([_ABI_GPU_INIT_CUDA],[
 
   AC_MSG_NOTICE([Cuda incs: ${abi_gpu_cuda_incs}])
   AC_MSG_NOTICE([Cuda libs: ${abi_gpu_cuda_libs}])
+
+  AC_SUBST(abi_gpu_nvtx_v3)
+
 ]) # _ABI_GPU_INIT_CUDA
 
 
@@ -263,7 +310,7 @@ AC_DEFUN([_ABI_GPU_INIT_CUDA],[
 
 # ABI_GPU_INIT()
 # --------------
-#
+#config/m4/arch-gpu.m4
 # Looks for an implementation of GPU, using the provided prefix.
 # Note 1: this is a convenience feature, purely for comfort.
 # Note 2: it should be run as early as possible.
@@ -370,6 +417,9 @@ AC_DEFUN([ABI_GPU_DETECT],[
           if test "${abi_gpu_cuda_old}" = "yes"; then
             AC_DEFINE([HAVE_GPU_CUDA3],1,[Define to 1 if you have a Cuda version < 4.])
           fi
+          if test "${abi_gpu_cuda_version_10}" = "yes"; then
+            AC_DEFINE([HAVE_GPU_CUDA10],1,[Define to 1 if you have a Cuda version >= 10 (for nvtx v3).])
+          fi
           case "${abi_gpu_precision}" in
             single)
               AC_DEFINE(HAVE_GPU_CUDA_SP,1,[Define to 1 if you want to perform single-precision Cuda calculations.])
@@ -416,5 +466,7 @@ AC_DEFUN([ABI_GPU_DETECT],[
 
   # Inform Automake
   AM_CONDITIONAL(DO_BUILD_17_GPU_TOOLBOX,[test "${abi_gpu_flavor}" != "none"])
-  AM_CONDITIONAL(DO_BUILD_52_MANAGE_CUDA,[test "${abi_gpu_flavor}" = "cuda-double" -o "${abi_gpu_flavor}" = "cuda-single"])
+  AM_CONDITIONAL(DO_BUILD_46_MANAGE_CUDA,[test "${abi_gpu_flavor}" = "cuda-double" -o "${abi_gpu_flavor}" = "cuda-single"])
+  AM_CONDITIONAL(DO_BUILD_NVTX,[test "${abi_gpu_nvtx_v3}" = "yes"])
+
 ]) # ABI_GPU_DETECT

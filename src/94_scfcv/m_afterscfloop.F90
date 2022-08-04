@@ -12,10 +12,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -60,7 +56,6 @@ module m_afterscfloop
  use m_paw_nhat,         only : nhatgrid,wvl_nhatgrid
  use m_paw_occupancies,  only : pawmkrhoij
  use m_paw_correlations, only : setnoccmmp
- use m_orbmag,           only : orbmag_type, orbmag_wf
  use m_fock,             only : fock_type
  use m_kg,               only : getph
  use m_spin_current,     only : spin_current
@@ -275,23 +270,10 @@ contains
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_scfcv_core
-!!
-!! CHILDREN
-!!      applyprojectorsonthefly,denspot_free_history,eigensystem_info,elpolariz
-!!      energies_copy,exchange_electronpositron,forstr,getph,hdr%update
-!!      kswfn_free_scf_data,last_orthon,metric,mkrho,nhatgrid,nonlop_test
-!!      orbmag_wf,pawcprj_getdim,pawmkrho,pawmkrhoij,prtposcar,prtrhomxmn
-!!      scprqt,setnoccmmp,spin_current,timab,total_energies,transgrid
-!!      write_energies,wrtout,wvl_eigen_abi2big,wvl_mkrho,wvl_nhatgrid
-!!      wvl_occ_abi2big,wvl_psitohpsi,wvl_rho_abi2big,wvl_tail_corrections
-!!      wvl_vtrial_abi2big,xcden,xmpi_sum,xred2xcart
-!!
 !! SOURCE
 
 subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
-& deltae,diffor,dtefield,dtfil,dtorbmag,dtset,eigen,electronpositron,elfr,&
+& deltae,diffor,dtefield,dtfil,dtset,eigen,electronpositron,elfr,&
 & energies,etotal,favg,fcart,fock,forold,grchempottn,grcondft,&
 & gred,gresid,grewtn,grhf,grhor,grvdw,&
 & grxc,gsqcut,hdr,extfpmd,indsym,intgres,irrzon,istep,istep_fock_outer,istep_mix,&
@@ -301,14 +283,14 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 & pawfgrtab,pawrad,pawrhoij,pawtab,pel,pel_cg,ph1d,ph1df,phnons,pion,prtfor,prtxml,&
 & psps,pwind,pwind_alloc,pwnsfac,res2,resid,residm,results_gs,&
 & rhog,rhor,rprimd,stress_needed,strscondft,strsxc,strten,symrec,synlgr,taug,&
-& taur,tollist,usecprj,vectornd,vhartr,vpsp,vtrial,vxc,vxctau,vxcavg,with_vectornd,wvl,&
+& taur,tollist,usecprj,vhartr,vpsp,vtrial,vxc,vxctau,vxcavg,wvl,&
 & xccc3d,xcctau3d,xred,ylm,ylmgr,qvpotzero,conv_retcode)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: istep,istep_fock_outer,istep_mix
  integer,intent(in) :: mcg,mcprj,mgfftf,moved_atm_inside,my_natom,n3xccc,nfftf,ngrvdw,nkxc
- integer,intent(in) :: optres,prtfor,prtxml,pwind_alloc,stress_needed,usecprj,with_vectornd
+ integer,intent(in) :: optres,prtfor,prtxml,pwind_alloc,stress_needed,usecprj
  integer,intent(inout) :: computed_forces
  real(dp),intent(in) :: cpus,deltae,gsqcut,res2,residm
  real(dp),intent(in) :: qvpotzero
@@ -317,7 +299,6 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  type(datafiles_type),intent(in) :: dtfil
  type(dataset_type),intent(inout) :: dtset
  type(efield_type),intent(inout) :: dtefield
- type(orbmag_type),intent(inout) :: dtorbmag
  type(electronpositron_type),pointer :: electronpositron
  type(energies_type),intent(inout) :: energies
  type(hdr_type),intent(inout) :: hdr
@@ -344,7 +325,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  real(dp),intent(in) :: resid(dtset%mband*dtset%nkpt*dtset%nsppol)
  real(dp),intent(in) :: strscondft(6)
  real(dp),intent(in) :: tollist(12),vpsp(nfftf)
- real(dp),intent(inout) :: vectornd(with_vectornd*nfftf,3),vtrial(nfftf,dtset%nspden)
+ real(dp),intent(inout) :: vtrial(nfftf,dtset%nspden)
  real(dp),intent(in) :: ylm(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),intent(in) :: ylmgr(dtset%mpw*dtset%mkmem,3,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),intent(inout) :: cg(2,mcg)
@@ -546,18 +527,6 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 &   npwarr,dtset%nsppol,psps%ntypat,pawrhoij,pawtab,pel,pel_cg,pelev,pion,&
 &   psps,pwind,pwind_alloc,pwnsfac,rprimd,ucvol,usecprj,xred)
  end if
-
-!----------------------------------------------------------------------
-! Orbital magnetization calculation: discretized wavefunction variant
-!----------------------------------------------------------------------
- if(dtset%orbmag.LT.0) then
-   call orbmag_wf(atindx1,cg,cprj,dtset,dtorbmag,&
-        & mcg,mcprj,mpi_enreg,nattyp,nfftf,npwarr,paw_ij,pawang,pawfgr,pawrad,pawtab,psps,&
-        & pwind,pwind_alloc,rprimd,usecprj,vectornd,&
-        & vhartr,vpsp,vxc,with_vectornd,xred,ylm,ylmgr)
- end if
-
-
 
  call timab(252,2,tsec)
  call timab(253,1,tsec)

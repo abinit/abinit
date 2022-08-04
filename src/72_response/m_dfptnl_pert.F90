@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -181,12 +177,6 @@ contains
 !!
 !! SIDE EFFECTS
 !!  TO DO!
-!!
-!! PARENTS
-!!      m_dfptnl_loop
-!!
-!! CHILDREN
-!!      dotprod_vn
 !!
 !! SOURCE
 
@@ -1181,12 +1171,6 @@ end subroutine dfptnl_pert
 !!  exc3(2)=real and imaginray part of the exchange correlation energy term
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
-!!      m_dfptnl_pert,m_pead_nl_loop
-!!
-!! CHILDREN
-!!      dotprod_vn
 !!
 !! SOURCE
 
