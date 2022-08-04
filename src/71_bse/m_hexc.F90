@@ -11,11 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!      m_haydock
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -44,9 +39,9 @@ MODULE m_hexc
  use m_hide_blas,         only : xdotc, xgemv
  use m_numeric_tools,     only : print_arr, symmetrize, hermitianize, wrap2_pmhalf
  use m_crystal,           only : crystal_t
- use m_bz_mesh,           only : kmesh_t, findqg0, get_bz_item
+ use m_bz_mesh,           only : kmesh_t, findqg0
  use m_double_grid,       only : double_grid_t, get_kpt_from_indices_coarse, compute_corresp
- use m_wfd,               only : wfd_t
+ use m_wfd,               only : wfdgw_t
  use m_bse_io,            only : exc_read_rcblock, exc_write_optme, exc_ham_ncwrite
  use m_pawtab,            only : pawtab_type
  use m_vcoul,             only : vcoul_t
@@ -117,10 +112,10 @@ MODULE m_hexc
     type(ebands_t),pointer :: qp_bst => null()
     ! band structures of the full problem
 
-    type(wfd_t),pointer :: wfd_coarse => null()
+    type(wfdgw_t),pointer :: wfd_coarse => null()
     ! Wfd of the coarse problem
 
-    type(wfd_t),pointer :: wfd => null()
+    type(wfdgw_t),pointer :: wfd => null()
     ! wfd of the full problem
 
  !arrays
@@ -228,19 +223,13 @@ CONTAINS  !=====================================================================
 !! BS_files<excparam>=Files for BS
 !! Cryst<crystal_t>=Info on the crystalline structure
 !! Kmesh_coarse<kmesh_t>=Kmesh info
-!! Wfd_coarse<wfd_t>=Wavefunction descriptor
+!! Wfd_coarse<wfdgw_t>=Wavefunction descriptor
 !! KS_BSt<ebands_t>=Kohn-Sham band structure
 !! QP_BSt<ebands_t>=Quasi-Particle band structure
 !! comm=communicator
 !!
 !! OUTPUT
 !! hexc<hexc_t>=Excitonic Hamiltonian
-!!
-!! PARENTS
-!!      m_haydock
-!!
-!! CHILDREN
-!!      timab
 !!
 !! SOURCE
 
@@ -254,7 +243,7 @@ subroutine hexc_init(hexc, BSp, BS_files, Cryst, Kmesh_coarse, Wfd_coarse, KS_BS
  type(excfiles),intent(in),target :: BS_files
  type(crystal_t),intent(in),target :: Cryst
  type(kmesh_t),intent(in),target :: Kmesh_coarse
- type(wfd_t),intent(in),target :: Wfd_coarse
+ type(wfdgw_t),intent(in),target :: Wfd_coarse
  type(ebands_t),intent(in),target :: KS_BSt, QP_BSt
 !arrays
 
@@ -415,7 +404,7 @@ end subroutine hexc_init
 !! Kmesh_dense<kmesh_t>=Kmesh info
 !! Vcp_dense<vcoul_t>=Dense mesh info about coulomb
 !! double_grid<double_grid_t>=Link between dense and coarse mesh
-!! Wfd_dense<wfd_t>=Wavefunction descriptor
+!! Wfd_dense<wfdgw_t>=Wavefunction descriptor
 !! KS_BSt_dense<ebands_t>=Kohn-Sham band structure
 !! QP_BSt_dense<ebands_t>=Quasi-Particle band structure
 !! Psps <type(pseudopotential_type)>=variables related to pseudopotentials.
@@ -432,12 +421,6 @@ end subroutine hexc_init
 !!   The memory might be modified by computing wavefunctions
 !!
 !!
-!! PARENTS
-!!      m_haydock
-!!
-!! CHILDREN
-!!      timab
-!!
 !! SOURCE
 
 subroutine hexc_interp_init(hexc_i, hexc, m3_width, method, Kmesh_dense, Vcp_dense, &
@@ -450,7 +433,7 @@ subroutine hexc_interp_init(hexc_i, hexc, m3_width, method, Kmesh_dense, Vcp_den
  type(hexc_t),intent(inout) :: hexc
  type(hexc_interp_t),intent(inout) :: hexc_i
  type(double_grid_t),intent(in),target :: double_grid
- type(wfd_t),intent(inout),target :: Wfd_dense !, Wfd
+ type(wfdgw_t),intent(inout),target :: Wfd_dense !, Wfd
  type(kmesh_t),intent(in),target :: Kmesh_dense
  type(pseudopotential_type),intent(in) :: Psps
  type(vcoul_t),intent(in),target :: Vcp_dense
@@ -582,12 +565,6 @@ end subroutine hexc_interp_init
 !!   Pre-compute info to save CPU time when computing matmul
 !!
 !!
-!! PARENTS
-!!      m_haydock
-!!
-!! CHILDREN
-!!      timab
-!!
 !! SOURCE
 
 subroutine hexc_build_hinterp(hexc,hexc_i)
@@ -660,12 +637,6 @@ end subroutine hexc_build_hinterp
 !!
 !! OUTPUT
 !! Cmat(nbnd_coarse) = Interpolated coefficients
-!!
-!! PARENTS
-!!      m_hexc
-!!
-!! CHILDREN
-!!      timab
 !!
 !! SOURCE
 
@@ -789,12 +760,6 @@ end subroutine hexc_compute_subhinterp
 !! OUTPUT
 !!   hinterp = Interpolated hamiltonian
 !!
-!! PARENTS
-!!      m_hexc
-!!
-!! CHILDREN
-!!      timab
-!!
 !! SOURCE
 
 subroutine hexc_compute_hinterp(BSp,hsize_coarse,hsize_dense,hmat,grid,nbnd_coarse,&
@@ -917,7 +882,7 @@ subroutine hexc_compute_hinterp(BSp,hsize_coarse,hsize_dense,hmat,grid,nbnd_coar
        !call findqg0(iq_bz,g0,kmkp,Qmesh_dense%nbz,Qmesh_dense%bz,BSp%mG0)
 
        !! * Get iq_ibz, and symmetries from iq_bz
-       !call get_BZ_item(Qmesh_dense,iq_bz,qbz,iq_ibz,isym_q,itim_q)
+       !call qmesh_dense%get_BZ_item(Qmesh_dense,iq_bz,qbz,iq_ibz,isym_q,itim_q)
 
        !if(iq_ibz > 1 .and. ABS(vc_sqrt_qbz - Vcp_dense%vc_sqrt(1,iq_ibz)) > 1.e-3) then
        !   write(*,*) "vc_sqrt_qbz = ",vc_sqrt_qbz
@@ -1182,12 +1147,6 @@ end subroutine hexc_compute_hinterp
 !! FUNCTION
 !! Destroy the interpolator object in memory
 !!
-!! PARENTS
-!!      m_haydock
-!!
-!! CHILDREN
-!!      timab
-!!
 !! SOURCE
 
 subroutine hexc_free(hexc)
@@ -1232,12 +1191,6 @@ end subroutine hexc_free
 !!
 !! FUNCTION
 !!  Destroy the interpolator object in memory
-!!
-!! PARENTS
-!!      m_haydock
-!!
-!! CHILDREN
-!!      timab
 !!
 !! SOURCE
 
@@ -1316,12 +1269,6 @@ end subroutine hexc_interp_free
 !!
 !! OUTPUT
 !!  hphi(hsize_dense) = Interp(hmat)*phi
-!!
-!! PARENTS
-!!      m_hexc
-!!
-!! CHILDREN
-!!      timab
 !!
 !! SOURCE
 
@@ -1629,12 +1576,6 @@ end subroutine hexc_interp_matmul
 !! OUTPUT
 !! hphi = hreso * phi
 !!
-!! PARENTS
-!!      m_haydock
-!!
-!! CHILDREN
-!!      timab
-!!
 !! SOURCE
 
 subroutine hexc_matmul_tda(hexc, hexc_i, phi, hphi)
@@ -1696,12 +1637,6 @@ end subroutine hexc_matmul_tda
 !! OUTPUT
 !! hphi = hreso * phi + ep_renorm * phi
 !!
-!! PARENTS
-!!      m_haydock
-!!
-!! CHILDREN
-!!      timab
-!!
 !! SOURCE
 
 subroutine hexc_matmul_elphon(hexc, phi, hphi, op, ep_renorm)
@@ -1758,12 +1693,6 @@ end subroutine hexc_matmul_elphon
 !!
 !! OUTPUT
 !! hphi = hreso * phi + parity * hcoup * CONJ(phi)
-!!
-!! PARENTS
-!!      m_haydock
-!!
-!! CHILDREN
-!!      timab
 !!
 !! SOURCE
 

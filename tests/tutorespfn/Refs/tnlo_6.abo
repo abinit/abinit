@@ -1,5 +1,5 @@
 
-.Version 9.3.4 of ABINIT 
+.Version 9.7.4 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,13 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue  9 Feb 2021.
-- ( at 14h42 )
+.Starting date : Wed  4 May 2022.
+- ( at 03h29 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/baguetl_v9.3.4-tutonlo/tests/TestBot_MPI1/tutorespfn_tnlofDFPT_2/tnlofDFPT_2.abi
-- output file    -> tnlofDFPT_2.abo
-- root for input  files -> tnlofDFPT_2i
-- root for output files -> tnlofDFPT_2o
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/tutorespfn_tnlo_6/tnlo_6.abi
+- output file    -> tnlo_6.abo
+- root for input  files -> tnlo_6i
+- root for output files -> tnlo_6o
 
 
  DATASET    1 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
@@ -34,7 +34,7 @@
 -    mband =           4        mffmem =           1         mkmem =          28
        mpw =          73          nfft =        1728          nkpt =          28
 ================================================================================
-P This job should need less than                       1.834 Mbytes of memory.
+P This job should need less than                       1.883 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.127 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
@@ -51,7 +51,7 @@ _ WF disk file :      0.127 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =         432
        mpw =          73          nfft =        1728          nkpt =         432
 ================================================================================
-P This job should need less than                       4.007 Mbytes of memory.
+P This job should need less than                       4.056 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      1.927 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
@@ -140,7 +140,7 @@ _ WF disk file :      1.927 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =         432
        mpw =          73          nfft =        1728          nkpt =         432
 ================================================================================
-P This job should need less than                       4.218 Mbytes of memory.
+P This job should need less than                       4.267 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      1.927 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
@@ -159,20 +159,6 @@ _ WF disk file :      1.927 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
             acell      7.1391127387E+00  7.1391127387E+00  7.1391127387E+00 Bohr
               amu      3.09737620E+01  2.69815390E+01
           dilatmx      1.05000000E+00
-  d3e_pert1_atpol1          1       1
-  d3e_pert1_atpol2          1       1
-  d3e_pert1_atpol3          1       1
-  d3e_pert1_atpol4          1       1
-  d3e_pert1_atpol5          1       1
-  d3e_pert1_atpol6          1       1
-  d3e_pert1_atpol7          1       2
-    d3e_pert1_dir1          0       0       0
-    d3e_pert1_dir2          0       0       0
-    d3e_pert1_dir3          0       0       0
-    d3e_pert1_dir4          0       0       0
-    d3e_pert1_dir5          0       0       0
-    d3e_pert1_dir6          0       0       0
-    d3e_pert1_dir7          1       1       1
    d3e_pert1_elfd1          0
    d3e_pert1_elfd2          0
    d3e_pert1_elfd3          0
@@ -187,13 +173,6 @@ _ WF disk file :      1.927 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
    d3e_pert1_phon5          0
    d3e_pert1_phon6          0
    d3e_pert1_phon7          1
-    d3e_pert2_dir1          0       0       0
-    d3e_pert2_dir2          0       0       0
-    d3e_pert2_dir3          0       0       0
-    d3e_pert2_dir4          0       0       0
-    d3e_pert2_dir5          0       0       0
-    d3e_pert2_dir6          0       0       0
-    d3e_pert2_dir7          1       1       1
    d3e_pert2_elfd1          0
    d3e_pert2_elfd2          0
    d3e_pert2_elfd3          0
@@ -201,13 +180,6 @@ _ WF disk file :      1.927 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
    d3e_pert2_elfd5          0
    d3e_pert2_elfd6          0
    d3e_pert2_elfd7          1
-    d3e_pert3_dir1          0       0       0
-    d3e_pert3_dir2          0       0       0
-    d3e_pert3_dir3          0       0       0
-    d3e_pert3_dir4          0       0       0
-    d3e_pert3_dir5          0       0       0
-    d3e_pert3_dir6          0       0       0
-    d3e_pert3_dir7          1       1       1
    d3e_pert3_elfd1          0
    d3e_pert3_elfd2          0
    d3e_pert3_elfd3          0
@@ -690,6 +662,13 @@ P          mk1mem7        432
            prtden6          0
            prtden7          0
            prteig           0
+           prtpot1          0
+           prtpot2          0
+           prtpot3          1
+           prtpot4          1
+           prtpot5          1
+           prtpot6          1
+           prtpot7          0
             prtwf1          1
             prtwf2          1
             prtwf3          1
@@ -697,20 +676,6 @@ P          mk1mem7        432
             prtwf5          1
             prtwf6          1
             prtwf7          0
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          1       1
-          rfatpol4          1       2
-          rfatpol5          1       1
-          rfatpol6          1       1
-          rfatpol7          1       1
-            rfdir1          0       0       0
-            rfdir2          0       0       0
-            rfdir3          1       1       1
-            rfdir4          1       1       1
-            rfdir5          1       1       1
-            rfdir6          1       1       1
-            rfdir7          0       0       0
            rfelfd1          0
            rfelfd2          0
            rfelfd3          2
@@ -746,20 +711,6 @@ P          mk1mem7        432
          rf2_dkde5          0
          rf2_dkde6          1
          rf2_dkde7          0
-    rf2_pert1_dir1          0       0       0
-    rf2_pert1_dir2          0       0       0
-    rf2_pert1_dir3          0       0       0
-    rf2_pert1_dir4          0       0       0
-    rf2_pert1_dir5          1       1       1
-    rf2_pert1_dir6          1       1       1
-    rf2_pert1_dir7          0       0       0
-    rf2_pert2_dir1          0       0       0
-    rf2_pert2_dir2          0       0       0
-    rf2_pert2_dir3          0       0       0
-    rf2_pert2_dir4          0       0       0
-    rf2_pert2_dir5          1       1       1
-    rf2_pert2_dir6          1       1       1
-    rf2_pert2_dir7          0       0       0
             rprim      0.0000000000E+00  7.0710678119E-01  7.0710678119E-01
                        7.0710678119E-01  0.0000000000E+00  7.0710678119E-01
                        7.0710678119E-01  7.0710678119E-01  0.0000000000E+00
@@ -921,8 +872,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      3.087   => boxcut(ratio)=   2.12522
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/baguetl_v9.3.4-tutonlo/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/P.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/baguetl_v9.3.4-tutonlo/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/P.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/P.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/P.psp8
 - P     ONCVPSP-3.3.0  r_core=   1.46089   1.55067   1.70594
 - 15.00000   5.00000    171102                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -936,8 +887,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              2   -3.024864   -0.802189
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/baguetl_v9.3.4-tutonlo/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Al.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/baguetl_v9.3.4-tutonlo/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Al.psp8
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Al.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Al.psp8
 - Al    ONCVPSP-3.3.0  r_core=   1.76802   1.76802   1.70587
 - 13.00000   3.00000    171102                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1101,7 +1052,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
          ecut(hartree)=      3.087   => boxcut(ratio)=   2.12522
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tnlofDFPT_2o_DS1_WFK
+-inwffil : will read wavefunctions from disk file tnlo_6o_DS1_WFK
 
 ================================================================================
  Non-SCF case, kpt    1 ( -0.08333 -0.16667  0.00000), residuals and eigenvalues=
@@ -1185,7 +1136,6 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=      3.087   => boxcut(ratio)=   2.12522
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tnlofDFPT_2o_DS2_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -1207,7 +1157,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tnlofDFPT_2o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1268,7 +1217,6 @@ tolerances: {tolwfr: 1.00E-22, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tnlofDFPT_2o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1329,7 +1277,6 @@ tolerances: {tolwfr: 1.00E-22, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tnlofDFPT_2o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1430,7 +1377,6 @@ meta: {optdriver: 1, rfelfd: 3, rfphon: 1, rfstrs: 3, }
          ecut(hartree)=      3.087   => boxcut(ratio)=   2.12522
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tnlofDFPT_2o_DS2_WFK
  symkchk : k-point set has full space-group symmetry.
 
  ==>  initialize data related to q vector <== 
@@ -1475,7 +1421,6 @@ meta: {optdriver: 1, rfelfd: 3, rfphon: 1, rfstrs: 3, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tnlofDFPT_2o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1495,10 +1440,10 @@ tolerances: {tolvrs: 1.00E-12, }
  ETOT  5   5.9340123684034     -2.621E-06 6.852E-09 3.992E-06
  ETOT  6   5.9340123535070     -1.490E-08 2.343E-11 6.160E-08
  ETOT  7   5.9340123533159     -1.911E-10 2.402E-13 7.230E-10
- ETOT  8   5.9340123533138     -2.089E-12 3.405E-15 1.212E-12
--open ddk wf file :tnlofDFPT_2o_DS3_1WF7
--open ddk wf file :tnlofDFPT_2o_DS3_1WF8
--open ddk wf file :tnlofDFPT_2o_DS3_1WF9
+ ETOT  8   5.9340123533138     -2.075E-12 3.405E-15 1.212E-12
+-open ddk wf file :tnlo_6o_DS3_1WF7
+-open ddk wf file :tnlo_6o_DS3_1WF8
+-open ddk wf file :tnlo_6o_DS3_1WF9
 
  scprqt:  WARNING -
   nstep=    8 was not enough SCF cycles to converge;
@@ -1537,7 +1482,6 @@ tolerances: {tolvrs: 1.00E-12, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tnlofDFPT_2o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1557,12 +1501,12 @@ tolerances: {tolvrs: 1.00E-12, }
  ETOT  5   5.9692648467080     -1.939E-07 2.966E-10 5.756E-07
  ETOT  6   5.9692648447072     -2.001E-09 3.024E-12 7.182E-09
  ETOT  7   5.9692648446797     -2.750E-11 4.617E-14 7.427E-11
- ETOT  8   5.9692648446793     -3.872E-13 5.638E-16 8.812E-13
+ ETOT  8   5.9692648446793     -3.908E-13 5.638E-16 8.812E-13
 
  At SCF step    8       vres2   =  8.81E-13 < tolvrs=  1.00E-12 =>converged.
--open ddk wf file :tnlofDFPT_2o_DS3_1WF7
--open ddk wf file :tnlofDFPT_2o_DS3_1WF8
--open ddk wf file :tnlofDFPT_2o_DS3_1WF9
+-open ddk wf file :tnlo_6o_DS3_1WF7
+-open ddk wf file :tnlo_6o_DS3_1WF8
+-open ddk wf file :tnlo_6o_DS3_1WF9
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1596,12 +1540,11 @@ tolerances: {tolvrs: 1.00E-12, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tnlofDFPT_2o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
-- dfpt_looppert: read the DDK wavefunctions from file: tnlofDFPT_2o_DS3_1WF7
+- dfpt_looppert: read the DDK wavefunctions from file: tnlo_6o_DS3_1WF7
 
 --- !BeginCycle
 iteration_state: {dtset: 4, }
@@ -1618,9 +1561,9 @@ tolerances: {tolvrs: 1.00E-12, }
  ETOT  6  -121.84960570749     -1.728E-07 1.372E-10 1.535E-06
  ETOT  7  -121.84960571316     -5.669E-09 5.137E-12 3.639E-08
  ETOT  8  -121.84960571329     -1.289E-10 1.454E-13 3.925E-10
--open ddk wf file :tnlofDFPT_2o_DS3_1WF7
--open ddk wf file :tnlofDFPT_2o_DS3_1WF8
--open ddk wf file :tnlofDFPT_2o_DS3_1WF9
+-open ddk wf file :tnlo_6o_DS3_1WF7
+-open ddk wf file :tnlo_6o_DS3_1WF8
+-open ddk wf file :tnlo_6o_DS3_1WF9
 
  scprqt:  WARNING -
   nstep=    8 was not enough SCF cycles to converge;
@@ -1652,12 +1595,11 @@ tolerances: {tolvrs: 1.00E-12, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tnlofDFPT_2o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
-- dfpt_looppert: read the DDK wavefunctions from file: tnlofDFPT_2o_DS3_1WF8
+- dfpt_looppert: read the DDK wavefunctions from file: tnlo_6o_DS3_1WF8
 
 --- !BeginCycle
 iteration_state: {dtset: 4, }
@@ -1674,9 +1616,9 @@ tolerances: {tolvrs: 1.00E-12, }
  ETOT  6  -121.84960570591     -1.683E-07 1.450E-10 1.503E-06
  ETOT  7  -121.84960571148     -5.567E-09 5.108E-12 3.590E-08
  ETOT  8  -121.84960571161     -1.278E-10 1.444E-13 3.727E-10
--open ddk wf file :tnlofDFPT_2o_DS3_1WF7
--open ddk wf file :tnlofDFPT_2o_DS3_1WF8
--open ddk wf file :tnlofDFPT_2o_DS3_1WF9
+-open ddk wf file :tnlo_6o_DS3_1WF7
+-open ddk wf file :tnlo_6o_DS3_1WF8
+-open ddk wf file :tnlo_6o_DS3_1WF9
 
  scprqt:  WARNING -
   nstep=    8 was not enough SCF cycles to converge;
@@ -1708,12 +1650,11 @@ tolerances: {tolvrs: 1.00E-12, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tnlofDFPT_2o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
-- dfpt_looppert: read the DDK wavefunctions from file: tnlofDFPT_2o_DS3_1WF9
+- dfpt_looppert: read the DDK wavefunctions from file: tnlo_6o_DS3_1WF9
 
 --- !BeginCycle
 iteration_state: {dtset: 4, }
@@ -1729,10 +1670,10 @@ tolerances: {tolvrs: 1.00E-12, }
  ETOT  5  -121.84960553136     -1.602E-05 2.427E-08 4.206E-05
  ETOT  6  -121.84960570412     -1.728E-07 1.372E-10 1.535E-06
  ETOT  7  -121.84960570979     -5.667E-09 5.137E-12 3.639E-08
- ETOT  8  -121.84960570992     -1.307E-10 1.454E-13 3.922E-10
--open ddk wf file :tnlofDFPT_2o_DS3_1WF7
--open ddk wf file :tnlofDFPT_2o_DS3_1WF8
--open ddk wf file :tnlofDFPT_2o_DS3_1WF9
+ ETOT  8  -121.84960570992     -1.306E-10 1.454E-13 3.922E-10
+-open ddk wf file :tnlo_6o_DS3_1WF7
+-open ddk wf file :tnlo_6o_DS3_1WF8
+-open ddk wf file :tnlo_6o_DS3_1WF9
 
  scprqt:  WARNING -
   nstep=    8 was not enough SCF cycles to converge;
@@ -1763,7 +1704,6 @@ tolerances: {tolvrs: 1.00E-12, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tnlofDFPT_2o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1784,9 +1724,9 @@ tolerances: {tolvrs: 1.00E-12, }
  ETOT  6   1.4600835892434     -3.160E-08 5.774E-11 9.480E-08
  ETOT  7   1.4600835888602     -3.832E-10 5.536E-13 4.205E-09
  ETOT  8   1.4600835888381     -2.209E-11 2.863E-14 1.373E-10
--open ddk wf file :tnlofDFPT_2o_DS3_1WF7
--open ddk wf file :tnlofDFPT_2o_DS3_1WF8
--open ddk wf file :tnlofDFPT_2o_DS3_1WF9
+-open ddk wf file :tnlo_6o_DS3_1WF7
+-open ddk wf file :tnlo_6o_DS3_1WF8
+-open ddk wf file :tnlo_6o_DS3_1WF9
 
  scprqt:  WARNING -
   nstep=    8 was not enough SCF cycles to converge;
@@ -1826,7 +1766,6 @@ tolerances: {tolvrs: 1.00E-12, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tnlofDFPT_2o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1846,10 +1785,10 @@ tolerances: {tolvrs: 1.00E-12, }
  ETOT  5   1.4600836311026     -5.401E-06 7.812E-09 8.984E-06
  ETOT  6   1.4600835994846     -3.162E-08 5.778E-11 9.508E-08
  ETOT  7   1.4600835990979     -3.867E-10 5.633E-13 4.249E-09
- ETOT  8   1.4600835990754     -2.248E-11 2.917E-14 1.379E-10
--open ddk wf file :tnlofDFPT_2o_DS3_1WF7
--open ddk wf file :tnlofDFPT_2o_DS3_1WF8
--open ddk wf file :tnlofDFPT_2o_DS3_1WF9
+ ETOT  8   1.4600835990754     -2.249E-11 2.917E-14 1.379E-10
+-open ddk wf file :tnlo_6o_DS3_1WF7
+-open ddk wf file :tnlo_6o_DS3_1WF8
+-open ddk wf file :tnlo_6o_DS3_1WF9
 
  scprqt:  WARNING -
   nstep=    8 was not enough SCF cycles to converge;
@@ -1889,7 +1828,6 @@ tolerances: {tolvrs: 1.00E-12, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tnlofDFPT_2o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1910,9 +1848,9 @@ tolerances: {tolvrs: 1.00E-12, }
  ETOT  6   1.4600836097179     -3.160E-08 5.774E-11 9.481E-08
  ETOT  7   1.4600836093348     -3.831E-10 5.535E-13 4.204E-09
  ETOT  8   1.4600836093127     -2.215E-11 2.862E-14 1.373E-10
--open ddk wf file :tnlofDFPT_2o_DS3_1WF7
--open ddk wf file :tnlofDFPT_2o_DS3_1WF8
--open ddk wf file :tnlofDFPT_2o_DS3_1WF9
+-open ddk wf file :tnlo_6o_DS3_1WF7
+-open ddk wf file :tnlo_6o_DS3_1WF8
+-open ddk wf file :tnlo_6o_DS3_1WF9
 
  scprqt:  WARNING -
   nstep=    8 was not enough SCF cycles to converge;
@@ -1952,7 +1890,6 @@ tolerances: {tolvrs: 1.00E-12, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tnlofDFPT_2o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1973,9 +1910,9 @@ tolerances: {tolvrs: 1.00E-12, }
  ETOT  6   1.0569776774762     -3.388E-08 6.332E-11 8.584E-08
  ETOT  7   1.0569776771014     -3.748E-10 6.245E-13 1.370E-09
  ETOT  8   1.0569776770941     -7.347E-12 1.255E-14 9.587E-12
--open ddk wf file :tnlofDFPT_2o_DS3_1WF7
--open ddk wf file :tnlofDFPT_2o_DS3_1WF8
--open ddk wf file :tnlofDFPT_2o_DS3_1WF9
+-open ddk wf file :tnlo_6o_DS3_1WF7
+-open ddk wf file :tnlo_6o_DS3_1WF8
+-open ddk wf file :tnlo_6o_DS3_1WF9
 
  scprqt:  WARNING -
   nstep=    8 was not enough SCF cycles to converge;
@@ -2015,7 +1952,6 @@ tolerances: {tolvrs: 1.00E-12, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tnlofDFPT_2o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -2035,10 +1971,10 @@ tolerances: {tolvrs: 1.00E-12, }
  ETOT  5   1.0569777099329     -4.082E-06 5.411E-09 9.270E-06
  ETOT  6   1.0569776760501     -3.388E-08 6.346E-11 8.591E-08
  ETOT  7   1.0569776756746     -3.755E-10 6.267E-13 1.376E-09
- ETOT  8   1.0569776756673     -7.375E-12 1.271E-14 9.719E-12
--open ddk wf file :tnlofDFPT_2o_DS3_1WF7
--open ddk wf file :tnlofDFPT_2o_DS3_1WF8
--open ddk wf file :tnlofDFPT_2o_DS3_1WF9
+ ETOT  8   1.0569776756673     -7.379E-12 1.271E-14 9.719E-12
+-open ddk wf file :tnlo_6o_DS3_1WF7
+-open ddk wf file :tnlo_6o_DS3_1WF8
+-open ddk wf file :tnlo_6o_DS3_1WF9
 
  scprqt:  WARNING -
   nstep=    8 was not enough SCF cycles to converge;
@@ -2078,7 +2014,6 @@ tolerances: {tolvrs: 1.00E-12, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tnlofDFPT_2o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -2098,10 +2033,10 @@ tolerances: {tolvrs: 1.00E-12, }
  ETOT  5   1.0569777084991     -4.078E-06 5.405E-09 9.262E-06
  ETOT  6   1.0569776746227     -3.388E-08 6.332E-11 8.585E-08
  ETOT  7   1.0569776742479     -3.747E-10 6.245E-13 1.370E-09
- ETOT  8   1.0569776742406     -7.365E-12 1.255E-14 9.589E-12
--open ddk wf file :tnlofDFPT_2o_DS3_1WF7
--open ddk wf file :tnlofDFPT_2o_DS3_1WF8
--open ddk wf file :tnlofDFPT_2o_DS3_1WF9
+ ETOT  8   1.0569776742406     -7.363E-12 1.255E-14 9.589E-12
+-open ddk wf file :tnlo_6o_DS3_1WF7
+-open ddk wf file :tnlo_6o_DS3_1WF8
+-open ddk wf file :tnlo_6o_DS3_1WF9
 
  scprqt:  WARNING -
   nstep=    8 was not enough SCF cycles to converge;
@@ -2640,8 +2575,8 @@ meta: {optdriver: 1, }
          ecut(hartree)=      3.087   => boxcut(ratio)=   2.12522
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/baguetl_v9.3.4-tutonlo/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/P.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/baguetl_v9.3.4-tutonlo/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/P.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/P.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/P.psp8
 - P     ONCVPSP-3.3.0  r_core=   1.46089   1.55067   1.70594
 - 15.00000   5.00000    171102                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2655,8 +2590,8 @@ meta: {optdriver: 1, }
              2   -3.024864   -0.802189
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/baguetl_v9.3.4-tutonlo/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Al.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/baguetl_v9.3.4-tutonlo/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Al.psp8
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Al.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Al.psp8
 - Al    ONCVPSP-3.3.0  r_core=   1.76802   1.76802   1.70587
 - 13.00000   3.00000    171102                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2672,7 +2607,6 @@ meta: {optdriver: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tnlofDFPT_2o_DS2_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -2690,12 +2624,11 @@ meta: {optdriver: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tnlofDFPT_2o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
-- dfpt_looppert: read the DDK wavefunctions from file: tnlofDFPT_2o_DS3_1WF7
+- dfpt_looppert: read the DDK wavefunctions from file: tnlo_6o_DS3_1WF7
 
 --- !BeginCycle
 iteration_state: {dtset: 5, }
@@ -2729,12 +2662,11 @@ tolerances: {tolwfr: 1.00E-22, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tnlofDFPT_2o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
-- dfpt_looppert: read the DDK wavefunctions from file: tnlofDFPT_2o_DS3_1WF8
+- dfpt_looppert: read the DDK wavefunctions from file: tnlo_6o_DS3_1WF8
 
 --- !BeginCycle
 iteration_state: {dtset: 5, }
@@ -2768,13 +2700,12 @@ tolerances: {tolwfr: 1.00E-22, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tnlofDFPT_2o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
-- dfpt_looppert: read the DDK wavefunctions from file: tnlofDFPT_2o_DS3_1WF8
-- dfpt_looppert: read the DDK wavefunctions from file: tnlofDFPT_2o_DS3_1WF9
+- dfpt_looppert: read the DDK wavefunctions from file: tnlo_6o_DS3_1WF8
+- dfpt_looppert: read the DDK wavefunctions from file: tnlo_6o_DS3_1WF9
 
 --- !BeginCycle
 iteration_state: {dtset: 5, }
@@ -2808,13 +2739,12 @@ tolerances: {tolwfr: 1.00E-22, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tnlofDFPT_2o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
-- dfpt_looppert: read the DDK wavefunctions from file: tnlofDFPT_2o_DS3_1WF7
-- dfpt_looppert: read the DDK wavefunctions from file: tnlofDFPT_2o_DS3_1WF8
+- dfpt_looppert: read the DDK wavefunctions from file: tnlo_6o_DS3_1WF7
+- dfpt_looppert: read the DDK wavefunctions from file: tnlo_6o_DS3_1WF8
 
 --- !BeginCycle
 iteration_state: {dtset: 5, }
@@ -2881,7 +2811,6 @@ meta: {optdriver: 1, }
          ecut(hartree)=      3.087   => boxcut(ratio)=   2.12522
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tnlofDFPT_2o_DS2_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -2899,14 +2828,13 @@ meta: {optdriver: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tnlofDFPT_2o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
-- dfpt_looppert: read the DDK wavefunctions from file: tnlofDFPT_2o_DS5_1WF25
-- dfpt_looppert: read the DDK wavefunctions from file: tnlofDFPT_2o_DS4_1WF10
-- dfpt_looppert: read the DDK wavefunctions from file: tnlofDFPT_2o_DS3_1WF7
+- dfpt_looppert: read the DDK wavefunctions from file: tnlo_6o_DS5_1WF25
+- dfpt_looppert: read the DDK wavefunctions from file: tnlo_6o_DS4_1WF10
+- dfpt_looppert: read the DDK wavefunctions from file: tnlo_6o_DS3_1WF7
 
 --- !BeginCycle
 iteration_state: {dtset: 6, }
@@ -2940,14 +2868,13 @@ tolerances: {tolwfr: 1.00E-22, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tnlofDFPT_2o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
-- dfpt_looppert: read the DDK wavefunctions from file: tnlofDFPT_2o_DS5_1WF26
-- dfpt_looppert: read the DDK wavefunctions from file: tnlofDFPT_2o_DS4_1WF11
-- dfpt_looppert: read the DDK wavefunctions from file: tnlofDFPT_2o_DS3_1WF8
+- dfpt_looppert: read the DDK wavefunctions from file: tnlo_6o_DS5_1WF26
+- dfpt_looppert: read the DDK wavefunctions from file: tnlo_6o_DS4_1WF11
+- dfpt_looppert: read the DDK wavefunctions from file: tnlo_6o_DS3_1WF8
 
 --- !BeginCycle
 iteration_state: {dtset: 6, }
@@ -2981,15 +2908,14 @@ tolerances: {tolwfr: 1.00E-22, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tnlofDFPT_2o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
-- dfpt_looppert: read the DDK wavefunctions from file: tnlofDFPT_2o_DS5_1WF28
-- dfpt_looppert: read the DDK wavefunctions from file: tnlofDFPT_2o_DS4_1WF12
-- dfpt_looppert: read the DDK wavefunctions from file: tnlofDFPT_2o_DS3_1WF8
-- dfpt_looppert: read the DDK wavefunctions from file: tnlofDFPT_2o_DS3_1WF9
+- dfpt_looppert: read the DDK wavefunctions from file: tnlo_6o_DS5_1WF28
+- dfpt_looppert: read the DDK wavefunctions from file: tnlo_6o_DS4_1WF12
+- dfpt_looppert: read the DDK wavefunctions from file: tnlo_6o_DS3_1WF8
+- dfpt_looppert: read the DDK wavefunctions from file: tnlo_6o_DS3_1WF9
 
 --- !BeginCycle
 iteration_state: {dtset: 6, }
@@ -3023,15 +2949,14 @@ tolerances: {tolwfr: 1.00E-22, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tnlofDFPT_2o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
-- dfpt_looppert: read the DDK wavefunctions from file: tnlofDFPT_2o_DS5_1WF30
-- dfpt_looppert: read the DDK wavefunctions from file: tnlofDFPT_2o_DS4_1WF11
-- dfpt_looppert: read the DDK wavefunctions from file: tnlofDFPT_2o_DS3_1WF7
-- dfpt_looppert: read the DDK wavefunctions from file: tnlofDFPT_2o_DS3_1WF8
+- dfpt_looppert: read the DDK wavefunctions from file: tnlo_6o_DS5_1WF30
+- dfpt_looppert: read the DDK wavefunctions from file: tnlo_6o_DS4_1WF11
+- dfpt_looppert: read the DDK wavefunctions from file: tnlo_6o_DS3_1WF7
+- dfpt_looppert: read the DDK wavefunctions from file: tnlo_6o_DS3_1WF8
 
 --- !BeginCycle
 iteration_state: {dtset: 6, }
@@ -3065,15 +2990,14 @@ tolerances: {tolwfr: 1.00E-22, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tnlofDFPT_2o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
-- dfpt_looppert: read the DDK wavefunctions from file: tnlofDFPT_2o_DS5_1WF28
-- dfpt_looppert: read the DDK wavefunctions from file: tnlofDFPT_2o_DS4_1WF11
-- dfpt_looppert: read the DDK wavefunctions from file: tnlofDFPT_2o_DS3_1WF9
-- dfpt_looppert: read the DDK wavefunctions from file: tnlofDFPT_2o_DS3_1WF8
+- dfpt_looppert: read the DDK wavefunctions from file: tnlo_6o_DS5_1WF28
+- dfpt_looppert: read the DDK wavefunctions from file: tnlo_6o_DS4_1WF11
+- dfpt_looppert: read the DDK wavefunctions from file: tnlo_6o_DS3_1WF9
+- dfpt_looppert: read the DDK wavefunctions from file: tnlo_6o_DS3_1WF8
 
 --- !BeginCycle
 iteration_state: {dtset: 6, }
@@ -3107,15 +3031,14 @@ tolerances: {tolwfr: 1.00E-22, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tnlofDFPT_2o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
-- dfpt_looppert: read the DDK wavefunctions from file: tnlofDFPT_2o_DS5_1WF30
-- dfpt_looppert: read the DDK wavefunctions from file: tnlofDFPT_2o_DS4_1WF10
-- dfpt_looppert: read the DDK wavefunctions from file: tnlofDFPT_2o_DS3_1WF8
-- dfpt_looppert: read the DDK wavefunctions from file: tnlofDFPT_2o_DS3_1WF7
+- dfpt_looppert: read the DDK wavefunctions from file: tnlo_6o_DS5_1WF30
+- dfpt_looppert: read the DDK wavefunctions from file: tnlo_6o_DS4_1WF10
+- dfpt_looppert: read the DDK wavefunctions from file: tnlo_6o_DS3_1WF8
+- dfpt_looppert: read the DDK wavefunctions from file: tnlo_6o_DS3_1WF7
 
 --- !BeginCycle
 iteration_state: {dtset: 6, }
@@ -3207,8 +3130,8 @@ NONLINEAR : PEAD=0, full DFPT computation of third order derivatives
          ecut(hartree)=      3.087   => boxcut(ratio)=   2.12522
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/baguetl_v9.3.4-tutonlo/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/P.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/baguetl_v9.3.4-tutonlo/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/P.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/P.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/P.psp8
 - P     ONCVPSP-3.3.0  r_core=   1.46089   1.55067   1.70594
 - 15.00000   5.00000    171102                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3222,8 +3145,8 @@ NONLINEAR : PEAD=0, full DFPT computation of third order derivatives
              2   -3.024864   -0.802189
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/baguetl_v9.3.4-tutonlo/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Al.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/baguetl_v9.3.4-tutonlo/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Al.psp8
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Al.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Al.psp8
 - Al    ONCVPSP-3.3.0  r_core=   1.76802   1.76802   1.70587
 - 13.00000   3.00000    171102                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3239,97 +3162,97 @@ NONLINEAR : PEAD=0, full DFPT computation of third order derivatives
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tnlofDFPT_2o_DS2_WFK
--inwffil : will read wavefunctions from disk file tnlofDFPT_2o_DS4_1WF1
--inwffil : will read wavefunctions from disk file tnlofDFPT_2o_DS4_1WF10
--inwffil : will read wavefunctions from disk file tnlofDFPT_2o_DS4_1WF10
--dfptnl_loop : read the wavefunctions from file: tnlofDFPT_2o_DS4_1WF10
--dfptnl_loop : read the wavefunctions from file: tnlofDFPT_2o_DS3_1WF7
--dfptnl_loop : read the wavefunctions from file: tnlofDFPT_2o_DS6_1WF34
+-inwffil : will read wavefunctions from disk file tnlo_6o_DS2_WFK
+-inwffil : will read wavefunctions from disk file tnlo_6o_DS4_1WF1
+-inwffil : will read wavefunctions from disk file tnlo_6o_DS4_1WF10
+-inwffil : will read wavefunctions from disk file tnlo_6o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: tnlo_6o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: tnlo_6o_DS3_1WF7
+-dfptnl_loop : read the wavefunctions from file: tnlo_6o_DS6_1WF34
 
 NONLINEAR :  perts :  1.1 /  4.1 /  4.1
--inwffil : will read wavefunctions from disk file tnlofDFPT_2o_DS4_1WF11
--dfptnl_loop : read the wavefunctions from file: tnlofDFPT_2o_DS4_1WF11
--dfptnl_loop : read the wavefunctions from file: tnlofDFPT_2o_DS3_1WF8
--dfptnl_loop : read the wavefunctions from file: tnlofDFPT_2o_DS6_1WF42
+-inwffil : will read wavefunctions from disk file tnlo_6o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: tnlo_6o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: tnlo_6o_DS3_1WF8
+-dfptnl_loop : read the wavefunctions from file: tnlo_6o_DS6_1WF42
 
 NONLINEAR :  perts :  1.1 /  4.2 /  4.1
--inwffil : will read wavefunctions from disk file tnlofDFPT_2o_DS4_1WF11
--inwffil : will read wavefunctions from disk file tnlofDFPT_2o_DS4_1WF10
--dfptnl_loop : read the wavefunctions from file: tnlofDFPT_2o_DS4_1WF10
--dfptnl_loop : read the wavefunctions from file: tnlofDFPT_2o_DS3_1WF7
--dfptnl_loop : read the wavefunctions from file: tnlofDFPT_2o_DS6_1WF39
+-inwffil : will read wavefunctions from disk file tnlo_6o_DS4_1WF11
+-inwffil : will read wavefunctions from disk file tnlo_6o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: tnlo_6o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: tnlo_6o_DS3_1WF7
+-dfptnl_loop : read the wavefunctions from file: tnlo_6o_DS6_1WF39
 
 NONLINEAR :  perts :  1.1 /  4.1 /  4.2
--inwffil : will read wavefunctions from disk file tnlofDFPT_2o_DS4_1WF4
--inwffil : will read wavefunctions from disk file tnlofDFPT_2o_DS4_1WF10
--inwffil : will read wavefunctions from disk file tnlofDFPT_2o_DS4_1WF10
--dfptnl_loop : read the wavefunctions from file: tnlofDFPT_2o_DS4_1WF10
--dfptnl_loop : read the wavefunctions from file: tnlofDFPT_2o_DS3_1WF7
--dfptnl_loop : read the wavefunctions from file: tnlofDFPT_2o_DS6_1WF34
+-inwffil : will read wavefunctions from disk file tnlo_6o_DS4_1WF4
+-inwffil : will read wavefunctions from disk file tnlo_6o_DS4_1WF10
+-inwffil : will read wavefunctions from disk file tnlo_6o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: tnlo_6o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: tnlo_6o_DS3_1WF7
+-dfptnl_loop : read the wavefunctions from file: tnlo_6o_DS6_1WF34
 
 NONLINEAR :  perts :  2.1 /  4.1 /  4.1
--inwffil : will read wavefunctions from disk file tnlofDFPT_2o_DS4_1WF11
--dfptnl_loop : read the wavefunctions from file: tnlofDFPT_2o_DS4_1WF11
--dfptnl_loop : read the wavefunctions from file: tnlofDFPT_2o_DS3_1WF8
--dfptnl_loop : read the wavefunctions from file: tnlofDFPT_2o_DS6_1WF42
+-inwffil : will read wavefunctions from disk file tnlo_6o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: tnlo_6o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: tnlo_6o_DS3_1WF8
+-dfptnl_loop : read the wavefunctions from file: tnlo_6o_DS6_1WF42
 
 NONLINEAR :  perts :  2.1 /  4.2 /  4.1
--inwffil : will read wavefunctions from disk file tnlofDFPT_2o_DS4_1WF11
--inwffil : will read wavefunctions from disk file tnlofDFPT_2o_DS4_1WF10
--dfptnl_loop : read the wavefunctions from file: tnlofDFPT_2o_DS4_1WF10
--dfptnl_loop : read the wavefunctions from file: tnlofDFPT_2o_DS3_1WF7
--dfptnl_loop : read the wavefunctions from file: tnlofDFPT_2o_DS6_1WF39
+-inwffil : will read wavefunctions from disk file tnlo_6o_DS4_1WF11
+-inwffil : will read wavefunctions from disk file tnlo_6o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: tnlo_6o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: tnlo_6o_DS3_1WF7
+-dfptnl_loop : read the wavefunctions from file: tnlo_6o_DS6_1WF39
 
 NONLINEAR :  perts :  2.1 /  4.1 /  4.2
--inwffil : will read wavefunctions from disk file tnlofDFPT_2o_DS4_1WF10
--inwffil : will read wavefunctions from disk file tnlofDFPT_2o_DS4_1WF10
--inwffil : will read wavefunctions from disk file tnlofDFPT_2o_DS4_1WF1
--dfptnl_loop : read the wavefunctions from file: tnlofDFPT_2o_DS4_1WF1
+-inwffil : will read wavefunctions from disk file tnlo_6o_DS4_1WF10
+-inwffil : will read wavefunctions from disk file tnlo_6o_DS4_1WF10
+-inwffil : will read wavefunctions from disk file tnlo_6o_DS4_1WF1
+-dfptnl_loop : read the wavefunctions from file: tnlo_6o_DS4_1WF1
 
 NONLINEAR :  perts :  4.1 /  1.1 /  4.1
--inwffil : will read wavefunctions from disk file tnlofDFPT_2o_DS4_1WF4
--dfptnl_loop : read the wavefunctions from file: tnlofDFPT_2o_DS4_1WF4
+-inwffil : will read wavefunctions from disk file tnlo_6o_DS4_1WF4
+-dfptnl_loop : read the wavefunctions from file: tnlo_6o_DS4_1WF4
 
 NONLINEAR :  perts :  4.1 /  2.1 /  4.1
--inwffil : will read wavefunctions from disk file tnlofDFPT_2o_DS4_1WF10
--dfptnl_loop : read the wavefunctions from file: tnlofDFPT_2o_DS4_1WF10
--dfptnl_loop : read the wavefunctions from file: tnlofDFPT_2o_DS3_1WF7
--dfptnl_loop : read the wavefunctions from file: tnlofDFPT_2o_DS6_1WF34
+-inwffil : will read wavefunctions from disk file tnlo_6o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: tnlo_6o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: tnlo_6o_DS3_1WF7
+-dfptnl_loop : read the wavefunctions from file: tnlo_6o_DS6_1WF34
 
 NONLINEAR :  perts :  4.1 /  4.1 /  4.1
--inwffil : will read wavefunctions from disk file tnlofDFPT_2o_DS4_1WF11
--dfptnl_loop : read the wavefunctions from file: tnlofDFPT_2o_DS4_1WF11
--dfptnl_loop : read the wavefunctions from file: tnlofDFPT_2o_DS3_1WF8
--dfptnl_loop : read the wavefunctions from file: tnlofDFPT_2o_DS6_1WF42
+-inwffil : will read wavefunctions from disk file tnlo_6o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: tnlo_6o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: tnlo_6o_DS3_1WF8
+-dfptnl_loop : read the wavefunctions from file: tnlo_6o_DS6_1WF42
 
 NONLINEAR :  perts :  4.1 /  4.2 /  4.1
--inwffil : will read wavefunctions from disk file tnlofDFPT_2o_DS4_1WF11
--inwffil : will read wavefunctions from disk file tnlofDFPT_2o_DS4_1WF1
--dfptnl_loop : read the wavefunctions from file: tnlofDFPT_2o_DS4_1WF1
+-inwffil : will read wavefunctions from disk file tnlo_6o_DS4_1WF11
+-inwffil : will read wavefunctions from disk file tnlo_6o_DS4_1WF1
+-dfptnl_loop : read the wavefunctions from file: tnlo_6o_DS4_1WF1
 
 NONLINEAR :  perts :  4.1 /  1.1 /  4.2
--inwffil : will read wavefunctions from disk file tnlofDFPT_2o_DS4_1WF4
--dfptnl_loop : read the wavefunctions from file: tnlofDFPT_2o_DS4_1WF4
+-inwffil : will read wavefunctions from disk file tnlo_6o_DS4_1WF4
+-dfptnl_loop : read the wavefunctions from file: tnlo_6o_DS4_1WF4
 
 NONLINEAR :  perts :  4.1 /  2.1 /  4.2
--inwffil : will read wavefunctions from disk file tnlofDFPT_2o_DS4_1WF10
--dfptnl_loop : read the wavefunctions from file: tnlofDFPT_2o_DS4_1WF10
--dfptnl_loop : read the wavefunctions from file: tnlofDFPT_2o_DS3_1WF7
--dfptnl_loop : read the wavefunctions from file: tnlofDFPT_2o_DS6_1WF39
+-inwffil : will read wavefunctions from disk file tnlo_6o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: tnlo_6o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: tnlo_6o_DS3_1WF7
+-dfptnl_loop : read the wavefunctions from file: tnlo_6o_DS6_1WF39
 
 NONLINEAR :  perts :  4.1 /  4.1 /  4.2
--inwffil : will read wavefunctions from disk file tnlofDFPT_2o_DS4_1WF11
--dfptnl_loop : read the wavefunctions from file: tnlofDFPT_2o_DS4_1WF11
--dfptnl_loop : read the wavefunctions from file: tnlofDFPT_2o_DS3_1WF8
--dfptnl_loop : read the wavefunctions from file: tnlofDFPT_2o_DS6_1WF35
+-inwffil : will read wavefunctions from disk file tnlo_6o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: tnlo_6o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: tnlo_6o_DS3_1WF8
+-dfptnl_loop : read the wavefunctions from file: tnlo_6o_DS6_1WF35
 
 NONLINEAR :  perts :  4.1 /  4.2 /  4.2
--inwffil : will read wavefunctions from disk file tnlofDFPT_2o_DS4_1WF12
--inwffil : will read wavefunctions from disk file tnlofDFPT_2o_DS4_1WF11
--dfptnl_loop : read the wavefunctions from file: tnlofDFPT_2o_DS4_1WF11
--dfptnl_loop : read the wavefunctions from file: tnlofDFPT_2o_DS3_1WF8
--dfptnl_loop : read the wavefunctions from file: tnlofDFPT_2o_DS6_1WF37
+-inwffil : will read wavefunctions from disk file tnlo_6o_DS4_1WF12
+-inwffil : will read wavefunctions from disk file tnlo_6o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: tnlo_6o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: tnlo_6o_DS3_1WF8
+-dfptnl_loop : read the wavefunctions from file: tnlo_6o_DS6_1WF37
 
 NONLINEAR :  perts :  4.1 /  4.2 /  4.3
 
@@ -3596,20 +3519,6 @@ NONLINEAR :  perts :  4.1 /  4.2 /  4.3
             acell      7.1391127387E+00  7.1391127387E+00  7.1391127387E+00 Bohr
               amu      3.09737620E+01  2.69815390E+01
           dilatmx      1.05000000E+00
-  d3e_pert1_atpol1          1       1
-  d3e_pert1_atpol2          1       1
-  d3e_pert1_atpol3          1       1
-  d3e_pert1_atpol4          1       1
-  d3e_pert1_atpol5          1       1
-  d3e_pert1_atpol6          1       1
-  d3e_pert1_atpol7          1       2
-    d3e_pert1_dir1          0       0       0
-    d3e_pert1_dir2          0       0       0
-    d3e_pert1_dir3          0       0       0
-    d3e_pert1_dir4          0       0       0
-    d3e_pert1_dir5          0       0       0
-    d3e_pert1_dir6          0       0       0
-    d3e_pert1_dir7          1       1       1
    d3e_pert1_elfd1          0
    d3e_pert1_elfd2          0
    d3e_pert1_elfd3          0
@@ -3624,13 +3533,6 @@ NONLINEAR :  perts :  4.1 /  4.2 /  4.3
    d3e_pert1_phon5          0
    d3e_pert1_phon6          0
    d3e_pert1_phon7          1
-    d3e_pert2_dir1          0       0       0
-    d3e_pert2_dir2          0       0       0
-    d3e_pert2_dir3          0       0       0
-    d3e_pert2_dir4          0       0       0
-    d3e_pert2_dir5          0       0       0
-    d3e_pert2_dir6          0       0       0
-    d3e_pert2_dir7          1       1       1
    d3e_pert2_elfd1          0
    d3e_pert2_elfd2          0
    d3e_pert2_elfd3          0
@@ -3638,13 +3540,6 @@ NONLINEAR :  perts :  4.1 /  4.2 /  4.3
    d3e_pert2_elfd5          0
    d3e_pert2_elfd6          0
    d3e_pert2_elfd7          1
-    d3e_pert3_dir1          0       0       0
-    d3e_pert3_dir2          0       0       0
-    d3e_pert3_dir3          0       0       0
-    d3e_pert3_dir4          0       0       0
-    d3e_pert3_dir5          0       0       0
-    d3e_pert3_dir6          0       0       0
-    d3e_pert3_dir7          1       1       1
    d3e_pert3_elfd1          0
    d3e_pert3_elfd2          0
    d3e_pert3_elfd3          0
@@ -4145,6 +4040,13 @@ P          mk1mem7        432
            prtden6          0
            prtden7          0
            prteig           0
+           prtpot1          0
+           prtpot2          0
+           prtpot3          1
+           prtpot4          1
+           prtpot5          1
+           prtpot6          1
+           prtpot7          0
             prtwf1          1
             prtwf2          1
             prtwf3          1
@@ -4152,20 +4054,6 @@ P          mk1mem7        432
             prtwf5          1
             prtwf6          1
             prtwf7          0
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          1       1
-          rfatpol4          1       2
-          rfatpol5          1       1
-          rfatpol6          1       1
-          rfatpol7          1       1
-            rfdir1          0       0       0
-            rfdir2          0       0       0
-            rfdir3          1       1       1
-            rfdir4          1       1       1
-            rfdir5          1       1       1
-            rfdir6          1       1       1
-            rfdir7          0       0       0
            rfelfd1          0
            rfelfd2          0
            rfelfd3          2
@@ -4201,20 +4089,6 @@ P          mk1mem7        432
          rf2_dkde5          0
          rf2_dkde6          1
          rf2_dkde7          0
-    rf2_pert1_dir1          0       0       0
-    rf2_pert1_dir2          0       0       0
-    rf2_pert1_dir3          0       0       0
-    rf2_pert1_dir4          0       0       0
-    rf2_pert1_dir5          1       1       1
-    rf2_pert1_dir6          1       1       1
-    rf2_pert1_dir7          0       0       0
-    rf2_pert2_dir1          0       0       0
-    rf2_pert2_dir2          0       0       0
-    rf2_pert2_dir3          0       0       0
-    rf2_pert2_dir4          0       0       0
-    rf2_pert2_dir5          1       1       1
-    rf2_pert2_dir6          1       1       1
-    rf2_pert2_dir7          0       0       0
             rprim      0.0000000000E+00  7.0710678119E-01  7.0710678119E-01
                        7.0710678119E-01  0.0000000000E+00  7.0710678119E-01
                        7.0710678119E-01  7.0710678119E-01  0.0000000000E+00
@@ -4455,11 +4329,10 @@ P          mk1mem7        432
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=        194.4  wall=        195.2
+- Proc.   0 individual time (sec): cpu=        154.8  wall=        155.4
 
 ================================================================================
 
  Calculation completed.
-.Delivered  26 WARNINGs and  49 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        194.4  wall=        195.2
-
+.Delivered  78 WARNINGs and  50 COMMENTs to log file.
++Overall time at end (sec) : cpu=        154.8  wall=        155.4

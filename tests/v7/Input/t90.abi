@@ -25,8 +25,6 @@ nqpt 1           # 1 qpoint at a time
 tolvrs 1.0d-8     # tolerance on 2DTE convergence: potential^(1) is what we need
 getwfk 1         # all other DS get wf from DS1
 prtwf 0
-rfatpol 1 1      # all atoms are perturbed
-rfdir 1 1 1      # all directions of perturbation
 rfphon 1
 
 qpt2   0.0 0.0 0.0
@@ -145,7 +143,7 @@ znucl 3
 ####  The comparison of the output file has been disabled: this test
 ####  fails on several slaves due to a different number of SCF cycles
 ####  Finding the magic numbers that make the test pass everywhere is a tricky business.
-####%% t90.out, tolnlines = 11, tolabs = 4.0e-3, tolrel = 1.1, fld_options =  -easy
+####%% t90.abo, tolnlines = 11, tolabs = 4.0e-3, tolrel = 1.1, fld_options =  -easy
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

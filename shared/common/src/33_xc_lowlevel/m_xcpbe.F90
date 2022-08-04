@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -128,12 +124,6 @@ contains
 !!
 !! TODO
 !!  WARNING: option=4 not yet implemented.
-!!
-!! PARENTS
-!!      m_drivexc
-!!
-!! CHILDREN
-!!      invcb
 !!
 !! SOURCE
 

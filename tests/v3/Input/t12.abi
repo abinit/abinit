@@ -47,7 +47,6 @@
 
 #For response function calculations
  rfdir     1 0 0
- rfatpol   1 2
  qpt       3*0.0d0
 
 #Common data

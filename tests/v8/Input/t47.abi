@@ -56,7 +56,6 @@ ndtset 5     jdtset 1 2 3 4 5
 #DATASET3 : ddk on the MP grid of k-points
 #*****************************************
    getwfk3   2
-    rfdir3   1 1 1
    rfelfd3   2
    tolwfr3   1.0d-18
     nband3   4
@@ -73,11 +72,9 @@ ndtset 5     jdtset 1 2 3 4 5
    prtden4   1
    getwfk4   2
    getddk4   3
-    rfdir4   1 1 1
    toldfe4   1.0d-10
    rfelfd4   3
    rfphon4   1
-  rfatpol4   1 2
     nband4   4
    kptopt4   2
   nshiftk4   4
@@ -104,17 +101,12 @@ optdriver5   5
 
   d3e_pert1_elfd5   1
   d3e_pert1_phon5   1
- d3e_pert1_atpol5   1 2
-   d3e_pert1_dir5   1 1 1
 
   d3e_pert2_elfd5   1
-   d3e_pert2_dir5   1 1 1
 
   d3e_pert3_elfd5   1
-   d3e_pert3_dir5   1 1 1
 
 nbdbuf 0
-
 
  pp_dirpath "$ABI_PSPDIR"
  pseudos "PseudosTM_pwteter/13al.pspnc, PseudosTM_pwteter/33as.pspnc"

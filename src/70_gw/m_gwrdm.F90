@@ -3,12 +3,8 @@
 !!  m_gwrdm
 !!
 !! FUNCTION
-!!  Compute density matrix correction Galitskii-Migdal Ecorr, G = Go + Go Sigma Go (imaginary freqs. are used in Sigma_c) 
+!!  Compute density matrix correction Galitskii-Migdal Ecorr, G = Go + Go Sigma Go (imaginary freqs. are used in Sigma_c)
 !!  and associated quantities (natural orbitals, matrix elements, etc.).
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -62,12 +58,6 @@ contains
 !!
 !! OUTPUT
 !! Update Sigp and Sr imaginary frequencies with iw, and weights with the quadrature weights
-!!
-!! PARENTS
-!!      m_sigma_driver
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -149,10 +139,6 @@ end subroutine quadrature_sigma_cw
 !! Ec ^k = 1/(4*pi) * fact_spin * int _{ -Inf }^{ +Inf } dv Sigma_c ^k (iv) * G0(iv)
 !!       = 1/(4*pi) * fact_spin * int _{   0  }^{ +Inf } dv 2 * Re{ Sigma_c ^k (iv) * G0(iv) }
 !!
-!! PARENTS
-!!  m_sigma_driver
-!!
-!! CHILDREN
 !! SOURCE
 
 function calc_Ec_GM_k(ib1,ib2,ik_ibz,Sr,weights,sigcme_k,BSt) result(Ec_GM_k)
@@ -218,12 +204,6 @@ end function calc_Ec_GM_k
 !!
 !! OUTPUT
 !! Updated rdm_k matrix array with Go (Sigma_x - alpha*Sigma_x - Vxc) Go
-!! PARENTS
-!!      m_sigma_driver
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine calc_rdmx(ib1,ib2,ik_ibz,pot,rdm_k,BSt)
@@ -291,12 +271,6 @@ end subroutine calc_rdmx
 !!
 !! OUTPUT
 !! Updated rdm_k matrix array with int Go(iw) Sigma_c(iw) Go(iw) dw
-!! PARENTS
-!!      m_sigma_driver
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine calc_rdmc(ib1,ib2,ik_ibz,Sr,weights,sigcme_k,BSt,rdm_k)
@@ -370,12 +344,6 @@ end subroutine calc_rdmc
 !!
 !! OUTPUT
 !! Compute the nat. orbitals and occ. numbers from the rdm_k matrix (for exchange and correlations)
-!! PARENTS
-!!      m_sigma_driver
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine natoccs(ib1,ib2,rdm_k,nateigv,occs,BSt,ik_ibz,iinfo,checksij)
@@ -498,7 +466,7 @@ subroutine natoccs(ib1,ib2,rdm_k,nateigv,occs,BSt,ik_ibz,iinfo,checksij)
    do ib2dm=1,ndim
      nateigv(ib1+(ib1dm-1),ib1+(ib2dm-1),ik_ibz,1)=eigenvect(ib1dm,ib2dm)
    end do
-   occs(ib1+(ib1dm-1),ik_ibz)=occs_tmp2(ib1dm)  ! Overwrite the initial KS-DFT occs from ib1 to ib2 
+   occs(ib1+(ib1dm-1),ik_ibz)=occs_tmp2(ib1dm)  ! Overwrite the initial KS-DFT occs from ib1 to ib2
    toccs_k=toccs_k+occs_tmp2(ib1dm)
  end do
 
@@ -540,12 +508,6 @@ end subroutine natoccs
 !!
 !! OUTPUT
 !! Updated Hdr and BSt information
-!! PARENTS
-!!      m_sigma_driver
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine update_hdr_bst(Wfd,occs,b1gw,b2gw,BSt,Hdr,ngfft_in)
@@ -555,7 +517,7 @@ subroutine update_hdr_bst(Wfd,occs,b1gw,b2gw,BSt,Hdr,ngfft_in)
  integer,intent(in),dimension(3) :: ngfft_in
  type(ebands_t),target,intent(inout) :: BSt
  type(Hdr_type),intent(inout) :: Hdr
- type(wfd_t),intent(in) :: Wfd
+ class(wfd_t),intent(in) :: Wfd
 !arrays
  real(dp),intent(in) :: occs(:,:)
 !Local variables ------------------------------
@@ -611,12 +573,6 @@ end subroutine update_hdr_bst
 !!
 !! OUTPUT
 !! Print the total (averaged) occ. = sum_k weight_k * Nelec_k
-!!
-!! PARENTS
-!!      m_sigma_driver
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -687,19 +643,13 @@ end subroutine print_tot_occ
 !! nateigv are stored if they are read from any checkpoint file
 !! sigmak_todo components set to 1 if the kpoint is read from any checkpoint file
 !!
-!! PARENTS
-!!      m_sigma_driver
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine get_chkprdm(Wfd,Kmesh,Sigp,BSt,occs,nateigv,sigmak_todo,my_rank,gw1rdm_fname_in)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: my_rank
- type(wfd_t),intent(in) :: Wfd
+ class(wfd_t),intent(in) :: Wfd
  type(kmesh_t),intent(in) :: Kmesh
  type(sigparams_t),intent(in) :: Sigp
  type(ebands_t),intent(in) :: BSt
@@ -839,19 +789,13 @@ end subroutine get_chkprdm
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_sigma_driver
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine print_chkprdm(Wfd,occs,nateigv,ik_ibz,my_rank,gw1rdm_fname_out)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ik_ibz,my_rank
- type(wfd_t),intent(in) :: Wfd
+ class(wfd_t),intent(in) :: Wfd
  character(len=fnlen),intent(in) :: gw1rdm_fname_out
 !arrays
  real(dp),intent(in) :: occs(:,:)
@@ -926,12 +870,6 @@ end subroutine print_chkprdm
 !!   %kinetic=matrix elements of $t$.
 !!   %vhartr =matrix elements of $v_H$.
 !! Sr=sigma_t (see the definition of this structured datatype)
-!!
-!! PARENTS
-!!      m_sigma_driver
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1012,12 +950,6 @@ end subroutine change_matrix
 !! all energy terms are self-explanatory
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_sigma_driver
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1124,12 +1056,6 @@ end subroutine print_total_energy
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_sigma_driver
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine print_band_energies(b1gw,b2gw,Sr,Sigp,Mels,Kmesh,BSt,new_hartr,old_purex)
@@ -1227,12 +1153,6 @@ end subroutine print_band_energies
 !! Rotate a matrix from KS to NO basis and vicerversa and save the new matrix on Mat.
 !! Mat=at the end an array containing the matrix elements in NO or KS basis
 !!
-!! PARENTS
-!!      m_gwrdm
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine rotate_ks_no(ib1,ib2,Mat,Umat,option)
@@ -1272,12 +1192,6 @@ end subroutine rotate_ks_no
 !!
 !! OUTPUT
 !! mat=array in the NO basis
-!!
-!! PARENTS
-!!      m_gwrdm
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1321,12 +1235,6 @@ end subroutine ks2no
 !! OUTPUT
 !! mat=array in the KS basis
 !!
-!! PARENTS
-!!      m_gwrdm
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine no2ks(ndim,mat,rot)
@@ -1368,11 +1276,6 @@ end subroutine no2ks
 !!
 !! OUTPUT
 !! Print the 1-RDM matrix
-!! PARENTS
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine printrdm_k(ib1,ib2,rdm_k) ! Only used for debug on this file, do not use it with large arrays!

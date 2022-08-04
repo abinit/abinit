@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.7.4 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h29 )
+.Starting date : Wed  4 May 2022.
+- ( at 01h24 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v6_t61/t61.in
-- output file    -> t61.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/v6_t61/t61.abi
+- output file    -> t61.abo
 - root for input  files -> t61i
 - root for output files -> t61o
 
@@ -34,7 +34,7 @@
 -    mband =          30        mffmem =           1         mkmem =           1
        mpw =        2401          nfft =       91125          nkpt =           1
 ================================================================================
-P This job should need less than                      24.199 Mbytes of memory.
+P This job should need less than                      26.870 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      1.101 Mbytes ; DEN or POT disk file :      0.697 Mbytes.
 ================================================================================
@@ -106,10 +106,9 @@ P          mk1mem           1
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
         optdriver1          0
         optdriver2          1
-          rfatpol1          1       1
-          rfatpol2          1       2
-            rfdir1          0       0       0
-            rfdir2          1       0       0
+           prtpot1          0
+           prtpot2          1
+            rfdir           1       0       0
            rfphon1          0
            rfphon2          1
           smdelta1          0
@@ -161,8 +160,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     15.000   => boxcut(ratio)=   2.10310
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
 -  Troullier-Martins psp for element  H         Thu Oct 27 17:28:54 EDT 1994
 -  1.00000   1.00000    940714                znucl, zion, pspdat
     1    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -338,7 +337,6 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=     15.000   => boxcut(ratio)=   2.10310
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t61o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -356,7 +354,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t61o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -378,7 +375,7 @@ tolerances: {tolvrs: 1.00E-08, }
  ETOT  7   36.229705782372     -6.140E-08 3.499E-05 5.259E-05
  ETOT  8   36.229705776533     -5.839E-09 1.807E-06 4.841E-06
  ETOT  9   36.229705776339     -1.939E-10 7.342E-06 2.473E-08
- ETOT 10   36.229705776335     -3.809E-12 4.196E-07 1.675E-09
+ ETOT 10   36.229705776335     -3.837E-12 4.196E-07 1.675E-09
 
  At SCF step   10       vres2   =  1.67E-09 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
@@ -415,7 +412,6 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t61o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -435,9 +431,9 @@ tolerances: {tolvrs: 1.00E-08, }
  ETOT  5   36.229783243514     -1.984E-03 9.857E-05 4.952E-01
  ETOT  6   36.229702805473     -8.044E-05 9.848E-06 4.422E-03
  ETOT  7   36.229702744079     -6.139E-08 3.662E-05 5.259E-05
- ETOT  8   36.229702738243     -5.835E-09 2.038E-06 4.841E-06
- ETOT  9   36.229702738045     -1.983E-10 7.901E-06 2.473E-08
- ETOT 10   36.229702738047      2.018E-12 4.901E-07 1.675E-09
+ ETOT  8   36.229702738244     -5.835E-09 2.038E-06 4.841E-06
+ ETOT  9   36.229702738045     -1.984E-10 7.901E-06 2.473E-08
+ ETOT 10   36.229702738047      1.961E-12 4.901E-07 1.675E-09
 
  At SCF step   10       vres2   =  1.67E-09 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
@@ -566,7 +562,7 @@ tolerances: {tolvrs: 1.00E-08, }
 - -6.293978E-01  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
 -  3.632061E+03
  chkph3 : WARNING -
-  The dynamical matrix was incomplete : phonon frequencies may be wrong ...
+  Dynamical matrix incomplete, phonon frequencies may be wrong, check input variables rfatpol and rfdir.
 ================================================================================
 
  ---- T=0 shift of eigenenergies due to electron-phonon interation at q ---- 
@@ -657,10 +653,9 @@ P          mk1mem           1
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
         optdriver1          0
         optdriver2          1
-          rfatpol1          1       1
-          rfatpol2          1       2
-            rfdir1          0       0       0
-            rfdir2          1       0       0
+           prtpot1          0
+           prtpot2          1
+            rfdir           1       0       0
            rfphon1          0
            rfphon2          1
           smdelta1          0
@@ -779,10 +774,10 @@ P          mk1mem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         13.1  wall=         13.1
+- Proc.   0 individual time (sec): cpu=         16.6  wall=         16.8
 
 ================================================================================
 
  Calculation completed.
-.Delivered   1 WARNINGs and  21 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         13.1  wall=         13.1
+.Delivered   1 WARNINGs and  10 COMMENTs to log file.
++Overall time at end (sec) : cpu=         16.6  wall=         16.8

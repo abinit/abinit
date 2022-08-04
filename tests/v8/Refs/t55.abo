@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.7.4 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h34 )
+.Starting date : Wed  4 May 2022.
+- ( at 01h13 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v8_t55/t55.in
-- output file    -> t55.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/v8_t55/t55.abi
+- output file    -> t55.abo
 - root for input  files -> t55i
 - root for output files -> t55o
 
@@ -150,9 +150,9 @@ P          mk1mem3          1
         optdriver1          0
         optdriver2          0
         optdriver3          1
-            rfdir1          0       0       0
-            rfdir2          0       0       0
-            rfdir3          1       1       1
+           prtpot1          0
+           prtpot2          0
+           prtpot3          1
            rfelfd1          0
            rfelfd2          0
            rfelfd3          2
@@ -246,8 +246,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     30.000   => boxcut(ratio)=   2.14352
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Mg-sp-gw.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Mg-sp-gw.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Mg-sp-gw.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Mg-sp-gw.psp8
 - Mg    ONCVPSP  r_core=  1.16  1.56
 - 12.00000  10.00000    150902                znucl, zion, pspdat
     8   11    1    4       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -260,8 +260,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              1   -6.605901   -2.664074
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/O.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/O.psp8
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/O.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/O.psp8
 - O     ONCVPSP  r_core=  1.36  1.46  1.26
 -  8.00000   6.00000    151103                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -529,8 +529,8 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=     30.000   => boxcut(ratio)=   2.14352
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Mg-sp-gw.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Mg-sp-gw.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Mg-sp-gw.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Mg-sp-gw.psp8
 - Mg    ONCVPSP  r_core=  1.16  1.56
 - 12.00000  10.00000    150902                znucl, zion, pspdat
     8   11    1    4       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -543,8 +543,8 @@ meta: {optdriver: 1, rfelfd: 2, }
              1   -6.605901   -2.664074
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/O.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/O.psp8
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/O.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/O.psp8
 - O     ONCVPSP  r_core=  1.36  1.46  1.26
 -  8.00000   6.00000    151103                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -560,7 +560,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t55o_DS2_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -582,7 +581,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t55o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -599,17 +597,17 @@ tolerances: {tolwfr: 1.00E-22, }
  ETOT  2  -45.308683947586     -3.190E-03 5.277E-06 0.000E+00
  ETOT  3  -45.308684640874     -6.933E-07 1.185E-09 0.000E+00
  ETOT  4  -45.308684641099     -2.254E-10 6.384E-13 0.000E+00
- ETOT  5  -45.308684641100     -9.948E-14 3.486E-16 0.000E+00
- ETOT  6  -45.308684641099      3.553E-14 1.574E-19 0.000E+00
- ETOT  7  -45.308684641100     -1.421E-14 1.485E-22 0.000E+00
- ETOT  8  -45.308684641100     -1.421E-14 5.750E-23 0.000E+00
+ ETOT  5  -45.308684641100     -9.237E-14 3.486E-16 0.000E+00
+ ETOT  6  -45.308684641100      2.842E-14 1.574E-19 0.000E+00
+ ETOT  7  -45.308684641099      1.421E-14 1.485E-22 0.000E+00
+ ETOT  8  -45.308684641100     -4.263E-14 5.750E-23 0.000E+00
 
  At SCF step    8   max residual=  5.75E-23 < tolwfr=  1.00E-22 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   20.182E-24; max=  57.502E-24
+ Mean square residual over all n,k,spin=   20.183E-24; max=  57.502E-24
  dfpt_looppert : ek2=    5.8681353568E+01
           f-sum rule ratio=    1.5279875991E+00
  prteigrs : about to open file t55t_1WF1_EIG
@@ -640,7 +638,6 @@ tolerances: {tolwfr: 1.00E-22, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t55o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -657,17 +654,17 @@ tolerances: {tolwfr: 1.00E-22, }
  ETOT  2  -45.308683734677     -3.665E-03 3.618E-06 0.000E+00
  ETOT  3  -45.308684639521     -9.048E-07 1.597E-09 0.000E+00
  ETOT  4  -45.308684639856     -3.358E-10 4.726E-13 0.000E+00
- ETOT  5  -45.308684639857     -1.776E-13 3.486E-16 0.000E+00
+ ETOT  5  -45.308684639857     -1.634E-13 3.486E-16 0.000E+00
  ETOT  6  -45.308684639857      2.842E-14 1.574E-19 0.000E+00
- ETOT  7  -45.308684639857      7.105E-15 1.485E-22 0.000E+00
- ETOT  8  -45.308684639857     -2.132E-14 7.283E-23 0.000E+00
+ ETOT  7  -45.308684639857     -2.132E-14 1.485E-22 0.000E+00
+ ETOT  8  -45.308684639857      2.132E-14 7.283E-23 0.000E+00
 
  At SCF step    8   max residual=  7.28E-23 < tolwfr=  1.00E-22 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   32.820E-24; max=  72.834E-24
+ Mean square residual over all n,k,spin=   32.820E-24; max=  72.835E-24
  dfpt_looppert : ek2=    5.8681353568E+01
           f-sum rule ratio=    1.5279875990E+00
  prteigrs : about to open file t55t_1WF1_EIG
@@ -698,7 +695,6 @@ tolerances: {tolwfr: 1.00E-22, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t55o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -715,10 +711,10 @@ tolerances: {tolwfr: 1.00E-22, }
  ETOT  2  -45.308683944806     -3.201E-03 5.279E-06 0.000E+00
  ETOT  3  -45.308684638397     -6.936E-07 1.185E-09 0.000E+00
  ETOT  4  -45.308684638622     -2.254E-10 6.391E-13 0.000E+00
- ETOT  5  -45.308684638622     -1.208E-13 3.486E-16 0.000E+00
- ETOT  6  -45.308684638622      3.553E-14 1.574E-19 0.000E+00
- ETOT  7  -45.308684638622     -2.132E-14 1.484E-22 0.000E+00
- ETOT  8  -45.308684638622     -2.132E-14 9.860E-23 0.000E+00
+ ETOT  5  -45.308684638622     -1.066E-13 3.486E-16 0.000E+00
+ ETOT  6  -45.308684638622      2.132E-14 1.574E-19 0.000E+00
+ ETOT  7  -45.308684638622     -7.105E-15 1.484E-22 0.000E+00
+ ETOT  8  -45.308684638622     -7.105E-15 9.860E-23 0.000E+00
 
  At SCF step    8   max residual=  9.86E-23 < tolwfr=  1.00E-22 =>converged.
 ================================================================================
@@ -951,9 +947,9 @@ P          mk1mem3          1
         optdriver1          0
         optdriver2          0
         optdriver3          1
-            rfdir1          0       0       0
-            rfdir2          0       0       0
-            rfdir3          1       1       1
+           prtpot1          0
+           prtpot2          0
+           prtpot3          1
            rfelfd1          0
            rfelfd2          0
            rfelfd3          2
@@ -1110,10 +1106,10 @@ P          mk1mem3          1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         11.1  wall=         11.2
+- Proc.   0 individual time (sec): cpu=         12.2  wall=         12.5
 
 ================================================================================
 
  Calculation completed.
-.Delivered   4 WARNINGs and  16 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         11.1  wall=         11.2
+.Delivered   3 WARNINGs and   9 COMMENTs to log file.
++Overall time at end (sec) : cpu=         12.2  wall=         12.5

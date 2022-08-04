@@ -549,29 +549,3 @@
    1   2   3   2  0.70734570237012D+01 -0.19488093386156D-16
    2   2   3   2  0.86109535882429D+01  0.38976186772311D-16
    3   2   3   2  0.15684410611944D+02  0.19488093386156D-16
-
- List of bloks and their characteristics 
-  
- 2nd derivatives (non-stat.)  - # elements :      36
- qpt  0.00000000E+00  0.00000000E+00  0.00000000E+00   1.0
-  
- 2nd derivatives (non-stat.)  - # elements :      36
- qpt  2.50000000E-01  0.00000000E+00  0.00000000E+00   1.0
-  
- 2nd derivatives (non-stat.)  - # elements :      36
- qpt  5.00000000E-01  0.00000000E+00  0.00000000E+00   1.0
-  
- 2nd derivatives (non-stat.)  - # elements :      36
- qpt  2.50000000E-01  2.50000000E-01  0.00000000E+00   1.0
-  
- 2nd derivatives (non-stat.)  - # elements :      36
- qpt  5.00000000E-01  2.50000000E-01  0.00000000E+00   1.0
-  
- 2nd derivatives (non-stat.)  - # elements :      36
- qpt -2.50000000E-01  2.50000000E-01  0.00000000E+00   1.0
-  
- 2nd derivatives (non-stat.)  - # elements :      36
- qpt  5.00000000E-01  5.00000000E-01  0.00000000E+00   1.0
-  
- 2nd derivatives (non-stat.)  - # elements :      36
- qpt -2.50000000E-01  5.00000000E-01  2.50000000E-01   1.0

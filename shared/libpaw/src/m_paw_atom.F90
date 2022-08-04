@@ -71,12 +71,6 @@ CONTAINS !===========================================================
 !!   type  2: g(r)=k(r).r^l; k(r)=[sin(Pi.r/rshp)/(Pi.r/rshp)]^2
 !!   type  3: g(r)=alpha1.jl(q1.r)+alpha2.jl(q2.r)
 !!
-!! PARENTS
-!!      m_paw_atom,m_paw_init,m_pawpsp
-!!
-!! CHILDREN
-!!      atompaw_shpfun,atompaw_vhnzc,bound_deriv,paw_spline,paw_splint,simp_gen
-!!
 !! SOURCE
 
 subroutine atompaw_shpfun(ll,mesh,norm,pawtab,shapefunc)
@@ -190,12 +184,6 @@ end subroutine atompaw_shpfun
 !!  al(2)= al coefficients
 !!  ql(2)= ql factors
 !!
-!! PARENTS
-!!      m_pawpsp
-!!
-!! CHILDREN
-!!      atompaw_shpfun,atompaw_vhnzc,bound_deriv,paw_spline,paw_splint,simp_gen
-!!
 !! SOURCE
 
  subroutine atompaw_shapebes(al,ql,ll,rc)
@@ -253,12 +241,6 @@ end subroutine atompaw_shapebes
 !!
 !! OUTPUT
 !!  vhnzc(:)=Hartree potential due to Z_nc
-!!
-!! PARENTS
-!!      m_paw_atom,m_pawpsp
-!!
-!! CHILDREN
-!!      atompaw_shpfun,atompaw_vhnzc,bound_deriv,paw_spline,paw_splint,simp_gen
 !!
 !! SOURCE
 
@@ -321,12 +303,6 @@ end subroutine atompaw_shapebes
 !!
 !! OUTPUT
 !!  pawtab%dij0(pawtab%lmn2_size)= Frozen part of the Dij term
-!!
-!! PARENTS
-!!      m_pawpsp
-!!
-!! CHILDREN
-!!      atompaw_shpfun,atompaw_vhnzc,bound_deriv,paw_spline,paw_splint,simp_gen
 !!
 !! SOURCE
 
@@ -521,12 +497,6 @@ end subroutine atompaw_shapebes
 !!
 !! OUTPUT
 !!  kij(pawtab%lmn2_size)= kinetic part of Dij
-!!
-!! PARENTS
-!!      m_pawpsp
-!!
-!! CHILDREN
-!!      atompaw_shpfun,atompaw_vhnzc,bound_deriv,paw_spline,paw_splint,simp_gen
 !!
 !! SOURCE
 

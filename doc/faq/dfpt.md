@@ -67,7 +67,7 @@ number of MPI procs.
 
 ## What to do if a perturbation does not converge?
 
-Firs of all, try to restart from the first-order WFK file using [[ird1wf]], [[get1wf]].
+First of all, try to restart from the first-order WFK file using [[ird1wf]], [[get1wf]].
 In principle, it is also possible to restart from the first-order density via [[get1den]]
 but use this approach only if the first-order WFK file is not available.
 You may want to use [[prtwf]] = -1 in the DFPT part to produce the first-order WFK file only

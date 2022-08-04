@@ -56,7 +56,6 @@ kptopt3?      2
 nqpt3?        1
 qpt3?         0.0 0.0 0.0
 rfphon3?      1
-rfatpol3?     1 1
 rfdir3?       1 0 0
 tolvrs3?      1.0d-10
 getwfk31     11
@@ -73,6 +72,8 @@ getddk34     23
 getddk35     25
 getddk36     25
 getddk37     25
+
+rfatpol 1 1
 
  pp_dirpath "$ABI_PSPDIR"
  pseudos "14-Si.nlcc.fhi"

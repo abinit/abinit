@@ -51,6 +51,8 @@ module m_special_funcs
  public :: k_fermi           ! Fermi wave vector corresponding to the local value of the real space density rhor.
  public :: k_thfermi         ! Thomas-Fermi wave vector corresponding to the local value of the real space density rhor
  public :: levi_civita_3     ! Return Levi-Civita tensor of rank 3
+ public :: fermi_dirac        ! Fermi Dirac distribution
+ public :: bose_einstein      ! Bose Einstein distribution
 !!***
 
 !!****t* m_special_funcs/jlspline_t
@@ -61,9 +63,6 @@ module m_special_funcs
 !!  Object used to interpolate Bessel functions
 !!
 !! SOURCE
-
- public :: fermi_dirac        ! Fermi Dirac distribution
- public :: bose_einstein      ! Bose Einstein distribution
 
  type,public :: jlspline_t
 
@@ -158,9 +157,6 @@ CONTAINS  !===========================================================
 !! OUTPUT
 !!  clp= resulting function
 !!
-!! PARENTS
-!!      nhatgrid
-!!
 !! SOURCE
 
 pure function clp(x)
@@ -195,10 +191,6 @@ end function clp
 !!
 !! OUTPUT
 !!   factorial= n! (real)
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -241,11 +233,6 @@ end function factorial
 !!
 !! OUTPUT
 !!   permutations= n!/(n-k)! (real)
-!!
-!! PARENTS
-!!      green_atomic_hubbard
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -292,10 +279,6 @@ end function permutations
 !! OUTPUT
 !!   binomcoeff= n!/( k!* (n-k)!)  (real dp)
 !!
-!! PARENTS
-!!
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -330,11 +313,6 @@ end function binomcoeff
 !! OUTPUT
 !!   Laguerre(x,n,a) (dp)
 !!
-!! PARENTS
-!!
-!!
-!! CHILDREN
-!!   factorial
 !!
 !! SOURCE
 
@@ -395,12 +373,6 @@ end function laguerre
 !! OUTPUT
 !!  RadFnH(r,n,l,Z) (dp)
 !!
-!! PARENTS
-!!
-!!
-!! CHILDREN
-!!  Laguerre
-!!  factorial
 !!
 !! SOURCE
 
@@ -468,13 +440,6 @@ end function RadFnH
 !! OUTPUT
 !!  IRadFnH(a,b,n,l,Z) (dp)
 !!
-!! PARENTS
-!!
-!!
-!! CHILDREN
-!!  Laguerre
-!!  factorial
-!!  RadFnH
 !!
 !! SOURCE
 
@@ -542,16 +507,13 @@ end function IRadFnH
 !! gaussian
 !!
 !! FUNCTION
-!!  Return the values of the normalized Gaussian distribution
+!!  Return the values of the normalized Gaussian distribution:
+!!
 !!    Gauss(arg,sigma) =  1/(sigma SQRT(2*pi)) e^{-arg**2/(2*sigma**2)}
 !!
 !! INPUTS
 !!   arg=Argument of the Gaussian.
 !!   sigma=Standard deviation
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -581,15 +543,11 @@ end function gaussian
 !! lorentzian
 !!
 !! FUNCTION
-!!  Approximate Dirac Delta with lorentzian
+!!  Lorentzian function.
 !!
 !! INPUTS
 !!   arg=Argument of the lorentzian.
 !!   sigma=Broadening factor
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -623,11 +581,6 @@ end function lorentzian
 !!
 !! OUTPUT
 !! derf_yy= error function of yy
-!!
-!! PARENTS
-!!      evdw_wannier,wvl_wfs_set
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -774,11 +727,6 @@ end function abi_derf
 !! OUTPUT
 !! derfc_yy=complementary error function of yy
 !!
-!! PARENTS
-!!      ewald,ewald2,dfpt_ewald,elt_ewald,ewald9,make_efg_ion,psp2lo,wvl_wfs_set
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 elemental function abi_derfc(yy) result(derfc_yy)
@@ -915,11 +863,6 @@ end function abi_derfc
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_rec,m_spin_current
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine GAMMA_FUNCTION(X,GA)
@@ -1054,11 +997,6 @@ end subroutine GAMMA_FUNCTION
 !! At small arg, the higher orders have so much cancellation that the
 !! analytic expression is very poor computationally.  In that case we
 !! use a rational polynomial approximation.
-!!
-!! PARENTS
-!!      m_mlwfovlp,m_psp1,m_special_funcs
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1267,11 +1205,6 @@ end subroutine besjm
 !! OUTPUT
 !!  sb_out(nm)=values of spherical bessel functions for l=0,nm-1
 !!
-!! PARENTS
-!!      m_forctqmc,m_paw_overlap,m_positron,m_psptk
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine sbf8(nm,xx,sb_out)
@@ -1346,8 +1279,6 @@ end subroutine sbf8
 !!  mu = chemical potential
 !!  temperature = T
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 function fermi_dirac(energy, mu, temperature)
@@ -1392,8 +1323,6 @@ end function fermi_dirac
 !!  energy = electron energy level
 !!  temperature = T
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 function bose_einstein(energy, temperature)
@@ -1419,7 +1348,7 @@ function bose_einstein(energy, temperature)
      write(message,'(a)') 'No Bose Einstein for negative energies'
      ABI_WARNING(message)
    end if
- else 
+ else
    write(message,'(a)') 'No Bose Einstein for negative or 0 T'
    ABI_WARNING(message)
  end if
@@ -1439,8 +1368,6 @@ end function bose_einstein
 !!
 !! INPUTS
 !!  rhor=Local density in real space.
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -1474,8 +1401,6 @@ end function k_fermi
 !! INPUTS
 !!  rhor=Local density in real space.
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 elemental function k_thfermi(rhor)
@@ -1504,8 +1429,6 @@ end function k_thfermi
 !!
 !! FUNCTION
  !! Return Levi-Civita tensor of rank 3
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -1545,12 +1468,6 @@ end function levi_civita_3
 !!  bess_spl=array of integrals
 !!  bess_spl_der=array of derivatives of integrals
 !!  xx=coordinates of points belonging to the grid
-!!
-!! PARENTS
-!!      m_cut3d,partial_dos_fractions
-!!
-!! CHILDREN
-!!      besjm,spline
 !!
 !! SOURCE
 
@@ -1623,11 +1540,6 @@ end function jlspline_new
 !! FUNCTION
 !!  deallocate memory
 !!
-!! PARENTS
-!!      m_cut3d,m_epjdos
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine jlspline_free(jlspl)
@@ -1661,8 +1573,6 @@ end subroutine jlspline_free
 !! OUTPUT
 !!
 !! FUNCTION
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -1708,10 +1618,6 @@ end function jlspline_integral
 !!
 !! INPUTS
 !!  sigma=Broadening parameter.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1771,10 +1677,6 @@ end function gspline_new
 !! OUTPUT
 !!  weights(nx,2)=First slice contains the gaussian approximant on xmesh.
 !!   The second slice stores the primitive.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1840,10 +1742,6 @@ end subroutine gspline_eval
 !!
 !! INPUTS
 !!  self<gspline_t>=Object used to spline the gaussian approximant
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

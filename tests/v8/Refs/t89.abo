@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.7.4 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,18 +14,18 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h37 )
+.Starting date : Wed  4 May 2022.
+- ( at 01h14 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v8_t87-t88-t89/t89.in
-- output file    -> t89.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/v8_t87-t88-t89/t89.abi
+- output file    -> t89.abo
 - root for input  files -> t89i
 - root for output files -> t89o
 
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Al.xml
+-   /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Al.xml
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/As.LDA_PW-JTH_sp.xml
+-   /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/As.LDA_PW-JTH_sp.xml
 
  DATASET    5 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -76,7 +76,7 @@ _ WF disk file :      0.280 Mbytes ; DEN or POT disk file :      0.053 Mbytes.
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        18    nfftf =      5832
 ================================================================================
-P This job should need less than                       4.433 Mbytes of memory.
+P This job should need less than                       4.494 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.280 Mbytes ; DEN or POT disk file :      0.091 Mbytes.
 ================================================================================
@@ -94,27 +94,15 @@ _ WF disk file :      0.280 Mbytes ; DEN or POT disk file :      0.091 Mbytes.
  -outvars: echo values of preprocessed input variables --------
             acell      1.0640000000E+01  1.0640000000E+01  1.0640000000E+01 Bohr
               amu      2.69815390E+01  7.49215900E+01
-  d3e_pert1_atpol5          1       1
-  d3e_pert1_atpol6          1       1
-  d3e_pert1_atpol7          1       2
-    d3e_pert1_dir5          0       0       0
-    d3e_pert1_dir6          0       0       0
-    d3e_pert1_dir7          1       1       1
    d3e_pert1_elfd5          0
    d3e_pert1_elfd6          0
    d3e_pert1_elfd7          1
    d3e_pert1_phon5          0
    d3e_pert1_phon6          0
    d3e_pert1_phon7          1
-    d3e_pert2_dir5          0       0       0
-    d3e_pert2_dir6          0       0       0
-    d3e_pert2_dir7          1       1       1
    d3e_pert2_elfd5          0
    d3e_pert2_elfd6          0
    d3e_pert2_elfd7          1
-    d3e_pert3_dir5          0       0       0
-    d3e_pert3_dir6          0       0       0
-    d3e_pert3_dir7          1       1       1
    d3e_pert3_elfd5          0
    d3e_pert3_elfd6          0
    d3e_pert3_elfd7          1
@@ -186,21 +174,15 @@ P          mk1mem           8
           prepanl5          1
           prepanl6          1
           prepanl7          0
-            rfdir5          1       1       1
-            rfdir6          1       1       1
-            rfdir7          0       0       0
+           prtpot5          1
+           prtpot6          1
+           prtpot7          0
          rf2_dkdk5          1
          rf2_dkdk6          0
          rf2_dkdk7          0
          rf2_dkde5          0
          rf2_dkde6          1
          rf2_dkde7          0
-    rf2_pert1_dir5          1       1       1
-    rf2_pert1_dir6          1       1       1
-    rf2_pert1_dir7          0       0       0
-    rf2_pert2_dir5          1       1       1
-    rf2_pert2_dir6          1       1       1
-    rf2_pert2_dir7          0       0       0
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
@@ -297,9 +279,9 @@ meta: {optdriver: 1, }
          ecut(hartree)=      7.000   => boxcut(ratio)=   2.01497
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Al.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Al.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Al.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Al.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Al.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Al.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.90363307
@@ -317,9 +299,9 @@ meta: {optdriver: 1, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/As.LDA_PW-JTH_sp.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/As.LDA_PW-JTH_sp.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/As.LDA_PW-JTH_sp.xml
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/As.LDA_PW-JTH_sp.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/As.LDA_PW-JTH_sp.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/As.LDA_PW-JTH_sp.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 2.10391912
@@ -340,7 +322,6 @@ meta: {optdriver: 1, }
    2.52339172E+02                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t89o_DS2_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -358,7 +339,6 @@ meta: {optdriver: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t89o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -398,7 +378,6 @@ tolerances: {tolwfr: 1.00E-20, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t89o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -438,7 +417,6 @@ tolerances: {tolwfr: 1.00E-20, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t89o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -478,7 +456,6 @@ tolerances: {tolwfr: 1.00E-20, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t89o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -519,7 +496,6 @@ tolerances: {tolwfr: 1.00E-20, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t89o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -541,7 +517,7 @@ tolerances: {tolwfr: 1.00E-20, }
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   10.310E-22; max=  86.073E-22
+ Mean square residual over all n,k,spin=   10.310E-22; max=  86.074E-22
 
  Two components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -560,7 +536,6 @@ tolerances: {tolwfr: 1.00E-20, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t89o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -655,7 +630,6 @@ meta: {optdriver: 1, }
          ecut(hartree)=      7.000   => boxcut(ratio)=   2.01497
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t89o_DS2_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -673,7 +647,6 @@ meta: {optdriver: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t89o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -715,7 +688,6 @@ tolerances: {tolwfr: 1.00E-18, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t89o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -757,7 +729,6 @@ tolerances: {tolwfr: 1.00E-18, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t89o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -799,7 +770,6 @@ tolerances: {tolwfr: 1.00E-18, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t89o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -842,7 +812,6 @@ tolerances: {tolwfr: 1.00E-18, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t89o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -885,7 +854,6 @@ tolerances: {tolwfr: 1.00E-18, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t89o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -928,7 +896,6 @@ tolerances: {tolwfr: 1.00E-18, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t89o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -945,7 +912,7 @@ tolerances: {tolwfr: 1.00E-18, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -5473.8704679298     -5.474E+03 6.318E-19 0.000E+00
+-ETOT  1  -5473.8704679299     -5.474E+03 6.318E-19 0.000E+00
 
  At SCF step    1   max residual=  6.32E-19 < tolwfr=  1.00E-18 =>converged.
 ================================================================================
@@ -971,7 +938,6 @@ tolerances: {tolwfr: 1.00E-18, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t89o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1014,7 +980,6 @@ tolerances: {tolwfr: 1.00E-18, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t89o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -3303,7 +3268,7 @@ NONLINEAR :  perts :  4.3 /  4.3 /  4.3
    1    1   2    4   1    4         40.6735816620         -0.0000000000
    1    1   2    4   2    4        -47.3331420113          0.0000000000
    1    1   2    4   3    4          1.1545315304         -0.0000000000
-   1    1   3    4   1    4         40.6735816728          0.0000000000
+   1    1   3    4   1    4         40.6735816727          0.0000000000
    1    1   3    4   2    4          1.1545315299         -0.0000000000
    1    1   3    4   3    4        -47.3331420217         -0.0000000000
    2    1   1    4   1    4        -47.3331420192         -0.0000000000
@@ -3354,18 +3319,18 @@ NONLINEAR :  perts :  4.3 /  4.3 /  4.3
    1    4   1    1   1    4       -101.5345662993         -0.0000000000
    1    4   1    1   2    4         53.0632449789         -0.0000000000
    1    4   1    1   3    4         53.0632449889          0.0000000000
-   1    4   2    1   1    4        128.5665107091         -0.0000000000
-   1    4   2    1   2    4         53.0632449811         -0.0000000000
+   1    4   2    1   1    4        128.5665107091          0.0000000000
+   1    4   2    1   2    4         53.0632449812          0.0000000000
    1    4   2    1   3    4       -183.7268668660         -0.0000000000
    1    4   3    1   1    4        128.5665107198         -0.0000000000
    1    4   3    1   2    4       -183.7268668726         -0.0000000000
    1    4   3    1   3    4         53.0632449789          0.0000000000
-   1    4   1    2   1    4        135.4313965430          0.0000000000
+   1    4   1    2   1    4        135.4313965430         -0.0000000000
    1    4   1    2   2    4        -68.8921855461         -0.0000000000
    1    4   1    2   3    4        -68.8921855562          0.0000000000
-   1    4   2    2   1    4       -132.7677947746          0.0000000000
+   1    4   2    2   1    4       -132.7677947746         -0.0000000000
    1    4   2    2   2    4        -68.8921855506         -0.0000000000
-   1    4   2    2   3    4        199.9958844529         -0.0000000000
+   1    4   2    2   3    4        199.9958844529          0.0000000000
    1    4   3    2   1    4       -132.7677947851          0.0000000000
    1    4   3    2   2    4        199.9958844614          0.0000000000
    1    4   3    2   3    4        -68.8921855505         -0.0000000000
@@ -3387,7 +3352,7 @@ NONLINEAR :  perts :  4.3 /  4.3 /  4.3
    1    4   2    4   1    4       -340.1487551000          0.0000000000
    1    4   2    4   2    4       -486.7518547641         -0.0000000000
    1    4   2    4   3    4        712.0698584067          0.0000000000
-   1    4   3    4   1    1         40.6735816728          0.0000000000
+   1    4   3    4   1    1         40.6735816727          0.0000000000
    1    4   3    4   2    1          1.1545315360         -0.0000000000
    1    4   3    4   3    1         42.1597598540          0.0000000000
    1    4   3    4   1    2        -55.1886024956          0.0000000000
@@ -3399,21 +3364,21 @@ NONLINEAR :  perts :  4.3 /  4.3 /  4.3
    2    4   1    1   1    4         53.0632449789         -0.0000000000
    2    4   1    1   2    4        128.5665107154         -0.0000000000
    2    4   1    1   3    4       -183.7268668692          0.0000000000
-   2    4   2    1   1    4         53.0632449811         -0.0000000000
+   2    4   2    1   1    4         53.0632449812          0.0000000000
    2    4   2    1   2    4       -101.5345662950         -0.0000000000
    2    4   2    1   3    4         53.0632449830          0.0000000000
    2    4   3    1   1    4       -183.7268668726         -0.0000000000
    2    4   3    1   2    4        128.5665107142         -0.0000000000
    2    4   3    1   3    4         53.0632449844         -0.0000000000
    2    4   1    2   1    4        -68.8921855461         -0.0000000000
-   2    4   1    2   2    4       -132.7677947831          0.0000000000
+   2    4   1    2   2    4       -132.7677947831         -0.0000000000
    2    4   1    2   3    4        199.9958844561         -0.0000000000
    2    4   2    2   1    4        -68.8921855506         -0.0000000000
    2    4   2    2   2    4        135.4313965409          0.0000000000
    2    4   2    2   3    4        -68.8921855501         -0.0000000000
    2    4   3    2   1    4        199.9958844614          0.0000000000
    2    4   3    2   2    4       -132.7677947834          0.0000000000
-   2    4   3    2   3    4        -68.8921855524          0.0000000000
+   2    4   3    2   3    4        -68.8921855525          0.0000000000
    2    4   1    4   1    1         42.1597598497         -0.0000000000
    2    4   1    4   2    1         40.6735816658          0.0000000000
    2    4   1    4   3    1          1.1545315297         -0.0000000000
@@ -3452,12 +3417,12 @@ NONLINEAR :  perts :  4.3 /  4.3 /  4.3
    3    4   3    1   3    4       -101.5345662955         -0.0000000000
    3    4   1    2   1    4        -68.8921855562          0.0000000000
    3    4   1    2   2    4        199.9958844561         -0.0000000000
-   3    4   1    2   3    4       -132.7677947748          0.0000000000
-   3    4   2    2   1    4        199.9958844529         -0.0000000000
+   3    4   1    2   3    4       -132.7677947748         -0.0000000000
+   3    4   2    2   1    4        199.9958844529          0.0000000000
    3    4   2    2   2    4        -68.8921855501         -0.0000000000
    3    4   2    2   3    4       -132.7677947781         -0.0000000000
    3    4   3    2   1    4        -68.8921855505         -0.0000000000
-   3    4   3    2   2    4        -68.8921855524          0.0000000000
+   3    4   3    2   2    4        -68.8921855525          0.0000000000
    3    4   3    2   3    4        135.4313965443         -0.0000000000
    3    4   1    4   1    1         42.1597598583          0.0000000000
    3    4   1    4   2    1          1.1545315349         -0.0000000000
@@ -3579,15 +3544,15 @@ NONLINEAR :  perts :  4.3 /  4.3 /  4.3
 
  ** sum_lambda1psi1psi1 :     
       1      1      1         12.119041685      -0.000000000
-      1      1      2         -6.890934592       0.000000000
+      1      1      2         -6.890934592      -0.000000000
       1      1      3         -6.890934592       0.000000000
-      1      2      1         -6.890934592       0.000000000
+      1      2      1         -6.890934592      -0.000000000
       1      2      2         -6.890934591       0.000000000
       1      2      3         14.694210623      -0.000000000
       1      3      1         -6.890934592       0.000000000
       1      3      2         14.694210623      -0.000000000
       1      3      3         -6.890934591      -0.000000000
-      2      1      1         -6.890934592       0.000000000
+      2      1      1         -6.890934592      -0.000000000
       2      1      2         -6.890934591       0.000000000
       2      1      3         14.694210623      -0.000000000
       2      2      1         -6.890934591       0.000000000
@@ -3715,12 +3680,12 @@ NONLINEAR :  perts :  4.3 /  4.3 /  4.3
     1          2       -0.093296287        0.043286071        0.071605385        0.000000000       -0.000000000        0.000000000
                         0.043286071       -0.024794886        0.043286071       -0.000000000        0.000000000       -0.000000000
                         0.071605385        0.043286071       -0.093296287        0.000000000       -0.000000000        0.000000000
-    1          3       -0.093296287        0.071605385        0.043286071       -0.000000000        0.000000000       -0.000000000
+    1          3       -0.093296287        0.071605385        0.043286071        0.000000000        0.000000000       -0.000000000
                         0.071605385       -0.093296287        0.043286071        0.000000000       -0.000000000        0.000000000
                         0.043286071        0.043286071       -0.024794887       -0.000000000        0.000000000        0.000000000
     2          1        0.057737093       -0.030535878       -0.030535878        0.000000000        0.000000000       -0.000000000
                        -0.030535878        0.017631327       -0.043750582        0.000000000       -0.000000000        0.000000000
-                       -0.030535878       -0.043750582        0.017631327       -0.000000000        0.000000000       -0.000000000
+                       -0.030535878       -0.043750582        0.017631327       -0.000000000        0.000000000        0.000000000
     2          2        0.017631327       -0.030535878       -0.043750582        0.000000000       -0.000000000        0.000000000
                        -0.030535878        0.057737093       -0.030535878       -0.000000000        0.000000000       -0.000000000
                        -0.043750582       -0.030535878        0.017631327        0.000000000       -0.000000000        0.000000000
@@ -3733,23 +3698,23 @@ NONLINEAR :  perts :  4.3 /  4.3 /  4.3
                         0.049702895       -0.230074589        0.191270797       -0.000000000        0.000000000       -0.000000000
     1          2        0.191270797        0.049702895       -0.230074589        0.000000000       -0.000000000        0.000000000
                         0.049702895       -0.124829060        0.049702895       -0.000000000       -0.000000000       -0.000000000
-                       -0.230074589        0.049702895        0.191270797        0.000000000       -0.000000000        0.000000000
+                       -0.230074589        0.049702895        0.191270797        0.000000000       -0.000000000       -0.000000000
     1          3        0.191270797       -0.230074589        0.049702895       -0.000000000        0.000000000        0.000000000
                        -0.230074589        0.191270797        0.049702895        0.000000000       -0.000000000        0.000000000
                         0.049702895        0.049702895       -0.124829060        0.000000000        0.000000000        0.000000000
     2          1        0.100990065       -0.036787886       -0.036787886        0.000000000        0.000000000       -0.000000000
-                       -0.036787886       -0.199281600        0.226891510        0.000000000       -0.000000000        0.000000000
+                       -0.036787886       -0.199281600        0.226891510        0.000000000        0.000000000        0.000000000
                        -0.036787886        0.226891510       -0.199281600       -0.000000000        0.000000000        0.000000000
-    2          2       -0.199281600       -0.036787886        0.226891510       -0.000000000        0.000000000       -0.000000000
+    2          2       -0.199281600       -0.036787886        0.226891510        0.000000000        0.000000000       -0.000000000
                        -0.036787886        0.100990065       -0.036787886        0.000000000        0.000000000       -0.000000000
                         0.226891510       -0.036787886       -0.199281600       -0.000000000       -0.000000000        0.000000000
     2          3       -0.199281600        0.226891510       -0.036787886       -0.000000000       -0.000000000        0.000000000
                         0.226891510       -0.199281600       -0.036787886       -0.000000000        0.000000000       -0.000000000
-                       -0.036787886       -0.036787886        0.100990065        0.000000000       -0.000000000        0.000000000
+                       -0.036787886       -0.036787886        0.100990065        0.000000000       -0.000000000       -0.000000000
  ** sum_lambda1psi0S1psi1 :   
     1          1        0.000553318       -0.000169159       -0.000169159       -0.000000000        0.000000000       -0.000000000
                        -0.000169159        0.002254210       -0.002433382        0.000000000       -0.000000000        0.000000000
-                       -0.000169159       -0.002433382        0.002254210       -0.000000000        0.000000000       -0.000000000
+                       -0.000169159       -0.002433382        0.002254210       -0.000000000        0.000000000        0.000000000
     1          2        0.002254210       -0.000169159       -0.002433382       -0.000000000        0.000000000       -0.000000000
                        -0.000169159        0.000553318       -0.000169159        0.000000000       -0.000000000       -0.000000000
                        -0.002433382       -0.000169159        0.002254210       -0.000000000       -0.000000000        0.000000000
@@ -3759,12 +3724,12 @@ NONLINEAR :  perts :  4.3 /  4.3 /  4.3
     2          1       -0.000907494        0.000589639        0.000589639        0.000000000        0.000000000       -0.000000000
                         0.000589639        0.005900103       -0.007868257        0.000000000       -0.000000000        0.000000000
                         0.000589639       -0.007868257        0.005900103       -0.000000000        0.000000000       -0.000000000
-    2          2        0.005900103        0.000589639       -0.007868257       -0.000000000        0.000000000       -0.000000000
+    2          2        0.005900103        0.000589639       -0.007868257       -0.000000000        0.000000000        0.000000000
                         0.000589639       -0.000907494        0.000589639        0.000000000       -0.000000000        0.000000000
-                       -0.007868257        0.000589639        0.005900103       -0.000000000        0.000000000       -0.000000000
-    2          3        0.005900103       -0.007868257        0.000589639       -0.000000000        0.000000000        0.000000000
-                       -0.007868257        0.005900103        0.000589639        0.000000000        0.000000000        0.000000000
-                        0.000589639        0.000589639       -0.000907494        0.000000000        0.000000000       -0.000000000
+                       -0.007868257        0.000589639        0.005900103        0.000000000        0.000000000       -0.000000000
+    2          3        0.005900103       -0.007868257        0.000589639        0.000000000       -0.000000000       -0.000000000
+                       -0.007868257        0.005900103        0.000589639       -0.000000000        0.000000000        0.000000000
+                        0.000589639        0.000589639       -0.000907494       -0.000000000        0.000000000       -0.000000000
  ** sum_psi0H2psi1a :         
     1          1       -0.000171498        0.003811279        0.003811279        0.000000000        0.000000000       -0.000000000
                         0.003811279       -0.003116582       -0.009489086        0.000000000       -0.000000000        0.000000000
@@ -3788,9 +3753,9 @@ NONLINEAR :  perts :  4.3 /  4.3 /  4.3
     1          1        0.005757704       -0.001556436       -0.001556436        0.000000000       -0.000000000        0.000000000
                        -0.001556436        0.022249636       -0.023161784       -0.000000000        0.000000000        0.000000000
                        -0.001556436       -0.023161784        0.022249636        0.000000000        0.000000000       -0.000000000
-    1          2        0.022249636       -0.001556436       -0.023161784        0.000000000       -0.000000000       -0.000000000
+    1          2        0.022249636       -0.001556436       -0.023161784        0.000000000       -0.000000000        0.000000000
                        -0.001556436        0.005757704       -0.001556436       -0.000000000       -0.000000000        0.000000000
-                       -0.023161784       -0.001556436        0.022249636       -0.000000000        0.000000000       -0.000000000
+                       -0.023161784       -0.001556436        0.022249636        0.000000000        0.000000000       -0.000000000
     1          3        0.022249636       -0.023161784       -0.001556436        0.000000000       -0.000000000        0.000000000
                        -0.023161784        0.022249636       -0.001556436       -0.000000000        0.000000000        0.000000000
                        -0.001556436       -0.001556436        0.005757704        0.000000000        0.000000000       -0.000000000
@@ -3800,8 +3765,8 @@ NONLINEAR :  perts :  4.3 /  4.3 /  4.3
     2          2       -0.024961732        0.003833818        0.023698613       -0.000000000        0.000000000        0.000000000
                         0.003833818       -0.009887893        0.003833818        0.000000000        0.000000000       -0.000000000
                         0.023698613        0.003833818       -0.024961732        0.000000000       -0.000000000       -0.000000000
-    2          3       -0.024961732        0.023698613        0.003833818        0.000000000        0.000000000       -0.000000000
-                        0.023698613       -0.024961732        0.003833818        0.000000000        0.000000000       -0.000000000
+    2          3       -0.024961732        0.023698613        0.003833818        0.000000000       -0.000000000       -0.000000000
+                        0.023698613       -0.024961732        0.003833818       -0.000000000        0.000000000       -0.000000000
                         0.003833818        0.003833818       -0.009887893       -0.000000000       -0.000000000        0.000000000
  ** eHxc21_paw :              
     1          1       -0.001574137        0.001129495        0.001129495       -0.000000000       -0.000000000       -0.000000000
@@ -3886,27 +3851,15 @@ NONLINEAR :  perts :  4.3 /  4.3 /  4.3
  -outvars: echo values of variables after computation  --------
             acell      1.0640000000E+01  1.0640000000E+01  1.0640000000E+01 Bohr
               amu      2.69815390E+01  7.49215900E+01
-  d3e_pert1_atpol5          1       1
-  d3e_pert1_atpol6          1       1
-  d3e_pert1_atpol7          1       2
-    d3e_pert1_dir5          0       0       0
-    d3e_pert1_dir6          0       0       0
-    d3e_pert1_dir7          1       1       1
    d3e_pert1_elfd5          0
    d3e_pert1_elfd6          0
    d3e_pert1_elfd7          1
    d3e_pert1_phon5          0
    d3e_pert1_phon6          0
    d3e_pert1_phon7          1
-    d3e_pert2_dir5          0       0       0
-    d3e_pert2_dir6          0       0       0
-    d3e_pert2_dir7          1       1       1
    d3e_pert2_elfd5          0
    d3e_pert2_elfd6          0
    d3e_pert2_elfd7          1
-    d3e_pert3_dir5          0       0       0
-    d3e_pert3_dir6          0       0       0
-    d3e_pert3_dir7          1       1       1
    d3e_pert3_elfd5          0
    d3e_pert3_elfd6          0
    d3e_pert3_elfd7          1
@@ -3987,21 +3940,15 @@ P          mk1mem           8
           prepanl5          1
           prepanl6          1
           prepanl7          0
-            rfdir5          1       1       1
-            rfdir6          1       1       1
-            rfdir7          0       0       0
+           prtpot5          1
+           prtpot6          1
+           prtpot7          0
          rf2_dkdk5          1
          rf2_dkdk6          0
          rf2_dkdk7          0
          rf2_dkde5          0
          rf2_dkde6          1
          rf2_dkde7          0
-    rf2_pert1_dir5          1       1       1
-    rf2_pert1_dir6          1       1       1
-    rf2_pert1_dir7          0       0       0
-    rf2_pert2_dir5          1       1       1
-    rf2_pert2_dir6          1       1       1
-    rf2_pert2_dir7          0       0       0
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
@@ -4127,10 +4074,10 @@ P          mk1mem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         25.5  wall=         25.6
+- Proc.   0 individual time (sec): cpu=         19.3  wall=         19.3
 
 ================================================================================
 
  Calculation completed.
-.Delivered 122 WARNINGs and  17 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         25.5  wall=         25.6
+.Delivered 417 WARNINGs and  14 COMMENTs to log file.
++Overall time at end (sec) : cpu=         19.3  wall=         19.3

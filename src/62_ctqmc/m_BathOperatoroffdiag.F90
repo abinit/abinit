@@ -19,12 +19,6 @@
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 #include "defs.h"
@@ -227,12 +221,6 @@ CONTAINS
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 SUBROUTINE BathOperatoroffdiag_init(op, flavors, samples, beta, iTech,opt_nondiag)
@@ -310,12 +298,6 @@ END SUBROUTINE BathOperatoroffdiag_init
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 SUBROUTINE BathOperatoroffdiag_reset(op)
@@ -374,12 +356,6 @@ END SUBROUTINE BathOperatoroffdiag_reset
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 SUBROUTINE BathOperatoroffdiag_activateParticle(op,flavor)
@@ -427,12 +403,6 @@ END SUBROUTINE BathOperatoroffdiag_activateParticle
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 DOUBLE PRECISION  FUNCTION BathOperatoroffdiag_getDetAdd(op,CdagC_1, position, particle)
@@ -688,12 +658,6 @@ END FUNCTION BathOperatoroffdiag_getDetAdd
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 DOUBLE PRECISION FUNCTION BathOperatoroffdiag_getDetRemove(op,position)
@@ -777,12 +741,6 @@ END FUNCTION BathOperatoroffdiag_getDetRemove
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -882,12 +840,6 @@ END FUNCTION BathOperatoroffdiag_getDetF
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -1297,12 +1249,6 @@ END SUBROUTINE BathOperatoroffdiag_setMAdd
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 SUBROUTINE BathOperatoroffdiag_setMRemove(op,particle) 
@@ -1507,12 +1453,6 @@ END SUBROUTINE BathOperatoroffdiag_setMRemove
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 SUBROUTINE BathOperatoroffdiag_swap(op, flavor1, flavor2)
@@ -1632,12 +1572,6 @@ END SUBROUTINE BathOperatoroffdiag_swap
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 SUBROUTINE BathOperatoroffdiag_initF(op,ifstream)
@@ -1685,12 +1619,6 @@ END SUBROUTINE BathOperatoroffdiag_initF
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -1744,12 +1672,6 @@ END SUBROUTINE BathOperatoroffdiag_setF
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -1811,12 +1733,6 @@ END SUBROUTINE BathOperatoroffdiag_printF
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 SUBROUTINE BathOperatoroffdiag_printM(op,ostream)
@@ -1858,12 +1774,6 @@ END SUBROUTINE BathOperatoroffdiag_printM
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -1921,12 +1831,6 @@ END SUBROUTINE BathOperatoroffdiag_printM_matrix
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 SUBROUTINE  BathOperatoroffdiag_destroy(op)
@@ -1982,12 +1886,6 @@ END SUBROUTINE BathOperatoroffdiag_destroy
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 SUBROUTINE BathOperatoroffdiag_doCheck(op,opt_check)
@@ -2024,12 +1922,6 @@ END SUBROUTINE BathOperatoroffdiag_doCheck
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -2185,12 +2077,6 @@ END SUBROUTINE BathOperatoroffdiag_checkM
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 SUBROUTINE BathOperatoroffdiag_recomputeM(op,particle,flav_i,flav_j)
@@ -2311,12 +2197,6 @@ END SUBROUTINE BathOperatoroffdiag_recomputeM
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 

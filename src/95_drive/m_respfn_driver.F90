@@ -8,14 +8,10 @@
 !!  Subdriver for DFPT calculations.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2022 ABINIT group (XG, DRH, MT, MKV)
+!!  Copyright (C) 1999-2022 ABINIT group (XG, DRH, MT, MKV, GA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -53,9 +49,8 @@ module m_respfn_driver
  use m_geometry,    only : irreducible_set_pert
  use m_dynmat,      only : chkph3, d2sym3, q0dy3_apply, q0dy3_calc, wings3, dfpt_phfrq, sytens, dfpt_prtph, &
                            asria_calc, asria_corr, cart29, cart39, chneu9, dfpt_sydy
- use m_ddb,         only : DDB_VERSION
- use m_ddb_hdr,     only : ddb_hdr_type, ddb_hdr_init
- use m_ddb_interpolate, only : outddbnc
+ use m_ddb,         only : ddb_type
+ use m_ddb_hdr,     only : ddb_hdr_type
  use m_occ,         only : newocc
  use m_efmas,       only : efmasdeg_free_array, efmasval_free_array
  use m_wfk,         only : wfk_read_eigenvalues, wfk_read_my_kptbands
@@ -190,13 +185,6 @@ contains
 !!      For compatibility reasons, (nfftf,ngfftf,mgfftf)
 !!      are set equal to (nfft,ngfft,mgfft) in that case.
 !!
-!! PARENTS
-!!      m_driver
-!!
-!! CHILDREN
-!!      dfpt_atm2fft,dfpt_mkcore,dfpt_mkvxc,dfpt_mkvxc_noncoll,dotprod_vn,timab
-!!      xmpi_sum
-!!
 !! SOURCE
 
 subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
@@ -244,16 +232,14 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  real(dp) :: eei,eew,ehart,eii,ek,enl,entropy,enxc
  real(dp) :: epaw,epawdc,etot,evdw,fermie,fermih,gsqcut,gsqcut_eff,gsqcutc_eff,qphnrm,residm ! CP added fermih
  real(dp) :: ucvol,vxcavg
- character(len=fnlen) :: dscrpt
- character(len=fnlen) :: filename
  character(len=500) :: message
  type(ebands_t) :: bstruct
  type(hdr_type) :: hdr,hdr_fine,hdr0,hdr_den
+ type(ddb_type) :: ddb
  type(ddb_hdr_type) :: ddb_hdr
  type(paw_dmft_type) :: paw_dmft
  type(pawfgr_type) :: pawfgr
  type(wvl_data) :: wvl
- type(crystal_t) :: Crystal
  type(xcdata_type) :: xcdata
  integer :: ddkfil(3),ngfft(18),ngfftf(18),rfdir(3),rf2_dirs_from_rfpert_nl(3,3)
  integer,allocatable :: atindx(:),atindx1(:),blkflg(:,:,:,:),blkflgfrx1(:,:,:,:),blkflg1(:,:,:,:)
@@ -1473,42 +1459,37 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 &   gprimd,dtset%mband,mpert,natom,ntypat,outd2,pawbec,pawpiezo,piezofrnl,dtset%prtbbb,&
 &   rfasr,rfpert,rprimd,dtset%typat,ucvol,usevdw,psps%ziontypat)
 
-   dscrpt=' Note : temporary (transfer) database '
-
-!  Initialize the header of the DDB file
-   call ddb_hdr_init(ddb_hdr,dtset,psps,pawtab,DDB_VERSION,dscrpt,&
-&   1,xred=xred,occ=occ,ngfft=ngfft)
-
-!  Open the formatted derivative database file, and write the header
-   call ddb_hdr%open_write(dtfil%fnameabo_ddb, dtfil%unddb)
-
-   call ddb_hdr%free()
-
 !  Output of the dynamical matrix (master only)
-   call dfpt_dyout(becfrnl,dtset%berryopt,blkflg,carflg,dtfil%unddb,ddkfil,dyew,dyfrlo,&
+   call dfpt_dyout(becfrnl,dtset%berryopt,blkflg,carflg,ddkfil,dyew,dyfrlo,&
 &   dyfrnl,dyfrx1,dyfrx2,dyfr_cplex,dyfr_nondiag,dyvdw,d2cart,d2cart_bbb,d2eig0,&
 &   d2k0,d2lo,d2loc0,d2matr,d2nl,d2nl0,d2nl1,d2ovl,d2vn,&
 &   eltcore,elteew,eltfrhar,eltfrkin,eltfrloc,eltfrnl,eltfrxc,eltvdw,&
 &   has_full_piezo,has_allddk,ab_out,dtset%mband,mpert,natom,ntypat,&
-&   outd2,pawbec,pawpiezo,piezofrnl,dtset%prtbbb,dtset%prtvol,qphon,qzero,&
+&   outd2,pawbec,pawpiezo,piezofrnl,dtset%prtbbb,dtset%prtvol,qzero,&
 &   dtset%typat,rfdir,rfpert,rfphon,rfstrs,psps%usepaw,usevdw,psps%ziontypat)
 
-   close(dtfil%unddb)
 
-#ifdef HAVE_NETCDF
-   ! Output dynamical matrix in NetCDF format.
-   call crystal_init(dtset%amu_orig(:,1), Crystal, &
-&   dtset%spgroup, dtset%natom, dtset%npsp, psps%ntypat, &
-&   dtset%nsym, rprimd, dtset%typat, xred, dtset%ziontypat, dtset%znucl, 1, &
-&   dtset%nspden==2.and.dtset%nsppol==1, .false., hdr%title, &
-&   dtset%symrel, dtset%tnons, dtset%symafm)
+!  Initialize ddb header object
+   call ddb_hdr%init(dtset,psps,pawtab,&
+&   dscrpt=' Note : temporary (transfer) database ',&
+&   nblok=1,xred=xred,occ=occ,ngfft=ngfft)
 
-   filename = strcat(dtfil%filnam_ds(4),"_DDB.nc")
+!  Initialize ddb object
+   call ddb%init(dtset, nblok=1, mpert=mpert, msize=(3*mpert*3*mpert))
 
-   call outddbnc(filename, mpert, d2matr, blkflg, dtset%qptn, Crystal)
-   call crystal%free()
-#endif
+! Set the values for the 2nd order derivatives
+   call ddb%set_qpt(iblok=1, qpt=qphon(1:3))
+   call ddb%set_d2matr(d2matr, blkflg, iblok=1)
 
+! Output dynamical matrix in text format.
+   call ddb%write_txt(ddb_hdr, dtfil%fnameabo_ddb)
+
+! Output dynamical matrix in netcdf format.
+   call ddb%write_nc(ddb_hdr, strcat(dtfil%fnameabo_ddb, ".nc"))
+
+! Deallocate ddb object
+   call ddb_hdr%free()
+   call ddb%free()
 
 !  In case of phonons, diagonalize the dynamical matrix
    if(rfphon==1)then
@@ -1874,13 +1855,6 @@ end subroutine respfn
 !! TODO
 !!  The localization tensor cannot be defined in the metallic case. It should not be computed.
 !!
-!! PARENTS
-!!      m_respfn_driver
-!!
-!! CHILDREN
-!!      dfpt_atm2fft,dfpt_mkcore,dfpt_mkvxc,dfpt_mkvxc_noncoll,dotprod_vn,timab
-!!      xmpi_sum
-!!
 !! SOURCE
 
 subroutine wrtloctens(blkflg,d2bbb,d2nl,mband,mpert,natom,prtbbb,rprimd,usepaw)
@@ -2011,7 +1985,7 @@ subroutine wrtloctens(blkflg,d2bbb,d2nl,mband,mpert,natom,prtbbb,rprimd,usepaw)
    write(message,'(6a)')ch10,&
 &   ' WARNING : Localization tensor calculation (this does not apply to other properties).',ch10,&
 &   '  Not all d/dk perturbations were computed. So the localization tensor in reciprocal space is incomplete,',ch10,&
-&   '  and transformation to cartesian coordinates may be wrong.'
+&   '  and transformation to cartesian coordinates may be wrong. Check input variable rfdir.'
    call wrtout(std_out,message,'COLL')
    call wrtout(ab_out,message,'COLL')
  end if
@@ -2044,7 +2018,6 @@ end subroutine wrtloctens
 !!  matrix has been calculated ; 0 otherwise )
 !!  carflg(3,mpert,3,mpert)= ( 1 if the element of the cartesian
 !!  2DTE matrix has been calculated correctly ; 0 otherwise )
-!!  ddboun=unit number for the derivative database output
 !!  ddkfil(3)=components are 1 if corresponding d/dk file exists, otherwise 0
 !!  (in what follows, DYMX means dynamical matrix, and D2MX means 2nd-order matrix)
 !!  dyew(2,3,natom,3,natom)=Ewald part of the DYMX
@@ -2094,7 +2067,6 @@ end subroutine wrtloctens
 !!  pawpiezo= flag for the computation of frozen part of Piezoelectric tensor (PAW only)
 !!  prtbbb=if 1, print the band-by-band decomposition
 !!  prtvol=print volume
-!!  qphon(3)=phonon wavelength, in reduced coordinates
 !!  qzero=1 if zero phonon wavevector
 !!  rfdir(3)=defines the directions for the perturbations
 !!  rfpert(mpert)=defines the perturbations
@@ -2112,26 +2084,19 @@ end subroutine wrtloctens
 !! This routine is called only by the processor me==0 .
 !! In consequence, no use of message and wrtout routine.
 !!
-!! PARENTS
-!!      m_respfn_driver
-!!
-!! CHILDREN
-!!      dfpt_atm2fft,dfpt_mkcore,dfpt_mkvxc,dfpt_mkvxc_noncoll,dotprod_vn,timab
-!!      xmpi_sum
-!!
 !! SOURCE
 
-subroutine dfpt_dyout(becfrnl,berryopt,blkflg,carflg,ddboun,ddkfil,dyew,dyfrlo,dyfrnl,&
+subroutine dfpt_dyout(becfrnl,berryopt,blkflg,carflg,ddkfil,dyew,dyfrlo,dyfrnl,&
 & dyfrx1,dyfrx2,dyfr_cplex,dyfr_nondiag,dyvdw,d2cart,d2cart_bbb,&
 & d2eig0,d2k0,d2lo,d2loc0,d2matr,d2nl,d2nl0,d2nl1,d2ovl,d2vn,&
 & eltcore,elteew,eltfrhar,eltfrkin,eltfrloc,eltfrnl,eltfrxc,eltvdw,&
 & has_full_piezo,has_allddk,iout,mband,mpert,natom,ntypat,&
-& outd2,pawbec,pawpiezo,piezofrnl,prtbbb,prtvol,qphon,qzero,typat,rfdir,&
+& outd2,pawbec,pawpiezo,piezofrnl,prtbbb,prtvol,qzero,typat,rfdir,&
 & rfpert,rfphon,rfstrs,usepaw,usevdw,zion)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: berryopt,ddboun,dyfr_cplex,dyfr_nondiag,iout,mband,mpert
+ integer,intent(in) :: berryopt,dyfr_cplex,dyfr_nondiag,iout,mband,mpert
  integer,intent(in) :: natom,ntypat,outd2,pawbec,pawpiezo,prtbbb,prtvol,qzero
  integer, intent(in) :: rfphon,rfstrs,usepaw,usevdw
 !arrays
@@ -2152,23 +2117,22 @@ subroutine dfpt_dyout(becfrnl,berryopt,blkflg,carflg,ddboun,ddkfil,dyew,dyfrlo,d
  real(dp),intent(in) :: eltfrhar(6,6),eltfrkin(6,6),eltfrloc(6+3*natom,6)
  real(dp),intent(in) :: eltfrnl(6+3*natom,6),eltfrxc(6+3*natom,6)
  real(dp),intent(in) :: eltvdw(6+3*natom,6*usevdw),piezofrnl(6,3*pawpiezo)
- real(dp),intent(in) :: qphon(3),zion(ntypat)
+ real(dp),intent(in) :: zion(ntypat)
  real(dp),intent(inout) :: d2cart_bbb(2,3,3,mpert,mband,mband*prtbbb)
  logical,intent(in) :: has_allddk,has_full_piezo
 
 !Local variables -------------------------
 !scalars
  integer :: iband,idir1,idir2,ii,ipert1,ipert2,jj,nelmts,nline
- real(dp) :: qptnrm,zi,zr
+ real(dp) :: zi,zr
 !arrays
  real(dp) :: delta(3,3)
 
 ! *********************************************************************
 
-!DEBUG
-!write(std_out,*)' dfpt_dyout : enter '
-!write(std_out,*)ddkfil
-!ENDDEBUG
+! GA: As much as I can tell, the option outd2 is always set to 1.
+!     This variable should be removed
+
 
 !Long print : includes detail of every part of the 2nd-order energy
  if(prtvol>=10)then
@@ -2947,19 +2911,6 @@ subroutine dfpt_dyout(becfrnl,berryopt,blkflg,carflg,ddboun,ddkfil,dyew,dyfrlo,d
    end do
  end do
 
- if(outd2==2)then
-   write(ddboun, '(/,a,i8)' ) ' 2nd derivatives (stationary) - # elements :',nelmts
- else if(outd2==1)then
-   write(ddboun, '(/,a,i8)' ) ' 2nd derivatives (non-stat.)  - # elements :',nelmts
- end if
-
-!Phonon wavevector
- qptnrm=1.0_dp
-
-!Note : if qptnrm should assume another value, it should
-!be checked if the f6.1 format is OK.
- write(ddboun, '(a,3es16.8,f6.1)' ) ' qpt',(qphon(ii),ii=1,3),qptnrm
-
 !Now the whole 2nd-order matrix, but not in cartesian coordinates,
 !and masses not included
  write(iout,*)' '
@@ -2981,9 +2932,6 @@ subroutine dfpt_dyout(becfrnl,berryopt,blkflg,carflg,ddboun,ddkfil,dyew,dyfrlo,d
          if(blkflg(idir1,ipert1,idir2,ipert2)==1)then
            nline=nline+1
            write(iout,'(2(i4,i5),2(1x,f20.10))')idir1,ipert1,idir2,ipert2,&
-&           d2matr(1,idir1,ipert1,idir2,ipert2),&
-&           d2matr(2,idir1,ipert1,idir2,ipert2)
-           write(ddboun, '(4i4,2d22.14)' )idir1,ipert1,idir2,ipert2,&
 &           d2matr(1,idir1,ipert1,idir2,ipert2),&
 &           d2matr(2,idir1,ipert1,idir2,ipert2)
          end if
@@ -3423,13 +3371,6 @@ end subroutine dfpt_dyout
 !! d2matr(2,3,mpert,3,mpert)=2nd-order matrix (masses non included,
 !!  no cartesian coordinates : simply second derivatives)
 !!
-!! PARENTS
-!!      m_respfn_driver
-!!
-!! CHILDREN
-!!      dfpt_atm2fft,dfpt_mkcore,dfpt_mkvxc,dfpt_mkvxc_noncoll,dotprod_vn,timab
-!!      xmpi_sum
-!!
 !! SOURCE
 
 subroutine dfpt_gatherdy(becfrnl,berryopt,blkflg,carflg,dyew,dyfrwf,dyfrx1,&
@@ -3474,12 +3415,6 @@ subroutine dfpt_gatherdy(becfrnl,berryopt,blkflg,carflg,dyew,dyfrwf,dyfrx1,&
 
 ! *********************************************************************
 
-
-!DEBUG
-!write(std_out,*)' dfpt_gatherdy : enter '
-!write(std_out,*)' outd2,mpert =',outd2,mpert
-!write(std_out,*)' blkflg(:,natom+2,:,natom+2)=',blkflg(:,natom+2,:,natom+2)
-!ENDDEBUG
 
  if(outd2/=3)then
 
@@ -3651,19 +3586,6 @@ subroutine dfpt_gatherdy(becfrnl,berryopt,blkflg,carflg,dyew,dyfrwf,dyfrx1,&
        end do
      end do
    end do
-
-!  DEBUG
-!  write(std_out,*)' d2matr '
-!  ipert2=natom+2
-!  do idir2=1,3
-!  ipert1=natom+2
-!  do idir1=1,3
-!  write(std_out,'(4i4,2es16.6)' )idir1,ipert1,idir2,ipert2,&
-!  &       d2matr(1,idir1,ipert1,idir2,ipert2),&
-!  &       d2matr(2,idir1,ipert1,idir2,ipert2)
-!  end do
-!  end do
-!  ENDDEBUG
 
 !  Cartesian coordinates transformation
    iblok=1 ; nblok=1
@@ -3868,9 +3790,6 @@ subroutine dfpt_gatherdy(becfrnl,berryopt,blkflg,carflg,dyew,dyfrwf,dyfrx1,&
 !end do
 !ENDDEBUG
 
-!DEBUG
-!write(std_out,*)' dfpt_gatherdy : exit '
-!ENDDEBUG
 
 end subroutine dfpt_gatherdy
 !!***
@@ -3945,13 +3864,6 @@ end subroutine dfpt_gatherdy
 !!                    (non-local only)
 !!                    If NCPP, it depends on one atom
 !!                    If PAW,  it depends on two atoms
-!!
-!! PARENTS
-!!      m_respfn_driver
-!!
-!! CHILDREN
-!!      dfpt_atm2fft,dfpt_mkcore,dfpt_mkvxc,dfpt_mkvxc_noncoll,dotprod_vn,timab
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -4162,13 +4074,6 @@ end subroutine dfpt_dyfro
 !!  blkflgfrx1(3,natom,3,natom)=flag to indicate whether an element has been computed or not
 !!  dyfrx1(2,3,natom,3,natom)=2nd-order non-linear xc
 !!    core-correction (part1) part of the dynamical matrix
-!!
-!! PARENTS
-!!      m_respfn_driver
-!!
-!! CHILDREN
-!!      dfpt_atm2fft,dfpt_mkcore,dfpt_mkvxc,dfpt_mkvxc_noncoll,dotprod_vn,timab
-!!      xmpi_sum
 !!
 !! SOURCE
 

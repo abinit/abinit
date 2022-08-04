@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.7.4 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h54 )
+.Starting date : Wed  4 May 2022.
+- ( at 03h22 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI10/paral_t51_MPI10-t52_MPI10-t53_MPI10/t51.in
-- output file    -> t51_MPI10.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/paral_t51_MPI10-t52_MPI10-t53_MPI10/t51.abi
+- output file    -> t51_MPI10.abo
 - root for input  files -> t51_MPI10i
 - root for output files -> t51_MPI10o
 
@@ -34,18 +34,18 @@
 -    mband =           6        mffmem =           1         mkmem =           1
        mpw =         168          nfft =        4096          nkpt =          10
 ================================================================================
-P This job should need less than                       2.368 Mbytes of memory.
+P This job should need less than                       2.485 Mbytes of memory.
 P Max. in main chain + fourwf.f
 P            6 blocks of mpw  integer numbers, for      0.004 Mbytes.
-P           35 blocks of mpw  real(dp)  numbers, for      0.045 Mbytes.
+P           29 blocks of mpw  real(dp)  numbers, for      0.037 Mbytes.
 P            2 blocks of nfft integer numbers, for      0.031 Mbytes.
-P           34 blocks of nfft real(dp)  numbers, for      1.063 Mbytes.
+P           38 blocks of nfft real(dp)  numbers, for      1.188 Mbytes.
 P              Additional     real(dp)  numbers, for      0.256 Mbytes.
 P              With residue estimated to be             0.969 Mbytes.
 P
 P Comparison of the memory needs of different chains
-P Main chain + fourwf.f                 2.368 Mbytes.
-P Main chain + nonlop.f + opernl.f      2.296 Mbytes.
+P Main chain + fourwf.f                 2.485 Mbytes.
+P Main chain + nonlop.f + opernl.f      2.414 Mbytes.
 P XC chain                              2.125 Mbytes.
 P mkrho chain                           2.211 Mbytes.
 P fourdp chain                          2.173 Mbytes.
@@ -175,8 +175,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10256
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosGTH_pwteter/13al.pspgth
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosGTH_pwteter/13al.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosGTH_pwteter/13al.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosGTH_pwteter/13al.pspgth
 - Goedecker-Teter-Hutter  Tue May 28 09:24:05 EDT 1996
 - 13.00000   3.00000    960528                znucl, zion, pspdat
     2    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -946,25 +946,25 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 
  Mean square residual over all n,k,spin=   11.257E-12; max=  64.579E-11
   -0.1250 -0.2500  0.0000    1  9.41892E-21 kpt; spin; max resid(k); each band:
-   2.75E-23  5.72E-23  1.48E-24  8.54E-23  3.93E-23  9.42E-21
+  2.75E-23 5.72E-23 1.48E-24 8.54E-23 3.93E-23 9.42E-21
   -0.1250  0.5000  0.0000    1  7.94416E-16 kpt; spin; max resid(k); each band:
-   2.56E-23  4.78E-23  3.19E-23  8.90E-24  7.88E-23  7.94E-16
+  2.56E-23 4.78E-23 3.19E-23 8.90E-24 7.88E-23 7.94E-16
   -0.2500 -0.3750  0.0000    1  9.09902E-23 kpt; spin; max resid(k); each band:
-   3.35E-23  6.95E-23  3.77E-23  4.25E-25  9.10E-23  8.16E-23
+  3.35E-23 6.95E-23 3.77E-23 4.25E-25 9.10E-23 8.16E-23
   -0.1250 -0.3750  0.1250    1  9.29836E-17 kpt; spin; max resid(k); each band:
-   5.15E-23  5.57E-23  3.57E-23  3.37E-23  1.68E-22  9.30E-17
+  5.15E-23 5.57E-23 3.57E-23 3.37E-23 1.68E-22 9.30E-17
   -0.1250  0.2500  0.0000    1  7.21287E-16 kpt; spin; max resid(k); each band:
-   4.28E-23  2.13E-23  2.45E-23  3.11E-23  2.77E-17  7.21E-16
+  4.28E-23 2.13E-23 2.45E-23 3.11E-23 2.77E-17 7.21E-16
   -0.2500  0.3750  0.0000    1  2.85708E-11 kpt; spin; max resid(k); each band:
-   5.94E-23  2.63E-23  2.79E-23  8.49E-24  1.01E-22  2.86E-11
+  5.94E-23 2.63E-23 2.79E-23 8.49E-24 1.01E-22 2.86E-11
   -0.3750  0.5000  0.0000    1  9.60310E-23 kpt; spin; max resid(k); each band:
-   3.32E-23  3.70E-23  6.95E-23  5.93E-25  9.60E-23  4.07E-23
+  3.32E-23 3.70E-23 6.95E-23 5.93E-25 9.60E-23 4.07E-23
   -0.2500  0.5000  0.1250    1  6.75567E-15 kpt; spin; max resid(k); each band:
-   3.75E-23  7.10E-23  3.46E-23  4.23E-23  7.90E-23  6.76E-15
+  3.75E-23 7.10E-23 3.46E-23 4.23E-23 7.90E-23 6.76E-15
   -0.1250  0.0000  0.0000    1  6.45793E-10 kpt; spin; max resid(k); each band:
-   9.74E-24  1.14E-22  2.55E-21  2.13E-21  6.46E-10  3.10E-15
+  9.74E-24 1.14E-22 2.55E-21 2.13E-21 6.46E-10 3.10E-15
   -0.3750  0.0000  0.0000    1  6.84278E-13 kpt; spin; max resid(k); each band:
-   4.50E-24  1.84E-24  2.44E-22  6.66E-22  3.32E-13  6.84E-13
+  4.50E-24 1.84E-24 2.44E-22 6.66E-22 3.32E-13 6.84E-13
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -1048,10 +1048,10 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  kpt#  10, nband=  6, wtk=  0.03125, kpt= -0.3750  0.0000  0.0000 (reduced coord)
    2.09241    8.73125   20.62001   20.62001   22.71887   22.71887
  Total charge density [el/Bohr^3]
-      Maximum=    3.3277E-02  at reduced coord.    0.8125    0.8750    0.8750
- Next maximum=    3.3277E-02  at reduced coord.    0.4375    0.8750    0.8750
-      Minimum=    8.1475E-05  at reduced coord.    0.0000    0.0000    0.0000
- Next minimum=    1.0537E-03  at reduced coord.    0.0625    0.0000    0.0000
+)     Maximum=    3.3277E-02  at reduced coord.    0.8125    0.8750    0.8750
+)Next maximum=    3.3277E-02  at reduced coord.    0.4375    0.8750    0.8750
+)     Minimum=    8.1475E-05  at reduced coord.    0.0000    0.0000    0.0000
+)Next minimum=    1.0537E-03  at reduced coord.    0.0625    0.0000    0.0000
    Integrated=    3.0000E+00
 
 --- !EnergyTerms
@@ -1182,19 +1182,20 @@ P           mkmem           1
 - Total wall clock time (s,m,h):          3.1        0.05      0.001
 -
 - For major independent code sections, cpu and wall times (sec),
--  as well as % of the time and number of calls for node 0-
+-  as well as % of the time and number of calls for node 0
+-
 -<BEGIN_TIMER mpi_nprocs = 10, omp_nthreads = 1, mpi_rank = 0>
 - cpu_time =            0.3, wall_time =            0.3
 -
-- routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
--                                                                  (-1=no count)
-- invars2                        0.037   1.2      0.037   1.2              1      -1.00        1.00       1.00
-- fourwf%(pot)                   0.030   1.0      0.030   1.0            287      -1.00        0.99       0.99
-- abinit(2)                      0.028   0.9      0.028   0.9              1      -1.00        1.00       1.00
-- others (124)                   0.071   2.3      0.071   2.3             -1      -1.00        0.99       0.99
+- routine                            cpu     %          wall     %      number of calls Gflops    Speedup Efficacity
+-                                                                        (-1=no count)
+- invars2                           0.038   1.2         0.038   1.2              1      -1.00        1.00       1.00
+- fourwf%(pot)                      0.030   1.0         0.030   1.0            287      -1.00        1.00       1.00
+- abinit(2)                         0.020   0.7         0.020   0.6              1      -1.00        1.00       1.00
+- others (136)                      0.059   1.9         0.062   2.0             -1      -1.00        0.96       0.96
 -<END_TIMER>
 -
-- subtotal                       0.165   5.3      0.166   5.3                                  0.99       0.99
+- subtotal                          0.147   4.8         0.149   4.8                                  0.98       0.98
 
 - For major independent code sections, cpu and wall times (sec),
 - as well as % of the total time and number of calls 
@@ -1202,27 +1203,26 @@ P           mkmem           1
 -<BEGIN_TIMER mpi_nprocs = 10, omp_nthreads = 1, mpi_rank = world>
 - cpu_time =           3.1, wall_time =           3.1
 -
-- routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
--                                                                  (-1=no count)
-- invars2                        0.404  13.1      0.406  13.0             10      -1.00        1.00       1.00
-- fourwf%(pot)                   0.302   9.8      0.303   9.7           2870      -1.00        0.99       0.99
-- abinit(2)                      0.240   7.8      0.241   7.7             10      -1.00        1.00       1.00
-- scfcv-scprqt                   0.110   3.6      0.111   3.6            100      -1.00        0.99       0.99
-- ewald                          0.097   3.1      0.098   3.1             10      -1.00        1.00       1.00
-- stress                         0.082   2.6      0.082   2.6             10      -1.00        1.00       1.00
-- ewald2 (+vdw_dftd)             0.078   2.5      0.078   2.5             10      -1.00        1.00       1.00
-- mkrho/=                        0.058   1.9      0.059   1.9            200      -1.00        1.00       1.00
-- vtorho(MPI)                    0.051   1.6      0.051   1.6            100      -1.00        1.00       1.00
-- nonlop(apply)                  0.040   1.3      0.040   1.3           2870      -1.00        0.99       0.99
-- fourdp                         0.040   1.3      0.040   1.3            510      -1.00        0.99       0.99
-- projbd                         0.025   0.8      0.026   0.8           4300      -1.00        0.98       0.98
-- xc:pot/=fourdp                 0.024   0.8      0.025   0.8            110      -1.00        1.00       1.00
-- symrhg(no FFT)                 0.018   0.6      0.018   0.6            100      -1.00        1.00       1.00
-- getghc-other                   0.016   0.5      0.016   0.5            -10      -1.00        1.04       1.04
-- others (112)                   0.066   2.1      0.066   2.1             -1      -1.00        1.00       1.00
+- routine                            cpu     %          wall     %      number of calls Gflops    Speedup Efficacity
+-                                                                        (-1=no count)
+- invars2                           0.377  12.3         0.378  12.2             10      -1.00        1.00       1.00
+- fourwf%(pot)                      0.288   9.4         0.289   9.3           2870      -1.00        1.00       1.00
+- abinit(2)                         0.185   6.0         0.186   6.0             10      -1.00        1.00       1.00
+- scfcv-scprqt                      0.122   4.0         0.125   4.0            100      -1.00        0.98       0.98
+- ewald                             0.096   3.1         0.096   3.1             10      -1.00        1.00       1.00
+- stress                            0.080   2.6         0.081   2.6             10      -1.00        1.00       1.00
+- ewald2 (+vdw_dftd)                0.077   2.5         0.077   2.5             10      -1.00        1.00       1.00
+- nonlop(apply)                     0.037   1.2         0.038   1.2           2870      -1.00        0.99       0.99
+- fourdp                            0.036   1.2         0.037   1.2            510      -1.00        1.00       1.00
+- mkrho/=                           0.030   1.0         0.030   1.0            200      -1.00        0.99       0.99
+- xc:pot/=fourdp                    0.025   0.8         0.025   0.8            110      -1.00        1.00       1.00
+- projbd                            0.023   0.7         0.023   0.7           4300      -1.00        0.99       0.99
+- vtorho(MPI)                       0.022   0.7         0.022   0.7            100      -1.00        1.00       1.00
+- symrhg(no FFT)                    0.017   0.5         0.017   0.5            100      -1.00        1.00       1.00
+- others (125)                      0.072   2.4         0.072   2.3             -1      -1.00        1.00       1.00
 -<END_TIMER>
 
-- subtotal                       1.652  53.4      1.659  53.3                                  1.00       1.00
+- subtotal                          1.487  48.5         1.494  48.1                                  1.00       1.00
 
 ================================================================================
 
@@ -1312,4 +1312,4 @@ P           mkmem           1
 
  Calculation completed.
 .Delivered   0 WARNINGs and   1 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.2  wall=          3.3
++Overall time at end (sec) : cpu=          3.2  wall=          3.2

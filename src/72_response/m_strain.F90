@@ -85,12 +85,6 @@ CONTAINS  !=====================================================================
 !! OUTPUT
 !!  strain = structure with all information of strain
 !!
-!! PARENTS
-!!      m_compute_anharmonics,m_effective_potential,m_generate_training_set
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine strain_init(strain,delta,direction,name)
@@ -143,12 +137,6 @@ end subroutine strain_init
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_compute_anharmonics
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine strain_free(strain)
@@ -187,12 +175,6 @@ end subroutine strain_free
 !!
 !! OUTPUT
 !!  strain = structure with all information of strain
-!!
-!! PARENTS
-!!      m_compute_anharmonics,m_effective_potential,m_fit_data
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -286,11 +268,6 @@ end subroutine strain_get
 !! OUTPUT
 !!  strain = structure with all information of strain
 !!
-!! PARENTS
-!!   anharmonic_terms_compute,
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine strain_apply(rprim,rprim_def,strain)
@@ -327,11 +304,6 @@ end subroutine strain_apply
 !!
 !! OUTPUT
 !!
-!!
-!! PARENTS
-!!   multibinit
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -441,11 +413,6 @@ end subroutine strain_def2strain
 !! OUTPUT
 !!
 !!
-!! PARENTS
-!!   multibinit
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine strain_strain2def(mat_strain,strain)
@@ -497,12 +464,6 @@ end subroutine strain_strain2def
 !!
 !! OUTPUT
 !! eff_pot = supercell structure with data to be output
-!!
-!! PARENTS
-!!      m_effective_potential
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 

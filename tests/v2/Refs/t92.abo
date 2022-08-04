@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.7.4 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h25 )
+.Starting date : Wed  4 May 2022.
+- ( at 01h23 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v2_t92/t92.in
-- output file    -> t92.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/v2_t92/t92.abi
+- output file    -> t92.abo
 - root for input  files -> t92i
 - root for output files -> t92o
 
@@ -34,7 +34,7 @@
 -    mband =           3        mffmem =           1         mkmem =           4
        mpw =          72          nfft =        1000          nkpt =           4
 ================================================================================
-P This job should need less than                       1.561 Mbytes of memory.
+P This job should need less than                       1.588 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.015 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
@@ -467,6 +467,10 @@ P          mk1mem4         64
         optdriver2          1
         optdriver3          1
         optdriver4          1
+           prtpot1          0
+           prtpot2          1
+           prtpot3          1
+           prtpot4          1
               qpt1     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt2     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt3     5.00000000E-01  0.00000000E+00  0.00000000E+00
@@ -582,8 +586,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.02747
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/3li.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/3li.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/3li.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/3li.pspnc
 -  Troullier-Martins psp for element  Li        Thu Oct 27 17:29:06 EDT 1994
 -  3.00000   1.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -752,7 +756,6 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.02747
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t92o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -770,7 +773,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t92o_DS1_WFK
 --------------------------------------------------------------------------------
 
  dfpt_looppert : total number of electrons, from k and k+q
@@ -785,16 +787,16 @@ tolerances: {toldfe: 1.00E-10, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  3.25267913699627E-04 -1.682E+00 7.830E-03 2.308E-01
- ETOT  2  1.29390719412689E-05 -3.123E-04 3.832E-06 9.731E-03
- ETOT  3  2.96978042872709E-07 -1.264E-05 8.187E-08 7.400E-05
- ETOT  4  1.58118543418240E-07 -1.389E-07 6.939E-10 7.446E-07
- ETOT  5  1.55748401557687E-07 -2.370E-09 1.039E-11 1.654E-08
- ETOT  6  1.55692066620972E-07 -5.633E-11 3.397E-13 8.616E-11
- ETOT  7  1.55691871221719E-07 -1.954E-13 8.826E-16 2.326E-13
+-ETOT  1  3.25267913697851E-04 -1.682E+00 7.830E-03 2.308E-01
+ ETOT  2  1.29390719417130E-05 -3.123E-04 3.832E-06 9.731E-03
+ ETOT  3  2.96978042428619E-07 -1.264E-05 8.187E-08 7.400E-05
+ ETOT  4  1.58118542974151E-07 -1.389E-07 6.939E-10 7.446E-07
+ ETOT  5  1.55748402889955E-07 -2.370E-09 1.039E-11 1.654E-08
+ ETOT  6  1.55692067065061E-07 -5.634E-11 3.397E-13 8.616E-11
+ ETOT  7  1.55691870777630E-07 -1.961E-13 8.826E-16 2.326E-13
 
  At SCF step    7, etot is converged : 
-  for the second time, diff in etot=  1.954E-13 < toldfe=  1.000E-10
+  for the second time, diff in etot=  1.961E-13 < toldfe=  1.000E-10
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -816,7 +818,7 @@ tolerances: {toldfe: 1.00E-10, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -8.68845646E-02  frxc 2 =   3.83613866E-02
  Resulting in :
- 2DEtotal=    0.1556918712E-06 Ha. Also 2DEtotal=    0.423659127170E-05 eV
+ 2DEtotal=    0.1556918708E-06 Ha. Also 2DEtotal=    0.423659125961E-05 eV
     (2DErelax=   -1.6826872168E+00 Ha. 2DEnonrelax=    1.6826873725E+00 Ha)
     (  non-var. 2DEtotal :    1.5105719280E-07 Ha)
 
@@ -921,8 +923,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      5.000   => boxcut(ratio)=   1.82472
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/3li.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/3li.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/3li.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/3li.pspnc
 -  Troullier-Martins psp for element  Li        Thu Oct 27 17:29:06 EDT 1994
 -  3.00000   1.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -938,7 +940,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t92o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -956,10 +957,8 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t92o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t92o_DS1_WFK
  dfpt_looppert : total number of electrons, from k and k+q
   fully or partially occupied states are    1.000000E+00 and    1.000000E+00.
  Initialisation of the first-order wave-functions :
@@ -977,11 +976,11 @@ tolerances: {toldfe: 1.00E-10, }
  ETOT  3 -0.14265974205422     -1.110E-05 1.160E-07 9.685E-05
  ETOT  4 -0.14265995753364     -2.155E-07 1.982E-09 1.605E-06
  ETOT  5 -0.14265996183667     -4.303E-09 1.652E-11 8.122E-09
- ETOT  6 -0.14265996185167     -1.500E-11 1.487E-13 1.738E-11
- ETOT  7 -0.14265996185170     -2.931E-14 2.428E-16 4.365E-14
+ ETOT  6 -0.14265996185168     -1.501E-11 1.487E-13 1.738E-11
+ ETOT  7 -0.14265996185170     -2.709E-14 2.428E-16 4.365E-14
 
  At SCF step    7, etot is converged : 
-  for the second time, diff in etot=  2.931E-14 < toldfe=  1.000E-10
+  for the second time, diff in etot=  2.709E-14 < toldfe=  1.000E-10
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1053,7 +1052,7 @@ tolerances: {toldfe: 1.00E-10, }
  Phonon frequencies in cm-1    :
 - -1.503985E+02 -1.503985E+02  0.000000E+00
  chkph3 : WARNING -
-  The dynamical matrix was incomplete : phonon frequencies may be wrong ...
+  Dynamical matrix incomplete, phonon frequencies may be wrong, check input variables rfatpol and rfdir.
 
 ================================================================================
 == DATASET  4 ==================================================================
@@ -1087,8 +1086,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      5.000   => boxcut(ratio)=   1.92609
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/3li.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/3li.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/3li.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/3li.pspnc
 -  Troullier-Martins psp for element  Li        Thu Oct 27 17:29:06 EDT 1994
 -  3.00000   1.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1104,7 +1103,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t92o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -1122,10 +1120,8 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t92o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t92o_DS1_WFK
  dfpt_looppert : total number of electrons, from k and k+q
   fully or partially occupied states are    1.000000E+00 and    1.000000E+00.
  Initialisation of the first-order wave-functions :
@@ -1138,16 +1134,16 @@ tolerances: {toldfe: 1.00E-10, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1 -6.94769067209504E-02 -1.685E+00 9.999E-03 2.111E-01
- ETOT  2 -6.97727060258362E-02 -2.958E-04 3.741E-06 8.822E-03
- ETOT  3 -6.97839131213962E-02 -1.121E-05 9.815E-08 7.457E-05
+-ETOT  1 -6.94769067209500E-02 -1.685E+00 9.999E-03 2.111E-01
+ ETOT  2 -6.97727060258358E-02 -2.958E-04 3.741E-06 8.822E-03
+ ETOT  3 -6.97839131213958E-02 -1.121E-05 9.815E-08 7.457E-05
  ETOT  4 -6.97840449581293E-02 -1.318E-07 9.652E-10 6.428E-07
- ETOT  5 -6.97840463083781E-02 -1.350E-09 1.019E-11 4.282E-09
- ETOT  6 -6.97840463156190E-02 -7.241E-12 4.499E-14 2.709E-11
- ETOT  7 -6.97840463156776E-02 -5.862E-14 3.701E-16 3.257E-13
+ ETOT  5 -6.97840463083790E-02 -1.350E-09 1.019E-11 4.282E-09
+ ETOT  6 -6.97840463156194E-02 -7.240E-12 4.499E-14 2.709E-11
+ ETOT  7 -6.97840463156772E-02 -5.729E-14 3.701E-16 3.257E-13
 
  At SCF step    7, etot is converged : 
-  for the second time, diff in etot=  5.862E-14 < toldfe=  1.000E-10
+  for the second time, diff in etot=  5.729E-14 < toldfe=  1.000E-10
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1185,10 +1181,10 @@ tolerances: {toldfe: 1.00E-10, }
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
   
-   1    1   2    1        -0.0000000000        -0.0000000000
+   1    1   2    1        -0.0000000000         0.0000000000
    1    1   3    1        -0.0000000000         0.0000000000
   
-   2    1   1    1        -0.0000000000         0.0000000000
+   2    1   1    1        -0.0000000000        -0.0000000000
    2    1   2    1        -0.0697838480         0.0000000000
    2    1   3    1        -0.0000000000        -0.0000000000
   
@@ -1202,10 +1198,10 @@ tolerances: {toldfe: 1.00E-10, }
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    1   2    1        -0.0000000000        -0.0000000000
+   1    1   2    1        -0.0000000000         0.0000000000
    1    1   3    1        -0.0000000000         0.0000000000
   
-   2    1   1    1        -0.0000000000         0.0000000000
+   2    1   1    1        -0.0000000000        -0.0000000000
    2    1   2    1        -0.0029064493         0.0000000000
    2    1   3    1        -0.0000000000        -0.0000000000
   
@@ -1219,7 +1215,7 @@ tolerances: {toldfe: 1.00E-10, }
  Phonon frequencies in cm-1    :
 - -1.051900E+02 -1.051900E+02  0.000000E+00
  chkph3 : WARNING -
-  The dynamical matrix was incomplete : phonon frequencies may be wrong ...
+  Dynamical matrix incomplete, phonon frequencies may be wrong, check input variables rfatpol and rfdir.
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -1229,7 +1225,7 @@ tolerances: {toldfe: 1.00E-10, }
               amu      6.94100000E+00
              ecut      5.00000000E+00 Hartree
            etotal1    -2.9350020248E-01
-           etotal2     1.5569187122E-07
+           etotal2     1.5569187078E-07
            etotal3    -1.4265996185E-01
            etotal4    -6.9784046316E-02
             fcart1    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
@@ -1596,6 +1592,10 @@ P          mk1mem4         64
         optdriver2          1
         optdriver3          1
         optdriver4          1
+           prtpot1          0
+           prtpot2          1
+           prtpot3          1
+           prtpot4          1
               qpt1     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt2     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt3     5.00000000E-01  0.00000000E+00  0.00000000E+00
@@ -1765,10 +1765,10 @@ P          mk1mem4         64
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          1.7  wall=          1.7
+- Proc.   0 individual time (sec): cpu=          2.0  wall=          2.3
 
 ================================================================================
 
  Calculation completed.
-.Delivered   6 WARNINGs and  28 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.7  wall=          1.7
+.Delivered   2 WARNINGs and   5 COMMENTs to log file.
++Overall time at end (sec) : cpu=          2.0  wall=          2.3

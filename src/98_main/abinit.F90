@@ -60,21 +60,6 @@
 !! OUTPUT
 !!  (main routine)
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      abi_io_redirect,abimem_init,abinit_doctor,bigdft_init_errors
-!!      bigdft_init_timing_categories,chkinp,chkvars,clnmpi_atom,clnmpi_grid
-!!      clnmpi_img,clnmpi_pert,date_and_time,delete_file,destroy_mpi_enreg
-!!      destroy_results_out,driver,dtsets,dump_config,dump_cpp_options
-!!      dump_optim,f_lib_finalize,f_lib_initialize,f_timing_reset,flush_unit
-!!      gather_results_out,get_dtsets_pspheads,herald,init_results_out,iofn1
-!!      libpaw_spmsg_getcount,memory_eval,mpi_setup,nctk_test_mpiio,out_acknowl
-!!      outvars,outxml_finalise,outxml_open,print_kinds,setdevice_cuda
-!!      specialmsg_getcount,testfi,timab,timana,timein,unsetdevice_cuda,wrtout
-!!      wvl_timing,xmpi_init,xmpi_show_info,xmpi_sum,xomp_show_info,xpapi_init
-!!      xpapi_show_info,xpapi_shutdown
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -82,6 +67,9 @@
 #endif
 
 #include "abi_common.h"
+
+! nvtx related macro definition
+#include "nvtx_macros.h"
 
 program abinit
 
@@ -126,6 +114,11 @@ program abinit
 
 #ifdef HAVE_GPU_CUDA
  use m_gpu_toolbox
+ use m_manage_cuda
+#endif
+
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
+ use m_nvtx_data
 #endif
 
 #if defined HAVE_BIGDFT
@@ -163,6 +156,7 @@ program abinit
  integer :: mu,natom,ncomment,ncomment_paw,ndtset
  integer :: ndtset_alloc,nexit,nexit_paw,nfft,nkpt,npsp
  integer :: nsppol,nwarning,nwarning_paw,prtvol,timopt,use_gpu_cuda
+ logical :: use_nvtx
  integer,allocatable :: nband(:),npwtot(:)
  real(dp) :: etotal, tcpui, twalli
  real(dp) :: strten(6),tsec(2)
@@ -366,8 +360,9 @@ program abinit
    call xmpi_show_info(std_out)  ! Info on the MPI environment.
  end if
 
-!Eventually activate GPU
+!Activate GPU is required
  use_gpu_cuda=0
+ use_nvtx=.false.
 #if defined HAVE_GPU_CUDA
  gpu_devices(:)=-1
  do ii=1,ndtset_alloc
@@ -375,8 +370,15 @@ program abinit
      use_gpu_cuda=1
      gpu_devices(:)=dtsets(ii)%gpu_devices(:)
    end if
+   if (dtsets(ii)%use_nvtx==1) then
+      use_nvtx=.true.
+   end if
  end do
  call setdevice_cuda(gpu_devices,use_gpu_cuda)
+
+#ifdef HAVE_GPU_NVTX_V3
+    NVTX_INIT(use_nvtx)
+#endif
 #endif
 
 !------------------------------------------------------------------------------
@@ -393,7 +395,9 @@ program abinit
  end if
 
  if(.not.test_exit)then
+   ABI_NVTX_START_RANGE(NVTX_MAIN_COMPUTATION)
    call driver(abinit_version,tcpui,dtsets,filnam,filstat, mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,results_out)
+   ABI_NVTX_END_RANGE()
  end if
 
 !------------------------------------------------------------------------------
@@ -473,18 +477,14 @@ program abinit
 !------------------------------------------------------------------------------
 
  ! 18) Bibliographical recommendations
- if(me==0) then
-   if(test_exit)then
+ if (me == 0) then
+   if (test_exit) then
      write(msg,'(a,a,i0,a)')ch10,' abinit : before driver, prtvol=',prtvol,', debugging mode => will skip acknowledgments'
      call wrtout([std_out, ab_out], msg)
    else
-     do ii=1,2
-       if(ii==1)iounit=ab_out
-       if(ii==2)iounit=std_out
-       call out_acknowl(dtsets,iounit,ndtset_alloc,npsp,pspheads)
-     end do
+     call out_acknowl(dtsets, ab_out, ndtset_alloc, npsp, pspheads)
    end if
- end if ! me==0
+ end if
 
 !------------------------------------------------------------------------------
 

@@ -1,10 +1,9 @@
 # The following md files have been copied from ~abinit and should be `git ignored`
+INSTALL_CentOS.md
 INSTALL_gpu.md
 INSTALL_EasyBuild.md
-INSTALL_CentOS.md
-INSTALL_MacOS.md
 INSTALL_Ubuntu.md
-# The following md files have been automatically generated and should be `git ignored`
+INSTALL_MacOS.md
 developers/autoconf_examples.md
 variables/index.md
 variables/external_parameters.md
@@ -78,6 +77,8 @@ topics/GWls.md
 topics/Hybrids.md
 topics/k-points.md
 topics/LatticeModel.md
+topics/LatticeWannier.md
+topics/LWFModel.md
 topics/LDAminushalf.md
 topics/longwave.md
 topics/LOTF.md
