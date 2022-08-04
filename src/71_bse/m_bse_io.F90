@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -91,12 +87,6 @@ CONTAINS  !====================================================================
 !! OUTPUT
 !!  Only writing
 !!
-!! PARENTS
-!!      m_exc_build
-!!
-!! CHILDREN
-!!      c_f_pointer
-!!
 !! SOURCE
 
 subroutine exc_write_bshdr(funt,Bsp,Hdr)
@@ -144,12 +134,6 @@ end subroutine exc_write_bshdr
 !! OUTPUT
 !!  fform=Integer defining the file format.
 !!  ierr=Status error.
-!!
-!! PARENTS
-!!      m_bse_io,m_exc_diago
-!!
-!! CHILDREN
-!!      c_f_pointer
 !!
 !! SOURCE
 
@@ -211,12 +195,6 @@ end subroutine exc_read_bshdr
 !! SIDE EFFECTS
 !!  Skip the header.
 !!
-!! PARENTS
-!!      m_exc_build
-!!
-!! CHILDREN
-!!      c_f_pointer
-!!
 !! SOURCE
 
 subroutine exc_skip_bshdr(funt,ierr)
@@ -258,12 +236,6 @@ end subroutine exc_skip_bshdr
 !!
 !! SIDE EFFECTS
 !!  ehdr_offset
-!!
-!! PARENTS
-!!      m_bse_io,m_exc_build,m_exc_diago
-!!
-!! CHILDREN
-!!      c_f_pointer
 !!
 !! SOURCE
 
@@ -315,12 +287,6 @@ end subroutine exc_skip_bshdr_mpio
 !! OUTPUT
 !!  [ene_list(nvec)]=Excitonic energies
 !!  vec_list(hsize,nvec)=Excitonic eigenvectors.
-!!
-!! PARENTS
-!!      m_bse_io,m_exc_analyze
-!!
-!! CHILDREN
-!!      c_f_pointer
 !!
 !! SOURCE
 
@@ -424,12 +390,6 @@ end subroutine exc_read_eigen
 !!
 !! TODO
 !! Remove Bsp
-!!
-!! PARENTS
-!!      m_exc_itdiago,m_hexc
-!!
-!! CHILDREN
-!!      c_f_pointer
 !!
 !! SOURCE
 
@@ -762,12 +722,6 @@ end subroutine exc_read_rcblock
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_exc_diago
-!!
-!! CHILDREN
-!!      c_f_pointer
-!!
 !! SOURCE
 
 subroutine exc_fullh_from_blocks(funt,block_type,nsppol,row_sign,diago_is_real,nreh,exc_size,exc_ham)
@@ -1016,8 +970,6 @@ end subroutine exc_fullh_from_blocks
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 pure function rrs_of_glob(row_glob,col_glob,size_glob)
@@ -1059,8 +1011,6 @@ end function rrs_of_glob
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -1106,8 +1056,6 @@ end function ccs_of_glob
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -1166,12 +1114,6 @@ end function offset_in_file
 !! OUTPUT
 !!  ierr=Status error
 !!  exc_mat(exc_size,exc_size)=The resonant block.
-!!
-!! PARENTS
-!!      m_exc_diago
-!!
-!! CHILDREN
-!!      c_f_pointer
 !!
 !! SOURCE
 
@@ -1288,11 +1230,6 @@ end subroutine exc_read_rblock_fio
 !!
 !! OUTPUT
 !!  Only writing.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
 !!
 !! SOURCE
 
@@ -1430,11 +1367,6 @@ end subroutine exc_amplitude
 !!      => -1 if NetCDF is not available
 !!      => 1 if NetCDF is available
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
-!!
 !! SOURCE
 
 subroutine exc_write_optme(filname,minb,maxb,nkbz,nsppol,nq,opt_cvk,ierr)
@@ -1536,12 +1468,6 @@ end subroutine exc_write_optme
 !!  ncid =NC file handle
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_hexc
-!!
-!! CHILDREN
-!!      c_f_pointer
 !!
 !! SOURCE
 

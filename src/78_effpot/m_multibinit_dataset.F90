@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -360,11 +356,6 @@ contains
 !! NOTES
 !! Should be executed by one processor only.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      outvars_scup
-!!
 !! SOURCE
 
 subroutine multibinit_dtset_init(multibinit_dtset,natom)
@@ -609,12 +600,6 @@ end subroutine multibinit_dtset_init
 !! OUTPUTS
 !!  multibinit_dtset <type(multibinit_dtset_type)> = multibinit_dataset structure
 !!
-!! PARENTS
-!!      m_multibinit_driver,m_multibinit_manager
-!!
-!! CHILDREN
-!!      outvars_scup
-!!
 !! SOURCE
 
 subroutine multibinit_dtset_free(multibinit_dtset)
@@ -786,12 +771,6 @@ end subroutine invars_multibinit_filenames_from_input_file
 !!
 !! NOTES
 !! Should be executed by one processor only.
-!!
-!! PARENTS
-!!      m_multibinit_driver,m_multibinit_manager
-!!
-!! CHILDREN
-!!      outvars_scup
 !!
 !! SOURCE
 
@@ -3356,12 +3335,6 @@ end subroutine invars10
 !!
 !! NOTES
 !! Should be executed by one processor only.
-!!
-!! PARENTS
-!!      m_multibinit_driver,m_multibinit_manager
-!!
-!! CHILDREN
-!!      outvars_scup
 !!
 !! SOURCE
 

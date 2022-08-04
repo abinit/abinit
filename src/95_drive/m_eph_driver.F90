@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -44,9 +40,7 @@ module m_eph_driver
  use m_nctk
  use m_wfk
  use m_distribfft
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
 
  use defs_datatypes,    only : pseudopotential_type, ebands_t
  use defs_abitypes,     only : MPI_type
@@ -72,6 +66,8 @@ module m_eph_driver
  use m_sigmaph,         only : sigmaph
  use m_pspini,          only : pspini
  use m_ephtk,           only : ephtk_update_ebands
+ use m_gstore,          only : gstore_t, gstore_new, gstore_from_ncpath
+ use m_migdal_eliashberg, only : migdal_eliashberg_iso !, migdal_eliashberg_aniso
 
  implicit none
 
@@ -90,7 +86,7 @@ contains
 !!
 !! FUNCTION
 !! Main routine to compute electron phonon coupling matrix elements and
-!! calculate related properties - superconductin Tc, phonon linewidths, electronic renormalization
+!! calculate related properties - superconducting Tc, phonon linewidths, electronic renormalization
 !! due to phonons and temperature effects...
 !!
 !! INPUTS
@@ -110,9 +106,6 @@ contains
 !! rprim(3,3)=Dimensionless real space primitive translations.
 !! xred(3,natom)=Reduced atomic coordinates.
 !!
-!! PARENTS
-!!      m_driver
-!!
 !! NOTES
 !!
 !! ON THE USE OF FFT GRIDS:
@@ -129,19 +122,6 @@ contains
 !! ---------------------------
 !!    - Only the usual FFT grid (defined by ecut) is used. It is defined by nfft, ngfft, mgfft, ...
 !!      For compatibility reasons, (nfftf,ngfftf,mgfftf) are set equal to (nfft,ngfft,mgfft) in that case.
-!!
-!! CHILDREN
-!!      cryst%free,cryst%print,cryst_ddb%free,cwtime,cwtime_report,ddb%free
-!!      ddb_from_file,ddb_hdr%free,destroy_mpi_enreg,dtset%free_nkpt_arrays
-!!      dvdb%free,dvdb%interpolate_and_write,dvdb%list_perts,dvdb%open_read
-!!      dvdb%print,dvdb%write_v1qavg,ebands_free,ebands_prtbltztrp,ebands_write
-!!      efmas_ncread,efmasdeg_free_array,efmasval_free_array,eph_gkk
-!!      eph_phgamma,eph_phpi,ephtk_update_ebands,frohlichmodel,ibte_driver
-!!      ifc%free,ifc%outphbtrap,ifc%print,ifc%printbxsf,ifc_init,ifc_mkphbs
-!!      init_distribfft_seq,initmpi_seq,mkphdos,ncwrite_v1qnu,pawfgr_destroy
-!!      pawfgr_init,phdos%free,phdos%ncwrite,phdos%print,print_ngfft,pspini
-!!      rta_driver,sigmaph,test_phrotation,wfk0_hdr%free,wfk0_hdr%vs_dtset
-!!      wfq_hdr%free,wrtout,xmpi_bcast
 !!
 !! SOURCE
 
@@ -161,15 +141,13 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: master = 0, natifc0 = 0, selectz0 = 0, nsphere0 = 0, prtsrlr0 = 0
+ integer,parameter :: master = 0, selectz0 = 0, nsphere0 = 0, prtsrlr0 = 0, with_cplex1 = 1
  integer :: ii,comm,nprocs,my_rank,psp_gencond,mgfftf,nfftf
  integer :: iblock_dielt_zeff, iblock_dielt, iblock_quadrupoles, ddb_nqshift, ierr, npert_miss
  integer :: omp_ncpus, work_size, nks_per_proc, mtyp, mpert, lwsym !msize,
  integer :: iatdir, iq2dir, iq1dir, quad_unt, iatom, jj
- real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem
-#ifdef HAVE_NETCDF
+ real(dp):: eff, mempercpu_mb, max_wfsmem_mb, nonscal_mem
  integer :: ncid,ncerr
-#endif
  real(dp) :: ecore,ecut_eff,ecutdg_eff,gsqcutc_eff,gsqcutf_eff
  real(dp) :: cpu,wall,gflops
  logical :: use_wfk, use_wfq, use_dvdb
@@ -185,9 +163,9 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  type(pawfgr_type) :: pawfgr
  type(mpi_type) :: mpi_enreg
  type(phonon_dos_type) :: phdos
+ type(gstore_t) :: gstore
 !arrays
  integer :: ngfftc(18), ngfftf(18), count_wminmax(2)
- integer,allocatable :: dummy_atifc(:)
  real(dp),parameter :: k0(3)=zero
  real(dp) :: wminmax(2), dielt(3,3), zeff(3,3,dtset%natom), zeff_raw(3,3,dtset%natom)
  real(dp) :: qdrp_cart(3,3,3,dtset%natom)
@@ -344,6 +322,15 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    ! Here we change the GS bands (Fermi level, scissors operator ...)
    ! All the modifications to ebands should be done here.
    call ephtk_update_ebands(dtset, ebands, "Ground state energies")
+
+   ! Need to update the WFK header to reflect the changes in ebands.
+   ! because we may need to write the header to ncfile
+   ! NB: eigenvalues are not stored in the header.
+
+   wfk0_hdr%occopt = ebands%occopt
+   call get_eneocc_vect(ebands, "occ", wfk0_hdr%occ)
+   wfk0_hdr%fermie = ebands%fermie
+   wfk0_hdr%nelect = ebands%nelect
  end if
 
  if (use_wfq) then
@@ -391,13 +378,11 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  call cwtime_report(" eph%ebands_postprocess:", cpu, wall, gflops)
 
  ! Read the DDB file.
- ABI_CALLOC(dummy_atifc, (dtset%natom))
-
  if (use_wfk) then
-   call ddb_from_file(ddb, ddb_filepath, dtset%brav, dtset%natom, natifc0, dummy_atifc, ddb_hdr, cryst_ddb, comm, &
+   call ddb%from_file(ddb_filepath, dtset%brav, ddb_hdr, cryst_ddb, comm, &
                       prtvol=dtset%prtvol)
 
-   ! DDB cryst comes from DPPT --> no time-reversal if q /= 0
+   ! DDB cryst comes from DFPT --> no time-reversal if q /= 0
    ! Change the value so that we use the same as the GS part.
    cryst_ddb%timrev = cryst%timrev
    if (cryst%compare(cryst_ddb, header=" Comparing WFK crystal with DDB crystal") /= 0) then
@@ -407,11 +392,8 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  else
    ! Get crystal from DDB.
    ! Warning: We may loose precision in rprimd and xred because DDB does not have enough significant digits.
-   call ddb_from_file(ddb, ddb_filepath, dtset%brav, dtset%natom, natifc0, dummy_atifc, ddb_hdr, cryst, comm, &
-                      prtvol=dtset%prtvol)
+   call ddb%from_file(ddb_filepath, dtset%brav, ddb_hdr, cryst, comm, prtvol=dtset%prtvol)
  end if
-
- ABI_FREE(dummy_atifc)
 
  ! Set the q-shift for the DDB (well we mainly use gamma-centered q-meshes)
  ddb_nqshift = 1
@@ -470,24 +452,24 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  ! Here we get the quadrupoles from the DDB file (this should become the official API).
  ! Section Copied from Anaddb.
 
-if (iblock_quadrupoles == 0) then
- mtyp = ddb_hdr%mblktyp
- mpert = dtset%natom + MPERT_MAX
- !msize = 3*mpert*3*mpert; if (mtyp==3) msize=msize*3*mpert
- !call wrtout(std_out, sjoin(" Trying to read Q* from DDB file, mtyp:", itoa(mtyp)))
+ if (iblock_quadrupoles == 0) then
+   mtyp = ddb_hdr%mblktyp
+   mpert = dtset%natom + MPERT_MAX
+   !msize = 3*mpert*3*mpert; if (mtyp==3) msize=msize*3*mpert
+   !call wrtout(std_out, sjoin(" Trying to read Q* from DDB file, mtyp:", itoa(mtyp)))
 
- ! MR: a new ddb is necessary for the longwave quantities due to incompability of it with authomatic reshapes
- ! that ddb%val and ddb%flg experience when passed as arguments of some routines
+   ! MR: a new ddb is necessary for the longwave quantities due to incompability of it with authomatic reshapes
+   ! that ddb%val and ddb%flg experience when passed as arguments of some routines
 
- ! Get Quadrupole tensor
- qdrp_cart=zero
- if (mtyp==33) then
-   lwsym=1
-   call ddb_lw_copy(ddb, ddb_lw, mpert, dtset%natom, dtset%ntypat)
-   iblock_quadrupoles = ddb_lw%get_quadrupoles(lwsym, 33, qdrp_cart)
-   call ddb_lw%free()
- end if
-endif
+   ! Get Quadrupole tensor
+   qdrp_cart=zero
+   if (mtyp==33) then
+     lwsym=1
+     call ddb_lw_copy(ddb, ddb_lw, mpert, dtset%natom, dtset%ntypat)
+     iblock_quadrupoles = ddb_lw%get_quadrupoles(lwsym, 33, qdrp_cart)
+     call ddb_lw%free()
+   end if
+ endif
 
  ! The default value is 1. Here we set the flags to zero if Q* is not available.
  if (iblock_quadrupoles == 0) then
@@ -543,7 +525,6 @@ endif
        call phdos%print(path)
      end if
 
-#ifdef HAVE_NETCDF
      path = strcat(dtfil%filnam_ds(4), "_PHDOS.nc")
      call wrtout(ab_out, sjoin("- Writing phonon DOS to netcdf file:", path))
      ncerr = nctk_open_create(ncid, path, xmpi_comm_self)
@@ -551,7 +532,6 @@ endif
      NCF_CHECK(cryst%ncwrite(ncid))
      call phdos%ncwrite(ncid)
      NCF_CHECK(nf90_close(ncid))
-#endif
    end if
    call phdos%free()
  end if ! prtphdos
@@ -645,13 +625,9 @@ endif
 
  ! I am not sure yet the EFMAS file will be needed as soon as eph_frohlichm/=0. To be decided later.
  if (dtset%eph_frohlichm /= 0) then
-#ifdef HAVE_NETCDF
    NCF_CHECK(nctk_open_read(ncid, dtfil%fnameabi_efmas, xmpi_comm_self))
    call efmas_ncread(efmasdeg, efmasval, kpt_efmas, ncid)
    NCF_CHECK(nf90_close(ncid))
-#else
-   ABI_ERROR("netcdf support not enabled")
-#endif
  end if
 
  ! ===========================================
@@ -662,7 +638,7 @@ endif
  ! TODO: Make sure that all subdrivers work with useylm == 1
  ABI_CHECK(dtset%useylm == 0, "useylm != 0 not implemented/tested")
 
- ! Relase nkpt-based arrays in dtset to decreased memory requirement if dense sampling.
+ ! Relase nkpt-based arrays in dtset to decrease memory requirement if dense sampling.
  ! EPH routines should not access them after this point.
  if (all(dtset%eph_task /= [6, 10])) call dtset%free_nkpt_arrays()
 
@@ -706,7 +682,8 @@ endif
 
  case (5, -5)
    ! Interpolate the phonon potential.
-   call dvdb%interpolate_and_write(dtset, dtfil%fnameabo_dvdb, ngfftc, ngfftf, cryst, ifc%ngqpt, ifc%nqshft, ifc%qshft, comm)
+   call dvdb%interpolate_and_write(dtset, dtfil%fnameabo_dvdb, ngfftc, ngfftf, cryst, &
+                                   ifc%ngqpt, ifc%nqshft, ifc%qshft, comm)
 
  case (6)
    ! Estimate zero-point renormalization and temperature-dependent electronic structure using the Frohlich model
@@ -728,10 +705,36 @@ endif
      call polaronmass(cryst, dtset, efmasdeg, efmasval, ifc)
    end if
 
+ case (11)
+   ! Write e-ph matrix elements to GSTORE file.
+   if (dtfil%filgstorein /= ABI_NOFILE) then
+     call wrtout([std_out, ab_out], sjoin(" Restarting GSTORE computation from:", dtfil%filgstorein))
+     gstore = gstore_from_ncpath(dtfil%filgstorein, 1, dtset, cryst, ebands, ifc, comm)
+   else
+     path = strcat(dtfil%filnam_ds(4), "_GSTORE.nc")
+     gstore = gstore_new(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm)
+     call gstore%compute(wfk0_path, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, ifc, &
+                         pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
+   end if
+   call gstore%free()
+
+ !case (12)
+   ! Variational polaron equations
+   !gstore = gstore_from_ncpath(dtfil%filgstorein, with_cplex2, dtset, cryst, ebands, ifc, comm)
+   !call variational_polaron(gstore, dtset, dtfil)
+
+ case (12, -12)
+ !case (13, -13)
+   ! Migdal-Eliashberg equations (isotropic/anisotropic case)
+   gstore = gstore_from_ncpath(dtfil%filgstorein, with_cplex1, dtset, cryst, ebands, ifc, comm)
+   if (dtset%eph_task == -12) call migdal_eliashberg_iso(gstore, dtset, dtfil)
+   !if (dtset%eph_task == +12) call migdal_eliashberg_aniso(gstore, dtset, dtfil)
+   call gstore%free()
+
  case (15, -15)
    ! Write average of DFPT potentials to file.
    if (nprocs > 1) then
-     ABI_WARNING("eph_task in [15, -15] does not support nprocs > 1. Running in sequential...")
+     ABI_WARNING("eph_task in [15, -15] (average of DFPT potentials) does not support nprocs > 1. Running in sequential.")
    end if
    dvdb%comm = xmpi_comm_self
    if (my_rank == master) then
@@ -743,7 +746,7 @@ endif
 
  case (-16, 16)
    if (nprocs > 1) then
-     ABI_WARNING("eph_task in [16, -16] does not support nprocs > 1. Running in sequential...")
+     ABI_WARNING("eph_task in [16, -16] (test_phrotation) does not support nprocs > 1. Running in sequential.")
    end if
 
    call test_phrotation(ifc, cryst, dtset%ph_ngqpt, comm)
@@ -772,6 +775,7 @@ endif
  call ebands_free(ebands_kq)
  call pawfgr_destroy(pawfgr)
  call destroy_mpi_enreg(mpi_enreg)
+ !call gstore%free()
 
  if (allocated(efmasdeg)) call efmasdeg_free_array(efmasdeg)
  if (allocated(efmasval)) call efmasval_free_array(efmasval)

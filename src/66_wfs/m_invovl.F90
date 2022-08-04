@@ -15,10 +15,6 @@
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -285,12 +281,6 @@ CONTAINS
 !! INPUTS
 !! nkpt= number of k-points
 !!
-!! PARENTS
-!!      m_gstate
-!!
-!! CHILDREN
-!!      dsymm,zhemm
-!!
 !! SOURCE
 
  subroutine init_invovl(nkpt)
@@ -318,12 +308,6 @@ CONTAINS
 !!
 !! INPUTS
 !! nkpt= number of k-points
-!!
-!! PARENTS
-!!      m_gstate
-!!
-!! CHILDREN
-!!      dsymm,zhemm
 !!
 !! SOURCE
  subroutine destroy_invovl(nkpt, use_gpu_cuda)
@@ -369,14 +353,6 @@ CONTAINS
 !! Builds of the invovl structure
 !!
 !! INPUTS
-!!
-!! PARENTS
-!!      m_vtorho
-!!
-!! CHILDREN
-!!      dsymm,zhemm
-!!      f_gpu_apply_invovl_inner_alloc
-!!      f_gpu_apply_invovl_inner_dealloc
 !!
 !! SOURCE
 
@@ -648,12 +624,6 @@ end subroutine make_invovl
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!      m_chebfi
-!!
-!! CHILDREN
-!!      dsymm,zhemm
-!!
 !! SOURCE
 
 subroutine apply_invovl(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_enreg, nspinor, block_sliced)
@@ -860,12 +830,6 @@ end subroutine apply_invovl
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!      m_invovl
-!!
-!! CHILDREN
-!!      dsymm,zhemm
-!!
 !! SOURCE
 subroutine solve_inner(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj, PtPsm1proj, block_sliced)
 
@@ -981,12 +945,6 @@ end subroutine solve_inner
 !! Helper function: applies a block-diagonal matrix mat(lmnmax, lmnmax, ntypat)
 !!
 !! INPUTS
-!!
-!! PARENTS
-!!      m_invovl
-!!
-!! CHILDREN
-!!      dsymm,zhemm
 !!
 !! SOURCE
 subroutine apply_block(ham, cplx, mat, nprojs, ndat, x, y, block_sliced)

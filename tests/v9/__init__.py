@@ -134,6 +134,9 @@ inp_files = [
     # projWF method for lattice wannier function in anaddb (disentangle option 2)
     "t111.abi",
 
+    # GS PAW Hybrid functionals
+    "t120.abi",  # test PBE0 and related functionals with PAW
+
     # More on DFPT
     "t130.abi", # test quadrupole calculation with all negative KB energies As PSP
 ]

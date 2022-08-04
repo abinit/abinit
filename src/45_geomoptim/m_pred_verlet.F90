@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -83,13 +79,6 @@ contains
 !! hist <type(abihist)> : History of positions,forces
 !!                               acell, rprimd, stresses
 !!
-!! PARENTS
-!!      m_precpred_1geo
-!!
-!! CHILDREN
-!!      fcart2gred,hist2var,metric,mkrdim,var2hist,wrtout,xcart2xred
-!!      xfpack_f2vout,xfpack_vin2x,xfpack_x2vin,xred2xcart
-!!
 !! SOURCE
 
 subroutine pred_verlet(ab_mover,hist,ionmov,itime,ntime,zDEBUG,iexit)
@@ -131,27 +120,13 @@ subroutine pred_verlet(ab_mover,hist,ionmov,itime,ntime,zDEBUG,iexit)
 !***************************************************************************
 
  if(iexit/=0)then
-   if (allocated(vin))           then
-     ABI_FREE(vin)
-   end if
-   if (allocated(vin_next))      then
-     ABI_FREE(vin_next)
-   end if
-   if (allocated(vout))          then
-     ABI_FREE(vout)
-   end if
-   if (allocated(vin_prev))      then
-     ABI_FREE(vin_prev)
-   end if
-   if (allocated(vout_prev))     then
-     ABI_FREE(vout_prev)
-   end if
-   if (allocated(hessin))        then
-     ABI_FREE(hessin)
-   end if
-   if (allocated(vel_prevhalf))  then
-     ABI_FREE(vel_prevhalf)
-   end if
+    ABI_SFREE(vin)
+    ABI_SFREE(vin_next)
+    ABI_SFREE(vout)
+    ABI_SFREE(vin_prev)
+    ABI_SFREE(vout_prev)
+    ABI_SFREE(hessin)
+    ABI_SFREE(vel_prevhalf)
    return
  end if
 
@@ -172,27 +147,13 @@ subroutine pred_verlet(ab_mover,hist,ionmov,itime,ntime,zDEBUG,iexit)
 !Notice that vin, vout, etc could be allocated
 !From a previous dataset with a different ndim
  if(itime==1)then
-   if (allocated(vin))           then
-     ABI_FREE(vin)
-   end if
-   if (allocated(vin_next))      then
-     ABI_FREE(vin_next)
-   end if
-   if (allocated(vout))          then
-     ABI_FREE(vout)
-   end if
-   if (allocated(vin_prev))      then
-     ABI_FREE(vin_prev)
-   end if
-   if (allocated(vout_prev))     then
-     ABI_FREE(vout_prev)
-   end if
-   if (allocated(hessin))        then
-     ABI_FREE(hessin)
-   end if
-   if (allocated(vel_prevhalf))  then
-     ABI_FREE(vel_prevhalf)
-   end if
+   ABI_SFREE(vin)
+   ABI_SFREE(vin_next)
+   ABI_SFREE(vout)
+   ABI_SFREE(vin_prev)
+   ABI_SFREE(vout_prev)
+   ABI_SFREE(hessin)
+   ABI_SFREE(vel_prevhalf)
 
    ABI_MALLOC(vin,(ndim))
    ABI_MALLOC(vin_next,(ndim))

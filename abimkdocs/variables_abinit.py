@@ -4283,7 +4283,7 @@ Variable(
 Select the electron-phonon task to be performed when [[optdriver]] == 7.
 The choice is among:
 
-* 0 --> No computation (mainly used to access the post-processing tools)
+* 0 --> No computation. Mainly used to access the post-processing tools.
 * 1 --> Compute phonon linewidths in metals and superconducting properties (isotropic formalism).
 * 2 --> Compute e-ph matrix elements. Save results in GKK.nc file.
 * -2 --> Compute e-ph matrix elements. Save results in GKQ.nc file that can be post-processed with AbiPy.
@@ -4298,11 +4298,15 @@ The choice is among:
 * 8 --> Compute phonon limited transport by solving the (linearized) IBTE using collision terms taken from SIGEPH.nc file.
         Requires [[ibte_prep]] = 1 when computing the imaginary part of the e-ph self-energy with [[eph_task]] == -4.
 * 10 --> Compute polaron effective mass, using the generalized Frohlich model, in the triply-degenerate VB or CB cubic case.
-         Polaron effective masses are computed along the 3 crystallographic directions: (100), (110) and (111). Same requirement than for [[eph_task]]=6.
-         Reference B. Guster et al to be published (2021) or (2022).
+         Polaron effective masses are computed along the 3 crystallographic directions: (100), (110) and (111). Same requirements as for [[eph_task]] = 6. Reference: [[cite:Guster2021]]
+* 11 --> Compute e-ph matrix elements on homogeneous k- and q-meshes.
+         Save results in GSTORE.nc file (requires netcdf library with MPI-IO support).
+         The k-mesh must be equal to the one associated to the input WFK file, the q-mesh is specified
+         by [[eph_ngqpt_fine]] (NB: the q-mesh must be a sub-mesh of the k-mesh or equal).
 * 15, -15 --> Write the average in r-space of the DFPT potentials to the V1QAVG.nc file.
               In the first case (+15) the q-points are specified via [[ph_nqpath]] and [[ph_qpath]]. The code assumes the
-              input DVDB contains q-points in the IBZ and the potentials along the path are interpolated with Fourier transform.
+              input DVDB contains q-points in the IBZ and the potentials along the path
+              are interpolated with Fourier transform.
               An array D(R) with the decay of the W(R,r) as a function of R is computed and saved to file
               In the second case (-15) the q-points are taken directly from the DVDB file.
 
@@ -14439,7 +14443,7 @@ Variable(
     topics=['q-points_useful'],
     dimensions="scalar",
     defaultval="0.1 meV",
-    mnemonics="PHonons: frequency(W)  STEP.",
+    mnemonics="PHonons: frequency(W) STEP.",
     characteristics=['[[ENERGY]]'],
     added_in_version="before_v9",
     text=r"""
@@ -14956,8 +14960,7 @@ _ions+electrons+positron_ system) that, when reached, will cause the SCF cycle
 to stop before the number of steps is [[nstep]] or the number of
 electronic/positronic steps is [[posnstep]].
 
-Can be specified in Ha (the default), Ry, eV or Kelvin, since [[postoldfe]] has
-the [[ENERGY]] characteristics.
+Can be specified in Ha (the default), Ry, eV or Kelvin, since [[postoldfe]] has the [[ENERGY]] characteristics.
 One and only one of [[postoldfe]] or [[postoldff]] can be set.
 """,
 ),
@@ -15815,7 +15818,7 @@ Variable(
 
 Variable(
     abivarname="prtnest",
-    varset="dev",
+    varset="eph",
     vartype="integer",
     topics=['printing_prfermi'],
     dimensions="scalar",
@@ -15824,9 +15827,16 @@ Variable(
     characteristics=['[[DEVELOP]]'],
     added_in_version="before_v9",
     text=r"""
-If set to 1, the nesting function for the k-point grid is printed (file extension _NEST). For the
-moment the path in q space for the nesting function is fixed, but will become
-an input as well.
+Same meaning as [[prtnest@anaddb]].
+The only difference with respect to the anaddb version is that the path in q-space
+must be specified in terms of [[ph_qpath]] and [[ph_nqpath]].
+
+By default, the nesting factor is computed using the Fermi level obtained in the GS run.
+In order to shift the Fermi level, use [[fermie_nest]].
+Note that, for the time being, the implementation is not compatible with [[nshiftk]] > 1.
+
+[[prtnest]] can be used either in the GS part or in the EPH code [[optdriver]] == 7 (possibly with
+[[eph_task]] = 0).
 """,
 ),
 
@@ -21669,13 +21679,12 @@ Variable(
     text=r"""
 This variable consists of two entries that allow one to select the k-points and the bands
 in the e-ph self-energy $\Sigma_\nk$ on the basis of their KS energy $\ee_\nk$.
-This variable is used in [eph_task]] = -4 to compute phonon-limited mobilities in the energy region relevant for transport.
+This variable is used in [[eph_task]] = -4 to compute phonon-limited mobilities in the energy region relevant for transport.
 
 If both entries in [[sigma_erange]] are negative, the code assumes a metal and only states within the energy
 window [efermi - abs(sigma_erange(1)), efermi + abs(sigma_erange(2)] are included in the calculation.
 
-Positive (or zero) values are used in semiconductors
-to define an energy range with respect to the band edges
+Positive (or zero) values are used in semiconductors to define an energy range with respect to the band edges.
 In this case, the first entry given the position of the holes with respect to the CBM while the second entry
 gives the position of electrons with respect to the VBM (energy differences are **always positive**, even for holes).
 A zero entry can be used to exclude either holes or electrons from the calculation.
@@ -21689,7 +21698,7 @@ Note that [[sigma_erange]] is not compatible with [[nkptgw]] and [[sigma_ngkpt]]
 
         sigma_erange 0.0 0.5 eV
 
-    to specify the energy intervals in eV units.
+    to specify the energy intervals in eV units. meV is supported as well.
 """,
 ),
 
@@ -21714,15 +21723,57 @@ Variable(
     abivarname="eph_phrange",
     varset="eph",
     topics=['SelfEnergy_expert'],
-    vartype="real",
+    vartype="integer",
     defaultval=[0, 0],
     dimensions=[2],
     mnemonics="EPH PHonon mode RANGE.",
     added_in_version="9.0.0",
     text=r"""
-This variable is used to select the range of phonon modes included in the computation of the electron-phonon self-energy.
-By default all phonon modes are included ([0, 0]), otherwise only the phonon modes with index between the first
-and second entry are included.
+This variable is used to select the range of phonon indices included in the computation
+of the electron-phonon self-energy.
+By default all phonon indices are included ([0, 0]), otherwise only the phonon indices between the first
+and second entry are **included**.
+Note that one can also use negative values to **exclude** a range of indices provided that
+abs(eph_phrange(1)) < abs(eph_phrange(2)).
+
+To summarize: use e.g. eph_phrange 4 6 to include phonon indices 4, 5, 6 in the calculation or
+use eph_phrange -4 -6 to include **ALL** phonon indices except 4, 5, 6.
+
+!!! important
+
+    The indices do not necessary correspond to phonon modes if there are crossings
+    in the phonon band structure.
+    At each q-point, indeed, phonons are ordered according to their energy.
+    and this order does not necessarly reflect the connection of the energy branch in q-space.
+""",
+),
+
+Variable(
+    abivarname="eph_phrange_w",
+    varset="eph",
+    topics=['SelfEnergy_expert'],
+    vartype="real",
+    defaultval=[0, 0],
+    dimensions=[2],
+    mnemonics="EPH PHonon mode RANGE (Frequency)",
+    characteristics=['[[ENERGY]]'],
+    added_in_version="9.6.2",
+    text=r"""
+This variable is used to include/exclude phonon modes in the computation of the electron-phonon self-energy
+on the basis of the vibrational energy instead of the index as done in [[eph_phrange]].
+The usage of [[eph_phrange_w]] is recommended especially if there are crossings in the phonon band structure.
+
+By default all phonon frequencies are included ([0, 0]), otherwise only the phonons
+whose energy is between the first and second entry are **included**.
+Note that one can also use negative values to **exclude** energies inside a range provided that
+abs(eph_phrange_w(1)) < abs(eph_phrange_w(2)).
+
+To summarize: use e.g. eph_phrange_w 40 60 meV to **include** phonon frequencies between 40 and 60 meV.
+Use eph_phrange_w -40 -60 meV to **exclude** phonon frequencies between 40 and 60 meV.
+
+!!! important
+
+    This variable has the [[ENERGY]] characteristics so the code assume Hartree units by default.
 """,
 ),
 
@@ -21826,6 +21877,31 @@ mode by using [[eph_task]] = 8 with [[getsigeph_filepath]].
 
     IBTE calculations cannot use [[sigma_ngkpt]] to donwsample the k-mesh.
     The k-mesh ([[ngkpt]] and the q-mesh [[eph_ngqpt_fine]] must be equal.
+""",
+),
+
+Variable(
+    abivarname="eph_prtscratew",
+    varset="eph",
+    topics=['ElPhonInt_expert'],
+    vartype="integer",
+    defaultval=0,
+    dimensions="scalar",
+    mnemonics="EPH PRINT spectral decomposition of SCATTERING RATES as a function of omega phonon.",
+    added_in_version="9.6.7",
+    text=r"""
+This variable can be used to compute the spectral decomposition of the SERTA/MRTA scattering rates
+in terms of an integral over phonon frequencies:
+
+$$
+1/tau_{n\kk} = \int_0^\infty f_{n\kk}(\ww)\dd\ww
+$$
+
+This option is available only when computing the imaginary part of the e-ph self-energy ([[eph_task]] = -4).
+The values of $f_{n\kk}(\ww)$ are stored in the SIGEPH file (scratew netcdf variable).
+
+The delta function $\delta(\omega - \omega_{\qnu})$ is approximated with a gaussian of standard deviation [[ph_smear]]
+and the spectral decomposition is evaluated on a linear mesh of step [[ph_wstep]] covering the entire vibrational spectrum.
 """,
 ),
 
@@ -22041,7 +22117,7 @@ allocated for the wavefunctions, especially when we have to sum over empty state
 
     The total number of MPI processes must be equal to the product of the different entries.
 
-    Note also that the EPH code implements its own MPI-algorithm and this [[eph_np_pqbks]] is
+    Note also that the EPH code implements its own MPI-algorithm and [[eph_np_pqbks]] is
     the **only variable** that should be used to change the default behaviour.
     Other variables such as [[nppert]], [[npband]], [[npfft]], [[npkpt]] and [[paral_kgb]]
     are **not used** in the EPH subdriver.
@@ -22749,6 +22825,8 @@ eigensolver to **accelerate** GS computations, structural relaxations and molecu
 The algorithm is inspired to [[cite:Kresse1996]] although the ABINIT implementation is not
 completely equivalent to the original formulation.
 RMM-DIIS can be used both with NC and PAW pseudos and is fully compatible with the [[paral_kgb]] distribution.
+Note, however, that PAW seems to be more sensitive to some internal tricks used to accelerate the computation
+so you should not expect to see the same speedup as in the NC case.
 This variable has no effect when [[optdriver]] > 0.
 
 It is worth noting that RMM-DIIS is usually employed **in conjunction with another eigenvalue solver**
@@ -22948,6 +23026,274 @@ self-consistent QS$GW$ or $G_0W_0$ starting from a hybrid-functional starting po
 * 1 --> Keep the old implementation.
 
 See line 743 in src/95_drive/screening.F90 .
+""",
+),
+
+Variable(
+    abivarname="gstore_cplex",
+    varset="eph",
+    vartype="integer",
+    topics=['ElPhonInt_basic'],
+    dimensions="scalar",
+    defaultval=2,
+    mnemonics=r"GSTORE ComPLEX dimension",
+    requires="[[optdriver]] == 7",
+    added_in_version="9.6.2",
+    text=r"""
+This input variable specifies whether the EPH code should store $|g|^2$ or $g$
+when computing the e-ph matrix elements ([[eph_task]] == 11)
+Possible values are:
+
+    1 --> compute and store $|g|^2$ in GSTORE.nc.
+          Use this option to reduce the size of the file but keep in mind
+          that the GSTORE can only be used to compute expression in which
+          only $|g|^2$ is needed.
+    2 --> compute and store complex $g$ in GSTORE.nc (default)
+""",
+),
+
+Variable(
+    abivarname="gstore_with_vk",
+    varset="eph",
+    vartype="integer",
+    topics=['ElPhonInt_basic'],
+    dimensions="scalar",
+    defaultval=1,
+    mnemonics=r"GSTORE WITH Velocity_k",
+    requires="[[optdriver]] == 7",
+    added_in_version="9.6.2",
+    text=r"""
+This input variable specifies whether the EPH code should compute and store
+the matrix elements of the velocity operator when computing the e-ph matrix elements ([[eph_task]] == 11)
+Possible values are:
+
+    0 --> Do not compute velocity matrix elements
+    1 --> compute and store the diagonal matrix elements (default)
+    2 --> compute and store diagonal + off-diagonal terms.
+""",
+),
+
+Variable(
+    abivarname="gstore_kzone",
+    varset="eph",
+    vartype="string",
+    topics=['ElPhonInt_basic'],
+    dimensions="scalar",
+    defaultval="ibz",
+    mnemonics=r"GSTORE K-point ZONE",
+    requires="[[optdriver]] == 7",
+    added_in_version="9.6.2",
+    text=r"""
+This input variable specifies whether the EPH code should compute the $g(\kk, \qq)$
+matrix elements for $\kk$ in the IBZ or in the BZ.
+
+!!! important
+
+    The combination [[gstore_kzone]] = "ibz" with [[gstore_qzone]] = "ibz" is not allowed.
+    One usually restricts one wavevector to the IBZ while the other wavevector covers the full BZ.
+    Using the BZ for both $\kk$ and $\qq$ is usually used for testing purposes.
+""",
+),
+
+Variable(
+    abivarname="gstore_qzone",
+    varset="eph",
+    vartype="string",
+    topics=['ElPhonInt_basic'],
+    dimensions="scalar",
+    defaultval="bz",
+    mnemonics=r"GSTORE Q-point ZONE",
+    requires="[[optdriver]] == 7",
+    added_in_version="9.6.2",
+    text=r"""
+This input variable specifies whether the EPH code should compute the $g(\kk, \qq)$
+e-ph matrix elements for $\qq$ in the IBZ or in the BZ.
+
+!!! important
+
+    The combination [[gstore_kzone]] = "ibz" with [[gstore_qzone]] = "ibz" is not allowed.
+    One usually restricts one wavevector to the IBZ while the other wavevector covers the full BZ.
+    Using the BZ for both $\kk$ and $\qq$ is usually used for testing purposes.
+""",
+),
+
+Variable(
+    abivarname="gstore_kfilter",
+    varset="eph",
+    vartype="string",
+    topics=['ElPhonInt_basic'],
+    dimensions="scalar",
+    defaultval="none",
+    mnemonics=r"GSTORE K-FILTER",
+    requires="[[optdriver]] == 7",
+    added_in_version="9.6.2",
+    text=r"""
+This input variable can be used to introduce a filter in the electronic wavevectors (k and k+q)
+when computing the e-ph matrix elements with [[eph_task]] == 11.
+Possible values are:
+
+    "none" --> No filter is applied.
+    "fs_tetra" --> Use tetrahedron method to filter k/k+q states on the Fermi surface.
+
+Note that it is possible to use another filter based on the position of the energy states wrt to either
+the CBM/VBM or the position wrt to the Fermi level via [[gstore_erange]].
+""",
+),
+
+Variable(
+    abivarname="gstore_brange",
+    varset="eph",
+    vartype="int",
+    topics=['ElPhonInt_basic'],
+    dimensions=[2, "[[nsppol]]"],
+    defaultval=0,
+    mnemonics=r"GSTORE Band RANGE",
+    requires="[[optdriver]] == 7",
+    added_in_version="9.6.2",
+    text=r"""
+This input variable can be used to specify the band range
+when computing the GSTORE.nc file with [[eph_task]] == 11.
+The first entry gives the first band to be included while the second index specifies the last band.
+
+Note that the array depends on the value of [[nsppol]] thus one has to provide four integers for the
+two different spin channels when [[nsppol]] == 2.
+
+If not specified in input, ABINIT will use all the bands from 1 up to the maximum number of bands
+unless additional filters are activated, see [[gstore_kfilter]] and [[gstore_erange]].
+""",
+),
+
+Variable(
+    abivarname="getgstore_filepath",
+    varset="eph",
+    vartype="string",
+    topics=['ElPhonInt_basic'],
+    dimensions="scalar",
+    defaultval="None",
+    mnemonics="GET the GSTORE.nc from FILEPATH",
+    requires="[[optdriver]] == 7",
+    added_in_version="9.6.2",
+    text=r"""
+This variable defines the path of the GSTORE.nc file with the e-ph matrix elements
+that should be used as input for further analysis.
+
+This variable can also be used when [[eph_task]] == 11 i.e. when we compute the GSTORE file.
+In this case, the code assumes we want to restart a GSTORE calculation and only the (k, q) entries
+that are missing in the nc file are computed.
+This option is very useful if the previous job has been killed due to timeout limit.
+""",
+),
+
+Variable(
+    abivarname="gstore_erange",
+    varset="eph",
+    vartype="real",
+    topics=['ElPhonInt_basic'],
+    dimensions=[2, "[[nsppol]]"],
+    characteristics=['[[ENERGY]]'],
+    requires="[[optdriver]] == 7",
+    mnemonics="GSTORE Energy  RANGE",
+    added_in_version="9.6.2",
+    text=r"""
+This variable is used when [[eph_task]] = 11 to define the k/q points that should be considered when
+producing the GSTORE.nc file
+This variable consists of two x [[nsppol]] entries that allow one to select the k-points and the bands
+on the basis of their KS energy $\ee_\nk$.
+
+If both entries in [[gstore_erange]] are negative, the code assumes a metal and only states within the energy
+window [efermi - abs(gstore_erange(1)), efermi + abs(gstore_erange(2)] are included in the calculation.
+
+Positive (or zero) values are used in semiconductors to define an energy range with respect to the band edges.
+In this case, the first entry given the position of the holes with respect to the CBM while the second entry
+gives the position of electrons with respect to the VBM (energy differences are **always positive**, even for holes).
+A zero entry can be used to exclude either holes or electrons from the calculation.
+
+If both entries are zero, the variable is ignored.
+Note that [[gstore_erange]] is not compatible with [[gstore_brange]].
+
+!!! important
+
+    By default, this variable is given in Hartree. Use e.g.
+
+        gstore_erange 0.0 0.5 eV
+
+    to specify the energy intervals in eV units. meV is supported as well.
+""",
+),
+
+Variable(
+    abivarname="gwr_np_gtks",
+    varset="gw",
+    vartype="integer",
+    topics=['GWR_expert'],
+    dimensions=[4],
+    defaultval=0,
+    mnemonics="GWR Number of Processors for G-vectors, Tau-points, K-points, Spin.",
+    requires="[[optdriver]] == 6",
+    added_in_version="9.6.2",
+    text=r"""
+This variable defines the Cartesian grid of MPI processors used for GWR calculations.
+If not specified in the input, the code will generate this grid automatically using the total number of processors
+and the basic dimensions of the job computed at runtime.
+
+!!! important
+
+    The total number of MPI processes must be equal to the product of the different entries.
+
+    Note also that the GWR code implements its own MPI-algorithm and [[gwr_np_gtks]] is
+    the **only variable** that should be used to change the default behaviour.
+    Other variables such as [[npband]], [[npfft]], [[npkpt]] and [[paral_kgb]]
+    are **not used** in the GWR subdriver.
+""",
+),
+
+Variable(
+    abivarname="gwr_task",
+    varset="gw",
+    vartype="string",
+    topics=['GWR_basic'],
+    dimensions=[1],
+    defaultval="G0W0",
+    mnemonics="GWR TASK",
+    requires="[[optdriver]] == 6",
+    added_in_version="9.6.2",
+    text=r"""
+This variable defines ...
+""",
+),
+
+Variable(
+    abivarname="gwr_ntau",
+    varset="gw",
+    vartype="integer",
+    topics=['GWR_basic'],
+    dimensions=[1],
+    defaultval=12,
+    mnemonics="GWR Number of TAU points.",
+    requires="[[optdriver]] == 6",
+    added_in_version="9.6.2",
+    text=r"""
+This variable defines the number of imaginary-time points
+
+!!! important
+
+    To avoid load imbalance the the total number of MPI processes should be a divisor/multiple of
+    [[gwr_ntau]] * [[nsppol]]
+""",
+),
+
+Variable(
+    abivarname="gwr_boxcutmin",
+    varset="gw",
+    vartype="real",
+    topics=['GWR_useful'],
+    dimensions=[1],
+    defaultval=2.0,
+    mnemonics="GWR BOX CUT-off MINimum",
+    requires="[[optdriver]] == 6",
+    added_in_version="9.6.2",
+    text=r"""
+This variable ...
 """,
 ),
 

@@ -12,10 +12,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -213,10 +209,6 @@ contains
 !! OUTPUT
 !!  tdks <class(tdks_type)> = the tdks object to initialize
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawtab, psps)
 
@@ -321,9 +313,9 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
                & dtset%istwfk,tdks%kg,dtset%kptns,tdks%mcg,tdks%mcprj,dtset%mgfft,      &
                & dtset%mkmem,mpi_enreg,psps%mpsang,dtset%mpw,dtset%natom,tdks%nattyp,   &
                & dtset%nband,dtset%natom,dtset%ngfft,dtset%nkpt,dtset%nloalg,           &
-               & tdks%npwarr,dtset%nspinor,dtset%nsppol,psps%ntypat,dtset%paral_kgb,    &
-               & tdks%ph1d,psps,tdks%rmet,dtset%typat,tdks%ucvol,tdks%unpaw,tdks%xred,  &
-               & tdks%ylm,tdks%ylmgr)
+               & tdks%npwarr,dtset%nspinor,dtset%nsppol,dtset%nsppol,psps%ntypat,       &
+               & dtset%paral_kgb,tdks%ph1d,psps,tdks%rmet,dtset%typat,tdks%ucvol,       &
+               & tdks%unpaw,tdks%xred,tdks%ylm,tdks%ylmgr)
  end if
  ABI_MALLOC(tdks%occ,(dtset%mband*dtset%nkpt*dtset%nsppol))
 
@@ -358,10 +350,6 @@ end subroutine tdks_init
 !!  psps <type(pseudopotential_type)> = variables related to pseudopotentials
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 subroutine tdks_free(tdks,dtset,mpi_enreg,psps)
@@ -481,10 +469,6 @@ end subroutine tdks_free
 !! OUTPUT
 !!  psp_gencond <integer> = store conditions for generating psp
 !!  ecut_eff <real(dp)> = effective PW cutoff energy
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 subroutine first_setup(codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad,pawtab,psps,psp_gencond,tdks)
@@ -752,10 +736,6 @@ end subroutine first_setup
 !! tdks <type(tdks_type)> = the tdks object to initialize
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 subroutine second_setup(dtset, mpi_enreg, pawang, pawrad, pawtab, psps, psp_gencond, tdks)
@@ -1030,10 +1010,6 @@ end subroutine second_setup
 !! tdks <type(tdks_type)> = the tdks object to initialize
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 subroutine read_wfk(dtfil, dtset, ecut_eff, fname_wfk, mpi_enreg, tdks)

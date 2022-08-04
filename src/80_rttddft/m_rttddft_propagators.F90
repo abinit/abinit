@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -88,10 +84,6 @@ contains
 !!  the exponential approximated by Taylor expansion of order 1 leads 
 !!  to the famous Euler method which is fast and simple but unstable
 !!  and thus insufficient for RT-TDDFT.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 subroutine rttddft_propagator_er(dtset, ham_k, istep, mpi_enreg, psps, tdks, calc_properties)
@@ -453,10 +445,6 @@ end subroutine rttddft_propagator_er
 !! NOTES
 !!  This propagator is time reversible 
 !!  (if H(t+dt/2) and the exponential are computed exactly).
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 subroutine rttddft_propagator_emr(dtset, ham_k, istep, mpi_enreg, psps, tdks)

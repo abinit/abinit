@@ -67,12 +67,6 @@ CONTAINS  !=====================================================================
 !! OUTPUT
 !!  pelev(3)= electronic polarisation. expectation value term (PAW only)
 !!
-!! PARENTS
-!!      m_berryphase_new
-!!
-!! CHILDREN
-!!      timab,xmpi_sum
-!!
 !! SOURCE
 
 subroutine pawpolev(my_natom,natom,ntypat,pawrhoij,pawtab,pelev,&

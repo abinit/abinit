@@ -12,10 +12,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -121,12 +117,6 @@ contains
 !! encorr = correction to energy for terms of order tsmear^2:
 !!
 !!       $  E_{phys} = E_{free} - encorr*(E_{int}-E_{free}) + O(tsmear^3)  $
-!!
-!! PARENTS
-!!      m_chi0,m_conducti,m_dfpt_looppert,m_ebands,m_gstate,m_occ
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -438,12 +428,6 @@ end subroutine getnel
 !!  fermie= fermi energy (Hartree)/fermi level for thermalized excited electrons in bands > ivalence when occopt=9
 !!  fermih= fermi level for thermalized excited holes in bands <= ivalence ! CP added for occopt 9 case
 !!  occ(maxval(nband(:))*nkpt*nsppol)=occupancies for each band and k point
-!!
-!! PARENTS
-!!      m_ebands,m_gstate,m_respfn_driver,m_vtorho
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -986,12 +970,6 @@ end subroutine newocc
 !!
 !! OUTPUT
 !!  argout(sizeout)=description
-!!
-!! PARENTS
-!!      m_occ
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1538,12 +1516,6 @@ end subroutine init_occ_ent
 !! otherwise,
 !!  $ rocceig(m,n)=\frac{1}{2}*(occ_{k,q}(m)-occ_k(n))/(eig0_{k,q}(m)-eig0_k(n))$
 !!
-!! PARENTS
-!!      m_dfpt_nstwf,m_dfpt_scfcv,m_dfpt_vtorho
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine occeig(doccde_k,doccde_kq,eig0_k,eig0_kq,nband_k,occopt,occ_k,occ_kq,rocceig)
@@ -1635,10 +1607,6 @@ end subroutine occeig
 !!   kT=Value of K_Boltzmann x T in Ha.
 !!   mu=Chemical potential in Ha.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 elemental real(dp) function occ_fd(ee, kT, mu)
@@ -1691,10 +1659,6 @@ end function occ_fd
 !!   kT=Value of K_Boltzmann x T in Ha.
 !!   mu=Chemical potential in Ha.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 elemental real(dp) function occ_dfde(ee, kT, mu)
@@ -1739,10 +1703,6 @@ end function occ_dfde
 !!   kT=Value of K_Boltzmann x T in Ha.
 !!   mu=Chemical potential in Ha (usually zero)
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 elemental real(dp) function occ_be(ee, kT, mu)
@@ -1786,10 +1746,6 @@ end function occ_be
 !!   ee=Single particle energy in Ha
 !!   kT=Value of K_Boltzmann x T in Ha.
 !!   mu=Chemical potential in Ha (usually zero)
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1850,12 +1806,6 @@ end function occ_dbe
 !!
 !! OUTPUT
 !!   Only writing.
-!!
-!! PARENTS
-!!      m_epjdos,m_occ
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 

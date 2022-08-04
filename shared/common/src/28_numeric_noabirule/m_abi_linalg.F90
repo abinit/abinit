@@ -282,11 +282,6 @@ CONTAINS  !===========================================================
 !! np_slk= max. number of processes to be used in Scalapack calls
 !! comm_scalapack= global communicator to be used in case of Scalapack
 !!
-!! PARENTS
-!!      m_driver,m_mpi_setup
-!!
-!! CHILDREN
-!!
 !! SOURCE
 !!
 
@@ -367,7 +362,7 @@ CONTAINS  !===========================================================
    call MPI_CART_SUB(commcart, keepdim, slk_communicator,abi_info1)
    keepdim = (/.false., .true./)
    call MPI_CART_SUB(commcart, keepdim, slk_complement_communicator,abi_info1)
-   call init_scalapack(slk_processor,slk_communicator)
+   call slk_processor%init(slk_communicator)
    slk_minsize=maxval(slk_processor%grid%dims(1:2))
    need_work_space=(use_slk/=1) ! In this case we never use the work arrays
    ABI_LINALG_SCALAPACK_ISON = .true.
@@ -432,11 +427,6 @@ CONTAINS  !===========================================================
 !! FUNCTION
 !!
 !! INPUTS
-!!
-!! PARENTS
-!!      m_abi_linalg
-!!
-!! CHILDREN
 !!
 !! SOURCE
 !!
@@ -635,11 +625,6 @@ CONTAINS  !===========================================================
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!      m_driver,m_mpi_setup
-!!
-!! CHILDREN
-!!
 !! SOURCE
 !!
  subroutine abi_linalg_finalize()
@@ -675,7 +660,7 @@ CONTAINS  !===========================================================
 
 #ifdef HAVE_LINALG_SCALAPACK
  if (ABI_LINALG_SCALAPACK_ISON) then
-   call end_scalapack(slk_processor)
+   call slk_processor%free()
    call xmpi_comm_free(slk_communicator)
    call xmpi_comm_free(slk_complement_communicator)
    slk_communicator=xmpi_comm_null
@@ -763,8 +748,6 @@ end subroutine linalg_allow_gemm3m
 !! FUNCTION
 !!  Enable the use of ZGEMM3M
 !!
-!! PARENTS
-!!
 !! NOTES
 !!  The CGEMM3M and ZGEMM3M routines use an algorithm requiring 3 real matrix
 !!  multiplications and 5 real matrix additions to compute the complex matrix
@@ -809,8 +792,6 @@ end function use_zgemm3m
 !!
 !! FUNCTION
 !!  Enable the use of CGEMM3M
-!!
-!! PARENTS
 !!
 !! NOTES
 !!  See use_zgemm3m
@@ -899,8 +880,6 @@ end function uplo_plasma
 !! FUNCTION
 !!  Convert trans character to PLASMA integer
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 integer function trans_plasma(trans)
@@ -930,8 +909,6 @@ end function trans_plasma
 !! FUNCTION
 !!  Convert side character to PLASMA integer
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 integer function side_plasma(side)
@@ -959,8 +936,6 @@ end function side_plasma
 !! FUNCTION
 !!  Convert diag character to PLASMA integer
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 integer function diag_plasma(diag)
@@ -987,8 +962,6 @@ end function diag_plasma
 !!
 !! FUNCTION
 !!  Convert jobz character to PLASMA integer
-!!
-!! PARENTS
 !!
 !! SOURCE
 

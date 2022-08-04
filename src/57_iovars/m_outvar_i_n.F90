@@ -10,10 +10,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -98,12 +94,6 @@ contains
 !! In consequence, no use of message and wrtout routine.
 !! The lines of code needed to output the defaults are preserved
 !! (see last section of the routine, but are presently disabled)
-!!
-!! PARENTS
-!!      m_outvars
-!!
-!! CHILDREN
-!!      prttagm,prttagm_images
 !!
 !! SOURCE
 

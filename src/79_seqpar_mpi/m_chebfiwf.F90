@@ -123,13 +123,6 @@ module m_chebfiwf
 !!  cg(2,npw*nspinor*nband)= planewave coefficients of wavefunctions
 !!  gs_hamk <type(gs_hamiltonian_type)>=all data for the hamiltonian at k
 !!
-!! PARENTS
-!!      vtowfk
-!!
-!! CHILDREN
-!!      xmpi_sum,chebfi_memInfo,xgBlock_map,xgBlock_scale,xomp_get_num_threads,chebfi_init
-!!      chebfi_run,chebfi_free,nonlop
-!!
 !! SOURCE
 
 subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
@@ -353,12 +346,6 @@ end subroutine chebfiwf2
 !!  BX <type(xgBlock_t)>= memory block containing S|C>
 !!  transposer <type(xgTransposer_t)>= data used for array transpositions
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xgBlock_getSize,xgBlock_reverseMap,xgBlock_scale,xgBlock_copy,xgTransposer_getRank
-!!      multithreaded_getghc
-!!
 !! SOURCE
 
 subroutine getghc_gsc1(X,AX,BX,transposer)
@@ -471,12 +458,6 @@ end subroutine getghc_gsc1
 !!  Bm1X <type(xgBlock_t)>= memory block containing S^-1|C>
 !!  transposer <type(xgTransposer_t)>= data used for array transpositions
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xgBlock_getSize,xgBlock_reverseMap,xgBlock_scale
-!!      pawcprj_alloc,pawcprj_free,apply_invovl
-!!
 !! SOURCE
 
 subroutine getBm1X(X,Bm1X,transposer)
@@ -587,11 +568,6 @@ end subroutine getBm1X
 !!
 !! SIDE EFFECTS
 !!  W <type(xgBlock_t)>= memory block
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xgBlock_colwiseMul
 !!
 !! SOURCE
 

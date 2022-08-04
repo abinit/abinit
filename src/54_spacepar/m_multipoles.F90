@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -70,12 +66,6 @@ contains
 !!
 !! OUTPUT
 !!  dipole(nspden)=mean value of the dipole of input array, for each nspden component
-!!
-!! PARENTS
-!!      m_multipoles
-!!
-!! CHILDREN
-!!      atomdata_from_znucl,ptabs_fourdp,wrtout,xmpi_sum,xred2xcart
 !!
 !! SOURCE
 
@@ -223,12 +213,6 @@ end subroutine multipoles_fftr
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_outscfcv
-!!
-!! CHILDREN
-!!      atomdata_from_znucl,ptabs_fourdp,wrtout,xmpi_sum,xred2xcart
-!!
 !! SOURCE
 
 subroutine multipoles_out(rhor,mpi_enreg,natom,nfft,ngfft,nspden,&
@@ -349,12 +333,6 @@ end subroutine multipoles_out
 !!  data written in file fnameabo_app_1dm
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_outscfcv
-!!
-!! CHILDREN
-!!      atomdata_from_znucl,ptabs_fourdp,wrtout,xmpi_sum,xred2xcart
 !!
 !! SOURCE
 

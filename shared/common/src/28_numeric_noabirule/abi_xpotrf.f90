@@ -30,8 +30,6 @@
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 subroutine abi_dpotrf(uplo,n,a,lda,info)
@@ -65,8 +63,6 @@ end subroutine abi_dpotrf
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 subroutine abi_zpotrf_2d(uplo,n,a,lda,info)
@@ -91,8 +87,6 @@ end subroutine abi_zpotrf_2d
 !! FUNCTION
 !!
 !! INPUTS
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -139,8 +133,6 @@ end subroutine abi_d2zpotrf
 !! FUNCTION
 !!
 !! INPUTS
-!!
-!! PARENTS
 !!
 !! SOURCE
 

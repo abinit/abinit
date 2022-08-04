@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -104,12 +100,6 @@ contains
 !!  nctab<nctab_t>=NC tables
 !!    %has_tvale=True if the pseudo contains the pseudo valence charge
 !!    %tvalespl(mqgrid_vl,2)=the pseudo valence density and 2nd derivative in reciprocal space on a regular grid
-!!
-!! PARENTS
-!!      m_pspini
-!!
-!! CHILDREN
-!!      dgesv
 !!
 !! SOURCE
 
@@ -686,12 +676,6 @@ end subroutine psp9in
 !!
 !! NOTES
 !!  This routine will be built only if PSML support is enabled.
-!!
-!! PARENTS
-!!      m_psp9
-!!
-!! CHILDREN
-!!      dgesv
 !!
 !! SOURCE
 

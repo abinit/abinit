@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -100,12 +96,6 @@ contains
 !!
 !! NOTES
 !!
-!!
-!! PARENTS
-!!      m_multibinit_driver
-!!
-!! CHILDREN
-!!      matr3inv,symanal,symfind,symlatt
 !!
 !! SOURCE
 
@@ -1059,12 +1049,6 @@ end subroutine mover_effpot
 !!
 !! NOTES
 !!
-!!
-!! PARENTS
-!!      m_mover_effpot
-!!
-!! CHILDREN
-!!      matr3inv,symanal,symfind,symlatt
 !!
 !! SOURCE
 

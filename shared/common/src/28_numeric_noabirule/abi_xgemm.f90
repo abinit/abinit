@@ -35,8 +35,6 @@
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!
 !! SOURCE
 
  subroutine abi_zgemm_2d(TRANSA,TRANSB,M,N,K,ALPHA,A,LDA,B,LDB,BETA,C,LDC)
@@ -96,8 +94,6 @@ end subroutine abi_zgemm_2d
 !! INPUTS
 !!
 !!
-!! PARENTS
-!!
 !! SOURCE
 
  subroutine abi_zgemm_2r(TRANSA,TRANSB,M,N,K,ALPHA,A,LDA,B,LDB,BETA,C,LDC)
@@ -155,10 +151,6 @@ end subroutine abi_zgemm_2r
 !! FUNCTION
 !!
 !! INPUTS
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 !!

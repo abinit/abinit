@@ -10,8 +10,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -76,12 +74,6 @@ CONTAINS
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!      m_argparse
-!!
-!! CHILDREN
-!!      inupper,timein,wrtout,xmpi_bcast
-!!
 !! SOURCE
 
 subroutine exit_init(time_limit)
@@ -107,12 +99,6 @@ end subroutine exit_init
 !!  Disable the time limit handler. This function should be called by a driver
 !!  routine that is not able to handle time limit events and wants to prevent
 !!  its children from installing their handlers.
-!!
-!! PARENTS
-!!      m_dfpt_looppert
-!!
-!! CHILDREN
-!!      inupper,timein,wrtout,xmpi_bcast
 !!
 !! SOURCE
 
@@ -144,8 +130,6 @@ end subroutine disable_timelimit
 !! FUNCTION
 !!  Return .True. if timelimit is enabled in this caller
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 logical pure function have_timelimit_in(abifunc) result(ans)
@@ -176,8 +160,6 @@ end function have_timelimit_in
 !!      write(std_out,*)"Enabling timelimit check in function: ",trim(FUNC_NAME)," with timelimit: ",trim(sec2str(get_timelimit()))
 !!    end if
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 function enable_timelimit_in(abifunc) result(prev_func)
@@ -203,8 +185,6 @@ end function enable_timelimit_in
 !! FUNCTION
 !!  Return the time limit in seconds
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 real(dp) pure function get_timelimit()
@@ -222,8 +202,6 @@ end function get_timelimit
 !!
 !! FUNCTION
 !!  Return the time limit in string form.
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -253,8 +231,6 @@ end function get_timelimit_string
 !!
 !! FUNCTION
 !!  Return the origin of execution time in seconds
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -290,12 +266,6 @@ end function get_start_time
 !!  iexit = index of "exit" on first line of file (0 if not found),
 !!      or -1 if the exit was ordered through the existence of the "exit" file
 !!      or -2 if the exit was ordered through the CPU time limit.
-!!
-!! PARENTS
-!!      m_common,m_dfpt_looppert,m_driver,m_gstate,m_respfn_driver
-!!
-!! CHILDREN
-!!      inupper,timein,wrtout,xmpi_bcast
 !!
 !! SOURCE
 

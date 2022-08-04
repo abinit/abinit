@@ -227,6 +227,7 @@ nav:
     - tutorial/positron.md
     - tutorial/tddft.md
     - tutorial/wannier90.md
+    - tutorial/z2pack.md
 - FAQ:
     - Configuration and compilation: faq/configuration_and_compilation.md
     - General questions: faq/general_questions.md
@@ -347,7 +348,7 @@ copyright: Copyright &copy; 2020-2021 The Abinit Group
 google_analytics: ['UA-116681470-1', 'docs.abinit.org']
 
 extra:
-    version: 9.7.5
+    version: 9.9.0
     previous_published_versions: [] #8.2.0
     social:
         - icon: fontawesome/brands/github

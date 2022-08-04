@@ -10,10 +10,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -164,13 +160,6 @@ contains
 !!                       cprj1=<p_i|C1nk,q> where p_i is a non-local projector
 !!    pawrhoij1(natom) <type(pawrhoij_type)>= 1st-order paw rhoij occupancies and related data
 !!                                            (cumulative, so input as well as output)
-!!
-!! PARENTS
-!!      m_dfpt_vtorho
-!!
-!! CHILDREN
-!!      cg_zaxpy,dotprod_g,pawcprj_alloc,pawcprj_copy,pawcprj_free
-!!      pawcprj_mpi_sum,pawcprj_set_zero,pawcprj_zaxpby,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -741,13 +730,6 @@ end subroutine dfpt_vtowfk
 !!  cwaveprj1(natom,nspinor)= 1st-order wave-function after correction
 !!                            projected on NL projectors (PAW)
 !!
-!! PARENTS
-!!      m_dfpt_vtowfk
-!!
-!! CHILDREN
-!!      cg_zaxpy,dotprod_g,pawcprj_alloc,pawcprj_copy,pawcprj_free
-!!      pawcprj_mpi_sum,pawcprj_set_zero,pawcprj_zaxpby,timab,xmpi_sum
-!!
 !! SOURCE
 
 subroutine full_active_wf1(cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,cycle_bands,eig1,&
@@ -910,13 +892,6 @@ end subroutine full_active_wf1
 !!
 !! NOTES
 !!  Was part of dfpt_vtowfk before.
-!!
-!! PARENTS
-!!      m_dfpt_vtowfk
-!!
-!! CHILDREN
-!!      cg_zaxpy,dotprod_g,pawcprj_alloc,pawcprj_copy,pawcprj_free
-!!      pawcprj_mpi_sum,pawcprj_set_zero,pawcprj_zaxpby,timab,xmpi_sum
 !!
 !! SOURCE
 

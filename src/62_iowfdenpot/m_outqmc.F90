@@ -15,10 +15,6 @@
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -78,12 +74,6 @@ contains
 !!
 !! OUTPUT
 !! Writes the file pwfn.data
-!!
-!! PARENTS
-!!      m_gstate
-!!
-!! CHILDREN
-!!      wrtout,xred2xcart
 !!
 !! SOURCE
 

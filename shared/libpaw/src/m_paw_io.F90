@@ -81,12 +81,6 @@ CONTAINS !===========================================================
 !!  unit=the unit number for output
 !!  Ha_or_eV= 1: output in hartrees, 2: output in eV
 !!
-!! PARENTS
-!!      m_paw_correlations,m_paw_ij,m_paw_slater,m_pawdij,m_pawrhoij
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine pawio_print_ij(unit,a_ij,adim,cplex,ndim,opt_l,opt_l_index, &

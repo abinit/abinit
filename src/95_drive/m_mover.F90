@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -185,12 +181,6 @@ contains
 !!      It is defined by nfft, ngfft, mgfft, ...
 !!      For compatibility reasons, (nfftf,ngfftf,mgfftf)
 !!      are set equal to (nfft,ngfft,mgfft) in that case.
-!!
-!! PARENTS
-!!      m_gstate,m_mover_effpot
-!!
-!! CHILDREN
-!!      metric,wrtout,xcart2xred,xred2xcart
 !!
 !! SOURCE
 
@@ -374,9 +364,9 @@ real(dp),allocatable :: gred_corrected(:,:),xred_prev(:,:)
  ncycle=specs%ncycle
 
  if(ab_mover%ionmov==25.and.scfcv_args%dtset%hmctt>=0)then
-   ncycle=scfcv_args%dtset%hmctt   
+   ncycle=scfcv_args%dtset%hmctt
    if(scfcv_args%dtset%hmcsst>0.and.ab_mover%optcell/=0)then
-      ncycle=ncycle+scfcv_args%dtset%hmcsst 
+      ncycle=ncycle+scfcv_args%dtset%hmcsst
    endif
  endif
 
@@ -620,7 +610,7 @@ real(dp),allocatable :: gred_corrected(:,:),xred_prev(:,:)
            endif
 
 !DEBUG
- write(std_out,'(a,5i4)')' m_mover, before scfcv_run : itimes(1:2)=',itimes(1:2)
+! write(std_out,'(a,5i4)')' m_mover, before scfcv_run : itimes(1:2)=',itimes(1:2)
 !ENDDEBUG
            call scfcv_run(scfcv_args, electronpositron, itimes, rhog, rhor, rprimd, xred, xred_old, conv_retcode)
            if (conv_retcode == -1) then
@@ -1031,12 +1021,6 @@ contains
 !!  at input  : iexit=  0 if not the last itime,  1 if the last itime
 !!  at output : iexit=  0 if not below tolerance, 1 if below tolerance
 !!
-!! PARENTS
-!!      m_mover
-!!
-!! CHILDREN
-!!      metric,wrtout,xcart2xred,xred2xcart
-!!
 !! SOURCE
 
 subroutine fconv(fcart,iatfix,iexit,itime,natom,ntime,optcell,strfact,strtarget,strten,rprim,tolmxf)
@@ -1169,12 +1153,6 @@ end subroutine fconv
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_mover
-!!
-!! CHILDREN
-!!      metric,wrtout,xcart2xred,xred2xcart
-!!
 !! SOURCE
 
 subroutine erlxconv(hist,iexit,itime,itime_hist,ntime,tolmxde)
@@ -1262,12 +1240,6 @@ end subroutine mover
 !!
 !! OUTPUT
 !!  (only writing)
-!!
-!! PARENTS
-!!      m_mover
-!!
-!! CHILDREN
-!!      metric,wrtout,xcart2xred,xred2xcart
 !!
 !! SOURCE
 
@@ -1527,12 +1499,6 @@ subroutine prtxfase(ab_mover,hist,itime,iout,pos)
 !! OUTPUT
 !!  tag = The string to put for each atom
 !!
-!! PARENTS
-!!      m_mover
-!!
-!! CHILDREN
-!!      metric,wrtout,xcart2xred,xred2xcart
-!!
 !! SOURCE
 
 subroutine gettag(atlist,index,natom,prtallatoms,tag)
@@ -1581,12 +1547,6 @@ subroutine gettag(atlist,index,natom,prtallatoms,tag)
 !!
 !! OUTPUT
 !!  tag = The string to put for aech atom
-!!
-!! PARENTS
-!!      m_mover
-!!
-!! CHILDREN
-!!      metric,wrtout,xcart2xred,xred2xcart
 !!
 !! SOURCE
 
@@ -1656,12 +1616,6 @@ end subroutine prtxfase
 !!  -- only printing --
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
-!!      m_mover
-!!
-!! CHILDREN
-!!      metric,wrtout,xcart2xred,xred2xcart
 !!
 !! SOURCE
 

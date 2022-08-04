@@ -12,10 +12,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -140,14 +136,6 @@ contains
 !!         dcwavef is delta_Psi(1)=-1/2.Sum_{j}[<C0_k+q_j|S(1)|C0_k_i>.|C0_k+q_j>]
 !!         see PRB 78, 035105 (2008) [[cite:Audouze2008]], Eq. (42)
 !!         input if usedcwavef=1, output if usedcwavef=2
-!!
-!! PARENTS
-!!      m_dfpt_vtowfk,m_sigmaph
-!!
-!! CHILDREN
-!!      cg_precon,cg_zaxpy,cg_zcopy,dotprod_g,getdc1,getgh1c,getghc
-!!      pawcprj_alloc,pawcprj_axpby,pawcprj_free,pawcprj_set_zero,projbd
-!!      sqnorm_g,timab,wrtout,xmpi_bcast,xmpi_sum
 !!
 !! SOURCE
 

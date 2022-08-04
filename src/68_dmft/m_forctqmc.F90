@@ -15,10 +15,6 @@
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -94,13 +90,6 @@ contains
 !!  green <type(green_type)>= green function
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_dmft
-!!
-!! CHILDREN
-!!      ctqmc_triqs_run,flush_unit,invoke_python_triqs,jbessel,sbf8
-!!      vee_ndim2tndim_hu_r,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -1759,13 +1748,6 @@ end subroutine qmc_prep_ctqmc
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_forctqmc
-!!
-!! CHILDREN
-!!      ctqmc_triqs_run,flush_unit,invoke_python_triqs,jbessel,sbf8
-!!      vee_ndim2tndim_hu_r,wrtout,xmpi_barrier
-!!
 !! SOURCE
 
 subroutine testcode_ctqmc_b(energy_level,hybri_coeff,weiss_for_rot,dmftqmc_l,fw1_nd,levels_ctqmc,&
@@ -1868,13 +1850,6 @@ end subroutine testcode_ctqmc_b
 !!  gw_tmp_nd
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_forctqmc
-!!
-!! CHILDREN
-!!      ctqmc_triqs_run,flush_unit,invoke_python_triqs,jbessel,sbf8
-!!      vee_ndim2tndim_hu_r,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -2150,13 +2125,6 @@ end subroutine testcode_ctqmc
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_forctqmc
-!!
-!! CHILDREN
-!!      ctqmc_triqs_run,flush_unit,invoke_python_triqs,jbessel,sbf8
-!!      vee_ndim2tndim_hu_r,wrtout,xmpi_barrier
-!!
 !! SOURCE
 
 subroutine ctqmcoutput_to_green(green,paw_dmft,gtmp_nd,gw_tmp_nd,gtmp,gw_tmp,iatom,leg_measure,opt_nondiag)
@@ -2287,13 +2255,6 @@ end subroutine ctqmcoutput_to_green
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_forctqmc
-!!
-!! CHILDREN
-!!      ctqmc_triqs_run,flush_unit,invoke_python_triqs,jbessel,sbf8
-!!      vee_ndim2tndim_hu_r,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -2465,13 +2426,6 @@ end subroutine ctqmcoutput_printgreen
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_forctqmc
-!!
-!! CHILDREN
-!!      ctqmc_triqs_run,flush_unit,invoke_python_triqs,jbessel,sbf8
-!!      vee_ndim2tndim_hu_r,wrtout,xmpi_barrier
 !!
 !! SOURCE
 

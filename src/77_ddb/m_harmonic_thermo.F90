@@ -12,10 +12,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -82,12 +78,6 @@ contains
 !!
 !! NOTES
 !! dosinc=increment between the channels for the phonon DOS in cm-1
-!!
-!! PARENTS
-!!      anaddb
-!!
-!! CHILDREN
-!!      end_sortph,ifc%fourq,matr3inv,mkrdim,smpbz,sortph,symkpt,wrtout
 !!
 !! SOURCE
 
