@@ -3106,7 +3106,6 @@ subroutine matr3eigval(eigval,matr)
 end subroutine matr3eigval
 !!***
 
-
 !!****f* ABINIT/jacobi
 !! NAME
 !!  jacobi

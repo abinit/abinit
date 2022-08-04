@@ -186,6 +186,9 @@ module m_slk
    procedure :: loc2gcol => slk_matrix_loc2gcol
     ! Determine the global (row|column) index from the local index
 
+   procedure :: get_head_and_wings => slk_get_head_and_wings
+   !procedure :: set_head_and_wings => slk_set_head_and_wings
+
    procedure :: copy => matrix_scalapack_copy
     ! Copy object
 
@@ -664,6 +667,79 @@ subroutine slkmat_print(mat, header, unit, prtvol)
  !if (prtvol > 10) call mat%write(unit)
 
 end subroutine slkmat_print
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_slk/slk_get_head_and_wings
+!! NAME
+!!  slk_get_head_and_wings
+!!
+!! FUNCTION
+!!  Return global arrays with the head and the wings of the matrix.
+!!  If call_mpi if False, global MPI sum is postoponed.
+!!  Useful to reduce the number of MPI calls if one has to operate on multiple matrices.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine slk_get_head_and_wings(mat, head, low_wing, up_wing, call_mpi)
+
+!Arguments ------------------------------------
+ class(matrix_scalapack),intent(in) :: mat
+ complex(dp),intent(out) :: head, low_wing(mat%sizeb_global(1)), up_wing(mat%sizeb_global(2))
+ logical,intent(in) :: call_mpi
+
+!Local variables-------------------------------
+ integer :: ierr, il_g1, il_g2, iglob1, iglob2
+ logical :: is_cplx
+
+! *********************************************************************
+
+ head = zero; low_wing = zero; up_wing = zero
+
+ is_cplx = allocated(mat%buffer_cplx)
+
+ do il_g2=1,mat%sizeb_local(2)
+   iglob2 = mat%loc2gcol(il_g2)
+   do il_g1=1,mat%sizeb_local(1)
+     iglob1 = mat%loc2grow(il_g1)
+
+     if (iglob1 == 1 .or. iglob2 == 1) then
+       if (iglob1 == 1 .and. iglob2 == 1) then
+         if (is_cplx) then
+           head = mat%buffer_cplx(il_g1, il_g2)
+         else
+           head = mat%buffer_real(il_g1, il_g2)
+         end if
+       else if (iglob1 == 1) then
+         if (is_cplx) then
+           up_wing(iglob2) = mat%buffer_cplx(il_g1, il_g2)
+         else
+           up_wing(iglob2) = mat%buffer_real(il_g1, il_g2)
+         end if
+       else if (iglob2 == 1) then
+         if (is_cplx) then
+           low_wing(iglob1) = mat%buffer_cplx(il_g1, il_g2)
+         else
+           low_wing(iglob1) = mat%buffer_real(il_g1, il_g2)
+         end if
+       end if
+     end if
+
+   end do
+ end do
+
+ if (call_mpi) then
+   call xmpi_sum(head, mat%processor%grid%ictxt, ierr)
+   call xmpi_sum(low_wing, mat%processor%grid%ictxt, ierr)
+   call xmpi_sum(up_wing, mat%processor%grid%ictxt, ierr)
+ end if
+
+end subroutine slk_get_head_and_wings
 !!***
 
 !----------------------------------------------------------------------

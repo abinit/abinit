@@ -49,7 +49,7 @@ module m_gsphere
  public :: table_gbig2kg       ! Associate the kg_k set of G-vectors with Gamma-centered G-sphere.
  public :: get_irredg          ! Given a set of G vectors, find the set of G"s generating the others by symmetry.
  public :: merge_kgirr         ! Merge a list of irreducible G vectors (see routine for more info)
- public :: setshells           ! Set consistently the number of shells, the number of plane-waves,  and the energy cut-off
+ public :: setshells           ! Set consistently the number of shells, the number of plane-waves, and the energy cut-off
  public :: kg_map              ! Compute the mapping between two lists of g-vectors.
  public :: make_istwfk_table
  public :: getkpgnorm          ! Compute the norms of the k+G vectors
@@ -77,6 +77,7 @@ module m_gsphere
 !! Note that, unlike the GS part, the basis set does not depend on the k-point.
 !!
 !! NOTES
+!!
 !! To indicate the indices in the arrays grottb, grottbm1 we use the following notation:
 !!
 !!  g defines the index of the reciprocal lattice vector in the array gvec

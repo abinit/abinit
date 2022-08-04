@@ -1005,7 +1005,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
 #ifdef __HAVE_GREENX
 if (dtset%gwr_ntau /= 0) then
-   call wrtout(std_out, "Using minimax mesh with ntau:", itoa(dtset%nfreqim))
+   call wrtout(std_out, sjoin("Using minimax mesh with ntau:", itoa(dtset%nfreqim)))
    gaps = ebands_get_gaps(ks_ebands, gap_err)
    ABI_CHECK(gap_err == 0, "gap_err")
    ! ================================
@@ -1253,7 +1253,7 @@ end if
      call write_screening("polarizability", unt_susc, Dtset%iomode, Ep%npwe, Ep%nomega, iqcalc, chi0)
 
      if (dtset%iomode == IO_MODE_ETSF .and. is_qeq0 == 1 .and. Ep%nI == 1 .and. Ep%nJ == 1) then
-       ! Write head and wings to file. See cchi0 for the equations neede to build chi0(q) for q--> 0.
+       ! Write head and wings to file. See cchi0 for the equations needed to build chi0(q) for q--> 0.
        wing_shape = "two, three, number_of_coefficients_dielectric_function, number_of_frequencies_dielectric_function"
        ncerr = nctk_def_arrays(unt_susc, [ &
          nctkarr_t("sus_head", "dp", "two, three, three, number_of_frequencies_dielectric_function"),   &
@@ -1264,20 +1264,20 @@ end if
 
        NCF_CHECK(nctk_set_datamode(unt_susc))
        NCF_CHECK(nf90_put_var(unt_susc, nctk_idname(unt_susc, "sus_head"), c2r(chi0_head)))
-       ABI_MALLOC(rwork_wing, (2, 3, Ep%npwe * Ep%nI, Ep%nomega))
 
+       ABI_MALLOC(rwork_wing, (2, 3, Ep%npwe * Ep%nI, Ep%nomega))
        do iomega=1,Ep%nomega
          do ig=1, Ep%npwe * Ep%nI
-           rwork_wing(1, :,ig,iomega) = real(chi0_lwing(ig,iomega,:))
-           rwork_wing(2, :,ig,iomega) = aimag(chi0_lwing(ig,iomega,:))
+           rwork_wing(1,:,ig,iomega) = real(chi0_lwing(ig,iomega,:))
+           rwork_wing(2,:,ig,iomega) = aimag(chi0_lwing(ig,iomega,:))
          end do
        end do
        NCF_CHECK(nf90_put_var(unt_susc, nctk_idname(unt_susc, "sus_lower_wing"), rwork_wing))
 
        do iomega=1,Ep%nomega
          do ig=1, Ep%npwe * Ep%nI
-           rwork_wing(1, :,ig,iomega) = real(chi0_uwing(ig,iomega,:))
-           rwork_wing(2, :,ig,iomega) = aimag(chi0_uwing(ig,iomega,:))
+           rwork_wing(1,:,ig,iomega) = real(chi0_uwing(ig,iomega,:))
+           rwork_wing(2,:,ig,iomega) = aimag(chi0_uwing(ig,iomega,:))
          end do
        end do
        NCF_CHECK(nf90_put_var(unt_susc, nctk_idname(unt_susc, "sus_upper_wing"), rwork_wing))

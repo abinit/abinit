@@ -2035,9 +2035,7 @@ subroutine rpa_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0,my_nqlwl,dim_wing,chi0_head,ch
 
  end do !iqlwl
 
- if (allocated(chi0_save))  then
-   ABI_FREE(chi0_save)
- end if
+ ABI_SFREE(chi0_save)
 
 end subroutine rpa_symepsm1
 !!***
