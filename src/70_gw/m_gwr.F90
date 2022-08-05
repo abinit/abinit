@@ -1834,7 +1834,6 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
          else
            ABI_WARNING("Metallic system of semiconductor with Fermi level inside bands!!!!")
          end if
-         !if (itau == 1) print *, "ib gt_cfact:", band, gt_cfact
 
          ABI_CHECK(wfd%get_wave_ptr(band, ik_ibz, spin, wave, msg) == 0, msg)
 
@@ -2014,13 +2013,15 @@ subroutine gwr_rotate_gt(gwr, my_ikf, my_it, my_is, desc_kbz, gt_pm)
 
  ! From:
  !
- !  u_{Sk}(Sg) = e^{-i(Sk+g).tnon} u_k(g)
+ !      u_{Sk}(Sg) = e^{-i(Sk+g).tnon} u_k(g)
  !
- !  u_{k+g0}(g-g0) = u_k(g)
+ ! and
+ !
+ !      u_{k+g0}(g-g0) = u_k(g)
  !
  ! one obtains:
  !
- ! G_{Sk+g0}(Sg-g0,Sg'-g0) = e^{-i tnon.(g-g')} G_k{g,g'}
+ !      G_{Sk+g0}(Sg-g0,Sg'-g0) = e^{-i tnon.(g-g')} G_k{g,g'}
 
  ABI_CHECK(trev_k == 0, "green: trev_k /= 0 not yet coded")
 
@@ -3669,7 +3670,7 @@ subroutine gwr_build_sigmac(gwr)
  integer :: my_iqf, iq_ibz, iq_bz, itau, ierr, ibc, jb, bmin, bmax, band ! col_bsize, npwsp, ib1, ib2,
  integer :: my_ikf, ipm, ik_bz, ig, ikcalc, uc_ir, ncid ! my_iqi,
  real(dp) :: cpu_tau, wall_tau, gflops_tau, cpu_all, wall_all, gflops_all, sck_ucvol, scq_ucvol  !, spin_fact
- real(dp) :: max_abs_imag_wt
+ real(dp) :: max_abs_imag_wct
  !logical :: k_is_gamma !, q_is_gamma
  character(len=500) :: msg
  type(desc_t), pointer :: desc_q, desc_k
@@ -3755,7 +3756,7 @@ subroutine gwr_build_sigmac(gwr)
  ! Diagonal matrix elements Sigmac_(itau) in the KS basis set.
  ABI_CALLOC(sigc_it_diag_kcalc, (2, gwr%ntau, gwr%max_nbcalc, gwr%nkcalc, gwr%nsppol))
 
- max_abs_imag_wt = zero
+ max_abs_imag_wct = zero
 
  do my_is=1,gwr%my_nspins
    spin = gwr%my_spins(my_is)
@@ -3868,9 +3869,8 @@ subroutine gwr_build_sigmac(gwr)
        call wt_plan_gp2rp%execute_ip_dpc(wct_scbox)
        wct_scbox = wct_scbox * (sc_nfft / scq_ucvol)
        !print *, "W(r,r):", wct_scbox(uc_ir)
-
        !print *, "Maxval abs imag G:", maxval(abs(aimag(gt_scbox)))
-       max_abs_imag_wt = max(max_abs_imag_wt, maxval(abs(aimag(wct_scbox))))
+       max_abs_imag_wct = max(max_abs_imag_wct, maxval(abs(aimag(wct_scbox))))
 !DEBUG
 !      wct_scbox = real(wct_scbox)
 !END DEBUG
@@ -3907,7 +3907,7 @@ subroutine gwr_build_sigmac(gwr)
    ABI_FREE(uc_psi_bk)
  end do ! my_is
 
- call wrtout(std_out, sjoin("Maxval abs imag W:", ftoa(max_abs_imag_wt)))
+ call wrtout(std_out, sjoin("Maxval abs imag W:", ftoa(max_abs_imag_wct)))
 
  ABI_FREE(gt_scbox)
  ABI_FREE(wct_scbox)

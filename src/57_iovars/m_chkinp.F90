@@ -736,7 +736,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 
 !  ecutsigx
 !  @MG FIXME reinstate this check, after having rewritten FFT treatment in GW
-   if( ANY( optdriver==(/RUNL_SIGMA/) ) .and..FALSE.)then
+   if( ANY( optdriver == [RUNL_SIGMA] ) .and..FALSE.)then
      call chkdpr(0,0,cond_string,cond_values,ierr,'ecutsigx',dt%ecutsigx,1,0.0_dp,iout)
      if(dt%fftgw<20)then
        if(dt%ecutwfn<dt%ecutsigx-tol8)then
@@ -750,7 +750,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      end if
    end if
 
-   if ( optdriver==RUNL_BSE) then
+   if ( optdriver == RUNL_BSE) then
      ! Check for BSE calculations that are not implemented.
      if (dt%nspinor == 2) then
        ABI_ERROR_NOSTOP("BSE with nspinor 2 not implemented", ierr)
@@ -908,7 +908,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        ABI_CHECK(dt%ph_nqpath > 0, "ph_nqpath must be specified when eph_task in [-5]")
      end if
      !if (dt%eph_task == -4 .and. dt%occopt /= 3) then
-     !  ABI_ERROR_NOSTOP("eph_task -4 required occopt 3 in the input file (Fermi-Dirac with physical Temperature!", ierr)
+     !  ABI_ERROR_NOSTOP("eph_task -4 requires occopt 3 in the input file (Fermi-Dirac with physical Temperature!", ierr)
      !end if
      if (dt%eph_fermie /= zero .and. nint(dt%tmesh(3)) /= 1) then
        ABI_ERROR_NOSTOP("eph_fermie does not support multiple temperatures in tmesh !", ierr)
@@ -1051,19 +1051,17 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      ! getwfk / getwfk_filepath / irdwfk
      if (dt%getwfk == 0 .and. dt%irdwfk == 0 .and. dt%getwfk_filepath==ABI_NOFILE .and. dt%td_restart==0) then
        write(msg, '(3a)' ) &
-       & 'Initial KS orbitals need to be read in WFK file for RT-TDDFT runs!',ch10,&
-       & 'Action: set irdwfk or getwfk /= 0 or specify the WFK filename using getwfk_filepath.'
+        'Initial KS orbitals need to be read in WFK file for RT-TDDFT runs!',ch10,&
+        'Action: set irdwfk or getwfk /= 0 or specify the WFK filename using getwfk_filepath.'
        ABI_ERROR_NOSTOP(msg, ierr)
      endif
      ! usewvl
      if (dt%usewvl /= 0) then
-        write(msg,'(a)') 'RT-TDDFT and wavelets are not compatible, set usewvl to 0.'
-        ABI_ERROR_NOSTOP(msg, ierr)
+        ABI_ERROR_NOSTOP('RT-TDDFT and wavelets are not compatible, set usewvl to 0.', ierr)
      endif
      ! nimage
      if (dt%nimage > 1) then
-        write(msg,'(a)') 'RT-TDDFT and multiple images are not compatible, set nimage to 1.'
-        ABI_ERROR_NOSTOP(msg, ierr)
+        ABI_ERROR_NOSTOP('RT-TDDFT and multiple images are not compatible, set nimage to 1.', ierr)
      endif
      ! tfkinfunc
      if (dt%tfkinfunc == 2) then
@@ -1073,33 +1071,27 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      endif
      ! positron
      if (dt%positron /= 0) then
-        write(msg,'(a)') 'RT-TDDFT and Positron are not compatible, set positron to 0.'
-        ABI_ERROR_NOSTOP(msg, ierr)
+        ABI_ERROR_NOSTOP('RT-TDDFT and Positron are not compatible, set positron to 0.', ierr)
      endif
      ! usefock
      if (dt%usefock==1) then
-        write(msg,'(a)') 'RT-TDDFT and Exact exchange are not compatible, set usefock to 0.'
-        ABI_ERROR_NOSTOP(msg, ierr)
+        ABI_ERROR_NOSTOP('RT-TDDFT and Exact exchange are not compatible, set usefock to 0.', ierr)
      end if
      ! usedmft
      if (dt%usedmft /= 0) then
-        write(msg,'(a)') 'RT-TDDFT and DFT+DMFT are not compatible, set usedmft to 0.'
-        ABI_ERROR_NOSTOP(msg, ierr)
+        ABI_ERROR_NOSTOP('RT-TDDFT and DFT+DMFT are not compatible, set usedmft to 0.', ierr)
      endif
      ! usepawu
      if (dt%usepawu /= 0) then
-        write(msg,'(a)') 'RT-TDDFT with DFT+U has not been tested yet, set usepawu to 0.'
-        ABI_ERROR_NOSTOP(msg, ierr)
+        ABI_ERROR_NOSTOP('RT-TDDFT with DFT+U has not been tested yet, set usepawu to 0.', ierr)
      endif
      ! usekden
      if (dt%usekden==1) then
-        write(msg,'(a)') 'RT-TDDFT with mGGA has not been tested yet, set usekden to 0.'
-        ABI_ERROR_NOSTOP(msg, ierr)
+        ABI_ERROR_NOSTOP('RT-TDDFT with mGGA has not been tested yet, set usekden to 0.', ierr)
      end if
      ! vdw_xc
      if (dt%vdw_xc /= 0) then
-        write(msg,'(a)') 'RT-TDDFT with VDW corrected functionals has not been tested yet, set vdw_xc to 0.'
-        ABI_ERROR_NOSTOP(msg, ierr)
+        ABI_ERROR_NOSTOP('RT-TDDFT with VDW corrected functionals has not been tested yet, set vdw_xc to 0.', ierr)
      endif
      !TODO FB: Should probably be made possible later
      ! useextfpmd
