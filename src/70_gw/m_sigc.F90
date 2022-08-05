@@ -545,8 +545,9 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  endif
  ABI_MALLOC(omegame0i,(nomega_tot))
 
- ! Here we divide the states where the QP energies are required into complexes. Note however that this approach is not
- ! based on group theory, and it might lead to spurious results in case of accidental degeneracies.
+ ! Here we divide the states where the QP energies are required into degenerate groups
+ ! Note however that this approach is not based on group theory, and it might lead to
+ ! spurious results in case of accidental degeneracies.
  nq_summed=Kmesh%nbz
  if (Sigp%symsigma > 0) then
    call Ltg_k%print(std_out, Dtset%prtvol, mode_paral='COLL')
@@ -1222,7 +1223,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  sigcme_tmp = sigcme_tmp /(Cryst%ucvol*Kmesh%nbz)
  sigc       = sigc       /(Cryst%ucvol*Kmesh%nbz)
 
- ! If we have summed over the IBZ_q now we have to average over complexes ===
+ ! If we have summed over the IBZ_q now we have to average over degenerate states
  ! Presently only diagonal terms are considered
  ! TODO QP-SCGW required a more involved approach, there is a check in sigma
  ! TODO it does not work if nspinor==2.

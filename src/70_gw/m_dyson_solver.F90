@@ -61,7 +61,7 @@ CONTAINS  !====================================================================
 !!  is linearly expanded around the previous single-particle energy (KS energy if one-shot)
 !!  and the derivative is evaluated by finite differences.
 !!  In the second method (AC), the values of the self-energy operator on the real axis are obtained
-!!  by means of an analitic continuation based on the Pade extrapolation.
+!!  by means of an analytic continuation based on the Pade extrapolation.
 !!
 !! INPUTS
 !!  ikcalc=Index of the considered k-point in the Sigp%kptgw2bz array.

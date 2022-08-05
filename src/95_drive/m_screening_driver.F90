@@ -1082,7 +1082,7 @@ end if
 
  write(msg,'(a,f12.1,a)')' Memory required for chi0 matrix= ',two*gwpc*Ep%npwe**2*Ep%nI*Ep%nJ*Ep%nomega*b2Mb," [Mb]."
  call wrtout(std_out, msg)
- ABI_MALLOC_OR_DIE(chi0,(Ep%npwe*Ep%nI,Ep%npwe*Ep%nJ,Ep%nomega), ierr)
+ ABI_MALLOC_OR_DIE(chi0, (Ep%npwe*Ep%nI,Ep%npwe*Ep%nJ,Ep%nomega), ierr)
 !
 !============================== END OF THE INITIALIZATION PART ===========================
 !
@@ -1433,11 +1433,11 @@ end if
    ABI_FREE(chi0_uwing)
    ABI_FREE(chi0_head)
 
-   if (my_rank==master .and. is_qeq0==1) then
+   if (my_rank == master .and. is_qeq0==1) then
      call spectra%repr(msg)
      call wrtout([ab_out, std_out], msg)
 
-     if (Ep%nomegaer>2) then
+     if (Ep%nomegaer > 2) then
        call spectra%write(W_EELF  ,Dtfil%fnameabo_eelf)
        call spectra%write(W_EM_LF ,Dtfil%fnameabo_em1_lf)
        call spectra%write(W_EM_NLF,Dtfil%fnameabo_em1_nlf)

@@ -1591,11 +1591,11 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  do spin=1,Sigp%nsppol
    do ik=1,Kmesh%nibz
      do ib=1,Sigp%nbnds
-       Sr%e0 (ib,ik,spin)=qp_ebands%eig(ib,ik,spin)
-       Sr%egw(ib,ik,spin)=qp_ebands%eig(ib,ik,spin)
+       Sr%e0 (ib,ik,spin) = qp_ebands%eig(ib,ik,spin)
+       Sr%egw(ib,ik,spin) = qp_ebands%eig(ib,ik,spin)
      end do
-     Sr%e0gap(ik,spin)=zero
-     ks_iv=ks_vbik(ik,spin)
+     Sr%e0gap(ik,spin) = zero
+     ks_iv = ks_vbik(ik, spin)
      if (Sigp%nbnds>=ks_iv+1) Sr%e0gap(ik,spin)=Sr%e0(ks_iv+1,ik,spin)-Sr%e0(ks_iv,ik,spin)
    end do
  end do

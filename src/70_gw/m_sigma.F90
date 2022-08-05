@@ -100,11 +100,11 @@ MODULE m_sigma
 
   real(dp),allocatable :: degwgap(:,:)
   ! (nkibz, nsppol)
-  ! Difference btw the QP and the KS optical gap.
+  ! Difference btw the QP and the KS direct gap.
 
   real(dp),allocatable :: egwgap(:,:)
   ! (nkibz,nsppol))
-  ! QP optical gap at each k-point and spin.
+  ! QP direct gap at each k-point and spin.
 
   real(dp),allocatable :: en_qp_diago(:,:,:)
   ! (nbnds,nkibz, nsppol))

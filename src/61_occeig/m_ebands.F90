@@ -1543,18 +1543,7 @@ pure function ebands_get_valence_idx(ebands, tol_fermi) result(val_idx)
 
  do spin=1,ebands%nsppol
    do ikpt=1,ebands%nkpt
-   ! CP modified
-   !  nband_k = ebands%nband(ikpt+(spin-1)*ebands%nkpt)
-   !  idx = 0
-   !  do band=1,nband_k
-   !    if (ebands%eig(band,ikpt,spin) > ebands%fermie + abs(tol_)) then
-   !      idx = band; exit
-   !    end if
-   !  end do
-   !  val_idx(ikpt,spin) = idx - 1
-   !  if (idx == 1) val_idx(ikpt, spin) = idx
-   !  if (idx == 0) val_idx(ikpt, spin) = nband_k
-      if (ebands%occopt==9) then
+      if (ebands%occopt == 9) then
          val_idx(ikpt,spin) = ebands%ivalence
       else
          nband_k = ebands%nband(ikpt+(spin-1)*ebands%nkpt)
@@ -1568,7 +1557,6 @@ pure function ebands_get_valence_idx(ebands, tol_fermi) result(val_idx)
          if (idx == 1) val_idx(ikpt, spin) = idx
          if (idx == 0) val_idx(ikpt, spin) = nband_k
       end if
-   ! End CP modified
    end do
  end do
 
