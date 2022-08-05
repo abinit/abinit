@@ -4700,6 +4700,7 @@ subroutine d3lwsym(blkflg,d3,has_strain,indsym,mpert,natom,nsym,symrec,symrel,sy
  end do  ! close loop over ithree
 
 end subroutine d3lwsym
+!!***
 
 !----------------------------------------------------------------------
 
