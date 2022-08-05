@@ -467,7 +467,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
  ABI_FREE(bbp_mask)
 
  write(msg,'(a,i0,a)')" Will sum ",my_nbbpks," (b,b',k,s) states in chi0q0."
- call wrtout(std_out,msg,'PERS')
+ call wrtout(std_out, msg)
 
  SELECT CASE (Ep%spmeth)
  CASE (0)
@@ -504,9 +504,9 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
 
    memreq = two*gwpc*Ep%npwe**2*(my_wr-my_wl+1)*b2Gb
    write(msg,'(a,f10.4,a)')' memory required per spectral point: ',two*gwpc*Ep%npwe**2*b2Mb,' [Mb]'
-   call wrtout(std_out,msg,'PERS')
+   call wrtout(std_out, msg)
    write(msg,'(a,f10.4,a)')' memory required by sf_chi0q0:       ',memreq,' [Gb]'
-   call wrtout(std_out,msg,'PERS')
+   call wrtout(std_out, msg)
    if (memreq > two) then
      ABI_WARNING(' Memory required for sf_chi0q0 is larger than 2.0 Gb!')
    end if
@@ -526,7 +526,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
  ABI_MALLOC(vkbr,(Kmesh%nibz))
  gradk_not_done=.TRUE.
 
- write(msg,'(a,i6,a)')' Calculation status ( ',nkpt_summed,' to be completed):'
+ write(msg,'(a,i0,a)')' Calculation status: ',nkpt_summed, ' k-points to be completed'
  call wrtout(std_out, msg)
  !
  ! ============================================
@@ -547,7 +547,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
      if (ALL(bbp_ks_distrb(:,:,ik_bz,spin) /= Wfd%my_rank)) CYCLE
 
      write(msg,'(2(a,i4),a,i2,a,i3)')' ik= ',ik_bz,'/',Kmesh%nbz,' spin=',spin,' done by mpi rank:',Wfd%my_rank
-     call wrtout(std_out,msg,'PERS')
+     call wrtout(std_out, msg)
 
      ! Get ik_ibz, non-symmorphic phase and symmetries from ik_bz.
      call kmesh%get_BZ_item(ik_bz,kbz,ik_ibz,isym_k,itim_k,ph_mkt)
@@ -1333,7 +1333,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
  ABI_FREE(bbp_mask)
 
  write(msg,'(a,i0,a)')" Will sum ",my_nbbpks," (b,b',k,s) states in chi0."
- call wrtout(std_out,msg,'PERS')
+ call wrtout(std_out, msg)
 
  if (Psps%usepaw==1) then
    ABI_MALLOC(Pwij,(Psps%ntypat))
@@ -1366,9 +1366,9 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
 
    memreq = two*gwpc*Ep%npwe**2*(my_wr-my_wl+1)*b2Gb
    write(msg,'(a,f10.4,a)')' memory required per spectral point: ',two*gwpc*Ep%npwe**2*b2Mb,' [Mb]'
-   call wrtout(std_out,msg,'PERS')
+   call wrtout(std_out,msg)
    write(msg,'(a,f10.4,a)')' memory required by sf_chi0: ',memreq,' [Gb]'
-   call wrtout(std_out,msg,'PERS')
+   call wrtout(std_out,msg)
    if (memreq > two) then
      ABI_WARNING(' Memory required for sf_chi0 is larger than 2.0 Gb!')
    end if
@@ -1385,7 +1385,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
    call Ltg_q%print(std_out, Dtset%prtvol, mode_paral='COLL')
  end if
 
- write(msg,'(a,i6,a)')' Calculation status : ',nkpt_summed,' to be completed '
+ write(msg,'(a,i0,a)')' Calculation status: ',nkpt_summed,' k-points to be completed'
  call wrtout(std_out, msg)
 
  ! ============================================
@@ -1445,7 +1445,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
      if (ALL(bbp_ks_distrb(:,:,ik_bz,spin) /= Wfd%my_rank)) CYCLE
 
      write(msg,'(2(a,i4),a,i2,a,i3)')' ik= ',ik_bz,'/',Kmesh%nbz,' spin= ',spin,' done by mpi rank:',Wfd%my_rank
-     call wrtout(std_out,msg,'PERS')
+     call wrtout(std_out,msg)
 
      ! Get ik_ibz, non-symmorphic phase, ph_mkt, and symmetries from ik_bz.
      call kmesh%get_BZ_item(ik_bz,kbz,ik_ibz,isym_k,itim_k,ph_mkt,umklp_k,isirred_k)
@@ -2322,7 +2322,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
      if (my_nband==0) CYCLE
 
      write(msg,'(2(a,i4),a,i2,a,i3)')' ik = ',ik_bz,' / ',Kmesh%nbz,' spin = ',spin,' done by processor ',Wfd%my_rank
-     call wrtout(std_out,msg,'PERS')
+     call wrtout(std_out, msg)
 
      do lbidx=1,my_nband
        ! Loop over bands treated by this node.

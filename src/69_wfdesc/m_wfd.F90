@@ -3699,7 +3699,8 @@ subroutine wfd_change_ngfft(Wfd, Cryst, Psps, new_ngfft)
  if (all(Wfd%ngfft(1:3) == new_ngfft(1:3)) ) RETURN ! Nothing to do.
 
  if (Wfd%prtvol > 0) then
-   write(msg,"(a,3(i0,1x),a,3(i0,1x),a)")" Changing FFT mesh: [",Wfd%ngfft(1:3),"] ==> [",new_ngfft(1:3),"]"
+   write(msg,"(a,3(i0,1x),a,3(i0,1x),a)") &
+     " Changing FFT mesh for wavefunctions: [",Wfd%ngfft(1:3),"] ==> [",new_ngfft(1:3),"]"
    call wrtout(std_out, msg)
  end if
 

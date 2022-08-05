@@ -2695,11 +2695,11 @@ subroutine littlegroup_print(Ltg,unit, prtvol, mode_paral)
  my_prtvol=0      ; if (PRESENT(prtvol    )) my_prtvol=prtvol
  my_mode  ='COLL' ; if (PRESENT(mode_paral)) my_mode  =mode_paral
 
- write(msg,'(4a,3es16.8,2a,i5,a,i5,2a,i3,a,i3)')ch10,&
-  ' ==== Little Group Info ==== ',ch10,&
-  '  External point ',Ltg%ext_pt,ch10,&
-  '  Number of points in the IBZ defined by little group  ',Ltg%nibz_Ltg,'/',Ltg%nbz,ch10,&
-  '  Number of operations in the little group : ',Ltg%nsym_Ltg,'/',Ltg%nsym_sg
+ write(msg,'(7a,i0,a,i0,2a,i0,a,i0)')ch10, &
+  ' ==== Little Group Info ==== ', ch10, &
+  '  External point: ',trim(ktoa(Ltg%ext_pt)), ch10, &
+  '  Number of points in the IBZ defined by little group:  ', Ltg%nibz_Ltg, '/', Ltg%nbz,ch10, &
+  '  Number of operations in the little group: ',Ltg%nsym_Ltg,'/',Ltg%nsym_sg
  call wrtout(my_unt,msg,my_mode)
 
  nop=0 ; nopg0=0
@@ -2742,7 +2742,7 @@ end subroutine littlegroup_print
 !!
 !! SOURCE
 
-function box_len(qpt,gprimd)
+function box_len(qpt, gprimd)
 
 !Arguments ------------------------------------
 !scalars
@@ -2759,18 +2759,18 @@ function box_len(qpt,gprimd)
 
 ! *************************************************************************
 
-!Compute reciprocal space metric
+ ! Compute reciprocal space metric
  gmet = MATMUL(TRANSPOSE(gprimd),gprimd)
 
-!Rotate the input q-point such that it is always in the first octant then normalize it.
-!Bravais lattices are invariant under inversion of any of the basis vectors.
+ ! Rotate the input q-point such that it is always in the first octant then normalize it.
+ ! Bravais lattices are invariant under inversion of any of the basis vectors.
  my_qpt = ABS(qpt)/normv(qpt,gmet,"G")
 
-!Check whether the q is along one of the reduced directions.
+ ! Check whether the q is along one of the reduced directions.
  idir=0; if (COUNT(ABS(qpt)<tol16) == 2) idir = imax_loc(ABS(qpt))
 
  if (idir/=0) then ! easy as q is along vector idir.
-   box_len =  normv(gprimd(:,idir),gmet,"G")
+   box_len =  normv(gprimd(:,idir), gmet, "G")
    RETURN
 
  else
@@ -2797,7 +2797,7 @@ function box_len(qpt,gprimd)
      if (x1<=one+tol16 .and. x2<=one+tol16) q0box=(/x1,x2,x3/)
    end if
 
-   if (ALL(q0box==(/-1,-1,-1/) )) then
+   if (ALL(q0box == [-1,-1,-1])) then
      ABI_BUG("Cannot found q0box")
    end if
 
