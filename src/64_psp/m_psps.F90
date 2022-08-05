@@ -192,6 +192,7 @@ subroutine psps_init_global(mtypalch, npsp, psps, pspheads)
  ABI_MALLOC(psps%title,(npsp))
  ABI_MALLOC(psps%zionpsp,(npsp))
  ABI_MALLOC(psps%znuclpsp,(npsp))
+ ABI_MALLOC(psps%rmatchpsp,(npsp))
  call psp2params_init(psps%gth_params, npsp)
 
  psps%filpsp(1:npsp)=pspheads(1:npsp)%filpsp
@@ -202,6 +203,7 @@ subroutine psps_init_global(mtypalch, npsp, psps, pspheads)
  psps%title(1:npsp)=pspheads(1:npsp)%title
  psps%zionpsp(1:npsp)=pspheads(1:npsp)%zionpsp
  psps%znuclpsp(1:npsp)=pspheads(1:npsp)%znuclpsp
+ psps%rmatchpsp(1:npsp)=pspheads(1:npsp)%rmatchpsp
 
  ! Transfer md5 checksum
  ABI_MALLOC(psps%md5_pseudos, (npsp))
@@ -529,6 +531,7 @@ subroutine psps_free(psps)
  ABI_SFREE(psps%title)
  ABI_SFREE(psps%zionpsp)
  ABI_SFREE(psps%znuclpsp)
+ ABI_SFREE(psps%rmatchpsp)
  ABI_SFREE(psps%algalch)
  ABI_SFREE(psps%mixalch)
  ABI_SFREE(psps%ekb)
@@ -671,6 +674,9 @@ subroutine psps_copy(pspsin, pspsout)
  end if
  if (allocated(pspsin%znucltypat)) then
    call alloc_copy(pspsin%znucltypat, pspsout%znucltypat)
+ end if
+ if (allocated(pspsin%rmatchpsp)) then
+   call alloc_copy(pspsin%rmatchpsp, pspsout%rmatchpsp)
  end if
 
  ! allocate and copy character strings
