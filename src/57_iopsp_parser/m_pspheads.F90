@@ -484,6 +484,9 @@ subroutine inpspheads(filnam, npsp, pspheads, ecut_tmp)
 
    ! Compute md5 checksum
    pspheads(ipsp)%md5_checksum = md5_sum_from_file(filnam(ipsp))
+   
+   ! Set matching radius (only available for PAW pseudopotentials for now)
+   pspheads(ipsp)%rmatchpsp = pspheads(ipsp)%pawheader%rpaw
  end do ! ipsp=1,npsp
 
  ! Note that mpsang is the max of 1+lmax, with minimal value 1 (even for local psps, at present)
