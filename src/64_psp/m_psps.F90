@@ -964,6 +964,7 @@ subroutine psps_ncwrite(psps, path)
  ncerr = nctk_def_arrays(ncid, [&
    nctkarr_t("ziontypat", "dp", "ntypat"), &
    nctkarr_t("znucltypat", "dp", "ntypat"), &
+   nctkarr_t("rmatchpsp", "dp", "ntypat"), &
    nctkarr_t("qgrid_vl", "dp", "mqgrid_vl"), &
    nctkarr_t("qgrid_ff", "dp", "mqgrid_ff"), &
    nctkarr_t("vlspl", "dp", "mqgrid_vl, two, ntypat"), &
@@ -993,6 +994,7 @@ subroutine psps_ncwrite(psps, path)
  NCF_CHECK(nf90_put_var(ncid, vid("useylm"), psps%useylm))
  NCF_CHECK(nf90_put_var(ncid, vid("ziontypat"), psps%ziontypat))
  NCF_CHECK(nf90_put_var(ncid, vid("znucltypat"), psps%znucltypat))
+ NCF_CHECK(nf90_put_var(ncid, vid("rmatchpsp"), psps%rmatchpsp))
  do ipsp=1,psps%npsp
    NCF_CHECK(nf90_put_var(ncid, vid("filpsp"), trim(psps%filpsp(ipsp)), start=[1, ipsp]))
    NCF_CHECK(nf90_put_var(ncid, vid("md5_pseudos"), trim(psps%md5_pseudos(ipsp)), start=[1, ipsp]))
