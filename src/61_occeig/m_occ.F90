@@ -783,7 +783,7 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
 
 !DEBUG
        write(std_out,'(a)') ' newocc : inside abs(stmbias) > tol10  section '
-       stop
+!      stop
 !ENDDEBUG
 
         ! CP added to prevent use with occopt = 9 so far
@@ -802,7 +802,7 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
 
 !DEBUG
      write(std_out,'(a)') ' newocc : before present(prtstm) section '
-     stop
+!    stop
 !ENDDEBUG
 
  !     Possibly filter a specific band contribution
@@ -823,7 +823,7 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
 
 !DEBUG
      write(std_out,'(a)') ' newocc : after present(prtstm) section '
-     stop
+!    stop
 !ENDDEBUG
 
        nelect_biased = abs(nelectmid - nelect_biased)
