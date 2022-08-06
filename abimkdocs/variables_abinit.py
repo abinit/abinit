@@ -15996,11 +15996,18 @@ Variable(
     mnemonics="PRinT the STM density",
     added_in_version="before_v9",
     text=r"""
-If set to 1 or a larger value, provide output of the electron density in real
+If set to 1, provide output of the electron density in real
 space rho(r), made only from the electrons close to the Fermi energy, in a
 range of energy (positive or negative), determined by the (positive or
 negative, but non-zero) value of the STM bias [[stmbias]].
-This is a very approximate way to obtain STM profiles: one can choose an
+Specifying a non-zero negative value is also allowed, and will produce also
+the output of an electron density in real space, like the above, but moreover
+will additionally filter it to have the contribution of one band only, 
+whose number is the absolute value of [[prtstm]]. Obviously abs([[prtstm]])
+must be smaller or equal to [[nband]].
+
+The electron density obtained from [[prtstm]]=1,
+is a very approximate way to obtain STM profiles: one can choose an
 equidensity surface, and consider that the STM tip will follow this surface.
 Such equidensity surface might be determined with the help of Cut3D, and
 further post-processing of it (to be implemented). The big approximations of
@@ -16009,11 +16016,16 @@ independent transfer matrix elements between the tip and the surface.
 The charge density is provided in units of electrons/Bohr^3. The name of the
 STM density file will be the root output name, followed by _STM. Like a _DEN
 file, it can be analyzed by cut3d.
+
+The negative values of [[prtstm]] allows one to perform a detailed band-by-band
+analysis of the [[prtstm]]=1 result.
+
 The file structure of this unformatted output file is described in [[help:abinit#denfile|this section]].
 For the STM charge density to be generated, one must give, as an input file,
 the converged wavefunctions obtained from a previous run, at exactly the same
 k-points and cut-off energy, self-consistently determined, using the
 occupation numbers from [[occopt]] = 7.
+
 In the run with positive [[prtstm]], one has to use:
 
   * positive [[iscf]]
@@ -16027,7 +16039,6 @@ Note that you might have to adjust the value of [[nband]] as well, for the
 treatment of unoccupied states, because the automatic determination of
 [[nband]] will often not include enough unoccupied states.
 When [[prtstm]] is non-zero, the stress tensor is set to zero.
-No output of _STM file is provided by [[prtstm]] lower or equal to 0.
 No other printing variables for density or potentials should be activated
 (e.g. [[prtden]] has to be set to zero).
 """,
