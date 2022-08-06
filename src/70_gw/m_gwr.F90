@@ -549,7 +549,7 @@ module m_gwr
    procedure :: get_green_gpr => gwr_get_green_gpr
     ! G_k(g,g') --> G_k(g',r) for each k in the BZ treated by this MPI proc for given spin and tau.
 
-   procedure :: get_gk_rpr => gwr_get_gk_rpr
+   procedure :: get_gk_rpr_pm => gwr_get_gk_rpr_pm
    ! Compute G_k(r',r) with (r, r') in the unit cell and k in the full BZ.
 
    procedure :: rotate_wct => gwr_rotate_wct
@@ -2173,16 +2173,13 @@ end subroutine gwr_get_green_gpr
 
 !----------------------------------------------------------------------
 
-!!****f* m_gwr/gwr_get_gk_rpr
+!!****f* m_gwr/gwr_get_gk_rpr_pm
 !! NAME
-!!  gwr_get_gk_rpr
+!!  gwr_get_gk_rpr_pm
 !!
 !! FUNCTION
 !!
-!!  Use FFTs to compute G_k(r',r) from G_k(g,g')
-!!
-!!  for k in the BZ and given spin and tau.
-!!
+!!  Use FFTs to compute G_k(r',r) from G_k(g,g') for k in the BZ and given spin and tau.
 !!  Note that output matrix is transposed.
 !!
 !! INPUTS
@@ -2191,12 +2188,12 @@ end subroutine gwr_get_green_gpr
 !!
 !! SOURCE
 
-subroutine gwr_get_gk_rpr(gwr, my_ikf, my_it, my_is, gk_rpr)
+subroutine gwr_get_gk_rpr_pm(gwr, my_ikf, my_it, my_is, gk_rpr_pm)
 
 !Arguments ------------------------------------
  class(gwr_t),intent(in) :: gwr
  integer,intent(in) :: my_ikf, my_it, my_is
- type(matrix_scalapack),intent(out) :: gk_rpr(2)
+ type(matrix_scalapack),intent(out) :: gk_rpr_pm(2)
 
 !Local variables-------------------------------
 !scalars
@@ -2251,18 +2248,78 @@ subroutine gwr_get_gk_rpr(gwr, my_ikf, my_it, my_is, gk_rpr)
      call fft_ur(desc_k%npw, gwr%g_nfft, gwr%nspinor, ndat1, &
                  gwr%g_mgfft, gwr%g_ngfft, desc_k%istwfk, desc_k%gvec, desc_k%gbound, &
                  gpr%buffer_cplx(:, ir1), &          ! in
-                 gk_rpr(ipm)%buffer_cplx(:, ir1))    ! out
+                 gk_rpr_pm(ipm)%buffer_cplx(:, ir1))    ! out
    end do
    call gpr%free()
    ! TODO: Rescale
-   ! gk_rpr(ipm)%buffer_cplx =
+   ! gk_rpr_pm(ipm)%buffer_cplx =
  end do ! ipm
 
  call slk_array_free(gt_pm)
 
- if (gwr%timeit) call cwtime_report(" gwr_get_gk_rpr:", cpu, wall, gflops)
+ if (gwr%timeit) call cwtime_report(" gwr_get_gk_rpr_pm:", cpu, wall, gflops)
 
-end subroutine gwr_get_gk_rpr
+end subroutine gwr_get_gk_rpr_pm
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_gwr/gwr_ggp_to_rpr
+!! NAME
+!!  gwr_ggp_to_rpr
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine gwr_ggp_to_rpr(gwr, desc, ggp, rpr)
+
+!Arguments ------------------------------------
+ class(gwr_t),intent(in) :: gwr
+ type(desc_t),intent(in) :: desc
+ type(matrix_scalapack),intent(in) :: ggp
+ type(matrix_scalapack),intent(out) :: rpr
+
+!Local variables-------------------------------
+!scalars
+ integer,parameter :: ndat1 = 1
+ integer :: ig2, npwsp, col_bsize, ir1
+ type(matrix_scalapack) :: rgp, gpr
+
+! *************************************************************************
+
+ ! Allocate rgp PBLAS matrix to store F(r,g')
+ npwsp = desc%npw * gwr%nspinor
+ col_bsize = npwsp / gwr%g_comm%nproc; if (mod(npwsp, gwr%g_comm%nproc) /= 0) col_bsize = col_bsize + 1
+ call rgp%init(gwr%g_nfft * gwr%nspinor, npwsp, gwr%g_slkproc, desc%istwfk, &
+               size_blocs=[gwr%g_nfft * gwr%nspinor, col_bsize])
+
+ do ig2=1,ggp%sizeb_local(2)
+   call fft_ug(desc%npw, gwr%g_nfft, gwr%nspinor, ndat1, &
+               gwr%g_mgfft, gwr%g_ngfft, desc%istwfk, desc%gvec, desc%gbound, &
+               ggp%buffer_cplx(:, ig2), & ! in
+               rgp%buffer_cplx(:, ig2))   ! out
+ end do ! ig2
+
+ ! F(r,g') --> F(g',r)
+ call rgp%ptrans("N", gpr)
+ call rgp%free()
+
+ ! F(g',r) -> F(r',r) and store results in rpr
+ do ir1=1,gpr%sizeb_local(2)
+   call fft_ur(desc%npw, gwr%g_nfft, gwr%nspinor, ndat1, &
+               gwr%g_mgfft, gwr%g_ngfft, desc%istwfk, desc%gvec, desc%gbound, &
+               gpr%buffer_cplx(:, ir1), &  ! in
+               rpr%buffer_cplx(:, ir1))    ! out
+ end do
+
+ call gpr%free()
+
+end subroutine gwr_ggp_to_rpr
 !!***
 
 !----------------------------------------------------------------------
@@ -2958,8 +3015,9 @@ subroutine gwr_build_tchi(gwr)
  integer :: sc_ngfft(18)
  integer,allocatable :: green_scg(:,:), chi_scg(:,:)
  real(dp) :: kk_bz(3), kpq_bz(3), qq_ibz(3) ! kk_ibz(3), qq_bz(3)
+ logical :: need_gt_kibz(gwr%nkibz), got_gt_kibz(gwr%nkibz)
  complex(dp),allocatable :: gt_scbox(:,:), chit_scbox(:)
- type(matrix_scalapack) :: gt_gpr(2, gwr%my_nkbz), chiq_gpr(gwr%my_nqibz), gk_rpr(2)
+ type(matrix_scalapack) :: gt_gpr(2, gwr%my_nkbz), chiq_gpr(gwr%my_nqibz), gk_rpr_pm(2)
  type(desc_t), target :: desc_mykbz(gwr%my_nkbz)
  type(fftbox_plan3_t) :: plan_gp2rp, plan_rp2gp
  complex(dp),allocatable :: cemiqr(:)
@@ -3171,10 +3229,9 @@ subroutine gwr_build_tchi(gwr)
         itau = gwr%my_itaus(my_it)
 
         ! Redistribute G_k in the IBZ so that each MPI proc can recostruct G in the BZ on the fly.
-        !need_kibz(gwr%nkibz)
-        !got_kibz(gwr%nkibz)
-        !call gwr%green_redistribute(my_it, my_is, need_kibz, got_kibz, "allocate')
-        !call gwr%green_redistribute(my_it, my_is, need_kibz, got_kibz, "free")
+        !need_gt_kibz
+        !call gwr%distrib_gt_kibz(itau, spin, need_kibz, got_kibz, "allocate')
+        !call gwr%distrib_gt_kibz(itau, spin, need_kibz, got_kibz, "free")
 
         do my_ikf=1,gwr%my_nkbz
           ik_bz = gwr%my_kbz_inds(my_ikf)
@@ -3182,8 +3239,7 @@ subroutine gwr_build_tchi(gwr)
 
           ! Use symmetries to get G_k from the corresponding image in the IBZ.
           ! G_k(g,g') --> G_k(r,r')
-          call gwr%get_gk_rpr(my_ikf, my_it, my_is, gk_rpr)
-          call slk_array_free(gk_rpr)
+          call gwr%get_gk_rpr_pm(my_ikf, my_it, my_is, gk_rpr_pm)
 
           do iq_ibz=1,gwr%nqibz
           !do my_iqi=1,gwr%my_nqibz
@@ -3191,64 +3247,15 @@ subroutine gwr_build_tchi(gwr)
             qq_ibz = gwr%qibz(:, iq_ibz)
             !iq_bz = gwr%my_qbz_inds(my_iqf)
             !qq_bz = gwr%qbz(:, iq_bz)
-            !associate (desc_q => gwr%tchi_desc_qibz(iq_ibz))
-
             kpq_bz = kk_bz + qq_ibz
             !ikpq_ibz = ??
             !kmq_bz = kk_bz - qq_ibz
             !ikmq_ibz = ??
-
-            ! Use symmetries to get G_kq from the corresponding image in the IBZ.
-            ! G_kq(g,g') --> G_kq(r,r')
-            !call gwr%get_gk_rpr(my_ikqf, my_it, my_is, gkq_rpr)
-            !call slk_array_free(gkq_rpr)
-
-            !tchi_rrp(my_iqi)%buffer_cplx = tchi(my_iqi)%buffer_cplx + gk_rpr%buffer_cplx * gkq_rpr%buffer_cplx
-
-            !desc_k = gwr%green_desc_kibz(ik_ibz)%rotate(symtab_k)
-            !desc_kpq = gwr%green_desc_kibz(ikpq_ibz)%rotate(symtab_kpq)
-
-            !gwr%gt_kibz(1, ik_ibz, itau, spin)%buffer_cplx(:,ig2)
-
-            !do ig2=1,ggp%sizeb_local(2)
-            !  call fft_ug(desc_k%npw, gwr%g_nfft, gwr%nspinor, ndat1, &
-            !              gwr%g_mgfft, gwr%g_ngfft, desc_k%istwfk, desc_k%gvec, desc_k%gbound, &
-            !              ggp%buffer_cplx(:, ig2),
-            !              rgp%buffer_cplx(:, ig2))
-            !end do ! ig2
-            !call rgp%ptrans("N", gpr)
-            !call rgp%free()
-
-            !do ir1=1,ggp%sizeb_local(2)
-            !  call fft_ug(desc_k%npw, gwr%g_nfft, gwr%nspinor, ndat1, &
-            !              gwr%g_mgfft, gwr%g_ngfft, desc_k%istwfk, desc_k%gvec, desc_k%gbound, &
-            !              gpr%buffer_cplx(:, ir1),
-            !              rpr%buffer_cplx(:, ir1))
-            !end do ! ir1
-            !call gpr%free()
-            !call rpr%ptrans("N", rrp)
-            !call rpr%free()
-
-            !call desc_k%free()
-            !call desc_kpq%free()
-
-            !my_nr = go_k_gpr%sizeb_local(2)
-            !do my_ir=1,my_nr
-            !   !chi_fft = go_rpr * ge_rpr
-            !   ! from r' to g'
-            !   !chi_rrp%buffer_cplx(:, my_ir) = gtk_rrp(1)%buffer_cplx(:, my_ir) * gtkq_rrp(2)%buffer_cplx(:, my_ir)
-            !end do
-
-            !call chi_gp_r%ptrans("N", chi_r_gp)
-            !call chi_gp_r%free()
-            !do ig2=1, chi_rp_g%sizeb_local(2)
-              !chi_r_gp%buffer_cplx(:, ig2)
-              !!gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx(:, ig2) = FFT_rg
-            !end do
-            !call chi_r_gp%free()
-            !end associate
           end do ! iq_ibz
         end do ! my_ikf
+
+        call slk_array_free(gk_rpr_pm)
+        !gwr%tchi_qibz(iq_ibz, itau, spin)
 
        write(msg,'(3(a,i0),a)')" My itau [", my_it, "/", gwr%my_ntau, "] (tot: ", gwr%ntau, ")"
        call cwtime_report(msg, cpu_tau, wall_tau, gflops_tau)
@@ -3284,6 +3291,30 @@ subroutine gwr_build_tchi(gwr)
 
 end subroutine gwr_build_tchi
 !!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_gwr/gwr_distrib_gt_kibz
+!! NAME
+!!  gwr_distrib_gt_kibz
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine gwr_distrib_gt_kibz(gwr)
+
+!Arguments ------------------------------------
+ class(gwr_t),target,intent(inout) :: gwr
+
+
+
+end subroutine gwr_distrib_gt_kibz
+
 
 !----------------------------------------------------------------------
 
@@ -3539,8 +3570,8 @@ subroutine gwr_build_wc(gwr)
        call wc%take_from(tmp_mat)
        call tmp_mat%free()
 
-       call wrtout(std_out, sjoin(" e-1 at q:", ktoa(qq_ibz), "i omega:", ftoa(gwr%iw_mesh(itau) * Ha_eV), "eV"))
-       call print_arr(wc%buffer_cplx, unit=std_out)
+       !call wrtout(std_out, sjoin(" e-1 at q:", ktoa(qq_ibz), "i omega:", ftoa(gwr%iw_mesh(itau) * Ha_eV), "eV"))
+       !call print_arr(wc%buffer_cplx, unit=std_out)
 
 #if 1
        ! Build Wc(q, iw) = [e^{-1}_q(g,g',iw) - delta_{gg'} v_q(g,g') by removing bare vc

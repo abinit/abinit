@@ -646,24 +646,24 @@ subroutine hscr_io(hscr, fform, rdwr, unt, comm, master, iomode)
      ])
      NCF_CHECK(ncerr)
 
-     ! MG: This part has been commented out.
      ! Add q-points for heads and wings for q-->0.
-     !if (hscr%nqlwl > 0) then
-     !  head_shape = "complex, number_of_spins, number_of_spins, number_of_frequencies_dielectric_function"
-     !  head_shape = trim(head_shape)//", number_of_qpoints_gamma_limit"
+     if (hscr%nqlwl > 0) then
+       !  MG: This part has been commented out as it's not used
+       !  head_shape = "complex, number_of_spins, number_of_spins, number_of_frequencies_dielectric_function"
+       !  head_shape = trim(head_shape)//", number_of_qpoints_gamma_limit"
 
-     !  wing_shape = "complex, number_of_coefficients_dielectric_function, number_of_spins, number_of_spins"
-     !  wing_shape = trim(wing_shape)//", number_of_frequencies_dielectric_function, number_of_qpoints_gamma_limit"
+       !  wing_shape = "complex, number_of_coefficients_dielectric_function, number_of_spins, number_of_spins"
+       !  wing_shape = trim(wing_shape)//", number_of_frequencies_dielectric_function, number_of_qpoints_gamma_limit"
 
-     !  ncerr = nctk_def_arrays(ncid, [&
-     !    nctkarr_t("dielectric_function_head", "dp", head_shape),&
-     !    nctkarr_t("dielectric_function_upper_wing", "dp", wing_shape),&
-     !    nctkarr_t("dielectric_function_lower_wing", "dp", wing_shape)], defmode=.True.)
-     !  NCF_CHECK(ncerr)
+       !  ncerr = nctk_def_arrays(ncid, [&
+       !    nctkarr_t("dielectric_function_head", "dp", head_shape),&
+       !    nctkarr_t("dielectric_function_upper_wing", "dp", wing_shape),&
+       !    nctkarr_t("dielectric_function_lower_wing", "dp", wing_shape)], defmode=.True.)
+       !  NCF_CHECK(ncerr)
 
-     !  NCF_CHECK(nctk_set_datamode(ncid))
-     !  NCF_CHECK(nf90_put_var(ncid, vid('qpoints_gamma_limit'), hscr%qlwl))
-     !end if
+       NCF_CHECK(nctk_set_datamode(ncid))
+       NCF_CHECK(nf90_put_var(ncid, vid('qpoints_gamma_limit'), hscr%qlwl))
+     end if
    else
      ABI_ERROR(sjoin('Unsupported iomode:',iomode2str(iomode)))
    end if
