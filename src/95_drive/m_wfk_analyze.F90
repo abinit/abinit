@@ -62,7 +62,7 @@ module m_wfk_analyze
  use m_pspini,          only : pspini
  use m_sigtk,           only : sigtk_kpts_in_erange
 
- use m_wfd_wannier,     only : wfd_run_wannier, wfd_mlwfovlp
+ use m_wfd_wannier,     only : wfd_run_wannier
 
  implicit none
 
@@ -351,6 +351,13 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
 
  case (WFK_TASK_CLASSIFY)
    ! Band classification.
+   if (my_rank == master) then
+     wfkfull_path = dtfil%fnameabo_wfk; if (dtset%iomode == IO_MODE_ETSF) wfkfull_path = nctk_ncify(wfkfull_path)
+     call wfk_tofullbz(wfk0_path, dtset, psps, pawtab, wfkfull_path)
+   end if
+   call xmpi_barrier(comm)
+
+
    call read_wfd()
 
    ABI_MALLOC(esymm,(wfd%nkibz,wfd%nsppol))
@@ -400,8 +407,27 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
 case (WFK_TASK_WANNIER)
    ! Construct Wannier function.
 
+  ! TODO: only when kpoint in IBZ
+  ! First generate WFK for fullBZ
+  !if (my_rank == master) then
+  !  wfkfull_path = dtfil%fnameabo_wfk; if (dtset%iomode == IO_MODE_ETSF) wfkfull_path = nctk_ncify(wfkfull_path)
+  !  call wfk_tofullbz(wfk0_path, dtset, psps, pawtab, wfkfull_path)
+  !end if
+  !call xmpi_barrier(comm)
+
    if (.True.) then
-      call read_wfd()
+      ABI_MALLOC(keep_ur, (ebands%mband, ebands%nkpt, ebands%nsppol))
+      ABI_MALLOC(bks_mask, (ebands%mband, ebands%nkpt, ebands%nsppol))
+      keep_ur = .False.; bks_mask = .True.
+      call wfd_init(wfd,cryst,pawtab,psps,keep_ur,ebands%mband,ebands%nband,ebands%nkpt,dtset%nsppol,bks_mask,&
+        dtset%nspden,dtset%nspinor,ecut_eff,dtset%ecutsm,dtset%dilatmx,wfk0_hdr%istwfk,ebands%kptns,ngfftc,&
+        dtset%nloalg,dtset%prtvol,dtset%pawprtvol,comm)
+
+      ABI_FREE(keep_ur)
+      ABI_FREE(bks_mask)
+
+      call wfd%read_wfk(wfk0_path,IO_MODE_MPI)
+
       call wfd_run_wannier(cryst=cryst, ebands=ebands,&
            & hdr=wfk0_hdr, mpi_enreg=mpi_enreg, &
            & ngfftc=ngfftc, ngfftf=ngfftf,  wfd=wfd, &

@@ -62,8 +62,8 @@ module m_mlwfovlp2
  use m_paw_overlap, only : smatrix_pawinit
  use m_evdw_wannier, only : evdw_wannier
  use m_fft,            only : fourwf
- use m_wfd, only: wfd_t, wfd_init, wave_t
- use m_abstract_wf, only: abstract_wf, cg_cprj, wfd_wf, init_mywfc
+! use m_wfd, only: wfd_t, wfd_init, wave_t
+ use m_abstract_wf, only: abstract_wf,  wann_ksetting_t
  use m_wannier_io,   only: write_eigenvalues, write_Amn, compute_and_write_unk, write_Mmn
 
  implicit none
@@ -139,30 +139,33 @@ module m_mlwfovlp2
 !!
 !! SOURCE
 
- subroutine mlwfovlp2(crystal, ebands, hdr, atindx1,cg,cprj,dtset,dtfil,eigen,gprimd,kg,&
+   subroutine mlwfovlp2(mywfc, crystal, ebands, hdr, atindx1, &
+     !&cg,cprj, &
+     &dtset,dtfil,eigen,gprimd,kg,&
 & mband,mcg,mcprj,mgfftc,mkmem,mpi_enreg,mpw,natom,&
 & nattyp,nfft,ngfft,nkpt,npwarr,nsppol,ntypat,occ,&
-& pawang,pawrad,pawtab,prtvol,psps,rprimd,ucvol,wfd, xred)
+& pawang,pawrad,pawtab,prtvol,psps,rprimd,ucvol, xred)
 
 !Arguments ------------------------------------
 !scalars
+
+class(abstract_wf), pointer :: mywfc
  integer,intent(in) :: mband,mcg,mcprj,mgfftc,mkmem,mpw,natom,nfft,nkpt
  integer,intent(in) :: nsppol,ntypat,prtvol
  real(dp),intent(in) :: ucvol
  type(crystal_t),intent(in) :: crystal
- type(ebands_t),intent(in) :: ebands
- type(hdr_type),intent(in) :: hdr
- type(MPI_type),intent(in) :: mpi_enreg
+ type(ebands_t),intent(inout) :: ebands
+ type(hdr_type),intent(inout) :: hdr
+ type(MPI_type),intent(inout) :: mpi_enreg
  type(dataset_type),intent(in) :: dtset
  type(datafiles_type),intent(in) :: dtfil
  type(pawang_type),intent(in) :: pawang
  type(pseudopotential_type),intent(in) :: psps
- type(wfd_t), optional,  intent(in) :: wfd
 !arrays
  integer,intent(in) :: atindx1(natom)
  integer :: kg(3,mpw*mkmem),nattyp(ntypat),ngfft(18),npwarr(nkpt)
- real(dp), optional, intent(in) :: cg(2,mcg)
- type(pawcprj_type), optional, intent(in) :: cprj(natom,mcprj)
+! real(dp), optional, intent(in) :: cg(2,mcg)
+! type(pawcprj_type), optional, intent(in) :: cprj(natom,mcprj)
  real(dp),optional, intent(in) :: eigen(mband*nkpt*nsppol),gprimd(3,3),rprimd(3,3)
  real(dp),intent(in) :: occ(mband*nkpt*nsppol)
  real(dp),intent(in) :: xred(3,natom)
@@ -172,6 +175,7 @@ module m_mlwfovlp2
  type(pawtab_type),intent(in) :: pawtab(:)
 
 !Local variables-------------------------------
+ type(wann_ksetting_t) :: kset
 !scalars
  integer :: band_index,cplex,i,iatom,iband,iband1,iband2,icgtemp
  integer :: ig,ii,ikg,ierr
@@ -231,7 +235,6 @@ module m_mlwfovlp2
  real(dp),allocatable :: tdocc_wan(:,:)
 #endif
 
- class(abstract_wf), pointer :: mywfc
 
 !************************************************************************
 
@@ -301,6 +304,8 @@ module m_mlwfovlp2
  if(psps%npsp/=psps%ntypat) then
    ABI_ERROR("prb npsp")
  end if
+
+
 !
 !Allocations.
 !
@@ -343,6 +348,9 @@ module m_mlwfovlp2
    call wrtout(std_out,  message,'COLL')
  end do
 
+
+
+
 !
 !some allocations after wannier90 setup
 !
@@ -351,6 +359,8 @@ module m_mlwfovlp2
  ABI_MALLOC(eigenvalues_w,(max_num_bands,nkpt,nsppol))
  ABI_MALLOC(M_matrix,(max_num_bands,max_num_bands,nntot,nkpt,nsppol))
  ABI_MALLOC(A_matrix,(max_num_bands,mwan,nkpt,nsppol))
+
+
 
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -381,9 +391,11 @@ module m_mlwfovlp2
  !call mywfc%init(cg, cprj, dtset, dtfil, hdr, &
  !     & MPI_enreg, nprocs, psps, pawtab, rank)
 
- call init_mywfc(mywfc=mywfc, wfd=wfd, cg=cg, cprj=cprj,  cryst=crystal,dtset=dtset, &
-   & dtfil=dtfil, hdr=hdr, MPI_enreg=MPI_enreg, nprocs=nprocs, psps=psps, &
-   & pawtab=pawtab, rank=rank)
+
+
+ !TODO uncomment
+! call mywfc%kset%set_ovikp( ovikp=ovikp, nntot=nntot, num_nnmax=num_nnmax)
+
 !
 !Shifts computed.
 !
@@ -407,7 +419,7 @@ module m_mlwfovlp2
 !&   npwarr,dtset%nspinor,nsppol,ovikp,dtfil%fnametmp_cg)
       call mlwfovlp_pw(mywfc,cm1,g1,kg,mband,&
    &   mkmem,mpi_enreg,mpw,nfft,ngfft,nkpt,nntot,&
-   &   npwarr,dtset%nspinor,nsppol,ovikp)
+   &   npwarr,hdr%nspinor,nsppol,ovikp)
 
    !mlwfovlp_pw(mywfc,cm1,g1,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nkpt,nntot,&
    !     &  npwarr,nspinor,nsppol,ovikp,seed_name)
@@ -441,10 +453,12 @@ module m_mlwfovlp2
            ikpt2= ovikp(ikpt1,intot)
            g1temp(:)=g1(:,ikpt1,intot)
            ! TODO : smatrix_pawinit: use my_wfc
+#ifdef DONOTCOMPILE
            call smatrix_pawinit(atindx1,cm2_paw,cprj,ikpt1,ikpt2,isppol,&
-&           g1temp,gprimd,dtset%kpt,mband,mband,mkmem,mpi_enreg,&
+&           g1temp,gprimd,hdr%kptns,mband,mband,mkmem,mpi_enreg,&
 &           natom,dtset%nband,nkpt,dtset%nspinor,nsppol,dtset%ntypat,pawang,pawrad,pawtab,rprimd,&
 &           dtfil%fnametmp_cprj,dtset%typat,xred)
+#endif
 !          cm1(:,:,:,intot,ikpt1,isppol)=four_pi*cm2_paw(:,:,:)
 !           write(6,*) "ikpt1=",ikpt1
 !           do iband=1,mband
@@ -683,7 +697,7 @@ module m_mlwfovlp2
      call wrtout(std_out,  message,'COLL')
 !
      call wannier_run(trim(seed_name(isppol)),ngkpt,nkpt,&            !input
-&    real_lattice,recip_lattice,dtset%kpt,num_bands(isppol),& !input
+&    real_lattice,recip_lattice,hdr%kptns,num_bands(isppol),& !input
 &    nwan(isppol),nntot,natom,atom_symbols,&                  !input
 &    xcart*Bohr_Ang,gamma_only,M_matrix(:,:,:,:,isppol),A_matrix(:,:,:,isppol),eigenvalues_w(:,:,isppol),& !input
 &    U_matrix(1:nwan(isppol),1:nwan(isppol),:,isppol),& !output
@@ -713,11 +727,11 @@ module m_mlwfovlp2
 
    ! Output ABIWAN.nc file
 #ifdef HAVE_NETCDF
-   if (dtset%kptopt == 0) then
+   if (hdr%kptopt == 0) then
      ABI_WARNING("Output of ABIWAN.nc requires kptopt /= 0. ABIWAN.nc file won't be produced!")
      ! Need kptrlatt in wigner_seitz and client code need to know the k-grid.
    end if
-   if (rank == master .and. dtset%kptopt /= 0) then
+   if (rank == master .and. hdr%kptopt /= 0) then
      abiwan_fname = strcat(dtfil%filnam_ds(4), "_ABIWAN.nc")
      call wrtout(std_out, sjoin("Saving wannier90 ouput results in:", abiwan_fname))
      call wigner_seitz([zero, zero, zero], [2, 2, 2], dtset%kptrlatt, crystal%rmet, nrpts, irvec, ndegen)
@@ -1194,7 +1208,8 @@ end subroutine mlwfovlp_seedname
  subroutine mlwfovlp_setup(atom_symbols,band_in,dtset,filew90_win,gamma_only,&
 & g1,lwanniersetup,mband,natom,nband_inc,nkpt,&
 & nntot,num_bands,num_nnmax,nsppol,nwan,ovikp,&
-& proj_l,proj_m,proj_radial,proj_site,proj_s_loc,proj_s_qaxis_loc,proj_x,proj_z,proj_zona,&
+& proj_l,proj_m,proj_radial,proj_site,proj_s_loc, &
+& proj_s_qaxis_loc,proj_x,proj_z,proj_zona,&
 & real_lattice,recip_lattice,rprimd,seed_name,spinors,xcart,xred)
 
 !Arguments---------------------------
@@ -1319,7 +1334,7 @@ end subroutine mlwfovlp_seedname
    do isppol=1,nsppol
 #ifdef HAVE_WANNIER90_V1
        call wannier_setup(seed_name(isppol),ngkpt,nkpt&            !input
-&      ,real_lattice,recip_lattice,dtset%kpt&                      !input
+&      ,real_lattice,recip_lattice,dtset%kptns&                      !input
 &      ,mband,natom,atom_symbols,xcart*Bohr_Ang&                   !input
 &      ,gamma_only,spinors&                                        !input
 &      ,nntot,ovikp,g1,num_bands(isppol),nwan(isppol)&             !output
@@ -1331,7 +1346,7 @@ end subroutine mlwfovlp_seedname
 !WANNIER90_V2 has the 2 optional arguments
      if (present(proj_s_loc)) then
        call wannier_setup(seed_name(isppol),ngkpt,nkpt&            !input
-&      ,real_lattice,recip_lattice,dtset%kpt&                      !input
+&      ,real_lattice,recip_lattice,dtset%kptns&                      !input
 &      ,mband,natom,atom_symbols,xcart*Bohr_Ang&                   !input
 &      ,gamma_only,spinors&                                        !input
 &      ,nntot,ovikp,g1,num_bands(isppol),nwan(isppol)&             !output
@@ -1343,7 +1358,7 @@ end subroutine mlwfovlp_seedname
      else
 !no proj_s_loc provided
        call wannier_setup(seed_name(isppol),ngkpt,nkpt&            !input
-&      ,real_lattice,recip_lattice,dtset%kpt&                      !input
+&      ,real_lattice,recip_lattice,dtset%kptns&                      !input
 &      ,mband,natom,atom_symbols,xcart*Bohr_Ang&                   !input
 &      ,gamma_only,spinors&                                        !input
 &      ,nntot,ovikp,g1,num_bands(isppol),nwan(isppol)&             !output
@@ -2103,7 +2118,7 @@ subroutine mlwfovlp_pw(mywfc,cm1,g1,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nkpt
        npw_k=npwarr(ikpt)
        gsum2(:)=0.d0
        gf(:,:) = (0.d0,0.d0)
-       kpt(:)=dtset%kpt(:,ikpt)
+       kpt(:)=dtset%kptns(:,ikpt)
        kg_k(:,1:npw_k)=kg(:,1+ikg:npw_k+ikg)
 
        do ipw=1, npw_k

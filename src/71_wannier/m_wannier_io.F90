@@ -79,7 +79,7 @@ contains
     ! below is copied/modified from m_mlwfovlp.F90
     do isppol=1,nsppol
        ! TODO : relpace this.
-       if (open_file(trim(fname(isppol)), message, newunit=iun(isppol), & 
+       if (open_file(trim(fname(isppol)), message, newunit=iun(isppol), &
             & form="formatted", status="unknown", action="write") /= 0) then
           ABI_ERROR(message)
        end if
@@ -191,7 +191,7 @@ contains
     class(abstract_wf), intent(inout) ::  mywfc
 
     integer :: iun_plot
-    integer :: isppol, ikpt, ikg, iband, ig 
+    integer :: isppol, ikpt, ikg, iband, ig
     integer :: n1, n2, n3, n4, n5, n6, cplex, mgfft, npw_k
     integer :: tim_fourwf
     real(dp) :: weight
@@ -273,7 +273,7 @@ contains
           !      write(iun_plot,*) n1tmp,n2tmp,n3tmp,ikpt,nband_inc
           write(iun_plot) n1tmp,n2tmp,n3tmp,ikpt,nband_inc(isppol)
           !      gbound=zero
-          call sphereboundary(gbound,dtset%istwfk(ikpt),kg_k,mgfft,npw_k)
+          call sphereboundary(gbound,mywfc%hdr%istwfk(ikpt),kg_k,mgfft,npw_k)
           write(std_out,*) "  writes UNK file for ikpt, spin=",ikpt,isppol
           denpot(:,:,:)=zero
           weight = one
@@ -292,7 +292,7 @@ contains
                 end do
                 tim_fourwf=0
                 call fourwf(cplex,denpot,cwavef,fofgout,fofr,&
-                     &           gbound,gbound,dtset%istwfk(ikpt),kg_k,kg_k,mgfft,&
+                     &           gbound,gbound,mywfc%hdr%istwfk(ikpt),kg_k,kg_k,mgfft,&
                      &           mpi_enreg,1,ngfft,npw_k,npw_k,n4,n5,n6,0,&
                      &           tim_fourwf,weight,weight,use_gpu_cuda=dtset%use_gpu_cuda)
                 !          do jj3=1,n3,spacing
@@ -340,7 +340,7 @@ contains
     print *, "size:", size(eigen, 1), size(eigen, 2), size(eigen,3)
     if(rank==master) then
        do isppol=1,nsppol
-          if (open_file(trim(filew90_eig(isppol)), message, newunit=iun(isppol), & 
+          if (open_file(trim(filew90_eig(isppol)), message, newunit=iun(isppol), &
                & form="formatted", status="unknown", action="write") /= 0) then
              ABI_ERROR(message)
           endif
