@@ -129,9 +129,9 @@ contains
     integer :: ik_ibz, spin, npw_k, ikg, iblk
     integer :: my_nbands,my_band_list(hdr%mband)
 
-    print *, "============================================================"
-    print *, "Starting WFD Wannier"
-    print *, "============================================================"
+    !print *, "============================================================"
+    !print *, "Starting WFD Wannier"
+    !print *, "============================================================"
 
     spaceComm=MPI_enreg%comm_cell
     nprocs=xmpi_comm_size(spaceComm)
@@ -145,27 +145,15 @@ contains
     nspinor=hdr%nspinor
     mband=hdr%mband
     nsppol = hdr%nsppol
-    mcg=mpw*nspinor*mband* mkmem *nsppol
-    mcprj = nspinor*mband* mkmem*nsppol
+    !mcg=mpw*nspinor*mband* mkmem *nsppol
+    !mcprj = nspinor*mband* mkmem*nsppol
     ! Is this correct for paw?
     nfft=product(ngfftc(1:3))
 
-    print *, "mpw:", mpw
-    print *, "nspinor:", nspinor
-    print *, "mband:", mband
-    print *, "mkmem:", mkmem
-    print *, "nsppol", nsppol
-    print *, "mcg", mcg
-    print *, "mcprj", mcprj
-    print *, "nfft", nfft
-
-
-    !print *, "kg=", kg
 
        if (present(cg)) then
 
          mkmem= dtset%mkmem
-         print *, "mkmem:", mkmem
          call init_mywfc(mywfc=mywfc, ebands=ebands, cg=cg, cprj=cprj, &
            &  cryst=cryst,dtset=dtset, &
            & dtfil=dtfil, hdr=hdr, MPI_enreg=MPI_enreg, nprocs=nprocs, psps=psps, &
@@ -187,19 +175,16 @@ contains
              & pawtab=pawtab, rank=rank, comm=spaceComm)
 
            ! TODO: distribute k
-           mkmem = mywfc%hdr%nkpt
+           mkmem = mywfc%kset%my_nkpt
            mpw=maxval(mywfc%hdr%npwarr)
-           print *, "mkmem:", mkmem
-           ! TODO : why is mpw in hdr_bz larger than in hdr_ibz?
-           print *, "mpw:", mpw
            mcg=mpw*nspinor*mband* mkmem *nsppol
            mcprj = nspinor*mband* mkmem*nsppol
-           block
-             integer :: ik
-             do ik =1, mkmem
-               print *, ik, ":", mywfc%ebands%kptns(:, ik)
-             end do
-           end block
+           ! block
+           !   integer :: ik
+           !   do ik =1, mkmem
+           !     print *, ik, ":", mywfc%ebands%kptns(:, ik)
+           !   end do
+           ! end block
 
            if (present(kg)) then
              ptr_kg=> kg

@@ -337,7 +337,6 @@ contains
     integer :: iun(nsppol), isppol, band_index, iband, jband, nband_k, ikpt
     character(len=1000) :: message
     !  Assign file unit numbers
-    print *, "size:", size(eigen, 1), size(eigen, 2), size(eigen,3)
     if(rank==master) then
        do isppol=1,nsppol
           if (open_file(trim(filew90_eig(isppol)), message, newunit=iun(isppol), &
@@ -357,8 +356,6 @@ contains
                 jband=jband+1
                 !          Writing data
                 if(rank==master) then
-                   print *, "iband, ikpt, isppol", iband, ikpt, isppol
-                   print *, "eigen:", eigen(iband, ikpt, isppol)
                    write(iun(isppol), '(2i6,4x,f10.5)' ) &
                         & jband,ikpt,Ha_eV*eigen(iband, ikpt, isppol)
                 end if
