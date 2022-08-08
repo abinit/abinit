@@ -1080,3 +1080,128 @@ end subroutine read_chkunit
  
   end subroutine mlwfovlp_wfd
 
+
+#ifdef DONTCOMPILE
+  subroutine ibz_to_fullbz(wfd, ebands, dtset, hdr, &
+    & cryst,  psps, pawtab, &
+    & wfd_bz, ebands_bz, hdr_bz, &
+    & bks_mask,  keep_ur, comm, kset)
+
+    type(wfd_t), optional, intent(inout) :: wfd
+    type(ebands_t), target, intent(inout) :: ebands
+    type(dataset_type),intent(in) :: dtset
+    type(hdr_type),  intent(in) :: hdr
+    type(crystal_t), intent(in) :: cryst
+    type(pseudopotential_type), intent(in) :: psps
+    type(pawtab_type), optional,intent(in) :: pawtab(:)
+    type(wann_ksetting_t), intent(inout) :: kset
+    logical,intent(in) :: bks_mask(:, :, :)
+    logical,intent(in) :: keep_ur(:, :, :)
+    integer , intent(in)::  comm
+
+    type(wfd_t),   intent(inout) :: wfd_bz
+    type(ebands_t), target,  intent(inout) :: ebands_bz
+    type(hdr_type),  intent(inout) :: hdr_bz
+    logical :: is_fullbz = .True.
+    integer, allocatable :: bz2ibz(:,:), indkk(:)
+    integer :: nk_ibz, nk_bz
+    !real(dp), pointer :: kk_ibz(:, :)=>null(), kk_bz(:, :)=> null()
+
+    integer :: mband,prtvol,pawprtvol
+    integer :: nkibz,nsppol,nspden,nspinor
+    real(dp) :: ecut,ecutsm,dilatmx
+
+    if(hdr%kptopt /=3 )then
+      !call ebands_and_kpt_expandk()
+
+      call hdr_expandk()
+      call wfd_expandk()
+    end if
+  contains
+
+
+
+    subroutine hdr_expandk()
+      ! see wfk_tofullbz in m_wfk
+      type(wvl_internal_type) :: dummy_wvl
+      integer:: kptopt3=3
+      call hdr_init_lowlvl(hdr_bz,ebands_bz,psps,pawtab,dummy_wvl,abinit_version,&
+        hdr%pertcase,hdr%natom,hdr%nsym,hdr%nspden,hdr%ecut,dtset%pawecutdg,hdr%ecutsm,dtset%dilatmx,&
+        hdr%intxc,hdr%ixc,hdr%stmbias,hdr%usewvl,dtset%pawcpxocc,dtset%pawspnorb,dtset%ngfft,dtset%ngfftdg,hdr%so_psp,&
+        hdr%qptn,cryst%rprimd,cryst%xred,hdr%symrel,hdr%tnons,hdr%symafm,hdr%typat,hdr%amu,hdr%icoulomb,&
+        kptopt3,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,dtset%cellcharge(1),&
+        dtset%kptrlatt_orig,dtset%kptrlatt,&
+        dtset%nshiftk_orig,dtset%nshiftk,dtset%shiftk_orig,dtset%shiftk)
+      ! End CP modified
+      if (psps%usepaw == 1) call pawrhoij_copy(hdr%pawrhoij, hdr_bz%pawrhoij)
+    end subroutine hdr_expandk
+
+
+
+    subroutine wfd_expandk(dtset, ebands,  )
+      integer :: ngfft
+      integer, allocatable :: istwfk(:)
+      integer :: ik, spin, band
+      complex, allocatable :: ug(:, :)
+      integer :: g0_k(3), g0_kq(3), g0_q(3), work_ngfft(18),gmax(3),indkk(6,1)
+      real(dp),allocatable ::  work(:,:,:,:), cg_kbz(:, :, :)
+      integer ::mpw, mband, npw_kbz
+      integer,allocatable :: kg_kbz(:,:)
+
+      nsppol = ebands%nsppol
+      nspinor = ebands%nspinor
+      ABI_MALLOC(istwfk, (ebands_bz%nkpt))
+      istwfk(:) = 1
+
+
+      !TODO: get mpw, gmax
+      call kset%get_mpw_gmax(dtset%ecut, mpw, gmax)
+
+      mpw = maxval(hdr_bz%npwarr)
+      mband = hdr_bz%mband
+      !call gstore%get_mpw_gmax(ecut, mpw, gmax)
+      ! TODO: Init work_ngfft
+      !gmax = gmax + 4 ! FIXME: this is to account for umklapp
+      !gmax = 2*gmax + 1
+      call ngfft_seq(work_ngfft, gmax)
+      !write(std_out,*)"work_ngfft(1:3): ",work_ngfft(1:3)
+
+      ABI_MALLOC(work, (2, work_ngfft(4), work_ngfft(5), work_ngfft(6)))
+      ABI_MALLOC(kg_kbz, (3, mpw))
+      !ABI_MALLOC(cg_kbz, (2, mpw*nspinor, nb))
+
+      ! TODO kibz=? ebands%kptns or ebands_bz%kptns
+      call wfd_init(wfd=wfd_bz,Cryst=cryst,Pawtab=pawtab,Psps=psps, &
+        & keep_ur=keep_ur,mband=ebands_bz%mband,nband=ebands_bz%nband, &
+        &nkibz=ebands_bz%nkpt,nsppol=dtset%nsppol,bks_mask=bks_mask,&
+        &nspden=dtset%nspden,nspinor=hdr%nspinor,ecut=dtset%ecut, &
+        &ecutsm=dtset%ecutsm,dilatmx=dtset%dilatmx, &
+        &istwfk=istwfk,kibz=ebands%kptns,ngfft=wfd%ngfft, &
+        &nloalg=wfd%nloalg,prtvol=dtset%prtvol,pawprtvol=dtset%pawprtvol,comm=comm,&
+        &  use_fnl_dir0der0 = .False.) ! optional
+      do spin =1, dtset%nsppol
+        do ik=1, ebands_bz%nkpt
+          npw_kbz=hdr_bz%npwarr(ik)
+          indkk(:, 1) = bz2ibz(:, ik)
+          !TODO: ecut or ecut_eff?
+          call wfd%sym_ug_kg(ecut=dtset%ecut, &
+            & kk_bz=ebands_bz%kptns, kk_ibz=ebands%kptns, bstart=1, nband=ebands_bz%nband(ik), &
+            & spin=spin, mpw=mpw, indkk=indkk, cryst=cryst, &
+            & work_ngfft=work_ngfft, work=work, istwf_kbz=istwfk(ik), &
+            & npw_kbz=npw_kbz, kg_kbz=kg_kbz, cgs_kbz=cg_kbz)
+            do band = 1, ebands_bz%mband
+              ! TODO push_ug
+              !call wfd_bz%push_ug(band, ik, spin, Cryst, ug, &
+              !  & update_ur=.True., update_cprj=.False.)
+            end do
+          end do
+      end do
+
+      ABI_FREE(kg_kbz)
+      ABI_FREE(work)
+
+    end subroutine wfd_expandk
+
+  end subroutine ibz_to_fullbz
+#endif
+

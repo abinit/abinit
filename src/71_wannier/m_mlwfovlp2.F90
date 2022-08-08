@@ -1586,10 +1586,9 @@ subroutine mlwfovlp_pw(mywfc,cm1,g1,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nkpt
 !    MPI:cycle over k-points not treated by this node
 !
       if (nprocs>1 ) then !sometimes we can have just one processor
+        !print *, "MPI_enreg%proc_distrb(ikpt,1,isppol)", ikpt, isppol , MPI_enreg%proc_distrb(ikpt,1,isppol)
          if ( ABS(MPI_enreg%proc_distrb(ikpt,1,isppol)-MPI_enreg%me)  /=0) CYCLE
       end if
-
-
 !
 !    write(std_out,*)'me',me,'ikpt',ikpt,'isppol',isppol
      do npoint=1,nfft
@@ -1632,6 +1631,7 @@ subroutine mlwfovlp_pw(mywfc,cm1,g1,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nkpt
 !      write(std_out,*) "ikpt ig npoint",ikpt,ig, npoint
      end do
      ikg=ikg+npw_k
+     !print *, "rank", mpi_enreg%me, "ikg", ikg, "nprocs:", nprocs
 
    end do !ikpt
  end do !isppol
@@ -2075,10 +2075,10 @@ subroutine mlwfovlp_pw(mywfc,cm1,g1,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nkpt
 !
 !  get ylmfac, factor used for rotations and hybrid orbitals
    do isppol=1,nsppol
-      print *, "nproj", nproj(isppol)
-      print *, "isppol", isppol
+      !print *, "nproj", nproj(isppol)
+      !print *, "isppol", isppol
       !print *, ylmc_fac(1:lmax2(isppol),1:nproj(isppol),isppol)
-      print *, "lmax, lmax2: ", lmax(isppol),lmax2(isppol)
+      !print *, "lmax, lmax2: ", lmax(isppol),lmax2(isppol)
       !print *, nproj(isppol),proj_l(:,isppol),proj_m(:,isppol),proj_x(:,:,isppol)
       !print *, proj_z(:,:,isppol)
 
