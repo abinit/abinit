@@ -21,11 +21,6 @@
 !! OUTPUT
 !!  (main routine)
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      timab,time_accu
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -141,12 +136,6 @@ program testTransposer
 !! OUTPUT
 !!  (main routine)
 !!
-!! PARENTS
-!!      testtransposer
-!!
-!! CHILDREN
-!!      timab,time_accu
-!!
 !! SOURCE
   subroutine test1()
     ABI_MALLOC(cg, (2,npw*nband))
@@ -209,10 +198,6 @@ program testTransposer
 !!
 !! OUTPUT
 !!  (main routine)
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
   subroutine test2()
@@ -309,10 +294,6 @@ program testTransposer
 !! OUTPUT
 !!  (main routine)
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
   subroutine initVectors()
@@ -357,10 +338,6 @@ program testTransposer
 !!
 !! OUTPUT
 !!  (main routine)
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -413,12 +390,6 @@ program testTransposer
 !!
 !! OUTPUT
 !!  (main routine)
-!!
-!! PARENTS
-!!      testtransposer
-!!
-!! CHILDREN
-!!      timab,time_accu
 !!
 !! SOURCE
 

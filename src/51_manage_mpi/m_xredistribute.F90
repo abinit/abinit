@@ -16,10 +16,6 @@
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -79,11 +75,6 @@ CONTAINS  !===========================================================
 !!
 !! SIDE EFFECTS
 !!  recvbuf= received buffer
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allgatherv,mpi_scatterv
 !!
 !! SOURCE
 subroutine xredistribute_mpi_dp(xval,send_counts,send_displs,recvbuf,&
@@ -152,11 +143,6 @@ end subroutine xredistribute_mpi_dp
 !!
 !! SIDE EFFECTS
 !!  recvbuf= received buffer
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allgatherv,mpi_scatterv
 !!
 !! SOURCE
 subroutine xredistribute_mpi_2d_dp(xval,send_counts,send_displs,recvbuf,&

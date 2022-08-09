@@ -227,10 +227,11 @@ P          mk1mem           4
               qpt3     0.00000000E+00  0.00000000E+00  5.00000000E-01
               qpt4     0.00000000E+00  0.00000000E+00  2.10000000E-01
               qpt5     0.00000000E+00  0.00000000E+00  2.10000000E-01
-            rfdir1          0       0       0
-            rfdir2          0       0       0
+          rfatpol           1       1
+            rfdir1          1       1       1
+            rfdir2          1       1       1
             rfdir3          0       0       1
-            rfdir4          0       0       0
+            rfdir4          1       1       1
             rfdir5          0       0       1
            rfphon1          0
            rfphon2          0
@@ -855,7 +856,7 @@ tolerances: {tolwfr: 1.00E-15, }
 -  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
 -  5.578552E+03
  chkph3 : WARNING -
-  The dynamical matrix was incomplete : phonon frequencies may be wrong ...
+  Dynamical matrix incomplete, phonon frequencies may be wrong, check input variables rfatpol and rfdir.
 
 ================================================================================
 == DATASET  4 ==================================================================
@@ -1282,7 +1283,7 @@ tolerances: {tolwfr: 1.00E-15, }
 -  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
 -  5.570469E+03
  chkph3 : WARNING -
-  The dynamical matrix was incomplete : phonon frequencies may be wrong ...
+  Dynamical matrix incomplete, phonon frequencies may be wrong, check input variables rfatpol and rfdir.
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -1384,10 +1385,11 @@ P          mk1mem           4
               qpt3     0.00000000E+00  0.00000000E+00  5.00000000E-01
               qpt4     0.00000000E+00  0.00000000E+00  2.10000000E-01
               qpt5     0.00000000E+00  0.00000000E+00  2.10000000E-01
-            rfdir1          0       0       0
-            rfdir2          0       0       0
+          rfatpol           1       1
+            rfdir1          1       1       1
+            rfdir2          1       1       1
             rfdir3          0       0       1
-            rfdir4          0       0       0
+            rfdir4          1       1       1
             rfdir5          0       0       1
            rfphon1          0
            rfphon2          0

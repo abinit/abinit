@@ -26,13 +26,11 @@
     nqpt1  0
   kptopt1  1
 
-#DATASET 2 : ddk perturbation (only the x direction is needed,
-#thanks to the use of symmetries)
+#DATASET 2 : ddk perturbation 
  getwfk2   1
  getden2   1
    iscf2  -3
    nqpt2   1
-  rfdir2   1 1 1
  rfelfd2   2
 
 #DATASET 3 : phonon and electric field perturbations
@@ -48,13 +46,11 @@
     nqpt4  0
   kptopt4  1
 
-#DATASET 5 : ddk perturbation (only the x direction is needed,
-#thanks to the use of symmetries)
+#DATASET 5 : ddk perturbation 
  getwfk5   4
  getden5   4
    iscf5  -3
    nqpt5   1
-  rfdir5   1 1 1
  rfelfd5   2
 
 #DATASET 6 : phonon and electric field perturbations
@@ -75,8 +71,6 @@
  nstep 20
  ntypat  1
  qpt    3*0.0d0
- rfatpol   1 2
- rfdir     1 1 1
  tolwfr  1.0d-16
  typat  1 1
  xred  3*0.231d0

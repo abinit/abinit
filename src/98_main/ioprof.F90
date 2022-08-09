@@ -16,14 +16,6 @@
 !!
 !! NOTES
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      abi_io_redirect,abimem_init,abinit_doctor,delete_file
-!!      get_command_argument,hdr%echo,hdr%free,hdr_read_from_fname,herald
-!!      wfk%close,wfk%print,wfk_check_wfkfile,wfk_create_wfkfile,wfk_nc2fort
-!!      wfk_open_read,wfk_prof,wrtout,xmpi_init
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H

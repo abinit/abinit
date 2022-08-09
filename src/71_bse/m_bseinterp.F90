@@ -10,10 +10,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -124,11 +120,6 @@ CONTAINS  !=====================================================================
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_hexc
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine interpolator_init(interpolator, double_grid, Wfd_dense, Wfd_coarse, &
@@ -222,11 +213,6 @@ end subroutine interpolator_init
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_hexc
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine int_alloc_work(interpolator, work_size)
@@ -256,11 +242,6 @@ end subroutine int_alloc_work
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_hexc
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -294,11 +275,6 @@ end subroutine int_free_work
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_bseinterp
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -476,11 +452,6 @@ end subroutine int_compute_overlaps
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_bseinterp
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine int_preprocess_tables(interpolator,double_grid)
@@ -567,11 +538,6 @@ end subroutine int_preprocess_tables
 !! TODO:
 !!  Some operations are faster if we allocate with shape (8,nreh(spin))
 !!
-!! PARENTS
-!!      m_bseinterp
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine int_compute_corresp(interpolator,BSp,double_grid)
@@ -655,11 +621,6 @@ end subroutine int_compute_corresp
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_hexc
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine interpolator_normalize(interpolator)
@@ -713,11 +674,6 @@ end subroutine interpolator_normalize
 !!
 !! OUTPUT
 !!
-!!
-!! PARENTS
-!!      m_hexc
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

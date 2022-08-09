@@ -110,10 +110,6 @@ CONTAINS  !===========================================================
 !!  The routine is able to deal both with a single vector as well as arrays of vectors.
 !!  Versions for integer and real vectors are provided.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 function normv_rdp_vector(xv,met,space) result(res)
@@ -297,10 +293,6 @@ end function normv_rdp_vector_array
 !! OUTPUT
 !!  res=scalar product of xv and xw
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 function vdotw_rr_vector(xv,xw,met,space) result(res)
@@ -353,10 +345,6 @@ end function vdotw_rr_vector
 !! OUTPUT
 !!  res=complex scalar product of xv and xw
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 function vdotw_rc_vector(xv,xw,met,space) result(res)
@@ -406,11 +394,6 @@ end function vdotw_rc_vector
 !! OUTPUT
 !!   c(3): real(dp) vector = a X b
 !!
-!! PARENTS
-!!      m_abimover,m_pred_delocint,m_symfind
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine acrossb(a,b,c)
@@ -444,11 +427,6 @@ end subroutine acrossb
 !!
 !! OUTPUT
 !!   wedge(3,3,3) : 9 basis vectors of rprimd ^ gprimd
-!!
-!! PARENTS
-!!      m_spacepar
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -512,11 +490,6 @@ end subroutine wedge_basis
 !!
 !! OUTPUT
 !!   produv(3) :: real(dp) output vector
-!!
-!! PARENTS
-!!      m_spacepar
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -588,11 +561,6 @@ end subroutine wedge_product
 !! than any of the other points R where R are the translation vectors of the supercell.
 !! In the end npts contains the total number of grid points that have been found in the Wigner-Seitz cell
 !! The number of lattice vectors R along each direction of the supercell is defined by lmax.
-!!
-!! PARENTS
-!!      m_mlwfovlp
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -733,11 +701,6 @@ end subroutine wigner_seitz
 !! OUTPUT
 !!  displ_red(2,3*natom,3*natom)=Phonon displacement in reduded coordinates.
 !!
-!! PARENTS
-!!      m_a2ftr,m_ddb,m_elphon,m_ifc,m_iogkk,m_phonons
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine phdispl_cart2red(natom, gprimd, displ_cart, displ_red)
@@ -816,11 +779,6 @@ end subroutine phdispl_cart2red
 !!
 !! The whole collection of symmetry matrices is call symrel(3,3,nsym)
 !! symrel1 contains just one of those matrices symrel1(3,3)
-!!
-!! PARENTS
-!!      m_cgtk,m_crystal,m_inwffil
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -994,10 +952,6 @@ end subroutine getspinrot
 !! OUTPUT
 !!  spinrot(2,2)=Rotation matrix (complex array)
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 pure function spinrot_cmat(spinrot)
@@ -1047,11 +1001,6 @@ end function spinrot_cmat
 !! So calling rotmat(x',z') will find the rotation
 !! matrix for the case in which we rotate the x and z
 !! axes from their default values to x' and z'.
-!!
-!! PARENTS
-!!      m_mlwfovlp
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1150,11 +1099,6 @@ end subroutine rotmat
 !! NOTE
 !!  Stops execution with an error message if iatfix breaks symmetry.
 !!
-!! PARENTS
-!!      m_gstate
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine fixsym(iatfix,indsym,natom,nsym)
@@ -1242,25 +1186,6 @@ end function det3r
 !!  gprimd(3,3)=dimensional primitive translations for reciprocal space ($\textrm{bohr}^{-1}$)
 !!  rmet(3,3)=real space metric ($\textrm{bohr}^{2}$).
 !!  ucvol=unit cell volume ($\textrm{bohr}^{3}$).
-!!
-!! PARENTS
-!!      cut3d,fftprof,m_ab7_symmetry,m_afterscfloop,m_bader,m_berryphase_new
-!!      m_bethe_salpeter,m_chkinp,m_common,m_conducti,m_crystal,m_cut3d
-!!      m_cutoff_cylinder,m_d2frnl,m_ddb,m_dens,m_dfpt_elt,m_dfpt_looppert
-!!      m_dfpt_scfcv,m_dft_energy,m_dtset,m_effective_potential
-!!      m_effective_potential_file,m_elpolariz,m_extfpmd,m_extraprho,m_fft
-!!      m_fft_prof,m_fit_data,m_fit_polynomial_coeff,m_forces,m_forstr
-!!      m_geometry,m_gstate,m_gstateimg,m_gtermcutoff,m_hamiltonian,m_ingeo
-!!      m_inkpts,m_invars2,m_io_kss,m_ioarr,m_kpts,m_ksdiago,m_memeval,m_mep
-!!      m_mlwfovlp_qp,m_mover,m_mpi_setup,m_newrho,m_newvtr,m_odamix,m_orbmag
-!!      m_paw_dfpt,m_paw_optics,m_pawpwij,m_prcref,m_pred_bfgs,m_pred_delocint
-!!      m_pred_fire,m_pred_isothermal,m_pred_langevin,m_pred_nose
-!!      m_pred_srkna14,m_pred_verlet,m_psolver,m_rhotoxc,m_scfcv_core
-!!      m_screening,m_screening_driver,m_sigma_driver,m_spacepar,m_stress
-!!      m_tdep_latt,m_thmeig,m_use_ga,m_vcoul,m_vdw_dftd2,m_vdw_dftd3,m_wfk
-!!      m_wvl_rho,m_xchybrid,m_xfpack,mkcore_wvl,mrgscr,optic
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1366,12 +1291,6 @@ end subroutine metric
 !!  acell(3)=unit cell length scales (bohr)
 !!  rprim(3,3)=dimensionless real space primitive translations
 !!
-!! PARENTS
-!!      m_dvdb,m_gstate,m_gstateimg,m_ingeo,m_memeval,m_pimd,m_pred_steepdesc
-!!      m_predict_pimd,m_use_ga,m_xfpack
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine mkradim(acell,rprim,rprimd)
@@ -1419,10 +1338,6 @@ end subroutine mkradim
 !!
 !! OUTPUT
 !!  (only writing)
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1504,11 +1419,6 @@ end subroutine chkrprimd
 !!                dump dilatmx_errmsg to the main output file.
 !!                handle_error
 !!              end if
-!!
-!! PARENTS
-!!      m_driver,m_precpred_1geo
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1608,16 +1518,6 @@ end subroutine chkdilatmx
 !!  rprimd(3,3)=dimensional real space primitive translations (bohr)
 !!              where: rprimd(i,j)=rprim(i,j)*acell(j)
 !!
-!! PARENTS
-!!      m_abi2big,m_bethe_salpeter,m_common,m_ddb,m_dfpt_looppert,m_driver
-!!      m_dtset,m_geometry,m_gstateimg,m_harmonic_thermo,m_ifc,m_ingeo
-!!      m_invars1,m_invars2,m_memeval,m_mpi_setup,m_outvar_o_z,m_parser
-!!      m_phonons,m_pred_bfgs,m_pred_fire,m_pred_isothermal,m_pred_steepdesc
-!!      m_pred_verlet,m_predict_pimd,m_results_img,m_screening_driver
-!!      m_sigma_driver,m_thmeig,m_use_ga,m_xfpack
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine mkrdim(acell,rprim,rprimd)
@@ -1662,17 +1562,6 @@ end subroutine mkrdim
 !!
 !! OUTPUT
 !!  xred(3,natom)=dimensionless reduced coordinates of atoms
-!!
-!! PARENTS
-!!      m_abi2big,m_cut3d,m_dens,m_driver,m_dvdb,m_effective_potential
-!!      m_effective_potential_file,m_evdw_wannier,m_generate_training_set
-!!      m_ingeo,m_ipi,m_mep,m_mover,m_mover_effpot,m_parser,m_paw_mkaewf
-!!      m_paw_pwaves_lmn,m_pimd_langevin,m_pimd_nosehoover,m_prcref
-!!      m_pred_delocint,m_pred_diisrelax,m_pred_isokinetic,m_pred_isothermal
-!!      m_pred_langevin,m_pred_lotf,m_pred_moldyn,m_pred_nose,m_pred_srkna14
-!!      m_pred_steepdesc,m_pred_velverlet,m_pred_verlet,m_relaxpol,mkcore_wvl
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1723,23 +1612,6 @@ end subroutine xcart2xred
 !! OUTPUT
 !!  xcart(3,natom)=cartesian coordinates of atoms (bohr)
 !!
-!! PARENTS
-!!      cut3d,m_abi2big,m_abihist,m_afterscfloop,m_berryphase,m_berryphase_new
-!!      m_crystal,m_ddb,m_driver,m_effective_potential,m_evdw_wannier
-!!      m_fft_mesh,m_fit_polynomial_coeff,m_forces,m_forstr,m_geometry
-!!      m_gstateimg,m_ingeo,m_memeval,m_mep,m_mklocl,m_mklocl_realspace
-!!      m_mlwfovlp,m_mover,m_mover_effpot,m_multipoles,m_nucprop,m_outqmc
-!!      m_outvar_o_z,m_outxml,m_paw_mkrho,m_paw_nhat,m_pimd_langevin
-!!      m_pimd_nosehoover,m_pred_delocint,m_pred_diisrelax,m_pred_fire
-!!      m_pred_isokinetic,m_pred_isothermal,m_pred_langevin,m_pred_lotf
-!!      m_pred_moldyn,m_pred_nose,m_pred_simple,m_pred_srkna14,m_pred_steepdesc
-!!      m_pred_velverlet,m_pred_verlet,m_results_img,m_rhotov,m_setvtr
-!!      m_spgdata,m_spin_current,m_symfind,m_tdep_abitypes,m_thmeig,m_vtorho
-!!      m_wvl_denspot,m_wvl_projectors,m_wvl_rho,m_wvl_rwwf,m_wvl_wfs
-!!      m_wvl_wfsinp,mkcore_wvl
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine xred2xcart(natom,rprimd,xcart,xred)
@@ -1787,11 +1659,6 @@ end subroutine xred2xcart
 !!    Unlike gred, fcart has been corrected by enforcing
 !!    the translational symmetry, namely that the sum of force
 !!    on all atoms is zero (except is a slab is used)
-!!
-!! PARENTS
-!!      m_forces,m_mep
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1857,12 +1724,6 @@ end subroutine gred2fcart
 !!  the translational symmetry, namely that the sum of force
 !!  on all atoms is zero.
 !!
-!! PARENTS
-!!      m_abihist,m_effective_potential,m_gstateimg,m_mep,m_mover,m_pred_bfgs
-!!      m_pred_delocint,m_pred_fire,m_pred_simple,m_pred_verlet
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine fcart2gred(fcart,gred,rprimd,natom)
@@ -1926,11 +1787,6 @@ end subroutine fcart2gred
 !! NOTES
 !!  The tolerance tol8 aims at giving a machine-independent ordering.
 !!  (this trick is used in bonds.f, listkk.f, prtrhomxmn.f and rsiaf9.f)
-!!
-!! PARENTS
-!!      m_outscfcv
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2264,11 +2120,6 @@ end subroutine bonds_lgth_angles
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_ingeo
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine randomcellpos(natom,npsp,ntypat,random_atpos,ratsph,rprim,rprimd,typat,xred,znucl,acell)
@@ -2481,11 +2332,6 @@ end subroutine randomcellpos
 !!  nsh= number of shells
 !!  mult(nat) = number of atoms on shell (only the first nsh entries are relevant)
 !!
-!! PARENTS
-!!      m_paw_uj
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine shellstruct(xred,rprimd,natom,magv,distv,smult,sdisv,nsh,atp,prtvol)
@@ -2619,11 +2465,6 @@ end subroutine shellstruct
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_geometry,m_paw_uj
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine ioniondist(natom,rprimd,xred,inm,option,varlist,magv,atp,prtvol)
@@ -2746,11 +2587,6 @@ end subroutine ioniondist
 !! OUTPUT
 !!  dist2
 !!
-!! PARENTS
-!!  ioniondist
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 function dist2(v1,v2,rprimd,option)
@@ -2862,11 +2698,6 @@ end function dist2
 !!  Note the use of pointers, memory is allocated inside the procedure and passed back
 !!  to the caller. Thus memory deallocation is relegated to the caller. To be on the safe side
 !!  the pointers should be nullified before entering.
-!!
-!! PARENTS
-!!      m_crystal,m_io_kss
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2986,11 +2817,6 @@ end subroutine remove_inversion
 !! When aprim=rprimd and bprim=gprimd, the routine operates in real space (on a real space symmetry)
 !! When aprim=gprimd and bprim=rprimd, the routine operates in reciprocal space (on a real space symmetry)
 !!
-!! PARENTS
-!!      m_crystal,m_matlu,m_phonons,m_spacepar
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine symredcart(aprim,bprim,symcart,symred)
@@ -3052,11 +2878,6 @@ end subroutine symredcart
 !!
 !! OUTPUT
 !! rprimd_symm(3,3)= symmetrized primitive vectors
-!!
-!! PARENTS
-!!      m_xfpack
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3134,11 +2955,6 @@ end subroutine strainsym
 !!
 !! SIDE EFFECTS
 !! stress(6)=stress tensor, in cartesian coordinates, in symmetric storage mode
-!!
-!! PARENTS
-!!      m_dfpt_nstwf,m_dfpt_scfcv,m_forstr,m_geometry,m_paw_dfpt,m_stress
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3236,11 +3052,6 @@ end subroutine stresssym
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_ipi,m_results_gs
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine stress_voigt_to_mat(stress6, stress_mat)
@@ -3284,12 +3095,6 @@ end subroutine stress_voigt_to_mat
 !! "cart" may be same array as "frac".
 !! If rprimd transpose is input instead of gprimd, then convert tensor
 !! in cartesian coordinates to reduced coordinates
-!!
-!! PARENTS
-!!      m_cgprj,m_d2frnl,m_geometry,m_mkcore,m_nonlop_pl,m_nonlop_ylm
-!!      mkcore_wvl
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3388,11 +3193,6 @@ end subroutine strconv
 !! symrl1(3,3,nsym1)=corresponding 3x3 matrices of the group symmetries (real space)
 !! tnons1(3,nsym1)=corresponding nonsymmorphic translations of space group in terms
 !!   of real space primitive translations (may be 0)!!
-!!
-!! PARENTS
-!!      m_dfpt_looppert,m_dtset,m_dvdb,m_iogkk
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3571,11 +3371,6 @@ end subroutine littlegroup_pert
 !!   0 for non-target perturbations
 !!   1 for basis perturbations
 !!  -1 for perturbations that can be found from basis perturbations
-!!
-!! PARENTS
-!!      m_dtset,m_dvdb,m_respfn_driver
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

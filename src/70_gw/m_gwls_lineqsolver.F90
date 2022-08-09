@@ -11,10 +11,6 @@
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -77,12 +73,6 @@ contains
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gwls_DielectricArray,m_gwls_polarisability
-!!
-!! CHILDREN
-!!      hpsikc,precondition_cplx,unset_precondition,xmpi_sum
 !!
 !! SOURCE
 
@@ -619,12 +609,6 @@ end subroutine sqmr
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gwls_polarisability
-!!
-!! CHILDREN
-!!      hpsikc,precondition_cplx,unset_precondition,xmpi_sum
 !!
 !! SOURCE
 

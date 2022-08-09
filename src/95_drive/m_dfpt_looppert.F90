@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -192,11 +188,6 @@ contains
 !!  d2ovl(2,mpert,3,mpert*usepaw)=1st-order change of WF overlap contributions to the 2DTEs
 !!  etotal=total energy (sum of 8 contributions) (hartree)
 !!
-!! PARENTS
-!!      m_respfn_driver
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde,&
@@ -308,7 +299,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  type(wvl_data) :: wvl
 !arrays
  integer :: eq_symop(3,3),ngfftf(18),file_index(4),rfdir(9),rf2dir(9),rf2_dir1(3),rf2_dir2(3)
- integer,allocatable :: blkflg_save(:,:,:,:),dimcprj_srt(:),dummy(:),dyn(:),indkpt1(:),indkpt1_tmp(:)
+ integer,allocatable :: blkflg_save(:,:,:,:),dimcprj_srt(:),dyn(:),indkpt1(:),indkpt1_tmp(:)
  integer,allocatable :: indsy1(:,:,:),irrzon1(:,:,:),istwfk_rbz(:),istwfk_pert(:,:,:)
  integer,allocatable :: kg(:,:),kg1(:,:),nband_rbz(:),npwar1(:),npwarr(:),npwtot(:)
  integer,allocatable :: kg1_mq(:,:),npwar1_mq(:),npwtot1_mq(:) !+q/-q duplicates
@@ -625,15 +616,13 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  ABI_MALLOC(zeff,(3,3,dtset%natom))
  if (dtset%getddb .ne. 0 .or. dtset%irdddb .ne. 0 ) then
    filnam = dtfil%filddbsin
-   ABI_MALLOC(dummy,(dtset%natom))
-   call ddb_from_file(ddb, filnam, 1, dtset%natom, 0, dummy, tmp_ddb_hdr, ddb_crystal, mpi_enreg%comm_world)
+   call ddb%from_file(filnam, 1, tmp_ddb_hdr, ddb_crystal, mpi_enreg%comm_world)
    call tmp_ddb_hdr%free()
    ! Get Dielectric Tensor and Effective Charges
    ! (initialized to one_3D and zero if the derivatives are not available in the DDB file)
    iblok = ddb%get_dielt_zeff(ddb_crystal,1,0,0,dielt,zeff)
    call ddb_crystal%free()
    call ddb%free()
-   ABI_FREE(dummy)
  end if
 
 !%%%% Parallelization over perturbations %%%%%
@@ -1159,7 +1148,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        call ctocprj(atindx,cg,choice,cprj,gmet,gprimd,-1,idir0,iorder_cprj,istwfk_rbz,&
 &       kg,kpt_rbz,mcg,mcprj,dtset%mgfft,mkmem_rbz,mpi_enreg,psps%mpsang,mpw,&
 &       dtset%natom,nattyp,nband_rbz,dtset%natom,dtset%ngfft,nkpt_rbz,dtset%nloalg,&
-&       npwarr,dtset%nspinor,dtset%nsppol,ntypat,dtset%paral_kgb,ph1d,psps,&
+&       npwarr,dtset%nspinor,dtset%nsppol,dtset%nsppol,ntypat,dtset%paral_kgb,ph1d,psps,&
 &       rmet,dtset%typat,ucvol,dtfil%unpaw,xred,ylm,ylmgr)
      end if
    end if
@@ -1338,7 +1327,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
          call ctocprj(atindx,cgq,choice,cprjq,gmet,gprimd,-1,idir0,0,istwfk_rbz,&
 &         kg1,kpq_rbz,mcgq,mcprjq,dtset%mgfft,mkqmem_rbz,mpi_enreg,psps%mpsang,mpw1,&
 &         dtset%natom,nattyp,nband_rbz,dtset%natom,dtset%ngfft,nkpt_rbz,dtset%nloalg,&
-&         npwar1,dtset%nspinor,dtset%nsppol,ntypat,dtset%paral_kgb,ph1d,&
+&         npwar1,dtset%nspinor,dtset%nsppol,dtset%nsppol,ntypat,dtset%paral_kgb,ph1d,&
 &         psps,rmet,dtset%typat,ucvol,dtfil%unpawq,xred,ylm1,ylmgr1)
        else if (mcprjq>0) then
          call pawcprj_copy(cprj,cprjq)
@@ -2415,7 +2404,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
          unitout = dtfil%unddb
          vrsddb=100401
 
-         call ddb_hdr_init(ddb_hdr,dtset,psps,pawtab,DDB_VERSION,dscrpt,&
+         call ddb_hdr%init(dtset,psps,pawtab,dscrpt,&
 &         1,xred=xred,occ=occ_pert)
 
          call ddb_hdr%open_write(dtfil%fnameabo_eigr2d, dtfil%unddb)
@@ -2623,10 +2612,6 @@ end subroutine dfpt_looppert
 !! OUTPUT
 !!  phasecg = phase of different wavefunction products <k,n | k+q,n'>
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine getcgqphase(dtset, timrev, cg,  mcg,  cgq, mcgq, mpi_enreg, nkpt_rbz, npwarr, npwar1, phasecg)
@@ -2830,11 +2815,6 @@ end subroutine getcgqphase
 !!
 !! NOTES
 !! all energies in Hartree
-!!
-!! PARENTS
-!!      m_dfpt_looppert
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3148,11 +3128,6 @@ end subroutine dfpt_prtene
 !! OUTPUT
 !!  eigenresp_mean(mband*nkpt*nsppol)= eigenresp, averaged over degenerate states
 !!
-!! PARENTS
-!!      m_dfpt_looppert,m_respfn_driver
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine eigen_meandege(eigen0,eigenresp,eigenresp_mean,mband,nband,nkpt,nsppol,option)
@@ -3234,7 +3209,7 @@ end subroutine eigen_meandege
 !!  should minimize the second order XC energy (without taking self-consistency into account).
 !!
 !! INPUTS
-!!  ipert = perturbtation type (works only for ipert==natom+5)
+!!  ipert = perturbation type (works only for ipert==natom+5)
 !!  idir  = direction of the applied magnetic field
 !!  cplex = complex or real first order density and magnetization
 !!  nfft  = dimension of the fft grid
@@ -3246,11 +3221,6 @@ end subroutine eigen_meandege
 !!
 !! OUTPUT
 !!  rhor1(cplex*nfft) = first order density magnetization guess
-!!
-!! PARENTS
-!!      m_dfpt_looppert
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

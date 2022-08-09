@@ -1,0 +1,4 @@
+This directory, gwr, contains tests which exercise parts
+of the ABINIT package, related to the GWR code.
+
+Please, see the README file in the tests directory (above this one) to get help.

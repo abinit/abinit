@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -59,7 +55,7 @@ contains
 !! are solved with the algorithm proposed by Zhang [J. Chem. Phys. 106, 6102 (1997)] [[cite:Zhang1997]],
 !! as worked out by Minary et al, J. Chem. Phys. 188, 2510 (2003) [[cite:Minary2003]].
 !! The conservation of the kinetic energy is obtained within machine precision, at each step.
-!! Related parameters : the time step (dtion), the initial temperature (mdtemp(1)) if the velocities are not defined to start with.
+!! Related parameters: the time step (dtion), the initial temperature (mdtemp(1)) if the velocities are not defined to start with.
 !!
 !! INPUTS
 !! ab_mover <type(abimover)> : Datatype with all the information needed by the preditor
@@ -71,12 +67,6 @@ contains
 !!
 !! SIDE EFFECTS
 !! hist <type(abihist)> : History of positions,forces acell, rprimd, stresses
-!! PARENTS
-!!      m_precpred_1geo
-!!
-!! CHILDREN
-!!      hist2var,var2hist,wrtout,xcart2xred,xred2xcart
-!!
 !! SOURCE
 
 subroutine pred_isokinetic(ab_mover,hist,itime,ntime,zDEBUG,iexit)
@@ -119,12 +109,8 @@ subroutine pred_isokinetic(ab_mover,hist,itime,ntime,zDEBUG,iexit)
 !ENDDEBUG
 
  if(iexit/=0)then
-   if (allocated(fcart_m))       then
-     ABI_FREE(fcart_m)
-   end if
-   if (allocated(vel_nexthalf))  then
-     ABI_FREE(vel_nexthalf)
-   end if
+   ABI_SFREE(fcart_m)
+   ABI_SFREE(vel_nexthalf)
    return
  end if
 
@@ -146,12 +132,8 @@ subroutine pred_isokinetic(ab_mover,hist,itime,ntime,zDEBUG,iexit)
 !###     dataset that exit before itime==ntime
 
  if(itime==1)then
-   if (allocated(fcart_m))       then
-     ABI_FREE(fcart_m)
-   end if
-   if (allocated(vel_nexthalf))  then
-     ABI_FREE(vel_nexthalf)
-   end if
+   ABI_SFREE(fcart_m)
+   ABI_SFREE(vel_nexthalf)
  end if
 
  if (.not.allocated(fcart_m))       then
@@ -203,7 +185,7 @@ subroutine pred_isokinetic(ab_mover,hist,itime,ntime,zDEBUG,iexit)
  enddo
 
 !Now, the number of degrees of freedom is reduced by four because of the kinetic energy conservation
-!and because of the conservation of the total momentum for each dimension, in case no atom position is fixed for that dimension 
+!and because of the conservation of the total momentum for each dimension, in case no atom position is fixed for that dimension
 !(in the latter case, one degree of freedom has already been taken away)
 !This was not done until v8.9 of ABINIT ...
  ndegfreedom=nxyzatfree
@@ -231,7 +213,7 @@ subroutine pred_isokinetic(ab_mover,hist,itime,ntime,zDEBUG,iexit)
    end do
 
 !  Computation of vel(:,:) at the next positions
-!  Computation of v2gauss, actually twice the kinetic energy. 
+!  Computation of v2gauss, actually twice the kinetic energy.
 !  Called 2K, cf Eq. (A13) of [[cite:Minary2003]].
    v2gauss=0.0_dp
    do iatom=1,ab_mover%natom
@@ -273,7 +255,7 @@ subroutine pred_isokinetic(ab_mover,hist,itime,ntime,zDEBUG,iexit)
          vel(idim,iatom)=zero
        endif
      enddo
-   enddo  
+   enddo
 
    if (zDEBUG)then
      write(std_out,*) 'Computation of the second half-velocity'

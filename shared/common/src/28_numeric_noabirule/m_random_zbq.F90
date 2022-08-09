@@ -25,10 +25,6 @@
 !!   See http://www.ucl.ac.uk/~ucakarc/work/software/randgen.txt
 !!   for further information
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H

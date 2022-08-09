@@ -15,10 +15,6 @@
 !!
 !! NOTES
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -136,12 +132,6 @@ contains
 !!  stand for the q-gradient of E^{\epsilon_{alpha}* \tau_{\kappa\beta}}.
 !!  By this reason there is an additional -1 factor here when computing
 !!  the physical observables.
-!!
-!! PARENTS
-!!      m_longwave
-!!
-!! CHILDREN
-!!      cart39
 !!
 !! SOURCE
 
@@ -1134,12 +1124,6 @@ end subroutine dfpt_qdrpole
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_dfpt_lw
-!!
-!! CHILDREN
-!!      cart39
-!!
 !! SOURCE
 
 subroutine dfpt_qdrpout(d3etot,eqgradhart,gprimd,kptopt,matom,mpert,natpert, &
@@ -1625,12 +1609,6 @@ end subroutine dfpt_qdrpout
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_longwave
-!!
-!! CHILDREN
-!!      cart39
 !!
 !! SOURCE
 
@@ -3148,12 +3126,6 @@ end subroutine dfpt_flexo
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_dfpt_lw
-!!
-!! CHILDREN
-!!      cart39
-!!
 !! SOURCE
 
  subroutine dfpt_ciflexoout(d3etot,elflexoflg,elflexowf,elflexowf_t1,elflexowf_t2, &
@@ -3684,12 +3656,6 @@ end subroutine dfpt_ciflexoout
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_dfpt_lw
-!!
-!! CHILDREN
-!!      cart39
-!!
 !! SOURCE
 
  subroutine dfpt_ddmdqout(ddmdq_flg,ddmdq_qgradhart,ddmdqwf,ddmdqwf_t1,ddmdqwf_t2,ddmdqwf_t3,d3etot, &
@@ -4054,12 +4020,6 @@ end subroutine dfpt_ciflexoout
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_dfpt_lw
-!!
-!! CHILDREN
-!!      cart39
 !!
 !! SOURCE
 

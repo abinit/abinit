@@ -151,6 +151,7 @@ _tsuite_dirs = [
     # "cpu",      This directory is disabled
     "etsf_io",
     "fast",
+    "gwr",
     "psml",
     "gpu",
     "libxc",

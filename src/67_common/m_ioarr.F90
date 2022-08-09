@@ -15,8 +15,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -41,9 +39,7 @@ MODULE m_ioarr
 #ifdef HAVE_MPI2
  use mpi
 #endif
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
 
  use defs_abitypes,   only : mpi_type
  use defs_datatypes,  only : ebands_t
@@ -127,11 +123,6 @@ CONTAINS  !=====================================================================
 !! === if rdwrpaw/=0 ===
 !!  pawrhoij(my_natom*usepaw) <type(pawrhoij_type)>= paw rhoij occupancies and related data
 !!
-!! PARENTS
-!!      m_gstate,m_outscfcv
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
@@ -154,10 +145,8 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
  type(pawrhoij_type),intent(inout) :: pawrhoij(:)
 
 !Local variables-------------------------------
-#ifdef HAVE_NETCDF
  integer :: ncid,ncerr
  character(len=fnlen) :: file_etsf
-#endif
 #ifdef HAVE_BIGDFT
  integer :: i,i1,i2,i3,ia,ind,n1,n2,n3
  integer :: zindex,zstart,zstop
@@ -213,12 +202,10 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
 
  call wrtout(std_out, 'ioarr: file name is: '//TRIM(fildata))
 
-#ifdef HAVE_NETCDF
  if (accessfil == IO_MODE_ETSF) then ! Initialize filename in case of ETSF file.
    file_etsf = nctk_ncify(fildata)
    call wrtout(std_out,sjoin('file name for ETSF access: ', file_etsf))
  end if
-#endif
 
 !Some definitions for MPI-IO access
  spaceComm = mpi_enreg%comm_cell
@@ -414,7 +401,6 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
        close (unit=unt, err=10, iomsg=errmsg)
      end if
 
-#ifdef HAVE_NETCDF
    else if (accessfil == 3) then
 
      ! Read the header and broadcast it in comm_cell
@@ -455,7 +441,6 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
        ncerr = nctk_read_datar(file_etsf,varname,ngfft,cplex,nfft,hdr0%nspden,comm_fft,fftn3_distrib,ffti3_local,arr)
        NCF_CHECK(ncerr)
      end if
-#endif
 
    else
      write(msg,'(a,i0,a)')'Bad value for accessfil', accessfil, ' on read '
@@ -577,7 +562,6 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
        close(unt, err=10, iomsg=errmsg)
      end if
 
-#ifdef HAVE_NETCDF
    else if ( accessfil == 3 ) then
 
      ! Master in comm_fft creates the file and writes the header.
@@ -611,7 +595,6 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
 
        NCF_CHECK(nf90_close(ncid))
      end if
-#endif
 
    else
      write(msg,'(a,i0,a)')'Bad value for accessfil', accessfil, ' on write '
@@ -684,11 +667,6 @@ end subroutine ioarr
 !!
 !!   fform i.e. the integer specification for data type is automatically initialized from varname.
 !!
-!! PARENTS
-!!      cut3d,m_ioarr,m_outscfcv,m_sigma_driver
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine fftdatar_write(varname,path,iomode,hdr,crystal,ngfft,cplex,nfft,nspden,datar,mpi_enreg,ebands)
@@ -712,10 +690,8 @@ subroutine fftdatar_write(varname,path,iomode,hdr,crystal,ngfft,cplex,nfft,nspde
  integer :: n1,n2,n3,comm_fft,nproc_fft,me_fft,iarr,ierr,ispden,unt,mpierr,fform
  integer :: i3_glob,my_iomode
  integer(kind=XMPI_OFFSET_KIND) :: hdr_offset,my_offset,nfft_tot
-#ifdef HAVE_NETCDF
  integer :: ncid,ncerr
  character(len=fnlen) :: file_etsf
-#endif
  real(dp) :: cputime,walltime,gflops
  character(len=500) :: msg,errmsg
  type(abifile_t) :: abifile
@@ -826,7 +802,6 @@ subroutine fftdatar_write(varname,path,iomode,hdr,crystal,ngfft,cplex,nfft,nspde
    !end if
 #endif
 
-#ifdef HAVE_NETCDF
  case (IO_MODE_ETSF)
    file_etsf = nctk_ncify(path)
 
@@ -853,7 +828,6 @@ subroutine fftdatar_write(varname,path,iomode,hdr,crystal,ngfft,cplex,nfft,nspde
 
      NCF_CHECK(nf90_close(ncid))
    end if
-#endif
 
  case default
    ABI_ERROR(sjoin("Wrong iomode:",itoa(my_iomode)))
@@ -889,11 +863,6 @@ end subroutine fftdatar_write
 !! See fftdatar_write for the meaning of the other variables.
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_dfpt_scfcv,m_scfcv_core
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -956,8 +925,8 @@ end subroutine fftdatar_write_from_hdr
 !!  is delegated to the caller.
 !!
 !! INPUTS
-!! fname=Name of the density file
-!! cplex=1 if density is real, 2 if complex e.g. DFPT density.
+!! fname=Name of the file
+!! cplex=1 if array is real, 2 if complex e.g. DFPT density.
 !! nspden=Number of spin density components.
 !! nfft=Number of FFT points (treated by this processor)
 !! ngfft(18)=Info on the FFT mesh.
@@ -989,17 +958,10 @@ end subroutine fftdatar_write_from_hdr
 !!   and pawrhoij is dimensioned with my_natom
 !!   All the processors inside comm and comm_atom should call this routine.
 !!
-!! PARENTS
-!!      m_dfpt_looppert,m_dfpt_lw,m_dfptnl_loop,m_dvdb,m_gstate,m_longwave
-!!      m_nonlinear,m_pead_nl_loop,m_positron,m_respfn_driver,m_sigma_driver
-!!      m_sigmaph,mrgscr
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orhor, ohdr, pawrhoij, comm, &
-  check_hdr, allow_interp) ! Optional
+                     check_hdr, allow_interp) ! Optional
 
 !Arguments ------------------------------------
 !scalars
@@ -1022,9 +984,7 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
  integer :: ispden,ifft,nfftot_file,nprocs,ierr,i1,i2,i3,i3_local,n1,n2,n3
  integer,parameter :: fform_den=52
  integer :: restart, restartpaw
-#ifdef HAVE_NETCDF
  integer :: ncerr
-#endif
  real(dp) :: ratio,ucvol
  real(dp) :: cputime,walltime,gflops
  logical :: need_interp,have_mpifft,allow_interp__
@@ -1088,7 +1048,6 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
      end do
      close(unt)
 
-#ifdef HAVE_NETCDF
    case (IO_MODE_ETSF)
      NCF_CHECK(nctk_open_read(unt, my_fname, xmpi_comm_self))
      call hdr_ncread(ohdr, unt, fform)
@@ -1115,7 +1074,7 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
                         count=[cplex, ohdr%ngfft(1), ohdr%ngfft(2), ohdr%ngfft(3), ohdr%nspden])
      NCF_CHECK(ncerr)
      NCF_CHECK(nf90_close(unt))
-#endif
+
    case default
      ABI_ERROR(sjoin("Wrong iomode:", itoa(iomode)))
    end select
@@ -1123,7 +1082,7 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
    need_interp = any(ohdr%ngfft(1:3) /= ngfft(1:3))
    if (need_interp .and. allow_interp__) then
      msg = sjoin("Different FFT meshes. Caller:", ltoa(ngfft(1:3)), &
-                 ". File: ", ltoa(ohdr%ngfft(1:3)), ". Will interpolate rhor(r).")
+                 ". File: ", ltoa(ohdr%ngfft(1:3)), ". Need to perform interpolation.")
      ABI_COMMENT(msg)
 
      ABI_MALLOC(rhor_tmp, (cplex*product(ngfft(1:3)), ohdr%nspden))
@@ -1285,10 +1244,6 @@ end subroutine read_rhor
 !!  unit=Fortran unit number (already opened in the caller).
 !!  msg=Error message if ierr /= 0
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 integer function fort_denpot_skip(unit, msg) result(ierr)
@@ -1348,11 +1303,6 @@ end function fort_denpot_skip
 !!  More explicitely:
 !!    We copy denpot_in(istar_in+1:istart_in+nelem,:)
 !!       into denpot_out(istart_out+1:istart_out+nelem,:)
-!!
-!! PARENTS
-!!      m_ioarr
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

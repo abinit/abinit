@@ -10,10 +10,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -48,7 +44,7 @@ MODULE m_haydock
  use m_numeric_tools,     only : print_arr, symmetrize, hermitianize, continued_fract, wrap2_pmhalf, iseven
  use m_kpts,              only : listkk
  use m_crystal,           only : crystal_t
- use m_bz_mesh,           only : kmesh_t, findqg0, get_bz_item
+ use m_bz_mesh,           only : kmesh_t, findqg0
  use m_double_grid,       only : double_grid_t, get_kpt_from_indices_coarse, compute_corresp
  use m_paw_hr,            only : pawhur_t
  use m_wfd,               only : wfdgw_t
@@ -94,11 +90,6 @@ CONTAINS  !=====================================================================
 !!
 !! OUTPUT
 !!  The imaginary part of the macroscopic dielectric function is written on the external file _EXC_MDF
-!!
-!! PARENTS
-!!      m_bethe_salpeter
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -612,11 +603,6 @@ end subroutine exc_haydock_driver
 !! OUTPUT
 !!  green(BSp%nomega,nkets)=
 !!
-!! PARENTS
-!!      m_haydock
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine haydock_herm(BSp,BS_files,Cryst,Hdr_bse,my_t1,my_t2,&
@@ -892,11 +878,6 @@ end subroutine haydock_herm
 !!    if niter_done>0: aa(1:niter_done), bb(1:niter_done) store the coefficients of the previous run.
 !!    when the routine returns aa(1:inn) and bb(1:inn) contain the matrix elements of the tridiagonal form.
 !!
-!! PARENTS
-!!      m_haydock
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine haydock_herm_algo(niter_done,niter_max,nomega,omega,tol_iter,check,&
@@ -1072,11 +1053,6 @@ end subroutine haydock_herm_algo
 !!  phi_n_file(:)
 !!  phi_nm1_file(:)
 !!
-!! PARENTS
-!!      m_haydock
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine haydock_restart(BSp,restart_file,ftype,iq_search,hsize,niter_file,aa_file,bb_file,phi_nm1_file,phi_n_file,comm)
@@ -1188,11 +1164,6 @@ end subroutine haydock_restart
 !!  tensor_red(BSp%nomega, 6) = idem in reduced coordinated
 !!  ierr = 0 if the tensors have been successfully computed
 !!      \= 0 if the system is ill-posed in terms of q-points (not enough or not independent q-points)
-!!
-!! PARENTS
-!!      m_haydock
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1313,11 +1284,6 @@ end subroutine haydock_mdf_to_tensor
 !!
 !! OUTPUT
 !!  green(BSp%nomega)=The imaginary part of the macroscopic dielectric function.
-!!
-!! PARENTS
-!!      m_haydock
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1567,11 +1533,6 @@ end subroutine haydock_psherm
 !!    if niter_done>0: aa(1:niter_done), bb(1:niter_done) store the coefficients of the previous run.
 !!    when the routine returns aa(1:inn) and bb(1:inn) contain the matrix elements of the tridiagonal form.
 !!  cc(niter_tot+1)
-!!
-!! PARENTS
-!!      m_haydock
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1866,11 +1827,6 @@ end subroutine haydock_psherm_optalgo
 !!
 !! OUTPUT
 !!  green(BSp%nomega)=The imaginary part of the macroscopic dielectric function.
-!!
-!! PARENTS
-!!      m_haydock
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2173,11 +2129,6 @@ end subroutine haydock_bilanczos
 !!    when the routine returns aa(1:inn) and bb(1:inn) contain the matrix elements of the tridiagonal form.
 !!  cc(niter_tot+1)
 !!
-!! PARENTS
-!!      m_haydock
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine haydock_bilanczos_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,check,hexc,hexc_i,hsize,my_t1,my_t2,&
@@ -2468,11 +2419,6 @@ end subroutine haydock_bilanczos_optalgo
 !!
 !! OUTPUT
 !!  spectrum(nz)=Contains f(z) on the input mesh.
-!!
-!! PARENTS
-!!      bsepostproc,m_haydock
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

@@ -18,8 +18,6 @@
 !!   Moreover the multiple calls to redef render the IO very inefficient
 !!   That part should be rationalized!
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -274,8 +272,6 @@ CONTAINS
 !! FUNCTION
 !!  Use netcdf classic mode for new files when only sequential-IO needs to be performed
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 subroutine nctk_use_classic_for_seq()
@@ -298,8 +294,6 @@ end subroutine nctk_use_classic_for_seq
 !! FUNCTION
 !!  Return the nc identifier from the name of the variable
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 integer function nctk_idname(ncid, varname) result(varid)
@@ -319,8 +313,8 @@ integer function nctk_idname(ncid, varname) result(varid)
  ncerr = nf90_inq_varid(ncid, varname, varid)
 
  if (ncerr /= nf90_noerr) then
-   write(msg,'(5a)')&
-     "NetCDF library returned: ",trim(nf90_strerror(ncerr)),ch10,&
+   write(msg,'(6a)')&
+     "NetCDF library returned: `",trim(nf90_strerror(ncerr)), "`", ch10,&
      "while trying to get the ncid of variable: ",trim(varname)
    ABI_ERROR(msg)
  end if
@@ -420,12 +414,6 @@ end function nctk_string_from_occopt
 !!  errmsg=String with error message. Use `if (len_trim(errmsg) /= 0) ABI_ERROR(errmsg)`
 !!    to handle possible errors in the caller.
 !!
-!! PARENTS
-!!      m_conducti,optic
-!!
-!! CHILDREN
-!!      ab_define_var
-!!
 !! SOURCE
 
 subroutine nctk_fort_or_ncfile(filename, iomode, errmsg)
@@ -477,10 +465,6 @@ end subroutine nctk_fort_or_ncfile
 !! OUTPUT
 !!  errmsg=String with error message if return value /= 0
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 integer function nctk_try_fort_or_ncfile(filename, errmsg, unit) result(ierr)
@@ -530,18 +514,12 @@ end function nctk_try_fort_or_ncfile
 !!  [print_warning]=TRUE if a warning about paral_kgb use has to be printed
 !!                  Optional, default=yes
 !!
-!! PARENTS
-!!      abinit
-!!
-!! CHILDREN
-!!      ab_define_var
-!!
 !! SOURCE
 
 subroutine nctk_test_mpiio(print_warning)
 
  logical,intent(in),optional :: print_warning
- 
+
 !Local variables-------------------------------
 !scalars
  logical :: my_print_warning
@@ -696,8 +674,6 @@ end function bail_if_ncerr
 !!  ncid=Netcdf identifier.
 !!  comm=MPI communicator.
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 integer function nctk_open_read(ncid, path, comm) result(ncerr)
@@ -754,8 +730,6 @@ end function nctk_open_read
 !!
 !! OUTPUT
 !!  ncid=Netcdf identifier.
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -844,8 +818,6 @@ end function nctk_open_create
 !! OUTPUT
 !!  ncid=Netcdf identifier.
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 integer function nctk_open_modify(ncid, path, comm) result(ncerr)
@@ -858,7 +830,7 @@ integer function nctk_open_modify(ncid, path, comm) result(ncerr)
 ! *********************************************************************
 
  if (.not. nctk_has_mpiio .and. xmpi_comm_size(comm) > 1) then
-   ABI_ERROR("netcdf without MPI-IO support with nprocs > 1!")
+   ABI_ERROR("netcdf without MPI-IO support and nprocs > 1!")
  end if
 
  if (xmpi_comm_size(comm) > 1 .or. nctk_has_mpiio) then
@@ -900,8 +872,6 @@ end function nctk_open_modify
 !!                       as defined in the ETSF specifications (default is .true.).
 !!                       When value is .false., arguments title, history and version
 !!                       are ignored.
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -969,8 +939,6 @@ end function nctk_add_etsf_header
 !! INPUTS
 !!  ncid=Netcdf identifier.
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 integer function nctk_set_defmode(ncid) result(ncerr)
@@ -1006,8 +974,6 @@ end function nctk_set_defmode
 !!
 !! OUTPUT
 !!  ncerr=Exit status
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -1061,8 +1027,6 @@ end function nctk_set_datamode
 !!  ncid=Netcdf file identifier.
 !!  varid=Netcdf variable identifier.
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 integer function nctk_set_collective(ncid, varid) result(ncerr)
@@ -1097,10 +1061,6 @@ end function nctk_set_collective
 !!  values(:)=List of integer scalars
 !!  [defmode]=If True, the nc file is set in define mode (default=False)
 !!  [prefix]=Prefix added to varnames and dimensions. Empty string if not specified.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1144,9 +1104,9 @@ integer function nctk_def_one_dim(ncid, nctkdim, defmode, prefix) result(ncerr)
  if (ncerr == nf90_noerr) then
    NCF_CHECK(nf90_inquire_dimension(ncid, dimid, len=dimlen))
    if (dimlen /= nctkdim%value) then
-     write(msg, "(2a,2(a,i0))")&
-        "dimension already exists with a different value",ch10,&
-        "file = ", dimlen, "; write = ", nctkdim%value
+     write(msg, "(4a,2(a,i0))")&
+        "dimension ", trim(dname)," already exists but with a different value",ch10,&
+        "from file: ", dimlen, "; about to write: ", nctkdim%value
      ABI_ERROR(msg)
    end if
  else
@@ -1173,10 +1133,6 @@ end function nctk_def_one_dim
 !!  values(:)=List of integer scalars
 !!  [defmode]=If True, the nc file is set in define mode (default=False)
 !!  [prefix]=Prefix added to varnames and dimensions. Empty string if not specified.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1228,10 +1184,6 @@ end function nctk_def_dim_list
 !!  ncid=Netcdf identifier.
 !!  varname=Name of the variable
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 integer function nctk_set_atomic_units(ncid, varname) result(ncerr)
@@ -1268,11 +1220,6 @@ end function nctk_set_atomic_units
 !!  ncid=Netcdf identifier.
 !!  [defmode]=If True, the nc file is set in define mode (default=False)
 !!
-!! PARENTS
-!!      m_dfpt_io,m_dfptdb,m_header,m_phonons
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 integer function nctk_def_basedims(ncid, defmode) result(ncerr)
@@ -1295,14 +1242,17 @@ integer function nctk_def_basedims(ncid, defmode) result(ncerr)
  ncerr = nctk_def_dims(ncid, [&
    nctkdim_t("complex", 2), nctkdim_t("symbol_length", 2), nctkdim_t("character_string_length", etsfio_charlen),&
    nctkdim_t("number_of_cartesian_directions", 3), nctkdim_t("number_of_reduced_dimensions", 3),&
-   nctkdim_t("number_of_vectors", 3)])
+   nctkdim_t("number_of_vectors", 3) &
+ ])
  NCF_CHECK(ncerr)
 
  ! Useful integers.
- ncerr = nctk_def_dims(ncid, [&
+ ncerr = nctk_def_dims(ncid, [ &
    nctkdim_t("one", 1), nctkdim_t("two", 2), nctkdim_t("three", 3), &
    nctkdim_t("four", 4), nctkdim_t("five", 5), nctkdim_t("six", 6), &
-   nctkdim_t("seven", 7), nctkdim_t("eight", 8), nctkdim_t("nine", 9), nctkdim_t("ten", 10)])
+   nctkdim_t("seven", 7), nctkdim_t("eight", 8), nctkdim_t("nine", 9), nctkdim_t("ten", 10), &
+   nctkdim_t("fnlen", fnlen + 1) &
+ ])
  NCF_CHECK(ncerr)
 
 end function nctk_def_basedims
@@ -1327,12 +1277,6 @@ end function nctk_def_basedims
 !!
 !! OUTPUT
 !!  (only writing)
-!!
-!! PARENTS
-!!      m_abihist,m_bse_io,m_effective_potential,m_nctk,m_spin_ncfile
-!!
-!! CHILDREN
-!!      ab_define_var
 !!
 !! SOURCE
 
@@ -1380,10 +1324,6 @@ end subroutine ab_define_var
 !!  xtype=Type of the variables
 !!  [defmode]=If True, the nc file is set in define mode (default=False)
 !!  [prefix]=Prefix added to varnames and dimensions. Empty string if not specified.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1450,10 +1390,6 @@ end function nctk_def_scalars_type
 !!  [defmode]=If True, the nc file is set in define mode (default=False)
 !!  [prefix]=Prefix added to varnames and dimensions. Empty string if not specified.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 integer function nctk_def_iscalars(ncid, varnames, defmode, prefix) result(ncerr)
@@ -1494,10 +1430,6 @@ end function nctk_def_iscalars
 !!  [defmode]=If True, the nc file is set in define mode (default=False)
 !!  [prefix]=Prefix added to varnames and dimensions. Empty string if not specified.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 integer function nctk_def_dpscalars(ncid, varnames, defmode, prefix) result(ncerr)
@@ -1537,10 +1469,6 @@ end function nctk_def_dpscalars
 !!  nctk_array=Array descriptor.
 !!  [defmode]=If True, the nc file is set in define mode (default=False)
 !!  [prefix]=Prefix added to varnames and dimensions. Empty string if not specified.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1665,10 +1593,6 @@ end function nctk_def_one_array
 !!  [defmode]=If True, the nc file is set in define mode (default=False)
 !!  [prefix]=Prefix added to varnames and dimensions. Empty string if not specified.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 
@@ -1722,10 +1646,6 @@ end function nctk_def_array_list
 !! OUTPUT
 !!  ncerr=Exit status
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 integer function nctk_write_iscalars(ncid, varnames, values, datamode) result(ncerr)
@@ -1773,10 +1693,6 @@ end function nctk_write_iscalars
 !!  varnames(:)=List of strings with the name of the variables
 !!  values(:)=List of real(dp) scalars
 !!  [datamode]=If True, the nc file is set in data mode (default=False)
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1827,10 +1743,6 @@ end function nctk_write_dpscalars
 !!  varnames(:)=List of strings with the name of the variables
 !!  values(:)=List of integer scalars
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 integer function nctk_defnwrite_ivars(ncid, varnames, values) result(ncerr)
@@ -1874,10 +1786,6 @@ end function nctk_defnwrite_ivars
 !!  ncid=Netcdf identifier.
 !!  varnames(:)=List of strings with the name of the variables
 !!  values(:)=List of integer scalars
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1928,10 +1836,6 @@ end function nctk_defnwrite_dpvars
 !!
 !! OUTPUT
 !!  ncerr=Exit status
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1990,10 +1894,6 @@ end function nctk_write_ibz
 !! OUTPUT
 !!  dimlen=Value of the dimension.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 integer function nctk_get_dim(ncid, dimname, dimlen, datamode) result(ncerr)
@@ -2049,10 +1949,6 @@ end function nctk_get_dim
 !!
 !! OUTPUT
 !!  Only writing
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2256,10 +2152,6 @@ end function nctk_write_datar
 !! OUTPUT
 !!  Only writing
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 integer function nctk_read_datar(path,varname,ngfft,cplex,nfft,nspden,&
@@ -2383,12 +2275,6 @@ end function nctk_read_datar
 !! OUTPUT
 !!   rhor_glob(cplex*nfft_tot,nspden)=Global array
 !!
-!! PARENTS
-!!      m_nctk
-!!
-!! CHILDREN
-!!      ab_define_var
-!!
 !! SOURCE
 
 subroutine collect_datar(ngfft,cplex,nfft,nspden,rhor,comm_fft,fftn3_distrib,ffti3_local,rhor_glob,master)
@@ -2465,12 +2351,6 @@ end subroutine collect_datar
 !! OUTPUT
 !!  rhor(cplex*nfft,nspden)=Array in real space (MPI-FFT distributed)
 !!
-!! PARENTS
-!!      m_nctk
-!!
-!! CHILDREN
-!!      ab_define_var
-!!
 !! SOURCE
 
 subroutine distrib_datar(ngfft,cplex,nfft,nspden,rhor_glob,master,comm_fft,fftn3_distrib,ffti3_local,rhor)
@@ -2534,12 +2414,6 @@ end subroutine distrib_datar
 !! OUTPUT
 !!  var<nctkvar_t>=Info on the variable.
 !!
-!! PARENTS
-!!      m_nctk
-!!
-!! CHILDREN
-!!      ab_define_var
-!!
 !! SOURCE
 
 subroutine var_from_id(ncid, varid, var)
@@ -2595,11 +2469,6 @@ end subroutine var_from_id
 !! OUTPUT
 !!  var<nctkvar_t>=Info on the variable.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      ab_define_var
-!!
 !! SOURCE
 
 subroutine var_from_name(ncid, name, var)
@@ -2641,12 +2510,6 @@ end subroutine var_from_name
 !!
 !! OUTPUT
 !!  Only writing.
-!!
-!! PARENTS
-!!      anaddb,m_ifc
-!!
-!! CHILDREN
-!!      ab_define_var
 !!
 !! SOURCE
 
@@ -2716,12 +2579,6 @@ end subroutine nctk_defwrite_nonana_terms
 !! OUTPUT
 !!  Only writing.
 !!
-!! PARENTS
-!!      anaddb
-!!
-!! CHILDREN
-!!      ab_define_var
-!!
 !! SOURCE
 
 subroutine nctk_defwrite_nonana_raman_terms(ncid, iphl2, nph2l, natom, rsus, mode)
@@ -2782,12 +2639,6 @@ end subroutine nctk_defwrite_nonana_raman_terms
 !! OUTPUT
 !!  Only writing.
 !!
-!! PARENTS
-!!      anaddb
-!!
-!! CHILDREN
-!!      ab_define_var
-!!
 !! SOURCE
 
 subroutine nctk_defwrite_raman_terms(ncid, natom, rsus, phfrq)
@@ -2836,12 +2687,6 @@ end subroutine nctk_defwrite_raman_terms
 !!
 !! TODO:
 !!  Remove
-!!
-!! PARENTS
-!!      m_outvars
-!!
-!! CHILDREN
-!!      ab_define_var
 !!
 !! SOURCE
 
@@ -2896,12 +2741,6 @@ integer :: ncerr, cmode
 !!
 !! OUTPUT
 !!  (only writing)
-!!
-!! PARENTS
-!!      m_parser
-!!
-!! CHILDREN
-!!      ab_define_var
 !!
 !! SOURCE
 
@@ -2980,12 +2819,6 @@ end subroutine write_var_netcdf
 !!
 !! OUTPUT
 !!  (only writing)
-!!
-!! PARENTS
-!!      m_gstate
-!!
-!! CHILDREN
-!!      ab_define_var
 !!
 !! SOURCE
 

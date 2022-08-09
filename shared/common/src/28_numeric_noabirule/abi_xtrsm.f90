@@ -32,8 +32,6 @@
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 subroutine abi_ztrsm(side,uplo,transa,diag,m,n,alpha,a,lda,b,ldb)
@@ -83,8 +81,6 @@ end subroutine abi_ztrsm
 !! FUNCTION
 !!
 !! INPUTS
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -148,8 +144,6 @@ end subroutine abi_dtrsm
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!
 !! SOURCE
 
  subroutine abi_d2ztrsm(side,uplo,transa,diag,m,n,alpha,a,lda,b,ldb,&
@@ -211,8 +205,6 @@ end subroutine abi_d2ztrsm
 !! FUNCTION
 !!
 !! INPUTS
-!!
-!! PARENTS
 !!
 !! SOURCE
 !!

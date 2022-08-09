@@ -25,8 +25,6 @@
 !!   [sigma] = Siemens/m  with S = Ampere/Volt = Ohm^-1
 !!   [mu] = S L^2 Q
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -60,7 +58,7 @@ module m_rta
  use m_crystal,        only : crystal_t
  use m_numeric_tools,  only : bisect, simpson_int, safe_div, arth
  use m_fstrings,       only : strcat, sjoin, itoa, ltoa, stoa, ftoa, yesno
- use m_kpts,           only : kpts_timrev_from_kptopt
+ use m_kpts,           only : kpts_timrev_from_kptopt, kpts_map
  use m_occ,            only : occ_fd, occ_dfde
  use m_pawtab,         only : pawtab_type
  use m_ddk,            only : ddkstore_t
@@ -281,12 +279,6 @@ contains  !=====================================================
 !! psps<pseudopotential_type>=Variables related to pseudopotentials.
 !! comm=MPI communicator.
 !!
-!! PARENTS
-!!      m_eph_driver
-!!
-!! CHILDREN
-!!      safe_div
-!!
 !! SOURCE
 
 subroutine rta_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
@@ -359,7 +351,7 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, 
 !Local variables ------------------------------
  integer,parameter :: sppoldbl1 = 1, master = 0
  integer :: ierr, spin, nprocs, my_rank, timrev, ik_ibz, ib, irta, itemp, ndat, nsppol, idat, mband, ikpt
- real(dp) :: dksqmax, cpu, wall, gflops
+ real(dp) :: cpu, wall, gflops
  character(len=500) :: msg
  character(len=fnlen) :: wfk_fname_dense
  type(ebands_t) :: tmp_ebands, ebands_dense
@@ -464,6 +456,7 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, 
 
  !print *, "linewidth_serta", maxval(abs(new%linewidths(:,:,:,:,1)))
  !print *, "linewidth_mrta", maxval(abs(new%linewidths(:,:,:,:,2)))
+ !print *, "max velocities", maxval(abs(new%vbks))
 
  if ( &
      dtset%useria == 888 .and. &
@@ -588,16 +581,15 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, 
    ABI_MALLOC(indkk, (6, tmp_ebands%nkpt))
 
    krank = krank_from_kptrlatt(new%ebands%nkpt, new%ebands%kptns, new%ebands%kptrlatt, compute_invrank=.False.)
-   call krank%get_mapping(tmp_ebands%nkpt, tmp_ebands%kptns, dksqmax, cryst%gmet, indkk, &
-                          cryst%nsym, cryst%symafm, cryst%symrec, timrev, use_symrec=.True.)
-   call krank%free()
 
-   if (dksqmax > tol12) then
-      write(msg, '(3a,es16.6,a)' ) &
+   if (kpts_map("symrec", timrev, cryst, krank, tmp_ebands%nkpt, tmp_ebands%kptns, indkk) /= 0) then
+     write(msg, '(3a)' ) &
        "Error while downsampling ebands in the transport driver",ch10, &
-       "The k-point could not be generated from a symmetrical one. dksqmax: ",dksqmax, ch10
-      ABI_ERROR(msg)
+       "The k-point could not be generated from a symmetrical one."
+     ABI_ERROR(msg)
    end if
+
+   call krank%free()
 
    ! Downsampling linewidths and velocities.
    ABI_MOVE_ALLOC(new%linewidths, tmp_array5)
@@ -674,11 +666,6 @@ end function rta_new
 !! dtset<dataset_type>=All input variables for this dataset.
 !! dtfil<datafiles_type>=variables related to files.
 !! comm=MPI communicator.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      safe_div
 !!
 !! SOURCE
 
@@ -1096,11 +1083,6 @@ end subroutine compute_rta
 !! cryst<crystal_t>=Crystalline structure
 !! comm=MPI communicator.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      safe_div
-!!
 !! SOURCE
 
 subroutine compute_rta_mobility(self, cryst, comm)
@@ -1113,7 +1095,7 @@ subroutine compute_rta_mobility(self, cryst, comm)
 !Local variables ------------------------------
  integer :: nsppol, nkibz, ib, ik_ibz, spin, ii, jj, itemp, ieh, cnt, nprocs, irta, time_opt
  real(dp) :: eig_nk, mu_e, linewidth, fact, fact0, max_occ, kT, wtk, cpu, wall, gflops
- real(dp) :: vr(3), vv_tens(3,3), vv_tenslw(3,3)
+ real(dp) :: vr(3), vv_tens(3,3), vv_tenslw(3,3) !, tmp_tens(3,3)
 
 !************************************************************************
 
@@ -1123,6 +1105,7 @@ subroutine compute_rta_mobility(self, cryst, comm)
  nkibz = self%ebands%nkpt; nsppol = self%ebands%nsppol
 
  time_opt = 0 ! This to preserve the previous behaviour in which TR was not used.
+ !time_opt = -1 ! This to preserve the previous behaviour in which TR was not used.
 
  ABI_CALLOC(self%mobility_mu, (3, 3, 2, nsppol, self%ntemp, self%nrta))
  ABI_CALLOC(self%conductivity_mu, (3, 3, 2, nsppol, self%ntemp, self%nrta))
@@ -1141,6 +1124,7 @@ subroutine compute_rta_mobility(self, cryst, comm)
  ! TODO: Implement other tensors. Compare these results with the ones obtained with spectral sigma
  ! In principle, they should be the same, in practice the integration of sigma requires enough resolution
  ! around the band edge.
+ !print *, "in RTA max velocities", maxval(abs(self%vbks))
  cnt = 0
  do spin=1,nsppol
    do ik_ibz=1,nkibz
@@ -1152,13 +1136,20 @@ subroutine compute_rta_mobility(self, cryst, comm)
 
        ! Store outer product in vv_tens
        vr(:) = self%vbks(:, ib, ik_ibz, spin)
+       ! Don't remove this if: it makes the loop a bit faster and, most importantly,
+       ! it prevents intel from miscompiling the code.
+       if (all(abs(vr) == zero)) cycle
+
        do ii=1,3
          do jj=1,3
            vv_tens(ii, jj) = vr(ii) * vr(jj)
          end do
        end do
+
        ! Symmetrize tensor.
+       !print *, "intens", vv_tens
        vv_tens = cryst%symmetrize_cart_tens33(vv_tens, time_opt)
+       !print *, "out_tens", vv_tens
 
        ! Multiply by the lifetime (SERTA or MRTA)
        do irta=1,self%nrta
@@ -1167,6 +1158,7 @@ subroutine compute_rta_mobility(self, cryst, comm)
            mu_e = self%transport_mu_e(itemp)
            ieh = 2; if (eig_nk >= mu_e) ieh = 1
            linewidth = self%linewidths(itemp, ib, ik_ibz, spin, irta)
+           !print *, linewidth, wtk, occ_dfde(eig_nk, kT, mu_e), "tens", vv_tens
            call safe_div( - wtk * vv_tens * occ_dfde(eig_nk, kT, mu_e), two * linewidth, zero, vv_tenslw)
            self%conductivity_mu(:, :, ieh, spin, itemp, irta) = self%conductivity_mu(:, :, ieh, spin, itemp, irta) &
              + vv_tenslw(:, :)
@@ -1215,11 +1207,6 @@ end subroutine compute_rta_mobility
 !! cryst<crystal_t>=Crystalline structure
 !! dtset<dataset_type>=All input variables for this dataset.
 !! ncid=Netcdf file handle.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      safe_div
 !!
 !! SOURCE
 
@@ -1349,11 +1336,6 @@ end subroutine rta_ncwrite
 !! cryst<crystal_t>=Crystalline structure
 !! dtset<dataset_type>=All input variables for this dataset.
 !! dtfil<datafiles_type>=variables related to files.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      safe_div
 !!
 !! SOURCE
 
@@ -1542,11 +1524,6 @@ end subroutine write_tensor
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      safe_div
-!!
 !! SOURCE
 
 subroutine rta_free(self)
@@ -1609,12 +1586,6 @@ end subroutine rta_free
 !! pawtab(ntypat*usepaw)<pawtab_type>=Paw tabulated starting data.
 !! psps<pseudopotential_type>=Variables related to pseudopotentials.
 !! comm=MPI communicator.
-!!
-!! PARENTS
-!!      m_eph_driver
-!!
-!! CHILDREN
-!!      safe_div
 !!
 !! SOURCE
 
@@ -1750,6 +1721,7 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
        end if
      end if
 
+     ! Note that the size along the (n, m) axis does not depend on the kcalc index.
      ABI_CALLOC(sr_p%vals, (sr_p%nq_ibzk_eff, bmin:bmax, bmin:bmax, ntemp))
      ABI_MALLOC(sr_p%kq_symtab, (6, sr_p%nq_ibzk_eff))
      ABI_MALLOC(sr_p%lgk_sym2glob, (2, sr_p%lgk_nsym))
@@ -2138,12 +2110,6 @@ end subroutine ibte_driver
 !! INPUTS
 !! cryst<crystal_t>=Crystalline structure
 !! comm=MPI communicator.
-!!
-!! PARENTS
-!!      m_rta
-!!
-!! CHILDREN
-!!      safe_div
 !!
 !! SOURCE
 

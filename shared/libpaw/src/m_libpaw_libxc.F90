@@ -365,11 +365,6 @@ contains
 !! FUNCTION
 !!  Load libXC constants from C headers
 !!
-!! PARENTS
-!!      m_libpaw_libxc
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine libpaw_libxc_constants_load()
@@ -493,10 +488,6 @@ contains
 !! SIDE EFFECTS
 !! [xc_functionals(2)]=<type(libpaw_libxc_type)>, optional argument
 !!                     XC functionals to initialize
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -674,10 +665,6 @@ end subroutine libpaw_libxc_init
 !! [xc_functionals(2)]=<type(libpaw_libxc_type)>, optional argument
 !!                     XC functionals to initialize
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine libpaw_libxc_end(xc_functionals)
@@ -810,10 +797,6 @@ end function libpaw_libxc_fullname
 !!
 !! OUTPUT
 !!  xcrefs(:)= references(s) of the functional
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1058,10 +1041,6 @@ end function libpaw_libxc_ismgga
 !! [xc_functionals(2)]=<type(libxc_functional_type)>, optional argument
 !!                     Handle for XC functionals
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  function libpaw_libxc_needs_laplacian(xc_functionals)
@@ -1130,10 +1109,6 @@ end function libpaw_libxc_is_hybrid
 !!
 !! INPUTS
 !!  xcid= id of a LibXC functional
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1212,10 +1187,6 @@ end function libpaw_libxc_has_kxc
 !! INPUTS
 !! [xc_functionals(2)]=<type(libpaw_libxc_type)>, optional argument
 !!                     Handle for XC functionals
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1309,10 +1280,6 @@ end function libpaw_libxc_nspin
 !! SIDE EFFECTS
 !! [xc_functionals(2)]=<type(libpaw_libxc_type)>, optional argument
 !!                     XC functionals to initialize
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1632,10 +1599,6 @@ end subroutine libpaw_libxc_getvxc
 !!  [hyb_mixing_sr]= mixing factor of short-range Fock contribution
 !!  [hyb_range]    = Range (for separation)
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine libpaw_libxc_get_hybridparams(hyb_mixing,hyb_mixing_sr,hyb_range,xc_functionals)
@@ -1721,10 +1684,6 @@ end subroutine libpaw_libxc_get_hybridparams
 !!                     XC functionals to initialize
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1949,11 +1908,6 @@ end function libpaw_libxc_gga_from_hybrid
 !! [xc_functionals(2)]=<type(libpaw_libxc_type)>, optional argument
 !!                     XC functionals to initialize
 !!
-!! PARENTS
-!!      m_libpaw_libxc
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine libpaw_libxc_compute_tb09(npts,nspden,rho,grho2,xc_functionals)
@@ -2085,11 +2039,6 @@ function char_f_to_c(f_string) result(c_string)
 !!
 !! OUTPUT
 !!  f_string=Fortran string
-!!
-!! PARENTS
-!!      m_libpaw_libxc
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -93,12 +89,6 @@ contains
 !! NOTES
 !!      this duplicates in part initberry for the init of the dtefield - should be made
 !!      into a common constructor in m_dtefield or somethin
-!!
-!! PARENTS
-!!      m_dfpt_scfcv
-!!
-!! CHILDREN
-!!      dzgedi,dzgefa,overlap_g,proc_distrb_band,xmpi_bcast,xmpi_sum
 !!
 !! SOURCE
 
@@ -740,12 +730,6 @@ end subroutine dfptff_initberry
 !! OUTPUT
 !! grad_berry(2,mpw1,dtefield%mband_occ) = the gradient of the Berry phase term
 !!
-!! PARENTS
-!!      m_dfpt_vtorho
-!!
-!! CHILDREN
-!!      dzgedi,dzgefa,overlap_g,proc_distrb_band,xmpi_bcast,xmpi_sum
-!!
 !! SOURCE
 
 subroutine dfptff_gradberry(cg,cg1,dtefield,grad_berry,ikpt,isppol,&
@@ -1228,12 +1212,6 @@ end subroutine dfptff_gradberry
 !!
 !! OUTPUT
 !! grad_berry = the gradient of the Berry phase term
-!!
-!! PARENTS
-!!      m_dfpt_vtorho
-!!
-!! CHILDREN
-!!      dzgedi,dzgefa,overlap_g,proc_distrb_band,xmpi_bcast,xmpi_sum
 !!
 !! SOURCE
 
@@ -1730,12 +1708,6 @@ end subroutine dfptff_gbefd
 !! OUTPUT
 !! eberry = the energy of the Berry phase term
 !!
-!! PARENTS
-!!      m_dfpt_scfcv
-!!
-!! CHILDREN
-!!      dzgedi,dzgefa,overlap_g,proc_distrb_band,xmpi_bcast,xmpi_sum
-!!
 !! SOURCE
 
 subroutine dfptff_edie(cg,cg1,dtefield,eberry,idir_efield,mband,mband_mem,mkmem_rbz,&
@@ -2127,12 +2099,6 @@ end subroutine dfptff_edie
 !! OUTPUT
 !! grad_berry(2,mpw1,dtefield%mband_occ) = the gradient of the Berry phase term
 !!
-!! PARENTS
-!!      m_dfpt_scfcv
-!!
-!! CHILDREN
-!!      dzgedi,dzgefa,overlap_g,proc_distrb_band,xmpi_bcast,xmpi_sum
-!!
 !! SOURCE
 
 subroutine dfptff_ebp(cg,cg1,dtefield,eberry,mband,mband_mem,mkmem_rbz,&
@@ -2455,12 +2421,6 @@ end subroutine dfptff_ebp
 !! OUTPUT
 !! diet = electric susceptibility tensor
 !!
-!! PARENTS
-!!      m_dfpt_scfcv
-!!
-!! CHILDREN
-!!      dzgedi,dzgefa,overlap_g,proc_distrb_band,xmpi_bcast,xmpi_sum
-!!
 !! SOURCE
 
 subroutine dfptff_die(cg,cg1,dtefield,d2lo,idirpert,ipert,mband,mband_mem,mkmem_rbz,&
@@ -2659,12 +2619,6 @@ end subroutine dfptff_die
 !! OUTPUT
 !! d2lo(1,1:3,natom+5,1:3,1:natom) = Born effective charge tensor
 !!
-!! PARENTS
-!!      m_dfpt_scfcv
-!!
-!! CHILDREN
-!!      dzgedi,dzgefa,overlap_g,proc_distrb_band,xmpi_bcast,xmpi_sum
-!!
 !! SOURCE
 
 subroutine dfptff_bec(cg,cg1,dtefield,natom,d2lo,idirpert,ipert,mband,mband_mem,mkmem_rbz,&
@@ -2859,12 +2813,6 @@ end subroutine dfptff_bec
 !!
 !! OUTPUT
 !! qmat(2,dtefield%nband_occ,dtefield%nband_occ,nkpt,2,3) = inverse of the overlap matrix
-!!
-!! PARENTS
-!!      m_dfpt_scfcv
-!!
-!! CHILDREN
-!!      dzgedi,dzgefa,overlap_g,proc_distrb_band,xmpi_bcast,xmpi_sum
 !!
 !! SOURCE
 
