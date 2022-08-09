@@ -60,11 +60,6 @@ CONTAINS  !===========================================================
 !! gpu_map(0,nproc-1)=contains for any proc the associated device
 !! number. -1 if no gpu is associated
 !!
-!! PARENTS
-!!      m_rec
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine find_set_gpu(nproc,commcart,gpu_map,ngpu)
@@ -167,11 +162,6 @@ end subroutine find_set_gpu
 !!        3: n cpu n gpu
 !!        4: n cpu > m gpu;
 !!        5: n cpu < m gpu
-!!
-!! PARENTS
-!!      m_rec
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

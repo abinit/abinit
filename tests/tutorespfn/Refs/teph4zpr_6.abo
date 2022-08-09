@@ -424,7 +424,6 @@ meta: {optdriver: 7, eph_task: 4, }
  asr: 1 chneut: 1
  dipdip: 1 symdynmat: 1
  Number of k-points for self-energy corrections: 1
- Including all final {mk+q} states inside energy window: [4.347 9.112 ] [eV]
  List of k-points for self-energy corrections:
    1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   6    9
 
@@ -686,7 +685,6 @@ meta: {optdriver: 7, eph_task: 4, }
  asr: 1 chneut: 1
  dipdip: 1 symdynmat: 1
  Number of k-points for self-energy corrections: 1
- Including all final {mk+q} states inside energy window: [4.347 9.112 ] [eV]
  List of k-points for self-energy corrections:
    1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   6    9
 
@@ -948,7 +946,6 @@ meta: {optdriver: 7, eph_task: 4, }
  asr: 1 chneut: 1
  dipdip: 1 symdynmat: 1
  Number of k-points for self-energy corrections: 1
- Including all final {mk+q} states inside energy window: [4.347 9.112 ] [eV]
  List of k-points for self-energy corrections:
    1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   6    9
 
@@ -1210,7 +1207,6 @@ meta: {optdriver: 7, eph_task: 4, }
  asr: 1 chneut: 1
  dipdip: 1 symdynmat: 1
  Number of k-points for self-energy corrections: 1
- Including all final {mk+q} states inside energy window: [4.347 9.112 ] [eV]
  List of k-points for self-energy corrections:
    1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   6    9
 

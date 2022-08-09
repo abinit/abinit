@@ -10,10 +10,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -81,12 +77,6 @@ contains
 !!         [3] P.A. Sterne and J.H. Kaiser, Phys. Rev. B 43, 13892 (1991) [[cite:Sterne1991]].
 !!         [4] M.J. Puska, A.P. Seitsonen and R.M. Nieminen, Phys. Rev. B 52, 10947 (1994) [[cite:Puska1994]].
 !!         [5] B. Barbiellini, M.J. Puska, T. Torsti and R.M.Nieminen, Phys. Rev. B 51, 7341 (1995) [[cite:Barbiellini1995]]
-!!
-!! PARENTS
-!!      m_gammapositron,m_positron
-!!
-!! CHILDREN
-!!      gammapositron,xcden
 !!
 !! SOURCE
 
@@ -297,12 +287,6 @@ end subroutine gammapositron
 !! NOTES
 !!  The input densities (rhor_e and rhor_p) should be positive everywhere
 !!  (call mkdenpos routine before entering this one)
-!!
-!! PARENTS
-!!      m_positron
-!!
-!! CHILDREN
-!!      gammapositron,xcden
 !!
 !! SOURCE
 

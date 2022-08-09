@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -105,11 +101,6 @@ contains
 !!  DFT-D3(BJ) S. Grimme, S. Ehrlich and L. Goerigk
 !!  Effect of the damping function in dispersion corrected density functional theory
 !!  Comput. Chem. 32, 1456 (2011) [[cite:Grimme2011]]
-!!
-!! PARENTS
-!!      m_respfn_driver,m_setvtr,m_stress
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1528,7 +1519,7 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
 &     '      Damping parameters:    a1 = ', vdw_a1, ',    a2 = ', vdw_a2
      call wrtout(std_out,msg,'COLL')
    end if
-   write(msg,'(a,es12.5,3a,i8,2a,es12.5,1a)') &
+   write(msg,'(a,es12.5,3a,i14,2a,es12.5,1a)') &
 &   '      Cut-off radius   = ',rcut,' Bohr',ch10,&
 &   '      Number of pairs contributing = ',npairs,ch10,&
 &   '      DFT-D3 (no 3-body) energy contribution = ',e_vdw_dftd3-e_3bt,' Ha'
@@ -1593,11 +1584,6 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
 !! FUNCTION
 !! Return the product of two complex numbers stored in rank 1 array
 !!
-!! PARENTS
-!!      m_vdw_dftd3
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
    subroutine comp_prod(a,b,c)
@@ -1622,11 +1608,6 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
 !!
 !! FUNCTION
 !! Convert gradients from cartesian to reduced coordinates
-!!
-!! PARENTS
-!!      m_vdw_dftd3
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

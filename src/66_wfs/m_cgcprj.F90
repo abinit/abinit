@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -102,12 +98,6 @@ contains
 !!  smn(2,nbd1,nbd2)=matrix of scalar products between the first set of wavefunctions and the second set of wavefunctions
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
-!!      m_cgcprj,m_extraprho,m_scfcv_core
-!!
-!! CHILDREN
-!!      dotprod_set_cgcprj,lincom_cgcprj,zpotrf,ztrsm
 !!
 !! SOURCE
 
@@ -440,12 +430,6 @@ end subroutine dotprod_set_cgcprj
 !!
 !! SIDE EFFECTS
 !!
-!! PARENTS
-!!      m_scfcv_core
-!!
-!! CHILDREN
-!!      dotprod_set_cgcprj,lincom_cgcprj,zpotrf,ztrsm
-!!
 !! SOURCE
 
 subroutine dotprodm_sumdiag_cgcprj(atindx1,cg_set,cprj_set,dimcprj,&
@@ -674,12 +658,6 @@ end subroutine dotprodm_sumdiag_cgcprj
 !!  cg(2,mcg)= plane wave wavefunction coefficients for the set of input wavefunctions (all k points and spinpol)
 !!  cprj(natom,mcprj) <type(pawcprj_type)>= projected input wave functions <Proj_i|Cnk> with NL projectors
 !!
-!! PARENTS
-!!      m_cgcprj,m_extraprho,m_scfcv_core
-!!
-!! CHILDREN
-!!      dotprod_set_cgcprj,lincom_cgcprj,zpotrf,ztrsm
-!!
 !! SOURCE
 
  subroutine lincom_cgcprj(alpha_mn,cg,cprj,dimcprj,&
@@ -802,12 +780,6 @@ end subroutine lincom_cgcprj
 !! SIDE EFFECTS
 !!  cg(2,mcg)= plane wave wavefunction coefficients for the set of input wavefunctions (all k points and spinpol)
 !!  cprj_k(natom,mcprj) <type(pawcprj_type)>= projected input wave functions <Proj_i|Cnk> with NL projectors for the specific k point and spinpol
-!!
-!! PARENTS
-!!      m_extraprho,m_scfcv_core
-!!
-!! CHILDREN
-!!      dotprod_set_cgcprj,lincom_cgcprj,zpotrf,ztrsm
 !!
 !! SOURCE
 

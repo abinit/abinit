@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -97,10 +93,6 @@ contains  !===========================================================
 !!  Created a function to be able to add more operations than just checking
 !!  the equality of the sums.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 function md5_check(sum1,sum2)
@@ -133,10 +125,6 @@ end function md5_check
 !!
 !! OUTPUT
 !!  String representing the MD5 sum of the file
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -183,10 +171,6 @@ end function md5_sum_from_file
 !! OUTPUT
 !!  String representing the MD5 sum of the argument
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 function md5_sum_from_string(text)
@@ -221,11 +205,6 @@ end function md5_sum_from_string
 !!
 !! OUTPUT
 !!  retval = string containing the MD5 checksum
-!!
-!! PARENTS
-!!      m_hash_md5
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -265,11 +244,6 @@ end subroutine hash_final
 !!  Created a function to be able to add more operations than just checking
 !!  the equality of the sums.
 !!
-!! PARENTS
-!!      m_hash_md5
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine hash_init(ctx)
@@ -301,11 +275,6 @@ end subroutine hash_init
 !!
 !! SIDE EFFECTS
 !!  ctx gets updated with the new data
-!!
-!! PARENTS
-!!      m_hash_md5
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

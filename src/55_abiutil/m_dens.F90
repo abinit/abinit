@@ -12,10 +12,6 @@
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -148,12 +144,6 @@ CONTAINS
 !!
 !! OUTPUT
 !!  hcharge(natom), hden(natom), hweight(natom)= Hirshfeld charges, densities, weights.
-!!
-!! PARENTS
-!!      m_cut3d
-!!
-!! CHILDREN
-!!      xmpi_gather
 !!
 !! SOURCE
 
@@ -459,16 +449,10 @@ end subroutine dens_hirsh
 !! SIDE EFFECTS
 !!  nv_constr_dft_r=the constrained potential or density in real space
 !!
-!! PARENTS
-!!      m_dens
-!!
-!! CHILDREN
-!!      xmpi_gather
-!!
 !! SOURCE
 
 subroutine add_atomic_fcts(natom,nspden,rprimd,mpi_enreg,nfft,ngfft,ntypat,option,ratsph, &
-  typat,coeffs_constr_dft,nv_constr_dft_r,xred)
+  ratsm, typat,coeffs_constr_dft,nv_constr_dft_r,xred)
 
 !Arguments ------------------------------------
 !scalars
@@ -480,6 +464,7 @@ subroutine add_atomic_fcts(natom,nspden,rprimd,mpi_enreg,nfft,ngfft,ntypat,optio
  real(dp),intent(in) :: coeffs_constr_dft(nspden,natom)
  real(dp),intent(inout) :: nv_constr_dft_r(nfft,nspden)
  real(dp),intent(in) :: ratsph(ntypat)
+ real(dp),intent(in) :: ratsm ! Ben change
  real(dp),intent(in) :: rprimd(3,3)
  real(dp),intent(in) :: xred(3,natom)
 
@@ -491,7 +476,7 @@ subroutine add_atomic_fcts(natom,nspden,rprimd,mpi_enreg,nfft,ngfft,ntypat,optio
  integer :: n1, n2, n3
  integer :: ifft_local
  integer ::  i1,i2,i3,ix,iy,iz,izloc
- real(dp) :: dfsm,dify,difz,fsm,r2atsph,rr1,rr2,rr3,ratsm,ratsm2,rx23,ry23,rz23
+ real(dp) :: dfsm,dify,difz,fsm,r2atsph,rr1,rr2,rr3,ratsm2,rx23,ry23,rz23 !Ben change: remove ratsm
  real(dp) :: r2,r2_11,r2_123,r2_23
  real(dp) :: ucvol
  real(dp),parameter :: delta=0.99_dp
@@ -511,7 +496,8 @@ subroutine add_atomic_fcts(natom,nspden,rprimd,mpi_enreg,nfft,ngfft,ntypat,optio
  n2 = ngfft(2)
  n3 = ngfft(3)
 
- ratsm = 0.05_dp ! default value for the smearing region radius - may become input variable later
+ !Ben change: comment out ratsm line
+ !ratsm = 0.05_dp ! default value for the smearing region radius - may become input variable later
 
  if(option==0)then
    nv_constr_dft_r = zero
@@ -641,12 +627,6 @@ end subroutine add_atomic_fcts
 !!  constrained_dft=datastructure that contain the needed information to enforce the density and magnetization constraints
 !!    Most of the data are simply copied from dtset, but also constrained_dft%intgf2(natom,natom) is computed from the available data.
 !!
-!! PARENTS
-!!      m_scfcv_core,m_setvtr
-!!
-!! CHILDREN
-!!      xmpi_gather
-!!
 !! SOURCE
 
  subroutine constrained_dft_ini(chrgat,constrained_dft,constraint_kind,&
@@ -741,12 +721,6 @@ end subroutine constrained_dft_ini
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_scfcv_core,m_setvtr
-!!
-!! CHILDREN
-!!      xmpi_gather
-!!
 !! SOURCE
 
  subroutine constrained_dft_free(constrained_dft)
@@ -817,12 +791,6 @@ end subroutine constrained_dft_free
 !!    At output it will be modified: projected onto the space orthogonal to the atomic spherical functions (if there is a related
 !!    constrained, and augmented by such atomic spherical functions multiplied by the difference between the actual
 !!    integrated charge or magnetization and the target ones.
-!!
-!! PARENTS
-!!      m_rhotov
-!!
-!! CHILDREN
-!!      xmpi_gather
 !!
 !! SOURCE
 
@@ -1187,7 +1155,7 @@ end subroutine constrained_dft_free
 !Now compute the new residual, by adding the spherical functions
  option=1
  call add_atomic_fcts(natom,nspden,c_dft%rprimd,mpi_enreg,nfftf,c_dft%ngfftf,ntypat,option,&
-&  c_dft%ratsph,c_dft%typat,coeffs_constr_dft,vresid,xred)
+&  c_dft%ratsph,c_dft%ratsm,c_dft%typat,coeffs_constr_dft,vresid,xred) ! Ben change: add ratsm
 
  ABI_FREE(coeffs_constr_dft)
  ABI_FREE(intgden)
@@ -1225,12 +1193,6 @@ end subroutine constrained_dft_free
 !! OUTPUT
 !!  nv_constr_dft_r=the constrained potential
 !!
-!! PARENTS
-!!      m_dft_energy,m_rhotov,m_setvtr
-!!
-!! CHILDREN
-!!      xmpi_gather
-!!
 !! NOTES
 !!  based on html notes for the VASP implementation at
 !!  http://cms.mpi.univie.ac.at/vasp/vasp/Constraining_direction_magnetic_moments.html
@@ -1250,7 +1212,7 @@ subroutine mag_penalty(c_dft,mpi_enreg,rhor,nv_constr_dft_r,xred)
 
 !Local variables-------------------------------
 !scalars
- integer :: iatom,magconon,natom,nfft,nspden,ntypat,option
+ integer :: iatom,magconon,natom,nfftf,nspden,ntypat,option
  integer :: cplex1=1
  real(dp):: cmm_x,cmm_y,cmm_z
  real(dp) :: intgden_proj,norm
@@ -1263,7 +1225,7 @@ subroutine mag_penalty(c_dft,mpi_enreg,rhor,nv_constr_dft_r,xred)
 
  magconon=c_dft%magconon
  natom=c_dft%natom
- nfft=c_dft%nfftf
+ nfftf=c_dft%nfftf
  nspden=c_dft%nspden
  ntypat=c_dft%ntypat
 
@@ -1271,7 +1233,7 @@ subroutine mag_penalty(c_dft,mpi_enreg,rhor,nv_constr_dft_r,xred)
  ABI_MALLOC(intgden,(nspden,natom))
 
 !We need the integrated magnetic moments and the smoothing function
- call calcdenmagsph(mpi_enreg,natom,nfft,c_dft%ngfftf,nspden,ntypat,&
+ call calcdenmagsph(mpi_enreg,natom,nfftf,c_dft%ngfftf,nspden,ntypat,&
 &  c_dft%ratsm,c_dft%ratsph,rhor,c_dft%rprimd,c_dft%typat,xred,1,cplex1,intgden=intgden,rhomag=rhomag)
  call prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,std_out,1,c_dft%ratsm,c_dft%ratsph,rhomag,c_dft%typat)
 
@@ -1357,8 +1319,8 @@ subroutine mag_penalty(c_dft,mpi_enreg,rhor,nv_constr_dft_r,xred)
 
 !Now compute the potential in real space
  option=0
- call add_atomic_fcts(natom,nspden,c_dft%rprimd,mpi_enreg,nfft,c_dft%ngfftf,ntypat,option,c_dft%ratsph, &
-   c_dft%typat,coeffs_constr_dft,nv_constr_dft_r,xred)
+ call add_atomic_fcts(natom,nspden,c_dft%rprimd,mpi_enreg,nfftf,c_dft%ngfftf,ntypat,option,c_dft%ratsph, &
+   c_dft%ratsm,c_dft%typat,coeffs_constr_dft,nv_constr_dft_r,xred) ! Ben change: add ratsm
 
  ABI_FREE(coeffs_constr_dft)
  ABI_FREE(intgden)
@@ -1382,12 +1344,6 @@ end subroutine mag_penalty
 !!  Epen=penalty contribution to the total energy corresponding to the constrained potential
 !!  Econstr=???
 !!  Eexp=???
-!!
-!! PARENTS
-!!      m_outscfcv
-!!
-!! CHILDREN
-!!      xmpi_gather
 !!
 !! SOURCE
 
@@ -1555,12 +1511,6 @@ end subroutine mag_penalty_e
 !!    In non collinear case component 1 is total density, and 2:4 are the magnetization vector
 !!  strs_intgden(6,nspden,natom)=stress contribution due to constrained integrated density (magnetization...), due to each atom. Optional arg
 !!  Rest is printing
-!!
-!! PARENTS
-!!      m_dens,m_dfpt_scfcv,m_outscfcv
-!!
-!! CHILDREN
-!!      xmpi_gather
 !!
 !! SOURCE
 
@@ -2001,12 +1951,6 @@ end subroutine calcdenmagsph
 !! OUTPUT
 !!  Printing
 !!
-!! PARENTS
-!!      m_dens,m_dfpt_scfcv,m_outscfcv
-!!
-!! CHILDREN
-!!      xmpi_gather
-!!
 !! SOURCE
 
 subroutine prtdenmagsph(cplex,intgden,natom,nspden,ntypat,nunit,option,ratsm,ratsph,rhomag,typat,ziontypat)
@@ -2308,12 +2252,6 @@ end subroutine prtdenmagsph
 !! fsm=value of the function
 !! dfsm=derivative of the function with respect to xarg (zero, except in the smearing region).
 !!
-!! PARENTS
-!!      m_dens
-!!
-!! CHILDREN
-!!      xmpi_gather
-!!
 !! SOURCE
 
 subroutine radsmear(dfsm,fsm,xarg,xcut,xsmear)
@@ -2373,12 +2311,6 @@ end subroutine radsmear
 !!  IMPORTANT: implementation is thoroughly checked only for npspinor = 1,
 !!             for other case might need to change the part gathering
 !!             the FFT mesh info
-!!
-!! PARENTS
-!!      m_dens
-!!
-!! CHILDREN
-!!      xmpi_gather
 !!
 !! SOURCE
 

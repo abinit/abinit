@@ -12,10 +12,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -258,14 +254,6 @@ contains
 !!      It is defined by nfft, ngfft, mgfft, ...
 !!      For compatibility reasons, (nfftf,ngfftf,mgfftf)
 !!      are set equal to (nfft,ngfft,mgfft) in that case.
-!!
-!! PARENTS
-!!      m_scfcv
-!!
-!! CHILDREN
-!!      cgcprj_cholesky,dotprod_set_cgcprj,dotprodm_sumdiag_cgcprj
-!!      lincom_cgcprj,pawcprj_alloc,pawcprj_axpby,pawcprj_free,pawcprj_get
-!!      pawcprj_getdim,pawcprj_lincom,pawcprj_put,timab,xmpi_sum,zgesv
 !!
 !! SOURCE
 
@@ -1168,7 +1156,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
          call ctocprj(atindx,cg,1,cprj,gmet,gprimd,iatom,idir,&
 &          iorder_cprj,dtset%istwfk,kg,dtset%kptns,mcg,mcprj,dtset%mgfft,dtset%mkmem,mpi_enreg,psps%mpsang,&
 &          dtset%mpw,dtset%natom,nattyp,dtset%nband,dtset%natom,ngfft, dtset%nkpt,dtset%nloalg,npwarr,dtset%nspinor,&
-&          dtset%nsppol,dtset%ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,ucvol,dtfil%unpaw,&
+&          dtset%nsppol,dtset%nsppol,dtset%ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,ucvol,dtfil%unpaw,&
 &          xred,ylm,ylmgr)
          ABI_NVTX_END_RANGE()
          call wrtout(std_out,' cprj is computed')
@@ -1213,7 +1201,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
          call ctocprj(atindx,cg,ctocprj_choice,cprj,gmet,gprimd,iatom,idir,&
 &         iorder_cprj,dtset%istwfk,kg,dtset%kptns,mcg,mcprj,dtset%mgfft,dtset%mkmem,mpi_enreg,psps%mpsang,&
 &         dtset%mpw,dtset%natom,nattyp,dtset%nband,dtset%natom,ngfft, dtset%nkpt,dtset%nloalg,npwarr,dtset%nspinor,&
-&         dtset%nsppol,dtset%ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,ucvol,dtfil%unpaw,&
+&         dtset%nsppol,dtset%nsppol,dtset%ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,ucvol,dtfil%unpaw,&
 &         xred,ylm,ylmgr)
        end if
        if(wfmixalg/=0)then
@@ -1341,7 +1329,6 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 !    and eventually add it to density from WFs
      nhatgrdim=0
      dummy_nhatgr = .False.
-!    This is executed only in the positron case.
      if (psps%usepaw==1.and.(dtset%positron>=0.or.ipositron/=1) &
 &     .and.((usexcnhat==0) &
 &     .or.(dtset%xclevel==2.and.(dtfil%ireadwf/=0.or.dtfil%ireadden/=0.or.initialized/=0)) &
@@ -2164,8 +2151,8 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 &   mcg,mcprj,dtset%mgfft,dtset%mkmem,mpi_enreg,psps%mpsang,&
 &   dtset%mpw,dtset%natom,nattyp,dtset%nband,dtset%natom,ngfft,&
 &   dtset%nkpt,dtset%nloalg,npwarr,dtset%nspinor,dtset%nsppol,&
-&   dtset%ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,&
-&   ucvol,dtfil%unpaw,xred,ylm,ylmgr)
+&   dtset%nsppol,dtset%ntypat,dtset%paral_kgb,ph1d,psps,rmet,&
+&   dtset%typat,ucvol,dtfil%unpaw,xred,ylm,ylmgr)
  end if
 
 ! MRM print final Hartree energy components
@@ -2518,14 +2505,6 @@ end subroutine scfcv_core
 !!      they have to be stored on the fine FFT grid.
 !!  In case of norm-conserving calculations the FFT grid is the usual FFT grid.
 !!
-!! PARENTS
-!!      m_scfcv_core
-!!
-!! CHILDREN
-!!      cgcprj_cholesky,dotprod_set_cgcprj,dotprodm_sumdiag_cgcprj
-!!      lincom_cgcprj,pawcprj_alloc,pawcprj_axpby,pawcprj_free,pawcprj_get
-!!      pawcprj_getdim,pawcprj_lincom,pawcprj_put,timab,xmpi_sum,zgesv
-!!
 !! SOURCE
 
 subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
@@ -2855,14 +2834,6 @@ end subroutine etotfor
 !!                          Value from previous SCF cycle is input and stored in some form
 !!                          Extrapolated value is output
 !!  scf_history_wf <type(scf_history_type)>=arrays obtained from previous SCF cycles
-!!
-!! PARENTS
-!!      m_scfcv_core
-!!
-!! CHILDREN
-!!      cgcprj_cholesky,dotprod_set_cgcprj,dotprodm_sumdiag_cgcprj
-!!      lincom_cgcprj,pawcprj_alloc,pawcprj_axpby,pawcprj_free,pawcprj_get
-!!      pawcprj_getdim,pawcprj_lincom,pawcprj_put,timab,xmpi_sum,zgesv
 !!
 !! SOURCE
 

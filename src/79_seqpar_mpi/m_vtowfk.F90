@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -156,17 +152,6 @@ contains
 !!                    (cumulative, so input as well as output). Update only
 !!                    for occopt<3 (fixed occupation numbers)
 !!  rmm_diis_status: Status of the RMM-DIIS eigensolver. See m_rmm_diis.
-!!
-!! PARENTS
-!!      m_vtorho
-!!
-!! CHILDREN
-!!      build_h,cg_hprotate_and_get_diag,cg_hrotate_and_get_diag,cgtk_fixphase
-!!      cgwf,cgwf_cprj,chebfi,cprj_rotate,cprj_update,cprj_update_oneband
-!!      cwtime,fourwf,getghc_nucdip,lobpcgwf,lobpcgwf2,meanvalue_g,mksubovl
-!!      nonlop,pawcprj_alloc,pawcprj_copy,pawcprj_free,pawcprj_put,prep_fourwf
-!!      prep_nonlop,pw_orthon,pw_orthon_cprj,rmm_diis,subdiago
-!!      subdiago_low_memory,timab,wrtout,xmpi_sum
 !!
 !! NOTES
 !!  The cprj are distributed over band and spinors processors.

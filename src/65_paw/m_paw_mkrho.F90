@@ -127,22 +127,13 @@ CONTAINS  !=====================================================================
 !!  They should be different only if pawrhoij is distributed over atomic sites
 !!  (in that case pawrhoij_unsym should not be distributed over atomic sites).
 !!
-!! PARENTS
-!!      m_afterscfloop,m_dfpt_nstwf,m_dfpt_scfcv,m_dfpt_vtorho,m_dfptnl_pert
-!!      m_scfcv_core,m_vtorho
-!!
-!! CHILDREN
-!!      free_my_atmtab,get_my_atmtab,initylmr,nhatgrid,pawfgrtab_free
-!!      pawfgrtab_init,pawrad_deducer0,pawtab_get_lsize,printxsf,sort_dp,spline
-!!      splint,wrtout,xmpi_barrier,xmpi_sum,xred2xcart
-!!
 !! SOURCE
 
 subroutine pawmkrho(compute_rhor_rhog,compch_fft,cplex,gprimd,idir,indsym,ipert,mpi_enreg,&
 &          my_natom,natom,nspden,nsym,ntypat,paral_kgb,pawang,pawfgr,pawfgrtab,pawprtvol,&
 &          pawrhoij,pawrhoij_unsym,&
 &          pawtab,qphon,rhopsg,rhopsr,rhor,rprimd,symafm,symrec,typat,ucvol,usewvl,xred,&
-&          pawang_sym,pawnhat,pawrhoij0,rhog) ! optional arguments
+&          pawang_sym,pawnhat,pawnhatgr,pawrhoij0,rhog) ! optional arguments
 
 !Arguments ------------------------------------
 !scalars
@@ -159,6 +150,7 @@ subroutine pawmkrho(compute_rhor_rhog,compch_fft,cplex,gprimd,idir,indsym,ipert,
  integer,intent(in) :: symafm(nsym),symrec(3,3,nsym),typat(natom)
  real(dp),intent(in) :: gprimd(3,3),qphon(3),rprimd(3,3),xred(3,natom)
  real(dp),intent(inout),target,optional :: pawnhat(cplex*pawfgr%nfft,nspden) !vz_i
+ real(dp),intent(inout),target,optional :: pawnhatgr(:,:,:) !vz_i
  real(dp),intent(inout) :: rhor(cplex*pawfgr%nfft,nspden*compute_rhor_rhog)
  real(dp),intent(out),optional :: rhog(2,pawfgr%nfft*compute_rhor_rhog)
  real(dp),intent(inout) :: rhopsg(2,pawfgr%nfftc*compute_rhor_rhog),rhopsr(cplex*pawfgr%nfftc,nspden*compute_rhor_rhog)
@@ -174,8 +166,9 @@ subroutine pawmkrho(compute_rhor_rhog,compch_fft,cplex,gprimd,idir,indsym,ipert,
  character(len=500) :: msg
 !arrays
  real(dp) :: tsec(2)
- real(dp) :: rhodum(0,0,0)
+ real(dp),target :: rhodum(0,0,0)
  real(dp),pointer :: pawnhat_ptr(:,:)
+ real(dp),pointer :: pawnhatgr_ptr(:,:,:)
  type(pawrhoij_type),pointer :: pawrhoij_ptr(:),pawrhoij0_ptr(:)
 
 ! ***********************************************************************
@@ -231,6 +224,11 @@ subroutine pawmkrho(compute_rhor_rhog,compch_fft,cplex,gprimd,idir,indsym,ipert,
  else
    ABI_MALLOC(pawnhat_ptr,(pawfgr%nfft,nspden))
  end if
+ if (present(pawnhatgr)) then
+   pawnhatgr_ptr => pawnhatgr
+ else
+   pawnhatgr_ptr => rhodum
+ end if
  if (present(pawrhoij0)) then
    pawrhoij0_ptr => pawrhoij0
  else
@@ -239,7 +237,7 @@ subroutine pawmkrho(compute_rhor_rhog,compch_fft,cplex,gprimd,idir,indsym,ipert,
 
  call pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,my_natom,natom,&
 & pawfgr%nfft,pawfgr%ngfft,ider,nspden,ntypat,pawang,pawfgrtab,&
-& rhodum,pawnhat_ptr,pawrhoij_ptr,pawrhoij0_ptr,pawtab,qphon,rprimd,ucvol,usewvl,xred,&
+& pawnhatgr_ptr,pawnhat_ptr,pawrhoij_ptr,pawrhoij0_ptr,pawtab,qphon,rprimd,ucvol,usewvl,xred,&
 & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
 & comm_fft=mpi_enreg%comm_fft,paral_kgb=paral_kgb,me_g0=mpi_enreg%me_g0,&
 & distribfft=mpi_enreg%distribfft,mpi_comm_wvl=mpi_enreg%comm_wvl)
@@ -268,6 +266,7 @@ subroutine pawmkrho(compute_rhor_rhog,compch_fft,cplex,gprimd,idir,indsym,ipert,
    ABI_FREE(pawrhoij_ptr)
  end if
  nullify(pawnhat_ptr)
+ nullify(pawnhatgr_ptr)
  nullify(pawrhoij_ptr)
 
  call timab(556,2,tsec)
@@ -327,14 +326,6 @@ end subroutine pawmkrho
 !!   Notice that this formula is expressed on the fine grid, and requires
 !!   interpolating the PAW radial functions onto this grid, as well as calling
 !!   initylmr in order to get the angular functions on the grid points.
-!!
-!! PARENTS
-!!      m_bethe_salpeter,m_outscfcv,m_sigma_driver
-!!
-!! CHILDREN
-!!      free_my_atmtab,get_my_atmtab,initylmr,nhatgrid,pawfgrtab_free
-!!      pawfgrtab_init,pawrad_deducer0,pawtab_get_lsize,printxsf,sort_dp,spline
-!!      splint,wrtout,xmpi_barrier,xmpi_sum,xred2xcart
 !!
 !! SOURCE
 

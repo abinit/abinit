@@ -12,10 +12,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -82,11 +78,6 @@ contains
 !!
 !! OUTPUT
 !!  vectornd(3,nfft)=Vector potential in real space, along Cartesian directions
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fourdp,ptabs_fourdp
 !!
 !! SOURCE
 
@@ -262,12 +253,6 @@ end subroutine make_vectornd2
 !!
 !! OUTPUT
 !!  vectornd(3,nfft)=Vector potential in real space, along Cartesian directions
-!!
-!! PARENTS
-!!      m_dfpt_scfcv,m_orbmag,m_scfcv_core
-!!
-!! CHILDREN
-!!      fourdp,ptabs_fourdp
 !!
 !! SOURCE
 
@@ -488,11 +473,6 @@ end subroutine make_vectornd
 !!
 !! OUTPUT
 !!  vunitpawspherepot(cplex*nfft)=Hartree potential in real space, either REAL or COMPLEX
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fourdp,ptabs_fourdp
 !!
 !! SOURCE
 
@@ -732,14 +712,6 @@ end subroutine mkunitpawspherepot
 !! OUTPUT
 !!  vhartr(cplex*nfft)=Hartree potential in real space, either REAL or COMPLEX
 !!
-!! PARENTS
-!!      m_dfpt_rhotov,m_dft_energy,m_fock_getghc,m_forstr,m_kxc,m_nonlinear
-!!      m_odamix,m_pead_nl_loop,m_positron,m_prcref,m_respfn_driver,m_rhotov
-!!      m_setvtr,m_sigma_driver,m_tddft
-!!
-!! CHILDREN
-!!      fourdp,ptabs_fourdp
-!!
 !! SOURCE
 
 subroutine hartre(cplex,gsqcut,icutcoul,izero,mpi_enreg,nfft,ngfft,nkpt,&
@@ -963,12 +935,6 @@ end subroutine hartre
 !! OUTPUT
 !!  ar=mean value
 !!
-!! PARENTS
-!!      m_dfpt_vtowfk,m_dft_energy,m_forstr,m_vtowfk
-!!
-!! CHILDREN
-!!      fourdp,ptabs_fourdp
-!!
 !! SOURCE
 
 subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,use_ndo,ar_im)
@@ -1181,12 +1147,6 @@ end subroutine meanvalue_g
 !!  rdfuncg_out TO BE DESCRIBED SB 090901
 !!  laplacerdfuncg_out TO BE DESCRIBED SB 090901
 !!
-!! PARENTS
-!!      m_frskerker1,m_frskerker2,m_prcref
-!!
-!! CHILDREN
-!!      fourdp,ptabs_fourdp
-!!
 !! SOURCE
 
 subroutine laplacian(gprimd,mpi_enreg,nfft,nfunc,ngfft,rdfuncr,&
@@ -1359,12 +1319,6 @@ end subroutine laplacian
 !! OUTPUT
 !!  frredgr(nfft,3)= reduced gradient of input function (same units as frin)
 !!
-!! PARENTS
-!!      m_dfpt_elt
-!!
-!! CHILDREN
-!!      fourdp,ptabs_fourdp
-!!
 !! SOURCE
 
 subroutine redgr(frin,frredgr,mpi_enreg,nfft,ngfft)
@@ -1508,12 +1462,6 @@ end subroutine redgr
 !! OUTPUT
 !!  vhartr1(nfft)=Inhomogeneous term in strain-perturbation-induced Hartree
 !!   potential in real space,
-!!
-!! PARENTS
-!!      m_dfpt_nstwf,m_dfpt_rhotov,m_dfpt_scfcv
-!!
-!! CHILDREN
-!!      fourdp,ptabs_fourdp
 !!
 !! SOURCE
 
@@ -1703,13 +1651,6 @@ end subroutine hartrestr
 !!  must be used, such as to transform (2*up) => (up+down,up)
 !! In spin-polarized, and if there is no symmetry to be
 !! applied on the system, only the total density is generated in G space
-!!
-!! PARENTS
-!!      m_dfpt_mkrho,m_dfpt_nstwf,m_dfpt_scfcv,m_dfpt_vtorho,m_dvdb,m_mkrho
-!!      m_suscep_stat,m_vtorho,m_vtorhorec,m_vtorhotf,m_wfd
-!!
-!! CHILDREN
-!!      fourdp,ptabs_fourdp
 !!
 !! SOURCE
 
@@ -2226,12 +2167,6 @@ end subroutine symrhg
 !!   grid points and the repetition number for each symmetry class.
 !!  phnons(2,n1*n2*n3,(nspden/nsppol)-3*(nspden/4))=phases associated with nonsymmorphic translations
 !!
-!! PARENTS
-!!      m_ab7_kpoints,m_spacepar,m_wfd
-!!
-!! CHILDREN
-!!      fourdp,ptabs_fourdp
-!!
 !! SOURCE
 
 subroutine irrzg(irrzon,nspden,nsppol,nsym,n1,n2,n3,phnons,symafm,symrel,tnons)
@@ -2614,12 +2549,6 @@ end subroutine irrzg
 !!  rhog1_eq(2,nfft)= symmetric density in reciprocal space for equivalent perturbation
 !!  rhor1_eq(cplex*nfft,nspden) = symmetric density in real space for equivalent perturbation
 !!
-!! PARENTS
-!!      m_dfpt_looppert
-!!
-!! CHILDREN
-!!      fourdp,ptabs_fourdp
-!!
 !! SOURCE
 
 subroutine rotate_rho(cplex, itirev, mpi_enreg, nfft, ngfft, nspden, &
@@ -2794,13 +2723,6 @@ end subroutine rotate_rho
 !! NOTES
 !! nsppol and nspden are needed in case of (anti)ferromagnetic symmetry operations
 !!
-!! PARENTS
-!!      m_dfpt_looppert,m_dfpt_lw,m_dvdb,m_gstate,m_longwave,m_nonlinear
-!!      m_respfn_driver,m_scfcv_core
-!!
-!! CHILDREN
-!!      fourdp,ptabs_fourdp
-!!
 !! SOURCE
 
 subroutine setsym(indsym,irrzon,iscf,natom,nfft,ngfft,nspden,nsppol,nsym,phnons,&
@@ -2895,12 +2817,6 @@ end subroutine setsym
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      dfpt_flexo,dfpt_qdrpole
-!!
-!! CHILDREN
-!!      fourdp,ptabs_fourdp
 !!
 !! SOURCE
 

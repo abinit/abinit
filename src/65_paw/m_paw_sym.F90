@@ -28,8 +28,8 @@ MODULE m_paw_sym
  use m_crystal,   only : crystal_t
  use m_pawang,    only : pawang_type
  use m_pawtab,    only : pawtab_type
- use m_pawcprj,   only : pawcprj_type,pawcprj_alloc,pawcprj_free,pawcprj_copy
- use m_bz_mesh,   only : kmesh_t,get_ibz_item,get_bz_item
+ use m_pawcprj,   only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy
+ use m_bz_mesh,   only : kmesh_t
 
  implicit none
 
@@ -77,22 +77,14 @@ CONTAINS  !=====================================================================
 !!     %zarot(2*lmax+1,2*lmax+1,lmax+1,nsym)=coefficients of the transformation of real spherical
 !!      harmonics under the symmetry operations.
 !!
-!! NOTES  
+!! NOTES
 !!  Derivatives are not symmetrized.
 !!
 !! OUTPUT
-!! 
-!! PARENTS
-!!      m_chi0,m_cohsex,m_prep_calc_ucrpa,m_sigc,m_sigx
-!!
-!! CHILDREN
-!!      get_bz_item,get_ibz_item,pawcprj_copy
 !!
 !! SOURCE
 
 subroutine paw_symcprj(ik_bz,nspinor,nband_k,Cryst,Kmesh,Pawtab,Pawang,Cprj_bz)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -124,18 +116,18 @@ subroutine paw_symcprj(ik_bz,nspinor,nband_k,Cryst,Kmesh,Pawtab,Pawang,Cprj_bz)
  ABI_CHECK(ncpgr==0,"Derivatives of cprj are not coded")
 
 !Get the index of the IBZ image associated to the BZ k-point ik_bz and related simmetry.
- call get_BZ_item(Kmesh,ik_bz,kbz,ik_ibz,isym,itim,isirred=isirred)
+ call Kmesh%get_BZ_item(ik_bz,kbz,ik_ibz,isym,itim,isirred=isirred)
 
  if (isirred) RETURN  ! It is a point in the IBZ, Symmetrization is not needed.
 !
 !The corresponding point kirr in the IBZ.
- call get_IBZ_item(Kmesh,ik_ibz,kirr,wtk)
+ call kmesh%get_IBZ_item(ik_ibz,kirr,wtk)
 
 !Local copy.
  do iatom=1,Cryst%natom
    nlmn_atom(iatom)=Pawtab(Cryst%typat(iatom))%lmn_size
  end do
- 
+
  call pawcprj_alloc(Cprjnk_kibz,ncpgr,nlmn_atom)
  call pawcprj_copy(Cprj_bz,Cprjnk_kibz)
 !
@@ -261,18 +253,10 @@ end subroutine paw_symcprj
 !!
 !! NOTES
 !!  Derivatives are not symmetrized.
-!! 
-!! PARENTS
-!!      m_exc_build
-!!
-!! CHILDREN
-!!      get_bz_item,get_ibz_item,pawcprj_copy
 !!
 !! SOURCE
 
 subroutine paw_symcprj_op(ik_bz,nspinor,nband_k,Cryst,Kmesh,Pawtab,Pawang,in_Cprj,out_Cprj)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -304,15 +288,15 @@ subroutine paw_symcprj_op(ik_bz,nspinor,nband_k,Cryst,Kmesh,Pawtab,Pawang,in_Cpr
  ABI_CHECK(ncpgr==0,"Derivatives of cprj are not coded")
 
 !Get the index of the IBZ image associated to the BZ k-point ik_bz and related simmetry.
- call get_BZ_item(Kmesh,ik_bz,kbz,ik_ibz,isym,itim,isirred=isirred)
+ call Kmesh%get_BZ_item(ik_bz,kbz,ik_ibz,isym,itim,isirred=isirred)
 
  if (isirred) then  ! It is a point in the IBZ, Symmetrization is not needed.
    call pawcprj_copy(in_Cprj,out_Cprj)
-   RETURN  
+   RETURN
  end if
 !
 !The corresponding point kirr in the IBZ.
- call get_IBZ_item(Kmesh,ik_ibz,kirr,wtk)
+ call Kmesh%get_IBZ_item(ik_ibz,kirr,wtk)
 !
 !=== DS_mmpl is the rotation matrix for real spherical harmonics associated to symrec(:,:,isym) ===
 !* Note the convention used by Blanco in Eq. 27 : DS_mmp multiply spherical harmonics as row vectors

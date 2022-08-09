@@ -94,27 +94,15 @@ _ WF disk file :      0.280 Mbytes ; DEN or POT disk file :      0.091 Mbytes.
  -outvars: echo values of preprocessed input variables --------
             acell      1.0640000000E+01  1.0640000000E+01  1.0640000000E+01 Bohr
               amu      2.69815390E+01  7.49215900E+01
-  d3e_pert1_atpol5          1       1
-  d3e_pert1_atpol6          1       1
-  d3e_pert1_atpol7          1       2
-    d3e_pert1_dir5          0       0       0
-    d3e_pert1_dir6          0       0       0
-    d3e_pert1_dir7          1       1       1
    d3e_pert1_elfd5          0
    d3e_pert1_elfd6          0
    d3e_pert1_elfd7          1
    d3e_pert1_phon5          0
    d3e_pert1_phon6          0
    d3e_pert1_phon7          1
-    d3e_pert2_dir5          0       0       0
-    d3e_pert2_dir6          0       0       0
-    d3e_pert2_dir7          1       1       1
    d3e_pert2_elfd5          0
    d3e_pert2_elfd6          0
    d3e_pert2_elfd7          1
-    d3e_pert3_dir5          0       0       0
-    d3e_pert3_dir6          0       0       0
-    d3e_pert3_dir7          1       1       1
    d3e_pert3_elfd5          0
    d3e_pert3_elfd6          0
    d3e_pert3_elfd7          1
@@ -189,21 +177,12 @@ P          mk1mem           8
            prtpot5          1
            prtpot6          1
            prtpot7          0
-            rfdir5          1       1       1
-            rfdir6          1       1       1
-            rfdir7          0       0       0
          rf2_dkdk5          1
          rf2_dkdk6          0
          rf2_dkdk7          0
          rf2_dkde5          0
          rf2_dkde6          1
          rf2_dkde7          0
-    rf2_pert1_dir5          1       1       1
-    rf2_pert1_dir6          1       1       1
-    rf2_pert1_dir7          0       0       0
-    rf2_pert2_dir5          1       1       1
-    rf2_pert2_dir6          1       1       1
-    rf2_pert2_dir7          0       0       0
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
@@ -3872,27 +3851,15 @@ NONLINEAR :  perts :  4.3 /  4.3 /  4.3
  -outvars: echo values of variables after computation  --------
             acell      1.0640000000E+01  1.0640000000E+01  1.0640000000E+01 Bohr
               amu      2.69815390E+01  7.49215900E+01
-  d3e_pert1_atpol5          1       1
-  d3e_pert1_atpol6          1       1
-  d3e_pert1_atpol7          1       2
-    d3e_pert1_dir5          0       0       0
-    d3e_pert1_dir6          0       0       0
-    d3e_pert1_dir7          1       1       1
    d3e_pert1_elfd5          0
    d3e_pert1_elfd6          0
    d3e_pert1_elfd7          1
    d3e_pert1_phon5          0
    d3e_pert1_phon6          0
    d3e_pert1_phon7          1
-    d3e_pert2_dir5          0       0       0
-    d3e_pert2_dir6          0       0       0
-    d3e_pert2_dir7          1       1       1
    d3e_pert2_elfd5          0
    d3e_pert2_elfd6          0
    d3e_pert2_elfd7          1
-    d3e_pert3_dir5          0       0       0
-    d3e_pert3_dir6          0       0       0
-    d3e_pert3_dir7          1       1       1
    d3e_pert3_elfd5          0
    d3e_pert3_elfd6          0
    d3e_pert3_elfd7          1
@@ -3976,21 +3943,12 @@ P          mk1mem           8
            prtpot5          1
            prtpot6          1
            prtpot7          0
-            rfdir5          1       1       1
-            rfdir6          1       1       1
-            rfdir7          0       0       0
          rf2_dkdk5          1
          rf2_dkdk6          0
          rf2_dkdk7          0
          rf2_dkde5          0
          rf2_dkde6          1
          rf2_dkde7          0
-    rf2_pert1_dir5          1       1       1
-    rf2_pert1_dir6          1       1       1
-    rf2_pert1_dir7          0       0       0
-    rf2_pert2_dir5          1       1       1
-    rf2_pert2_dir6          1       1       1
-    rf2_pert2_dir7          0       0       0
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
