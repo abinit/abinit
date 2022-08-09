@@ -39,6 +39,7 @@ module m_orbmag
   use defs_datatypes,     only : pseudopotential_type
   use defs_abitypes,      only : MPI_type
   use m_cgprj,            only : getcprj
+  use m_cgtools,          only : projbd
   use m_dfpt_nstwf,       only : gaugetransfo
   use m_fft,              only : fftpac
   use m_fourier_interpol, only : transgrid
@@ -95,6 +96,7 @@ module m_orbmag
   private :: apply_d2lr_term_k
   private :: apply_dl_term_k
   private :: lamb_core
+  private :: make_pcg1
   private :: orbmag_ptpaw_output
   private :: local_rhoij
   
@@ -176,7 +178,7 @@ subroutine orbmag_ptpaw(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_en
  real(dp),allocatable :: cg_k(:,:),cg1_k(:,:,:),cgrvtrial(:,:),cwavef(:,:)
  real(dp),allocatable :: eig_k(:),ffnl_k(:,:,:,:),kinpw(:),kpg_k(:,:)
  real(dp),allocatable :: om_k(:,:,:),omo_k(:,:,:,:),orbmag_terms(:,:,:,:),orbmag_trace(:,:,:)
- real(dp),allocatable :: ph1d(:,:),ph3d(:,:,:),phkxred(:,:),realgnt(:),rhoij(:,:,:)
+ real(dp),allocatable :: pcg1_k(:,:,:),ph1d(:,:),ph3d(:,:,:),phkxred(:,:),realgnt(:),rhoij(:,:,:)
  real(dp),allocatable :: vectornd(:,:),vectornd_pac(:,:,:,:,:),vlocal(:,:,:,:)
  real(dp),allocatable :: ylm_k(:,:),ylmgr_k(:,:,:)
  complex(dpc),allocatable :: dlanp(:,:,:),dlp2(:,:,:),dlq(:,:,:),dlvh(:,:,:),dlvhnzc(:,:,:)
@@ -403,7 +405,12 @@ subroutine orbmag_ptpaw(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_en
    call pawcprj_get(atindx,cprj_k,cprj,dtset%natom,1,icprj,ikpt,0,isppol,dtset%mband,&
      & dtset%mkmem,dtset%natom,nband_k,nband_k,my_nspinor,dtset%nsppol,0)
 
-   ! compute <p|cg1> cprjs
+   ! compute P_c|cg1>
+   ABI_MALLOC(pcg1_k,(2,mcgk,3))
+   call make_pcg1(cg_k,cg1_k,dimlmn,gs_hamk,istwf_k,mcgk,mpi_enreg,&
+     & dtset%natom,nband_k,npw_k,my_nspinor,pcg1_k)
+
+   ! compute <p|Pc cg1> cprjs
    ABI_MALLOC(cwavef,(2,npw_k))
    choice = 5
    cpopt = 0
@@ -416,7 +423,7 @@ subroutine orbmag_ptpaw(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_en
      call pawcprj_put(atindx,cwaveprj,cprj_k,dtset%natom,nn,0,ikpt,0,isppol,dtset%mband,&
        & dtset%mkmem,dtset%natom,1,nband_k,dimlmn,dtset%nspinor,dtset%nsppol,0)
      do adir = 1, 3
-       cwavef(1:2,1:npw_k) = cg1_k(1:2,(nn-1)*npw_k+1:nn*npw_k,adir)
+       cwavef(1:2,1:npw_k) = pcg1_k(1:2,(nn-1)*npw_k+1:nn*npw_k,adir)
        call getcprj(choice,cpopt,cwavef,cwaveprj,ffnl_k,idir,psps%indlmn,istwf_k,&
          & kg_k,kpg_k,kpoint,psps%lmnmax,dtset%mgfft,mpi_enreg,dtset%natom,nattyp,dtset%ngfft,&
          & dtset%nloalg,npw_k,dtset%nspinor,dtset%ntypat,phkxred,ph1d,ph3d,ucvol,psps%useylm)
@@ -439,7 +446,7 @@ subroutine orbmag_ptpaw(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_en
    ABI_MALLOC(om_k,(2,nband_k,3))
    ABI_MALLOC(omo_k,(2,nband_k,3,3))
 
-   call apply_pw_k(bc_k,cg1_k,dimlmn,eig_k,gs_hamk,mcgk,mpi_enreg,dtset%natom,&
+   call apply_pw_k(bc_k,pcg1_k,dimlmn,eig_k,gs_hamk,mcgk,mpi_enreg,dtset%natom,&
      & nband_k,npw_k,dtset%nspinor,om_k)
 
    orbmag_terms(:,:,:,ibcpw) = orbmag_terms(:,:,:,ibcpw) + trnrm*bc_k
@@ -532,6 +539,7 @@ subroutine orbmag_ptpaw(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_en
 
    ABI_FREE(cg_k)
    ABI_FREE(cg1_k)
+   ABI_FREE(pcg1_k)
    ABI_FREE(eig_k)
    ABI_FREE(ylm_k)
    ABI_FREE(ylmgr_k)
@@ -650,6 +658,116 @@ subroutine orbmag_ptpaw(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_en
 end subroutine orbmag_ptpaw
 !!***
 
+!!****f* ABINIT/make_pcg1
+!! NAME
+!! make_pcg1
+!!
+!! FUNCTION
+!! compute Pc|cg1> from |cg1> and |cg>
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2021 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!! see Audouze et al PRB 78, 035105 (2008) Eq. 40
+!!
+!! SOURCE
+
+subroutine make_pcg1(cg_k,cg1_k,dimlmn,gs_hamk,istwf_k,mcgk,mpi_enreg,&
+    & natom,nband_k,npw_k,nspinor,pcg1_k)
+
+  !Arguments ------------------------------------
+  !scalars
+  integer,intent(in) :: istwf_k,mcgk,natom,nband_k,npw_k,nspinor
+  type(gs_hamiltonian_type),intent(inout) :: gs_hamk
+  type(MPI_type), intent(inout) :: mpi_enreg
+
+  !arrays
+  integer,intent(in) :: dimlmn(natom)
+  real(dp),intent(in) :: cg_k(2,mcgk),cg1_k(2,mcgk,3)
+  real(dp),intent(out) :: pcg1_k(2,mcgk,3)
+
+  !Local variables -------------------------
+  !scalars
+  integer :: adir,choice,comm_fft,cpopt,iband,jband
+  integer :: me_g0,ndat,nnlout,paw_opt,signs,tim_nonlop
+  real(dp) :: doti,dotr,s0,s1
+  !arrays
+  real(dp) :: lambda(1)
+  real(dp),allocatable :: cwavef(:,:),enlout(:),svectout(:,:)
+  real(dp),allocatable :: vcg1(:,:),vectout(:,:)
+  type(pawcprj_type),allocatable :: cwaveprj(:,:)
+
+!--------------------------------------------------------------------
+
+  choice = 1
+  cpopt = -1
+  paw_opt = 3
+  signs = 2
+  tim_nonlop = 0
+  lambda = zero
+  nnlout = 0
+  me_g0 = mpi_enreg%me_g0
+  comm_fft = mpi_enreg%comm_fft
+  ndat = 1
+
+  ABI_MALLOC(cwaveprj,(natom,1))
+  call pawcprj_alloc(cwaveprj,3,dimlmn)
+  ABI_MALLOC(cwavef,(2,npw_k))
+  ABI_MALLOC(vectout,(2,npw_k))
+  ABI_MALLOC(svectout,(2,npw_k))
+  ABI_MALLOC(vcg1,(2,npw_k))
+
+  pcg1_k = zero
+
+  do adir = 1, 3
+
+    do iband = 1, nband_k
+
+      cwavef(1:2,1:npw_k)=cg_k(1:2,(iband-1)*npw_k+1:iband*npw_k)
+      choice=5 ! apply dS/dk, that is, S^1
+      call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,adir,lambda,mpi_enreg,ndat,&
+        & nnlout,paw_opt,signs,svectout,tim_nonlop,cwavef,vectout)
+
+      ! form vcg1 = -1/2 \sum |u_j^0><u_j^0|S^1|u_i^0>, the valence band part of cg1
+      vcg1 = zero
+      do jband = 1, nband_k
+        cwavef(1:2,1:npw_k)=cg_k(1:2,(jband-1)*npw_k+1:jband*npw_k)
+        dotr = DOT_PRODUCT(cwavef(1,:),svectout(1,:))+DOT_PRODUCT(cwavef(2,:),svectout(2,:))
+        doti = DOT_PRODUCT(cwavef(1,:),svectout(2,:))-DOT_PRODUCT(cwavef(2,:),svectout(1,:))
+        vcg1(1,:) = vcg1(1,:) - half*( dotr*cwavef(1,:) - doti*cwavef(2,:))
+        vcg1(2,:) = vcg1(2,:) - half*( dotr*cwavef(2,:) + doti*cwavef(1,:))
+      end do
+    
+      ! subtract vcg1 from cg1_k to obtain pcg1, the conduction band part of cg1 
+      pcg1_k(1:2,(iband-1)*npw_k+1:iband*npw_k,adir) =cg1_k(1:2,(iband-1)*npw_k+1:iband*npw_k,adir)-&
+       &  vcg1(1:2,1:npw_k)
+      
+    end do
+  end do
+
+  ABI_FREE(cwavef)
+  ABI_FREE(vectout)
+  ABI_FREE(vcg1)
+  ABI_FREE(svectout)
+  call pawcprj_free(cwaveprj)
+  ABI_FREE(cwaveprj)
+ 
+end subroutine make_pcg1
+!!***
+
 !!****f* ABINIT/apply_pw_k
 !! NAME
 !! apply_pw_k
@@ -759,9 +877,9 @@ subroutine apply_pw_k(bc_k,cg1_k,dimlmn,Enk,gs_hamk,mcgk,mpi_enreg,&
           om_k(2,nn,adir) = om_k(2,nn,adir) + aimag(com*eabg*c2*cme)
 
           ! berry curvature needs <du/dk|S|du/dk>, no nonlocal parts here, do that elsewhere
-          bcc = gwavef
+          !bcc = gwavef
           
-          !bcc = gsc
+          bcc = gsc
 
           dotr = DOT_PRODUCT(bwavef(1,:),bcc(1,:))+DOT_PRODUCT(bwavef(2,:),bcc(2,:))
           doti = DOT_PRODUCT(bwavef(1,:),bcc(2,:))-DOT_PRODUCT(bwavef(2,:),bcc(1,:))
