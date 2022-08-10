@@ -409,8 +409,8 @@ subroutine orbmag_ptpaw(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_en
 
    ! compute P_c|cg1>
    ABI_MALLOC(pcg1_k,(2,mcgk,3))
-   call make_pcg1(cg_k,cg1_k,dimlmn,gs_hamk,istwf_k,mcgk,mpi_enreg,&
-     & dtset%natom,nband_k,npw_k,my_nspinor,pcg1_k)
+   call make_pcg1(atindx,cg_k,cg1_k,cprj_k,dimlmn,dtset,gs_hamk,&
+     & ikpt,istwf_k,isppol,mcgk,mpi_enreg,nband_k,npw_k,my_nspinor,pcg1_k)
 
    ! compute <p|Pc cg1> cprjs
    ABI_MALLOC(cwavef,(2,npw_k))
@@ -687,17 +687,19 @@ end subroutine orbmag_ptpaw
 !!
 !! SOURCE
 
-subroutine make_pcg1(cg_k,cg1_k,dimlmn,gs_hamk,istwf_k,mcgk,mpi_enreg,&
-    & natom,nband_k,npw_k,nspinor,pcg1_k)
+subroutine make_pcg1(atindx,cg_k,cg1_k,cprj_k,dimlmn,dtset,gs_hamk,&
+    & ikpt,istwf_k,isppol,mcgk,mpi_enreg,nband_k,npw_k,my_nspinor,pcg1_k)
 
   !Arguments ------------------------------------
   !scalars
-  integer,intent(in) :: istwf_k,mcgk,natom,nband_k,npw_k,nspinor
+  integer,intent(in) :: ikpt,isppol,istwf_k,mcgk,my_nspinor,nband_k,npw_k
+  type(dataset_type),intent(in) :: dtset
   type(gs_hamiltonian_type),intent(inout) :: gs_hamk
   type(MPI_type), intent(inout) :: mpi_enreg
+  type(pawcprj_type),intent(in) ::  cprj_k(dtset%natom,nband_k)
 
   !arrays
-  integer,intent(in) :: dimlmn(natom)
+  integer,intent(in) :: atindx(dtset%natom),dimlmn(dtset%natom)
   real(dp),intent(in) :: cg_k(2,mcgk),cg1_k(2,mcgk,3)
   real(dp),intent(out) :: pcg1_k(2,mcgk,3)
 
@@ -714,8 +716,8 @@ subroutine make_pcg1(cg_k,cg1_k,dimlmn,gs_hamk,istwf_k,mcgk,mpi_enreg,&
 
 !--------------------------------------------------------------------
 
-  choice = 1
-  cpopt = -1
+  choice = 5 ! dS/dk in nonlop
+  cpopt = 4 ! cprj and derivatives already in memory
   paw_opt = 3
   signs = 2
   tim_nonlop = 0
@@ -725,7 +727,7 @@ subroutine make_pcg1(cg_k,cg1_k,dimlmn,gs_hamk,istwf_k,mcgk,mpi_enreg,&
   comm_fft = mpi_enreg%comm_fft
   ndat = 1
 
-  ABI_MALLOC(cwaveprj,(natom,1))
+  ABI_MALLOC(cwaveprj,(dtset%natom,1))
   call pawcprj_alloc(cwaveprj,3,dimlmn)
   ABI_MALLOC(cwavef,(2,npw_k))
   ABI_MALLOC(vectout,(2,npw_k))
@@ -739,7 +741,8 @@ subroutine make_pcg1(cg_k,cg1_k,dimlmn,gs_hamk,istwf_k,mcgk,mpi_enreg,&
     do iband = 1, nband_k
 
       cwavef(1:2,1:npw_k)=cg_k(1:2,(iband-1)*npw_k+1:iband*npw_k)
-      choice=5 ! apply dS/dk, that is, S^1
+      call pawcprj_get(atindx,cwaveprj,cprj_k,dtset%natom,iband,0,ikpt,0,isppol,dtset%mband,&
+        & dtset%mkmem,dtset%natom,1,nband_k,my_nspinor,dtset%nsppol,0)
       call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,adir,lambda,mpi_enreg,ndat,&
         & nnlout,paw_opt,signs,svectout,tim_nonlop,cwavef,vectout)
 
