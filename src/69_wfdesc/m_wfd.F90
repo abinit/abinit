@@ -39,7 +39,7 @@ module m_wfd
  use defs_abitypes,    only : mpi_type
  use m_gwdefs,         only : one_gw
  use m_time,           only : cwtime, cwtime_report, timab
- use m_fstrings,       only : toupper, firstchar, int2char10, sjoin, itoa, strcat, itoa, yesno
+ use m_fstrings,       only : toupper, firstchar, int2char10, sjoin, itoa, strcat, itoa, yesno, ltoa
  use m_io_tools,       only : get_unit, iomode_from_fname, iomode2str, open_file
  use m_numeric_tools,  only : imin_loc, list2blocks, bool2index
  use m_hide_blas,      only : xcopy, xdotc
@@ -3699,9 +3699,8 @@ subroutine wfd_change_ngfft(Wfd, Cryst, Psps, new_ngfft)
  if (all(Wfd%ngfft(1:3) == new_ngfft(1:3)) ) RETURN ! Nothing to do.
 
  if (Wfd%prtvol > 0) then
-   write(msg,"(a,3(i0,1x),a,3(i0,1x),a)") &
-     " Changing FFT mesh for wavefunctions: [",Wfd%ngfft(1:3),"] ==> [",new_ngfft(1:3),"]"
-   call wrtout(std_out, msg)
+   call wrtout(std_out,  &
+     sjoin(" Changing FFT mesh for wavefunctions: ",ltoa(Wfd%ngfft(1:3)), " ==> ", ltoa(new_ngfft(1:3))))
  end if
 
  ! Change FFT dimensions.
@@ -3722,7 +3721,7 @@ subroutine wfd_change_ngfft(Wfd, Cryst, Psps, new_ngfft)
  ABI_REMALLOC(Wfd%irottb, (Wfd%nfftot,Cryst%nsym))
  call rotate_FFT_mesh(Cryst%nsym,Cryst%symrel,Cryst%tnons,Wfd%ngfft,Wfd%irottb,iscompatibleFFT)
 
- if (.not.iscompatibleFFT) then
+ if (.not. iscompatibleFFT) then
    ABI_WARNING("FFT mesh not compatible with symmetries. Wavefunction symmetrization should not be done in r-space!")
  end if
 

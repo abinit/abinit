@@ -444,7 +444,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
    ! * 1 if Vloc in atomic data is VH(tnzc) (Kresse's formulation)
    call wrtout(std_out, sjoin(' using usexcnhat: ', itoa(usexcnhat)))
    !
-   ! Identify parts of the rectangular grid where the density has to be calculated ===
+   ! Identify parts of the rectangular grid where the density has to be calculated
    optcut = 0; optgr0 = Dtset%pawstgylm; optgr1 = 0; optgr2 = 0; optrad = 1 - Dtset%pawstgylm
    if (Dtset%pawcross==1) optrad=1
    if (Dtset%xclevel==2.and.usexcnhat>0) optgr1=Dtset%pawstgylm
@@ -588,20 +588,21 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  !if (gwcalctyp<10        )  KS_mflags%only_diago = 1 ! off-diagonal elements only for SC on wavefunctions.
  KS_mflags%only_diago = 1 ! off-diagonal elements only for SC on wavefunctions.
 
- ! Load wavefunctions for Sigma_nk in kcalc_wfd
+ ! Load wavefunctions for Sigma_nk in gwr%kcalc_wfd.
  call gwr%load_kcalc_wfd(wfk_path, tmp_kstab)
 
+ ! Compute gwr%ks_me matrix elements.
  call calc_vhxc_me(gwr%kcalc_wfd, ks_mflags, gwr%ks_me, cryst, dtset, nfftf, ngfftf, &
                    ks_vtrial, ks_vhartr, ks_vxc, psps, pawtab, ks_paw_an, pawang, pawfgrtab, ks_paw_ij, dijexc_core, &
                    ks_rhor, usexcnhat, ks_nhat, ks_nhatgr, nhatgrdim, tmp_kstab, taur=ks_taur)
 
- if (my_rank == master) call gwr%ks_me%print(header="KS matrix elements", unit=std_out)
  ABI_FREE(tmp_kstab)
+ if (my_rank == master) call gwr%ks_me%print(header="KS matrix elements", unit=std_out)
 
  if (use_wfk) then
    ! Build Green's function in imaginary-time from WFK file
-   call gwr%build_gtau_from_wfk(wfk_path)
    !call gwr%calc_head_wings(wfk_path)
+   call gwr%build_gtau_from_wfk(wfk_path)
  else
    !call gwr%build_gtau_from_vtrial(wfk_path, ngfftf, ks_vtrial)
  end if
