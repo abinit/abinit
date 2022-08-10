@@ -850,7 +850,6 @@ subroutine matrix_from_global(matrix, reference, istwf_k)
  integer :: i,j,iglob,jglob,ind !cptr
  real(dp) :: val_real !err,
  complex(dp) :: val_cplx
- character(len=500) :: msg
 
 ! *********************************************************************
 
@@ -921,7 +920,6 @@ subroutine matrix_from_global_sym(matrix, reference, istwf_k)
  !real(dp) :: err
  complex(dp)::val_cplx
  real(dp)   ::val_real
- character(len=500) :: msg
 
 ! *********************************************************************
 
@@ -995,7 +993,7 @@ subroutine matrix_from_realmatrix(matrix, reference, istwf_k)
  real(dp),intent(in) :: reference(:,:)
 
 !Local variables-------------------------------
- integer :: i,j,iglob,jglob,cptr
+ integer :: i,j,iglob,jglob
  real(dp) :: val
 
 ! *********************************************************************
@@ -1038,7 +1036,7 @@ subroutine matrix_from_complexmatrix(matrix, reference, istwf_k)
  real(dp),intent(in) :: reference(:,:)
 
 !Local variables-------------------------------
- integer :: i,j,iglob,jglob,cptr
+ integer :: i,j,iglob,jglob
  complex(dpc) :: val
 
 ! *********************************************************************
@@ -1081,7 +1079,7 @@ subroutine matrix_to_global(matrix, reference, istwf_k)
  real(dp),intent(inout) :: reference(*) !(nband_k*(nband_k+1))
 
 !Local variables-------------------------------
- integer  :: i,j,iglob,jglob,ind,cptr
+ integer  :: i,j,iglob,jglob,ind
  !real(dp) :: err
 
 ! *********************************************************************
@@ -1142,7 +1140,7 @@ subroutine matrix_to_realmatrix(matrix, reference, istwf_k)
  real(dp),intent(inout) :: reference(:,:)
 
 !Local variables-------------------------------
- integer :: i,j,iglob,jglob,cptr
+ integer :: i,j,iglob,jglob
  !complex(dpc) :: zvar
 
 ! *********************************************************************
@@ -1184,7 +1182,7 @@ subroutine matrix_to_complexmatrix(matrix, reference, istwf_k)
  complex(dpc),intent(inout) :: reference(:,:)
 
 !Local variables-------------------------------
- integer  :: i,j,iglob,jglob,cptr
+ integer  :: i,j,iglob,jglob 
  !real(dp) :: err
 
 ! *********************************************************************
@@ -1226,7 +1224,7 @@ subroutine matrix_to_reference(matrix, reference, istwf_k)
  real(dp),intent(inout) :: reference(:,:)
 
 !Local variables-------------------------------
- integer  :: i,j,iglob,jglob,ind,cptr
+ integer  :: i,j,iglob,jglob,ind
  !real(dp) :: err
 
 ! *********************************************************************
@@ -1743,7 +1741,7 @@ subroutine compute_eigen_problem(processor,matrix,results,eigen,comm,istwf_k)
   DOUBLE PRECISION            :: ABSTOL,ORFAC
   integer,          parameter :: IZERO=0
 
-  integer ::  M,NZ,IA,JA,IZ,JZ,ierr,TWORK_tmp(3),TWORK(3)
+  integer ::  M,NZ,ierr,TWORK_tmp(3),TWORK(3)
 
   DOUBLE PRECISION, external :: PDLAMCH
 
@@ -2239,7 +2237,7 @@ subroutine compute_eigen1(comm,processor,cplex,nbli_global,nbco_global,matrix,ve
  real(dp),intent(inout) :: vector(:)
 
 !Local variables-------------------------------
- integer :: i,j,ierr
+ integer :: ierr
  type(matrix_scalapack) :: sca_matrix1
  type(matrix_scalapack) :: sca_matrix2
  real(dp),allocatable :: r_tmp_evec(:,:)
@@ -2359,7 +2357,7 @@ subroutine compute_eigen2(comm,processor,cplex,nbli_global,nbco_global,matrix1,m
  real(dp),intent(inout) :: vector(:)
 
 !Local variables-------------------------------
- integer :: i,j,ierr
+ integer :: ierr
  type(matrix_scalapack) :: sca_matrix1
  type(matrix_scalapack) :: sca_matrix2
  type(matrix_scalapack) :: sca_matrix3
@@ -2488,7 +2486,6 @@ subroutine slk_pzheev(jobz, uplo, Slk_mat, Slk_vec, w)
 !Local variables ------------------------------
 !scalars
  integer :: lwork,lrwork,info,nn
- character(len=500) :: msg
 !arrays
  real(dp),allocatable :: rwork(:)
  complex(dpc),allocatable :: work(:)
@@ -2622,11 +2619,10 @@ subroutine slk_pzheevx(jobz,range,uplo,Slk_mat,vl,vu,il,iu,abstol,Slk_vec,mene_f
 
 !Local variables-------------------------------
 !scalars
- integer  :: lwork,lrwork,liwork,info,nvec_calc,ierr
+ integer  :: lwork,lrwork,liwork,info,nvec_calc
  real(dp) :: orfac
  character(len=500) :: msg
 !arrays
- integer :: ibuff(3),max_ibuff(3)
  integer,allocatable  :: iwork(:),iclustr(:),ifail(:)
  real(dp),allocatable  :: rwork(:),gap(:)
  complex(dpc),allocatable :: work(:)
@@ -2894,12 +2890,11 @@ subroutine slk_pzhegvx(ibtype,jobz,range,uplo,Slk_matA,Slk_matB,vl,vu,il,iu,abst
 
 !Local variables-------------------------------
 !scalars
- integer  :: lwork,lrwork,liwork,info,nvec_calc,ierr
+ integer  :: lwork,lrwork,liwork,info,nvec_calc
  real(dp) :: orfac
  logical :: ltest
  character(len=500) :: msg
 !arrays
- integer :: ibuff(3),max_ibuff(3)
  integer :: desca(DLEN_),descb(DLEN_),descz(DLEN_)
  integer,allocatable  :: iwork(:),iclustr(:),ifail(:)
  real(dp),allocatable  :: rwork(:),gap(:)
@@ -3100,7 +3095,6 @@ subroutine slk_zinvert(Slk_mat)
 !Local variables ------------------------------
 !scalars
  integer :: lwork,info,ipiv_size,liwork
- character(len=500) :: msg
 !array
  integer,allocatable :: ipiv(:),iwork(:)
  complex(dpc),allocatable :: work(:)
@@ -3265,13 +3259,13 @@ subroutine slk_write(Slk_mat, uplo, is_fortran_file, fname,mpi_fh, offset, flags
 
 !Local variables ------------------------------
 !scalars
- integer :: jloc,iloc,iglob,jglob,nrows_glob,ncols_glob,elw,nrows_w,ncols_w
+ integer :: jloc,iloc,nrows_glob,ncols_glob,elw,nrows_w,ncols_w
  integer :: slk_type,offset_err,etype,nfrec,bsize_elm,mpi_type_elm
  integer(XMPI_OFFSET_KIND) :: my_offset
  logical :: do_open
 #if defined HAVE_LINALG_SCALAPACK && defined HAVE_MPI_IO
  integer :: comm,my_flags,my_fh,buffer_size
- integer :: ierr,ij_loc,nelw,col_glob
+ integer :: ierr,nelw,col_glob
 !arrays
  integer(XMPI_OFFSET_KIND),allocatable :: bsize_frecord(:)
  integer,pointer :: elw2slk(:,:)
@@ -3490,7 +3484,6 @@ subroutine slk_read(Slk_mat,uplo,symtype,is_fortran_file,fname,mpi_fh,offset,fla
  logical :: do_open
  integer :: comm,my_flags,my_fh,buffer_size,ierr,col_glob
  integer :: nfrec,bsize_elm,mpi_type_elm
- complex(dpc) :: ctest
  logical,parameter :: check_frm=.TRUE.
  integer(XMPI_OFFSET_KIND),allocatable :: bsize_frecord(:)
 !arrays
@@ -3949,7 +3942,7 @@ subroutine slk_single_fview_read(Slk_mat,uplo,etype,slk_type,offset_err,is_fortr
 !Local variables ------------------------------
 !scalars
  integer :: jloc,iloc,iglob,jglob,nrows_glob,ncols_glob,mpi_err,nel
- integer :: bsize_frm,mpi_type_elm,ij_loc,bsize_etype,bsize_elm,cpad_bsize
+ integer :: bsize_frm,mpi_type_elm,ij_loc,bsize_etype,bsize_elm
  integer(XMPI_OFFSET_KIND) :: ijp_glob,my_offset,cpad_frm
 !arrays
  character(len=500) :: msg
@@ -4149,11 +4142,10 @@ subroutine slk_single_fview_write(Slk_mat,uplo,nelw,elw2slk,etype,slk_type,offse
 !scalars
  integer :: jloc,iloc,iglob,jglob,nrows_glob,ncols_glob,mpi_err,nel_max
  integer :: grow_min,grow_max,gcol_min,gcol_max
- integer :: bsize_frm,mpi_type_elm,ij_loc,bsize_elm,cpad_bsize
+ integer :: bsize_frm,mpi_type_elm,ij_loc,bsize_elm
  integer(XMPI_OFFSET_KIND) :: ijp_glob,my_offset,cpad_frm
 !arrays
  character(len=500) :: msg
- integer :: starts(2),sub_sizes(2)
  integer,allocatable :: block_length(:),block_type(:)
  integer(XMPI_ADDRESS_KIND),allocatable :: block_displ(:)
 
