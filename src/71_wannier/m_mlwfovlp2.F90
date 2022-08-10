@@ -21,6 +21,11 @@
 #include "config.h"
 #endif
 
+!#define HAVE_NETCDF 1
+!#define HAVE_WANNIER90 1
+!#define  HAVE_WANNIER90_V1 1
+!#define  HAVE_WANNIER90_V2 1
+
 #include "abi_common.h"
 
 module m_mlwfovlp2
@@ -175,13 +180,13 @@ class(abstract_wf), pointer :: mywfc
  type(pawtab_type),intent(in) :: pawtab(:)
 
 !Local variables-------------------------------
- type(wann_ksetting_t) :: kset
+
 !scalars
- integer :: band_index,cplex,i,iatom,iband,iband1,iband2,icgtemp
- integer :: ig,ii,ikg,ierr
- integer :: ikpt,ikpt1,ikpt2,ilmn,intot,isppol,itypat
- integer :: iun(nsppol),iun_plot,iwan,jband,jband1,jband2,jj,jj1,jj2,jj3
- integer :: lmn_size,lproj,lwanniersetup,mwan,mgfft,n1
+ integer :: i
+ integer :: ierr
+ integer :: ikpt1,ikpt2,intot,isppol
+ integer :: iwan
+ integer :: lproj,lwanniersetup,mwan
 #if defined HAVE_WANNIER90
  integer :: kk
 #ifdef HAVE_NETCDF
@@ -191,12 +196,9 @@ class(abstract_wf), pointer :: mywfc
  integer,allocatable :: irvec(:,:),ndegen(:)
 #endif
 #endif
- integer :: n1tmp,n2,n2tmp,n3,n3tmp,n4,n5,n6,nband_k
- integer :: nntot,npw_k,num_nnmax,spacing
- integer :: tim_fourwf
+ integer :: nntot,num_nnmax
  integer :: master,max_num_bands,nprocs,spaceComm,rank
  integer  :: nwan(nsppol),nband_inc(nsppol),num_bands(nsppol)
- real(dp) :: weight
 #if defined HAVE_WANNIER90
  real(dp) :: corrvdw
  complex(dpc) :: caux,caux2,caux3
@@ -205,19 +207,18 @@ class(abstract_wf), pointer :: mywfc
  character(len=fnlen) :: wfnname
  character(len=1000) :: message
  character(len=fnlen) :: seed_name(nsppol)
- character(len=fnlen) :: fname,filew90_win(nsppol),filew90_wout(nsppol),filew90_amn(nsppol),filew90_ramn(nsppol)
+ character(len=fnlen) :: filew90_win(nsppol),filew90_wout(nsppol),filew90_amn(nsppol),filew90_ramn(nsppol)
  character(len=fnlen) :: filew90_mmn(nsppol),filew90_eig(nsppol)
 !arrays
  integer :: g1temp(3),ngkpt(3)
- integer,allocatable :: g1(:,:,:),gbound(:,:),icg(:,:)
- integer,allocatable:: kg_k(:,:),ovikp(:,:)
+ integer,allocatable :: g1(:,:,:)
+ integer,allocatable::ovikp(:,:)
  integer,allocatable :: proj_l(:,:),proj_m(:,:),proj_radial(:,:)
  integer,allocatable :: proj_s_loc(:)
  real(dp) :: real_lattice(3,3)
  real(dp) :: recip_lattice(3,3)
- real(dp),allocatable :: cm1(:,:,:,:,:,:),cm2_paw(:,:,:),cwavef(:,:)
- real(dp),allocatable :: denpot(:,:,:)
- real(dp),allocatable :: eigenvalues_w(:,:,:),fofgout(:,:),fofr(:,:,:,:)
+ real(dp),allocatable :: cm1(:,:,:,:,:,:),cm2_paw(:,:,:)
+ real(dp),allocatable :: eigenvalues_w(:,:,:)
  real(dp),allocatable :: proj_site(:,:,:),proj_x(:,:,:),proj_z(:,:,:),proj_zona(:,:)
  real(dp),allocatable :: wann_centres(:,:,:),wann_spreads(:,:),xcart(:,:)
  real(dp),allocatable :: proj_s_qaxis_loc(:,:)
@@ -239,6 +240,9 @@ class(abstract_wf), pointer :: mywfc
 !************************************************************************
 
  ABI_UNUSED((/crystal%natom, ebands%nkpt, hdr%nkpt/))
+ ABI_UNUSED(atindx1)
+ ABI_UNUSED((/mcg, mcprj, prtvol/))
+ ABI_UNUSED_A(pawang)
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !1) Initialize variables and allocations
@@ -452,13 +456,11 @@ class(abstract_wf), pointer :: mywfc
          do intot=1,nntot
            ikpt2= ovikp(ikpt1,intot)
            g1temp(:)=g1(:,ikpt1,intot)
-           ! TODO : smatrix_pawinit: use my_wfc
-#ifdef DONOTCOMPILE
-           call smatrix_pawinit(atindx1,cm2_paw,cprj,ikpt1,ikpt2,isppol,&
+           ! TODO : smatrix_pawinit: use high level wfd.
+           call smatrix_pawinit(atindx1,cm2_paw,mywfc%get_cprj_ptr(),ikpt1,ikpt2,isppol,&
 &           g1temp,gprimd,hdr%kptns,mband,mband,mkmem,mpi_enreg,&
 &           natom,dtset%nband,nkpt,dtset%nspinor,nsppol,dtset%ntypat,pawang,pawrad,pawtab,rprimd,&
 &           dtfil%fnametmp_cprj,dtset%typat,xred)
-#endif
 !          cm1(:,:,:,intot,ikpt1,isppol)=four_pi*cm2_paw(:,:,:)
 !           write(6,*) "ikpt1=",ikpt1
 !           do iband=1,mband
@@ -810,6 +812,39 @@ class(abstract_wf), pointer :: mywfc
    if (dtset%vdw_xc==10.or.dtset%vdw_xc==11.or.dtset%vdw_xc==12.or.dtset%vdw_xc==14.and.rank==master) then
 !    vdw_xc==10,11,12,14 starts the
 !    vdW interaction using MLWFs
+     call evaluate_vdw_with_mlwf()
+   end if
+
+#else
+   ABI_UNUSED(occ)
+#endif
+!  FIXME: looks like there is no automatic test which goes through here: g95 bot did not catch
+!  the missing deallocations
+   ABI_FREE(wann_centres)
+   ABI_FREE(wann_spreads)
+   ABI_FREE(U_matrix)
+   ABI_FREE(U_matrix_opt)
+   ABI_FREE(lwindow)
+
+ end if !lwannierrun
+!
+!deallocation
+!
+ ABI_FREE(band_in)
+ ABI_FREE(atom_symbols)
+ ABI_FREE(xcart)
+ ABI_FREE(eigenvalues_w)
+ ABI_FREE(M_matrix)
+ ABI_FREE(A_matrix)
+
+ call mywfc%free()
+ ABI_FREE_SCALAR(mywfc)
+
+contains
+!!***
+
+  subroutine evaluate_vdw_with_mlwf()
+    integer :: ii, jj, ikpt, iband
      write(std_out,*) 'nwan(nsppol)=',ch10
      do ii=1,nsppol
        write(std_out,*) 'nsppol=',ii, 'nwan(nsppol)=',nwan(ii),ch10
@@ -887,35 +922,7 @@ class(abstract_wf), pointer :: mywfc
      ABI_FREE(occ_arr)
      ABI_FREE(occ_wan)
      ABI_FREE(tdocc_wan)
-   end if
-#else
-   ABI_UNUSED(occ)
-#endif
-!  FIXME: looks like there is no automatic test which goes through here: g95 bot did not catch
-!  the missing deallocations
-   ABI_FREE(wann_centres)
-   ABI_FREE(wann_spreads)
-   ABI_FREE(U_matrix)
-   ABI_FREE(U_matrix_opt)
-   ABI_FREE(lwindow)
-
- end if !lwannierrun
-!
-!deallocation
-!
- ABI_FREE(band_in)
- ABI_FREE(atom_symbols)
- ABI_FREE(xcart)
- ABI_FREE(eigenvalues_w)
- ABI_FREE(M_matrix)
- ABI_FREE(A_matrix)
-
- call mywfc%free()
- ABI_FREE_SCALAR(mywfc)
-
-contains
-!!***
-
+   end subroutine evaluate_vdw_with_mlwf
 
 end subroutine mlwfovlp2
 !!***
@@ -1458,13 +1465,12 @@ subroutine mlwfovlp_pw(mywfc,cm1,g1,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nkpt
 !Local variables-------------------------------
 !scalars
  integer :: iband1,iband2,ierr,ig,ig1,ig1b,ig2,ig2b
- integer :: ig3,ig3b,igk1,igk2,igks1,igks2,ii,ikg,ikpt,ikpt1,ikpt2,imntot,index,intot,ios,ipw
- integer :: ispinor,isppol,iunit,me,n1,n2,n3,npoint,npoint2,npw_k,npw_k2
+ integer :: ig3,ig3b,igk1,igk2,igks1,igks2,ikg,ikpt,ikpt1,ikpt2,imntot,index,intot
+ integer :: ispinor,isppol,me,n1,n2,n3,npoint,npoint2,npw_k,npw_k2
  integer :: nprocs,spaceComm
  integer,allocatable::indpwk(:,:),kg_k(:,:)
  integer,allocatable :: invpwk(:,:)
  character(len=500) :: message
- character(len=fnlen) ::  cg_file  !file containing cg info used in case of MPI
  logical::lfile
  real(dp),allocatable :: cg_read(:,:) !to be used in case of MPI
 
@@ -1875,7 +1881,7 @@ subroutine mlwfovlp_pw(mywfc,cm1,g1,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nkpt
 !Local variables-------------------------------
 !scalars
  integer :: iatom,iatprjn,iband,iband1,iband2,ibg,icat,icg,icg_shift
- integer :: idum,idx,ikg,ikpt,ilmn,ipw,iproj
+ integer :: idum,ikg,ikpt,ilmn,ipw,iproj
  integer :: ispinor,isppol,itypat,iwan,jband,jj1,libprjn
  integer :: lmn_size,natprjn,nband_k,nbprjn,npw_k
  integer :: sumtmp
@@ -2412,6 +2418,8 @@ subroutine mlwfovlp_projpaw(A_paw,band_in,mywfc,just_augmentation,max_num_bands,
 !real(dp),allocatable :: ylm(:,:)
 
 
+ ABI_UNUSED(mkmem)
+ ABI_UNUSED(nspinor)
 ! *************************************************************************
 
  write(message, '(a,a)' )ch10,'** mlwfovlp_proj:  compute in-sphere part of A_matrix'

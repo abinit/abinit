@@ -116,6 +116,8 @@ module m_abstract_wf
     procedure :: cg_elem => abstract_wf_cg_elem
     procedure :: cg_elem_complex => abstract_wf_cg_elem_complex
     procedure :: cprj_elem =>abstract_wf_cprj_elem
+    procedure :: get_cg_ptr => abstract_wf_get_cprj_ptr
+    procedure :: get_cprj_ptr => abstract_wf_get_cprj_ptr
     procedure :: load_cg => abstract_wf_load_cg
     !procedure :: show_info
     procedure :: get_kgs=>  abstract_wf_get_kgs
@@ -135,6 +137,8 @@ module m_abstract_wf
     procedure :: cg_elem
     procedure :: cg_elem_complex
     procedure :: cprj_elem
+    procedure :: get_cg_ptr => cg_cprj_get_cprj_ptr
+    procedure :: get_cprj_ptr => cg_cprj_get_cprj_ptr
     procedure :: write_cg_and_cprj_tmpfile
     procedure :: remove_tmpfile
     procedure :: load_cg
@@ -164,6 +168,7 @@ module m_abstract_wf
   contains
     procedure :: init => wfd_wf_init
     procedure :: free => wfd_wf_free
+    !procedure :: get_ug => wfd_wf_ug
     procedure :: cg_elem => wfd_cg_elem
     procedure :: cg_elem_complex => wfd_cg_elem_complex
     procedure :: cprj_elem =>wfd_cprj_elem
@@ -326,12 +331,12 @@ contains
    real(dp),intent(in) :: ecut
    integer,intent(out) :: mpw, gmax(3)
    integer,parameter :: istwfk1 = 1
-   real(dp) :: cpu, wall, gflops !weight_k,
+   !real(dp) :: cpu, wall, gflops !weight_k,
    !type(gqk_t),pointer :: gqk
    !arrays
    integer :: my_gmax(3), onpw, ipw, ii, my_mpw, ierr
    integer,allocatable :: gtmp(:,:)
-   real(dp) :: kk(3), qpt(3)
+   real(dp) :: kk(3)
 
    integer :: spin, my_ik
 
@@ -494,6 +499,21 @@ end subroutine wann_ksetting_get_mpw_gmax
     ABI_ERROR("Function should be overrided:")
   end function abstract_wf_cprj_elem
 
+  function abstract_wf_get_cg_ptr(self) result(cg)
+    class(abstract_wf), target, intent(inout) :: self
+    real(dp), pointer :: cg(:,:)
+    ABI_UNUSED_A(self)
+    ABI_UNUSED(cg)
+    ABI_ERROR("The function abstract_wf%get_cg_ptr is not implemented")
+  end function abstract_wf_get_cg_ptr
+
+  function abstract_wf_get_cprj_ptr(self) result(cprj)
+    class(abstract_wf), target, intent(inout) :: self
+    type(pawcprj_type), pointer :: cprj(:, :)
+    ABI_UNUSED_A(self)
+    ABI_UNUSED_A(cprj)
+    ABI_ERROR("The function abstract_wf%get_cg_ptr is not implemented")
+  end function abstract_wf_get_cprj_ptr
 
   subroutine abstract_wf_get_kgs(self, ptr_kg)
     class(abstract_wf), intent(inout) :: self
@@ -682,7 +702,7 @@ end subroutine wann_ksetting_get_mpw_gmax
       integer, allocatable :: istwfk(:)
       integer :: ik, spin, band
       complex(gwpc), allocatable :: ug(:)
-      integer :: g0_k(3), g0_kq(3), g0_q(3), work_ngfft(18),gmax(3),indkk(6,1)
+      integer ::  work_ngfft(18),gmax(3),indkk(6,1)
       real(dp),allocatable ::  work(:,:,:,:), cg_kbz(:, :, :)
       integer ::mpw, mband, npw_kbz, size, ik_ibz
       integer,allocatable :: kg_kbz(:,:)
@@ -784,13 +804,6 @@ end subroutine wann_ksetting_get_mpw_gmax
 
 
 
-  subroutine wfd_free(self)
-    class(wfd_wf), intent(inout) :: self
-    nullify(self%wfd)
-    !ABI_SFREE(self%cg_cache)
-    call self%abstract_wf%free()
-  end subroutine wfd_free
-
 !
 !  subroutine wfd_build_cache(self, iband, ik, isppol)
 !    class(wfd_wf), intent(inout) :: self
@@ -809,27 +822,27 @@ end subroutine wann_ksetting_get_mpw_gmax
 !  end subroutine wfd_build_cache
 
 
-  subroutine wfd_ug(self, iband, ikpt, isppol, ug )
-    class(wfd_Wf), intent(inout) :: self
-    integer, intent(in) ::  iband, ikpt, isppol
-    real(dp), intent(inout) :: ug(:, :)
-    integer :: ik_ibz
-    integer :: npw_k
-    type(wave_t),pointer :: wave
-    character(len=500) :: msg
-    ik_ibz=ikpt
-    !if(.not. (iband==self%iband_c .and. ikpt==self%ikpt_c .and. isppol==self%isppol_c)) then
-       !print *, "Building cache for : ", iband, ikpt, isppol
-       !call self%build_cache(iband, ikpt, isppol)
-    !end if
-    ABI_CHECK(self%wfd%get_wave_ptr(iband, ik_ibz, isppol, wave, msg) == 0, msg)
-    if (.not. wave%has_ug == WFD_STORED) then
-       write(msg,'(a,i0,a,3i0)')" Node ",self%wfd%my_rank," doesn't have (band,ik_ibz,spin): ",iband,ik_ibz,isppol
-       ABI_BUG(msg)
-    end if
-    npw_k = self%Wfd%npwarr(ik_ibz)
-    call xcopy(npw_k*self%Wfd%nspinor, wave%ug, 1, ug, 1)
-  end subroutine wfd_ug
+  ! subroutine wfd_wf_ug(self, iband, ikpt, isppol, ug )
+  !   class(wfd_Wf), intent(inout) :: self
+  !   integer, intent(in) ::  iband, ikpt, isppol
+  !   real(dp), intent(inout) :: ug(:, :)
+  !   integer :: ik_ibz
+  !   integer :: npw_k
+  !   type(wave_t),pointer :: wave
+  !   character(len=500) :: msg
+  !   ik_ibz=ikpt
+  !   !if(.not. (iband==self%iband_c .and. ikpt==self%ikpt_c .and. isppol==self%isppol_c)) then
+  !      !print *, "Building cache for : ", iband, ikpt, isppol
+  !      !call self%build_cache(iband, ikpt, isppol)
+  !   !end if
+  !   ABI_CHECK(self%wfd%get_wave_ptr(iband, ik_ibz, isppol, wave, msg) == 0, msg)
+  !   if (.not. wave%has_ug == WFD_STORED) then
+  !      write(msg,'(a,i0,a,3i0)')" Node ",self%wfd%my_rank," doesn't have (band,ik_ibz,spin): ",iband,ik_ibz,isppol
+  !      ABI_BUG(msg)
+  !   end if
+  !   npw_k = self%Wfd%npwarr(ik_ibz)
+  !   call xcopy(npw_k*self%Wfd%nspinor, wave%ug, 1, ug, 1)
+  ! end subroutine wfd_wf_ug
 
 
   function wfd_cg_elem(self, icplx, ig, ispinor, iband, ikpt, isppol ) result(res)
@@ -975,9 +988,20 @@ end subroutine wann_ksetting_get_mpw_gmax
     integer :: ind
     complex(dp) :: res
     ind=ig+self%iwav(ispinor, iband,ikpt,isppol)
-    res=CMPLX(self%cg(1,ind),  self%cg(2,ind))
+    res=CMPLX(self%cg(1,ind),  self%cg(2,ind), kind=dp)
   end function cg_elem_complex
 
+  function cg_cprj_get_cg_ptr(self) result(cg)
+    class(cg_cprj), target, intent(inout) :: self
+    real(dp), pointer :: cg(:,:)
+    cg=> self%cg
+  end function cg_cprj_get_cg_ptr
+
+  function cg_cprj_get_cprj_ptr(self) result(cprj)
+    class(cg_cprj), target, intent(inout) :: self
+    type(pawcprj_type), pointer :: cprj(:, :)
+    cprj=>self%cprj
+  end function cg_cprj_get_cprj_ptr
 
   subroutine compute_index_cprj(self)
     ! FIXME:hexu: this is modified from the m_mlwfovlp,
@@ -1246,25 +1270,25 @@ end subroutine wann_ksetting_get_mpw_gmax
  end subroutine write_cg_and_cprj
 
 
- subroutine wfd_print_norm(wfd, hdr)
-   type(wfd_t), intent(in) :: wfd
-   type(hdr_type), intent(in) :: hdr
-   integer :: spin, band, ikpt, size
-   real(dp), allocatable :: cgtemp(:, :)
-   do spin=1, wfd%nsppol
-     do ikpt=1, wfd%nkibz
-       size=wfd%nspinor * hdr%npwarr(ikpt)
-       ABI_MALLOC(cgtemp, (2,  size))
-       do band=1, wfd%mband
-         cgtemp(:, :)=0
-         !if(isirr(ik)) then
-         call wfd%copy_cg(band,ikpt, spin, cgtemp)
-         !print *, "spin:", spin, "band:", band, "ik:", ikpt, "delta:", sum(cgtemp**2)
-       end do
-       ABI_FREE(cgtemp)
-     end do
-   end do
- end subroutine wfd_print_norm
+ ! subroutine wfd_print_norm(wfd, hdr)
+ !   type(wfd_t), intent(in) :: wfd
+ !   type(hdr_type), intent(in) :: hdr
+ !   integer :: spin, band, ikpt, size
+ !   real(dp), allocatable :: cgtemp(:, :)
+ !   do spin=1, wfd%nsppol
+ !     do ikpt=1, wfd%nkibz
+ !       size=wfd%nspinor * hdr%npwarr(ikpt)
+ !       ABI_MALLOC(cgtemp, (2,  size))
+ !       do band=1, wfd%mband
+ !         cgtemp(:, :)=0
+ !         !if(isirr(ik)) then
+ !         call wfd%copy_cg(band,ikpt, spin, cgtemp)
+ !         !print *, "spin:", spin, "band:", band, "ik:", ikpt, "delta:", sum(cgtemp**2)
+ !       end do
+ !       ABI_FREE(cgtemp)
+ !     end do
+ !   end do
+ ! end subroutine wfd_print_norm
 
 
 end module m_abstract_wf
