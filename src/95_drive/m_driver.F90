@@ -771,7 +771,6 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
        filnam,filstat,idtset,jdtset_,ndtset)
 
    case(RUNL_RESPFN)
-
      call respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,mkmems,mpi_enregs(idtset),&
        npwtot,occ,pawang,pawrad,pawtab,psps,results_respfn,xred)
 

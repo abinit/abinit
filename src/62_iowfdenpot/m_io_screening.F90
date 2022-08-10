@@ -411,7 +411,7 @@ subroutine hscr_io(hscr, fform, rdwr, unt, comm, master, iomode)
 !scalars
  integer :: my_rank,nprocs,ncerr,ncid,varid,ierr !ii
  character(len=500) :: errmsg
- character(len=nctk_slen) :: varname,head_shape,wing_shape
+ character(len=nctk_slen) :: varname !,head_shape,wing_shape
 !arrays
  real(dp),allocatable :: real_omega(:,:)
  real(dp), ABI_CONTIGUOUS pointer :: r2vals(:,:) !,rvals3(:,:,:)

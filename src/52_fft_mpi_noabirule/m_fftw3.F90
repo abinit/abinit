@@ -356,9 +356,11 @@ subroutine fftw3_seqfourdp(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,isign,fofg,fofr,fftw_
  case (1)
    ! Real case.
    select case (isign)
-   case (ABI_FFTW_FORWARD) ! -1; R --> G
+   case (ABI_FFTW_FORWARD)
+     ! -1; R --> G
      call fftw3_r2c_op(nx,ny,nz,ldx,ldy,ldz,ndat,fofr,fofg,fftw_flags=my_flags)
-   case (ABI_FFTW_BACKWARD) ! +1; G --> R
+   case (ABI_FFTW_BACKWARD)
+     ! +1; G --> R
      call fftw3_c2r_op(nx,ny,nz,ldx,ldy,ldz,ndat,fofg,fofr,fftw_flags=my_flags)
    case default
      ABI_BUG("Wrong isign")

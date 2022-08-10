@@ -758,7 +758,7 @@ end function fft_check_rotrans
 !!  ngfft(18)=Information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!
 !! OUTPUT
-!!  irottb(ngfftot,nsym)=Indeces of $R^{-1}(r-\tau)$ in the FFT box.
+!!  irottb(ngfftot,nsym)=Indices of $R^{-1}(r-\tau)$ in the FFT box.
 !!  preserve=.FALSE. if the FFT mesh does not fulfil all symmetry properties of the crystal.
 !!
 !! NOTES
@@ -770,7 +770,7 @@ end function fft_check_rotrans
 !!
 !! SOURCE
 
-subroutine rotate_fft_mesh(nsym,symrel,tnons,ngfft,irottb,preserve)
+subroutine rotate_fft_mesh(nsym, symrel, tnons, ngfft, irottb, preserve)
 
 !Arguments ------------------------------------
 !scalars

@@ -2119,7 +2119,7 @@ end subroutine findq
 !!  mG0(3)= For each reduced direction gives the maximum G0 component to account for umklapp processes
 !!
 !! OUTPUT
-!!  iq=index of q vector in BZ table
+!!  iq=index of q in qbz array.
 !!  g0(3)=reciprocal space vector, to be used in igfft
 !!
 !! SOURCE
@@ -2154,14 +2154,12 @@ subroutine findqg0(iq, g0, kmkp, nqbz, qbz, mG0)
    ! Find q close to 0
    do iqbz=1,nqbz
      if (ALL(ABS(qbz(:,iqbz))<tolq0)) then
-       iq=iqbz
+       iq = iqbz
      end if
    end do
 
-   if (iq==0) then
-     ABI_BUG('Wrong list of q-points: q=0 not present.')
-   end if
-   g0(:)=0; RETURN
+   ABI_CHECK(iq /= 0, 'Wrong list of q-points: q=0 not present.')
+   g0(:) = 0; RETURN
 
  else
    ! q is not zero, find q such as k-kp=q+G0.
@@ -2222,7 +2220,7 @@ subroutine findqg0(iq, g0, kmkp, nqbz, qbz, mG0)
   end do g1loop
 
   if (iq == 0) then
-    write(msg,'(a,3f9.5)')' q = k-kp+G0 not found. kmkp = ',kmkp
+    write(msg,'(a, 3f9.5)')' q = k-kp+G0 not found. kmkp:',kmkp
     ABI_ERROR(msg)
   end if
 

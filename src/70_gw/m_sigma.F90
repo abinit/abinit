@@ -591,19 +591,18 @@ end subroutine write_sigma_results
 !!
 !! SOURCE
 
-function gw_spectral_function(Sr,io,ib,ikibz,is) result(aw)
+real(dp) function gw_spectral_function(Sr,io,ib,ikibz,is) result(aw)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: io,ib,ikibz,is
- real(dp) :: aw
  type(sigma_t),intent(in) :: Sr
 
 ! *********************************************************************
 
- aw = one/pi*ABS(AIMAG(Sr%sigcme(ib,ikibz,io,is)))&
-   /( (REAL(Sr%omega_r(io)-Sr%hhartree(ib,ib,ikibz,is)-Sr%sigxcme(ib,ikibz,io,is)))**2&
-     +(AIMAG(Sr%sigcme(ib,ikibz,io,is)))**2) /Ha_eV
+ aw = one / pi * ABS(AIMAG(Sr%sigcme(ib,ikibz,io,is))) &
+   /( (REAL(Sr%omega_r(io) - Sr%hhartree(ib,ib,ikibz,is) - Sr%sigxcme(ib,ikibz,io,is)))**2 &
+     +(AIMAG(Sr%sigcme(ib,ikibz,io,is))) ** 2) / Ha_eV
 
 end function gw_spectral_function
 !!***

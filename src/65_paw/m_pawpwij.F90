@@ -1147,8 +1147,7 @@ end subroutine paw_rho_tw_g
 !!  paw_cross_rho_tw_g
 !!
 !! FUNCTION
-!!  Compute the cross term between the PAW onsite part and plane-wave part
-!!  in rho_tw
+!!  Compute the cross term between the PAW onsite part and plane-wave part in rho_tw
 !!
 !! INPUTS
 !!
