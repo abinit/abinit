@@ -84,6 +84,8 @@ module m_orbmag
 
   public :: orbmag_ptpaw
 
+  private :: make_ddir
+
   private :: d2lr_p2
   private :: d2lr_Anp
   private :: dl_Anp
@@ -1492,6 +1494,84 @@ subroutine dl_vhnzc(dlvhnzc,dtset,gntselect,gprimd,lmn2max,my_lmax,pawrad,pawtab
  
 end subroutine dl_vhnzc
 !!***
+
+!!****f* ABINIT/make_ddir
+!! NAME
+!! make_ddir
+!!
+!! FUNCTION
+!! Compute onsite <phi_i|r_dir|phi_j> - <\tilde{phi}_i|r_dir|\tilde{phi}_j>
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2021 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!! computed in Cart directions from pawtab%qijl(dir,klmn)
+!! then transformed to xtal coords
+!!
+!! SOURCE
+
+subroutine make_ddir(ddir,dtset,gprimd,lmn2max,pawtab)
+
+  !Arguments ------------------------------------
+  !scalars
+  integer,intent(in) :: lmn2max
+  type(dataset_type),intent(in) :: dtset
+
+  !arrays
+  real(dp),intent(in) :: gprimd(3,3)
+  real(dp),intent(out) :: ddir(lmn2max,dtset%natom,3)
+  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
+
+  !Local variables -------------------------
+  !scalars
+  integer :: adir,iat,itypat,klmn
+  real(dp) :: cdij
+
+  !arrays
+  integer,dimension(3) :: adir_to_sij = (/4,2,3/)
+  real(dp) :: ddir_cart(3),ddir_red(3)
+
+!--------------------------------------------------------------------
+
+ ! dij prefactor
+ ! the pawtab%qijl moments do not have the sqrt(4\pi/3) factor we need here for
+ ! normalization 
+ cdij = sqrt(four_pi/three)
+ ddir=zero
+ do itypat = 1, dtset%ntypat
+   do klmn=1, pawtab(itypat)%lmn2_size
+     do adir = 1, 3
+       ! note adir 1,2,3 corresponds to cartesian x,y,z. In the abinit real spherical 
+       ! harmonics, x~m=1 so LM=4; y~m=-1 so LM=2; z~m=0 so LM=3
+       ! adir_to_sij encodes this map
+       ddir_cart(adir) = cdij*pawtab(itypat)%qijl(adir_to_sij(adir),klmn)
+     end do
+     ! now have ddir in cart coords, convert to crystal coords where ddk wavefunctions are
+     ddir_red = MATMUL(TRANSPOSE(gprimd),ddir_cart)
+     do iat = 1, dtset%natom
+       if(dtset%typat(iat) == itypat) then
+         ddir(klmn,iat,1:3) = ddir_red(1:3)
+       end if
+     end do ! end loop over atoms
+   end do ! end loop over klmn
+ end do ! end loop over types
+ 
+end subroutine make_ddir
+!!***
+
 
 !!****f* ABINIT/dl_q
 !! NAME
