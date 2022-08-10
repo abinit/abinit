@@ -441,7 +441,7 @@ type(gaps_t) function ebands_get_gaps(ebands, ierr) result(gaps)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: occopt3 = 3, prtvol0 = 0
- real(dp),parameter :: spinmagntarget_ = -99.99_dp, stmbias0 = zero
+ real(dp),parameter :: spinmagntarget_ = -99.99_dp
  real(dp) :: tsmear
  type(ebands_t)  :: tmp_ebands
  !character(len=500) :: msg
@@ -466,7 +466,7 @@ type(gaps_t) function ebands_get_gaps(ebands, ierr) result(gaps)
    ! Remove extrael to go back to intrinsic system
    if (ebands%extrael /= zero) tmp_ebands%nelect = ebands%nelect - ebands%extrael
    !if (ebands%cellcharge /= zero) tmp_ebands%nelect = ebands%nelect + ebands%cellcharge
-   call ebands_update_occ(tmp_ebands, spinmagntarget_, stmbias0)
+   call ebands_update_occ(tmp_ebands, spinmagntarget_)
 
    ! Try to compute gaps the again with new Fermi level at FD T = tsmear computed from update_occ.
    ! Return ierr
@@ -2322,7 +2322,7 @@ subroutine ebands_update_occ(ebands, spinmagntarget, stmbias, prtvol)
 
    call newocc(doccde,eigen,entropy,fermie,fermih,ebands%ivalence,spinmagntarget,mband,ebands%nband,&
      ebands%nelect,ebands%ne_qFD,ebands%nh_qFD,ebands%nkpt,ebands%nspinor,ebands%nsppol,occ,ebands%occopt,&
-     my_prtvol,stmbias_local,ebands%tphysel,ebands%tsmear,ebands%wtk)
+     my_prtvol,ebands%tphysel,ebands%tsmear,ebands%wtk,stmbias=stmbias_local)
 
    ! Save output in ebands%.
    ebands%entropy = entropy
@@ -2454,7 +2454,6 @@ subroutine ebands_set_scheme(ebands, occopt, tsmear, spinmagntarget, prtvol, upd
 
 !Local variables-------------------------------
 !scalars
- real(dp),parameter :: stmbias0 = zero
  logical :: my_update_occ
 
 ! *************************************************************************
@@ -2470,7 +2469,7 @@ subroutine ebands_set_scheme(ebands, occopt, tsmear, spinmagntarget, prtvol, upd
  ebands%occopt = occopt; ebands%tsmear = tsmear
 
  if (my_update_occ) then
-   call ebands_update_occ(ebands, spinmagntarget, stmbias0, prtvol=prtvol)
+   call ebands_update_occ(ebands, spinmagntarget, prtvol=prtvol)
    if (prtvol > 10) call wrtout(std_out, sjoin(' Fermi level is now:', ftoa(ebands%fermie)))
  end if
 
