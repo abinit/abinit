@@ -75,7 +75,7 @@ module m_outscfcv
  use m_mlwfovlp_qp,      only : mlwfovlp_qp
  use m_paw_mkaewf,       only : pawmkaewf
  use m_dens,             only : mag_penalty_e, calcdenmagsph, prtdenmagsph
- use m_mlwfovlp,         only : mlwfovlp
+ !use m_mlwfovlp,         only : mlwfovlp
  use m_wfd_wannier,      only : wfd_run_wannier
  use m_datafordmft,      only : datafordmft
  use m_mkrho,            only : read_atomden
@@ -440,19 +440,17 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  call timab(1152,1,tsec)
 
  if (dtset%prtwant==2) then
-    if(.True.) then
        call wfd_run_wannier(cryst=crystal, ebands=ebands, hdr=hdr, mpi_enreg=mpi_enreg, &
          & ngfftc=ngfft, ngfftf=ngfft, dtset=dtset, dtfil=dtfil,  &
          & pawang=pawang,  pawrad=pawrad, pawtab=pawtab, psps=psps, &
          &  kg=kg, cg=cg, cprj=cprj)
-    else
+!    else
+!
+!       call mlwfovlp(crystal, ebands, hdr, atindx1,cg,cprj,dtset,dtfil,eigen,gprimd,kg,&
+!&   mband,mcg,mcprj,mgfftc,mkmem,mpi_enreg,mpw,natom,&
+!&   nattyp,nfft,ngfft,nkpt,npwarr,nsppol,ntypat,occ,&
+!&   pawang,pawrad,pawtab,prtvol,psps,rprimd,ucvol,xred)
 
-       call mlwfovlp(crystal, ebands, hdr, atindx1,cg,cprj,dtset,dtfil,eigen,gprimd,kg,&
-&   mband,mcg,mcprj,mgfftc,mkmem,mpi_enreg,mpw,natom,&
-&   nattyp,nfft,ngfft,nkpt,npwarr,nsppol,ntypat,occ,&
-&   pawang,pawrad,pawtab,prtvol,psps,rprimd,ucvol,xred)
-
-    end if
 
 
  else if (dtset%prtwant==3) then
@@ -465,10 +463,16 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 &   nkpt,npwarr,nspden,nsppol,ntypat,Hdr,pawtab,rprimd,MPI_enreg)
 
 !  Call Wannier90
-   call mlwfovlp(crystal, ebands, hdr, atindx1,cg,cprj,dtset,dtfil,eigen2,gprimd,kg,&
-&   mband,mcg,mcprj,mgfftc,mkmem,mpi_enreg,mpw,natom,&
-&   nattyp,nfft,ngfft,nkpt,npwarr,nsppol,ntypat,occ,&
-&   pawang,pawrad,pawtab,prtvol,psps,rprimd,ucvol,xred)
+!   call mlwfovlp(crystal, ebands, hdr, atindx1,cg,cprj,dtset,dtfil,eigen2,gprimd,kg,&
+!&   mband,mcg,mcprj,mgfftc,mkmem,mpi_enreg,mpw,natom,&
+!&   nattyp,nfft,ngfft,nkpt,npwarr,nsppol,ntypat,occ,&
+!&   pawang,pawrad,pawtab,prtvol,psps,rprimd,ucvol,xred)
+
+   call wfd_run_wannier(cryst=crystal, ebands=ebands, hdr=hdr, mpi_enreg=mpi_enreg, &
+     & ngfftc=ngfft, ngfftf=ngfft, dtset=dtset, dtfil=dtfil,  &
+     & pawang=pawang,  pawrad=pawrad, pawtab=pawtab, psps=psps, &
+     &  kg=kg, cg=cg, cprj=cprj)
+
 
 !  this is the old implementation, risky due to unpredictable size effects
 !  now eigen is not overwritten, one should use other ways to print the GW corrections

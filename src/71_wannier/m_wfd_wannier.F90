@@ -1,4 +1,4 @@
-!!****m*ABINIT/m_wfd_wannie
+!!****m*ABINIT/m_wfd_wannier
 !! NAME
 !!  m_wfd_wannier
 !!
@@ -67,7 +67,7 @@ module m_wfd_wannier
 
   use m_abstract_wf,     only : abstract_wf, compute_iwav, write_cg_and_cprj, wann_ksetting_t, init_mywfc
   !use m_mlwfovlp,        only : mlwfovlp, mlwfovlp_pw, mlwfovlp_proj, mlwfovlp_projpaw, mlwfovlp_setup, mlwfovlp_seedname
-  use m_mlwfovlp2,        only : mlwfovlp2
+  use m_mlwfovlp,        only : mlwfovlp
 
   use defs_wannier90
 #ifdef HAVE_NETCDF
@@ -79,7 +79,6 @@ module m_wfd_wannier
   private
   integer,  parameter :: master=0
   public :: wfd_run_wannier
-  !public :: wfd_mlwfovlp
 
 contains
 
@@ -146,17 +145,14 @@ contains
     !mcprj = nspinor*mband* mkmem*nsppol
     ! Is this correct for paw?
     nfft=product(ngfftc(1:3))
-
-
        if (present(cg)) then
-
          mkmem= dtset%mkmem
          call init_mywfc(mywfc=mywfc, ebands=ebands, cg=cg, cprj=cprj, &
            &  cryst=cryst,dtset=dtset, &
            & dtfil=dtfil, hdr=hdr, MPI_enreg=MPI_enreg, nprocs=nprocs, psps=psps, &
            & pawtab=pawtab, rank=rank, comm=spaceComm)
          ptr_kg => kg
-          ! call mlwfovlp2(mywfc=mywfc, crystal=cryst, ebands=ebands, hdr=hdr, atindx1=cryst%atindx1  &
+          ! call mlwfovlp(mywfc=mywfc, crystal=cryst, ebands=ebands, hdr=hdr, atindx1=cryst%atindx1  &
           !      &,dtset=dtset,dtfil=dtfil, &
           !      & eigen=ebands%eig,gprimd=cryst%gprimd,kg=ptr_kg,&
           !      & mband=hdr%mband,mcg=mcg,mcprj=mcprj,mgfftc=mgfftc, &
@@ -191,7 +187,7 @@ contains
            end if
          end if
 
-         call mlwfovlp2(mywfc=mywfc, crystal=cryst, ebands=mywfc%ebands, hdr=mywfc%hdr, atindx1=cryst%atindx1  &
+         call mlwfovlp(mywfc=mywfc, crystal=cryst, ebands=mywfc%ebands, hdr=mywfc%hdr, atindx1=cryst%atindx1  &
                &,dtset=mywfc%dtset,dtfil=dtfil, &
                & eigen=mywfc%ebands%eig,gprimd=cryst%gprimd,kg=ptr_kg,&
                & mband=mywfc%hdr%mband,mcg=mcg,mcprj=mcprj,mgfftc=mgfftc, &

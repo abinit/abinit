@@ -21,7 +21,6 @@ sources = [
  "defs_wannier90.F90",
  "m_abstract_wf.F90",
  "m_mlwfovlp.F90",
- "m_mlwfovlp2.F90",
  "m_mlwfovlp_qp.F90",
  "m_scdm_math.F90", 
  "m_wannier_builder.F90",
