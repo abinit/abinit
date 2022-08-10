@@ -105,7 +105,6 @@ contains
     real(dp), optional, target, intent(in) :: cg(:, :)
     integer, optional, target, intent(in) :: kg(:, :)
     type(pawcprj_type), optional, target, intent(in) :: cprj(:, :)
-    logical, allocatable :: bks_mask(:, :, :), keep_ur(:, :, :)
     class(abstract_wf), pointer :: mywfc
     integer :: mgfftc
     integer :: nfft
@@ -126,8 +125,6 @@ contains
     ! TODO: mcprj
 
     integer :: spaceComm, nprocs, rank, master
-    integer :: ik_ibz, spin, npw_k, ikg, iblk
-    integer :: my_nbands,my_band_list(hdr%mband)
 
     !print *, "============================================================"
     !print *, "Starting WFD Wannier"

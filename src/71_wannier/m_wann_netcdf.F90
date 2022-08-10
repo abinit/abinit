@@ -3,8 +3,8 @@
 !!  m_wann_math
 !!
 !! FUNCTION
-!! Writting Wannier function information to netcdf file. 
-!! 
+!! Writting Wannier function information to netcdf file.
+!!
 !! COPYRIGHT
 !!  Copyright (C) 2005-2022 ABINIT group (hexu)
 !!  This file is distributed under the terms of the
@@ -211,11 +211,11 @@ module m_wann_netcdf
 
   end subroutine write_Amnk
 
-  subroutine write_atoms(self, natom, cell, numbers, masses, xred, xcart)
+  subroutine write_atoms(self, natom, cell, numbers, masses, xred)
     class(IOwannNC), intent(inout):: self
     integer, intent(in):: natom
     integer, intent(in):: numbers(:)
-    real(dp), intent(in):: cell(:,:), masses(:), xred(:, :), xcart(:,:)
+    real(dp), intent(in):: cell(:,:), masses(:), xred(:, :)
 
 #if defined HAVE_NETCDF
     integer:: ncerr
@@ -274,7 +274,6 @@ module m_wann_netcdf
     ABI_UNUSED(numbers)
     ABI_UNUSED(masses)
     ABI_UNUSED(xred)
-    ABI_UNUSED(xcart)
 #endif
   end subroutine write_atoms
 

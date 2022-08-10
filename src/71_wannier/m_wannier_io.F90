@@ -203,6 +203,7 @@ contains
     integer :: n1tmp, n2tmp, n3tmp, jj1, jj2, jj3, ipw, ispinor
     character(len=1000) :: message
 
+    ABI_UNUSED(nspinor)
     if(usepaw==1) then
        write(message, '( a,a,a,a,a,a,a,a,a)')ch10,&
             &     "   WARNING: The UNK matrices will not contain the correct wavefunctions ",ch10,&
