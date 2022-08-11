@@ -167,7 +167,7 @@ subroutine orbmag_ptpaw(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_en
  !scalars
  integer :: adir,buff_size,choice,cpopt,dimffnl,exchn2n3d,iat,iatom,icg,icmplx,icprj,ider,idir,ierr
  integer :: ikg,ikg1,ikpt,ilm,indx,isppol,istwf_k,iterm,itypat,lmn2max
- integer :: me,mcgk,my_lmax,my_nspinor,nband_k,ncpgr,ngfft1,ngfft2,ngfft3,ngfft4
+ integer :: me,mcgk,my_lmax,my_nspinor,nband_k,ngfft1,ngfft2,ngfft3,ngfft4
  integer :: ngfft5,ngfft6,ngnt,nn,nkpg,npw_k,nproc,spaceComm,with_vectornd
  real(dp) :: arg,ecut_eff,trnrm,ucvol
  logical :: has_nucdip
@@ -226,17 +226,16 @@ subroutine orbmag_ptpaw(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_en
  ABI_MALLOC(kg_k,(3,dtset%mpw))
  ABI_MALLOC(kinpw,(dtset%mpw))
 
- ncpgr = 3
  ABI_MALLOC(dimlmn,(dtset%natom))
  call pawcprj_getdim(dimlmn,dtset%natom,nattyp,dtset%ntypat,dtset%typat,pawtab,'O')
  ABI_MALLOC(cprj_k,(dtset%natom,dtset%mband))
- call pawcprj_alloc(cprj_k,ncpgr,dimlmn)
+ call pawcprj_alloc(cprj_k,cprj(1,1)%ncpgr,dimlmn)
  ABI_MALLOC(cprj1_k,(dtset%natom,dtset%mband,3))
  do adir = 1, 3
-   call pawcprj_alloc(cprj1_k(:,:,adir),ncpgr,dimlmn)
+   call pawcprj_alloc(cprj1_k(:,:,adir),0,dimlmn)
  end do
  ABI_MALLOC(cwaveprj,(dtset%natom,1))
- call pawcprj_alloc(cwaveprj,ncpgr,dimlmn)
+ call pawcprj_alloc(cwaveprj,0,dimlmn)
 
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
@@ -414,16 +413,10 @@ subroutine orbmag_ptpaw(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_en
 
    ! compute <p|Pc cg1> cprjs
    ABI_MALLOC(cwavef,(2,npw_k))
-   choice = 5
+   choice = 1
    cpopt = 0
    idir = 0
    do nn = 1, nband_k
-     cwavef(1:2,1:npw_k) = cg_k(1:2,(nn-1)*npw_k+1:nn*npw_k)
-     call getcprj(choice,cpopt,cwavef,cwaveprj,ffnl_k,idir,psps%indlmn,istwf_k,&
-       & kg_k,kpg_k,kpoint,psps%lmnmax,dtset%mgfft,mpi_enreg,dtset%natom,nattyp,dtset%ngfft,&
-       & dtset%nloalg,npw_k,dtset%nspinor,dtset%ntypat,phkxred,ph1d,ph3d,ucvol,psps%useylm)
-     call pawcprj_put(atindx,cwaveprj,cprj_k,dtset%natom,nn,0,ikpt,0,isppol,dtset%mband,&
-       & dtset%mkmem,dtset%natom,1,nband_k,dimlmn,dtset%nspinor,dtset%nsppol,0)
      do adir = 1, 3
        cwavef(1:2,1:npw_k) = pcg1_k(1:2,(nn-1)*npw_k+1:nn*npw_k,adir)
        call getcprj(choice,cpopt,cwavef,cwaveprj,ffnl_k,idir,psps%indlmn,istwf_k,&
