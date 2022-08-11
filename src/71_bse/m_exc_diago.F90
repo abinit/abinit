@@ -1093,7 +1093,7 @@ subroutine exc_diago_coupling_hegv(Bsp,BS_files,Hdr_bse,prtvol,comm)
 #if defined HAVE_LINALG_SCALAPACK && defined HAVE_MPI_IO
  integer,parameter :: istwfk1=1
  integer :: amode,mpi_fh,tbloc,mene_found,mpi_err,my_nel,nsblocks
- integer :: iloc,jj,jloc,iglob,jglob,etype,slk_mask_type,offset_err,el,rrs_kind,ccs_kind
+ integer :: iloc,jloc,iglob,jglob,etype,slk_mask_type,offset_err,el,rrs_kind,ccs_kind
  integer(XMPI_OFFSET_KIND) :: ehdr_offset,fmarker,my_offset
  integer :: gsub(2,2)
  logical,parameter :: is_fortran_file=.TRUE.

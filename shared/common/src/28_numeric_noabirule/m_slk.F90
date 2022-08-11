@@ -2088,7 +2088,7 @@ subroutine compute_generalized_eigen_problem(processor,matrix1,matrix2,results,e
   DOUBLE PRECISION            :: ABSTOL,ORFAC
   integer         , parameter :: IZERO=0
 
-  integer ::  M,NZ,IA,JA,IZ,JZ,ierr,TWORK_tmp(3),TWORK(3)
+  integer ::  M,NZ,ierr,TWORK_tmp(3),TWORK(3)
 
   DOUBLE PRECISION, external :: PDLAMCH
 
