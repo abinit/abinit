@@ -966,7 +966,7 @@ CONTAINS  !=====================================================================
 !Option for interaction energy in case of non-collinear magnetism:
 !           1: E_int=-U/4.N.(N-2)
 !           2: E_int=-U/2.(Nup.(Nup-1)+Ndn.(Ndn-1))
- integer,parameter :: option_interaction=1
+ integer,parameter :: option_interaction=3
  integer :: cplex_occ,dmftdc,ispden,jspden,lpawu,m1,m11,m2,m21,m3,m31,m4,m41,nspden
  real(dp) :: eks_opt3,edcdc_opt3,edcdctemp,edctemp,edftutemp,jpawu,jpawu_dc,mnorm,mx,my,mz
  real(dp) :: n_sig,n_sigs,n_msig,n_msigs,n_dndn,n_tot,n_upup
