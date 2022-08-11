@@ -65,6 +65,10 @@ topology.so
 *.[ao]
 *.stderr
 *.stdout
+*.cmod
+*.stb
+*.ilm
+*.cmdx
 buildbot.ac
 CMakeFiles
 CMakeCache.txt
