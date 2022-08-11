@@ -85,6 +85,7 @@ module m_orbmag
   public :: orbmag_ptpaw
 
   private :: make_ddir
+  private :: berry_cc
 
   private :: d2lr_p2
   private :: d2lr_Anp
@@ -408,8 +409,8 @@ subroutine orbmag_ptpaw(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_en
 
    ! compute P_c|cg1>
    ABI_MALLOC(pcg1_k,(2,mcgk,3))
-   call make_pcg1(atindx,cg_k,cg1_k,cprj_k,dimlmn,dtset,gs_hamk,&
-     & ikpt,istwf_k,isppol,mcgk,mpi_enreg,nband_k,npw_k,my_nspinor,pcg1_k)
+   call make_pcg1(atindx,cg_k,cg1_k,cprj_k,dimlmn,dtset,gs_hamk,ikpt,isppol,&
+     & mcgk,mpi_enreg,nband_k,npw_k,my_nspinor,pcg1_k)
 
    ! compute <p|Pc cg1> cprjs
    ABI_MALLOC(cwavef,(2,npw_k))
@@ -443,9 +444,11 @@ subroutine orbmag_ptpaw(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_en
 
    call apply_pw_k(bc_k,pcg1_k,dimlmn,eig_k,gs_hamk,mcgk,mpi_enreg,dtset%natom,&
      & nband_k,npw_k,dtset%nspinor,om_k)
-
-   orbmag_terms(:,:,:,ibcpw) = orbmag_terms(:,:,:,ibcpw) + trnrm*bc_k
    orbmag_terms(:,:,:,iompw) = orbmag_terms(:,:,:,iompw) + trnrm*om_k
+
+   call berry_cc(atindx,bc_k,cprj1_k,dimlmn,dtset,gs_hamk,ikpt,isppol,mcgk,&
+     & mpi_enreg,my_nspinor,nband_k,npw_k,pcg1_k)
+   orbmag_terms(:,:,:,ibcpw) = orbmag_terms(:,:,:,ibcpw) + trnrm*bc_k
    
    !--------------------------------------------------------------------------------
    ! additional onsite terms to both Berry and orbmag (no |phi> derivatives) 
@@ -681,25 +684,25 @@ end subroutine orbmag_ptpaw
 !! SOURCE
 
 subroutine make_pcg1(atindx,cg_k,cg1_k,cprj_k,dimlmn,dtset,gs_hamk,&
-    & ikpt,istwf_k,isppol,mcgk,mpi_enreg,nband_k,npw_k,my_nspinor,pcg1_k)
+    & ikpt,isppol,mcgk,mpi_enreg,nband_k,npw_k,my_nspinor,pcg1_k)
 
   !Arguments ------------------------------------
   !scalars
-  integer,intent(in) :: ikpt,isppol,istwf_k,mcgk,my_nspinor,nband_k,npw_k
+  integer,intent(in) :: ikpt,isppol,mcgk,my_nspinor,nband_k,npw_k
   type(dataset_type),intent(in) :: dtset
   type(gs_hamiltonian_type),intent(inout) :: gs_hamk
   type(MPI_type), intent(inout) :: mpi_enreg
-  type(pawcprj_type),intent(in) ::  cprj_k(dtset%natom,nband_k)
 
   !arrays
   integer,intent(in) :: atindx(dtset%natom),dimlmn(dtset%natom)
   real(dp),intent(in) :: cg_k(2,mcgk),cg1_k(2,mcgk,3)
   real(dp),intent(out) :: pcg1_k(2,mcgk,3)
+  type(pawcprj_type),intent(in) ::  cprj_k(dtset%natom,nband_k)
 
   !Local variables -------------------------
   !scalars
-  integer :: adir,choice,comm_fft,cpopt,iband,jband
-  integer :: me_g0,ndat,nnlout,paw_opt,signs,tim_nonlop
+  integer :: adir,choice,cpopt,iband,jband
+  integer :: ndat,nnlout,paw_opt,signs,tim_nonlop
   real(dp) :: doti,dotr,s0,s1
   !arrays
   real(dp) :: lambda(1)
@@ -716,8 +719,6 @@ subroutine make_pcg1(atindx,cg_k,cg1_k,cprj_k,dimlmn,dtset,gs_hamk,&
   tim_nonlop = 0
   lambda = zero
   nnlout = 0
-  me_g0 = mpi_enreg%me_g0
-  comm_fft = mpi_enreg%comm_fft
   ndat = 1
 
   ABI_MALLOC(cwaveprj,(dtset%natom,1))
@@ -765,6 +766,117 @@ subroutine make_pcg1(atindx,cg_k,cg1_k,cprj_k,dimlmn,dtset,gs_hamk,&
  
 end subroutine make_pcg1
 !!***
+
+!!****f* ABINIT/berry_cc
+!! NAME
+!! berry_cc
+!!
+!! FUNCTION
+!! compute CC contribution to integral of Berry curvature
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2021 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!!
+!! SOURCE
+
+subroutine berry_cc(atindx,bc_k,cprj1_k,dimlmn,dtset,gs_hamk,&
+    & ikpt,isppol,mcgk,mpi_enreg,my_nspinor,nband_k,npw_k,pcg1_k)
+
+  !Arguments ------------------------------------
+  !scalars
+  integer,intent(in) :: ikpt,isppol,mcgk,my_nspinor,nband_k,npw_k
+  type(dataset_type),intent(in) :: dtset
+  type(gs_hamiltonian_type),intent(inout) :: gs_hamk
+  type(MPI_type), intent(inout) :: mpi_enreg
+
+  !arrays
+  integer,intent(in) :: atindx(dtset%natom),dimlmn(dtset%natom)
+  real(dp),intent(in) :: pcg1_k(2,mcgk,3)
+  real(dp),intent(out) :: bc_k(2,nband_k,3)
+  type(pawcprj_type),intent(in) ::  cprj1_k(dtset%natom,nband_k,3)
+
+  !Local variables -------------------------
+  !scalars
+  integer :: adir,bdir,choice,cpopt,gdir,ndat,nn,nnlout,paw_opt,signs,tim_nonlop
+  real(dp) :: c2,doti,dotr,eabg
+  complex(dpc) :: cme
+  
+  !arrays
+  real(dp) :: lambda(1)
+  real(dp),allocatable :: bwavef(:,:),enlout(:),gwavef(:,:),svectout(:,:),vectout(:,:)
+  type(pawcprj_type),allocatable :: cwaveprj(:,:)
+
+!--------------------------------------------------------------------
+
+  ! in abinit, exp(i k.r) is used not exp(i 2\pi k.r) so the following
+  ! term arises to properly normalize the derivatives
+  c2=1.0d0/(two_pi*two_pi)
+
+  ABI_MALLOC(bwavef,(2,npw_k))
+  ABI_MALLOC(gwavef,(2,npw_k))
+  ABI_MALLOC(vectout,(2,npw_k))
+  ABI_MALLOC(svectout,(2,npw_k))
+  ABI_MALLOC(cwaveprj,(dtset%natom,1))
+  call pawcprj_alloc(cwaveprj,0,dimlmn)
+
+  choice = 1  ! (I + S) in nonlop
+  cpopt = 2 ! cprj in memory
+  paw_opt = 3
+  signs = 2
+  tim_nonlop = 0
+  lambda = zero
+  nnlout = 0
+  ndat = 1
+  
+  bc_k = zero
+  do nn = 1, nband_k
+
+    do gdir = 1, 3
+      gwavef(1:2,1:npw_k) = pcg1_k(1:2,(nn-1)*npw_k+1:nn*npw_k,gdir)
+      call pawcprj_get(atindx,cwaveprj,cprj1_k(:,:,gdir),dtset%natom,nn,0,ikpt,0,isppol,dtset%mband,&
+        & dtset%mkmem,dtset%natom,1,nband_k,my_nspinor,dtset%nsppol,0)
+      call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,0,lambda,mpi_enreg,ndat,&
+        & nnlout,paw_opt,signs,svectout,tim_nonlop,gwavef,vectout)
+
+      do bdir = 1, 3
+        bwavef(1:2,1:npw_k) = pcg1_k(1:2,(nn-1)*npw_k+1:nn*npw_k,bdir)
+        do adir = 1, 3
+          eabg = eijk(adir,bdir,gdir)
+          if (abs(eabg) < half) cycle
+          dotr = DOT_PRODUCT(bwavef(1,:),svectout(1,:))+DOT_PRODUCT(bwavef(2,:),svectout(2,:))
+          doti = DOT_PRODUCT(bwavef(1,:),svectout(2,:))-DOT_PRODUCT(bwavef(2,:),svectout(1,:))
+          cme = cmplx(dotr,doti,KIND=dpc)
+          bc_k(1,nn,adir) = bc_k(1,nn,adir) + real(cbc*eabg*c2*cme)
+          bc_k(2,nn,adir) = bc_k(2,nn,adir) + aimag(cbc*eabg*c2*cme)
+        end do ! adir
+      end do ! bdir
+    end do ! gdir
+  end do !loop over bands
+
+  ABI_FREE(bwavef)
+  ABI_FREE(gwavef)
+  ABI_FREE(vectout)
+  ABI_FREE(svectout)
+  call pawcprj_free(cwaveprj)
+  ABI_FREE(cwaveprj)
+
+end subroutine berry_cc
+!!***
+
 
 !!****f* ABINIT/apply_pw_k
 !! NAME
