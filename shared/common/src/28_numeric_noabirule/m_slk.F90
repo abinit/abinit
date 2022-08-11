@@ -459,6 +459,7 @@ subroutine init_matrix_scalapack(matrix, nbli_global, nbco_global, processor, is
 
 ! *********************************************************************
 
+ ABI_UNUSED(tbloc)
  DBG_ENTER("COLL")
 
 #ifdef HAVE_LINALG_ELPA
@@ -998,6 +999,8 @@ subroutine matrix_from_realmatrix(matrix, reference, istwf_k)
 
 ! *********************************************************************
 
+ ABI_UNUSED(istwf_k)
+
  do i=1,matrix%sizeb_local(1)
    do j=1,matrix%sizeb_local(2)
      call matrix%loc2glob(i, j, iglob, jglob)
@@ -1040,6 +1043,8 @@ subroutine matrix_from_complexmatrix(matrix, reference, istwf_k)
  complex(dpc) :: val
 
 ! *********************************************************************
+
+ ABI_UNUSED(istwf_k)
 
  do i=1,matrix%sizeb_local(1)
    do j=1,matrix%sizeb_local(2)
@@ -1145,6 +1150,8 @@ subroutine matrix_to_realmatrix(matrix, reference, istwf_k)
 
 ! *********************************************************************
 
+ ABI_UNUSED(istwf_k)
+
  do i=1,matrix%sizeb_local(1)
    do j=1,matrix%sizeb_local(2)
      call matrix%loc2glob(i, j, iglob, jglob)
@@ -1186,6 +1193,8 @@ subroutine matrix_to_complexmatrix(matrix, reference, istwf_k)
  !real(dp) :: err
 
 ! *********************************************************************
+
+ ABI_UNUSED(istwf_k)
 
  do i=1,matrix%sizeb_local(1)
    do j=1,matrix%sizeb_local(2)
