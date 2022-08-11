@@ -22,7 +22,7 @@
 #endif
 
 !#define HAVE_NETCDF 1
-!#define HAVE_WANNIER90 1
+!#define HAVE_WANNIER90 0
 !#define  HAVE_WANNIER90_V1 1
 !#define  HAVE_WANNIER90_V2 1
 
@@ -179,6 +179,7 @@ class(abstract_wf), pointer :: mywfc
  type(pawrad_type),intent(in) :: pawrad(:)
  type(pawtab_type),intent(in) :: pawtab(:)
 
+ type(pawcprj_type), pointer :: cprj_ptr(:, :)
 !Local variables-------------------------------
 
 !scalars
@@ -188,7 +189,7 @@ class(abstract_wf), pointer :: mywfc
  integer :: iwan
  integer :: lproj,lwanniersetup,mwan
 #if defined HAVE_WANNIER90
- integer :: kk
+
 #ifdef HAVE_NETCDF
  integer :: ncid, ncerr, nrpts
  character(len=fnlen) :: abiwan_fname
@@ -199,10 +200,6 @@ class(abstract_wf), pointer :: mywfc
  integer :: nntot,num_nnmax
  integer :: master,max_num_bands,nprocs,spaceComm,rank
  integer  :: nwan(nsppol),nband_inc(nsppol),num_bands(nsppol)
-#if defined HAVE_WANNIER90
- real(dp) :: corrvdw
- complex(dpc) :: caux,caux2,caux3
-#endif
  logical :: gamma_only,leig,lmmn,lwannierrun,spinors !,have_disentangled
  character(len=fnlen) :: wfnname
  character(len=1000) :: message
@@ -229,13 +226,9 @@ class(abstract_wf), pointer :: mywfc
  logical,allocatable :: band_in(:,:),lwindow(:,:,:)
  character(len=3),allocatable :: atom_symbols(:)
  logical,allocatable::just_augmentation(:,:)
-#if defined HAVE_WANNIER90
+#ifdef HAVE_WANNIER90
  real(dp) :: spreadw(3,nsppol)
- real(dp),allocatable :: csix(:,:,:,:)
- real(dpc),allocatable :: occ_arr(:,:,:),occ_wan(:,:,:)
- real(dp),allocatable :: tdocc_wan(:,:)
 #endif
-
 
 !************************************************************************
 
@@ -457,7 +450,8 @@ class(abstract_wf), pointer :: mywfc
            ikpt2= ovikp(ikpt1,intot)
            g1temp(:)=g1(:,ikpt1,intot)
            ! TODO : smatrix_pawinit: use high level wfd.
-           call smatrix_pawinit(atindx1,cm2_paw,mywfc%get_cprj_ptr(),ikpt1,ikpt2,isppol,&
+             cprj_ptr=>mywfc%get_cprj_ptr()
+           call smatrix_pawinit(atindx1,cm2_paw,cprj_ptr,ikpt1,ikpt2,isppol,&
 &           g1temp,gprimd,hdr%kptns,mband,mband,mkmem,mpi_enreg,&
 &           natom,dtset%nband,nkpt,dtset%nspinor,nsppol,dtset%ntypat,pawang,pawrad,pawtab,rprimd,&
 &           dtfil%fnametmp_cprj,dtset%typat,xred)
@@ -844,13 +838,19 @@ contains
 !!***
 
   subroutine evaluate_vdw_with_mlwf()
-    integer :: ii, jj, ikpt, iband
+#ifdef HAVE_WANNIER90
+    integer :: ii, jj, ikpt, iband, kk
+    real(dp) :: corrvdw
+    complex(dpc) :: caux,caux2,caux3
+    real(dp),allocatable :: csix(:,:,:,:)
+    real(dpc),allocatable :: occ_arr(:,:,:),occ_wan(:,:,:)
+    real(dp),allocatable :: tdocc_wan(:,:)
+
      write(std_out,*) 'nwan(nsppol)=',ch10
      do ii=1,nsppol
        write(std_out,*) 'nsppol=',ii, 'nwan(nsppol)=',nwan(ii),ch10
      end do
      write(std_out,*) 'mwan=', mwan, ch10
-
      ABI_MALLOC(occ_arr,(mband,nkpt,isppol))
      ABI_MALLOC(occ_wan,(mwan,nkpt,nsppol))
      ABI_MALLOC(tdocc_wan,(mwan,nsppol))
@@ -922,6 +922,7 @@ contains
      ABI_FREE(occ_arr)
      ABI_FREE(occ_wan)
      ABI_FREE(tdocc_wan)
+#endif
    end subroutine evaluate_vdw_with_mlwf
 
 end subroutine mlwfovlp

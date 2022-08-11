@@ -381,7 +381,8 @@ end subroutine wann_ksetting_get_mpw_gmax
 
 
 
-  subroutine init_mywfc(mywfc, ebands, wfd , cg, cprj, cryst, dtset, dtfil, hdr, MPI_enreg, nprocs, psps, pawtab, rank, comm)
+subroutine init_mywfc(mywfc, ebands, wfd , cg, cprj, cryst, &
+  & dtset, dtfil, hdr, MPI_enreg, nprocs, psps, pawtab, rank, comm)
     class(abstract_wf), pointer, intent(inout) :: mywfc
     type(crystal_t), target, intent(in) :: cryst
     type(ebands_t), target, optional, intent(inout) :: ebands
@@ -403,7 +404,9 @@ end subroutine wann_ksetting_get_mpw_gmax
     end if
     select type(mywfc)
     type is(cg_cprj)
-       call mywfc%init( ebands, cg, cprj, cryst, dtset, dtfil, hdr, MPI_enreg, nprocs, psps, pawtab, rank, comm)
+      call mywfc%init( ebands=ebands, cg=cg, cprj=cprj, cryst=cryst, dtset=dtset, &
+        & dtfil=dtfil, hdr=hdr, MPI_enreg=mpi_enreg, nprocs=nprocs, &
+        & psps=psps, pawtab=pawtab, rank=rank, comm=comm)
     type is(wfd_wf)
        call mywfc%init( ebands, wfd, cryst, dtset, dtfil, hdr, MPI_enreg, nprocs, psps, pawtab, rank, comm)
        !call wfd_print_norm(mywfc%wfd, mywfc%hdr)
@@ -946,7 +949,12 @@ end subroutine wann_ksetting_get_mpw_gmax
     if(present(cprj) .and. present(pawtab)) then
        self%has_paw=.True.
     end if
-    if(present(cprj))  self%cprj => cprj
+    if(present(cprj)) then
+      print *, "cprj linked"
+      print *, "before linked", cprj(1,1)%cp(:,:)
+      self%cprj => cprj
+      print *, "after linked", self%cprj(1,1)%cp(:,:)
+    end if
     ABI_MALLOC(self%iwav,(self%nspinor, self%mband,self%nkpt,self%nsppol))
     call compute_iwav(MPI_enreg, dtset, hdr, self%iwav, nprocs, rank)
     call self%compute_index_cprj()
