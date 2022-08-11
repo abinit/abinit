@@ -444,6 +444,15 @@ AC_DEFUN([ABI_GPU_DETECT],[
         fi
         ;;
 
+      hip*)
+        AC_DEFINE([HAVE_GPU_HIP],1,[Define to 1 if you have the HIP library.])
+        #abi_gpu_serial="${abi_gpu_cuda_serial}"
+        abi_gpu_serial="yes"
+        abi_gpu_fcflags="${abi_gpu_cuda_fcflags}"
+        abi_gpu_ldflags="${abi_gpu_cuda_ldflags}"
+        abi_gpu_incs="${abi_gpu_cuda_incs}"
+        abi_gpu_libs="${abi_gpu_cuda_libs}"
+        ;;
     esac
 
     if test "${abi_gpu_serial}" = "no"; then
