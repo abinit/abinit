@@ -1,4 +1,4 @@
-/* dev_spec.cu*/
+/* dev_spec_cuda.cpp*/
 
 /*
  * Copyright (C) 2008-2022 ABINIT Group (MMancini,FDahm)
@@ -9,17 +9,19 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <abi_gpu_header_common.h>
 #include <cuda_runtime_api.h>
 #include "cuda_api_error_check.h"
 
-static __host__ int version_2_cores(int major, int minor);
+static int version_2_cores(int major, int minor);
 
 /*=========================================================================*/
 /*________________________ GPU_function called by HOST_____________________*/
 /*=========================================================================*/
 // display CUDA device info
-static __host__ void  prt_dev_info()
+static void prt_dev_info()
 {
   int deviceCount;
   cudaGetDeviceCount(&deviceCount);
@@ -53,8 +55,7 @@ static __host__ void  prt_dev_info()
 
 
 // Explicit Cuda Error ---------------------
-__host__  void
-check_err(int line)
+void check_err(int line )
 {
   /* cuda check errors */
   cudaError_t cudaError;
@@ -69,7 +70,7 @@ check_err(int line)
 
 
 // Gives the number of GPU devices ---------
-extern "C" __host__
+extern "C"
 void get_gpu_ndev_(int* ndevice)
 {
   int deviceCount;
@@ -80,7 +81,7 @@ void get_gpu_ndev_(int* ndevice)
 }
 
 // Gives the max memory available for a GPU device ---------
-extern "C" __host__
+extern "C"
 void get_gpu_max_mem_(int* device, float* max_mem)
 {
   cudaDeviceProp deviceProp;
@@ -99,7 +100,7 @@ void gpu_get_free_mem_cpp(size_t* free_mem)
 }
 
 // Set the device if it exists   -----------------
-extern "C" __host__
+extern "C"
 void set_dev_(int* gpudevice)
 {
  if(*gpudevice >-1){
@@ -122,7 +123,7 @@ void set_dev_(int* gpudevice)
 
 
 // Unset the devices  -----------------
-extern "C"  __host__
+extern "C"
 void unset_dev_()
 {
 #if defined HAVE_GPU_CUDA3
@@ -136,7 +137,7 @@ void unset_dev_()
 // Synchronize device (makes the CPU waits the GPU to finish all running kernels)
 // this is required when using mamanged memory in order to reuse safely on CPU data
 // that were processed / modified by the GPU
-extern "C"  __host__
+extern "C"
 void gpu_device_synchronize_cpp()
 {
   cudaError_t cudaError = cudaDeviceSynchronize();
@@ -149,7 +150,7 @@ void gpu_device_synchronize_cpp()
 }
 
 //
-extern "C"  __host__
+extern "C"
 void gpu_get_device_cpp(int *deviceId)
 {
   CHECK_CUDA_ERROR( cudaGetDevice(deviceId) );
@@ -158,7 +159,7 @@ void gpu_get_device_cpp(int *deviceId)
 }
 
 //
-extern "C"  __host__
+extern "C"
 void gpu_data_prefetch_async_cpp(const void* devPtr, size_t count, int deviceId)
 {
 
@@ -168,7 +169,7 @@ void gpu_data_prefetch_async_cpp(const void* devPtr, size_t count, int deviceId)
 }
 
 //
-extern "C"  __host__
+extern "C"
 void gpu_memory_advise_cpp(const void* devPtr, size_t count, cudaMemoryAdvise advice, int deviceId)
 {
 
@@ -178,7 +179,7 @@ void gpu_memory_advise_cpp(const void* devPtr, size_t count, cudaMemoryAdvise ad
 }
 
 // Get context  -----------------------
-extern "C"  __host__
+extern "C"
 void check_context_(int *res,char *message)
 {
   *res=1;
@@ -192,7 +193,7 @@ void check_context_(int *res,char *message)
 
 
 // Get info from device  --------------
-extern "C" __host__
+extern "C"
 void  get_dev_info_(int* device,
 		    char* name,
 		    int* lenname,
@@ -225,7 +226,7 @@ void  get_dev_info_(int* device,
 
 
 // Get number of devices  --------------
-extern "C"  __host__
+extern "C"
 void c_get_ndevice_(int* ndev)
 {
   *ndev=0;
@@ -250,7 +251,7 @@ void c_get_ndevice_(int* ndev)
 // Get number of cores of device  --------------
 //This function is present in cuda SDK: see ${CUDAROOT}/common/inc/helper_cuda_drvapi.h
 //To be completed for new card versions
-static __host__
+static
 int version_2_cores(int major, int minor)
 {
     // Defines for GPU Architecture types (using the SM version to determine the # of cores per SM

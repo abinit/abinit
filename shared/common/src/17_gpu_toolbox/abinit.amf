@@ -8,5 +8,5 @@
 
 #noinst_HEADERS = cuda_rec_head.h
 
-dev_spec.$(OBJEXT): dev_spec.cu 
-timing_cuda.$(OBJEXT): timing_cuda.cu 
+dev_spec.$(OBJEXT): dev_spec.cpp
+timing_cuda.$(OBJEXT): timing_cuda.cpp

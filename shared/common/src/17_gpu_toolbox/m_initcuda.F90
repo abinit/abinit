@@ -112,7 +112,7 @@ CONTAINS !===========================================================
 !arrays
  integer :: vers(0:1)
 ! *********************************************************************
-#if defined HAVE_GPU_CUDA
+#if defined HAVE_GPU
  write(msg,'(a,80a)')' ',('_',ii=1,80)
  call wrtout(std_out,msg,'PERS')
  write(msg,'(a25,a25,a31,a)')  '________________________',&
@@ -173,7 +173,7 @@ CONTAINS !===========================================================
  real(sp) :: locmax
 ! *********************************************************************
  gpuinfo%ndevice = 0
-#if defined HAVE_GPU_CUDA
+#if defined HAVE_GPU
 !--Initialization
  if(device>-1)then
    !--Get the number of device for this proc
@@ -204,7 +204,7 @@ CONTAINS !===========================================================
 !scalars
  integer,intent(out) :: ndevice
 ! *********************************************************************
-#if defined HAVE_GPU_CUDA
+#if defined HAVE_GPU
 !--Get the number of device for this proc
  call c_get_ndevice(ndevice)
 #endif
@@ -238,7 +238,7 @@ subroutine Get_Mem_Dev(device,max_mem_dev)
  real(sp),intent(out) :: max_mem_dev
 !Local variables ------------------------------
 ! *********************************************************************
-#if defined HAVE_GPU_CUDA
+#if defined HAVE_GPU
  call get_GPU_max_mem(device,max_mem_dev)
 #endif
 end subroutine Get_Mem_Dev
@@ -262,7 +262,7 @@ end subroutine Get_Mem_Dev
 !scalars
  type(devGPU_type),intent(inout) :: gpuinfo
 ! *********************************************************************
-#if defined HAVE_GPU_CUDA
+#if defined HAVE_GPU
  if (allocated(gpuinfo%maxmemdev))  then
    ABI_FREE(gpuinfo%maxmemdev)
  end if
@@ -315,7 +315,7 @@ end subroutine Get_Mem_Dev
  nproc=xmpi_comm_size(xmpi_world)
  me=xmpi_comm_rank(xmpi_world)
 
-#if defined HAVE_GPU_CUDA
+#if defined HAVE_GPU
  device=-1
  call c_get_ndevice(nb_devices)
  nb_devices=min(nb_devices,5)
@@ -412,7 +412,7 @@ end subroutine Get_Mem_Dev
 
  if (use_gpu_cuda==ABI_GPU_DISABLED) return
 
-#if defined HAVE_GPU_CUDA
+#if defined HAVE_GPU
 
  ! Closing YAKL and Kokkos if opened
  if (use_gpu_cuda==ABI_GPU_KOKKOS .or. use_gpu_cuda==ABI_GPU_LEGACY) then
@@ -458,13 +458,13 @@ end subroutine Get_Mem_Dev
 !scalars
  integer :: ii,nproc
  character(len=500) :: msg
-#if defined HAVE_GPU_CUDA
+#if defined HAVE_GPU
  integer :: constmem,gflops,jj,lenname,nprocs,ncores,regist,sharemem
  real(sp) :: clockRate,globalmem
  character(len=20) :: name
 #endif
 !arrays
-#if defined HAVE_GPU_CUDA
+#if defined HAVE_GPU
  integer :: vers(0:1)
  integer,allocatable :: isort(:)
  real(dp),allocatable :: flops(:),mem(:)
@@ -484,7 +484,7 @@ end subroutine Get_Mem_Dev
  write(msg,'(a,i2,a)') ch10,nb_devices,' GPU device(s) have been detected on the current node:'
  call wrtout(std_out,msg,'PERS')
 
-#if defined HAVE_GPU_CUDA
+#if defined HAVE_GPU
 !Check device(s) properties
  ABI_MALLOC(flops,(nb_devices))
  ABI_MALLOC(mem,  (nb_devices))

@@ -16,7 +16,7 @@
 
 !!***
 
-#ifndef HAVE_GPU_CUDA
+#ifndef HAVE_GPU
 
 !!****f* m_abi_gpu_linalg/gpu_device_synchronize
 !! NAME
@@ -90,7 +90,7 @@ end subroutine check_gpu_mem
 !!  gpu_ptr= C_PTR on gpu memory location that has been allocated
 !!
 !! SIDE EFFECTS
-!!   WARNING! : this routine is a dummy one when HAVE_GPU_CUDA is not enabled
+!!   WARNING! : this routine is a dummy one when HAVE_GPU is not enabled
 !!   the correct one is in 17_gpu_toolbox/dev_spec.cu
 !!
 !! SOURCE
@@ -122,7 +122,7 @@ end subroutine alloc_on_gpu
 !!  dtab = fortran tab which will contains data
 !!
 !! SIDE EFFECTS
-!!   WARNING! : this routine is a dummy one when HAVE_GPU_CUDA is not enabled
+!!   WARNING! : this routine is a dummy one when HAVE_GPU is not enabled
 !!   the correct one is in 17_gpu_toolbox/dev_spec.cu
 !!
 !! SOURCE
@@ -160,7 +160,7 @@ end subroutine copy_from_gpu
 !!  gpu_ptr= C_PTR on gpu memory location
 !!
 !! SIDE EFFECTS
-!!   WARNING! : this routine is a dummy one when HAVE_GPU_CUDA is not enabled
+!!   WARNING! : this routine is a dummy one when HAVE_GPU is not enabled
 !!   the correct one is in 17_gpu_toolbox/dev_spec.cu
 !!
 !! SOURCE
@@ -233,7 +233,7 @@ end subroutine copy_gpu_to_gpu
 !!  gpu_ptr= C_PTR on gpu memory location that has been allocated
 !!
 !! SIDE EFFECTS
-!!   WARNING! : this routine is a dummy one when HAVE_GPU_CUDA is not enabled
+!!   WARNING! : this routine is a dummy one when HAVE_GPU is not enabled
 !!   the correct one is in 17_gpu_toolbox/dev_spec.cu
 !!
 !! SOURCE
@@ -367,7 +367,7 @@ end subroutine gpu_managed_ptr_status
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!!   WARNING! : this routine is a dummy one when HAVE_GPU_CUDA is not enabled
+!!   WARNING! : this routine is a dummy one when HAVE_GPU is not enabled
 !!   the correct one is in 17_gpu_toolbox/gpu_linalg.cu
 !!
 !! SOURCE
@@ -390,7 +390,7 @@ end subroutine gpu_linalg_init
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!!   WARNING! : this routine is a dummy one when HAVE_GPU_CUDA is not enabled
+!!   WARNING! : this routine is a dummy one when HAVE_GPU is not enabled
 !!   the correct one is in 17_gpu_toolbox/gpu_linalg.cu
 !!
 !! SOURCE
@@ -428,7 +428,7 @@ end subroutine gpu_linalg_shutdown
 !!
 !!
 !! SIDE EFFECTS
-!!   WARNING! : this routine is a dummy one when HAVE_GPU_CUDA is not enabled
+!!   WARNING! : this routine is a dummy one when HAVE_GPU is not enabled
 !!   the correct one is in 17_gpu_toolbox/gpu_linalg.cu
 !!
 !! SOURCE
@@ -501,7 +501,7 @@ end subroutine gpu_xgemm
 !!  b_gpu
 !!
 !! SIDE EFFECTS
-!!   WARNING! : this routine is a dummy one when HAVE_GPU_CUDA is not enabled
+!!   WARNING! : this routine is a dummy one when HAVE_GPU is not enabled
 !!   the correct one is in 17_gpu_toolbox/gpu_linalg.cu
 !!
 !! SOURCE
@@ -3493,7 +3493,7 @@ subroutine gpu_xorthonormalize(blockvectorx_gpu,blockvectorbx_gpu,blocksize,spac
 !arrays
  type(c_ptr),intent(inout) :: blockvectorbx_gpu, blockvectorx_gpu, sqgram_gpu
 !Local variables-------------------------------
-#if defined HAVE_GPU_CUDA
+#if defined HAVE_GPU
  integer :: ierr,info
  real(dp),    dimension(:,:),allocatable, target :: d_sqgram
  complex(dpc),dimension(:,:),allocatable, target :: z_sqgram
@@ -3506,7 +3506,7 @@ subroutine gpu_xorthonormalize(blockvectorx_gpu,blockvectorbx_gpu,blocksize,spac
  character(len=500) :: message
 
 ! *********************************************************************
-#if defined HAVE_GPU_CUDA
+#if defined HAVE_GPU
  if (present(tim_xortho).and.present(timopt)) then
    if(abs(timopt)==3) then
      call timab(tim_xortho,1,tsec)
@@ -3559,7 +3559,7 @@ subroutine gpu_xorthonormalize(blockvectorx_gpu,blockvectorbx_gpu,blocksize,spac
  return
 
 #else
- message='  This routine is not allowed when Cuda is disabled !'
+ message='  This routine is not allowed when running on GPU is disabled !'
  ABI_BUG(message)
  if (.false.) then
    write(std_out,*) blocksize,vectsize,spaceComm,x_cplx

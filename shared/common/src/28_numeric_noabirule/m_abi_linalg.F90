@@ -36,7 +36,7 @@ module m_abi_linalg
  use plasma, except_dp => dp, except_sp => sp
 #endif
 
-#if defined HAVE_GPU_CUDA
+#if defined HAVE_GPU
  use m_gpu_toolbox
 #endif
 
@@ -324,7 +324,7 @@ module m_abi_linalg
  public :: ortho_reim
  !----------------------------------------------------------------------
 
-#ifdef HAVE_GPU_CUDA
+#ifdef HAVE_GPU
 
   interface
 
@@ -611,7 +611,7 @@ CONTAINS  !===========================================================
 #endif
 #endif
 
-#ifdef HAVE_GPU_CUDA
+#ifdef HAVE_GPU
 !Cublas initialization
  if (use_gpu_cuda/=ABI_GPU_DISABLED) call gpu_linalg_init()
  abi_linalg_gpu_mode = use_gpu_cuda !FIXME Add a check for this
@@ -889,7 +889,7 @@ CONTAINS  !===========================================================
 #endif
 #endif
 
-#ifdef HAVE_GPU_CUDA
+#ifdef HAVE_GPU
  if (use_gpu_cuda/=ABI_GPU_DISABLED) then
    call abi_gpu_work_finalize()
    call gpu_linalg_shutdown()
