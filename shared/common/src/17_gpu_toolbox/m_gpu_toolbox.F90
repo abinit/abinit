@@ -42,6 +42,7 @@ module m_gpu_toolbox
 
   !Interfaces for C bindings --- To be completed
 #ifdef HAVE_FC_ISO_C_BINDING
+#if defined HAVE_GPU
 #if defined HAVE_GPU_CUDA
 
   ! mirroring cuda enum cudaMemoryAdvise usually defined in
@@ -73,9 +74,10 @@ module m_gpu_toolbox
     ! Let the Unified Memory subsystem decide on the page faulting policy for the specified device
     enumerator :: CUDA_MEM_ADVISE_UNSET_ACCESSED_BY        = 6
   end enum
+#endif
 
-  ! CUFFT Transform Types
-  ! Replicates cuFFT_type enum.
+  ! CUFFT/hipFFT Transform Types
+  ! Replicates cuFFT_type enum, matched (obviously) by hipFFT_type.
   ! We could use enum from official CUDA Fortran interface but it is only
   ! accessible using NVHPC compiler.
   ! Only Z2Z is mostly used so an assert on its value will check for enum changes
@@ -89,7 +91,8 @@ module m_gpu_toolbox
     enumerator :: FFT_Z2Z = 105  !  z'69'     ! Double-Complex to Double-Complex
   end enum
 
-  ! CUFFT Direction enum
+  ! CUFFT/hipFFT Direction enum
+  ! In hipFFT, "BACKWARD" wording is used instead of "INVERSE" (from cuFFT)
   enum, bind(C)
     enumerator :: FFT_INVERSE =  1
     enumerator :: FFT_FORWARD = -1
@@ -102,6 +105,7 @@ module m_gpu_toolbox
     !    type(C_PTR) :: ptr
     !  end function cuda_func
 
+#if defined HAVE_GPU_CUDA
     subroutine gpu_device_synchronize() bind(c, name='gpu_device_synchronize_cpp')
       use, intrinsic :: iso_c_binding
       implicit none
@@ -135,6 +139,7 @@ module m_gpu_toolbox
       integer(kind=C_INT),               value :: advice
       integer(kind=C_INT32_T),           value :: deviceId
     end subroutine gpu_memory_advise_f
+#endif
 
     !!! FFT related routines
     subroutine gpu_fft_plan_destroy() bind(c, name='gpu_fft_plan_destroy_cpp')
