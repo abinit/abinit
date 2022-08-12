@@ -86,7 +86,8 @@ module m_orbmag
 
   private :: make_ddir
   private :: berry_cc
-  private :: berry_vv
+  private :: berry_vva
+  private :: berry_vvb
   private :: berry_cv
 
   !private :: d2lr_p2
@@ -453,7 +454,10 @@ subroutine orbmag_ptpaw(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_en
      & mpi_enreg,my_nspinor,nband_k,npw_k,pcg1_k)
    orbmag_terms(:,:,:,ibcc) = orbmag_terms(:,:,:,ibcc) + trnrm*bc_k
    
-   call berry_vv(atindx,bc_k,cprj_k,ddir,dtset,lmn2max,nband_k,pawtab)
+   call berry_vva(atindx,bc_k,cprj_k,ddir,dtset,lmn2max,nband_k,pawtab)
+   orbmag_terms(:,:,:,ibvv) = orbmag_terms(:,:,:,ibvv) + trnrm*bc_k
+   
+   call berry_vvb(atindx,bc_k,cprj_k,ddir,dtset,lmn2max,nband_k,pawtab)
    orbmag_terms(:,:,:,ibvv) = orbmag_terms(:,:,:,ibvv) + trnrm*bc_k
    
    call berry_cv(atindx,bc_k,cprj_k,cprj1_k,ddir,dtset,lmn2max,nband_k,pawtab)
@@ -869,9 +873,9 @@ end subroutine berry_cv
 !!***
 
 
-!!****f* ABINIT/berry_vv
+!!****f* ABINIT/berry_vva
 !! NAME
-!! berry_vv
+!! berry_vva
 !!
 !! FUNCTION
 !! compute VV contribution to integral of Berry curvature
@@ -895,7 +899,7 @@ end subroutine berry_cv
 !!
 !! SOURCE
 
-subroutine berry_vv(atindx,bc_k,cprj_k,ddir,dtset,lmn2max,nband_k,pawtab)
+subroutine berry_vva(atindx,bc_k,cprj_k,ddir,dtset,lmn2max,nband_k,pawtab)
 
   !Arguments ------------------------------------
   !scalars
@@ -913,7 +917,7 @@ subroutine berry_vv(atindx,bc_k,cprj_k,ddir,dtset,lmn2max,nband_k,pawtab)
   !scalars
   integer :: adir,bdir,gdir,iat,iatom,ilmn,itypat,jlmn,klmn,nn,np
   real(dp) :: c2,eabg,qij
-  complex(dpc) :: cnpi,cnpj,cnpn,cpdb,cpdg,cpi,cpj,ct1,ct2,ctermdb,ctermdg,ctermq
+  complex(dpc) :: cpdb,cpdg,cpi,cpj,ctermdb,ctermdg,ctermq
   
   !arrays
 
@@ -945,17 +949,7 @@ subroutine berry_vv(atindx,bc_k,cprj_k,ddir,dtset,lmn2max,nband_k,pawtab)
                 ctermq = c2*cbc*eabg*CONJG(cpdb)*qij*cpdg
                 ctermdb = c2*cbc*eabg*CONJG(cpi)*(j_dpc)*ddir(klmn,itypat,bdir)*cpdg
                 ctermdg = c2*cbc*eabg*CONJG(cpdb)*(-j_dpc)*ddir(klmn,itypat,gdir)*cpj
-                cnpn = czero
-                do np = 1, nband_k
-                  cnpi = CMPLX(cprj_k(iatom,np)%cp(1,ilmn),cprj_k(iatom,np)%cp(2,ilmn),KIND=dpc)
-                  cnpj = CMPLX(cprj_k(iatom,np)%cp(1,jlmn),cprj_k(iatom,np)%cp(2,jlmn),KIND=dpc)
-                  ct1 = CONJG(cpdb)*qij*cnpj+CONJG(cnpi)*(j_dpc)*ddir(klmn,itypat,bdir)*cnpj
-                  ct2 = CONJG(cnpi)*qij*cpdg+CONJG(cnpi)*(-j_dpc)*ddir(klmn,itypat,gdir)*cnpj
-                  cnpn = cnpn + ct1*ct2
-                end do
-
-                !bc_k(1,nn,adir) = bc_k(1,nn,adir) + REAL(ctermq+ctermdb+ctermdg+cnpn)
-                !bc_k(2,nn,adir) = bc_k(2,nn,adir) + AIMAG(ctermq+ctermdb+ctermdg+cnpn)
+               
                 bc_k(1,nn,adir) = bc_k(1,nn,adir) + REAL(ctermq+ctermdb+ctermdg)
                 bc_k(2,nn,adir) = bc_k(2,nn,adir) + AIMAG(ctermq+ctermdb+ctermdg)
 
@@ -968,8 +962,110 @@ subroutine berry_vv(atindx,bc_k,cprj_k,ddir,dtset,lmn2max,nband_k,pawtab)
 
   end do !loop over bands
 
-end subroutine berry_vv
+end subroutine berry_vva
 !!***
+
+!!****f* ABINIT/berry_vvb
+!! NAME
+!! berry_vva
+!!
+!! FUNCTION
+!! compute VV contribution to integral of Berry curvature
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2021 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!!
+!! SOURCE
+
+subroutine berry_vvb(atindx,bc_k,cprj_k,ddir,dtset,lmn2max,nband_k,pawtab)
+
+  !Arguments ------------------------------------
+  !scalars
+  integer,intent(in) :: lmn2max,nband_k
+  type(dataset_type),intent(in) :: dtset
+
+  !arrays
+  integer,intent(in) :: atindx(dtset%natom)
+  real(dp),intent(in) :: ddir(lmn2max,dtset%ntypat,3)
+  real(dp),intent(out) :: bc_k(2,nband_k,3)
+  type(pawcprj_type),intent(in) :: cprj_k(dtset%natom,nband_k)
+  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
+
+  !Local variables -------------------------
+  !scalars
+  integer :: adir,bdir,gdir,iat,iatom,ilmn,itypat,jlmn,klmn,nn,np
+  real(dp) :: c2,eabg,qij
+  complex(dpc) :: cnp,cnpb,cnpg,cpdb,cpdg,cpi,cpj
+  
+  !arrays
+
+!--------------------------------------------------------------------
+
+  ! in abinit, exp(i k.r) is used not exp(i 2\pi k.r) so the following
+  ! term arises to properly normalize the derivatives
+  c2=1.0d0/(two_pi*two_pi)
+
+  bc_k = zero
+  do nn = 1, nband_k
+    do adir = 1, 3
+      do bdir = 1, 3
+        do gdir = 1, 3
+          eabg = eijk(adir,bdir,gdir)
+          if (abs(eabg) < half) cycle
+  
+          cnp = czero
+          do np = 1, nband_k
+     
+            cnpb = czero
+            cnpg = czero 
+            do iat=1,dtset%natom
+              iatom=atindx(iat)
+              itypat=dtset%typat(iat)
+              do ilmn = 1, pawtab(itypat)%lmn_size
+                cpi = CMPLX(cprj_k(iatom,np)%cp(1,ilmn),cprj_k(iatom,np)%cp(2,ilmn),KIND=dpc)
+                do jlmn = 1, pawtab(itypat)%lmn_size
+                  cpj = CMPLX(cprj_k(iatom,nn)%cp(1,jlmn),cprj_k(iatom,nn)%cp(2,jlmn),KIND=dpc)
+                  cpdg = CMPLX(cprj_k(iatom,nn)%dcp(1,gdir,jlmn),cprj_k(iatom,nn)%dcp(2,gdir,jlmn),KIND=dpc)
+                  cpdb = CMPLX(cprj_k(iatom,nn)%dcp(1,bdir,jlmn),cprj_k(iatom,nn)%dcp(2,bdir,jlmn),KIND=dpc)
+                  klmn = MATPACK(ilmn,jlmn)
+                  qij = pawtab(itypat)%sij(klmn)
+                  cnpg = cnpg + CONJG(cpi)*qij*cpdg + &
+                   & CONJG(cpi)*(-j_dpc)*ddir(klmn,itypat,gdir)*cpj 
+                  cnpb = cnpb + CONJG(cpi)*qij*cpdb + &
+                   & CONJG(cpi)*(-j_dpc)*ddir(klmn,itypat,bdir)*cpj 
+                end do ! loop over jlmn
+              end do ! loop over ilmn
+            end do ! loop over atoms
+
+            cnp = cnp + CONJG(cnpb)*cnpg
+                  
+
+          end do ! loop over np
+          bc_k(1,nn,adir) = bc_k(1,nn,adir) - REAL(c2*cbc*eabg*cnp)
+          bc_k(2,nn,adir) = bc_k(2,nn,adir) - AIMAG(c2*cbc*eabg*cnp)
+
+        end do ! gdir
+      end do ! bdir
+    end do ! adir
+  end do !loop over bands
+
+end subroutine berry_vvb
+!!***
+
 
 
 !!****f* ABINIT/berry_cc
