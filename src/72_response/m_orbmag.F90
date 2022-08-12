@@ -832,40 +832,42 @@ subroutine berry_cv(atindx,bc_k,cprj_k,cprj1_k,ddir,dtset,lmn2max,nband_k,pawtab
 
   bc_k = zero
   do nn = 1, nband_k
+    do adir = 1, 3
+      do bdir = 1, 3
+        do gdir = 1, 3
+          eabg = eijk(adir,bdir,gdir)
+          if (abs(eabg) < half) cycle
 
-    do iat=1,dtset%natom
-      iatom=atindx(iat)
-      itypat=dtset%typat(iat)
-      do ilmn = 1, pawtab(itypat)%lmn_size
-        cpi = CMPLX(cprj_k(iatom,nn)%cp(1,ilmn),cprj_k(iatom,nn)%cp(2,ilmn),KIND=dpc)
-        do jlmn = 1, pawtab(itypat)%lmn_size
-          cpj = CMPLX(cprj_k(iatom,nn)%cp(1,jlmn),cprj_k(iatom,nn)%cp(2,jlmn),KIND=dpc)
-          klmn = MATPACK(ilmn,jlmn)
-          qij = pawtab(itypat)%sij(klmn)
-          do adir = 1, 3
-            do bdir = 1, 3
-              cpdb = CMPLX(cprj_k(iatom,nn)%dcp(1,bdir,ilmn),cprj_k(iatom,nn)%dcp(2,bdir,ilmn),KIND=dpc)
-              pcbi = CMPLX(cprj1_k(iatom,nn,bdir)%cp(1,ilmn),cprj1_k(iatom,nn,bdir)%cp(2,ilmn),KIND=dpc)
-              do gdir = 1, 3
-                eabg = eijk(adir,bdir,gdir)
-                if (abs(eabg) < half) cycle
+          ct2 = czero; ct3 = czero
+          do iat=1,dtset%natom
+            iatom=atindx(iat)
+            itypat=dtset%typat(iat)
+            do ilmn = 1, pawtab(itypat)%lmn_size
+              cpi = CMPLX(cprj_k(iatom,nn)%cp(1,ilmn),cprj_k(iatom,nn)%cp(2,ilmn),KIND=dpc)
+              do jlmn = 1, pawtab(itypat)%lmn_size
+                cpj = CMPLX(cprj_k(iatom,nn)%cp(1,jlmn),cprj_k(iatom,nn)%cp(2,jlmn),KIND=dpc)
+                klmn = MATPACK(ilmn,jlmn)
+                qij = pawtab(itypat)%sij(klmn)
+                cpdb = CMPLX(cprj_k(iatom,nn)%dcp(1,bdir,ilmn),cprj_k(iatom,nn)%dcp(2,bdir,ilmn),KIND=dpc)
+                pcbi = CMPLX(cprj1_k(iatom,nn,bdir)%cp(1,ilmn),cprj1_k(iatom,nn,bdir)%cp(2,ilmn),KIND=dpc)
                 cpdg = CMPLX(cprj_k(iatom,nn)%dcp(1,gdir,jlmn),cprj_k(iatom,nn)%dcp(2,gdir,jlmn),KIND=dpc)
                 pcgj = CMPLX(cprj1_k(iatom,nn,gdir)%cp(1,jlmn),cprj1_k(iatom,nn,gdir)%cp(2,jlmn),KIND=dpc)
 
-                ct2 = c2*cbc*eabg*(CONJG(pcbi)*(-j_dpc)*ddir(klmn,itypat,gdir)*cpj+&
+                ct2 = ct2 + (CONJG(pcbi)*(-j_dpc)*ddir(klmn,itypat,gdir)*cpj+&
                   & CONJG(pcbi)*qij*cpdg)
-                ct3 = c2*cbc*eabg*(CONJG(cpi)*(j_dpc)*ddir(klmn,itypat,bdir)*pcgj+&
+                ct3 = ct3 + (CONJG(cpi)*(j_dpc)*ddir(klmn,itypat,bdir)*pcgj+&
                   & CONJG(cpdb)*qij*pcgj)
-                
-                bc_k(1,nn,adir) = bc_k(1,nn,adir) + REAL(ct2 + ct3)
-                bc_k(2,nn,adir) = bc_k(2,nn,adir) + AIMAG(ct2 + ct3)
 
-              end do ! gdir
-            end do ! bdir
-          end do ! adir
-        end do ! loop over jlmn
-      end do ! loop over ilmn
-    end do ! loop over natom
+              end do ! jlmn
+            end do ! ilmn
+          end do ! iatom
+
+          bc_k(1,nn,adir) = bc_k(1,nn,adir) + REAL(c2*cbc*eabg*(ct2 + ct3))
+          bc_k(2,nn,adir) = bc_k(2,nn,adir) + AIMAG(c2*cbc*eabg*(ct2 + ct3))
+        
+        end do ! gdir
+      end do ! bdir
+    end do ! adir
 
   end do !loop over bands
 
@@ -930,35 +932,37 @@ subroutine berry_vva(atindx,bc_k,cprj_k,ddir,dtset,lmn2max,nband_k,pawtab)
   bc_k = zero
   do nn = 1, nband_k
 
-    do iat=1,dtset%natom
-      iatom=atindx(iat)
-      itypat=dtset%typat(iat)
-      do ilmn = 1, pawtab(itypat)%lmn_size
-        cpi = CMPLX(cprj_k(iatom,nn)%cp(1,ilmn),cprj_k(iatom,nn)%cp(2,ilmn),KIND=dpc)
-        do jlmn = 1, pawtab(itypat)%lmn_size
-          cpj = CMPLX(cprj_k(iatom,nn)%cp(1,jlmn),cprj_k(iatom,nn)%cp(2,jlmn),KIND=dpc)
-          klmn = MATPACK(ilmn,jlmn)
-          qij = pawtab(itypat)%sij(klmn)
-          do adir = 1, 3
-            do bdir = 1, 3
-              cpdb = CMPLX(cprj_k(iatom,nn)%dcp(1,bdir,ilmn),cprj_k(iatom,nn)%dcp(2,bdir,ilmn),KIND=dpc)
-              do gdir = 1, 3
-                eabg = eijk(adir,bdir,gdir)
-                if (abs(eabg) < half) cycle
-                cpdg = CMPLX(cprj_k(iatom,nn)%dcp(1,gdir,jlmn),cprj_k(iatom,nn)%dcp(2,gdir,jlmn),KIND=dpc)
-                ctermq = c2*cbc*eabg*CONJG(cpdb)*qij*cpdg
-                ctermdb = c2*cbc*eabg*CONJG(cpi)*(j_dpc)*ddir(klmn,itypat,bdir)*cpdg
-                ctermdg = c2*cbc*eabg*CONJG(cpdb)*(-j_dpc)*ddir(klmn,itypat,gdir)*cpj
-               
-                bc_k(1,nn,adir) = bc_k(1,nn,adir) + REAL(ctermq+ctermdb+ctermdg)
-                bc_k(2,nn,adir) = bc_k(2,nn,adir) + AIMAG(ctermq+ctermdb+ctermdg)
+    do adir = 1, 3
+      do bdir = 1, 3
+        do gdir = 1, 3
+          eabg = eijk(adir,bdir,gdir)
+          if (abs(eabg) < half) cycle
 
-              end do ! gdir
-            end do ! bdir
-          end do ! adir
-        end do ! loop over jlmn
-      end do ! loop over ilmn
-    end do ! loop over natom
+          ctermq = czero; ctermdb = czero; ctermdg = czero
+          do iat=1,dtset%natom
+            iatom=atindx(iat)
+            itypat=dtset%typat(iat)
+            do ilmn = 1, pawtab(itypat)%lmn_size
+              cpi = CMPLX(cprj_k(iatom,nn)%cp(1,ilmn),cprj_k(iatom,nn)%cp(2,ilmn),KIND=dpc)
+              do jlmn = 1, pawtab(itypat)%lmn_size
+                cpj = CMPLX(cprj_k(iatom,nn)%cp(1,jlmn),cprj_k(iatom,nn)%cp(2,jlmn),KIND=dpc)
+                klmn = MATPACK(ilmn,jlmn)
+                qij = pawtab(itypat)%sij(klmn)
+                cpdb = CMPLX(cprj_k(iatom,nn)%dcp(1,bdir,ilmn),cprj_k(iatom,nn)%dcp(2,bdir,ilmn),KIND=dpc)
+                cpdg = CMPLX(cprj_k(iatom,nn)%dcp(1,gdir,jlmn),cprj_k(iatom,nn)%dcp(2,gdir,jlmn),KIND=dpc)
+                ctermq = ctermq + CONJG(cpdb)*qij*cpdg
+                ctermdb = ctermdb + CONJG(cpi)*(j_dpc)*ddir(klmn,itypat,bdir)*cpdg
+                ctermdg = ctermdg + CONJG(cpdb)*(-j_dpc)*ddir(klmn,itypat,gdir)*cpj
+              end do ! jlmn
+            end do ! ilmn
+          end do ! iat
+         
+          bc_k(1,nn,adir) = bc_k(1,nn,adir) + REAL(c2*cbc*eabg*(ctermq+ctermdb+ctermdg))
+          bc_k(2,nn,adir) = bc_k(2,nn,adir) + AIMAG(c2*cbc*eabg*(ctermq+ctermdb+ctermdg))
+        
+        end do ! gdir
+      end do ! bdir
+    end do ! adir
 
   end do !loop over bands
 
