@@ -665,10 +665,20 @@ SUBROUTINE Ctqmcoffdiag_allocateAll(op)
   op%measDE = 0.d0
 
   FREEIF(op%mu)
-  MALLOC(op%mu,(1:flavors) )
+#ifdef FC_LLVM
+  ! LLVM 16 doesn't recognize this macro here
+  MALLOC(op%mu, (1:flavors) )
+#else
+  MALLOC(op%mu, (1:flavors))
+#endif
   op%mu = 0.d0
   FREEIF(op%hybri_limit)
+#ifdef FC_LLVM
+  ! LLVM 16 doesn't recognize this macro here
   MALLOC(op%hybri_limit, (flavors,flavors) )
+#else
+  MALLOC(op%hybri_limit, (flavors,flavors))
+#endif
   op%hybri_limit = czero
 END SUBROUTINE Ctqmcoffdiag_allocateAll
 !!***
