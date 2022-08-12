@@ -643,7 +643,7 @@ SUBROUTINE Ctqmc_allocateAll(this)
   this%measDE = 0.d0
 
   FREEIF(this%mu)
-  MALLOC(this%mu,(1:flavors) )
+  MALLOC(this%mu, (1:flavors) )
   this%mu = 0.d0
 END SUBROUTINE Ctqmc_allocateAll
 !!***
