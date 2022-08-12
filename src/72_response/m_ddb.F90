@@ -6036,7 +6036,12 @@ subroutine ddb_to_dtset(comm, dtset, filename, psps)
  ABI_REMALLOC(dtset%spinat, (3,dtset%natom))
  dtset%spinat(:,:) = ddb_hdr%spinat(1:3,1:ddb_hdr%matom)
 
+#ifdef FC_LLVM
+ ! LLVM 16 doesn't recognize this macro here
+ ABI_REMALLOC(dtset%xred_orig, (3,dtset%natom,mxnimage) )
+#else
  ABI_REMALLOC(dtset%xred_orig, (3,dtset%natom,mxnimage))
+#endif
  dtset%xred_orig(:,:,1) = ddb_hdr%xred(1:3,1:ddb_hdr%matom)
 
  ABI_REMALLOC(dtset%ziontypat, (dtset%ntypat))
