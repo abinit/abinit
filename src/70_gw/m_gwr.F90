@@ -96,9 +96,6 @@
 !!  - Need to extend FFT API to avoid scaling if isign = -1. Also fft_ug and fft_ur should accept isign
 !!    optional argument.
 !!
-!!  - Make kbz2ibz and qbz2ibz tables global. Change symmetrization API so that we alwasy pass global indices
-!!    It's easier to read and it is also possible to change the distribution of the matrices at run-time.
-!!
 !! COPYRIGHT
 !! Copyright (C) 1999-2021 ABINIT group (MG)
 !! This file is distributed under the terms of the
@@ -508,13 +505,9 @@ module m_gwr
     ! (3, nkibz)
     ! Reduced coordinates of the k-points in the IBZ
 
-   integer,allocatable :: my_kbz2ibz(:,:)
-    ! (6, my_nkbz)
-    ! These table used the conventions for the symmetrization of the wavefunctions expected by cgtk_rotate.
-    ! In this case listkk has been called with symrel and use_symrec=False
-
-   integer,allocatable :: my_qbz2ibz(:,:)
-    ! (6, my_nqbz)
+   integer,allocatable :: kbz2ibz(:,:)
+    ! (6, nkbz)
+    ! Mapping kBZ to IBZ (symrec conventions)
 
    real(dp), contiguous, pointer :: wtk(:) => null()
     ! (nkibz)
@@ -526,7 +519,7 @@ module m_gwr
 
    integer,allocatable :: qbz2ibz(:,:)
    ! (6, nqbz)
-   ! Mapping qBZ to IBZ.
+   ! Mapping qBZ to IBZ (symrec conventions)
 
    real(dp),allocatable :: qibz(:,:)
    ! (3, nqibz)
@@ -667,7 +660,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
 !Local variables-------------------------------
 !scalars
  integer,parameter :: me_fft0 = 0, paral_fft0 = 0, nproc_fft1 = 1, istwfk1 = 1
- integer,parameter :: qptopt1 = 1, timrev1 = 1, master = 0, ndims = 4
+ integer,parameter :: qptopt1 = 1, qtimrev1 = 1, master = 0, ndims = 4
  integer :: my_is, my_it, my_ikf, my_iqf, ii, npwsp, col_bsize, ebands_timrev, my_iki, my_iqi, itau, spin
  integer :: my_nshiftq, iq_bz, iq_ibz, npw_, ncid, ig, ig_start
  integer :: comm_cart, me_cart, ierr, all_nproc, nps, my_rank, qprange_, gap_err, ncerr
@@ -682,8 +675,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
 !arrays
  integer :: qptrlatt(3,3), dims(ndims)
  integer :: indkk_k(6,1)
- integer,allocatable :: kbz2ibz(:,:), qbz2ibz(:,:), gvec_(:,:)
- integer,allocatable :: degblock(:,:), degblock_all(:,:,:,:), ndeg_all(:,:)
+ integer,allocatable :: gvec_(:,:),degblock(:,:), degblock_all(:,:,:,:), ndeg_all(:,:)
  real(dp) :: my_shiftq(3,1), kk_ibz(3), kk_bz(3), qq_bz(3), qq_ibz(3), kk(3)
  real(dp),allocatable :: wtk(:), kibz(:,:)
  logical :: periods(ndims), keepdim(ndims)
@@ -752,24 +744,24 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  gwr%ngkpt = get_diag(ks_ebands%kptrlatt)
 
  ! Note symrec convention
- ABI_MALLOC(kbz2ibz, (6, gwr%nkbz))
+ ABI_MALLOC(gwr%kbz2ibz, (6, gwr%nkbz))
  ebands_timrev = kpts_timrev_from_kptopt(ks_ebands%kptopt)
 
  krank_ibz = krank_from_kptrlatt(gwr%nkibz, kibz, ks_ebands%kptrlatt, compute_invrank=.False.)
 
- if (kpts_map("symrec", ebands_timrev, cryst, krank_ibz, gwr%nkbz, gwr%kbz, kbz2ibz) /= 0) then
+ if (kpts_map("symrec", ebands_timrev, cryst, krank_ibz, gwr%nkbz, gwr%kbz, gwr%kbz2ibz) /= 0) then
    ABI_ERROR("Cannot map kBZ to IBZ!")
  end if
 
  ! Order kbz by stars and rearrange entries in kbz2ibz table.
- call kpts_pack_in_stars(gwr%nkbz, gwr%kbz, kbz2ibz)
+ call kpts_pack_in_stars(gwr%nkbz, gwr%kbz, gwr%kbz2ibz)
 
  if (my_rank == master) then
    call kpts_map_print([std_out, ab_out], " Mapping kBZ --> kIBZ", "symrec", &
-                       gwr%kbz, kibz, kbz2ibz, gwr%dtset%prtvol)
+                       gwr%kbz, kibz, gwr%kbz2ibz, gwr%dtset%prtvol)
  end if
 
- !call get_ibz2bz(gwr%nkibz, gwr%nkbz, kbz2ibz, kibz2bz, ierr)
+ !call get_ibz2bz(gwr%nkibz, gwr%nkbz, gwr%kbz2ibz, kibz2bz, ierr)
  !ABI_CHECK(ierr == 0, "Something wrong in symmetry tables for k-points")
 
  ! Setup qIBZ, weights and BZ.
@@ -785,20 +777,20 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  gwr%ngqpt = get_diag(qptrlatt)
 
  ! HM: the bz2ibz produced above is incomplete, I do it here using listkk
- ABI_MALLOC(qbz2ibz, (6, gwr%nqbz))
+ ABI_MALLOC(gwr%qbz2ibz, (6, gwr%nqbz))
 
  qrank = krank_from_kptrlatt(gwr%nqibz, gwr%qibz, qptrlatt, compute_invrank=.False.)
 
- if (kpts_map("symrec", timrev1, cryst, qrank, gwr%nqbz, gwr%qbz, qbz2ibz) /= 0) then
+ if (kpts_map("symrec", qtimrev1, cryst, qrank, gwr%nqbz, gwr%qbz, gwr%qbz2ibz) /= 0) then
    ABI_ERROR("Cannot map qBZ to IBZ!")
  end if
  call qrank%free()
 
  ! Order qbz by stars and rearrange entries in qbz2ibz table.
- call kpts_pack_in_stars(gwr%nqbz, gwr%qbz, qbz2ibz)
+ call kpts_pack_in_stars(gwr%nqbz, gwr%qbz, gwr%qbz2ibz)
  if (my_rank == master) then
    call kpts_map_print([std_out, ab_out], " Mapping qBZ --> qIBZ", "symrec", &
-                       gwr%qbz, gwr%qibz, qbz2ibz, gwr%dtset%prtvol)
+                       gwr%qbz, gwr%qibz, gwr%qbz2ibz, gwr%dtset%prtvol)
  end if
 
  ! ==========================
@@ -923,7 +915,6 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
        degblock_all(:, 1:ndeg, ikcalc, spin) = degblock(:, 1:ndeg)
 
        ABI_FREE(degblock)
-
      end do
    end if ! symsigma
  end do ! ikcalc
@@ -1156,12 +1147,10 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  call xmpi_split_block(gwr%nkbz, gwr%kpt_comm%value, gwr%my_nkbz, gwr%my_kbz_inds)
  ABI_CHECK(gwr%my_nkbz > 0, "my_nkbz == 0, decrease number of procs for k-point level")
 
- ABI_MALLOC(gwr%my_kbz2ibz, (6, gwr%my_nkbz))
- gwr%my_kbz2ibz = kbz2ibz(:, gwr%my_kbz_inds(:))
-
  ABI_ICALLOC(gwr%np_kibz, (gwr%nkibz))
  do my_ikf=1,gwr%my_nkbz
-   ik_ibz = gwr%my_kbz2ibz(1, my_ikf)
+   ik_bz = gwr%my_kbz_inds(my_ikf)
+   ik_ibz = gwr%kbz2ibz(1, ik_bz)
    gwr%np_kibz(ik_ibz) = 1
  end do
 
@@ -1176,18 +1165,15 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
 
  call xmpi_sum(gwr%np_kibz, gwr%kpt_comm%value, ierr)
 
- ABI_FREE(kbz2ibz)
-
  ! Distribute q-points in the full BZ, transfer symmetry tables.
  ! Finally find the number of IBZ q-points that should be stored in memory.
  call xmpi_split_block(gwr%nqbz, gwr%kpt_comm%value, gwr%my_nqbz, gwr%my_qbz_inds)
- ABI_MALLOC(gwr%my_qbz2ibz, (6, gwr%my_nqbz))
- gwr%my_qbz2ibz = qbz2ibz(:, gwr%my_qbz_inds(:))
 
  ABI_ICALLOC(gwr%np_qibz, (gwr%nqibz))
 
  do my_iqf=1,gwr%my_nqbz
-   iq_ibz = gwr%my_qbz2ibz(1, my_iqf)
+   iq_bz = gwr%my_qbz_inds(my_iqf)
+   iq_ibz = gwr%qbz2ibz(1, iq_bz)
    gwr%np_qibz(iq_ibz) = 1
  end do
 
@@ -1201,8 +1187,6 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  end do
 
  call xmpi_sum(gwr%np_qibz, gwr%kpt_comm%value, ierr)
-
- ABI_FREE(qbz2ibz)
 
  ! =========================================
  ! Find FFT mesh and max number of g-vectors
@@ -1487,13 +1471,11 @@ subroutine gwr_free(gwr)
 !Arguments ------------------------------------
  class(gwr_t), intent(inout) :: gwr
 
-!Local variables-------------------------------
-
 ! *************************************************************************
 
  ABI_SFREE(gwr%kbz)
- ABI_SFREE(gwr%my_kbz2ibz)
- ABI_SFREE(gwr%my_qbz2ibz)
+ ABI_SFREE(gwr%kbz2ibz)
+ ABI_SFREE(gwr%qbz2ibz)
  ABI_SFREE(gwr%my_kbz_inds)
  ABI_SFREE(gwr%my_kibz_inds)
  ABI_SFREE(gwr%my_qbz_inds)
@@ -2036,17 +2018,17 @@ end subroutine gwr_build_gtau_from_wfk
 !!
 !! SOURCE
 
-subroutine gwr_rotate_gpm(gwr, my_ikf, my_it, my_is, desc_kbz, gt_pm)
+subroutine gwr_rotate_gpm(gwr, ik_bz, itau, spin, desc_kbz, gt_pm)
 
 !Arguments ------------------------------------
  class(gwr_t),intent(in) :: gwr
- integer,intent(in) :: my_ikf, my_it, my_is
+ integer,intent(in) :: ik_bz, spin, itau
  type(desc_t),intent(out) :: desc_kbz
  type(matrix_scalapack),intent(out) :: gt_pm(2)
 
 !Local variables-------------------------------
 !scalars
- integer :: ig1, ig2, il_g1, il_g2, ipm, spin, itau, ik_ibz, isym_k, trev_k, g0_k(3), ik_bz, tsign_k
+ integer :: ig1, ig2, il_g1, il_g2, ipm, ik_ibz, isym_k, trev_k, g0_k(3), tsign_k
  logical :: isirr_k
 !arrays
  integer :: g1(3), g2(3)
@@ -2058,12 +2040,8 @@ subroutine gwr_rotate_gpm(gwr, my_ikf, my_it, my_is, desc_kbz, gt_pm)
 
  !call cwtime(cpu, wall, gflops, "start")
 
- spin = gwr%my_spins(my_is)
- itau = gwr%my_itaus(my_it)
- ik_bz = gwr%my_kbz_inds(my_ikf)
-
- ik_ibz = gwr%my_kbz2ibz(1, my_ikf); isym_k = gwr%my_kbz2ibz(2, my_ikf)
- trev_k = gwr%my_kbz2ibz(6, my_ikf); g0_k = gwr%my_kbz2ibz(3:5, my_ikf)
+ ik_ibz = gwr%kbz2ibz(1, ik_bz); isym_k = gwr%kbz2ibz(2, ik_bz)
+ trev_k = gwr%kbz2ibz(6, ik_bz); g0_k = gwr%kbz2ibz(3:5, ik_bz)
  isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
  tsign_k = merge(1, -1, trev_k == 0)
  !ABI_CHECK(all(g0_k == 0), sjoin("For kbz:", ktoa(gwr%kbz(:, ik_bz)), "g0_k:", ltoa(g0_k), " != 0"))
@@ -2164,11 +2142,11 @@ end subroutine gwr_rotate_gpm
 !!
 !! SOURCE
 
-subroutine gwr_get_green_gpr(gwr, my_it, my_is, desc_mykbz, gt_gpr)
+subroutine gwr_get_green_gpr(gwr, itau, spin, desc_mykbz, gt_gpr)
 
 !Arguments ------------------------------------
  class(gwr_t),intent(in) :: gwr
- integer,intent(in) :: my_it, my_is
+ integer,intent(in) :: itau, spin
  type(desc_t),intent(out) :: desc_mykbz(gwr%my_nkbz)
  type(matrix_scalapack),intent(inout) :: gt_gpr(2, gwr%my_nkbz)
 
@@ -2195,7 +2173,7 @@ subroutine gwr_get_green_gpr(gwr, my_it, my_is, desc_mykbz, gt_gpr)
    if (.not. k_is_gamma) call calc_ceikr(kk_bz, gwr%g_ngfft, gwr%g_nfft, gwr%nspinor, ceikr)
 
    ! Get G_k(+/- itau) in the BZ.
-   call gwr%rotate_gpm(my_ikf, my_it, my_is, desc_mykbz(my_ikf), gt_pm)
+   call gwr%rotate_gpm(ik_bz, itau, spin, desc_mykbz(my_ikf), gt_pm)
 
    do ipm=1,2
      associate (ggp => gt_pm(ipm), desc_k => desc_mykbz(my_ikf))
@@ -2261,11 +2239,11 @@ end subroutine gwr_get_green_gpr
 !!
 !! SOURCE
 
-subroutine gwr_get_gk_rpr_pm(gwr, my_ikf, my_it, my_is, ipm_list, gk_rpr_pm)
+subroutine gwr_get_gk_rpr_pm(gwr, my_ikf, itau, spin, ipm_list, gk_rpr_pm)
 
 !Arguments ------------------------------------
  class(gwr_t),intent(in) :: gwr
- integer,intent(in) :: my_ikf, my_it, my_is, ipm_list(:)
+ integer,intent(in) :: my_ikf, itau, spin, ipm_list(:)
  type(matrix_scalapack),intent(inout) :: gk_rpr_pm(2)
 
 !Local variables-------------------------------
@@ -2283,7 +2261,7 @@ subroutine gwr_get_gk_rpr_pm(gwr, my_ikf, my_it, my_is, ipm_list, gk_rpr_pm)
  !kk_bz = gwr%kbz(:, ik_bz)
 
  ! Get G_k(+/- itau) in the BZ.
- call gwr%rotate_gpm(my_ikf, my_it, my_is, desc_k, gt_pm)
+ call gwr%rotate_gpm(ik_bz, itau, spin, desc_k, gt_pm)
 
  do ii=1,size(ipm_list)
    ipm = ipm_list(ii)
@@ -2421,17 +2399,17 @@ end subroutine gwr_ggp_to_rpr
 !!
 !! SOURCE
 
-subroutine gwr_rotate_wc(gwr, my_iqf, my_it, my_is, desc_qbz, wc_qbz)
+subroutine gwr_rotate_wc(gwr, iq_bz, itau, spin, desc_qbz, wc_qbz)
 
 !Arguments ------------------------------------
  class(gwr_t),intent(inout) :: gwr
- integer,intent(in) :: my_iqf, my_it, my_is
+ integer,intent(in) :: iq_bz, itau, spin
  type(desc_t),intent(out) :: desc_qbz
  type(matrix_scalapack),intent(inout) :: wc_qbz
 
 !Local variables-------------------------------
 !scalars
- integer :: ig1, ig2, il_g1, il_g2, spin, itau, iq_ibz, isym_q, trev_q, g0_q(3), iq_bz, tsign_q
+ integer :: ig1, ig2, il_g1, il_g2, iq_ibz, isym_q, trev_q, g0_q(3), tsign_q
  logical :: isirr_q
 !arrays
  integer :: g1(3), g2(3)
@@ -2442,13 +2420,13 @@ subroutine gwr_rotate_wc(gwr, my_iqf, my_it, my_is, desc_qbz, wc_qbz)
 
  ABI_CHECK(gwr%wc_space == "itau", sjoin("wc_space:", gwr%wc_space, " != itau"))
 
- spin = gwr%my_spins(my_is)
- itau = gwr%my_itaus(my_it)
- iq_bz = gwr%my_qbz_inds(my_iqf)
+ !spin = gwr%my_spins(my_is)
+ !itau = gwr%my_itaus(my_it)
+ !iq_bz = gwr%my_qbz_inds(my_iqf)
  qq_bz = gwr%qbz(:, iq_bz)
 
- iq_ibz = gwr%my_qbz2ibz(1, my_iqf); isym_q = gwr%my_qbz2ibz(2, my_iqf)
- trev_q = gwr%my_qbz2ibz(6, my_iqf); g0_q = gwr%my_qbz2ibz(3:5, my_iqf)
+ iq_ibz = gwr%qbz2ibz(1, iq_bz); isym_q = gwr%qbz2ibz(2, iq_bz)
+ trev_q = gwr%qbz2ibz(6, iq_bz); g0_q = gwr%qbz2ibz(3:5, iq_bz)
  isirr_q = (isym_q == 1 .and. trev_q == 0 .and. all(g0_q == 0))
  tsign_q = merge(1, -1, trev_q == 0)
  ! TODO: Understand why legacy GW does not need umklapp
@@ -2528,11 +2506,11 @@ end subroutine gwr_rotate_wc
 !!
 !! SOURCE
 
-subroutine gwr_get_wc_gpr(gwr, my_it, my_is, desc_myqbz, wc_gpr)
+subroutine gwr_get_wc_gpr(gwr, itau, spin, desc_myqbz, wc_gpr)
 
 !Arguments ------------------------------------
  class(gwr_t),intent(inout) :: gwr
- integer,intent(in) :: my_it, my_is
+ integer,intent(in) :: itau, spin
  type(desc_t),target,intent(out) :: desc_myqbz(gwr%my_nqbz)
  type(matrix_scalapack),intent(inout) :: wc_gpr(gwr%my_nqbz)
 
@@ -2559,7 +2537,7 @@ subroutine gwr_get_wc_gpr(gwr, my_it, my_is, desc_myqbz, wc_gpr)
    if (.not. q_is_gamma) call calc_ceikr(qq_bz, gwr%g_ngfft, gwr%g_nfft, gwr%nspinor, ceiqr)
 
    ! Get W_q in the BZ.
-   call gwr%rotate_wc(my_iqf, my_it, my_is, desc_myqbz(my_iqf), wc_qbz)
+   call gwr%rotate_wc(iq_bz, itau, spin, desc_myqbz(my_iqf), wc_qbz)
    associate (desc_q => desc_myqbz(my_iqf))
 
    ! Allocate rgp PBLAS matrix to store Wc(r, g')
@@ -2620,12 +2598,12 @@ end subroutine gwr_get_wc_gpr
 !!
 !! SOURCE
 
-subroutine gwr_get_wc_rpr_qbz(gwr, my_it, my_is, qq_bz, wc_rpr)
+subroutine gwr_get_wc_rpr_qbz(gwr, qq_bz, itau, spin, wc_rpr)
 
 !Arguments ------------------------------------
  class(gwr_t),intent(inout) :: gwr
- integer,intent(in) :: my_it, my_is
  real(dp),intent(in) :: qq_bz(3)
+ integer,intent(in) :: itau, spin
  type(matrix_scalapack),intent(inout) :: wc_rpr
 
 !Local variables-------------------------------
@@ -2639,11 +2617,13 @@ subroutine gwr_get_wc_rpr_qbz(gwr, my_it, my_is, qq_bz, wc_rpr)
 
 ! *************************************************************************
 
+ ABI_ERROR("Not Implemented error")
+
  ! Identify q + g0 = k - kp with q in gwr%qbz.
- ! Non-zero g0, requires the application of the phase.
+ ! NB: Non-zero g0, requires the application of the phase.
  !call findqg0(iq_bz, g0, kmkp, gwr%nqbz, gwr%qbz, mG0)
 
- !call gwr%rotate_wc(my_iqf, my_it, my_is, desc_q, wct_ggp)
+ !call gwr%rotate_wc(iq_bz, itau, spin, desc_q, wct_ggp)
 
  ABI_MALLOC(ceiqr, (gwr%g_nfft * gwr%nspinor))
 
@@ -2654,7 +2634,7 @@ subroutine gwr_get_wc_rpr_qbz(gwr, my_it, my_is, qq_bz, wc_rpr)
  !if (.not. q_is_gamma) call calc_ceikr(qq_bz, gwr%g_ngfft, gwr%g_nfft, gwr%nspinor, ceiqr)
 
  !! Get W_q in the BZ.
- !!call gwr%rotate_wc(my_iqf, my_it, my_is, desc_myqbz(my_iqf), wc_ggp)
+ !!call gwr%rotate_wc(iq_bz, itau, spin, desc_myqbz(my_iqf), wc_ggp)
  !associate (desc_q => desc_myqbz(my_iqf))
 
  ! Allocate rgp PBLAS matrix to store Wc(r, g')
@@ -2850,6 +2830,7 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
               ! Spins are not distributed (this should happen only in sequential execution).
               if (spin == 1) then
                 mats(itau)%buffer_cplx = mats(itau)%buffer_cplx + gwr%tchi_qibz(iq_ibz,itau,spin+1)%buffer_cplx
+                gwr%tchi_qibz(iq_ibz,itau,spin+1)%buffer_cplx = mats(itau)%buffer_cplx
               end if
             end if
           end if
@@ -3319,7 +3300,7 @@ subroutine gwr_build_tchi(gwr)
        itau = gwr%my_itaus(my_it)
 
        ! G_k(g,g') --> G_k(g',r) e^{ik.r} for each k in the BZ treated by me.
-       call gwr%get_green_gpr(my_it, my_is, desc_mykbz, gt_gpr)
+       call gwr%get_green_gpr(itau, spin, desc_mykbz, gt_gpr)
 
        ! Loop over r in the unit cell that is now MPI-distributed in g_comm.
        my_nr = gt_gpr(1,1)%sizeb_local(2)
@@ -4223,10 +4204,10 @@ if (.True.) then
      itau = gwr%my_itaus(my_it)
 
      ! G_k(g,g') --> G_k(g',r) e^{ik.r} for each k in the BZ treated by me.
-     call gwr%get_green_gpr(my_it, my_is, desc_mykbz, gt_gpr)
+     call gwr%get_green_gpr(itau, spin, desc_mykbz, gt_gpr)
 
      ! Wc_q(g,g') --> Wc_q(g',r) e^{iq.r} for each q in the BZ treated by me.
-     call gwr%get_wc_gpr(my_it, my_is, desc_myqbz, wc_gpr)
+     call gwr%get_wc_gpr(itau, spin, desc_myqbz, wc_gpr)
 
      my_nr = gt_gpr(1,1)%sizeb_local(2)
      ABI_CHECK(my_nr == wc_gpr(1)%sizeb_local(2), "my_nr != wc_gpr(1)%sizeb_local(2)")
@@ -4248,7 +4229,7 @@ if (.True.) then
        gt_scbox = zero
        do my_ikf=1,gwr%my_nkbz
          ik_bz = gwr%my_kbz_inds(my_ikf)
-         ik_ibz = gwr%my_kbz2ibz(1, my_ikf)
+         ik_ibz = gwr%kbz2ibz(1, ik_bz)
 
          ! Compute k+g'
          desc_k => desc_mykbz(my_ikf)
@@ -4276,7 +4257,7 @@ if (.True.) then
        wct_scbox = zero
        do my_iqf=1,gwr%my_nqbz
          iq_bz = gwr%my_qbz_inds(my_iqf)
-         iq_ibz = gwr%my_qbz2ibz(1, my_iqf)
+         iq_ibz = gwr%qbz2ibz(1, iq_bz)
 
          ! Compute q+g' vectors.
          desc_q => desc_myqbz(my_iqf)
@@ -4400,7 +4381,7 @@ else
          qq_bz = gwr%kcalc(:, ikcalc) - kk_bz
 
          ! FIXME: Finalize implementation
-         call gwr%get_wc_rpr_qbz(my_it, my_is, qq_bz, wc_rpr)
+         call gwr%get_wc_rpr_qbz(qq_bz, itau, spin, wc_rpr)
 
          do ipm=1,2
            sigc_rpr(ipm, ikcalc)%buffer_cplx = sigc_rpr(ipm, ikcalc)%buffer_cplx + &
