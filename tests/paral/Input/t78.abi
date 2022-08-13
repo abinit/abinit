@@ -7,7 +7,6 @@ ndtset 3
 #ndtset 1; jdtset 3
 
 ecut      12 # 35
-istwfk *1
 
 # Parallel settings for dataset 1 and 2
 # These variables are not used in the GWR code.
@@ -68,6 +67,7 @@ diemac   4.0
 # Definition of the k-point grid
 occopt 1            # Semiconductor
 ngkpt   2 2 2
+#ngkpt   4 4 4
 nshiftk 1
 shiftk  0.0 0.0 0.0 # Gamma-centered (IMPORTANT)
 
