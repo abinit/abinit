@@ -886,19 +886,12 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    ABI_MALLOC(doccde,(dtset%mband*dtset%nkpt*dtset%nsppol))
 !  Warning : ideally, results_gs%entropy should not be set up here XG 20011007
 !  Do not take into account the possible STM bias
-! CP modified
-!   call newocc(doccde,eigen,results_gs%energies%entropy,&
-!&   results_gs%energies%e_fermie,&
-!&   dtset%spinmagntarget,dtset%mband,dtset%nband,&
-!&   dtset%nelect,dtset%nkpt,dtset%nspinor,dtset%nsppol,occ,&
-!&   dtset%occopt,dtset%prtvol,zero,dtset%tphysel,dtset%tsmear,dtset%wtk)
    call newocc(doccde,eigen,results_gs%energies%entropy,&
 &   results_gs%energies%e_fermie,results_gs%energies%e_fermih,dtset%ivalence,&
 &   dtset%spinmagntarget,dtset%mband,dtset%nband,&
 &   dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%nkpt,dtset%nspinor,dtset%nsppol,occ,&
-&   dtset%occopt,dtset%prtvol,zero,dtset%tphysel,dtset%tsmear,dtset%wtk,&
-&   extfpmd)
-! End CP modified
+&   dtset%occopt,dtset%prtvol,dtset%tphysel,dtset%tsmear,dtset%wtk,&
+&   extfpmd=extfpmd)
    if (dtset%dmftcheck>=0.and.dtset%usedmft>=1.and.(sum(args_gs%upawu(:))>=tol8.or.  &
 &   sum(args_gs%jpawu(:))>tol8).and.dtset%dmft_entropy==0) results_gs%energies%entropy=zero
    ABI_FREE(doccde)
