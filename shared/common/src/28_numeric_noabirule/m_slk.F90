@@ -287,6 +287,8 @@ module m_slk
    module procedure slk_array4_free
  end interface slk_array_free
 
+ public :: slk_array_set                       ! Elemental routine to set the value of the buffer to a costant value `cvalue`.
+
  public :: slk_array_locmem_mb                 ! Compute memory allocated for an array of matrix_scalapack elements
  interface slk_array_locmem_mb
    !module procedure slk_array1_locmem_mb
@@ -922,6 +924,32 @@ subroutine slk_array4_free(slk_arr4)
     end do
   end do
 end subroutine slk_array4_free
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_slk/slk_array_set
+!! NAME
+!!  slk_array_set
+!!
+!! FUNCTION
+!!  Elemental routine to set the value of the PBLAS buffer to a costant value `cvalue`.
+!!  Usually used to zero all the buffers in an array of matrix_scalapack objects.
+!!
+!! SOURCE
+
+elemental subroutine slk_array_set(mat, cvalue)
+
+!Arguments ------------------------------------
+ class(matrix_scalapack),intent(inout) :: mat
+ complex(dp),intent(in)  :: cvalue
+
+!Local variables-------------------------------
+
+ if (allocated(mat%buffer_cplx)) mat%buffer_cplx = cvalue
+ if (allocated(mat%buffer_real)) mat%buffer_real = real(cvalue)
+
+end subroutine slk_array_set
 !!***
 
 !----------------------------------------------------------------------
