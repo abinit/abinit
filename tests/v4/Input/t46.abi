@@ -2,8 +2,9 @@
 #
 # Determination of the STM density profile of aluminum :
 # convergence with respect to the number of vacuum layers.
+# Also, band-by-band decomposition of the STM density profile
 
-ndtset 3
+ndtset 4
 
 #GD calculation
  tolwfr1 1.0d-12
@@ -21,6 +22,14 @@ stmbias2 -2.0  eV # Might have been given in Ha, but the eV units are more commo
 stmbias3  2.0  eV # Might have been given in Ha, but the eV units are more common
   nstep3 1
  tolwfr3 1.0d-6
+
+#Features needed for the band-by-band decomposition of STM charge density : 
+# positive bias, DS4, probe occupied states, only band 6 using prtstm -6 (proceed similarly for other bands)
+ getwfk4 1
+ prtstm4 -6  
+stmbias4  2.0  eV # Might have been given in Ha, but the eV units are more common
+  nstep4 1
+ tolwfr4 1.0d-6
 
 
 #Definition of the unit cell
@@ -93,5 +102,6 @@ prtden 0          # Do not print density
 #%%   5-atom Al slab, with three vacuum layers.
 #%%   First, converge the wavefunctions, then compute the
 #%%   STM charge density below and above the Fermi energy, within a 2eV range.
+#%%   Also compute band-by-band decomposition of STM charge density below the Fermi energy, within a 2eV range.
 #%% topics = STM
 #%%<END TEST_INFO>
