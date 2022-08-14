@@ -74,9 +74,10 @@ module m_orbmag
                                                &(/3,3,3/))
 
   integer,parameter :: ibcc=1,ibcv=2,ibvv=3
+  integer,parameter :: imecc=4,imecv=5,imevv=6
   !integer,parameter :: iompw=6,iomdpdp=7,iomdpu=8,iomdudu=9,iomlr=10,iomlmb=11,iomanp=12
   !integer,parameter :: iomdlanp=13,iomdlp2=14,iomdlvhnzc=15,iomdlvh=16,iomdlq=17
-  integer,parameter :: nterms=3
+  integer,parameter :: nterms=6
   complex(dpc),parameter :: cbc = j_dpc/two_pi ! Berry curvature pre-factor
   complex(dpc),parameter :: com = -half*j_dpc  ! Orbital magnetism pre-factor
 
@@ -85,10 +86,10 @@ module m_orbmag
   public :: orbmag_ptpaw
 
   private :: make_ddir
-  private :: berry_cc
-  private :: berry_vva
-  private :: berry_vvb
-  private :: berry_cv
+  private :: berry_e_cc
+  private :: berry_e_vva
+  private :: berry_e_vvb
+  private :: berry_e_cv
 
   !private :: d2lr_p2
   !private :: d2lr_Anp
@@ -183,7 +184,7 @@ subroutine orbmag_ptpaw(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_en
  real(dp),allocatable :: bc_k(:,:,:),buffer1(:),buffer2(:)
  real(dp),allocatable :: cg_k(:,:),cg1_k(:,:,:),cgrvtrial(:,:),cwavef(:,:),ddir(:,:,:)
  real(dp),allocatable :: eig_k(:),ffnl_k(:,:,:,:),kinpw(:),kpg_k(:,:)
- real(dp),allocatable :: orbmag_terms(:,:,:,:),orbmag_trace(:,:,:)
+ real(dp),allocatable :: om_k(:,:,:),orbmag_terms(:,:,:,:),orbmag_trace(:,:,:)
  real(dp),allocatable :: pcg1_k(:,:,:),ph1d(:,:),ph3d(:,:,:),phkxred(:,:),realgnt(:)
  real(dp),allocatable :: vectornd(:,:),vectornd_pac(:,:,:,:,:),vlocal(:,:,:,:)
  real(dp),allocatable :: ylm_k(:,:),ylmgr_k(:,:,:)
@@ -443,25 +444,29 @@ subroutine orbmag_ptpaw(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_en
    !--------------------------------------------------------------------------------
    ABI_MALLOC(bc_k,(2,nband_k,3))
    !ABI_MALLOC(bco_k,(2,nband_k,3,3))
-   !ABI_MALLOC(om_k,(2,nband_k,3))
+   ABI_MALLOC(om_k,(2,nband_k,3))
    !ABI_MALLOC(omo_k,(2,nband_k,3,3))
 
    !call apply_pw_k(bc_k,pcg1_k,dimlmn,eig_k,gs_hamk,mcgk,mpi_enreg,dtset%natom,&
    !  & nband_k,npw_k,dtset%nspinor,om_k)
    !orbmag_terms(:,:,:,iompw) = orbmag_terms(:,:,:,iompw) + trnrm*om_k
 
-   call berry_cc(atindx,bc_k,cprj1_k,dimlmn,dtset,gs_hamk,ikpt,isppol,mcgk,&
-     & mpi_enreg,my_nspinor,nband_k,npw_k,pcg1_k)
+   call berry_e_cc(atindx,bc_k,cprj1_k,dimlmn,dtset,eig_k,gs_hamk,ikpt,isppol,mcgk,&
+     & mpi_enreg,my_nspinor,nband_k,npw_k,om_k,pcg1_k)
    orbmag_terms(:,:,:,ibcc) = orbmag_terms(:,:,:,ibcc) + trnrm*bc_k
+   orbmag_terms(:,:,:,imecc) = orbmag_terms(:,:,:,imecc) + trnrm*om_k
    
-   call berry_vva(atindx,bc_k,cprj_k,ddir,dtset,lmn2max,nband_k,pawtab)
+   call berry_e_vva(atindx,bc_k,cprj_k,ddir,dtset,eig_k,lmn2max,nband_k,om_k,pawtab)
    orbmag_terms(:,:,:,ibvv) = orbmag_terms(:,:,:,ibvv) + trnrm*bc_k
+   orbmag_terms(:,:,:,imevv) = orbmag_terms(:,:,:,imevv) + trnrm*om_k
    
-   call berry_vvb(atindx,bc_k,cprj_k,ddir,dtset,lmn2max,nband_k,pawtab)
+   call berry_e_vvb(atindx,bc_k,cprj_k,ddir,dtset,eig_k,lmn2max,nband_k,om_k,pawtab)
    orbmag_terms(:,:,:,ibvv) = orbmag_terms(:,:,:,ibvv) + trnrm*bc_k
+   orbmag_terms(:,:,:,imevv) = orbmag_terms(:,:,:,imevv) + trnrm*om_k
    
-   call berry_cv(atindx,bc_k,cprj_k,cprj1_k,ddir,dtset,lmn2max,nband_k,pawtab)
+   call berry_e_cv(atindx,bc_k,cprj_k,cprj1_k,ddir,dtset,eig_k,lmn2max,nband_k,om_k,pawtab)
    orbmag_terms(:,:,:,ibcv) = orbmag_terms(:,:,:,ibcv) + trnrm*bc_k
+   orbmag_terms(:,:,:,imecv) = orbmag_terms(:,:,:,imecv) + trnrm*om_k
    
    !--------------------------------------------------------------------------------
    ! additional onsite terms to both Berry and orbmag (no |phi> derivatives) 
@@ -541,7 +546,7 @@ subroutine orbmag_ptpaw(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_en
 
    ABI_FREE(bc_k)
    !ABI_FREE(bco_k)
-   !ABI_FREE(om_k)
+   ABI_FREE(om_k)
    !ABI_FREE(omo_k)
 
    icg = icg + npw_k*nband_k
@@ -594,13 +599,9 @@ subroutine orbmag_ptpaw(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_en
  ! convert orbmag magnetization to orbital moment
  ! Berry curvature terms are ignored
  ! Lamb term ignored
- !do iterm = 1, nterms
- !  if ((iterm.EQ.ibcc).OR.&
- !    & (iterm.EQ.ibcv).OR.&
- !    & (iterm.EQ.ibvv).OR.&
- !    & (iterm.EQ.iomlmb)) cycle
- !  orbmag_terms(:,:,:,iterm) = ucvol*orbmag_terms(:,:,:,iterm)
- !end do
+ do iterm = imecc, nterms
+   orbmag_terms(:,:,:,iterm) = ucvol*orbmag_terms(:,:,:,iterm)
+ end do
 
  ! compute trace over filled states of each term
  ABI_MALLOC(orbmag_trace,(2,3,nterms))
@@ -775,9 +776,9 @@ subroutine make_pcg1(atindx,cg_k,cg1_k,cprj_k,dimlmn,dtset,gs_hamk,&
 end subroutine make_pcg1
 !!***
 
-!!****f* ABINIT/berry_cv
+!!****f* ABINIT/berry_e_cv
 !! NAME
-!! berry_cv
+!! berry_e_cv
 !!
 !! FUNCTION
 !! compute CV contribution to integral of Berry curvature
@@ -801,7 +802,7 @@ end subroutine make_pcg1
 !!
 !! SOURCE
 
-subroutine berry_cv(atindx,bc_k,cprj_k,cprj1_k,ddir,dtset,lmn2max,nband_k,pawtab)
+subroutine berry_e_cv(atindx,bc_k,cprj_k,cprj1_k,ddir,dtset,eig_k,lmn2max,nband_k,om_k,pawtab)
 
   !Arguments ------------------------------------
   !scalars
@@ -810,8 +811,8 @@ subroutine berry_cv(atindx,bc_k,cprj_k,cprj1_k,ddir,dtset,lmn2max,nband_k,pawtab
 
   !arrays
   integer,intent(in) :: atindx(dtset%natom)
-  real(dp),intent(in) :: ddir(lmn2max,dtset%ntypat,3)
-  real(dp),intent(out) :: bc_k(2,nband_k,3)
+  real(dp),intent(in) :: ddir(lmn2max,dtset%ntypat,3),eig_k(nband_k)
+  real(dp),intent(out) :: bc_k(2,nband_k,3),om_k(2,nband_k,3)
   type(pawcprj_type),intent(in) :: cprj_k(dtset%natom,nband_k)
   type(pawcprj_type),intent(in) :: cprj1_k(dtset%natom,nband_k,3)
   type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
@@ -831,6 +832,7 @@ subroutine berry_cv(atindx,bc_k,cprj_k,cprj1_k,ddir,dtset,lmn2max,nband_k,pawtab
   c2=1.0d0/(two_pi*two_pi)
 
   bc_k = zero
+  om_k = zero
   do nn = 1, nband_k
     do adir = 1, 3
       do bdir = 1, 3
@@ -864,6 +866,8 @@ subroutine berry_cv(atindx,bc_k,cprj_k,cprj1_k,ddir,dtset,lmn2max,nband_k,pawtab
 
           bc_k(1,nn,adir) = bc_k(1,nn,adir) + REAL(c2*cbc*eabg*(ct2 + ct3))
           bc_k(2,nn,adir) = bc_k(2,nn,adir) + AIMAG(c2*cbc*eabg*(ct2 + ct3))
+          om_k(1,nn,adir) = om_k(1,nn,adir) + REAL(c2*com*eabg*eig_k(nn)*(ct2 + ct3))
+          om_k(2,nn,adir) = om_k(2,nn,adir) + AIMAG(c2*com*eabg*eig_k(nn)*(ct2 + ct3))
         
         end do ! gdir
       end do ! bdir
@@ -871,13 +875,13 @@ subroutine berry_cv(atindx,bc_k,cprj_k,cprj1_k,ddir,dtset,lmn2max,nband_k,pawtab
 
   end do !loop over bands
 
-end subroutine berry_cv
+end subroutine berry_e_cv
 !!***
 
 
-!!****f* ABINIT/berry_vva
+!!****f* ABINIT/berry_e_vva
 !! NAME
-!! berry_vva
+!! berry_e_vva
 !!
 !! FUNCTION
 !! compute VV contribution to integral of Berry curvature
@@ -901,7 +905,7 @@ end subroutine berry_cv
 !!
 !! SOURCE
 
-subroutine berry_vva(atindx,bc_k,cprj_k,ddir,dtset,lmn2max,nband_k,pawtab)
+subroutine berry_e_vva(atindx,bc_k,cprj_k,ddir,dtset,eig_k,lmn2max,nband_k,om_k,pawtab)
 
   !Arguments ------------------------------------
   !scalars
@@ -910,8 +914,8 @@ subroutine berry_vva(atindx,bc_k,cprj_k,ddir,dtset,lmn2max,nband_k,pawtab)
 
   !arrays
   integer,intent(in) :: atindx(dtset%natom)
-  real(dp),intent(in) :: ddir(lmn2max,dtset%ntypat,3)
-  real(dp),intent(out) :: bc_k(2,nband_k,3)
+  real(dp),intent(in) :: ddir(lmn2max,dtset%ntypat,3),eig_k(nband_k)
+  real(dp),intent(out) :: bc_k(2,nband_k,3),om_k(2,nband_k,3)
   type(pawcprj_type),intent(in) :: cprj_k(dtset%natom,nband_k)
   type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
 
@@ -959,6 +963,8 @@ subroutine berry_vva(atindx,bc_k,cprj_k,ddir,dtset,lmn2max,nband_k,pawtab)
          
           bc_k(1,nn,adir) = bc_k(1,nn,adir) + REAL(c2*cbc*eabg*(ctermq+ctermdb+ctermdg))
           bc_k(2,nn,adir) = bc_k(2,nn,adir) + AIMAG(c2*cbc*eabg*(ctermq+ctermdb+ctermdg))
+          om_k(1,nn,adir) = om_k(1,nn,adir) + REAL(c2*com*eabg*eig_k(nn)*(ctermq+ctermdb+ctermdg))
+          om_k(2,nn,adir) = om_k(2,nn,adir) + AIMAG(c2*com*eabg*eig_k(nn)*(ctermq+ctermdb+ctermdg))
         
         end do ! gdir
       end do ! bdir
@@ -966,12 +972,12 @@ subroutine berry_vva(atindx,bc_k,cprj_k,ddir,dtset,lmn2max,nband_k,pawtab)
 
   end do !loop over bands
 
-end subroutine berry_vva
+end subroutine berry_e_vva
 !!***
 
-!!****f* ABINIT/berry_vvb
+!!****f* ABINIT/berry_e_vvb
 !! NAME
-!! berry_vva
+!! berry_e_vva
 !!
 !! FUNCTION
 !! compute VV contribution to integral of Berry curvature
@@ -995,7 +1001,7 @@ end subroutine berry_vva
 !!
 !! SOURCE
 
-subroutine berry_vvb(atindx,bc_k,cprj_k,ddir,dtset,lmn2max,nband_k,pawtab)
+subroutine berry_e_vvb(atindx,bc_k,cprj_k,ddir,dtset,eig_k,lmn2max,nband_k,om_k,pawtab)
 
   !Arguments ------------------------------------
   !scalars
@@ -1004,8 +1010,8 @@ subroutine berry_vvb(atindx,bc_k,cprj_k,ddir,dtset,lmn2max,nband_k,pawtab)
 
   !arrays
   integer,intent(in) :: atindx(dtset%natom)
-  real(dp),intent(in) :: ddir(lmn2max,dtset%ntypat,3)
-  real(dp),intent(out) :: bc_k(2,nband_k,3)
+  real(dp),intent(in) :: ddir(lmn2max,dtset%ntypat,3),eig_k(nband_k)
+  real(dp),intent(out) :: bc_k(2,nband_k,3),om_k(2,nband_k,3)
   type(pawcprj_type),intent(in) :: cprj_k(dtset%natom,nband_k)
   type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
 
@@ -1024,6 +1030,7 @@ subroutine berry_vvb(atindx,bc_k,cprj_k,ddir,dtset,lmn2max,nband_k,pawtab)
   c2=1.0d0/(two_pi*two_pi)
 
   bc_k = zero
+  om_k = zero
   do nn = 1, nband_k
     do adir = 1, 3
       do bdir = 1, 3
@@ -1054,9 +1061,11 @@ subroutine berry_vvb(atindx,bc_k,cprj_k,ddir,dtset,lmn2max,nband_k,pawtab)
                 end do ! loop over jlmn
               end do ! loop over ilmn
             end do ! loop over atoms
+          
+            om_k(1,nn,adir) = om_k(1,nn,adir) - REAL(c2*cbc*eabg*(eig_k(nn)+eig_k(np))*CONJG(cnpb)*cnpg)
+            om_k(2,nn,adir) = om_k(2,nn,adir) - AIMAG(c2*cbc*eabg*(eig_k(nn)+eig_k(np))*CONJG(cnpb)*cnpg)
 
             cnp = cnp + CONJG(cnpb)*cnpg
-                  
 
           end do ! loop over np
           bc_k(1,nn,adir) = bc_k(1,nn,adir) - REAL(c2*cbc*eabg*cnp)
@@ -1067,14 +1076,14 @@ subroutine berry_vvb(atindx,bc_k,cprj_k,ddir,dtset,lmn2max,nband_k,pawtab)
     end do ! adir
   end do !loop over bands
 
-end subroutine berry_vvb
+end subroutine berry_e_vvb
 !!***
 
 
 
-!!****f* ABINIT/berry_cc
+!!****f* ABINIT/berry_e_cc
 !! NAME
-!! berry_cc
+!! berry_e_cc
 !!
 !! FUNCTION
 !! compute CC contribution to integral of Berry curvature
@@ -1098,8 +1107,8 @@ end subroutine berry_vvb
 !!
 !! SOURCE
 
-subroutine berry_cc(atindx,bc_k,cprj1_k,dimlmn,dtset,gs_hamk,&
-    & ikpt,isppol,mcgk,mpi_enreg,my_nspinor,nband_k,npw_k,pcg1_k)
+subroutine berry_e_cc(atindx,bc_k,cprj1_k,dimlmn,dtset,eig_k,gs_hamk,&
+    & ikpt,isppol,mcgk,mpi_enreg,my_nspinor,nband_k,npw_k,om_k,pcg1_k)
 
   !Arguments ------------------------------------
   !scalars
@@ -1110,8 +1119,8 @@ subroutine berry_cc(atindx,bc_k,cprj1_k,dimlmn,dtset,gs_hamk,&
 
   !arrays
   integer,intent(in) :: atindx(dtset%natom),dimlmn(dtset%natom)
-  real(dp),intent(in) :: pcg1_k(2,mcgk,3)
-  real(dp),intent(out) :: bc_k(2,nband_k,3)
+  real(dp),intent(in) :: eig_k(nband_k),pcg1_k(2,mcgk,3)
+  real(dp),intent(out) :: bc_k(2,nband_k,3),om_k(2,nband_k,3)
   type(pawcprj_type),intent(in) ::  cprj1_k(dtset%natom,nband_k,3)
 
   !Local variables -------------------------
@@ -1148,6 +1157,7 @@ subroutine berry_cc(atindx,bc_k,cprj1_k,dimlmn,dtset,gs_hamk,&
   ndat = 1
   
   bc_k = zero
+  om_k = zero
   do nn = 1, nband_k
 
     do gdir = 1, 3
@@ -1167,6 +1177,8 @@ subroutine berry_cc(atindx,bc_k,cprj1_k,dimlmn,dtset,gs_hamk,&
           cme = cmplx(dotr,doti,KIND=dpc)
           bc_k(1,nn,adir) = bc_k(1,nn,adir) + real(cbc*eabg*c2*cme)
           bc_k(2,nn,adir) = bc_k(2,nn,adir) + aimag(cbc*eabg*c2*cme)
+          om_k(1,nn,adir) = om_k(1,nn,adir) + real(eig_k(nn)*com*eabg*c2*cme)
+          om_k(2,nn,adir) = om_k(2,nn,adir) + aimag(eig_k(nn)*com*eabg*c2*cme)
         end do ! adir
       end do ! bdir
     end do ! gdir
@@ -1179,7 +1191,7 @@ subroutine berry_cc(atindx,bc_k,cprj1_k,dimlmn,dtset,gs_hamk,&
   call pawcprj_free(cwaveprj)
   ABI_FREE(cwaveprj)
 
-end subroutine berry_cc
+end subroutine berry_e_cc
 !!***
 
 
@@ -2637,13 +2649,13 @@ subroutine orbmag_ptpaw_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace)
  ! ***********************************************************************
 
  orbmag_bb=zero;orbmag_total=zero
- !do iterms = ibcd+1, nterms
- !  orbmag_total(1:2,1:3)=orbmag_total(1:2,1:3) + orbmag_trace(1:2,1:3,iterms)
- !  do iband=1, nband_k
- !    if (iterms == iomlmb) cycle
- !    orbmag_bb(1:2,iband,1:3) = orbmag_bb(1:2,iband,1:3) + orbmag_terms(1:2,iband,1:3,iterms)
- !  end do
- !end do
+ do iterms = imecc, nterms
+   orbmag_total(1:2,1:3)=orbmag_total(1:2,1:3) + orbmag_trace(1:2,1:3,iterms)
+   do iband=1, nband_k
+     ! if (iterms == iomlmb) cycle
+     orbmag_bb(1:2,iband,1:3) = orbmag_bb(1:2,iband,1:3) + orbmag_terms(1:2,iband,1:3,iterms)
+   end do
+ end do
  berry_bb=zero;berry_total=zero
  do iterms = ibcc,ibvv
    berry_total(1:2,1:3)=berry_total(1:2,1:3) + orbmag_trace(1:2,1:3,iterms)
@@ -2658,12 +2670,12 @@ subroutine orbmag_ptpaw_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace)
  write(message,'(a,a)')' Orbital magnetic moment computed with DFPT derivative wavefunctions ',ch10
  call wrtout(ab_out,message,'COLL')
 
- !write(message,'(a)')' Orbital magnetic moment, Cartesian directions : '
- !call wrtout(ab_out,message,'COLL')
- !write(message,'(3es16.8)') (orbmag_total(1,adir),adir=1,3)
- !call wrtout(ab_out,message,'COLL')
- !write(message,'(a)')ch10
- !call wrtout(ab_out,message,'COLL')
+ write(message,'(a)')' Orbital magnetic moment, Cartesian directions : '
+ call wrtout(ab_out,message,'COLL')
+ write(message,'(3es16.8)') (orbmag_total(1,adir),adir=1,3)
+ call wrtout(ab_out,message,'COLL')
+ write(message,'(a)')ch10
+ call wrtout(ab_out,message,'COLL')
  write(message,'(a)')' Integral of Berry curvature, Cartesian directions : '
  call wrtout(ab_out,message,'COLL')
  write(message,'(3es16.8)') (berry_total(1,adir),adir=1,3)
@@ -2671,11 +2683,15 @@ subroutine orbmag_ptpaw_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace)
 
  if(dtset%orbmag .GE. 2) then
    write(message,'(a)')ch10
-   !call wrtout(ab_out,message,'COLL')
-   !write(message,'(a)')' Orbital magnetic moment, term-by-term breakdown : '
-   !call wrtout(ab_out,message,'COLL')
-   !write(message,'(a,3es16.8)') '       <du/dk|H+E|du/dk> : ',(orbmag_trace(1,adir,iompw),adir=1,3)
-   !call wrtout(ab_out,message,'COLL')
+   call wrtout(ab_out,message,'COLL')
+   write(message,'(a)')' Orbital magnetic moment, term-by-term breakdown : '
+   call wrtout(ab_out,message,'COLL')
+   write(message,'(a,3es16.8)') '      C-E-C  : ',(orbmag_trace(1,adir,imecc),adir=1,3)
+   call wrtout(ab_out,message,'COLL')
+   write(message,'(a,3es16.8)') '       C-E-V : ',(orbmag_trace(1,adir,imecv),adir=1,3)
+   call wrtout(ab_out,message,'COLL')
+   write(message,'(a,3es16.8)') '       V-E-V : ',(orbmag_trace(1,adir,imevv),adir=1,3)
+   call wrtout(ab_out,message,'COLL')
    !write(message,'(a,3es16.8)') '     onsite <dp|D+Eq|dp> : ',(orbmag_trace(1,adir,iomdpdp),adir=1,3)
    !call wrtout(ab_out,message,'COLL')
    !write(message,'(a,3es16.8)') '      onsite <dp|D+Eq|u> : ',(orbmag_trace(1,adir,iomdpu),adir=1,3)
@@ -2698,8 +2714,8 @@ subroutine orbmag_ptpaw_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace)
    !call wrtout(ab_out,message,'COLL')
    !write(message,'(a,3es16.8)') '               Lamb core : ',(orbmag_trace(1,adir,iomlmb),adir=1,3)
    !call wrtout(ab_out,message,'COLL')
-   !write(message,'(a)')ch10
-   !call wrtout(ab_out,message,'COLL')
+   write(message,'(a)')ch10
+   call wrtout(ab_out,message,'COLL')
    write(message,'(a)')' Berry curvature, term-by-term breakdown : '
    call wrtout(ab_out,message,'COLL')
    write(message,'(a,3es16.8)') ' C-C : ',(orbmag_trace(1,adir,ibcc),adir=1,3)
@@ -2720,10 +2736,14 @@ subroutine orbmag_ptpaw_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace)
      call wrtout(ab_out,message,'COLL')
      write(message,'(a,i2,a,i2)') ' band ',iband,' of ',nband_k
      call wrtout(ab_out,message,'COLL')
-     !write(message,'(a,3es16.8)') ' Orbital magnetic moment : ',(orbmag_bb(1,iband,adir),adir=1,3)
-     !call wrtout(ab_out,message,'COLL')
-     !write(message,'(a,3es16.8)') '       <du/dk|H+E|du/dk> : ',(orbmag_terms(1,iband,adir,iompw),adir=1,3)
-     !call wrtout(ab_out,message,'COLL')
+     write(message,'(a,3es16.8)') ' Orbital magnetic moment : ',(orbmag_bb(1,iband,adir),adir=1,3)
+     call wrtout(ab_out,message,'COLL')
+     write(message,'(a,3es16.8)') '       C-E-C : ',(orbmag_terms(1,iband,adir,imecc),adir=1,3)
+     call wrtout(ab_out,message,'COLL')
+     write(message,'(a,3es16.8)') '       C-E-V : ',(orbmag_terms(1,iband,adir,imecv),adir=1,3)
+     call wrtout(ab_out,message,'COLL')
+     write(message,'(a,3es16.8)') '       V-E-V : ',(orbmag_terms(1,iband,adir,imevv),adir=1,3)
+     call wrtout(ab_out,message,'COLL')
      !write(message,'(a,3es16.8)') '    onsite <dp|D+Eq|dp>  : ',(orbmag_terms(1,iband,adir,iomdpdp),adir=1,3)
      !call wrtout(ab_out,message,'COLL')
      !write(message,'(a,3es16.8)') '      onsite <dp|D+Eq|u> : ',(orbmag_terms(1,iband,adir,iomdpu),adir=1,3)
