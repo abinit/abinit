@@ -152,8 +152,7 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, minbnd, maxbnd, cryst, QP_BSt, Sigp,
  integer :: spad,spadx1,spadx2,irow,npw_k,ndegs,wtqm,wtqp,my_nbks
  integer :: isym_kgw,isym_ki,gwx_mgfft,use_padfft,use_padfftf,gwx_fftalga,gwx_fftalgb
  integer :: gwx_nfft,nfftf,mgfftf,nhat12_grdim,npwx,nsig_ab
- real(dp) :: cpu,wall,gflops
- real(dp) :: fact_sp,theta_mu_minus_esum,theta_mu_minus_esum2,tol_empty
+ real(dp) :: cpu,wall,gflops, fact_sp,theta_mu_minus_esum,theta_mu_minus_esum2,tol_empty
  complex(dpc) :: ctmp,ph_mkgwt,ph_mkt
  complex(gwpc) :: gwpc_sigxme,gwpc_sigxme2,xdot_tmp
  logical :: iscompatibleFFT,q_is_gamma
@@ -161,17 +160,13 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, minbnd, maxbnd, cryst, QP_BSt, Sigp,
  type(wave_t),pointer :: wave_sum, wave_jb
 !arrays
  integer :: g0(3),spinor_padx(2,4)
- integer,allocatable :: igfftxg0(:),igfftfxg0(:)
- integer,allocatable :: degtab(:,:,:)
+ integer,allocatable :: igfftxg0(:),igfftfxg0(:), degtab(:,:,:)
  integer,allocatable :: gwx_gfft(:,:),gwx_gbound(:,:),gboundf(:,:)
- integer,allocatable ::  ktabr(:,:),irottb(:,:),ktabrf(:,:)
- integer,allocatable :: proc_distrb(:,:,:)
- real(dp) :: ksum(3),kgw(3),kgw_m_ksum(3),qbz(3),q0(3),tsec(2)
- real(dp) :: spinrot_kbz(4),spinrot_kgw(4)
+ integer,allocatable :: ktabr(:,:),irottb(:,:),ktabrf(:,:), proc_distrb(:,:,:)
+ real(dp) :: ksum(3), kgw(3), kgw_m_ksum(3), qbz(3), q0(3), tsec(2), spinrot_kbz(4), spinrot_kgw(4)
  real(dp),ABI_CONTIGUOUS pointer :: qp_ene(:,:,:),qp_occ(:,:,:)
  real(dp),allocatable :: nhat12(:,:,:),grnhat12(:,:,:,:)
- complex(gwpc),allocatable :: vc_sqrt_qbz(:),rhotwg(:),rhotwgp(:), rhotwg_ki(:,:)
- complex(gwpc),allocatable :: ur_bdgw(:,:),ur_ibz(:)
+ complex(gwpc),allocatable :: vc_sqrt_qbz(:),rhotwg(:),rhotwgp(:), rhotwg_ki(:,:), ur_bdgw(:,:),ur_ibz(:)
  complex(gwpc),allocatable :: ur_ae_sum(:),ur_ae_onsite_sum(:),ur_ps_onsite_sum(:)
  complex(gwpc),allocatable :: ur_ae_bdgw(:,:),ur_ae_onsite_bdgw(:,:),ur_ps_onsite_bdgw(:,:)
  complex(dpc),allocatable  :: sigxcme_tmp(:,:), sigxme_tmp(:,:,:),sym_sigx(:,:,:),sigx(:,:,:,:)
@@ -193,8 +188,7 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, minbnd, maxbnd, cryst, QP_BSt, Sigp,
  ! Initialize some values.
  gwcalctyp = Sigp%gwcalctyp; nspinor = wfd%nspinor; nsppol = wfd%nsppol; npwx = sigp%npwx
  dim_rtwg = 1; if (nspinor == 2) dim_rtwg = 2
- nsig_ab = sigp%nsig_ab
- spinor_padx = reshape([0, 0, npwx, npwx, 0, npwx, npwx, 0], [2, 4])
+ nsig_ab = sigp%nsig_ab; spinor_padx = reshape([0, 0, npwx, npwx, 0, npwx, npwx, 0], [2, 4])
  ABI_CHECK(Sigp%npwx == Gsph_x%ng, "Sigp%npwx != Gsph_x%ng")
 
  qp_ene => QP_BSt%eig; qp_occ => QP_BSt%occ
@@ -247,17 +241,17 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, minbnd, maxbnd, cryst, QP_BSt, Sigp,
 
  ! MRM allow lower occ numbers
  ! Normalization of theta_mu_minus_esum. If nsppol==2, qp_occ $\in [0,1]$
- SELECT CASE (nsppol)
- CASE (1)
+ select case (nsppol)
+ case (1)
    fact_sp = half; tol_empty = tol_empty_in        ! below this value the state is assumed empty
    if (nspinor == 2) then
      fact_sp = one; tol_empty = half * tol_empty_in  ! below this value the state is assumed empty
    end if
- CASE (2)
+ case (2)
    fact_sp = one; tol_empty = half * tol_empty_in  ! to be consistent and obtain similar results if a metallic
- CASE DEFAULT                                      ! spin unpolarized system is treated using nsppol==2
-   ABI_BUG('Wrong nsppol')
- END SELECT
+ case default                                      ! spin unpolarized system is treated using nsppol==2
+   ABI_BUG(sjoin('Wrong nsppol:', itoa(nsppol)))
+ end select
 
  ! Table for \Sigmax_ij matrix elements.
  Sigxij_tab => Sigp%Sigxij_tab(ikcalc, 1:nsppol)
@@ -346,12 +340,11 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, minbnd, maxbnd, cryst, QP_BSt, Sigp,
    ! Find number of degenerates subspaces and number of bands in each subspace.
    ! The tolerance is a little bit arbitrary (0.001 eV)
    ! It could be reduced, in particular in case of nearly accidental degeneracies
-   ABI_MALLOC(degtab, (ib1:ib2, ib1:ib2, nsppol))
-   degtab=0
+   ABI_ICALLOC(degtab, (ib1:ib2, ib1:ib2, nsppol))
    do spin=1,nsppol
      do ib=ib1,ib2
        do jb=ib1,ib2
-        if (ABS(qp_ene(ib,jk_ibz,spin) - qp_ene(jb,jk_ibz,spin)) < 0.001 / Ha_ev) degtab(ib,jb,spin)=1
+        if (abs(qp_ene(ib,jk_ibz,spin) - qp_ene(jb,jk_ibz,spin)) < 0.001 / Ha_ev) degtab(ib,jb,spin)=1
        end do
      end do
    end do

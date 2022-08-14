@@ -855,6 +855,11 @@ iteration_state: {dtset: 3, }
 iteration_state: {dtset: 3, }
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
+QP_VBM_band: 25
+QP_CBM_band: 24
+KS_gap     :    4.791
+QP_gap     :    5.043
+Delta_QP_KS:    0.251
 data: !Tabular |
      Band      E0 <VxcDFT>   SigX SigC(E0)     Z1      Z2  E-E0       E
        24  -2.508 -18.415   0.000   2.865   0.850  -0.012  18.079  15.571
@@ -866,6 +871,11 @@ data: !Tabular |
 iteration_state: {dtset: 3, }
 kpoint     : [   0.500,    0.000,    0.000, ]
 spin       : 1
+QP_VBM_band: 25
+QP_CBM_band: 24
+KS_gap     :    7.341
+QP_gap     :    1.883
+Delta_QP_KS:   -5.458
 data: !Tabular |
      Band      E0 <VxcDFT>   SigX SigC(E0)     Z1      Z2  E-E0       E
        24  -2.283 -19.038   0.000   2.951   0.848  -0.011  18.650  16.367
@@ -1142,7 +1152,7 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=        154.9  wall=        370.2
+- Proc.   0 individual time (sec): cpu=        150.8  wall=        747.3
 
 ================================================================================
 
