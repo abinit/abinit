@@ -1544,14 +1544,14 @@ pure function ebands_get_valence_idx(ebands, tol_fermi) result(val_idx)
  do spin=1,ebands%nsppol
    do ikpt=1,ebands%nkpt
       if (ebands%occopt == 9) then
-         val_idx(ikpt,spin) = ebands%ivalence
+        val_idx(ikpt,spin) = ebands%ivalence
       else
          nband_k = ebands%nband(ikpt+(spin-1)*ebands%nkpt)
          idx = 0
          do band=1,nband_k
-            if (ebands%eig(band,ikpt,spin) > ebands%fermie + abs(tol_)) then
-               idx = band; exit
-            end if
+           if (ebands%eig(band,ikpt,spin) > ebands%fermie + abs(tol_)) then
+             idx = band; exit
+           end if
          end do
          val_idx(ikpt,spin) = idx - 1
          if (idx == 1) val_idx(ikpt, spin) = idx
@@ -2183,10 +2183,7 @@ pure logical function ebands_has_metal_scheme(ebands) result(ans)
 
 ! *************************************************************************
 
- ! CP modified
-! ans = (any(ebands%occopt == [3, 4, 5, 6, 7, 8]))
  ans = (any(ebands%occopt == [3, 4, 5, 6, 7, 8, 9]))
- ! End CP modified
 
 end function ebands_has_metal_scheme
 !!***

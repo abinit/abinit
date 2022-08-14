@@ -600,9 +600,9 @@ real(dp) function gw_spectral_function(Sr,io,ib,ikibz,is) result(aw)
 
 ! *********************************************************************
 
- aw = one / pi * ABS(AIMAG(Sr%sigcme(ib,ikibz,io,is))) &
-   /( (REAL(Sr%omega_r(io) - Sr%hhartree(ib,ib,ikibz,is) - Sr%sigxcme(ib,ikibz,io,is)))**2 &
-     +(AIMAG(Sr%sigcme(ib,ikibz,io,is))) ** 2) / Ha_eV
+ aw = one / pi * abs(aimag(Sr%sigcme(ib,ikibz,io,is))) &
+   /( (real(Sr%omega_r(io) - Sr%hhartree(ib,ib,ikibz,is) - Sr%sigxcme(ib,ikibz,io,is)))**2 &
+     +(aimag(Sr%sigcme(ib,ikibz,io,is))) ** 2) / Ha_eV
 
 end function gw_spectral_function
 !!***

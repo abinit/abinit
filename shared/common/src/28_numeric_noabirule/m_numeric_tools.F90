@@ -166,6 +166,7 @@ MODULE m_numeric_tools
  end interface r2c
 
  interface c2r
+   module procedure cdp2rdp_0D
    module procedure cdp2rdp_1D
    module procedure cdp2rdp_2D
    module procedure cdp2rdp_3D
@@ -1169,6 +1170,39 @@ pure function rdp2cdp_6D(rr) result(cc)
  cc(:,:,:,:,:,:)=CMPLX(rr(1,:,:,:,:,:,:),rr(2,:,:,:,:,:,:), kind=dpc)
 
 end function rdp2cdp_6D
+!!***
+
+
+!----------------------------------------------------------------------
+
+!!****f* m_numeric_tools/cdp2rdp_0D
+!! NAME
+!!  cdp2rdp_0D
+!!
+!! FUNCTION
+!!  Create a real variable containing real and imaginary part starting from a complex array
+!!
+!! INPUTS
+!!  cc=the input complex number
+!!
+!! OUTPUT
+!!  rr(2=the real array
+!!
+!! SOURCE
+
+pure function cdp2rdp_0D(cc) result(rr)
+
+!Arguments ------------------------------------
+!scalars
+ complex(dpc),intent(in) :: cc
+ real(dp) :: rr(2)
+
+! *********************************************************************
+
+ rr(1)=REAL (cc)
+ rr(2)=AIMAG(cc)
+
+end function cdp2rdp_0D
 !!***
 
 !----------------------------------------------------------------------
