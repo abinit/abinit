@@ -1370,7 +1370,7 @@ elemental function iseven(nn)
  logical :: iseven
 ! *********************************************************************
 
- iseven=.FALSE.; if ((nn/2)*2==nn) iseven=.TRUE.
+ iseven = ((nn / 2) * 2 == nn)
 
 end function iseven
 !!***

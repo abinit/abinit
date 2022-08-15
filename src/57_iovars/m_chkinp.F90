@@ -133,8 +133,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    else
      write(msg, '(a,a)' ) ch10,' chkinp: Checking input parameters for consistency.'
    end if
-   call wrtout(iout,msg,'COLL')
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(iout,msg)
+   call wrtout(std_out,msg)
 
    ! Will test directly on the dataset "dt"
    dt = dtsets(idtset)%copy()
@@ -386,8 +386,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
          write(msg, '(2a,i4,a,i4,2a,es12.4,a,i4,es12.4)' )ch10,&
 &         ' chkinp : imgmov=',dt%imgmov,', occopt=',dt%occopt,ch10,&
 &         ' chkinp : cellcharge(1)=',dt%cellcharge(1),', while for image=',iimage,', cellcharge=',dt%cellcharge(iimage)
-         call wrtout(iout,msg,'COLL')
-         call wrtout(std_out,  msg,'COLL')
+         call wrtout(iout,msg)
+         call wrtout(std_out,  msg)
          write(msg, '(a,i4,2a,i4,2a,f8.2,4a)' )&
           ' This is not allowed : cellcharge is allowed to vary only when imgmov=6 and occopt=0 or 2.',ch10,&
 &         ' Action: check the content of the input variables cellcharge, imgmov anf occopt.'
@@ -418,46 +418,46 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      if(mismatch_fft_tnons/=0)then
        if(fixed_mismatch==1)then
          write(msg, '(2a)' ) ch10,' chkinp: COMMENT -'
-         call wrtout(std_out,msg,'COLL')
+         call wrtout(std_out,msg)
          write(msg, '(4a,3es20.10)' )  &
 &          '   Found potentially symmetry-breaking value of tnons (see input variable chksymtnons). ', ch10,&
 &          '   The following shift of all reduced symmetry-corrected atomic positions might possibly remove this problem:',ch10,&
 &          xred(:,1)-dt%xred_orig(:,1,1)
-         call wrtout(std_out,msg,'COLL')
-         call wrtout(iout,msg,'COLL')
+         call wrtout(std_out,msg)
+         call wrtout(iout,msg)
          write(msg, '(4a)' ) ch10,&
 &          '   For your convenience, you might cut+paste the shifted new atomic positions (for image 1 only):',ch10,&
 &          '   xred'
-         call wrtout(std_out,msg,'COLL')
-         call wrtout(iout,msg,'COLL')
+         call wrtout(std_out,msg)
+         call wrtout(iout,msg)
          do iatom=1,dt%natom
            write(msg,'(a,3es20.10)') '        ',xred(:,iatom)
-           call wrtout(std_out,msg,'COLL')
-           call wrtout(iout,msg,'COLL')
+           call wrtout(std_out,msg)
+           call wrtout(iout,msg)
          enddo
-         call wrtout(std_out,' ','COLL')
+         call wrtout(std_out,' ')
        endif
 
        if(dt%chksymtnons==1 .or. dt%chksymtnons==3)then
          write(msg, '(8a,i4,2a,9i3,2a,3es20.10,11a)' ) ch10,&
-&          ' chkinp: ERROR -',ch10,&
-&          '   Chksymtnons=1 or 3 . Found potentially symmetry-breaking value of tnons, ', ch10,&
-&          '   which is neither a rational fraction in 1/8th nor in 1/12th (1/9th and 1/10th are tolerated also) :', ch10,&
-&          '   for the symmetry number ',mismatch_fft_tnons,ch10,&
-&          '   symrel is ',dt%symrel(1:3,1:3,mismatch_fft_tnons),ch10,&
-&          '   tnons is ',dt%tnons(1:3,mismatch_fft_tnons),ch10,&
-&          '   So, your atomic positions are not aligned with the FFT grid.',ch10,&
-&          '   Please, read the description of the input variable chksymtnons.',ch10,&
-&          '   If you are planning cDFT, GW or BSE calculations, such tnons value is very problematic.',ch10,&
-&          '   Otherwise, you might set chksymtnons=0.',&
-&          '   But do not be surprised if ABINIT do not converge for cDFT, or crashes for GW or BSE.',ch10,&
-&          '   Better solution : you might shift your atomic positions to better align the FFT grid and the symmetry axes.'
-         call wrtout(std_out,msg,'COLL')
+          ' chkinp: ERROR -',ch10,&
+          '   Chksymtnons=1 or 3 . Found potentially symmetry-breaking value of tnons, ', ch10,&
+          '   which is neither a rational fraction in 1/8th nor in 1/12th (1/9th and 1/10th are tolerated also) :', ch10,&
+          '   for the symmetry number ',mismatch_fft_tnons,ch10,&
+          '   symrel is ',dt%symrel(1:3,1:3,mismatch_fft_tnons),ch10,&
+          '   tnons is ',dt%tnons(1:3,mismatch_fft_tnons),ch10,&
+          '   So, your atomic positions are not aligned with the FFT grid.',ch10,&
+          '   Please, read the description of the input variable chksymtnons.',ch10,&
+          '   If you are planning cDFT, GW or BSE calculations, such tnons value is very problematic.',ch10,&
+          '   Otherwise, you might set chksymtnons=0.',&
+          '   But do not be surprised if ABINIT do not converge for cDFT, or crashes for GW or BSE.',ch10,&
+          '   Better solution : you might shift your atomic positions to better align the FFT grid and the symmetry axes.'
+         call wrtout(std_out,msg)
          if(fixed_mismatch==1)then
            call flush_unit(std_out)
            write(msg, '(a)' )&
 &          '   ABINIT has detected such a possible shift. See the suggestion given in the COMMENT above (or in output or log file).'
-           call wrtout(std_out,msg,'COLL')
+           call wrtout(std_out,msg)
          endif
          ierr=ierr+1 ! Previously a warning: for slab geometries arbitrary tnons can appear along the vacuum direction.
                      ! But then simply set chksymtnons=0 ...
@@ -691,7 +691,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !  ecut
 !  With planewaves, one must use positive ecut
    if(usewvl==0)then
-     !if (abs(dt%ecut+1._dp)<tol2) then
      if (dt%ecut < tol2) then
        write(msg, '(3a)' )&
         'The input keyword "ecut" is compulsory !',ch10,&
@@ -796,9 +795,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      end if
 
      ! Avoid wasting CPUs if nsppol==2.
-     if (dt%nsppol==2 .and. .not. iseven(nproc) .and. nproc > 1) then
+     if (dt%nsppol == 2 .and. .not. iseven(nproc) .and. nproc > 1) then
        write(msg,'(3a)') "Spin-polarized GW calculations should be run with an even number of processors ",ch10,&
-        " for achieving an optimal distribution of memory and CPU load. Change the number of processors."
+        " for achieving an optimal distribution of memory and CPU load. Please change the number of processors."
        ABI_ERROR_NOSTOP(msg, ierr)
      end if
    end if
@@ -1562,7 +1561,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    call chkint_eq(0,0,cond_string,cond_values,ierr,'kssform',dt%kssform,3,(/0,1,3/),iout)
 
    if (dt%kssform/=0 .and. dt%nbandkss/=0) then ! Check for outkss limitations.
-     call wrtout(std_out," Checking if input is consistent with KSS generation",'COLL')
+     call wrtout(std_out," Checking if input is consistent with KSS generation")
      call chkint_eq(0,0,cond_string,cond_values,ierr,'paral_kgb',dt%paral_kgb,1,(/0/),iout)
      call chkint_eq(0,0,cond_string,cond_values,ierr,'iomode',dt%iomode,2,(/IO_MODE_FORTRAN,IO_MODE_ETSF/),iout)
    end if
@@ -1591,7 +1590,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 #if defined HAVE_LOTF
    if (dt%ionmov==23) then
      write(msg, '(a,a)' ) ch10, '=== LOTF METHOD ================================================================'
-     call wrtout(ab_out,msg,'COLL')
+     call wrtout(ab_out,msg)
      cond_string(1)='ionmov' ; cond_values(1)=dt%ionmov
      call chkint_eq(0,1,cond_string,cond_values,ierr,'lotf_classic',dt%lotf_classic,1,(/5/),iout)
      call chkint_ge(0,1,cond_string,cond_values,ierr,'lotf_nitex',dt%lotf_nitex,1,iout)
@@ -1698,8 +1697,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
            if(dt%npspalch<=6)then
              write(msg, '(2a,6es12.4)' )ch10,' chkinp : mixalch(:,itypat,iimage)=',dt%mixalch_orig(:,itypat,iimage)
            end if
-           call wrtout(iout,msg,'COLL')
-           call wrtout(std_out,  msg,'COLL')
+           call wrtout(iout,msg)
+           call wrtout(std_out,  msg)
            write(msg, '(a,i4,2a,i4,2a,f8.2,4a)' )&
             'For the alchemical atom number',itypat,ch10,&
             'image number',iimage,ch10,&
@@ -1718,8 +1717,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      summix=sum(dt%mixesimgf(1:dt%nimage))
      if(abs(summix-one)>tol10)then
        write(msg, '(2a,20es12.4)' )ch10,' chkinp : mixesimgf(1:dt%nimage)=',dt%mixesimgf(1:dt%nimage)
-       call wrtout(iout,msg,'COLL')
-       call wrtout(std_out,  msg,'COLL')
+       call wrtout(iout,msg)
+       call wrtout(std_out,  msg)
        write(msg, '(a,es12.4,4a)' )&
         'The sum of the mixing image factors is',summix,ch10,&
         'while it should be one.',ch10,&
@@ -1836,8 +1835,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
       '  with the relaxation of cell parameters, for internal consistency purpose.',ch10, &
       '  For more information, please refer to "M. Stengel, N.A. Spaldin and D.Vanderbilt,', ch10, &
       '  Nat. Phys., 5, 304,(2009)" and its supplementary notes.', ch10 ! [[cite:Stengel2009]]
-     call wrtout(ab_out,msg,'COLL')
-     call wrtout(std_out,msg,'COLL')
+     call wrtout(ab_out,msg)
+     call wrtout(std_out,msg)
    end if
 
    if (dt%optcell /=0 .and. (dt%berryopt == 6 ))  then
@@ -1848,8 +1847,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
       '  with the relaxation of cell parameters, for internal consistency purpose.',ch10, &
       '  For more information, please refer to "M. Stengel, N.A. Spaldin and D.Vanderbilt,', ch10, &
       '  Nat. Phys., 5, 304,(2009)" and its supplementary notes.' ! [[cite:Stengel2009]]
-     call wrtout(ab_out,msg,'COLL')
-     call wrtout(std_out,msg,'COLL')
+     call wrtout(ab_out,msg)
+     call wrtout(std_out,msg)
    end if
 
 !  ndynimage
@@ -3181,21 +3180,21 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !  recgratio
    if (dt%tfkinfunc==2) then
      write(msg, '(a,a)' ) ch10,'=== RECURSION METHOD ==========================================================='
-     call wrtout(ab_out,msg,'COLL')
+     call wrtout(ab_out,msg)
      cond_string(1)='tfkinfunc' ; cond_values(1)=dt%tfkinfunc
      call chkint_ge(0,1,cond_string,cond_values,ierr,'recgratio',dt%recgratio,1,iout)
      if(dt%recgratio>1) then
        write(msg, '(a,a)' )'=== Coarse Grid is used in recursion ==========================================='
-       call wrtout(ab_out,msg,'COLL')
+       call wrtout(ab_out,msg)
        write(msg, '(a,i3,a,a,i3,a,i3,a,i3)' ) 'grid ratio =',dt%recgratio,&
         ch10,'fine grid =   ',dt%ngfft(1),' ',dt%ngfft(2),' ',dt%ngfft(3)
-       call wrtout(ab_out,msg,'COLL')
+       call wrtout(ab_out,msg)
        write(msg, '(a,i2,a,i2,a,i2)' ) 'coarse grid = ',&
         dt%ngfft(1)/dt%recgratio,' ',dt%ngfft(2)/dt%recgratio,' ',dt%ngfft(3)/dt%recgratio
-       call wrtout(ab_out,msg,'COLL')
+       call wrtout(ab_out,msg)
      else
        write(msg, '(a,i2,a,i2,a,i2)' ) 'fine grid =   ',dt%ngfft(1),' ',dt%ngfft(2),' ',dt%ngfft(3)
-       call wrtout(ab_out,msg,'COLL')
+       call wrtout(ab_out,msg)
      end if
    end if
 
@@ -3304,7 +3303,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      ' Tip ... It might be possible that the ground state is either non-spin-polarized, or antiferromagnetic.',ch10,&
      ' In the former case, it is advantageous to use nsppol=1 and nspden=1,',ch10,&
      ' while in the latter  case, it is advantageous to use nsppol=1 and nspden=2.'
-     call wrtout(iout,msg,'COLL')
+     call wrtout(iout,msg)
    end if
 
 !  stmbias
@@ -3330,8 +3329,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        'When nsppol==1 and nspden==2, at least one of the symmetry operations',ch10,&
        'must be anti-ferromagnetic (symafm=-1), in order to deduce the spin-down density',ch10,&
        'from the spin-up density.'
-       call wrtout(iout,msg,'COLL')
-       call wrtout(std_out,  msg,'COLL')
+       call wrtout(iout,msg)
+       call wrtout(std_out,  msg)
        write(msg, '(7a)' ) &
        'However, it is observed that none of the symmetry operations is anti-ferromagnetic.',ch10,&
        'Action: Check the atomic positions, the input variables spinat, symrel, tnons, symafm.',ch10,&
@@ -3607,8 +3606,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    if(dt%usepotzero/=0)then
      if(dt%iscf<10) then
        write(msg, '(3a)' )&
-&       'usepotzero can only be used with density mixing (not implemented yet)',ch10,&
-&       'Action: choose iscf > 10 '
+        'usepotzero can only be used with density mixing (not implemented yet)',ch10,&
+        'Action: choose iscf > 10 '
        ABI_ERROR_NOSTOP(msg,ierr)
      end if
    end if
@@ -3642,7 +3641,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !    &       ' chkinp : ERROR -',ch10,&
 !    &       '  When GPU is in use (use_gpu_cuda=1), wfoptalg must be 4 or 14 !',ch10,&
 !    &       '  Action: change wfoptalg in your input file.'
-!    call wrtout(std_out,msg,'COLL')
+!    call wrtout(std_out,msg)
 !    ierr=ierr+1
 !    end if
      if (dt%useylm==0) then
@@ -3669,7 +3668,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 &     ' invars0: ERROR -',ch10,&
 &     '   Input variables use_gpu_cuda is on but abinit hasn''t been built with gpu mode enabled !',ch10,&
 &     '   Action: change the input variable use_gpu_cuda or re-compile ABINIT with Cuda enabled.'
-     call wrtout(std_out,msg,'COLL')
+     call wrtout(std_out,msg)
      ierr=ierr+1
 #endif
 #ifndef HAVE_GPU_CUDA_DP
@@ -3679,7 +3678,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 &     '   with gpu mode in DOUBLE PRECISION enabled !',ch10,&
 &     '   Action: change the input variable use_gpu_cuda',ch10,&
 &     '   or re-compile ABINIT with double precision Cuda enabled.'
-     call wrtout(std_out,msg,'COLL')
+     call wrtout(std_out,msg)
      ierr=ierr+1
 #endif
    end if
@@ -3718,7 +3717,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 &         '  Van der Waals DFT-D2 correction (vdw_xc=5) only available for the following XC functionals:',ch10,&
 &         '      GGA-PBE, GGA-BLYP, GGA-BP86, mGGA-TPSS',ch10,&
 &         '  Action: change your pseudopotential file.'
-         call wrtout(std_out,msg,'COLL')
+         call wrtout(std_out,msg)
          ierr=ierr+1
        end if
 !       Only for the first 5 lines of the periodic table
@@ -3727,7 +3726,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
            write(msg,'(4a,f5.1,a)') ch10,&
 &           ' chkinp : ERROR -',ch10,&
 &           '  Van der Waals DFT-D2 correction (vdw_xc=5) not available for atom type Z=',dt%znucl(itypat),' !'
-           call wrtout(std_out,msg,'COLL')
+           call wrtout(std_out,msg)
            ierr=ierr+1
          end if
        end do
@@ -3746,7 +3745,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 &         '  Van der Waals DFT-D correction (vdw_xc=',dt%vdw_xc,') only available for the following XC functionals:',ch10,&
 &         '      GGA-PBE, GGA-BLYP, GGA-BP86, mGGA-TPSS, GGA-RevPBE, PBE0',ch10,&
 &         '  Action: change your pseudopotential file.'
-         call wrtout(std_out,msg,'COLL')
+         call wrtout(std_out,msg)
          ierr=ierr+1
        end if
 !       Only up to chemical species 96
@@ -3755,7 +3754,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
            write(msg,'(4a,i2,1a,f5.1,a)') ch10,&
 &           ' chkinp : ERROR -',ch10,&
 &           '  Van der Waals DFT-D correction (vdw_xc=',dt%vdw_xc,') not available for atom type Z=',dt%znucl(itypat),' !'
-           call wrtout(std_out,msg,'COLL')
+           call wrtout(std_out,msg)
            ierr=ierr+1
          end if
        end do
@@ -3850,8 +3849,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 &           abs(frac(3,ia)-frac(3,ib))<1.0d-6         ) then
              if(iimage>1)then
                write(msg,'(2a,i5)') ch10,' The following was observed for image=',iimage
-               call wrtout(iout,msg,'COLL')
-               call wrtout(std_out,msg,'COLL')
+               call wrtout(iout,msg)
+               call wrtout(std_out,msg)
              end if
              write(msg, '(a,i4,a,i4,a,a,a,a,a,a)' )&
 &             'Atoms number',ia,' and',ib,' are located at the same point',' of the unit cell',ch10,&
@@ -4010,6 +4009,27 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      end if
    end if
 
+   if (optdriver == RUNL_GWR) then
+     ! Avoid wasting CPUs if nsppol==2.
+     if (dt%nsppol == 2 .and. .not. iseven(nproc) .and. nproc > 1) then
+       write(msg,'(3a)') "Spin-polarized GW calculations should be run with an even number of processors ",ch10,&
+        " for achieving an optimal distribution of memory and CPU load. Please change the number of processors."
+       ABI_ERROR_NOSTOP(msg, ierr)
+     end if
+     if (dt%usepaw == 1) then
+       ABI_ERROR_NOSTOP("GWR with PAW not yet implemented", ierr)
+     end if
+     if (dt%nshiftk /= 1 .or. any(abs(dt%shiftk(:,1)) > tol6)) then
+       ABI_ERROR_NOSTOP('GWR requires Gamma-centered k-meshes', ierr)
+     end if
+   end if
+
+   ! ===========================================================
+   ! Write COMMENTs if some combination of input vars look weird
+   ! ===========================================================
+   if (optdriver == RUNL_EPH .and. dt%dipdip /= 0 .and. any(dt%occopt == [3, 4, 5, 6, 7])) then
+     ABI_COMMENT("dipdip can be set to 0 in case of metals whereas dipdip 1 should be used in polar materials.")
+   end if
 
 !  If molecular dynamics or structural optimization is being done
 !  (dt%ionmov>0), make sure not all atoms are fixed
@@ -4022,7 +4042,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !  &   '  Thus all atoms are fixed and option ionmov to move atoms',&
 !  &           ' is inconsistent.',ch10,&
 !  &   '  Action: change ionmov or natfix and iatfix in input file and resubmit.'
-!  call wrtout(std_out,msg,"COLL")
+!  call wrtout(std_out,msg)
 !  ierr = ierr + 1
 !  end if
 !  end if
@@ -4058,7 +4078,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 &       dtsets(idtset)%wvl_hgrid, " bohr  |", &
 &       two * pi * pi / (dtsets(idtset)%wvl_hgrid ** 2), " Ht  | ", &
 &       half * pi * pi / (dtsets(idtset)%wvl_hgrid ** 2), " Ht"
-       call wrtout(std_out,msg,'COLL')
+       call wrtout(std_out,msg)
        wvl_hgrid = dtsets(idtset)%wvl_hgrid
      end if
      twvl = twvl .or. (dtsets(idtset)%usewvl == 1 .and. dtsets(idtset)%iomode /= IO_MODE_ETSF)
@@ -4067,16 +4087,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      write(msg,'(5a)') &
 &     'Restart files from wavelets in non ETSF format does not follow', ch10, &
 &     'the ABINIT standards.', ch10, &
-&     'Put iomode to 3 to use ETSF retart files.'
+&     'Set iomode to 3 to use ETSF retart files.'
      ABI_WARNING(msg)
    end if
- end if
-
- ! ===========================================================
- ! Write COMMENTs if some combination of input vars look weird
- ! ===========================================================
- if (optdriver == RUNL_EPH .and. dt%dipdip /= 0 .and. any(dt%occopt == [3, 4, 5, 6, 7])) then
-   ABI_COMMENT("dipdip can be set to 0 in case of metals whereas dipdip 1 should be used in polar materials.")
  end if
 
  ! If there was a problem, then stop.
@@ -4088,7 +4101,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    ' Checking consistency of input data against itself revealed some problem(s).',ch10,&
    ' So, stopping. The details of the problem(s) are given in the error file or the standard output file (= "log" file).',ch10,&
    ' In parallel, the details might not even be printed there. Then, try running in sequential to see the details.'
-   call wrtout(iout,msg,'COLL')
+   call wrtout(iout,msg)
    write(msg,'(a,i0,5a)')&
    'Checking consistency of input data against itself gave ',ierr,' inconsistency.',ch10,&
    'The details of the problem can be found above (or in output or log file).',ch10,&
