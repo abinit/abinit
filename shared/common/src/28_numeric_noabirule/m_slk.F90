@@ -662,14 +662,13 @@ subroutine slkmat_print(mat, header, unit, prtvol)
  write(msg,'(3(3a))') &
    '  sizeb_global ..... ', trim(ltoa(mat%sizeb_global)), ch10, &
    '  sizeb_local ...... ', trim(ltoa(mat%sizeb_local)), ch10, &
-   '  sizeb_blocs ...... ', trim(ltoa(mat%sizeb_blocs)), ch10, &
+   '  sizeb_blocs ...... ', trim(ltoa(mat%sizeb_blocs)), ch10
  call wrtout(unt, msg)
- if (associated(mat%processor%grid%dims)) then
+ if (associated(mat%processor)) then
    write(msg,'((3a))') &
    '  grid dims ........ ', trim(ltoa(mat%processor%grid%dims)), ch10
    call wrtout(unt, msg)
  end if
-
 
  !if (prtvol > 10) call mat%write(unit)
 
