@@ -37,7 +37,7 @@ https://github.com/abinit/abiconfig.
 ])
 
 # Initialize Autoconf
-AC_PREREQ(2.59)
+AC_PREREQ([2.71])
 AC_INIT([ABINIT],[9.9.0],[https://bugs.launchpad.net/abinit/],[abinit])
 AC_REVISION([Autotools support for ABINIT 9])
 AC_CONFIG_AUX_DIR([config/gnu])
@@ -1056,7 +1056,9 @@ if test ! -z "${status}" -o ! -z "${mandatory}"; then
 fi
 
 # Always generate a build script for required fallbacks
-AC_OUTPUT([fallbacks/INSTALL fallbacks/README fallbacks/build-abinit-fallbacks.sh],[chmod +x fallbacks/build-abinit-fallbacks.sh])
+AC_CONFIG_FILES([fallbacks/INSTALL fallbacks/README fallbacks/build-abinit-fallbacks.sh])
+AC_CONFIG_COMMANDS([default],[chmod +x fallbacks/build-abinit-fallbacks.sh],[])
+AC_OUTPUT
 
 # Check that we have all required fallbacks
 ABI_FALLBACKS_VALIDATE([${abi_fbk_required}])
