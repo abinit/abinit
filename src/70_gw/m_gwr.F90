@@ -140,7 +140,7 @@ module m_gwr
  use m_crystal,       only : crystal_t
  use m_dtset,         only : dataset_type
  use m_fftcore,       only : get_kg, sphereboundary, getng, print_ngfft
- use m_mpinfo,        only : destroy_mpi_enreg, initmpi_seq
+ use m_mpinfo,        only : initmpi_seq, destroy_mpi_enreg
  use m_distribfft,    only : init_distribfft_seq
  use m_fft,           only : fft_ug, fft_ur, fftbox_plan3_t, fourdp
  use m_fft_mesh,      only : calc_ceikr
@@ -228,7 +228,7 @@ module m_gwr
 !! gwr_t
 !!
 !! FUNCTION
-!!  This object provides the API high-level to perform the different steps of the GWR algorithm.
+!!  This object provides the high-level API to perform the different steps of the GWR algorithm.
 !!
 !! SOURCE
 
@@ -557,7 +557,7 @@ module m_gwr
    procedure :: rotate_gpm => gwr_rotate_gpm
    ! Reconstruct the Green's functions in the kBZ from the IBZ.
 
-   procedure :: get_green_gpr => gwr_get_green_gpr
+   procedure :: get_myk_green_gpr => gwr_get_myk_green_gpr
     ! G_k(g,g') --> G_k(g',r) for each k in the BZ treated by this MPI proc for given spin and tau.
 
    procedure :: get_gk_rpr_pm => gwr_get_gk_rpr_pm
@@ -566,7 +566,7 @@ module m_gwr
    procedure :: rotate_wc => gwr_rotate_wc
    ! Reconstruct Wc(q) in the BZ from the IBZ.
 
-   procedure :: get_wc_gpr => gwr_get_wc_gpr
+   procedure :: get_myq_wc_gpr => gwr_get_myq_wc_gpr
    ! W_q(g,g') --> W_q(g',r) for each q in the BZ treated by this MPI procs for given spin and tau.
 
    procedure :: get_wc_rpr_qbz => gwr_get_wc_rpr_qbz
@@ -695,7 +695,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  gwr%kibz => ks_ebands%kptns
  gwr%wtk => ks_ebands%wtk
  gwr%mpi_enreg => mpi_enreg
- gwr%timeit = dtset%prtvol >= 20
+ gwr%timeit = dtset%prtvol > 20
 
  ! Initialize qp_ebands with KS values.
  call ebands_copy(ks_ebands, gwr%qp_ebands)
@@ -1225,7 +1225,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
 
  if (my_rank == master) then
    call print_ngfft(gwr%g_ngfft, header="FFT mesh for Green's function", unit=std_out)
-   call wrtout(std_out, sjoin("batch_size:", itoa(gwr%batch_size)))
+   call wrtout(std_out, sjoin(" batch_size:", itoa(gwr%batch_size)))
  end if
 
  ! Now we know the value of g_ngfft. Setup tables for zero-padded FFTs.
@@ -2118,9 +2118,9 @@ end subroutine gwr_rotate_gpm
 
 !----------------------------------------------------------------------
 
-!!****f* m_gwr/gwr_get_green_gpr
+!!****f* m_gwr/gwr_get_myk_green_gpr
 !! NAME
-!!  gwr_get_green_gpr
+!!  gwr_get_myk_green_gpr
 !!
 !! FUNCTION
 !!  Use FFTs to compute G_k(g,g') --> G_k(g',r)
@@ -2140,7 +2140,7 @@ end subroutine gwr_rotate_gpm
 !!
 !! SOURCE
 
-subroutine gwr_get_green_gpr(gwr, itau, spin, desc_mykbz, gt_gpr)
+subroutine gwr_get_myk_green_gpr(gwr, itau, spin, desc_mykbz, gt_gpr)
 
 !Arguments ------------------------------------
  class(gwr_t),intent(in) :: gwr
@@ -2215,9 +2215,9 @@ subroutine gwr_get_green_gpr(gwr, itau, spin, desc_mykbz, gt_gpr)
 
  ABI_FREE(ceikr)
 
- if (gwr%timeit) call cwtime_report(" gwr_get_green_gpr:", cpu, wall, gflops)
+ if (gwr%timeit) call cwtime_report(" gwr_get_myk_green_gpr:", cpu, wall, gflops)
 
-end subroutine gwr_get_green_gpr
+end subroutine gwr_get_myk_green_gpr
 !!***
 
 !----------------------------------------------------------------------
@@ -2485,9 +2485,9 @@ end subroutine gwr_rotate_wc
 
 !----------------------------------------------------------------------
 
-!!****f* m_gwr/gwr_get_wc_gpr
+!!****f* m_gwr/gwr_get_myq_wc_gpr
 !! NAME
-!!  gwr_get_wc_gpr
+!!  gwr_get_myq_wc_gpr
 !!
 !! FUNCTION
 !!  Use FFTs to compute: Wc_q(g,g') --> Wc_q(g',r)
@@ -2503,7 +2503,7 @@ end subroutine gwr_rotate_wc
 !!
 !! SOURCE
 
-subroutine gwr_get_wc_gpr(gwr, itau, spin, desc_myqbz, wc_gpr)
+subroutine gwr_get_myq_wc_gpr(gwr, itau, spin, desc_myqbz, wc_gpr)
 
 !Arguments ------------------------------------
  class(gwr_t),intent(inout) :: gwr
@@ -2576,9 +2576,9 @@ subroutine gwr_get_wc_gpr(gwr, itau, spin, desc_myqbz, wc_gpr)
 
  ABI_FREE(ceiqr)
 
- if (gwr%timeit) call cwtime_report(" gwr_get_wc_gpr:", cpu, wall, gflops)
+ if (gwr%timeit) call cwtime_report(" gwr_get_myq_wc_gpr:", cpu, wall, gflops)
 
-end subroutine gwr_get_wc_gpr
+end subroutine gwr_get_myq_wc_gpr
 !!***
 
 !----------------------------------------------------------------------
@@ -3156,7 +3156,7 @@ subroutine gwr_print(gwr, header, unit)
 
  call ydoc%write_and_free(unt)
 
- if (gwr%dtset%prtvol > 10) then
+ if (gwr%dtset%prtvol >= 30) then
    do my_is=1,gwr%my_nspins
      spin = gwr%my_spins(my_is)
      do my_it=1,gwr%my_ntau
@@ -3197,7 +3197,7 @@ subroutine gwr_build_tchi(gwr)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: ndat1 = 1, istwfk1 = 1
+ integer,parameter :: ndat1 = 1, istwfk1 = 1, tim_fourdp0 = 0
  integer :: my_is, my_it, my_ikf, ig, my_ir, my_nr, npwsp, ncol_glob, col_bsize, my_iqi !, my_iki ! my_iqf,
  integer :: idat, ndat, sc_nfft, spin, ik_ibz, ik_bz, iq_ibz, ierr, ipm, itau, ig2 ! ig1
  real(dp) :: cpu_tau, wall_tau, gflops_tau, cpu_all, wall_all, gflops_all, local_max, max_abs_imag_chit !, spin_fact, sc_ucvol,
@@ -3206,6 +3206,7 @@ subroutine gwr_build_tchi(gwr)
  character(len=5000) :: msg
  type(desc_t),pointer :: desc_k, desc_q
  type(matrix_scalapack) :: chi_rgp
+ type(mpi_type) :: tchi_mpi_enreg
 !arrays
  integer :: sc_ngfft(18)
  integer,allocatable :: green_scg(:,:), chi_scg(:,:)
@@ -3246,6 +3247,10 @@ subroutine gwr_build_tchi(gwr)
    !sck_ucvol = gwr%cryst%ucvol * product(gwr%ngkpt)
    !scq_ucvol = gwr%cryst%ucvol * product(gwr%ngqpt)
    !sc_augsize = product(sc_ngfft(4:6))
+
+   !call initmpi_seq(tchi_mpi_enreg)
+   !call init_distribfft_seq(tchi_mpi_enreg%distribfft, 'c', sc_ngfft(2), sc_ngfft(3), 'all')
+   !call init_distribfft_seq(tchi_mpi_enreg%distribfft, 'f', sc_ngfft(2), sc_ngfft(3), 'all')
 
    call wrtout(std_out, " Building chi0 with FFTs in the supercell:", pre_newlines=2)
    call wrtout(std_out, sjoin(" sc_ngfft:", ltoa(sc_ngfft(1:8))))
@@ -3296,7 +3301,7 @@ subroutine gwr_build_tchi(gwr)
        itau = gwr%my_itaus(my_it)
 
        ! G_k(g,g') --> G_k(g',r) e^{ik.r} for each k in the BZ treated by me.
-       call gwr%get_green_gpr(itau, spin, desc_mykbz, gt_gpr)
+       call gwr%get_myk_green_gpr(itau, spin, desc_mykbz, gt_gpr)
 
        ! Loop over r in the unit cell that is now MPI-distributed in g_comm.
        my_nr = gt_gpr(1,1)%sizeb_local(2)
@@ -3337,9 +3342,8 @@ if (.True.) then
          gt_scbox = gt_scbox * sc_nfft ! / sck_ucvol)
 
 else
-
          ! This is just to check if replacing a single FFT in the supercell with
-         ! nkpt FFTs in the unit cell is faster.
+         ! nkpt FFTs in the unit cell + communication is faster.
          do my_ikf=1,gwr%my_nkbz
            desc_k => desc_mykbz(my_ikf)
 
@@ -3351,7 +3355,7 @@ else
                          gt_ucbox(:,ipm))                              ! out
              !gt_ucbox(:,ipm) = gt_ucbox(:,ipm) * gwr%g_nfft
 
-             ! This becomes the bottleneck bur perhaps one can take advantage of localization.
+             ! This becomes the bottleneck but perhaps one can take advantage of localization.
              ! Moreover the FFTs are distributed inside kpt_comm
              call ur_to_scpsi(gwr%ngkpt, gwr%g_ngfft, gwr%g_nfft, gwr%nspinor, ndat1, &
                               gt_ucbox(:,ipm), cone, sc_ceimkr(:, my_ikf), gt_scbox(:,ipm))
@@ -3368,7 +3372,8 @@ end if
          !max_abs_imag_chit = max(max_abs_imag_chit, maxval(abs(aimag(chit_scbox))))
 
          ! Back to tchi(G'=q+g',r) space immediately.
-         call plan_rp2gp%execute(chit_scbox)
+         call plan_rp2gp%execute(chit_scbox)  ! + 1
+         !call r2c_fft(cplex1, fofg, fofr, isign=-1, tchi_mpi_enreg, sc_nfft, ndat1, sc_ngfft, tim_fourdp0)
 
          ! Extract tchi_q(g',r) on the ecuteps g-sphere from the FFT box in the supercell
          ! and save data in chiq_gpr PBLAS matrix. Only my q-points in the IBZ are considered.
@@ -3458,6 +3463,7 @@ end if
    ABI_FREE(sc_ceimkr)
 
    call slk_array_free(chiq_gpr)
+   !call destroy_mpi_enreg(tchi_mpi_enreg)
 
   else
     ! ===================================================================
@@ -4072,7 +4078,7 @@ subroutine gwr_build_sigmac(gwr)
  type(desc_t), pointer :: desc_q, desc_k
  type(yamldoc_t) :: ydoc
 !arrays
- integer :: sc_ngfft(18), need_qibz(gwr%nqibz),  got_qibz(gwr%nqibz), units(3)
+ integer :: sc_ngfft(18), need_qibz(gwr%nqibz),  got_qibz(gwr%nqibz), units(4)
  integer,allocatable :: green_scg(:,:), wc_scg(:,:)
  real(dp) :: kk_bz(3), kcalc_bz(3), qq_bz(3)  !, qq_ibz(3)
  !real(dp),allocatable :: inv_rmR(:), rylm_rmR(:,:)
@@ -4084,21 +4090,20 @@ subroutine gwr_build_sigmac(gwr)
  type(desc_t), target :: desc_mykbz(gwr%my_nkbz), desc_myqbz(gwr%my_nqbz)
  type(fftbox_plan3_t) :: gt_plan_gp2rp, wt_plan_gp2rp
 
- integer :: band_val, ibv
- integer :: ncerr, unt_it, unt_iw, unt_rw !, unt_aw
- real(dp) :: e0
- complex(dp) :: zz, sigc_e0, dsigc_de0, z_e0
- integer,allocatable :: ks_vbik(:,:), iperm(:) !, qp_vbik(:,:)
+ integer :: band_val, ibv, ncerr, unt_it, unt_iw, unt_rw, unt_aw
+ real(dp) :: e0, ks_gap, qp_gap
+ complex(dp) :: zz, sigc_e0, dsigc_de0, z_e0, sig_xc
+ integer,allocatable :: ks_vbik(:,:), iperm(:)
  real(dp),allocatable :: sorted_qpe(:)
  real(dp) :: e0_kcalc(gwr%max_nbcalc, gwr%nkcalc, gwr%nsppol)
+ real(dp) :: spfunc_diag_kcalc(gwr%nwr, gwr%max_nbcalc, gwr%nkcalc, gwr%nsppol)
+ real(dp) :: sigx_kcalc(gwr%max_nbcalc, gwr%nkcalc, gwr%nsppol)
+ real(dp) :: ks_gap_kcalc(gwr%nkcalc, gwr%nsppol), qp_gap_kcalc(gwr%nkcalc, gwr%nsppol)
  complex(dp) :: ze0_kcalc(gwr%max_nbcalc, gwr%nkcalc, gwr%nsppol), rw_mesh(gwr%nwr)
  complex(dp) :: sigc_iw_diag_kcalc(gwr%ntau, gwr%max_nbcalc, gwr%nkcalc, gwr%nsppol)
  complex(dp) :: sigc_e0_kcalc(gwr%max_nbcalc, gwr%nkcalc, gwr%nsppol)
  complex(dp) :: qpe_zlin_kcalc(gwr%max_nbcalc, gwr%nkcalc, gwr%nsppol), imag_zmesh(gwr%ntau,2)
  complex(dp) :: sigc_rw_diag_kcalc(gwr%nwr, gwr%max_nbcalc, gwr%nkcalc, gwr%nsppol)
- real(dp) :: sigx_kcalc(gwr%max_nbcalc, gwr%nkcalc, gwr%nsppol)
- real(dp) :: ks_gap_kcalc(gwr%nkcalc, gwr%nsppol), qp_gap_kcalc(gwr%nkcalc, gwr%nsppol)
- real(dp) :: ks_gap, qp_gap !kse_prev, kse_val, kse_cond, qpe_oms, qpe_oms_val, qpe_oms_cond
 
 ! *************************************************************************
 
@@ -4203,10 +4208,10 @@ if (.True.) then
      itau = gwr%my_itaus(my_it)
 
      ! G_k(g,g') --> G_k(g',r) e^{ik.r} for each k in the BZ treated by me.
-     call gwr%get_green_gpr(itau, spin, desc_mykbz, gt_gpr)
+     call gwr%get_myk_green_gpr(itau, spin, desc_mykbz, gt_gpr)
 
      ! Wc_q(g,g') --> Wc_q(g',r) e^{iq.r} for each q in the BZ treated by me.
-     call gwr%get_wc_gpr(itau, spin, desc_myqbz, wc_gpr)
+     call gwr%get_myq_wc_gpr(itau, spin, desc_myqbz, wc_gpr)
 
      my_nr = gt_gpr(1,1)%sizeb_local(2)
      ABI_CHECK(my_nr == wc_gpr(1)%sizeb_local(2), "my_nr != wc_gpr(1)%sizeb_local(2)")
@@ -4437,8 +4442,6 @@ end if
  imag_zmesh(:,1) = j_dpc * gwr%iw_mesh
  imag_zmesh(:,2) = -j_dpc * gwr%iw_mesh
 
-
-
  do spin=1,gwr%nsppol
    do ikcalc=1,gwr%nkcalc
       ik_ibz = gwr%kcalc2ibz(ikcalc, 1)
@@ -4487,11 +4490,14 @@ end if
             sigc_e0 = pade(gwr%ntau, imag_zmesh(:,2), conjg(sigc_iw_diag_kcalc(:, ibc, ikcalc, spin)), zz)
           end if
           sigc_rw_diag_kcalc(iw, ibc, ikcalc, spin) = sigc_e0
+          sig_xc = sigc_e0 + sigx_kcalc(ibc, ikcalc, spin)
 
           ! Spectral function
-          !aw = one / pi * abs(aimag(Sr%sigcme(ib,ikibz,io,is))) &
-          !  /( (real(Sr%omega_r(io) - Sr%hhartree(ib,ib,ikibz,is) - Sr%sigxcme(ib,ikibz,io,is)))**2 &
-          !    +(aimag(Sr%sigcme(ib,ikibz,io,is))) ** 2) / Ha_eV
+          spfunc_diag_kcalc(iw, ibc, ikcalc, spin) = zero
+          !spfunc_diag_kcalc(iw, ibc, ikcalc, spin) = &
+          !  one / pi * abs(aimag(sigc_e0) &
+          !  /( (real(rw_mesh(iw) - Sr%hhartree(ib, ib, ik_ibz, spin) - sigx_xc)) ** 2 &
+          !    +(aimag(sigc_e0)) ** 2) / Ha_eV
         end do
 
         ! TODO
@@ -4571,12 +4577,6 @@ end if
         end do
 
         call ydoc%write_units_and_free([std_out, ab_out])
-
-
-
-
-
-
      end do ! ikcalc
    end do ! spin
 
@@ -4597,12 +4597,12 @@ end if
    end if
    write(unt_rw, "(a)")"# Diagonal elements of Sigma_c(omega) in eV units"
    write(unt_rw, "(a)")"# omega Re/Im Sigma_c(omega)"
-   !if (open_file(strcat(gwr%dtfil%filnam_ds(4), '_AW'), msg, newunit=unt_aw, action="write") /= 0) then
-   !  ABI_ERROR(msg)
-   !end if
-   !write(unt_aw, "(a)")"# Spectral function A(omega)"
+   if (open_file(strcat(gwr%dtfil%filnam_ds(4), '_AW'), msg, newunit=unt_aw, action="write") /= 0) then
+     ABI_ERROR(msg)
+   end if
+   write(unt_aw, "(a)")"# Spectral function A(omega)"
 
-   units = [unt_it, unt_iw, unt_rw]
+   units = [unt_it, unt_iw, unt_rw, unt_aw]
 
    ! TODO: Finalize the implementation and put output files under test.
    do spin=1,gwr%nsppol
@@ -4612,22 +4612,26 @@ end if
        do band=gwr%bstart_ks(ikcalc, spin), gwr%bstop_ks(ikcalc, spin)
          ibc = band - gwr%bstart_ks(ikcalc, spin) + 1
          e0 = e0_kcalc(ibc, ikcalc, spin)
-         rw_mesh = arth(e0 - gwr%wr_step * (gwr%nwr / 2), gwr%wr_step, gwr%nwr) * Ha_eV
          call write_units(units, sjoin("# band:", itoa(band), ", spin:", itoa(spin)))
+         ! Write Sigma_c(i tau) and Sigma_c(i omega)
          do itau=1,gwr%ntau
            write(unt_it, "(*(es16.8))") &
              gwr%tau_mesh(itau), &
              c2r(sigc_it_diag_kcalc(1, itau, ibc, ikcalc, spin)), &
              c2r(sigc_it_diag_kcalc(2, itau, ibc, ikcalc, spin))
            write(unt_iw, "(*(es16.8))") gwr%iw_mesh(itau) * Ha_eV, c2r(sigc_iw_diag_kcalc(itau, ibc, ikcalc, spin)) * Ha_eV
-           write(unt_rw, "(*(es16.8))") rw_mesh(itau), c2r(sigc_rw_diag_kcalc(itau, ibc, ikcalc, spin)) * Ha_eV
-           !write(unt_aw, "(*(es16.8))") rw_mesh(itau), c2r(sigc_rw_diag_kcalc(itau, ibc, ikcalc, spin)) / Ha_eV
+         end do
+         ! Write Sigma_c(omega) and A(omega)
+         rw_mesh = arth(e0 - gwr%wr_step * (gwr%nwr / 2), gwr%wr_step, gwr%nwr) * Ha_eV
+         do iw=1,gwr%nwr
+           write(unt_rw, "(*(es16.8))") rw_mesh(itau), c2r(sigc_rw_diag_kcalc(iw, ibc, ikcalc, spin)) * Ha_eV
+           write(unt_aw, "(*(es16.8))") rw_mesh(itau), spfunc_diag_kcalc(iw, ibc, ikcalc, spin) / Ha_eV
          end do
        end do
      end do
    end do
 
-   close(unt_it); close(unt_iw); close(unt_rw) !; close(unt_aw)
+   close(unt_it); close(unt_iw); close(unt_rw); close(unt_aw)
 
    ! Add results to the GWR.nc
    NCF_CHECK(nctk_open_modify(ncid, gwr%gwrnc_path, xmpi_comm_self))
@@ -4639,7 +4643,8 @@ end if
      nctkarr_t("sigx_kcalc", "dp", "max_nbcalc, nkcalc, nsppol"), &
      nctkarr_t("sigc_it_diag_kcalc", "dp", "two, two, ntau, max_nbcalc, nkcalc, nsppol"), &
      nctkarr_t("sigc_iw_diag_kcalc", "dp", "two, ntau, max_nbcalc, nkcalc, nsppol"), &
-     nctkarr_t("sigc_rw_diag_kcalc", "dp", "two, nwr, max_nbcalc, nkcalc, nsppol") &
+     nctkarr_t("sigc_rw_diag_kcalc", "dp", "two, nwr, max_nbcalc, nkcalc, nsppol"), &
+     nctkarr_t("spfunc_diag_kcalc", "dp", "nwr, max_nbcalc, nkcalc, nsppol") &
    ])
    NCF_CHECK(ncerr)
    ! Write data.
@@ -4651,6 +4656,7 @@ end if
    NCF_CHECK(nf90_put_var(ncid, vid("sigc_it_diag_kcalc"), c2r(sigc_it_diag_kcalc)))
    NCF_CHECK(nf90_put_var(ncid, vid("sigc_iw_diag_kcalc"), c2r(sigc_iw_diag_kcalc)))
    NCF_CHECK(nf90_put_var(ncid, vid("sigc_rw_diag_kcalc"), c2r(sigc_rw_diag_kcalc)))
+   NCF_CHECK(nf90_put_var(ncid, vid("spfunc_diag_kcalc"), spfunc_diag_kcalc))
    NCF_CHECK(nf90_close(ncid))
  end if
 
@@ -4923,7 +4929,7 @@ subroutine gwr_ncwrite_tchi_wc(gwr, what, filepath)
  real(dp) :: cpu, wall, gflops
 !arrays
  integer :: dist_qibz(gwr%nqibz)
- real(dp),ABI_CONTIGUOUS pointer :: fptr(:,:,:)
+ real(dp), ABI_CONTIGUOUS pointer :: fptr(:,:,:)
  type(matrix_scalapack), pointer :: mats(:)
 
 ! *************************************************************************
@@ -5538,6 +5544,25 @@ end function vid
 
 end subroutine load_head_wings_from_sus_file__
 !!***
+
+subroutine r2c_fft(cplex, fofg, fofr, isign, mpi_enreg, nfft, ndat, ngfft, tim_fourdp)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: cplex,isign,nfft,ndat,tim_fourdp
+ type(MPI_type),intent(in) :: mpi_enreg
+!arrays
+ integer,intent(in) :: ngfft(18)
+ real(dp),intent(inout) :: fofg(2,nfft,ndat),fofr(cplex*nfft,ndat)
+
+!Local variables-------------------------------
+
+ !call c_f_pointer(c_loc(cg_mat%buffer_cplx), fofg, shape=[2, nfft, ndat])
+ !call c_f_pointer(c_loc(cg_mat%buffer_cplx), fofr, shape=[cplex*nfft * ndat])
+
+ !call fourdp(cplex, fofg, fofr, isign, mpi_enreg, nfft, ndat, ngfft)
+
+end subroutine r2c_fft
 
 end module m_gwr
 !!***

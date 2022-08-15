@@ -1314,11 +1314,11 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    ! in case of self-consistency we might calculate here the ppm coefficients using qp_rhor
  end if ! gwcalctyp>=10
 
- !=== KS hamiltonian hdft(b1,b1,k,s)= <b1,k,s|H_s|b1,k,s> ===
- ABI_MALLOC(hdft,(b1gw:b2gw,b1gw:b2gw,Kmesh%nibz,Sigp%nsppol*Sigp%nsig_ab))
+ ! KS hamiltonian: hdft(b1,b1,k,s)= <b1,k,s|H_s|b1,k,s>
+ ABI_MALLOC(hdft, (b1gw:b2gw, b1gw:b2gw, Kmesh%nibz, Sigp%nsppol*Sigp%nsig_ab))
  hdft = czero
 
- if (Dtset%nspinor==1) then
+ if (Dtset%nspinor == 1) then
    do spin=1,Sigp%nsppol
      do ik=1,Kmesh%nibz
        do ib=b1gw,b2gw
@@ -1335,9 +1335,9 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    ABI_MALLOC(bmask, (wfd%mband))
    bmask = .False.; bmask(b1gw:b2gw) = .True.
 
-   if (Wfd%usepaw==1) then
-     ABI_MALLOC(Cp1,(Wfd%natom,Wfd%nspinor))
-     call pawcprj_alloc(Cp1,0,Wfd%nlmn_atm)
+   if (Wfd%usepaw == 1) then
+     ABI_MALLOC(Cp1,(Wfd%natom, Wfd%nspinor))
+     call pawcprj_alloc(Cp1, 0, Wfd%nlmn_atm)
    end if
 
    do spin=1,Sigp%nsppol
@@ -1357,11 +1357,11 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
            call wfd%get_cprj(ib,ik_ibz,spin,Cryst,Cp1,sorted=.FALSE.)
            ovlp = ovlp + paw_overlap(Cp1,Cp1,Cryst%typat,Pawtab)
          end if
-!        write(std_out,*)ovlp(1),ovlp(2)
+         ! write(std_out,*)ovlp(1),ovlp(2)
          norm=DBLE(ovlp(1)+ovlp(2))
          ovlp(1)=DBLE(ovlp(1)/norm); ovlp(2)=DBLE(ovlp(2)/norm) ! ovlp(2)=cone-ovlp(1)
-         hdft(ib,ib,ik_ibz,1) = ks_ebands%eig(ib,ik_ibz,1)*ovlp(1)-KS_me%vxc(ib,ib,ik_ibz,3)
-         hdft(ib,ib,ik_ibz,2) = ks_ebands%eig(ib,ik_ibz,1)*ovlp(2)-KS_me%vxc(ib,ib,ik_ibz,4)
+         hdft(ib,ib,ik_ibz,1) = ks_ebands%eig(ib,ik_ibz,1)*ovlp(1) - KS_me%vxc(ib,ib,ik_ibz,3)
+         hdft(ib,ib,ik_ibz,2) = ks_ebands%eig(ib,ik_ibz,1)*ovlp(2) - KS_me%vxc(ib,ib,ik_ibz,4)
          hdft(ib,ib,ik_ibz,3) = KS_me%vxc(ib,ib,ik_ibz,3)
          hdft(ib,ib,ik_ibz,4) = KS_me%vxc(ib,ib,ik_ibz,4)
        end do
@@ -1387,15 +1387,15 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  ! * ks_vUme is zero unless we are using DFT+U as starting point, see calc_vHxc_braket
  ! * Note that vH matrix elements are calculated using the true uncutted interaction.
 
- if (gwcalctyp<10) then
+ if (gwcalctyp < 10) then
    ! For one-shot GW use the KS representation.
-   Sr%hhartree=hdft-KS_me%vxcval
+   Sr%hhartree = hdft - KS_me%vxcval
    ! Additional goodies for PAW
    !  * DFT +U Hamiltonian
    !  * LEXX.
    !  * Core contribution estimated using Fock exchange.
    if (Dtset%usepaw==1) then
-     if (Sigp%use_sigxcore==1) Sr%hhartree=hdft - (KS_me%vxc - KS_me%sxcore)
+     if (Sigp%use_sigxcore==1) Sr%hhartree = hdft - (KS_me%vxc - KS_me%sxcore)
      if (Dtset%usepawu/=0) Sr%hhartree=Sr%hhartree-KS_me%vu
      if (Dtset%useexexch/=0) then
        ABI_ERROR("useexexch > 0 not implemented")
@@ -1447,9 +1447,9 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      QP_mflags%has_kinetic  =1
      QP_mflags%has_hbare    =1
    end if
-   !  QP_mflags%has_vxc     =1
-   !  QP_mflags%has_vxcval  =1
-   !  if (Sigp%gwcalctyp >100) QP_mflags%has_vxcval_hybrid=1
+   !QP_mflags%has_vxc     =1
+   !QP_mflags%has_vxcval  =1
+   !if (Sigp%gwcalctyp >100) QP_mflags%has_vxcval_hybrid=1
    if (mod10==5 .and. &
        (Dtset%ixc_sigma==-402 .or. Dtset%ixc_sigma==-406 .or. Dtset%ixc_sigma==-427 .or. Dtset%ixc_sigma==-428 .or. &
        Dtset%ixc_sigma==-456 .or. Dtset%ixc_sigma==41 .or. Dtset%ixc_sigma==42)) then
