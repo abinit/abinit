@@ -612,7 +612,7 @@ subroutine mkunitpawspherepot(cplex,gsqcut,izero,mpi_enreg,natom,nfft,ngfft,&
          gqred(1) = gq(1,i1); gqred(2) = gq(2,i2); gqred(3) = gq(3,i3)
 
          if(gs<=cutoff)then
-    
+
 
            ! Identify min/max indexes (to cancel unbalanced contributions later)
            ! Count (q+g)-vectors with similar norm
@@ -671,7 +671,7 @@ subroutine mkunitpawspherepot(cplex,gsqcut,izero,mpi_enreg,natom,nfft,ngfft,&
    end if
  end if
 
- ! Fourier Transform 
+ ! Fourier Transform
  call fourdp(cplex,work1,vunitpawspherepot,1,mpi_enreg,nfft,1,ngfft,0)
 
  ABI_FREE(work1)
@@ -2454,15 +2454,9 @@ subroutine irrzg(irrzon,nspden,nsppol,nsym,n1,n2,n3,phnons,symafm,symrel,tnons)
      end do
    end do
 
-   if (allocated(symafm_used))  then
-     ABI_FREE(symafm_used)
-   end if
-   if (allocated(symrel_used))  then
-     ABI_FREE(symrel_used)
-   end if
-   if (allocated(tnons_used))  then
-     ABI_FREE(tnons_used)
-   end if
+   ABI_SFREE(symafm_used)
+   ABI_SFREE(symrel_used)
+   ABI_SFREE(tnons_used)
 
  end do ! imagn
 

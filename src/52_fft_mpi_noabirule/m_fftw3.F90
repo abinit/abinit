@@ -1825,9 +1825,9 @@ subroutine fftw3_r2c_op(nx,ny,nz,ldx,ldy,ldz,ndat,ff,gg,fftw_flags)
  call fftw3_destroy_plan(my_plan)
 
  call ZDSCAL(nhp*ndat, one/(nx*ny*nz), gg_hp, 1)  ! FFTW returns not normalized FTs
+
  ! Reconstruct full FFT: Hermitian redundancy: out[i] is the conjugate of out[n-i]
  padx = (nx/2+1)
-
  ABI_MALLOC(i1inver,(padx))
  ABI_MALLOC(i2inver,(ny))
  ABI_MALLOC(i3inver,(nz))
