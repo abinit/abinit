@@ -399,6 +399,8 @@ module m_gwr
    integer :: g_ngfft(18) = -1, g_mgfft = -1, g_nfft = -1
    ! FFT mesh for the Green's function.
 
+   integer :: mg0(3) = [2, 2, 2]
+
    !integer :: chi_ngfft(18) = -1, chi_mgfft = -1, chi_nfft = -1
    !integer :: sig_ngfft(18) = -1, sig_mgfft = -1, sig_nfft = -1
 
@@ -2523,10 +2525,9 @@ subroutine gwr_get_myq_wc_gpr(gwr, itau, spin, desc_myqbz, wc_gpr)
 !Local variables-------------------------------
 !scalars
  integer :: my_iqf, iq_bz, ig2, npwsp, col_bsize, idat, ndat
- real(dp) :: cpu, wall, gflops
+ real(dp) :: cpu, wall, gflops, qq_bz(3)
  logical :: q_is_gamma
  type(matrix_scalapack) :: rgp, wc_qbz
- real(dp) :: qq_bz(3)
  complex(dp),allocatable :: ceiqr(:)
 
 ! *************************************************************************
@@ -2614,7 +2615,7 @@ subroutine gwr_get_wc_rpr_qbz(gwr, qq_bz, itau, spin, wc_rpr)
 
 !Local variables-------------------------------
 !scalars
- integer :: my_iqf, iq_bz, ig2, npwsp, col_bsize, ir1, idat, ndat
+ integer :: my_iqf, iq_bz, ig2, npwsp, col_bsize, ir1, idat, ndat, g0_q(3)
  !logical :: q_is_gamma
  type(desc_t) :: desc_q
  type(matrix_scalapack) :: wc_ggp, rgp, gpr
@@ -2626,21 +2627,18 @@ subroutine gwr_get_wc_rpr_qbz(gwr, qq_bz, itau, spin, wc_rpr)
 
  ! Identify q + g0 = k - kp with q in gwr%qbz.
  ! NB: Non-zero g0, requires the application of the phase.
- !call findqg0(iq_bz, g0, kmkp, gwr%nqbz, gwr%qbz, mG0)
-
- !call gwr%rotate_wc(iq_bz, itau, spin, desc_q, wct_ggp)
-
- ABI_MALLOC(ceiqr, (gwr%g_nfft * gwr%nspinor))
+ !call findqg0(iq_bz, g0_q, kmkp, gwr%nqbz, gwr%qbz, gwr%mg0)
 
  !iq_bz = gwr%my_qbz_inds(my_iqf)
  !qq_bz = gwr%qbz(:, iq_bz)
-
  !q_is_gamma = normv(qq_bz, gwr%cryst%gmet, "G") < GW_TOLQ0
- !if (.not. q_is_gamma) call calc_ceikr(qq_bz, gwr%g_ngfft, gwr%g_nfft, gwr%nspinor, ceiqr)
+ !if (.not. q_is_gamma) then
+ !ABI_MALLOC(ceiqr, (gwr%g_nfft * gwr%nspinor))
+ !call calc_ceikr(qq_bz, gwr%g_ngfft, gwr%g_nfft, gwr%nspinor, ceiqr)
+ !end if
 
- !! Get W_q in the BZ.
- !!call gwr%rotate_wc(iq_bz, itau, spin, desc_myqbz(my_iqf), wc_ggp)
- !associate (desc_q => desc_myqbz(my_iqf))
+ ! Get W_q in the BZ.
+ call gwr%rotate_wc(iq_bz, itau, spin, desc_q, wc_ggp)
 
  ! Allocate rgp PBLAS matrix to store Wc(r, g')
  npwsp = desc_q%npw * gwr%nspinor
@@ -2665,7 +2663,7 @@ subroutine gwr_get_wc_rpr_qbz(gwr, qq_bz, itau, spin, wc_rpr)
    ! Multiply by e^{iq.r}
    !if (.not. q_is_gamma) then
    !  do idat=0,ndat-1
-   !    rgp%buffer_cplx(:, ig2+idat) = ceiqr(:) * rgp%buffer_cplx(:, ig2+idat)
+   !    !rgp%buffer_cplx(:, ig2+idat) = ceiqr(:) * rgp%buffer_cplx(:, ig2+idat)
    !  end do
    !end if
  end do ! ig2
@@ -2688,8 +2686,8 @@ subroutine gwr_get_wc_rpr_qbz(gwr, qq_bz, itau, spin, wc_rpr)
                gpr%buffer_cplx(:, ir1), &     ! in
                wc_rpr%buffer_cplx(:, ir1))    ! out
  end do
- call gpr%free()
 
+ call gpr%free()
  call desc_q%free()
  call wc_ggp%free()
 
@@ -2727,8 +2725,8 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
 !arrays
  real(dp), pointer :: weights_ptr(:,:)
  !real(dp) :: wgt_globmy(gwr%ntau, gwr%my_ntau)
- complex(dp) :: wgt_globmy(gwr%ntau, gwr%my_ntau)  ! Use complex instead of real to be able to use ZGEMM.
  !complex(dp):: cwork_myit(gwr%my_ntau), glob_cwork(gwr%ntau)
+ complex(dp) :: wgt_globmy(gwr%ntau, gwr%my_ntau)  ! Use complex instead of real to be able to use ZGEMM.
  complex(dp),allocatable :: cwork_myit(:,:,:), glob_cwork(:,:,:)
  type(matrix_scalapack), pointer :: mats(:)
 
@@ -2794,8 +2792,8 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
      it0 = gwr%my_itaus(1)
      loc1_size = mats(it0)%sizeb_local(1)
      loc2_size = mats(it0)%sizeb_local(2)
-     batch_size = loc2_size
-     !batch_size = 1
+     ! TODO: How to determine batch_size?
+     !batch_size = loc2_size
      batch_size = 5
      !batch_size = 1
 
@@ -2815,7 +2813,7 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
          end do
        end do
 
-       ! Compute contribution to itau matrix (TODO: ZGEMM)
+       ! Compute contribution to itau matrix
        !!$OMP PARALLEL DO
        do idat=1,ndat
          !do ig1=1,mats(it0)%sizeb_local(1)
@@ -3381,10 +3379,14 @@ subroutine gwr_build_tchi(gwr)
 
    ! Precompute phase factors e^{-ik.R} in the super cell.
    ABI_MALLOC(sc_ceimkr, (sc_nfft * gwr%nspinor, gwr%my_nkbz))
+   !ABI_MALLOC(uc_ceimkr, (gwr%g_nfft * gwr%nspinor, gwr%my_nkbz))
+
    do my_ikf=1,gwr%my_nkbz
      ik_bz = gwr%my_kbz_inds(my_ikf)
      call calc_sc_ceikr(-gwr%kbz(:,ik_bz), gwr%ngkpt, gwr%g_ngfft, gwr%g_nfft, gwr%nspinor, sc_ceimkr(:,my_ikf))
+     !call calc_ceikr(-gwr%kbz(:,ik_bz), gwr%g_ngfft, gwr%g_nfft, gwr%nspinor, uc_ceimkr(:,my_ikf))
    end do
+   !ABI_FREE(uc_ceimkr)
 
    ! Allocate PBLAS arrays for tchi_q(g',r) for all q in the IBZ treated by this MPI rank.
    do my_iqi=1,gwr%my_nqibz
@@ -3460,13 +3462,15 @@ else
                          gwr%g_mgfft, gwr%g_ngfft, desc_k%istwfk, desc_k%gvec, desc_k%gbound, &
                          gt_gpr(ipm, my_ikf)%buffer_cplx(:, my_ir), &  ! in
                          gt_ucbox(:,ipm))                              ! out
-             !gt_ucbox(:,ipm) = gt_ucbox(:,ipm) * gwr%g_nfft
+
+             ! Scketching the algo.
+             !gt_ucbox(:,ipm) = gt_ucbox(:,ipm) * uc_ceimkr(:,my_ikf)
+             !gt_scbox(:,ipm) = matmul(gt_ucbox(:,:,ipm), eiqL)
 
              ! This becomes the bottleneck but perhaps one can take advantage of localization.
              ! Moreover the FFTs are distributed inside kpt_comm
-             ! Also, one can save all the FFTs in a matrix G(my_nkbz, nfft * ndat)
-             ! and then use zgemm to compute \sum_k M(R',k) G(k, nfft * ndat)
-             ! with precomputed M(R',k) = e^{-ik R'}
+             ! Also, one can save all the FFTs in a matrix G(mnfft * ndat, my_nkbz) multiply by the e^{-ikr} phase
+             ! and then use zgemm to compute Out(r,L) = [e^{-ikr}G_k(r)] e^{-ikL} with precomputed e^{-iLk} phases.
              call ur_to_scpsi(gwr%ngkpt, gwr%g_ngfft, gwr%g_nfft, gwr%nspinor, ndat, &
                               gt_ucbox(:,ipm), cone, sc_ceimkr(:, my_ikf), gt_scbox(:,ipm))
            end do ! ipm
