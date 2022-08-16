@@ -288,14 +288,7 @@ module m_slk
  end interface slk_array_free
 
  public :: slk_array_set                       ! Elemental routine to set the value of the buffer to a costant value `cvalue`.
-
  public :: slk_array_locmem_mb                 ! Compute memory allocated for an array of matrix_scalapack elements
- interface slk_array_locmem_mb
-   !module procedure slk_array1_locmem_mb
-   !module procedure slk_array2_locmem_mb
-   module procedure slk_array3_locmem_mb
-   module procedure slk_array4_locmem_mb
- end interface slk_array_locmem_mb
 
 
 CONTAINS  !==============================================================================
@@ -609,7 +602,7 @@ pure real(dp) function locmem_mb(mat)
 ! *********************************************************************
 
  locmem_mb = zero
- if (allocated(mat%buffer_real)) locmem_mb = product(int(shape(mat%buffer_real))) * dp ! * storage_size(arr, kind=8)
+ if (allocated(mat%buffer_real)) locmem_mb = product(int(shape(mat%buffer_real))) * dp
  if (allocated(mat%buffer_cplx)) locmem_mb = product(int(shape(mat%buffer_cplx))) * two * dp
  locmem_mb = locmem_mb * b2Mb
 
@@ -958,12 +951,13 @@ end subroutine slk_array_set
 
 !----------------------------------------------------------------------
 
-!!****f* m_slk/slk_array3_locmem_mb
+!!****f* m_slk/slk_array_locmem_mb
 !! NAME
-!!  slk_array3_locmem_mb
+!!  slk_array_locmem_mb
 !!
 !! FUNCTION
-!!  Compute memory allocated for an array of matrix_scalapack elements
+!!  Elemental function ot tompute memory allocated for an array of matrix_scalapack elements
+!!  Usage: mem_mb = sum(mat_array)
 !!
 !! PARENTS
 !!
@@ -971,49 +965,10 @@ end subroutine slk_array_set
 !!
 !! SOURCE
 
-real(dp) function slk_array3_locmem_mb(slk_arr3) result(mem_mb)
-  class(matrix_scalapack),intent(in) :: slk_arr3(:,:,:)
-  integer :: i1, i2, i3
-  mem_mb = zero
-  do i3=1,size(slk_arr3, dim=3)
-    do i2=1,size(slk_arr3, dim=2)
-      do i1=1,size(slk_arr3, dim=1)
-        mem_mb = mem_mb + slk_arr3(i1, i2, i3)%locmem_mb()
-      end do
-    end do
-  end do
-end function slk_array3_locmem_mb
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_slk/slk_array4_locmem_mb
-!! NAME
-!!  slk_array4_locmem_mb
-!!
-!! FUNCTION
-!!  Compute memory allocated for an array of matrix_scalapack elements
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-real(dp) function slk_array4_locmem_mb(slk_arr4) result(mem_mb)
-  class(matrix_scalapack),intent(in) :: slk_arr4(:,:,:,:)
-  integer :: i1, i2, i3, i4
-  mem_mb = zero
-  do i4=1,size(slk_arr4, dim=4)
-    do i3=1,size(slk_arr4, dim=3)
-      do i2=1,size(slk_arr4, dim=2)
-        do i1=1,size(slk_arr4, dim=1)
-          mem_mb = mem_mb + slk_arr4(i1, i2, i3, i4)%locmem_mb()
-        end do
-      end do
-    end do
-  end do
-end function slk_array4_locmem_mb
+elemental real(dp) function slk_array_locmem_mb(mat) result(mem_mb)
+  class(matrix_scalapack),intent(in) :: mat
+  mem_mb = mat%locmem_mb()
+end function slk_array_locmem_mb
 !!***
 
 !----------------------------------------------------------------------
