@@ -2726,8 +2726,10 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
  logical :: sum_spins_
 !arrays
  real(dp), pointer :: weights_ptr(:,:)
- real(dp) :: wgt_globmy(gwr%ntau, gwr%my_ntau)
- complex(dp):: cwork_myit(gwr%my_ntau), glob_cwork(gwr%ntau)
+ !real(dp) :: wgt_globmy(gwr%ntau, gwr%my_ntau)
+ complex(dp) :: wgt_globmy(gwr%ntau, gwr%my_ntau)  ! Use complex instead of real to be able to use ZGEMM.
+ !complex(dp):: cwork_myit(gwr%my_ntau), glob_cwork(gwr%ntau)
+ complex(dp),allocatable :: cwork_myit(:,:,:), glob_cwork(:,:,:)
  type(matrix_scalapack), pointer :: mats(:)
 
 ! *************************************************************************
@@ -2793,48 +2795,54 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
      loc1_size = mats(it0)%sizeb_local(1)
      loc2_size = mats(it0)%sizeb_local(2)
      batch_size = loc2_size
+     !batch_size = 1
+     batch_size = 5
+     !batch_size = 1
 
-     !ABI_MALLOC(cwork_myit, (gwr%my_ntau, loc1_size, batch_size))
-     !ABI_MALLOC(glob_cwork, (gwr%ntau, loc1_size, batch_size))
+     ABI_MALLOC(cwork_myit, (gwr%my_ntau, loc1_size, batch_size))
+     ABI_MALLOC(glob_cwork, (gwr%ntau, loc1_size, batch_size))
 
-     do ig2=1,mats(it0)%sizeb_local(2) !, batch_size
+     do ig2=1,mats(it0)%sizeb_local(2), batch_size
        ndat = merge(batch_size, loc2_size-ig2+1, ig2+batch_size-1 <= loc2_size)
-       do ig1=1,mats(it0)%sizeb_local(1)
 
-         ! Extract matrix elements as a function of tau
-         ! TODO: Here we can block over ig1 and call zgemv to reduce the number of MPI communications.
-         do my_it=1,gwr%my_ntau
-           itau = gwr%my_itaus(my_it)
-           !do idat=1,ndat
-           cwork_myit(my_it) = mats(itau)%buffer_cplx(ig1, ig2)
-           !cwork_myit(my_it, ig1, idat) = mats(itau)%buffer_cplx(ig1, ig2+idat-1)
-           !end do
+       ! Extract matrix elements as a function of tau.
+       do idat=1,ndat
+         do ig1=1,mats(it0)%sizeb_local(1)
+           do my_it=1,gwr%my_ntau
+             itau = gwr%my_itaus(my_it)
+             cwork_myit(my_it, ig1, idat) = mats(itau)%buffer_cplx(ig1, ig2+idat-1)
+           end do
          end do
+       end do
 
-         ! Compute contribution to itau matrix
-         !do idat=1,ndat
-         do itau=1,gwr%ntau
-           glob_cwork(itau) = dot_product(wgt_globmy(itau, :), cwork_myit)
-           !glob_cwork(itau, ig1, idat) = dot_product(wgt_globmy(itau, :), cwork_myit(:, ig1, idat))
-         end do
+       ! Compute contribution to itau matrix (TODO: ZGEMM)
+       !!$OMP PARALLEL DO
+       do idat=1,ndat
+         !do ig1=1,mats(it0)%sizeb_local(1)
+         ! do itau=1,gwr%ntau
+         !   glob_cwork(itau, ig1, idat) = dot_product(wgt_globmy(itau, :), cwork_myit(:, ig1, idat))
+         ! end do
          !end do
+         call ZGEMM("N", "N", gwr%ntau, loc1_size, gwr%my_ntau, cone, &
+                    wgt_globmy, gwr%ntau, cwork_myit(:,:,idat), gwr%my_ntau, czero, glob_cwork(:,:,idat), gwr%ntau)
+       end do
 
-         call xmpi_sum(glob_cwork, gwr%tau_comm%value, ierr)
+       call xmpi_sum(glob_cwork, gwr%tau_comm%value, ierr)
 
-         ! Update my local (g1,g2) entry to have it in imaginary-frequency space.
-         do my_it=1,gwr%my_ntau
-           itau = gwr%my_itaus(my_it)
-           mats(itau)%buffer_cplx(ig1, ig2) = glob_cwork(itau)
-           !do idat=1,ndat
-           !mats(itau)%buffer_cplx(ig1+idat-1, ig2) = glob_cwork(itau, ig1, idat)
-           !end do
+       ! Update my local (g1,g2) entry to have it in imaginary-frequency space.
+       do idat=1,ndat
+         do ig1=1,mats(it0)%sizeb_local(1)
+           do my_it=1,gwr%my_ntau
+             itau = gwr%my_itaus(my_it)
+             mats(itau)%buffer_cplx(ig1, ig2+idat-1) = glob_cwork(itau, ig1, idat)
+           end do
          end do
+       end do
 
-       end do ! ig1
      end do ! ig2
 
-     !ABI_FREE(cwork_myit)
-     !ABI_FREE(glob_cwork)
+     ABI_FREE(cwork_myit)
+     ABI_FREE(glob_cwork)
 
      end associate
    end do ! my_iqi
