@@ -74,10 +74,10 @@ module m_orbmag
                                                &(/3,3,3/))
 
   integer,parameter :: ibcc=1,ibcv=2,ibvv=3
-  integer,parameter :: imcc=4,imvvb=5,iomlr=6,iomanp=7
+  integer,parameter :: imcc=4,imvvb=5,iomlr=6,iomanp=7,iomlmb=8
   !integer,parameter :: iompw=6,iomdpdp=7,iomdpu=8,iomdudu=9,iomlr=10,iomlmb=11,iomanp=12
   !integer,parameter :: iomdlanp=13,iomdlp2=14,iomdlvhnzc=15,iomdlvh=16,iomdlq=17
-  integer,parameter :: nterms=7
+  integer,parameter :: nterms=8
   complex(dpc),parameter :: cbc = j_dpc/two_pi ! Berry curvature pre-factor
   complex(dpc),parameter :: com = -half*j_dpc  ! Orbital magnetism pre-factor
 
@@ -104,7 +104,7 @@ module m_orbmag
   !private :: apply_onsite_d0_k
   private :: apply_d2lr_term_k
   !private :: apply_dl_term_k
-  !private :: lamb_core
+  private :: lamb_core
   private :: make_pcg1
   private :: orbmag_ptpaw_output
   !private :: local_rhoij
@@ -592,6 +592,7 @@ subroutine orbmag_ptpaw(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_en
  ! so [rprimd]*grad_(k_red) x [rprimd]*grad_(k_red) = det[rprimd]*[rprimd]^{-1,T} grad_(k_red) x grad_(k_red)
  ! 
  do iterm = 1, nterms
+   if (iterm .EQ. iomlmb) cycle
    do nn = 1, nband_k
      do icmplx = 1, 2
        if((iterm.EQ.iomlr).OR.(iterm.EQ.iomanp)) then
@@ -607,6 +608,7 @@ subroutine orbmag_ptpaw(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_en
  ! Berry curvature terms are ignored
  ! Lamb term ignored
  do iterm = imcc, nterms
+   if (iterm .EQ. iomlmb) cycle
    orbmag_terms(:,:,:,iterm) = ucvol*orbmag_terms(:,:,:,iterm)
  end do
 
@@ -617,9 +619,9 @@ subroutine orbmag_ptpaw(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_en
    orbmag_trace = orbmag_trace + orbmag_terms(:,nn,:,:)
  end do
 
- ! get the Lamb term
-! call lamb_core(atindx,dtset,omlamb)
-! orbmag_trace(:,:,iomlmb) = omlamb
+! get the Lamb term
+ call lamb_core(atindx,dtset,omlamb)
+ orbmag_trace(:,:,iomlmb) = omlamb
 !
  call orbmag_ptpaw_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace)
 
@@ -1815,59 +1817,59 @@ end subroutine berry_cc
 !end subroutine apply_onsite_d0_k
 !!!***
 !
-!!!****f* ABINIT/lamb_core
-!!! NAME
-!!! lamb_core
-!!!
-!!! FUNCTION
-!!! add core electron contribution to the orbital magnetic moment
-!!!
-!!! COPYRIGHT
-!!! Copyright (C) 2003-2021 ABINIT  group
-!!! This file is distributed under the terms of the
-!!! GNU General Public License, see ~abinit/COPYING
-!!! or http://www.gnu.org/copyleft/gpl.txt .
-!!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
-!!!
-!!! INPUTS
-!!!
-!!! OUTPUT
-!!!
-!!! SIDE EFFECTS
-!!!
-!!! TODO
-!!!
-!!! NOTES
-!!!
-!!! SOURCE
-!
-!subroutine lamb_core(atindx,dtset,omlamb)
-!
-!  !Arguments ------------------------------------
-!  !scalars
-!  type(dataset_type),intent(in) :: dtset
-!
-!  !arrays
-!  integer,intent(in) :: atindx(dtset%natom)
-!  real(dp),intent(out) :: omlamb(2,3)
-!
-!  !Local variables -------------------------
-!  !scalars
-!  integer :: adir,iat,iatom,itypat
-!
-!!--------------------------------------------------------------------
-!
-!  omlamb = zero 
-!  do adir = 1, 3
-!    do iat=1,dtset%natom
-!      iatom = atindx(iat)
-!      itypat = dtset%typat(iat)
-!      omlamb(1,adir) = omlamb(1,adir) - dtset%lambsig(itypat)*dtset%nucdipmom(adir,iat)
-!    end do ! end loop over atoms
-!  end do ! end loop over adir
-! 
-!end subroutine lamb_core
-!!!***
+!!****f* ABINIT/lamb_core
+!! NAME
+!! lamb_core
+!!
+!! FUNCTION
+!! add core electron contribution to the orbital magnetic moment
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2021 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!!
+!! SOURCE
+
+subroutine lamb_core(atindx,dtset,omlamb)
+
+  !Arguments ------------------------------------
+  !scalars
+  type(dataset_type),intent(in) :: dtset
+
+  !arrays
+  integer,intent(in) :: atindx(dtset%natom)
+  real(dp),intent(out) :: omlamb(2,3)
+
+  !Local variables -------------------------
+  !scalars
+  integer :: adir,iat,iatom,itypat
+
+!--------------------------------------------------------------------
+
+  omlamb = zero 
+  do adir = 1, 3
+    do iat=1,dtset%natom
+      iatom = atindx(iat)
+      itypat = dtset%typat(iat)
+      omlamb(1,adir) = omlamb(1,adir) - dtset%lambsig(itypat)*dtset%nucdipmom(adir,iat)
+    end do ! end loop over atoms
+  end do ! end loop over adir
+ 
+end subroutine lamb_core
+!!***
 !
 !!!****f* ABINIT/dl_vh
 !!! NAME
@@ -2894,34 +2896,18 @@ subroutine orbmag_ptpaw_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace)
    call wrtout(ab_out,message,'COLL')
    write(message,'(a)')' Orbital magnetic moment, term-by-term breakdown : '
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)') '    Mag CC : ',(orbmag_trace(1,adir,imcc),adir=1,3)
+   write(message,'(a,3es16.8)') '     CC : ',(orbmag_trace(1,adir,imcc),adir=1,3)
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)') '   Mag VVb : ',(orbmag_trace(1,adir,imvvb),adir=1,3)
+   write(message,'(a,3es16.8)') '    VVb : ',(orbmag_trace(1,adir,imvvb),adir=1,3)
    call wrtout(ab_out,message,'COLL')
-   !write(message,'(a,3es16.8)') '     onsite <dp|D+Eq|dp> : ',(orbmag_trace(1,adir,iomdpdp),adir=1,3)
-   !call wrtout(ab_out,message,'COLL')
-   !write(message,'(a,3es16.8)') '      onsite <dp|D+Eq|u> : ',(orbmag_trace(1,adir,iomdpu),adir=1,3)
-   !call wrtout(ab_out,message,'COLL')
-   !write(message,'(a,3es16.8)') '     onsite <du|D+Eq|du> : ',(orbmag_trace(1,adir,iomdudu),adir=1,3)
-   !call wrtout(ab_out,message,'COLL')
-   !write(message,'(a,3es16.8)') '                   dl Eq : ',(orbmag_trace(1,adir,iomdlq),adir=1,3)
-   !call wrtout(ab_out,message,'COLL')
-   !write(message,'(a,3es16.8)') '                   dl vh : ',(orbmag_trace(1,adir,iomdlvh),adir=1,3)
-   !call wrtout(ab_out,message,'COLL')
-   !write(message,'(a,3es16.8)') '                dl vhnzc : ',(orbmag_trace(1,adir,iomdlvhnzc),adir=1,3)
-   !call wrtout(ab_out,message,'COLL')
-   !write(message,'(a,3es16.8)') '                 dl An.p : ',(orbmag_trace(1,adir,iomdlanp),adir=1,3)
-   !call wrtout(ab_out,message,'COLL')
-   !write(message,'(a,3es16.8)') '                dl p^2/2 : ',(orbmag_trace(1,adir,iomdlp2),adir=1,3)
-   !call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)') ' <u|p>r_b p^2/2 r_g<p|u> : ',(orbmag_trace(1,adir,iomlr),adir=1,3)
+   write(message,'(a,3es16.8)') '   VV L : ',(orbmag_trace(1,adir,iomlr),adir=1,3)
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)') ' <u|p>r_b A0.p r_g <p|u> : ',(orbmag_trace(1,adir,iomanp),adir=1,3)
+   write(message,'(a,3es16.8)') ' VV A.p : ',(orbmag_trace(1,adir,iomanp),adir=1,3)
    call wrtout(ab_out,message,'COLL')
-   !write(message,'(a,3es16.8)') '               Lamb core : ',(orbmag_trace(1,adir,iomlmb),adir=1,3)
-   !call wrtout(ab_out,message,'COLL')
-   !write(message,'(a)')ch10
-   !call wrtout(ab_out,message,'COLL')
+   write(message,'(a,3es16.8)') '   Lamb : ',(orbmag_trace(1,adir,iomlmb),adir=1,3)
+   call wrtout(ab_out,message,'COLL')
+   write(message,'(a)')ch10
+   call wrtout(ab_out,message,'COLL')
    write(message,'(a)')' Berry curvature, term-by-term breakdown : '
    call wrtout(ab_out,message,'COLL')
    write(message,'(a,3es16.8)') ' C-C : ',(orbmag_trace(1,adir,ibcc),adir=1,3)
@@ -2944,29 +2930,15 @@ subroutine orbmag_ptpaw_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace)
      call wrtout(ab_out,message,'COLL')
      write(message,'(a,3es16.8)') ' Orbital magnetic moment : ',(orbmag_bb(1,iband,adir),adir=1,3)
      call wrtout(ab_out,message,'COLL')
-     write(message,'(a,3es16.8)') '     Mag CC : ',(orbmag_terms(1,iband,adir,imcc),adir=1,3)
+     write(message,'(a,3es16.8)') '     CC : ',(orbmag_terms(1,iband,adir,imcc),adir=1,3)
      call wrtout(ab_out,message,'COLL')
-     write(message,'(a,3es16.8)') '    Mag VVb : ',(orbmag_terms(1,iband,adir,imvvb),adir=1,3)
+     write(message,'(a,3es16.8)') '    VVb : ',(orbmag_terms(1,iband,adir,imvvb),adir=1,3)
      call wrtout(ab_out,message,'COLL')
-     !write(message,'(a,3es16.8)') '    onsite <dp|D+Eq|dp>  : ',(orbmag_terms(1,iband,adir,iomdpdp),adir=1,3)
-     !call wrtout(ab_out,message,'COLL')
-     !write(message,'(a,3es16.8)') '      onsite <dp|D+Eq|u> : ',(orbmag_terms(1,iband,adir,iomdpu),adir=1,3)
-     !call wrtout(ab_out,message,'COLL')
-     !write(message,'(a,3es16.8)') '     onsite <du|D+Eq|du> : ',(orbmag_terms(1,iband,adir,iomdudu),adir=1,3)
-     !call wrtout(ab_out,message,'COLL')
-     !write(message,'(a,3es16.8)') '                   dl Eq : ',(orbmag_terms(1,iband,adir,iomdlq),adir=1,3)
-     !call wrtout(ab_out,message,'COLL')
-     !write(message,'(a,3es16.8)') '                   dl vh : ',(orbmag_terms(1,iband,adir,iomdlvh),adir=1,3)
-     !call wrtout(ab_out,message,'COLL')
-     !write(message,'(a,3es16.8)') '                dl vhnzc : ',(orbmag_terms(1,iband,adir,iomdlvhnzc),adir=1,3)
-     !call wrtout(ab_out,message,'COLL')
-     !write(message,'(a,3es16.8)') '                 dl An.p : ',(orbmag_terms(1,iband,adir,iomdlanp),adir=1,3)
-     !call wrtout(ab_out,message,'COLL')
-     !write(message,'(a,3es16.8)') '                dl p^2/2 : ',(orbmag_terms(1,iband,adir,iomdlp2),adir=1,3)
-     !call wrtout(ab_out,message,'COLL')
-     write(message,'(a,3es16.8)') ' <u|p>r_b p^2/2 r_g<p|u> : ',(orbmag_terms(1,iband,adir,iomlr),adir=1,3)
+     write(message,'(a,3es16.8)') '   VV L : ',(orbmag_terms(1,iband,adir,iomlr),adir=1,3)
      call wrtout(ab_out,message,'COLL')
-     write(message,'(a,3es16.8)') ' <u|p>r_b A0.p r_g <p|u> : ',(orbmag_terms(1,iband,adir,iomanp),adir=1,3)
+     write(message,'(a,3es16.8)') ' VV A.p : ',(orbmag_terms(1,iband,adir,iomanp),adir=1,3)
+     call wrtout(ab_out,message,'COLL')
+     write(message,'(a)')ch10
      call wrtout(ab_out,message,'COLL')
      write(message,'(a,3es16.8)') '         Berry curvature : ',(berry_bb(1,iband,adir),adir=1,3)
      call wrtout(ab_out,message,'COLL')
