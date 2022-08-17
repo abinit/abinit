@@ -74,10 +74,10 @@ module m_orbmag
                                                &(/3,3,3/))
 
   integer,parameter :: ibcc=1,ibcv=2,ibvv=3
-  integer,parameter :: imcc=4,imvvb=5,iomlr=6,iomanp=7,iomlmb=8
+  integer,parameter :: imcc=4,imvvb=5,iomlr=6,iomanp=7,iomlmb=8,imvva3=9
   !integer,parameter :: iompw=6,iomdpdp=7,iomdpu=8,iomdudu=9,iomlr=10,iomlmb=11,iomanp=12
   !integer,parameter :: iomdlanp=13,iomdlp2=14,iomdlvhnzc=15,iomdlvh=16,iomdlq=17
-  integer,parameter :: nterms=8
+  integer,parameter :: nterms=9
   complex(dpc),parameter :: cbc = j_dpc/two_pi ! Berry curvature pre-factor
   complex(dpc),parameter :: com = -half*j_dpc  ! Orbital magnetism pre-factor
 
@@ -89,6 +89,7 @@ module m_orbmag
   private :: berry_cc
   private :: mag_cc
   private :: mag_vvb
+  private :: mag_vva3
   private :: berry_vva
   private :: berry_vvb
   private :: berry_cv
@@ -471,6 +472,9 @@ subroutine orbmag_ptpaw(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_en
    
    call mag_vvb(atindx,cprj_k,ddir,dtset,eig_k,lmn2max,nband_k,om_k,pawtab)
    orbmag_terms(:,:,:,imvvb) = orbmag_terms(:,:,:,imvvb) + trnrm*om_k
+
+   call mag_vva3(atindx,cprj_k,eig_k,dtset%natom,nband_k,dtset%ntypat,om_k,paw_ij,pawtab,dtset%typat)
+   orbmag_terms(:,:,:,imvva3) = orbmag_terms(:,:,:,imvva3) + trnrm*om_k
    !--------------------------------------------------------------------------------
    ! additional onsite terms to both Berry and orbmag (no |phi> derivatives) 
    !--------------------------------------------------------------------------------
@@ -1675,6 +1679,120 @@ end subroutine berry_cc
 !
 !end subroutine apply_dl_term_k
 !!!***
+
+!!****f* ABINIT/mag_vva3
+!! NAME
+!! mag_vva3
+!!
+!! FUNCTION
+!! Compute orbital magnetization due to
+!! <u|dp> but no derivatives of |phi>
+!! Uses the DDK wavefunctions
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2020 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!! Direct questions and comments to J Zwanziger
+!!
+!! SOURCE
+
+subroutine mag_vva3(atindx,cprj_k,Enk,natom,nband_k,ntypat,om_k,paw_ij,pawtab,typat)
+
+ !Arguments ------------------------------------
+ !scalars
+ integer,intent(in) :: natom,nband_k,ntypat
+
+ !arrays
+ integer,intent(in) :: atindx(natom),typat(natom)
+ real(dp),intent(in) :: Enk(nband_k)
+ real(dp),intent(out) :: om_k(2,nband_k,3)
+ type(pawcprj_type),intent(inout) :: cprj_k(natom,nband_k)
+ type(paw_ij_type),intent(inout) :: paw_ij(natom)
+ type(pawtab_type),intent(in) :: pawtab(ntypat)
+
+ !Local variables -------------------------
+ !scalars
+ integer :: adir,bdir,gdir,iat,iatom,ilmn,itypat,jlmn,klmn,nn
+ real(dp) :: c2,eabg,qij
+ complex(dpc) :: dij,omme
+ logical :: cplex_dij
+
+ !arrays
+ complex(dpc) :: udp(2,2)
+
+ !-----------------------------------------------------------------------
+
+ cplex_dij = (paw_ij(1)%cplex_dij .EQ. 2)
+
+ ! in abinit, exp(i k.r) is used not exp(i 2\pi k.r) so the following
+ ! term arises to properly normalize the derivatives (there are two in the Chern number,
+ ! one for each wavefunction derivative) 
+ c2=1.0d0/(two_pi*two_pi)
+
+ om_k = zero
+ do nn = 1, nband_k
+   do iat=1,natom
+     iatom=atindx(iat)
+     itypat=typat(iat)
+     do klmn=1,pawtab(itypat)%lmn2_size
+       ilmn = pawtab(itypat)%indklmn(7,klmn)
+       jlmn = pawtab(itypat)%indklmn(8,klmn)
+
+       do adir = 1, 3
+
+         omme = czero
+         do bdir = 1, 3
+           do gdir = 1, 3
+             eabg = eijk(adir,bdir,gdir)
+             if ( abs(eabg) < half ) cycle
+
+             ! udp(m,n) means direction m, state n
+             udp(1,1) = cmplx(cprj_k(iatom,nn)%dcp(1,bdir,ilmn),cprj_k(iatom,nn)%dcp(2,bdir,ilmn),KIND=dpc)
+             udp(1,2) = cmplx(cprj_k(iatom,nn)%dcp(1,bdir,jlmn),cprj_k(iatom,nn)%dcp(2,bdir,jlmn),KIND=dpc)
+             udp(2,1) = cmplx(cprj_k(iatom,nn)%dcp(1,gdir,ilmn),cprj_k(iatom,nn)%dcp(2,gdir,ilmn),KIND=dpc)     
+             udp(2,2) = cmplx(cprj_k(iatom,nn)%dcp(1,gdir,jlmn),cprj_k(iatom,nn)%dcp(2,gdir,jlmn),KIND=dpc)     
+
+             qij = pawtab(itypat)%sij(klmn)
+
+             if (cplex_dij) then
+               dij = cmplx(paw_ij(iat)%dij(2*klmn-1,1),paw_ij(iat)%dij(2*klmn,1),KIND=dpc)
+             else
+               dij = cmplx(paw_ij(iat)%dij(klmn,1),zero,KIND=dpc)
+             end if
+
+             omme = omme + com*c2*eabg*(dij+Enk(nn)*qij)*conjg(udp(1,1))*udp(2,2)
+
+             if (ilmn /= jlmn) then
+               omme = omme + com*c2*eabg*conjg(dij+Enk(nn)*qij)*conjg(udp(1,2))*udp(2,1)
+             end if
+           end do ! gdir
+         end do ! bdir
+
+         om_k(1,nn,adir) = om_k(1,nn,adir) + REAL(omme)
+         om_k(2,nn,adir) = om_k(2,nn,adir) + AIMAG(omme)
+
+       end do ! end loop over adir
+
+     end do ! end loop over klmn
+   end do ! end loop over atoms
+   
+ end do ! end loop over nn
+
+end subroutine mag_vva3
+!!***
 !
 !!!****f* ABINIT/apply_onsite_d0_k
 !!! NAME
@@ -2898,6 +3016,8 @@ subroutine orbmag_ptpaw_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace)
    call wrtout(ab_out,message,'COLL')
    write(message,'(a,3es16.8)') '     CC : ',(orbmag_trace(1,adir,imcc),adir=1,3)
    call wrtout(ab_out,message,'COLL')
+   write(message,'(a,3es16.8)') '   VVa3 : ',(orbmag_trace(1,adir,imvva3),adir=1,3)
+   call wrtout(ab_out,message,'COLL')
    write(message,'(a,3es16.8)') '    VVb : ',(orbmag_trace(1,adir,imvvb),adir=1,3)
    call wrtout(ab_out,message,'COLL')
    write(message,'(a,3es16.8)') '   VV L : ',(orbmag_trace(1,adir,iomlr),adir=1,3)
@@ -2931,6 +3051,8 @@ subroutine orbmag_ptpaw_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace)
      write(message,'(a,3es16.8)') ' Orbital magnetic moment : ',(orbmag_bb(1,iband,adir),adir=1,3)
      call wrtout(ab_out,message,'COLL')
      write(message,'(a,3es16.8)') '     CC : ',(orbmag_terms(1,iband,adir,imcc),adir=1,3)
+     call wrtout(ab_out,message,'COLL')
+     write(message,'(a,3es16.8)') '   VVa3 : ',(orbmag_terms(1,iband,adir,imvva3),adir=1,3)
      call wrtout(ab_out,message,'COLL')
      write(message,'(a,3es16.8)') '    VVb : ',(orbmag_terms(1,iband,adir,imvvb),adir=1,3)
      call wrtout(ab_out,message,'COLL')
