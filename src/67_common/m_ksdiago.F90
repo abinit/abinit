@@ -25,17 +25,22 @@ module m_ksdiago
  use m_abicore
  use m_errors
  use m_xmpi
+ use m_xomp
  use m_hamiltonian
  use m_distribfft
 
  use defs_datatypes,      only : pseudopotential_type
  use defs_abitypes,       only : MPI_type
- use m_fstrings,          only : toupper
+ use m_dtset,             only : dataset_type
+ use m_fstrings,          only : toupper, ktoa, itoa, sjoin
+ use m_time,              only : cwtime, cwtime_report
  use m_geometry,          only : metric
  use m_hide_lapack,       only : xhegv_cplex, xheev_cplex, xheevx_cplex, xhegvx_cplex
+ use m_slk,               only : matrix_scalapack, processor_scalapack, &
+                                 compute_eigen_problem, compute_generalized_eigen_problem
  use m_kg,                only : mkkin, mkkpg
  use m_crystal,           only : crystal_t
- use m_fftcore,           only : kpgsph
+ use m_fftcore,           only : kpgsph, get_kg
  use m_fft,               only : fftpac
  use m_cgtools,           only : set_istwfk
  use m_electronpositron,  only : electronpositron_type
@@ -46,13 +51,40 @@ module m_ksdiago
  use m_pawfgr,            only : pawfgr_type
  use m_initylmg,          only : initylmg
  use m_mkffnl,            only : mkffnl
- use m_getghc,            only : getghc
+ use m_getghc,            only : getghc, multithreaded_getghc
  use m_cgprj,             only : getcprj
 
  implicit none
 
  private
 !!***
+
+
+!!****t* m_ksdiago/ugb_t
+!! NAME
+!!  ugb_t
+!!
+!! FUNCTION
+!!
+!! SOURCE
+
+ type, public :: ugb_t
+   integer :: istwf_k = -1
+   integer :: nband_k = - 1
+   integer :: npw_k = -1
+   integer :: nspinor = -1
+   type(processor_scalapack) :: processor
+   type(matrix_scalapack) :: mat
+   integer, allocatable :: kg_k(:,:)
+   real(dp),allocatable :: eig_k(:)
+   !type(pawcprj_type),allocatable :: cprj_k(:,:)
+   ! (natom, nspinor*onband_diago))
+
+ !contains
+ !  procedure :: free =>  ugb_free
+ end type ugb_t
+!!***
+
 
 !!****t* m_ksdiago/ddiago_ctl_type
 !! NAME
@@ -154,7 +186,7 @@ module m_ksdiago
 
  public :: ksdiago
  public :: init_ddiago_ctl
- !public :: ksdiago_slk
+ public :: ksdiago_slk
 !!***
 
 contains
@@ -263,10 +295,10 @@ subroutine ksdiago(Diago_ctl, nband_k, nfftc, mgfftc, ngfftc, natom, &
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: mkmem_ = 1, tim_getghc = 4, paral_kgb0 = 0, master = 0, ndat1 = 1
+ integer,parameter :: mkmem_ = 1, tim_getghc = 4, paral_kgb0 = 0, master = 0, ndat1 = 1, ncomp1 = 1
  integer :: cprj_choice,cpopt,dimffnl,ib,ider,idir,isppol,npw_k
  integer :: ikg,istwf_k,exchn2n3d,prtvol
- integer :: jj,n1,n2,n3,n4,n5,n6,negv,nkpg,nprocs,npw_k_test,my_rank,optder
+ integer :: jj,n1,n2,n3,n4,n5,n6,negv,nkpg,nproc,npw_k_test,my_rank,optder
  integer :: type_calc,sij_opt,igsp2,cplex_ghg,iband,iorder_cprj,ibs1,ibs2
  real(dp),parameter :: lambda0 = zero
  real(dp) :: ucvol,ecutsm,effmass_free,size_mat,ecut
@@ -281,7 +313,7 @@ subroutine ksdiago(Diago_ctl, nband_k, nfftc, mgfftc, ngfftc, natom, &
  integer :: nloalg(3)
  integer,allocatable :: kg_k(:,:)
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),kptns_(3,1),kpoint(3),ylmgr_dum(1,1,1)
- real(dp),allocatable :: ph3d(:,:,:),pwave(:,:),ffnl(:,:,:,:),kinpw(:),kpg_k(:,:)
+ real(dp),allocatable :: ph3d(:,:,:),bras(:,:),ffnl(:,:,:,:),kinpw(:),kpg_k(:,:)
  real(dp),allocatable :: vlocal(:,:,:,:),ylm_k(:,:),dum_ylm_gr_k(:,:,:)
  real(dp),allocatable :: ghc(:,:),gvnlxc(:,:),gsc(:,:),ghg_mat(:,:,:),gsg_mat(:,:,:)
  real(dp),pointer :: cwavef(:,:)
@@ -289,9 +321,9 @@ subroutine ksdiago(Diago_ctl, nband_k, nfftc, mgfftc, ngfftc, natom, &
 
 ! *********************************************************************
 
- nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+ nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
 
- if (nprocs > 1) then
+ if (nproc > 1) then
    ABI_WARNING("ksdiago not supported in parallel. Running in sequential.")
  end if
 
@@ -352,9 +384,9 @@ subroutine ksdiago(Diago_ctl, nband_k, nfftc, mgfftc, ngfftc, natom, &
  onband_diago = nband_k
  if (nband_k==-1 .or. nband_k >= npw_k*nspinor) then
    onband_diago = npw_k*nspinor
-   write(msg,'(4a)')ch10,&
-    ' Since the number of bands to be computed was (-1) or',ch10,&
-    ' too large, it has been set to the max value npw_k*nspinor. '
+   write(msg,'(4a,i0)')ch10,&
+    ' Since the number of bands to be computed was -1 or',ch10,&
+    ' too large, it has been set to the maximum value npw_k*nspinor: ',npw_k*nspinor
    call wrtout(std_out, msg)
  end if
 
@@ -383,7 +415,7 @@ subroutine ksdiago(Diago_ctl, nband_k, nfftc, mgfftc, ngfftc, natom, &
  ! Set up local potential vlocal on the coarse FFT mesh from vtrial taking into account the spin.
 
  call gspot_transgrid_and_pack(isppol, psps%usepaw, paral_kgb0, nfftc, ngfftc, nfftf, &
-                               nspden, gs_hamk%nvloc, 1, pawfgr, mpi_enreg_seq, vtrial, vlocal)
+                               nspden, gs_hamk%nvloc, ncomp1, pawfgr, mpi_enreg_seq, vtrial, vlocal)
  call gs_hamk%load_spin(isppol, vlocal=vlocal, with_nonlocal=.true.)
 
  ! This for meta-gga.
@@ -445,8 +477,8 @@ subroutine ksdiago(Diago_ctl, nband_k, nfftc, mgfftc, ngfftc, natom, &
                      kg_k=kg_k, kpg_k=kpg_k, ffnl_k=ffnl, ph3d_k=ph3d, compute_ph3d=.true., compute_gbound=.true.)
 
  ! Prepare call to getghc.
- type_calc=0                              ! For applying the whole Hamiltonian
- sij_opt=0; if (psps%usepaw==1) sij_opt=1 ! For PAW, <k+G|S|k+G"> is also needed.
+ type_calc = 0                                ! For applying the whole Hamiltonian
+ sij_opt = 0; if (psps%usepaw==1) sij_opt = 1 ! For PAW, <k+G|S|k+G"> is also needed.
 
  cpopt = -1    ! If cpopt=-1, <p_lmn|in> (and derivatives) are computed here (and not saved)
  if (psps%usepaw==1.and..FALSE.) then ! TODO Calculate <p_lmn|k+G>.
@@ -466,20 +498,21 @@ subroutine ksdiago(Diago_ctl, nband_k, nfftc, mgfftc, ngfftc, natom, &
  ABI_STAT_MALLOC(gsg_mat, (cplex_ghg, npw_k*nspinor, npw_k*nspinor*psps%usepaw), ierr)
  ABI_CHECK(ierr == 0, msg)
 
- ! Ccwaveprj is ordered, see nonlop_ylm.
+ ! cwaveprj is ordered, see nonlop_ylm.
  ABI_MALLOC(cwaveprj, (natom, nspinor*(1+cpopt)*gs_hamk%usepaw))
  if (cpopt == 0) call pawcprj_alloc(cwaveprj, 0, gs_hamk%dimcprj)
 
  ! Initialize plane-wave array with zeros
- ABI_CALLOC(pwave, (2, npw_k*nspinor))
+ ABI_CALLOC(bras, (2, npw_k*nspinor))
  if (prtvol > 0) call wrtout(std_out, ' Calculating <G|H|G''> elements')
 
  ! Loop over the |beta,G''> component.
  do igsp2=1,npw_k*nspinor
-   ! Get <:|H|beta,G''> and <:|S_{PAW}|beta,G''>
-   pwave(1,igsp2) = one
 
-   call getghc(cpopt, pwave, cwaveprj, ghc, gsc, gs_hamk, gvnlxc, lambda0, MPI_enreg_seq, ndat1, &
+   bras(1, igsp2) = one
+
+   ! Get <:|H|beta,G''> and <:|S_{PAW}|beta,G''>
+   call getghc(cpopt, bras, cwaveprj, ghc, gsc, gs_hamk, gvnlxc, lambda0, MPI_enreg_seq, ndat1, &
                prtvol, sij_opt, tim_getghc, type_calc)
 
    ! Fill the upper triangle.
@@ -487,11 +520,11 @@ subroutine ksdiago(Diago_ctl, nband_k, nfftc, mgfftc, ngfftc, natom, &
    if (psps%usepaw == 1) gsg_mat(:,1:igsp2,igsp2) = gsc(:,1:igsp2)
 
    ! Reset the |G,beta> component that has been treated.
-   pwave(1,igsp2) = zero
+   bras(1, igsp2) = zero
  end do
 
  ! Free workspace memory allocated so far.
- ABI_FREE(pwave)
+ ABI_FREE(bras)
  ABI_FREE(kinpw)
  ABI_FREE(vlocal)
  ABI_FREE(ghc)
@@ -511,12 +544,12 @@ subroutine ksdiago(Diago_ctl, nband_k, nfftc, mgfftc, ngfftc, natom, &
 
  if (do_full_diago) then
    ! Full diagonalization
-   write(msg,'(2a,3es16.8,3x,3a,i5)')ch10,&
-     ' Begin complete diagonalization for kpt= ',kpoint(:),stag(isppol),ch10,&
-     ' - Size of mat.=',npw_k*nspinor
-   if (prtvol > 0) call wrtout(std_out, msg)
+   write(msg,'(6a,i0)')ch10,&
+     ' Begin full diagonalization for kpt: ',trim(ktoa(kpoint)), stag(isppol), ch10,&
+     ' Matrix size: ', npw_k*nspinor
+   call wrtout(std_out, msg)
 
-   if (psps%usepaw==0) then
+   if (psps%usepaw == 0) then
      call xheev_cplex(jobz, "Upper", cplex_ghg, npw_k*nspinor, ghg_mat, eig_ene, msg, ierr)
    else
      call xhegv_cplex(1, jobz, "Upper", cplex_ghg, npw_k*nspinor, ghg_mat, gsg_mat, eig_ene, msg, ierr)
@@ -528,12 +561,12 @@ subroutine ksdiago(Diago_ctl, nband_k, nfftc, mgfftc, ngfftc, natom, &
    ! Partial diagonalization
    range = Diago_ctl%range !range="Irange"
 
-   write(msg,'(2a,3es16.8,3a,i5,a,i5)')ch10,&
+   write(msg,'(2a,3es16.8,3a,i0,a,i0)')ch10,&
      ' Begin partial diagonalization for kpt= ',kpoint,stag(isppol),ch10,&
-     ' - Size of mat.=',npw_k*nspinor,' - # bnds=',onband_diago
-   if (prtvol>0) call wrtout(std_out, msg)
+     ' - Size of mat.=',npw_k*nspinor,' - # out_nband: ',onband_diago
+   call wrtout(std_out, msg)
 
-   if (psps%usepaw==0) then
+   if (psps%usepaw == 0) then
      call xheevx_cplex(jobz, range, "Upper", cplex_ghg, npw_k*nspinor, ghg_mat, zero, zero,&
        1, onband_diago, -tol8, negv, eig_ene, eig_vec, npw_k*nspinor, msg, ierr)
    else
@@ -549,7 +582,7 @@ subroutine ksdiago(Diago_ctl, nband_k, nfftc, mgfftc, ngfftc, natom, &
  if (prtvol > 0 .and. my_rank == master) then
    ! Write eigenvalues.
    frmt1='(8x,9(1x,f7.2))' ; frmt2='(8x,9(1x,f7.2))'
-   write(msg,'(a,3es16.8,3x,a)')' Eigenvalues in eV for kpt= ',kpoint,stag(isppol)
+   write(msg,'(2a,3x,a)')' Eigenvalues in eV for kpt: ', trim(ktoa(kpoint)), stag(isppol)
    call wrtout(std_out, msg)
 
    write(msg,frmt1)(eig_ene(ib)*Ha_eV,ib=1,MIN(9,onband_diago))
@@ -659,7 +692,7 @@ subroutine init_ddiago_ctl(Dctl, jobz, isppol, nspinor, ecut, kpoint, nloalg, gm
   Dctl%istwf_k = set_istwfk(kpoint)
  end if
 
- ABI_CHECK(Dctl%istwf_k==1,"istwf_k/=1 not coded")
+ ABI_CHECK(Dctl%istwf_k == 1, "istwf_k/=1 not coded")
 
  Dctl%jobz   = toupper(jobz(1:1))
  Dctl%range  = "A"
@@ -769,184 +802,143 @@ end subroutine init_ddiago_ctl
 !!
 !! FUNCTION
 !!  This routine performs the direct diagonalization of the Kohn-Sham Hamiltonian
-!!  for a given k-point and spin. The routine drives the following operations:
-!!
-!!    1) Re-computing <G|H|G_prim> matrix elements for all (G, G_prim).
-!!       starting from the knowledge of the local potential on the real-space FFT mesh.
-!!
-!!    2) Diagonalizing H in the plane-wave basis.
-!!
-!!  It is called in outkss.F90 during the generation of the KSS file
-!!  needed for a GW post-treatment. Since many-body calculations usually
-!!  require a large number of eigenstates eigen-functions, a direct
-!!  diagonalization of the Hamiltonian might reveal more stable than iterative
-!!  techniques that might be problematic when several high energy states are required.
-!!  The main drawback of the direct diagonalization is the bad scaling with the size
-!!  of the basis set (npw**3) and the large memory requirements.
+!!  for a given k-point and spin using Scalapack/ELPA
 !!
 !! INPUTS
 !!  kpoint(3)
 !!  prtvol=Integer Flags  defining verbosity level
-!!  ecut=cut-off energy for plane wave basis sphere (Ha)
 !!  mgfftc=maximum size of 1D FFTs (coarse mesh).
-!!  natom=number of atoms in cell.
 !!  nfftf=(effective) number of FFT grid points in the dense FFT mesh (for this processor)
 !!         (nfftf=nfft for norm-conserving potential runs)
-!!  nspinor=number of spinorial components of the wavefunctions
-!!  nsppol=1 for unpolarized, 2 for spin-polarized
-!!  nspden=number of density components
 !!  pawtab(psps%ntypat*psps%usepaw) <type(pawtab_type)>=paw tabulated starting data
 !!  pawfgr<pawfgr_type>=fine grid parameters and related data
 !!  paw_ij(natom) <type(paw_ij_type)>=paw arrays given on (i,j) channels
 !!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
-!!  rprimd(3,3)=dimensional primitive translations for real space (bohr)
 !!  vtrial(nfftf,nspden)=the trial potential
 !!  comm=MPI communicator.
-!!  [electronpositron] <electronpositron_type>=quantities for the electron-positron annihilation.
 !!  nfftc=Number of points in the coarse FFT mesh.
 !!  ngfftc(18)=Info about 3D FFT for the coarse mesh, see ~abinit/doc/variables/vargs.htm#ngfft
-!!  Diago_ctl<ddiago_ctl_type>=Datatype storing variables and options controlling the direct diagonalization.
+!!  [electronpositron] <electronpositron_type>=quantities for the electron-positron annihilation.
 !!
 !! OUTPUT
-!!  ierr=Status error.
 !!  onband_diago
-!!
-!! SIDE EFFECTS
-!!  eig_ene(:)=Pointer used for allocating and storing the eigenvalues (hartree)
-!!    input: pointer to NULL
-!!     output: eig_ene(onband_diago)=The calculatated eigenvalues in ascending order.
-!!
-!!  eig_vec(:,:,:)=Pointer used for allocating and holding the wave functions at this k-point and spin.
-!!    input: pointer to NULL
-!!    output: eig_vec(2,npw_k*nspinor,onband_diago)=The calculated eigenvectors.
-!!
-!!  cprj_k(natom,nspinor*onband_diago) PAW only===
-!!   input: pointer to NULL
-!!   output: Projected eigenstates <Proj_i|Cnk> from output eigenstates.
+!!  eig_ene(onband_diago)=The calculatated eigenvalues in ascending order.
+!!  cprj_k(natom,nspinor*onband_diago): Projected eigenstates <Proj_i|Cnk> from output eigenstates. PAW only
 !!
 !! SOURCE
 
-subroutine ksdiago_slk(Diago_ctl, nband_k, nfftc, mgfftc, ngfftc, &
-                       nfftf, nspinor, nspden, nsppol, pawtab, pawfgr, paw_ij,&
-                       cryst, psps, vtrial, onband_diago, eig_ene, eig_vec, cprj_k, comm, ierr,&
+subroutine ksdiago_slk(isppol, istwf_k, kpoint, ecut, nband_k, ngfftc, nfftf, &
+                       dtset, pawtab, pawfgr, paw_ij, cryst, psps, vtrial, &
+                       onband_diago, eig_ene, ugb, cprj_k, comm, &
                        electronpositron) ! Optional arguments
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: mgfftc,comm,nband_k,nfftf,nsppol,nspden,nspinor,nfftc
- integer,intent(out) :: ierr, onband_diago
+ integer,intent(in) :: isppol, istwf_k
+ real(dp),intent(in) :: kpoint(3), ecut
+ type(dataset_type),intent(in) :: dtset
+ integer,intent(in) :: comm,nband_k,nfftf
+ integer,intent(inout) :: onband_diago
  type(crystal_t),intent(in) :: cryst
  type(pseudopotential_type),intent(in) :: psps
  type(pawfgr_type),intent(in) :: pawfgr
- type(ddiago_ctl_type),intent(in) :: Diago_ctl
 !arrays
- integer,intent(in) :: ngfftc(18)
- real(dp),intent(inout) :: vtrial(nfftf,nspden)
- real(dp),allocatable,target,intent(inout) :: eig_ene(:),eig_vec(:,:,:)
- type(pawcprj_type),pointer :: cprj_k(:,:)
+ integer,intent(in) :: ngfftc(18) !, ngfftf(18)
+ real(dp),intent(inout) :: vtrial(nfftf,dtset%nspden)
+ real(dp),allocatable,intent(inout) :: eig_ene(:)
+ type(matrix_scalapack),intent(inout) :: ugb
+ type(pawcprj_type),allocatable,intent(inout) :: cprj_k(:,:)
  type(pawtab_type),intent(in) :: pawtab(psps%ntypat*psps%usepaw)
  type(paw_ij_type),intent(in) :: paw_ij(cryst%natom*psps%usepaw)
- type(electronpositron_type),optional,pointer :: Electronpositron
+ type(electronpositron_type),optional,pointer :: electronpositron
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: mkmem_ = 1, tim_getghc = 4, paral_kgb0 = 0, master = 0, ndat1 = 1
- integer :: cprj_choice,cpopt,dimffnl,ib,ider,idir,isppol,npw_k
- integer :: ikg,istwf_k,exchn2n3d,prtvol
- integer :: jj,n1,n2,n3,n4,n5,n6,negv,nkpg,nprocs,npw_k_test,my_rank,optder
- integer :: type_calc,sij_opt,igsp2,cplex_ghg,iband,iorder_cprj,ibs1,ibs2
+ integer,parameter :: mkmem_ = 1, tim_getghc = 4, paral_kgb0 = 0, master = 0, ncomp1 = 1
+ integer :: cprj_choice,cpopt,dimffnl,ib,ider,idir,npw_k,nfftc,mgfftc, igs, ige, omp_nt
+ integer :: jj,n1,n2,n3,n4,n5,n6,negv,nkpg,nproc,npw_k_test,my_rank,optder
+ integer :: type_calc,sij_opt,igsp2,ig, cplex_ghg,iband,iorder_cprj,ibs1,ibs2
+ integer :: npwsp, col_bsize, nsppol, nspinor, nspden, loc2_size, il_g2
+ integer :: idat, ndat, batch_size, mat_size !, ierr
  real(dp),parameter :: lambda0 = zero
- real(dp) :: ucvol,ecutsm,effmass_free,size_mat,ecut
+ real(dp) :: size_mat, cpu, wall, gflops !, mem_mb
  logical :: do_full_diago
- character(len=50) :: jobz,range
  character(len=80) :: frmt1,frmt2
  character(len=10) :: stag(2)
  character(len=500) :: msg
  type(MPI_type) :: MPI_enreg_seq
  type(gs_hamiltonian_type) :: gs_hamk
+ type(matrix_scalapack) :: ghg_mat, gsg_mat, ghg_4diag, gsg_4diag
+ type(processor_scalapack) :: slkproc, slkproc_4diag
 !arrays
- integer :: nloalg(3)
  integer,allocatable :: kg_k(:,:)
- real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),kptns_(3,1),kpoint(3),ylmgr_dum(1,1,1)
- real(dp),allocatable :: ph3d(:,:,:),pwave(:,:),ffnl(:,:,:,:),kinpw(:),kpg_k(:,:)
+ real(dp) :: kptns_(3,1), ylmgr_dum(1,1,1)
+ real(dp),allocatable :: ph3d(:,:,:),ffnl(:,:,:,:),kinpw(:),kpg_k(:,:)
  real(dp),allocatable :: vlocal(:,:,:,:),ylm_k(:,:),dum_ylm_gr_k(:,:,:)
- real(dp),allocatable :: ghc(:,:),gvnlxc(:,:),gsc(:,:),ghg_mat(:,:,:),gsg_mat(:,:,:)
+ real(dp),target,allocatable :: bras(:,:), ghc(:,:), gvnlxc(:,:), gsc(:,:) !,ghg_mat(:,:,:),gsg_mat(:,:,:)
  real(dp),pointer :: cwavef(:,:)
+ !real(dp), ABI_CONTIGUOUS pointer :: gsc_bk(:,:), cg_bk(:,:), ghc_bk(:,:), gvnlxc_bk(:,:)
  type(pawcprj_type),allocatable :: cwaveprj(:,:)
 
 ! *********************************************************************
 
- nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+ nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
 
- if (nprocs > 1) then
-   ABI_WARNING("ksdiago not supported in parallel. Running in sequential.")
+ !====================
+ !=== Check input ====
+ !====================
+ if (all(istwf_k /= [1, 2])) then
+   ABI_ERROR(sjoin("istwfk:", itoa(istwf_k), "not allowed:"))
  end if
 
- call initmpi_seq(MPI_enreg_seq) ! Fake MPI_type for sequential part.
+ if (istwf_k == 2) then
+   !ABI_WARNING("istwfk == 2 is still under development")
+   ABI_ERROR("istwfk == 2 is still under development")
+ end if
+
+ ! MPI_type for sequential part.
+ call initmpi_seq(MPI_enreg_seq)
  call init_distribfft_seq(MPI_enreg_seq%distribfft, 'c', ngfftc(2), ngfftc(3), 'all')
  if (pawfgr%usefinegrid /= 0) then
    call init_distribfft_seq(MPI_enreg_seq%distribfft, 'f', pawfgr%ngfft(2), pawfgr%ngfft(3), 'all')
  end if
 
- isppol  = Diago_ctl%isppol
- kpoint  = Diago_ctl%kpoint
- istwf_k = Diago_ctl%istwf_k
- !% nband_k = Diago_ctl%nband_k
- npw_k   = Diago_ctl%npw_k
- nloalg  = Diago_ctl%nloalg
- ecut    = Diago_ctl%ecut
- ecutsm  = Diago_ctl%ecutsm
- effmass_free = Diago_ctl%effmass_free
- prtvol  = Diago_ctl%prtvol
-
- call metric(gmet, gprimd, -1, rmet, cryst%rprimd, ucvol)
-
+ nspinor = dtset%nspinor
+ nsppol = dtset%nsppol
+ nspden = dtset%nspden
  if (nsppol == 1) stag= ['          ','          ']
  if (nsppol == 2) stag= ['SPIN UP:  ','SPIN DOWN:']
+
+ call get_kg(kpoint, istwf_k, ecut, cryst%gmet, npw_k, kg_k)
+ npwsp = npw_k * nspinor
 
  ! The coarse FFT mesh.
  n1 = ngfftc(1); n2 = ngfftc(2); n3 = ngfftc(3)
  n4 = ngfftc(4); n5 = ngfftc(5); n6 = ngfftc(6)
-
- !====================
- !=== Check input ====
- !====================
- ierr = 0
-
- ! istwfk must be 1 for each k-point
- if (istwf_k/=1) then
-   write(msg,'(7a)')&
-   ' istwfk /= 1 not allowed:',ch10,&
-   ' States output not programmed for time-reversal symmetry.',ch10,&
-   ' Action: change istwfk in input file (put it to 1 for all kpt).',ch10,&
-   ' Program does not stop but _KSS file will not be created...'
-   ABI_WARNING(msg)
-   ierr = ierr + 1
- end if
-
- if (ierr /= 0) RETURN ! Houston we have a problem!
+ nfftc = product(ngfftc(1:3))
+ mgfftc = maxval(ngfftc(1:3))
 
  ! Initialize the Hamiltonian datatype on the coarse FFT mesh.
  if (present(electronpositron)) then
    call init_hamiltonian(gs_hamk, psps, pawtab, nspinor, nsppol, nspden, cryst%natom, cryst%typat, cryst%xred, nfftc, &
-    mgfftc, ngfftc, cryst%rprimd, nloalg, paw_ij=paw_ij, usecprj=0, electronpositron=electronpositron)
+    mgfftc, ngfftc, cryst%rprimd, dtset%nloalg, paw_ij=paw_ij, usecprj=0, electronpositron=electronpositron)
  else
    call init_hamiltonian(gs_hamk, psps, pawtab, nspinor, nsppol, nspden, cryst%natom, cryst%typat, cryst%xred, nfftc, &
-    mgfftc, ngfftc, cryst%rprimd, nloalg, paw_ij=paw_ij, usecprj=0)
+    mgfftc, ngfftc, cryst%rprimd, dtset%nloalg, paw_ij=paw_ij, usecprj=0)
  end if
 
  ! Check on the number of stored bands.
- onband_diago = nband_k
- if (nband_k==-1 .or. nband_k >= npw_k*nspinor) then
-   onband_diago = npw_k*nspinor
-   write(msg,'(4a)')ch10,&
-    ' Since the number of bands to be computed was (-1) or',ch10,&
-    ' too large, it has been set to the max value npw_k*nspinor. '
-   call wrtout(std_out, msg)
- end if
+ !onband_diago = nband_k
+ !if (nband_k == -1 .or. nband_k >= npwsp) then
+ !  onband_diago = npwsp
+ !  write(msg,'(4a, i0)')ch10,&
+ !   ' Since the number of bands to be computed was -1 or',ch10,&
+ !   ' too large, it has been set to the maximum value npw_k*nspinor: ',npwsp
+ !  call wrtout(std_out, msg)
+ !end if
 
- !do_full_diago = (onband_diago==npw_k*nspinor)
- do_full_diago = Diago_ctl%do_full_diago
+ !do_full_diago = (onband_diago == npw_k*nspinor)
+ do_full_diago = .True.
 
  if (do_full_diago) then
    write(msg,'(6a)')ch10,&
@@ -959,7 +951,7 @@ subroutine ksdiago_slk(Diago_ctl, nband_k, nfftc, mgfftc, ngfftc, &
    ' is less than the number of G-vectors found,',ch10,&
    ' the program will perform partial diagonalization.'
  end if
- if (prtvol > 0) call wrtout(std_out, msg)
+ if (dtset%prtvol > 0) call wrtout(std_out, msg)
 
  ! Set up local potential vlocal with proper dimensioning, from vtrial.
  ! Select spin component of interest if nspden<=2 as nvloc==1, for nspden==4, nvloc==4
@@ -970,7 +962,7 @@ subroutine ksdiago_slk(Diago_ctl, nband_k, nfftc, mgfftc, ngfftc, &
  ! Set up local potential vlocal on the coarse FFT mesh from vtrial taking into account the spin.
 
  call gspot_transgrid_and_pack(isppol, psps%usepaw, paral_kgb0, nfftc, ngfftc, nfftf, &
-                               nspden, gs_hamk%nvloc, 1, pawfgr, mpi_enreg_seq, vtrial, vlocal)
+                               nspden, gs_hamk%nvloc, ncomp1, pawfgr, mpi_enreg_seq, vtrial, vlocal)
  call gs_hamk%load_spin(isppol, vlocal=vlocal, with_nonlocal=.true.)
 
  ! This for meta-gga.
@@ -980,19 +972,11 @@ subroutine ksdiago_slk(Diago_ctl, nband_k, nfftc, mgfftc, ngfftc, &
  !  call gs_hamk%load_spin(isppol, vxctaulocal=vxctaulocal)
  !end if
 
- ! Calculate G-vectors, for this k-point. Count also the number of planewaves as a check.
- exchn2n3d = 0; ikg = 0
- ABI_MALLOC(kg_k, (3, npw_k))
-
- call kpgsph(ecut, exchn2n3d, gmet, ikg, 0, istwf_k, kg_k, kpoint, 0, MPI_enreg_seq, 0, npw_k_test)
- ABI_CHECK(npw_k_test == npw_k, "npw_k_test/=npw_k")
- call kpgsph(ecut,exchn2n3d,gmet,ikg,0,istwf_k,kg_k,kpoint,mkmem_,MPI_enreg_seq,npw_k,npw_k_test)
-
  !========================
  !==== Kinetic energy ====
  !========================
  ABI_MALLOC(kinpw, (npw_k))
- call mkkin(ecut, ecutsm, effmass_free, gmet, kg_k, kinpw, kpoint, npw_k, 0, 0)
+ call mkkin(ecut, dtset%ecutsm, dtset%effmass_free, cryst%gmet, kg_k, kinpw, kpoint, npw_k, 0, 0)
 
  !================================
  !==== Non-local form factors ====
@@ -1005,14 +989,14 @@ subroutine ksdiago_slk(Diago_ctl, nband_k, nfftc, mgfftc, ngfftc, &
    kptns_(:,1) = kpoint
 
    ! Here mband is not used if paral_compil_kpt=0
-   call initylmg(gprimd, kg_k, kptns_, mkmem_, MPI_enreg_seq, psps%mpsang, npw_k, [nband_k], 1, &
+   call initylmg(cryst%gprimd, kg_k, kptns_, mkmem_, MPI_enreg_seq, psps%mpsang, npw_k, [nband_k], 1, &
      [npw_k], 1, optder, cryst%rprimd, ylm_k, dum_ylm_gr_k)
 
    ABI_FREE(dum_ylm_gr_k)
  end if
 
  ! Compute (k+G) vectors (only if useylm=1)
- nkpg = 3 * nloalg(3)
+ nkpg = 3 * dtset%nloalg(3)
  ABI_MALLOC(kpg_k, (npw_k, nkpg))
  if (nkpg > 0) call mkkpg(kg_k, kpg_k, kpoint, nkpg, npw_k)
 
@@ -1020,9 +1004,9 @@ subroutine ksdiago_slk(Diago_ctl, nband_k, nfftc, mgfftc, ngfftc, &
  idir=0; ider=0; dimffnl=1+ider ! Now the derivative is not needed anymore.
  ABI_MALLOC(ffnl, (npw_k, dimffnl, psps%lmnmax, psps%ntypat))
 
- call mkffnl(psps%dimekb, dimffnl, psps%ekb, ffnl, psps%ffspl, gmet, gprimd, ider, idir, psps%indlmn, &
+ call mkffnl(psps%dimekb, dimffnl, psps%ekb, ffnl, psps%ffspl, cryst%gmet, cryst%gprimd, ider, idir, psps%indlmn, &
    kg_k, kpg_k, kpoint, psps%lmnmax, psps%lnmax, psps%mpsang, psps%mqgrid_ff, nkpg, npw_k, &
-   psps%ntypat, psps%pspso, psps%qgrid_ff, rmet, psps%usepaw, psps%useylm, ylm_k, ylmgr_dum)
+   psps%ntypat, psps%pspso, psps%qgrid_ff, cryst%rmet, psps%usepaw, psps%useylm, ylm_k, ylmgr_dum)
 
  ABI_FREE(ylm_k)
 
@@ -1032,53 +1016,104 @@ subroutine ksdiago_slk(Diago_ctl, nband_k, nfftc, mgfftc, ngfftc, &
                      kg_k=kg_k, kpg_k=kpg_k, ffnl_k=ffnl, ph3d_k=ph3d, compute_ph3d=.true., compute_gbound=.true.)
 
  ! Prepare call to getghc.
- type_calc=0                              ! For applying the whole Hamiltonian
- sij_opt=0; if (psps%usepaw==1) sij_opt=1 ! For PAW, <k+G|S|k+G"> is also needed.
+ type_calc = 0                                ! For applying the whole Hamiltonian
+ sij_opt = 0; if (psps%usepaw==1) sij_opt = 1 ! For PAW, <k+G|S|k+G"> is also needed.
 
  cpopt = -1    ! If cpopt=-1, <p_lmn|in> (and derivatives) are computed here (and not saved)
- if (psps%usepaw==1.and..FALSE.) then ! TODO Calculate <p_lmn|k+G>.
+ if (psps%usepaw == 1 .and. .FALSE.) then ! TODO Calculate <p_lmn|k+G>.
    cpopt = 0  ! <p_lmn|in> are computed here and saved
  end if
 
- ABI_MALLOC(ghc, (2, npw_k*nspinor*ndat1))
- ABI_MALLOC(gvnlxc, (2, npw_k*nspinor*ndat1))
- ABI_MALLOC(gsc, (2, npw_k*nspinor*ndat1*(sij_opt+1)/2))
+ ! Define batch size for the application of the Hamiltonian
+ ! This is useful if OpenMP is activated thus we use multiple of omp_nt.
+ omp_nt = xomp_get_num_threads(open_parallel=.True.)
+ batch_size = 1
+ !batch_size = 4 * omp_nt
 
- cplex_ghg = 2
- size_mat = cplex_ghg*(npw_k*nspinor)**2*dp*b2Mb
- write(msg,'(a,f0.3,a)')" Out-of-memory in ghg_mat. Memory required by the Hamiltonian matrix: ",size_mat," [Mb]."
- ABI_STAT_MALLOC(ghg_mat, (cplex_ghg, npw_k*nspinor, npw_k*nspinor), ierr)
- ABI_CHECK(ierr == 0, msg)
- write(msg,'(a,f0.3,a)')" Out-of-memory in gsg_mat. Memory required by the PAW overlap operator: ",size_mat," [Mb]."
- ABI_STAT_MALLOC(gsg_mat, (cplex_ghg, npw_k*nspinor, npw_k*nspinor*psps%usepaw), ierr)
- ABI_CHECK(ierr == 0, msg)
+ ABI_MALLOC(ghc, (2, npwsp * batch_size))
+ ABI_MALLOC(gvnlxc, (2, npwsp * batch_size))
+ ABI_MALLOC(gsc, (2, npwsp * batch_size*(sij_opt+1)/2))
 
- ! Ccwaveprj is ordered, see nonlop_ylm.
- ABI_MALLOC(cwaveprj, (cryst%natom, nspinor*(1+cpopt)*gs_hamk%usepaw))
+ ! Init 1D PBLAS grid to block-distribute matrices along columns.
+ call slkproc%init(comm, grid_dims=[1, nproc])
+
+ mat_size = npwsp; if (istwf_k == 2) mat_size = 2 * npwsp - 1
+
+ col_bsize = mat_size / nproc; if (mod(mat_size, nproc) /= 0) col_bsize = col_bsize + 1
+ call ghg_mat%init(mat_size, mat_size, slkproc, istwf_k, size_blocs=[mat_size, col_bsize])
+ if (psps%usepaw == 1) call gsg_mat%init(mat_size, mat_size, slkproc, istwf_k, size_blocs=[mat_size, col_bsize])
+
+ ! cwaveprj is ordered, see nonlop_ylm.
+ ABI_MALLOC(cwaveprj, (cryst%natom, nspinor*(1+cpopt)*gs_hamk%usepaw*batch_size))
  if (cpopt == 0) call pawcprj_alloc(cwaveprj, 0, gs_hamk%dimcprj)
 
  ! Initialize plane-wave array with zeros
- ABI_CALLOC(pwave, (2, npw_k*nspinor))
- if (prtvol > 0) call wrtout(std_out, ' Calculating <G|H|G''> elements')
+ ABI_CALLOC(bras, (2, npwsp * batch_size))
+ if (dtset%prtvol > 0) call wrtout(std_out, ' Calculating <G|H|G''> elements')
 
  ! Loop over the |beta,G''> component.
- do igsp2=1,npw_k*nspinor
+ loc2_size = ghg_mat%sizeb_local(2)
+
+ do il_g2=1, ghg_mat%sizeb_local(2), batch_size
+   ndat = merge(batch_size, loc2_size-il_g2+1, il_g2+batch_size-1 <= loc2_size)
+   igsp2 = ghg_mat%loc2gcol(il_g2)
+
+   bras = zero
+   if (istwf_k == 1) then
+     do idat=0,ndat-1
+       bras(1, igsp2 + idat * npwsp + idat) = one
+     end do
+   else
+     do idat=0,ndat-1
+       if (igsp2 + idat <= npwsp) then
+         bras(1, igsp2 + idat * npwsp + idat) = half   ! Cosine
+         if (igsp2 == 1) bras(1, igsp2 + idat * npwsp + idat) = one
+       else
+         ig = igsp2 - npwsp + 1 + 1
+         bras(2, ig + idat * npwsp + idat) = +half  ! Sine
+       end if
+     end do
+   end if
+
    ! Get <:|H|beta,G''> and <:|S_{PAW}|beta,G''>
-   pwave(1,igsp2) = one
+   call multithreaded_getghc(cpopt, bras, cwaveprj, ghc, gsc, gs_hamk, gvnlxc, lambda0, mpi_enreg_seq, ndat, &
+                             dtset%prtvol, sij_opt, tim_getghc, type_calc)
 
-   call getghc(cpopt, pwave, cwaveprj, ghc, gsc, gs_hamk, gvnlxc, lambda0, MPI_enreg_seq, ndat1, &
-               prtvol, sij_opt, tim_getghc, type_calc)
+   ! Fill local buffer.
+   if (istwf_k == 1) then
+     do idat=0,ndat-1
+       igs = 1 + idat * npwsp; ige = igs + npwsp - 1
+       ghg_mat%buffer_cplx(:, il_g2 + idat) = cmplx(ghc(1, igs:ige), ghc(2, igs:ige), kind=dp)
+     end do
+     if (psps%usepaw == 1) then
+       do idat=0,ndat-1
+         igs = 1 + idat * npwsp; ige = igs + npwsp - 1
+         gsg_mat%buffer_cplx(:,il_g2+idat) = cmplx(gsc(1,igs:ige), gsc(2,igs:ige), kind=dp)
+       end do
+     end if
 
-   ! Fill the upper triangle.
-   ghg_mat(:,1:igsp2,igsp2) = ghc(:,1:igsp2)
-   if (psps%usepaw == 1) gsg_mat(:,1:igsp2,igsp2) = gsc(:,1:igsp2)
+   else
 
-   ! Reset the |G,beta> component that has been treated.
-   pwave(1,igsp2) = zero
- end do
+     do idat=0,ndat-1
+       igs = 1 + idat * npwsp; ige = igs + npwsp - 1
+       !if (igsp2 == 1 .or. igsp2 == npwsp + 1 .and. idat == 0) then
+       !  ghc(:, igs:ige) = tol3
+       !  !print *, ghc(:, igs:ige)
+       !end if
+       ghg_mat%buffer_real(1:npwsp, il_g2 + idat) = ghc(1, igs:ige)    ! CC or CS
+       !ghg_mat%buffer_real(npwsp+1:, il_g2 + idat) = -ghc(2, igs:ige)  ! SC or SS
+       ghg_mat%buffer_real(npwsp+1:, il_g2 + idat) = -ghc(2, igs+1:ige)  ! SC or SS
+     end do
+   end if
+
+   ! Reset the |G,beta> components that has been treated.
+   !do idat=0,ndat-1
+   !  bras(1, igsp2 + idat * npwsp + idat) = zero
+   !end do
+ end do ! il_g2
 
  ! Free workspace memory allocated so far.
- ABI_FREE(pwave)
+ ABI_FREE(bras)
  ABI_FREE(kinpw)
  ABI_FREE(vlocal)
  ABI_FREE(ghc)
@@ -1091,57 +1126,76 @@ subroutine ksdiago_slk(Diago_ctl, nband_k, nfftc, mgfftc, ngfftc, &
  !===========================================
  !=== Diagonalization of <G|H|G''> matrix ===
  !===========================================
- ABI_MALLOC(eig_ene, (onband_diago))
- ABI_MALLOC(eig_vec, (cplex_ghg, npw_k*nspinor, onband_diago))
+ onband_diago = mat_size
+ ABI_MALLOC(eig_ene, (mat_size))
 
- jobz = Diago_ctl%jobz  !jobz="Vectors"
+ ! If possible, use 2D rectangular grid of processors for diagonalization.
+ call slkproc_4diag%init(comm)
+
+ call ghg_mat%change_size_blocs(ghg_4diag, processor=slkproc_4diag)
+ call ghg_mat%free()
+ if (psps%usepaw == 1) then
+   call gsg_mat%change_size_blocs(gsg_4diag, processor=slkproc_4diag)
+   call gsg_mat%free()
+ end if
+ call ghg_4diag%copy(ugb)
 
  if (do_full_diago) then
    ! Full diagonalization
-   write(msg,'(2a,3es16.8,3x,3a,i5)')ch10,&
-     ' Begin complete diagonalization for kpt= ',kpoint(:),stag(isppol),ch10,&
-     ' - Size of mat.=',npw_k*nspinor
-   if (prtvol > 0) call wrtout(std_out, msg)
+   write(msg,'(6a, i0)')ch10,&
+     ' Begin full diagonalization for kpt: ',trim(ktoa(kpoint)), stag(isppol), ch10,&
+     ' Matrix size: ',npwsp
+   call wrtout(std_out, msg)
+   call cwtime(cpu, wall, gflops, "start")
 
-   if (psps%usepaw==0) then
-     call xheev_cplex(jobz, "Upper", cplex_ghg, npw_k*nspinor, ghg_mat, eig_ene, msg, ierr)
+   if (psps%usepaw == 0) then
+     !call ghg_4diag%pzheev("V", "U", ugb, eig_ene)
+     call compute_eigen_problem(ghg_4diag%processor, ghg_4diag, ugb, eig_ene, comm, istwf_k)
    else
-     call xhegv_cplex(1, jobz, "Upper", cplex_ghg, npw_k*nspinor, ghg_mat, gsg_mat, eig_ene, msg, ierr)
+     call compute_generalized_eigen_problem(ghg_4diag%processor, ghg_4diag, gsg_4diag, ugb, eig_ene, comm, istwf_k)
    end if
-   ABI_CHECK(ierr == 0, msg)
-   eig_vec(:,:,:)=  ghg_mat
+   call cwtime_report(" full_diago", cpu, wall, gflops)
 
  else
    ! Partial diagonalization
-   range = Diago_ctl%range !range="Irange"
+   ! range = Diago_ctl%range !range="Irange"
+   ABI_ERROR("Not Implemented Error")
+   call cwtime(cpu, wall, gflops, "start")
 
-   write(msg,'(2a,3es16.8,3a,i5,a,i5)')ch10,&
+   write(msg,'(2a,3es16.8,3a,i0,a,i0)')ch10,&
      ' Begin partial diagonalization for kpt= ',kpoint,stag(isppol),ch10,&
-     ' - Size of mat.=',npw_k*nspinor,' - # bnds=',onband_diago
-   if (prtvol>0) call wrtout(std_out, msg)
+     ' - Size of mat.=',npw_k*nspinor,' - # out_nband: ', onband_diago
+   call wrtout(std_out, msg)
 
-   if (psps%usepaw==0) then
-     call xheevx_cplex(jobz, range, "Upper", cplex_ghg, npw_k*nspinor, ghg_mat, zero, zero,&
-       1, onband_diago, -tol8, negv, eig_ene, eig_vec, npw_k*nspinor, msg, ierr)
+   !range = "I"
+   !ilu =
+   if (psps%usepaw == 0) then
+     !call slk_pzheevx(Slk_mat, "V", range, "U", vl, vu, il, iu, abstol, Slk_vec, mene_found, eigen)
+     !call xheevx_cplex(jobz, range, "Upper", cplex_ghg, npw_k*nspinor, ghg_mat, zero, zero,&
+     !  1, onband_diago, -tol8, negv, eig_ene, eig_vec, npw_k*nspinor, msg, ierr)
    else
-     call xhegvx_cplex(1, jobz, range, "Upper", cplex_ghg, npw_k*nspinor, ghg_mat, gsg_mat, zero, zero,&
-       1, onband_diago, -tol8, negv, eig_ene, eig_vec, npw_k*nspinor, msg, ierr)
+     !call slk_pzhegvx(Slk_matA, ibtype, "V", range, "U", Slk_matB, vl, vu, il, iu, abstol, Slk_vec, mene_found, eigen)
+     !call xhegvx_cplex(1, jobz, range, "Upper", cplex_ghg, npw_k*nspinor, ghg_mat, gsg_mat, zero, zero,&
+     !  1, onband_diago, -tol8, negv, eig_ene, eig_vec, npw_k*nspinor, msg, ierr)
    end if
-   ABI_CHECK(ierr == 0, msg)
+   call cwtime_report(" partial_diago", cpu, wall, gflops)
  end if
 
- ABI_FREE(ghg_mat)
- ABI_FREE(gsg_mat)
+ call ghg_4diag%free()
+ call gsg_4diag%free()
+ call slkproc%free()
+ !call ugb%free()
+ !call slkproc_4diag%free()
 
- if (prtvol > 0 .and. my_rank == master) then
+ if (dtset%prtvol > 0 .and. my_rank == master) then
    ! Write eigenvalues.
    frmt1='(8x,9(1x,f7.2))' ; frmt2='(8x,9(1x,f7.2))'
-   write(msg,'(a,3es16.8,3x,a)')' Eigenvalues in eV for kpt= ',kpoint,stag(isppol)
+   write(msg,'(2a,3x,a)')' Eigenvalues in eV for kpt: ', trim(ktoa(kpoint)), stag(isppol)
    call wrtout(std_out, msg)
 
    write(msg,frmt1)(eig_ene(ib)*Ha_eV,ib=1,MIN(9,onband_diago))
    call wrtout(std_out, msg)
-   if (onband_diago >9 ) then
+   if (onband_diago > 9 ) then
      do jj=10,onband_diago,9
        write(msg,frmt2) (eig_ene(ib)*Ha_eV,ib=jj,MIN(jj+8,onband_diago))
        call wrtout(std_out, msg)
@@ -1152,35 +1206,34 @@ subroutine ksdiago_slk(Diago_ctl, nband_k, nfftc, mgfftc, ngfftc, &
  !========================================================
  !==== Calculate <Proj_i|Cnk> from output eigenstates ====
  !========================================================
- if (psps%usepaw == 1) then
+ !if (psps%usepaw == 1) then
 
-   iorder_cprj = 1 !  Ordered (order does change wrt input file); will be changed later
-   ABI_MALLOC(cprj_k, (cryst%natom, nspinor*onband_diago))
-   call pawcprj_alloc(cprj_k, 0, gs_hamk%dimcprj)
+ !  iorder_cprj = 1 !  Ordered (order does change wrt input file); will be changed later
+ !  ABI_MALLOC(cprj_k, (cryst%natom, nspinor*onband_diago))
+ !  call pawcprj_alloc(cprj_k, 0, gs_hamk%dimcprj)
+ !  idir = 0; cprj_choice = 1  ! Only projected wave functions.
 
-   idir = 0; cprj_choice = 1  ! Only projected wave functions.
+ !  do iband=1,onband_diago
+ !    ibs1=nspinor*(iband-1)+1
+ !    ibs2=ibs1; if (nspinor==2) ibs2=ibs2+1
+ !    cwavef => eig_vec(1:2,1:npw_k,iband)
 
-   do iband=1,onband_diago
-     ibs1=nspinor*(iband-1)+1
-     ibs2=ibs1; if (nspinor==2) ibs2=ibs2+1
-     cwavef => eig_vec(1:2,1:npw_k,iband)
+ !    call getcprj(cprj_choice,0,cwavef,cprj_k(:,ibs1:ibs2),&
+ !     gs_hamk%ffnl_k,idir,gs_hamk%indlmn,gs_hamk%istwf_k,gs_hamk%kg_k,&
+ !     gs_hamk%kpg_k,gs_hamk%kpt_k,gs_hamk%lmnmax,gs_hamk%mgfft,MPI_enreg_seq,&
+ !     gs_hamk%natom,gs_hamk%nattyp,gs_hamk%ngfft,gs_hamk%nloalg,gs_hamk%npw_k,gs_hamk%nspinor,&
+ !     gs_hamk%ntypat,gs_hamk%phkxred,gs_hamk%ph1d,gs_hamk%ph3d_k,gs_hamk%ucvol,gs_hamk%useylm)
+ !  end do
 
-     call getcprj(cprj_choice,0,cwavef,cprj_k(:,ibs1:ibs2),&
-      gs_hamk%ffnl_k,idir,gs_hamk%indlmn,gs_hamk%istwf_k,gs_hamk%kg_k,&
-      gs_hamk%kpg_k,gs_hamk%kpt_k,gs_hamk%lmnmax,gs_hamk%mgfft,MPI_enreg_seq,&
-      gs_hamk%natom,gs_hamk%nattyp,gs_hamk%ngfft,gs_hamk%nloalg,gs_hamk%npw_k,gs_hamk%nspinor,&
-      gs_hamk%ntypat,gs_hamk%phkxred,gs_hamk%ph1d,gs_hamk%ph3d_k,gs_hamk%ucvol,gs_hamk%useylm)
-   end do
-
-   !  Reorder the cprj (order is now the same as in input file)
-   call pawcprj_reorder(cprj_k, gs_hamk%atindx1)
- end if ! usepaw
+ !  !  Reorder the cprj (order is now the same as in input file)
+ !  call pawcprj_reorder(cprj_k, gs_hamk%atindx1)
+ !end if ! usepaw
 
  ! Free memory.
  ABI_FREE(kpg_k)
- ABI_FREE(kg_k)
  ABI_FREE(ph3d)
  ABI_FREE(ffnl)
+ ABI_FREE(kg_k)
 
  call destroy_mpi_enreg(MPI_enreg_seq)
  call gs_hamk%free()

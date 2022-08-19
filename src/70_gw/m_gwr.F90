@@ -1232,11 +1232,12 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  ! TODO: For the time being no augmentation
  gwr%g_ngfft(4:6) = gwr%g_ngfft(1:3)
 
+ ! Defined batch sizes for FFT transforms, use multiples of OpenMP threads.
  omp_nt = xomp_get_num_threads(open_parallel=.True.)
  gwr%uc_batch_size = max(1, gwr%dtset%userid * omp_nt)
  gwr%sc_batch_size = max(1, gwr%dtset%userie * omp_nt)
 
- gwr%uc_batch_size = 4; gwr%sc_batch_size = 4
+ !gwr%uc_batch_size = 4; gwr%sc_batch_size = 4
 
  if (my_rank == master) then
    call print_ngfft(gwr%g_ngfft, header="FFT mesh for Green's function", unit=std_out)
@@ -1958,7 +1959,7 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
      nband_k = wfk_hdr%nband(ik_ibz)
      npwsp = npw_k * gwr%nspinor
 
-     ! Init CG(npw_k * nspinor, nband) PBLAS matrix within gtau communicator.
+     ! Init CG(npwsp, nband) PBLAS matrix within gtau communicator.
      ! and distribute it over bands so that each proc reads a subset of bands in read_band_block
      col_bsize = nband_k / gwr%gtau_comm%nproc; if (mod(nband_k, gwr%gtau_comm%nproc) /= 0) col_bsize = col_bsize + 1
      call cg_mat%init(npwsp, nband_k, gtau_slkproc, istwfk1, size_blocs=[npwsp, col_bsize])
@@ -1973,15 +1974,21 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
      call wfk%read_band_block([my_bstart, my_bstop], ik_ibz, spin, xmpio_single, kg_k=kg_k, cg_k=cg_k)
 
      !call cg_mat%copy(cg_work)
-     !call cg_work%free()
 
      do itau=1,gwr%ntau
-       !gt_cfact = exp(-gwr%tau_mesh(itau)  * eig_nk)
-       !call slk_pzgemm(transa, transb, matrix1, cone, matrix2, czero, results)
        !my_it = gwr%myit_from_itau(itau)
+       !gt_cfact = exp(-gwr%tau_mesh(itau)  * eig_nk)
+       !call slk_pzgemm("N", "C", matrix1, cone, matrix2, czero, results)
        !if (my_it == -1) cycle
-       !associate (gt => gwr%gt_kibz(ipm, ik_ibz, itau, spin))
+
+       !if (gwr%tau_comm%me == gwr%tau_master(itau)) then
+       !  do ipm=1,2
+       !    gwr%gt_kibz(ipm, ik_ibz, itau, spin)%buffer_cplx = loc_cwork(:,:,ipm)
+       !  end do
+       !end if
      end do
+
+     !call cg_work%free()
 
      call cg_mat%free()
    end do ! my_iki
@@ -4014,6 +4021,10 @@ subroutine gwr_build_wc(gwr)
 
  q0sph = two_pi * (three / (four_pi * gwr%cryst%ucvol * gwr%nqbz)) ** third
 
+ ! If possible, use 2d rectangular grid of processors for diagonalization.
+ !call slkproc_4diag%init(comm)
+ !call slkproc_4diag%free()
+
  do my_iqi=1,gwr%my_nqibz
    call cwtime(cpu_q, wall_q, gflops_q, "start")
    iq_ibz = gwr%my_qibz_inds(my_iqi)
@@ -4060,10 +4071,10 @@ subroutine gwr_build_wc(gwr)
        !call wrtout(std_out, "Printing wc%buffer_cplex before inversion")
        !call print_arr(wc%buffer_cplx, unit=std_out)
 
-       call wc%change_size_blocs(tmp_mat)
+       call wc%change_size_blocs(tmp_mat) ! processor=slkproc_4diag
        call tmp_mat%zinvert()
        !call tmp_mat%zdhp_invert("U")
-       call wc%take_from(tmp_mat)
+       call wc%take_from(tmp_mat)  ! processor=wc%processor)
        call tmp_mat%free()
 
        !call wrtout(std_out, sjoin(" e-1 at q:", ktoa(qq_ibz), "i omega:", ftoa(gwr%iw_mesh(itau) * Ha_eV), "eV"))
@@ -4541,8 +4552,8 @@ else
      ! Remember that sigma is stored as (r', r) with the second dimension MPI-distributed
      do ikcalc=1,gwr%nkcalc
        do band=gwr%bstart_ks(ikcalc, spin), gwr%bstop_ks(ikcalc, spin)
-         call diag_braket("T", sigc_rpr(1, ikcalc), gwr%g_nfft * gwr%nspinor, uc_psi_bk(:, band, ikcalc), sigc_pm(1))
-         call diag_braket("T", sigc_rpr(2, ikcalc), gwr%g_nfft * gwr%nspinor, uc_psi_bk(:, band, ikcalc), sigc_pm(2))
+         !call diag_braket("T", sigc_rpr(1, ikcalc), gwr%g_nfft * gwr%nspinor, uc_psi_bk(:, band, ikcalc), sigc_pm(1))
+         !call diag_braket("T", sigc_rpr(2, ikcalc), gwr%g_nfft * gwr%nspinor, uc_psi_bk(:, band, ikcalc), sigc_pm(2))
          ibc = band - gwr%bstart_ks(ikcalc, spin) + 1
          sigc_it_diag_kcalc(:, itau, ibc, ikcalc, spin) = sigc_pm(:)
         end do
@@ -4860,6 +4871,8 @@ end subroutine gwr_build_sigmac
 !!
 !! SOURCE
 
+#if 0
+
 subroutine diag_braket(trans, mat, nfftsp, u_glob, cout, do_mpi_sum)
 
 !Arguments ------------------------------------
@@ -4907,6 +4920,8 @@ subroutine diag_braket(trans, mat, nfftsp, u_glob, cout, do_mpi_sum)
 
 end subroutine diag_braket
 !!***
+
+#endif
 
 !----------------------------------------------------------------------
 

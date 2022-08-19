@@ -4461,22 +4461,22 @@ subroutine get_kg(kpoint, istwf_k, ecut, gmet, npw_k, kg_k)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: mkmem_=1,exchn2n3d0=0,ikg0=0
+ integer,parameter :: mkmem_ = 1, exchn2n3d0 = 0, ikg0 = 0
  integer :: npw_k_test
  type(MPI_type) :: MPI_enreg_seq
 !arrays
- integer :: kg_dum(3,0)
+ integer :: kg_dum(3, 0)
 
 ! *********************************************************************
 
  call initmpi_seq(MPI_enreg_seq)
 
  ! Calculate the number of G-vectors for this k-point.
- call kpgsph(ecut,exchn2n3d0,gmet,ikg0,0,istwf_k,kg_dum,kpoint,0,MPI_enreg_seq,0,npw_k)
+ call kpgsph(ecut,exchn2n3d0, gmet, ikg0, 0, istwf_k, kg_dum, kpoint, 0, MPI_enreg_seq, 0, npw_k)
 
  ! Allocate and calculate the set of G-vectors.
  ABI_MALLOC(kg_k,(3,npw_k))
- call kpgsph(ecut,exchn2n3d0,gmet,ikg0,0,istwf_k,kg_k,kpoint,mkmem_,MPI_enreg_seq,npw_k,npw_k_test)
+ call kpgsph(ecut, exchn2n3d0, gmet, ikg0, 0, istwf_k, kg_k, kpoint, mkmem_, MPI_enreg_seq, npw_k, npw_k_test)
 
  call destroy_mpi_enreg(MPI_enreg_seq)
 
