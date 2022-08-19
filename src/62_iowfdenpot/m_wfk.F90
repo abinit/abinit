@@ -2153,8 +2153,8 @@ subroutine wfk_write_band_block(Wfk,band_block,ik_ibz,spin,sc_mode,kg_k,cg_k,eig
    ABI_ERROR(sjoin('Wrong value of iomode:', itoa(Wfk%iomode)))
  end select
 
- ABI_FREE (eig_buffer)
- ABI_FREE (cg_buffer)
+ ABI_FREE(eig_buffer)
+ ABI_FREE(cg_buffer)
 
  DBG_EXIT("COLL")
 

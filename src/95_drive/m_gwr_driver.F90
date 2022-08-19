@@ -42,6 +42,7 @@ module m_gwr_driver
  use m_io_tools,        only : file_exists, open_file
  use m_time,            only : cwtime, cwtime_report
  use m_fstrings,        only : strcat, sjoin, ftoa, itoa
+ use m_slk,             only : matrix_scalapack
  use m_fftcore,         only : print_ngfft ! ngfft_seq,
  use m_fft,             only : fourdp
  use m_ioarr,           only : read_rhor
@@ -69,6 +70,8 @@ module m_gwr_driver
  use m_paw_tools,       only : chkpawovlp, pawprt
  use m_paw_denpot,      only : pawdenpot
  use m_paw_init,        only : pawinit, paw_gencond
+ use m_pawcprj,         only : pawcprj_type, pawcprj_free !, pawcprj_alloc, paw_overlap
+ use m_ksdiago,         only : ksdiago_slk
  use m_mkrho,           only : prtrhomxmn
  use m_melemts,         only : melflags_t !, melements_t
  use m_setvtr,          only : setvtr
@@ -147,7 +150,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
 !Local variables ------------------------------
 !scalars
  integer,parameter :: master = 0, cplex1 = 1, ipert0 = 0, idir0 = 0, optrhoij1 = 1
- integer :: ii, comm, nprocs, my_rank, mgfftf, nfftf, omp_ncpus, work_size, nks_per_proc, ierr
+ integer :: ii, comm, nprocs, my_rank, mgfftf, nfftf, omp_ncpus, work_size, nks_per_proc, ierr, spin, ik_ibz
  real(dp) :: eff, mempercpu_mb, max_wfsmem_mb, nonscal_mem
  real(dp) :: ecore, ecut_eff, ecutdg_eff, cpu, wall, gflops
  logical, parameter :: is_dfpt = .false.
@@ -169,7 +172,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  integer :: ndij !,ndim,nfftf,nfftf_tot,nkcalc,gwc_nfft,gwc_nfftot,gwx_nfft,gwx_nfftot
  integer :: ngrvdw, nhatgrdim, nkxc, nspden_rhoij, optene !nzlmopt,
  integer :: optcut, optgr0, optgr1, optgr2, optrad, psp_gencond !option,
- integer :: rhoxsp_method, usexcnhat !, use_aerhor,use_umklp
+ integer :: rhoxsp_method, usexcnhat, onband_diago !, use_aerhor,use_umklp
  !real(dp) :: compch_fft, compch_sph !,r_s,rhoav,alpha
  real(dp) :: gsqcutc_eff, gsqcutf_eff, gsqcut_shp
  real(dp) :: vxcavg !,vxcavg_qp ucvol,
@@ -178,6 +181,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  type(energies_type) :: KS_energies
  type(melflags_t) :: KS_mflags
  type(paw_dmft_type) :: Paw_dmft
+ type(matrix_scalapack) :: u_gb
 !arrays
  integer :: ngfftc(18),ngfftf(18),unts(2) ! gwc_ngfft(18),gwx_ngfft(18),
  integer,allocatable :: nq_spl(:), l_size_atm(:) !,qp_vbik(:,:),tmp_gfft(:,:),ks_vbik(:,:),nband(:,:),
@@ -188,11 +192,13 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  real(dp),allocatable :: ks_rhor(:,:),ks_vhartr(:), ks_vtrial(:,:), ks_vxc(:,:), ks_taur(:,:)
  real(dp),allocatable :: kxc(:,:), ph1d(:,:), ph1df(:,:) !qp_kxc(:,:),
  real(dp),allocatable :: vpsp(:), xccc3d(:), dijexc_core(:,:,:) !, dij_hf(:,:,:)
+ real(dp),allocatable :: eig_ene(:)
  type(Paw_an_type),allocatable :: KS_paw_an(:)
  type(Paw_ij_type),allocatable :: KS_paw_ij(:)
  type(Pawfgrtab_type),allocatable :: Pawfgrtab(:)
  type(Pawrhoij_type),allocatable :: KS_Pawrhoij(:)
  type(pawpwff_t),allocatable :: Paw_pwff(:)
+ type(pawcprj_type),allocatable :: cprj_k(:,:)
 
 !************************************************************************
 
@@ -562,6 +568,24 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  ABI_FREE(grewtn)
 
  call cwtime_report(" prepare gwr_driver_init", cpu, wall, gflops)
+
+ do spin=1,dtset%nsppol
+   do ik_ibz=1,dtset%nkpt
+     !call ksdiago_slk(spin, dtset%istwfk(ik_ibz), dtset%kptns(:,ik_ibz), dtset%ecut, -1, ngfftc, nfftf, &
+     call ksdiago_slk(spin, 1, dtset%kptns(:,ik_ibz), dtset%ecut, -1, ngfftc, nfftf, &
+                      dtset, pawtab, pawfgr, ks_paw_ij, cryst, psps, ks_vtrial, &
+                      onband_diago, eig_ene, u_gb, cprj_k, comm)
+
+     ABI_FREE(eig_ene)
+     call u_gb%free()
+     if (dtset%usepaw == 1) then
+       call pawcprj_free(cprj_k)
+       ABI_FREE(cprj_k)
+     end if
+     stop
+   end do
+ end do
+ stop
 
  ! ====================================================
  ! === This is the real GWR stuff once all is ready ===
