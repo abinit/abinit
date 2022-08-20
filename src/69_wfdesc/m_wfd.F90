@@ -977,11 +977,11 @@ subroutine wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,mband,nband,nkibz,nsppol,bks_m
  end do
  call xmpi_sum(wfd%npwarr, wfd%comm, ierr)
 
- mpw = MAXVAL(Wfd%npwarr)
+ mpw = maxval(Wfd%npwarr)
 
  ABI_MALLOC(Wfd%nband, (nkibz,nsppol))
- Wfd%nband=nband; Wfd%mband = mband
- ABI_CHECK(MAXVAL(Wfd%nband) == mband, "Wrong mband")
+ Wfd%nband = nband; Wfd%mband = mband
+ ABI_CHECK_IEQ(maxval(Wfd%nband), mband, "Wrong mband")
 
  ! Allocate u(g) and, if required, also u(r)
  ug_size = one*nspinor*mpw*COUNT(bks_mask)
@@ -1847,7 +1847,7 @@ subroutine wfd_ug2cprj(Wfd,band,ik_ibz,spin,choice,idir,natom,Cryst,cwaveprj,sor
 ! *********************************************************************
 
  ! Different form factors have to be calculated and stored in Kdata.
- ABI_CHECK(choice == 1, "choice/=1 not coded")
+ ABI_CHECK_IEQ(choice, 1, "choice/=1 not coded")
 
  dimffnl = 1
  npw_k   = Wfd%npwarr(ik_ibz)
@@ -4606,11 +4606,11 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
       nband_disk = Hdr%nband(ik_ibz+(spin-1)*Hdr%nkpt)
       istwfk_disk = hdr%istwfk(ik_ibz)
       change_gsphere = istwfk_disk /= wfd%istwfk(ik_ibz)
-      nband_wfd  = Wfd%nband(ik_ibz,spin)
+      nband_wfd  = Wfd%nband(ik_ibz, spin)
 
       if (nband_wfd > nband_disk) then
-        write(msg,'(a,2(i0,1x))')&
-         "nband_wfd to be read cannot be greater than nband_disk while: ",nband_wfd,nband_disk
+        write(msg,'(2(a, i0))')&
+         "nband_wfd to be read: ", nband_wfd,", cannot be greater than nband_disk: ",nband_disk
         ABI_ERROR(msg)
       end if
 

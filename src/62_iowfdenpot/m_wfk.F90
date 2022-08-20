@@ -82,7 +82,7 @@ module m_wfk
  use m_distribfft,   only : init_distribfft_seq
  use m_mpinfo,       only : destroy_mpi_enreg, initmpi_seq
  use m_rwwf,         only : rwwf
- use m_kpts,         only : listkk,kpts_timrev_from_kptopt
+ use m_kpts,         only : listkk, kpts_timrev_from_kptopt
 
  implicit none
 
@@ -474,15 +474,15 @@ end subroutine wfk_open_read
 !!
 !! SOURCE
 
-subroutine wfk_open_write(Wfk,Hdr,fname,formeig,iomode,funt,comm,write_hdr,write_frm)
+subroutine wfk_open_write(Wfk, Hdr, fname, formeig, iomode, funt, comm, write_hdr, write_frm)
 
 !Arguments ------------------------------------
 !scalars
+ class(wfk_t),intent(out) :: Wfk
  integer,intent(in) :: iomode,comm,formeig,funt
  character(len=*),intent(in) :: fname
  logical,optional,intent(in) :: write_hdr,write_frm
  type(hdr_type),intent(in) :: Hdr
- class(wfk_t),intent(out) :: Wfk
 
 !Local variables-------------------------------
 !scalars
@@ -1754,7 +1754,7 @@ end subroutine wfk_read_bks
 !!
 !! SOURCE
 
-subroutine wfk_write_band_block(Wfk,band_block,ik_ibz,spin,sc_mode,kg_k,cg_k,eig_k,occ_k)
+subroutine wfk_write_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg_k, eig_k, occ_k)
 
 !Arguments ------------------------------------
 !scalars
@@ -2977,7 +2977,6 @@ subroutine wfk_read_my_kptbands(inpath_, distrb_flags, comm, ecut_eff_in, &
  logical :: isirred_kf
  logical :: needthisk
  logical :: convnsppol1to2
- logical,parameter :: force_istwfk1=.False.
  type(wfk_t),target :: wfk_disk
  type(crystal_t) :: cryst
 !arrays
