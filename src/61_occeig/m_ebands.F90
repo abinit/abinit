@@ -958,6 +958,7 @@ end function ebands_from_hdr
 !! INPUTS
 !!  dtset<dataset_type>=Abinit dataset
 !!  npwarr(dtset%nkpt)=Number of G-vectors for each k-point.
+!!  [nband]= If present, use these values instead of dtset%nband
 !!
 !! OUTPUT
 !!  ebands<ebands_t>=The ebands_t datatype completely initialized.
@@ -965,11 +966,12 @@ end function ebands_from_hdr
 !!
 !! SOURCE
 
-type(ebands_t) function ebands_from_dtset(dtset, npwarr) result(new)
+type(ebands_t) function ebands_from_dtset(dtset, npwarr, nband) result(new)
 
 !Arguments ------------------------------------
 !scalars
- type(dataset_type),intent(in) :: dtset
+ type(dataset_type),target,intent(in) :: dtset
+ integer,target,optional,intent(in) :: nband(dtset%nkpt * dtset%nsppol)
 !arrays
  integer,intent(in) :: npwarr(dtset%nkpt)
 
@@ -978,25 +980,22 @@ type(ebands_t) function ebands_from_dtset(dtset, npwarr) result(new)
  integer :: bantot
 !arrays
  real(dp),allocatable :: ugly_doccde(:), ugly_ene(:), ugly_occ(:)
+ integer,pointer :: nband__(:)
 ! *************************************************************************
 
+ nband__ => dtset%nband; if (present(nband)) nband__ => nband
+
  ! Have to use ugly 1d vectors to call ebands_init
- bantot = sum(dtset%nband)
+ bantot = sum(nband__)
  ABI_CALLOC(ugly_doccde, (bantot))
  ABI_CALLOC(ugly_ene, (bantot))
  ABI_CALLOC(ugly_occ, (bantot))
 
- ! CP modified
- !call ebands_init(bantot, new, dtset%nelect, ugly_doccde, ugly_ene, dtset%istwfk, dtset%kptns, dtset%nband, dtset%nkpt, &
- ! npwarr, dtset%nsppol, dtset%nspinor, dtset%tphysel, dtset%tsmear, dtset%occopt, ugly_occ, dtset%wtk,&
- ! dtset%cellcharge, dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
- ! dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
  call ebands_init(bantot, new, dtset%nelect, dtset%ne_qFD, dtset%nh_qFD, dtset%ivalence, ugly_doccde, ugly_ene, &
-  dtset%istwfk, dtset%kptns, dtset%nband, dtset%nkpt, &
+  dtset%istwfk, dtset%kptns, nband__, dtset%nkpt, &
   npwarr, dtset%nsppol, dtset%nspinor, dtset%tphysel, dtset%tsmear, dtset%occopt, ugly_occ, dtset%wtk,&
   dtset%cellcharge(1), dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
   dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
- ! End CP modified
 
  !new%extrael = dtset%eph_extrael
 
@@ -2257,10 +2256,11 @@ end function ebands_write_bxsf
 !! for each spin channel starting from the the knowledge of eigenvalues.
 !!
 !! INPUTS
+!!  ebands<ebands_t>=Info on the band structure, the smearing technique and the physical temperature used.
 !!  spinmagntarget=if differ from -99.99d0, fix the spin polarization (in Bohr magneton)
 !!  [stmbias]=
 !!  [prtvol]=Verbosity level (0 for lowest level)
-!!  ebands<ebands_t>=Info on the band structure, the smearing technique and the physical temperature used.
+!!  [fermie_to_zero]=If True, fermie is set to zero and energies are shifted accordingly. Default: False
 !!
 !! OUTPUT
 !!  see also SIDE EFFECTS.
@@ -2279,7 +2279,7 @@ end function ebands_write_bxsf
 !!
 !! SOURCE
 
-subroutine ebands_update_occ(ebands, spinmagntarget, stmbias, prtvol)
+subroutine ebands_update_occ(ebands, spinmagntarget, stmbias, prtvol, fermie_to_zero)
 
 !Arguments ------------------------------------
 !scalars
@@ -2287,11 +2287,12 @@ subroutine ebands_update_occ(ebands, spinmagntarget, stmbias, prtvol)
  integer,optional,intent(in) :: prtvol
  real(dp),intent(in) :: spinmagntarget
  real(dp),optional,intent(in) :: stmbias
+ logical,optional,intent(in) :: fermie_to_zero
 
 !Local variables-------------------------------
 !scalars
  integer :: band,mband,ikibz,nkpt,spin,nsppol,my_prtvol,nband_k
- real(dp) :: entropy,fermie,fermih,stmbias_local,ndiff,cbot,vtop,maxocc ! CP added fermih for occopt 9
+ real(dp) :: entropy,fermie,fermih,stmbias_local,ndiff,cbot,vtop,maxocc
  character(len=500) :: msg
 !arrays
  real(dp) :: nelect_spin(ebands%nsppol),condbottom(ebands%nsppol),valencetop(ebands%nsppol)
@@ -2413,6 +2414,14 @@ subroutine ebands_update_occ(ebands, spinmagntarget, stmbias, prtvol)
     'Too large difference in number of electrons:,',ch10,&
     'Expected = ',ebands%nelect,' Calculated = ',sum(nelect_spin)
    ABI_ERROR(msg)
+ end if
+
+ if (present(fermie_to_zero)) then
+   if (fermie_to_zero) then
+     ebands%eig = ebands%eig - ebands%fermie
+     ebands%fermih = ebands%fermih - ebands%fermie
+     ebands%fermie = zero
+   end if
  end if
 
 end subroutine ebands_update_occ

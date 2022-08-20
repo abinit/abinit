@@ -39,11 +39,11 @@ module m_gwr_driver
 
  use defs_datatypes,    only : pseudopotential_type, ebands_t
  use defs_abitypes,     only : MPI_type
- use m_io_tools,        only : file_exists, open_file
+ use m_io_tools,        only : file_exists, open_file, get_unit, iomode_from_fname
  use m_time,            only : cwtime, cwtime_report
  use m_fstrings,        only : strcat, sjoin, ftoa, itoa
  use m_slk,             only : matrix_scalapack
- use m_fftcore,         only : print_ngfft ! ngfft_seq,
+ use m_fftcore,         only : print_ngfft, get_kg
  use m_fft,             only : fourdp
  use m_ioarr,           only : read_rhor
  use m_energies,        only : energies_type, energies_init
@@ -71,7 +71,7 @@ module m_gwr_driver
  use m_paw_denpot,      only : pawdenpot
  use m_paw_init,        only : pawinit, paw_gencond
  use m_pawcprj,         only : pawcprj_type, pawcprj_free !, pawcprj_alloc, paw_overlap
- use m_ksdiago,         only : ksdiago_slk
+ use m_ksdiago,         only : ugb_t !ksdiago_slk,
  use m_mkrho,           only : prtrhomxmn
  use m_melemts,         only : melflags_t !, melements_t
  use m_setvtr,          only : setvtr
@@ -150,20 +150,21 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
 !Local variables ------------------------------
 !scalars
  integer,parameter :: master = 0, cplex1 = 1, ipert0 = 0, idir0 = 0, optrhoij1 = 1
- integer :: ii, comm, nprocs, my_rank, mgfftf, nfftf, omp_ncpus, work_size, nks_per_proc, ierr, spin, ik_ibz
+ integer :: ii, comm, nprocs, my_rank, mgfftf, nfftf, omp_ncpus, work_size, nks_per_proc, ierr, spin, ik_ibz, nband_k
  real(dp) :: eff, mempercpu_mb, max_wfsmem_mb, nonscal_mem
  real(dp) :: ecore, ecut_eff, ecutdg_eff, cpu, wall, gflops
  logical, parameter :: is_dfpt = .false.
  logical :: use_wfk
  character(len=500) :: msg
  character(len=fnlen) :: wfk_path, den_path, kden_path
- type(hdr_type) :: wfk_hdr, den_hdr, kden_hdr
+ type(hdr_type) :: wfk_hdr, den_hdr, kden_hdr, owfk_hdr
  type(crystal_t) :: cryst, den_cryst, wfk_cryst
- type(ebands_t) :: ks_ebands
+ type(ebands_t) :: ks_ebands, owfk_ebands
  type(pawfgr_type) :: pawfgr
  type(wvl_data) :: wvl
  type(mpi_type) :: mpi_enreg
  type(gwr_t) :: gwr
+ type(wfk_t) :: owfk
 !arrays
  real(dp), parameter :: k0(3) = zero
  integer :: cplex, cplex_dij, cplex_rhoij
@@ -181,24 +182,24 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  type(energies_type) :: KS_energies
  type(melflags_t) :: KS_mflags
  type(paw_dmft_type) :: Paw_dmft
- type(matrix_scalapack) :: u_gb
+ type(ugb_t) :: ugb
 !arrays
  integer :: ngfftc(18),ngfftf(18),unts(2) ! gwc_ngfft(18),gwx_ngfft(18),
- integer,allocatable :: nq_spl(:), l_size_atm(:) !,qp_vbik(:,:),tmp_gfft(:,:),ks_vbik(:,:),nband(:,:),
- integer,allocatable :: tmp_kstab(:,:,:)
+ integer,allocatable :: nq_spl(:), l_size_atm(:) !,qp_vbik(:,:),tmp_gfft(:,:),ks_vbik(:,:)
+ integer,allocatable :: tmp_kstab(:,:,:), npwarr_ik(:), gvec_(:,:), istwfk_ik(:), nband_iks(:,:)
  real(dp) :: strsxc(6) !,tsec(2)
  real(dp),allocatable :: grchempottn(:,:),grewtn(:,:),grvdw(:,:),qmax(:)
  real(dp),allocatable :: ks_nhat(:,:),ks_nhatgr(:,:,:),ks_rhog(:,:)
  real(dp),allocatable :: ks_rhor(:,:),ks_vhartr(:), ks_vtrial(:,:), ks_vxc(:,:), ks_taur(:,:)
  real(dp),allocatable :: kxc(:,:), ph1d(:,:), ph1df(:,:) !qp_kxc(:,:),
  real(dp),allocatable :: vpsp(:), xccc3d(:), dijexc_core(:,:,:) !, dij_hf(:,:,:)
- real(dp),allocatable :: eig_ene(:)
+ real(dp),allocatable :: eig_k(:), occ_k(:)
  type(Paw_an_type),allocatable :: KS_paw_an(:)
  type(Paw_ij_type),allocatable :: KS_paw_ij(:)
  type(Pawfgrtab_type),allocatable :: Pawfgrtab(:)
  type(Pawrhoij_type),allocatable :: KS_Pawrhoij(:)
  type(pawpwff_t),allocatable :: Paw_pwff(:)
- type(pawcprj_type),allocatable :: cprj_k(:,:)
+ !type(pawcprj_type),allocatable :: cprj_k(:,:)
 
 !************************************************************************
 
@@ -293,18 +294,18 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
    end if
    call wrtout(unts, sjoin("- Reading GS density from: ", den_path))
 
-   if (use_wfk) then
-     if (nctk_try_fort_or_ncfile(wfk_path, msg) /= 0) then
-       ABI_ERROR(sjoin("Cannot find GS WFK file:", wfk_path, ". Error:", msg))
-     end if
-     call wrtout(unts, sjoin("- Reading GS states from WFK file:", wfk_path))
-   end if
-
    if (dtset%usekden == 1) then
      if (nctk_try_fort_or_ncfile(kden_path, msg) /= 0) then
        ABI_ERROR(sjoin("Cannot find KDEN file:", kden_path, ". Error:", msg))
      end if
      call wrtout(unts, sjoin("- Reading KDEN kinetic energy density from: ", kden_path))
+   end if
+
+   if (use_wfk) then
+     if (nctk_try_fort_or_ncfile(wfk_path, msg) /= 0) then
+       ABI_ERROR(sjoin("Cannot find GS WFK file:", wfk_path, ". Error:", msg))
+     end if
+     call wrtout(unts, sjoin("- Reading GS states from WFK file:", wfk_path))
    end if
 
    call wrtout(ab_out, ch10//ch10)
@@ -327,11 +328,8 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
    call wfk_cryst%free()
    !call wfk_cryst%print(header="crystal structure from WFK file")
 
-   call ebands_update_occ(ks_ebands, dtset%spinmagntarget, prtvol=0)
-
-   ! TODO: Make sure that ef is inside the gap if semiconductor.
-   ks_ebands%eig = ks_ebands%eig - ks_ebands%fermie
-   ks_ebands%fermie = zero
+   ! Make sure that ef is inside the gap if semiconductor.
+   call ebands_update_occ(ks_ebands, dtset%spinmagntarget, prtvol=dtset%prtvol, fermie_to_zero=.True.)
 
    ! Here we change the GS bands (Fermi level, scissors operator ...)
    ! All the modifications to ebands should be done here.
@@ -569,77 +567,119 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
 
  call cwtime_report(" prepare gwr_driver_init", cpu, wall, gflops)
 
- do spin=1,dtset%nsppol
+ if (dtset%gwr_task == "HDIAGO") then
+   ! Perform direct diagonalization of the Hamiltonian and write WFK file.
+   ABI_MALLOC(nband_iks, (dtset%nkpt, dtset%nsppol))
+   ABI_MALLOC(npwarr_ik, (dtset%nkpt))
+   ABI_MALLOC(istwfk_ik, (dtset%nkpt))
+   istwfk_ik = 1 ! istwkf 2 is not yet supported.
+
+   ! Compute npw_k from ecut
    do ik_ibz=1,dtset%nkpt
-     !call ksdiago_slk(spin, dtset%istwfk(ik_ibz), dtset%kptns(:,ik_ibz), dtset%ecut, -1, ngfftc, nfftf, &
-     call ksdiago_slk(spin, 1, dtset%kptns(:,ik_ibz), dtset%ecut, -1, ngfftc, nfftf, &
-                      dtset, pawtab, pawfgr, ks_paw_ij, cryst, psps, ks_vtrial, &
-                      onband_diago, eig_ene, u_gb, cprj_k, comm)
-
-     ABI_FREE(eig_ene)
-     call u_gb%free()
-     if (dtset%usepaw == 1) then
-       call pawcprj_free(cprj_k)
-       ABI_FREE(cprj_k)
-     end if
-     stop
+     call get_kg(dtset%kptns(:,ik_ibz), istwfk_ik(ik_ibz), dtset%ecut, cryst%gmet, npwarr_ik(ik_ibz), gvec_)
+     ABI_FREE(gvec_)
+     nband_iks(ik_ibz, :) = npwarr_ik(ik_ibz)
    end do
- end do
- stop
 
- ! ====================================================
- ! === This is the real GWR stuff once all is ready ===
- ! ====================================================
+   ! Build header with new npwarr and nband
+   owfk_ebands = ebands_from_dtset(dtset, npwarr_ik, nband=nband_iks)
+   !owfk_ebands%eig = zero
+   call hdr_init(owfk_ebands, codvsn, dtset, owfk_hdr, pawtab, 0, psps, wvl%descr)
 
- call gwr%init(dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg, comm)
+   ! Change the value of istwfk that has been taked from dtset.
+   ABI_REMALLOC(owfk_hdr%istwfk, (dtset%nkpt))
+   owfk_hdr%istwfk(:) = istwfk_ik
 
- !=== Calculate Vxc(b1,b2,k,s)=<b1,k,s|v_{xc}|b2,k,s> for all the states included in GW ===
- !  * This part is parallelized within wfd%comm since each node has all GW wavefunctions.
- !  * Note that vH matrix elements are calculated using the true uncutted interaction.
+   call owfk%open_write(owfk_hdr, dtfil%fnameabo_wfk, 0, iomode_from_fname(dtfil%fnameabo_wfk), get_unit(), comm)
 
- call KS_mflags%reset()
- !if (rdm_update) then
- !KS_mflags%has_hbare=1
- !KS_mflags%has_kinetic=1
- !end if
- KS_mflags%has_vhartree=1
- KS_mflags%has_vxc     =1
- KS_mflags%has_vxcval  =1
- if (Dtset%usepawu /= 0  )  KS_mflags%has_vu      = 1
- if (Dtset%useexexch /= 0)  KS_mflags%has_lexexch = 1
- if (Dtset%usepaw==1 .and. Dtset%gw_sigxcore == 1) KS_mflags%has_sxcore = 1
- !if (gwcalctyp<10        )  KS_mflags%only_diago = 1 ! off-diagonal elements only for SC on wavefunctions.
- KS_mflags%only_diago = 1 ! off-diagonal elements only for SC on wavefunctions.
+   do spin=1,dtset%nsppol
+     do ik_ibz=1,dtset%nkpt
+       nband_k = nband_iks(ik_ibz, spin)
+       !nband_k = -1
+       call ugb%from_diago( &
+                          !spin, dtset%istwfk(ik_ibz), dtset%kptns(:,ik_ibz), dtset%ecut, nband_k, ngfftc, nfftf, &
+                          spin, 1, dtset%kptns(:,ik_ibz), dtset%ecut, nband_k, ngfftc, nfftf, &
+                          dtset, pawtab, pawfgr, ks_paw_ij, cryst, psps, ks_vtrial, eig_k, &
+                          comm)
 
- ! Load wavefunctions for Sigma_nk in gwr%kcalc_wfd.
- call gwr%load_kcalc_wfd(wfk_path, tmp_kstab)
+       ! occupancies are set to zero.
+       ! Client code is responsbile to recompile occ and fermie when reading the WFK.
+       ABI_CALLOC(occ_k, (nband_k))
+       !owfk_ebands%eig(1:nband_k, ik_ibz, spin) = eig_k
 
- ! Compute gwr%ks_me matrix elements.
- call calc_vhxc_me(gwr%kcalc_wfd, ks_mflags, gwr%ks_me, cryst, dtset, nfftf, ngfftf, &
-                   ks_vtrial, ks_vhartr, ks_vxc, psps, pawtab, ks_paw_an, pawang, pawfgrtab, ks_paw_ij, dijexc_core, &
-                   ks_rhor, usexcnhat, ks_nhat, ks_nhatgr, nhatgrdim, tmp_kstab, taur=ks_taur)
+       call owfk%write_band_block([ugb%my_bstart, ugb%my_bstop], ik_ibz, spin, xmpio_collective, &
+                                   kg_k=ugb%kg_k, cg_k=ugb%cg_k, eig_k=eig_k(1:nband_k), occ_k=occ_k)
+       ABI_FREE(eig_k)
+       ABI_FREE(occ_k)
+       call ugb%free()
+     end do
+   end do
 
- ABI_FREE(tmp_kstab)
- if (my_rank == master) call gwr%ks_me%print(header="KS matrix elements", unit=std_out)
+   !call ebands_update_occ(owfk_ebands, dtset%spinmagntarget, prtvol=dtset%prtvol, fermie_to_zero=.False.)
 
- if (use_wfk) then
-   ! Build Green's function in imaginary-time from WFK file
-   !call gwr%calc_head_wings(wfk_path)
-   call gwr%build_gtau_from_wfk(wfk_path)
+   ABI_FREE(npwarr_ik)
+   ABI_FREE(istwfk_ik)
+   ABI_FREE(nband_iks)
+
+   call owfk_hdr%free()
+   call ebands_free(owfk_ebands)
+   call owfk%close()
  else
-   !call gwr%build_gtau_from_vtrial(wfk_path, ngfftf, ks_vtrial)
+
+   ! ====================================================
+   ! === This is the real GWR stuff once all is ready ===
+   ! ====================================================
+
+   call gwr%init(dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg, comm)
+
+   !=== Calculate Vxc(b1,b2,k,s)=<b1,k,s|v_{xc}|b2,k,s> for all the states included in GW ===
+   !  * This part is parallelized within wfd%comm since each node has all GW wavefunctions.
+   !  * Note that vH matrix elements are calculated using the true uncutted interaction.
+
+   call KS_mflags%reset()
+   !if (rdm_update) then
+   !KS_mflags%has_hbare=1
+   !KS_mflags%has_kinetic=1
+   !end if
+   KS_mflags%has_vhartree=1
+   KS_mflags%has_vxc     =1
+   KS_mflags%has_vxcval  =1
+   if (Dtset%usepawu /= 0  )  KS_mflags%has_vu      = 1
+   if (Dtset%useexexch /= 0)  KS_mflags%has_lexexch = 1
+   if (Dtset%usepaw==1 .and. Dtset%gw_sigxcore == 1) KS_mflags%has_sxcore = 1
+   !if (gwcalctyp<10        )  KS_mflags%only_diago = 1 ! off-diagonal elements only for SC on wavefunctions.
+   KS_mflags%only_diago = 1 ! off-diagonal elements only for SC on wavefunctions.
+
+   ! Load wavefunctions for Sigma_nk in gwr%kcalc_wfd.
+   call gwr%load_kcalc_wfd(wfk_path, tmp_kstab)
+
+   ! Compute gwr%ks_me matrix elements.
+   call calc_vhxc_me(gwr%kcalc_wfd, ks_mflags, gwr%ks_me, cryst, dtset, nfftf, ngfftf, &
+                     ks_vtrial, ks_vhartr, ks_vxc, psps, pawtab, ks_paw_an, pawang, pawfgrtab, ks_paw_ij, dijexc_core, &
+                     ks_rhor, usexcnhat, ks_nhat, ks_nhatgr, nhatgrdim, tmp_kstab, taur=ks_taur)
+
+   ABI_FREE(tmp_kstab)
+   if (my_rank == master) call gwr%ks_me%print(header="KS matrix elements", unit=std_out)
+
+   if (use_wfk) then
+     ! Build Green's function in imaginary-time from WFK file
+     !call gwr%calc_head_wings(wfk_path)
+     call gwr%build_gtau_from_wfk(wfk_path)
+   else
+     !call gwr%build_gtau_from_vtrial(wfk_path, ngfftf, ks_vtrial)
+   end if
+
+   select case (dtset%gwr_task)
+   case ("G0W0")
+     call gwr%run_g0w0()
+
+   case ("RPA_ENERGY")
+     call gwr%rpa_energy()
+
+   case default
+     ABI_ERROR(sjoin("Invalid value of gwr_task:", dtset%gwr_task))
+   end select
  end if
-
- select case (dtset%gwr_task)
- case ("G0W0")
-   call gwr%run_g0w0()
-
- case ("RPA_ENERGY")
-   call gwr%rpa_energy()
-
- case default
-   ABI_ERROR(sjoin("Invalid value of gwr_task:", dtset%gwr_task))
- end select
 
  !=====================
  !==== Free memory ====

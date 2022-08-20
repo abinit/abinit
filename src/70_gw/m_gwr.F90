@@ -148,7 +148,8 @@ module m_gwr
  use m_gsphere,       only : kg_map
  use m_melemts,       only : melements_t
  use m_ioarr,         only : read_rhor
- use m_slk,           only : matrix_scalapack, processor_scalapack, slk_array_free, slk_array_set, slk_array_locmem_mb
+ use m_slk,           only : matrix_scalapack, processor_scalapack, slk_array_free, slk_array_set, slk_array_locmem_mb, &
+                            block_dist_1d
  use m_wfk,           only : wfk_read_ebands, wfk_t, wfk_open_read
  use m_wfd,           only : wfd_init, wfd_t, wfdgw_t, wave_t, WFD_STORED
  use m_pawtab,        only : pawtab_type
@@ -668,7 +669,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
 !scalars
  integer,parameter :: me_fft0 = 0, paral_fft0 = 0, nproc_fft1 = 1, istwfk1 = 1
  integer,parameter :: qptopt1 = 1, qtimrev1 = 1, master = 0, ndims = 4
- integer :: my_is, my_it, my_ikf, my_iqf, ii, npwsp, col_bsize, ebands_timrev, my_iki, my_iqi, itau, spin
+ integer :: my_is, my_it, my_ikf, my_iqf, ii, npwsp, ebands_timrev, my_iki, my_iqi, itau, spin
  integer :: my_nshiftq, iq_bz, iq_ibz, npw_, ncid, ig, ig_start
  integer :: comm_cart, me_cart, ierr, all_nproc, nps, my_rank, qprange_, gap_err, ncerr, omp_nt
  integer :: jj, cnt, ikcalc, ndeg, mband, bstop, nbsum, it, iw
@@ -1399,6 +1400,7 @@ subroutine gwr_alloc_free_mats(gwr, mask_ibz, what, action)
 !Local variables-------------------------------
  integer :: my_is, my_it, ipm, npwsp, col_bsize, my_iki, my_iqi, itau, spin, ik_ibz, iq_ibz
  type(matrix_scalapack), pointer :: mat
+ character(len=500) :: msg
 
 ! *************************************************************************
 
@@ -1417,7 +1419,8 @@ subroutine gwr_alloc_free_mats(gwr, mask_ibz, what, action)
        do ik_ibz=1,gwr%nkibz
          if (mask_ibz(ik_ibz) == 0) cycle
          npwsp = gwr%green_desc_kibz(ik_ibz)%npw * gwr%nspinor
-         col_bsize = npwsp / gwr%g_comm%nproc; if (mod(npwsp, gwr%g_comm%nproc) /= 0) col_bsize = col_bsize + 1
+         !col_bsize = npwsp / gwr%g_comm%nproc; if (mod(npwsp, gwr%g_comm%nproc) /= 0) col_bsize = col_bsize + 1
+         ABI_CHECK(block_dist_1d(npwsp, gwr%g_comm%nproc, col_bsize, msg), msg)
          associate (gt => gwr%gt_kibz(:, ik_ibz, itau, spin))
          do ipm=1,2
            if (action == "malloc") call gt(ipm)%init(npwsp, npwsp, gwr%g_slkproc, 1, size_blocs=[npwsp, col_bsize])
@@ -1433,7 +1436,8 @@ subroutine gwr_alloc_free_mats(gwr, mask_ibz, what, action)
        do iq_ibz=1,gwr%nqibz
          if (mask_ibz(iq_ibz) == 0) cycle
          npwsp = gwr%tchi_desc_qibz(iq_ibz)%npw * gwr%nspinor
-         col_bsize = npwsp / gwr%g_comm%nproc; if (mod(npwsp, gwr%g_comm%nproc) /= 0) col_bsize = col_bsize + 1
+         !col_bsize = npwsp / gwr%g_comm%nproc; if (mod(npwsp, gwr%g_comm%nproc) /= 0) col_bsize = col_bsize + 1
+         ABI_CHECK(block_dist_1d(npwsp, gwr%g_comm%nproc, col_bsize, msg), msg)
          if (what == "tchi") mat => gwr%tchi_qibz(iq_ibz, itau, spin)
          if (what == "wc") mat => gwr%wc_qibz(iq_ibz, itau, spin)
          if (action == "malloc") call mat%init(npwsp, npwsp, gwr%g_slkproc, 1, size_blocs=[npwsp, col_bsize])
@@ -1448,7 +1452,8 @@ subroutine gwr_alloc_free_mats(gwr, mask_ibz, what, action)
        do ik_ibz=1,gwr%nkibz
          if (mask_ibz(ik_ibz) == 0) cycle
          npwsp = gwr%tchi_desc_qibz(iq_ibz)%npw * gwr%nspinor
-         col_bsize = npwsp / gwr%g_comm%nproc; if (mod(npwsp, gwr%g_comm%nproc) /= 0) col_bsize = col_bsize + 1
+         !col_bsize = npwsp / gwr%g_comm%nproc; if (mod(npwsp, gwr%g_comm%nproc) /= 0) col_bsize = col_bsize + 1
+         ABI_CHECK(block_dist_1d(npwsp, gwr%g_comm%nproc, col_bsize, msg), msg)
          associate (sigc => gwr%sigc_kibz(:, ik_ibz, itau, spin))
          do ipm=1,2
            if (action == "malloc") call sigc(ipm)%init(npwsp, npwsp, gwr%g_slkproc, 1, size_blocs=[npwsp, col_bsize])
@@ -1711,7 +1716,7 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: formeig0 = 0, istwfk1 = 1
- integer :: mband, nkibz, nsppol, my_is, my_iki, spin, ik_ibz ! my_it,
+ integer :: mband, min_nband, nkibz, nsppol, my_is, my_iki, spin, ik_ibz ! my_it,
  integer :: my_ib, my_nb, band, npw_k, mpw, istwf_k, itau, ipm, ig1, ig2, il_g1, il_g2
  integer :: nbsum, npwsp, col_bsize, nband_k, my_bstart, my_bstop, nb, ierr
  real(dp) :: f_nk, eig_nk, ef, spin_fact, cpu, wall, gflops
@@ -1755,16 +1760,19 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
  ! treated by this MPI rank are stored in memory.
 
  nkibz = wfk_ebands%nkpt; nsppol = wfk_ebands%nsppol; mband = wfk_ebands%mband
+ min_nband = minval(wfk_ebands%nband)
 
  ABI_MALLOC(nband, (nkibz, nsppol))
  ABI_MALLOC(bks_mask, (mband, nkibz, nsppol))
  ABI_MALLOC(keep_ur, (mband, nkibz, nsppol))
- nband = mband; bks_mask = .False.; keep_ur = .False.
+ nband = reshape(wfk_ebands%nband, [nkibz, nsppol])
+ !nband = mband
+ bks_mask = .False.; keep_ur = .False.
 
  nbsum = dtset%nband(1)
- if (nbsum > mband) then
-   ABI_WARNING(sjoin("WFK file contains", itoa(mband), "states while you want to use:", itoa(nbsum)))
-   nbsum = mband
+ if (nbsum > min_nband) then
+   ABI_WARNING(sjoin("WFK file contains", itoa(min_nband), "states while you're asking for:", itoa(nbsum)))
+   nbsum = min_nband
  end if
  call wrtout(std_out, sjoin(" Computing Green's function with nbsum:", itoa(nbsum)))
 
@@ -1961,7 +1969,8 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
 
      ! Init CG(npwsp, nband) PBLAS matrix within gtau communicator.
      ! and distribute it over bands so that each proc reads a subset of bands in read_band_block
-     col_bsize = nband_k / gwr%gtau_comm%nproc; if (mod(nband_k, gwr%gtau_comm%nproc) /= 0) col_bsize = col_bsize + 1
+     !col_bsize = nband_k / gwr%gtau_comm%nproc; if (mod(nband_k, gwr%gtau_comm%nproc) /= 0) col_bsize = col_bsize + 1
+     ABI_CHECK(block_dist_1d(nband_k, gwr%gtau_comm%nproc, col_bsize, msg), msg)
      call cg_mat%init(npwsp, nband_k, gtau_slkproc, istwfk1, size_blocs=[npwsp, col_bsize])
 
      my_bstart = cg_mat%loc2gcol(1)
@@ -2171,6 +2180,7 @@ subroutine gwr_get_myk_green_gpr(gwr, itau, spin, desc_mykbz, gt_gpr)
  integer :: my_ikf, ik_bz, ig2, ipm, npwsp, col_bsize, idat, ndat
  logical :: k_is_gamma
  real(dp) :: kk_bz(3), cpu, wall, gflops
+ character(len=500) :: msg
  type(matrix_scalapack) :: rgp, gt_pm(2)
  complex(dp),allocatable :: ceikr(:)
 
@@ -2195,7 +2205,8 @@ subroutine gwr_get_myk_green_gpr(gwr, itau, spin, desc_mykbz, gt_gpr)
 
      ! Allocate rgp PBLAS matrix to store G(r,g')
      npwsp = desc_k%npw * gwr%nspinor
-     col_bsize = npwsp / gwr%g_comm%nproc; if (mod(npwsp, gwr%g_comm%nproc) /= 0) col_bsize = col_bsize + 1
+     !col_bsize = npwsp / gwr%g_comm%nproc; if (mod(npwsp, gwr%g_comm%nproc) /= 0) col_bsize = col_bsize + 1
+     ABI_CHECK(block_dist_1d(npwsp, gwr%g_comm%nproc, col_bsize, msg), msg)
      call rgp%init(gwr%g_nfft * gwr%nspinor, npwsp, gwr%g_slkproc, desc_k%istwfk, &
                    size_blocs=[gwr%g_nfft * gwr%nspinor, col_bsize])
 
@@ -2267,6 +2278,7 @@ subroutine gwr_get_gk_rpr_pm(gwr, my_ikf, itau, spin, gk_rpr_pm)
  real(dp) :: cpu, wall, gflops
  type(matrix_scalapack) :: rgp, gt_pm(2), gpr
  type(desc_t) :: desc_k
+ character(len=500) :: msg
 
 ! *************************************************************************
 
@@ -2284,7 +2296,8 @@ subroutine gwr_get_gk_rpr_pm(gwr, my_ikf, itau, spin, gk_rpr_pm)
 
    ! Allocate rgp PBLAS matrix to store G(r,g')
    npwsp = desc_k%npw * gwr%nspinor
-   col_bsize = npwsp / gwr%g_comm%nproc; if (mod(npwsp, gwr%g_comm%nproc) /= 0) col_bsize = col_bsize + 1
+   !col_bsize = npwsp / gwr%g_comm%nproc; if (mod(npwsp, gwr%g_comm%nproc) /= 0) col_bsize = col_bsize + 1
+   ABI_CHECK(block_dist_1d(npwsp, gwr%g_comm%nproc, col_bsize, msg), msg)
    call rgp%init(gwr%g_nfft * gwr%nspinor, npwsp, gwr%g_slkproc, desc_k%istwfk, &
                  size_blocs=[gwr%g_nfft * gwr%nspinor, col_bsize])
 
@@ -2364,12 +2377,14 @@ subroutine gwr_ggp_to_rpr(gwr, desc, ggp, rpr)
 !scalars
  integer :: ig2, npwsp, col_bsize, ir1, ndat
  type(matrix_scalapack) :: rgp, gpr
+ character(len=500) :: msg
 
 ! *************************************************************************
 
  ! Allocate rgp PBLAS matrix to store F(r,g')
  npwsp = desc%npw * gwr%nspinor
- col_bsize = npwsp / gwr%g_comm%nproc; if (mod(npwsp, gwr%g_comm%nproc) /= 0) col_bsize = col_bsize + 1
+ !col_bsize = npwsp / gwr%g_comm%nproc; if (mod(npwsp, gwr%g_comm%nproc) /= 0) col_bsize = col_bsize + 1
+ ABI_CHECK(block_dist_1d(npwsp, gwr%g_comm%nproc, col_bsize, msg), msg)
  call rgp%init(gwr%g_nfft * gwr%nspinor, npwsp, gwr%g_slkproc, desc%istwfk, &
                size_blocs=[gwr%g_nfft * gwr%nspinor, col_bsize])
 
@@ -2534,6 +2549,7 @@ subroutine gwr_get_myq_wc_gpr(gwr, itau, spin, desc_myqbz, wc_gpr)
  integer :: my_iqf, iq_bz, ig2, npwsp, col_bsize, idat, ndat
  real(dp) :: cpu, wall, gflops, qq_bz(3)
  logical :: q_is_gamma
+ character(len=500) :: msg
  type(matrix_scalapack) :: rgp, wc_qbz
  complex(dp),allocatable :: ceiqr(:)
 
@@ -2556,7 +2572,8 @@ subroutine gwr_get_myq_wc_gpr(gwr, itau, spin, desc_myqbz, wc_gpr)
 
    ! Allocate rgp PBLAS matrix to store Wc(r, g')
    npwsp = desc_q%npw * gwr%nspinor
-   col_bsize = npwsp / gwr%g_comm%nproc; if (mod(npwsp, gwr%g_comm%nproc) /= 0) col_bsize = col_bsize + 1
+   !col_bsize = npwsp / gwr%g_comm%nproc; if (mod(npwsp, gwr%g_comm%nproc) /= 0) col_bsize = col_bsize + 1
+   ABI_CHECK(block_dist_1d(npwsp, gwr%g_comm%nproc, col_bsize, msg), msg)
    call rgp%init(gwr%g_nfft * gwr%nspinor, npwsp, gwr%g_slkproc, desc_q%istwfk, &
                  size_blocs=[gwr%g_nfft * gwr%nspinor, col_bsize])
 
@@ -2624,6 +2641,7 @@ subroutine gwr_get_wc_rpr_qbz(gwr, qq_bz, itau, spin, wc_rpr)
 !scalars
  integer :: my_iqf, iq_bz, ig2, npwsp, col_bsize, ir1, idat, ndat, g0_q(3)
  !logical :: q_is_gamma
+ character(len=500) :: msg
  type(desc_t) :: desc_q
  type(matrix_scalapack) :: wc_ggp, rgp, gpr
  complex(dp),allocatable :: ceiqr(:)
@@ -2649,7 +2667,8 @@ subroutine gwr_get_wc_rpr_qbz(gwr, qq_bz, itau, spin, wc_rpr)
 
  ! Allocate rgp PBLAS matrix to store Wc(r, g')
  npwsp = desc_q%npw * gwr%nspinor
- col_bsize = npwsp / gwr%g_comm%nproc; if (mod(npwsp, gwr%g_comm%nproc) /= 0) col_bsize = col_bsize + 1
+ !col_bsize = npwsp / gwr%g_comm%nproc; if (mod(npwsp, gwr%g_comm%nproc) /= 0) col_bsize = col_bsize + 1
+ ABI_CHECK(block_dist_1d(npwsp, gwr%g_comm%nproc, col_bsize, msg), msg)
  call rgp%init(gwr%g_nfft * gwr%nspinor, npwsp, gwr%g_slkproc, desc_q%istwfk, &
                size_blocs=[gwr%g_nfft * gwr%nspinor, col_bsize])
 
@@ -3400,7 +3419,8 @@ subroutine gwr_build_tchi(gwr)
      iq_ibz = gwr%my_qibz_inds(my_iqi)
      npwsp = gwr%tchi_desc_qibz(iq_ibz)%npw * gwr%nspinor
      ncol_glob = gwr%g_nfft * gwr%nspinor
-     col_bsize = ncol_glob / gwr%g_comm%nproc; if (mod(ncol_glob, gwr%g_comm%nproc) /= 0) col_bsize = col_bsize + 1
+     !col_bsize = ncol_glob / gwr%g_comm%nproc; if (mod(ncol_glob, gwr%g_comm%nproc) /= 0) col_bsize = col_bsize + 1
+     ABI_CHECK(block_dist_1d(ncol_glob, gwr%g_comm%nproc, col_bsize, msg), msg)
      call chiq_gpr(my_iqi)%init(npwsp, gwr%g_nfft * gwr%nspinor, gwr%g_slkproc, 1, size_blocs=[npwsp, col_bsize])
    end do
    mem_mb = sum(slk_array_locmem_mb(chiq_gpr))

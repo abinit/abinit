@@ -205,7 +205,7 @@ module m_slk
     ! Transpose matrix
 
    procedure :: change_size_blocs => slk_change_size_blocs
-    ! Change the block sizes, return new matrix
+    ! Change the block sizes and the processor, return new matrix
 
    procedure :: take_from => slk_take_from
     ! Take values from source
@@ -233,8 +233,11 @@ module m_slk
 
  end type matrix_scalapack
 
- public :: matrix_get_local_cplx           ! Returns a local matrix coefficient of complex type.
- public :: matrix_get_local_real           ! Returns a local matrix coefficient of double precision type.
+ public :: block_dist_1d                   ! Return block size for one-dimensional block column/row distribution
+ public :: slk_has_elpa                    ! Return True if ELPA support is activated
+
+ public :: matrix_get_local_cplx           ! Return a local matrix coefficient of complex type.
+ public :: matrix_get_local_real           ! Return a local matrix coefficient of double precision type.
  public :: matrix_set_local_cplx           ! Sets a local matrix coefficient of complex type.
  public :: matrix_set_local_real           ! Sets a local matrix coefficient of double precision type.
  public :: idx_loc                         ! Local indices of an entry
@@ -289,6 +292,7 @@ module m_slk
 
  public :: slk_array_set                       ! Elemental routine to set the value of the buffer to a costant value `cvalue`.
  public :: slk_array_locmem_mb                 ! Compute memory allocated for an array of matrix_scalapack elements
+
 
 
 CONTAINS  !==============================================================================
@@ -568,8 +572,7 @@ subroutine init_matrix_scalapack(matrix, nbli_global, nbco_global, processor, is
                processor%grid%ictxt, MAX(1, matrix%sizeb_local(1)), info)
 
  if (info /= 0) then
-   write(msg,'(2(a,i0))')" rank: ",processor%myproc,' error while initializing scalapack matrix, info: ',info
-   ABI_ERROR(msg)
+   ABI_ERROR(sjoin("Error while initializing scalapack matrix. info:", itoa(info)))
  end if
 
  ! Allocate local buffer.
@@ -638,8 +641,8 @@ subroutine slkmat_print(mat, header, unit, prtvol)
  integer,optional,intent(in) :: prtvol, unit
 
 !Local variables-------------------------------
- integer :: unt, my_prtvol !, ii
- character(len=100) :: dtype
+ integer :: unt, my_prtvol, grid_dims(2)
+ character(len=50) :: matrix_dtype
  character(len=5000) :: msg
 
 ! *********************************************************************
@@ -651,22 +654,20 @@ subroutine slkmat_print(mat, header, unit, prtvol)
  if (present(header)) msg=' ==== '//trim(adjustl(header))//' ==== '
  call wrtout(unt, msg)
 
- dtype = "unknown"
- if (allocated(mat%buffer_real)) dtype = "real"
- if (allocated(mat%buffer_cplx)) dtype = "complex"
+ matrix_dtype = "undefined"
+ if (allocated(mat%buffer_real)) matrix_dtype = "real"
+ if (allocated(mat%buffer_cplx)) matrix_dtype = "complex"
+ grid_dims = [-1, -1]
+ if (associated(mat%processor)) grid_dims = mat%processor%grid%dims
 
- write(msg,'(4(3a))') &
-   '  type ............. ', trim(dtype), ch10, &
-   '  sizeb_global ..... ', trim(ltoa(mat%sizeb_global)), ch10, &
-   '  sizeb_local ...... ', trim(ltoa(mat%sizeb_local)), ch10, &
-   '  sizeb_blocs ...... ', trim(ltoa(mat%sizeb_blocs)), ch10
+ write(msg,'(5(3a),a,f8.1,a)') &
+   "  matrix_dtype ..... ", trim(matrix_dtype), ch10, &
+   "  sizeb_global ..... ", trim(ltoa(mat%sizeb_global)), ch10, &
+   "  sizeb_local ...... ", trim(ltoa(mat%sizeb_local)), ch10, &
+   "  sizeb_blocs ...... ", trim(ltoa(mat%sizeb_blocs)), ch10, &
+   "  processor grid  .. ", trim(ltoa(grid_dims)), ch10, &
+   "  memory (Mb) ...... ", mat%locmem_mb(), ch10
  call wrtout(unt, msg)
-
- if (associated(mat%processor)) then
-   write(msg,'((3a))') &
-   '  grid dims ........ ', trim(ltoa(mat%processor%grid%dims)), ch10
-   call wrtout(unt, msg)
- end if
 
  !if (prtvol > 10) call mat%write(unit)
 
@@ -946,6 +947,80 @@ elemental real(dp) function slk_array_locmem_mb(mat) result(mem_mb)
   class(matrix_scalapack),intent(in) :: mat
   mem_mb = mat%locmem_mb()
 end function slk_array_locmem_mb
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_slk/block_dist_1d
+!! NAME
+!!  block_dist_1d
+!!
+!! FUNCTION
+!!  Return block size for one-dimensional block column (row) distribution.
+!!  Mainly used to assign blocks of contiguous columns (rows) of a matrix to successive processes
+!!  when a 1d grid is employed.
+!!
+!!  It is usually interfaced with CPP macros, e.g:
+!!
+!!    ABI_CHECK(block_dist_1d(size, nproc, block_size, msg), msg)
+!!
+!! INPUTS
+!!  size=Size of the matrix (either number of rows or number of colums)
+!!  nproc=Number of processoes in the 1D scalapack grid
+!!
+!! OUTPUT
+!!  ok= Boolean flag with exit status (idle processes are not allowed).
+!!  block_size=Size of the block along this axis needed for one-dimensional block distribution
+!!  msg=Error message (if not ok)
+!!
+!! SOURCE
+
+logical function block_dist_1d(size, nproc, block_size, msg) result (ok)
+
+!Arguments ------------------------------------
+ integer, intent(in) :: size, nproc
+ integer,intent(out) :: block_size
+ character(len=*),intent(out) :: msg
+
+! *********************************************************************
+
+ ok = .True.; msg = ""
+
+ block_size = size / nproc
+ if (block_size == 0) then
+   ok = .False.
+   write(msg, "(2(a,i0), 2a)") &
+     "The number of MPI processors:", nproc, " exceeeds the number of rows (columms) of the matrix:", size, ch10, &
+     "Please decrease the number of MPI processes."
+   return
+ end if
+
+ if (mod(size, nproc) /= 0) block_size = block_size + 1
+
+end function block_dist_1d
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_slk/slk_has_elpa
+!! NAME
+!!  slk_has_elpa
+!!
+!! FUNCTION
+!!  Return True if ELPA support is activated
+!!
+!! SOURCE
+
+pure logical function slk_has_elpa() result (ans)
+
+! *********************************************************************
+
+ ans = .False.
+#ifdef HAVE_LINALG_ELPA
+ ans = .True.
+#endif
+
+end function slk_has_elpa
 !!***
 
 !----------------------------------------------------------------------
@@ -3724,7 +3799,8 @@ end subroutine slk_ptrans
 !!
 !! SOURCE
 
-subroutine slk_change_size_blocs(in_mat, out_mat, size_blocs, processor)
+subroutine slk_change_size_blocs(in_mat, out_mat, &
+                                 size_blocs, processor)  ! Optional
 
 !Arguments ------------------------------------
  class(matrix_scalapack),target,intent(in) :: in_mat
@@ -3747,7 +3823,7 @@ subroutine slk_change_size_blocs(in_mat, out_mat, size_blocs, processor)
  else
    call out_mat%init(in_mat%sizeb_global(1), in_mat%sizeb_global(1), processor__, istwf_k)
  end if
- call out_mat%print()
+ !call out_mat%print()
 
  ! p?gemr2d: Copies a submatrix from one general rectangular matrix to another.
  ! prototype
