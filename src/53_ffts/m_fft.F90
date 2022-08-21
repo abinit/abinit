@@ -2125,9 +2125,9 @@ end function fftu_mpi_utests
 !! SOURCE
 
 subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
-&  kg_kin,kg_kout,mgfft,mpi_enreg,ndat,ngfft,npwin,npwout,n4,n5,n6,option,&
-&  tim_fourwf,weight_r,weight_i, &
-&  use_gpu_cuda,use_ndo,fofginb) ! Optional arguments
+                  kg_kin,kg_kout,mgfft,mpi_enreg,ndat,ngfft,npwin,npwout,n4,n5,n6,option,&
+                  tim_fourwf,weight_r,weight_i, &
+                  use_gpu_cuda,use_ndo,fofginb) ! Optional arguments
 
 !Arguments ------------------------------------
 !scalars

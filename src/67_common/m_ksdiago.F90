@@ -34,6 +34,7 @@ module m_ksdiago
  use defs_abitypes,       only : MPI_type
  use m_dtset,             only : dataset_type
  use m_fstrings,          only : toupper, ktoa, itoa, sjoin
+ use m_numeric_tools,     only : blocked_loop
  use m_time,              only : cwtime, cwtime_report
  use m_geometry,          only : metric
  use m_hide_lapack,       only : xhegv_cplex, xheev_cplex, xheevx_cplex, xhegvx_cplex
@@ -84,6 +85,8 @@ module m_ksdiago
 
    integer :: npwsp = -1
 
+   integer,pointer :: comm
+
    type(processor_scalapack) :: processor
 
    type(matrix_scalapack) :: mat
@@ -92,8 +95,6 @@ module m_ksdiago
 
    real(dp), contiguous, pointer :: cg_k(:,:)
 
-   !real(dp),allocatable :: eig_k(:)
-
    type(pawcprj_type),allocatable :: cprj_k(:,:)
    ! (natom, nspinor*onband_diago))
 
@@ -101,6 +102,8 @@ module m_ksdiago
 
    procedure :: from_diago  => ugb_from_diago
     ! Build object by direct diagonalization of the KS Hamiltonian
+
+   !procedure :: bcast => ugb_bcast
 
    procedure :: free => ugb_free
     ! Free memory
@@ -879,7 +882,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  integer :: jj,n1,n2,n3,n4,n5,n6,negv,nkpg,nproc,npw_k_test,my_rank,optder
  integer :: type_calc,sij_opt,igsp2,ig, cplex_ghg,iband,ibs1,ibs2
  integer :: npwsp, col_bsize, nsppol, nspinor, nspden, loc2_size, il_g2
- integer :: idat, ndat, batch_size, h_size
+ integer :: idat, ndat, batch_size, h_size, mene_found
  real(dp),parameter :: lambda0 = zero
  real(dp) :: size_mat, cpu, wall, gflops !, mem_mb
  logical :: do_full_diago
@@ -957,20 +960,20 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
    call wrtout(std_out, msg)
  end if
 
- do_full_diago = nband_k == npw_k*nspinor
+ do_full_diago = nband_k == npwsp
 
- if (do_full_diago) then
-   write(msg,'(6a)')ch10,&
-   ' Since the number of bands to be computed',ch10,&
-   ' is equal to the number of G-vectors found for this kpt,',ch10,&
-   ' the program will perform complete diagonalization.'
- else
-   write(msg,'(6a)')ch10,&
-   ' Since the number of bands to be computed',ch10,&
-   ' is less than the number of G-vectors found,',ch10,&
-   ' the program will perform partial diagonalization.'
- end if
- if (dtset%prtvol > 0) call wrtout(std_out, msg)
+ !if (do_full_diago) then
+ !  write(msg,'(6a)')ch10,&
+ !  ' Since the number of bands to be computed',ch10,&
+ !  ' is equal to the number of G-vectors found for this kpt,',ch10,&
+ !  ' the program will perform complete diagonalization.'
+ !else
+ !  write(msg,'(6a)')ch10,&
+ !  ' Since the number of bands to be computed',ch10,&
+ !  ' is less than the number of G-vectors found,',ch10,&
+ !  ' the program will perform partial diagonalization.'
+ !end if
+ !if (dtset%prtvol > 0) call wrtout(std_out, msg)
 
  ! Set up local potential vlocal with proper dimensioning, from vtrial.
  ! Select spin component of interest if nspden<=2 as nvloc==1, for nspden==4, nvloc==4
@@ -1073,7 +1076,8 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  loc2_size = ghg_mat%sizeb_local(2)
 
  do il_g2=1, ghg_mat%sizeb_local(2), batch_size
-   ndat = merge(batch_size, loc2_size-il_g2+1, il_g2+batch_size-1 <= loc2_size)
+   !ndat = merge(batch_size, loc2_size-il_g2+1, il_g2+batch_size-1 <= loc2_size)
+   ndat = blocked_loop(il_g2, loc2_size, batch_size)
    igsp2 = ghg_mat%loc2gcol(il_g2)
 
    bras = zero
@@ -1158,7 +1162,6 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  call ghg_4diag%copy(eigvec)
 
  if (do_full_diago) then
-   ! Full diagonalization
    write(msg,'(6a, i0)')ch10,&
      ' Begin full diagonalization for kpt: ',trim(ktoa(kpoint)), stag(spin), ch10,&
      ' Matrix size: ',npwsp
@@ -1174,26 +1177,17 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
    call cwtime_report(" full_diago", cpu, wall, gflops)
 
  else
-   ! Partial diagonalization
-   ! range = Diago_ctl%range !range="Irange"
-   ABI_ERROR("Not Implemented Error")
+   write(msg,'(6a,i0,a,i0)') ch10,&
+     ' Begin partial diagonalization for kpt: ',trim(ktoa(kpoint)), stag(spin), ch10,&
+     ' Matrix size: ',npwsp,', nband_k: ', nband_k
+   call wrtout(std_out, msg)
    call cwtime(cpu, wall, gflops, "start")
 
-   write(msg,'(2a,3es16.8,3a,i0,a,i0)')ch10,&
-     ' Begin partial diagonalization for kpt= ',kpoint, stag(spin), ch10,&
-     ' - Size of mat.=',npw_k*nspinor,' - # out_nband: ', nband_k
-   call wrtout(std_out, msg)
-
-   !range = "I"
-   !ilu =
+   ! TODO: ELPA interface
    if (psps%usepaw == 0) then
-     !call slk_pzheevx(Slk_mat, "V", range, "U", vl, vu, il, iu, abstol, Slk_vec, mene_found, eigen)
-     !call xheevx_cplex(jobz, range, "Upper", cplex_ghg, npw_k*nspinor, ghg_mat, zero, zero,&
-     !  1, nband_k, -tol8, negv, eig_ene, eig_vec, npw_k*nspinor, msg, ierr)
+     call ghg_4diag%pzheevx("V", "I", "U", zero, zero, 1, nband_k, -tol8, eigvec, mene_found, eig_ene)
    else
-     !call slk_pzhegvx(Slk_matA, ibtype, "V", range, "U", Slk_matB, vl, vu, il, iu, abstol, Slk_vec, mene_found, eigen)
-     !call xhegvx_cplex(1, jobz, range, "Upper", cplex_ghg, npw_k*nspinor, ghg_mat, gsg_mat, zero, zero,&
-     !  1, nband_k, -tol8, negv, eig_ene, eig_vec, npw_k*nspinor, msg, ierr)
+     call ghg_4diag%pzhegvx(1, "V", "I", "U", gsg_4diag, zero, zero, 1, nband_k, -tol8, eigvec, mene_found, eig_ene)
    end if
    call cwtime_report(" partial_diago", cpu, wall, gflops)
  end if
@@ -1236,6 +1230,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  ugb%my_nband = ugb%my_bstop - ugb%my_bstart + 1
 
  call c_f_pointer(c_loc(ugb%mat%buffer_cplx), ugb%cg_k, shape=[2, npwsp * ugb%my_nband])
+ ugb%comm => ugb%mat%processor%comm
 
  call eigvec%free()
  call proc_4diag%free()
@@ -1299,8 +1294,8 @@ subroutine ugb_free(ugb)
  call ugb%mat%free()
  call ugb%processor%free()
  ABI_SFREE(ugb%kg_k)
- !ABI_SFREE(ugb%eig_k)
- nullify(ugb%cg_k)
+ ugb%cg_k => null()
+ ugb%comm => null()
 
  if (allocated(ugb%cprj_k)) then
    call pawcprj_free(ugb%cprj_k)
@@ -1309,7 +1304,6 @@ subroutine ugb_free(ugb)
 
 end subroutine ugb_free
 !!***
-
 
 end module m_ksdiago
 !!***

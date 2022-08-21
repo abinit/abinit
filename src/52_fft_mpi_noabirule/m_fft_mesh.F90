@@ -29,7 +29,7 @@ MODULE m_fft_mesh
  use m_hide_blas
 
  use defs_fftdata,     only : size_goed_fft
- use m_fstrings,       only : sjoin, itoa
+ use m_fstrings,       only : sjoin, itoa, ltoa
  use m_numeric_tools,  only : denominator, mincm, iseven, pfactorize
  use m_symtk,          only : mati3inv
  use m_geometry,       only : xred2xcart
@@ -252,7 +252,7 @@ end subroutine zpad_free
 !! Four methods are implemented for the calculation of the mesh:
 !!  method=0 --> FFT mesh defined by the user, useful for debugging.
 !!  method=1     Roughly takes the FFT box which encloses the larger of the two spheres of radius
-!!               aliasing_factor*rwfn and rsigx, where rwfn and rsigx are the radius of the spheres
+!!               aliasing_factor * rwfn and rsigx, where rwfn and rsigx are the radius of the spheres
 !!               with npwwfn and npwsigx planewaves respectively. The default aliasing_factor is 1.
 !!  method=2 --> Calculates the optimal FFT grid which allows aliasing only outside the sphere of the
 !!               npwsigx planewaves (finer than method=1 with aliasing_factor=1).
@@ -263,7 +263,7 @@ end subroutine zpad_free
 !!
 !! SOURCE
 
-subroutine setmesh(gmet,gvec,ngfft,npwvec,npwsigx,npwwfn,nfftot,method,mG0,Cryst,enforce_sym,unit)
+subroutine setmesh(gmet, gvec, ngfft, npwvec, npwsigx, npwwfn, nfftot, method, mG0, Cryst, enforce_sym, unit)
 
 !Arguments ------------------------------------
 !scalars
@@ -293,9 +293,8 @@ subroutine setmesh(gmet,gvec,ngfft,npwvec,npwsigx,npwwfn,nfftot,method,mG0,Cryst
 
  DBG_ENTER("COLL")
 
- if (ANY(mg0<0)) then
-   write(msg,'(a,3(i0,1x))')' called with wrong value of mG0 = ',mG0
-   ABI_BUG(msg)
+ if (any(mg0 < 0)) then
+   ABI_BUG(sjoin('Wrong mG0:', trim(ltoa(mG0))))
  end if
 
  tnons_warn = "Check your fractional translations tnons. "//ch10//&
@@ -308,20 +307,20 @@ subroutine setmesh(gmet,gvec,ngfft,npwvec,npwsigx,npwwfn,nfftot,method,mG0,Cryst
  nsym   =  Cryst%nsym
  symrel => Cryst%symrel
  tnons  => Cryst%tnons
- !
+
  ! Calculate the limits of the sphere of npwwfn G-vectors in each direction.
- m1=MAXVAL(ABS(gvec(1,1:npwwfn)))
- m2=MAXVAL(ABS(gvec(2,1:npwwfn)))
- m3=MAXVAL(ABS(gvec(3,1:npwwfn)))
- !
+ m1 = MAXVAL(ABS(gvec(1,1:npwwfn)))
+ m2 = MAXVAL(ABS(gvec(2,1:npwwfn)))
+ m3 = MAXVAL(ABS(gvec(3,1:npwwfn)))
+
  ! Calculate the limits of the sphere of npsigx G-vectors in each direction.
  ! Ensure that G+G0 will fit into the FFT grid, where G is any of the npwsigx/npweps vectors
  ! and G0 is (i,j,k) [-nG0shell<i,j,k<nG0shell]. This is required when npwsigx>npwwfn since
  ! we have to take into account umklapp G0 vectors to evaluate the oscillator matrix elements
  ! (see rho_tw_g) or to symmetrize these quantities (see also cigfft).
- mm1=MAXVAL(ABS(gvec(1,1:npwsigx)))
- mm2=MAXVAL(ABS(gvec(2,1:npwsigx)))
- mm3=MAXVAL(ABS(gvec(3,1:npwsigx)))
+ mm1 = MAXVAL(ABS(gvec(1,1:npwsigx)))
+ mm2 = MAXVAL(ABS(gvec(2,1:npwsigx)))
+ mm3 = MAXVAL(ABS(gvec(3,1:npwsigx)))
 
  mm1=mm1+mG0(1)
  mm2=mm2+mG0(2)
@@ -364,7 +363,7 @@ subroutine setmesh(gmet,gvec,ngfft,npwvec,npwsigx,npwwfn,nfftot,method,mG0,Cryst
  case (1)
    aliasing_factor=1
    write(msg,'(2a,i3)')ch10,' using method 1 with aliasing_factor = ',aliasing_factor
-   call wrtout(ount,msg,'COLL')
+   call wrtout(ount, msg)
    m1=m1*aliasing_factor
    m2=m2*aliasing_factor
    m3=m3*aliasing_factor
@@ -397,7 +396,7 @@ subroutine setmesh(gmet,gvec,ngfft,npwvec,npwsigx,npwwfn,nfftot,method,mG0,Cryst
    write(msg,'(a,f7.3,3a,f7.3,a)')&
     ' calculated ecutwfn          = ',ecutwfn, ' [Ha] ',ch10,&
     ' calculated ecutsigx/ecuteps = ',ecutsigx,' [Ha]'
-   call wrtout(ount,msg,'COLL')
+   call wrtout(ount, msg)
    !
    ! In the calculation of the GW self-energy or of the RPA dielectric matrix,
    ! we have products $ \rho_{12}(r)=u_1*(r) u_2(r) $ of wavefunctions whose Fourier
@@ -414,7 +413,7 @@ subroutine setmesh(gmet,gvec,ngfft,npwvec,npwsigx,npwwfn,nfftot,method,mG0,Cryst
    gsqmax=reff**2
 
    write(msg,'(a,i2,a,f7.3,a)')' using method = ',method,' with ecuteff = ',ecuteff,' [Ha]'
-   call wrtout(ount,msg,'COLL')
+   call wrtout(ount, msg)
    !
    ! === Search the limits of the reff sphere in each direction ===
    !ig1max=2*m1+1
@@ -471,9 +470,9 @@ subroutine setmesh(gmet,gvec,ngfft,npwvec,npwsigx,npwwfn,nfftot,method,mG0,Cryst
  if (enforce_sym==0) then
    ! === Determine the best size for the FFT grid *without* considering the symm ops ===
    ! * Ideally n=2*m+1 but this  could not be allowed by the FFT library.
-   call size_goed_fft(m1,n1,ierr)
-   call size_goed_fft(m2,n2,ierr)
-   call size_goed_fft(m3,n3,ierr)
+   call size_goed_fft(m1, n1, ierr)
+   call size_goed_fft(m2, n2, ierr)
+   call size_goed_fft(m3, n3, ierr)
    ABI_CHECK(ierr == 0, sjoin("size_goed_fft failed", ch10, tnons_warn))
    nfftot=n1*n2*n3
 
@@ -502,7 +501,7 @@ subroutine setmesh(gmet,gvec,ngfft,npwvec,npwsigx,npwwfn,nfftot,method,mG0,Cryst
  else
    ! === Determine the best size for the FFT grid considering symm ops ===
    ! * Ideally n=2*m+1 but this could not be allowed by the FFT library (at present only Goedecker)
-   call wrtout(ount,' Finding a FFT mesh compatible with all the symmetries','COLL')
+   call wrtout(ount,' Finding a FFT mesh compatible with all the symmetries')
 
    ! 1) Find a FFT mesh compatible with the non-symmorphic operations
    fftnons(:)=1
@@ -514,7 +513,7 @@ subroutine setmesh(gmet,gvec,ngfft,npwvec,npwsigx,npwwfn,nfftot,method,mG0,Cryst
      end do
    end do
    write(msg,'(a,3(i0,1x))')' setmesh: divisor mesh ',fftnons(:)
-   call wrtout(ount,msg,'COLL')
+   call wrtout(ount, msg)
    !
    ! 2) Check if also rotations preserve the grid.
    ! * Use previous m values as Initial guess.
@@ -557,8 +556,8 @@ subroutine setmesh(gmet,gvec,ngfft,npwvec,npwsigx,npwwfn,nfftot,method,mG0,Cryst
  write(msg,'(3(a,i5),2a,i12,a)')&
   ' setmesh: FFT mesh size selected  = ',n1,'x',n2,'x',n3,ch10,&
   '          total number of points  = ',nfftot,ch10
- call wrtout(ount,msg,'COLL')
- if (ount /= dev_null) call wrtout(ab_out,msg,'COLL')
+ call wrtout(ount, msg)
+ if (ount /= dev_null) call wrtout(ab_out, msg)
 
  ngfft(1)=n1
  ngfft(2)=n2
@@ -954,8 +953,7 @@ subroutine cigfft(mG0,npwvec,ngfft,gvec,igfft,ierr)
  DBG_ENTER("COLL")
 
  if (ANY(mg0<0)) then
-   write(msg,'(a,3i4)')' Found negative value of mg0= ',mg0
-   ABI_BUG(msg)
+   ABI_BUG(sjoin('Found negative value of mg0:', trim(ltoa(mg0))))
  end if
 
  n1=ngfft(1)

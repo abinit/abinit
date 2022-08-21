@@ -35,7 +35,7 @@ module m_slk
  use m_fstrings,      only : firstchar, toupper, itoa, sjoin, ltoa
  use m_copy,          only : alloc_copy
  use m_time,          only : cwtime, cwtime_report
- !use m_numeric_tools, only : print_arr
+ use m_numeric_tools, only : blocked_loop !, print_arr
 
  implicit none
 
@@ -78,7 +78,7 @@ module m_slk
    ! Number of procs for rows/columns
 
    integer :: ictxt = xmpi_comm_null
-   ! BLACS context
+   ! BLACS context i.e. MPI communicator.
 
  end type grid_scalapack
 
@@ -220,7 +220,7 @@ module m_slk
     ! Eigenvalues and, optionally, eigenvectors of an Hermitian matrix A. A * X = lambda * X
 
    procedure :: pzheevx => slk_pzheevx
-    ! Eigenvalues and, optionally, eigenvectors of a complex hermitian matrix A. ! A * X = lambda *  X
+    ! Eigenvalues and, optionally, eigenvectors of a complex Hermitian matrix A. ! A * X = lambda *  X
 
    procedure :: pzhegvx => slk_pzhegvx
      ! Eigenvalues and, optionally, eigenvectors of a complex
@@ -282,7 +282,7 @@ module m_slk
  public :: slk_bsize_and_type                ! Returns the byte size and the MPI datatype associated to the matrix elements
                                              ! that are stored in the ScaLAPACK_matrix
 
- public :: slk_array_free                     !  Deallocate array of matrix_scalapack elements
+ public :: slk_array_free                    !  Deallocate array of matrix_scalapack elements
  interface slk_array_free
    module procedure slk_array1_free
    module procedure slk_array2_free
@@ -2162,9 +2162,6 @@ end subroutine slk_pzgemm
 !!  istwf_k= 2 if we have a real matrix else complex.
 !!
 !! OUTPUT
-!!  None
-!!
-!! SIDE EFFECTS
 !!  results= ScaLAPACK matrix coming out of the operation
 !!  eigen= eigenvalues of the matrix
 !!
@@ -2272,7 +2269,7 @@ subroutine compute_eigen_problem(processor, matrix, results, eigen, comm, istwf_
   TWORK_tmp(2) = INT(RWORK_tmp(1))
   TWORK_tmp(3) = INT(real(CWORK_tmp(1)))
 
- !! Get the maximum of the size of the work arrays processor%comm
+  ! Get the maximum of the size of the work arrays processor%comm
   call MPI_ALLREDUCE(TWORK_tmp,TWORK,3,MPI_integer,MPI_MAX,comm,ierr)
 
   LIWORK = TWORK(1)
@@ -2298,6 +2295,10 @@ subroutine compute_eigen_problem(processor, matrix, results, eigen, comm, istwf_
   else
     ABI_MALLOC(CWORK,(1))
   end if
+
+  ! prototype
+  !call pzheevx(jobz, range, uplo, n, a, ia, ja, desca, vl, vu, il, iu, abstol, m, nz, w,
+  !             orfac, z, iz, jz, descz, work, lwork, rwork, lrwork, iwork, liwork, ifail, iclustr, gap, info)
 
   ! Call the calculation routine
   if (istwf_k/=2) then
@@ -3024,7 +3025,7 @@ end subroutine slk_pzheev
 !!
 !! FUNCTION
 !!  slk_pzheevx provides an object-oriented interface to the ScaLAPACK routine PZHEEVX that
-!!  computes selected eigenvalues and, optionally, eigenvectors of a complex hermitian matrix A.
+!!  computes selected eigenvalues and, optionally, eigenvectors of a complex Hermitian matrix A.
 !!  A * X = lambda * X
 !!
 !! INPUTS
@@ -3137,6 +3138,10 @@ subroutine slk_pzheevx(Slk_mat, jobz, range, uplo, vl, vu, il, iu, abstol, Slk_v
  ! This is clearly seen in the source in which rwork(1:3) is accessed
  ! during the calculation of the workspace size.
 
+  ! prototype
+  !call pzheevx(jobz, range, uplo, n, a, ia, ja, desca, vl, vu, il, iu, abstol, m, nz, w,
+  !             orfac, z, iz, jz, descz, work, lwork, rwork, lrwork, iwork, liwork, ifail, iclustr, gap, info)
+
   call PZHEEVX(jobz,range,uplo, Slk_mat%sizeb_global(2),Slk_mat%buffer_cplx,1,1,Slk_mat%descript%tab,&
     vl,vu,il,iu,abstol,mene_found,nvec_calc,eigen,orfac,&
     Slk_vec%buffer_cplx,1,1,Slk_vec%descript%tab,&
@@ -3178,8 +3183,12 @@ subroutine slk_pzheevx(Slk_mat, jobz, range, uplo, vl, vu, il, iu, abstol, Slk_v
   ABI_MALLOC(rwork, (lrwork))
   ABI_MALLOC(iwork, (liwork))
 
- ! Call the scaLAPACK routine.
- ! write(std_out,*) 'I am using PZHEEVX'
+  ! prototype
+  !call pzheevx(jobz, range, uplo, n, a, ia, ja, desca, vl, vu, il, iu, abstol, m, nz, w,
+  !             orfac, z, iz, jz, descz, work, lwork, rwork, lrwork, iwork, liwork, ifail, iclustr, gap, info)
+
+  ! Call the scaLAPACK routine.
+  ! write(std_out,*) 'I am using PZHEEVX'
   call PZHEEVX(jobz,range,uplo, Slk_mat%sizeb_global(2),Slk_mat%buffer_cplx,1,1,Slk_mat%descript%tab,&
     vl,vu,il,iu,abstol,mene_found,nvec_calc, eigen,orfac,&
     Slk_vec%buffer_cplx,1,1,Slk_vec%descript%tab,&
@@ -3187,41 +3196,40 @@ subroutine slk_pzheevx(Slk_mat, jobz, range, uplo, vl, vu, il, iu, abstol, Slk_v
 
  ! Handle possible error.
  if (info < 0) then
-   write(msg,'(a,i7,a)')" The ",-info,"-th argument of PZHEEVX had an illegal value."
-   if (info==-25) msg = " LRWORK is too small to compute all the eigenvectors requested, no computation is performed"
+   write(msg,'(a,i0,a)')" The ",-info,"-th argument of PZHEEVX had an illegal value."
+   if (info == -25) msg = " LRWORK is too small to compute all the eigenvectors requested, no computation is performed"
    ABI_ERROR(msg)
  end if
 
  if (info > 0) then
-   write(msg,'(a,i7)') " PZHEEVX returned info: ",info
+   write(msg,'(a,i0)') " PZHEEVX returned info: ",info
    call wrtout(std_out, msg)
-   if (MOD(info,2)/=0)then
+   if (MOD(info, 2)/=0)then
      write(msg,'(3a)')&
      " One or more eigenvectors failed to converge. ",ch10,&
      " Their indices are stored in IFAIL. Ensure ABSTOL=2.0*PDLAMCH('U')"
      call wrtout(std_out, msg)
    end if
-   if (MOD(info/2,2)/=0) then
+   if (MOD(info / 2, 2) /= 0) then
      write(msg,'(5a)')&
      " Eigenvectors corresponding to one or more clusters of eigenvalues ",ch10,&
      " could not be reorthogonalized because of insufficient workspace. ",ch10,&
      " The indices of the clusters are stored in the array ICLUSTR."
      call wrtout(std_out, msg)
    end if
-   if (MOD(info/4,2)/=0) then
+   if (MOD(info / 4, 2) /= 0) then
      write(msg,'(3a)')" Space limit prevented PZHEEVX from computing all of the eigenvectors between VL and VU. ",ch10,&
       " The number of eigenvectors computed is returned in NZ."
      call wrtout(std_out, msg)
    end if
-   if (MOD(info/8,2)/=0) then
-     msg = " PZSTEBZ  failed to compute eigenvalues. Ensure ABSTOL=2.0*PDLAMCH('U')"
-     call wrtout(std_out, msg)
+   if (MOD(info / 8, 2) /= 0) then
+     call wrtout(std_out, "PZSTEBZ failed to compute eigenvalues. Ensure ABSTOL=2.0*PDLAMCH('U')")
    end if
    ABI_ERROR("Cannot continue")
  end if
 
  ! Check the number of eigenvalues found wrt to the number of vectors calculated.
- if ( firstchar(jobz, ['V','v']) .and. mene_found/=nvec_calc) then
+ if ( firstchar(jobz, ['V','v']) .and. mene_found /= nvec_calc) then
    write(msg,'(5a)')&
    " The user supplied insufficient space and PZHEEVX is not able to detect this before beginning computation. ",ch10,&
    " To get all the  eigenvectors requested, the user must supply both sufficient space to hold the ",ch10,&
@@ -3506,7 +3514,7 @@ subroutine slk_pzhegvx(Slk_matA, ibtype, jobz, range, uplo, Slk_matB, vl, vu, il
  end if
 
  if (info > 0) then
-   write(msg,'(a,i7)') " PZHEGVX returned info: ",info
+   write(msg,'(a,i0)') " PZHEGVX returned info: ",info
    call wrtout(std_out, msg)
    if (MOD(info,2)/=0)then
      write(msg,'(3a)')&
@@ -3514,24 +3522,24 @@ subroutine slk_pzhegvx(Slk_matA, ibtype, jobz, range, uplo, Slk_matB, vl, vu, il
      " Their indices are stored in IFAIL. Ensure ABSTOL=2.0*PDLAMCH('U')"
      call wrtout(std_out, msg)
    end if
-   if (MOD(info/2,2)/=0) then
+   if (MOD(info / 2, 2) /= 0) then
      write(msg,'(5a)')&
      " Eigenvectors corresponding to one or more clusters of eigenvalues ",ch10,&
      " could not be reorthogonalized because of insufficient workspace. ",ch10,&
      " The indices of the clusters are stored in the array ICLUSTR."
      call wrtout(std_out, msg)
    end if
-   if (MOD(info/4,2)/=0) then
+   if (MOD(info / 4, 2) /= 0) then
      write(msg,'(3a)')&
      " Space limit prevented PZHEGVX from computing all of the eigenvectors between VL and VU. ",ch10,&
      " The number of eigenvectors  computed  is returned in NZ."
      call wrtout(std_out, msg)
    end if
-   if (MOD(info/8,2)/=0) then
+   if (MOD(info / 8, 2) /= 0) then
      msg = " PZSTEBZ  failed to compute eigenvalues. Ensure ABSTOL=2.0*PDLAMCH('U')"
      call wrtout(std_out, msg)
    end if
-   if (MOD(info/16,2)/=0) then
+   if (MOD(info / 16, 2) /= 0) then
      write(msg,'(3a)')&
      " B was not positive definite.",ch10,&
      " IFAIL(1) indicates the order of the smallest minor which is not positive definite."
@@ -4074,7 +4082,7 @@ subroutine slk_write(Slk_mat, uplo, is_fortran_file, fname,mpi_fh, offset, flags
 
 !************************************************************************
 
- ABI_CHECK(allocated(Slk_mat%buffer_cplx), "%buffer_cplx not allocated")
+ ABI_CHECK(allocated(Slk_mat%buffer_cplx), "buffer_cplx not allocated")
 
  if (firstchar(uplo, ["U","L"]) .and. Slk_mat%sizeb_global(1) /= Slk_mat%sizeb_global(2) ) then
    ABI_ERROR("rectangular matrices are not compatible with the specified uplo")
@@ -4119,7 +4127,7 @@ subroutine slk_write(Slk_mat, uplo, is_fortran_file, fname,mpi_fh, offset, flags
      is_fortran_file=is_fortran_file)
  end if
 
- if (offset_err/=0) then
+ if (offset_err /= 0) then
    write(msg,"(3a)")&
     " Global position index cannot be stored in standard Fortran integer ",ch10,&
     " scaLAPACK matrix cannot be read with a single MPI-IO call."
@@ -4291,14 +4299,14 @@ subroutine slk_read(Slk_mat,uplo,symtype,is_fortran_file,fname,mpi_fh,offset,fla
 
  do_open = PRESENT(fname)
  if (do_open) then
-   ABI_CHECK(.not.PRESENT(fname),"fname should not be present")
+   ABI_CHECK(.not.PRESENT(fname), "fname should not be present")
  else
-   ABI_CHECK(PRESENT(mpi_fh),"mpi_fh should be present")
+   ABI_CHECK(PRESENT(mpi_fh), "mpi_fh should be present")
  end if
 
  my_offset=0; if (PRESENT(offset)) my_offset=offset
 
- ABI_CHECK(allocated(Slk_mat%buffer_cplx),"%buffer_cplx not allocated")
+ ABI_CHECK(allocated(Slk_mat%buffer_cplx), "%buffer_cplx not allocated")
  if (firstchar(uplo, ["U","L"]) .and. Slk_mat%sizeb_global(1) /= Slk_mat%sizeb_global(2) ) then
    ABI_ERROR("rectangular matrices are not compatible with the specified uplo")
  end if
@@ -4307,7 +4315,7 @@ subroutine slk_read(Slk_mat,uplo,symtype,is_fortran_file,fname,mpi_fh,offset,fla
 
  buffer_size= PRODUCT(Slk_mat%sizeb_local(1:2))
 
- call wrtout(std_out, "slk_read: Using MPI-IO","PERS")
+ call wrtout(std_out, "slk_read: Using MPI-IO")
 
  comm = Slk_mat%processor%comm
 
@@ -4344,7 +4352,7 @@ subroutine slk_read(Slk_mat,uplo,symtype,is_fortran_file,fname,mpi_fh,offset,fla
 !write(std_out,*)"ctest",ctest
 !ENDDEBUG
 
- !call print_arr(Slk_mat%buffer_cplx,max_r=10,max_c=10,unit=std_out,mode_paral="PERS")
+ !call print_arr(Slk_mat%buffer_cplx,max_r=10,max_c=10,unit=std_out)
  !
  ! Close the file and release the MPI filetype.
  call MPI_type_FREE(slk_type,ierr)
@@ -4355,7 +4363,7 @@ subroutine slk_read(Slk_mat,uplo,symtype,is_fortran_file,fname,mpi_fh,offset,fla
 !It seems that personal call makes the code stuck
 !if (is_fortran_file .and. check_frm .and. Slk_mat%Processor%myproc==0) then ! Master checks the Fortran markers.
  if (is_fortran_file .and. check_frm) then ! Master checks the Fortran markers.
-   call wrtout(std_out,"Checking Fortran record markers...","PERS", do_flush=.True.)
+   call wrtout(std_out,"Checking Fortran record markers...", do_flush=.True.)
    nfrec = Slk_mat%sizeb_global(2)
    ABI_MALLOC(bsize_frecord,(nfrec))
    if (firstchar(uplo, ["A"])) then
@@ -4651,7 +4659,8 @@ subroutine slk_symmetrize(Slk_mat, uplo, symtype)
        do iloc=1,Slk_mat%sizeb_local(1)
          call slk_mat%loc2glob(iloc, jloc, iglob, jglob)
          ij_loc = ij_loc+1
-         if (jglob<iglob) then ! Diagonal elements are not forced to be real.
+         if (jglob < iglob) then
+          ! Diagonal elements are not forced to be real.
            Slk_mat%buffer_cplx(iloc,jloc) = DCONJG(Slk_mat%buffer_cplx(iloc,jloc))
          end if
          !if (iglob==jglob) Slk_mat%buffer_cplx(iloc,jloc) =  real(Slk_mat%buffer_cplx(iloc,jloc))
@@ -5069,14 +5078,14 @@ subroutine slk_single_fview_write(Slk_mat,uplo,nelw,elw2slk,etype,slk_type,offse
  block_type  (nelw+2)= MPI_UB
 
  call xmpio_type_struct(nelw+2,block_length,block_displ,block_type,slk_type,mpi_err)
- ABI_CHECK_MPI(mpi_err,"MPI_type_STRUCT")
+ ABI_CHECK_MPI(mpi_err, "MPI_type_STRUCT")
 
  ABI_FREE(block_length)
  ABI_FREE(block_displ)
  ABI_FREE(block_type)
 
  call MPI_type_COMMIT(slk_type,mpi_err)
- ABI_CHECK_MPI(mpi_err,"MPI_type_COMMIT")
+ ABI_CHECK_MPI(mpi_err, "MPI_type_COMMIT")
 
 #else
  ABI_ERROR("MPI-IO is mandatatory in slk_single_fview_read")

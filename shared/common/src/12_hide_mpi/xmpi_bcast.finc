@@ -59,6 +59,7 @@ end subroutine xmpi_bcast_intv
 !!      mpi_bcast
 !!
 !! SOURCE
+
 subroutine xmpi_bcast_int1d(xval,master,comm,ier)
 
 !Arguments ------------------------------------
@@ -170,6 +171,7 @@ end subroutine xmpi_bcast_int2d
 !!      mpi_bcast
 !!
 !! SOURCE
+
 subroutine xmpi_bcast_int3d(xval,master,comm,ier)
 
 !Arguments-------------------------
@@ -235,6 +237,7 @@ end subroutine xmpi_bcast_int3d
 !!      mpi_bcast
 !!
 !! SOURCE
+
 subroutine xmpi_bcast_int4d(xval,master,comm,ier)
 
 !Arguments-------------------------
@@ -348,6 +351,7 @@ end subroutine xmpi_bcast_dpv
 !!      mpi_bcast
 !!
 !! SOURCE
+
 subroutine xmpi_bcast_dp1d(xval,master,comm,ier)
 
 !Arguments-------------------------
@@ -981,6 +985,7 @@ end subroutine xmpi_bcast_sp4d
 !!      mpi_bcast
 !!
 !! SOURCE
+
 subroutine xmpi_bcast_cplxv(xval,master,comm,ier)
 
 !Arguments-------------------------
@@ -1026,6 +1031,7 @@ end subroutine xmpi_bcast_cplxv
 !!      mpi_bcast
 !!
 !! SOURCE
+
 subroutine xmpi_bcast_cplx1d(xval,master,comm,ier)
 
 !Arguments-------------------------
@@ -1189,6 +1195,7 @@ end subroutine xmpi_bcast_cplx3d
 !!  xval= buffer array
 !!
 !! SOURCE
+
 subroutine xmpi_bcast_cplx4d(xval,master,comm,ier)
 
 !Arguments-------------------------
@@ -1569,6 +1576,7 @@ end subroutine xmpi_bcast_ch0d
 !!  xval= buffer array
 !!
 !! SOURCE
+
 subroutine xmpi_bcast_ch1d(xval,master,comm,ier)
 
 !Arguments-------------------------

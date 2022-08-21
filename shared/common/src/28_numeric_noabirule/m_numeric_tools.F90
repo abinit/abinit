@@ -99,8 +99,8 @@ MODULE m_numeric_tools
  public :: kramerskronig         ! check or apply the Kramers Kronig relation
  public :: invcb                 ! Compute a set of inverse cubic roots as fast as possible.
  public :: safe_div              ! Performs 'save division' that is to prevent overflow, underflow, NaN or infinity errors
- public :: bool2index            ! Allocate and return array with the indices in the input boolean array
-                                 ! that evaluates to .True.
+ public :: bool2index            ! Allocate and return array with the indices in a boolean array that evaluates to .True.
+ public :: blocked_loop          ! Helper function to implement blocked algorithms inside do loops.
 
  !MG FIXME: deprecated: just to avoid updating refs while refactoring.
  public :: dotproduct
@@ -6266,6 +6266,38 @@ subroutine bool2index(bool_list, out_index)
  end do
 
 end subroutine bool2index
+!!***
+
+!!****f* ABINIT/blocked_loop
+!! NAME
+!! blocked_loop
+!!
+!! FUNCTION
+!!  Helper function to implement blocked algorithms inside do loops i.e. algorithms
+!!  operating on multiple items up to a maximum `batch_size`.
+!!
+!! Usage:
+!!
+!!   batch_size = 4
+!!   allocate(work(..., batch_size)
+!!
+!!   do ii=1, loop_stop, batch_size
+!!     ndat = blocked_loop(ii, loop_stop, batch_size)
+!!     ! operate on ndat items in work
+!!   end do
+!!
+!! SOURCE
+
+integer pure function blocked_loop(loop_index, loop_stop, batch_size) result(ndat)
+
+!Arguments ----------------------------------------------
+ integer,intent(in) :: loop_index, loop_stop, batch_size
+
+! *********************************************************************
+
+ ndat = merge(batch_size, loop_stop - loop_index + 1, loop_index + batch_size - 1 <= loop_stop)
+
+end function blocked_loop
 !!***
 
 END MODULE m_numeric_tools
