@@ -156,7 +156,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  logical, parameter :: is_dfpt = .false.
  logical :: use_wfk, print_wfk
  character(len=500) :: msg
- character(len=fnlen) :: wfk_path, den_path, kden_path
+ character(len=fnlen) :: wfk_path, den_path, kden_path, out_path
  type(hdr_type) :: wfk_hdr, den_hdr, kden_hdr, owfk_hdr
  type(crystal_t) :: cryst, den_cryst, wfk_cryst
  type(ebands_t) :: ks_ebands, owfk_ebands
@@ -190,7 +190,8 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  real(dp) :: strsxc(6) !,tsec(2)
  real(dp),allocatable :: grchempottn(:,:),grewtn(:,:),grvdw(:,:),qmax(:)
  real(dp),allocatable :: ks_nhat(:,:),ks_nhatgr(:,:,:),ks_rhog(:,:)
- real(dp),allocatable :: ks_rhor(:,:),ks_vhartr(:), ks_vtrial(:,:), ks_vxc(:,:), ks_taur(:,:)
+ real(dp),allocatable :: ks_rhor(:,:),ks_vhartr(:), ks_vtrial(:,:), ks_vxc(:,:)
+ real(dp),allocatable :: ks_taur(:,:), ks_vxctau(:,:), xcctau3d(:)
  real(dp),allocatable :: kxc(:,:), ph1d(:,:), ph1df(:,:) !qp_kxc(:,:),
  real(dp),allocatable :: vpsp(:), xccc3d(:), dijexc_core(:,:,:) !, dij_hf(:,:,:)
  real(dp),allocatable :: eig_k(:), occ_k(:)
@@ -553,13 +554,19 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  ABI_MALLOC(vpsp, (nfftf))
  ABI_MALLOC(ks_vxc, (nfftf, Dtset%nspden))
 
+ ABI_MALLOC(ks_vxctau, (nfftf, dtset%nspden * dtset%usekden))
+ ABI_MALLOC(xcctau3d, (n3xccc * dtset%usekden))
+ ABI_FREE(ks_vxctau)
+ ABI_FREE(xcctau3d)
+
  optene = 4; moved_atm_inside = 0; moved_rhor = 0; istep = 1
 
  call setvtr(Cryst%atindx1,Dtset,KS_energies,cryst%gmet,cryst%gprimd,grchempottn,grewtn,grvdw,gsqcutf_eff,&
              istep,kxc,mgfftf,moved_atm_inside,moved_rhor,MPI_enreg,&
              Cryst%nattyp,nfftf,ngfftf,ngrvdw,ks_nhat,ks_nhatgr,nhatgrdim,nkxc,Cryst%ntypat,Psps%n1xccc,n3xccc,&
              optene,pawrad,Pawtab,ph1df,Psps,ks_rhog,ks_rhor,cryst%rmet,cryst%rprimd,strsxc,&
-             Cryst%ucvol,usexcnhat,ks_vhartr,vpsp,ks_vtrial,ks_vxc,vxcavg,Wvl,xccc3d,Cryst%xred,taur=ks_taur)
+             Cryst%ucvol,usexcnhat,ks_vhartr,vpsp,ks_vtrial,ks_vxc,vxcavg,Wvl,xccc3d,Cryst%xred, &
+             taur=ks_taur) !xcctau3d=xcctau3d, vxctau=ks_vxctau)
 
  ABI_FREE(grvdw)
  ABI_FREE(grchempottn)
@@ -573,14 +580,15 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
    ABI_MALLOC(npwarr_ik, (dtset%nkpt))
    ABI_MALLOC(istwfk_ik, (dtset%nkpt))
    istwfk_ik = 1 ! istwkf 2 is not yet supported.
+   !istwfk_ik = dtset%istwfk
 
-   ! Compute npw_k from ecut
+   ! Compute npw_k from ecut so that we can update the header.
    do ik_ibz=1,dtset%nkpt
      call get_kg(dtset%kptns(:,ik_ibz), istwfk_ik(ik_ibz), dtset%ecut, cryst%gmet, npwarr_ik(ik_ibz), gvec_)
      ABI_FREE(gvec_)
-     nband_iks(ik_ibz, :) = npwarr_ik(ik_ibz)
+     !nband_iks(ik_ibz, :) = npwarr_ik(ik_ibz)
    end do
-   !nband_iks(:,:) = maxval(dtset%nband)
+   nband_iks(:,:) = maxval(dtset%nband)
 
    ! Build header with new npwarr and nband
    owfk_ebands = ebands_from_dtset(dtset, npwarr_ik, nband=nband_iks)
@@ -590,11 +598,12 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
    ABI_REMALLOC(owfk_hdr%istwfk, (dtset%nkpt))
    owfk_hdr%istwfk(:) = istwfk_ik
 
-   print_wfk = .False.
    print_wfk = .True.
-
    if (print_wfk) then
-     call owfk%open_write(owfk_hdr, dtfil%fnameabo_wfk, 0, iomode_from_fname(dtfil%fnameabo_wfk), get_unit(), comm)
+     out_path = dtfil%fnameabo_wfk
+     if (dtset%iomode == IO_MODE_ETSF) out_path = nctk_ncify(out_path)
+     call wrtout(std_out, sjoin(" Writing wavefunctions to:", out_path))
+     call owfk%open_write(owfk_hdr, out_path, 0, iomode_from_fname(out_path), get_unit(), comm)
    end if
 
    do spin=1,dtset%nsppol
@@ -606,13 +615,15 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
        if (print_wfk) then
          ! occupancies are set to zero.
          ! Client code is responsbile to recompile occ and fermie when reading the WFK.
-         ABI_CALLOC(occ_k, (nband_k))
-         !owfk_ebands%eig(1:nband_k, ik_ibz, spin) = eig_k
+         ABI_CALLOC(occ_k, (owfk%mband))
+         owfk_ebands%eig(1:nband_k, ik_ibz, spin) = eig_k(1:nband_k)
 
          call owfk%write_band_block([ugb%my_bstart, ugb%my_bstop], ik_ibz, spin, &
                                      xmpio_collective, &
                                      !xmpio_single, &
-                                     kg_k=ugb%kg_k, cg_k=ugb%cg_k, eig_k=eig_k(1:nband_k), occ_k=occ_k)
+                                     kg_k=ugb%kg_k, cg_k=ugb%cg_k, &
+                                     eig_k=owfk_ebands%eig(:, ik_ibz, spin), &
+                                     occ_k=occ_k)
          ABI_FREE(occ_k)
        end if
 

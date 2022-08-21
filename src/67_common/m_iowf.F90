@@ -144,17 +144,17 @@ subroutine outresid(dtset,kptns,mband,&
 !      Find largest residual over all bands for given k point
        residk=maxval(resid(1+band_index:nband_k+band_index))
        write(msg,'(1x,3f8.4,3x,i2,1p,e13.5,a)')kptns(1:3,ikpt),spin,residk,' kpt; spin; max resid(k); each band:'
-       if(dtset%prtvol>=2) call wrtout(ab_out,msg,'COLL')
-       call wrtout(std_out,msg,'COLL')
+       if(dtset%prtvol>=2) call wrtout(ab_out, msg)
+       call wrtout(std_out, msg)
        do ii=0,(nband_k-1)/8
          write(msg,'(1x,1p,8e9.2)')(resid(iband+band_index),iband=1+ii*8,min(nband_k,8+ii*8))
-         if(dtset%prtvol>=2) call wrtout(ab_out,msg,'COLL')
-         call wrtout(std_out,msg,'COLL')
+         if(dtset%prtvol>=2) call wrtout(ab_out, msg)
+         call wrtout(std_out, msg)
        end do
      else if(ikpt==nkpt_eff+1)then
        write(msg,'(2a)')' outwf : prtvol=0 or 1, do not print more k-points.',ch10
-       if(dtset%prtvol>=2) call wrtout(ab_out,msg,'COLL')
-       call wrtout(std_out,msg,'COLL')
+       if(dtset%prtvol>=2) call wrtout(ab_out, msg)
+       call wrtout(std_out, msg)
      end if
      band_index=band_index+nband_k
    end do
@@ -404,17 +404,17 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
            NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vkbsign"), vkbsign))
            if(dtset%prtvol>=2)then
              write(msg,'(a)') 'prtkbff: writing first and last G-components of the KB form factors'
-             call wrtout(ab_out,msg,'COLL')
+             call wrtout(ab_out, msg)
              do iat=1,psps%ntypat
                write(msg,'(a10,i5)') 'atype ',iat
-               call wrtout(ab_out,msg,'COLL')
+               call wrtout(ab_out, msg)
                do iproj=1,psps%lnmax
                  write(msg,'(a10,i5,a,a10,e12.4,a,2(a10,2e12.4,a))') &
                         'projector ', iproj,ch10, &
                         'vkbsign   ', vkbsign(iproj,iat), ch10, &
                         'vkb       ', vkb(1,iproj,iat),  vkb(npwk_disk,iproj,iat), ch10, &
                         'vkbd      ', vkbd(1,iproj,iat), vkbd(npwk_disk,iproj,iat), ''
-                 call wrtout(ab_out,msg,'COLL')
+                 call wrtout(ab_out, msg)
                end do
              end do
            end if
@@ -793,7 +793,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
  done = .False.
 
  path = nctk_ncify(fname)
- call wrtout(std_out, sjoin("in cg_ncwrite with path:", path), "COLL")
+ call wrtout(std_out, sjoin("in cg_ncwrite with path:", path))
 
  ! communicators and ranks
  comm_cell = mpi_enreg%comm_cell; me_cell = mpi_enreg%me_cell; nproc_cell = mpi_enreg%nproc_cell
@@ -1006,7 +1006,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
      use_collective = (response == 0) ! or (response == 1 .and. nproc_cell == 1)
 
      if (use_collective) then
-       call wrtout(std_out,"Using collective IO for the CGs","COLL")
+       call wrtout(std_out,"Using collective IO for the CGs")
        ! Use collective IO for the CGs
        ncerr = nf90_einval
 #ifdef HAVE_NETCDF_MPI
@@ -1041,7 +1041,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
        end do
 
      else
-       call wrtout(std_out,"Using individual IO for the CGs","COLL")
+       call wrtout(std_out, "Using individual IO for the CGs")
        ! Individual IO of the CGs (for debugging purposes)
        icg = 0
        do spin=1,nsppol
