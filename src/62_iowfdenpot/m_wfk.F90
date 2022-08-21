@@ -1747,8 +1747,8 @@ end subroutine wfk_read_bks
 !!    xmpio_collective ==> for collective writing.
 !!  [kg_k=(:,:)] = G-vectors
 !!  [cg_k(:,:)]  = Fourier coefficients
-!!  [eig_k(:)] = Eigenvalues
-!!  [occ_k(:)] = Occupancies
+!!  [eig_k(:)] = Eigenvalues (dimensioned with wfk%mband, see below)
+!!  [occ_k(:)] = Occupancies ((dimensioned with wfk%mband, see below)
 !!
 !! SOURCE
 
@@ -1770,6 +1770,7 @@ subroutine wfk_write_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg
  integer :: npw_disk,nspinor_disk,nband_disk,band
  integer :: ipw,my_bcount,npwso,npw_tot,nb_block,base
  character(len=500) :: errmsg !msg,
+ real(dp) :: cpu, wall, gflops
 !arrays
  real(dp),ABI_CONTIGUOUS pointer :: tmp_eigk(:)
  real(dp), allocatable :: eig_buffer(:), cg_buffer(:,:)
@@ -1787,6 +1788,8 @@ subroutine wfk_write_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg
  DBG_ENTER("COLL")
 
  ABI_CHECK(Wfk%rw_mode == WFK_WRITEMODE, "Wfk must be in WRITEMODE")
+
+ call cwtime(cpu, wall, gflops, "start")
 
  ! Look before you leap.
  npw_disk     = Wfk%Hdr%npwarr(ik_ibz)
@@ -1845,10 +1848,10 @@ subroutine wfk_write_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg
      !write(unitwf) (eigen(iband),iband=1,nband_disk),(occ(iband),iband=1,nband_disk)
 
      if (present(eig_k) .and. present(occ_k)) then
-       write(Wfk%fh, err=10, iomsg=errmsg) eig_k, occ_k
+       write(Wfk%fh, err=10, iomsg=errmsg) eig_k(1:nband_disk), occ_k(1:nband_disk)
      else
        ABI_ERROR("Not coded")
-       write(Wfk%fh, err=10, iomsg=errmsg) ! eig_k(1:nband_disk), occ_k(1:nband_k)
+       write(Wfk%fh, err=10, iomsg=errmsg) ! eig_k(1:nband_disk), occ_k(1:nband_disk)
      end if
 
      ! The wave-functions.
@@ -2140,7 +2143,7 @@ subroutine wfk_write_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg
      ! Write the nb_block bands starting from band_block(1)
      ! The coefficients_of_wavefunctions on file have shape [cplex, mpw, nspinor, mband, nkpt, nsppol]
      NCF_CHECK(nf90_inq_varid(wfk%fh, "coefficients_of_wavefunctions", cg_varid))
-    if (sc_mode == xmpio_collective .and. wfk%nproc > 1) then
+     if (sc_mode == xmpio_collective .and. wfk%nproc > 1) then
        NCF_CHECK(nctk_set_collective(wfk%fh, cg_varid))
      end if
 
@@ -2155,6 +2158,8 @@ subroutine wfk_write_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg
 
  ABI_FREE(eig_buffer)
  ABI_FREE(cg_buffer)
+
+ call cwtime_report(" wfk_write_band_block", cpu, wall, gflops)
 
  DBG_EXIT("COLL")
 
@@ -2970,7 +2975,7 @@ subroutine wfk_read_my_kptbands(inpath_, distrb_flags, comm, ecut_eff_in, &
  integer :: spin_saved, spin_sym
  integer :: mpierr
  integer :: ask_accurate, sppoldbl
- real(dp) :: cpu,wall,gflops
+ real(dp) :: cpu, wall, gflops
  real(dp) :: ecut_eff_disk
  real(dp) :: dksqmax
  character(len=fnlen) :: inpath

@@ -340,7 +340,7 @@ subroutine ksdiago(Diago_ctl, nband_k, nfftc, mgfftc, ngfftc, natom, &
  integer,allocatable :: kg_k(:,:)
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),kptns_(3,1),kpoint(3),ylmgr_dum(1,1,1)
  real(dp),allocatable :: ph3d(:,:,:),bras(:,:),ffnl(:,:,:,:),kinpw(:),kpg_k(:,:)
- real(dp),allocatable :: vlocal(:,:,:,:),ylm_k(:,:),dum_ylm_gr_k(:,:,:)
+ real(dp),allocatable :: vlocal(:,:,:,:),ylm_k(:,:),dum_ylm_gr_k(:,:,:), vxctaulocal(:,:,:,:,:)
  real(dp),allocatable :: ghc(:,:),gvnlxc(:,:),gsc(:,:),ghg_mat(:,:,:),gsg_mat(:,:,:)
  real(dp),pointer :: cwavef(:,:)
  type(pawcprj_type),allocatable :: cwaveprj(:,:)
@@ -378,6 +378,16 @@ subroutine ksdiago(Diago_ctl, nband_k, nfftc, mgfftc, ngfftc, natom, &
  ! The coarse FFT mesh.
  n1 = ngfftc(1); n2 = ngfftc(2); n3 = ngfftc(3)
  n4 = ngfftc(4); n5 = ngfftc(5); n6 = ngfftc(6)
+
+ ! See sequence of calls in vtorho.
+
+ ! Check that usekden is not 0 if want to use vxctau
+ !with_vxctau = (present(vxctau).and.dtset%usekden/=0)
+
+ ! Check that fock is present if want to use fock option
+ !usefock = (dtset%usefock==1 .and. associated(fock))
+ !usefock_ACE=0
+ !if (usefock) usefock_ACE=fock%fock_common%use_ACE
 
  !====================
  !=== Check input ====
@@ -437,6 +447,10 @@ subroutine ksdiago(Diago_ctl, nband_k, nfftc, mgfftc, ngfftc, natom, &
  ! option=2: vtrial(n1*n2*n3,ispden) --> vlocal(nd1,nd2,nd3) real case
 
  ABI_MALLOC(vlocal, (n4, n5, n6, gs_hamk%nvloc))
+ !if (with_vxctau) then
+ !  ABI_MALLOC(vxctaulocal,(n4,n5,n6,gs_hamk%nvloc,4))
+ !end if
+
 
  ! Set up local potential vlocal on the coarse FFT mesh from vtrial taking into account the spin.
 
@@ -556,6 +570,7 @@ subroutine ksdiago(Diago_ctl, nband_k, nfftc, mgfftc, ngfftc, natom, &
  ABI_FREE(ghc)
  ABI_FREE(gvnlxc)
  ABI_FREE(gsc)
+ ABI_SFREE(vxctaulocal)
 
  if (psps%usepaw == 1 .and. cpopt == 0) call pawcprj_free(Cwaveprj)
  ABI_FREE(cwaveprj)
@@ -870,6 +885,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
 !arrays
  integer,intent(in) :: ngfftc(18)
  real(dp),intent(inout) :: vtrial(nfftf,dtset%nspden)
+ !real(dp),intent(inout) :: vxctau(nfftf, dtset%nspden, 4*dtset%usekden)
  real(dp),allocatable,intent(out) :: eig_k(:)
  type(pawtab_type),intent(in) :: pawtab(psps%ntypat*psps%usepaw)
  type(paw_ij_type),intent(in) :: paw_ij(cryst%natom*psps%usepaw)
@@ -916,8 +932,8 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  end if
 
  if (istwf_k == 2) then
-   !ABI_WARNING("istwfk == 2 is still under development")
-   ABI_ERROR("istwfk == 2 is still under development")
+   ABI_WARNING("istwfk == 2 is still under development")
+   !ABI_ERROR("istwfk == 2 is still under development")
  end if
 
  ! MPI_type for sequential part.
@@ -1049,8 +1065,8 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  ! Define batch size for the application of the Hamiltonian
  ! This is useful if OpenMP is activated thus we use multiple of omp_nt.
  omp_nt = xomp_get_num_threads(open_parallel=.True.)
- batch_size = 1
  !batch_size = 4 * omp_nt
+ batch_size = 1
 
  ABI_MALLOC(ghc, (2, npwsp * batch_size))
  ABI_MALLOC(gvnlxc, (2, npwsp * batch_size))
@@ -1076,7 +1092,6 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  loc2_size = ghg_mat%sizeb_local(2)
 
  do il_g2=1, ghg_mat%sizeb_local(2), batch_size
-   !ndat = merge(batch_size, loc2_size-il_g2+1, il_g2+batch_size-1 <= loc2_size)
    ndat = blocked_loop(il_g2, loc2_size, batch_size)
    igsp2 = ghg_mat%loc2gcol(il_g2)
 
@@ -1115,7 +1130,6 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
      end if
 
    else
-
      do idat=0,ndat-1
        igs = 1 + idat * npwsp; ige = igs + npwsp - 1
        !if (igsp2 == 1 .or. igsp2 == npwsp + 1 .and. idat == 0) then
@@ -1150,7 +1164,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  !===========================================
  ABI_MALLOC(eig_ene, (h_size))
 
- ! If possible, use 2D rectangular grid of processors for diagonalization.
+ ! Change size block and, if possible, use 2D rectangular grid of processors for diagonalization
  call proc_4diag%init(comm)
 
  call ghg_mat%change_size_blocs(ghg_4diag, processor=proc_4diag)
@@ -1159,7 +1173,11 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
    call gsg_mat%change_size_blocs(gsg_4diag, processor=proc_4diag)
    call gsg_mat%free()
  end if
+
+ ! global dimension is (h_size, h_size) even for partial diago.
+ ! then one extracts the (hsize, nband_k) sub-matrix before returning
  call ghg_4diag%copy(eigvec)
+ !call eigvec%init(h_size, nband_k, proc_4diag, istwf_k, size_blocs=ghg_4diag%sizeb_blocs)
 
  if (do_full_diago) then
    write(msg,'(6a, i0)')ch10,&
@@ -1214,8 +1232,11 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
 
  ! Now transfer eigvec to ugb datastructure using 1d grid (block column distribution)
  call ugb%processor%init(comm, grid_dims=[1, nproc])
+
  ABI_CHECK(block_dist_1d(nband_k, nproc, col_bsize, msg), msg)
- call eigvec%change_size_blocs(ugb%mat, size_blocs=[h_size, col_bsize], processor=ugb%processor)
+
+ !call eigvec%change_size_blocs(ugb%mat, size_blocs=[h_size, col_bsize], processor=ugb%processor)
+ call eigvec%cut(h_size, nband_k, ugb%mat, size_blocs=[h_size, col_bsize], processor=ugb%processor)
 
  ABI_MALLOC(eig_k, (nband_k))
  eig_k(:) = eig_ene(1:nband_k)

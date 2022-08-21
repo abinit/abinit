@@ -4239,7 +4239,8 @@ subroutine gwr_build_sigmac(gwr)
  complex(dp) :: sigc_pm(2), cpsi_r, odd_t(gwr%ntau), even_t(gwr%ntau)
  complex(dp),target,allocatable :: sigc_it_diag_kcalc(:,:,:,:,:)
  complex(dp),allocatable :: gt_scbox(:,:), wct_scbox(:), sc_ceikr(:), uc_ceikr(:)
- complex(gwpc),allocatable :: uc_psi_bk(:,:,:), sc_psi_bk(:,:,:)
+ complex(dp),allocatable :: uc_psi_bk(:,:,:), sc_psi_bk(:,:,:)
+ complex(gwpc),allocatable :: ur(:)
  type(matrix_scalapack) :: gt_gpr(2, gwr%my_nkbz), gk_rpr_pm(2), sigc_rpr(2,gwr%nkcalc), wc_rpr, wc_gpr(gwr%my_nqbz)
  type(desc_t), target :: desc_mykbz(gwr%my_nkbz), desc_myqbz(gwr%my_nqbz)
  type(fftbox_plan3_t) :: gt_plan_gp2rp, wt_plan_gp2rp
@@ -4334,6 +4335,7 @@ if (gwr%use_supercell_for_sigma) then
 
    ABI_MALLOC_OR_DIE(uc_psi_bk, (gwr%g_nfft * gwr%nspinor, bmin:bmax, gwr%nkcalc), ierr)
    ABI_MALLOC_OR_DIE(sc_psi_bk, (sc_nfft * gwr%nspinor, bmin:bmax, gwr%nkcalc), ierr)
+   ABI_MALLOC(ur, (gwr%g_nfft * gwr%nspinor))
    ABI_MALLOC(sc_ceikr, (sc_nfft * gwr%nspinor))
    ABI_MALLOC(uc_ceikr, (gwr%g_nfft * gwr%nspinor))
 
@@ -4346,7 +4348,8 @@ if (gwr%use_supercell_for_sigma) then
      call calc_ceikr(kcalc_bz, gwr%g_ngfft, gwr%g_nfft, gwr%nspinor, uc_ceikr)
 
      do band=gwr%bstart_ks(ikcalc, spin), gwr%bstop_ks(ikcalc, spin)
-       call gwr%kcalc_wfd%get_ur(band, ikcalc_ibz, spin, uc_psi_bk(:, band, ikcalc))
+       call gwr%kcalc_wfd%get_ur(band, ikcalc_ibz, spin, ur)
+       uc_psi_bk(:, band, ikcalc) = ur
 
        ! Multiply by the phases to get psi_nk(r) in the super cell.
        call ur_to_scpsi(gwr%ngkpt, gwr%g_ngfft, gwr%g_nfft, gwr%nspinor, 1, &
@@ -4355,6 +4358,7 @@ if (gwr%use_supercell_for_sigma) then
      end do
    end do ! ikcalc
 
+   ABI_FREE(ur)
    ABI_FREE(sc_ceikr)
    ABI_FREE(uc_ceikr)
 

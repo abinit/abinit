@@ -1240,7 +1240,7 @@ end function hdr_get_nelect_from_occ
 !!   it, contain its definite values, except for evolving variables
 !!
 !! SOURCE
-! CP modified argument list: added ne_qFD,nh_qFD,ivalence
+
 subroutine hdr_init_lowlvl(hdr,ebands,psps,pawtab,wvl,&
   codvsn,pertcase,natom,nsym,nspden,ecut,pawecutdg,ecutsm,dilatmx,&
   intxc,ixc,stmbias,usewvl,pawcpxocc,pawspnorb,ngfft,ngfftdg,so_psp,qptn,&
