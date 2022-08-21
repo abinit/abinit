@@ -3870,6 +3870,8 @@ end subroutine slk_change_size_blocs
 !!  slk_cut
 !!
 !! FUNCTION
+!!  Extract submatrix of shape (glob_nrows, glob_ncols) starting at `ija` from `in_mat`
+!!  and create new matrix with `size_blocs` and `processor`
 !!
 !! INPUTS
 !!
