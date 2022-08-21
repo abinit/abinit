@@ -1745,12 +1745,10 @@ end subroutine wfk_read_bks
 !!  sc_mode= MPI-IO option
 !!    xmpio_single     ==> for writing by current proc.
 !!    xmpio_collective ==> for collective writing.
-!!
-!! OUTPUTS
 !!  [kg_k=(:,:)] = G-vectors
 !!  [cg_k(:,:)]  = Fourier coefficients
-!!  [eig_k(:)] = Eigenvectors
-!!  [occ_k(:)] = Eigenvectors
+!!  [eig_k(:)] = Eigenvalues
+!!  [occ_k(:)] = Occupancies
 !!
 !! SOURCE
 
@@ -1788,7 +1786,7 @@ subroutine wfk_write_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg
 
  DBG_ENTER("COLL")
 
- ABI_CHECK(Wfk%rw_mode==WFK_WRITEMODE, "Wfk must be in WRITEMODE")
+ ABI_CHECK(Wfk%rw_mode == WFK_WRITEMODE, "Wfk must be in WRITEMODE")
 
  ! Look before you leap.
  npw_disk     = Wfk%Hdr%npwarr(ik_ibz)
@@ -1796,30 +1794,32 @@ subroutine wfk_write_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg
  nband_disk   = Wfk%nband(ik_ibz,spin)
  nb_block     = (band_block(2) - band_block(1) + 1)
  npw_tot      = npw_disk * nspinor_disk * nb_block
+
  ABI_MALLOC (eig_buffer, (2*nband_disk))
  ABI_MALLOC (cg_buffer, (2,npw_disk*nspinor_disk))
+
  if (PRESENT(kg_k)) then
-   ABI_CHECK(SIZE(kg_k,DIM=2) >= npw_disk,"kg_k too small")
+   ABI_CHECK_IGEQ(SIZE(kg_k,DIM=2), npw_disk,"kg_k too small")
  end if
 
  if (PRESENT(cg_k)) then
-   ABI_CHECK(SIZE(cg_k, DIM=2) >= npw_tot,"cg_k too small")
+   ABI_CHECK_IGEQ(SIZE(cg_k, DIM=2), npw_tot,"cg_k too small")
  end if
 
  if (PRESENT(eig_k)) then
-   if (Wfk%formeig==0) then
-      ABI_CHECK(SIZE(eig_k) >= nband_disk, "GS eig_k too small")
-      ABI_CHECK(PRESENT(occ_k),"both eig_k and occ_k must be present")
-   else if (Wfk%formeig==1) then
-      ABI_CHECK(SIZE(eig_k) >= 2*nband_disk**2, "DFPT eig_k too small")
+   if (Wfk%formeig == 0) then
+      ABI_CHECK_IGEQ(SIZE(eig_k), nband_disk, "GS eig_k too small")
+      ABI_CHECK(PRESENT(occ_k), "both eig_k and occ_k must be present")
+   else if (Wfk%formeig == 1) then
+      ABI_CHECK_IGEQ(SIZE(eig_k), 2*nband_disk**2, "DFPT eig_k too small")
    else
      ABI_ERROR("formeig != [0,1]")
    end if
  end if
 
  if (PRESENT(occ_k)) then
-   ABI_CHECK(SIZE(occ_k) >= nband_disk, "GS eig_k too small")
-   ABI_CHECK(PRESENT(eig_k),"both eig_k and occ_k must be present")
+   ABI_CHECK_IGEQ(SIZE(occ_k), nband_disk, "GS eig_k too small")
+   ABI_CHECK(PRESENT(eig_k), "both eig_k and occ_k must be present")
    ABI_CHECK(Wfk%formeig == 0, "formeig /=0 with occ_k in input!")
  end if
 

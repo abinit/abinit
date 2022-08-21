@@ -154,7 +154,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  real(dp) :: eff, mempercpu_mb, max_wfsmem_mb, nonscal_mem
  real(dp) :: ecore, ecut_eff, ecutdg_eff, cpu, wall, gflops
  logical, parameter :: is_dfpt = .false.
- logical :: use_wfk
+ logical :: use_wfk, print_wfk
  character(len=500) :: msg
  character(len=fnlen) :: wfk_path, den_path, kden_path
  type(hdr_type) :: wfk_hdr, den_hdr, kden_hdr, owfk_hdr
@@ -580,37 +580,43 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
      ABI_FREE(gvec_)
      nband_iks(ik_ibz, :) = npwarr_ik(ik_ibz)
    end do
+   !nband_iks(:,:) = maxval(dtset%nband)
 
    ! Build header with new npwarr and nband
    owfk_ebands = ebands_from_dtset(dtset, npwarr_ik, nband=nband_iks)
-   !owfk_ebands%eig = zero
    call hdr_init(owfk_ebands, codvsn, dtset, owfk_hdr, pawtab, 0, psps, wvl%descr)
 
    ! Change the value of istwfk that has been taked from dtset.
    ABI_REMALLOC(owfk_hdr%istwfk, (dtset%nkpt))
    owfk_hdr%istwfk(:) = istwfk_ik
 
-   call owfk%open_write(owfk_hdr, dtfil%fnameabo_wfk, 0, iomode_from_fname(dtfil%fnameabo_wfk), get_unit(), comm)
+   print_wfk = .False.
+   print_wfk = .True.
+
+   if (print_wfk) then
+     call owfk%open_write(owfk_hdr, dtfil%fnameabo_wfk, 0, iomode_from_fname(dtfil%fnameabo_wfk), get_unit(), comm)
+   end if
 
    do spin=1,dtset%nsppol
      do ik_ibz=1,dtset%nkpt
        nband_k = nband_iks(ik_ibz, spin)
-       !nband_k = -1
-       call ugb%from_diago( &
-                          !spin, dtset%istwfk(ik_ibz), dtset%kptns(:,ik_ibz), dtset%ecut, nband_k, ngfftc, nfftf, &
-                          spin, 1, dtset%kptns(:,ik_ibz), dtset%ecut, nband_k, ngfftc, nfftf, &
-                          dtset, pawtab, pawfgr, ks_paw_ij, cryst, psps, ks_vtrial, eig_k, &
-                          comm)
+       call ugb%from_diago(spin, istwfk_ik(ik_ibz), dtset%kptns(:,ik_ibz), dtset%ecut, nband_k, ngfftc, nfftf, &
+                           dtset, pawtab, pawfgr, ks_paw_ij, cryst, psps, ks_vtrial, eig_k, comm)
 
-       ! occupancies are set to zero.
-       ! Client code is responsbile to recompile occ and fermie when reading the WFK.
-       ABI_CALLOC(occ_k, (nband_k))
-       !owfk_ebands%eig(1:nband_k, ik_ibz, spin) = eig_k
+       if (print_wfk) then
+         ! occupancies are set to zero.
+         ! Client code is responsbile to recompile occ and fermie when reading the WFK.
+         ABI_CALLOC(occ_k, (nband_k))
+         !owfk_ebands%eig(1:nband_k, ik_ibz, spin) = eig_k
 
-       call owfk%write_band_block([ugb%my_bstart, ugb%my_bstop], ik_ibz, spin, xmpio_collective, &
-                                   kg_k=ugb%kg_k, cg_k=ugb%cg_k, eig_k=eig_k(1:nband_k), occ_k=occ_k)
+         call owfk%write_band_block([ugb%my_bstart, ugb%my_bstop], ik_ibz, spin, &
+                                     xmpio_collective, &
+                                     !xmpio_single, &
+                                     kg_k=ugb%kg_k, cg_k=ugb%cg_k, eig_k=eig_k(1:nband_k), occ_k=occ_k)
+         ABI_FREE(occ_k)
+       end if
+
        ABI_FREE(eig_k)
-       ABI_FREE(occ_k)
        call ugb%free()
      end do
    end do
@@ -623,7 +629,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
 
    call owfk_hdr%free()
    call ebands_free(owfk_ebands)
-   call owfk%close()
+   if (print_wfk) call owfk%close()
  else
 
    ! ====================================================
@@ -719,6 +725,71 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  call ebands_free(ks_ebands)
  call destroy_mpi_enreg(mpi_enreg)
  call gwr%free()
+
+contains
+
+! Compute matrix elements at q = 0.
+subroutine ugb_calc_osc_gamma()
+
+ use m_fft,           only : fft_ug !, fft_ur, fftbox_plan3_t, fourdp
+
+ integer,parameter :: ndat = 1
+ integer :: nproc, my_rank, master, my_ib, master_ib !, npw_k, nspinor
+ real(dp),contiguous,pointer :: master_cg_k(:,:)
+ integer :: master_binds(2), master_bstart, master_bstop, master_nband
+ integer,allocatable :: gbound_k(:,:)
+
+ nproc = xmpi_comm_size(ugb%comm); my_rank = xmpi_comm_rank(ugb%comm)
+
+ !npw_k = ugb%npw_k; nspinor = ugb%nspinor
+
+ ! M_{12}(g) = <1|e^{-ig.r}|2> => M_{12}(g) = M_{21}(-g)^*
+
+ !ABI_MALLOC(gbound_k, (2 * gwr%g_mgfft + 8, 2))
+ !call sphereboundary(gbound_k, desc_kbz%istwfk, desc_kbz%gvec, gwr%g_mgfft, desc_kbz%npw)
+
+ do master=0,nproc-1
+
+   if (my_rank == master) master_binds = [ugb%my_bstart, ugb%my_bstop]
+   call xmpi_bcast(master_binds, master, ugb%comm, ierr)
+   master_bstart = master_binds(1); master_bstop = master_binds(2); master_nband = master_bstop - master_bstart + 1
+
+   if (my_rank /= master) then
+     ABI_MALLOC(master_cg_k, (2, ugb%npwsp * master_nband))
+   else
+     master_cg_k => ugb%cg_k
+   end if
+   call xmpi_bcast(master_cg_k, master, ugb%comm, ierr)
+
+   do my_ib=ugb%my_bstart, ugb%my_bstop
+
+     !call fft_ug(ugb%npw_k, gwr%g_nfft, ugb%nspinor, ndat, &
+     !            gwr%g_mgfft, gwr%g_ngfft, ugb%istwfk, ugb%kg_k, gbound_k, &
+     !            ugb%cg_k(:, ig2), &         ! in
+     !            my_ur)    ! out
+
+     do master_ib=master_bstart, master_bstop
+
+       !call fft_ug(ugb%npw_k, gwr%g_nfft, ugb%nspinor, ndat, &
+       !            gwr%g_mgfft, gwr%g_ngfft, ugb%istwfk, ugb%kg_k, gbound_k, &
+       !            ugb%cg_k(:, ig2), &         ! in
+       !            master_ur)    ! out
+
+       !master_ur * my_ur
+
+     end do ! master_ib
+   end do ! my_ib
+
+   ! Write data
+
+   if (my_rank /= master) then
+     ABI_FREE(master_cg_k)
+   end if
+ end do ! iproc
+
+ !ABI_FREE(gbound_k)
+
+end subroutine ugb_calc_osc_gamma
 
 end subroutine gwr_driver
 !!***
