@@ -25,7 +25,7 @@
    call C_F_pointer(C_loc(ug), real_ug, shape=[2, npw_k*ndat])
    call C_F_pointer(C_loc(ur), real_ur, shape=[2, ldx*ldy*ldz*ndat])
 
-   if (ndat==1) then
+   if (ndat == 1) then
      call FFT_PREF(fftrisc) (cplex0,denpot,real_ug,fofgout,real_ur,&
 &      gbound,gbound,istwf_k,kg_k,kg_k,mgfft,ngfft,npw_k,npwout0,ldx,ldy,ldz,option0,weight1_r, weight1_i)
    else
@@ -40,7 +40,7 @@
 
  else
    !
-   if (.not. SPAWN_THREADS_HERE(ndat,nthreads)) then
+   if (.not. SPAWN_THREADS_HERE(ndat, nthreads)) then
     
      ! Insert fg in fg_aug defined on the (augmented) FFT mesh
      call TK_PREF(gsph2box) (nx,ny,nz,ldx,ldy,ldz,ndat,npw_k,istwf_k,kg_k,ug,ur)

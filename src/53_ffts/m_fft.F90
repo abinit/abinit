@@ -90,21 +90,21 @@ MODULE m_fft
  !public :: fftmpi_u
 
  interface fft_ug
-   !module procedure fft_ug_dp   TODO
+   !module procedure fft_ug_dp  TODO
    module procedure fft_ug_spc
    module procedure fft_ug_dpc
  end interface fft_ug
  !public :: fft_ug_spc, fft_ug_dpc
 
  interface fft_ur
-   !module procedure fft_ur_dp      TODO
+   !module procedure fft_ur_dp  TODO
    module procedure fft_ur_spc
    module procedure fft_ur_dpc
  end interface fft_ur
  !public :: fft_ur_spc, fft_ur_dpc
 
  interface fftpad
-   !module procedure fftpad_dp
+   !module procedure fftpad_dp  TODO
    module procedure fftpad_spc
    module procedure fftpad_dpc
  end interface fftpad

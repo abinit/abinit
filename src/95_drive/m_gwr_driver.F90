@@ -744,26 +744,33 @@ subroutine ugb_calc_osc_gamma()
 
  use m_fft,           only : fft_ug !, fft_ur, fftbox_plan3_t, fourdp
 
- integer,parameter :: ndat = 1
- integer :: nproc, my_rank, master, my_ib, master_ib !, npw_k, nspinor
+ integer,parameter :: ndat = 1, ndat1 = 1
+ integer :: nproc, my_rank, master, my_ib, master_ib, npw_k, nspinor, idat
  real(dp),contiguous,pointer :: master_cg_k(:,:)
- integer :: master_binds(2), master_bstart, master_bstop, master_nband
+ integer :: master_brange(2), master_bstart, master_bstop, master_nband
  integer,allocatable :: gbound_k(:,:)
+ integer :: u_ngfft(18), u_nfft, u_mgfft
+ complex(gwpc),allocatable :: my_ur(:), master_ur(:,:)
 
  nproc = xmpi_comm_size(ugb%comm); my_rank = xmpi_comm_rank(ugb%comm)
-
- !npw_k = ugb%npw_k; nspinor = ugb%nspinor
-
  ! M_{12}(g) = <1|e^{-ig.r}|2> => M_{12}(g) = M_{21}(-g)^*
 
- !ABI_MALLOC(gbound_k, (2 * gwr%g_mgfft + 8, 2))
- !call sphereboundary(gbound_k, desc_kbz%istwfk, desc_kbz%gvec, gwr%g_mgfft, desc_kbz%npw)
+ npw_k = ugb%npw_k; nspinor = ugb%nspinor
+ !u_ngfft(18) ??
+ u_nfft = product(u_ngfft(1:3))
+ u_mgfft = maxval(u_ngfft(1:3))
+
+ ABI_MALLOC(gbound_k, (2 * u_mgfft + 8, 2))
+ !call sphereboundary(gbound_k, ugb%istwfk, ugb%kg_k, u_mgfft, npw_k)
+
+ ABI_MALLOC(my_ur, (u_nfft * nspinor * ndat1))
+ ABI_MALLOC(master_ur, (u_nfft * nspinor, ndat))
 
  do master=0,nproc-1
 
-   if (my_rank == master) master_binds = [ugb%my_bstart, ugb%my_bstop]
-   call xmpi_bcast(master_binds, master, ugb%comm, ierr)
-   master_bstart = master_binds(1); master_bstop = master_binds(2); master_nband = master_bstop - master_bstart + 1
+   if (my_rank == master) master_brange = [ugb%my_bstart, ugb%my_bstop]
+   call xmpi_bcast(master_brange, master, ugb%comm, ierr)
+   master_bstart = master_brange(1); master_bstop = master_brange(2); master_nband = master_bstop - master_bstart + 1
 
    if (my_rank /= master) then
      ABI_MALLOC(master_cg_k, (2, ugb%npwsp * master_nband))
@@ -774,31 +781,42 @@ subroutine ugb_calc_osc_gamma()
 
    do my_ib=ugb%my_bstart, ugb%my_bstop
 
-     !call fft_ug(ugb%npw_k, gwr%g_nfft, ugb%nspinor, ndat, &
-     !            gwr%g_mgfft, gwr%g_ngfft, ugb%istwfk, ugb%kg_k, gbound_k, &
+     !call fft_ug(npw_k, u_nfft, nspinor, ndat, &
+     !            u_mgfft, u_ngfft, ugb%istwfk, ugb%kg_k, gbound_k, &
      !            ugb%cg_k(:, ig2), &         ! in
-     !            my_ur)    ! out
+     !            my_ur)                      ! out
 
-     do master_ib=master_bstart, master_bstop
+     do master_ib=master_bstart, master_bstop !, batch_size
+       !ndat = blocked_loop(master_ib, master_btop, batch_size)
 
-       !call fft_ug(ugb%npw_k, gwr%g_nfft, ugb%nspinor, ndat, &
-       !            gwr%g_mgfft, gwr%g_ngfft, ugb%istwfk, ugb%kg_k, gbound_k, &
-       !            ugb%cg_k(:, ig2), &         ! in
-       !            master_ur)    ! out
+       !call fft_ug(npw_k, u_nfft, nspinor, ndat, &
+       !            u_mgfft, u_ngfft, ugb%istwfk, ugb%kg_k, gbound_k, &
+       !            master_cg_k(:, master_ib)), &         ! in
+       !            master_ur)                  ! out
 
-       !master_ur * my_ur
+       !do idat=1,ndat
+       !  master_ur(:, idat) = conjg(master_ur(:, idat)) * my_ur(:)
+       !end do
 
+       !call fft_ur(desc%npw, u_nfft, nspinor, ndat, &
+       !            u_mgfft, u_ngfft, desc%istwfk, desc%gvec, desc%gbound, &
+       !            master_ur, &  ! in
+       !            rpr%buffer_cplx(:, ir1))    ! out
+
+       !call fftpad(u12prod, ngfft, nx, ny, nz, ldx, ldy, ldz, ndat, mgfft, -1, gbound)
      end do ! master_ib
    end do ! my_ib
 
-   ! Write data
+   ! TODO: Write data
 
    if (my_rank /= master) then
      ABI_FREE(master_cg_k)
    end if
  end do ! iproc
 
- !ABI_FREE(gbound_k)
+ ABI_FREE(gbound_k)
+ ABI_FREE(my_ur)
+ ABI_FREE(master_ur)
 
 end subroutine ugb_calc_osc_gamma
 

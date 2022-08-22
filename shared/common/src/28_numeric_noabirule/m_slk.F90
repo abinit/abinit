@@ -752,18 +752,21 @@ end subroutine slk_get_head_and_wings
 !!  matrix_scalapack_copy
 !!
 !! FUNCTION
-!!  Copy the object.
+!!  Copy in_mat to new_mat.
+!!  If empty is True, the values in the local buffer are not copied. Default: False
 !!
 !! SOURCE
 
-subroutine matrix_scalapack_copy(in_mat, new_mat)
+subroutine matrix_scalapack_copy(in_mat, new_mat, empty)
 
 !Arguments ------------------------------------
  class(matrix_scalapack),intent(in) :: in_mat
  class(matrix_scalapack),intent(out) :: new_mat
+ logical,optional,intent(in) :: empty
 
 !Local variables-------------------------------
  integer :: istwfk
+ logical :: empty__
 
 ! *********************************************************************
 
@@ -775,10 +778,13 @@ subroutine matrix_scalapack_copy(in_mat, new_mat)
  call new_mat%init(in_mat%sizeb_global(1), in_mat%sizeb_global(2), in_mat%processor, istwfk, &
                    size_blocs=in_mat%sizeb_blocs)
 
- if (istwfk == 1) then
-   new_mat%buffer_cplx = in_mat%buffer_cplx
- else
-   new_mat%buffer_real = in_mat%buffer_real
+ empty__ = .False.; if (present(empty)) empty__ = empty
+ if (.not. empty__) then
+   if (istwfk == 1) then
+     new_mat%buffer_cplx = in_mat%buffer_cplx
+   else
+     new_mat%buffer_real = in_mat%buffer_real
+   end if
  end if
 
 end subroutine matrix_scalapack_copy
@@ -2107,8 +2113,7 @@ end function my_locc
 !! FUNCTION
 !!  Extended matrix * matrix product: C := alpha*A*B + beta*C
 !!
-!!  For a simple matrix vector product, one can simply pass
-!!  alpha = cone and beta = czero
+!!  For a simple matrix vector product, one can simply pass alpha = cone and beta = czero
 !!
 !! INPUTS
 !!  matrix1= first ScaLAPACK matrix (matrix A)
@@ -3942,7 +3947,7 @@ end subroutine slk_cut
 !!  slk_take_from
 !!
 !! FUNCTION
-!!  Take values from source
+!!  Take values from source. NB: This routine should be called by all procs owning mat and source.
 !!
 !! INPUTS
 !!
@@ -3969,6 +3974,14 @@ subroutine slk_take_from(mat, source)
 
  ! prototype
  !call pzgemr2d(m, n, a, ia, ja, desca, b, ib, jb, descb, ictxt)
+
+ ! Take care when context A is disjoint from context B. The general rules for which parameters need to be set are:
+ !
+ !   - All calling processes must have the correct m and n.
+ !   - Processes in context A must correctly define all parameters describing A.
+ !   - Processes in context B must correctly define all parameters describing B.
+ !   - Processes which are not members of context A must pass ctxt_a = -1 and need not set other parameters describing A.
+ !   - Processes which are not members of contextB must pass ctxt_b = -1 and need not set other parameters describing B.
 
  if (allocated(mat%buffer_cplx)) then
 #ifdef HAVE_LINALG_SCALAPACK

@@ -400,10 +400,10 @@ module m_gwr
    integer :: g_ngfft(18) = -1, g_mgfft = -1, g_nfft = -1
    ! FFT mesh for the Green's function.
 
-   integer :: mg0(3) = [2, 2, 2]
-
    !integer :: chi_ngfft(18) = -1, chi_mgfft = -1, chi_nfft = -1
    !integer :: sig_ngfft(18) = -1, sig_mgfft = -1, sig_nfft = -1
+
+   integer :: mg0(3) = [2, 2, 2]
 
    type(desc_t),allocatable :: green_desc_kibz(:)
    ! (nkibz)
@@ -1419,7 +1419,6 @@ subroutine gwr_alloc_free_mats(gwr, mask_ibz, what, action)
        do ik_ibz=1,gwr%nkibz
          if (mask_ibz(ik_ibz) == 0) cycle
          npwsp = gwr%green_desc_kibz(ik_ibz)%npw * gwr%nspinor
-         !col_bsize = npwsp / gwr%g_comm%nproc; if (mod(npwsp, gwr%g_comm%nproc) /= 0) col_bsize = col_bsize + 1
          ABI_CHECK(block_dist_1d(npwsp, gwr%g_comm%nproc, col_bsize, msg), msg)
          associate (gt => gwr%gt_kibz(:, ik_ibz, itau, spin))
          do ipm=1,2
@@ -1436,7 +1435,6 @@ subroutine gwr_alloc_free_mats(gwr, mask_ibz, what, action)
        do iq_ibz=1,gwr%nqibz
          if (mask_ibz(iq_ibz) == 0) cycle
          npwsp = gwr%tchi_desc_qibz(iq_ibz)%npw * gwr%nspinor
-         !col_bsize = npwsp / gwr%g_comm%nproc; if (mod(npwsp, gwr%g_comm%nproc) /= 0) col_bsize = col_bsize + 1
          ABI_CHECK(block_dist_1d(npwsp, gwr%g_comm%nproc, col_bsize, msg), msg)
          if (what == "tchi") mat => gwr%tchi_qibz(iq_ibz, itau, spin)
          if (what == "wc") mat => gwr%wc_qibz(iq_ibz, itau, spin)
@@ -1452,7 +1450,6 @@ subroutine gwr_alloc_free_mats(gwr, mask_ibz, what, action)
        do ik_ibz=1,gwr%nkibz
          if (mask_ibz(ik_ibz) == 0) cycle
          npwsp = gwr%tchi_desc_qibz(iq_ibz)%npw * gwr%nspinor
-         !col_bsize = npwsp / gwr%g_comm%nproc; if (mod(npwsp, gwr%g_comm%nproc) /= 0) col_bsize = col_bsize + 1
          ABI_CHECK(block_dist_1d(npwsp, gwr%g_comm%nproc, col_bsize, msg), msg)
          associate (sigc => gwr%sigc_kibz(:, ik_ibz, itau, spin))
          do ipm=1,2
@@ -1718,7 +1715,7 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
  integer,parameter :: formeig0 = 0, istwfk1 = 1
  integer :: mband, min_nband, nkibz, nsppol, my_is, my_iki, spin, ik_ibz ! my_it,
  integer :: my_ib, my_nb, band, npw_k, mpw, istwf_k, itau, ipm, ig1, ig2, il_g1, il_g2
- integer :: nbsum, npwsp, col_bsize, nband_k, my_bstart, my_bstop, nb, ierr
+ integer :: nbsum, npwsp, col_bsize, nband_k, my_bstart, my_bstop, my_nband, ierr
  real(dp) :: f_nk, eig_nk, ef, spin_fact, cpu, wall, gflops
  complex(dp) :: gt_cfact
  character(len=5000) :: msg
@@ -1728,7 +1725,7 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
  type(hdr_type) :: wfk_hdr
  type(wfk_t) :: wfk
  type(processor_scalapack) :: gtau_slkproc
- type(matrix_scalapack), target :: cg_mat
+ type(matrix_scalapack), target :: cg_mat, cg_work, green_mat
 !arrays
  integer :: lsize(2), mask_kibz(gwr%nkibz)
  integer,allocatable :: nband(:,:), wfd_istwfk(:), my_bands(:), kg_k(:,:)
@@ -1969,36 +1966,39 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
 
      ! Init CG(npwsp, nband) PBLAS matrix within gtau communicator.
      ! and distribute it over bands so that each proc reads a subset of bands in read_band_block
-     !col_bsize = nband_k / gwr%gtau_comm%nproc; if (mod(nband_k, gwr%gtau_comm%nproc) /= 0) col_bsize = col_bsize + 1
      ABI_CHECK(block_dist_1d(nband_k, gwr%gtau_comm%nproc, col_bsize, msg), msg)
      call cg_mat%init(npwsp, nband_k, gtau_slkproc, istwfk1, size_blocs=[npwsp, col_bsize])
 
      my_bstart = cg_mat%loc2gcol(1)
      my_bstop = cg_mat%loc2gcol(cg_mat%sizeb_local(2))
-     nb = my_bstop - my_bstart + 1
-     ABI_CHECK(nb > 0, "nb == 0, decrease number of procs for G and tau parallelism.")
+     my_nband = my_bstop - my_bstart + 1
+     ABI_CHECK(my_nband > 0, "nb == 0, decrease number of procs for G and tau parallelism.")
 
      ! Read my bands
-     call c_f_pointer(c_loc(cg_mat%buffer_cplx), cg_k, shape=[2, npwsp * nb])
-     call wfk%read_band_block([my_bstart, my_bstop], ik_ibz, spin, xmpio_single, kg_k=kg_k, cg_k=cg_k)
+     call c_f_pointer(c_loc(cg_mat%buffer_cplx), cg_k, shape=[2, npwsp * my_nband])
+     call wfk%read_band_block([my_bstart, my_bstop], ik_ibz, spin, xmpio_single, & ! xmpio_collective,
+                              kg_k=kg_k, cg_k=cg_k)
 
      !call cg_mat%copy(cg_work)
+     !call cg_mat%change_size_blocs(cg_work, size_blocs=, processor=)
+     !call cg_work%copy(green_mat, empty=.True.)
 
      do itau=1,gwr%ntau
        !my_it = gwr%myit_from_itau(itau)
        !gt_cfact = exp(-gwr%tau_mesh(itau)  * eig_nk)
-       !call slk_pzgemm("N", "C", matrix1, cone, matrix2, czero, results)
+       !call slk_pzgemm("N", "C", cg_work, cone, cg_work, czero, green_mat)
+       !call gwr%gt_kibz(ipm, ik_ibz, itau, spin)%take_from(green_mat)
        !if (my_it == -1) cycle
-
        !if (gwr%tau_comm%me == gwr%tau_master(itau)) then
        !  do ipm=1,2
        !    gwr%gt_kibz(ipm, ik_ibz, itau, spin)%buffer_cplx = loc_cwork(:,:,ipm)
+
        !  end do
        !end if
      end do
 
      !call cg_work%free()
-
+     !call green_mat%free()
      call cg_mat%free()
    end do ! my_iki
  end do ! my_is
@@ -2205,7 +2205,6 @@ subroutine gwr_get_myk_green_gpr(gwr, itau, spin, desc_mykbz, gt_gpr)
 
      ! Allocate rgp PBLAS matrix to store G(r,g')
      npwsp = desc_k%npw * gwr%nspinor
-     !col_bsize = npwsp / gwr%g_comm%nproc; if (mod(npwsp, gwr%g_comm%nproc) /= 0) col_bsize = col_bsize + 1
      ABI_CHECK(block_dist_1d(npwsp, gwr%g_comm%nproc, col_bsize, msg), msg)
      call rgp%init(gwr%g_nfft * gwr%nspinor, npwsp, gwr%g_slkproc, desc_k%istwfk, &
                    size_blocs=[gwr%g_nfft * gwr%nspinor, col_bsize])
@@ -2296,7 +2295,6 @@ subroutine gwr_get_gk_rpr_pm(gwr, my_ikf, itau, spin, gk_rpr_pm)
 
    ! Allocate rgp PBLAS matrix to store G(r,g')
    npwsp = desc_k%npw * gwr%nspinor
-   !col_bsize = npwsp / gwr%g_comm%nproc; if (mod(npwsp, gwr%g_comm%nproc) /= 0) col_bsize = col_bsize + 1
    ABI_CHECK(block_dist_1d(npwsp, gwr%g_comm%nproc, col_bsize, msg), msg)
    call rgp%init(gwr%g_nfft * gwr%nspinor, npwsp, gwr%g_slkproc, desc_k%istwfk, &
                  size_blocs=[gwr%g_nfft * gwr%nspinor, col_bsize])
@@ -2383,7 +2381,6 @@ subroutine gwr_ggp_to_rpr(gwr, desc, ggp, rpr)
 
  ! Allocate rgp PBLAS matrix to store F(r,g')
  npwsp = desc%npw * gwr%nspinor
- !col_bsize = npwsp / gwr%g_comm%nproc; if (mod(npwsp, gwr%g_comm%nproc) /= 0) col_bsize = col_bsize + 1
  ABI_CHECK(block_dist_1d(npwsp, gwr%g_comm%nproc, col_bsize, msg), msg)
  call rgp%init(gwr%g_nfft * gwr%nspinor, npwsp, gwr%g_slkproc, desc%istwfk, &
                size_blocs=[gwr%g_nfft * gwr%nspinor, col_bsize])
@@ -2572,7 +2569,6 @@ subroutine gwr_get_myq_wc_gpr(gwr, itau, spin, desc_myqbz, wc_gpr)
 
    ! Allocate rgp PBLAS matrix to store Wc(r, g')
    npwsp = desc_q%npw * gwr%nspinor
-   !col_bsize = npwsp / gwr%g_comm%nproc; if (mod(npwsp, gwr%g_comm%nproc) /= 0) col_bsize = col_bsize + 1
    ABI_CHECK(block_dist_1d(npwsp, gwr%g_comm%nproc, col_bsize, msg), msg)
    call rgp%init(gwr%g_nfft * gwr%nspinor, npwsp, gwr%g_slkproc, desc_q%istwfk, &
                  size_blocs=[gwr%g_nfft * gwr%nspinor, col_bsize])
@@ -2667,7 +2663,6 @@ subroutine gwr_get_wc_rpr_qbz(gwr, qq_bz, itau, spin, wc_rpr)
 
  ! Allocate rgp PBLAS matrix to store Wc(r, g')
  npwsp = desc_q%npw * gwr%nspinor
- !col_bsize = npwsp / gwr%g_comm%nproc; if (mod(npwsp, gwr%g_comm%nproc) /= 0) col_bsize = col_bsize + 1
  ABI_CHECK(block_dist_1d(npwsp, gwr%g_comm%nproc, col_bsize, msg), msg)
  call rgp%init(gwr%g_nfft * gwr%nspinor, npwsp, gwr%g_slkproc, desc_q%istwfk, &
                size_blocs=[gwr%g_nfft * gwr%nspinor, col_bsize])
@@ -3418,7 +3413,6 @@ subroutine gwr_build_tchi(gwr)
      iq_ibz = gwr%my_qibz_inds(my_iqi)
      npwsp = gwr%tchi_desc_qibz(iq_ibz)%npw * gwr%nspinor
      ncol_glob = gwr%g_nfft * gwr%nspinor
-     !col_bsize = ncol_glob / gwr%g_comm%nproc; if (mod(ncol_glob, gwr%g_comm%nproc) /= 0) col_bsize = col_bsize + 1
      ABI_CHECK(block_dist_1d(ncol_glob, gwr%g_comm%nproc, col_bsize, msg), msg)
      call chiq_gpr(my_iqi)%init(npwsp, gwr%g_nfft * gwr%nspinor, gwr%g_slkproc, 1, size_blocs=[npwsp, col_bsize])
    end do
@@ -4529,14 +4523,19 @@ else
    bmax = maxval(gwr%bstop_ks(:, spin))
 
    ABI_MALLOC_OR_DIE(uc_psi_bk, (gwr%g_nfft * gwr%nspinor, bmin:bmax, gwr%nkcalc), ierr)
+   ABI_MALLOC(ur, (gwr%g_nfft * gwr%nspinor))
+
    do ikcalc=1,gwr%nkcalc
      kcalc_bz = gwr%kcalc(:, ikcalc)
      ikcalc_ibz = gwr%kcalc2ibz(ikcalc, 1)  ! TODO: Assuming wfs in IBZ
 
      do band=gwr%bstart_ks(ikcalc, spin), gwr%bstop_ks(ikcalc, spin)
-       call gwr%kcalc_wfd%get_ur(band, ikcalc_ibz, spin, uc_psi_bk(:, band, ikcalc))
+       call gwr%kcalc_wfd%get_ur(band, ikcalc_ibz, spin, ur)
+       uc_psi_bk(:, band, ikcalc) = ur
      end do
    end do
+
+   ABI_FREE(ur)
 
    ! Construct Sigma(itau) using convolutions in k-space and real-space representation in the unit cell.
    do my_it=1,gwr%my_ntau
