@@ -829,8 +829,8 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
        do jatm=1,natom
          jtypat=typat(atindx1(jatm))
          lm_sizej=pawtab(jtypat)%lcut_size**2
-         ABI_MALLOC(prod_nondiag(jatm)%value,(ngrad_nondiag,lm_sizej))
-         ABI_MALLOC(prodp_nondiag(jatm)%value,(ngradp_nondiag,lm_sizej))
+         ABI_CALLOC(prod_nondiag(jatm)%value,(ngrad_nondiag,lm_sizej))
+         ABI_CALLOC(prodp_nondiag(jatm)%value,(ngradp_nondiag,lm_sizej))
        end do
      end if
 

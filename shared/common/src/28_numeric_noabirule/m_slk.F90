@@ -522,7 +522,7 @@ subroutine init_matrix_scalapack(matrix, nbli_global, nbco_global, processor, is
  integer, parameter :: DEFAULT_SIZE_BLOCS = 24
  integer :: info,sizeb
  integer,external :: NUMROC
- character(len=500) :: msg
+ !character(len=500) :: msg
 
 ! *********************************************************************
 

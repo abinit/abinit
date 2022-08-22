@@ -203,7 +203,7 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
  integer,parameter :: master=0, ncell=3, nmc_max=2500000
  integer :: nmc,nseed, i1,i2,i3,ig,imc
  integer :: ii,iqlwl,iq_bz,iq_ibz,npar,npt
- integer :: opt_cylinder,opt_surface,test,rank,nprocs
+ integer :: opt_cylinder,opt_surface,rank,nprocs ! test,
  real(dp),parameter :: tolq0 = 1.d-3, tol999 = 999.0
  real(dp) :: b1b1,b2b2,b3b3,b1b2,b2b3,b3b1
  real(dp) :: bz_geometry_factor,bz_plane,check,dx,integ,q0_vol,q0_volsph

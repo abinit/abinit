@@ -173,7 +173,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  integer :: ndij !,ndim,nfftf,nfftf_tot,nkcalc,gwc_nfft,gwc_nfftot,gwx_nfft,gwx_nfftot
  integer :: ngrvdw, nhatgrdim, nkxc, nspden_rhoij, optene !nzlmopt,
  integer :: optcut, optgr0, optgr1, optgr2, optrad, psp_gencond !option,
- integer :: rhoxsp_method, usexcnhat, onband_diago !, use_aerhor,use_umklp
+ integer :: rhoxsp_method, usexcnhat !, use_aerhor,use_umklp
  !real(dp) :: compch_fft, compch_sph !,r_s,rhoav,alpha
  real(dp) :: gsqcutc_eff, gsqcutf_eff, gsqcut_shp
  real(dp) :: vxcavg !,vxcavg_qp ucvol,
@@ -745,7 +745,7 @@ subroutine ugb_calc_osc_gamma()
  use m_fft,           only : fft_ug !, fft_ur, fftbox_plan3_t, fourdp
 
  integer,parameter :: ndat = 1, ndat1 = 1
- integer :: nproc, my_rank, master, my_ib, master_ib, npw_k, nspinor, idat
+ integer :: nproc, my_rank, master, my_ib, master_ib, npw_k, nspinor !, idat
  real(dp),contiguous,pointer :: master_cg_k(:,:)
  integer :: master_brange(2), master_bstart, master_bstop, master_nband
  integer,allocatable :: gbound_k(:,:)

@@ -669,13 +669,13 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
 !scalars
  integer,parameter :: me_fft0 = 0, paral_fft0 = 0, nproc_fft1 = 1, istwfk1 = 1
  integer,parameter :: qptopt1 = 1, qtimrev1 = 1, master = 0, ndims = 4
- integer :: my_is, my_it, my_ikf, my_iqf, ii, npwsp, ebands_timrev, my_iki, my_iqi, itau, spin
+ integer :: my_it, my_ikf, my_iqf, ii, ebands_timrev, my_iki, my_iqi, itau, spin ! my_is, npwsp,
  integer :: my_nshiftq, iq_bz, iq_ibz, npw_, ncid, ig, ig_start
  integer :: comm_cart, me_cart, ierr, all_nproc, nps, my_rank, qprange_, gap_err, ncerr, omp_nt
  integer :: jj, cnt, ikcalc, ndeg, mband, bstop, nbsum, it, iw
  integer :: ik_ibz, ik_bz, isym_k, trev_k, g0_k(3)
  logical :: isirr_k, changed, q_is_gamma
- real(dp) :: cpu, wall, gflops, mem_mb, te_min, te_max, wmax
+ real(dp) :: cpu, wall, gflops, te_min, te_max, wmax ! mem_mb,
  character(len=5000) :: msg
  logical :: reorder
  type(krank_t) :: qrank, krank_ibz
@@ -1398,7 +1398,7 @@ subroutine gwr_alloc_free_mats(gwr, mask_ibz, what, action)
  character(len=*),intent(in) :: what, action
 
 !Local variables-------------------------------
- integer :: my_is, my_it, ipm, npwsp, col_bsize, my_iki, my_iqi, itau, spin, ik_ibz, iq_ibz
+ integer :: my_is, my_it, ipm, npwsp, col_bsize, itau, spin, ik_ibz, iq_ibz
  type(matrix_scalapack), pointer :: mat
  character(len=500) :: msg
 
@@ -1725,7 +1725,7 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
  type(hdr_type) :: wfk_hdr
  type(wfk_t) :: wfk
  type(processor_scalapack) :: gtau_slkproc
- type(matrix_scalapack), target :: cg_mat, cg_work, green_mat
+ type(matrix_scalapack), target :: cg_mat !, cg_work, green_mat
 !arrays
  integer :: lsize(2), mask_kibz(gwr%nkibz)
  integer,allocatable :: nband(:,:), wfd_istwfk(:), my_bands(:), kg_k(:,:)
@@ -2273,7 +2273,7 @@ subroutine gwr_get_gk_rpr_pm(gwr, my_ikf, itau, spin, gk_rpr_pm)
 
 !Local variables-------------------------------
 !scalars
- integer :: ik_bz, ig2, ipm, npwsp, col_bsize, ir1, ii, ndat
+ integer :: ik_bz, ig2, ipm, npwsp, col_bsize, ir1, ndat
  real(dp) :: cpu, wall, gflops
  type(matrix_scalapack) :: rgp, gt_pm(2), gpr
  type(desc_t) :: desc_k
@@ -2290,9 +2290,6 @@ subroutine gwr_get_gk_rpr_pm(gwr, my_ikf, itau, spin, gk_rpr_pm)
  call gwr%rotate_gpm(ik_bz, itau, spin, desc_k, gt_pm)
 
  do ipm=1,2
-   !ipm = ipm_list(ii)
-   !ABI_CHECK(any(ipm == [1, 2]), sjoin("Wrong ipm:", itoa(ipm)))
-
    ! Allocate rgp PBLAS matrix to store G(r,g')
    npwsp = desc_k%npw * gwr%nspinor
    ABI_CHECK(block_dist_1d(npwsp, gwr%g_comm%nproc, col_bsize, msg), msg)
@@ -2635,7 +2632,7 @@ subroutine gwr_get_wc_rpr_qbz(gwr, qq_bz, itau, spin, wc_rpr)
 
 !Local variables-------------------------------
 !scalars
- integer :: my_iqf, iq_bz, ig2, npwsp, col_bsize, ir1, idat, ndat, g0_q(3)
+ integer :: iq_bz, ig2, npwsp, col_bsize, ir1, ndat !, idat, g0_q(3), my_iqf,
  !logical :: q_is_gamma
  character(len=500) :: msg
  type(desc_t) :: desc_q
@@ -3312,20 +3309,20 @@ subroutine gwr_build_tchi(gwr)
 !scalars
  integer,parameter :: istwfk1 = 1, tim_fourdp0 = 0
  integer :: my_is, my_it, my_ikf, ig, my_ir, my_nr, npwsp, ncol_glob, col_bsize, my_iqi !, my_iki ! my_iqf,
- integer :: idat, ndat, sc_nfft, spin, ik_ibz, ik_bz, iq_ibz, ierr, ipm, itau, ig2 ! ig1
- real(dp) :: cpu_tau, wall_tau, gflops_tau, cpu_all, wall_all, gflops_all, cpu, wall, gflops
- real(dp) :: tchi_rfact, mem_mb, local_max, max_abs_imag_chit !, spin_fact, sc_ucvol,
+ integer :: idat, ndat, sc_nfft, spin, ik_bz, iq_ibz, ierr, ipm, itau, ig2 ! ig1
+ real(dp) :: cpu_tau, wall_tau, gflops_tau, cpu_all, wall_all, gflops_all !, cpu, wall, gflops
+ real(dp) :: tchi_rfact, mem_mb, local_max, max_abs_imag_chit !, spin_fact, sc_ucvol, ik_ibz,
  logical :: q_is_gamma
  character(len=5000) :: msg
  type(desc_t),pointer :: desc_k, desc_q
  type(matrix_scalapack) :: chi_rgp
- type(mpi_type) :: tchi_mpi_enreg
+ !type(mpi_type) :: tchi_mpi_enreg
 !arrays
  integer :: sc_ngfft(18)
  integer,allocatable :: green_scg(:,:), chi_scg(:,:)
  integer :: mask_qibz(gwr%nqibz)
  real(dp) :: kk_bz(3), kpq_bz(3), qq_ibz(3) !, qq_bz(3) ! kk_ibz(3),
- logical :: need_gt_kibz(gwr%nkibz), got_gt_kibz(gwr%nkibz)
+ !logical :: need_gt_kibz(gwr%nkibz), got_gt_kibz(gwr%nkibz)
  complex(dp),allocatable :: gt_scbox(:,:), chit_scbox(:), gt_ucbox(:,:)
  type(matrix_scalapack) :: gt_gpr(2, gwr%my_nkbz), chiq_gpr(gwr%my_nqibz), gk_rpr_pm(2)
  type(desc_t), target :: desc_mykbz(gwr%my_nkbz)
@@ -3704,7 +3701,7 @@ subroutine gwr_distrib_gt_kibz(gwr, itau, spin, need_kibz, got_kibz, action)
 
 !Local variables-------------------------------
  integer,parameter :: istwfk1 = 1
- integer :: ik_ibz, ipm, npwsp, col_bsize, ierr, lsize(2)
+ integer :: ik_ibz, ipm, ierr, lsize(2) ! col_bsize, npwsp,
  integer :: do_mpi_kibz(gwr%nkibz), sender_kibz(gwr%nkibz)
  real(dp) :: kk_ibz(3), cpu, wall, gflops
  complex(dp),allocatable :: cbuf_k(:,:)
@@ -4217,8 +4214,8 @@ subroutine gwr_build_sigmac(gwr)
 !Local variables-------------------------------
 !scalars
  integer :: my_is, my_it, spin, ik_ibz, ikcalc_ibz, sc_nfft, sc_size, my_ir, my_nr, iw, idat, ndat !my_iki,
- integer :: my_iqf, iq_ibz, iq_bz, itau, ierr, ibc, jb, bmin, bmax, band, nbc ! col_bsize, npwsp, ib1, ib2,
- integer :: my_ikf, ipm, ik_bz, ig, ikcalc, uc_ir, ir, sc_ir, ncid, col_bsize, npwsp, ibeg, iend ! my_iqi,
+ integer :: my_iqf, iq_ibz, iq_bz, itau, ierr, ibc, bmin, bmax, band, nbc ! col_bsize, npwsp, ib1, ib2,
+ integer :: my_ikf, ipm, ik_bz, ig, ikcalc, uc_ir, ir, ncid, col_bsize, npwsp, ibeg, iend ! my_iqi, sc_ir,
  real(dp) :: cpu_tau, wall_tau, gflops_tau, cpu_all, wall_all, gflops_all, cpu, wall, gflops, mem_mb
  real(dp) :: max_abs_imag_wct, max_abs_re_wct, sck_ucvol, scq_ucvol  !, spin_fact
  !logical :: k_is_gamma !, q_is_gamma
@@ -4247,7 +4244,7 @@ subroutine gwr_build_sigmac(gwr)
  real(dp) :: e0_kcalc(gwr%max_nbcalc, gwr%nkcalc, gwr%nsppol)
  real(dp) :: spfunc_diag_kcalc(gwr%nwr, gwr%max_nbcalc, gwr%nkcalc, gwr%nsppol)
  real(dp) :: sigx_kcalc(gwr%max_nbcalc, gwr%nkcalc, gwr%nsppol)
- real(dp) :: ks_gap_kcalc(gwr%nkcalc, gwr%nsppol), qp_gap_kcalc(gwr%nkcalc, gwr%nsppol)
+ !real(dp) :: ks_gap_kcalc(gwr%nkcalc, gwr%nsppol), qp_gap_kcalc(gwr%nkcalc, gwr%nsppol)
  complex(dp) :: ze0_kcalc(gwr%max_nbcalc, gwr%nkcalc, gwr%nsppol), rw_mesh(gwr%nwr)
  complex(dp) :: sigc_iw_diag_kcalc(gwr%ntau, gwr%max_nbcalc, gwr%nkcalc, gwr%nsppol)
  complex(dp) :: sigc_e0_kcalc(gwr%max_nbcalc, gwr%nkcalc, gwr%nsppol)
@@ -5720,24 +5717,24 @@ end function vid
 end subroutine load_head_wings_from_sus_file__
 !!***
 
-subroutine r2c_fft(cplex, fofg, fofr, isign, mpi_enreg, nfft, ndat, ngfft, tim_fourdp)
-
-!Arguments ------------------------------------
-!scalars
- integer,intent(in) :: cplex,isign,nfft,ndat,tim_fourdp
- type(MPI_type),intent(in) :: mpi_enreg
-!arrays
- integer,intent(in) :: ngfft(18)
- real(dp),intent(inout) :: fofg(2,nfft,ndat),fofr(cplex*nfft,ndat)
-
-!Local variables-------------------------------
-
- !call c_f_pointer(c_loc(cg_mat%buffer_cplx), fofg, shape=[2, nfft, ndat])
- !call c_f_pointer(c_loc(cg_mat%buffer_cplx), fofr, shape=[cplex*nfft * ndat])
-
- !call fourdp(cplex, fofg, fofr, isign, mpi_enreg, nfft, ndat, ngfft)
-
-end subroutine r2c_fft
+!subroutine r2c_fft(cplex, fofg, fofr, isign, mpi_enreg, nfft, ndat, ngfft, tim_fourdp)
+!
+!!Arguments ------------------------------------
+!!scalars
+! integer,intent(in) :: cplex,isign,nfft,ndat,tim_fourdp
+! type(MPI_type),intent(in) :: mpi_enreg
+!!arrays
+! integer,intent(in) :: ngfft(18)
+! real(dp),intent(inout) :: fofg(2,nfft,ndat),fofr(cplex*nfft,ndat)
+!
+!!Local variables-------------------------------
+!
+! !call c_f_pointer(c_loc(cg_mat%buffer_cplx), fofg, shape=[2, nfft, ndat])
+! !call c_f_pointer(c_loc(cg_mat%buffer_cplx), fofr, shape=[cplex*nfft * ndat])
+!
+! !call fourdp(cplex, fofg, fofr, isign, mpi_enreg, nfft, ndat, ngfft)
+!
+!end subroutine r2c_fft
 
 end module m_gwr
 !!***

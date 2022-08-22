@@ -895,12 +895,12 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
 !scalars
  integer,parameter :: mkmem_ = 1, tim_getghc = 4, paral_kgb0 = 0, master = 0, ncomp1 = 1
  integer :: cprj_choice,cpopt,dimffnl,ib,ider,idir,npw_k,nfftc,mgfftc, igs, ige, omp_nt
- integer :: jj,n1,n2,n3,n4,n5,n6,negv,nkpg,nproc,npw_k_test,my_rank,optder
- integer :: type_calc,sij_opt,igsp2,ig, cplex_ghg,iband,ibs1,ibs2
+ integer :: jj,n1,n2,n3,n4,n5,n6,nkpg,nproc,my_rank,optder
+ integer :: type_calc,sij_opt,igsp2,ig !, iband,ibs1,ibs2
  integer :: npwsp, col_bsize, nsppol, nspinor, nspden, loc2_size, il_g2
  integer :: idat, ndat, batch_size, h_size, mene_found
  real(dp),parameter :: lambda0 = zero
- real(dp) :: size_mat, cpu, wall, gflops !, mem_mb
+ real(dp) :: cpu, wall, gflops !, mem_mb
  logical :: do_full_diago
  character(len=80) :: frmt1,frmt2
  character(len=10) :: stag(2)
