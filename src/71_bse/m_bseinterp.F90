@@ -28,9 +28,7 @@ MODULE m_bseinterp
  use m_nctk
  use m_haydock_io
  use m_linalg_interfaces
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
 
  use m_fstrings,          only : indent, strcat, sjoin, itoa
  use defs_datatypes,      only : pseudopotential_type
@@ -253,12 +251,8 @@ subroutine int_free_work(interpolator)
 
 !*****************************************************************************
 
- if( allocated(interpolator%btemp)) then
-   ABI_FREE(interpolator%btemp)
- end if
- if( allocated(interpolator%ctemp)) then
-   ABI_FREE(interpolator%ctemp)
- end if
+ ABI_SFREE(interpolator%btemp)
+ ABI_SFREE(interpolator%ctemp)
 
 end subroutine int_free_work
 !!***
@@ -684,21 +678,10 @@ subroutine interpolator_free(interpolator)
 
 !*****************************************************************************
 
- if( allocated(interpolator%overlaps) ) then
-   ABI_FREE(interpolator%overlaps)
- end if
-
- if (allocated(interpolator%corresp)) then
-   ABI_FREE(interpolator%corresp)
- end if
-
- if (allocated(interpolator%interp_factors)) then
-   ABI_FREE(interpolator%interp_factors)
- end if
-
- if( associated(interpolator%double_grid) ) then
-   nullify(interpolator%double_grid)
- end if
+ ABI_SFREE(interpolator%overlaps)
+ ABI_SFREE(interpolator%corresp)
+ ABI_SFREE(interpolator%interp_factors)
+ if( associated(interpolator%double_grid) ) nullify(interpolator%double_grid)
 
 end subroutine interpolator_free
 !!***

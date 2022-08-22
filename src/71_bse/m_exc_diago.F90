@@ -21,7 +21,6 @@
 MODULE m_exc_diago
 
  use defs_basis
-
  use m_bs_defs
  use m_abicore
  use m_errors

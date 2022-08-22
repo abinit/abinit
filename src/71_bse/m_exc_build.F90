@@ -551,7 +551,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
    ! Announce the treatment of submatrix treated by each node.
    bsize_my_block = 2*dpc*my_hsize
    write(msg,'(4(a,i0))')' Treating ',my_hsize,'/',nels,' matrix elements, from column ',my_cols(1),' up to column ',my_cols(2)
-   call wrtout(std_out,msg,'PERS')
+   call wrtout(std_out, msg)
 
    if (is_resonant) then
      write(msg,'(a,f8.1,a)')' Calculating resonant blocks. Memory required: ',bsize_my_block*b2Mb,' [Mb] <<< MEM'
@@ -609,7 +609,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
        if (my_cols(2)<itpk_min .or. my_cols(1)>itpk_max) CYCLE
 
        write(msg,'(3(a,i0))')" status: ",ikp_bz,"/",BSp%nkbz," done by node ",my_rank
-       call wrtout(std_out,msg,"PERS",do_flush=.True.)
+       call wrtout(std_out, msg, do_flush=.True.)
 
        ! * Get ikp_ibz, non-symmorphic phase, ph_mkpt, and symmetries from ikp_bz.
        call kmesh%get_BZ_item(ikp_bz,kpbz,ikp_ibz,isym_kp,itim_kp,ph_mkpt,isirred=isirred)
@@ -1085,8 +1085,8 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
      dump_unt = get_unit()
      msg=' Coupling Hamiltonian matrix elements: '
      if (is_resonant) msg=' Reasonant Hamiltonian matrix elements: '
-     call wrtout(dump_unt,msg,"PERS")
-     call wrtout(dump_unt,'    k  v  c  s      k" v" c" s"       H',"PERS")
+     call wrtout(dump_unt, msg)
+     call wrtout(dump_unt,'    k  v  c  s      k" v" c" s"       H')
      do itp=1,BSp%nreh(block)
        ikp_bz = Bsp%Trans(itp,spin2)%k
        ivp    = Bsp%Trans(itp,spin2)%v
@@ -1100,7 +1100,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
            http = my_bsham(ir)
            !if (ABS(http) > tol3) then
            write(msg,'(2(i0,1x),2(i5,3i3,3x),2f7.3)')it,itp, ik_bz,iv,ic,spin1, ikp_bz,ivp,icp,spin2, http
-           call wrtout(dump_unt,msg,"PERS")
+           call wrtout(dump_unt, msg)
            !end if
          end if
        end do
@@ -1113,8 +1113,8 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
      dump_unt = 999
      msg=' Coupling Hamiltonian matrix elements: '
      if (is_resonant) msg=' Resonant Hamiltonian matrix elements: '
-     call wrtout(dump_unt,msg,"PERS")
-     call wrtout(dump_unt,'    k v  c  s      k" v" c" s"       H',"PERS")
+     call wrtout(dump_unt, msg)
+     call wrtout(dump_unt,'    k v  c  s      k" v" c" s"       H')
      do itp=1,BSp%nreh(block)
        ikp_bz = Bsp%Trans(itp,spin2)%k
        ivp    = Bsp%Trans(itp,spin2)%v
@@ -1152,7 +1152,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
            else
              write(msg,'(2(i0,1x),2(i5,3i3,3x),2f24.20)')it,itp, ik_bz,iv,ic,spin1, ikp_bz,ivp,icp,spin2, http
            end if
-           call wrtout(dump_unt,msg,"PERS")
+           call wrtout(dump_unt, msg)
            !end if
          end if
        end do
@@ -2444,7 +2444,7 @@ subroutine wfd_all_mgq0(Wfd,Cryst,Qmesh,Gsph_x,Vcp,&
 
  call cwtime(cpu,wall,gflops,"stop")
  write(msg,'(2(a,f9.6))')"cpu_time = ",cpu,", wall_time = ",wall
- call wrtout(std_out,msg,"PERS")
+ call wrtout(std_out, msg)
 
  ABI_FREE(rhotwg1)
  ABI_FREE(igfftg0)

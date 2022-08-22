@@ -29,9 +29,7 @@ MODULE m_hexc
  use m_nctk
  use m_haydock_io
  use m_linalg_interfaces
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
 
  use m_time,              only : timab
  use m_fstrings,          only : indent, strcat, sjoin, itoa
@@ -375,15 +373,11 @@ subroutine hexc_init(hexc, BSp, BS_files, Cryst, Kmesh_coarse, Wfd_coarse, KS_BS
    end do
 
    if (BSp%prt_ncham) then
-#ifdef HAVE_NETCDF
      ncerr = nctk_open_create(ncid, trim(hexc%BS_files%out_basename)//"_HEXC.nc", xmpi_comm_self)
      NCF_CHECK_MSG(ncerr, "Creating HEXC file")
      call exc_ham_ncwrite(ncid, hexc%Kmesh_coarse, hexc%BSp, hexc%hsize_coarse, hexc%BSp%nreh, &
 &         hexc%BSp%vcks2t,hexc%hreso,hexc%diag_coarse)
      NCF_CHECK(nf90_close(ncid))
-#else
-     ABI_UNUSED(ncid)
-#endif
    end if
  end if
 
@@ -589,28 +583,18 @@ subroutine hexc_build_hinterp(hexc,hexc_i)
 &  hexc_i%kdense2div, hexc_i%all_acoeffs,hexc_i%all_bcoeffs, hexc_i%all_ccoeffs, &
 &  hexc_i%Kmesh_dense, hexc_i%Vcp_dense, hexc%crystal%gmet, hexc_i%hinterp, hexc_i%m3_width)
 
- if( allocated(hexc_i%all_acoeffs) ) then
-   ABI_FREE(hexc_i%all_acoeffs)
- end if
- if( allocated(hexc_i%all_bcoeffs) ) then
-   ABI_FREE(hexc_i%all_bcoeffs)
- end if
- if( allocated(hexc_i%all_ccoeffs) ) then
-   ABI_FREE(hexc_i%all_ccoeffs)
- end if
+ ABI_SFREE(hexc_i%all_acoeffs)
+ ABI_SFREE(hexc_i%all_bcoeffs)
+ ABI_SFREE(hexc_i%all_ccoeffs)
 
 
  if (hexc%BSp%prt_ncham) then
-#ifdef HAVE_NETCDF
    ABI_COMMENT("Printing HEXC_I.nc file")
    ncerr = nctk_open_create(ncid, trim(hexc%BS_files%out_basename)//"_HEXC_I.nc", xmpi_comm_self)
    NCF_CHECK_MSG(ncerr, "Creating HEXC_I file")
    call exc_ham_ncwrite(ncid, hexc_i%Kmesh_dense, hexc%BSp, hexc_i%hsize_dense, hexc%BSp%nreh_interp, &
 &       hexc%BSp%vcks2t_interp, hexc_i%hinterp, hexc_i%diag_dense)
    NCF_CHECK(nf90_close(ncid))
-#else
-   ABI_UNUSED(ncid)
-#endif
  end if
 
 end subroutine hexc_build_hinterp
@@ -1168,17 +1152,9 @@ subroutine hexc_free(hexc)
    nullify(hexc%kmesh_coarse)
  end if
 
- if( allocated(hexc%hreso) ) then
-   ABI_FREE(hexc%hreso)
- end if
-
- if( allocated(hexc%hcoup) ) then
-   ABI_FREE(hexc%hcoup)
- end if
-
- if( allocated(hexc%diag_coarse) ) then
-   ABI_FREE(hexc%diag_coarse)
- end if
+ ABI_SFREE(hexc%hreso)
+ ABI_SFREE(hexc%hcoup)
+ ABI_SFREE(hexc%diag_coarse)
 
 end subroutine hexc_free
 !!***
@@ -1201,37 +1177,14 @@ subroutine hexc_interp_free(hexc_i)
 
 !*****************************************************************************
 
- if( allocated(hexc_i%kdense2div) ) then
-   ABI_FREE(hexc_i%kdense2div)
- end if
-
- if( allocated(hexc_i%div2kdense) ) then
-   ABI_FREE(hexc_i%div2kdense)
- end if
-
- if( allocated(hexc_i%diag_dense) ) then
-   ABI_FREE(hexc_i%diag_dense)
- end if
-
- if( allocated(hexc_i%hinterp) ) then
-   ABI_FREE(hexc_i%hinterp)
- end if
-
- if( allocated(hexc_i%all_hmat) ) then
-   ABI_FREE(hexc_i%all_hmat)
- end if
-
- if( allocated(hexc_i%all_acoeffs) ) then
-   ABI_FREE(hexc_i%all_acoeffs)
- end if
-
- if( allocated(hexc_i%all_bcoeffs) ) then
-   ABI_FREE(hexc_i%all_bcoeffs)
- end if
-
- if( allocated(hexc_i%all_ccoeffs) ) then
-   ABI_FREE(hexc_i%all_ccoeffs)
- end if
+ ABI_SFREE(hexc_i%kdense2div)
+ ABI_SFREE(hexc_i%div2kdense)
+ ABI_SFREE(hexc_i%diag_dense)
+ ABI_SFREE(hexc_i%hinterp)
+ ABI_SFREE(hexc_i%all_hmat)
+ ABI_SFREE(hexc_i%all_acoeffs)
+ ABI_SFREE(hexc_i%all_bcoeffs)
+ ABI_SFREE(hexc_i%all_ccoeffs)
 
  if( associated(hexc_i%kmesh_dense) ) then
    nullify(hexc_i%kmesh_dense)
