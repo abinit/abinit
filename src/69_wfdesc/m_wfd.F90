@@ -3690,7 +3690,7 @@ subroutine wfd_change_ngfft(Wfd, Cryst, Psps, new_ngfft)
  integer,parameter :: npw0=0
  integer :: npw_k, ik_ibz, istwf_k, is, ik, ib
  logical :: iscompatibleFFT
- character(len=500) :: msg
+ !character(len=500) :: msg
 !arrays
  integer,allocatable :: kg_k(:,:)
 
