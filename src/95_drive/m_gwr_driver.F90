@@ -603,7 +603,14 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
    ABI_REMALLOC(owfk_hdr%istwfk, (dtset%nkpt))
    owfk_hdr%istwfk(:) = istwfk_ik
 
+   !call xmpi_pools_2d%init(dtset%nkpt, dtset%nsppol, mask_ks)
+   !call pools%free()
+   !pools%mask(ik_ibz, spin)
+   !pools%comm(ik_ibz, spin)
+
    print_wfk = .True.
+   print_wfk = dtset%prtwf > 0
+
    if (print_wfk) then
      out_path = dtfil%fnameabo_wfk
      if (dtset%iomode == IO_MODE_ETSF) out_path = nctk_ncify(out_path)
@@ -625,7 +632,9 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
 
          call c_f_pointer(c_loc(ugb%cg_k), cg_k_ptr, shape=[2, ugb%npwsp * ugb%my_nband])
 
-         call owfk%write_band_block([ugb%my_bstart, ugb%my_bstop], ik_ibz, spin, xmpio_collective, & ! xmpio_single, &
+         call owfk%write_band_block([ugb%my_bstart, ugb%my_bstop], ik_ibz, spin, &
+                                     xmpio_collective, &
+                                     !xmpio_single, &
                                      kg_k=ugb%kg_k, cg_k=cg_k_ptr, &
                                      eig_k=owfk_ebands%eig(:, ik_ibz, spin), occ_k=occ_k)
          ABI_FREE(occ_k)

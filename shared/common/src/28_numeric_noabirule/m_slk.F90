@@ -2513,9 +2513,9 @@ subroutine solve_gevp_real(na,nev,na_rows,na_cols,nblk,a,b,ev,z,tmp1,tmp2, &
 
 !----------------------------------------------------------------------
 
-!!****f* m_slk/compute_eigen_problem
+!!****f* m_slk/compute_generalized_eigen_problem
 !! NAME
-!!  compute_eigen_problem
+!!  compute_generalized_eigen_problem
 !!
 !! FUNCTION
 !!  Calculation of eigenvalues and eigenvectors of the generalized eigenvalue problem: A * X = lambda * B X

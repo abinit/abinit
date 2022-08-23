@@ -1991,14 +1991,14 @@ subroutine wfk_write_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg
 !----------------------------------------------------------------------------
 ! record 4 cg
      if (present(cg_k)) then
-!TODO: in principle these markers are written when the file is opened, no need here.
-       ABI_MALLOC(bsize_frecords, (nb_block))
-       bsize_frecords = 2 * npw_disk * nspinor_disk * xmpi_bsize_dp
-! TODO: why 2*frm size here? Each band cg is a single record!
-       my_offset = Wfk%offset_ks(ik_ibz,spin,REC_CG) + (band_block(1)-1) * (bsize_frecords(1) + 2*xmpio_bsize_frm)
-       call xmpio_write_frmarkers(Wfk%fh,my_offset,sc_mode,nb_block,bsize_frecords,mpierr)
-       ABI_CHECK(mpierr==0,"mpierr!=0")
-       ABI_FREE(bsize_frecords)
+       !TODO: in principle these markers are written when the file is opened, no need here.
+       !ABI_MALLOC(bsize_frecords, (nb_block))
+       !bsize_frecords = 2 * npw_disk * nspinor_disk * xmpi_bsize_dp
+       !! TODO: why 2*frm size here? Each band cg is a single record!
+       !my_offset = Wfk%offset_ks(ik_ibz,spin,REC_CG) + (band_block(1)-1) * (bsize_frecords(1) + 2*xmpio_bsize_frm)
+       !call xmpio_write_frmarkers(Wfk%fh,my_offset,sc_mode,nb_block,bsize_frecords,mpierr)
+       !ABI_CHECK(mpierr==0,"mpierr!=0")
+       !ABI_FREE(bsize_frecords)
 
        my_offset = Wfk%offset_ks(ik_ibz,spin,REC_CG)
        sizes    = (/npw_disk*nspinor_disk, nband_disk/)

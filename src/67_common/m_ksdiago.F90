@@ -34,7 +34,7 @@ module m_ksdiago
  use defs_datatypes,      only : pseudopotential_type
  use defs_abitypes,       only : MPI_type
  use m_dtset,             only : dataset_type
- use m_fstrings,          only : toupper, ktoa, itoa, sjoin
+ use m_fstrings,          only : toupper, ktoa, itoa, sjoin, ftoa
  use m_numeric_tools,     only : blocked_loop
  use m_time,              only : cwtime, cwtime_report
  use m_geometry,          only : metric
@@ -890,9 +890,9 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  integer :: jj,n1,n2,n3,n4,n5,n6,nkpg,nproc,my_rank,optder
  integer :: type_calc,sij_opt,igsp2,ig, my_ib,ibs1 !,ibs2
  integer :: npwsp, col_bsize, nsppol, nspinor, nspden, loc2_size, il_g2
- integer :: idat, ndat, batch_size, h_size, mene_found
+ integer :: idat, ndat, batch_size, h_size !, mene_found
  real(dp),parameter :: lambda0 = zero
- real(dp) :: cpu, wall, gflops !, mem_mb
+ real(dp) :: cpu, wall, gflops, mem_mb
  logical :: do_full_diago
  character(len=80) :: frmt1,frmt2
  character(len=10) :: stag(2)
@@ -1075,6 +1075,11 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  call ghg_mat%init(h_size, h_size, proc_1d, istwf_k, size_blocs=[h_size, col_bsize])
  if (psps%usepaw == 1) call gsg_mat%init(h_size, h_size, proc_1d, istwf_k, size_blocs=[h_size, col_bsize])
 
+ ! Estimate memory
+ mem_mb = ghg_mat%locmem_mb()
+ mem_mb = two * (psps%usepaw + 1) * mem_mb + mem_mb  ! last term for eigvec matrix
+ call wrtout(std_out, sjoin("Memory for Scalapack matrices:", ftoa(mem_mb, fmt="(f8.1)"), ' [Mb] <<< MEM'))
+
  ! cwaveprj is ordered, see nonlop_ylm.
  ABI_MALLOC(cwaveprj, (cryst%natom, nspinor*(1+cpopt)*gs_hamk%usepaw*batch_size))
  if (cpopt == 0) call pawcprj_alloc(cwaveprj, 0, gs_hamk%dimcprj)
@@ -1174,9 +1179,9 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  !call eigvec%init(h_size, nband_k, proc_4diag, istwf_k, size_blocs=ghg_4diag%sizeb_blocs)
 
  if (do_full_diago) then
-   write(msg,'(6a, i0)')ch10,&
+   write(msg,'(5a, 2(a,i0))')ch10,&
      ' Begin full diagonalization for kpt: ',trim(ktoa(kpoint)), stag(spin), ch10,&
-     ' Matrix size: ',npwsp
+     ' Matrix size: ',npwsp,  "nproc: ", nproc
    call wrtout(std_out, msg)
    call cwtime(cpu, wall, gflops, "start")
 
@@ -1189,9 +1194,9 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
    call cwtime_report(" full_diago", cpu, wall, gflops)
 
  else
-   write(msg,'(6a,i0,a,i0)') ch10,&
+   write(msg,'(6a,i0,2(a,i0))') ch10,&
      ' Begin partial diagonalization for kpt: ',trim(ktoa(kpoint)), stag(spin), ch10,&
-     ' Matrix size: ',npwsp,', nband_k: ', nband_k
+     ' Matrix size: ',npwsp,', nband_k: ', nband_k, "nproc: ", nproc
    call wrtout(std_out, msg)
    call cwtime(cpu, wall, gflops, "start")
 
