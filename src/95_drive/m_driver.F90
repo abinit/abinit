@@ -39,6 +39,9 @@ module m_driver
  use m_xc_vdw
 #endif
  use m_xgScalapack
+#ifdef HAVE_LINALG_ELPA
+ use m_elpa
+#endif
 
  use defs_datatypes, only : pseudopotential_type, pspheader_type
  use defs_abitypes,  only : MPI_type
@@ -228,6 +231,10 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
  end do
 
  call timab(641,2,tsec)
+
+#ifdef HAVE_LINALG_ELPA
+ call elpa_func_init()
+#endif
 
 !*********************************************************************
 !Big loop on datasets
@@ -937,6 +944,10 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 !*********************************************************************
 
  call timab(644,1,tsec)
+
+#ifdef HAVE_LINALG_ELPA
+ call elpa_func_uninit()
+#endif
 
  !PSP deallocation
  call psps_free(psps)
