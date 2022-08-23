@@ -70,6 +70,7 @@ module libxc_functionals
  public :: libxc_functionals_getvxc             ! Return XC potential and energy, from input density
  public :: libxc_functionals_isgga              ! Return TRUE if the XC functional is GGA or meta-GGA
  public :: libxc_functionals_ismgga             ! Return TRUE if the XC functional is meta-GGA
+ public :: libxc_functionals_istb09             ! Return TRUE if the XC functional is Tran-Blaha 2009.
  public :: libxc_functionals_needs_laplacian    ! Return TRUE if functional uses LAPLACIAN
  public :: libxc_functionals_is_hybrid          ! Return TRUE if the XC functional is hybrid
  public :: libxc_functionals_is_hybrid_from_id  ! Return TRUE if a XC functional is hybrid, from its id
@@ -1032,6 +1033,41 @@ function libxc_functionals_ismgga(xc_functionals)
  end if
 
 end function libxc_functionals_ismgga
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* libxc_functionals/libxc_functionals_istb09
+!! NAME
+!!  libxc_functionals_istb09
+!!
+!! FUNCTION
+!!  Test function to identify whether the presently used functional
+!!  is Tran-Blaha 2009 or not
+!!
+!! INPUTS
+!! [xc_functionals(2)]=<type(libxc_functional_type)>, optional argument
+!!                     Handle for XC functionals
+!!
+!! SOURCE
+
+logical function libxc_functionals_istb09(xc_functionals) result(ans)
+
+!Arguments ------------------------------------
+ type(libxc_functional_type),intent(in),optional :: xc_functionals(2)
+
+! *************************************************************************
+
+ ans  = .false.
+ if (.not.libxc_constants_initialized) call libxc_functionals_constants_load()
+
+ if (present(xc_functionals)) then
+   ans = any(xc_functionals%id == libxc_functionals_getid('XC_MGGA_X_TB09'))
+ else
+   ans = any(xc_global%id == libxc_functionals_getid('XC_MGGA_X_TB09'))
+ end if
+
+end function libxc_functionals_istb09
 !!***
 
 !----------------------------------------------------------------------

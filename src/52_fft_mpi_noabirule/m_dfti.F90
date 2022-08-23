@@ -54,7 +54,7 @@ MODULE m_dfti
  use MKL_DFTI
 #endif
 
- use m_fstrings,  only : basename, strcat, int2char10
+ use m_fstrings,  only : basename, strcat, int2char10, itoa, sjoin
  use m_hide_blas, only : xcopy
  use m_fft_mesh,  only : zpad_t, zpad_init, zpad_free
 
@@ -344,8 +344,8 @@ end subroutine dfti_seqfourdp
 !!
 !! SOURCE
 
-subroutine dfti_seqfourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
-&  kg_kin,kg_kout,mgfft,ndat,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
+subroutine dfti_seqfourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k, &
+                          kg_kin,kg_kout,mgfft,ndat,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
 
 !Arguments ------------------------------------
 !scalars
@@ -367,14 +367,17 @@ subroutine dfti_seqfourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,is
 
 ! *************************************************************************
 
- if (option==1 .and. cplex/=1) then
-   write(msg,'(a,i0)')' With the option number 1, cplex must be 1 but it is cplex=',cplex
+ if (all(option /= [0, 1, 2, 3])) then
+   write(msg,'(a,i0,a)')' Option:',option,' is not allowed. Only option=0, 1, 2 or 3 are allowed presently.'
    ABI_ERROR(msg)
  end if
 
+ if (option == 1 .and. cplex /= 1) then
+   ABI_ERROR(sjoin("With option number 1, cplex must be 1 but it is cplex:", itoa(cplex)))
+ end if
+
  if (option==2 .and. (cplex/=1 .and. cplex/=2)) then
-   write(msg,'(a,i0)')' With the option number 2, cplex must be 1 or 2, but it is cplex=',cplex
-   ABI_ERROR(msg)
+   ABI_ERROR(sjoin("With the option number 2, cplex must be 1 or 2, but it is cplex:", itoa(cplex)))
  end if
 
  nx=ngfft(1); ny=ngfft(2); nz=ngfft(3)
