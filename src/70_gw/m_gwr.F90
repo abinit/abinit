@@ -3263,7 +3263,7 @@ subroutine gwr_print_mem(gwr, unit)
 !scalars
  integer :: unt
  real(dp) :: mem_mb
- character(len=500) :: msg
+ !character(len=500) :: msg
 
 ! *********************************************************************
 
@@ -3787,7 +3787,7 @@ subroutine gwr_distrib_mats_qibz(gwr, what, itau, spin, need_qibz, got_qibz, act
 
 !Local variables-------------------------------
  integer,parameter :: istwfk1 = 1
- integer :: iq_ibz, npwsp, col_bsize, ierr, lsize(2)
+ integer :: iq_ibz, ierr, lsize(2)  ! col_bsize, npwsp,
  integer :: do_mpi_qibz(gwr%nqibz), sender_qibz(gwr%nqibz)
  real(dp) :: qq_ibz(3), cpu, wall, gflops
  complex(dp),allocatable :: cbuf_q(:,:)
