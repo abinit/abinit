@@ -53,7 +53,7 @@ MODULE m_fftw3
  use m_numeric_tools,  only : imax_loc
  use defs_abitypes,    only : MPI_type
  use m_mpinfo,         only : ptabs_fourwf
- use m_fstrings,       only : strcat
+ use m_fstrings,       only : strcat, itoa, sjoin
  use m_fft_mesh,       only : zpad_t, zpad_init, zpad_free
 
  implicit none
@@ -438,8 +438,8 @@ end subroutine fftw3_seqfourdp
 !!
 !! SOURCE
 
-subroutine fftw3_seqfourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
-&  kg_kin,kg_kout,mgfft,ndat,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
+subroutine fftw3_seqfourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k, &
+                          kg_kin,kg_kout,mgfft,ndat,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
 
 !Arguments ------------------------------------
 !scalars
@@ -468,24 +468,22 @@ subroutine fftw3_seqfourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,i
 
 ! *************************************************************************
 
- nx=ngfft(1); ny=ngfft(2); nz=ngfft(3)
- fftalg=ngfft(7); fftalga=fftalg/100; fftalgc=mod(fftalg,10)
- fftcache=ngfft(8)
-
- if (ALL(option /= (/0,1,2,3/))) then
-   write(msg,'(a,i0,a)')' The option number',option,' is not allowed. Only option=0, 1, 2 or 3 are allowed presently.'
+ if (all(option /= [0, 1, 2, 3])) then
+   write(msg,'(a,i0,a)')' Option:',option,' is not allowed. Only option=0, 1, 2 or 3 are allowed presently.'
    ABI_ERROR(msg)
  end if
 
- if (option==1 .and. cplex/=1) then
-   write(msg,'(a,i0)')' With the option number 1, cplex must be 1 but it is cplex=',cplex
-   ABI_ERROR(msg)
+ if (option == 1 .and. cplex /= 1) then
+   ABI_ERROR(sjoin("With option number 1, cplex must be 1 but it is cplex:", itoa(cplex)))
  end if
 
  if (option==2 .and. (cplex/=1 .and. cplex/=2)) then
-   write(msg,'(a,i0)')' With the option number 2, cplex must be 1 or 2, but it is cplex=',cplex
-   ABI_ERROR(msg)
+   ABI_ERROR(sjoin("With the option number 2, cplex must be 1 or 2, but it is cplex:", itoa(cplex)))
  end if
+
+ nx=ngfft(1); ny=ngfft(2); nz=ngfft(3)
+ fftalg=ngfft(7); fftalga=fftalg/100; fftalgc=mod(fftalg,10)
+ fftcache=ngfft(8)
 
  use_fftrisc = (fftalgc==2)
  if (istwf_k==2.and.option==3) use_fftrisc = .FALSE.
@@ -494,7 +492,7 @@ subroutine fftw3_seqfourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,i
  nthreads = xomp_get_num_threads(open_parallel=.TRUE.)
 
  if (use_fftrisc) then
-   !call wrtout(std_out, calling fftw3_fftrisc","COLL")
+   !call wrtout(std_out, calling fftw3_fftrisc")
 
    if (ndat == 1) then
      if (fftcore_mixprec == 0) then
@@ -2261,7 +2259,7 @@ subroutine fftw3_init_threads()
 
 #ifdef HAVE_FFTW3_THREADS
  if (THREADS_INITED==0) then
-   !call wrtout(std_out,"Calling dfftw_init_threads()","COLL")
+   !call wrtout(std_out,"Calling dfftw_init_threads()")
    call dfftw_init_threads(iret)
 
    if (iret==0) then
@@ -2278,7 +2276,7 @@ subroutine fftw3_init_threads()
 #endif
 
 #ifdef HAVE_FFTW3_MPI
-  !call wrtout(std_out,"Calling fftw_mpi_init()","COLL")
+  !call wrtout(std_out,"Calling fftw_mpi_init()")
   call fftw_mpi_init()
 #endif
 
@@ -2504,13 +2502,13 @@ function dplan_many_dft_1D(rank,n,howmany,fin,inembed,istride,idist,fout,onembed
 !$OMP END CRITICAL (OMPC_dfftw_plan_many_dft_1D)
 
  if (plan==NULL_PLAN) then
-   call wrtout(std_out,"dfftw_plan_many_dft returned NULL_PLAN!","COLL")
+   call wrtout(std_out, "dfftw_plan_many_dft returned NULL_PLAN!")
    write(frmt,*)"(a,",rank,"(1x,i0),3(a,i0),a,2(a,",rank,"(1x,i0),2(a,i0),a))"
    write(msg,frmt)&
 &    " n= ",n," howmany= ",howmany," sign= ",sign," flags= ",flags,ch10,&
 &    " inembed= ",inembed," istride= ",istride," idist=",idist,ch10,    &
 &    " onembed= ",onembed," ostride= ",ostride," odist=",idist,ch10
-   call wrtout(std_out,msg,"COLL")
+   call wrtout(std_out, msg)
    ABI_ERROR("Check FFTW library and/or abinit code")
  end if
 
@@ -2553,13 +2551,13 @@ function dplan_many_dft_2D(rank,n,howmany,fin,inembed,istride,idist,fout,onembed
 !$OMP END CRITICAL (OMPC_dfftw_plan_many_dft_2D)
 
  if (plan==NULL_PLAN) then
-   call wrtout(std_out,"dfftw_plan_many_dft returned NULL_PLAN!","COLL")
+   call wrtout(std_out, "dfftw_plan_many_dft returned NULL_PLAN!")
    write(frmt,*)"(a,",rank,"(1x,i0),3(a,i0),a,2(a,",rank,"(1x,i0),2(a,i0),a))"
    write(msg,frmt)&
 &    " n= ",n," howmany= ",howmany," sign= ",sign," flags= ",flags,ch10,&
 &    " inembed= ",inembed," istride= ",istride," idist=",idist,ch10,    &
 &    " onembed= ",onembed," ostride= ",ostride," odist=",idist,ch10
-   call wrtout(std_out,msg,"COLL")
+   call wrtout(std_out, msg)
    ABI_ERROR("Check FFTW library and/or abinit code")
  end if
 
@@ -2603,13 +2601,13 @@ function cplan_many_dft(rank,n,howmany,fin,inembed,istride,idist,fout,onembed,os
 !$OMP END CRITICAL (OMPC_cplan_many_dft)
 
  if (plan==NULL_PLAN) then ! handle the error
-   call wrtout(std_out,"sfftw_plan_many_dft returned NULL_PLAN (complex version)","COLL")
+   call wrtout(std_out, "sfftw_plan_many_dft returned NULL_PLAN (complex version)")
    write(frmt,*)"(a,",rank,"(1x,i0),3(a,i0),a,2(a,",rank,"(1x,i0),2(a,i0),a))"
    write(msg,frmt)&
 &    " n = ",n," howmany = ",howmany," sign = ",sign," flags = ",flags,ch10,&
 &    " inembed = ",inembed," istride = ",istride," idist =",idist,ch10,     &
 &    " onembed = ",onembed," ostride = ",ostride," odist =",idist,ch10
-   call wrtout(std_out,msg,"COLL")
+   call wrtout(std_out, msg)
    ABI_ERROR("Check FFTW library and/or abinit code")
  end if
 
@@ -2653,13 +2651,13 @@ function zplan_many_dft(rank,n,howmany,fin,inembed,istride,idist,fout,onembed,os
 !$OMP END CRITICAL (OMPC_zplan_many_dft)
 
  if (plan==NULL_PLAN) then ! handle the error
-   call wrtout(std_out,"dfftw_plan_many_dft returned NULL_PLAN (complex version)","COLL")
+   call wrtout(std_out, "dfftw_plan_many_dft returned NULL_PLAN (complex version)")
    write(frmt,*)"(a,",rank,"(1x,i0),3(a,i0),a,2(a,",rank,"(1x,i0),2(a,i0),a))"
    write(msg,frmt)&
 &    " n = ",n," howmany = ",howmany," sign = ",sign," flags = ",flags,ch10,&
 &    " inembed = ",inembed," istride = ",istride," idist =",idist,ch10,     &
 &    " onembed = ",onembed," ostride = ",ostride," odist =",idist,ch10
-   call wrtout(std_out,msg,"COLL")
+   call wrtout(std_out, msg)
    ABI_ERROR("Check FFTW library and/or abinit code")
  end if
 
@@ -2704,13 +2702,13 @@ function dplan_many_dft_r2c(rank,n,howmany,fin,inembed,istride,idist,fout,onembe
 !$OMP END CRITICAL (OMPC_dplan_many_dft_r2c)
 
  if (plan==NULL_PLAN) then ! handle the error.
-   call wrtout(std_out,"dfftw_plan_many_dft_r2c returned NULL_PLAN","COLL")
+   call wrtout(std_out, "dfftw_plan_many_dft_r2c returned NULL_PLAN")
    write(frmt,*)"(a,",rank,"(1x,i0),2(a,i0),a,2(a,",rank,"(1x,i0),2(a,i0),a))"
    write(msg,frmt)&
 &    " n = ",n," howmany = ",howmany," flags = ",flags,ch10,&
 &    " inembed = ",inembed," istride = ",istride," idist = ",idist,ch10,&
 &    " onembed = ",onembed," ostride = ",ostride," odist = ",idist,ch10
-   call wrtout(std_out,msg,"COLL")
+   call wrtout(std_out, msg)
    ABI_ERROR("Check FFTW library and/or abinit code")
  end if
 
@@ -2753,13 +2751,13 @@ function dplan_many_dft_c2r(rank,n,howmany,fin,inembed,istride,idist,fout,onembe
 !$OMP END CRITICAL (OMPC_dplan_many_dft_c2r)
 
  if (plan==NULL_PLAN) then ! handle the error.
-   call wrtout(std_out,"dfftw_plan_many_dft_c2r returned NULL_PLAN","COLL")
+   call wrtout(std_out, "dfftw_plan_many_dft_c2r returned NULL_PLAN")
    write(frmt,*)"(a,",rank,"(1x,i0),2(a,i0),a,2(a,",rank,"(1x,i0),2(a,i0),a))"
    write(msg,frmt)&
 &    " n = ",n," howmany = ",howmany," flags = ",flags,ch10,&
 &    " inembed = ",inembed," istride = ",istride," idist = ",idist,ch10,&
 &    " onembed = ",onembed," ostride = ",ostride," odist = ",idist,ch10
-   call wrtout(std_out,msg,"COLL")
+   call wrtout(std_out, msg)
    ABI_ERROR("Check FFTW library and/or abinit code")
  end if
 
@@ -3967,7 +3965,7 @@ subroutine fftw3_mpiback_wf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
 
 ! *************************************************************************
 
- !call wrtout(std_out,"mpiback standard ALLTOALL + FFTW3","COLL")
+ !call wrtout(std_out,"mpiback standard ALLTOALL + FFTW3")
 
  ! FIXME must provide a default value but which one?
  ! ioption = 0
@@ -5341,7 +5339,7 @@ subroutine fftw3_applypot(cplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
    ABI_ERROR(msg)
  end if
 
- !call wrtout(std_out,"applypot standard ALLTOALL + FFTW3","COLL")
+ !call wrtout(std_out,"applypot standard ALLTOALL + FFTW3")
 
  ! Effective m1 and m2 (complex-to-complex or real-to-complex)
  n1eff=n1; m2ieff=m2i; m2oeff=m2o; m1zt=n1
@@ -6114,7 +6112,7 @@ subroutine fftw3_mpiback_manywf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
 
 ! *************************************************************************
 
- !call wrtout(std_out,"mpiback with non-blocking IALLTOALL + FFTW3","COLL")
+ !call wrtout(std_out,"mpiback with non-blocking IALLTOALL + FFTW3")
 
 
  ! FIXME must provide a default value but which one?
@@ -6812,7 +6810,7 @@ subroutine fftw3_applypot_many(cplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
    ABI_ERROR(msg)
  end if
 
- !call wrtout(std_out,"applypot with non-blocking IALLTOALL + FFTW3","COLL")
+ !call wrtout(std_out,"applypot with non-blocking IALLTOALL + FFTW3")
  !write(std_out,"(a,i0)")"in applypot_many with ndat: ",ndat
 
  ! Effective m1 and m2 (complex-to-complex or real-to-complex)

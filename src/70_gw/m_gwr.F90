@@ -94,7 +94,11 @@
 !!  - Optimization for Gamma-only. Memory and c -> r FFTs
 !!
 !!  - Need to extend FFT API to avoid scaling if isign = -1. Also fft_ug and fft_ur should accept isign
-!!    optional argument.
+!!    optional argument. Refactor of all the FFT routines used in the GW code is needed
+!!    in order to exploit R2C, C2R (e.g. chi0(q=0) and GPU version.
+!!
+!!  - Possible incompatibilities between gwpc, slk matrices that are always in dp and GW machinery
+!!
 !!
 !! COPYRIGHT
 !! Copyright (C) 1999-2021 ABINIT group (MG)
@@ -149,7 +153,7 @@ module m_gwr
  use m_melemts,       only : melements_t
  use m_ioarr,         only : read_rhor
  use m_slk,           only : matrix_scalapack, processor_scalapack, slk_array_free, slk_array_set, slk_array_locmem_mb, &
-                            block_dist_1d
+                             block_dist_1d
  use m_wfk,           only : wfk_read_ebands, wfk_t, wfk_open_read
  use m_wfd,           only : wfd_init, wfd_t, wfdgw_t, wave_t, WFD_STORED
  use m_pawtab,        only : pawtab_type

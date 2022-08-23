@@ -36,6 +36,7 @@ module m_gwr_driver
  use m_wfk
  use m_distribfft
  use m_nctk
+ use iso_c_binding
 
  use defs_datatypes,    only : pseudopotential_type, ebands_t
  use defs_abitypes,     only : MPI_type
@@ -182,7 +183,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  type(energies_type) :: KS_energies
  type(melflags_t) :: KS_mflags
  type(paw_dmft_type) :: Paw_dmft
- type(ugb_t) :: ugb
+ type(ugb_t), target :: ugb
 !arrays
  integer :: ngfftc(18),ngfftf(18),unts(2) ! gwc_ngfft(18),gwx_ngfft(18),
  integer,allocatable :: nq_spl(:), l_size_atm(:) !,qp_vbik(:,:),tmp_gfft(:,:),ks_vbik(:,:)
@@ -191,10 +192,11 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  real(dp),allocatable :: grchempottn(:,:),grewtn(:,:),grvdw(:,:),qmax(:)
  real(dp),allocatable :: ks_nhat(:,:),ks_nhatgr(:,:,:),ks_rhog(:,:)
  real(dp),allocatable :: ks_rhor(:,:),ks_vhartr(:), ks_vtrial(:,:), ks_vxc(:,:)
- real(dp),allocatable :: ks_taur(:,:), ks_vxctau(:,:), xcctau3d(:)
+ real(dp),allocatable :: ks_taur(:,:) !, ks_vxctau(:,:), xcctau3d(:)
  real(dp),allocatable :: kxc(:,:), ph1d(:,:), ph1df(:,:) !qp_kxc(:,:),
  real(dp),allocatable :: vpsp(:), xccc3d(:), dijexc_core(:,:,:) !, dij_hf(:,:,:)
  real(dp),allocatable :: eig_k(:), occ_k(:)
+ real(dp),contiguous,pointer :: cg_k_ptr(:,:)
  type(Paw_an_type),allocatable :: KS_paw_an(:)
  type(Paw_ij_type),allocatable :: KS_paw_ij(:)
  type(Pawfgrtab_type),allocatable :: Pawfgrtab(:)
@@ -554,10 +556,13 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  ABI_MALLOC(vpsp, (nfftf))
  ABI_MALLOC(ks_vxc, (nfftf, Dtset%nspden))
 
- ABI_MALLOC(ks_vxctau, (nfftf, dtset%nspden * dtset%usekden))
- ABI_MALLOC(xcctau3d, (n3xccc * dtset%usekden))
- ABI_FREE(ks_vxctau)
- ABI_FREE(xcctau3d)
+ ! I don't think direct diago can be used with mega-GGA due to the functional derivative wrt KS states.
+ ! TB-BK should be OK though.
+
+ !ABI_MALLOC(ks_vxctau, (nfftf, dtset%nspden * dtset%usekden))
+ !ABI_MALLOC(xcctau3d, (n3xccc * dtset%usekden))
+ !ABI_FREE(ks_vxctau)
+ !ABI_FREE(xcctau3d)
 
  optene = 4; moved_atm_inside = 0; moved_rhor = 0; istep = 1
 
@@ -614,16 +619,15 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
 
        if (print_wfk) then
          ! occupancies are set to zero.
-         ! Client code is responsbile to recompile occ and fermie when reading the WFK.
+         ! Client code is responsbile to recompile occ and fermie when reading this WFK.
          ABI_CALLOC(occ_k, (owfk%mband))
          owfk_ebands%eig(1:nband_k, ik_ibz, spin) = eig_k(1:nband_k)
 
-         call owfk%write_band_block([ugb%my_bstart, ugb%my_bstop], ik_ibz, spin, &
-                                     xmpio_collective, &
-                                     !xmpio_single, &
-                                     kg_k=ugb%kg_k, cg_k=ugb%cg_k, &
-                                     eig_k=owfk_ebands%eig(:, ik_ibz, spin), &
-                                     occ_k=occ_k)
+         call c_f_pointer(c_loc(ugb%cg_k), cg_k_ptr, shape=[2, ugb%npwsp * ugb%my_nband])
+
+         call owfk%write_band_block([ugb%my_bstart, ugb%my_bstop], ik_ibz, spin, xmpio_collective, & ! xmpio_single, &
+                                     kg_k=ugb%kg_k, cg_k=cg_k_ptr, &
+                                     eig_k=owfk_ebands%eig(:, ik_ibz, spin), occ_k=occ_k)
          ABI_FREE(occ_k)
        end if
 
@@ -746,7 +750,7 @@ subroutine ugb_calc_osc_gamma()
 
  integer,parameter :: ndat = 1, ndat1 = 1
  integer :: nproc, my_rank, master, my_ib, master_ib, npw_k, nspinor !, idat
- real(dp),contiguous,pointer :: master_cg_k(:,:)
+ real(dp),contiguous,pointer :: master_cg_k(:,:,:)
  integer :: master_brange(2), master_bstart, master_bstop, master_nband
  integer,allocatable :: gbound_k(:,:)
  integer :: u_ngfft(18), u_nfft, u_mgfft
@@ -773,7 +777,7 @@ subroutine ugb_calc_osc_gamma()
    master_bstart = master_brange(1); master_bstop = master_brange(2); master_nband = master_bstop - master_bstart + 1
 
    if (my_rank /= master) then
-     ABI_MALLOC(master_cg_k, (2, ugb%npwsp * master_nband))
+     ABI_MALLOC(master_cg_k, (2, ugb%npwsp, master_nband))
    else
      master_cg_k => ugb%cg_k
    end if
@@ -781,9 +785,9 @@ subroutine ugb_calc_osc_gamma()
 
    do my_ib=ugb%my_bstart, ugb%my_bstop
 
-     !call fft_ug(npw_k, u_nfft, nspinor, ndat, &
+     !call fft_ug(npw_k, u_nfft, nspinor, ndat1, &
      !            u_mgfft, u_ngfft, ugb%istwfk, ugb%kg_k, gbound_k, &
-     !            ugb%cg_k(:, ig2), &         ! in
+     !            ugb%cg_k(:,:,my_ib), &      ! in
      !            my_ur)                      ! out
 
      do master_ib=master_bstart, master_bstop !, batch_size
@@ -791,8 +795,8 @@ subroutine ugb_calc_osc_gamma()
 
        !call fft_ug(npw_k, u_nfft, nspinor, ndat, &
        !            u_mgfft, u_ngfft, ugb%istwfk, ugb%kg_k, gbound_k, &
-       !            master_cg_k(:, master_ib)), &         ! in
-       !            master_ur)                  ! out
+       !            master_cg_k(:,:,master_ib)), &   ! in
+       !            master_ur)                       ! out
 
        !do idat=1,ndat
        !  master_ur(:, idat) = conjg(master_ur(:, idat)) * my_ur(:)

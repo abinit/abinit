@@ -2167,14 +2167,17 @@ end subroutine slk_pzgemm
 !!  matrix= the matrix to process
 !!  comm= MPI communicator
 !!  istwf_k= 2 if we have a real matrix else complex.
+!!  [nev]= Number of eigenvalues needed. Default: full set
 !!
 !! OUTPUT
-!!  results= ScaLAPACK matrix coming out of the operation
-!!  eigen= eigenvalues of the matrix
+!!  results= ScaLAPACK matrix coming out of the operation (global dimensions must be equal to matrix
+!!         even if only a part of the eigenvectors is needed.
+!!  eigen= eigenvalues of the matrix dimensioned as the global size of the square matrix
+!!         even if only a part of the eigenvalues is needed.
 !!
 !! SOURCE
 
-subroutine compute_eigen_problem(processor, matrix, results, eigen, comm, istwf_k)
+subroutine compute_eigen_problem(processor, matrix, results, eigen, comm, istwf_k, nev)
 
 #ifdef HAVE_LINALG_ELPA
   !Arguments ------------------------------------
@@ -2183,21 +2186,24 @@ subroutine compute_eigen_problem(processor, matrix, results, eigen, comm, istwf_
   type(matrix_scalapack),intent(inout) :: results
   DOUBLE PRECISION,intent(inout) :: eigen(:)
   integer,intent(in)  :: comm,istwf_k
+  integer,optional,intent(in) :: nev
+
   !Local variables ------------------------------
   type(elpa_hdl_t) :: elpa_hdl
+  integer :: nev__
 
 !************************************************************************
+
+  nev__ = matrix%sizeb_global(1); if (present(nev)) nev__ = nev
 
   call elpa_func_allocate(elpa_hdl,processor%comm,processor%coords(1),processor%coords(2))
   call elpa_func_set_matrix(elpa_hdl,matrix%sizeb_global(1),matrix%sizeb_blocs(1),&
 &                           matrix%sizeb_local(1),matrix%sizeb_local(2))
 
   if (istwf_k/=2) then
-    call elpa_func_solve_evp_1stage(elpa_hdl,matrix%buffer_cplx,results%buffer_cplx,&
-&                                   eigen,matrix%sizeb_global(1))
+    call elpa_func_solve_evp_1stage(elpa_hdl,matrix%buffer_cplx,results%buffer_cplx,eigen,nev__)
   else
-    call elpa_func_solve_evp_1stage(elpa_hdl,matrix%buffer_real,results%buffer_real,&
-&                                   eigen,matrix%sizeb_global(1))
+    call elpa_func_solve_evp_1stage(elpa_hdl,matrix%buffer_real,results%buffer_real,eigen,nev__)
   end if
 
   call elpa_func_deallocate(elpa_hdl)
@@ -2209,6 +2215,7 @@ subroutine compute_eigen_problem(processor, matrix, results, eigen, comm, istwf_
   type(matrix_scalapack),intent(inout)       :: results
   DOUBLE PRECISION,intent(inout) :: eigen(:)
   integer,intent(in)  :: comm,istwf_k
+  integer,optional,intent(in) :: nev
 
 #ifdef HAVE_LINALG_SCALAPACK
   !Local variables-------------------------------
@@ -2231,10 +2238,17 @@ subroutine compute_eigen_problem(processor, matrix, results, eigen, comm, istwf_
   integer,          parameter :: IZERO=0
 
   integer ::  M,NZ,ierr,TWORK_tmp(3),TWORK(3) ! IA,JA,IZ,JZ,
+  integer :: nev__, il, iu
+  character(len=1) :: range
 
   DOUBLE PRECISION, external :: PDLAMCH
 
 ! *************************************************************************
+
+  nev__ = matrix%sizeb_global(1); range = "A"; il = 0; iu = 0
+  if (present(nev)) then
+    nev__ = nev; range = "I"; il = 1; iu = nev
+  end if
 
   ! Initialisation
   INFO   = 0
@@ -2248,19 +2262,19 @@ subroutine compute_eigen_problem(processor, matrix, results, eigen, comm, istwf_
 
   ! Get the size of the work arrays
   if (istwf_k/=2) then
-     call PZHEEVX('V','A','U',&
+     call PZHEEVX('V', range, 'U',&
 &      matrix%sizeb_global(2),&
 &      matrix%buffer_cplx,1,1,matrix%descript%tab, &
-&      ZERO,ZERO,IZERO,IZERO,ABSTOL,&
+&      ZERO,ZERO,il,iu,ABSTOL,&
 &      m,nz,eigen,ORFAC, &
 &      results%buffer_cplx,1,1,results%descript%tab, &
 &      CWORK_tmp,-1,RWORK_tmp,-1,IWORK_tmp,-1,&
 &      IFAIL,ICLUSTR,GAP,INFO)
   else
-     call PDSYEVX('V','A','U',&
+     call PDSYEVX('V', range, 'U',&
 &      matrix%sizeb_global(2),&
 &      matrix%buffer_real,1,1,matrix%descript%tab, &
-&      ZERO,ZERO,IZERO,IZERO,ABSTOL,&
+&      ZERO,ZERO,il,iu,ABSTOL,&
 &      m,nz,eigen,ORFAC, &
 &      results%buffer_real,1,1,results%descript%tab, &
 &      RWORK_tmp,-1,IWORK_tmp,-1,&
@@ -2310,20 +2324,20 @@ subroutine compute_eigen_problem(processor, matrix, results, eigen, comm, istwf_
   ! Call the calculation routine
   if (istwf_k/=2) then
     ! write(std_out,*) 'I am using PZHEEVX'
-    call PZHEEVX('V','A','U',&
+    call PZHEEVX('V', range, 'U',&
      matrix%sizeb_global(2),&
      matrix%buffer_cplx,1,1,matrix%descript%tab, &
-     ZERO,ZERO,IZERO,IZERO,ABSTOL,&
+     ZERO,ZERO,il,iu,ABSTOL,&
      m,nz,eigen,ORFAC, &
      results%buffer_cplx,1,1,results%descript%tab, &
      CWORK,LCWORK,RWORK,LRWORK,IWORK,LIWORK,&
      IFAIL,ICLUSTR,GAP,INFO)
   else
     ! write(std_out,*) ' I am using PDSYEVX'
-    call PDSYEVX('V','A','U',&
+    call PDSYEVX('V', range, 'U',&
      matrix%sizeb_global(2),&
      matrix%buffer_real,1,1,matrix%descript%tab, &
-     ZERO,ZERO,IZERO,IZERO,ABSTOL,&
+     ZERO,ZERO,il,iu,ABSTOL,&
      m,nz,eigen,ORFAC, &
      results%buffer_real,1,1,results%descript%tab, &
      RWORK,LRWORK,IWORK,LIWORK,&
@@ -2366,9 +2380,6 @@ end subroutine compute_eigen_problem
 !!  matrix2= second ScaLAPACK matrix (matrix B)
 !!  comm= MPI communicator
 !!  istwf_k= 2 if we have a real matrix else complex.
-!!
-!! OUTPUT
-!!  None
 !!
 !! SIDE EFFECTS
 !!  results= ScaLAPACK matrix coming out of the operation
@@ -2500,7 +2511,33 @@ subroutine solve_gevp_real(na,nev,na_rows,na_cols,nblk,a,b,ev,z,tmp1,tmp2, &
  end subroutine solve_gevp_real
 #endif
 
-subroutine compute_generalized_eigen_problem(processor,matrix1,matrix2,results,eigen,comm,istwf_k)
+!----------------------------------------------------------------------
+
+!!****f* m_slk/compute_eigen_problem
+!! NAME
+!!  compute_eigen_problem
+!!
+!! FUNCTION
+!!  Calculation of eigenvalues and eigenvectors of the generalized eigenvalue problem: A * X = lambda * B X
+!!  complex and real cases.
+!!
+!! INPUTS
+!!  processor= descriptor of a processor
+!!  matrix1=  A matrix
+!!  matrix2=  B matrix
+!!  comm= MPI communicator
+!!  istwf_k= 2 if we have a real matrix else complex.
+!!  [nev]= Number of eigenvalues needed. Default: full set
+!!
+!! OUTPUT
+!!  results= ScaLAPACK matrix coming out of the operation (global dimensions must be equal to matrix
+!!         even if only a part of the eigenvectors is needed.
+!!  eigen= eigenvalues of the matrix dimensioned as the global size of the square matrix
+!!         even if only a part of the eigenvalues is needed.
+!!
+!! SOURCE
+
+subroutine compute_generalized_eigen_problem(processor,matrix1,matrix2,results,eigen,comm,istwf_k,nev)
 
 #ifdef HAVE_LINALG_ELPA
 !Arguments ------------------------------------
@@ -2508,18 +2545,20 @@ subroutine compute_generalized_eigen_problem(processor,matrix1,matrix2,results,e
   type(matrix_scalapack),intent(in)          :: matrix1,matrix2
   type(matrix_scalapack),intent(inout)       :: results
   DOUBLE PRECISION,intent(inout) :: eigen(:)
-
   integer,intent(in)  :: comm,istwf_k
-
+  integer,optional,intent(in) :: nev
 !Local
   type(matrix_scalapack) :: tmp1, tmp2
-  integer :: i,n_col, n_row
+  integer :: i,n_col, n_row, nev__
   integer,external :: indxl2g,numroc
+
+  nev__ = matrix1%sizeb_global(2); if (present(nev)) nev__ = nev
 
   call tmp1%init(matrix1%sizeb_global(1),matrix1%sizeb_global(2),processor,istwf_k)
   call tmp2%init(matrix1%sizeb_global(1),matrix1%sizeb_global(2),processor,istwf_k)
+
   if (istwf_k/=2) then
-     call solve_gevp_complex(matrix1%sizeb_global(1),matrix1%sizeb_global(2), &
+     call solve_gevp_complex(matrix1%sizeb_global(1), nev__, &
 &          matrix1%sizeb_local(1),matrix1%sizeb_local(2),matrix1%sizeb_blocs(1), &
 &          matrix1%buffer_cplx,matrix2%buffer_cplx,eigen,results%buffer_cplx, &
 &          tmp1%buffer_cplx,tmp2%buffer_cplx, &
@@ -2527,7 +2566,7 @@ subroutine compute_generalized_eigen_problem(processor,matrix1,matrix2,results,e
 &          processor%grid%dims(1),processor%grid%dims(2), &
 &          matrix1%descript%tab,processor%comm)
   else
-     call solve_gevp_real(matrix1%sizeb_global(1),matrix1%sizeb_global(2), &
+     call solve_gevp_real(matrix1%sizeb_global(1), nev__, &
 &          matrix1%sizeb_local(1),matrix1%sizeb_local(2),matrix1%sizeb_blocs(1), &
 &          matrix1%buffer_real,matrix2%buffer_real,eigen,results%buffer_real, &
 &          tmp1%buffer_real,tmp2%buffer_real, &
@@ -2544,8 +2583,8 @@ subroutine compute_generalized_eigen_problem(processor,matrix1,matrix2,results,e
   type(matrix_scalapack),intent(in)          :: matrix1,matrix2
   type(matrix_scalapack),intent(inout)       :: results
   DOUBLE PRECISION,intent(inout) :: eigen(:)
-
   integer,intent(in)  :: comm,istwf_k
+  integer,optional,intent(in) :: nev
 
 #ifdef HAVE_LINALG_SCALAPACK
 !Local variables-------------------------------
@@ -2564,9 +2603,16 @@ subroutine compute_generalized_eigen_problem(processor,matrix1,matrix2,results,e
   DOUBLE PRECISION            :: ABSTOL,ORFAC
   integer         , parameter :: IZERO=0
   integer ::  M,NZ,ierr,TWORK_tmp(3),TWORK(3) ! IA,JA,IZ,JZ,
+  character(len=1) :: range
+  integer :: nev__, il, iu
   DOUBLE PRECISION, external :: PDLAMCH
 
 ! *************************************************************************
+
+  nev__ = matrix1%sizeb_global(2); range = "A"; il = 0; iu = 0
+  if (present(nev)) then
+    nev__ = nev; range = "I"; il = 1; iu = nev
+  end if
 
   ! Initialisation
   INFO   = 0
@@ -2579,22 +2625,22 @@ subroutine compute_generalized_eigen_problem(processor,matrix1,matrix2,results,e
   ABI_MALLOC(GAP    ,(  processor%grid%dims(1)*processor%grid%dims(2)))
 
   ! Get the size of the work arrays
-  if (istwf_k/=2) then
-     call PZHEGVX(1,'V','A','U',&
+  if (istwf_k /= 2) then
+     call PZHEGVX(1, 'V', range, 'U',&
 &      matrix1%sizeb_global(2),&
 &      matrix1%buffer_cplx,1,1,matrix1%descript%tab, &
 &      matrix2%buffer_cplx,1,1,matrix2%descript%tab, &
-&      ZERO,ZERO,IZERO,IZERO,ABSTOL,&
+&      ZERO,ZERO,il,iu,ABSTOL,&
 &      m,nz,eigen,ORFAC, &
 &      results%buffer_cplx,1,1,results%descript%tab, &
 &      CWORK_tmp,-1,RWORK_tmp,-1,IWORK_tmp,-1,&
 &      IFAIL,ICLUSTR,GAP,INFO)
   else
-     call PDSYGVX(1,'V','A','U',&
+     call PDSYGVX(1,'V',range,'U',&
 &      matrix1%sizeb_global(2),&
 &      matrix1%buffer_real,1,1,matrix1%descript%tab, &
 &      matrix2%buffer_real,1,1,matrix2%descript%tab, &
-&      ZERO,ZERO,IZERO,IZERO,ABSTOL,&
+&      ZERO,ZERO,il,iu,ABSTOL,&
 &      m,nz,eigen,ORFAC, &
 &      results%buffer_real,1,1,results%descript%tab, &
 &      RWORK_tmp,-1,IWORK_tmp,-1,&
@@ -2639,23 +2685,23 @@ subroutine compute_generalized_eigen_problem(processor,matrix1,matrix2,results,e
 
   ! Call the calculation routine
   if (istwf_k/=2) then
-  !   write(std_out,*) 'I am using PZHEGVX'
-     call PZHEGVX(1,'V','A','U',&
+     ! write(std_out,*) 'I am using PZHEGVX'
+     call PZHEGVX(1,'V',range,'U',&
 &      matrix1%sizeb_global(2),&
 &      matrix1%buffer_cplx,1,1,matrix1%descript%tab, &
 &      matrix2%buffer_cplx,1,1,matrix2%descript%tab, &
-&      ZERO,ZERO,IZERO,IZERO,ABSTOL,&
+&      ZERO,ZERO,il,iu,ABSTOL,&
 &      m,nz,eigen,ORFAC, &
 &      results%buffer_cplx,1,1,results%descript%tab, &
 &      CWORK,LCWORK,RWORK,LRWORK,IWORK,LIWORK,&
 &      IFAIL,ICLUSTR,GAP,INFO)
   else
-  !   write(std_out,*) 'I am using PDSYGVX'
-     call PDSYGVX(1,'V','A','U',&
+     ! write(std_out,*) 'I am using PDSYGVX'
+     call PDSYGVX(1,'V',range,'U',&
 &      matrix1%sizeb_global(2),&
 &      matrix1%buffer_real,1,1,matrix1%descript%tab, &
 &      matrix2%buffer_real,1,1,matrix2%descript%tab, &
-&      ZERO,ZERO,IZERO,IZERO,ABSTOL,&
+&      ZERO,ZERO,il,iu,ABSTOL,&
 &      m,nz,eigen,ORFAC, &
 &      results%buffer_real,1,1,results%descript%tab, &
 &      RWORK,LRWORK,IWORK,LIWORK,&
@@ -2746,6 +2792,7 @@ subroutine compute_eigen1(comm,processor,cplex,nbli_global,nbco_global,matrix,ve
    ABI_MALLOC(z_tmp_evec,(nbli_global,nbco_global))
    z_tmp_evec=cmplx(0._DP,0._DP)
 #ifdef HAVE_LINALG_ELPA
+   ! The full matrix must be set (not only one half like in scalapack).
    do j=1,nbco_global
       do i=j+1,nbli_global
          matrix(2*(i-1)+1,j) = matrix(2*(j-1)+1,i)
@@ -2759,6 +2806,7 @@ subroutine compute_eigen1(comm,processor,cplex,nbli_global,nbco_global,matrix,ve
    ABI_MALLOC(r_tmp_evec,(nbli_global,nbco_global))
    r_tmp_evec(:,:)=0._DP
 #ifdef HAVE_LINALG_ELPA
+   ! The full matrix must be set (not only one half like in scalapack).
    do j=1,nbco_global
       do i=j+1,nbli_global
          matrix(i,j) = matrix(j,i)
@@ -2867,6 +2915,7 @@ subroutine compute_eigen2(comm,processor,cplex,nbli_global,nbco_global,matrix1,m
    ABI_MALLOC(z_tmp_evec,(nbli_global,nbco_global))
    z_tmp_evec=cmplx(0._DP,0._DP)
 #ifdef HAVE_LINALG_ELPA
+   ! The full matrix must be set (not only one half like in scalapack).
    do j=1,nbco_global
       do i=j+1,nbli_global
          matrix1(2*(i-1)+1,j) = matrix1(2*(j-1)+1,i)
@@ -2883,6 +2932,7 @@ subroutine compute_eigen2(comm,processor,cplex,nbli_global,nbco_global,matrix1,m
    ABI_MALLOC(r_tmp_evec,(nbli_global,nbco_global))
    r_tmp_evec(:,:)=0._DP
 #ifdef HAVE_LINALG_ELPA
+   ! The full matrix must be set (not only one half like in scalapack).
    do j=1,nbco_global
       do i=j+1,nbli_global
          matrix1(i,j) = matrix1(j,i)
@@ -2993,7 +3043,7 @@ subroutine slk_pzheev(Slk_mat, jobz, uplo, Slk_vec, w)
  ABI_MALLOC(rwork, (1))
 
  call PZHEEV(jobz, uplo, Slk_mat%sizeb_global(2), Slk_mat%buffer_cplx, 1, 1, Slk_mat%descript%tab, &
-   w, Slk_vec%buffer_cplx, 1, 1, Slk_vec%descript%tab, work, lwork, rwork, lrwork, info)
+             w, Slk_vec%buffer_cplx, 1, 1, Slk_vec%descript%tab, work, lwork, rwork, lrwork, info)
  ABI_CHECK(info == 0, sjoin("Error during the calculation of the workspace size, info:", itoa(info)))
 
  lwork = NINT(real(work(1))); lrwork= NINT(rwork(1)) !*2
@@ -3086,15 +3136,12 @@ end subroutine slk_pzheev
 !!
 !! OUTPUT
 !!  mene_found= (global output) Total number of eigenvalues found.  0 <= mene_found <= N.
-!!
 !!  eigen(N)= (global output) Eigenvalues of A where N is the dimension of M
 !!            On normal exit, the first mene_found entries contain the selected eigenvalues in ascending order.
 !!
 !! SIDE EFFECTS
 !!  If JOBZ="V", the local buffer Slk_vec%buffer_cplx will contain part of the distributed eigenvectors.
-!!
-!!  Slk_mat<ScaLAPACK_matrix>=
-!!    %buffer_cplx is destroyed when the routine returns
+!!  Slk%mat%buffer_cplx is destroyed when the routine returns
 !!
 !! SOURCE
 
@@ -3203,17 +3250,21 @@ subroutine slk_pzheevx(Slk_mat, jobz, range, uplo, vl, vu, il, iu, abstol, Slk_v
     Slk_vec%buffer_cplx,1,1,Slk_vec%descript%tab,&
     work,lwork,rwork,lrwork,iwork,liwork,ifail,iclustr,gap,info)
 
+ ! TODO
+ !call pxheevx_info_to_msg(info, jobz, nvec_calc, mene_found, msg)
+ !ABI_CHECK(info == 0, msg)
+
  ! Handle possible error.
  if (info < 0) then
-   write(msg,'(a,i0,a)')" The ",-info,"-th argument of PZHEEVX had an illegal value."
+   write(msg,'(a,i0,a)')" The ", -info, "-th argument of P?HEEVX had an illegal value."
    if (info == -25) msg = " LRWORK is too small to compute all the eigenvectors requested, no computation is performed"
    ABI_ERROR(msg)
  end if
 
  if (info > 0) then
-   write(msg,'(a,i0)') " PZHEEVX returned info: ",info
+   write(msg,'(a,i0)') " P?HEEVX returned info: ",info
    call wrtout(std_out, msg)
-   if (MOD(info, 2)/=0)then
+   if (MOD(info, 2) /= 0)then
      write(msg,'(3a)')&
      " One or more eigenvectors failed to converge. ",ch10,&
      " Their indices are stored in IFAIL. Ensure ABSTOL=2.0*PDLAMCH('U')"
@@ -3241,8 +3292,9 @@ subroutine slk_pzheevx(Slk_mat, jobz, range, uplo, vl, vu, il, iu, abstol, Slk_v
  if ( firstchar(jobz, ['V','v']) .and. mene_found /= nvec_calc) then
    write(msg,'(5a)')&
    " The user supplied insufficient space and PZHEEVX is not able to detect this before beginning computation. ",ch10,&
-   " To get all the  eigenvectors requested, the user must supply both sufficient space to hold the ",ch10,&
+   " To get all the eigenvectors requested, the user must supply both sufficient space to hold the ",ch10,&
    " eigenvectors in Z (M .LE. DESCZ(N_)) and sufficient workspace to compute them. "
+   !ierr = huge(1)
    ABI_ERROR(msg)
  end if
 
@@ -4669,7 +4721,7 @@ end subroutine slk_single_fview_read_mask
 !!  slk_symmetrize
 !!
 !! FUNCTION
-!!  Symmetrize a squared scaLAPACK-distributed matrix.
+!!  Symmetrize a square scaLAPACK matrix.
 !!
 !! INPUTS
 !!  uplo=String specifying whether only the upper or lower triangular part of the global matrix has been read
@@ -4704,7 +4756,6 @@ subroutine slk_symmetrize(Slk_mat, uplo, symtype)
 
 !************************************************************************
 
- ! @matrix_scalapack
  is_cplx = (allocated(Slk_mat%buffer_cplx))
  is_real = (allocated(Slk_mat%buffer_real))
 

@@ -29,6 +29,7 @@ module m_ksdiago
  use m_hamiltonian
  use m_distribfft
  use iso_c_binding
+ use libxc_functionals
 
  use defs_datatypes,      only : pseudopotential_type
  use defs_abitypes,       only : MPI_type
@@ -72,20 +73,17 @@ module m_ksdiago
  type, public :: ugb_t
 
    integer :: istwf_k = -1
-
-   integer :: nband_k = - 1
-
-   integer :: my_nband = - 1
-   integer :: my_bstart = -1
-   integer :: my_bstop = - 1
-
-   integer :: npw_k = -1
-
    integer :: nspinor = -1
-
+   integer :: npw_k = -1
    integer :: npwsp = -1
 
+   integer :: nband_k = - 1
+   integer :: my_bstart = -1
+   integer :: my_bstop = - 1
+   integer :: my_nband = - 1
+
    integer,pointer :: comm
+   ! pointer to MPI communicator in mat
 
    type(processor_scalapack) :: processor
 
@@ -93,7 +91,9 @@ module m_ksdiago
 
    integer, allocatable :: kg_k(:,:)
 
-   real(dp), contiguous, pointer :: cg_k(:,:)
+   real(dp), contiguous, pointer :: cg_k(:,:,:)
+   ! (2, npwsp * ugb%my_nband)
+   ! pointer to mat%buffer_cplx
 
    type(pawcprj_type),allocatable :: cprj_k(:,:)
    ! (natom, nspinor*onband_diago))
@@ -102,6 +102,8 @@ module m_ksdiago
 
    procedure :: from_diago  => ugb_from_diago
     ! Build object by direct diagonalization of the KS Hamiltonian
+
+   !procedure :: print => ugb_print
 
    !procedure :: bcast => ugb_bcast
 
@@ -152,7 +154,7 @@ module m_ksdiago
   ! TODO Not implemented
 
   real(dp) :: abstol
-   ! used fro RANGE="V","I", and "A" when do_full_diago=.FALSE.
+   ! used fro RANGE= "V", "I", and "A" when do_full_diago=.FALSE.
    ! The absolute error tolerance for the eigenvalues. An approximate eigenvalue is accepted
    ! as converged when it is determined to lie in an interval [a,b] of width less than or equal to
    !
@@ -378,16 +380,6 @@ subroutine ksdiago(Diago_ctl, nband_k, nfftc, mgfftc, ngfftc, natom, &
  ! The coarse FFT mesh.
  n1 = ngfftc(1); n2 = ngfftc(2); n3 = ngfftc(3)
  n4 = ngfftc(4); n5 = ngfftc(5); n6 = ngfftc(6)
-
- ! See sequence of calls in vtorho.
-
- ! Check that usekden is not 0 if want to use vxctau
- !with_vxctau = (present(vxctau).and.dtset%usekden/=0)
-
- ! Check that fock is present if want to use fock option
- !usefock = (dtset%usefock==1 .and. associated(fock))
- !usefock_ACE=0
- !if (usefock) usefock_ACE=fock%fock_common%use_ACE
 
  !====================
  !=== Check input ====
@@ -651,11 +643,11 @@ subroutine ksdiago(Diago_ctl, nband_k, nfftc, mgfftc, ngfftc, natom, &
      ibs2 = ibs1; if (nspinor == 2) ibs2=ibs2+1
      cwavef => eig_vec(1:2,1:npw_k,iband)
 
-     call getcprj(cprj_choice,0,cwavef,cprj_k(:,ibs1:ibs2),&
-       gs_hamk%ffnl_k,idir,gs_hamk%indlmn,gs_hamk%istwf_k,gs_hamk%kg_k,&
-       gs_hamk%kpg_k,gs_hamk%kpt_k,gs_hamk%lmnmax,gs_hamk%mgfft,mpi_enreg_seq,&
-       gs_hamk%natom,gs_hamk%nattyp,gs_hamk%ngfft,gs_hamk%nloalg,gs_hamk%npw_k,gs_hamk%nspinor,&
-       gs_hamk%ntypat,gs_hamk%phkxred,gs_hamk%ph1d,gs_hamk%ph3d_k,gs_hamk%ucvol,gs_hamk%useylm)
+     call getcprj(cprj_choice, 0, cwavef, cprj_k(:,ibs1:ibs2), &
+       gs_hamk%ffnl_k, idir, gs_hamk%indlmn, gs_hamk%istwf_k, gs_hamk%kg_k, &
+       gs_hamk%kpg_k, gs_hamk%kpt_k, gs_hamk%lmnmax, gs_hamk%mgfft, mpi_enreg_seq, &
+       gs_hamk%natom, gs_hamk%nattyp, gs_hamk%ngfft, gs_hamk%nloalg, gs_hamk%npw_k, gs_hamk%nspinor, &
+       gs_hamk%ntypat, gs_hamk%phkxred, gs_hamk%ph1d, gs_hamk%ph3d_k, gs_hamk%ucvol, gs_hamk%useylm)
    end do
 
    !  Reorder the cprj (order is now the same as in input file)
@@ -896,7 +888,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  integer,parameter :: mkmem_ = 1, tim_getghc = 4, paral_kgb0 = 0, master = 0, ncomp1 = 1
  integer :: cprj_choice,cpopt,dimffnl,ib,ider,idir,npw_k,nfftc,mgfftc, igs, ige, omp_nt
  integer :: jj,n1,n2,n3,n4,n5,n6,nkpg,nproc,my_rank,optder
- integer :: type_calc,sij_opt,igsp2,ig !, iband,ibs1,ibs2
+ integer :: type_calc,sij_opt,igsp2,ig, my_ib,ibs1 !,ibs2
  integer :: npwsp, col_bsize, nsppol, nspinor, nspden, loc2_size, il_g2
  integer :: idat, ndat, batch_size, h_size, mene_found
  real(dp),parameter :: lambda0 = zero
@@ -922,7 +914,14 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
 
  nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
 
- !call ugb%free()
+ ! See sequence of calls in vtorho.
+ ! Check that usekden is not 0 if want to use vxctau
+ !with_vxctau = (present(vxctau).and.dtset%usekden/=0)
+
+ ! Check that fock is present if want to use fock option
+ !usefock = (dtset%usefock==1 .and. associated(fock))
+ !usefock_ACE=0
+ !if (usefock) usefock_ACE=fock%fock_common%use_ACE
 
  !====================
  !=== Check input ====
@@ -935,6 +934,14 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
    ABI_WARNING("istwfk == 2 is still under development")
    !ABI_ERROR("istwfk == 2 is still under development")
  end if
+
+ if (dtset%ixc < 0) then
+   if (libxc_functionals_ismgga() .and. .not. libxc_functionals_istb09()) then
+     ABI_ERROR("meta-gga functionals are not compatible with direct diagonalization!")
+   end if
+ end if
+
+ ABI_CHECK_IEQ(dtset%usefock,  0, "direct diagonalization does not support usefock")
 
  ! MPI_type for sequential part.
  call initmpi_seq(mpi_enreg_seq)
@@ -977,19 +984,6 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  end if
 
  do_full_diago = nband_k == npwsp
-
- !if (do_full_diago) then
- !  write(msg,'(6a)')ch10,&
- !  ' Since the number of bands to be computed',ch10,&
- !  ' is equal to the number of G-vectors found for this kpt,',ch10,&
- !  ' the program will perform complete diagonalization.'
- !else
- !  write(msg,'(6a)')ch10,&
- !  ' Since the number of bands to be computed',ch10,&
- !  ' is less than the number of G-vectors found,',ch10,&
- !  ' the program will perform partial diagonalization.'
- !end if
- !if (dtset%prtvol > 0) call wrtout(std_out, msg)
 
  ! Set up local potential vlocal with proper dimensioning, from vtrial.
  ! Select spin component of interest if nspden<=2 as nvloc==1, for nspden==4, nvloc==4
@@ -1065,8 +1059,8 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  ! Define batch size for the application of the Hamiltonian
  ! This is useful if OpenMP is activated thus we use multiple of omp_nt.
  omp_nt = xomp_get_num_threads(open_parallel=.True.)
- !batch_size = 4 * omp_nt
- batch_size = 1
+ batch_size = 4 * omp_nt
+ !batch_size = 1
 
  ABI_MALLOC(ghc, (2, npwsp * batch_size))
  ABI_MALLOC(gvnlxc, (2, npwsp * batch_size))
@@ -1201,11 +1195,13 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
    call wrtout(std_out, msg)
    call cwtime(cpu, wall, gflops, "start")
 
-   ! TODO: ELPA interface
    if (psps%usepaw == 0) then
-     call ghg_4diag%pzheevx("V", "I", "U", zero, zero, 1, nband_k, -tol8, eigvec, mene_found, eig_ene)
+     !call ghg_4diag%pzheevx("V", "I", "U", zero, zero, 1, nband_k, -tol8, eigvec, mene_found, eig_ene)
+     call compute_eigen_problem(ghg_4diag%processor, ghg_4diag, eigvec, eig_ene, comm, istwf_k, nev=nband_k)
    else
-     call ghg_4diag%pzhegvx(1, "V", "I", "U", gsg_4diag, zero, zero, 1, nband_k, -tol8, eigvec, mene_found, eig_ene)
+     !call ghg_4diag%pzhegvx(1, "V", "I", "U", gsg_4diag, zero, zero, 1, nband_k, -tol8, eigvec, mene_found, eig_ene)
+     call compute_generalized_eigen_problem(ghg_4diag%processor, ghg_4diag, gsg_4diag, eigvec, eig_ene, comm, istwf_k, &
+                                            nev=nband_k)
    end if
    call cwtime_report(" partial_diago", cpu, wall, gflops)
  end if
@@ -1242,39 +1238,36 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  eig_k(:) = eig_ene(1:nband_k)
 
  ugb%istwf_k = istwf_k
- ugb%npw_k = npw_k
  ugb%nspinor = nspinor
+ ugb%npw_k = npw_k
  ugb%npwsp = npwsp
  ugb%nband_k = nband_k
  ugb%my_bstart = ugb%mat%loc2gcol(1)
  ugb%my_bstop = ugb%mat%loc2gcol(ugb%mat%sizeb_local(2))
  ugb%my_nband = ugb%my_bstop - ugb%my_bstart + 1
 
- call c_f_pointer(c_loc(ugb%mat%buffer_cplx), ugb%cg_k, shape=[2, npwsp * ugb%my_nband])
+ call c_f_pointer(c_loc(ugb%mat%buffer_cplx), ugb%cg_k, shape=[2, npwsp, ugb%my_nband])
  ugb%comm => ugb%mat%processor%comm
 
  call eigvec%free()
  call proc_4diag%free()
 
- !========================================================
- !==== Calculate <Proj_i|Cnk> from output eigenstates ====
- !========================================================
  if (psps%usepaw == 1) then
-   ABI_MALLOC(ugb%cprj_k, (cryst%natom, nspinor * nband_k))
+   ! Calculate <Proj_i|Cnk> from output eigenstates. Note my_nband
+
+   ABI_MALLOC(ugb%cprj_k, (cryst%natom, nspinor * ugb%my_nband))
    call pawcprj_alloc(ugb%cprj_k, 0, gs_hamk%dimcprj)
    idir = 0; cprj_choice = 1  ! Only projected wave functions.
 
-   !do iband=1,nband_k
-   !  ibs1 = nspinor * (iband - 1) + 1
-   !  ibs2 = ibs1; if (nspinor == 2) ibs2=ibs2+1
-   !  cwavef => eig_vec(1:2,1:npw_k,iband)
+   do my_ib=1,ugb%my_nband
+     ibs1 = nspinor * (my_ib - 1) + 1
 
-   !  call getcprj(cprj_choice,0,cwavef,ugb%cprj_k(:,ibs1:ibs2),&
-   !   gs_hamk%ffnl_k,idir,gs_hamk%indlmn,gs_hamk%istwf_k,gs_hamk%kg_k,&
-   !   gs_hamk%kpg_k,gs_hamk%kpt_k,gs_hamk%lmnmax,gs_hamk%mgfft, mpi_enreg_seq,&
-   !   gs_hamk%natom,gs_hamk%nattyp,gs_hamk%ngfft,gs_hamk%nloalg,gs_hamk%npw_k,gs_hamk%nspinor,&
-   !   gs_hamk%ntypat,gs_hamk%phkxred,gs_hamk%ph1d,gs_hamk%ph3d_k,gs_hamk%ucvol,gs_hamk%useylm)
-   !end do
+     call getcprj(cprj_choice, 0, ugb%cg_k(:,:,my_ib), ugb%cprj_k(:,ibs1),&
+      gs_hamk%ffnl_k,idir,gs_hamk%indlmn,gs_hamk%istwf_k,gs_hamk%kg_k,&
+      gs_hamk%kpg_k,gs_hamk%kpt_k,gs_hamk%lmnmax,gs_hamk%mgfft, mpi_enreg_seq,&
+      gs_hamk%natom,gs_hamk%nattyp,gs_hamk%ngfft,gs_hamk%nloalg,gs_hamk%npw_k,gs_hamk%nspinor,&
+      gs_hamk%ntypat,gs_hamk%phkxred,gs_hamk%ph1d,gs_hamk%ph3d_k,gs_hamk%ucvol,gs_hamk%useylm)
+   end do
 
    !  Reorder the cprj (order is now the same as in input file)
    call pawcprj_reorder(ugb%cprj_k, gs_hamk%atindx1)

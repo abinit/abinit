@@ -1756,12 +1756,12 @@ subroutine wfk_write_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: ik_ibz,spin,sc_mode !,mband,rdcg,rdeig,npw_k,nband_k
  class(wfk_t),intent(inout) :: Wfk
+ integer,intent(in) :: ik_ibz,spin,sc_mode
 !arrays
  integer,intent(in) :: band_block(2)
- integer,intent(in),optional :: kg_k(:,:)  !(3,npw_k)
- real(dp),intent(in),optional :: cg_k(:,:) ! cg_k(2,rdcg*cgsize2) !(2,npw_k*nspinor*nband)
+ integer,intent(in),optional :: kg_k(:,:)  ! (3, npw_k)
+ real(dp),intent(in),optional :: cg_k(:,:) ! (2, npw_k*nspinor*nband)
  real(dp),intent(in),optional :: eig_k((2*Wfk%mband)**Wfk%formeig*Wfk%mband)
  real(dp),intent(in),optional :: occ_k(Wfk%mband)
 
@@ -1802,11 +1802,11 @@ subroutine wfk_write_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg
  ABI_MALLOC (cg_buffer, (2,npw_disk*nspinor_disk))
 
  if (PRESENT(kg_k)) then
-   ABI_CHECK_IGEQ(SIZE(kg_k,DIM=2), npw_disk,"kg_k too small")
+   ABI_CHECK_IGEQ(SIZE(kg_k, DIM=2), npw_disk, "kg_k too small")
  end if
 
  if (PRESENT(cg_k)) then
-   ABI_CHECK_IGEQ(SIZE(cg_k, DIM=2), npw_tot,"cg_k too small")
+   ABI_CHECK_IGEQ(SIZE(cg_k, DIM=2), npw_tot, "cg_k too small")
  end if
 
  if (PRESENT(eig_k)) then
