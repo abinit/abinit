@@ -97,6 +97,8 @@ module m_orbmag
 
   private :: d2lr_p2
   private :: d2lr_Anp
+
+  private :: tdt_me
   !private :: dl_Anp
   !private :: dl_p2
   !private :: dl_q
@@ -797,6 +799,93 @@ subroutine make_pcg1(atindx,cg_k,cg1_k,cprj_k,dimlmn,dtset,gs_hamk,&
 end subroutine make_pcg1
 !!***
 
+!!****f* ABINIT/tdt_me
+!! NAME
+!! tdt_me
+!!
+!! FUNCTION
+!! compute the matrix element <bra|T^\dag (\partial T)|ket>
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2021 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!! atindx
+!! bra_cprj_k : cprj for bra wavefunctions
+!! bra_n : index of band to use on bra side
+!! ddir : set of <phi|r|phi> - <t phi|r|t phi>
+!! dtset
+!! idir : direction (1..3) for derivatives
+!! ket_cprj_k : cprj for ket wavefunctions
+!! ket_n index of band to use on ket side
+!! lmn2max
+!! nband_k
+!! pawtab
+!! tdtme : output matrix element
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!!
+!! SOURCE
+
+subroutine tdt_me(atindx,bra_cprj_k,bra_n,ddir,dtset,idir,ket_cprj_k,&
+    & ket_n,lmn2max,nband_k,pawtab,tdtme)
+
+  !Arguments ------------------------------------
+  !scalars
+  integer,intent(in) :: bra_n,idir,ket_n,lmn2max,nband_k
+  type(dataset_type),intent(in) :: dtset
+
+  !arrays
+  integer,intent(in) :: atindx(dtset%natom)
+  real(dp),intent(in) :: ddir(lmn2max,dtset%ntypat,3)
+  complex(dpc),intent(out) :: tdtme
+  type(pawcprj_type),intent(in) :: bra_cprj_k(dtset%natom,nband_k)
+  type(pawcprj_type),intent(in) :: ket_cprj_k(dtset%natom,nband_k)
+  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
+
+  !Local variables -------------------------
+  !scalars
+  integer :: iat,iatom,ilmn,itypat,jlmn,klmn
+  real(dp) :: qij
+  complex(dpc) :: cpdj,cpi,cpj
+  
+  !arrays
+
+!--------------------------------------------------------------------
+
+  tdtme = czero
+  do iat=1,dtset%natom
+    iatom=atindx(iat)
+    itypat=dtset%typat(iat)
+    do ilmn = 1, pawtab(itypat)%lmn_size
+      cpi = CMPLX(bra_cprj_k(iatom,bra_n)%cp(1,ilmn),bra_cprj_k(iatom,bra_n)%cp(2,ilmn),KIND=dpc)
+      do jlmn = 1, pawtab(itypat)%lmn_size
+        cpj = CMPLX(ket_cprj_k(iatom,ket_n)%cp(1,jlmn),ket_cprj_k(iatom,ket_n)%cp(2,jlmn),KIND=dpc)
+        klmn = MATPACK(ilmn,jlmn)
+        qij = pawtab(itypat)%sij(klmn)
+        cpdj = CMPLX(ket_cprj_k(iatom,ket_n)%dcp(1,idir,jlmn),ket_cprj_k(iatom,ket_n)%dcp(2,idir,jlmn),KIND=dpc)
+
+        tdtme = tdtme + CONJG(cpi)*qij*cpdj + &
+          & CONJG(cpi)*(-j_dpc)*ddir(klmn,itypat,idir)*cpj
+
+      end do ! jlmn
+    end do ! ilmn
+  end do ! iatom
+
+end subroutine tdt_me
+!!***
+
+
 !!****f* ABINIT/berry_cv
 !! NAME
 !! berry_cv
@@ -860,32 +949,13 @@ subroutine berry_cv(atindx,bc_k,cprj_k,cprj1_k,ddir,dtset,lmn2max,nband_k,pawtab
           eabg = eijk(adir,bdir,gdir)
           if (abs(eabg) < half) cycle
 
-          ct2 = czero; ct3 = czero
-          do iat=1,dtset%natom
-            iatom=atindx(iat)
-            itypat=dtset%typat(iat)
-            do ilmn = 1, pawtab(itypat)%lmn_size
-              cpi = CMPLX(cprj_k(iatom,nn)%cp(1,ilmn),cprj_k(iatom,nn)%cp(2,ilmn),KIND=dpc)
-              do jlmn = 1, pawtab(itypat)%lmn_size
-                cpj = CMPLX(cprj_k(iatom,nn)%cp(1,jlmn),cprj_k(iatom,nn)%cp(2,jlmn),KIND=dpc)
-                klmn = MATPACK(ilmn,jlmn)
-                qij = pawtab(itypat)%sij(klmn)
-                cpdb = CMPLX(cprj_k(iatom,nn)%dcp(1,bdir,ilmn),cprj_k(iatom,nn)%dcp(2,bdir,ilmn),KIND=dpc)
-                pcbi = CMPLX(cprj1_k(iatom,nn,bdir)%cp(1,ilmn),cprj1_k(iatom,nn,bdir)%cp(2,ilmn),KIND=dpc)
-                cpdg = CMPLX(cprj_k(iatom,nn)%dcp(1,gdir,jlmn),cprj_k(iatom,nn)%dcp(2,gdir,jlmn),KIND=dpc)
-                pcgj = CMPLX(cprj1_k(iatom,nn,gdir)%cp(1,jlmn),cprj1_k(iatom,nn,gdir)%cp(2,jlmn),KIND=dpc)
+          call tdt_me(atindx,cprj1_k(:,:,bdir),nn,ddir,dtset,gdir,cprj_k,&
+              & nn,lmn2max,nband_k,pawtab,ct2)
+          call tdt_me(atindx,cprj1_k(:,:,gdir),nn,ddir,dtset,bdir,cprj_k,&
+              & nn,lmn2max,nband_k,pawtab,ct3)
 
-                ct2 = ct2 + (CONJG(pcbi)*(-j_dpc)*ddir(klmn,itypat,gdir)*cpj+&
-                  & CONJG(pcbi)*qij*cpdg)
-                ct3 = ct3 + (CONJG(cpi)*(j_dpc)*ddir(klmn,itypat,bdir)*pcgj+&
-                  & CONJG(cpdb)*qij*pcgj)
-
-              end do ! jlmn
-            end do ! ilmn
-          end do ! iatom
-
-          bc_k(1,nn,adir) = bc_k(1,nn,adir) + REAL(c2*cbc*eabg*(ct2 + ct3))
-          bc_k(2,nn,adir) = bc_k(2,nn,adir) + AIMAG(c2*cbc*eabg*(ct2 + ct3))
+          bc_k(1,nn,adir) = bc_k(1,nn,adir) + REAL(c2*cbc*eabg*(ct2 + CONJG(ct3)))
+          bc_k(2,nn,adir) = bc_k(2,nn,adir) + AIMAG(c2*cbc*eabg*(ct2 + CONJG(ct3)))
         
         end do ! gdir
       end do ! bdir
@@ -1133,9 +1203,9 @@ subroutine berry_vvb(atindx,bc_k,cprj_k,ddir,dtset,lmn2max,nband_k,pawtab)
 
   !Local variables -------------------------
   !scalars
-  integer :: adir,bdir,gdir,iat,iatom,ilmn,itypat,jlmn,klmn,nn,np
-  real(dp) :: c2,eabg,qij
-  complex(dpc) :: cnp,cnpb,cnpg,cpdb,cpdg,cpi,cpj
+  integer :: adir,bdir,gdir,nn,np
+  real(dp) :: c2,eabg
+  complex(dpc) :: cnp,cnpb,cnpg
   
   !arrays
 
@@ -1154,31 +1224,15 @@ subroutine berry_vvb(atindx,bc_k,cprj_k,ddir,dtset,lmn2max,nband_k,pawtab)
           if (abs(eabg) < half) cycle
   
           do np = 1, nband_k
-     
-            cnpb = czero
-            cnpg = czero 
-            do iat=1,dtset%natom
-              iatom=atindx(iat)
-              itypat=dtset%typat(iat)
-              do ilmn = 1, pawtab(itypat)%lmn_size
-                cpi = CMPLX(cprj_k(iatom,np)%cp(1,ilmn),cprj_k(iatom,np)%cp(2,ilmn),KIND=dpc)
-                do jlmn = 1, pawtab(itypat)%lmn_size
-                  cpj = CMPLX(cprj_k(iatom,nn)%cp(1,jlmn),cprj_k(iatom,nn)%cp(2,jlmn),KIND=dpc)
-                  cpdg = CMPLX(cprj_k(iatom,nn)%dcp(1,gdir,jlmn),cprj_k(iatom,nn)%dcp(2,gdir,jlmn),KIND=dpc)
-                  cpdb = CMPLX(cprj_k(iatom,nn)%dcp(1,bdir,jlmn),cprj_k(iatom,nn)%dcp(2,bdir,jlmn),KIND=dpc)
-                  klmn = MATPACK(ilmn,jlmn)
-                  qij = pawtab(itypat)%sij(klmn)
-                  cnpg = cnpg + CONJG(cpi)*qij*cpdg + &
-                   & CONJG(cpi)*(-j_dpc)*ddir(klmn,itypat,gdir)*cpj 
-                  cnpb = cnpb + CONJG(cpi)*qij*cpdb + &
-                   & CONJG(cpi)*(-j_dpc)*ddir(klmn,itypat,bdir)*cpj 
-                end do ! loop over jlmn
-              end do ! loop over ilmn
-            end do ! loop over atoms
+    
+            call tdt_me(atindx,cprj_k,np,ddir,dtset,bdir,cprj_k,&
+              & nn,lmn2max,nband_k,pawtab,cnpb)
+            call tdt_me(atindx,cprj_k,np,ddir,dtset,gdir,cprj_k,&
+              & nn,lmn2max,nband_k,pawtab,cnpg)
 
             cnp = c2*cbc*eabg*CONJG(cnpb)*cnpg
             bc_k(1,nn,adir) = bc_k(1,nn,adir) - REAL(cnp)
-            bc_k(2,nn,adir) = bc_k(2,nn,adir) - AIMAG(cnpg)
+            bc_k(2,nn,adir) = bc_k(2,nn,adir) - AIMAG(cnp)
 
           end do ! loop over np
 
@@ -1397,7 +1451,7 @@ subroutine berry_cc(atindx,bc_k,cprj1_k,dimlmn,dtset,gs_hamk,&
           if (abs(eabg) < half) cycle
           dotr = DOT_PRODUCT(bwavef(1,:),svectout(1,:))+DOT_PRODUCT(bwavef(2,:),svectout(2,:))
           doti = DOT_PRODUCT(bwavef(1,:),svectout(2,:))-DOT_PRODUCT(bwavef(2,:),svectout(1,:))
-          cme = cmplx(dotr,doti,KIND=dpc)
+          cme = CMPLX(dotr,doti,KIND=dpc)
           bc_k(1,nn,adir) = bc_k(1,nn,adir) + real(cbc*eabg*c2*cme)
           bc_k(2,nn,adir) = bc_k(2,nn,adir) + aimag(cbc*eabg*c2*cme)
         end do ! adir
