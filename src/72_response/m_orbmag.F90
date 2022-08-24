@@ -73,11 +73,11 @@ module m_orbmag
                                                &zero,zero,zero/),& !{1..3}33
                                                &(/3,3,3/))
 
-  integer,parameter :: ibcc=1,ibcv=2,ibvv=3
-  integer,parameter :: imcc=4,imvvb=5,iomlr=6,iomanp=7,iomlmb=8,imvva3=9,imcva=10
+  integer,parameter :: ibcc=1,ibcv=2,ibvva=3,ibvvb=4
+  integer,parameter :: imcc=5,imvvb=6,iomlr=7,iomanp=8,iomlmb=9,imvva3=10,imcva=11
   !integer,parameter :: iompw=6,iomdpdp=7,iomdpu=8,iomdudu=9,iomlr=10,iomlmb=11,iomanp=12
   !integer,parameter :: iomdlanp=13,iomdlp2=14,iomdlvhnzc=15,iomdlvh=16,iomdlq=17
-  integer,parameter :: nterms=10
+  integer,parameter :: nterms=11
   complex(dpc),parameter :: cbc = j_dpc/two_pi ! Berry curvature pre-factor
   complex(dpc),parameter :: com = -half*j_dpc  ! Orbital magnetism pre-factor
 
@@ -459,26 +459,26 @@ subroutine orbmag_ptpaw(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_en
    orbmag_terms(:,:,:,ibcc) = orbmag_terms(:,:,:,ibcc) + trnrm*bc_k
    
    call berry_vva(atindx,bc_k,cprj_k,ddir,dtset,lmn2max,nband_k,pawtab)
-   orbmag_terms(:,:,:,ibvv) = orbmag_terms(:,:,:,ibvv) + trnrm*bc_k
+   orbmag_terms(:,:,:,ibvva) = orbmag_terms(:,:,:,ibvva) + trnrm*bc_k
    
    call berry_vvb(atindx,bc_k,cprj_k,ddir,dtset,lmn2max,nband_k,pawtab)
-   orbmag_terms(:,:,:,ibvv) = orbmag_terms(:,:,:,ibvv) + trnrm*bc_k
+   orbmag_terms(:,:,:,ibvvb) = orbmag_terms(:,:,:,ibvvb) + trnrm*bc_k
    
    call berry_cv(atindx,bc_k,cprj_k,cprj1_k,ddir,dtset,lmn2max,nband_k,pawtab)
    orbmag_terms(:,:,:,ibcv) = orbmag_terms(:,:,:,ibcv) + trnrm*bc_k
    
-   call mag_cc(atindx,cprj1_k,dimlmn,dtset,eig_k,gs_hamk,&
-    & ikpt,isppol,mcgk,mpi_enreg,my_nspinor,nband_k,npw_k,om_k,pcg1_k)
-   orbmag_terms(:,:,:,imcc) = orbmag_terms(:,:,:,imcc) + trnrm*om_k
+   !call mag_cc(atindx,cprj1_k,dimlmn,dtset,eig_k,gs_hamk,&
+   ! & ikpt,isppol,mcgk,mpi_enreg,my_nspinor,nband_k,npw_k,om_k,pcg1_k)
+   !orbmag_terms(:,:,:,imcc) = orbmag_terms(:,:,:,imcc) + trnrm*om_k
 
-   call mag_cva(atindx,cprj_k,cprj1_k,eig_k,dtset%natom,nband_k,dtset%ntypat,om_k,paw_ij,pawtab,dtset%typat)
-   orbmag_terms(:,:,:,imcva) = orbmag_terms(:,:,:,imcva) + trnrm*om_k
-   
-   call mag_vvb(atindx,cprj_k,ddir,dtset,eig_k,lmn2max,nband_k,om_k,pawtab)
-   orbmag_terms(:,:,:,imvvb) = orbmag_terms(:,:,:,imvvb) + trnrm*om_k
+   !call mag_cva(atindx,cprj_k,cprj1_k,eig_k,dtset%natom,nband_k,dtset%ntypat,om_k,paw_ij,pawtab,dtset%typat)
+   !orbmag_terms(:,:,:,imcva) = orbmag_terms(:,:,:,imcva) + trnrm*om_k
+   !
+   !call mag_vvb(atindx,cprj_k,ddir,dtset,eig_k,lmn2max,nband_k,om_k,pawtab)
+   !orbmag_terms(:,:,:,imvvb) = orbmag_terms(:,:,:,imvvb) + trnrm*om_k
 
-   call mag_vva3(atindx,cprj_k,eig_k,dtset%natom,nband_k,dtset%ntypat,om_k,paw_ij,pawtab,dtset%typat)
-   orbmag_terms(:,:,:,imvva3) = orbmag_terms(:,:,:,imvva3) + trnrm*om_k
+   !call mag_vva3(atindx,cprj_k,eig_k,dtset%natom,nband_k,dtset%ntypat,om_k,paw_ij,pawtab,dtset%typat)
+   !orbmag_terms(:,:,:,imvva3) = orbmag_terms(:,:,:,imvva3) + trnrm*om_k
    !--------------------------------------------------------------------------------
    ! additional onsite terms to both Berry and orbmag (no |phi> derivatives) 
    !--------------------------------------------------------------------------------
@@ -2890,7 +2890,7 @@ subroutine apply_d2lr_term_k(atindx,cprj_k,dtset,iterm,lmn2max,mterm,nband_k,omm
 
 !--------------------------------------------------------------------
   ! iterm <= ibcd is berry type, others are orb mag type
-  if ( iterm <= ibvv ) then
+  if ( iterm <= ibvvb ) then
     cpre = cbc
   else
     cpre = com
@@ -3111,7 +3111,7 @@ subroutine orbmag_ptpaw_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace)
    end do
  end do
  berry_bb=zero;berry_total=zero
- do iterms = ibcc,ibvv
+ do iterms = ibcc,ibvvb
    berry_total(1:2,1:3)=berry_total(1:2,1:3) + orbmag_trace(1:2,1:3,iterms)
    do iband=1, nband_k
      berry_bb(1:2,iband,1:3) = berry_bb(1:2,iband,1:3) + orbmag_terms(1:2,iband,1:3,iterms)
@@ -3158,11 +3158,13 @@ subroutine orbmag_ptpaw_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace)
    call wrtout(ab_out,message,'COLL')
    write(message,'(a)')' Berry curvature, term-by-term breakdown : '
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)') ' C-C : ',(orbmag_trace(1,adir,ibcc),adir=1,3)
+   write(message,'(a,3es16.8)') '  C-C : ',(orbmag_trace(1,adir,ibcc),adir=1,3)
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)') ' C-V : ',(orbmag_trace(1,adir,ibcv),adir=1,3)
+   write(message,'(a,3es16.8)') '  C-V : ',(orbmag_trace(1,adir,ibcv),adir=1,3)
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)') ' V-V : ',(orbmag_trace(1,adir,ibvv),adir=1,3)
+   write(message,'(a,3es16.8)') ' V-Va : ',(orbmag_trace(1,adir,ibvva),adir=1,3)
+   call wrtout(ab_out,message,'COLL')
+   write(message,'(a,3es16.8)') ' V-Vb : ',(orbmag_trace(1,adir,ibvvb),adir=1,3)
    call wrtout(ab_out,message,'COLL')
  end if
 
@@ -3194,11 +3196,13 @@ subroutine orbmag_ptpaw_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace)
      call wrtout(ab_out,message,'COLL')
      write(message,'(a,3es16.8)') '         Berry curvature : ',(berry_bb(1,iband,adir),adir=1,3)
      call wrtout(ab_out,message,'COLL')
-     write(message,'(a,3es16.8)') ' C-C : ',(orbmag_terms(1,iband,adir,ibcc),adir=1,3)
+     write(message,'(a,3es16.8)') '  C-C : ',(orbmag_terms(1,iband,adir,ibcc),adir=1,3)
      call wrtout(ab_out,message,'COLL')
-     write(message,'(a,3es16.8)') ' C-V : ',(orbmag_terms(1,iband,adir,ibcv),adir=1,3)
+     write(message,'(a,3es16.8)') '  C-V : ',(orbmag_terms(1,iband,adir,ibcv),adir=1,3)
      call wrtout(ab_out,message,'COLL')
-     write(message,'(a,3es16.8)') ' V-V : ',(orbmag_terms(1,iband,adir,ibvv),adir=1,3)
+     write(message,'(a,3es16.8)') ' V-Va : ',(orbmag_terms(1,iband,adir,ibvva),adir=1,3)
+     call wrtout(ab_out,message,'COLL')
+     write(message,'(a,3es16.8)') ' V-Vb : ',(orbmag_terms(1,iband,adir,ibvvb),adir=1,3)
      call wrtout(ab_out,message,'COLL')
    end do
  end if
