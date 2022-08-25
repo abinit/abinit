@@ -814,7 +814,7 @@ subroutine ugb_calc_osc_gamma()
  u_mgfft = maxval(u_ngfft(1:3))
 
  ABI_MALLOC(gbound_k, (2 * u_mgfft + 8, 2))
- call sphereboundary(gbound_k, ugb%istwfk, ugb%kg_k, u_mgfft, npw_k)
+ call sphereboundary(gbound_k, ugb%istwf_k, ugb%kg_k, u_mgfft, npw_k)
 
  ABI_MALLOC(my_ur, (u_nfft * nspinor * ndat1))
  ABI_MALLOC(master_ur, (u_nfft * nspinor, ndat))
