@@ -2124,7 +2124,7 @@ subroutine wfk_write_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg
        ABI_ERROR("Don't pass occ_k when formeig==1 and ETSF-IO")
      end if
      if (present(eig_k)) then
-!       ABI_WARNING("Don't pass eig_k when formeig==1 and ETSF-IO")
+       !ABI_WARNING("Don't pass eig_k when formeig==1 and ETSF-IO")
 
        NCF_CHECK(nf90_inq_varid(wfk%fh, "h1_matrix_elements", h1_varid))
        if (sc_mode == xmpio_collective .and. wfk%nproc > 1) then

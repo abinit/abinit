@@ -337,6 +337,7 @@ end subroutine mpiotk_read_fsuba_dp2D
 !!  subsizes(2)
 !!  starts(2)
 !!  bufsz = dimension of buffer (takes into accout both real and imaginary part)
+!!  buffer(bufsz)
 !!  chunk_bsize =
 !!  sc_mode= MPI-IO option
 !!    xmpio_single     ==> for reading by current proc.
@@ -344,7 +345,6 @@ end subroutine mpiotk_read_fsuba_dp2D
 !!  comm = MPI communicator
 !!
 !! OUTPUTS
-!!  buffer(bufsz)
 !!  ierr=status error. A non zero value indicates that chunk_bsize is smaller that the fortran record
 !!    and therefore bufsz has not been written.
 !!

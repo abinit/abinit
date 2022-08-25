@@ -970,10 +970,10 @@ end function slk_array_locmem_mb
 !!
 !!  It is usually interfaced with CPP macros, e.g:
 !!
-!!    ABI_CHECK(block_dist_1d(size, nproc, block_size, msg), msg)
+!!    ABI_CHECK(block_dist_1d(mat_size, nproc, block_size, msg), msg)
 !!
 !! INPUTS
-!!  size=Size of the matrix (either number of rows or number of colums)
+!!  mat_size=Size of the matrix (either number of rows or number of colums)
 !!  nproc=Number of processoes in the 1D scalapack grid
 !!
 !! OUTPUT
@@ -983,10 +983,10 @@ end function slk_array_locmem_mb
 !!
 !! SOURCE
 
-logical function block_dist_1d(size, nproc, block_size, msg) result (ok)
+logical function block_dist_1d(mat_size, nproc, block_size, msg) result (ok)
 
 !Arguments ------------------------------------
- integer, intent(in) :: size, nproc
+ integer, intent(in) :: mat_size, nproc
  integer,intent(out) :: block_size
  character(len=*),intent(out) :: msg
 
@@ -994,16 +994,16 @@ logical function block_dist_1d(size, nproc, block_size, msg) result (ok)
 
  ok = .True.; msg = ""
 
- block_size = size / nproc
+ block_size = mat_size / nproc
  if (block_size == 0) then
    ok = .False.
    write(msg, "(2(a,i0), 2a)") &
-     "The number of MPI processors:", nproc, " exceeeds the number of rows (columms) of the matrix:", size, ch10, &
+     "The number of MPI processors:", nproc, " exceeeds the number of rows (columms) of the matrix:", mat_size, ch10, &
      "Please decrease the number of MPI processes."
    return
  end if
 
- if (mod(size, nproc) /= 0) block_size = block_size + 1
+ if (mod(mat_size, nproc) /= 0) block_size = block_size + 1
 
 end function block_dist_1d
 !!***

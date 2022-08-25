@@ -81,6 +81,10 @@ module m_ksdiago
    integer :: my_bstart = -1
    integer :: my_bstop = - 1
    integer :: my_nband = - 1
+   ! Number of bands treated by this proc. 0 if idle proc
+
+   logical :: has_idle_procs
+   ! True if there are procs in comm who don't own any column.
 
    integer,pointer :: comm
    ! pointer to MPI communicator in mat
@@ -889,7 +893,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  integer :: cprj_choice,cpopt,dimffnl,ib,ider,idir,npw_k,nfftc,mgfftc, igs, ige, omp_nt
  integer :: jj,n1,n2,n3,n4,n5,n6,nkpg,nproc,my_rank,optder
  integer :: type_calc,sij_opt,igsp2,ig, my_ib,ibs1 !,ibs2
- integer :: npwsp, col_bsize, nsppol, nspinor, nspden, loc2_size, il_g2
+ integer :: npwsp, col_bsize, nsppol, nspinor, nspden, loc2_size, il_g2, ierr, min_my_nband
  integer :: idat, ndat, batch_size, h_size !, mene_found
  real(dp),parameter :: lambda0 = zero
  real(dp) :: cpu, wall, gflops, mem_mb
@@ -899,9 +903,8 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  character(len=500) :: msg
  type(MPI_type) :: mpi_enreg_seq
  type(gs_hamiltonian_type) :: gs_hamk
- type(matrix_scalapack) :: ghg_mat, gsg_mat, ghg_4diag, gsg_4diag
+ type(matrix_scalapack) :: ghg_mat, gsg_mat, ghg_4diag, gsg_4diag, eigvec
  type(processor_scalapack) :: proc_1d, proc_4diag
- type(matrix_scalapack) :: eigvec
 !arrays
  real(dp) :: kptns_(3,1), ylmgr_dum(1,1,1)
  real(dp),allocatable :: ph3d(:,:,:), ffnl(:,:,:,:), kinpw(:), kpg_k(:,:)
@@ -1078,7 +1081,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  ! Estimate memory
  mem_mb = ghg_mat%locmem_mb()
  mem_mb = two * (psps%usepaw + 1) * mem_mb + mem_mb  ! last term for eigvec matrix
- call wrtout(std_out, sjoin("Memory for Scalapack matrices:", ftoa(mem_mb, fmt="(f8.1)"), ' [Mb] <<< MEM'))
+ call wrtout(std_out, sjoin(" Local memory for scalapack matrices:", ftoa(mem_mb, fmt="(f8.1)"), ' [Mb] <<< MEM'))
 
  ! cwaveprj is ordered, see nonlop_ylm.
  ABI_MALLOC(cwaveprj, (cryst%natom, nspinor*(1+cpopt)*gs_hamk%usepaw*batch_size))
@@ -1176,12 +1179,11 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  ! global dimension is (h_size, h_size) even for partial diago.
  ! then one extracts the (hsize, nband_k) sub-matrix before returning
  call ghg_4diag%copy(eigvec)
- !call eigvec%init(h_size, nband_k, proc_4diag, istwf_k, size_blocs=ghg_4diag%sizeb_blocs)
 
  if (do_full_diago) then
    write(msg,'(5a, 2(a,i0))')ch10,&
      ' Begin full diagonalization for kpt: ',trim(ktoa(kpoint)), stag(spin), ch10,&
-     ' Matrix size: ',npwsp,  "nproc: ", nproc
+     ' Matrix size: ',npwsp, ", nproc: ", nproc
    call wrtout(std_out, msg)
    call cwtime(cpu, wall, gflops, "start")
 
@@ -1196,7 +1198,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  else
    write(msg,'(6a,i0,2(a,i0))') ch10,&
      ' Begin partial diagonalization for kpt: ',trim(ktoa(kpoint)), stag(spin), ch10,&
-     ' Matrix size: ',npwsp,', nband_k: ', nband_k, "nproc: ", nproc
+     ' Matrix size: ',npwsp,', nband_k: ', nband_k, ", nproc: ", nproc
    call wrtout(std_out, msg)
    call cwtime(cpu, wall, gflops, "start")
 
@@ -1235,9 +1237,9 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  call ugb%processor%init(comm, grid_dims=[1, nproc])
 
  ABI_CHECK(block_dist_1d(nband_k, nproc, col_bsize, msg), msg)
-
- !call eigvec%change_size_blocs(ugb%mat, size_blocs=[h_size, col_bsize], processor=ugb%processor)
  call eigvec%cut(h_size, nband_k, ugb%mat, size_blocs=[h_size, col_bsize], processor=ugb%processor)
+ call eigvec%free()
+ call proc_4diag%free()
 
  ABI_MALLOC(eig_k, (nband_k))
  eig_k(:) = eig_ene(1:nband_k)
@@ -1247,17 +1249,23 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  ugb%npw_k = npw_k
  ugb%npwsp = npwsp
  ugb%nband_k = nband_k
+ ugb%comm => ugb%mat%processor%comm
+
  ugb%my_bstart = ugb%mat%loc2gcol(1)
  ugb%my_bstop = ugb%mat%loc2gcol(ugb%mat%sizeb_local(2))
  ugb%my_nband = ugb%my_bstop - ugb%my_bstart + 1
 
- call c_f_pointer(c_loc(ugb%mat%buffer_cplx), ugb%cg_k, shape=[2, npwsp, ugb%my_nband])
- ugb%comm => ugb%mat%processor%comm
+ if (ugb%my_nband > 0) then
+   call c_f_pointer(c_loc(ugb%mat%buffer_cplx), ugb%cg_k, shape=[2, npwsp, ugb%my_nband])
+ else
+   ugb%my_nband = 0
+   ugb%cg_k => null()
+ end if
 
- call eigvec%free()
- call proc_4diag%free()
+ call xmpi_min(ugb%my_nband, min_my_nband, comm, ierr)
+ ugb%has_idle_procs = min_my_nband == 0
 
- if (psps%usepaw == 1) then
+ if (psps%usepaw == 1 .and. ugb%my_nband > 0) then
    ! Calculate <Proj_i|Cnk> from output eigenstates. Note my_nband
 
    ABI_MALLOC(ugb%cprj_k, (cryst%natom, nspinor * ugb%my_nband))
