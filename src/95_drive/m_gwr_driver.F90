@@ -151,11 +151,12 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
 !Local variables ------------------------------
 !scalars
  integer,parameter :: master = 0, cplex1 = 1, ipert0 = 0, idir0 = 0, optrhoij1 = 1
- integer :: ii, comm, nprocs, my_rank, mgfftf, nfftf, omp_ncpus, work_size, nks_per_proc, ierr, spin, ik_ibz, nband_k
+ integer :: ii, comm, nprocs, my_rank, mgfftf, nfftf, omp_ncpus, work_size, nks_per_proc
+ integer :: ierr, spin, ik_ibz, nband_k, iomode__
  real(dp) :: eff, mempercpu_mb, max_wfsmem_mb, nonscal_mem
  real(dp) :: ecore, ecut_eff, ecutdg_eff, cpu, wall, gflops
  logical, parameter :: is_dfpt = .false.
- logical :: use_wfk, print_wfk
+ logical :: read_wfk, print_wfk
  character(len=500) :: msg
  character(len=fnlen) :: wfk_path, den_path, kden_path, out_path
  type(hdr_type) :: wfk_hdr, den_hdr, kden_hdr, owfk_hdr
@@ -170,7 +171,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  real(dp), parameter :: k0(3) = zero
  integer :: cplex, cplex_dij, cplex_rhoij
  integer :: gnt_option !,has_dijU,has_dijso,iab,bmin,bmax,irr_idx1,irr_idx2
- integer :: istep, moved_atm_inside, moved_rhor, n3xccc
+ integer :: istep, moved_atm_inside, moved_rhor, n3xccc, sc_mode
  integer :: ndij !,ndim,nfftf,nfftf_tot,nkcalc,gwc_nfft,gwc_nfftot,gwx_nfft,gwx_nfftot
  integer :: ngrvdw, nhatgrdim, nkxc, nspden_rhoij, optene !nzlmopt,
  integer :: optcut, optgr0, optgr1, optgr2, optrad, psp_gencond !option,
@@ -184,6 +185,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  type(melflags_t) :: KS_mflags
  type(paw_dmft_type) :: Paw_dmft
  type(ugb_t), target :: ugb
+ type(xmpi_pool2d_t) :: diago_pool
 !arrays
  integer :: ngfftc(18),ngfftf(18),unts(2) ! gwc_ngfft(18),gwx_ngfft(18),
  integer,allocatable :: nq_spl(:), l_size_atm(:) !,qp_vbik(:,:),tmp_gfft(:,:),ks_vbik(:,:)
@@ -279,7 +281,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  end if
 
  cryst = dtset%get_crystal(img=1)
- use_wfk = .True.
+ read_wfk = .True.
 
  ! Some variables need to be initialized/nullify at start
  usexcnhat = 0
@@ -304,7 +306,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
      call wrtout(unts, sjoin("- Reading KDEN kinetic energy density from: ", kden_path))
    end if
 
-   if (use_wfk) then
+   if (read_wfk) then
      if (nctk_try_fort_or_ncfile(wfk_path, msg) /= 0) then
        ABI_ERROR(sjoin("Cannot find GS WFK file:", wfk_path, ". Error:", msg))
      end if
@@ -319,7 +321,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  call xmpi_bcast(den_path, master, comm, ierr)
  call xmpi_bcast(kden_path, master, comm, ierr)
 
- if (use_wfk) then
+ if (read_wfk) then
    ! Construct crystal and ks_ebands from the GS WFK file.
    ks_ebands = wfk_read_ebands(wfk_path, comm, out_hdr=wfk_hdr)
    call wfk_hdr%vs_dtset(dtset)
@@ -597,46 +599,55 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
 
    ! Build header with new npwarr and nband
    owfk_ebands = ebands_from_dtset(dtset, npwarr_ik, nband=nband_iks)
+   owfk_ebands%eig = zero
    call hdr_init(owfk_ebands, codvsn, dtset, owfk_hdr, pawtab, 0, psps, wvl%descr)
 
    ! Change the value of istwfk that has been taked from dtset.
    ABI_REMALLOC(owfk_hdr%istwfk, (dtset%nkpt))
    owfk_hdr%istwfk(:) = istwfk_ik
 
-   !call xmpi_pools_2d%init(dtset%nkpt, dtset%nsppol, mask_ks)
-   !call pools%free()
-   !pools%mask(ik_ibz, spin)
-   !pools%comm(ik_ibz, spin)
-
    print_wfk = .True.
    print_wfk = dtset%prtwf > 0
 
+   call diago_pool%from_dims(dtset%nkpt, dtset%nsppol, comm)
+
    if (print_wfk) then
-     out_path = dtfil%fnameabo_wfk
-     if (dtset%iomode == IO_MODE_ETSF) out_path = nctk_ncify(out_path)
+     out_path = dtfil%fnameabo_wfk; if (dtset%iomode == IO_MODE_ETSF) out_path = nctk_ncify(out_path)
+     iomode__ = iomode_from_fname(out_path)
      call wrtout(std_out, sjoin(" Writing wavefunctions to:", out_path))
-     call owfk%open_write(owfk_hdr, out_path, 0, iomode_from_fname(out_path), get_unit(), comm)
+     if (my_rank == master) then
+       call owfk%open_write(owfk_hdr, out_path, 0, iomode__, get_unit(), xmpi_comm_self, &
+                            write_hdr=.True., write_frm=.True.)
+       call owfk%close()
+     end if
+     call xmpi_barrier(comm)
+     call owfk%open_write(owfk_hdr, out_path, 0, iomode__, get_unit(), diago_pool%comm, &
+                          write_hdr=.False., write_frm=.False.)
    end if
 
    do spin=1,dtset%nsppol
      do ik_ibz=1,dtset%nkpt
+       if (.not. diago_pool%treats(ik_ibz, spin)) cycle
+
        nband_k = nband_iks(ik_ibz, spin)
        call ugb%from_diago(spin, istwfk_ik(ik_ibz), dtset%kptns(:,ik_ibz), dtset%ecut, nband_k, ngfftc, nfftf, &
-                           dtset, pawtab, pawfgr, ks_paw_ij, cryst, psps, ks_vtrial, eig_k, comm)
+                           dtset, pawtab, pawfgr, ks_paw_ij, cryst, psps, ks_vtrial, eig_k, diago_pool%comm)
 
        if (print_wfk) then
          ! occupancies are set to zero.
-         ! Client code is responsbile to recompile occ and fermie when reading this WFK.
+         ! Client code is responsible for recomputing occ and fermie when reading this WFK.
          ABI_CALLOC(occ_k, (owfk%mband))
          owfk_ebands%eig(1:nband_k, ik_ibz, spin) = eig_k(1:nband_k)
 
-         call c_f_pointer(c_loc(ugb%cg_k), cg_k_ptr, shape=[2, ugb%npwsp * ugb%my_nband])
+         !sc_mode = merge(xmpio_single, xmpi_collective, ugb%has_idle_procs)
+         sc_mode = xmpio_single
+         if (ugb%my_nband > 0) then
+           call c_f_pointer(c_loc(ugb%cg_k), cg_k_ptr, shape=[2, ugb%npwsp * ugb%my_nband])
 
-         call owfk%write_band_block([ugb%my_bstart, ugb%my_bstop], ik_ibz, spin, &
-                                     xmpio_collective, &
-                                     !xmpio_single, &
-                                     kg_k=ugb%kg_k, cg_k=cg_k_ptr, &
-                                     eig_k=owfk_ebands%eig(:, ik_ibz, spin), occ_k=occ_k)
+           call owfk%write_band_block([ugb%my_bstart, ugb%my_bstop], ik_ibz, spin, sc_mode, &
+                                       kg_k=ugb%kg_k, cg_k=cg_k_ptr, &
+                                       eig_k=owfk_ebands%eig(:, ik_ibz, spin), occ_k=occ_k)
+         end if
          ABI_FREE(occ_k)
        end if
 
@@ -654,6 +665,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
    call owfk_hdr%free()
    call ebands_free(owfk_ebands)
    if (print_wfk) call owfk%close()
+   call diago_pool%free()
  else
 
    ! ====================================================
@@ -691,7 +703,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
    ABI_FREE(tmp_kstab)
    if (my_rank == master) call gwr%ks_me%print(header="KS matrix elements", unit=std_out)
 
-   if (use_wfk) then
+   if (read_wfk) then
      ! Build Green's function in imaginary-time from WFK file
      !call gwr%calc_head_wings(wfk_path)
      call gwr%build_gtau_from_wfk(wfk_path)

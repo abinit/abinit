@@ -177,6 +177,29 @@ module m_xmpi
  public :: xcomm_from_mpi_int
 !!***
 
+!----------------------------------------------------------------------
+
+!!****t* m_xmpi/xmpi_pool2d_t
+!! NAME
+!! xmpi_pool2d_t
+!!
+!! FUNCTION
+!!
+!! SOURCE
+
+ type, public :: xmpi_pool2d_t
+   !integer :: value = xmpi_comm_self
+   integer :: n1 = -1, n2 = -1
+   integer :: comm
+   logical,allocatable :: treats(:, :)
+   ! (n1, n2)
+ contains
+   procedure :: free => pool2d_free
+   procedure :: from_dims => pool2d_from_dims
+ end type xmpi_pool2d_t
+
+!!***
+
 ! Public procedures.
  public :: xmpi_init                  ! Initialize the MPI environment.
  public :: xmpi_set_inplace_operations! Set internal flag to use MPI_IN_PLACE whenever possible.
@@ -2476,15 +2499,12 @@ end subroutine xmpi_distab_4D
 !!
 !! SOURCE
 
-pure function xmpi_distrib_with_replicas(itask,ntasks,rank,nprocs) result(bool)
+pure logical function xmpi_distrib_with_replicas(itask, ntasks, rank, nprocs) result(bool)
 
 !Arguments ------------------------------------
-!scalars
  integer,intent(in) :: itask,rank,nprocs,ntasks
- logical :: bool
 
 !Local variables-------------------------------
-!scalars
  integer :: ii,mnp_pool,rk_base
 
 ! *************************************************************************
@@ -2492,11 +2512,10 @@ pure function xmpi_distrib_with_replicas(itask,ntasks,rank,nprocs) result(bool)
  ! If the number of processors is less than ntasks, we have max one task per processor,
  ! else we replicate the tasks inside a pool of max size mnp_pool
  if (nprocs <= ntasks) then
-   bool = (MODULO(itask-1, nprocs)==rank)
+   bool = (MODULO(itask-1, nprocs) == rank)
  else
    mnp_pool = (nprocs / ntasks)
-   !write(std_out,*)"Will duplicate itasks"
-   !write(std_out,*)"mnp_pool",mnp_pool,"nprocs, ntasks",nprocs,ntasks
+   !write(std_out,*)"Will duplicate itask, mnp_pool", mnp_pool, "nprocs, ntasks", nprocs, ntasks
 
    rk_base = MODULO(itask-1, nprocs)
    bool = .False.
@@ -4893,7 +4912,6 @@ end subroutine xmpi_distrib_2d
 type(xcomm_t) function xcomm_from_mpi_int(comm_int) result(new)
    integer,intent(in) :: comm_int
    integer :: newcomm, ierr
-
    new%value = comm_int; new%me = 0; new%nproc = 1
 #ifdef HAVE_MPI
    call MPI_Comm_dup(comm_int, newcomm, ierr)
@@ -4903,26 +4921,120 @@ type(xcomm_t) function xcomm_from_mpi_int(comm_int) result(new)
 #endif
 end function xcomm_from_mpi_int
 
- pure logical function xcomm_skip(self, iter)
-   class(xcomm_t),intent(in) :: self
-   integer,intent(in) :: iter
-   xcomm_skip = mod(iter, self%nproc) /= self%me
- end function xcomm_skip
- subroutine xcomm_set_to_self(self)
-   class(xcomm_t),intent(inout) :: self
-   call self%free()
-   self%value = xmpi_comm_self; self%me = 0; self%nproc = 1
- end subroutine xcomm_set_to_self
- subroutine xcomm_set_to_null(self)
-   class(xcomm_t),intent(inout) :: self
-   call self%free()
-   self%value = xmpi_comm_null
- end subroutine xcomm_set_to_null
- subroutine xcomm_free(self)
-   class(xcomm_t),intent(inout) :: self
-   call xmpi_comm_free(self%value)
-   self%me = -1; self%nproc = 0
- end subroutine xcomm_free
+pure logical function xcomm_skip(self, iter)
+  class(xcomm_t),intent(in) :: self
+  integer,intent(in) :: iter
+  xcomm_skip = mod(iter, self%nproc) /= self%me
+end function xcomm_skip
+subroutine xcomm_set_to_self(self)
+  class(xcomm_t),intent(inout) :: self
+  call self%free()
+  self%value = xmpi_comm_self; self%me = 0; self%nproc = 1
+end subroutine xcomm_set_to_self
+subroutine xcomm_set_to_null(self)
+  class(xcomm_t),intent(inout) :: self
+  call self%free()
+  self%value = xmpi_comm_null
+end subroutine xcomm_set_to_null
+subroutine xcomm_free(self)
+  class(xcomm_t),intent(inout) :: self
+  call xmpi_comm_free(self%value)
+  self%me = -1; self%nproc = 0
+end subroutine xcomm_free
+
+!!****f* m_xmpi/pool2d_from_dims
+!! NAME
+!!  pool2d_from_dims
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! SOURCE
+
+subroutine pool2d_from_dims(pool, n1, n2, input_comm)
+
+!Arguments-------------------------
+ class(xmpi_pool2d_t),intent(out) :: pool
+ integer,intent(in) :: n1, n2, input_comm
+
+!Local variables-------------------
+ integer :: itask, ntasks, my_rank, nprocs, color, mpierr, jj, i1, i2, my_ntasks
+ integer,allocatable :: my_inds(:)
+ integer :: check(n1, n2)
+!----------------------------------------------------------------------
+
+ my_rank = xmpi_comm_rank(input_comm); nprocs = xmpi_comm_size(input_comm)
+
+ pool%n1 = n1; pool%n2 = n2
+ ABI_MALLOC(pool%treats, (n1, n2))
+ pool%treats = .False.
+
+ ntasks = n1 * n2; color = ntasks + 1
+
+ if (nprocs <= ntasks) then
+    color = my_rank
+    call xmpi_split_block(ntasks, input_comm, my_ntasks, my_inds)
+    do jj=1,size(my_inds)
+      itask = my_inds(jj) ! = i1 + (i2 - 1) * n1
+      i1 = mod(itask - 1, n1) + 1
+      i2 = 1 + (itask - i1) / n1
+      pool%treats(i1, i2) = .True.
+    end do
+    ABI_FREE(my_inds)
+ else
+   i2_loop: do i2=1,n2
+     do i1=1,n1
+       itask = i1 + (i2 - 1) * n1
+       if (xmpi_distrib_with_replicas(itask, ntasks, my_rank, nprocs)) then
+         pool%treats(i1, i2) = .True.; color = itask
+         exit i2_loop
+       end if
+     end do
+   end do i2_loop
+ end if
+
+!DEBUG
+ where (pool%treats)
+   check = 1
+ else where
+   check = 0
+ end where
+ call xmpi_sum(check, input_comm, mpierr)
+ if (any(check == 0)) then
+   write(*, *) check
+   call xmpi_abort(msg="Wrong distribution")
+ end if
+!END_DEBUG
+
+ call xmpi_comm_split(input_comm, color, my_rank, pool%comm, mpierr)
+
+end subroutine pool2d_from_dims
+!!***
+
+!!****f* m_xmpi/pool2d_from_dims
+!! NAME
+!!  pool2d_from_dims
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! SOURCE
+
+subroutine pool2d_free(pool)
+
+!Arguments-------------------------
+ class(xmpi_pool2d_t),intent(inout) :: pool
+
+!----------------------------------------------------------------------
+
+ ABI_SFREE(pool%treats)
+ call xmpi_comm_free_0D(pool%comm)
+
+end subroutine pool2d_free
+!!***
+
 
 end module m_xmpi
 !!***
