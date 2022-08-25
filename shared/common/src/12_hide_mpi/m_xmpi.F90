@@ -28,7 +28,6 @@ module m_xmpi
 
  use defs_basis
  use m_profiling_abi
- !use m_errors
  use, intrinsic :: iso_c_binding
 #ifdef HAVE_FC_ISO_FORTRAN_2008
  use ISO_FORTRAN_ENV, only : int16, int32, int64
@@ -184,20 +183,26 @@ module m_xmpi
 !! xmpi_pool2d_t
 !!
 !! FUNCTION
+!!  Pool of MPI processors used to tread a 2D problem of shape (n1, n2)
 !!
 !! SOURCE
 
  type, public :: xmpi_pool2d_t
-   !integer :: value = xmpi_comm_self
-   integer :: n1 = -1, n2 = -1
-   integer :: comm
-   logical,allocatable :: treats(:, :)
-   ! (n1, n2)
- contains
-   procedure :: free => pool2d_free
-   procedure :: from_dims => pool2d_from_dims
- end type xmpi_pool2d_t
 
+   integer :: n1 = -1, n2 = -1
+   ! Dimensions of the 2d problem
+
+   type(xcomm_t) :: comm
+   ! Pool communicator
+
+   logical,allocatable :: treats(:,:)
+   ! (n1, n2)
+   ! True if this pool treats (i1, i2)
+
+ contains
+   procedure :: from_dims => pool2d_from_dims     ! Init pool from problem dims.
+   procedure :: free => pool2d_free               ! Free memory.
+ end type xmpi_pool2d_t
 !!***
 
 ! Public procedures.
@@ -1598,7 +1603,7 @@ end subroutine xmpi_comm_group
 !!
 !! SOURCE
 
-subroutine xmpi_comm_split(input_comm,color,key,output_comm,mpierr)
+subroutine xmpi_comm_split(input_comm, color, key, output_comm, mpierr)
 
 !Arguments-------------------------
 !scalars
@@ -1733,7 +1738,7 @@ subroutine xmpi_barrier(comm)
  integer,intent(in) :: comm
 
 !Local variables-------------------
- integer   :: ier
+ integer :: ier
 #ifdef HAVE_MPI
  integer :: nprocs
 #endif
@@ -2485,13 +2490,13 @@ end subroutine xmpi_distab_4D
 !!  xmpi_distrib_with_replicas
 !!
 !! FUNCTION
-!!  This function distributes the i-th task among `nprocs` inside a MPI communicator.
+!!  This function distributes the i-th task `itask` among `nprocs` inside a MPI communicator.
 !!  If nprocs > ntasks, multiple MPI ranks will be assigned to a given task.
 !!
 !! INPUTS
 !!  itask=Index of the task (must be <= ntasks)
 !!  ntasks= number of tasks
-!!  rank=MPI Rank of this processor
+!!  rank=MPI Rank of this processor in the MPI communicator.
 !!  nprocs=Number of processors in the MPI communicator.
 !!
 !! OUTPUT
@@ -2509,19 +2514,19 @@ pure logical function xmpi_distrib_with_replicas(itask, ntasks, rank, nprocs) re
 
 ! *************************************************************************
 
- ! If the number of processors is less than ntasks, we have max one task per processor,
+ ! If the number of processors is less than ntasks, we have max one processor per task
  ! else we replicate the tasks inside a pool of max size mnp_pool
  if (nprocs <= ntasks) then
-   bool = (MODULO(itask-1, nprocs) == rank)
+   bool = modulo(itask - 1, nprocs) == rank
  else
    mnp_pool = (nprocs / ntasks)
    !write(std_out,*)"Will duplicate itask, mnp_pool", mnp_pool, "nprocs, ntasks", nprocs, ntasks
 
-   rk_base = MODULO(itask-1, nprocs)
+   rk_base = modulo(itask - 1, nprocs)
    bool = .False.
    do ii=1,mnp_pool+1
-     if (rank == rk_base + (ii-1) * ntasks) then
-        bool = .True.; exit
+     if (rank == rk_base + (ii - 1) * ntasks) then
+       bool = .True.; exit
      end if
    end do
  end if
@@ -4911,13 +4916,13 @@ end subroutine xmpi_distrib_2d
 
 type(xcomm_t) function xcomm_from_mpi_int(comm_int) result(new)
    integer,intent(in) :: comm_int
-   integer :: newcomm, ierr
+   integer :: new_comm, ierr
    new%value = comm_int; new%me = 0; new%nproc = 1
 #ifdef HAVE_MPI
-   call MPI_Comm_dup(comm_int, newcomm, ierr)
-   new%value = newcomm
-   new%nproc = xmpi_comm_size(newcomm)
-   new%me = xmpi_comm_rank(newcomm)
+   call MPI_Comm_dup(comm_int, new_comm, ierr)
+   new%value = new_comm
+   new%nproc = xmpi_comm_size(new_comm)
+   new%me = xmpi_comm_rank(new_comm)
 #endif
 end function xcomm_from_mpi_int
 
@@ -4949,6 +4954,8 @@ end subroutine xcomm_free
 !! FUNCTION
 !!
 !! INPUTS
+!!  n1, n2: dimensions of the problem
+!!  input_comm: Initial MPI communicator
 !!
 !! SOURCE
 
@@ -4959,9 +4966,9 @@ subroutine pool2d_from_dims(pool, n1, n2, input_comm)
  integer,intent(in) :: n1, n2, input_comm
 
 !Local variables-------------------
- integer :: itask, ntasks, my_rank, nprocs, color, mpierr, jj, i1, i2, my_ntasks
- integer,allocatable :: my_inds(:)
+ integer :: itask, ntasks, my_rank, nprocs, color, mpierr, jj, i1, i2, my_ntasks, new_comm
  integer :: check(n1, n2)
+ integer,allocatable :: my_inds(:)
 !----------------------------------------------------------------------
 
  my_rank = xmpi_comm_rank(input_comm); nprocs = xmpi_comm_size(input_comm)
@@ -4987,8 +4994,7 @@ subroutine pool2d_from_dims(pool, n1, n2, input_comm)
      do i1=1,n1
        itask = i1 + (i2 - 1) * n1
        if (xmpi_distrib_with_replicas(itask, ntasks, my_rank, nprocs)) then
-         pool%treats(i1, i2) = .True.; color = itask
-         exit i2_loop
+         pool%treats(i1, i2) = .True.; color = itask; exit i2_loop
        end if
      end do
    end do i2_loop
@@ -5003,11 +5009,13 @@ subroutine pool2d_from_dims(pool, n1, n2, input_comm)
  call xmpi_sum(check, input_comm, mpierr)
  if (any(check == 0)) then
    write(*, *) check
-   call xmpi_abort(msg="Wrong distribution")
+   call xmpi_abort(msg="Wrong distribution in pool2d_from_dims")
  end if
 !END_DEBUG
 
- call xmpi_comm_split(input_comm, color, my_rank, pool%comm, mpierr)
+ call xmpi_comm_split(input_comm, color, my_rank, new_comm, mpierr)
+ pool%comm = xcomm_from_mpi_int(new_comm)
+ call xmpi_comm_free(new_comm)
 
 end subroutine pool2d_from_dims
 !!***
@@ -5030,7 +5038,7 @@ subroutine pool2d_free(pool)
 !----------------------------------------------------------------------
 
  ABI_SFREE(pool%treats)
- call xmpi_comm_free_0D(pool%comm)
+ call pool%comm%free()
 
 end subroutine pool2d_free
 !!***
