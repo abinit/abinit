@@ -34,7 +34,7 @@ module m_ksdiago
  use defs_datatypes,      only : pseudopotential_type
  use defs_abitypes,       only : MPI_type
  use m_dtset,             only : dataset_type
- use m_fstrings,          only : toupper, ktoa, itoa, sjoin, ftoa
+ use m_fstrings,          only : toupper, ktoa, itoa, sjoin, ftoa, ltoa
  use m_numeric_tools,     only : blocked_loop
  use m_time,              only : cwtime, cwtime_report
  use m_geometry,          only : metric
@@ -1181,9 +1181,9 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  call ghg_4diag%copy(eigvec)
 
  if (do_full_diago) then
-   write(msg,'(5a, 2(a,i0))')ch10,&
+   write(msg,'(5a, (a,i0), 2a)')ch10,&
      ' Begin full diagonalization for kpt: ',trim(ktoa(kpoint)), stag(spin), ch10,&
-     ' Matrix size: ',npwsp, ", nproc: ", nproc
+     ' Matrix size: ',npwsp, ", Scalapack grid: ", trim(ltoa(ghg_4diag%processor%grid%dims))
    call wrtout(std_out, msg)
    call cwtime(cpu, wall, gflops, "start")
 
@@ -1196,9 +1196,9 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
    call cwtime_report(" full_diago", cpu, wall, gflops)
 
  else
-   write(msg,'(6a,i0,2(a,i0))') ch10,&
+   write(msg,'(6a,i0,(a,i0), 2a)') ch10,&
      ' Begin partial diagonalization for kpt: ',trim(ktoa(kpoint)), stag(spin), ch10,&
-     ' Matrix size: ',npwsp,', nband_k: ', nband_k, ", nproc: ", nproc
+     ' Matrix size: ',npwsp,', nband_k: ', nband_k,", Scalapack grid: ", trim(ltoa(ghg_4diag%processor%grid%dims))
    call wrtout(std_out, msg)
    call cwtime(cpu, wall, gflops, "start")
 

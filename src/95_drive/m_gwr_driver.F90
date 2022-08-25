@@ -281,7 +281,6 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  end if
 
  cryst = dtset%get_crystal(img=1)
- read_wfk = .True.
 
  ! Some variables need to be initialized/nullify at start
  usexcnhat = 0
@@ -305,41 +304,12 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
      end if
      call wrtout(unts, sjoin("- Reading KDEN kinetic energy density from: ", kden_path))
    end if
-
-   if (read_wfk) then
-     if (nctk_try_fort_or_ncfile(wfk_path, msg) /= 0) then
-       ABI_ERROR(sjoin("Cannot find GS WFK file:", wfk_path, ". Error:", msg))
-     end if
-     call wrtout(unts, sjoin("- Reading GS states from WFK file:", wfk_path))
-   end if
-
    call wrtout(ab_out, ch10//ch10)
  end if ! master
 
  ! Broadcast filenames (needed because they might have been changed if we are using netcdf files)
- call xmpi_bcast(wfk_path, master, comm, ierr)
  call xmpi_bcast(den_path, master, comm, ierr)
  call xmpi_bcast(kden_path, master, comm, ierr)
-
- if (read_wfk) then
-   ! Construct crystal and ks_ebands from the GS WFK file.
-   ks_ebands = wfk_read_ebands(wfk_path, comm, out_hdr=wfk_hdr)
-   call wfk_hdr%vs_dtset(dtset)
-
-   wfk_cryst = wfk_hdr%get_crystal()
-   if (cryst%compare(wfk_cryst, header=" Comparing input crystal with WFK crystal") /= 0) then
-     ABI_ERROR("Crystal structure from input and from WFK file do not agree! Check messages above!")
-   end if
-   call wfk_cryst%free()
-   !call wfk_cryst%print(header="crystal structure from WFK file")
-
-   ! Make sure that ef is inside the gap if semiconductor.
-   call ebands_update_occ(ks_ebands, dtset%spinmagntarget, prtvol=dtset%prtvol, fermie_to_zero=.True.)
-
-   ! Here we change the GS bands (Fermi level, scissors operator ...)
-   ! All the modifications to ebands should be done here.
-   !call ephtk_update_ebands(dtset, ks_ebands, "Ground state energies")
- end if
 
  ! TODO: FFT meshes for DEN/POT should be initialized from the DEN file instead of the dtset.
  ! Interpolating the DEN indeed breaks degeneracies in the vxc matrix elements.
@@ -582,7 +552,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  call cwtime_report(" prepare gwr_driver_init", cpu, wall, gflops)
 
  if (dtset%gwr_task == "HDIAGO") then
-   ! Perform direct diagonalization of the Hamiltonian and write WFK file.
+   ! Direct diagonalization of the Hamiltonian.
    ABI_MALLOC(nband_iks, (dtset%nkpt, dtset%nsppol))
    ABI_MALLOC(npwarr_ik, (dtset%nkpt))
    ABI_MALLOC(istwfk_ik, (dtset%nkpt))
@@ -597,51 +567,62 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
    end do
    nband_iks(:,:) = maxval(dtset%nband)
 
-   ! Build header with new npwarr and nband
+   ! Build header with new npwarr and nband.
    owfk_ebands = ebands_from_dtset(dtset, npwarr_ik, nband=nband_iks)
    owfk_ebands%eig = zero
    call hdr_init(owfk_ebands, codvsn, dtset, owfk_hdr, pawtab, 0, psps, wvl%descr)
 
-   ! Change the value of istwfk that has been taked from dtset.
+   ! Change the value of istwfk taken from dtset.
    ABI_REMALLOC(owfk_hdr%istwfk, (dtset%nkpt))
    owfk_hdr%istwfk(:) = istwfk_ik
 
    print_wfk = .True.
    print_wfk = dtset%prtwf > 0
 
+   ! Build pools to distributed (kpt, spin)
    call diago_pool%from_dims(dtset%nkpt, dtset%nsppol, comm)
 
    if (print_wfk) then
+     ! Master write header and Fortran record markers if needed.
      out_path = dtfil%fnameabo_wfk; if (dtset%iomode == IO_MODE_ETSF) out_path = nctk_ncify(out_path)
      iomode__ = iomode_from_fname(out_path)
-     call wrtout(std_out, sjoin(" Writing wavefunctions to:", out_path))
+     call wrtout(std_out, sjoin(" Writing wavefunctions to file:", out_path))
      if (my_rank == master) then
        call owfk%open_write(owfk_hdr, out_path, 0, iomode__, get_unit(), xmpi_comm_self, &
                             write_hdr=.True., write_frm=.True.)
+       !TODO: owfk%get_mem_mb()
        call owfk%close()
      end if
      call xmpi_barrier(comm)
-     call owfk%open_write(owfk_hdr, out_path, 0, iomode__, get_unit(), diago_pool%comm, &
+     ! Reopen file inside diago_pool%comm.
+     call owfk%open_write(owfk_hdr, out_path, 0, iomode__, get_unit(), diago_pool%comm%value, &
                           write_hdr=.False., write_frm=.False.)
    end if
+
+   !ABI_MALLOC(ugb_ks, (dtset%nkpt, dtset%nsppol))
+   !ABI_FREE(ugb_ks)
 
    do spin=1,dtset%nsppol
      do ik_ibz=1,dtset%nkpt
        if (.not. diago_pool%treats(ik_ibz, spin)) cycle
 
+       !associate (ugb => ugb_ks(ik_ibz, spin))
+
        nband_k = nband_iks(ik_ibz, spin)
        call ugb%from_diago(spin, istwfk_ik(ik_ibz), dtset%kptns(:,ik_ibz), dtset%ecut, nband_k, ngfftc, nfftf, &
-                           dtset, pawtab, pawfgr, ks_paw_ij, cryst, psps, ks_vtrial, eig_k, diago_pool%comm)
+                           dtset, pawtab, pawfgr, ks_paw_ij, cryst, psps, ks_vtrial, eig_k, diago_pool%comm%value)
+
+       owfk_ebands%eig(1:nband_k, ik_ibz, spin) = eig_k(1:nband_k)
 
        if (print_wfk) then
          ! occupancies are set to zero.
          ! Client code is responsible for recomputing occ and fermie when reading this WFK.
          ABI_CALLOC(occ_k, (owfk%mband))
-         owfk_ebands%eig(1:nband_k, ik_ibz, spin) = eig_k(1:nband_k)
 
-         !sc_mode = merge(xmpio_single, xmpi_collective, ugb%has_idle_procs)
-         sc_mode = xmpio_single
+         sc_mode = merge(xmpio_single, xmpio_collective, ugb%has_idle_procs)
          if (ugb%my_nband > 0) then
+           ABI_CHECK(all(shape(ugb%cg_k) == [2, ugb%npwsp, ugb%my_nband]), "Wrong shape")
+           ABI_CHECK_IEQ(ugb%npw_k, owfk_hdr%npwarr(ik_ibz), "Wronk npw_k")
            call c_f_pointer(c_loc(ugb%cg_k), cg_k_ptr, shape=[2, ugb%npwsp * ugb%my_nband])
 
            call owfk%write_band_block([ugb%my_bstart, ugb%my_bstop], ik_ibz, spin, sc_mode, &
@@ -653,10 +634,20 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
 
        ABI_FREE(eig_k)
        call ugb%free()
+       !end associate
+     end do ! ik_ibz
+   end do ! spin
+   call wrtout(std_out, " Direct diagonalization completed by this pool.")
+
+   ! Collect eigenvalues
+   do spin=1,dtset%nsppol
+     do ik_ibz=1,dtset%nkpt
+       if (diago_pool%treats(ik_ibz, spin) .and. diago_pool%comm%me /= 0) owfk_ebands%eig(1:nband_k, ik_ibz, spin) = zero
      end do
    end do
+   call xmpi_sum(owfk_ebands%eig, comm, ierr)
 
-   !call ebands_update_occ(owfk_ebands, dtset%spinmagntarget, prtvol=dtset%prtvol, fermie_to_zero=.False.)
+   call ebands_update_occ(owfk_ebands, dtset%spinmagntarget, prtvol=dtset%prtvol, fermie_to_zero=.True.)
 
    ABI_FREE(npwarr_ik)
    ABI_FREE(istwfk_ik)
@@ -666,11 +657,42 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
    call ebands_free(owfk_ebands)
    if (print_wfk) call owfk%close()
    call diago_pool%free()
- else
 
+ else
    ! ====================================================
    ! === This is the real GWR stuff once all is ready ===
    ! ====================================================
+   read_wfk = .True.
+
+   if (read_wfk) then
+     if (my_rank == master) then
+       if (nctk_try_fort_or_ncfile(wfk_path, msg) /= 0) then
+          ABI_ERROR(sjoin("Cannot find GS WFK file:", wfk_path, ". Error:", msg))
+       end if
+       call wrtout(unts, sjoin("- Reading GS states from WFK file:", wfk_path))
+     end if
+
+     ! Broadcast filenames (needed because they might have been changed if we are using netcdf files)
+     call xmpi_bcast(wfk_path, master, comm, ierr)
+
+     ! Construct crystal and ks_ebands from the GS WFK file.
+     ks_ebands = wfk_read_ebands(wfk_path, comm, out_hdr=wfk_hdr)
+     call wfk_hdr%vs_dtset(dtset)
+
+     wfk_cryst = wfk_hdr%get_crystal()
+     if (cryst%compare(wfk_cryst, header=" Comparing input crystal with WFK crystal") /= 0) then
+       ABI_ERROR("Crystal structure from input and from WFK file do not agree! Check messages above!")
+     end if
+     call wfk_cryst%free()
+     !call wfk_cryst%print(header="crystal structure from WFK file")
+
+     ! Make sure that ef is inside the gap if semiconductor.
+     call ebands_update_occ(ks_ebands, dtset%spinmagntarget, prtvol=dtset%prtvol, fermie_to_zero=.True.)
+
+     ! Here we change the GS bands (Fermi level, scissors operator ...)
+     ! All the modifications to ebands should be done here.
+     !call ephtk_update_ebands(dtset, ks_ebands, "Ground state energies")
+   end if
 
    call gwr%init(dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg, comm)
 
@@ -714,6 +736,9 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
    select case (dtset%gwr_task)
    case ("G0W0")
      call gwr%run_g0w0()
+
+   !case ("CHI0_HEAD_WINGS")
+   !  call compute_chi0_head_wings(wfk_path)
 
    case ("RPA_ENERGY")
      call gwr%rpa_energy()

@@ -1226,18 +1226,18 @@ subroutine initmpi_grid(mpi_enreg)
     !Effective number of processors used for the grid
    nproc_eff=mpi_enreg%nproc_fft*mpi_enreg%nproc_band *mpi_enreg%nproc_spkpt*mpi_enreg%nproc_spinor
    if(nproc_eff/=nproc) then
-     write(msg,'(4a,5(a,i0))') &
+     write(msg,'(4a,5(a,i0,a))') &
       '  The number of band*FFT*spin*kpt*spinor processors, npband*npfft*np_spkpt*npspinor should be',ch10,&
       '  equal to the total number of processors, nproc.',ch10,&
-      '  However, npband   =',mpi_enreg%nproc_band,&
-      '           npfft    =',mpi_enreg%nproc_fft,&
-      '           np_spkpt =',mpi_enreg%nproc_spkpt,&
-      '           npspinor =',mpi_enreg%nproc_spinor,&
-      '       and nproc    =',nproc
+      '  However, npband   =',mpi_enreg%nproc_band, ch10, &
+      '           npfft    =',mpi_enreg%nproc_fft, ch10, &
+      '           np_spkpt =',mpi_enreg%nproc_spkpt, ch10, &
+      '           npspinor =',mpi_enreg%nproc_spinor, ch10, &
+      '           nproc    =',nproc,ch10
      ABI_WARNING(msg)
    end if
 
-   !Nothing to do if only 1 proc
+   ! Nothing to do if only 1 proc
    if (nproc_eff==1) return
 
    ! Initialize the communicator for Hartree-Fock to xmpi_comm_self

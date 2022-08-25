@@ -134,9 +134,9 @@ module m_wfk
   ! Number of spinor components.
 
   integer :: formeig
-   ! formeig=format of the eigenvalues
-   !    0 => vector of eigenvalues
-   !    1 => hermitian matrix of eigenvalues
+   ! format of the eigenvalues
+   !    0 => vector of eigenvalues (GS case)
+   !    1 => Hermitian matrix of eigenvalues (DFPT case)
    ! TODO: this should be reported somewhere in the WFK file, at present is passed to wfk_open
 
   integer :: fform
@@ -166,7 +166,7 @@ module m_wfk
   integer(XMPI_OFFSET_KIND) :: offset_eof
   ! EOF offset (used for MPI-IO access)
 
-  logical :: debug=.FALSE.
+  logical :: debug = .FALSE.
   !logical :: debug=.TRUE.
 
   type(hdr_type) :: Hdr
@@ -321,7 +321,7 @@ CONTAINS
 !!
 !! NOTES TODO
 !!   it would be better if formeig and iomode could be determined from the file itself!
-!!   eg iomode from the file extension, and formeig from whether it is WFK or 1WF
+!!   e.g iomode from the file extension, and formeig from whether it is WFK or 1WF
 !!
 !! SOURCE
 
@@ -339,9 +339,7 @@ subroutine wfk_open_read(Wfk, fname, formeig, iomode, funt, comm, Hdr_out)
  integer :: ierr,mpierr
  character(len=500) :: msg
 #ifdef HAVE_MPI_IO
- integer :: fform !,ncerr
-
- integer :: nfrec
+ integer :: fform, nfrec !,ncerr
  integer(XMPI_OFFSET_KIND) :: offset
  integer(XMPI_OFFSET_KIND),allocatable :: bsize_frecords(:)
 #endif
@@ -379,7 +377,7 @@ subroutine wfk_open_read(Wfk, fname, formeig, iomode, funt, comm, Hdr_out)
  Wfk%formeig = formeig
  Wfk%iomode = iomode
  if (endswith(fname, ".nc")) wfk%iomode = IO_MODE_ETSF
- ! This is to test the different versions.
+ ! This to test the different versions.
  !wfk%iomode    = IO_MODE_MPI
  !if (.not. endswith(fname, ".nc") .and. xmpi_comm_size == 1) wfk%iomode == IO_MODE_FORTRAN
 
@@ -486,8 +484,7 @@ subroutine wfk_open_write(Wfk, Hdr, fname, formeig, iomode, funt, comm, write_hd
 
 !Local variables-------------------------------
 !scalars
- integer :: mpierr,ierr
- integer :: hdroffset(1)
+ integer :: mpierr,ierr, hdroffset(1)
  real(dp) :: cpu,wall,gflops
  logical :: do_write_frm,do_write_hdr
  character(len=500) :: msg
@@ -506,23 +503,20 @@ subroutine wfk_open_write(Wfk, Hdr, fname, formeig, iomode, funt, comm, write_hd
  do_write_frm = .TRUE.; if (present(write_frm)) do_write_frm = write_frm
 
  !Initialize mandatory data of the Wfk datastructure
- !@wfk_t
  Wfk%rw_mode     = WFK_WRITEMODE
  Wfk%chunk_bsize = WFK_CHUNK_BSIZE
 
  Wfk%fname     = fname
  Wfk%formeig   = formeig
  Wfk%iomode    = iomode; if (endswith(fname, ".nc")) wfk%iomode = IO_MODE_ETSF
- ! This is to test the different versions.
- !wfk%iomode   = IO_MODE_MPI
- !if (.not. endswith(fname, ".nc") .and. xmpi_comm_size == 1) wfk%iomode == IO_MODE_FORTRAN
+ ! This to test the different versions.
+ !wfk%iomode   = IO_MODE_MPI; if (.not. endswith(fname, ".nc") .and. xmpi_comm_size == 1) wfk%iomode == IO_MODE_FORTRAN
 
  Wfk%comm      = comm
  Wfk%master    = 0
  Wfk%my_rank   = xmpi_comm_rank(comm)
  Wfk%nproc     = xmpi_comm_size(comm)
  Wfk%fform     = 2
-
 
  ! Copy the header
  call hdr_copy(Hdr,Wfk%Hdr)
@@ -543,7 +537,7 @@ subroutine wfk_open_write(Wfk, Hdr, fname, formeig, iomode, funt, comm, write_hd
  ABI_MALLOC(Wfk%nband, (Wfk%nkpt,Wfk%nsppol))
  Wfk%nband = RESHAPE(Wfk%Hdr%nband, (/Wfk%nkpt,Wfk%nsppol/))
 
- ierr=0
+ ierr = 0
 
  select case (wfk%iomode)
  case (IO_MODE_FORTRAN)
@@ -557,11 +551,10 @@ subroutine wfk_open_write(Wfk, Hdr, fname, formeig, iomode, funt, comm, write_hd
    call wfk_compute_offsets(Wfk)
 
    call hdr_skip(Wfk%fh,ierr)
-   Wfk%f90_fptr = (/1,1,REC_NPW/)
+   Wfk%f90_fptr = [1, 1, REC_NPW]
 
 #ifdef HAVE_MPI_IO
  case (IO_MODE_MPI)
-
    call cwtime(cpu, wall, gflops, "start")
 
    ! FIXME: mode flags should be rationalized
@@ -571,7 +564,6 @@ subroutine wfk_open_write(Wfk, Hdr, fname, formeig, iomode, funt, comm, write_hd
    ABI_CHECK_MPI(mpierr,"MPI_FILE_OPEN")
 
    !call MPI_FILE_SET_VIEW(Wfk%fh,origin,MPI_BYTE,MPI_BYTE,'native',xmpio_info,mpierr)
-
    ! TODO
    !%% call MPI_File_set_size(Wfk%fh, MPI_Offset size, mpierr)
    !ABI_CHECK_MPI(mpierr,"MPI_FILE_SET_SIZE")
@@ -684,15 +676,13 @@ subroutine wfk_close(Wfk, delete)
  integer :: ierr
  !character(len=500) :: msg
 #ifdef HAVE_MPI_IO
- integer :: mpierr,nfrec
+ integer :: mpierr, nfrec
  integer(XMPI_OFFSET_KIND),allocatable :: bsize_frecords(:)
 #endif
 
 ! *************************************************************************
 
  DBG_ENTER("COLL")
-
- !@wfk_t
 
  ! Close the file only if it was open.
  if (wfk%rw_mode /= WFK_NOMODE) then
@@ -2001,13 +1991,13 @@ subroutine wfk_write_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg
        !ABI_FREE(bsize_frecords)
 
        my_offset = Wfk%offset_ks(ik_ibz,spin,REC_CG)
-       sizes    = (/npw_disk*nspinor_disk, nband_disk/)
-       subsizes = (/npw_disk*nspinor_disk, band_block(2)-band_block(1)+1/)
+       sizes    = [npw_disk*nspinor_disk, nband_disk]
+       subsizes = [npw_disk*nspinor_disk, band_block(2)-band_block(1)+1]
        bufsz = 2 * npw_disk * nspinor_disk * nb_block
        starts = [1, band_block(1)]
 
        call mpiotk_write_fsuba_dp2D(Wfk%fh,my_offset,sizes,subsizes,starts,bufsz,cg_k,Wfk%chunk_bsize,sc_mode,Wfk%comm,mpierr)
-       ABI_CHECK(mpierr==0,"mpierr!=0")
+       ABI_CHECK(mpierr == 0, "mpierr != 0")
      end if
 
 !----------------------------------------------------------------------------
