@@ -1,6 +1,6 @@
 # GWR calculations for crystalline alpha-quartz.
 # Dataset 1: ground state calculation to get the density
-# Dataset 2: NSCF run to produce the WFK file with empty states.
+# Dataset 2: Direct diagonalization to produce the WFK file with empty states.
 # Dataset 3: one-shot G0W0 calculation in real-space and imaginary-time.
 
 ndtset 3
@@ -20,14 +20,13 @@ npkpt  4
 nband1      32       # number of (occ and empty) bands to be computed
 tolvrs1     1.0d-8
 
-#######################################
-# Dataset 2: NSCF run with empty states
-#######################################
-iscf2       -2       # NSCF run
-getden2  1
-tolwfr2  1.0e-12     # Will stop when this tolerance is achieved
+###########################################
+# Dataset 2: Direct diago with empty states
+###########################################
+optdriver2  6        # Activate GWR code
+gwr_task2 "HDIAGO"   # One-shot calculation
+getden2    1
 nband2     100       # Number of (occ + empty) bands
-nbdbuf2     20       # Do not apply the tolwfr criterium to the last 20 bands (faster)
 
 ################################
 # Dataset 3: G0W0 with GWR code

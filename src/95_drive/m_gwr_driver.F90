@@ -579,7 +579,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
    print_wfk = .True.
    print_wfk = dtset%prtwf > 0
 
-   ! Build pools to distributed (kpt, spin)
+   ! Build pools to distribute (kpt, spin) diago
    call diago_pool%from_dims(dtset%nkpt, dtset%nsppol, comm)
 
    if (print_wfk) then
@@ -637,7 +637,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
        !end associate
      end do ! ik_ibz
    end do ! spin
-   call wrtout(std_out, " Direct diagonalization completed by this pool.")
+   call wrtout(std_out, " Direct diagonalization completed by this MPI pool.")
 
    ! Collect eigenvalues
    do spin=1,dtset%nsppol
