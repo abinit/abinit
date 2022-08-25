@@ -1130,7 +1130,7 @@ subroutine wfk_read_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg_
 
  DBG_ENTER("COLL")
 
- ABI_CHECK(Wfk%rw_mode == WFK_READMODE, "Wfk must be in READMODE")
+ ABI_CHECK_IEQ(Wfk%rw_mode, WFK_READMODE, "Wfk must be in READMODE")
 
  if (wfk_validate_ks(wfk, ik_ibz, spin) /= 0) then
    ABI_ERROR("Wrong (ik_ibz, spin) args, Aborting now")
@@ -1777,7 +1777,7 @@ subroutine wfk_write_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg
 
  DBG_ENTER("COLL")
 
- ABI_CHECK(Wfk%rw_mode == WFK_WRITEMODE, "Wfk must be in WRITEMODE")
+ ABI_CHECK_IEQ(Wfk%rw_mode,  WFK_WRITEMODE, "Wfk must be in WRITEMODE")
 
  call cwtime(cpu, wall, gflops, "start")
 
@@ -2226,7 +2226,7 @@ subroutine wfk_read_bmask(Wfk, bmask, ik_ibz, spin, sc_mode, kg_k, cg_k, eig_k, 
 
  DBG_ENTER("COLL")
 
- ABI_CHECK(Wfk%rw_mode==WFK_READMODE, "Wfk must be in READMODE")
+ ABI_CHECK_IEQ(Wfk%rw_mode, WFK_READMODE, "Wfk must be in READMODE")
 
  !do band=1,wfk%mband
  !  if (.not. bmask(band)) continue
