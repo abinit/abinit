@@ -642,7 +642,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
    ! Collect eigenvalues
    do spin=1,dtset%nsppol
      do ik_ibz=1,dtset%nkpt
-       if (diago_pool%treats(ik_ibz, spin) .and. diago_pool%comm%me /= 0) owfk_ebands%eig(1:nband_k, ik_ibz, spin) = zero
+       if (diago_pool%treats(ik_ibz, spin) .and. diago_pool%comm%me /= 0) owfk_ebands%eig(:, ik_ibz, spin) = zero
      end do
    end do
    call xmpi_sum(owfk_ebands%eig, comm, ierr)
@@ -792,6 +792,7 @@ contains
 ! Compute matrix elements at q = 0.
 subroutine ugb_calc_osc_gamma()
 
+ use m_fftcore,       only : sphereboundary !, getng, print_ngfft get_kg,
  use m_fft,           only : fft_ug !, fft_ur, fftbox_plan3_t, fourdp
 
  integer,parameter :: ndat = 1, ndat1 = 1
@@ -806,12 +807,14 @@ subroutine ugb_calc_osc_gamma()
  ! M_{12}(g) = <1|e^{-ig.r}|2> => M_{12}(g) = M_{21}(-g)^*
 
  npw_k = ugb%npw_k; nspinor = ugb%nspinor
+
+ ! Set FFT mesh for wavefunctions and g-sphere for oscillators
  !u_ngfft(18) ??
  u_nfft = product(u_ngfft(1:3))
  u_mgfft = maxval(u_ngfft(1:3))
 
  ABI_MALLOC(gbound_k, (2 * u_mgfft + 8, 2))
- !call sphereboundary(gbound_k, ugb%istwfk, ugb%kg_k, u_mgfft, npw_k)
+ call sphereboundary(gbound_k, ugb%istwfk, ugb%kg_k, u_mgfft, npw_k)
 
  ABI_MALLOC(my_ur, (u_nfft * nspinor * ndat1))
  ABI_MALLOC(master_ur, (u_nfft * nspinor, ndat))
@@ -850,7 +853,7 @@ subroutine ugb_calc_osc_gamma()
 
        !call fft_ur(desc%npw, u_nfft, nspinor, ndat, &
        !            u_mgfft, u_ngfft, desc%istwfk, desc%gvec, desc%gbound, &
-       !            master_ur, &  ! in
+       !            master_ur, &                ! in
        !            rpr%buffer_cplx(:, ir1))    ! out
 
        !call fftpad(u12prod, ngfft, nx, ny, nz, ldx, ldy, ldz, ndat, mgfft, -1, gbound)

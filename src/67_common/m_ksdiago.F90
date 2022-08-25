@@ -1093,6 +1093,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  ! Loop over the |beta,G''> component.
  loc2_size = ghg_mat%sizeb_local(2)
 
+ call cwtime(cpu, wall, gflops, "start")
  do il_g2=1, ghg_mat%sizeb_local(2), batch_size
    ndat = blocked_loop(il_g2, loc2_size, batch_size)
    igsp2 = ghg_mat%loc2gcol(il_g2)
@@ -1149,6 +1150,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
    !  bras(1, igsp2 + idat * npwsp + idat) = zero
    !end do
  end do ! il_g2
+ call cwtime_report(" build_hgg'", cpu, wall, gflops)
 
  ! Free workspace memory allocated so far.
  ABI_FREE(bras)
@@ -1294,8 +1296,6 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
 
  call destroy_mpi_enreg(mpi_enreg_seq)
  call gs_hamk%free()
-
- !call xmpi_barrier(comm)
 
 end subroutine ugb_from_diago
 !!***
