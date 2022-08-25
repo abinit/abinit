@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  7 Aug 2022.
-- ( at 22h29 )
+.Starting date : Thu 25 Aug 2022.
+- ( at 21h49 )
   
 - input  file    -> /Users/gmatteo/git_repos/abinit_gwr/_build/tests/Test_suite/gwr_t01/t01.abi
 - output file    -> t01.abo
@@ -43,7 +43,7 @@ _ WF disk file :      0.018 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
  DATASET    2 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  2.
-     intxc =       0    ionmov =       0      iscf =      -2    lmnmax =       6
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       6
      lnmax =       6     mgfft =      15  mpssoang =       3    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
@@ -51,7 +51,7 @@ _ WF disk file :      0.018 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 -    mband =          40        mffmem =           1         mkmem =           3
        mpw =          57          nfft =        3375          nkpt =           3
 ================================================================================
-P This job should need less than                       1.520 Mbytes of memory.
+P This job should need less than                       1.932 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.106 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
@@ -96,15 +96,18 @@ _ WF disk file :      0.080 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
          ecutsigx2     0.00000000E+00 Hartree
          ecutsigx3     4.00000000E+00 Hartree
 -          fftalg         312
+           getden1          0
+           getden2          1
+           getden3          1
+           getwfk1          0
+           getwfk2          0
+           getwfk3          2
     gwr_boxcutmin1     2.00000000E+00
     gwr_boxcutmin2     2.00000000E+00
     gwr_boxcutmin3     1.10000000E+00
          gwr_ntau1         12
          gwr_ntau2         12
          gwr_ntau3          6
-             iscf1          7
-             iscf2         -2
-             iscf3          7
            istwfk        2    3    7
               ixc          11
            jdtset        1    2    3
@@ -120,9 +123,6 @@ P           mkmem           3
             nband1          6
             nband2         40
             nband3         30
-           nbdbuf1          0
-           nbdbuf2          5
-           nbdbuf3          0
            ndtset           3
             ngfft          15      15      15
              nkpt           3
@@ -133,13 +133,20 @@ P           mkmem           3
              nsym          48
            ntypat           1
               occ1     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+              occ2     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
               occ3     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
         optdriver1          0
-        optdriver2          0
+        optdriver2          6
         optdriver3          6
         prtsuscep1          0
         prtsuscep2          0
@@ -202,9 +209,6 @@ P           mkmem           3
            tolvrs1     1.00000000E-08
            tolvrs2     0.00000000E+00
            tolvrs3     0.00000000E+00
-           tolwfr1     0.00000000E+00
-           tolwfr2     1.00000000E-12
-           tolwfr3     0.00000000E+00
             typat      1  1
               wtk        0.12500    0.50000    0.37500
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -400,98 +404,21 @@ iteration_state: {dtset: 2, }
 dimensions: {natom: 2, nkpt: 3, mband: 40, nsppol: 1, nspinor: 1, nspden: 1, mpw: 57, }
 cutoff_energies: {ecut:   4.0, pawecutdg:  -1.0, }
 electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
-meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
+meta: {optdriver: 6, }
 ...
 
- mkfilename: getden from: t01o_DS1_DEN
+ mkfilename : getden/=0, take file _DEN from output of DATASET   1.
 
  Exchange-correlation functional for the present dataset will be:
   GGA: Perdew-Burke-Ernzerhof functional - ixc=11
  Citation for XC functional:
   J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
 
- Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
- R(1)=  0.0000000  5.1300000  5.1300000  G(1)= -0.0974659  0.0974659  0.0974659
- R(2)=  5.1300000  0.0000000  5.1300000  G(2)=  0.0974659 -0.0974659  0.0974659
- R(3)=  5.1300000  5.1300000  0.0000000  G(3)=  0.0974659  0.0974659 -0.0974659
- Unit cell volume ucvol=  2.7001139E+02 bohr^3
- Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+- Reading GS density from: t01o_DS1_DEN
 
- getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  15  15  15
-         ecut(hartree)=      4.000   => boxcut(ratio)=   2.15429
+
+
 --------------------------------------------------------------------------------
-
-
-================================================================================
- prteigrs : about to open file t01o_DS2_EIG
- Non-SCF case, kpt    1 (  0.00000  0.00000  0.00000), residuals and eigenvalues=
-  2.97E-13  4.11E-13  1.06E-13  5.27E-13  1.94E-13  1.92E-13  7.38E-13  1.17E-13
-  3.09E-13  4.92E-13  5.44E-13  6.36E-13  2.92E-13  6.10E-13  3.85E-13  5.23E-13
-  3.27E-13  3.35E-13  6.61E-13  1.60E-13  5.91E-13  6.82E-13  4.87E-13  6.57E-13
-  9.22E-13  6.41E-13  9.60E-13  5.55E-13  5.72E-13  8.39E-13  3.83E-13  3.65E-13
-  4.45E-13  1.70E-13  5.41E-13  5.90E-13  5.67E-13  4.51E-07  8.46E-07  3.33E-06
- -2.5677E-01  1.7086E-01  1.7086E-01  1.7086E-01  2.6105E-01  2.6105E-01
-  2.6105E-01  3.2015E-01  4.6492E-01  4.6492E-01  4.8435E-01  5.8591E-01
-  5.8591E-01  5.8591E-01  7.4423E-01  1.0874E+00  1.0874E+00  1.0874E+00
-  1.1336E+00  1.1336E+00  1.1336E+00  1.1341E+00  1.1341E+00  1.2505E+00
-  1.2505E+00  1.2505E+00  1.5401E+00  1.5401E+00  1.5401E+00  1.6392E+00
-  1.6767E+00  1.6767E+00  1.7219E+00  1.7219E+00  1.7390E+00  1.7390E+00
-  1.7390E+00  1.8018E+00  1.8018E+00  1.8019E+00
- prteigrs : prtvol=0 or 1, do not print more k-points.
-
-
-
---- !ResultsGS
-iteration_state: {dtset: 2, }
-comment   : Summary of ground state results
-lattice_vectors:
-- [  0.0000000,   5.1300000,   5.1300000, ]
-- [  5.1300000,   0.0000000,   5.1300000, ]
-- [  5.1300000,   5.1300000,   0.0000000, ]
-lattice_lengths: [   7.25492,    7.25492,    7.25492, ]
-lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
-lattice_volume:   2.7001139E+02
-convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  9.600E-13, diffor:  0.000E+00, }
-etotal    :  -8.30927869E+00
-entropy   :   0.00000000E+00
-fermie    :   1.70857178E-01
-cartesian_stress_tensor: null
-pressure_GPa: null
-xred      :
-- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Si]
-- [  2.5000E-01,   2.5000E-01,   2.5000E-01, Si]
-cartesian_forces: null
-force_length_stats: {min: null, max: null, mean: null, }
-...
-
- Integrated electronic density in atomic spheres:
- ------------------------------------------------
- Atom  Sphere_radius  Integrated_density
-    1        2.00000          1.78506392
-    2        2.00000          1.72909566
-================================================================================
-
- ----iterations are completed or convergence reached----
-
- Mean square residual over all n,k,spin=   36.185E-14; max=  95.996E-14
- reduced coordinates (array xred) for    2 atoms
-       0.000000000000      0.000000000000      0.000000000000
-       0.250000000000      0.250000000000      0.250000000000
-
- cartesian coordinates (angstrom) at end:
-    1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      1.35733954003335     1.35733954003335     1.35733954003335
- length scales= 10.260000000000 10.260000000000 10.260000000000 bohr
-              =  5.429358160133  5.429358160133  5.429358160133 angstroms
- prteigrs : about to open file t01o_DS2_EIG
- Eigenvalues (hartree) for nkpt=   3  k points:
- kpt#   1, nband= 40, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.25677    0.17086    0.17086    0.17086    0.26105    0.26105    0.26105    0.32015
-   0.46492    0.46492    0.48435    0.58591    0.58591    0.58591    0.74423    1.08737
-   1.08737    1.08737    1.13363    1.13363    1.13363    1.13406    1.13406    1.25045
-   1.25045    1.25045    1.54012    1.54012    1.54012    1.63921    1.67669    1.67669
-   1.72186    1.72186    1.73898    1.73898    1.73898    1.80185    1.80185    1.80185
- prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
 ================================================================================
@@ -507,9 +434,9 @@ electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.0000
 meta: {optdriver: 6, }
 ...
 
- mkfilename: getwfk from: t01o_DS2_WFK
+ mkfilename : getwfk/=0, take file _WFK from output of DATASET   2.
 
- mkfilename: getden from: t01o_DS1_DEN
+ mkfilename : getden/=0, take file _DEN from output of DATASET   1.
 
  Exchange-correlation functional for the present dataset will be:
   GGA: Perdew-Burke-Ernzerhof functional - ixc=11
@@ -517,12 +444,12 @@ meta: {optdriver: 6, }
   J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
 
 - Reading GS density from: t01o_DS1_DEN
-- Reading GS states from WFK file: t01o_DS2_WFK
 
 
 
 --------------------------------------------------------------------------------
 
+- Reading GS states from WFK file: t01o_DS2_WFK
   Mapping kBZ --> kIBZ
  Legend: bz = TS(ibz) + g0 where isym is the index of the symrec operation S and itim is 1 if TR is used.
         BZ                                       IBZ                                       ibz  isym  itim  g0
@@ -593,13 +520,13 @@ Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(o
 
        1       2       3       4       5       6
     1 -22.312 -11.817  -4.709  -1.809  -0.487  -0.036
-        0.000   0.000   0.000   0.000  -0.000   0.000
+        0.000  -0.000  -0.000  -0.000  -0.000  -0.000
 
     2 -22.377 -11.594  -3.921  -1.284  -0.320  -0.024
-        0.000   0.000  -0.000   0.000   0.000   0.000
+        0.000  -0.000  -0.000  -0.000  -0.000   0.000
 
     3 -22.370 -11.524  -3.810  -1.778  -1.306  -0.736
-        0.000   0.000   0.000   0.000  -0.000  -0.000
+       -0.000   0.000  -0.000  -0.000   0.000  -0.000
 
  Trace of: gt_kibz for ipm: 2 , spin: 1 for testing purposes:
  (ik_ibz, itau) table
@@ -646,24 +573,24 @@ Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(o
 --- !EMACRO_WITHOUT_LOCAL_FIELDS
 iteration_state: {dtset: 3, }
 'epsilon_{iw, q -> Gamma}(0,0)': !Tabular |
-      1.17768303E-02    9.99999863E-01    0.00000000E+00
-      4.26019184E-02    9.99999867E-01    0.00000000E+00
-      1.02353357E-01    9.99999891E-01    0.00000000E+00
-      2.42819629E-01    9.99999967E-01    0.00000000E+00
-      6.17145550E-01    9.99999986E-01    0.00000000E+00
-      1.86464996E+00    9.99999980E-01    0.00000000E+00
+      1.17768303E-02    1.00000184E+00    0.00000000E+00
+      4.26019184E-02    1.00000176E+00    0.00000000E+00
+      1.02353357E-01    1.00000147E+00    0.00000000E+00
+      2.42819629E-01    1.00000089E+00    0.00000000E+00
+      6.17145550E-01    1.00000030E+00    0.00000000E+00
+      1.86464996E+00    1.00000008E+00    0.00000000E+00
 ...
 
 
 --- !EMACRO_WITH_LOCAL_FIELDS
 iteration_state: {dtset: 3, }
 'epsilon_{iw, q -> Gamma}(0,0)': !Tabular |
-      1.17768303E-02    1.00000014E+00   -5.16680147E-25
-      4.26019184E-02    1.00000013E+00   -4.60242726E-25
-      1.02353357E-01    1.00000011E+00   -3.06690813E-25
-      2.42819629E-01    1.00000003E+00   -7.20323269E-26
-      6.17145550E-01    1.00000001E+00   -3.80368376E-26
-      1.86464996E+00    1.00000002E+00   -2.21971349E-26
+      1.17768303E-02    9.99998240E-01    4.56250482E-18
+      4.26019184E-02    9.99998314E-01    5.85123701E-18
+      1.02353357E-01    9.99998574E-01    8.19422093E-18
+      2.42819629E-01    9.99999128E-01   -7.25305178E-19
+      6.17145550E-01    9.99999702E-01   -6.29710262E-18
+      1.86464996E+00    9.99999918E-01    7.34319196E-20
 ...
 
  Trace of: wc_qibz for spin: 1 for testing purposes:
@@ -672,7 +599,7 @@ iteration_state: {dtset: 3, }
  (iq_ibz, iomega) table
        1       2       3       4       5       6
     1  -0.248  -0.244  -0.231  -0.199  -0.132  -0.039
-       -0.000  -0.000  -0.000  -0.000  -0.000   0.000
+        0.000   0.000   0.000  -0.000  -0.000   0.000
 
     2  -0.443  -0.435  -0.413  -0.359  -0.233  -0.063
         0.000   0.000   0.000   0.000   0.000  -0.000
@@ -734,21 +661,27 @@ data: !Tabular |
          ecutsigx2     0.00000000E+00 Hartree
          ecutsigx3     4.00000000E+00 Hartree
            etotal1    -8.3092786940E+00
+           etotal2     0.0000000000E+00
            etotal3     0.0000000000E+00
             fcart1    -1.0497642196E-27  1.4696699074E-27 -1.0497642196E-27
                        1.0497642196E-27 -1.4696699074E-27  1.0497642196E-27
+            fcart2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
 -          fftalg         312
+           getden1          0
+           getden2          1
+           getden3          1
+           getwfk1          0
+           getwfk2          0
+           getwfk3          2
     gwr_boxcutmin1     2.00000000E+00
     gwr_boxcutmin2     2.00000000E+00
     gwr_boxcutmin3     1.10000000E+00
          gwr_ntau1         12
          gwr_ntau2         12
          gwr_ntau3          6
-             iscf1          7
-             iscf2         -2
-             iscf3          7
            istwfk        2    3    7
               ixc          11
            jdtset        1    2    3
@@ -764,9 +697,6 @@ P           mkmem           3
             nband1          6
             nband2         40
             nband3         30
-           nbdbuf1          0
-           nbdbuf2          5
-           nbdbuf3          0
            ndtset           3
             ngfft          15      15      15
              nkpt           3
@@ -777,13 +707,20 @@ P           mkmem           3
              nsym          48
            ntypat           1
               occ1     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+              occ2     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
               occ3     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
         optdriver1          0
-        optdriver2          0
+        optdriver2          6
         optdriver3          6
         prtsuscep1          0
         prtsuscep2          0
@@ -796,6 +733,8 @@ P           mkmem           3
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
           spgroup         227
            strten1     3.5076488370E-05  3.5076488370E-05  3.5076488370E-05
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+           strten2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -850,9 +789,6 @@ P           mkmem           3
            tolvrs1     1.00000000E-08
            tolvrs2     0.00000000E+00
            tolvrs3     0.00000000E+00
-           tolwfr1     0.00000000E+00
-           tolwfr2     1.00000000E-12
-           tolwfr3     0.00000000E+00
             typat      1  1
               wtk        0.12500    0.50000    0.37500
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -957,7 +893,7 @@ P           mkmem           3
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          3.9  wall=          4.8
+- Proc.   0 individual time (sec): cpu=          3.2  wall=          3.5
 
 ================================================================================
 
