@@ -638,6 +638,9 @@ module m_gwr
 
  real(dp),private,parameter :: TOL_EDIFF = 0.001_dp * eV_Ha
 
+ integer,private,parameter :: PRINT_MODR = 20
+ integer,private, parameter :: istwfk1 = 1
+
 contains
 !!***
 
@@ -672,7 +675,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: me_fft0 = 0, paral_fft0 = 0, nproc_fft1 = 1, istwfk1 = 1
+ integer,parameter :: me_fft0 = 0, paral_fft0 = 0, nproc_fft1 = 1
  integer,parameter :: qptopt1 = 1, qtimrev1 = 1, master = 0, ndims = 4
  integer :: my_it, my_ikf, my_iqf, ii, ebands_timrev, my_iki, my_iqi, itau, spin ! my_is, npwsp,
  integer :: my_nshiftq, iq_bz, iq_ibz, npw_, ncid, ig, ig_start
@@ -1725,7 +1728,7 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: formeig0 = 0, istwfk1 = 1
+ integer,parameter :: formeig0 = 0
  integer :: mband, min_nband, nkibz, nsppol, my_is, my_iki, spin, ik_ibz ! my_it,
  integer :: my_ib, my_nb, band, npw_k, mpw, istwf_k, itau, ipm, ig1, ig2, il_g1, il_g2
  integer :: nbsum, npwsp, col_bsize, nband_k, my_bstart, my_bstop, my_nband, ierr
@@ -1858,7 +1861,7 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
  ABI_CHECK(abs(ef) < tol12, "ef should have been set to zero!")
  spin_fact = two / (gwr%nsppol * gwr%nspinor)
 
- call wrtout(std_out, "Build Green's functions from KS states...")
+ call wrtout(std_out, " Building Green's functions from KS states...")
  do my_is=1,gwr%my_nspins
    spin = gwr%my_spins(my_is)
    do my_iki=1,gwr%my_nkibz
@@ -1925,6 +1928,7 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
            ABI_ERROR(msg)
          end if
 
+         ! TODO: Optimize this part.
          do il_g2=1, gt0%sizeb_local(2)
            ig2 = gt0%loc2gcol(il_g2)
            do il_g1=1, gt0%sizeb_local(1)
@@ -3323,10 +3327,9 @@ subroutine gwr_build_tchi(gwr)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: istwfk1 = 1, tim_fourdp0 = 0
  integer :: my_is, my_it, my_ikf, ig, my_ir, my_nr, npwsp, ncol_glob, col_bsize, my_iqi !, my_iki ! my_iqf,
- integer :: idat, ndat, sc_nfft, spin, ik_bz, iq_ibz, ierr, ipm, itau, ig2 ! ig1
- real(dp) :: cpu_tau, wall_tau, gflops_tau, cpu_all, wall_all, gflops_all !, cpu, wall, gflops
+ integer :: idat, ndat, sc_nfft, spin, ik_bz, iq_ibz, ierr, ipm, itau, ig2, my_rank ! ig1
+ real(dp) :: cpu_tau, wall_tau, gflops_tau, cpu_all, wall_all, gflops_all, cpu_ir, wall_ir, gflops_ir
  real(dp) :: tchi_rfact, mem_mb, local_max, max_abs_imag_chit !, spin_fact, sc_ucvol, ik_ibz,
  logical :: q_is_gamma
  character(len=5000) :: msg
@@ -3348,6 +3351,7 @@ subroutine gwr_build_tchi(gwr)
 ! *************************************************************************
 
  call cwtime(cpu_all, wall_all, gflops_all, "start")
+ my_rank = xmpi_comm_rank(gwr%comm)
 
  ABI_CHECK(gwr%tchi_space == "none", sjoin("tchi_space: ", gwr%tchi_space, " != none"))
  gwr%tchi_space = "itau"
@@ -3377,13 +3381,13 @@ subroutine gwr_build_tchi(gwr)
    !call init_distribfft_seq(tchi_mpi_enreg%distribfft, 'f', sc_ngfft(2), sc_ngfft(3), 'all')
 
    call wrtout(std_out, " Building chi0 with FFTs in the supercell:", pre_newlines=2)
-   call wrtout(std_out, sjoin(" sc_ngfft:", ltoa(sc_ngfft(1:8))))
+   call wrtout(std_out, sjoin(" ngkpt:", ltoa(gwr%ngkpt), " ngqpt:", ltoa(gwr%ngqpt)))
    call wrtout(std_out, sjoin(" gwr_boxcutmin:", ftoa(gwr%dtset%gwr_boxcutmin)))
-   call wrtout(std_out, sjoin(" ngkpt:", ltoa(gwr%ngkpt)))
-   call wrtout(std_out, sjoin(" ngqpt:", ltoa(gwr%ngqpt)))
-   call wrtout(std_out, sjoin(" ntau:", itoa(gwr%ntau)))
-   call wrtout(std_out, sjoin(" FFT uc_batch_size:", itoa(gwr%uc_batch_size)))
-   call wrtout(std_out, sjoin(" FFT sc_batch_size:", itoa(gwr%sc_batch_size)), do_flush=.True.)
+   call wrtout(std_out, sjoin(" sc_ngfft:", ltoa(sc_ngfft(1:8))))
+   call wrtout(std_out, sjoin(" my_ntau:", itoa(gwr%my_ntau), "ntau:", itoa(gwr%ntau)))
+   call wrtout(std_out, sjoin(" my_nkbz:", itoa(gwr%my_nkbz), "nkibz:", itoa(gwr%nkibz)))
+   call wrtout(std_out, sjoin(" FFT uc_batch_size:", itoa(gwr%uc_batch_size), &
+                              " FFT sc_batch_size:", itoa(gwr%sc_batch_size)), do_flush=.True.)
 
    ! Be careful when using the FFT plan with ndat as ndat can change inside the loop if we start to block.
    ! Perhaps the safest approach would be to generate the plan on the fly.
@@ -3444,8 +3448,10 @@ subroutine gwr_build_tchi(gwr)
        my_nr = gt_gpr(1,1)%sizeb_local(2)
 
        do my_ir=1, my_nr, gwr%sc_batch_size
+         if (my_ir <= 3 * gwr%sc_batch_size .or. mod(my_ir, PRINT_MODR) == 0) then
+           call cwtime(cpu_ir, wall_ir, gflops_ir, "start")
+         end if
          ndat = blocked_loop(my_ir, my_nr, gwr%sc_batch_size)
-         !if (mod(my_ir, 50) == 0 .and. my_rank == master) write(std_out, *) my_ir, my_nr
 
          !call cwtime(cpu, wall, gflops, "start")
          ! Insert G_k(g',r) in G'-space in the supercell FFT box for fixed r.
@@ -3542,6 +3548,11 @@ end if
                          chiq_gpr(my_iqi)%buffer_cplx(:, my_ir))  ! out
          end do ! my_iqi
          !call cwtime_report("chiq part", cpu, wall, gflops)
+
+         if (my_ir <= 3 * gwr%sc_batch_size .or. mod(my_ir, PRINT_MODR) == 0) then
+           write(msg,'(3(a,i0),a)')" My ir [", my_ir, "/", my_nr, "] (tot: ", gwr%g_nfft, ")"
+           if (my_rank == 0) call cwtime_report(msg, cpu_ir, wall_ir, gflops_ir)
+         end if
        end do ! my_ir
 
        ! Free descriptors and PBLAS matrices in kBZ.
@@ -3715,7 +3726,6 @@ subroutine gwr_distrib_gt_kibz(gwr, itau, spin, need_kibz, got_kibz, action)
  character(len=*),intent(in) :: action
 
 !Local variables-------------------------------
- integer,parameter :: istwfk1 = 1
  integer :: ik_ibz, ipm, ierr, lsize(2) ! col_bsize, npwsp,
  integer :: do_mpi_kibz(gwr%nkibz), sender_kibz(gwr%nkibz)
  real(dp) :: kk_ibz(3), cpu, wall, gflops
@@ -3797,7 +3807,6 @@ subroutine gwr_distrib_mats_qibz(gwr, what, itau, spin, need_qibz, got_qibz, act
  character(len=*),intent(in) :: action
 
 !Local variables-------------------------------
- integer,parameter :: istwfk1 = 1
  integer :: iq_ibz, ierr, lsize(2)  ! col_bsize, npwsp,
  integer :: do_mpi_qibz(gwr%nqibz), sender_qibz(gwr%nqibz)
  real(dp) :: qq_ibz(3), cpu, wall, gflops
@@ -4228,10 +4237,11 @@ subroutine gwr_build_sigmac(gwr)
 
 !Local variables-------------------------------
 !scalars
- integer :: my_is, my_it, spin, ik_ibz, ikcalc_ibz, sc_nfft, sc_size, my_ir, my_nr, iw, idat, ndat !my_iki,
+ integer :: my_is, my_it, spin, ik_ibz, ikcalc_ibz, sc_nfft, sc_size, my_ir, my_nr, iw, idat, ndat, my_rank !my_iki,
  integer :: my_iqf, iq_ibz, iq_bz, itau, ierr, ibc, bmin, bmax, band, nbc ! col_bsize, npwsp, ib1, ib2,
  integer :: my_ikf, ipm, ik_bz, ig, ikcalc, uc_ir, ir, ncid, col_bsize, npwsp, ibeg, iend ! my_iqi, sc_ir,
- real(dp) :: cpu_tau, wall_tau, gflops_tau, cpu_all, wall_all, gflops_all, cpu, wall, gflops, mem_mb
+ real(dp) :: cpu_tau, wall_tau, gflops_tau, cpu_all, wall_all, gflops_all, cpu, wall, gflops
+ real(dp) :: mem_mb, cpu_ir, wall_ir, gflops_ir
  real(dp) :: max_abs_imag_wct, max_abs_re_wct, sck_ucvol, scq_ucvol  !, spin_fact
  !logical :: k_is_gamma !, q_is_gamma
  character(len=500) :: msg
@@ -4269,6 +4279,7 @@ subroutine gwr_build_sigmac(gwr)
 ! *************************************************************************
 
  call cwtime(cpu_all, wall_all, gflops_all, "start")
+ my_rank = xmpi_comm_rank(gwr%comm)
 
  ABI_CHECK(gwr%wc_space == "itau", sjoin("wc_space: ", gwr%wc_space, " != itau"))
 
@@ -4287,14 +4298,15 @@ subroutine gwr_build_sigmac(gwr)
  sck_ucvol = gwr%cryst%ucvol * product(gwr%ngkpt)
  scq_ucvol = gwr%cryst%ucvol * product(gwr%ngqpt)
  !sc_augsize = product(sc_ngfft(4:6))
+
  call wrtout(std_out, sjoin(" Building Sigma_c with FFTs in the supercell:", ltoa(sc_ngfft(1:3))), pre_newlines=2)
- call wrtout(std_out, sjoin(" sc_ngfft:", ltoa(sc_ngfft(1:8))))
+ call wrtout(std_out, sjoin(" ngkpt:", ltoa(gwr%ngkpt), " ngqpt:", ltoa(gwr%ngqpt)))
  call wrtout(std_out, sjoin(" gwr_boxcutmin:", ftoa(gwr%dtset%gwr_boxcutmin)))
- call wrtout(std_out, sjoin(" ngkpt:", ltoa(gwr%ngkpt)))
- call wrtout(std_out, sjoin(" ngqpt:", ltoa(gwr%ngqpt)))
- call wrtout(std_out, sjoin(" ntau:", itoa(gwr%ntau)))
- call wrtout(std_out, sjoin(" FFT uc_batch_size:", itoa(gwr%uc_batch_size)))
- call wrtout(std_out, sjoin(" FFT sc_batch_size:", itoa(gwr%sc_batch_size)))
+ call wrtout(std_out, sjoin(" sc_ngfft:", ltoa(sc_ngfft(1:8))))
+ call wrtout(std_out, sjoin(" my_ntau:", itoa(gwr%my_ntau), "ntau:", itoa(gwr%ntau)))
+ call wrtout(std_out, sjoin(" my_nkbz:", itoa(gwr%my_nkbz), "nkibz:", itoa(gwr%nkibz)))
+ call wrtout(std_out, sjoin(" FFT uc_batch_size:", itoa(gwr%uc_batch_size), &
+                            " FFT sc_batch_size:", itoa(gwr%sc_batch_size)), do_flush=.True.)
 
  ! The g-vectors in the supercell for G and tchi.
  ABI_MALLOC(green_scg, (3, gwr%green_mpw))
@@ -4384,7 +4396,11 @@ if (gwr%use_supercell_for_sigma) then
 
      ! Loop over r in the unit cell that is now MPI-distributed in g_comm.
      do my_ir=1, my_nr, gwr%sc_batch_size
+       if (my_ir <= 3 * gwr%sc_batch_size .or. mod(my_ir, PRINT_MODR) == 0) then
+         call cwtime(cpu_ir, wall_ir, gflops_ir, "start")
+       end if
        ndat = blocked_loop(my_ir, my_nr, gwr%sc_batch_size)
+
        uc_ir = gt_gpr(1,1)%loc2gcol(my_ir)  ! FIXME: This won't work if nspinor 2
 
        !sc_ir
@@ -4464,7 +4480,7 @@ if (gwr%use_supercell_for_sigma) then
        gt_scbox(:, 1) = gt_scbox(:, 1) * wct_scbox(:)
        gt_scbox(:, 2) = gt_scbox(:, 2) * wct_scbox(:)
        !print *, "Maxval abs imag G:", maxval(abs(aimag(gt_scbox)))
-       call cwtime_report("GW part", cpu, wall, gflops)
+       !call cwtime_report("GW part", cpu, wall, gflops)
 
        ! Integrate self-energy matrix elements in the R-supercell for fixed r(s)
        do ikcalc=1,gwr%nkcalc
@@ -4485,6 +4501,11 @@ if (gwr%use_supercell_for_sigma) then
           end do
        end do ! ikcalc
        !call cwtime_report("Sig Matrix part", cpu, wall, gflops)
+
+       if (my_ir <= 3 * gwr%sc_batch_size .or. mod(my_ir, PRINT_MODR) == 0) then
+         write(msg,'(3(a,i0),a)')" My ir [", my_ir, "/", my_nr, "] (tot: ", gwr%g_nfft, ")"
+         if (my_rank == 0) call cwtime_report(msg, cpu_ir, wall_ir, gflops_ir)
+       end if
      end do ! my_ir
 
      ! Free descriptors and PBLAS matrices in kBZ and qBZ.
