@@ -99,6 +99,7 @@
 !!
 !!  - Possible incompatibilities between gwpc, slk matrices that are always in dp and GW machinery
 !!
+!!  - Single precision for scalapack matrices.
 !!
 !! COPYRIGHT
 !! Copyright (C) 1999-2021 ABINIT group (MG)
@@ -1050,9 +1051,11 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
 
    if (ii == 1 .and. nps > 1) then
      if (gwr%nkbz > 1) then
+       ! Give priority to tau/kbz
        call xmpi_distrib_2d(nps, "12", gwr%ntau, gwr%nkbz, gwr%tau_comm%nproc, gwr%kpt_comm%nproc, ierr)
        ABI_CHECK(ierr == 0, sjoin("Cannot distribute nprocs:", itoa(nps), " with priority: tau/kbz"))
      else
+       ! Give priority to tau/g
        call xmpi_distrib_2d(nps, "12", gwr%ntau, gwr%green_mpw, gwr%tau_comm%nproc, gwr%g_comm%nproc, ierr)
        ABI_CHECK(ierr == 0, sjoin("Cannot distribute nprocs:", itoa(nps), " with priority: tau/g"))
      end if
@@ -1413,10 +1416,13 @@ subroutine gwr_alloc_free_mats(gwr, mask_ibz, what, action)
    spin = gwr%my_spins(my_is)
    do my_it=1,gwr%my_ntau
      itau = gwr%my_itaus(my_it)
+     ! All the PBLAS matrices are MPI distributed over g' in blocks
 
      select case (what)
      case ("green")
-       ! Allocate G_k(g,g') for k in my IBZ, MPI distributed over g' in blocks
+       ! ==================================
+       ! Allocate G_k(g,g') for k in my IBZ
+       ! ==================================
        ABI_CHECK_IEQ(size(mask_ibz), gwr%nkibz, "wrong mask size")
 
        do ik_ibz=1,gwr%nkibz
@@ -1432,7 +1438,9 @@ subroutine gwr_alloc_free_mats(gwr, mask_ibz, what, action)
        end do
 
      case ("tchi", "wc")
-       ! Allocate tchi_q(g,g') for q in my IBZ, MPI distributed over g' in blocks
+       ! =====================================
+       ! Allocate tchi_q(g,g') for q in my IBZ
+       ! =====================================
        ABI_CHECK_IEQ(size(mask_ibz), gwr%nqibz, "wrong mask size")
 
        do iq_ibz=1,gwr%nqibz
@@ -1469,7 +1477,7 @@ subroutine gwr_alloc_free_mats(gwr, mask_ibz, what, action)
    end do ! my_it
  end do ! my_is
 
- call gwr_print_mem(unit=std_out)
+ call gwr%print_mem(unit=std_out)
 
 end subroutine gwr_alloc_free_mats
 !!***
@@ -1850,6 +1858,7 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
  ABI_CHECK(abs(ef) < tol12, "ef should have been set to zero!")
  spin_fact = two / (gwr%nsppol * gwr%nspinor)
 
+ call wrtout(std_out, "Build Green's functions from KS states...")
  do my_is=1,gwr%my_nspins
    spin = gwr%my_spins(my_is)
    do my_iki=1,gwr%my_nkibz
@@ -1933,13 +1942,12 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
            gwr%gt_kibz(ipm, ik_ibz, itau, spin)%buffer_cplx(:,:) = loc_cwork(:,:,ipm)
          end do
        end if
-
      end do ! itau
 
      ABI_FREE(loc_cwork)
      end associate
 
-     write(msg,'(3(a,i0),a)')" My iki [", my_iki, "/", gwr%my_nkibz, "] (tot: ", gwr%nkbz, ")"
+     write(msg,'(3(a,i0),a)')" My iki [", my_iki, "/", gwr%my_nkibz, "] (tot: ", gwr%nkibz, ")"
      call cwtime_report(msg, cpu_green, wall_green, gflops_green)
    end do ! my_iki
  end do ! my_is
@@ -3350,8 +3358,6 @@ subroutine gwr_build_tchi(gwr)
 
  max_abs_imag_chit = zero
 
- call gwr%print_mem(unit=std_out)
-
  if (gwr%use_supercell_for_tchi) then
    ! ============================
    ! GWr algorithm with supercell
@@ -3377,7 +3383,7 @@ subroutine gwr_build_tchi(gwr)
    call wrtout(std_out, sjoin(" ngqpt:", ltoa(gwr%ngqpt)))
    call wrtout(std_out, sjoin(" ntau:", itoa(gwr%ntau)))
    call wrtout(std_out, sjoin(" FFT uc_batch_size:", itoa(gwr%uc_batch_size)))
-   call wrtout(std_out, sjoin(" FFT sc_batch_size:", itoa(gwr%sc_batch_size)))
+   call wrtout(std_out, sjoin(" FFT sc_batch_size:", itoa(gwr%sc_batch_size)), do_flush=.True.)
 
    ! Be careful when using the FFT plan with ndat as ndat can change inside the loop if we start to block.
    ! Perhaps the safest approach would be to generate the plan on the fly.
@@ -3403,14 +3409,14 @@ subroutine gwr_build_tchi(gwr)
    ABI_MALLOC(cemiqr, (gwr%g_nfft * gwr%nspinor))
 
    ! Precompute phase factors e^{-ik.R} in the super cell.
-   ABI_MALLOC(sc_ceimkr, (sc_nfft * gwr%nspinor, gwr%my_nkbz))
+   !ABI_MALLOC(sc_ceimkr, (sc_nfft * gwr%nspinor, gwr%my_nkbz))
    !ABI_MALLOC(uc_ceimkr, (gwr%g_nfft * gwr%nspinor, gwr%my_nkbz))
 
-   do my_ikf=1,gwr%my_nkbz
-     ik_bz = gwr%my_kbz_inds(my_ikf)
-     call calc_sc_ceikr(-gwr%kbz(:,ik_bz), gwr%ngkpt, gwr%g_ngfft, gwr%g_nfft, gwr%nspinor, sc_ceimkr(:,my_ikf))
-     !call calc_ceikr(-gwr%kbz(:,ik_bz), gwr%g_ngfft, gwr%g_nfft, gwr%nspinor, uc_ceimkr(:,my_ikf))
-   end do
+   !do my_ikf=1,gwr%my_nkbz
+   !  ik_bz = gwr%my_kbz_inds(my_ikf)
+   !  !call calc_sc_ceikr(-gwr%kbz(:,ik_bz), gwr%ngkpt, gwr%g_ngfft, gwr%g_nfft, gwr%nspinor, sc_ceimkr(:,my_ikf))
+   !  !call calc_ceikr(-gwr%kbz(:,ik_bz), gwr%g_ngfft, gwr%g_nfft, gwr%nspinor, uc_ceimkr(:,my_ikf))
+   !end do
    !ABI_FREE(uc_ceimkr)
 
    ! Allocate PBLAS arrays for tchi_q(g',r) for all q in the IBZ treated by this MPI rank.
@@ -3422,7 +3428,7 @@ subroutine gwr_build_tchi(gwr)
      call chiq_gpr(my_iqi)%init(npwsp, gwr%g_nfft * gwr%nspinor, gwr%g_slkproc, 1, size_blocs=[npwsp, col_bsize])
    end do
    mem_mb = sum(slk_array_locmem_mb(chiq_gpr))
-   call wrtout(std_out, sjoin(' Local memory needed for chiq_gpr: ', ftoa(mem_mb, fmt="f8.1"), ' [Mb] <<< MEM'))
+   call wrtout(std_out, sjoin(' Local memory for chiq_gpr: ', ftoa(mem_mb, fmt="f8.1"), ' [Mb] <<< MEM'))
 
    ! Loop over my spins and my taus.
    do my_is=1,gwr%my_nspins
@@ -3439,6 +3445,7 @@ subroutine gwr_build_tchi(gwr)
 
        do my_ir=1, my_nr, gwr%sc_batch_size
          ndat = blocked_loop(my_ir, my_nr, gwr%sc_batch_size)
+         !if (mod(my_ir, 50) == 0 .and. my_rank == master) write(std_out, *) my_ir, my_nr
 
          !call cwtime(cpu, wall, gflops, "start")
          ! Insert G_k(g',r) in G'-space in the supercell FFT box for fixed r.
@@ -3602,7 +3609,7 @@ end if
    ABI_FREE(green_scg)
    ABI_FREE(chi_scg)
    ABI_FREE(cemiqr)
-   ABI_SFREE(sc_ceimkr)
+   !ABI_SFREE(sc_ceimkr)
 
    call slk_array_free(chiq_gpr)
    !call destroy_mpi_enreg(tchi_mpi_enreg)
@@ -4390,7 +4397,8 @@ if (gwr%use_supercell_for_sigma) then
 
        ! Insert G_k(g',r) in G'-space in the supercell FFT box for fixed r.
        ! Take the union of (k,g') for k in the BZ.
-       call cwtime(cpu, wall, gflops, "start")
+       !call cwtime(cpu, wall, gflops, "start")
+
        gt_scbox = zero
        do my_ikf=1,gwr%my_nkbz
          ik_bz = gwr%my_kbz_inds(my_ikf)
@@ -4415,7 +4423,7 @@ if (gwr%use_supercell_for_sigma) then
        ! G(G',r) --> G(R',r)
        call gt_plan_gp2rp%execute_ip_dpc(gt_scbox)
        gt_scbox = gt_scbox * (sc_nfft / sck_ucvol)
-       call cwtime_report("G part", cpu, wall, gflops)
+       !call cwtime_report("G part", cpu, wall, gflops)
 
        ! Insert Wc_q(g',r) in G'-space in the supercell FFT box for fixed r.
        ! Take the union of (q,g') for q in the BZ. Also, note ngqpt instead of ngkpt.
@@ -4437,7 +4445,7 @@ if (gwr%use_supercell_for_sigma) then
 
        ! TODO: Should block using nproc in kpt_comm, scatter data and perform multiple FFTs in parallel.
        call xmpi_sum(wct_scbox, gwr%kpt_comm%value, ierr)
-       call cwtime_report("W part", cpu, wall, gflops)
+       !call cwtime_report("W part", cpu, wall, gflops)
 
        ! Wc(G',r) --> Wc(R',r)
        call wt_plan_gp2rp%execute_ip_dpc(wct_scbox)
@@ -4476,8 +4484,7 @@ if (gwr%use_supercell_for_sigma) then
            end  do
           end do
        end do ! ikcalc
-       call cwtime_report("Sig Matrix part", cpu, wall, gflops)
-
+       !call cwtime_report("Sig Matrix part", cpu, wall, gflops)
      end do ! my_ir
 
      ! Free descriptors and PBLAS matrices in kBZ and qBZ.
@@ -4514,7 +4521,7 @@ else
    end do
  end do
  mem_mb = slk_array_locmem_mb(wc_rpr) + sum(slk_array_locmem_mb(gk_rpr_pm)) + sum(slk_array_locmem_mb(sigc_rpr))
- call wrtout(std_out, sjoin(' Memory needed for local PBLAS matrices: ', ftoa(mem_mb, fmt="f8.1"), ' [Mb] <<< MEM'))
+ call wrtout(std_out, sjoin(' Memory for local PBLAS matrices: ', ftoa(mem_mb, fmt="f8.1"), ' [Mb] <<< MEM'))
 
  ! Define tables to account for symmetries:
  !  - when looping over the BZ, we only need to include the union of IBZ_x for x in kcalc.
