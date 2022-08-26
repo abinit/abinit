@@ -611,7 +611,8 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
                            dtset, pawtab, pawfgr, ks_paw_ij, cryst, psps, ks_vtrial, eig_k, diago_pool%comm%value)
 
        call cwtime(diago_cpu, diago_wall, gflops, "stop")
-       diago_info(1, ik_ibz, spin) = diago_wall
+       if (diago_pool%comm%me == 0) diago_info(1, ik_ibz, spin) = diago_wall
+       call cwtime(diago_cpu, diago_wall, gflops, "start")
 
        owfk_ebands%eig(1:nband_k, ik_ibz, spin) = eig_k(1:nband_k)
 
@@ -633,8 +634,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
          ABI_FREE(occ_k)
        end if
        call cwtime(diago_cpu, diago_wall, gflops, "stop")
-       diago_info(2, ik_ibz, spin) = diago_wall
-       diago_info(3, ik_ibz, spin) = dble(diago_pool%comm%nproc)
+       if (diago_pool%comm%me == 0) diago_info(2:3, ik_ibz, spin) = [diago_wall, dble(diago_pool%comm%nproc)]
 
        ABI_FREE(eig_k)
        call ugb%free()
@@ -648,8 +648,8 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
        do ik_ibz=1,dtset%nkpt
          associate (info => diago_info(:, ik_ibz, spin))
          write(std_out, "(2(a,i0),5a,i0)") &
-           "ik_ibz:", ik_ibz, "spin:", spin, &
-           "diago_wall:", trim(sec2str(info(1))), "io_wall:", trim(sec2str(info(2))), "nprocs:", int(info(3))
+           "ik_ibz: ", ik_ibz, "spin: ", spin, &
+           "diago_wall: ", trim(sec2str(info(1))), ", io_wall: ", trim(sec2str(info(2))), ", nprocs: ", int(info(3))
          end associate
        end do
      end do
@@ -673,6 +673,8 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
    call ebands_free(owfk_ebands)
    call diago_pool%free()
    if (print_wfk) call owfk%close()
+
+ !else if (dtset%gwr_task == "CC4S") then
 
  else
    ! ====================================================
