@@ -552,18 +552,18 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  call cwtime_report(" prepare gwr_driver_init", cpu, wall, gflops)
 
  if (dtset%gwr_task == "HDIAGO") then
-   ! Direct diagonalization of the Hamiltonian.
+   ! ==========================================
+   ! Direct diagonalization of the Hamiltonian
+   ! ==========================================
    ABI_MALLOC(nband_iks, (dtset%nkpt, dtset%nsppol))
    ABI_MALLOC(npwarr_ik, (dtset%nkpt))
    ABI_MALLOC(istwfk_ik, (dtset%nkpt))
-   istwfk_ik = 1 ! istwkf 2 is not yet supported.
-   !istwfk_ik = dtset%istwfk
+   istwfk_ik = 1 ! TODO: istwkf 2 is not yet supported.
 
    ! Compute npw_k from ecut so that we can update the header.
    do ik_ibz=1,dtset%nkpt
      call get_kg(dtset%kptns(:,ik_ibz), istwfk_ik(ik_ibz), dtset%ecut, cryst%gmet, npwarr_ik(ik_ibz), gvec_)
      ABI_FREE(gvec_)
-     !nband_iks(ik_ibz, :) = npwarr_ik(ik_ibz)
    end do
    nband_iks(:,:) = maxval(dtset%nband)
 
@@ -579,11 +579,12 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
    print_wfk = .True.
    print_wfk = dtset%prtwf > 0
 
-   ! Build pools to distribute (kpt, spin) diago
-   call diago_pool%from_dims(dtset%nkpt, dtset%nsppol, comm)
+   ! Build pools to distribute (kpt, spin) diago.
+   ! Try to have rectangular grids in each pool to improve efficiency in scalapack routines.
+   call diago_pool%from_dims(dtset%nkpt, dtset%nsppol, comm, rectangular=.True.)
 
    if (print_wfk) then
-     ! Master write header and Fortran record markers if needed.
+     ! Master writes header and Fortran record markers if needed.
      out_path = dtfil%fnameabo_wfk; if (dtset%iomode == IO_MODE_ETSF) out_path = nctk_ncify(out_path)
      iomode__ = iomode_from_fname(out_path)
      call wrtout(std_out, sjoin(" Writing wavefunctions to file:", out_path))
@@ -599,14 +600,9 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
                           write_hdr=.False., write_frm=.False.)
    end if
 
-   !ABI_MALLOC(ugb_ks, (dtset%nkpt, dtset%nsppol))
-   !ABI_FREE(ugb_ks)
-
    do spin=1,dtset%nsppol
      do ik_ibz=1,dtset%nkpt
        if (.not. diago_pool%treats(ik_ibz, spin)) cycle
-
-       !associate (ugb => ugb_ks(ik_ibz, spin))
 
        nband_k = nband_iks(ik_ibz, spin)
        call ugb%from_diago(spin, istwfk_ik(ik_ibz), dtset%kptns(:,ik_ibz), dtset%ecut, nband_k, ngfftc, nfftf, &
@@ -634,7 +630,6 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
 
        ABI_FREE(eig_k)
        call ugb%free()
-       !end associate
      end do ! ik_ibz
    end do ! spin
    call wrtout(std_out, " Direct diagonalization completed by this MPI pool.")
@@ -655,8 +650,8 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
 
    call owfk_hdr%free()
    call ebands_free(owfk_ebands)
-   if (print_wfk) call owfk%close()
    call diago_pool%free()
+   if (print_wfk) call owfk%close()
 
  else
    ! ====================================================
