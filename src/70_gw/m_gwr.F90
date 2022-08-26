@@ -1058,7 +1058,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
      end if
    else
      ! ii divides ntau and nps.
-     gwr%tau_comm%nproc  = ii
+     gwr%tau_comm%nproc = ii
      nps = nps / gwr%tau_comm%nproc
 
      gwr%kpt_comm%nproc = 1  ! Init values assuming Gamma-only sampling.
@@ -1383,7 +1383,6 @@ end function vid
 end subroutine gwr_init
 !!***
 
-
 !----------------------------------------------------------------------
 
 !!****f* m_gwr/gwr_alloc_free_mats
@@ -1469,6 +1468,8 @@ subroutine gwr_alloc_free_mats(gwr, mask_ibz, what, action)
 
    end do ! my_it
  end do ! my_is
+
+ call gwr_print_mem(unit=std_out)
 
 end subroutine gwr_alloc_free_mats
 !!***
@@ -1720,7 +1721,7 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
  integer :: mband, min_nband, nkibz, nsppol, my_is, my_iki, spin, ik_ibz ! my_it,
  integer :: my_ib, my_nb, band, npw_k, mpw, istwf_k, itau, ipm, ig1, ig2, il_g1, il_g2
  integer :: nbsum, npwsp, col_bsize, nband_k, my_bstart, my_bstop, my_nband, ierr
- real(dp) :: f_nk, eig_nk, ef, spin_fact, cpu, wall, gflops
+ real(dp) :: f_nk, eig_nk, ef, spin_fact, cpu, wall, gflops, cpu_green, wall_green, gflops_green
  complex(dp) :: gt_cfact
  character(len=5000) :: msg
  type(wfd_t),target :: wfd
@@ -1852,6 +1853,7 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
  do my_is=1,gwr%my_nspins
    spin = gwr%my_spins(my_is)
    do my_iki=1,gwr%my_nkibz
+     call cwtime(cpu_green, wall_green, gflops_green, "start")
      ik_ibz = gwr%my_kibz_inds(my_iki)
      kk_ibz = gwr%kibz(:, ik_ibz)
      npw_k = wfd%npwarr(ik_ibz)
@@ -1928,7 +1930,7 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
        call xmpi_sum_master(loc_cwork, gwr%tau_master(itau), gwr%tau_comm%value, ierr)
        if (gwr%tau_comm%me == gwr%tau_master(itau)) then
          do ipm=1,2
-           gwr%gt_kibz(ipm, ik_ibz, itau, spin)%buffer_cplx = loc_cwork(:,:,ipm)
+           gwr%gt_kibz(ipm, ik_ibz, itau, spin)%buffer_cplx(:,:) = loc_cwork(:,:,ipm)
          end do
        end if
 
@@ -1937,7 +1939,9 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
      ABI_FREE(loc_cwork)
      end associate
 
-   end do ! my_ikf
+     write(msg,'(3(a,i0),a)')" My iki [", my_iki, "/", gwr%my_nkibz, "] (tot: ", gwr%nkbz, ")"
+     call cwtime_report(msg, cpu_green, wall_green, gflops_green)
+   end do ! my_iki
  end do ! my_is
 
  !call ddkop%free()
