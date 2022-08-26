@@ -41,7 +41,7 @@ module m_gwr_driver
  use defs_datatypes,    only : pseudopotential_type, ebands_t
  use defs_abitypes,     only : MPI_type
  use m_io_tools,        only : file_exists, open_file, get_unit, iomode_from_fname
- use m_time,            only : cwtime, cwtime_report
+ use m_time,            only : cwtime, cwtime_report, sec2str
  use m_fstrings,        only : strcat, sjoin, ftoa, itoa
  use m_slk,             only : matrix_scalapack
  use m_fftcore,         only : print_ngfft, get_kg
@@ -154,7 +154,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  integer :: ii, comm, nprocs, my_rank, mgfftf, nfftf, omp_ncpus, work_size, nks_per_proc
  integer :: ierr, spin, ik_ibz, nband_k, iomode__
  real(dp) :: eff, mempercpu_mb, max_wfsmem_mb, nonscal_mem
- real(dp) :: ecore, ecut_eff, ecutdg_eff, cpu, wall, gflops
+ real(dp) :: ecore, ecut_eff, ecutdg_eff, cpu, wall, gflops, diago_cpu, diago_wall, diago_gflops
  logical, parameter :: is_dfpt = .false.
  logical :: read_wfk, print_wfk
  character(len=500) :: msg
@@ -190,7 +190,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  integer :: ngfftc(18),ngfftf(18),unts(2) ! gwc_ngfft(18),gwx_ngfft(18),
  integer,allocatable :: nq_spl(:), l_size_atm(:) !,qp_vbik(:,:),tmp_gfft(:,:),ks_vbik(:,:)
  integer,allocatable :: tmp_kstab(:,:,:), npwarr_ik(:), gvec_(:,:), istwfk_ik(:), nband_iks(:,:)
- real(dp) :: strsxc(6) !,tsec(2)
+ real(dp) :: strsxc(6), diago_info(3, dtset%nkpt, dtset%nsppol) !,tsec(2)
  real(dp),allocatable :: grchempottn(:,:),grewtn(:,:),grvdw(:,:),qmax(:)
  real(dp),allocatable :: ks_nhat(:,:),ks_nhatgr(:,:,:),ks_rhog(:,:)
  real(dp),allocatable :: ks_rhor(:,:),ks_vhartr(:), ks_vtrial(:,:), ks_vxc(:,:)
@@ -582,6 +582,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
    ! Build pools to distribute (kpt, spin) diago.
    ! Try to have rectangular grids in each pool to improve efficiency in scalapack routines.
    call diago_pool%from_dims(dtset%nkpt, dtset%nsppol, comm, rectangular=.True.)
+   diago_info = zero
 
    if (print_wfk) then
      ! Master writes header and Fortran record markers if needed.
@@ -603,10 +604,14 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
    do spin=1,dtset%nsppol
      do ik_ibz=1,dtset%nkpt
        if (.not. diago_pool%treats(ik_ibz, spin)) cycle
+       call cwtime(diago_cpu, diago_wall, gflops, "start")
 
        nband_k = nband_iks(ik_ibz, spin)
        call ugb%from_diago(spin, istwfk_ik(ik_ibz), dtset%kptns(:,ik_ibz), dtset%ecut, nband_k, ngfftc, nfftf, &
                            dtset, pawtab, pawfgr, ks_paw_ij, cryst, psps, ks_vtrial, eig_k, diago_pool%comm%value)
+
+       call cwtime(diago_cpu, diago_wall, gflops, "stop")
+       diago_info(1, ik_ibz, spin) = diago_wall
 
        owfk_ebands%eig(1:nband_k, ik_ibz, spin) = eig_k(1:nband_k)
 
@@ -627,12 +632,28 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
          end if
          ABI_FREE(occ_k)
        end if
+       call cwtime(diago_cpu, diago_wall, gflops, "stop")
+       diago_info(2, ik_ibz, spin) = diago_wall
+       diago_info(3, ik_ibz, spin) = dble(diago_pool%comm%nproc)
 
        ABI_FREE(eig_k)
        call ugb%free()
      end do ! ik_ibz
    end do ! spin
    call wrtout(std_out, " Direct diagonalization completed by this MPI pool.")
+
+   call xmpi_sum_master(diago_info, master, comm, ierr)
+   if (my_rank == master) then
+     do spin=1,dtset%nsppol
+       do ik_ibz=1,dtset%nkpt
+         associate (info => diago_info(:, ik_ibz, spin))
+         write(std_out, "(2(a,i0),5a,i0)") &
+           "ik_ibz:", ik_ibz, "spin:", spin, &
+           "diago_wall:", trim(sec2str(info(1))), "io_wall:", trim(sec2str(info(2))), "nprocs:", int(info(3))
+         end associate
+       end do
+     end do
+   end if
 
    ! Collect eigenvalues
    do spin=1,dtset%nsppol

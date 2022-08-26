@@ -63,6 +63,7 @@ MODULE m_fstrings
  public :: startswith      ! Returns .TRUE. is the string starts with the specified prefix.
  public :: endswith        ! Returns .True if the string ends with the specified suffix.
  public :: indent          ! Indent text
+ public :: string_in       ! Compare input str with a list of comma-separated strings
  public :: prep_char       ! Prepend `char` to each line in a string.
  public :: int2char4       ! Convert a positive integer number (zero included) to a character(len=*)
                            ! with trailing zeros if the number is <=9999
@@ -1589,6 +1590,10 @@ end function endswith
 !! INPUTS
 !!   istr=Input string
 !!
+!! PARENTS
+!!
+!! CHILDREN
+!!
 !! SOURCE
 
 pure function indent(istr) result(ostr)
@@ -1621,6 +1626,50 @@ pure function indent(istr) result(ostr)
  !ostr(jj+1:) = "H"
 
 end function indent
+!!***
+
+!!****f* m_fstrings/string_in
+!! NAME
+!!  string_in
+!!
+!! FUNCTION
+!! Compare input str with a list of comma-separated strings
+!! Example: string_in("foo", "foo, bar") --> True
+!!
+!! INPUTS
+!!   string=Input string
+!!
+!! SOURCE
+
+pure logical function string_in(string, tokens) result(ans)
+
+ character(len=*),intent(in) :: string, tokens
+
+!Local variables-------------------------------
+ integer :: ii, prev, cnt
+
+! *********************************************************************
+
+ ans = .False.
+ prev = 0; cnt = 0
+ do ii=1,len_trim(tokens)
+   if (tokens(ii:ii) == ",") then
+     cnt = cnt + 1
+     if (trim(lstrip(string)) == lstrip(tokens(prev+1:ii-1))) then
+       ans = .True.; return
+     end if
+     prev = ii
+   end if
+ end do
+
+ if (cnt == 0) then
+   ans = trim(lstrip(string)) == trim(lstrip(tokens)); return
+ end if
+
+ ! Handle last item if "foo, bar"
+ ans = trim(lstrip(string)) == lstrip(tokens(prev+1:ii-1))
+
+end function string_in
 !!***
 
 !----------------------------------------------------------------------
