@@ -36,6 +36,7 @@ module m_chkinp
  use m_io_tools,       only : flush_unit
  use m_numeric_tools,  only : iseven, isdiagmat
  use m_symtk,          only : chkgrp, chkorthsy, symmetrize_xred
+ use m_fstrings,       only : string_in, sjoin
  use m_geometry,       only : metric
  use m_fftcore,        only : fftalg_has_mpi
  use m_exit,           only : get_timelimit
@@ -4021,6 +4022,10 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      end if
      if (dt%nshiftk /= 1 .or. any(abs(dt%shiftk(:,1)) > tol6)) then
        ABI_ERROR_NOSTOP('GWR requires Gamma-centered k-meshes', ierr)
+     end if
+     msg = "G0W0, HDIAGO"
+     if (.not. string_in(dt%gwr_task, msg)) then
+       ABI_ERROR_NOSTOP(sjoin("Invalid gwr_task:`", dt%gwr_task, "`, must be among:", msg), ierr)
      end if
    end if
 
