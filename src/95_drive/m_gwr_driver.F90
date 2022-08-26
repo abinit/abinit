@@ -576,30 +576,24 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
    ABI_REMALLOC(owfk_hdr%istwfk, (dtset%nkpt))
    owfk_hdr%istwfk(:) = istwfk_ik
 
-   print_wfk = .True.
-   print_wfk = dtset%prtwf > 0
-
-   ! Build pools to distribute (kpt, spin) diago.
+   ! Build pools to distribute (kpt, spin)
    ! Try to have rectangular grids in each pool to improve efficiency in scalapack routines.
    call diago_pool%from_dims(dtset%nkpt, dtset%nsppol, comm, rectangular=.True.)
    diago_info = zero
 
-   if (print_wfk) then
-     ! Master writes header and Fortran record markers if needed.
-     out_path = dtfil%fnameabo_wfk; if (dtset%iomode == IO_MODE_ETSF) out_path = nctk_ncify(out_path)
-     iomode__ = iomode_from_fname(out_path)
-     call wrtout(std_out, sjoin(" Writing wavefunctions to file:", out_path))
-     if (my_rank == master) then
-       call owfk%open_write(owfk_hdr, out_path, 0, iomode__, get_unit(), xmpi_comm_self, &
-                            write_hdr=.True., write_frm=.True.)
-       !TODO: owfk%get_mem_mb()
-       call owfk%close()
-     end if
-     call xmpi_barrier(comm)
-     ! Reopen file inside diago_pool%comm.
-     call owfk%open_write(owfk_hdr, out_path, 0, iomode__, get_unit(), diago_pool%comm%value, &
-                          write_hdr=.False., write_frm=.False.)
+   ! Master writes header and Fortran record markers if needed.
+   out_path = dtfil%fnameabo_wfk; if (dtset%iomode == IO_MODE_ETSF) out_path = nctk_ncify(out_path)
+   iomode__ = iomode_from_fname(out_path)
+   call wrtout(std_out, sjoin(" Writing wavefunctions to file:", out_path))
+   if (my_rank == master) then
+     call owfk%open_write(owfk_hdr, out_path, 0, iomode__, get_unit(), xmpi_comm_self, &
+                          write_hdr=.True., write_frm=.True.)
+     call owfk%close()
    end if
+   call xmpi_barrier(comm)
+   ! Reopen file inside diago_pool%comm.
+   call owfk%open_write(owfk_hdr, out_path, 0, iomode__, get_unit(), diago_pool%comm%value, &
+                        write_hdr=.False., write_frm=.False.)
 
    do spin=1,dtset%nsppol
      do ik_ibz=1,dtset%nkpt
@@ -616,23 +610,22 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
 
        owfk_ebands%eig(1:nband_k, ik_ibz, spin) = eig_k(1:nband_k)
 
-       if (print_wfk) then
-         ! occupancies are set to zero.
-         ! Client code is responsible for recomputing occ and fermie when reading this WFK.
-         ABI_CALLOC(occ_k, (owfk%mband))
+       ! occupancies are set to zero. Client code is responsible for recomputing occ and fermie when reading this WFK.
+       ABI_CALLOC(occ_k, (owfk%mband))
 
-         sc_mode = merge(xmpio_single, xmpio_collective, ugb%has_idle_procs)
-         if (ugb%my_nband > 0) then
-           ABI_CHECK(all(shape(ugb%cg_k) == [2, ugb%npwsp, ugb%my_nband]), "Wrong shape")
-           ABI_CHECK_IEQ(ugb%npw_k, owfk_hdr%npwarr(ik_ibz), "Wronk npw_k")
-           call c_f_pointer(c_loc(ugb%cg_k), cg_k_ptr, shape=[2, ugb%npwsp * ugb%my_nband])
+       sc_mode = merge(xmpio_single, xmpio_collective, ugb%has_idle_procs)
 
-           call owfk%write_band_block([ugb%my_bstart, ugb%my_bstop], ik_ibz, spin, sc_mode, &
-                                       kg_k=ugb%kg_k, cg_k=cg_k_ptr, &
-                                       eig_k=owfk_ebands%eig(:, ik_ibz, spin), occ_k=occ_k)
-         end if
-         ABI_FREE(occ_k)
+       if (ugb%my_nband > 0) then
+         ABI_CHECK(all(shape(ugb%cg_k) == [2, ugb%npwsp, ugb%my_nband]), "Wrong shape")
+         ABI_CHECK_IEQ(ugb%npw_k, owfk_hdr%npwarr(ik_ibz), "Wronk npw_k")
+         call c_f_pointer(c_loc(ugb%cg_k), cg_k_ptr, shape=[2, ugb%npwsp * ugb%my_nband])
+
+         call owfk%write_band_block([ugb%my_bstart, ugb%my_bstop], ik_ibz, spin, sc_mode, &
+                                     kg_k=ugb%kg_k, cg_k=cg_k_ptr, &
+                                     eig_k=owfk_ebands%eig(:, ik_ibz, spin), occ_k=occ_k)
        end if
+       ABI_FREE(occ_k)
+
        call cwtime(diago_cpu, diago_wall, gflops, "stop")
        if (diago_pool%comm%me == 0) diago_info(2:3, ik_ibz, spin) = [diago_wall, dble(diago_pool%comm%nproc)]
 
@@ -640,16 +633,16 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
        call ugb%free()
      end do ! ik_ibz
    end do ! spin
-   call wrtout(std_out, " Direct diagonalization completed by this MPI pool.")
+
+   call wrtout(std_out, " Direct diago completed by this MPI pool. Other pools might take more time if k != 0")
 
    call xmpi_sum_master(diago_info, master, comm, ierr)
    if (my_rank == master) then
      do spin=1,dtset%nsppol
        do ik_ibz=1,dtset%nkpt
          associate (info => diago_info(:, ik_ibz, spin))
-         write(std_out, "(2(a,i0),5a,i0)") &
-           "ik_ibz: ", ik_ibz, "spin: ", spin, &
-           "diago_wall: ", trim(sec2str(info(1))), ", io_wall: ", trim(sec2str(info(2))), ", nprocs: ", int(info(3))
+         write(std_out, "(2(a,i0),5a,i0)") "ik_ibz: ", ik_ibz, ", spin: ", spin, &
+           ", diago_wall: ", trim(sec2str(info(1))), ", io_wall: ", trim(sec2str(info(2))), ", nprocs: ", int(info(3))
          end associate
        end do
      end do
@@ -672,9 +665,11 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
    call owfk_hdr%free()
    call ebands_free(owfk_ebands)
    call diago_pool%free()
-   if (print_wfk) call owfk%close()
+   call owfk%close()
 
  !else if (dtset%gwr_task == "CC4S") then
+   ! Diagonalize Hamiltonian at k = Gamma
+   ! Compute oscillator matrix elements and save results to disk
 
  else
    ! ====================================================
@@ -826,10 +821,9 @@ subroutine ugb_calc_osc_gamma()
 
  npw_k = ugb%npw_k; nspinor = ugb%nspinor
 
- ! Set FFT mesh for wavefunctions and g-sphere for oscillators
+ ! Setup FFT mesh for wavefunctions and g-sphere for oscillators
  !u_ngfft(18) ??
- u_nfft = product(u_ngfft(1:3))
- u_mgfft = maxval(u_ngfft(1:3))
+ u_nfft = product(u_ngfft(1:3)); u_mgfft = maxval(u_ngfft(1:3))
 
  ABI_MALLOC(gbound_k, (2 * u_mgfft + 8, 2))
  call sphereboundary(gbound_k, ugb%istwf_k, ugb%kg_k, u_mgfft, npw_k)

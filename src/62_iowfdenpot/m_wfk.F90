@@ -374,6 +374,8 @@ subroutine wfk_open_read(Wfk, fname, formeig, iomode, funt, comm, Hdr_out)
  end if
  call xmpi_bcast(wfk%fname, wfk%master, comm, ierr)
 
+ !TODO: owfk%get_mem_mb()
+
  Wfk%formeig = formeig
  Wfk%iomode = iomode
  if (endswith(fname, ".nc")) wfk%iomode = IO_MODE_ETSF

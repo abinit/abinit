@@ -1150,7 +1150,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
    !  bras(1, igsp2 + idat * npwsp + idat) = zero
    !end do
  end do ! il_g2
- call cwtime_report(" build_hgg'", cpu, wall, gflops)
+ call cwtime_report(" build_hg1g2", cpu, wall, gflops)
 
  ! Free workspace memory allocated so far.
  ABI_FREE(bras)
