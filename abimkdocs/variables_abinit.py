@@ -16002,7 +16002,7 @@ range of energy (positive or negative), determined by the (positive or
 negative, but non-zero) value of the STM bias [[stmbias]].
 Specifying a non-zero negative value is also allowed, and will produce also
 the output of an electron density in real space, like the above, but moreover
-will additionally filter it to have the contribution of one band only, 
+will additionally filter it to have the contribution of one band only,
 whose number is the absolute value of [[prtstm]]. Obviously abs([[prtstm]])
 must be smaller or equal to [[nband]].
 
@@ -23248,7 +23248,15 @@ Variable(
     requires="[[optdriver]] == 6",
     added_in_version="9.6.2",
     text=r"""
-This variable defines ...
+Select the task to be performed when [[optdriver]] == 6 i.e. GWR code.
+The choice is among:
+
+* G0W0 -->  one-shot GW.
+* HDIAG --> direct diagonalization of the KS Hamiltonian.
+
+!!! important
+
+    At the time of writing ( |today| ), PAW is not supported by the GWR code.
 """,
 ),
 
@@ -23267,8 +23275,7 @@ This variable defines the number of imaginary-time points
 
 !!! important
 
-    To avoid load imbalance the the total number of MPI processes should be a divisor/multiple of
-    [[gwr_ntau]] * [[nsppol]]
+    To avoid load imbalance the the total number of MPI processes should be a divisor/multiple of [[gwr_ntau]] * [[nsppol]]
 """,
 ),
 
