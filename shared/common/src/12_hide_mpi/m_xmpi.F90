@@ -183,7 +183,10 @@ module m_xmpi
 !! xmpi_pool2d_t
 !!
 !! FUNCTION
-!!  Pool of MPI processors used to tread a 2D problem of shape (n1, n2)
+!!  Pool of MPI processors operating a 2D problem of shape (n1, n2).
+!!  Each item in the (n1, n2) matrix is assigned to a single pool.
+!!  Note that differerent pools do not necessarily have the same number of procs,
+!!  thus a pool is more flexibile than a Cartesian grid although inter-pool communication becomes more complex.
 !!
 !! SOURCE
 
@@ -193,7 +196,7 @@ module m_xmpi
    ! Dimensions of the 2d problem
 
    type(xcomm_t) :: comm
-   ! Pool communicator
+   ! MPI communicator
 
    logical,allocatable :: treats(:,:)
    ! (n1, n2)
@@ -4952,22 +4955,27 @@ end subroutine xcomm_free
 !!  pool2d_from_dims
 !!
 !! FUNCTION
+!!  Build pool of MPI procs to distribute (n1 x n2) tasks.
 !!
 !! INPUTS
 !!  n1, n2: dimensions of the problem
 !!  input_comm: Initial MPI communicator
+!!  [rectangular]: If True, change the number of procs in each pool so that it's possible to
+!!      create a rectangular grid. Useful for Scalapack algorithms in which 1d grid are not efficient.
+!!      Default: False.
 !!
 !! SOURCE
 
-subroutine pool2d_from_dims(pool, n1, n2, input_comm)
+subroutine pool2d_from_dims(pool, n1, n2, input_comm, rectangular)
 
 !Arguments-------------------------
  class(xmpi_pool2d_t),intent(out) :: pool
  integer,intent(in) :: n1, n2, input_comm
+ logical,optional,intent(in) :: rectangular
 
 !Local variables-------------------
  integer :: itask, ntasks, my_rank, nprocs, color, mpierr, jj, i1, i2, my_ntasks, new_comm
- integer :: check(n1, n2)
+ integer :: grid_dims(2), check(n1, n2)
  integer,allocatable :: my_inds(:)
 !----------------------------------------------------------------------
 
@@ -5017,18 +5025,55 @@ subroutine pool2d_from_dims(pool, n1, n2, input_comm)
  pool%comm = xcomm_from_mpi_int(new_comm)
  call xmpi_comm_free(new_comm)
 
+ if (present(rectangular)) then
+ if (rectangular) then
+   if (pool%comm%nproc == 1 .or. is_rectangular_grid(pool%comm%nproc, grid_dims)) return
+
+   do jj=pool%comm%nproc-1,1,-1
+     if (is_rectangular_grid(jj, grid_dims)) then
+       color = merge(1, 0, pool%comm%me < jj)
+       call xmpi_comm_split(pool%comm%value, color, pool%comm%me, new_comm, mpierr)
+       call pool%comm%free()
+       pool%comm = xcomm_from_mpi_int(new_comm)
+       call xmpi_comm_free(new_comm)
+       if (color == 0) pool%treats = .False.
+       exit
+     end if
+   end do
+ end if
+ end if
+
+contains
+
+logical function is_rectangular_grid(nproc, grid_dims) result (ans)
+  integer,intent(in) :: nproc
+  integer,intent(out) :: grid_dims(2)
+
+  integer :: i
+
+  ! Search for a rectangular grid of processors
+  i=INT(SQRT(float(nproc)))
+  do while (MOD(nproc,i) /= 0)
+    i = i-1
+  end do
+  i=max(i,1)
+
+  grid_dims(1) = i
+  grid_dims(2) = INT(nproc/i)
+
+  ans = grid_dims(1) > 1 .and. grid_dims(2) > 1
+
+end function is_rectangular_grid
+
 end subroutine pool2d_from_dims
 !!***
 
-!!****f* m_xmpi/pool2d_from_dims
+!!****f* m_xmpi/pool2d_free
 !! NAME
-!!  pool2d_from_dims
+!!  pool2d_free
 !!
 !! FUNCTION
-!!
-!! INPUTS
-!!
-!! SOURCE
+!!  Free memory
 
 subroutine pool2d_free(pool)
 
