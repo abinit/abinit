@@ -37,6 +37,7 @@ getwfk3 2 # WFK file with empty states
 gwr_ntau3   6        # Number of imaginary-time points
 
 gwr_boxcutmin3  1.1  # This should be subject to convergence studies
+mixprec3    1        # Mixed precision FFT.
 
 nband3      30       # Bands to be used in the screening calculation
 ecuteps3    4        # Cut-off energy of the planewave set to represent the dielectric matrix.
