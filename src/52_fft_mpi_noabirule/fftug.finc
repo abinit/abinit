@@ -11,35 +11,41 @@
 ! *************************************************************************
 
  ! FFT: ug -> ur 
- !
- nthreads = xomp_get_num_threads(open_parallel=.TRUE.)
 
- use_fftrisc = (MOD(fftalg,10)==2 .and. ANY(istwf_k==(/1,2/)) )
+ use_fftrisc = mod(fftalg, 10) == 2 .and. anu(istwf_k== [1, 2])
 
  if (use_fftrisc) then
-   !call wrtout(std_out,ABI_FUNC//" with use_fftrisc","COLL")
+   !call wrtout(std_out, "fft_ug: using_fftrisc")
    !
    ! Initialize ngfft
-   ngfft(1:8) = (/nx, ny, nz, ldx, ldy, ldz, fftalg, fftcache/)
+   ngfft(1:8) = [nx, ny, nz, ldx, ldy, ldz, fftalg, fftcache]
 
-   call C_F_pointer(C_loc(ug), real_ug, shape=[2, npw_k*ndat])
-   call C_F_pointer(C_loc(ur), real_ur, shape=[2, ldx*ldy*ldz*ndat])
+   call C_F_pointer(c_loc(ug), real_ug, shape=[2, npw_k*ndat])
+   call C_F_pointer(c_loc(ur), real_ur, shape=[2, ldx*ldy*ldz*ndat])
 
-   if (ndat == 1) then
-     call FFT_PREF(fftrisc) (cplex0,denpot,real_ug,fofgout,real_ur,&
-&      gbound,gbound,istwf_k,kg_k,kg_k,mgfft,ngfft,npw_k,npwout0,ldx,ldy,ldz,option0,weight1_r, weight1_i)
-   else
-!$OMP PARALLEL DO PRIVATE(ug_ptr, ur_ptr)
+   if (fftcore_mixprec == 0) then
+     !$OMP PARALLEL DO PRIVATE(ug_ptr, ur_ptr) IF (ndat > 1)
      do dat=1,ndat
        ug_ptr = 1 + (dat-1)*npw_k
        ur_ptr = 1 + (dat-1)*ldx*ldy*ldz
        call FFT_PREF(fftrisc) (cplex0,denpot,real_ug(:,ug_ptr:),fofgout,real_ur(:,ur_ptr:),&
-&        gbound,gbound,istwf_k,kg_k,kg_k,mgfft,ngfft,npw_k,npwout0,ldx,ldy,ldz,option0,weight1_r,weight1_i)
+         gbound,gbound,istwf_k,kg_k,kg_k,mgfft,ngfft,npw_k,npwout0,ldx,ldy,ldz,option0,weight1_r,weight1_i)
+     end do
+
+   else
+     ! Mixed precision FFT
+     !$OMP PARALLEL DO PRIVATE(ug_ptr, ur_ptr) IF (ndat > 1)
+     do dat=1,ndat
+       ug_ptr = 1 + (dat-1)*npw_k
+       ur_ptr = 1 + (dat-1)*ldx*ldy*ldz
+       call FFT_PREF(fftrisc_mixprec) (cplex0,denpot,real_ug(:,ug_ptr:),fofgout,real_ur(:,ur_ptr:),&
+         gbound,gbound,istwf_k,kg_k,kg_k,mgfft,ngfft,npw_k,npwout0,ldx,ldy,ldz,option0,weight1_r,weight1_i)
      end do
    end if
 
  else
-   !
+
+   nthreads = xomp_get_num_threads(open_parallel=.TRUE.)
    if (.not. SPAWN_THREADS_HERE(ndat, nthreads)) then
     
      ! Insert fg in fg_aug defined on the (augmented) FFT mesh

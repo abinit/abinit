@@ -3559,6 +3559,7 @@ end if
            if (my_rank == 0) call cwtime_report(msg, cpu_ir, wall_ir, gflops_ir)
          end if
        end do ! my_ir
+       call wrtout(std_out, "Computation of chiq_gpr completed")
 
        ! Free descriptors and PBLAS matrices in kBZ.
        call desc_array_free(desc_mykbz)

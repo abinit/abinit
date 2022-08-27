@@ -801,10 +801,11 @@ subroutine degtab_array_free(degtab)
 
  do jj=1,size(degtab, dim=2)
    do ii=1,size(degtab, dim=1)
+     if (.not. allocated(degtab(ii, jj)%bids)) cycle
      do ideg=1,size(degtab(ii, jj)%bids)
-       ABI_FREE(degtab(ii, jj)%bids(ideg)%vals)
+       ABI_SFREE(degtab(ii, jj)%bids(ideg)%vals)
      end do
-     ABI_FREE(degtab(ii, jj)%bids)
+     ABI_SFREE(degtab(ii, jj)%bids)
    end do
  end do
 
@@ -813,4 +814,3 @@ end subroutine degtab_array_free
 
 end module m_sigtk
 !!***
-
