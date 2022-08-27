@@ -31,15 +31,15 @@ MODULE m_clib
  public :: clib_etime
  public :: clib_mtrace
  public :: clib_print_mallinfo
- public :: clib_ulimit_stack   ! Set stack size limit to maximum allowed value.
+ public :: clib_ulimit_stack    ! Set stack size limit to maximum allowed value.
  !public :: clib_usleep         ! Suspend calling thread for microseconds of clock time
 
 !FIXME the interfaces below have been commented out since abilint
 ! JB : because interface must have a name in abilint
 
-!! ===================================================
-!! ==== Fortran-bindings declared in fsi_posix.c ====
-!! ===================================================
+! ===================================================
+! ==== Fortran-bindings declared in fsi_posix.c ====
+! ===================================================
 ! interface
 !   subroutine clib_mkdir(path, ierr)
 !     import
@@ -71,9 +71,9 @@ MODULE m_clib
    end function
  end interface
 
-!! =================================================
-!! ==== Fortran-bindings declared in mallinfo.c ====
-!! =================================================
+! =================================================
+! ==== Fortran-bindings declared in mallinfo.c ====
+! =================================================
  interface
    subroutine clib_mallinfo(arena, hblkhd, usmblks, fsmblks, uordblks, fordblks) bind(C, name="clib_mallinfo")
      import
@@ -81,9 +81,9 @@ MODULE m_clib
    end subroutine clib_mallinfo
  end interface
 
-!! ==================================================
-!! ==== Fortran-bindings declared in gnu_tools.c ====
-!! ==================================================
+! ==================================================
+! ==== Fortran-bindings declared in gnu_tools.c ====
+! ==================================================
 
  interface
    subroutine clib_mtrace(ierr) bind(C, name="clib_mtrace")
