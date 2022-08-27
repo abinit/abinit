@@ -934,6 +934,8 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
 
  ABI_CHECK(ierr == 0, "kptgw wavevectors must be in the IBZ read from the WFK file.")
 
+ ! FIXME: This trigger SIGSEGV on lumi, don't know why!
+#if 0
  ! Build degtab tables.
  if (abs(gwr%dtset%symsigma) == 1) then
    call xmpi_sum(ndeg_all, comm, ierr)
@@ -952,6 +954,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
      end do
    end do
  end if
+#endif
 
  ABI_FREE(degblock_all)
  ABI_FREE(ndeg_all)
@@ -1474,6 +1477,7 @@ subroutine gwr_alloc_free_mats(gwr, mask_ibz, what, action)
    end do ! my_it
  end do ! my_is
 
+ call wrtout(std_out, "")
  call gwr%print_mem(unit=std_out)
 
 end subroutine gwr_alloc_free_mats
@@ -1855,7 +1859,7 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
  ABI_CHECK(abs(ef) < tol12, "ef should have been set to zero!")
  spin_fact = two / (gwr%nsppol * gwr%nspinor)
 
- call wrtout(std_out, " Building Green's functions from KS states...")
+ call wrtout(std_out, sjoin(" Building Green's functions from KS states with nband", itoa(nbsum), "..."))
  do my_is=1,gwr%my_nspins
    spin = gwr%my_spins(my_is)
    do my_iki=1,gwr%my_nkibz
@@ -3419,6 +3423,11 @@ subroutine gwr_build_tchi(gwr)
    !end do
    !ABI_FREE(uc_ceimkr)
 
+   ABI_MALLOC(gt_gpr, (2, gwr%my_nkbz))
+   ABI_MALLOC(chiq_gpr, (gwr%my_nqibz))
+   ABI_MALLOC(gk_rpr_pm, (2))
+   ABI_MALLOC(desc_mykbz, (gwr%my_nkbz))
+
    ! Allocate PBLAS arrays for tchi_q(g',r) for all q in the IBZ treated by this MPI rank.
    do my_iqi=1,gwr%my_nqibz
      iq_ibz = gwr%my_qibz_inds(my_iqi)
@@ -3429,11 +3438,6 @@ subroutine gwr_build_tchi(gwr)
    end do
    mem_mb = sum(slk_array_locmem_mb(chiq_gpr))
    call wrtout(std_out, sjoin(' Local memory for chiq_gpr: ', ftoa(mem_mb, fmt="f8.1"), ' [Mb] <<< MEM'))
-
-   ABI_MALLOC(gt_gpr, (2, gwr%my_nkbz))
-   ABI_MALLOC(chiq_gpr, (gwr%my_nqibz))
-   ABI_MALLOC(gk_rpr_pm, (2))
-   ABI_MALLOC(desc_mykbz, (gwr%my_nkbz))
 
    ! Loop over my spins and my taus.
    do my_is=1,gwr%my_nspins
@@ -3623,13 +3627,13 @@ end if
    ABI_FREE(cemiqr)
    !ABI_SFREE(sc_ceimkr)
 
+   call slk_array_free(chiq_gpr)
+   !call destroy_mpi_enreg(tchi_mpi_enreg)
+
    ABI_FREE(gt_gpr)
    ABI_FREE(chiq_gpr)
    ABI_FREE(gk_rpr_pm)
    ABI_FREE(desc_mykbz)
-
-   call slk_array_free(chiq_gpr)
-   !call destroy_mpi_enreg(tchi_mpi_enreg)
 
   else
     ! ===================================================================
