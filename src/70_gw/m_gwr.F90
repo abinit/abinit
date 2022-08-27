@@ -630,16 +630,13 @@ module m_gwr
    procedure :: ncwrite_tchi_wc => gwr_ncwrite_tchi_wc
    ! Write tchi or wc to netcdf file
 
-   !procedure :: ncread_tchi_wc => gwr_ncread_tchi_wc
-   ! Read tchi or wc to netcdf file
-
  end type gwr_t
 !!***
 
  real(dp),private,parameter :: TOL_EDIFF = 0.001_dp * eV_Ha
 
  integer,private,parameter :: PRINT_MODR = 20
- integer,private, parameter :: istwfk1 = 1
+ integer,private,parameter :: istwfk1 = 1
 
 contains
 !!***
@@ -675,22 +672,19 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: me_fft0 = 0, paral_fft0 = 0, nproc_fft1 = 1
- integer,parameter :: qptopt1 = 1, qtimrev1 = 1, master = 0, ndims = 4
- integer :: my_it, my_ikf, my_iqf, ii, ebands_timrev, my_iki, my_iqi, itau, spin ! my_is, npwsp,
+ integer,parameter :: me_fft0 = 0, paral_fft0 = 0, nproc_fft1 = 1, qptopt1 = 1, qtimrev1 = 1, master = 0, ndims = 4
+ integer :: my_it, my_ikf, my_iqf, ii, ebands_timrev, my_iki, my_iqi, itau, spin
  integer :: my_nshiftq, iq_bz, iq_ibz, npw_, ncid, ig, ig_start
  integer :: comm_cart, me_cart, ierr, all_nproc, nps, my_rank, qprange_, gap_err, ncerr, omp_nt
  integer :: jj, cnt, ikcalc, ndeg, mband, bstop, nbsum, it, iw
  integer :: ik_ibz, ik_bz, isym_k, trev_k, g0_k(3)
- logical :: isirr_k, changed, q_is_gamma
- real(dp) :: cpu, wall, gflops, te_min, te_max, wmax ! mem_mb,
+ real(dp) :: cpu, wall, gflops, te_min, te_max, wmax
+ logical :: isirr_k, changed, q_is_gamma, reorder
  character(len=5000) :: msg
- logical :: reorder
  type(krank_t) :: qrank, krank_ibz
  type(gaps_t) :: ks_gaps
 !arrays
- integer :: qptrlatt(3,3), dims(ndims)
- integer :: indkk_k(6,1)
+ integer :: qptrlatt(3,3), dims(ndims), indkk_k(6,1)
  integer,allocatable :: gvec_(:,:),degblock(:,:), degblock_all(:,:,:,:), ndeg_all(:,:)
  real(dp) :: my_shiftq(3,1), kk_ibz(3), kk_bz(3), qq_bz(3), qq_ibz(3), kk(3)
  real(dp),allocatable :: wtk(:), kibz(:,:)
@@ -1078,7 +1072,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
          call xmpi_distrib_2d(nps, "12", gwr%nkbz, gwr%green_mpw, gwr%kpt_comm%nproc, gwr%g_comm%nproc, ierr)
          ABI_CHECK(ierr == 0, sjoin("Cannot distribute nprocs:", itoa(nps), " with priority: k/g"))
        else
-         ! ii divides nkbz and nps.
+         ! In this case, ii divides nkbz and nps.
          gwr%kpt_comm%nproc = ii
          gwr%g_comm%nproc = nps / ii
        end if
@@ -3343,8 +3337,10 @@ subroutine gwr_build_tchi(gwr)
  real(dp) :: kk_bz(3), kpq_bz(3), qq_ibz(3) !, qq_bz(3) ! kk_ibz(3),
  !logical :: need_gt_kibz(gwr%nkibz), got_gt_kibz(gwr%nkibz)
  complex(dp),allocatable :: gt_scbox(:,:), chit_scbox(:), gt_ucbox(:,:)
- type(matrix_scalapack) :: gt_gpr(2, gwr%my_nkbz), chiq_gpr(gwr%my_nqibz), gk_rpr_pm(2)
- type(desc_t), target :: desc_mykbz(gwr%my_nkbz)
+ !type(matrix_scalapack) :: gt_gpr(2, gwr%my_nkbz), chiq_gpr(gwr%my_nqibz), gk_rpr_pm(2)
+ !type(desc_t), target :: desc_mykbz(gwr%my_nkbz)
+ type(matrix_scalapack),allocatable :: gt_gpr(:,:), chiq_gpr(:), gk_rpr_pm(:)
+ type(desc_t), target, allocatable :: desc_mykbz(:)
  type(fftbox_plan3_t) :: plan_gp2rp, plan_rp2gp
  complex(dp),allocatable :: cemiqr(:), sc_ceimkr(:,:) !, uc_ceikr(:)
 
@@ -3433,6 +3429,11 @@ subroutine gwr_build_tchi(gwr)
    end do
    mem_mb = sum(slk_array_locmem_mb(chiq_gpr))
    call wrtout(std_out, sjoin(' Local memory for chiq_gpr: ', ftoa(mem_mb, fmt="f8.1"), ' [Mb] <<< MEM'))
+
+   ABI_MALLOC(gt_gpr, (2, gwr%my_nkbz))
+   ABI_MALLOC(chiq_gpr, (gwr%my_nqibz))
+   ABI_MALLOC(gk_rpr_pm, (2))
+   ABI_MALLOC(desc_mykbz, (gwr%my_nkbz))
 
    ! Loop over my spins and my taus.
    do my_is=1,gwr%my_nspins
@@ -3577,7 +3578,7 @@ end if
          ! MPI-transposition: tchi_q(g',r) => tchi_q(r,g')
          call chiq_gpr(my_iqi)%ptrans("N", chi_rgp)
 
-         !ABI_CHECK(size(gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx, dim=2) == size(chi_rgp%buffer_cplx, dim=2), "len2")
+         !ABI_CHECK_IEQ(size(gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx, dim=2), size(chi_rgp%buffer_cplx, dim=2), "len2")
 
          ! FFT r --> g along the first dimension: tchi_q(r,g') --> tchi_q(g,g')
          ! Results stored in gwr%tchi_qibz.
@@ -3612,7 +3613,7 @@ end if
        write(msg,'(3(a,i0),a)')" My itau [", my_it, "/", gwr%my_ntau, "] (tot: ", gwr%ntau, ")"
        call cwtime_report(msg, cpu_tau, wall_tau, gflops_tau)
      end do ! my_it
-   end do ! spin
+   end do ! my_is
 
    ABI_FREE(gt_ucbox)
    ABI_FREE(gt_scbox)
@@ -3621,6 +3622,11 @@ end if
    ABI_FREE(chi_scg)
    ABI_FREE(cemiqr)
    !ABI_SFREE(sc_ceimkr)
+
+   ABI_FREE(gt_gpr)
+   ABI_FREE(chiq_gpr)
+   ABI_FREE(gk_rpr_pm)
+   ABI_FREE(desc_mykbz)
 
    call slk_array_free(chiq_gpr)
    !call destroy_mpi_enreg(tchi_mpi_enreg)
@@ -3691,13 +3697,7 @@ end if
  ! Write file with chi0(i omega)
  if (gwr%dtset%prtsuscep > 0) call gwr%ncwrite_tchi_wc("tchi", trim(gwr%dtfil%filnam_ds(4))//'_TCHIM.nc')
 
- ! TODO: When reading, we have to perform consistency checks to handle possible difference in:
- !   - input ecuteps and the value found on disk
- ! NB: Changing q-mesh or time/imaginary mesh is not possible.
- !call gwr%ncread_tchi_wc("tchi", trim(gwr%dtfil%filnam_ds(4))//'_TCHIM.nc'))
-
  call cwtime_report(" gwr_build_tchi:", cpu_all, wall_all, gflops_all)
- !stop
 
 end subroutine gwr_build_tchi
 !!***
@@ -3909,8 +3909,7 @@ subroutine gwr_print_trace(gwr, what)
 
  my_rank = xmpi_comm_rank(gwr%comm)
 
- comment = "Invalid space!"
- units = [std_out, ab_out]
+ comment = "Invalid space!"; units = [std_out, ab_out]
 
  select case (what)
  case ("tchi_qibz", "wc_qibz")
@@ -4114,7 +4113,6 @@ subroutine gwr_build_wc(gwr)
        !call wrtout(std_out, sjoin(" e-1 at q:", ktoa(qq_ibz), "i omega:", ftoa(gwr%iw_mesh(itau) * Ha_eV), "eV"))
        !call print_arr(wc%buffer_cplx, unit=std_out)
 
-#if 1
        ! Build Wc(q, iw) = [e^{-1}_q(g,g',iw) - delta_{gg'} v_q(g,g') by removing bare vc
        do il_g2=1,wc%sizeb_local(2)
          iglob2 = wc%loc2gcol(il_g2)
@@ -4163,7 +4161,6 @@ subroutine gwr_build_wc(gwr)
        !  !call wc%symmetrize("A", "H")
        !  !call wc%set_head_and_wings(czero)
        !end if
-#endif
        end associate
      end do  ! my_it
    end do ! my_is
