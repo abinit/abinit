@@ -73,6 +73,7 @@ MODULE m_fftw3
  public :: fftw3_seqfourdp      ! 3D FFT of lengths nx, ny, nz. Mainly used for densities or potentials.
  public :: fftw3_seqfourwf      ! FFT transform of wavefunctions (high-level interface).
  public :: fftw3_fftrisc
+ public :: fftw3_fftrisc_mixprec ! Mixed precision version of fftrisc: input/output in dp, computation done in sp.
  public :: fftw3_fftug          ! G-->R. 3D zero-padded FFT of lengths nx, ny, nz. Mainly used for wavefunctions
  public :: fftw3_fftur          ! R-->G, 3D zero-padded FFT of lengths nx, ny, nz. Mainly used for wavefunctions
  public :: fftw3_use_lib_threads
@@ -1032,7 +1033,12 @@ subroutine fftw3_fftug_dp(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_
 #undef TK_PREF
 #define TK_PREF(name) CONCAT(cg_,name)
 
+#undef  FFT_PRECISION
+#define FFT_PRECISION FFT_DOUBLE
+
 #include "fftug.finc"
+
+#undef  FFT_PRECISION
 
 #else
  ! Silence compiler warning
@@ -1097,7 +1103,12 @@ subroutine fftw3_fftug_spc(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf
 #undef TK_PREF
 #define TK_PREF(name) CONCAT(cplx_,name)
 
+#undef  FFT_PRECISION
+#define FFT_PRECISION FFT_SINGLE
+
 #include "fftug.finc"
+
+#undef  FFT_PRECISION
 
 #else
  ! Silence compiler warning
@@ -1162,7 +1173,12 @@ subroutine fftw3_fftug_dpc(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf
 #undef TK_PREF
 #define TK_PREF(name) CONCAT(cplx_,name)
 
+#undef  FFT_PRECISION
+#define FFT_PRECISION FFT_DOUBLE
+
 #include "fftug.finc"
+
+#undef  FFT_PRECISION
 
 #else
  ! Silence compiler warning
@@ -1229,7 +1245,12 @@ subroutine fftw3_fftur_dp(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_
 #undef TK_PREF
 #define TK_PREF(name) CONCAT(cg_,name)
 
+#undef  FFT_PRECISION
+#define FFT_PRECISION FFT_DOUBLE
+
 #include "fftur.finc"
+
+#undef  FFT_PRECISION
 
 #else
  ! Silence compiler warning
@@ -1297,7 +1318,12 @@ subroutine fftw3_fftur_spc(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf
 #undef TK_PREF
 #define TK_PREF(name) CONCAT(cplx_,name)
 
+#undef  FFT_PRECISION
+#define FFT_PRECISION FFT_SINGLE
+
 #include "fftur.finc"
+
+#undef  FFT_PRECISION
 
 #else
  ! Silence compiler warning
@@ -1365,7 +1391,12 @@ subroutine fftw3_fftur_dpc(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf
 #undef TK_PREF
 #define TK_PREF(name) CONCAT(cplx_,name)
 
+#undef  FFT_PRECISION
+#define FFT_PRECISION FFT_DOUBLE
+
 #include "fftur.finc"
+
+#undef  FFT_PRECISION
 
 #else
  ! Silence compiler warning

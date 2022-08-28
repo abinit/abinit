@@ -101,6 +101,28 @@
 !!
 !!  - Single precision for scalapack matrices.
 !!
+!!  - Memory peaks:
+!!
+!!      (env3.9) [magianto@uan01 /scratch/project_465000061/magianto/DDIAGO_ZnO]
+!!      $~/git_repos/abinit/tests/Scripts/abimem.py peaks abimem_rank0.mocc
+!!      [0] <var=gt_scbox, A@m_gwr.F90:3395, addr=0x14aa53673010, size_mb=379.688>
+!!      [1] <var=xsum, A@xmpi_sum.finc:2551, addr=0x14aa2fce9010, size_mb=379.688>
+!!      [2] <var=gt_scbox, A@m_gwr.F90:4338, addr=0x14aa4f64f010, size_mb=379.688>
+!!      [3] <var=allcg_k, A@m_wfd.F90:4631, addr=0x14aa56b57010, size_mb=217.865>
+!!      [4] <var=chit_scbox, A@m_gwr.F90:3396, addr=0x14aa4789a010, size_mb=189.844>
+!!      [5] <var=wct_scbox, A@m_gwr.F90:4339, addr=0x14aa43876010, size_mb=189.844>
+!!      [6] <var=xsum, A@xmpi_sum.finc:2476, addr=0x14aa31bb0010, size_mb=189.844>
+!!      [7] <var=cg_k, A@m_wfd.F90:4623, addr=0x14aa64535010, size_mb=108.932>
+!!      [8] <var=sc_psi_bk, A@m_gwr.F90:4356, addr=0x14aa3d989010, size_mb=94.922>
+!!      [9] <var=sc_ceikr, A@m_gwr.F90:4358, addr=0x10dd28a0, size_mb=47.461>
+!!      [10] <var=loc_cwork, A@m_gwr.F90:1894, addr=0x1f3b6fb0, size_mb=11.691>
+!!      [11] <var=xsum, A@xmpi_sum_master.finc:1313, addr=0x1ff67d00, size_mb=11.691>
+!!      [12] <var=matrix%buffer_cplx, A@m_slk.F90:582, addr=0x8eded70, size_mb=5.845>
+!!      [13] <var=Wfd%irottb, A@m_wfd.F90:3721, addr=0x8b4f960, size_mb=3.560>
+!!      [14] <var=rhonow, A@m_rhotoxc.F90:613, addr=0x14aa6afc4010, size_mb=2.373>
+!!      [15] <var=rhor_file, A@m_ioarr.F90:1045, addr=0x14aa6b0df010, size_mb=1.266>
+!!
+!!
 !! COPYRIGHT
 !! Copyright (C) 1999-2021 ABINIT group (MG)
 !! This file is distributed under the terms of the
@@ -130,6 +152,7 @@ module m_gwr
  use m_yaml
  use m_sigtk
  use iso_c_binding
+ use m_hide_blas
 
  use defs_datatypes,  only : pseudopotential_type, ebands_t
  use defs_abitypes,   only : mpi_type
@@ -144,7 +167,7 @@ module m_gwr
  use m_krank,         only : krank_t, krank_new, krank_from_kptrlatt, get_ibz2bz, star_from_ibz_idx
  use m_crystal,       only : crystal_t
  use m_dtset,         only : dataset_type
- use m_fftcore,       only : get_kg, sphereboundary, getng, print_ngfft
+ use m_fftcore,       only : get_kg, sphereboundary, getng, print_ngfft, fftcore_set_mixprec
  use m_mpinfo,        only : initmpi_seq, destroy_mpi_enreg
  use m_distribfft,    only : init_distribfft_seq
  use m_fft,           only : fft_ug, fft_ur, fftbox_plan3_t, fourdp
@@ -1155,6 +1178,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
    gwr%tau_master(itau) = gwr%tau_comm%me
  end do
  call xmpi_max_ip(gwr%tau_master, gwr%tau_comm%value, ierr)
+ ABI_CHECK(all(gwr%tau_master > -1), "tau_master!")
 
  call xmpi_split_block(gwr%nsppol, gwr%spin_comm%value, gwr%my_nspins, gwr%my_spins)
  ABI_CHECK(gwr%my_nspins > 0, "my_nspins == 0, decrease number of procs for spin level")
@@ -1868,8 +1892,8 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
      kk_ibz = gwr%kibz(:, ik_ibz)
      npw_k = wfd%npwarr(ik_ibz)
      istwf_k = wfd%istwfk(ik_ibz)
-     associate (desc_k => gwr%green_desc_kibz(ik_ibz))
 
+     associate (desc_k => gwr%green_desc_kibz(ik_ibz))
      ABI_CHECK_IEQ(npw_k, desc_k%npw, "npw_k != desc_k%npw")
      ABI_CHECK(all(wfd%kdata(ik_ibz)%kg_k == desc_k%gvec), "kg_k != desc_k%gvec")
      !ABI_MALLOC(cgwork, (2, npw_k * wfd%nspinor))
@@ -1949,7 +1973,7 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
      ABI_FREE(loc_cwork)
      end associate
 
-     write(msg,'(3(a,i0),a)')" My iki [", my_iki, "/", gwr%my_nkibz, "] (tot: ", gwr%nkibz, ")"
+     write(msg,'(3(a,i0),a)')" My ik_ibz [", my_iki, "/", gwr%my_nkibz, "] (tot: ", gwr%nkibz, ")"
      call cwtime_report(msg, cpu_green, wall_green, gflops_green)
    end do ! my_iki
  end do ! my_is
@@ -1966,7 +1990,8 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
  RETURN
 
  ! PBLAS-based version.
- call wfk_open_read(wfk, wfk_path, formeig0, iomode_from_fname(wfk_path), get_unit(), gwr%comm, hdr_out=wfk_hdr)
+ call wfk_open_read(wfk, wfk_path, formeig0, iomode_from_fname(wfk_path), &
+                    get_unit(), gwr%comm, hdr_out=wfk_hdr)
 
  mpw = maxval(wfk_hdr%npwarr)
  ABI_MALLOC(kg_k, (3, mpw))
@@ -1982,7 +2007,7 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
      nband_k = wfk_hdr%nband(ik_ibz)
      npwsp = npw_k * gwr%nspinor
 
-     ! Init CG(npwsp, nband) PBLAS matrix within gtau communicator.
+     ! Init CG(npwsp, nband) PBLAS matrix within the gtau communicator.
      ! and distribute it over bands so that each proc reads a subset of bands in read_band_block
      ABI_CHECK(block_dist_1d(nband_k, gwr%gtau_comm%nproc, col_bsize, msg), msg)
      call cg_mat%init(npwsp, nband_k, gtau_slkproc, istwfk1, size_blocs=[npwsp, col_bsize])
@@ -1994,6 +2019,7 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
 
      ! Read my bands
      call c_f_pointer(c_loc(cg_mat%buffer_cplx), cg_k, shape=[2, npwsp * my_nband])
+
      call wfk%read_band_block([my_bstart, my_bstop], ik_ibz, spin, xmpio_single, & ! xmpio_collective,
                               kg_k=kg_k, cg_k=cg_k)
 
@@ -2010,7 +2036,6 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
        !if (gwr%tau_comm%me == gwr%tau_master(itau)) then
        !  do ipm=1,2
        !    gwr%gt_kibz(ipm, ik_ibz, itau, spin)%buffer_cplx = loc_cwork(:,:,ipm)
-
        !  end do
        !end if
      end do
@@ -2040,8 +2065,13 @@ end subroutine gwr_build_gtau_from_wfk
 !!  Reconstruct the Green's functions in the kBZ from the IBZ.
 !!
 !! INPUTS
+!!   ik_bz = Index of the k-point in the BZ
+!!   itau = tau index (global index)
+!!   spin = spin index
 !!
 !! OUTPUT
+!!  desc_kbz =
+!!  gt_pm(2) =
 !!
 !! NOTES
 !!
@@ -2195,7 +2225,7 @@ subroutine gwr_get_myk_green_gpr(gwr, itau, spin, desc_mykbz, gt_gpr)
 
 !Local variables-------------------------------
 !scalars
- integer :: my_ikf, ik_bz, ig2, ipm, npwsp, col_bsize, idat, ndat
+ integer :: my_ikf, ik_bz, ig2, ipm, npwsp, col_bsize, idat, ndat, ii
  logical :: k_is_gamma
  real(dp) :: kk_bz(3), cpu, wall, gflops
  character(len=500) :: msg
@@ -3461,6 +3491,8 @@ subroutine gwr_build_tchi(gwr)
          !call cwtime(cpu, wall, gflops, "start")
          ! Insert G_k(g',r) in G'-space in the supercell FFT box for fixed r.
          ! Note that we need to take the union of (k, g') for k in the BZ.
+
+         !call xscal(size(gt_scbox, czero, gt_scbox, 1)
          gt_scbox = zero
 
 !if (.False.) then
@@ -3506,7 +3538,7 @@ else
                          gt_gpr(ipm, my_ikf)%buffer_cplx(:, my_ir), &  ! in
                          gt_ucbox(:,ipm))                              ! out
 
-             ! Scketching the algo.
+             ! Sketching the algo.
              !gt_ucbox(:,ipm) = gt_ucbox(:,ipm) * uc_ceimkr(:,my_ikf)
              !gt_scbox(:,ipm) = matmul(gt_ucbox(:,:,ipm), eiqL)
 

@@ -112,9 +112,6 @@ _ WF disk file :      0.159 Mbytes ; DEN or POT disk file :      0.053 Mbytes.
                        5.00000000E-01  0.00000000E+00  0.00000000E+00
          kptrlatt        2    0    0      0    2    0      0    0    2
           kptrlen      1.45098311E+01
-          mixprec1       0
-          mixprec2       0
-          mixprec3       1
 P           mkmem           3
             natom           2
             nband1          6
@@ -837,9 +834,6 @@ data: !Tabular |
                        5.00000000E-01  0.00000000E+00  0.00000000E+00
          kptrlatt        2    0    0      0    2    0      0    0    2
           kptrlen      1.45098311E+01
-          mixprec1       0
-          mixprec2       0
-          mixprec3       1
 P           mkmem           3
             natom           2
             nband1          6

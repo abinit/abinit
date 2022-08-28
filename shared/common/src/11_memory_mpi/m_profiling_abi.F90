@@ -150,11 +150,11 @@ contains
 !!       3 -> Write info only if allocation/deallocation is larger or smaller than limit_mb
 !!                depending on of the sign of limit_mb
 !!    NOTE: By default, only master node writes, use negative values to make all MPI procs write info to disk.
-!!  [delta_time]=Interval in second for snapshots. Will write report to std_out evety delta_time seconds.
+!!  [delta_time]=Interval in second for snapshots. Will write report to std_out every delta_time seconds.
 !!  [filename] = If present, activate memory logging only inside filename (basename).
 !!  [limit_mb]= Set memory limit in Mb if level == 3. Print allocation/deallocation only above this limit.
-!!    Positive value to print above the threshold
-!!    Negative value to print beloc the threshold
+!!    Positive value to print above the threshold.
+!!    Negative value to print below the threshold.
 
 subroutine abimem_init(level, delta_time, filename, limit_mb)
 

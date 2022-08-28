@@ -735,14 +735,14 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 
    if(dtsets(idtset)%paral_kgb==1) mpi_enregs(idtset)%paralbd=0
 
-!  Check if some MPI processes are empty (MBPT code uses a complete different MPI algorithm)
-   do_check = all(optdriver /= [RUNL_SCREENING, RUNL_SIGMA, RUNL_BSE, RUNL_EPH])
+!  Check if some MPI processes are empty (MBPT codes uses a complete different MPI algorithm)
+   do_check = all(optdriver /= [RUNL_SCREENING, RUNL_SIGMA, RUNL_BSE, RUNL_EPH, RUNL_GWR])
    if (dtsets(idtset)%usewvl == 0 .and. do_check) then
      if (.not.mpi_distrib_is_ok(mpi_enregs(idtset),mband_upper,&
           dtsets(idtset)%nkpt,dtsets(idtset)%mkmem,nsppol,msg=msg)) then
        write(msg,'(5a)') trim(msg),ch10,&
          'YOU ARE STRONGLY ADVISED TO ACTIVATE AUTOMATIC PARALLELIZATION!',ch10,&
-         'PUT "AUTOPARAL=1" IN THE INPUT FILE.'
+         'USE "AUTOPARAL=1" IN THE INPUT FILE.'
        ABI_WARNING(msg)
      end if
    end if
