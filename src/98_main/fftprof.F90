@@ -76,6 +76,7 @@ program fftprof
  use defs_abitypes,only : MPI_type
  use m_fstrings,   only : lower
  use m_specialmsg, only : specialmsg_getcount, herald
+ use m_argparse,   only : get_arg !, get_arg_list, get_start_step_num
  use m_io_tools,   only : flush_unit
  use m_geometry,   only : metric
  use m_fftcore,    only : get_cache_kb, get_kg, fftalg_isavailable, fftalg_has_mpi, getng, fftcore_set_mixprec
@@ -93,11 +94,11 @@ program fftprof
  integer :: ii,fftcache,it,cplex,ntests,option_fourwf,osc_npw
  integer :: map2sphere,use_padfft,isign,nthreads,comm,nprocs,my_rank
  integer :: iset,iall,inplace,nsets,avail,ith,idx,ut_nfft,ut_mgfft
- integer :: nfftalgs,alg,fftalg,fftalga,fftalgc,nfailed,ierr,paral_kgb
+ integer :: nfftalgs,alg,fftalg,fftalga,fftalgc,nfailed,ierr,paral_kgb,abimem_level
  character(len=24) :: codename
  character(len=500) :: header,msg
- real(dp),parameter :: boxcutmin2=two
- real(dp) :: ucvol
+ real(dp),parameter :: boxcutmin2 = two
+ real(dp) :: ucvol, abimem_limit_mb
  logical :: test_fourdp,test_fourwf,test_gw,do_seq_bench,do_seq_utests
  logical :: iam_master,do_mpi_utests !,do_mpi_bench,
  type(MPI_type) :: MPI_enreg
@@ -137,8 +138,10 @@ program fftprof
  ! Initialize memory profiling if it is activated
  ! if a full abimem.mocc report is desired, set the argument of abimem_init to "2" instead of "0"
  ! note that abimem.mocc files can easily be multiple GB in size so don't use this option normally
+ ABI_CHECK(get_arg("abimem-level", abimem_level, msg, default=0) == 0, msg)
+ ABI_CHECK(get_arg("abimem-limit-mb", abimem_limit_mb, msg, default=20.0_dp) == 0, msg)
 #ifdef HAVE_MEM_PROFILING
- call abimem_init(0)
+ call abimem_init(abimem_level, limit_mb=abimem_limit_mb)
 #endif
 
  if (iam_master) then
@@ -228,7 +231,7 @@ program fftprof
    ! List the FFT libraries that will be tested.
    ! Goedecker FFTs are always available, other libs are optional.
    nfftalgs = COUNT(fftalgs/=0)
-   ABI_CHECK(nfftalgs > 0,"fftalgs must be specified")
+   ABI_CHECK(nfftalgs > 0, "fftalgs must be specified")
 
    nfailed = 0; nthreads = 0
    do ii=1,nfftalgs
@@ -240,14 +243,13 @@ program fftprof
        nfailed = nfailed + fftu_mpi_utests(fftalg,ecut,rprimd,ndat,nthreads,comm,paral_kgb)
      end do
    end do
-   ! TEMPORARY
-   !goto 1
 
    nfailed = 0; nthreads = 0
    do ii=1,nfftalgs
      fftalg = fftalgs(ii)
      do cplex=1,2
-       write(msg,"(4(a,i0))")"MPI fftbox_utests with fftalg = ",fftalg,", cplex = ",cplex," ndat = ",ndat,", nthreads = ",nthreads
+       write(msg,"(4(a,i0))")&
+         "MPI fftbox_utests with fftalg = ",fftalg,", cplex = ",cplex," ndat = ",ndat,", nthreads = ",nthreads
        call wrtout(std_out, msg)
        nfailed = nfailed + fftbox_mpi_utests(fftalg=fftalg,cplex=cplex,ndat=ndat,nthreads=nthreads,comm_fft=comm)
      end do
@@ -341,11 +343,11 @@ program fftprof
    ! (cplex=2 only allowed for option=2, and istwf_k=1)
    nsets=4; if (Ftest(1)%istwf_k==1) nsets=5
    ABI_MALLOC(fourwf_params,(2,nsets))
-   fourwf_params(:,1) = [0,0]
-   fourwf_params(:,2) = [1,1]
-   fourwf_params(:,3) = [2,1]
-   fourwf_params(:,4) = [3,0]
-   if (nsets==5) fourwf_params(:,5) = [2,2]
+   fourwf_params(:,1) = [0, 0]
+   fourwf_params(:,2) = [1, 1]
+   fourwf_params(:,3) = [2, 1]
+   fourwf_params(:,4) = [3, 0]
+   if (nsets==5) fourwf_params(:,5) = [2, 2]
 
    do iset=1,nsets
      option_fourwf = fourwf_params(1,iset)
@@ -353,7 +355,7 @@ program fftprof
      do it=1,ntests
        call time_fourwf(Ftest(it),cplex,option_fourwf,header,Ftprof(it))
      end do
-     call fftprof_print(Ftprof,header)
+     call fftprof_print(Ftprof, header)
      call fftprof_free(Ftprof)
    end do
    ABI_FREE(fourwf_params)
@@ -447,7 +449,7 @@ program fftprof
    call wrtout(std_out, "Entering benchmark mode")
    write(std_out,*)"ecut_arth",ecut_arth,", necut ",necut
 
-   if (INDEX(tasks,"bench_fourdp")>0) then
+   if (INDEX(tasks, "bench_fourdp") > 0) then
      isign=1; cplex=1
      call prof_fourdp(fft_setups,isign,cplex,necut,ecut_arth,boxcutmin2,rprimd,nsym,symrel,MPI_enreg)
 
@@ -455,7 +457,7 @@ program fftprof
      call prof_fourdp(fft_setups,isign,cplex,necut,ecut_arth,boxcutmin2,rprimd,nsym,symrel,MPI_enreg)
    end if
 
-   if (INDEX(tasks,"bench_fourwf")>0) then
+   if (INDEX(tasks, "bench_fourwf") > 0) then
      cplex=2; option_fourwf=0
      call prof_fourwf(fft_setups,cplex,option_fourwf,kpoint,necut,ecut_arth,boxcutmin2,rprimd,nsym,symrel,MPI_enreg)
 
@@ -472,7 +474,7 @@ program fftprof
      call prof_fourwf(fft_setups,cplex,option_fourwf,kpoint,necut,ecut_arth,boxcutmin2,rprimd,nsym,symrel,MPI_enreg)
    end if
 
-   if (INDEX(tasks,"bench_rhotwg")>0) then
+   if (INDEX(tasks, "bench_rhotwg") > 0) then
      map2sphere=1; use_padfft=1
      call prof_rhotwg(fft_setups,map2sphere,use_padfft,necut,ecut_arth,osc_ecut,boxcutmin2,&
       rprimd,nsym,symrel,gmet,MPI_enreg)

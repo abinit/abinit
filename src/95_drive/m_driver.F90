@@ -748,7 +748,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
    ! FFTW3 threads initialization
    if (dtset%ngfft(7) / 100 == FFT_FFTW3) call fftw3_init_threads()
 
-   ! Set precision for FFT libs.
+   ! Activate mixed-precision for FFT libs.
    ii = fftcore_set_mixprec(dtset%mixprec)
 
 !  linalg initialisation

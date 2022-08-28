@@ -4628,6 +4628,7 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
 
       else
         ! Master reads full set of bands and broadcasts data, then each proc extract its own set of wavefunctions.
+        ! TODO: Should read in blocks to reduce memory footprint
         ABI_MALLOC_OR_DIE(allcg_k, (2, npw_disk*wfd%nspinor*(bmax-bmin+1)), ierr)
         if (my_rank == master) then
           call wfk%read_band_block([bmin, bmax], ik_ibz, spin, xmpio_single, kg_k=kg_k, cg_k=allcg_k, eig_k=eig_k)

@@ -2085,7 +2085,6 @@ end function fftu_mpi_utests
 !!         if 1: do direct FFT, then sum the density
 !!         if 2: do direct FFT, multiply by the potential, then do reverse FFT
 !!         if 3: do reverse FFT only
-!! paral_kgb=Flag related to the kpoint-band-fft parallelism
 !! tim_fourwf=timing code of the calling routine (can be set to 0 if not attributed)
 !! weight_r=weight to be used for the accumulation of the density in real space
 !!         (needed only when option=1)
@@ -2866,7 +2865,7 @@ subroutine fourdp(cplex, fofg, fofr, isign, mpi_enreg, nfft, ndat, ngfft, tim_fo
    call timab(260+tim_fourdp,2,tsec); return
  end if
 
- if (fftalga==FFT_DFTI) then
+ if (fftalga == FFT_DFTI) then
    ! Call sequential or MPI MKL.
    if (nproc_fft == 1) then
      call dfti_seqfourdp(cplex,n1,n2,n3,n1,n2,n3,ndat,isign,fofg,fofr)

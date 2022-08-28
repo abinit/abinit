@@ -34,13 +34,21 @@
          gbound,gbound,istwf_k,kg_kin0,kg_k,mgfft,ngfft,npwin0,npw_k,ldx,ldy,ldz,option3,weight_r,weight_i)
      end do
    else
-     ! Mixed precision FFT
+     ! Mixed precision FFT but only if we have double precision API
      !$OMP PARALLEL DO PRIVATE(ug_ptr, ur_ptr) IF (ndat > 1)
      do dat=1,ndat
        ug_ptr = 1 + (dat-1)*npw_k
        ur_ptr = 1 + (dat-1)*ldx*ldy*ldz
+#if FFT_PRECISION == FFT_DOUBLE
        call FFT_PREF(fftrisc_mixprec) (cplex0,denpot,dum_ugin,real_ug(:,ug_ptr:),real_ur(:,ur_ptr:),&
          gbound,gbound,istwf_k,kg_kin0,kg_k,mgfft,ngfft,npwin0,npw_k,ldx,ldy,ldz,option3,weight_r,weight_i)
+#elif FFT_PRECISION == FFT_SINGLE
+       call FFT_PREF(fftrisc) (cplex0,denpot,dum_ugin,real_ug(:,ug_ptr:),real_ur(:,ur_ptr:),&
+         gbound,gbound,istwf_k,kg_kin0,kg_k,mgfft,ngfft,npwin0,npw_k,ldx,ldy,ldz,option3,weight_r,weight_i)
+#else
+#error "Wrong FFT precision"
+#endif
+
      end do
    end if
 

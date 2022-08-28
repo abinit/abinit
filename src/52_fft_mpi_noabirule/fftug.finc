@@ -12,7 +12,7 @@
 
  ! FFT: ug -> ur 
 
- use_fftrisc = mod(fftalg, 10) == 2 .and. anu(istwf_k== [1, 2])
+ use_fftrisc = mod(fftalg, 10) == 2 .and. any(istwf_k== [1, 2])
 
  if (use_fftrisc) then
    !call wrtout(std_out, "fft_ug: using_fftrisc")
@@ -33,13 +33,20 @@
      end do
 
    else
-     ! Mixed precision FFT
+     ! Mixed precision FFT but only if we have the double precision API.
      !$OMP PARALLEL DO PRIVATE(ug_ptr, ur_ptr) IF (ndat > 1)
      do dat=1,ndat
        ug_ptr = 1 + (dat-1)*npw_k
        ur_ptr = 1 + (dat-1)*ldx*ldy*ldz
+#if FFT_PRECISION == FFT_DOUBLE
        call FFT_PREF(fftrisc_mixprec) (cplex0,denpot,real_ug(:,ug_ptr:),fofgout,real_ur(:,ur_ptr:),&
          gbound,gbound,istwf_k,kg_k,kg_k,mgfft,ngfft,npw_k,npwout0,ldx,ldy,ldz,option0,weight1_r,weight1_i)
+#elif FFT_PRECISION == FFT_SINGLE
+       call FFT_PREF(fftrisc) (cplex0,denpot,real_ug(:,ug_ptr:),fofgout,real_ur(:,ur_ptr:),&
+         gbound,gbound,istwf_k,kg_k,kg_k,mgfft,ngfft,npw_k,npwout0,ldx,ldy,ldz,option0,weight1_r,weight1_i)
+#else
+#error "Wrong FFT precision"
+#endif
      end do
    end if
 
