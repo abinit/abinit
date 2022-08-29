@@ -27,6 +27,7 @@ MODULE m_fft_mesh
  use m_errors
  use m_abicore
  use m_hide_blas
+ use iso_c_binding
 
  use defs_fftdata,     only : size_goed_fft
  use m_fstrings,       only : sjoin, itoa, ltoa
@@ -54,6 +55,7 @@ MODULE m_fft_mesh
  public :: calc_ceikr          ! e^{ik.r} on the FFT mesh (complex valued).
  public :: times_eigr          ! Multiply an array on the real-space mesh by e^{iG0.r}
  public :: times_eikr          ! Multiply an array on the real-space mesh by e^{ik.r}
+ public :: ctimes_eikr         ! Version for complex array
  public :: phase               ! Compute ph(ig)=$\exp(\pi\ i \ n/ngfft)$ for n=0,...,ngfft/2,-ngfft/2+1,...,-1
  public :: mkgrid_fft          ! Sets the grid of fft (or real space) points to be treated.
 
@@ -64,7 +66,7 @@ MODULE m_fft_mesh
 
  !interface times_eikr
  !  module procedure times_eikr_dp
- !  module procedure times_eikr_dpc
+ !  module procedure ctimes_eikr_dpc
  !end interface times_eikr
 !!***
 
@@ -1483,11 +1485,11 @@ end subroutine times_eigr
 !!  ndat=Number of arrays to transform
 !!
 !! SIDE EFFECTS
-!!  ur(2,nfft)= contains u(r) in input. output: u(r) e^{ig.r} on the real-space FFT mesh.
+!!  ur(2,nfft,ndat)= contains u(r) in input. output: u(r) e^{ig.r} on the real-space FFT mesh.
 !!
 !! SOURCE
 
-pure subroutine times_eikr(kk, ngfft, nfft, ndat, ur)
+subroutine times_eikr(kk, ngfft, nfft, ndat, ur)
 
 !Arguments ------------------------------------
 !scalars
@@ -1498,16 +1500,14 @@ pure subroutine times_eikr(kk, ngfft, nfft, ndat, ur)
  real(dp),intent(inout) :: ur(2,nfft,ndat)
 
 !Local variables-------------------------------
-!scalars
  integer :: ix,iy,iz,ifft,idat
- real(dp) :: kr
-!arrays
- real(dp) :: ph(2),val(2)
+ real(dp) :: kr, ph(2),val(2)
 
 ! *************************************************************************
 
  if (all(abs(kk) < tol12)) return
 
+ !$OMP PARALEL DO IF (ndat > 1) PRIVATE(ifft, kr, ph, val)
  do idat=1,ndat
    ifft = 0
    do iz=0,ngfft(3)-1
@@ -1528,6 +1528,28 @@ pure subroutine times_eikr(kk, ngfft, nfft, ndat, ur)
  end do
 
 end subroutine times_eikr
+!!***
+
+! Version for double precision complex arrays.
+subroutine ctimes_eikr(kk, ngfft, nfft, ndat, ur)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nfft,ndat
+!arrays
+ real(dp),intent(in) :: kk(3)
+ integer,intent(in) :: ngfft(18)
+ complex(dp),target,intent(inout) :: ur(nfft,ndat)
+
+!Local variables-------------------------------
+ real(dp),contiguous,pointer :: ur_ptr(:,:,:)
+
+! *************************************************************************
+
+ call c_f_pointer(c_loc(ur), ur_ptr, shape=[2, nfft, ndat])
+ call times_eikr(kk, ngfft, nfft, ndat, ur_ptr)
+
+end subroutine ctimes_eikr
 !!***
 
 !!****f* m_fft_mesh/phase

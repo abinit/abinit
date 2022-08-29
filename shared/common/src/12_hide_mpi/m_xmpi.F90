@@ -4975,7 +4975,7 @@ subroutine pool2d_from_dims(pool, n1, n2, input_comm, rectangular)
 
 !Local variables-------------------
  integer :: itask, ntasks, my_rank, nprocs, color, mpierr, jj, i1, i2, my_ntasks, new_comm
- integer :: grid_dims(2), check(n1, n2)
+ integer :: grid_dims(2) ! , check(n1, n2)
  integer,allocatable :: my_inds(:)
 !----------------------------------------------------------------------
 
@@ -5009,16 +5009,16 @@ subroutine pool2d_from_dims(pool, n1, n2, input_comm, rectangular)
  end if
 
 !DEBUG
- where (pool%treats)
-   check = 1
- else where
-   check = 0
- end where
- call xmpi_sum(check, input_comm, mpierr)
- if (any(check == 0)) then
-   write(*, *) check
-   call xmpi_abort(msg="Wrong distribution in pool2d_from_dims")
- end if
+! where (pool%treats)
+!   check = 1
+! else where
+!   check = 0
+! end where
+! call xmpi_sum(check, input_comm, mpierr)
+! if (any(check == 0)) then
+!   write(std_out, *) check
+!   call xmpi_abort(msg="Wrong distribution in pool2d_from_dims")
+! end if
 !END_DEBUG
 
  call xmpi_comm_split(input_comm, color, my_rank, new_comm, mpierr)

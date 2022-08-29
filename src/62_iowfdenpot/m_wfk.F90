@@ -1770,8 +1770,7 @@ subroutine wfk_write_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg
  integer :: mpierr,bufsz,recnpw_type,gkk_type,cgblock_type
  integer(XMPI_OFFSET_KIND) :: my_offset,my_offpad
  integer :: sizes(2),subsizes(2),starts(2),dims(3),types(2)
-! integer(XMPI_OFFSET_KIND) :: bsize_rec(1)
- integer(XMPI_OFFSET_KIND),allocatable :: bsize_frecords(:)
+ !integer(XMPI_OFFSET_KIND),allocatable :: bsize_frecords(:)
 #endif
  integer :: kg_varid,eig_varid,occ_varid,cg_varid,ncerr,h1_varid
 

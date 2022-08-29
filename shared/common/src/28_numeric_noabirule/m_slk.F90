@@ -2509,6 +2509,7 @@ subroutine solve_gevp_real(na,nev,na_rows,na_cols,nblk,a,b,ev,z,tmp1,tmp2, &
   call elpa_func_deallocate(elpa_hdl)
 
  end subroutine solve_gevp_real
+!!***
 #endif
 
 !----------------------------------------------------------------------
