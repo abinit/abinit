@@ -59,7 +59,7 @@
 !!     the spherical symmetry of vc(r). Besides, when symmetries are used to reconstruct the term for q in the BZ,
 !!     one might have to take into account umklapps. Use cache?
 !!
-!!   - Computation of Sigma_x = iGv must be done in Fourier space using the Lehmann representation so
+!!   - Computation of Sigma_x = Gv must be done in Fourier space using the Lehmann representation so
 !!     that we can handle the long-range behavior in q-space. Unfortunately, we cannot simply call calc_sigx_me
 !!     from GWR so we have to implement a new routine.
 !!
@@ -79,7 +79,7 @@
 !!    but I don't know if this approach will give smooth bands
 !!    as we don't have q --> 0 when k does not belong to the k-mesh.
 !!
-!!  - New routine for direct diagonalization of the KS Hamiltonian based on PBLAS?
+!!  - DONE: New routine for direct diagonalization of the KS Hamiltonian based on PBLAS?
 !!
 !!  - New routine to compute oscillator matrix elements with NC/PAW and PBLAS matrices.
 !!    It can be used to compute tchi head/wings as well as Sigma_x + interface with coupled-cluster codes.
@@ -94,12 +94,12 @@
 !!  - Optimization for Gamma-only. Memory and c -> r FFTs
 !!
 !!  - Need to extend FFT API to avoid scaling if isign = -1. Also fft_ug and fft_ur should accept isign
-!!    optional argument. Refactor of all the FFT routines used in the GW code is needed
+!!    optional argument. Refactoring of all the FFT routines used in the GW code is needed
 !!    in order to exploit R2C, C2R (e.g. chi0(q=0) and GPU version.
 !!
 !!  - Possible incompatibilities between gwpc, slk matrices that are always in dp and GW machinery
 !!
-!!  - Single precision for scalapack matrices.
+!!  - Single precision for scalapack matrices?
 !!
 !!  - Memory peaks:
 !!
@@ -171,7 +171,7 @@ module m_gwr
  use m_mpinfo,        only : initmpi_seq, destroy_mpi_enreg
  use m_distribfft,    only : init_distribfft_seq
  use m_fft,           only : fft_ug, fft_ur, fftbox_plan3_t, fourdp
- use m_fft_mesh,      only : calc_ceikr
+ use m_fft_mesh,      only : calc_ceikr, ctimes_eikr
  use m_kpts,          only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, kpts_map, kpts_map_print, kpts_pack_in_stars
  use m_gsphere,       only : kg_map
  use m_melemts,       only : melements_t
@@ -514,7 +514,13 @@ module m_gwr
 
    type(matrix_scalapack),allocatable :: wc_qibz(:,:,:)
    ! (nqibz, ntau, nsppol)
-   ! Correlated screened Coulomb interaction (does not depend on the spin, though)
+   ! Correlated screened Coulomb interaction summed over collinear spin
+   ! Replicated across the spin comm if nsppol == 2.
+
+   !type(matrix_scalapack),allocatable :: em1_qibz(:,:,:)
+   ! Inverse dielectric matrix at omega = 0
+   ! (nqibz, nsppol)
+   ! Replicated across the tau comm and the spin comm if nsppol == 2.
 
    character(len=10) :: wc_space = "none"
    ! "none", "itau", "iomega"
@@ -641,7 +647,7 @@ module m_gwr
    ! Build the correlated part of the screened interaction.
 
    procedure :: build_sigmac => gwr_build_sigmac
-   ! Build the correlated part of the self-energy iGWc
+   ! Build the correlated part of the self-energy GWc
    ! and compute matrix elements in the KS representation.
 
    procedure :: rpa_energy => gwr_rpa_energy
@@ -1402,9 +1408,9 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  call cwtime_report(" gwr_init:", cpu, wall, gflops)
 
 contains
- integer function vid(vname)
-   character(len=*),intent(in) :: vname
-   vid = nctk_idname(ncid, vname)
+integer function vid(vname)
+  character(len=*),intent(in) :: vname
+  vid = nctk_idname(ncid, vname)
 end function vid
 
 end subroutine gwr_init
@@ -2225,7 +2231,7 @@ subroutine gwr_get_myk_green_gpr(gwr, itau, spin, desc_mykbz, gt_gpr)
 
 !Local variables-------------------------------
 !scalars
- integer :: my_ikf, ik_bz, ig2, ipm, npwsp, col_bsize, idat, ndat, ii
+ integer :: my_ikf, ik_bz, ig2, ipm, npwsp, col_bsize, idat, ndat !, ii
  logical :: k_is_gamma
  real(dp) :: kk_bz(3), cpu, wall, gflops
  character(len=500) :: msg
@@ -3492,7 +3498,7 @@ subroutine gwr_build_tchi(gwr)
          ! Insert G_k(g',r) in G'-space in the supercell FFT box for fixed r.
          ! Note that we need to take the union of (k, g') for k in the BZ.
 
-         !call xscal(size(gt_scbox, czero, gt_scbox, 1)
+         !call xscal(size(gt_scbox), czero, gt_scbox, 1)
          gt_scbox = zero
 
 !if (.False.) then
@@ -3523,16 +3529,16 @@ if (.True.) then
 
          ! G(G',r) --> G(R',r) = sum_{k,g'} e^{-i(k+g').R'} G_k(g',r)
          call plan_gp2rp%execute_ip_dpc(gt_scbox)
-         gt_scbox = gt_scbox * sc_nfft ! / sck_ucvol)
+         gt_scbox = gt_scbox * sc_nfft
 
 else
          ! This is just to check if replacing a single FFT in the supercell with
          ! nkpt FFTs in the unit cell + communication is faster.
-         do my_ikf=1,gwr%my_nkbz
-           desc_k => desc_mykbz(my_ikf)
+         do ipm=1,2
+           do my_ikf=1,gwr%my_nkbz
+             desc_k => desc_mykbz(my_ikf)
 
-           do ipm=1,2
-             ! NB: The sign is wrong as it should be -1.
+             ! FIXME The sign is wrong as it should be -1.
              call fft_ug(desc_k%npw, gwr%g_nfft, gwr%nspinor, ndat, &
                          gwr%g_mgfft, gwr%g_ngfft, desc_k%istwfk, desc_k%gvec, desc_k%gbound, &
                          gt_gpr(ipm, my_ikf)%buffer_cplx(:, my_ir), &  ! in
@@ -3540,16 +3546,18 @@ else
 
              ! Sketching the algo.
              !gt_ucbox(:,ipm) = gt_ucbox(:,ipm) * uc_ceimkr(:,my_ikf)
-             !gt_scbox(:,ipm) = matmul(gt_ucbox(:,:,ipm), eiqL)
+             !gt_scbox(:,ipm) = matmul(gt_ucbox(:,:,ipm), emiLk)
+
+             !call ctimes_eikr(-kk, gwr%g_ngfft, gwr%g_nfft, ndat, gt_ucbox(:,ipm)))
 
              ! This becomes the bottleneck but perhaps one can take advantage of localization.
              ! Moreover the FFTs are distributed inside kpt_comm
              ! Also, one can save all the FFTs in a matrix G(mnfft * ndat, my_nkbz) multiply by the e^{-ikr} phase
              ! and then use zgemm to compute Out(r,L) = [e^{-ikr}G_k(r)] e^{-ikL} with precomputed e^{-iLk} phases.
-             call ur_to_scpsi(gwr%ngkpt, gwr%g_ngfft, gwr%g_nfft, gwr%nspinor, ndat, &
-                              gt_ucbox(:,ipm), cone, sc_ceimkr(:, my_ikf), gt_scbox(:,ipm))
-           end do ! ipm
-         end do ! my_ikf
+             !call ur_to_scpsi(gwr%ngkpt, gwr%g_ngfft, gwr%g_nfft, gwr%nspinor, ndat, &
+             !                 gt_ucbox(:,ipm), cone, sc_ceimkr(:, my_ikf), gt_scbox(:,ipm))
+           end do ! my_ikf
+         end do ! ipm
 
          ! TODO: Should block using nproc in kpt_comm, scatter data and perform multiple FFTs in parallel.
          if (gwr%kpt_comm%nproc > 1) call xmpi_sum(gt_scbox, gwr%kpt_comm%value, ierr)
@@ -3568,7 +3576,9 @@ end if
 
          ! Extract tchi_q(g',r) on the ecuteps g-sphere from the FFT box in the supercell
          ! and save data in chiq_gpr PBLAS matrix. Only my q-points in the IBZ are considered.
-         ! Alternatively, one can use zero-padded to go from R-supercell to ecuteps g-sphere.
+         ! Alternatively, one can avoid the FFT above and
+         ! use zero-padded to go from the supercell to the ecuteps g-sphere inside the my_iqi loop.
+         ! This approach should play well with k-point parallelism.
          do my_iqi=1,gwr%my_nqibz
            iq_ibz = gwr%my_qibz_inds(my_iqi)
            qq_ibz = gwr%qibz(:, iq_ibz)
@@ -3603,7 +3613,7 @@ end if
        !     1) MPI transpose to have tchi_q(r,g')
        !     2) FFT along first dimension to have tchi_q(g,g') stored in gwr%tchi_qibz
        !
-       tchi_rfact =  one / gwr%g_nfft / gwr%cryst%ucvol / (gwr%nkbz * gwr%nqbz)
+       tchi_rfact = one / gwr%g_nfft / gwr%cryst%ucvol / (gwr%nkbz * gwr%nqbz)
        do my_iqi=1,gwr%my_nqibz
          iq_ibz = gwr%my_qibz_inds(my_iqi)
          desc_q => gwr%tchi_desc_qibz(iq_ibz)
@@ -3640,6 +3650,7 @@ end if
            do idat=0,ndat-1
              gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx(:, ig2 + idat) = &
              gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx(:, ig2 + idat) * tchi_rfact
+             !call xscal(size(gt_scbox), czero, gt_scbox, 1)
            end do
          end do
 
@@ -4274,7 +4285,7 @@ subroutine gwr_build_sigmac(gwr)
  integer :: my_is, my_it, spin, ik_ibz, ikcalc_ibz, sc_nfft, sc_size, my_ir, my_nr, iw, idat, ndat, my_rank !my_iki,
  integer :: my_iqf, iq_ibz, iq_bz, itau, ierr, ibc, bmin, bmax, band, nbc ! col_bsize, npwsp, ib1, ib2,
  integer :: my_ikf, ipm, ik_bz, ig, ikcalc, uc_ir, ir, ncid, col_bsize, npwsp, ibeg, iend ! my_iqi, sc_ir,
- real(dp) :: cpu_tau, wall_tau, gflops_tau, cpu_all, wall_all, gflops_all, cpu, wall, gflops
+ real(dp) :: cpu_tau, wall_tau, gflops_tau, cpu_all, wall_all, gflops_all !, cpu, wall, gflops
  real(dp) :: mem_mb, cpu_ir, wall_ir, gflops_ir
  real(dp) :: max_abs_imag_wct, max_abs_re_wct, sck_ucvol, scq_ucvol  !, spin_fact
  !logical :: k_is_gamma !, q_is_gamma
@@ -4906,8 +4917,8 @@ end if
 
 contains
 integer function vid(vname)
-   character(len=*),intent(in) :: vname
-   vid = nctk_idname(ncid, vname)
+ character(len=*),intent(in) :: vname
+ vid = nctk_idname(ncid, vname)
 end function vid
 
 subroutine write_units(units, str)
@@ -5281,9 +5292,9 @@ subroutine gwr_ncwrite_tchi_wc(gwr, what, filepath)
  call cwtime_report(" gwr_ncwrite_tchi_wc:", cpu, wall, gflops)
 
 contains
- integer function vid(vname)
-   character(len=*),intent(in) :: vname
-   vid = nctk_idname(ncid, vname)
+integer function vid(vname)
+  character(len=*),intent(in) :: vname
+  vid = nctk_idname(ncid, vname)
 end function vid
 
 end subroutine gwr_ncwrite_tchi_wc
@@ -5608,7 +5619,7 @@ subroutine load_head_wings_from_sus_file__(gwr, filepath)
  call wrtout(std_out, sjoin(" Loading head and wings from:", filepath))
 
  if (.not. file_exists(filepath)) then
-   ABI_WARNING("Cannot find fine with head and wings. Results are WRONG. Returning.")
+   ABI_WARNING("Cannot find file with head and wings. Results are WRONG. Returning.")
    return
  end if
 
@@ -5779,9 +5790,9 @@ subroutine load_head_wings_from_sus_file__(gwr, filepath)
  ABI_FREE(sus_uwing)
 
 contains
- integer function vid(vname)
-   character(len=*),intent(in) :: vname
-   vid = nctk_idname(ncid, vname)
+integer function vid(vname)
+  character(len=*),intent(in) :: vname
+  vid = nctk_idname(ncid, vname)
 end function vid
 
 end subroutine load_head_wings_from_sus_file__

@@ -156,7 +156,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  real(dp) :: eff, mempercpu_mb, max_wfsmem_mb, nonscal_mem
  real(dp) :: ecore, ecut_eff, ecutdg_eff, cpu, wall, gflops, diago_cpu, diago_wall, diago_gflops
  logical, parameter :: is_dfpt = .false.
- logical :: read_wfk, print_wfk
+ logical :: read_wfk
  character(len=500) :: msg
  character(len=fnlen) :: wfk_path, den_path, kden_path, out_path
  type(hdr_type) :: wfk_hdr, den_hdr, kden_hdr, owfk_hdr
@@ -598,15 +598,15 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
    do spin=1,dtset%nsppol
      do ik_ibz=1,dtset%nkpt
        if (.not. diago_pool%treats(ik_ibz, spin)) cycle
-       call cwtime(diago_cpu, diago_wall, gflops, "start")
+       call cwtime(diago_cpu, diago_wall, diago_gflops, "start")
 
        nband_k = nband_iks(ik_ibz, spin)
        call ugb%from_diago(spin, istwfk_ik(ik_ibz), dtset%kptns(:,ik_ibz), dtset%ecut, nband_k, ngfftc, nfftf, &
                            dtset, pawtab, pawfgr, ks_paw_ij, cryst, psps, ks_vtrial, eig_k, diago_pool%comm%value)
 
-       call cwtime(diago_cpu, diago_wall, gflops, "stop")
+       call cwtime(diago_cpu, diago_wall, diago_gflops, "stop")
        if (diago_pool%comm%me == 0) diago_info(1, ik_ibz, spin) = diago_wall
-       call cwtime(diago_cpu, diago_wall, gflops, "start")
+       call cwtime(diago_cpu, diago_wall, diago_gflops, "start")
 
        owfk_ebands%eig(1:nband_k, ik_ibz, spin) = eig_k(1:nband_k)
 
@@ -626,7 +626,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
        end if
        ABI_FREE(occ_k)
 
-       call cwtime(diago_cpu, diago_wall, gflops, "stop")
+       call cwtime(diago_cpu, diago_wall, diago_gflops, "stop")
        if (diago_pool%comm%me == 0) diago_info(2:3, ik_ibz, spin) = [diago_wall, dble(diago_pool%comm%nproc)]
 
        ABI_FREE(eig_k)

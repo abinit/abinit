@@ -743,7 +743,6 @@ subroutine accumulate_chi0_q0(is_metallic,ik_bz,isym_kbz,itim_kbz,gwcomp,nspinor
            ABI_BUG(sjoin('Wrong value of itim:', itoa(itim)))
          END SELECT
 
-
          ! === Accumulate heads and wings for each small q ===
          ! FIXME extrapolar method should be checked!!
 
