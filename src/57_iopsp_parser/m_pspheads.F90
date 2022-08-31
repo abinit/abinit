@@ -387,6 +387,10 @@ subroutine inpspheads(filnam, npsp, pspheads, ecut_tmp)
      end do
      pspheads(ipsp)%pawheader%l_size=2*maxval(orb)+1
      pspheads(ipsp)%xccc=1  ! We suppose apriori that cc is used (but n1xccc is not used in PAW)
+     
+     ! Set matching radius (only available for PAW pseudopotentials for now)
+     pspheads(ipsp)%rmatchpsp = pspheads(ipsp)%pawheader%rpaw
+     
      ABI_FREE(orb)
 
 #if defined HAVE_BIGDFT
