@@ -75,8 +75,8 @@ module m_orbmag
 
   integer,parameter :: ibcc=1,ibcv=2,ibvva=3,ibvvb=4
   integer,parameter :: iomlr=5,iomanp=6,iomlmb=7
-  integer,parameter :: imcch=8,imvvbh=9,imcce=10,imcve=11,imvvae=12,imvvbe=13
-  integer,parameter :: nterms=13
+  integer,parameter :: imcch=8,imvvbh=9,imcce=10,imcve=11,imvvae=12,imvvbe=13,imvvah1=14,imcvh1=15
+  integer,parameter :: nterms=15
   real(dp),parameter :: c2 = one/(two_pi*two_pi) ! accounts for exp(i k.r) in abinit derivatives rather than exp( 2pi i k.r)
   complex(dpc),parameter :: cbc = j_dpc/two_pi ! Berry curvature pre-factor
   complex(dpc),parameter :: com = -half*j_dpc  ! Orbital magnetism pre-factor
@@ -88,7 +88,9 @@ module m_orbmag
   private :: make_ddir
   private :: cc_fgh
   private :: cv_fh
+  private :: cv_g1
   private :: vva_fh
+  private :: vva_g1
   private :: vvb_fgh
 
   private :: d2lr_p2
@@ -454,6 +456,13 @@ subroutine orbmag_ptpaw(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_en
    call cv_fh(atindx,cprj_k,cprj1_k,ddir,dtset,eig_k,ff_k,hh_k,lmn2max,nband_k,pawtab)
    orbmag_terms(:,:,:,ibcv) = orbmag_terms(:,:,:,ibcv) + trnrm*ff_k
    orbmag_terms(:,:,:,imcve) = orbmag_terms(:,:,:,imcve) + trnrm*hh_k
+
+ 
+   call cv_g1(atindx,cprj_k,cprj1_k,dtset,gg_k,lmn2max,nband_k,paw_ij,pawtab)
+   orbmag_terms(:,:,:,imcvh1) = orbmag_terms(:,:,:,imcvh1) + trnrm*gg_k
+
+   call vva_g1(atindx,cprj_k,dtset,gg_k,lmn2max,nband_k,paw_ij,pawtab)
+   orbmag_terms(:,:,:,imvvah1) = orbmag_terms(:,:,:,imvvah1) + trnrm*gg_k
    
    !--------------------------------------------------------------------------------
    ! onsite <phi|r_b p^2/2 r_g>
@@ -691,8 +700,9 @@ subroutine make_pcg1(atindx,cg_k,cg1_k,cprj_k,dimlmn,dtset,gs_hamk,&
       end do
     
       ! subtract vcg1 from cg1_k to obtain pcg1, the conduction band part of cg1 
-      pcg1_k(1:2,(iband-1)*npw_k+1:iband*npw_k,adir) =cg1_k(1:2,(iband-1)*npw_k+1:iband*npw_k,adir)-&
-       &  vcg1(1:2,1:npw_k)
+      !pcg1_k(1:2,(iband-1)*npw_k+1:iband*npw_k,adir) =cg1_k(1:2,(iband-1)*npw_k+1:iband*npw_k,adir)-&
+      ! &  vcg1(1:2,1:npw_k)
+      pcg1_k(1:2,(iband-1)*npw_k+1:iband*npw_k,adir) =cg1_k(1:2,(iband-1)*npw_k+1:iband*npw_k,adir)
 
     end do
   end do
@@ -875,6 +885,219 @@ subroutine cv_fh(atindx,cprj_k,cprj1_k,ddir,dtset,eig_k,ff_k,hh_k,lmn2max,nband_
 end subroutine cv_fh
 !!***
 
+!!****f* ABINIT/cv_g1
+!! NAME
+!! cv_g1
+!!
+!! FUNCTION
+!! compute cv contribution to g due to simple Dij terms only
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2021 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!!
+!! SOURCE
+
+subroutine cv_g1(atindx,cprj_k,cprj1_k,dtset,gg,lmn2max,nband_k,paw_ij,pawtab)
+
+  !Arguments ------------------------------------
+  !scalars
+  integer,intent(in) :: lmn2max,nband_k
+  type(dataset_type),intent(in) :: dtset
+
+  !arrays
+  integer,intent(in) :: atindx(dtset%natom)
+  real(dp),intent(out) :: gg(2,nband_k,3)
+  type(pawcprj_type),intent(in) :: cprj_k(dtset%natom,nband_k)
+  type(pawcprj_type),intent(in) :: cprj1_k(dtset%natom,nband_k,3)
+  type(paw_ij_type),intent(inout) :: paw_ij(dtset%natom)
+  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
+
+  !Local variables -------------------------
+  !scalars
+  integer :: adir,bdir,gdir,iat,iatom,ilmn,itypat,jlmn,klmn,nn
+  real(dp) :: eabg
+  logical :: cplex_dij
+  complex(dpc) :: ct,ctermdij,dij
+  
+  !arrays
+  complex(dpc) :: dup(2,2),udp(2,2)
+
+!--------------------------------------------------------------------
+
+  cplex_dij = (paw_ij(1)%cplex_dij .EQ. 2)
+
+  gg = zero
+  do nn = 1, nband_k
+
+    do adir = 1, 3
+      do bdir = 1, 3
+        do gdir = 1, 3
+          eabg = eijk(adir,bdir,gdir)
+          if (abs(eabg) < half) cycle
+
+          ctermdij = czero
+          do iat=1,dtset%natom
+            iatom=atindx(iat)
+            itypat=dtset%typat(iat)
+            do klmn = 1, pawtab(itypat)%lmn2_size
+              ilmn = pawtab(itypat)%indklmn(7,klmn)
+              jlmn = pawtab(itypat)%indklmn(8,klmn)
+             
+              if (cplex_dij) then
+                dij = cmplx(paw_ij(iat)%dij(2*klmn-1,1),paw_ij(iat)%dij(2*klmn,1),KIND=dpc)
+              else
+                dij = cmplx(paw_ij(iat)%dij(klmn,1),zero,KIND=dpc)
+              end if
+
+              ! <u|d_m p_n> : udp(m,n) means direction m, state n
+              udp(1,1) = cmplx(cprj_k(iatom,nn)%dcp(1,bdir,ilmn),cprj_k(iatom,nn)%dcp(2,bdir,ilmn),KIND=dpc)
+              udp(1,2) = cmplx(cprj_k(iatom,nn)%dcp(1,bdir,jlmn),cprj_k(iatom,nn)%dcp(2,bdir,jlmn),KIND=dpc)
+              udp(2,1) = cmplx(cprj_k(iatom,nn)%dcp(1,gdir,ilmn),cprj_k(iatom,nn)%dcp(2,gdir,ilmn),KIND=dpc)     
+              udp(2,2) = cmplx(cprj_k(iatom,nn)%dcp(1,gdir,jlmn),cprj_k(iatom,nn)%dcp(2,gdir,jlmn),KIND=dpc)     
+
+              ! <d_m u|p_n> : dup(m,n) means direction m, state n
+              dup(1,1) = cmplx(cprj1_k(iatom,nn,bdir)%cp(1,ilmn),cprj1_k(iatom,nn,bdir)%cp(2,ilmn),KIND=dpc)
+              dup(1,2) = cmplx(cprj1_k(iatom,nn,bdir)%cp(1,jlmn),cprj1_k(iatom,nn,bdir)%cp(2,jlmn),KIND=dpc)
+              dup(2,1) = cmplx(cprj1_k(iatom,nn,gdir)%cp(1,ilmn),cprj1_k(iatom,nn,gdir)%cp(2,ilmn),KIND=dpc)     
+              dup(2,2) = cmplx(cprj1_k(iatom,nn,gdir)%cp(1,jlmn),cprj1_k(iatom,nn,gdir)%cp(2,jlmn),KIND=dpc)     
+
+              ctermdij = ctermdij + dij*(CONJG(udp(1,1))*dup(2,2)+CONJG(dup(1,1))*udp(2,2))
+              if (ilmn /= jlmn) then
+                ctermdij = ctermdij + CONJG(dij)*(CONJG(udp(1,2))*dup(2,1)+CONJG(dup(1,2))*udp(2,1))
+              end if
+          
+            end do ! klmn
+          end do ! iat
+        
+          ct = c2*com*eabg*ctermdij 
+          gg(1,nn,adir) = gg(1,nn,adir) + REAL(ct)
+          gg(2,nn,adir) = gg(2,nn,adir) + AIMAG(ct)
+        
+        end do ! gdir
+      end do ! bdir
+    end do ! adir
+
+  end do !loop over bands
+
+end subroutine cv_g1
+!!***
+
+
+!!****f* ABINIT/vva_g1
+!! NAME
+!! vva_g1
+!!
+!! FUNCTION
+!! compute VVa contribution to g due to simple Dij terms only
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2021 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!!
+!! SOURCE
+
+subroutine vva_g1(atindx,cprj_k,dtset,gg,lmn2max,nband_k,paw_ij,pawtab)
+
+  !Arguments ------------------------------------
+  !scalars
+  integer,intent(in) :: lmn2max,nband_k
+  type(dataset_type),intent(in) :: dtset
+
+  !arrays
+  integer,intent(in) :: atindx(dtset%natom)
+  real(dp),intent(out) :: gg(2,nband_k,3)
+  type(pawcprj_type),intent(in) :: cprj_k(dtset%natom,nband_k)
+  type(paw_ij_type),intent(inout) :: paw_ij(dtset%natom)
+  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
+
+  !Local variables -------------------------
+  !scalars
+  integer :: adir,bdir,gdir,iat,iatom,ilmn,itypat,jlmn,klmn,nn
+  real(dp) :: eabg
+  logical :: cplex_dij
+  complex(dpc) :: cpdb,cpdg,ct,ctermdij,dij
+  
+  !arrays
+
+!--------------------------------------------------------------------
+
+  cplex_dij = (paw_ij(1)%cplex_dij .EQ. 2)
+
+  gg = zero
+  do nn = 1, nband_k
+
+    do adir = 1, 3
+      do bdir = 1, 3
+        do gdir = 1, 3
+          eabg = eijk(adir,bdir,gdir)
+          if (abs(eabg) < half) cycle
+
+          ctermdij = czero
+          do iat=1,dtset%natom
+            iatom=atindx(iat)
+            itypat=dtset%typat(iat)
+            do klmn = 1, pawtab(itypat)%lmn2_size
+              ilmn = pawtab(itypat)%indklmn(7,klmn)
+              jlmn = pawtab(itypat)%indklmn(8,klmn)
+            
+              if (cplex_dij) then
+                dij = cmplx(paw_ij(iat)%dij(2*klmn-1,1),paw_ij(iat)%dij(2*klmn,1),KIND=dpc)
+              else
+                dij = cmplx(paw_ij(iat)%dij(klmn,1),zero,KIND=dpc)
+              end if
+          
+              cpdb = CMPLX(cprj_k(iatom,nn)%dcp(1,bdir,ilmn),cprj_k(iatom,nn)%dcp(2,bdir,ilmn),KIND=dpc)
+              cpdg = CMPLX(cprj_k(iatom,nn)%dcp(1,gdir,jlmn),cprj_k(iatom,nn)%dcp(2,gdir,jlmn),KIND=dpc)
+              ctermdij = ctermdij + CONJG(cpdb)*dij*cpdg
+              
+              if (ilmn /= jlmn) then
+                cpdb = CMPLX(cprj_k(iatom,nn)%dcp(1,bdir,jlmn),cprj_k(iatom,nn)%dcp(2,bdir,jlmn),KIND=dpc)
+                cpdg = CMPLX(cprj_k(iatom,nn)%dcp(1,gdir,ilmn),cprj_k(iatom,nn)%dcp(2,gdir,ilmn),KIND=dpc)
+                ctermdij = ctermdij + CONJG(cpdb)*CONJG(dij)*cpdg
+              end if
+          
+            end do ! klmn
+          end do ! iat
+        
+          ct = c2*com*eabg*ctermdij 
+          gg(1,nn,adir) = gg(1,nn,adir) + REAL(ct)
+          gg(2,nn,adir) = gg(2,nn,adir) + AIMAG(ct)
+        
+        end do ! gdir
+      end do ! bdir
+    end do ! adir
+
+  end do !loop over bands
+
+end subroutine vva_g1
+!!***
 
 !!****f* ABINIT/vva_fh
 !! NAME
@@ -1700,6 +1923,10 @@ subroutine orbmag_ptpaw_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace)
    call wrtout(ab_out,message,'COLL')
    write(message,'(a,3es16.8)')'    CC: H : ',(orbmag_trace(1,adir,imcch),adir=1,3)
    call wrtout(ab_out,message,'COLL')
+   write(message,'(a,3es16.8)')'   CV: H1 : ',(orbmag_trace(1,adir,imcvh1),adir=1,3)
+   call wrtout(ab_out,message,'COLL')
+   write(message,'(a,3es16.8)')'  VVa: H1 : ',(orbmag_trace(1,adir,imvvah1),adir=1,3)
+   call wrtout(ab_out,message,'COLL')
    write(message,'(a,3es16.8)')'   VVb: H : ',(orbmag_trace(1,adir,imvvbh),adir=1,3)
    call wrtout(ab_out,message,'COLL')
    write(message,'(a,3es16.8)')'     VV L : ',(orbmag_trace(1,adir,iomlr),adir=1,3)
@@ -1743,6 +1970,10 @@ subroutine orbmag_ptpaw_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace)
      write(message,'(a,3es16.8)') ' Orbital magnetic moment : ',(orbmag_bb(1,iband,adir),adir=1,3)
      call wrtout(ab_out,message,'COLL')
      write(message,'(a,3es16.8)') '    CC: H : ',(orbmag_terms(1,iband,adir,imcch),adir=1,3)
+     call wrtout(ab_out,message,'COLL')
+     write(message,'(a,3es16.8)') '   CV: H1 : ',(orbmag_terms(1,iband,adir,imcvh1),adir=1,3)
+     call wrtout(ab_out,message,'COLL')
+     write(message,'(a,3es16.8)') '  VVa: H1 : ',(orbmag_terms(1,iband,adir,imvvah1),adir=1,3)
      call wrtout(ab_out,message,'COLL')
      write(message,'(a,3es16.8)') '   VVb: H : ',(orbmag_terms(1,iband,adir,imvvbh),adir=1,3)
      call wrtout(ab_out,message,'COLL')
