@@ -225,6 +225,9 @@ module m_hdr
 
   real(dp), allocatable :: znucltypat(:)
   ! znucltypat(ntypat) from alchemy
+  
+  real(dp), allocatable :: rmatchpsp(:)
+  ! rmatchpsp(npsp) from psps
 
   character(len=8) :: codvsn
   ! version of the code
@@ -856,6 +859,7 @@ subroutine hdr_malloc(hdr, bantot, nkpt, nsppol, npsp, natom, ntypat, nsym, nshi
  ABI_MALLOC(hdr%zionpsp, (npsp))
  ABI_MALLOC(hdr%znuclpsp, (npsp))
  ABI_MALLOC(hdr%znucltypat, (ntypat))
+ ABI_MALLOC(hdr%rmatchpsp, (ntypat))
  ABI_MALLOC(hdr%title, (npsp))
  ABI_MALLOC(hdr%shiftk, (3,nshiftk))
  ABI_MALLOC(hdr%shiftk_orig, (3,nshiftk_orig))
@@ -1049,6 +1053,7 @@ subroutine hdr_free(hdr)
  ABI_SFREE(hdr%zionpsp)
  ABI_SFREE(hdr%znuclpsp)
  ABI_SFREE(hdr%znucltypat)
+ ABI_SFREE(hdr%rmatchpsp)
 
  !string arrays
  ABI_SFREE(hdr%md5_pseudos)
@@ -1174,6 +1179,7 @@ subroutine hdr_copy(Hdr_in,Hdr_cp)
  call alloc_copy( Hdr_in%zionpsp   ,Hdr_cp%zionpsp   )
  call alloc_copy( Hdr_in%znuclpsp  ,Hdr_cp%znuclpsp  )
  call alloc_copy( Hdr_in%znucltypat,Hdr_cp%znucltypat)
+ call alloc_copy( Hdr_in%rmatchpsp ,Hdr_cp%rmatchpsp )
  call alloc_copy(Hdr_in%shiftk, Hdr_cp%shiftk)
  call alloc_copy(Hdr_in%shiftk_orig, Hdr_cp%shiftk_orig)
 
@@ -1380,6 +1386,7 @@ subroutine hdr_init_lowlvl(hdr,ebands,psps,pawtab,wvl,&
  hdr%znuclpsp  =psps%znuclpsp
  hdr%znucltypat=psps%znucltypat
  hdr%zionpsp   =psps%zionpsp
+ hdr%rmatchpsp =psps%rmatchpsp
  do ipsp=1,psps%npsp
    write(hdr%title(ipsp), "(A)") psps%title(ipsp)(1:132)
  end do
@@ -2126,7 +2133,8 @@ subroutine hdr_echo(hdr, fform, rdwr, unit, header)
      write(ount,'(a,f6.2,a,f6.2,a,i3,a,i6,a,i3,a,i3)' ) &
       '  znuclpsp=',hdr%znuclpsp(ipsp),    ', zionpsp=',  hdr%zionpsp(ipsp),&
       ', pspso=' , hdr%pspso(ipsp),  ', pspdat=',hdr%pspdat(ipsp),          &
-      ', pspcod=', hdr%pspcod(ipsp), ', pspxc=', hdr%pspxc(ipsp)
+      ', pspcod=', hdr%pspcod(ipsp), ', pspxc=', hdr%pspxc(ipsp),           &
+      ', rmatchpsp=', hdr%rmatchpsp(ipsp)
 
      if(hdr%usepaw==1)then
        write(ount,'(a,i3)' ) '  lmn_size=', hdr%lmn_size(ipsp)
@@ -2639,6 +2647,7 @@ subroutine hdr_bcast(hdr, master, me, comm)
    list_dpr(1+index:npsp   +index)=hdr%zionpsp                   ; index=index+npsp
    list_dpr(1+index:npsp   +index)=hdr%znuclpsp                  ; index=index+npsp
    list_dpr(1+index:ntypat  +index)=hdr%znucltypat               ; index=index+ntypat
+   list_dpr(1+index:ntypat  +index)=hdr%rmatchpsp                ; index=index+ntypat
    list_dpr(1+index)=hdr%nelect; index=index+1
    list_dpr(1+index)=hdr%ne_qFD; index=index+1 ! CP added line
    list_dpr(1+index)=hdr%nh_qFD; index=index+1 ! CP added line
@@ -2683,6 +2692,7 @@ subroutine hdr_bcast(hdr, master, me, comm)
    hdr%zionpsp =list_dpr(1+index:npsp   +index)                     ; index=index+npsp
    hdr%znuclpsp=list_dpr(1+index:npsp   +index)                     ; index=index+npsp
    hdr%znucltypat=list_dpr(1+index:ntypat  +index)                  ; index=index+ntypat
+   hdr%rmatchpsp=list_dpr(1+index:ntypat  +index)                   ; index=index+ntypat
    hdr%nelect = list_dpr(1+index); index=index+1
    hdr%ne_qFD = list_dpr(1+index); index=index+1 ! CP added line
    hdr%nh_qFD = list_dpr(1+index); index=index+1 ! CP added line
@@ -2973,7 +2983,7 @@ subroutine hdr_fort_read(Hdr,unit,fform,rewind)
  do ipsp=1,hdr%npsp
    read(unit, err=10, iomsg=errmsg) &
      hdr%title(ipsp), hdr%znuclpsp(ipsp), hdr%zionpsp(ipsp), hdr%pspso(ipsp), hdr%pspdat(ipsp), &
-     hdr%pspcod(ipsp), hdr%pspxc(ipsp), hdr%lmn_size(ipsp), hdr%md5_pseudos(ipsp)
+     hdr%pspcod(ipsp), hdr%pspxc(ipsp), hdr%lmn_size(ipsp), hdr%md5_pseudos(ipsp), hdr%rmatchpsp(ipsp)
  end do
 
  if (hdr%usepaw==1) then ! Reading the Rhoij tab if the PAW method was used.
@@ -3149,6 +3159,7 @@ subroutine hdr_ncread(Hdr, ncid, fform)
  NCF_CHECK(nf90_get_var(ncid, vid("symafm"), hdr%symafm))
  NCF_CHECK(nf90_get_var(ncid, vid("zionpsp"), hdr%zionpsp))
  NCF_CHECK(nf90_get_var(ncid, vid("znuclpsp"), hdr%znuclpsp))
+ NCF_CHECK(nf90_get_var(ncid, vid("rmatchpsp"), hdr%rmatchpsp))
  NCF_CHECK(nf90_get_var(ncid, vid("kptopt"), hdr%kptopt))
  NCF_CHECK(nf90_get_var(ncid, vid("pawcpxocc"), hdr%pawcpxocc))
  NCF_CHECK(nf90_get_var(ncid, vid("nelect"), hdr%nelect))
@@ -3310,7 +3321,7 @@ subroutine hdr_fort_write(Hdr,unit,fform,ierr,rewind)
  do ipsp=1,hdr%npsp
    write(unit, err=10, iomsg=errmsg) &
      hdr%title(ipsp), hdr%znuclpsp(ipsp), hdr%zionpsp(ipsp), hdr%pspso(ipsp), hdr%pspdat(ipsp), &
-     hdr%pspcod(ipsp), hdr%pspxc(ipsp), hdr%lmn_size(ipsp), hdr%md5_pseudos(ipsp)
+     hdr%pspcod(ipsp), hdr%pspxc(ipsp), hdr%lmn_size(ipsp), hdr%md5_pseudos(ipsp), hdr%rmatchpsp(ipsp)
  end do
 
  if (hdr%usepaw==1) then
@@ -3540,6 +3551,7 @@ integer function hdr_ncwrite(hdr, ncid, fform, spinat, nc_define) result(ncerr)
      nctkarr_t("title", "c", "psptitlen, npsp"),&
      nctkarr_t("zionpsp", "dp", "npsp"),&
      nctkarr_t("znuclpsp", "dp", "npsp"),&
+     nctkarr_t("rmatchpsp", "dp", "npsp"),&
      nctkarr_t("lmn_size", "i", "npsp")])
    NCF_CHECK(ncerr)
 
@@ -3674,6 +3686,7 @@ integer function hdr_ncwrite(hdr, ncid, fform, spinat, nc_define) result(ncerr)
  NCF_CHECK(nf90_put_var(ncid, vid("symafm"), hdr%symafm))
  NCF_CHECK(nf90_put_var(ncid, vid("znuclpsp"), hdr%znuclpsp))
  NCF_CHECK(nf90_put_var(ncid, vid("zionpsp"), hdr%zionpsp))
+ NCF_CHECK(nf90_put_var(ncid, vid("rmatchpsp"), hdr%rmatchpsp))
  NCF_CHECK(nf90_put_var(ncid, vid("lmn_size"), hdr%lmn_size))
  NCF_CHECK(nf90_put_var(ncid, vid("usewvl"), hdr%usewvl))
 
@@ -4517,6 +4530,7 @@ subroutine hdr_check(fform, fform0, hdr, hdr0, mode_paral, restart, restartpaw)
      ! NOTE, XG 000719: should do something about pspso
      ! NOTE, XG 020716: znucl and zion are not written
      if (abs(hdr%znuclpsp(ipsp)-hdr0%znuclpsp(ipsp))>tol6) itest=1
+     if (abs(hdr%rmatchpsp(ipsp)-hdr0%rmatchpsp(ipsp))>tol6) itest=1
      if (abs(hdr%zionpsp(ipsp)-hdr0%zionpsp(ipsp))>tol6) then
        itest=1; tpsch=1
      end if

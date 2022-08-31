@@ -481,6 +481,10 @@ module defs_datatypes
    ! znucltypat(ntypat)
    ! The atomic number of each type of atom (might be alchemy wrt psps)
 
+  real(dp), allocatable :: rmatchpsp(:)
+   ! rmatchpsp(npsp)
+   ! For each pseudopotential, the matching radius
+
 ! Character arrays
   character(len=fnlen), allocatable :: filpsp(:)
    ! filpsp(npsps)
@@ -597,6 +601,9 @@ module defs_datatypes
 
   real(dp) :: znuclpsp
     ! atomic number of the nuclei
+    
+  real(dp) :: rmatchpsp
+    ! matching radius of the pseudopotential
 
   real(dp) :: GTHradii(0:4)
     ! Radii values for GTH (and HGH) family potentials
