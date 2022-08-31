@@ -91,11 +91,11 @@ contains
   !!  this=extfpmd_type object concerned
   !!
   !! SOURCE
-  subroutine init(this,mband,nbcut,nfft,nspden,rprimd,version)
+  subroutine init(this,mband,nbcut,nbdbuf,nfft,nspden,rprimd,version)
     ! Arguments -------------------------------
     ! Scalars
     class(extfpmd_type),intent(inout) :: this
-    integer,intent(in) :: mband,nbcut,nfft,nspden,version
+    integer,intent(in) :: mband,nbcut,nbdbuf,nfft,nspden,version
     ! Arrays
     real(dp),intent(in) :: rprimd(3,3)
 
