@@ -860,8 +860,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
      ABI_ERROR(msg)
    else
      ABI_MALLOC(extfpmd,)
-     call extfpmd%init(dtset%mband,dtset%extfpmd_nbcut,dtset%nfft,&
-&     dtset%nspden,rprimd,dtset%useextfpmd)
+     call extfpmd%init(dtset%mband,dtset%extfpmd_nbcut,dtset%extfpmd_nbdbuf,&
+&     dtset%nfft,dtset%nspden,rprimd,dtset%useextfpmd)
    end if
  end if
 

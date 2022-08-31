@@ -247,7 +247,11 @@ subroutine getnel(doccde, dosdeltae, eigen, entropy, fermie, fermih, maxocc, mba
          do iband=low_band_index,high_band_index
             index = index + 1
             ent(index)                = ent(index)*maxocc
-            occ(iband + index_tot)    = occ_tmp(index)*maxocc
+            if (iband > high_band_index - 25) then
+              occ(iband + index_tot)    = zero
+            else
+              occ(iband + index_tot)    = occ_tmp(index)*maxocc
+            end if
             doccde(iband + index_tot) = -doccde_tmp(index)*maxocc*tsmearinv
             entropy                   = entropy + wk*ent(index)
             nelect                    = nelect + wk*occ(iband + index_tot)

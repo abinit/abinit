@@ -56,7 +56,7 @@ module m_extfpmd
   !!
   !! SOURCE
   type,public :: extfpmd_type
-    integer :: bcut,nbcut,nfft,nspden,version
+    integer :: bcut,nbcut,nbdbuf,nfft,nspden,version
     real(dp) :: e_bcut,edc_kinetic,e_kinetic,entropy
     real(dp) :: nelect,shiftfactor,ucvol
     real(dp),allocatable :: vtrial(:,:)
@@ -105,8 +105,9 @@ contains
 
     ! *********************************************************************
 
-    this%bcut=mband
+    this%bcut=mband-nbdbuf
     this%nbcut=nbcut
+    this%nbdbuf=nbdbuf
     this%version=version
     ABI_MALLOC(this%vtrial,(nfft,nspden))
     this%vtrial(:,:)=zero
@@ -154,6 +155,7 @@ contains
     this%nspden=0
     this%bcut=0
     this%nbcut=0
+    this%nbdbuf=0
     this%version=1
     this%e_bcut=zero
     this%edc_kinetic=zero
@@ -219,7 +221,7 @@ contains
         abs_err=zero
         do isppol=1,nsppol
           do ikpt=1,nkpt
-            nband_k=nband(ikpt+(isppol-1)*nkpt)
+            nband_k=nband(ikpt+(isppol-1)*nkpt)-this%nbdbuf
             rel_err=rel_err+wtk(ikpt)*abs((eigen(band_index+nband_k)-&
             & extfpmd_e_fg(dble(nband_k),this%ucvol)-this%shiftfactor)/&
             & eigen(band_index+nband_k))
@@ -248,7 +250,7 @@ contains
       band_index=0
       do isppol=1,nsppol
         do ikpt=1,nkpt
-          nband_k=nband(ikpt+(isppol-1)*nkpt)
+          nband_k=nband(ikpt+(isppol-1)*nkpt)-this%nbdbuf
           do ii=nband_k-this%nbcut+1,nband_k
             this%shiftfactor=this%shiftfactor+&
             & wtk(ikpt)*(eigen(band_index+ii)-extfpmd_e_fg(dble(ii),this%ucvol))
@@ -268,7 +270,7 @@ contains
       band_index=0
       do isppol=1,nsppol
         do ikpt=1,nkpt
-          nband_k=nband(ikpt+(isppol-1)*nkpt)
+          nband_k=nband(ikpt+(isppol-1)*nkpt)-this%nbdbuf
           do ii=nband_k-this%nbcut+1,nband_k
             this%shiftfactor=this%shiftfactor+&
             & wtk(ikpt)*(eigen(band_index+ii)-eknk(band_index+ii))
