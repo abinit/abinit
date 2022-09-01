@@ -41,7 +41,7 @@ prtsuscep3 1         # Write TCHI file.
 getden3 1
 getwfk3 2
 gwr_ntau3   6         # Number of imaginary-time points
-gwr_np_gtks 2 2 2 1
+gwr_np_gtks 2 1 2 1
 
 #gwr_boxcutmin3  1.1 # This should be subject to convergence studies
 gwr_boxcutmin3  1.0 
@@ -106,10 +106,10 @@ pseudos "Si-GGA.psp8, O-GGA.psp8"
 #%% executable = abinit
 #%% need_cpp_vars = HAVE_LINALG_SCALAPACK
 #%% [paral_info]
-#%% nprocs_to_test = 8
-#%% max_nprocs = 8
-#%% [NCPU_8]
-#%% files_to_test = t78_MPI8.abo, tolnlines = 25, tolabs = 1.010e-03, tolrel = 6.000e-03, fld_options = -medium
+#%% nprocs_to_test = 4
+#%% max_nprocs = 4
+#%% [NCPU_4]
+#%% files_to_test = t78_MPI4.abo, tolnlines = 25, tolabs = 1.010e-03, tolrel = 6.000e-03, fld_options = -medium
 #%% [extra_info]
 #%% authors =  M. Giantomassi
 #%% keywords = GWR, NC
