@@ -84,6 +84,7 @@ contains
   !!  this=extfpmd_type object concerned
   !!  mband=maximum number of bands
   !!  nbcut=number of states used to average the constant potential value
+  !!  nbdbuf=Number of bands in the buffer to converge scf cycle with extfpmd models
   !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
   !!  version=extfpmd implementation version
   !!
@@ -221,12 +222,12 @@ contains
         abs_err=zero
         do isppol=1,nsppol
           do ikpt=1,nkpt
-            nband_k=nband(ikpt+(isppol-1)*nkpt)-this%nbdbuf
-            rel_err=rel_err+wtk(ikpt)*abs((eigen(band_index+nband_k)-&
-            & extfpmd_e_fg(dble(nband_k),this%ucvol)-this%shiftfactor)/&
-            & eigen(band_index+nband_k))
-            abs_err=abs_err+wtk(ikpt)*abs(eigen(band_index+nband_k)-&
-            & extfpmd_e_fg(dble(nband_k),this%ucvol)-this%shiftfactor)
+            nband_k=nband(ikpt+(isppol-1)*nkpt)
+            rel_err=rel_err+wtk(ikpt)*abs((eigen(band_index+nband_k-this%nbdbuf)-&
+            & extfpmd_e_fg(dble(nband_k-this%nbdbuf),this%ucvol)-this%shiftfactor)/&
+            & eigen(band_index+nband_k-this%nbdbuf))
+            abs_err=abs_err+wtk(ikpt)*abs(eigen(band_index+nband_k-this%nbdbuf)-&
+            & extfpmd_e_fg(dble(nband_k-this%nbdbuf),this%ucvol)-this%shiftfactor)
             band_index=band_index+nband_k
           end do
         end do
@@ -250,8 +251,8 @@ contains
       band_index=0
       do isppol=1,nsppol
         do ikpt=1,nkpt
-          nband_k=nband(ikpt+(isppol-1)*nkpt)-this%nbdbuf
-          do ii=nband_k-this%nbcut+1,nband_k
+          nband_k=nband(ikpt+(isppol-1)*nkpt)
+          do ii=nband_k-this%nbdbuf-this%nbcut+1,nband_k-this%nbdbuf
             this%shiftfactor=this%shiftfactor+&
             & wtk(ikpt)*(eigen(band_index+ii)-extfpmd_e_fg(dble(ii),this%ucvol))
           end do
@@ -270,12 +271,12 @@ contains
       band_index=0
       do isppol=1,nsppol
         do ikpt=1,nkpt
-          nband_k=nband(ikpt+(isppol-1)*nkpt)-this%nbdbuf
-          do ii=nband_k-this%nbcut+1,nband_k
+          nband_k=nband(ikpt+(isppol-1)*nkpt)
+          do ii=nband_k-this%nbdbuf-this%nbcut+1,nband_k-this%nbdbuf
             this%shiftfactor=this%shiftfactor+&
             & wtk(ikpt)*(eigen(band_index+ii)-eknk(band_index+ii))
           end do
-          this%e_bcut=this%e_bcut+wtk(ikpt)*eigen(band_index+nband_k)
+          this%e_bcut=this%e_bcut+wtk(ikpt)*eigen(band_index+nband_k-this%nbdbuf)
           band_index=band_index+nband_k
         end do
       end do
@@ -294,7 +295,7 @@ contains
       do isppol=1,nsppol
         do ikpt=1,nkpt
           nband_k=nband(ikpt+(isppol-1)*nkpt)
-          this%e_bcut=this%e_bcut+wtk(ikpt)*eigen(band_index+nband_k)
+          this%e_bcut=this%e_bcut+wtk(ikpt)*eigen(band_index+nband_k-this%nbdbuf)
           band_index=band_index+nband_k
         end do
       end do
