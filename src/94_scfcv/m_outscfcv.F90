@@ -823,7 +823,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
    call timab(1162,1,tsec)
 
 !  STM
-   if (dtset%prtstm>0) then
+   if (dtset%prtstm/=0) then
      call fftdatar_write("stm",dtfil%fnameabo_app_stm,dtset%iomode,hdr,&
      crystal,ngfft,cplex1,nfft,nspden,rhor,mpi_enreg,ebands=ebands)
    end if

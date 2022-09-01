@@ -24,14 +24,14 @@ module m_qplusg
  use defs_basis
 
  implicit none
- 
- private 
+
+ private
 !!***
-  
+
  public :: cmod_qpg
 !!***
 
-CONTAINS 
+CONTAINS
 !!***
 
 !!****f* m_qplusg/cmod_qpg
@@ -79,7 +79,7 @@ subroutine cmod_qpg(nq,iq,q,npwvec,gvec,gprimd,qplusg)
 &             gprimd(3,ii)*gprimd(3,:)
  end do
 
- if (ALL(ABS(q(:,iq))<tol3)) then !FIXED<--FIXME avoid this, everything should be under the control of the programmer.
+ if (ALL(ABS(q(:,iq))<tol3)) then ! FIXME avoid this, everything should be under the control of the programmer.
    ! * Treat q as if it were zero except when G=0
    qplusg(1)=two_pi*SQRT(DOT_PRODUCT(q(:,iq),MATMUL(gmet,q(:,iq))))
    do ig=2,npwvec

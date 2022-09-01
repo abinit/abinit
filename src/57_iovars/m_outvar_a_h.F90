@@ -1168,6 +1168,21 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  !dprarr(1,:)  =dtsets(:)%gstore_gstore_erange
  !call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gstore_erange','ENE',0)
 
+ dprarr(1,:) = dtsets(:)%gwr_boxcutmin
+ call prttagm(dprarr, intarr, iout, jdtset_, 1, marr, narr, narrm, ncid, ndtset_alloc, 'gwr_boxcutmin', 'DPR', 0)
+
+ narr = size(dtsets(0)%gwr_np_gtks)
+ do idtset=0,ndtset_alloc
+   intarr(1:narr,idtset) = dtsets(idtset)%gwr_np_gtks
+ end do
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,narrm,ncid,ndtset_alloc,'gwr_np_gtks','INT',0, firstchar="-")
+
+ intarr(1,:) = dtsets(:)%gwr_ntau
+ call prttagm(dprarr, intarr, iout, jdtset_, 2, marr, 1, narrm, ncid, ndtset_alloc, 'gwr_ntau', 'INT', 0)
+
+ ! TODO
+ !call prttagm(dprarr, intarr, iout, jdtset_, 2, marr, 1, narrm, ncid, ndtset_alloc, 'gwr_task', 'INT', 0)
+
 !grchrg
  print_constraint=0
  do idtset=1,ndtset_alloc

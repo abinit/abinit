@@ -34,8 +34,8 @@ module m_sigc
  use m_fstrings,      only : sjoin, itoa
  use m_geometry,      only : normv
  use m_crystal,       only : crystal_t
- use m_bz_mesh,       only : kmesh_t, get_BZ_item, findqg0, littlegroup_t, littlegroup_print
- use m_gsphere,       only : gsphere_t, gsph_fft_tabs
+ use m_bz_mesh,       only : kmesh_t, findqg0, littlegroup_t
+ use m_gsphere,       only : gsphere_t
  use m_fft_mesh,      only : get_gftt, rotate_fft_mesh, cigfft
  use m_vcoul,         only : vcoul_t
  use m_wfd,           only : wfdgw_t, wave_t
@@ -270,8 +270,8 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 
  ! Index of the GW point in the BZ array, its image in IBZ and time-reversal ===
  jk_bz=Sigp%kptgw2bz(ikcalc)
- call get_BZ_item(Kmesh,jk_bz,kgw,jk_ibz,isym_kgw,jik,ph_mkgwt)
- !%call get_IBZ_item(Kmesh,jk_ibz,kibz,wtk)
+ call kmesh%get_BZ_item(jk_bz,kgw,jk_ibz,isym_kgw,jik,ph_mkgwt)
+ !%call kmesh%get_IBZ_item(jk_ibz,kibz,wtk)
 
  ! TODO: the new version based of get_uug won't suppporte kptgw vectors that are not in
  ! the IBZ since one should perform the rotation before entering the band loop
@@ -284,9 +284,9 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  ib1=minbnd; ib2=maxbnd
 
  write(msg,'(2a,3f8.3,2a,2(i3,a))')ch10,&
-&  ' Calculating <nk|Sigma_c(omega)|nk> at k = ',kgw(:),ch10,&
-&  ' bands n = from ',ib1,' to ',ib2,ch10
- call wrtout(std_out,msg,'COLL')
+  ' Calculating <nk|Sigma_c(omega)|nk> at k = ',kgw(:),ch10,&
+  ' bands n = from ',ib1,' to ',ib2,ch10
+ call wrtout(std_out, msg)
 
  if ( Dtset%gwaclowrank > 0 ) then
    ! Today we use the same number of eigenvectors irrespective to iw'
@@ -326,7 +326,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 
  ! Print type of calculation.
  sigma_type = sigma_type_from_key(mod10)
- call wrtout(std_out,sigma_type,'COLL')
+ call wrtout(std_out, sigma_type)
 
  ! Set up logical flags for Sigma calculation
  if (mod10==SIG_GW_AC.and.Sigp%gwcalctyp/=1) then
@@ -334,8 +334,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
        ABI_ERROR("not implemented")
    else
      write(msg,'(a34,i9)')'Constructing Sigma_c(iw) for k = ',ikcalc
-     call wrtout(std_out,msg,'COLL')
-     call wrtout(ab_out,msg,'COLL')
+     call wrtout([std_out, ab_out], msg)
    end if
  end if
 
@@ -344,9 +343,10 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  end if
 
  if (mod10==SIG_GW_AC) then
-   write(msg,'(3a,i6,a,i6)') ' Using a low-rank formula for AC',&
-&           ch10,' Number of epsm1 eigenvectors retained: ',neigmax,' over ',Sigp%npwc
-   call wrtout(std_out,msg,'COLL')
+   write(msg,'(3a,i6,a,i6)')&
+     ' Using a low-rank formula for AC', ch10, &
+     ' Number of epsm1 eigenvectors retained: ',neigmax,' over ',Sigp%npwc
+   call wrtout(std_out, msg)
  endif
 
 
@@ -423,15 +423,15 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 &  my_nbks,proc_distrb,got,global=.TRUE.)
 
  write(msg,'(a,i0,a)')" Will sum ",my_nbks," (b,k,s) states in Sigma_c."
- call wrtout(std_out,msg,'PERS')
+ call wrtout(std_out, msg)
 
  if (Sigp%gwcomp==1) then
    en_high=MAXVAL(qp_ene(Sigp%nbnds,:,:)) + Sigp%gwencomp
    write(msg,'(6a,e11.4,a)')ch10,&
-&    ' Using the extrapolar approximation to accelerate convergence',ch10,&
-&    ' with respect to the number of bands included',ch10,&
-&    ' with extrapolar energy: ',en_high*Ha_eV,' [eV]'
-   call wrtout(std_out,msg,'COLL')
+    ' Using the extrapolar approximation to accelerate convergence',ch10,&
+    ' with respect to the number of bands included',ch10,&
+    ' with extrapolar energy: ',en_high*Ha_eV,' [eV]'
+   call wrtout(std_out, msg)
    ABI_MALLOC(wf1swf2_g,(gwc_nfftot*nspinor))
  end if
 
@@ -548,8 +548,8 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  ! Here we divide the states where the QP energies are required into complexes. Note however that this approach is not
  ! based on group theory, and it might lead to spurious results in case of accidental degeneracies.
  nq_summed=Kmesh%nbz
- if (Sigp%symsigma>0) then
-   call littlegroup_print(Ltg_k,std_out,Dtset%prtvol,'COLL')
+ if (Sigp%symsigma > 0) then
+   call Ltg_k%print(std_out, Dtset%prtvol, mode_paral='COLL')
    nq_summed=SUM(Ltg_k%ibzq(:))
    !
    ! Find number of degenerate subspaces and number of bands in each subspace
@@ -569,7 +569,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  end if !symsigma
 
  write(msg,'(2a,i6,a)')ch10,' calculation status ( ',nq_summed,' to be completed):'
- call wrtout(std_out,msg,'COLL')
+ call wrtout(std_out, msg)
 
  ! Here we have a problem in case of CD since epsm1q might be huge
  ! TODO if single q (ex molecule) dont allocate epsm1q, avoid waste of memory
@@ -647,7 +647,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
      call timab(434,1,tsec) ! initq
 
      ! Find the corresponding irreducible k-point
-     call get_BZ_item(Kmesh,ik_bz,ksum,ik_ibz,isym_ki,iik,ph_mkt)
+     call kmesh%get_BZ_item(ik_bz,ksum,ik_ibz,isym_ki,iik,ph_mkt)
      spinrot_kbz(:)=Cryst%spinrot(:,isym_ki)
 
      ! Identify q and G0 where q + G0 = k_GW - k_i
@@ -671,8 +671,8 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
      call wrtout(std_out,msg,'PERS')
 
      ! Find the corresponding irred q-point.
-     call get_BZ_item(Qmesh,iq_bz,qbz,iq_ibz,isym_q,itim_q)
-     q_is_gamma = (normv(qbz,Cryst%gmet,"G") < GW_TOL_W0)
+     call qmesh%get_BZ_item(iq_bz,qbz,iq_ibz,isym_q,itim_q)
+     q_is_gamma = (normv(qbz,Cryst%gmet,"G") < GW_TOLQ0)
 
      !q_is_gamma = (normv(qbz,Cryst%gmet,"G") < 0.7)
      !if (iq_ibz/=2.and.iq_ibz/=1) CYCLE
@@ -683,7 +683,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
      !  a) FFT index of the G-G0.
      !  b) gw_gbound table for the zero-padded FFT performed in rhotwg.
      ABI_MALLOC(gw_gbound,(2*gwc_mgfft+8,2))
-     call gsph_fft_tabs(Gsph_c,g0,gwc_mgfft,gwc_ngfft,use_padfft,gw_gbound,igfftcg0)
+     call Gsph_c%fft_tabs(g0,gwc_mgfft,gwc_ngfft,use_padfft,gw_gbound,igfftcg0)
 
      if (ANY(gwc_fftalga == [2, 4])) use_padfft=0 ! Pad-FFT is not coded in rho_tw_g
 #ifdef FC_IBM
@@ -697,7 +697,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 
      if (Dtset%pawcross==1) then
        ABI_MALLOC(gboundf,(2*mgfftf+8,2))
-       call gsph_fft_tabs(Gsph_c,g0,mgfftf,rho_ngfft,use_padfftf,gboundf,igfftfcg0)
+       call Gsph_c%fft_tabs(g0,mgfftf,rho_ngfft,use_padfftf,gboundf,igfftfcg0)
        if ( ANY(gwc_fftalga == (/2,4/)) ) use_padfftf=0
        if (use_padfftf==0) then
          ABI_FREE(gboundf)
@@ -720,10 +720,10 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
          if (Wfd%usepaw==1.and.PPm%userho==1) then
            ! Use PAW AE rhor.
            call setup_ppmodel(PPm,Cryst,Qmesh,Er%npwe,Er%nomega,Er%omega,Er%epsm1,rho_nfftot,Gsph_c%gvec,&
-&            rho_ngfft,aepaw_rhor(:,1),iqiA=iq_ibz)
+                              rho_ngfft,aepaw_rhor(:,1),iqiA=iq_ibz)
          else
            call setup_ppmodel(PPm,Cryst,Qmesh,Er%npwe,Er%nomega,Er%omega,Er%epsm1,rho_nfftot,Gsph_c%gvec,&
-&            rho_ngfft,rhor(:,1),iqiA=iq_ibz)
+                              rho_ngfft,rhor(:,1),iqiA=iq_ibz)
          end if
        end if
      end if
@@ -795,11 +795,11 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
        end if
      end if !gwcalctyp
 
-     ! Get Fourier components of the Coulombian interaction in the BZ ===
+     ! Get Fourier components of the Coulomb interaction in the BZ
      ! In 3D systems, neglecting umklapp: vc(Sq,sG) = vc(q,G) = 4pi/|q+G|**2
      ! The same relation holds for 0-D systems, but not in 1-D or 2D systems. It depends on S.
      do ig=1,npwc
-       vc_sqrt_qbz(Gsph_c%rottb(ig,itim_q,isym_q))=Vcp%vc_sqrt(ig,iq_ibz)
+       vc_sqrt_qbz(Gsph_c%rottb(ig,itim_q,isym_q)) = Vcp%vc_sqrt(ig,iq_ibz)
      end do
 
      call timab(434,2,tsec) ! initq
@@ -822,7 +822,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
          call paw_symcprj(ik_bz,nspinor,1,Cryst,Kmesh,Pawtab,Pawang,Cprj_ksum)
          if (Dtset%pawcross==1) then
            call Wfdf%paw_get_aeur(ib,ik_ibz,spin,Cryst,Paw_onsite,Psps,Pawtab,Pawfgrtab,&
-&              ur_ae_sum,ur_ae_onsite_sum,ur_ps_onsite_sum)
+                                  ur_ae_sum,ur_ae_onsite_sum,ur_ps_onsite_sum)
          end if
        end if
 
@@ -833,21 +833,22 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
        do jb=ib1,ib2
 
          call rho_tw_g(nspinor,npwc,gwc_nfftot,ndat1,gwc_ngfft,1,use_padfft,igfftcg0,gw_gbound,&
-&          ur_ibz        ,iik,ktabr(:,ik_bz),ph_mkt  ,spinrot_kbz,  &
-&          wfr_bdgw(:,jb),jik,ktabr(:,jk_bz),ph_mkgwt,spinrot_kgw,&
-&          nspinor,rhotwg_ki(:,jb))
+            ur_ibz        ,iik,ktabr(:,ik_bz),ph_mkt  ,spinrot_kbz,  &
+            wfr_bdgw(:,jb),jik,ktabr(:,jk_bz),ph_mkgwt,spinrot_kgw,&
+            nspinor,rhotwg_ki(:,jb))
 
          if (Psps%usepaw==1) then
            ! Add on-site contribution, projectors are already in BZ !TODO Recheck this!
            i2=jb; if (nspinor==2) i2=(2*jb-1)
            spad=(nspinor-1)
            call paw_rho_tw_g(npwc,nspinor,nspinor,Cryst%natom,Cryst%ntypat,Cryst%typat,Cryst%xred,Gsph_c%gvec,&
-&            Cprj_ksum(:,:),Cprj_kgw(:,i2:i2+spad),Pwij_qg,rhotwg_ki(:,jb))
+                             Cprj_ksum(:,:),Cprj_kgw(:,i2:i2+spad),Pwij_qg,rhotwg_ki(:,jb))
+
            if (Dtset%pawcross==1) then ! Add paw cross term
              call paw_cross_rho_tw_g(nspinor,npwc,nfftf,rho_ngfft,1,use_padfftf,igfftfcg0,gboundf,&
-&             ur_ae_sum,ur_ae_onsite_sum,ur_ps_onsite_sum,iik,ktabrf(:,ik_bz),ph_mkt,spinrot_kbz,&
-&             ur_ae_bdgw(:,jb),ur_ae_onsite_bdgw(:,jb),ur_ps_onsite_bdgw(:,jb),jik,ktabrf(:,jk_bz),ph_mkgwt,spinrot_kgw,&
-&             nspinor,rhotwg_ki(:,jb))
+               ur_ae_sum,ur_ae_onsite_sum,ur_ps_onsite_sum,iik,ktabrf(:,ik_bz),ph_mkt,spinrot_kbz,&
+               ur_ae_bdgw(:,jb),ur_ae_onsite_bdgw(:,jb),ur_ps_onsite_bdgw(:,jb),jik,ktabrf(:,jk_bz),ph_mkgwt,spinrot_kgw,&
+               nspinor,rhotwg_ki(:,jb))
            end if
          end if
 
@@ -897,7 +898,6 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
        if (Sr%nomega_r>0) omegame0i(1:Sr%nomega_r)=DBLE(Sr%omega_r(1:Sr%nomega_r))-e0i
 
        call timab(437,2,tsec) ! rho_tw_g
-
        call timab(443,1,tsec) ! ac_lrk_appl
 
        if (mod10==SIG_GW_AC) then
@@ -906,12 +906,11 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
            ABI_MALLOC(epsm1_sqrt_rhotw, (neig(iiw), minbnd:maxbnd))
            ! epsm1_sqrt_rhotw = SQRT(epsm1) * rho_tw
            call xgemm('C','N',neig(iiw),maxbnd-minbnd+1,npwc,cone_gw,ac_epsm1cqwz2(:,:,iiw),npwc,&
-&                    rhotwg_ki,npwc,czero_gw,epsm1_sqrt_rhotw,neig(iiw))
+                      rhotwg_ki,npwc,czero_gw,epsm1_sqrt_rhotw,neig(iiw))
            call xherk('L','C',maxbnd-minbnd+1,neig(iiw),one_gw,epsm1_sqrt_rhotw,neig(iiw),zero_gw,&
                      rhotw_epsm1_rhotw(:,:,iiw),maxbnd-minbnd+1)
 
-           ! Get the upper part of rhotw_epsm1_rhotw
-           ! that is hermitian by construction
+           ! Get the upper part of rhotw_epsm1_rhotw that is hermitian by construction
            do jb=minbnd,maxbnd
              do kb=jb+1,maxbnd
                rhotw_epsm1_rhotw(jb,kb,iiw) = CONJG( rhotw_epsm1_rhotw(kb,jb,iiw) )
@@ -941,7 +940,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
            ! Moreover, for ppmodel 3 and 4, spinorial case is not allowed
            sigc_ket  = czero_gw
            call calc_sig_ppm(PPm,nspinor,npwc,nomega_tot,rhotwgp,botsq,otq,&
-&           omegame0i,Sigp%zcut,theta_mu_minus_e0i,eig,npwc,sigc_ket,sigcme_3)
+                             omegame0i,Sigp%zcut,theta_mu_minus_e0i,eig,npwc,sigc_ket,sigcme_3)
 
            if (PPm%model==3.or.PPm%model==4) then
              sigcme2(:,kb)=sigcme2(:,kb) + (wtqp+wtqm)*DBLE(sigcme_3(:)) + (wtqp-wtqm)*j_gw*AIMAG(sigcme_3(:))
@@ -970,19 +969,19 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
            ! Check memory saving
            if (Er%mqmem == 0) then
              call calc_sigc_cd(npwc,npwc,nspinor,nomega_tot,Er%nomega,Er%nomega_r,Er%nomega_i,rhotwgp,&
-&             Er%omega,Er%epsm1(:,:,:,1),omegame0i,theta_mu_minus_e0i,sigc_ket,Dtset%ppmfrq,npoles_missing(kb),&
-&              method=Dtset%cd_frqim_method)
+                Er%omega,Er%epsm1(:,:,:,1),omegame0i,theta_mu_minus_e0i,sigc_ket,Dtset%ppmfrq,npoles_missing(kb),&
+                method=Dtset%cd_frqim_method)
            else
              call calc_sigc_cd(npwc,npwc,nspinor,nomega_tot,Er%nomega,Er%nomega_r,Er%nomega_i,rhotwgp,&
-&             Er%omega,epsm1_qbz,omegame0i,theta_mu_minus_e0i,sigc_ket,Dtset%ppmfrq,npoles_missing(kb),&
-&              method=Dtset%cd_frqim_method)
+               Er%omega,epsm1_qbz,omegame0i,theta_mu_minus_e0i,sigc_ket,Dtset%ppmfrq,npoles_missing(kb),&
+               method=Dtset%cd_frqim_method)
            end if
 
 #if 0
            if (wtqm/=0) then
              call calc_sigc_cd(npwc,npwc,nspinor,,nomega_tot,Er%nomega,Er%nomega_r,Er%nomega_i,rhotwgp,&
-&              Er%omega,epsm1_trcc_qbz,omegame0i,theta_mu_minus_e0i,aherm_sigc_ket,Dtset%ppmfrq,npoles_missing(kb),&
-&               method=Dtset%cd_frqim_method)
+                Er%omega,epsm1_trcc_qbz,omegame0i,theta_mu_minus_e0i,aherm_sigc_ket,Dtset%ppmfrq,npoles_missing(kb),&
+               method=Dtset%cd_frqim_method)
 
              herm_sigc_ket  = half*(sigc_ket + aherm_sigc_ket)
              aherm_sigc_ket = half*(sigc_ket - aherm_sigc_ket)
@@ -1001,14 +1000,14 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
            ket2      = czero_gw
 
            call calc_sig_ppm(PPm,nspinor,npwc,nomega_tot,rhotwgp,botsq,otq,&
-&            omegame0i,Sigp%zcut,theta_mu_minus_e0i,eig,npwc,ket1,sigcme_new)
+                             omegame0i,Sigp%zcut,theta_mu_minus_e0i,eig,npwc,ket1,sigcme_new)
 
            if (Sigp%gwcalctyp==28) then
              if (PPm%model/=1.and.PPm%model/=2) then
                ! This is needed to have npwc=PPm%dm2_botsq=PPm%dm2_otq
                write(msg,'(3a)')&
-&                'For the time being, gwcalctyp=28 cannot be used with ppmodel=3,4.',ch10,&
-&                'Use another Plasmon Pole Model when gwcalctyp=28.'
+                  'For the time being, gwcalctyp=28 cannot be used with ppmodel=3,4.',ch10,&
+                  'Use another Plasmon Pole Model when gwcalctyp=28.'
                ABI_ERROR(msg)
              end if
              ABI_MALLOC(botsq_conjg_transp,(PPm%dm2_botsq,npwc))
@@ -1018,7 +1017,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
              otq_transp=TRANSPOSE(otq)
 
              call calc_sig_ppm(PPm,nspinor,npwc,nomega_tot,rhotwgp,botsq_conjg_transp,otq_transp,&
-&              omegame0i,Sigp%zcut,theta_mu_minus_e0i,eig,npwc,ket2,sigcme_3)
+                omegame0i,Sigp%zcut,theta_mu_minus_e0i,eig,npwc,ket2,sigcme_3)
 
              ABI_FREE(botsq_conjg_transp)
              ABI_FREE(otq_transp)
@@ -1050,14 +1049,14 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 
            ! Calculate \Sigma(E_k)|k> to obtain <j|\Sigma(E_k)|k>
            call calc_sigc_cd(npwc,npwc,nspinor,nomega_tot,Er%nomega,Er%nomega_r,Er%nomega_i,rhotwgp,&
-&            Er%omega,epsm1_qbz,omegame0i,theta_mu_minus_e0i,ket1,Dtset%ppmfrq,npoles_missing(kb),&
-&             method=Dtset%cd_frqim_method)
+              Er%omega,epsm1_qbz,omegame0i,theta_mu_minus_e0i,ket1,Dtset%ppmfrq,npoles_missing(kb),&
+              method=Dtset%cd_frqim_method)
 
            if (Sigp%gwcalctyp==29) then
              ! Calculate \Sigma^*(E_k)|k> to obtain <k|\Sigma(E_k)|j>^*
              call calc_sigc_cd(npwc,npwc,nspinor,nomega_tot,Er%nomega,Er%nomega_r,Er%nomega_i,rhotwgp,&
-&              Er%omega,epsm1_trcc_qbz,omegame0i,theta_mu_minus_e0i,ket2,Dtset%ppmfrq,npoles_missing(kb),&
-&               method=Dtset%cd_frqim_method)
+               Er%omega,epsm1_trcc_qbz,omegame0i,theta_mu_minus_e0i,ket2,Dtset%ppmfrq,npoles_missing(kb),&
+               method=Dtset%cd_frqim_method)
              sigc_ket = half*(ket1+ket2)
            else
              sigc_ket = ket1
@@ -1070,7 +1069,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
          if (Sigp%gwcomp==1) then
            ! TODO spinor not implemented
            call calc_sig_ppm_comp(npwc,nomega_tot,rhotwgp,botsq,otq,DBLE(Sr%egw(kb,jk_ibz,spin)-en_high),&
-&            Sigp%zcut,theta_mu_minus_e0i,sigc_ket,PPm%model,npwc,PPm%dm2_botsq,PPm%dm2_otq)
+              Sigp%zcut,theta_mu_minus_e0i,sigc_ket,PPm%model,npwc,PPm%dm2_botsq,PPm%dm2_otq)
          end if
 
          call timab(438,2,tsec) !
@@ -1093,7 +1092,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
                  omegame0i2_ac = omegame0i_ac*omegame0i_ac
                  do iiw=1,Er%nomega_i
                    sigctmp(io,iab) = sigctmp(io,iab) + piinv * rhotw_epsm1_rhotw(jb,kb,iiw) * omegame0i_ac &
-&                                                      /(omegame0i2_ac + omegap2(iiw))
+                                                      / (omegame0i2_ac + omegap2(iiw))
                  end do
                end do
              end do
@@ -1126,19 +1125,19 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
                  end if
                  spad=(nspinor-1)
                  call paw_rho_tw_g(gwc_nfftot,Sigp%nsig_ab,nspinor,Cryst%natom,Cryst%ntypat,Cryst%typat,Cryst%xred,&
-&                  gw_gfft,Cprj_kgw(:,i1:i1+spad),Cprj_kgw(:,i2:i2+spad),Pwij_fft,wf1swf2_g)
+                   gw_gfft,Cprj_kgw(:,i1:i1+spad),Cprj_kgw(:,i2:i2+spad),Pwij_fft,wf1swf2_g)
 
                  if (Dtset%pawcross==1) then ! Add paw cross term
                    call paw_cross_rho_tw_g(nspinor,npwc,nfftf,rho_ngfft,1,use_padfftf,igfftfcg0,gboundf,&
-&                   ur_ae_bdgw(:,jb),ur_ae_onsite_bdgw(:,jb),ur_ps_onsite_bdgw(:,jb),jik,ktabrf(:,jk_bz),ph_mkgwt,spinrot_kgw,&
-&                   ur_ae_bdgw(:,kb),ur_ae_onsite_bdgw(:,kb),ur_ps_onsite_bdgw(:,kb),jik,ktabrf(:,jk_bz),ph_mkgwt,spinrot_kgw,&
-&                   nspinor,wf1swf2_g)
+                   ur_ae_bdgw(:,jb),ur_ae_onsite_bdgw(:,jb),ur_ps_onsite_bdgw(:,jb),jik,ktabrf(:,jk_bz),ph_mkgwt,spinrot_kgw,&
+                   ur_ae_bdgw(:,kb),ur_ae_onsite_bdgw(:,kb),ur_ps_onsite_bdgw(:,kb),jik,ktabrf(:,jk_bz),ph_mkgwt,spinrot_kgw,&
+                   nspinor,wf1swf2_g)
                  end if
                end if
 
                ! The static contribution from completeness relation is calculated once ===
                call calc_coh_comp(iq_ibz,Vcp%i_sz,(jb==kb),nspinor,Sigp%nsig_ab,DBLE(Sr%egw(kb,jk_ibz,spin)-en_high),&
-&                npwc,Gsph_c%gvec,gwc_ngfft,gwc_nfftot,wf1swf2_g,vc_sqrt_qbz,botsq,otq,sigcohme)
+                 npwc,Gsph_c%gvec,gwc_ngfft,gwc_nfftot,wf1swf2_g,vc_sqrt_qbz,botsq,otq,sigcohme)
 
                do io=1,nomega_sigc
                  sigctmp(io,:) = sigctmp(io,:)+sigcohme(:)
@@ -1151,7 +1150,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
              is_idx=spin; if (nspinor==2) is_idx=iab
 
              sigcme_tmp(:,jb,kb,is_idx)=sigcme_tmp(:,jb,kb,is_idx) + &
-&              (wtqp+wtqm)*DBLE(sigctmp(:,iab)) + (wtqp-wtqm)*j_gw*AIMAG(sigctmp(:,iab))
+               (wtqp+wtqm)*DBLE(sigctmp(:,iab)) + (wtqp-wtqm)*j_gw*AIMAG(sigctmp(:,iab))
 
              sigc(1,:,jb,kb,is_idx)=sigc(1,:,jb,kb,is_idx) + wtqp*      sigctmp(:,iab)
              sigc(2,:,jb,kb,is_idx)=sigc(2,:,jb,kb,is_idx) + wtqm*CONJG(sigctmp(:,iab))
@@ -1301,7 +1300,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
        npls = npoles_missing(band)
        if (npls>0) then
          write(msg,'(a,2(i0,a))')" For band ",band," there are ",npls," missing poles"
-         call wrtout(std_out,msg,"COLL")
+         call wrtout(std_out, msg)
        end if
      end do
    end if
@@ -1309,7 +1308,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
    w_localmax = MAXVAL(w_maxval)
    call xmpi_max(w_localmax,w_max, Wfd%comm, ierr)
    write(msg,'(a,f12.5,a)') ' Max omega value used in W(omega): ',w_max*Ha_eV,' [eV]'
-   call wrtout(std_out,msg,"COLL")
+   call wrtout(std_out, msg)
  end if
  call timab(442,2,tsec) ! final ops
 
@@ -1317,9 +1316,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  ! ==== Deallocate memory ====
  ! ===========================
  if (Psps%usepaw==1) then
-   if (allocated(gw_gfft)) then
-     ABI_FREE(gw_gfft)
-   end if
+   ABI_SFREE(gw_gfft)
    call pawcprj_free(Cprj_ksum)
    ABI_FREE(Cprj_ksum)
    if (allocated(Pwij_fft)) then
@@ -1347,46 +1344,20 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  ABI_FREE(sigc)
  ABI_FREE(w_maxval)
 
- if (allocated(sigc_ket)) then
-   ABI_FREE(sigc_ket)
- endif
- if (allocated(ket1)) then
-   ABI_FREE(ket1)
- endif
- if (allocated(ket2)) then
-   ABI_FREE(ket2)
- endif
- if (allocated(epsm1_qbz)) then
-   ABI_FREE(epsm1_qbz)
- end if
- if (allocated(epsm1_trcc_qbz)) then
-   ABI_FREE(epsm1_trcc_qbz)
- end if
- if (allocated(epsm1_tmp)) then
-   ABI_FREE(epsm1_tmp)
- end if
- if (allocated(degtab)) then
-   ABI_FREE(degtab)
- end if
- if (allocated(ac_epsm1cqwz2)) then
-   ABI_FREE(ac_epsm1cqwz2)
- end if
- if (allocated(rhotw_epsm1_rhotw)) then
-   ABI_FREE(rhotw_epsm1_rhotw)
- end if
- if (allocated(aherm_sigc_ket)) then
-   ABI_FREE(aherm_sigc_ket)
- end if
- if (allocated(herm_sigc_ket)) then
-   ABI_FREE(herm_sigc_ket)
- end if
- if (Sigp%gwcomp==1) then
-   ABI_FREE(wf1swf2_g)
- end if
- if (Sigp%gwcomp==1) then
-   ABI_FREE(extrapolar_distrb)
- end if
- ABI_FREE(proc_distrb)
+ ABI_SFREE(sigc_ket)
+ ABI_SFREE(ket1)
+ ABI_SFREE(ket2)
+ ABI_SFREE(epsm1_qbz)
+ ABI_SFREE(epsm1_trcc_qbz)
+ ABI_SFREE(epsm1_tmp)
+ ABI_SFREE(degtab)
+ ABI_SFREE(ac_epsm1cqwz2)
+ ABI_SFREE(rhotw_epsm1_rhotw)
+ ABI_SFREE(aherm_sigc_ket)
+ ABI_SFREE(herm_sigc_ket)
+ ABI_SFREE(wf1swf2_g)
+ ABI_SFREE(extrapolar_distrb)
+ ABI_SFREE(proc_distrb)
 
  call timab(431,2,tsec)
  call timab(424,2,tsec) ! calc_sigc_me

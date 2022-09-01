@@ -44,9 +44,7 @@ module m_hdr
 #ifdef HAVE_MPI2
  use mpi
 #endif
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
  use m_nctk
  use m_dtset
 
@@ -720,7 +718,6 @@ type(abifile_t) function abifile_from_fform(fform) result(afile)
  integer,intent(in) :: fform
 
 !Local variables-------------------------------
-!scalars
  integer :: ii
 ! *************************************************************************
 
@@ -896,7 +893,7 @@ end subroutine hdr_malloc
 !!
 !! SOURCE
 
-subroutine hdr_init(ebands, codvsn, dtset, hdr, pawtab, pertcase, psps,wvl, &
+subroutine hdr_init(ebands, codvsn, dtset, hdr, pawtab, pertcase, psps, wvl, &
                     mpi_atmtab, comm_atom) ! optional arguments (parallelism)
 
 !Arguments ------------------------------------
@@ -940,15 +937,6 @@ subroutine hdr_init(ebands, codvsn, dtset, hdr, pawtab, pertcase, psps,wvl, &
  ! Note: The structure parameters are taken from the first image, also cellcharge !
  if (present(comm_atom)) then
    if (present(mpi_atmtab)) then
-     ! CP modified
-     !call hdr_init_lowlvl(hdr,ebands,psps,pawtab,wvl,codvsn,pertcase,&
-     !  dtset%natom,dtset%nsym,dtset%nspden,dtset%ecut,dtset%pawecutdg,dtset%ecutsm,dtset%dilatmx,&
-     !  dtset%intxc,dtset%ixc,dtset%stmbias,dtset%usewvl,dtset%pawcpxocc,dtset%pawspnorb,dtset%ngfft,dtset%ngfftdg,&
-     !  dtset%so_psp,dtset%qptn, dtset%rprimd_orig(:,:,image),dtset%xred_orig(:,:,image),&
-     !  dtset%symrel,dtset%tnons,dtset%symafm,dtset%typat,dtset%amu_orig(:,image),dtset%icoulomb,&
-     !  dtset%kptopt,dtset%nelect,dtset%cellcharge(image),dtset%kptrlatt_orig,dtset%kptrlatt,&
-     !  dtset%nshiftk_orig,dtset%nshiftk,dtset%shiftk_orig,dtset%shiftk,&
-     !  comm_atom=comm_atom,mpi_atmtab=mpi_atmtab)
      call hdr_init_lowlvl(hdr,ebands,psps,pawtab,wvl,codvsn,pertcase,&
        dtset%natom,dtset%nsym,dtset%nspden,dtset%ecut,dtset%pawecutdg,dtset%ecutsm,dtset%dilatmx,&
        dtset%intxc,dtset%ixc,dtset%stmbias,dtset%usewvl,dtset%pawcpxocc,dtset%pawspnorb,dtset%ngfft,dtset%ngfftdg,&
@@ -957,17 +945,7 @@ subroutine hdr_init(ebands, codvsn, dtset, hdr, pawtab, pertcase, psps,wvl, &
        dtset%kptopt,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,dtset%cellcharge(image),&
        dtset%kptrlatt_orig,dtset%kptrlatt,dtset%nshiftk_orig,dtset%nshiftk,dtset%shiftk_orig,dtset%shiftk,&
        comm_atom=comm_atom,mpi_atmtab=mpi_atmtab)
-     ! End CP modified
    else
-     ! CP modified
-     !call hdr_init_lowlvl(hdr,ebands,psps,pawtab,wvl,codvsn,pertcase,&
-     !  dtset%natom,dtset%nsym,dtset%nspden,dtset%ecut,dtset%pawecutdg,dtset%ecutsm,dtset%dilatmx,&
-     !  dtset%intxc,dtset%ixc,dtset%stmbias,dtset%usewvl,dtset%pawcpxocc,dtset%pawspnorb,dtset%ngfft,dtset%ngfftdg,&
-     !  dtset%so_psp,dtset%qptn, dtset%rprimd_orig(:,:,image),dtset%xred_orig(:,:,image),&
-     !  dtset%symrel,dtset%tnons,dtset%symafm,dtset%typat,dtset%amu_orig(:,image),dtset%icoulomb,&
-     !  dtset%kptopt,dtset%nelect,dtset%cellcharge(image),dtset%kptrlatt_orig,dtset%kptrlatt,&
-     !  dtset%nshiftk_orig,dtset%nshiftk,dtset%shiftk_orig,dtset%shiftk,&
-     !  comm_atom=comm_atom)
      call hdr_init_lowlvl(hdr,ebands,psps,pawtab,wvl,codvsn,pertcase,&
        dtset%natom,dtset%nsym,dtset%nspden,dtset%ecut,dtset%pawecutdg,dtset%ecutsm,dtset%dilatmx,&
        dtset%intxc,dtset%ixc,dtset%stmbias,dtset%usewvl,dtset%pawcpxocc,dtset%pawspnorb,dtset%ngfft,dtset%ngfftdg,&
@@ -976,17 +954,8 @@ subroutine hdr_init(ebands, codvsn, dtset, hdr, pawtab, pertcase, psps,wvl, &
        dtset%kptopt,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,dtset%cellcharge(image),&
        dtset%kptrlatt_orig,dtset%kptrlatt,dtset%nshiftk_orig,dtset%nshiftk,dtset%shiftk_orig,dtset%shiftk,&
        comm_atom=comm_atom)
-     ! End CP modified
    end if
  else
-   ! CP modified
-   !call hdr_init_lowlvl(hdr,ebands,psps,pawtab,wvl,codvsn,pertcase,&
-   !  dtset%natom,dtset%nsym,dtset%nspden,dtset%ecut,dtset%pawecutdg,dtset%ecutsm,dtset%dilatmx,&
-   !  dtset%intxc,dtset%ixc,dtset%stmbias,dtset%usewvl,dtset%pawcpxocc,dtset%pawspnorb,dtset%ngfft,dtset%ngfftdg,&
-   !  dtset%so_psp,dtset%qptn, dtset%rprimd_orig(:,:,image),dtset%xred_orig(:,:,image),dtset%symrel,&
-   !  dtset%tnons,dtset%symafm,dtset%typat,dtset%amu_orig(:,image),dtset%icoulomb,&
-   !  dtset%kptopt,dtset%nelect,dtset%cellcharge(image),dtset%kptrlatt_orig,dtset%kptrlatt,&
-   !  dtset%nshiftk_orig,dtset%nshiftk,dtset%shiftk_orig,dtset%shiftk)
    call hdr_init_lowlvl(hdr,ebands,psps,pawtab,wvl,codvsn,pertcase,&
      dtset%natom,dtset%nsym,dtset%nspden,dtset%ecut,dtset%pawecutdg,dtset%ecutsm,dtset%dilatmx,&
      dtset%intxc,dtset%ixc,dtset%stmbias,dtset%usewvl,dtset%pawcpxocc,dtset%pawspnorb,dtset%ngfft,dtset%ngfftdg,&
@@ -994,7 +963,6 @@ subroutine hdr_init(ebands, codvsn, dtset, hdr, pawtab, pertcase, psps,wvl, &
      dtset%tnons,dtset%symafm,dtset%typat,dtset%amu_orig(:,image),dtset%icoulomb,&
      dtset%kptopt,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,dtset%cellcharge(image),&
      dtset%kptrlatt_orig,dtset%kptrlatt,dtset%nshiftk_orig,dtset%nshiftk,dtset%shiftk_orig,dtset%shiftk)
-   ! End CP modified
  end if
 
 end subroutine hdr_init
@@ -1491,7 +1459,7 @@ end subroutine hdr_init_lowlvl
 !!
 !! SOURCE
 
-subroutine hdr_read_from_fname(Hdr,fname,fform,comm)
+subroutine hdr_read_from_fname(Hdr, fname, fform, comm)
 
 !Arguments ------------------------------------
  integer,intent(in) :: comm
@@ -1527,14 +1495,10 @@ subroutine hdr_read_from_fname(Hdr,fname,fform,comm)
 
    else
      ! Use Netcdf to open the file and read the header.
-#ifdef HAVE_NETCDF
      NCF_CHECK(nctk_open_read(fh, my_fname, xmpi_comm_self))
      call hdr_ncread(Hdr,fh, fform)
      ABI_CHECK(fform /= 0, sjoin("Error while reading:", my_fname))
      NCF_CHECK(nf90_close(fh))
-#else
-     ABI_ERROR("netcdf support not enabled")
-#endif
    end if
  end if
 
@@ -1591,7 +1555,6 @@ subroutine hdr_write_to_fname(Hdr,fname,fform)
 
  else
    ! Use Netcdf to open the file and write the header.
-#ifdef HAVE_NETCDF
    if (file_exists(fname)) then
      NCF_CHECK(nctk_open_modify(fh,fname, xmpi_comm_self))
    else
@@ -1600,9 +1563,6 @@ subroutine hdr_write_to_fname(Hdr,fname,fform)
 
    NCF_CHECK(hdr%ncwrite(fh, fform, nc_define=.True.))
    NCF_CHECK(nf90_close(fh))
-#else
-   ABI_ERROR("netcdf support not enabled")
-#endif
  end if
 
 end subroutine hdr_write_to_fname
@@ -3030,7 +2990,6 @@ subroutine hdr_ncread(Hdr, ncid, fform)
  integer,intent(out) :: fform
  type(hdr_type),target,intent(out) :: hdr
 
-#ifdef HAVE_NETCDF
 !Local variables-------------------------------
 !scalars
  integer :: nresolution, itypat, ii, varid, ncerr ! CP added varid, ncerr
@@ -3211,10 +3170,6 @@ subroutine hdr_ncread(Hdr, ncid, fform)
 
  endif
  ! End CP added
-
-#else
- ABI_ERROR("netcdf support not activated")
-#endif
 
 contains
  integer function vid(vname)
@@ -3416,7 +3371,6 @@ integer function hdr_ncwrite(hdr, ncid, fform, spinat, nc_define) result(ncerr)
  class(hdr_type),target,intent(in) :: hdr
  real(dp),optional,intent(in) :: spinat(3, hdr%natom)
 
-#ifdef HAVE_NETCDF
 !Local variables-------------------------------
 !scalars
  logical :: my_define
@@ -3733,11 +3687,6 @@ integer function hdr_ncwrite(hdr, ncid, fform, spinat, nc_define) result(ncerr)
   ncerr = nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: "ne_qFD", "nh_qFD"],[hdr%ne_qFD, hdr%nh_qFD])
  end if
  ! End CP added
-
-
-#else
- ABI_ERROR("netcdf support not activated")
-#endif
 
 contains
  integer function vid(vname)
@@ -4975,7 +4924,7 @@ subroutine hdr_vs_dtset(Hdr,Dtset)
  ! Check istwfk storage
  if (allocated(dtset%istwfk)) then
    if ((any(Hdr%istwfk(:) /= Dtset%istwfk(1:Dtset%nkpt))) ) then
-     ABI_COMMENT('istwfk read from Header differs from the values specified in the input file (this is not critical)')
+     ABI_COMMENT('istwfk from header differs from the values specified in the input file (not critical)')
      !call wrtout(std_out, "  Hdr | input ")
      !do ik=1,Dtset%nkpt
      !  write(msg,'(i5,3x,i5)')Hdr%istwfk(ik),Dtset%istwfk(ik)

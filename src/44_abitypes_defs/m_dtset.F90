@@ -281,6 +281,10 @@ type, public :: dataset_type
  integer :: gw_qprange
  integer :: gw_sctype
  integer :: gw_sigxcore = 0
+
+ integer :: gwr_ntau = 12
+ real(dp) :: gwr_boxcutmin = two
+ character(len=fnlen) :: gwr_task = "G0W0"
 !H
  integer :: hmcsst
  integer :: hmctt
@@ -660,6 +664,7 @@ type, public :: dataset_type
  integer :: eph_ngqpt_fine(3) = 0
  integer :: eph_np_pqbks(5) = 0
  integer :: fockdownsampling(3)
+ integer :: gwr_np_gtks(4) = 0
  integer :: jfielddir(3)
  integer :: kptrlatt(3,3)
  integer :: kptrlatt_orig(3,3)=0
@@ -1532,6 +1537,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%fftgw              = dtin%fftgw
  dtout%fft_count          = dtin%fft_count
  dtout%fockdownsampling   = dtin%fockdownsampling
+ dtout%gwr_np_gtks        = dtin%gwr_np_gtks
  dtout%fockoptmix         = dtin%fockoptmix
  dtout%fock_icutcoul      = dtin%fock_icutcoul
  dtout%freqim_alpha       = dtin%freqim_alpha
@@ -1613,9 +1619,10 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%gw_sctype          = dtin%gw_sctype
  dtout%gw_sigxcore        = dtin%gw_sigxcore
  dtout%gw_toldfeig        = dtin%gw_toldfeig
- dtout%gwls_stern_kmax= dtin%gwls_stern_kmax
+
+ dtout%gwls_stern_kmax      = dtin%gwls_stern_kmax
  dtout%gwls_npt_gauss_quad  = dtin%gwls_npt_gauss_quad
- dtout%gwls_diel_model= dtin%gwls_diel_model
+ dtout%gwls_diel_model      = dtin%gwls_diel_model
  dtout%gwls_print_debug     = dtin%gwls_print_debug
  dtout%gwls_nseeds          = dtin%gwls_nseeds
  dtout%gwls_n_proj_freq     = dtin%gwls_n_proj_freq
@@ -1628,10 +1635,15 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%gwls_correlation     = dtin%gwls_correlation
  dtout%gwls_first_seed      = dtin%gwls_first_seed
  dtout%gwls_recycle         = dtin%gwls_recycle
- dtout%hyb_mixing      = dtin%hyb_mixing
- dtout%hyb_mixing_sr   = dtin%hyb_mixing_sr
- dtout%hyb_range_dft   = dtin%hyb_range_dft
- dtout%hyb_range_fock  = dtin%hyb_range_fock
+
+ dtout%gwr_ntau = dtin%gwr_ntau
+ dtout%gwr_boxcutmin = dtin%gwr_boxcutmin
+ dtout%gwr_task = dtin%gwr_task
+
+ dtout%hyb_mixing         = dtin%hyb_mixing
+ dtout%hyb_mixing_sr      = dtin%hyb_mixing_sr
+ dtout%hyb_range_dft      = dtin%hyb_range_dft
+ dtout%hyb_range_fock     = dtin%hyb_range_fock
  dtout%hmcsst             = dtin%hmcsst
  dtout%hmctt              = dtin%hmctt
  dtout%ibte_abs_tol       = dtin%ibte_abs_tol
@@ -3297,6 +3309,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' fit_nfixcoeff fit_rangePower fit_SPCoupling fit_SPC_maxS fit_tolMSDE fit_tolMSDF fit_tolMSDFS'
  list_vars=trim(list_vars)//' fit_nimposecoeff fit_imposecoeff fit_tolMSDS fit_tolGF'
  list_vars=trim(list_vars)//' fockoptmix focktoldfe fockdownsampling fock_icutcoul'
+ list_vars=trim(list_vars)//' gwr_np_gtks gwr_ntau gwr_boxcutmin gwr_task'
  list_vars=trim(list_vars)//' freqim_alpha freqremax freqremin freqspmax'
  list_vars=trim(list_vars)//' freqspmin friction frzfermi fxcartfactor'
  list_vars=trim(list_vars)//' freqspmin friction frzfermi fxcartfactor'

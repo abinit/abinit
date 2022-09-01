@@ -15996,11 +15996,18 @@ Variable(
     mnemonics="PRinT the STM density",
     added_in_version="before_v9",
     text=r"""
-If set to 1 or a larger value, provide output of the electron density in real
+If set to 1, provide output of the electron density in real
 space rho(r), made only from the electrons close to the Fermi energy, in a
 range of energy (positive or negative), determined by the (positive or
 negative, but non-zero) value of the STM bias [[stmbias]].
-This is a very approximate way to obtain STM profiles: one can choose an
+Specifying a non-zero negative value is also allowed, and will produce also
+the output of an electron density in real space, like the above, but moreover
+will additionally filter it to have the contribution of one band only, 
+whose number is the absolute value of [[prtstm]]. Obviously abs([[prtstm]])
+must be smaller or equal to [[nband]].
+
+The electron density obtained from [[prtstm]]=1,
+is a very approximate way to obtain STM profiles: one can choose an
 equidensity surface, and consider that the STM tip will follow this surface.
 Such equidensity surface might be determined with the help of Cut3D, and
 further post-processing of it (to be implemented). The big approximations of
@@ -16009,11 +16016,16 @@ independent transfer matrix elements between the tip and the surface.
 The charge density is provided in units of electrons/Bohr^3. The name of the
 STM density file will be the root output name, followed by _STM. Like a _DEN
 file, it can be analyzed by cut3d.
+
+The negative values of [[prtstm]] allows one to perform a detailed band-by-band
+analysis of the [[prtstm]]=1 result.
+
 The file structure of this unformatted output file is described in [[help:abinit#denfile|this section]].
 For the STM charge density to be generated, one must give, as an input file,
 the converged wavefunctions obtained from a previous run, at exactly the same
 k-points and cut-off energy, self-consistently determined, using the
 occupation numbers from [[occopt]] = 7.
+
 In the run with positive [[prtstm]], one has to use:
 
   * positive [[iscf]]
@@ -16027,7 +16039,6 @@ Note that you might have to adjust the value of [[nband]] as well, for the
 treatment of unoccupied states, because the automatic determination of
 [[nband]] will often not include enough unoccupied states.
 When [[prtstm]] is non-zero, the stress tensor is set to zero.
-No output of _STM file is provided by [[prtstm]] lower or equal to 0.
 No other printing variables for density or potentials should be activated
 (e.g. [[prtden]] has to be set to zero).
 """,
@@ -22096,7 +22107,7 @@ allocated for the wavefunctions, especially when we have to sum over empty state
 
     The total number of MPI processes must be equal to the product of the different entries.
 
-    Note also that the EPH code implements its own MPI-algorithm and this [[eph_np_pqbks]] is
+    Note also that the EPH code implements its own MPI-algorithm and [[eph_np_pqbks]] is
     the **only variable** that should be used to change the default behaviour.
     Other variables such as [[nppert]], [[npband]], [[npfft]], [[npkpt]] and [[paral_kgb]]
     are **not used** in the EPH subdriver.
@@ -23197,6 +23208,82 @@ Note that [[gstore_erange]] is not compatible with [[gstore_brange]].
         gstore_erange 0.0 0.5 eV
 
     to specify the energy intervals in eV units. meV is supported as well.
+""",
+),
+
+Variable(
+    abivarname="gwr_np_gtks",
+    varset="gw",
+    vartype="integer",
+    topics=['GWR_expert'],
+    dimensions=[4],
+    defaultval=0,
+    mnemonics="GWR Number of Processors for G-vectors, Tau-points, K-points, Spin.",
+    requires="[[optdriver]] == 6",
+    added_in_version="9.6.2",
+    text=r"""
+This variable defines the Cartesian grid of MPI processors used for GWR calculations.
+If not specified in the input, the code will generate this grid automatically using the total number of processors
+and the basic dimensions of the job computed at runtime.
+
+!!! important
+
+    The total number of MPI processes must be equal to the product of the different entries.
+
+    Note also that the GWR code implements its own MPI-algorithm and [[gwr_np_gtks]] is
+    the **only variable** that should be used to change the default behaviour.
+    Other variables such as [[npband]], [[npfft]], [[npkpt]] and [[paral_kgb]]
+    are **not used** in the GWR subdriver.
+""",
+),
+
+Variable(
+    abivarname="gwr_task",
+    varset="gw",
+    vartype="string",
+    topics=['GWR_basic'],
+    dimensions=[1],
+    defaultval="G0W0",
+    mnemonics="GWR TASK",
+    requires="[[optdriver]] == 6",
+    added_in_version="9.6.2",
+    text=r"""
+This variable defines ...
+""",
+),
+
+Variable(
+    abivarname="gwr_ntau",
+    varset="gw",
+    vartype="integer",
+    topics=['GWR_basic'],
+    dimensions=[1],
+    defaultval=12,
+    mnemonics="GWR Number of TAU points.",
+    requires="[[optdriver]] == 6",
+    added_in_version="9.6.2",
+    text=r"""
+This variable defines the number of imaginary-time points
+
+!!! important
+
+    To avoid load imbalance the the total number of MPI processes should be a divisor/multiple of
+    [[gwr_ntau]] * [[nsppol]]
+""",
+),
+
+Variable(
+    abivarname="gwr_boxcutmin",
+    varset="gw",
+    vartype="real",
+    topics=['GWR_useful'],
+    dimensions=[1],
+    defaultval=2.0,
+    mnemonics="GWR BOX CUT-off MINimum",
+    requires="[[optdriver]] == 6",
+    added_in_version="9.6.2",
+    text=r"""
+This variable ...
 """,
 ),
 

@@ -435,6 +435,13 @@ def submodules(ctx):
         ctx.run("git submodule update --remote --init", pty=True)
         ctx.run("git submodule update --recursive --remote", pty=True)
 
+
+def run(cmd):
+    cprint(f"Executing: `{cmd}`", color="green")
+    ctx.run(cmd)
+
+
+
 @task
 def branchoff(ctx, start_point):
     """"Checkout new branch from start_point e.g. `trunk/release-9.0` and set default upstream to origin."""
@@ -442,10 +449,6 @@ def branchoff(ctx, start_point):
         remote, branch = start_point.split("/")
     except:
         remote = "trunk"
-
-    def run(cmd):
-        cprint(f"Executing: `{cmd}`", color="green")
-        ctx.run(cmd)
 
     run(f"git fetch {remote}")
     # Create new branch `test_v9.0` using trunk/release-9.0 as start_point:
@@ -455,6 +458,22 @@ def branchoff(ctx, start_point):
     # Change default upstream. If you forget this step, you will be pushing to trunk
     run("git branch --set-upstream-to origin")
     run("git push origin HEAD")
+
+
+@task
+def dryrun_merge(ctx, start_point):
+    """"Merge `remote/branch` in dry-run mode."""
+    run(f"git merge --no-commit --no-ff {start_point}")
+
+    print("""
+To examine the staged changes:
+
+    $ git diff --cached
+
+And you can undo the merge, even if it is a fast-forward merge:
+
+$ git merge --abort
+""")
 
 
 @task

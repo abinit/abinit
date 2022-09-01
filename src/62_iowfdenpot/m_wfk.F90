@@ -65,9 +65,7 @@ module m_wfk
  use m_pawrhoij
  use m_wffile
  use m_nctk
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
  use m_clib
  use m_symkpt
 
@@ -331,9 +329,9 @@ subroutine wfk_open_read(Wfk, fname, formeig, iomode, funt, comm, Hdr_out)
 
 !Arguments ------------------------------------
 !scalars
+ class(wfk_t),intent(inout) :: Wfk
  integer,intent(in) :: iomode,comm,formeig,funt
  character(len=*),intent(in) :: fname
- class(wfk_t),intent(inout) :: Wfk
  type(hdr_type),optional,intent(inout) :: Hdr_out  ! should be intent(out), but psc miscompiles the call!
 
 !Local variables-------------------------------
@@ -352,39 +350,42 @@ subroutine wfk_open_read(Wfk, fname, formeig, iomode, funt, comm, Hdr_out)
 
  DBG_ENTER("COLL")
 
- !Initialize the mandatory data of the Wfk datastructure
- !@wfk_t
- Wfk%rw_mode     = WFK_READMODE
- Wfk%chunk_bsize = WFK_CHUNK_BSIZE
-
- Wfk%fname     = fname
-!Checking the existence of data file
- if (.not.file_exists(fname)) then
-   ! Trick needed to run Abinit test suite in netcdf mode.
-   if (file_exists(nctk_ncify(fname))) then
-     write(std_out,"(3a)")"- File: ",trim(fname)," does not exist but found netcdf file with similar name."
-     Wfk%fname = nctk_ncify(fname)
-   end if
-   if (.not. file_exists(Wfk%fname)) then
-     ABI_ERROR('Missing data file: '//TRIM(Wfk%fname))
-   end if
- end if
-
- Wfk%formeig   = formeig
- Wfk%iomode    = iomode;
- if (endswith(fname, ".nc")) wfk%iomode = IO_MODE_ETSF
- ! This is to test the different versions.
- !wfk%iomode    = IO_MODE_MPI
- !if (.not. endswith(fname, ".nc") .and. xmpi_comm_size == 1) wfk%iomode == IO_MODE_FORTRAN
-
  Wfk%comm      = comm
  Wfk%master    = 0
  Wfk%my_rank   = xmpi_comm_rank(comm)
  Wfk%nproc     = xmpi_comm_size(comm)
 
+ !Initialize the mandatory data of the Wfk datastructure
+ !@wfk_t
+ Wfk%rw_mode     = WFK_READMODE
+ Wfk%chunk_bsize = WFK_CHUNK_BSIZE
+ Wfk%fname = fname
+
+ ! Master checks the existence of data file
+ if (wfk%my_rank == wfk%master) then
+   if (.not. file_exists(fname)) then
+     ! Trick needed to run Abinit test suite in netcdf mode.
+     if (file_exists(nctk_ncify(fname))) then
+       write(std_out,"(3a)")"- File: ",trim(fname)," does not exist but found netcdf file with similar name."
+       Wfk%fname = nctk_ncify(fname)
+     end if
+     if (.not. file_exists(Wfk%fname)) then
+       ABI_ERROR('Missing data file: '//TRIM(Wfk%fname))
+     end if
+   end if
+ end if
+ call xmpi_bcast(wfk%fname, wfk%master, comm, ierr)
+
+ Wfk%formeig = formeig
+ Wfk%iomode = iomode
+ if (endswith(fname, ".nc")) wfk%iomode = IO_MODE_ETSF
+ ! This is to test the different versions.
+ !wfk%iomode    = IO_MODE_MPI
+ !if (.not. endswith(fname, ".nc") .and. xmpi_comm_size == 1) wfk%iomode == IO_MODE_FORTRAN
+
  ! Reads fform and the Header.
  call hdr_read_from_fname(Wfk%Hdr,fname,Wfk%fform,comm)
- ABI_CHECK(Wfk%fform/=0,"fform ==0")
+ ABI_CHECK(Wfk%fform /= 0, "fform == 0")
 
  if (Wfk%debug) call Wfk%Hdr%echo(Wfk%fform, 4, unit=std_out)
 
@@ -438,10 +439,8 @@ subroutine wfk_open_read(Wfk, fname, formeig, iomode, funt, comm, Hdr_out)
    end if
 #endif
 
-#ifdef HAVE_NETCDF
  case (IO_MODE_ETSF)
    NCF_CHECK(nctk_open_read(wfk%fh, wfk%fname, wfk%comm))
-#endif
 
  case default
    ABI_ERROR(sjoin('Wrong or unsupported iomode:', itoa(wfk%iomode)))
@@ -497,9 +496,7 @@ subroutine wfk_open_write(Wfk,Hdr,fname,formeig,iomode,funt,comm,write_hdr,write
  integer(XMPI_OFFSET_KIND) :: offset
  integer(XMPI_OFFSET_KIND),allocatable :: bsize_frecords(:)
 #endif
-#ifdef HAVE_NETCDF
  integer :: ncerr
-#endif
 
 !************************************************************************
 
@@ -628,15 +625,13 @@ subroutine wfk_open_write(Wfk,Hdr,fname,formeig,iomode,funt,comm,write_hdr,write
    end if
 #endif
 
-#ifdef HAVE_NETCDF
  CASE (IO_MODE_ETSF)
    !NCF_CHECK(nctk_open_modify(wfk%fh, wfk%fname, wfk%comm))
 
    if (nctk_has_mpiio) then
 #ifdef HAVE_NETCDF_MPI
      ncerr = nf90_create(wfk%fname, cmode=ior(ior(nf90_netcdf4, nf90_mpiio), nf90_write), &
-         comm=wfk%comm, info=xmpio_info, ncid=wfk%fh)
-
+                         comm=wfk%comm, info=xmpio_info, ncid=wfk%fh)
      NCF_CHECK_MSG(ncerr, sjoin("nf90_create: ", wfk%fname))
 #else
      ABI_ERROR("You should not be here")
@@ -655,7 +650,6 @@ subroutine wfk_open_write(Wfk,Hdr,fname,formeig,iomode,funt,comm,write_hdr,write
 
    ! Switch to data mode.
    NCF_CHECK(nctk_set_datamode(wfk%fh))
-#endif
 
  case default
    ABI_ERROR(sjoin('Wrong/unsupported iomode: ', itoa(wfk%iomode)))
@@ -726,10 +720,8 @@ subroutine wfk_close(Wfk, delete)
      end if
 #endif
 
-#ifdef HAVE_NETCDF
    case (IO_MODE_ETSF)
      NCF_CHECK(nf90_close(wfk%fh))
-#endif
 
    case default
      ABI_ERROR(sjoin('Wrong/unsupported value of iomode: ', itoa(Wfk%iomode)))
@@ -940,7 +932,6 @@ subroutine wfk_ncdef_dims_vars(ncid, hdr, fform, write_hdr, iskss)
 
 !Local variables-------------------------------
 !scalars
-#ifdef HAVE_NETCDF
  character(len=500) :: title,history
  logical :: do_write_hdr,my_iskss
  integer :: ivar,mpw,ncerr
@@ -997,10 +988,6 @@ subroutine wfk_ncdef_dims_vars(ncid, hdr, fform, write_hdr, iskss)
  !NF90_DEF_VAR_FILL(INTEGER NCID, INTEGER VARID, INTEGER NO_FILL, FILL_VALUE)
  !NCF_CHECK(nf90_inq_varid(ncid, "coefficients_of_wavefunctions", ivar))
  !NCF_CHECK(nf90_def_var_fill(ncid, ivar, 0, -one))
-
-#else
- ABI_ERROR("netcdf not available")
-#endif
 
 end subroutine wfk_ncdef_dims_vars
 !!***
@@ -1127,8 +1114,8 @@ subroutine wfk_read_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg_
  class(wfk_t),intent(inout) :: Wfk
 !arrays
  integer,intent(in) :: band_block(2)
- integer,intent(out), DEV_CONTARRD  optional :: kg_k(:,:) !(3,npw_k)
- real(dp),intent(out), DEV_CONTARRD optional :: cg_k(:,:) !(2,npw_k*nspinor*nband)
+ integer,intent(out), DEV_CONTARRD  optional :: kg_k(:,:) ! (3,npw_k)
+ real(dp),intent(out), DEV_CONTARRD optional :: cg_k(:,:) ! (2,npw_k*nspinor*nband)
  real(dp),intent(inout),optional :: eig_k((2*Wfk%mband)**Wfk%formeig*Wfk%mband)
  real(dp),intent(out),optional :: occ_k(Wfk%mband)
 
@@ -1146,16 +1133,14 @@ subroutine wfk_read_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg_
  integer(XMPI_OFFSET_KIND) :: my_offset,my_offpad
  integer :: sizes(2),subsizes(2),starts(2),types(2)
 #endif
-#ifdef HAVE_NETCDF
  integer :: kg_varid,eig_varid,occ_varid,cg_varid,ncerr,h1_varid,idx,ib1,ib2
  real(dp),allocatable :: h1mat(:,:,:)
-#endif
 
 !************************************************************************
 
  DBG_ENTER("COLL")
 
- ABI_CHECK(Wfk%rw_mode==WFK_READMODE, "Wfk must be in READMODE")
+ ABI_CHECK(Wfk%rw_mode == WFK_READMODE, "Wfk must be in READMODE")
 
  if (wfk_validate_ks(wfk, ik_ibz, spin) /= 0) then
    ABI_ERROR("Wrong (ik_ibz, spin) args, Aborting now")
@@ -1167,8 +1152,8 @@ subroutine wfk_read_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg_
 
  nband_disk   = Wfk%nband(ik_ibz,spin)
  ! there are several cases here, reading in fewer than mband bands,
- !   or possibly more than you have allocated, and truncating
- !   nband_disk_keep could be used to distinguish these cases
+ ! or possibly more than you have allocated, and truncating
+ ! nband_disk_keep could be used to distinguish these cases
  nband_disk_keep = nband_disk
  if (present(occ_k)) then
    nband_disk_keep = min(nband_disk, size(occ_k))
@@ -1418,7 +1403,6 @@ subroutine wfk_read_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg_
    end select
 #endif
 
-#ifdef HAVE_NETCDF
  case (IO_MODE_ETSF)
    if (present(kg_k)) then
      ! Read the reduced_coordinates_of_plane_waves for this k point.
@@ -1489,7 +1473,6 @@ subroutine wfk_read_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg_
        count=[2,npw_disk,wfk%nspinor,nb_block,1,1])
      NCF_CHECK_MSG(ncerr, "getting cg_k")
   end if
-#endif
 
  case default
    ABI_ERROR(sjoin('Wrong/unsupported iomode: ', itoa(Wfk%iomode)))
@@ -1549,9 +1532,7 @@ subroutine wfk_read_bks(wfk, band, ik_ibz, spin, sc_mode, cg_bks, eig1_bks)
  integer(XMPI_OFFSET_KIND) :: my_offset,my_offpad
  integer :: sizes(2),types(2)
 #endif
-#ifdef HAVE_NETCDF
  integer :: h1_varid,cg_varid,ncerr
-#endif
  character(len=500) :: errmsg
 !arrays
  real(dp),allocatable :: all_eigk(:)
@@ -1712,7 +1693,6 @@ subroutine wfk_read_bks(wfk, band, ik_ibz, spin, sc_mode, cg_bks, eig1_bks)
 #endif
 #endif
 
-#ifdef HAVE_NETCDF
    case (IO_MODE_ETSF)
      ! Read h1 matrix elements. The netcdf array has shape:
      ! [complex, max_number_of_states, max_number_of_states, number_of_kpoints, number_of_spins]
@@ -1733,7 +1713,6 @@ subroutine wfk_read_bks(wfk, band, ik_ibz, spin, sc_mode, cg_bks, eig1_bks)
      ncerr = nf90_get_var(wfk%fh, cg_varid, cg_bks, start=[1,1,1,band,ik_ibz,spin], &
        count=[2,npw_disk,wfk%nspinor,1,1,1])
      NCF_CHECK_MSG(ncerr, "getting cg_k")
-#endif
 
   case default
     ABI_ERROR(sjoin('Wrong value for iomode:', itoa(Wfk%iomode)))
@@ -1803,9 +1782,7 @@ subroutine wfk_write_band_block(Wfk,band_block,ik_ibz,spin,sc_mode,kg_k,cg_k,eig
 ! integer(XMPI_OFFSET_KIND) :: bsize_rec(1)
  integer(XMPI_OFFSET_KIND),allocatable :: bsize_frecords(:)
 #endif
-#ifdef HAVE_NETCDF
  integer :: kg_varid,eig_varid,occ_varid,cg_varid,ncerr,h1_varid
-#endif
 
 !************************************************************************
 
@@ -2107,7 +2084,6 @@ subroutine wfk_write_band_block(Wfk,band_block,ik_ibz,spin,sc_mode,kg_k,cg_k,eig
    end if
 #endif
 
-#ifdef HAVE_NETCDF
  case (IO_MODE_ETSF)
    if (present(kg_k)) then
      ! Write the reduced_coordinates_of_plane_waves for this k point.
@@ -2172,7 +2148,6 @@ subroutine wfk_write_band_block(Wfk,band_block,ik_ibz,spin,sc_mode,kg_k,cg_k,eig
                           count=[2,npw_disk,wfk%nspinor,nb_block,1,1])
      NCF_CHECK_MSG(ncerr, "putting cg_k")
   end if
-#endif
 
  case default
    ABI_ERROR(sjoin('Wrong value of iomode:', itoa(Wfk%iomode)))
@@ -2249,10 +2224,8 @@ subroutine wfk_read_bmask(Wfk, bmask, ik_ibz, spin, sc_mode, kg_k, cg_k, eig_k, 
  integer,allocatable :: block_length(:),block_type(:)
  integer(XMPI_ADDRESS_KIND),allocatable :: block_displ(:)
  real(dp),allocatable :: buffer(:,:)
-#ifdef HAVE_NETCDF
  integer :: kg_varid,eig_varid,occ_varid,cg_varid,ncerr
  integer,allocatable :: blocks(:,:)
-#endif
 
 !************************************************************************
 
@@ -2607,7 +2580,6 @@ subroutine wfk_read_bmask(Wfk, bmask, ik_ibz, spin, sc_mode, kg_k, cg_k, eig_k, 
    end if
 #endif
 
-#ifdef HAVE_NETCDF
  case (IO_MODE_ETSF)
    ABI_CHECK(wfk%formeig == 0, "formeig != 0 not coded")
    !write(std_out,*)"bmask: ",bmask
@@ -2706,7 +2678,6 @@ subroutine wfk_read_bmask(Wfk, bmask, ik_ibz, spin, sc_mode, kg_k, cg_k, eig_k, 
      !   end do
      !end do
    end if
-#endif
 
  case default
    ABI_ERROR(sjoin('Wrong/unsupported value of iomode: ', itoa(wfk%iomode)))
@@ -2959,14 +2930,12 @@ end subroutine wfk_read_eigenvalues
 !!  occ = occupations of all bands at my k
 !!  pawrhoij = PAW matrix elements in projectors
 !!
-!! NOTES
-!!
 !! SOURCE
 
-subroutine wfk_read_my_kptbands(inpath_, distrb_flags, comm, ecut_eff_in,&
-&          formeig, istwfk_in, kptns_in, mcg, mband_in, mband_mem_in, mkmem_in, mpw_in,&
-&          natom_in, nkpt_in, npwarr, nspinor_in, nsppol_in, usepaw_in,&
-&          cg, kg, eigen, occ, pawrhoij, ask_accurate_)
+subroutine wfk_read_my_kptbands(inpath_, distrb_flags, comm, ecut_eff_in, &
+           formeig, istwfk_in, kptns_in, mcg, mband_in, mband_mem_in, mkmem_in, mpw_in, &
+           natom_in, nkpt_in, npwarr, nspinor_in, nsppol_in, usepaw_in, &
+           cg, kg, eigen, occ, pawrhoij, ask_accurate_)
 
 !Arguments ------------------------------------
 !scalars
@@ -2981,7 +2950,6 @@ subroutine wfk_read_my_kptbands(inpath_, distrb_flags, comm, ecut_eff_in,&
  character(len=fnlen), intent(in) :: inpath_
  logical, intent(in) :: distrb_flags(nkpt_in,mband_in,nsppol_in)
  real(dp), intent(in),target :: kptns_in(3,nkpt_in)
-
  real(dp), intent(out) :: cg(2,mcg)
  integer, intent(out), optional :: kg(3,mpw_in*mkmem_in)
  real(dp), intent(out), optional :: eigen(mband_in*(2*mband_in)**formeig*nkpt_in*nsppol_in)
@@ -2991,12 +2959,12 @@ subroutine wfk_read_my_kptbands(inpath_, distrb_flags, comm, ecut_eff_in,&
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: formeig0=0
+ integer,parameter :: formeig0 = 0, master = 0
  integer :: spin,ikf,ik_disk,nband_k,mpw_disk,mband,nspinor
  integer :: iomode,nsppol,isym,itimrev
  integer :: npw_disk,npw_kf,istwf_disk,istwf_kf
  integer :: ikpt,ii,jj,kk,ll,iqst,nqst
- integer :: ibdoff
+ integer :: ibdoff, ierr, my_rank
  integer :: wfk_unt, iband, nband_me, nband_me_disk
  integer :: nband_me_saved, iband_saved
  integer :: spin_saved, spin_sym
@@ -3024,18 +2992,24 @@ subroutine wfk_read_my_kptbands(inpath_, distrb_flags, comm, ecut_eff_in,&
 
  call cwtime(cpu, wall, gflops, "start")
 
- inpath = inpath_
- !Checking the existence of data file
- if (.not.file_exists(inpath)) then
-   ! Trick needed to run Abinit test suite in netcdf mode.
-   if (file_exists(nctk_ncify(inpath))) then
-     write(std_out,"(3a)")"- File: ",trim(inpath)," does not exist but found netcdf file with similar name."
-     inpath = nctk_ncify(inpath)
-   end if
+ my_rank = xmpi_comm_rank(comm)
+
+ ! Master checks the existence of data file
+ if (my_rank == master) then
+   inpath = inpath_
    if (.not. file_exists(inpath)) then
-     ABI_ERROR('Missing data file: '//TRIM(inpath))
+     ! Trick needed to run Abinit test suite in netcdf mode.
+     if (file_exists(nctk_ncify(inpath))) then
+       write(std_out,"(3a)")"- File: ",trim(inpath)," does not exist but found netcdf file with similar name."
+       inpath = nctk_ncify(inpath)
+     end if
+     if (.not. file_exists(inpath)) then
+       ABI_ERROR('Missing data file: '//TRIM(inpath))
+     end if
    end if
  end if
+
+ call xmpi_bcast(inpath, master, comm, ierr)
 
  ! now attack the cg reading
  iomode = iomode_from_fname(inpath)
@@ -5544,7 +5518,6 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, comm)
 
  ! Read interpolated ebands and kshe_mask from KERANGE file and build fine_ebands object.
  ! NOTE: KERANGE is written by sigtk_kpts_in_erange in m_sigtk module.
-#ifdef HAVE_NETCDF
  NCF_CHECK(nctk_open_read(ncid, kerange_path, xmpi_comm_self))
  ! Read header associated to the fine k-mesh
  call hdr_ncread(fine_hdr, ncid, fform)
@@ -5565,9 +5538,6 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, comm)
  fine_ebands = ebands_from_hdr(fine_hdr, fine_mband, fine_eigen)
  !call ebands_print(fine_ebands, header="SKW interpolated energies", prtvol=dtset%prtvol)
  ABI_FREE(fine_eigen)
-#else
- ABI_ERROR("wfk_klist2mesh requires NETCDF support.")
-#endif
 
  if (my_rank == master) then
    write(std_out, "(2a)")ch10, repeat("=", 92)
@@ -5698,10 +5668,8 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, comm)
 
  if (iomode == IO_MODE_ETSF) then
   ! Add crystal structure and ebands if netcdf output.
-#ifdef HAVE_NETCDF
    NCF_CHECK(cryst%ncwrite(owfk%fh))
    NCF_CHECK(ebands_ncwrite(fine_ebands, owfk%fh))
-#endif
  end if
 
  call fine_hdr%free()
