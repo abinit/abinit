@@ -708,6 +708,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
    end if
 
    call gwr%init(dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg, comm)
+   if (gwr%idle_proc) goto 100
 
    !=== Calculate Vxc(b1,b2,k,s)=<b1,k,s|v_{xc}|b2,k,s> for all the states included in GW ===
    !  * This part is parallelized within wfd%comm since each node has all GW wavefunctions.
@@ -764,6 +765,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  !=====================
  !==== Free memory ====
  !=====================
+100 call xmpi_barrier(comm)
  ABI_FREE(ks_nhat)
  ABI_FREE(ks_nhatgr)
  ABI_FREE(dijexc_core)
@@ -825,6 +827,8 @@ subroutine ugb_calc_osc_gamma()
  !u_ngfft(18) ??
  u_nfft = product(u_ngfft(1:3)); u_mgfft = maxval(u_ngfft(1:3))
 
+ !call ugb%set_ngfft(u_ngfft)
+
  ABI_MALLOC(gbound_k, (2 * u_mgfft + 8, 2))
  call sphereboundary(gbound_k, ugb%istwf_k, ugb%kg_k, u_mgfft, npw_k)
 
@@ -846,7 +850,7 @@ subroutine ugb_calc_osc_gamma()
 
    do my_ib=ugb%my_bstart, ugb%my_bstop
 
-     !call fft_ug(npw_k, u_nfft, nspinor, ndat1, &
+     !call fft_ug(ugb%npw_k, u_nfft, nspinor, ndat1, &
      !            u_mgfft, u_ngfft, ugb%istwfk, ugb%kg_k, gbound_k, &
      !            ugb%cg_k(:,:,my_ib), &      ! in
      !            my_ur)                      ! out
@@ -854,7 +858,7 @@ subroutine ugb_calc_osc_gamma()
      do master_ib=master_bstart, master_bstop !, batch_size
        !ndat = blocked_loop(master_ib, master_btop, batch_size)
 
-       !call fft_ug(npw_k, u_nfft, nspinor, ndat, &
+       !call fft_ug(ugb%npw_k, u_nfft, nspinor, ndat, &
        !            u_mgfft, u_ngfft, ugb%istwfk, ugb%kg_k, gbound_k, &
        !            master_cg_k(:,:,master_ib)), &   ! in
        !            master_ur)                       ! out

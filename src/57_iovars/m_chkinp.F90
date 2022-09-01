@@ -4012,11 +4012,11 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 
    if (optdriver == RUNL_GWR) then
      ! Avoid wasting CPUs if nsppol==2.
-     if (dt%nsppol == 2 .and. .not. iseven(nproc) .and. nproc > 1) then
-       write(msg,'(3a)') "Spin-polarized GW calculations should be run with an even number of processors ",ch10,&
-        " for achieving an optimal distribution of memory and CPU load. Please change the number of processors."
-       ABI_ERROR_NOSTOP(msg, ierr)
-     end if
+     !if (dt%nsppol == 2 .and. .not. iseven(nproc) .and. nproc > 1) then
+     !  write(msg,'(3a)') "Spin-polarized GW calculations should be run with an even number of processors ",ch10,&
+     !   " for achieving an optimal distribution of memory and CPU load. Please change the number of processors."
+     !  ABI_ERROR_NOSTOP(msg, ierr)
+     !end if
      if (dt%usepaw == 1) then
        ABI_ERROR_NOSTOP("GWR with PAW not yet implemented", ierr)
      end if
