@@ -11,7 +11,7 @@
 !!
 !! Inside the g/r communicator, we use PBLAS matrices to store G, tchi and W.
 !! using a 1D processor grid with block distribution either along columns or rows.
-!! A 2D grid would require MPI-FFT.
+!! A 2D grid, indeed, would require MPI-FFT or some communication before performing the FFTs.
 !!
 !! Let's assume for simplicity that we have only two MPI procs in the g/r communicator.
 !! Matrices in (g,g') space are distributed along columns so that the g-index is local
@@ -338,6 +338,8 @@ module m_gwr
   logical :: timeit = .False.
   ! Internal variable used to activate profiling in low-level routines
 
+  logical :: idle_proc
+
   integer,allocatable :: bstart_ks(:,:)
    ! bstart_ks(nkcalc, nsppol)
    ! Initial KS band index included in self-energy matrix elements for each k-point in kcalc.
@@ -363,11 +365,8 @@ module m_gwr
    ! True if we are using the supercell formalism for sigma
    ! False if we are using the mixed-space approach with convolutions in k-space.
 
-   integer :: ngkpt(3) = -1
-   ! Number of divisions in k-point mesh.
-
-   integer :: ngqpt(3) = -1
-   ! Number of divisions in q-point mesh.
+   integer :: ngkpt(3) = -1, ngqpt(3) = -1
+   ! Number of divisions in k/q meshes.
 
    integer,allocatable :: my_spins(:)
    ! (my_nspins)
@@ -450,6 +449,8 @@ module m_gwr
 
    integer :: comm
    ! Initial MPI communicator with all procs involved in the calculation
+   ! NB: gwr%comm is not necessarly the same as the input_comm
+   ! as we might have removed some cores in input_comm to have nproc divisible by ntau * nsppol.
 
    type(xcomm_t) :: spin_comm
    ! MPI communicator over spins.
@@ -517,13 +518,13 @@ module m_gwr
    ! Correlated screened Coulomb interaction summed over collinear spin
    ! Replicated across the spin comm if nsppol == 2.
 
+   character(len=10) :: wc_space = "none"
+   ! "none", "itau", "iomega"
+
    !type(matrix_scalapack),allocatable :: em1_qibz(:,:,:)
    ! Inverse dielectric matrix at omega = 0
    ! (nqibz, nsppol)
    ! Replicated across the tau comm and the spin comm if nsppol == 2.
-
-   character(len=10) :: wc_space = "none"
-   ! "none", "itau", "iomega"
 
    type(matrix_scalapack),allocatable :: sigc_kibz(:,:,:,:)
    ! (2, nkibz, ntau, nsppol)
@@ -685,7 +686,7 @@ contains
 !!
 !! SOURCE
 
-subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg, comm)
+subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg, input_comm)
 
 !Arguments ------------------------------------
 !scalars
@@ -697,7 +698,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  type(pawtab_type),target,intent(in) :: pawtab(psps%ntypat*psps%usepaw)
  type(ebands_t),target,intent(in) :: ks_ebands
  type(mpi_type),target,intent(in) :: mpi_enreg
- integer,intent(in) :: comm
+ integer,intent(in) :: input_comm
 
 !Local variables-------------------------------
 !scalars
@@ -721,7 +722,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
 
 ! *************************************************************************
 
- all_nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+ all_nproc = xmpi_comm_size(input_comm); my_rank = xmpi_comm_rank(input_comm)
 
  call cwtime(cpu, wall, gflops, "start")
 
@@ -739,7 +740,6 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  ! Initialize qp_ebands with KS values.
  call ebands_copy(ks_ebands, gwr%qp_ebands)
 
- gwr%comm = comm
  gwr%nspinor = dtset%nspinor
  gwr%nsppol = dtset%nsppol
  gwr%nspden = dtset%nspden
@@ -858,7 +858,8 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
 
    if (any(abs(dtset%sigma_erange) > zero)) then
      ! Use sigma_erange and (optionally) sigma_ngkpt
-     call sigtk_kcalc_from_erange(dtset, cryst, ks_ebands, ks_gaps, gwr%nkcalc, gwr%kcalc, gwr%bstart_ks, gwr%nbcalc_ks, comm)
+     call sigtk_kcalc_from_erange(dtset, cryst, ks_ebands, ks_gaps, &
+                                  gwr%nkcalc, gwr%kcalc, gwr%bstart_ks, gwr%nbcalc_ks, input_comm)
 
    else
      ! Use qp_range to select the interesting k-points and the corresponding bands.
@@ -967,8 +968,8 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
 #if 0
  ! Build degtab tables.
  if (abs(gwr%dtset%symsigma) == 1) then
-   call xmpi_sum(ndeg_all, comm, ierr)
-   call xmpi_sum(degblock_all, comm, ierr)
+   call xmpi_sum(ndeg_all, input_comm, ierr)
+   call xmpi_sum(degblock_all, input_comm, ierr)
    do ikcalc=1,gwr%nkcalc
      do spin=1,gwr%nsppol
        ndeg = ndeg_all(ikcalc, spin)
@@ -1051,6 +1052,8 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  ! ========================
  ! === MPI DISTRIBUTION ===
  ! ========================
+ ! NB: Here we define gwr%comm and gwr%idle_proc
+ ! Do not use input_comm after this section as idle processors return immediately.
 
  if (any(dtset%gwr_np_gtks /= 0)) then
    ! Use MPI parameters from input file.
@@ -1058,20 +1061,34 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
    gwr%tau_comm%nproc  = dtset%gwr_np_gtks(2)
    gwr%kpt_comm%nproc  = dtset%gwr_np_gtks(3)
    gwr%spin_comm%nproc = dtset%gwr_np_gtks(4)
+
+   !call xmpi_comm_multiple_of(gwr%tau_comm%nproc * gwr%spin_comm%nproc, input_comm, gwr%idle_proc, gwr%comm)
+   !if (gwr%idle_proc) return
+   gwr%comm = input_comm
+#ifdef HAVE_MPI
+   call MPI_Comm_dup(input_comm, gwr%comm, ierr)
+#endif
+   all_nproc = xmpi_comm_size(gwr%comm)
  else
    ! Automatic grid generation.
+   !
    !   Priorities        |  MPI Scalability                | Memory
    ! ==================================================================================================
    !   spin (if any)     |  excellent                      | scales
    !   tau               |  excellent                      | scales
-   !   kbz               |  to be optimized!               | scales (depends on BZ -> IBZ mapping)
+   !   kbz               |  to be optimized!               | scales (depends on the BZ -> IBZ mapping)
    !   g/r (PBLAS)       |  network intensive              ! scales
    !
+
+   call xmpi_comm_multiple_of(gwr%ntau * gwr%dtset%nsppol, input_comm, gwr%idle_proc, gwr%comm)
+   if (gwr%idle_proc) return
+   all_nproc = xmpi_comm_size(gwr%comm)
+
    gwr%spin_comm%nproc = 1
-   if (gwr%nsppol == 2 .and. all_nproc > 1) then
-     ABI_CHECK(mod(all_nproc, 2) == 0, "when nsppol == 2, nprocs should be even!")
-     gwr%spin_comm%nproc = 2
-   end if
+   !if (gwr%nsppol == 2 .and. all_nproc > 1) then
+   !  ABI_CHECK(mod(all_nproc, 2) == 0, "when nsppol == 2, nprocs should be even!")
+   !  gwr%spin_comm%nproc = 2
+   !end if
 
    nps = all_nproc / gwr%spin_comm%nproc
    do ii=nps,1,-1
@@ -1139,35 +1156,35 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
 
  ! Create communicator for g-vectors
  keepdim = .False.; keepdim(1) = .True.
- call MPI_CART_SUB(comm_cart, keepdim, gwr%g_comm%value, ierr); gwr%g_comm%me = xmpi_comm_rank(gwr%g_comm%value)
+ call gwr%g_comm%from_cart_sub(comm_cart, keepdim)
 
  ! Create communicator for tau
  keepdim = .False.; keepdim(2) = .True.
- call MPI_CART_SUB(comm_cart, keepdim, gwr%tau_comm%value, ierr); gwr%tau_comm%me = xmpi_comm_rank(gwr%tau_comm%value)
+ call gwr%tau_comm%from_cart_sub(comm_cart, keepdim)
 
  ! Create communicator for k-points
  keepdim = .False.; keepdim(3) = .True.
- call MPI_CART_SUB(comm_cart, keepdim, gwr%kpt_comm%value, ierr); gwr%kpt_comm%me = xmpi_comm_rank(gwr%kpt_comm%value)
+ call gwr%kpt_comm%from_cart_sub(comm_cart, keepdim)
 
  ! Create communicator for spin
  keepdim = .False.; keepdim(4) = .True.
- call MPI_CART_SUB(comm_cart, keepdim, gwr%spin_comm%value, ierr); gwr%spin_comm%me = xmpi_comm_rank(gwr%spin_comm%value)
+ call gwr%spin_comm%from_cart_sub(comm_cart, keepdim)
 
  ! Create communicator for the (g, tau) 2D grid.
  keepdim = .False.; keepdim(1) = .True.; keepdim(2) = .True.
- call MPI_CART_SUB(comm_cart, keepdim, gwr%gtau_comm%value, ierr); gwr%gtau_comm%me = xmpi_comm_rank(gwr%gtau_comm%value)
+ call gwr%gtau_comm%from_cart_sub(comm_cart, keepdim)
 
  ! Create communicator for the (g, tau) 2D grid.
  keepdim = .False.; keepdim(1) = .True.; keepdim(3) = .True.
- call MPI_CART_SUB(comm_cart, keepdim, gwr%gk_comm%value, ierr); gwr%gk_comm%me = xmpi_comm_rank(gwr%gk_comm%value)
+ call gwr%gk_comm%from_cart_sub(comm_cart, keepdim)
 
  ! Create communicator for the (g, tau, k) 3D subgrid.
  keepdim = .True.; keepdim(4) = .False.
- call MPI_CART_SUB(comm_cart, keepdim, gwr%gtk_comm%value, ierr); gwr%gtk_comm%me = xmpi_comm_rank(gwr%gtk_comm%value)
+ call gwr%gtk_comm%from_cart_sub(comm_cart, keepdim)
 
  ! Create communicator for the (tau, k, spin) 3D subgrid.
  keepdim = .True.; keepdim(1) = .False.
- call MPI_CART_SUB(comm_cart, keepdim, gwr%tks_comm%value, ierr); gwr%tks_comm%me = xmpi_comm_rank(gwr%tks_comm%value)
+ call gwr%tks_comm%from_cart_sub(comm_cart, keepdim)
 
  call xmpi_comm_free(comm_cart)
 #endif
@@ -1270,12 +1287,12 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  ! TODO: For the time being no augmentation
  gwr%g_ngfft(4:6) = gwr%g_ngfft(1:3)
 
- ! Defined batch sizes for FFT transforms, use multiples of OpenMP threads.
+ ! Define batch sizes for FFT transforms, use multiples of OpenMP threads.
  omp_nt = xomp_get_num_threads(open_parallel=.True.)
  gwr%uc_batch_size = max(1, gwr%dtset%userid * omp_nt)
  gwr%sc_batch_size = max(1, gwr%dtset%userie * omp_nt)
 
- gwr%uc_batch_size = 4; gwr%sc_batch_size = 4
+ !gwr%uc_batch_size = 4; gwr%sc_batch_size = 4
 
  if (my_rank == master) then
    call print_ngfft(gwr%g_ngfft, header="FFT mesh for Green's function", unit=std_out)
@@ -1740,11 +1757,7 @@ end subroutine gwr_load_kcalc_wfd
 !!  gwr_build_gtau_from_wfk
 !!
 !! FUNCTION
-!!  Build the Green's function in imaginary time from the WFK file
-!!
-!! INPUTS
-!!
-!! OUTPUT
+!!  Build the Green's function in imaginary time from the WFK file `wfk_path`
 !!
 !! SOURCE
 
@@ -1758,7 +1771,7 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
 !scalars
  integer,parameter :: formeig0 = 0
  integer :: mband, min_nband, nkibz, nsppol, my_is, my_iki, spin, ik_ibz ! my_it,
- integer :: my_ib, my_nb, band, npw_k, mpw, istwf_k, itau, ipm, ig1, ig2, il_g1, il_g2
+ integer :: my_ib, my_nb, band, npw_k, mpw, istwf_k, itau, ipm, ig1, ig2, il_g1, il_g2, il_b
  integer :: nbsum, npwsp, col_bsize, nband_k, my_bstart, my_bstop, my_nband, ierr
  real(dp) :: f_nk, eig_nk, ef, spin_fact, cpu, wall, gflops, cpu_green, wall_green, gflops_green
  complex(dp) :: gt_cfact
@@ -1769,7 +1782,7 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
  type(hdr_type) :: wfk_hdr
  type(wfk_t) :: wfk
  type(processor_scalapack) :: gtau_slkproc
- type(matrix_scalapack), target :: cg_mat !, cg_work, green_mat
+ type(matrix_scalapack), target :: cg_mat, cg_work, green_mat
 !arrays
  integer :: lsize(2), mask_kibz(gwr%nkibz)
  integer,allocatable :: nband(:,:), wfd_istwfk(:), my_bands(:), kg_k(:,:)
@@ -1881,10 +1894,12 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
  !         - Diagonalize H in the subspace to get variational approximation to the KS states
  !         - Add these approximated eigenstats to G.
  !
+
+ mpw = maxval(wfd%npwarr)
+
  ! TODO: Mv m_ddk in 72_response below 70_gw or move gwr to higher level.
  !ddkop = ddkop_new(dtset, gwr%cryst, gwr%pawtab, gwr%psps, wfd%mpi_enreg, mpw, wfd%ngfft)
 
- mpw = maxval(wfd%npwarr)
  ef = gwr%ks_ebands%fermie
  ABI_CHECK(abs(ef) < tol12, "ef should have been set to zero!")
  spin_fact = two / (gwr%nsppol * gwr%nspinor)
@@ -1917,7 +1932,7 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
      ! TODO: spinor and use BLAS2 but take into account PBLAS distribution
      ! or rewrite everything with PBLAS routines.
 
-     ! This just to get the dimension of the local buffer from the first PBLAS matrix I treat.
+     ! This just to get the dimension of the local buffer from the first PBLAS matrix we treat.
      itau = gwr%my_itaus(1)
      associate (gt0 => gwr%gt_kibz(1, ik_ibz, itau, spin))
      lsize = gt0%sizeb_local
@@ -1930,7 +1945,7 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
        do my_ib=1,my_nb
          band = my_bands(my_ib)
          f_nk = gwr%ks_ebands%occ(band, ik_ibz, spin)
-         eig_nk = gwr%ks_ebands%eig(band, ik_ibz, spin) - ef
+         eig_nk = gwr%ks_ebands%eig(band, ik_ibz, spin) ! - ef
 
          ! Select occupied or empty G.
          if (eig_nk < -tol6) then
@@ -1995,7 +2010,9 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
 
  RETURN
 
- ! PBLAS-based version.
+ ! ====================
+ ! PBLAS-based version
+ ! ====================
  call wfk_open_read(wfk, wfk_path, formeig0, iomode_from_fname(wfk_path), &
                     get_unit(), gwr%comm, hdr_out=wfk_hdr)
 
@@ -2013,7 +2030,7 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
      nband_k = wfk_hdr%nband(ik_ibz)
      npwsp = npw_k * gwr%nspinor
 
-     ! Init CG(npwsp, nband) PBLAS matrix within the gtau communicator.
+     ! Init cg(npwsp, nband) PBLAS matrix within the gtau communicator.
      ! and distribute it over bands so that each proc reads a subset of bands in read_band_block
      ABI_CHECK(block_dist_1d(nband_k, gwr%gtau_comm%nproc, col_bsize, msg), msg)
      call cg_mat%init(npwsp, nband_k, gtau_slkproc, istwfk1, size_blocs=[npwsp, col_bsize])
@@ -2029,26 +2046,48 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
      call wfk%read_band_block([my_bstart, my_bstop], ik_ibz, spin, xmpio_single, & ! xmpio_collective,
                               kg_k=kg_k, cg_k=cg_k)
 
-     !call cg_mat%copy(cg_work)
+     !call wfk%read_bmask(bmask, ik_ibz, spin, xmpio_single, & ! xmpio_collective,
+     !                   kg_k=kg_k, cg_k=cg_k) !, eig_k, occ_k)
+
+     call cg_mat%copy(cg_work)
      !call cg_mat%change_size_blocs(cg_work, size_blocs=, processor=)
-     !call cg_work%copy(green_mat, empty=.True.)
+     call cg_work%copy(green_mat, empty=.True.)
+
+     ! TODO: Compute contribution to head and wings for this (kpoint, spin)
 
      do itau=1,gwr%ntau
-       !my_it = gwr%myit_from_itau(itau)
-       !gt_cfact = exp(-gwr%tau_mesh(itau)  * eig_nk)
-       !call slk_pzgemm("N", "C", cg_work, cone, cg_work, czero, green_mat)
-       !call gwr%gt_kibz(ipm, ik_ibz, itau, spin)%take_from(green_mat)
-       !if (my_it == -1) cycle
-       !if (gwr%tau_comm%me == gwr%tau_master(itau)) then
-       !  do ipm=1,2
-       !    gwr%gt_kibz(ipm, ik_ibz, itau, spin)%buffer_cplx = loc_cwork(:,:,ipm)
-       !  end do
-       !end if
+       do ipm=1,2
+         !my_it = gwr%myit_from_itau(itau)
+
+         ! Multiply by columns by tau exponential.
+         do il_b=1, cg_work%sizeb_local(2)
+          band = cg_work%loc2gcol(il_b)
+          f_nk = gwr%ks_ebands%occ(band, ik_ibz, spin)
+          eig_nk = gwr%ks_ebands%eig(band, ik_ibz, spin)
+
+          gt_cfact = exp(-gwr%tau_mesh(itau) * eig_nk)
+          cg_work%buffer_cplx(:,il_b) = cg_work%buffer_cplx(:,il_b) * gt_cfact
+          !do il_g1=1,cg_work%sizeb_local(1)
+          !end do
+         end do
+
+         call slk_pzgemm("N", "C", cg_work, cone, cg_work, czero, green_mat)
+
+         ! This is the tricky part has we have to redistribute the data between two different comms
+         !call gwr%gt_kibz(ipm, ik_ibz, itau, spin)%take_from(green_mat)
+         !call green_mat%move_to(gwr%gt_kibz(ipm, ik_ibz, itau, spin))
+         !if (my_it == -1) cycle
+         !if (gwr%tau_comm%me == gwr%tau_master(itau)) then
+         !  do ipm=1,2
+         !    gwr%gt_kibz(ipm, ik_ibz, itau, spin)%buffer_cplx = loc_cwork(:,:,ipm)
+         !  end do
+         !end if
+       end do ! ipm
      end do
 
-     !call cg_work%free()
-     !call green_mat%free()
      call cg_mat%free()
+     call cg_work%free()
+     call green_mat%free()
    end do ! my_iki
  end do ! my_is
 
@@ -2863,9 +2902,11 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
      it0 = gwr%my_itaus(1)
      loc1_size = mats(it0)%sizeb_local(1)
      loc2_size = mats(it0)%sizeb_local(2)
-     ! TODO: How to determine batch_size?
+     !
+     ! batch_size in terms of columns
+     ! TODO: How to determine batch_size automatically to avoid going OOM
      !batch_size = loc2_size
-     batch_size = 5
+     batch_size = 4
      !batch_size = 1
 
      ABI_MALLOC(cwork_myit, (gwr%my_ntau, loc1_size, batch_size))
@@ -4064,7 +4105,7 @@ subroutine gwr_build_wc(gwr)
  logical :: q_is_gamma, free_tchi
  character(len=5000) :: msg
  complex(dpc) :: vcs_g1, vcs_g2
- type(matrix_scalapack) :: tmp_mat
+ type(matrix_scalapack) :: em1
  type(yamldoc_t) :: ydoc
 !arrays
  real(dp) :: qq_ibz(3)
@@ -4103,8 +4144,7 @@ subroutine gwr_build_wc(gwr)
  q0sph = two_pi * (three / (four_pi * gwr%cryst%ucvol * gwr%nqbz)) ** third
 
  ! If possible, use 2d rectangular grid of processors for diagonalization.
- !call slkproc_4diag%init(comm)
- !call slkproc_4diag%free()
+ !call slkproc_4diag%init(gwr%g_comm%value)
 
  do my_iqi=1,gwr%my_nqibz
    call cwtime(cpu_q, wall_q, gflops_q, "start")
@@ -4152,11 +4192,11 @@ subroutine gwr_build_wc(gwr)
        !call wrtout(std_out, "Printing wc%buffer_cplex before inversion")
        !call print_arr(wc%buffer_cplx, unit=std_out)
 
-       call wc%change_size_blocs(tmp_mat) ! processor=slkproc_4diag
-       call tmp_mat%zinvert()
-       !call tmp_mat%zdhp_invert("U")
-       call wc%take_from(tmp_mat)  ! processor=wc%processor)
-       call tmp_mat%free()
+       call wc%change_size_blocs(em1) ! processor=slkproc_4diag
+       call em1%zinvert()
+       !call em1%zdhp_invert("U")
+       call wc%take_from(em1)  ! processor=wc%processor)
+       call em1%free()
 
        !call wrtout(std_out, sjoin(" e-1 at q:", ktoa(qq_ibz), "i omega:", ftoa(gwr%iw_mesh(itau) * Ha_eV), "eV"))
        !call print_arr(wc%buffer_cplx, unit=std_out)
@@ -4172,8 +4212,7 @@ subroutine gwr_build_wc(gwr)
            vcs_g1 = desc_q%vc_sqrt(ig1)
 
            if (iglob1 == 1 .and. iglob2 == 1) then
-             ! Store epsilon^{-1}_{iw, iq_ibz}(0, 0)
-             ! Rescale by np_qibz because we will MPI reduce this array.
+             ! Store epsilon^{-1}_{iw, iq_ibz}(0, 0). Rescale by np_qibz because we will MPI reduce this array.
              em1_wq(itau, iq_ibz) = wc%buffer_cplx(il_g1, il_g2) / gwr%np_qibz(iq_ibz)
            end if
 
@@ -4183,33 +4222,21 @@ subroutine gwr_build_wc(gwr)
            ! Handle divergence in Wc for q --> 0
            if (q_is_gamma .and. (iglob1 == 1 .or. iglob2 == 1)) then
              if (iglob1 == 1 .and. iglob2 == 1) then
-               vcs_g1 = sqrt(i_sz)
-               vcs_g2 = sqrt(i_sz)
-               !wc%buffer_cplx(il_g1, il_g2) = real(wc%buffer_cplx(il_g1, il_g2))
-               !vcs_g1 = zero; vcs_g2 = zero
+               vcs_g1 = sqrt(i_sz); vcs_g2 = sqrt(i_sz)
              else if (iglob1 == 1) then
                !vcs_g1 = (four_pi) ** (three/two) * q0sph ** 2 / two
                vcs_g1 = sqrt(i_sz)
-               !vcs_g1 = zero
              else if (iglob2 == 1) then
                !vcs_g2 = (four_pi) ** (three/two) * q0sph ** 2 / two
                vcs_g2 = sqrt(i_sz)
-               !vcs_g2 = zero
              end if
            end if
 
            wc%buffer_cplx(il_g1, il_g2) = wc%buffer_cplx(il_g1, il_g2) * vcs_g1 * vcs_g2 / gwr%cryst%ucvol
          end do ! il_g1
        end do ! il_g2
-
-       !if (q_is_gamma) then
-       !  !call wrtout(std_out, "Setting Wc(q=0) to zero"); wc%buffer_cplx = zero
-       !  !call wrtout(std_out, sjoin(" Wc for q:", ktoa(qq_ibz), "i omega:", ftoa(gwr%iw_mesh(itau) * Ha_eV), "eV"))
-       !  !call print_arr(wc%buffer_cplx, unit=std_out)
-       !  !call wc%symmetrize("A", "H")
-       !  !call wc%set_head_and_wings(czero)
-       !end if
        end associate
+
      end do  ! my_it
    end do ! my_is
    end associate
@@ -4217,6 +4244,8 @@ subroutine gwr_build_wc(gwr)
    write(msg,'(2(a,i0),a)')" My iqi [", my_iqi, "/", gwr%my_nqibz, "]"
    call cwtime_report(msg, cpu_q, wall_q, gflops_q)
  end do ! my_iqi
+
+ !call slkproc_4diag%free()
 
  call xmpi_sum_master(em1_wq, master, gwr%gtk_comm%value, ierr)
  call xmpi_sum_master(eps_wq, master, gwr%gtk_comm%value, ierr)

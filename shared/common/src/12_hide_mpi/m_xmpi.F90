@@ -171,6 +171,7 @@ module m_xmpi
    procedure :: set_to_null => xcomm_set_to_null
    procedure :: set_to_self => xcomm_set_to_self
    procedure :: free => xcomm_free
+   procedure :: from_cart_sub => xcomm_from_cart_sub     ! Helper function to build sub-communicators in a Cartesian grid.
  end type xcomm_t
 
  public :: xcomm_from_mpi_int
@@ -225,6 +226,7 @@ module m_xmpi
  public :: xmpi_comm_translate_ranks  ! Hides MPI_GROUP_TRANSLATE_RANKS from MPI library.
  public :: xmpi_comm_split            ! Hides MPI_COMM_SPLIT from MPI library.
  public :: xmpi_subcomm               ! Creates a sub-communicator from an input communicator.
+ public :: xmpi_comm_multiple_of      ! Creates sub-communicator with number of procs multiple of a certain number.
  public :: xmpi_barrier               ! Hides MPI_BARRIER from MPI library.
  public :: xmpi_name                  ! Hides MPI_NAME from MPI library.
  public :: xmpi_iprobe                ! Hides MPI_IPROBE from MPI library.
@@ -1551,6 +1553,58 @@ end function xmpi_subcomm
 
 !----------------------------------------------------------------------
 
+!!****f* m_xmpi/xmpi_comm_multiple
+!! NAME
+!!  xmpi_comm_multiple
+!!
+!! FUNCTION
+!!  Given an input communicator `input_comm`, create a new communicator
+!!  with number of procs multiple of a certain number `ntasks`.
+!!  Use all procs if ntasks >= input_nprocs.
+!!
+!! INPUTS
+!!  ntasks=Number of tasks.
+!!  comm=input communicator
+!!
+!! OUTPUT
+!!  idle_proc=True if this proc is idle. In this case, output_comm contains all the idle procs.
+!!  output_comm=Output communicator
+!!
+!! SOURCE
+
+subroutine xmpi_comm_multiple_of(ntasks, input_comm, idle_proc, output_comm)
+
+!Arguments-------------------------
+!scalars
+ integer,intent(in) :: ntasks, input_comm
+ integer,intent(out) :: output_comm
+ logical,intent(out) :: idle_proc
+
+!Local variables-------------------------------
+ integer :: color, my_rank, ierr, input_nproc
+
+! *************************************************************************
+
+ my_rank = xmpi_comm_rank(input_comm)
+ input_nproc = xmpi_comm_size(input_comm)
+
+ if (input_nproc <= ntasks) then
+   ! Use all procs in input comm.
+   idle_proc = .False.; output_comm = input_comm
+#ifdef HAVE_MPI
+   call MPI_Comm_dup(input_comm, output_comm, ierr)
+#endif
+ else
+   color = merge(0, 1, my_rank + 1 <= (ntasks / input_nproc) * input_nproc)
+   idle_proc = color == 1
+   call xmpi_comm_split(input_comm, color, my_rank, output_comm, ierr)
+ end if
+
+end subroutine xmpi_comm_multiple_of
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_xmpi/xmpi_comm_group
 !! NAME
 !!  xmpi_comm_group
@@ -1609,7 +1663,6 @@ end subroutine xmpi_comm_group
 subroutine xmpi_comm_split(input_comm, color, key, output_comm, mpierr)
 
 !Arguments-------------------------
-!scalars
  integer,intent(in) :: color,input_comm,key
  integer,intent(out) :: mpierr,output_comm
 
@@ -4822,8 +4875,7 @@ end subroutine xmpio_create_coldistr_from_fp3blocks
 !! xmpi_distrib_2d
 !!
 !! FUNCTION
-!!  Try to optimally distribute nprocs in a 2d grid of shape (n1, n2)
-!!  given a problem of dimension (n1, n2).
+!!  Try to optimally distribute nprocs in a 2d grid of shape (n1, n2) given a problem of dimension (n1, n2).
 !!  Use order string to define priorities:
 !!      "12" or "21" if both dimensions should be optimized (if not possibile the first one gets optimized)
 !!      "1" or "2" to optimize only one dimension.
@@ -4884,8 +4936,7 @@ end subroutine balance_21
 
 subroutine balance_1()
  integer :: imod1
- ! Try to find n1 x n2 = nprocs so that only size1 is multiple of n1
- ! Allow for some load imbalance.
+ ! Try to find n1 x n2 = nprocs so that only size1 is multiple of n1. Allow for some load imbalance.
  do ii=nprocs,1,-1
    imod1 = mod(size1, ii)
    if ((imod1 == 0 .or. imod1 >= nprocs / 2) .and. mod(nprocs, ii) == 0) then
@@ -4900,8 +4951,7 @@ end subroutine balance_1
 
 subroutine balance_2()
  integer :: imod2
- ! Try to find n1 x n2 = nprocs so that only size2 is multiple of n2
- ! Allow for some load imbalance.
+ ! Try to find n1 x n2 = nprocs so that only size2 is multiple of n2. Allow for some load imbalance.
  do ii=nprocs,1,-1
    imod2 = mod(size2, ii)
    if ((imod2 == 0 .or. imod2 >= nprocs / 2) .and. mod(nprocs, ii) == 0) then
@@ -4949,6 +4999,20 @@ subroutine xcomm_free(self)
   call xmpi_comm_free(self%value)
   self%me = -1; self%nproc = 0
 end subroutine xcomm_free
+! Helper function to build sub-communicators in a Cartesian grid.
+subroutine xcomm_from_cart_sub(self, comm_cart, keepdim)
+ class(xcomm_t),intent(out) :: self
+ integer,intent(in) :: comm_cart
+ logical,intent(in) :: keepdim(:)
+ integer :: ierr
+
+#ifdef HAVE_MPI
+ call MPI_CART_SUB(comm_cart, keepdim, self%value, ierr)
+#endif
+ self%me = xmpi_comm_rank(self%value)
+ self%nproc = xmpi_comm_size(self%value)
+
+end subroutine xcomm_from_cart_sub
 
 !!****f* m_xmpi/pool2d_from_dims
 !! NAME
@@ -5087,7 +5151,6 @@ subroutine pool2d_free(pool)
 
 end subroutine pool2d_free
 !!***
-
 
 end module m_xmpi
 !!***
