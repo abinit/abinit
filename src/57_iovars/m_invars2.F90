@@ -36,17 +36,17 @@ module m_invars2
 
  use defs_datatypes, only : pspheader_type
  use m_time,      only : timab
- use m_fstrings,  only : sjoin, itoa, ltoa, tolower
+ use m_fstrings,  only : sjoin, itoa, ltoa, tolower, toupper
  use m_symtk,     only : matr3inv
  use m_parser,    only : intagm, intagm_img
- use m_geometry,   only : mkrdim, metric
- use m_gsphere,    only : setshells
+ use m_geometry,  only : mkrdim, metric
+ use m_gsphere,   only : setshells
  use m_xcdata,    only : get_auxc_ixc, get_xclevel
  use m_inkpts,    only : inkpts
  use m_ingeo,     only : invacuum
  use m_ipi,       only : ipi_check_initial_consistency
  use m_crystal,   only : crystal_t
- use m_bz_mesh,   only : kmesh_init, kmesh_t, find_qmesh
+ use m_bz_mesh,   only : kmesh_t, find_qmesh
 
  implicit none
 
@@ -580,6 +580,19 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwgmcorr',tread,'INT')
  if(tread==1) dtset%gwgmcorr=intarr(1)
+
+ narr = size(dtset%gwr_np_gtks)
+ call intagm(dprarr, intarr, jdtset, marr, narr, string(1:lenstr), 'gwr_np_gtks', tread, 'INT')
+ if (tread == 1) dtset%gwr_np_gtks = intarr(1:narr)
+
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gwr_ntau', tread,'INT')
+ if (tread == 1) dtset%gwr_ntau = intarr(1)
+
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gwr_boxcutmin', tread, 'DPR')
+ if (tread == 1) dtset%gwr_boxcutmin = dprarr(1)
+
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "wfk_task", tread, 'KEY', key_value=key_value)
+ if (tread == 1) dtset%gwr_task = toupper(trim(key_value))
 
  ! RESPFN integer input variables (needed here to get the value of response)
  ! Warning: rfddk,rfelfd,rfmagn,rfphon,rfstrs,rfsrs_ref,rfuser,rf2_dkdk and rf2_dkde are also read in invars1
@@ -2589,10 +2602,10 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nctime',tread,'INT')
  if(tread==1) dtset%nctime=intarr(1)
- 
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nucefg',tread,'INT')
  if(tread==1) dtset%nucefg=intarr(1)
- 
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nucfc',tread,'INT')
  if(tread==1) dtset%nucfc=intarr(1)
 
@@ -3653,7 +3666,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    end if
  end if
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),"wfk_task",tread,'KEY',key_value=key_value)
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "wfk_task", tread, 'KEY', key_value=key_value)
  if (tread==1) dtset%wfk_task = str2wfktask(tolower(key_value))
  if (dtset%optdriver == RUNL_WFK .and. dtset%wfk_task == WFK_TASK_NONE) then
    ABI_ERROR(sjoin("A valid wfk_task must be specified when optdriver= ", itoa(dtset%optdriver), ", Received:", key_value))
@@ -3687,7 +3700,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  if (dtset%nqptdm == -1) then
    cryst = dtset%get_crystal(1)
    !call cryst%print(mode_paral='COLL')
-   call kmesh_init(Kmesh, Cryst, dtset%nkpt, dtset%kptns, Dtset%kptopt, wrap_1zone=.FALSE.)
+   call Kmesh%init(Cryst, dtset%nkpt, dtset%kptns, Dtset%kptopt, wrap_1zone=.FALSE.)
 
    ! Some required information are not filled up inside kmesh_init
    ! So doing it here, even though it is not clean

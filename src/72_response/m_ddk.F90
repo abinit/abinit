@@ -40,9 +40,7 @@ MODULE m_ddk
  use m_ebands
  use m_pawcprj
  use m_getgh1c
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
 
  use m_fstrings,      only : strcat, sjoin, itoa, ktoa
  use m_io_tools,      only : iomode_from_fname
@@ -229,9 +227,7 @@ subroutine ddkstore_compute_ddk(ds, wfk_path, prefix, dtset, psps, pawtab, ngfft
  integer :: mband, nbcalc, nsppol, ib_v, ib_c, mpw, spin, nspinor, nkpt, nband_k, npw_k
  integer :: ii, ik, bmin, bmax, istwf_k, idir, my_rank, nproc, ierr, bstop
  real(dp) :: cpu, wall, gflops, cpu_all, wall_all, gflops_all
-#ifdef HAVE_NETCDF
  integer :: ncerr, ncid
-#endif
  character(len=500) :: msg
  character(len=fnlen) :: fname
  logical :: write_ncfile
@@ -536,7 +532,6 @@ subroutine ddkstore_compute_ddk(ds, wfk_path, prefix, dtset, psps, pawtab, ngfft
  end if
 
  ! Write matrix elements to disk.
-#ifdef HAVE_NETCDF
 
  ! Output EVK file in netcdf format.
  if (my_rank == master .and. write_ncfile) then
@@ -585,7 +580,6 @@ subroutine ddkstore_compute_ddk(ds, wfk_path, prefix, dtset, psps, pawtab, ngfft
    end do
    call tmp_hdr%free()
  end if
-#endif
 
  if (my_rank == master .and. dtset%prtvol > 0) then
    write(ab_out, "(2a)")ch10,"Writing velocity matrix elements (only diagonal terms, real part) for testing purpose:"

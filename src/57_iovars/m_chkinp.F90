@@ -2337,10 +2337,11 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !  call chkint_eq(1,1,cond_string,cond_values,ierr,'optcell',dt%optcell,1,(/0/),iout)
 !  end if
 
-!  optdriver
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'optdriver',optdriver,11,&
-&   [RUNL_GSTATE,RUNL_RESPFN,RUNL_SCREENING,RUNL_SIGMA,RUNL_NONLINEAR,RUNL_BSE,&
-&   RUNL_GWLS, RUNL_WFK,RUNL_EPH,RUNL_LONGWAVE,RUNL_RTTDDFT],iout)
+   ! Check the value of optdriver
+   call chkint_eq(0, 0, cond_string, cond_values, ierr, 'optdriver', optdriver, 12,&
+                  [RUNL_GSTATE,RUNL_RESPFN,RUNL_SCREENING,RUNL_SIGMA,RUNL_NONLINEAR,RUNL_GWR, RUNL_BSE, &
+                   RUNL_GWLS, RUNL_WFK,RUNL_EPH,RUNL_LONGWAVE,RUNL_RTTDDFT], iout)
+
    if (response==1.and.all(dt%optdriver/=[RUNL_RESPFN,RUNL_NONLINEAR,RUNL_LONGWAVE])) then
      write(msg,'(a,i3,3a,14(a,i2),4a)' )&
 &     'The input variable optdriver=',dt%optdriver,ch10,&
@@ -3076,7 +3077,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    !end if
 
 !  prtstm
-   call chkint_ge(0,0,cond_string,cond_values,ierr,'prtstm',dt%prtstm,0,iout)
+   call chkint_le(0,0,cond_string,cond_values,ierr,'prtstm',dt%prtstm,1,iout)
+   call chkint_ge(0,0,cond_string,cond_values,ierr,'prtstm',dt%prtstm,-dt%mband,iout)
    if(optdriver/=RUNL_GSTATE)then
      cond_string(1)='optdriver' ; cond_values(1)=optdriver
      call chkint_eq(0,1,cond_string,cond_values,ierr,'prtstm',dt%prtstm,1,(/0/),iout)

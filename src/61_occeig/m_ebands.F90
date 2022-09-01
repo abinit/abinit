@@ -441,7 +441,7 @@ type(gaps_t) function ebands_get_gaps(ebands, ierr) result(gaps)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: occopt3 = 3, prtvol0 = 0
- real(dp),parameter :: spinmagntarget_ = -99.99_dp, stmbias0 = zero
+ real(dp),parameter :: spinmagntarget_ = -99.99_dp
  real(dp) :: tsmear
  type(ebands_t)  :: tmp_ebands
  !character(len=500) :: msg
@@ -466,7 +466,7 @@ type(gaps_t) function ebands_get_gaps(ebands, ierr) result(gaps)
    ! Remove extrael to go back to intrinsic system
    if (ebands%extrael /= zero) tmp_ebands%nelect = ebands%nelect - ebands%extrael
    !if (ebands%cellcharge /= zero) tmp_ebands%nelect = ebands%nelect + ebands%cellcharge
-   call ebands_update_occ(tmp_ebands, spinmagntarget_, stmbias0)
+   call ebands_update_occ(tmp_ebands, spinmagntarget_)
 
    ! Try to compute gaps the again with new Fermi level at FD T = tsmear computed from update_occ.
    ! Return ierr
@@ -720,6 +720,8 @@ subroutine gaps_print(gaps, unit, header, kTmesh, mu_e)
    call wrtout(unt, msg)
    write(msg, "(a,f9.3,2a)")" Direct gap:     ", opt_gap * Ha_eV," (eV) at k: ", trim(ktoa(gaps%optical_kpoints(:,spin)))
    call wrtout(unt, msg)
+   !write(msg, "((2(a, f9.3)))")" Fermi level:", gaps%fermie * Ha_eV, " (eV) with nelect:", gaps%nelect
+   !call wrtout(unt, msg)
 
    if (present(mu_e) .and. present(kTmesh) .and. all(gaps%ierr == 0)) then
      ntemp = size(mu_e)
@@ -795,6 +797,7 @@ end subroutine gaps_print
 subroutine ebands_init(bantot, ebands, nelect, ne_qFD, nh_qFD, ivalence, doccde, eig, istwfk, kptns, &
   nband, nkpt, npwarr, nsppol, nspinor, tphysel, tsmear, occopt, occ, wtk, &
   cellcharge, kptopt, kptrlatt_orig, nshiftk_orig, shiftk_orig, kptrlatt, nshiftk, shiftk)
+
 ! CP modified input list: added ne_qFD, nh_qFD, ivalence.
 !Arguments ------------------------------------
 !scalars
@@ -1154,9 +1157,9 @@ end subroutine ebands_move_alloc
 !!
 !! INPUTS
 !!  ebands<ebands_t>The type containing the data.
-!!  [unit]=Unit number (std_out if None)
+!!  [unit]=Unit number (default: std_out)
 !!  [header]=title for info
-!!  [prtvol]=Verbosity level (0 if None)
+!!  [prtvol]=Verbosity level (default: 0)
 !!
 !! OUTPUT
 !!  Only writing
@@ -1166,10 +1169,9 @@ end subroutine ebands_move_alloc
 subroutine ebands_print(ebands, header, unit, prtvol)
 
 !Arguments ------------------------------------
-!scalars
- integer,optional,intent(in) :: prtvol,unit
- character(len=*),optional,intent(in) :: header
  class(ebands_t),intent(in) :: ebands
+ integer,optional,intent(in) :: prtvol, unit
+ character(len=*),optional,intent(in) :: header
 
 !Local variables-------------------------------
  integer :: spin, ikpt, unt, my_prtvol, ii
@@ -1179,7 +1181,7 @@ subroutine ebands_print(ebands, header, unit, prtvol)
  unt = std_out; if (present(unit)) unt =unit
  my_prtvol = 0; if (present(prtvol)) my_prtvol = prtvol
 
- msg=' ==== Info on the ebands_t ==== '
+ msg = ' ==== Info on the ebands_t ==== '
  if (present(header)) msg=' ==== '//trim(adjustl(header))//' ==== '
  call wrtout(unt, msg)
 
@@ -2329,14 +2331,9 @@ subroutine ebands_update_occ(ebands, spinmagntarget, stmbias, prtvol)
    ABI_MALLOC(occ, (mband*nkpt*nsppol))
    ABI_MALLOC(doccde, (mband*nkpt*nsppol))
 
-   ! CP modified
-   !call newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,ebands%nband,&
-   ! ebands%nelect,ebands%nkpt,ebands%nspinor,ebands%nsppol,occ,ebands%occopt,&
-   ! my_prtvol,stmbias_local,ebands%tphysel,ebands%tsmear,ebands%wtk)
    call newocc(doccde,eigen,entropy,fermie,fermih,ebands%ivalence,spinmagntarget,mband,ebands%nband,&
      ebands%nelect,ebands%ne_qFD,ebands%nh_qFD,ebands%nkpt,ebands%nspinor,ebands%nsppol,occ,ebands%occopt,&
-     my_prtvol,stmbias_local,ebands%tphysel,ebands%tsmear,ebands%wtk)
-   !End CP modified
+     my_prtvol,ebands%tphysel,ebands%tsmear,ebands%wtk,stmbias=stmbias_local)
 
    ! Save output in ebands%.
    ebands%entropy = entropy
@@ -2366,7 +2363,6 @@ subroutine ebands_update_occ(ebands, spinmagntarget, stmbias, prtvol)
      ebands%occ(1:mband,:,:) = maxocc
      !ABI_ERROR("Occupation factors are not initialized, likely due to scf = -2")
    end if
-
 
    ! Calculate the valence index for each spin channel.
    do spin=1,ebands%nsppol
@@ -2401,7 +2397,7 @@ subroutine ebands_update_occ(ebands, spinmagntarget, stmbias, prtvol)
      end if
    end if
 
-   ! Save results. Here I dont know if it is better to be consistent with the abinit convention i.e fermi=vtop
+   ! Save results. Here I dont know if it is better to be consistent with the abinit convention i.e fermi = vtop
    ebands%entropy = zero
    ebands%fermie = (vtop + cbot) / 2
    if (ABS(cbot - vtop) < tol4) ebands%fermie = vtop ! To avoid error on the last digit
@@ -2427,7 +2423,7 @@ subroutine ebands_update_occ(ebands, spinmagntarget, stmbias, prtvol)
  end if
 
  if (ABS(ndiff) > 5.d-2*ebands%nelect) then
-   write(msg,'(2a,2(a,es12.4))')&
+   write(msg,'(2a,2(a,es12.4))') &
     'Too large difference in number of electrons:,',ch10,&
     'Expected = ',ebands%nelect,' Calculated = ',sum(nelect_spin)
    ABI_ERROR(msg)
@@ -2469,7 +2465,6 @@ subroutine ebands_set_scheme(ebands, occopt, tsmear, spinmagntarget, prtvol, upd
 
 !Local variables-------------------------------
 !scalars
- real(dp),parameter :: stmbias0 = zero
  logical :: my_update_occ
 
 ! *************************************************************************
@@ -2485,7 +2480,7 @@ subroutine ebands_set_scheme(ebands, occopt, tsmear, spinmagntarget, prtvol, upd
  ebands%occopt = occopt; ebands%tsmear = tsmear
 
  if (my_update_occ) then
-   call ebands_update_occ(ebands, spinmagntarget, stmbias0, prtvol=prtvol)
+   call ebands_update_occ(ebands, spinmagntarget, prtvol=prtvol)
    if (prtvol > 10) call wrtout(std_out, sjoin(' Fermi level is now:', ftoa(ebands%fermie)))
  end if
 
