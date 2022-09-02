@@ -647,6 +647,8 @@ module m_gwr
    procedure :: build_gtau_from_wfk => gwr_build_gtau_from_wfk
    ! Build the Green's function in imaginary time for k-points in the IBZ from the WFK file
 
+   procedure :: build_green => gwr_build_green
+
    procedure :: build_tchi => gwr_build_tchi
    ! Build the irreducible polarizability
 
@@ -1801,7 +1803,6 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
  type(hdr_type) :: wfk_hdr
  type(wfk_t) :: wfk
  type(dataset_type),pointer :: dtset
- !type(processor_scalapack) :: gtau_slkproc
  type(matrix_scalapack), target :: work, green ! cg_mat,
 !arrays
  integer :: lsize(2), mask_kibz(gwr%nkibz)
@@ -1815,10 +1816,6 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
 ! *************************************************************************
 
  call cwtime(cpu, wall, gflops, "start")
-
- ! Allocate Green's functions
- mask_kibz = 0; mask_kibz(gwr%my_kibz_inds(:)) = 1
- call gwr%alloc_free_mats(mask_kibz, "green", "malloc")
 
  dtset => gwr%dtset
 
@@ -1929,6 +1926,10 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
 !if (.True.) then
 if (.False.) then
 
+ ! Allocate Green's functions
+ mask_kibz = 0; mask_kibz(gwr%my_kibz_inds(:)) = 1
+ call gwr%alloc_free_mats(mask_kibz, "green", "malloc")
+
  do my_is=1,gwr%my_nspins
    spin = gwr%my_spins(my_is)
    do my_iki=1,gwr%my_nkibz
@@ -2023,11 +2024,16 @@ if (.False.) then
    end do ! my_iki
  end do ! my_is
 
+ if (gwr%dtset%prtvol > 0) call gwr_print_trace(gwr, "gt_kibz")
+
  !call ddkop%free()
 
 else
 
- !call gwr%gtau_slkproc%init(gwr%gtau_comm%value, grid_dims=[1, gwr%gtau_comm%nproc])
+ !call gwr%read_ugb_from_wfk(wfk_filepath)
+ !call gwr%build_head_and_wings()
+ !call gwr%build_sigxme()
+ !call gwr%build_green(free_ugb=.True.)
 
  ! Allocate PBLAS matrices with wavefunctions up to ugb_nband
  ! Init cg(npwsp, nband) PBLAS matrix within the gtau communicator.
@@ -2046,11 +2052,6 @@ else
      call gwr%ugb(ik_ibz, spin)%init(npwsp, gwr%ugb_nband, gwr%gtau_slkproc, istwfk1, size_blocs=[npwsp, col_bsize])
    end do
  end do
-
- !call gwr%read_ugb_from_wfk(wfk_filepath)
- !call gwr%build_head_and_wings()
- !call gwr%build_sigxme()
- !call gwr%build_green(free_ugb=.True.)
 
  ! ====================
  ! PBLAS-based version
@@ -2107,6 +2108,112 @@ else
      !call ddkop%free()
      !ABI_FREE(cgwork)
 
+     write(msg,'(3(a,i0),a)')" My ik_ibz [", my_iki, "/", gwr%my_nkibz, "] (tot: ", gwr%nkibz, ")"
+     call cwtime_report(msg, cpu_green, wall_green, gflops_green)
+     end associate
+   end do ! my_iki
+ end do ! my_is
+
+ ABI_FREE(kg_k)
+
+ call gwr%build_green(free_ugb=.True.)
+
+end if
+
+ ABI_FREE(my_bands)
+
+ call wfd%free()
+ call wfk%close()
+ call wfk_hdr%free()
+
+ call cwtime_report(" gwr_build_gtau_from_wfk:", cpu, wall, gflops)
+
+end subroutine gwr_build_gtau_from_wfk
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_gwr/gwr_build_green
+!! NAME
+!!  gwr_build_green
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine gwr_build_green(gwr, free_ugb)
+
+!Arguments ------------------------------------
+ class(gwr_t),intent(inout) :: gwr
+ logical,intent(in) :: free_ugb
+
+!Local variables-------------------------------
+!scalars
+ integer :: my_is, my_iki, spin, ik_ibz, band, itau, ipm, il_b !, npw_k, istwf_k,
+ integer :: npwsp, isgn ! nband_k,
+ real(dp) :: f_nk, eig_nk, cpu, wall, gflops, cpu_green, wall_green, gflops_green
+ character(len=500) :: msg
+ complex(dp) :: gt_cfact
+ type(matrix_scalapack), target :: work, green ! cg_mat,
+ integer :: mask_kibz(gwr%nkibz)
+
+! *************************************************************************
+
+ ABI_CHECK(abs(gwr%ks_ebands%fermie) < tol12, "ef should have been set to zero!")
+
+ call cwtime(cpu, wall, gflops, "start")
+
+ ! Allocate Green's functions
+ mask_kibz = 0; mask_kibz(gwr%my_kibz_inds(:)) = 1
+ call gwr%alloc_free_mats(mask_kibz, "green", "malloc")
+
+ ! Allocate PBLAS matrices with wavefunctions up to ugb_nband
+ ! Init cg(npwsp, nband) PBLAS matrix within the gtau communicator.
+ ! and distribute it over bands so that each proc reads a subset of bands in read_band_block
+
+ !ABI_MALLOC(gwr%ugb, (gwr%nkibz, gwr%nsppol))
+ !gwr%ugb_nband = nbsum
+
+ !do my_is=1,gwr%my_nspins
+ !  spin = gwr%my_spins(my_is)
+ !  do my_iki=1,gwr%my_nkibz
+ !    ik_ibz = gwr%my_kibz_inds(my_iki)
+ !    npw_k = gwr%green_desc_kibz(ik_ibz)%npw
+ !    npwsp = npw_k * gwr%nspinor
+ !    ABI_CHECK(block_dist_1d(gwr%ugb_nband, gwr%gtau_comm%nproc, col_bsize, msg), msg)
+ !    call gwr%ugb(ik_ibz, spin)%init(npwsp, gwr%ugb_nband, gwr%gtau_slkproc, istwfk1, size_blocs=[npwsp, col_bsize])
+ !  end do
+ !end do
+
+ !call gwr%read_ugb_from_wfk(wfk_filepath)
+ !call gwr%build_head_and_wings()
+ !call gwr%build_sigxme()
+ !call gwr%build_green(free_ugb=.True.)
+
+ ! ====================
+ ! PBLAS-based version
+ ! ====================
+ !call wfk_open_read(wfk, wfk_path, formeig0, iomode_from_fname(wfk_path), get_unit(), gwr%comm) !  hdr_out=wfk_hdr)
+
+ do my_is=1,gwr%my_nspins
+   spin = gwr%my_spins(my_is)
+   do my_iki=1,gwr%my_nkibz
+     call cwtime(cpu_green, wall_green, gflops_green, "start")
+     ik_ibz = gwr%my_kibz_inds(my_iki)
+     !kk_ibz = gwr%kibz(:, ik_ibz)
+     !npw_k = wfk_hdr%npwarr(ik_ibz)
+     !istwf_k = wfk_hdr%istwfk(ik_ibz)
+     ! TODO
+     !ABI_CHECK_IEQ(istwf_k, 1, "istwfk_k should be 1")
+     !nband_k = wfk_hdr%nband(ik_ibz)
+
+     associate (ugb => gwr%ugb(ik_ibz, spin), desc_k => gwr%green_desc_kibz(ik_ibz))
+     npwsp = desc_k%npw * gwr%nspinor
+
      call ugb%copy(work)
      !call ugb%change_size_blocs(work, size_blocs=, processor=)
      !call work%copy(green, empty=.True.)
@@ -2115,7 +2222,6 @@ else
 
      do itau=1,gwr%ntau
        do ipm=1,2
-
          ! Multiply columns by exponentials in imaginary time.
          work%buffer_cplx = ugb%buffer_cplx
 
@@ -2146,7 +2252,7 @@ else
 
      call work%free()
      call green%free()
-     !if (free_ugb) call ugb%free()
+     if (free_ugb) call ugb%free()
 
      write(msg,'(3(a,i0),a)')" My ik_ibz [", my_iki, "/", gwr%my_nkibz, "] (tot: ", gwr%nkibz, ")"
      call cwtime_report(msg, cpu_green, wall_green, gflops_green)
@@ -2154,22 +2260,13 @@ else
    end do ! my_iki
  end do ! my_is
 
- !call gtau_slkproc%free()
- ABI_FREE(kg_k)
-
-end if
-
- ABI_FREE(my_bands)
-
- call wfd%free()
- call wfk%close()
- call wfk_hdr%free()
-
  if (gwr%dtset%prtvol > 0) call gwr_print_trace(gwr, "gt_kibz")
- call cwtime_report(" gwr_build_gtau_from_wfk:", cpu, wall, gflops)
+ call cwtime_report(" gwr_build_green:", cpu, wall, gflops)
 
-end subroutine gwr_build_gtau_from_wfk
+end subroutine gwr_build_green
 !!***
+
+
 
 !----------------------------------------------------------------------
 
