@@ -1791,27 +1791,20 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: formeig0 = 0
- integer :: mband, min_nband, nkibz, nsppol, my_is, my_iki, spin, ik_ibz ! my_it,
- integer :: my_ib, my_nb, band, npw_k, mpw, istwf_k, itau, ipm, ig1, ig2, il_g1, il_g2, il_b
- integer :: nbsum, npwsp, col_bsize, nband_k, my_bstart, my_bstop, my_nband, ierr, isgn
- real(dp) :: f_nk, eig_nk, ef, spin_fact, cpu, wall, gflops, cpu_green, wall_green, gflops_green
- complex(dp) :: gt_cfact
+ integer :: mband, min_nband, nkibz, nsppol, my_is, my_iki, spin, ik_ibz
+ integer :: my_ib, my_nb, band, npw_k, mpw, istwf_k !, itau !, il_b
+ integer :: nbsum, npwsp, col_bsize, nband_k, my_bstart, my_bstop, my_nband, ierr
+ real(dp) :: f_nk, eig_nk, ef, cpu, wall, gflops, cpu_green, wall_green, gflops_green
  character(len=5000) :: msg
- type(wfd_t),target :: wfd
- type(wave_t),pointer :: wave
  type(ebands_t) :: wfk_ebands
  type(hdr_type) :: wfk_hdr
  type(wfk_t) :: wfk
  type(dataset_type),pointer :: dtset
- type(matrix_scalapack), target :: work, green ! cg_mat,
 !arrays
- integer :: lsize(2), mask_kibz(gwr%nkibz)
- integer,allocatable :: nband(:,:), wfd_istwfk(:), my_bands(:), kg_k(:,:)
+ integer,allocatable :: kg_k(:,:)
  real(dp) :: kk_ibz(3)
  !real(dp),allocatable :: cgwork(:,:)
  real(dp),ABI_CONTIGUOUS pointer :: cg_k(:,:)
- complex(dp),allocatable :: loc_cwork(:,:,:)
- logical,allocatable :: bks_mask(:,:,:), keep_ur(:,:,:)
 
 ! *************************************************************************
 
@@ -1826,19 +1819,8 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
  !cryst = wfk_hdr%get_crystal()
  !call cryst%print(header="crystal structure from WFK file")
 
- ! Initialize the wave function descriptor.
- ! Only wavefunctions for the symmetrical imagine of the k-points
- ! treated by this MPI rank are stored in memory.
-
  nkibz = wfk_ebands%nkpt; nsppol = wfk_ebands%nsppol; mband = wfk_ebands%mband
  min_nband = minval(wfk_ebands%nband)
-
- ABI_MALLOC(nband, (nkibz, nsppol))
- ABI_MALLOC(bks_mask, (mband, nkibz, nsppol))
- ABI_MALLOC(keep_ur, (mband, nkibz, nsppol))
- nband = reshape(wfk_ebands%nband, [nkibz, nsppol])
- !nband = mband
- bks_mask = .False.; keep_ur = .False.
 
  nbsum = dtset%nband(1)
  if (nbsum > min_nband) then
@@ -1846,48 +1828,7 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
    nbsum = min_nband
  end if
  call wrtout(std_out, sjoin(" Computing Green's function with nbsum:", itoa(nbsum)))
-
- ! Init bks_mask:
- !
- !  - each MPI proc reads only the (k-points, spin) it needs.
- !  - For given (k, s), bands are distributed inside tau_comm
- !    This means that bands are replicated across g_comm.
- !
- ! TODO: Use (g_comm x tau_comm) 2D grid to distribute bands
- !       Requires PBLAS redistribuution though.
-
- call xmpi_split_block(nbsum, gwr%tau_comm%value, my_nb, my_bands)
- ABI_CHECK(my_nb > 0, "my_nb == 0")
-
- do my_is=1,gwr%my_nspins
-   spin = gwr%my_spins(my_is)
-   do my_iki=1,gwr%my_nkibz
-     ik_ibz = gwr%my_kibz_inds(my_iki)
-     bks_mask(my_bands(:), ik_ibz, spin) = .True.
-   end do
- end do
-
- ! Impose istwfk = 1 for all k-points.
- ! wfd_read_wfk will handle a possible conversion if the WFK contains istwfk /= 1.
- ABI_MALLOC(wfd_istwfk, (nkibz))
- wfd_istwfk = 1
-
- call wfd_init(wfd, gwr%cryst, gwr%pawtab, gwr%psps, keep_ur, mband, nband, nkibz, dtset%nsppol, bks_mask, &
-   dtset%nspden, dtset%nspinor, dtset%ecut, dtset%ecutsm, dtset%dilatmx, wfd_istwfk, wfk_ebands%kptns, gwr%g_ngfft, &
-   dtset%nloalg, dtset%prtvol, dtset%pawprtvol, gwr%comm)
-
- call wfd%print(header="Wavefunctions for GWR calculation")
-
- ABI_FREE(nband)
- ABI_FREE(keep_ur)
- ABI_FREE(wfd_istwfk)
- ABI_FREE(bks_mask)
-
  call ebands_free(wfk_ebands)
- !call wfk_hdr%free()
-
- ! Read KS wavefunctions.
- call wfd%read_wfk(wfk_path, iomode_from_fname(wfk_path))
 
  ! ==============================================
  ! Build Green's functions in g-space for given k
@@ -1912,131 +1853,46 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
  !         - Add these approximated eigenstats to G.
  !
 
- mpw = maxval(wfd%npwarr)
-
- ! TODO: Mv m_ddk in 72_response below 70_gw or move gwr to higher level.
- !ddkop = ddkop_new(dtset, gwr%cryst, gwr%pawtab, gwr%psps, wfd%mpi_enreg, mpw, wfd%ngfft)
-
- ef = gwr%ks_ebands%fermie
- ABI_CHECK(abs(ef) < tol12, "ef should have been set to zero!")
- spin_fact = two / (gwr%nsppol * gwr%nspinor)
+ ! Select occupied or empty G.
+ ! if (eig_nk < -tol6) then
+ !   !ipm = 1
+ !   !gt_cfact = j_dpc * exp(gwr%tau_mesh(itau) * eig_nk)
+ !   ! Vasp convention
+ !   ipm = 2
+ !   gt_cfact = exp(gwr%tau_mesh(itau) * eig_nk)
+ ! else if (eig_nk > tol6) then
+ !   !ipm = 2
+ !   !gt_cfact = -j_dpc * exp(-gwr%tau_mesh(itau) * eig_nk)
+ !   ! Vasp convention
+ !   ipm = 1
+ !   gt_cfact = -exp(-gwr%tau_mesh(itau) * eig_nk)
+ ! else
+ !   ABI_WARNING("Metallic system of semiconductor with Fermi level inside bands!!!!")
+ ! end if
 
  call wrtout(std_out, sjoin(" Building Green's functions from KS states with nbsum", itoa(nbsum), "..."))
 
-!if (.True.) then
-if (.False.) then
+ ! TODO
+ ! Compute contribution to head and wings for this (kpoint, spin)
+ ! taking into account that the same ik_ibz might be replicated.
 
- ! Allocate Green's functions
- mask_kibz = 0; mask_kibz(gwr%my_kibz_inds(:)) = 1
- call gwr%alloc_free_mats(mask_kibz, "green", "malloc")
-
- do my_is=1,gwr%my_nspins
-   spin = gwr%my_spins(my_is)
-   do my_iki=1,gwr%my_nkibz
-     call cwtime(cpu_green, wall_green, gflops_green, "start")
-     ik_ibz = gwr%my_kibz_inds(my_iki)
-     kk_ibz = gwr%kibz(:, ik_ibz)
-     npw_k = wfd%npwarr(ik_ibz)
-     istwf_k = wfd%istwfk(ik_ibz)
-
-     associate (desc_k => gwr%green_desc_kibz(ik_ibz))
-     ABI_CHECK_IEQ(npw_k, desc_k%npw, "npw_k != desc_k%npw")
-     ABI_CHECK(all(wfd%kdata(ik_ibz)%kg_k == desc_k%gvec), "kg_k != desc_k%gvec")
-     !ABI_MALLOC(cgwork, (2, npw_k * gwr%nspinor))
-     !call ddkop%setup_spin_kpoint(gwr%dtset, gwr%cryst, gwr%psps, spin, kk_ibz, istwf_k, npw_k, wfd%kdata(ik_ibz)%kg_k)
-     end associate
-
-     ! Loop over global set of taus.
-     ! For each tau, sum local set of bands distributed inside tau_comm.
-     ! Each proc store partial results in loc_cwork dimensioned as PBLAS matrix.
-     ! Finally, reduce PBLAS data on the processor treating tau inside tau_comm.
-
-     !call wfd%copy_cg(band_ks, ik_ibz, spin, cgwork)
-     !eig0nk = ebands%eig(band_ks, ik_ibz, spin)
-     !sigma%vcar_calc(:, ib_k, ikcalc, spin) = ddkop%get_vdiag(eig0nk, istwf_k, npw_k, gwr%nspinor, cgwork, cwaveprj0)
-     ! TODO: spinor and use BLAS2 but take into account PBLAS distribution
-     ! or rewrite everything with PBLAS routines.
-
-     ! This just to get the dimension of the local buffer from the first PBLAS matrix we treat.
-     itau = gwr%my_itaus(1)
-     associate (gt0 => gwr%gt_kibz(1, ik_ibz, itau, spin))
-     lsize = gt0%sizeb_local
-     ABI_MALLOC(loc_cwork, (lsize(1), lsize(2), 2))
-
-     do itau=1,gwr%ntau
-
-       loc_cwork = zero
-       ! Sum over bands treated by me.
-       do my_ib=1,my_nb
-         band = my_bands(my_ib)
-         f_nk = gwr%ks_ebands%occ(band, ik_ibz, spin)
-         eig_nk = gwr%ks_ebands%eig(band, ik_ibz, spin) ! - ef
-
-         ! Select occupied or empty G.
-         if (eig_nk < -tol6) then
-           !ipm = 1
-           !gt_cfact = j_dpc * exp(gwr%tau_mesh(itau) * eig_nk)
-           ! Vasp convention
-           ipm = 2
-           gt_cfact = exp(gwr%tau_mesh(itau) * eig_nk)
-         else if (eig_nk > tol6) then
-           !ipm = 2
-           !gt_cfact = -j_dpc * exp(-gwr%tau_mesh(itau) * eig_nk)
-           ! Vasp convention
-           ipm = 1
-           gt_cfact = -exp(-gwr%tau_mesh(itau) * eig_nk)
-         else
-           ABI_WARNING("Metallic system of semiconductor with Fermi level inside bands!!!!")
-         end if
-
-         ABI_CHECK(wfd%get_wave_ptr(band, ik_ibz, spin, wave, msg) == 0, msg)
-
-         if (.not. wave%has_ug == WFD_STORED) then
-           write(msg,'(a,3(i0,1x),a)')" ug for (band, ik_ibz, spin): ",band, ik_ibz, spin," is not stored in memory!"
-           ABI_ERROR(msg)
-         end if
-
-         ! TODO: Optimize this part.
-         do il_g2=1, gt0%sizeb_local(2)
-           ig2 = gt0%loc2gcol(il_g2)
-           do il_g1=1, gt0%sizeb_local(1)
-             ig1 = gt0%loc2grow(il_g1)
-             loc_cwork(il_g1, il_g2, ipm) = loc_cwork(il_g1, il_g2, ipm) &
-               + gt_cfact * wave%ug(ig1) * GWPC_CONJG(wave%ug(ig2))
-           end do
-         end do
-       end do  ! my_ib
-
-       ! Sum partial contributions on tau_master(itau)
-       call xmpi_sum_master(loc_cwork, gwr%tau_master(itau), gwr%tau_comm%value, ierr)
-       if (gwr%tau_comm%me == gwr%tau_master(itau)) then
-         do ipm=1,2
-           gwr%gt_kibz(ipm, ik_ibz, itau, spin)%buffer_cplx(:,:) = loc_cwork(:,:,ipm)
-         end do
-       end if
-     end do ! itau
-
-     ABI_FREE(loc_cwork)
-     end associate
-
-     write(msg,'(3(a,i0),a)')" My ik_ibz [", my_iki, "/", gwr%my_nkibz, "] (tot: ", gwr%nkibz, ")"
-     call cwtime_report(msg, cpu_green, wall_green, gflops_green)
-   end do ! my_iki
- end do ! my_is
-
- if (gwr%dtset%prtvol > 0) call gwr_print_trace(gwr, "gt_kibz")
-
+ !mpw = maxval(wfd%npwarr)
+ ! TODO: Mv m_ddk in 72_response below 70_gw or move gwr to higher level.
+ !ddkop = ddkop_new(dtset, gwr%cryst, gwr%pawtab, gwr%psps, wfd%mpi_enreg, mpw, wfd%ngfft)
  !call ddkop%free()
 
-else
+ !ABI_MALLOC(cgwork, (2, npw_k * gwr%nspinor))
+ !call ddkop%setup_spin_kpoint(gwr%dtset, gwr%cryst, gwr%psps, spin, kk_ibz, istwf_k, npw_k, kg_k)
+ !do il_b=1, ugb%sizeb_local(2)
+ !  band = ugb%loc2gcol(il_b)
+ !  eig_nk = gwr%ks_ebands%eig(band, ik_ibz, spin)
+ !  call c_f_pointer(c_loc(ugb%buffer_cplx(:,il_b)), cwave, shape=[2, npwsp])
+ !  call ddkop%apply(eig_nk, npw_k, nspinor, cwave, cwaveprj)
+ !end do
+ !call ddkop%free()
+ !ABI_FREE(cgwork)
 
- !call gwr%read_ugb_from_wfk(wfk_filepath)
- !call gwr%build_head_and_wings()
- !call gwr%build_sigxme()
- !call gwr%build_green(free_ugb=.True.)
-
- ! Allocate PBLAS matrices with wavefunctions up to ugb_nband
- ! Init cg(npwsp, nband) PBLAS matrix within the gtau communicator.
+ ! Init ugb(npwsp, nbsum) PBLAS matrix within the gtau communicator.
  ! and distribute it over bands so that each proc reads a subset of bands in read_band_block
 
  ABI_MALLOC(gwr%ugb, (gwr%nkibz, gwr%nsppol))
@@ -2053,9 +1909,6 @@ else
    end do
  end do
 
- ! ====================
- ! PBLAS-based version
- ! ====================
  call wfk_open_read(wfk, wfk_path, formeig0, iomode_from_fname(wfk_path), get_unit(), gwr%comm) !  hdr_out=wfk_hdr)
 
  mpw = maxval(wfk_hdr%npwarr)
@@ -2088,25 +1941,12 @@ else
      call wfk%read_band_block([my_bstart, my_bstop], ik_ibz, spin, xmpio_single, & ! xmpio_collective,
                               kg_k=kg_k, cg_k=cg_k)
 
+     ! TODO: use round-robing + use gtau_comm% for IO.
      !call wfk%read_bmask(bmask, ik_ibz, spin, xmpio_single, & ! xmpio_collective,
      !                    kg_k=kg_k, cg_k=cg_k) !, eig_k, occ_k)
 
      ABI_CHECK_IEQ(npw_k, desc_k%npw, "npw_k != desc_k%npw")
      ABI_CHECK(all(kg_k(:,1:npw_k) == desc_k%gvec), "kg_k != desc_k%gvec")
-
-     ! TODO
-     ! Compute contribution to head and wings for this (kpoint, spin)
-     ! taking into account that the same ik_ibz might be replicated.
-     !ABI_MALLOC(cgwork, (2, npw_k * gwr%nspinor))
-     !call ddkop%setup_spin_kpoint(gwr%dtset, gwr%cryst, gwr%psps, spin, kk_ibz, istwf_k, npw_k, kg_k)
-     !do il_b=1, ugb%sizeb_local(2)
-     !  band = ugb%loc2gcol(il_b)
-     !  eig_nk = gwr%ks_ebands%eig(band, ik_ibz, spin)
-     !  call c_f_pointer(c_loc(ugb%buffer_cplx(:,il_b)), cwave, shape=[2, npwsp])
-     !  call ddkop%apply(eig_nk, npw_k, nspinor, cwave, cwaveprj)
-     !end do
-     !call ddkop%free()
-     !ABI_FREE(cgwork)
 
      write(msg,'(3(a,i0),a)')" My ik_ibz [", my_iki, "/", gwr%my_nkibz, "] (tot: ", gwr%nkibz, ")"
      call cwtime_report(msg, cpu_green, wall_green, gflops_green)
@@ -2115,16 +1955,10 @@ else
  end do ! my_is
 
  ABI_FREE(kg_k)
-
- call gwr%build_green(free_ugb=.True.)
-
-end if
-
- ABI_FREE(my_bands)
-
- call wfd%free()
  call wfk%close()
  call wfk_hdr%free()
+
+ call gwr%build_green(free_ugb=.True.)
 
  call cwtime_report(" gwr_build_gtau_from_wfk:", cpu, wall, gflops)
 
@@ -2153,8 +1987,7 @@ subroutine gwr_build_green(gwr, free_ugb)
 
 !Local variables-------------------------------
 !scalars
- integer :: my_is, my_iki, spin, ik_ibz, band, itau, ipm, il_b !, npw_k, istwf_k,
- integer :: npwsp, isgn ! nband_k,
+ integer :: my_is, my_iki, spin, ik_ibz, band, itau, ipm, il_b, npwsp, isgn
  real(dp) :: f_nk, eig_nk, cpu, wall, gflops, cpu_green, wall_green, gflops_green
  character(len=500) :: msg
  complex(dp) :: gt_cfact
@@ -2171,46 +2004,11 @@ subroutine gwr_build_green(gwr, free_ugb)
  mask_kibz = 0; mask_kibz(gwr%my_kibz_inds(:)) = 1
  call gwr%alloc_free_mats(mask_kibz, "green", "malloc")
 
- ! Allocate PBLAS matrices with wavefunctions up to ugb_nband
- ! Init cg(npwsp, nband) PBLAS matrix within the gtau communicator.
- ! and distribute it over bands so that each proc reads a subset of bands in read_band_block
-
- !ABI_MALLOC(gwr%ugb, (gwr%nkibz, gwr%nsppol))
- !gwr%ugb_nband = nbsum
-
- !do my_is=1,gwr%my_nspins
- !  spin = gwr%my_spins(my_is)
- !  do my_iki=1,gwr%my_nkibz
- !    ik_ibz = gwr%my_kibz_inds(my_iki)
- !    npw_k = gwr%green_desc_kibz(ik_ibz)%npw
- !    npwsp = npw_k * gwr%nspinor
- !    ABI_CHECK(block_dist_1d(gwr%ugb_nband, gwr%gtau_comm%nproc, col_bsize, msg), msg)
- !    call gwr%ugb(ik_ibz, spin)%init(npwsp, gwr%ugb_nband, gwr%gtau_slkproc, istwfk1, size_blocs=[npwsp, col_bsize])
- !  end do
- !end do
-
- !call gwr%read_ugb_from_wfk(wfk_filepath)
- !call gwr%build_head_and_wings()
- !call gwr%build_sigxme()
- !call gwr%build_green(free_ugb=.True.)
-
- ! ====================
- ! PBLAS-based version
- ! ====================
- !call wfk_open_read(wfk, wfk_path, formeig0, iomode_from_fname(wfk_path), get_unit(), gwr%comm) !  hdr_out=wfk_hdr)
-
  do my_is=1,gwr%my_nspins
    spin = gwr%my_spins(my_is)
    do my_iki=1,gwr%my_nkibz
      call cwtime(cpu_green, wall_green, gflops_green, "start")
      ik_ibz = gwr%my_kibz_inds(my_iki)
-     !kk_ibz = gwr%kibz(:, ik_ibz)
-     !npw_k = wfk_hdr%npwarr(ik_ibz)
-     !istwf_k = wfk_hdr%istwfk(ik_ibz)
-     ! TODO
-     !ABI_CHECK_IEQ(istwf_k, 1, "istwfk_k should be 1")
-     !nband_k = wfk_hdr%nband(ik_ibz)
-
      associate (ugb => gwr%ugb(ik_ibz, spin), desc_k => gwr%green_desc_kibz(ik_ibz))
      npwsp = desc_k%npw * gwr%nspinor
 
@@ -2265,8 +2063,6 @@ subroutine gwr_build_green(gwr, free_ugb)
 
 end subroutine gwr_build_green
 !!***
-
-
 
 !----------------------------------------------------------------------
 
@@ -5342,7 +5138,10 @@ subroutine gwr_run_g0w0(gwr)
 
 ! *************************************************************************
 
- !call gwr%calc_sigx_mels()
+ !call gwr%read_ugb_from_wfk(wfk_filepath)
+ !call gwr%build_chi0_head_and_wings()
+ !call gwr%build_sigxme()
+ !call gwr%build_green(free_ugb=.True.)
  call gwr%build_tchi()
  call gwr%build_wc()
  call gwr%build_sigmac()
