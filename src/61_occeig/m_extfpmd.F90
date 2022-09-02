@@ -484,7 +484,7 @@ contains
     ! Local variables -------------------------
     ! Scalars
     integer :: ii,ifft,ispden
-    real(dp) :: ix,step,factor,fn,gamma,minocc
+    real(dp) :: ix,step,factor,fn,gamma
     ! Arrays
     real(dp),dimension(:),allocatable :: valuesent
 

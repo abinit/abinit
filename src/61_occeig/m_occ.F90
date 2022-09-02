@@ -477,7 +477,7 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
 !Local variables-------------------------------
  integer,parameter :: niter_max=120,nkpt_max=2,fake_unit=-666,option1=1
  integer :: cnt,cnt2,cnt3,ib,iban,ibantot,ii,ik,ikpt,is,isppol,nban,nkpt_eff,sign
- integer :: extfpmd_nbdbuf
+ integer :: extfpmd_nbdbuf=0
  integer,allocatable :: nbandt(:)
  real(dp),parameter :: tol = tol14
  !real(dp),parameter :: tol = tol10
