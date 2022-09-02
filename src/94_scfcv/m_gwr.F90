@@ -101,6 +101,8 @@
 !!
 !!  - Single precision for scalapack matrices?
 !!
+!!  - Use round-robin distribution instead of blocked-distribution to improve load balance.
+!!
 !!  - Memory peaks:
 !!
 !!      (env3.9) [magianto@uan01 /scratch/project_465000061/magianto/DDIAGO_ZnO]
@@ -177,7 +179,7 @@ module m_gwr
  use m_melemts,       only : melements_t
  use m_ioarr,         only : read_rhor
  use m_slk,           only : matrix_scalapack, processor_scalapack, slk_array_free, slk_array_set, slk_array_locmem_mb, &
-                             block_dist_1d
+                             block_dist_1d, slk_pzgemm
  use m_wfk,           only : wfk_read_ebands, wfk_t, wfk_open_read
  use m_wfd,           only : wfd_init, wfd_t, wfdgw_t, wave_t, WFD_STORED
  use m_pawtab,        only : pawtab_type
@@ -389,6 +391,8 @@ module m_gwr
    ! (nkibz)
    ! Number of processors in kpt_comm treating iq_ibz
 
+   !logical, allocatable :: distrib_kibz(:)
+
    real(dp),allocatable :: tau_mesh(:), tau_wgs(:)
    ! (ntau)
    ! Imaginary tau mesh and integration weights.
@@ -500,7 +504,6 @@ module m_gwr
    type(mpi_type),pointer :: mpi_enreg => null()
 
    type(processor_scalapack) :: g_slkproc
-   !type(processor_scalapack) :: gtau_slkproc
 
    type(matrix_scalapack),allocatable :: gt_kibz(:,:,:,:)
    ! (2, nkibz, ntau, nsppol)
@@ -531,6 +534,15 @@ module m_gwr
 
    character(len=10) :: sigc_space = "none"
    ! "none", "itau", "iomega"
+
+   type(matrix_scalapack),allocatable :: ugb(:,:)
+   ! (nkibz, nsppol)
+   ! Fourier components of the KS wavefunctions.
+   ! Bands are distributed inside the gtau_comm in round-robin fashion.
+
+   type(processor_scalapack) :: gtau_slkproc
+
+   integer :: ugb_nband = -1
 
    !character(len=fnlen) :: wfk_path = ABI_NOFILE
    ! Path to the WFK file with the KS wavefunctions.
@@ -1207,7 +1219,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  ABI_CHECK(gwr%my_nspins > 0, "my_nspins == 0, decrease number of procs for spin level")
 
  ! Distribute k-points in the full BZ, build redirection tables.
- ! Finally, find the number of IBZ k-points to be stored by this MPI rank.
+ ! Finally, find the number of IBZ k-points stored by this MPI rank.
 
  call xmpi_split_block(gwr%nkbz, gwr%kpt_comm%value, gwr%my_nkbz, gwr%my_kbz_inds)
  ABI_CHECK(gwr%my_nkbz > 0, "my_nkbz == 0, decrease number of procs for k-point level")
@@ -1335,6 +1347,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
 
  ! Init 1D PBLAS grid to block-distribute matrices along columns.
  call gwr%g_slkproc%init(gwr%g_comm%value, grid_dims=[1, gwr%g_comm%nproc])
+ call gwr%gtau_slkproc%init(gwr%gtau_comm%value, grid_dims=[1, gwr%gtau_comm%nproc])
 
  ! ==================================
  ! Allocate arrays of PBLAS matrices
@@ -1478,7 +1491,7 @@ subroutine gwr_alloc_free_mats(gwr, mask_ibz, what, action)
          ABI_CHECK(block_dist_1d(npwsp, gwr%g_comm%nproc, col_bsize, msg), msg)
          associate (gt => gwr%gt_kibz(:, ik_ibz, itau, spin))
          do ipm=1,2
-           if (action == "malloc") call gt(ipm)%init(npwsp, npwsp, gwr%g_slkproc, 1, size_blocs=[npwsp, col_bsize])
+           if (action == "malloc") call gt(ipm)%init(npwsp, npwsp, gwr%g_slkproc, istwfk1, size_blocs=[npwsp, col_bsize])
            if (action == "free") call gt(ipm)%free()
          end do
          end associate
@@ -1622,6 +1635,12 @@ subroutine gwr_free(gwr)
  end if
  call gwr%g_slkproc%free()
 
+ if (allocated(gwr%ugb)) then
+   call slk_array_free(gwr%ugb)
+   ABI_FREE(gwr%ugb)
+ end if
+ call gwr%gtau_slkproc%free()
+
  call gwr%ks_me%free()
 
  ! datatypes.
@@ -1764,7 +1783,7 @@ end subroutine gwr_load_kcalc_wfd
 subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
 
 !Arguments ------------------------------------
- class(gwr_t),intent(inout) :: gwr
+ class(gwr_t),target,intent(inout) :: gwr
  character(len=*),intent(in) :: wfk_path
 
 !Local variables-------------------------------
@@ -1772,7 +1791,7 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
  integer,parameter :: formeig0 = 0
  integer :: mband, min_nband, nkibz, nsppol, my_is, my_iki, spin, ik_ibz ! my_it,
  integer :: my_ib, my_nb, band, npw_k, mpw, istwf_k, itau, ipm, ig1, ig2, il_g1, il_g2, il_b
- integer :: nbsum, npwsp, col_bsize, nband_k, my_bstart, my_bstop, my_nband, ierr
+ integer :: nbsum, npwsp, col_bsize, nband_k, my_bstart, my_bstop, my_nband, ierr, isgn
  real(dp) :: f_nk, eig_nk, ef, spin_fact, cpu, wall, gflops, cpu_green, wall_green, gflops_green
  complex(dp) :: gt_cfact
  character(len=5000) :: msg
@@ -1781,8 +1800,9 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
  type(ebands_t) :: wfk_ebands
  type(hdr_type) :: wfk_hdr
  type(wfk_t) :: wfk
- type(processor_scalapack) :: gtau_slkproc
- type(matrix_scalapack), target :: cg_mat, cg_work, green_mat
+ type(dataset_type),pointer :: dtset
+ !type(processor_scalapack) :: gtau_slkproc
+ type(matrix_scalapack), target :: work, green ! cg_mat,
 !arrays
  integer :: lsize(2), mask_kibz(gwr%nkibz)
  integer,allocatable :: nband(:,:), wfd_istwfk(:), my_bands(:), kg_k(:,:)
@@ -1800,7 +1820,7 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
  mask_kibz = 0; mask_kibz(gwr%my_kibz_inds(:)) = 1
  call gwr%alloc_free_mats(mask_kibz, "green", "malloc")
 
- associate (dtset => gwr%dtset)
+ dtset => gwr%dtset
 
  wfk_ebands = wfk_read_ebands(wfk_path, gwr%comm, out_hdr=wfk_hdr)
  call wfk_hdr%vs_dtset(dtset)
@@ -1867,7 +1887,7 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
  ABI_FREE(bks_mask)
 
  call ebands_free(wfk_ebands)
- call wfk_hdr%free()
+ !call wfk_hdr%free()
 
  ! Read KS wavefunctions.
  call wfd%read_wfk(wfk_path, iomode_from_fname(wfk_path))
@@ -1904,7 +1924,11 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
  ABI_CHECK(abs(ef) < tol12, "ef should have been set to zero!")
  spin_fact = two / (gwr%nsppol * gwr%nspinor)
 
- call wrtout(std_out, sjoin(" Building Green's functions from KS states with nband", itoa(nbsum), "..."))
+ call wrtout(std_out, sjoin(" Building Green's functions from KS states with nbsum", itoa(nbsum), "..."))
+
+!if (.True.) then
+if (.False.) then
+
  do my_is=1,gwr%my_nspins
    spin = gwr%my_spins(my_is)
    do my_iki=1,gwr%my_nkibz
@@ -1917,8 +1941,8 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
      associate (desc_k => gwr%green_desc_kibz(ik_ibz))
      ABI_CHECK_IEQ(npw_k, desc_k%npw, "npw_k != desc_k%npw")
      ABI_CHECK(all(wfd%kdata(ik_ibz)%kg_k == desc_k%gvec), "kg_k != desc_k%gvec")
-     !ABI_MALLOC(cgwork, (2, npw_k * wfd%nspinor))
-     !call ddkop%setup_spin_kpoint(dtset, gwr%cryst, gwr%psps, spin, kk_ibz, istwf_k, npw_k, wfd%kdata(ik_ibz)%kg_k)
+     !ABI_MALLOC(cgwork, (2, npw_k * gwr%nspinor))
+     !call ddkop%setup_spin_kpoint(gwr%dtset, gwr%cryst, gwr%psps, spin, kk_ibz, istwf_k, npw_k, wfd%kdata(ik_ibz)%kg_k)
      end associate
 
      ! Loop over global set of taus.
@@ -1928,7 +1952,7 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
 
      !call wfd%copy_cg(band_ks, ik_ibz, spin, cgwork)
      !eig0nk = ebands%eig(band_ks, ik_ibz, spin)
-     !sigma%vcar_calc(:, ib_k, ikcalc, spin) = ddkop%get_vdiag(eig0nk, istwf_k, npw_k, wfd%nspinor, cgwork, cwaveprj0)
+     !sigma%vcar_calc(:, ib_k, ikcalc, spin) = ddkop%get_vdiag(eig0nk, istwf_k, npw_k, gwr%nspinor, cgwork, cwaveprj0)
      ! TODO: spinor and use BLAS2 but take into account PBLAS distribution
      ! or rewrite everything with PBLAS routines.
 
@@ -2000,102 +2024,149 @@ subroutine gwr_build_gtau_from_wfk(gwr, wfk_path)
  end do ! my_is
 
  !call ddkop%free()
- call wfd%free()
- ABI_FREE(my_bands)
 
- if (gwr%dtset%prtvol > 0) call gwr_print_trace(gwr, "gt_kibz")
+else
 
- call cwtime_report(" gwr_build_gtau_from_wfk:", cpu, wall, gflops)
- end associate
+ !call gwr%gtau_slkproc%init(gwr%gtau_comm%value, grid_dims=[1, gwr%gtau_comm%nproc])
 
- RETURN
+ ! Allocate PBLAS matrices with wavefunctions up to ugb_nband
+ ! Init cg(npwsp, nband) PBLAS matrix within the gtau communicator.
+ ! and distribute it over bands so that each proc reads a subset of bands in read_band_block
 
- ! ====================
- ! PBLAS-based version
- ! ====================
- call wfk_open_read(wfk, wfk_path, formeig0, iomode_from_fname(wfk_path), &
-                    get_unit(), gwr%comm, hdr_out=wfk_hdr)
-
- mpw = maxval(wfk_hdr%npwarr)
- ABI_MALLOC(kg_k, (3, mpw))
-
- call gtau_slkproc%init(gwr%gtau_comm%value, grid_dims=[1, gwr%gtau_comm%nproc])
+ ABI_MALLOC(gwr%ugb, (gwr%nkibz, gwr%nsppol))
+ gwr%ugb_nband = nbsum
 
  do my_is=1,gwr%my_nspins
    spin = gwr%my_spins(my_is)
    do my_iki=1,gwr%my_nkibz
      ik_ibz = gwr%my_kibz_inds(my_iki)
+     npw_k = gwr%green_desc_kibz(ik_ibz)%npw
+     npwsp = npw_k * gwr%nspinor
+     ABI_CHECK(block_dist_1d(gwr%ugb_nband, gwr%gtau_comm%nproc, col_bsize, msg), msg)
+     call gwr%ugb(ik_ibz, spin)%init(npwsp, gwr%ugb_nband, gwr%gtau_slkproc, istwfk1, size_blocs=[npwsp, col_bsize])
+   end do
+ end do
+
+ !call gwr%read_ugb_from_wfk(wfk_filepath)
+ !call gwr%build_head_and_wings()
+ !call gwr%build_sigxme()
+ !call gwr%build_green(free_ugb=.True.)
+
+ ! ====================
+ ! PBLAS-based version
+ ! ====================
+ call wfk_open_read(wfk, wfk_path, formeig0, iomode_from_fname(wfk_path), get_unit(), gwr%comm) !  hdr_out=wfk_hdr)
+
+ mpw = maxval(wfk_hdr%npwarr)
+ ABI_MALLOC(kg_k, (3, mpw))
+
+ do my_is=1,gwr%my_nspins
+   spin = gwr%my_spins(my_is)
+   do my_iki=1,gwr%my_nkibz
+     call cwtime(cpu_green, wall_green, gflops_green, "start")
+     ik_ibz = gwr%my_kibz_inds(my_iki)
+     kk_ibz = gwr%kibz(:, ik_ibz)
      npw_k = wfk_hdr%npwarr(ik_ibz)
      istwf_k = wfk_hdr%istwfk(ik_ibz)
-     nband_k = wfk_hdr%nband(ik_ibz)
+     ! TODO
+     ABI_CHECK_IEQ(istwf_k, 1, "istwfk_k should be 1")
+     !nband_k = wfk_hdr%nband(ik_ibz)
      npwsp = npw_k * gwr%nspinor
 
-     ! Init cg(npwsp, nband) PBLAS matrix within the gtau communicator.
-     ! and distribute it over bands so that each proc reads a subset of bands in read_band_block
-     ABI_CHECK(block_dist_1d(nband_k, gwr%gtau_comm%nproc, col_bsize, msg), msg)
-     call cg_mat%init(npwsp, nband_k, gtau_slkproc, istwfk1, size_blocs=[npwsp, col_bsize])
+     associate (ugb => gwr%ugb(ik_ibz, spin), desc_k => gwr%green_desc_kibz(ik_ibz))
 
-     my_bstart = cg_mat%loc2gcol(1)
-     my_bstop = cg_mat%loc2gcol(cg_mat%sizeb_local(2))
+     my_bstart = ugb%loc2gcol(1)
+     my_bstop = ugb%loc2gcol(ugb%sizeb_local(2))
      my_nband = my_bstop - my_bstart + 1
      ABI_CHECK(my_nband > 0, "nb == 0, decrease number of procs for G and tau parallelism.")
+     !print *, "my_bstart, my_bstop, nsum",  my_bstart, my_bstop, nbsum
 
      ! Read my bands
-     call c_f_pointer(c_loc(cg_mat%buffer_cplx), cg_k, shape=[2, npwsp * my_nband])
+     call c_f_pointer(c_loc(ugb%buffer_cplx), cg_k, shape=[2, npwsp * my_nband])
 
      call wfk%read_band_block([my_bstart, my_bstop], ik_ibz, spin, xmpio_single, & ! xmpio_collective,
                               kg_k=kg_k, cg_k=cg_k)
 
      !call wfk%read_bmask(bmask, ik_ibz, spin, xmpio_single, & ! xmpio_collective,
-     !                   kg_k=kg_k, cg_k=cg_k) !, eig_k, occ_k)
+     !                    kg_k=kg_k, cg_k=cg_k) !, eig_k, occ_k)
 
-     call cg_mat%copy(cg_work)
-     !call cg_mat%change_size_blocs(cg_work, size_blocs=, processor=)
-     call cg_work%copy(green_mat, empty=.True.)
+     ABI_CHECK_IEQ(npw_k, desc_k%npw, "npw_k != desc_k%npw")
+     ABI_CHECK(all(kg_k(:,1:npw_k) == desc_k%gvec), "kg_k != desc_k%gvec")
 
-     ! TODO: Compute contribution to head and wings for this (kpoint, spin)
+     ! TODO
+     ! Compute contribution to head and wings for this (kpoint, spin)
+     ! taking into account that the same ik_ibz might be replicated.
+     !ABI_MALLOC(cgwork, (2, npw_k * gwr%nspinor))
+     !call ddkop%setup_spin_kpoint(gwr%dtset, gwr%cryst, gwr%psps, spin, kk_ibz, istwf_k, npw_k, kg_k)
+     !do il_b=1, ugb%sizeb_local(2)
+     !  band = ugb%loc2gcol(il_b)
+     !  eig_nk = gwr%ks_ebands%eig(band, ik_ibz, spin)
+     !  call c_f_pointer(c_loc(ugb%buffer_cplx(:,il_b)), cwave, shape=[2, npwsp])
+     !  call ddkop%apply(eig_nk, npw_k, nspinor, cwave, cwaveprj)
+     !end do
+     !call ddkop%free()
+     !ABI_FREE(cgwork)
+
+     call ugb%copy(work)
+     !call ugb%change_size_blocs(work, size_blocs=, processor=)
+     !call work%copy(green, empty=.True.)
+
+     call green%init(npwsp, npwsp, gwr%gtau_slkproc, istwfk1) ! size_blocs=[npwsp, col_bsize])
 
      do itau=1,gwr%ntau
        do ipm=1,2
-         !my_it = gwr%myit_from_itau(itau)
 
-         ! Multiply by columns by tau exponential.
-         do il_b=1, cg_work%sizeb_local(2)
-          band = cg_work%loc2gcol(il_b)
+         ! Multiply columns by exponentials in imaginary time.
+         work%buffer_cplx = ugb%buffer_cplx
+
+         !!$OMP PARALLEL DO PRIVATE(band, f_nk, eig_nk, gt_cfact)
+         do il_b=1, work%sizeb_local(2)
+          band = work%loc2gcol(il_b)
           f_nk = gwr%ks_ebands%occ(band, ik_ibz, spin)
           eig_nk = gwr%ks_ebands%eig(band, ik_ibz, spin)
+          gt_cfact = zero
+          if (ipm == 2) then
+            if (eig_nk < -tol6) gt_cfact = exp(gwr%tau_mesh(itau) * eig_nk)
+          else
+            if (eig_nk > tol6) gt_cfact = exp(-gwr%tau_mesh(itau) * eig_nk)
+          end if
 
-          gt_cfact = exp(-gwr%tau_mesh(itau) * eig_nk)
-          cg_work%buffer_cplx(:,il_b) = cg_work%buffer_cplx(:,il_b) * gt_cfact
-          !do il_g1=1,cg_work%sizeb_local(1)
-          !end do
-         end do
+          work%buffer_cplx(:,il_b) = work%buffer_cplx(:,il_b) * sqrt(real(gt_cfact))
+          !call xscal(npwsp, work%buffer_cplx(:,il_b), cone * sqrt(real(gt_cfact)), 1)
+         end do ! il_b
 
-         call slk_pzgemm("N", "C", cg_work, cone, cg_work, czero, green_mat)
+         ! Build G(g,g',ipm)
+         isgn = merge(1, -1, ipm == 2)
+         call slk_pzgemm("N", "C", work, isgn * cone, work, czero, green)
 
-         ! This is the tricky part has we have to redistribute the data between two different comms
-         !call gwr%gt_kibz(ipm, ik_ibz, itau, spin)%take_from(green_mat)
-         !call green_mat%move_to(gwr%gt_kibz(ipm, ik_ibz, itau, spin))
-         !if (my_it == -1) cycle
-         !if (gwr%tau_comm%me == gwr%tau_master(itau)) then
-         !  do ipm=1,2
-         !    gwr%gt_kibz(ipm, ik_ibz, itau, spin)%buffer_cplx = loc_cwork(:,:,ipm)
-         !  end do
-         !end if
+         ! Here we redistribute the data between two different communicators: gtau_comm -> g_comm.
+         call gwr%gt_kibz(ipm, ik_ibz, itau, spin)%take_from(green)
        end do ! ipm
-     end do
+     end do ! itau
 
-     call cg_mat%free()
-     call cg_work%free()
-     call green_mat%free()
+     call work%free()
+     call green%free()
+     !if (free_ugb) call ugb%free()
+
+     write(msg,'(3(a,i0),a)')" My ik_ibz [", my_iki, "/", gwr%my_nkibz, "] (tot: ", gwr%nkibz, ")"
+     call cwtime_report(msg, cpu_green, wall_green, gflops_green)
+     end associate
    end do ! my_iki
  end do ! my_is
 
- call gtau_slkproc%free()
+ !call gtau_slkproc%free()
  ABI_FREE(kg_k)
 
+end if
+
+ ABI_FREE(my_bands)
+
+ call wfd%free()
  call wfk%close()
  call wfk_hdr%free()
+
+ if (gwr%dtset%prtvol > 0) call gwr_print_trace(gwr, "gt_kibz")
+ call cwtime_report(" gwr_build_gtau_from_wfk:", cpu, wall, gflops)
 
 end subroutine gwr_build_gtau_from_wfk
 !!***

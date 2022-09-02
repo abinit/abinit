@@ -2134,19 +2134,31 @@ end function my_locc
 subroutine slk_pzgemm(transa, transb, matrix1, alpha, matrix2, beta, results)
 
 !Arguments ------------------------------------
- character(len=*),intent(in) :: transa, transb
+ character(len=1),intent(in) :: transa, transb
  type(matrix_scalapack),intent(in) :: matrix1, matrix2
  type(matrix_scalapack),intent(inout) :: results
  complex(dpc),intent(in) :: alpha, beta
 
+!Local variables-------------------------------
+ integer :: mm, nn, kk
+
 !************************************************************************
 
+ mm  = matrix1%sizeb_global(1)
+ nn  = matrix2%sizeb_global(2)
+ kk  = matrix1%sizeb_global(2)
+
+ if (toupper(transa) /= 'N') then
+   mm = matrix1%sizeb_global(2)
+   kk = matrix1%sizeb_global(1)
+ end if
+ if (toupper(transb) /= 'N') nn = matrix2%sizeb_global(1)
+
 #ifdef HAVE_LINALG_SCALAPACK
- call PZGEMM(transa, transb, matrix1%sizeb_global(1), matrix2%sizeb_global(2), &
-             matrix1%sizeb_global(2), alpha, matrix1%buffer_cplx, 1, 1, &
-             matrix1%descript%tab, matrix2%buffer_cplx, 1, 1,           &
-             matrix2%descript%tab, beta, results%buffer_cplx, 1, 1,     &
-             results%descript%tab)
+ call PZGEMM(transa, transb, mm, nn, kk, alpha, &
+             matrix1%buffer_cplx, 1, 1, matrix1%descript%tab, &
+             matrix2%buffer_cplx, 1, 1, matrix2%descript%tab, &
+             beta, results%buffer_cplx, 1, 1, results%descript%tab)
 #endif
 
 end subroutine slk_pzgemm
@@ -4000,7 +4012,8 @@ end subroutine slk_cut
 !!  slk_take_from
 !!
 !! FUNCTION
-!!  Take values from source. NB: This routine should be called by all procs owning mat and source.
+!!  Take values from source.
+!!  NB: This routine should be called by all procs owning mat and source.
 !!
 !! INPUTS
 !!
@@ -4008,22 +4021,19 @@ end subroutine slk_cut
 !!
 !! SOURCE
 
-subroutine slk_take_from(mat, source)
+subroutine slk_take_from(out_mat, source, ija, ijb)
 
 !Arguments ------------------------------------
- class(matrix_scalapack),intent(inout) :: mat
+ class(matrix_scalapack),intent(inout) :: out_mat
  class(matrix_scalapack),intent(in) :: source
+ integer,optional,intent(in) :: ija(2), ijb(2)
 
 !Local variables-------------------------------
- integer :: istwfk_1, istwfk_2
+ integer :: mm, nn, istwfk_1, istwfk_2
+ character(len=500) :: msg
+ integer :: ija__(2), ijb__(2)
 
 ! *************************************************************************
-
- istwfk_1 = merge(1, 2, allocated(mat%buffer_cplx))
- istwfk_2 = merge(1, 2, allocated(source%buffer_cplx))
-
- ABI_CHECK_IEQ(istwfk_1, istwfk_2, "istwfk_1 /= istwfk_2")
- ABI_CHECK(all(mat%sizeb_global == source%sizeb_global), "Matrices should have the same global shape!")
 
  ! prototype
  !call pzgemr2d(m, n, a, ia, ja, desca, b, ib, jb, descb, ictxt)
@@ -4036,18 +4046,38 @@ subroutine slk_take_from(mat, source)
  !   - Processes which are not members of context A must pass ctxt_a = -1 and need not set other parameters describing A.
  !   - Processes which are not members of contextB must pass ctxt_b = -1 and need not set other parameters describing B.
 
- if (allocated(mat%buffer_cplx)) then
-#ifdef HAVE_LINALG_SCALAPACK
-   call pzgemr2d(mat%sizeb_global(1), mat%sizeb_global(2),  &
-                 source%buffer_cplx, 1, 1, source%descript%tab,   &
-                 mat%buffer_cplx, 1, 1, mat%descript%tab, &
-                 mat%processor%grid%ictxt)
+ mm = source%sizeb_global(1)
+ nn = source%sizeb_global(2)
 
- else if (allocated(mat%buffer_real)) then
-   call pdgemr2d(mat%sizeb_global(1), mat%sizeb_global(2),  &
-                 source%buffer_real, 1, 1, source%descript%tab,   &
-                 mat%buffer_real, 1, 1, mat%descript%tab, &
-                 mat%processor%grid%ictxt)
+ ija__ = [1, 1]; if (present(ija)) ija__ = ija
+ ijb__ = [1, 1]; if (present(ijb)) ijb__ = ijb
+
+ if (all(out_mat%sizeb_global == -1)) then
+   out_mat%descript%tab(CTXT_) = -1
+ else
+   istwfk_1 = merge(1, 2, allocated(out_mat%buffer_cplx))
+   istwfk_2 = merge(1, 2, allocated(source%buffer_cplx))
+
+   ABI_CHECK_IEQ(istwfk_1, istwfk_2, "istwfk_mat /= istwfk_source")
+   if (any(out_mat%sizeb_global /= source%sizeb_global)) then
+     msg = sjoin("Matrices should have same global shape! out_mat:", ltoa(out_mat%sizeb_global), &
+                 "source:", ltoa(source%sizeb_global))
+     ABI_ERROR(msg)
+   end if
+ end if
+
+ if (allocated(source%buffer_cplx)) then
+#ifdef HAVE_LINALG_SCALAPACK
+   call pzgemr2d(mm, nn,  &
+                 source%buffer_cplx, ija__(1), ija__(2), source%descript%tab,   &
+                 out_mat%buffer_cplx, ijb__(1), ijb__(2), out_mat%descript%tab, &
+                 source%processor%grid%ictxt)
+
+ else if (allocated(source%buffer_real)) then
+   call pdgemr2d(mm, nn,  &
+                 source%buffer_real, ija__(1), ija__(2), source%descript%tab,   &
+                 out_mat%buffer_real,ijb__(1), ijb__(2), out_mat%descript%tab, &
+                 source%processor%grid%ictxt)
 #endif
  else
    ABI_ERROR("Neither buffer_cplx nor buffer_real are allocated!")
