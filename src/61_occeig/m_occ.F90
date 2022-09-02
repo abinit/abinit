@@ -239,7 +239,7 @@ subroutine getnel(doccde, dosdeltae, eigen, entropy, fermie, fermih, maxocc, mba
    ! Normalize occ and ent, and sum number of electrons and entropy
    ! Use different loops for nelect and entropy because bantot may be quite large in the EPH code
    ! when we use very dense k-meshes.
-
+   
    ! Manage number of bands in buffer for extfpmd calculation, when extfpmd_nbdbuf not 0.
    ! Set occupation and entropy of buffered bands to zero.
    if(present(extfpmd_nbdbuf)) then
@@ -430,7 +430,7 @@ end subroutine getnel
 !!  mband=maximum number of bands
 !!  nband(nkpt)=number of bands at each k point
 !!  nelect=number of electrons per unit cell
-!!  ne_qFD, nh_qFD=number of thermalized excited electrons (resp. holes) in bands > ivalence (resp. <= ivalence)
+!!  ne_qFD, nh_qFD=number of thermalized excited electrons (resp. holes) in bands > ivalence (resp. <= ivalence) 
 !!  ivalence= band index of the last valence band ! CP added for occopt 9 case
 !!  nkpt=number of k points
 !!  nspinor=number of spinorial components of the wavefunctions
@@ -645,8 +645,8 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
    end if
    sign = 1
    do is = 1, nsppol
-     fermie_hit(is) = fermie_hi
-     fermie_lot(is) = fermie_lo
+     fermie_hit(is) = fermie_hi 
+     fermie_lot(is) = fermie_lo 
      nelectt(is) = half*(nelect+sign*spinmagntarget)
      sign = -sign
      nelecthit(is) = nelecthi
@@ -701,7 +701,7 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
 
    ! Usual bisection loop
    do ii=1,niter_max
-     fermie_mid = (fermie_hi + fermie_lo) * half
+     fermie_mid = (fermie_hi + fermie_lo) * half 
      if (occopt == 9) fermih_mid=(fermih_hi+fermih_lo)*half
      ! Produce nelectmid from fermimid
      if (occopt /= 9) then
@@ -788,8 +788,8 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
      end if
    end do ! End of bisection loop
 
-   fermie = fermie_mid
-   entropy= entropye
+   fermie = fermie_mid 
+   entropy= entropye 
 
    if (occopt /= 9) then
       write(msg, '(2(a,f14.6),a,i0)' ) &
@@ -827,7 +827,7 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
            ABI_ERROR(msg)
         end if
 
-       fermie_biased = fermie - stmbias
+       fermie_biased = fermie - stmbias 
        ABI_MALLOC(occt,(mband*nkpt*nsppol))
 
        call getnel(doccde,dosdeltae,eigen,entropy,fermie_biased,fermie_biased,maxocc,mband,nband,&
@@ -928,10 +928,10 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
        ! write(std_out,'(a,es24.16,a,es24.16)' )' newocc: from fermi=',fermimid,', getnel gives nelect=',nelectmid
 
        if(nelectmid>=nelect_tmp)then
-         fermie_hi=fermie_mid_tmp
+         fermie_hi=fermie_mid_tmp 
          nelecthi=nelectmid
        else
-         fermie_lo=fermie_mid_tmp
+         fermie_lo=fermie_mid_tmp 
          nelectlo=nelectmid
        end if
        if( abs(nelecthi-nelectlo) <= 1.0d-13 .or. abs(fermie_hi-fermie_lo) <= 0.5d-14*abs(fermie_hi+fermie_lo) ) exit
@@ -946,7 +946,7 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
 
      cnt2 = cnt2 + nkpt*mband
      entropy = entropy + entropyet(is)
-     fermie=fermie_mid
+     fermie=fermie_mid 
      write(msg, '(a,i2,a,f14.6,a,f14.6,a,a,i4)' ) &
        ' newocc: new Fermi energy for spin ', is, ' is ',fermie,' , with nelect: ',nelectmid,ch10,&
        '  Number of bisection calls =',ii
