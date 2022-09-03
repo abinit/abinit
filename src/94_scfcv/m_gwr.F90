@@ -5956,6 +5956,13 @@ subroutine gwr_build_sigxme(gwr)
    bmin =  gwr%bstart_ks(ikcalc, spin)
    bmax = gwr%bstop_ks(ikcalc, spin)
 
+   ! ==============================================================
+   ! ==== Find little group of the k-points for GW corrections ====
+   ! ==============================================================
+   ! * The little group is used only if symsigma == 1
+   ! * If use_umklp == 1 then symmetries requiring an umklapp to preserve k_gw are included as well.
+   !call ltg_k%init(Sigp%kptgw(:,ikcalc), Qmesh, Cryst, use_umklp=1, npwe=0)
+
    write(msg,'(6a)')ch10,&
     ' Calculating <nk|Sigma_x|nk> at k: ',trim(ktoa(kgw)), ", for bands: ", trim(ltoa([bmin, bmax])),ch10
    call wrtout(std_out, msg)

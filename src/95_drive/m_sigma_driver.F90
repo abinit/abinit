@@ -734,15 +734,13 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  ! ==============================================================
  ! ==== Find little group of the k-points for GW corrections ====
  ! ==============================================================
- ! * The little group is calculated only if symsigma == 1
- ! * If use_umklp == 1 then also symmetries requiring an umklapp to preserve k_gw are included.
+ ! * The little group is used only if symsigma == 1
+ ! * If use_umklp == 1 then symmetries requiring an umklapp to preserve k_gw are included as well.
  !
  ABI_MALLOC(Ltg_k, (Sigp%nkptgw))
  use_umklp = 1
  do ikcalc=1,Sigp%nkptgw
-   if (Sigp%symsigma /= 0) then
-     call Ltg_k(ikcalc)%init(Sigp%kptgw(:,ikcalc), Qmesh, Cryst, use_umklp, npwe=0)
-   end if
+   if (Sigp%symsigma /= 0) call Ltg_k(ikcalc)%init(Sigp%kptgw(:,ikcalc), Qmesh, Cryst, use_umklp, npwe=0)
  end do
 
  ! Compute structure factor phases and large sphere cut-off
