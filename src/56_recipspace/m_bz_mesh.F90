@@ -2293,7 +2293,7 @@ subroutine littlegroup_init(Ltg, ext_pt, Kmesh, Cryst, use_umklp, npwe, gvec)
  integer :: dummy_timrev,enough,idx,ige,igpw,ik,ind,iold,iout,isym,itest,itim
  integer :: nbz,nkibzq,nsym,nsym_Ltg,ntest,timrev,ierr,npwvec
  real(dp) :: G0len,kin,mG0len,max_kin
- logical :: found,found_identity,ltest,use_antiferro
+ logical :: found,found_identity,use_antiferro
  character(len=500) :: msg
 !arrays
  integer :: g0(3),gg(3),gmG0(3),identity(3,3),nop(Cryst%timrev),nopg0(2)
@@ -2306,51 +2306,48 @@ subroutine littlegroup_init(Ltg, ext_pt, Kmesh, Cryst, use_umklp, npwe, gvec)
 !************************************************************************
 
  DBG_ENTER("COLL")
- !
- ! !@littlegroup_t
- ! === Initial check ====
- ltest=(Cryst%timrev==1.or.Cryst%timrev==2)
- ABI_CHECK(ltest,'Wrong value for timrev')
- !
+
+ ABI_CHECK(any(Cryst%timrev == [1, 2]), sjoin("Wrong value for cryst%timrev:", itoa(cryst%timrev)))
+
  ! === Get useful data ===
  nsym          =  Cryst%nsym
- !timrev       = 1
  timrev        =  Cryst%timrev
+ !timrev       = 1
  symrec        => Cryst%symrec
  symafm        => Cryst%symafm
  use_antiferro =  Cryst%use_antiferro
 
  nbz =  Kmesh%nbz
+
+ ! Destroy structure if it already exists
+ call Ltg%free()
  !
- ! === Destroy structure if it already exists ===
- call littlegroup_free(Ltg)
- !
- ! === Store dimensions and useful info ===
- Ltg%nsym_sg  =nsym
- Ltg%timrev   =timrev
- Ltg%nbz      =nbz
+ ! Store dimensions and useful info.
+ Ltg%nsym_sg  = nsym
+ Ltg%timrev   = timrev
+ Ltg%nbz      = nbz
  !Ltg%use_umklp=use_umklp ! 1 if umklapp processes are used
  Ltg%ext_pt(:)=ext_pt(:)
 
- ABI_MALLOC(Ltg%G0,(3,timrev,nsym))
- ABI_MALLOC(Ltg%ibzq,(nbz))
- ABI_MALLOC(Ltg%bz2ibz,(nbz))
- ABI_MALLOC(Ltg%preserve,(timrev,nsym))
- ABI_MALLOC(Ltg%wtksym,(timrev,nsym,nbz))
- ABI_MALLOC(Ltg%tab,(nbz))
- ABI_MALLOC(Ltg%tabi,(nbz))
- ABI_MALLOC(Ltg%tabo,(nbz))
- ABI_MALLOC(Ltg%flag_umklp,(timrev,nsym))
+ ABI_MALLOC(Ltg%G0, (3,timrev,nsym))
+ ABI_MALLOC(Ltg%ibzq, (nbz))
+ ABI_MALLOC(Ltg%bz2ibz, (nbz))
+ ABI_MALLOC(Ltg%preserve, (timrev, nsym))
+ ABI_MALLOC(Ltg%wtksym, (timrev, nsym, nbz))
+ ABI_MALLOC(Ltg%tab, (nbz))
+ ABI_MALLOC(Ltg%tabi, (nbz))
+ ABI_MALLOC(Ltg%tabo, (nbz))
+ ABI_MALLOC(Ltg%flag_umklp, (timrev, nsym))
  !
  ! In the old GW implementation we were removing symmetries related by time-reversal and
  ! sometimes it happened that only the inversion was reported in the KSS file (see outkss.F90).
  identity(:,:)=RESHAPE((/1,0,0,0,1,0,0,0,1/),(/3,3/)) ; found_identity=.FALSE.
  do isym=1,nsym
-   if (ALL(symrec(:,:,isym)==identity)) then
-    found_identity=.TRUE. ; EXIT
+   if (ALL(symrec(:,:,isym) == identity)) then
+    found_identity=.TRUE.; EXIT
    end if
  end do
- if (.not.found_identity) then
+ if (.not. found_identity) then
    write(msg,'(5a)')&
      'Only the inversion was found in the set of symmetries read from the KSS file ',ch10,&
      'Likely you are using a KSS file generated with an old version of Abinit, ',ch10,&
@@ -2358,7 +2355,7 @@ subroutine littlegroup_init(Ltg, ext_pt, Kmesh, Cryst, use_umklp, npwe, gvec)
    ABI_ERROR(msg)
  end if
 
- ! Find operations in the little group as well as umklapp vectors G0 ===
+ ! Find operations in the little group as well as umklapp vectors G0
  call littlegroup_q(nsym, ext_pt, symxpt, symrec, symafm, dummy_timrev, prtvol=0)
 
  Ltg%preserve(:,:)=0; Ltg%g0(:,:,:)=0; Ltg%flag_umklp(:,:)=0; mG0len=zero
@@ -2386,9 +2383,9 @@ subroutine littlegroup_init(Ltg, ext_pt, Kmesh, Cryst, use_umklp, npwe, gvec)
  end do
  nsym_Ltg=SUM(nop(:))
 
- ! Store little group operations, include time-reversal if present ===
- Ltg%nsym_Ltg=nsym_Ltg
- ABI_MALLOC(symrec_Ltg,(3,3,Ltg%nsym_Ltg))
+ ! Store little group operations, include time-reversal if present.
+ Ltg%nsym_Ltg = nsym_Ltg
+ ABI_MALLOC(symrec_Ltg, (3,3,Ltg%nsym_Ltg))
 
  ind=1
  do itim=1,timrev
@@ -2401,14 +2398,14 @@ subroutine littlegroup_init(Ltg, ext_pt, Kmesh, Cryst, use_umklp, npwe, gvec)
    end do
  end do
 
- ! Check the closure of the (ferromagnetic) little group ===
+ ! Check the closure of the (ferromagnetic) little group
  ABI_MALLOC(symafm_ltg,(Ltg%nsym_Ltg))
- symafm_ltg(:)=1
+ symafm_ltg(:) = 1
  call chkgrp(Ltg%nsym_Ltg,symafm_ltg,symrec_Ltg,ierr)
- ABI_CHECK(ierr==0,"Error in group closure")
+ ABI_CHECK(ierr == 0, "Error in group closure")
 
  ABI_FREE(symafm_ltg)
- !
+
  ! Find the irreducible zone associated to ext_pt
  ! Do not use time-reversal since it has been manually introduced previously
  ABI_MALLOC(indkpt1,(nbz))
@@ -2463,23 +2460,23 @@ subroutine littlegroup_init(Ltg, ext_pt, Kmesh, Cryst, use_umklp, npwe, gvec)
       if (Ltg%preserve(itim,isym)==0) CYCLE
       knew(:)=(3-2*itim)*MATMUL(symrec(:,:,isym),Kmesh%bz(:,ik))
       !
-      ! === Check whether it has already been found (to within a RL vector) ===
+      ! Check whether it has already been found (to within a RL vector)
       iold=0
       do itest=1,ntest
         if (isamek(knew(:),ktest(:,itest),gg)) iold=iold+1
       end do
 
       if (iold==0) then
-        ! == Found new BZ point ===
+        ! Found new BZ point
         ! For this point the operation (isym,itim) must be considered to reconstruct the full BZ
         Ltg%wtksym(itim,isym,ik)=1
         ntest=ntest+1
         ktest(:,ntest)=knew(:)
         !
-        ! === Now find knew in the BZ array ===
+        ! Now find knew in the BZ array
         found=.FALSE.
         do idx=1,nbz
-          if (isamek(knew(:),Kmesh%bz(:,idx),gg)) then ! They are the same within a RL vector
+          if (isamek(knew(:), Kmesh%bz(:,idx),gg)) then ! They are the same within a RL vector
             Ltg%tab (idx)=ik
             Ltg%tabo(idx)=isym
             Ltg%tabi(idx)=3-2*itim

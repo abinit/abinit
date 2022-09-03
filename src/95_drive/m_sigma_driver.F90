@@ -734,14 +734,14 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  ! ==============================================================
  ! ==== Find little group of the k-points for GW corrections ====
  ! ==============================================================
- ! * The little group is calculated only if sys_sigma.
- ! * If use_umklp==1 then also symmetries requiring an umklapp to preserve k_gw are included.
+ ! * The little group is calculated only if symsigma == 1
+ ! * If use_umklp == 1 then also symmetries requiring an umklapp to preserve k_gw are included.
  !
  ABI_MALLOC(Ltg_k, (Sigp%nkptgw))
- use_umklp=1
+ use_umklp = 1
  do ikcalc=1,Sigp%nkptgw
    if (Sigp%symsigma /= 0) then
-     call Ltg_k(ikcalc)%init(Sigp%kptgw(:,ikcalc),Qmesh,Cryst,use_umklp,0)
+     call Ltg_k(ikcalc)%init(Sigp%kptgw(:,ikcalc), Qmesh, Cryst, use_umklp, npwe=0)
    end if
  end do
 
@@ -3624,7 +3624,6 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
 
  do iqbz=1,Qmesh%nbz
    call qmesh%get_BZ_item(iqbz, q_bz, iq_ibz, isym, itim, umklp=q_umklp)
-
    !print *, "iqbz, q_bz, iq_ibz, isym, itim, umklp"
    !print *, iqbz, q_bz, iq_ibz, isym, itim, q_umklp
 
@@ -3634,7 +3633,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
      write(msg,'(a,3f6.3,a,3f6.3,2a,9i3,a,i2,2a)')&
        'qpoint ',Qmesh%bz(:,iqbz),' is the symmetric of ',Qmesh%ibz(:,iq_ibz),ch10,&
        'through operation ',Cryst%symrec(:,:,isym),' and itim ',itim,ch10,&
-       'however a non zero umklapp G_o vector is required and this is not yet allowed'
+       'however a non-zero umklapp G_o vector is required and this is not yet allowed'
      ABI_ERROR(msg)
    end if
  end do
@@ -3789,25 +3788,25 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
 
  ! === Setup of the FFT mesh for the oscilator strengths ===
  ! * gwc_ngfft(7:18)==Dtset%ngfft(7:18) which is initialized before entering screening.
- ! * Here we redefine gwc_ngfft(1:6) according to the following options :
+ ! * Here we redefine gwc_ngfft(1:6) according to the following options:
  !
- ! method==0 --> FFT grid read from fft.in (debugging purpose)
- ! method==1 --> Normal FFT mesh
- ! method==2 --> Slightly augmented FFT grid to calculate exactly rho_tw_g (see setmesh.F90)
- ! method==3 --> Doubled FFT grid, same as the the FFT for the density,
+ ! method == 0 --> FFT grid read from fft.in (debugging purpose)
+ ! method == 1 --> Normal FFT mesh
+ ! method == 2 --> Slightly augmented FFT grid to calculate exactly rho_tw_g (see setmesh.F90)
+ ! method == 3 --> Doubled FFT grid, same as the the FFT for the density,
  !
- ! enforce_sym==1 ==> Enforce a FFT mesh compatible with all the symmetry operation and FFT library
- ! enforce_sym==0 ==> Find the smallest FFT grid compatbile with the library, do not care about symmetries
+ ! enforce_sym == 1 --> Enforce a FFT mesh compatible with all the symmetry operation and FFT library
+ ! enforce_sym == 0 --> Find the smallest FFT grid compatbile with the library, do not care about symmetries
  !
- gwc_ngfft(1:18)=Dtset%ngfft(1:18)
- gwx_ngfft(1:18)=Dtset%ngfft(1:18)
+ gwc_ngfft(1:18) = Dtset%ngfft(1:18)
+ gwx_ngfft(1:18) = Dtset%ngfft(1:18)
 
  method=2
  if (Dtset%fftgw==00 .or. Dtset%fftgw==01) method=0
  if (Dtset%fftgw==10 .or. Dtset%fftgw==11) method=1
  if (Dtset%fftgw==20 .or. Dtset%fftgw==21) method=2
  if (Dtset%fftgw==30 .or. Dtset%fftgw==31) method=3
- enforce_sym=MOD(Dtset%fftgw,10)
+ enforce_sym = MOD(Dtset%fftgw, 10)
 
  ! FFT mesh for sigma_x.
  call setmesh(gmet,Gsph_Max%gvec,gwx_ngfft,Sigp%npwvec,Sigp%npwx,Sigp%npwwfn,&
@@ -3861,10 +3860,6 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
  ! ===================================
  ! ==== Final compatibility tests ====
  ! ===================================
- !if (ANY(ks_ebands%istwfk/=1)) then
- !  ABI_WARNING('istwfk/=1 is still under development')
- !end if
-
  ltest=(ks_ebands%mband == Sigp%nbnds .and. ALL(ks_ebands%nband == Sigp%nbnds))
  ABI_CHECK(ltest,'BUG in definition of ks_ebands%nband')
 
@@ -3872,7 +3867,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
  if (Dtset%symsigma/=0 .and. Sigp%nomegasr/=0) then
    if (cryst%idx_spatial_inversion() == 0) then
      write(msg,'(5a)')' setup_sigma : BUG :',ch10,&
-      'It is not possible to use symsigma/=0 to calculate the spectral function ',ch10,&
+      'It is not possible to use symsigma /= 0 to calculate the spectral function ',ch10,&
       'when the system does not have the spatial inversion. Please use symsigma=0 '
      ABI_WARNING(msg)
    end if
