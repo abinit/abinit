@@ -2377,9 +2377,9 @@ end subroutine compute_eigen_problem
 
 !----------------------------------------------------------------------
 
-!!****f* m_slk/compute_generalized_eigen_problem
+!!****f* m_slk/solve_gevp_complex
 !! NAME
-!!  compute_generalized_eigen_problem
+!!  solve_gevp_complex
 !!
 !! FUNCTION
 !!  Calculation of eigenvalues and eigenvectors:

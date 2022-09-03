@@ -160,7 +160,7 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, Sigp, 
  type(wave_t),pointer :: wave_sum, wave_jb
 !arrays
  integer :: g0(3), spinor_padx(2,4)
- integer,allocatable :: igfftxg0(:), igfftfxg0(:), degtab(:,:,:), gwx_gfft(:,:), gwx_gbound(:,:), gboundf(:,:)
+ integer,allocatable :: igfftxg0(:), igfftfxg0(:), degtab(:,:,:), x_gbound(:,:), gboundf(:,:)
  integer,allocatable :: ktabr(:,:),irottb(:,:),ktabrf(:,:), proc_distrb(:,:,:)
  real(dp) :: ksum(3), kgw(3), kgw_m_ksum(3), qbz(3), q0(3), spinrot_kbz(4), spinrot_kgw(4), tsec(2)
  real(dp),contiguous, pointer :: qp_ene(:,:,:), qp_occ(:,:,:)
@@ -200,7 +200,7 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, Sigp, 
  call kmesh%get_BZ_item(jk_bz, kgw, jk_ibz, isym_kgw, jik, ph_mkgwt)
  spinrot_kgw(:) = cryst%spinrot(:,isym_kgw)
 
- write(msg,'(6a)')ch10,&
+ write(msg,'(6a)') ch10, &
   ' Calculating <nk|Sigma_x|nk> at k: ',trim(ktoa(kgw)), ", for bands: ", trim(ltoa([bmin, bmax])),ch10
  call wrtout(std_out, msg)
 
@@ -429,9 +429,9 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, Sigp, 
 
      ! Tables for the FFT of the oscillators.
      !  a) FFT index of G-G0.
-     !  b) gwx_gbound table for the zero-padded FFT performed in rhotwg.
-     ABI_MALLOC(gwx_gbound, (2*x_mgfft+8, 2))
-     call Gsph_x%fft_tabs(g0, x_mgfft, x_ngfft, use_padfft, gwx_gbound, igfftxg0)
+     !  b) x_gbound table for the zero-padded FFT performed in rhotwg.
+     ABI_MALLOC(x_gbound, (2*x_mgfft+8, 2))
+     call Gsph_x%fft_tabs(g0, x_mgfft, x_ngfft, use_padfft, x_gbound, igfftxg0)
 
      if (any(x_fftalga == [2, 4])) use_padfft = 0 ! Padded-FFT is not coded in rho_tw_g
 #ifdef FC_IBM
@@ -439,8 +439,8 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, Sigp, 
      use_padfft = 0
 #endif
      if (use_padfft == 0) then
-       ABI_FREE(gwx_gbound)
-       ABI_MALLOC(gwx_gbound, (2*x_mgfft+8, 2*use_padfft))
+       ABI_FREE(x_gbound)
+       ABI_MALLOC(x_gbound, (2*x_mgfft+8, 2*use_padfft))
      end if
 
      if (pawcross==1) then
@@ -509,7 +509,7 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, Sigp, 
                                  grnhat12,nhat12,pawtab)
 
          else
-           call rho_tw_g(nspinor,npwx,x_nfft,ndat1,x_ngfft,1,use_padfft,igfftxg0,gwx_gbound, &
+           call rho_tw_g(nspinor,npwx,x_nfft,ndat1,x_ngfft,1,use_padfft,igfftxg0,x_gbound, &
                          ur_ibz        ,iik,ktabr(:,ik_bz),ph_mkt  ,spinrot_kbz, &
                          ur_bdgw(:,jb),jik,ktabr(:,jk_bz),ph_mkgwt,spinrot_kgw, &
                          nspinor,rhotwg_ki(:,jb))
@@ -617,7 +617,7 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, Sigp, 
      end do ! ib_sum
 
      ! Deallocate k-dependent quantities.
-     ABI_FREE(gwx_gbound)
+     ABI_FREE(x_gbound)
      if (pawcross==1) then
        ABI_FREE(gboundf)
      end if
@@ -743,7 +743,6 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, Sigp, 
  ! ==== Deallocate memory ====
  ! ===========================
  if (psps%usepaw == 1) then
-   ABI_SFREE(gwx_gfft)
    call pawcprj_free(Cprj_ksum)
    ABI_FREE(Cprj_ksum)
    if (allocated(Pwij_fft)) then
