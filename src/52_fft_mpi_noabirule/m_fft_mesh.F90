@@ -1507,7 +1507,7 @@ subroutine times_eikr(kk, ngfft, nfft, ndat, ur)
 
  if (all(abs(kk) < tol12)) return
 
- !$OMP PARALEL DO IF (ndat > 1) PRIVATE(ifft, kr, ph, val)
+ !$OMP PARALLEL DO IF (ndat > 1) PRIVATE(ifft, kr, ph, val)
  do idat=1,ndat
    ifft = 0
    do iz=0,ngfft(3)-1
