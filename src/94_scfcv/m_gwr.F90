@@ -175,6 +175,7 @@ module m_gwr
  use m_fft,           only : fft_ug, fft_ur, fftbox_plan3_t, fourdp
  use m_fft_mesh,      only : calc_ceikr, ctimes_eikr
  use m_kpts,          only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, kpts_map, kpts_map_print, kpts_pack_in_stars
+ use m_bz_mesh,       only : littlegroup_t
  use m_gsphere,       only : kg_map
  use m_melemts,       only : melements_t
  use m_ioarr,         only : read_rhor
@@ -2711,6 +2712,8 @@ subroutine gwr_get_wc_rpr_qbz(gwr, qq_bz, itau, spin, wc_rpr)
 
  ABI_ERROR("Not Implemented error")
 
+ call wrtout(std_out, trim(ktoa(qq_bz)))
+
  ! Identify q + g0 = k - kp with q in gwr%qbz.
  ! NB: Non-zero g0, requires the application of the phase.
  !call findqg0(iq_bz, g0_q, kmkp, gwr%nqbz, gwr%qbz, gwr%mg0)
@@ -3470,7 +3473,7 @@ subroutine gwr_build_tchi(gwr)
 
    !do my_ikf=1,gwr%my_nkbz
    !  ik_bz = gwr%my_kbz_inds(my_ikf)
-   !  !call calc_sc_ceikr(-gwr%kbz(:,ik_bz), gwr%ngkpt, gwr%g_ngfft, gwr%g_nfft, gwr%nspinor, sc_ceimkr(:,my_ikf))
+   !  !call calc_sc_ceikr(-gwr%kbz(:,ik_bz), gwr%ngkpt, gwr%g_ngfft, gwr%nspinor, sc_ceimkr(:,my_ikf))
    !  !call calc_ceikr(-gwr%kbz(:,ik_bz), gwr%g_ngfft, gwr%g_nfft, gwr%nspinor, uc_ceimkr(:,my_ikf))
    !end do
    !ABI_FREE(uc_ceimkr)
@@ -4411,7 +4414,7 @@ if (gwr%use_supercell_for_sigma) then
      ikcalc_ibz = gwr%kcalc2ibz(ikcalc, 1)  ! TODO: Assuming wfs in IBZ
 
      ! Compute e^{ik.r} phases on the two FFT meshes: super cell and unit cell.
-     call calc_sc_ceikr(kcalc_bz, gwr%ngkpt, gwr%g_ngfft, gwr%g_nfft, gwr%nspinor, sc_ceikr)
+     call calc_sc_ceikr(kcalc_bz, gwr%ngkpt, gwr%g_ngfft, gwr%nspinor, sc_ceikr)
      call calc_ceikr(kcalc_bz, gwr%g_ngfft, gwr%g_nfft, gwr%nspinor, uc_ceikr)
 
      do band=gwr%bstart_ks(ikcalc, spin), gwr%bstop_ks(ikcalc, spin)
@@ -5537,19 +5540,18 @@ end subroutine ur_to_scpsi
 !!  kk(3): k-point in reduced coordinates of the unit cell
 !!  sc_shape: shape of the supercell.
 !!  uc_ngfft(18)=: nformation about the 3d FFT for the unit cell.
-!!  uc_nfft=total number of points in the FFT mesh of the unit cell
 !!  nspinor=number of spinor components.
 !!
 !! OUTPUT
 !!  sc_ceikr(..., nspinor) = e^{ik.r} on the supercell fft mesh.
 !!
-!! source
+!! SOURCE
 
-pure subroutine calc_sc_ceikr(kk, sc_shape, uc_ngfft, uc_nfft, nspinor, sc_ceikr)
+pure subroutine calc_sc_ceikr(kk, sc_shape, uc_ngfft, nspinor, sc_ceikr)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: sc_shape(3), uc_nfft, nspinor
+ integer,intent(in) :: sc_shape(3), nspinor
 !arrays
  real(dp),intent(in) :: kk(3)
  integer,intent(in) :: uc_ngfft(18)
@@ -5851,6 +5853,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
 ! *************************************************************************
 
  call wrtout(std_out, "TODO: Building head and wings")
+ call wrtout(std_out, sjoin("nkbz:", itoa(gwr%nkbz)))
 
 end subroutine gwr_build_chi0_head_and_wings
 !!***
@@ -5887,6 +5890,8 @@ subroutine gwr_build_sigxme(gwr)
  real(dp) :: cpu, wall, gflops, fact_spin, theta_mu_minus_esum, theta_mu_minus_esum2, tol_empty, tol_empty_in
  character(len=5000) :: msg
  type(matrix_scalapack),pointer :: ugb_kibz
+ type(crystal_t),pointer :: cryst
+ type(littlegroup_t) :: ltg_k
 !arrays
  integer :: g0(3), spinor_padx(2,4)
  integer :: x_ngfft(18)
@@ -5900,6 +5905,7 @@ subroutine gwr_build_sigxme(gwr)
  call wrtout(std_out, "TODO: Computing matrix elements of Sigma_x ...")
 
  nsppol = gwr%nsppol; nspinor = gwr%nspinor
+ cryst => gwr%cryst
 
  if (gwr%sc_iteration == 0) then
    qp_ene => gwr%ks_ebands%eig; qp_occ => gwr%ks_ebands%occ
@@ -5935,7 +5941,7 @@ subroutine gwr_build_sigxme(gwr)
  !x_mpw = -1
  !do ik_bz=1,gwr%nkbz
  !  kk_bz = gwr%kbz(:, ik_bz)
- !  call get_kg(kk_bz, istwfk1, dtset%ecut, gwr%cryst%gmet, npw_, gvec_)
+ !  call get_kg(kk_bz, istwfk1, dtset%ecut, cryst%gmet, npw_, gvec_)
  !  ABI_FREE(gvec_)
  !  call getng(dtset%gwr_boxcutmin, dtset%chksymtnons, dtset%ecut, cryst%gmet, &
  !             kk_bz, me_fft0, x_mgfft, gwr%g_nfft, x_ngfft, nproc_fft1, cryst%nsym, paral_fft0, &
@@ -5952,18 +5958,16 @@ subroutine gwr_build_sigxme(gwr)
  do ikcalc=1,gwr%nkcalc ! TODO: Should be spin dependent!
 
    ikcalc_ibz = gwr%kcalc2ibz(ikcalc, 1)
-   kgw = gwr%kcalc(:, ikcalc)
-   bmin =  gwr%bstart_ks(ikcalc, spin)
-   bmax = gwr%bstop_ks(ikcalc, spin)
+   kgw = gwr%kcalc(:, ikcalc); bmin =  gwr%bstart_ks(ikcalc, spin); bmax = gwr%bstop_ks(ikcalc, spin)
 
    ! ==============================================================
    ! ==== Find little group of the k-points for GW corrections ====
    ! ==============================================================
    ! * The little group is used only if symsigma == 1
    ! * If use_umklp == 1 then symmetries requiring an umklapp to preserve k_gw are included as well.
-   !call ltg_k%init(Sigp%kptgw(:,ikcalc), Qmesh, Cryst, use_umklp=1, npwe=0)
+   !call ltg_k%init(kgw, Qmesh, cryst, use_umklp=1, npwe=0)
 
-   write(msg,'(6a)')ch10,&
+   write(msg,'(6a)') ch10, &
     ' Calculating <nk|Sigma_x|nk> at k: ',trim(ktoa(kgw)), ", for bands: ", trim(ltoa([bmin, bmax])),ch10
    call wrtout(std_out, msg)
 
@@ -6176,6 +6180,7 @@ subroutine gwr_build_sigxme(gwr)
    ABI_FREE(sigxcme_tmp)
    ABI_FREE(sigx)
 
+   call ltg_k%free()
  end do ! ikcalc
  end do ! my_is
 

@@ -2277,15 +2277,17 @@ end subroutine findqg0
 !! SOURCE
 
 subroutine littlegroup_init(Ltg, ext_pt, Kmesh, Cryst, use_umklp, npwe, gvec)
+!subroutine littlegroup_init(Ltg, ext_pt, nbz, bz, Cryst, use_umklp, npwe, gvec)
 
 !Arguments ------------------------------------
 !scalars
  class(littlegroup_t),intent(inout) :: Ltg
- integer,intent(in) :: npwe,use_umklp
+ integer,intent(in) :: npwe, use_umklp !, nbz
  type(crystal_t),target,intent(in) :: Cryst
- type(kmesh_t),intent(in) :: Kmesh
+ type(kmesh_t),target,intent(in) :: Kmesh
+ !real(dp),intent(in) :: bz(3,nbz)
 !arrays
- integer,optional,intent(in) :: gvec(:,:) ! (3,npwvec)
+ integer,optional,intent(in) :: gvec(:,:) ! (3,npwe)
  real(dp),intent(in) :: ext_pt(3)
 
 !Local variables-------------------------------
@@ -2302,6 +2304,7 @@ subroutine littlegroup_init(Ltg, ext_pt, Kmesh, Cryst, use_umklp, npwe, gvec)
  integer,pointer :: symafm(:),symrec(:,:,:)
  real(dp) :: knew(3)
  real(dp),allocatable :: ktest(:,:),wtk(:),wtk_folded(:)
+ real(dp),pointer :: bz(:,:)
 
 !************************************************************************
 
@@ -2318,6 +2321,7 @@ subroutine littlegroup_init(Ltg, ext_pt, Kmesh, Cryst, use_umklp, npwe, gvec)
  use_antiferro =  Cryst%use_antiferro
 
  nbz =  Kmesh%nbz
+ bz => Kmesh%bz
 
  ! Destroy structure if it already exists
  call Ltg%free()
@@ -2414,7 +2418,7 @@ subroutine littlegroup_init(Ltg, ext_pt, Kmesh, Cryst, use_umklp, npwe, gvec)
  ABI_MALLOC(bz2ibz_smap, (6, nbz))
  wtk=one; iout=0; dummy_timrev=0
 
- call symkpt(0,Cryst%gmet,indkpt1,iout,Kmesh%bz,nbz,nkibzq,Ltg%nsym_Ltg,symrec_Ltg,dummy_timrev,wtk,wtk_folded, &
+ call symkpt(0,Cryst%gmet,indkpt1,iout, bz, nbz,nkibzq,Ltg%nsym_Ltg,symrec_Ltg,dummy_timrev,wtk,wtk_folded, &
              bz2ibz_smap, xmpi_comm_self)
 
  ABI_FREE(bz2ibz_smap)
@@ -2458,7 +2462,7 @@ subroutine littlegroup_init(Ltg, ext_pt, Kmesh, Cryst, use_umklp, npwe, gvec)
       ! Form IS k only for (IS) pairs in the (ferromagnetic) little group.
       if (symafm(isym)==-1) CYCLE
       if (Ltg%preserve(itim,isym)==0) CYCLE
-      knew(:)=(3-2*itim)*MATMUL(symrec(:,:,isym),Kmesh%bz(:,ik))
+      knew(:)=(3-2*itim)*MATMUL(symrec(:,:,isym), bz(:,ik))
       !
       ! Check whether it has already been found (to within a RL vector)
       iold=0
@@ -2476,7 +2480,7 @@ subroutine littlegroup_init(Ltg, ext_pt, Kmesh, Cryst, use_umklp, npwe, gvec)
         ! Now find knew in the BZ array
         found=.FALSE.
         do idx=1,nbz
-          if (isamek(knew(:), Kmesh%bz(:,idx),gg)) then ! They are the same within a RL vector
+          if (isamek(knew(:), bz(:,idx), gg)) then ! They are the same within a RL vector
             Ltg%tab (idx)=ik
             Ltg%tabo(idx)=isym
             Ltg%tabi(idx)=3-2*itim
@@ -2557,14 +2561,14 @@ subroutine littlegroup_init(Ltg, ext_pt, Kmesh, Cryst, use_umklp, npwe, gvec)
  !  if (ABS(SUM(Ltg%wtksym(1,:,ik)+Ltg%wtksym(2,:,ik))-wtk_folded(ik))>tol6) then
  !    write(std_out,*)' sum(Ltg%wtksym,ik)-wtk_folded(ik) = ',sum(Ltg%wtksym(1,:,ik)+Ltg%wtksym(2,:,ik))-wtk_folded(ik)
  !    write(std_out,*)Ltg%wtksym(1,:,ik),Ltg%wtksym(2,:,ik),wtk_folded(ik)
- !    write(std_out,*)ik,Kmesh%bz(:,ik)
+ !    write(std_out,*)ik, bz(:,ik)
  !    ABI_BUG("Wrong weight")
  !  end if
  !end do
  !do ik=1,nbz
- !  knew = Ltg%tabi(ik) * MATMUL(symrec(:,:,Ltg%tabo(ik)),Kmesh%bz(:,Ltg%tab(ik)))
- !  if (.not.isamek(knew,Kmesh%bz(:,ik),gg)) then
- !    write(std_out,*)knew,Kmesh%bz(:,ik)
+ !  knew = Ltg%tabi(ik) * MATMUL(symrec(:,:,Ltg%tabo(ik)), bz(:,Ltg%tab(ik)))
+ !  if (.not.isamek(knew, bz(:,ik),gg)) then
+ !    write(std_out,*)knew, bz(:,ik)
  !    write(std_out,*)Ltg%tabo(ik),Ltg%tabi(ik),Ltg%tab(ik)
  !    ABI_BUG("Wrong tables")
  !  end if
