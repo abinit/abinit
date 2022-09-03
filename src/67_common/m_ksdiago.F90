@@ -78,10 +78,12 @@ module m_ksdiago
    integer :: npwsp = -1
 
    integer :: nband_k = - 1
-   integer :: my_bstart = -1
-   integer :: my_bstop = - 1
-   integer :: my_nband = - 1
-   ! Number of bands treated by this proc. 0 if idle proc
+   ! Total number of bands
+
+   integer :: my_bstart = -1, my_bstop = - 1, my_nband = - 1
+   ! 1) Initial band
+   ! 2) Last band
+   ! 3) Number of bands treated by this proc. 0 if idle proc
 
    logical :: has_idle_procs
    ! True if there are procs in comm who don't own any column.
@@ -92,15 +94,19 @@ module m_ksdiago
    type(processor_scalapack) :: processor
 
    type(matrix_scalapack) :: mat
+   ! Global matrix (npwsp, nband_k)
 
    integer, allocatable :: kg_k(:,:)
+   ! (3, npw_k)
+   ! G-vectors
 
    real(dp), contiguous, pointer :: cg_k(:,:,:)
-   ! (2, npwsp * ugb%my_nband)
+   ! (2, npwsp * my_nband)
    ! pointer to mat%buffer_cplx
 
    type(pawcprj_type),allocatable :: cprj_k(:,:)
-   ! (natom, nspinor*onband_diago))
+   ! (natom, nspinor * my_nband))
+   ! PAW projections.
 
  contains
 
