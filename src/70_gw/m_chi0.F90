@@ -2146,19 +2146,14 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
 
  call pack_eneocc(BSt%nkpt,BSt%nsppol,BSt%mband,BSt%nband,BSt%bantot,shift_ene,eigen_pdelta_vec)
 
- ! CP modified
- !call getnel(o_doccde,dummy_dosdeltae,eigen_pdelta_vec,o_entropy,BSt%fermie,maxocc,BSt%mband,BSt%nband,&
-!&  o_nelect,BSt%nkpt,BSt%nsppol,o_occ_pdelta,BSt%occopt,option1,BSt%tphysel,BSt%tsmear,unitdos0,BSt%wtk)
-! write(std_out,*)"nelect1: ",o_nelect
  if (BSt%occopt < 9) then
    call getnel(o_doccde,dummy_dosdeltae,eigen_pdelta_vec,o_entropy,BSt%fermie,BSt%fermie,maxocc,BSt%mband,BSt%nband,&
 &              o_nelect,BSt%nkpt,BSt%nsppol,o_occ_pdelta,BSt%occopt,option1,BSt%tphysel,BSt%tsmear,unitdos0,BSt%wtk,1,BSt%nband(1))
-! CP: adding 1 and BSt%nband(1) as dummy arguments since here we already test for occopt==9
-   write(std_out,*)"nelect1: ",o_nelect
+   ! CP: adding 1 and BSt%nband(1) as dummy arguments since here we already test for occopt==9
+   !write(std_out,*)"nelect1: ",o_nelect
  else
    ABI_ERROR('occopt 9 not implemented for GW calculations')
  end if
- ! End CP modified
  !
  ! Calculate the occupations at f(e-delta/2).
  shift_ene = BSt%eig - half*delta_ene
@@ -2252,12 +2247,12 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
  END SELECT
 
  use_umklp = 0
- call Ltg_q%init(q0, Kmesh, Cryst, use_umklp, Ep%npwepG0, gvec=Gsph_epsG0%gvec)
+ call Ltg_q%init(q0, Kmesh%nbz, Kmesh%bz, Cryst, use_umklp, Ep%npwepG0, gvec=Gsph_epsG0%gvec)
 
  write(msg,'(a,i2)')' Using symmetries to sum only over the IBZ_q  = ',Ep%symchi
  call wrtout(std_out, msg)
  !
- ! === Evaluate oscillator matrix elements btw partial waves. Note that q=Gamma is used.
+ ! Evaluate oscillator matrix elements btw partial waves. Note that q=Gamma is used.
  if (Psps%usepaw==1) then
    ABI_MALLOC(Pwij,(Psps%ntypat))
    call pawpwij_init(Pwij,Ep%npwepG0, [zero,zero,zero], Gsph_epsG0%gvec,Cryst%rprimd,Psps,Pawtab,Paw_pwff)

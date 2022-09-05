@@ -1,4 +1,4 @@
-# GWR calculations for crystalline alpha-quartz.
+# GWR calculations for crystalline alpha-quartz. Test g/tau parallelism
 # Dataset 1: ground state calculation to get the density
 # Dataset 2: Direct diagonalization to produce the WFK file with empty states.
 # Dataset 3: one-shot G0W0 calculation in real-space and imaginary-time.
@@ -6,25 +6,24 @@
 ndtset 3
 #ndtset 1; jdtset 3
 
-ecut      12 # 35
-
-# Parallel settings for dataset 1 and 2
-# These variables are not used in the GWR code.
-paral_kgb 1
-npband 2
-npkpt  4
+#ecut      12 # 35
+ecut      8 # 35
 
 ####################
 # Dataset 1: SCF run
 ####################
 nband1      32       # number of (occ and empty) bands to be computed
 tolvrs1     1.0d-8
+# Parallel settings for dataset 1. NB: These variables are not used in the GWR code.
+paral_kgb1 1
+npband1 2
+npkpt1  4
 
 ###########################################
 # Dataset 2: Direct diago with empty states
 ###########################################
 optdriver2  6        # Activate GWR code
-gwr_task2 "HDIAGO"   # One-shot calculation
+gwr_task2 "HDIAGO"   # Direct diagonalization
 getden2    1
 nband2     100       # Number of (occ + empty) bands
 
@@ -41,10 +40,10 @@ prtsuscep3 1         # Write TCHI file.
 getden3 1
 getwfk3 2
 gwr_ntau3   6         # Number of imaginary-time points
-gwr_np_gtks 2 1 2 1
+gwr_np_gtks 2 1 2 1   # G and tau parallelism
 
-#gwr_boxcutmin3  1.1 # This should be subject to convergence studies
-gwr_boxcutmin3  1.0 
+gwr_boxcutmin3  1.0  # This should be subject to convergence studies
+#mixprec3    1
 
 nband3      80       # Bands to be used in the screening calculation
 ecuteps3    4        # Cut-off energy of the planewave set to represent the dielectric matrix.
@@ -66,7 +65,6 @@ diemac   4.0
 # Definition of the k-point grid
 occopt 1            # Semiconductor
 ngkpt   2 2 2
-#ngkpt   4 4 4
 nshiftk 1
 shiftk  0.0 0.0 0.0 # Gamma-centered (IMPORTANT)
 
@@ -114,5 +112,5 @@ pseudos "Si-GGA.psp8, O-GGA.psp8"
 #%% authors =  M. Giantomassi
 #%% keywords = GWR, NC
 #%% description =
-#%%   GWR calculations for crystalline alpha-quartz
+#%%   GWR calculations for crystalline alpha-quartz.  Test g/tau parallelism.
 #%%<END TEST_INFO>

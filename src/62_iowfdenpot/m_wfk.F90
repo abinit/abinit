@@ -3068,11 +3068,9 @@ subroutine wfk_read_my_kptbands(inpath_, distrb_flags, comm, ecut_eff_in, &
  call listkk(dksqmax, cryst%gmet, rbz2disk, wfk_disk%hdr%kptns, kptns_in, wfk_disk%hdr%nkpt, nkpt_in, cryst%nsym, &
    sppoldbl, cryst%symafm, cryst%symrel, cryst%timrev-1, xmpi_comm_self, use_symrec=.False.)
 
-
  if (ask_accurate == 1) then
    ABI_CHECK(dksqmax < tol8, " WF file read but k-points too far from requested set")
  end if
-
 
  ! More efficienct algorithm based on random access IO:
  !   For each point in the irred disk set:
@@ -3227,7 +3225,7 @@ subroutine wfk_read_my_kptbands(inpath_, distrb_flags, comm, ecut_eff_in, &
 
          ! complete the spin down wfk with an AFM symop
          if (spin_sym /= spin) then
-           !  try next symop to find afm operation to get the spin component we want
+           ! try next symop to find afm operation to get the spin component we want
            do isym = 1, cryst%nsym
              if (cryst%symafm(isym) == 1) cycle
              ksym = matmul(symrelT(:,:,isym), k_disk)
@@ -3318,7 +3316,6 @@ subroutine wfk_read_my_kptbands(inpath_, distrb_flags, comm, ecut_eff_in, &
 
 end subroutine wfk_read_my_kptbands
 !!***
-
 
 !----------------------------------------------------------------------
 

@@ -757,17 +757,17 @@ end subroutine phdispl_cart2red
 !!
 !! INPUTS
 !! rprimd(3,3)=dimensional primitive translations for real space (bohr)
-!! symrel_conv(3,3)=symmetry operation in real space in terms
-!!  of primitive translations rprimd
+!! symrel_conv(3,3)=symmetry operation in real space in terms of primitive translations rprimd
 !!
 !! OUTPUT
-!! spinrot(4)=components of the spinor rotation matrix :
+!! spinrot(4)=components of the spinor rotation matrix:
+!!
 !!  spinrot(1)=$\cos \phi / 2$
 !!  spinrot(2)=$\sin \phi / 2 \times u_x$
 !!  spinrot(3)=$\sin \phi / 2 \times u_y$
 !!  spinrot(4)=$\sin \phi / 2 \times u_z$
-!!  where $\phi$ is the angle of rotation, and
-!!  $(u_x,u_y,u_z)$ is the normalized direction of the rotation axis
+!!
+!!  where $\phi$ is the angle of rotation, and $(u_x,u_y,u_z)$ is the normalized direction of the rotation axis
 !!
 !! NOTES
 !! Only the proper part of the symmetry operation is taken into account:
@@ -800,20 +800,19 @@ subroutine getspinrot(rprimd, spinrot, symrel_conv)
 
  symrel1(:,:)=symrel_conv(:,:)
 
-!Compute determinant of the matrix
+ ! Compute determinant of the matrix
  call mati3det(symrel1,det)
 
-!Produce a rotation from an improper symmetry
- if(det==-1)symrel1(:,:)=-symrel1(:,:)
+ !Produce a rotation from an improper symmetry
+ if (det==-1) symrel1(:,:) = -symrel1(:,:)
 
-!Test the possibility of the unit matrix
- identity(:,:)=0
- identity(1,1)=1 ; identity(2,2)=1 ; identity(3,3)=1
+ ! Test the possibility of the unit matrix
+ identity(:,:)=0; identity(1,1)=1; identity(2,2)=1; identity(3,3)=1
 
- if( sum((symrel1(:,:)-identity(:,:))**2)/=0)then
+ if (sum((symrel1(:,:) - identity(:,:))**2)/=0) then
 
-!  Transform symmetry matrix in the system defined by rprimd
-   call matr3inv(rprimd,rprimd_invt)
+   ! Transform symmetry matrix in the system defined by rprimd
+   call matr3inv(rprimd, rprimd_invt)
    do ii=1,3
      coord(:,ii)=rprimd_invt(ii,:)
    end do
@@ -829,8 +828,8 @@ subroutine getspinrot(rprimd, spinrot, symrel_conv)
 &     coordinvt(3,:)*matr1(3,ii)
    end do
 
-!  Find the eigenvector with unit eigenvalue of the
-!  rotation matrix in cartesian coordinate, matr2
+   ! Find the eigenvector with unit eigenvalue of the
+   ! rotation matrix in cartesian coordinate, matr2
 
    matr1(:,:)=matr2(:,:)
    matr1(1,1)=matr1(1,1)-one
@@ -909,7 +908,7 @@ subroutine getspinrot(rprimd, spinrot, symrel_conv)
 
  else
 
-!  Here, the case of the unit matrix
+   ! Here, the case of the unit matrix
    axis(:)=zero
    phi=zero
    spinrot(1)=one
@@ -940,7 +939,7 @@ end subroutine getspinrot
 !!  spinrot_cmat
 !!
 !! FUNCTION
-!!  Construct 2x2 complex matrix representing rotation operator in spin-space.
+!!  Construct 2x2 complex matrix representing the rotation operator in spin-space.
 !!
 !! INPUTS
 !!  spinrot(4)=components of the spinor rotation matrix computed by getspinrot
@@ -958,7 +957,21 @@ pure function spinrot_cmat(spinrot)
 
 ! *************************************************************************
 
+ ! Build rotation matrix from spinrot:
+ !
+ ! ( cos(phi/2) + i n_z sin(phi/2),  (+n_y + i n_x) sin(phi/2)      )
+ ! ( (-n_y + i n_x) sin(phi/2)    ,  cos(phi/2) - i n_z sin(phi/2)  )
+
+ ! spinrot(1)=cos(half*phi)
+ ! spinrot(2)=axis(1)*sin(half*phi)
+ ! spinrot(3)=axis(2)*sin(half*phi)
+ ! spinrot(4)=axis(3)*sin(half*phi)
+
  ! Rotation in spinor space (same equations as in wfconv)
+ ! TODO: Be careful here as wfconv uses symrel^T to map k-points (listkk)
+ ! thus the inverse of the corresponding symrec.
+ ! This may explain why all the terms with sin(phi/2) change sign (phi --> -phi)
+
  spinrot_cmat(1,1) = spinrot(1) + j_dpc*spinrot(4)
  spinrot_cmat(1,2) = spinrot(3) + j_dpc*spinrot(2)
  spinrot_cmat(2,1) =-spinrot(3) + j_dpc*spinrot(2)
@@ -985,7 +998,7 @@ end function spinrot_cmat
 !! INPUTS
 !!  xaxis(3)= vectors defining the x axis
 !!  zaxis(3)= vectors defining the z axis
-
+!!
 !! OUTPUT
 !!  inversion_flag = flag that indicates that an inversion operation
 !!   on the coordinate system should be done

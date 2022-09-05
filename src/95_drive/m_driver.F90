@@ -145,8 +145,8 @@ contains
 subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 &                 mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,results_out)
 
- !Arguments ------------------------------------
- !scalars
+!Arguments ------------------------------------
+!scalars
  integer,intent(in) :: ndtset,ndtset_alloc,npsp
  real(dp),intent(in) :: cpui
  character(len=8),intent(in) :: codvsn

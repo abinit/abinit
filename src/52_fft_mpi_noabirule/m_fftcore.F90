@@ -1519,7 +1519,7 @@ end subroutine sphereboundary
 !! iflag=option parameter. Possible values: -1, -2, 1, 2
 !! me_g0=1 if this node has G=0.
 !! shiftg(3)=The shift in reciprocal space.
-!! symm(3,3)=symmetry operation in reciprocal space to be applied.
+!! symm(3,3)=symmetry operation in reciprocal space to be applied (symrec)
 !! xnorm=Normalization factor.
 !!
 !! SIDE EFFECTS
@@ -1690,6 +1690,7 @@ subroutine sphere(cg,ndat,npw,cfft,n1,n2,n3,n4,n5,n6,kg_k,istwf_k,iflag,me_g0,sh
    end if
 
  else if (iflag==-1 .or. iflag==-2) then
+   ! extract cg(output) from cfft(input)
 
    use_symmetry=0
    identity(:,:)=0; identity(1,1)=1 ; identity(2,2)=1 ; identity(3,3)=1
@@ -1731,6 +1732,7 @@ subroutine sphere(cg,ndat,npw,cfft,n1,n2,n3,n4,n5,n6,kg_k,istwf_k,iflag,me_g0,sh
          end do
        end if
      else
+       ! use_symmetry == 1
 !$OMP PARALLEL DO PRIVATE(i1,i2,i3,j1,j2,j3,l1,l2,l3,ipwdat,i3dat) IF (ndat>1)
        do idat=1,ndat
          do ipw=1,npw
@@ -1747,6 +1749,7 @@ subroutine sphere(cg,ndat,npw,cfft,n1,n2,n3,n4,n5,n6,kg_k,istwf_k,iflag,me_g0,sh
            ipwdat = ipw + (idat-1) * npw
            i3dat = i3 + (idat-1)*n6
 
+           ! c(g) = cfft(S(g + shiftg))
            cg(1,ipwdat)=cfft(1,i1,i2,i3dat)*xnorm
            cg(2,ipwdat)=cfft(2,i1,i2,i3dat)*xnorm
          end do

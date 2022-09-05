@@ -747,14 +747,14 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
    end if
 
    select case (dtset%gwr_task)
+   case ("RPA_ENERGY")
+     call gwr%rpa_energy()
+
    case ("G0W0")
      call gwr%run_g0w0()
 
    !case ("CHI0_HEAD_WINGS")
    !  call compute_chi0_head_wings(wfk_path)
-
-   case ("RPA_ENERGY")
-     call gwr%rpa_energy()
 
    case default
      ABI_ERROR(sjoin("Invalid value of gwr_task:", dtset%gwr_task))

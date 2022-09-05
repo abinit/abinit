@@ -2491,10 +2491,11 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  integer,allocatable :: temp(:,:), gtmp(:,:),degblock(:,:), degblock_all(:,:,:,:), ndeg_all(:,:), iperm(:)
  real(dp):: params(4), my_shiftq(3,1), kk(3), kq(3), intp_shiftk(3)
 #ifdef HAVE_MPI
- integer :: ndims, comm_cart, me_cart
+ integer,parameter :: ndims = 5
+ integer :: comm_cart, me_cart
  logical :: reorder
- integer,allocatable :: dims(:)
- logical,allocatable :: periods(:), keepdim(:)
+ integer :: dims(ndims)
+ logical :: periods(ndims), keepdim(ndims)
 #endif
 
 ! *************************************************************************
@@ -2939,10 +2940,6 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
 #ifdef HAVE_MPI
  ! Create 5d cartesian communicator: 3*natom perturbations, q-points in IBZ, bands in Sigma sum, kpoints in Sigma_k, spins
  ! FIXME: Fix spin
- ndims = 5
- ABI_MALLOC(dims, (ndims))
- ABI_MALLOC(periods, (ndims))
- ABI_MALLOC(keepdim, (ndims))
  periods(:) = .False.; reorder = .False.
  dims = [new%pert_comm%nproc, new%qpt_comm%nproc, new%bsum_comm%nproc, new%kcalc_comm%nproc, new%spin_comm%nproc]
 
@@ -2953,35 +2950,32 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
 
  ! Create communicator to distribute natom3 perturbations.
  keepdim = .False.; keepdim(1) = .True.
- call MPI_CART_SUB(comm_cart, keepdim, new%pert_comm%value, ierr); new%pert_comm%me = xmpi_comm_rank(new%pert_comm%value)
+ call new%pert_comm%from_cart_sub(comm_cart, keepdim)
 
  ! Create communicator for qpoints in self-energy integration.
  keepdim = .False.; keepdim(2) = .True.
- call MPI_CART_SUB(comm_cart, keepdim, new%qpt_comm%value, ierr); new%qpt_comm%me = xmpi_comm_rank(new%qpt_comm%value)
+ call new%qpt_comm%from_cart_sub(comm_cart, keepdim)
 
  ! Create communicator for bands for self-energy summation
  keepdim = .False.; keepdim(3) = .True.
- call MPI_CART_SUB(comm_cart, keepdim, new%bsum_comm%value, ierr); new%bsum_comm%me = xmpi_comm_rank(new%bsum_comm%value)
+ call new%bsum_comm%from_cart_sub(comm_cart, keepdim)
 
  ! Create communicator for kpoints.
  keepdim = .False.; keepdim(4) = .True.
- call MPI_CART_SUB(comm_cart, keepdim, new%kcalc_comm%value, ierr); new%kcalc_comm%me = xmpi_comm_rank(new%kcalc_comm%value)
+ call new%kcalc_comm%from_cart_sub(comm_cart, keepdim)
 
  ! Create communicator for spins.
  keepdim = .False.; keepdim(5) = .True.
- call MPI_CART_SUB(comm_cart, keepdim, new%spin_comm%value, ierr); new%spin_comm%me = xmpi_comm_rank(new%spin_comm%value)
+ call new%spin_comm%from_cart_sub(comm_cart, keepdim)
 
  ! Create communicator for the (band_sum, qpoint_sum) loops
  keepdim = .False.; keepdim(2:3) = .True.
- call MPI_CART_SUB(comm_cart, keepdim, new%qb_comm%value, ierr); new%qb_comm%me = xmpi_comm_rank(new%qb_comm%value)
+ call new%qb_comm%from_cart_sub(comm_cart, keepdim)
 
  ! Create communicator for the (perturbation, band_sum, qpoint_sum)
  keepdim = .False.; keepdim(1:3) = .True.
- call MPI_CART_SUB(comm_cart, keepdim, new%pqb_comm%value, ierr); new%pqb_comm%me = xmpi_comm_rank(new%pqb_comm%value)
+ call new%pqb_comm%from_cart_sub(comm_cart, keepdim)
 
- ABI_FREE(dims)
- ABI_FREE(periods)
- ABI_FREE(keepdim)
  call xmpi_comm_free(comm_cart)
 #endif
 
