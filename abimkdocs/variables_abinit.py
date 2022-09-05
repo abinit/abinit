@@ -22930,6 +22930,13 @@ Enables the calculation of contributions to the energy, entropy, stresses,
 number of electrons and chemical potential using the extended first principle
 molecular dynamics model for high temperature simulations.
 
+For now, ExtFPMD is only available with [[occopt]] = 3, with [[tsmear]] defined
+as the electronic temperature. More occupation options will be supported in the
+future.
+
+In case of electronic SCF cycle convergency problems, try to set a number of
+unoccupied bands in the buffer with [[extfpmd_nbdbuf]] input variable.
+
   * **useextfpmd** = 1 *(Recommanded)*, the energy shift will be evaluated
 by making an integration of the trial potential over the real space and the
 contributions will be computed with integrals over the band number.
@@ -22960,6 +22967,29 @@ Specifies the number of bands to use when averaging over last bands to get the
 energy shift when [[useextfpmd]] = 2 or 3.
 
 **extfpmd_nbcut** must be less than [[nband]].
+""",
+),
+
+Variable(
+    abivarname="extfpmd_nbdbuf",
+    varset="gstate",
+    vartype="integer",
+    topics=['ExtFPMD_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="EXTended FPMD: Number of BanDs for the BUFfer",
+    added_in_version="9.9.0",
+    text=r"""
+Specifies the number of bands to use for the buffer when [[useextfpmd]] /= 0.
+Among the total number of bands [[nband]], last [[extfpmd_nbdbuf]] bands
+occupation will be set to 0, and ExtFPMD model will take charge of computing
+electronic contributions starting from [[nband]] - [[extfpmd_nbdbuf]].
+
+In some cases, setting this input variable to a positive number can solve
+convergency problems due to high variations of electron density within the SCF
+cycle.
+
+**extfpmd_nbdbuf** must be less than [[nband]].
 """,
 ),
 
