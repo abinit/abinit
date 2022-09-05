@@ -22966,7 +22966,7 @@ Variable(
 Specifies the number of bands to use when averaging over last bands to get the
 energy shift when [[useextfpmd]] = 2 or 3.
 
-**extfpmd_nbcut** must be less than [[nband]].
+**extfpmd_nbcut** must be less than or equal to [[nband]].
 """,
 ),
 
@@ -22989,7 +22989,10 @@ In some cases, setting this input variable to a positive number can solve
 convergency problems due to high variations of electron density within the SCF
 cycle.
 
-**extfpmd_nbdbuf** must be less than [[nband]].
+Moreover, setting [[extfpmd_nbdbuf]] = [[nband]] should theoretically give
+access to Fermi gas orbital free calculations (not tested yet).
+
+**extfpmd_nbdbuf** must be less than or equal to [[nband]].
 """,
 ),
 
