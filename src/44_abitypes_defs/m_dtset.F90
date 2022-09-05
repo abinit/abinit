@@ -815,6 +815,7 @@ type, public :: dataset_type
  real(dp) :: recrcut
  real(dp) :: recefermi
  real(dp) :: rectolden
+ real(dp) :: rfomega
  real(dp) :: rhoqpmix
  real(dp) :: rifcsph = zero
  real(dp) :: rcut
@@ -2099,6 +2100,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%recrcut            = dtin%recrcut
  dtout%recefermi          = dtin%recefermi
  dtout%rectolden          = dtin%rectolden
+ dtout%rfomega            = dtin%rfomega
  dtout%dfpt_sciss         = dtin%dfpt_sciss
  dtout%mbpt_sciss         = dtin%mbpt_sciss
  dtout%spinmagntarget     = dtin%spinmagntarget
@@ -2562,15 +2564,6 @@ subroutine dtset_get_npert_rbz(dtset, nband_rbz, nkpt_rbz, npert)
 
  ABI_MALLOC(pertsy,(3,mpert))
  call irreducible_set_pert(indsym,mpert,dtset%natom,dtset%nsym,pertsy,dtset%rfdir,rfpert,symq,symrec,dtset%symrel)
-
-!MR: Deactivate perturbation symmetries for a longwave calculation (TODO)
-! if (dtset%prepalw/=0) then
-!   do ipert=1,dtset%natom+6
-!     do idir=1,3
-!       if( pertsy(idir,ipert)==-1 ) pertsy(idir,ipert)=1
-!     end do
-!   end do
-! end if
 
  npert=0
 ! ABI_MALLOC(pert_tmp,(3*mpert))
@@ -3439,7 +3432,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' random_atpos randomseed ratsm ratsph ratsph_extra rcut'
  list_vars=trim(list_vars)//' recefermi recgratio recnpath recnrec recptrott recrcut rectesteg rectolden'
  list_vars=trim(list_vars)//' red_dfield red_efield red_efieldbar restartxf rfasr'
- list_vars=trim(list_vars)//' rfatpol rfddk rfdir rfelfd rfmagn rfmeth rfphon'
+ list_vars=trim(list_vars)//' rfatpol rfddk rfdir rfelfd rfmagn rfmeth rfomega rfphon'
  list_vars=trim(list_vars)//' rfstrs rfstrs_ref rfuser rf2_dkdk rf2_dkde rf2_pert1_dir rf2_pert2_dir rhoqpmix rifcsph rprim'
  !These input parameters are obsolete (keep them for compatibility)
  list_vars=trim(list_vars)//' rf1atpol rf1dir rf1elfd rf1phon'
