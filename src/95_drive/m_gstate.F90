@@ -854,20 +854,20 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !Initialize (eventually) extfpmd object
  if(dtset%useextfpmd>=1.and.dtset%occopt==3) then
    if(dtset%useextfpmd/=1.and.dtset%extfpmd_nbcut>dtset%mband) then
-     write(msg,'(3a,i0,a,i0,3a)') "Not enough bands to activate extfpmd routines.",ch10,&
-     & "nband=",dtset%mband," < extfpmd_nbcut=",dtset%extfpmd_nbcut,".",ch10,&
+     write(msg,'(3a,i0,a,i0,3a)') "Not enough bands to activate ExtFPMD routines.",ch10,&
+     & "extfpmd_nbcut = ",dtset%extfpmd_nbcut," should be less than or equal to nband = ",dtset%mband,".",ch10,&
      & "Action: Increase nband or decrease extfpmd_nbcut."
      ABI_ERROR(msg)
    else
      if(dtset%useextfpmd/=1.and.(dtset%extfpmd_nbdbuf+dtset%extfpmd_nbcut)>dtset%mband) then
-       write(msg,'(a,i0,a,i0,2a,i0,3a)') "extfpmd_nbdbuf=",dtset%extfpmd_nbdbuf," + extfpmd_nbcut=",&
-       & dtset%extfpmd_nbcut,ch10,"should be strictly less than nband=",dtset%mband,".",ch10,&
+       write(msg,'(a,i0,a,i0,a,i0,2a,i0,3a)') "(extfpmd_nbdbuf = ",dtset%extfpmd_nbdbuf," + extfpmd_nbcut = ",&
+       & dtset%extfpmd_nbcut,") = ",dtset%extfpmd_nbdbuf+dtset%extfpmd_nbcut,ch10,"should be less than or equal to nband = ",dtset%mband,".",ch10,&
        & "Assume experienced user. Execution will continue with extfpmd_nbdbuf = 0."
        ABI_WARNING(msg)
        dtset%extfpmd_nbdbuf = 0
      else if(dtset%extfpmd_nbdbuf>dtset%mband) then
-       write(msg,'(a,i0,a,i0,3a)') "extfpmd_nbdbuf=",dtset%extfpmd_nbdbuf,&
-       & "should be strictly less than nband=",dtset%mband,".",ch10,&
+       write(msg,'(a,i0,a,i0,3a)') "extfpmd_nbdbuf = ",dtset%extfpmd_nbdbuf,&
+       & " should be less than or equal to nband = ",dtset%mband,".",ch10,&
        & "Assume experienced user. Execution will continue with extfpmd_nbdbuf = 0."
        ABI_WARNING(msg)
        dtset%extfpmd_nbdbuf = 0
