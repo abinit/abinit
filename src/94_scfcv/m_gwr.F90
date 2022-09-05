@@ -158,7 +158,7 @@ module m_gwr
 
  use defs_datatypes,  only : pseudopotential_type, ebands_t
  use defs_abitypes,   only : mpi_type
- use m_gwdefs,        only : GW_TOLQ0, GW_Q0_DEFAULT
+ use m_gwdefs,        only : GW_TOLQ0, GW_Q0_DEFAULT, sigijtab_t
  use m_time,          only : cwtime, cwtime_report, sec2str
  use m_io_tools,      only : iomode_from_fname, get_unit, file_exists, open_file
  use m_numeric_tools, only : blocked_loop, get_diag, isdiagmat, arth, print_arr, pade, dpade, newrap_step, c2r !, linfit
@@ -175,7 +175,7 @@ module m_gwr
  use m_fft,           only : fft_ug, fft_ur, fftbox_plan3_t, fourdp
  use m_fft_mesh,      only : calc_ceikr, ctimes_eikr
  use m_kpts,          only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, kpts_map, kpts_map_print, kpts_pack_in_stars
- use m_bz_mesh,       only : littlegroup_t
+ use m_bz_mesh,       only : littlegroup_t, findqg0
  use m_gsphere,       only : kg_map
  use m_melemts,       only : melements_t
  use m_ioarr,         only : read_rhor
@@ -490,7 +490,7 @@ module m_gwr
    type(crystal_t), pointer :: cryst => null()
    ! Crystal structure.
 
-   integer :: sc_iteration = 0
+   integer :: scf_iteration = 0
    ! Internal counter used to implement self-consistency (not yet implemented)
 
    type(ebands_t), pointer :: ks_ebands => null()
@@ -730,7 +730,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  integer :: my_it, my_ikf, my_iqf, ii, ebands_timrev, my_iki, my_iqi, itau, spin
  integer :: my_nshiftq, iq_bz, iq_ibz, npw_, ncid, ig, ig_start
  integer :: comm_cart, me_cart, ierr, all_nproc, nps, my_rank, qprange_, gap_err, ncerr, omp_nt
- integer :: jj, cnt, ikcalc, ndeg, mband, bstop, nbsum, it, iw
+ integer :: cnt, ikcalc, ndeg, mband, bstop, nbsum, it, iw ! jj,
  integer :: ik_ibz, ik_bz, isym_k, trev_k, g0_k(3)
  real(dp) :: cpu, wall, gflops, te_min, te_max, wmax
  logical :: isirr_k, changed, q_is_gamma, reorder
@@ -1803,9 +1803,9 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
 !scalars
  integer,parameter :: formeig0 = 0
  integer :: mband, min_nband, nkibz, nsppol, my_is, my_iki, spin, ik_ibz
- integer :: my_ib, my_nb, band, npw_k, mpw, istwf_k !, itau !, il_b
- integer :: nbsum, npwsp, col_bsize, nband_k, my_bstart, my_bstop, my_nband, ierr
- real(dp) :: f_nk, eig_nk, ef, cpu, wall, gflops, cpu_green, wall_green, gflops_green
+ integer :: band, npw_k, mpw, istwf_k !, itau !, il_b
+ integer :: nbsum, npwsp, col_bsize, my_bstart, my_bstop, my_nband ! nband_k,
+ real(dp) :: cpu, wall, gflops, cpu_green, wall_green, gflops_green
  character(len=5000) :: msg
  type(ebands_t) :: wfk_ebands
  type(hdr_type) :: wfk_hdr
@@ -1994,7 +1994,7 @@ end subroutine gwr_read_ugb_from_wfk
 subroutine gwr_build_green(gwr, free_ugb)
 
 !Arguments ------------------------------------
- class(gwr_t),intent(inout) :: gwr
+ class(gwr_t),target,intent(inout) :: gwr
  logical,intent(in) :: free_ugb
 
 !Local variables-------------------------------
@@ -2003,14 +2003,23 @@ subroutine gwr_build_green(gwr, free_ugb)
  real(dp) :: f_nk, eig_nk, cpu, wall, gflops, cpu_green, wall_green, gflops_green
  character(len=500) :: msg
  complex(dp) :: gt_cfact
- type(matrix_scalapack), target :: work, green ! cg_mat,
+ type(matrix_scalapack), target :: work, green
  integer :: mask_kibz(gwr%nkibz)
+!arrays
+ real(dp),contiguous, pointer :: qp_ene(:,:,:), qp_occ(:,:,:)
 
 ! *************************************************************************
 
- ABI_CHECK(abs(gwr%ks_ebands%fermie) < tol12, "ef should have been set to zero!")
-
  call cwtime(cpu, wall, gflops, "start")
+
+ ! Use KS or QP energies depending on the iteration state.
+ if (gwr%scf_iteration == 0) then
+   qp_ene => gwr%ks_ebands%eig; qp_occ => gwr%ks_ebands%occ
+   ABI_CHECK(abs(gwr%ks_ebands%fermie) < tol12, "Fermie should have been set to zero!")
+ else
+   qp_ene => gwr%qp_ebands%eig; qp_occ => gwr%qp_ebands%occ
+   ABI_CHECK(abs(gwr%qp_ebands%fermie) < tol12, "Fermie should have been set to zero!")
+ end if
 
  ! Allocate Green's functions
  mask_kibz = 0; mask_kibz(gwr%my_kibz_inds(:)) = 1
@@ -2038,8 +2047,8 @@ subroutine gwr_build_green(gwr, free_ugb)
          !!$OMP PARALLEL DO PRIVATE(band, f_nk, eig_nk, gt_cfact)
          do il_b=1, work%sizeb_local(2)
           band = work%loc2gcol(il_b)
-          f_nk = gwr%ks_ebands%occ(band, ik_ibz, spin)
-          eig_nk = gwr%ks_ebands%eig(band, ik_ibz, spin)
+          f_nk = qp_occ(band, ik_ibz, spin)
+          eig_nk = qp_ene(band, ik_ibz, spin)
           gt_cfact = zero
           if (ipm == 2) then
             if (eig_nk < -tol6) gt_cfact = exp(gwr%tau_mesh(itau) * eig_nk)
@@ -3401,7 +3410,7 @@ subroutine gwr_build_tchi(gwr)
  type(matrix_scalapack),allocatable :: gt_gpr(:,:), chiq_gpr(:), gk_rpr_pm(:)
  type(desc_t), target, allocatable :: desc_mykbz(:)
  type(fftbox_plan3_t) :: plan_gp2rp, plan_rp2gp
- complex(dp),allocatable :: cemiqr(:), sc_ceimkr(:,:) !, uc_ceikr(:)
+ complex(dp),allocatable :: cemiqr(:) !, sc_ceimkr(:,:) !, uc_ceikr(:)
 
 ! *************************************************************************
 
@@ -4327,6 +4336,7 @@ subroutine gwr_build_sigmac(gwr)
  complex(dp) :: sigc_e0_kcalc(gwr%max_nbcalc, gwr%nkcalc, gwr%nsppol)
  complex(dp) :: qpe_zlin_kcalc(gwr%max_nbcalc, gwr%nkcalc, gwr%nsppol), imag_zmesh(gwr%ntau,2)
  complex(dp) :: sigc_rw_diag_kcalc(gwr%nwr, gwr%max_nbcalc, gwr%nkcalc, gwr%nsppol)
+ type(ebands_t),pointer :: prev_ebands
 
 ! *************************************************************************
 
@@ -4337,6 +4347,13 @@ subroutine gwr_build_sigmac(gwr)
 
  !mask_kibz = 0; mask_kibz(gwr%my_kibz_inds(:)) = 1
  !call gwr%alloc_free_mats(mask_kibz, "sigma" "malloc")
+
+ ! Use KS or QP energies depending on the iteration state.
+ if (gwr%scf_iteration == 0) then
+   prev_ebands => gwr%ks_ebands
+ else
+   prev_ebands => gwr%qp_ebands
+ end if
 
  ! Set FFT mesh in the supercell
  ! Be careful when using the FFT plan with ndat as ndat can change inside the loop if we start to block.
@@ -4703,7 +4720,7 @@ end if
       ik_ibz = gwr%kcalc2ibz(ikcalc, 1)
       do band=gwr%bstart_ks(ikcalc, spin), gwr%bstop_ks(ikcalc, spin)
         ibc = band - gwr%bstart_ks(ikcalc, spin) + 1
-        e0 = gwr%ks_ebands%eig(band, ik_ibz, spin)
+        e0 = prev_ebands%eig(band, ik_ibz, spin)
 
         associate (vals_pmt => sigc_it_diag_kcalc(:,:, ibc, ikcalc, spin))
         ! f(t) = E(t) + O(t) = (f(t) + f(-t)) / 2  + (f(t) - f(-t)) / 2
@@ -4767,10 +4784,12 @@ end if
    end do ! ikcalc
  end do ! spin
 
- ! Master writes results to ab_out, std_out and GWR.nc
- if (xmpi_comm_rank(gwr%comm) == 0) then
+ ! TODO: Update gwr%qp_ebands
 
-   !is_metallic = ebands_has_metal_scheme(gwr%ks_ebands)
+ if (xmpi_comm_rank(gwr%comm) == 0) then
+   ! Master writes results to ab_out, std_out and GWR.nc
+
+   !is_metallic = ebands_has_metal_scheme(prev__ebands)
    !call write_notations([std_out, ab_out]
    ABI_MALLOC(ks_vbik, (gwr%ks_ebands%nkpt, gwr%ks_ebands%nsppol))
    ks_vbik(:,:) = ebands_get_valence_idx(gwr%ks_ebands)
@@ -5143,23 +5162,69 @@ end subroutine gwr_rpa_energy
 !!
 !! SOURCE
 
-subroutine gwr_run_g0w0(gwr)
+subroutine gwr_run_g0w0(gwr, free_ugb)
 
 !Arguments ------------------------------------
  class(gwr_t),intent(inout) :: gwr
+ logical,optional,intent(in) :: free_ugb
 
 !Local variables-------------------------------
 !scalars
-!arrays
+ logical :: free_ugb__
 
 ! *************************************************************************
 
+ free_ugb__ = .True.; if (present(free_ugb)) free_ugb__ = free_ugb
+
  call gwr%build_chi0_head_and_wings()
  call gwr%build_sigxme()
- call gwr%build_green(free_ugb=.True.)
+ call gwr%build_green(free_ugb=free_ugb__)
  call gwr%build_tchi()
  call gwr%build_wc()
  call gwr%build_sigmac()
+
+ ! Sketching energy-only self-consistency:
+ ! Possibe values:
+ !   - G0W0
+ !   - eGeW
+ !   - eGW0
+ !   - G0eW
+
+ ! To implement restart capabilities we need to
+ ! read scf_iteration, qp_ebands and gwr_task from GWR
+ ! build_sigmac is responsible for writing checkpoint data with qp_ebands at each iteration
+
+ !select case (dtset%gwr_task)
+ !case ("eGeW")
+ !  converged = .False.
+ !  do while (.not. converged)
+ !    call gwr%run_g0w0(free_ugb=.False.)
+ !    gwr%scf_iteration = gwr%scf_iteration + 1
+ !    converged = gwr%scf_cycle_is_converged()
+ !  end do
+
+ !case ("eGW0")
+ !  call gwr%run_g0w0(free_ugb=.False.)
+ !  converged = .False.
+ !  do while (.not. converged)
+ !    call gwr%build_sigxme()  ! This should not change in semiconductors
+ !    call gwr%build_sigmac()
+ !    gwr%scf_iteration = gwr%scf_iteration + 1
+ !    converged = gwr%scf_cycle_is_converged()
+ !  end do
+
+ !case ("G0eW")
+ !  call gwr%run_g0w0(free_ugb=.False.)
+ !  converged = .False.
+ !  do while (.not. converged)
+ !    call gwr%build_tchi()
+ !    call gwr%build_wc()
+ !    call gwr%build_sigmac()
+ !    gwr%scf_iteration = gwr%scf_iteration + 1
+ !    converged = gwr%scf_cycle_is_converged()
+ !  end do
+
+ !end select
 
 end subroutine gwr_run_g0w0
 !!***
@@ -5844,16 +5909,24 @@ end subroutine load_head_wings_from_sus_file__
 subroutine gwr_build_chi0_head_and_wings(gwr)
 
 !Arguments ------------------------------------
- class(gwr_t),intent(inout) :: gwr
+ class(gwr_t),target,intent(inout) :: gwr
 
 !Local variables-------------------------------
 !scalars
 !arrays
+ real(dp),contiguous, pointer :: qp_ene(:,:,:), qp_occ(:,:,:)
 
 ! *************************************************************************
 
  call wrtout(std_out, "TODO: Building head and wings")
- call wrtout(std_out, sjoin("nkbz:", itoa(gwr%nkbz)))
+ !call wrtout(std_out, sjoin("nkbz:", itoa(gwr%nkbz)))
+
+ ! Use KS or QP energies depending on the iteration state.
+ if (gwr%scf_iteration == 0) then
+   qp_ene => gwr%ks_ebands%eig; qp_occ => gwr%ks_ebands%occ
+ else
+   qp_ene => gwr%qp_ebands%eig; qp_occ => gwr%qp_ebands%occ
+ end if
 
 end subroutine gwr_build_chi0_head_and_wings
 !!***
@@ -5879,35 +5952,43 @@ subroutine gwr_build_sigxme(gwr)
 
 !Local variables-------------------------------
 !scalars
- integer :: nsppol, nspinor, ierr, my_ikf, ib_sum, ii, iab, kb, il_b, ig
- integer :: my_is, ikcalc, ikcalc_ibz, bmin, bmax
- integer :: spin, isym, jb, is_idx
- integer :: spad, spadx1, spadx2, irow, npw_k, ndegs, wtqm, wtqp
+ integer :: nsppol, nspinor, ierr, my_ikf, band_sum, ii, kb, il_b, ig, x_mpw, npw_, my_rank ! iab,
+ integer :: my_is, ikcalc, ikcalc_ibz, bmin, bmax, band
+ integer :: spin, isym, jb !, is_idx
+ integer :: spad, spadx1, spadx2, npw_k, wtqm, wtqp ! irow, ndegs,
  integer :: npwx, x_nfft, x_mgfft, x_fftalga, nsig_ab
  integer :: ik_bz, ik_ibz, isym_k, trev_k, g0_k(3), tsign_k
  integer :: iq_bz, iq_ibz, isym_q, trev_q, g0_q(3), tsign_q
  logical :: isirr_k, isirr_q
  real(dp) :: cpu, wall, gflops, fact_spin, theta_mu_minus_esum, theta_mu_minus_esum2, tol_empty, tol_empty_in
+ real(dp) :: gwr_boxcutmin_x
  character(len=5000) :: msg
  type(matrix_scalapack),pointer :: ugb_kibz
  type(crystal_t),pointer :: cryst
+ type(dataset_type),pointer :: dtset
  type(littlegroup_t) :: ltg_k
 !arrays
  integer :: g0(3), spinor_padx(2,4)
  integer :: x_ngfft(18)
- real(dp) :: ksum(3), kgw(3), kgw_m_ksum(3), qbz(3), q0(3), spinrot_kbz(4), spinrot_kgw(4) !, tsec(2)
+ integer,allocatable :: gbound_kcalc(:,:), gvec_(:,:)
+ real(dp) :: ksum(3), kk_bz(3), kgw(3), kgw_m_ksum(3), qbz(3), q0(3) !, spinrot_kbz(4), spinrot_kgw(4) !, tsec(2)
  real(dp),contiguous, pointer :: qp_ene(:,:,:), qp_occ(:,:,:)
- complex(gwpc),allocatable :: vc_sqrt_qbz(:), rhotwg(:), rhotwgp(:), rhotwg_ki(:,:), ur_bdgw(:,:), ur_ibz(:), ur_ksum(:)
- complex(dpc),allocatable  :: sigxcme_tmp(:,:), sigxme_tmp(:,:,:), sym_sigx(:,:,:), sigx(:,:,:,:)
+ !type(ebands_t),pointer :: prev_ebands
+ complex(gwpc),allocatable :: vc_sqrt_qbz(:), rhotwg(:), rhotwgp(:), rhotwg_ki(:,:), ur_bdgw(:,:), ur_ksum(:) ! ur_ibz(:),
+ complex(dpc),allocatable  :: sigxcme_tmp(:,:), sigxme_tmp(:,:,:), sigx(:,:,:,:) ! sym_sigx(:,:,:),
+ type(sigijtab_t),pointer :: Sigxij_tab(:)
 
 ! *************************************************************************
 
  call wrtout(std_out, "TODO: Computing matrix elements of Sigma_x ...")
 
+ my_rank = xmpi_comm_rank(gwr%comm)
+
  nsppol = gwr%nsppol; nspinor = gwr%nspinor
  cryst => gwr%cryst
+ dtset => gwr%dtset
 
- if (gwr%sc_iteration == 0) then
+ if (gwr%scf_iteration == 0) then
    qp_ene => gwr%ks_ebands%eig; qp_occ => gwr%ks_ebands%occ
  else
    qp_ene => gwr%qp_ebands%eig; qp_occ => gwr%qp_ebands%occ
@@ -5934,28 +6015,35 @@ subroutine gwr_build_sigxme(gwr)
  ! =========================================
  ! Note the usage of ecutsigx and gwr_boxcutmin and the loops over the full BZ.
  ! All the procs execute this part.
+ ! FIXME: umklapp, ecutsigx and q-centered G-sphere
 
- !x_ngfft = gwr%dtset%ngfft ! Allow user to specify fftalg
+ x_ngfft = gwr%dtset%ngfft ! Allow user to specify fftalg
  !x_ngfft(1:6) = 0
 
- !x_mpw = -1
- !do ik_bz=1,gwr%nkbz
- !  kk_bz = gwr%kbz(:, ik_bz)
- !  call get_kg(kk_bz, istwfk1, dtset%ecut, cryst%gmet, npw_, gvec_)
- !  ABI_FREE(gvec_)
- !  call getng(dtset%gwr_boxcutmin, dtset%chksymtnons, dtset%ecut, cryst%gmet, &
- !             kk_bz, me_fft0, x_mgfft, gwr%g_nfft, x_ngfft, nproc_fft1, cryst%nsym, paral_fft0, &
- !             cryst%symrel, cryst%tnons, unit=dev_null)
- !  x_mpw = max(x_mpw, npw_)
- !end do
+ x_mpw = -1
+ do ik_bz=1,gwr%nkbz
+   kk_bz = gwr%kbz(:, ik_bz)
+   call get_kg(kk_bz, istwfk1, dtset%ecut, cryst%gmet, npw_, gvec_)
+   ABI_FREE(gvec_)
+   gwr_boxcutmin_x = two
+   call getng(gwr_boxcutmin_x, dtset%chksymtnons, dtset%ecut, cryst%gmet, &
+              kk_bz, me_fft0, x_mgfft, x_nfft, x_ngfft, nproc_fft1, cryst%nsym, paral_fft0, &
+              cryst%symrel, cryst%tnons, unit=dev_null)
+   x_mpw = max(x_mpw, npw_)
+ end do
 
- x_nfft = product(x_ngfft(1:3)); x_mgfft = maxval(x_ngfft(1:3)); x_fftalga = x_ngfft(7) / 100
+ if (my_rank == 0) call print_ngfft(x_ngfft, header="FFT mesh for Sigma_x", unit=std_out)
+
+ !x_nfft = product(x_ngfft(1:3)); x_mgfft = maxval(x_ngfft(1:3)); x_fftalga = x_ngfft(7) / 100
  npwx = 1
  nsig_ab = nspinor ** 2; spinor_padx = reshape([0, 0, npwx, npwx, 0, npwx, npwx, 0], [2, 4])
 
  do my_is=1,gwr%my_nspins
  spin = gwr%my_spins(my_is)
  do ikcalc=1,gwr%nkcalc ! TODO: Should be spin dependent!
+
+   !Table for \Sigmax_ij matrix elements.
+   !Sigxij_tab => Sigp%Sigxij_tab(ikcalc, 1:nsppol)
 
    ikcalc_ibz = gwr%kcalc2ibz(ikcalc, 1)
    kgw = gwr%kcalc(:, ikcalc); bmin =  gwr%bstart_ks(ikcalc, spin); bmax = gwr%bstop_ks(ikcalc, spin)
@@ -5965,7 +6053,7 @@ subroutine gwr_build_sigxme(gwr)
    ! ==============================================================
    ! * The little group is used only if symsigma == 1
    ! * If use_umklp == 1 then symmetries requiring an umklapp to preserve k_gw are included as well.
-   !call ltg_k%init(kgw, Qmesh, cryst, use_umklp=1, npwe=0)
+   call ltg_k%init(kgw, gwr%nqbz, gwr%qbz, cryst, use_umklp=1, npwe=0)
 
    write(msg,'(6a)') ch10, &
     ' Calculating <nk|Sigma_x|nk> at k: ',trim(ktoa(kgw)), ", for bands: ", trim(ltoa([bmin, bmax])),ch10
@@ -5975,19 +6063,31 @@ subroutine gwr_build_sigxme(gwr)
    ! Load wavefunctions for Sigma_x matrix elements
    ! ===============================================
    ! All procs need ur_bdgw but the IBZ is distributed and, possibly, replicated in gwr%kpt_comm.
-   ! Here we select the right procs, fill the buffer with the FFT results and then use a dumb xmpi_sum
-   ! to gather the results.
+   ! Here we select the right procs, fill the buffer with the FFT results and then use
+   ! a dumb xmpi_sum + rescaling to gather the results.
+   ! FIXME: g-vectors from green's descriptor or use another array to be able to deal with istwfk == 2?
+
    ABI_MALLOC_OR_DIE(ur_bdgw, (x_nfft * nspinor, bmin:bmax), ierr)
    ur_bdgw = zero
 
-   !ABI_MALLOC(gbound_kcalc, (2 * x_mgfft + 8, 2))
-   !call sphereboundary(gbound_kcalc, desc_kbz%istwfk, desc_kbz%gvec, x_mgfft, desc_kbz%npw)
+   if (any(ikcalc_ibz == gwr%my_kibz_inds)) then
+     associate (desc_kcalc => gwr%green_desc_kibz(ikcalc_ibz), ugb_kcalc => gwr%ugb(ikcalc_ibz, spin))
+     ABI_MALLOC(gbound_kcalc, (2 * x_mgfft + 8, 2))
+     call sphereboundary(gbound_kcalc, desc_kcalc%istwfk, desc_kcalc%gvec, x_mgfft, desc_kcalc%npw)
 
-   !call fft_ug(npw_kcalc, x_nfft, nspinor, ndat1, &
-   !            x_mgfft, x_ngfft, istwf_kcalc, desc_k%gvec, desc_k%gbound, &
-   !            gwr%ugb(ikcalc_ibz, spin)%buffer_cplx(:, il_b), &
-   !            ur_bdgw)    ! out
-   !ABI_FREE(gbound_kcalc)
+     do il_b=1,ugb_kcalc%sizeb_local(2)
+       band = ugb_kcalc%loc2gcol(il_b); if (band < bmin .or. band > bmax) cycle
+       call fft_ug(desc_kcalc%npw, x_nfft, nspinor, ndat1, &
+                   x_mgfft, x_ngfft, desc_kcalc%istwfk, desc_kcalc%gvec, gbound_kcalc, &
+                   gwr%ugb(ikcalc_ibz, spin)%buffer_cplx(:, il_b), &  ! in
+                   ur_bdgw(:, band))                                  ! out
+     end do
+     ABI_FREE(gbound_kcalc)
+     end associate
+   end if
+
+   call xmpi_sum(ur_bdgw, gwr%gtk_comm%value, ierr)
+   ur_bdgw = ur_bdgw / gwr%np_kibz(ikcalc_ibz)
 
    !ABI_MALLOC(ur_ibz, (x_nfft * nspinor))
    ABI_MALLOC(ur_ksum, (x_nfft * nspinor))
@@ -6012,6 +6112,7 @@ subroutine gwr_build_sigxme(gwr)
      !call kmesh%get_BZ_item(ik_bz, ksum, ik_ibz, isym_ki, iik, ph_mkt)
 
      ! FIXME: Be careful with the symmetry conventions here!
+     ! and the interplay between umklapp in q and FFT
      ik_ibz = gwr%kbz2ibz(1, ik_bz); isym_k = gwr%kbz2ibz(2, ik_bz)
      trev_k = gwr%kbz2ibz(6, ik_bz); g0_k = gwr%kbz2ibz(3:5, ik_bz)
      isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
@@ -6019,25 +6120,31 @@ subroutine gwr_build_sigxme(gwr)
 
      ! Identify q and G0 where q + G0 = k_GW - ksum
      kgw_m_ksum = kgw - ksum
-     !call findqg0(iq_bz, g0, kgw_m_ksum, Qmesh%nbz, Qmesh%bz, Sigp%mG0)
+     call findqg0(iq_bz, g0, kgw_m_ksum, gwr%nqbz, gwr%qbz, gwr%mG0)
 
      ! If symmetries are exploited only q-points in the IBZ_k are computed.
-     ! In this case elements are weighted according to wtqp and wtqm.
-     ! wtqm is for time-reversal.
+     ! In this case elements are weighted according to wtqp and wtqm. wtqm is for time-reversal.
      wtqp = 1; wtqm = 0
      !if (can_symmetrize(spin)) then
-     !  if (ltg_k%ibzq(iq_bz) /= 1) cycle
-     !  wtqp = 0; wtqm = 0
-     !  do isym=1,ltg_k%nsym_sg
-     !    wtqp = wtqp + ltg_k%wtksym(1, isym, iq_bz)
-     !    wtqm = wtqm + ltg_k%wtksym(2, isym, iq_bz)
-     !  end do
-     !end if
+     if (gwr%dtset%symsigma == 1) then
+       if (ltg_k%ibzq(iq_bz) /= 1) cycle
+       wtqp = 0; wtqm = 0
+       do isym=1,ltg_k%nsym_sg
+         wtqp = wtqp + ltg_k%wtksym(1, isym, iq_bz)
+         wtqm = wtqm + ltg_k%wtksym(2, isym, iq_bz)
+       end do
+     end if
 
      ! Find the corresponding irreducible q-point.
      ! NB: non-zero umklapp G_o is not allowed. There's a check in setup_sigma
      !call qmesh%get_BZ_item(iq_bz, qbz, iq_ibz, isym_q, itim_q)
      !q_is_gamma = normv(qbz, cryst%gmet, "G") < GW_TOLQ0
+
+     ! Tables for the FFT of the oscillators.
+     !  a) FFT index of G-G0.
+     !  b) x_gbound table for the zero-padded FFT performed in rhotwg.
+     !ABI_MALLOC(x_gbound, (2*x_mgfft+8, 2))
+     !call Gsph_x%fft_tabs(g0, x_mgfft, x_ngfft, use_padfft, x_gbound, igfftxg0)
 
      !qq_bz = gwr%qbz(:, iq_bz)
      !iq_ibz = gwr%qbz2ibz(1, iq_bz); isym_q = gwr%qbz2ibz(2, iq_bz)
@@ -6059,21 +6166,24 @@ subroutine gwr_build_sigxme(gwr)
      ugb_kibz => gwr%ugb(ik_ibz, spin)
 
      do il_b=1,ugb_kibz%sizeb_local(2)
-       ib_sum = ugb_kibz%loc2gcol(il_b)
+       band_sum = ugb_kibz%loc2gcol(il_b)
 
        ! Skip empty states. MRM: allow negative occ numbers.
-       if (abs(qp_occ(ib_sum, ik_ibz, spin)) < tol_empty) CYCLE
+       if (abs(qp_occ(band_sum, ik_ibz, spin)) < tol_empty) CYCLE
 
-       !call wfd%get_ur(ib_sum, ik_ibz, spin, ur_ibz)
+       !call wfd%get_ur(band_sum, ik_ibz, spin, ur_ibz)
 
        ! Compute ur_ksum(r) from the symmetrical image.
-       !ugb_kibz%buffer_cplx(:, il_b)
+       ! I should rotate the g-vectors outside the loop and rotate ug here
+       ! but at present I cannot use cgtk_rotate due to the symrel^T convention.
+
+       !
        !call fft_ug(npw_k, x_nfft, nspinor, ndat1, &
        !            x_mgfft, x_ngfft, desc_k%istwfk, desc_k%gvec, desc_k%gbound, &
-       !            ggp%buffer_cplx(:, ig2), &  ! in
-       !            ur_ksum)    ! out
+       !            ugb_kibz%buffer_cplx(:, il_b), &  ! in
+       !            ur_ksum)                          ! out
 
-       ! Get all <k-q,ib_sum,s|e^{-i(q+G).r}|s,jb,k>
+       ! Get all <k-q,band_sum,s|e^{-i(q+G).r}|s,jb,k>
        do jb=bmin,bmax
 
          ! Multiply by the square root of the Coulomb term
@@ -6089,22 +6199,22 @@ subroutine gwr_build_sigxme(gwr)
            !
            !   * The oscillator is evaluated at q = 0 as it is considered constant in the small cube around Gamma
            !     while the Colulomb term is integrated out.
-           !   * If nspinor == 1, we have nonzero contribution only if ib_sum == jb
-           !   * If nspinor == 2, we evaluate <ib_sum,up|jb,up> and <ib_sum,dwn|jb,dwn>,
+           !   * If nspinor == 1, we have nonzero contribution only if band_sum == jb
+           !   * If nspinor == 2, we evaluate <band_sum,up|jb,up> and <band_sum,dwn|jb,dwn>,
            !     and impose orthonormalization since npwwfn might be < npwvec.
            !   * Note the use of i_sz_resid and not i_sz, to account for the possibility
            !     to have generalized KS basis set from hybrid
 
            if (nspinor == 1) then
              rhotwg_ki(1, jb) = czero_gw
-             if (ib_sum == jb) rhotwg_ki(1,jb) = CMPLX(SQRT(Vcp%i_sz_resid), 0.0_gwp)
+             if (band_sum == jb) rhotwg_ki(1,jb) = CMPLX(SQRT(Vcp%i_sz_resid), 0.0_gwp)
              !rhotwg_ki(1,jb) = czero_gw ! DEBUG
 
            else
              npw_k = wfd%npwarr(ik_ibz)
              rhotwg_ki(1, jb) = zero; rhotwg_ki(npwx+1, jb) = zero
-             if (ib_sum == jb) then
-               ABI_CHECK(wfd%get_wave_ptr(ib_sum, ik_ibz, spin, wave_sum, msg) == 0, msg)
+             if (band_sum == jb) then
+               ABI_CHECK(wfd%get_wave_ptr(band_sum, ik_ibz, spin, wave_sum, msg) == 0, msg)
                cg_sum => wave_sum%ug
                ABI_CHECK(wfd%get_wave_ptr(jb, jk_ibz, spin, wave_jb, msg) == 0, msg)
                cg_jb  => wave_jb%ug
@@ -6120,13 +6230,13 @@ subroutine gwr_build_sigxme(gwr)
 #endif
        end do ! jb Got all matrix elements from bmin up to bmax.
 
-       theta_mu_minus_esum  = fact_spin * qp_occ(ib_sum, ik_ibz, spin)
-       theta_mu_minus_esum2 = sqrt(abs(fact_spin * qp_occ(ib_sum, ik_ibz, spin))) ! MBB Nat. orb. funct. approx. sqrt(occ)
+       theta_mu_minus_esum  = fact_spin * qp_occ(band_sum, ik_ibz, spin)
+       theta_mu_minus_esum2 = sqrt(abs(fact_spin * qp_occ(band_sum, ik_ibz, spin))) ! MBB Nat. orb. funct. approx. sqrt(occ)
 
 
        if (abs(theta_mu_minus_esum / fact_spin) >= tol_empty) then     ! MRM: allow negative occ numbers
          do kb=bmin,bmax
-#if 0
+
            ! Copy the ket Sigma_x |phi_{k,kb}>.
            rhotwgp(:) = rhotwg_ki(:, kb)
 
@@ -6136,12 +6246,13 @@ subroutine gwr_build_sigxme(gwr)
            !      * Only off-diagonal elements connecting states with same character.
            !      * Only the upper triangle if HF, SEX, or COHSEX.
 
+#if 0
            do irow=1,Sigxij_tab(spin)%col(kb)%size1
              jb = Sigxij_tab(spin)%col(kb)%bidx(irow)
              rhotwg(:) = rhotwg_ki(:,jb)
 
              ! Calculate bare exchange <phi_jb|Sigma_x|phi_kb>.
-             ! Do the scalar product only if ib_sum is occupied.
+             ! Do the scalar product only if band_sum is occupied.
              do iab=1,nsig_ab
                spadx1 = spinor_padx(1, iab); spadx2 = spinor_padx(2, iab)
                xdot_tmp = -XDOTC(npwx, rhotwg(spadx1+1:), 1, rhotwgp(spadx2+1:), 1)
@@ -6166,7 +6277,7 @@ subroutine gwr_build_sigxme(gwr)
          end do ! kb
        end if
 
-     end do ! ib_sum
+     end do ! band_sum
    end do ! my_ifk Got all diagonal (off-diagonal) matrix elements.
 
    ABI_FREE(ur_bdgw)

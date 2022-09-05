@@ -339,7 +339,7 @@ subroutine setmesh(gmet, gvec, ngfft, npwvec, npwsigx, npwwfn, nfftot, method, m
   ' setmesh: npwwfn        = ',npwwfn, '; Max (m1,m2,m3)   = ',m1,m2,m3,ch10,&
   '          npweps/npwsigx= ',npwsigx,'; Max (mm1,mm2,mm3)= ',mm1,mm2,mm3,ch10,&
   '          mG0 added     = ',mG0(:)
- call wrtout(ount,msg,'COLL')
+ call wrtout(ount, msg)
  !
  ! === Different FFT grids according to method ==
  select case (method)
@@ -471,11 +471,14 @@ subroutine setmesh(gmet, gvec, ngfft, npwvec, npwsigx, npwwfn, nfftot, method, m
 
  if (enforce_sym==0) then
    ! === Determine the best size for the FFT grid *without* considering the symm ops ===
-   ! * Ideally n=2*m+1 but this  could not be allowed by the FFT library.
+   ! * Ideally n=2*m+1 but this could not be allowed by the FFT library.
    call size_goed_fft(m1, n1, ierr)
+   ABI_CHECK(ierr == 0, sjoin("size_goed_fft failed", ch10, tnons_warn))
    call size_goed_fft(m2, n2, ierr)
+   ABI_CHECK(ierr == 0, sjoin("size_goed_fft failed", ch10, tnons_warn))
    call size_goed_fft(m3, n3, ierr)
    ABI_CHECK(ierr == 0, sjoin("size_goed_fft failed", ch10, tnons_warn))
+
    nfftot=n1*n2*n3
 
    ! * Check if the FFT is compatible, write ONLY a warning if it breaks the symmetry
@@ -494,7 +497,7 @@ subroutine setmesh(gmet, gvec, ngfft, npwvec, npwsigx, npwwfn, nfftot, method, m
    !
    ! * Warn if not compatibile with tnons or rotational part.
    if (.not.fft_ok) then
-    ABI_WARNING('FFT mesh is not compatible with non-symmorphic translations')
+     ABI_WARNING('FFT mesh is not compatible with non-symmorphic translations')
    end if
    if (.not.(check_rot_fft(nsym,symrel,n1,n2,n3))) then
      ABI_WARNING('FFT mesh is not compatible with rotations')
@@ -520,9 +523,12 @@ subroutine setmesh(gmet, gvec, ngfft, npwvec, npwsigx, npwwfn, nfftot, method, m
    ! 2) Check if also rotations preserve the grid.
    ! * Use previous m values as Initial guess.
    call size_goed_fft(m1,fftsym(1),ierr)
+   ABI_CHECK(ierr == 0, sjoin("size_goed_fft failed", ch10, tnons_warn))
    call size_goed_fft(m2,fftsym(2),ierr)
+   ABI_CHECK(ierr == 0, sjoin("size_goed_fft failed", ch10, tnons_warn))
    call size_goed_fft(m3,fftsym(3),ierr)
    ABI_CHECK(ierr == 0, sjoin("size_goed_fft failed", ch10, tnons_warn))
+
    mdum(1)=m1
    mdum(2)=m2
    mdum(3)=m3
@@ -573,7 +579,7 @@ subroutine setmesh(gmet, gvec, ngfft, npwvec, npwsigx, npwwfn, nfftot, method, m
  ! * Presently only Goedecker"s library or FFTW3 are allowed, see size_goed_fft.F90
  fftalg=ngfft(7); fftalga=fftalg/100; fftalgc=MOD(fftalg,10)
 
- if ( ALL(fftalga /= (/FFT_SG,FFT_FFTW3, FFT_DFTI/)) ) then
+ if ( ALL(fftalga /= [FFT_SG, FFT_FFTW3, FFT_DFTI]) ) then
    write(msg,'(6a)')ch10,&
     "Only Goedecker's routines with fftalg=1xx or FFTW3/DFTI routines are allowed in GW calculations. ",ch10,&
     "Action : check the value of fftalg in your input file, ",ch10,&

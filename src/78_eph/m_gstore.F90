@@ -1084,9 +1084,9 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, eph_np_pqbks, priority, n
      ! hence the q-point parallelism is expected to be more efficient.
      ! On the other hand, the k-point parallelism and the perturbation parallelism
      ! allow one to reduce the memory requirements associated to the wavefunctions (kpt) and
-     ! the scattering potential in the supercell (perturbations).
+     ! the scattering potentials in the supercell (perturbations).
      ! Here we try to optimize performance but it's clear that for large systems the user
-     ! has to specify eph_np_pqbks in the input file.
+     ! should specify eph_np_pqbks in the input file.
 
      select case (priority)
      case ("q")
@@ -1140,20 +1140,19 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, eph_np_pqbks, priority, n
 
    ! Create communicator for q-points
    keepdim = .False.; keepdim(1) = .True.
-   call MPI_CART_SUB(comm_cart, keepdim, gqk%qpt_comm%value, ierr); gqk%qpt_comm%me = xmpi_comm_rank(gqk%qpt_comm%value)
+   call gqk%qpt_comm%from_cart_sub(comm_cart, keepdim)
 
    ! Create communicator for k-points
    keepdim = .False.; keepdim(2) = .True.
-   call MPI_CART_SUB(comm_cart, keepdim, gqk%kpt_comm%value, ierr); gqk%kpt_comm%me = xmpi_comm_rank(gqk%kpt_comm%value)
+   call gqk%kpt_comm%from_cart_sub(comm_cart, keepdim)
 
    ! Create communicator for perturbations.
    keepdim = .False.; keepdim(3) = .True.
-   call MPI_CART_SUB(comm_cart, keepdim, gqk%pert_comm%value, ierr); gqk%pert_comm%me = xmpi_comm_rank(gqk%pert_comm%value)
+   call gqk%pert_comm%from_cart_sub(comm_cart, keepdim)
 
    ! Create communicator for the (qpt, pert) 2D grid
    keepdim = .False.; keepdim(1) = .True.; keepdim(3) = .True.
-   call MPI_CART_SUB(comm_cart, keepdim, gqk%qpt_pert_comm%value, ierr)
-   gqk%qpt_pert_comm%me = xmpi_comm_rank(gqk%qpt_pert_comm%value)
+   call gqk%qpt_pert_comm%from_cart_sub(comm_cart, keepdim)
 
    call xmpi_comm_free(comm_cart)
 #endif
@@ -3540,7 +3539,7 @@ function gstore_from_ncpath(path, with_cplex, dtset, cryst, ebands, ifc, comm) r
  call xmpi_comm_free(comm_spin)
 
  ! Now we read the big arrays with MPI-IO and hdf5 groups.
- ! Note the loop over spin to account as each gqk has its own dimensions.
+ ! Note the loop over spin as each gqk has its own dimensions.
  ! Recall the shape on the arrays:
  !
  ! In memory, we have allocated:

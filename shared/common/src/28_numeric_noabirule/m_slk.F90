@@ -993,6 +993,7 @@ logical function block_dist_1d(mat_size, nproc, block_size, msg) result (ok)
 ! *********************************************************************
 
  ok = .True.; msg = ""
+ !block_size = 1; return
 
  block_size = mat_size / nproc
  if (block_size == 0) then

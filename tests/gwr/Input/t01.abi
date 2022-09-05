@@ -24,7 +24,7 @@ nband2     40        # Number of (occ + empty) bands
 # Dataset 3: G0W0 with GWR code
 ################################
 optdriver3  6        # Activate GWR code
-gwr_task3 "G0W0"     # One-shot calculation
+gwr_task3 "G0W0"     # Direct diagonalization
 
 prtvol3 1            # Write additional stuff to abo file for testing purposes.
                      # DO NOT USE this option for production runs!

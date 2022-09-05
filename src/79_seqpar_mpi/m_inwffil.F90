@@ -2657,7 +2657,7 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
  integer :: istwf10_k,istwf1_k,istwf2_k,isym,itimrev
  integer :: mgfft1,mgfft2,n1,n2,n3,n4,n5,n6
  integer :: nbremn,npwtot,nspinor_index,nspinor1_this_proc,nspinor2_this_proc
- integer :: order,ortalgo 
+ integer :: order,ortalgo
  real(dp) :: ai,ar,arg,bi,br,eig_tmp,spinrots,spinrotx,spinroty,spinrotz
  character(len=500) :: message
  integer, parameter :: int64 = selected_int_kind(18)
@@ -3001,10 +3001,10 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
          ai=wavefspinor(2,ipw)
          br=wavefspinor(1,npw2+ipw)
          bi=wavefspinor(2,npw2+ipw)
-         wavefspinor(1,ipw)     = spinrots*ar-spinrotz*ai +spinroty*br-spinrotx*bi
-         wavefspinor(2,ipw)     = spinrots*ai+spinrotz*ar +spinroty*bi+spinrotx*br
-         wavefspinor(1,npw2+ipw)=-spinroty*ar-spinrotx*ai +spinrots*br+spinrotz*bi
-         wavefspinor(2,npw2+ipw)=-spinroty*ai+spinrotx*ar +spinrots*bi-spinrotz*br
+         wavefspinor(1,ipw)     =  spinrots*ar - spinrotz*ai + spinroty*br - spinrotx*bi
+         wavefspinor(2,ipw)     =  spinrots*ai + spinrotz*ar + spinroty*bi + spinrotx*br
+         wavefspinor(1,npw2+ipw)= -spinroty*ar - spinrotx*ai + spinrots*br + spinrotz*bi
+         wavefspinor(2,npw2+ipw)= -spinroty*ai + spinrotx*ar + spinrots*bi - spinrotz*br
        end do
 !$OMP END DO
 !$OMP END PARALLEL

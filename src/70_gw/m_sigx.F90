@@ -145,7 +145,7 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, Sigp, 
 !Local variables ------------------------------
 !scalars
  integer,parameter :: ndat1 = 1, use_pawnhat0 = 0, ider0 = 0
- integer :: gwcalctyp,izero,iab,ib_sum,ib,ierr,ig,ig_rot,ii,iik,itim_q,i2
+ integer :: gwcalctyp,izero,iab,band_sum,ib,ierr,ig,ig_rot,ii,iik,itim_q,i2
  integer :: ik_bz, ik_ibz, isym_q, iq_bz, iq_ibz, spin, isym, jb, is_idx
  integer :: jik,jk_bz,jk_ibz,kb,nspinor,nsppol,ifft
  integer :: nq_summed,ibsp,dimcprj_gw,dim_rtwg, isym_kgw, isym_ki
@@ -253,8 +253,8 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, Sigp, 
  do spin=1,nsppol
    do ik_bz=1,Kmesh%nbz
      ik_ibz = Kmesh%tab(ik_bz)
-     do ib_sum=1,Sigp%nbnds
-       bks_mask(ib_sum, ik_bz, spin) = (abs(qp_occ(ib_sum, ik_ibz, spin)) >= tol_empty)  ! MRM allow negative occ
+     do band_sum=1,Sigp%nbnds
+       bks_mask(band_sum, ik_bz, spin) = (abs(qp_occ(band_sum, ik_ibz, spin)) >= tol_empty)  ! MRM allow negative occ
      end do
    end do
  end do
@@ -407,8 +407,7 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, Sigp, 
      call findqg0(iq_bz, g0, kgw_m_ksum, Qmesh%nbz, Qmesh%bz, Sigp%mG0)
 
      ! If symmetries are exploited only q-points in the IBZ_k are computed.
-     ! In this case elements are weighted according to wtqp and wtqm.
-     ! wtqm is for time-reversal.
+     ! In this case elements are weighted according to wtqp and wtqm. wtqm is for time-reversal.
      wtqp = 1; wtqm = 0
      if (can_symmetrize(spin)) then
        if (ltg_k%ibzq(iq_bz) /= 1) cycle
@@ -473,29 +472,29 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, Sigp, 
      ! ==========================
      ! Sum over (occupied) bands
      ! ==========================
-     do ib_sum=1,Sigp%nbnds
+     do band_sum=1,Sigp%nbnds
 
        ! Parallelism over bands.
-       if (proc_distrb(ib_sum, ik_bz, spin) /= wfd%my_rank) CYCLE
+       if (proc_distrb(band_sum, ik_bz, spin) /= wfd%my_rank) CYCLE
 
        ! Skip empty states. MRM: allow negative occ numbers.
-       if (abs(qp_occ(ib_sum, ik_ibz, spin)) < tol_empty) CYCLE
+       if (abs(qp_occ(band_sum, ik_ibz, spin)) < tol_empty) CYCLE
 
-       call wfd%get_ur(ib_sum, ik_ibz, spin, ur_ibz)
+       call wfd%get_ur(band_sum, ik_ibz, spin, ur_ibz)
 
        if (psps%usepaw == 1) then
          ! Load cprj for point ksum, this spin or spinor and *THIS* band.
          ! TODO MG I could avoid doing this but I have to exchange spin and bands ???
          ! For sure there is a better way to do this!
-         call wfd%get_cprj(ib_sum, ik_ibz, spin, cryst, Cprj_ksum, sorted=.FALSE.)
+         call wfd%get_cprj(band_sum, ik_ibz, spin, cryst, Cprj_ksum, sorted=.FALSE.)
          call paw_symcprj(ik_bz, nspinor, 1, cryst, Kmesh, Pawtab, Pawang, Cprj_ksum)
          if (pawcross==1) then
-           call wfdf%paw_get_aeur(ib_sum,ik_ibz,spin,cryst,Paw_onsite,psps,Pawtab,Pawfgrtab,&
+           call wfdf%paw_get_aeur(band_sum,ik_ibz,spin,cryst,Paw_onsite,psps,Pawtab,Pawfgrtab,&
                                   ur_ae_sum,ur_ae_onsite_sum,ur_ps_onsite_sum)
          end if
        end if
 
-       ! Get all <k-q,ib_sum,s|e^{-i(q+G).r}|s,jb,k>
+       ! Get all <k-q,band_sum,s|e^{-i(q+G).r}|s,jb,k>
        do jb=bmin,bmax
 
          if (Psps%usepaw==1 .and. use_pawnhat0 == 1) then
@@ -541,22 +540,22 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, Sigp, 
            !
            !   * The oscillator is evaluated at q = 0 as it is considered constant in the small cube around Gamma
            !     while the Colulomb term is integrated out.
-           !   * If nspinor == 1, we have nonzero contribution only if ib_sum == jb
-           !   * If nspinor == 2, we evaluate <ib_sum,up|jb,up> and <ib_sum,dwn|jb,dwn>,
+           !   * If nspinor == 1, we have nonzero contribution only if band_sum == jb
+           !   * If nspinor == 2, we evaluate <band_sum,up|jb,up> and <band_sum,dwn|jb,dwn>,
            !     and impose orthonormalization since npwwfn might be < npwvec.
            !   * Note the use of i_sz_resid and not i_sz, to account for the possibility
            !     to have generalized KS basis set from hybrid
 
            if (nspinor == 1) then
              rhotwg_ki(1, jb) = czero_gw
-             if (ib_sum == jb) rhotwg_ki(1,jb) = CMPLX(SQRT(Vcp%i_sz_resid), 0.0_gwp)
+             if (band_sum == jb) rhotwg_ki(1,jb) = CMPLX(SQRT(Vcp%i_sz_resid), 0.0_gwp)
              !rhotwg_ki(1,jb) = czero_gw ! DEBUG
 
            else
              npw_k = wfd%npwarr(ik_ibz)
              rhotwg_ki(1, jb) = zero; rhotwg_ki(npwx+1, jb) = zero
-             if (ib_sum == jb) then
-               ABI_CHECK(wfd%get_wave_ptr(ib_sum, ik_ibz, spin, wave_sum, msg) == 0, msg)
+             if (band_sum == jb) then
+               ABI_CHECK(wfd%get_wave_ptr(band_sum, ik_ibz, spin, wave_sum, msg) == 0, msg)
                cg_sum => wave_sum%ug
                ABI_CHECK(wfd%get_wave_ptr(jb, jk_ibz, spin, wave_jb, msg) == 0, msg)
                cg_jb  => wave_jb%ug
@@ -571,8 +570,8 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, Sigp, 
          end if
        end do ! jb Got all matrix elements from bmin up to bmax.
 
-       theta_mu_minus_esum  = fact_spin * qp_occ(ib_sum, ik_ibz, spin)
-       theta_mu_minus_esum2 = sqrt(abs(fact_spin * qp_occ(ib_sum, ik_ibz, spin))) ! MBB Nat. orb. funct. approx. sqrt(occ)
+       theta_mu_minus_esum  = fact_spin * qp_occ(band_sum, ik_ibz, spin)
+       theta_mu_minus_esum2 = sqrt(abs(fact_spin * qp_occ(band_sum, ik_ibz, spin))) ! MBB Nat. orb. funct. approx. sqrt(occ)
 
        if (abs(theta_mu_minus_esum / fact_spin) >= tol_empty) then     ! MRM: allow negative occ numbers
          do kb=bmin,bmax
@@ -590,7 +589,7 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, Sigp, 
              rhotwg(:) = rhotwg_ki(:,jb)
 
              ! Calculate bare exchange <phi_jb|Sigma_x|phi_kb>.
-             ! Do the scalar product only if ib_sum is occupied.
+             ! Do the scalar product only if band_sum is occupied.
              do iab=1,nsig_ab
                spadx1 = spinor_padx(1, iab); spadx2 = spinor_padx(2, iab)
                xdot_tmp = -XDOTC(npwx, rhotwg(spadx1+1:), 1, rhotwgp(spadx2+1:), 1)
@@ -614,7 +613,7 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, Sigp, 
          end do ! kb
        end if
 
-     end do ! ib_sum
+     end do ! band_sum
 
      ! Deallocate k-dependent quantities.
      ABI_FREE(x_gbound)

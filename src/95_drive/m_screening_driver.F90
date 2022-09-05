@@ -1863,12 +1863,12 @@ subroutine setup_screening(codvsn,acell,rprim,wfk_fname,Dtset,Psps,Pawtab,&
  ! * Here we calculate the enlargement of the G-sphere, npwepG0, needed to account for umklapps.
  ! TODO Switch on use_umklp, write all this stuff to ab_out
 
- Ep%npwepG0=Ep%npwe
- ABI_MALLOC(Ltg_q,(Qmesh%nibz))
+ Ep%npwepG0 = Ep%npwe
+ ABI_MALLOC(Ltg_q, (Qmesh%nibz))
 
  do iq=1,Qmesh%nibz
    qtmp = Qmesh%ibz(:,iq); if (normv(qtmp,gmet,'G') < GW_TOLQ0) qtmp(:) = zero; use_umklp = 0
-   call Ltg_q(iq)%init(qtmp,Kmesh,Cryst,use_umklp,Ep%npwe,gvec=gvec_kss)
+   call Ltg_q(iq)%init(qtmp, Kmesh%nbz, Kmesh%bz, Cryst, use_umklp, Ep%npwe, gvec=gvec_kss)
  end do
 
  ecutepspG0 = Dtset%ecuteps
@@ -1882,8 +1882,8 @@ subroutine setup_screening(codvsn,acell,rprim,wfk_fname,Dtset,Psps,Pawtab,&
 
  if (Ep%npwepG0>Ep%npwvec) then
    write(msg,'(3a,i5,a,i5)')&
-&    ' npwepG0 > npwvec, decrease npweps or increase npwwfn. ',ch10,&
-&    ' npwepG0 = ',Ep%npwepG0,' npwvec = ',Ep%npwvec
+    ' npwepG0 > npwvec, decrease npweps or increase npwwfn. ',ch10,&
+    ' npwepG0 = ',Ep%npwepG0,' npwvec = ',Ep%npwvec
    ABI_ERROR(msg)
  end if
 

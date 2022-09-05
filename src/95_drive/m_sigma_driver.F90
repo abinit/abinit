@@ -740,7 +740,9 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  ABI_MALLOC(Ltg_k, (Sigp%nkptgw))
  use_umklp = 1
  do ikcalc=1,Sigp%nkptgw
-   if (Sigp%symsigma /= 0) call Ltg_k(ikcalc)%init(Sigp%kptgw(:,ikcalc), Qmesh, Cryst, use_umklp, npwe=0)
+   if (Sigp%symsigma /= 0) then
+     call Ltg_k(ikcalc)%init(Sigp%kptgw(:,ikcalc), Qmesh%nbz, Qmesh%bz, Cryst, use_umklp, npwe=0)
+   end if
  end do
 
  ! Compute structure factor phases and large sphere cut-off
@@ -3643,7 +3645,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
 
  call get_ng0sh(Sigp%nkptgw,Sigp%kptgw,Kmesh%nbz,Kmesh%bz,Qmesh%nbz,Qmesh%bz,-one,ng0sh_opt)
  call wrtout(std_out, sjoin(' Optimal value for ng0sh ', ltoa(ng0sh_opt)))
- Sigp%mG0=ng0sh_opt
+ Sigp%mG0 = ng0sh_opt
 
 ! G-sphere for W and Sigma_c is initialized from the SCR file.
  call Gsph_c%init(Cryst, Er%npwe, gvec=Er%gvec)
@@ -3785,7 +3787,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
  Sigp%ecutsigx = Dtset%ecutsigx
 
  ! === Setup of the FFT mesh for the oscilator strengths ===
- ! * gwc_ngfft(7:18)==Dtset%ngfft(7:18) which is initialized before entering screening.
+ ! * Init gwc_ngfft(7:18) and gwx_ngfft(7:18) with Dtset%ngfft(7:18)
  ! * Here we redefine gwc_ngfft(1:6) according to the following options:
  !
  ! method == 0 --> FFT grid read from fft.in (debugging purpose)
@@ -3799,20 +3801,20 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
  gwc_ngfft(1:18) = Dtset%ngfft(1:18)
  gwx_ngfft(1:18) = Dtset%ngfft(1:18)
 
- method=2
- if (Dtset%fftgw==00 .or. Dtset%fftgw==01) method=0
- if (Dtset%fftgw==10 .or. Dtset%fftgw==11) method=1
- if (Dtset%fftgw==20 .or. Dtset%fftgw==21) method=2
- if (Dtset%fftgw==30 .or. Dtset%fftgw==31) method=3
- enforce_sym = MOD(Dtset%fftgw, 10)
+ method = 2
+ if (Dtset%fftgw == 00 .or. Dtset%fftgw == 01) method = 0
+ if (Dtset%fftgw == 10 .or. Dtset%fftgw == 11) method = 1
+ if (Dtset%fftgw == 20 .or. Dtset%fftgw == 21) method = 2
+ if (Dtset%fftgw == 30 .or. Dtset%fftgw == 31) method = 3
+ enforce_sym = mod(dtset%fftgw, 10)
 
  ! FFT mesh for sigma_x.
- call setmesh(gmet,Gsph_Max%gvec,gwx_ngfft,Sigp%npwvec,Sigp%npwx,Sigp%npwwfn,&
-              gwx_nfftot,method,Sigp%mG0,Cryst,enforce_sym)
+ call setmesh(gmet, Gsph_Max%gvec, gwx_ngfft, Sigp%npwvec, Sigp%npwx, Sigp%npwwfn, &
+              gwx_nfftot, method, Sigp%mG0, Cryst, enforce_sym)
 
  ! FFT mesh for sigma_c.
- call setmesh(gmet,Gsph_Max%gvec,gwc_ngfft,Sigp%npwvec,Er%npwe,Sigp%npwwfn,&
-              gwc_nfftot,method,Sigp%mG0,Cryst,enforce_sym,unit=dev_null)
+ call setmesh(gmet, Gsph_Max%gvec, gwc_ngfft, Sigp%npwvec, Er%npwe, Sigp%npwwfn,&
+              gwc_nfftot, method, Sigp%mG0, Cryst, enforce_sym, unit=dev_null)
 
  ! ======================================================================
  ! ==== Check for presence of files with core orbitals, for PAW only ====

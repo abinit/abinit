@@ -255,9 +255,10 @@ subroutine ts_usug_kkp_bz(npw, nr, ndat, ngfft, map2sphere, use_padfft, igfftg0,
 
 ! *************************************************************************
 
- ! Form rho-twiddle(r)=u_1^*(r,b1,kbz1) u_2(r,b2,kbz2), to account for symmetries:
- ! u(r,b,kbz)=e^{-2i\pi kibz.(R^{-1}t} u (R{^-1}(r-t),b,kibz)
- !           =e^{+2i\pi kibz.(R^{-1}t} u*({R^-1}(r-t),b,kibz) for time-reversal
+ ! Form rho-twiddle(r) = u_1^*(r,b1,kbz1) u_2(r,b2,kbz2), to account for symmetries:
+ !
+ ! u(r,b,kbz) = e^{-2i\pi kibz.(R^{-1}t} u (R{^-1}(r-t), b, kibz)
+ !            = e^{+2i\pi kibz.(R^{-1}t} u*({R^-1}(r-t), b, kibz) for time-reversal symmetry.
  !
  ABI_MALLOC(u12prod,(nr*ndat))
  call usur_kkp_bz(nr,ndat,time1,ktabr1,ktabp1,u1,time2,ktabr2,ktabp2,u2,u12prod)
@@ -308,7 +309,7 @@ end subroutine ts_usug_kkp_bz
 !! INPUTS
 !! nr=number of FFT grid points
 !! ndat=Number of wavefunctions to transform.
-!! u1(nr*ndat),u2(nr*ndat)=the two wavefunctions iin the IBZ (periodic part)
+!! u1(nr*ndat),u2(nr*ndat)=the two wavefunctions in the IBZ (periodic part)
 !! time1=1 if kbz1 = Sk1, 2 if kbz1 = -Sk_1 (k_1 is in the IBZ)
 !! time2=1 if kbz2 = Sk2, 2 if kbz2 = -Sk_2 (k_2 is in the IBZ)
 !! ktabr1(nr),ktabr2(nr)= tables R^-1(r-t) for the two k-points
