@@ -223,6 +223,41 @@ module m_gemm_nonlop
      integer(kind=c_int32_t), value, intent(in)    :: option
    end subroutine fix_realvec
 
+#if defined(HAVE_KOKKOS)
+
+    subroutine opernlc_ylm_allwf_kokkos(cplex, cplex_enl, cplex_fac, &
+      &                                 dimenl1, dimenl2, dimekbq, &
+      &                                 iatm, itypat, &
+      &                                 natom, nincat, nspinor, nspinortot, paw_opt, nlmn, &
+      &                                 enl, &
+      &                                 gx_gpu, gxfac_gpu, gxfac_sij_gpu, &
+      &                                 shift_spinor, ndat, &
+      &                                 atindx1, &
+      &                                 indlmn, &
+      &                                 lambda, &
+      &                                 sij, &
+      &                                 ibeg, iend, &
+      &                                 nattyp_max) bind(c, name='opernlc_ylm_allwf_kokkos_cpp')
+      use, intrinsic :: iso_c_binding
+      implicit none
+      integer(kind=c_int32_t), value, intent(in)    :: cplex, cplex_enl, cplex_fac
+      integer(kind=c_int32_t), value, intent(in)    :: dimenl1, dimenl2, dimekbq
+      integer(kind=c_int32_t), value, intent(in)    :: iatm, itypat
+      integer(kind=c_int32_t), value, intent(in)    :: natom, nincat, nspinor, nspinortot, paw_opt, nlmn
+      type(c_ptr),                    intent(inout) :: enl ! (dimenl1, dimenl2, nspinortot**2, dimekbq)
+      type(c_ptr),                    intent(inout) :: gx_gpu ! (cplex,nlmn,nincat,nspinor*ndat)
+      type(c_ptr),                    intent(inout) :: gxfac_gpu ! (cplex_fac,nlmn,nincat,nspinor*ndat)
+      type(c_ptr),                    intent(inout) :: gxfac_sij_gpu !(cplex,nlmn,nincat,nspinor*ndat*(paw_opt/3))
+      integer(kind=c_int32_t), value, intent(in)    :: shift_spinor, ndat
+      type(c_ptr),                    intent(inout) :: atindx1 ! (natom)
+      type(c_ptr),                    intent(inout) :: indlmn  ! (6,nlmn)
+      type(c_ptr),                    intent(inout) :: lambda ! (ndat)
+      type(c_ptr),                    intent(inout) :: sij ! (((paw_opt+1)/3)*nlmn*(nlmn+1)/2)
+      integer(kind=c_int32_t), value, intent(in)    :: ibeg, iend, nattyp_max
+    end subroutine opernlc_ylm_allwf_kokkos
+
+#endif
+
  end interface
 
 #endif
@@ -1213,6 +1248,7 @@ contains
   real(dp) :: dgxdt_dum_in(1,1,1,1,1), dgxdt_dum_out(1,1,1,1,1),dgxdt_dum_out2(1,1,1,1,1)
   real(dp) :: d2gxdt_dum_in(1,1,1,1,1), d2gxdt_dum_out(1,1,1,1,1),d2gxdt_dum_out2(1,1,1,1,1)
   integer :: npw_max
+  integer :: nattyp_max
 
   real(dp), allocatable :: sij_typ(:)
 
@@ -1387,6 +1423,9 @@ contains
         nd2gxdtfac = 0
         optder = 0
 
+        ! get the maximun of nattyp array
+        nattyp_max = maxval(nattyp)
+
         ABI_MALLOC     ( sij_typ    , (((paw_opt+1)/3)*lmnmax*(lmnmax+1)/2) )
 
         shift = 0
@@ -1424,6 +1463,26 @@ contains
           !     &                  nattyp(itypat), nlmn, nspinor, nspinortot, paw_opt, sij_typ)
           ! end do ! idat
 
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS)
+          ! TODO - PK
+          ! call opernlc_ylm_allwf_kokkos(cplex, cplex_enl, cplex_fac, &
+          !   &                           dimenl1, dimenl2, dimekbq, &
+          !   &                           iatm, itypat, &
+          !   &                           natom, nattyp(itypat), nspinor, &
+          !   &                           nspinortot, paw_opt, nlmn, &
+          !   &                           enl_gpu, &
+          !   &                           projections_gpu, &
+          !   &                           vnl_projections_gpu, &
+          !   &                           s_projections_gpu, &
+          !   &                           shift_spinor, ndat, &
+          !   &                           atindx1_gpu, &
+          !   &                           indlmn_gpu, &
+          !   &                           lambda_gpu, &
+          !   &                           sij_typ_gpu, &
+          !   &                           ibeg, iend, nattyp_max)
+
+#else
+
           ! TODO - PK
           call opernlc_ylm_allwf_cpu(atindx1, cplex, cplex_enl, cplex_fac, &
             &                  dimenl1, dimenl2, dimekbq, enl, &
@@ -1432,6 +1491,8 @@ contains
             &                  s_projections_cpu(:, ibeg:iend,1:nspinor*ndat), &
             &                  iatm, indlmn(:,:,itypat), itypat, ndat, lambda, mpi_enreg, natom, &
             &                  nattyp(itypat), nlmn, nspinor, nspinortot, paw_opt, sij_typ)
+
+#endif
 
           shift = shift + nattyp(itypat)*nlmn
           iatm  = iatm  + nattyp(itypat)
