@@ -192,7 +192,6 @@ subroutine psps_init_global(mtypalch, npsp, psps, pspheads)
  ABI_MALLOC(psps%title,(npsp))
  ABI_MALLOC(psps%zionpsp,(npsp))
  ABI_MALLOC(psps%znuclpsp,(npsp))
- ABI_MALLOC(psps%rmatchpsp,(npsp))
  call psp2params_init(psps%gth_params, npsp)
 
  psps%filpsp(1:npsp)=pspheads(1:npsp)%filpsp
@@ -203,7 +202,6 @@ subroutine psps_init_global(mtypalch, npsp, psps, pspheads)
  psps%title(1:npsp)=pspheads(1:npsp)%title
  psps%zionpsp(1:npsp)=pspheads(1:npsp)%zionpsp
  psps%znuclpsp(1:npsp)=pspheads(1:npsp)%znuclpsp
- psps%rmatchpsp(1:npsp)=pspheads(1:npsp)%rmatchpsp
 
  ! Transfer md5 checksum
  ABI_MALLOC(psps%md5_pseudos, (npsp))
@@ -531,7 +529,6 @@ subroutine psps_free(psps)
  ABI_SFREE(psps%title)
  ABI_SFREE(psps%zionpsp)
  ABI_SFREE(psps%znuclpsp)
- ABI_SFREE(psps%rmatchpsp)
  ABI_SFREE(psps%algalch)
  ABI_SFREE(psps%mixalch)
  ABI_SFREE(psps%ekb)
@@ -674,9 +671,6 @@ subroutine psps_copy(pspsin, pspsout)
  end if
  if (allocated(pspsin%znucltypat)) then
    call alloc_copy(pspsin%znucltypat, pspsout%znucltypat)
- end if
- if (allocated(pspsin%rmatchpsp)) then
-   call alloc_copy(pspsin%rmatchpsp, pspsout%rmatchpsp)
  end if
 
  ! allocate and copy character strings
@@ -964,7 +958,6 @@ subroutine psps_ncwrite(psps, path)
  ncerr = nctk_def_arrays(ncid, [&
    nctkarr_t("ziontypat", "dp", "ntypat"), &
    nctkarr_t("znucltypat", "dp", "ntypat"), &
-   nctkarr_t("rmatchpsp", "dp", "ntypat"), &
    nctkarr_t("qgrid_vl", "dp", "mqgrid_vl"), &
    nctkarr_t("qgrid_ff", "dp", "mqgrid_ff"), &
    nctkarr_t("vlspl", "dp", "mqgrid_vl, two, ntypat"), &
@@ -994,7 +987,6 @@ subroutine psps_ncwrite(psps, path)
  NCF_CHECK(nf90_put_var(ncid, vid("useylm"), psps%useylm))
  NCF_CHECK(nf90_put_var(ncid, vid("ziontypat"), psps%ziontypat))
  NCF_CHECK(nf90_put_var(ncid, vid("znucltypat"), psps%znucltypat))
- NCF_CHECK(nf90_put_var(ncid, vid("rmatchpsp"), psps%rmatchpsp))
  do ipsp=1,psps%npsp
    NCF_CHECK(nf90_put_var(ncid, vid("filpsp"), trim(psps%filpsp(ipsp)), start=[1, ipsp]))
    NCF_CHECK(nf90_put_var(ncid, vid("md5_pseudos"), trim(psps%md5_pseudos(ipsp)), start=[1, ipsp]))
