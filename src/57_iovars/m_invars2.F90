@@ -896,6 +896,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'mdtemp',tread,'DPR')
  if(tread==1) dtset%mdtemp(1:2)=dprarr(1:2)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rfomega',tread,'ENE')
+ if(tread==1) dtset%rfomega=dprarr(1)
+
 !LONG WAVE integer input variables
 !FIXME
 ! if(dtset%optdriver==RUNL_LONGWAVE) then
