@@ -3228,6 +3228,12 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !  rfmeth
    call chkint_eq(0,0,cond_string,cond_values,ierr,'rfmeth',dt%rfmeth,6,(/-3,-2,-1,1,2,3/),iout)
 
+!  rfomega
+   if(dt%rfomega/=zero)then
+     cond_string(1)='rfomega' ; cond_values(1)=dt%rfomega
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'tim1rev',dt%tim1rev,1,0,iout)
+   end if
+
 !  rprimd
 !  With optcell beyond 4, one has constraints on rprimd.
    cond_string(1)='optcell' ; cond_values(1)=dt%optcell

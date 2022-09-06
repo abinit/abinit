@@ -812,6 +812,9 @@ contains
  intarr(1,:)=dtsets(:)%rfmeth
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'rfmeth','INT',0)
 
+ dprarr(1,:)=dtsets(:)%rfomega
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'rfomega','ENE',0)
+
  intarr(1,:)=dtsets(:)%rfphon
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'rfphon','INT',0)
 
