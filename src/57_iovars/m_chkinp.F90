@@ -3231,7 +3231,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !  rfomega
    if(dt%rfomega/=zero)then
      cond_string(1)='rfomega' ; cond_values(1)=dt%rfomega
-     call chkint_eq(1,1,cond_string,cond_values,ierr,'tim1rev',dt%tim1rev,1,0,iout)
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'tim1rev',dt%tim1rev,1,(/0/),iout)
    end if
 
 !  rprimd
