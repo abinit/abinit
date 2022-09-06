@@ -230,33 +230,41 @@ module m_gemm_nonlop
 
     subroutine opernlc_ylm_allwf_kokkos(cplex, cplex_enl, cplex_fac, &
       &                                 dimenl1, dimenl2, dimekbq, &
-      &                                 iatm, itypat, &
-      &                                 natom, nincat, nspinor, nspinortot, paw_opt, nlmn, &
-      &                                 enl, &
-      &                                 gx_gpu, gxfac_gpu, gxfac_sij_gpu, &
+      &                                 iatm, itypat, ntypat, nprojs, &
+      &                                 natom, nincat, nspinor, &
+      &                                 nspinortot, paw_opt, &
+      &                                 nlmn, lmnmax, &
+      &                                 enl_gpu, &
+      &                                 gx_gpu, &
+      &                                 gxfac_gpu, &
+      &                                 gxfac2_gpu, &
+      &                                 gxfac_sij_gpu, &
       &                                 shift_spinor, ndat, &
-      &                                 atindx1, &
-      &                                 indlmn, &
-      &                                 lambda, &
-      &                                 sij, &
-      &                                 ibeg, iend, &
+      &                                 atindx1_gpu, &
+      &                                 indlmn_gpu, &
+      &                                 lambda_gpu, &
+      &                                 sij_typ_gpu, &
+      &                                 shift_proj, &
       &                                 nattyp_max) bind(c, name='opernlc_ylm_allwf_kokkos_cpp')
       use, intrinsic :: iso_c_binding
       implicit none
       integer(kind=c_int32_t), value, intent(in)    :: cplex, cplex_enl, cplex_fac
       integer(kind=c_int32_t), value, intent(in)    :: dimenl1, dimenl2, dimekbq
-      integer(kind=c_int32_t), value, intent(in)    :: iatm, itypat
-      integer(kind=c_int32_t), value, intent(in)    :: natom, nincat, nspinor, nspinortot, paw_opt, nlmn
-      type(c_ptr),                    intent(inout) :: enl ! (dimenl1, dimenl2, nspinortot**2, dimekbq)
-      type(c_ptr),                    intent(inout) :: gx_gpu ! (cplex,nlmn,nincat,nspinor*ndat)
-      type(c_ptr),                    intent(inout) :: gxfac_gpu ! (cplex_fac,nlmn,nincat,nspinor*ndat)
-      type(c_ptr),                    intent(inout) :: gxfac_sij_gpu !(cplex,nlmn,nincat,nspinor*ndat*(paw_opt/3))
+      integer(kind=c_int32_t), value, intent(in)    :: iatm, itypat, ntypat, nprojs
+      integer(kind=c_int32_t), value, intent(in)    :: natom, nincat, nspinor
+      integer(kind=c_int32_t), value, intent(in)    :: nspinortot, paw_opt
+      integer(kind=c_int32_t), value, intent(in)    :: nlmn, lmnmax
+      type(c_ptr),             value                :: enl_gpu ! (dimenl1, dimenl2, nspinortot**2, dimekbq)
+      type(c_ptr),             value                :: gx_gpu ! (cplex,nlmn,nincat,nspinor*ndat)
+      type(c_ptr),             value                :: gxfac_gpu ! (cplex_fac,nlmn,nincat,nspinor*ndat)
+      type(c_ptr),             value                :: gxfac2_gpu ! (cplex_fac,nlmn,nincat,nspinor*ndat)
+      type(c_ptr),             value                :: gxfac_sij_gpu !(cplex,nlmn,nincat,nspinor*ndat*(paw_opt/3))
       integer(kind=c_int32_t), value, intent(in)    :: shift_spinor, ndat
-      type(c_ptr),                    intent(inout) :: atindx1 ! (natom)
-      type(c_ptr),                    intent(inout) :: indlmn  ! (6,nlmn)
-      type(c_ptr),                    intent(inout) :: lambda ! (ndat)
-      type(c_ptr),                    intent(inout) :: sij ! (((paw_opt+1)/3)*nlmn*(nlmn+1)/2)
-      integer(kind=c_int32_t), value, intent(in)    :: ibeg, iend, nattyp_max
+      type(c_ptr),             value                :: atindx1_gpu ! (natom)
+      type(c_ptr),             value                :: indlmn_gpu  ! (6,nlmn)
+      type(c_ptr),             value                :: lambda_gpu ! (ndat)
+      type(c_ptr),             value                :: sij_typ_gpu ! (((paw_opt+1)/3)*nlmn*(nlmn+1)/2)
+      integer(kind=c_int32_t), value, intent(in)    :: shift_proj, nattyp_max
     end subroutine opernlc_ylm_allwf_kokkos
 
 #endif
@@ -1230,18 +1238,19 @@ contains
   integer,intent(in) :: istwf_k,lmnmax,matblk,natom,ndat,nkpgin
   integer,intent(in) :: nkpgout,nnlout,npwin,npwout,nspinor,nspinortot,ntypat
   integer,intent(in) :: paw_opt,useylm
-  integer,optional,intent(in) :: use_gpu_cuda
-  real(dp),intent(in) :: lambda(ndat)
-  type(MPI_type),intent(in) :: mpi_enreg
+  integer,optional,intent(in)      :: use_gpu_cuda
+  real(dp), target, intent(in)     :: lambda(ndat)
+  type(MPI_type),   intent(in)     :: mpi_enreg
+
   !arrays
-  integer,intent(in)     :: atindx1(natom),indlmn(6,lmnmax,ntypat)
-  integer,intent(in)     :: nattyp(ntypat)
-  real(dp),intent(in)    :: enl(dimenl1,dimenl2,nspinortot**2,dimekbq)
-  real(dp),intent(in)    :: sij(dimenl1,ntypat*((paw_opt+1)/3))
-  real(dp),target, intent(inout) ::  vectin (2,npwin*nspinor*ndat)
-  real(dp),target, intent(out)   :: svectout(2,npwout*nspinor*(paw_opt/3)*ndat)
-  real(dp),target, intent(inout) ::  vectout(2,npwout*nspinor*ndat) !vz_i
-  type(pawcprj_type),intent(inout) :: cprjin(natom,nspinor*((cpopt+5)/5)*ndat)
+  integer,  target, intent(in)     :: atindx1(natom)
+  integer,  target, intent(in)     :: indlmn(6,lmnmax,ntypat)
+  integer,          intent(in)     :: nattyp(ntypat)
+  real(dp), target, intent(in)     :: enl(dimenl1,dimenl2,nspinortot**2,dimekbq)
+  real(dp), target, intent(in)     :: sij(dimenl1,ntypat*((paw_opt+1)/3))
+  real(dp), target, intent(inout)  ::  vectin (2,npwin*nspinor*ndat)
+  real(dp), target, intent(out)    :: svectout(2,npwout*nspinor*(paw_opt/3)*ndat)
+  real(dp), target, intent(inout)  ::  vectout(2,npwout*nspinor*ndat) !vz_i
 
   ! locals
   integer :: idat, nprojs, shift, iatom, nlmn, ierr, ibeg, iend
@@ -1253,16 +1262,39 @@ contains
   integer :: npw_max
   integer :: nattyp_max
 
-  real(dp), allocatable :: sij_typ(:)
+  real(dp), allocatable, target :: sij_typ(:)
 
   type(c_ptr)                      :: projections_gpu,        s_projections_gpu,        vnl_projections_gpu
   real(dp),    allocatable, target :: projections_cpu(:,:,:), s_projections_cpu(:,:,:), vnl_projections_cpu(:,:,:)
+
+  ! used inside opernlc_ylm_allwf_kokkos_cpp when iphase > 1
+  type(c_ptr)                      :: vnl_projections2_gpu
+
   type(c_ptr)                      :: temp_realvec_gpu
   type(c_ptr)                      :: vectin_gpu, vectout_gpu, svectout_gpu
+
+  type(c_ptr)                      :: enl_gpu
+  integer                          :: enl_size_bytes
+
+  integer                          :: sizeof_int
+
+  type(c_ptr)                      :: atindx1_gpu
+  integer                          :: atindx1_size_bytes
+
+  type(c_ptr)                      :: indlmn_gpu
+  integer                          :: indlmn_size_bytes
+
+  type(c_ptr)                      :: lambda_gpu
+  integer                          :: lambda_size_bytes
+
+  type(c_ptr)                      :: sij_typ_gpu
+  integer                          :: sij_typ_size_bytes
 
   integer(kind=c_int32_t), parameter :: izero = 0
   integer(kind=c_int32_t), parameter :: fix_realvec_divide_by_2 = 0
   integer(kind=c_int32_t), parameter :: fix_realvec_zero_out    = 1
+
+  integer                          :: shift_spinor
 
 ! *************************************************************************
 
@@ -1284,12 +1316,39 @@ contains
   call gpu_memset(  s_projections_gpu, izero, cplex *     nprojs * nspinor*ndat * dp)
   call gpu_memset(vnl_projections_gpu, izero, cplex_fac * nprojs * nspinor*ndat * dp)
 
+  if (dimekbq>1) then
+    ABI_CHECK(cplex_fac==2,"BUG: invalid cplex_fac==1 when dimekbq=2!")
+    ABI_MALLOC_CUDA(vnl_projections2_gpu, (cplex_fac * nprojs * nspinor*ndat * dp))
+    call gpu_memset(vnl_projections2_gpu, izero, cplex_fac * nprojs * nspinor*ndat * dp)
+  end if
+
   ABI_MALLOC_CUDA(vectin_gpu, 2 * npwin*nspinor*ndat * dp)
   ABI_MALLOC_CUDA( vectin_gpu,  2 * npwin *nspinor*ndat * dp)
   ABI_MALLOC_CUDA( vectout_gpu, 2 * npwout*nspinor*ndat * dp)
   ABI_MALLOC_CUDA(svectout_gpu, 2 * npwout*nspinor*ndat*(paw_opt/3) * dp)
 
   call copy_on_gpu(C_LOC(vectin(1,1)), vectin_gpu, 2*npwin*nspinor*ndat*dp)
+
+  !! gpu alloc and init : enl_gpu
+  enl_size_bytes = dimenl1 * dimenl2 * nspinortot**2 * dimekbq * dp
+  ABI_MALLOC_CUDA( enl_gpu, enl_size_bytes )
+  call copy_on_gpu( C_LOC(enl(1,1,1,1)) , enl_gpu, enl_size_bytes )
+
+  !! gpu alloc and init atindx1_gpu
+  sizeof_int = 4
+  atindx1_size_bytes = natom * sizeof_int
+  ABI_MALLOC_CUDA( atindx1_gpu,  atindx1_size_bytes )
+  call copy_on_gpu( C_LOC(atindx1(1)) , atindx1_gpu, atindx1_size_bytes )
+
+  !! gpu alloc and init indlmn_gpu
+  indlmn_size_bytes = 6*lmnmax*ntypat * sizeof_int
+  ABI_MALLOC_CUDA( indlmn_gpu,  indlmn_size_bytes )
+  call copy_on_gpu( C_LOC(indlmn(1,1,1)) , indlmn_gpu, indlmn_size_bytes )
+
+  !! gpu alloc and init lambda_gpu
+  lambda_size_bytes =  ndat * dp
+  ABI_MALLOC_CUDA( lambda_gpu, lambda_size_bytes )
+  call copy_on_gpu( C_LOC(lambda(1)) , lambda_gpu, lambda_size_bytes )
 
   if(nprojs == 0) then
     ! TODO check if this is correct
@@ -1429,6 +1488,10 @@ contains
         ! get the maximun of nattyp array
         nattyp_max = maxval(nattyp)
 
+        !! gpu alloc and init sij_typ_size_bytes
+        sij_typ_size_bytes = (((paw_opt+1)/3)*lmnmax*(lmnmax+1)/2) * dp
+        ABI_MALLOC_CUDA( sij_typ_gpu, sij_typ_size_bytes )
+
         ABI_MALLOC     ( sij_typ    , (((paw_opt+1)/3)*lmnmax*(lmnmax+1)/2) )
 
         shift = 0
@@ -1439,7 +1502,7 @@ contains
             if (cplex_enl==1) then
 
               do ilmn=1,nlmn*(nlmn+1)/2
-                sij_typ(ilmn)=sij(ilmn,itypat)
+                sij_typ(ilmn) = sij(ilmn,itypat)
               end do
 
             else
@@ -1449,6 +1512,8 @@ contains
               end do
 
             end if
+
+            call copy_on_gpu( C_LOC(sij_typ(1)) , sij_typ_gpu, sij_typ_size_bytes )
 
           end if ! paw_opt>=2
 
@@ -1468,21 +1533,43 @@ contains
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS)
           ! TODO - PK
-          ! call opernlc_ylm_allwf_kokkos(cplex, cplex_enl, cplex_fac, &
-          !   &                           dimenl1, dimenl2, dimekbq, &
-          !   &                           iatm, itypat, &
-          !   &                           natom, nattyp(itypat), nspinor, &
-          !   &                           nspinortot, paw_opt, nlmn, &
-          !   &                           enl_gpu, &
-          !   &                           projections_gpu, &
-          !   &                           vnl_projections_gpu, &
-          !   &                           s_projections_gpu, &
-          !   &                           shift_spinor, ndat, &
-          !   &                           atindx1_gpu, &
-          !   &                           indlmn_gpu, &
-          !   &                           lambda_gpu, &
-          !   &                           sij_typ_gpu, &
-          !   &                           ibeg, iend, nattyp_max)
+
+          !Parallelization over spinors treatment
+          shift_spinor = 0
+          if (mpi_enreg%paral_spinor==1) then
+            shift_spinor = mpi_enreg%me_spinor
+          end if
+
+          if (gemm_nonlop_use_kokkos_debug) then
+            !write(*,*) "opernlc_ylm_allwf_kokkos"
+            call opernlc_ylm_allwf_kokkos(cplex, cplex_enl, cplex_fac, &
+              &                           dimenl1, dimenl2, dimekbq, &
+              &                           iatm, itypat, ntypat, nprojs, &
+              &                           natom, nattyp(itypat), nspinor, &
+              &                           nspinortot, paw_opt, &
+              &                           nlmn, lmnmax, &
+              &                           enl_gpu, &
+              &                           projections_gpu, &
+              &                           vnl_projections_gpu, &
+              &                           vnl_projections2_gpu, &
+              &                           s_projections_gpu, &
+              &                           shift_spinor, ndat, &
+              &                           atindx1_gpu, &
+              &                           indlmn_gpu, &
+              &                           lambda_gpu, &
+              &                           sij_typ_gpu, &
+              &                           shift, nattyp_max)
+          else
+            ! TODO - PK
+            !write(*,*) "opernlc_ylm_allwf_cpu"
+            call opernlc_ylm_allwf_cpu(atindx1, cplex, cplex_enl, cplex_fac, &
+              &                  dimenl1, dimenl2, dimekbq, enl, &
+              &                  projections_cpu(:, ibeg:iend, 1:nspinor*ndat), &
+              &                  vnl_projections_cpu(:, ibeg:iend, 1:nspinor*ndat), &
+              &                  s_projections_cpu(:, ibeg:iend, 1:nspinor*ndat), &
+              &                  iatm, indlmn(:,:,itypat), itypat, ndat, lambda, mpi_enreg, natom, &
+              &                  nattyp(itypat), nlmn, nspinor, nspinortot, paw_opt, sij_typ)
+          end if
 
 #else
 
@@ -1490,8 +1577,8 @@ contains
           call opernlc_ylm_allwf_cpu(atindx1, cplex, cplex_enl, cplex_fac, &
             &                  dimenl1, dimenl2, dimekbq, enl, &
             &                  projections_cpu(:, ibeg:iend, 1:nspinor*ndat), &
-            &                  vnl_projections_cpu(:, ibeg:iend,1:nspinor*ndat), &
-            &                  s_projections_cpu(:, ibeg:iend,1:nspinor*ndat), &
+            &                  vnl_projections_cpu(:, ibeg:iend, 1:nspinor*ndat), &
+            &                  s_projections_cpu(:, ibeg:iend, 1:nspinor*ndat), &
             &                  iatm, indlmn(:,:,itypat), itypat, ndat, lambda, mpi_enreg, natom, &
             &                  nattyp(itypat), nlmn, nspinor, nspinortot, paw_opt, sij_typ)
 
@@ -1501,11 +1588,17 @@ contains
           iatm  = iatm  + nattyp(itypat)
         end do ! itypat
         ABI_FREE(sij_typ)
+        ABI_FREE_CUDA( sij_typ_gpu )
 
-        ! TO BE REMOVED LATTER
-        ! upload s_projections and vnl_projections to GPU
-        call copy_on_gpu(C_LOC(  s_projections_cpu(1,1,1)),   s_projections_gpu, cplex     * nprojs * nspinor*ndat * dp)
-        call copy_on_gpu(C_LOC(vnl_projections_cpu(1,1,1)), vnl_projections_gpu, cplex_fac * nprojs * nspinor*ndat * dp)
+        if (gemm_nonlop_use_kokkos_debug) then
+          ! nothing to do, s_projections and vnl_projections data are already in GPU memory
+        else
+          ! TO BE REMOVED LATTER
+          ! upload s_projections and vnl_projections to GPU
+          call copy_on_gpu(C_LOC(  s_projections_cpu(1,1,1)),   s_projections_gpu, cplex     * nprojs * nspinor*ndat * dp)
+          call copy_on_gpu(C_LOC(vnl_projections_cpu(1,1,1)), vnl_projections_gpu, cplex_fac * nprojs * nspinor*ndat * dp)
+        end if
+
 
       else ! choice == 7
 
@@ -1627,6 +1720,9 @@ contains
   ABI_FREE_CUDA(    projections_gpu)
   ABI_FREE_CUDA(  s_projections_gpu)
   ABI_FREE_CUDA(vnl_projections_gpu)
+  if (dimekbq>1) then
+    ABI_FREE_CUDA(vnl_projections2_gpu)
+  end if
 
   ABI_FREE_CUDA(      vectin_gpu)
   ABI_FREE_CUDA(     vectout_gpu)
@@ -1636,10 +1732,16 @@ contains
     ABI_FREE_CUDA(temp_realvec_gpu)
   end if
 
+  ABI_FREE_CUDA( enl_gpu )
+  ABI_FREE_CUDA( atindx1_gpu )
+  ABI_FREE_CUDA( indlmn_gpu )
+  ABI_FREE_CUDA( lambda_gpu )
+
   ! if projections_cpu was allocated, then free it here
   ABI_FREE(    projections_cpu)
   ABI_FREE(  s_projections_cpu) ! TO BE REMOVED
   ABI_FREE(vnl_projections_cpu) ! TO BE REMOVED
+
 
  end subroutine gemm_nonlop_gpu
 !***
