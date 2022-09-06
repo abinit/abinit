@@ -157,13 +157,14 @@ contains
     !Local variables-------------------------------
     !Arrays
     !scalars
-    integer  :: cplex_, ia, idat, idat_ispinor, idat_jspinor, ierr
-    integer  :: ijlmn,ijspin,ilm,ilmn,i0lmn,iln,index_enl,iphase,ispinor,ispinor_index
-    integer  :: j0lmn,jilmn,jispin,jjlmn,jlm,jlmn,jspinor,jspinor_index,mu,shift
+    integer  :: ia, idat, idat_ispinor, idat_jspinor
+    integer  :: ijlmn,ilm,ilmn,i0lmn,iln,index_enl,iphase,ispinor,ispinor_index
+    integer  :: j0lmn,jjlmn,jlm,jlmn,jspinor,shift
+    !integer  :: ierr,ijspin,jilmn,jispin,jspinor_index FIXME Unneeded ?
     real(dp) :: sijr
     !arrays
-    real(dp)                    :: enl_(2), gxfi(2), gxi(cplex), gxj(cplex)
-    real(dp),allocatable        :: gxfac_offdiag(:,:,:,:),gxfj(:,:)
+    real(dp)                    :: enl_(2), gxi(cplex), gxj(cplex)
+    !real(dp),allocatable        :: gxfac_offdiag(:,:,:,:) !FIXME Unneeded
     real(dp),pointer            :: gxfac_(:,:,:,:)
     real(dp),pointer            :: enl_ptr(:,:,:)
 
