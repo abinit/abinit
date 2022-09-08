@@ -145,8 +145,8 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
 & eig0_k,eig0_kq,eig1_k,ghc,gh1c_n,grad_berry,gsc,gscq,&
 & gs_hamkq,gvnlxc,gvnlx1,icgq,idir,ipert,igscq,&
 & mcgq,mgscq,mpi_enreg,mpw1,natom,nband,nband_me,nbdbuf,nline_in,npw,npw1,nspinor,&
-& omega,opt_gvnlx1,prtvol,quit,resid,rf_hamkq,dfpt_sciss,tolrde,tolwfr,&
-& usedcwavef,wfoptalg,nlines_done)
+& opt_gvnlx1,prtvol,quit,resid,rf_hamkq,dfpt_sciss,tolrde,tolwfr,&
+& usedcwavef,wfoptalg,nlines_done,omega)
 
 !Arguments ------------------------------------
 !scalars
@@ -156,7 +156,8 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
  integer,intent(in) :: nbdbuf,nline_in,npw,npw1,nspinor,opt_gvnlx1
  integer,intent(in) :: prtvol,quit,usedcwavef,wfoptalg
  integer,intent(inout) :: nlines_done
- real(dp),intent(in) :: dfpt_sciss,omega,tolrde,tolwfr
+ real(dp),intent(in) :: dfpt_sciss,tolrde,tolwfr
+ real(dp),optional,intent(in) :: omega
  real(dp),intent(out) :: resid
  type(MPI_type),intent(in) :: mpi_enreg
  type(rf2_t), intent(in) :: rf2
@@ -187,7 +188,7 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
  integer :: ipws,ispinor,istwf_k,jband,nline,optlocal,optnl,dc_shift_band,sij_opt
  integer :: test_is_ok,useoverlap,usepaw,usevnl,usetolrde
  real(dp) :: d2edt2,d2te,d2teold,dedt,deltae,deold,dotgg
- real(dp) :: dotgp,doti,dotr,eshift,eshiftkq,gamma,optekin,prod1,prod2
+ real(dp) :: dotgp,doti,dotr,eshift,eshiftkq,gamma,omega_,optekin,prod1,prod2
  real(dp) :: theta,tol_restart,u1h0me0u1
  logical :: gen_eigenpb
  integer :: skipme, bands_skipped_now(nband)
@@ -256,7 +257,8 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
  eshift=eig0_k(band)-dfpt_sciss
 
  ! Remove omega for a finite-frequency calculation
- eshift=eshift-omega
+ omega_=zero ; if (present(omega)) omega_=omega
+ eshift=eshift-omega_
 
  ! Additional initializations
  istwf_k=gs_hamkq%istwf_k
