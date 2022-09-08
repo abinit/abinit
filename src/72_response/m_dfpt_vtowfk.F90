@@ -173,8 +173,8 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 & isppol,mband,mband_mem,mcgq,mcprjq,mkmem,mk1mem,&
 & mpi_enreg,mpw,mpw1,natom,nband_k,ncpgr,&
 & nnsclo_now,npw_k,npw1_k,nspinor,nsppol,&
-& n4,n5,n6,occ_k,omega,pawrhoij1,prtvol,psps,resid_k,rf_hamkq,rf_hamk_dir2,rhoaug1,rocceig,&
-& ddk_f,wtk_k,nlines_done,cg1_out)
+& n4,n5,n6,occ_k,pawrhoij1,prtvol,psps,resid_k,rf_hamkq,rf_hamk_dir2,rhoaug1,rocceig,&
+& ddk_f,wtk_k,nlines_done,cg1_out,omega)
 
 !Arguments ------------------------------------
 !scalars
@@ -187,7 +187,8 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
  integer,optional,intent(in) :: cg1_out
  integer,intent(in) :: nband_k,npw1_k,npw_k
  integer,intent(inout) :: nlines_done
- real(dp),intent(in) :: fermie1,omega,wtk_k
+ real(dp),intent(in) :: fermie1,wtk_k
+ real(dp),optional,intent(in) :: omega
  type(MPI_type),intent(in) :: mpi_enreg
  type(datafiles_type),intent(in) :: dtfil
  type(dataset_type),intent(in) :: dtset
@@ -439,8 +440,8 @@ unit_me = 6
  &       rf2,dcwavef,&
  &       eig0_k,eig0_kq,eig1_k,gh0c1,gh1c_n,grad_berry,gsc,gscq,gs_hamkq,gvnlxc,gvnlx1,icgq,&
  &       idir,ipert,igscq,mcgq,mgscq,mpi_enreg,mpw1,natom,nband_k,nband_me,dtset%nbdbuf,dtset%nline,&
- &       npw_k,npw1_k,nspinor,omega,opt_gvnlx1,prtvol,quit,resid,rf_hamkq,dtset%dfpt_sciss,dtset%tolrde,&
- &       dtset%tolwfr,usedcwavef,dtset%wfoptalg,nlines_done)
+ &       npw_k,npw1_k,nspinor,opt_gvnlx1,prtvol,quit,resid,rf_hamkq,dtset%dfpt_sciss,dtset%tolrde,&
+ &       dtset%tolwfr,usedcwavef,dtset%wfoptalg,nlines_done,omega=omega)
          resid_k(iband)=resid
        end if
        
