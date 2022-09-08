@@ -515,6 +515,9 @@ subroutine gpu_xorthonormalize(blockvectorx_gpu,blockvectorbx_gpu,blocksize,spac
 &                              sqgram_gpu,vectsize,&
 &                              x_cplx,timopt,tim_xortho) ! optional arguments
 
+  use, intrinsic :: iso_c_binding
+  implicit none
+
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: blocksize,spaceComm,vectsize,x_cplx
