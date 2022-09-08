@@ -1061,6 +1061,9 @@ end function jobz_plasma
 !!
 function gpu_allocated(gpu_ptr) result(is_allocated)
 
+  use, intrinsic :: iso_c_binding
+  implicit none
+
   !Arguments ------------------------------------
   type(c_ptr),                    intent(in) :: gpu_ptr
   logical(kind=c_bool)                       :: is_allocated
