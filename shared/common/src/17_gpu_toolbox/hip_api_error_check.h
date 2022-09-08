@@ -36,7 +36,12 @@
 
 #pragma once
 
-#include <hip.h>
+#include <hip/hip_runtime.h>
+#include <hip/driver_types.h>
+#include <hipblas/hipblas.h>
+#include <hipfft/hipfft.h>
+#include <hipsolver/hipsolver.h>
+//#include <hipsparse.h>
 #include <string>
 #include <stdio.h> // for fflush
 #include <cassert>
@@ -88,11 +93,14 @@ extern "C" {
 
 
 // HIP Runtime error messages
-#ifdef __DRIVER_TYPES_H__
 static const char *_hipGetErrorEnum(hipError_t error) {
   return hipGetErrorName(error);
 }
-#endif
+
+// cuBLAS API errors
+static const char *_hipGetErrorEnum(hipblasStatus_t error) {
+  return hipblasStatusToString(error);
+}
 
 #ifdef HIP_DRIVER_API
 // HIP Driver API errors
@@ -143,9 +151,9 @@ static const char *_hipGetErrorEnum(cublasStatus_t error) {
 }
 #endif
 
-#ifdef _HIPFFT_H_
-// cuFFT API errors
-static const char *_hipGetErrorEnum(cufftResult error) {
+#ifdef HIPFFT_H_
+// hipFFT API errors
+static const char *_hipGetErrorEnum(hipfftResult error) {
   switch (error) {
     case HIPFFT_SUCCESS:
       return "HIPFFT_SUCCESS";
@@ -192,9 +200,6 @@ static const char *_hipGetErrorEnum(cufftResult error) {
     case HIPFFT_NOT_IMPLEMENTED:
       return "HIPFFT_NOT_IMPLEMENTED";
 
-    case HIPFFT_LICENSE_ERROR:
-      return "HIPFFT_LICENSE_ERROR";
-
     case HIPFFT_NOT_SUPPORTED:
       return "HIPFFT_NOT_SUPPORTED";
   }
@@ -203,9 +208,9 @@ static const char *_hipGetErrorEnum(cufftResult error) {
 }
 #endif
 
-#ifdef HIPSPARSEAPI
+#ifdef _HIPSPARSE_H_
 // cuSPARSE API errors
-static const char *_hipGetErrorEnum(cusparseStatus_t error) {
+static const char *_hipGetErrorEnum(hipsparseStatus_t error) {
   switch (error) {
     case HIPSPARSE_STATUS_SUCCESS:
       return "HIPSPARSE_STATUS_SUCCESS";
@@ -225,23 +230,32 @@ static const char *_hipGetErrorEnum(cusparseStatus_t error) {
     case HIPSPARSE_STATUS_MAPPING_ERROR:
       return "HIPSPARSE_STATUS_MAPPING_ERROR";
 
-    case HIPSPARSE_STATUS_EXEHIPTION_FAILED:
-      return "HIPSPARSE_STATUS_EXEHIPTION_FAILED";
+    case HIPSPARSE_STATUS_EXECUTION_FAILED:
+      return "HIPSPARSE_STATUS_EXECUTION_FAILED";
 
     case HIPSPARSE_STATUS_INTERNAL_ERROR:
       return "HIPSPARSE_STATUS_INTERNAL_ERROR";
 
     case HIPSPARSE_STATUS_MATRIX_TYPE_NOT_SUPPORTED:
       return "HIPSPARSE_STATUS_MATRIX_TYPE_NOT_SUPPORTED";
+
+    case HIPSPARSE_STATUS_ZERO_PIVOT:
+      return "HIPSPARSE_STATUS_ZERO_PIVOT";
+
+    case HIPSPARSE_STATUS_NOT_SUPPORTED:
+      return "HIPSPARSE_STATUS_NOT_SUPPORTED";
+
+    case HIPSPARSE_STATUS_INSUFFICIENT_RESOURCES:
+      return "HIPSPARSE_STATUS_INSUFFICIENT_RESOURCES";
   }
 
   return "<unknown>";
 }
 #endif
 
-#ifdef HIPSOLVER_COMMON_H_
+#ifdef HIPSOLVER_H
 // cuSOLVER API errors
-static const char *_hipGetErrorEnum(cusolverStatus_t error) {
+static const char *_hipGetErrorEnum(hipsolverStatus_t error) {
   switch (error) {
     case HIPSOLVER_STATUS_SUCCESS:
       return "HIPSOLVER_STATUS_SUCCESS";
@@ -255,27 +269,30 @@ static const char *_hipGetErrorEnum(cusolverStatus_t error) {
       return "HIPSOLVER_STATUS_ARCH_MISMATCH";
     case HIPSOLVER_STATUS_MAPPING_ERROR:
       return "HIPSOLVER_STATUS_MAPPING_ERROR";
-    case HIPSOLVER_STATUS_EXEHIPTION_FAILED:
-      return "HIPSOLVER_STATUS_EXEHIPTION_FAILED";
+    case HIPSOLVER_STATUS_EXECUTION_FAILED:
+      return "HIPSOLVER_STATUS_EXECUTION_FAILED";
     case HIPSOLVER_STATUS_INTERNAL_ERROR:
       return "HIPSOLVER_STATUS_INTERNAL_ERROR";
-    case HIPSOLVER_STATUS_MATRIX_TYPE_NOT_SUPPORTED:
-      return "HIPSOLVER_STATUS_MATRIX_TYPE_NOT_SUPPORTED";
-    case HIPSOLVER_STATUS_NOT_SUPPORTED:
-      return "HIPSOLVER_STATUS_NOT_SUPPORTED ";
+    case HIPSOLVER_STATUS_HANDLE_IS_NULLPTR:
+      return "HIPSOLVER_STATUS_HANDLE_IS_NULLPTR";
+    case HIPSOLVER_STATUS_INVALID_ENUM:
+      return "HIPSOLVER_STATUS_INVALID_ENUM";
     case HIPSOLVER_STATUS_ZERO_PIVOT:
       return "HIPSOLVER_STATUS_ZERO_PIVOT";
-    case HIPSOLVER_STATUS_INVALID_LICENSE:
-      return "HIPSOLVER_STATUS_INVALID_LICENSE";
+    case HIPSOLVER_STATUS_UNKNOWN:
+      return "HIPSOLVER_STATUS_UNKNOWN";
+    case HIPSOLVER_STATUS_NOT_SUPPORTED:
+      return "HIPSOLVER_STATUS_NOT_SUPPORTED ";
   }
 
   return "<unknown>";
 }
 #endif
 
+
 #ifdef HIPRAND_H_
-// cuRAND API errors
-static const char *_hipGetErrorEnum(curandStatus_t error) {
+// hipRAND API errors
+static const char *_hipGetErrorEnum(hiprandStatus_t error) {
   switch (error) {
     case HIPRAND_STATUS_SUCCESS:
       return "HIPRAND_STATUS_SUCCESS";
@@ -313,6 +330,9 @@ static const char *_hipGetErrorEnum(curandStatus_t error) {
     case HIPRAND_STATUS_ARCH_MISMATCH:
       return "HIPRAND_STATUS_ARCH_MISMATCH";
 
+    case HIPRAND_STATUS_NOT_IMPLEMENTED:
+      return "HIPRAND_STATUS_NOT_IMPLEMENTED";
+
     case HIPRAND_STATUS_INTERNAL_ERROR:
       return "HIPRAND_STATUS_INTERNAL_ERROR";
   }
@@ -325,13 +345,14 @@ template <typename T>
 void check_hip_error(T result, char const *const func, const char *const file,
            int const line) {
   if (result) {
-    fprintf(stderr, "HIP error at %s:%d code=%d(%s) \"%s\" \n", file, line,
-            static_cast<unsigned int>(result), _hipGetErrorEnum(result), func);
+    fprintf(stderr, "HIP error at :\n\t%s:%d \n\treturn code = %d (%s)\n\t\"%s\" \n\n",
+        file, line,
+        static_cast<unsigned int>(result), _hipGetErrorEnum(result), func);
+    fflush(stderr);
     ABORT();
   }
 }
 
-#ifdef __DRIVER_TYPES_H__
 // This will output the proper HIP error strings in the event
 // that a HIP host call returns an error
 #define CHECK_HIP_ERROR(value) check_hip_error((value), #value, __FILE__, __LINE__)
@@ -354,7 +375,7 @@ inline void __getLastHipError(const char *errorMessage, const char *file,
             hipGetErrorString(err));
 
     // Make sure we call HIP Device Reset before exiting
-    hipDeviceReset();
+    err = hipDeviceReset();
 
     ABORT();
   }
@@ -377,7 +398,6 @@ inline void __printLastHipError(const char *errorMessage, const char *file,
             hipGetErrorString(err));
   }
 }
-#endif /* __DRIVER_TYPES_H__ */
 
 
 /**
