@@ -589,6 +589,15 @@ end do
  end do
 #endif
 
+ dtsets(:)%use_kokkos_debug=0
+#if defined HAVE_GPU_CUDA && defined HAVE_KOKKOS
+ do idtset=1,ndtset_alloc
+   jdtset=dtsets(idtset)%jdtset ; if(ndtset==0)jdtset=0
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'use_kokkos_debug',tread,'INT')
+   if(tread==1)dtsets(idtset)%use_kokkos_debug=intarr(1)
+ end do
+#endif
+
  if (use_gpu_cuda==1) then
 #if defined HAVE_GPU_CUDA && defined HAVE_GPU_CUDA_DP
    if (ii<=0) then
