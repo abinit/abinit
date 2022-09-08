@@ -64,6 +64,10 @@ EXTERNAL_MODS = {
     "scup_global",
     # GreenX library (temporary version)
     "gx_minimax",
+    "mp2_grids",
+    # Kokkos fortran interoperability
+    "flcl_mod",
+    "flcl_util_kokkos_mod",
 }
 
 
