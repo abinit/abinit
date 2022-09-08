@@ -147,6 +147,9 @@ module m_gemm_nonlop
  ! When 0, nonlop is computed by calling the regular nonlop_gpu
  ! When 1, nonlop is computed by calling gemm_nonlop_gpu
 
+ logical, save, public :: gemm_nonlop_use_kokkos_debug = .false.
+ ! public variable controlled by dataset variable use_kokkos_debug - probably removed when kokkos version is debuged
+
  !!
  !! GPU interface
  !!
