@@ -1882,7 +1882,7 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
  !   ABI_WARNING("Metallic system of semiconductor with Fermi level inside bands!!!!")
  ! end if
 
- call wrtout(std_out, sjoin(" Building Green's functions from KS states with nbsum", itoa(nbsum), "..."))
+ call wrtout(std_out, sjoin(" Reading KS states with nbsum", itoa(nbsum), "..."))
 
  ! TODO
  ! Compute contribution to head and wings for this (kpoint, spin)
@@ -1921,7 +1921,8 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
    end do
  end do
 
- call wfk_open_read(wfk, wfk_path, formeig0, iomode_from_fname(wfk_path), get_unit(), gwr%comm) !  hdr_out=wfk_hdr)
+ !call wfk_open_read(wfk, wfk_path, formeig0, iomode_from_fname(wfk_path), get_unit(), gwr%comm)
+ call wfk_open_read(wfk, wfk_path, formeig0, iomode_from_fname(wfk_path), get_unit(), gwr%gtau_comm%value)
 
  mpw = maxval(wfk_hdr%npwarr)
  ABI_MALLOC(kg_k, (3, mpw))
@@ -1946,18 +1947,20 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
      my_nband = my_bstop - my_bstart + 1
      ABI_CHECK(my_nband > 0, "nb == 0, decrease number of procs for G and tau parallelism.")
      !print *, "my_bstart, my_bstop, nsum",  my_bstart, my_bstop, nbsum
+     ABI_CHECK_IEQ(npw_k, desc_k%npw, "npw_k != desc_k%npw")
 
      ! Read my bands
      call c_f_pointer(c_loc(ugb%buffer_cplx), cg_k, shape=[2, npwsp * my_nband])
 
-     call wfk%read_band_block([my_bstart, my_bstop], ik_ibz, spin, xmpio_single, & ! xmpio_collective,
+     call wfk%read_band_block([my_bstart, my_bstop], ik_ibz, spin,  &
+                              !xmpio_single, &
+                              xmpio_collective, &
                               kg_k=kg_k, cg_k=cg_k)
 
-     ! TODO: use round-robing + use gtau_comm% for IO.
+     ! TODO: use round-robin + use gtau_comm% for IO.
      !call wfk%read_bmask(bmask, ik_ibz, spin, xmpio_single, & ! xmpio_collective,
      !                    kg_k=kg_k, cg_k=cg_k) !, eig_k, occ_k)
 
-     ABI_CHECK_IEQ(npw_k, desc_k%npw, "npw_k != desc_k%npw")
      ABI_CHECK(all(kg_k(:,1:npw_k) == desc_k%gvec), "kg_k != desc_k%gvec")
 
      write(msg,'(3(a,i0),a)')" My ik_ibz [", my_iki, "/", gwr%my_nkibz, "] (tot: ", gwr%nkibz, ")"
