@@ -88,8 +88,6 @@ CONTAINS  !====================================================================
 
 subroutine sg_fft_cc(fftcache,n1,n2,n3,nd1,nd2,nd3,ndat,isign,arr,ftarr)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: fftcache,n1,n2,n3,nd1,nd2,nd3,ndat,isign
@@ -154,8 +152,6 @@ end subroutine sg_fft_cc
 !! SOURCE
 
 subroutine fft_cc_one_nothreadsafe(fftcache,nd1,nd2,nd3,n1,n2,n3,arr,ftarr,ris)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -256,8 +252,6 @@ end subroutine fft_cc_one_nothreadsafe
 !! SOURCE
 
 subroutine sg_fft_rc(cplex,fofg,fofr,isign,nfft,ngfft)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -590,8 +584,6 @@ end subroutine sg_fft_rc
 
 subroutine sg_fftpad(fftcache,mgfft,n1,n2,n3,nd1,nd2,nd3,ndat,gbound,isign,arr,ftarr)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: fftcache,mgfft,n1,n2,n3,nd1,nd2,nd3,ndat,isign
@@ -650,8 +642,6 @@ end subroutine sg_fftpad
 !! SOURCE
 
 subroutine fftpad_one_nothreadsafe(fftcache,mgfft,nd1,nd2,nd3,n1,n2,n3,arr,ftarr,ris,gbound)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -845,8 +835,6 @@ end subroutine fftpad_one_nothreadsafe
 
 subroutine sg_fftpx(fftcache,mfac,mg,mgfft,nd1,nd2,nd3,n2,n3,&
 &    z,zbr,trig,aft,now,bef,ris,ind,ic,gbound)
-
- implicit none
 
 !Arguments ------------------------------------
 !Dimensions of aft, now, bef, ind, and trig should agree with
@@ -1584,8 +1572,6 @@ end subroutine sg_fftpx
 subroutine sg_fftx(fftcache,mfac,mg,nd1,nd2,nd3,n2,n3,z,zbr,&
 & trig,aft,now,bef,ris,ind,ic)
 
- implicit none
-
 !Arguments ------------------------------------
 !Dimensions of aft, now, bef, ind, and trig should agree with
 !those in subroutine ctrig.
@@ -2293,8 +2279,6 @@ end subroutine sg_fftx
 subroutine sg_ffty(fftcache,mfac,mg,nd1,nd2,nd3,n1i,n1,n3i,n3,&
 &          z,zbr,trig,aft,now,bef,ris,ind,ic)
 
- implicit none
-
 !Arguments ------------------------------------
 !Dimensions of aft, now, bef, ind, and trig should agree with
 !those in subroutine ctrig.
@@ -2962,8 +2946,6 @@ end subroutine sg_ffty
 !! SOURCE
 
 subroutine sg_fftz(mfac,mg,nd1,nd2,nd3,n1,n2i,n2,z,zbr,trig,aft,now,bef,ris,ind,ic)
-
- implicit none
 
 !Arguments ------------------------------------
 !Dimensions of aft, now, bef, ind, and trig should agree with
@@ -3704,8 +3686,6 @@ end subroutine sg_fftz
 
 subroutine sg_ctrig(n,trig,aft,bef,now,ris,ic,ind,mfac,mg)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mfac,mg,n
@@ -3858,8 +3838,6 @@ end subroutine sg_ctrig
 subroutine sg_fftrisc(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
 & kg_kin,kg_kout,mgfft,ndat,ngfft,npwin,npwout,n4,n5,n6,option,weight_r, weight_i)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,istwf_k,mgfft,n4,n5,n6,ndat,npwin,npwout,option
@@ -3995,8 +3973,6 @@ end subroutine sg_fftrisc
 
 subroutine fftrisc_one_nothreadsafe(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
 & kg_kin,kg_kout,mgfft,ngfft,npwin,npwout,n4,n5,n6,option,weight_r,weight_i)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -4916,8 +4892,6 @@ subroutine sg_fftrisc_2(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,&
 & istwf_k,kg_kin,kg_kout,&
 & mgfft,ngfft,npwin,npwout,n4,n5,n6,option,weight_r,weight_2,&
 & luse_ndo,fofgin_p) ! optional
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -5936,8 +5910,6 @@ end subroutine sg_fftrisc_2
 !! SOURCE
 
 subroutine sg_poisson(fftcache,cplex,nx,ny,nz,ldx,ldy,ldz,ndat,vg,nr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

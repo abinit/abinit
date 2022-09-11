@@ -500,7 +500,7 @@ subroutine gw_box2gsph(nr, ndat, npw, igfftg0, iarrbox, oarrsph)
    do ig=1,npw
      igfft=igfftg0(ig)
      if (igfft/=0) then
-       ! G-G0 belong to the FFT mesh.
+       ! G-G0 belongs to the FFT mesh.
        oarrsph(ig) = iarrbox(igfft)
      else
        ! Set this component to zero.
@@ -515,7 +515,7 @@ subroutine gw_box2gsph(nr, ndat, npw, igfftg0, iarrbox, oarrsph)
      do ig=1,npw
        igfft=igfftg0(ig)
        if (igfft/=0) then
-         ! G-G0 belong to the FFT mesh.
+         ! G-G0 belongs to the FFT mesh.
          oarrsph(ig+pgsp) = iarrbox(igfft+pfft)
        else
          ! Set this component to zero.

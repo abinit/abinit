@@ -874,15 +874,15 @@ subroutine fftpad_dpc(ff, ngfft, nx, ny, nz, ldx, ldy, ldz, ndat, mgfft, isign, 
  select case (fftalga)
 
  case (FFT_FFTW3)
-   call fftw3_fftpad(ff,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
+   call fftw3_fftpad(ff, nx, ny, nz, ldx, ldy, ldz, ndat, mgfft, isign, gbound)
 
  case (FFT_DFTI)
-   call dfti_fftpad(ff,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
+   call dfti_fftpad(ff, nx, ny, nz, ldx, ldy, ldz, ndat, mgfft, isign, gbound)
 
  case (FFT_SG)
    ! Goedecker"s routines.
    ! TODO: sg_fftpad is not the fastest routine, here I should call sg_fftrisc but I need
-   ! kg_kin that are not available in rho_tw_g, actually one should pass G-G0 due to
+   ! kg_kin that is not available in rho_tw_g, actually one should pass G-G0 due to
    ! the shift introduced by the umklapp.
    ncount = ldx*ldy*ldz*ndat
 

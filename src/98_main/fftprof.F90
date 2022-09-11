@@ -215,11 +215,9 @@ program fftprof
 #endif
 
 #ifndef HAVE_OPENMP
- ABI_CHECK(max_nthreads<=1,"nthreads>1 but OMP support is not enabled!")
+ ABI_CHECK(max_nthreads <= 1, "nthreads>1 but OMP support is not enabled!")
 #endif
- if (max_nthreads>1.and. iam_master) then
-   call xomp_show_info(std_out)
- end if
+ if (max_nthreads>1 .and. iam_master) call xomp_show_info(std_out)
 
  call fft_use_lib_threads(use_lib_threads)
  !write(std_out,*)"use_lib_threads: ",use_lib_threads
@@ -281,7 +279,7 @@ program fftprof
 
  ntests = max_nthreads * nfftalgs
 
- ! First dimension contains (fftalg,fftcache,ndat,nthreads,available).
+ ! First dimension contains (fftalg, fftcache, ndat, nthreads, available).
  ABI_MALLOC(fft_setups,(5,ntests))
 
  ! Default Goedecker library.
@@ -444,7 +442,7 @@ program fftprof
    call wrtout(std_out, msg)
  end if
 
-! Benchmarks for the sequential version.
+ ! Benchmarks for the sequential version.
  if (do_seq_bench) then
    call wrtout(std_out, "Entering benchmark mode")
    write(std_out,*)"ecut_arth",ecut_arth,", necut ",necut

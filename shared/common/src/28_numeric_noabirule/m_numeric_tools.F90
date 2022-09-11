@@ -5248,18 +5248,17 @@ end function simpson
 !!
 !! OUTPUT
 !!  phi = phase of cx fold into [-pi,pi]
-!!  rho = modul of cx
+!!  rho = module of cx
 !!
 !! SOURCE
 
-pure subroutine rhophi(cx,phi,rho)
+pure subroutine rhophi(cx, phi, rho)
 
 !Arguments ------------------------------------
 !scalars
  real(dp),intent(out) :: phi,rho
 !arrays
  real(dp),intent(in) :: cx(2)
-
 
 ! ***********************************************************************
 
@@ -5269,7 +5268,7 @@ pure subroutine rhophi(cx,phi,rho)
 
    phi = atan(cx(2)/cx(1))
 
-!  phi is an element of [-pi,pi]
+   ! phi is an element of [-pi,pi]
    if (cx(1) < zero) then
      if (phi < zero) then
        phi = phi + pi
@@ -5283,9 +5282,9 @@ pure subroutine rhophi(cx,phi,rho)
    if (cx(2) > tol8) then
      phi = pi*half
    else if (cx(2) < tol8) then
-     phi = -0.5_dp*pi
+     phi = -pi*half
    else
-     phi = 0
+     phi = zero
    end if
 
  end if
