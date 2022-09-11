@@ -136,7 +136,7 @@ MODULE m_FFT_prof
  public :: time_rhotwg
  public :: time_fftu
 
- ! Routines for benchmarks.
+ ! Routines for benchmarking
  public :: prof_fourdp
  public :: prof_fourwf
  public :: prof_rhotwg
@@ -1891,10 +1891,10 @@ function empty_cache(kbsize) result(fake)
  fake = int(SUM(chunk)) ! Need a result, otherwise some smart compiler could skip the call.
  ABI_FREE(chunk)
 
-!----------------------------------------------------------------------
-
 end function empty_cache
 !!***
+
+!----------------------------------------------------------------------
 
 END MODULE m_FFT_prof
 !!***

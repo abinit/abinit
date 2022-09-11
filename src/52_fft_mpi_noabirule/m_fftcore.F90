@@ -1490,17 +1490,17 @@ end subroutine sphereboundary
 !! sphere
 !!
 !! FUNCTION
-!! Array cg is defined in sphere with npw points. Insert cg inside box
-!! of n1*n2*n3 points to define array cfft for fft box.
-!! corresponds to given element in cg. rest of cfft is filled with 0 s.
+!! Array cg is defined in sphere with npw g-vectors.
+!! Insert cg inside FFT box of n1*n2*n3 points to define array cfft for
+!! rest of cfft is filled with 0 s.
 !!
-!! iflag=1==>insert cg into cfft.
-!! iflag=2==>insert cg into cfft, where the second and third dimension
-!! have been switched (needed for new 2002 SGoedecker FFT)
+!! iflag=1 ==> insert cg into cfft.
+!! iflag=2 ==> insert cg into cfft, where the second and third dimension
+!!      have been switched (needed for new 2002 SGoedecker FFT)
 !! iflag=-1==> extract cg from cfft.
 !! iflag=-2==> extract cg from cfft, where the second and third dimension
 !! have been switched (needed for new 2002 SGoedecker FFT)
-!!  (WARNING: iflag=-2 cannot use symmetry operations)
+!!      WARNING: iflag=-2 cannot use symmetry operations.
 !!
 !! There is also the possibility to apply a symmetry operation,
 !! as well as to make a shift in reciprocal space, or to multiply
@@ -1509,9 +1509,9 @@ end subroutine sphereboundary
 !!
 !! INPUTS
 !! cg(2,npw*ndat)= contains values for npw G vectors in basis sphere
-!! ndat=number of FFT to do in //
+!! ndat=number of wavefunctions
 !! npw=number of G vectors in basis at this k point
-!! cfft(2,n4,n5,n6*ndat) = fft box
+!! cfft(2,n4,n5,n6*ndat) = array in FFT box
 !! n1,n2,n3=physical dimension of the box (cfft)
 !! n4,n5,n6=memory dimension of cfft
 !! kg_k(3,npw)=integer coordinates of G vectors in basis sphere
@@ -1519,7 +1519,7 @@ end subroutine sphereboundary
 !! iflag=option parameter. Possible values: -1, -2, 1, 2
 !! me_g0=1 if this node has G=0.
 !! shiftg(3)=The shift in reciprocal space.
-!! symm(3,3)=symmetry operation in reciprocal space to be applied (symrec)
+!! symrec(3,3)=symmetry operation in reciprocal space to be applied (symrec)
 !! xnorm=Normalization factor.
 !!
 !! SIDE EFFECTS
@@ -1541,14 +1541,14 @@ end subroutine sphereboundary
 !!
 !! SOURCE
 
-subroutine sphere(cg,ndat,npw,cfft,n1,n2,n3,n4,n5,n6,kg_k,istwf_k,iflag,me_g0,shiftg,symm,xnorm)
+subroutine sphere(cg, ndat, npw, cfft, n1, n2, n3, n4, n5, n6, kg_k, istwf_k, iflag, me_g0, shiftg, symrec, xnorm)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iflag,istwf_k,n1,n2,n3,n4,n5,n6,ndat,npw,me_g0
  real(dp),intent(in) :: xnorm
 !arrays
- integer,intent(in) :: kg_k(3,npw),shiftg(3),symm(3,3)
+ integer,intent(in) :: kg_k(3,npw),shiftg(3),symrec(3,3)
  real(dp),intent(inout) :: cfft(2,n4,n5,n6*ndat),cg(2,npw*ndat)
 
 !Local variables-------------------------------
@@ -1694,7 +1694,7 @@ subroutine sphere(cg,ndat,npw,cfft,n1,n2,n3,n4,n5,n6,kg_k,istwf_k,iflag,me_g0,sh
 
    use_symmetry=0
    identity(:,:)=0; identity(1,1)=1 ; identity(2,2)=1 ; identity(3,3)=1
-   if(sum((symm(:,:)-identity(:,:))**2)/=0)use_symmetry=1
+   if(sum((symrec(:,:)-identity(:,:))**2)/=0)use_symmetry=1
    if(sum(shiftg(:)**2)/=0)use_symmetry=1
 
    ! Extract cg from cfft, ignoring components outside range of cg:
@@ -1716,6 +1716,7 @@ subroutine sphere(cg,ndat,npw,cfft,n1,n2,n3,n4,n5,n6,kg_k,istwf_k,iflag,me_g0,sh
            end do
          end do
        else
+         ! iflag==-2
 !$OMP PARALLEL DO PRIVATE(i1,i2,i3,ipwdat,i2dat) IF (ndat>1)
          do idat=1,ndat
            do ipw=1,npw
@@ -1739,12 +1740,14 @@ subroutine sphere(cg,ndat,npw,cfft,n1,n2,n3,n4,n5,n6,kg_k,istwf_k,iflag,me_g0,sh
            l1=kg_k(1,ipw)+shiftg(1)
            l2=kg_k(2,ipw)+shiftg(2)
            l3=kg_k(3,ipw)+shiftg(3)
-           j1=symm(1,1)*l1+symm(1,2)*l2+symm(1,3)*l3
-           j2=symm(2,1)*l1+symm(2,2)*l2+symm(2,3)*l3
-           j3=symm(3,1)*l1+symm(3,2)*l2+symm(3,3)*l3
-           if(j1<0)j1=j1+n1; i1=j1+1
-           if(j2<0)j2=j2+n2; i2=j2+1
-           if(j3<0)j3=j3+n3; i3=j3+1
+           j1=symrec(1,1)*l1+symrec(1,2)*l2+symrec(1,3)*l3
+           j2=symrec(2,1)*l1+symrec(2,2)*l2+symrec(2,3)*l3
+           j3=symrec(3,1)*l1+symrec(3,2)*l2+symrec(3,3)*l3
+           if(j1<0) j1=j1+n1; i1=j1+1
+           if(j2<0) j2=j2+n2; i2=j2+1
+           if(j3<0) j3=j3+n3; i3=j3+1
+           ! [i1, i2, i3] are the indices of S(g + g0) in the FFT box.
+           ! while ipw is the index of g in kg_k
 
            ipwdat = ipw + (idat-1) * npw
            i3dat = i3 + (idat-1)*n6
@@ -1816,7 +1819,8 @@ subroutine sphere(cg,ndat,npw,cfft,n1,n2,n3,n4,n5,n6,kg_k,istwf_k,iflag,me_g0,sh
          end do
        end if
 
-     else ! Use symmetry
+     else
+       ! Use symmetry
        id1=n1/2+2
        id2=n2/2+2
        id3=n3/2+2
@@ -1834,9 +1838,9 @@ subroutine sphere(cg,ndat,npw,cfft,n1,n2,n3,n4,n5,n6,kg_k,istwf_k,iflag,me_g0,sh
            l1=kg_k(1,ipw)+shiftg(1)
            l2=kg_k(2,ipw)+shiftg(2)
            l3=kg_k(3,ipw)+shiftg(3)
-           j1=symm(1,1)*l1+symm(1,2)*l2+symm(1,3)*l3
-           j2=symm(2,1)*l1+symm(2,2)*l2+symm(2,3)*l3
-           j3=symm(3,1)*l1+symm(3,2)*l2+symm(3,3)*l3
+           j1=symrec(1,1)*l1+symrec(1,2)*l2+symrec(1,3)*l3
+           j2=symrec(2,1)*l1+symrec(2,2)*l2+symrec(2,3)*l3
+           j3=symrec(3,1)*l1+symrec(3,2)*l2+symrec(3,3)*l3
            if(j1<0)j1=j1+n1 ; i1=j1+1
            if(j2<0)j2=j2+n2 ; i2=j2+1
            if(j3<0)j3=j3+n3 ; i3=j3+1
@@ -1845,9 +1849,9 @@ subroutine sphere(cg,ndat,npw,cfft,n1,n2,n3,n4,n5,n6,kg_k,istwf_k,iflag,me_g0,sh
            l1=i1inv-(i1inv/id1)*n1-1+shiftg(1)
            l2=i2inv-(i2inv/id2)*n2-1+shiftg(2)
            l3=i3inv-(i3inv/id3)*n3-1+shiftg(3)
-           j1=symm(1,1)*l1+symm(1,2)*l2+symm(1,3)*l3
-           j2=symm(2,1)*l1+symm(2,2)*l2+symm(2,3)*l3
-           j3=symm(3,1)*l1+symm(3,2)*l2+symm(3,3)*l3
+           j1=symrec(1,1)*l1+symrec(1,2)*l2+symrec(1,3)*l3
+           j2=symrec(2,1)*l1+symrec(2,2)*l2+symrec(2,3)*l3
+           j3=symrec(3,1)*l1+symrec(3,2)*l2+symrec(3,3)*l3
            if(j1<0)j1=j1+n1 ; i1inv=j1+1
            if(j2<0)j2=j2+n2 ; i2inv=j2+1
            if(j3<0)j3=j3+n3 ; i3inv=j3+1
@@ -1933,7 +1937,6 @@ end subroutine sphere
 !! SOURCE
 
 subroutine sphere_fft(cg,ndat,npw,cfft,n1,n2,n3,n4,n5,kg_k,tab_fftwf2_local,nd2proc)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -2143,7 +2146,6 @@ end subroutine change_istwfk
 
 pure subroutine switch(n1dfft,n2,lot,n1,lzt,zt,zw)
 
-
 !Arguments ------------------------------------
  integer,intent(in) :: n1dfft,n2,lot,n1,lzt
  real(dp),intent(in) :: zt(2,lzt,n1)
@@ -2193,7 +2195,6 @@ end subroutine switch
 !! SOURCE
 
 pure subroutine switch_cent(n1dfft,max2,m2,n2,lot,n1,lzt,zt,zw)
-
 
 !Arguments ------------------------------------
  integer,intent(in) :: n1dfft,max2,m2,n2,lot,n1,lzt
@@ -2265,7 +2266,6 @@ end subroutine switch_cent
 !! SOURCE
 
 pure subroutine switchreal(includelast,n1dfft,n2,n2eff,lot,n1zt,lzt,zt,zw)
-
 
 !Arguments ------------------------------------
  integer,intent(in) :: includelast,n1dfft,n2,n2eff,lot,n1zt,lzt
@@ -2350,7 +2350,6 @@ end subroutine switchreal
 !! SOURCE
 
 pure subroutine switchreal_cent(includelast,n1dfft,max2,n2,lot,n1zt,lzt,zt,zw)
-
 
 !Arguments ------------------------------------
  integer,intent(in) :: includelast,n1dfft,max2,n2,lot,n1zt,lzt
@@ -2456,7 +2455,6 @@ pure subroutine scramble(i1,j2,lot,n1dfft,md1,n3,md2proc,nnd3,zw,zmpi2)
  real(dp),intent(inout) :: zmpi2(2,md1,md2proc,nnd3)
 
 !Local variables-------------------------------
-!scalars
  integer :: i3,i
 
 ! *************************************************************************
@@ -2494,7 +2492,6 @@ end subroutine scramble
 !! SOURCE
 
 pure subroutine fill(nd1,nd3,lot,n1dfft,n3,zf,zw)
-
 
 !Arguments ------------------------------------
  integer,intent(in) :: nd1,nd3,lot,n1dfft,n3
@@ -2543,7 +2540,6 @@ end subroutine fill
 !! SOURCE
 
 pure subroutine fill_cent(md1,md3,lot,n1dfft,max3,m3,n3,zf,zw)
-
 
 !Arguments ------------------------------------
  integer,intent(in) :: md1,md3,lot,n1dfft,max3,m3,n3
@@ -2606,7 +2602,6 @@ end subroutine fill_cent
 
 pure subroutine unfill(nd1,nd3,lot,n1dfft,n3,zw,zf)
 
-
 !Arguments ------------------------------------
  integer,intent(in) :: nd1,nd3,lot,n1dfft,n3
  real(dp),intent(in) :: zw(2,lot,n3)
@@ -2652,7 +2647,6 @@ end subroutine unfill
 
 pure subroutine unfill_cent(md1,md3,lot,n1dfft,max3,m3,n3,zw,zf)
 
-
 !Arguments ------------------------------------
  integer,intent(in) :: md1,md3,lot,n1dfft,max3,m3,n3
  real(dp),intent(in) :: zw(2,lot,n3)
@@ -2696,7 +2690,6 @@ end subroutine unfill_cent
 !! SOURCE
 
 pure subroutine unmpiswitch(j3,n1dfft,Jp2st,J2st,lot,n1,nd2proc,nd3proc,nproc,ioption,zw,zmpi1)
-
 
 !Arguments ------------------------------------
  integer,intent(in) :: j3,n1dfft,lot,n1,nd2proc,nd3proc,nproc,ioption
@@ -2769,7 +2762,6 @@ end subroutine unmpiswitch
 !! SOURCE
 
 pure subroutine unmpiswitch_cent(j3,n1dfft,Jp2stf,J2stf,lot,max1,md1,m1,n1,md2proc,nd3proc,nproc,ioption,zw,zmpi1)
-
 
 !Arguments ------------------------------------
  integer,intent(in) :: j3,n1dfft,lot,max1,md1,m1,n1,md2proc,nd3proc,nproc,ioption
@@ -2868,7 +2860,6 @@ end subroutine unmpiswitch_cent
 
 pure subroutine unscramble(i1,j2,lot,n1dfft,md1,n3,md2proc,nnd3,zmpi2,zw)
 
-
 !Arguments ------------------------------------
  integer,intent(in) :: i1,j2,lot,n1dfft,md1,n3,md2proc,nnd3
  real(dp),intent(in) :: zmpi2(2,md1,md2proc,nnd3)
@@ -2913,7 +2904,6 @@ end subroutine unscramble
 
 pure subroutine unswitch(n1dfft,n2,lot,n1,lzt,zw,zt)
 
-
 !Arguments ------------------------------------
  integer,intent(in) :: n1dfft,n2,lot,n1,lzt
  real(dp),intent(in) :: zw(2,lot,n2)
@@ -2957,7 +2947,6 @@ end subroutine unswitch
 !! SOURCE
 
 pure subroutine unswitch_cent(n1dfft,max2,m2,n2,lot,n1,lzt,zw,zt)
-
 
 !Arguments ------------------------------------
  integer,intent(in) :: n1dfft,max2,m2,n2,lot,n1,lzt
@@ -3013,7 +3002,6 @@ end subroutine unswitch_cent
 
 pure subroutine unswitchreal(n1dfft,n2,n2eff,lot,n1zt,lzt,zw,zt)
 
-
 !Arguments ------------------------------------
  integer,intent(in) :: n1dfft,n2,n2eff,lot,n1zt,lzt
  real(dp),intent(in) :: zw(2,lot,n2)
@@ -3066,7 +3054,6 @@ end subroutine unswitchreal
 !! SOURCE
 
 pure subroutine unswitchreal_cent(n1dfft,max2,n2,lot,n1zt,lzt,zw,zt)
-
 
 !Arguments ------------------------------------
  integer,intent(in) :: n1dfft,max2,n2,lot,n1zt,lzt
@@ -3127,7 +3114,6 @@ end subroutine unswitchreal_cent
 !! SOURCE
 
 pure subroutine mpiswitch(j3,n1dfft,Jp2st,J2st,lot,n1,nd2proc,nd3proc,nproc,ioption,zmpi1,zw)
-
 
 !Arguments ------------------------------------
  integer,intent(in) :: j3,n1dfft,lot,n1,nd2proc,nd3proc,nproc,ioption
@@ -3212,8 +3198,7 @@ end subroutine mpiswitch
 
 
 pure subroutine mpiswitch_cent(j3,n1dfft,Jp2stb,J2stb,lot,max1,md1,m1,n1,md2proc,&
-&  nd3proc,nproc,ioption,zmpi1,zw,max2,m2,n2)
-
+                               nd3proc,nproc,ioption,zmpi1,zw,max2,m2,n2)
 
 !Arguments ------------------------------------
  integer,intent(in) :: j3,n1dfft,lot,max1,md1,m1,n1,md2proc,nd3proc,nproc,ioption
@@ -3329,7 +3314,6 @@ end subroutine mpiswitch_cent
 
 pure subroutine mpifft_fg2dbox(nfft,ndat,fofg,n1,n2,n3,n4,nd2proc,n6,fftn2_distrib,ffti2_local,me_fft,workf)
 
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfft,ndat,n1,n2,n3,n4,nd2proc,n6,me_fft
@@ -3378,7 +3362,6 @@ end subroutine mpifft_fg2dbox
 
 pure subroutine mpifft_fg2dbox_dpc(nfft,ndat,fofg,n1,n2,n3,n4,nd2proc,n6,fftn2_distrib,ffti2_local,me_fft,workf)
 
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfft,ndat,n1,n2,n3,n4,nd2proc,n6,me_fft
@@ -3425,7 +3408,6 @@ end subroutine mpifft_fg2dbox_dpc
 !! SOURCE
 
 pure subroutine mpifft_dbox2fg(n1,n2,n3,n4,nd2proc,n6,ndat,fftn2_distrib,ffti2_local,me_fft,workf,nfft,fofg)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -3479,7 +3461,6 @@ end subroutine mpifft_dbox2fg
 
 pure subroutine mpifft_dbox2fg_dpc(n1,n2,n3,n4,nd2proc,n6,ndat,fftn2_distrib,ffti2_local,me_fft,workf,nfft,fofg)
 
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: n1,n2,n3,n4,nd2proc,n6,ndat,me_fft,nfft
@@ -3531,7 +3512,6 @@ end subroutine mpifft_dbox2fg_dpc
 !! SOURCE
 
 pure subroutine mpifft_dbox2fr(n1,n2,n3,n4,n5,nd3proc,ndat,fftn3_distrib,ffti3_local,me_fft,workr,cplex,nfft,fofr)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -3610,7 +3590,6 @@ end subroutine mpifft_dbox2fr
 
 pure subroutine mpifft_dbox2fr_dpc(n1,n2,n3,n4,n5,nd3proc,ndat,fftn3_distrib,ffti3_local,me_fft,workr,cplex,nfft,fofr)
 
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: n1,n2,n3,n4,n5,nd3proc,ndat,me_fft,nfft,cplex
@@ -3683,7 +3662,6 @@ end subroutine mpifft_dbox2fr_dpc
 !! SOURCE
 
 pure subroutine mpifft_fr2dbox(cplex,nfft,ndat,fofr,n1,n2,n3,n4,n5,nd3proc,fftn3_distrib,ffti3_local,me_fft,workr)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -3758,7 +3736,6 @@ end subroutine mpifft_fr2dbox
 !! SOURCE
 
 pure subroutine mpifft_fr2dbox_dpc(cplex,nfft,ndat,fofr,n1,n2,n3,n4,n5,nd3proc,fftn3_distrib,ffti3_local,me_fft,workr)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -3842,7 +3819,6 @@ end subroutine mpifft_fr2dbox_dpc
 !! SOURCE
 
 subroutine indfftrisc(gbound,indpw_k,kg_k,mgfft,ngb,ngfft,npw_k)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -4670,7 +4646,6 @@ end subroutine addrho
 
 subroutine multpot(icplexwf,icplex,includelast,nd1,nd2,n2,lot,n1dfft,pot,zw)
 
-
  !Arguments ------------------------------------
  integer,intent(in) :: icplexwf,icplex,includelast,nd1,nd2,n2,lot,n1dfft
  real(dp),intent(in) :: pot(icplex*nd1,nd2)
@@ -4782,7 +4757,6 @@ end subroutine multpot
 !! SOURCE
 
 subroutine mpifft_collect_datar(ngfft,cplex,nfft,nspden,rhor,comm_fft,fftn3_distrib,ffti3_local,rhor_glob,master)
-
 
 !Arguments ------------------------------------
 !scalars

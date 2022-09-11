@@ -10,7 +10,7 @@
 !! Memory and workload are distributed using a 4D cartesian grid: (g/r, tau, k-points, spin).
 !!
 !! Inside the g/r communicator, we use PBLAS matrices to store G, tchi and W.
-!! using a 1D processor grid with block distribution either along columns or rows.
+!! using a 1D processor grid with block distribution along columns.
 !! A 2D grid, indeed, would require MPI-FFT or some communication before performing the FFTs.
 !!
 !! Let's assume for simplicity that we have only two MPI procs in the g/r communicator.
@@ -78,8 +78,6 @@
 !!    For Sigma_x, we need a specialized routine that can handle arbitrary q, especially at the level of v(q, G)
 !!    but I don't know if this approach will give smooth bands
 !!    as we don't have q --> 0 when k does not belong to the k-mesh.
-!!
-!!  - DONE: New routine for direct diagonalization of the KS Hamiltonian based on PBLAS?
 !!
 !!  - New routine to compute oscillator matrix elements with NC/PAW and PBLAS matrices.
 !!    It can be used to compute tchi head/wings as well as Sigma_x + interface with coupled-cluster codes.
@@ -159,7 +157,7 @@ module m_gwr
  use defs_datatypes,  only : pseudopotential_type, ebands_t
  use defs_abitypes,   only : mpi_type
  use m_gwdefs,        only : GW_TOLQ0, GW_Q0_DEFAULT, sigijtab_t
- use m_time,          only : cwtime, cwtime_report, sec2str
+ use m_time,          only : cwtime, cwtime_report, sec2str, timab
  use m_io_tools,      only : iomode_from_fname, get_unit, file_exists, open_file
  use m_numeric_tools, only : blocked_loop, get_diag, isdiagmat, arth, print_arr, pade, dpade, newrap_step, c2r !, linfit
  use m_copy,          only : alloc_copy
@@ -740,7 +738,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
 !arrays
  integer :: qptrlatt(3,3), dims(ndims), indkk_k(6,1)
  integer,allocatable :: gvec_(:,:),degblock(:,:), degblock_all(:,:,:,:), ndeg_all(:,:)
- real(dp) :: my_shiftq(3,1), kk_ibz(3), kk_bz(3), qq_bz(3), qq_ibz(3), kk(3)
+ real(dp) :: my_shiftq(3,1), kk_ibz(3), kk_bz(3), qq_bz(3), qq_ibz(3), kk(3), tsec(2)
  real(dp),allocatable :: wtk(:), kibz(:,:)
  logical :: periods(ndims), keepdim(ndims)
 
@@ -749,6 +747,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  all_nproc = xmpi_comm_size(input_comm); my_rank = xmpi_comm_rank(input_comm)
 
  call cwtime(cpu, wall, gflops, "start")
+ call timab(1920, 1, tsec)
 
  gwr%dtset => dtset
  gwr%dtfil => dtfil
@@ -810,11 +809,10 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  gwr%ngkpt = get_diag(ks_ebands%kptrlatt)
 
  ! Note symrec convention
- ABI_MALLOC(gwr%kbz2ibz, (6, gwr%nkbz))
  ebands_timrev = kpts_timrev_from_kptopt(ks_ebands%kptopt)
-
  krank_ibz = krank_from_kptrlatt(gwr%nkibz, kibz, ks_ebands%kptrlatt, compute_invrank=.False.)
 
+ ABI_MALLOC(gwr%kbz2ibz, (6, gwr%nkbz))
  if (kpts_map("symrec", ebands_timrev, cryst, krank_ibz, gwr%nkbz, gwr%kbz, gwr%kbz2ibz) /= 0) then
    ABI_ERROR("Cannot map kBZ to IBZ!")
  end if
@@ -1315,7 +1313,6 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  omp_nt = xomp_get_num_threads(open_parallel=.True.)
  gwr%uc_batch_size = max(1, gwr%dtset%userid * omp_nt)
  gwr%sc_batch_size = max(1, gwr%dtset%userie * omp_nt)
-
  !gwr%uc_batch_size = 4; gwr%sc_batch_size = 4
 
  if (my_rank == master) then
@@ -1345,6 +1342,8 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
    associate (desc_q => gwr%tchi_desc_qibz(iq_ibz))
    ! Compute sqrt(v(q,G))
    !TODO: Implement cutoff in vc
+   ! Also, one can decide to sort the g-vectors by |g| if q in the IBZ to facilitate
+   ! the extrapolation of the RPA energy as a function of ecut_chi as done in Vasp.
    ABI_MALLOC(desc_q%vc_sqrt, (desc_q%npw))
    ig_start = 1
    if (q_is_gamma) then
@@ -1448,6 +1447,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  end if ! master
 
  call cwtime_report(" gwr_init:", cpu, wall, gflops)
+ call timab(1920, 2, tsec)
 
 contains
 integer function vid(vname)
@@ -1813,13 +1813,14 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
  type(dataset_type),pointer :: dtset
 !arrays
  integer,allocatable :: kg_k(:,:)
- real(dp) :: kk_ibz(3)
+ real(dp) :: kk_ibz(3), tsec(2)
  !real(dp),allocatable :: cgwork(:,:)
  real(dp),ABI_CONTIGUOUS pointer :: cg_k(:,:)
 
 ! *************************************************************************
 
  call cwtime(cpu, wall, gflops, "start")
+ call timab(1921, 1, tsec)
 
  dtset => gwr%dtset
 
@@ -1969,9 +1970,8 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
  call wfk%close()
  call wfk_hdr%free()
 
- !call gwr%build_green(free_ugb=.True.)
-
  call cwtime_report(" gwr_read_ugb_from_wfk:", cpu, wall, gflops)
+ call timab(1921, 2, tsec)
 
 end subroutine gwr_read_ugb_from_wfk
 !!***
@@ -2006,11 +2006,13 @@ subroutine gwr_build_green(gwr, free_ugb)
  type(matrix_scalapack), target :: work, green
  integer :: mask_kibz(gwr%nkibz)
 !arrays
+ real(dp) :: tsec(2)
  real(dp),contiguous, pointer :: qp_ene(:,:,:), qp_occ(:,:,:)
 
 ! *************************************************************************
 
  call cwtime(cpu, wall, gflops, "start")
+ call timab(1922, 1, tsec)
 
  ! Use KS or QP energies depending on the iteration state.
  if (gwr%scf_iteration == 0) then
@@ -2081,6 +2083,7 @@ subroutine gwr_build_green(gwr, free_ugb)
 
  if (gwr%dtset%prtvol > 0) call gwr_print_trace(gwr, "gt_kibz")
  call cwtime_report(" gwr_build_green:", cpu, wall, gflops)
+ call timab(1922, 2, tsec)
 
 end subroutine gwr_build_green
 !!***
@@ -3399,12 +3402,12 @@ subroutine gwr_build_tchi(gwr)
  type(matrix_scalapack) :: chi_rgp
  !type(mpi_type) :: tchi_mpi_enreg
 !arrays
- integer :: sc_ngfft(18)
+ integer :: sc_ngfft(18), gg(3)
  integer,allocatable :: green_scg(:,:), chi_scg(:,:)
  integer :: mask_qibz(gwr%nqibz)
- real(dp) :: kk_bz(3), kpq_bz(3), qq_ibz(3) !, qq_bz(3) ! kk_ibz(3),
+ real(dp) :: kk_bz(3), kpq_bz(3), qq_ibz(3), tsec(2) !, qq_bz(3) ! kk_ibz(3),
  !logical :: need_gt_kibz(gwr%nkibz), got_gt_kibz(gwr%nkibz)
- complex(dp),allocatable :: gt_scbox(:,:), chit_scbox(:), gt_ucbox(:,:)
+ complex(dp),allocatable :: gt_scbox(:,:), chit_scbox(:) !, gt_ucbox(:,:)
  !type(matrix_scalapack) :: gt_gpr(2, gwr%my_nkbz), chiq_gpr(gwr%my_nqibz), gk_rpr_pm(2)
  !type(desc_t), target :: desc_mykbz(gwr%my_nkbz)
  type(matrix_scalapack),allocatable :: gt_gpr(:,:), chiq_gpr(:), gk_rpr_pm(:)
@@ -3415,6 +3418,7 @@ subroutine gwr_build_tchi(gwr)
 ! *************************************************************************
 
  call cwtime(cpu_all, wall_all, gflops_all, "start")
+ call timab(1923, 1, tsec)
  my_rank = xmpi_comm_rank(gwr%comm)
 
  ABI_CHECK(gwr%tchi_space == "none", sjoin("tchi_space: ", gwr%tchi_space, " != none"))
@@ -3458,9 +3462,11 @@ subroutine gwr_build_tchi(gwr)
    ndat = gwr%sc_batch_size
    ABI_CALLOC(gt_scbox, (sc_nfft * gwr%nspinor * ndat, 2))
    ABI_CALLOC(chit_scbox, (sc_nfft * gwr%nspinor * ndat))
+   mem_mb = (sc_nfft * gwr%nspinor * ndat * 3 * 2 * dp) * b2Mb
+   call wrtout(std_out, sjoin(" Memory for scbox arrays:", ftoa(mem_mb, fmt="f8.1"), ' [Mb] <<< MEM'))
 
    ! This for the version with my_nkbz FFTs in the unit cell
-   ABI_CALLOC(gt_ucbox, (gwr%g_nfft * gwr%nspinor * ndat, 2))
+   !ABI_CALLOC(gt_ucbox, (gwr%g_nfft * gwr%nspinor * ndat, 2))
 
    ! (ngfft, ndat, isign)
    call plan_gp2rp%from_ngfft(sc_ngfft, gwr%nspinor * ndat * 2, -1)
@@ -3526,7 +3532,6 @@ subroutine gwr_build_tchi(gwr)
          ! Insert G_k(g',r) in G'-space in the supercell FFT box for fixed r.
          ! Note that we need to take the union of (k, g') for k in the BZ.
 
-         !call xscal(size(gt_scbox), czero, gt_scbox, 1)
          gt_scbox = zero
 
 !if (.False.) then
@@ -3536,8 +3541,9 @@ if (.True.) then
 
            ! Compute k+g
            desc_k => desc_mykbz(my_ikf)
+           gg = nint(gwr%kbz(:, ik_bz) * gwr%ngkpt)
            do ig=1,desc_k%npw
-             green_scg(:,ig) = nint(gwr%kbz(:, ik_bz) * gwr%ngkpt) + gwr%ngkpt * desc_k%gvec(:,ig)
+             green_scg(:,ig) = gg + gwr%ngkpt * desc_k%gvec(:,ig)
            end do
 
            do ipm=1,2
@@ -3553,6 +3559,9 @@ if (.True.) then
          ! TODO: Should block using nproc in kpt_comm, scatter data and perform multiple FFTs in parallel.
          if (gwr%kpt_comm%nproc > 1) call xmpi_sum(gt_scbox, gwr%kpt_comm%value, ierr)
 
+         !call xmpi_isum(gt_scbox(:,ipm), gwr%kpt_comm%value, request_ipm(ipm), ierr)
+         !call xmpi_wait(request_ipm(ipm), ierr)
+
          !call cwtime_report("G part", cpu, wall, gflops)
 
          ! G(G',r) --> G(R',r) = sum_{k,g'} e^{-i(k+g').R'} G_k(g',r)
@@ -3560,17 +3569,17 @@ if (.True.) then
          gt_scbox = gt_scbox * sc_nfft
 
 else
-         ! This is just to check if replacing a single FFT in the supercell with
+         ! This is just to check whether replacing a single FFT in the supercell with
          ! nkpt FFTs in the unit cell + communication is faster.
          do ipm=1,2
            do my_ikf=1,gwr%my_nkbz
              desc_k => desc_mykbz(my_ikf)
 
              ! FIXME The sign is wrong as it should be -1.
-             call fft_ug(desc_k%npw, gwr%g_nfft, gwr%nspinor, ndat, &
-                         gwr%g_mgfft, gwr%g_ngfft, desc_k%istwfk, desc_k%gvec, desc_k%gbound, &
-                         gt_gpr(ipm, my_ikf)%buffer_cplx(:, my_ir), &  ! in
-                         gt_ucbox(:,ipm))                              ! out
+             !call fft_ug(desc_k%npw, gwr%g_nfft, gwr%nspinor, ndat, &
+             !            gwr%g_mgfft, gwr%g_ngfft, desc_k%istwfk, desc_k%gvec, desc_k%gbound, &
+             !            gt_gpr(ipm, my_ikf)%buffer_cplx(:, my_ir), &  ! in
+             !            gt_ucbox(:,ipm))                              ! out
 
              ! Sketching the algo.
              !gt_ucbox(:,ipm) = gt_ucbox(:,ipm) * uc_ceimkr(:,my_ikf)
@@ -3604,23 +3613,31 @@ end if
 
          ! Extract tchi_q(g',r) on the ecuteps g-sphere from the FFT box in the supercell
          ! and save data in chiq_gpr PBLAS matrix. Only my q-points in the IBZ are considered.
-         ! Alternatively, one can avoid the FFT above and
-         ! use zero-padded to go from the supercell to the ecuteps g-sphere inside the my_iqi loop.
-         ! This approach should play well with k-point parallelism.
+
          do my_iqi=1,gwr%my_nqibz
            iq_ibz = gwr%my_qibz_inds(my_iqi)
            qq_ibz = gwr%qibz(:, iq_ibz)
            desc_q => gwr%tchi_desc_qibz(iq_ibz)
 
            ! Compute q+g vectors.
+           gg = nint(qq_ibz * gwr%ngqpt)
            do ig=1,desc_q%npw
-             chi_scg(:,ig) = nint(qq_ibz * gwr%ngqpt) + gwr%ngqpt(:) * desc_q%gvec(:,ig)
+             chi_scg(:,ig) = gg + gwr%ngqpt(:) * desc_q%gvec(:,ig)
            end do
 
            !ABI_CHECK_IEQ(size(chiq_gpr(my_iqi)%buffer_cplx, dim=1), desc_q%npw, "desc_q!")
            call box2gsph(sc_ngfft, desc_q%npw, gwr%nspinor * ndat, chi_scg, &
                          chit_scbox, &                            ! in
                          chiq_gpr(my_iqi)%buffer_cplx(:, my_ir))  ! out
+
+           ! Alternatively, one can avoid the above FFT above
+           ! use zero-padded to go from the supercell to the ecuteps g-sphere inside the my_iqi loop.
+           ! This approach should play well with k-point parallelism.
+           !call fft_ur(desc_q%npw, sc_nfft, gwr%nspinor, ndat, sc_mgfft, sc_ngfft, &
+           !            istwfk1, desc_q%gvec, sc_gbound_q, &
+           !            chit_scbox, &                            ! in
+           !            chiq_gpr(my_iqi)%buffer_cplx(:, my_ir))  ! out
+
          end do ! my_iqi
          !call cwtime_report("chiq part", cpu, wall, gflops)
 
@@ -3691,12 +3708,12 @@ end if
      end do ! my_it
    end do ! my_is
 
-   ABI_FREE(gt_ucbox)
    ABI_FREE(gt_scbox)
    ABI_FREE(chit_scbox)
    ABI_FREE(green_scg)
    ABI_FREE(chi_scg)
    ABI_FREE(cemiqr)
+   !ABI_SFREE(gt_ucbox)
    !ABI_SFREE(sc_ceimkr)
 
    call slk_array_free(chiq_gpr)
@@ -3774,6 +3791,7 @@ end if
  if (gwr%dtset%prtsuscep > 0) call gwr%ncwrite_tchi_wc("tchi", trim(gwr%dtfil%filnam_ds(4))//'_TCHIM.nc')
 
  call cwtime_report(" gwr_build_tchi:", cpu_all, wall_all, gflops_all)
+ call timab(1923, 2, tsec)
 
 end subroutine gwr_build_tchi
 !!***
@@ -4095,12 +4113,13 @@ subroutine gwr_build_wc(gwr)
  type(matrix_scalapack) :: em1
  type(yamldoc_t) :: ydoc
 !arrays
- real(dp) :: qq_ibz(3)
+ real(dp) :: qq_ibz(3), tsec(2)
  complex(dpc) :: em1_wq(gwr%ntau, gwr%nqibz), eps_wq(gwr%ntau, gwr%nqibz)
 
 ! *************************************************************************
 
  call cwtime(cpu_all, wall_all, gflops_all, "start")
+ call timab(1924, 1, tsec)
  call wrtout(std_out, " Building correlated screening Wc from irreducible chi ...", pre_newlines=2)
 
  my_rank = xmpi_comm_rank(gwr%comm)
@@ -4272,6 +4291,7 @@ subroutine gwr_build_wc(gwr)
  !if (gwr%dtset%prtvol > 0) call gwr%print_trace("wc_qibz")
 
  call cwtime_report(" gwr_build_wc:", cpu_all, wall_all, gflops_all)
+ call timab(1924, 2, tsec)
 
 end subroutine gwr_build_wc
 !!***
@@ -4309,9 +4329,9 @@ subroutine gwr_build_sigmac(gwr)
  type(desc_t), pointer :: desc_q, desc_k
  type(yamldoc_t) :: ydoc
 !arrays
- integer :: sc_ngfft(18), need_qibz(gwr%nqibz),  got_qibz(gwr%nqibz), units(4)
+ integer :: sc_ngfft(18), need_qibz(gwr%nqibz),  got_qibz(gwr%nqibz), units(4), gg(3)
  integer,allocatable :: green_scg(:,:), wc_scg(:,:)
- real(dp) :: kk_bz(3), kcalc_bz(3), qq_bz(3)  !, qq_ibz(3)
+ real(dp) :: kk_bz(3), kcalc_bz(3), qq_bz(3), tsec(2)  !, qq_ibz(3)
  !real(dp),allocatable :: inv_rmR(:), rylm_rmR(:,:)
  complex(dp) :: sigc_pm(2), cpsi_r, odd_t(gwr%ntau), even_t(gwr%ntau)
  complex(dp),target,allocatable :: sigc_it_diag_kcalc(:,:,:,:,:)
@@ -4341,6 +4361,7 @@ subroutine gwr_build_sigmac(gwr)
 ! *************************************************************************
 
  call cwtime(cpu_all, wall_all, gflops_all, "start")
+ call timab(1925, 1, tsec)
  my_rank = xmpi_comm_rank(gwr%comm)
 
  ABI_CHECK(gwr%wc_space == "itau", sjoin("wc_space: ", gwr%wc_space, " != itau"))
@@ -4491,8 +4512,9 @@ if (gwr%use_supercell_for_sigma) then
 
          ! Compute k+g'
          desc_k => desc_mykbz(my_ikf)
+         gg = nint(gwr%kbz(:, ik_bz) * gwr%ngkpt)
          do ig=1,desc_k%npw
-           green_scg(:,ig) = nint(gwr%kbz(:, ik_bz) * gwr%ngkpt) + gwr%ngkpt * desc_k%gvec(:,ig)
+           green_scg(:,ig) = gg + gwr%ngkpt * desc_k%gvec(:,ig)
          end do
 
          do ipm=1,2
@@ -4519,8 +4541,9 @@ if (gwr%use_supercell_for_sigma) then
 
          ! Compute q+g' vectors.
          desc_q => desc_myqbz(my_iqf)
+         gg = nint(gwr%qbz(:, iq_bz) * gwr%ngqpt)
          do ig=1,desc_q%npw
-           wc_scg(:,ig) = nint(gwr%qbz(:, iq_bz) * gwr%ngqpt) + gwr%ngqpt * desc_q%gvec(:,ig)
+           wc_scg(:,ig) = gg + gwr%ngqpt * desc_q%gvec(:,ig)
          end do
 
          call gsph2box(sc_ngfft, desc_q%npw, gwr%nspinor * ndat, wc_scg, &
@@ -4940,6 +4963,7 @@ end if
 
  ABI_FREE(sigc_it_diag_kcalc)
  call cwtime_report(" gwr_build_sigmac:", cpu_all, wall_all, gflops_all)
+ call timab(1925, 2, tsec)
 
 contains
 integer function vid(vname)
@@ -5099,7 +5123,7 @@ subroutine gwr_rpa_energy(gwr)
      weight_q = gwr%wtq(iq_ibz)
      q_is_gamma = normv(qq_ibz, gwr%cryst%gmet, "G") < GW_TOLQ0
 
-     ! NB: Take into account that iq_ibz might be replicated across procs.
+     ! NB: Take into account that iq_ibz might be replicated across procs in kpt_comm.
      do my_it=1,gwr%my_ntau
        itau = gwr%my_itaus(my_it)
 
@@ -5974,7 +5998,8 @@ subroutine gwr_build_sigxme(gwr)
  real(dp) :: ksum(3), kk_bz(3), kgw(3), kgw_m_ksum(3), qbz(3), q0(3) !, spinrot_kbz(4), spinrot_kgw(4) !, tsec(2)
  real(dp),contiguous, pointer :: qp_ene(:,:,:), qp_occ(:,:,:)
  !type(ebands_t),pointer :: prev_ebands
- complex(gwpc),allocatable :: vc_sqrt_qbz(:), rhotwg(:), rhotwgp(:), rhotwg_ki(:,:), ur_bdgw(:,:), ur_ksum(:) ! ur_ibz(:),
+ complex(gwpc),allocatable :: vc_sqrt_qbz(:), rhotwg(:), rhotwgp(:), rhotwg_ki(:,:) ! ur_bdgw(:,:), ur_ksum(:) ! ur_ibz(:),
+ complex(dp),allocatable :: ur_bdgw(:,:), ur_ksum(:) ! ur_ibz(:),
  complex(dpc),allocatable  :: sigxcme_tmp(:,:), sigxme_tmp(:,:,:), sigx(:,:,:,:) ! sym_sigx(:,:,:),
  type(sigijtab_t),pointer :: Sigxij_tab(:)
 
@@ -6087,6 +6112,7 @@ subroutine gwr_build_sigxme(gwr)
    end if
 
    call xmpi_sum(ur_bdgw, gwr%gtk_comm%value, ierr)
+   ! Rescale
    ur_bdgw = ur_bdgw / gwr%np_kibz(ikcalc_ibz)
 
    !ABI_MALLOC(ur_ibz, (x_nfft * nspinor))
@@ -6100,9 +6126,9 @@ subroutine gwr_build_sigxme(gwr)
    ABI_CALLOC(sigxcme_tmp, (bmin:bmax, nsppol * nsig_ab))
    ABI_CALLOC(sigx, (2, bmin:bmax, bmin:bmax, nsppol * nsig_ab))
 
-   ! ==============================
-   ! ==== Sum over k in the BZ ====
-   ! ==============================
+   ! =================================
+   ! ==== Sum over my k in the BZ ====
+   ! =================================
 
    do my_ikf=1,gwr%my_nkbz
      ik_bz = gwr%my_kbz_inds(my_ikf)

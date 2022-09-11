@@ -1115,6 +1115,14 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  !names(1905)='splfit'; basic(1905) = 1
  !names(1906)='mkkin'; basic(1906) = 1
 
+ ! GWR code
+ names(1920)='gwr_init'; basic(1920) = 1
+ names(1921)='gwr_read_ugb_from_wfk'; basic(1921) = 1
+ names(1922)='gwr_build_green'; basic(1922) = 1
+ names(1923)='gwr_build_tchi'; basic(1923) = 1
+ names(1924)='gwr_build_wc'; basic(1924) = 1
+ names(1925)='gwr_build_sigmac'; basic(1925) = 1
+
  names(TIMER_SIZE)='(other)                         ' ! This is a generic slot, to compute a complement
 
 !==================================================================================

@@ -77,7 +77,7 @@ module m_wfk
  use m_fstrings,     only : sjoin, strcat, endswith, itoa, ktoa
  use m_io_tools,     only : get_unit, mvrecord, iomode_from_fname, iomode2str, open_file, close_unit, delete_file, file_exists
  use m_numeric_tools,only : mask2blocks, stats_t, stats_eval, wrap2_pmhalf
- use m_cgtk,         only : cgtk_rotate
+ use m_cgtk,         only : cgtk_rotate, cgtk_rotate_symrec
  use m_fftcore,      only : get_kg, ngfft_seq
  use m_distribfft,   only : init_distribfft_seq
  use m_mpinfo,       only : destroy_mpi_enreg, initmpi_seq
@@ -248,13 +248,14 @@ module m_wfk
                                    ! Mainly used to interface ABINIT with other codes that
                                    ! cannot handle symmetries e.g. lobster
  public :: wfk_nc2fort             ! Convert a netcdf WFK file to a Fortran WFK file.
- public :: wfk_klist2mesh
  public :: wfk_ncdef_dims_vars     ! Define basic dimensions for netcdf file format.
  public :: wfk_read_ebands         ! Read the GS eigenvalues and return ebands_t object.
  public :: wfk_read_eigenvalues    ! Read all the GS eigenvalues stored in the WFK file.
  public :: wfk_read_h1mat          ! Read all the H1 matrix elements.
  public :: wfk_read_my_kptbands    ! Read in all of my bands and k, depending on a distribution flag array
  public :: wfk_write_my_kptbands   ! Write all of my bands and k to a file, depending on a distribution flag array
+ public :: wfk_klist2mesh          ! Generate a full WFK file with k in the IBZ from a file with a subset of k-points
+                                   ! Mainly used in the transport part when the kerange trick is employed.
 
  ! Profiling tools
  public :: wfk_prof                ! Profiling tool.
@@ -263,6 +264,7 @@ module m_wfk
  public :: wfk_diff                ! Compare two WFK file for binary equality.
  public :: wfk_create_wfkfile      ! Create a FAKE WFK file.
  public :: wfk_check_wfkfile       ! Read a FAKE WFK file and perform basic tests.
+ public :: wfk_check_symtab
 
 !!***
 
@@ -537,7 +539,7 @@ subroutine wfk_open_write(Wfk, Hdr, fname, formeig, iomode, funt, comm, write_hd
  Wfk%nspinor = Wfk%Hdr%nspinor
 
  ABI_MALLOC(Wfk%nband, (Wfk%nkpt,Wfk%nsppol))
- Wfk%nband = RESHAPE(Wfk%Hdr%nband, (/Wfk%nkpt,Wfk%nsppol/))
+ Wfk%nband = RESHAPE(Wfk%Hdr%nband, [Wfk%nkpt, Wfk%nsppol])
 
  ierr = 0
 
@@ -4910,7 +4912,7 @@ subroutine wfk_prof(wfk_fname, formeig, nband, comm)
      call cwtime(cpu,wall,gflops,"stop")
      write(msg,'(3(a,i2),2(a,f8.2))')&
        " iomode: ",iomode,", nproc: ",nproc,", option: ",option,", cpu: ",cpu,", wall:",wall
-     call wrtout(std_out,msg,"COLL")
+     call wrtout(std_out, msg)
      !call cwtime_report(" FULL_WFK written to file. ", cpu, wall, gflops)
    end do
  end do
@@ -4983,7 +4985,7 @@ subroutine wfk_create_wfkfile(wfk_fname,Hdr,iomode,formeig,Kvars,cwtimes,comm)
  call wfk%open_write(Hdr,wfk_fname,formeig,iomode,funt,comm,write_frm=.TRUE.)
 
  call cwtime(cpu,wall,gflops,"stop")
- cwtimes = cwtimes + (/cpu,wall/)
+ cwtimes = cwtimes + [cpu, wall]
 
  do spin=1,nsppol
    do ik_ibz=1,nkpt
@@ -5277,7 +5279,7 @@ subroutine fill_or_check(task,Hdr,Kvars,ik_ibz,spin,formeig,kg_k,cg_k,eig_k,occ_
    if (ierr/=0) then
      ABI_WARNING(TRIM(msg)//": FAILED")
    else
-     call wrtout(std_out,TRIM(msg)//": OK","COLL")
+     call wrtout(std_out,TRIM(msg)//": OK")
    end if
 
  CASE DEFAULT
@@ -5380,8 +5382,8 @@ subroutine wfk_diff(fname1,fname2,formeig,comm,ierr)
      ABI_MALLOC_OR_DIE(cg2_k,(2,mcg), ierr)
 
      ! Read the block of bands for this (k,s).
-     call wfk1%read_band_block((/1,nband_k/),ik_ibz,spin,sc_mode,kg_k=kg1_k,eig_k=eig1_k,occ_k=occ1_k) !, cg_k=cg1_k,
-     call wfk2%read_band_block((/1,nband_k/),ik_ibz,spin,sc_mode,kg_k=kg2_k,eig_k=eig2_k,occ_k=occ2_k) !, cg_k=cg2_k,
+     call wfk1%read_band_block([1, nband_k],ik_ibz,spin,sc_mode,kg_k=kg1_k,eig_k=eig1_k,occ_k=occ1_k) !, cg_k=cg1_k,
+     call wfk2%read_band_block([1, nband_k],ik_ibz,spin,sc_mode,kg_k=kg2_k,eig_k=eig2_k,occ_k=occ2_k) !, cg_k=cg2_k,
 
      if (ANY( ABS(kg1_k - kg2_k) > zero)) then
        ierr = ierr + 2
@@ -5415,7 +5417,7 @@ subroutine wfk_diff(fname1,fname2,formeig,comm,ierr)
      if (ierr/=0) then
        ABI_WARNING(TRIM(msg)//": FAILED")
      else
-       call wrtout(std_out,TRIM(msg)//": OK","COLL")
+       call wrtout(std_out,TRIM(msg)//": OK")
      end if
 
      ABI_FREE(eig1_k)
@@ -5735,6 +5737,231 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, comm)
 100 call xmpi_barrier(comm)
 
 end subroutine wfk_klist2mesh
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_wfk/wfk_check_symtab
+!! NAME
+!!  wfk_check_symtab
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!  in_wfkpath = Input WFK file generated with kptopt 3
+!!      Only GS WFK files supported (formeig==0)
+!!
+!! SOURCE
+
+subroutine wfk_check_symtab(in_wfkpath, comm)
+
+ use m_krank,         only : krank_t, krank_new, krank_from_kptrlatt, get_ibz2bz, star_from_ibz_idx
+ use m_kpts,          only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, kpts_map, kpts_map_print, kpts_pack_in_stars
+ use m_cgtools,       only : fxphas_and_cmp
+
+!Arguments ------------------------------------
+!scalars
+ character(len=*),intent(in) :: in_wfkpath
+ integer,intent(in) :: comm
+
+!Local variables-------------------------------
+!scalars
+ integer,parameter :: formeig0 = 0, master = 0, kptopt1 = 1
+ integer :: spin, nband_k, mpw, mband, nspinor, ik_ibz, ik_bz !, ierr, ikf
+ integer :: nsppol, iomode, npw_kf, npw_ki, istwf_kf, istwf_ki, ii, my_rank, ebands_timrev, nkibz, nkbz
+ integer :: isym_k, trev_k, g0_k(3)
+ logical :: isirr_k
+ character(len=500) :: msg
+ character(len=fnlen) :: my_inpath
+ type(wfk_t) :: wfk
+ type(crystal_t) :: cryst
+ type(krank_t) :: krank_ibz
+ type(ebands_t) :: ks_ebands
+!arrays
+ integer :: work_ngfft(18), gmax(3), gmax_kf(3), gmax_ki(3)
+ integer,allocatable :: symrec_kbz2ibz(:,:), symrel_kbz2ibz(:,:), symrec_ibz2bz(:), symrel_ibz2bz(:)
+ integer,allocatable :: kg_kf(:,:), kg_ki(:,:)
+ real(dp) :: ki(3), kf(3)
+ real(dp),allocatable :: kibz(:,:), kbz(:,:), wtk(:), cg_kf(:,:), cg_ki(:,:), cg_symrel(:,:), cg_symrec(:,:)  !, eig_k(:), occ_k(:)
+ real(dp),allocatable :: work(:,:,:,:)
+
+! *************************************************************************
+
+ my_rank = xmpi_comm_rank(comm); if (my_rank /= master) return
+
+ call wrtout(std_out, " In wfk_check_symtab")
+
+ ! Open WFK file with k-point list, extract dimensions and allocate workspace arrays.
+ my_inpath = in_wfkpath
+ if (nctk_try_fort_or_ncfile(my_inpath, msg) /= 0) then
+   ABI_ERROR(msg)
+ end if
+ ks_ebands = wfk_read_ebands(my_inpath, xmpi_comm_self)
+ ABI_CHECK_IEQ(ks_ebands%kptopt, 3, "kptopt should be 3")
+
+ iomode = iomode_from_fname(my_inpath)
+ call wfk_open_read(wfk, my_inpath, formeig0, iomode, get_unit(), xmpi_comm_self)
+ mband = wfk%mband; nsppol = wfk%nsppol; nspinor = wfk%nspinor
+
+ cryst = wfk%hdr%get_crystal()
+ ebands_timrev = kpts_timrev_from_kptopt(kptopt1)
+ !ebands_timrev = kpts_timrev_from_kptopt(ks_ebands%kptopt)
+
+ ! Get IBZ with kptopt1
+ call kpts_ibz_from_kptrlatt(cryst, ks_ebands%kptrlatt, kptopt1, ks_ebands%nshiftk, ks_ebands%shiftk, &
+                             nkibz, kibz, wtk, nkbz, kbz) !, bz2ibz=bz2ibz)
+
+ ABI_CHECK(all(abs(ks_ebands%kptns - kbz) < tol12), "Wrong kbz!")
+
+ krank_ibz = krank_from_kptrlatt(nkibz, kibz, ks_ebands%kptrlatt, compute_invrank=.False.)
+
+ ! Build symmetry tables using the two conventions.
+
+ ABI_MALLOC(symrec_kbz2ibz, (6, nkbz))
+ if (kpts_map("symrec", ebands_timrev, cryst, krank_ibz, nkbz, kbz, symrec_kbz2ibz) /= 0) then
+   ABI_ERROR("Cannot map kBZ to IBZ!")
+ end if
+ ! Index of IBZ k-point in the full BZ (used to access IBZ in the WFK)
+ ABI_MALLOC(symrec_ibz2bz, (nkibz))
+ do ik_bz=1,nkbz
+   ik_ibz = symrec_kbz2ibz(1,ik_bz); isym_k = symrec_kbz2ibz(2,ik_bz)
+   trev_k = symrec_kbz2ibz(6,ik_bz); g0_k = symrec_kbz2ibz(3:5,ik_bz)
+   isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
+   if (isirr_k) then
+     !print *,  "ik_bz, ik_ibz", ik_bz, ik_ibz
+     symrec_ibz2bz(ik_ibz) = ik_bz
+   end if
+ end do
+
+ ABI_MALLOC(symrel_kbz2ibz, (6, nkbz))
+ if (kpts_map("symrel", ebands_timrev, cryst, krank_ibz, nkbz, kbz, symrel_kbz2ibz) /= 0) then
+   ABI_ERROR("Cannot map kBZ to IBZ!")
+ end if
+ ! Index of IBZ k-point in the full BZ (used to access IBZ in the WFK)
+ ABI_MALLOC(symrel_ibz2bz, (nkibz))
+ do ik_bz=1,nkbz
+   ik_ibz = symrel_kbz2ibz(1,ik_bz); isym_k = symrel_kbz2ibz(2,ik_bz)
+   trev_k = symrel_kbz2ibz(6,ik_bz); g0_k = symrel_kbz2ibz(3:5,ik_bz)
+   isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
+   if (isirr_k) symrel_ibz2bz(ik_ibz) = ik_bz
+ end do
+
+ ! Allocate workspace arrays for wavefunction block.
+ mpw = maxval(ks_ebands%npwarr)
+ ABI_MALLOC(kg_kf, (3, mpw))
+ ABI_MALLOC(kg_ki, (3, mpw))
+ ABI_MALLOC(cg_kf, (2, mpw * nspinor * mband))
+ ABI_MALLOC(cg_ki, (2, mpw * nspinor * mband))
+ ABI_MALLOC(cg_symrel, (2, mpw * nspinor * mband))
+ ABI_MALLOC(cg_symrec, (2, mpw * nspinor * mband))
+ !ABI_MALLOC(eig_k, ((2*mband)**wfk%formeig * mband) )
+ !ABI_MALLOC(occ_k, (mband))
+
+ do spin=1,nsppol
+   ! Note how we loop over the full BZ as this is what we have in the WFK file.
+   do ik_bz=1,nkbz
+
+     nband_k = wfk%nband(ik_bz, spin)
+     nband_k = min(4, nband_k)
+
+     ! Read wavefunctions at full k.
+     npw_kf = wfk%hdr%npwarr(ik_bz)
+     istwf_kf = wfk%hdr%istwfk(ik_bz)
+     kf = ks_ebands%kptns(:, ik_bz)
+     call wfk%read_band_block([1, nband_k], ik_bz, spin, xmpio_single, cg_k=cg_kf, kg_k=kg_kf)
+
+     ! -----------------------------------------------
+     ! Build ik_bz from ik_ibz using symrel convention
+     ! -----------------------------------------------
+
+     ik_ibz = symrel_kbz2ibz(1,ik_bz); isym_k = symrel_kbz2ibz(2,ik_bz)
+     trev_k = symrel_kbz2ibz(6,ik_bz); g0_k = symrel_kbz2ibz(3:5,ik_bz)
+     isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
+
+     if (isirr_k) cycle
+
+     ii = symrel_ibz2bz(ik_ibz)
+     ki = ks_ebands%kptns(:, ii)
+     npw_ki = wfk%hdr%npwarr(ii)
+     istwf_ki = wfk%hdr%istwfk(ii)
+     !write(std_out, *), "kf: ", trim(ktoa(kf)), "istwf_kf:", istwf_kf
+     !write(std_out, *), "ki: ", trim(ktoa(ki)), "istwf_ki:", istwf_ki
+     !ABI_CHECK_IEQ(istwf_ki, istwf_kf, "istwf_ki /= istwf_kf")
+
+     call wfk%read_band_block([1, nband_k], ii, spin, xmpio_single, cg_k=cg_ki, kg_k=kg_ki)
+
+     ! FFT box must enclose the two spheres centered on kdisk and kf
+     gmax_kf = maxval(abs(kg_kf(:, 1:npw_kf)), dim=2)
+     gmax_ki = maxval(abs(kg_ki(:, 1:npw_ki)), dim=2)
+     do ii=1,3
+       gmax(ii) = max(gmax_kf(ii), gmax_ki(ii))
+     end do
+     gmax = 2 * gmax + 1
+     call ngfft_seq(work_ngfft, gmax)
+     ABI_CALLOC(work, (2, work_ngfft(4), work_ngfft(5), work_ngfft(6)))
+
+     call cgtk_rotate(cryst, ki, isym_k, trev_k, g0_k, nspinor, nband_k, &
+                      npw_ki, kg_ki, npw_kf, kg_kf, istwf_ki, istwf_kf, cg_ki, cg_symrel, work_ngfft, work)
+
+     ! Compare cg_kf with cg_symrel taking into account a possible gauge.
+     if (.not. fxphas_and_cmp(npw_kf, nspinor, nband_k, istwf_kf, cg_kf, cg_symrel, ks_ebands%eig(:, ik_bz, spin), msg)) then
+       call wrtout(std_out, msg)
+     end if
+
+     ! -----------------------------------------------
+     ! Build ik_bz from ik_ibz using symrec convention
+     ! -----------------------------------------------
+     ik_ibz = symrec_kbz2ibz(1,ik_bz); isym_k = symrec_kbz2ibz(2,ik_bz)
+     trev_k = symrec_kbz2ibz(6,ik_bz); g0_k = symrec_kbz2ibz(3:5,ik_bz)
+     isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
+
+     ii = symrec_ibz2bz(ik_ibz)
+     ki = ks_ebands%kptns(:, ii)
+     npw_ki = wfk%hdr%npwarr(ii)
+     istwf_ki = wfk%hdr%istwfk(ii)
+     !write(std_out, *), "kf: ", trim(ktoa(kf)), "istwf_kf:", istwf_kf
+     !write(std_out, *), "ki: ", trim(ktoa(ki)), "istwf_ki:", istwf_ki
+     !ABI_CHECK_IEQ(istwf_ki, istwf_kf, "istwf_ki /= istwf_kf")
+
+     call wfk%read_band_block([1, nband_k], ii, spin, xmpio_single, cg_k=cg_ki, kg_k=kg_ki)
+
+     !call cgtk_rotate_symrec(cryst, ki, isym_k, trev_k, g0_k, nspinor, nband_k, &
+     !                        npw_ki, kg_ki, npw_kf, kg_kf, istwf_ki, istwf_kf, cg_ki, cg_symrec, work_ngfft, work)
+
+     ! Compare cg_kf with cg_symrel taking into account a possible gauge.
+     !if (.not. fxphas_and_cmp(npw_kf, nspinor, nband_k, istwf_kf, cg_kf, cg_symrec, ks_ebands%eig(:, ik_bz, spin), msg)) then
+     !  call wrtout(std_out, msg)
+     !end if
+
+     ABI_FREE(work)
+   end do
+ end do
+
+ ! Free memory
+ ABI_FREE(symrec_kbz2ibz)
+ ABI_FREE(symrel_kbz2ibz)
+ ABI_FREE(symrec_ibz2bz)
+ ABI_FREE(symrel_ibz2bz)
+ ABI_FREE(kibz)
+ ABI_FREE(kbz)
+ ABI_FREE(wtk)
+ call krank_ibz%free()
+
+ ABI_FREE(kg_kf)
+ ABI_FREE(cg_kf)
+ ABI_FREE(kg_ki)
+ ABI_FREE(cg_ki)
+ ABI_FREE(cg_symrel)
+ ABI_FREE(cg_symrec)
+ ABI_SFREE(work)
+ !ABI_FREE(eig_k)
+ !ABI_FREE(occ_k)
+
+ call cryst%free()
+ call ebands_free(ks_ebands)
+ call wfk%close()
+
+end subroutine wfk_check_symtab
 !!***
 
 !----------------------------------------------------------------------

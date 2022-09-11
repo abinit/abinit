@@ -710,7 +710,7 @@ end subroutine ph1d3d
 !!
 !! SOURCE
 
-subroutine getph(atindx,natom,n1,n2,n3,ph1d,xred)
+subroutine getph(atindx, natom, n1, n2, n3, ph1d, xred)
 
 !Arguments ------------------------------------
 !scalars
@@ -729,15 +729,15 @@ subroutine getph(atindx,natom,n1,n2,n3,ph1d,xred)
 
 ! *************************************************************************
 
- ph1d_size1=size(ph1d,1);ph1d_size2=size(ph1d,2)
- ph1d_sizemin=(2*n1+1+2*n2+1+2*n3+1)*natom
- if (ph1d_size1/=2.or.ph1d_size2<ph1d_sizemin) then
+ ph1d_size1=size(ph1d,1); ph1d_size2=size(ph1d,2)
+ ph1d_sizemin = (2*n1+1+2*n2+1+2*n3+1)*natom
+ if (ph1d_size1 /= 2 .or. ph1d_size2 < ph1d_sizemin) then
    ABI_BUG('Wrong ph1d sizes!')
  end if
 
  do ia=1,natom
 
-!  Store the phase factor of atom number ia in place atindx(ia)
+   ! Store the phase factor of atom number ia in place atindx(ia)
    i1=(atindx(ia)-1)*(2*n1+1)
    i2=(atindx(ia)-1)*(2*n2+1)+natom*(2*n1+1)
    i3=(atindx(ia)-1)*(2*n3+1)+natom*(2*n1+1+2*n2+1)
@@ -762,10 +762,8 @@ subroutine getph(atindx,natom,n1,n2,n3,ph1d,xred)
 
  end do
 
-!This is to avoid uninitialized ph1d values
- if (ph1d_sizemin<ph1d_size2) then
-   ph1d(:,ph1d_sizemin+1:ph1d_size2)=zero
- end if
+ ! This to avoid uninitialized ph1d values
+ if (ph1d_sizemin < ph1d_size2) ph1d(:,ph1d_sizemin+1:ph1d_size2)=zero
 
 end subroutine getph
 !!***
