@@ -41,10 +41,11 @@
 subroutine alloc_on_gpu(gpu_ptr,size)
 
 !Arguments ------------------------------------
- type(c_ptr),            :: gpu_ptr
+ type(c_ptr)             :: gpu_ptr
  integer    , intent(in) :: size ! size in bytes to allocate
 
- ABI_UNUSED(/gpu_ptr,size_in_bytes/)
+ ABI_UNUSED(gpu_ptr)
+ ABI_UNUSED(size)
 
 end subroutine alloc_on_gpu
 !!***
@@ -72,11 +73,13 @@ end subroutine alloc_on_gpu
 subroutine copy_from_gpu(cpu_ptr,gpu_ptr,size_in_bytes)
 
 !Arguments ------------------------------------
- type(c_ptr),                        :: cpu_ptr
- type(c_ptr),                        :: gpu_ptr
+ type(c_ptr)                         :: cpu_ptr
+ type(c_ptr)                         :: gpu_ptr
  integer(kind=c_int32_t), intent(in) :: size_in_bytes ! size in byte (to be transfered)
 
- ABI_UNUSED(/cpu_ptr,gpu_ptr,size_in_bytes/)
+ ABI_UNUSED(cpu_ptr)
+ ABI_UNUSED(gpu_ptr)
+ ABI_UNUSED(size_in_bytes)
 
 end subroutine copy_from_gpu
 !!***
@@ -104,11 +107,13 @@ end subroutine copy_from_gpu
 subroutine copy_on_gpu(cpu_ptr,gpu_ptr,size_in_bytes)
 
   !Arguments ------------------------------------
-  type(c_ptr),                        :: cpu_ptr
-  type(c_ptr),                        :: gpu_ptr
+  type(c_ptr)                         :: cpu_ptr
+  type(c_ptr)                         :: gpu_ptr
   integer(kind=c_int32_t), intent(in) :: size_in_bytes ! size in byte (to be transfered)
 
-  ABI_UNUSED(/cpu_ptr,gpu_ptr,size_in_bytes/)
+  ABI_UNUSED(cpu_ptr)
+  ABI_UNUSED(gpu_ptr)
+  ABI_UNUSED(size_in_bytes)
 
 end subroutine copy_on_gpu
 !!***
@@ -143,7 +148,9 @@ subroutine copy_gpu_to_gpu(cpu_ptr,gpu_ptr,size_in_bytes)
   type(c_ptr)                         :: src_gpu_ptr
   integer(kind=c_int32_t), intent(in) :: size_in_bytes ! size in byte (to be transfered)
 
-  ABI_UNUSED(/dest_gpu_ptr,src_gpu_ptr,size_in_bytes/)
+  ABI_UNUSED(dest_gpu_ptr)
+  ABI_UNUSED(src_gpu_ptr)
+  ABI_UNUSED(size_in_bytes)
 
 end subroutine copy_gpu_to_gpu
 !!***
@@ -171,7 +178,7 @@ subroutine dealloc_on_gpu(gpu_ptr)
   !Arguments ------------------------------------
   type(c_ptr) :: gpu_ptr
 
-  ABI_UNUSED(/gpu_ptr/)
+  ABI_UNUSED(gpu_ptr)
 
 end subroutine dealloc_on_gpu
 !!***
@@ -207,7 +214,9 @@ subroutine gpu_memset(gpu_ptr, val, array_size)
   integer(kind=c_int32_t), intent(in) :: val
   integer(kind=c_int32_t), intent(in) :: array_size
 
-  ABI_UNUSED(/gpu_ptr,val,array_size/)
+  ABI_UNUSED(gpu_ptr)
+  ABI_UNUSED(val)
+  ABI_UNUSED(array_size)
 
 end subroutine gpu_memset
 !!***
@@ -237,10 +246,10 @@ end subroutine gpu_memset
 subroutine gpu_allocated_impl(gpu_ptr, is_allocated)
 
   !Arguments ------------------------------------
-  type(c_ptr),                      :: gpu_ptr
+  type(c_ptr)                       :: gpu_ptr
   logical(kind=c_bool), intent(out) :: is_allocated = .false.
 
-  ABI_UNUSED(/gpu_ptr/)
+  ABI_UNUSED(gpu_ptr)
 
 end subroutine gpu_allocated_impl
 !!***
