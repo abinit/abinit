@@ -641,7 +641,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
      do spin=1,dtset%nsppol
        do ik_ibz=1,dtset%nkpt
          associate (info => diago_info(:, ik_ibz, spin))
-         write(std_out, "(2(a,i0),5a,i0)") "ik_ibz: ", ik_ibz, ", spin: ", spin, &
+         write(std_out, "(2(a,i0),5a,i0)") " ik_ibz: ", ik_ibz, ", spin: ", spin, &
            ", diago_wall: ", trim(sec2str(info(1))), ", io_wall: ", trim(sec2str(info(2))), ", nprocs: ", int(info(3))
          end associate
        end do
