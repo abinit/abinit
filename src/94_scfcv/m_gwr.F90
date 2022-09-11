@@ -339,7 +339,7 @@ module m_gwr
   logical :: timeit = .False.
   ! Internal variable used to activate profiling in low-level routines
 
-  logical :: idle_proc
+  logical :: idle_proc = .False.
 
   integer,allocatable :: bstart_ks(:,:)
    ! bstart_ks(nkcalc, nsppol)
@@ -1101,9 +1101,9 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
    !   kbz               |  to be optimized!               | scales (depends on the BZ -> IBZ mapping)
    !   g/r (PBLAS)       |  network intensive              ! scales
    !
-
-   call xmpi_comm_multiple_of(gwr%ntau * gwr%dtset%nsppol, input_comm, gwr%idle_proc, gwr%comm)
-   if (gwr%idle_proc) return
+   gwr%comm = input_comm
+   !call xmpi_comm_multiple_of(gwr%ntau * gwr%dtset%nsppol, input_comm, gwr%idle_proc, gwr%comm)
+   !if (gwr%idle_proc) return
    all_nproc = xmpi_comm_size(gwr%comm)
 
    gwr%spin_comm%nproc = 1
@@ -1942,12 +1942,12 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
 
      associate (ugb => gwr%ugb(ik_ibz, spin), desc_k => gwr%green_desc_kibz(ik_ibz))
 
+     ABI_CHECK_IEQ(npw_k, desc_k%npw, "npw_k != desc_k%npw")
      my_bstart = ugb%loc2gcol(1)
      my_bstop = ugb%loc2gcol(ugb%sizeb_local(2))
      my_nband = my_bstop - my_bstart + 1
-     ABI_CHECK(my_nband > 0, "nb == 0, decrease number of procs for G and tau parallelism.")
+     ABI_CHECK(my_nband > 0, sjoin("my_nband:", itoa(my_nband), " decrease procs for G and tau parallelism."))
      !print *, "my_bstart, my_bstop, nsum",  my_bstart, my_bstop, nbsum
-     ABI_CHECK_IEQ(npw_k, desc_k%npw, "npw_k != desc_k%npw")
 
      ! Read my bands
      call c_f_pointer(c_loc(ugb%buffer_cplx), cg_k, shape=[2, npwsp * my_nband])
@@ -6323,6 +6323,8 @@ subroutine gwr_build_sigxme(gwr)
    call ltg_k%free()
  end do ! ikcalc
  end do ! my_is
+
+ call wrtout(std_out, "gwr_build_sigxme completed")
 
 end subroutine gwr_build_sigxme
 !!***
