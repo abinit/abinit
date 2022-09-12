@@ -619,7 +619,11 @@ program abinit
  ABI_FREE(pspheads)
 
 #if defined HAVE_GPU_CUDA
+#if defined(HAVE_KOKKOS)
+ ! don't do anything, cuda context will be destroyed in Kokkos::finalize
+#else
  call unsetdevice_cuda(use_gpu_cuda)
+#endif
 #endif
 
  call xpapi_shutdown()
