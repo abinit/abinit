@@ -966,13 +966,12 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &   rhor1,rmet,rprimd,symaf1,symrc1,symrl1,tnons1,ucvol,usecprj,useylmgr1,ddk_f,&
 &   vectornd,vtrial,vtrial1,with_vectornd,wtk_rbz,xred,ylm,ylm1,ylmgr1,omega=omega)
 
-   if (mpi_enreg%me == 0) then
-   write(100,*) "ITERATION:",istep 
-   write(100,*) "cplex:", cplex
-   do ifft=1,nfftf
-     write(100,*) rhor1(2*ifft-1,1),rhor1(2*ifft,1)
-   end do 
-   end if
+!   if (mpi_enreg%me == 0) then
+!   write(100,*) "ITERATION:",istep 
+!   do ifft=1,nfftf
+!     write(100,*) rhor1(2*ifft-1,1),rhor1(2*ifft,1)
+!   end do 
+!   end if
 
    if (.not.kramers_deg) then
      rhor1_pq=rhor1 !at this stage rhor1_pq contains only one term of the 1st order density at +q
@@ -989,13 +988,13 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &     pawrhoij1,pawtab,phnons1,ph1d,dtset%prtvol,psps,pwindall,qmat,resid_mq,residm_mq,rhog1_mq,&
 &     rhor1_mq,rmet,rprimd,symaf1,symrc1,symrl1,tnons1,ucvol,usecprj,useylmgr1,ddk_f,&
 &     vectornd,vtrial,vtrial1_mq,with_vectornd,wtk_rbz,xred,ylm,ylm1,ylmgr1,omega=omega_mq)
-     if (mpi_enreg%me == 0) then
-     write(101,*) "ITERATION:",istep 
-     write(101,*) "cplex:", cplex
-     do ifft=1,nfftf
-       write(101,*) rhor1_mq(2*ifft-1,1),rhor1_mq(2*ifft,1)
-     end do 
-     end if
+!     if (mpi_enreg%me == 0) then
+!     write(101,*) "ITERATION:",istep 
+!     write(101,*) "cplex:", cplex
+!     do ifft=1,nfftf
+!       write(101,*) rhor1_mq(2*ifft-1,1),rhor1_mq(2*ifft,1)
+!     end do 
+!     end if
      !reconstruct the +q and -q densities, this might bug if fft parallelization is used, todo...
      do ifft=1,nfftf
        rhor1_pq(2*ifft-1,:) = half*(rhor1(2*ifft-1,:)+rhor1_mq(2*ifft-1,:))
