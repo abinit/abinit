@@ -227,7 +227,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
  integer :: iorder_cprj,iorder_cprj1,ipw,iscf_mod,ispinor,me,mgscq,nkpt_max
  integer :: option,opt_gvnlx1,quit,test_ddk
  integer :: tocceig,usedcwavef,ptr,shift_band
- real(dp) :: aa,ai,ar,eig0nk,resid,residk,scprod,energy_factor
+ real(dp) :: aa,ai,ar,eig0nk,omega_,resid,residk,scprod,energy_factor
  character(len=500) :: message
  type(rf2_t) :: rf2
 !arrays
@@ -276,6 +276,8 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
  else
    ABI_MALLOC(gsc,(0,0))
  end if
+
+ omega_=zero; if(present(omega))omega_=omega
 
 !Read the npw and kg records of wf files
  test_ddk=0
@@ -441,7 +443,7 @@ unit_me = 6
  &       eig0_k,eig0_kq,eig1_k,gh0c1,gh1c_n,grad_berry,gsc,gscq,gs_hamkq,gvnlxc,gvnlx1,icgq,&
  &       idir,ipert,igscq,mcgq,mgscq,mpi_enreg,mpw1,natom,nband_k,nband_me,dtset%nbdbuf,dtset%nline,&
  &       npw_k,npw1_k,nspinor,opt_gvnlx1,prtvol,quit,resid,rf_hamkq,dtset%dfpt_sciss,dtset%tolrde,&
- &       dtset%tolwfr,usedcwavef,dtset%wfoptalg,nlines_done,omega=omega)
+ &       dtset%tolwfr,usedcwavef,dtset%wfoptalg,nlines_done,omega=omega_)
          resid_k(iband)=resid
        end if
        

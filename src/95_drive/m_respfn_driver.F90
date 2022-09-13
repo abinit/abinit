@@ -930,6 +930,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
  dyfr_nondiag=0;if (psps%usepaw==1.and.rfphon==1) dyfr_nondiag=1
  dyfr_cplex=1;if (psps%usepaw==1.and.rfphon==1.and.(.not.qeq0)) dyfr_cplex=2
+ if (abs(dtset%rfomega)>tol10) dyfr_cplex=2
  ABI_MALLOC(dyew,(2,3,natom,3,natom))
  ABI_MALLOC(dyewq0,(3,3,natom))
  ABI_MALLOC(dyfrlo,(3,3,natom))
@@ -1095,6 +1096,9 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  if(dtset%prtvol==-level)then
    call wrtout(std_out,' respfn: frozen wavef. and Ewald(q=0) part of 2DTE done.','COLL')
  end if
+
+!Deactivate time-reversal symmetry for finite-omega calculations
+ if (abs(dtset%rfomega)>tol10) timrev=0
 
  call timab(136,2,tsec)
 

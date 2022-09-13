@@ -394,7 +394,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  nkpt_max=50;if (xmpi_paral==1) nkpt_max=-1
 !TODO: this flag for paral_atom is ignored below
  paral_atom=(dtset%natom/=my_natom)
- cplex=2-timrev !cplex=2 ! DEBUG: impose cplex=2
+ cplex=2-timrev ! cplex=2 ! DEBUG: impose cplex=2
  first_entry=.true.
  initialized=0
  ecore=zero ; ek=zero ; ehart=zero ; enxc=zero ; eei=zero ; enl=zero ; eii=zero
@@ -1313,8 +1313,14 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &          dtset%natom, nkpt_rbz, npwar1, dtset%nspinor, dtset%nsppol, dtset%usepaw,&
 &          cgq, eigen=eigenq, occ=occ_disk)
      call timab(144,2,tsec)
+   end if
 
-     if (.not.kramers_deg) then
+   if (.not.kramers_deg) then
+     if (dtfil%fnamewffq == dtfil%fnamewffk .and. sum(dtset%qptn(1:3)**2) < 1.d-14) then
+       call wrtout(std_out, " qpt is Gamma, psi_k+q initialized from psi_k in memory")
+       cg_mq = cg
+       eigen_mq = eigen0
+     else
        !SPr: later "make" a separate WFQ file for "-q"
        call timab(144,1,tsec)
        call wfk_read_my_kptbands(dtfil%fnamewffq, distrb_flags, spacecomm,dtset%ecut*(dtset%dilatmx)**2, &
