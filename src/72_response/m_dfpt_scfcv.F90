@@ -961,7 +961,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
    if (mpi_enreg%me == 0) then
    write(100,*) "ITERATION:",istep 
    write(100,*) "cplex:", cplex
-   do ifft=1,nfftf/2
+   do ifft=1,nfftf
      write(100,*) rhor1(2*ifft-1,1),rhor1(2*ifft,1)
    end do 
    end if
@@ -984,7 +984,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      if (mpi_enreg%me == 0) then
      write(101,*) "ITERATION:",istep 
      write(101,*) "cplex:", cplex
-     do ifft=1,nfftf/2
+     do ifft=1,nfftf
        write(101,*) rhor1_mq(2*ifft-1,1),rhor1_mq(2*ifft,1)
      end do 
      end if
