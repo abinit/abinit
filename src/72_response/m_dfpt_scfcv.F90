@@ -814,14 +814,22 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
        !get initial guess for vtrial1 at -q
        do ifft=1,nfftf
          vtrial1_mq(2*ifft-1,1)=+vtrial1(2*ifft-1,1)
-         vtrial1_mq(2*ifft-1,2)=+vtrial1(2*ifft-1,2)
          vtrial1_mq(2*ifft  ,1)=-vtrial1(2*ifft  ,1)
-         vtrial1_mq(2*ifft  ,2)=-vtrial1(2*ifft  ,2)
-         vtrial1_mq(2*ifft-1,3)= vtrial1(2*ifft  ,4) !Re[V^12]
-         vtrial1_mq(2*ifft  ,3)= vtrial1(2*ifft-1,4) !Im[V^12],see definition of v(:,4) cplex=2 case
-         vtrial1_mq(2*ifft  ,4)= vtrial1(2*ifft-1,3) !Re[V^21]=Re[V^12]
-         vtrial1_mq(2*ifft-1,4)= vtrial1(2*ifft  ,3) !Re[V^21]=Re[V^12]
        end do
+       if (nspden >= 2) then
+         do ifft=1,nfftf
+           vtrial1_mq(2*ifft-1,2)=+vtrial1(2*ifft-1,2)
+           vtrial1_mq(2*ifft  ,2)=-vtrial1(2*ifft  ,2)
+         end do
+       end if
+       if (nspden > 2) then
+         do ifft=1,nfftf
+           vtrial1_mq(2*ifft-1,3)= vtrial1(2*ifft  ,4) !Re[V^12]
+           vtrial1_mq(2*ifft  ,3)= vtrial1(2*ifft-1,4) !Im[V^12],see definition of v(:,4) cplex=2 case
+           vtrial1_mq(2*ifft  ,4)= vtrial1(2*ifft-1,3) !Re[V^21]=Re[V^12]
+           vtrial1_mq(2*ifft-1,4)= vtrial1(2*ifft  ,3) !Re[V^21]=Re[V^12]
+         end do
+       end if
      end if
 
 !    For Q=0 and metallic occupation, initialize quantities needed to
