@@ -2190,7 +2190,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      vtrial_local = vtrial
      if((dtset%orbmag .GE. 1) .AND. (dtset%orbmag .LE. 4)) then
        call orbmag_ptpaw(cg,cg1_3,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
-         & nfftf,ngfftf,npwarr,paw_ij,pawfgr,pawrad,pawtab,psps,rprimd,vtrial_local,xred,ylm,ylmgr)
+         & nfftf,ngfftf,npwarr,occ,paw_ij,pawfgr,pawrad,pawtab,psps,rprimd,vtrial_local,xred,ylm,ylmgr)
      end if 
      if( ALLOCATED(vtrial_local) ) then
        ABI_FREE(vtrial_local)
