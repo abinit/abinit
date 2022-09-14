@@ -75,8 +75,10 @@ module m_orbmag
 
   integer,parameter :: if1=1,if2=2,if3=3,if4=4
   integer,parameter :: iomlr=5,iomanp=6,iomlmb=7
-  integer,parameter :: ig1=8,ig4=9,ih1=10,ih2=11,ih3=12,ih4=13,ig3a=14,ig2a=15,ig2b=16,ig3b=17
-  integer,parameter :: nterms=17
+  integer,parameter :: ig1=8,ig4=9,ih1=10,ih2=11,ih3=12,ih4=13
+  integer,parameter :: ig2a_dij=14,ig2b_p2=15,ig2b_ap=16,ig2b_vha=17,ig2b_vhnzc=18
+  integer,parameter :: ig3a_dij=19,ig3b_p2=20,ig3b_ap=21,ig3b_vha=22,ig3b_vhnzc=23
+  integer,parameter :: nterms=23
   real(dp),parameter :: c2 = one/(two_pi*two_pi) ! accounts for exp(i k.r) in abinit derivatives rather than exp( 2pi i k.r)
   complex(dpc),parameter :: cbc = j_dpc/two_pi ! Berry curvature pre-factor
   complex(dpc),parameter :: com = -half*j_dpc  ! Orbital magnetism pre-factor
@@ -473,34 +475,34 @@ subroutine orbmag_ptpaw(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_en
    orbmag_terms(:,:,:,ig4) = orbmag_terms(:,:,:,ig4) + trnrm*gg_k
    
    call make_g2a(atindx,cprj_k,cprj1_k,dtset,gg_k,lmn2max,nband_k,paw_ij,pawtab)
-   orbmag_terms(:,:,:,ig2a) = orbmag_terms(:,:,:,ig2a) + trnrm*gg_k
+   orbmag_terms(:,:,:,ig2a_dij) = orbmag_terms(:,:,:,ig2a_dij) + trnrm*gg_k
    
    call make_g2b(atindx,cprj_k,cprj1_k,ddir_p2,dtset,gg_k,psps%lmnmax,nband_k,pawtab)
-   orbmag_terms(:,:,:,ig2b) = orbmag_terms(:,:,:,ig2b) + trnrm*gg_k
+   orbmag_terms(:,:,:,ig2b_p2) = orbmag_terms(:,:,:,ig2b_p2) + trnrm*gg_k
 
    call make_g2b(atindx,cprj_k,cprj1_k,ddir_ap,dtset,gg_k,psps%lmnmax,nband_k,pawtab)
-   orbmag_terms(:,:,:,ig2b) = orbmag_terms(:,:,:,ig2b) + trnrm*gg_k
+   orbmag_terms(:,:,:,ig2b_ap) = orbmag_terms(:,:,:,ig2b_ap) + trnrm*gg_k
 
    call make_g2b(atindx,cprj_k,cprj1_k,ddir_vha,dtset,gg_k,psps%lmnmax,nband_k,pawtab)
-   orbmag_terms(:,:,:,ig2b) = orbmag_terms(:,:,:,ig2b) + trnrm*gg_k
+   orbmag_terms(:,:,:,ig2b_vha) = orbmag_terms(:,:,:,ig2b_vha) + trnrm*gg_k
 
    call make_g2b(atindx,cprj_k,cprj1_k,ddir_vhnzc,dtset,gg_k,psps%lmnmax,nband_k,pawtab)
-   orbmag_terms(:,:,:,ig2b) = orbmag_terms(:,:,:,ig2b) + trnrm*gg_k
+   orbmag_terms(:,:,:,ig2b_vhnzc) = orbmag_terms(:,:,:,ig2b_vhnzc) + trnrm*gg_k
 
    call make_g3a(atindx,cprj_k,dtset,gg_k,lmn2max,nband_k,paw_ij,pawtab)
-   orbmag_terms(:,:,:,ig3a) = orbmag_terms(:,:,:,ig3a) + trnrm*gg_k
+   orbmag_terms(:,:,:,ig3a_dij) = orbmag_terms(:,:,:,ig3a_dij) + trnrm*gg_k
    
    call make_g3b(atindx,cprj_k,ddir_p2,dtset,gg_k,psps%lmnmax,nband_k,pawtab)
-   orbmag_terms(:,:,:,ig3b) = orbmag_terms(:,:,:,ig3b) + trnrm*gg_k
+   orbmag_terms(:,:,:,ig3b_p2) = orbmag_terms(:,:,:,ig3b_p2) + trnrm*gg_k
    
    call make_g3b(atindx,cprj_k,ddir_ap,dtset,gg_k,psps%lmnmax,nband_k,pawtab)
-   orbmag_terms(:,:,:,ig3b) = orbmag_terms(:,:,:,ig3b) + trnrm*gg_k
+   orbmag_terms(:,:,:,ig3b_ap) = orbmag_terms(:,:,:,ig3b_ap) + trnrm*gg_k
    
    call make_g3b(atindx,cprj_k,ddir_vha,dtset,gg_k,psps%lmnmax,nband_k,pawtab)
-   orbmag_terms(:,:,:,ig3b) = orbmag_terms(:,:,:,ig3b) + trnrm*gg_k
+   orbmag_terms(:,:,:,ig3b_vha) = orbmag_terms(:,:,:,ig3b_vha) + trnrm*gg_k
    
    call make_g3b(atindx,cprj_k,ddir_vhnzc,dtset,gg_k,psps%lmnmax,nband_k,pawtab)
-   orbmag_terms(:,:,:,ig3b) = orbmag_terms(:,:,:,ig3b) + trnrm*gg_k
+   orbmag_terms(:,:,:,ig3b_vhnzc) = orbmag_terms(:,:,:,ig3b_vhnzc) + trnrm*gg_k
    
    !--------------------------------------------------------------------------------
    ! onsite <phi|r_b p^2/2 r_g>
@@ -2166,43 +2168,59 @@ subroutine orbmag_ptpaw_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace)
    call wrtout(ab_out,message,'COLL')
    write(message,'(a)')' Orbital magnetic moment, term-by-term breakdown : '
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)')'      g1 : ',(orbmag_trace(1,adir,ig1),adir=1,3)
+   write(message,'(a,3es16.8)')'        <Pc du|THT|Pc_du> : ',(orbmag_trace(1,adir,ig1),adir=1,3)
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)')'     g2a : ',(orbmag_trace(1,adir,ig2a),adir=1,3)
+   write(message,'(a,3es16.8)')'      <Pc du|T(dT)|u>*Dij : ',(orbmag_trace(1,adir,ig2a_dij),adir=1,3)
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)')'     g2b : ',(orbmag_trace(1,adir,ig2b),adir=1,3)
+   write(message,'(a,3es16.8)')'     <Pc du|T(dT)|u>d(p2) : ',(orbmag_trace(1,adir,ig2b_p2),adir=1,3)
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)')'     g3a : ',(orbmag_trace(1,adir,ig3a),adir=1,3)
+   write(message,'(a,3es16.8)')'    <Pc du|T(dT)|u>d(A.p) : ',(orbmag_trace(1,adir,ig2b_ap),adir=1,3)
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)')'     g3b : ',(orbmag_trace(1,adir,ig3b),adir=1,3)
+   write(message,'(a,3es16.8)')'     <Pc du|T(dT)|u>d(vH) : ',(orbmag_trace(1,adir,ig2b_vha),adir=1,3)
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)')'   g3d L : ',(orbmag_trace(1,adir,iomlr),adir=1,3)
+   write(message,'(a,3es16.8)')'  <Pc du|T(dT)|u>d(vHnzc) : ',(orbmag_trace(1,adir,ig2b_vhnzc),adir=1,3)
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)')' g3d A.p : ',(orbmag_trace(1,adir,iomanp),adir=1,3)
+   write(message,'(a,3es16.8)')'       <u|(dT)(dT)|u>*Dij : ',(orbmag_trace(1,adir,ig3a_dij),adir=1,3)
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)')'      g4 : ',(orbmag_trace(1,adir,ig4),adir=1,3)
+   write(message,'(a,3es16.8)')'      <u|(dT)(dT)|u>d(p2) : ',(orbmag_trace(1,adir,ig3b_p2),adir=1,3)
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)')'      h1 : ',(orbmag_trace(1,adir,ih1),adir=1,3)
+   write(message,'(a,3es16.8)')'     <u|(dT)(dT)|u>d(A.p) : ',(orbmag_trace(1,adir,ig3b_ap),adir=1,3)
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)')'      h2 : ',(orbmag_trace(1,adir,ih2),adir=1,3)
+   write(message,'(a,3es16.8)')'      <u|(dT)(dT)|u>d(vH) : ',(orbmag_trace(1,adir,ig3b_vha),adir=1,3)
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)')'      h3 : ',(orbmag_trace(1,adir,ih3),adir=1,3)
+   write(message,'(a,3es16.8)')'   <u|(dT)(dT)|u>d(vHnzc) : ',(orbmag_trace(1,adir,ig3b_vhnzc),adir=1,3)
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)')'      h4 : ',(orbmag_trace(1,adir,ih4),adir=1,3)
+   write(message,'(a,3es16.8)')'  <u|(dT)(dT)|u>dd(p2)(L) : ',(orbmag_trace(1,adir,iomlr),adir=1,3)
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)')'    Lamb : ',(orbmag_trace(1,adir,iomlmb),adir=1,3)
+   write(message,'(a,3es16.8)')'    <u|(dT)(dT)|u>dd(A.p) : ',(orbmag_trace(1,adir,iomanp),adir=1,3)
+   call wrtout(ab_out,message,'COLL')
+   write(message,'(a,3es16.8)')'   -<u|(dT)Pv H Pv(dT)|u> : ',(orbmag_trace(1,adir,ig4),adir=1,3)
+   call wrtout(ab_out,message,'COLL')
+   write(message,'(a)')ch10
+   call wrtout(ab_out,message,'COLL')
+   write(message,'(a,3es16.8)')'     Enk*<Pc du|TT|Pc_du> : ',(orbmag_trace(1,adir,ih1),adir=1,3)
+   call wrtout(ab_out,message,'COLL')
+   write(message,'(a,3es16.8)')' Enk*<Pc du|T(dT)|u>+cnjg : ',(orbmag_trace(1,adir,ih2),adir=1,3)
+   call wrtout(ab_out,message,'COLL')
+   write(message,'(a,3es16.8)')'       Enk*<u|(dT)(dT)|u> : ',(orbmag_trace(1,adir,ih3),adir=1,3)
+   call wrtout(ab_out,message,'COLL')
+   write(message,'(a,3es16.8)')'    -Enk*<u|(dT)Pv(dT)|u> : ',(orbmag_trace(1,adir,ih4),adir=1,3)
+   call wrtout(ab_out,message,'COLL')
+   write(message,'(a)')ch10
+   call wrtout(ab_out,message,'COLL')
+   write(message,'(a,3es16.8)')'                     Lamb : ',(orbmag_trace(1,adir,iomlmb),adir=1,3)
    call wrtout(ab_out,message,'COLL')
    write(message,'(a)')ch10
    call wrtout(ab_out,message,'COLL')
    write(message,'(a)')' Berry curvature, term-by-term breakdown : '
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)') '  f1 : ',(orbmag_trace(1,adir,if1),adir=1,3)
+   write(message,'(a,3es16.8)') '      <Pc du|TT|Pc_du> : ',(orbmag_trace(1,adir,if1),adir=1,3)
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)') '  f2 : ',(orbmag_trace(1,adir,if2),adir=1,3)
+   write(message,'(a,3es16.8)') ' <Pc du|T(dT)|u>+CONJG : ',(orbmag_trace(1,adir,if2),adir=1,3)
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)') '  f3 : ',(orbmag_trace(1,adir,if3),adir=1,3)
+   write(message,'(a,3es16.8)') '        <u|(dT)(dT)|u> : ',(orbmag_trace(1,adir,if3),adir=1,3)
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)') '  f4 : ',(orbmag_trace(1,adir,if4),adir=1,3)
+   write(message,'(a,3es16.8)') '     -<u|(dT)Pv(dT)|u> : ',(orbmag_trace(1,adir,if4),adir=1,3)
    call wrtout(ab_out,message,'COLL')
  end if
 
@@ -2218,15 +2236,27 @@ subroutine orbmag_ptpaw_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace)
      call wrtout(ab_out,message,'COLL')
      write(message,'(a,3es16.8)') ' Orbital magnetic moment : ',(orbmag_bb(1,iband,adir),adir=1,3)
      call wrtout(ab_out,message,'COLL')
-     write(message,'(a,3es16.8)') '      g1 : ',(orbmag_terms(1,iband,adir,ig1),adir=1,3)
+     write(message,'(a,3es16.8)') '        g1 : ',(orbmag_terms(1,iband,adir,ig1),adir=1,3)
      call wrtout(ab_out,message,'COLL')
-     write(message,'(a,3es16.8)') '     g2a : ',(orbmag_terms(1,iband,adir,ig2a),adir=1,3)
+     write(message,'(a,3es16.8)') '   g2a_dij : ',(orbmag_terms(1,iband,adir,ig2a_dij),adir=1,3)
      call wrtout(ab_out,message,'COLL')
-     write(message,'(a,3es16.8)') '     g2b : ',(orbmag_terms(1,iband,adir,ig2b),adir=1,3)
+     write(message,'(a,3es16.8)') '    g2b_p2 : ',(orbmag_terms(1,iband,adir,ig2b_p2),adir=1,3)
      call wrtout(ab_out,message,'COLL')
-     write(message,'(a,3es16.8)') '     g3a : ',(orbmag_terms(1,iband,adir,ig3a),adir=1,3)
+     write(message,'(a,3es16.8)') '    g2b_ap : ',(orbmag_terms(1,iband,adir,ig2b_ap),adir=1,3)
      call wrtout(ab_out,message,'COLL')
-     write(message,'(a,3es16.8)') '     g3b : ',(orbmag_terms(1,iband,adir,ig3b),adir=1,3)
+     write(message,'(a,3es16.8)') '   g2b_vha : ',(orbmag_terms(1,iband,adir,ig2b_vha),adir=1,3)
+     call wrtout(ab_out,message,'COLL')
+     write(message,'(a,3es16.8)') ' g2b_vhnzc : ',(orbmag_terms(1,iband,adir,ig2b_vhnzc),adir=1,3)
+     call wrtout(ab_out,message,'COLL')
+     write(message,'(a,3es16.8)') '   g3a_dij : ',(orbmag_terms(1,iband,adir,ig3a_dij),adir=1,3)
+     call wrtout(ab_out,message,'COLL')
+     write(message,'(a,3es16.8)') '    g3b_p2 : ',(orbmag_terms(1,iband,adir,ig3b_p2),adir=1,3)
+     call wrtout(ab_out,message,'COLL')
+     write(message,'(a,3es16.8)') '    g3b_ap : ',(orbmag_terms(1,iband,adir,ig3b_ap),adir=1,3)
+     call wrtout(ab_out,message,'COLL')
+     write(message,'(a,3es16.8)') '   g3b_vha : ',(orbmag_terms(1,iband,adir,ig3b_vha),adir=1,3)
+     call wrtout(ab_out,message,'COLL')
+     write(message,'(a,3es16.8)') ' g3b_vhnzc : ',(orbmag_terms(1,iband,adir,ig3b_vhnzc),adir=1,3)
      call wrtout(ab_out,message,'COLL')
      write(message,'(a,3es16.8)') '   g3d L : ',(orbmag_terms(1,iband,adir,iomlr),adir=1,3)
      call wrtout(ab_out,message,'COLL')
