@@ -50,10 +50,13 @@ module m_orbmag
   use m_mkffnl,           only : mkffnl
   use m_mpinfo,           only : proc_distrb_cycle
   use m_nonlop,           only : nonlop
+  use m_paw_an,           only : paw_an_type
+  use m_pawang,           only : pawang_type
   use m_pawcprj,          only : pawcprj_type, pawcprj_alloc, pawcprj_free,pawcprj_getdim, pawcprj_get, pawcprj_put
   use m_paw_dmft,         only : paw_dmft_type
   use m_pawfgr,           only : pawfgr_type
   use m_paw_ij,           only : paw_ij_type
+  use m_paw_denpot,       only : pawdensities
   use m_paw_occupancies,  only : pawmkrhoij
   use m_pawrad,           only : nderiv_gen,pawrad_type,pawrad_deducer0,simp_gen
   use m_pawrhoij,         only : pawrhoij_alloc, pawrhoij_free, pawrhoij_type
@@ -95,6 +98,7 @@ module m_orbmag
   private :: make_ddir_p2
   private :: make_ddir_ap
   private :: make_ddir_vha
+  private :: make_ddir_vha2
   private :: make_fgh1
   private :: make_fh2
   private :: make_fh3
@@ -150,7 +154,7 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
 subroutine orbmag_ptpaw(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
-    & nfftf,ngfftf,npwarr,occ,paw_ij,pawfgr,pawrad,pawtab,psps,rprimd,vtrial,xred,ylm,ylmgr)
+    & nfftf,ngfftf,npwarr,occ,paw_ij,paw_an,pawang,pawfgr,pawrad,pawtab,psps,rprimd,vtrial,xred,ylm,ylmgr)
 
  !Arguments ------------------------------------
  !scalars
@@ -158,6 +162,7 @@ subroutine orbmag_ptpaw(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_en
  real(dp),intent(in) :: gsqcut
  type(dataset_type),intent(in) :: dtset
  type(MPI_type), intent(inout) :: mpi_enreg
+ type(pawang_type),intent(in) :: pawang
  type(pawfgr_type),intent(in) :: pawfgr
  type(pseudopotential_type), intent(inout) :: psps
 
@@ -172,6 +177,7 @@ subroutine orbmag_ptpaw(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_en
  real(dp),intent(in) :: ylmgr(dtset%mpw*dtset%mkmem,3,psps%mpsang*psps%mpsang*psps%useylm)
  type(pawcprj_type),intent(in) ::  cprj(dtset%natom,mcprj)
  type(paw_ij_type),intent(inout) :: paw_ij(dtset%natom*psps%usepaw)
+ type(paw_an_type),intent(inout) :: paw_an(dtset%natom)
  type(pawrad_type),intent(in) :: pawrad(dtset%ntypat*psps%usepaw)
  type(pawtab_type),intent(inout) :: pawtab(psps%ntypat*psps%usepaw)
 
@@ -305,6 +311,8 @@ subroutine orbmag_ptpaw(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_en
  ABI_MALLOC(pawrhoij,(dtset%natom))
  call pawrhoij_alloc(pawrhoij,dtset%pawcpxocc,dtset%nspden,dtset%nspinor,dtset%nsppol,dtset%typat,&
    & pawtab=pawtab)
+ paw_dmft%use_sc_dmft=0
+ paw_dmft%use_dmft=0
  call pawmkrhoij(atindx,atindx1,cprj,dimlmn,dtset%istwfk,dtset%kptopt,dtset%mband,dtset%mband,&
    & mcprj,dtset%mkmem,mpi_enreg,dtset%natom,dtset%nband,dtset%nkpt,dtset%nspinor,dtset%nsppol,&
    & occ,dtset%paral_kgb,paw_dmft,pawrhoij,0,dtset%usewvl,dtset%wtk)
@@ -2390,6 +2398,98 @@ subroutine make_ddir_vhnzc(ddir_vhnzc,dtset,gntselect,gprimd,lmnmax,my_lmax,pawr
  end do ! end loop over types
  
 end subroutine make_ddir_vhnzc
+
+!!****f* ABINIT/make_ddir_vha2
+!! NAME
+!! make_ddir_vha2
+!!
+!! FUNCTION
+!! Compute onsite r*vhartree
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2021 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!! computed in Cart directions then transformed to xtal coords
+!!
+!! PARENTS
+!!      m_orbmag
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine make_ddir_vha2(atindx,dtset,paw_an,pawang,pawrad,pawrhoij,pawtab)
+
+  !Arguments ------------------------------------
+  !scalars
+  type(dataset_type),intent(in) :: dtset
+  type(pawang_type),intent(in) :: pawang
+
+  !arrays
+  integer,intent(in) :: atindx(dtset%natom)
+  type(paw_an_type),intent(inout) :: paw_an(dtset%natom)
+  type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
+  type(pawrhoij_type),intent(in) :: pawrhoij(dtset%natom)
+  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
+
+  !Local variables -------------------------
+  !scalars
+  integer :: cplex,iat,iatom,itypat,lm_size,mesh_size,nzlmopt
+  integer :: opt_compch,opt_dens,opt_l,opt_print
+  real(dp) :: compch_sph
+
+  !arrays
+  real(dp),allocatable :: nhat1(:,:,:),rho1(:,:,:),trho1(:,:,:)
+  logical,allocatable :: lmselectin(:),lmselectout(:)
+
+!--------------------------------------------------------------------
+
+ nzlmopt = -1
+ opt_compch = 0
+ opt_dens = 1
+ opt_l = -1
+ opt_print = 0
+
+ do iat = 1, dtset%natom
+   iatom = atindx(iat)
+   itypat = dtset%typat(iat)
+  
+   cplex = pawrhoij(iatom)%cplex_rhoij 
+   mesh_size=pawtab(itypat)%mesh_size
+   lm_size = paw_an(iatom)%lm_size
+   ABI_MALLOC(lmselectin,(lm_size))
+   ABI_MALLOC(lmselectout,(lm_size))
+   ABI_MALLOC(nhat1,(cplex*mesh_size,lm_size,dtset%nspden*(1-((opt_dens+1)/2))))
+   ABI_MALLOC(rho1,(cplex*mesh_size,lm_size,dtset%nspden))
+   ABI_MALLOC(trho1,(cplex*mesh_size,lm_size,dtset%nspden*(1-(opt_dens/2))))
+   
+   call pawdensities(compch_sph,cplex,iatom,lmselectin,lmselectout,&
+     & lm_size,nhat1,dtset%nspden,nzlmopt,opt_compch,opt_dens,opt_l,&
+     & opt_print,pawang,dtset%pawprtvol,pawrad(itypat),pawrhoij(iatom),&
+     & pawtab(itypat),rho1,trho1)
+
+   ABI_FREE(lmselectin)
+   ABI_FREE(lmselectout)
+   ABI_FREE(nhat1)
+   ABI_FREE(rho1)
+   ABI_FREE(trho1)
+
+ end do
+ 
+end subroutine make_ddir_vha2
 
 !!****f* ABINIT/make_ddir_vha
 !! NAME
