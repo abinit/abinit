@@ -637,8 +637,8 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,mpi_enreg)
      call chebfi_swapInnerBuffers(chebfi, spacedim, neigenpairs)
    else
      call chebfi_swapInnerBuffers(chebfi, chebfi%total_spacedim, chebfi%bandpp)
-  end if
-  ABI_NVTX_END_RANGE()
+   end if
+   ABI_NVTX_END_RANGE()
    call timab(tim_swap,2,tsec)
 
    !A * Psi

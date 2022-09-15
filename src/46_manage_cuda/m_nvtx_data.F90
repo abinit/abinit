@@ -28,7 +28,7 @@ module m_nvtx_data
 
   logical :: nvtx_activated = .false.
 
-  integer, parameter :: NUMBER_OF_NVTX_REGIONS = 27
+  integer, parameter :: NUMBER_OF_NVTX_REGIONS = 30
   character(len=32), dimension(NUMBER_OF_NVTX_REGIONS) :: nvtx_names
   integer          , dimension(NUMBER_OF_NVTX_REGIONS) :: nvtx_ids
 
@@ -42,23 +42,26 @@ module m_nvtx_data
   integer, parameter :: NVTX_CHEBFI2 = 8
   integer, parameter :: NVTX_ORTHO_WF = 9
   integer, parameter :: NVTX_GETGHC = 10
-  integer, parameter :: NVTX_CHEBFI2_RR = 11 ! Rayleigh Ritz
-  integer, parameter :: NVTX_CHEBFI2_RRQ = 12 ! Rayleigh Ritz Quotient
-  integer, parameter :: NVTX_CHEBFI2_CORE = 13 ! core
-  integer, parameter :: NVTX_CHEBFI2_NONLOP = 14
-  integer, parameter :: NVTX_CTOCPRJ = 15
-  integer, parameter :: NVTX_SCF_FOURWF = 16
-  integer, parameter :: NVTX_MKRHO = 17
-  integer, parameter :: NVTX_INVOVL = 18
-  integer, parameter :: NVTX_INVOVL_NONLOP1 = 19
-  integer, parameter :: NVTX_INVOVL_NONLOP2 = 20
-  integer, parameter :: NVTX_INVOVL_INNER = 21
-  integer, parameter :: NVTX_INVOVL_INNER_APPLY_BLOCK = 22
-  integer, parameter :: NVTX_INVOVL_INNER_GEMM = 23
-  integer, parameter :: NVTX_SUB_SPC_DIAGO = 24
-  integer, parameter :: NVTX_CHEBFI2_NEXT_ORDER = 25
-  integer, parameter :: NVTX_CHEBFI2_SWAP_BUF = 26
-  integer, parameter :: NVTX_CHEBFI2_GET_AX_BX = 27
+  integer, parameter :: NVTX_GETGHC_LOCPOT = 11
+  integer, parameter :: NVTX_GETGHC_NLOCPOT = 12
+  integer, parameter :: NVTX_GETGHC_KIN = 13
+  integer, parameter :: NVTX_CHEBFI2_RR = 14 ! Rayleigh Ritz
+  integer, parameter :: NVTX_CHEBFI2_RRQ = 15 ! Rayleigh Ritz Quotient
+  integer, parameter :: NVTX_CHEBFI2_CORE = 16 ! core
+  integer, parameter :: NVTX_CHEBFI2_NONLOP = 17
+  integer, parameter :: NVTX_CTOCPRJ = 18
+  integer, parameter :: NVTX_SCF_FOURWF = 19
+  integer, parameter :: NVTX_MKRHO = 20
+  integer, parameter :: NVTX_INVOVL = 21
+  integer, parameter :: NVTX_INVOVL_NONLOP1 = 22
+  integer, parameter :: NVTX_INVOVL_NONLOP2 = 23
+  integer, parameter :: NVTX_INVOVL_INNER = 24
+  integer, parameter :: NVTX_INVOVL_INNER_APPLY_BLOCK = 25
+  integer, parameter :: NVTX_INVOVL_INNER_GEMM = 26
+  integer, parameter :: NVTX_SUB_SPC_DIAGO = 27
+  integer, parameter :: NVTX_CHEBFI2_NEXT_ORDER = 28
+  integer, parameter :: NVTX_CHEBFI2_SWAP_BUF = 29
+  integer, parameter :: NVTX_CHEBFI2_GET_AX_BX = 30
 
 contains
 
@@ -84,6 +87,9 @@ contains
          & "CHEBFI2", &
          & "ORTHO_WF", &
          & "GETGHC", &
+         & "LOCPOT", &
+         & "NLOCPOT", &
+         & "KINETIC", &
          & "CHEBFI2_RR", &
          & "CHEBFI2_RRQ", &
          & "CHEBFI2_CORE", &
@@ -112,24 +118,27 @@ contains
     nvtx_ids(7) = NVTX_CHEBFI1
     nvtx_ids(8) = NVTX_CHEBFI2
     nvtx_ids(9) = NVTX_ORTHO_WF
-    nvtx_ids(10) = NVTX_GETGHC
-    nvtx_ids(11)= NVTX_CHEBFI2_RR
-    nvtx_ids(12)= NVTX_CHEBFI2_RRQ
-    nvtx_ids(13)= NVTX_CHEBFI2_CORE
-    nvtx_ids(14)= NVTX_CHEBFI2_NONLOP
-    nvtx_ids(15)= NVTX_CTOCPRJ
-    nvtx_ids(16)= NVTX_SCF_FOURWF
-    nvtx_ids(17)= NVTX_MKRHO
-    nvtx_ids(18)= NVTX_INVOVL
-    nvtx_ids(19)= NVTX_INVOVL_NONLOP1
-    nvtx_ids(20)= NVTX_INVOVL_NONLOP2
-    nvtx_ids(21)= NVTX_INVOVL_INNER
-    nvtx_ids(22)= NVTX_INVOVL_INNER_APPLY_BLOCK
-    nvtx_ids(23)= NVTX_INVOVL_INNER_GEMM
-    nvtx_ids(24)= NVTX_SUB_SPC_DIAGO
-    nvtx_ids(25)= NVTX_CHEBFI2_NEXT_ORDER
-    nvtx_ids(26)= NVTX_CHEBFI2_SWAP_BUF
-    nvtx_ids(27)= NVTX_CHEBFI2_GET_AX_BX
+    nvtx_ids(10)= NVTX_GETGHC
+    nvtx_ids(11)= NVTX_GETGHC_LOCPOT
+    nvtx_ids(12)= NVTX_GETGHC_NLOCPOT
+    nvtx_ids(13)= NVTX_GETGHC_KIN
+    nvtx_ids(14)= NVTX_CHEBFI2_RR
+    nvtx_ids(15)= NVTX_CHEBFI2_RRQ
+    nvtx_ids(16)= NVTX_CHEBFI2_CORE
+    nvtx_ids(17)= NVTX_CHEBFI2_NONLOP
+    nvtx_ids(18)= NVTX_CTOCPRJ
+    nvtx_ids(19)= NVTX_SCF_FOURWF
+    nvtx_ids(20)= NVTX_MKRHO
+    nvtx_ids(21)= NVTX_INVOVL
+    nvtx_ids(22)= NVTX_INVOVL_NONLOP1
+    nvtx_ids(23)= NVTX_INVOVL_NONLOP2
+    nvtx_ids(24)= NVTX_INVOVL_INNER
+    nvtx_ids(25)= NVTX_INVOVL_INNER_APPLY_BLOCK
+    nvtx_ids(26)= NVTX_INVOVL_INNER_GEMM
+    nvtx_ids(27)= NVTX_SUB_SPC_DIAGO
+    nvtx_ids(28)= NVTX_CHEBFI2_NEXT_ORDER
+    nvtx_ids(29)= NVTX_CHEBFI2_SWAP_BUF
+    nvtx_ids(30)= NVTX_CHEBFI2_GET_AX_BX
 
   end subroutine nvtx_init
 
