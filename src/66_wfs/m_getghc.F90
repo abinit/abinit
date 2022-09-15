@@ -19,6 +19,9 @@
 
 #include "abi_common.h"
 
+! nvtx related macro definition
+#include "nvtx_macros.h"
+
 module m_getghc
 
  use defs_basis
@@ -35,6 +38,10 @@ module m_getghc
  use m_fock_getghc, only : fock_getghc, fock_ACE_getghc
  use m_nonlop,      only : nonlop
  use m_fft,         only : fourwf
+
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
+ use m_nvtx_data
+#endif
 
  implicit none
 
@@ -293,6 +300,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 !============================================================
 ! Application of the local potential
 !============================================================
+ ABI_NVTX_START_RANGE(NVTX_GETGHC_LOCPOT)
 
  if (any(type_calc == [0, 1, 3])) then
 
@@ -682,6 +690,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
    end if
 
  end if ! type_calc
+ ABI_NVTX_END_RANGE()
 
 
  if (any(type_calc == [0, 2, 3])) then
@@ -689,7 +698,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 !============================================================
 ! Application of the non-local potential and the Fock potential
 !============================================================
-
+   ABI_NVTX_START_RANGE(NVTX_GETGHC_NLOCPOT)
    if (type_calc==0 .or. type_calc==2) then
      signs=2 ; choice=1 ; nnlout=1 ; idir=0 ; tim_nonlop=1
      cpopt_here=-1;if (gs_ham%usepaw==1) cpopt_here=cpopt
@@ -754,10 +763,12 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
      ! for kinetic and local only, nonlocal and vfock should be zero
      gvnlxc_(:,:) = zero
    end if ! if(type_calc...
+   ABI_NVTX_END_RANGE()
 
 !============================================================
 ! Assemble kinetic, local, nonlocal and Fock contributions
 !============================================================
+   ABI_NVTX_START_RANGE(NVTX_GETGHC_KIN)
 
 !  Assemble modified kinetic, local and nonlocal contributions
    !  to <G|H|C(n,k)>. Take also into account build-in debugging.
@@ -850,6 +861,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
        end do ! ispinor
      end do ! idat
    end if
+   ABI_NVTX_END_RANGE()
 
 !  Special case of PAW + Fock : only return Fock operator contribution in gvnlxc_
    if (gs_ham%usepaw==1 .and. has_fock) then
