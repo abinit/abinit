@@ -27,6 +27,7 @@
 #include "abi_common.h"
 
 #define MATPACK(row,col) (MAX(row,col)*(MAX(row,col)-1)/2 + MIN(row,col))
+#define LMPACK(l,m) (l*l+l+1+m)
 
 module m_orbmag
 
@@ -115,6 +116,7 @@ module m_orbmag
   private :: apply_d2lr_term_k
   private :: lamb_core
   private :: make_pcg1
+  private :: pack_pawrhoij
   private :: orbmag_ptpaw_output
   
 CONTAINS  !========================================================================================
@@ -184,7 +186,7 @@ subroutine orbmag_ptpaw(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_en
  !Local
  !scalars
  integer :: adir,buff_size,choice,cpopt,dimffnl,exchn2n3d,iat,iatom,icg,icmplx,icprj,ider,idir,ierr
- integer :: ikg,ikg1,ikpt,ilm,indx,isppol,istwf_k,iterm,itypat,lmn2max
+ integer :: ikg,ikg1,ikpt,ilm,indx,isppol,istwf_k,iterm,itypat,klmn,lmn2max
  integer :: me,mcgk,my_lmax,my_nspinor,nband_k,ngfft1,ngfft2,ngfft3,ngfft4
  integer :: ngfft5,ngfft6,ngnt,nn,nkpg,npw_k,nproc,spaceComm,with_vectornd
  real(dp) :: arg,ecut_eff,trnrm,ucvol
@@ -316,7 +318,8 @@ subroutine orbmag_ptpaw(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_en
  call pawmkrhoij(atindx,atindx1,cprj,dimlmn,dtset%istwfk,dtset%kptopt,dtset%mband,dtset%mband,&
    & mcprj,dtset%mkmem,mpi_enreg,dtset%natom,dtset%nband,dtset%nkpt,dtset%nspinor,dtset%nsppol,&
    & occ,dtset%paral_kgb,paw_dmft,pawrhoij,0,dtset%usewvl,dtset%wtk)
-
+ call pack_pawrhoij(dtset,pawrhoij)
+   
  ABI_MALLOC(ddir_sij,(psps%lmnmax,psps%lmnmax,dtset%natom,3))
  call make_ddir_sij(ddir_sij,dtset,gprimd,psps%lmnmax,pawtab)
 
@@ -330,6 +333,9 @@ subroutine orbmag_ptpaw(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_en
  call make_ddir_vha(atindx,ddir_vha,dtset,gntselect,gprimd,psps%lmnmax,lmn2max,my_lmax,&
     & pawrad,pawrhoij,pawtab,psps,realgnt)
  
+ call make_ddir_vha2(atindx,dtset,gntselect,my_lmax,paw_an,&
+   & pawang,pawrad,pawrhoij,pawtab,realgnt)
+
  ABI_MALLOC(ddir_vhnzc,(psps%lmnmax,psps%lmnmax,dtset%natom,3))
  call make_ddir_vhnzc(ddir_vhnzc,dtset,gntselect,gprimd,psps%lmnmax,my_lmax,pawrad,pawtab,realgnt)
  
@@ -2054,13 +2060,13 @@ subroutine d2lr_Anp(dtset,gntselect,gprimd,lmn2_max,mpan,my_lmax,pawrad,pawtab,r
 
             do ll = abs(il-1),il+1
               do mm = -ll,ll
-                llmm = ll*ll + ll + 1 + mm
+                llmm = LMPACK(ll,mm)
                 gint_b = gntselect(llmm,lm1b)
                 if(gint_b == 0) cycle
 
                 do llp = abs(jl-1),jl+1
                   do mmp = -llp,llp
-                    llmmp = llp*llp + llp + 1 + mmp
+                    llmmp = LMPACK(llp,mmp)
                     gint_g = gntselect(llmmp,lm1g)
                     if(gint_g == 0) cycle
 
@@ -2431,15 +2437,19 @@ end subroutine make_ddir_vhnzc
 !!
 !! SOURCE
 
-subroutine make_ddir_vha2(atindx,dtset,paw_an,pawang,pawrad,pawrhoij,pawtab)
+subroutine make_ddir_vha2(atindx,dtset,gntselect,my_lmax,paw_an,&
+    & pawang,pawrad,pawrhoij,pawtab,realgnt)
 
   !Arguments ------------------------------------
   !scalars
+  integer,intent(in) :: my_lmax
   type(dataset_type),intent(in) :: dtset
   type(pawang_type),intent(in) :: pawang
 
   !arrays
   integer,intent(in) :: atindx(dtset%natom)
+  integer,intent(in) :: gntselect((2*my_lmax-1)**2,my_lmax**2*(my_lmax**2+1)/2)
+  real(dp),intent(in) :: realgnt((2*my_lmax-1)**2*(my_lmax)**4)
   type(paw_an_type),intent(inout) :: paw_an(dtset%natom)
   type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
   type(pawrhoij_type),intent(in) :: pawrhoij(dtset%natom)
@@ -2447,17 +2457,20 @@ subroutine make_ddir_vha2(atindx,dtset,paw_an,pawang,pawrad,pawrhoij,pawtab)
 
   !Local variables -------------------------
   !scalars
-  integer :: cplex,iat,iatom,itypat,lm_size,mesh_size,nzlmopt
+  integer :: cplex,gint,iat,iatom,ilmn,imesh,itypat
+  integer :: jmesh,klmn,klm,kln,ll,llmm,lm_size
+  integer :: mesh_size,mm,nzlmopt
   integer :: opt_compch,opt_dens,opt_l,opt_print
-  real(dp) :: compch_sph
+  real(dp) :: compch_sph,dij,nl1,nlt1,rfac,rr,rp,vhaint
 
   !arrays
-  real(dp),allocatable :: nhat1(:,:,:),rho1(:,:,:),trho1(:,:,:)
+  real(dp),allocatable :: ff(:),ff1(:),fft1(:),nhat1(:,:,:)
+  real(dp),allocatable :: rho1(:,:,:),trho1(:,:,:)
   logical,allocatable :: lmselectin(:),lmselectout(:)
 
 !--------------------------------------------------------------------
 
- nzlmopt = -1
+ nzlmopt = 0
  opt_compch = 0
  opt_dens = 1
  opt_l = -1
@@ -2467,7 +2480,7 @@ subroutine make_ddir_vha2(atindx,dtset,paw_an,pawang,pawrad,pawrhoij,pawtab)
    iatom = atindx(iat)
    itypat = dtset%typat(iat)
   
-   cplex = pawrhoij(iatom)%cplex_rhoij 
+   cplex = pawrhoij(iatom)%qphase
    mesh_size=pawtab(itypat)%mesh_size
    lm_size = paw_an(iatom)%lm_size
    ABI_MALLOC(lmselectin,(lm_size))
@@ -2475,19 +2488,76 @@ subroutine make_ddir_vha2(atindx,dtset,paw_an,pawang,pawrad,pawrhoij,pawtab)
    ABI_MALLOC(nhat1,(cplex*mesh_size,lm_size,dtset%nspden*(1-((opt_dens+1)/2))))
    ABI_MALLOC(rho1,(cplex*mesh_size,lm_size,dtset%nspden))
    ABI_MALLOC(trho1,(cplex*mesh_size,lm_size,dtset%nspden*(1-(opt_dens/2))))
-   
+   ABI_MALLOC(ff,(mesh_size))
+   ABI_MALLOC(ff1,(mesh_size))
+   ABI_MALLOC(fft1,(mesh_size))
+  
+   lmselectin = .TRUE. 
    call pawdensities(compch_sph,cplex,iatom,lmselectin,lmselectout,&
      & lm_size,nhat1,dtset%nspden,nzlmopt,opt_compch,opt_dens,opt_l,&
      & opt_print,pawang,dtset%pawprtvol,pawrad(itypat),pawrhoij(iatom),&
      & pawtab(itypat),rho1,trho1)
+
+   do klmn = 1, pawtab(itypat)%lmn2_size
+     klm = pawtab(itypat)%indklmn(1,klmn)
+     kln = pawtab(itypat)%indklmn(2,klmn)
+
+     dij = zero
+
+     do ll = pawtab(itypat)%indklmn(3,klmn), pawtab(itypat)%indklmn(4,klmn), 2
+       do mm = -ll, ll
+         llmm = LMPACK(ll,mm)
+         gint = gntselect(llmm,klm)
+         if (gint .EQ. 0) cycle
+           
+         ! construct integrand for rho1 vHa, trho1
+         do imesh = 2, mesh_size
+           rr = pawrad(itypat)%rad(imesh)
+             
+           ! for this mesh point, do the interior nonlocal integral over Hartree potential
+           do jmesh = 2, imesh
+             rp = pawrad(itypat)%rad(jmesh)
+             rfac = (rp**2)*(rp**ll)/(rr**(ll+1))
+             ff1(jmesh) = rho1(jmesh,llmm,1)*rfac
+             fft1(jmesh) = trho1(jmesh,llmm,1)*rfac
+           end do
+           do jmesh=imesh+1, mesh_size
+             rp = pawrad(itypat)%rad(jmesh)
+             rfac = (rp**2)*(rr**ll)/(rp**(ll+1))
+             ff1(jmesh) = rho1(jmesh,llmm,1)*rfac
+             fft1(jmesh) = trho1(jmesh,llmm,1)*rfac
+           end do
+
+           call pawrad_deducer0(ff1,mesh_size,pawrad(itypat))
+           call simp_gen(nl1,ff1,pawrad(itypat))
+           call pawrad_deducer0(fft1,mesh_size,pawrad(itypat))
+           call simp_gen(nlt1,fft1,pawrad(itypat))
+           ff(imesh)=pawtab(itypat)%phiphj(imesh,kln)*nl1 - &
+             & pawtab(itypat)%tphitphj(imesh,kln)*nlt1
+         
+         end do ! end loop over imesh
+
+         call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
+         call simp_gen(vhaint,ff,pawrad(itypat))
+
+         dij = dij + realgnt(gint)*four_pi*vhaint/(two*ll+one)
+       end do ! end loop over mm
+     end do ! end loop over ll
+
+     write(std_out,'(a,2i4,es16.8)')'JWZ debug iatom klmn dij ',iatom,klmn,dij
+
+   end do ! end loop over klmn
 
    ABI_FREE(lmselectin)
    ABI_FREE(lmselectout)
    ABI_FREE(nhat1)
    ABI_FREE(rho1)
    ABI_FREE(trho1)
+   ABI_FREE(ff)
+   ABI_FREE(ff1)
+   ABI_FREE(fft1)
 
- end do
+ end do ! end loop over iat
  
 end subroutine make_ddir_vha2
 
@@ -2900,6 +2970,121 @@ subroutine make_ddir_ap(ddir_ap,dtset,gntselect,gprimd,lmnmax,my_lmax,pawrad,paw
 end subroutine make_ddir_ap
 !!***
 
+!!****f* ABINIT/pack_pawrhoij
+!! NAME
+!! pack_pawrhoij
+!!
+!! FUNCTION
+!! for a pawhoij data structure, add packed data from unpacked
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2021 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!!
+!! PARENTS
+!!      m_orbmag
+!!
+!! CHILDREN
+!!
+!! SOURCE
 
+subroutine pack_pawrhoij(dtset,pawrhoij)
+
+  !Arguments ------------------------------------
+  !scalars
+  type(dataset_type),intent(in) :: dtset
+  type(pawrhoij_type),intent(inout) :: pawrhoij(dtset%natom)
+
+  !arrays
+
+  !Local variables -------------------------
+  !scalars
+  integer :: iatom,isel,klmn
+  real(dp) :: ri,rr
+  logical :: cprho
+  character(len=500) :: msg
+ 
+  !arrays
+!--------------------------------------------------------------------
+
+  do iatom = 1, dtset%natom
+    if (pawrhoij(iatom)%use_rhoij_ .EQ. 0) then
+      msg='Unpacked rhoij elements not available.'
+      ABI_BUG(msg)
+    end if
+
+    if(allocated(pawrhoij(iatom)%rhoijselect)) then
+      deallocate(pawrhoij(iatom)%rhoijselect)
+    end if
+    if(allocated(pawrhoij(iatom)%rhoijp)) then
+      deallocate(pawrhoij(iatom)%rhoijp)
+    end if
+
+    isel = 0
+    cprho = (pawrhoij(iatom)%cplex_rhoij .EQ. 2)
+    do klmn = 1, pawrhoij(iatom)%lmn2_size
+      if (cprho) then
+        rr = pawrhoij(iatom)%rhoij_(2*klmn-1,1)
+        ri = pawrhoij(iatom)%rhoij_(2*klmn,1)
+      else
+        rr = pawrhoij(iatom)%rhoij_(klmn,1)
+        ri = zero
+      end if
+      if ( (rr**2+ri**2) .GT. tol12 ) then
+        isel = isel + 1
+      end if
+    end do ! end loop over klmn
+    pawrhoij(iatom)%nrhoijsel = isel
+
+    if (cprho) then
+      allocate(pawrhoij(iatom)%rhoijp(1:2*isel,dtset%nspden))
+    else
+      allocate(pawrhoij(iatom)%rhoijp(1:isel,dtset%nspden))
+    end if
+    allocate(pawrhoij(iatom)%rhoijselect(1:isel))
+
+    pawrhoij(iatom)%rhoijp = zero
+    pawrhoij(iatom)%rhoijselect = 0
+
+    isel = 0 
+    do klmn = 1, pawrhoij(iatom)%lmn_size
+      if (cprho) then
+        rr = pawrhoij(iatom)%rhoij_(2*klmn-1,1)
+        ri = pawrhoij(iatom)%rhoij_(2*klmn,1)
+      else
+        rr = pawrhoij(iatom)%rhoij_(klmn,1)
+        ri = zero
+      end if
+      if ( (rr**2+ri**2) .GT. tol12 ) then
+        isel = isel + 1
+        pawrhoij(iatom)%rhoijselect(isel) = klmn
+        if (cprho) then
+          pawrhoij(iatom)%rhoijp(2*isel-1,1) = rr
+          pawrhoij(iatom)%rhoijp(2*isel,1) = ri
+        else
+          pawrhoij(iatom)%rhoijp(isel,1) = rr
+        end if ! if cprho
+      end if ! if rhoij nonzero
+    end do ! end loop over klmn
+
+    pawrhoij(iatom)%use_rhoijp=1
+
+  end do ! end loop over iatom
+ 
+end subroutine pack_pawrhoij
+!!***
 
 end module m_orbmag
