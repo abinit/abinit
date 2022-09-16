@@ -704,9 +704,9 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  endif
 
  ! Set the value of omega for a finite-frequency calculation
- omega=dtset%rfomega
+ omega=-dtset%rfomega
  if (.not.kramers_deg) then
-   omega_mq=-dtset%rfomega
+   omega_mq=dtset%rfomega
  end if
 
  call timab(154,2,tsec)
