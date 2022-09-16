@@ -419,6 +419,8 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  real(dp) :: rhomag(2,nspden),rmet(3,3),tollist(12),tsec(2)
  real(dp) :: zeff_red(3),zeff_bar(3,3)
  real(dp) :: intgden(dtset%nspden,dtset%natom),dentot(dtset%nspden)
+ real(dp) :: d2bbb_mq(2,3,3,mpert,dtset%mband,dtset%mband*prtbbb)
+ real(dp) :: d2lo_mq(2,3,mpert,3,mpert),d2nl_mq(2,3,mpert,3,mpert)
 !real(dp) :: zdmc_red(3),zdmc_bar(3,3),mean_rhor1(1) !dynamic magnetic charges and mean density
  real(dp),allocatable :: dielinv(:,:,:,:,:)
  real(dp),allocatable :: fcart(:,:),nhat1(:,:),nhat1gr(:,:,:),nhatfermi(:,:),nvresid1(:,:),nvresid2(:,:)
@@ -998,14 +1000,16 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !     end if
      !reconstruct the +q and -q densities, this might bug if fft parallelization is used, todo...
      do ifft=1,nfftf
-       rhor1_pq(2*ifft-1,:) = half*(rhor1(2*ifft-1,:)+rhor1_mq(2*ifft-1,:))
-       rhor1_pq(2*ifft  ,:) = half*(rhor1(2*ifft  ,:)-rhor1_mq(2*ifft  ,:))
-       rhor1_mq(2*ifft-1,:) = rhor1_pq(2*ifft-1,:)
-       rhor1_mq(2*ifft  ,:) =-rhor1_pq(2*ifft  ,:)
+!       rhor1_pq(2*ifft-1,:) = half*(rhor1(2*ifft-1,:)+rhor1_mq(2*ifft-1,:))
+!       rhor1_pq(2*ifft  ,:) = half*(rhor1(2*ifft  ,:)-rhor1_mq(2*ifft  ,:))
+!       rhor1_mq(2*ifft-1,:) = rhor1_pq(2*ifft-1,:)
+!       rhor1_mq(2*ifft  ,:) =-rhor1_pq(2*ifft  ,:)
+       rhor1(2*ifft-1,:) = half*(rhor1_pq(2*ifft-1,:)+rhor1_mq(2*ifft-1,:))
+       rhor1(2*ifft  ,:) = half*(rhor1_pq(2*ifft  ,:)-rhor1_mq(2*ifft  ,:))
      end do
-     rhor1=rhor1_pq
+     !rhor1=rhor1_pq
      call fourdp(cplex,rhog1,rhor1(:,1),-1,mpi_enreg,nfftf,1, ngfftf, 0)
-     call fourdp(cplex,rhog1_mq,rhor1_mq(:,1),-1,mpi_enreg,nfftf,1, ngfftf, 0)
+     !call fourdp(cplex,rhog1_mq,rhor1_mq(:,1),-1,mpi_enreg,nfftf,1, ngfftf, 0)
    end if
 
    if (dtset%berryopt== 4.or.dtset%berryopt== 6.or.dtset%berryopt== 7.or.&
@@ -1060,6 +1064,15 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &     efrloc,efrnl,efrx1,efrx2,ehart1,ek0,ek1,eii,elast,eloc0,elpsp1,&
 &     end0,end1,enl0,enl1,epaw1,etotal,evar,evdw,exc1,ipert,dtset%natom,optene)
      call timab(152,1,tsec)
+     if(.not.kramers_deg) then
+       call dfpt_etot(dtset%berryopt,deltae_mq,eberry_mq,edocc_mq,eeig0_mq,eew,efrhar,efrkin,&
+&        efrloc,efrnl,efrx1,efrx2,ehart1_mq,ek0_mq,ek1_mq,eii,elast_mq,eloc0_mq,elpsp1_mq,&
+&        enl0_mq,end1_mq,enl0_mq,enl1_mq,epaw1_mq,etotal_mq,evar_mq,evdw,exc1_mq,ipert,dtset%natom,optene)
+
+       etotal=half*(etotal+etotal_mq)
+       deltae=half*(deltae+deltae_mq)
+       evar=half*(evar+evar_mq)
+     end if
      choice=2
      ! CP modified
 !     call scprqt(choice,cpus,deltae,diffor,dtset,eigen0,&
@@ -1130,16 +1143,14 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &     end0,end1,enl0,enl1,epaw1,etotal,evar,evdw,exc1,ipert,dtset%natom,optene)
 !&     enl0,enl1,epaw1,etotal,evar,evdw,exc1,elmag1,ipert,dtset%natom,optene)
 !    !debug: compute the d2E/d-qd+q energy, should be equal to the one from previous line
-     if (abs(omega)>tol7) then
-       if(.not.kramers_deg) then
-         call dfpt_etot(dtset%berryopt,deltae_mq,eberry_mq,edocc_mq,eeig0_mq,eew,efrhar,efrkin,&
- &         efrloc,efrnl,efrx1,efrx2,ehart1_mq,ek0_mq,ek1_mq,eii,elast_mq,eloc0_mq,elpsp1_mq,&
- &         enl0_mq,end1_mq,enl0_mq,enl1_mq,epaw1_mq,etotal_mq,evar_mq,evdw,exc1_mq,ipert,dtset%natom,optene)
- 
-        etotal=half*(etotal+etotal_mq)
-        deltae=half*(deltae+deltae_mq)
-        evar=half*(evar+evar_mq)
-        end if
+     if(.not.kramers_deg) then
+       call dfpt_etot(dtset%berryopt,deltae_mq,eberry_mq,edocc_mq,eeig0_mq,eew,efrhar,efrkin,&
+&        efrloc,efrnl,efrx1,efrx2,ehart1_mq,ek0_mq,ek1_mq,eii,elast_mq,eloc0_mq,elpsp1_mq,&
+&        enl0_mq,end1_mq,enl0_mq,enl1_mq,epaw1_mq,etotal_mq,evar_mq,evdw,exc1_mq,ipert,dtset%natom,optene)
+
+       etotal=half*(etotal+etotal_mq)
+       deltae=half*(deltae+deltae_mq)
+       evar=half*(evar+evar_mq)
      end if
 
      call timab(152,1,tsec)
@@ -1188,27 +1199,27 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &       initialized,iscf_mod,ispmix,istep,mix,pawfgr%coatofin,&
 &       mpi_enreg,my_natom,nfftf,nfftmix,ngfftf,ngfftmix,npawmix,pawrhoij1,&
 &       qphon,rhor1,rprimd,psps%usepaw,nvresid1,vtrial1)
-       if (.not.kramers_deg) then
-       !same problem as with density reconstruction, TODO proper fft parallelization...
-         do ifft=1,nfftf
-           vtrial1_mq(2*ifft-1,1)=+vtrial1(2*ifft-1,1)
-           vtrial1_mq(2*ifft  ,1)=-vtrial1(2*ifft  ,1)
-         end do
-         if (nspden >= 2) then
-           do ifft=1,nfftf
-             vtrial1_mq(2*ifft-1,2)=+vtrial1(2*ifft-1,2)
-             vtrial1_mq(2*ifft  ,2)=-vtrial1(2*ifft  ,2)
-           end do
-         end if
-         if (nspden > 2) then
-           do ifft=1,nfftf
-             vtrial1_mq(2*ifft-1,3)= vtrial1(2*ifft  ,4) !Re[V^12]
-             vtrial1_mq(2*ifft  ,3)= vtrial1(2*ifft-1,4) !Im[V^12],see definition of v(:,4) cplex=2 case
-             vtrial1_mq(2*ifft  ,4)= vtrial1(2*ifft-1,3) !Re[V^21]=Re[V^12]
-             vtrial1_mq(2*ifft-1,4)= vtrial1(2*ifft  ,3) !Re[V^21]=Re[V^12]
-           end do
-         end if
-       end if
+!       if (.not.kramers_deg) then
+!       !same problem as with density reconstruction, TODO proper fft parallelization...
+!         do ifft=1,nfftf
+!           vtrial1_mq(2*ifft-1,1)=+vtrial1(2*ifft-1,1)
+!           vtrial1_mq(2*ifft  ,1)=-vtrial1(2*ifft  ,1)
+!         end do
+!         if (nspden >= 2) then
+!           do ifft=1,nfftf
+!             vtrial1_mq(2*ifft-1,2)=+vtrial1(2*ifft-1,2)
+!             vtrial1_mq(2*ifft  ,2)=-vtrial1(2*ifft  ,2)
+!           end do
+!         end if
+!         if (nspden > 2) then
+!           do ifft=1,nfftf
+!             vtrial1_mq(2*ifft-1,3)= vtrial1(2*ifft  ,4) !Re[V^12]
+!             vtrial1_mq(2*ifft  ,3)= vtrial1(2*ifft-1,4) !Im[V^12],see definition of v(:,4) cplex=2 case
+!             vtrial1_mq(2*ifft  ,4)= vtrial1(2*ifft-1,3) !Re[V^21]=Re[V^12]
+!             vtrial1_mq(2*ifft-1,4)= vtrial1(2*ifft  ,3) !Re[V^21]=Re[V^12]
+!           end do
+!         end if
+!       end if
        initialized=1
      end if
    end if
@@ -1392,6 +1403,9 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 
  if (psps%usepaw==0.and.dtset%userie/=919.and. &
 & (ipert==dtset%natom+3.or.ipert==dtset%natom+4)) then
+   if (.not.kramers_deg.and.abs(omega)>tol7) then
+     ABI_ERROR('Finte-omega calculations not yet implemented for rfstrs')
+   end if
    call dfpt_nselt(blkflg,cg,cg1,cplex,&
 &   d2bbb,d2lo,d2nl,ecut,dtset%ecutsm,dtset%effmass_free,&
 &   gmet,gprimd,gsqcut,idir,&
@@ -1420,18 +1434,56 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &     symrl1,tnons1,ucvol,usecprj,psps%usepaw,usexcnhat,useylmgr1,vectornd,vhartr1,vpsp1,vtrial,vtrial1,vxc,&
 &     with_vectornd,wtk_rbz,xccc3d1,xred,ylm,ylm1,ylmgr1)
    else
-     if (dtset%nspden==4) then
-       call dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eigen0,eigen1,gmet,&
-&       gsqcut,idir,indkpt1,indsy1,ipert,istwfk_rbz,kg,kg1,kpt_rbz,kxc,mband_mem_rbz,mkmem,mk1mem,mpert,mpi_enreg,&
-&       mpw,mpw1,nattyp,nband_rbz,nfftf,ngfftf,nkpt,nkpt_rbz,nkxc,npwarr,npwar1,nspden,&
-&       dtset%nsppol,nsym1,occ_rbz,ph1d,psps,rhor1,rmet,rprimd,symrc1,ucvol,&
-&       wtk_rbz,xred,ylm,ylm1,rhor=rhor,vxc=vxc)
-     else
-       call dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eigen0,eigen1,gmet,&
-&       gsqcut,idir,indkpt1,indsy1,ipert,istwfk_rbz,kg,kg1,kpt_rbz,kxc,mband_mem_rbz,mkmem,mk1mem,mpert,mpi_enreg,&
-&       mpw,mpw1,nattyp,nband_rbz,nfftf,ngfftf,nkpt,nkpt_rbz,nkxc,npwarr,npwar1,nspden,&
-&       dtset%nsppol,nsym1,occ_rbz,ph1d,psps,rhor1,rmet,rprimd,symrc1,ucvol,&
-&       wtk_rbz,xred,ylm,ylm1)
+     if(kramers_deg) then
+       if (dtset%nspden==4) then
+         call dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eigen0,eigen1,gmet,&
+&         gsqcut,idir,indkpt1,indsy1,ipert,istwfk_rbz,kg,kg1,kpt_rbz,kxc,mband_mem_rbz,mkmem,mk1mem,mpert,mpi_enreg,&
+&         mpw,mpw1,nattyp,nband_rbz,nfftf,ngfftf,nkpt,nkpt_rbz,nkxc,npwarr,npwar1,nspden,&
+&         dtset%nsppol,nsym1,occ_rbz,ph1d,psps,rhor1,rmet,rprimd,symrc1,ucvol,&
+&         wtk_rbz,xred,ylm,ylm1,rhor=rhor,vxc=vxc)
+       else
+         call dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eigen0,eigen1,gmet,&
+&         gsqcut,idir,indkpt1,indsy1,ipert,istwfk_rbz,kg,kg1,kpt_rbz,kxc,mband_mem_rbz,mkmem,mk1mem,mpert,mpi_enreg,&
+&         mpw,mpw1,nattyp,nband_rbz,nfftf,ngfftf,nkpt,nkpt_rbz,nkxc,npwarr,npwar1,nspden,&
+&         dtset%nsppol,nsym1,occ_rbz,ph1d,psps,rhor1,rmet,rprimd,symrc1,ucvol,&
+&         wtk_rbz,xred,ylm,ylm1)
+       end if
+     else if(.not.kramers_deg) then
+       if (dtset%nspden==4) then
+         call dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eigen0,eigen1,gmet,&
+&         gsqcut,idir,indkpt1,indsy1,ipert,istwfk_rbz,kg,kg1,kpt_rbz,kxc,mband_mem_rbz,mkmem,mk1mem,mpert,mpi_enreg,&
+&         mpw,mpw1,nattyp,nband_rbz,nfftf,ngfftf,nkpt,nkpt_rbz,nkxc,npwarr,npwar1,nspden,&
+&         dtset%nsppol,nsym1,occ_rbz,ph1d,psps,rhor1_pq,rmet,rprimd,symrc1,ucvol,&
+&         wtk_rbz,xred,ylm,ylm1,rhor=rhor,vxc=vxc)
+       else
+         call dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eigen0,eigen1,gmet,&
+&         gsqcut,idir,indkpt1,indsy1,ipert,istwfk_rbz,kg,kg1,kpt_rbz,kxc,mband_mem_rbz,mkmem,mk1mem,mpert,mpi_enreg,&
+&         mpw,mpw1,nattyp,nband_rbz,nfftf,ngfftf,nkpt,nkpt_rbz,nkxc,npwarr,npwar1,nspden,&
+&         dtset%nsppol,nsym1,occ_rbz,ph1d,psps,rhor1_pq,rmet,rprimd,symrc1,ucvol,&
+&         wtk_rbz,xred,ylm,ylm1)
+       end if
+       if (dtset%nspden==4) then
+         call dfpt_nstdy(atindx,blkflg,cg_mq,cg1_mq,cplex,dtfil,dtset,d2bbb_mq,d2lo_mq,d2nl_mq,eigen0,eigen1_mq,gmet,&
+&         gsqcut,idir,indkpt1,indsy1,ipert,istwfk_rbz,kg,kg1_mq,kpt_rbz,kxc,mband_mem_rbz,mkmem,mk1mem,mpert,mpi_enreg,&
+&         mpw,mpw1_mq,nattyp,nband_rbz,nfftf,ngfftf,nkpt,nkpt_rbz,nkxc,npwarr,npwar1_mq,nspden,&
+&         dtset%nsppol,nsym1,occ_rbz,ph1d,psps,rhor1_mq,rmet,rprimd,symrc1,ucvol,&
+&         wtk_rbz,xred,ylm,ylm1,rhor=rhor,vxc=vxc)
+       else
+         call dfpt_nstdy(atindx,blkflg,cg_mq,cg1_mq,cplex,dtfil,dtset,d2bbb_mq,d2lo_mq,d2nl_mq,eigen0,eigen1_mq,gmet,&
+&         gsqcut,idir,indkpt1,indsy1,ipert,istwfk_rbz,kg,kg1_mq,kpt_rbz,kxc,mband_mem_rbz,mkmem,mk1mem,mpert,mpi_enreg,&
+&         mpw,mpw1_mq,nattyp,nband_rbz,nfftf,ngfftf,nkpt,nkpt_rbz,nkxc,npwarr,npwar1_mq,nspden,&
+&         dtset%nsppol,nsym1,occ_rbz,ph1d,psps,rhor1_mq,rmet,rprimd,symrc1,ucvol,&
+&         wtk_rbz,xred,ylm,ylm1)
+       end if
+
+       !Mix up (q,w) and (-q,-w) second-order derivatives
+       d2bbb(1,:,:,:,:,:)=half*(d2bbb(1,:,:,:,:,:)+d2bbb_mq(1,:,:,:,:,:))
+       d2bbb(2,:,:,:,:,:)=half*(d2bbb(2,:,:,:,:,:)-d2bbb_mq(2,:,:,:,:,:))
+       d2lo(1,:,:,:,:)=half*(d2lo(1,:,:,:,:)+d2lo_mq(1,:,:,:,:))
+       d2lo(2,:,:,:,:)=half*(d2lo(2,:,:,:,:)-d2lo_mq(2,:,:,:,:))
+       d2nl(1,:,:,:,:)=half*(d2nl(1,:,:,:,:)+d2nl_mq(1,:,:,:,:))
+       d2nl(2,:,:,:,:)=half*(d2nl(2,:,:,:,:)-d2nl_mq(2,:,:,:,:))
+
      end if
    end if
  end if
