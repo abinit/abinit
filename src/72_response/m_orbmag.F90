@@ -100,6 +100,7 @@ module m_orbmag
   private :: make_ddir_ap
   private :: make_ddir_vha
   private :: make_ddir_vha2
+  private :: make_ddir_vha3
   private :: make_fgh1
   private :: make_fh2
   private :: make_fh3
@@ -333,8 +334,10 @@ subroutine orbmag_ptpaw(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_en
  call make_ddir_vha(atindx,ddir_vha,dtset,gntselect,gprimd,psps%lmnmax,lmn2max,my_lmax,&
     & pawrad,pawrhoij,pawtab,psps,realgnt)
  
- call make_ddir_vha2(atindx,dtset,gntselect,my_lmax,paw_an,&
-   & pawang,pawrad,pawrhoij,pawtab,realgnt)
+ !call make_ddir_vha2(atindx,ddir_vha,dtset,gntselect,gprimd,psps%lmnmax,my_lmax,paw_an,&
+ !  & pawang,pawrad,pawrhoij,pawtab,realgnt)
+ call make_ddir_vha3(atindx,ddir_vha,dtset,gntselect,gprimd,psps%lmnmax,my_lmax,&
+   & pawrad,pawrhoij,pawtab,realgnt)
 
  ABI_MALLOC(ddir_vhnzc,(psps%lmnmax,psps%lmnmax,dtset%natom,3))
  call make_ddir_vhnzc(ddir_vhnzc,dtset,gntselect,gprimd,psps%lmnmax,my_lmax,pawrad,pawtab,realgnt)
@@ -2405,6 +2408,172 @@ subroutine make_ddir_vhnzc(ddir_vhnzc,dtset,gntselect,gprimd,lmnmax,my_lmax,pawr
  
 end subroutine make_ddir_vhnzc
 
+!!****f* ABINIT/make_ddir_vha3
+!! NAME
+!! make_ddir_vha3
+!!
+!! FUNCTION
+!! Compute onsite r*vhartree
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2021 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!! computed in Cart directions then transformed to xtal coords
+!!
+!! PARENTS
+!!      m_orbmag
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine make_ddir_vha3(atindx,ddir_vha,dtset,gntselect,gprimd,lmnmax,my_lmax,pawrad,pawrhoij,pawtab,realgnt)
+
+  !Arguments ------------------------------------
+  !scalars
+  integer,intent(in) :: lmnmax,my_lmax
+  type(dataset_type),intent(in) :: dtset
+
+  !arrays
+  integer,intent(in) :: atindx(dtset%natom)
+  integer,intent(in) :: gntselect((2*my_lmax-1)**2,my_lmax**2*(my_lmax**2+1)/2)
+  real(dp),intent(in) :: gprimd(3,3),realgnt((2*my_lmax-1)**2*(my_lmax)**4)
+  complex(dpc),intent(out) :: ddir_vha(lmnmax,lmnmax,dtset%natom,3)
+  type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
+  type(pawrhoij_type),intent(in) :: pawrhoij(dtset%natom)
+  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
+
+  !Local variables -------------------------
+  !scalars
+  integer :: adir,cplex,g1,g2,g3,iat,iatom,ij,ijlm,ijln,ilmn,imesh,itypat,jlmn,jmesh
+  integer :: kl,kllm,klln,ll,llmax,llmin,llmm,lp,lp1a,lpmp,mm,mp,mesh_size
+  real(dp) :: eijkl,nl1,nlt1,rfac,rp,rr,vhaint
+
+  !arrays
+  integer,dimension(3) :: adir_to_sij = (/4,2,3/)
+  real(dp) :: dij_cart(2,3),dij_red(2,3),rhokl(2)
+  real(dp),allocatable :: ff(:),ff1(:),fft1(:)
+
+!--------------------------------------------------------------------
+
+ ddir_vha = czero
+
+ do iat = 1, dtset%natom
+   iatom = atindx(iat)
+   itypat = dtset%typat(iat)
+  
+   cplex = pawrhoij(iatom)%qphase
+   mesh_size=pawtab(itypat)%mesh_size
+   
+   ABI_MALLOC(ff,(mesh_size))
+   ABI_MALLOC(ff1,(mesh_size))
+   ABI_MALLOC(fft1,(mesh_size))
+
+   do ij = 1, pawtab(itypat)%lmn2_size
+     ijlm = pawtab(itypat)%indklmn(1,ij)
+     ijln = pawtab(itypat)%indklmn(2,ij)
+     ilmn = pawtab(itypat)%indklmn(7,ij)
+     jlmn = pawtab(itypat)%indklmn(8,ij)
+     do kl = 1, pawtab(itypat)%lmn2_size
+       kllm = pawtab(itypat)%indklmn(1,kl)
+       klln = pawtab(itypat)%indklmn(2,kl)
+       rhokl(1) = pawrhoij(iatom)%rhoij_(2*kl-1,1)
+       rhokl(2) = pawrhoij(iatom)%rhoij_(2*kl,1)
+
+       dij_cart = zero
+
+       do ll = pawtab(itypat)%indklmn(3,kl),pawtab(itypat)%indklmn(4,kl),2
+
+         do imesh = 2, mesh_size
+           rr = pawrad(itypat)%rad(imesh)
+
+           do jmesh = 2, imesh
+             rp = pawrad(itypat)%rad(jmesh)
+             rfac = (rp**ll)/(rr**(ll+1))
+             ff1(jmesh)=rfac*pawtab(itypat)%phiphj(jmesh,klln)
+             fft1(jmesh)=rfac*pawtab(itypat)%tphitphj(jmesh,klln)
+           end do
+           do jmesh = imesh+1,mesh_size
+             rp = pawrad(itypat)%rad(jmesh)
+             rfac = (rr**ll)/(rp**(ll+1))
+             ff1(jmesh)=rfac*pawtab(itypat)%phiphj(jmesh,klln)
+             fft1(jmesh)=rfac*pawtab(itypat)%tphitphj(jmesh,klln)
+           end do
+           call pawrad_deducer0(ff1,mesh_size,pawrad(itypat))
+           call simp_gen(nl1,ff1,pawrad(itypat))
+           call pawrad_deducer0(fft1,mesh_size,pawrad(itypat))
+           call simp_gen(nlt1,fft1,pawrad(itypat))
+
+           ff(imesh)=pawtab(itypat)%phiphj(imesh,ijln)*nl1 - &
+             & pawtab(itypat)%tphitphj(imesh,klln)*nlt1
+
+         end do
+         call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
+         call simp_gen(vhaint,ff,pawrad(itypat))
+
+         do mm = -ll, ll
+           llmm = LMPACK(ll,mm)
+           g3 = gntselect(llmm,kllm)
+           if (g3 .EQ. 0) cycle
+       
+           do lp = pawtab(itypat)%indklmn(3,ij),pawtab(itypat)%indklmn(4,ij),2
+             do mp = -lp, lp
+               lpmp = LMPACK(lp,mp)
+
+               g1 = gntselect(lpmp,ijlm)
+               if (g1 .EQ. 0) cycle
+
+               do adir = 1, 3
+                 lp1a = MATPACK(lpmp,adir_to_sij(adir))
+                 g2 = gntselect(llmm,lp1a)
+                 if (g2 .EQ. 0) cycle
+
+                 dij_cart(1,adir) = dij_cart(1,adir) + rhokl(1)*four_pi*sqrt(four_pi/three)*&
+                   realgnt(g1)*realgnt(g2)*realgnt(g3)*vhaint/(two*ll+one)
+                 dij_cart(2,adir) = dij_cart(2,adir) + rhokl(2)*four_pi*sqrt(four_pi/three)*&
+                   realgnt(g1)*realgnt(g2)*realgnt(g3)*vhaint/(two*ll+one)
+
+               end do !adir
+             end do !mp
+           end do ! lp
+         end do ! mm
+       end do ! ll
+     end do ! kl
+
+     if (ilmn .NE. jlmn) then
+       dij_cart(1,1:3) = two*dij_cart(1,1:3)
+       dij_cart(2,1:3) = zero
+     end if
+
+     dij_red(1,1:3) = MATMUL(TRANSPOSE(gprimd),dij_cart(1,1:3))
+     dij_red(2,1:3) = MATMUL(TRANSPOSE(gprimd),dij_cart(2,1:3))
+
+     ddir_vha(ilmn,jlmn,iat,1:3) = CMPLX(dij_red(1,1:3),dij_red(2,1:3),KIND=dpc)
+
+   end do ! ij
+  
+   ABI_FREE(ff)
+   ABI_FREE(ff1)
+   ABI_FREE(fft1)
+
+ end do ! end loop over iat
+ 
+end subroutine make_ddir_vha3
+
+
 !!****f* ABINIT/make_ddir_vha2
 !! NAME
 !! make_ddir_vha2
@@ -2437,19 +2606,20 @@ end subroutine make_ddir_vhnzc
 !!
 !! SOURCE
 
-subroutine make_ddir_vha2(atindx,dtset,gntselect,my_lmax,paw_an,&
+subroutine make_ddir_vha2(atindx,ddir_vha,dtset,gntselect,gprimd,lmnmax,my_lmax,paw_an,&
     & pawang,pawrad,pawrhoij,pawtab,realgnt)
 
   !Arguments ------------------------------------
   !scalars
-  integer,intent(in) :: my_lmax
+  integer,intent(in) :: lmnmax,my_lmax
   type(dataset_type),intent(in) :: dtset
   type(pawang_type),intent(in) :: pawang
 
   !arrays
   integer,intent(in) :: atindx(dtset%natom)
   integer,intent(in) :: gntselect((2*my_lmax-1)**2,my_lmax**2*(my_lmax**2+1)/2)
-  real(dp),intent(in) :: realgnt((2*my_lmax-1)**2*(my_lmax)**4)
+  real(dp),intent(in) :: gprimd(3,3),realgnt((2*my_lmax-1)**2*(my_lmax)**4)
+  complex(dpc),intent(out) :: ddir_vha(lmnmax,lmnmax,dtset%natom,3)
   type(paw_an_type),intent(inout) :: paw_an(dtset%natom)
   type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
   type(pawrhoij_type),intent(in) :: pawrhoij(dtset%natom)
@@ -2457,13 +2627,15 @@ subroutine make_ddir_vha2(atindx,dtset,gntselect,my_lmax,paw_an,&
 
   !Local variables -------------------------
   !scalars
-  integer :: cplex,gint,iat,iatom,ilmn,imesh,itypat
-  integer :: jmesh,klmn,klm,kln,ll,llmm,lm_size
-  integer :: mesh_size,mm,nzlmopt
+  integer :: adir,cplex,gint,g2int,iat,iatom,ilmn,imesh,itypat
+  integer :: jlmn,jmesh,klmadir,klmn,klm,kln,ll,llmm,lm_size,lp,lpmp
+  integer :: mesh_size,mm,mp,nzlmopt
   integer :: opt_compch,opt_dens,opt_l,opt_print
-  real(dp) :: compch_sph,dij,nl1,nlt1,rfac,rr,rp,vhaint
+  real(dp) :: cdij,compch_sph,nl1,nlt1,rfac,rr,rp,vhaint
 
   !arrays
+  integer,dimension(3) :: adir_to_sij = (/4,2,3/)
+  real(dp) :: dij_cart(3),dij_red(3)
   real(dp),allocatable :: ff(:),ff1(:),fft1(:),nhat1(:,:,:)
   real(dp),allocatable :: rho1(:,:,:),trho1(:,:,:)
   logical,allocatable :: lmselectin(:),lmselectout(:)
@@ -2475,6 +2647,9 @@ subroutine make_ddir_vha2(atindx,dtset,gntselect,my_lmax,paw_an,&
  opt_dens = 1
  opt_l = -1
  opt_print = 0
+
+ cdij = four_pi*sqrt(four_pi/3.0D0)
+ ddir_vha = czero
 
  do iat = 1, dtset%natom
    iatom = atindx(iat)
@@ -2501,50 +2676,72 @@ subroutine make_ddir_vha2(atindx,dtset,gntselect,my_lmax,paw_an,&
    do klmn = 1, pawtab(itypat)%lmn2_size
      klm = pawtab(itypat)%indklmn(1,klmn)
      kln = pawtab(itypat)%indklmn(2,klmn)
+     ilmn = pawtab(itypat)%indklmn(7,klmn)
+     jlmn = pawtab(itypat)%indklmn(8,klmn)
 
-     dij = zero
+     dij_cart = zero
 
      do ll = pawtab(itypat)%indklmn(3,klmn), pawtab(itypat)%indklmn(4,klmn), 2
        do mm = -ll, ll
          llmm = LMPACK(ll,mm)
          gint = gntselect(llmm,klm)
          if (gint .EQ. 0) cycle
-           
-         ! construct integrand for rho1 vHa, trho1
-         do imesh = 2, mesh_size
-           rr = pawrad(itypat)%rad(imesh)
-             
-           ! for this mesh point, do the interior nonlocal integral over Hartree potential
-           do jmesh = 2, imesh
-             rp = pawrad(itypat)%rad(jmesh)
-             rfac = (rp**2)*(rp**ll)/(rr**(ll+1))
-             ff1(jmesh) = rho1(jmesh,llmm,1)*rfac
-             fft1(jmesh) = trho1(jmesh,llmm,1)*rfac
-           end do
-           do jmesh=imesh+1, mesh_size
-             rp = pawrad(itypat)%rad(jmesh)
-             rfac = (rp**2)*(rr**ll)/(rp**(ll+1))
-             ff1(jmesh) = rho1(jmesh,llmm,1)*rfac
-             fft1(jmesh) = trho1(jmesh,llmm,1)*rfac
-           end do
 
-           call pawrad_deducer0(ff1,mesh_size,pawrad(itypat))
-           call simp_gen(nl1,ff1,pawrad(itypat))
-           call pawrad_deducer0(fft1,mesh_size,pawrad(itypat))
-           call simp_gen(nlt1,fft1,pawrad(itypat))
-           ff(imesh)=pawtab(itypat)%phiphj(imesh,kln)*nl1 - &
-             & pawtab(itypat)%tphitphj(imesh,kln)*nlt1
-         
-         end do ! end loop over imesh
+         do adir = 1, 3
 
-         call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
-         call simp_gen(vhaint,ff,pawrad(itypat))
+           do lp = abs(ll-1), ll+1, 2
+             do mp = -lp, lp
+               lpmp = LMPACK(lp,mp)
+               klmadir = MATPACK(llmm,adir_to_sij(adir))
+               g2int = gntselect(lpmp,klmadir)
+               if (g2int .EQ. 0) cycle
 
-         dij = dij + realgnt(gint)*four_pi*vhaint/(two*ll+one)
+               ! construct integrand for rho1 vHa, trho1
+               do imesh = 2, mesh_size
+                 rr = pawrad(itypat)%rad(imesh)
+                   
+                 ! for this mesh point, do the interior nonlocal integral over Hartree potential
+                 do jmesh = 2, imesh
+                   rp = pawrad(itypat)%rad(jmesh)
+                   rfac = (rp**2)*(rp**lp)/(rr**(lp+1))
+                   ff1(jmesh) = rho1(jmesh,lpmp,1)*rfac
+                   fft1(jmesh) = trho1(jmesh,lpmp,1)*rfac
+                 end do
+                 do jmesh=imesh+1, mesh_size
+                   rp = pawrad(itypat)%rad(jmesh)
+                   rfac = (rp**2)*(rr**lp)/(rp**(lp+1))
+                   ff1(jmesh) = rho1(jmesh,lpmp,1)*rfac
+                   fft1(jmesh) = trho1(jmesh,lpmp,1)*rfac
+                 end do
+
+                 call pawrad_deducer0(ff1,mesh_size,pawrad(itypat))
+                 call simp_gen(nl1,ff1,pawrad(itypat))
+                 call pawrad_deducer0(fft1,mesh_size,pawrad(itypat))
+                 call simp_gen(nlt1,fft1,pawrad(itypat))
+                 
+                 ff(imesh)=rr*pawtab(itypat)%phiphj(imesh,kln)*nl1 - &
+                   & rr*pawtab(itypat)%tphitphj(imesh,kln)*nlt1
+               
+               end do ! end loop over imesh
+
+               call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
+               call simp_gen(vhaint,ff,pawrad(itypat))
+
+               dij_cart(adir) = dij_cart(adir) + &
+                 & cdij*realgnt(gint)*realgnt(g2int)*vhaint/(two*ll+one)
+               
+             end do ! end loop over mp
+           end do ! end loop over lp
+         end do ! end loop over adir
        end do ! end loop over mm
      end do ! end loop over ll
 
-     write(std_out,'(a,2i4,es16.8)')'JWZ debug iatom klmn dij ',iatom,klmn,dij
+     dij_red = MATMUL(TRANSPOSE(gprimd),dij_cart)
+
+     do adir = 1, 3
+       ddir_vha(ilmn,jlmn,iat,adir) = CMPLX(dij_red(adir),zero,KIND=dpc)
+       ddir_vha(jlmn,ilmn,iat,adir) = ddir_vha(ilmn,jlmn,iat,adir)
+     end do
 
    end do ! end loop over klmn
 
@@ -3033,6 +3230,7 @@ subroutine pack_pawrhoij(dtset,pawrhoij)
       deallocate(pawrhoij(iatom)%rhoijp)
     end if
 
+    ! count number of nonzero pawrhoij elements
     isel = 0
     cprho = (pawrhoij(iatom)%cplex_rhoij .EQ. 2)
     do klmn = 1, pawrhoij(iatom)%lmn2_size
