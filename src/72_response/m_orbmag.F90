@@ -2517,8 +2517,8 @@ subroutine make_ddir_vha3(atindx,ddir_vha,dtset,gntselect,gprimd,lmnmax,my_lmax,
            call pawrad_deducer0(fft1,mesh_size,pawrad(itypat))
            call simp_gen(nlt1,fft1,pawrad(itypat))
 
-           ff(imesh)=pawtab(itypat)%phiphj(imesh,ijln)*nl1 - &
-             & pawtab(itypat)%tphitphj(imesh,klln)*nlt1
+           ff(imesh)=rr*pawtab(itypat)%phiphj(imesh,ijln)*nl1 - &
+             & rr*pawtab(itypat)%tphitphj(imesh,klln)*nlt1
 
          end do
          call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
