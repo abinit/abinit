@@ -419,9 +419,9 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  real(dp) :: rhomag(2,nspden),rmet(3,3),tollist(12),tsec(2)
  real(dp) :: zeff_red(3),zeff_bar(3,3)
  real(dp) :: intgden(dtset%nspden,dtset%natom),dentot(dtset%nspden)
- real(dp) :: d2bbb_mq(2,3,3,mpert,dtset%mband,dtset%mband*prtbbb)
- real(dp) :: d2lo_mq(2,3,mpert,3,mpert),d2nl_mq(2,3,mpert,3,mpert)
 !real(dp) :: zdmc_red(3),zdmc_bar(3,3),mean_rhor1(1) !dynamic magnetic charges and mean density
+ real(dp),allocatable :: cg1_pq(:,:),cg1_active_pq(:,:)
+ real(dp),allocatable :: d2bbb_mq(:,:,:,:,:,:),d2lo_mq(:,:,:,:,:),d2nl_mq(:,:,:,:,:)
  real(dp),allocatable :: dielinv(:,:,:,:,:)
  real(dp),allocatable :: fcart(:,:),nhat1(:,:),nhat1gr(:,:,:),nhatfermi(:,:),nvresid1(:,:),nvresid2(:,:)
  real(dp),allocatable :: qmat(:,:,:,:,:,:),resid2(:),rhog2(:,:),rhor2(:,:),rhorfermi(:,:)
@@ -584,6 +584,11 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
    ABI_MALLOC(vhartr1_mq,(cplex*nfftf))
    ABI_MALLOC(vtrial1_pq,(cplex*nfftf,nspden))
    ABI_MALLOC(vtrial1_mq,(cplex*nfftf,nspden))
+   ABI_MALLOC(d2bbb_mq,(2,3,3,mpert,dtset%mband,dtset%mband*prtbbb))
+   ABI_MALLOC(d2lo_mq,(2,3,mpert,3,mpert))
+   ABI_MALLOC(d2nl_mq,(2,3,mpert,3,mpert))
+   ABI_MALLOC(cg1_pq,(2,mpw1_mq*dtset%nspinor*mband_mem_rbz*mk1mem*dtset%nsppol))
+   ABI_MALLOC(cg1_active_pq,(2,mpw1_mq*dtset%nspinor*mband_mem_rbz*mk1mem*dtset%nsppol*dim_eig2rf))
  end if
 ! TODO: for non collinear case this should always be nspden, in NCPP case as well!!!
  ABI_MALLOC(vxc1,(cplex*nfftf,nspden*(1-usexcnhat))) ! Not always needed
@@ -979,6 +984,8 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
    if (.not.kramers_deg) then
      rhor1_pq=rhor1 !at this stage rhor1_pq contains only one term of the 1st order density at +q
      rhog1_pq=rhog1 !same for rhog1_pq
+     cg1_pq=cg1
+     cg1_active_pq=cg1_active
      !get the second term related to 1st order wf at -q
      call dfpt_vtorho(cg,cg_mq,cg1_mq,cg1_active_mq,cplex,cprj,cprjq,cprj1,&
 &     dbl_nnsclo_mq,dim_eig2rf,doccde_rbz,docckde_mq,dtefield,dtfil,dtset,-dtset%qptn,edocc_mq,&
@@ -991,13 +998,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &     pawrhoij1,pawtab,phnons1,ph1d,dtset%prtvol,psps,pwindall,qmat,resid_mq,residm_mq,rhog1_mq,&
 &     rhor1_mq,rmet,rprimd,symaf1,symrc1,symrl1,tnons1,ucvol,usecprj,useylmgr1,ddk_f,&
 &     vectornd,vtrial,vtrial1_mq,with_vectornd,wtk_rbz,xred,ylm,ylm1,ylmgr1,omega=omega_mq)
-!     if (mpi_enreg%me == 0) then
-!     write(101,*) "ITERATION:",istep 
-!     write(101,*) "cplex:", cplex
-!     do ifft=1,nfftf
-!       write(101,*) rhor1_mq(2*ifft-1,1),rhor1_mq(2*ifft,1)
-!     end do 
-!     end if
+
      !reconstruct the +q and -q densities, this might bug if fft parallelization is used, todo...
      do ifft=1,nfftf
 !       rhor1_pq(2*ifft-1,:) = half*(rhor1(2*ifft-1,:)+rhor1_mq(2*ifft-1,:))
@@ -1010,6 +1011,12 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      !rhor1=rhor1_pq
      call fourdp(cplex,rhog1,rhor1(:,1),-1,mpi_enreg,nfftf,1, ngfftf, 0)
      !call fourdp(cplex,rhog1_mq,rhor1_mq(:,1),-1,mpi_enreg,nfftf,1, ngfftf, 0)
+
+     !reconstruct the first-order wave functions
+     cg1(1,:)=half*(cg1_pq(1,:)+cg1_mq(1,:))
+     cg1(2,:)=half*(cg1_pq(2,:)-cg1_mq(2,:))
+     cg1_active(1,:)=half*(cg1_active_pq(1,:)+cg1_active_mq(1,:))
+     cg1_active(2,:)=half*(cg1_active_pq(2,:)-cg1_active_mq(2,:))
    end if
 
    if (dtset%berryopt== 4.or.dtset%berryopt== 6.or.dtset%berryopt== 7.or.&
@@ -1656,6 +1663,11 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
    ABI_FREE(vxc1_mq)
    ABI_FREE(vtrial1_pq)
    ABI_FREE(vtrial1_mq)
+   ABI_FREE(d2bbb_mq)
+   ABI_FREE(d2lo_mq)
+   ABI_FREE(d2nl_mq)
+   ABI_FREE(cg1_pq)
+   ABI_FREE(cg1_active_pq)
  end if
  ABI_FREE(vhartr1)
  ABI_FREE(vxc1)
