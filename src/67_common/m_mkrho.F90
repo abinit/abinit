@@ -203,7 +203,6 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
  end if
  use_nondiag_occup_dmft=0
 
-
 !if(dtset%nspinor==2.and.paw_dmft%use_sc_dmft==1) then
 !write(message, '(a,a,a,a)' )ch10,&
 !&   ' mkrho : ERROR -',ch10,&
@@ -401,7 +400,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 &                 istwf_k,kg_k,kg_k,dtset%mgfft,mpi_enreg,1,dtset%ngfft,&
 &                 npw_k,1,n4,n5,n6,1,tim_fourwf,weight,weight_i,&
 &                 use_ndo=use_nondiag_occup_dmft,fofginb=cwavefb(:,:,1),&
-&                 use_gpu_cuda=dtset%use_gpu_cuda)
+&                 use_gpu_cuda=dtset%use_gpu_cuda_in_fourwf)
 
 
                  if(dtset%nspinor==2)then
@@ -416,7 +415,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
                      call fourwf(1,rhoaug,cwavef(:,:,2),dummy,wfraug,gbound,gbound,&
 &                     istwf_k,kg_k,kg_k,dtset%mgfft,mpi_enreg,1,dtset%ngfft,&
 &                     npw_k,1,n4,n5,n6,1,tim_fourwf,weight,weight_i,&
-&                     use_ndo=use_nondiag_occup_dmft,fofginb=cwavefb(:,:,2),use_gpu_cuda=dtset%use_gpu_cuda)
+&                     use_ndo=use_nondiag_occup_dmft,fofginb=cwavefb(:,:,2),use_gpu_cuda=dtset%use_gpu_cuda_in_fourwf)
 
 
                    else if(dtset%nspden==4) then
@@ -443,17 +442,17 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
                      call fourwf(1,rhoaug_down,cwavef(:,:,2),dummy,wfraug,gbound,gbound,&
 &                     istwf_k,kg_k,kg_k,dtset%mgfft,mpi_enreg,1,dtset%ngfft,&
 &                     npw_k,1,n4,n5,n6,1,tim_fourwf,weight,weight_i,&
-&                     use_ndo=use_nondiag_occup_dmft,fofginb=cwavefb(:,:,2),use_gpu_cuda=dtset%use_gpu_cuda)
+&                     use_ndo=use_nondiag_occup_dmft,fofginb=cwavefb(:,:,2),use_gpu_cuda=dtset%use_gpu_cuda_in_fourwf)
 
                      call fourwf(1,rhoaug_mx,cwavef_x,dummy,wfraug,gbound,gbound,&
 &                     istwf_k,kg_k,kg_k,dtset%mgfft,mpi_enreg,1,dtset%ngfft,&
 &                     npw_k,1,n4,n5,n6,1,tim_fourwf,weight,weight_i,&
-&                     use_ndo=use_nondiag_occup_dmft,fofginb=cwavefb_x,use_gpu_cuda=dtset%use_gpu_cuda)
+&                     use_ndo=use_nondiag_occup_dmft,fofginb=cwavefb_x,use_gpu_cuda=dtset%use_gpu_cuda_in_fourwf)
 
                      call fourwf(1,rhoaug_my,cwavef_y,dummy,wfraug,gbound,gbound,&
 &                     istwf_k,kg_k,kg_k,dtset%mgfft,mpi_enreg,1,dtset%ngfft,&
 &                     npw_k,1,n4,n5,n6,1,tim_fourwf,weight,weight_i,&
-&                     use_ndo=use_nondiag_occup_dmft,fofginb=cwavefb_y,use_gpu_cuda=dtset%use_gpu_cuda)
+&                     use_ndo=use_nondiag_occup_dmft,fofginb=cwavefb_y,use_gpu_cuda=dtset%use_gpu_cuda_in_fourwf)
 
                      ABI_FREE(cwavef_x)
                      ABI_FREE(cwavef_y)
