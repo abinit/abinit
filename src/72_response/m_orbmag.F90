@@ -84,8 +84,8 @@ module m_orbmag
   integer,parameter :: iomlr=5,iomanp=6,iomlmb=7
   integer,parameter :: ig1=8,ig4=9,ih1=10,ih2=11,ih3=12,ih4=13
   integer,parameter :: ig2a_dij=14,ig2b_p2=15,ig2b_ap=16,ig2b_vha=17,ig2b_vhnzc=18
-  integer,parameter :: ig3a_dij=19,ig3b_p2=20,ig3b_ap=21,ig3b_vha=22,ig3b_vhnzc=23
-  integer,parameter :: nterms=23
+  integer,parameter :: ig3a_dij=19,ig3b_p2=20,ig3b_ap=21,ig3b_vha=22,ig3b_vhnzc=23,ig3b_vhnhat=24,ig2b_vhnhat=25
+  integer,parameter :: nterms=25
   real(dp),parameter :: c2 = one/(two_pi*two_pi) ! accounts for exp(i k.r) in abinit derivatives rather than exp( 2pi i k.r)
   complex(dpc),parameter :: cbc = j_dpc/two_pi ! Berry curvature pre-factor
   complex(dpc),parameter :: com = -half*j_dpc  ! Orbital magnetism pre-factor
@@ -100,6 +100,7 @@ module m_orbmag
   private :: make_ddir_ap
   private :: make_ddir_vha
   private :: make_ddir_vha2
+  private :: make_ddir_vhnhat
   private :: make_ddir_vha3
   private :: make_fgh1
   private :: make_fh2
@@ -206,7 +207,7 @@ subroutine orbmag_ptpaw(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_en
  real(dp),allocatable :: vectornd(:,:),vectornd_pac(:,:,:,:,:),vlocal(:,:,:,:)
  real(dp),allocatable :: ylm_k(:,:),ylmgr_k(:,:,:)
  complex(dpc),allocatable :: ddir_ap(:,:,:,:),ddir_p2(:,:,:,:),ddir_sij(:,:,:,:)
- complex(dpc),allocatable :: ddir_vha(:,:,:,:),ddir_vhnzc(:,:,:,:)
+ complex(dpc),allocatable :: ddir_vha(:,:,:,:),ddir_vhnhat(:,:,:,:),ddir_vhnzc(:,:,:,:)
  complex(dpc),allocatable :: mp2(:,:,:),mpan(:,:,:)
  type(pawcprj_type),allocatable :: cprj_k(:,:),cprj1_k(:,:,:),cwaveprj(:,:)
  type(pawrhoij_type),allocatable :: pawrhoij(:)
@@ -335,6 +336,10 @@ subroutine orbmag_ptpaw(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_en
  !   & pawrad,pawrhoij,pawtab,psps,realgnt)
  
  call make_ddir_vha2(atindx,ddir_vha,dtset,gntselect,gprimd,psps%lmnmax,my_lmax,paw_an,&
+   & pawang,pawrad,pawrhoij,pawtab,realgnt)
+ 
+ ABI_MALLOC(ddir_vhnhat,(psps%lmnmax,psps%lmnmax,dtset%natom,3))
+ call make_ddir_vhnhat(atindx,ddir_vhnhat,dtset,gntselect,gprimd,psps%lmnmax,my_lmax,paw_an,&
    & pawang,pawrad,pawrhoij,pawtab,realgnt)
  
  !call make_ddir_vha3(atindx,ddir_vha,dtset,gntselect,gprimd,psps%lmnmax,my_lmax,&
@@ -500,6 +505,9 @@ subroutine orbmag_ptpaw(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_en
 
    call make_g2b(atindx,cprj_k,cprj1_k,ddir_vha,dtset,gg_k,psps%lmnmax,nband_k,pawtab)
    orbmag_terms(:,:,:,ig2b_vha) = orbmag_terms(:,:,:,ig2b_vha) + trnrm*gg_k
+   
+   call make_g2b(atindx,cprj_k,cprj1_k,ddir_vhnhat,dtset,gg_k,psps%lmnmax,nband_k,pawtab)
+   orbmag_terms(:,:,:,ig2b_vhnhat) = orbmag_terms(:,:,:,ig2b_vhnhat) + trnrm*gg_k
 
    call make_g2b(atindx,cprj_k,cprj1_k,ddir_vhnzc,dtset,gg_k,psps%lmnmax,nband_k,pawtab)
    orbmag_terms(:,:,:,ig2b_vhnzc) = orbmag_terms(:,:,:,ig2b_vhnzc) + trnrm*gg_k
@@ -515,6 +523,9 @@ subroutine orbmag_ptpaw(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_en
    
    call make_g3b(atindx,cprj_k,ddir_vha,dtset,gg_k,psps%lmnmax,nband_k,pawtab)
    orbmag_terms(:,:,:,ig3b_vha) = orbmag_terms(:,:,:,ig3b_vha) + trnrm*gg_k
+   
+   call make_g3b(atindx,cprj_k,ddir_vhnhat,dtset,gg_k,psps%lmnmax,nband_k,pawtab)
+   orbmag_terms(:,:,:,ig3b_vhnhat) = orbmag_terms(:,:,:,ig3b_vhnhat) + trnrm*gg_k
    
    call make_g3b(atindx,cprj_k,ddir_vhnzc,dtset,gg_k,psps%lmnmax,nband_k,pawtab)
    orbmag_terms(:,:,:,ig3b_vhnzc) = orbmag_terms(:,:,:,ig3b_vhnzc) + trnrm*gg_k
@@ -647,6 +658,7 @@ subroutine orbmag_ptpaw(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_en
  ABI_FREE(ddir_ap)
  ABI_FREE(ddir_sij)
  ABI_FREE(ddir_vha)
+ ABI_FREE(ddir_vhnhat)
  ABI_FREE(ddir_vhnzc)
  ABI_FREE(mp2)
  ABI_FREE(mpan)
@@ -2193,6 +2205,8 @@ subroutine orbmag_ptpaw_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace)
    call wrtout(ab_out,message,'COLL')
    write(message,'(a,3es16.8)')'  <Pc du|T(dT)|u>d(vHnzc) : ',(orbmag_trace(1,adir,ig2b_vhnzc),adir=1,3)
    call wrtout(ab_out,message,'COLL')
+   write(message,'(a,3es16.8)')' <Pc du|T(dT)|u>d(vHnhat) : ',(orbmag_trace(1,adir,ig2b_vhnhat),adir=1,3)
+   call wrtout(ab_out,message,'COLL')
    write(message,'(a,3es16.8)')'       <u|(dT)(dT)|u>*Dij : ',(orbmag_trace(1,adir,ig3a_dij),adir=1,3)
    call wrtout(ab_out,message,'COLL')
    write(message,'(a,3es16.8)')'      <u|(dT)(dT)|u>d(p2) : ',(orbmag_trace(1,adir,ig3b_p2),adir=1,3)
@@ -2202,6 +2216,8 @@ subroutine orbmag_ptpaw_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace)
    write(message,'(a,3es16.8)')'      <u|(dT)(dT)|u>d(vH) : ',(orbmag_trace(1,adir,ig3b_vha),adir=1,3)
    call wrtout(ab_out,message,'COLL')
    write(message,'(a,3es16.8)')'   <u|(dT)(dT)|u>d(vHnzc) : ',(orbmag_trace(1,adir,ig3b_vhnzc),adir=1,3)
+   call wrtout(ab_out,message,'COLL')
+   write(message,'(a,3es16.8)')'  <u|(dT)(dT)|u>d(vHnhat) : ',(orbmag_trace(1,adir,ig3b_vhnhat),adir=1,3)
    call wrtout(ab_out,message,'COLL')
    write(message,'(a,3es16.8)')'  <u|(dT)(dT)|u>dd(p2)(L) : ',(orbmag_trace(1,adir,iomlr),adir=1,3)
    call wrtout(ab_out,message,'COLL')
@@ -2571,6 +2587,213 @@ subroutine make_ddir_vha3(atindx,ddir_vha,dtset,gntselect,gprimd,lmnmax,my_lmax,
  
 end subroutine make_ddir_vha3
 
+!!****f* ABINIT/make_ddir_vnhat
+!! NAME
+!! make_ddir_vnhat
+!!
+!! FUNCTION
+!! Compute onsite r*vnhat
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2021 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!! computed in Cart directions then transformed to xtal coords
+!!
+!! PARENTS
+!!      m_orbmag
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine make_ddir_vhnhat(atindx,ddir_vhnhat,dtset,gntselect,gprimd,lmnmax,my_lmax,paw_an,&
+    & pawang,pawrad,pawrhoij,pawtab,realgnt)
+
+  !Arguments ------------------------------------
+  !scalars
+  integer,intent(in) :: lmnmax,my_lmax
+  type(dataset_type),intent(in) :: dtset
+  type(pawang_type),intent(in) :: pawang
+
+  !arrays
+  integer,intent(in) :: atindx(dtset%natom)
+  integer,intent(in) :: gntselect((2*my_lmax-1)**2,my_lmax**2*(my_lmax**2+1)/2)
+  real(dp),intent(in) :: gprimd(3,3),realgnt((2*my_lmax-1)**2*(my_lmax)**4)
+  complex(dpc),intent(out) :: ddir_vhnhat(lmnmax,lmnmax,dtset%natom,3)
+  type(paw_an_type),intent(inout) :: paw_an(dtset%natom)
+  type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
+  type(pawrhoij_type),intent(in) :: pawrhoij(dtset%natom)
+  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
+
+  !Local variables -------------------------
+  !scalars
+  integer :: adir,cplex,gint,g2int,iat,iatom,ilmn,imesh,itypat,isel
+  integer :: jlmn,jmesh,klmadir,klmn,klm,kln,ll,llmm,lm_size,lp,lpmp
+  integer :: mesh_size,mm,mp,nzlmopt
+  integer :: opt_compch,opt_dens,opt_l,opt_print
+  real(dp) :: cdij,compch_sph,nl1,nlt1,rfac,rr,rp,vhaint,rrhokl
+
+  !arrays
+  integer,dimension(3) :: adir_to_sij = (/4,2,3/)
+  real(dp) :: dij_cart(3),dij_red(3)
+  real(dp),allocatable :: ff(:),ff1(:),fft1(:),nhat1(:,:,:)
+  real(dp),allocatable :: my_rho1(:,:,:),rho1(:,:,:),trho1(:,:,:)
+  logical,allocatable :: lmselectin(:),lmselectout(:)
+
+!--------------------------------------------------------------------
+
+ nzlmopt = 0
+ opt_compch = 0
+ opt_dens = 0
+ opt_l = -1
+ opt_print = 0
+
+ cdij = four_pi*sqrt(four_pi/3.0D0)
+ ddir_vhnhat = czero
+
+ do iat = 1, dtset%natom
+   iatom = atindx(iat)
+   itypat = dtset%typat(iat)
+  
+   cplex = pawrhoij(iatom)%qphase
+   mesh_size=pawtab(itypat)%mesh_size
+   lm_size = paw_an(iatom)%lm_size
+   ABI_MALLOC(lmselectin,(lm_size))
+   ABI_MALLOC(lmselectout,(lm_size))
+   ABI_MALLOC(nhat1,(cplex*mesh_size,lm_size,dtset%nspden*(1-((opt_dens+1)/2))))
+   ABI_MALLOC(rho1,(cplex*mesh_size,lm_size,dtset%nspden))
+   ABI_MALLOC(my_rho1,(cplex*mesh_size,lm_size,dtset%nspden))
+   ABI_MALLOC(trho1,(cplex*mesh_size,lm_size,dtset%nspden*(1-(opt_dens/2))))
+   ABI_MALLOC(ff,(mesh_size))
+   ABI_MALLOC(ff1,(mesh_size))
+   ABI_MALLOC(fft1,(mesh_size))
+  
+   lmselectin = .TRUE. 
+   call pawdensities(compch_sph,cplex,iatom,lmselectin,lmselectout,&
+     & lm_size,nhat1,dtset%nspden,nzlmopt,opt_compch,opt_dens,opt_l,&
+     & opt_print,pawang,dtset%pawprtvol,pawrad(itypat),pawrhoij(iatom),&
+     & pawtab(itypat),rho1,trho1)
+
+   !! check rho1 density
+   !my_rho1 = zero
+   !do isel = 1,pawrhoij(iatom)%nrhoijsel
+   !  klmn = pawrhoij(iatom)%rhoijselect(isel)
+   !  rrhokl = pawrhoij(iatom)%rhoijp(2*isel-1,1)
+   !  do ll = pawtab(itypat)%indklmn(3,klmn),pawtab(itypat)%indklmn(4,klmn),2
+   !    do mm = -ll,ll
+   !      llmm = LMPACK(ll,mm)
+   !      gint = gntselect(llmm,pawtab(itypat)%indklmn(1,klmn))
+   !      if (gint .EQ. 0) cycle
+   !      my_rho1(2:mesh_size,llmm,1) = my_rho1(2:mesh_size,llmm,1) + &
+   !        & rrhokl*pawtab(itypat)%phiphj(2:mesh_size,klmn)*realgnt(gint)*&
+   !        & pawtab(itypat)%dltij(klmn)/&
+   !        & pawrad(itypat)%rad(2:mesh_size)**2
+   !    end do !mm
+   !  end do !ll
+   !  call pawrad_deducer0(my_rho1(:,llmm,1),mesh_size,pawrad(itypat))
+
+   !end do !klmn
+   !
+   !do llmm = 1, lm_size
+   !  do imesh = 1, 20
+   !    write(std_out,'(a,i4,2es16.8)')'JWZ debug imesh myrho1 rho1 ',&
+   !      & imesh,my_rho1(imesh,llmm,1),rho1(imesh,llmm,1)
+   !  end do !imesh
+   !end do ! llmm
+   
+   do klmn = 1, pawtab(itypat)%lmn2_size
+     klm = pawtab(itypat)%indklmn(1,klmn)
+     kln = pawtab(itypat)%indklmn(2,klmn)
+     ilmn = pawtab(itypat)%indklmn(7,klmn)
+     jlmn = pawtab(itypat)%indklmn(8,klmn)
+
+     dij_cart = zero
+
+     do ll = pawtab(itypat)%indklmn(3,klmn), pawtab(itypat)%indklmn(4,klmn), 2
+       do mm = -ll, ll
+         llmm = LMPACK(ll,mm)
+         gint = gntselect(llmm,klm)
+         if (gint .EQ. 0) cycle
+
+         do adir = 1, 3
+
+           do lp = abs(ll-1), ll+1, 2
+             do mp = -lp, lp
+               lpmp = LMPACK(lp,mp)
+               klmadir = MATPACK(llmm,adir_to_sij(adir))
+               g2int = gntselect(lpmp,klmadir)
+               if (g2int .EQ. 0) cycle
+
+               ! construct integrand for rho1 vHa, trho1
+               do imesh = 2, mesh_size
+                 rr = pawrad(itypat)%rad(imesh)
+                   
+                 ! for this mesh point, do the interior nonlocal integral over Hartree potential
+                 do jmesh = 2, imesh
+                   rp = pawrad(itypat)%rad(jmesh)
+                   rfac = (rp**2)*(rp**lp)/(rr**(lp+1))
+                   ff1(jmesh) = nhat1(jmesh,lpmp,1)*rfac
+                 end do
+                 do jmesh=imesh+1, mesh_size
+                   rp = pawrad(itypat)%rad(jmesh)
+                   rfac = (rp**2)*(rr**lp)/(rp**(lp+1))
+                   ff1(jmesh) = nhat1(jmesh,lpmp,1)*rfac
+                 end do
+
+                 call pawrad_deducer0(ff1,mesh_size,pawrad(itypat))
+                 call simp_gen(nl1,ff1,pawrad(itypat))
+                 
+                 ff(imesh)=-rr*pawtab(itypat)%tphitphj(imesh,kln)*nl1
+               
+               end do ! end loop over imesh
+
+               call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
+               call simp_gen(vhaint,ff,pawrad(itypat))
+
+               dij_cart(adir) = dij_cart(adir) + &
+                 & cdij*realgnt(gint)*realgnt(g2int)*vhaint/(two*ll+one)
+               
+             end do ! end loop over mp
+           end do ! end loop over lp
+         end do ! end loop over adir
+       end do ! end loop over mm
+     end do ! end loop over ll
+
+     dij_red = MATMUL(TRANSPOSE(gprimd),dij_cart)
+
+     do adir = 1, 3
+       ddir_vhnhat(ilmn,jlmn,iat,adir) = CMPLX(dij_red(adir),zero,KIND=dpc)
+       ddir_vhnhat(jlmn,ilmn,iat,adir) = ddir_vhnhat(ilmn,jlmn,iat,adir)
+     end do
+
+   end do ! end loop over klmn
+
+   ABI_FREE(lmselectin)
+   ABI_FREE(lmselectout)
+   ABI_FREE(nhat1)
+   ABI_FREE(my_rho1)
+   ABI_FREE(rho1)
+   ABI_FREE(trho1)
+   ABI_FREE(ff)
+   ABI_FREE(ff1)
+   ABI_FREE(fft1)
+
+ end do ! end loop over iat
+ 
+end subroutine make_ddir_vhnhat
 
 !!****f* ABINIT/make_ddir_vha2
 !! NAME
