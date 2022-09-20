@@ -1457,13 +1457,13 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
        end if
      else if(.not.kramers_deg) then
        if (dtset%nspden==4) then
-         call dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eigen0,eigen1,gmet,&
+         call dfpt_nstdy(atindx,blkflg,cg,cg1_pq,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eigen0,eigen1,gmet,&
 &         gsqcut,idir,indkpt1,indsy1,ipert,istwfk_rbz,kg,kg1,kpt_rbz,kxc,mband_mem_rbz,mkmem,mk1mem,mpert,mpi_enreg,&
 &         mpw,mpw1,nattyp,nband_rbz,nfftf,ngfftf,nkpt,nkpt_rbz,nkxc,npwarr,npwar1,nspden,&
 &         dtset%nsppol,nsym1,occ_rbz,ph1d,psps,rhor1_pq,rmet,rprimd,symrc1,ucvol,&
 &         wtk_rbz,xred,ylm,ylm1,rhor=rhor,vxc=vxc)
        else
-         call dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eigen0,eigen1,gmet,&
+         call dfpt_nstdy(atindx,blkflg,cg,cg1_pq,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eigen0,eigen1,gmet,&
 &         gsqcut,idir,indkpt1,indsy1,ipert,istwfk_rbz,kg,kg1,kpt_rbz,kxc,mband_mem_rbz,mkmem,mk1mem,mpert,mpi_enreg,&
 &         mpw,mpw1,nattyp,nband_rbz,nfftf,ngfftf,nkpt,nkpt_rbz,nkxc,npwarr,npwar1,nspden,&
 &         dtset%nsppol,nsym1,occ_rbz,ph1d,psps,rhor1_pq,rmet,rprimd,symrc1,ucvol,&
