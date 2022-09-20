@@ -428,7 +428,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  real(dp),allocatable :: susmat(:,:,:,:,:),vectornd(:,:),vhartr1(:),vxc1(:,:)
  real(dp),allocatable :: vhartr1_tmp(:,:)
  real(dp),allocatable,target :: vtrial1(:,:),vtrial2(:,:)
- real(dp),allocatable :: vtrial1_pq(:,:),vtrial1_mq(:,:),rhorfermi_mq(:,:)
+ real(dp),allocatable :: vtrial1_mq(:,:),rhorfermi_mq(:,:)
  real(dp),allocatable :: nvresid1_mq(:,:),vxc1_mq(:,:),vhartr1_mq(:)
  real(dp),pointer :: vtrial1_tmp(:,:)
  type(pawcprj_type),allocatable :: cprj1(:,:)
@@ -582,13 +582,12 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  ABI_MALLOC(vtrial1,(cplex*nfftf,nspden))
  if(.not.kramers_deg) then
    ABI_MALLOC(vhartr1_mq,(cplex*nfftf))
-   ABI_MALLOC(vtrial1_pq,(cplex*nfftf,nspden))
    ABI_MALLOC(vtrial1_mq,(cplex*nfftf,nspden))
    ABI_MALLOC(d2bbb_mq,(2,3,3,mpert,dtset%mband,dtset%mband*prtbbb))
    ABI_MALLOC(d2lo_mq,(2,3,mpert,3,mpert))
    ABI_MALLOC(d2nl_mq,(2,3,mpert,3,mpert))
-   ABI_MALLOC(cg1_pq,(2,mpw1_mq*dtset%nspinor*mband_mem_rbz*mk1mem*dtset%nsppol))
-   ABI_MALLOC(cg1_active_pq,(2,mpw1_mq*dtset%nspinor*mband_mem_rbz*mk1mem*dtset%nsppol*dim_eig2rf))
+   ABI_MALLOC(cg1_pq,(2,mpw1*dtset%nspinor*mband_mem_rbz*mk1mem*dtset%nsppol))
+   ABI_MALLOC(cg1_active_pq,(2,mpw1*dtset%nspinor*mband_mem_rbz*mk1mem*dtset%nsppol*dim_eig2rf))
  end if
 ! TODO: for non collinear case this should always be nspden, in NCPP case as well!!!
  ABI_MALLOC(vxc1,(cplex*nfftf,nspden*(1-usexcnhat))) ! Not always needed
@@ -816,7 +815,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &     nvresid1,res2,vtrial1,vxc,vxc1,xccc3d1,dtset%ixcrot)
 
      if(.not.kramers_deg) then
-       vtrial1_pq=vtrial1 !save trial potential at +q
        !rhor1_mq=rhor1
        !rhog1_mq=rhog1
        !get initial guess for vtrial1 at -q
@@ -974,12 +972,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &   rhor1,rmet,rprimd,symaf1,symrc1,symrl1,tnons1,ucvol,usecprj,useylmgr1,ddk_f,&
 &   vectornd,vtrial,vtrial1,with_vectornd,wtk_rbz,xred,ylm,ylm1,ylmgr1,omega=omega)
 
-!   if (mpi_enreg%me == 0) then
-!   write(100,*) "ITERATION:",istep 
-!   do ifft=1,nfftf
-!     write(100,*) rhor1(2*ifft-1,1),rhor1(2*ifft,1)
-!   end do 
-!   end if
 
    if (.not.kramers_deg) then
      rhor1_pq=rhor1 !at this stage rhor1_pq contains only one term of the 1st order density at +q
@@ -1206,27 +1198,27 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &       initialized,iscf_mod,ispmix,istep,mix,pawfgr%coatofin,&
 &       mpi_enreg,my_natom,nfftf,nfftmix,ngfftf,ngfftmix,npawmix,pawrhoij1,&
 &       qphon,rhor1,rprimd,psps%usepaw,nvresid1,vtrial1)
-!       if (.not.kramers_deg) then
-!       !same problem as with density reconstruction, TODO proper fft parallelization...
-!         do ifft=1,nfftf
-!           vtrial1_mq(2*ifft-1,1)=+vtrial1(2*ifft-1,1)
-!           vtrial1_mq(2*ifft  ,1)=-vtrial1(2*ifft  ,1)
-!         end do
-!         if (nspden >= 2) then
-!           do ifft=1,nfftf
-!             vtrial1_mq(2*ifft-1,2)=+vtrial1(2*ifft-1,2)
-!             vtrial1_mq(2*ifft  ,2)=-vtrial1(2*ifft  ,2)
-!           end do
-!         end if
-!         if (nspden > 2) then
-!           do ifft=1,nfftf
-!             vtrial1_mq(2*ifft-1,3)= vtrial1(2*ifft  ,4) !Re[V^12]
-!             vtrial1_mq(2*ifft  ,3)= vtrial1(2*ifft-1,4) !Im[V^12],see definition of v(:,4) cplex=2 case
-!             vtrial1_mq(2*ifft  ,4)= vtrial1(2*ifft-1,3) !Re[V^21]=Re[V^12]
-!             vtrial1_mq(2*ifft-1,4)= vtrial1(2*ifft  ,3) !Re[V^21]=Re[V^12]
-!           end do
-!         end if
-!       end if
+       if (.not.kramers_deg) then
+       !same problem as with density reconstruction, TODO proper fft parallelization...
+         do ifft=1,nfftf
+           vtrial1_mq(2*ifft-1,1)=+vtrial1(2*ifft-1,1)
+           vtrial1_mq(2*ifft  ,1)=-vtrial1(2*ifft  ,1)
+         end do
+         if (nspden >= 2) then
+           do ifft=1,nfftf
+             vtrial1_mq(2*ifft-1,2)=+vtrial1(2*ifft-1,2)
+             vtrial1_mq(2*ifft  ,2)=-vtrial1(2*ifft  ,2)
+           end do
+         end if
+         if (nspden > 2) then
+           do ifft=1,nfftf
+             vtrial1_mq(2*ifft-1,3)= vtrial1(2*ifft  ,4) !Re[V^12]
+             vtrial1_mq(2*ifft  ,3)= vtrial1(2*ifft-1,4) !Im[V^12],see definition of v(:,4) cplex=2 case
+             vtrial1_mq(2*ifft  ,4)= vtrial1(2*ifft-1,3) !Re[V^21]=Re[V^12]
+             vtrial1_mq(2*ifft-1,4)= vtrial1(2*ifft  ,3) !Re[V^21]=Re[V^12]
+           end do
+         end if
+       end if
        initialized=1
      end if
    end if
@@ -1661,7 +1653,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  if (.not.kramers_deg) then
    ABI_FREE(vhartr1_mq)
    ABI_FREE(vxc1_mq)
-   ABI_FREE(vtrial1_pq)
    ABI_FREE(vtrial1_mq)
    ABI_FREE(d2bbb_mq)
    ABI_FREE(d2lo_mq)
