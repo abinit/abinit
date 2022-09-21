@@ -422,6 +422,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !real(dp) :: zdmc_red(3),zdmc_bar(3,3),mean_rhor1(1) !dynamic magnetic charges and mean density
  real(dp),allocatable :: cg1_pq(:,:),cg1_active_pq(:,:)
  real(dp),allocatable :: d2bbb_mq(:,:,:,:,:,:),d2lo_mq(:,:,:,:,:),d2nl_mq(:,:,:,:,:)
+ real(dp),allocatable :: d2bbb_pq(:,:,:,:,:,:),d2lo_pq(:,:,:,:,:),d2nl_pq(:,:,:,:,:)
  real(dp),allocatable :: dielinv(:,:,:,:,:)
  real(dp),allocatable :: fcart(:,:),nhat1(:,:),nhat1gr(:,:,:),nhatfermi(:,:),nvresid1(:,:),nvresid2(:,:)
  real(dp),allocatable :: qmat(:,:,:,:,:,:),resid2(:),rhog2(:,:),rhor2(:,:),rhorfermi(:,:)
@@ -584,8 +585,11 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
    ABI_MALLOC(vhartr1_mq,(cplex*nfftf))
    ABI_MALLOC(vtrial1_mq,(cplex*nfftf,nspden))
    ABI_MALLOC(d2bbb_mq,(2,3,3,mpert,dtset%mband,dtset%mband*prtbbb))
+   ABI_MALLOC(d2bbb_pq,(2,3,3,mpert,dtset%mband,dtset%mband*prtbbb))
    ABI_MALLOC(d2lo_mq,(2,3,mpert,3,mpert))
+   ABI_MALLOC(d2lo_pq,(2,3,mpert,3,mpert))
    ABI_MALLOC(d2nl_mq,(2,3,mpert,3,mpert))
+   ABI_MALLOC(d2nl_pq,(2,3,mpert,3,mpert))
    ABI_MALLOC(cg1_pq,(2,mpw1*dtset%nspinor*mband_mem_rbz*mk1mem*dtset%nsppol))
    ABI_MALLOC(cg1_active_pq,(2,mpw1*dtset%nspinor*mband_mem_rbz*mk1mem*dtset%nsppol*dim_eig2rf))
  end if
@@ -974,10 +978,10 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 
 
    if (.not.kramers_deg) then
-     rhor1_pq=rhor1 !at this stage rhor1_pq contains only one term of the 1st order density at +q
-     rhog1_pq=rhog1 !same for rhog1_pq
-     cg1_pq=cg1
-     cg1_active_pq=cg1_active
+     rhor1_pq(:,:)=rhor1(:,:) !at this stage rhor1_pq contains only one term of the 1st order density at +q
+     rhog1_pq(:,:)=rhog1(:,:) !same for rhog1_pq
+     cg1_pq(:,:)=cg1(:,:)
+     cg1_active_pq(:,:)=cg1_active(:,:)
      !get the second term related to 1st order wf at -q
      call dfpt_vtorho(cg,cg_mq,cg1_mq,cg1_active_mq,cplex,cprj,cprjq,cprj1,&
 &     dbl_nnsclo_mq,dim_eig2rf,doccde_rbz,docckde_mq,dtefield,dtfil,dtset,-dtset%qptn,edocc_mq,&
@@ -1449,13 +1453,13 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
        end if
      else if(.not.kramers_deg) then
        if (dtset%nspden==4) then
-         call dfpt_nstdy(atindx,blkflg,cg,cg1_pq,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eigen0,eigen1,gmet,&
+         call dfpt_nstdy(atindx,blkflg,cg,cg1_pq,cplex,dtfil,dtset,d2bbb_pq,d2lo_pq,d2nl_pq,eigen0,eigen1,gmet,&
 &         gsqcut,idir,indkpt1,indsy1,ipert,istwfk_rbz,kg,kg1,kpt_rbz,kxc,mband_mem_rbz,mkmem,mk1mem,mpert,mpi_enreg,&
 &         mpw,mpw1,nattyp,nband_rbz,nfftf,ngfftf,nkpt,nkpt_rbz,nkxc,npwarr,npwar1,nspden,&
 &         dtset%nsppol,nsym1,occ_rbz,ph1d,psps,rhor1_pq,rmet,rprimd,symrc1,ucvol,&
 &         wtk_rbz,xred,ylm,ylm1,rhor=rhor,vxc=vxc)
        else
-         call dfpt_nstdy(atindx,blkflg,cg,cg1_pq,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eigen0,eigen1,gmet,&
+         call dfpt_nstdy(atindx,blkflg,cg,cg1_pq,cplex,dtfil,dtset,d2bbb_pq,d2lo_pq,d2nl_pq,eigen0,eigen1,gmet,&
 &         gsqcut,idir,indkpt1,indsy1,ipert,istwfk_rbz,kg,kg1,kpt_rbz,kxc,mband_mem_rbz,mkmem,mk1mem,mpert,mpi_enreg,&
 &         mpw,mpw1,nattyp,nband_rbz,nfftf,ngfftf,nkpt,nkpt_rbz,nkxc,npwarr,npwar1,nspden,&
 &         dtset%nsppol,nsym1,occ_rbz,ph1d,psps,rhor1_pq,rmet,rprimd,symrc1,ucvol,&
@@ -1476,12 +1480,12 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
        end if
 
        !Mix up (q,w) and (-q,-w) second-order derivatives
-       d2bbb(1,:,:,:,:,:)=half*(d2bbb(1,:,:,:,:,:)+d2bbb_mq(1,:,:,:,:,:))
-       d2bbb(2,:,:,:,:,:)=half*(d2bbb(2,:,:,:,:,:)-d2bbb_mq(2,:,:,:,:,:))
-       d2lo(1,:,:,:,:)=half*(d2lo(1,:,:,:,:)+d2lo_mq(1,:,:,:,:))
-       d2lo(2,:,:,:,:)=half*(d2lo(2,:,:,:,:)-d2lo_mq(2,:,:,:,:))
-       d2nl(1,:,:,:,:)=half*(d2nl(1,:,:,:,:)+d2nl_mq(1,:,:,:,:))
-       d2nl(2,:,:,:,:)=half*(d2nl(2,:,:,:,:)-d2nl_mq(2,:,:,:,:))
+       d2bbb(1,:,:,:,:,:)=half*(d2bbb_pq(1,:,:,:,:,:)+d2bbb_mq(1,:,:,:,:,:))
+       d2bbb(2,:,:,:,:,:)=half*(d2bbb_pq(2,:,:,:,:,:)-d2bbb_mq(2,:,:,:,:,:))
+       d2lo(1,:,:,:,:)=half*(d2lo_pq(1,:,:,:,:)+d2lo_mq(1,:,:,:,:))
+       d2lo(2,:,:,:,:)=half*(d2lo_pq(2,:,:,:,:)-d2lo_mq(2,:,:,:,:))
+       d2nl(1,:,:,:,:)=half*(d2nl_pq(1,:,:,:,:)+d2nl_mq(1,:,:,:,:))
+       d2nl(2,:,:,:,:)=half*(d2nl_pq(2,:,:,:,:)-d2nl_mq(2,:,:,:,:))
 
      end if
    end if
