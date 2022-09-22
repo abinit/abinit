@@ -1,12 +1,20 @@
 # Al at high temperature using the Extended FPMD model
-ndtset 3
+ndtset 4
 
 useextfpmd1 1
-useextfpmd2 2
-useextfpmd3 3
-extfpmd_nbcut 10
+nband1 50
 
-nband 50
+useextfpmd2 2
+nband2 50
+
+useextfpmd3 3
+nband3 50
+
+useextfpmd4 1
+extfpmd_nbdbuf4 10
+nband4 60
+
+extfpmd_nbcut 10
 
 dipdip 0
 occopt 3
