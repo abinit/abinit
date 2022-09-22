@@ -2618,7 +2618,7 @@ subroutine make_ddir_vhnhat(atindx,ddir_vhnhat,dtset,gntselect,gprimd,lmnmax,my_
 
 !--------------------------------------------------------------------
 
- nzlmopt = 0
+ nzlmopt = -1
  opt_compch = 0
  opt_dens = 0
  opt_l = -1
@@ -2650,33 +2650,6 @@ subroutine make_ddir_vhnhat(atindx,ddir_vhnhat,dtset,gntselect,gprimd,lmnmax,my_
      & opt_print,pawang,dtset%pawprtvol,pawrad(itypat),pawrhoij(iatom),&
      & pawtab(itypat),rho1,trho1)
 
-   !! check rho1 density
-   !my_rho1 = zero
-   !do isel = 1,pawrhoij(iatom)%nrhoijsel
-   !  klmn = pawrhoij(iatom)%rhoijselect(isel)
-   !  rrhokl = pawrhoij(iatom)%rhoijp(2*isel-1,1)
-   !  do ll = pawtab(itypat)%indklmn(3,klmn),pawtab(itypat)%indklmn(4,klmn),2
-   !    do mm = -ll,ll
-   !      llmm = LMPACK(ll,mm)
-   !      gint = gntselect(llmm,pawtab(itypat)%indklmn(1,klmn))
-   !      if (gint .EQ. 0) cycle
-   !      my_rho1(2:mesh_size,llmm,1) = my_rho1(2:mesh_size,llmm,1) + &
-   !        & rrhokl*pawtab(itypat)%phiphj(2:mesh_size,klmn)*realgnt(gint)*&
-   !        & pawtab(itypat)%dltij(klmn)/&
-   !        & pawrad(itypat)%rad(2:mesh_size)**2
-   !    end do !mm
-   !  end do !ll
-   !  call pawrad_deducer0(my_rho1(:,llmm,1),mesh_size,pawrad(itypat))
-
-   !end do !klmn
-   !
-   !do llmm = 1, lm_size
-   !  do imesh = 1, 20
-   !    write(std_out,'(a,i4,2es16.8)')'JWZ debug imesh myrho1 rho1 ',&
-   !      & imesh,my_rho1(imesh,llmm,1),rho1(imesh,llmm,1)
-   !  end do !imesh
-   !end do ! llmm
-   
    do klmn = 1, pawtab(itypat)%lmn2_size
      klm = pawtab(itypat)%indklmn(1,klmn)
      kln = pawtab(itypat)%indklmn(2,klmn)
@@ -2812,10 +2785,11 @@ subroutine make_ddir_vha2(atindx,ddir_vha,dtset,gntselect,gprimd,lmnmax,my_lmax,
   !Local variables -------------------------
   !scalars
   integer :: adir,cplex,gint,g2int,iat,iatom,ilmn,imesh,itypat,isel
-  integer :: jlmn,jmesh,klmadir,klmn,klm,kln,ll,llmm,lm_size,lp,lpmp
+  integer :: jlmn,jmesh,klmadir,klmn,klm,kln,ll,llmm,lm_size,lmin,lmax,lp,lpmp
   integer :: mesh_size,mm,mp,nzlmopt
   integer :: opt_compch,opt_dens,opt_l,opt_print
   real(dp) :: cdij,compch_sph,nl1,nlt1,rfac,rr,rp,vhaint,rrhokl
+  real(dp) :: nterm
 
   !arrays
   integer,dimension(3) :: adir_to_sij = (/4,2,3/)
@@ -2826,7 +2800,7 @@ subroutine make_ddir_vha2(atindx,ddir_vha,dtset,gntselect,gprimd,lmnmax,my_lmax,
 
 !--------------------------------------------------------------------
 
- nzlmopt = 0
+ nzlmopt = -1
  opt_compch = 0
  opt_dens = 1
  opt_l = -1
@@ -2853,6 +2827,7 @@ subroutine make_ddir_vha2(atindx,ddir_vha,dtset,gntselect,gprimd,lmnmax,my_lmax,
    ABI_MALLOC(fft1,(mesh_size))
   
    lmselectin = .TRUE. 
+   write(std_out,'(a)') 'JWZ debug call pawdensities '
    call pawdensities(compch_sph,cplex,iatom,lmselectin,lmselectout,&
      & lm_size,nhat1,dtset%nspden,nzlmopt,opt_compch,opt_dens,opt_l,&
      & opt_print,pawang,dtset%pawprtvol,pawrad(itypat),pawrhoij(iatom),&
@@ -2860,29 +2835,40 @@ subroutine make_ddir_vha2(atindx,ddir_vha,dtset,gntselect,gprimd,lmnmax,my_lmax,
 
    !! check rho1 density
    my_rho1 = zero
-   do ll = 0, my_lmax-1
-     do mm = -ll,ll
-       llmm = LMPACK(ll,mm)
-       do isel = 1,pawrhoij(iatom)%nrhoijsel
-         klmn = pawrhoij(iatom)%rhoijselect(isel)
-         gint = gntselect(llmm,pawtab(itypat)%indklmn(1,klmn))
-         write(std_out,'(a,5i4)')'JWZ debug ll mm isel klmn gint ',ll,mm,isel,klmn,gint
-         if (gint .EQ. 0) cycle
-         rrhokl = pawrhoij(iatom)%rhoijp(2*isel-1,1)
-         my_rho1(2:mesh_size,llmm,1) = my_rho1(2:mesh_size,llmm,1) + &
-           & rrhokl*pawtab(itypat)%phiphj(2:mesh_size,klmn)*realgnt(gint)*&
-           & pawtab(itypat)%dltij(klmn)/&
-           & pawrad(itypat)%rad(2:mesh_size)**2
-       end do !isel
-       call pawrad_deducer0(my_rho1(:,llmm,1),mesh_size,pawrad(itypat))
-     end do !mm
-   end do !ll
+   do isel = 1, pawrhoij(iatom)%nrhoijsel
+     klmn = pawrhoij(iatom)%rhoijselect(isel)
+     klm = pawtab(itypat)%indklmn(1,klmn)
+     kln = pawtab(itypat)%indklmn(2,klmn)
+     lmin = pawtab(itypat)%indklmn(3,klmn)
+     lmax = pawtab(itypat)%indklmn(4,klmn)
+     rrhokl = pawrhoij(iatom)%rhoijp(2*isel-1,1)
+     rrhokl = rrhokl*pawtab(itypat)%dltij(klmn)
+     do ll=lmin,lmax,2
+       do llmm = ll**2+1,(ll+1)**2
+         gint=gntselect(llmm,klm)
+         if (gint .NE. 0) then
+           write(std_out,'(a,i4,es16.8,3i4)')'JWZ debug isel rrhokl ll llmm gint ',isel,rrhokl,ll,llmm,gint
+           do imesh = 2, mesh_size
+             nterm = rrhokl*pawtab(itypat)%phiphj(imesh,kln)*realgnt(gint)/&
+               & (pawrad(itypat)%rad(imesh)**2)
+             my_rho1(imesh,llmm,1) = my_rho1(imesh,llmm,1) + nterm
+             if (imesh < 10) write(std_out,'(es16.8)') nterm
+           end do !imesh
+         end if ! gint .NE. 0
+       end do !llmm
+     end do ! ll
+   end do !isel
    
-   do llmm = 1, lm_size
-     do imesh = 1, 20
-       write(std_out,'(a,i4,2es16.8)')'JWZ debug imesh myrho1 rho1 ',&
-         & imesh,my_rho1(imesh,llmm,1),rho1(imesh,llmm,1)
-     end do !imesh
+   do llmm=1,lm_size
+     if (lmselectout(llmm)) then
+       write(std_out,'(a,i4,2es16.8)')'JWZ debug llmm max_my max_n1 ',llmm,MAXVAL(abs(my_rho1(:,llmm,1))),&
+         & MAXVAL(abs(rho1(:,llmm,1)))
+       call pawrad_deducer0(my_rho1(:,llmm,1),mesh_size,pawrad(itypat))
+       do imesh = 1, 20
+         write(std_out,'(a,2i4,2es16.8)')'JWZ debug llmm imesh myrho1 rho1 ',llmm,&
+           & imesh,my_rho1(imesh,llmm,1),rho1(imesh,llmm,1)
+       end do !imesh
+     end if
    end do ! llmm
    
    do klmn = 1, pawtab(itypat)%lmn2_size
@@ -3456,9 +3442,10 @@ subroutine pack_pawrhoij(dtset,pawrhoij)
         rr = pawrhoij(iatom)%rhoij_(klmn,1)
         ri = zero
       end if
-      if ( (ABS(rr) .GT. tol12) .OR. (ABS(ri) .GT. tol12) ) then
-        isel = isel + 1
-      end if
+      !if ( (ABS(rr) .GT. tol16) .OR. (ABS(ri) .GT. tol16) ) then
+      !  isel = isel + 1
+      !end if
+      isel = isel+1
     end do ! end loop over klmn
     pawrhoij(iatom)%nrhoijsel = isel
 
@@ -3481,7 +3468,7 @@ subroutine pack_pawrhoij(dtset,pawrhoij)
         rr = pawrhoij(iatom)%rhoij_(klmn,1)
         ri = zero
       end if
-      if ( (ABS(rr) .GT. tol12) .OR. (ABS(ri) .GT. tol12) ) then
+      !if ( (ABS(rr) .GT. tol16) .OR. (ABS(ri) .GT. tol16) ) then
         isel = isel + 1
         pawrhoij(iatom)%rhoijselect(isel) = klmn
         if (cprho) then
@@ -3490,7 +3477,7 @@ subroutine pack_pawrhoij(dtset,pawrhoij)
         else
           pawrhoij(iatom)%rhoijp(isel,1) = rr
         end if ! if cprho
-      end if ! if rhoij nonzero
+      !end if ! if rhoij nonzero
     end do ! end loop over klmn
 
     pawrhoij(iatom)%use_rhoijp=1
