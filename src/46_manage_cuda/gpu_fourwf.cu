@@ -94,7 +94,7 @@
 
 #include "abi_common.h"
 #include "stdio.h"
-#include "cuda_header.h" 
+#include "cuda_header.h"
 #include "abi_gpu_header.h"
 #include "cuda_api_error_check.h"
 
@@ -129,10 +129,31 @@ static double *buff_weighti;
 //static double *buff_kgkout;
 
 
-extern "C" void gpu_fourwf_(int *cplex,double *denpot,double *fofgin,double *fofgout,double *fofr,int *gboundin,int *gboundout,int *istwf_k,
-			    int *kg_kin,int *kg_kout,int *mgfft,void *mpi_enreg,int *ndat,int *ngfft,int *npwin,int *npwout,int *n4,int *n5,int *n6,int *option,
-			    int *paral_kgb,int * tim_fourwf,double *weight_r,double *weight_i)/*,
-												int *use_ndo,double *fofginb)*/
+extern "C" void gpu_fourwf_(int *cplex,
+                            double *denpot,
+                            double *fofgin,
+                            double *fofgout,
+                            double *fofr,
+                            int *gboundin,
+                            int *gboundout,
+                            int *istwf_k,
+                            int *kg_kin,
+                            int *kg_kout,
+                            int *mgfft,
+                            void *mpi_enreg,
+                            int *ndat,
+                            int *ngfft,
+                            int *npwin,
+                            int *npwout,
+                            int *n4,
+                            int *n5,
+                            int *n6,
+                            int *option,
+                            int *paral_kgb,
+                            int * tim_fourwf,
+                            double *weight_r,
+                            double *weight_i)
+/*, int *use_ndo,double *fofginb)*/
 {
   // !Arguments ------------------------------------
   //   !scalars
@@ -231,7 +252,7 @@ extern "C" void gpu_fourwf_(int *cplex,double *denpot,double *fofgin,double *fof
   if(*option==1){
     //We finish denpot and weight transferts
     CHECK_CUDA_ERROR( cudaStreamSynchronize(stream_cpy) );
-    
+
     //call density accumulation routine on gpu
     gpu_density_accumulation_(fofr_gpu,denpot_gpu,weightr_gpu,weighti_gpu,&nfft_tot,ndat,&stream_compute);
 
@@ -264,10 +285,11 @@ extern "C" void gpu_fourwf_(int *cplex,double *denpot,double *fofgin,double *fof
 
 
 //Memory allocation routine
-extern "C" void alloc_gpu_fourwf_(int *ngfft,int *ndat,int *npwin,int *npwout){
+extern "C" void alloc_gpu_fourwf_(int *ngfft, int *ndat, int *npwin, int *npwout)
+{
 
-//   printf("alloc_gpu_fourwf called with (nfft,ndat,npwin,npwout)=(%d,%d,%d,%d)\n",ngfft[0]*ngfft[1]*ngfft[2],*ndat,*npwin,*npwout);
-//   fflush(stdout);
+  //printf("alloc_gpu_fourwf called with (nfft,ndat,npwin,npwout)=(%d,%d,%d,%d)\n",ngfft[0]*ngfft[1]*ngfft[2],*ndat,*npwin,*npwout);
+  //fflush(stdout);
 
   gpu_initialized = 1;
 
@@ -314,7 +336,7 @@ extern "C" void alloc_gpu_fourwf_(int *ngfft,int *ndat,int *npwin,int *npwout){
   CHECK_CUDA_ERROR( cudaMallocHost(&buff_denpot,fft_size*sizeof(double))) ;
   CHECK_CUDA_ERROR( cudaMallocHost(&buff_weightr,ndat_loc*sizeof(double)) );
   CHECK_CUDA_ERROR( cudaMallocHost(&buff_weighti,ndat_loc*sizeof(double)) );
-  
+
 }//End of alloc_gpu_fourwf_
 
 
@@ -342,5 +364,3 @@ extern "C" void free_gpu_fourwf_(){
   gpu_initialized = 0;
 }//end of free_gpu_fourwf_()
 //***
-
-
