@@ -109,13 +109,11 @@ subroutine alloc_hamilt_gpu(atindx1,dtset,gprimd,mpi_enreg,nattyp,npwarr,option,
    else
      npw_max_loc=dtset%mpw
    end if
-!  Initialize gpu data needed in fourwf
-!  ndat=bandpp when paral_kgb=1
-   if(mpi_enreg%paral_kgb==1) then
-     call alloc_gpu_fourwf(dtset%ngfft,dtset%bandpp,npw_max_loc,npw_max_loc)
-   else
-     call alloc_gpu_fourwf(dtset%ngfft,1,npw_max_loc,npw_max_loc)
-   end if
+   ! Initialize gpu data needed in fourwf
+   ! ndat=bandpp when paral_kgb=1
+   ! no matter paral_kgb=0 or 1, we gathet all bands into a single call gpu_fourwf
+   call alloc_gpu_fourwf(dtset%ngfft,dtset%bandpp,npw_max_loc,npw_max_loc)
+
  end if
 !=== Nonlocal Hamiltonian ===
  if (option==1.or.option==2) then
