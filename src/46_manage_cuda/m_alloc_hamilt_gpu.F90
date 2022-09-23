@@ -44,6 +44,22 @@ module m_alloc_hamilt_gpu
  public :: dealloc_hamilt_gpu
 !!***
 
+ private :: alloc_nonlop_kokkos
+ private :: dealloc_nonlop_kokkos
+
+ !! data type to store pointers to data used on GPU, mostly in gemm nonlop
+ !! opernla/b/c
+ type, public :: gemm_nonlop_kokkos_type
+
+   logical     :: allocated
+   type(c_ptr) ::     projections_gpu
+   type(c_ptr) ::   s_projections_gpu
+   type(c_ptr) :: vnl_projections_gpu
+
+ end type gemm_nonlop_kokkos_type
+
+ type(gemm_nonlop_kokkos_type), save, public, target :: gemm_nonlop_kokkos
+
 contains
 !!***
 
@@ -88,6 +104,7 @@ subroutine alloc_hamilt_gpu(atindx1,dtset,gprimd,mpi_enreg,nattyp,npwarr,option,
 !scalars
 #if defined HAVE_GPU_CUDA
  integer :: dimekb1_max,dimekb2_max,dimffnl_max,ierr,ikpt,npw_max_loc,npw_max_nonloc
+ integer :: cplex
  integer ::npwarr_tmp(dtset%nkpt)
 
  integer(kind=c_int32_t) :: proj_dim(3)
@@ -132,15 +149,49 @@ subroutine alloc_hamilt_gpu(atindx1,dtset,gprimd,mpi_enreg,nattyp,npwarr,option,
    dimekb1_max=psps%dimekb
    if (dtset%usepaw==0) dimekb2_max=psps%ntypat
    if (dtset%usepaw==1) dimekb2_max=dtset%natom
-   call alloc_nonlop_gpu(npw_max_nonloc,npw_max_nonloc,dtset%nspinor,dtset%natom,&
-&   dtset%ntypat,psps%lmnmax,psps%indlmn,nattyp,atindx1,gprimd,&
-&   dimffnl_max,dimffnl_max,dimekb1_max,dimekb2_max)
- end if
+
+   ! TODO (PK) : disable this allocation when Kokkos is available
+   ! to save memory on GPU side
+   call alloc_nonlop_gpu(npw_max_nonloc, &
+     &                   npw_max_nonloc,&
+     &                   dtset%nspinor,&
+     &                   dtset%natom,&
+     &                   dtset%ntypat,&
+     &                   psps%lmnmax,&
+     &                   psps%indlmn,&
+     &                   nattyp,&
+     &                   atindx1,&
+     &                   gprimd,&
+     &                   dimffnl_max,&
+     &                   dimffnl_max,&
+     &                   dimekb1_max,&
+     &                   dimekb2_max)
+
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS)
+   if (dtset%use_gemm_nonlop_gpu == 1) then
+
+     call alloc_nonlop_kokkos(dtset, &
+       &                      psps, &
+       &                      npw_max_nonloc,&
+       &                      npw_max_nonloc,&
+       &                      atindx1,&
+       &                      nattyp,&
+       &                      use_gpu_cuda)
+
+   end if
+
+#endif
+
+ end if ! option 1 or 2
+
  call xmpi_barrier(mpi_enreg%comm_cell)
+
 #else
+
  if (.false.) then
    write(std_out,*) atindx1(1),dtset%natom,gprimd(1,1),mpi_enreg%me,nattyp(1),option
  end if
+
 #endif
 
 end subroutine alloc_hamilt_gpu
@@ -179,19 +230,127 @@ subroutine dealloc_hamilt_gpu(option,use_gpu_cuda)
  if (use_gpu_cuda==0) return
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_FC_ISO_C_BINDING)
+
  if (option==0.or.option==2) then
    call free_gpu_fourwf()
  end if
  if (option==1.or.option==2) then
    call free_nonlop_gpu()
- end if
+
+#if defined(HAVE_KOKKOS)
+   call dealloc_nonlop_kokkos()
+#endif
+
+ end if ! option 1 or 2
+
 #else
+
  if (.false.) then
    write(std_out,*) option
  end if
+
 #endif
 
 end subroutine dealloc_hamilt_gpu
+!!***
+
+!!****f* ABINIT/alloc_nonlop_kokkos
+!! NAME
+!! alloc_hamilt_gpu
+!!
+!! FUNCTION
+!! allocate several memory pieces on a GPU device for the application
+!! of Hamiltonian using a GPU
+!!
+!! INPUTS
+!!  atindx1(natom)=index table for atoms, inverse of atindx (see gstate.f)
+!!  dtset <type(dataset_type)>=all input variables for this dataset
+!!  nattyp(ntypat)= # atoms of each type.
+!!  npwin is the number of plane waves for vectin
+!!  npwout is the number of plane waves for vectout
+!!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
+!!  use_gpu_cuda= 0 or 1 to know if we use cuda
+!!
+!! OUTPUT
+!!  (no output - only allocation on GPU, member of gemm_nonlop_kokkos)
+!!
+!! SOURCE
+
+subroutine alloc_nonlop_kokkos(dtset,&
+  &                            psps,&
+  &                            npwin,&
+  &                            npwout,&
+  &                            atindx1,&
+  &                            nattyp,&
+  &                            use_gpu_cuda)
+
+  !Arguments ------------------------------------
+  !scalars
+  type(dataset_type),        intent(in) :: dtset
+  type(pseudopotential_type),intent(in) :: psps
+  integer,                   intent(in) :: npwin
+  integer,                   intent(in) :: npwout
+  integer,                   intent(in) :: atindx1(dtset%natom)
+  !arrays
+  integer,                   intent(in) :: nattyp(dtset%ntypat)
+  !integer,                   intent(in) :: npwarr(dtset%nkpt)
+
+  ! other
+  integer,                   intent(in) :: use_gpu_cuda
+
+  integer :: cplex
+  integer :: nprojs
+  integer :: itypat
+
+  cplex=2; !if (istwf_k>1) cplex=1
+
+  ! compute nprojs
+  nprojs = 0
+  do itypat = 1,dtset%ntypat
+    nprojs = nprojs + count(psps%indlmn(3,:,itypat)>0) * nattyp(itypat)
+  end do
+
+
+  !! allocate memory on device
+
+  if (gemm_nonlop_kokkos % allocated .eqv. .false.) then
+    ! These will store the non-local factors for vectin, svectout and vectout respectively
+    ABI_MALLOC_CUDA(gemm_nonlop_kokkos%    projections_gpu, (cplex * nprojs * dtset%nspinor*dtset%bandpp * dp))
+    ABI_MALLOC_CUDA(gemm_nonlop_kokkos%  s_projections_gpu, (cplex * nprojs * dtset%nspinor*dtset%bandpp * dp))
+    ABI_MALLOC_CUDA(gemm_nonlop_kokkos%vnl_projections_gpu, (2     * nprojs * dtset%nspinor*dtset%bandpp * dp))
+
+
+
+    gemm_nonlop_kokkos % allocated = .true.
+  end if
+
+end subroutine alloc_nonlop_kokkos
+!!***
+
+!!****f* ABINIT/dealloc_nonlop_kokkos
+!! NAME
+!! dealloc_nonlop_kokkos
+!!
+!! FUNCTION
+!! deallocate several memory pieces on a GPU device used for the application
+!! of nonlop operators using Kokkos implementation
+!!
+!!
+!! OUTPUT
+!!  (no output - only deallocation on GPU)
+!!
+!! SOURCE
+
+subroutine dealloc_nonlop_kokkos()
+
+  if (gemm_nonlop_kokkos % allocated) then
+    ABI_FREE_CUDA(gemm_nonlop_kokkos%    projections_gpu)
+    ABI_FREE_CUDA(gemm_nonlop_kokkos%  s_projections_gpu)
+    ABI_FREE_CUDA(gemm_nonlop_kokkos%vnl_projections_gpu)
+    gemm_nonlop_kokkos % allocated = .false.
+  end if
+
+end subroutine dealloc_nonlop_kokkos
 !!***
 
 end module m_alloc_hamilt_gpu

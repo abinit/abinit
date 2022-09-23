@@ -439,10 +439,10 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    gemm_nonlop_use_gemm_gpu = .false.
  end if
 
- if(dtset%use_kokkos_debug == 1) then
-   gemm_nonlop_use_kokkos_debug = .true.
+ if(dtset%use_kokkos == 1) then
+   gemm_nonlop_use_kokkos = .true.
  else
-   gemm_nonlop_use_kokkos_debug = .false.
+   gemm_nonlop_use_kokkos = .false.
  endif
 
 !Set up the Ylm for each k point
