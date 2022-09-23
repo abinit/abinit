@@ -334,7 +334,7 @@ subroutine rttddft_propagator_er(dtset, ham_k, istep, mpi_enreg, psps, tdks, cal
             call make_gemm_nonlop(my_ikpt,ham_k%npw_fft_k,ham_k%lmnmax,ham_k%ntypat,     &
                                & ham_k%indlmn, ham_k%nattyp, ham_k%istwf_k, ham_k%ucvol, &
                                & ham_k%ffnl_k, ham_k%ph3d_k, ham_k%kpt_k, ham_k%kg_k, ham_k%kpg_k, &
-                               & dtset%use_gemm_nonlop_gpu)
+                               & my_nspinor, nband_k, dtset%use_gemm_nonlop_gpu)
          end if
       end if
 
