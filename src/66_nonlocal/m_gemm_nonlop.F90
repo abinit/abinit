@@ -47,6 +47,10 @@ module m_gemm_nonlop
  use m_geometry, only : strconv
  use m_kg, only : mkkpg
 
+#if defined(HAVE_GPU_CUDA)
+  use m_alloc_hamilt_gpu, only : gemm_nonlop_kokkos
+#endif
+
 #ifdef HAVE_FC_ISO_C_BINDING
  use, intrinsic :: iso_c_binding, only : c_ptr, c_int32_t, c_int64_t, c_float, c_double, c_size_t, c_loc
 #endif
@@ -132,18 +136,6 @@ module m_gemm_nonlop
  type(gemm_nonlop_gpu_type), save, public, allocatable :: gemm_nonlop_kpt_gpu(:)
  !(nkpt)
 
-  !! data type to store pointers to data used on GPU, mostly opernla/b/c
-  type, public :: gemm_nonlop_kokkos_type
-
-    logical     :: allocated
-    type(c_ptr) ::     projections_gpu
-    type(c_ptr) ::   s_projections_gpu
-    type(c_ptr) :: vnl_projections_gpu
-
-  end type gemm_nonlop_kokkos_type
-
-  type(gemm_nonlop_kokkos_type), save, public, target :: gemm_nonlop_kokkos
-
 #endif
 
 
@@ -159,8 +151,8 @@ module m_gemm_nonlop
  ! When 0, nonlop is computed by calling the regular nonlop_gpu
  ! When 1, nonlop is computed by calling gemm_nonlop_gpu
 
- logical, save, public :: gemm_nonlop_use_kokkos_debug = .false.
- ! public variable controlled by dataset variable use_kokkos_debug - probably removed when kokkos version is debuged
+ logical, save, public :: gemm_nonlop_use_kokkos = .false.
+ ! public variable controlled by dataset variable use_kokkos - probably removed when kokkos version is debuged
 
  !!
  !! GPU interface
@@ -410,14 +402,12 @@ contains
 !! SOURCE
  subroutine make_gemm_nonlop(ikpt,npw,lmnmax,ntypat,indlmn,nattyp,istwf_k,ucvol,ffnl_k, &
 &                            ph3d_k,kpt_k,kg_k,kpg_k,use_gemm_nonlop_gpu, &
-&                            my_nspinor,nband_k,compute_grad_strain,compute_grad_atom) ! Optional parameters
+&                            compute_grad_strain,compute_grad_atom) ! Optional parameters
 
   integer, intent(in) :: ikpt
   integer, intent(in) :: npw, lmnmax, ntypat
   integer, intent(in) :: indlmn(:,:,:), kg_k(:,:)
   integer, intent(in) :: nattyp(ntypat)
-  integer, intent(in) :: my_nspinor
-  integer, intent(in) :: nband_k
   integer, intent(in) :: istwf_k
   logical, intent(in), optional :: compute_grad_strain,compute_grad_atom
   real(dp), intent(in) :: ucvol
@@ -428,7 +418,6 @@ contains
   integer, intent(in) :: use_gemm_nonlop_gpu
 
   integer :: nprojs,ndprojs,ngrads
-  integer :: cplex
 
   integer,parameter :: alpha(6)=(/1,2,3,3,3,2/),beta(6)=(/1,2,3,2,1,1/)
   integer :: itypat, ilmn, nlmn, ia, iaph3d, igrad, shift, shift_grad
@@ -446,8 +435,6 @@ contains
 !  ABI_CHECK((.not.my_compute_grad_atom).or.size(kpg_k)>0,"kpg_k should be allocated to compute gradients!")
 
   iaph3d = 1
-
-  cplex=2;if (istwf_k>1) cplex=1
 
   ABI_MALLOC(atom_projs, (2, npw, lmnmax))
   if (my_compute_grad_strain) then
@@ -670,24 +657,6 @@ contains
       call copy_on_gpu(c_loc(gemm_nonlop_kpt(ikpt)%projs_i(1,1,1)), gemm_nonlop_kpt_gpu(ikpt)%projs_i, 1*npw*nprojs*dp)
     end if
   end if ! use_gemm_nonlop_gpu == 1
-#endif
-
-
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS)
-  if (use_gemm_nonlop_gpu == 1) then
-
-    !! allocate memory on device
-
-    if (gemm_nonlop_kokkos % allocated .eqv. .false.) then
-      ! These will store the non-local factors for vectin, svectout and vectout respectively
-      ABI_MALLOC_CUDA(gemm_nonlop_kokkos%    projections_gpu, (cplex * nprojs * my_nspinor*nband_k * dp))
-      ABI_MALLOC_CUDA(gemm_nonlop_kokkos%  s_projections_gpu, (cplex * nprojs * my_nspinor*nband_k * dp))
-      ABI_MALLOC_CUDA(gemm_nonlop_kokkos%vnl_projections_gpu, (2     * nprojs * my_nspinor*nband_k * dp))
-
-      gemm_nonlop_kokkos % allocated = .true.
-    end if
-
-  end if
 #endif
 
   ABI_FREE(atom_projs)
@@ -1241,13 +1210,6 @@ contains
 
    ABI_FREE(gemm_nonlop_kpt_gpu)
 
-   if (gemm_nonlop_kokkos % allocated) then
-     ABI_FREE_CUDA(gemm_nonlop_kokkos%    projections_gpu)
-     ABI_FREE_CUDA(gemm_nonlop_kokkos%  s_projections_gpu)
-     ABI_FREE_CUDA(gemm_nonlop_kokkos%vnl_projections_gpu)
-     gemm_nonlop_kokkos % allocated = .false.
-   end if
-
  end subroutine destroy_gemm_nonlop_gpu
  !!***
 
@@ -1581,7 +1543,7 @@ contains
             shift_spinor = mpi_enreg%me_spinor
           end if
 
-          if (gemm_nonlop_use_kokkos_debug) then
+          if (gemm_nonlop_use_kokkos) then
             !write(*,*) "opernlc_ylm_allwf_kokkos"
             call opernlc_ylm_allwf_kokkos(cplex, cplex_enl, cplex_fac, &
               &                           dimenl1, dimenl2, dimekbq, &
@@ -1631,7 +1593,7 @@ contains
         ABI_FREE(sij_typ)
         ABI_FREE_CUDA( sij_typ_gpu )
 
-        if (gemm_nonlop_use_kokkos_debug) then
+        if (gemm_nonlop_use_kokkos) then
           ! nothing to do, s_projections and vnl_projections data are already in GPU memory
         else
           ! TO BE REMOVED LATTER

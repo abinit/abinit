@@ -932,7 +932,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
        call make_gemm_nonlop(my_ikpt,gs_hamk%npw_fft_k,gs_hamk%lmnmax,gs_hamk%ntypat, &
 &            gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%istwf_k, gs_hamk%ucvol, &
 &            gs_hamk%ffnl_k, gs_hamk%ph3d_k, gs_hamk%kpt_k, gs_hamk%kg_k, gs_hamk%kpg_k, &
-&            my_nspinor,nband_k,use_gemm_nonlop_gpu, &
+&            use_gemm_nonlop_gpu, &
 &            compute_grad_strain=(stress_needed>0),compute_grad_atom=(optfor>0))
        end if
 
