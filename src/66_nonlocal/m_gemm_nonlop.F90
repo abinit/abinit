@@ -1278,7 +1278,9 @@ contains
   type(c_ptr)                      :: vnl_projections2_gpu
 
   type(c_ptr)                      :: temp_realvec_gpu
-  type(c_ptr)                      :: vectin_gpu, vectout_gpu, svectout_gpu
+
+  ! GPU waveform data are allocated in m_alloc_hamilt_gpu
+  !type(c_ptr)                      :: vectin_gpu, vectout_gpu, svectout_gpu
 
   type(c_ptr)                      :: enl_gpu
   integer                          :: enl_size_bytes
@@ -1325,12 +1327,11 @@ contains
     call gpu_memset(vnl_projections2_gpu, izero, cplex_fac * nprojs * nspinor*ndat * dp)
   end if
 
-  ABI_MALLOC_CUDA(vectin_gpu, 2 * npwin*nspinor*ndat * dp)
-  ABI_MALLOC_CUDA( vectin_gpu,  2 * npwin *nspinor*ndat * dp)
-  ABI_MALLOC_CUDA( vectout_gpu, 2 * npwout*nspinor*ndat * dp)
-  ABI_MALLOC_CUDA(svectout_gpu, 2 * npwout*nspinor*ndat*(paw_opt/3) * dp)
+  !ABI_MALLOC_CUDA( vectin_gpu,  2 * npwin *nspinor*ndat * dp)
+  !ABI_MALLOC_CUDA( vectout_gpu, 2 * npwout*nspinor*ndat * dp)
+  !ABI_MALLOC_CUDA(svectout_gpu, 2 * npwout*nspinor*ndat*(paw_opt/3) * dp)
 
-  call copy_on_gpu(C_LOC(vectin(1,1)), vectin_gpu, 2*npwin*nspinor*ndat*dp)
+  call copy_on_gpu(C_LOC(vectin(1,1)), gemm_nonlop_kokkos%vectin_gpu, 2*npwin*nspinor*ndat*dp)
 
   !! gpu alloc and init : enl_gpu
   enl_size_bytes = dimenl1 * dimenl2 * nspinortot**2 * dimekbq * dp
@@ -1403,7 +1404,7 @@ contains
          &            nprojs, ndat*nspinor, npwin, &                                                ! M,N,K
          &            cone, &                                                                       ! alpha
          &            gemm_nonlop_kpt_gpu(gemm_nonlop_ikpt_this_proc_being_treated)%projs, npwin, & ! A, LDA
-         &            vectin_gpu, npwin, &                                                          ! B, LDB
+         &            gemm_nonlop_kokkos%vectin_gpu, npwin, &                                                          ! B, LDB
          &            czero, &                                                                      ! beta
          &            gemm_nonlop_kokkos%projections_gpu, nprojs)                                   ! C, LDC
 
@@ -1416,7 +1417,7 @@ contains
 
        ! only compute real part of projections = P^* psi => projections_r = P_r^T psi_r + P_i^T psi_i
        !temp_realvec(1:npwin*nspinor*ndat) = vectin(1,1:npwin*nspinor*ndat)
-       call extract_real_part(temp_realvec_gpu, vectin_gpu, npwin*nspinor*ndat)
+       call extract_real_part(temp_realvec_gpu, gemm_nonlop_kokkos%vectin_gpu, npwin*nspinor*ndat)
 
        if(istwf_k == 2 .and. mpi_enreg%me_g0 == 1) then
          ! do idat=1, ndat*nspinor
@@ -1434,7 +1435,7 @@ contains
          &            gemm_nonlop_kokkos%projections_gpu, nprojs)                                     ! C, LDC
 
        !temp_realvec(1:npwin*nspinor*ndat) = vectin(2,1:npwin*nspinor*ndat)
-       call extract_imag_part(temp_realvec_gpu, vectin_gpu, npwin*nspinor*ndat)
+       call extract_imag_part(temp_realvec_gpu, gemm_nonlop_kokkos%vectin_gpu, npwin*nspinor*ndat)
 
        if(istwf_k == 2 .and. mpi_enreg%me_g0 == 1) then
          ! do idat=1, ndat*nspinor
@@ -1624,7 +1625,7 @@ contains
             &            gemm_nonlop_kpt_gpu(gemm_nonlop_ikpt_this_proc_being_treated)%projs, npwout, & ! A, LDA
             &            gemm_nonlop_kokkos%s_projections_gpu, nprojs, &                                ! B, LDB
             &            czero, &                                                                       ! beta
-            &            svectout_gpu, npwout)                                                          ! C, LDC
+            &            gemm_nonlop_kokkos%svectout_gpu, npwout)                                       ! C, LDC
 
         else
 
@@ -1640,7 +1641,7 @@ contains
             &            czero, &                                                                       ! beta
             &            temp_realvec_gpu, npwout)                                                      ! C, LDC
           !svectout(1,1:npwout*nspinor*ndat) = temp_realvec_gpu(1:npwout*nspinor*ndat)
-          call insert_real_part(svectout_gpu, temp_realvec_gpu, npwout*nspinor*ndat)
+          call insert_real_part(gemm_nonlop_kokkos%svectout_gpu, temp_realvec_gpu, npwout*nspinor*ndat)
 
           call gpu_xgemm(cplex, 'N', 'N', &
             &            npwout, ndat*nspinor, nprojs, &                                                ! M,N,K
@@ -1650,7 +1651,7 @@ contains
             &            czero, &                                                                       ! beta
             &            temp_realvec_gpu, npwout)                                                      ! C, LDC
           !svectout(2,1:npwout*nspinor*ndat) = temp_realvec(1:npwout*nspinor*ndat)
-          call insert_imag_part(svectout_gpu, temp_realvec_gpu, npwout*nspinor*ndat)
+          call insert_imag_part(gemm_nonlop_kokkos%svectout_gpu, temp_realvec_gpu, npwout*nspinor*ndat)
 
         end if ! cplex == 2
 
@@ -1660,16 +1661,17 @@ contains
           ! this a axpy operation with x => vectin_gpu, y => svectout_gpu and alpha=1
           ! please remember that svectout_gpu and vectin_gpu have same size when paw_opt >= 3 and paw_opt<6
           ! this is the case here
-          call gpu_xaxpy(1, &                       ! real
-            &            2*npwin*nspinor*ndat, &    ! size
-            &            cone, &                    ! alpha
-            &            vectin_gpu, 1, &           ! X, incrx
-            &            svectout_gpu, 1)           ! Y, incry
+          call gpu_xaxpy(1, &                                  ! real
+            &            2*npwin*nspinor*ndat, &               ! size
+            &            cone, &                               ! alpha
+            &            gemm_nonlop_kokkos%vectin_gpu, 1, &   ! X, incrx
+            &            gemm_nonlop_kokkos%svectout_gpu, 1)   ! Y, incry
 
         endif
 
         ! copy back results on host
-        call copy_from_gpu(C_LOC(svectout(1,1)), svectout_gpu, 2*npwout*nspinor*(paw_opt/3)*ndat * dp)
+        call copy_from_gpu(C_LOC(svectout(1,1)), gemm_nonlop_kokkos%svectout_gpu,&
+          & 2*npwout*nspinor*(paw_opt/3)*ndat * dp)
 
       end if ! (paw_opt == 3 .or. paw_opt == 4)
 
@@ -1682,9 +1684,9 @@ contains
             &            npwout, ndat*nspinor, nprojs, &                                                ! M,N,K
             &            cone, &                                                                        ! alpha
             &            gemm_nonlop_kpt_gpu(gemm_nonlop_ikpt_this_proc_being_treated)%projs, npwout, & ! A, LDA
-            &            gemm_nonlop_kokkos%vnl_projections_gpu, nprojs, &                                                 ! B, LDB
+            &            gemm_nonlop_kokkos%vnl_projections_gpu, nprojs, &                              ! B, LDB
             &            czero, &                                                                       ! beta
-            &            vectout_gpu, npwout)                                                           ! C, LDC
+            &            gemm_nonlop_kokkos%vectout_gpu, npwout)                                        ! C, LDC
 
         else
 
@@ -1700,7 +1702,7 @@ contains
             &            czero, &                                                                      ! beta
             &            temp_realvec_gpu, npwout)                                                     ! C, LDC
           ! vectout(1,1:npwout*nspinor*ndat) = temp_realvec(1:npwout*nspinor*ndat)
-          call insert_real_part(vectout_gpu, temp_realvec_gpu, npwout*nspinor*ndat)
+          call insert_real_part(gemm_nonlop_kokkos%vectout_gpu, temp_realvec_gpu, npwout*nspinor*ndat)
 
           call gpu_xgemm(cplex, 'N', 'N', &
             &            npwout, ndat*nspinor, nprojs, &                                               ! M,N,K
@@ -1710,12 +1712,12 @@ contains
             &            czero, &                                                                      ! beta
             &            temp_realvec_gpu, npwout)                                                     ! C, LDC
           ! vectout(2,1:npwout*nspinor*ndat) = temp_realvec(1:npwout*nspinor*ndat)
-          call insert_imag_part(vectout_gpu, temp_realvec_gpu, npwout*nspinor*ndat)
+          call insert_imag_part(gemm_nonlop_kokkos%vectout_gpu, temp_realvec_gpu, npwout*nspinor*ndat)
 
         end if  ! cplex_fac == 2
 
         ! copy back results on host
-        call copy_from_gpu(C_LOC(vectout(1,1)), vectout_gpu, 2*npwout*nspinor*ndat * dp)
+        call copy_from_gpu(C_LOC(vectout(1,1)), gemm_nonlop_kokkos%vectout_gpu, 2*npwout*nspinor*ndat * dp)
 
       end if ! (paw_opt == 0 .or. paw_opt == 1 .or. paw_opt == 4)
 
@@ -1725,9 +1727,9 @@ contains
     ABI_FREE_CUDA(vnl_projections2_gpu)
   end if
 
-  ABI_FREE_CUDA(      vectin_gpu)
-  ABI_FREE_CUDA(     vectout_gpu)
-  ABI_FREE_CUDA(    svectout_gpu)
+  !ABI_FREE_CUDA(      vectin_gpu)
+  !ABI_FREE_CUDA(     vectout_gpu)
+  !ABI_FREE_CUDA(    svectout_gpu)
 
   if (gpu_allocated(temp_realvec_gpu)) then
     ABI_FREE_CUDA(temp_realvec_gpu)
