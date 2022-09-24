@@ -56,6 +56,10 @@ module m_alloc_hamilt_gpu
    type(c_ptr) ::   s_projections_gpu
    type(c_ptr) :: vnl_projections_gpu
 
+   type(c_ptr) ::   vectin_gpu
+   type(c_ptr) ::  vectout_gpu
+   type(c_ptr) :: svectout_gpu
+
  end type gemm_nonlop_kokkos_type
 
  type(gemm_nonlop_kokkos_type), save, public, target :: gemm_nonlop_kokkos
@@ -302,6 +306,11 @@ subroutine alloc_nonlop_kokkos(dtset,&
   integer :: nprojs
   integer :: itypat
 
+  real(dp) :: allocated_size_bytes
+  character(len=500)    :: message
+
+  allocated_size_bytes = 0.
+
   cplex=2; !if (istwf_k>1) cplex=1
 
   ! compute nprojs
@@ -319,9 +328,21 @@ subroutine alloc_nonlop_kokkos(dtset,&
     ABI_MALLOC_CUDA(gemm_nonlop_kokkos%  s_projections_gpu, (cplex * nprojs * dtset%nspinor*dtset%bandpp * dp))
     ABI_MALLOC_CUDA(gemm_nonlop_kokkos%vnl_projections_gpu, (2     * nprojs * dtset%nspinor*dtset%bandpp * dp))
 
+    allocated_size_bytes = allocated_size_bytes + (2*cplex+2)*nprojs * dtset%nspinor*dtset%bandpp * dp
 
+
+    ABI_MALLOC_CUDA(gemm_nonlop_kokkos%  vectin_gpu,  2*npwin * dtset%nspinor*dtset%bandpp * dp)
+    ABI_MALLOC_CUDA(gemm_nonlop_kokkos%  vectout_gpu, 2*npwout * dtset%nspinor*dtset%bandpp * dp)
+    ABI_MALLOC_CUDA(gemm_nonlop_kokkos% svectout_gpu, 2*npwout * dtset%nspinor*dtset%bandpp * dp)
+
+    allocated_size_bytes = allocated_size_bytes + &
+      & 2 * (npwin+2*npwout) * dtset%nspinor * dtset%bandpp * dp
 
     gemm_nonlop_kokkos % allocated = .true.
+
+    write(message,*) '  alloc_nonlop_kokkos allocated ', allocated_size_bytes*1e-6, ' MBytes on device memory'
+    call wrtout(std_out,message,'COLL')
+
   end if
 
 end subroutine alloc_nonlop_kokkos
@@ -347,6 +368,11 @@ subroutine dealloc_nonlop_kokkos()
     ABI_FREE_CUDA(gemm_nonlop_kokkos%    projections_gpu)
     ABI_FREE_CUDA(gemm_nonlop_kokkos%  s_projections_gpu)
     ABI_FREE_CUDA(gemm_nonlop_kokkos%vnl_projections_gpu)
+
+    ABI_FREE_CUDA(gemm_nonlop_kokkos% vectin_gpu)
+    ABI_FREE_CUDA(gemm_nonlop_kokkos% vectout_gpu)
+    ABI_FREE_CUDA(gemm_nonlop_kokkos%svectout_gpu)
+
     gemm_nonlop_kokkos % allocated = .false.
   end if
 
