@@ -44,6 +44,10 @@ module m_xmpi
 use m_kokkos_utils
 #endif
 
+#ifdef HAVE_YAKL
+ use gator_mod
+#endif
+
  implicit none
 
  private
@@ -839,6 +843,10 @@ subroutine xmpi_init()
  endif
 #endif
 
+#if HAVE_YAKL
+ call gator_init()
+#endif
+
 end subroutine xmpi_init
 !!***
 
@@ -912,6 +920,12 @@ subroutine xmpi_end()
  integer :: mpierr
 
 ! *************************************************************************
+
+#ifdef HAVE_YAKL
+ write(std_out,*)'calling yakl gator_finalize'
+ call gator_finalize()
+ write(std_out,*)'yakl gator finalized'
+#endif
 
 #ifdef HAVE_KOKKOS
  ! finalize kokkos
