@@ -2348,7 +2348,7 @@ subroutine make_ddir_vhnzc(ddir_vhnzc,dtset,gntselect,gprimd,lmnmax,my_lmax,pawr
  cdij = sqrt(four_pi/three)
  ddir_vhnzc=czero
  do itypat = 1, dtset%ntypat
-   mesh_size=pawrad(itypat)%mesh_size
+   mesh_size=pawtab(itypat)%mesh_size
    pwave_size=size(pawtab(itypat)%phiphj(:,1))
    ABI_MALLOC(ff,(mesh_size))
 
@@ -2827,7 +2827,6 @@ subroutine make_ddir_vha2(atindx,ddir_vha,dtset,gntselect,gprimd,lmnmax,my_lmax,
    ABI_MALLOC(fft1,(mesh_size))
   
    lmselectin = .TRUE. 
-   write(std_out,'(a)') 'JWZ debug call abinit pawdensities '
    call pawdensities(compch_sph,cplex,iatom,lmselectin,lmselectout,&
      & lm_size,nhat1,dtset%nspden,nzlmopt,opt_compch,opt_dens,opt_l,&
      & opt_print,pawang,dtset%pawprtvol,pawrad(itypat),pawrhoij(iatom),&
@@ -3564,26 +3563,26 @@ subroutine make_d(atindx,atindx1,cprj,dimlmn,dterms,dtset,&
    & occ,dtset%paral_kgb,paw_dmft,pawrhoij,0,dtset%usewvl,dtset%wtk)
  call pack_pawrhoij(dtset,pawrhoij)
 
- do iat = 1, dtset%natom
-   itypat = dtset%typat(iat)
-   write(std_out,'(a,2i4)')'JWZ debug pawrhoij cplex_rhoij qphase ',pawrhoij(iat)%cplex_rhoij,pawrhoij(iat)%qphase
-   do klmn = 1, pawrhoij(iat)%lmn2_size
-     ilmn = pawtab(itypat)%indklmn(7,klmn)
-     jlmn = pawtab(itypat)%indklmn(8,klmn)
-     rhoij = czero
-     do iband = 1, dtset%mband
-       cpi = CMPLX(cprj(1,iband)%cp(1,ilmn),cprj(1,iband)%cp(2,ilmn))
-       cpj = CMPLX(cprj(1,iband)%cp(1,jlmn),cprj(1,iband)%cp(2,jlmn))
-       rhoij = rhoij + two*CONJG(cpi)*cpj
-     end do
-     do isel = 1, pawrhoij(iat)%nrhoijsel
-       if (pawrhoij(iat)%rhoijselect(isel) .EQ. klmn) then
-         write(std_out,'(a,4es16.8)')' JWZ debug pawrhoij rhoij ',pawrhoij(iat)%rhoijp(2*isel-1,1),pawrhoij(iat)%rhoijp(2*isel,1),&
-           & real(rhoij),aimag(rhoij)
-       end if
-     end do
-   end do
- end do
+ !do iat = 1, dtset%natom
+ !  itypat = dtset%typat(iat)
+ !  write(std_out,'(a,2i4)')'JWZ debug pawrhoij cplex_rhoij qphase ',pawrhoij(iat)%cplex_rhoij,pawrhoij(iat)%qphase
+ !  do klmn = 1, pawrhoij(iat)%lmn2_size
+ !    ilmn = pawtab(itypat)%indklmn(7,klmn)
+ !    jlmn = pawtab(itypat)%indklmn(8,klmn)
+ !    rhoij = czero
+ !    do iband = 1, dtset%mband
+ !      cpi = CMPLX(cprj(1,iband)%cp(1,ilmn),cprj(1,iband)%cp(2,ilmn))
+ !      cpj = CMPLX(cprj(1,iband)%cp(1,jlmn),cprj(1,iband)%cp(2,jlmn))
+ !      rhoij = rhoij + two*CONJG(cpi)*cpj
+ !    end do
+ !    do isel = 1, pawrhoij(iat)%nrhoijsel
+ !      if (pawrhoij(iat)%rhoijselect(isel) .EQ. klmn) then
+ !        write(std_out,'(a,4es16.8)')' JWZ debug pawrhoij rhoij ',pawrhoij(iat)%rhoijp(2*isel-1,1),pawrhoij(iat)%rhoijp(2*isel,1),&
+ !          & real(rhoij),aimag(rhoij)
+ !      end if
+ !    end do
+ !  end do
+ !end do
  
  ! make Gaunt integrals
  my_lmax = psps%mpsang + 1
