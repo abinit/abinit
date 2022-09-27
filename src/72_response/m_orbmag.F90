@@ -2603,9 +2603,9 @@ subroutine make_ddir_vhnhat(atindx,ddir_vhnhat,dtset,gntselect,gprimd,lmnmax,my_
 
   !Local variables -------------------------
   !scalars
-  integer :: adir,cplex,gint,g2int,iat,iatom,ilmn,imesh,itypat,isel
-  integer :: jlmn,jmesh,klmadir,klmn,klm,kln,ll,llmm,lm_size,lp,lpmp
-  integer :: mesh_size,mm,mp,nzlmopt
+  integer :: adir,cplex,gint,g2int,iat,iatom,ilm,ilmn,ilmp,imesh,itypat,isel
+  integer :: jlmn,jmesh,klmadir,klmn,klm,kln,ll,lm_size,lmax,lmin,lp
+  integer :: mesh_size,nzlmopt
   integer :: opt_compch,opt_dens,opt_l,opt_print
   real(dp) :: cdij,compch_sph,nl1,nlt1,rfac,rr,rp,vhaint,rrhokl
 
@@ -2613,7 +2613,7 @@ subroutine make_ddir_vhnhat(atindx,ddir_vhnhat,dtset,gntselect,gprimd,lmnmax,my_
   integer,dimension(3) :: adir_to_sij = (/4,2,3/)
   real(dp) :: dij_cart(3),dij_red(3)
   real(dp),allocatable :: ff(:),ff1(:),fft1(:),nhat1(:,:,:)
-  real(dp),allocatable :: my_rho1(:,:,:),rho1(:,:,:),trho1(:,:,:)
+  real(dp),allocatable :: rho1(:,:,:),trho1(:,:,:)
   logical,allocatable :: lmselectin(:),lmselectout(:)
 
 !--------------------------------------------------------------------
@@ -2638,7 +2638,6 @@ subroutine make_ddir_vhnhat(atindx,ddir_vhnhat,dtset,gntselect,gprimd,lmnmax,my_
    ABI_MALLOC(lmselectout,(lm_size))
    ABI_MALLOC(nhat1,(cplex*mesh_size,lm_size,dtset%nspden*(1-((opt_dens+1)/2))))
    ABI_MALLOC(rho1,(cplex*mesh_size,lm_size,dtset%nspden))
-   ABI_MALLOC(my_rho1,(cplex*mesh_size,lm_size,dtset%nspden))
    ABI_MALLOC(trho1,(cplex*mesh_size,lm_size,dtset%nspden*(1-(opt_dens/2))))
    ABI_MALLOC(ff,(mesh_size))
    ABI_MALLOC(ff1,(mesh_size))
@@ -2653,24 +2652,24 @@ subroutine make_ddir_vhnhat(atindx,ddir_vhnhat,dtset,gntselect,gprimd,lmnmax,my_
    do klmn = 1, pawtab(itypat)%lmn2_size
      klm = pawtab(itypat)%indklmn(1,klmn)
      kln = pawtab(itypat)%indklmn(2,klmn)
+     lmin = pawtab(itypat)%indklmn(3,klmn)
+     lmax = pawtab(itypat)%indklmn(4,klmn)
      ilmn = pawtab(itypat)%indklmn(7,klmn)
      jlmn = pawtab(itypat)%indklmn(8,klmn)
 
      dij_cart = zero
 
-     do ll = pawtab(itypat)%indklmn(3,klmn), pawtab(itypat)%indklmn(4,klmn), 2
-       do mm = -ll, ll
-         llmm = LMPACK(ll,mm)
-         gint = gntselect(llmm,klm)
+     do ll = lmin,lmax,2
+       do ilm = ll**2+1,(ll+1)**2
+         gint = gntselect(ilm,klm)
          if (gint .EQ. 0) cycle
 
          do adir = 1, 3
 
            do lp = abs(ll-1), ll+1, 2
-             do mp = -lp, lp
-               lpmp = LMPACK(lp,mp)
-               klmadir = MATPACK(llmm,adir_to_sij(adir))
-               g2int = gntselect(lpmp,klmadir)
+             do ilmp = lp**2+1,(lp+1)**2
+               klmadir = MATPACK(ilm,adir_to_sij(adir))
+               g2int = gntselect(ilmp,klmadir)
                if (g2int .EQ. 0) cycle
 
                ! construct integrand for rho1 vHa, trho1
@@ -2681,12 +2680,12 @@ subroutine make_ddir_vhnhat(atindx,ddir_vhnhat,dtset,gntselect,gprimd,lmnmax,my_
                  do jmesh = 2, imesh
                    rp = pawrad(itypat)%rad(jmesh)
                    rfac = (rp**2)*(rp**lp)/(rr**(lp+1))
-                   ff1(jmesh) = nhat1(jmesh,lpmp,1)*rfac
+                   ff1(jmesh) = nhat1(jmesh,ilmp,1)*rfac
                  end do
                  do jmesh=imesh+1, mesh_size
                    rp = pawrad(itypat)%rad(jmesh)
                    rfac = (rp**2)*(rr**lp)/(rp**(lp+1))
-                   ff1(jmesh) = nhat1(jmesh,lpmp,1)*rfac
+                   ff1(jmesh) = nhat1(jmesh,ilmp,1)*rfac
                  end do
 
                  call pawrad_deducer0(ff1,mesh_size,pawrad(itypat))
@@ -2720,7 +2719,6 @@ subroutine make_ddir_vhnhat(atindx,ddir_vhnhat,dtset,gntselect,gprimd,lmnmax,my_
    ABI_FREE(lmselectin)
    ABI_FREE(lmselectout)
    ABI_FREE(nhat1)
-   ABI_FREE(my_rho1)
    ABI_FREE(rho1)
    ABI_FREE(trho1)
    ABI_FREE(ff)
