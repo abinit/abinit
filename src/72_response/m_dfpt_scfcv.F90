@@ -592,6 +592,12 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
    ABI_MALLOC(d2nl_pq,(2,3,mpert,3,mpert))
    ABI_MALLOC(cg1_pq,(2,mpw1*dtset%nspinor*mband_mem_rbz*mk1mem*dtset%nsppol))
    ABI_MALLOC(cg1_active_pq,(2,mpw1*dtset%nspinor*mband_mem_rbz*mk1mem*dtset%nsppol*dim_eig2rf))
+   d2bbb_mq=zero
+   d2bbb_pq=zero
+   d2lo_mq=zero
+   d2lo_pq=zero
+   d2nl_mq=zero
+   d2nl_pq=zero
  end if
 ! TODO: for non collinear case this should always be nspden, in NCPP case as well!!!
  ABI_MALLOC(vxc1,(cplex*nfftf,nspden*(1-usexcnhat))) ! Not always needed
@@ -962,6 +968,12 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !  No need to continue and call dfpt_vtorho, when nstep==0
    if(nstep==0) exit
 
+!   write(200,*) "ITERATION:", istep
+!   write(201,*) "ITERATION:", istep
+!   do ifft=1,nfftf
+!       write(200,*) vtrial1(2*ifft-1,1),vtrial1(2*ifft  ,1)
+!       write(201,*) vtrial1_mq(2*ifft-1,1),vtrial1_mq(2*ifft  ,1)
+!   end do
 !  #######################e1magh###############################################
 !  Compute the 1st-order density rho1 from the 1st-order trial potential
 !  ----------------------------------------------------------------------
@@ -977,7 +989,9 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &   vectornd,vtrial,vtrial1,with_vectornd,wtk_rbz,xred,ylm,ylm1,ylmgr1,omega=omega)
 
 
+
    if (.not.kramers_deg) then
+
      rhor1_pq(:,:)=rhor1(:,:) !at this stage rhor1_pq contains only one term of the 1st order density at +q
      rhog1_pq(:,:)=rhog1(:,:) !same for rhog1_pq
      cg1_pq(:,:)=cg1(:,:)
@@ -1015,6 +1029,18 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      cg1_active(2,:)=half*(cg1_active_pq(2,:)-cg1_active_mq(2,:))
    end if
 
+   write(300,*) 'ITERATION:', istep
+   write(301,*) 'ITERATION:', istep
+   do ifft=1,mpw1*dtset%nspinor*mband_mem_rbz*mk1mem*dtset%nsppol
+     write(300,*) cg1_pq(1,ifft),cg1_pq(2,ifft)
+     write(301,*) cg1_mq(1,ifft),cg1_mq(2,ifft)
+   end do
+!   write(200,*) 'ITERATION:', istep
+!   write(201,*) 'ITERATION:', istep
+!   do ifft=1,nfftf
+!     write(200,*) rhor1_pq(2*ifft-1,1),rhor1_pq(2*ifft,1)
+!     write(201,*) rhor1_mq(2*ifft-1,1),rhor1_mq(2*ifft,1)
+!   end do
    if (dtset%berryopt== 4.or.dtset%berryopt== 6.or.dtset%berryopt== 7.or.&
 &   dtset%berryopt==14.or.dtset%berryopt==16.or.dtset%berryopt==17) then
 
@@ -1069,8 +1095,8 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      call timab(152,1,tsec)
      if(.not.kramers_deg) then
        call dfpt_etot(dtset%berryopt,deltae_mq,eberry_mq,edocc_mq,eeig0_mq,eew,efrhar,efrkin,&
-&        efrloc,efrnl,efrx1,efrx2,ehart1_mq,ek0_mq,ek1_mq,eii,elast_mq,eloc0_mq,elpsp1_mq,&
-&        enl0_mq,end1_mq,enl0_mq,enl1_mq,epaw1_mq,etotal_mq,evar_mq,evdw,exc1_mq,ipert,dtset%natom,optene)
+&        efrloc,efrnl,efrx1,efrx2,ehart1,ek0_mq,ek1_mq,eii,elast_mq,eloc0_mq,elpsp1_mq,&
+&        enl0_mq,end1_mq,enl0_mq,enl1_mq,epaw1_mq,etotal_mq,evar_mq,evdw,exc1,ipert,dtset%natom,optene)
 
        etotal=half*(etotal+etotal_mq)
        deltae=half*(deltae+deltae_mq)
@@ -1146,10 +1172,23 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &     end0,end1,enl0,enl1,epaw1,etotal,evar,evdw,exc1,ipert,dtset%natom,optene)
 !&     enl0,enl1,epaw1,etotal,evar,evdw,exc1,elmag1,ipert,dtset%natom,optene)
 !    !debug: compute the d2E/d-qd+q energy, should be equal to the one from previous line
+       write(100,*) "line1"
+       write(100,*) deltae,eberry,edocc,eeig0
+       write(100,*) "line2"
+       write(100,*) ehart1,ek0,ek1,elast,eloc0,elpsp1
+       write(100,*) "line3"
+       write(100,*) enl0,end1,enl0,enl1,epaw1,etotal,evar,exc1
      if(.not.kramers_deg) then
        call dfpt_etot(dtset%berryopt,deltae_mq,eberry_mq,edocc_mq,eeig0_mq,eew,efrhar,efrkin,&
-&        efrloc,efrnl,efrx1,efrx2,ehart1_mq,ek0_mq,ek1_mq,eii,elast_mq,eloc0_mq,elpsp1_mq,&
-&        enl0_mq,end1_mq,enl0_mq,enl1_mq,epaw1_mq,etotal_mq,evar_mq,evdw,exc1_mq,ipert,dtset%natom,optene)
+&        efrloc,efrnl,efrx1,efrx2,ehart1,ek0_mq,ek1_mq,eii,elast_mq,eloc0_mq,elpsp1_mq,&
+&        enl0_mq,end1_mq,enl0_mq,enl1_mq,epaw1_mq,etotal_mq,evar_mq,evdw,exc1,ipert,dtset%natom,optene)
+
+       write(101,*) "line1"
+       write(101,*) deltae_mq,eberry_mq,edocc_mq,eeig0_mq
+       write(101,*) "line2"
+       write(101,*) ehart1,ek0_mq,ek1_mq,elast_mq,eloc0_mq,elpsp1_mq
+       write(101,*) "line3"
+       write(101,*) enl0_mq,end1_mq,enl0_mq,enl1_mq,epaw1_mq,etotal_mq,evar_mq,exc1
 
        etotal=half*(etotal+etotal_mq)
        deltae=half*(deltae+deltae_mq)
@@ -3568,6 +3607,7 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
 !        X. Gonze and C. Lee, PRB 55, 10355 (1997) [[cite:Gonze1997a]]
 !        The minus sign is due to the fact that the effective charges
 !        are minus the second derivatives of the energy
+
          if (ipert == dtset%natom+2) then
            d2lo(1,idir1,ipert1,idir,ipert)=-dotr
            d2lo(2,idir1,ipert1,idir,ipert)=-doti
