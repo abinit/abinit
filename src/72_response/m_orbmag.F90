@@ -97,6 +97,25 @@ module m_orbmag
   complex(dpc),parameter :: cbc = j_dpc/two_pi ! Berry curvature pre-factor
   complex(dpc),parameter :: com = -half*j_dpc  ! Orbital magnetism pre-factor
 
+  ! local datatype for pawdensities
+  type,private :: paw_sph_den_type
+    ! integer scalars
+    integer :: lm_size
+    integer :: mesh_size
+    integer :: cplex_density
+    integer :: nspden
+
+    ! logical arrays
+    logical,allocatable :: lmselectin(:)
+    logical,allocatable :: lmselectout(:)
+
+    ! real arrays
+    real(dp),allocatable :: rho1(:,:,:)
+    real(dp),allocatable :: trho1(:,:,:)
+    real(dp),allocatable :: nhat1(:,:,:)
+
+  end type paw_sph_den_type
+
   ! Bound methods:
 
   public :: orbmag_ptpaw
@@ -128,6 +147,8 @@ module m_orbmag
   private :: make_pcg1
   private :: pack_pawrhoij
   private :: orbmag_ptpaw_output
+  private :: paw_sph_den_alloc
+  private :: paw_sph_den_free
   
 CONTAINS  !========================================================================================
 !!***
@@ -2582,47 +2603,36 @@ end subroutine make_ddir_vha3
 !!
 !! SOURCE
 
-subroutine make_ddir_vhnhat(atindx,ddir_vhnhat,dtset,gntselect,gprimd,lmnmax,my_lmax,paw_an,&
-    & pawang,pawrad,pawrhoij,pawtab,realgnt)
+subroutine make_ddir_vhnhat(atindx,ddir_vhnhat,dtset,gntselect,gprimd,lmnmax,my_lmax,&
+    & pawrad,pawsphden,pawtab,realgnt)
 
   !Arguments ------------------------------------
   !scalars
   integer,intent(in) :: lmnmax,my_lmax
   type(dataset_type),intent(in) :: dtset
-  type(pawang_type),intent(in) :: pawang
 
   !arrays
   integer,intent(in) :: atindx(dtset%natom)
   integer,intent(in) :: gntselect((2*my_lmax-1)**2,my_lmax**2*(my_lmax**2+1)/2)
   real(dp),intent(in) :: gprimd(3,3),realgnt((2*my_lmax-1)**2*(my_lmax)**4)
   complex(dpc),intent(out) :: ddir_vhnhat(lmnmax,lmnmax,dtset%natom,3)
-  type(paw_an_type),intent(inout) :: paw_an(dtset%natom)
   type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
-  type(pawrhoij_type),intent(in) :: pawrhoij(dtset%natom)
+  type(paw_sph_den_type),intent(in) :: pawsphden(dtset%natom)
   type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
 
   !Local variables -------------------------
   !scalars
-  integer :: adir,cplex,gint,g2int,iat,iatom,ilm,ilmn,ilmp,imesh,itypat,isel
-  integer :: jlmn,jmesh,klmadir,klmn,klm,kln,ll,lm_size,lmax,lmin,lp
-  integer :: mesh_size,nzlmopt
-  integer :: opt_compch,opt_dens,opt_l,opt_print
-  real(dp) :: cdij,compch_sph,nl1,nlt1,rfac,rr,rp,vhaint,rrhokl
+  integer :: adir,gint,g2int,iat,iatom,ilm,ilmn,ilmp,imesh,itypat
+  integer :: jlmn,jmesh,klmadir,klmn,klm,kln,ll,lmax,lmin,lp
+  integer :: mesh_size
+  real(dp) :: cdij,nlt1,rfac,rr,rp,vhaint
 
   !arrays
   integer,dimension(3) :: adir_to_sij = (/4,2,3/)
   real(dp) :: dij_cart(3),dij_red(3)
-  real(dp),allocatable :: ff(:),ff1(:),fft1(:),nhat1(:,:,:)
-  real(dp),allocatable :: rho1(:,:,:),trho1(:,:,:)
-  logical,allocatable :: lmselectin(:),lmselectout(:)
+  real(dp),allocatable :: ff(:),fft1(:)
 
 !--------------------------------------------------------------------
-
- nzlmopt = -1
- opt_compch = 0
- opt_dens = 0
- opt_l = -1
- opt_print = 0
 
  cdij = four_pi*sqrt(four_pi/3.0D0)
  ddir_vhnhat = czero
@@ -2631,24 +2641,10 @@ subroutine make_ddir_vhnhat(atindx,ddir_vhnhat,dtset,gntselect,gprimd,lmnmax,my_
    iatom = atindx(iat)
    itypat = dtset%typat(iat)
   
-   cplex = pawrhoij(iatom)%qphase
    mesh_size=pawtab(itypat)%mesh_size
-   lm_size = paw_an(iatom)%lm_size
-   ABI_MALLOC(lmselectin,(lm_size))
-   ABI_MALLOC(lmselectout,(lm_size))
-   ABI_MALLOC(nhat1,(cplex*mesh_size,lm_size,dtset%nspden*(1-((opt_dens+1)/2))))
-   ABI_MALLOC(rho1,(cplex*mesh_size,lm_size,dtset%nspden))
-   ABI_MALLOC(trho1,(cplex*mesh_size,lm_size,dtset%nspden*(1-(opt_dens/2))))
    ABI_MALLOC(ff,(mesh_size))
-   ABI_MALLOC(ff1,(mesh_size))
    ABI_MALLOC(fft1,(mesh_size))
   
-   lmselectin = .TRUE. 
-   call pawdensities(compch_sph,cplex,iatom,lmselectin,lmselectout,&
-     & lm_size,nhat1,dtset%nspden,nzlmopt,opt_compch,opt_dens,opt_l,&
-     & opt_print,pawang,dtset%pawprtvol,pawrad(itypat),pawrhoij(iatom),&
-     & pawtab(itypat),rho1,trho1)
-
    do klmn = 1, pawtab(itypat)%lmn2_size
      klm = pawtab(itypat)%indklmn(1,klmn)
      kln = pawtab(itypat)%indklmn(2,klmn)
@@ -2680,18 +2676,18 @@ subroutine make_ddir_vhnhat(atindx,ddir_vhnhat,dtset,gntselect,gprimd,lmnmax,my_
                  do jmesh = 2, imesh
                    rp = pawrad(itypat)%rad(jmesh)
                    rfac = (rp**2)*(rp**lp)/(rr**(lp+1))
-                   ff1(jmesh) = nhat1(jmesh,ilmp,1)*rfac
+                   fft1(jmesh) = pawsphden(iatom)%nhat1(jmesh,ilmp,1)*rfac
                  end do
                  do jmesh=imesh+1, mesh_size
                    rp = pawrad(itypat)%rad(jmesh)
                    rfac = (rp**2)*(rr**lp)/(rp**(lp+1))
-                   ff1(jmesh) = nhat1(jmesh,ilmp,1)*rfac
+                   fft1(jmesh) = pawsphden(iatom)%nhat1(jmesh,ilmp,1)*rfac
                  end do
 
-                 call pawrad_deducer0(ff1,mesh_size,pawrad(itypat))
-                 call simp_gen(nl1,ff1,pawrad(itypat))
+                 call pawrad_deducer0(fft1,mesh_size,pawrad(itypat))
+                 call simp_gen(nlt1,fft1,pawrad(itypat))
                  
-                 ff(imesh)=-rr*pawtab(itypat)%tphitphj(imesh,kln)*nl1
+                 ff(imesh)=-rr*pawtab(itypat)%tphitphj(imesh,kln)*nlt1
                
                end do ! end loop over imesh
 
@@ -2716,124 +2712,118 @@ subroutine make_ddir_vhnhat(atindx,ddir_vhnhat,dtset,gntselect,gprimd,lmnmax,my_
 
    end do ! end loop over klmn
 
-   ABI_FREE(lmselectin)
-   ABI_FREE(lmselectout)
-   ABI_FREE(nhat1)
-   ABI_FREE(rho1)
-   ABI_FREE(trho1)
    ABI_FREE(ff)
-   ABI_FREE(ff1)
    ABI_FREE(fft1)
 
  end do ! end loop over iat
  
 end subroutine make_ddir_vhnhat
 
-!!****f* ABINIT/make_ddir_vxc
-!! NAME
-!! make_ddir_vxc
-!!
-!! FUNCTION
-!! Compute onsite r*vxc
-!!
-!! COPYRIGHT
-!! Copyright (C) 2003-2021 ABINIT  group
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! SIDE EFFECTS
-!!
-!! TODO
-!!
-!! NOTES
-!! computed in Cart directions then transformed to xtal coords
-!!
-!! PARENTS
-!!      m_orbmag
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-subroutine make_ddir_vxc(atindx,ddir_vxc,dtset,gntselect,gprimd,lmnmax,my_lmax,paw_an,&
-    & pawang,pawrad,pawrhoij,pawtab,realgnt)
-
-  !Arguments ------------------------------------
-  !scalars
-  integer,intent(in) :: lmnmax,my_lmax
-  type(dataset_type),intent(in) :: dtset
-  type(pawang_type),intent(in) :: pawang
-
-  !arrays
-  integer,intent(in) :: atindx(dtset%natom)
-  integer,intent(in) :: gntselect((2*my_lmax-1)**2,my_lmax**2*(my_lmax**2+1)/2)
-  real(dp),intent(in) :: gprimd(3,3),realgnt((2*my_lmax-1)**2*(my_lmax)**4)
-  complex(dpc),intent(out) :: ddir_vxc(lmnmax,lmnmax,dtset%natom,3)
-  type(paw_an_type),intent(inout) :: paw_an(dtset%natom)
-  type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
-  type(pawrhoij_type),intent(in) :: pawrhoij(dtset%natom)
-  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
-
-  !Local variables -------------------------
-  !scalars
-  integer :: adir,cplex,gint,g2int,iat,iatom,ilm,ilmn,ilmp,imesh,itypat,isel
-  integer :: jlmn,jmesh,klmadir,klmn,klm,kln,ll,lm_size,lmin,lmax,lp
-  integer :: mesh_size,nzlmopt
-  integer :: opt_compch,opt_dens,opt_l,opt_print
-  real(dp) :: cdij,compch_sph,nl1,nlt1,rfac,rr,rp,vhaint,rrhokl
-  real(dp) :: nterm
-
-  !arrays
-  integer,dimension(3) :: adir_to_sij = (/4,2,3/)
-  real(dp) :: dij_cart(3),dij_red(3)
-  real(dp),allocatable :: nhat1(:,:,:),rho1(:,:,:),trho1(:,:,:)
-  logical,allocatable :: lmselectin(:),lmselectout(:)
-
-!--------------------------------------------------------------------
-
- nzlmopt = -1
- opt_compch = 0
- opt_dens = 1
- opt_l = -1
- opt_print = 0
-
- cdij = sqrt(four_pi/3.0D0)
- ddir_vxc = czero
-
- do iat = 1, dtset%natom
-   iatom = atindx(iat)
-   itypat = dtset%typat(iat)
-  
-   cplex = pawrhoij(iatom)%qphase
-   mesh_size=pawtab(itypat)%mesh_size
-   lm_size = paw_an(iatom)%lm_size
-   ABI_MALLOC(lmselectin,(lm_size))
-   ABI_MALLOC(lmselectout,(lm_size))
-   ABI_MALLOC(nhat1,(cplex*mesh_size,lm_size,dtset%nspden*(1-((opt_dens+1)/2))))
-   ABI_MALLOC(rho1,(cplex*mesh_size,lm_size,dtset%nspden))
-   ABI_MALLOC(trho1,(cplex*mesh_size,lm_size,dtset%nspden*(1-(opt_dens/2))))
-  
-   lmselectin = .TRUE. 
-   call pawdensities(compch_sph,cplex,iatom,lmselectin,lmselectout,&
-     & lm_size,nhat1,dtset%nspden,nzlmopt,opt_compch,opt_dens,opt_l,&
-     & opt_print,pawang,dtset%pawprtvol,pawrad(itypat),pawrhoij(iatom),&
-     & pawtab(itypat),rho1,trho1)
-
-   ABI_FREE(lmselectin)
-   ABI_FREE(lmselectout)
-   ABI_FREE(nhat1)
-   ABI_FREE(rho1)
-   ABI_FREE(trho1)
-
- end do ! end loop over iat
- 
-end subroutine make_ddir_vxc
+!!!****f* ABINIT/make_ddir_vxc
+!!! NAME
+!!! make_ddir_vxc
+!!!
+!!! FUNCTION
+!!! Compute onsite r*vxc
+!!!
+!!! COPYRIGHT
+!!! Copyright (C) 2003-2021 ABINIT  group
+!!! This file is distributed under the terms of the
+!!! GNU General Public License, see ~abinit/COPYING
+!!! or http://www.gnu.org/copyleft/gpl.txt .
+!!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!!
+!!! INPUTS
+!!!
+!!! OUTPUT
+!!!
+!!! SIDE EFFECTS
+!!!
+!!! TODO
+!!!
+!!! NOTES
+!!! computed in Cart directions then transformed to xtal coords
+!!!
+!!! PARENTS
+!!!      m_orbmag
+!!!
+!!! CHILDREN
+!!!
+!!! SOURCE
+!
+!subroutine make_ddir_vxc(atindx,ddir_vxc,dtset,gntselect,gprimd,lmnmax,my_lmax,paw_an,&
+!    & pawang,pawrad,pawrhoij,pawtab,realgnt)
+!
+!  !Arguments ------------------------------------
+!  !scalars
+!  integer,intent(in) :: lmnmax,my_lmax
+!  type(dataset_type),intent(in) :: dtset
+!  type(pawang_type),intent(in) :: pawang
+!
+!  !arrays
+!  integer,intent(in) :: atindx(dtset%natom)
+!  integer,intent(in) :: gntselect((2*my_lmax-1)**2,my_lmax**2*(my_lmax**2+1)/2)
+!  real(dp),intent(in) :: gprimd(3,3),realgnt((2*my_lmax-1)**2*(my_lmax)**4)
+!  complex(dpc),intent(out) :: ddir_vxc(lmnmax,lmnmax,dtset%natom,3)
+!  type(paw_an_type),intent(inout) :: paw_an(dtset%natom)
+!  type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
+!  type(pawrhoij_type),intent(in) :: pawrhoij(dtset%natom)
+!  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
+!
+!  !Local variables -------------------------
+!  !scalars
+!  integer :: adir,cplex,gint,g2int,iat,iatom,ilm,ilmn,ilmp,imesh,itypat,isel
+!  integer :: jlmn,jmesh,klmadir,klmn,klm,kln,ll,lm_size,lmin,lmax,lp
+!  integer :: mesh_size,nzlmopt
+!  integer :: opt_compch,opt_dens,opt_l,opt_print
+!  real(dp) :: cdij,compch_sph,nl1,nlt1,rfac,rr,rp,vhaint,rrhokl
+!  real(dp) :: nterm
+!
+!  !arrays
+!  integer,dimension(3) :: adir_to_sij = (/4,2,3/)
+!  real(dp) :: dij_cart(3),dij_red(3)
+!  real(dp),allocatable :: nhat1(:,:,:),rho1(:,:,:),trho1(:,:,:)
+!  logical,allocatable :: lmselectin(:),lmselectout(:)
+!
+!!--------------------------------------------------------------------
+!
+! nzlmopt = -1
+! opt_compch = 0
+! opt_dens = 1
+! opt_l = -1
+! opt_print = 0
+!
+! cdij = sqrt(four_pi/3.0D0)
+! ddir_vxc = czero
+!
+! do iat = 1, dtset%natom
+!   iatom = atindx(iat)
+!   itypat = dtset%typat(iat)
+!  
+!   cplex = pawrhoij(iatom)%qphase
+!   mesh_size=pawtab(itypat)%mesh_size
+!   lm_size = paw_an(iatom)%lm_size
+!   ABI_MALLOC(lmselectin,(lm_size))
+!   ABI_MALLOC(lmselectout,(lm_size))
+!   ABI_MALLOC(nhat1,(cplex*mesh_size,lm_size,dtset%nspden*(1-((opt_dens+1)/2))))
+!   ABI_MALLOC(rho1,(cplex*mesh_size,lm_size,dtset%nspden))
+!   ABI_MALLOC(trho1,(cplex*mesh_size,lm_size,dtset%nspden*(1-(opt_dens/2))))
+!  
+!   lmselectin = .TRUE. 
+!   call pawdensities(compch_sph,cplex,iatom,lmselectin,lmselectout,&
+!     & lm_size,nhat1,dtset%nspden,nzlmopt,opt_compch,opt_dens,opt_l,&
+!     & opt_print,pawang,dtset%pawprtvol,pawrad(itypat),pawrhoij(iatom),&
+!     & pawtab(itypat),rho1,trho1)
+!
+!   ABI_FREE(lmselectin)
+!   ABI_FREE(lmselectout)
+!   ABI_FREE(nhat1)
+!   ABI_FREE(rho1)
+!   ABI_FREE(trho1)
+!
+! end do ! end loop over iat
+! 
+!end subroutine make_ddir_vxc
 
 
 !!****f* ABINIT/make_ddir_vha2
@@ -2868,48 +2858,37 @@ end subroutine make_ddir_vxc
 !!
 !! SOURCE
 
-subroutine make_ddir_vha2(atindx,ddir_vha,dtset,gntselect,gprimd,lmnmax,my_lmax,paw_an,&
-    & pawang,pawrad,pawrhoij,pawtab,realgnt)
+subroutine make_ddir_vha2(atindx,ddir_vha,dtset,gntselect,gprimd,lmnmax,my_lmax,&
+    & pawrad,pawsphden,pawtab,realgnt)
 
   !Arguments ------------------------------------
   !scalars
   integer,intent(in) :: lmnmax,my_lmax
   type(dataset_type),intent(in) :: dtset
-  type(pawang_type),intent(in) :: pawang
 
   !arrays
   integer,intent(in) :: atindx(dtset%natom)
   integer,intent(in) :: gntselect((2*my_lmax-1)**2,my_lmax**2*(my_lmax**2+1)/2)
   real(dp),intent(in) :: gprimd(3,3),realgnt((2*my_lmax-1)**2*(my_lmax)**4)
   complex(dpc),intent(out) :: ddir_vha(lmnmax,lmnmax,dtset%natom,3)
-  type(paw_an_type),intent(inout) :: paw_an(dtset%natom)
   type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
-  type(pawrhoij_type),intent(in) :: pawrhoij(dtset%natom)
+  type(paw_sph_den_type),intent(in) :: pawsphden(dtset%natom)
   type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
 
   !Local variables -------------------------
   !scalars
-  integer :: adir,cplex,gint,g2int,iat,iatom,ilm,ilmn,ilmp,imesh,itypat,isel
-  integer :: jlmn,jmesh,klmadir,klmn,klm,kln,ll,lm_size,lmin,lmax,lp
-  integer :: mesh_size,nzlmopt
-  integer :: opt_compch,opt_dens,opt_l,opt_print
-  real(dp) :: cdij,compch_sph,nl1,nlt1,rfac,rr,rp,vhaint,rrhokl
+  integer :: adir,gint,g2int,iat,iatom,ilm,ilmn,ilmp,imesh,itypat
+  integer :: jlmn,jmesh,klmadir,klmn,klm,kln,ll,lmin,lmax,lp
+  integer :: mesh_size
+  real(dp) :: cdij,nl1,nlt1,rfac,rr,rp,vhaint,rrhokl
   real(dp) :: nterm
 
   !arrays
   integer,dimension(3) :: adir_to_sij = (/4,2,3/)
   real(dp) :: dij_cart(3),dij_red(3)
-  real(dp),allocatable :: ff(:),ff1(:),fft1(:),nhat1(:,:,:)
-  real(dp),allocatable :: my_rho1(:,:,:),rho1(:,:,:),trho1(:,:,:)
-  logical,allocatable :: lmselectin(:),lmselectout(:)
+  real(dp),allocatable :: ff(:),ff1(:),fft1(:)
 
 !--------------------------------------------------------------------
-
- nzlmopt = -1
- opt_compch = 0
- opt_dens = 1
- opt_l = -1
- opt_print = 0
 
  cdij = four_pi*sqrt(four_pi/3.0D0)
  ddir_vha = czero
@@ -2918,62 +2897,11 @@ subroutine make_ddir_vha2(atindx,ddir_vha,dtset,gntselect,gprimd,lmnmax,my_lmax,
    iatom = atindx(iat)
    itypat = dtset%typat(iat)
   
-   cplex = pawrhoij(iatom)%qphase
    mesh_size=pawtab(itypat)%mesh_size
-   lm_size = paw_an(iatom)%lm_size
-   ABI_MALLOC(lmselectin,(lm_size))
-   ABI_MALLOC(lmselectout,(lm_size))
-   ABI_MALLOC(nhat1,(cplex*mesh_size,lm_size,dtset%nspden*(1-((opt_dens+1)/2))))
-   ABI_MALLOC(rho1,(cplex*mesh_size,lm_size,dtset%nspden))
-   !ABI_MALLOC(my_rho1,(cplex*mesh_size,lm_size,dtset%nspden))
-   ABI_MALLOC(trho1,(cplex*mesh_size,lm_size,dtset%nspden*(1-(opt_dens/2))))
    ABI_MALLOC(ff,(mesh_size))
    ABI_MALLOC(ff1,(mesh_size))
    ABI_MALLOC(fft1,(mesh_size))
   
-   lmselectin = .TRUE. 
-   call pawdensities(compch_sph,cplex,iatom,lmselectin,lmselectout,&
-     & lm_size,nhat1,dtset%nspden,nzlmopt,opt_compch,opt_dens,opt_l,&
-     & opt_print,pawang,dtset%pawprtvol,pawrad(itypat),pawrhoij(iatom),&
-     & pawtab(itypat),rho1,trho1)
-
-   !!! check rho1 density
-   !write(std_out,'(a)') 'JWZ debug call my pawdensities '
-   !my_rho1 = zero
-   !do isel = 1, pawrhoij(iatom)%nrhoijsel
-   !  klmn = pawrhoij(iatom)%rhoijselect(isel)
-   !  klm = pawtab(itypat)%indklmn(1,klmn)
-   !  kln = pawtab(itypat)%indklmn(2,klmn)
-   !  lmin = pawtab(itypat)%indklmn(3,klmn)
-   !  lmax = pawtab(itypat)%indklmn(4,klmn)
-   !  rrhokl = pawrhoij(iatom)%rhoijp(2*isel-1,1)
-   !  rrhokl = rrhokl*pawtab(itypat)%dltij(klmn)
-   !  do ll=lmin,lmax,2
-   !    do ilm = ll**2+1,(ll+1)**2
-   !      gint=gntselect(ilm,klm)
-   !      if (gint .NE. 0) then
-   !        do imesh = 2, mesh_size
-   !          nterm = rrhokl*pawtab(itypat)%phiphj(imesh,kln)*realgnt(gint)/&
-   !            & (pawrad(itypat)%rad(imesh)**2)
-   !          my_rho1(imesh,ilm,1) = my_rho1(imesh,ilm,1) + nterm
-   !        end do !imesh
-   !      end if ! gint .NE. 0
-   !    end do !ilm
-   !  end do ! ll
-   !end do !isel
-   !
-   !do ll=0,pawtab(itypat)%lcut_size-1
-   !  do ilm = ll**2+1,(ll+1)**2
-   !    if (lmselectout(ilm)) then
-   !      call pawrad_deducer0(my_rho1(:,ilm,1),mesh_size,pawrad(itypat))
-   !      do imesh = 1, 20
-   !        write(std_out,'(a,2i4,2es16.8)')'JWZ debug ilm imesh myrho1 rho1 ',ilm,&
-   !          & imesh,my_rho1(imesh,ilm,1),rho1(imesh,ilm,1)
-   !      end do !imesh
-   !    end if
-   !  end do ! ilm
-   !end do ! ll
-   
    do klmn = 1, pawtab(itypat)%lmn2_size
      klm = pawtab(itypat)%indklmn(1,klmn)
      kln = pawtab(itypat)%indklmn(2,klmn)
@@ -3007,14 +2935,14 @@ subroutine make_ddir_vha2(atindx,ddir_vha,dtset,gntselect,gprimd,lmnmax,my_lmax,
                  do jmesh = 2, imesh
                    rp = pawrad(itypat)%rad(jmesh)
                    rfac = (rp**2)*(rp**lp)/(rr**(lp+1))
-                   ff1(jmesh) = rho1(jmesh,ilmp,1)*rfac
-                   fft1(jmesh) = trho1(jmesh,ilmp,1)*rfac
+                   ff1(jmesh) = pawsphden(iatom)%rho1(jmesh,ilmp,1)*rfac
+                   fft1(jmesh) = pawsphden(iatom)%trho1(jmesh,ilmp,1)*rfac
                  end do
                  do jmesh=imesh+1, mesh_size
                    rp = pawrad(itypat)%rad(jmesh)
                    rfac = (rp**2)*(rr**lp)/(rp**(lp+1))
-                   ff1(jmesh) = rho1(jmesh,ilmp,1)*rfac
-                   fft1(jmesh) = trho1(jmesh,ilmp,1)*rfac
+                   ff1(jmesh) = pawsphden(iatom)%rho1(jmesh,ilmp,1)*rfac
+                   fft1(jmesh) = pawsphden(iatom)%trho1(jmesh,ilmp,1)*rfac
                  end do
 
                  call pawrad_deducer0(ff1,mesh_size,pawrad(itypat))
@@ -3048,12 +2976,6 @@ subroutine make_ddir_vha2(atindx,ddir_vha,dtset,gntselect,gprimd,lmnmax,my_lmax,
 
    end do ! end loop over klmn
 
-   ABI_FREE(lmselectin)
-   ABI_FREE(lmselectout)
-   ABI_FREE(nhat1)
-   !ABI_FREE(my_rho1)
-   ABI_FREE(rho1)
-   ABI_FREE(trho1)
    ABI_FREE(ff)
    ABI_FREE(ff1)
    ABI_FREE(fft1)
@@ -3471,6 +3393,155 @@ subroutine make_ddir_ap(ddir_ap,dtset,gntselect,gprimd,lmnmax,my_lmax,pawrad,paw
 end subroutine make_ddir_ap
 !!***
 
+!!****f* ABINIT/paw_sph_den_free
+!! NAME
+!! paw_sph_den_free
+!!
+!! FUNCTION
+!! free paw_sph_den_type
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2021 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!!
+!! PARENTS
+!!      m_orbmag
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine paw_sph_den_free(paw_sph_den)
+
+  !Arguments ------------------------------------
+  !scalars
+  type(paw_sph_den_type),intent(inout) :: paw_sph_den
+
+  !arrays
+
+  !Local variables -------------------------
+  !scalars
+ 
+  !arrays
+!--------------------------------------------------------------------
+
+  if(allocated(paw_sph_den%lmselectin)) then
+    ABI_FREE(paw_sph_den%lmselectin)
+  end if
+  
+  if(allocated(paw_sph_den%lmselectout)) then
+    ABI_FREE(paw_sph_den%lmselectout)
+  end if
+  
+  if(allocated(paw_sph_den%rho1)) then
+    ABI_FREE(paw_sph_den%rho1)
+  end if
+
+  if(allocated(paw_sph_den%trho1)) then
+    ABI_FREE(paw_sph_den%trho1)
+  end if
+
+  if(allocated(paw_sph_den%nhat1)) then
+    ABI_FREE(paw_sph_den%nhat1)
+  end if
+ 
+end subroutine paw_sph_den_free
+!!***
+
+
+!!****f* ABINIT/paw_sph_den_alloc
+!! NAME
+!! paw_sph_den_alloc
+!!
+!! FUNCTION
+!! allocate paw_sph_den_type
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2021 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!!
+!! PARENTS
+!!      m_orbmag
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine paw_sph_den_alloc(cplex,lm_size,mesh_size,nspden,paw_sph_den)
+
+  !Arguments ------------------------------------
+  !scalars
+  integer,intent(in) :: cplex,lm_size,mesh_size,nspden
+  type(paw_sph_den_type),intent(inout) :: paw_sph_den
+
+  !arrays
+
+  !Local variables -------------------------
+  !scalars
+ 
+  !arrays
+!--------------------------------------------------------------------
+
+  paw_sph_den%lm_size = lm_size
+  paw_sph_den%mesh_size = mesh_size
+  paw_sph_den%cplex_density = cplex
+  paw_sph_den%nspden = nspden
+
+  if(allocated(paw_sph_den%lmselectin)) then
+    ABI_FREE(paw_sph_den%lmselectin)
+  end if
+  ABI_MALLOC(paw_sph_den%lmselectin,(lm_size))
+  
+  if(allocated(paw_sph_den%lmselectout)) then
+    ABI_FREE(paw_sph_den%lmselectout)
+  end if
+  ABI_MALLOC(paw_sph_den%lmselectout,(lm_size))
+  
+  if(allocated(paw_sph_den%rho1)) then
+    ABI_FREE(paw_sph_den%rho1)
+  end if
+  ABI_MALLOC(paw_sph_den%rho1,(cplex*mesh_size,lm_size,nspden))
+
+  if(allocated(paw_sph_den%trho1)) then
+    ABI_FREE(paw_sph_den%trho1)
+  end if
+  ABI_MALLOC(paw_sph_den%trho1,(cplex*mesh_size,lm_size,nspden))
+
+  if(allocated(paw_sph_den%nhat1)) then
+    ABI_FREE(paw_sph_den%nhat1)
+  end if
+  ABI_MALLOC(paw_sph_den%nhat1,(cplex*mesh_size,lm_size,nspden))
+ 
+end subroutine paw_sph_den_alloc
+!!***
+
+
 !!****f* ABINIT/pack_pawrhoij
 !! NAME
 !! pack_pawrhoij
@@ -3646,8 +3717,10 @@ subroutine make_d(atindx,atindx1,cprj,dimlmn,dterms,dtset,&
 
   !Local variables -------------------------
   !scalars
-  integer :: iat,iband,isel,itypat,ilmn,jlmn,klmn
-  integer :: my_lmax,ngnt
+  integer :: iat,iatom,iband,isel,itypat,ilmn,jlmn,klmn
+  integer :: my_lmax,ngnt,nzlmopt
+  integer :: opt_compch,opt_dens,opt_l,opt_print
+  real(dp) :: compch_sph
   complex(dpc) :: cpi,cpj,rhoij
   type(paw_dmft_type) :: paw_dmft
  
@@ -3655,6 +3728,7 @@ subroutine make_d(atindx,atindx1,cprj,dimlmn,dterms,dtset,&
   integer,allocatable :: gntselect(:,:)
   real(dp),allocatable :: realgnt(:)
   type(pawrhoij_type),allocatable :: pawrhoij(:)
+  type(paw_sph_den_type),allocatable :: pawsphden(:)
 !--------------------------------------------------------------------
 
  !make pawrhoij
@@ -3695,6 +3769,29 @@ subroutine make_d(atindx,atindx1,cprj,dimlmn,dterms,dtset,&
  ABI_MALLOC(gntselect,((2*my_lmax-1)**2,my_lmax**2*(my_lmax**2+1)/2))
  call realgaunt(my_lmax,ngnt,gntselect,realgnt)
 
+ ! make onsite densities
+ nzlmopt = -1
+ opt_compch = 0
+ opt_dens = 0
+ opt_l = -1
+ opt_print = 0
+ ABI_MALLOC(pawsphden,(dtset%natom))
+ do iat = 1, dtset%natom
+   iatom = atindx(iat)
+   itypat = dtset%typat(iat)
+   call paw_sph_den_alloc(pawrhoij(iatom)%qphase,paw_an(iatom)%lm_size,&
+     & pawtab(itypat)%mesh_size,dtset%nspden,pawsphden(iatom))
+
+   pawsphden(iatom)%lmselectin = .TRUE. 
+   call pawdensities(compch_sph,pawsphden(iatom)%cplex_density,iatom,&
+     & pawsphden(iatom)%lmselectin,pawsphden(iatom)%lmselectout,&
+     & pawsphden(iatom)%lm_size,pawsphden(iatom)%nhat1,dtset%nspden,&
+     & nzlmopt,opt_compch,opt_dens,opt_l,opt_print,pawang,dtset%pawprtvol,&
+     & pawrad(itypat),pawrhoij(iatom),pawtab(itypat),&
+     & pawsphden(iatom)%rho1,pawsphden(iatom)%trho1)
+ 
+ end do ! iat
+
  ! generate d terms
 
  ! term idsij arises from <phi|r|phi> - <tphi|r|rphi>, is the d analog of pawtab(itypat)%sij
@@ -3708,20 +3805,25 @@ subroutine make_d(atindx,atindx1,cprj,dimlmn,dterms,dtset,&
  call make_ddir_ap(dterms(idpa,:,:,:,:),dtset,gntselect,gprimd,psps%lmnmax,my_lmax,pawrad,pawtab,realgnt)
  
  ! term idvha due to v_H[n1], corresponds to term 2a of roadmap paper
- call make_ddir_vha2(atindx,dterms(idvha,:,:,:,:),dtset,gntselect,gprimd,psps%lmnmax,my_lmax,paw_an,&
-   & pawang,pawrad,pawrhoij,pawtab,realgnt)
+ call make_ddir_vha2(atindx,dterms(idvha,:,:,:,:),dtset,gntselect,gprimd,psps%lmnmax,my_lmax,&
+   & pawrad,pawsphden,pawtab,realgnt)
 
  ! term idvhnzc due to v_H[nZ], corresponds to term 2b of roadmap paper
  call make_ddir_vhnzc(dterms(idvhnzc,:,:,:,:),dtset,gntselect,gprimd,psps%lmnmax,my_lmax,pawrad,pawtab,realgnt)
 
  ! term idvhnhat due to v_H[nhat], corresponds to term 2c of roadmap paper
- call make_ddir_vhnhat(atindx,dterms(idvhnhat,:,:,:,:),dtset,gntselect,gprimd,psps%lmnmax,my_lmax,paw_an,&
-   & pawang,pawrad,pawrhoij,pawtab,realgnt)
+ call make_ddir_vhnhat(atindx,dterms(idvhnhat,:,:,:,:),dtset,gntselect,gprimd,psps%lmnmax,my_lmax,&
+   & pawrad,pawsphden,pawtab,realgnt)
 
  call pawrhoij_free(pawrhoij)
  ABI_FREE(pawrhoij)
  ABI_FREE(realgnt)
  ABI_FREE(gntselect)
+
+ do iat = 1, dtset%natom
+   call paw_sph_den_free(pawsphden(iat))
+ end do
+ ABI_FREE(pawsphden)
  
 end subroutine make_d
 !!***
