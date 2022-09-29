@@ -106,6 +106,10 @@ module m_gstate
  use m_manage_cuda
 #endif
 
+#if defined HAVE_YAKL
+ use gator_mod
+#endif
+
  use defs_wvltypes,      only : wvl_data,coulomb_operator,wvl_wf_type
 #if defined HAVE_BIGDFT
  use BigDFT_API,         only : wvl_timing => timing,xc_init,xc_end,XC_MIXED,XC_ABINIT,&
@@ -304,7 +308,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  real(dp),allocatable :: ph1d(:,:),ph1df(:,:),phnons(:,:,:),resid(:),rhowfg(:,:)
  real(dp),allocatable :: rhowfr(:,:),spinat_dum(:,:),start(:,:),work(:)
  real(dp),allocatable :: ylm(:,:),ylmgr(:,:,:)
- real(dp),pointer :: cg(:,:),eigen(:),pwnsfac(:,:),rhog(:,:),rhor(:,:)
+ real(dp),pointer, contiguous :: cg(:,:)
+ real(dp),pointer :: eigen(:),pwnsfac(:,:),rhog(:,:),rhor(:,:)
  real(dp),pointer :: taug(:,:),taur(:,:),xred_old(:,:)
  type(pawrhoij_type),pointer :: pawrhoij(:)
  type(coulomb_operator) :: kernel_dummy
@@ -708,7 +713,11 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    cg => scf_history%cg(:,:,1)
    eigen => scf_history%eigen(:,1)
  else
+#if defined HAVE_GPU && defined HAVE_YAKL
+   ABI_MALLOC_MANAGED(cg, (/2,mcg/))
+#else
    ABI_MALLOC_OR_DIE(cg,(2,mcg), ierr)
+#endif
    ABI_MALLOC(eigen,(dtset%mband*dtset%nkpt*dtset%nsppol))
  end if
 
@@ -1645,7 +1654,11 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  call pawfgr_destroy(pawfgr)
 
  if(dtset%imgwfstor==0)then
+#if defined HAVE_GPU && defined HAVE_YAKL
+   ABI_FREE_MANAGED(cg)
+#else
    ABI_FREE(cg)
+#endif
    ABI_FREE(eigen)
  else
    nullify(cg,eigen)
