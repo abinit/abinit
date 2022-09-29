@@ -739,7 +739,7 @@ end subroutine fft_ur_dpc
 !!
 !! FUNCTION
 !!  Driver routine used to transform COMPLEX arrays using 3D zero-padded FFTs.
-!!  TARGET: SPC arrays
+!!  TARGET: single-precision complex.
 !!
 !! INPUTS
 !!  ngfft(18)=Info on the 3D FFT.
@@ -748,7 +748,8 @@ end subroutine fft_ur_dpc
 !!  ndat=Number of FFTs
 !!  mgfft=MAX(nx,ny,nz), only used to dimension gbound
 !!  isign=The sign of the transform.
-!!  gbound(2*mgfft+8,2)= The boundaries of the basis sphere of G vectors at a given k-point. See sphereboundary for more info.
+!!  gbound(2*mgfft+8,2)= The boundaries of the basis sphere of G vectors at a given k-point.
+!!    See sphereboundary for more info.
 !!
 !! SIDE EFFECTS
 !!  ff(ldx*ldy*ldz*ndat)=
@@ -780,10 +781,10 @@ subroutine fftpad_spc(ff, ngfft, nx, ny, nz, ldx, ldy, ldz, ndat, mgfft, isign, 
  select case (fftalga)
 
  case (FFT_FFTW3)
-   call fftw3_fftpad(ff,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
+   call fftw3_fftpad(ff, nx, ny, nz, ldx, ldy, ldz, ndat, mgfft, isign, gbound)
 
  case (FFT_DFTI)
-   call dfti_fftpad(ff,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
+   call dfti_fftpad(ff, nx, ny, nz, ldx, ldy, ldz, ndat, mgfft, isign, gbound)
 
  case (FFT_SG)
    ! Goedecker"s routines.

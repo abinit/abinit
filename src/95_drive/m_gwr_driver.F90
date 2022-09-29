@@ -3,7 +3,7 @@
 !!  m_gwr_driver
 !!
 !! FUNCTION
-!!   Driver for GWR calculations
+!!  Driver for GWR calculations
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2021-2022 ABINIT group (MG)
@@ -577,7 +577,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
    owfk_hdr%istwfk(:) = istwfk_ik
 
    ! Build pools to distribute (kpt, spin)
-   ! Try to have rectangular grids in each pool to improve efficiency in scalapack routines.
+   ! Try to have rectangular grids in each pool to improve efficiency in scalapack diago.
    call diago_pool%from_dims(dtset%nkpt, dtset%nsppol, comm, rectangular=.True.)
    diago_info = zero
 
@@ -591,6 +591,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
      call owfk%close()
    end if
    call xmpi_barrier(comm)
+
    ! Reopen file inside diago_pool%comm.
    call owfk%open_write(owfk_hdr, out_path, 0, iomode__, get_unit(), diago_pool%comm%value, &
                         write_hdr=.False., write_frm=.False.)
@@ -649,6 +650,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
    end if
 
    ! Collect eigenvalues
+   ! CHECK THIS PART WITH MANY PROCS AS I'VE SEEN WEIRD RESULTS ON LUMI
    do spin=1,dtset%nsppol
      do ik_ibz=1,dtset%nkpt
        if (diago_pool%treats(ik_ibz, spin) .and. diago_pool%comm%me /= 0) owfk_ebands%eig(:, ik_ibz, spin) = zero
@@ -667,9 +669,10 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
    call diago_pool%free()
    call owfk%close()
 
- !else if (dtset%gwr_task == "CC4S") then
+ !else if (dtset%gwr_task == "CC4CS") then
    ! Diagonalize Hamiltonian at k = Gamma
    ! Compute oscillator matrix elements and save results to disk
+   !call cc4cs()
 
  else
    ! ====================================================
@@ -804,7 +807,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
 contains
 
 ! Compute matrix elements at q = 0.
-subroutine ugb_calc_osc_gamma()
+subroutine cc4cs()
 
  use m_fftcore,       only : sphereboundary !, getng, print_ngfft get_kg,
  use m_fft,           only : fft_ug !, fft_ur, fftbox_plan3_t, fourdp
@@ -886,7 +889,7 @@ subroutine ugb_calc_osc_gamma()
  ABI_FREE(my_ur)
  ABI_FREE(master_ur)
 
-end subroutine ugb_calc_osc_gamma
+end subroutine cc4cs
 
 end subroutine gwr_driver
 !!***

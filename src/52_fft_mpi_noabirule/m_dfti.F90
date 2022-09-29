@@ -1556,10 +1556,10 @@ subroutine dfti_fftpad_dp(ff,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
 
  ! Associate complex fptr with real ff via the C pointer
  cptr = C_loc(ff)
- call C_F_pointer(cptr,fptr, SHAPE=(/ldx*ldy*ldz*ndat/))
+ call C_F_pointer(cptr, fptr, SHAPE=[ldx*ldy*ldz*ndat])
 
  ! Call complex version --> a lot of boilerplate code avoided
- call dfti_fftpad_dpc(fptr,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
+ call dfti_fftpad_dpc(fptr, nx, ny, nz, ldx, ldy, ldz, ndat, mgfft, isign, gbound)
 
 #else
  ABI_ERROR("FFT_DFTI support not activated")
@@ -1580,7 +1580,7 @@ end subroutine dfti_fftpad_dp
 !! FUNCTION
 !!  This routine transforms wavefunctions using 3D zero-padded FFTs with DFTI.
 !!  The 3D ffts are computed only on lines and planes which have non zero elements (see zpad_init)
-!!  FFT transform is in-place. Target: complex DPC arrays.
+!!  FFT transform is in-place. Target: complex double-precision arrays.
 !!
 !! INPUTS
 !!   nx,ny,nz=Logical dimensions of the FFT mesh.
@@ -1598,7 +1598,7 @@ end subroutine dfti_fftpad_dp
 !!
 !! SOURCE
 
-subroutine dfti_fftpad_dpc(ff,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
+subroutine dfti_fftpad_dpc(ff, nx, ny, nz, ldx, ldy, ldz, ndat, mgfft, isign, gbound)
 
 !Arguments ------------------------------------
 !scalars
@@ -1608,7 +1608,6 @@ subroutine dfti_fftpad_dpc(ff,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
  complex(dpc),intent(inout) :: ff(ldx*ldy*ldz*ndat)
 
 !Local variables-------------------------------
-!scalars
 #ifdef HAVE_DFTI
 
 ! *************************************************************************

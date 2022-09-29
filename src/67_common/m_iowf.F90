@@ -383,7 +383,7 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
 
        ! Calculate KB form factors and derivatives.
        ! The arrays are allocated with lnmax to support pseudos with more than projector.
-       ! Note that lnmax takes into account lloc hence arrays are in packed form and one should be
+       ! Note that lnmax takes into account lloc hence arrays are in packed form and should be
        ! accessed with the indices provided by psps%indlmn.
        ABI_MALLOC(vkbsign, (psps%lnmax, psps%ntypat))
        ABI_MALLOC(vkb, (mpw_disk, psps%lnmax, psps%ntypat))
