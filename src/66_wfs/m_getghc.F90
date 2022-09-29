@@ -1691,6 +1691,44 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lamb
  spacedim     = size(cwavef  ,dim=2)/ndat
  spacedim_prj = size(cwaveprj,dim=2)/ndat
 
+
+#ifdef HAVE_GPU
+ usegvnlxc=1
+ if (size(gvnlxc)==0) usegvnlxc=0
+
+ if ( present(kg_fft_k) ) then
+   if (present(kg_fft_kp)) then
+     call getghc(cpopt,cwavef,cwaveprj,&
+       &      ghc,gsc(:,1:ndat*spacedim*gs_ham%usepaw),&
+       &      gs_ham,gvnlxc(:,1:ndat*spacedim*usegvnlxc),lambda, mpi_enreg,ndat,&
+       &      prtvol,sij_opt,tim_getghc,type_calc,&
+       &      select_k=select_k_default,kg_fft_k=kg_fft_k,kg_fft_kp=kg_fft_kp)
+   else
+     call getghc(cpopt,cwavef,cwaveprj,&
+       &      ghc,gsc(:,1:ndat*spacedim*gs_ham%usepaw),&
+       &      gs_ham,gvnlxc(:,1:ndat*spacedim*usegvnlxc),lambda, mpi_enreg,ndat,&
+       &      prtvol,sij_opt,tim_getghc,type_calc,&
+       &      select_k=select_k_default,kg_fft_k=kg_fft_k)
+   end if
+ else
+   if (present(kg_fft_kp)) then
+     call getghc(cpopt,cwavef,cwaveprj,&
+       &      ghc,gsc(:,1:ndat*spacedim*gs_ham%usepaw),&
+       &      gs_ham,gvnlxc(:,1:ndat*spacedim*usegvnlxc),lambda, mpi_enreg,ndat,&
+       &      prtvol,sij_opt,tim_getghc,type_calc,&
+       &      select_k=select_k_default,kg_fft_kp=kg_fft_kp)
+   else
+     call getghc(cpopt,cwavef,cwaveprj,&
+       &      ghc,gsc(:,1:ndat*spacedim*gs_ham%usepaw),&
+       &      gs_ham,gvnlxc(:,1:ndat*spacedim*usegvnlxc),lambda, mpi_enreg,ndat,&
+       &      prtvol,sij_opt,tim_getghc,type_calc,&
+       &      select_K=select_k_default)
+   end if
+ end if
+
+ ! end GPU version
+#else
+
     !$omp parallel default (none) &
     !$omp& private(ithread,nthreads,chunk,firstband,lastband,residuchunk,firstelt,lastelt,firstprj,lastprj,is_nested,usegvnlxc), &
     !$omp& shared(cwavef,ghc,gsc, gvnlxc,spacedim,spacedim_prj,ndat,kg_fft_k,kg_fft_kp,gs_ham,cwaveprj,mpi_enreg), &
@@ -1778,6 +1816,9 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lamb
 #endif
 #endif
     !$omp end parallel
+
+! end HAVE_GPU
+#endif
 
 end subroutine multithreaded_getghc
 !!***
