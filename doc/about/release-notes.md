@@ -92,7 +92,7 @@ By L. Baguet (MR793).
 **B.7** The Extended First-Principles Molecular Dynamics has been implemented.
 This method allows one to drastically reduce the needed number of bands for high temperature simulations,
 using pure single plane waves description based on the Fermi gas model beyond explicitly computed bands.
-The implementation and usage will be described in an upcoming paper which is currently under review (Authors: *A. Blanchet, J. Clérouin, M. Torrent, F. Soubiran*).
+The implementation and usage are described in <https://doi.org/10.1016/j.cpc.2021.108215> (Authors: *A. Blanchet, J. Clérouin, M. Torrent, F. Soubiran*).
 
 See [[topic:ExtFPMD]], as well as the input variables [[useextfpmd]] and [[extfpmd_nbcut]],
 and test [[test:v9_92]].

@@ -727,7 +727,15 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 !Add extfpmd free electrons contribution to density
  if(present(extfpmd)) then
    if(associated(extfpmd)) then
-     rhor(:,:)=rhor(:,:)+extfpmd%nelect/ucvol/dtset%nspden
+     if(extfpmd%version==1.or.extfpmd%version==2.or.extfpmd%version==3) then
+       rhor(:,:)=rhor(:,:)+extfpmd%nelect/ucvol/dtset%nspden
+     else if(extfpmd%version==4) then
+       do ispden=1,dtset%nspden
+         do ifft=1,dtset%nfft
+           rhor(ifft,ispden)=rhor(ifft,ispden)+extfpmd%nelectarr(ifft,ispden)/ucvol/dtset%nspden
+         end do
+       end do
+     end if
      rhog(1,1)=rhog(1,1)+extfpmd%nelect/ucvol/dtset%nspden
    end if
  end if
