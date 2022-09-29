@@ -340,6 +340,7 @@ module m_gwr
   ! Internal variable used to activate profiling in low-level routines
 
   logical :: idle_proc = .False.
+  ! True if there idle procs i.e. if processes in the input_comm have been excluded.
 
   integer,allocatable :: bstart_ks(:,:)
    ! bstart_ks(nkcalc, nsppol)
@@ -434,6 +435,7 @@ module m_gwr
    !integer :: sig_ngfft(18) = -1, sig_mgfft = -1, sig_nfft = -1
 
    integer :: mg0(3) = [2, 2, 2]
+   ! Max shifts to account for umklapps.
 
    type(desc_t),allocatable :: green_desc_kibz(:)
    ! (nkibz)
@@ -1813,6 +1815,7 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
  type(dataset_type),pointer :: dtset
 !arrays
  integer,allocatable :: kg_k(:,:)
+ logical,allocatable :: bks_mask(:,:,:)
  real(dp) :: kk_ibz(3), tsec(2)
  !real(dp),allocatable :: cgwork(:,:)
  real(dp),ABI_CONTIGUOUS pointer :: cg_k(:,:)
@@ -1884,26 +1887,6 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
 
  call wrtout(std_out, sjoin(" Reading KS states with nbsum", itoa(nbsum), "..."))
 
- ! TODO
- ! Compute contribution to head and wings for this (kpoint, spin)
- ! taking into account that the same ik_ibz might be replicated.
-
- !mpw = maxval(wfd%npwarr)
- ! TODO: Mv m_ddk in 72_response below 70_gw or move gwr to higher level.
- !ddkop = ddkop_new(dtset, gwr%cryst, gwr%pawtab, gwr%psps, wfd%mpi_enreg, mpw, wfd%ngfft)
- !call ddkop%free()
-
- !ABI_MALLOC(cgwork, (2, npw_k * gwr%nspinor))
- !call ddkop%setup_spin_kpoint(gwr%dtset, gwr%cryst, gwr%psps, spin, kk_ibz, istwf_k, npw_k, kg_k)
- !do il_b=1, ugb%sizeb_local(2)
- !  band = ugb%loc2gcol(il_b)
- !  eig_nk = gwr%ks_ebands%eig(band, ik_ibz, spin)
- !  call c_f_pointer(c_loc(ugb%buffer_cplx(:,il_b)), cwave, shape=[2, npwsp])
- !  call ddkop%apply(eig_nk, npw_k, nspinor, cwave, cwaveprj)
- !end do
- !call ddkop%free()
- !ABI_FREE(cgwork)
-
  ! Init ugb(npwsp, nbsum) PBLAS matrix within the gtau communicator.
  ! and distribute it over bands so that each proc reads a subset of bands in read_band_block
 
@@ -1926,6 +1909,8 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
 
  mpw = maxval(wfk_hdr%npwarr)
  ABI_MALLOC(kg_k, (3, mpw))
+
+ ABI_MALLOC(bks_mask, (mband, nkibz, nsppol))
 
  do my_is=1,gwr%my_nspins
    spin = gwr%my_spins(my_is)
@@ -1958,18 +1943,25 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
                               kg_k=kg_k, cg_k=cg_k)
 
      ! TODO: use round-robin + use gtau_comm% for IO.
-     !call wfk%read_bmask(bmask, ik_ibz, spin, xmpio_single, & ! xmpio_collective,
-     !                    kg_k=kg_k, cg_k=cg_k) !, eig_k, occ_k)
+     !bks_mask = .False.
+     !do il_b=1, ugb%sizeb_local(2)
+     !  band = ugb%loc2gcol(il_b)
+     !  bks_maks(band, ik_ibz, spin) = .True.
+     !end do
+     !call wfk%read_bmask(bks_mask, ik_ibz, spin, xmpio_single, & ! xmpio_collective,
+     !                    kg_k=kg_k, cg_k=cg_k)
 
      ABI_CHECK(all(kg_k(:,1:npw_k) == desc_k%gvec), "kg_k != desc_k%gvec")
 
-     write(msg,'(3(a,i0),a)')" My ik_ibz [", my_iki, "/", gwr%my_nkibz, "] (tot: ", gwr%nkibz, ")"
+     write(msg,'(3(a,i0),a)')" Read ugb_k: ik_ibz [", my_iki, "/", gwr%my_nkibz, "] (tot: ", gwr%nkibz, ")"
      call cwtime_report(msg, cpu_green, wall_green, gflops_green)
      end associate
    end do ! my_iki
  end do ! my_is
 
  ABI_FREE(kg_k)
+ ABI_FREE(bks_mask)
+
  call wfk%close()
  call wfk_hdr%free()
 
@@ -2042,6 +2034,7 @@ subroutine gwr_build_green(gwr, free_ugb)
      !call ugb%change_size_blocs(work, size_blocs=, processor=)
      !call work%copy(green, empty=.True.)
 
+     ! output of pzgemm.
      call green%init(npwsp, npwsp, gwr%gtau_slkproc, istwfk1) ! size_blocs=[npwsp, col_bsize])
 
      do itau=1,gwr%ntau
@@ -2078,7 +2071,7 @@ subroutine gwr_build_green(gwr, free_ugb)
      call green%free()
      if (free_ugb) call ugb%free()
 
-     write(msg,'(3(a,i0),a)')" My ik_ibz [", my_iki, "/", gwr%my_nkibz, "] (tot: ", gwr%nkibz, ")"
+     write(msg,'(3(a,i0),a)')" G_k [", my_iki, "/", gwr%my_nkibz, "] (tot: ", gwr%nkibz, ")"
      call cwtime_report(msg, cpu_green, wall_green, gflops_green)
      end associate
    end do ! my_iki
@@ -3488,7 +3481,6 @@ subroutine gwr_build_tchi(gwr)
    ! Precompute phase factors e^{-ik.R} in the super cell.
    !ABI_MALLOC(sc_ceimkr, (sc_nfft * gwr%nspinor, gwr%my_nkbz))
    !ABI_MALLOC(uc_ceimkr, (gwr%g_nfft * gwr%nspinor, gwr%my_nkbz))
-
    !do my_ikf=1,gwr%my_nkbz
    !  ik_bz = gwr%my_kbz_inds(my_ikf)
    !  !call calc_sc_ceikr(-gwr%kbz(:,ik_bz), gwr%ngkpt, gwr%g_ngfft, gwr%nspinor, sc_ceimkr(:,my_ikf))
@@ -4598,7 +4590,7 @@ if (gwr%use_supercell_for_sigma) then
        !call cwtime_report("Sig Matrix part", cpu, wall, gflops)
 
        if (my_ir <= 3 * gwr%sc_batch_size .or. mod(my_ir, PRINT_MODR) == 0) then
-         write(msg,'(3(a,i0),a)')" My ir [", my_ir, "/", my_nr, "] (tot: ", gwr%g_nfft, ")"
+         write(msg,'(3(a,i0),a)')" Sigma_c my_ir [", my_ir, "/", my_nr, "] (tot: ", gwr%g_nfft, ")"
          if (my_rank == 0) call cwtime_report(msg, cpu_ir, wall_ir, gflops_ir)
        end if
      end do ! my_ir
@@ -4609,7 +4601,7 @@ if (gwr%use_supercell_for_sigma) then
      call desc_array_free(desc_myqbz)
      call slk_array_free(wc_gpr)
 
-     write(msg,'(3(a,i0),a)')" My itau [", my_it, "/", gwr%my_ntau, "] (tot: ", gwr%ntau, ")"
+     write(msg,'(3(a,i0),a)')" Sigma_c my_itau [", my_it, "/", gwr%my_ntau, "] (tot: ", gwr%ntau, ")"
      call cwtime_report(msg, cpu_tau, wall_tau, gflops_tau)
    end do ! my_it
 
@@ -4709,7 +4701,7 @@ else
         end do
      end do ! ikcalc
 
-     write(msg,'(3(a,i0),a)')" My itau [", my_it, "/", gwr%my_ntau, "] (tot: ", gwr%ntau, ")"
+     write(msg,'(3(a,i0),a)')" Sigma_c my_itau [", my_it, "/", gwr%my_ntau, "] (tot: ", gwr%ntau, ")"
      call cwtime_report(msg, cpu_tau, wall_tau, gflops_tau)
    end do ! my_it
 
@@ -5292,7 +5284,7 @@ subroutine gwr_ncwrite_tchi_wc(gwr, what, filepath)
 
  ! Cannot reuse SCR.nc/SUSC.nc fileformat as:
  !  - hscr_new requires ep%
- !  - these file formats assume Gamma-centered gvectors.
+ !  - old file formats assume Gamma-centered g vectors.
 
  all_nproc = xmpi_comm_size(gwr%comm); my_rank = xmpi_comm_rank(gwr%comm)
  call cwtime(cpu, wall, gflops, "start")
@@ -5376,14 +5368,16 @@ subroutine gwr_ncwrite_tchi_wc(gwr, what, filepath)
      do my_it=1,gwr%my_ntau
        itau = gwr%my_itaus(my_it)
 
-       ! NB: Assuming PBLAS matrix distributed in contigous blocks along the column index.
+       ! FIXME: Assuming PBLAS matrix distributed in contigous blocks along the column index.
        my_ncols = mats(itau)%sizeb_local(2)
        my_gcol_start = mats(itau)%loc2gcol(1)
+
        call c_f_pointer(c_loc(mats(itau)%buffer_cplx), fptr, shape=[2, npwtot_q, my_ncols])
 
        ncerr = nf90_put_var(ncid, vid("mats"), fptr, &
                             start=[1, 1, my_gcol_start, itau, iq_ibz, spin], &
                             count=[2, npwtot_q, my_ncols, 1, 1, 1])
+                            !stride=[1, gwr%g_comm%nproc, 1, 1, 1])
        NCF_CHECK(ncerr)
      end do
      end associate
@@ -5955,6 +5949,26 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
    qp_ene => gwr%qp_ebands%eig; qp_occ => gwr%qp_ebands%occ
  end if
 
+ ! TODO
+ ! Compute contribution to head and wings for this (kpoint, spin)
+ ! taking into account that the same ik_ibz might be replicated.
+
+ !mpw = maxval(wfd%npwarr)
+ ! TODO: Mv m_ddk in 72_response below 70_gw or move gwr to higher level.
+ !ddkop = ddkop_new(dtset, gwr%cryst, gwr%pawtab, gwr%psps, wfd%mpi_enreg, mpw, wfd%ngfft)
+ !call ddkop%free()
+
+ !ABI_MALLOC(cgwork, (2, npw_k * gwr%nspinor))
+ !call ddkop%setup_spin_kpoint(gwr%dtset, gwr%cryst, gwr%psps, spin, kk_ibz, istwf_k, npw_k, kg_k)
+ !do il_b=1, ugb%sizeb_local(2)
+ !  band = ugb%loc2gcol(il_b)
+ !  eig_nk = gwr%ks_ebands%eig(band, ik_ibz, spin)
+ !  call c_f_pointer(c_loc(ugb%buffer_cplx(:,il_b)), cwave, shape=[2, npwsp])
+ !  call ddkop%apply(eig_nk, npw_k, nspinor, cwave, cwaveprj)
+ !end do
+ !call ddkop%free()
+ !ABI_FREE(cgwork)
+
 end subroutine gwr_build_chi0_head_and_wings
 !!***
 
@@ -6104,7 +6118,7 @@ subroutine gwr_build_sigxme(gwr)
      call sphereboundary(gbound_kcalc, desc_kcalc%istwfk, desc_kcalc%gvec, x_mgfft, desc_kcalc%npw)
 
      do il_b=1,ugb_kcalc%sizeb_local(2)
-       band = ugb_kcalc%loc2gcol(il_b); if (band < bmin .or. band > bmax) cycle
+       band = ugb_kcalc%loc2gcol(il_b); if (band < bmin .or. band > bmax) CYCLE
        call fft_ug(desc_kcalc%npw, x_nfft, nspinor, ndat1, &
                    x_mgfft, x_ngfft, desc_kcalc%istwfk, desc_kcalc%gvec, gbound_kcalc, &
                    gwr%ugb(ikcalc_ibz, spin)%buffer_cplx(:, il_b), &  ! in

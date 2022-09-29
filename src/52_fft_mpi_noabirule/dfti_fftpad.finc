@@ -7,7 +7,7 @@
 
  nthreads = xomp_get_num_threads(open_parallel=.TRUE.)
 
- call zpad_init(zpad,nx,ny,nz,ldx,ldy,ldz,mgfft,gbound)
+ call zpad_init(zpad, nx, ny, nz, ldx, ldy, ldz, mgfft, gbound)
 
  SELECT CASE (isign)
 

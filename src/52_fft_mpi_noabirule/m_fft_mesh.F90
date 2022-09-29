@@ -141,14 +141,14 @@ subroutine zpad_init(zpad,nx,ny,nz,ldx,ldy,ldz,mgfft,gbound)
 
 ! *************************************************************************
 
- g3_min = gbound(3,2)
- g3_max = gbound(4,2)
+ g3_min = gbound(3, 2)
+ g3_max = gbound(4, 2)
 
  zpad%n_zplanes = g3_max - g3_min + 1
 
- ABI_MALLOC(zpad%zplane,      (2,nz))
- ABI_MALLOC(zpad%linex2ifft_yz, (2,nx*ny*nz))
- !
+ ABI_MALLOC(zpad%zplane,      (2, nz))
+ ABI_MALLOC(zpad%linex2ifft_yz, (2, nx*ny*nz))
+
  ! Loop over the z-planes intersecting the G-sphere.
  nlinex = 0
  do gg3=1,zpad%n_zplanes
