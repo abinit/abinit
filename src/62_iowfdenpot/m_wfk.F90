@@ -4376,6 +4376,7 @@ end subroutine mpio_write_eigocc_k
 !!
 !! OUTPUT
 !!  Output is written to file out_path
+!!  hdr_kfull: header of the WFK file.
 !!
 !! NOTES
 !!  - This routine should be called by a single processor.
@@ -4383,13 +4384,14 @@ end subroutine mpio_write_eigocc_k
 !!
 !! SOURCE
 
-subroutine wfk_tofullbz(in_path, dtset, psps, pawtab, out_path)
+subroutine wfk_tofullbz(in_path, dtset, psps, pawtab, out_path, hdr_kfull)
 
 !Arguments ------------------------------------
 !scalars
  character(len=*),intent(in) :: in_path,out_path
  type(pseudopotential_type),intent(in) :: psps
  type(dataset_type),intent(in) :: dtset
+ type(hdr_type),intent(out) :: hdr_kfull
 !arrays
  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat*psps%usepaw)
 
@@ -4407,7 +4409,7 @@ subroutine wfk_tofullbz(in_path, dtset, psps, pawtab, out_path)
  type(wfk_t),target :: iwfk
  type(wfk_t) :: owfk
  type(crystal_t) :: cryst
- type(hdr_type) :: hdr_kfull
+
  type(hdr_type),pointer :: ihdr
  type(ebands_t) :: ebands_ibz
  type(ebands_t),target :: ebands_full
@@ -4486,7 +4488,6 @@ subroutine wfk_tofullbz(in_path, dtset, psps, pawtab, out_path)
 
  out_iomode = iomode_from_fname(out_path)
  call owfk%open_write(hdr_kfull, out_path, iwfk%formeig, out_iomode, get_unit(), xmpi_comm_self)
- call hdr_kfull%free()
 
  ! workspace array for BZ wavefunction block.
  mpw_kf = maxval(ebands_full%npwarr)

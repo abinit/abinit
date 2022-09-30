@@ -21585,8 +21585,8 @@ Possible values are:
 
   * "wfk_fullbz" --> Read input WFK file and produce new WFK file with $\kk$-points in the full BZ.
      Wavefunctions with [[istwfk]] > 2 are automatically converted into the full G-sphere representation.
-     This option can be used to interface Abinit with external tools (e.g. lobster)
-     requiring $\kk$-points in the full BZ.
+     This option can be used to interface Abinit with external tools (e.g. lobster) requiring $\kk$-points in the full BZ.
+     Use [[iomode]] = 3 and [[prtkbff]] = 1 to produce a WFK file in netcdf format with Kleynmann-Bylander form factors.
 
   * "wfk_einterp" --> Read energies from WFK file and interpolate the band structure with the SKW method
      using the parameters specified by [[einterp]].

@@ -56,6 +56,7 @@ MODULE m_iowf
 
  public :: outwf
  public :: outresid
+ public :: prtkbff            !  Write KB form factors to WFK in netcdf format.
 
 !!***
 
@@ -248,11 +249,6 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
  integer,allocatable :: kg_disk(:,:)
  real(dp) :: tsec(2)
  real(dp),allocatable :: cg_disk(:,:),eig_k(:),occ_k(:)
-#ifdef HAVE_NETCDF
- integer :: ncid, ncerr, kg_varid, mpw_disk, npwk_disk
- real(dp),allocatable :: vkb(:,:,:),vkbd(:,:,:),vkbsign(:,:)
- type(crystal_t) :: crystal
-#endif
 
 ! *************************************************************************
 !For readability of the source file, define a "me" variable also in the sequential case
@@ -344,92 +340,7 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
      ! having to deal with paral_kgb distribution.
      if (me == master .and. dtset%prtkbff == 1 .and. dtset%iomode == IO_MODE_ETSF .and. dtset%usepaw == 0) then
        ABI_CHECK(done, "cg_ncwrite was not able to generate WFK.nc in parallel. Perhaps hdf5 is not working")
-       path = nctk_ncify(filnam)
-       call wrtout(std_out, sjoin("Writing KB form factors to:", path))
-       NCF_CHECK(nctk_open_modify(ncid, path, xmpi_comm_self))
-       NCF_CHECK(nf90_inq_varid(ncid, "reduced_coordinates_of_plane_waves", kg_varid))
-       mpw_disk = maxval(hdr%npwarr)
-
-       ! Dimensions needed by client code to allocate memory when reading.
-       ncerr = nctk_def_dims(ncid, [ &
-         nctkdim_t("mproj", psps%mproj), &
-         nctkdim_t("mpsang", psps%mpsang), &
-         nctkdim_t("mpssoang", psps%mpssoang), &
-         nctkdim_t("lnmax", psps%lnmax), &
-         nctkdim_t("lmnmax", psps%lmnmax) &
-       ])
-       NCF_CHECK(ncerr)
-
-       ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "mpspso"])
-       NCF_CHECK(ncerr)
-
-       ! Write indlmn table (needed to access vkb arrays)
-       ncerr = nctk_def_arrays(ncid, [ &
-         nctkarr_t("indlmn", "int", "six, lmnmax, number_of_atom_species"), &
-         nctkarr_t("vkbsign", "dp", "lnmax, number_of_atom_species"), &
-         nctkarr_t("vkb", "dp", "max_number_of_coefficients, lnmax, number_of_atom_species, number_of_kpoints"), &
-         nctkarr_t("vkbd", "dp", "max_number_of_coefficients, lnmax, number_of_atom_species, number_of_kpoints") &
-       ], defmode=.True.)
-       NCF_CHECK(ncerr)
-
-       ! Switch to write mode.
-       NCF_CHECK(nctk_set_datamode(ncid))
-       NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "indlmn"), psps%indlmn))
-
-       ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: &
-         "mpspso"], &
-         [psps%mpspso])
-       NCF_CHECK(ncerr)
-
-       ! Calculate KB form factors and derivatives.
-       ! The arrays are allocated with lnmax to support pseudos with more than projector.
-       ! Note that lnmax takes into account lloc hence arrays are in packed form and should be
-       ! accessed with the indices provided by psps%indlmn.
-       ABI_MALLOC(vkbsign, (psps%lnmax, psps%ntypat))
-       ABI_MALLOC(vkb, (mpw_disk, psps%lnmax, psps%ntypat))
-       ABI_MALLOC(vkbd, (mpw_disk, psps%lnmax, psps%ntypat))
-       ABI_MALLOC(kg_disk, (3, mpw_disk))
-
-       crystal = hdr%get_crystal()
-
-       ! For each k-point: read full G-vector list from file, compute KB data and write to file.
-       do ikpt=1,nkpt
-         npwk_disk = hdr%npwarr(ikpt)
-         NCF_CHECK(nf90_get_var(ncid, kg_varid, kg_disk, start=[1, 1, ikpt], count=[3, npwk_disk, 1]))
-         vkb = zero; vkbd = zero
-         call calc_vkb(crystal, psps, kptns(:, ikpt), npwk_disk, mpw_disk, kg_disk, vkbsign, vkb, vkbd)
-
-         if (ikpt == 1) then
-           ! This for the automatic tests.
-           NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vkbsign"), vkbsign))
-           if(dtset%prtvol>=2)then
-             write(msg,'(a)') 'prtkbff: writing first and last G-components of the KB form factors'
-             call wrtout(ab_out, msg)
-             do iat=1,psps%ntypat
-               write(msg,'(a10,i5)') 'atype ',iat
-               call wrtout(ab_out, msg)
-               do iproj=1,psps%lnmax
-                 write(msg,'(a10,i5,a,a10,e12.4,a,2(a10,2e12.4,a))') &
-                        'projector ', iproj,ch10, &
-                        'vkbsign   ', vkbsign(iproj,iat), ch10, &
-                        'vkb       ', vkb(1,iproj,iat),  vkb(npwk_disk,iproj,iat), ch10, &
-                        'vkbd      ', vkbd(1,iproj,iat), vkbd(npwk_disk,iproj,iat), ''
-                 call wrtout(ab_out, msg)
-               end do
-             end do
-           end if
-         end if
-
-         NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vkb"), vkb, start=[1, 1, 1, ikpt]))
-         NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vkbd"), vkbd, start=[1, 1, 1, ikpt]))
-       end do
-       NCF_CHECK(nf90_close(ncid))
-
-       ABI_FREE(kg_disk)
-       ABI_FREE(vkbsign)
-       ABI_FREE(vkb)
-       ABI_FREE(vkbd)
-       call crystal%free()
+       call prtkbff(filnam, hdr, psps, dtset%prtvol)
      end if
 
      if (done) return
@@ -1337,6 +1248,130 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
  DBG_EXIT("COLL")
 
 end subroutine cg_ncwrite
+!!***
+
+!!****f* m_iowf/prtkbff
+!! NAME
+!!  prtkbff
+!!
+!! FUNCTION
+!!  Write KB form factors to WFK in netcdf format.
+!!  Only master works. G-vectors are read from file to avoid
+!!  having to deal with paral_kgb distribution.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine prtkbff(filnam, hdr, psps, prtvol)
+
+!Arguments ------------------------------------
+ character(len=*),intent(in) :: filnam
+ type(hdr_type),intent(in) :: hdr
+ type(pseudopotential_type),intent(in) :: psps
+ integer,intent(in) :: prtvol
+
+!Local variables-------------------------------
+!scalars
+ character(len=fnlen) :: path
+ character(len=500) :: msg
+ integer :: ncid, ncerr, kg_varid, mpw_disk, npwk_disk, ikpt, iat, iproj
+ integer,allocatable :: kg_disk(:,:)
+ real(dp),allocatable :: vkb(:,:,:),vkbd(:,:,:),vkbsign(:,:)
+ type(crystal_t) :: crystal
+
+! *************************************************************************
+
+ path = nctk_ncify(filnam)
+ call wrtout(std_out, sjoin("Writing KB form factors to:", path))
+ NCF_CHECK(nctk_open_modify(ncid, path, xmpi_comm_self))
+ NCF_CHECK(nf90_inq_varid(ncid, "reduced_coordinates_of_plane_waves", kg_varid))
+ mpw_disk = maxval(hdr%npwarr)
+
+ ! Dimensions needed by client code to allocate memory when reading.
+ ncerr = nctk_def_dims(ncid, [ &
+   nctkdim_t("mproj", psps%mproj), &
+   nctkdim_t("mpsang", psps%mpsang), &
+   nctkdim_t("mpssoang", psps%mpssoang), &
+   nctkdim_t("lnmax", psps%lnmax), &
+   nctkdim_t("lmnmax", psps%lmnmax) &
+ ])
+ NCF_CHECK(ncerr)
+
+ ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "mpspso"])
+ NCF_CHECK(ncerr)
+
+ ! Write indlmn table (needed to access vkb arrays)
+ ncerr = nctk_def_arrays(ncid, [ &
+   nctkarr_t("indlmn", "int", "six, lmnmax, number_of_atom_species"), &
+   nctkarr_t("vkbsign", "dp", "lnmax, number_of_atom_species"), &
+   nctkarr_t("vkb", "dp", "max_number_of_coefficients, lnmax, number_of_atom_species, number_of_kpoints"), &
+   nctkarr_t("vkbd", "dp", "max_number_of_coefficients, lnmax, number_of_atom_species, number_of_kpoints") &
+ ], defmode=.True.)
+ NCF_CHECK(ncerr)
+
+ ! Switch to write mode.
+ NCF_CHECK(nctk_set_datamode(ncid))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "indlmn"), psps%indlmn))
+
+ ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: &
+   "mpspso"], &
+   [psps%mpspso])
+ NCF_CHECK(ncerr)
+
+ ! Calculate KB form factors and derivatives.
+ ! The arrays are allocated with lnmax to support pseudos with more than projector.
+ ! Note that lnmax takes into account lloc hence arrays are in packed form and should be
+ ! accessed with the indices provided by psps%indlmn.
+ ABI_MALLOC(vkbsign, (psps%lnmax, psps%ntypat))
+ ABI_MALLOC(vkb, (mpw_disk, psps%lnmax, psps%ntypat))
+ ABI_MALLOC(vkbd, (mpw_disk, psps%lnmax, psps%ntypat))
+ ABI_MALLOC(kg_disk, (3, mpw_disk))
+
+ crystal = hdr%get_crystal()
+
+ ! For each k-point: read full G-vector list from file, compute KB data and write to file.
+ do ikpt=1,hdr%nkpt
+   npwk_disk = hdr%npwarr(ikpt)
+   NCF_CHECK(nf90_get_var(ncid, kg_varid, kg_disk, start=[1, 1, ikpt], count=[3, npwk_disk, 1]))
+   vkb = zero; vkbd = zero
+   call calc_vkb(crystal, psps, hdr%kptns(:, ikpt), npwk_disk, mpw_disk, kg_disk, vkbsign, vkb, vkbd)
+
+   if (ikpt == 1) then
+     ! This for the automatic tests.
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vkbsign"), vkbsign))
+     if(prtvol >= 2) then
+       write(msg,'(a)') 'prtkbff: writing first and last G-components of the KB form factors'
+       call wrtout(ab_out, msg)
+       do iat=1,psps%ntypat
+         write(msg,'(a10,i5)') 'atype ',iat
+         call wrtout(ab_out, msg)
+         do iproj=1,psps%lnmax
+           write(msg,'(a10,i5,a,a10,e12.4,a,2(a10,2e12.4,a))') &
+                  'projector ', iproj,ch10, &
+                  'vkbsign   ', vkbsign(iproj,iat), ch10, &
+                  'vkb       ', vkb(1,iproj,iat),  vkb(npwk_disk,iproj,iat), ch10, &
+                  'vkbd      ', vkbd(1,iproj,iat), vkbd(npwk_disk,iproj,iat), ''
+           call wrtout(ab_out, msg)
+         end do
+       end do
+     end if
+   end if
+
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vkb"), vkb, start=[1, 1, 1, ikpt]))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vkbd"), vkbd, start=[1, 1, 1, ikpt]))
+ end do
+ NCF_CHECK(nf90_close(ncid))
+
+ ABI_FREE(kg_disk)
+ ABI_FREE(vkbsign)
+ ABI_FREE(vkb)
+ ABI_FREE(vkbd)
+ call crystal%free()
+
+end subroutine prtkbff
 !!***
 
 !----------------------------------------------------------------------
