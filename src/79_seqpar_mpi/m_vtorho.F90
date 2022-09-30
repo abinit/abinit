@@ -25,6 +25,7 @@
 
 module m_vtorho
 
+ use iso_fortran_env, only : int32,int64,real32,real64
  use defs_basis
  use defs_wvltypes
  use m_abicore
@@ -60,7 +61,7 @@ module m_vtorho
  use m_electronpositron,   only : electronpositron_type,electronpositron_calctype
  use m_paw_dmft,           only : paw_dmft_type,init_dmft,destroy_dmft,print_dmft,saveocc_dmft
  use m_paw_correlations,   only : setnoccmmp
- use m_paw_occupancies,   only : pawmkrhoij
+ use m_paw_occupancies,    only : pawmkrhoij
  use m_paw_mkrho,          only : pawmkrho
  use m_crystal,            only : crystal_init, crystal_t
  use m_oper,               only : oper_type,init_oper,destroy_oper
@@ -88,6 +89,10 @@ module m_vtorho
 
 #if defined HAVE_GPU_CUDA
  use m_manage_cuda
+#endif
+
+#if defined HAVE_YAKL
+ use gator_mod
 #endif
 
 #if defined HAVE_BIGDFT
@@ -380,7 +385,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  type(bandfft_kpt_type),pointer :: my_bandfft_kpt => null()
  type(gs_hamiltonian_type) :: gs_hamk
 !arrays
- integer,allocatable :: kg_k(:,:)
+ integer(int32), ABI_CONTIGUOUS pointer :: kg_k(:,:) => null()
  real(dp) :: dielar(7),dphase_k(3),kpoint(3),qpt(3),rhodum(1),tsec(2),ylmgr_dum(0,0,0)
  real(dp),allocatable :: EigMin(:,:),buffer1(:),buffer2(:),cgq(:,:)
  real(dp),allocatable :: cgrkxc(:,:),cgrvtrial(:,:),doccde(:)
@@ -839,7 +844,12 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        !resid_k(:)=zero
        zshift(:)=dtset%eshift
 
+#if defined HAVE_GPU && defined HAVE_YAKL
+       ABI_MALLOC_MANAGED(kg_k, (/3,npw_k/))
+#else
        ABI_MALLOC(kg_k,(3,npw_k))
+#endif
+
        ABI_MALLOC(ylm_k,(npw_k,psps%mpsang*psps%mpsang*psps%useylm))
        kg_k(:,1:npw_k)=kg(:,1+ikg:npw_k+ikg)
        if (psps%useylm==1) then
@@ -964,7 +974,13 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 #endif
        ABI_FREE(ffnl)
        ABI_FREE(kinpw)
+
+#if defined HAVE_GPU && defined HAVE_YAKL
+       ABI_FREE_MANAGED(kg_k)
+#else
        ABI_FREE(kg_k)
+#endif
+
        ABI_FREE(kpg_k)
        ABI_FREE(ylm_k)
        ABI_FREE(ph3d)

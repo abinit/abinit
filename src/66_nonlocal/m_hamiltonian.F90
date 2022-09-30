@@ -29,6 +29,8 @@
 
 module m_hamiltonian
 
+ use iso_fortran_env, only : int32,int64,real32,real64
+
  use defs_basis
  use m_abicore
  use m_errors
@@ -254,7 +256,7 @@ module m_hamiltonian
    ! gbound_kp(2*mgfft+8,2)
    ! G sphere boundary, for each plane wave at k^prime
 
-  integer, pointer :: kg_k(:,:) => null()
+  integer(int32), ABI_CONTIGUOUS pointer :: kg_k(:,:) => null()
    ! kg_k(3,npw_fft_k)
    ! G vector coordinates with respect to reciprocal lattice translations
    ! at k
