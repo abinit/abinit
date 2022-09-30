@@ -824,29 +824,29 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &     rhog,rhog1,rhor,rhor1,rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1,vpsp1,&
 &     nvresid1,res2,vtrial1,vxc,vxc1,xccc3d1,dtset%ixcrot)
 
-     if(.not.kramers_deg) then
-       !rhor1_mq=rhor1
-       !rhog1_mq=rhog1
-       !get initial guess for vtrial1 at -q
-       do ifft=1,nfftf
-         vtrial1_mq(2*ifft-1,1)=+vtrial1(2*ifft-1,1)
-         vtrial1_mq(2*ifft  ,1)=-vtrial1(2*ifft  ,1)
-       end do
-       if (nspden >= 2) then
-         do ifft=1,nfftf
-           vtrial1_mq(2*ifft-1,2)=+vtrial1(2*ifft-1,2)
-           vtrial1_mq(2*ifft  ,2)=-vtrial1(2*ifft  ,2)
-         end do
-       end if
-       if (nspden > 2) then
-         do ifft=1,nfftf
-           vtrial1_mq(2*ifft-1,3)= vtrial1(2*ifft  ,4) !Re[V^12]
-           vtrial1_mq(2*ifft  ,3)= vtrial1(2*ifft-1,4) !Im[V^12],see definition of v(:,4) cplex=2 case
-           vtrial1_mq(2*ifft  ,4)= vtrial1(2*ifft-1,3) !Re[V^21]=Re[V^12]
-           vtrial1_mq(2*ifft-1,4)= vtrial1(2*ifft  ,3) !Re[V^21]=Re[V^12]
-         end do
-       end if
-     end if
+!     if(.not.kramers_deg) then
+!       !rhor1_mq=rhor1
+!       !rhog1_mq=rhog1
+!       !get initial guess for vtrial1 at -q
+!       do ifft=1,nfftf
+!         vtrial1_mq(2*ifft-1,1)=+vtrial1(2*ifft-1,1)
+!         vtrial1_mq(2*ifft  ,1)=-vtrial1(2*ifft  ,1)
+!       end do
+!       if (nspden >= 2) then
+!         do ifft=1,nfftf
+!           vtrial1_mq(2*ifft-1,2)=+vtrial1(2*ifft-1,2)
+!           vtrial1_mq(2*ifft  ,2)=-vtrial1(2*ifft  ,2)
+!         end do
+!       end if
+!       if (nspden > 2) then
+!         do ifft=1,nfftf
+!           vtrial1_mq(2*ifft-1,3)= vtrial1(2*ifft  ,4) !Re[V^12]
+!           vtrial1_mq(2*ifft  ,3)= vtrial1(2*ifft-1,4) !Im[V^12],see definition of v(:,4) cplex=2 case
+!           vtrial1_mq(2*ifft  ,4)= vtrial1(2*ifft-1,3) !Re[V^21]=Re[V^12]
+!           vtrial1_mq(2*ifft-1,4)= vtrial1(2*ifft  ,3) !Re[V^21]=Re[V^12]
+!         end do
+!       end if
+!     end if
 
 !    For Q=0 and metallic occupation, initialize quantities needed to
 !    compute the first-order Fermi energy
@@ -968,6 +968,42 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !  No need to continue and call dfpt_vtorho, when nstep==0
    if(nstep==0) exit
 
+   !Initializations 
+   if (.not.kramers_deg) then
+   !same problem as with density reconstruction, TODO proper fft parallelization...
+     cg1_mq(1,:)=cg1(1,:)
+     cg1_mq(2,:)=-cg1(2,:)
+     cg1_active_mq(1,:)=cg1_active(1,:)
+     cg1_active_mq(2,:)=-cg1_active(2,:)
+     do ifft=1,nfftf
+       vtrial1_mq(2*ifft-1,1)=+vtrial1(2*ifft-1,1)
+       vtrial1_mq(2*ifft  ,1)=-vtrial1(2*ifft  ,1)
+       nvresid1_mq(2*ifft-1,1)=+nvresid1(2*ifft-1,1)
+       nvresid1_mq(2*ifft  ,1)=-nvresid1(2*ifft  ,1)
+       rhor1_mq(2*ifft-1,1)=+rhor1(2*ifft-1,1)
+       rhor1_mq(2*ifft  ,1)=-rhor1(2*ifft  ,1)
+     end do
+     if (nspden >= 2) then
+       do ifft=1,nfftf
+         vtrial1_mq(2*ifft-1,2)=+vtrial1(2*ifft-1,2)
+         vtrial1_mq(2*ifft  ,2)=-vtrial1(2*ifft  ,2)
+         nvresid1_mq(2*ifft-1,2)=+nvresid1(2*ifft-1,2)
+         nvresid1_mq(2*ifft  ,2)=-nvresid1(2*ifft  ,2)
+       end do
+     end if
+     if (nspden > 2) then
+       do ifft=1,nfftf
+         vtrial1_mq(2*ifft-1,3)= vtrial1(2*ifft  ,4) !Re[V^12]
+         vtrial1_mq(2*ifft  ,3)= vtrial1(2*ifft-1,4) !Im[V^12],see definition of v(:,4) cplex=2 case
+         vtrial1_mq(2*ifft  ,4)= vtrial1(2*ifft-1,3) !Re[V^21]=Re[V^12]
+         vtrial1_mq(2*ifft-1,4)= vtrial1(2*ifft  ,3) !Re[V^21]=Re[V^12]
+         nvresid1_mq(2*ifft-1,3)= nvresid1(2*ifft  ,4) !Re[V^12]
+         nvresid1_mq(2*ifft  ,3)= nvresid1(2*ifft-1,4) !Im[V^12],see definition of v(:,4) cplex=2 case
+         nvresid1_mq(2*ifft  ,4)= nvresid1(2*ifft-1,3) !Re[V^21]=Re[V^12]
+         nvresid1_mq(2*ifft-1,4)= nvresid1(2*ifft  ,3) !Re[V^21]=Re[V^12]
+       end do
+     end if
+   end if
 !   write(200,*) "ITERATION:", istep
 !   write(201,*) "ITERATION:", istep
 !   do ifft=1,nfftf
@@ -1029,12 +1065,12 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      cg1_active(2,:)=half*(cg1_active_pq(2,:)-cg1_active_mq(2,:))
    end if
 
-   write(300,*) 'ITERATION:', istep
-   write(301,*) 'ITERATION:', istep
-   do ifft=1,mpw1*dtset%nspinor*mband_mem_rbz*mk1mem*dtset%nsppol
-     write(300,*) cg1_pq(1,ifft),cg1_pq(2,ifft)
-     write(301,*) cg1_mq(1,ifft),cg1_mq(2,ifft)
-   end do
+!   write(300,*) 'ITERATION:', istep
+!   write(301,*) 'ITERATION:', istep
+!   do ifft=1,mpw1*dtset%nspinor*mband_mem_rbz*mk1mem*dtset%nsppol
+!     write(300,*) cg1_pq(1,ifft),cg1_pq(2,ifft)
+!     write(301,*) cg1_mq(1,ifft),cg1_mq(2,ifft)
+!   end do
 !   write(200,*) 'ITERATION:', istep
 !   write(201,*) 'ITERATION:', istep
 !   do ifft=1,nfftf
@@ -1172,23 +1208,23 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &     end0,end1,enl0,enl1,epaw1,etotal,evar,evdw,exc1,ipert,dtset%natom,optene)
 !&     enl0,enl1,epaw1,etotal,evar,evdw,exc1,elmag1,ipert,dtset%natom,optene)
 !    !debug: compute the d2E/d-qd+q energy, should be equal to the one from previous line
-       write(100,*) "line1"
-       write(100,*) deltae,eberry,edocc,eeig0
-       write(100,*) "line2"
-       write(100,*) ehart1,ek0,ek1,elast,eloc0,elpsp1
-       write(100,*) "line3"
-       write(100,*) enl0,end1,enl0,enl1,epaw1,etotal,evar,exc1
+!       write(100,*) "line1"
+!       write(100,*) deltae,eberry,edocc,eeig0
+!       write(100,*) "line2"
+!       write(100,*) ehart1,ek0,ek1,elast,eloc0,elpsp1
+!       write(100,*) "line3"
+!       write(100,*) enl0,end1,enl0,enl1,epaw1,etotal,evar,exc1
      if(.not.kramers_deg) then
        call dfpt_etot(dtset%berryopt,deltae_mq,eberry_mq,edocc_mq,eeig0_mq,eew,efrhar,efrkin,&
 &        efrloc,efrnl,efrx1,efrx2,ehart1,ek0_mq,ek1_mq,eii,elast_mq,eloc0_mq,elpsp1_mq,&
 &        enl0_mq,end1_mq,enl0_mq,enl1_mq,epaw1_mq,etotal_mq,evar_mq,evdw,exc1,ipert,dtset%natom,optene)
 
-       write(101,*) "line1"
-       write(101,*) deltae_mq,eberry_mq,edocc_mq,eeig0_mq
-       write(101,*) "line2"
-       write(101,*) ehart1,ek0_mq,ek1_mq,elast_mq,eloc0_mq,elpsp1_mq
-       write(101,*) "line3"
-       write(101,*) enl0_mq,end1_mq,enl0_mq,enl1_mq,epaw1_mq,etotal_mq,evar_mq,exc1
+!       write(101,*) "line1"
+!       write(101,*) deltae_mq,eberry_mq,edocc_mq,eeig0_mq
+!       write(101,*) "line2"
+!       write(101,*) ehart1,ek0_mq,ek1_mq,elast_mq,eloc0_mq,elpsp1_mq
+!       write(101,*) "line3"
+!       write(101,*) enl0_mq,end1_mq,enl0_mq,enl1_mq,epaw1_mq,etotal_mq,evar_mq,exc1
 
        etotal=half*(etotal+etotal_mq)
        deltae=half*(deltae+deltae_mq)
@@ -1241,27 +1277,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &       initialized,iscf_mod,ispmix,istep,mix,pawfgr%coatofin,&
 &       mpi_enreg,my_natom,nfftf,nfftmix,ngfftf,ngfftmix,npawmix,pawrhoij1,&
 &       qphon,rhor1,rprimd,psps%usepaw,nvresid1,vtrial1)
-       if (.not.kramers_deg) then
-       !same problem as with density reconstruction, TODO proper fft parallelization...
-         do ifft=1,nfftf
-           vtrial1_mq(2*ifft-1,1)=+vtrial1(2*ifft-1,1)
-           vtrial1_mq(2*ifft  ,1)=-vtrial1(2*ifft  ,1)
-         end do
-         if (nspden >= 2) then
-           do ifft=1,nfftf
-             vtrial1_mq(2*ifft-1,2)=+vtrial1(2*ifft-1,2)
-             vtrial1_mq(2*ifft  ,2)=-vtrial1(2*ifft  ,2)
-           end do
-         end if
-         if (nspden > 2) then
-           do ifft=1,nfftf
-             vtrial1_mq(2*ifft-1,3)= vtrial1(2*ifft  ,4) !Re[V^12]
-             vtrial1_mq(2*ifft  ,3)= vtrial1(2*ifft-1,4) !Im[V^12],see definition of v(:,4) cplex=2 case
-             vtrial1_mq(2*ifft  ,4)= vtrial1(2*ifft-1,3) !Re[V^21]=Re[V^12]
-             vtrial1_mq(2*ifft-1,4)= vtrial1(2*ifft  ,3) !Re[V^21]=Re[V^12]
-           end do
-         end if
-       end if
        initialized=1
      end if
    end if
