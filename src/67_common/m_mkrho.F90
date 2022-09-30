@@ -21,6 +21,8 @@
 
 module m_mkrho
 
+ use, intrinsic :: iso_fortran_env, only: int32, int64, real32, real64
+
  use defs_basis
  use defs_wvltypes
  use m_abicore
@@ -47,6 +49,10 @@ module m_mkrho
  use m_prep_kgb,     only : prep_fourwf
  use m_wvl_rho,      only : wvl_mkrho
  use m_rot_cg,       only : rot_cg
+
+#if defined HAVE_YAKL
+ use gator_mod
+#endif
 
  implicit none
 
@@ -168,7 +174,8 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
  real(dp) :: weight,weight_i
  !character(len=500) :: message
 !arrays
- integer,allocatable :: gbound(:,:),kg_k(:,:)
+ integer,allocatable :: gbound(:,:)
+ integer(int32),ABI_CONTIGUOUS pointer :: kg_k(:,:) => null()
  logical :: locc_test,nspinor1TreatedByThisProc,nspinor2TreatedByThisProc
  real(dp) :: dummy(2,1),tsec(2)
  real(dp),allocatable :: cwavef(:,:,:),cwavefb(:,:,:),cwavef_x(:,:)
@@ -323,7 +330,11 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
          end if
 
          ABI_MALLOC(gbound,(2*dtset%mgfft+8,2))
+#if defined HAVE_GPU && defined HAVE_YAKL
+         ABI_MALLOC_MANAGED(kg_k, (/3,npw_k/))
+#else
          ABI_MALLOC(kg_k,(3,npw_k))
+#endif
 
          kg_k(:,1:npw_k)=kg(:,1+ikg:npw_k+ikg)
          call sphereboundary(gbound,istwf_k,kg_k,dtset%mgfft,npw_k)
@@ -717,7 +728,11 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
          end if
 
          ABI_FREE(gbound)
+#if defined HAVE_GPU && defined HAVE_YAKL
+         ABI_FREE_MANAGED(kg_k)
+#else
          ABI_FREE(kg_k)
+#endif
 
          bdtot_index=bdtot_index+nband_k
 
