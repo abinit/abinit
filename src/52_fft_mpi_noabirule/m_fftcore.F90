@@ -39,6 +39,7 @@ module m_fftcore
 
  use m_time,         only : timab
  use m_fstrings,     only : itoa, sjoin
+ use m_geometry,     only : normv
  use defs_abitypes,  only : MPI_type
  use m_mpinfo,       only : destroy_mpi_enreg, initmpi_seq
 
@@ -4416,18 +4417,15 @@ end subroutine kpgcount
 !!  ecut=Cutoff energy for planewave basis set.
 !!  gmet(3,3)=reciprocal space metric ($\textrm{bohr}^{-2}$).
 !!  istwfk=Options defining if time-reversal is used to decrease the number of G"s.
+!!  [sorted]=True if g-vectors should be sorted by |g|. Default: False.
 !!
 !! OUTPUT
 !!  npw_k=Total number of G-vectors in the full G-sphere.
-!!
-!! SIDE EFFECTS
-!!  kg_k(:,:):
-!!   allocated inside the routine.
-!!   output: kg_k(3,npw_k) contains the list of G-vectors.
+!!  kg_k(3,npw_k) list of G-vectors allocated by the routine.
 !!
 !! SOURCE
 
-subroutine get_kg(kpoint, istwf_k, ecut, gmet, npw_k, kg_k)
+subroutine get_kg(kpoint, istwf_k, ecut, gmet, npw_k, kg_k, sorted)
 
 !Arguments ------------------------------------
 !scalars
@@ -4437,14 +4435,17 @@ subroutine get_kg(kpoint, istwf_k, ecut, gmet, npw_k, kg_k)
 !arrays
  integer,allocatable,intent(out) :: kg_k(:,:)
  real(dp),intent(in) :: gmet(3,3),kpoint(3)
+ logical,optional,intent(in) :: sorted
 
 !Local variables-------------------------------
 !scalars
  integer,parameter :: mkmem_ = 1, exchn2n3d0 = 0, ikg0 = 0
- integer :: npw_k_test
+ integer :: npw_k_test, ig, ig_sort
  type(MPI_type) :: MPI_enreg_seq
 !arrays
  integer :: kg_dum(3, 0)
+ integer,allocatable :: iperm(:), iwork(:,:)
+ real(dp),allocatable :: gnorm(:)
 
 ! *********************************************************************
 
@@ -4458,6 +4459,30 @@ subroutine get_kg(kpoint, istwf_k, ecut, gmet, npw_k, kg_k)
  call kpgsph(ecut, exchn2n3d0, gmet, ikg0, 0, istwf_k, kg_k, kpoint, mkmem_, MPI_enreg_seq, npw_k, npw_k_test)
 
  call destroy_mpi_enreg(MPI_enreg_seq)
+
+ if (present(sorted)) then
+   if (sorted) then
+     ABI_MALLOC(gnorm, (npw_k))
+     ABI_MALLOC(iperm, (npw_k))
+     iperm = [(ig, ig=1,npw_k)]
+     do ig=1,npw_k
+       gnorm(ig) = normv(kg_k(:, ig), gmet, "G")
+     end do
+
+     call sort_dp(npw_k, gnorm, iperm, tol14)
+     ABI_FREE(gnorm)
+
+     ABI_MALLOC(iwork, (3, npw_k))
+     iwork = kg_k
+     do ig=1,npw_k
+       ig_sort = iperm(ig)
+       kg_k(:,ig) = iwork(:,ig_sort)
+     end do
+
+     ABI_FREE(iwork)
+     ABI_FREE(iperm)
+   end if
+ end if
 
 end subroutine get_kg
 !!***

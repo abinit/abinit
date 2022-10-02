@@ -183,7 +183,7 @@ module m_gwr
  use m_wfd,           only : wfd_init, wfd_t, wfdgw_t, wave_t, WFD_STORED
  use m_pawtab,        only : pawtab_type
 #ifdef __HAVE_GREENX
- use gx_api,          only : gx_minimax_grid, gx_get_error_message
+ use gx_minimax,          only : gx_minimax_grid, gx_get_error_message
 #endif
 
  implicit none
@@ -211,6 +211,9 @@ module m_gwr
 
    integer :: npw = -1
    ! Total number of plane-waves for this k/q-point.
+
+   logical :: sorted
+   ! True if gvec are sorted by |g|
 
    integer,allocatable :: gvec(:,:)
    ! gvec(3, npw)
@@ -443,7 +446,7 @@ module m_gwr
 
    type(desc_t),allocatable :: tchi_desc_qibz(:)
    ! (nqibz)
-   ! Descriptor for tchi
+   ! Descriptor for tchi. NB: The g-vectors are sorted by |G|
 
    !type(desc_t),allocatable :: sigma_desc_kibz(:)
    ! (nkibz)
@@ -456,6 +459,8 @@ module m_gwr
    ! Initial MPI communicator with all procs involved in the calculation
    ! NB: gwr%comm is not necessarly the same as the input_comm
    ! as we might have removed some cores in input_comm to have nproc divisible by ntau * nsppol.
+
+   !type(xcomm_t) :: comm
 
    type(xcomm_t) :: spin_comm
    ! MPI communicator over spins.
@@ -522,8 +527,8 @@ module m_gwr
 
    type(matrix_scalapack),allocatable :: wc_qibz(:,:,:)
    ! (nqibz, ntau, nsppol)
-   ! Correlated screened Coulomb interaction summed over collinear spin
-   ! Replicated across the spin comm if nsppol == 2.
+   ! Correlated screened Coulomb interaction summed over collinear spins
+   ! Replicated across spin_comm if nsppol == 2.
 
    character(len=10) :: wc_space = "none"
    ! "none", "itau", "iomega"
@@ -631,7 +636,7 @@ module m_gwr
    procedure :: cos_transform  => gwr_cos_transform
    ! Inhomogeneous cosine transform.
 
-   procedure :: alloc_free_mats => gwr_alloc_free_mats
+   procedure :: malloc_free_mats => gwr_malloc_free_mats
    ! Allocate/Deallocate matrices for G/tchi/Sigma
 
    procedure :: free => gwr_free
@@ -643,7 +648,7 @@ module m_gwr
    procedure :: print_mem => gwr_print_mem
 
    procedure :: print_trace => gwr_print_trace
-    ! Print trace of matrices for testing purposes.
+   ! Print trace of matrices for testing purposes.
 
    procedure :: load_kcalc_wfd => gwr_load_kcalc_wfd
    ! Load the KS states for Sigma_nk from the WFK file
@@ -674,8 +679,10 @@ module m_gwr
    ! Compute RPA energy.
 
    procedure :: build_chi0_head_and_wings => gwr_build_chi0_head_and_wings
+   ! Compute head and wings of chi0
 
    procedure :: build_sigxme => gwr_build_sigxme
+   ! Compute matrix elements of exchange part.
 
    procedure :: run_g0w0 => gwr_run_g0w0
    ! Compute QP corrections with G0W0.
@@ -686,6 +693,7 @@ module m_gwr
  end type gwr_t
 !!***
 
+ ! private parameters.
  real(dp),private,parameter :: TOL_EDIFF = 0.001_dp * eV_Ha
 
  integer,private,parameter :: PRINT_MODR = 20
@@ -772,9 +780,9 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  gwr%usepaw = dtset%usepaw
 
  gwr%use_supercell_for_tchi = .True.
- if (gwr%dtset%useria == 1) gwr%use_supercell_for_tchi = .False.
+ !if (gwr%dtset%useria == 1) gwr%use_supercell_for_tchi = .False.
  gwr%use_supercell_for_sigma = .True.
- if (gwr%dtset%userib == 1) gwr%use_supercell_for_sigma = .False.
+ !if (gwr%dtset%userib == 1) gwr%use_supercell_for_sigma = .False.
 
  mband = ks_ebands%mband
  nbsum = dtset%nband(1)
@@ -911,7 +919,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
 
  end if ! nkptgw /= 0
 
- ! Include all degenerate states and map kcalc to ibz.
+ ! Include all degenerate states and map kcalc to the ibz.
  ! NB: This part is copied from sigmaph.
 
  ! The k-point and the symmetries connecting the BZ k-point to the IBZ.
@@ -1340,12 +1348,13 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
    qq_ibz = gwr%qibz(:, iq_ibz)
    q_is_gamma = (normv(qq_ibz, gwr%cryst%gmet, "G") < GW_TOLQ0)
    ! Note ecuteps instead of ecut.
-   call gwr%tchi_desc_qibz(iq_ibz)%init(qq_ibz, istwfk1, dtset%ecuteps, gwr)
+   ! Also, sort the g-vectors by |g| when q in the IBZ to facilitate
+   ! the extrapolation of the RPA energy as a function of ecut_chi
+   !call gwr%tchi_desc_qibz(iq_ibz)%init(qq_ibz, istwfk1, dtset%ecuteps, gwr, sorted=.False.)
+   call gwr%tchi_desc_qibz(iq_ibz)%init(qq_ibz, istwfk1, dtset%ecuteps, gwr, sorted=.True.)
    associate (desc_q => gwr%tchi_desc_qibz(iq_ibz))
    ! Compute sqrt(v(q,G))
    !TODO: Implement cutoff in vc
-   ! Also, one can decide to sort the g-vectors by |g| if q in the IBZ to facilitate
-   ! the extrapolation of the RPA energy as a function of ecut_chi as done in Vasp.
    ABI_MALLOC(desc_q%vc_sqrt, (desc_q%npw))
    ig_start = 1
    if (q_is_gamma) then
@@ -1462,15 +1471,17 @@ end subroutine gwr_init
 
 !----------------------------------------------------------------------
 
-!!****f* m_gwr/gwr_alloc_free_mats
+!!****f* m_gwr/gwr_malloc_free_mats
 !! NAME
-!! gwr_alloc_free_mats
+!! gwr_malloc_free_mats
 !!
 !! FUNCTION
+!! Allocate/Free PBLAS matrices according to what for the set of k/q-points
+!! selected by mask_ibz
 !!
 !! SOURCE
 
-subroutine gwr_alloc_free_mats(gwr, mask_ibz, what, action)
+subroutine gwr_malloc_free_mats(gwr, mask_ibz, what, action)
 
 !Arguments ------------------------------------
  class(gwr_t), target, intent(inout) :: gwr
@@ -1554,7 +1565,7 @@ subroutine gwr_alloc_free_mats(gwr, mask_ibz, what, action)
  call wrtout(std_out, "")
  call gwr%print_mem(unit=std_out)
 
-end subroutine gwr_alloc_free_mats
+end subroutine gwr_malloc_free_mats
 !!***
 
 !----------------------------------------------------------------------
@@ -1790,8 +1801,7 @@ end subroutine gwr_load_kcalc_wfd
 !!  gwr_read_ugb_from_wfk
 !!
 !! FUNCTION
-
-!!  Read wavefunctions from WFK file.
+!!  Read wavefunctions from the WFK file wfk_path.
 !!
 !! SOURCE
 
@@ -1805,7 +1815,7 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
 !scalars
  integer,parameter :: formeig0 = 0
  integer :: mband, min_nband, nkibz, nsppol, my_is, my_iki, spin, ik_ibz
- integer :: band, npw_k, mpw, istwf_k !, itau !, il_b
+ integer :: npw_k, mpw, istwf_k !, itau !, il_b band,
  integer :: nbsum, npwsp, col_bsize, my_bstart, my_bstop, my_nband ! nband_k,
  real(dp) :: cpu, wall, gflops, cpu_green, wall_green, gflops_green
  character(len=5000) :: msg
@@ -2020,7 +2030,7 @@ subroutine gwr_build_green(gwr, free_ugb)
 
  ! Allocate Green's functions
  mask_kibz = 0; mask_kibz(gwr%my_kibz_inds(:)) = 1
- call gwr%alloc_free_mats(mask_kibz, "green", "malloc")
+ call gwr%malloc_free_mats(mask_kibz, "green", "malloc")
 
  do my_is=1,gwr%my_nspins
    spin = gwr%my_spins(my_is)
@@ -2034,7 +2044,7 @@ subroutine gwr_build_green(gwr, free_ugb)
      !call ugb%change_size_blocs(work, size_blocs=, processor=)
      !call work%copy(green, empty=.True.)
 
-     ! output of pzgemm.
+     ! Init output of pzgemm.
      call green%init(npwsp, npwsp, gwr%gtau_slkproc, istwfk1) ! size_blocs=[npwsp, col_bsize])
 
      do itau=1,gwr%ntau
@@ -2822,7 +2832,7 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
  logical :: sum_spins_
 !arrays
  real(dp), pointer :: weights_ptr(:,:)
- complex(dp) :: wgt_globmy(gwr%ntau, gwr%my_ntau)  ! Use complex instead of real to be able to use ZGEMM.
+ complex(dp) :: wgt_globmy(gwr%ntau, gwr%my_ntau)  ! Use complex instead of real to be able to call ZGEMM.
  complex(dp),allocatable :: cwork_myit(:,:,:), glob_cwork(:,:,:)
  type(matrix_scalapack), pointer :: mats(:)
 
@@ -2998,7 +3008,7 @@ end subroutine gwr_cos_transform
 !!
 !! SOURCE
 
-subroutine desc_init(desc, kk, istwfk, ecut, gwr)
+subroutine desc_init(desc, kk, istwfk, ecut, gwr, sorted)
 
 !Arguments ------------------------------------
  class(desc_t),intent(inout) :: desc
@@ -3006,11 +3016,14 @@ subroutine desc_init(desc, kk, istwfk, ecut, gwr)
  integer,intent(in) :: istwfk
  real(dp),intent(in) :: ecut
  class(gwr_t),intent(in) :: gwr
+ logical,optional,intent(in) :: sorted
 
 ! *************************************************************************
 
+ desc%sorted = .False.; if (present(sorted)) desc%sorted = sorted
+
  desc%istwfk = istwfk
- call get_kg(kk, desc%istwfk, ecut, gwr%cryst%gmet, desc%npw, desc%gvec)
+ call get_kg(kk, desc%istwfk, ecut, gwr%cryst%gmet, desc%npw, desc%gvec, sorted=desc%sorted)
  ABI_MALLOC(desc%gbound, (2 * gwr%g_mgfft + 8, 2))
  call sphereboundary(desc%gbound, desc%istwfk, desc%gvec, gwr%g_mgfft, desc%npw)
 
@@ -3043,6 +3056,7 @@ subroutine desc_copy(in_desc, new_desc)
 
  new_desc%istwfk = in_desc%istwfk
  new_desc%npw = in_desc%npw
+ new_desc%sorted = in_desc%sorted
 
  call alloc_copy(in_desc%gvec, new_desc%gvec)
  call alloc_copy(in_desc%gbound, new_desc%gbound)
@@ -3422,7 +3436,7 @@ subroutine gwr_build_tchi(gwr)
 
  ! Allocate tchi matrices
  mask_qibz = 0; mask_qibz(gwr%my_qibz_inds(:)) = 1
- call gwr%alloc_free_mats(mask_qibz, "tchi", "malloc")
+ call gwr%malloc_free_mats(mask_qibz, "tchi", "malloc")
 
  max_abs_imag_chit = zero
 
@@ -3843,7 +3857,7 @@ subroutine gwr_distrib_gt_kibz(gwr, itau, spin, need_kibz, got_kibz, action)
    call xmpi_min_ip(sender_kibz, gwr%kpt_comm%value, ierr)
 
    ! Allocate memory
-   call gwr%alloc_free_mats(got_kibz, "green", "malloc")
+   call gwr%malloc_free_mats(got_kibz, "green", "malloc")
 
    ! MPI communication
    do ik_ibz=1,gwr%nkibz
@@ -3863,7 +3877,7 @@ subroutine gwr_distrib_gt_kibz(gwr, itau, spin, need_kibz, got_kibz, action)
    do ik_ibz=1,gwr%nkibz
      if (got_kibz(ik_ibz) == 1) call gwr%green_desc_kibz(ik_ibz)%free()
    end do
-   call gwr%alloc_free_mats(got_kibz, "green", "free")
+   call gwr%malloc_free_mats(got_kibz, "green", "free")
 
  case default
    ABI_ERROR(sjoin("Invalid action:", action))
@@ -3926,7 +3940,7 @@ subroutine gwr_distrib_mats_qibz(gwr, what, itau, spin, need_qibz, got_qibz, act
    call xmpi_min_ip(sender_qibz, gwr%kpt_comm%value, ierr)
 
    ! Allocate memory
-   call gwr%alloc_free_mats(got_qibz, what, "malloc")
+   call gwr%malloc_free_mats(got_qibz, what, "malloc")
 
    ! MPI communication
    do iq_ibz=1,gwr%nqibz
@@ -3950,7 +3964,7 @@ subroutine gwr_distrib_mats_qibz(gwr, what, itau, spin, need_qibz, got_qibz, act
    do iq_ibz=1,gwr%nqibz
      if (got_qibz(iq_ibz) == 1) call gwr%tchi_desc_qibz(iq_ibz)%free()
    end do
-   call gwr%alloc_free_mats(got_qibz, what, "free")
+   call gwr%malloc_free_mats(got_qibz, what, "free")
 
  case default
    ABI_ERROR(sjoin("Invalid action:", action))
@@ -4362,7 +4376,7 @@ subroutine gwr_build_sigmac(gwr)
  ABI_CHECK(gwr%wc_space == "itau", sjoin("wc_space: ", gwr%wc_space, " != itau"))
 
  !mask_kibz = 0; mask_kibz(gwr%my_kibz_inds(:)) = 1
- !call gwr%alloc_free_mats(mask_kibz, "sigma" "malloc")
+ !call gwr%malloc_free_mats(mask_kibz, "sigma" "malloc")
 
  ! Use KS or QP energies depending on the iteration state.
  if (gwr%scf_iteration == 0) then
@@ -5090,10 +5104,10 @@ subroutine gwr_rpa_energy(gwr)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0
- integer :: my_is, my_iqi, my_it, itau, spin, iq_ibz, ii
+ integer :: my_is, my_iqi, my_it, itau, spin, iq_ibz, ii, ierr
  integer :: il_g1, il_g2, ig1, ig2, npw_q !, ierr, iglob2, iglob1,
  logical :: q_is_gamma
- real(dp) :: weight_q, qq_ibz(3)
+ real(dp) :: weight_q, qq_ibz(3), ec_rpa
  complex(dpc) :: vcs_g1, vcs_g2
 !arrays
  type(matrix_scalapack) :: chi_tmp, dummy_vec
@@ -5110,6 +5124,7 @@ subroutine gwr_rpa_energy(gwr)
  ! TODO: Compute RPA energy with different number of PWs and extrapolate.
  ! See also calc_rpa_functional in m_screening_driver
  !spin_fact = two / (gwr%nsppol * gwr%nspinor)
+ ec_rpa = zero
  do my_is=1,gwr%my_nspins
    spin = gwr%my_spins(my_is)
    do my_iqi=1,gwr%my_nqibz
@@ -5123,6 +5138,8 @@ subroutine gwr_rpa_energy(gwr)
        itau = gwr%my_itaus(my_it)
 
        associate (desc_q => gwr%tchi_desc_qibz(iq_ibz), tchi => gwr%tchi_qibz(iq_ibz, itau, spin))
+       ABI_CHECK(desc_q%sorted, "g-vectors are not sorted!")
+
        if (my_it == 1) then
          ! Allocate workspace. NB: npw_q is the total number of PWs for this q.
          call tchi%copy(chi_tmp)
@@ -5141,12 +5158,13 @@ subroutine gwr_rpa_energy(gwr)
          end do
        end do
 
+       ! Diagonalize matrix.
        call chi_tmp%pzheev("N", "U", dummy_vec, eig)
 
        ! Perform integration in imaginary frequency.
+       ! Eq (6) 10.1103/PhysRevB.81.115126
        do ii=1,desc_q%npw
-         !eig(ii)
-         !gwr%iw_wgs(itau)
+         ec_rpa = ec_rpa + weight_q * gwr%iw_wgs(itau) * (log(one - eig(ii)) + eig(ii)) / two_pi
        end do
 
        if (my_it == gwr%my_ntau) then
@@ -5160,9 +5178,12 @@ subroutine gwr_rpa_energy(gwr)
    end do ! my_iqi
  end do ! my_is
 
- ! Print results to ab_out and nc file
- !call xmpi_sum_master(ec_rpa, master, gwr%comm, ierr)
+ call xmpi_sum_master(ec_rpa, master, gwr%comm, ierr)
  !call xmpi_sum_master(ec_gm, master, gwr%comm, ierr)
+
+ ! Print results to ab_out and nc file
+ !if (gwr%comm%me == master) then
+ !end if
 
 end subroutine gwr_rpa_energy
 !!***
@@ -5209,9 +5230,8 @@ subroutine gwr_run_g0w0(gwr, free_ugb)
  !   - eGW0
  !   - G0eW
 
- ! To implement restart capabilities we need to
- ! read scf_iteration, qp_ebands and gwr_task from GWR
- ! build_sigmac is responsible for writing checkpoint data with qp_ebands at each iteration
+ ! To implement restart capabilities we need to read scf_iteration, qp_ebands and gwr_task from GWR
+ ! build_sigmac is responsible for writing checkpoint data with qp_ebands at each iteration.
 
  !select case (dtset%gwr_task)
  !case ("eGeW")
@@ -5920,6 +5940,7 @@ end subroutine load_head_wings_from_sus_file__
 !!  gwr_build_chi0_head_and_wings
 !!
 !! FUNCTION
+!!  Compute head and wings of chi0
 !!
 !! INPUTS
 !!
@@ -5979,6 +6000,7 @@ end subroutine gwr_build_chi0_head_and_wings
 !!  gwr_build_sigxme
 !!
 !! FUNCTION
+!! Compute matrix elements of exchange part.
 !!
 !! INPUTS
 !!
@@ -5996,10 +6018,10 @@ subroutine gwr_build_sigxme(gwr)
  integer :: nsppol, nspinor, ierr, my_ikf, band_sum, ii, kb, il_b, ig, x_mpw, npw_, my_rank ! iab,
  integer :: my_is, ikcalc, ikcalc_ibz, bmin, bmax, band
  integer :: spin, isym, jb !, is_idx
- integer :: spad, spadx1, spadx2, npw_k, wtqm, wtqp ! irow, ndegs,
- integer :: npwx, x_nfft, x_mgfft, x_fftalga, nsig_ab
- integer :: ik_bz, ik_ibz, isym_k, trev_k, g0_k(3), tsign_k
- integer :: iq_bz, iq_ibz, isym_q, trev_q, g0_q(3), tsign_q
+ integer :: spad, wtqm, wtqp ! irow, ndegs, npw_k, spadx1, spadx2,
+ integer :: npwx, x_nfft, x_mgfft, nsig_ab !, x_fftalga,
+ integer :: ik_bz, ik_ibz, isym_k, trev_k, g0_k(3) !, tsign_k
+ integer :: iq_bz, iq_ibz, isym_q, trev_q !, g0_q(3) !, tsign_q
  logical :: isirr_k, isirr_q
  real(dp) :: cpu, wall, gflops, fact_spin, theta_mu_minus_esum, theta_mu_minus_esum2, tol_empty, tol_empty_in
  real(dp) :: gwr_boxcutmin_x
@@ -6009,8 +6031,7 @@ subroutine gwr_build_sigxme(gwr)
  type(dataset_type),pointer :: dtset
  type(littlegroup_t) :: ltg_k
 !arrays
- integer :: g0(3), spinor_padx(2,4)
- integer :: x_ngfft(18)
+ integer :: g0(3), spinor_padx(2,4), x_ngfft(18)
  integer,allocatable :: gbound_kcalc(:,:), gvec_(:,:)
  real(dp) :: ksum(3), kk_bz(3), kgw(3), kgw_m_ksum(3), qbz(3), q0(3) !, spinrot_kbz(4), spinrot_kgw(4) !, tsec(2)
  real(dp),contiguous, pointer :: qp_ene(:,:,:), qp_occ(:,:,:)
@@ -6018,7 +6039,7 @@ subroutine gwr_build_sigxme(gwr)
  complex(gwpc),allocatable :: vc_sqrt_qbz(:), rhotwg(:), rhotwgp(:), rhotwg_ki(:,:) ! ur_bdgw(:,:), ur_ksum(:) ! ur_ibz(:),
  complex(dp),allocatable :: ur_bdgw(:,:), ur_ksum(:) ! ur_ibz(:),
  complex(dpc),allocatable  :: sigxcme_tmp(:,:), sigxme_tmp(:,:,:), sigx(:,:,:,:) ! sym_sigx(:,:,:),
- type(sigijtab_t),pointer :: Sigxij_tab(:)
+ !type(sigijtab_t),pointer :: Sigxij_tab(:)
 
 ! *************************************************************************
 
