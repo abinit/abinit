@@ -392,9 +392,23 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  real(dp),allocatable :: dphasek(:,:),eig_k(:),ek_k(:),ek_k_nd(:,:,:),eknk(:),eknk_nd(:,:,:,:,:),end_k(:)
  real(dp),allocatable :: enlx_k(:),enlxnk(:),focknk(:),fockfornk(:,:,:),ffnl(:,:,:,:),grnl_k(:,:), xcart(:,:)
  real(dp),allocatable :: grnlnk(:,:),kinpw(:),kpg_k(:,:),occ_k(:),ph3d(:,:,:)
- real(dp),allocatable :: pwnsfacq(:,:),resid_k(:),rhoaug(:,:,:,:)
+ real(dp),allocatable :: pwnsfacq(:,:),resid_k(:)
+
+#if defined HAVE_GPU && defined HAVE_YAKL
+ real(real64), ABI_CONTIGUOUS pointer :: rhoaug(:,:,:,:) => null()
+#else
+ real(dp),allocatable :: rhoaug(:,:,:,:)
+#endif
+
  real(dp),allocatable :: rhowfg(:,:),rhowfr(:,:),tauwfg(:,:),tauwfr(:,:)
- real(dp),allocatable :: vectornd_pac(:,:,:,:,:),vlocal(:,:,:,:)
+ real(dp),allocatable :: vectornd_pac(:,:,:,:,:)
+
+#if defined HAVE_GPU && defined HAVE_YAKL
+ real(real64), ABI_CONTIGUOUS pointer :: vlocal(:,:,:,:) => null()
+#else
+ real(dp), allocatable :: vlocal(:,:,:,:)
+#endif
+
  real(dp),allocatable :: vxctaulocal(:,:,:,:,:),ylm_k(:,:),zshift(:)
  type(pawcprj_type),allocatable :: cprj_tmp(:,:)
  type(pawcprj_type),allocatable,target:: cprj_local(:,:)
@@ -694,8 +708,14 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      nkpt1 = dtefield%mkmem_max
    end if
 
+#if defined HAVE_GPU && defined HAVE_YAKL
+   ABI_MALLOC_MANAGED(rhoaug, (/n4,n5,n6,gs_hamk%nvloc/))
+   ABI_MALLOC_MANAGED(vlocal, (/n4,n5,n6,gs_hamk%nvloc/))
+#else
    ABI_MALLOC(rhoaug,(n4,n5,n6,gs_hamk%nvloc))
    ABI_MALLOC(vlocal,(n4,n5,n6,gs_hamk%nvloc))
+#endif
+
    if(with_vxctau) then
      ABI_MALLOC(vxctaulocal,(n4,n5,n6,gs_hamk%nvloc,4))
    end if
@@ -1114,8 +1134,15 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      call xmpi_sum(dphasek,spaceComm_distrb,ierr)
      ABI_FREE(dphasek)
    end if ! berryflag
+
+#if defined HAVE_GPU && defined HAVE_YAKL
+   ABI_FREE_MANAGED(rhoaug)
+   ABI_FREE_MANAGED(vlocal)
+#else
    ABI_FREE(rhoaug)
    ABI_FREE(vlocal)
+#endif
+
    if(with_vxctau) then
      ABI_FREE(vxctaulocal)
    end if
