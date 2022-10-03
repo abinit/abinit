@@ -1085,6 +1085,17 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !  check the exit criterion, then mix the 1st-order density
 !  ----------------------------------------------------------------------
 
+!  For tim1rev=0 we need to compute the SCF energies from the physically 
+!  meaningful first-order density
+   if (.not.kramers_deg.and.ipert<dtset%natom+10) then
+     optene=1
+     call dfpt_rhotov(cplex,ehart01,ehart1,elpsp1,exc1,elmag1,gsqcut,idir,ipert,&
+&     dtset%ixc,kxc,mpi_enreg,dtset%natom,nfftf,ngfftf,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,&
+&     nspden,n3xccc,nmxc,optene,optres,dtset%qptn,rhog,rhog1,rhor,rhor1,&
+&     rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1,vpsp1,nvresid1,res2,vtrial1,vxc,vxc1,xccc3d1,dtset%ixcrot)
+   end if
+
+
    if (iscf_mod>=10) then
      optene = 1 ! use double counting scheme
      call dfpt_etot(dtset%berryopt,deltae,eberry,edocc,eeig0,eew,efrhar,efrkin,&
@@ -1096,9 +1107,11 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &        efrloc,efrnl,efrx1,efrx2,ehart1,ek0_mq,ek1_mq,eii,elast_mq,eloc0_mq,elpsp1_mq,&
 &        enl0_mq,end1_mq,enl0_mq,enl1_mq,epaw1_mq,etotal_mq,evar_mq,evdw,exc1,ipert,dtset%natom,optene)
 
-       etotal=half*(etotal+etotal_mq)
-       deltae=half*(deltae+deltae_mq)
-       evar=half*(evar+evar_mq)
+       !Avoids double counting of SCF energies
+       etotal=half*(etotal+etotal_mq-ehart1-exc1)
+       evar=half*(evar+evar_mq-ehart1-exc1)
+       deltae=evar-elast
+       elast=evar
      end if
      choice=2
      ! CP modified
@@ -1136,7 +1149,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !  Compute the new 1st-order potential from the 1st-order density
 !  ----------------------------------------------------------------------
 
-   if (ipert<dtset%natom+10) then
+   if (kramers_deg.and.ipert<dtset%natom+10) then
      optene=1
      call dfpt_rhotov(cplex,ehart01,ehart1,elpsp1,exc1,elmag1,gsqcut,idir,ipert,&
 &     dtset%ixc,kxc,mpi_enreg,dtset%natom,nfftf,ngfftf,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,&
@@ -1188,9 +1201,11 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !       write(101,*) "line3"
 !       write(101,*) enl0_mq,end1_mq,enl0_mq,enl1_mq,epaw1_mq,etotal_mq,evar_mq,exc1
 
-       etotal=half*(etotal+etotal_mq)
-       deltae=half*(deltae+deltae_mq)
-       evar=half*(evar+evar_mq)
+       !Avoids double counting of SCF energies
+       etotal=half*(etotal+etotal_mq-ehart1-exc1)
+       evar=half*(evar+evar_mq-ehart1-exc1)
+       deltae=evar-elast
+       elast=evar
      end if
 
      call timab(152,1,tsec)
