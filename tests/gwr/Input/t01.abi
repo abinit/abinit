@@ -3,7 +3,7 @@
 # Dataset 2: Direct diagonalization to produce the WFK file with empty states.
 # Dataset 3: one-shot G0W0 calculation in real-space and imaginary-time.
 
-ndtset      3
+ndtset      4
 
 ####################
 # Dataset 1: SCF run
@@ -25,20 +25,17 @@ nband2     40        # Number of (occ + empty) bands
 ################################
 optdriver3  6        # Activate GWR code
 gwr_task3 "G0W0"     # Direct diagonalization
+getden3 1
+getwfk3 2 # WFK file with empty states
 
 prtvol3 1            # Write additional stuff to abo file for testing purposes.
                      # DO NOT USE this option for production runs!
 prtsuscep3 1         # Write TCHI file.
                      # DO NOT USE this option for production runs unless you really need a TCHI file.
 
-getden3 1
-getwfk3 2 # WFK file with empty states
-
 gwr_ntau3   6        # Number of imaginary-time points
-
 gwr_boxcutmin3  1.1  # This should be subject to convergence studies
 #mixprec3    1        # Mixed precision FFT.
-
 nband3      30       # Bands to be used in the screening calculation
 ecuteps3    4        # Cut-off energy of the planewave set to represent the dielectric matrix.
                      # It is important to adjust this parameter.
@@ -54,6 +51,18 @@ kptgw3               # k-points in reduced coordinates
 bdgw3       # calculate GW corrections for bands from 4 to 5
    4  5
    4  5
+
+################################
+# Dataset 4: RPA energy 
+################################
+optdriver4  6        # Activate GWR code
+gwr_task4 "RPA_ENERGY"     # Direct diagonalization
+getden4 1
+getwfk4 2 # WFK file with empty states
+gwr_ntau4   6        
+gwr_boxcutmin4  1.1  
+nband4      30       
+ecuteps4    4        
 
 # Definition of the k-point grid
 # IMPORTANT: GWR requires Gamma-centered k-meshes
