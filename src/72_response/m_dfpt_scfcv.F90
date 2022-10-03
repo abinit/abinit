@@ -824,30 +824,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &     rhog,rhog1,rhor,rhor1,rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1,vpsp1,&
 &     nvresid1,res2,vtrial1,vxc,vxc1,xccc3d1,dtset%ixcrot)
 
-!     if(.not.kramers_deg) then
-!       !rhor1_mq=rhor1
-!       !rhog1_mq=rhog1
-!       !get initial guess for vtrial1 at -q
-!       do ifft=1,nfftf
-!         vtrial1_mq(2*ifft-1,1)=+vtrial1(2*ifft-1,1)
-!         vtrial1_mq(2*ifft  ,1)=-vtrial1(2*ifft  ,1)
-!       end do
-!       if (nspden >= 2) then
-!         do ifft=1,nfftf
-!           vtrial1_mq(2*ifft-1,2)=+vtrial1(2*ifft-1,2)
-!           vtrial1_mq(2*ifft  ,2)=-vtrial1(2*ifft  ,2)
-!         end do
-!       end if
-!       if (nspden > 2) then
-!         do ifft=1,nfftf
-!           vtrial1_mq(2*ifft-1,3)= vtrial1(2*ifft  ,4) !Re[V^12]
-!           vtrial1_mq(2*ifft  ,3)= vtrial1(2*ifft-1,4) !Im[V^12],see definition of v(:,4) cplex=2 case
-!           vtrial1_mq(2*ifft  ,4)= vtrial1(2*ifft-1,3) !Re[V^21]=Re[V^12]
-!           vtrial1_mq(2*ifft-1,4)= vtrial1(2*ifft  ,3) !Re[V^21]=Re[V^12]
-!         end do
-!       end if
-!     end if
-
 !    For Q=0 and metallic occupation, initialize quantities needed to
 !    compute the first-order Fermi energy
 !    ----------------------------------------------------------------------
@@ -971,19 +947,15 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
    !Initializations 
    if (.not.kramers_deg) then
    !same problem as with density reconstruction, TODO proper fft parallelization...
-   cg1(:,:)=cg1_pq(:,:)
-   cg1_active(:,:)=cg1_active_pq(:,:)
-!     cg1_mq(1,:)=cg1(1,:)
-!     cg1_mq(2,:)=-cg1(2,:)
-!     cg1_active_mq(1,:)=cg1_active(1,:)
-!     cg1_active_mq(2,:)=-cg1_active(2,:)
+     cg1(:,:)=cg1_pq(:,:)
+     cg1_active(:,:)=cg1_active_pq(:,:)
      do ifft=1,nfftf
        vtrial1_mq(2*ifft-1,1)=+vtrial1(2*ifft-1,1)
        vtrial1_mq(2*ifft  ,1)=-vtrial1(2*ifft  ,1)
        nvresid1_mq(2*ifft-1,1)=+nvresid1(2*ifft-1,1)
        nvresid1_mq(2*ifft  ,1)=-nvresid1(2*ifft  ,1)
-       rhor1_mq(2*ifft-1,1)=+rhor1(2*ifft-1,1)
-       rhor1_mq(2*ifft  ,1)=-rhor1(2*ifft  ,1)
+!       rhor1_mq(2*ifft-1,1)=+rhor1(2*ifft-1,1)
+!       rhor1_mq(2*ifft  ,1)=-rhor1(2*ifft  ,1)
      end do
      if (nspden >= 2) then
        do ifft=1,nfftf
@@ -991,6 +963,8 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
          vtrial1_mq(2*ifft  ,2)=-vtrial1(2*ifft  ,2)
          nvresid1_mq(2*ifft-1,2)=+nvresid1(2*ifft-1,2)
          nvresid1_mq(2*ifft  ,2)=-nvresid1(2*ifft  ,2)
+!         rhor1_mq(2*ifft-1,2)=+rhor1(2*ifft-1,2)
+!         rhor1_mq(2*ifft  ,2)=-rhor1(2*ifft  ,2)
        end do
      end if
      if (nspden > 2) then
@@ -1003,6 +977,10 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
          nvresid1_mq(2*ifft  ,3)= nvresid1(2*ifft-1,4) !Im[V^12],see definition of v(:,4) cplex=2 case
          nvresid1_mq(2*ifft  ,4)= nvresid1(2*ifft-1,3) !Re[V^21]=Re[V^12]
          nvresid1_mq(2*ifft-1,4)= nvresid1(2*ifft  ,3) !Re[V^21]=Re[V^12]
+!         rhor1_mq(2*ifft-1,3)= rhor1(2*ifft  ,4)
+!         rhor1_mq(2*ifft  ,3)= rhor1(2*ifft-1,4)
+!         rhor1_mq(2*ifft  ,4)= rhor1(2*ifft-1,3) 
+!         rhor1_mq(2*ifft-1,4)= rhor1(2*ifft  ,3) 
        end do
      end if
    end if
@@ -1049,16 +1027,10 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 
      !reconstruct the +q and -q densities, this might bug if fft parallelization is used, todo...
      do ifft=1,nfftf
-!       rhor1_pq(2*ifft-1,:) = half*(rhor1(2*ifft-1,:)+rhor1_mq(2*ifft-1,:))
-!       rhor1_pq(2*ifft  ,:) = half*(rhor1(2*ifft  ,:)-rhor1_mq(2*ifft  ,:))
-!       rhor1_mq(2*ifft-1,:) = rhor1_pq(2*ifft-1,:)
-!       rhor1_mq(2*ifft  ,:) =-rhor1_pq(2*ifft  ,:)
        rhor1(2*ifft-1,:) = half*(rhor1_pq(2*ifft-1,:)+rhor1_mq(2*ifft-1,:))
        rhor1(2*ifft  ,:) = half*(rhor1_pq(2*ifft  ,:)-rhor1_mq(2*ifft  ,:))
      end do
-     !rhor1=rhor1_pq
      call fourdp(cplex,rhog1,rhor1(:,1),-1,mpi_enreg,nfftf,1, ngfftf, 0)
-     !call fourdp(cplex,rhog1_mq,rhor1_mq(:,1),-1,mpi_enreg,nfftf,1, ngfftf, 0)
 
      !reconstruct the first-order wave functions
      cg1(1,:)=half*(cg1_pq(1,:)+cg1_mq(1,:))
@@ -1067,18 +1039,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      cg1_active(2,:)=half*(cg1_active_pq(2,:)-cg1_active_mq(2,:))
    end if
 
-!   write(300,*) 'ITERATION:', istep
-!   write(301,*) 'ITERATION:', istep
-!   do ifft=1,mpw1*dtset%nspinor*mband_mem_rbz*mk1mem*dtset%nsppol
-!     write(300,*) cg1_pq(1,ifft),cg1_pq(2,ifft)
-!     write(301,*) cg1_mq(1,ifft),cg1_mq(2,ifft)
-!   end do
-!   write(200,*) 'ITERATION:', istep
-!   write(201,*) 'ITERATION:', istep
-!   do ifft=1,nfftf
-!     write(200,*) rhor1_pq(2*ifft-1,1),rhor1_pq(2*ifft,1)
-!     write(201,*) rhor1_mq(2*ifft-1,1),rhor1_mq(2*ifft,1)
-!   end do
    if (dtset%berryopt== 4.or.dtset%berryopt== 6.or.dtset%berryopt== 7.or.&
 &   dtset%berryopt==14.or.dtset%berryopt==16.or.dtset%berryopt==17) then
 
