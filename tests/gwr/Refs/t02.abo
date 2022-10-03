@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 25 Aug 2022.
-- ( at 21h52 )
+.Starting date : Sun  2 Oct 2022.
+- ( at 23h47 )
   
 - input  file    -> /Users/gmatteo/git_repos/abinit_gwr/_build/tests/Test_suite/gwr_t02/t02.abi
 - output file    -> t02.abo
@@ -73,6 +73,23 @@ P This job should need less than                       2.688 Mbytes of memory.
 _ WF disk file :      0.159 Mbytes ; DEN or POT disk file :      0.053 Mbytes.
 ================================================================================
 
+
+ DATASET    4 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
+================================================================================
+ Values of the parameters that define the memory need for DATASET  4.
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       6
+     lnmax =       6     mgfft =      15  mpssoang =       3    mqgrid =    3001
+     natom =       2  nloc_mem =       1    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =      48    n1xccc =    2501    ntypat =       1
+    occopt =       1   xclevel =       2
+-    mband =          30        mffmem =           1         mkmem =           3
+       mpw =          57          nfft =        3375          nkpt =           3
+================================================================================
+P This job should need less than                       2.688 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      0.159 Mbytes ; DEN or POT disk file :      0.053 Mbytes.
+================================================================================
+
 --------------------------------------------------------------------------------
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
@@ -92,19 +109,31 @@ _ WF disk file :      0.159 Mbytes ; DEN or POT disk file :      0.053 Mbytes.
           ecuteps1     0.00000000E+00 Hartree
           ecuteps2     0.00000000E+00 Hartree
           ecuteps3     4.00000000E+00 Hartree
+          ecuteps4     4.00000000E+00 Hartree
          ecutsigx1     0.00000000E+00 Hartree
          ecutsigx2     0.00000000E+00 Hartree
          ecutsigx3     4.00000000E+00 Hartree
+         ecutsigx4     0.00000000E+00 Hartree
 -          fftalg         312
+           getden1          0
+           getden2          0
+           getden3          0
+           getden4          1
+           getwfk1          0
+           getwfk2          0
+           getwfk3          0
+           getwfk4          2
     gwr_boxcutmin1     2.00000000E+00
     gwr_boxcutmin2     2.00000000E+00
     gwr_boxcutmin3     1.10000000E+00
+    gwr_boxcutmin4     1.10000000E+00
          gwr_ntau1         12
          gwr_ntau2         12
          gwr_ntau3          6
+         gwr_ntau4          6
            istwfk        2    3    7
               ixc          11
-           jdtset        1    2    3
+           jdtset        1    2    3    4
               kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00
                        5.00000000E-01  0.00000000E+00  0.00000000E+00
                        5.00000000E-01  5.00000000E-01  0.00000000E+00
@@ -117,12 +146,14 @@ P           mkmem           3
             nband1          6
             nband2         40
             nband3         30
-           ndtset           3
+            nband4         30
+           ndtset           4
             ngfft          15      15      15
              nkpt           3
            nkptgw1          0
            nkptgw2          0
            nkptgw3          2
+           nkptgw4          0
            nspden           2
            nsppol           2
             nstep          20
@@ -154,15 +185,28 @@ P           mkmem           3
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+              occ4     1.000000  1.000000  1.000000  1.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
         optdriver1          0
         optdriver2          6
         optdriver3          6
+        optdriver4          6
         prtsuscep1          0
         prtsuscep2          0
         prtsuscep3          1
+        prtsuscep4          0
            prtvol1          0
            prtvol2          0
            prtvol3          1
+           prtvol4          0
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
@@ -219,6 +263,7 @@ P           mkmem           3
            tolvrs1     1.00000000E-08
            tolvrs2     0.00000000E+00
            tolvrs3     0.00000000E+00
+           tolvrs4     0.00000000E+00
             typat      1  1
               wtk        0.12500    0.50000    0.37500
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -246,6 +291,13 @@ P           mkmem           3
  while in the latter  case, it is advantageous to use nsppol=1 and nspden=2.
 
  chkinp: Checking input parameters for consistency, jdtset=   3.
+ This is a calculation with spin-up and spin-down wavefunctions,         ... nsppol=  2
+ in which the target spin-polarization is zero.                  ... spinmagntarget=   0.00
+ Tip ... It might be possible that the ground state is either non-spin-polarized, or antiferromagnetic.
+ In the former case, it is advantageous to use nsppol=1 and nspden=1,
+ while in the latter  case, it is advantageous to use nsppol=1 and nspden=2.
+
+ chkinp: Checking input parameters for consistency, jdtset=   4.
  This is a calculation with spin-up and spin-down wavefunctions,         ... nsppol=  2
  in which the target spin-polarization is zero.                  ... spinmagntarget=   0.00
  Tip ... It might be possible that the ground state is either non-spin-polarized, or antiferromagnetic.
@@ -793,6 +845,109 @@ data: !Tabular |
 ...
 
 
+================================================================================
+== DATASET  4 ==================================================================
+-   mpi_nproc: 2, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 4, }
+dimensions: {natom: 2, nkpt: 3, mband: 30, nsppol: 2, nspinor: 1, nspden: 2, mpw: 57, }
+cutoff_energies: {ecut:   4.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 6, }
+...
+
+ mkfilename : getwfk/=0, take file _WFK from output of DATASET   2.
+
+ mkfilename : getden/=0, take file _DEN from output of DATASET   1.
+
+ Exchange-correlation functional for the present dataset will be:
+  GGA: Perdew-Burke-Ernzerhof functional - ixc=11
+ Citation for XC functional:
+  J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
+
+- Reading GS density from: t02o_DS1_DEN
+
+
+
+--------------------------------------------------------------------------------
+
+- Reading GS states from WFK file: t02o_DS2_WFK
+  Mapping kBZ --> kIBZ
+ Legend: bz = TS(ibz) + g0 where isym is the index of the symrec operation S and itim is 1 if TR is used.
+        BZ                                       IBZ                                       ibz  isym  itim  g0
+     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]     1     1     0  [0, 0, 0]
+     2  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]     2     1     0  [0, 0, 0]
+     3  [ 5.0000E-01,  5.0000E-01,  5.0000E-01]  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]     2     5     0  [1, 1, 1]
+     4  [ 0.0000E+00,  0.0000E+00,  5.0000E-01]  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]     2     3     0  [0, 0, 0]
+     5  [ 0.0000E+00,  5.0000E-01,  0.0000E+00]  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]     2     7     0  [0, 0, 0]
+     6  [ 5.0000E-01,  5.0000E-01,  0.0000E+00]  [ 5.0000E-01,  5.0000E-01,  0.0000E+00]     3     1     0  [0, 0, 0]
+     7  [ 5.0000E-01,  0.0000E+00,  5.0000E-01]  [ 5.0000E-01,  5.0000E-01,  0.0000E+00]     3     9     0  [1, 0, 1]
+     8  [ 0.0000E+00,  5.0000E-01,  5.0000E-01]  [ 5.0000E-01,  5.0000E-01,  0.0000E+00]     3    17     0  [0, 0, 0]
+
+
+  Mapping qBZ --> qIBZ
+ Legend: bz = TS(ibz) + g0 where isym is the index of the symrec operation S and itim is 1 if TR is used.
+        BZ                                       IBZ                                       ibz  isym  itim  g0
+     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]     1     1     0  [0, 0, 0]
+     2  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]     2     1     0  [0, 0, 0]
+     3  [ 5.0000E-01,  5.0000E-01,  5.0000E-01]  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]     2     5     0  [1, 1, 1]
+     4  [ 0.0000E+00,  0.0000E+00,  5.0000E-01]  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]     2     3     0  [0, 0, 0]
+     5  [ 0.0000E+00,  5.0000E-01,  0.0000E+00]  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]     2     7     0  [0, 0, 0]
+     6  [ 5.0000E-01,  5.0000E-01,  0.0000E+00]  [ 5.0000E-01,  5.0000E-01,  0.0000E+00]     3     1     0  [0, 0, 0]
+     7  [ 5.0000E-01,  0.0000E+00,  5.0000E-01]  [ 5.0000E-01,  5.0000E-01,  0.0000E+00]     3     9     0  [1, 0, 1]
+     8  [ 0.0000E+00,  5.0000E-01,  5.0000E-01]  [ 5.0000E-01,  5.0000E-01,  0.0000E+00]     3    17     0  [0, 0, 0]
+
+
+
+ === Kohn-Sham gaps and band edges from IBZ mesh ===
+ >>>> For spin 1
+ Indirect band gap semiconductor
+ Fundamental gap:     0.903 (eV)
+   VBM:    -0.451 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     0.451 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
+ Direct gap:         2.454 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ >>>> For spin 2
+ Indirect band gap semiconductor
+ Fundamental gap:     0.903 (eV)
+   VBM:    -0.451 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     0.451 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
+ Direct gap:         2.454 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+
+ ==== Info on the GWR object ====
+
+--- !GWR_params
+iteration_state: {dtset: 4, }
+gwr_task: RPA_ENERGY
+ntau: 6
+ngkpt: [2, 2, 2, ]
+nkbz: 8
+nkibz: 3
+ngqpt: [2, 2, 2, ]
+nqbz: 8
+nqibz: 3
+green_mpw: 113
+tchi_mpw: 113
+g_ngfft: [8, 8, 8, 8, 8, 8, ]
+P gwr_np_gtks: [1, 1, 1, 1, ]
+P np_kibz: [1, 1, 1, ]
+P np_qibz: [1, 1, 1, ]
+ft_max_err_t2w_cos:   1.69754589E-02
+ft_max_err_w2t_cos:   5.30899554E-04
+ft_max_err_t2w_sin:   3.37574009E-01
+cosft_duality_error:   7.86621974E-04
+Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(omega)
+    1 2.14326E-01   5.65695E-01   1.17768E-02   9.86472E-02
+    2 1.28479E+00   1.69884E+00   4.26018E-02   1.61121E-01
+    3 4.04689E+00   4.16332E+00   1.02353E-01   3.47775E-01
+    4 1.06328E+01   9.74339E+00   2.42819E-01   8.63686E-01
+    5 2.57181E+01   2.20388E+01   6.17144E-01   2.43896E+00
+    6 6.02384E+01   5.21457E+01   1.86465E+00   9.78845E+00
+...
+
+ RPA Ec:  -1.13364092E+00 (Ha)
+
 == END DATASET(S) ==============================================================
 ================================================================================
   
@@ -805,28 +960,43 @@ data: !Tabular |
           ecuteps1     0.00000000E+00 Hartree
           ecuteps2     0.00000000E+00 Hartree
           ecuteps3     4.00000000E+00 Hartree
+          ecuteps4     4.00000000E+00 Hartree
          ecutsigx1     0.00000000E+00 Hartree
          ecutsigx2     0.00000000E+00 Hartree
          ecutsigx3     4.00000000E+00 Hartree
+         ecutsigx4     0.00000000E+00 Hartree
            etotal1    -8.3092786940E+00
            etotal2     0.0000000000E+00
            etotal3     0.0000000000E+00
-            fcart1     3.4117337135E-28  7.0859084820E-28 -1.8108432787E-27
-                      -3.4117337135E-28 -7.0859084820E-28  1.8108432787E-27
+           etotal4     0.0000000000E+00
+            fcart1     1.8370873842E-28 -5.5112621527E-28  5.5112621527E-28
+                      -1.8370873842E-28  5.5112621527E-28 -5.5112621527E-28
             fcart2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+            fcart4     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
 -          fftalg         312
+           getden1          0
+           getden2          0
+           getden3          0
+           getden4          1
+           getwfk1          0
+           getwfk2          0
+           getwfk3          0
+           getwfk4          2
     gwr_boxcutmin1     2.00000000E+00
     gwr_boxcutmin2     2.00000000E+00
     gwr_boxcutmin3     1.10000000E+00
+    gwr_boxcutmin4     1.10000000E+00
          gwr_ntau1         12
          gwr_ntau2         12
          gwr_ntau3          6
+         gwr_ntau4          6
            istwfk        2    3    7
               ixc          11
-           jdtset        1    2    3
+           jdtset        1    2    3    4
               kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00
                        5.00000000E-01  0.00000000E+00  0.00000000E+00
                        5.00000000E-01  5.00000000E-01  0.00000000E+00
@@ -839,12 +1009,14 @@ P           mkmem           3
             nband1          6
             nband2         40
             nband3         30
-           ndtset           3
+            nband4         30
+           ndtset           4
             ngfft          15      15      15
              nkpt           3
            nkptgw1          0
            nkptgw2          0
            nkptgw3          2
+           nkptgw4          0
            nspden           2
            nsppol           2
             nstep          20
@@ -876,15 +1048,28 @@ P           mkmem           3
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+              occ4     1.000000  1.000000  1.000000  1.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
         optdriver1          0
         optdriver2          6
         optdriver3          6
+        optdriver4          6
         prtsuscep1          0
         prtsuscep2          0
         prtsuscep3          1
+        prtsuscep4          0
            prtvol1          0
            prtvol2          0
            prtvol3          1
+           prtvol4          0
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
@@ -895,6 +1080,8 @@ P           mkmem           3
            strten2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+           strten4     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
                        0 -1  1   0 -1  0   1 -1  0       0  1 -1   0  1  0  -1  1  0
@@ -947,6 +1134,7 @@ P           mkmem           3
            tolvrs1     1.00000000E-08
            tolvrs2     0.00000000E+00
            tolvrs3     0.00000000E+00
+           tolvrs4     0.00000000E+00
             typat      1  1
               wtk        0.12500    0.50000    0.37500
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00

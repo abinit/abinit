@@ -2947,7 +2947,7 @@ subroutine wfdgw_distribute_bands(Wfd,ik_ibz,spin,my_nband,my_band_list,got,bmas
    else if (how_many > 1) then
      ! This band is duplicated. Assign it trying to obtain a good load distribution.
      rank_mask=.FALSE.; rank_mask(proc_ranks(1:how_many)+1)=.TRUE.
-     idle = imin_loc(get_more,mask=rank_mask)
+     idle = imin_loc(get_more, mask=rank_mask)
      get_more(idle) = get_more(idle) + 1
      if (Wfd%my_rank==idle-1) then
        my_nband=my_nband + 1
