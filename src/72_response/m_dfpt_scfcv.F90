@@ -971,10 +971,12 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
    !Initializations 
    if (.not.kramers_deg) then
    !same problem as with density reconstruction, TODO proper fft parallelization...
-     cg1_mq(1,:)=cg1(1,:)
-     cg1_mq(2,:)=-cg1(2,:)
-     cg1_active_mq(1,:)=cg1_active(1,:)
-     cg1_active_mq(2,:)=-cg1_active(2,:)
+   cg1(:,:)=cg1_pq(:,:)
+   cg1_active(:,:)=cg1_active_pq(:,:)
+!     cg1_mq(1,:)=cg1(1,:)
+!     cg1_mq(2,:)=-cg1(2,:)
+!     cg1_active_mq(1,:)=cg1_active(1,:)
+!     cg1_active_mq(2,:)=-cg1_active(2,:)
      do ifft=1,nfftf
        vtrial1_mq(2*ifft-1,1)=+vtrial1(2*ifft-1,1)
        vtrial1_mq(2*ifft  ,1)=-vtrial1(2*ifft  ,1)
