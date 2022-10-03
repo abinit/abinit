@@ -33,12 +33,17 @@
 
 module m_xg
 
+  use, intrinsic :: iso_c_binding, only: c_double, c_double_complex
+
   use m_errors
   use m_abicore
   use defs_basis
   use m_time, only : timab
   use m_xmpi, only : xmpi_sum
 
+#if defined HAVE_YAKL
+ use gator_mod
+#endif
 
   implicit none
 
@@ -70,9 +75,15 @@ module m_xg
   integer, save, private :: lrwork = 0
   integer, save, private :: lcwork = 0
   integer, save, private :: liwork = 0
+#if defined HAVE_GPU && defined HAVE_YAKL
+  integer(kind=c_int32_t),        ABI_CONTIGUOUS pointer, save, private :: iwork(:) => null()
+  real(kind=c_double),            ABI_CONTIGUOUS pointer, save, private :: rwork(:) => null()
+  complex(kind=c_double_complex), ABI_CONTIGUOUS pointer, save, private :: cwork(:) => null()
+#else
   integer, allocatable,  save, private :: iwork(:)
-  double precision, allocatable, save, private :: rwork(:)
-  complex(kind= 8), allocatable, save, private :: cwork(:)
+  real(kind=c_double),            allocatable, save, private :: rwork(:)
+  complex(kind=c_double_complex), allocatable, save, private :: cwork(:)
+#endif
 
   type, public :: xgBlock_t
     integer, private :: space
@@ -82,8 +93,8 @@ module m_xg
     character, public :: trans
     character, public :: normal
     integer, private :: spacedim_comm
-    double precision, pointer, private :: vecR(:,:) => null()
-    complex(kind=8) , pointer, private :: vecC(:,:) => null()
+    real(kind=c_double)           , pointer, private :: vecR(:,:) => null()
+    complex(kind=c_double_complex), pointer, private :: vecC(:,:) => null()
   end type xgBlock_t
 
   type, public :: xg_t
@@ -93,8 +104,13 @@ module m_xg
     character, public :: trans
     character, public :: normal
     integer, private :: spacedim_comm
-    double precision, allocatable, private :: vecR(:,:)
-    complex(kind=8) , allocatable, private :: vecC(:,:)
+#if defined HAVE_GPU && defined HAVE_YAKL
+    real(kind=c_double)            , ABI_CONTIGUOUS pointer, private :: vecR(:,:) => null()
+    complex(kind=c_double_complex) , ABI_CONTIGUOUS pointer, private :: vecC(:,:) => null()
+#else
+    real(kind=c_double)            , allocatable, private :: vecR(:,:)
+    complex(kind=c_double_complex) , allocatable, private :: vecC(:,:)
+#endif
     type(xgBlock_t), public :: self
   end type xg_t
 
@@ -205,8 +221,24 @@ contains
 
   subroutine checkResizeI(array,current_dim,asked_dim)
 
+#if defined HAVE_GPU && defined HAVE_YAKL
+
+    integer(kind=c_int32_t), ABI_CONTIGUOUS pointer, intent(inout) :: array(:)
+    integer, intent(inout)  :: current_dim
+    integer, intent(in   )  :: asked_dim
+
+    if ( current_dim < asked_dim  ) then
+      current_dim = asked_dim
+      if ( associated(array) ) then
+        ABI_FREE_MANAGED(array)
+      end if
+      ABI_MALLOC_MANAGED(array,(/asked_dim/))
+    end if
+
+#else
+
     integer, allocatable, intent(inout) :: array(:)
-    integer, intent(inout) :: current_dim
+    integer, intent(inout)  :: current_dim
     integer, intent(in   )  :: asked_dim
 
     if ( current_dim < asked_dim  ) then
@@ -216,6 +248,9 @@ contains
       end if
       ABI_MALLOC(array,(asked_dim))
     end if
+
+#endif
+
   end subroutine checkResizeI
   !!***
 
@@ -225,6 +260,22 @@ contains
   !! checkResizeR
 
   subroutine checkResizeR(array,current_dim,asked_dim)
+
+#if defined HAVE_GPU && defined HAVE_YAKL
+
+    real(kind=c_double), ABI_CONTIGUOUS pointer, intent(inout) :: array(:)
+    integer, intent(inout) :: current_dim
+    integer, intent(in   ) :: asked_dim
+
+    if ( current_dim < asked_dim  ) then
+      current_dim = asked_dim
+      if ( associated(array) ) then
+        ABI_FREE_MANAGED(array)
+      end if
+      ABI_MALLOC_MANAGED(array,(/asked_dim/))
+    end if
+
+#else
 
     double precision, allocatable, intent(inout) :: array(:)
     integer, intent(inout) :: current_dim
@@ -237,6 +288,9 @@ contains
       end if
       ABI_MALLOC(array,(asked_dim))
     end if
+
+#endif
+
   end subroutine checkResizeR
   !!***
 
@@ -246,6 +300,22 @@ contains
   !! checkResizeC
 
   subroutine checkResizeC(array,current_dim,asked_dim)
+
+#if defined HAVE_GPU && defined HAVE_YAKL
+
+    complex(kind=c_double_complex), ABI_CONTIGUOUS pointer, intent(inout) :: array(:)
+    integer, intent(inout)  :: current_dim
+    integer, intent(in   )  :: asked_dim
+
+    if ( current_dim < asked_dim  ) then
+      current_dim = asked_dim
+      if ( associated(array) ) then
+        ABI_FREE_MANAGED(array)
+      end if
+      ABI_MALLOC_MANAGED(array,(/asked_dim/))
+    end if
+
+#else
 
     complex(kind=8), allocatable, intent(inout) :: array(:)
     integer, intent(inout) :: current_dim
@@ -258,6 +328,9 @@ contains
       end if
       ABI_MALLOC(array,(asked_dim))
     end if
+
+#endif
+
   end subroutine checkResizeC
   !!***
 
@@ -312,6 +385,26 @@ contains
     end if
 
     ! MG: Initialize arrays with zero to avoid SIGFPE in xmpi_sum
+#if defined HAVE_GPU && defined HAVE_YAKL
+    select case (space)
+    case (SPACE_R,SPACE_CR)
+      if ( associated(xg%vecR) ) then
+        ABI_FREE_MANAGED(xg%vecR)
+      end if
+      ABI_MALLOC_MANAGED_BOUNDS(xg%vecR,(/rows,cols/), (/1,1/))
+      xg%vecR(:,:) = zero
+      xg%trans = 't'
+    case (SPACE_C)
+      if ( associated(xg%vecC) ) then
+        ABI_FREE_MANAGED(xg%vecC)
+      end if
+      ABI_MALLOC_MANAGED_BOUNDS(xg%vecC,(/rows,cols/), (/1,1/))
+      xg%vecC(:,:) = zero
+      xg%trans = 'c'
+    case default
+      ABI_ERROR("Invalid space")
+    end select
+#else
     select case (space)
     case (SPACE_R,SPACE_CR)
       if ( allocated(xg%vecR) ) then
@@ -330,6 +423,7 @@ contains
     case default
       ABI_ERROR("Invalid space")
     end select
+#endif
 
     xg%space = space
     xg%normal = 'n'
@@ -719,6 +813,18 @@ contains
 
     type(xg_t), intent(inout) :: xg
 
+#if defined HAVE_GPU && defined HAVE_YAKL
+
+    if ( associated(xg%vecR) ) then
+      ABI_FREE_MANAGED(xg%vecR)
+    end if
+
+    if ( associated(xg%vecC) ) then
+      ABI_FREE_MANAGED(xg%vecC)
+    end if
+
+#else
+
     if ( allocated(xg%vecR) ) then
       ABI_FREE(xg%vecR)
     end if
@@ -726,6 +832,9 @@ contains
     if ( allocated(xg%vecC) ) then
       ABI_FREE(xg%vecC)
     end if
+
+#endif
+
   end subroutine xg_free
   !!***
 
@@ -2564,6 +2673,20 @@ contains
 
   subroutine xg_finalize()
 
+#if defined HAVE_GPU && defined HAVE_YAKL
+
+    if ( associated(iwork) ) then
+      ABI_FREE_MANAGED(iwork)
+    end if
+    if ( associated(rwork) ) then
+      ABI_FREE_MANAGED(rwork)
+    end if
+    if ( associated(cwork) ) then
+      ABI_FREE_MANAGED(cwork)
+    end if
+
+#else
+
     if ( allocated(iwork) ) then
       ABI_FREE(iwork)
     end if
@@ -2573,6 +2696,9 @@ contains
     if ( allocated(cwork) ) then
       ABI_FREE(cwork)
     end if
+
+#endif
+
     liwork = 0
     lrwork = 0
     lcwork = 0
