@@ -80,7 +80,12 @@ module m_orbmag
                                                &one,zero,zero,& !{1..3}23
                                                &zero,zero,zero/),& !{1..3}33
                                                &(/3,3,3/))
- 
+
+
+  ! map from adir = 1, 2, 3 to its S_1adir packed for spherical harmonic calls
+  ! x = r*S_1(1), y = r*S_1(-1), z = r*S_1(0)  
+  integer,parameter :: pack1a(3) = (/4,2,3/)
+
   ! these parameters name the various output terms                                             
   integer,parameter :: if1=1,if2=2,if3=3,if4=4
   integer,parameter :: iomlr=5,iomanp=6,iomlmb=7
@@ -1758,7 +1763,6 @@ subroutine make_ddir_sij(ddir_sij,dtset,gprimd,lmnmax,pawtab)
   real(dp) :: cdij
 
   !arrays
-  integer,dimension(3) :: adir_to_sij = (/4,2,3/)
   real(dp) :: ddir_cart(3),ddir_red(3)
 
 !--------------------------------------------------------------------
@@ -1774,10 +1778,7 @@ subroutine make_ddir_sij(ddir_sij,dtset,gprimd,lmnmax,pawtab)
      do jlmn=1, pawtab(itypat)%lmn_size
        klmn=MATPACK(ilmn,jlmn)
        do adir = 1, 3
-         ! note adir 1,2,3 corresponds to cartesian x,y,z. In the abinit real spherical 
-         ! harmonics, x~m=1 so LM=4; y~m=-1 so LM=2; z~m=0 so LM=3
-         ! adir_to_sij encodes this map
-         ddir_cart(adir) = cdij*pawtab(itypat)%qijl(adir_to_sij(adir),klmn)
+         ddir_cart(adir) = cdij*pawtab(itypat)%qijl(pack1a(adir),klmn)
        end do
        ! now have ddir in cart coords, convert to crystal coords where ddk wavefunctions are
        ddir_red = MATMUL(TRANSPOSE(gprimd),ddir_cart)
@@ -2021,7 +2022,6 @@ subroutine d2lr_Anp(dtset,gntselect,gprimd,lmn2_max,mpan,my_lmax,pawrad,pawtab,r
   complex(dpc) :: cme,orbl_me
 
   !arrays
-  integer,dimension(3) :: adir_to_sij = (/4,2,3/)
   real(dp),allocatable :: ff(:)
   complex(dpc) :: dij_cart(3),dij_red(3)
 
@@ -2061,10 +2061,10 @@ subroutine d2lr_Anp(dtset,gntselect,gprimd,lmn2_max,mpan,my_lmax,pawrad,pawtab,r
             eabg = eijk(adir,bdir,gdir)
             if ( abs(eabg) < tol8 ) cycle
 
-            lb = adir_to_sij(bdir)
+            lb = pack1a(bdir)
             lm1b = MATPACK(ilm,lb)
 
-            lg = adir_to_sij(gdir)
+            lg = pack1a(gdir)
             lm1g = MATPACK(jlm,lg)
 
             do ll = abs(il-1),il+1
@@ -2372,7 +2372,6 @@ subroutine make_ddir_vhnzc(ddir_vhnzc,dtset,gntselect,gprimd,lmnmax,my_lmax,pawr
   real(dp) :: cdij,intg
 
   !arrays
-  integer,dimension(3) :: adir_to_sij = (/4,2,3/)
   real(dp) :: dij_cart(3),dij_red(3)
   real(dp),allocatable :: ff(:)
 
@@ -2402,7 +2401,7 @@ subroutine make_ddir_vhnzc(ddir_vhnzc,dtset,gntselect,gprimd,lmnmax,my_lmax,pawr
 
        dij_cart = zero
        do adir = 1, 3
-         lm1b = adir_to_sij(adir)
+         lm1b = pack1a(adir)
          gint = gntselect(lm1b,klm)
          if (gint == 0) cycle
          dij_cart(adir) = cdij*realgnt(gint)*intg
@@ -2478,7 +2477,6 @@ subroutine make_ddir_vha3(atindx,ddir_vha,dtset,gntselect,gprimd,lmnmax,my_lmax,
   complex(dpc) :: rhokl
 
   !arrays
-  integer,dimension(3) :: adir_to_sij = (/4,2,3/)
   complex(dpc) :: dij_cart(3),dij_red(3)
   real(dp),allocatable :: ff(:),ff1(:),fft1(:)
 
@@ -2556,7 +2554,7 @@ subroutine make_ddir_vha3(atindx,ddir_vha,dtset,gntselect,gprimd,lmnmax,my_lmax,
                    if (g1 .EQ. 0) cycle
 
                    do adir = 1, 3
-                     lm1a = MATPACK(lpmp,adir_to_sij(adir))
+                     lm1a = MATPACK(lpmp,pack1a(adir))
                      g2 = gntselect(llmm,lm1a)
                      if (g2 .EQ. 0) cycle
 
@@ -2641,7 +2639,6 @@ subroutine make_ddir_vhnhat(atindx,ddir_vhnhat,dtset,gntselect,gprimd,lmnmax,my_
   real(dp) :: cdij,nlt1,rfac,rr,rp,vhaint
 
   !arrays
-  integer,dimension(3) :: adir_to_sij = (/4,2,3/)
   real(dp) :: dij_cart(3),dij_red(3)
   real(dp),allocatable :: ff(:),fft1(:)
 
@@ -2677,7 +2674,7 @@ subroutine make_ddir_vhnhat(atindx,ddir_vhnhat,dtset,gntselect,gprimd,lmnmax,my_
 
            do lp = abs(ll-1), ll+1, 2
              do ilmp = lp**2+1,(lp+1)**2
-               klmadir = MATPACK(ilm,adir_to_sij(adir))
+               klmadir = MATPACK(ilm,pack1a(adir))
                g2int = gntselect(ilmp,klmadir)
                if (g2int .EQ. 0) cycle
 
@@ -2792,7 +2789,6 @@ subroutine make_ddir_vxc(atindx,ddir_vxc,dtset,gntselect,gprimd,lmnmax,my_lmax,&
   logical :: non_magnetic_xc
 
   !arrays
-  integer,dimension(3) :: adir_to_sij = (/4,2,3/)
   real(dp) :: dij_cart(3),dij_red(3)
   real(dp),allocatable :: ff(:),kxc(:,:,:),k3xc(:,:,:)
   real(dp),allocatable :: vxc(:,:,:),tvxc(:,:,:)
@@ -2852,7 +2848,7 @@ subroutine make_ddir_vxc(atindx,ddir_vxc,dtset,gntselect,gprimd,lmnmax,my_lmax,&
        do adir = 1, 3
          dij_cart(adir) = dij_cart(adir) + &
            & pawang%angwgth(ipt)*pawang%ylmr(ilm,ipt)*pawang%ylmr(jlm,ipt)*&
-           & pawang%ylmr(adir_to_sij(adir),ipt)*xcint
+           & pawang%ylmr(pack1a(adir),ipt)*xcint
        end do ! adir
      end do ! ipt
 
@@ -2930,7 +2926,6 @@ subroutine make_ddir_vha2(atindx,ddir_vha,dtset,gntselect,gprimd,lmnmax,my_lmax,
   real(dp) :: nterm
 
   !arrays
-  integer,dimension(3) :: adir_to_sij = (/4,2,3/)
   real(dp) :: dij_cart(3),dij_red(3)
   real(dp),allocatable :: ff(:),ff1(:),fft1(:)
 
@@ -2967,7 +2962,7 @@ subroutine make_ddir_vha2(atindx,ddir_vha,dtset,gntselect,gprimd,lmnmax,my_lmax,
 
            do lp = abs(ll-1), ll+1, 2
              do ilmp=lp**2+1,(lp+1)**2
-               klmadir = MATPACK(ilm,adir_to_sij(adir))
+               klmadir = MATPACK(ilm,pack1a(adir))
                g2int = gntselect(ilmp,klmadir)
                if (g2int .EQ. 0) cycle
 
@@ -3090,7 +3085,6 @@ subroutine make_ddir_vha(atindx,ddir_vha,dtset,gntselect,gprimd,lmnmax,lmn2max,m
   complex(dpc) :: rhomn
 
   !arrays
-  integer,dimension(3) :: adir_to_sij = (/4,2,3/)
   real(dp),allocatable :: ff(:),fmnl(:),intg(:,:,:,:),tfmnl(:)
   complex(dpc) :: dij_cart(3),dij_red(3)
 
@@ -3159,7 +3153,7 @@ subroutine make_ddir_vha(atindx,ddir_vha,dtset,gntselect,gprimd,lmnmax,lmn2max,m
 
        dij_cart = czero
        do adir = 1, 3
-         lm1b = MATPACK(ilm,adir_to_sij(adir))
+         lm1b = MATPACK(ilm,pack1a(adir))
          do ll = abs(il-1),il+1
            do mm = -ll,ll
              llmm = ll*ll+ll+1+mm
@@ -3256,7 +3250,6 @@ subroutine make_ddir_p2(ddir_p2,dtset,gntselect,gprimd,lmnmax,my_lmax,pawrad,paw
   real(dp) :: c1m,intg
 
   !arrays
-  integer,dimension(3) :: adir_to_sij = (/4,2,3/)
   real(dp),allocatable :: ff(:),uj(:),ujder(:),uj2der(:)
   complex(dpc) :: dij_cart(3)
 
@@ -3299,7 +3292,7 @@ subroutine make_ddir_p2(ddir_p2,dtset,gntselect,gprimd,lmnmax,my_lmax,pawrad,paw
 
         dij_cart = czero 
         do adir = 1, 3
-          lm1b = adir_to_sij(adir)
+          lm1b = pack1a(adir)
           gint = gntselect(lm1b,klm)
           if (gint == 0) cycle
           dij_cart(adir) = cmplx(-half*c1m*realgnt(gint)*intg,zero)
@@ -3373,7 +3366,6 @@ subroutine make_ddir_ap(ddir_ap,dtset,gntselect,gprimd,lmnmax,my_lmax,pawrad,paw
   complex(dpc) :: cme,orbl_me
 
   !arrays
-  integer,dimension(3) :: adir_to_sij = (/4,2,3/)
   real(dp),allocatable :: ff(:)
   complex(dpc) :: dij_cart(3)
 
@@ -3410,7 +3402,7 @@ subroutine make_ddir_ap(ddir_ap,dtset,gntselect,gprimd,lmnmax,my_lmax,pawrad,paw
         dij_cart = czero
         do adir = 1, 3
           cme = czero
-          l1b = adir_to_sij(adir)
+          l1b = pack1a(adir)
           ilml1b = MATPACK(ilm,l1b)
 
           do bigl = abs(il-1),il+1
