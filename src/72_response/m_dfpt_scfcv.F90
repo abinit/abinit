@@ -1097,21 +1097,20 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 
 
    if (iscf_mod>=10) then
-     optene = 1 ! use double counting scheme
+     optene = 0 
      call dfpt_etot(dtset%berryopt,deltae,eberry,edocc,eeig0,eew,efrhar,efrkin,&
 &     efrloc,efrnl,efrx1,efrx2,ehart1,ek0,ek1,eii,elast,eloc0,elpsp1,&
 &     end0,end1,enl0,enl1,epaw1,etotal,evar,evdw,exc1,ipert,dtset%natom,optene)
      call timab(152,1,tsec)
      if(.not.kramers_deg) then
        call dfpt_etot(dtset%berryopt,deltae_mq,eberry_mq,edocc_mq,eeig0_mq,eew,efrhar,efrkin,&
-&        efrloc,efrnl,efrx1,efrx2,ehart1,ek0_mq,ek1_mq,eii,elast_mq,eloc0_mq,elpsp1_mq,&
-&        enl0_mq,end1_mq,enl0_mq,enl1_mq,epaw1_mq,etotal_mq,evar_mq,evdw,exc1,ipert,dtset%natom,optene)
+&        efrloc,efrnl,efrx1,efrx2,ehart1,ek0_mq,ek1_mq,eii,elast_mq,eloc0_mq,elpsp1,&
+&        end0_mq,end1_mq,enl0_mq,enl1_mq,epaw1_mq,etotal_mq,evar_mq,evdw,exc1,ipert,dtset%natom,optene)
 
-       !Avoids double counting of SCF energies
-       etotal=half*(etotal+etotal_mq-ehart1-exc1)
-       evar=half*(evar+evar_mq-ehart1-exc1)
-       deltae=evar-elast
-       elast=evar
+       !Implicictly avoids double counting of SCF and local energies
+       etotal=half*(etotal+etotal_mq)
+       evar=half*(evar+evar_mq)
+       deltae=half*(deltae+deltae_mq)
      end if
      choice=2
      ! CP modified
@@ -1183,29 +1182,15 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &     end0,end1,enl0,enl1,epaw1,etotal,evar,evdw,exc1,ipert,dtset%natom,optene)
 !&     enl0,enl1,epaw1,etotal,evar,evdw,exc1,elmag1,ipert,dtset%natom,optene)
 !    !debug: compute the d2E/d-qd+q energy, should be equal to the one from previous line
-!       write(100,*) "line1"
-!       write(100,*) deltae,eberry,edocc,eeig0
-!       write(100,*) "line2"
-!       write(100,*) ehart1,ek0,ek1,elast,eloc0,elpsp1
-!       write(100,*) "line3"
-!       write(100,*) enl0,end1,enl0,enl1,epaw1,etotal,evar,exc1
      if(.not.kramers_deg) then
        call dfpt_etot(dtset%berryopt,deltae_mq,eberry_mq,edocc_mq,eeig0_mq,eew,efrhar,efrkin,&
-&        efrloc,efrnl,efrx1,efrx2,ehart1,ek0_mq,ek1_mq,eii,elast_mq,eloc0_mq,elpsp1_mq,&
-&        enl0_mq,end1_mq,enl0_mq,enl1_mq,epaw1_mq,etotal_mq,evar_mq,evdw,exc1,ipert,dtset%natom,optene)
+&        efrloc,efrnl,efrx1,efrx2,ehart1,ek0_mq,ek1_mq,eii,elast_mq,eloc0_mq,elpsp1,&
+&        end0_mq,end1_mq,enl0_mq,enl1_mq,epaw1_mq,etotal_mq,evar_mq,evdw,exc1,ipert,dtset%natom,optene)
 
-!       write(101,*) "line1"
-!       write(101,*) deltae_mq,eberry_mq,edocc_mq,eeig0_mq
-!       write(101,*) "line2"
-!       write(101,*) ehart1,ek0_mq,ek1_mq,elast_mq,eloc0_mq,elpsp1_mq
-!       write(101,*) "line3"
-!       write(101,*) enl0_mq,end1_mq,enl0_mq,enl1_mq,epaw1_mq,etotal_mq,evar_mq,exc1
-
-       !Avoids double counting of SCF energies
-       etotal=half*(etotal+etotal_mq-ehart1-exc1)
-       evar=half*(evar+evar_mq-ehart1-exc1)
-       deltae=evar-elast
-       elast=evar
+       !Implicictly avoids double counting of SCF and local energies
+       etotal=half*(etotal+etotal_mq)
+       evar=half*(evar+evar_mq)
+       deltae=half*(deltae+deltae_mq)
      end if
 
      call timab(152,1,tsec)
