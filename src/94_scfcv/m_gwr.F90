@@ -159,7 +159,7 @@ module m_gwr
  use m_gwdefs,        only : GW_TOLQ0, GW_Q0_DEFAULT, sigijtab_t
  use m_time,          only : cwtime, cwtime_report, sec2str, timab
  use m_io_tools,      only : iomode_from_fname, get_unit, file_exists, open_file
- use m_numeric_tools, only : blocked_loop, get_diag, isdiagmat, arth, print_arr, imin_loc, &
+ use m_numeric_tools, only : blocked_loop, get_diag, isdiagmat, arth, print_arr, imin_loc, imax_loc, &
                              pade, dpade, newrap_step, c2r, linfit, bisect
  use m_copy,          only : alloc_copy
  use m_geometry,      only : normv, vdotw
@@ -213,8 +213,11 @@ module m_gwr
    integer :: npw = -1
    ! Total number of plane-waves for this k/q-point.
 
+   integer :: ig0 = -1
+   ! Index of g = 0. Useful when gvec are sorted by |q+g|^2/2
+
    logical :: sorted
-   ! True if gvec are sorted by |g|
+   ! True if gvec are sorted by |q+g|^2/2
 
    integer,allocatable :: gvec(:,:)
    ! gvec(3, npw)
@@ -451,7 +454,7 @@ module m_gwr
 
    type(desc_t),allocatable :: tchi_desc_qibz(:)
    ! (nqibz)
-   ! Descriptor for tchi. NB: The g-vectors are sorted by |G|
+   ! Descriptor for tchi. NB: The g-vectors are sorted by |q+g|^2/2
 
    !type(desc_t),allocatable :: sigma_desc_kibz(:)
    ! (nkibz)
@@ -508,6 +511,9 @@ module m_gwr
 
    type(ebands_t) :: qp_ebands
    ! QP energies
+
+   type(ebands_t) :: qp_ebands_prev
+   ! QP energies of the previous iteration. Used if self-consistency.
 
    type(pseudopotential_type), pointer :: psps => null()
    ! NC Pseudos data
@@ -741,7 +747,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
 !scalars
  integer,parameter :: qptopt1 = 1, qtimrev1 = 1, master = 0, ndims = 4
  integer :: my_it, my_ikf, my_iqf, ii, ebands_timrev, my_iki, my_iqi, itau, spin
- integer :: my_nshiftq, iq_bz, iq_ibz, npw_, ncid, ig, ig_start
+ integer :: my_nshiftq, iq_bz, iq_ibz, npw_, ncid, ig
  integer :: comm_cart, me_cart, ierr, all_nproc, nps, my_rank, qprange_, gap_err, ncerr, omp_nt
  integer :: cnt, ikcalc, ndeg, mband, bstop, nbsum, it, iw ! jj,
  integer :: ik_ibz, ik_bz, isym_k, trev_k, g0_k(3)
@@ -1391,21 +1397,19 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
    qq_ibz = gwr%qibz(:, iq_ibz)
    q_is_gamma = (normv(qq_ibz, gwr%cryst%gmet, "G") < GW_TOLQ0)
    ! Note ecuteps instead of ecut.
-   ! Also, sort the g-vectors by |g| when q in the IBZ to facilitate
+   ! Also, sort the g-vectors by |q+g|^2/2 when q is in the IBZ to facilitate
    ! the extrapolation of the RPA energy as a function of ecut_chi
-   !call gwr%tchi_desc_qibz(iq_ibz)%init(qq_ibz, istwfk1, dtset%ecuteps, gwr, sorted=.False.)
    call gwr%tchi_desc_qibz(iq_ibz)%init(qq_ibz, istwfk1, dtset%ecuteps, gwr, sorted=.True.)
    associate (desc_q => gwr%tchi_desc_qibz(iq_ibz))
    ! Compute sqrt(v(q,G))
    !TODO: Implement cutoff in vc
    ABI_MALLOC(desc_q%vc_sqrt, (desc_q%npw))
-   ig_start = 1
-   if (q_is_gamma) then
-     ig_start = 2
-     desc_q%vc_sqrt(1) = sqrt(four_pi) / normv(GW_Q0_DEFAULT, gwr%cryst%gmet, "G")
-   end if
-   do ig=ig_start,desc_q%npw
-     desc_q%vc_sqrt(ig) = sqrt(four_pi) / normv(qq_ibz + desc_q%gvec(:,ig), gwr%cryst%gmet, "G")
+   do ig=1,desc_q%npw
+     if (q_is_gamma .and. ig == desc_q%ig0) then
+       desc_q%vc_sqrt(ig) = sqrt(four_pi) / normv(GW_Q0_DEFAULT, gwr%cryst%gmet, "G")
+     else
+       desc_q%vc_sqrt(ig) = sqrt(four_pi) / normv(qq_ibz + desc_q%gvec(:,ig), gwr%cryst%gmet, "G")
+     end if
    end do
    end associate
  end do
@@ -1674,6 +1678,7 @@ subroutine gwr_free(gwr)
  ABI_SFREE(gwr%kcalc2ibz)
 
  call ebands_free(gwr%qp_ebands)
+ call ebands_free(gwr%qp_ebands_prev)
  call gwr%kcalc_wfd%free()
 
  ! Free descriptors
@@ -3064,6 +3069,9 @@ subroutine desc_init(desc, kk, istwfk, ecut, gwr, sorted)
  class(gwr_t),intent(in) :: gwr
  logical,optional,intent(in) :: sorted
 
+!Local variables-------------------------------
+ integer :: ig
+
 ! *************************************************************************
 
  desc%sorted = .False.; if (present(sorted)) desc%sorted = sorted
@@ -3072,6 +3080,14 @@ subroutine desc_init(desc, kk, istwfk, ecut, gwr, sorted)
  call get_kg(kk, desc%istwfk, ecut, gwr%cryst%gmet, desc%npw, desc%gvec, sorted=desc%sorted)
  ABI_MALLOC(desc%gbound, (2 * gwr%g_mgfft + 8, 2))
  call sphereboundary(desc%gbound, desc%istwfk, desc%gvec, gwr%g_mgfft, desc%npw)
+
+ ! Find the index of g = 0 (needed if sorted)
+ desc%ig0 = -1
+ do ig=1,desc%npw
+   if (all(desc%gvec(:,ig) == 0)) then
+     desc%ig0 = ig; exit
+   end if
+ end do
 
 end subroutine desc_init
 !!***
@@ -3102,6 +3118,7 @@ subroutine desc_copy(in_desc, new_desc)
 
  new_desc%istwfk = in_desc%istwfk
  new_desc%npw = in_desc%npw
+ new_desc%ig0 = in_desc%ig0
  new_desc%sorted = in_desc%sorted
 
  call alloc_copy(in_desc%gvec, new_desc%gvec)
@@ -4157,7 +4174,8 @@ subroutine gwr_build_wc(gwr)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0
- integer :: my_iqi, my_it, my_is, iq_ibz, spin, itau, iw, ierr, il_g1, il_g2, ig1, ig2, iglob1, iglob2, my_rank
+ integer :: my_iqi, my_it, my_is, iq_ibz, spin, itau, iw, ierr
+ integer :: il_g1, il_g2, ig1, ig2, iglob1, iglob2, my_rank, ig0
  real(dp) :: cpu_all, wall_all, gflops_all, cpu_q, wall_q, gflops_q, q0_vol, i_sz, q0sph
  logical :: q_is_gamma, free_tchi
  character(len=5000) :: msg
@@ -4208,6 +4226,8 @@ subroutine gwr_build_wc(gwr)
    qq_ibz = gwr%qibz(:, iq_ibz)
    q_is_gamma = normv(qq_ibz, gwr%cryst%gmet, "G") < GW_TOLQ0
    associate (desc_q => gwr%tchi_desc_qibz(iq_ibz))
+   ig0 = desc_q%ig0
+   ABI_CHECK_IEQ(ig0, 1, "ig0")
 
    ! The spin loop is needed so that procs in different pools operate
    ! on their own matrix that has been already summed over (collinear) spins.
@@ -4232,7 +4252,7 @@ subroutine gwr_build_wc(gwr)
            wc%buffer_cplx(il_g1, il_g2) = -wc%buffer_cplx(il_g1, il_g2) * vcs_g1 * vcs_g2
            if (iglob1 == iglob2) then
              wc%buffer_cplx(il_g1, il_g2) = one + wc%buffer_cplx(il_g1, il_g2)
-             if (iglob1 == 1 .and. iglob2 == 1) then
+             if (iglob1 == ig0 .and. iglob2 == ig0) then
                ! Store epsilon_{iw, iq_ibz}(0, 0)
                ! Rescale by np_qibz because we will MPI reduce this array.
                eps_wq(itau, iq_ibz) = wc%buffer_cplx(il_g1, il_g2) / gwr%np_qibz(iq_ibz)
@@ -4267,7 +4287,7 @@ subroutine gwr_build_wc(gwr)
            ig1 = mod(iglob1 - 1, desc_q%npw) + 1
            vcs_g1 = desc_q%vc_sqrt(ig1)
 
-           if (iglob1 == 1 .and. iglob2 == 1) then
+           if (iglob1 == ig0 .and. iglob2 == ig0) then
              ! Store epsilon^{-1}_{iw, iq_ibz}(0, 0). Rescale by np_qibz because we will MPI reduce this array.
              em1_wq(itau, iq_ibz) = wc%buffer_cplx(il_g1, il_g2) / gwr%np_qibz(iq_ibz)
            end if
@@ -4276,13 +4296,13 @@ subroutine gwr_build_wc(gwr)
            if (iglob1 == iglob2) wc%buffer_cplx(il_g1, il_g2) = wc%buffer_cplx(il_g1, il_g2) - one
 
            ! Handle divergence in Wc for q --> 0
-           if (q_is_gamma .and. (iglob1 == 1 .or. iglob2 == 1)) then
-             if (iglob1 == 1 .and. iglob2 == 1) then
+           if (q_is_gamma .and. (iglob1 == ig0 .or. iglob2 == ig0)) then
+             if (iglob1 == ig0 .and. iglob2 == ig0) then
                vcs_g1 = sqrt(i_sz); vcs_g2 = sqrt(i_sz)
-             else if (iglob1 == 1) then
+             else if (iglob1 == ig0) then
                !vcs_g1 = (four_pi) ** (three/two) * q0sph ** 2 / two
                vcs_g1 = sqrt(i_sz)
-             else if (iglob2 == 1) then
+             else if (iglob2 == ig0) then
                !vcs_g2 = (four_pi) ** (three/two) * q0sph ** 2 / two
                vcs_g2 = sqrt(i_sz)
              end if
@@ -4406,7 +4426,7 @@ subroutine gwr_build_sigmac(gwr)
  complex(dp) :: sigc_e0_kcalc(gwr%max_nbcalc, gwr%nkcalc, gwr%nsppol)
  complex(dp) :: qpe_zlin_kcalc(gwr%max_nbcalc, gwr%nkcalc, gwr%nsppol), imag_zmesh(gwr%ntau,2)
  complex(dp) :: sigc_rw_diag_kcalc(gwr%nwr, gwr%max_nbcalc, gwr%nkcalc, gwr%nsppol)
- type(ebands_t),pointer :: prev_ebands
+ type(ebands_t),pointer :: now_ebands
 
 ! *************************************************************************
 
@@ -4420,9 +4440,9 @@ subroutine gwr_build_sigmac(gwr)
 
  ! Use KS or QP energies depending on the iteration state.
  if (gwr%scf_iteration == 0) then
-   prev_ebands => gwr%ks_ebands
+   now_ebands => gwr%ks_ebands
  else
-   prev_ebands => gwr%qp_ebands
+   now_ebands => gwr%qp_ebands
  end if
 
  ! Set FFT mesh in the supercell
@@ -4792,7 +4812,7 @@ end if
       ik_ibz = gwr%kcalc2ibz(ikcalc, 1)
       do band=gwr%bstart_ks(ikcalc, spin), gwr%bstop_ks(ikcalc, spin)
         ibc = band - gwr%bstart_ks(ikcalc, spin) + 1
-        e0 = prev_ebands%eig(band, ik_ibz, spin)
+        e0 = now_ebands%eig(band, ik_ibz, spin)
 
         associate (vals_pmt => sigc_it_diag_kcalc(:,:, ibc, ikcalc, spin))
         ! f(t) = E(t) + O(t) = (f(t) + f(-t)) / 2  + (f(t) - f(-t)) / 2
@@ -4857,6 +4877,7 @@ end if
  end do ! spin
 
  ! TODO: Update gwr%qp_ebands
+ call ebands_copy(gwr%qp_ebands, gwr%qp_ebands_prev)
 
  if (gwr%comm%me == 0) then
    ! Master writes results to ab_out, std_out and GWR.nc
@@ -5145,7 +5166,7 @@ subroutine gwr_rpa_energy(gwr)
 !scalars
  integer,parameter :: master = 0
  integer :: my_is, my_iqi, my_it, itau, spin, iq_ibz, ii, ierr, ig, ncut, icut, mat_size
- integer :: il_g1, il_g2, ig1, ig2, npw_q !, ierr, iglob2, iglob1,
+ integer :: il_g1, il_g2, ig1, ig2, npw_q, ig0
  logical :: q_is_gamma
  real(dp) :: weight, qq_ibz(3), estep, aa, bb, rmsq, ecut_soft, damp
  complex(dpc) :: vcs_g1, vcs_g2
@@ -5171,8 +5192,8 @@ subroutine gwr_rpa_energy(gwr)
 
  ecut_chi = arth(gwr%dtset%ecuteps + tol12, estep, ncut)
 
- ! Polarizability has been summed over spins in build_tchi.
- ! The loop over spins is needed to parallelize the loop over my_iqi.
+ ! Polarizability has been summed over spins inside build_tchi.
+ ! The loop over spins is needed to parallelize the loop over my_iqi if nsppol == 2
  do my_is=1,gwr%my_nspins
    spin = gwr%my_spins(my_is)
    if (gwr%spin_comm%nproc == 1 .and. spin == 2) cycle
@@ -5183,12 +5204,13 @@ subroutine gwr_rpa_energy(gwr)
      qq_ibz = gwr%qibz(:, iq_ibz)
      q_is_gamma = normv(qq_ibz, gwr%cryst%gmet, "G") < GW_TOLQ0
 
-     ! NB: Take into account that iq_ibz might be replicated across the procs in gwr%kpt_comm.
+     ! iq_ibz might be replicated inside gwr%kpt_comm.
      if (.not. gwr%itreat_qibz(iq_ibz)) cycle
 
      desc_q => gwr%tchi_desc_qibz(iq_ibz)
-     ABI_CHECK(desc_q%sorted, "g-vectors are not sorted!")
+     ABI_CHECK(desc_q%sorted, "g-vectors are not sorted by |g|!")
      npw_q = desc_q%npw
+     ig0 = desc_q%ig0
 
      ABI_MALLOC(kin_qg, (npw_q))
      do ig=1,npw_q
@@ -5222,7 +5244,7 @@ subroutine gwr_rpa_energy(gwr)
            !  damp = sqrt(half * (one + cos(pi * (kin_qg(ig2) - ecut_soft) / (ecut_chi(icut) - ecut_soft))))
            !end if
            vcs_g2 = desc_q%vc_sqrt(ig2) * damp
-           if (q_is_gamma .and. ig2 == 1) vcs_g2 = zero
+           if (q_is_gamma .and. ig2 == ig0) vcs_g2 = zero
 
            do il_g1=1,tchi%sizeb_local(1)
              ig1 = mod(tchi%loc2grow(il_g1) - 1, desc_q%npw) + 1
@@ -5231,7 +5253,7 @@ subroutine gwr_rpa_energy(gwr)
              !  damp = sqrt(half * (one + cos(pi * (kin_qg(ig1) - ecut_soft) / (ecut_chi(icut) - ecut_soft))))
              !end if
              vcs_g1 = desc_q%vc_sqrt(ig1) * damp
-             if (q_is_gamma .and. ig1 == 1) vcs_g1 = zero
+             if (q_is_gamma .and. ig1 == ig0) vcs_g1 = zero
              chi_tmp%buffer_cplx(il_g1, il_g2) = tchi%buffer_cplx(il_g1, il_g2) * vcs_g1 * vcs_g2
            end do
          end do
@@ -5240,7 +5262,6 @@ subroutine gwr_rpa_energy(gwr)
          ! Eq (6) 10.1103/PhysRevB.81.115126
          ! NB: have to build chi_tmp inside loop over icut as matrix is destroyed by pzheev.
          mat_size = bisect(kin_qg, ecut_chi(icut))
-         mat_size = min(mat_size + 1, npw_q)
          call chi_tmp%pzheev("N", "U", dummy_vec, eig, mat_size=mat_size)
 
          weight = gwr%wtq(iq_ibz) * gwr%iw_wgs(itau) / two_pi
@@ -5335,7 +5356,7 @@ subroutine gwr_run_g0w0(gwr, free_ugb)
  !  do while (.not. converged)
  !    call gwr%run_g0w0(free_ugb=.False.)
  !    gwr%scf_iteration = gwr%scf_iteration + 1
- !    converged = gwr%scf_cycle_is_converged()
+ !    call gwr%check_scf_cycle(converged)
  !  end do
 
  !case ("eGW0")
@@ -5345,7 +5366,7 @@ subroutine gwr_run_g0w0(gwr, free_ugb)
  !    call gwr%build_sigxme()  ! This should not change in semiconductors
  !    call gwr%build_sigmac()
  !    gwr%scf_iteration = gwr%scf_iteration + 1
- !    converged = gwr%scf_cycle_is_converged()
+ !    call gwr%check_scf_cycle(converged)
  !  end do
 
  !case ("G0eW")
@@ -5356,12 +5377,67 @@ subroutine gwr_run_g0w0(gwr, free_ugb)
  !    call gwr%build_wc()
  !    call gwr%build_sigmac()
  !    gwr%scf_iteration = gwr%scf_iteration + 1
- !    converged = gwr%scf_cycle_is_converged()
+ !    call gwr%check_scf_cycle(converged)
  !  end do
 
  !end select
 
 end subroutine gwr_run_g0w0
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_gwr/check_scf_cyle
+!! NAME
+!!  check_scf_cycle
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine check_scf_cycle(gwr, converged)
+
+!Arguments ------------------------------------
+ class(gwr_t),intent(inout) :: gwr
+ logical,intent(out) :: converged
+
+!Local variables-------------------------------
+ integer :: spin, ik_ibz, band, nband_k
+ real(dp) :: etol, max_adiff, adiff(gwr%qp_ebands%mband)
+
+! *************************************************************************
+
+ etol = 0.005_dp * eV_Ha; max_adiff = -one; converged = .True.
+
+ associate (now => gwr%qp_ebands, prev => gwr%qp_ebands_prev)
+ do spin=1,gwr%nsppol
+   do ik_ibz=1,now%nkpt
+     nband_k = now%nband(ik_ibz + (spin-1)*now%nkpt)
+     adiff(1:nband_k) = abs(now%eig(1:nband_k, ik_ibz, spin) - prev%eig(1:nband_k, ik_ibz, spin))
+     band = maxloc(adiff(1:nband_k), dim=1)
+     max_adiff = max(max_adiff, adiff(band))
+     if (adiff(band) > etol) converged = .False.
+     if (gwr%comm%me == 0) then
+       !write(ab_out, *)
+     end if
+   end do
+ end do
+ end associate
+
+ ! Just to be on the safe side
+ call xmpi_land(converged, gwr%comm%value)
+
+ if (gwr%comm%me == 0) then
+   if (converged) then
+   else
+   end if
+ end if
+
+end subroutine check_scf_cycle
 !!***
 
 !----------------------------------------------------------------------
@@ -5813,7 +5889,7 @@ subroutine load_head_wings_from_sus_file__(gwr, filepath)
 !Local variables-------------------------------
 !scalars
  integer, parameter :: master = 0
- integer :: sus_npw, sus_nomega, ncerr, ncid, nmiss, ig_sus, ig, ierr
+ integer :: sus_npw, sus_nomega, ncerr, ncid, nmiss, ig_sus, ig, ierr, ig0
  integer :: my_iqi, my_it, my_is, iq_ibz, spin, itau, iw, il_g1, il_g2, ig1, ig2, iglob1, iglob2, ig1_inv, ig2_inv
  real(dp) :: max_err
  logical :: q_is_gamma
@@ -5911,6 +5987,7 @@ subroutine load_head_wings_from_sus_file__(gwr, filepath)
      if (.not. q_is_gamma) cycle
 
      associate (desc_q => gwr%tchi_desc_qibz(iq_ibz))
+     ig0 = desc_q%ig0
      ABI_CALLOC(gwr%chi0_head_myw, (3, 3, gwr%my_ntau))
      ABI_CALLOC(gwr%chi0_uwing_myw, (3, desc_q%npw, gwr%my_ntau))
      ABI_CALLOC(gwr%chi0_lwing_myw, (3, desc_q%npw, gwr%my_ntau))
@@ -5948,14 +6025,14 @@ subroutine load_head_wings_from_sus_file__(gwr, filepath)
            iglob1 = chi%loc2grow(il_g1)
            ig1 = mod(iglob1 - 1, desc_q%npw) + 1
 
-           if (iglob1 == 1 .and. iglob2 == 1) then
+           if (iglob1 == ig0 .and. iglob2 == ig0) then
              chi%buffer_cplx(il_g1, il_g2) = &
                vdotw(GW_Q0_DEFAULT, matmul(gwr%chi0_head_myw(:,:,my_it), GW_Q0_DEFAULT), gwr%cryst%gmet, "G")
-           else if (iglob2 == 1) then
+           else if (iglob2 == ig0) then
              chi%buffer_cplx(il_g1, il_g2) = &
                vdotw(GW_Q0_DEFAULT, gwr%chi0_lwing_myw(:, ig1, my_it), gwr%cryst%gmet, "G")
                !vdotw(GW_Q0_DEFAULT, conjg(gwr%chi0_uwing_myw(:, ig1, my_it)), gwr%cryst%gmet, "G")
-           else if (iglob1 == 1) then
+           else if (iglob1 == ig0) then
              chi%buffer_cplx(il_g1, il_g2) = &
                vdotw(GW_Q0_DEFAULT, gwr%chi0_uwing_myw(:, ig2, my_it), gwr%cryst%gmet, "G")
            end if
@@ -6129,7 +6206,7 @@ subroutine gwr_build_sigxme(gwr)
  integer,allocatable :: gbound_kcalc(:,:), gvec_(:,:)
  real(dp) :: ksum(3), kk_bz(3), kgw(3), kgw_m_ksum(3), qbz(3), q0(3) !, spinrot_kbz(4), spinrot_kgw(4) !, tsec(2)
  real(dp),contiguous, pointer :: qp_ene(:,:,:), qp_occ(:,:,:)
- !type(ebands_t),pointer :: prev_ebands
+ !type(ebands_t),pointer :: now_ebands
  complex(gwpc),allocatable :: vc_sqrt_qbz(:), rhotwg(:), rhotwgp(:), rhotwg_ki(:,:) ! ur_bdgw(:,:), ur_ksum(:) ! ur_ibz(:),
  complex(dp),allocatable :: ur_bdgw(:,:), ur_ksum(:) ! ur_ibz(:),
  complex(dpc),allocatable  :: sigxcme_tmp(:,:), sigxme_tmp(:,:,:), sigx(:,:,:,:) ! sym_sigx(:,:,:),
