@@ -1063,6 +1063,8 @@ subroutine ebands_copy(ibands, obands)
 
 ! *********************************************************************
 
+ call ebands_free(obands)
+
  ! Copy scalars
  obands%bantot       = ibands%bantot
  obands%ivalence     = ibands%ivalence ! CP added for occopt 9
