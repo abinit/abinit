@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  2 Oct 2022.
-- ( at 23h44 )
+.Starting date : Tue  4 Oct 2022.
+- ( at 17h21 )
   
 - input  file    -> /Users/gmatteo/git_repos/abinit_gwr/_build/tests/Test_suite/gwr_t01/t01.abi
 - output file    -> t01.abo
@@ -68,7 +68,7 @@ _ WF disk file :      0.106 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 -    mband =          30        mffmem =           1         mkmem =           3
        mpw =          57          nfft =        3375          nkpt =           3
 ================================================================================
-P This job should need less than                       1.859 Mbytes of memory.
+P This job should need less than                       1.886 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.080 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
@@ -82,10 +82,10 @@ _ WF disk file :      0.080 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
     occopt =       1   xclevel =       2
--    mband =          30        mffmem =           1         mkmem =           2
+-    mband =          30        mffmem =           1         mkmem =           3
        mpw =          57          nfft =        3375          nkpt =           3
 ================================================================================
-P This job should need less than                       1.859 Mbytes of memory.
+P This job should need less than                       1.886 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.080 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
@@ -141,7 +141,7 @@ _ WF disk file :      0.080 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
                        5.00000000E-01  0.00000000E+00  0.00000000E+00
          kptrlatt        2    0    0      0    2    0      0    0    2
           kptrlen      1.45098311E+01
-P           mkmem           2
+P           mkmem           3
             natom           2
             nband1          6
             nband2         40
@@ -609,24 +609,24 @@ Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(o
 --- !EMACRO_WITHOUT_LOCAL_FIELDS
 iteration_state: {dtset: 3, }
 'epsilon_{iw, q -> Gamma}(0,0)': !Tabular |
-      1.17768303E-02    1.00000184E+00    0.00000000E+00
-      4.26019184E-02    1.00000176E+00    0.00000000E+00
-      1.02353357E-01    1.00000147E+00    0.00000000E+00
-      2.42819629E-01    1.00000089E+00    0.00000000E+00
-      6.17145550E-01    1.00000030E+00    0.00000000E+00
-      1.86464996E+00    1.00000008E+00    0.00000000E+00
+      1.17768303E-02    9.99999990E-01    0.00000000E+00
+      4.26019184E-02    9.99999990E-01    0.00000000E+00
+      1.02353357E-01    9.99999987E-01    0.00000000E+00
+      2.42819629E-01    1.00000001E+00    0.00000000E+00
+      6.17145550E-01    1.00000001E+00    0.00000000E+00
+      1.86464996E+00    9.99999973E-01    0.00000000E+00
 ...
 
 
 --- !EMACRO_WITH_LOCAL_FIELDS
 iteration_state: {dtset: 3, }
 'epsilon_{iw, q -> Gamma}(0,0)': !Tabular |
-      1.17768303E-02    9.99998240E-01    4.56250482E-18
-      4.26019184E-02    9.99998314E-01    5.85123701E-18
-      1.02353357E-01    9.99998574E-01    8.19422093E-18
-      2.42819629E-01    9.99999128E-01   -7.25305178E-19
-      6.17145550E-01    9.99999702E-01   -6.29710262E-18
-      1.86464996E+00    9.99999918E-01    7.34319196E-20
+      1.17768303E-02    1.00000001E+00   -2.06510574E-25
+      4.26019184E-02    1.00000001E+00   -2.13967823E-25
+      1.02353357E-01    1.00000001E+00   -8.86655980E-26
+      2.42819629E-01    9.99999993E-01    9.28522206E-26
+      6.17145550E-01    9.99999994E-01   -3.99026453E-26
+      1.86464996E+00    1.00000003E+00   -6.19413236E-26
 ...
 
  Trace of: wc_qibz for spin: 1 for testing purposes:
@@ -683,7 +683,7 @@ data: !Tabular |
 
 ================================================================================
 == DATASET  4 ==================================================================
--   mpi_nproc: 2, omp_nthreads: -1 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -759,7 +759,7 @@ nqibz: 3
 green_mpw: 113
 tchi_mpw: 113
 g_ngfft: [8, 8, 8, 8, 8, 8, ]
-P gwr_np_gtks: [1, 2, 1, 1, ]
+P gwr_np_gtks: [1, 1, 1, 1, ]
 P np_kibz: [1, 1, 1, ]
 P np_qibz: [1, 1, 1, ]
 ft_max_err_t2w_cos:   1.69754129E-02
@@ -775,7 +775,13 @@ Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(o
     6 6.02383E+01   5.21455E+01   1.86465E+00   9.78848E+00
 ...
 
- RPA Ec: -1.13364E+00 (Ha)
+        ecut_chi ecut_chi^(-3/2)     RPA Ec (eV)     RPA Ec (Ha)
+  3.20000000E+00  1.74692811E-01 -3.33860692E+01 -1.22691552E+00
+  3.40000000E+00  1.59507690E-01 -3.33860692E+01 -1.22691552E+00
+  3.60000000E+00  1.46401744E-01 -3.36577696E+01 -1.23690033E+00
+  3.80000000E+00  1.34997152E-01 -3.36772150E+01 -1.23761493E+00
+  4.00000000E+00  1.25000000E-01 -3.38195931E+01 -1.24284723E+00
+              oo               0 -3.49568598E+01 -1.28464101E+00
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -798,8 +804,8 @@ Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(o
            etotal2     0.0000000000E+00
            etotal3     0.0000000000E+00
            etotal4     0.0000000000E+00
-            fcart1    -1.0497642196E-27  6.2985853173E-28 -1.0497642196E-27
-                       1.0497642196E-27 -6.2985853173E-28  1.0497642196E-27
+            fcart1    -1.0497642196E-27  1.4696699074E-27 -1.0497642196E-27
+                       1.0497642196E-27 -1.4696699074E-27  1.0497642196E-27
             fcart2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -833,7 +839,7 @@ Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(o
                        5.00000000E-01  0.00000000E+00  0.00000000E+00
          kptrlatt        2    0    0      0    2    0      0    0    2
           kptrlen      1.45098311E+01
-P           mkmem           2
+P           mkmem           3
             natom           2
             nband1          6
             nband2         40
