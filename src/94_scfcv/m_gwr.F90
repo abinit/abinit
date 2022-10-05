@@ -160,7 +160,7 @@ module m_gwr
  use m_time,          only : cwtime, cwtime_report, sec2str, timab
  use m_io_tools,      only : iomode_from_fname, get_unit, file_exists, open_file
  use m_numeric_tools, only : blocked_loop, get_diag, isdiagmat, arth, print_arr, imin_loc, &
-                             pade, dpade, newrap_step, c2r !, linfit
+                             pade, dpade, newrap_step, c2r, linfit, bisect
  use m_copy,          only : alloc_copy
  use m_geometry,      only : normv, vdotw
  use m_fstrings,      only : sjoin, itoa, strcat, ktoa, ltoa, ftoa
@@ -5139,19 +5139,20 @@ end subroutine diag_braket
 subroutine gwr_rpa_energy(gwr)
 
 !Arguments ------------------------------------
- class(gwr_t),intent(inout) :: gwr
+ class(gwr_t),target,intent(inout) :: gwr
 
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0
- integer :: my_is, my_iqi, my_it, itau, spin, iq_ibz, ii, ierr
+ integer :: my_is, my_iqi, my_it, itau, spin, iq_ibz, ii, ierr, ig, ncut, icut, mat_size
  integer :: il_g1, il_g2, ig1, ig2, npw_q !, ierr, iglob2, iglob1,
  logical :: q_is_gamma
- real(dp) :: weight_q, qq_ibz(3), ec_rpa
+ real(dp) :: weight, qq_ibz(3), estep, aa, bb, rmsq, ecut_soft, damp
  complex(dpc) :: vcs_g1, vcs_g2
+ type(desc_t),pointer :: desc_q
 !arrays
  type(matrix_scalapack) :: chi_tmp, dummy_vec
- real(dp),allocatable :: eig(:)
+ real(dp),allocatable :: eig(:), kin_qg(:), ec_rpa(:), ecut_chi(:)
 
 ! *************************************************************************
 
@@ -5161,61 +5162,92 @@ subroutine gwr_rpa_energy(gwr)
 
  ABI_CHECK(gwr%tchi_space == "iomega", sjoin("tchi_space:", gwr%tchi_space, "!= iomega"))
 
- ! Polarizability has been summed over spins in build_tchi.
- ! The loop over spins is needed to parallelie the loop of my_iqi.
-
  ! See also calc_rpa_functional in m_screening_driver
- ! TODO: Compute RPA energy with different number of PWs and extrapolate.
- ec_rpa = zero
+ ! Compute RPA energy with ncut cutoff energies to extrapolate for ecut --> oo
+ ncut = 5
+ estep = - gwr%dtset%ecuteps * 0.05_dp
+ ABI_CALLOC(ec_rpa, (ncut))
+ ABI_MALLOC(ecut_chi, (ncut))
+
+ ecut_chi = arth(gwr%dtset%ecuteps + tol12, estep, ncut)
+
+ ! Polarizability has been summed over spins in build_tchi.
+ ! The loop over spins is needed to parallelize the loop over my_iqi.
  do my_is=1,gwr%my_nspins
    spin = gwr%my_spins(my_is)
    if (gwr%spin_comm%nproc == 1 .and. spin == 2) cycle
+
    do my_iqi=1,gwr%my_nqibz
      if (gwr%spin_comm%skip(my_iqi)) cycle
      iq_ibz = gwr%my_qibz_inds(my_iqi)
      qq_ibz = gwr%qibz(:, iq_ibz)
-     weight_q = gwr%wtq(iq_ibz)
      q_is_gamma = normv(qq_ibz, gwr%cryst%gmet, "G") < GW_TOLQ0
 
      ! NB: Take into account that iq_ibz might be replicated across the procs in gwr%kpt_comm.
      if (.not. gwr%itreat_qibz(iq_ibz)) cycle
 
+     desc_q => gwr%tchi_desc_qibz(iq_ibz)
+     ABI_CHECK(desc_q%sorted, "g-vectors are not sorted!")
+     npw_q = desc_q%npw
+
+     ABI_MALLOC(kin_qg, (npw_q))
+     do ig=1,npw_q
+       kin_qg(ig) = half * normv(qq_ibz + desc_q%gvec(:,ig), gwr%cryst%gmet, "G") ** 2
+     end do
+
      do my_it=1,gwr%my_ntau
        itau = gwr%my_itaus(my_it)
-
-       associate (desc_q => gwr%tchi_desc_qibz(iq_ibz), tchi => gwr%tchi_qibz(iq_ibz, itau, spin))
-       ABI_CHECK(desc_q%sorted, "g-vectors are not sorted!")
+       associate (tchi => gwr%tchi_qibz(iq_ibz, itau, spin))
 
        if (my_it == 1) then
          ! Allocate workspace. NB: npw_q is the total number of PWs for this q.
          call tchi%copy(chi_tmp)
-         npw_q = desc_q%npw
          ABI_CHECK_IEQ(npw_q, tchi%sizeb_global(1), "npw_q")
          ABI_MALLOC(eig, (npw_q))
        end if
 
-       ! NB: Contribution due to q --> 0 is ignored.
-       ! This is not optimal but consistent with calc_rpa_functional
-       do il_g2=1,tchi%sizeb_local(2)
-         ig2 = mod(tchi%loc2gcol(il_g2) - 1, desc_q%npw) + 1
-         vcs_g2 = desc_q%vc_sqrt(ig2)
-         if (q_is_gamma) vcs_g2 = zero
-         do il_g1=1,tchi%sizeb_local(1)
-           ig1 = mod(tchi%loc2grow(il_g1) - 1, desc_q%npw) + 1
-           vcs_g1 = desc_q%vc_sqrt(ig1)
-           if (q_is_gamma) vcs_g1 = zero
-           chi_tmp%buffer_cplx(il_g1, il_g2) = tchi%buffer_cplx(il_g1, il_g2) * vcs_g1 * vcs_g2
+       do icut=1,ncut
+
+         ! Damp Coulomb kernel in order to have smooth E(V).
+         ! See also https://www.vasp.at/wiki/index.php/ENCUTGWSOFT
+         ! and Harl's PhD thesis available at: https://utheses.univie.ac.at/detail/2259
+         ecut_soft = 0.8_dp * ecut_chi(icut)
+
+         ! TODO: Contribution due to head for q --> 0 is ignored.
+         ! This is not optimal but consistent with calc_rpa_functional
+         do il_g2=1,tchi%sizeb_local(2)
+           ig2 = mod(tchi%loc2gcol(il_g2) - 1, desc_q%npw) + 1
+           damp = one
+           !if (kin_qg(ig2) > ecut_soft) then
+           !  damp = sqrt(half * (one + cos(pi * (kin_qg(ig2) - ecut_soft) / (ecut_chi(icut) - ecut_soft))))
+           !end if
+           vcs_g2 = desc_q%vc_sqrt(ig2) * damp
+           if (q_is_gamma .and. ig2 == 1) vcs_g2 = zero
+
+           do il_g1=1,tchi%sizeb_local(1)
+             ig1 = mod(tchi%loc2grow(il_g1) - 1, desc_q%npw) + 1
+             damp = one
+             !if (kin_qg(ig1) > ecut_soft) then
+             !  damp = sqrt(half * (one + cos(pi * (kin_qg(ig1) - ecut_soft) / (ecut_chi(icut) - ecut_soft))))
+             !end if
+             vcs_g1 = desc_q%vc_sqrt(ig1) * damp
+             if (q_is_gamma .and. ig1 == 1) vcs_g1 = zero
+             chi_tmp%buffer_cplx(il_g1, il_g2) = tchi%buffer_cplx(il_g1, il_g2) * vcs_g1 * vcs_g2
+           end do
          end do
-       end do
 
-       ! Diagonalize matrix.
-       call chi_tmp%pzheev("N", "U", dummy_vec, eig)
+         ! Diagonalize sub-matrix and perform integration in imaginary frequency.
+         ! Eq (6) 10.1103/PhysRevB.81.115126
+         ! NB: have to build chi_tmp inside loop over icut as matrix is destroyed by pzheev.
+         mat_size = bisect(kin_qg, ecut_chi(icut))
+         mat_size = min(mat_size + 1, npw_q)
+         call chi_tmp%pzheev("N", "U", dummy_vec, eig, mat_size=mat_size)
 
-       ! Perform integration in imaginary frequency.
-       ! Eq (6) 10.1103/PhysRevB.81.115126
-       do ii=1,desc_q%npw
-         ec_rpa = ec_rpa + weight_q * gwr%iw_wgs(itau) * (log(one - eig(ii)) + eig(ii)) / two_pi
-       end do
+         weight = gwr%wtq(iq_ibz) * gwr%iw_wgs(itau) / two_pi
+         do ii=1,mat_size
+           ec_rpa(icut) = ec_rpa(icut) + weight * (log(one - eig(ii)) + eig(ii))
+         end do
+       end do ! icut
 
        if (my_it == gwr%my_ntau) then
          ! Free workspace
@@ -5225,15 +5257,29 @@ subroutine gwr_rpa_energy(gwr)
        end associate
 
      end do ! my_it
+
+     ABI_FREE(kin_qg)
    end do ! my_iqi
  end do ! my_is
 
  call xmpi_sum_master(ec_rpa, master, gwr%comm%value, ierr)
 
- ! Print results to ab_out and nc file
+ ! Print results to ab_out.
  if (gwr%comm%me == master) then
-   write(ab_out, "(a,es16.8,a)")" RPA Ec: ", ec_rpa, " (Ha)"
+   write(ab_out, "(4a16)")"ecut_chi", "ecut_chi^(-3/2)", "RPA Ec (eV)", "RPA Ec (Ha)"
+   do icut=ncut,1,-1
+     write(ab_out, "(*(es16.8))") &
+       ecut_chi(icut), ecut_chi(icut) ** (-three/two), ec_rpa(icut) * Ha_eV, ec_rpa(icut)
+   end do
+   if (ncut > 1) then
+     ! Add last line with extrapolated value
+     rmsq = linfit(ncut, ecut_chi(:) ** (-three/two), ec_rpa, aa, bb)
+     write(ab_out, "(2a16,*(es16.8))") "oo", "0", bb * Ha_eV, bb
+   end if
  end if
+
+ ABI_FREE(ec_rpa)
+ ABI_FREE(ecut_chi)
 
 end subroutine gwr_rpa_energy
 !!***

@@ -1548,13 +1548,13 @@ end function inrange_dp
 !!  bisect_rdp
 !!
 !! FUNCTION
-!!  Given an array AA(1:N), and a value x, returns the index j such that AA(j)<=x<= AA(j + 1).
+!!  Given an array AA(1:N), and a value x, returns the index j such that AA(j) <= x <= AA(j + 1).
 !!  AA must be monotonic, either increasing or decreasing. j=0 or
 !!  j=N is returned to indicate that x is out of range.
 !!
 !! SOURCE
 
-pure function bisect_rdp(AA,xx) result(loc)
+pure function bisect_rdp(AA, xx) result(loc)
 
 !Arguments ------------------------------------
 !scalars
@@ -1600,7 +1600,7 @@ end function bisect_rdp
 !!  bisect_int
 !!
 !! FUNCTION
-!!  Given an array AA(1:N), and a value x, returns the index j such that AA(j)<=x<= AA(j + 1).
+!!  Given an array AA(1:N), and a value x, returns the index j such that AA(j) <= x <= AA(j + 1).
 !!  AA must be monotonic, either increasing or decreasing. j=0 or
 !!  j=N is returned to indicate that x is out of range.
 !!
@@ -2014,7 +2014,7 @@ end subroutine mask2blocks
 !! OUTPUT
 !!  aa=coefficient of linear term of fit
 !!  bb=coefficient of constant term of fit
-!!  function linfit=root mean square of differences between data and fit
+!!  res=root mean square of differences between data and fit
 !!
 !! SOURCE
 
@@ -2065,6 +2065,7 @@ end function linfit_rdp
 !!  linfit_spc
 !!
 !! FUNCTION
+!!  Perform a linear fit, y=ax+b, of data
 !!
 !! INPUTS
 !!
@@ -2117,6 +2118,7 @@ end function linfit_spc
 !!  linfit_dpc
 !!
 !! FUNCTION
+!!  Perform a linear fit, y=ax+b, of data
 !!
 !! INPUTS
 !!

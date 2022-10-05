@@ -3028,7 +3028,8 @@ end subroutine compute_eigen2
 !!
 !! SOURCE
 
-subroutine slk_pzheev(Slk_mat, jobz, uplo, Slk_vec, w)
+subroutine slk_pzheev(Slk_mat, jobz, uplo, Slk_vec, w, &
+                      mat_size, ija, ijz) ! Optional
 
 !Arguments ------------------------------------
 !scalars
@@ -3037,6 +3038,7 @@ subroutine slk_pzheev(Slk_mat, jobz, uplo, Slk_vec, w)
  class(matrix_scalapack),intent(inout) :: Slk_vec
 !arrays
  real(dp),intent(out) :: w(:)
+ integer,optional,intent(in) :: mat_size, ija(2), ijz(2)
 
 #ifdef HAVE_LINALG_SCALAPACK
 !Local variables ------------------------------
@@ -3044,6 +3046,7 @@ subroutine slk_pzheev(Slk_mat, jobz, uplo, Slk_vec, w)
  integer :: lwork, lrwork, info, nn
  !character(len=500) :: msg
 !arrays
+ integer :: ija__(2), ijz__(2)
  real(dp),allocatable :: rwork(:)
  complex(dpc),allocatable :: work(:)
 
@@ -3051,13 +3054,19 @@ subroutine slk_pzheev(Slk_mat, jobz, uplo, Slk_vec, w)
 
  ABI_CHECK(allocated(Slk_mat%buffer_cplx), "buffer_cplx not allocated")
 
+ nn = Slk_mat%sizeb_global(2); if (present(mat_size)) nn = mat_size
+ ija__ = [1, 1]; if (present(ija)) ija__ = ija
+ ijz__ = [1, 1]; if (present(ijz)) ijz__ = ijz
+
  ! Get optimal size of workspace.
  lwork= - 1; lrwork = -1
  ABI_MALLOC(work, (1))
  ABI_MALLOC(rwork, (1))
 
- call PZHEEV(jobz, uplo, Slk_mat%sizeb_global(2), Slk_mat%buffer_cplx, 1, 1, Slk_mat%descript%tab, &
-             w, Slk_vec%buffer_cplx, 1, 1, Slk_vec%descript%tab, work, lwork, rwork, lrwork, info)
+ !call pzheev(jobz, uplo, n, a, ia, ja, desca, w, z, iz, jz, descz, work, lwork, rwork, lrwork, info)
+
+ call PZHEEV(jobz, uplo, nn, Slk_mat%buffer_cplx, ija__(1), ija__(2), Slk_mat%descript%tab, &
+             w, Slk_vec%buffer_cplx, ijz__(1), ijz__(2), Slk_vec%descript%tab, work, lwork, rwork, lrwork, info)
  ABI_CHECK(info == 0, sjoin("Error during the calculation of the workspace size, info:", itoa(info)))
 
  lwork = NINT(real(work(1))); lrwork= NINT(rwork(1)) !*2
@@ -3065,7 +3074,6 @@ subroutine slk_pzheev(Slk_mat, jobz, uplo, Slk_vec, w)
  ABI_FREE(rwork)
 
  ! MG: Nov 23 2011. On my mac with the official scalapack package, rwork(1) is not large enough and causes a SIGFAULT.
- nn = Slk_mat%sizeb_global(1)
  if (firstchar(jobz, ['V'])) then
    if (lrwork < 2*nn + 2*nn-2) lrwork = 2*nn + 2*nn-2
  else if (firstchar(jobz, ['N'])) then
@@ -3077,8 +3085,8 @@ subroutine slk_pzheev(Slk_mat, jobz, uplo, Slk_vec, w)
  ABI_MALLOC(work, (lwork))
  ABI_MALLOC(rwork, (lrwork))
 
- call PZHEEV(jobz, uplo, Slk_mat%sizeb_global(2), Slk_mat%buffer_cplx, 1, 1, Slk_mat%descript%tab, &
-             w, Slk_vec%buffer_cplx, 1, 1, Slk_vec%descript%tab, work, lwork, rwork, lrwork, info)
+ call PZHEEV(jobz, uplo, nn, Slk_mat%buffer_cplx, ija__(1), ija__(2), Slk_mat%descript%tab, &
+             w, Slk_vec%buffer_cplx, ijz__(1), ijz__(2), Slk_vec%descript%tab, work, lwork, rwork, lrwork, info)
  ABI_CHECK(info == 0, sjoin("PZHEEV returned info:", itoa(info)))
 
  ABI_FREE(work)
