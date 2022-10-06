@@ -220,6 +220,7 @@
 #define ABI_MALLOC_MANAGED_BOUNDS(array,size,lbounds) call gator_allocate(array,size,lbounds)
 
 #define ABI_FREE_MANAGED(array) call gator_deallocate(array)
+#define ABI_SFREE_MANAGED(array) if (associated(array)) then NEWLINE ABI_FREE_MANAGED(array) NEWLINE endif
 
 
 /* Macros to allocate zero-initialized arrays. */
