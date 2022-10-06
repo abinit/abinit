@@ -1331,7 +1331,7 @@ contains
   !ABI_MALLOC_CUDA( vectout_gpu, 2 * npwout*nspinor*ndat * dp)
   !ABI_MALLOC_CUDA(svectout_gpu, 2 * npwout*nspinor*ndat*(paw_opt/3) * dp)
 
-  call copy_on_gpu(C_LOC(vectin(1,1)), gemm_nonlop_kokkos%vectin_gpu, 2*npwin*nspinor*ndat*dp)
+  !call copy_on_gpu(C_LOC(vectin(1,1)), gemm_nonlop_kokkos%vectin_gpu, 2*npwin*nspinor*ndat*dp)
 
   !! gpu alloc and init : enl_gpu
   enl_size_bytes = dimenl1 * dimenl2 * nspinortot**2 * dimekbq * dp
@@ -1404,7 +1404,7 @@ contains
          &            nprojs, ndat*nspinor, npwin, &                                                ! M,N,K
          &            cone, &                                                                       ! alpha
          &            gemm_nonlop_kpt_gpu(gemm_nonlop_ikpt_this_proc_being_treated)%projs, npwin, & ! A, LDA
-         &            gemm_nonlop_kokkos%vectin_gpu, npwin, &                                                          ! B, LDB
+         &            C_LOC(vectin), npwin, &                                                       ! B, LDB
          &            czero, &                                                                      ! beta
          &            gemm_nonlop_kokkos%projections_gpu, nprojs)                                   ! C, LDC
 
@@ -1417,7 +1417,7 @@ contains
 
        ! only compute real part of projections = P^* psi => projections_r = P_r^T psi_r + P_i^T psi_i
        !temp_realvec(1:npwin*nspinor*ndat) = vectin(1,1:npwin*nspinor*ndat)
-       call extract_real_part(temp_realvec_gpu, gemm_nonlop_kokkos%vectin_gpu, npwin*nspinor*ndat)
+       call extract_real_part(temp_realvec_gpu, C_LOC(vectin), npwin*nspinor*ndat)
 
        if(istwf_k == 2 .and. mpi_enreg%me_g0 == 1) then
          ! do idat=1, ndat*nspinor
@@ -1435,7 +1435,7 @@ contains
          &            gemm_nonlop_kokkos%projections_gpu, nprojs)                                     ! C, LDC
 
        !temp_realvec(1:npwin*nspinor*ndat) = vectin(2,1:npwin*nspinor*ndat)
-       call extract_imag_part(temp_realvec_gpu, gemm_nonlop_kokkos%vectin_gpu, npwin*nspinor*ndat)
+       call extract_imag_part(temp_realvec_gpu, C_LOC(vectin), npwin*nspinor*ndat)
 
        if(istwf_k == 2 .and. mpi_enreg%me_g0 == 1) then
          ! do idat=1, ndat*nspinor
@@ -1664,7 +1664,7 @@ contains
           call gpu_xaxpy(1, &                                  ! real
             &            2*npwin*nspinor*ndat, &               ! size
             &            cone, &                               ! alpha
-            &            gemm_nonlop_kokkos%vectin_gpu, 1, &   ! X, incrx
+            &            C_LOC(vectin), 1, &                   ! X, incrx
             &            gemm_nonlop_kokkos%svectout_gpu, 1)   ! Y, incry
 
         endif
@@ -1730,6 +1730,9 @@ contains
   !ABI_FREE_CUDA(      vectin_gpu)
   !ABI_FREE_CUDA(     vectout_gpu)
   !ABI_FREE_CUDA(    svectout_gpu)
+
+  ! device sync before reusing data computed on device
+  call gpu_device_synchronize()
 
   if (gpu_allocated(temp_realvec_gpu)) then
     ABI_FREE_CUDA(temp_realvec_gpu)
