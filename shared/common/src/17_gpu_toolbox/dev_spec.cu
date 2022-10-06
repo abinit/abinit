@@ -122,6 +122,33 @@ void unset_dev_()
   return;
 }
 
+// Synchronize device (makes the CPU waits the GPU to finish all running kernels)
+// this is required when using mamanged memory in order to reuse safely on CPU data
+// that were processed / modified by the GPU
+extern "C"  __host__
+void gpu_device_synchronize_cpp()
+{
+  cudaError_t cudaError = cudaDeviceSynchronize();
+  if(cudaError != cudaSuccess)
+    {
+      fprintf(stderr, "CUDA Runtime API Error reported : %s when trying to call cudaDeviceSynchronize\n", cudaGetErrorString(cudaError));
+      fflush(stderr);
+    }
+  return;
+}
+
+//
+extern "C"  __host__
+void gpu_data_prefetch_async_cpp(const void* devPtr, size_t count)
+{
+  int deviceId;
+
+  CHECK_CUDA_ERROR( cudaGetDevice(&deviceId) );
+
+  CHECK_CUDA_ERROR( cudaMemPrefetchAsync(devPtr, count, deviceId) );
+
+  return;
+}
 
 // Get context  -----------------------
 extern "C"  __host__
