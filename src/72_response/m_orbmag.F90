@@ -82,27 +82,44 @@ module m_orbmag
                                                &(/3,3,3/))
 
 
-  ! map from adir = 1, 2, 3 to its S_1adir packed for spherical harmonic calls
+  ! map from adir = 1, 2, 3 to S_1,adir packed for spherical harmonic calls
   ! x = r*S_1(1), y = r*S_1(-1), z = r*S_1(0)  
   integer,parameter :: pack1a(3) = (/4,2,3/)
 
   ! these parameters name the various output terms                                             
-  integer,parameter :: if1=1,if2=2,if3=3,if4=4
-  integer,parameter :: iomlr=5,iomanp=6,iomlmb=7
-  integer,parameter :: ig1=8,ig4=9,ih1=10,ih2=11,ih3=12,ih4=13
-  integer,parameter :: ig2a_dij=14,ig2b_p2=15,ig2b_ap=16,ig2b_vha=17,ig2b_vhnzc=18
-  integer,parameter :: ig3a_dij=19,ig3b_p2=20,ig3b_ap=21,ig3b_vha=22,ig3b_vhnzc=23
-  integer,parameter :: ig3b_vhnhat=24,ig2b_vhnhat=25,ig2b_vxc=26,ig3b_vxc=27
-  integer,parameter :: nterms=27
+  integer,parameter :: ichern1=1,ichern2=2
+  integer,parameter :: nterms=2
 
   ! these parameters name the various d terms
-  integer,parameter :: idp2=1,idpa=2,idvhnzc=3,idvha=4,idvhnhat=5,idsij=6,idvxc=7
-  integer,parameter :: ndterms=7
+  integer,parameter :: idsij=1
+  !integer,parameter :: idp2=1,idpa=2,idvhnzc=3,idvha=4,idvhnhat=5,idsij=6,idvxc=7
+  integer,parameter :: ndterms=1
 
   ! these parameters are constants used repeatedly
-  real(dp),parameter :: c2 = one/(two_pi*two_pi) ! accounts for exp(i k.r) in abinit derivatives rather than exp( 2pi i k.r)
-  complex(dpc),parameter :: cbc = j_dpc/two_pi ! Berry curvature pre-factor
-  complex(dpc),parameter :: com = -half*j_dpc  ! Orbital magnetism pre-factor
+  
+  ! accounts for exp(i k.r) in abinit derivatives rather than exp( 2pi i k.r)
+  real(dp),parameter :: c2=one/(two_pi*two_pi) 
+  complex(dpc),parameter :: cbc=j_dpc/two_pi ! Berry curvature pre-factor
+  complex(dpc),parameter :: com=-half*j_dpc  ! Orbital magnetism pre-factor
+
+  ! local datatype for d_\alpha terms
+  type,private :: dterm_type
+    ! scalars
+    integer :: lmn2max
+    integer :: natom
+
+    ! real arrays
+
+    ! not really a d term but convenient to have it with the others in the same format
+    ! <phi|phi> - <tphi|tphi>
+    ! qij(natom,lmn2max)
+    complex(dpc),allocatable :: qij(:,:)
+    
+    ! <phi|r_alpha|phi> - <tphi|r_alpha|tphi>
+    ! dqij(natom,lmn2max,3)
+    complex(dpc),allocatable :: dqij(:,:,:)
+
+  end type dterm_type
 
   ! local datatype for pawdensities
   type,private :: paw_sph_den_type
@@ -127,6 +144,7 @@ module m_orbmag
 
   public :: orbmag_ptpaw
 
+  private :: make_chern_c
   private :: make_d
   private :: make_ddir_sij
   private :: make_ddir_vhnzc
@@ -135,19 +153,12 @@ module m_orbmag
   private :: make_ddir_vha
   private :: make_ddir_vhnhat
   private :: make_ddir_vxc
-  private :: make_fgh1
-  private :: make_fh2
-  private :: make_fh3
-  private :: make_fgh4
-  private :: make_g2a
-  private :: make_g2b
-  private :: make_g3a
-  private :: make_g3b
+  private :: tdt_me
+  private :: dtdt_me
 
   private :: d2lr_p2
   private :: d2lr_Anp
 
-  private :: tdt_me
   private :: apply_d2lr_term_k
   private :: lamb_core
   private :: make_pcg1
@@ -155,6 +166,8 @@ module m_orbmag
   private :: orbmag_ptpaw_output
   private :: paw_sph_den_alloc
   private :: paw_sph_den_free
+  private :: dterm_alloc
+  private :: dterm_free
   
 CONTAINS  !========================================================================================
 !!***
@@ -228,19 +241,19 @@ subroutine orbmag_ptpaw(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_en
  integer :: ngfft5,ngfft6,ngnt,nn,nkpg,npw_k,nproc,spaceComm,with_vectornd
  real(dp) :: arg,ecut_eff,trnrm,ucvol
  logical :: has_nucdip
+ type(dterm_type) :: dterm
  type(gs_hamiltonian_type) :: gs_hamk
 
  !arrays
  integer,allocatable :: atindx(:),atindx1(:),dimlmn(:),gntselect(:,:),kg_k(:,:),nattyp(:)
  real(dp) :: gmet(3,3),gprimd(3,3),kpoint(3),omlamb(2,3),rhodum(1),rmet(3,3)
  real(dp),allocatable :: buffer1(:),buffer2(:)
- real(dp),allocatable :: cg_k(:,:),cg1_k(:,:,:),cgrvtrial(:,:),cwavef(:,:)
- real(dp),allocatable :: eig_k(:),ff_k(:,:,:),ffnl_k(:,:,:,:),gg_k(:,:,:),hh_k(:,:,:) 
+ real(dp),allocatable :: cg_k(:,:),cg1_k(:,:,:),cgrvtrial(:,:),ct_k(:,:,:),cwavef(:,:)
+ real(dp),allocatable :: eig_k(:),ffnl_k(:,:,:,:)
  real(dp),allocatable :: kinpw(:),kpg_k(:,:),orbmag_terms(:,:,:,:),orbmag_trace(:,:,:)
  real(dp),allocatable :: pcg1_k(:,:,:),ph1d(:,:),ph3d(:,:,:),phkxred(:,:),realgnt(:)
  real(dp),allocatable :: vectornd(:,:),vectornd_pac(:,:,:,:,:),vlocal(:,:,:,:)
  real(dp),allocatable :: ylm_k(:,:),ylmgr_k(:,:,:)
- complex(dpc),allocatable :: dterms(:,:,:,:,:)
  complex(dpc),allocatable :: mp2(:,:,:),mpan(:,:,:)
  type(pawcprj_type),allocatable :: cprj_k(:,:),cprj1_k(:,:,:),cwaveprj(:,:)
 
@@ -339,11 +352,13 @@ subroutine orbmag_ptpaw(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_en
  end if
 
  !========  compute onsite terms ==========
-
+ 
  lmn2max = psps%lmnmax*(psps%lmnmax+1)/2
 
- ABI_MALLOC(dterms,(ndterms,psps%lmnmax,psps%lmnmax,dtset%natom,3))
- call make_d(atindx,atindx1,cprj,dimlmn,dterms,dtset,gprimd,mcprj,&
+ ! note: in make_d, terms will be filled as iatom using atindx
+ call dterm_alloc(dterm,lmn2max,dtset%natom)
+
+ call make_d(atindx,atindx1,cprj,dimlmn,dterm,dtset,gprimd,mcprj,&
    & mpi_enreg,occ,paw_an,pawang,pawrad,pawtab,psps)
 
  ABI_MALLOC(mp2,(lmn2max,dtset%natom,3))
@@ -360,6 +375,8 @@ subroutine orbmag_ptpaw(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_en
 
  ABI_MALLOC(orbmag_terms,(2,nband_k,3,nterms))
  orbmag_terms = zero 
+
+ ABI_MALLOC(ct_k,(2,nband_k,3))
 
  write(std_out,'(a)')' entering kpt loop...'
 
@@ -468,87 +485,20 @@ subroutine orbmag_ptpaw(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_en
    !--------------------------------------------------------------------------------
    ! Finally ready to compute contributions to orbital magnetism and Berry curvature
    !--------------------------------------------------------------------------------
+   call make_chern_c(atindx,cprj_k,cprj1_k,ct_k,dterm,dtset,mcgk,nband_k,npw_k,pcg1_k,pawtab)
+   orbmag_terms(:,:,:,ichern1) = orbmag_terms(:,:,:,ichern1) + trnrm*ct_k(:,:,:)
    
-   ABI_MALLOC(ff_k,(2,nband_k,3))
-   ABI_MALLOC(gg_k,(2,nband_k,3))
-   ABI_MALLOC(hh_k,(2,nband_k,3))
-
-   call make_fgh1(atindx,cprj1_k,dimlmn,dtset,eig_k,ff_k,gg_k,gs_hamk,hh_k,ikpt,isppol,mcgk,&
-     & mpi_enreg,my_nspinor,nband_k,npw_k,pcg1_k)
-   orbmag_terms(:,:,:,if1) = orbmag_terms(:,:,:,if1) + trnrm*ff_k
-   orbmag_terms(:,:,:,ih1) = orbmag_terms(:,:,:,ih1) + trnrm*hh_k
-   orbmag_terms(:,:,:,ig1) = orbmag_terms(:,:,:,ig1) + trnrm*gg_k
-  
-   call make_fh2(atindx,cprj_k,cprj1_k,dterms(idsij,:,:,:,:),dtset,eig_k,ff_k,hh_k,psps%lmnmax,nband_k,pawtab)
-   orbmag_terms(:,:,:,if2) = orbmag_terms(:,:,:,if2) + trnrm*ff_k
-   orbmag_terms(:,:,:,ih2) = orbmag_terms(:,:,:,ih2) + trnrm*hh_k
- 
-   call make_fh3(atindx,cprj_k,dterms(idsij,:,:,:,:),dtset,eig_k,ff_k,hh_k,psps%lmnmax,nband_k,pawtab)
-   orbmag_terms(:,:,:,if3) = orbmag_terms(:,:,:,if3) + trnrm*ff_k
-   orbmag_terms(:,:,:,ih3) = orbmag_terms(:,:,:,ih3) + trnrm*hh_k
-   
-   call make_fgh4(atindx,cprj_k,dterms(idsij,:,:,:,:),dtset,eig_k,ff_k,gg_k,hh_k,psps%lmnmax,nband_k,pawtab)
-   orbmag_terms(:,:,:,if4) = orbmag_terms(:,:,:,if4) + trnrm*ff_k
-   orbmag_terms(:,:,:,ih4) = orbmag_terms(:,:,:,ih4) + trnrm*hh_k
-   orbmag_terms(:,:,:,ig4) = orbmag_terms(:,:,:,ig4) + trnrm*gg_k
-   
-   call make_g2a(atindx,cprj_k,cprj1_k,dtset,gg_k,lmn2max,nband_k,paw_ij,pawtab)
-   orbmag_terms(:,:,:,ig2a_dij) = orbmag_terms(:,:,:,ig2a_dij) + trnrm*gg_k
-   
-   call make_g2b(atindx,cprj_k,cprj1_k,dterms(idp2,:,:,:,:),dtset,gg_k,psps%lmnmax,nband_k,pawtab)
-   orbmag_terms(:,:,:,ig2b_p2) = orbmag_terms(:,:,:,ig2b_p2) + trnrm*gg_k
-
-   call make_g2b(atindx,cprj_k,cprj1_k,dterms(idpa,:,:,:,:),dtset,gg_k,psps%lmnmax,nband_k,pawtab)
-   orbmag_terms(:,:,:,ig2b_ap) = orbmag_terms(:,:,:,ig2b_ap) + trnrm*gg_k
-
-   call make_g2b(atindx,cprj_k,cprj1_k,dterms(idvha,:,:,:,:),dtset,gg_k,psps%lmnmax,nband_k,pawtab)
-   orbmag_terms(:,:,:,ig2b_vha) = orbmag_terms(:,:,:,ig2b_vha) + trnrm*gg_k
-   
-   call make_g2b(atindx,cprj_k,cprj1_k,dterms(idvhnhat,:,:,:,:),dtset,gg_k,psps%lmnmax,nband_k,pawtab)
-   orbmag_terms(:,:,:,ig2b_vhnhat) = orbmag_terms(:,:,:,ig2b_vhnhat) + trnrm*gg_k
-
-   call make_g2b(atindx,cprj_k,cprj1_k,dterms(idvhnzc,:,:,:,:),dtset,gg_k,psps%lmnmax,nband_k,pawtab)
-   orbmag_terms(:,:,:,ig2b_vhnzc) = orbmag_terms(:,:,:,ig2b_vhnzc) + trnrm*gg_k
-   
-   call make_g2b(atindx,cprj_k,cprj1_k,dterms(idvxc,:,:,:,:),dtset,gg_k,psps%lmnmax,nband_k,pawtab)
-   orbmag_terms(:,:,:,ig2b_vxc) = orbmag_terms(:,:,:,ig2b_vxc) + trnrm*gg_k
-
-   call make_g3a(atindx,cprj_k,dtset,gg_k,lmn2max,nband_k,paw_ij,pawtab)
-   orbmag_terms(:,:,:,ig3a_dij) = orbmag_terms(:,:,:,ig3a_dij) + trnrm*gg_k
-   
-   call make_g3b(atindx,cprj_k,dterms(idp2,:,:,:,:),dtset,gg_k,psps%lmnmax,nband_k,pawtab)
-   orbmag_terms(:,:,:,ig3b_p2) = orbmag_terms(:,:,:,ig3b_p2) + trnrm*gg_k
-   
-   call make_g3b(atindx,cprj_k,dterms(idpa,:,:,:,:),dtset,gg_k,psps%lmnmax,nband_k,pawtab)
-   orbmag_terms(:,:,:,ig3b_ap) = orbmag_terms(:,:,:,ig3b_ap) + trnrm*gg_k
-   
-   call make_g3b(atindx,cprj_k,dterms(idvha,:,:,:,:),dtset,gg_k,psps%lmnmax,nband_k,pawtab)
-   orbmag_terms(:,:,:,ig3b_vha) = orbmag_terms(:,:,:,ig3b_vha) + trnrm*gg_k
-   
-   call make_g3b(atindx,cprj_k,dterms(idvhnhat,:,:,:,:),dtset,gg_k,psps%lmnmax,nband_k,pawtab)
-   orbmag_terms(:,:,:,ig3b_vhnhat) = orbmag_terms(:,:,:,ig3b_vhnhat) + trnrm*gg_k
-   
-   call make_g3b(atindx,cprj_k,dterms(idvhnzc,:,:,:,:),dtset,gg_k,psps%lmnmax,nband_k,pawtab)
-   orbmag_terms(:,:,:,ig3b_vhnzc) = orbmag_terms(:,:,:,ig3b_vhnzc) + trnrm*gg_k
-   
-   call make_g3b(atindx,cprj_k,dterms(idvxc,:,:,:,:),dtset,gg_k,psps%lmnmax,nband_k,pawtab)
-   orbmag_terms(:,:,:,ig3b_vxc) = orbmag_terms(:,:,:,ig3b_vxc) + trnrm*gg_k
-   
-   !--------------------------------------------------------------------------------
-   ! onsite <phi|r_b p^2/2 r_g>
-   !--------------------------------------------------------------------------------
-   call apply_d2lr_term_k(atindx,cprj_k,dtset,iomlr,lmn2max,mp2,nband_k,gg_k,pawtab)
-   orbmag_terms(:,:,:,iomlr) = orbmag_terms(:,:,:,iomlr) + trnrm*gg_k
-   
-   !--------------------------------------------------------------------------------
-   ! onsite <phi|r_b p.A0 r_g> 
-   !--------------------------------------------------------------------------------
-   call apply_d2lr_term_k(atindx,cprj_k,dtset,iomanp,lmn2max,mpan,nband_k,gg_k,pawtab)
-   orbmag_terms(:,:,:,iomanp) = orbmag_terms(:,:,:,iomanp) + trnrm*gg_k
-
-   ABI_FREE(ff_k)
-   ABI_FREE(gg_k)
-   ABI_FREE(hh_k)
+   !!--------------------------------------------------------------------------------
+   !! onsite <phi|r_b p^2/2 r_g>
+   !!--------------------------------------------------------------------------------
+   !call apply_d2lr_term_k(atindx,cprj_k,dtset,iomlr,lmn2max,mp2,nband_k,gg_k,pawtab)
+   !orbmag_terms(:,:,:,iomlr) = orbmag_terms(:,:,:,iomlr) + trnrm*gg_k
+   !
+   !!--------------------------------------------------------------------------------
+   !! onsite <phi|r_b p.A0 r_g> 
+   !!--------------------------------------------------------------------------------
+   !call apply_d2lr_term_k(atindx,cprj_k,dtset,iomanp,lmn2max,mpan,nband_k,gg_k,pawtab)
+   !orbmag_terms(:,:,:,iomanp) = orbmag_terms(:,:,:,iomanp) + trnrm*gg_k
 
    icg = icg + npw_k*nband_k
    ikg = ikg + npw_k
@@ -590,25 +540,20 @@ subroutine orbmag_ptpaw(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_en
  ! so [rprimd]*grad_(k_red) x [rprimd]*grad_(k_red) = det[rprimd]*[rprimd]^{-1,T} grad_(k_red) x grad_(k_red)
  ! 
  do iterm = 1, nterms
-   if (iterm .EQ. iomlmb) cycle
    do nn = 1, nband_k
      do icmplx = 1, 2
-       if((iterm.EQ.iomlr).OR.(iterm.EQ.iomanp)) then
-         orbmag_terms(icmplx,nn,1:3,iterm) = MATMUL(rprimd,orbmag_terms(icmplx,nn,1:3,iterm))
-       else
-         orbmag_terms(icmplx,nn,1:3,iterm) = ucvol*MATMUL(gprimd,orbmag_terms(icmplx,nn,1:3,iterm))
-       end if
+       orbmag_terms(icmplx,nn,1:3,iterm) = ucvol*MATMUL(gprimd,orbmag_terms(icmplx,nn,1:3,iterm))
      end do
    end do
  end do
 
- ! convert orbmag magnetization to orbital moment
- ! Berry curvature terms are ignored
- ! Lamb term ignored
- do iterm = iomlr, nterms
-   if (iterm .EQ. iomlmb) cycle
-   orbmag_terms(:,:,:,iterm) = ucvol*orbmag_terms(:,:,:,iterm)
- end do
+ !! convert orbmag magnetization to orbital moment
+ !! Berry curvature terms are ignored
+ !! Lamb term ignored
+ !do iterm = iomlr, nterms
+ !  if (iterm .EQ. iomlmb) cycle
+ !  orbmag_terms(:,:,:,iterm) = ucvol*orbmag_terms(:,:,:,iterm)
+ !end do
 
  ! compute trace over filled states of each term
  ABI_MALLOC(orbmag_trace,(2,3,nterms))
@@ -617,11 +562,11 @@ subroutine orbmag_ptpaw(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_en
    orbmag_trace = orbmag_trace + orbmag_terms(:,nn,:,:)
  end do
 
-! get the Lamb term
- call lamb_core(atindx,dtset,omlamb)
- orbmag_trace(:,:,iomlmb) = omlamb
-!
- call orbmag_ptpaw_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace)
+!! get the Lamb term
+! call lamb_core(atindx,dtset,omlamb)
+! orbmag_trace(:,:,iomlmb) = omlamb
+ 
+call orbmag_ptpaw_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace)
 
 !---------------------------------------------------
 ! deallocate memory
@@ -655,15 +600,148 @@ subroutine orbmag_ptpaw(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_en
  call pawcprj_free(cwaveprj)
  ABI_FREE(cwaveprj)
 
- ABI_FREE(dterms)
+ call dterm_free(dterm)
+
  ABI_FREE(mp2)
  ABI_FREE(mpan)
  
  ABI_FREE(orbmag_terms)
+ ABI_FREE(ct_k)
  ABI_FREE(orbmag_trace)
 
 end subroutine orbmag_ptpaw
 !!***
+
+!!****f* ABINIT/make_chern_c
+!! NAME
+!! make_chern_c
+!!
+!! FUNCTION
+!! compute berry curvature originating from P_c terms
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2021 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!!
+!! SOURCE
+
+subroutine make_chern_c(atindx,cprj_k,cprj1_k,ct,dterm,dtset,mcgk,nband_k,npw_k,pcg1_k,pawtab)
+
+  !Arguments ------------------------------------
+  !scalars
+  integer,intent(in) :: mcgk,nband_k,npw_k
+  type(dterm_type),intent(in) :: dterm
+  type(dataset_type),intent(in) :: dtset
+
+  !arrays
+  integer,intent(in) :: atindx(dtset%natom)
+  real(dp),intent(in) :: pcg1_k(2,mcgk,3)
+  real(dp),intent(out) :: ct(2,nband_k,3)
+  type(pawcprj_type),intent(in) :: cprj_k(dtset%natom,nband_k)
+  type(pawcprj_type),intent(in) :: cprj1_k(dtset%natom,nband_k,3)
+  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
+
+  !Local variables -------------------------
+  !scalars
+  integer :: adir,bdir,gdir,iat,iatom,ilmn,itypat,jlmn,klmn,nn,np
+  real(dp) :: dotr,doti,epsabg
+  complex(dpc) :: ci,cj,cpi,cpj,cterm,dtdt,tdt,tdtp
+  !arrays
+
+!--------------------------------------------------------------------
+
+ ct = zero
+
+ do adir = 1, 3
+   do bdir = 1, 3
+     do gdir = 1, 3
+       epsabg = eijk(adir,bdir,gdir)
+       if (ABS(epsabg) .LT. tol8) cycle
+       do nn = 1, nband_k
+         dotr = DOT_PRODUCT(pcg1_k(1,(nn-1)*npw_k+1:nn*npw_k,bdir),&
+           &                pcg1_k(1,(nn-1)*npw_k+1:nn*npw_k,gdir)) + &
+           &    DOT_PRODUCT(pcg1_k(2,(nn-1)*npw_k+1:nn*npw_k,bdir),&
+           &                pcg1_k(2,(nn-1)*npw_k+1:nn*npw_k,gdir)) 
+         doti = DOT_PRODUCT(pcg1_k(1,(nn-1)*npw_k+1:nn*npw_k,bdir),&
+           &                pcg1_k(2,(nn-1)*npw_k+1:nn*npw_k,gdir)) - &
+           &    DOT_PRODUCT(pcg1_k(2,(nn-1)*npw_k+1:nn*npw_k,bdir),&
+           &                pcg1_k(1,(nn-1)*npw_k+1:nn*npw_k,gdir)) 
+         cterm = cbc*c2*epsabg*CMPLX(dotr,doti,KIND=dpc)
+         ct(1,nn,adir) = ct(1,nn,adir) +  REAL(cterm)
+         ct(2,nn,adir) = ct(2,nn,adir) + AIMAG(cterm)
+
+         cterm = czero
+         do iat = 1, dtset%natom
+           itypat = dtset%typat(iat)
+           iatom = atindx(iat)
+
+           do ilmn = 1, pawtab(itypat)%lmn_size
+             do jlmn = 1, pawtab(itypat)%lmn_size
+               klmn = MATPACK(ilmn,jlmn)
+
+               ci = CMPLX(cprj1_k(iatom,nn,bdir)%cp(1,ilmn),cprj1_k(iatom,nn,bdir)%cp(2,ilmn))
+               cj = CMPLX(cprj1_k(iatom,nn,gdir)%cp(1,jlmn),cprj1_k(iatom,nn,gdir)%cp(2,jlmn))
+               cterm = cterm + CONJG(ci)*cj*pawtab(itypat)%sij(klmn)
+
+             end do !jlmn
+           end do !ilmn
+         end do !iat
+         cterm=cbc*c2*epsabg*cterm
+         ct(1,nn,adir) = ct(1,nn,adir) +  REAL(cterm)
+         ct(2,nn,adir) = ct(2,nn,adir) + AIMAG(cterm)
+         
+         cterm = czero
+
+         call tdt_me(dterm%qij,atindx,cprj1_k(:,nn,bdir),dterm%dqij,dtset,gdir,cprj_k(:,nn),&
+           & dterm%lmn2max,pawtab,tdt)
+         cterm = cterm + tdt
+         
+         call tdt_me(dterm%qij,atindx,cprj1_k(:,nn,gdir),dterm%dqij,dtset,bdir,cprj_k(:,nn),&
+           & dterm%lmn2max,pawtab,tdt)
+         cterm = cterm + CONJG(tdt)
+         
+         call dtdt_me(dterm%qij,atindx,cprj_k(:,nn),bdir,dterm%dqij,dtdt,dtset,&
+           & gdir,cprj_k(:,nn),dterm%lmn2max,pawtab)
+         cterm = cterm + dtdt
+         
+         cterm=cbc*c2*epsabg*cterm
+         ct(1,nn,adir) = ct(1,nn,adir) +  REAL(cterm)
+         ct(2,nn,adir) = ct(2,nn,adir) + AIMAG(cterm)
+
+         cterm = czero
+         do np = 1, nband_k
+           call tdt_me(dterm%qij,atindx,cprj_k(:,np),dterm%dqij,dtset,gdir,cprj_k(:,nn),&
+             & dterm%lmn2max,pawtab,tdt)
+           
+           call tdt_me(dterm%qij,atindx,cprj_k(:,np),dterm%dqij,dtset,bdir,cprj_k(:,nn),&
+             & dterm%lmn2max,pawtab,tdtp)
+           cterm = cterm + CONJG(tdtp)*tdt
+         end do !np
+         cterm=cbc*c2*epsabg*cterm
+         ct(1,nn,adir) = ct(1,nn,adir) -  REAL(cterm)
+         ct(2,nn,adir) = ct(2,nn,adir) - AIMAG(cterm)
+
+       end do !nn
+     end do !gdir
+   end do !bdir
+ end do !adir
+ 
+end subroutine make_chern_c
+!!***
+
 
 !!****f* ABINIT/make_pcg1
 !! NAME
@@ -779,888 +857,6 @@ subroutine make_pcg1(atindx,cg_k,cg1_k,cprj_k,dimlmn,dtset,gs_hamk,&
 end subroutine make_pcg1
 !!***
 
-!!****f* ABINIT/tdt_me
-!! NAME
-!! tdt_me
-!!
-!! FUNCTION
-!! compute the matrix element <bra|T^\dag (\partial T)|ket>
-!!
-!! COPYRIGHT
-!! Copyright (C) 2003-2021 ABINIT  group
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
-!!
-!! INPUTS
-!! atindx
-!! bra_cprj_k : cprj for bra wavefunctions
-!! bra_n : index of band to use on bra side
-!! ddir : set of <phi|r|phi> - <t phi|r|t phi>
-!! dtset
-!! idir : direction (1..3) for derivatives
-!! ket_cprj_k : cprj for ket wavefunctions
-!! ket_n index of band to use on ket side
-!! lmn2max
-!! nband_k
-!! pawtab
-!! tdtme : output matrix element
-!!
-!! OUTPUT
-!!
-!! SIDE EFFECTS
-!!
-!! TODO
-!!
-!! NOTES
-!!
-!! SOURCE
-
-subroutine tdt_me(atindx,bra_cprj_k,bra_n,ddir,dtset,idir,ket_cprj_k,&
-    & ket_n,lmnmax,nband_k,pawtab,tdtme)
-
-  !Arguments ------------------------------------
-  !scalars
-  integer,intent(in) :: bra_n,idir,ket_n,lmnmax,nband_k
-  type(dataset_type),intent(in) :: dtset
-
-  !arrays
-  integer,intent(in) :: atindx(dtset%natom)
-  complex(dpc),intent(in) :: ddir(lmnmax,lmnmax,dtset%natom,3)
-  complex(dpc),intent(out) :: tdtme
-  type(pawcprj_type),intent(in) :: bra_cprj_k(dtset%natom,nband_k)
-  type(pawcprj_type),intent(in) :: ket_cprj_k(dtset%natom,nband_k)
-  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
-
-  !Local variables -------------------------
-  !scalars
-  integer :: iat,iatom,ilmn,itypat,jlmn,klmn
-  real(dp) :: qij
-  complex(dpc) :: cpdj,cpi,cpj
-  
-  !arrays
-
-!--------------------------------------------------------------------
-
-  tdtme = czero
-  do iat=1,dtset%natom
-    iatom=atindx(iat)
-    itypat=dtset%typat(iat)
-    do ilmn = 1, pawtab(itypat)%lmn_size
-      cpi = CMPLX(bra_cprj_k(iatom,bra_n)%cp(1,ilmn),bra_cprj_k(iatom,bra_n)%cp(2,ilmn),KIND=dpc)
-      do jlmn = 1, pawtab(itypat)%lmn_size
-        cpj = CMPLX(ket_cprj_k(iatom,ket_n)%cp(1,jlmn),ket_cprj_k(iatom,ket_n)%cp(2,jlmn),KIND=dpc)
-        klmn = MATPACK(ilmn,jlmn)
-        qij = pawtab(itypat)%sij(klmn)
-        cpdj = CMPLX(ket_cprj_k(iatom,ket_n)%dcp(1,idir,jlmn),ket_cprj_k(iatom,ket_n)%dcp(2,idir,jlmn),KIND=dpc)
-
-        tdtme = tdtme + CONJG(cpi)*qij*cpdj + &
-          & CONJG(cpi)*(-j_dpc)*ddir(ilmn,jlmn,iat,idir)*cpj
-
-      end do ! jlmn
-    end do ! ilmn
-  end do ! iat
-
-end subroutine tdt_me
-!!***
-
-
-!!****f* ABINIT/make_fh2
-!! NAME
-!! make_fh2
-!!
-!! FUNCTION
-!! compute term 2 contribution to f and h functions
-!!
-!! COPYRIGHT
-!! Copyright (C) 2003-2021 ABINIT  group
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! SIDE EFFECTS
-!!
-!! TODO
-!!
-!! NOTES
-!!
-!! SOURCE
-
-subroutine make_fh2(atindx,cprj_k,cprj1_k,ddir,dtset,eig_k,ff_k,hh_k,lmnmax,nband_k,pawtab)
-
-  !Arguments ------------------------------------
-  !scalars
-  integer,intent(in) :: lmnmax,nband_k
-  type(dataset_type),intent(in) :: dtset
-
-  !arrays
-  integer,intent(in) :: atindx(dtset%natom)
-  real(dp),intent(in) :: eig_k(nband_k)
-  complex(dpc),intent(in) :: ddir(lmnmax,lmnmax,dtset%natom,3)
-  real(dp),intent(out) :: ff_k(2,nband_k,3),hh_k(2,nband_k,3)
-  type(pawcprj_type),intent(in) :: cprj_k(dtset%natom,nband_k)
-  type(pawcprj_type),intent(in) :: cprj1_k(dtset%natom,nband_k,3)
-  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
-
-  !Local variables -------------------------
-  !scalars
-  integer :: adir,bdir,gdir,iat,iatom,ilmn,itypat,jlmn,klmn,nn
-  real(dp) :: eabg,qij
-  complex(dpc) :: cpdb,cpdg,cpi,cpj,ct,ct2,ct3,pcbi,pcgj
-  
-  !arrays
-
-!--------------------------------------------------------------------
-
-  ff_k = zero; hh_k = zero
-  do nn = 1, nband_k
-    do adir = 1, 3
-      do bdir = 1, 3
-        do gdir = 1, 3
-          eabg = eijk(adir,bdir,gdir)
-          if (abs(eabg) < half) cycle
-
-          call tdt_me(atindx,cprj1_k(:,:,bdir),nn,ddir,dtset,gdir,cprj_k,&
-              & nn,lmnmax,nband_k,pawtab,ct2)
-          call tdt_me(atindx,cprj1_k(:,:,gdir),nn,ddir,dtset,bdir,cprj_k,&
-              & nn,lmnmax,nband_k,pawtab,ct3)
-
-          ! Chern number (f function) weighted by 1
-          ct = c2*cbc*eabg*(ct2+CONJG(ct3))
-          ff_k(1,nn,adir) = ff_k(1,nn,adir) + REAL(ct)
-          ff_k(2,nn,adir) = ff_k(2,nn,adir) + AIMAG(ct)
-          
-          ! Mag E (h function) weighted by E_nk
-          ct = c2*com*eabg*eig_k(nn)*(ct2+CONJG(ct3))
-          hh_k(1,nn,adir) = hh_k(1,nn,adir) + REAL(ct)
-          hh_k(2,nn,adir) = hh_k(2,nn,adir) + AIMAG(ct)
-        
-        end do ! gdir
-      end do ! bdir
-    end do ! adir
-
-  end do !loop over bands
-
-end subroutine make_fh2
-!!***
-
-!!****f* ABINIT/make_g3b
-!! NAME
-!! make_g3b
-!!
-!! FUNCTION
-!! compute contribution to g3 due to r*H term
-!!
-!! COPYRIGHT
-!! Copyright (C) 2003-2021 ABINIT  group
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! SIDE EFFECTS
-!!
-!! TODO
-!!
-!! NOTES
-!!
-!! SOURCE
-
-subroutine make_g3b(atindx,cprj_k,ddir,dtset,gg,lmnmax,nband_k,pawtab)
-
-  !Arguments ------------------------------------
-  !scalars
-  integer,intent(in) :: lmnmax,nband_k
-  type(dataset_type),intent(in) :: dtset
-
-  !arrays
-  integer,intent(in) :: atindx(dtset%natom)
-  real(dp),intent(out) :: gg(2,nband_k,3)
-  complex(dpc),intent(in) :: ddir(lmnmax,lmnmax,dtset%natom,3)
-  type(pawcprj_type),intent(in) :: cprj_k(dtset%natom,nband_k)
-  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
-
-  !Local variables -------------------------
-  !scalars
-  integer :: adir,bdir,gdir,iat,iatom,ilmn,itypat,jlmn,klmn,nn
-  real(dp) :: eabg
-  complex(dpc) :: cpi,cpj,ct,ctermdij,dbi,dgj
-  
-  !arrays
-
-!--------------------------------------------------------------------
-
-  gg = zero
-  do nn = 1, nband_k
-
-    do adir = 1, 3
-      do bdir = 1, 3
-        do gdir = 1, 3
-          eabg = eijk(adir,bdir,gdir)
-          if (abs(eabg) < half) cycle
-
-          ctermdij = czero
-          do iat=1,dtset%natom
-            iatom=atindx(iat)
-            itypat=dtset%typat(iat)
-            do ilmn = 1, pawtab(itypat)%lmn_size
-              do jlmn = 1, pawtab(itypat)%lmn_size
-                klmn = MATPACK(ilmn,jlmn)
-
-                cpi = CMPLX(cprj_k(iatom,nn)%cp(1,ilmn),cprj_k(iatom,nn)%cp(2,ilmn),KIND=dpc)
-                cpj = CMPLX(cprj_k(iatom,nn)%cp(1,jlmn),cprj_k(iatom,nn)%cp(2,jlmn),KIND=dpc)
-
-                dbi = CMPLX(cprj_k(iatom,nn)%dcp(1,bdir,ilmn),cprj_k(iatom,nn)%dcp(2,bdir,ilmn),KIND=dpc)
-                dgj = CMPLX(cprj_k(iatom,nn)%dcp(1,gdir,jlmn),cprj_k(iatom,nn)%dcp(2,gdir,jlmn),KIND=dpc)
-             
-                ctermdij = ctermdij + (-j_dpc)*ddir(ilmn,jlmn,iat,gdir)*CONJG(dbi)*cpj + &
-                  & (+j_dpc)*ddir(ilmn,jlmn,iat,bdir)*CONJG(cpi)*dgj
-            
-              end do ! jlmn
-            end do ! ilmn
-          end do ! iat
-        
-          ct = c2*com*eabg*ctermdij 
-          gg(1,nn,adir) = gg(1,nn,adir) + REAL(ct)
-          gg(2,nn,adir) = gg(2,nn,adir) + AIMAG(ct)
-        
-        end do ! gdir
-      end do ! bdir
-    end do ! adir
-
-  end do !loop over bands
-
-end subroutine make_g3b
-!!***
-
-
-!!****f* ABINIT/make_g2b
-!! NAME
-!! make_g2b
-!!
-!! FUNCTION
-!! compute contribution to g2 due to r*H term
-!!
-!! COPYRIGHT
-!! Copyright (C) 2003-2021 ABINIT  group
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! SIDE EFFECTS
-!!
-!! TODO
-!!
-!! NOTES
-!!
-!! SOURCE
-
-subroutine make_g2b(atindx,cprj_k,cprj1_k,ddir,dtset,gg,lmnmax,nband_k,pawtab)
-
-  !Arguments ------------------------------------
-  !scalars
-  integer,intent(in) :: lmnmax,nband_k
-  type(dataset_type),intent(in) :: dtset
-
-  !arrays
-  integer,intent(in) :: atindx(dtset%natom)
-  real(dp),intent(out) :: gg(2,nband_k,3)
-  complex(dpc),intent(in) :: ddir(lmnmax,lmnmax,dtset%natom,3)
-  type(pawcprj_type),intent(in) :: cprj_k(dtset%natom,nband_k)
-  type(pawcprj_type),intent(in) :: cprj1_k(dtset%natom,nband_k,3)
-  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
-
-  !Local variables -------------------------
-  !scalars
-  integer :: adir,bdir,gdir,iat,iatom,ilmn,itypat,jlmn,klmn,nn
-  real(dp) :: eabg
-  complex(dpc) :: cpi,cpj,ct,ctermdij,dbi,dgj
-  
-  !arrays
-
-!--------------------------------------------------------------------
-
-  gg = zero
-  do nn = 1, nband_k
-
-    do adir = 1, 3
-      do bdir = 1, 3
-        do gdir = 1, 3
-          eabg = eijk(adir,bdir,gdir)
-          if (abs(eabg) < half) cycle
-
-          ctermdij = czero
-          do iat=1,dtset%natom
-            iatom=atindx(iat)
-            itypat=dtset%typat(iat)
-            do ilmn = 1, pawtab(itypat)%lmn_size
-              do jlmn = 1, pawtab(itypat)%lmn_size
-                klmn = MATPACK(ilmn,jlmn)
-
-                cpi = CMPLX(cprj_k(iatom,nn)%cp(1,ilmn),cprj_k(iatom,nn)%cp(2,ilmn),KIND=dpc)
-                cpj = CMPLX(cprj_k(iatom,nn)%cp(1,jlmn),cprj_k(iatom,nn)%cp(2,jlmn),KIND=dpc)
-
-                dbi = CMPLX(cprj1_k(iatom,nn,bdir)%cp(1,ilmn),cprj1_k(iatom,nn,bdir)%cp(2,ilmn),KIND=dpc)
-                dgj = CMPLX(cprj1_k(iatom,nn,gdir)%cp(1,jlmn),cprj1_k(iatom,nn,gdir)%cp(2,jlmn),KIND=dpc)
-             
-                ctermdij = ctermdij + (-j_dpc)*ddir(ilmn,jlmn,iat,gdir)*CONJG(dbi)*cpj + &
-                  & (+j_dpc)*ddir(ilmn,jlmn,iat,bdir)*CONJG(cpi)*dgj
-            
-              end do ! jlmn
-            end do ! ilmn
-          end do ! iat
-        
-          ct = c2*com*eabg*ctermdij 
-          gg(1,nn,adir) = gg(1,nn,adir) + REAL(ct)
-          gg(2,nn,adir) = gg(2,nn,adir) + AIMAG(ct)
-        
-        end do ! gdir
-      end do ! bdir
-    end do ! adir
-
-  end do !loop over bands
-
-end subroutine make_g2b
-!!***
-
-!!****f* ABINIT/make_g2a
-!! NAME
-!! make_g2a
-!!
-!! FUNCTION
-!! compute contribution to g2 due to simple Dij terms only
-!!
-!! COPYRIGHT
-!! Copyright (C) 2003-2021 ABINIT  group
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! SIDE EFFECTS
-!!
-!! TODO
-!!
-!! NOTES
-!!
-!! SOURCE
-
-subroutine make_g2a(atindx,cprj_k,cprj1_k,dtset,gg,lmn2max,nband_k,paw_ij,pawtab)
-
-  !Arguments ------------------------------------
-  !scalars
-  integer,intent(in) :: lmn2max,nband_k
-  type(dataset_type),intent(in) :: dtset
-
-  !arrays
-  integer,intent(in) :: atindx(dtset%natom)
-  real(dp),intent(out) :: gg(2,nband_k,3)
-  type(pawcprj_type),intent(in) :: cprj_k(dtset%natom,nband_k)
-  type(pawcprj_type),intent(in) :: cprj1_k(dtset%natom,nband_k,3)
-  type(paw_ij_type),intent(inout) :: paw_ij(dtset%natom)
-  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
-
-  !Local variables -------------------------
-  !scalars
-  integer :: adir,bdir,gdir,iat,iatom,ilmn,itypat,jlmn,klmn,nn
-  real(dp) :: eabg
-  logical :: cplex_dij
-  complex(dpc) :: ct,ctermdij,dij
-  
-  !arrays
-  complex(dpc) :: dup(2,2),udp(2,2)
-
-!--------------------------------------------------------------------
-
-  cplex_dij = (paw_ij(1)%cplex_dij .EQ. 2)
-
-  gg = zero
-  do nn = 1, nband_k
-
-    do adir = 1, 3
-      do bdir = 1, 3
-        do gdir = 1, 3
-          eabg = eijk(adir,bdir,gdir)
-          if (abs(eabg) < half) cycle
-
-          ctermdij = czero
-          do iat=1,dtset%natom
-            iatom=atindx(iat)
-            itypat=dtset%typat(iat)
-            do klmn = 1, pawtab(itypat)%lmn2_size
-              ilmn = pawtab(itypat)%indklmn(7,klmn)
-              jlmn = pawtab(itypat)%indklmn(8,klmn)
-             
-              if (cplex_dij) then
-                dij = cmplx(paw_ij(iat)%dij(2*klmn-1,1),paw_ij(iat)%dij(2*klmn,1),KIND=dpc)
-              else
-                dij = cmplx(paw_ij(iat)%dij(klmn,1),zero,KIND=dpc)
-              end if
-
-              ! <u|d_m p_n> : udp(m,n) means direction m, state n
-              udp(1,1) = cmplx(cprj_k(iatom,nn)%dcp(1,bdir,ilmn),cprj_k(iatom,nn)%dcp(2,bdir,ilmn),KIND=dpc)
-              udp(1,2) = cmplx(cprj_k(iatom,nn)%dcp(1,bdir,jlmn),cprj_k(iatom,nn)%dcp(2,bdir,jlmn),KIND=dpc)
-              udp(2,1) = cmplx(cprj_k(iatom,nn)%dcp(1,gdir,ilmn),cprj_k(iatom,nn)%dcp(2,gdir,ilmn),KIND=dpc)     
-              udp(2,2) = cmplx(cprj_k(iatom,nn)%dcp(1,gdir,jlmn),cprj_k(iatom,nn)%dcp(2,gdir,jlmn),KIND=dpc)     
-
-              ! <d_m u|p_n> : dup(m,n) means direction m, state n
-              dup(1,1) = cmplx(cprj1_k(iatom,nn,bdir)%cp(1,ilmn),cprj1_k(iatom,nn,bdir)%cp(2,ilmn),KIND=dpc)
-              dup(1,2) = cmplx(cprj1_k(iatom,nn,bdir)%cp(1,jlmn),cprj1_k(iatom,nn,bdir)%cp(2,jlmn),KIND=dpc)
-              dup(2,1) = cmplx(cprj1_k(iatom,nn,gdir)%cp(1,ilmn),cprj1_k(iatom,nn,gdir)%cp(2,ilmn),KIND=dpc)     
-              dup(2,2) = cmplx(cprj1_k(iatom,nn,gdir)%cp(1,jlmn),cprj1_k(iatom,nn,gdir)%cp(2,jlmn),KIND=dpc)     
-
-              ctermdij = ctermdij + dij*(CONJG(udp(1,1))*dup(2,2)+CONJG(dup(1,1))*udp(2,2))
-              if (ilmn /= jlmn) then
-                ctermdij = ctermdij + CONJG(dij)*(CONJG(udp(1,2))*dup(2,1)+CONJG(dup(1,2))*udp(2,1))
-              end if
-          
-            end do ! klmn
-          end do ! iat
-        
-          ct = c2*com*eabg*ctermdij 
-          gg(1,nn,adir) = gg(1,nn,adir) + REAL(ct)
-          gg(2,nn,adir) = gg(2,nn,adir) + AIMAG(ct)
-        
-        end do ! gdir
-      end do ! bdir
-    end do ! adir
-
-  end do !loop over bands
-
-end subroutine make_g2a
-!!***
-
-
-!!****f* ABINIT/make_g3a
-!! NAME
-!! make_g3a
-!!
-!! FUNCTION
-!! compute term 3 contribution to g due to simple Dij terms only
-!!
-!! COPYRIGHT
-!! Copyright (C) 2003-2021 ABINIT  group
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! SIDE EFFECTS
-!!
-!! TODO
-!!
-!! NOTES
-!!
-!! SOURCE
-
-subroutine make_g3a(atindx,cprj_k,dtset,gg,lmn2max,nband_k,paw_ij,pawtab)
-
-  !Arguments ------------------------------------
-  !scalars
-  integer,intent(in) :: lmn2max,nband_k
-  type(dataset_type),intent(in) :: dtset
-
-  !arrays
-  integer,intent(in) :: atindx(dtset%natom)
-  real(dp),intent(out) :: gg(2,nband_k,3)
-  type(pawcprj_type),intent(in) :: cprj_k(dtset%natom,nband_k)
-  type(paw_ij_type),intent(inout) :: paw_ij(dtset%natom)
-  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
-
-  !Local variables -------------------------
-  !scalars
-  integer :: adir,bdir,gdir,iat,iatom,ilmn,itypat,jlmn,klmn,nn
-  real(dp) :: eabg
-  logical :: cplex_dij
-  complex(dpc) :: cpdb,cpdg,ct,ctermdij,dij
-  
-  !arrays
-
-!--------------------------------------------------------------------
-
-  cplex_dij = (paw_ij(1)%cplex_dij .EQ. 2)
-
-  gg = zero
-  do nn = 1, nband_k
-
-    do adir = 1, 3
-      do bdir = 1, 3
-        do gdir = 1, 3
-          eabg = eijk(adir,bdir,gdir)
-          if (abs(eabg) < half) cycle
-
-          ctermdij = czero
-          do iat=1,dtset%natom
-            iatom=atindx(iat)
-            itypat=dtset%typat(iat)
-            do klmn = 1, pawtab(itypat)%lmn2_size
-              ilmn = pawtab(itypat)%indklmn(7,klmn)
-              jlmn = pawtab(itypat)%indklmn(8,klmn)
-            
-              if (cplex_dij) then
-                dij = cmplx(paw_ij(iat)%dij(2*klmn-1,1),paw_ij(iat)%dij(2*klmn,1),KIND=dpc)
-              else
-                dij = cmplx(paw_ij(iat)%dij(klmn,1),zero,KIND=dpc)
-              end if
-          
-              cpdb = CMPLX(cprj_k(iatom,nn)%dcp(1,bdir,ilmn),cprj_k(iatom,nn)%dcp(2,bdir,ilmn),KIND=dpc)
-              cpdg = CMPLX(cprj_k(iatom,nn)%dcp(1,gdir,jlmn),cprj_k(iatom,nn)%dcp(2,gdir,jlmn),KIND=dpc)
-              ctermdij = ctermdij + CONJG(cpdb)*dij*cpdg
-              
-              if (ilmn /= jlmn) then
-                cpdb = CMPLX(cprj_k(iatom,nn)%dcp(1,bdir,jlmn),cprj_k(iatom,nn)%dcp(2,bdir,jlmn),KIND=dpc)
-                cpdg = CMPLX(cprj_k(iatom,nn)%dcp(1,gdir,ilmn),cprj_k(iatom,nn)%dcp(2,gdir,ilmn),KIND=dpc)
-                ctermdij = ctermdij + CONJG(cpdb)*CONJG(dij)*cpdg
-              end if
-          
-            end do ! klmn
-          end do ! iat
-        
-          ct = c2*com*eabg*ctermdij 
-          gg(1,nn,adir) = gg(1,nn,adir) + REAL(ct)
-          gg(2,nn,adir) = gg(2,nn,adir) + AIMAG(ct)
-        
-        end do ! gdir
-      end do ! bdir
-    end do ! adir
-
-  end do !loop over bands
-
-end subroutine make_g3a
-!!***
-
-!!****f* ABINIT/make_fh3
-!! NAME
-!! make_fh3
-!!
-!! FUNCTION
-!! compute term 3 contribution to f and h functions
-!!
-!! COPYRIGHT
-!! Copyright (C) 2003-2021 ABINIT  group
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! SIDE EFFECTS
-!!
-!! TODO
-!!
-!! NOTES
-!!
-!! SOURCE
-
-subroutine make_fh3(atindx,cprj_k,ddir,dtset,eig_k,ff,hh,lmnmax,nband_k,pawtab)
-
-  !Arguments ------------------------------------
-  !scalars
-  integer,intent(in) :: lmnmax,nband_k
-  type(dataset_type),intent(in) :: dtset
-
-  !arrays
-  integer,intent(in) :: atindx(dtset%natom)
-  real(dp),intent(in) :: eig_k(nband_k)
-  real(dp),intent(out) :: ff(2,nband_k,3),hh(2,nband_k,3)
-  complex(dpc),intent(in) :: ddir(lmnmax,lmnmax,dtset%natom,3)
-  type(pawcprj_type),intent(in) :: cprj_k(dtset%natom,nband_k)
-  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
-
-  !Local variables -------------------------
-  !scalars
-  integer :: adir,bdir,gdir,iat,iatom,ilmn,itypat,jlmn,klmn,nn,np
-  real(dp) :: eabg,qij
-  complex(dpc) :: cpdb,cpdg,cpi,cpj,ctermdb,ctermdg,ctermq
-  
-  !arrays
-
-!--------------------------------------------------------------------
-
-  ff = zero; hh = zero
-  do nn = 1, nband_k
-
-    do adir = 1, 3
-      do bdir = 1, 3
-        do gdir = 1, 3
-          eabg = eijk(adir,bdir,gdir)
-          if (abs(eabg) < half) cycle
-
-          ctermq = czero; ctermdb = czero; ctermdg = czero
-          do iat=1,dtset%natom
-            iatom=atindx(iat)
-            itypat=dtset%typat(iat)
-            do ilmn = 1, pawtab(itypat)%lmn_size
-              cpi = CMPLX(cprj_k(iatom,nn)%cp(1,ilmn),cprj_k(iatom,nn)%cp(2,ilmn),KIND=dpc)
-              do jlmn = 1, pawtab(itypat)%lmn_size
-                cpj = CMPLX(cprj_k(iatom,nn)%cp(1,jlmn),cprj_k(iatom,nn)%cp(2,jlmn),KIND=dpc)
-                klmn = MATPACK(ilmn,jlmn)
-                qij = pawtab(itypat)%sij(klmn)
-                cpdb = CMPLX(cprj_k(iatom,nn)%dcp(1,bdir,ilmn),cprj_k(iatom,nn)%dcp(2,bdir,ilmn),KIND=dpc)
-                cpdg = CMPLX(cprj_k(iatom,nn)%dcp(1,gdir,jlmn),cprj_k(iatom,nn)%dcp(2,gdir,jlmn),KIND=dpc)
-                ctermq = ctermq + CONJG(cpdb)*qij*cpdg
-                ctermdb = ctermdb + CONJG(cpi)*(j_dpc)*ddir(ilmn,jlmn,iat,bdir)*cpdg
-                ctermdg = ctermdg + CONJG(cpdb)*(-j_dpc)*ddir(ilmn,jlmn,iat,gdir)*cpj
-              end do ! jlmn
-            end do ! ilmn
-          end do ! iat
-         
-          ff(1,nn,adir) = ff(1,nn,adir) + REAL(c2*cbc*eabg*(ctermq+ctermdb+ctermdg))
-          ff(2,nn,adir) = ff(2,nn,adir) + AIMAG(c2*cbc*eabg*(ctermq+ctermdb+ctermdg))
-          hh(1,nn,adir) = hh(1,nn,adir) + REAL(c2*com*eabg*eig_k(nn)*(ctermq+ctermdb+ctermdg))
-          hh(2,nn,adir) = hh(2,nn,adir) + AIMAG(c2*com*eabg*eig_k(nn)*(ctermq+ctermdb+ctermdg))
-        
-        end do ! gdir
-      end do ! bdir
-    end do ! adir
-
-  end do !loop over bands
-
-end subroutine make_fh3
-!!***
-
-!!****f* ABINIT/make_fgh4
-!! NAME
-!! make_fgh4
-!!
-!! FUNCTION
-!! compute term 4 contribution to f, g, and h functions
-!!
-!! COPYRIGHT
-!! Copyright (C) 2003-2021 ABINIT  group
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! SIDE EFFECTS
-!!
-!! TODO
-!!
-!! NOTES
-!!
-!! SOURCE
-
-subroutine make_fgh4(atindx,cprj_k,ddir,dtset,eig_k,ff_k,gg_k,hh_k,lmnmax,nband_k,pawtab)
-
-  !Arguments ------------------------------------
-  !scalars
-  integer,intent(in) :: lmnmax,nband_k
-  type(dataset_type),intent(in) :: dtset
-
-  !arrays
-  integer,intent(in) :: atindx(dtset%natom)
-  real(dp),intent(in) :: eig_k(nband_k)
-  complex(dpc),intent(in) :: ddir(lmnmax,lmnmax,dtset%natom,3)
-  real(dp),intent(out) :: ff_k(2,nband_k,3),gg_k(2,nband_k,3),hh_k(2,nband_k,3)
-  type(pawcprj_type),intent(in) :: cprj_k(dtset%natom,nband_k)
-  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
-
-  !Local variables -------------------------
-  !scalars
-  integer :: adir,bdir,gdir,nn,np
-  real(dp) :: eabg
-  complex(dpc) :: cnp,cnpb,cnpg
-  
-  !arrays
-
-!--------------------------------------------------------------------
-  
-  ff_k = zero; gg_k = zero; hh_k = zero
-  do nn = 1, nband_k
-   do adir = 1, 3
-      do bdir = 1, 3
-        do gdir = 1, 3
-          eabg = eijk(adir,bdir,gdir)
-          if (abs(eabg) < half) cycle
-  
-          do np = 1, nband_k
-    
-
-            call tdt_me(atindx,cprj_k,np,ddir,dtset,bdir,cprj_k,&
-              & nn,lmnmax,nband_k,pawtab,cnpb)
-            call tdt_me(atindx,cprj_k,np,ddir,dtset,gdir,cprj_k,&
-              & nn,lmnmax,nband_k,pawtab,cnpg)
-
-            ! Chern (term ff) weighted by 1
-            cnp = c2*cbc*eabg*CONJG(cnpb)*cnpg
-            ff_k(1,nn,adir) = ff_k(1,nn,adir) - REAL(cnp)
-            ff_k(2,nn,adir) = ff_k(2,nn,adir) - AIMAG(cnp)
-            
-            ! Mag E (term hh) weighted by E_nk
-            cnp = c2*com*eabg*eig_k(nn)*CONJG(cnpb)*cnpg
-            hh_k(1,nn,adir) = hh_k(1,nn,adir) - REAL(cnp)
-            hh_k(2,nn,adir) = hh_k(2,nn,adir) - AIMAG(cnp)
-            
-            ! Mag H (term gg) weighted by E_n'k
-            cnp = c2*com*eabg*eig_k(np)*CONJG(cnpb)*cnpg
-            gg_k(1,nn,adir) = gg_k(1,nn,adir) - REAL(cnp)
-            gg_k(2,nn,adir) = gg_k(2,nn,adir) - AIMAG(cnp)
-
-          end do ! loop over np
-
-        end do ! gdir
-      end do ! bdir
-    end do ! adir
-  end do !loop over bands
-
-end subroutine make_fgh4
-!!***
-
-!!****f* ABINIT/make_fgh1
-!! NAME
-!! make_fgh1
-!!
-!! FUNCTION
-!! compute term 1 contribution to f, g, and h functions
-!!
-!! COPYRIGHT
-!! Copyright (C) 2003-2021 ABINIT  group
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! SIDE EFFECTS
-!!
-!! TODO
-!!
-!! NOTES
-!!
-!! SOURCE
-
-subroutine make_fgh1(atindx,cprj1_k,dimlmn,dtset,eig_k,ff_k,gg_k,gs_hamk,&
-    & hh_k,ikpt,isppol,mcgk,mpi_enreg,my_nspinor,nband_k,npw_k,pcg1_k)
-
-  !Arguments ------------------------------------
-  !scalars
-  integer,intent(in) :: ikpt,isppol,mcgk,my_nspinor,nband_k,npw_k
-  type(dataset_type),intent(in) :: dtset
-  type(gs_hamiltonian_type),intent(inout) :: gs_hamk
-  type(MPI_type), intent(inout) :: mpi_enreg
-
-  !arrays
-  integer,intent(in) :: atindx(dtset%natom),dimlmn(dtset%natom)
-  real(dp),intent(in) :: eig_k(nband_k),pcg1_k(2,mcgk,3)
-  real(dp),intent(out) :: ff_k(2,nband_k,3),gg_k(2,nband_k,3),hh_k(2,nband_k,3)
-  type(pawcprj_type),intent(in) ::  cprj1_k(dtset%natom,nband_k,3)
-
-  !Local variables -------------------------
-  !scalars
-  integer :: adir,bdir,cpopt,gdir,ndat,nn,sij_opt,tim_getghc,type_calc
-  real(dp) :: doti,dotr,eabg,lambda
-  complex(dpc) :: cme,ct
-  
-  !arrays
-  real(dp),allocatable :: bwavef(:,:),ghc(:,:),gsc(:,:),gvnlxc(:,:),gwavef(:,:)
-  type(pawcprj_type),allocatable :: cwaveprj(:,:)
-
-!--------------------------------------------------------------------
-
-  ABI_MALLOC(bwavef,(2,npw_k))
-  ABI_MALLOC(gwavef,(2,npw_k))
-  ABI_MALLOC(ghc,(2,npw_k))
-  ABI_MALLOC(gsc,(2,npw_k))
-  ABI_MALLOC(gvnlxc,(2,npw_k))
-  ABI_MALLOC(cwaveprj,(dtset%natom,1))
-  call pawcprj_alloc(cwaveprj,0,dimlmn)
-
-  cpopt = 2 ! cprj in memory
-  lambda = zero
-  ndat = 1
-  sij_opt = 1 ! save S overlap in gsc
-  tim_getghc = 0
-  type_calc = 0 ! use full PAW Hamiltonian
-  
-  ff_k = zero; gg_k = zero; hh_k = zero
-  do nn = 1, nband_k
-    do gdir = 1, 3
-      gwavef(1:2,1:npw_k) = pcg1_k(1:2,(nn-1)*npw_k+1:nn*npw_k,gdir)
-      call pawcprj_get(atindx,cwaveprj,cprj1_k(:,:,gdir),dtset%natom,nn,0,ikpt,0,isppol,dtset%mband,&
-        & dtset%mkmem,dtset%natom,1,nband_k,my_nspinor,dtset%nsppol,0)
-
-      call getghc(cpopt,gwavef,cwaveprj,ghc,gsc,gs_hamk,gvnlxc,lambda,mpi_enreg,&
-        & ndat,dtset%prtvol,sij_opt,tim_getghc,type_calc)
-
-      do bdir = 1, 3
-        bwavef(1:2,1:npw_k) = pcg1_k(1:2,(nn-1)*npw_k+1:nn*npw_k,bdir)
-        do adir = 1, 3
-          eabg = eijk(adir,bdir,gdir)
-          if (abs(eabg) < half) cycle
-  
-          dotr = DOT_PRODUCT(bwavef(1,:),gsc(1,:))+DOT_PRODUCT(bwavef(2,:),gsc(2,:))
-          doti = DOT_PRODUCT(bwavef(1,:),gsc(2,:))-DOT_PRODUCT(bwavef(2,:),gsc(1,:))
-          cme = CMPLX(dotr,doti,KIND=dpc)
-
-          ! Chern number (function ff) weighted by 1
-          ct = cbc*c2*eabg*cme
-          ff_k(1,nn,adir) = ff_k(1,nn,adir) + real(ct)
-          ff_k(2,nn,adir) = ff_k(2,nn,adir) + aimag(ct)
-          
-          ! Mag E  (function hh) weighted by E_nk
-          ct = com*c2*eabg*cme*eig_k(nn)
-          hh_k(1,nn,adir) = hh_k(1,nn,adir) + real(ct)
-          hh_k(2,nn,adir) = hh_k(2,nn,adir) + aimag(ct)
-
-          ! Mag H  (function gg) weighted by H
-          dotr = DOT_PRODUCT(bwavef(1,:),ghc(1,:))+DOT_PRODUCT(bwavef(2,:),ghc(2,:))
-          doti = DOT_PRODUCT(bwavef(1,:),ghc(2,:))-DOT_PRODUCT(bwavef(2,:),ghc(1,:))
-          cme = CMPLX(dotr,doti,KIND=dpc)
-
-          ct = com*c2*eabg*cme
-          gg_k(1,nn,adir) = gg_k(1,nn,adir) + real(ct)
-          gg_k(2,nn,adir) = gg_k(2,nn,adir) + aimag(ct)
- 
-        end do ! adir
-      end do ! bdir
-    end do ! gdir
-  end do !loop over bands
-
-  ABI_FREE(bwavef)
-  ABI_FREE(gwavef)
-  ABI_FREE(ghc)
-  ABI_FREE(gsc)
-  ABI_FREE(gvnlxc)
-  call pawcprj_free(cwaveprj)
-  ABI_FREE(cwaveprj)
-
-end subroutine make_fgh1
-!!***
-
 !!****f* ABINIT/lamb_core
 !! NAME
 !! lamb_core
@@ -1715,6 +911,159 @@ subroutine lamb_core(atindx,dtset,omlamb)
 end subroutine lamb_core
 !!***
 
+!!****f* ABINIT/dtdt_me
+!! NAME
+!! dtdt_me
+!!
+!! FUNCTION
+!! Matrix element <u_n|(\partial_bdir T)^\dag A (\partial_gdir T)|u_m>, for one atom
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2021 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!! aij :: scalar ij couplings
+!! bcp :: bra side cprj
+!! bdir :: bra side deriv direc
+!! daij :: vector ij couplings
+!! kcp :: ket side cprj
+!! kdir :: ket side deriv direc
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!! not for use with momentum terms, we assume here the double deriv coupling is zero
+!! as is the case for Hartree like terms
+!!
+!! SOURCE
+
+subroutine dtdt_me(aij,atindx,bcp,bdir,daij,dtdt,dtset,gdir,kcp,lmn2max,pawtab)
+
+  !Arguments ------------------------------------
+  !scalars
+  integer,intent(in) :: bdir,gdir,lmn2max
+  complex(dpc),intent(out) :: dtdt
+  type(dataset_type),intent(in) :: dtset
+
+  !arrays
+  integer,intent(in) :: atindx(dtset%natom)
+  complex(dpc),intent(in) :: aij(dtset%natom,lmn2max),daij(dtset%natom,lmn2max,3)
+  type(pawcprj_type),intent(in) :: bcp(dtset%natom),kcp(dtset%natom)
+  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
+
+  !Local variables -------------------------
+  !scalars
+  integer :: iat,iatom,itypat,ilmn,jlmn,klmn
+  complex(dpc) :: cpi,cpj,dcpi,dcpj
+
+  !arrays
+
+!--------------------------------------------------------------------
+
+  dtdt = czero
+  do iat = 1, dtset%natom
+    itypat=dtset%typat(iat)
+    iatom = atindx(iat)
+    do ilmn = 1, pawtab(itypat)%lmn_size
+      do jlmn = 1, pawtab(itypat)%lmn_size
+        klmn = MATPACK(ilmn,jlmn)
+        cpi =  CMPLX(bcp(iatom)%cp(1,ilmn),bcp(iatom)%cp(2,ilmn))
+        cpj =  CMPLX(kcp(iatom)%cp(1,jlmn),kcp(iatom)%cp(2,jlmn))
+        dcpi = CMPLX(bcp(iatom)%dcp(1,bdir,ilmn),bcp(iatom)%dcp(2,bdir,ilmn))
+        dcpj = CMPLX(kcp(iatom)%dcp(1,gdir,jlmn),kcp(iatom)%dcp(2,gdir,jlmn))
+        dtdt = dtdt + CONJG(dcpi)*dcpj*aij(iatom,klmn)
+        dtdt = dtdt + CONJG(dcpi)*cpj*daij(iatom,klmn,gdir)
+        dtdt = dtdt + CONJG(cpi)*dcpj*CONJG(daij(iatom,klmn,bdir))
+      end do !jlmn
+    end do !ilmn
+  end do !iat
+
+end subroutine dtdt_me
+!!***
+
+
+!!****f* ABINIT/tdt_me
+!! NAME
+!! tdt_me
+!!
+!! FUNCTION
+!! Matrix element <u_n|T^\dag A (\partial_idir T)|u_m>
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2021 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!! aij :: scalar ij couplings
+!! bcp :: bra side cprj
+!! daij :: vector ij couplings
+!! idir :: direction of interest for derivatives
+!! kcp :: ket side cprj
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!!
+!! SOURCE
+
+subroutine tdt_me(aij,atindx,bcp,daij,dtset,idir,kcp,lmn2max,pawtab,tdt)
+
+  !Arguments ------------------------------------
+  !scalars
+  integer,intent(in) :: idir,lmn2max
+  complex(dpc),intent(out) :: tdt
+  type(dataset_type),intent(in) :: dtset
+
+  !arrays
+  integer,intent(in) :: atindx(dtset%natom)
+  complex(dpc),intent(in) :: aij(dtset%natom,lmn2max),daij(dtset%natom,lmn2max,3)
+  type(pawcprj_type),intent(in) :: bcp(dtset%natom),kcp(dtset%natom)
+  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
+
+  !Local variables -------------------------
+  !scalars
+  integer :: iat,iatom,itypat,ilmn,jlmn,klmn
+  complex(dpc) :: cpi,cpj,dcpj
+
+  !arrays
+
+!--------------------------------------------------------------------
+
+  tdt = czero
+  do iat = 1, dtset%natom
+    iatom = atindx(iat)
+    itypat=dtset%typat(iat)
+    do ilmn = 1, pawtab(itypat)%lmn_size
+      do jlmn = 1, pawtab(itypat)%lmn_size
+        klmn = MATPACK(ilmn,jlmn)
+        cpi =  CMPLX(bcp(iatom)%cp(1,ilmn),bcp(iatom)%cp(2,ilmn))
+        cpj =  CMPLX(kcp(iatom)%cp(1,jlmn),kcp(iatom)%cp(2,jlmn))
+        dcpj = CMPLX(kcp(iatom)%dcp(1,idir,jlmn),kcp(iatom)%dcp(2,idir,jlmn))
+        tdt = tdt + CONJG(cpi)*dcpj*aij(iatom,klmn) + &
+          & CONJG(cpi)*cpj*daij(iatom,klmn,idir)
+      end do !jlmn
+    end do !ilmn
+  end do !iat
+
+end subroutine tdt_me
+!!***
+
+
 !!****f* ABINIT/make_ddir_sij
 !! NAME
 !! make_ddir_sij
@@ -1743,21 +1092,21 @@ end subroutine lamb_core
 !!
 !! SOURCE
 
-subroutine make_ddir_sij(ddir_sij,dtset,gprimd,lmnmax,pawtab)
+subroutine make_ddir_sij(atindx,dterm,dtset,gprimd,pawtab)
 
   !Arguments ------------------------------------
   !scalars
-  integer,intent(in) :: lmnmax
+  type(dterm_type),intent(inout) :: dterm
   type(dataset_type),intent(in) :: dtset
 
   !arrays
+  integer,intent(in) :: atindx(dtset%natom)
   real(dp),intent(in) :: gprimd(3,3)
-  complex(dpc),intent(out) :: ddir_sij(lmnmax,lmnmax,dtset%natom,3)
   type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
 
   !Local variables -------------------------
   !scalars
-  integer :: adir,iat,itypat,ilmn,jlmn,klmn
+  integer :: adir,iat,iatom,itypat,ilmn,jlmn,klmn
   real(dp) :: cdij
 
   !arrays
@@ -1769,22 +1118,23 @@ subroutine make_ddir_sij(ddir_sij,dtset,gprimd,lmnmax,pawtab)
  ! the pawtab%qijl moments do not have the sqrt(4\pi/3) factor we need here for
  ! normalization 
  cdij = sqrt(four_pi/three)
- ddir_sij=czero
  do iat = 1, dtset%natom
+   iatom = atindx(iat)
    itypat = dtset%typat(iat)
-   do ilmn=1, pawtab(itypat)%lmn_size
-     do jlmn=1, pawtab(itypat)%lmn_size
-       klmn=MATPACK(ilmn,jlmn)
-       do adir = 1, 3
-         ddir_cart(adir) = cdij*pawtab(itypat)%qijl(pack1a(adir),klmn)
-       end do
-       ! now have ddir in cart coords, convert to crystal coords where ddk wavefunctions are
-       ddir_red = MATMUL(TRANSPOSE(gprimd),ddir_cart)
-       do adir = 1, 3
-         ddir_sij(ilmn,jlmn,iat,adir) = CMPLX(ddir_red(adir),zero,KIND=dpc)
-       end do
-     end do !jlmn
-   end do ! ilmn
+   do klmn = 1, pawtab(itypat)%lmn2_size
+     
+     ! qij is not really a d term but it's convenient to have it 
+     ! in the same format as the d terms 
+     dterm%qij(iatom,klmn)=CMPLX(pawtab(itypat)%sij(klmn),zero)
+
+     do adir = 1, 3
+       ddir_cart(adir) = cdij*pawtab(itypat)%qijl(pack1a(adir),klmn)
+     end do !adir
+    
+     ! now have ddir in cart coords, convert to crystal coords where ddk wavefunctions are
+     ddir_red = MATMUL(TRANSPOSE(gprimd),ddir_cart)
+     dterm%dqij(iatom,klmn,1:3) = -j_dpc*ddir_red(1:3)
+   end do ! klmn
  end do ! end loop over types
  
 end subroutine make_ddir_sij
@@ -1935,7 +1285,7 @@ subroutine apply_d2lr_term_k(atindx,cprj_k,dtset,iterm,lmn2max,mterm,nband_k,omm
 
 !--------------------------------------------------------------------
 ! iterm <= if4 is berry type, others are orb mag type
-  if ( iterm <= if4 ) then
+  if ( iterm <= ichern2 ) then
     cpre = cbc
   else
     cpre = com
@@ -2148,14 +1498,14 @@ subroutine orbmag_ptpaw_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace)
  ! ***********************************************************************
 
  orbmag_bb=zero;orbmag_total=zero
- do iterms = iomlr, nterms
-   orbmag_total(1:2,1:3)=orbmag_total(1:2,1:3) + orbmag_trace(1:2,1:3,iterms)
-   do iband=1, nband_k
-     orbmag_bb(1:2,iband,1:3) = orbmag_bb(1:2,iband,1:3) + orbmag_terms(1:2,iband,1:3,iterms)
-   end do
- end do
+ !do iterms = iomlr, nterms
+ !  orbmag_total(1:2,1:3)=orbmag_total(1:2,1:3) + orbmag_trace(1:2,1:3,iterms)
+ !  do iband=1, nband_k
+ !    orbmag_bb(1:2,iband,1:3) = orbmag_bb(1:2,iband,1:3) + orbmag_terms(1:2,iband,1:3,iterms)
+ !  end do
+ !end do
  berry_bb=zero;berry_total=zero
- do iterms = if1,if4
+ do iterms = ichern1,ichern2
    berry_total(1:2,1:3)=berry_total(1:2,1:3) + orbmag_trace(1:2,1:3,iterms)
    do iband=1, nband_k
      berry_bb(1:2,iband,1:3) = berry_bb(1:2,iband,1:3) + orbmag_terms(1:2,iband,1:3,iterms)
@@ -2184,67 +1534,11 @@ subroutine orbmag_ptpaw_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace)
    call wrtout(ab_out,message,'COLL')
    write(message,'(a)')' Orbital magnetic moment, term-by-term breakdown : '
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)')'        <Pc du|THT|Pc_du> : ',(orbmag_trace(1,adir,ig1),adir=1,3)
-   call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)')'      <Pc du|T(dT)|u>*Dij : ',(orbmag_trace(1,adir,ig2a_dij),adir=1,3)
-   call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)')'     <Pc du|T(dT)|u>d(p2) : ',(orbmag_trace(1,adir,ig2b_p2),adir=1,3)
-   call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)')'    <Pc du|T(dT)|u>d(A.p) : ',(orbmag_trace(1,adir,ig2b_ap),adir=1,3)
-   call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)')'     <Pc du|T(dT)|u>d(vH) : ',(orbmag_trace(1,adir,ig2b_vha),adir=1,3)
-   call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)')'  <Pc du|T(dT)|u>d(vHnzc) : ',(orbmag_trace(1,adir,ig2b_vhnzc),adir=1,3)
-   call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)')' <Pc du|T(dT)|u>d(vHnhat) : ',(orbmag_trace(1,adir,ig2b_vhnhat),adir=1,3)
-   call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)')'    <Pc du|T(dT)|u>d(vxc) : ',(orbmag_trace(1,adir,ig2b_vxc),adir=1,3)
-   call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)')'       <u|(dT)(dT)|u>*Dij : ',(orbmag_trace(1,adir,ig3a_dij),adir=1,3)
-   call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)')'      <u|(dT)(dT)|u>d(p2) : ',(orbmag_trace(1,adir,ig3b_p2),adir=1,3)
-   call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)')'     <u|(dT)(dT)|u>d(A.p) : ',(orbmag_trace(1,adir,ig3b_ap),adir=1,3)
-   call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)')'      <u|(dT)(dT)|u>d(vH) : ',(orbmag_trace(1,adir,ig3b_vha),adir=1,3)
-   call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)')'   <u|(dT)(dT)|u>d(vHnzc) : ',(orbmag_trace(1,adir,ig3b_vhnzc),adir=1,3)
-   call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)')'  <u|(dT)(dT)|u>d(vHnhat) : ',(orbmag_trace(1,adir,ig3b_vhnhat),adir=1,3)
-   call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)')'     <u|(dT)(dT)|u>d(vxc) : ',(orbmag_trace(1,adir,ig3b_vxc),adir=1,3)
-   call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)')'  <u|(dT)(dT)|u>dd(p2)(L) : ',(orbmag_trace(1,adir,iomlr),adir=1,3)
-   call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)')'    <u|(dT)(dT)|u>dd(A.p) : ',(orbmag_trace(1,adir,iomanp),adir=1,3)
-   call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)')'   -<u|(dT)Pv H Pv(dT)|u> : ',(orbmag_trace(1,adir,ig4),adir=1,3)
-   call wrtout(ab_out,message,'COLL')
-   write(message,'(a)')ch10
-   call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)')'     Enk*<Pc du|TT|Pc_du> : ',(orbmag_trace(1,adir,ih1),adir=1,3)
-   call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)')' Enk*<Pc du|T(dT)|u>+cnjg : ',(orbmag_trace(1,adir,ih2),adir=1,3)
-   call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)')'       Enk*<u|(dT)(dT)|u> : ',(orbmag_trace(1,adir,ih3),adir=1,3)
-   call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)')'    -Enk*<u|(dT)Pv(dT)|u> : ',(orbmag_trace(1,adir,ih4),adir=1,3)
-   call wrtout(ab_out,message,'COLL')
-   write(message,'(a)')ch10
-   call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)')'                     Lamb : ',(orbmag_trace(1,adir,iomlmb),adir=1,3)
-   call wrtout(ab_out,message,'COLL')
-   write(message,'(a)')ch10
-   call wrtout(ab_out,message,'COLL')
    write(message,'(a)')' Berry curvature, term-by-term breakdown : '
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)') '      <Pc du|TT|Pc_du> : ',(orbmag_trace(1,adir,if1),adir=1,3)
+   write(message,'(a,3es16.8)') ' Pc terms : ',(orbmag_trace(1,adir,ichern1),adir=1,3)
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)') ' <Pc du|T(dT)|u>+CONJG : ',(orbmag_trace(1,adir,if2),adir=1,3)
-   call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)') '        <u|(dT)(dT)|u> : ',(orbmag_trace(1,adir,if3),adir=1,3)
-   call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)') '     -<u|(dT)Pv(dT)|u> : ',(orbmag_trace(1,adir,if4),adir=1,3)
+   write(message,'(a,3es16.8)') ' Pv terms : ',(orbmag_trace(1,adir,ichern2),adir=1,3)
    call wrtout(ab_out,message,'COLL')
  end if
 
@@ -2260,53 +1554,13 @@ subroutine orbmag_ptpaw_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace)
      call wrtout(ab_out,message,'COLL')
      write(message,'(a,3es16.8)') ' Orbital magnetic moment : ',(orbmag_bb(1,iband,adir),adir=1,3)
      call wrtout(ab_out,message,'COLL')
-     write(message,'(a,3es16.8)') '        g1 : ',(orbmag_terms(1,iband,adir,ig1),adir=1,3)
-     call wrtout(ab_out,message,'COLL')
-     write(message,'(a,3es16.8)') '   g2a_dij : ',(orbmag_terms(1,iband,adir,ig2a_dij),adir=1,3)
-     call wrtout(ab_out,message,'COLL')
-     write(message,'(a,3es16.8)') '    g2b_p2 : ',(orbmag_terms(1,iband,adir,ig2b_p2),adir=1,3)
-     call wrtout(ab_out,message,'COLL')
-     write(message,'(a,3es16.8)') '    g2b_ap : ',(orbmag_terms(1,iband,adir,ig2b_ap),adir=1,3)
-     call wrtout(ab_out,message,'COLL')
-     write(message,'(a,3es16.8)') '   g2b_vha : ',(orbmag_terms(1,iband,adir,ig2b_vha),adir=1,3)
-     call wrtout(ab_out,message,'COLL')
-     write(message,'(a,3es16.8)') ' g2b_vhnzc : ',(orbmag_terms(1,iband,adir,ig2b_vhnzc),adir=1,3)
-     call wrtout(ab_out,message,'COLL')
-     write(message,'(a,3es16.8)') '   g3a_dij : ',(orbmag_terms(1,iband,adir,ig3a_dij),adir=1,3)
-     call wrtout(ab_out,message,'COLL')
-     write(message,'(a,3es16.8)') '    g3b_p2 : ',(orbmag_terms(1,iband,adir,ig3b_p2),adir=1,3)
-     call wrtout(ab_out,message,'COLL')
-     write(message,'(a,3es16.8)') '    g3b_ap : ',(orbmag_terms(1,iband,adir,ig3b_ap),adir=1,3)
-     call wrtout(ab_out,message,'COLL')
-     write(message,'(a,3es16.8)') '   g3b_vha : ',(orbmag_terms(1,iband,adir,ig3b_vha),adir=1,3)
-     call wrtout(ab_out,message,'COLL')
-     write(message,'(a,3es16.8)') ' g3b_vhnzc : ',(orbmag_terms(1,iband,adir,ig3b_vhnzc),adir=1,3)
-     call wrtout(ab_out,message,'COLL')
-     write(message,'(a,3es16.8)') '   g3d L : ',(orbmag_terms(1,iband,adir,iomlr),adir=1,3)
-     call wrtout(ab_out,message,'COLL')
-     write(message,'(a,3es16.8)') ' g3d A.p : ',(orbmag_terms(1,iband,adir,iomanp),adir=1,3)
-     call wrtout(ab_out,message,'COLL')
-     write(message,'(a,3es16.8)') '      g4 : ',(orbmag_terms(1,iband,adir,ig4),adir=1,3)
-     call wrtout(ab_out,message,'COLL')
-     write(message,'(a,3es16.8)') '      h1 : ',(orbmag_terms(1,iband,adir,ih1),adir=1,3)
-     call wrtout(ab_out,message,'COLL')
-     write(message,'(a,3es16.8)') '      h2 : ',(orbmag_terms(1,iband,adir,ih2),adir=1,3)
-     call wrtout(ab_out,message,'COLL')
-     write(message,'(a,3es16.8)') '      h3 : ',(orbmag_terms(1,iband,adir,ih3),adir=1,3)
-     call wrtout(ab_out,message,'COLL')
-     write(message,'(a,3es16.8)') '      h4 : ',(orbmag_terms(1,iband,adir,ih4),adir=1,3)
-     call wrtout(ab_out,message,'COLL')
      write(message,'(a)')ch10
      call wrtout(ab_out,message,'COLL')
      write(message,'(a,3es16.8)') ' Berry curvature : ',(berry_bb(1,iband,adir),adir=1,3)
      call wrtout(ab_out,message,'COLL')
-     write(message,'(a,3es16.8)') '  f1 : ',(orbmag_terms(1,iband,adir,if1),adir=1,3)
+     write(message,'(a,3es16.8)') ' Pc terms : ',(orbmag_terms(1,iband,adir,ichern1),adir=1,3)
      call wrtout(ab_out,message,'COLL')
-     write(message,'(a,3es16.8)') '  f2 : ',(orbmag_terms(1,iband,adir,if2),adir=1,3)
-     call wrtout(ab_out,message,'COLL')
-     write(message,'(a,3es16.8)') '  f3 : ',(orbmag_terms(1,iband,adir,if3),adir=1,3)
-     call wrtout(ab_out,message,'COLL')
-     write(message,'(a,3es16.8)') '  f4 : ',(orbmag_terms(1,iband,adir,if4),adir=1,3)
+     write(message,'(a,3es16.8)') ' Pv terms : ',(orbmag_terms(1,iband,adir,ichern2),adir=1,3)
      call wrtout(ab_out,message,'COLL')
    end do
  end if
@@ -3095,6 +2349,62 @@ subroutine make_ddir_ap(ddir_ap,dtset,gntselect,gprimd,lmnmax,my_lmax,pawrad,paw
 end subroutine make_ddir_ap
 !!***
 
+!!****f* ABINIT/dterm_free
+!! NAME
+!! dterm_free
+!!
+!! FUNCTION
+!! free dterm_type
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2021 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!!
+!! PARENTS
+!!      m_orbmag
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine dterm_free(dterm)
+
+  !Arguments ------------------------------------
+  !scalars
+  type(dterm_type),intent(inout) :: dterm
+
+  !arrays
+
+  !Local variables -------------------------
+  !scalars
+ 
+  !arrays
+!--------------------------------------------------------------------
+
+  if(allocated(dterm%qij)) then
+    ABI_FREE(dterm%qij)
+  end if
+
+  if(allocated(dterm%dqij)) then
+    ABI_FREE(dterm%dqij)
+  end if
+ 
+end subroutine dterm_free
+!!***
+
 !!****f* ABINIT/paw_sph_den_free
 !! NAME
 !! paw_sph_den_free
@@ -3163,6 +2473,67 @@ subroutine paw_sph_den_free(paw_sph_den)
 end subroutine paw_sph_den_free
 !!***
 
+!!****f* ABINIT/dterm_alloc
+!! NAME
+!! dterm_alloc
+!!
+!! FUNCTION
+!! allocate dterm_type
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2021 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!!
+!! PARENTS
+!!      m_orbmag
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine dterm_alloc(dterm,lmn2max,natom)
+
+  !Arguments ------------------------------------
+  !scalars
+  integer,intent(in) :: lmn2max,natom
+  type(dterm_type),intent(inout) :: dterm
+
+  !arrays
+
+  !Local variables -------------------------
+  !scalars
+ 
+  !arrays
+!--------------------------------------------------------------------
+
+  dterm%lmn2max = lmn2max
+  dterm%natom = natom
+
+  if(allocated(dterm%qij)) then
+    ABI_FREE(dterm%qij)
+  end if
+  ABI_MALLOC(dterm%qij,(natom,lmn2max))
+
+  if(allocated(dterm%dqij)) then
+    ABI_FREE(dterm%dqij)
+  end if
+  ABI_MALLOC(dterm%dqij,(natom,lmn2max,3))
+  
+end subroutine dterm_alloc
+!!***
 
 !!****f* ABINIT/paw_sph_den_alloc
 !! NAME
@@ -3380,12 +2751,13 @@ end subroutine pack_pawrhoij
 !!
 !! SOURCE
 
-subroutine make_d(atindx,atindx1,cprj,dimlmn,dterms,dtset,&
-    & gprimd,mcprj,mpi_enreg,occ,paw_an,pawang,pawrad,pawtab,psps)
+subroutine make_d(atindx,atindx1,cprj,dimlmn,dterm,dtset,gprimd,&
+    & mcprj,mpi_enreg,occ,paw_an,pawang,pawrad,pawtab,psps)
 
   !Arguments ------------------------------------
   !scalars
   integer,intent(in) :: mcprj
+  type(dterm_type),intent(inout) :: dterm
   type(dataset_type),intent(in) :: dtset
   type(MPI_type), intent(inout) :: mpi_enreg
   type(pawang_type),intent(in) :: pawang
@@ -3396,7 +2768,6 @@ subroutine make_d(atindx,atindx1,cprj,dimlmn,dterms,dtset,&
   integer,intent(in) :: dimlmn(dtset%natom)
   real(dp),intent(in) :: gprimd(3,3)
   real(dp), intent(in) :: occ(dtset%mband*dtset%nkpt*dtset%nsppol)
-  complex(dpc),intent(out) :: dterms(ndterms,psps%lmnmax,psps%lmnmax,dtset%natom,3)
   type(paw_an_type),intent(inout) :: paw_an(dtset%natom)
   type(pawcprj_type),intent(in) ::  cprj(dtset%natom,mcprj)
   type(pawrad_type),intent(in) :: pawrad(dtset%ntypat*psps%usepaw)
@@ -3418,7 +2789,6 @@ subroutine make_d(atindx,atindx1,cprj,dimlmn,dterms,dtset,&
   type(paw_sph_den_type),allocatable :: pawsphden(:)
 !--------------------------------------------------------------------
 
- dterms = zero
  !make pawrhoij
  ABI_MALLOC(pawrhoij,(dtset%natom))
  call pawrhoij_alloc(pawrhoij,dtset%pawcpxocc,dtset%nspden,dtset%nspinor,dtset%nsppol,dtset%typat,&
@@ -3461,30 +2831,29 @@ subroutine make_d(atindx,atindx1,cprj,dimlmn,dterms,dtset,&
 
  ! generate d terms
 
- ! term idsij arises from <phi|r|phi> - <tphi|r|rphi>, is the d analog of pawtab(itypat)%sij
- call make_ddir_sij(dterms(idsij,:,:,:,:),dtset,gprimd,psps%lmnmax,pawtab)
+ call make_ddir_sij(atindx,dterm,dtset,gprimd,pawtab)
 
- ! term idp2 due to onsite p^2/2, corresponds to term 1 of Torrent PAW roadmap paper appendix E
- ! Comp. Mat. Sci. 42, 337-351 (2008)
- call make_ddir_p2(dterms(idp2,:,:,:,:),dtset,gntselect,gprimd,psps%lmnmax,my_lmax,pawrad,pawtab,realgnt)
+ !! term idp2 due to onsite p^2/2, corresponds to term 1 of Torrent PAW roadmap paper appendix E
+ !! Comp. Mat. Sci. 42, 337-351 (2008)
+ !call make_ddir_p2(dterms(idp2,:,:,:,:),dtset,gntselect,gprimd,psps%lmnmax,my_lmax,pawrad,pawtab,realgnt)
 
- ! term idpa due to onsite A.p, not part of the roadmap paper but similar to term 1
- call make_ddir_ap(dterms(idpa,:,:,:,:),dtset,gntselect,gprimd,psps%lmnmax,my_lmax,pawrad,pawtab,realgnt)
- 
- ! term idvha due to v_H[n1], corresponds to term 2a of roadmap paper
- call make_ddir_vha(atindx,dterms(idvha,:,:,:,:),dtset,gntselect,gprimd,psps%lmnmax,my_lmax,&
-   & pawrad,pawsphden,pawtab,realgnt)
+ !! term idpa due to onsite A.p, not part of the roadmap paper but similar to term 1
+ !call make_ddir_ap(dterms(idpa,:,:,:,:),dtset,gntselect,gprimd,psps%lmnmax,my_lmax,pawrad,pawtab,realgnt)
+ !
+ !! term idvha due to v_H[n1], corresponds to term 2a of roadmap paper
+ !call make_ddir_vha(atindx,dterms(idvha,:,:,:,:),dtset,gntselect,gprimd,psps%lmnmax,my_lmax,&
+ !  & pawrad,pawsphden,pawtab,realgnt)
 
- ! term idvhnzc due to v_H[nZ], corresponds to term 2b of roadmap paper
- call make_ddir_vhnzc(dterms(idvhnzc,:,:,:,:),dtset,gntselect,gprimd,psps%lmnmax,my_lmax,pawrad,pawtab,realgnt)
+ !! term idvhnzc due to v_H[nZ], corresponds to term 2b of roadmap paper
+ !call make_ddir_vhnzc(dterms(idvhnzc,:,:,:,:),dtset,gntselect,gprimd,psps%lmnmax,my_lmax,pawrad,pawtab,realgnt)
 
- ! term idvhnhat due to v_H[nhat], corresponds to term 2c of roadmap paper
- call make_ddir_vhnhat(atindx,dterms(idvhnhat,:,:,:,:),dtset,gntselect,gprimd,psps%lmnmax,my_lmax,&
-   & pawrad,pawsphden,pawtab,realgnt)
+ !! term idvhnhat due to v_H[nhat], corresponds to term 2c of roadmap paper
+ !call make_ddir_vhnhat(atindx,dterms(idvhnhat,:,:,:,:),dtset,gntselect,gprimd,psps%lmnmax,my_lmax,&
+ !  & pawrad,pawsphden,pawtab,realgnt)
 
- ! term idvxc due to v_xc[n1+nc] corresponds to term 3a in roadmap paper
- call make_ddir_vxc(atindx,dterms(idvxc,:,:,:,:),dtset,gntselect,gprimd,psps%lmnmax,my_lmax,&
-    & pawang,pawrad,pawsphden,pawtab,realgnt)
+ !! term idvxc due to v_xc[n1+nc] corresponds to term 3a in roadmap paper
+ !call make_ddir_vxc(atindx,dterms(idvxc,:,:,:,:),dtset,gntselect,gprimd,psps%lmnmax,my_lmax,&
+ !   & pawang,pawrad,pawsphden,pawtab,realgnt)
 
  ABI_FREE(realgnt)
  ABI_FREE(gntselect)
