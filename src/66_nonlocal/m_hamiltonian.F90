@@ -60,6 +60,10 @@ module m_hamiltonian
  use, intrinsic :: iso_c_binding, only : c_ptr,c_loc,c_f_pointer,c_int32_t
 #endif
 
+#if defined HAVE_GPU && defined HAVE_YAKL
+ use gator_mod
+#endif
+
  implicit none
 
  private
@@ -200,11 +204,19 @@ module m_hamiltonian
 
 ! ===== Integer arrays
 
+#if defined HAVE_GPU && defined HAVE_YAKL
+  integer(c_int32_t), ABI_CONTIGUOUS pointer :: atindx(:) => null()
+#else
   integer, allocatable :: atindx(:)
+#endif
    ! atindx(natom)
    ! index table for atoms (see gstate.f)
 
+#if defined HAVE_GPU && defined HAVE_YAKL
+  integer(c_int32_t), ABI_CONTIGUOUS pointer :: atindx1(:) => null()
+#else
   integer, allocatable :: atindx1(:)
+#endif
    ! atindx1(natom)
    ! index table for atoms, inverse of atindx (see gstate.f)
 
@@ -217,13 +229,21 @@ module m_hamiltonian
    ! gbound_k(2*mgfft+8,2)
    ! G sphere boundary, for each plane wave at k
 
-  integer(kind=c_int32_t), allocatable :: indlmn(:,:,:)
+#if defined HAVE_GPU && defined HAVE_YAKL
+  integer(c_int32_t), ABI_CONTIGUOUS pointer :: indlmn(:,:,:) => null()
+#else
+  integer(c_int32_t), allocatable :: indlmn(:,:,:)
+#endif
    ! indlmn(6,lmnmax,ntypat)
    ! For each type of psp,
    ! array giving l,m,n,lm,ln,spin for i=ln  (if useylm=0)
    !                                or i=lmn (if useylm=1)
 
+#if defined HAVE_GPU && defined HAVE_YAKL
+  integer(c_int32_t), ABI_CONTIGUOUS pointer :: nattyp(:) => null()
+#else
   integer, allocatable :: nattyp(:)
+#endif
    ! nattyp(ntypat)
    ! # of atoms of each type
 
@@ -242,7 +262,11 @@ module m_hamiltonian
    ! into account, 2 if a spin-orbit component is used
    ! Revelant for NC-psps and PAW
 
+#if defined HAVE_GPU && defined HAVE_YAKL
+  integer(c_int32_t), ABI_CONTIGUOUS pointer :: typat(:) => null()
+#else
   integer, allocatable :: typat(:)
+#endif
    ! typat(natom)
    ! type of each atom
 
@@ -297,7 +321,11 @@ module m_hamiltonian
    ! nucdipmom(3,natom)
    ! nuclear dipole moments at each atomic position
 
+#if defined HAVE_GPU && defined HAVE_YAKL
+  real(c_double), ABI_CONTIGUOUS pointer :: ph1d(:,:) => null()
+#else
   real(dp), allocatable :: ph1d(:,:)
+#endif
    ! ph1d(2,3*(2*mgfft+1)*natom)
    ! 1-dim phase arrays for structure factor (see getph.f).
 
@@ -561,15 +589,24 @@ subroutine destroy_hamiltonian(Ham)
    ABI_FREE(Ham%gbound_kp)
  end if
 
-! Integer arrays
+ ! Integer arrays
+#if defined HAVE_GPU && defined HAVE_YAKL
+ ABI_SFREE_MANAGED(Ham%atindx)
+ ABI_SFREE_MANAGED(Ham%atindx1)
+ ABI_SFREE_MANAGED(Ham%typat)
+ ABI_SFREE_MANAGED(Ham%indlmn)
+ ABI_SFREE_MANAGED(Ham%nattyp)
+#else
  ABI_SFREE(Ham%atindx)
  ABI_SFREE(Ham%atindx1)
- ABI_SFREE(Ham%dimcprj)
- ABI_SFREE(Ham%gbound_k)
+ ABI_SFREE(Ham%typat)
  ABI_SFREE(Ham%indlmn)
  ABI_SFREE(Ham%nattyp)
+#endif
+ ABI_SFREE(Ham%gbound_k)
  ABI_SFREE(Ham%pspso)
- ABI_SFREE(Ham%typat)
+
+ ABI_SFREE(Ham%dimcprj)
 
 ! Real Pointers
  if (associated(Ham%phkpxred,Ham%phkxred)) then
@@ -598,7 +635,11 @@ subroutine destroy_hamiltonian(Ham)
  ABI_SFREE(Ham%ekb_spin)
  ABI_SFREE(Ham%sij)
  ABI_SFREE(Ham%nucdipmom)
+#if defined HAVE_GPU && defined HAVE_YAKL
+ ABI_SFREE_MANAGED(Ham%ph1d)
+#else
  ABI_SFREE(Ham%ph1d)
+#endif
 
 ! Structured datatype pointers
  if (associated(Ham%fockcommon)) nullify(Ham%fockcommon)
@@ -709,14 +750,24 @@ subroutine init_hamiltonian(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
  ABI_CHECK(mgfft==MAXVAL(ngfft(1:3)),"Wrong mgfft")
 
 !Allocate the arrays of the Hamiltonian whose dimensions do not depend on k
+#if defined HAVE_GPU && defined HAVE_YAKL
+ ABI_MALLOC_MANAGED(ham%atindx,(/natom/))
+ ABI_MALLOC_MANAGED(ham%atindx1,(/natom/))
+ ABI_MALLOC_MANAGED(ham%typat,(/natom/))
+ ABI_MALLOC_MANAGED(ham%indlmn,(/6,psps%lmnmax,psps%ntypat/))
+ ABI_MALLOC_MANAGED(ham%nattyp,(/psps%ntypat/))
+ ABI_MALLOC_MANAGED(ham%ph1d,(/2,3*(2*mgfft+1)*natom/))
+#else
  ABI_MALLOC(ham%atindx,(natom))
  ABI_MALLOC(ham%atindx1,(natom))
  ABI_MALLOC(ham%typat,(natom))
  ABI_MALLOC(ham%indlmn,(6,psps%lmnmax,psps%ntypat))
  ABI_MALLOC(ham%nattyp,(psps%ntypat))
- ABI_MALLOC(ham%nucdipmom,(3,natom))
  ABI_MALLOC(ham%ph1d,(2,3*(2*mgfft+1)*natom))
+#endif
+
  ABI_MALLOC(ham%pspso,(psps%ntypat))
+ ABI_MALLOC(ham%nucdipmom,(3,natom))
 
 !Initialize most of the Hamiltonian
  indx=1
