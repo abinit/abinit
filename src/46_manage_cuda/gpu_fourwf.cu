@@ -209,6 +209,10 @@ extern "C" void gpu_fourwf_(int *cplex,
     alloc_gpu_fourwf_(ngfft,ndat,npwin,npwout);
   }//end if "fft size changed"
 
+  int deviceId;
+  CHECK_CUDA_ERROR( cudaGetDevice(&deviceId) );
+  CHECK_CUDA_ERROR( cudaMemPrefetchAsync ( fofgin, 2*(*npwin)*(*ndat)*sizeof(double), deviceId) );
+
 
   //memcpy cpu => buffer
   //if(*option == 1 || *option == 2)
