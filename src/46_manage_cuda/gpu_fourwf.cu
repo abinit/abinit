@@ -211,7 +211,11 @@ extern "C" void gpu_fourwf_(int *cplex,
 
   int deviceId;
   CHECK_CUDA_ERROR( cudaGetDevice(&deviceId) );
-  CHECK_CUDA_ERROR( cudaMemPrefetchAsync ( fofgin, 2*(*npwin)*(*ndat)*sizeof(double), deviceId) );
+  if(*option!=3)
+    CHECK_CUDA_ERROR( cudaMemPrefetchAsync ( fofgin,  2*(*npwin)*(*ndat)*sizeof(double), deviceId) );
+
+  if(*option==2 || *option==3)
+    CHECK_CUDA_ERROR( cudaMemPrefetchAsync ( fofgout, 2*(*npwout)*(*ndat)*sizeof(double), deviceId) );
 
 
   //memcpy cpu => buffer
@@ -261,7 +265,7 @@ extern "C" void gpu_fourwf_(int *cplex,
     gpu_density_accumulation_(fofr_gpu,denpot,weightr_gpu,weighti_gpu,&nfft_tot,ndat,&stream_compute);
 
     // when using managed memory, do a device sync before re-using data on host
-    CHECK_CUDA_ERROR( cudaDeviceSynchronize() );
+    //CHECK_CUDA_ERROR( cudaDeviceSynchronize() );
 
     //We get denpot back on cpu
     //CHECK_CUDA_ERROR( cudaMemcpy(denpot,denpot_gpu,nfft_tot*sizeof(double),cudaMemcpyDeviceToHost) );
@@ -287,11 +291,14 @@ extern "C" void gpu_fourwf_(int *cplex,
     gpu_sphere_out_(fofgout,work_gpu,kg_kout,npwout,&n1,&n2,&n3,ndat,&stream_compute);
 
     // when using managed memory, do a device sync before re-using data on host
-    CHECK_CUDA_ERROR( cudaDeviceSynchronize() );
+    //CHECK_CUDA_ERROR( cudaDeviceSynchronize() );
 
     //We get fofgout back on cpu
     //CHECK_CUDA_ERROR( cudaMemcpy(fofgout,fofgout_gpu,2*(*npwout)*(*ndat)*sizeof(double),cudaMemcpyDeviceToHost) );
   }
+
+  // when using managed memory, do a device sync before re-using data on host
+  CHECK_CUDA_ERROR( cudaDeviceSynchronize() );
 
 }//end subroutine gpu_fourwf
 
