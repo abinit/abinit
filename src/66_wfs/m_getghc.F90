@@ -24,6 +24,8 @@
 
 module m_getghc
 
+ use, intrinsic :: iso_c_binding
+
  use defs_basis
  use m_errors
  use m_abicore
@@ -38,6 +40,10 @@ module m_getghc
  use m_fock_getghc, only : fock_getghc, fock_ACE_getghc
  use m_nonlop,      only : nonlop
  use m_fft,         only : fourwf
+
+#if defined HAVE_GPU_CUDA
+ use m_gpu_toolbox
+#endif
 
 #if defined HAVE_YAKL
  use gator_mod
@@ -58,6 +64,45 @@ module m_getghc
  public :: multithreaded_getghc
  public :: getghc_nucdip ! compute <G|H_nucdip|C> for input vector |C> expressed in recip space
 !!***
+
+ !!
+ !! GPU/Kokkos interface
+ !!
+#if defined(HAVE_FC_ISO_C_BINDING) && defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
+
+  interface
+
+    !> assemble energy contributions into ghc / gsc array
+    subroutine assemble_energy_contribution_kokkos(ghc_ptr, &
+      &                                            gsc_ptr, &
+      &                                            kinpw_k2_ptr, &
+      &                                            cwavef_ptr, &
+      &                                            gvnlxc_ptr, &
+      &                                            ndat, &
+      &                                            my_nspinor, &
+      &                                            npw_k2, &
+      &                                            sij_opt, &
+      &                                            k1_eq_k2, &
+      &                                            hugevalue) &
+      & bind(c, name='assemble_energy_contribution_kokkos_cpp')
+      use, intrinsic :: iso_c_binding
+      implicit none
+      type(c_ptr)            , value             :: ghc_ptr
+      type(c_ptr)            , value             :: gsc_ptr
+      type(c_ptr)            , value             :: kinpw_k2_ptr
+      type(c_ptr)            , value             :: cwavef_ptr
+      type(c_ptr)            , value             :: gvnlxc_ptr
+      integer(kind=c_int32_t), value, intent(in) :: ndat
+      integer(kind=c_int32_t), value, intent(in) :: my_nspinor
+      integer(kind=c_int32_t), value, intent(in) :: npw_k2
+      integer(kind=c_int32_t), value, intent(in) :: sij_opt
+      logical(kind=c_bool),    value, intent(in) :: k1_eq_k2
+      real(kind=c_double),     value, intent(in) :: hugevalue
+    end subroutine assemble_energy_contribution_kokkos
+
+  end interface
+
+#endif
 
 contains
 !!***
@@ -141,9 +186,9 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 !arrays
  integer,intent(in),optional,target :: kg_fft_k(:,:),kg_fft_kp(:,:)
  real(dp),intent(out),target :: gsc(:,:)
- real(dp),intent(inout) :: cwavef(:,:)
+ real(dp),intent(inout), target :: cwavef(:,:)
  real(dp),optional,intent(inout) :: cwavef_r(:,:,:,:,:)
- real(dp),intent(out) :: ghc(:,:)
+ real(dp),intent(out), target :: ghc(:,:)
  real(dp),intent(out),target :: gvnlxc(:,:)
  type(pawcprj_type),intent(inout),target :: cwaveprj(:,:)
  !MG: Passing these arrays assumed-shape has the drawback that client code is
@@ -156,7 +201,8 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
  integer :: ig,igspinor,ii,iispinor,ikpt_this_proc,ipw,ispinor,my_nspinor
  integer :: n4,n5,n6,nnlout,npw_fft,npw_k1,npw_k2,nspinortot,option_fft
  integer :: paw_opt,select_k_,shift1,shift2,signs,tim_nonlop
- logical :: k1_eq_k2,have_to_reequilibrate,has_fock,local_gvnlxc
+ logical(kind=c_bool) :: k1_eq_k2
+ logical :: have_to_reequilibrate,has_fock,local_gvnlxc
  logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc,use_cwavef_r
  real(dp) :: ghcim,ghcre,weight
  character(len=500) :: msg
@@ -206,6 +252,8 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
  real(dp), pointer                :: gsc_ptr(:,:)
  type(fock_common_type),pointer :: fock
  type(pawcprj_type),pointer :: cwaveprj_fock(:,:),cwaveprj_idat(:,:),cwaveprj_nonlop(:,:)
+
+ real(c_double), parameter        :: hugevalue = huge(zero)*1.d-11
 
 ! *********************************************************************
 
@@ -813,97 +861,110 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 !============================================================
    ABI_NVTX_START_RANGE(NVTX_GETGHC_KIN)
 
-   !  Assemble modified kinetic, local and nonlocal contributions
-   !  to <G|H|C(n,k)>. Take also into account build-in debugging.
-   if(prtvol/=-level)then
-     do idat=1,ndat
-       if (k1_eq_k2) then
-!      !!$OMP PARALLEL DO PRIVATE(igspinor) COLLAPSE(2)
-         do ispinor=1,my_nspinor
-           do ig=1,npw_k2
-             igspinor=ig+npw_k2*(ispinor-1)+npw_k2*my_nspinor*(idat-1)
-             if(kinpw_k2(ig)<huge(zero)*1.d-11)then
-               ghc(re,igspinor)= ghc(re,igspinor) + kinpw_k2(ig)*cwavef(re,igspinor) + gvnlxc_(re,igspinor)
-               ghc(im,igspinor)= ghc(im,igspinor) + kinpw_k2(ig)*cwavef(im,igspinor) + gvnlxc_(im,igspinor)
-             else
-               ghc(re,igspinor)=zero
-               ghc(im,igspinor)=zero
-               if (sij_opt==1) then
-                 gsc(re,igspinor)=zero
-                 gsc(im,igspinor)=zero
-               end if
-             end if
-           end do ! ig
-         end do ! ispinor
-
-       else
-!      !!$OMP PARALLEL DO PRIVATE(igspinor) COLLAPSE(2)
-         do ispinor=1,my_nspinor
-           do ig=1,npw_k2
-             igspinor=ig+npw_k2*(ispinor-1)+npw_k2*my_nspinor*(idat-1)
-             if(kinpw_k2(ig)<huge(zero)*1.d-11)then
-               ghc(re,igspinor)= ghc(re,igspinor) + gvnlxc_(re,igspinor)
-               ghc(im,igspinor)= ghc(im,igspinor) + gvnlxc_(im,igspinor)
-             else
-               ghc(re,igspinor)=zero
-               ghc(im,igspinor)=zero
-               if (sij_opt==1) then
-                 gsc(re,igspinor)=zero
-                 gsc(im,igspinor)=zero
-               end if
-             end if
-           end do ! ig
-         end do ! ispinor
-       end if
-     end do ! idat
-   else
-!    Here, debugging section
-     call wrtout(std_out,' getghc : components of ghc ','PERS')
-     write(msg,'(a)')&
-&     'icp ig ispinor igspinor re/im     ghc        kinpw         cwavef      glocc        gvnlxc  gsc'
-     call wrtout(std_out,msg,'PERS')
-     do idat=1,ndat
-       do ispinor=1,my_nspinor
-         do ig=1,npw_k2
-           igspinor=ig+npw_k2*(ispinor-1)+npw_k2*my_nspinor*(idat-1)
-           if(kinpw_k2(ig)<huge(zero)*1.d-11)then
-             if (k1_eq_k2) then
-               ghcre=kinpw_k2(ig)*cwavef(re,igspinor)+ghc(re,igspinor)+gvnlxc_(re,igspinor)
-               ghcim=kinpw_k2(ig)*cwavef(im,igspinor)+ghc(im,igspinor)+gvnlxc_(im,igspinor)
-             else
-               ghcre=ghc(re,igspinor)+gvnlxc_(re,igspinor)
-               ghcim=ghc(im,igspinor)+gvnlxc_(im,igspinor)
-             end if
-           else
-             ghcre=zero
-             ghcim=zero
-             if (sij_opt==1) then
-               gsc(re,igspinor)=zero
-               gsc(im,igspinor)=zero
-             end if
-           end if
-           iispinor=ispinor;if (mpi_enreg%paral_spinor==1) iispinor=mpi_enreg%me_spinor+1
-           if (sij_opt == 1) then
-             write(msg,'(a,3(1x,i5),6(1x,es13.6))') '  1 ', ig, iispinor, igspinor,ghcre,&
-&             kinpw_k2(ig),cwavef(re,igspinor),ghc(re,igspinor),gvnlxc_(re,igspinor), gsc(re,igspinor)
-             call wrtout(std_out,msg,'PERS')
-             write(msg,'(a,3(1x,i5),6(1x,es13.6))') '  2 ', ig, iispinor, igspinor,ghcim,&
-&             kinpw_k2(ig),cwavef(im,igspinor),ghc(im,igspinor),gvnlxc_(im,igspinor), gsc(im,igspinor)
-             call wrtout(std_out,msg,'PERS')
-           else
-             write(msg,'(a,3(1x,i5),6(1x,es13.6))') '  1 ', ig, iispinor, igspinor,ghcre,&
-&             kinpw_k2(ig),cwavef(re,igspinor),ghc(re,igspinor),gvnlxc_(re,igspinor)
-             call wrtout(std_out,msg,'PERS')
-             write(msg,'(a,3(1x,i5),6(1x,es13.6))') '  2 ', ig, iispinor, igspinor,ghcim,&
-&             kinpw_k2(ig),cwavef(im,igspinor),ghc(im,igspinor),gvnlxc_(im,igspinor)
-             call wrtout(std_out,msg,'PERS')
-           end if
-           ghc(re,igspinor)=ghcre
-           ghc(im,igspinor)=ghcim
-         end do ! ig
-       end do ! ispinor
-     end do ! idat
+#if defined(HAVE_FC_ISO_C_BINDING) && defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
+   if (gs_ham%use_gpu_cuda == 1) then
+     call assemble_energy_contribution_kokkos(c_loc(ghc), &
+       & c_loc(gsc), c_loc(kinpw_k2), c_loc(cwavef), c_loc(gvnlxc_), &
+       & ndat, my_nspinor, npw_k2, sij_opt, k1_eq_k2, hugevalue)
+     ! sync device so that data can be reused safely on host
+     ! will probably be moved elsewhere once all the scf loop runs on device
+     call gpu_device_synchronize()
    end if
+#endif
+
+   if (gs_ham%use_gpu_cuda == 0) then
+     !  Assemble modified kinetic, local and nonlocal contributions
+     !  to <G|H|C(n,k)>. Take also into account build-in debugging.
+     if(prtvol/=-level)then
+       do idat=1,ndat
+         if (k1_eq_k2) then
+           !      !!$OMP PARALLEL DO PRIVATE(igspinor) COLLAPSE(2)
+           do ispinor=1,my_nspinor
+             do ig=1,npw_k2
+               igspinor=ig+npw_k2*(ispinor-1)+npw_k2*my_nspinor*(idat-1)
+               if(kinpw_k2(ig)<huge(zero)*1.d-11)then
+                 ghc(re,igspinor) = ghc(re,igspinor) + kinpw_k2(ig)*cwavef(re,igspinor) + gvnlxc_(re,igspinor)
+                 ghc(im,igspinor) = ghc(im,igspinor) + kinpw_k2(ig)*cwavef(im,igspinor) + gvnlxc_(im,igspinor)
+               else
+                 ghc(re,igspinor)=zero
+                 ghc(im,igspinor)=zero
+                 if (sij_opt==1) then
+                   gsc(re,igspinor)=zero
+                   gsc(im,igspinor)=zero
+                 end if
+               end if
+             end do ! ig
+           end do ! ispinor
+
+         else
+           !      !!$OMP PARALLEL DO PRIVATE(igspinor) COLLAPSE(2)
+           do ispinor=1,my_nspinor
+             do ig=1,npw_k2
+               igspinor=ig+npw_k2*(ispinor-1)+npw_k2*my_nspinor*(idat-1)
+               if(kinpw_k2(ig)<huge(zero)*1.d-11)then
+                 ghc(re,igspinor)= ghc(re,igspinor) + gvnlxc_(re,igspinor)
+                 ghc(im,igspinor)= ghc(im,igspinor) + gvnlxc_(im,igspinor)
+               else
+                 ghc(re,igspinor)=zero
+                 ghc(im,igspinor)=zero
+                 if (sij_opt==1) then
+                   gsc(re,igspinor)=zero
+                   gsc(im,igspinor)=zero
+                 end if
+               end if
+             end do ! ig
+           end do ! ispinor
+         end if
+       end do ! idat
+     else
+       !    Here, debugging section
+       call wrtout(std_out,' getghc : components of ghc ','PERS')
+       write(msg,'(a)')&
+         &     'icp ig ispinor igspinor re/im     ghc        kinpw         cwavef      glocc        gvnlxc  gsc'
+       call wrtout(std_out,msg,'PERS')
+       do idat=1,ndat
+         do ispinor=1,my_nspinor
+           do ig=1,npw_k2
+             igspinor=ig+npw_k2*(ispinor-1)+npw_k2*my_nspinor*(idat-1)
+             if(kinpw_k2(ig)<huge(zero)*1.d-11)then
+               if (k1_eq_k2) then
+                 ghcre=kinpw_k2(ig)*cwavef(re,igspinor)+ghc(re,igspinor)+gvnlxc_(re,igspinor)
+                 ghcim=kinpw_k2(ig)*cwavef(im,igspinor)+ghc(im,igspinor)+gvnlxc_(im,igspinor)
+               else
+                 ghcre=ghc(re,igspinor)+gvnlxc_(re,igspinor)
+                 ghcim=ghc(im,igspinor)+gvnlxc_(im,igspinor)
+               end if
+             else
+               ghcre=zero
+               ghcim=zero
+               if (sij_opt==1) then
+                 gsc(re,igspinor)=zero
+                 gsc(im,igspinor)=zero
+               end if
+             end if
+             iispinor=ispinor;if (mpi_enreg%paral_spinor==1) iispinor=mpi_enreg%me_spinor+1
+             if (sij_opt == 1) then
+               write(msg,'(a,3(1x,i5),6(1x,es13.6))') '  1 ', ig, iispinor, igspinor,ghcre,&
+                 &             kinpw_k2(ig),cwavef(re,igspinor),ghc(re,igspinor),gvnlxc_(re,igspinor), gsc(re,igspinor)
+               call wrtout(std_out,msg,'PERS')
+               write(msg,'(a,3(1x,i5),6(1x,es13.6))') '  2 ', ig, iispinor, igspinor,ghcim,&
+                 &             kinpw_k2(ig),cwavef(im,igspinor),ghc(im,igspinor),gvnlxc_(im,igspinor), gsc(im,igspinor)
+               call wrtout(std_out,msg,'PERS')
+             else
+               write(msg,'(a,3(1x,i5),6(1x,es13.6))') '  1 ', ig, iispinor, igspinor,ghcre,&
+                 &             kinpw_k2(ig),cwavef(re,igspinor),ghc(re,igspinor),gvnlxc_(re,igspinor)
+               call wrtout(std_out,msg,'PERS')
+               write(msg,'(a,3(1x,i5),6(1x,es13.6))') '  2 ', ig, iispinor, igspinor,ghcim,&
+                 &             kinpw_k2(ig),cwavef(im,igspinor),ghc(im,igspinor),gvnlxc_(im,igspinor)
+               call wrtout(std_out,msg,'PERS')
+             end if
+             ghc(re,igspinor)=ghcre
+             ghc(im,igspinor)=ghcim
+           end do ! ig
+         end do ! ispinor
+       end do ! idat
+     end if
+   end if ! gs_ham%use_gpu_cuda == 0
    ABI_NVTX_END_RANGE()
 
 !  Special case of PAW + Fock : only return Fock operator contribution in gvnlxc_

@@ -47,6 +47,12 @@ using AbiView_r64_2d = Kokkos::View<double**, Kokkos::LayoutLeft,   memory_space
 using AbiView_r64_3d = Kokkos::View<double***, Kokkos::LayoutLeft,  memory_space, memory_trait >;
 using AbiView_r64_4d = Kokkos::View<double****, Kokkos::LayoutLeft, memory_space, memory_trait >;
 
+//! device views types for array of doubles, unmanaged memory (allocated on fortran side), const
+using AbiView_r64_1d_const = Kokkos::View<const double*, memory_space, memory_trait >;
+using AbiView_r64_2d_const = Kokkos::View<const double**, Kokkos::LayoutLeft,   memory_space, memory_trait >;
+using AbiView_r64_3d_const = Kokkos::View<const double***, Kokkos::LayoutLeft,  memory_space, memory_trait >;
+using AbiView_r64_4d_const = Kokkos::View<const double****, Kokkos::LayoutLeft, memory_space, memory_trait >;
+
 //! device views types for array of doubles, managed memory
 using AbiView_r64_3d_managed = Kokkos::View<double***, Kokkos::LayoutLeft,  memory_space >;
 
