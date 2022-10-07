@@ -813,7 +813,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 !============================================================
    ABI_NVTX_START_RANGE(NVTX_GETGHC_KIN)
 
-!  Assemble modified kinetic, local and nonlocal contributions
+   !  Assemble modified kinetic, local and nonlocal contributions
    !  to <G|H|C(n,k)>. Take also into account build-in debugging.
    if(prtvol/=-level)then
      do idat=1,ndat
