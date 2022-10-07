@@ -1629,7 +1629,7 @@ contains
             &            gemm_nonlop_kpt_gpu(gemm_nonlop_ikpt_this_proc_being_treated)%projs, npwout, & ! A, LDA
             &            gemm_nonlop_kokkos%s_projections_gpu, nprojs, &                                ! B, LDB
             &            czero, &                                                                       ! beta
-            &            gemm_nonlop_kokkos%svectout_gpu, npwout)                                       ! C, LDC
+            &            C_LOC(svectout(1,1)), npwout)                                                  ! C, LDC
 
         else
 
@@ -1645,7 +1645,7 @@ contains
             &            czero, &                                                                       ! beta
             &            temp_realvec_gpu, npwout)                                                      ! C, LDC
           !svectout(1,1:npwout*nspinor*ndat) = temp_realvec_gpu(1:npwout*nspinor*ndat)
-          call insert_real_part(gemm_nonlop_kokkos%svectout_gpu, temp_realvec_gpu, npwout*nspinor*ndat)
+          call insert_real_part(C_LOC(svectout(1,1)), temp_realvec_gpu, npwout*nspinor*ndat)
 
           call gpu_xgemm(cplex, 'N', 'N', &
             &            npwout, ndat*nspinor, nprojs, &                                                ! M,N,K
@@ -1655,7 +1655,7 @@ contains
             &            czero, &                                                                       ! beta
             &            temp_realvec_gpu, npwout)                                                      ! C, LDC
           !svectout(2,1:npwout*nspinor*ndat) = temp_realvec(1:npwout*nspinor*ndat)
-          call insert_imag_part(gemm_nonlop_kokkos%svectout_gpu, temp_realvec_gpu, npwout*nspinor*ndat)
+          call insert_imag_part(C_LOC(svectout(1,1)), temp_realvec_gpu, npwout*nspinor*ndat)
 
         end if ! cplex == 2
 
@@ -1669,13 +1669,16 @@ contains
             &            2*npwin*nspinor*ndat, &               ! size
             &            cone, &                               ! alpha
             &            C_LOC(vectin), 1, &                   ! X, incrx
-            &            gemm_nonlop_kokkos%svectout_gpu, 1)   ! Y, incry
+            &            C_LOC(svectout(1,1)), 1)              ! Y, incry
 
         endif
 
         ! copy back results on host
-        call copy_from_gpu(C_LOC(svectout(1,1)), gemm_nonlop_kokkos%svectout_gpu,&
-          & 2*npwout*nspinor*(paw_opt/3)*ndat * dp)
+        !call copy_from_gpu(C_LOC(svectout(1,1)), gemm_nonlop_kokkos%svectout_gpu,&
+        !  & 2*npwout*nspinor*(paw_opt/3)*ndat * dp)
+
+        ! reminder : a call to cudaDeviceSynchronize is needed so that svectout can be re-used safely on host
+        ! don't do it here, only when really needed
 
       end if ! (paw_opt == 3 .or. paw_opt == 4)
 
@@ -1736,6 +1739,7 @@ contains
   !ABI_FREE_CUDA(    svectout_gpu)
 
   ! device sync before reusing data computed on device
+  ! this may not be the best location to have this sync
   call gpu_device_synchronize()
 
   if (gpu_allocated(temp_realvec_gpu)) then
