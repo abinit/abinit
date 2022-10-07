@@ -392,7 +392,7 @@ subroutine mkkin (ecut,ecutsm,effmass_free,gmet,kg,kinpw,kpt,npw,idir1,idir2)
      if(kpg2>ecut-tol12)then
        if(order==0) then
 !        Will filter the wavefunction, based on this value, in cgwf.f, getghc.f and precon.f
-         kinetic=huge(0.0_dp)*1.d-10
+         kinetic=huge(zero)*1.d-10
        else
 !        The wavefunction has been filtered : no derivative
          kinetic=0
