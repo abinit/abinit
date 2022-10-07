@@ -65,76 +65,101 @@
 /*******                                                 **********/
 /******************************************************************/
 
-__global__ void kernel_set_zero(double *tab,int n){
+/**
+ * Why not use cudaMemset ?
+ */
+__global__
+void kernel_set_zero(double *tab,int n)
+{
+
   int id= threadIdx.x + blockDim.x*(blockIdx.x + gridDim.x*blockIdx.y);
   if(id<n)
     tab[id]=0.;
-}
 
-__global__ void kernel_sphere_in(double *cfft, const double *cg, const int *kg_k,
-                                 const int npw,const int ndat,const int n1,const int n2,const int n3,
-                                 const int shift_inv1,const int shift_inv2,const int shift_inv3,
-                                 const int istwfk)
+} // kernel_set_zero
+
+__global__
+void kernel_sphere_in(double *cfft,
+                      const double *cg,
+                      const int *kg_k,
+                      const int npw,
+                      const int ndat,
+                      const int n1,
+                      const int n2,
+                      const int n3,
+                      const int shift_inv1,
+                      const int shift_inv2,
+                      const int shift_inv3,
+                      const int istwfk)
 {
 
-  int ipw,idat,thread_id;
-  int i1,i2,i3;
-  thread_id  = threadIdx.x + blockIdx.x*blockDim.x;
-  idat = blockIdx.y;
+  int thread_id  = threadIdx.x + blockIdx.x*blockDim.x;
+  int idat = blockIdx.y;
 
-  for(ipw=thread_id; ipw<npw; ipw+=blockDim.x*gridDim.x){
-    i1=kg_k[ipw*3];//kg_k(1,ipw)
-    i2=kg_k[ipw*3 + 1];//kg_k(2,ipw)
-    i3=kg_k[ipw*3 + 2];//kg_k(3,ipw)
-    if(i1<0)
-      i1+=n1;
-    if(i2<0)
-      i2+=n2;
-    if(i3<0)
-      i3+=n3;
+  for (int ipw=thread_id; ipw<npw; ipw+=blockDim.x*gridDim.x)
+    {
+      int i1=kg_k[ipw*3];//kg_k(1,ipw)
+      int i2=kg_k[ipw*3 + 1];//kg_k(2,ipw)
+      int i3=kg_k[ipw*3 + 2];//kg_k(3,ipw)
+      if(i1<0)
+        i1+=n1;
+      if(i2<0)
+        i2+=n2;
+      if(i3<0)
+        i3+=n3;
 
-    //We write cfft(i1,i2,i3)
-    //(double2): cfft[i1 + n1*(i2 + n2*(i3 + n3*idat))] = cg[ipw + npw*idat]
-    cfft[   2*(i1 + n1*(i2 + n2*(i3+n3*idat)))] = cg[    2*(ipw + npw*idat)];
-    cfft[1+ 2*(i1 + n1*(i2 + n2*(i3+n3*idat)))] = cg[1 + 2*(ipw + npw*idat)];
+      //We write cfft(i1,i2,i3)
+      //(double2): cfft[i1 + n1*(i2 + n2*(i3 + n3*idat))] = cg[ipw + npw*idat]
+      cfft[   2*(i1 + n1*(i2 + n2*(i3+n3*idat)))] = cg[    2*(ipw + npw*idat)];
+      cfft[1+ 2*(i1 + n1*(i2 + n2*(i3+n3*idat)))] = cg[1 + 2*(ipw + npw*idat)];
 
-    if(istwfk > 1){
-      int i1inv,i2inv,i3inv;
-      i1inv = (shift_inv1 - i1) % n1;
-      i2inv = (shift_inv2 - i2) % n2;
-      i3inv = (shift_inv3 - i3) % n3;
-      //cfft(1,i1inv,i2inv,i3inv+n6*(idat-1))= cg(1,ipw+npw*(idat-1))
-      //cfft(2,i1inv,i2inv,i3inv+n6*(idat-1))=-cg(2,ipw+npw*(idat-1))
-      cfft[   2*(i1inv + n1*(i2inv + n2*(i3inv+n3*idat)))] =  cg[    2*(ipw + npw*idat)];
-      cfft[1+ 2*(i1inv + n1*(i2inv + n2*(i3inv+n3*idat)))] = -cg[1 + 2*(ipw + npw*idat)];
-    }
-  }
-}
+      if(istwfk > 1){
+        int i1inv,i2inv,i3inv;
+        i1inv = (shift_inv1 - i1) % n1;
+        i2inv = (shift_inv2 - i2) % n2;
+        i3inv = (shift_inv3 - i3) % n3;
+        //cfft(1,i1inv,i2inv,i3inv+n6*(idat-1))= cg(1,ipw+npw*(idat-1))
+        //cfft(2,i1inv,i2inv,i3inv+n6*(idat-1))=-cg(2,ipw+npw*(idat-1))
+        cfft[   2*(i1inv + n1*(i2inv + n2*(i3inv+n3*idat)))] =  cg[    2*(ipw + npw*idat)];
+        cfft[1+ 2*(i1inv + n1*(i2inv + n2*(i3inv+n3*idat)))] = -cg[1 + 2*(ipw + npw*idat)];
+      }
+    } // end for ipw
 
-__global__ void kernel_sphere_out(const double *cfft, double *cg, int *kg_k,int npw,int ndat,int n1,int n2,int n3,double norm)
+} // kernel_sphere_in
+
+__global__
+void kernel_sphere_out(const double *cfft,
+                       double *cg,
+                       const int *kg_k,
+                       const int npw,
+                       const int ndat,
+                       const int n1,
+                       const int n2,
+                       const int n3,
+                       const double norm)
 {
 
-  int ig,idat,thread_id;
-  int i1,i2,i3;
-  thread_id = threadIdx.x + blockIdx.x*blockDim.x;
-  idat = blockIdx.y;
+  int thread_id = threadIdx.x + blockIdx.x * blockDim.x;
+  int idat = blockIdx.y;
 
-  for(ig=thread_id; ig<npw; ig+=blockDim.x*gridDim.x){
-    i1=kg_k[ig*3];//kg_k(1,ipw)
-    i2=kg_k[ig*3 + 1];//kg_k(2,ipw)
-    i3=kg_k[ig*3 + 2];//kg_k(3,ipw)
-    if(i1<0)
-      i1+=n1;
-    if(i2<0)
-      i2+=n2;
-    if(i3<0)
-      i3+=n3;
+  for (int ig=thread_id; ig<npw; ig+=blockDim.x*gridDim.x)
+    {
+      int i1 = kg_k[ig*3    ];//kg_k(1,ipw)
+      int i2 = kg_k[ig*3 + 1];//kg_k(2,ipw)
+      int i3 = kg_k[ig*3 + 2];//kg_k(3,ipw)
+      if(i1<0)
+        i1+=n1;
+      if(i2<0)
+        i2+=n2;
+      if(i3<0)
+        i3+=n3;
 
-    //We write cg(ig)
-    cg[    2*(ig + npw*idat)] = norm * cfft[   2*(i1 + n1*(i2 + n2*(i3+n3*idat)))] ;
-    cg[1 + 2*(ig + npw*idat)] = norm * cfft[1+ 2*(i1 + n1*(i2 + n2*(i3+n3*idat)))] ;
-  }
-}
+      //We write cg(ig)
+      cg[    2*(ig + npw*idat)] = norm * cfft[   2*(i1 + n1*(i2 + n2*(i3+n3*idat)))] ;
+      cg[1 + 2*(ig + npw*idat)] = norm * cfft[1+ 2*(i1 + n1*(i2 + n2*(i3+n3*idat)))] ;
+    } // end for ig
+
+} // kernel_sphere_out
 
 /******************************************************************/
 /*******                                                 **********/
@@ -142,7 +167,16 @@ __global__ void kernel_sphere_out(const double *cfft, double *cg, int *kg_k,int 
 /*******                                                 **********/
 /******************************************************************/
 
-extern "C" void gpu_sphere_in_(const double *cg,double *cfft,int *kg_k,int *npw,int *n1,int *n2,int *n3,int *ndat,int *istwfk,cudaStream_t *compute_stream)
+extern "C" void gpu_sphere_in_(const double *cg,
+                               double *cfft,
+                               const int *kg_k,
+                               const int *npw,
+                               const int *n1,
+                               const int *n2,
+                               const int *n3,
+                               const int *ndat,
+                               const int *istwfk,
+                               cudaStream_t *compute_stream)
 {
 
   //Arguments ------------------------------------
@@ -244,7 +278,15 @@ extern "C" void gpu_sphere_in_(const double *cg,double *cfft,int *kg_k,int *npw,
 //
 // SOURCE
 
-extern "C" void gpu_sphere_out_(double *cg,const double *cfft,int *kg_k,int *npw,int *n1,int *n2,int *n3,int* ndat,cudaStream_t *compute_stream)
+extern "C" void gpu_sphere_out_(double *cg,
+                                const double *cfft,
+                                const int *kg_k,
+                                const int *npw,
+                                const int *n1,
+                                const int *n2,
+                                const int *n3,
+                                const int* ndat,
+                                cudaStream_t *compute_stream)
 {
 
    //Arguments ------------------------------------
