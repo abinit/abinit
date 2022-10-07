@@ -391,7 +391,15 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  real(dp),allocatable :: cgrkxc(:,:),cgrvtrial(:,:),doccde(:)
  real(dp),allocatable :: dphasek(:,:),eig_k(:),ek_k(:),ek_k_nd(:,:,:),eknk(:),eknk_nd(:,:,:,:,:),end_k(:)
  real(dp),allocatable :: enlx_k(:),enlxnk(:),focknk(:),fockfornk(:,:,:),ffnl(:,:,:,:),grnl_k(:,:), xcart(:,:)
- real(dp),allocatable :: grnlnk(:,:),kinpw(:),kpg_k(:,:),occ_k(:),ph3d(:,:,:)
+ real(dp),allocatable :: grnlnk(:,:)
+
+#if defined HAVE_GPU && defined HAVE_YAKL
+ real(c_double), ABI_CONTIGUOUS pointer :: kinpw(:)
+#else
+ real(dp),allocatable :: kinpw(:)
+#endif
+
+ real(dp),allocatable :: kpg_k(:,:),occ_k(:),ph3d(:,:,:)
  real(dp),allocatable :: pwnsfacq(:,:),resid_k(:)
 
 #if defined HAVE_GPU && defined HAVE_YAKL
@@ -881,7 +889,11 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !      Set up remaining of the Hamiltonian
 
 !      Compute (1/2) (2 Pi)**2 (k+G)**2:
+#if defined HAVE_GPU && defined HAVE_YAKL
+       ABI_MALLOC_MANAGED(kinpw,(/npw_k/))
+#else
        ABI_MALLOC(kinpw,(npw_k))
+#endif
        call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg_k,kinpw,kpoint,npw_k,0,0)
 
 !      Compute (k+G) vectors (only if useylm=1)
@@ -993,11 +1005,12 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        if(dtset%use_gpu_cuda==1) call gpu_finalize_ffnl_ph3d()
 #endif
        ABI_FREE(ffnl)
-       ABI_FREE(kinpw)
 
 #if defined HAVE_GPU && defined HAVE_YAKL
+       ABI_FREE_MANAGED(kinpw)
        ABI_FREE_MANAGED(kg_k)
 #else
+       ABI_FREE(kinpw)
        ABI_FREE(kg_k)
 #endif
 
