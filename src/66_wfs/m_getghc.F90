@@ -39,6 +39,10 @@ module m_getghc
  use m_nonlop,      only : nonlop
  use m_fft,         only : fourwf
 
+#if defined HAVE_YAKL
+ use gator_mod
+#endif
+
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
  use m_nvtx_data
 #endif
@@ -157,18 +161,49 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
  real(dp) :: ghcim,ghcre,weight
  character(len=500) :: msg
 !arrays
- integer, pointer :: gbound_k1(:,:),gbound_k2(:,:),kg_k1(:,:),kg_k2(:,:)
- integer, ABI_CONTIGUOUS pointer :: indices_pw_fft(:),kg_k_fft(:,:)
- integer, ABI_CONTIGUOUS pointer :: recvcount_fft(:),recvdisp_fft(:)
- integer, ABI_CONTIGUOUS pointer ::  sendcount_fft(:),senddisp_fft(:)
- integer, allocatable:: dimcprj(:)
- real(dp) :: enlout(ndat),lambda_ndat(ndat),tsec(2)
- real(dp),target :: nonlop_dum(1,1)
- real(dp),allocatable :: buff_wf(:,:),cwavef1(:,:),cwavef2(:,:),cwavef_fft(:,:),cwavef_fft_tr(:,:)
- real(dp),allocatable :: ghc1(:,:),ghc2(:,:),ghc3(:,:),ghc4(:,:),ghc_mGGA(:,:),ghc_vectornd(:,:)
- real(dp),allocatable :: gvnlc(:,:),vlocal_tmp(:,:,:),work(:,:,:,:)
- real(dp),pointer :: gvnlxc_(:,:),kinpw_k1(:),kinpw_k2(:),kpt_k1(:),kpt_k2(:)
- real(dp),pointer :: gsc_ptr(:,:)
+ integer,  pointer                :: gbound_k1(:,:)
+ integer,  pointer                :: gbound_k2(:,:)
+ integer,  pointer                :: kg_k1(:,:)
+ integer,  pointer                :: kg_k2(:,:)
+ integer,  ABI_CONTIGUOUS pointer :: indices_pw_fft(:), kg_k_fft(:,:)
+ integer,  ABI_CONTIGUOUS pointer :: recvcount_fft(:), recvdisp_fft(:)
+ integer,  ABI_CONTIGUOUS pointer :: sendcount_fft(:), senddisp_fft(:)
+ integer,  allocatable:: dimcprj(:)
+ real(dp)                         :: enlout(ndat), lambda_ndat(ndat), tsec(2)
+ real(dp), target                 :: nonlop_dum(1,1)
+ real(dp), allocatable            :: buff_wf(:,:)
+ real(dp), allocatable            :: cwavef1(:,:)
+ real(dp), allocatable            :: cwavef2(:,:)
+ real(dp), allocatable            :: cwavef_fft(:,:)
+ real(dp), allocatable            :: cwavef_fft_tr(:,:)
+
+ real(dp), allocatable            :: ghc1(:,:)
+ real(dp), allocatable            :: ghc2(:,:)
+ real(dp), allocatable            :: ghc3(:,:)
+ real(dp), allocatable            :: ghc4(:,:)
+ real(dp), allocatable            :: ghc_mGGA(:,:)
+ real(dp), allocatable            :: ghc_vectornd(:,:)
+
+#if defined HAVE_GPU && defined HAVE_YAKL
+ real(c_double), ABI_CONTIGUOUS pointer :: gvnlc(:,:)
+#else
+ real(dp), allocatable            :: gvnlc(:,:)
+#endif
+
+ real(dp), allocatable            :: vlocal_tmp(:,:,:)
+ real(dp), allocatable            :: work(:,:,:,:)
+
+#if defined HAVE_GPU && defined HAVE_YAKL
+ real(c_double), ABI_CONTIGUOUS pointer :: gvnlxc_(:,:)
+#else
+ real(dp), pointer                :: gvnlxc_(:,:)
+#endif
+
+ real(dp), pointer                :: kinpw_k1(:)
+ real(dp), pointer                :: kinpw_k2(:)
+ real(dp), pointer                :: kpt_k1(:)
+ real(dp), pointer                :: kpt_k2(:)
+ real(dp), pointer                :: gsc_ptr(:,:)
  type(fock_common_type),pointer :: fock
  type(pawcprj_type),pointer :: cwaveprj_fock(:,:),cwaveprj_idat(:,:),cwaveprj_nonlop(:,:)
 
@@ -239,7 +274,11 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
  if (any(type_calc == [0, 2, 3])) then
    local_gvnlxc = size(gvnlxc)==0
    if (local_gvnlxc) then
+#if defined HAVE_GPU && defined HAVE_YAKL
+     ABI_MALLOC_MANAGED(gvnlxc_, (/2,npw_k2*my_nspinor*ndat/))
+#else
      ABI_MALLOC(gvnlxc_,(2,npw_k2*my_nspinor*ndat))
+#endif
    else
      gvnlxc_ => gvnlxc
    end if
@@ -733,7 +772,11 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 
      if (gs_ham%usepaw==1 .and. has_fock)then
        if (fock_get_getghc_call(fock)==1) then
-         ABI_MALLOC(gvnlc,(2,npw_k2*my_nspinor*ndat))
+#if defined HAVE_GPU && defined HAVE_YAKL
+         ABI_MALLOC_MANAGED(gvnlc, (/2,npw_k2*my_nspinor*ndat/))
+#else
+         ABI_MALLOC(gvnlc, (2,npw_k2*my_nspinor*ndat))
+#endif
          gvnlc=gvnlxc_
        endif
      endif
@@ -866,11 +909,19 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 !  Special case of PAW + Fock : only return Fock operator contribution in gvnlxc_
    if (gs_ham%usepaw==1 .and. has_fock) then
      gvnlxc_=gvnlxc_-gvnlc
+#if defined HAVE_GPU && defined HAVE_YAKL
+     ABI_FREE_MANAGED(gvnlc)
+#else
      ABI_FREE(gvnlc)
+#endif
    endif
 
    if (local_gvnlxc) then
+#if defined HAVE_GPU && defined HAVE_YAKL
+     ABI_FREE_MANAGED(gvnlxc_)
+#else
      ABI_FREE(gvnlxc_)
+#endif
    end if
 
 !  Structured debugging : if prtvol=-level, stop here.
