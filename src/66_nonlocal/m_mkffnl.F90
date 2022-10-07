@@ -376,7 +376,7 @@ subroutine mkffnl(dimekb, dimffnl, ekb, ffnl, ffspl, gmet, gprimd, ider, idir, i
    end if
  else
    if (nkpg<3) then
-     ecut=huge(0.0d0)*0.1d0;ecutsm=zero;effmass_free=one
+     ecut=huge(zero)*0.1d0;ecutsm=zero;effmass_free=one
      ! Note that with ecutsm=0, the right kinetic energy is computed
      call mkkin(ecut,ecutsm,effmass_free,gmet,kg,kpgnorm,kpt,npw,0,0)
 !$OMP PARALLEL DO

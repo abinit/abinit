@@ -2911,7 +2911,7 @@ subroutine dfpt_nsteltwf(cg,cg1,d2nl_k,ecut,ecutsm,effmass_free,gs_hamk,icg,icg1
        do ispinor=1,nspinor
          do ipw=1,npw1_k
            ipws=ipw+npw1_k*(ispinor-1)
-           if(kinpw1(ipw)<huge(0.0_dp)*1.d-11)then
+           if(kinpw1(ipw)<huge(zero)*1.d-11)then
              gvnlx1(1,ipws)=gvnlx1(1,ipws)+dkinpw(ipw)*cwave0(1,ipws)
              gvnlx1(2,ipws)=gvnlx1(2,ipws)+dkinpw(ipw)*cwave0(2,ipws)
            else
