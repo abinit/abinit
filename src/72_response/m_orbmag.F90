@@ -152,6 +152,7 @@ module m_orbmag
   private :: make_fgh_c
   private :: make_fh_v
   private :: make_g_pv
+  private :: make_g_d
   private :: make_d
   private :: dterm_qij
   private :: dterm_vhnzc
@@ -506,6 +507,9 @@ subroutine orbmag_ptpaw(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_en
    call make_g_pv(atindx,cprj_k,dterm,dtset,eig_k,gg_k,nband_k,pawtab)
    orbmag_terms(:,:,:,igpv) = orbmag_terms(:,:,:,igpv) + trnrm*gg_k(:,:,:)
    
+   call make_g_d(atindx,cprj_k,cprj1_k,dterm,dtset,gg_k,nband_k,pawtab)
+   orbmag_terms(:,:,:,igd) = orbmag_terms(:,:,:,igd) + trnrm*gg_k(:,:,:)
+   
    !!--------------------------------------------------------------------------------
    !! onsite <phi|r_b p^2/2 r_g>
    !!--------------------------------------------------------------------------------
@@ -718,6 +722,91 @@ subroutine make_g_pv(atindx,cprj_k,dterm,dtset,eig_k,gg_k,nband_k,pawtab)
  end do !adir
  
 end subroutine make_g_pv
+!!***
+
+!!****f* ABINIT/make_g_d
+!! NAME
+!! make_g_d
+!!
+!! FUNCTION
+!! compute g from dterms
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2021 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!!
+!! SOURCE
+
+subroutine make_g_d(atindx,cprj_k,cprj1_k,dterm,dtset,gg_k,nband_k,pawtab)
+
+  !Arguments ------------------------------------
+  !scalars
+  integer,intent(in) :: nband_k
+  type(dterm_type),intent(in) :: dterm
+  type(dataset_type),intent(in) :: dtset
+
+  !arrays
+  integer,intent(in) :: atindx(dtset%natom)
+  real(dp),intent(out) :: gg_k(2,nband_k,3)
+  type(pawcprj_type),intent(in) :: cprj_k(dtset%natom,nband_k)
+  type(pawcprj_type),intent(in) :: cprj1_k(dtset%natom,nband_k,3)
+  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
+
+  !Local variables -------------------------
+  !scalars
+  integer :: adir,bdir,gdir,nn
+  real(dp) :: epsabg
+  complex(dpc) :: cterm,gterm,dtdt,tdt,tdtp
+  !arrays
+
+!--------------------------------------------------------------------
+
+ gg_k = zero
+
+ do adir = 1, 3
+   do bdir = 1, 3
+     do gdir = 1, 3
+       epsabg = eijk(adir,bdir,gdir)
+       if (ABS(epsabg) .LT. tol8) cycle
+       do nn = 1, nband_k
+         
+         cterm = czero
+
+         call tdt_me(dterm%vhnzc,atindx,cprj1_k(:,nn,bdir),dterm%dvhnzc,dtset,gdir,cprj_k(:,nn),&
+           & dterm%lmn2max,pawtab,tdt)
+         cterm = cterm + tdt
+         
+         call tdt_me(dterm%vhnzc,atindx,cprj1_k(:,nn,gdir),dterm%dvhnzc,dtset,bdir,cprj_k(:,nn),&
+           & dterm%lmn2max,pawtab,tdt)
+         cterm = cterm + CONJG(tdt)
+         
+         call dtdt_me(dterm%vhnzc,atindx,cprj_k(:,nn),bdir,dterm%dvhnzc,dtdt,dtset,&
+           & gdir,cprj_k(:,nn),dterm%lmn2max,pawtab)
+         cterm = cterm + dtdt
+         
+         gterm=com*c2*epsabg*cterm
+         gg_k(1,nn,adir) = gg_k(1,nn,adir) +  REAL(gterm)
+         gg_k(2,nn,adir) = gg_k(2,nn,adir) + AIMAG(gterm)
+
+       end do !nn
+     end do !gdir
+   end do !bdir
+ end do !adir
+ 
+end subroutine make_g_d
 !!***
 
 
@@ -1625,6 +1714,8 @@ subroutine orbmag_ptpaw_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace)
    call wrtout(ab_out,message,'COLL')
    write(message,'(a,3es16.8)') ' -Pv/Ham terms : ',(orbmag_trace(1,adir,igpv),adir=1,3)
    call wrtout(ab_out,message,'COLL')
+   write(message,'(a,3es16.8)') '  Pv/Ham terms : ',(orbmag_trace(1,adir,igd),adir=1,3)
+   call wrtout(ab_out,message,'COLL')
    write(message,'(a,3es16.8)') '   Pc/En terms : ',(orbmag_trace(1,adir,ihpc),adir=1,3)
    call wrtout(ab_out,message,'COLL')
    write(message,'(a,3es16.8)') '   Pv/En terms : ',(orbmag_trace(1,adir,ihpv),adir=1,3)
@@ -1658,6 +1749,8 @@ subroutine orbmag_ptpaw_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace)
      write(message,'(a,3es16.8)') '  Pc/Ham terms : ',(orbmag_terms(1,iband,adir,igpc),adir=1,3)
      call wrtout(ab_out,message,'COLL')
      write(message,'(a,3es16.8)') ' -Pv/Ham terms : ',(orbmag_terms(1,iband,adir,igpv),adir=1,3)
+     call wrtout(ab_out,message,'COLL')
+     write(message,'(a,3es16.8)') '  Pv/Ham terms : ',(orbmag_terms(1,iband,adir,igd),adir=1,3)
      call wrtout(ab_out,message,'COLL')
      write(message,'(a,3es16.8)') '   Pc/En terms : ',(orbmag_terms(1,iband,adir,ihpc),adir=1,3)
      call wrtout(ab_out,message,'COLL')
