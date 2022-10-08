@@ -48,6 +48,7 @@ module m_gemm_nonlop
  use m_kg, only : mkkpg
 
 #if defined(HAVE_GPU_CUDA)
+  use m_gpu_toolbox
   use m_alloc_hamilt_gpu, only : gemm_nonlop_kokkos
 #endif
 
@@ -1281,6 +1282,7 @@ contains
 
   ! GPU waveform data are allocated in m_alloc_hamilt_gpu
   !type(c_ptr)                      :: vectin_gpu, vectout_gpu, svectout_gpu
+  integer(c_size_t)                :: vectin_size
 
   type(c_ptr)                      :: enl_gpu
   integer                          :: enl_size_bytes
@@ -1332,6 +1334,8 @@ contains
   !ABI_MALLOC_CUDA(svectout_gpu, 2 * npwout*nspinor*ndat*(paw_opt/3) * dp)
 
   !call copy_on_gpu(C_LOC(vectin(1,1)), gemm_nonlop_kokkos%vectin_gpu, 2*npwin*nspinor*ndat*dp)
+  vectin_size = 2*npwin*nspinor*ndat*dp
+  call gpu_data_prefetch_async(C_LOC(vectin), vectin_size)
 
   if (choice == 7) then
     call gpu_data_prefetch_async(C_LOC(svectout), vectin_size)
