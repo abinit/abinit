@@ -117,7 +117,7 @@ module m_orbmag
     complex(dpc),allocatable :: dqij(:,:,:)
     
     ! <phi|vH[nZc]|phi> - <tphi|vH[nZc]|tphi>
-    ! dvhnzc(natom,lmn2max)
+    ! vhnzc(natom,lmn2max)
     complex(dpc),allocatable :: vhnzc(:,:)
     
     ! <phi|r_alpha vH[nZc]|phi> - <tphi|r_alpha vH[nZc]|tphi>
@@ -1772,11 +1772,12 @@ subroutine dterm_vhnzc(atindx,dterm,dtset,gntselect,gprimd,&
      ff(2:pwave_size) = ff(2:pwave_size) - &
        & pawtab(itypat)%tphitphj(2:pwave_size,kln)*&
        & pawtab(itypat)%vhtnzc(2:pwave_size)
-     
-     call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
-     call simp_gen(intff,ff,pawrad(itypat))
-
-     if (ilm .EQ. jlm) dterm%vhnzc(iatom,klmn) = CMPLX(intff,zero)
+    
+     if (ilm == jlm) then 
+       call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
+       call simp_gen(intff,ff,pawrad(itypat))
+       dterm%vhnzc(iatom,klmn) = CMPLX(intff,zero)
+     end if
 
      dff(2:pwave_size) = ff(2:pwave_size)*pawrad(itypat)%rad(2:pwave_size)
      call pawrad_deducer0(dff,mesh_size,pawrad(itypat))
