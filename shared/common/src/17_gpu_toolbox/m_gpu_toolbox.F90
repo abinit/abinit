@@ -94,9 +94,9 @@ contains
     implicit none
     type(c_ptr),             value          :: dev_ptr
     integer(kind=C_SIZE_T),  value          :: count
-    integer(kind=C_INT32_t), value,optional :: deviceId
+    integer(kind=C_INT32_T), value,optional :: deviceId
 
-    integer(kind=C_INT32_t)                 :: currentDevId
+    integer(kind=C_INT32_T)                 :: currentDevId
 
     ! if a device id is provided, use it
     ! if not, just probe driver to get current device id
