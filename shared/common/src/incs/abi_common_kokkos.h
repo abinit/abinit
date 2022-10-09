@@ -62,4 +62,18 @@ using AbiView_i32_1d = Kokkos::View<int32_t*, memory_space, memory_trait >;
 using AbiView_i32_2d = Kokkos::View<int32_t**, Kokkos::LayoutLeft,   memory_space, memory_trait >;
 using AbiView_i32_3d = Kokkos::View<int32_t***, Kokkos::LayoutLeft,   memory_space, memory_trait >;
 
+//! device views types for array of complex doubles, unmanaged memory (allocated on fortran side)
+using cplx_t = Kokkos::complex<double>;
+using AbiView_c64_1d = Kokkos::View<cplx_t*, memory_space, memory_trait >;
+using AbiView_c64_2d = Kokkos::View<cplx_t**, Kokkos::LayoutLeft,   memory_space, memory_trait >;
+using AbiView_c64_3d = Kokkos::View<cplx_t***, Kokkos::LayoutLeft,  memory_space, memory_trait >;
+using AbiView_c64_4d = Kokkos::View<cplx_t****, Kokkos::LayoutLeft, memory_space, memory_trait >;
+
+//! device views types for array of complex doubles, unmanaged memory (allocated on fortran side), const
+using AbiView_c64_1d_const = Kokkos::View<const cplx_t*, memory_space, memory_trait >;
+using AbiView_c64_2d_const = Kokkos::View<const cplx_t**, Kokkos::LayoutLeft,   memory_space, memory_trait >;
+using AbiView_c64_3d_const = Kokkos::View<const cplx_t***, Kokkos::LayoutLeft,  memory_space, memory_trait >;
+using AbiView_c64_4d_const = Kokkos::View<const cplx_t****, Kokkos::LayoutLeft, memory_space, memory_trait >;
+
+
 #endif // _ABINIT_COMMON_KOKKOS_H
