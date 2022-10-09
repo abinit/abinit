@@ -139,11 +139,17 @@ void gpu_device_synchronize_cpp()
 
 //
 extern "C"  __host__
-void gpu_data_prefetch_async_cpp(const void* devPtr, size_t count)
+void gpu_get_device_cpp(int *deviceId)
 {
-  int deviceId;
+  CHECK_CUDA_ERROR( cudaGetDevice(deviceId) );
 
-  CHECK_CUDA_ERROR( cudaGetDevice(&deviceId) );
+  return;
+}
+
+//
+extern "C"  __host__
+void gpu_data_prefetch_async_cpp(const void* devPtr, size_t count, int deviceId)
+{
 
   CHECK_CUDA_ERROR( cudaMemPrefetchAsync(devPtr, count, deviceId) );
 
