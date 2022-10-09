@@ -41,6 +41,11 @@ module m_xg
   use m_time, only : timab
   use m_xmpi, only : xmpi_sum
 
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS) && defined(HAVE_YAKL)
+  use m_gpu_toolbox
+  use m_xg_kokkos
+#endif
+
 #if defined HAVE_YAKL
  use gator_mod
 #endif
@@ -166,6 +171,7 @@ module m_xg
   public :: xgBlock_set
   public :: xgBlock_map
   public :: xgBlock_reverseMap
+  public :: xgBlock_prefetch_async
   public :: xgBlock_get
   public :: xgBlock_copy
   public :: xgBlock_pack
@@ -618,6 +624,52 @@ contains
   end subroutine xgBlock_reverseMap
   !!***
 
+  !!****f* m_xg/xgBlock_prefetch_async
+  !!
+  !! Help the compiler to upload / dowload data to/from GPU memory
+  !!
+  !! if deviceId is CPU_DEVICE_ID (= -1, defined in 17_gpu_toolbox/m_gpu_toolbox.F90)
+  !! then data is prefetch on host, else it is prefetch to GPU memory
+  !!
+  !! NAME
+  !! xgBlock_prefetch_async
+
+  subroutine xgBlock_prefetch_async(xgBlock, deviceId)
+    use iso_c_binding
+    type(xgBlock_t) ,             intent(inout) :: xgBlock
+    integer(C_INT32_T), optional, intent(in)    :: deviceId
+
+    real(dp), pointer                           :: array(:,:)
+    integer                                     :: blockdim
+    integer                                     :: spacedim
+    integer                                     :: ldim
+    integer(C_SIZE_T)                           :: byte_count
+
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
+
+    ! get the array pointer underneath the xgBlock
+    call xgBlock_getSize(xgBlock,spacedim,blockdim,ldim)
+    call xgBlock_reverseMap(xgBlock,array,1,spacedim*blockdim)
+
+    select case (xgBlock%space)
+    case ( SPACE_R,SPACE_CR )
+      byte_count = ldim*blockdim*dp
+    case ( SPACE_C )
+      byte_count = ldim*blockdim*dpc
+    end select
+
+    ! now we can call the memory prefetch
+    if (present(deviceId)) then
+      call gpu_data_prefetch_async(c_loc(array), byte_count , deviceId)
+    else
+      call gpu_data_prefetch_async(c_loc(array), byte_count)
+    end if
+
+#endif
+
+  end subroutine xgBlock_prefetch_async
+  !!***
+
   !!****f* m_xg/xg_get
   !!
   !! NAME
@@ -727,7 +779,7 @@ contains
   !! NAME
   !! xg_setBlock
 
-  subroutine xg_setBlock(xg,Xgblock, fcol, rows, cols)
+  subroutine xg_setBlock(xg, Xgblock, fcol, rows, cols)
     use, intrinsic :: iso_c_binding
     type(xg_t), intent(inout) :: xg
     type(xgBlock_t), intent(inout) :: xgBlock
@@ -2192,63 +2244,123 @@ contains
   !! NAME
   !! xgBlock_colwiseDotProduct
 
-  subroutine xgBlock_colwiseDotProduct(xgBlockA,xgBlockB,dot,max_val,max_elt,min_val,min_elt)
+  subroutine xgBlock_colwiseDotProduct(xgBlockA,xgBlockB,dot,max_val,max_elt,min_val,min_elt,use_gpu_cuda)
 
-    type(xgBlock_t) , intent(in   ) :: xgBlockA
-    type(xgBlock_t) , intent(in   ) :: xgBlockB
-    type(xgBlock_t) , intent(inout) :: dot
-    double precision, intent(  out), optional :: max_val
-    integer         , intent(  out), optional :: max_elt
-    double precision, intent(  out), optional :: min_val
-    integer         , intent(  out), optional :: min_elt
+    type(xgBlock_t)  , intent(in   ) :: xgBlockA
+    type(xgBlock_t)  , intent(in   ) :: xgBlockB
+    type(xgBlock_t)  , intent(inout) :: dot
+    double precision , intent(  out), optional :: max_val
+    integer          , intent(  out), optional :: max_elt
+    double precision , intent(  out), optional :: min_val
+    integer          , intent(  out), optional :: min_elt
+    integer          , intent(in   ), optional :: use_gpu_cuda
     integer :: icol
     double precision,external :: ddot
     double complex,external :: zdotc !conjugated dot product
+    integer :: l_use_gpu_cuda = 0
 
-    select case(xgBlockA%space)
-    case(SPACE_R,SPACE_CR)
-      !$omp parallel do shared(dot,xgBlockA,xgBlockB) &
-      !$omp& schedule(static)
-      do icol = 1, xgBlockA%cols
-        dot%vecR(icol,1) = ddot(xgBlockA%rows,xgBlockA%vecR(:,icol),1,xgBlockB%vecR(:,icol),1)
-      end do
-      !$omp end parallel do
+    ! if optional parameter is present, use it
+    ! else use default value, i.e. don't use GPU
+    if (present(use_gpu_cuda)) then
+      l_use_gpu_cuda = use_gpu_cuda
+    end if
 
-      if ( present(max_val) ) then
-        max_val = maxval(dot%vecR(1:xgBlockA%cols,1))
-      end if
-      if ( present(min_val) ) then
-        min_val = minval(dot%vecR(1:xgBlockA%cols,1))
-      end if
-      if ( present(max_elt) ) then
-        max_elt = maxloc(dot%vecR(1:xgBlockA%cols,1),dim=1)
-      end if
-      if ( present(min_elt) ) then
-        min_elt = minloc(dot%vecR(1:xgBlockA%cols,1),dim=1)
-      end if
+    if (l_use_gpu_cuda==1) then
 
-    case(SPACE_C)
-      !$omp parallel do shared(dot,xgBlockA,xgBlockB), &
-      !$omp& schedule(static)
-      do icol = 1, xgBlockA%cols
-        dot%vecC(icol,1) = zdotc(xgBlockA%rows,xgBlockA%vecC(:,icol),1,xgBlockB%vecC(:,icol),1)
-      end do
-      !$omp end parallel do
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS) && defined(HAVE_YAKL)
 
-      if ( present(max_val) ) then
-        max_val = maxval(dble(dot%vecC(1:xgBlockA%cols,1)))
-      end if
-      if ( present(min_val) ) then
-        min_val = minval(dble(dot%vecC(1:xgBlockA%cols,1)))
-      end if
-      if ( present(max_elt) ) then
-        max_elt = maxloc(dble(dot%vecC(1:xgBlockA%cols,1)),dim=1)
-      end if
-      if ( present(min_elt) ) then
-        min_elt = minloc(dble(dot%vecC(1:xgBlockA%cols,1)),dim=1)
-      end if
+      select case(xgBlockA%space)
+      case(SPACE_R,SPACE_CR)
+        call computeBatchedDotProduct_scalar(c_loc(xgBlockA%vecR), c_loc(xgBlockB%vecR), &
+          & c_loc(dot%vecR), xgBlockA%rows, xgBlockA%cols)
 
-    end select
+        ! do reductions
+        if ( present(max_val) ) then
+          call computeMax_scalar(c_loc(dot%vecR(1,1)), xgBlockA%cols, max_val)
+        end if
+        if ( present(min_val) ) then
+          call computeMin_scalar(c_loc(dot%vecR(1,1)), xgBlockA%cols, min_val)
+        end if
+        if ( present(max_elt) ) then
+          call computeMaxloc_scalar(c_loc(dot%vecR(1,1)), xgBlockA%cols, max_elt)
+        end if
+        if ( present(min_elt) ) then
+          call computeMinloc_scalar(c_loc(dot%vecR(1,1)), xgBlockA%cols, min_elt)
+        end if
+
+      case(SPACE_C)
+        call computeBatchedDotProduct_cplx(c_loc(xgBlockA%vecC), c_loc(xgBlockB%vecC), &
+          & c_loc(dot%vecC), xgBlockA%rows, xgBlockA%cols)
+
+        ! do reductions
+        if ( present(max_val) ) then
+          call computeMax_complex(c_loc(dot%vecC(1,1)), xgBlockA%cols, max_val)
+        end if
+        if ( present(min_val) ) then
+          call computeMin_complex(c_loc(dot%vecC(1,1)), xgBlockA%cols, min_val)
+        end if
+        if ( present(max_elt) ) then
+          call computeMaxloc_complex(c_loc(dot%vecC(1,1)), xgBlockA%cols, max_elt)
+        end if
+        if ( present(min_elt) ) then
+          call computeMinloc_scalar(c_loc(dot%vecC(1,1)), xgBlockA%cols, min_elt)
+        end if
+
+      end select
+
+#else
+      ! we shouldn't be here, it means use_gpu_cuda was wrongly set to 1 in
+      ! input parameter file
+#endif
+
+    else
+
+      select case(xgBlockA%space)
+      case(SPACE_R,SPACE_CR)
+        !$omp parallel do shared(dot,xgBlockA,xgBlockB) &
+        !$omp& schedule(static)
+        do icol = 1, xgBlockA%cols
+          dot%vecR(icol,1) = ddot(xgBlockA%rows,xgBlockA%vecR(:,icol),1,xgBlockB%vecR(:,icol),1)
+        end do
+        !$omp end parallel do
+
+        if ( present(max_val) ) then
+          max_val = maxval(dot%vecR(1:xgBlockA%cols,1))
+        end if
+        if ( present(min_val) ) then
+          min_val = minval(dot%vecR(1:xgBlockA%cols,1))
+        end if
+        if ( present(max_elt) ) then
+          max_elt = maxloc(dot%vecR(1:xgBlockA%cols,1),dim=1)
+        end if
+        if ( present(min_elt) ) then
+          min_elt = minloc(dot%vecR(1:xgBlockA%cols,1),dim=1)
+        end if
+
+      case(SPACE_C)
+        !$omp parallel do shared(dot,xgBlockA,xgBlockB), &
+        !$omp& schedule(static)
+        do icol = 1, xgBlockA%cols
+          dot%vecC(icol,1) = zdotc(xgBlockA%rows,xgBlockA%vecC(:,icol),1,xgBlockB%vecC(:,icol),1)
+        end do
+        !$omp end parallel do
+
+        if ( present(max_val) ) then
+          max_val = maxval(dble(dot%vecC(1:xgBlockA%cols,1)))
+        end if
+        if ( present(min_val) ) then
+          min_val = minval(dble(dot%vecC(1:xgBlockA%cols,1)))
+        end if
+        if ( present(max_elt) ) then
+          max_elt = maxloc(dble(dot%vecC(1:xgBlockA%cols,1)),dim=1)
+        end if
+        if ( present(min_elt) ) then
+          min_elt = minloc(dble(dot%vecC(1:xgBlockA%cols,1)),dim=1)
+        end if
+
+      end select
+
+    end if ! use_gpu_cuda
 
   end subroutine xgBlock_colwiseDotProduct
   !!***
@@ -2258,61 +2370,132 @@ contains
   !! NAME
   !! xgBlock_colwiseDivision
 
-  subroutine xgBlock_colwiseDivision(xgBlockA, xgBlockB, divResult,max_val,max_elt,min_val,min_elt)
+  subroutine xgBlock_colwiseDivision(xgBlockA, xgBlockB, divResult, &
+    & max_val, max_elt, min_val, min_elt, use_gpu_cuda)
 
-    type(xgBlock_t) , intent(in   ) :: xgBlockA
-    type(xgBlock_t) , intent(in   ) :: xgBlockB
-    type(xgBlock_t) , intent(inout) :: divResult
-    double precision, intent(inout), optional :: max_val
-    integer, dimension(2)      , intent(inout), optional :: max_elt
-    double precision, intent(inout), optional :: min_val
-    integer, dimension(2)      , intent(inout), optional :: min_elt
+    type(xgBlock_t) ,      intent(in   )           :: xgBlockA
+    type(xgBlock_t) ,      intent(in   )           :: xgBlockB
+    type(xgBlock_t) ,      intent(inout)           :: divResult
+    double precision,      intent(inout), optional :: max_val
+    integer, dimension(2), intent(inout), optional, target :: max_elt
+    double precision,      intent(inout), optional :: min_val
+    integer, dimension(2), intent(inout), optional, target :: min_elt
+    integer,               intent(in   ), optional :: use_gpu_cuda
+
     integer :: irow
+    integer :: l_use_gpu_cuda = 0
 
-    select case(xgBlockA%space)
-    case(SPACE_R,SPACE_CR)
-      !$omp parallel do shared(divResult,xgBlockA,xgBlockB), &
-      !$omp& schedule(static)
-      do irow = 1, xgBlockA%rows
-        divResult%vecR(irow,:) = xgBlockA%vecR(irow,:)/xgBlockB%vecR(irow,:)
-      end do
-      !$omp end parallel do
+    ! TODO: evaluate if total_size should be a 64 bit integer, i.e.
+    ! does spacedim * neigenpairs be larger than 2^31 = 2. 10^9
+    integer(kind=c_int32_t)  :: total_size
 
-      if ( present(max_val) ) then
-        max_val = maxval(dble(divResult%vecR))
-      end if
-      if ( present(min_val) ) then
-        min_val = minval(dble(divResult%vecR))
-      end if
-      if ( present(max_elt) ) then
-        max_elt = maxloc(dble(divResult%vecR(1:xgBlockA%rows,1:xgBlockA%cols)))
-      end if
-      if ( present(min_elt) ) then
-        min_elt = minloc(dble(divResult%vecR(1:xgBlockA%rows,1:xgBlockA%cols)))
-      end if
+    ! if optional parameter is present, use it
+    ! else use default value, i.e. don't use GPU
+    if (present(use_gpu_cuda)) then
+      l_use_gpu_cuda = use_gpu_cuda
+    end if
 
-    case(SPACE_C)
+    if (l_use_gpu_cuda==1) then
 
-      !$omp parallel do shared(divResult,xgBlockA,xgBlockB), &
-      !$omp& schedule(static)
-      do irow = 1, xgBlockA%rows
-        divResult%vecC(irow,:) = xgBlockA%vecC(irow,:)/xgBlockB%vecC(irow,:)
-      end do
-      !$omp end parallel do
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS) && defined(HAVE_YAKL)
 
-      if ( present(max_val) ) then
-        max_val = maxval(dble(divResult%vecC))
-      end if
-      if ( present(min_val) ) then
-        min_val = minval(dble(divResult%vecC))
-      end if
-      if ( present(max_elt) ) then
-        max_elt = maxloc(dble(divResult%vecC(1:xgBlockA%rows,1:xgBlockA%cols)))
-      end if
-      if ( present(min_elt) ) then
-        min_elt = minloc(dble(divResult%vecC(1:xgBlockA%rows,1:xgBlockA%cols)))
-      end if
-    end select
+      total_size = xgBlockA%rows * xgBlockA%cols
+
+      select case(xgBlockA%space)
+      case(SPACE_R,SPACE_CR)
+        call computeColwiseDivision_scalar(c_loc(xgBlockA%vecR(1,1)), &
+          &                                c_loc(xgBlockB%vecR(1,1)), &
+          &                                total_size,                &
+          &                                c_loc(divResult%vecR(1,1)))
+
+        ! do reductions
+        if ( present(max_val) ) then
+          call computeMax_scalar(c_loc(divResult%vecR(1,1)), total_size, max_val)
+        end if
+        if ( present(min_val) ) then
+          call computeMin_scalar(c_loc(divResult%vecR(1,1)), total_size, min_val)
+        end if
+        if ( present(max_elt) ) then
+          call computeMaxloc_scalar_2d(c_loc(divResult%vecR(1,1)), xgBlockA%rows, xgBlockA%cols, c_loc(max_elt))
+        end if
+        if ( present(min_elt) ) then
+          call computeMinloc_scalar_2d(c_loc(divResult%vecR(1,1)), xgBlockA%rows, xgBlockA%cols, c_loc(min_elt))
+        end if
+
+      case(SPACE_C)
+        call computeColwiseDivision_complex(c_loc(xgBlockA%vecC(1,1)), &
+          &                                 c_loc(xgBlockB%vecC(1,1)), &
+          &                                 total_size,                &
+          &                                 c_loc(divResult%vecC(1,1)))
+
+        if ( present(max_val) ) then
+          call computeMax_complex(c_loc(divResult%vecC(1,1)), total_size, max_val)
+        end if
+        if ( present(min_val) ) then
+          call computeMin_complex(c_loc(divResult%vecC(1,1)), total_size, min_val)
+        end if
+        if ( present(max_elt) ) then
+          call computeMaxloc_complex_2d(c_loc(divResult%vecC(1,1)), xgBlockA%rows, xgBlockA%cols, c_loc(max_elt))
+        end if
+        if ( present(min_elt) ) then
+          call computeMinloc_complex_2d(c_loc(divResult%vecC(1,1)), xgBlockA%rows, xgBlockA%cols, c_loc(min_elt))
+        end if
+
+      end select
+
+#else
+      ! we shouldn't be here, it means use_gpu_cuda was wrongly set to 1 in
+      ! input parameter file
+#endif
+
+    else
+
+      select case(xgBlockA%space)
+      case(SPACE_R,SPACE_CR)
+        !$omp parallel do shared(divResult,xgBlockA,xgBlockB), &
+        !$omp& schedule(static)
+        do irow = 1, xgBlockA%rows
+          divResult%vecR(irow,:) = xgBlockA%vecR(irow,:)/xgBlockB%vecR(irow,:)
+        end do
+        !$omp end parallel do
+
+        if ( present(max_val) ) then
+          max_val = maxval(dble(divResult%vecR))
+        end if
+        if ( present(min_val) ) then
+          min_val = minval(dble(divResult%vecR))
+        end if
+        if ( present(max_elt) ) then
+          max_elt = maxloc(dble(divResult%vecR(1:xgBlockA%rows,1:xgBlockA%cols)))
+        end if
+        if ( present(min_elt) ) then
+          min_elt = minloc(dble(divResult%vecR(1:xgBlockA%rows,1:xgBlockA%cols)))
+        end if
+
+      case(SPACE_C)
+
+        !$omp parallel do shared(divResult,xgBlockA,xgBlockB), &
+        !$omp& schedule(static)
+        do irow = 1, xgBlockA%rows
+          divResult%vecC(irow,:) = xgBlockA%vecC(irow,:)/xgBlockB%vecC(irow,:)
+        end do
+        !$omp end parallel do
+
+        if ( present(max_val) ) then
+          max_val = maxval(dble(divResult%vecC))
+        end if
+        if ( present(min_val) ) then
+          min_val = minval(dble(divResult%vecC))
+        end if
+        if ( present(max_elt) ) then
+          max_elt = maxloc(dble(divResult%vecC(1:xgBlockA%rows,1:xgBlockA%cols)))
+        end if
+        if ( present(min_elt) ) then
+          min_elt = minloc(dble(divResult%vecC(1:xgBlockA%rows,1:xgBlockA%cols)))
+        end if
+      end select
+
+    end if ! use_gpu_cuda
 
   end subroutine xgBlock_colwiseDivision
   !!***
@@ -2393,14 +2576,20 @@ contains
   !! NAME
   !! xgBlock_getSize
 
-  subroutine xgBlock_getSize(xgBlock, rows, cols)
+  subroutine xgBlock_getSize(xgBlock, rows, cols, ldim)
 
-    type(xgBlock_t), intent(in   ) :: xgBlock
-    integer        , intent(  out) :: rows
-    integer        , intent(  out) :: cols
+    type(xgBlock_t)  , intent(in   ) :: xgBlock
+    integer          , intent(  out) :: rows
+    integer          , intent(  out) :: cols
+    integer, optional, intent(  out) :: ldim
 
     rows = xgBlock%rows
     cols = xgBlock%cols
+
+    if (present(ldim)) then
+      ldim = xgBlock%ldim
+    end if
+
   end subroutine xgBlock_getSize
   !!***
 
