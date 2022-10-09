@@ -899,13 +899,18 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
        ! Setup gemm_nonlop
        if (gemm_nonlop_use_gemm) then
+         !check
+         if (optforces>0.and.(.not.associated(gs_hamk%kpg_k))) then
+           msg='kpg_k should be allocated to compute forces!'
+           ABI_BUG(msg)
+         end if
          !set the global variable indicating to gemm_nonlop where to get its data from
          gemm_nonlop_ikpt_this_proc_being_treated = my_ikpt
          if (istep <= 1) then
            !Init the arrays
            call make_gemm_nonlop(my_ikpt,gs_hamk%npw_fft_k,gs_hamk%lmnmax, &
 &           gs_hamk%ntypat, gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%istwf_k, gs_hamk%ucvol, gs_hamk%ffnl_k,&
-&           gs_hamk%ph3d_k)
+&           gs_hamk%ph3d_k,gs_hamk%kpg_k,compute_grad_atom=(optforces>0))
          end if
        end if
 
