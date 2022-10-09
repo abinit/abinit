@@ -1283,6 +1283,7 @@ subroutine dterm_qij(atindx,dterm,dtset,gprimd,pawtab)
   !scalars
   integer :: adir,iat,iatom,itypat,ilmn,jlmn,klmn
   real(dp) :: cdij
+  complex(dpc) :: cqij
 
   !arrays
   real(dp) :: ddir_cart(3),ddir_red(3)
@@ -1294,24 +1295,27 @@ subroutine dterm_qij(atindx,dterm,dtset,gprimd,pawtab)
  ! the pawtab%qijl moments do not have the sqrt(4\pi/3) factor we need here for
  ! normalization 
  cdij = sqrt(four_pi/three)
- do iat = 1, dtset%natom
-   iatom = atindx(iat)
-   itypat = dtset%typat(iat)
+ do itypat = 1, dtset%ntypat
    do klmn = 1, pawtab(itypat)%lmn2_size
      
      ! qij is not really a d term but it's convenient to have it 
      ! in the same format as the d terms 
-     dterm%qij(iatom,klmn)=CMPLX(pawtab(itypat)%sij(klmn),zero)
+     cqij=CMPLX(pawtab(itypat)%sij(klmn),zero)
 
      do adir = 1, 3
        ddir_cart(adir) = cdij*pawtab(itypat)%qijl(pack1a(adir),klmn)
      end do !adir
-    
      ! now have ddir in cart coords, convert to crystal coords where ddk wavefunctions are
      ddir_red = MATMUL(TRANSPOSE(gprimd),ddir_cart)
-     dterm%dqij(iatom,klmn,1:3) = -j_dpc*ddir_red(1:3)
+     do iat = 1, dtset%natom
+       iatom = atindx(iat)
+       if (dtset%typat(iat) .EQ. itypat) then
+         dterm%dqij(iatom,klmn,1:3) = -j_dpc*ddir_red(1:3)
+         dterm%qij(iatom,klmn) = cqij
+       end if
+     end do !iat
    end do ! klmn
- end do ! end loop over types
+ end do ! itypat
  
 end subroutine dterm_qij
 !!***
@@ -1844,9 +1848,7 @@ subroutine dterm_vhnzc(atindx,dterm,dtset,gntselect,gprimd,&
 
  ! dij prefactor
  cdij = sqrt(four_pi/three)
- do iat = 1, dtset%natom
-   iatom = atindx(iat)
-   itypat = dtset%typat(iat)
+ do itypat = 1, dtset%ntypat
 
    mesh_size=pawtab(itypat)%mesh_size
    pwave_size=size(pawtab(itypat)%phiphj(:,1))
@@ -1865,11 +1867,11 @@ subroutine dterm_vhnzc(atindx,dterm,dtset,gntselect,gprimd,&
      ff(2:pwave_size) = ff(2:pwave_size) - &
        & pawtab(itypat)%tphitphj(2:pwave_size,kln)*&
        & pawtab(itypat)%vhtnzc(2:pwave_size)
-    
+
+     intff = zero    
      if (ilm == jlm) then 
        call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
        call simp_gen(intff,ff,pawrad(itypat))
-       dterm%vhnzc(iatom,klmn) = CMPLX(intff,zero)
      end if
 
      dff(2:pwave_size) = ff(2:pwave_size)*pawrad(itypat)%rad(2:pwave_size)
@@ -1884,7 +1886,14 @@ subroutine dterm_vhnzc(atindx,dterm,dtset,gntselect,gprimd,&
        dij_cart(adir) = cdij*realgnt(gint)*intdff
      end do
      dij_red = MATMUL(TRANSPOSE(gprimd),dij_cart)
-     dterm%dvhnzc(iatom,klmn,1:3)=-j_dpc*dij_red(1:3)
+
+     do iat = 1, dtset%natom
+       iatom=atindx(iat)
+       if (dtset%typat(iat) .EQ. itypat) then
+         dterm%vhnzc(iatom,klmn) = intff
+         dterm%dvhnzc(iatom,klmn,1:3)=-j_dpc*dij_red(1:3)
+       end if
+     end do !iat
      
    end do ! klmn
    ABI_FREE(dff)
