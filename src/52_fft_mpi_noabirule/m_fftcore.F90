@@ -4417,7 +4417,7 @@ end subroutine kpgcount
 !!  ecut=Cutoff energy for planewave basis set.
 !!  gmet(3,3)=reciprocal space metric ($\textrm{bohr}^{-2}$).
 !!  istwfk=Options defining if time-reversal is used to decrease the number of G"s.
-!!  [sorted]=True if g-vectors should be sorted by |g|. Default: False.
+!!  [kin_sorted]=True if output g-vectors should be sorted by |k+g|^2/2. Default: False.
 !!
 !! OUTPUT
 !!  npw_k=Total number of G-vectors in the full G-sphere.
@@ -4425,7 +4425,7 @@ end subroutine kpgcount
 !!
 !! SOURCE
 
-subroutine get_kg(kpoint, istwf_k, ecut, gmet, npw_k, kg_k, sorted)
+subroutine get_kg(kpoint, istwf_k, ecut, gmet, npw_k, kg_k, kin_sorted)
 
 !Arguments ------------------------------------
 !scalars
@@ -4435,7 +4435,7 @@ subroutine get_kg(kpoint, istwf_k, ecut, gmet, npw_k, kg_k, sorted)
 !arrays
  integer,allocatable,intent(out) :: kg_k(:,:)
  real(dp),intent(in) :: gmet(3,3),kpoint(3)
- logical,optional,intent(in) :: sorted
+ logical,optional,intent(in) :: kin_sorted
 
 !Local variables-------------------------------
 !scalars
@@ -4445,7 +4445,7 @@ subroutine get_kg(kpoint, istwf_k, ecut, gmet, npw_k, kg_k, sorted)
 !arrays
  integer :: kg_dum(3, 0)
  integer,allocatable :: iperm(:), iwork(:,:)
- real(dp),allocatable :: gnorm(:)
+ real(dp),allocatable :: kin_kg(:)
 
 ! *********************************************************************
 
@@ -4460,17 +4460,17 @@ subroutine get_kg(kpoint, istwf_k, ecut, gmet, npw_k, kg_k, sorted)
 
  call destroy_mpi_enreg(MPI_enreg_seq)
 
- if (present(sorted)) then
-   if (sorted) then
-     ABI_MALLOC(gnorm, (npw_k))
+ if (present(kin_sorted)) then
+   if (kin_sorted) then
+     ABI_MALLOC(kin_kg, (npw_k))
      ABI_MALLOC(iperm, (npw_k))
      iperm = [(ig, ig=1,npw_k)]
      do ig=1,npw_k
-       gnorm(ig) = normv(kg_k(:, ig), gmet, "G")
+       kin_kg(ig) = half * normv(kpoint + kg_k(:, ig), gmet, "G") ** 2
      end do
 
-     call sort_dp(npw_k, gnorm, iperm, tol14)
-     ABI_FREE(gnorm)
+     call sort_dp(npw_k, kin_kg, iperm, tol14)
+     ABI_FREE(kin_kg)
 
      ABI_MALLOC(iwork, (3, npw_k))
      iwork = kg_k

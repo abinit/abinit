@@ -1004,6 +1004,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    ABI_FREE(zw)
 
 #ifdef __HAVE_GREENX
+!if (dtset%gwr_ntau /= 0 .and. .False.) then
 if (dtset%gwr_ntau /= 0) then
    call wrtout(std_out, sjoin("Using minimax mesh with ntau:", itoa(dtset%nfreqim)))
    gaps = ebands_get_gaps(ks_ebands, gap_err)

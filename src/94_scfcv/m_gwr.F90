@@ -216,7 +216,7 @@ module m_gwr
    integer :: ig0 = -1
    ! Index of g = 0. Useful when gvec are sorted by |q+g|^2/2
 
-   logical :: sorted
+   logical :: kin_sorted
    ! True if gvec are sorted by |q+g|^2/2
 
    integer,allocatable :: gvec(:,:)
@@ -657,6 +657,7 @@ module m_gwr
    ! Print info on the object.
 
    procedure :: print_mem => gwr_print_mem
+   ! Print memory required by PBLAS matrices.
 
    procedure :: print_trace => gwr_print_trace
    ! Print trace of matrices for testing purposes.
@@ -1108,10 +1109,6 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
    !call xmpi_comm_multiple_of(gwr%tau_comm%nproc * gwr%spin_comm%nproc, input_comm, gwr%idle_proc, gwr%comm)
    !if (gwr%idle_proc) return
    gwr%comm = xcomm_from_mpi_int(input_comm)
-!   gwr%comm = input_comm
-!#ifdef HAVE_MPI
-!   call MPI_Comm_dup(input_comm, gwr%comm, ierr)
-!#endif
    all_nproc = gwr%comm%nproc
  else
    ! Automatic grid generation.
@@ -1123,7 +1120,6 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
    !   kbz               |  to be optimized!               | scales (depends on the BZ -> IBZ mapping)
    !   g/r (PBLAS)       |  network intensive              ! scales
    !
-   !gwr%comm = input_comm
    gwr%comm = xcomm_from_mpi_int(input_comm)
    all_nproc = gwr%comm%nproc
    !call xmpi_comm_multiple_of(gwr%ntau * gwr%dtset%nsppol, input_comm, gwr%idle_proc, gwr%comm)
@@ -1399,7 +1395,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
    ! Note ecuteps instead of ecut.
    ! Also, sort the g-vectors by |q+g|^2/2 when q is in the IBZ to facilitate
    ! the extrapolation of the RPA energy as a function of ecut_chi
-   call gwr%tchi_desc_qibz(iq_ibz)%init(qq_ibz, istwfk1, dtset%ecuteps, gwr, sorted=.True.)
+   call gwr%tchi_desc_qibz(iq_ibz)%init(qq_ibz, istwfk1, dtset%ecuteps, gwr, kin_sorted=.True.)
    associate (desc_q => gwr%tchi_desc_qibz(iq_ibz))
    ! Compute sqrt(v(q,G))
    !TODO: Implement cutoff in vc
@@ -2242,9 +2238,13 @@ subroutine gwr_rotate_gpm(gwr, ik_bz, itau, spin, desc_kbz, gt_pm)
  ! Rotate gvec, recompute gbound and rotate vc_sqrt
  ! TODO: 1) Handle TR and routine to rotate tchi/W including vc_sqrt
  !       2) Make sure that the FFT box is large enough to accomodate umklapps
+ desc_kbz%ig0 = -1
  do ig1=1,desc_kbz%npw
    desc_kbz%gvec(:,ig1) = tsign_k * matmul(gwr%cryst%symrec(:,:,isym_k), desc_kibz%gvec(:,ig1)) - g0_k
+   if (all(desc_kbz%gvec(:,ig1) == 0)) desc_kbz%ig0 = ig1
  end do
+ desc_kbz%kin_sorted = .False.
+ ABI_CHECK(desc_kbz%ig0 /= -1, "Cannot find g=0 after rotation!")
 
  call sphereboundary(desc_kbz%gbound, desc_kbz%istwfk, desc_kbz%gvec, gwr%g_mgfft, desc_kbz%npw)
 
@@ -2609,9 +2609,13 @@ subroutine gwr_rotate_wc(gwr, iq_bz, itau, spin, desc_qbz, wc_qbz)
  ! rotate gvec, recompute gbound and rotate vc_sqrt.
  ! TODO: 1) Handle TR and routine to rotate tchi/W including vc_sqrt
  !       2) Make sure that FFT box is large enough to accomodate umklapps
+ desc_qbz%ig0 = -1
  do ig1=1,desc_qbz%npw
    desc_qbz%gvec(:,ig1) = tsign_q * matmul(gwr%cryst%symrec(:,:,isym_q), desc_qibz%gvec(:,ig1)) - g0_q
+   if (all(desc_qbz%gvec(:,ig1) == 0)) desc_qbz%ig0 = ig1
  end do
+ desc_qbz%kin_sorted = .False.
+ ABI_CHECK(desc_qbz%ig0 /= -1, "Cannot find g=0 after rotation!")
 
  call sphereboundary(desc_qbz%gbound, desc_qbz%istwfk, desc_qbz%gvec, gwr%g_mgfft, desc_qbz%npw)
 
@@ -3059,7 +3063,7 @@ end subroutine gwr_cos_transform
 !!
 !! SOURCE
 
-subroutine desc_init(desc, kk, istwfk, ecut, gwr, sorted)
+subroutine desc_init(desc, kk, istwfk, ecut, gwr, kin_sorted)
 
 !Arguments ------------------------------------
  class(desc_t),intent(inout) :: desc
@@ -3067,21 +3071,21 @@ subroutine desc_init(desc, kk, istwfk, ecut, gwr, sorted)
  integer,intent(in) :: istwfk
  real(dp),intent(in) :: ecut
  class(gwr_t),intent(in) :: gwr
- logical,optional,intent(in) :: sorted
+ logical,optional,intent(in) :: kin_sorted
 
 !Local variables-------------------------------
  integer :: ig
 
 ! *************************************************************************
 
- desc%sorted = .False.; if (present(sorted)) desc%sorted = sorted
+ desc%kin_sorted = .False.; if (present(kin_sorted)) desc%kin_sorted = kin_sorted
 
  desc%istwfk = istwfk
- call get_kg(kk, desc%istwfk, ecut, gwr%cryst%gmet, desc%npw, desc%gvec, sorted=desc%sorted)
+ call get_kg(kk, desc%istwfk, ecut, gwr%cryst%gmet, desc%npw, desc%gvec, kin_sorted=desc%kin_sorted)
  ABI_MALLOC(desc%gbound, (2 * gwr%g_mgfft + 8, 2))
  call sphereboundary(desc%gbound, desc%istwfk, desc%gvec, gwr%g_mgfft, desc%npw)
 
- ! Find the index of g = 0 (needed if sorted)
+ ! Find the index of g = 0 (needed if kin_sorted)
  desc%ig0 = -1
  do ig=1,desc%npw
    if (all(desc%gvec(:,ig) == 0)) then
@@ -3119,7 +3123,7 @@ subroutine desc_copy(in_desc, new_desc)
  new_desc%istwfk = in_desc%istwfk
  new_desc%npw = in_desc%npw
  new_desc%ig0 = in_desc%ig0
- new_desc%sorted = in_desc%sorted
+ new_desc%kin_sorted = in_desc%kin_sorted
 
  call alloc_copy(in_desc%gvec, new_desc%gvec)
  call alloc_copy(in_desc%gbound, new_desc%gbound)
@@ -4227,7 +4231,6 @@ subroutine gwr_build_wc(gwr)
    q_is_gamma = normv(qq_ibz, gwr%cryst%gmet, "G") < GW_TOLQ0
    associate (desc_q => gwr%tchi_desc_qibz(iq_ibz))
    ig0 = desc_q%ig0
-   ABI_CHECK_IEQ(ig0, 1, "ig0")
 
    ! The spin loop is needed so that procs in different pools operate
    ! on their own matrix that has been already summed over (collinear) spins.
@@ -5150,6 +5153,7 @@ end subroutine diag_braket
 !!  gwr_rpa_energy
 !!
 !! FUNCTION
+!!  Compute the correlated part of the total energy within ACFDF.
 !!
 !! INPUTS
 !!
@@ -5171,9 +5175,10 @@ subroutine gwr_rpa_energy(gwr)
  real(dp) :: weight, qq_ibz(3), estep, aa, bb, rmsq, ecut_soft, damp
  complex(dpc) :: vcs_g1, vcs_g2
  type(desc_t),pointer :: desc_q
+ character(len=500) :: msg
 !arrays
  type(matrix_scalapack) :: chi_tmp, dummy_vec
- real(dp),allocatable :: eig(:), kin_qg(:), ec_rpa(:), ecut_chi(:)
+ real(dp),allocatable :: eig(:), kin_qg(:), ec_rpa(:), ec_mp2(:), ecut_chi(:)
 
 ! *************************************************************************
 
@@ -5184,12 +5189,12 @@ subroutine gwr_rpa_energy(gwr)
  ABI_CHECK(gwr%tchi_space == "iomega", sjoin("tchi_space:", gwr%tchi_space, "!= iomega"))
 
  ! See also calc_rpa_functional in m_screening_driver
- ! Compute RPA energy with ncut cutoff energies to extrapolate for ecut --> oo
- ncut = 5
- estep = - gwr%dtset%ecuteps * 0.05_dp
- ABI_CALLOC(ec_rpa, (ncut))
- ABI_MALLOC(ecut_chi, (ncut))
+ ! Compute RPA energy for ncut cutoff energies in order to extrapolate for ecut --> oo
+ ncut = 5; estep = -gwr%dtset%ecuteps * 0.05_dp
 
+ ABI_CALLOC(ec_rpa, (ncut))
+ ABI_CALLOC(ec_mp2, (ncut))
+ ABI_MALLOC(ecut_chi, (ncut))
  ecut_chi = arth(gwr%dtset%ecuteps + tol12, estep, ncut)
 
  ! Polarizability has been summed over spins inside build_tchi.
@@ -5208,7 +5213,7 @@ subroutine gwr_rpa_energy(gwr)
      if (.not. gwr%itreat_qibz(iq_ibz)) cycle
 
      desc_q => gwr%tchi_desc_qibz(iq_ibz)
-     ABI_CHECK(desc_q%sorted, "g-vectors are not sorted by |g|!")
+     ABI_CHECK(desc_q%kin_sorted, "g-vectors are not sorted by |q+g|^2!")
      npw_q = desc_q%npw
      ig0 = desc_q%ig0
 
@@ -5267,6 +5272,12 @@ subroutine gwr_rpa_energy(gwr)
          weight = gwr%wtq(iq_ibz) * gwr%iw_wgs(itau) / two_pi
          do ii=1,mat_size
            ec_rpa(icut) = ec_rpa(icut) + weight * (log(one - eig(ii)) + eig(ii))
+           ! second order Moeller Plesset.
+           ec_mp2(icut) = ec_mp2(icut) - weight * eig(ii) ** 2 / two
+           !if (eig(ii) > zero) then
+           !  write(msg, "(a, es16.8)")"Positive eigenvalue:", eig(ii)
+           !  ABI_ERROR(msg)
+           !end if
          end do
        end do ! icut
 
@@ -5284,9 +5295,10 @@ subroutine gwr_rpa_energy(gwr)
  end do ! my_is
 
  call xmpi_sum_master(ec_rpa, master, gwr%comm%value, ierr)
+ call xmpi_sum_master(ec_mp2, master, gwr%comm%value, ierr)
 
- ! Print results to ab_out.
  if (gwr%comm%me == master) then
+   ! Print results to ab_out.
    write(ab_out, "(4a16)")"ecut_chi", "ecut_chi^(-3/2)", "RPA Ec (eV)", "RPA Ec (Ha)"
    do icut=ncut,1,-1
      write(ab_out, "(*(es16.8))") &
@@ -5300,6 +5312,7 @@ subroutine gwr_rpa_energy(gwr)
  end if
 
  ABI_FREE(ec_rpa)
+ ABI_FREE(ec_mp2)
  ABI_FREE(ecut_chi)
 
 end subroutine gwr_rpa_energy
@@ -5468,7 +5481,7 @@ subroutine gwr_ncwrite_tchi_wc(gwr, what, filepath)
  integer :: ncid, ncerr, ierr
  real(dp) :: cpu, wall, gflops
 !arrays
- integer :: dist_qibz(gwr%nqibz)
+ !integer :: dist_qibz(gwr%nqibz)
  real(dp), ABI_CONTIGUOUS pointer :: fptr(:,:,:)
  type(matrix_scalapack), pointer :: mats(:)
 
@@ -5526,13 +5539,14 @@ subroutine gwr_ncwrite_tchi_wc(gwr, what, filepath)
  ! The same q-point in the IBZ might be stored on different pools.
  ! To avoid writing the same array multiple times, we use dist_qibz
  ! to select the procs inside gwr%kpt_comm who are gonna write the iq_ibz q-point.
- dist_qibz = huge(1)
- do my_iqi=1,gwr%my_nqibz
-   iq_ibz = gwr%my_qibz_inds(my_iqi)
-   dist_qibz(iq_ibz) = gwr%kpt_comm%me
- end do
- call xmpi_min_ip(dist_qibz, gwr%kpt_comm%value, ierr)
- ABI_CHECK(all(dist_qibz /= huge(1)), "Wrong distribution of qibz points in gwr%kpt_comm")
+
+ !dist_qibz = huge(1)
+ !do my_iqi=1,gwr%my_nqibz
+ !  iq_ibz = gwr%my_qibz_inds(my_iqi)
+ !  dist_qibz(iq_ibz) = gwr%kpt_comm%me
+ !end do
+ !call xmpi_min_ip(dist_qibz, gwr%kpt_comm%value, ierr)
+ !ABI_CHECK(all(dist_qibz /= huge(1)), "Wrong distribution of qibz points in gwr%kpt_comm")
 
  ! Reopen the file in gwr%comm.
  NCF_CHECK(nctk_open_modify(ncid, filepath, gwr%comm%value))
@@ -5541,7 +5555,9 @@ subroutine gwr_ncwrite_tchi_wc(gwr, what, filepath)
    spin = gwr%my_spins(my_is)
    do my_iqi=1,gwr%my_nqibz
      iq_ibz = gwr%my_qibz_inds(my_iqi)
-     if (dist_qibz(iq_ibz) /= gwr%kpt_comm%me) cycle
+
+     !if (dist_qibz(iq_ibz) /= gwr%kpt_comm%me) cycle
+     if (.not. gwr%itreat_qibz(iq_ibz)) cycle
 
      associate (desc_q => gwr%tchi_desc_qibz(iq_ibz))
      npwtot_q = desc_q%npw
@@ -5635,13 +5651,15 @@ subroutine gsph2box(ngfft, npw, ndat, kg_k, cg, cfft)
 !$OMP PARALLEL DO PRIVATE(i1, i2, i3) IF (ndat > 1)
  do idat=1,ndat
    do ipw=1,npw
-     i1 = kg_k(1,ipw); if (i1 < 0) i1 = i1+n1; i1 = i1+1
-     i2 = kg_k(2,ipw); if (i2 < 0) i2 = i2+n2; i2 = i2+1
-     i3 = kg_k(3,ipw); if (i3 < 0) i3 = i3+n3; i3 = i3+1
-
+     !i1 = kg_k(1,ipw); if (i1 < 0) i1 = i1+n1; i1 = i1+1
+     !i2 = kg_k(2,ipw); if (i2 < 0) i2 = i2+n2; i2 = i2+1
+     !i3 = kg_k(3,ipw); if (i3 < 0) i3 = i3+n3; i3 = i3+1
      !ABI_CHECK(i1 == modulo(kg_k(1, ipw), n1) + 1, "i1")
      !ABI_CHECK(i2 == modulo(kg_k(2, ipw), n2) + 1, "i2")
      !ABI_CHECK(i3 == modulo(kg_k(3, ipw), n3) + 1, "i3")
+     i1 = modulo(kg_k(1, ipw), n1) + 1
+     i2 = modulo(kg_k(2, ipw), n2) + 1
+     i3 = modulo(kg_k(3, ipw), n3) + 1
 
      !if (any(kg_k(:,ipw) > ngfft(1:3)/2) .or. any(kg_k(:,ipw) < -(ngfft(1:3)-1)/2) ) then
      !  write(msg,'(a,3(i0,1x),a)')" The G-vector: ",kg_k(:, ipw)," falls outside the FFT box. Increase boxcutmin (?)"
@@ -5701,13 +5719,15 @@ subroutine box2gsph(ngfft, npw, ndat, kg_k, cfft, cg)
 !$OMP PARALLEL DO PRIVATE(i1, i2, i3, ipwdat, i3dat) IF (ndat > 1)
  do idat=1,ndat
    do ipw=1,npw
-     i1 = kg_k(1,ipw); if (i1 < 0) i1 = i1+n1; i1 = i1+1
-     i2 = kg_k(2,ipw); if (i2 < 0) i2 = i2+n2; i2 = i2+1
-     i3 = kg_k(3,ipw); if (i3 < 0) i3 = i3+n3; i3 = i3+1
-
+     !i1 = kg_k(1,ipw); if (i1 < 0) i1 = i1+n1; i1 = i1+1
+     !i2 = kg_k(2,ipw); if (i2 < 0) i2 = i2+n2; i2 = i2+1
+     !i3 = kg_k(3,ipw); if (i3 < 0) i3 = i3+n3; i3 = i3+1
      !ABI_CHECK(i1 == modulo(kg_k(1, ipw), n1) + 1, "i1")
      !ABI_CHECK(i2 == modulo(kg_k(2, ipw), n2) + 1, "i2")
      !ABI_CHECK(i3 == modulo(kg_k(3, ipw), n3) + 1, "i3")
+     i1 = modulo(kg_k(1, ipw), n1) + 1
+     i2 = modulo(kg_k(2, ipw), n2) + 1
+     i3 = modulo(kg_k(3, ipw), n3) + 1
 
      !if (any(kg_k(:,ipw) > ngfft(1:3)/2) .or. any(kg_k(:,ipw) < -(ngfft(1:3)-1)/2) ) then
      !  write(msg,'(a,3(i0,1x),a)')" The G-vector: ",kg_k(:, ipw)," falls outside the FFT box. Increase boxcutmin (?)"
@@ -6192,11 +6212,12 @@ subroutine gwr_build_sigxme(gwr)
  integer :: spad, wtqm, wtqp ! irow, ndegs, npw_k, spadx1, spadx2,
  integer :: npwx, x_nfft, x_mgfft, nsig_ab !, x_fftalga,
  integer :: ik_bz, ik_ibz, isym_k, trev_k, g0_k(3) !, tsign_k
- integer :: iq_bz, iq_ibz, isym_q, trev_q !, g0_q(3) !, tsign_q
+ integer :: iq_bz, iq_ibz, isym_q, trev_q, g0_q(3) !, tsign_q
  logical :: isirr_k, isirr_q
  real(dp) :: cpu, wall, gflops, fact_spin, theta_mu_minus_esum, theta_mu_minus_esum2, tol_empty, tol_empty_in
  real(dp) :: gwr_boxcutmin_x
  character(len=5000) :: msg
+ logical :: q_is_gamma
  type(matrix_scalapack),pointer :: ugb_kibz
  type(crystal_t),pointer :: cryst
  type(dataset_type),pointer :: dtset
@@ -6204,9 +6225,8 @@ subroutine gwr_build_sigxme(gwr)
 !arrays
  integer :: g0(3), spinor_padx(2,4), x_ngfft(18)
  integer,allocatable :: gbound_kcalc(:,:), gvec_(:,:)
- real(dp) :: ksum(3), kk_bz(3), kgw(3), kgw_m_ksum(3), qbz(3), q0(3) !, spinrot_kbz(4), spinrot_kgw(4) !, tsec(2)
+ real(dp) :: ksum(3), kk_bz(3), kgw(3), kgw_m_ksum(3), qq_bz(3) !, q0(3) !, spinrot_kbz(4), spinrot_kgw(4) !, tsec(2)
  real(dp),contiguous, pointer :: qp_ene(:,:,:), qp_occ(:,:,:)
- !type(ebands_t),pointer :: now_ebands
  complex(gwpc),allocatable :: vc_sqrt_qbz(:), rhotwg(:), rhotwgp(:), rhotwg_ki(:,:) ! ur_bdgw(:,:), ur_ksum(:) ! ur_ibz(:),
  complex(dp),allocatable :: ur_bdgw(:,:), ur_ksum(:) ! ur_ibz(:),
  complex(dpc),allocatable  :: sigxcme_tmp(:,:), sigxme_tmp(:,:,:), sigx(:,:,:,:) ! sym_sigx(:,:,:),
@@ -6216,9 +6236,7 @@ subroutine gwr_build_sigxme(gwr)
 
  call wrtout(std_out, "TODO: Computing matrix elements of Sigma_x ...")
 
- nsppol = gwr%nsppol; nspinor = gwr%nspinor
- cryst => gwr%cryst
- dtset => gwr%dtset
+ nsppol = gwr%nsppol; nspinor = gwr%nspinor; cryst => gwr%cryst; dtset => gwr%dtset
 
  if (gwr%scf_iteration == 0) then
    qp_ene => gwr%ks_ebands%eig; qp_occ => gwr%ks_ebands%occ
@@ -6333,9 +6351,9 @@ subroutine gwr_build_sigxme(gwr)
    ABI_CALLOC(sigxcme_tmp, (bmin:bmax, nsppol * nsig_ab))
    ABI_CALLOC(sigx, (2, bmin:bmax, bmin:bmax, nsppol * nsig_ab))
 
-   ! =================================
-   ! ==== Sum over my k in the BZ ====
-   ! =================================
+   ! ========================================
+   ! ==== Sum over my k-points in the BZ ====
+   ! ========================================
 
    do my_ikf=1,gwr%my_nkbz
      ik_bz = gwr%my_kbz_inds(my_ikf)
@@ -6368,22 +6386,22 @@ subroutine gwr_build_sigxme(gwr)
        end do
      end if
 
+     qq_bz = gwr%qbz(:, iq_bz)
+     iq_ibz = gwr%qbz2ibz(1, iq_bz); isym_q = gwr%qbz2ibz(2, iq_bz)
+     trev_q = gwr%qbz2ibz(6, iq_bz); g0_q = gwr%qbz2ibz(3:5, iq_bz)
+     isirr_q = (isym_q == 1 .and. trev_q == 0 .and. all(g0_q == 0))
+     !tsign_q = merge(1, -1, trev_q == 0)
+
      ! Find the corresponding irreducible q-point.
      ! NB: non-zero umklapp G_o is not allowed. There's a check in setup_sigma
      !call qmesh%get_BZ_item(iq_bz, qbz, iq_ibz, isym_q, itim_q)
-     !q_is_gamma = normv(qbz, cryst%gmet, "G") < GW_TOLQ0
+     q_is_gamma = normv(qq_bz, cryst%gmet, "G") < GW_TOLQ0
 
      ! Tables for the FFT of the oscillators.
      !  a) FFT index of G-G0.
      !  b) x_gbound table for the zero-padded FFT performed in rhotwg.
      !ABI_MALLOC(x_gbound, (2*x_mgfft+8, 2))
      !call Gsph_x%fft_tabs(g0, x_mgfft, x_ngfft, use_padfft, x_gbound, igfftxg0)
-
-     !qq_bz = gwr%qbz(:, iq_bz)
-     !iq_ibz = gwr%qbz2ibz(1, iq_bz); isym_q = gwr%qbz2ibz(2, iq_bz)
-     !trev_q = gwr%qbz2ibz(6, iq_bz); g0_q = gwr%qbz2ibz(3:5, iq_bz)
-     !isirr_q = (isym_q == 1 .and. trev_q == 0 .and. all(g0_q == 0))
-     !tsign_q = merge(1, -1, trev_q == 0)
 
      ! Get Fourier components of the Coulomb interaction in the BZ
      ! In 3D systems, neglecting umklapp,  vc(Sq,sG)=vc(q,G)=4pi/|q+G|
@@ -6426,8 +6444,10 @@ subroutine gwr_build_sigxme(gwr)
            !rhotwg_ki(spad+1:spad+npwx,jb) = rhotwg_ki(spad+1:spad + npwx,jb) * vc_sqrt_qbz(1:npwx)
          end do
 
+
 #if 0
          if (ik_bz == jk_bz) then
+
            ! Treat analytically the case q --> 0:
            !
            !   * The oscillator is evaluated at q = 0 as it is considered constant in the small cube around Gamma
@@ -6461,11 +6481,11 @@ subroutine gwr_build_sigxme(gwr)
            end if
          end if
 #endif
+
        end do ! jb Got all matrix elements from bmin up to bmax.
 
        theta_mu_minus_esum  = fact_spin * qp_occ(band_sum, ik_ibz, spin)
        theta_mu_minus_esum2 = sqrt(abs(fact_spin * qp_occ(band_sum, ik_ibz, spin))) ! MBB Nat. orb. funct. approx. sqrt(occ)
-
 
        if (abs(theta_mu_minus_esum / fact_spin) >= tol_empty) then     ! MRM: allow negative occ numbers
          do kb=bmin,bmax
@@ -6527,6 +6547,16 @@ subroutine gwr_build_sigxme(gwr)
    call ltg_k%free()
  end do ! ikcalc
  end do ! my_is
+
+ ! Gather contributions from all the CPUs.
+ !call xmpi_sum(sigxme_tmp, gwr%comm%value, ierr)
+ !call xmpi_sum(sigxcme_tmp, gwr%comm%value, ierr)
+ !call xmpi_sum(sigx, gwr%comm%value, ierr)
+
+ ! Multiply by constants. For 3D systems sqrt(4pi) is included in vc_sqrt_qbz.
+ !sigxme_tmp  = (one / (cryst%ucvol * gwr%nkbz)) * sigxme_tmp  ! * Sigp%sigma_mixing
+ !sigxcme_tmp = (one / (cryst%ucvol * gwr%nkbz)) * sigxcme_tmp ! * Sigp%sigma_mixing
+ !sigx        = (one / (cryst%ucvol * gwr%nkbz)) * sigx        ! * Sigp%sigma_mixing
 
  call wrtout(std_out, "gwr_build_sigxme completed")
 

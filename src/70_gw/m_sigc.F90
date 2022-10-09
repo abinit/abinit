@@ -490,22 +490,29 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
    end if
  end if ! usepaw==1
 
- if (mod10==SIG_GW_AC) then ! Calculate Gauss-Legendre quadrature knots and weights for analytic continuation
+ if (mod10==SIG_GW_AC) then
+   ! Calculate Gauss-Legendre quadrature knots and weights for analytic continuation
 
    ABI_MALLOC(rhotw_epsm1_rhotw, (minbnd:maxbnd, minbnd:maxbnd, Er%nomega_i))
-
    call coeffs_gausslegint(zero,one,gl_knots,gl_wts,Er%nomega_i)
 
+   ierr = 0
    do io=1,Er%nomega_i ! First frequencies are always real
      if (ABS(AIMAG(one*Er%omega(Er%nomega_r+io))-(one/gl_knots(io)-one)) > 0.0001) then
-      write(msg,'(3a)')&
-&       ' Frequencies in the SCR file are not compatible with the analytic continuation. ',ch10,&
-&       ' Verify the frequencies in the SCR file. '
-      ABI_WARNING(msg)
-      if (Wfd%my_rank==Wfd%master) write(std_out,*)AIMAG(Er%omega(Er%nomega_r+io)),(one/gl_knots(io)-one)
-      ABI_ERROR("Cannot continue!")
+      ierr = ierr + 1
+      if (Wfd%my_rank == Wfd%master) then
+        if (io == 1) write(std_out, "(a)")"omega_file, gauss_legendre_omega (ev)"
+        write(std_out,*)io, AIMAG(Er%omega(Er%nomega_r+io)) * Ha_eV, (one/gl_knots(io)-one) * Ha_eV
+      end if
      end if
    end do
+   if (ierr /= 0) then
+     write(std_out, *)"Er%nomega_r:", Er%nomega_r, "Er%nomega_i:", Er%nomega_i
+     write(msg,'(3a)')&
+       'Frequencies in the SCR file are not compatible with the analytic continuation. ',ch10,&
+       'Verify the frequencies in the SCR file. '
+     ABI_ERROR(msg)
+  end if
 
    ! To calculate \int_0^\infty domegap f(omegap), we calculate \int_0^1 dz f(1/z-1)/z^2.
    omegap(:)=one/gl_knots(:)-one

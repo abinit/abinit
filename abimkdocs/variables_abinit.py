@@ -23284,8 +23284,9 @@ Variable(
 Select the task to be performed when [[optdriver]] == 6 i.e. GWR code.
 The choice is among:
 
-* G0W0 -->  one-shot GW.
 * HDIAG --> direct diagonalization of the KS Hamiltonian.
+* G0W0 -->  one-shot GW.
+* RPA_ENERGY --> Compute RPA correlation energy within the ACFDT framework.
 
 !!! important
 

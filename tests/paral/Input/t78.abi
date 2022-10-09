@@ -5,6 +5,7 @@
 
 ndtset 3
 #ndtset 1; jdtset 3
+#nsym 1 kptopt 3
 
 #ecut      12 # 35
 ecut      8 # 35
