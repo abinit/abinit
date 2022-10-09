@@ -2,8 +2,10 @@
 # Dataset 1: ground state calculation to get the density
 # Dataset 2: Direct diagonalization to produce the WFK file with empty states.
 # Dataset 3: one-shot G0W0 calculation in real-space and imaginary-time.
+# Dataset 4: RPA energy calculation within ACFD
 
 ndtset      4
+#nsym 1 kptopt 3
 
 ####################
 # Dataset 1: SCF run
@@ -56,7 +58,7 @@ bdgw3       # calculate GW corrections for bands from 4 to 5
 # Dataset 4: RPA energy 
 ################################
 optdriver4  6        # Activate GWR code
-gwr_task4 "RPA_ENERGY"     # Direct diagonalization
+gwr_task4 "RPA_ENERGY"     # Compute RPA energy.
 getden4 1
 getwfk4 2 # WFK file with empty states
 gwr_ntau4   6        

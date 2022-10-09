@@ -72,9 +72,9 @@ module m_gwr_driver
  use m_paw_denpot,      only : pawdenpot
  use m_paw_init,        only : pawinit, paw_gencond
  use m_pawcprj,         only : pawcprj_type, pawcprj_free !, pawcprj_alloc, paw_overlap
- use m_ksdiago,         only : ugb_t !ksdiago_slk,
+ use m_ksdiago,         only : ugb_t
  use m_mkrho,           only : prtrhomxmn
- use m_melemts,         only : melflags_t !, melements_t
+ use m_melemts,         only : melflags_t
  use m_setvtr,          only : setvtr
  use m_vhxc_me,         only : calc_vhxc_me
  use m_gwr,             only : gwr_t
@@ -746,7 +746,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
      ! Build Green's function in imaginary-time from WFK file
      call gwr%read_ugb_from_wfk(wfk_path)
    else
-     !call gwr%get_ugb_from_vtrial(wfk_path, ngfftf, ks_vtrial)
+     !call gwr%get_ugb_from_vtrial(ngfftf, ks_vtrial)
    end if
 
    select case (dtset%gwr_task)
@@ -755,6 +755,9 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
 
    case ("G0W0")
      call gwr%run_g0w0()
+
+   !case ("eGeW", "eGW0", "G0eW")
+   !  call gwr%run_scf_gw()
 
    !case ("CHI0_HEAD_WINGS")
    !  call compute_chi0_head_wings(wfk_path)
