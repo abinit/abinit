@@ -45,6 +45,10 @@ module m_chebfi2
  use omp_lib
 #endif
 
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
+ use m_gpu_toolbox, only : CPU_DEVICE_ID, gpu_device_synchronize
+#endif
+
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
  use m_nvtx_data
 #endif
@@ -110,6 +114,7 @@ module m_chebfi2
    logical :: paw
    integer :: eigenProblem   !1 (A*x = (lambda)*B*x), 2 (A*B*x = (lambda)*x), 3 (B*A*x = (lambda)*x)
    integer :: istwf_k
+   integer :: use_gpu_cuda
    integer :: me_g0
 
    !ARRAYS
@@ -181,7 +186,7 @@ module m_chebfi2
 !! SOURCE
 
 subroutine chebfi_init(chebfi,neigenpairs,spacedim,tolerance,ecut,paral_kgb,nproc_band,bandpp,nproc_fft, &
-                       nline,space,eigenProblem,istwf_k,spacecom,me_g0,paw)
+                       nline,space,eigenProblem,istwf_k,spacecom,me_g0,paw,use_gpu_cuda)
 
  implicit none
 
@@ -198,6 +203,7 @@ subroutine chebfi_init(chebfi,neigenpairs,spacedim,tolerance,ecut,paral_kgb,npro
  integer       , intent(in   ) :: space
  integer       , intent(in   ) :: spacecom
  integer       , intent(in   ) :: spacedim
+ integer       , intent(in   ) :: use_gpu_cuda
  logical       , intent(in   ) :: paw
  real(dp)      , intent(in   ) :: ecut
  real(dp)      , intent(in   ) :: tolerance
@@ -225,6 +231,7 @@ subroutine chebfi_init(chebfi,neigenpairs,spacedim,tolerance,ecut,paral_kgb,npro
  chebfi%istwf_k = istwf_k
  chebfi%me_g0 = me_g0
  chebfi%paw = paw
+ chebfi%use_gpu_cuda = use_gpu_cuda
 
  call chebfi_allocateAll(chebfi)
 
@@ -582,6 +589,19 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,mpi_enreg)
 
 !********************* Compute Rayleigh quotients for every band, and set lambda equal to the largest one *****
  ABI_NVTX_START_RANGE(NVTX_CHEBFI2_RRQ)
+
+ ! NOTICE : the following lines are kept for reference
+ ! they are no longer necessary as chebfi_rayleighRitzQuotients can fully run on GPU
+ ! it is no longer necessary to issue a data prefetch, data are already present on device
+
+!  if (chebfi%use_gpu_cuda == 1) then
+! #if defined(HAVE_GPU_CUDA)
+!    call xgBlock_prefetch_async(chebfi%xXColsRows,  CPU_DEVICE_ID)
+!    call xgBlock_prefetch_async(chebfi%xAXColsRows, CPU_DEVICE_ID)
+!    call xgBlock_prefetch_async(chebfi%xBXColsRows, CPU_DEVICE_ID)
+! #endif
+!  end if
+
  call timab(tim_RR_q, 1, tsec)
  call chebfi_rayleighRitzQuotients(chebfi, maxeig, mineig, DivResults%self) !OK
  call timab(tim_RR_q, 2, tsec)
@@ -760,12 +780,16 @@ subroutine chebfi_rayleighRitzQuotients(chebfi,maxeig,mineig,DivResults)
    call xg_init(Results2, chebfi%space, chebfi%bandpp, 1)
  end if
 
- call xgBlock_colwiseDotProduct(chebfi%xXColsRows,chebfi%xAXColsRows,Results1%self)
+ call xgBlock_colwiseDotProduct(chebfi%xXColsRows, chebfi%xAXColsRows, Results1%self, &
+   & use_gpu_cuda=chebfi%use_gpu_cuda)
 
 !PAW
- call xgBlock_colwiseDotProduct(chebfi%xXColsRows,chebfi%xBXColsRows,Results2%self)
+ call xgBlock_colwiseDotProduct(chebfi%xXColsRows, chebfi%xBXColsRows, Results2%self, &
+   & use_gpu_cuda=chebfi%use_gpu_cuda)
 
- call xgBlock_colwiseDivision(Results1%self, Results2%self, DivResults, maxeig, maxeig_pos, mineig, mineig_pos)
+ call xgBlock_colwiseDivision(Results1%self, Results2%self, DivResults, &
+   & maxeig, maxeig_pos, mineig, mineig_pos, &
+   & use_gpu_cuda=chebfi%use_gpu_cuda)
 
  call xg_free(Results1)
  call xg_free(Results2)
