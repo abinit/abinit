@@ -156,7 +156,7 @@ module m_orbmag
   private :: make_d
   private :: dterm_qij
   private :: dterm_vhnzc
-  private :: make_ddir_p2
+  private :: dterm_p2
   private :: make_ddir_ap
   private :: make_ddir_vha
   private :: make_ddir_vhnhat
@@ -2346,12 +2346,12 @@ subroutine make_ddir_vha(atindx,ddir_vha,dtset,gntselect,gprimd,lmnmax,my_lmax,&
  
 end subroutine make_ddir_vha
 
-!!****f* ABINIT/make_ddir_p2
+!!****f* ABINIT/dterm_p2
 !! NAME
-!! make_ddir_p2
+!! dterm_p2
 !!
 !! FUNCTION
-!! Compute onsite r*p^2/2
+!! Compute onsite p^2/2 and r*p^2/2
 !!
 !! COPYRIGHT
 !! Copyright (C) 2003-2021 ABINIT  group
@@ -2378,84 +2378,147 @@ end subroutine make_ddir_vha
 !!
 !! SOURCE
 
-subroutine make_ddir_p2(ddir_p2,dtset,gntselect,gprimd,lmnmax,my_lmax,pawrad,pawtab,realgnt)
+subroutine dterm_p2(dterm,dtset,gntselect,gprimd,my_lmax,pawrad,pawtab,realgnt)
 
   !Arguments ------------------------------------
   !scalars
-  integer,intent(in) :: lmnmax,my_lmax
+  integer,intent(in) :: my_lmax
+  type(dterm_type),intent(inout) :: dterm
   type(dataset_type),intent(in) :: dtset
 
   !arrays
   integer,intent(in) :: gntselect((2*my_lmax-1)**2,my_lmax**2*(my_lmax**2+1)/2)
   real(dp),intent(in) :: gprimd(3,3),realgnt((2*my_lmax-1)**2*(my_lmax)**4)
-  complex(dpc),intent(out) :: ddir_p2(lmnmax,lmnmax,dtset%natom,3)
   type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
   type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
 
   !Local variables -------------------------
   !scalars
-  integer :: adir,gint,iat,itypat,ilmn,iln,jl,jlmn,jln,klm,klmn,lm1b,mesh_size,pwave_size
-  real(dp) :: c1m,intg
+  integer :: adir,gint,iat,itypat,ilmn,ilm,iln,imesh,jl,jlm,jlmn,jln
+  integer :: ll,llmm,lmj1a,mesh_size,pwave_size
+  real(dp) :: c1m,intg,rr
 
   !arrays
-  real(dp),allocatable :: ff(:),uj(:),ujder(:),uj2der(:)
-  complex(dpc) :: dij_cart(3)
+  real(dp) :: dij_cart(3)
+  real(dp),allocatable :: ff(:),ffj(:),tffj(:),uj(:),ujder(:),uj2der(:)
+  real(dp),allocatable :: tuj(:),tujder(:),tuj2der(:)
 
 !--------------------------------------------------------------------
 
   c1m = sqrt(four_pi/three)
-  ddir_p2=czero
-  do iat=1,dtset%natom
-    itypat=dtset%typat(iat)
+  do itypat=1,dtset%ntypat
     mesh_size=pawrad(itypat)%mesh_size
-    pwave_size=size(pawtab(itypat)%phiphj(:,1))
+    !pwave_size=size(pawtab(itypat)%phiphj(:,1))
+    pwave_size=mesh_size
     ABI_MALLOC(ff,(mesh_size))
+    ABI_MALLOC(ffj,(mesh_size))
+    ABI_MALLOC(tffj,(mesh_size))
     ABI_MALLOC(uj,(mesh_size))
     ABI_MALLOC(ujder,(mesh_size))
     ABI_MALLOC(uj2der,(mesh_size))
+    ABI_MALLOC(tuj,(mesh_size))
+    ABI_MALLOC(tujder,(mesh_size))
+    ABI_MALLOC(tuj2der,(mesh_size))
 
-    do ilmn=1, pawtab(itypat)%lmn_size
-      do jlmn=1, pawtab(itypat)%lmn_size
-        klmn = MATPACK(ilmn,jlmn)
+    do jlmn=1, pawtab(itypat)%lmn_size
+      jlm = pawtab(itypat)%indlmn(4,jlmn)
+      jln = pawtab(itypat)%indlmn(5,jlmn)
+      jl = pawtab(itypat)%indlmn(1,jlmn)
 
-        klm = pawtab(itypat)%indklmn(1,klmn)
+      uj = zero
+      uj(1:pwave_size) = pawtab(itypat)%phi(1:pwave_size,jln)
+      call nderiv_gen(ujder,uj,pawrad(itypat),uj2der)
+      ffj = zero
+      do imesh = 2, pwave_size
+        rr = pawrad(itypat)%rad(imesh)
+        ffj(imesh) = uj2der(imesh)-jl*(jl+1)*pawtab(itypat)%phi(imesh,jln)/(rr*rr)
+      end do
+      
+      uj = zero
+      uj(1:pwave_size) = pawtab(itypat)%tphi(1:pwave_size,jln)
+      call nderiv_gen(ujder,uj,pawrad(itypat),uj2der)
+      tffj = zero
+      do imesh = 2, pwave_size
+        rr = pawrad(itypat)%rad(imesh)
+        tffj(imesh) = uj2der(imesh)-jl*(jl+1)*pawtab(itypat)%tphi(imesh,jln)/(rr*rr)
+      end do
+
+      do ilmn=1, pawtab(itypat)%lmn_size
+
+        ilm = pawtab(itypat)%indlmn(4,ilmn)
+        if (ilm .NE. jlm) cycle
+
         iln = pawtab(itypat)%indlmn(5,ilmn)
-        jln = pawtab(itypat)%indlmn(5,jlmn)
-        jl = pawtab(itypat)%indlmn(1,jlmn)
+       
+        do imesh=2,pwave_size 
+          ff(imesh) = pawtab(itypat)%phi(imesh,iln)*ffj(imesh) - &
+         & pawtab(itypat)%tphi(imesh,iln)*tffj(imesh)
+        end do
 
-        ff = zero
-        uj = zero
-        uj(1:pwave_size) = pawtab(itypat)%phi(1:pwave_size,jln)
-        call nderiv_gen(ujder,uj,pawrad(itypat),uj2der)
-        ff(2:pwave_size) = pawrad(itypat)%rad(2:pwave_size)*pawtab(itypat)%phi(2:pwave_size,iln)*(uj2der(2:pwave_size)&
-          & - jl*(jl+1)*pawtab(itypat)%phi(2:pwave_size,jln)/pawrad(itypat)%rad(2:pwave_size)**2)
-        uj = zero
-        uj(1:pwave_size) = pawtab(itypat)%tphi(1:pwave_size,jln)
-        call nderiv_gen(ujder,uj,pawrad(itypat),uj2der)
-        ff(2:pwave_size) = ff(2:pwave_size) - &
-          & (pawrad(itypat)%rad(2:pwave_size)*pawtab(itypat)%tphi(2:pwave_size,iln)*(uj2der(2:pwave_size)&
-          & - jl*(jl+1)*pawtab(itypat)%tphi(2:pwave_size,jln)/pawrad(itypat)%rad(2:pwave_size)**2))
         call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
         call simp_gen(intg,ff,pawrad(itypat))
 
-        dij_cart = czero 
-        do adir = 1, 3
-          lm1b = pack1a(adir)
-          gint = gntselect(lm1b,klm)
-          if (gint == 0) cycle
-          dij_cart(adir) = cmplx(-half*c1m*realgnt(gint)*intg,zero)
-        end do ! end loop over adir
+        !write(std_out,'(a,5i4,es16.8)')' JWZ debug ilmn iln jlmn jln klmn ke ',&
+        !  & ilmn,iln,jlmn,jln,MATPACK(ilmn,jlmn),-half*intg
 
-        ddir_p2(ilmn,jlmn,iat,1:3) = MATMUL(TRANSPOSE(gprimd),dij_cart)
-      end do ! jlmn
-    end do ! ilmn
+      end do ! ilmn
+    end do ! jlmn
+
+    do jlmn = 1, pawtab(itypat)%lmn_size
+      jlm = pawtab(itypat)%indlmn(4,jlmn)
+      jln = pawtab(itypat)%indlmn(5,jlmn)
+      jl = pawtab(itypat)%indlmn(1,jlmn)
+      
+      do imesh=1,pwave_size
+        rr=pawrad(itypat)%rad(imesh)
+        uj(imesh) = pawtab(itypat)%phi(imesh,jln)*rr
+        tuj(imesh) = pawtab(itypat)%tphi(imesh,jln)*rr
+      end do!imesh
+      call nderiv_gen(ujder,uj,pawrad(itypat),uj2der)
+      call nderiv_gen(tujder,tuj,pawrad(itypat),tuj2der)
+      do ilmn = 1, pawtab(itypat)%lmn_size
+        ilm = pawtab(itypat)%indlmn(4,ilmn)
+        iln = pawtab(itypat)%indlmn(5,ilmn)
+     
+        dij_cart = zero 
+        do ll=abs(jl-1),jl+1,2
+          do imesh=2,mesh_size
+            rr=pawrad(itypat)%rad(imesh)
+            ffj(imesh)=uj2der(imesh)-ll*(ll+1)*uj(imesh)/(rr*rr)
+            tffj(imesh)=tuj2der(imesh)-ll*(ll+1)*tuj(imesh)/(rr*rr)
+            ff(imesh) = pawtab(itypat)%phi(imesh,iln)*ffj(imesh) - &
+              & pawtab(itypat)%tphi(imesh,iln)*tffj(imesh)
+          end do !imesh
+          call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
+          call simp_gen(intg,ff,pawrad(itypat))
+          do llmm=ll**2+1,(ll+1)**2
+            if ( ilm .NE. llmm ) cycle
+            do adir =1, 3
+              lmj1a = MATPACK(jlm,pack1a(adir))
+              gint = gntselect(llmm,lmj1a)
+              if ( gint .EQ. 0 ) cycle
+              dij_cart(adir) = dij_cart(adir) - half*realgnt(gint)*intg
+            end do !adir
+          end do !llmm
+        end do !ll
+
+        write(std_out,'(a,3i4,3es16.8)')'JWZ debug ilmn jlmn klmn dij ',ilmn,jlmn,MATPACK(ilmn,jlmn),&
+          & dij_cart(1),dij_cart(2),dij_cart(3)
+      end do !ilmn
+    end do !jlmn
+
     ABI_FREE(ff)
+    ABI_FREE(ffj)
+    ABI_FREE(tffj)
     ABI_FREE(uj)
     ABI_FREE(ujder)
     ABI_FREE(uj2der)
-  end do ! end loop over atoms
+    ABI_FREE(tuj)
+    ABI_FREE(tujder)
+    ABI_FREE(tuj2der)
+  end do !itypat 
  
-end subroutine make_ddir_p2
+end subroutine dterm_p2
 !!***
 
 !!****f* ABINIT/make_ddir_ap
@@ -3083,7 +3146,7 @@ subroutine make_d(atindx,atindx1,cprj,dimlmn,dterm,dtset,gprimd,&
 
  !! term idp2 due to onsite p^2/2, corresponds to term 1 of Torrent PAW roadmap paper appendix E
  !! Comp. Mat. Sci. 42, 337-351 (2008)
- !call make_ddir_p2(dterms(idp2,:,:,:,:),dtset,gntselect,gprimd,psps%lmnmax,my_lmax,pawrad,pawtab,realgnt)
+ call dterm_p2(dterm,dtset,gntselect,gprimd,my_lmax,pawrad,pawtab,realgnt)
 
  !! term idpa due to onsite A.p, not part of the roadmap paper but similar to term 1
  !call make_ddir_ap(dterms(idpa,:,:,:,:),dtset,gntselect,gprimd,psps%lmnmax,my_lmax,pawrad,pawtab,realgnt)
