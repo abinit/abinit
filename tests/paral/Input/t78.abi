@@ -4,6 +4,7 @@
 # Dataset 3: one-shot G0W0 calculation in real-space and imaginary-time.
 
 ndtset 3
+timopt 1
 #ndtset 1; jdtset 3
 #nsym 1 kptopt 3
 

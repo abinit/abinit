@@ -780,7 +780,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      end do
    end do
    ! Recreate the Sig_ij tables taking advantage of the classification of the bands.
-   call sigma_tables(Sigp,Kmesh,KS_sym)
+   call sigma_tables(Sigp,Kmesh, esymm=KS_sym)
  end if
 
  call timab(405,2,tsec) ! Init2
@@ -1147,7 +1147,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      end do
 
      ! Recreate the Sig_ij tables taking advantage of the classification of the bands.
-     call sigma_tables(Sigp,Kmesh,QP_sym)
+     call sigma_tables(Sigp, Kmesh, esymm=QP_sym)
    end if
 !  #endif
 
@@ -3898,7 +3898,7 @@ end subroutine setup_sigma
 !!
 !! INPUTS
 !! Kmesh <kmesh_t>=Structure describing the k-point sampling.
-!! [Bnd_sym(Kmesh%nibz,Sigp%nsppol)] <type(Bands_Symmetries)>
+!! [esymm(Kmesh%nibz,Sigp%nsppol)]= Bands_Symmetries
 !!
 !! SiDE EFFECTS
 !! Sigp<sigparams_t>=This routine initializes the tables:
@@ -3908,161 +3908,47 @@ end subroutine setup_sigma
 !!
 !! SOURCE
 
+subroutine sigma_tables(Sigp, Kmesh, esymm)
 
-subroutine sigma_tables(Sigp, Kmesh, Bnd_sym)
+  use m_sigtk, only : sigtk_sigma_tables
 
 !Arguments ------------------------------------
 !scalars
- type(sigparams_t),intent(inout) :: Sigp
+ type(sigparams_t),target,intent(inout) :: Sigp
  type(kmesh_t),intent(in) :: Kmesh
 !arrays
- type(esymm_t),optional,intent(in) :: Bnd_sym(Kmesh%nibz,Sigp%nsppol)
+ type(esymm_t),optional,intent(in) :: esymm(Kmesh%nibz, Sigp%nsppol)
 
 !Local variables-------------------------------
 !scalars
- integer :: gwcalctyp,spin,ikcalc,ik_ibz,bmin,bmax,bcol,brow
- integer :: ii,idx_x,idx_c,irr_idx1,irr_idx2
- logical :: sigc_is_herm
+ integer :: ikcalc,ik_ibz
+ logical :: sigc_is_herm, only_diago
 !arrays
- integer,allocatable :: sigc_bidx(:),sigx_bidx(:)
- logical :: use_sym_at(Kmesh%nibz,Sigp%nsppol)
+ integer,allocatable :: sigc_bidx(:), sigx_bidx(:), kcalc2ibz(:)
 
 ! *************************************************************************
 
- gwcalctyp = Sigp%gwcalctyp
+ only_diago = sigp%gwcalctyp < 20
  sigc_is_herm = sigma_is_herm(Sigp)
 
- ! Recreate the Sig_ij tables taking advantage of the classification of the bands.
- if (allocated(Sigp%Sigxij_tab)) then
-   call sigijtab_free(Sigp%Sigxij_tab)
-   ABI_FREE(Sigp%Sigxij_tab)
- end if
- if (allocated(Sigp%Sigcij_tab)) then
-   call sigijtab_free(Sigp%Sigcij_tab)
-   ABI_FREE(Sigp%Sigcij_tab)
- end if
+ !nsppol = sigp%nsppol; nkptgw = sigp%nkptgw
+ !minbnd => sigp%minbnd; maxbnd => sigp%maxbnd
 
- ABI_MALLOC(Sigp%Sigcij_tab, (Sigp%nkptgw, Sigp%nsppol))
- ABI_MALLOC(Sigp%Sigxij_tab, (Sigp%nkptgw, Sigp%nsppol))
+ ABI_MALLOC(kcalc2ibz, (sigp%nkptgw))
+ do ikcalc=1,sigp%nkptgw
+   ik_ibz = Kmesh%tab(Sigp%kptgw2bz(ikcalc))
+   kcalc2ibz(ikcalc) = ik_ibz
+ end do
 
- use_sym_at=.FALSE.
- if (PRESENT(Bnd_sym)) then
-   do spin=1,Sigp%nsppol
-     do ikcalc=1,Sigp%nkptgw
-      ik_ibz = Kmesh%tab(Sigp%kptgw2bz(ikcalc))
-      use_sym_at(ik_ibz,spin) = .not. esymm_failed(Bnd_sym(ik_ibz,spin))
-     end do
-   end do
+ if (present(esymm)) then
+   call sigtk_sigma_tables(sigp%nkptgw, kmesh%nibz, sigp%nsppol, sigp%minbnd, sigp%maxbnd, kcalc2ibz, &
+                           only_diago, sigc_is_herm, sigp%sigxij_tab, sigp%sigcij_tab, esymm=esymm)
+ else
+   call sigtk_sigma_tables(sigp%nkptgw, kmesh%nibz, sigp%nsppol, sigp%minbnd, sigp%maxbnd, kcalc2ibz, &
+                           only_diago, sigc_is_herm, sigp%sigxij_tab, sigp%sigcij_tab)
  end if
 
- do spin=1,Sigp%nsppol
-   do ikcalc=1,Sigp%nkptgw
-     ik_ibz = Kmesh%tab(Sigp%kptgw2bz(ikcalc))
-
-     if (use_sym_at(ik_ibz, spin)) then
-       if (gwcalctyp < 20) then
-         ABI_ERROR("You should not be here!")
-       end if
-
-       bmin = Sigp%minbnd(ikcalc,spin); bmax = Sigp%maxbnd(ikcalc,spin)
-       ABI_MALLOC(Sigp%Sigxij_tab(ikcalc, spin)%col, (bmin:bmax))
-       ABI_MALLOC(Sigp%Sigcij_tab(ikcalc, spin)%col, (bmin:bmax))
-
-       do bcol=bmin,bmax
-         ABI_MALLOC(sigc_bidx, (bmax - bmin + 1))
-         ABI_MALLOC(sigx_bidx, (bmax - bmin + 1))
-
-         if (Bnd_sym(ik_ibz,spin)%err_status /= 0) then
-           ! Band classification failed.
-           sigc_bidx = (/(ii, ii=bmin, bmax)/)
-           idx_c = bmax - bmin + 1
-           sigx_bidx = (/(ii,ii=bmin,bcol)/) ! Hermitian
-           idx_x = bcol - bmin + 1
-         else
-           irr_idx2 = Bnd_sym(ik_ibz,spin)%b2irrep(bcol)
-           idx_c = 0
-           do brow=bmin,bmax
-             irr_idx1 = Bnd_sym(ik_ibz,spin)%b2irrep(brow)
-             if (sigc_is_herm .and. bcol < brow) CYCLE  ! Only the upper triangle for HF, SEX, or COHSEX.
-             if (irr_idx1 == irr_idx2) then ! same character, add this row to the list.
-               idx_c = idx_c + 1
-               sigc_bidx(idx_c) = brow
-             end if
-           end do
-           idx_x = 0
-           do brow=bmin,bcol
-             irr_idx1 = Bnd_sym(ik_ibz,spin)%b2irrep(brow)
-             if (bcol<brow) CYCLE  ! Sig_x is always Hermitian.
-             if (irr_idx1 == irr_idx2) then ! same character, add this row to the list.
-               idx_x = idx_x +1
-               sigx_bidx(idx_x) = brow
-             end if
-           end do
-         end if
-
-         ! Table for Sigma_x matrix elements taking into account symmetries of the bands.
-         ABI_MALLOC(Sigp%Sigxij_tab(ikcalc, spin)%col(bcol)%bidx, (idx_x))
-
-         Sigp%Sigxij_tab(ikcalc, spin)%col(bcol)%size1= idx_x
-         Sigp%Sigxij_tab(ikcalc, spin)%col(bcol)%bidx(:) = sigx_bidx(1:idx_x)
-         !write(std_out,*)" Sigxij_tab: ikcalc, spin, bcol ",ikcalc,spin,bcol
-         !write(std_out,*)" size: ",idx_x,(Sigp%Sigxij_tab(ikcalc,spin)%col(bcol)%bidx(ii),ii=1,idx_x)
-         !
-         ! Table for Sigma_c matrix elements taking into account symmetries of the bands.
-         ABI_MALLOC(Sigp%Sigcij_tab(ikcalc, spin)%col(bcol)%bidx, (idx_c))
-
-         Sigp%Sigcij_tab(ikcalc, spin)%col(bcol)%size1= idx_c
-         Sigp%Sigcij_tab(ikcalc, spin)%col(bcol)%bidx(:) = sigc_bidx(1:idx_c)
-         !write(std_out,*)" Sigcij_tab: ikcalc, spin, bcol ",ikcalc,spin,bcol
-         !write(std_out,*)" size: ",idx_c,(Sigp%Sigcij_tab(ikcalc,spin)%col(bcol)%bidx(ii), ii=1,idx_c)
-
-         ABI_FREE(sigx_bidx)
-         ABI_FREE(sigc_bidx)
-       end do ! bcol
-
-     else
-       ! Symmetries cannot be used for this (k,s).
-       bmin = Sigp%minbnd(ikcalc, spin); bmax = Sigp%maxbnd(ikcalc,spin)
-       ABI_MALLOC(Sigp%Sigcij_tab (ikcalc, spin)%col, (bmin:bmax))
-       ABI_MALLOC(Sigp%Sigxij_tab (ikcalc, spin)%col, (bmin:bmax))
-
-       if (gwcalctyp < 20) then
-         ! QP wavefunctions == KS, therefore only diagonal elements are calculated.
-         do bcol=bmin,bmax
-           ABI_MALLOC(Sigp%Sigcij_tab(ikcalc, spin)%col(bcol)%bidx, (1:1))
-           Sigp%Sigcij_tab(ikcalc, spin)%col(bcol)%size1= 1
-           Sigp%Sigcij_tab(ikcalc, spin)%col(bcol)%bidx(1) = bcol
-           ABI_MALLOC(Sigp%Sigxij_tab(ikcalc, spin)%col(bcol)%bidx, (1:1))
-           Sigp%Sigxij_tab(ikcalc, spin)%col(bcol)%size1 = 1
-           Sigp%Sigxij_tab(ikcalc, spin)%col(bcol)%bidx(1) = bcol
-         end do
-       else
-         ! Use QP wavefunctions, Sigma_ij matrix is sparse but we have to classify the states in sigma.
-         ! The only thing we can do here is filling the entire matrix taking advantage of Hermiticity (if any).
-         do bcol=bmin,bmax
-           ABI_MALLOC(Sigp%Sigxij_tab(ikcalc, spin)%col(bcol)%bidx, (bcol-bmin+1))
-           Sigp%Sigxij_tab(ikcalc, spin)%col(bcol)%size1= bcol-bmin+1
-           Sigp%Sigxij_tab(ikcalc, spin)%col(bcol)%bidx(:) = (/(ii,ii=bmin,bcol)/) ! Sigma_x is Hermitian.
-           !write(std_out,*)"Sigxij_tab: ikcalc, spin, bcol ",ikcalc,spin,bcol,Sigp%Sigxij_tab(ikcalc,spin)%col(bcol)%bidx(:)
-
-           ABI_MALLOC(sigc_bidx, (bmax-bmin+1))
-           idx_c = 0
-           do brow=bmin,bmax
-             if (sigc_is_herm .and. bcol < brow) CYCLE  ! Only the upper triangle of Sigc_ij is needed (SEX, COHSEX).
-             idx_c = idx_c +1
-             sigc_bidx(idx_c) = brow
-           end do
-           ABI_MALLOC(Sigp%Sigcij_tab(ikcalc, spin)%col(bcol)%bidx,(idx_c))
-           Sigp%Sigcij_tab(ikcalc, spin)%col(bcol)%size1= idx_c
-           Sigp%Sigcij_tab(ikcalc, spin)%col(bcol)%bidx(:) = sigc_bidx(1:idx_c)
-           ABI_FREE(sigc_bidx)
-           !write(std_out,*)"Sigcij_tab: ikcalc, spin, bcol ",ikcalc,spin,bcol,Sigp%Sigcij_tab(ikcalc,spin)%col(bcol)%bidx(:)
-         end do
-       end if
-     end if
-
-   end do !ikcalc
- end do !spin
+ ABI_FREE(kcalc2ibz)
 
 end subroutine sigma_tables
 !!***

@@ -42,8 +42,8 @@ module m_cgtk
 !!***
 
  public :: cgtk_rotate         ! Recostruct wfs in the BZ from IBZ using symmetry tables generated
-                               ! with the the symrel convention
- public :: cgtk_rotate_symrec
+                               ! with the the symrel^T conventions.
+ public :: cgtk_rotate_symrec  ! Similat to cgtk_rotate but assumes symrec conventions.
  public :: cgtk_change_gsphere
  public :: cgtk_fixphase
 !!***

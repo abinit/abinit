@@ -1122,7 +1122,10 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1923)='gwr_build_tchi'; basic(1923) = 1
  names(1924)='gwr_build_wc'; basic(1924) = 1
  names(1925)='gwr_build_sigmac'; basic(1925) = 1
+ names(1926)='gwr_build_sigxme'; basic(1926) = 1
+ names(1927)='gwr_build_head_wings'; basic(1927) = 1
 
+ ! TIMER_SIZE is 1999. See m_time
  names(TIMER_SIZE)='(other)                         ' ! This is a generic slot, to compute a complement
 
 !==================================================================================

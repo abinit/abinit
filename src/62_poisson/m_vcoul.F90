@@ -816,7 +816,7 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
    !
    ! === Integration of 1/q^2 singularity ===
    ! * We use the auxiliary function from PRB 75, 205126 (2007) [[cite:Carrier2007]]
-   q0_vol=(two_pi) **3 / (Kmesh%nbz*ucvol); bz_geometry_factor=zero
+   q0_vol = (two_pi) **3 / (Kmesh%nbz*ucvol); bz_geometry_factor=zero
 
    ! $$ MG: this is to restore the previous implementation, it will facilitate the merge
    ! Analytic integration of 4pi/q^2 over the volume element:
