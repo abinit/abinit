@@ -109,7 +109,7 @@ pseudos "Si-GGA.psp8, O-GGA.psp8"
 #%% nprocs_to_test = 4
 #%% max_nprocs = 4
 #%% [NCPU_4]
-#%% files_to_test = t78_MPI4.abo, tolnlines = 25, tolabs = 1.010e-03, tolrel = 6.000e-03, fld_options = -medium
+#%% files_to_test = t78_MPI4.abo, tolnlines = 25, tolabs = 1.1e-03, tolrel = 6.0e-03, fld_options = -medium
 #%% [extra_info]
 #%% authors =  M. Giantomassi
 #%% keywords = GWR, NC

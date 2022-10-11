@@ -584,9 +584,6 @@ end subroutine symmetrize_afm_chi0
 !!     %symchi=1 if symmetrization has to be performed.
 !!     %nomega=number of frequencies in chi0.
 !!
-!! OUTPUT
-!!  (see side effects)
-!!
 !! SIDE EFFECTS
 !!  chi0(npwe,npwe,nomega)= Updated independent-particle susceptibility matrix in reciprocal space at q==0.
 !!  chi0_head(3,3,Ep%nomega)=Head.
@@ -616,7 +613,7 @@ end subroutine symmetrize_afm_chi0
 !! SOURCE
 
 subroutine accumulate_chi0_q0(is_metallic,ik_bz,isym_kbz,itim_kbz,gwcomp,nspinor,npwepG0,Ep,Cryst,Ltg_q,Gsph_epsG0,&
-& chi0,rhotwx,rhotwg,green_w,green_enhigh_w,deltaf_b1b2,chi0_head,chi0_lwing,chi0_uwing)
+                              chi0,rhotwx,rhotwg,green_w,green_enhigh_w,deltaf_b1b2,chi0_head,chi0_lwing,chi0_uwing)
 
 !Arguments ------------------------------------
 !scalars
@@ -638,8 +635,7 @@ subroutine accumulate_chi0_q0(is_metallic,ik_bz,isym_kbz,itim_kbz,gwcomp,nspinor
 
 !Local variables-------------------------------
 !scalars
- integer :: itim,io,isym,idir,jdir
- integer :: isymop,nsymop
+ integer :: itim,io,isym,idir,jdir,isymop,nsymop
  real(gwp) :: dr
  complex(gwpc) :: dd
  !character(len=500) :: msg
@@ -671,10 +667,10 @@ subroutine accumulate_chi0_q0(is_metallic,ik_bz,isym_kbz,itim_kbz,gwcomp,nspinor
      ! and that it is not a metal
      ! then the corresponding chi0(io) is hermitian
      if( ABS(AIMAG(green_w(io))) < 1.0e-6_dp .and. .not. is_metallic ) then
-       dr=green_w(io)
+       dr = green_w(io)
        call xher('U',Ep%npwe,dr,rhotwg,1,chi0(:,:,io),Ep%npwe)
      else
-       dd=green_w(io)
+       dd = green_w(io)
        call xgerc(Ep%npwe,Ep%npwe,dd,rhotwg,1,rhotwg,1,chi0(:,:,io),Ep%npwe)
      endif
    end do
@@ -694,9 +690,8 @@ subroutine accumulate_chi0_q0(is_metallic,ik_bz,isym_kbz,itim_kbz,gwcomp,nspinor
      do io=1,Ep%nomega
        chi0_uwing(:,io,idir) = chi0_uwing(:,io,idir) + green_w(io) * mir_kbz(idir)*CONJG(rhotwg)
        chi0_lwing(:,io,idir) = chi0_lwing(:,io,idir) + green_w(io) * rhotwg*CONJG(mir_kbz(idir))
-       ! Add contribution due to extrapolar technique.
-       !if (gwcomp==1.and.ABS(deltaf_b1b2) >= GW_TOL_DOCC) then
-       if (gwcomp==1) then
+       if (gwcomp == 1) then
+         ! Add contribution due to extrapolar technique.
          chi0_uwing(:,io,idir) = chi0_uwing(:,io,idir) + green_enhigh_w(io) * mir_kbz(idir)*CONJG(rhotwg)
          chi0_lwing(:,io,idir) = chi0_lwing(:,io,idir) + green_enhigh_w(io) * rhotwg*CONJG(mir_kbz(idir))
        end if
@@ -708,9 +703,8 @@ subroutine accumulate_chi0_q0(is_metallic,ik_bz,isym_kbz,itim_kbz,gwcomp,nspinor
      do jdir=1,3
        do idir=1,3
          chi0_head(idir,jdir,io) = chi0_head(idir,jdir,io) + green_w(io) * mir_kbz(idir)*CONJG(mir_kbz(jdir))
-         ! Add contribution due to extrapolar technique.
-         !if (gwcomp==1.and.ABS(deltaf_b1b2) >= GW_TOL_DOCC) then
-         if (gwcomp==1) then
+         if (gwcomp == 1) then
+           ! Add contribution due to extrapolar technique.
            chi0_head(idir,jdir,io) = chi0_head(idir,jdir,io) + green_enhigh_w(io) * mir_kbz(idir)*CONJG(mir_kbz(jdir))
          end if
        end do
@@ -748,7 +742,7 @@ subroutine accumulate_chi0_q0(is_metallic,ik_bz,isym_kbz,itim_kbz,gwcomp,nspinor
 
          ! Symmetrize <r> in full BZ: <Sk b|r|Sk b'> = R <k b|r|k b'> + \tau \delta_{bb'}
          if (nspinor == 1) then
-           mir_kbz =(3-2*itim) * MATMUL(Cryst%symrec(:,:,isym),rhotwx(:,1))
+           mir_kbz = (3-2*itim) * MATMUL(Cryst%symrec(:,:,isym),rhotwx(:,1))
          else
            mir_kbz = (3-2*itim) * MATMUL(Cryst%symrec(:,:,isym), sum(rhotwx(:,1:2), dim=2))
          end if
@@ -760,9 +754,8 @@ subroutine accumulate_chi0_q0(is_metallic,ik_bz,isym_kbz,itim_kbz,gwcomp,nspinor
            do io=1,Ep%nomega
              chi0_uwing(:,io,idir) = chi0_uwing(:,io,idir) + green_w(io) * mir_kbz(idir)*CONJG(rhotwg_sym(:,isymop))
              chi0_lwing(:,io,idir) = chi0_lwing(:,io,idir) + green_w(io) * rhotwg_sym(:,isymop)*CONJG(mir_kbz(idir))
-             ! Add contribution due to extrapolar technique.
-             !if (gwcomp==1.and.ABS(deltaf_b1b2)>=GW_TOL_DOCC) then
              if (gwcomp==1) then
+               ! Add contribution due to extrapolar technique.
                chi0_uwing(:,io,idir) = chi0_uwing(:,io,idir) + green_enhigh_w(io) * mir_kbz(idir)*CONJG(rhotwg_sym(:,isymop))
                chi0_lwing(:,io,idir) = chi0_lwing(:,io,idir) + green_enhigh_w(io) * rhotwg_sym(:,isymop)*CONJG(mir_kbz(idir))
              end if
@@ -774,9 +767,8 @@ subroutine accumulate_chi0_q0(is_metallic,ik_bz,isym_kbz,itim_kbz,gwcomp,nspinor
            do jdir=1,3
              do idir=1,3
                 chi0_head(idir,jdir,io) = chi0_head(idir,jdir,io) +  green_w(io) * mir_kbz(idir)*CONJG(mir_kbz(jdir))
-                ! Add contribution due to extrapolar technique.
-                !if (gwcomp==1.and.ABS(deltaf_b1b2) >= GW_TOL_DOCC) then
                 if (gwcomp==1) then
+                  ! Add contribution due to extrapolar technique.
                   chi0_head(idir,jdir,io) = chi0_head(idir,jdir,io) + green_enhigh_w(io)*mir_kbz(idir)*CONJG(mir_kbz(jdir))
                 end if
              end do
@@ -794,11 +786,11 @@ subroutine accumulate_chi0_q0(is_metallic,ik_bz,isym_kbz,itim_kbz,gwcomp,nspinor
      ! Check if green_w(io) is real (=> pure imaginary omega)
      ! and that it is not a metal
      ! then the corresponding chi0(io) is hermitian
-     if( ABS(AIMAG(green_w(io))) < 1.0e-6_dp .and. .not. is_metallic ) then
-       dr=green_w(io)
+     if (ABS(AIMAG(green_w(io))) < 1.0e-6_dp .and. .not. is_metallic) then
+       dr = green_w(io)
        call xherk('U','N',Ep%npwe,nsymop,dr,rhotwg_sym,Ep%npwe,one_gw,chi0(:,:,io),Ep%npwe)
      else
-       dd=green_w(io)
+       dd = green_w(io)
        call xgemm('N','C',Ep%npwe,Ep%npwe,nsymop,dd,rhotwg_sym,Ep%npwe,rhotwg_sym,Ep%npwe,cone_gw,chi0(:,:,io),Ep%npwe)
      endif
    end do
@@ -806,7 +798,7 @@ subroutine accumulate_chi0_q0(is_metallic,ik_bz,isym_kbz,itim_kbz,gwcomp,nspinor
    ABI_FREE(rhotwg_sym)
 
  CASE DEFAULT
-   ABI_BUG(sjoin('Wrong value of symchi ',itoa(Ep%symchi)))
+   ABI_BUG(sjoin('Wrong value of symchi:', itoa(Ep%symchi)))
  END SELECT
 
 end subroutine accumulate_chi0_q0
@@ -1122,7 +1114,6 @@ subroutine assemblychi0sf(ik_bz,symchi,Ltg_q,npwepG0,npwe,rhotwg,Gsph_epsG0,&
 !arrays
  integer :: Sm1_gmG0(npwe)
  complex(gwpc) :: rhotwg_sym(npwe)
-
 
 ! *************************************************************************
 
