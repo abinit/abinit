@@ -582,7 +582,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  ABI_MALLOC(vhartr1,(cplex*nfftf))
  ABI_MALLOC(vtrial1,(cplex*nfftf,nspden))
  if(.not.kramers_deg) then
-   ABI_MALLOC(vhartr1_mq,(cplex*nfftf))
    ABI_MALLOC(vtrial1_mq,(cplex*nfftf,nspden))
    ABI_MALLOC(d2bbb_mq,(2,3,3,mpert,dtset%mband,dtset%mband*prtbbb))
    ABI_MALLOC(d2bbb_pq,(2,3,3,mpert,dtset%mband,dtset%mband*prtbbb))
@@ -946,16 +945,15 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 
    !Initializations 
    if (.not.kramers_deg) then
-   !same problem as with density reconstruction, TODO proper fft parallelization...
      cg1(:,:)=cg1_pq(:,:)
      cg1_active(:,:)=cg1_active_pq(:,:)
+
+     !same problem as with density reconstruction, TODO proper fft parallelization...
      do ifft=1,nfftf
        vtrial1_mq(2*ifft-1,1)=+vtrial1(2*ifft-1,1)
        vtrial1_mq(2*ifft  ,1)=-vtrial1(2*ifft  ,1)
        nvresid1_mq(2*ifft-1,1)=+nvresid1(2*ifft-1,1)
        nvresid1_mq(2*ifft  ,1)=-nvresid1(2*ifft  ,1)
-!       rhor1_mq(2*ifft-1,1)=+rhor1(2*ifft-1,1)
-!       rhor1_mq(2*ifft  ,1)=-rhor1(2*ifft  ,1)
      end do
      if (nspden >= 2) then
        do ifft=1,nfftf
@@ -963,8 +961,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
          vtrial1_mq(2*ifft  ,2)=-vtrial1(2*ifft  ,2)
          nvresid1_mq(2*ifft-1,2)=+nvresid1(2*ifft-1,2)
          nvresid1_mq(2*ifft  ,2)=-nvresid1(2*ifft  ,2)
-!         rhor1_mq(2*ifft-1,2)=+rhor1(2*ifft-1,2)
-!         rhor1_mq(2*ifft  ,2)=-rhor1(2*ifft  ,2)
        end do
      end if
      if (nspden > 2) then
@@ -977,19 +973,10 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
          nvresid1_mq(2*ifft  ,3)= nvresid1(2*ifft-1,4) !Im[V^12],see definition of v(:,4) cplex=2 case
          nvresid1_mq(2*ifft  ,4)= nvresid1(2*ifft-1,3) !Re[V^21]=Re[V^12]
          nvresid1_mq(2*ifft-1,4)= nvresid1(2*ifft  ,3) !Re[V^21]=Re[V^12]
-!         rhor1_mq(2*ifft-1,3)= rhor1(2*ifft  ,4)
-!         rhor1_mq(2*ifft  ,3)= rhor1(2*ifft-1,4)
-!         rhor1_mq(2*ifft  ,4)= rhor1(2*ifft-1,3) 
-!         rhor1_mq(2*ifft-1,4)= rhor1(2*ifft  ,3) 
        end do
      end if
    end if
-!   write(200,*) "ITERATION:", istep
-!   write(201,*) "ITERATION:", istep
-!   do ifft=1,nfftf
-!       write(200,*) vtrial1(2*ifft-1,1),vtrial1(2*ifft  ,1)
-!       write(201,*) vtrial1_mq(2*ifft-1,1),vtrial1_mq(2*ifft  ,1)
-!   end do
+
 !  #######################e1magh###############################################
 !  Compute the 1st-order density rho1 from the 1st-order trial potential
 !  ----------------------------------------------------------------------
@@ -1004,14 +991,12 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &   rhor1,rmet,rprimd,symaf1,symrc1,symrl1,tnons1,ucvol,usecprj,useylmgr1,ddk_f,&
 &   vectornd,vtrial,vtrial1,with_vectornd,wtk_rbz,xred,ylm,ylm1,ylmgr1,omega=omega)
 
-
-
    if (.not.kramers_deg) then
-
      rhor1_pq(:,:)=rhor1(:,:) !at this stage rhor1_pq contains only one term of the 1st order density at +q
      rhog1_pq(:,:)=rhog1(:,:) !same for rhog1_pq
      cg1_pq(:,:)=cg1(:,:)
      cg1_active_pq(:,:)=cg1_active(:,:)
+
      !get the second term related to 1st order wf at -q
      call dfpt_vtorho(cg,cg_mq,cg1_mq,cg1_active_mq,cplex,cprj,cprjq,cprj1,&
 &     dbl_nnsclo_mq,dim_eig2rf,doccde_rbz,docckde_mq,dtefield,dtfil,dtset,-dtset%qptn,edocc_mq,&
@@ -1031,12 +1016,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
        rhor1(2*ifft  ,:) = half*(rhor1_pq(2*ifft  ,:)-rhor1_mq(2*ifft  ,:))
      end do
      call fourdp(cplex,rhog1,rhor1(:,1),-1,mpi_enreg,nfftf,1, ngfftf, 0)
-
-     !reconstruct the first-order wave functions
-     cg1(1,:)=half*(cg1_pq(1,:)+cg1_mq(1,:))
-     cg1(2,:)=half*(cg1_pq(2,:)-cg1_mq(2,:))
-     cg1_active(1,:)=half*(cg1_active_pq(1,:)+cg1_active_mq(1,:))
-     cg1_active(2,:)=half*(cg1_active_pq(2,:)-cg1_active_mq(2,:))
    end if
 
    if (dtset%berryopt== 4.or.dtset%berryopt== 6.or.dtset%berryopt== 7.or.&
@@ -1671,7 +1650,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  ABI_FREE(fcart)
  ABI_FREE(vtrial1)
  if (.not.kramers_deg) then
-   ABI_FREE(vhartr1_mq)
    ABI_FREE(vxc1_mq)
    ABI_FREE(vtrial1_mq)
    ABI_FREE(d2bbb_mq)
