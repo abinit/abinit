@@ -63,8 +63,7 @@ EXTERNAL_MODS = {
     # Scale-UP for effective models
     "scup_global",
     # GreenX library (temporary version)
-    "mp2_grids",
-    "gx_api",
+    "gx_minimax",
 }
 
 
