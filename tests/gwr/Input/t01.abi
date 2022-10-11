@@ -5,6 +5,7 @@
 # Dataset 4: RPA energy calculation within ACFD
 
 ndtset      4
+timopt 1
 #nsym 1 kptopt 3
 
 ####################
@@ -108,7 +109,6 @@ pseudos "Pseudodojo_nc_sr_04_pbe_standard_psp8/Si.psp8"
 #%% [files]
 #%% files_to_test =
 #%%   t01.abo, tolnlines = 25, tolabs = 1.1e-3, tolrel = 1.1, fld_options = -medium
-########%%   t01.abo, tolnlines = 12, tolabs = 1.1e-3, tolrel = 3.0e-3, fld_options = -medium
 #%% [paral_info]
 #%% max_nprocs = 12
 #%% [extra_info]

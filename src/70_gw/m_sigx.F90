@@ -58,6 +58,7 @@ module m_sigx
 !!***
 
  public :: calc_sigx_me
+ public :: sigx_symmetrize   ! Symmetrize Sig_x matrix elements
 !!***
 
 contains
@@ -149,7 +150,7 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, Sigp, 
  integer :: ik_bz, ik_ibz, isym_q, iq_bz, iq_ibz, spin, isym, jb, is_idx
  integer :: jik,jk_bz,jk_ibz,kb,nspinor,nsppol,ifft
  integer :: nq_summed,ibsp,dimcprj_gw,dim_rtwg, isym_kgw, isym_ki
- integer :: spad, spadx1, spadx2, irow, npw_k, ndegs, wtqm, wtqp
+ integer :: spad, spadx1, spadx2, irow, npw_k, wtqm, wtqp
  integer :: npwx, x_nfft, x_mgfft, x_fftalga, nsig_ab
  integer :: nfftf, mgfftf, nhat12_grdim, my_nbks, use_padfft, use_padfftf
  real(dp) :: cpu, wall, gflops, fact_spin, theta_mu_minus_esum, theta_mu_minus_esum2, tol_empty
@@ -160,13 +161,13 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, Sigp, 
  type(wave_t),pointer :: wave_sum, wave_jb
 !arrays
  integer :: g0(3), spinor_padx(2,4)
- integer,allocatable :: igfftxg0(:), igfftfxg0(:), degtab(:,:,:), x_gbound(:,:), gboundf(:,:)
+ integer,allocatable :: igfftxg0(:), igfftfxg0(:), x_gbound(:,:), gboundf(:,:)
  integer,allocatable :: ktabr(:,:),irottb(:,:),ktabrf(:,:), proc_distrb(:,:,:)
  real(dp) :: ksum(3), kgw(3), kgw_m_ksum(3), qbz(3), q0(3), spinrot_kbz(4), spinrot_kgw(4), tsec(2)
  real(dp),contiguous, pointer :: qp_ene(:,:,:), qp_occ(:,:,:)
  real(dp),allocatable :: nhat12(:,:,:),grnhat12(:,:,:,:)
  complex(gwpc),allocatable :: vc_sqrt_qbz(:), rhotwg(:), rhotwgp(:), rhotwg_ki(:,:), ur_bdgw(:,:), ur_ibz(:)
- complex(dpc),allocatable  :: sigxcme_tmp(:,:), sigxme_tmp(:,:,:), sym_sigx(:,:,:), sigx(:,:,:,:)
+ complex(dpc),allocatable  :: sigxcme_tmp(:,:), sigxme_tmp(:,:,:), sigx(:,:,:,:)
  complex(gwpc),allocatable :: ur_ae_sum(:),ur_ae_onsite_sum(:),ur_ps_onsite_sum(:)
  complex(gwpc),allocatable :: ur_ae_bdgw(:,:),ur_ae_onsite_bdgw(:,:),ur_ps_onsite_bdgw(:,:)
  complex(gwpc),contiguous, pointer :: cg_jb(:),cg_sum(:)
@@ -321,18 +322,6 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, Sigp, 
  if (Sigp%symsigma > 0) then
    call ltg_k%print(std_out, prtvol, mode_paral='COLL')
    nq_summed = sum(ltg_k%ibzq(:))
-
-   ! Find number of degenerates subspaces and number of bands in each subspace.
-   ! The tolerance is a little bit arbitrary (0.001 eV)
-   ! It could be reduced, in particular in case of nearly accidental degeneracies
-   ABI_ICALLOC(degtab, (bmin:bmax, bmin:bmax, nsppol))
-   do spin=1,nsppol
-     do ib=bmin,bmax
-       do jb=bmin,bmax
-        if (abs(qp_ene(ib, jk_ibz, spin) - qp_ene(jb, jk_ibz, spin)) < 0.001 / Ha_ev) degtab(ib, jb, spin) = 1
-       end do
-     end do
-   end do
  end if ! symsigma
 
  write(msg,'(2a,i0,a)')ch10,' calc_sigx_me: calculation status (', nq_summed, ' to be completed):'
@@ -532,7 +521,7 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, Sigp, 
          ! In 3-D systems, the factor sqrt(4pi) is included
          do ii=1,nspinor
            spad = (ii-1) * npwx
-           rhotwg_ki(spad+1:spad+npwx,jb) = rhotwg_ki(spad+1:spad + npwx,jb) * vc_sqrt_qbz(1:npwx)
+           rhotwg_ki(spad+1:spad+npwx, jb) = rhotwg_ki(spad+1:spad + npwx, jb) * vc_sqrt_qbz(1:npwx)
          end do
 
          if (ik_bz == jk_bz) then
@@ -548,7 +537,7 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, Sigp, 
 
            if (nspinor == 1) then
              rhotwg_ki(1, jb) = czero_gw
-             if (band_sum == jb) rhotwg_ki(1,jb) = CMPLX(SQRT(Vcp%i_sz_resid), 0.0_gwp)
+             if (band_sum == jb) rhotwg_ki(1,jb) = cmplx(sqrt(Vcp%i_sz_resid), 0.0_gwp)
              !rhotwg_ki(1,jb) = czero_gw ! DEBUG
 
            else
@@ -560,9 +549,9 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, Sigp, 
                ABI_CHECK(wfd%get_wave_ptr(jb, jk_ibz, spin, wave_jb, msg) == 0, msg)
                cg_jb  => wave_jb%ug
                ctmp = xdotc(npw_k, cg_sum(1:), 1, cg_jb(1:), 1)
-               rhotwg_ki(1, jb) = CMPLX(SQRT(Vcp%i_sz_resid), 0.0_gwp) * real(ctmp)
+               rhotwg_ki(1, jb) = cmplx(sqrt(Vcp%i_sz_resid), 0.0_gwp) * real(ctmp)
                ctmp = xdotc(npw_k, cg_sum(npw_k+1:), 1, cg_jb(npw_k+1:), 1)
-               rhotwg_ki(npwx+1, jb) = CMPLX(SQRT(Vcp%i_sz_resid), 0.0_gwp) * real(ctmp)
+               rhotwg_ki(npwx+1, jb) = cmplx(sqrt(Vcp%i_sz_resid), 0.0_gwp) * real(ctmp)
              end if
              !rhotwg_ki(1, jb) = zero; rhotwg_ki(npwx+1, jb) = zero
              ! PAW is missing
@@ -658,48 +647,10 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, Sigp, 
  ! NOTE: Presently only diagonal terms are considered
  ! TODO QP-SCGW required a more involved approach, there is a check in sigma
  ! TODO it does not work if spinor == 2.
+
  do spin=1,nsppol
-   if (can_symmetrize(spin)) then
-     ABI_MALLOC(sym_sigx, (bmin:bmax, bmin:bmax, nsig_ab))
-     sym_sigx = czero
-
-     ! Average over degenerate diagonal elements.
-     do ib=bmin,bmax
-       ndegs=0
-       do jb=bmin,bmax
-         if (degtab(ib,jb,spin)==1) then
-           if (nspinor == 1) then
-             sym_sigx(ib, ib, 1) = sym_sigx(ib, ib, 1) + sum(sigx(:,jb,jb,spin))
-           else
-             do ii=1,nsig_ab
-               sym_sigx(ib, ib, ii) = sym_sigx(ib, ib, ii) + sum(sigx(:,jb,jb,ii))
-             end do
-           end if
-         end if
-         ndegs = ndegs + degtab(ib,jb,spin)
-       end do
-       sym_sigx(ib,ib,:) = sym_sigx(ib,ib,:) / ndegs
-     end do
-
-     if (gwcalctyp >= 20) then
-       call esymm_symmetrize_mels(QP_sym(spin),bmin,bmax,sigx(:,:,:,spin),sym_sigx(:,:,1))
-     end if
-
-     ! Copy symmetrized values.
-     do ib=bmin,bmax
-       do jb=bmin,bmax
-         if (nspinor == 1) then
-           sigxme_tmp(ib,jb,spin) = sym_sigx(ib,jb,1)
-         else
-           do ii=1,nsig_ab
-             sigxme_tmp(ib,jb,ii) = sym_sigx(ib,jb,ii)
-           end do
-         end if
-       end do
-     end do
-
-     ABI_FREE(sym_sigx)
-   end if
+   if (.not. can_symmetrize(spin)) cycle
+   call sigx_symmetrize(jk_ibz, spin, bmin, bmax, nsppol, nspinor, nsig_ab, qp_ene, sigx, sigxme_tmp)
  end do
 
  if (gwcalctyp >= 20) then
@@ -734,7 +685,7 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, Sigp, 
  end do
 
  ! Save full exchange matrix in Sr%
- Sr%x_mat(bmin:bmax, bmin:bmax, jk_ibz,:) = sigxme_tmp(bmin:bmax,bmin:bmax,:)
+ Sr%x_mat(bmin:bmax, bmin:bmax, jk_ibz, :) = sigxme_tmp(bmin:bmax, bmin:bmax,:)
  ABI_FREE(sigxme_tmp)
  ABI_FREE(sigxcme_tmp)
 
@@ -768,7 +719,6 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, Sigp, 
  ABI_FREE(ktabr)
  ABI_FREE(sigx)
  ABI_FREE(proc_distrb)
- ABI_SFREE(degtab)
 
  call timab(430,2,tsec) ! csigme (SigX)
  call cwtime_report(" calc_sigx_me:", cpu, wall, gflops)
@@ -776,6 +726,81 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, Sigp, 
  DBG_EXIT("COLL")
 
 end subroutine calc_sigx_me
+!!***
+
+!!****f* ABINIT/sigx_symmetrize
+!! NAME
+!! sigx_symmetrize
+!!
+!! FUNCTION
+!!  Symmetrize Sig_x matrix elements
+!!
+
+subroutine sigx_symmetrize(jk_ibz, spin, bmin, bmax, nsppol, nspinor, nsig_ab, qp_ene, sigx, sigxme_tmp)
+
+ integer,intent(in) :: jk_ibz, spin, bmin, bmax, nsppol, nspinor, nsig_ab
+ real(dp),intent(in) :: qp_ene(:,:,:)
+ complex(dp),intent(in) :: sigx(2, bmin:bmax, bmin:bmax, nsppol * nsig_ab)
+ complex(dp),intent(inout) :: sigxme_tmp(bmin:bmax, bmin:bmax, nsppol * nsig_ab)
+
+!Local variables ------------------------------
+ integer :: ib, jb, ndegs, ii
+ integer,allocatable :: degtab(:,:)
+ complex(dpc),allocatable :: sym_sigx(:,:,:)
+
+!************************************************************************
+
+ ! Find number of degenerates subspaces and number of bands in each subspace.
+ ! The tolerance is a little bit arbitrary (0.001 eV)
+ ! It could be reduced, in particular in case of nearly accidental degeneracies
+
+ ABI_ICALLOC(degtab, (bmin:bmax, bmin:bmax))
+ do ib=bmin,bmax
+   do jb=bmin,bmax
+    if (abs(qp_ene(ib, jk_ibz, spin) - qp_ene(jb, jk_ibz, spin)) < 0.001 / Ha_ev) degtab(ib, jb) = 1
+   end do
+ end do
+
+ ABI_MALLOC(sym_sigx, (bmin:bmax, bmin:bmax, nsig_ab))
+ sym_sigx = czero
+
+ ! Average over degenerate diagonal elements.
+ do ib=bmin,bmax
+   ndegs=0
+   do jb=bmin,bmax
+     if (degtab(ib,jb)==1) then
+       if (nspinor == 1) then
+         sym_sigx(ib, ib, 1) = sym_sigx(ib, ib, 1) + sum(sigx(:,jb,jb,spin))
+       else
+         do ii=1,nsig_ab
+           sym_sigx(ib, ib, ii) = sym_sigx(ib, ib, ii) + sum(sigx(:,jb,jb,ii))
+         end do
+       end if
+     end if
+     ndegs = ndegs + degtab(ib,jb)
+   end do
+   sym_sigx(ib,ib,:) = sym_sigx(ib,ib,:) / ndegs
+ end do
+
+ !if (gwcalctyp >= 20) call esymm_symmetrize_mels(QP_sym(spin),bmin,bmax,sigx(:,:,:,spin),sym_sigx(:,:,1))
+
+ ! Copy symmetrized values.
+ do ib=bmin,bmax
+   do jb=bmin,bmax
+     if (nspinor == 1) then
+       sigxme_tmp(ib,jb,spin) = sym_sigx(ib,jb,1)
+     else
+       do ii=1,nsig_ab
+         sigxme_tmp(ib,jb,ii) = sym_sigx(ib,jb,ii)
+       end do
+     end if
+   end do
+ end do
+
+ ABI_FREE(sym_sigx)
+ ABI_FREE(degtab)
+
+end subroutine sigx_symmetrize
 !!***
 
 end module m_sigx

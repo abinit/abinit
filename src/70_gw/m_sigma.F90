@@ -36,7 +36,6 @@ MODULE m_sigma
 #endif
  use m_wfd
 
-
  use defs_datatypes,   only : ebands_t
  use defs_abitypes,    only : MPI_type
  use m_numeric_tools,  only : c2r
@@ -136,8 +135,8 @@ MODULE m_sigma
   ! Diagonal matrix elements $\<nks|\Sigma_xc|nks\>$ taking sqrt(occs) in \Sigma_x, occs in [0,1]
 
   complex(dp),allocatable :: x_mat(:,:,:,:)
-  ! (b1gw:b2gw,b1gw:b2gw,nkibz,nsppol*nsig_ab))
-  ! Matrix elements of $\<nks|\Sigma_x|nk's\>$
+  ! (b1gw:b2gw, b1gw:b2gw, nkibz, nsppol*nsig_ab)
+  ! Matrix elements of $\<nks|\Sigma_x|mks\>$
 
   real(dp),allocatable :: vxcme(:,:,:)
   ! (b1gw:b2gw,nkibz,nsppol*nsig_ab))

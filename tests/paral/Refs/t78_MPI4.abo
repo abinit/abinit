@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  4 Sep 2022.
-- ( at 02h00 )
+.Starting date : Mon 10 Oct 2022.
+- ( at 14h38 )
   
 - input  file    -> /Users/gmatteo/git_repos/abinit_gwr/_build/tests/Test_suite/paral_t78_MPI4/t78.abi
 - output file    -> t78_MPI4.abo
@@ -204,6 +204,7 @@ P           mkmem           1
            symrel      1  0  0   0  1  0   0  0  1       1  0  0  -1 -1  0   0  0 -1
                        0  1  0  -1 -1  0   0  0  1       0  1  0   1  0  0   0  0 -1
                       -1 -1  0   1  0  0   0  0  1      -1 -1  0   0  1  0   0  0 -1
+           timopt           1
             tnons      0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000 -0.3333333     0.0000000  0.0000000 -0.3333333
                        0.0000000  0.0000000  0.3333333     0.0000000  0.0000000  0.3333333
@@ -730,15 +731,15 @@ iteration_state: {dtset: 3, }
 iteration_state: {dtset: 3, }
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
-QP_VBM_band: 25
-QP_CBM_band: 24
+QP_VBM_band: 24
+QP_CBM_band: 25
 KS_gap     :    3.170
-QP_gap     :    5.459
-Delta_QP_KS:    2.289
+QP_gap     :    7.226
+Delta_QP_KS:    4.056
 data: !Tabular |
      Band      E0 <VxcDFT>   SigX SigC(E0)     Z1      Z2  E-E0       E
-       24  -1.797 -17.192   0.000   2.417   0.855  -0.010  16.768  14.972
-       25   1.374 -10.429   0.000  -1.427   0.904  -0.003   8.138   9.512
+       24  -1.797 -17.192 -21.431   2.417   0.855  -0.010  -1.557  -3.354
+       25   1.374 -10.429  -6.238  -1.427   0.904  -0.003   2.498   3.872
 ...
 
 
@@ -746,15 +747,15 @@ data: !Tabular |
 iteration_state: {dtset: 3, }
 kpoint     : [   0.500,    0.000,    0.000, ]
 spin       : 1
-QP_VBM_band: 25
-QP_CBM_band: 24
+QP_VBM_band: 24
+QP_CBM_band: 25
 KS_gap     :    6.036
-QP_gap     :    2.067
-Delta_QP_KS:   -3.969
+QP_gap     :   10.427
+Delta_QP_KS:    4.391
 data: !Tabular |
      Band      E0 <VxcDFT>   SigX SigC(E0)     Z1      Z2  E-E0       E
-       24  -1.500 -17.930   0.000   2.517   0.854  -0.009  17.470  15.970
-       25   4.536 -12.131   0.000  -1.669   0.895  -0.012   9.367  13.903
+       24  -1.500 -17.930 -22.038   2.517   0.854  -0.009  -1.360  -2.860
+       25   4.536 -12.131  -7.077  -1.669   0.895  -0.012   3.030   7.566
 ...
 
 
@@ -918,6 +919,7 @@ P           mkmem           1
            symrel      1  0  0   0  1  0   0  0  1       1  0  0  -1 -1  0   0  0 -1
                        0  1  0  -1 -1  0   0  0  1       0  1  0   1  0  0   0  0 -1
                       -1 -1  0   1  0  0   0  0  1      -1 -1  0   0  1  0   0  0 -1
+           timopt           1
             tnons      0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000 -0.3333333     0.0000000  0.0000000 -0.3333333
                        0.0000000  0.0000000  0.3333333     0.0000000  0.0000000  0.3333333
@@ -960,10 +962,45 @@ P           mkmem           1
 
 ================================================================================
 
+- Total cpu        time (s,m,h):        257.8        4.30      0.072
+- Total wall clock time (s,m,h):        383.5        6.39      0.107
+-
+- For major independent code sections, cpu and wall times (sec),
+-  as well as % of the time and number of calls for node 0
+-
+-<BEGIN_TIMER mpi_nprocs = 4, omp_nthreads = 1, mpi_rank = 0>
+- cpu_time =           64.6, wall_time =           96.0
+-
+- routine                            cpu     %          wall     %      number of calls Gflops    Speedup Efficacity
+-                                                                        (-1=no count)
+- gwr_build_sigmac                 30.100  11.7        44.459  11.6              1      -1.00        0.68       0.68
+- gwr_build_tchi                   25.285   9.8        39.531  10.3              1      -1.00        0.64       0.64
+- fourwf%(pot)                      1.737   0.7         2.263   0.6           2123      -1.00        0.77       0.77
+- others (144)                      6.157   2.4         7.925   2.1             -1      -1.00        0.78       0.78
+-<END_TIMER>
+-
+- subtotal                         63.279  24.5        94.178  24.6                                  0.67       0.67
 
-- Timing analysis has been suppressed with timopt=0
+- For major independent code sections, cpu and wall times (sec),
+- as well as % of the total time and number of calls 
 
+-<BEGIN_TIMER mpi_nprocs = 4, omp_nthreads = 1, mpi_rank = world>
+- cpu_time =         257.8, wall_time =         383.5
+-
+- routine                            cpu     %          wall     %      number of calls Gflops    Speedup Efficacity
+-                                                                        (-1=no count)
+- gwr_build_sigmac                120.359  46.7       177.891  46.4              4      -1.00        0.68       0.68
+- gwr_build_tchi                  101.245  39.3       158.357  41.3              4      -1.00        0.64       0.64
+- fourwf%(pot)                      7.037   2.7         9.072   2.4           8499      -1.00        0.78       0.78
+- ewald                             5.768   2.2         7.227   1.9             12      -1.00        0.80       0.80
+- nonlop(apply)                     4.281   1.7         5.701   1.5           8499      -1.00        0.75       0.75
+- pspini                            2.814   1.1         3.460   0.9             12      -1.00        0.81       0.81
+- gwr_build_green                   2.296   0.9         3.833   1.0              4      -1.00        0.60       0.60
+- invars2                           1.643   0.6         2.004   0.5             12      -1.00        0.82       0.82
+- others (139)                      7.527   2.9         9.423   2.5             -1      -1.00        0.80       0.80
+-<END_TIMER>
 
+- subtotal                        252.970  98.1       376.968  98.3                                  0.67       0.67
 
 ================================================================================
 
@@ -1044,7 +1081,7 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         61.5  wall=         86.9
+- Proc.   0 individual time (sec): cpu=         64.6  wall=         96.0
 
 ================================================================================
 
