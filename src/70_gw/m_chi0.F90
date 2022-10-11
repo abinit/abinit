@@ -32,7 +32,7 @@ module m_chi0
  use m_dtset
 
  use defs_datatypes,    only : pseudopotential_type, ebands_t
- use m_fstrings,        only : ftoa, sjoin
+ use m_fstrings,        only : ftoa, sjoin, itoa
  use m_gwdefs,          only : GW_TOL_DOCC, GW_TOL_W0, czero_gw, em1params_t, g0g0w
  use m_numeric_tools,   only : imin_loc, print_arr
  use m_geometry,        only : normv, vdotw
@@ -79,7 +79,7 @@ contains
 !! cchi0q0
 !!
 !! FUNCTION
-!! Calculate chi0 in the limit q-->0
+!! Calculate chi0 in the limit q --> 0
 !!
 !! INPUTS
 !!  use_tr=If .TRUE. Wfs_val are allocate and only resonant transitions are evaluated (assumes time reversal symmetry)
@@ -156,10 +156,11 @@ contains
 !!  u(r,b,-Sk) = u*(R^-1(r-t),b,k) e^{ iSK*t}
 !!
 !!  The gradient of Vnl(K,Kp) for the k-point in the BZ should be:
+!!
 !!   gradvnl(SG,SGp,Sk)=S gradvnl(G,Gp,kibz)
 !!
 !! TODO
-!!  Check npwepG0 before Switching on umklapp
+!!  Check npwepG0 before activating umklapps
 !!
 !! SOURCE
 
@@ -208,9 +209,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
  real(dp) :: cpu_time,wall_time,gflops
  real(dp) :: fac,fac1,fac2,fac3,fac4,spin_fact,deltaf_b1b2,weight,factor
  real(dp) :: max_rest,min_rest,my_max_rest,my_min_rest
- real(dp) :: en_high,deltaeGW_enhigh_b2
- real(dp) :: wl,wr,numerator,deltaeGW_b1b2
- real(dp) :: gw_gsq,memreq
+ real(dp) :: en_high,deltaeGW_enhigh_b2,wl,wr,numerator,deltaeGW_b1b2,gw_gsq,memreq
  complex(dpc) :: deltaeKS_b1b2
  logical :: qzero,luwindow,is_metallic
  character(len=500) :: msg_tmp,msg,allup
@@ -218,13 +217,10 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
  type(wave_t),pointer :: wave1, wave2
 !arrays
  integer,ABI_CONTIGUOUS pointer :: kg_k(:,:)
- integer :: ucrpa_bands(2)
+ integer :: ucrpa_bands(2), got(Wfd%nproc)
  integer :: wtk_ltg(Kmesh%nbz)
- integer :: got(Wfd%nproc)
- integer,allocatable :: tabr_k(:),tabrf_k(:)
- integer,allocatable :: igffteps0(:),gspfft_igfft(:),igfftepsG0f(:)
- integer,allocatable :: gw_gfft(:,:),gw_gbound(:,:),dummy_gbound(:,:),gboundf(:,:)
- integer,allocatable :: bbp_ks_distrb(:,:,:,:)
+ integer,allocatable :: tabr_k(:),tabrf_k(:), igffteps0(:),gspfft_igfft(:),igfftepsG0f(:)
+ integer,allocatable :: gw_gfft(:,:),gw_gbound(:,:),dummy_gbound(:,:),gboundf(:,:), bbp_ks_distrb(:,:,:,:)
  real(dp) :: kbz(3),spinrot_kbz(4),q0(3)
  real(dp),ABI_CONTIGUOUS pointer :: ks_energy(:,:,:),qp_energy(:,:,:),qp_occ(:,:,:)
  real(dp),allocatable :: omegasf(:)
@@ -232,29 +228,26 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
  complex(gwpc),allocatable :: rhotwg(:)
  complex(dpc),allocatable :: green_w(:),green_enhigh_w(:)
  complex(dpc),allocatable :: sf_lwing(:,:,:),sf_uwing(:,:,:),sf_head(:,:,:)
- complex(dpc) :: wng(3),chq(3)
+ complex(dpc) :: wng(3), chq(3)
  complex(dpc) :: ph_mkt
- complex(gwpc),allocatable :: sf_chi0(:,:,:)
  complex(dpc),allocatable :: kkweight(:,:)
- complex(gwpc),allocatable :: ur1_kibz(:),ur2_kibz(:)
- complex(gwpc),allocatable :: usr1_k(:),ur2_k(:)
- complex(gwpc),allocatable :: wfwfg(:)
+ complex(gwpc),allocatable :: ur1_kibz(:),ur2_kibz(:), usr1_k(:),ur2_k(:), wfwfg(:), sf_chi0(:,:,:)
  complex(gwpc),allocatable :: ur_ae1(:),ur_ae_onsite1(:),ur_ps_onsite1(:)
  complex(gwpc),allocatable :: ur_ae2(:),ur_ae_onsite2(:),ur_ps_onsite2(:)
  complex(gwpc),ABI_CONTIGUOUS pointer :: ug1(:),ug2(:)
  complex(dpc), allocatable :: coeffW_BZ(:,:,:,:,:,:)
  logical :: gradk_not_done(Kmesh%nibz)
  logical,allocatable :: bbp_mask(:,:)
- type(pawcprj_type),allocatable :: Cprj1_bz(:,:),Cprj2_bz(:,:)
- type(pawcprj_type),allocatable :: Cprj1_ibz(:,:),Cprj2_ibz(:,:)
+ type(pawcprj_type),allocatable :: Cprj1_bz(:,:),Cprj2_bz(:,:), Cprj1_ibz(:,:),Cprj2_ibz(:,:)
  type(pawpwij_t),allocatable :: Pwij(:),Pwij_fft(:)
  type(pawhur_t),allocatable :: Hur(:)
  type(vkbr_t),allocatable :: vkbr(:)
+
 !************************************************************************
 
  DBG_ENTER("COLL")
 
- call cwtime(cpu_time,wall_time,gflops,"start")
+ call cwtime(cpu_time, wall_time, gflops, "start")
 
  ! Change FFT mesh if needed
  if (ANY(ngfft_gw(1:3) /= Wfd%ngfft(1:3))) call wfd%change_ngfft(Cryst,Psps,ngfft_gw)
@@ -263,51 +256,49 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
  if (Dtset%pawcross==1) mgfftf = MAXVAL(ngfftf(1:3))
 
  ! Copy important variables.
- comm = Wfd%comm; nsppol = Wfd%nsppol; nspinor = Wfd%nspinor; mband = Wfd%mband
- nfft = Wfd%nfft
- ABI_CHECK(Wfd%nfftot==nfftot_gw,"Wrong nfftot_gw")
- dim_rtwg=1 !; if (nspinor==2) dim_rtwg=2 ! Can reduce size depending on Ep%nI and Ep%nj
+ comm = Wfd%comm; nsppol = Wfd%nsppol; nspinor = Wfd%nspinor; mband = Wfd%mband; nfft = Wfd%nfft
+ ABI_CHECK(Wfd%nfftot == nfftot_gw, "Wrong nfftot_gw")
+ dim_rtwg = 1 !; if (nspinor==2) dim_rtwg=2 ! Can reduce size depending on Ep%nI and Ep%nj
 
  is_metallic = ebands_has_metal_scheme(QP_BSt)
  ucrpa_bands(1)=dtset%ucrpa_bands(1)
  ucrpa_bands(2)=dtset%ucrpa_bands(2)
  luwindow=.false.
- if(abs(dtset%ucrpa_window(1)+1_dp)>tol8.or.(abs(dtset%ucrpa_window(2)+1_dp)>tol8)) then
-   luwindow=.true.
- endif
+ if (abs(dtset%ucrpa_window(1)+1_dp)>tol8.or.(abs(dtset%ucrpa_window(2)+1_dp)>tol8)) luwindow=.true.
 
  ! For cRPA calculation of U: read forlb.ovlp
  if(dtset%ucrpa>=1 .AND. dtset%plowan_compute<10) then
    call read_plowannier(Cryst,bandinf,bandsup,coeffW_BZ,itypatcor,Kmesh,lcor,luwindow,&
-& nspinor,nsppol,pawang,dtset%prtvol,ucrpa_bands)
+     nspinor,nsppol,pawang,dtset%prtvol,ucrpa_bands)
  endif
 
  ks_energy => KS_BSt%eig
  qp_energy => QP_BSt%eig; qp_occ => QP_BSt%occ
 
- chi0_lwing = czero; chi0_uwing= czero; chi0_head = czero
+ chi0_lwing = czero; chi0_uwing = czero; chi0_head = czero
 
- if (Psps%usepaw==0) then
-   if (Ep%inclvkb/=0) then
-     ! Include the term <n,k|[Vnl,iqr]|n"k>' for q->0.
-     ABI_CHECK(nspinor==1,"nspinor+inclvkb not coded")
+ if (Psps%usepaw == 0) then
+   if (Ep%inclvkb /= 0) then
+     ! Include the term <n,k|[Vnl,iqr]|n"k>' for q -> 0.
+     ABI_CHECK(nspinor == 1, "nspinor with inclvkb not coded")
    else
      ABI_WARNING('Neglecting <n,k|[Vnl,iqr]|m,k>')
    end if
+
  else
    ! For PAW+DFT+U, precalculate <\phi_i|[Hu,r]|phi_j\>
-   ABI_MALLOC(HUr,(Cryst%natom))
-   if (Dtset%usepawu/=0) then
+   ABI_MALLOC(HUr, (Cryst%natom))
+   if (Dtset%usepawu /= 0) then
      call pawhur_init(hur,nsppol,Dtset%pawprtvol,Cryst,Pawtab,Pawang,Pawrad,Paw_ij)
    end if
  end if
 
  ! Initialize the completeness correction.
- ABI_MALLOC(green_enhigh_w,(Ep%nomega))
- green_enhigh_w=czero
+ ABI_MALLOC(green_enhigh_w, (Ep%nomega))
+ green_enhigh_w = czero
 
- if (Ep%gwcomp==1) then
-   en_high=MAXVAL(qp_energy(Ep%nbnds,:,:))+Ep%gwencomp
+ if (Ep%gwcomp == 1) then
+   en_high = MAXVAL(qp_energy(Ep%nbnds,:,:))+Ep%gwencomp
    write(msg,'(a,f8.2,a)')' Using completeness correction with energy ',en_high*Ha_eV,' [eV] '
    call wrtout(std_out, msg)
    ABI_MALLOC(wfwfg,(nfft*nspinor**2))
@@ -336,30 +327,28 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
  ! Setup weight (2 for spin unpolarized systems, 1 for polarized).
  ! spin_fact is used to normalize the occupation factors to one.
  ! Consider also the AFM case.
- SELECT CASE (nsppol)
- CASE (1)
-   weight=two/Kmesh%nbz; spin_fact=half
-   if (Wfd%nspden==2) then
-     weight=one/Kmesh%nbz; spin_fact=half
+ select case (nsppol)
+ case (1)
+   weight = two / Kmesh%nbz; spin_fact = half
+   if (Wfd%nspden == 2) then
+     weight = one / Kmesh%nbz; spin_fact = half
    end if
-   if (nspinor==2) then
-     weight=one/Kmesh%nbz; spin_fact=one
+   if (nspinor == 2) then
+     weight = one / Kmesh%nbz; spin_fact = one
    end if
-
- CASE (2)
-   weight=one/Kmesh%nbz; spin_fact=one
-
- CASE DEFAULT
-   ABI_BUG("Wrong nsppol")
- END SELECT
+ case (2)
+   weight = one / Kmesh%nbz; spin_fact = one
+ case default
+   ABI_BUG(sjoin("Wrong nsppol:", itoa(nsppol)))
+ end select
 
  ! Weight for points in the IBZ_q
- wtk_ltg(:)=1
- if (Ep%symchi==1) then
+ wtk_ltg(:) = 1
+ if (Ep%symchi == 1) then
    do ik_bz=1,Ltg_q%nbz
-     wtk_ltg(ik_bz)=0
-     if (Ltg_q%ibzq(ik_bz)/=1) CYCLE ! Only k in IBZ_q
-     wtk_ltg(ik_bz)=SUM(Ltg_q%wtksym(:,:,ik_bz))
+     wtk_ltg(ik_bz) = 0
+     if (Ltg_q%ibzq(ik_bz) /= 1) CYCLE ! Only k in IBZ_q
+     wtk_ltg(ik_bz) = sum(Ltg_q%wtksym(:,:,ik_bz))
    end do
  end if
 
@@ -376,17 +365,15 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
  call wrtout(std_out, msg)
 
  if (use_tr) then
-   ! Special care has to be taken in metals and/or spin dependent systems
-   ! as Wfs_val might contain unoccupied states.
    call wrtout(std_out,' Using faster algorithm based on time reversal symmetry.')
  else
    call wrtout(std_out,' Using slow algorithm without time reversal symmetry.')
  end if
 
  ! Evaluate oscillator matrix elements btw partial waves. Note q=Gamma
- if (Psps%usepaw==1) then
+ if (Psps%usepaw == 1) then
    ABI_MALLOC(Pwij,(Psps%ntypat))
-   call pawpwij_init(Pwij,Ep%npwepG0,(/zero,zero,zero/),Gsph_epsG0%gvec,Cryst%rprimd,Psps,Pawtab,Paw_pwff)
+   call pawpwij_init(Pwij,Ep%npwepG0, [zero, zero, zero],Gsph_epsG0%gvec,Cryst%rprimd,Psps,Pawtab,Paw_pwff)
 
    ABI_MALLOC(Cprj1_bz,(Cryst%natom,nspinor))
    call pawcprj_alloc(Cprj1_bz,0,Wfd%nlmn_atm)
@@ -472,14 +459,14 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
  SELECT CASE (Ep%spmeth)
  CASE (0)
    call wrtout(std_out,' Calculating chi0(q=(0,0,0),omega,G,G")')
-   ABI_MALLOC(green_w,(Ep%nomega))
+   ABI_MALLOC(green_w, (Ep%nomega))
 
  CASE (1, 2)
    call wrtout(std_out,' Calculating Im chi0(q=(0,0,0),omega,G,G")')
    !
    ! === Find max and min resonant transitions for this q, report values for this processor ===
    call make_transitions(Wfd,1,Ep%nbnds,nbvw,nsppol,Ep%symchi,Cryst%timrev,GW_TOL_DOCC,&
-&    max_rest,min_rest,my_max_rest,my_min_rest,Kmesh,Ltg_q,qp_energy,qp_occ,(/zero,zero,zero/),bbp_ks_distrb)
+     max_rest,min_rest,my_max_rest,my_min_rest,Kmesh,Ltg_q,qp_energy,qp_occ,(/zero,zero,zero/),bbp_ks_distrb)
 
    !FIXME there is a problem in make_transitions due to MPI_enreg
    !ltest=(MPI_enreg%gwpara==0.or.MPI_enreg%gwpara==2)
@@ -490,11 +477,9 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
    ABI_MALLOC(kkweight,(Ep%nomegasf,Ep%nomega))
    !my_wl=1; my_wr=Ep%nomegasf
    call setup_spectral(Ep%nomega,Ep%omega,Ep%nomegasf,omegasf,max_rest,min_rest,my_max_rest,my_min_rest,&
-&     0,Ep%zcut,zero,my_wl,my_wr,kkweight)
+      0,Ep%zcut,zero,my_wl,my_wr,kkweight)
 
-   if (.not.use_tr) then
-     ABI_BUG('Hilbert transform requires time-reversal')
-   end if
+   ABI_CHECK(use_tr, 'Hilbert transform requires time-reversal')
 
    ! allocate heads and wings of the spectral function.
    ABI_MALLOC(sf_head,(3,3,my_wl:my_wr))
@@ -523,8 +508,8 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
    call Ltg_q%print(std_out, Dtset%prtvol, mode_paral='COLL')
  end if
 
- ABI_MALLOC(vkbr,(Kmesh%nibz))
- gradk_not_done=.TRUE.
+ ABI_MALLOC(vkbr, (Kmesh%nibz))
+ gradk_not_done = .TRUE.
 
  write(msg,'(a,i0,a)')' Calculation status: ',nkpt_summed, ' k-points to be completed'
  call wrtout(std_out, msg)
@@ -532,7 +517,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
  ! ============================================
  ! === Begin big fat loop over transitions ====
  ! ============================================
- chi0=czero_gw; chi0_sumrule =zero
+ chi0 = czero_gw; chi0_sumrule = zero
 
  ! Loop on spin to calculate $\chi_{\up,\up} + \chi_{\down,\down}$
  do spin=1,nsppol
@@ -540,8 +525,8 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
 
    ! Loop over k-points in the BZ.
    do ik_bz=1,Kmesh%nbz
-     if (Ep%symchi==1) then
-       if (Ltg_q%ibzq(ik_bz)/=1) CYCLE ! Only IBZ_q
+     if (Ep%symchi == 1) then
+       if (Ltg_q%ibzq(ik_bz) /= 1) CYCLE ! Only IBZ_q
      end if
 
      if (ALL(bbp_ks_distrb(:,:,ik_bz,spin) /= Wfd%my_rank)) CYCLE
@@ -559,10 +544,10 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
      npw_k   =  Wfd%npwarr(ik_ibz)
      kg_k    => Wfd%Kdata(ik_ibz)%kg_k
 
-     if (Psps%usepaw==0.and.Ep%inclvkb/=0.and.gradk_not_done(ik_ibz)) then
+     if (Psps%usepaw == 0 .and. Ep%inclvkb /= 0 .and. gradk_not_done(ik_ibz)) then
        ! Include term <n,k|[Vnl,iqr]|n"k>' for q->0.
-       call vkbr_init(vkbr(ik_ibz),Cryst,Psps,Ep%inclvkb,istwf_k,npw_k,Kmesh%ibz(:,ik_ibz),kg_k)
-       gradk_not_done(ik_ibz)=.FALSE.
+       call vkbr_init(vkbr(ik_ibz), Cryst, Psps, Ep%inclvkb, istwf_k, npw_k, Kmesh%ibz(:,ik_ibz), kg_k)
+       gradk_not_done(ik_ibz) = .FALSE.
      end if
 
      ! Loop over "conduction" states.
@@ -628,21 +613,22 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
            ! Adler-Wiser expression.
            ! Add small imaginary of the Time-Ordered resp function but only for non-zero real omega  FIXME What about metals?
 
-           if (.not.use_tr) then
+           if (.not. use_tr) then
              ! Adler-Wiser without time-reversal.
              do io=1,Ep%nomega
-               green_w(io) = g0g0w(Ep%omega(io),deltaf_b1b2,deltaeGW_b1b2,Ep%zcut,GW_TOL_W0,one_pole)
+               green_w(io) = g0g0w(Ep%omega(io), deltaf_b1b2, deltaeGW_b1b2, Ep%zcut, GW_TOL_W0, one_pole)
              end do
+
            else
-             if (Ep%gwcomp==0) then ! cannot be completely skipped in case of completeness correction
-               if (band1<band2) CYCLE ! Here we GAIN a factor ~2
+             if (Ep%gwcomp == 0) then ! cannot be completely skipped in case of completeness correction
+               if (band1 < band2) CYCLE ! Here we GAIN a factor ~2
              end if
 
              do io=1,Ep%nomega
                !Rangel: In metals, the intra-band transitions term does not contain the antiresonant part
                !if(abs(deltaeGW_b1b2)>GW_TOL_W0) green_w(io) = g0g0w(Ep%omega(io),deltaf_b1b2,deltaeGW_b1b2,Ep%zcut,GW_TOL_W0)
-               if (band1==band2) green_w(io) = g0g0w(Ep%omega(io),deltaf_b1b2,deltaeGW_b1b2,Ep%zcut,GW_TOL_W0,one_pole)
-               if (band1/=band2) green_w(io) = g0g0w(Ep%omega(io),deltaf_b1b2,deltaeGW_b1b2,Ep%zcut,GW_TOL_W0,two_poles)
+               if (band1 == band2) green_w(io) = g0g0w(Ep%omega(io), deltaf_b1b2, deltaeGW_b1b2, Ep%zcut, GW_TOL_W0, one_pole)
+               if (band1 /= band2) green_w(io) = g0g0w(Ep%omega(io), deltaf_b1b2, deltaeGW_b1b2, Ep%zcut, GW_TOL_W0, two_poles)
 
                if (Ep%gwcomp==1) then ! Calculate the completeness correction
                  numerator= -spin_fact*qp_occ(band2,ik_ibz,spin)
@@ -670,20 +656,20 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
 
                if (Psps%usepaw==1) then
                  call paw_rho_tw_g(nfft,dim_rtwg,nspinor,Cryst%natom,Cryst%ntypat,Cryst%typat,Cryst%xred,gw_gfft,&
-&                  Cprj2_bz,Cprj2_bz,Pwij_fft,wfwfg)
+                   Cprj2_bz,Cprj2_bz,Pwij_fft,wfwfg)
 
                 ! Add PAW cross term
                 if (Dtset%pawcross==1) then
                   call paw_cross_rho_tw_g(nspinor,Ep%npwepG0,nfftf_tot,ngfftf,1,use_padfftf,igfftepsG0f,gboundf,&
-&                  ur_ae2,ur_ae_onsite2,ur_ps_onsite2,itim_k,tabrf_k,ph_mkt,spinrot_kbz,&
-&                  ur_ae2,ur_ae_onsite2,ur_ps_onsite2,itim_k,tabrf_k,ph_mkt,spinrot_kbz,&
-&                  dim_rtwg,wfwfg)
+                    ur_ae2,ur_ae_onsite2,ur_ps_onsite2,itim_k,tabrf_k,ph_mkt,spinrot_kbz,&
+                    ur_ae2,ur_ae_onsite2,ur_ps_onsite2,itim_k,tabrf_k,ph_mkt,spinrot_kbz,&
+                    dim_rtwg,wfwfg)
                 end if
                end if
 
                qzero=.TRUE.
                call completechi0_deltapart(ik_bz,qzero,Ep%symchi,Ep%npwe,Gsph_FFT%ng,Ep%nomega,nspinor,&
-&                nfft,ngfft_gw,gspfft_igfft,Gsph_FFT,Ltg_q,green_enhigh_w,wfwfg,chi0)
+                 nfft,ngfft_gw,gspfft_igfft,Gsph_FFT,Ltg_q,green_enhigh_w,wfwfg,chi0)
              end if
            end if ! use_tr
 
@@ -695,18 +681,18 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
 
          ! FFT of u^*_{b1,k}(r) u_{b2,k}(r) and (q,G=0) limit using small q and k.p perturbation theory
          call rho_tw_g(nspinor,Ep%npwe,nfft,ndat1,ngfft_gw,1,use_padfft,igffteps0,gw_gbound,&
-&          ur1_kibz,itim_k,tabr_k,ph_mkt,spinrot_kbz,&
-&          ur2_kibz,itim_k,tabr_k,ph_mkt,spinrot_kbz,&
-&          dim_rtwg,rhotwg)
+           ur1_kibz,itim_k,tabr_k,ph_mkt,spinrot_kbz,&
+           ur2_kibz,itim_k,tabr_k,ph_mkt,spinrot_kbz,&
+           dim_rtwg,rhotwg)
 
-         if (Psps%usepaw==0) then
+         if (Psps%usepaw == 0) then
            ! Matrix elements of i[H,r] for NC pseudopotentials.
            rhotwx = nc_ihr_comm(vkbr(ik_ibz),cryst,psps,npw_k,nspinor,istwf_k,Ep%inclvkb,Kmesh%ibz(:,ik_ibz),ug1,ug2,kg_k)
 
          else
            ! 1) Add PAW onsite contribution, projectors are already in the BZ.
            call paw_rho_tw_g(Ep%npwe,dim_rtwg,nspinor,Cryst%natom,Cryst%ntypat,Cryst%typat,Cryst%xred,Gsph_epsG0%gvec,&
-&            Cprj1_bz,Cprj2_bz,Pwij,rhotwg)
+             Cprj1_bz,Cprj2_bz,Pwij,rhotwg)
 
            ! 2) Matrix elements of i[H,r] for PAW.
            rhotwx = paw_ihr(spin,nspinor,npw_k,istwf_k,Kmesh%ibz(:,ik_ibz),Cryst,Pawtab,ug1,ug2,kg_k,Cprj1_ibz,Cprj2_ibz,HUr)
@@ -714,22 +700,23 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
            ! Add PAW cross term
            if (Dtset%pawcross==1) then
              call paw_cross_rho_tw_g(nspinor,Ep%npwepG0,nfftf_tot,ngfftf,1,use_padfftf,igfftepsG0f,gboundf,&
-&             ur_ae1,ur_ae_onsite1,ur_ps_onsite1,itim_k,tabrf_k,ph_mkt,spinrot_kbz,&
-&             ur_ae2,ur_ae_onsite2,ur_ps_onsite2,itim_k,tabrf_k,ph_mkt,spinrot_kbz,&
-&             dim_rtwg,rhotwg)
+               ur_ae1,ur_ae_onsite1,ur_ps_onsite1,itim_k,tabrf_k,ph_mkt,spinrot_kbz,&
+               ur_ae2,ur_ae_onsite2,ur_ps_onsite2,itim_k,tabrf_k,ph_mkt,spinrot_kbz,&
+               dim_rtwg,rhotwg)
+
               ! Add cross-term contribution to the commutator
              if (Dtset%userib/=111) then
                call paw_cross_ihr_comm(rhotwx,nspinor,nfftf_tot,Cryst,Pawfgrtab,Paw_onsite,&
-&                   ur_ae1,ur_ae2,ur_ae_onsite1,ur_ae_onsite2,Cprj1_ibz,Cprj2_ibz)
+                    ur_ae1,ur_ae2,ur_ae_onsite1,ur_ae_onsite2,Cprj1_ibz,Cprj2_ibz)
              end if
            end if
          end if
 
          ! Treat a possible degeneracy between v and c.
-         if (ABS(deltaeKS_b1b2)>GW_TOL_W0) then
-           rhotwx=-rhotwx/deltaeKS_b1b2
+         if (ABS(deltaeKS_b1b2) > GW_TOL_W0) then
+           rhotwx = -rhotwx / deltaeKS_b1b2
          else
-           rhotwx=czero_gw
+           rhotwx = czero_gw
          end if
 
          SELECT CASE (Ep%spmeth)
@@ -845,37 +832,38 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
 
            ! Adler-Wiser expression, to be consistent here we use the KS eigenvalues (?)
            call accumulate_chi0_q0(is_metallic,ik_bz,isym_k,itim_k,Ep%gwcomp,nspinor,Ep%npwepG0,Ep,&
-&           Cryst,Ltg_q,Gsph_epsG0,chi0,rhotwx,rhotwg,green_w,green_enhigh_w,deltaf_b1b2,chi0_head,chi0_lwing,chi0_uwing)
+             Cryst,Ltg_q,Gsph_epsG0,chi0,rhotwx,rhotwg,green_w,green_enhigh_w,deltaf_b1b2,chi0_head,chi0_lwing,chi0_uwing)
 
          CASE (1, 2)
            ! Spectral method, to be consistent here we use the KS eigenvalues.
            call accumulate_sfchi0_q0(ik_bz,isym_k,itim_k,nspinor,Ep%symchi,Ep%npwepG0,Ep%npwe,Cryst,Ltg_q,&
-&            Gsph_epsG0,deltaf_b1b2,my_wl,iomegal,wl,my_wr,iomegar,wr,rhotwx,rhotwg,Ep%nomegasf,sf_chi0,sf_head,sf_lwing,sf_uwing)
+             Gsph_epsG0,deltaf_b1b2,my_wl,iomegal,wl,my_wr,iomegar,wr,rhotwx,rhotwg,Ep%nomegasf,&
+             sf_chi0,sf_head,sf_lwing,sf_uwing)
 
          CASE DEFAULT
            ABI_BUG("Wrong spmeth")
          END SELECT
 
          ! Accumulating the sum rule on chi0. Eq. (5.284) in G.D. Mahan Many-Particle Physics 3rd edition. [[cite:Mahan2000]]
-         factor=spin_fact*qp_occ(band2,ik_ibz,spin)
+         factor = spin_fact * qp_occ(band2,ik_ibz,spin)
 
          call accumulate_chi0sumrule(ik_bz,Ep%symchi,Ep%npwe,factor,deltaeGW_b1b2,&
-&          Ltg_q,Gsph_epsG0,Ep%npwepG0,rhotwg,chi0_sumrule)
+                                     Ltg_q,Gsph_epsG0,Ep%npwepG0,rhotwg,chi0_sumrule)
 
          if (Ep%gwcomp==1) then
            ! Include also the completeness correction in the sum rule.
            factor=-spin_fact*qp_occ(band2,ik_ibz,spin)
            call accumulate_chi0sumrule(ik_bz,Ep%symchi,Ep%npwe,factor,deltaeGW_enhigh_b2,&
-&            Ltg_q,Gsph_epsG0,Ep%npwepG0,rhotwg,chi0_sumrule)
-           if (band1==Ep%nbnds) then
-             chi0_sumrule(:)=chi0_sumrule(:) + wtk_ltg(ik_bz)*spin_fact*qp_occ(band2,ik_ibz,spin)*deltaeGW_enhigh_b2
+                                       Ltg_q,Gsph_epsG0,Ep%npwepG0,rhotwg,chi0_sumrule)
+           if (band1 == Ep%nbnds) then
+             chi0_sumrule(:) = chi0_sumrule(:) + wtk_ltg(ik_bz)*spin_fact*qp_occ(band2,ik_ibz,spin)*deltaeGW_enhigh_b2
            end if
          end if
 
        end do !band2
      end do !band1
 
-     if (Psps%usepaw==0.and.Ep%inclvkb/=0.and.Ep%symchi==1) then
+     if (Psps%usepaw == 0 .and. Ep%inclvkb /= 0 .and. Ep%symchi == 1) then
        call vkbr_free(vkbr(ik_ibz)) ! Not need anymore as we loop only over IBZ.
      end if
    end do !ik_bz
@@ -903,15 +891,15 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
 
    ABI_SFREE(sf_chi0)
 
-   ! Sum contributions from each proc ===
+   ! Sum contributions from each proc
    ! Looping on frequencies to avoid problems with the size of the MPI packet
    do io=1,Ep%nomega
      call xmpi_sum(chi0(:,:,io),comm,ierr)
    end do
 
    call hilbert_transform_headwings(Ep%npwe,Ep%nomega,Ep%nomegasf,&
-&   my_wl,my_wr,kkweight,sf_lwing,sf_uwing,sf_head,chi0_lwing,&
-&   chi0_uwing,chi0_head,Ep%spmeth)
+     my_wl,my_wr,kkweight,sf_lwing,sf_uwing,sf_head,chi0_lwing,&
+     chi0_uwing,chi0_head,Ep%spmeth)
 
  CASE DEFAULT
    ABI_BUG("Wrong spmeth")
@@ -919,24 +907,24 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
 
  ! Divide by the volume
 !$OMP PARALLEL WORKSHARE
-   chi0=chi0*weight/Cryst%ucvol
+   chi0 = chi0 * weight / Cryst%ucvol
 !$OMP END PARALLEL WORKSHARE
 
  ! Collect sum rule. pi comes from Im[1/(x-ieta)] = pi delta(x)
- call xmpi_sum(chi0_sumrule,comm,ierr)
- chi0_sumrule=chi0_sumrule * pi * weight / Cryst%ucvol
+ call xmpi_sum(chi0_sumrule, comm, ierr)
+ chi0_sumrule = chi0_sumrule * pi * weight / Cryst%ucvol
 
  ! Collect heads and wings.
- call xmpi_sum(chi0_head,comm,ierr)
- call xmpi_sum(chi0_lwing,comm,ierr)
- call xmpi_sum(chi0_uwing,comm,ierr)
+ call xmpi_sum(chi0_head, comm, ierr)
+ call xmpi_sum(chi0_lwing, comm, ierr)
+ call xmpi_sum(chi0_uwing, comm, ierr)
 
- chi0_head  = chi0_head * weight/Cryst%ucvol
+ chi0_head = chi0_head * weight / Cryst%ucvol
  do io=1,Ep%nomega ! Tensor in the basis of the reciprocal lattice vectors.
    chi0_head(:,:,io) = MATMUL(chi0_head(:,:,io),Cryst%gmet) * (two_pi**2)
  end do
- chi0_lwing = chi0_lwing * weight/Cryst%ucvol
- chi0_uwing = chi0_uwing * weight/Cryst%ucvol
+ chi0_lwing = chi0_lwing * weight / Cryst%ucvol
+ chi0_uwing = chi0_uwing * weight / Cryst%ucvol
 
  ! ===============================================
  ! ==== Symmetrize chi0 in case of AFM system ====
@@ -966,16 +954,16 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
  ! FB: because of the intraband term, chi0 is never hermitian in case of metals
  if (.not. is_metallic) then
    do io=1,Ep%nomega
-     if (ABS(REAL(Ep%omega(io)))<0.00001) then
+     if (ABS(REAL(Ep%omega(io))) < 0.00001) then
        do ig2=1,Ep%npwe
          do ig1=1,ig2-1
-          chi0(ig2,ig1,io)=GWPC_CONJG(chi0(ig1,ig2,io))
+           chi0(ig2,ig1,io)=GWPC_CONJG(chi0(ig1,ig2,io))
          end do
        end do
      end if
    end do
  end if
- !
+
  ! =====================
  ! ==== Free memory ====
  ! =====================
@@ -1006,13 +994,13 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
  call Gsph_FFT%free()
 
  if (Psps%usepaw==1) then ! deallocation for PAW.
-   call pawcprj_free(Cprj1_bz )
+   call pawcprj_free(Cprj1_bz)
    ABI_FREE(Cprj1_bz)
-   call pawcprj_free(Cprj2_bz )
+   call pawcprj_free(Cprj2_bz)
    ABI_FREE(Cprj2_bz)
-   call pawcprj_free(Cprj1_ibz )
+   call pawcprj_free(Cprj1_ibz)
    ABI_FREE(Cprj1_ibz)
-   call pawcprj_free(Cprj2_ibz )
+   call pawcprj_free(Cprj2_ibz)
    ABI_FREE(Cprj2_ibz)
    call pawpwij_free(Pwij)
    ABI_FREE(Pwij)
@@ -1039,7 +1027,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
    ABI_FREE(coeffW_BZ)
  endif
 
- call cwtime(cpu_time,wall_time,gflops,"stop")
+ call cwtime(cpu_time, wall_time, gflops, "stop")
  write(std_out,'(2(a,f9.1))')" cpu_time = ",cpu_time,", wall_time = ",wall_time
 
  DBG_EXIT("COLL")
@@ -1199,20 +1187,19 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
 
  nsppol = Wfd%nsppol; nspinor = Wfd%nspinor
  is_metallic = ebands_has_metal_scheme(QP_BSt)
+
  ucrpa_bands(1)=dtset%ucrpa_bands(1)
  ucrpa_bands(2)=dtset%ucrpa_bands(2)
  luwindow=.false.
  if(abs(dtset%ucrpa_window(1)+1_dp)>tol8.or.(abs(dtset%ucrpa_window(2)+1_dp)>tol8)) then
    luwindow=.true.
  endif
-! write(6,*)"ucrpa_bands",ucrpa_bands
-! write(6,*)"ucrpa_window",dtset%ucrpa_window
-! write(6,*)"luwindow",luwindow
+ !write(6,*)"ucrpa_bands",ucrpa_bands; write(6,*)"ucrpa_window",dtset%ucrpa_window; write(6,*)"luwindow",luwindow
 
-!  For cRPA calculation of U: read forlb.ovlp
+ ! For cRPA calculation of U: read forlb.ovlp
  if(dtset%ucrpa>=1 .AND. dtset%plowan_compute <10) then
    call read_plowannier(Cryst,bandinf,bandsup,coeffW_BZ,itypatcor,Kmesh,lcor,luwindow,&
-& nspinor,nsppol,pawang,dtset%prtvol,ucrpa_bands)
+     nspinor,nsppol,pawang,dtset%prtvol,ucrpa_bands)
  endif
 ! End of reading forlb.ovlp
 
@@ -1263,23 +1250,23 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
 
  ! Setup weights (2 for spin unpolarized system, 1 for polarized).
  ! spin_fact is used to normalize the occupation factors to one. Consider also the AFM case.
- SELECT CASE (nsppol)
- CASE (1)
-   weight=two/Kmesh%nbz; spin_fact=half
+ select case (nsppol)
+ case (1)
+   weight = two / Kmesh%nbz; spin_fact = half
    if (Wfd%nspden==2) then
-    weight=one/Kmesh%nbz; spin_fact=half
+    weight = one / Kmesh%nbz; spin_fact = half
    end if
    if (nspinor==2) then
-    weight=one/Kmesh%nbz; spin_fact=one
+    weight = one / Kmesh%nbz; spin_fact = one
    end if
- CASE (2)
-   weight=one/Kmesh%nbz; spin_fact=one
- CASE DEFAULT
+ case (2)
+   weight = one / Kmesh%nbz; spin_fact = one
+ case default
    ABI_BUG("Wrong nsppol")
- END SELECT
+ end select
 
  ! Weight for points in the IBZ_q.
- wtk_ltg(:)=1
+ wtk_ltg(:) = 1
  if (Ep%symchi==1) then
    do ik_bz=1,Ltg_q%nbz
      wtk_ltg(ik_bz)=0
@@ -1309,8 +1296,8 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
 
  do spin=1,nsppol
    do ik_bz=1,Kmesh%nbz
-     if (Ep%symchi==1) then
-       if (Ltg_q%ibzq(ik_bz)/=1) CYCLE  ! Only IBZ_q
+     if (Ep%symchi == 1) then
+       if (Ltg_q%ibzq(ik_bz) /= 1) CYCLE  ! Only IBZ_q
      end if
 
      ! Get ik_ibz, non-symmorphic phase, ph_mkt, and symmetries from ik_bz.

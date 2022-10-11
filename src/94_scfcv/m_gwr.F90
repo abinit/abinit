@@ -5671,21 +5671,13 @@ subroutine gsph2box(ngfft, npw, ndat, kg_k, cg, cfft)
 !$OMP PARALLEL DO PRIVATE(i1, i2, i3) IF (ndat > 1)
  do idat=1,ndat
    do ipw=1,npw
-     !i1 = kg_k(1,ipw); if (i1 < 0) i1 = i1+n1; i1 = i1+1
-     !i2 = kg_k(2,ipw); if (i2 < 0) i2 = i2+n2; i2 = i2+1
-     !i3 = kg_k(3,ipw); if (i3 < 0) i3 = i3+n3; i3 = i3+1
-     !ABI_CHECK(i1 == modulo(kg_k(1, ipw), n1) + 1, "i1")
-     !ABI_CHECK(i2 == modulo(kg_k(2, ipw), n2) + 1, "i2")
-     !ABI_CHECK(i3 == modulo(kg_k(3, ipw), n3) + 1, "i3")
      i1 = modulo(kg_k(1, ipw), n1) + 1
      i2 = modulo(kg_k(2, ipw), n2) + 1
      i3 = modulo(kg_k(3, ipw), n3) + 1
-
      !if (any(kg_k(:,ipw) > ngfft(1:3)/2) .or. any(kg_k(:,ipw) < -(ngfft(1:3)-1)/2) ) then
      !  write(msg,'(a,3(i0,1x),a)')" The G-vector: ",kg_k(:, ipw)," falls outside the FFT box. Increase boxcutmin (?)"
      !  ABI_ERROR(msg)
      !end if
-
      cfft(i1,i2,i3+n6*(idat-1)) = cg(ipw+npw*(idat-1))
    end do
  end do
@@ -5739,12 +5731,6 @@ subroutine box2gsph(ngfft, npw, ndat, kg_k, cfft, cg)
 !$OMP PARALLEL DO PRIVATE(i1, i2, i3, ipwdat, i3dat) IF (ndat > 1)
  do idat=1,ndat
    do ipw=1,npw
-     !i1 = kg_k(1,ipw); if (i1 < 0) i1 = i1+n1; i1 = i1+1
-     !i2 = kg_k(2,ipw); if (i2 < 0) i2 = i2+n2; i2 = i2+1
-     !i3 = kg_k(3,ipw); if (i3 < 0) i3 = i3+n3; i3 = i3+1
-     !ABI_CHECK(i1 == modulo(kg_k(1, ipw), n1) + 1, "i1")
-     !ABI_CHECK(i2 == modulo(kg_k(2, ipw), n2) + 1, "i2")
-     !ABI_CHECK(i3 == modulo(kg_k(3, ipw), n3) + 1, "i3")
      i1 = modulo(kg_k(1, ipw), n1) + 1
      i2 = modulo(kg_k(2, ipw), n2) + 1
      i3 = modulo(kg_k(3, ipw), n3) + 1
@@ -5756,7 +5742,6 @@ subroutine box2gsph(ngfft, npw, ndat, kg_k, cfft, cg)
 
      ipwdat = ipw + (idat-1) * npw
      i3dat = i3 + (idat-1) * n6
-
      cg(ipwdat) = cfft(i1,i2,i3dat)
    end do
  end do
@@ -6167,8 +6152,20 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
 
 !Local variables-------------------------------
 !scalars
+ integer :: nsppol, nspinor, ierr, my_is, spin, my_ikf !ii, jj, kb, il_b, ig, ig_start, u_mpw, npw_, iab
+ integer :: ik_bz, ik_ibz, isym_k, trev_k, g0_k(3)
+ integer :: iq_bz, iq_ibz, isym_q, trev_q, g0_q(3)
+ logical :: isirr_k
+ real(dp) :: spin_fact, weight
+ type(matrix_scalapack),pointer :: ugb_kibz
+ !character(len=5000) :: msg
+ !type(crystal_t),pointer :: cryst
+ !type(dataset_type),pointer :: dtset
+ type(littlegroup_t) :: ltg_q
+ !type(desc_t),pointer :: desc_k
 !arrays
- real(dp) :: tsec(2)
+ integer :: wtk_ltg(gwr%nkbz)
+ real(dp) :: kk_ibz(3), kk_bz(3), tsec(2)
  real(dp),contiguous, pointer :: qp_ene(:,:,:), qp_occ(:,:,:)
 
 ! *************************************************************************
@@ -6177,6 +6174,8 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  call timab(1927, 1, tsec)
  !call wrtout(std_out, sjoin("nkbz:", itoa(gwr%nkbz)))
 
+ nspinor = gwr%nspinor; nsppol = gwr%nsppol
+
  ! Use KS or QP energies depending on the iteration state.
  if (gwr%scf_iteration == 0) then
    qp_ene => gwr%ks_ebands%eig; qp_occ => gwr%ks_ebands%occ
@@ -6184,11 +6183,62 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
    qp_ene => gwr%qp_ebands%eig; qp_occ => gwr%qp_ebands%occ
  end if
 
+ ! Setup weight (2 for spin unpolarized systems, 1 for polarized).
+ ! spin_fact is used to normalize the occupation factors to one.
+ ! Consider also the AFM case.
+ select case (nsppol)
+ case (1)
+   weight = two / gwr%nkbz; spin_fact = half
+   if (gwr%nspden == 2) then
+     weight = one / gwr%nkbz; spin_fact = half
+   end if
+   if (nspinor == 2) then
+     weight = one / gwr%nkbz; spin_fact = one
+   end if
+ case (2)
+   weight = one / gwr%nkbz; spin_fact = one
+ case default
+   ABI_BUG(sjoin("Wrong nsppol:", itoa(nsppol)))
+ end select
+
+ ! Weight for points in the IBZ_q
+ !call Ltg_q%init([zero, zero, zero], Kmesh%nbz, Kmesh%bz, Cryst, use_umklp, Ep%npwe, gvec=gvec_kss)
+ !wtk_ltg(:) = 1
+ !if (gwr%dtset%symchi == 1) then
+ !  do ik_bz=1,Ltg_q%nbz
+ !    wtk_ltg(ik_bz) = 0
+ !    if (Ltg_q%ibzq(ik_bz) /= 1) CYCLE ! Only k in IBZ_q
+ !    wtk_ltg(ik_bz) = sum(Ltg_q%wtksym(:,:,ik_bz))
+ !  end do
+ !end if
+ !call Ltg_q%free()
+
  ! TODO
  ! Compute contribution to head and wings for this (kpoint, spin)
  ! taking into account that the same ik_ibz might be replicated.
 
  !mpw = maxval(wfd%npwarr)
+
+ do my_is=1,gwr%my_nspins
+   spin = gwr%my_spins(my_is)
+   do my_ikf=1,gwr%my_nkbz
+     ik_bz = gwr%my_kbz_inds(my_ikf)
+     !kk_bz = gwr%kbz(:, ik_bz)
+
+     ! FIXME: Be careful with the symmetry conventions here!
+     ! and the interplay between umklapp in q and FFT
+     ik_ibz = gwr%kbz2ibz_symrel(1, ik_bz); isym_k = gwr%kbz2ibz_symrel(2, ik_bz)
+     trev_k = gwr%kbz2ibz_symrel(6, ik_bz); g0_k = gwr%kbz2ibz_symrel(3:5, ik_bz)
+     isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
+     kk_ibz = gwr%kibz(:, ik_ibz)
+
+     ugb_kibz => gwr%ugb(ik_ibz, spin)
+
+   end do ! my_ikf
+ end do ! my_is
+
+ call timab(1927, 2, tsec)
+
  ! TODO: Mv m_ddk in 72_response below 70_gw or move gwr to higher level.
  !ddkop = ddkop_new(dtset, gwr%cryst, gwr%pawtab, gwr%psps, wfd%mpi_enreg, mpw, wfd%ngfft)
  !call ddkop%free()
@@ -6203,8 +6253,6 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  !end do
  !call ddkop%free()
  !ABI_FREE(cgwork)
-
- call timab(1927, 2, tsec)
 
 end subroutine gwr_build_chi0_head_and_wings
 !!***
@@ -6236,8 +6284,8 @@ subroutine gwr_build_sigxme(gwr)
  integer :: spin, isym, jb, is_idx
  integer :: spad, wtqm, wtqp, irow, spadx1, spadx2
  integer :: npwx, u_nfft, u_mgfft, nsig_ab !, x_fftalga,
- integer :: ik_bz, ik_ibz, isym_k, trev_k, g0_k(3) !, tsign_k
- integer :: iq_bz, iq_ibz, isym_q, trev_q, g0_q(3) !, tsign_q
+ integer :: ik_bz, ik_ibz, isym_k, trev_k, g0_k(3)
+ integer :: iq_bz, iq_ibz, isym_q, trev_q, g0_q(3)
  logical :: isirr_k, isirr_q, only_diago, sigc_is_herm
  real(dp) :: cpu, wall, gflops, fact_spin, theta_mu_minus_esum, theta_mu_minus_esum2, tol_empty, tol_empty_in
  real(dp) :: gwr_boxcutmin_x, i_sz_resid, q0_vol
@@ -6346,13 +6394,9 @@ subroutine gwr_build_sigxme(gwr)
  q0_vol = (two_pi) **3 / (gwr%nkbz * gwr%cryst%ucvol)
  i_sz_resid = four_pi*7.44*q0_vol**(-two_thirds)
 
- ! Compute matrix elements.
  do my_is=1,gwr%my_nspins
  spin = gwr%my_spins(my_is)
  do ikcalc=1,gwr%nkcalc ! TODO: Should be spin dependent!
-
-   ! Table for \Sigmax_ij matrix elements.
-   !Sigxij_tab => Sigp%Sigxij_tab(ikcalc, spin)
 
    ikcalc_ibz = gwr%kcalc2ibz(ikcalc, 1)
    kgw = gwr%kcalc(:, ikcalc); bmin =  gwr%bstart_ks(ikcalc, spin); bmax = gwr%bstop_ks(ikcalc, spin)
@@ -6423,7 +6467,6 @@ subroutine gwr_build_sigxme(gwr)
      ik_ibz = gwr%kbz2ibz_symrel(1, ik_bz); isym_k = gwr%kbz2ibz_symrel(2, ik_bz)
      trev_k = gwr%kbz2ibz_symrel(6, ik_bz); g0_k = gwr%kbz2ibz_symrel(3:5, ik_bz)
      isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
-     !tsign_k = merge(1, -1, trev_k == 0)
      kk_ibz = gwr%kibz(:, ik_ibz)
 
      ! Identify q and G0 where q + G0 = k_GW - ksum
@@ -6450,7 +6493,6 @@ subroutine gwr_build_sigxme(gwr)
      iq_ibz = gwr%qbz2ibz(1, iq_bz); isym_q = gwr%qbz2ibz(2, iq_bz)
      trev_q = gwr%qbz2ibz(6, iq_bz); g0_q = gwr%qbz2ibz(3:5, iq_bz)
      isirr_q = (isym_q == 1 .and. trev_q == 0 .and. all(g0_q == 0))
-     !tsign_q = merge(1, -1, trev_q == 0)
 
      ! Find the corresponding irreducible q-point.
      ! NB: non-zero umklapp G_o is not allowed. There's a check in setup_sigma
@@ -6480,6 +6522,7 @@ subroutine gwr_build_sigxme(gwr)
      do ig=ig_start,npwx
        !ig_rot = Gsph_x%rottb(ig, itim_q, isym_q)
        !vc_sqrt_qbz(ig_rot) = Vcp%vc_sqrt_resid(ig, iq_ibz)
+       ! TODO: Check this part (qq_bz) but it should be OK
        vc_sqrt_qbz(ig) = sqrt(four_pi) / normv(qq_bz + gvec_x(:,ig), gwr%cryst%gmet, "G")
      end do
 
