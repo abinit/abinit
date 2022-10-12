@@ -292,7 +292,7 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
              & tdks%energies%e_fermih,dtset%ivalence,dtset%spinmagntarget,     &
              & dtset%mband,dtset%nband,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD, &
              & dtset%nkpt,dtset%nspinor,dtset%nsppol,tdks%occ0,dtset%occopt,   &
-             & dtset%prtvol,zero,dtset%tphysel,dtset%tsmear,dtset%wtk,extfpmd)
+             & dtset%prtvol,dtset%tphysel,dtset%tsmear,dtset%wtk,extfpmd=extfpmd)
    ABI_FREE(doccde)
  end if
 
