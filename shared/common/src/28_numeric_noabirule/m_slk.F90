@@ -4107,7 +4107,7 @@ end subroutine slk_take_from
 !!
 !! FUNCTION
 !!  Return on all processors the complex submatrix of shape (mm, nn) starting at position ija.
-!!  `out_carr` is allocated by the routine.
+!!  NB: `out_carr` is allocated by this routine.
 !!
 !! SOURCE
 
@@ -4129,15 +4129,15 @@ subroutine slk_zcollect(in_mat, mm, nn, ija, out_carr)
  ABI_CHECK(allocated(in_mat%buffer_cplx), "buffer_cplx is not allocated")
 
  if (in_mat%processor%grid%nbprocs == 1) then
-   ! Simple copy
+   ! Copy buffer and return
    ABI_MALLOC(out_carr, (mm, nn))
    out_carr(:,:) = in_mat%buffer_cplx(ija(1):ija(1)+mm-1, ija(2):ija(2)+nn-1)
    return
  end if
 
  ! Two-step algorithm:
- ! 1) Use pzgemr2d to collect submatrix on master.
- ! 2) Master brodacasts submatrix.
+ !     1) Use pzgemr2d to collect submatrix on master.
+ !     2) Master brodacasts submatrix.
 
  if (in_mat%processor%myproc == master) then
    call processor%init(xmpi_comm_self)
@@ -4155,8 +4155,8 @@ subroutine slk_zcollect(in_mat, mm, nn, ija, out_carr)
 
  if (in_mat%processor%myproc == master) then
    ABI_MOVE_ALLOC(out_mat%buffer_cplx, out_carr)
-   call processor%free()
    call out_mat%free()
+   call processor%free()
  else
    ABI_MALLOC(out_carr, (mm, nn))
  end if

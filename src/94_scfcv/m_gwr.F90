@@ -6167,7 +6167,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  integer :: ik_bz, ik_ibz, isym_k, trev_k, g0_k(3)
  integer :: iq_bz, iq_ibz, isym_q, trev_q, g0_q(3)
  integer :: nkpt_summed, use_umklp, band1, band2, band1_start, band1_stop, il_b, nb, block_size, ii, mband
- integer :: istwf_ki, npw_ki, nI, nJ, nomega, io
+ integer :: istwf_ki, npw_ki, nI, nJ, nomega, io, dim_rtwg
  integer :: npwe, u_nfft, u_mgfft, u_mpw
  logical :: isirr_k, use_tr
  real(dp) :: spin_fact, weight, deltaf_b1b2, deltaeGW_b1b2, gwr_boxcutmin_c, zcut
@@ -6183,7 +6183,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  integer :: g0(3), gmax(3), spinor_padx(2,4), u_ngfft(18), work_ngfft(18)
  integer :: wtk_ltg(gwr%nkbz)
  integer,contiguous, pointer :: kg_ki(:,:)
- integer,allocatable :: gvec_q0(:,:), gbound_q0(:,:)
+ integer,allocatable :: gvec_q0(:,:), gbound_q0(:,:), u_gbound(:,:)
  real(dp) :: kk_ibz(3), kk_bz(3), tsec(2)
  real(dp),contiguous, pointer :: qp_eig(:,:,:), qp_occ(:,:,:), ks_eig(:,:,:)
  real(dp),allocatable :: work(:,:,:,:)
@@ -6191,6 +6191,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  logical,allocatable :: bbp_mask(:,:)
  complex(dp),allocatable :: ug1_block(:,:)
  complex(gwpc) :: rhotwx(3, gwr%nspinor**2)
+ complex(gwpc),allocatable :: ug1(:), ug2(:), ur1_kibz(:), ur2_kibz(:), ur_prod(:), rhotwg(:)
  complex(dpc) :: green_w(gwr%ntau), omega(gwr%ntau)
  complex(dpc),allocatable :: chi0_lwing(:,:,:), chi0_uwing(:,:,:), chi0_head(:,:,:)
  type(vkbr_t),allocatable :: vkbr(:)
@@ -6252,6 +6253,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  end if
  call wrtout(std_out, sjoin(' Calculation status: ', itoa(nkpt_summed), ' k-points to be completed'))
 
+ ! TODO: Replace vkbr with ddk and factorize calls to DDK |bra>
  ABI_MALLOC(vkbr, (gwr%nkibz))
  gradk_not_done = .TRUE.
 
@@ -6264,6 +6266,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  ! =========================================
  gwr_boxcutmin_c = two
  call gwr%get_u_ngfft(gwr_boxcutmin_c, u_ngfft, u_nfft, u_mgfft, u_mpw, gmax)
+
 
  ! Init work_ngfft
  gmax = gmax + 4 ! FIXME: this is to account for umklapp, shouls also consider Gamma-only and istwfk
@@ -6295,6 +6298,13 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  ABI_CALLOC(chi0_head, (3, 3, nomega))
  omega(:) = j_dpc * gwr%iw_mesh(:)
 
+ ABI_MALLOC(u_gbound, (2 * u_mgfft + 8, 2))
+ ABI_MALLOC(ur1_kibz, (u_nfft * nspinor))
+ ABI_MALLOC(ur2_kibz, (u_nfft * nspinor))
+ ABI_MALLOC(ur_prod, (u_nfft * nspinor))
+ dim_rtwg = 1 !; if (nspinor==2) dim_rtwg=2 ! Can reduce size depending on Ep%nI and Ep%nj
+ ABI_MALLOC(rhotwg, (npwe*dim_rtwg))
+
  do my_is=1,gwr%my_nspins
    spin = gwr%my_spins(my_is)
 
@@ -6320,11 +6330,14 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
      !if (.not. gwr%itreat_ikibz(ik_ibz)) CYCLE
 
      ugb_kibz => gwr%ugb(ik_ibz, spin)
-
      desc_ki => gwr%green_desc_kibz(ik_ibz)
      istwf_ki =  desc_ki%istwfk
      npw_ki   =  desc_ki%npw
      kg_ki    => desc_ki%gvec
+
+     ABI_MALLOC(ug1, (npw_ki * nspinor))
+     ABI_MALLOC(ug2, (npw_ki * nspinor))
+     call sphereboundary(u_gbound, istwf_ki, kg_ki, u_mgfft, npw_ki)
 
      if (gwr%usepaw == 0 .and. dtset%inclvkb /= 0 .and. gradk_not_done(ik_ibz)) then
        ! Include term <n,k|[Vnl,iqr]|n"k>' for q -> 0.
@@ -6337,8 +6350,6 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
                         gwcomp0, spmeth0, gwr%ugb_nband, mband, now_ebands, bbp_mask)
 
      block_size = 48
-     !ABI_MALLOC(ug1_block, (npw_ki * nspinor, block_size))
-
      do band1_start=1, gwr%ugb_nband, block_size
        if (all(.not. bbp_mask(band1_start:, :))) exit
        nb = blocked_loop(band1_start, gwr%ugb_nband, block_size)
@@ -6347,8 +6358,8 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
        call ugb_kibz%zcollect(npw_ki * nspinor, nb, [1, band1_start], ug1_block)
 
        ! Dump algorithm based on xmpi_sum. To be replaced by an all_gather
-       ! The advantage is that it works indepently of the PBLAS distribution.
-       !ug1_block = zero
+       ! The advantage is that it works indipendently of the PBLAS distribution.
+       !ABI_CALLOC(ug1_block, (npw_ki * nspinor, block_size))
        !do il_b=1, ugb_kibz%sizeb_local(2)
        !  band1 = ugb_kibz%loc2gcol(il_b)
        !  ii = band1 - band1_start + 1
@@ -6356,18 +6367,21 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
        !end do ! il_b1
        !call xmpi_sum(ug1_block, ugb_kibz%processor%comm, ierr)
 
+       ! FIXME: This is not compatible with g-para
+
        ! Loop over "conduction" states.
        do band1=1,gwr%ugb_nband
          !ABI_CHECK(wfd%get_wave_ptr(band1, ik_ibz, spin, wave1, msg) == 0, msg)
          !ug1 => wave1%ug
          !call wfd%get_ur(band1,ik_ibz,spin,ur1_kibz)
 
+         ug1 = ugb_kibz%buffer_cplx(:, band1)
+
+         call fft_ug(npw_ki, u_nfft, nspinor, ndat1, u_mgfft, u_ngfft, istwf_ki, kg_ki, u_gbound, &
+                     ug1, ur1_kibz)
+
          ! Loop over "valence" states.
          do band2=1,gwr%ugb_nband
-
-           !ABI_CHECK(wfd%get_wave_ptr(band2, ik_ibz, spin, wave2, msg) == 0, msg)
-           !ug2 => wave2%ug
-           !call wfd%get_ur(band2,ik_ibz,spin,ur2_kibz)
 
            deltaeKS_b1b2 = ks_eig(band1, ik_ibz, spin) - ks_eig(band2, ik_ibz, spin)
            deltaf_b1b2  = spin_fact * (qp_occ(band1, ik_ibz, spin) - qp_occ(band2, ik_ibz, spin))
@@ -6375,6 +6389,20 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
 
            ! Skip negligible transitions.
            if (abs(deltaf_b1b2) < GW_TOL_DOCC) CYCLE
+
+           !ABI_CHECK(wfd%get_wave_ptr(band2, ik_ibz, spin, wave2, msg) == 0, msg)
+           !ug2 => wave2%ug
+           !call wfd%get_ur(band2,ik_ibz,spin,ur2_kibz)
+
+           ug2 = ugb_kibz%buffer_cplx(:, band2)
+
+           call fft_ug(npw_ki, u_nfft, nspinor, ndat1, u_mgfft, u_ngfft, istwf_ki, kg_ki, u_gbound, &
+                       ug2, ur2_kibz)
+
+           ! FIXME: nspinor 2 is wrong as we have 2x2 matrix
+           ur_prod(:) = conjg(ur1_kibz(:)) * ur2_kibz
+           call fft_ur(npwe, u_nfft, nspinor, ndat1, u_mgfft, u_ngfft, istwfk1, gvec_q0, gbound_q0, &
+                       ur_prod, rhotwg)
 
            ! Adler-Wiser expression.
            ! Add small imaginary of the Time-Ordered response function but only for non-zero real omega
@@ -6396,11 +6424,12 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
              end do
            end if
 
-           !if (gwr%usepaw == 0) then
-           !  ! Matrix elements of i[H,r] for NC pseudopotentials.
-           !  rhotwx = nc_ihr_comm(vkbr(ik_ibz), cryst, psps, npw_ki, nspinor, istwf_ki, gwr%dtset%inclvkb, &
-           !                       kk_ibz, ug1, ug2, kg_ki)  ! NB ug1 and ug2 are kind=gwpc
-           !end if
+           if (gwr%usepaw == 0) then
+             ! Matrix elements of i[H,r] for NC pseudopotentials.
+             ! NB ug1 and ug2 are kind=gwpc
+             rhotwx = nc_ihr_comm(vkbr(ik_ibz), cryst, gwr%psps, npw_ki, nspinor, istwf_ki, gwr%dtset%inclvkb, &
+                                  kk_ibz, ug1, ug2, kg_ki)
+           end if
 
            ! Treat a possible degeneracy between v and c.
            if (abs(deltaeKS_b1b2) > GW_TOL_W0) then
@@ -6409,30 +6438,39 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
              rhotwx = czero_gw
            end if
 
-#if 0
            ! Adler-Wiser expression, to be consistent here we use the KS eigenvalues (?)
            !call accumulate_chi0_q0(is_metallic,ik_bz,isym_k,itim_k,Ep%gwcomp,nspinor,Ep%npwepG0,Ep,&
            !  Cryst,Ltg_q,Gsph_epsG0,chi0,rhotwx,rhotwg,green_w,green_enhigh_w,deltaf_b1b2,chi0_head,chi0_lwing,chi0_uwing)
-#endif
+
          end do ! band2
        end do ! band1
 
+       ABI_FREE(ug1_block)
      end do ! band1_start
-     ABI_FREE(ug1_block)
 
-     if (gwr%usepaw == 0 .and. dtset%inclvkb /= 0 .and. dtset%symchi == 1) then
-       call vkbr_free(vkbr(ik_ibz)) ! Not need anymore as we loop only over IBZ.
-     end if
+     !if (gwr%usepaw == 0 .and. dtset%inclvkb /= 0 .and. dtset%symchi == 1) then
+     !  call vkbr_free(vkbr(ik_ibz)) ! Not need anymore as we loop only over IBZ.
+     !end if
+
+     ABI_FREE(ug1)
+     ABI_FREE(ug2)
+
    end do ! my_ikf
  end do ! my_is
 
- call Ltg_q%free()
- call vkbr_free(vkbr)
- ABI_FREE(vkbr)
  ABI_FREE(bbp_mask)
  ABI_FREE(gvec_q0)
  ABI_FREE(gbound_q0)
  ABI_FREE(work)
+ ABI_FREE(ur1_kibz)
+ ABI_FREE(ur2_kibz)
+ ABI_FREE(ur_prod)
+ ABI_FREE(rhotwg)
+ ABI_FREE(u_gbound)
+
+ call Ltg_q%free()
+ call vkbr_free(vkbr)
+ ABI_FREE(vkbr)
 
  ! Collect head and wings.
  call xmpi_sum(chi0_head, gwr%comm%value, ierr)
@@ -6770,10 +6808,8 @@ subroutine gwr_build_sigxme(gwr)
                           npw_k, kg_k, desc_ki%istwfk, istwf_k, cg1_ptr, cg2_ptr, work_ngfft, work)
        end if
 
-       call fft_ug(npw_k, u_nfft, nspinor, ndat1, &
-                   u_mgfft, u_ngfft, istwf_k, kg_k, gbound_ksum, &
-                   ug_ksum,                       &  ! in
-                   ur_ksum)                          ! out
+       call fft_ug(npw_k, u_nfft, nspinor, ndat1, u_mgfft, u_ngfft, istwf_k, kg_k, gbound_ksum, &
+                   ug_ksum, ur_ksum)
 
        if (any(g0 /= 0)) ur_ksum = ur_ksum * conjg(eig0r)
        !if (any(g0 /= 0)) ur_ksum = ur_ksum * eig0r
@@ -6781,6 +6817,7 @@ subroutine gwr_build_sigxme(gwr)
        ! Get all <k-q,band_sum,s|e^{-i(q+G).r}|s,jb,k>
        do jb=bmin,bmax
 
+         ! FIXME: nspinor 2 is wrong as we have 2x2 matrix
          ur_prod(:) = conjg(ur_ksum(:)) * ur_bdgw(:,jb)
          call fft_ur(npwx, u_nfft, nspinor, ndat1, u_mgfft, u_ngfft, istwfk1, gvec_x, gbound_x, &
                     ur_prod, rhotwg_ki(:,jb))
