@@ -223,6 +223,16 @@ end type invovl_kpt_type
      integer(kind=c_int32_t), value, intent(in) :: block_sliced
    end subroutine f_solve_inner_gpu
 
+   !> add arrays on GPU, array already on device (managed memory)
+   subroutine add_array_kokkos(array1_ptr, array2_ptr, array_size) &
+     & bind(c, name='add_array_kokkos_cpp')
+     use, intrinsic :: iso_c_binding
+     implicit none
+     type(c_ptr)            , value             :: array1_ptr
+     type(c_ptr)            , value             :: array2_ptr
+     integer(kind=c_int32_t), value, intent(in) :: array_size
+   end subroutine add_array_kokkos
+
  end interface
 
 #endif
@@ -639,17 +649,20 @@ subroutine apply_invovl(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_enreg, 
   integer, intent(in) :: npw, ndat
   integer, intent(in) :: nspinor
   integer, intent(in) :: block_sliced
-  real(dp), intent(inout) :: cwavef(2, npw*nspinor*ndat) ! TODO should be in, fix nonlop
+  real(dp), intent(inout), target :: cwavef(2, npw*nspinor*ndat) ! TODO should be in, fix nonlop
   type(mpi_type) :: mpi_enreg
-  real(dp), intent(inout) :: sm1cwavef(2, npw*nspinor*ndat)
+  real(dp), intent(inout), target :: sm1cwavef(2, npw*nspinor*ndat)
   type(pawcprj_type), intent(inout) :: cwaveprj(ham%natom,nspinor*ndat)
 
-  real(dp),allocatable, target :: proj(:,:,:),sm1proj(:,:,:),PtPsm1proj(:,:,:)
+  real(dp),allocatable, target :: proj(:,:,:), sm1proj(:,:,:), PtPsm1proj(:,:,:)
 
   ! used to pass proj dimensions to cuda
   integer(kind=c_int32_t) :: proj_dim(3)
   integer(kind=c_int32_t) :: nattyp_dim
   integer(kind=c_int32_t) :: indlmn_dim(3)
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS) && defined(HAVE_YAKL)
+  integer(kind=c_int32_t) :: cwavef_size
+#endif
 
   integer :: idat, iatom, nlmn, shift
   real(dp) :: tsec(2)
@@ -813,7 +826,15 @@ subroutine apply_invovl(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_enreg, 
     end do
   end do
 
-  sm1cwavef = cwavef + sm1cwavef
+  if (ham%use_gpu_cuda==1) then
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS) && defined(HAVE_YAKL)
+    cwavef_size = 2*npw*nspinor*ndat
+    call add_array_kokkos(c_loc(sm1cwavef), c_loc(cwavef), cwavef_size)
+#endif
+  else
+    sm1cwavef = cwavef + sm1cwavef
+  end if
+
   call pawcprj_axpby(one, one, cwaveprj_in, cwaveprj)
   call pawcprj_free(cwaveprj_in)
   ABI_NVTX_END_RANGE()
