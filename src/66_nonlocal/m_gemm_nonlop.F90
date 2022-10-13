@@ -1333,6 +1333,10 @@ contains
 
   !call copy_on_gpu(C_LOC(vectin(1,1)), gemm_nonlop_kokkos%vectin_gpu, 2*npwin*nspinor*ndat*dp)
 
+  if (choice == 7) then
+    call gpu_data_prefetch_async(C_LOC(svectout), vectin_size)
+  end if
+
   !! gpu alloc and init : enl_gpu
   enl_size_bytes = dimenl1 * dimenl2 * nspinortot**2 * dimekbq * dp
   ABI_MALLOC_CUDA( enl_gpu, enl_size_bytes )
