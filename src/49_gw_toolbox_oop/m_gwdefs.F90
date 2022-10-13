@@ -670,7 +670,7 @@ end function sigma_needs_ppm
 !!
 !! SOURCE
 
-function g0g0w(omega,numerator,delta_ene,zcut,TOL_W0,opt_poles)
+function g0g0w(omega, numerator, delta_ene, zcut, TOL_W0, opt_poles)
 
 !Arguments ------------------------------------
 !scalars
@@ -686,20 +686,24 @@ function g0g0w(omega,numerator,delta_ene,zcut,TOL_W0,opt_poles)
 
 !************************************************************************
 
- if (delta_ene**2>tol14) then
-   sgn=SIGN(1.0_dp,delta_ene)
-   !
-   if (opt_poles == 2) then ! Resonant and anti-resonant contributions.
-     if (DABS(REAL(omega))>TOL_W0) then
+ if (delta_ene**2 > tol14) then
+   sgn = SIGN(1.0_dp,delta_ene)
+
+   if (opt_poles == 2) then
+     ! Resonant and anti-resonant contributions.
+     if (DABS(REAL(omega)) > TOL_W0) then
+       ! omega on the real axis
        g0g0w =  numerator / (omega + delta_ene - j_dpc*sgn*zcut) &
                -numerator / (omega - delta_ene + j_dpc*sgn*zcut)
      else
-       g0g0w =  numerator / (omega + delta_ene)&
+       ! omega on the imag axis
+       g0g0w =  numerator / (omega + delta_ene) &
                -numerator / (omega - delta_ene)
      end if
 
-   else if (opt_poles == 1) then ! Only resonant contribution is included.
-     if (DABS(REAL(omega))>TOL_W0) then
+   else if (opt_poles == 1) then
+     ! Only resonant contribution is included.
+     if (DABS(REAL(omega)) > TOL_W0) then
        g0g0w =  numerator / (omega + delta_ene - j_dpc*sgn*zcut)
      else
        g0g0w =  numerator / (omega + delta_ene)
@@ -711,7 +715,7 @@ function g0g0w(omega,numerator,delta_ene,zcut,TOL_W0,opt_poles)
    end if ! opt_poles
 
  else
-   ! delta_ene**2<tol14
+   ! delta_ene**2 < tol14
    g0g0w = czero
  end if
 
