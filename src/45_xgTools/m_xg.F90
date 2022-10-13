@@ -2058,11 +2058,17 @@ contains
   !! NAME
   !! xgBlock_saxpyR
 
-  subroutine xgBlock_saxpyR(xgBlock1, da, xgBlock2)
+  subroutine xgBlock_saxpyR(xgBlock1, da, xgBlock2, use_gpu_cuda)
 
-    type(xgBlock_t), intent(inout) :: xgBlock1
+    type(xgBlock_t),  intent(inout) :: xgBlock1
     double precision, intent(in   ) :: da
-    type(xgBlock_t), intent(in   ) :: xgBlock2
+    type(xgBlock_t),  intent(in   ) :: xgBlock2
+    integer        ,  intent(in   ), optional :: use_gpu_cuda
+
+    integer      :: l_use_gpu_cuda = 0
+    complex(dpc) :: da_cplx
+
+    da_cplx = dcmplx(da,0.0_dp)
 
     if ( xgBlock1%space /= xgBlock2%space ) then
       ABI_ERROR("Must be same space for saxpy")
@@ -2074,12 +2080,33 @@ contains
       ABI_ERROR("Must have same cols for saxpy")
     end if
 
-    select case(xgBlock1%space)
-    case (SPACE_R,SPACE_CR)
-      call daxpy(xgBlock1%cols*xgBlock1%LDim,da,xgBlock2%vecR,1,xgBlock1%vecR,1)
-    case (SPACE_C)
-      call zaxpy(xgBlock1%cols*xgBlock1%LDim,dcmplx(da,0.d0),xgBlock2%vecC,1,xgBlock1%vecC,1)
-    end select
+    ! if optional parameter is present, use it
+    ! else use default value, i.e. don't use GPU
+    if (present(use_gpu_cuda)) then
+      l_use_gpu_cuda = use_gpu_cuda
+    end if
+
+    if (l_use_gpu_cuda==1) then
+
+      select case(xgBlock1%space)
+      case (SPACE_R,SPACE_CR)
+        call gpu_xaxpy(1, xgBlock1%cols*xgBlock1%LDim, da_cplx, c_loc(xgBlock2%vecR),1,c_loc(xgBlock1%vecR),1)
+        !call daxpy(xgBlock1%cols*xgBlock1%LDim,da,xgBlock2%vecR,1,xgBlock1%vecR,1)
+      case (SPACE_C)
+        call gpu_xaxpy(2, xgBlock1%cols*xgBlock1%LDim, da_cplx, c_loc(xgBlock2%vecC),1,c_loc(xgBlock1%vecC),1)
+        !call zaxpy(xgBlock1%cols*xgBlock1%LDim,dcmplx(da,0.d0),xgBlock2%vecC,1,xgBlock1%vecC,1)
+      end select
+
+    else
+
+      select case(xgBlock1%space)
+      case (SPACE_R,SPACE_CR)
+        call daxpy(xgBlock1%cols*xgBlock1%LDim,da,xgBlock2%vecR,1,xgBlock1%vecR,1)
+      case (SPACE_C)
+        call zaxpy(xgBlock1%cols*xgBlock1%LDim,dcmplx(da,0.d0),xgBlock2%vecC,1,xgBlock1%vecC,1)
+      end select
+
+    end if
 
   end subroutine xgBlock_saxpyR
   !!***
@@ -2089,11 +2116,14 @@ contains
   !! NAME
   !! xgBlock_saxpyC
 
-  subroutine xgBlock_saxpyC(xgBlock1, da, xgBlock2)
+  subroutine xgBlock_saxpyC(xgBlock1, da, xgBlock2, use_gpu_cuda)
 
     type(xgBlock_t), intent(inout) :: xgBlock1
-    double complex, intent(in   ) :: da
+    double complex,  intent(in   ) :: da
     type(xgBlock_t), intent(in   ) :: xgBlock2
+    integer        , intent(in   ), optional :: use_gpu_cuda
+
+    integer      :: l_use_gpu_cuda = 0
 
     if ( xgBlock1%space /= xgBlock2%space ) then
       ABI_ERROR("Must be same space for Saxpy")
@@ -2108,7 +2138,17 @@ contains
       ABI_ERROR("Not correct space")
     end if
 
-    call zaxpy(xgBlock1%cols*xgBlock1%LDim,da,xgBlock2%vecC,1,xgBlock1%vecC,1)
+    ! if optional parameter is present, use it
+    ! else use default value, i.e. don't use GPU
+    if (present(use_gpu_cuda)) then
+      l_use_gpu_cuda = use_gpu_cuda
+    end if
+
+    if (l_use_gpu_cuda==1) then
+      call gpu_xaxpy(2, xgBlock1%cols*xgBlock1%LDim, da, c_loc(xgBlock2%vecC), 1, c_loc(xgBlock1%vecC), 1)
+    else
+      call zaxpy(xgBlock1%cols*xgBlock1%LDim, da, xgBlock2%vecC, 1, xgBlock1%vecC, 1)
+    end if
 
   end subroutine xgBlock_saxpyC
   !!***
@@ -2505,33 +2545,65 @@ contains
   !! NAME
   !! xgBlock_scaleR
 
-  subroutine xgBlock_scaleR(xgBlock, val, inc)
+  subroutine xgBlock_scaleR(xgBlock, val, inc, use_gpu_cuda)
 
-    type(xgBlock_t) , intent(inout) :: xgBlock
-    double precision, intent(in   ) :: val
-    integer         , intent(in   ) :: inc
-    integer :: i
+    type(xgBlock_t) , intent(inout)           :: xgBlock
+    double precision, intent(in   )           :: val
+    integer         , intent(in   )           :: inc
+    integer         , intent(in   ), optional :: use_gpu_cuda
 
-    if ( xgBlock%ldim .eq. xgBlock%rows ) then
-      select case(xgBlock%space)
-      case (SPACE_R,SPACE_CR)
-        call dscal(xgBlock%ldim*xgBlock%cols/inc,val,xgBlock%vecR,inc)
-      case (SPACE_C)
-        call zdscal(xgBlock%ldim*xgBlock%cols/inc,val,xgBlock%vecC,inc)
-      end select
+    integer      :: i
+    integer      :: l_use_gpu_cuda = 0
+    complex(dpc) :: valc
+
+    valc = dcmplx(val,0.0_dp)
+
+    ! if optional parameter is present, use it
+    ! else use default value, i.e. don't use GPU
+    if (present(use_gpu_cuda)) then
+      l_use_gpu_cuda = use_gpu_cuda
+    end if
+
+    if (l_use_gpu_cuda==1) then
+
+      if ( xgBlock%ldim .eq. xgBlock%rows ) then
+        select case(xgBlock%space)
+        case (SPACE_R,SPACE_CR)
+          call gpu_xscal(1, xgBlock%ldim*xgBlock%cols/inc, valc, c_loc(xgBlock%vecR), inc)
+        case (SPACE_C)
+          call gpu_xscal(2, xgBlock%ldim*xgBlock%cols/inc, valc, c_loc(xgBlock%vecC), inc)
+        end select
+      else
+
+        ! TODO (PK) : evaluate if it is really necessary to deal with this case
+        ABI_ERROR("Scaling a xgBlock when xgBlock%ldim != xgBlock%rows is not implemented for GPU. FIX ME if needed.")
+
+      end if
+
     else
-      select case(xgBlock%space)
-      case (SPACE_R,SPACE_CR)
-        !$omp parallel do
-        do i=1,xgBlock%cols
-          call dscal(xgBlock%rows/inc,val,xgBlock%vecR(:,i),inc)
-        end do
-      case (SPACE_C)
-        !$omp parallel do
-        do i=1,xgBlock%cols
-          call zdscal(xgBlock%rows/inc,val,xgBlock%vecC(:,i),inc)
-        end do
-      end select
+
+      if ( xgBlock%ldim .eq. xgBlock%rows ) then
+        select case(xgBlock%space)
+        case (SPACE_R,SPACE_CR)
+          call dscal(xgBlock%ldim*xgBlock%cols/inc,val,xgBlock%vecR,inc)
+        case (SPACE_C)
+          call zdscal(xgBlock%ldim*xgBlock%cols/inc,val,xgBlock%vecC,inc)
+        end select
+      else
+        select case(xgBlock%space)
+        case (SPACE_R,SPACE_CR)
+          !$omp parallel do
+          do i=1,xgBlock%cols
+            call dscal(xgBlock%rows/inc,val,xgBlock%vecR(:,i),inc)
+          end do
+        case (SPACE_C)
+          !$omp parallel do
+          do i=1,xgBlock%cols
+            call zdscal(xgBlock%rows/inc,val,xgBlock%vecC(:,i),inc)
+          end do
+        end select
+      end if
+
     end if
 
   end subroutine xgBlock_scaleR
@@ -2542,30 +2614,59 @@ contains
   !! NAME
   !! xgBlock_scaleC
 
-  subroutine xgBlock_scaleC(xgBlock, val, inc)
+  subroutine xgBlock_scaleC(xgBlock, val, inc, use_gpu_cuda)
 
-    type(xgBlock_t), intent(inout) :: xgBlock
-    complex(kind=8), intent(in   ) :: val
-    integer        , intent(in   ) :: inc
+    type(xgBlock_t), intent(inout)           :: xgBlock
+    complex(kind=8), intent(in   )           :: val
+    integer        , intent(in   )           :: inc
+    integer        , intent(in   ), optional :: use_gpu_cuda
+
     integer :: i
+    integer :: l_use_gpu_cuda = 0
 
-    if ( xgBlock%ldim .eq. xgBlock%rows ) then
-      select case(xgBlock%space)
-      case (SPACE_R,SPACE_CR)
-        ABI_ERROR("Scaling real vector with a complex not possible")
-      case (SPACE_C)
-        call zscal(xgBlock%ldim*xgBlock%cols/inc,val,xgBlock%vecC,inc)
-      end select
+    ! if optional parameter is present, use it
+    ! else use default value, i.e. don't use GPU
+    if (present(use_gpu_cuda)) then
+      l_use_gpu_cuda = use_gpu_cuda
+    end if
+
+    if (l_use_gpu_cuda==1) then
+
+      if ( xgBlock%ldim .eq. xgBlock%rows ) then
+        select case(xgBlock%space)
+        case (SPACE_R,SPACE_CR)
+          ABI_ERROR("Scaling real vector with a complex not possible")
+        case (SPACE_C)
+          call gpu_xscal(2, xgBlock%ldim*xgBlock%cols/inc, val, c_loc(xgBlock%vecC), inc)
+        end select
+      else
+
+        ! TODO (PK) : evaluate if it is really necessary to deal with this case
+        ABI_ERROR("Scaling a xgBlock when xgBlock%ldim != xgBlock%rows is not implemented for GPU. FIX ME if needed.")
+
+      end if
+
     else
-      select case(xgBlock%space)
-      case (SPACE_R,SPACE_CR)
-        ABI_ERROR("Scaling real vector with a complex not possible")
-      case (SPACE_C)
-        !$omp parallel do
-        do i=1,xgBlock%cols
-          call zscal(xgBlock%rows/inc,val,xgBlock%vecC(:,i),inc)
-        end do
-      end select
+
+      if ( xgBlock%ldim .eq. xgBlock%rows ) then
+        select case(xgBlock%space)
+        case (SPACE_R,SPACE_CR)
+          ABI_ERROR("Scaling real vector with a complex not possible")
+        case (SPACE_C)
+          call zscal(xgBlock%ldim*xgBlock%cols/inc,val,xgBlock%vecC,inc)
+        end select
+      else
+        select case(xgBlock%space)
+        case (SPACE_R,SPACE_CR)
+          ABI_ERROR("Scaling real vector with a complex not possible")
+        case (SPACE_C)
+          !$omp parallel do
+          do i=1,xgBlock%cols
+            call zscal(xgBlock%rows/inc,val,xgBlock%vecC(:,i),inc)
+          end do
+        end select
+      end if
+
     end if
 
   end subroutine xgBlock_scaleC
