@@ -673,6 +673,7 @@ subroutine apply_invovl(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_enreg, 
 
   ! *************************************************************************
 
+  ABI_NVTX_START_RANGE(NVTX_INVOVL_PREP)
   ikpt_this_proc=bandfft_kpt_get_ikpt()
   invovl => invovl_kpt(ikpt_this_proc)
 
@@ -717,6 +718,7 @@ subroutine apply_invovl(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_enreg, 
   call timab(timer_apply_inv_ovl_opernla, 1, tsec)
 
   call pawcprj_alloc(cwaveprj_in,0,ham%dimcprj)
+  ABI_NVTX_END_RANGE()
 
   ! get the cprj
   ABI_NVTX_START_RANGE(NVTX_INVOVL_NONLOP1)
@@ -800,6 +802,7 @@ subroutine apply_invovl(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_enreg, 
 
   call timab(timer_apply_inv_ovl_opernlb, 2, tsec)
 
+  ABI_NVTX_START_RANGE(NVTX_INVOVL_POST2)
   ! copy PtPSm1proj to cwaveprj(:,:)
   do idat=1, ndat*nspinor
     shift = 0
@@ -813,6 +816,7 @@ subroutine apply_invovl(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_enreg, 
   sm1cwavef = cwavef + sm1cwavef
   call pawcprj_axpby(one, one, cwaveprj_in, cwaveprj)
   call pawcprj_free(cwaveprj_in)
+  ABI_NVTX_END_RANGE()
 
   ABI_FREE(proj)
   ABI_FREE(sm1proj)
@@ -891,7 +895,6 @@ subroutine solve_inner(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj, PtPsm1
    temp_proj = sm1proj(:,ibeg:iend,:)
 
    ! compute matrix multiplication : PtPsm1proj(:,:,1) = invovl%gram * temp_proj(:,:,1)
-   ABI_NVTX_START_RANGE(NVTX_INVOVL_INNER_GEMM)
    call abi_xgemm('N', 'N', nprojs, ndat, nlmntot_this_proc, cone, &
      & invovl%gram_projs(:,:,1), nprojs, &
      & temp_proj(:,:,1), nlmntot_this_proc, czero, &
@@ -902,7 +905,6 @@ subroutine solve_inner(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj, PtPsm1
    ! exit check
    errs = SUM(SUM(resid**2, 1),1)
    call xmpi_sum(errs, mpi_enreg%comm_fft, ierr)
-   ABI_NVTX_END_RANGE()
 
    maxerr = sqrt(MAXVAL(errs/normprojs))
    if(maxerr < precision .or. additional_steps_to_take == 1) then
@@ -962,7 +964,6 @@ subroutine apply_block(ham, cplx, mat, nprojs, ndat, x, y, block_sliced)
 
 ! *************************************************************************
 
-  ABI_NVTX_START_RANGE(NVTX_INVOVL_INNER_APPLY_BLOCK)
   if (block_sliced == 1) then
 
      do idat = 1, ndat
@@ -1011,7 +1012,6 @@ subroutine apply_block(ham, cplx, mat, nprojs, ndat, x, y, block_sliced)
      end do
 
   end if
- ABI_NVTX_END_RANGE()
 
 end subroutine apply_block
 !!***

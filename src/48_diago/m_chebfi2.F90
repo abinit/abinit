@@ -841,10 +841,10 @@ subroutine chebfi_computeNextOrderChebfiPolynom(chebfi,iline,center,one_over_r,t
    end subroutine getBm1X
  end interface
 
-!Local variables-------------------------------
+ !Local variables-------------------------------
  real(dp) :: tsec(2)
 
-! *********************************************************************
+ ! *********************************************************************
 
  if (chebfi%paw) then
    call timab(tim_invovl, 1, tsec)
@@ -856,6 +856,7 @@ subroutine chebfi_computeNextOrderChebfiPolynom(chebfi,iline,center,one_over_r,t
    call xgBlock_copy(chebfi%xAXColsRows,chebfi%X_next, 1, 1)
  end if
 
+ ABI_NVTX_START_RANGE(NVTX_INVOVL_POST3)
  call xgBlock_scale(chebfi%xXColsRows, center, 1) !scale by c
 
  !(B-1 * A * Psi^i-1 - c * Psi^i-1)
@@ -866,11 +867,12 @@ subroutine chebfi_computeNextOrderChebfiPolynom(chebfi,iline,center,one_over_r,t
 
  if (iline == 0) then
    call xgBlock_scale(chebfi%X_next, one_over_r, 1)
-else
+ else
    call xgBlock_scale(chebfi%X_next, two_over_r, 1)
 
    call xgBlock_saxpy(chebfi%X_next, dble(-1.0), chebfi%X_prev)
-end if
+ end if
+ ABI_NVTX_END_RANGE()
 
 end subroutine chebfi_computeNextOrderChebfiPolynom
 !!***

@@ -28,7 +28,7 @@ module m_nvtx_data
 
   logical :: nvtx_activated = .false.
 
-  integer, parameter :: NUMBER_OF_NVTX_REGIONS = 30
+  integer, parameter :: NUMBER_OF_NVTX_REGIONS = 32
   character(len=32), dimension(NUMBER_OF_NVTX_REGIONS) :: nvtx_names
   integer          , dimension(NUMBER_OF_NVTX_REGIONS) :: nvtx_ids
 
@@ -53,15 +53,17 @@ module m_nvtx_data
   integer, parameter :: NVTX_SCF_FOURWF = 19
   integer, parameter :: NVTX_MKRHO = 20
   integer, parameter :: NVTX_INVOVL = 21
-  integer, parameter :: NVTX_INVOVL_NONLOP1 = 22
-  integer, parameter :: NVTX_INVOVL_NONLOP2 = 23
-  integer, parameter :: NVTX_INVOVL_INNER = 24
-  integer, parameter :: NVTX_INVOVL_INNER_APPLY_BLOCK = 25
-  integer, parameter :: NVTX_INVOVL_INNER_GEMM = 26
-  integer, parameter :: NVTX_SUB_SPC_DIAGO = 27
-  integer, parameter :: NVTX_CHEBFI2_NEXT_ORDER = 28
-  integer, parameter :: NVTX_CHEBFI2_SWAP_BUF = 29
-  integer, parameter :: NVTX_CHEBFI2_GET_AX_BX = 30
+  integer, parameter :: NVTX_INVOVL_PREP = 22
+  integer, parameter :: NVTX_INVOVL_NONLOP1 = 23
+  integer, parameter :: NVTX_INVOVL_NONLOP2 = 24
+  integer, parameter :: NVTX_INVOVL_INNER = 25
+  integer, parameter :: NVTX_INVOVL_POST1 = 26
+  integer, parameter :: NVTX_INVOVL_POST2 = 27
+  integer, parameter :: NVTX_INVOVL_POST3 = 28
+  integer, parameter :: NVTX_SUB_SPC_DIAGO = 29
+  integer, parameter :: NVTX_CHEBFI2_NEXT_ORDER = 30
+  integer, parameter :: NVTX_CHEBFI2_SWAP_BUF = 31
+  integer, parameter :: NVTX_CHEBFI2_GET_AX_BX = 32
 
 contains
 
@@ -98,11 +100,13 @@ contains
          & "SCF_FOURWF", &
          & "MKRHO", &
          & "INVOVL", &
+         & "INVOVL_PREP", &
          & "INVOVL_NONLOP1", &
          & "INVOVL_NONLOP2", &
          & "INVOVL_INNER", &
-         & "INVOVL_INNER_APPLY_BLOCK", &
-         & "INVOVL_INNER_GEMM", &
+         & "INVOVL_POST1", &
+         & "INVOVL_POST2", &
+         & "INVOVL_POST3", &
          & "SUB_SPC_DIAGO", &
          & "CHEBFI2_NEXT_ORDER", &
          & "CHEBFI2_SWAP_BUF", &
@@ -130,15 +134,17 @@ contains
     nvtx_ids(19)= NVTX_SCF_FOURWF
     nvtx_ids(20)= NVTX_MKRHO
     nvtx_ids(21)= NVTX_INVOVL
-    nvtx_ids(22)= NVTX_INVOVL_NONLOP1
-    nvtx_ids(23)= NVTX_INVOVL_NONLOP2
-    nvtx_ids(24)= NVTX_INVOVL_INNER
-    nvtx_ids(25)= NVTX_INVOVL_INNER_APPLY_BLOCK
-    nvtx_ids(26)= NVTX_INVOVL_INNER_GEMM
-    nvtx_ids(27)= NVTX_SUB_SPC_DIAGO
-    nvtx_ids(28)= NVTX_CHEBFI2_NEXT_ORDER
-    nvtx_ids(29)= NVTX_CHEBFI2_SWAP_BUF
-    nvtx_ids(30)= NVTX_CHEBFI2_GET_AX_BX
+    nvtx_ids(22)= NVTX_INVOVL_PREP
+    nvtx_ids(23)= NVTX_INVOVL_NONLOP1
+    nvtx_ids(24)= NVTX_INVOVL_NONLOP2
+    nvtx_ids(25)= NVTX_INVOVL_INNER
+    nvtx_ids(26)= NVTX_INVOVL_POST1
+    nvtx_ids(27)= NVTX_INVOVL_POST2
+    nvtx_ids(28)= NVTX_INVOVL_POST3
+    nvtx_ids(29)= NVTX_SUB_SPC_DIAGO
+    nvtx_ids(30)= NVTX_CHEBFI2_NEXT_ORDER
+    nvtx_ids(31)= NVTX_CHEBFI2_SWAP_BUF
+    nvtx_ids(32)= NVTX_CHEBFI2_GET_AX_BX
 
   end subroutine nvtx_init
 
