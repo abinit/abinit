@@ -548,7 +548,7 @@ contains
      spaceComm_band=mpi_enreg%comm_band ! not actually used as npband_bandfft=1
      cg_band_distributed=.true.
      cprj_band_distributed=.true.
-     npband_dfpt=1
+     npband_dfpt=mpi_enreg%nproc_band
    else
      spaceComm_band=xmpi_comm_self
      cg_band_distributed=.false.
@@ -569,6 +569,8 @@ contains
 
 !Check sizes
  if (mpw*mband_cg*my_nspinor*mkmem*my_nsppol>mcg) then
+!write (100+mpi_enreg%me_kpt, *) ' mcg = ', mcg, ' and mpw*mband_cg*my_nspinor*mkmem*my_nsppol  = ', mpw,mband_cg,my_nspinor,mkmem,my_nsppol, ' mpi_enreg%nproc_band ', mpi_enreg%nproc_band
+!flush (100+mpi_enreg%me_kpt)
    ABI_BUG('Bad mcg value!')
  end if
  if (mband_cprj*my_nspinor*mkmem*my_nsppol>mcprj) then
