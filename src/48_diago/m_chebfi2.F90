@@ -857,21 +857,27 @@ subroutine chebfi_computeNextOrderChebfiPolynom(chebfi,iline,center,one_over_r,t
  end if
 
  ABI_NVTX_START_RANGE(NVTX_INVOVL_POST3)
- call xgBlock_scale(chebfi%xXColsRows, center, 1) !scale by c
+ call xgBlock_scale(chebfi%xXColsRows, center, 1, chebfi%use_gpu_cuda) !scale by center
 
  !(B-1 * A * Psi^i-1 - c * Psi^i-1)
- call xgBlock_saxpy(chebfi%X_next, dble(-1.0), chebfi%xXColsRows)
+ call xgBlock_saxpy(chebfi%X_next, dble(-1.0), chebfi%xXColsRows, chebfi%use_gpu_cuda)
 
  !Psi^i-1  = 1/c * Psi^i-1
- call xgBlock_scale(chebfi%xXColsRows, 1/center, 1) !counter scale by c
+ call xgBlock_scale(chebfi%xXColsRows, 1/center, 1, chebfi%use_gpu_cuda) !counter scale by 1/center
 
  if (iline == 0) then
-   call xgBlock_scale(chebfi%X_next, one_over_r, 1)
+   call xgBlock_scale(chebfi%X_next, one_over_r, 1, chebfi%use_gpu_cuda)
  else
-   call xgBlock_scale(chebfi%X_next, two_over_r, 1)
+   call xgBlock_scale(chebfi%X_next, two_over_r, 1, chebfi%use_gpu_cuda)
 
-   call xgBlock_saxpy(chebfi%X_next, dble(-1.0), chebfi%X_prev)
+   call xgBlock_saxpy(chebfi%X_next, dble(-1.0), chebfi%X_prev, chebfi%use_gpu_cuda)
  end if
+
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
+ if (chebfi%use_gpu_cuda==1) then
+   call gpu_device_synchronize()
+ end if
+#endif
  ABI_NVTX_END_RANGE()
 
 end subroutine chebfi_computeNextOrderChebfiPolynom
