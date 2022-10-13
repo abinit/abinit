@@ -1074,6 +1074,12 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &     rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1,vpsp1,nvresid1,res2,vtrial1,vxc,vxc1,xccc3d1,dtset%ixcrot)
    end if
 
+   write(100,'(6f18.8)') ek0,edocc,eeig0,eloc0,enl0,ek0+edocc+eeig0+eloc0+enl0
+   write(100,'(3f18.8)') ehart1,exc1,enl1
+   write(100,*)
+   write(101,'(6f18.8)') ek0_mq,edocc_mq,eeig0_mq,eloc0_mq,enl0_mq,ek0_mq+edocc_mq+eeig0_mq+eloc0_mq+enl0_mq
+   write(101,'(3f18.8)') ehart1,exc1,enl1_mq
+   write(101,*)
 
    if (iscf_mod>=10) then
      optene = 0 
