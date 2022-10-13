@@ -208,9 +208,13 @@ module m_slk
     ! Change the block sizes and the processor, return new matrix
 
    procedure :: cut => slk_cut
+    ! Extract submatrix and create new matrix with `size_blocs` and `processor`
 
    procedure :: take_from => slk_take_from
     ! Take values from source
+
+   procedure :: zcollect => slk_zcollect
+    ! Return on all processors the complex submatrix of shape (mm, nn) starting at position ija.
 
    procedure :: get_trace => slk_get_trace
     ! Compute the trace of an N-by-N distributed matrix.
@@ -432,7 +436,7 @@ subroutine init_scalapack(processor, comm, grid_dims)
 
 !Local variables-------------------------------
  type(grid_scalapack) :: grid
- integer :: nbproc,myproc !,ierr
+ integer :: nbproc,myproc
 
 ! *********************************************************************
 
@@ -3959,7 +3963,7 @@ end subroutine slk_change_size_blocs
 !! SOURCE
 
 subroutine slk_cut(in_mat, glob_nrows, glob_ncols, out_mat, &
-                    size_blocs, processor, ija, ijb)  ! Optional
+                   size_blocs, processor, ija, ijb)  ! Optional
 
 !Arguments ------------------------------------
  class(matrix_scalapack),target,intent(in) :: in_mat
@@ -4093,6 +4097,73 @@ subroutine slk_take_from(out_mat, source, ija, ijb)
  end if
 
 end subroutine slk_take_from
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_slk/slk_zcollect
+!! NAME
+!!  slk_zcollect
+!!
+!! FUNCTION
+!!  Return on all processors the complex submatrix of shape (mm, nn) starting at position ija.
+!!  `out_carr` is allocated by the routine.
+!!
+!! SOURCE
+
+subroutine slk_zcollect(in_mat, mm, nn, ija, out_carr)
+
+!Arguments ------------------------------------
+ class(matrix_scalapack),intent(in) :: in_mat
+ integer,intent(in) :: mm, nn, ija(2)
+ complex(dp),allocatable,intent(out) :: out_carr(:,:)
+
+!Local variables-------------------------------
+ integer,parameter :: istwfk1 = 1, master = 0
+ integer :: ierr
+ type(processor_scalapack) :: processor
+ type(matrix_scalapack) :: out_mat
+
+! *************************************************************************
+
+ ABI_CHECK(allocated(in_mat%buffer_cplx), "buffer_cplx is not allocated")
+
+ if (in_mat%processor%grid%nbprocs == 1) then
+   ! Simple copy
+   ABI_MALLOC(out_carr, (mm, nn))
+   out_carr(:,:) = in_mat%buffer_cplx(ija(1):ija(1)+mm-1, ija(2):ija(2)+nn-1)
+   return
+ end if
+
+ ! Two-step algorithm:
+ ! 1) Use pzgemr2d to collect submatrix on master.
+ ! 2) Master brodacasts submatrix.
+
+ if (in_mat%processor%myproc == master) then
+   call processor%init(xmpi_comm_self)
+   call out_mat%init(mm, nn, in_mat%processor, istwfk1, size_blocs=[mm, nn])
+ else
+   out_mat%descript%tab(CTXT_) = -1
+ end if
+
+#ifdef HAVE_LINALG_SCALAPACK
+ call pzgemr2d(mm, nn,  &
+               in_mat%buffer_cplx, ija(1), ija(2), in_mat%descript%tab,   &
+               out_mat%buffer_cplx, 1, 1, out_mat%descript%tab, &
+               in_mat%processor%grid%ictxt)
+#endif
+
+ if (in_mat%processor%myproc == master) then
+   ABI_MOVE_ALLOC(out_mat%buffer_cplx, out_carr)
+   call processor%free()
+   call out_mat%free()
+ else
+   ABI_MALLOC(out_carr, (mm, nn))
+ end if
+
+ call xmpi_bcast(out_carr, master, in_mat%processor%comm, ierr)
+
+end subroutine slk_zcollect
 !!***
 
 !----------------------------------------------------------------------
