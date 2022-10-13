@@ -1154,13 +1154,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &       mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
      end if
 
-     write(100,'(6f18.8)') ek0,edocc,eeig0,eloc0,enl0,ek0+edocc+eeig0+eloc0+enl0
-     write(100,'(3f18.8)') ehart1,exc1,enl1
-     write(100,*)
-     write(101,'(6f18.8)') ek0_mq,edocc_mq,eeig0_mq,eloc0_mq,enl0_mq,ek0_mq+edocc_mq+eeig0_mq+eloc0_mq+enl0_mq
-     write(101,'(3f18.8)') ehart1,exc1,enl1_mq
-     write(101,*)
-
      optene = 0 ! use direct scheme
      call dfpt_etot(dtset%berryopt,deltae,eberry,edocc,eeig0,eew,efrhar,efrkin,&
 &     efrloc,efrnl,efrx1,efrx2,ehart1,ek0,ek1,eii,elast,eloc0,elpsp1,&
