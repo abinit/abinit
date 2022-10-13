@@ -91,7 +91,7 @@ module m_screening_driver
  use m_paw_correlations, only : pawpuxinit
  use m_plowannier,    only : plowannier_type,init_plowannier,get_plowannier, fullbz_plowannier,destroy_plowannier
 #ifdef __HAVE_GREENX
- use gx_minimax,       only : gx_minimax_grid, gx_get_error_message
+ use gx_minimax,      only : gx_minimax_grid, gx_get_error_message
 #endif
 
  implicit none
@@ -1004,8 +1004,8 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    ABI_FREE(zw)
 
 #ifdef __HAVE_GREENX
-if (.False.) then
-!if (dtset%gwr_ntau /= 0) then
+!if (.False.) then
+if (dtset%gwr_ntau /= 0) then
    call wrtout(std_out, sjoin("Using minimax mesh with ntau:", itoa(dtset%nfreqim)))
    gaps = ebands_get_gaps(ks_ebands, gap_err)
    ABI_CHECK(gap_err == 0, "gap_err")
@@ -1025,7 +1025,6 @@ if (.False.) then
                         iw_mesh, iw_wgs,   &
                         t2w_cos_wgs, w2t_cos_wgs, t2w_sin_wgs, &
                         ft_max_error, cosft_duality_error, ierr)
-   !ABI_CHECK(ierr == 0, "Error calling gx_minimax_grid")
    if (ierr /= 0) then
      call gx_get_error_message(msg)
      ABI_ERROR(msg)

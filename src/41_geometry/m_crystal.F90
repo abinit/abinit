@@ -34,10 +34,11 @@ MODULE m_crystal
 
  use m_io_tools,       only : file_exists
  use m_numeric_tools,  only : set2unit
+ use m_hide_lapack,    only : matrginv
  use m_fstrings,       only : int2char10, sjoin, yesno, itoa, strcat
  use m_symtk,          only : mati3inv, sg_multable, symatm, print_symmetries
  use m_spgdata,        only : spgdata
- use m_geometry,       only : metric, xred2xcart, xcart2xred, remove_inversion, getspinrot, symredcart
+ use m_geometry,       only : metric, xred2xcart, xcart2xred, remove_inversion, getspinrot, symredcart, normv
  use m_io_tools,       only : open_file
 
  implicit none
@@ -236,6 +237,9 @@ MODULE m_crystal
 
    procedure :: symmetrize_cart_tens33 => crystal_symmetrize_cart_tens33
    ! Symmetrize a cartesian 3x3 tensor
+
+   procedure :: get_redcart_qdirs => get_redcart_qdirs
+   ! Return predefined list of 6 q-versors in reciprocal space reduced coordinates.
 
  end type crystal_t
 
@@ -1737,6 +1741,52 @@ function crystal_symmetrize_cart_tens33(cryst, t, time_opt) result(tsum)
  tsum = tsum / nsym_sum
 
 end function crystal_symmetrize_cart_tens33
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_crystal/get_recart_qdirs
+!! NAME
+!!  get_recart_qdirs
+!!
+!! FUNCTION
+!!  Return predefined list of 6 q-versors in reciprocal space reduced coordinates.
+!!  First 3 entries are along the recip. space lattice vectors, then along the Cartesian axis x,y,z.
+!!
+!! INPUTS
+!!
+!! SOURCE
+
+subroutine get_redcart_qdirs(cryst, nq, qdirs)
+
+ class(crystal_t),intent(in) :: cryst
+ integer,intent(out) :: nq
+ real(dp),allocatable,intent(out) :: qdirs(:,:)
+
+!Local variables-------------------------------
+ integer :: iq
+ real(dp) :: qred2cart(3,3), qcart2red(3,3)
+
+! *************************************************************************
+
+ qred2cart = two_pi * cryst%gprimd
+ qcart2red = qred2cart
+ call matrginv(qcart2red, 3, 3)
+
+ nq = 6
+ ABI_MALLOC(qdirs, (3, nq))
+ qdirs(:,1) = [one, zero, zero]  ! (100)
+ qdirs(:,2) = [zero, one, zero]  ! (010)
+ qdirs(:,3) = [zero, zero, one]  ! (001)
+ qdirs(:,4) = matmul(qcart2red, [one, zero, zero]) ! (x)
+ qdirs(:,5) = matmul(qcart2red, [zero, one, zero]) ! (y)
+ qdirs(:,6) = matmul(qcart2red, [zero, zero, one]) ! (z)
+
+ do iq=1,nq ! normalization
+   qdirs(:,iq) = qdirs(:,iq) / normv(qdirs(:,iq), cryst%gmet, "G")
+ end do
+
+end subroutine get_redcart_qdirs
 !!***
 
 END MODULE m_crystal
