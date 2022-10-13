@@ -523,7 +523,8 @@ subroutine getBm1X(X,Bm1X,transposer)
    gsm1hc_filter(:,:) = ghc_filter(:,:)
  end if
 
-!Scale cg, ghc, gsc
+ ABI_NVTX_START_RANGE(NVTX_INVOVL_POST1)
+ !Scale cg, ghc, gsc
  if ( l_istwf == 2 ) then
    call xgBlock_scale(X,sqrt2,1)
    if (l_paral_kgb == 0) then
@@ -554,6 +555,7 @@ subroutine getBm1X(X,Bm1X,transposer)
      ABI_FREE(cwaveprj_next)
    end if
  end if
+ ABI_NVTX_END_RANGE()
 
 end subroutine getBm1X
 !!***
