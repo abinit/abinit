@@ -20,7 +20,7 @@ module m_nvtx
   use, intrinsic :: iso_c_binding
   implicit none
 
-  integer,private,parameter :: nbcol=14
+  integer,private,parameter :: nbcol=19
   integer(kind=C_INT32_T),private :: col(nbcol) = [ &
        & int(Z'0000ff00',kind=C_INT32_T), & ! GREEN
        & int(Z'000000ff',kind=C_INT32_T), & ! BLUE
@@ -35,7 +35,12 @@ module m_nvtx
        & int(Z'00b832ff',kind=C_INT32_T), &
        & int(Z'00f9fa7d',kind=C_INT32_T), & ! LIGHT YELLOW
        & int(Z'00f96c56',kind=C_INT32_T), &
-       & int(Z'0094b5dc',kind=C_INT32_T) ]
+       & int(Z'0094b5dc',kind=C_INT32_T), &
+       & int(Z'00cc99ff',kind=C_INT32_T), & ! LIGHT PURPLE
+       & int(Z'00a50201',kind=C_INT32_T), & ! DARK RED
+       & int(Z'0001a4a5',kind=C_INT32_T), & ! KIND OF CYAN
+       & int(Z'00d8fb08',kind=C_INT32_T), & ! FLASHY YELLOW
+       & int(Z'0090aacc',kind=C_INT32_T) ]
   character,private,target :: tempName(256)
 
   type, bind(C):: nvtxEventAttributes
