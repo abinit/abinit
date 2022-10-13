@@ -44,6 +44,7 @@ MODULE m_chi0tk
  public :: assemblychi0_sym
  public :: symmetrize_afm_chi0
  public :: accumulate_chi0_q0
+ public :: accumulate_head_wings_imagw
  public :: accumulate_sfchi0_q0
  public :: assemblychi0sf
  public :: approxdelta
@@ -419,8 +420,8 @@ subroutine symmetrize_afm_chi0(Cryst,Gsph,Ltg_q,npwe,nomega,chi0,chi0_head,chi0_
        do ipair=1,Cryst%nsym/2
          isymf = pairs2sym(1,ipair)
          isyma = pairs2sym(2,ipair)
-         phase = ( Gsph%phmSGt(ig1,isymf)*CONJG(Gsph%phmSGt(ig1,isyma)) ) * &
-&                ( Gsph%phmSGt(ig2,isymf)*CONJG(Gsph%phmSGt(ig2,isyma)) )
+         phase = ( Gsph%phmSGt(ig1,isymf)*conjg(Gsph%phmSGt(ig1,isyma)) ) * &
+&                ( Gsph%phmSGt(ig2,isymf)*conjg(Gsph%phmSGt(ig2,isyma)) )
          if (ipair>1 .and. (ABS(phase_old-phase) > tol6)) then
            nonzero=0; EXIT
          end if
@@ -455,7 +456,7 @@ subroutine symmetrize_afm_chi0(Cryst,Gsph,Ltg_q,npwe,nomega,chi0,chi0_head,chi0_
        do ig1=1,npwe
          k0g=ig1*(ig1-1)/2
          kg=k0g+1
-         chi0_lwing(ig1,io,:)=CONJG(afm_mat(kg))*chi0_lwing(ig1,io,:)
+         chi0_lwing(ig1,io,:)=conjg(afm_mat(kg))*chi0_lwing(ig1,io,:)
        end do
      end do
    end if
@@ -480,7 +481,7 @@ subroutine symmetrize_afm_chi0(Cryst,Gsph,Ltg_q,npwe,nomega,chi0,chi0_head,chi0_
        k0g=ig1*(ig1-1)/2
        do ig2=1,ig1-1
          kg=k0g+ig2
-         chi0(ig1,ig2,io)=CONJG(afm_mat(kg))*chi0(ig1,ig2,io)
+         chi0(ig1,ig2,io)=conjg(afm_mat(kg))*chi0(ig1,ig2,io)
        end do
      end do
 
@@ -516,10 +517,10 @@ subroutine symmetrize_afm_chi0(Cryst,Gsph,Ltg_q,npwe,nomega,chi0,chi0_head,chi0_
            do isym=1,ltg_q%nsym_sg
              ! use only afm sym preserving q with and without time-reversal
              if ( cryst%symafm(isym)==-1 .and. ltg_q%preserve(itim,isym)==1 ) then
-               phase =  Gsph%phmGt(ig1,isym)*CONJG(Gsph%phmGt(ig2,isym))
+               phase =  Gsph%phmGt(ig1,isym)*conjg(Gsph%phmGt(ig2,isym))
                iSmg1=Gsph%rottbm1(ig1,itim,isym)
                iSmg2=Gsph%rottbm1(ig2,itim,isym)
-               ctmp=chi0(iSmg1,iSmg2,io)*phase !; if (itim==2) ctmp=CONJG(ctmp) !check this
+               ctmp=chi0(iSmg1,iSmg2,io)*phase !; if (itim==2) ctmp=conjg(ctmp) !check this
                sumchi=sumchi+ctmp !chi0(iSmg1,iSmg2,io)*phase
              end if
            end do ! isym
@@ -626,7 +627,7 @@ subroutine accumulate_chi0_q0(is_metallic,ik_bz,isym_kbz,itim_kbz,gwcomp,nspinor
  type(em1params_t),intent(in) :: Ep
 !arrays
  complex(gwpc),intent(in) :: rhotwg(npwepG0)
- complex(gwpc),intent(in) :: rhotwx(3,nspinor**2)
+ complex(gwpc),intent(in) :: rhotwx(3, nspinor**2)
  complex(gwpc),intent(inout) :: chi0(Ep%npwe*Ep%nI, Ep%npwe*Ep%nJ, Ep%nomega)
  complex(dpc),intent(in) :: green_w(Ep%nomega), green_enhigh_w(Ep%nomega)
  complex(dpc),intent(inout) :: chi0_head(3, 3, Ep%nomega)
@@ -655,15 +656,15 @@ subroutine accumulate_chi0_q0(is_metallic,ik_bz,isym_kbz,itim_kbz,gwcomp,nspinor
  case (0)
    ! Do not use symmetries.
    ! Symmetrize rhotwg in the full BZ and accumulate over the full BZ i.e.
-   !   chi0(G1,G2,io) = chi0(G1,G2,io) + (rhotwg(G1)*CONJG(rhotwg(G2)))*green_w(io)
+   !   chi0(G1,G2,io) = chi0(G1,G2,io) + (rhotwg(G1)*conjg(rhotwg(G2)))*green_w(io)
    !
    ! The non-analytic term is symmetrized for this k-point in the BZ according to:
-   !    rhotwg(1)= S^-1q * rhotwx_ibz
-   !    rhotwg(1)=-S^-1q * CONJG(rhotwx_ibz) if time-reversal is used.
+   !    rhotwg(1) =  S^-1q * rhotwx_ibz
+   !    rhotwg(1) = -S^-1q * conjg(rhotwx_ibz) if time-reversal is used.
 
    ! Multiply elements G1,G2 of rhotwg by green_w(io) and accumulate in chi0(G1,G2,io)
 
-   ! Rely on MKL threads for OPENMP parallelization
+!$OMP PARALLEL DO IF PRIVATE(dr, dd) IF (nomega > 2)
    do io=1,nomega
      ! Check if green_w(io) is real (=> pure imaginary omega)
      ! and that it is not a metal
@@ -685,17 +686,17 @@ subroutine accumulate_chi0_q0(is_metallic,ik_bz,isym_kbz,itim_kbz,gwcomp,nspinor
    else
      mir_kbz = (3-2*itim_kbz) * matmul(Cryst%symrec(:,:,isym_kbz), sum(rhotwx(:,1:2), dim=2))
    end if
-   if (itim_kbz == 2) mir_kbz=CONJG(mir_kbz)
+   if (itim_kbz == 2) mir_kbz = conjg(mir_kbz)
 
    ! here we might take advantage of Hermiticity along Im axis in RPA (see mkG0w)
    do idir=1,3
      do io=1,nomega
-       chi0_uwing(:,io,idir) = chi0_uwing(:,io,idir) + green_w(io) * mir_kbz(idir)*CONJG(rhotwg)
-       chi0_lwing(:,io,idir) = chi0_lwing(:,io,idir) + green_w(io) * rhotwg*CONJG(mir_kbz(idir))
+       chi0_uwing(:,io,idir) = chi0_uwing(:,io,idir) + green_w(io) * mir_kbz(idir)*conjg(rhotwg)
+       chi0_lwing(:,io,idir) = chi0_lwing(:,io,idir) + green_w(io) * rhotwg*conjg(mir_kbz(idir))
        if (gwcomp == 1) then
          ! Add contribution due to extrapolar technique.
-         chi0_uwing(:,io,idir) = chi0_uwing(:,io,idir) + green_enhigh_w(io) * mir_kbz(idir)*CONJG(rhotwg)
-         chi0_lwing(:,io,idir) = chi0_lwing(:,io,idir) + green_enhigh_w(io) * rhotwg*CONJG(mir_kbz(idir))
+         chi0_uwing(:,io,idir) = chi0_uwing(:,io,idir) + green_enhigh_w(io) * mir_kbz(idir)*conjg(rhotwg)
+         chi0_lwing(:,io,idir) = chi0_lwing(:,io,idir) + green_enhigh_w(io) * rhotwg*conjg(mir_kbz(idir))
        end if
      end do
    end do
@@ -704,10 +705,10 @@ subroutine accumulate_chi0_q0(is_metallic,ik_bz,isym_kbz,itim_kbz,gwcomp,nspinor
    do io=1,nomega
      do jdir=1,3
        do idir=1,3
-         chi0_head(idir,jdir,io) = chi0_head(idir,jdir,io) + green_w(io) * mir_kbz(idir)*CONJG(mir_kbz(jdir))
+         chi0_head(idir,jdir,io) = chi0_head(idir,jdir,io) + green_w(io) * mir_kbz(idir)*conjg(mir_kbz(jdir))
          if (gwcomp == 1) then
            ! Add contribution due to extrapolar technique.
-           chi0_head(idir,jdir,io) = chi0_head(idir,jdir,io) + green_enhigh_w(io) * mir_kbz(idir)*CONJG(mir_kbz(jdir))
+           chi0_head(idir,jdir,io) = chi0_head(idir,jdir,io) + green_enhigh_w(io) * mir_kbz(idir)*conjg(mir_kbz(jdir))
          end if
        end do
      end do
@@ -716,7 +717,7 @@ subroutine accumulate_chi0_q0(is_metallic,ik_bz,isym_kbz,itim_kbz,gwcomp,nspinor
  case (1)
    ! Use symmetries to reconstruct the integrand.
 
-   nsymop = count(Ltg_q%wtksym(:,:,ik_bz)==1)
+   nsymop = count(Ltg_q%wtksym(:,:,ik_bz) == 1)
    ABI_MALLOC(rhotwg_sym, (npwe, nsymop))
    isymop = 0
 
@@ -734,7 +735,7 @@ subroutine accumulate_chi0_q0(is_metallic,ik_bz,isym_kbz,itim_kbz,gwcomp,nspinor
          case (1)
            rhotwg_sym(1:npwe, isymop) = rhotwg(Sm1G(1:npwe)) * phmGt(1:npwe)
          case (2)
-           rhotwg_sym(1:npwe,isymop) = CONJG(rhotwg(Sm1G(1:npwe))) * phmGt(1:npwe)
+           rhotwg_sym(1:npwe,isymop) = conjg(rhotwg(Sm1G(1:npwe))) * phmGt(1:npwe)
          case default
            ABI_BUG(sjoin('Wrong value of itim:', itoa(itim)))
          end select
@@ -744,22 +745,22 @@ subroutine accumulate_chi0_q0(is_metallic,ik_bz,isym_kbz,itim_kbz,gwcomp,nspinor
 
          ! Symmetrize <r> in full BZ: <Sk b|r|Sk b'> = R <k b|r|k b'> + \tau \delta_{bb'}
          if (nspinor == 1) then
-           mir_kbz = (3-2*itim) * matmul(Cryst%symrec(:,:,isym),rhotwx(:,1))
+           mir_kbz = (3-2*itim) * matmul(Cryst%symrec(:,:,isym), rhotwx(:,1))
          else
            mir_kbz = (3-2*itim) * matmul(Cryst%symrec(:,:,isym), sum(rhotwx(:,1:2), dim=2))
          end if
 
-         if (itim == 2) mir_kbz=CONJG(mir_kbz)
+         if (itim == 2) mir_kbz = conjg(mir_kbz)
 
          ! here we might take advantage of Hermiticity along Im axis in RPA (see mkG0w)
          do idir=1,3
            do io=1,nomega
-             chi0_uwing(:,io,idir) = chi0_uwing(:,io,idir) + green_w(io) * mir_kbz(idir)*CONJG(rhotwg_sym(:,isymop))
-             chi0_lwing(:,io,idir) = chi0_lwing(:,io,idir) + green_w(io) * rhotwg_sym(:,isymop)*CONJG(mir_kbz(idir))
+             chi0_uwing(:,io,idir) = chi0_uwing(:,io,idir) + green_w(io) * mir_kbz(idir) * conjg(rhotwg_sym(:,isymop))
+             chi0_lwing(:,io,idir) = chi0_lwing(:,io,idir) + green_w(io) * rhotwg_sym(:,isymop) * conjg(mir_kbz(idir))
              if (gwcomp == 1) then
                ! Add contribution due to extrapolar technique.
-               chi0_uwing(:,io,idir) = chi0_uwing(:,io,idir) + green_enhigh_w(io) * mir_kbz(idir)*CONJG(rhotwg_sym(:,isymop))
-               chi0_lwing(:,io,idir) = chi0_lwing(:,io,idir) + green_enhigh_w(io) * rhotwg_sym(:,isymop)*CONJG(mir_kbz(idir))
+               chi0_uwing(:,io,idir) = chi0_uwing(:,io,idir) + green_enhigh_w(io) * mir_kbz(idir) * conjg(rhotwg_sym(:,isymop))
+               chi0_lwing(:,io,idir) = chi0_lwing(:,io,idir) + green_enhigh_w(io) * rhotwg_sym(:,isymop) * conjg(mir_kbz(idir))
              end if
            end do
          end do
@@ -768,10 +769,10 @@ subroutine accumulate_chi0_q0(is_metallic,ik_bz,isym_kbz,itim_kbz,gwcomp,nspinor
          do io=1,nomega
            do jdir=1,3
              do idir=1,3
-                chi0_head(idir,jdir,io) = chi0_head(idir,jdir,io) + green_w(io) * mir_kbz(idir)*CONJG(mir_kbz(jdir))
+                chi0_head(idir,jdir,io) = chi0_head(idir,jdir,io) + green_w(io) * mir_kbz(idir) * conjg(mir_kbz(jdir))
                 if (gwcomp == 1) then
                   ! Add contribution due to extrapolar technique.
-                  chi0_head(idir,jdir,io) = chi0_head(idir,jdir,io) + green_enhigh_w(io)*mir_kbz(idir)*CONJG(mir_kbz(jdir))
+                  chi0_head(idir,jdir,io) = chi0_head(idir,jdir,io) + green_enhigh_w(io)*mir_kbz(idir) * conjg(mir_kbz(jdir))
                 end if
              end do
            end do
@@ -782,8 +783,7 @@ subroutine accumulate_chi0_q0(is_metallic,ik_bz,isym_kbz,itim_kbz,gwcomp,nspinor
    end do !isym
 
    ! Multiply rhotwg_sym by green_w(io) and accumulate in chi0(G,Gp,io)
-   ! note that single precision is faster (sometimes factor ~2).
-   ! Rely on MKL threads for OPENMP parallelization
+!$OMP PARALLEL DO IF PRIVATE(dr, dd) IF (nomega > 2)
    do io=1,nomega
      ! Check if green_w(io) is real (=> pure imaginary omega) and that it is not a metal
      ! then the corresponding chi0(io) is hermitian
@@ -803,6 +803,153 @@ subroutine accumulate_chi0_q0(is_metallic,ik_bz,isym_kbz,itim_kbz,gwcomp,nspinor
  end select
 
 end subroutine accumulate_chi0_q0
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_chi0tk/accumulate_head_wings_imagw
+!! NAME
+!! accumulate_head_wings_imagw
+!!
+!! FUNCTION
+
+subroutine accumulate_head_wings_imagw( &
+                              npwe, nomega, nI, nJ, symchi, &
+                              is_metallic, ik_bz, isym_kbz, itim_kbz, nspinor, Cryst, Ltg_q, Gsph_epsG0,&
+                              rhotwx, rhotwg, green_w, chi0_head, chi0_lwing, chi0_uwing)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: npwe, nomega, nI, nJ, symchi
+ logical,intent(in) :: is_metallic
+ integer,intent(in) :: ik_bz,isym_kbz,itim_kbz,nspinor
+ type(littlegroup_t),intent(in) :: Ltg_q
+ type(gsphere_t),target,intent(in) :: Gsph_epsG0
+ type(crystal_t),intent(in) :: Cryst
+!arrays
+ complex(gwpc),intent(in) :: rhotwg(npwe)
+ complex(gwpc),intent(in) :: rhotwx(3, nspinor**2)
+ complex(dpc),intent(in) :: green_w(nomega)
+ complex(dpc),intent(inout) :: chi0_head(3, 3, nomega)
+ complex(dpc),intent(inout) :: chi0_lwing(npwe*nI, nomega, 3)
+ complex(dpc),intent(inout) :: chi0_uwing(npwe*nJ, nomega, 3)
+
+!Local variables-------------------------------
+!scalars
+ integer :: itim,io,isym,idir,jdir,isymop,nsymop
+ !character(len=500) :: msg
+!arrays
+ integer,ABI_CONTIGUOUS pointer :: Sm1G(:)
+ complex(dpc) :: mir_kbz(3)
+ complex(gwpc),allocatable :: rhotwg_sym(:,:)
+ complex(gwpc), ABI_CONTIGUOUS pointer :: phmGt(:)
+
+!************************************************************************
+
+ select case (symchi)
+ case (0)
+   ! Do not use symmetries.
+   ! Symmetrize rhotwg in the full BZ and accumulate over the full BZ i.e.
+   !   chi0(G1,G2,io) = chi0(G1,G2,io) + (rhotwg(G1)*conjg(rhotwg(G2)))*green_w(io)
+   !
+   ! The non-analytic term is symmetrized for this k-point in the BZ according to:
+   !    rhotwg(1) =  S^-1q * rhotwx_ibz
+   !    rhotwg(1) = -S^-1q * conjg(rhotwx_ibz) if time-reversal is used.
+
+   ! Multiply elements G1,G2 of rhotwg by green_w(io) and accumulate in chi0(G1,G2,io)
+
+   ! === Accumulate heads and wings for each small q ===
+   ! Symmetrize <r> in full BZ: <Sk b|r|Sk b'> = R <k b|r|k b'> + \tau \delta_{bb'}
+   if (nspinor == 1) then
+     mir_kbz = (3-2*itim_kbz) * matmul(Cryst%symrec(:,:,isym_kbz), rhotwx(:,1))
+   else
+     mir_kbz = (3-2*itim_kbz) * matmul(Cryst%symrec(:,:,isym_kbz), sum(rhotwx(:,1:2), dim=2))
+   end if
+   if (itim_kbz == 2) mir_kbz = conjg(mir_kbz)
+
+   ! here we might take advantage of Hermiticity along Im axis in RPA (see mkG0w)
+   do idir=1,3
+     do io=1,nomega
+       chi0_uwing(:,io,idir) = chi0_uwing(:,io,idir) + green_w(io) * mir_kbz(idir)*conjg(rhotwg)
+       chi0_lwing(:,io,idir) = chi0_lwing(:,io,idir) + green_w(io) * rhotwg*conjg(mir_kbz(idir))
+     end do
+   end do
+
+   ! Accumulate the head.
+   do io=1,nomega
+     do jdir=1,3
+       do idir=1,3
+         chi0_head(idir,jdir,io) = chi0_head(idir,jdir,io) + green_w(io) * mir_kbz(idir)*conjg(mir_kbz(jdir))
+       end do
+     end do
+   end do
+
+ case (1)
+   ! Use symmetries to reconstruct the integrand.
+
+   nsymop = count(Ltg_q%wtksym(:,:,ik_bz) == 1)
+   ABI_MALLOC(rhotwg_sym, (npwe, nsymop))
+   isymop = 0
+
+   ! Loop over symmetries of the space group and time-reversal.
+   do isym=1,Ltg_q%nsym_sg
+     do itim=1,Ltg_q%timrev
+
+       if (Ltg_q%wtksym(itim, isym, ik_bz) == 1) then
+         ! This operation belongs to the little group and has to be considered to reconstruct the BZ.
+         phmGt => Gsph_epsG0%phmGt  (1:npwe, isym) ! In the 2 lines below note the slicing (1:npwe)
+         Sm1G  => Gsph_epsG0%rottbm1(1:npwe, itim, isym)
+
+         isymop = isymop + 1
+         select case (itim)
+         case (1)
+           rhotwg_sym(1:npwe, isymop) = rhotwg(Sm1G(1:npwe)) * phmGt(1:npwe)
+         case (2)
+           rhotwg_sym(1:npwe,isymop) = conjg(rhotwg(Sm1G(1:npwe))) * phmGt(1:npwe)
+         case default
+           ABI_BUG(sjoin('Wrong value of itim:', itoa(itim)))
+         end select
+
+         ! === Accumulate heads and wings for each small q ===
+         ! FIXME extrapolar method should be checked!!
+
+         ! Symmetrize <r> in full BZ: <Sk b|r|Sk b'> = R <k b|r|k b'> + \tau \delta_{bb'}
+         if (nspinor == 1) then
+           mir_kbz = (3-2*itim) * matmul(Cryst%symrec(:,:,isym), rhotwx(:,1))
+         else
+           mir_kbz = (3-2*itim) * matmul(Cryst%symrec(:,:,isym), sum(rhotwx(:,1:2), dim=2))
+         end if
+
+         if (itim == 2) mir_kbz = conjg(mir_kbz)
+
+         ! here we might take advantage of Hermiticity along Im axis in RPA (see mkG0w)
+         do idir=1,3
+           do io=1,nomega
+             chi0_uwing(:,io,idir) = chi0_uwing(:,io,idir) + green_w(io) * mir_kbz(idir) * conjg(rhotwg_sym(:,isymop))
+             chi0_lwing(:,io,idir) = chi0_lwing(:,io,idir) + green_w(io) * rhotwg_sym(:,isymop) * conjg(mir_kbz(idir))
+           end do
+         end do
+
+         ! Accumulate the head.
+         do io=1,nomega
+           do jdir=1,3
+             do idir=1,3
+                chi0_head(idir,jdir,io) = chi0_head(idir,jdir,io) + green_w(io) * mir_kbz(idir) * conjg(mir_kbz(jdir))
+             end do
+           end do
+         end do
+
+       end if !wtksym
+     end do !itim
+   end do !isym
+
+   ABI_FREE(rhotwg_sym)
+
+ case default
+   ABI_BUG(sjoin('Wrong value of symchi:', itoa(symchi)))
+ end select
+
+end subroutine accumulate_head_wings_imagw
 !!***
 
 !----------------------------------------------------------------------
@@ -928,27 +1075,27 @@ subroutine accumulate_sfchi0_q0(ikbz,isym_kbz,itim_kbz,nspinor,symchi,npwepG0,np
     else
       mir_kbz = (3-2*itim_kbz) * MATMUL(Cryst%symrec(:,:,isym_kbz), sum(rhotwx(:,1:2), dim=2))
     end if
-   if (itim_kbz==2) mir_kbz=CONJG(mir_kbz)
+   if (itim_kbz==2) mir_kbz=conjg(mir_kbz)
 
    do jdir=1,3
      if (wl<huge(0.0_dp)*1.d-11) then
        ! this is awful but it is still a first coding
        ! Num is single precision needed for cgerc check factocc
        num=-wl*factocc
-       sf_uwing(:,iomegal,jdir) = sf_uwing(:,iomegal,jdir) + num * mir_kbz(jdir) * CONJG(rhotwg(1:npwepG0))
-       sf_lwing(:,iomegal,jdir) = sf_lwing(:,iomegal,jdir) + num * rhotwg(1:npwepG0) * CONJG(mir_kbz(jdir))
+       sf_uwing(:,iomegal,jdir) = sf_uwing(:,iomegal,jdir) + num * mir_kbz(jdir) * conjg(rhotwg(1:npwepG0))
+       sf_lwing(:,iomegal,jdir) = sf_lwing(:,iomegal,jdir) + num * rhotwg(1:npwepG0) * conjg(mir_kbz(jdir))
        do idir=1,3
-         sf_head(idir,jdir,iomegal) = sf_head(idir,jdir,iomegal) + num * mir_kbz(idir) * CONJG(mir_kbz(jdir))
+         sf_head(idir,jdir,iomegal) = sf_head(idir,jdir,iomegal) + num * mir_kbz(idir) * conjg(mir_kbz(jdir))
        end do
      end if
 
      ! Last point, must accumulate left point but not the right one
      if (iomegar/=nomegasf+1 .and. wr<huge(0.0_dp)*1.d-11) then
        num=-wr*factocc
-       sf_uwing(:,iomegar,jdir) = sf_uwing(:,iomegar,jdir) + num * mir_kbz(jdir) * CONJG(rhotwg(1:npwepG0))
-       sf_lwing(:,iomegar,jdir) = sf_lwing(:,iomegar,jdir) + num * rhotwg(1:npwepG0) * CONJG(mir_kbz(jdir))
+       sf_uwing(:,iomegar,jdir) = sf_uwing(:,iomegar,jdir) + num * mir_kbz(jdir) * conjg(rhotwg(1:npwepG0))
+       sf_lwing(:,iomegar,jdir) = sf_lwing(:,iomegar,jdir) + num * rhotwg(1:npwepG0) * conjg(mir_kbz(jdir))
        do idir=1,3
-         sf_head(idir,jdir,iomegar) = sf_head(idir,jdir,iomegar) + num * mir_kbz(idir) * CONJG(mir_kbz(jdir))
+         sf_head(idir,jdir,iomegar) = sf_head(idir,jdir,iomegar) + num * mir_kbz(idir) * conjg(mir_kbz(jdir))
        end do
      end if
    end do ! jdir
@@ -980,7 +1127,7 @@ subroutine accumulate_sfchi0_q0(ikbz,isym_kbz,itim_kbz,nspinor,symchi,npwepG0,np
          CASE (1)
            rhotwg_sym(1:npwe)=rhotwg(Sm1G(1:npwe))*phmGt(1:npwe)
          CASE (2)
-           rhotwg_sym(1:npwe)=CONJG(rhotwg(Sm1G(1:npwe)))*phmGt(1:npwe)
+           rhotwg_sym(1:npwe)=conjg(rhotwg(Sm1G(1:npwe)))*phmGt(1:npwe)
          CASE DEFAULT
            ABI_BUG(sjoin('Wrong value of itim:', itoa(itim)))
          END SELECT
@@ -1004,27 +1151,27 @@ subroutine accumulate_sfchi0_q0(ikbz,isym_kbz,itim_kbz,nspinor,symchi,npwepG0,np
          else
            mir_kbz = (3-2*itim) * MATMUL(Cryst%symrec(:,:,isym), sum(rhotwx(:,1:2), dim=2))
          end if
-         if (itim==2) mir_kbz=CONJG(mir_kbz)
+         if (itim==2) mir_kbz=conjg(mir_kbz)
 
          do jdir=1,3
            if (wl<huge(0.0_dp)*1.d-11) then
              ! this is awful but it is still a first coding
              ! Num is single precision needed for cgerc check factocc
              num=-wl*factocc
-             sf_uwing(:,iomegal,jdir) = sf_uwing(:,iomegal,jdir) + num * mir_kbz(jdir) * CONJG(rhotwg_sym(1:npwe))
-             sf_lwing(:,iomegal,jdir) = sf_lwing(:,iomegal,jdir) + num * rhotwg_sym(1:npwe) * CONJG(mir_kbz(jdir))
+             sf_uwing(:,iomegal,jdir) = sf_uwing(:,iomegal,jdir) + num * mir_kbz(jdir) * conjg(rhotwg_sym(1:npwe))
+             sf_lwing(:,iomegal,jdir) = sf_lwing(:,iomegal,jdir) + num * rhotwg_sym(1:npwe) * conjg(mir_kbz(jdir))
              do idir=1,3
-               sf_head(idir,jdir,iomegal) = sf_head(idir,jdir,iomegal) + num * mir_kbz(idir) * CONJG(mir_kbz(jdir))
+               sf_head(idir,jdir,iomegal) = sf_head(idir,jdir,iomegal) + num * mir_kbz(idir) * conjg(mir_kbz(jdir))
              end do
            end if
 
            ! Last point, must accumulate left point but not the right one
            if (iomegar/=nomegasf+1 .and. wr<huge(0.0_dp)*1.d-11) then
              num=-wr*factocc
-             sf_uwing(:,iomegar,jdir) = sf_uwing(:,iomegar,jdir) + num * mir_kbz(jdir) * CONJG(rhotwg_sym(1:npwe))
-             sf_lwing(:,iomegar,jdir) = sf_lwing(:,iomegar,jdir) + num * rhotwg_sym(1:npwe) * CONJG(mir_kbz(jdir))
+             sf_uwing(:,iomegar,jdir) = sf_uwing(:,iomegar,jdir) + num * mir_kbz(jdir) * conjg(rhotwg_sym(1:npwe))
+             sf_lwing(:,iomegar,jdir) = sf_lwing(:,iomegar,jdir) + num * rhotwg_sym(1:npwe) * conjg(mir_kbz(jdir))
              do idir=1,3
-               sf_head(idir,jdir,iomegar) = sf_head(idir,jdir,iomegar) + num * mir_kbz(idir) * CONJG(mir_kbz(jdir))
+               sf_head(idir,jdir,iomegar) = sf_head(idir,jdir,iomegar) + num * mir_kbz(idir) * conjg(mir_kbz(jdir))
              end do
            end if
          end do ! jdir
@@ -1183,7 +1330,7 @@ subroutine assemblychi0sf(ik_bz,symchi,Ltg_q,npwepG0,npwe,rhotwg,Gsph_epsG0,&
          CASE (1)
            rhotwg_sym(1:npwe)=rhotwg(Sm1_gmG0(1:npwe)) * Gsph_epsG0%phmGt(1:npwe,isym)
          CASE (2)
-           rhotwg_sym(1:npwe)=CONJG(rhotwg(Sm1_gmG0(1:npwe))) * Gsph_epsG0%phmGt(1:npwe,isym)
+           rhotwg_sym(1:npwe)=conjg(rhotwg(Sm1_gmG0(1:npwe))) * Gsph_epsG0%phmGt(1:npwe,isym)
          CASE DEFAULT
            ABI_BUG(sjoin('Wrong value for itim:', itoa(itim)))
          END SELECT
@@ -1215,7 +1362,7 @@ subroutine assemblychi0sf(ik_bz,symchi,Ltg_q,npwepG0,npwe,rhotwg,Gsph_epsG0,&
 !$omp parallel do
            do ig2=1,npwe
              do ig1=1,npwe
-               chi0sf(ig1,ig2,iomegal) = chi0sf(ig1,ig2,iomegal) + num * rhotwg_sym(ig1) * CONJG(rhotwg_sym(ig2))
+               chi0sf(ig1,ig2,iomegal) = chi0sf(ig1,ig2,iomegal) + num * rhotwg_sym(ig1) * conjg(rhotwg_sym(ig2))
              end do
            end do
          end if
@@ -1228,7 +1375,7 @@ subroutine assemblychi0sf(ik_bz,symchi,Ltg_q,npwepG0,npwe,rhotwg,Gsph_epsG0,&
            do ig2=1,npwe
              do ig1=1,npwe
                !call XGERC(npwe,npwe,num,rhotwg_sym,1,rhotwg_sym,1,chi0sf(:,:,iomegal),npwe)
-               chi0sf(ig1,ig2,iomegar) = chi0sf(ig1,ig2,iomegar) + num * rhotwg_sym(ig1) * CONJG(rhotwg_sym(ig2))
+               chi0sf(ig1,ig2,iomegar) = chi0sf(ig1,ig2,iomegar) + num * rhotwg_sym(ig1) * conjg(rhotwg_sym(ig2))
              end do
            end do
          end if

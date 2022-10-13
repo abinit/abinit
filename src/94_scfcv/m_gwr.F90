@@ -176,7 +176,7 @@ module m_gwr
  use m_fft_mesh,      only : calc_ceikr, calc_ceigr, ctimes_eikr
  use m_kpts,          only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, kpts_map, kpts_map_print, kpts_pack_in_stars
  use m_bz_mesh,       only : littlegroup_t, findqg0
- use m_gsphere,       only : kg_map
+ use m_gsphere,       only : kg_map, gsphere_t
  use m_melemts,       only : melements_t
  use m_ioarr,         only : read_rhor
  use m_slk,           only : matrix_scalapack, processor_scalapack, slk_array_free, slk_array_set, slk_array_locmem_mb, &
@@ -4912,7 +4912,7 @@ end if
  if (gwr%comm%me == 0) then
    ! Master writes results to ab_out, std_out and GWR.nc
 
-   !is_metallic = ebands_has_metal_scheme(prev__ebands)
+   !is_metallic = ebands_has_metal_scheme(prev_ebands)
    !call write_notations([std_out, ab_out]
    ABI_MALLOC(ks_vbik, (gwr%ks_ebands%nkpt, gwr%ks_ebands%nsppol))
    ks_vbik(:,:) = ebands_get_valence_idx(gwr%ks_ebands)
@@ -6155,7 +6155,7 @@ end subroutine load_head_wings_from_sus_file__
 subroutine gwr_build_chi0_head_and_wings(gwr)
 
  use m_vkbr,            only : vkbr_t, vkbr_free, vkbr_init, nc_ihr_comm
- use m_chi0tk,          only : chi0_bbp_mask
+ use m_chi0tk,          only : chi0_bbp_mask, accumulate_head_wings_imagw
 
 !Arguments ------------------------------------
  class(gwr_t),target,intent(inout) :: gwr
@@ -6167,9 +6167,9 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  integer :: ik_bz, ik_ibz, isym_k, trev_k, g0_k(3)
  integer :: iq_bz, iq_ibz, isym_q, trev_q, g0_q(3)
  integer :: nkpt_summed, use_umklp, band1, band2, band1_start, band1_stop, il_b, nb, block_size, ii, mband
- integer :: istwf_ki, npw_ki, nI, nJ, nomega, io, dim_rtwg
+ integer :: istwf_ki, npw_ki, nI, nJ, nomega, io, iq, nq, dim_rtwg
  integer :: npwe, u_nfft, u_mgfft, u_mpw
- logical :: isirr_k, use_tr
+ logical :: isirr_k, use_tr, is_metallic
  real(dp) :: spin_fact, weight, deltaf_b1b2, deltaeGW_b1b2, gwr_boxcutmin_c, zcut
  complex(dpc) :: deltaeKS_b1b2
  type(matrix_scalapack),pointer :: ugb_kibz
@@ -6183,18 +6183,21 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  integer :: g0(3), gmax(3), spinor_padx(2,4), u_ngfft(18), work_ngfft(18)
  integer :: wtk_ltg(gwr%nkbz)
  integer,contiguous, pointer :: kg_ki(:,:)
- integer,allocatable :: gvec_q0(:,:), gbound_q0(:,:), u_gbound(:,:)
+ integer,allocatable :: gvec_q0(:,:), gbound_q0(:,:), u_gbound(:,:) !, Sm1G(:,:,:)
  real(dp) :: kk_ibz(3), kk_bz(3), tsec(2)
  real(dp),contiguous, pointer :: qp_eig(:,:,:), qp_occ(:,:,:), ks_eig(:,:,:)
- real(dp),allocatable :: work(:,:,:,:)
+ real(dp),allocatable :: work(:,:,:,:), qdirs(:,:)
  logical :: gradk_not_done(gwr%nkibz)
  logical,allocatable :: bbp_mask(:,:)
+ complex(dpc) :: chq(3) ! wng(3)
  complex(dp),allocatable :: ug1_block(:,:)
  complex(gwpc) :: rhotwx(3, gwr%nspinor**2)
  complex(gwpc),allocatable :: ug1(:), ug2(:), ur1_kibz(:), ur2_kibz(:), ur_prod(:), rhotwg(:)
  complex(dpc) :: green_w(gwr%ntau), omega(gwr%ntau)
- complex(dpc),allocatable :: chi0_lwing(:,:,:), chi0_uwing(:,:,:), chi0_head(:,:,:)
+ complex(dpc),allocatable :: chi0_lwing(:,:,:), chi0_uwing(:,:,:), chi0_head(:,:,:), head_qvals(:)
+ !complex(gwpc), allocatable :: phmGt(:,:)
  type(vkbr_t),allocatable :: vkbr(:)
+ type(gsphere_t) :: gsph
 
 ! *************************************************************************
 
@@ -6215,6 +6218,8 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  end if
  ks_eig => gwr%ks_ebands%eig
  mband = gwr%ks_ebands%mband
+
+ is_metallic = ebands_has_metal_scheme(now_ebands)
 
  ! Setup weight (2 for spin unpolarized systems, 1 for polarized).
  ! spin_fact is used to normalize the occupation factors to one.
@@ -6267,7 +6272,6 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  gwr_boxcutmin_c = two
  call gwr%get_u_ngfft(gwr_boxcutmin_c, u_ngfft, u_nfft, u_mgfft, u_mpw, gmax)
 
-
  ! Init work_ngfft
  gmax = gmax + 4 ! FIXME: this is to account for umklapp, shouls also consider Gamma-only and istwfk
  gmax = 2 * gmax + 1
@@ -6278,11 +6282,25 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  if (gwr%comm%me == 0) call print_ngfft(u_ngfft, header="FFT mesh for head/wings computation", unit=std_out)
 
  ! Need to broacast G-vectors at q = 0 if k/q-point parallelism is on,
- if (gwr%kpt_comm%me == 0) npwe = gwr%tchi_desc_qibz(1)%npw
+ if (gwr%kpt_comm%me == 0) then
+   npwe = gwr%tchi_desc_qibz(1)%npw
+   ABI_CHECK(gwr%tchi_desc_qibz(1)%kin_sorted, "g-vectors are not sorted by |q+g|^2/2 !")
+ end if
  call xmpi_bcast(npwe, 0, gwr%kpt_comm%value, ierr)
  ABI_MALLOC(gvec_q0, (3, npwe))
  if (gwr%kpt_comm%me == 0) gvec_q0 = gwr%tchi_desc_qibz(1)%gvec
  call xmpi_bcast(gvec_q0, 0, gwr%kpt_comm%value, ierr)
+
+ call gsph%init(cryst, npwe, gvec_q0)
+
+ !ABI_MALLOC(phmGt, (npwe, cryst%nsym))
+ !do isym=1,cryst%nsym
+ !  do ig=1,npwe
+ !    phmGt(ig, isym) = EXP(-j_dpc*two_pi*DOT_PRODUCT(gvec_q0(:,ig), cryst%tnons(:,isym)))
+ !  end do
+ !end do
+ ! Calculate tables for rotated Gs
+ !ABI_MALLOC(Sm1G, (npwe, 2, cryst%nsym))
 
  ABI_MALLOC(gbound_q0, (2 * u_mgfft + 8, 2))
  call sphereboundary(gbound_q0, istwfk1, gvec_q0, u_mgfft, npwe)
@@ -6345,9 +6363,9 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
        gradk_not_done(ik_ibz) = .FALSE.
      end if
 
-     !bbp_mask = .True.
      call chi0_bbp_mask(ik_ibz, ik_ibz, spin, spin_fact, use_tr, &
                         gwcomp0, spmeth0, gwr%ugb_nband, mband, now_ebands, bbp_mask)
+     !bbp_mask = .True.
 
      block_size = 48
      do band1_start=1, gwr%ugb_nband, block_size
@@ -6438,6 +6456,19 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
              rhotwx = czero_gw
            end if
 
+           ! NB: Using symrec conventions here
+           ik_ibz = gwr%kbz2ibz(1, ik_bz); isym_k = gwr%kbz2ibz(2, ik_bz)
+           trev_k = gwr%kbz2ibz(6, ik_bz); g0_k = gwr%kbz2ibz(3:5, ik_bz)
+           !isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
+           !kk_ibz = gwr%kibz(:, ik_ibz)
+
+           trev_k = trev_k + 1  ! GW routines assume trev in [1, 2]
+
+           call accumulate_head_wings_imagw( &
+                                        npwe, nomega, nI, nJ, dtset%symchi, &
+                                        is_metallic, ik_bz, isym_k, trev_k, nspinor, cryst, Ltg_q, Gsph, &
+                                        rhotwx, rhotwg, green_w, chi0_head, chi0_lwing, chi0_uwing)
+
            ! Adler-Wiser expression, to be consistent here we use the KS eigenvalues (?)
            !call accumulate_chi0_q0(is_metallic,ik_bz,isym_k,itim_k,Ep%gwcomp,nspinor,Ep%npwepG0,Ep,&
            !  Cryst,Ltg_q,Gsph_epsG0,chi0,rhotwx,rhotwg,green_w,green_enhigh_w,deltaf_b1b2,chi0_head,chi0_lwing,chi0_uwing)
@@ -6454,13 +6485,14 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
 
      ABI_FREE(ug1)
      ABI_FREE(ug2)
-
    end do ! my_ikf
  end do ! my_is
 
  ABI_FREE(bbp_mask)
  ABI_FREE(gvec_q0)
  ABI_FREE(gbound_q0)
+ !ABI_FREE(Sm1G)
+ !ABI_FREE(phmGt)
  ABI_FREE(work)
  ABI_FREE(ur1_kibz)
  ABI_FREE(ur2_kibz)
@@ -6469,6 +6501,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  ABI_FREE(u_gbound)
 
  call Ltg_q%free()
+ call gsph%free()
  call vkbr_free(vkbr)
  ABI_FREE(vkbr)
 
@@ -6487,6 +6520,27 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
 
  if (gwr%comm%me == 0) then
    ! Output results to ab_out and std_out
+   ! ===================================================
+   ! ==== Construct head and wings from the tensor =====
+   ! ===================================================
+   call cryst%get_redcart_qdirs(nq, qdirs)
+   qdirs = qdirs * tol3
+   ABI_MALLOC(head_qvals, (nq))
+   write(msg, "(*(a14))") "iomega (eV)", "[100]", "[010]", "[001]", "x", "y", "z"
+   call wrtout([std_out, ab_out], msg)
+   do io=1,nomega
+     do iq=1,nq
+       chq = matmul(chi0_head(:,:,io), qdirs(:,iq))
+       head_qvals(iq) = vdotw(qdirs(:, iq), chq, cryst%gmet, "G")
+     end do
+     write(msg, "(*(es12.5,2x))") gwr%iw_mesh(io) * Ha_eV, real(head_qvals(:))
+     call wrtout([std_out, ab_out], msg)
+     write(msg, "(*(es12.5,2x))") gwr%iw_mesh(io) * Ha_eV, aimag(head_qvals(:))
+     call wrtout([std_out, ab_out], msg)
+   end do
+   call wrtout([std_out, ab_out], " ")
+   ABI_FREE(qdirs)
+   ABI_FREE(head_qvals)
  end if
 
  ABI_FREE(chi0_lwing)

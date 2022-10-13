@@ -356,11 +356,11 @@ subroutine gsph_init(Gsph, Cryst, ng, gvec, ecut)
    ABI_FREE(gvec_ptr)
  end if
  !
- ! === Calculate phase exp{-i2\pi G.\tau} ===
- ABI_MALLOC(Gsph%phmGt,(Gsph%ng,nsym))
- do ig=1,Gsph%ng
-   do isym=1,nsym
-    Gsph%phmGt(ig,isym)=EXP(-j_dpc*two_pi*DOT_PRODUCT(Gsph%gvec(:,ig),tnons(:,isym)))
+ ! Calculate phase exp{-i2\pi G.\tau}
+ ABI_MALLOC(Gsph%phmGt, (Gsph%ng,nsym))
+ do isym=1,nsym
+   do ig=1,Gsph%ng
+    Gsph%phmGt(ig, isym) = EXP(-j_dpc*two_pi*DOT_PRODUCT(Gsph%gvec(:,ig), tnons(:,isym)))
    end do
  end do
  !
@@ -412,13 +412,13 @@ subroutine gsph_init(Gsph, Cryst, ng, gvec, ecut)
  Gsph%shlen=shlen(1:nsh)
  ABI_FREE(shlim)
  ABI_FREE(shlen)
- !
- ! === Calculate tables for rotated G"s ===
- ABI_MALLOC(Gsph%rottb  ,(Gsph%ng,timrev,nsym))
- ABI_MALLOC(Gsph%rottbm1,(Gsph%ng,timrev,nsym))
 
- call setup_G_rotation(nsym,symrec,timrev,Gsph%ng,Gsph%gvec,&
-&  Gsph%g2sh,Gsph%nsh,Gsph%shlim,Gsph%rottb,Gsph%rottbm1)
+ ! Calculate tables for rotated G"s
+ ABI_MALLOC(Gsph%rottb  , (Gsph%ng,timrev,nsym))
+ ABI_MALLOC(Gsph%rottbm1, (Gsph%ng,timrev,nsym))
+
+ call setup_G_rotation(nsym, symrec, timrev, Gsph%ng, Gsph%gvec,&
+   Gsph%g2sh, Gsph%nsh, Gsph%shlim, Gsph%rottb, Gsph%rottbm1)
 
  ! Store Mapping G --> -G
  ! (we use a specialized table instead of rootb since rottb assumes time-reversal symmetry.

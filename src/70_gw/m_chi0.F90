@@ -228,7 +228,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,qp_ebands,ks_ebands,Gsph_eps
  complex(gwpc),allocatable :: rhotwg(:)
  complex(dpc),allocatable :: green_w(:),green_enhigh_w(:)
  complex(dpc),allocatable :: sf_lwing(:,:,:),sf_uwing(:,:,:),sf_head(:,:,:)
- complex(dpc) :: wng(3), chq(3)
+ complex(dpc) :: chq(3), wng(3)
  complex(dpc) :: ph_mkt
  complex(dpc),allocatable :: kkweight(:,:)
  complex(gwpc),allocatable :: ur1_kibz(:),ur2_kibz(:), usr1_k(:),ur2_k(:), wfwfg(:), sf_chi0(:,:,:)
