@@ -276,8 +276,8 @@ subroutine chebfi_allocateAll(chebfi)
 
 ! *********************************************************************
 
- space = chebfi%space
- spacedim = chebfi%spacedim
+ space       = chebfi%space
+ spacedim    = chebfi%spacedim
  neigenpairs = chebfi%neigenpairs
 
  call chebfi_free(chebfi)
@@ -905,19 +905,19 @@ end subroutine chebfi_computeNextOrderChebfiPolynom
 
 subroutine chebfi_swapInnerBuffers(chebfi,spacedim,neigenpairs)
 
- implicit none
+  implicit none
 
-!Arguments ------------------------------------
- integer        , intent(in) :: spacedim
- integer        , intent(in) :: neigenpairs
- type(chebfi_t) , intent(inout) :: chebfi
+  ! Arguments ------------------------------------
+  integer        , intent(in   ) :: spacedim
+  integer        , intent(in   ) :: neigenpairs
+  type(chebfi_t) , intent(inout) :: chebfi
 
-! *********************************************************************
+  ! *********************************************************************
 
- call xgBlock_setBlock(chebfi%X_prev, chebfi%X_swap, 1, spacedim, neigenpairs) !X_swap = X_prev
- call xgBlock_setBlock(chebfi%xXColsRows, chebfi%X_prev, 1, spacedim, neigenpairs) !X_prev = xXColsRows
- call xgBlock_setBlock(chebfi%X_next, chebfi%xXColsRows, 1, spacedim, neigenpairs) !xXColsRows = X_next
- call xgBlock_setBlock(chebfi%X_swap, chebfi%X_next, 1, spacedim, neigenpairs) !X_next = X_swap
+  call xgBlock_setBlock(chebfi%X_prev,     chebfi%X_swap,     1, spacedim, neigenpairs) !X_swap = X_prev
+  call xgBlock_setBlock(chebfi%xXColsRows, chebfi%X_prev,     1, spacedim, neigenpairs) !X_prev = xXColsRows
+  call xgBlock_setBlock(chebfi%X_next,     chebfi%xXColsRows, 1, spacedim, neigenpairs) !xXColsRows = X_next
+  call xgBlock_setBlock(chebfi%X_swap,     chebfi%X_next,     1, spacedim, neigenpairs) !X_next = X_swap
 
 end subroutine chebfi_swapInnerBuffers
 !!***
@@ -943,52 +943,52 @@ end subroutine chebfi_swapInnerBuffers
 
 subroutine chebfi_rayleighRitz(chebfi,nline)
 
- implicit none
+  implicit none
 
-!Arguments ------------------------------------
- integer        , intent(in) :: nline
- type(chebfi_t) , intent(inout) :: chebfi
-!Local variables-------------------------------
-!scalars
- integer :: eigenProblem
- integer :: info
- integer :: me_g0
- integer :: neigenpairs
- integer :: space
- integer :: spacedim
- integer :: remainder
- type(xg_t) :: A_und_X !H_UND_PSI
- type(xg_t) :: B_und_X !S_UND_PSI
- type(xgBlock_t) :: X_first_row
- type(xgBlock_t) :: AX_first_row
- type(xgBlock_t) :: BX_first_row
-!arrays
- real(dp) :: tsec(2)
+  ! Arguments ------------------------------------
+  integer        , intent(in   ) :: nline
+  type(chebfi_t) , intent(inout) :: chebfi
+  ! Local variables-------------------------------
+  ! scalars
+  integer :: eigenProblem
+  integer :: info
+  integer :: me_g0
+  integer :: neigenpairs
+  integer :: space
+  integer :: spacedim
+  integer :: remainder
+  type(xg_t) :: A_und_X !H_UND_PSI
+  type(xg_t) :: B_und_X !S_UND_PSI
+  type(xgBlock_t) :: X_first_row
+  type(xgBlock_t) :: AX_first_row
+  type(xgBlock_t) :: BX_first_row
+  ! arrays
+  real(dp) :: tsec(2)
 
-! *********************************************************************
+  ! *********************************************************************
 
- space = chebfi%space
- eigenProblem = chebfi%eigenProblem
- me_g0 = chebfi%me_g0
+  space = chebfi%space
+  eigenProblem = chebfi%eigenProblem
+  me_g0 = chebfi%me_g0
 
- spacedim = chebfi%spacedim
- neigenpairs = chebfi%neigenpairs   !remains whole nband domain since it is after transpose
+  spacedim = chebfi%spacedim
+  neigenpairs = chebfi%neigenpairs   !remains whole nband domain since it is after transpose
 
- call xg_init(A_und_X,space,neigenpairs,neigenpairs,chebfi%spacecom)
- call xg_init(B_und_X,space,neigenpairs,neigenpairs,chebfi%spacecom)
+  call xg_init(A_und_X,space,neigenpairs,neigenpairs,chebfi%spacecom)
+  call xg_init(B_und_X,space,neigenpairs,neigenpairs,chebfi%spacecom)
 
- call timab(tim_RR_gemm_1,1,tsec)
- call xgBlock_gemm(chebfi%AX%self%trans, chebfi%X%normal, 1.0d0, chebfi%AX%self, chebfi%X, 0.d0, A_und_X%self)
+  call timab(tim_RR_gemm_1,1,tsec)
+  call xgBlock_gemm(chebfi%AX%self%trans, chebfi%X%normal, 1.0d0, chebfi%AX%self, chebfi%X, 0.d0, A_und_X%self)
 
- if (chebfi%paw) then
-   call xgBlock_gemm(chebfi%BX%self%trans, chebfi%X%normal, 1.0d0, chebfi%BX%self, chebfi%X, 0.d0, B_und_X%self)
- else
-   call xgBlock_gemm(chebfi%X%trans, chebfi%X%normal, 1.0d0, chebfi%X, chebfi%X, 0.d0, B_und_X%self)
- end if
- call timab(tim_RR_gemm_1,2,tsec)
+  if (chebfi%paw) then
+    call xgBlock_gemm(chebfi%BX%self%trans, chebfi%X%normal, 1.0d0, chebfi%BX%self, chebfi%X, 0.d0, B_und_X%self)
+  else
+    call xgBlock_gemm(chebfi%X%trans, chebfi%X%normal, 1.0d0, chebfi%X, chebfi%X, 0.d0, B_und_X%self)
+  end if
+  call timab(tim_RR_gemm_1,2,tsec)
 
- call timab(tim_RR_scale,1,tsec)
- if(chebfi%istwf_k == 2) then
+  call timab(tim_RR_scale,1,tsec)
+  if(chebfi%istwf_k == 2) then
     call xgBlock_scale(chebfi%X, 1/sqrt2, 1)
     if (me_g0 == 1)  then
       call xgBlock_setBlock(chebfi%X, X_first_row, 1, 2, neigenpairs) !has to be 2 rows in SPACE_CR
@@ -1006,73 +1006,73 @@ subroutine chebfi_rayleighRitz(chebfi,nline)
         call xgBlock_scale(BX_first_row, sqrt2, 1)
       end if
     end if
- end if
- call timab(tim_RR_scale,2,tsec)
+  end if
+  call timab(tim_RR_scale,2,tsec)
 
- call timab(tim_RR_hegv,1,tsec)
- select case (eigenSolver)
- case (EIGENVD)
-   call xgBlock_hegvd(eigenProblem, 'v','u', A_und_X%self, B_und_X%self, chebfi%eigenvalues, info)
- case (EIGENV)
-   call xgBlock_hegv(eigenProblem, 'v','u', A_und_X%self, B_und_X%self, chebfi%eigenvalues, info)
- case default
+  call timab(tim_RR_hegv,1,tsec)
+  select case (eigenSolver)
+  case (EIGENVD)
+    call xgBlock_hegvd(eigenProblem, 'v','u', A_und_X%self, B_und_X%self, chebfi%eigenvalues, info)
+  case (EIGENV)
+    call xgBlock_hegv(eigenProblem, 'v','u', A_und_X%self, B_und_X%self, chebfi%eigenvalues, info)
+  case default
     ABI_ERROR("Error for Eigen Solver HEGV")
- end select
- call timab(tim_RR_hegv,2,tsec)
+  end select
+  call timab(tim_RR_hegv,2,tsec)
 
- remainder = mod(nline, 3) !3 buffer swap, keep the info which one contains X_data at the end of loop
+  remainder = mod(nline, 3) !3 buffer swap, keep the info which one contains X_data at the end of loop
 
- call timab(tim_RR_XNP_reset,1,tsec)
- !resize X_NP from colrwos to linalg since it will be used in RR
- if (chebfi%paral_kgb == 1 .and. xmpi_comm_size(chebfi%spacecom) > 1) then
-   call xg_free(chebfi%X_NP)
+  call timab(tim_RR_XNP_reset,1,tsec)
+  !resize X_NP from colrwos to linalg since it will be used in RR
+  if (chebfi%paral_kgb == 1 .and. xmpi_comm_size(chebfi%spacecom) > 1) then
+    call xg_free(chebfi%X_NP)
 
-   call xg_init(chebfi%X_NP,space,spacedim,2*neigenpairs,chebfi%spacecom)
+    call xg_init(chebfi%X_NP,space,spacedim,2*neigenpairs,chebfi%spacecom)
 
-   call xg_setBlock(chebfi%X_NP,chebfi%X_next,1,spacedim,neigenpairs)
-   call xg_setBlock(chebfi%X_NP,chebfi%X_prev,neigenpairs+1,spacedim,neigenpairs)
-   call xgBlock_zero(chebfi%X_NP%self)
- end if
- call timab(tim_RR_XNP_reset,2,tsec)
+    call xg_setBlock(chebfi%X_NP,chebfi%X_next,1,spacedim,neigenpairs)
+    call xg_setBlock(chebfi%X_NP,chebfi%X_prev,neigenpairs+1,spacedim,neigenpairs)
+    call xgBlock_zero(chebfi%X_NP%self)
+  end if
+  call timab(tim_RR_XNP_reset,2,tsec)
 
- call timab(tim_RR_gemm_2,1,tsec)
- if (remainder == 1) then
-   call xgBlock_setBlock(chebfi%X_next, chebfi%AX_swap, 1, spacedim, neigenpairs)
-   call xgBlock_setBlock(chebfi%X, chebfi%BX_swap, 1, spacedim, neigenpairs)
-   call xgBlock_setBlock(chebfi%X_prev, chebfi%X_swap, 1, spacedim, neigenpairs)
+  call timab(tim_RR_gemm_2,1,tsec)
+  if (remainder == 1) then
+    call xgBlock_setBlock(chebfi%X_next, chebfi%AX_swap, 1, spacedim, neigenpairs)
+    call xgBlock_setBlock(chebfi%X, chebfi%BX_swap, 1, spacedim, neigenpairs)
+    call xgBlock_setBlock(chebfi%X_prev, chebfi%X_swap, 1, spacedim, neigenpairs)
 
-   call xgBlock_gemm(chebfi%X%normal, A_und_X%self%normal, 1.0d0, &
-                     chebfi%X, A_und_X%self, 0.d0, chebfi%X_swap)
+    call xgBlock_gemm(chebfi%X%normal, A_und_X%self%normal, 1.0d0, &
+      chebfi%X, A_und_X%self, 0.d0, chebfi%X_swap)
 
- else if (remainder == 2) then
-   call xgBlock_setBlock(chebfi%X_prev, chebfi%AX_swap, 1, spacedim, neigenpairs)
-   call xgBlock_setBlock(chebfi%X, chebfi%BX_swap, 1, spacedim, neigenpairs)
-   call xgBlock_setBlock(chebfi%X_next, chebfi%X_swap, 1, spacedim, neigenpairs)
+  else if (remainder == 2) then
+    call xgBlock_setBlock(chebfi%X_prev, chebfi%AX_swap, 1, spacedim, neigenpairs)
+    call xgBlock_setBlock(chebfi%X, chebfi%BX_swap, 1, spacedim, neigenpairs)
+    call xgBlock_setBlock(chebfi%X_next, chebfi%X_swap, 1, spacedim, neigenpairs)
 
-   call xgBlock_gemm(chebfi%X%normal, A_und_X%self%normal, 1.0d0, &
-                     chebfi%X, A_und_X%self, 0.d0, chebfi%X_swap)
+    call xgBlock_gemm(chebfi%X%normal, A_und_X%self%normal, 1.0d0, &
+      chebfi%X, A_und_X%self, 0.d0, chebfi%X_swap)
 
- else if (remainder == 0) then
-   call xgBlock_setBlock(chebfi%X_prev, chebfi%AX_swap, 1, spacedim, neigenpairs)
-   call xgBlock_setBlock(chebfi%X_next, chebfi%BX_swap, 1, spacedim, neigenpairs)
-   call xgBlock_setBlock(chebfi%X, chebfi%X_swap, 1, spacedim, neigenpairs)
-   call xgBlock_gemm(chebfi%X%normal, A_und_X%self%normal, 1.0d0, &
-&                     chebfi%X, A_und_X%self, 0.d0, chebfi%X_next)
-   call xgBlock_copy(chebfi%X_next,chebfi%X_swap, 1, 1)    !copy cannot be avoided :(
- end if
+  else if (remainder == 0) then
+    call xgBlock_setBlock(chebfi%X_prev, chebfi%AX_swap, 1, spacedim, neigenpairs)
+    call xgBlock_setBlock(chebfi%X_next, chebfi%BX_swap, 1, spacedim, neigenpairs)
+    call xgBlock_setBlock(chebfi%X, chebfi%X_swap, 1, spacedim, neigenpairs)
+    call xgBlock_gemm(chebfi%X%normal, A_und_X%self%normal, 1.0d0, &
+      &                     chebfi%X, A_und_X%self, 0.d0, chebfi%X_next)
+    call xgBlock_copy(chebfi%X_next,chebfi%X_swap, 1, 1)    !copy cannot be avoided :(
+  end if
 
- call xgBlock_gemm(chebfi%AX%self%normal, A_und_X%self%normal, 1.0d0, &
-                   chebfi%AX%self, A_und_X%self, 0.d0, chebfi%AX_swap)
+  call xgBlock_gemm(chebfi%AX%self%normal, A_und_X%self%normal, 1.0d0, &
+    chebfi%AX%self, A_und_X%self, 0.d0, chebfi%AX_swap)
 
- if (chebfi%paw) then
-   call xgBlock_gemm(chebfi%BX%self%normal, A_und_X%self%normal, 1.0d0, &
-                     chebfi%BX%self, A_und_X%self, 0.d0, chebfi%BX_swap)
- end if
+  if (chebfi%paw) then
+    call xgBlock_gemm(chebfi%BX%self%normal, A_und_X%self%normal, 1.0d0, &
+      chebfi%BX%self, A_und_X%self, 0.d0, chebfi%BX_swap)
+  end if
 
- call timab(tim_RR_gemm_2,2,tsec)
+  call timab(tim_RR_gemm_2,2,tsec)
 
- call xg_free(A_und_X)
- call xg_free(B_und_X)
+  call xg_free(A_und_X)
+  call xg_free(B_und_X)
 
 end subroutine chebfi_rayleighRitz
 !!***
@@ -1097,44 +1097,44 @@ end subroutine chebfi_rayleighRitz
 !!
 !! SOURCE
 
- real(dp) function chebfi_computeResidue(chebfi, residu, pcond)
+real(dp) function chebfi_computeResidue(chebfi, residu, pcond)
 
- implicit none
+  implicit none
 
-!Arguments ------------------------------------
- type(chebfi_t) , intent(inout) :: chebfi
- type(xgBlock_t) , intent(inout) :: residu
- interface
-   subroutine pcond(W)
-     use m_xg, only : xgBlock_t
-     type(xgBlock_t), intent(inout) :: W
-   end subroutine pcond
- end interface
+  ! Arguments ------------------------------------
+  type(chebfi_t)  , intent(inout) :: chebfi
+  type(xgBlock_t) , intent(inout) :: residu
+  interface
+    subroutine pcond(W)
+      use m_xg, only : xgBlock_t
+      type(xgBlock_t), intent(inout) :: W
+    end subroutine pcond
+  end interface
 
-!Local variables-------------------------------
-!scalars
- integer :: eigResiduMax,eigResiduMin
- real(dp) :: maxResidu,minResidu
-!arrays
- real(dp) :: tsec(2)
+  ! Local variables-------------------------------
+  ! scalars
+  integer :: eigResiduMax,eigResiduMin
+  real(dp) :: maxResidu,minResidu
+  !arrays
+  real(dp) :: tsec(2)
 
-! *********************************************************************
+  ! *********************************************************************
 
- if (chebfi%paw) then
-   call xgBlock_colwiseCymax(chebfi%AX_swap,chebfi%eigenvalues,chebfi%BX_swap,chebfi%AX_swap)
- else
-   call xgBlock_colwiseCymax(chebfi%AX_swap,chebfi%eigenvalues,chebfi%X_swap,chebfi%AX_swap)
- end if
+  if (chebfi%paw) then
+    call xgBlock_colwiseCymax(chebfi%AX_swap,chebfi%eigenvalues,chebfi%BX_swap,chebfi%AX_swap)
+  else
+    call xgBlock_colwiseCymax(chebfi%AX_swap,chebfi%eigenvalues,chebfi%X_swap,chebfi%AX_swap)
+  end if
 
-!pcond call
- call timab(tim_pcond,1,tsec)
- call pcond(chebfi%AX_swap)
- call timab(tim_pcond,2,tsec)
+  ! pcond call
+  call timab(tim_pcond,1,tsec)
+  call pcond(chebfi%AX_swap)
+  call timab(tim_pcond,2,tsec)
 
- call xgBlock_colwiseNorm2(chebfi%AX_swap, residu, max_val=maxResidu, max_elt=eigResiduMax,&
-                           min_val=minResidu, min_elt=eigResiduMin)
+  call xgBlock_colwiseNorm2(chebfi%AX_swap, residu, max_val=maxResidu, max_elt=eigResiduMax,&
+    min_val=minResidu, min_elt=eigResiduMin)
 
- chebfi_computeResidue = maxResidu
+  chebfi_computeResidue = maxResidu
 
 end function chebfi_computeResidue
 !!***
@@ -1163,52 +1163,52 @@ end function chebfi_computeResidue
 
 subroutine chebfi_ampfactor(chebfi,eig,lambda_minus,lambda_plus,nline_bands)
 
- implicit none
+  implicit none
 
-!Arguments ------------------------------------
- integer, intent(in) :: nline_bands(:)
- real(dp), pointer, intent(in) :: eig(:,:)
- real(dp), intent(in) :: lambda_minus
- real(dp), intent(in) :: lambda_plus
- type(chebfi_t) , intent(inout) :: chebfi
+  ! Arguments ------------------------------------
+  integer,           intent(in   ) :: nline_bands(:)
+  real(dp), pointer, intent(in   ) :: eig(:,:)
+  real(dp),          intent(in   ) :: lambda_minus
+  real(dp),          intent(in   ) :: lambda_plus
+  type(chebfi_t),    intent(inout) :: chebfi
 
-!Local variables-------------------------------
-!scalars
- integer :: iband,nbands
- real(dp) :: ampfactor
- real(dp) :: eig_per_band
- type(xgBlock_t) :: X_part
- type(xgBlock_t) :: AX_part
- type(xgBlock_t) :: BX_part
+  ! Local variables-------------------------------
+  ! scalars
+  integer         :: iband,nbands
+  real(dp)        :: ampfactor
+  real(dp)        :: eig_per_band
+  type(xgBlock_t) :: X_part
+  type(xgBlock_t) :: AX_part
+  type(xgBlock_t) :: BX_part
 
-! *********************************************************************
+  ! *********************************************************************
 
- if (chebfi%paral_kgb == 0) then
-   nbands = chebfi%neigenpairs
- else
-   nbands = chebfi%bandpp
- end if
+  if (chebfi%paral_kgb == 0) then
+    nbands = chebfi%neigenpairs
+  else
+    nbands = chebfi%bandpp
+  end if
 
- do iband = 1, nbands
+  do iband = 1, nbands
 
-   eig_per_band = eig(1,iband)
+    eig_per_band = eig(1,iband)
 
-   !cheb_poly1(x, n, a, b)
-   ampfactor = cheb_poly1(eig_per_band, nline_bands(iband), lambda_minus, lambda_plus)
+    !cheb_poly1(x, n, a, b)
+    ampfactor = cheb_poly1(eig_per_band, nline_bands(iband), lambda_minus, lambda_plus)
 
-   if(abs(ampfactor) < 1e-3) ampfactor = 1e-3 !just in case, avoid amplifying too much
+    if(abs(ampfactor) < 1e-3) ampfactor = 1e-3 !just in case, avoid amplifying too much
 
-   call xgBlock_setBlock(chebfi%xXColsRows, X_part, iband, chebfi%total_spacedim, 1)
-   call xgBlock_setBlock(chebfi%xAXColsRows, AX_part, iband, chebfi%total_spacedim, 1)
+    call xgBlock_setBlock(chebfi%xXColsRows, X_part, iband, chebfi%total_spacedim, 1)
+    call xgBlock_setBlock(chebfi%xAXColsRows, AX_part, iband, chebfi%total_spacedim, 1)
 
-   call xgBlock_scale(X_part, 1/ampfactor, 1)
-   call xgBlock_scale(AX_part, 1/ampfactor, 1)
+    call xgBlock_scale(X_part, 1/ampfactor, 1)
+    call xgBlock_scale(AX_part, 1/ampfactor, 1)
 
-   if(chebfi%paw) then
-     call xgBlock_setBlock(chebfi%xBXColsRows, BX_part, iband, chebfi%total_spacedim, 1)
-     call xgBlock_scale(BX_part, 1/ampfactor, 1)
-   end if
- end do
+    if(chebfi%paw) then
+      call xgBlock_setBlock(chebfi%xBXColsRows, BX_part, iband, chebfi%total_spacedim, 1)
+      call xgBlock_scale(BX_part, 1/ampfactor, 1)
+    end if
+  end do
 
 end subroutine chebfi_ampfactor
 !!***
@@ -1237,38 +1237,38 @@ end subroutine chebfi_ampfactor
 
 function cheb_oracle1(xx,aa,bb,tol,nmax) result(nn)
 
- implicit none
+  implicit none
 
-!Arguments ------------------------------------
- integer :: nn
- integer,intent(in) :: nmax
- real(dp), intent(in) :: xx,aa,bb
- real(dp) :: tol
+  ! Arguments ------------------------------------
+  integer              :: nn
+  integer,  intent(in) :: nmax
+  real(dp), intent(in) :: xx,aa,bb
+  real(dp), intent(in) :: tol
 
-!Local variables-------------------------------
- integer :: ii
- real(dp) :: yy,yim1,xred,temp
+  ! Local variables-------------------------------
+  integer :: ii
+  real(dp) :: yy,yim1,xred,temp
 
-! *************************************************************************
+  ! *************************************************************************
 
- xred = (xx-(aa+bb)/2)/(bb-aa)*2
- yy = xred
- yim1 = 1 !ONE
+  xred = (xx-(aa+bb)/2)/(bb-aa)*2
+  yy = xred
+  yim1 = 1 !ONE
 
- nn = nmax
- if(1/(yy**2) < tol) then
-   nn = 1
- else
-   do ii=2, nmax-1
-     temp = yy
-     yy = 2*xred*yy - yim1
-     yim1 = temp
-     if(1/(yy**2) < tol) then
-       nn = ii
-       exit
-     end if
-   end do
- end if
+  nn = nmax
+  if(1/(yy**2) < tol) then
+    nn = 1
+  else
+    do ii=2, nmax-1
+      temp = yy
+      yy = 2*xred*yy - yim1
+      yim1 = temp
+      if(1/(yy**2) < tol) then
+        nn = ii
+        exit
+      end if
+    end do
+  end if
 
 end function cheb_oracle1
 !!***
@@ -1296,27 +1296,27 @@ end function cheb_oracle1
 
 function cheb_poly1(xx,nn,aa,bb) result(yy)
 
- implicit none
+  implicit none
 
-!Arguments ------------------------------------
- integer, intent(in) :: nn
- real(dp), intent(in) :: xx, aa, bb
- real(dp) :: yy
+  ! Arguments ------------------------------------
+  integer,  intent(in) :: nn
+  real(dp), intent(in) :: xx, aa, bb
+  real(dp)             :: yy
 
-!Local variables-------------------------------
- integer :: ii
- real(dp) :: xred,yim1,temp
+  ! Local variables-------------------------------
+  integer  :: ii
+  real(dp) :: xred,yim1,temp
 
-! *************************************************************************
+  ! *************************************************************************
 
- xred = (xx-(aa+bb)/2)/(bb-aa)*2
- yy = xred
- yim1 = 1
- do ii= 2, nn
-   temp = yy
-   yy = 2*xred*yy - yim1
-   yim1 = temp
- end do
+  xred = (xx-(aa+bb)/2)/(bb-aa)*2
+  yy = xred
+  yim1 = 1
+  do ii= 2, nn
+    temp = yy
+    yy = 2*xred*yy - yim1
+    yim1 = temp
+  end do
 
 end function cheb_poly1
 !!***
