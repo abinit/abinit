@@ -350,7 +350,7 @@ subroutine symmetrize_afm_chi0(Cryst,Gsph,Ltg_q,npwe,nomega,chi0,chi0_head,chi0_
  type(crystal_t),intent(in) :: Cryst
  type(littlegroup_t),intent(in) :: Ltg_q
 !arrays
- complex(gwpc),intent(inout) :: chi0(npwe,npwe,nomega)
+ complex(gwpc),optional,intent(inout) :: chi0(npwe,npwe,nomega)
  complex(dpc),optional,intent(inout) :: chi0_lwing(npwe,nomega,3)
  complex(dpc),optional,intent(inout) :: chi0_uwing(npwe,nomega,3)
  complex(dpc),optional,intent(inout) :: chi0_head(3,3,nomega)
@@ -461,31 +461,32 @@ subroutine symmetrize_afm_chi0(Cryst,Gsph,Ltg_q,npwe,nomega,chi0,chi0_head,chi0_
      end do
    end if
 
-   do io=1,nomega
-     ! Take care of diagonal.
-     do ig1=1,npwe
-       chi0(ig1,ig1,io)=two*chi0(ig1,ig1,io)
-     end do
-
-     ! Upper and lower triangle are treated differently:
-     ! We took advantage of the fact the afm_mat is hermitian to reduce memory.
-     do ig2=2,npwe
-       k0g=ig2*(ig2-1)/2
-       do ig1=1,ig2-1
-         kg=k0g+ig1
-         chi0(ig1,ig2,io)=afm_mat(kg)*chi0(ig1,ig2,io)
+   if (PRESENT(chi0)) then
+     do io=1,nomega
+       ! Take care of diagonal.
+       do ig1=1,npwe
+         chi0(ig1,ig1,io)=two*chi0(ig1,ig1,io)
        end do
-     end do
 
-     do ig1=2,npwe
-       k0g=ig1*(ig1-1)/2
-       do ig2=1,ig1-1
-         kg=k0g+ig2
-         chi0(ig1,ig2,io)=conjg(afm_mat(kg))*chi0(ig1,ig2,io)
+       ! Upper and lower triangle are treated differently:
+       ! We took advantage of the fact the afm_mat is hermitian to reduce memory.
+       do ig2=2,npwe
+         k0g=ig2*(ig2-1)/2
+         do ig1=1,ig2-1
+           kg=k0g+ig1
+           chi0(ig1,ig2,io)=afm_mat(kg)*chi0(ig1,ig2,io)
+         end do
        end do
-     end do
 
-   end do !io
+       do ig1=2,npwe
+         k0g=ig1*(ig1-1)/2
+         do ig2=1,ig1-1
+           kg=k0g+ig2
+           chi0(ig1,ig2,io)=conjg(afm_mat(kg))*chi0(ig1,ig2,io)
+         end do
+       end do
+     end do !io
+   end if
 
    ABI_FREE(afm_mat)
 

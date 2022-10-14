@@ -204,7 +204,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,qp_ebands,ks_ebands,Gsph_eps
  integer :: bandinf,bandsup,lcor,nspinor,npw_k,istwf_k,mband,nfft,band1c,band2c
  integer :: band1,band2,iat1,iat2,iat,ig,ig1,ig2,itim_k,ik_bz,ik_ibz,io,iqlwl,ispinor1,ispinor2,isym_k,il1,il2
  integer :: itypatcor,m1,m2,nkpt_summed,dim_rtwg,use_padfft,gw_fftalga,use_padfftf,mgfftf
- integer :: my_nbbp,my_nbbpks,spin,nsppol
+ integer :: my_nbbp,my_nbbpks,spin,nsppol,iq,nq
  integer :: comm,ierr,my_wl,my_wr,iomegal,iomegar,gw_mgfft,dummy
  real(dp) :: cpu_time,wall_time,gflops
  real(dp) :: fac,fac1,fac2,fac3,fac4,spin_fact,deltaf_b1b2,weight,factor
@@ -223,7 +223,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,qp_ebands,ks_ebands,Gsph_eps
  integer,allocatable :: gw_gfft(:,:),gw_gbound(:,:),dummy_gbound(:,:),gboundf(:,:), bbp_ks_distrb(:,:,:,:)
  real(dp) :: kbz(3),spinrot_kbz(4),q0(3)
  real(dp),ABI_CONTIGUOUS pointer :: ks_eig(:,:,:),qp_eig(:,:,:),qp_occ(:,:,:)
- real(dp),allocatable :: omegasf(:)
+ real(dp),allocatable :: omegasf(:), qdirs(:,:)
  complex(gwpc) :: rhotwx(3,Wfd%nspinor**2)
  complex(gwpc),allocatable :: rhotwg(:)
  complex(dpc),allocatable :: green_w(:),green_enhigh_w(:)
@@ -235,7 +235,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,qp_ebands,ks_ebands,Gsph_eps
  complex(gwpc),allocatable :: ur_ae1(:),ur_ae_onsite1(:),ur_ps_onsite1(:)
  complex(gwpc),allocatable :: ur_ae2(:),ur_ae_onsite2(:),ur_ps_onsite2(:)
  complex(gwpc),ABI_CONTIGUOUS pointer :: ug1(:),ug2(:)
- complex(dpc), allocatable :: coeffW_BZ(:,:,:,:,:,:)
+ complex(dpc), allocatable :: coeffW_BZ(:,:,:,:,:,:), head_qvals(:)
  logical :: gradk_not_done(Kmesh%nibz)
  logical,allocatable :: bbp_mask(:,:)
  type(pawcprj_type),allocatable :: Cprj1_bz(:,:),Cprj2_bz(:,:), Cprj1_ibz(:,:),Cprj2_ibz(:,:)
@@ -342,7 +342,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,qp_ebands,ks_ebands,Gsph_eps
    ABI_BUG(sjoin("Wrong nsppol:", itoa(nsppol)))
  end select
 
- ! Weight for points in the IBZ_q
+ ! k-weights for points in the IBZ_q
  wtk_ltg(:) = 1
  if (Ep%symchi == 1) then
    do ik_bz=1,Ltg_q%nbz
@@ -932,8 +932,9 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,qp_ebands,ks_ebands,Gsph_eps
  ! ===============================================
  ! Reconstruct $chi0{\down,\down}$ from $chi0{\up,\up}$.
  ! Works only in the case of magnetic group Shubnikov type IV.
- if (Cryst%use_antiferro) then
-   call symmetrize_afm_chi0(Cryst,Gsph_epsG0,Ltg_q,Ep%npwe,Ep%nomega,chi0,chi0_head,chi0_lwing,chi0_uwing)
+ if (cryst%use_antiferro) then
+   call symmetrize_afm_chi0(Cryst, Gsph_epsG0, Ltg_q, Ep%npwe, Ep%nomega, chi0=chi0, &
+                            chi0_head=chi0_head, chi0_lwing=chi0_lwing, chi0_uwing=chi0_uwing)
  end if
 
  ! ===================================================
@@ -949,6 +950,30 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,qp_ebands,ks_ebands,Gsph_eps
    chq = matmul(chi0_head(:,:,io), Ep%qlwl(:,1))
    chi0(1,1,io) = vdotw(Ep%qlwl(:,1), chq, Cryst%gmet,"G")  ! Use user-defined small q
  end do
+
+ if (wfd%my_rank == 0) then
+   call cryst%get_redcart_qdirs(nq, qdirs)
+   qdirs = qdirs * tol3
+   ABI_MALLOC(head_qvals, (nq))
+   call wrtout([std_out, ab_out], "Head of irreducible polarizability for q --> 0", pre_newlines=1)
+   write(msg, "(*(a14))") "omega_re (eV)", "omega_im (eV)", "[100]", "[010]", "[001]", "x", "y", "z"
+   call wrtout([std_out, ab_out], msg)
+   do io=1,Ep%nomega
+     do iq=1,nq
+       chq = matmul(chi0_head(:,:,io), qdirs(:,iq))
+       head_qvals(iq) = vdotw(qdirs(:, iq), chq, cryst%gmet, "G")
+     end do
+     write(msg, "(*(es12.5,2x))") ep%omega(io) * Ha_eV, real(head_qvals(:))
+     call wrtout([std_out, ab_out], msg)
+     ! Write imag part to std_out
+     write(msg, "(*(es12.5,2x))") ep%omega(io) * Ha_eV, aimag(head_qvals(:))
+     call wrtout(std_out, msg)
+   end do
+   call wrtout([std_out, ab_out], " ")
+   ABI_FREE(qdirs)
+   ABI_FREE(head_qvals)
+ end if
+ !stop
 
  ! Impose Hermiticity (valid only for zero or purely imaginary frequencies)
  ! MG: what about metals, where we have poles around zero?
@@ -1146,7 +1171,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,qp_ebands,Gsph_epsG0,&
  integer :: ig1,ig2,iat1,iat2,iat,ik_bz,ik_ibz,ikmq_bz,ikmq_ibz
  integer :: io,iomegal,iomegar,ispinor1,ispinor2,isym_k,itypatcor,nfft,il1,il2
  integer :: isym_kmq,itim_k,itim_kmq,m1,m2,my_wl,my_wr,size_chi0
- integer :: nfound,nkpt_summed,nspinor,nsppol,mband
+ integer :: nfound,nkpt_summed,nspinor,nsppol,mband,nq,iq
  integer :: comm,gw_mgfft,use_padfft,gw_fftalga,lcor,mgfftf,use_padfftf
  integer :: my_nbbp,my_nbbpks,spin,nbmax,dummy
  real(dp) :: cpu_time,wall_time,gflops
@@ -1867,7 +1892,9 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,qp_ebands,Gsph_epsG0,&
  ! === Symmetrize chi0 in case of AFM system ===
  ! Reconstruct $chi0{\down,\down}$ from $chi0{\up,\up}$.
  ! Works only in case of magnetic group Shubnikov type IV.
- if (Cryst%use_antiferro) call symmetrize_afm_chi0(Cryst,Gsph_epsG0,Ltg_q,Ep%npwe,Ep%nomega,chi0)
+ if (Cryst%use_antiferro) then
+   call symmetrize_afm_chi0(Cryst,Gsph_epsG0,Ltg_q,Ep%npwe,Ep%nomega,chi0=chi0)
+ end if
 
  ! =====================
  ! ==== Free memory ====
@@ -2380,7 +2407,8 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
  ! * Reconstruct $chi0{\down,\down}$ from $chi0{\up,\up}$.
  ! * Works only in the case of magnetic group Shubnikov type IV.
  if (Cryst%use_antiferro) then
-   call symmetrize_afm_chi0(Cryst,Gsph_epsG0,Ltg_q,Ep%npwe,Ep%nomega,chi0,chi0_head,chi0_lwing,chi0_uwing)
+   call symmetrize_afm_chi0(Cryst, Gsph_epsG0, Ltg_q, Ep%npwe, Ep%nomega, chi0=chi0, &
+                            chi0_head=chi0_head, chi0_lwing=chi0_lwing, chi0_uwing=chi0_uwing)
  end if
  !
  ! ==================================================

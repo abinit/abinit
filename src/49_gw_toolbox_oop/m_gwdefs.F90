@@ -696,7 +696,7 @@ function g0g0w(omega, numerator, delta_ene, zcut, TOL_W0, opt_poles)
        g0g0w =  numerator / (omega + delta_ene - j_dpc*sgn*zcut) &
                -numerator / (omega - delta_ene + j_dpc*sgn*zcut)
      else
-       ! omega on the imag axis
+       ! omega on the imag axis (g0g0w is purely real)
        g0g0w =  numerator / (omega + delta_ene) &
                -numerator / (omega - delta_ene)
      end if

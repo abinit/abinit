@@ -177,7 +177,10 @@ module m_slk
     ! Return memory allocated for the local buffer in Mb.
 
    procedure :: print => slkmat_print
-    !  Print info on scalapack matrix.
+    ! Print info on scalapack matrix.
+
+   procedure :: glob2loc => slk_glob2loc
+   ! Determine the local indices of an element from its global indices and return haveit bool flag.
 
    procedure :: loc2glob => slk_matrix_loc2glob
     ! Return global indices of a matrix element from the local indices.
@@ -187,7 +190,10 @@ module m_slk
     ! Determine the global (row|column) index from the local index
 
    procedure :: get_head_and_wings => slk_get_head_and_wings
-   !procedure :: set_head_and_wings => slk_set_head_and_wings
+    ! Return global arrays with the head and the wings of the matrix.
+
+   procedure :: set_head_and_wings => slk_set_head_and_wings
+    ! Set head and the wings of the matrix starting from global arrays.
 
    procedure :: copy => matrix_scalapack_copy
     ! Copy object
@@ -248,8 +254,8 @@ module m_slk
  public :: matrix_set_local_real           ! Sets a local matrix coefficient of double precision type.
  public :: idx_loc                         ! Local indices of an entry
                                            ! from its global indices, independently of the processor.
- public :: glob_loc                        ! Return global location of a matrix coefficient.
- public :: loc_glob                        ! Return global index from a local index (row or column)
+ !public :: glob_loc__                      ! Return global location of a matrix coefficient.
+ !public :: loc_glob__                        ! Return global index from a local index (row or column)
                                            ! as a function of a given processor
  public :: matrix_from_global              ! Fills SCALAPACK matrix from full matrix.
  public :: matrix_from_global_sym          ! Fills SCALAPACK matrix from a full matrix.
@@ -688,7 +694,7 @@ end subroutine slkmat_print
 !!
 !! FUNCTION
 !!  Return global arrays with the head and the wings of the matrix.
-!!  If call_mpi if False, global MPI sum is postoponed.
+!!  If call_mpi if False, global MPI sum is postponed.
 !!  Useful to reduce the number of MPI calls if one has to operate on multiple matrices.
 !!
 !! SOURCE
@@ -749,6 +755,63 @@ subroutine slk_get_head_and_wings(mat, head, low_wing, up_wing, call_mpi)
 end subroutine slk_get_head_and_wings
 !!***
 
+!----------------------------------------------------------------------
+
+!!****f* m_slk/slk_set_head_and_wings
+!! NAME
+!!  slk_set_head_and_wings
+!!
+!! FUNCTION
+!!  Set head and the wings of the matrix starting from global arrays.
+!!
+!! SOURCE
+
+subroutine slk_set_head_and_wings(mat, head, low_wing, up_wing)
+
+!Arguments ------------------------------------
+ class(matrix_scalapack),intent(inout) :: mat
+ complex(dp),intent(in) :: head, low_wing(mat%sizeb_global(1)), up_wing(mat%sizeb_global(2))
+
+!Local variables-------------------------------
+ integer :: ierr, il_g1, il_g2, iglob1, iglob2
+ logical :: is_cplx
+
+! *********************************************************************
+
+ is_cplx = allocated(mat%buffer_cplx)
+
+ do il_g2=1,mat%sizeb_local(2)
+   iglob2 = mat%loc2gcol(il_g2)
+   do il_g1=1,mat%sizeb_local(1)
+     iglob1 = mat%loc2grow(il_g1)
+
+     if (iglob1 == 1 .or. iglob2 == 1) then
+       if (iglob1 == 1 .and. iglob2 == 1) then
+         if (is_cplx) then
+           mat%buffer_cplx(il_g1, il_g2) = head
+         else
+           mat%buffer_real(il_g1, il_g2) = real(head)
+         end if
+       else if (iglob1 == 1) then
+         if (is_cplx) then
+           mat%buffer_cplx(il_g1, il_g2) = up_wing(iglob2)
+         else
+           mat%buffer_real(il_g1, il_g2) = real(up_wing(iglob2))
+         end if
+       else if (iglob2 == 1) then
+         if (is_cplx) then
+           mat%buffer_cplx(il_g1, il_g2) = low_wing(iglob1)
+         else
+           mat%buffer_real(il_g1, il_g2) = real(low_wing(iglob1))
+         end if
+       end if
+     end if
+
+   end do
+ end do
+
+end subroutine slk_set_head_and_wings
+!!***
 !----------------------------------------------------------------------
 
 !!****f* m_slk/matrix_scalapack_copy
@@ -1196,17 +1259,17 @@ subroutine idx_loc(matrix, i, j, iloc, jloc)
 
 ! *********************************************************************
 
- iloc = glob_loc(matrix, i, 1)
- jloc = glob_loc(matrix, j, 2)
+ iloc = glob_loc__(matrix, i, 1)
+ jloc = glob_loc__(matrix, j, 2)
 
 end subroutine idx_loc
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_slk/glob_loc
+!!****f* m_slk/glob_loc__
 !! NAME
-!!  glob_loc
+!!  glob_loc__
 !!
 !! FUNCTION
 !!  Returns the global location of a matrix coefficient.
@@ -1218,7 +1281,7 @@ end subroutine idx_loc
 !!
 !! SOURCE
 
-integer function glob_loc(matrix, idx, lico)
+integer function glob_loc__(matrix, idx, lico)
 
 !Arguments ------------------------------------
  class(matrix_scalapack),intent(in) :: matrix
@@ -1230,11 +1293,56 @@ integer function glob_loc(matrix, idx, lico)
 
 ! *********************************************************************
 
- glob_loc = NUMROC(idx, matrix%sizeb_blocs(lico), &
+ glob_loc__ = NUMROC(idx, matrix%sizeb_blocs(lico), &
                    matrix%processor%coords(lico), 0, matrix%processor%grid%dims(lico))
 #endif
 
-end function glob_loc
+end function glob_loc__
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_slk/slk_glob2loc
+!! NAME
+!!  slk_glob2loc
+!!
+!! FUNCTION
+!!  Determine the local indices of an element from its global indices and return haveit bool flag.
+!!
+!! INPUTS
+!!  iloc= local row index.
+!!  jloc= local column index.
+!!
+!! OUTPUT
+!!  iloc= row in the matrix
+!!  jloc= column in the matrix
+!!  haveit= True if (iglob, jglob) is stored on this proc
+!!
+!! SOURCE
+
+subroutine slk_glob2loc(mat, iglob, jglob, iloc, jloc, haveit)
+
+!Arguments ------------------------------------
+ class(matrix_scalapack),intent(in) :: mat
+ integer, intent(in) :: iglob, jglob
+ integer, intent(in) :: iloc, jloc
+ logical,intent(out) :: haveit
+
+!Local variables-------------------------------
+ integer :: row_src, col_src
+
+! *********************************************************************
+
+#ifdef HAVE_LINALG_SCALAPACK
+ ! SUBROUTINE INFOG2L( GRINDX, GCINDX, DESC, NPROW, NPCOL, MYROW, MYCOL, LRINDX, LCINDX, RSRC, CSRC)
+
+ call INFOG2L(iglob, jglob, mat%descript%tab, mat%processor%grid%dims(1), mat%processor%grid%dims(2), &
+   mat%processor%coords(1), mat%processor%coords(2), iloc, jloc, row_src, col_src)
+
+ haveit = all(mat%processor%coords /= [row_src, col_src])
+#endif
+
+end subroutine slk_glob2loc
 !!***
 
 !----------------------------------------------------------------------
@@ -1266,8 +1374,8 @@ pure subroutine slk_matrix_loc2glob(matrix, iloc, jloc, i, j)
 
 ! *********************************************************************
 
- i = loc_glob(matrix, matrix%processor, iloc, 1)
- j = loc_glob(matrix, matrix%processor, jloc, 2)
+ i = loc_glob__(matrix, matrix%processor, iloc, 1)
+ j = loc_glob__(matrix, matrix%processor, jloc, 2)
 
 end subroutine slk_matrix_loc2glob
 !!***
@@ -1293,7 +1401,7 @@ integer pure function slk_matrix_loc2grow(matrix, iloc) result(iglob)
 
 ! *********************************************************************
 
- iglob = loc_glob(matrix, matrix%processor, iloc, 1)
+ iglob = loc_glob__(matrix, matrix%processor, iloc, 1)
 
 end function slk_matrix_loc2grow
 !!***
@@ -1319,16 +1427,16 @@ integer pure function slk_matrix_loc2gcol(matrix, jloc) result(jglob)
 
 ! *********************************************************************
 
- jglob = loc_glob(matrix, matrix%processor, jloc, 2)
+ jglob = loc_glob__(matrix, matrix%processor, jloc, 2)
 
 end function slk_matrix_loc2gcol
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_slk/loc_glob
+!!****f* m_slk/loc_glob__
 !! NAME
-!!  loc_glob
+!!  loc_glob__
 !!
 !! FUNCTION
 !!  Determine the global index from a local index (row or column) as a function of a given processor
@@ -1341,7 +1449,7 @@ end function slk_matrix_loc2gcol
 !!
 !! SOURCE
 
-integer pure function loc_glob(matrix, proc, idx, lico)
+integer pure function loc_glob__(matrix, proc, idx, lico)
 
 !Arguments ------------------------------------
  class(matrix_scalapack),intent(in) :: matrix
@@ -1357,9 +1465,9 @@ integer pure function loc_glob(matrix, proc, idx, lico)
  rest = MOD(idx-1, matrix%sizeb_blocs(lico))
  nblocs = nbcyc * proc%grid%dims(lico) + proc%coords(lico)
 
- loc_glob = nblocs * matrix%sizeb_blocs(lico) + rest + 1
+ loc_glob__ = nblocs * matrix%sizeb_blocs(lico) + rest + 1
 
-end function loc_glob
+end function loc_glob__
 !!***
 
 !----------------------------------------------------------------------
