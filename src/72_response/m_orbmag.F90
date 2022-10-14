@@ -2394,7 +2394,7 @@ subroutine dterm_p2(dterm,dtset,gntselect,gprimd,my_lmax,pawrad,pawtab,realgnt)
 
   !Local variables -------------------------
   !scalars
-  integer :: adir,gint,iat,itypat,ilmn,ilm,iln,imesh,jl,jlm,jlmn,jln
+  integer :: adir,gint,iat,itypat,il,ilmn,ilm,iln,imesh,jl,jlm,jlmn,jln
   integer :: ll,llmm,lmj1a,mesh_size,pwave_size
   real(dp) :: c1m,intg,rr
 
@@ -2425,27 +2425,28 @@ subroutine dterm_p2(dterm,dtset,gntselect,gprimd,my_lmax,pawrad,pawtab,realgnt)
       jln = pawtab(itypat)%indlmn(5,jlmn)
       jl = pawtab(itypat)%indlmn(1,jlmn)
 
-      uj = zero
-      uj(1:pwave_size) = pawtab(itypat)%phi(1:pwave_size,jln)
+      uj = zero; tuj = zero
+      do imesh=1, pwave_size
+        rr=pawrad(itypat)%rad(imesh)
+        uj(imesh)  = pawtab(itypat)%phi(imesh,jln)
+        tuj(imesh) = pawtab(itypat)%tphi(imesh,jln)
+        !write(std_out,'(a,i4,3es16.8)')'JWZ debug jln rr uj tuj ',&
+        !  & jln,rr,uj(imesh),tuj(imesh)
+      end do
       call nderiv_gen(ujder,uj,pawrad(itypat),uj2der)
-      ffj = zero
+      call nderiv_gen(tujder,tuj,pawrad(itypat),tuj2der)
+      
+      ffj = zero; tffj = zero
       do imesh = 2, pwave_size
         rr = pawrad(itypat)%rad(imesh)
-        ffj(imesh) = uj2der(imesh)-jl*(jl+1)*pawtab(itypat)%phi(imesh,jln)/(rr*rr)
+        ffj(imesh) = uj2der(imesh)-jl*(jl+1)*uj(imesh)/(rr*rr)
+        tffj(imesh) = tuj2der(imesh)-jl*(jl+1)*tuj(imesh)/(rr*rr)
       end do
       
-      uj = zero
-      uj(1:pwave_size) = pawtab(itypat)%tphi(1:pwave_size,jln)
-      call nderiv_gen(ujder,uj,pawrad(itypat),uj2der)
-      tffj = zero
-      do imesh = 2, pwave_size
-        rr = pawrad(itypat)%rad(imesh)
-        tffj(imesh) = uj2der(imesh)-jl*(jl+1)*pawtab(itypat)%tphi(imesh,jln)/(rr*rr)
-      end do
-
       do ilmn=1, pawtab(itypat)%lmn_size
 
         ilm = pawtab(itypat)%indlmn(4,ilmn)
+        il = pawtab(itypat)%indlmn(1,ilmn)
         if (ilm .NE. jlm) cycle
 
         iln = pawtab(itypat)%indlmn(5,ilmn)
@@ -2458,8 +2459,8 @@ subroutine dterm_p2(dterm,dtset,gntselect,gprimd,my_lmax,pawrad,pawtab,realgnt)
         call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
         call simp_gen(intg,ff,pawrad(itypat))
 
-        !write(std_out,'(a,5i4,es16.8)')' JWZ debug ilmn iln jlmn jln klmn ke ',&
-        !  & ilmn,iln,jlmn,jln,MATPACK(ilmn,jlmn),-half*intg
+        write(std_out,'(a,5i4,es16.8)')' JWZ debug ilmn il jlmn jl klmn ke ',&
+          & ilmn,il,jlmn,jl,MATPACK(ilmn,jlmn),-half*intg
 
       end do ! ilmn
     end do ! jlmn
@@ -2497,13 +2498,13 @@ subroutine dterm_p2(dterm,dtset,gntselect,gprimd,my_lmax,pawrad,pawtab,realgnt)
               lmj1a = MATPACK(jlm,pack1a(adir))
               gint = gntselect(llmm,lmj1a)
               if ( gint .EQ. 0 ) cycle
-              dij_cart(adir) = dij_cart(adir) - half*realgnt(gint)*intg
+              dij_cart(adir) = dij_cart(adir) - half*c1m*realgnt(gint)*intg
             end do !adir
           end do !llmm
         end do !ll
 
-        write(std_out,'(a,3i4,3es16.8)')'JWZ debug ilmn jlmn klmn dij ',ilmn,jlmn,MATPACK(ilmn,jlmn),&
-          & dij_cart(1),dij_cart(2),dij_cart(3)
+        !write(std_out,'(a,3i4,3es16.8)')'JWZ debug ilmn jlmn klmn dij ',ilmn,jlmn,MATPACK(ilmn,jlmn),&
+        !  & dij_cart(1),dij_cart(2),dij_cart(3)
       end do !ilmn
     end do !jlmn
 
