@@ -1093,21 +1093,31 @@ contains
   !! NAME
   !! xgBlock_gemmR
 
-  subroutine xgBlock_gemmR(transa, transb, alpha, xgBlockA, xgBlockB, beta, xgBlockW)
+  subroutine xgBlock_gemmR(transa, transb, alpha, xgBlockA, xgBlockB, beta, xgBlockW, use_gpu_cuda)
 
-    character, intent(in) :: transa
-    character, intent(in) :: transb
-    double precision, intent(in) :: alpha
-    type(xgBlock_t), intent(in) :: xgBlockA
-    type(xgBlock_t), intent(in) :: xgBlockB
-    double precision, intent(in) :: beta
-    type(xgBlock_t), intent(inout) :: xgBlockW
-    complex(kind=8) :: calpha
-    complex(kind=8) :: cbeta
-    integer :: K
+    character,        intent(in   )           :: transa
+    character,        intent(in   )           :: transb
+    double precision, intent(in   )           :: alpha
+    type(xgBlock_t),  intent(in   )           :: xgBlockA
+    type(xgBlock_t),  intent(in   )           :: xgBlockB
+    double precision, intent(in   )           :: beta
+    type(xgBlock_t),  intent(inout)           :: xgBlockW
+    integer        ,  intent(in   ), optional :: use_gpu_cuda
+
+    complex(kind=8)  :: calpha
+    complex(kind=8)  :: cbeta
+    integer          :: K
     double precision :: tsec(2)
+    integer          :: l_use_gpu_cuda = 0
 
     call timab(tim_gemm,1,tsec)
+
+    ! if optional parameter is present, use it
+    ! else use default value, i.e. don't use GPU
+    if (present(use_gpu_cuda)) then
+      l_use_gpu_cuda = use_gpu_cuda
+    end if
+
     if ( xgBlockA%space /= xgBlockB%space .or. xgBlockB%space /= xgBlockB%space ) then
       ABI_ERROR("Not same space")
     end if
@@ -1118,23 +1128,67 @@ contains
       K = xgBlockA%rows
     end if
 
+    calpha = dcmplx(alpha,0.d0)
+    cbeta  = dcmplx(beta, 0.d0)
+
     select case(xgBlockA%space)
+
     case (SPACE_R,SPACE_CR)
-      call dgemm(transa,transb,xgBlockW%rows, xgBlockW%cols, K, &
-        alpha,xgBlockA%vecR, xgBlockA%LDim, &
-        xgBlockB%vecR, xgBlockB%LDim, beta,xgBlockW%vecR,xgBlockW%LDim)
+      if (l_use_gpu_cuda==1) then
+        call gpu_xgemm(1, transa, transb, xgBlockW%rows, xgBlockW%cols, K, &
+          calpha, &
+          c_loc(xgBlockA%vecR), xgBlockA%LDim, &
+          c_loc(xgBlockB%vecR), xgBlockB%LDim, &
+          cbeta, &
+          c_loc(xgBlockW%vecR), xgBlockW%LDim)
+      else
+        call dgemm(transa, transb, xgBlockW%rows, xgBlockW%cols, K, &
+          alpha, &
+          xgBlockA%vecR, xgBlockA%LDim, &
+          xgBlockB%vecR, xgBlockB%LDim, &
+          beta, &
+          xgBlockW%vecR, xgBlockW%LDim)
+
+      end if
+
       if ( transa == xgBlockA%trans .and. (beta) < 1d-10) then
+        if (l_use_gpu_cuda==1) then
+          ! CPU waits for GPU to finish before doing MPI communications
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
+          call gpu_device_synchronize()
+#endif
+        end if
         call xmpi_sum(xgBlockW%vecR,xgBlockW%spacedim_comm,K)
       end if
+
     case(SPACE_C)
-      calpha = dcmplx(alpha,0.d0)
-      cbeta = dcmplx(beta,0.d0)
-      call zgemm(transa,transb,xgBlockW%rows, xgBlockW%cols, K, &
-        calpha,xgBlockA%vecC, xgBlockA%LDim, &
-        xgBlockB%vecC, xgBlockB%LDim, cbeta,xgBlockW%vecC,xgBlockW%LDim)
+
+      if (l_use_gpu_cuda==1) then
+        call gpu_xgemm(2, transa, transb, xgBlockW%rows, xgBlockW%cols, K, &
+          calpha, &
+          c_loc(xgBlockA%vecC), xgBlockA%LDim, &
+          c_loc(xgBlockB%vecC), xgBlockB%LDim, &
+          cbeta, &
+          c_loc(xgBlockW%vecC), xgBlockW%LDim)
+      else
+        call zgemm(transa, transb, xgBlockW%rows, xgBlockW%cols, K, &
+          calpha, &
+          xgBlockA%vecC, xgBlockA%LDim, &
+          xgBlockB%vecC, xgBlockB%LDim, &
+          cbeta, &
+          xgBlockW%vecC, xgBlockW%LDim)
+      end if
+
       if ( xgBlockW%spacedim_comm/= -1 .and. transa == xgBlockW%trans .and. abs(beta) < 1d-10 ) then
+        if (l_use_gpu_cuda==1) then
+          ! CPU waits for GPU to finish before doing MPI communications
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
+          call gpu_device_synchronize()
+#endif
+        end if
         call xmpi_sum(xgBlockW%vecC,xgBlockW%spacedim_comm,K)
       end if
+
     end select
 
     call timab(tim_gemm,2,tsec)
@@ -1147,19 +1201,28 @@ contains
   !! NAME
   !! xgBlock_gemmC
 
-  subroutine xgBlock_gemmC(transa, transb, alpha, xgBlockA, xgBlockB, beta, xgBlockW)
+  subroutine xgBlock_gemmC(transa, transb, alpha, xgBlockA, xgBlockB, beta, xgBlockW, use_gpu_cuda)
 
-    character, intent(in) :: transa
-    character, intent(in) :: transb
-    complex(kind=8), intent(in) :: alpha
-    type(xgBlock_t), intent(in) :: xgBlockA
-    type(xgBlock_t), intent(in) :: xgBlockB
-    complex(kind=8), intent(in) :: beta
-    type(xgBlock_t), intent(inout) :: xgBlockW
-    integer :: K
+    character,       intent(in   )           :: transa
+    character,       intent(in   )           :: transb
+    complex(kind=8), intent(in   )           :: alpha
+    type(xgBlock_t), intent(in   )           :: xgBlockA
+    type(xgBlock_t), intent(in   )           :: xgBlockB
+    complex(kind=8), intent(in   )           :: beta
+    type(xgBlock_t), intent(inout)           :: xgBlockW
+    integer        , intent(in   ), optional :: use_gpu_cuda
+
+    integer          :: K
     double precision :: tsec(2)
+    integer          :: l_use_gpu_cuda = 0
 
     call timab(tim_gemm,1,tsec)
+
+    ! if optional parameter is present, use it
+    ! else use default value, i.e. don't use GPU
+    if (present(use_gpu_cuda)) then
+      l_use_gpu_cuda = use_gpu_cuda
+    end if
 
     if ( xgBlockA%space /= xgBlockB%space .or. xgBlockB%space /= xgBlockB%space ) then
       ABI_ERROR("Not same space")
@@ -1174,10 +1237,28 @@ contains
       K = xgBlockA%rows
     end if
 
-    call zgemm(transa,transb,xgBlockW%rows, xgBlockW%cols, K, &
-      alpha,xgBlockA%vecC, xgBlockA%LDim, &
-      xgBlockB%vecC, xgBlockB%LDim, beta,xgBlockW%vecC,xgBlockW%LDim)
+    if (l_use_gpu_cuda==1) then
+      call gpu_xgemm(2, transa, transb, xgBlockW%rows, xgBlockW%cols, K, &
+        alpha, &
+        c_loc(xgBlockA%vecC), xgBlockA%LDim, &
+        c_loc(xgBlockB%vecC), xgBlockB%LDim, &
+        beta, &
+        c_loc(xgBlockW%vecC), xgBlockW%LDim)
+    else
+      call zgemm(transa, transb, xgBlockW%rows, xgBlockW%cols, K, &
+        alpha, &
+        xgBlockA%vecC, xgBlockA%LDim, &
+        xgBlockB%vecC, xgBlockB%LDim, &
+        beta, &
+        xgBlockW%vecC, xgBlockW%LDim)
+    end if
     if ( xgBlockW%spacedim_comm/= -1 .and. transa == xgBlockA%trans .and. abs(beta) < 1.d-10 ) then
+      if (l_use_gpu_cuda==1) then
+        ! CPU waits for GPU to finish before doing MPI communications
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
+        call gpu_device_synchronize()
+#endif
+      end if
       call xmpi_sum(xgBlockW%vecC,xgBlockW%spacedim_comm,K)
     end if
 
