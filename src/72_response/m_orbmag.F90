@@ -105,6 +105,7 @@ module m_orbmag
   ! local datatype for d_\alpha terms
   type,private :: dterm_type
     ! scalars
+    integer :: lmnmax
     integer :: lmn2max
     integer :: natom
 
@@ -113,16 +114,16 @@ module m_orbmag
     complex(dpc),allocatable :: qij(:,:)
     
     ! <phi|r_alpha|phi> - <tphi|r_alpha|tphi>
-    ! dqij(natom,lmn2max,3)
-    complex(dpc),allocatable :: dqij(:,:,:)
+    ! dqij(natom,lmnmax,lmnmax,3)
+    complex(dpc),allocatable :: dqij(:,:,:,:)
     
     ! <phi|vH[nZc]|phi> - <tphi|vH[nZc]|tphi>
     ! vhnzc(natom,lmn2max)
     complex(dpc),allocatable :: vhnzc(:,:)
     
     ! <phi|r_alpha vH[nZc]|phi> - <tphi|r_alpha vH[nZc]|tphi>
-    ! dvhnzc(natom,lmn2max,3)
-    complex(dpc),allocatable :: dvhnzc(:,:,:)
+    ! dvhnzc(natom,lmnmax,lmnmax,3)
+    complex(dpc),allocatable :: dvhnzc(:,:,:,:)
 
   end type dterm_type
 
@@ -364,7 +365,7 @@ subroutine orbmag_ptpaw(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_en
  lmn2max = psps%lmnmax*(psps%lmnmax+1)/2
 
  ! note: in make_d, terms will be filled as iatom using atindx
- call dterm_alloc(dterm,lmn2max,dtset%natom)
+ call dterm_alloc(dterm,psps%lmnmax,lmn2max,dtset%natom)
 
  call make_d(atindx,atindx1,cprj,dimlmn,dterm,dtset,gprimd,mcprj,&
    & mpi_enreg,occ,paw_an,pawang,pawrad,pawtab,psps)
@@ -706,10 +707,10 @@ subroutine make_g_pv(atindx,cprj_k,dterm,dtset,eig_k,gg_k,nband_k,pawtab)
 
          do np = 1, nband_k
            call tdt_me(dterm%qij,atindx,cprj_k(:,np),dterm%dqij,dtset,gdir,cprj_k(:,nn),&
-             & dterm%lmn2max,pawtab,tdt)
+             & dterm%lmnmax,dterm%lmn2max,pawtab,tdt)
            
            call tdt_me(dterm%qij,atindx,cprj_k(:,np),dterm%dqij,dtset,bdir,cprj_k(:,nn),&
-             & dterm%lmn2max,pawtab,tdtp)
+             & dterm%lmnmax,dterm%lmn2max,pawtab,tdtp)
            cterm = cterm + CONJG(tdtp)*tdt*eig_k(np)
          end do !np
          cterm=com*c2*epsabg*cterm
@@ -786,15 +787,15 @@ subroutine make_g_d(atindx,cprj_k,cprj1_k,dterm,dtset,gg_k,nband_k,pawtab)
          cterm = czero
 
          call tdt_me(dterm%vhnzc,atindx,cprj1_k(:,nn,bdir),dterm%dvhnzc,dtset,gdir,cprj_k(:,nn),&
-           & dterm%lmn2max,pawtab,tdt)
+           & dterm%lmnmax,dterm%lmn2max,pawtab,tdt)
          cterm = cterm + tdt
          
          call tdt_me(dterm%vhnzc,atindx,cprj1_k(:,nn,gdir),dterm%dvhnzc,dtset,bdir,cprj_k(:,nn),&
-           & dterm%lmn2max,pawtab,tdt)
+           & dterm%lmnmax,dterm%lmn2max,pawtab,tdt)
          cterm = cterm + CONJG(tdt)
          
          call dtdt_me(dterm%vhnzc,atindx,cprj_k(:,nn),bdir,dterm%dvhnzc,dtdt,dtset,&
-           & gdir,cprj_k(:,nn),dterm%lmn2max,pawtab)
+           & gdir,cprj_k(:,nn),dterm%lmnmax,dterm%lmn2max,pawtab)
          cterm = cterm + dtdt
          
          gterm=com*c2*epsabg*cterm
@@ -873,15 +874,15 @@ subroutine make_fh_v(atindx,cprj_k,cprj1_k,dterm,dtset,eig_k,ff_k,hh_k,nband_k,p
          cterm = czero
 
          call tdt_me(dterm%qij,atindx,cprj1_k(:,nn,bdir),dterm%dqij,dtset,gdir,cprj_k(:,nn),&
-           & dterm%lmn2max,pawtab,tdt)
+           & dterm%lmnmax,dterm%lmn2max,pawtab,tdt)
          cterm = cterm + tdt
          
          call tdt_me(dterm%qij,atindx,cprj1_k(:,nn,gdir),dterm%dqij,dtset,bdir,cprj_k(:,nn),&
-           & dterm%lmn2max,pawtab,tdt)
+           & dterm%lmnmax,dterm%lmn2max,pawtab,tdt)
          cterm = cterm + CONJG(tdt)
          
          call dtdt_me(dterm%qij,atindx,cprj_k(:,nn),bdir,dterm%dqij,dtdt,dtset,&
-           & gdir,cprj_k(:,nn),dterm%lmn2max,pawtab)
+           & gdir,cprj_k(:,nn),dterm%lmnmax,dterm%lmn2max,pawtab)
          cterm = cterm + dtdt
          
          fterm=cbc*c2*epsabg*cterm
@@ -895,10 +896,10 @@ subroutine make_fh_v(atindx,cprj_k,cprj1_k,dterm,dtset,eig_k,ff_k,hh_k,nband_k,p
          cterm = czero
          do np = 1, nband_k
            call tdt_me(dterm%qij,atindx,cprj_k(:,np),dterm%dqij,dtset,gdir,cprj_k(:,nn),&
-             & dterm%lmn2max,pawtab,tdt)
+             & dterm%lmnmax,dterm%lmn2max,pawtab,tdt)
            
            call tdt_me(dterm%qij,atindx,cprj_k(:,np),dterm%dqij,dtset,bdir,cprj_k(:,nn),&
-             & dterm%lmn2max,pawtab,tdtp)
+             & dterm%lmnmax,dterm%lmn2max,pawtab,tdtp)
            cterm = cterm + CONJG(tdtp)*tdt
          end do !np
          fterm=cbc*c2*epsabg*cterm
@@ -1120,17 +1121,18 @@ end subroutine lamb_core
 !!
 !! SOURCE
 
-subroutine dtdt_me(aij,atindx,bcp,bdir,daij,dtdt,dtset,gdir,kcp,lmn2max,pawtab)
+subroutine dtdt_me(aij,atindx,bcp,bdir,daij,dtdt,dtset,gdir,kcp,lmnmax,lmn2max,pawtab)
 
   !Arguments ------------------------------------
   !scalars
-  integer,intent(in) :: bdir,gdir,lmn2max
+  integer,intent(in) :: bdir,gdir,lmnmax,lmn2max
   complex(dpc),intent(out) :: dtdt
   type(dataset_type),intent(in) :: dtset
 
   !arrays
   integer,intent(in) :: atindx(dtset%natom)
-  complex(dpc),intent(in) :: aij(dtset%natom,lmn2max),daij(dtset%natom,lmn2max,3)
+  complex(dpc),intent(in) :: aij(dtset%natom,lmn2max)
+  complex(dpc),intent(in) :: daij(dtset%natom,lmnmax,lmnmax,3)
   type(pawcprj_type),intent(in) :: bcp(dtset%natom),kcp(dtset%natom)
   type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
 
@@ -1155,8 +1157,8 @@ subroutine dtdt_me(aij,atindx,bcp,bdir,daij,dtdt,dtset,gdir,kcp,lmn2max,pawtab)
         dcpi = CMPLX(bcp(iatom)%dcp(1,bdir,ilmn),bcp(iatom)%dcp(2,bdir,ilmn))
         dcpj = CMPLX(kcp(iatom)%dcp(1,gdir,jlmn),kcp(iatom)%dcp(2,gdir,jlmn))
         dtdt = dtdt + CONJG(dcpi)*dcpj*aij(iatom,klmn)
-        dtdt = dtdt + CONJG(dcpi)*cpj*daij(iatom,klmn,gdir)
-        dtdt = dtdt + CONJG(cpi)*dcpj*CONJG(daij(iatom,klmn,bdir))
+        dtdt = dtdt + CONJG(dcpi)*cpj*daij(iatom,ilmn,jlmn,gdir)
+        dtdt = dtdt + CONJG(cpi)*dcpj*CONJG(daij(iatom,ilmn,jlmn,bdir))
       end do !jlmn
     end do !ilmn
   end do !iat
@@ -1196,17 +1198,18 @@ end subroutine dtdt_me
 !!
 !! SOURCE
 
-subroutine tdt_me(aij,atindx,bcp,daij,dtset,idir,kcp,lmn2max,pawtab,tdt)
+subroutine tdt_me(aij,atindx,bcp,daij,dtset,idir,kcp,lmnmax,lmn2max,pawtab,tdt)
 
   !Arguments ------------------------------------
   !scalars
-  integer,intent(in) :: idir,lmn2max
+  integer,intent(in) :: idir,lmnmax,lmn2max
   complex(dpc),intent(out) :: tdt
   type(dataset_type),intent(in) :: dtset
 
   !arrays
   integer,intent(in) :: atindx(dtset%natom)
-  complex(dpc),intent(in) :: aij(dtset%natom,lmn2max),daij(dtset%natom,lmn2max,3)
+  complex(dpc),intent(in) :: aij(dtset%natom,lmn2max)
+  complex(dpc),intent(in) :: daij(dtset%natom,lmnmax,lmnmax,3)
   type(pawcprj_type),intent(in) :: bcp(dtset%natom),kcp(dtset%natom)
   type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
 
@@ -1230,7 +1233,7 @@ subroutine tdt_me(aij,atindx,bcp,daij,dtset,idir,kcp,lmn2max,pawtab,tdt)
         cpj =  CMPLX(kcp(iatom)%cp(1,jlmn),kcp(iatom)%cp(2,jlmn))
         dcpj = CMPLX(kcp(iatom)%dcp(1,idir,jlmn),kcp(iatom)%dcp(2,idir,jlmn))
         tdt = tdt + CONJG(cpi)*dcpj*aij(iatom,klmn) + &
-          & CONJG(cpi)*cpj*daij(iatom,klmn,idir)
+          & CONJG(cpi)*cpj*daij(iatom,ilmn,jlmn,idir)
       end do !jlmn
     end do !ilmn
   end do !iat
@@ -1296,25 +1299,29 @@ subroutine dterm_qij(atindx,dterm,dtset,gprimd,pawtab)
  ! normalization 
  cdij = sqrt(four_pi/three)
  do itypat = 1, dtset%ntypat
-   do klmn = 1, pawtab(itypat)%lmn2_size
+   do ilmn = 1, pawtab(itypat)%lmn_size
+     do jlmn = 1, pawtab(itypat)%lmn_size
+       klmn = MATPACK(ilmn,jlmn)
      
-     ! qij is not really a d term but it's convenient to have it 
-     ! in the same format as the d terms 
-     cqij=CMPLX(pawtab(itypat)%sij(klmn),zero)
+       ! qij is not really a d term but it's convenient to have it 
+       ! in the same format as the d terms 
+       cqij=CMPLX(pawtab(itypat)%sij(klmn),zero)
 
-     do adir = 1, 3
-       ddir_cart(adir) = cdij*pawtab(itypat)%qijl(pack1a(adir),klmn)
-     end do !adir
-     ! now have ddir in cart coords, convert to crystal coords where ddk wavefunctions are
-     ddir_red = MATMUL(TRANSPOSE(gprimd),ddir_cart)
-     do iat = 1, dtset%natom
-       iatom = atindx(iat)
-       if (dtset%typat(iat) .EQ. itypat) then
-         dterm%dqij(iatom,klmn,1:3) = -j_dpc*ddir_red(1:3)
-         dterm%qij(iatom,klmn) = cqij
-       end if
-     end do !iat
-   end do ! klmn
+       do adir = 1, 3
+         ddir_cart(adir) = cdij*pawtab(itypat)%qijl(pack1a(adir),klmn)
+       end do !adir
+       ! now have ddir in cart coords, convert to crystal coords where ddk wavefunctions are
+       ddir_red = MATMUL(TRANSPOSE(gprimd),ddir_cart)
+       do iat = 1, dtset%natom
+         iatom = atindx(iat)
+         if (dtset%typat(iat) .EQ. itypat) then
+           dterm%dqij(iatom,ilmn,jlmn,1:3) = -j_dpc*ddir_red(1:3)
+           dterm%dqij(iatom,jlmn,ilmn,1:3) = -j_dpc*ddir_red(1:3)
+           dterm%qij(iatom,klmn) = cqij
+         end if
+       end do !iat
+     end do !jlmn
+   end do ! ilmn
  end do ! itypat
  
 end subroutine dterm_qij
@@ -1834,7 +1841,7 @@ subroutine dterm_vhnzc(atindx,dterm,dtset,gntselect,gprimd,&
 
   !Local variables -------------------------
   !scalars
-  integer :: adir,gint,iat,iatom,ilm,itypat,jlm
+  integer :: adir,gint,iat,iatom,ilm,ilmn,itypat,jlm,jlmn
   integer :: klm,klmn,kln,lm1b,mesh_size,pwave_size
   real(dp) :: cdij,intdff,intff
 
@@ -1855,47 +1862,50 @@ subroutine dterm_vhnzc(atindx,dterm,dtset,gntselect,gprimd,&
    ABI_MALLOC(dff,(mesh_size))
    ABI_MALLOC(ff,(mesh_size))
 
-   do klmn = 1, pawtab(itypat)%lmn2_size
+   do ilmn = 1, pawtab(itypat)%lmn_size
+     do jlmn = 1, pawtab(itypat)%lmn_size
+       klmn = MATPACK(ilmn,jlmn)
 
-     klm = pawtab(itypat)%indklmn(1,klmn)
-     kln = pawtab(itypat)%indklmn(2,klmn)
-     ilm = pawtab(itypat)%indklmn(5,klmn)
-     jlm = pawtab(itypat)%indklmn(6,klmn)
+       klm = pawtab(itypat)%indklmn(1,klmn)
+       kln = pawtab(itypat)%indklmn(2,klmn)
+       ilm = pawtab(itypat)%indklmn(5,klmn)
+       jlm = pawtab(itypat)%indklmn(6,klmn)
 
-     ff(2:pwave_size) = pawtab(itypat)%phiphj(2:pwave_size,kln)*&
-       & pawtab(itypat)%vhnzc(2:pwave_size)
-     ff(2:pwave_size) = ff(2:pwave_size) - &
-       & pawtab(itypat)%tphitphj(2:pwave_size,kln)*&
-       & pawtab(itypat)%vhtnzc(2:pwave_size)
+       ff(2:pwave_size) = pawtab(itypat)%phiphj(2:pwave_size,kln)*&
+         & pawtab(itypat)%vhnzc(2:pwave_size)
+       ff(2:pwave_size) = ff(2:pwave_size) - &
+         & pawtab(itypat)%tphitphj(2:pwave_size,kln)*&
+         & pawtab(itypat)%vhtnzc(2:pwave_size)
 
-     intff = zero    
-     if (ilm == jlm) then 
-       call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
-       call simp_gen(intff,ff,pawrad(itypat))
-     end if
-
-     dff(2:pwave_size) = ff(2:pwave_size)*pawrad(itypat)%rad(2:pwave_size)
-     call pawrad_deducer0(dff,mesh_size,pawrad(itypat))
-     call simp_gen(intdff,dff,pawrad(itypat))
-
-     dij_cart = zero
-     do adir = 1, 3
-       lm1b = pack1a(adir)
-       gint = gntselect(lm1b,klm)
-       if (gint == 0) cycle
-       dij_cart(adir) = cdij*realgnt(gint)*intdff
-     end do
-     dij_red = MATMUL(TRANSPOSE(gprimd),dij_cart)
-
-     do iat = 1, dtset%natom
-       iatom=atindx(iat)
-       if (dtset%typat(iat) .EQ. itypat) then
-         dterm%vhnzc(iatom,klmn) = intff
-         dterm%dvhnzc(iatom,klmn,1:3)=-j_dpc*dij_red(1:3)
+       intff = zero    
+       if (ilm == jlm) then 
+         call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
+         call simp_gen(intff,ff,pawrad(itypat))
        end if
-     end do !iat
-     
-   end do ! klmn
+
+       dff(2:pwave_size) = ff(2:pwave_size)*pawrad(itypat)%rad(2:pwave_size)
+       call pawrad_deducer0(dff,mesh_size,pawrad(itypat))
+       call simp_gen(intdff,dff,pawrad(itypat))
+
+       dij_cart = zero
+       do adir = 1, 3
+         lm1b = pack1a(adir)
+         gint = gntselect(lm1b,klm)
+         if (gint == 0) cycle
+         dij_cart(adir) = cdij*realgnt(gint)*intdff
+       end do
+       dij_red = MATMUL(TRANSPOSE(gprimd),dij_cart)
+
+       do iat = 1, dtset%natom
+         iatom=atindx(iat)
+         if (dtset%typat(iat) .EQ. itypat) then
+           dterm%vhnzc(iatom,klmn) = intff
+           dterm%dvhnzc(iatom,ilmn,jlmn,1:3)=-j_dpc*dij_red(1:3)
+           dterm%dvhnzc(iatom,jlmn,ilmn,1:3)=-j_dpc*dij_red(1:3)
+         end if
+       end do !iat
+     end do !jlmn
+   end do ! ilmn
    ABI_FREE(dff)
    ABI_FREE(ff)
 
@@ -2459,8 +2469,8 @@ subroutine dterm_p2(dterm,dtset,gntselect,gprimd,my_lmax,pawrad,pawtab,realgnt)
         call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
         call simp_gen(intg,ff,pawrad(itypat))
 
-        write(std_out,'(a,5i4,es16.8)')' JWZ debug ilmn il jlmn jl klmn ke ',&
-          & ilmn,il,jlmn,jl,MATPACK(ilmn,jlmn),-half*intg
+        !write(std_out,'(a,5i4,es16.8)')' JWZ debug ilmn il jlmn jl klmn ke ',&
+        !  & ilmn,il,jlmn,jl,MATPACK(ilmn,jlmn),-half*intg
 
       end do ! ilmn
     end do ! jlmn
@@ -2806,11 +2816,11 @@ end subroutine paw_sph_den_free
 !!
 !! SOURCE
 
-subroutine dterm_alloc(dterm,lmn2max,natom)
+subroutine dterm_alloc(dterm,lmnmax,lmn2max,natom)
 
   !Arguments ------------------------------------
   !scalars
-  integer,intent(in) :: lmn2max,natom
+  integer,intent(in) :: lmnmax,lmn2max,natom
   type(dterm_type),intent(inout) :: dterm
 
   !arrays
@@ -2821,6 +2831,7 @@ subroutine dterm_alloc(dterm,lmn2max,natom)
   !arrays
 !--------------------------------------------------------------------
 
+  dterm%lmnmax = lmnmax
   dterm%lmn2max = lmn2max
   dterm%natom = natom
 
@@ -2832,7 +2843,7 @@ subroutine dterm_alloc(dterm,lmn2max,natom)
   if(allocated(dterm%dqij)) then
     ABI_FREE(dterm%dqij)
   end if
-  ABI_MALLOC(dterm%dqij,(natom,lmn2max,3))
+  ABI_MALLOC(dterm%dqij,(natom,lmnmax,lmnmax,3))
   
   if(allocated(dterm%vhnzc)) then
     ABI_FREE(dterm%vhnzc)
@@ -2842,7 +2853,7 @@ subroutine dterm_alloc(dterm,lmn2max,natom)
   if(allocated(dterm%dvhnzc)) then
     ABI_FREE(dterm%dvhnzc)
   end if
-  ABI_MALLOC(dterm%dvhnzc,(natom,lmn2max,3))
+  ABI_MALLOC(dterm%dvhnzc,(natom,lmnmax,lmnmax,3))
   
 end subroutine dterm_alloc
 !!***
