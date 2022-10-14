@@ -269,7 +269,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  integer :: mcgmq,mcg1mq,mpw1_mq !+/-q duplicates
  integer :: maxidir,me,mgfftf,mkmem_rbz,mk1mem_rbz,mkqmem_rbz,mpw,mpw1,my_nkpt_rbz
  integer :: n3xccc,nband_k,ncpgr,ndir,nkpt_eff,nkpt_max,nline_save,nmatel,npert_io,npert_me,nspden_rhoij
- integer :: nstep_save,nsym1,ntypat,nwffile,nylmgr,nylmgr1,old_comm_atom,openexit,option,optorth,optthm,pertcase
+ integer :: nstep_save,nsym1,ntypat,nwffile,nylmgr,nylmgr1,old_comm_atom,openexit,option,optorth,optthm,pertcase,pertcase_mq
  integer :: qphase_rhoij,rdwr,rdwrpaw,spaceComm,smdelta,timrev_pert,timrev_kpt,to_compute_this_pert
  integer :: unitout,useylmgr,useylmgr1,vrsddb,dfpt_scfcv_retcode,optn2
 #ifdef HAVE_NETCDF
@@ -284,7 +284,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  logical,parameter :: paral_pert_inplace=.true.,remove_inv=.false.
  logical :: first_entry,found_eq_gkk,t_exist,paral_atom,write_1wfk,init_rhor1
  logical :: kramers_deg
- character(len=fnlen) :: dscrpt,fiden1i,fiwf1i,fiwf1o,fiwfddk,fnamewff(4),gkkfilnam,fname,filnam
+ character(len=fnlen) :: dscrpt,fiden1i,fiwf1i,fiwf1o,fiwf1o_mq,fiwfddk,fnamewff(4),gkkfilnam,fname,filnam
  character(len=500) :: msg
  type(crystal_t) :: crystal,ddb_crystal
  type(dataset_type), pointer :: dtset_tmp
@@ -292,7 +292,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  type(ebands_t) :: ebands_kmq !+/-q duplicates
  type(eigr2d_t)  :: eigr2d,eigi2d
  type(gkk_t)     :: gkk2d
- type(hdr_type) :: hdr,hdr_den,hdr_tmp
+ type(hdr_type) :: hdr,hdr_mq,hdr_den,hdr_tmp
  type(ddb_hdr_type) :: ddb_hdr, tmp_ddb_hdr
  type(pawang_type) :: pawang1
  type(wfk_t) :: ddk_f(4)
@@ -1269,7 +1269,9 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    call hdr_init(ebands_kq,codvsn,dtset,hdr,pawtab,pertcase,psps,wvl%descr, &
      comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab )
    if (.not.kramers_deg) then
-     call hdr_init(ebands_kmq,codvsn,dtset,hdr,pawtab,pertcase,psps,wvl%descr, &
+     !MR: this is to not interfere with the second-order derivatives
+     pertcase_mq=pertcase+(dtset%natom+12)*3
+     call hdr_init(ebands_kmq,codvsn,dtset,hdr_mq,pawtab,pertcase_mq,psps,wvl%descr, &
        comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab )
    end if
 
@@ -1453,6 +1455,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    call wrtout([std_out, ab_out], msg)
    call appdig(pertcase,dtfil%fnamewff1,fiwf1i)
    call appdig(pertcase,dtfil%fnameabo_1wf,fiwf1o)
+   call appdig(pertcase_mq,dtfil%fnameabo_1wf,fiwf1o_mq)
 
 !  Allocate 1st-order PAW occupancies (rhoij1)
    if (psps%usepaw==1) then
@@ -1910,7 +1913,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &       dielt,dim_eig2rf,doccde_rbz,docckqde,dtfil,dtset_tmp,&
 &       d2bbb,d2lo,d2nl,d2ovl,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrnl,efrx1,efrx2,&
 &       ehart01,ehart1,eigenq,eigen0,eigen1,eii,ek0,ek1,eloc0,elpsp1,&
-&       end0,end1,enl0,enl1,eovl1,epaw1,etotal,evdw,exc1,fermie,gh0c1_set,gh1c_set,hdr,idir,&
+&       end0,end1,enl0,enl1,eovl1,epaw1,etotal,evdw,exc1,fermie,gh0c1_set,gh1c_set,hdr_mq,idir,&
 &       indkpt1,indsy1,initialized,ipert,irrzon1,istwfk_rbz,&
 &       kg,kg1,kpt_rbz,kxc,mband_mem_rbz,mgfftf,mkmem_rbz,mkqmem_rbz,mk1mem_rbz,&
 &       mpert,mpi_enreg,mpw,mpw1,mpw1_mq,my_natom,&
@@ -1918,7 +1921,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &       npwarr,npwar1,nspden,&
 &       nsym1,n3xccc,occkq,occ_rbz,&
 &       paw_an_pert,paw_ij_pert,pawang,pawang1,pawfgr,pawfgrtab_pert,pawrad,pawrhoij_pert,pawrhoij1,pawtab,&
-&       pertcase,phnons1,ph1d,ph1df,prtbbb,psps,&
+&       pertcase_mq,phnons1,ph1d,ph1df,prtbbb,psps,&
 &       dtset%qptn,resid,residm,rhog,rhog1,&
 &       rhor,rhor1,rprimd,symaf1,symrc1,symrl1,tnons1,&
 &       usecprj,useylmgr,useylmgr1,ddk_f,vpsp1,vtrial,vxc,&
@@ -2138,6 +2141,12 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &          dtset%mband, mband_mem_rbz, mk1mem_rbz, dtset%mpw, nkpt_rbz, dtset%nspinor, dtset%nsppol, &
 &          cg1, kg1, eigen1)
 
+     if (.not.kramers_deg) then
+       call wfk_write_my_kptbands(fiwf1o_mq, distrb_flags, spacecomm, formeig, hdr_mq, dtset%iomode, &
+&            dtset%mband, mband_mem_rbz, mk1mem_rbz, dtset%mpw, nkpt_rbz, dtset%nspinor, dtset%nsppol, &
+&            cg1_mq, kg1_mq, eigen1_mq)
+     end if
+
 !     call outwf(cg1,dtset,psps,eigen1,fiwf1o,hdr,kg1,kpt_rbz,&
 !&     dtset%mband,mcg1,mk1mem_rbz,mpi_enreg,mpw1,dtset%natom,nband_rbz,&
 !&     nkpt_rbz,npwar1,dtset%nsppol,&
@@ -2331,6 +2340,9 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      ABI_FREE(mpi_enreg%my_kpttab)
    end if
    call hdr%free()
+   if (.not.kramers_deg) then
+     call hdr_mq%free()
+   end if
 
    ! Clean band structure datatypes (should use it more in the future !)
    call ebands_free(ebands_k)
