@@ -681,17 +681,17 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,mpi_enreg)
  if (chebfi%paral_kgb == 1) then
    call xmpi_barrier(chebfi%spacecom)
 
-   call xgTransposer_transpose(chebfi%xgTransposerX,STATE_LINALG)
+   call xgTransposer_transpose(chebfi%xgTransposerX, STATE_LINALG)
    call xgTransposer_transpose(chebfi%xgTransposerAX,STATE_LINALG)
    call xgTransposer_transpose(chebfi%xgTransposerBX,STATE_LINALG)
 
    if (xmpi_comm_size(chebfi%spacecom) == 1) then !only one MPI proc reset buffers to right addresses (because of X-Xcolwise swaps)
-     call xgBlock_setBlock(chebfi%xXColsRows, chebfi%X, 1, spacedim, neigenpairs)
+     call xgBlock_setBlock(chebfi%xXColsRows,  chebfi%X,       1, spacedim, neigenpairs)
      call xgBlock_setBlock(chebfi%xAXColsRows, chebfi%AX%self, 1, spacedim, neigenpairs)
      call xgBlock_setBlock(chebfi%xBXColsRows, chebfi%BX%self, 1, spacedim, neigenpairs)
   end if
  else
-   call xgBlock_setBlock(chebfi%xXColsRows, chebfi%X, 1, spacedim, neigenpairs)
+   call xgBlock_setBlock(chebfi%xXColsRows,  chebfi%X,       1, spacedim, neigenpairs)
    call xgBlock_setBlock(chebfi%xAXColsRows, chebfi%AX%self, 1, spacedim, neigenpairs)
    call xgBlock_setBlock(chebfi%xBXColsRows, chebfi%BX%self, 1, spacedim, neigenpairs)
  end if
@@ -967,12 +967,12 @@ subroutine chebfi_rayleighRitz(chebfi,nline)
 
   ! *********************************************************************
 
-  space = chebfi%space
+  space        = chebfi%space
   eigenProblem = chebfi%eigenProblem
-  me_g0 = chebfi%me_g0
+  me_g0        = chebfi%me_g0
 
-  spacedim = chebfi%spacedim
-  neigenpairs = chebfi%neigenpairs   !remains whole nband domain since it is after transpose
+  spacedim     = chebfi%spacedim
+  neigenpairs  = chebfi%neigenpairs   !remains whole nband domain since it is after transpose
 
   call xg_init(A_und_X,space,neigenpairs,neigenpairs,chebfi%spacecom)
   call xg_init(B_und_X,space,neigenpairs,neigenpairs,chebfi%spacecom)
