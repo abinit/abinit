@@ -1921,7 +1921,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &       npwarr,npwar1,nspden,&
 &       nsym1,n3xccc,occkq,occ_rbz,&
 &       paw_an_pert,paw_ij_pert,pawang,pawang1,pawfgr,pawfgrtab_pert,pawrad,pawrhoij_pert,pawrhoij1,pawtab,&
-&       pertcase_mq,phnons1,ph1d,ph1df,prtbbb,psps,&
+&       pertcase,phnons1,ph1d,ph1df,prtbbb,psps,&
 &       dtset%qptn,resid,residm,rhog,rhog1,&
 &       rhor,rhor1,rprimd,symaf1,symrc1,symrl1,tnons1,&
 &       usecprj,useylmgr,useylmgr1,ddk_f,vpsp1,vtrial,vxc,&
