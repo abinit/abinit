@@ -196,7 +196,7 @@ contains
   real(dp),allocatable :: atom_projs(:,:,:), atom_dprojs(:,:,:,:), temp(:)
   integer :: itypat, ilmn, nlmn, ia, iaph3d, igrad, shift, shift_grad
   integer :: il, ipw, idir, idir1,idir2
-  logical :: parity,testkpg,my_compute_grad_strain,my_compute_grad_atom
+  logical :: parity,my_compute_grad_strain,my_compute_grad_atom
 
 ! *************************************************************************
 
