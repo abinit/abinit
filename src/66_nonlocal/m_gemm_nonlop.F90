@@ -440,14 +440,15 @@ contains
 
   ! locals
   integer :: ii, ia, idat, igrad, nprojs, ngrads, shift, iatom, nlmn, ierr, ibeg, iend
-  integer :: cplex, cplex_enl, cplex_fac, proj_shift, grad_shift, enlout_shift
+  integer :: cplex, cplex_enl, cplex_fac, proj_shift, grad_shift
+  integer :: enlout_shift, force_shift, nnlout_test
   integer :: iatm, ndgxdt, ndgxdtfac, nd2gxdt, nd2gxdtfac, optder, itypat, ilmn
-  real(dp) :: enlk,esum
   integer :: cplex_dgxdt(1), cplex_d2gxdt(1)
+  real(dp) :: esum
   real(dp) :: work(6)
   real(dp) :: dgxdt_dum_in(1,1,1,1,1), dgxdt_dum_out(1,1,1,1,1),dgxdt_dum_out2(1,1,1,1,1)
   real(dp) :: d2gxdt_dum_in(1,1,1,1,1), d2gxdt_dum_out(1,1,1,1,1),d2gxdt_dum_out2(1,1,1,1,1)
-  real(dp), allocatable :: sij_typ(:)
+  real(dp), allocatable :: enlk(:),sij_typ(:)
   real(dp), allocatable :: projections(:,:,:), s_projections(:,:,:), vnl_projections(:,:,:)
   real(dp), allocatable :: dprojections(:,:,:), temp_realvec(:)
 
@@ -469,6 +470,16 @@ contains
 &      (choice>3.and.choice/=7.and.choice/=23.and.signs==1) .or. &
 &      (useylm/=1) ) then
     ABI_BUG('gemm_nonlop option not supported!')
+  end if
+  if (signs==1) then
+    nnlout_test=0
+    if (choice==1) nnlout_test=1
+    if (choice==2) nnlout_test=3*natom
+    if (choice==3) nnlout_test=6
+    if (choice==23) nnlout_test=6+3*natom
+    if (nnlout<nnlout_test) then
+      ABI_BUG('wrong nnlout size!')
+    end if
   end if
 
   cplex=2;if (istwf_k>1) cplex=1
@@ -703,6 +714,7 @@ contains
     if(signs==1) then
       enlout=zero
       if(choice==1.or.choice==3.or.choice==23) then
+        ABI_MALLOC(enlk,(ndat))
         enlk=zero
         do idat=1,ndat*nspinor
           proj_shift=0
@@ -718,16 +730,17 @@ contains
                 end do
               end do
               proj_shift=proj_shift+nlmn
-              enlk = enlk + esum
+              enlk(idat) = enlk(idat) + esum
             end do
           end do
         end do
-        if (choice==1) enlout(1)=enlk
+        if (choice==1) enlout(1:ndat)=enlk(1:ndat)
       end if ! choice=1/3/23
       if(choice==2.or.choice==3.or.choice==23) then
         do idat=1,ndat*nspinor
           proj_shift=0 ; grad_shift=0
-          enlout_shift=merge(6,0,choice==23)
+          enlout_shift=(idat-1)*nnlout
+          force_shift=merge(6,0,choice==23)
           do itypat=1, ntypat
             nlmn=count(indlmn(3,:,itypat)>0)
             do ia=1,nattyp(itypat)
@@ -742,7 +755,7 @@ contains
                     end do
                   end do
                   grad_shift=grad_shift+nlmn
-                  enlout(igrad)=enlout(igrad) + two*esum
+                  enlout(enlout_shift+igrad)=enlout(enlout_shift+igrad) + two*esum
                 end do
               end if
               if (choice==2.or.choice==23) then
@@ -756,9 +769,10 @@ contains
                     end do
                   end do
                   grad_shift=grad_shift+nlmn
-                  enlout(enlout_shift+igrad)=enlout(enlout_shift+igrad) + two*esum
+                  enlout(enlout_shift+force_shift+igrad)= &
+&                               enlout(enlout_shift+force_shift+igrad) + two*esum
                 end do
-                enlout_shift=enlout_shift+3
+                force_shift=force_shift+3
               end if
               proj_shift=proj_shift+nlmn
             end do
@@ -769,11 +783,6 @@ contains
     end if !opernld
 
   end if ! choice>0
-
-! Release memory
-  ABI_FREE(projections)
-  ABI_FREE(s_projections)
-  ABI_FREE(vnl_projections)
 
 ! Reduction in case of parallelism
   if (signs==1.and.mpi_enreg%paral_spinor==1) then
@@ -789,10 +798,21 @@ contains
 !  - Convert from reduced to cartesian coordinates
 !  - Substract volume contribution
  if ((choice==3.or.choice==23).and.signs==1.and.paw_opt<=3) then
-   call strconv(enlout(1:6),gprimd,work)
-   enlout(1:3)=(work(1:3)-enlk)
-   enlout(4:6)= work(4:6)
+   do idat=1,ndat
+     enlout_shift=(idat-1)*nnlout
+     call strconv(enlout(enlout_shift+1:enlout_shift+6),gprimd,work)
+     enlout(enlout_shift+1:enlout_shift+3)=(work(1:3)-enlk(idat))
+     enlout(enlout_shift+4:enlout_shift+6)= work(4:6)
+   end do
  end if
+
+! Release memory
+  ABI_FREE(projections)
+  ABI_FREE(s_projections)
+  ABI_FREE(vnl_projections)
+  if (allocated(enlk)) then
+    ABI_FREE(enlk)
+  end if
 
  end subroutine gemm_nonlop
 !***
