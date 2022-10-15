@@ -43,6 +43,7 @@ module m_gemm_nonlop
  use m_opernlc_ylm, only : opernlc_ylm
  use m_pawcprj, only : pawcprj_type
  use m_geometry, only : strconv
+ use m_kg, only : mkkpg
 
  implicit none
 
@@ -176,34 +177,38 @@ contains
 !!
 !! SOURCE
 
- subroutine make_gemm_nonlop(ikpt,npw,lmnmax,ntypat,indlmn,nattyp,istwf_k,ucvol,ffnl_k,ph3d_k,kpg_k, &
+ subroutine make_gemm_nonlop(ikpt,npw,lmnmax,ntypat,indlmn,nattyp,istwf_k,ucvol,ffnl_k, &
+&                            ph3d_k,kpt_k,kg_k,kpg_k, &
 &                            compute_grad_strain,compute_grad_atom) ! Optional parameters
 
   integer, intent(in) :: ikpt
   integer, intent(in) :: npw, lmnmax,ntypat
-  integer, intent(in) :: indlmn(:,:,:)
+  integer, intent(in) :: indlmn(:,:,:), kg_k(:,:)
   integer, intent(in) :: nattyp(ntypat)
   integer, intent(in) :: istwf_k
   logical, intent(in), optional :: compute_grad_strain,compute_grad_atom
   real(dp), intent(in) :: ucvol
   real(dp), intent(in) :: ffnl_k(:,:,:,:)
   real(dp), intent(in) :: ph3d_k(:,:,:)
-  real(dp), intent(in) :: kpg_k(:,:)
+  real(dp), intent(in) :: kpt_k(:)
+  real(dp), intent(in), target :: kpg_k(:,:)
 
   integer :: nprojs,ndprojs,ngrads
 
   integer,parameter :: alpha(6)=(/1,2,3,3,3,2/),beta(6)=(/1,2,3,2,1,1/)
-  real(dp),allocatable :: atom_projs(:,:,:), atom_dprojs(:,:,:,:), temp(:)
   integer :: itypat, ilmn, nlmn, ia, iaph3d, igrad, shift, shift_grad
-  integer :: il, ipw, idir, idir1,idir2
+  integer :: il, ipw, idir, idir1, idir2, nkpg_local
   logical :: parity,my_compute_grad_strain,my_compute_grad_atom
+  real(dp),allocatable :: atom_projs(:,:,:), atom_dprojs(:,:,:,:), temp(:)
+  real(dp),pointer :: kpg(:,:)
 
 ! *************************************************************************
 
   my_compute_grad_strain=.false. ; if (present(compute_grad_strain)) my_compute_grad_strain=compute_grad_strain
   my_compute_grad_atom=.false. ; if (present(compute_grad_atom)) my_compute_grad_atom=compute_grad_atom
-  ABI_CHECK((.not.my_compute_grad_strain).or.size(kpg_k)>0,"kpg_k should be allocated to compute gradients!")
-  ABI_CHECK((.not.my_compute_grad_atom).or.size(kpg_k)>0,"kpg_k should be allocated to compute gradients!")
+  ABI_CHECK(size(ph3d_k)>0,'nloalg(2)<0 not compatible with use_gemm_nonlop=1!')
+!  ABI_CHECK((.not.my_compute_grad_strain).or.size(kpg_k)>0,"kpg_k should be allocated to compute gradients!")
+!  ABI_CHECK((.not.my_compute_grad_atom).or.size(kpg_k)>0,"kpg_k should be allocated to compute gradients!")
 
   iaph3d = 1
 
@@ -267,6 +272,16 @@ contains
       ABI_MALLOC(gemm_nonlop_kpt(ikpt)%dprojs_r, (1, 1, 1))
       ABI_MALLOC(gemm_nonlop_kpt(ikpt)%dprojs_i, (1, 1, 1))
     end if
+  end if
+
+  ! Compute (k+G) vectors if needed
+  nkpg_local=0
+  if ((my_compute_grad_strain.or.my_compute_grad_atom).and.size(kpg_k)==0) then
+    nkpg_local=3
+    ABI_MALLOC(kpg,(npw,nkpg_local))
+    call mkkpg(kg_k,kpg,kpt_k,nkpg_local,npw)
+  else
+    kpg => kpg_k
   end if
 
   shift = 0 ; shift_grad = 0
@@ -350,8 +365,8 @@ contains
             do ilmn=1,nlmn
               do ipw=1,npw
                 gemm_nonlop_kpt(ikpt)%dprojs(:, ipw, shift_grad+nlmn*igrad+ilmn) = &
-&                  -half*(atom_dprojs(:, ipw, idir1, ilmn)*kpg_k(ipw,idir2) &
-&                        +atom_dprojs(:, ipw, idir2, ilmn)*kpg_k(ipw,idir1))
+&                  -half*(atom_dprojs(:, ipw, idir1, ilmn)*kpg(ipw,idir2) &
+&                        +atom_dprojs(:, ipw, idir2, ilmn)*kpg(ipw,idir1))
               end do
             end do
             igrad=igrad+1
@@ -362,9 +377,9 @@ contains
            do ilmn=1,nlmn
               do ipw=1,npw
                 gemm_nonlop_kpt(ikpt)%dprojs(1, ipw, shift_grad+nlmn*igrad+ilmn) = &
-&                     +atom_projs(2, ipw, ilmn)*kpg_k(ipw,idir)*two_pi
+&                     +atom_projs(2, ipw, ilmn)*kpg(ipw,idir)*two_pi
                 gemm_nonlop_kpt(ikpt)%dprojs(2, ipw, shift_grad+nlmn*igrad+ilmn) = &
-&                     -atom_projs(1, ipw, ilmn)*kpg_k(ipw,idir)*two_pi
+&                     -atom_projs(1, ipw, ilmn)*kpg(ipw,idir)*two_pi
               end do
             end do
             igrad=igrad+1
@@ -388,6 +403,9 @@ contains
   ABI_FREE(temp)
   if (allocated(atom_dprojs)) then
     ABI_FREE(atom_dprojs)
+  end if
+  if (nkpg_local>0) then
+    ABI_FREE(kpg)
   end if
 
  end subroutine make_gemm_nonlop
