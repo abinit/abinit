@@ -573,7 +573,7 @@ contains
                  vectin, npwin, czero, dprojections, ngrads*nprojs)
       end if
     else
-       ABI_MALLOC(temp_realvec,(MAX(npwout,npwin)*nspinor*ndat))
+      ABI_MALLOC(temp_realvec,(MAX(npwout,npwin)*nspinor*ndat))
       ! only compute real part of projections = P^* psi => projections_r = P_r^T psi_r + P_i^T psi_i
       temp_realvec(1:npwin*nspinor*ndat) = vectin(1,1:npwin*nspinor*ndat)
       if(istwf_k == 2 .and. mpi_enreg%me_g0 == 1) then
@@ -828,6 +828,9 @@ contains
   ABI_FREE(projections)
   ABI_FREE(s_projections)
   ABI_FREE(vnl_projections)
+  if (allocated(dprojections)) then
+    ABI_FREE(dprojections)
+  end if
   if (allocated(enlk)) then
     ABI_FREE(enlk)
   end if
