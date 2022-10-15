@@ -955,7 +955,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,qp_ebands,ks_ebands,Gsph_eps
    call cryst%get_redcart_qdirs(nq, qdirs)
    qdirs = qdirs * tol3
    ABI_MALLOC(head_qvals, (nq))
-   call wrtout([std_out, ab_out], "Head of irreducible polarizability for q --> 0", pre_newlines=1)
+   call wrtout([std_out, ab_out], "Head of the irreducible polarizability for q --> 0", pre_newlines=1)
    write(msg, "(*(a14))") "omega_re (eV)", "omega_im (eV)", "[100]", "[010]", "[001]", "x", "y", "z"
    call wrtout([std_out, ab_out], msg)
    do io=1,Ep%nomega

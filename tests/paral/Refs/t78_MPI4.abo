@@ -619,6 +619,16 @@ Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(o
     6 2.38776E+01   1.84855E+01   3.03436E+00   1.45252E+01
 ...
 
+
+Head of irreducible polarizability for q --> 0
+   iomega (eV)         [100]         [010]         [001]             x             y             z
+ 8.68279E-01  -2.33688E-07  -2.33308E-07  -2.22325E-07  -2.32621E-07  -2.36130E-07  -2.22325E-07
+ 3.01645E+00  -2.05062E-07  -2.04739E-07  -1.96151E-07  -2.04319E-07  -2.06647E-07  -1.96151E-07
+ 6.69632E+00  -1.48289E-07  -1.48092E-07  -1.43716E-07  -1.47929E-07  -1.48975E-07  -1.43716E-07
+ 1.41905E+01  -7.86544E-08  -7.85886E-08  -7.73573E-08  -7.85448E-08  -7.88516E-08  -7.73573E-08
+ 3.13763E+01  -2.67704E-08  -2.67603E-08  -2.65506E-08  -2.67528E-08  -2.68030E-08  -2.65506E-08
+ 8.25691E+01  -4.78416E-09  -4.78345E-09  -4.76134E-09  -4.78268E-09  -4.78717E-09  -4.76134E-09
+
  Trace of: gt_kibz for ipm: 1 , spin: 1 for testing purposes:
  (ik_ibz, itau) table
 
@@ -689,24 +699,24 @@ Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(o
 --- !EMACRO_WITHOUT_LOCAL_FIELDS
 iteration_state: {dtset: 3, }
 'epsilon_{iw, q -> Gamma}(0,0)': !Tabular |
-      3.19086685E-02    1.00000000E+00    0.00000000E+00
-      1.10852360E-01    1.00000000E+00    0.00000000E+00
-      2.46085310E-01    1.00000000E+00    0.00000000E+00
-      5.21490053E-01    9.99999998E-01    0.00000000E+00
-      1.15305721E+00    9.99999991E-01    0.00000000E+00
-      3.03435879E+00    9.99999996E-01    0.00000000E+00
+      3.19086685E-02    3.86511634E+00   -1.05567690E-17
+      1.10852360E-01    3.52133902E+00   -1.76403758E-17
+      2.46085310E-01    2.83503894E+00   -8.82533994E-18
+      5.21490053E-01    1.98029469E+00   -2.96672810E-18
+      1.15305721E+00    1.33504795E+00    1.87089760E-20
+      3.03435879E+00    1.05998222E+00   -1.09088788E-19
 ...
 
 
 --- !EMACRO_WITH_LOCAL_FIELDS
 iteration_state: {dtset: 3, }
 'epsilon_{iw, q -> Gamma}(0,0)': !Tabular |
-      3.19086685E-02    9.99999999E-01    2.48467300E-25
-      1.10852360E-01    9.99999999E-01    2.21100371E-25
-      2.46085310E-01    1.00000000E+00    1.75346329E-25
-      5.21490053E-01    1.00000000E+00    9.35673705E-26
-      1.15305721E+00    1.00000001E+00   -9.60653134E-27
-      3.03435879E+00    1.00000000E+00   -3.41175402E-27
+      3.19086685E-02    2.86309328E-01    1.49077799E-18
+      1.10852360E-01    3.13358710E-01    9.75781955E-19
+      2.46085310E-01    3.84571828E-01    9.28348110E-19
+      5.21490053E-01    5.33491927E-01    3.62530101E-19
+      1.15305721E+00    7.60919185E-01   -4.23516474E-22
+      3.03435879E+00    9.44259290E-01    1.04907181E-19
 ...
 
  Trace of: wc_qibz for spin: 1 for testing purposes:
@@ -714,7 +724,7 @@ iteration_state: {dtset: 3, }
 
  (iq_ibz, iomega) table
        1       2       3       4       5       6
-    1  -0.256  -0.251  -0.234  -0.188  -0.106  -0.028
+    1  -0.995  -0.962  -0.871  -0.672  -0.354  -0.085
         0.000   0.000   0.000   0.000   0.000   0.000
 
     2  -0.362  -0.355  -0.330  -0.264  -0.146  -0.037
@@ -734,12 +744,12 @@ spin       : 1
 QP_VBM_band: 24
 QP_CBM_band: 25
 KS_gap     :    3.170
-QP_gap     :    7.226
-Delta_QP_KS:    4.056
+QP_gap     :    4.873
+Delta_QP_KS:    1.703
 data: !Tabular |
      Band      E0 <VxcDFT>   SigX SigC(E0)     Z1      Z2  E-E0       E
-       24  -1.797 -17.192 -21.431   2.417   0.855  -0.010  -1.557  -3.354
-       25   1.374 -10.429  -6.238  -1.427   0.904  -0.003   2.498   3.872
+       24  -1.797 -17.192 -21.431   3.690   0.804  -0.018  -0.441  -2.237
+       25   1.374 -10.429  -6.238  -2.702   0.848  -0.016   1.262   2.636
 ...
 
 
@@ -750,12 +760,12 @@ spin       : 1
 QP_VBM_band: 24
 QP_CBM_band: 25
 KS_gap     :    6.036
-QP_gap     :   10.427
-Delta_QP_KS:    4.391
+QP_gap     :    8.101
+Delta_QP_KS:    2.065
 data: !Tabular |
      Band      E0 <VxcDFT>   SigX SigC(E0)     Z1      Z2  E-E0       E
-       24  -1.500 -17.930 -22.038   2.517   0.854  -0.009  -1.360  -2.860
-       25   4.536 -12.131  -7.077  -1.669   0.895  -0.012   3.030   7.566
+       24  -1.500 -17.930 -22.038   3.790   0.803  -0.018  -0.255  -1.755
+       25   4.536 -12.131  -7.077  -2.919   0.848  -0.020   1.810   6.346
 ...
 
 
@@ -962,45 +972,45 @@ P           mkmem           1
 
 ================================================================================
 
-- Total cpu        time (s,m,h):        257.8        4.30      0.072
-- Total wall clock time (s,m,h):        383.5        6.39      0.107
+- Total cpu        time (s,m,h):        306.7        5.11      0.085
+- Total wall clock time (s,m,h):        514.5        8.58      0.143
 -
 - For major independent code sections, cpu and wall times (sec),
 -  as well as % of the time and number of calls for node 0
 -
 -<BEGIN_TIMER mpi_nprocs = 4, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =           64.6, wall_time =           96.0
+- cpu_time =           76.9, wall_time =          128.7
 -
 - routine                            cpu     %          wall     %      number of calls Gflops    Speedup Efficacity
 -                                                                        (-1=no count)
-- gwr_build_sigmac                 30.100  11.7        44.459  11.6              1      -1.00        0.68       0.68
-- gwr_build_tchi                   25.285   9.8        39.531  10.3              1      -1.00        0.64       0.64
-- fourwf%(pot)                      1.737   0.7         2.263   0.6           2123      -1.00        0.77       0.77
-- others (144)                      6.157   2.4         7.925   2.1             -1      -1.00        0.78       0.78
+- gwr_build_sigmac                 32.262  10.5        58.755  11.4              1      -1.00        0.55       0.55
+- gwr_build_tchi                   25.858   8.4        45.532   8.8              1      -1.00        0.57       0.57
+- gwr_build_head_wings              9.782   3.2        12.045   2.3              1      -1.00        0.81       0.81
+- others (145)                      7.760   2.5        10.635   2.1             -1      -1.00        0.73       0.73
 -<END_TIMER>
 -
-- subtotal                         63.279  24.5        94.178  24.6                                  0.67       0.67
+- subtotal                         75.661  24.7       126.968  24.7                                  0.60       0.60
 
 - For major independent code sections, cpu and wall times (sec),
 - as well as % of the total time and number of calls 
 
 -<BEGIN_TIMER mpi_nprocs = 4, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =         257.8, wall_time =         383.5
+- cpu_time =         306.7, wall_time =         514.5
 -
 - routine                            cpu     %          wall     %      number of calls Gflops    Speedup Efficacity
 -                                                                        (-1=no count)
-- gwr_build_sigmac                120.359  46.7       177.891  46.4              4      -1.00        0.68       0.68
-- gwr_build_tchi                  101.245  39.3       158.357  41.3              4      -1.00        0.64       0.64
-- fourwf%(pot)                      7.037   2.7         9.072   2.4           8499      -1.00        0.78       0.78
-- ewald                             5.768   2.2         7.227   1.9             12      -1.00        0.80       0.80
-- nonlop(apply)                     4.281   1.7         5.701   1.5           8499      -1.00        0.75       0.75
-- pspini                            2.814   1.1         3.460   0.9             12      -1.00        0.81       0.81
-- gwr_build_green                   2.296   0.9         3.833   1.0              4      -1.00        0.60       0.60
-- invars2                           1.643   0.6         2.004   0.5             12      -1.00        0.82       0.82
-- others (139)                      7.527   2.9         9.423   2.5             -1      -1.00        0.80       0.80
+- gwr_build_sigmac                129.014  42.1       235.120  45.7              4      -1.00        0.55       0.55
+- gwr_build_tchi                  103.017  33.6       182.214  35.4              4      -1.00        0.57       0.57
+- gwr_build_head_wings             38.878  12.7        48.172   9.4              4      -1.00        0.81       0.81
+- fourwf%(pot)                      6.734   2.2         8.484   1.6           8499      -1.00        0.79       0.79
+- ewald                             5.502   1.8         6.835   1.3             12      -1.00        0.80       0.80
+- nonlop(apply)                     4.044   1.3         5.081   1.0           8499      -1.00        0.80       0.80
+- pspini                            2.936   1.0         4.385   0.9             12      -1.00        0.67       0.67
+- gwr_build_green                   2.256   0.7         2.902   0.6              4      -1.00        0.78       0.78
+- others (140)                      9.277   3.0        14.437   2.8             -1      -1.00        0.64       0.64
 -<END_TIMER>
 
-- subtotal                        252.970  98.1       376.968  98.3                                  0.67       0.67
+- subtotal                        301.655  98.3       507.630  98.7                                  0.59       0.59
 
 ================================================================================
 
@@ -1081,13 +1091,13 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         64.6  wall=         96.0
+- Proc.   0 individual time (sec): cpu=         76.9  wall=        128.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        246.3  wall=        347.3
++Overall time at end (sec) : cpu=        307.0  wall=        514.9
 - [ALL OK] MEMORY CONSUMPTION REPORT FOR C CODE:
 -   There were 140 allocations and 140 deallocations in C code
 - [ALL OK] MEMORY CONSUMPTION REPORT FOR FORTRAN CODE:
