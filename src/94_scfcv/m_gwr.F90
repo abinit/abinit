@@ -203,13 +203,13 @@ module m_gwr
  type,public :: desc_t
 
    integer :: istwfk = 1
-   ! Storage mode for this k point.
+   ! Storage mode for this k/q point.
 
    integer :: npw = -1
    ! Total number of plane-waves for this k/q-point.
 
    integer :: ig0 = -1
-   ! Index of g = 0. Useful when gvec are sorted by |q+g|^2/2
+   ! Index of g = 0.
 
    logical :: kin_sorted
    ! True if gvec are sorted by |q+g|^2/2
@@ -266,59 +266,59 @@ module m_gwr
 
  type, public :: gwr_t
 
-   integer :: nsppol = 1, nspinor = -1, nspden = -1
-   ! Number of independent spin polarizations, number of spinor components and spin density.
+  integer :: nsppol = 1, nspinor = -1, nspden = -1
+  ! Number of independent spin polarizations, number of spinor components and spin density.
 
-   integer :: natom = -1
-    ! Number of atoms
+  integer :: natom = -1
+   ! Number of atoms
 
-   integer :: usepaw = -1
-    ! 0 if NC pseudos. 1 if PAW is used (not yet supported).
+  integer :: usepaw = -1
+   ! 0 if NC pseudos. 1 if PAW is used (not yet supported).
 
-   integer :: my_nspins = -1
-   ! Number of independent spin polarizations treated by this MPI proc
+  integer :: my_nspins = -1
+  ! Number of independent spin polarizations treated by this MPI proc
 
-   integer :: nkbz = -1, nkibz = -1
-   ! Number of k-points in the BZ/IBZ
+  integer :: nkbz = -1, nkibz = -1
+  ! Number of k-points in the BZ/IBZ
 
-   integer :: my_nkibz = -1, my_nkbz = -1
-   ! Number of k-points in the IBZ/BZ stored by this MPI proc.
+  integer :: my_nkibz = -1, my_nkbz = -1
+  ! Number of k-points in the IBZ/BZ stored by this MPI proc.
 
-   integer :: uc_batch_size = -1
-   ! Max number of unit cell FFT-transforms done in batch mode.
+  integer :: uc_batch_size = -1
+  ! Max number of unit cell FFT-transforms done in batch mode.
 
-   integer :: sc_batch_size = -1
-   ! Max number of supercell-cell FFT-transforms done in batch mode.
+  integer :: sc_batch_size = -1
+  ! Max number of supercell-cell FFT-transforms done in batch mode.
 
-   integer,allocatable :: my_kbz_inds(:)
-   ! (my_nkbz)
-   ! List of k-BZ indices treated by this proc.
+  integer,allocatable :: my_kbz_inds(:)
+  ! (my_nkbz)
+  ! List of k-BZ indices treated by this proc.
 
-   integer,allocatable :: my_kibz_inds(:)
-   ! (my_nkibz)
-   ! List of k-IBZ indices treated by this proc.
+  integer,allocatable :: my_kibz_inds(:)
+  ! (my_nkibz)
+  ! List of k-IBZ indices treated by this proc.
 
-   integer :: nqbz = -1, nqibz = -1
-   ! Number of q-points in the BZ/IBZ
+  integer :: nqbz = -1, nqibz = -1
+  ! Number of q-points in the BZ/IBZ
 
-   integer :: my_nqibz = -1, my_nqbz = -1
-   ! Number of q-points in the IBZ/BZ stored by this MPI proc.
+  integer :: my_nqibz = -1, my_nqbz = -1
+  ! Number of q-points in the IBZ/BZ stored by this MPI proc.
 
-   integer,allocatable :: my_qibz_inds(:)
-   ! (my_nqibz)
-   ! List of q-IBZ indices treated by this proc.
+  integer,allocatable :: my_qibz_inds(:)
+  ! (my_nqibz)
+  ! List of q-IBZ indices treated by this proc.
 
-   integer,allocatable :: my_qbz_inds(:)
-   ! (my_nqbz)
-   ! List of q-IBZ indices treated by this proc.
+  integer,allocatable :: my_qbz_inds(:)
+  ! (my_nqbz)
+  ! List of q-IBZ indices treated by this proc.
 
-   integer :: ntau = -1
-   ! Total number of imaginary time points.
+  integer :: ntau = -1
+  ! Total number of imaginary time points.
 
-   integer :: my_ntau = -1
-   ! Number of imaginary time/frequency points treated by this MPI rank.
+  integer :: my_ntau = -1
+  ! Number of imaginary time/frequency points treated by this MPI rank.
 
-   !integer :: nomega = -1, my_nomega = -1
+  !integer :: nomega = -1, my_nomega = -1
 
   integer :: nkcalc
    ! Number of Sigma_nk k-points computed
@@ -333,6 +333,9 @@ module m_gwr
 
   real(dp) :: wr_step = -one
    ! Step of the linear mesh along the real axis (Ha units).
+
+  real(dp) :: q0(3) = GW_Q0_DEFAULT
+   ! The small q for the treatment of q --> 0
 
   real(dp),allocatable :: kcalc(:,:)
    ! kcalc(3, nkcalc)
@@ -802,6 +805,9 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  !if (gwr%dtset%useria == 1) gwr%use_supercell_for_tchi = .False.
  gwr%use_supercell_for_sigma = .True.
  !if (gwr%dtset%userib == 1) gwr%use_supercell_for_sigma = .False.
+
+ if (dtset%gw_nqlwl /= 0) gwr%q0 = dtset%gw_qlwl(:, 1)
+ call wrtout(std_out, sjoin("Using q0:", ktoa(gwr%q0)))
 
  mband = ks_ebands%mband
  nbsum = dtset%nband(1)
@@ -1420,7 +1426,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
    ABI_MALLOC(desc_q%vc_sqrt, (desc_q%npw))
    do ig=1,desc_q%npw
      if (q_is_gamma .and. ig == desc_q%ig0) then
-       desc_q%vc_sqrt(ig) = sqrt(four_pi) / normv(GW_Q0_DEFAULT, gwr%cryst%gmet, "G")
+       desc_q%vc_sqrt(ig) = sqrt(four_pi) / normv(gwr%q0, gwr%cryst%gmet, "G")
      else
        desc_q%vc_sqrt(ig) = sqrt(four_pi) / normv(qq_ibz + desc_q%gvec(:,ig), gwr%cryst%gmet, "G")
      end if
@@ -1918,7 +1924,7 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
    ABI_WARNING(sjoin("WFK file contains", itoa(min_nband), "states while you're asking for:", itoa(nbsum)))
    nbsum = min_nband
  end if
- call wrtout(std_out, sjoin(" Computing Green's function with nbsum:", itoa(nbsum)))
+ call wrtout(std_out, sjoin(" Computing Green's function with nbsum:", itoa(nbsum)), do_flush=.True.)
  call ebands_free(wfk_ebands)
 
  ! ==============================================
@@ -2618,8 +2624,7 @@ subroutine gwr_rotate_wc(gwr, iq_bz, itau, spin, desc_qbz, wc_qbz)
 
  if (isirr_q) then
    ! Copy the matrices and we are done.
-   call gwr%wc_qibz(iq_ibz, itau, spin)%copy(wc_qbz)
-   return
+   call gwr%wc_qibz(iq_ibz, itau, spin)%copy(wc_qbz); return
  end if
 
  !ABI_WARNING_IF(trev_q == 0, "wc_rotate: trev_q /= 0 not yet coded")
@@ -2886,8 +2891,6 @@ end subroutine gwr_get_wc_rpr_qbz
 !!
 !! INPUTS
 !!
-!! OUTPUT
-!!
 !! SOURCE
 
 subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
@@ -2904,6 +2907,7 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
  real(dp) :: cpu, wall, gflops !, tau
  logical :: sum_spins_
 !arrays
+ integer,allocatable :: requests(:)
  real(dp), pointer :: weights_ptr(:,:)
  complex(dp) :: wgt_globmy(gwr%ntau, gwr%my_ntau)  ! Use complex instead of real to be able to call ZGEMM.
  complex(dp),allocatable :: cwork_myit(:,:,:), glob_cwork(:,:,:)
@@ -2954,7 +2958,7 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
    end do
  end do
 
- ! And now perform inhomegenous FFT in parallel.
+ ! And now perform inhomogenous FT in parallel.
  do my_is=1,gwr%my_nspins
    spin = gwr%my_spins(my_is)
    do my_iqi=1,gwr%my_nqibz
@@ -2973,22 +2977,24 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
      loc2_size = mats(it0)%sizeb_local(2)
      !
      ! batch_size in terms of columns
-     ! TODO: How to determine batch_size automatically to avoid going OOM
-     !batch_size = loc2_size
-     batch_size = 4
+     ! TODO: Determine batch_size automatically to avoid going OOM
+     !batch_size = 4
      !batch_size = 1
+     !batch_size = 48
+     batch_size = loc2_size
 
      ABI_MALLOC(cwork_myit, (gwr%my_ntau, loc1_size, batch_size))
      ABI_MALLOC(glob_cwork, (gwr%ntau, loc1_size, batch_size))
+     ABI_MALLOC(requests, (batch_size))
 
      do ig2=1,mats(it0)%sizeb_local(2), batch_size
        ndat = blocked_loop(ig2, mats(it0)%sizeb_local(2), batch_size)
 
        ! Extract matrix elements as a function of tau.
        do idat=1,ndat
-         do ig1=1,mats(it0)%sizeb_local(1)
-           do my_it=1,gwr%my_ntau
-             itau = gwr%my_itaus(my_it)
+         do my_it=1,gwr%my_ntau
+           itau = gwr%my_itaus(my_it)
+           do ig1=1,mats(it0)%sizeb_local(1)
              cwork_myit(my_it, ig1, idat) = mats(itau)%buffer_cplx(ig1, ig2+idat-1)
            end do
          end do
@@ -2997,22 +3003,28 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
        ! Compute contribution to itau matrix
        !!$OMP PARALLEL DO
        do idat=1,ndat
-         !do ig1=1,mats(it0)%sizeb_local(1)
-         ! do itau=1,gwr%ntau
-         !   glob_cwork(itau, ig1, idat) = dot_product(wgt_globmy(itau, :), cwork_myit(:, ig1, idat))
-         ! end do
-         !end do
+#if 0
+         do ig1=1,mats(it0)%sizeb_local(1)
+          do itau=1,gwr%ntau
+            glob_cwork(itau, ig1, idat) = dot_product(wgt_globmy(itau, :), cwork_myit(:, ig1, idat))
+          end do
+         end do
+#else
          call ZGEMM("N", "N", gwr%ntau, loc1_size, gwr%my_ntau, cone, &
                     wgt_globmy, gwr%ntau, cwork_myit(:,:,idat), gwr%my_ntau, czero, glob_cwork(:,:,idat), gwr%ntau)
+#endif
+
+         !call xmpi_isum_ip(glob_cwork(:,:,idat), gwr%tau_comm%value, requests(idat), ierr)
        end do
 
+       !call xmpi_waitall_1d(requests(1:ndat), ierr)
        call xmpi_sum(glob_cwork, gwr%tau_comm%value, ierr)
 
        ! Update my local (g1,g2) entry to have it in imaginary-frequency space.
        do idat=1,ndat
-         do ig1=1,mats(it0)%sizeb_local(1)
-           do my_it=1,gwr%my_ntau
-             itau = gwr%my_itaus(my_it)
+         do my_it=1,gwr%my_ntau
+           itau = gwr%my_itaus(my_it)
+           do ig1=1,mats(it0)%sizeb_local(1)
              mats(itau)%buffer_cplx(ig1, ig2+idat-1) = glob_cwork(itau, ig1, idat)
            end do
          end do
@@ -3022,7 +3034,7 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
 
      ABI_FREE(cwork_myit)
      ABI_FREE(glob_cwork)
-
+     ABI_FREE(requests)
      end associate
    end do ! my_iqi
  end do ! my_is
@@ -3895,12 +3907,12 @@ end if
 
        do ig=2,desc_q0%npw
          wng = gwr%chi0_uwing_myw(:,ig, my_it)
-         up_wing_q(ig) = vdotw(GW_Q0_DEFAULT, wng, gwr%cryst%gmet, "G")
+         up_wing_q(ig) = vdotw(gwr%q0, wng, gwr%cryst%gmet, "G")
          wng = gwr%chi0_lwing_myw(:,ig,my_it)
-         low_wing_q(ig) = vdotw(GW_Q0_DEFAULT, wng, gwr%cryst%gmet, "G")
+         low_wing_q(ig) = vdotw(gwr%q0, wng, gwr%cryst%gmet, "G")
        end do
-       chq = matmul(gwr%chi0_head_myw(:,:,my_it), GW_Q0_DEFAULT)
-       head_q = vdotw(GW_Q0_DEFAULT, chq, gwr%cryst%gmet, "G")
+       chq = matmul(gwr%chi0_head_myw(:,:,my_it), gwr%q0)
+       head_q = vdotw(gwr%q0, chq, gwr%cryst%gmet, "G")
 
        call mat_ts(itau, spin)%set_head_and_wings(head_q, low_wing_q, up_wing_q)
      end do ! my_it
@@ -6092,14 +6104,14 @@ subroutine load_head_wings_from_sus_file__(gwr, filepath)
 
            if (iglob1 == ig0 .and. iglob2 == ig0) then
              chi%buffer_cplx(il_g1, il_g2) = &
-               vdotw(GW_Q0_DEFAULT, matmul(gwr%chi0_head_myw(:,:,my_it), GW_Q0_DEFAULT), gwr%cryst%gmet, "G")
+               vdotw(gwr%q0, matmul(gwr%chi0_head_myw(:,:,my_it), gwr%q0), gwr%cryst%gmet, "G")
            else if (iglob2 == ig0) then
              chi%buffer_cplx(il_g1, il_g2) = &
-               vdotw(GW_Q0_DEFAULT, gwr%chi0_lwing_myw(:, ig1, my_it), gwr%cryst%gmet, "G")
-               !vdotw(GW_Q0_DEFAULT, conjg(gwr%chi0_uwing_myw(:, ig1, my_it)), gwr%cryst%gmet, "G")
+               vdotw(gwr%q0, gwr%chi0_lwing_myw(:, ig1, my_it), gwr%cryst%gmet, "G")
+               !vdotw(gwr%q0, conjg(gwr%chi0_uwing_myw(:, ig1, my_it)), gwr%cryst%gmet, "G")
            else if (iglob1 == ig0) then
              chi%buffer_cplx(il_g1, il_g2) = &
-               vdotw(GW_Q0_DEFAULT, gwr%chi0_uwing_myw(:, ig2, my_it), gwr%cryst%gmet, "G")
+               vdotw(gwr%q0, gwr%chi0_uwing_myw(:, ig2, my_it), gwr%cryst%gmet, "G")
            end if
 
          end do ! il_ig1
@@ -6118,10 +6130,8 @@ subroutine load_head_wings_from_sus_file__(gwr, filepath)
 
            if (abs(aimag(chi%buffer_cplx(ig1, ig2)) + aimag(chi%buffer_cplx(ig1_inv, ig2_inv))) > tol6) then
              ierr = ierr + 1
-#if 0
-             write(std_out, *) aimag(chi%buffer_cplx(ig1, ig2)), aimag(chi%buffer_cplx(ig1_inv, ig2_inv))
-             write(std_out, *) desc_q%gvec(:, ig1), desc_q%gvec(:, ig2)
-#endif
+             !write(std_out, *) aimag(chi%buffer_cplx(ig1, ig2)), aimag(chi%buffer_cplx(ig1_inv, ig2_inv))
+             !write(std_out, *) desc_q%gvec(:, ig1), desc_q%gvec(:, ig2)
            end if
          end do
        end do
@@ -6198,7 +6208,8 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  integer :: nsppol, nspinor, ierr, my_is, spin, my_ikf, itau, my_it
  integer :: ik_bz, ik_ibz, isym_k, trev_k, g0_k(3)
  integer :: iq_bz, iq_ibz, isym_q, trev_q, g0_q(3)
- integer :: nkpt_summed, use_umklp, band1, band2, band1_start, band1_stop, ib, il_b1, il_b2, nb, block_size, ii, mband
+ integer :: nkpt_summed, use_umklp, band1, band2, band1_start, band1_stop
+ integer :: ib, il_b1, il_b2, nb, block_size, ii, mband
  integer :: istwf_ki, npw_ki, nI, nJ, ig, nomega, io, iq, nq, dim_rtwg
  integer :: npwe, u_nfft, u_mgfft, u_mpw
  logical :: isirr_k, use_tr, is_metallic
@@ -6232,7 +6243,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
 ! *************************************************************************
 
  call timab(1927, 1, tsec)
- call wrtout(std_out, " Building chi0 head and wings...", pre_newlines=1)
+ call wrtout(std_out, " Computing chi0 head and wings...", pre_newlines=1, do_flush=.True.)
 
  nspinor = gwr%nspinor; nsppol = gwr%nsppol; dtset => gwr%dtset; cryst => gwr%cryst
  use_tr = gwr%dtset%awtr == 1
@@ -6318,6 +6329,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
    call Ltg_q%print(std_out, Dtset%prtvol)
  end if
  call wrtout(std_out, sjoin(' Calculation status: ', itoa(nkpt_summed), ' k-points to be completed'))
+ !print *, "npwe", npwe
 
  ! ============================================
  ! === Begin big fat loop over transitions ====
@@ -6337,8 +6349,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  dim_rtwg = 1 !; if (nspinor==2) dim_rtwg=2 ! Can reduce size depending on Ep%nI and Ep%nj
  ABI_MALLOC(rhotwg, (npwe * dim_rtwg))
 
- goto 10
-
+ !goto 10
  do my_is=1,gwr%my_nspins
    spin = gwr%my_spins(my_is)
    ! Loop over my k-points in the BZ.
@@ -6360,9 +6371,11 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
 
      ugb_kibz => gwr%ugb(ik_ibz, spin)
      desc_ki => gwr%green_desc_kibz(ik_ibz)
-     istwf_ki =  desc_ki%istwfk
      npw_ki   =  desc_ki%npw
+     istwf_ki =  desc_ki%istwfk
      kg_ki    => desc_ki%gvec
+
+     !print *, "ik_ibz", ik_ibz, "npw_ki", npw_ki
 
      ABI_MALLOC(ug1, (npw_ki * nspinor))
      ABI_MALLOC(ug2, (npw_ki * nspinor))
@@ -6374,6 +6387,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
        gradk_not_done(ik_ibz) = .FALSE.
      end if
 
+
      call chi0_bbp_mask(ik_ibz, ik_ibz, spin, spin_fact, use_tr, &
                         gwcomp0, spmeth0, gwr%ugb_nband, mband, now_ebands, bbp_mask)
      !bbp_mask = .True.
@@ -6381,26 +6395,33 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
      block_size = min(48, gwr%ugb_nband)
      !block_size = 1
      do band1_start=1, gwr%ugb_nband, block_size
-       if (all(.not. bbp_mask(band1_start:, :))) exit
+       if (all(.not. bbp_mask(band1_start:, :))) then
+         !print *, "exiting band1_start loop"
+         exit
+       end if
+       !print *, "band1_start, gwr%ugb_nband, block_size", band1_start, gwr%ugb_nband, block_size
        nb = blocked_loop(band1_start, gwr%ugb_nband, block_size)
        band1_stop = band1_start + nb - 1
 
-#if 0
+#if 1
        call ugb_kibz%zcollect(npw_ki * nspinor, nb, [1, band1_start], ug1_block)
 #else
        ! Dump algorithm based on xmpi_sum. To be replaced by an all_gather
        ! The advantage is that it works indipendently of the PBLAS distribution.
-       ABI_CALLOC(ug1_block, (npw_ki * nspinor, block_size))
+       ABI_CALLOC(ug1_block, (npw_ki * nspinor, nb))
        do il_b1=1, ugb_kibz%sizeb_local(2)
          band1 = ugb_kibz%loc2gcol(il_b1)
          ii = band1 - band1_start + 1
          if (band1 >= band1_start .and. band1 <= band1_stop) ug1_block(:, ii) = ugb_kibz%buffer_cplx(:, il_b1)
        end do ! il_b1
        call xmpi_sum(ug1_block, ugb_kibz%processor%comm, ierr)
+       !ABI_FREE(ug1_block)
+       !cycle
 #endif
 
        ! FIXME: This part should be tested with tau/g-para
        ! Add support for symsigma = 0
+       ! TODO: Invert the loop order
 
        ! Loop over "conduction" states.
        !do band1=band1_start, band1_stop
@@ -6421,11 +6442,12 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
            deltaeKS_b1b2 = ks_eig(band1, ik_ibz, spin) - ks_eig(band2, ik_ibz, spin)
            deltaf_b1b2  = spin_fact * (qp_occ(band1, ik_ibz, spin) - qp_occ(band2, ik_ibz, spin))
            deltaeGW_b1b2 = qp_eig(band1, ik_ibz, spin) - qp_eig(band2, ik_ibz, spin)
+           !cycle
 
            ! Skip negligible transitions.
            if (abs(deltaf_b1b2) < GW_TOL_DOCC) CYCLE
 
-           ug2 = ugb_kibz%buffer_cplx(:, band2)
+           ug2 = ugb_kibz%buffer_cplx(:, il_b2)
            call fft_ug(npw_ki, u_nfft, nspinor, ndat1, u_mgfft, u_ngfft, istwf_ki, kg_ki, u_gbound, &
                        ug2, ur2_kibz)
 
@@ -6496,7 +6518,6 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
      ABI_FREE(ug2)
    end do ! my_ikf
  end do ! my_is
-
  10 continue
 
  ABI_FREE(bbp_mask)
@@ -6561,7 +6582,6 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
    ABI_FREE(qdirs)
    ABI_FREE(head_qvals)
  end if
- !stop
 
  ! Save quantities for later use as this routine is usually called before build_tchi
  !if (gwr%kpt_comm%me == 0) then
@@ -6613,7 +6633,7 @@ end subroutine gwr_build_chi0_head_and_wings
 !!  gwr_build_sigxme
 !!
 !! FUNCTION
-!! Compute matrix elements of exchange part.
+!! Compute matrix elements of the exchange part.
 !!
 !! INPUTS
 !!
@@ -6661,17 +6681,24 @@ subroutine gwr_build_sigxme(gwr)
 
 ! *************************************************************************
 
- call wrtout(std_out, " Computing matrix elements of Sigma_x ...")
+ call wrtout(std_out, " Computing matrix elements of Sigma_x ...", do_flush=.True.)
  call timab(1920, 1, tsec)
  call cwtime(cpu_all, wall_all, gflops_all, "start")
 
  nsppol = gwr%nsppol; nspinor = gwr%nspinor; cryst => gwr%cryst; dtset => gwr%dtset
+ nsig_ab = nspinor ** 2
 
  if (gwr%scf_iteration == 0) then
    qp_eig => gwr%ks_ebands%eig; qp_occ => gwr%ks_ebands%occ
  else
    qp_eig => gwr%qp_ebands%eig; qp_occ => gwr%qp_ebands%occ
  end if
+
+ ! Allocate matrix with Sigma_x matrix elements.
+ ii = minval(gwr%bstart_ks); jj = maxval(gwr%bstop_ks)
+ ABI_RECALLOC(gwr%x_mat, (ii:jj, ii:jj, gwr%nkcalc, gwr%nsppol * nsig_ab))
+ !ABI_WARNING("Returning from gwr_build_sigxme")
+ !return
 
  ! Table for \Sigmax_ij matrix elements.
  only_diago = .True.; sigc_is_herm = .False.
@@ -6710,13 +6737,6 @@ subroutine gwr_build_sigxme(gwr)
  call ngfft_seq(work_ngfft, gmax)
  !write(std_out,*)"work_ngfft(1:3): ",work_ngfft(1:3)
  ABI_MALLOC(work, (2, work_ngfft(4), work_ngfft(5), work_ngfft(6)))
-
- nsig_ab = nspinor ** 2
-
- ! Allocate matrix with Sigma_x matrix elements.
- ii = minval(gwr%bstart_ks); jj = maxval(gwr%bstop_ks)
- ABI_MALLOC_IFNOT(gwr%x_mat, (ii:jj, ii:jj, gwr%nkcalc, gwr%nsppol * nsig_ab))
- gwr%x_mat = zero
 
  ! TODO: This comes from Crystal mode in m_vcoul
  q0_vol = (two_pi) **3 / (gwr%nkbz * gwr%cryst%ucvol)
@@ -6914,7 +6934,7 @@ subroutine gwr_build_sigxme(gwr)
          ! FIXME: nspinor 2 is wrong as we have 2x2 matrix
          ur_prod(:) = conjg(ur_ksum(:)) * ur_bdgw(:,jb)
          call fft_ur(npwx, u_nfft, nspinor, ndat1, u_mgfft, u_ngfft, istwfk1, gvec_x, gbound_x, &
-                    ur_prod, rhotwg_ki(:,jb))
+                     ur_prod, rhotwg_ki(:,jb))
 
          ! Multiply by the square root of the Coulomb term
          ! In 3-D systems, the factor sqrt(4pi) is included
@@ -7045,12 +7065,12 @@ subroutine gwr_build_sigxme(gwr)
    !  ABI_WARNING("Should hermitianize non-collinear sigma!")
    !end if
 
-   ! Save full exchange matrix in gwr%
+   ! Save full exchange matrix in gwr%x_mat
    if (gwr%nspinor == 1) then
-     gwr%x_mat(bmin:bmax, bmin:bmax, ikcalc_ibz, spin) = sigxme_tmp(bmin:bmax, bmin:bmax, spin)
-     !print *, "Sigmx_me", get_diag(gwr%x_mat(bmin:bmax, bmin:bmax, ikcalc_ibz, spin))
+     gwr%x_mat(bmin:bmax, bmin:bmax, ikcalc, spin) = sigxme_tmp(bmin:bmax, bmin:bmax, spin)
+     !print *, "Sigmx_me", get_diag(gwr%x_mat(bmin:bmax, bmin:bmax, ikcalc, spin))
    else
-     gwr%x_mat(bmin:bmax, bmin:bmax, ikcalc_ibz, :) = sigxme_tmp(bmin:bmax, bmin:bmax, :)
+     gwr%x_mat(bmin:bmax, bmin:bmax, ikcalc, :) = sigxme_tmp(bmin:bmax, bmin:bmax, :)
    end if
 
    ABI_FREE(ur_bdgw)
@@ -7064,7 +7084,6 @@ subroutine gwr_build_sigxme(gwr)
    call cwtime_report(" Sigx_nk:", cpu_k, wall_all, gflops_k)
  end do ! ikcalc
  end do ! my_is
- !stop
 
  if (gwr%spin_comm%nproc > 1) call xmpi_sum(gwr%x_mat, gwr%spin_comm%value, ierr)
 
