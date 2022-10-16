@@ -1687,7 +1687,7 @@ contains
   !! NAME
   !! xgBlock_hegvd
 
-  subroutine xgBlock_hegvd(itype, jobz, uplo, xgBlockA, xgBlockB, xgBlockW, info)
+  subroutine xgBlock_hegvd(itype, jobz, uplo, xgBlockA, xgBlockB, xgBlockW, info, use_gpu_cuda)
 
     integer         , intent(in   ) :: itype
     character       , intent(in   ) :: jobz
@@ -1696,7 +1696,11 @@ contains
     type(xgBlock_t) , intent(inout) :: xgBlockB
     type(xgBlock_t) , intent(inout) :: xgBlockW
     integer         , intent(  out) :: info
+    integer         , intent(in   ), optional :: use_gpu_cuda
+
     double precision :: tsec(2)
+    integer          :: l_use_gpu_cuda = 0
+    integer          :: bufferSize = -1
 
     call timab(tim_hegvd,1,tsec)
 
@@ -1707,41 +1711,102 @@ contains
       ABI_ERROR("Block3 must be real")
     end if
 
-    call checkResize(iwork,liwork,5*xgBlockA%rows+3)
-
-    select case(xgBlockA%space)
-
-    case (SPACE_R,SPACE_CR)
-      call checkResize(rwork,lrwork,2*xgBlockA%rows*xgBlockA%rows+6*xgBlockA%rows+1)
-
-      call dsygvd(itype, jobz, uplo, xgBlockA%rows, xgBlockA%vecR, xgBlockA%ldim, &
-        xgBlockB%vecR, xgBlockB%ldim, xgBlockW%vecR, rwork, lrwork, iwork, liwork, info)
-
-    case (SPACE_C)
-
-      call checkResize(cwork,lcwork,xgBlockA%rows*xgBlockA%rows+2*xgBlockA%rows)
-      call checkResize(rwork,lrwork,2*(xgBlockA%rows*xgBlockA%rows)+5*xgBlockA%rows+1)
-
-      call zhegvd(itype, jobz, uplo, xgBlockA%rows, xgBlockA%vecC, xgBlockA%ldim,&
-        xgBlockB%vecC, xgBlockB%ldim, xgBlockW%vecR, cwork, lcwork, &
-        rwork, lrwork, iwork, liwork, info)
-
-      if ( int(cwork(1)) > lcwork ) then
-        !write(std_out,*) "Allocate work from", lcwork, "to", int(cwork(1))
-        call checkResize(cwork,lcwork,int(cwork(1)))
-      end if
-
-    end select
-
-    if ( rwork(1) > lrwork ) then
-      !write(std_out,*) "Allocate work from", lrwork, "to", int(rwork(1))
-      call checkResize(rwork,lrwork,int(rwork(1)))
+    ! if optional parameter is present, use it
+    ! else use default value, i.e. don't use GPU
+    if (present(use_gpu_cuda)) then
+      l_use_gpu_cuda = use_gpu_cuda
     end if
 
+    if (l_use_gpu_cuda==1) then
 
-    if ( iwork(1) > liwork ) then
-      !write(std_out,*) "Allocate work from", liwork, "to", int(iwork(1))
-      call checkResize(iwork,liwork,int(iwork(1)))
+      ! WIP : TO FINISH
+      select case(xgBlockA%space)
+
+      case (SPACE_R,SPACE_CR)
+
+        ! probe needed bufferSize
+        call gpu_xsygvd_buffersize(1, itype, jobz, uplo, &
+          &             xgBlockA%rows, &
+          &             c_loc(xgBlockA%vecR), xgBlockA%ldim, &
+          &             c_loc(xgBlockB%vecR), xgBlockB%ldim, &
+          &             c_loc(xgBlockW%vecR), &
+          &             bufferSize)
+
+
+        ! resize rwork if needed
+        call checkResize(rwork,lrwork,bufferSize)
+
+        ! and compute
+        call gpu_xsygvd(1, itype, jobz, uplo, &
+          &             xgBlockA%rows, &
+          &             c_loc(xgBlockA%vecR), xgBlockA%ldim, &
+          &             c_loc(xgBlockB%vecR), xgBlockB%ldim, &
+          &             c_loc(xgBlockW%vecR), &
+          &             c_loc(rwork), bufferSize, info)
+
+      case (SPACE_C)
+
+        ! probe needed bufferSize
+        call gpu_xsygvd_buffersize(2, itype, jobz, uplo, &
+          &             xgBlockA%rows, &
+          &             c_loc(xgBlockA%vecC), xgBlockA%ldim, &
+          &             c_loc(xgBlockB%vecC), xgBlockB%ldim, &
+          &             c_loc(xgBlockW%vecR), &
+          &             bufferSize)
+
+        ! resize cwork if needed
+        call checkResize(cwork,lcwork,bufferSize)
+
+        ! and compute
+        call gpu_xsygvd(2, itype, jobz, uplo, &
+          &             xgBlockA%rows, &
+          &             c_loc(xgBlockA%vecC), xgBlockA%ldim, &
+          &             c_loc(xgBlockB%vecC), xgBlockB%ldim, &
+          &             c_loc(xgBlockW%vecR), &
+          &             c_loc(cwork), bufferSize, info)
+
+      end select
+
+    else
+
+      call checkResize(iwork,liwork,5*xgBlockA%rows+3)
+
+      select case(xgBlockA%space)
+
+      case (SPACE_R,SPACE_CR)
+
+        call checkResize(rwork,lrwork,2*xgBlockA%rows*xgBlockA%rows+6*xgBlockA%rows+1)
+
+        call dsygvd(itype, jobz, uplo, xgBlockA%rows, xgBlockA%vecR, xgBlockA%ldim, &
+          xgBlockB%vecR, xgBlockB%ldim, xgBlockW%vecR, rwork, lrwork, iwork, liwork, info)
+
+      case (SPACE_C)
+
+        call checkResize(cwork,lcwork,xgBlockA%rows*xgBlockA%rows+2*xgBlockA%rows)
+        call checkResize(rwork,lrwork,2*(xgBlockA%rows*xgBlockA%rows)+5*xgBlockA%rows+1)
+
+        call zhegvd(itype, jobz, uplo, xgBlockA%rows, xgBlockA%vecC, xgBlockA%ldim,&
+          xgBlockB%vecC, xgBlockB%ldim, xgBlockW%vecR, cwork, lcwork, &
+          rwork, lrwork, iwork, liwork, info)
+
+        if ( int(cwork(1)) > lcwork ) then
+          !write(std_out,*) "Allocate work from", lcwork, "to", int(cwork(1))
+          call checkResize(cwork,lcwork,int(cwork(1)))
+        end if
+
+      end select
+
+      if ( rwork(1) > lrwork ) then
+        !write(std_out,*) "Allocate work from", lrwork, "to", int(rwork(1))
+        call checkResize(rwork,lrwork,int(rwork(1)))
+      end if
+
+
+      if ( iwork(1) > liwork ) then
+        !write(std_out,*) "Allocate work from", liwork, "to", int(iwork(1))
+        call checkResize(iwork,liwork,int(iwork(1)))
+      end if
+
     end if
 
     call timab(tim_hegvd,2,tsec)
