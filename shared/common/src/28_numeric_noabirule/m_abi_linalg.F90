@@ -288,6 +288,8 @@ module m_abi_linalg
  public :: gpu_xtrsm
  public :: gpu_xaxpy
  public :: gpu_xscal
+ public :: gpu_xsygvd
+ public :: gpu_xsygvd_bufferSize
 #endif
 
  public :: gpu_allocated
