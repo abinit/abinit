@@ -15,6 +15,7 @@
 #include <gpu_linalg.h>
 
 cublasHandle_t cublas_handle;
+cusolverDnHandle_t cusolverDn_handle;
 
 // utility function for compatiblity between cublas v1/v2 API
 cublasOperation_t select_cublas_op(char *c)
@@ -90,8 +91,10 @@ cublasDiagType_t select_cublas_diag_type(char *c)
 //             the correct one is in xx_gpu_toolbox/gpu_linalg.cu
 /*=========================================================================*/
 
-extern "C" void gpu_linalg_init_(){
+extern "C" void gpu_linalg_init_()
+{
   CUDA_API_CHECK( cublasCreate(&cublas_handle) );
+  CUDA_API_CHECK( cusolverDnCreate(&cusolverDn_handle) );
 }
 
 /*=========================================================================*/
@@ -105,8 +108,10 @@ extern "C" void gpu_linalg_init_(){
 //             the correct one is in xx_gpu_toolbox/gpu_linalg.cu
 /*=========================================================================*/
 
-extern "C" void gpu_linalg_shutdown_(){
+extern "C" void gpu_linalg_shutdown_()
+{
   CUDA_API_CHECK( cublasDestroy(cublas_handle) );
+  CUDA_API_CHECK( cusolverDnDestroy(cusolverDn_handle) );
 }
 
 /*=========================================================================*/

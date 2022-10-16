@@ -37,7 +37,7 @@ AC_DEFUN([_ABI_GPU_CHECK_CUDA],[
   AC_LANG_PUSH([C])
 
   # Check usability of headers
-  AC_CHECK_HEADERS([cuda_runtime_api.h cufft.h cublas.h])
+  AC_CHECK_HEADERS([cuda_runtime_api.h cufft.h cublas.h cusolver_common.h])
 
   # Look for libraries and routines
   AC_MSG_CHECKING([whether Cuda programs can be compiled])
@@ -94,6 +94,7 @@ AC_DEFUN([_ABI_GPU_INIT_CUDA],[
   abi_gpu_cuda_has_cc="no"
   abi_gpu_cuda_has_common="no"
   abi_gpu_cuda_has_fft="no"
+  abi_gpu_cuda_has_cusolver="no"
   abi_gpu_cuda_has_incs="no"
   abi_gpu_cuda_has_libs="no"
   abi_gpu_cuda_has_linalg="no"
@@ -175,6 +176,9 @@ AC_DEFUN([_ABI_GPU_INIT_CUDA],[
     if test -s "${abi_gpu_cuda_root}/include/cublas.h"; then
       abi_result="${abi_result} blas"
     fi
+    if test -s "${abi_gpu_cuda_root}/include/cusolver_common.h"; then
+      abi_result="${abi_result} cusolver"
+    fi
     if test -s "${abi_gpu_cuda_root}/SDK/C/common/inc/cutil.h"; then
       if test "${GPU_CPPFLAGS}" = ""; then
         abi_gpu_cuda_incs="-I${abi_gpu_cuda_root}/SDK/C/common/inc ${abi_gpu_cuda_incs}"
@@ -231,6 +235,13 @@ AC_DEFUN([_ABI_GPU_INIT_CUDA],[
         fi
         abi_gpu_cuda_has_linalg="yes"
         abi_result="${abi_result} blas"
+      fi
+      if test -e "${abi_gpu_cuda_libdir}/libcusolver.${abi_so_ext}"; then
+        if test "${GPU_LIBS}" = ""; then
+          abi_gpu_cuda_libs="-lcusolver ${abi_gpu_cuda_libs}"
+        fi
+        abi_gpu_cuda_has_cusolver="yes"
+        abi_result="${abi_result} cusolver"
       fi
       if test "${GPU_LIBS}" = ""; then
         abi_gpu_cuda_libs="-L${abi_gpu_cuda_libdir} ${abi_gpu_cuda_libs}"
@@ -348,6 +359,7 @@ AC_DEFUN([ABI_GPU_INIT],[
         _ABI_GPU_INIT_CUDA
         abi_gpu_has_cc="${abi_gpu_cuda_has_cc}"
         abi_gpu_has_fft="${abi_gpu_cuda_has_fft}"
+        abi_gpu_has_cublas="${abi_gpu_cuda_has_cublas}"
         abi_gpu_has_incs="${abi_gpu_cuda_has_incs}"
         abi_gpu_has_libs="${abi_gpu_cuda_has_libs}"
         abi_gpu_has_linalg="${abi_gpu_cuda_has_linalg}"
