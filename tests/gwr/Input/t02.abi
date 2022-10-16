@@ -77,6 +77,7 @@ ecuteps4    4
 # Definition of the k-point grid
 # IMPORTANT: GWR requires Gamma-centered k-meshes
 ngkpt   2 2 2
+#ngkpt   4 4 4
 nshiftk 1
 shiftk  0.0 0.0 0.0
 

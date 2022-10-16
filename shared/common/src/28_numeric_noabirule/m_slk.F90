@@ -4215,7 +4215,7 @@ end subroutine slk_take_from
 !!
 !! FUNCTION
 !!  Return on all processors the complex submatrix of shape (mm, nn) starting at position ija.
-!!  NB: `out_carr` is allocated by this routine.
+!!  NB: `out_carr` is allocated by the routine.
 !!
 !! SOURCE
 
