@@ -17,8 +17,8 @@
 cublasHandle_t cublas_handle;
 cusolverDnHandle_t cusolverDn_handle;
 
-// utility function for compatiblity between cublas v1/v2 API
-cublasOperation_t select_cublas_op(char *c)
+//! utility function for compatiblity between cublas v1/v2 API
+cublasOperation_t select_cublas_op(const char *c)
 {
   cublasOperation_t op;
 
@@ -34,8 +34,8 @@ cublasOperation_t select_cublas_op(char *c)
   return op;
 }
 
-// utility function for compatiblity between cublas v1/v2 API
-cublasSideMode_t select_cublas_side(char *c)
+//! utility function for compatiblity between cublas v1/v2 API
+cublasSideMode_t select_cublas_side(const char *c)
 {
   cublasSideMode_t mode;
 
@@ -49,8 +49,8 @@ cublasSideMode_t select_cublas_side(char *c)
   return mode;
 }
 
-// utility function for compatiblity between cublas v1/v2 API
-cublasFillMode_t select_cublas_fill_mode(char *c)
+//! utility function for compatiblity between cublas v1/v2 API
+cublasFillMode_t select_cublas_fill_mode(const char *c)
 {
   cublasFillMode_t mode;
 
@@ -64,8 +64,8 @@ cublasFillMode_t select_cublas_fill_mode(char *c)
   return mode;
 }
 
-// utility function for compatiblity between cublas v1/v2 API
-cublasDiagType_t select_cublas_diag_type(char *c)
+//! utility function for compatiblity between cublas v1/v2 API
+cublasDiagType_t select_cublas_diag_type(const char *c)
 {
   cublasDiagType_t diag;
 
@@ -78,6 +78,36 @@ cublasDiagType_t select_cublas_diag_type(char *c)
 
   return diag;
 }
+
+//! utility function to select eigen type
+cusolverEigType_t select_eigen_type(const int eigType_int)
+{
+  cusolverEigType_t eigType = CUSOLVER_EIG_TYPE_1;
+
+  if (eigType_int < 1 or eigType_int > 3)
+    printf("CUSOLVER API error, input can't be converted to a valid cusolver eigen type !\n");
+  else
+    eigType = static_cast<cusolverEigType_t>(eigType_int);
+
+  return eigType;
+}
+
+//! utility function to select eigen mode
+cusolverEigMode_t select_eigen_mode(const char* c)
+{
+
+  cusolverEigMode_t eigMode = CUSOLVER_EIG_MODE_NOVECTOR;
+
+  if (*c =='n' or *c=='N')
+    eigMode = CUSOLVER_EIG_MODE_NOVECTOR;
+  else if (*c =='v' or *c=='V')
+    eigMode = CUSOLVER_EIG_MODE_VECTOR;
+  else
+    printf("CUSOLVER API error, character can't be converted to a valid eigen mode !\n");
+
+  return eigMode;
+}
+
 
 
 /*=========================================================================*/
@@ -283,8 +313,9 @@ extern "C" void gpu_xaxpy_(int* cplx, int *N,
 //
 // INPUTS
 //  cplx  = 1 if real 2 if complex
+//  N     = vector size
 //  alpha = scalar complex value (when doing computation with real value, only the real part is used)
-//  x =     input/output vector
+//  x     = input/output vector
 //  incrx = increment between two consecutive values of x
 //
 // OUTPUT
@@ -304,3 +335,110 @@ extern "C" void gpu_xscal_(int* cplx, int *N,
                               alpha,
                               (cuDoubleComplex *)(*X_ptr), *incrx) );
 } // gpu_xscal_
+
+/*=========================================================================*/
+// NAME
+//  gpu_xsygvd
+//
+// FUNCTION
+//  Compute a LAPACK SYGVD operation on GPU
+//  compute eigen values/vectors of a real generalized
+//  symmetric-definite eigenproblem
+//
+// See LAPACK doc in reference implementation:
+// https://github.com/Reference-LAPACK/lapack/blob/master/SRC/dsygvd.f
+//
+// INPUTS
+//  itype = integer, type of problem
+//  jobz  = character, 'n'(eigenvalues only) or 'v' (eigenvalues + eigenvectors)
+//  uplo  = character, 'u' or 'l'
+//  A_nrows = matrix size
+//  A_ptr = pointer to gpu memory location of matrix A
+//  lda   = leading dimension of matrix A
+//  B_ptr = pointer to gpu memory location of matrix B
+//  ldb   = leading dimension of matrix B
+//  W_ptr = pointer to gpu memory location of matrix W (output eigen values)
+//  work_ptr =
+//  lwork =
+//  devInfo  =
+//
+/*=========================================================================*/
+
+extern "C" void gpu_xsygvd_(const int* cplx,
+                            const int* itype,
+                            const char* jobz,
+                            const char* uplo,
+                            const int* A_nrows,
+                            void **A_ptr,
+                            const int *lda,
+                            void** B_ptr,
+                            const int* ldb,
+                            void** W_ptr,
+                            void** work_ptr,
+                            int* lwork,
+                            int* devInfo)
+{
+
+  const cusolverEigType_t itype_cu = select_eigen_type(*itype);
+  const cusolverEigMode_t jobz_cu  = select_eigen_mode(jobz);
+  const cublasFillMode_t  fillMode = select_cublas_fill_mode(uplo);
+
+  if (*cplx == 1)
+    {
+      CUDA_API_CHECK( cusolverDnDsygvd(cusolverDn_handle, itype_cu,
+                                       jobz_cu, fillMode, *A_nrows,
+                                       (double*)(*A_ptr), *lda,
+                                       (double*)(*B_ptr), *ldb,
+                                       (double*)(*W_ptr),
+                                       (double*)(*work_ptr),
+                                       *lwork, devInfo) );
+    }
+  else
+    {
+      CUDA_API_CHECK( cusolverDnZhegvd(cusolverDn_handle, itype_cu,
+                                       jobz_cu, fillMode, *A_nrows,
+                                       (cuDoubleComplex*)(*A_ptr), *lda,
+                                       (cuDoubleComplex*)(*B_ptr), *ldb,
+                                       (double*)(*W_ptr),
+                                       (cuDoubleComplex*)(*work_ptr),
+                                       *lwork, devInfo) );
+    }
+
+
+} // gpu_xsygvd_
+
+extern "C" void gpu_xsygvd_buffersize_(const int* cplx,
+                                       const int* itype,
+                                       const char* jobz,
+                                       const char* uplo,
+                                       const int* A_nrows,
+                                       void **A_ptr,
+                                       const int *lda,
+                                       void** B_ptr,
+                                       const int* ldb,
+                                       void** W_ptr,
+                                       int* lwork)
+{
+
+  const cusolverEigType_t itype_cu = select_eigen_type(*itype);
+  const cusolverEigMode_t jobz_cu  = select_eigen_mode(jobz);
+  const cublasFillMode_t  fillMode = select_cublas_fill_mode(uplo);
+
+  if (*cplx == 1)
+    {
+      CUDA_API_CHECK( cusolverDnDsygvd_bufferSize(cusolverDn_handle, itype_cu,
+                                                  jobz_cu, fillMode, *A_nrows,
+                                                  (const double*)(*A_ptr), *lda,
+                                                  (const double*)(*B_ptr), *ldb,
+                                                  (const double*)(*W_ptr), lwork) );
+    }
+  else
+    {
+      CUDA_API_CHECK( cusolverDnZhegvd_bufferSize(cusolverDn_handle, itype_cu,
+                                                  jobz_cu, fillMode, *A_nrows,
+                                                  (const cuDoubleComplex*)(*A_ptr), *lda,
+                                                  (const cuDoubleComplex*)(*B_ptr), *ldb,
+                                                  (const double*)(*W_ptr), lwork) );
+    }
+
+} // gpu_xsygvd_bufferSize_

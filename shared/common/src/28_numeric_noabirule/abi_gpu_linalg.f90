@@ -466,11 +466,11 @@ end subroutine gpu_xaxpy
 !!  x = alpha * x
 !!
 !! INPUTS
-!!  cplx  = 1 if real 2 if complex
-!!  size  = vector size
-!!  alpha = scalar complex value
-!!  x_gpu = pointer to gpu memory location of array x
-!! incrx  = stride between consecutive elements of x
+!!  cplx   = 1 if real 2 if complex
+!!  size   = vector size
+!!  alpha  = scalar complex value
+!!  x_gpu  = pointer to gpu memory location of array x
+!!  incrx  = stride between consecutive elements of x
 !!
 !! SOURCE
 subroutine gpu_xscal(cplx, size, alpha, x_gpu, incrx)
@@ -484,6 +484,112 @@ subroutine gpu_xscal(cplx, size, alpha, x_gpu, incrx)
 
 end subroutine gpu_xscal
 !!***
+
+!!****f* m_abi_gpu_linalg/gpu_xsygvd
+!! NAME
+!!  gpu_xsygvd
+!!
+!! FUNCTION
+!!  Compute a LAPACK SYGVD operation on GPU
+!!  compute eigen values/vectors of a real generalized
+!!  symmetric-definite eigenproblem
+!!
+!! See cusolver documentation
+!! https://docs.nvidia.com/cuda/cusolver/index.html#cuSolverDN-lt-t-gt-sygvd
+!!
+!! See also LAPACK doc in reference implementation:
+!! https://github.com/Reference-LAPACK/lapack/blob/master/SRC/dsygvd.f
+!!
+!! INPUTS
+!!  cplx  = 1 if real 2 if complex
+!!  itype = integer, type of problem
+!!  jobz  = character, 'n'(eigenvalues only) or 'v' (eigenvalues + eigenvectors)
+!!  uplo  = character, 'u' or 'l'
+!!  A_nrows = matrix size
+!!  A_ptr = pointer to gpu memory location of matrix A
+!!  lda   = leading dimension of matrix A
+!!  B_ptr = pointer to gpu memory location of matrix B
+!!  ldb   = leading dimension of matrix B
+!!  W_ptr = pointer to gpu memory location of matrix W (output eigen values)
+!!  work_ptr =
+!!  lwork =
+!!  devInfo  =
+!!
+!! SOURCE
+subroutine gpu_xsygvd(cplx, itype, jobz, uplo, A_nrows, &
+  &                   A_ptr, lda, &
+  &                   B_ptr, ldb, &
+  &                   W_ptr,      &
+  &                   work_ptr, lwork, &
+  &                   devInfo)
+
+  ! Arguments ------------------------------------
+  integer,         intent(in   ) :: cplx
+  integer,         intent(in   ) :: itype
+  character(len=1),intent(in   ) :: jobz
+  character(len=1),intent(in   ) :: uplo
+  integer,         intent(in   ) :: A_nrows
+  type(c_ptr),     intent(in   ) :: A_ptr
+  integer,         intent(in   ) :: lda
+  type(c_ptr),     intent(in   ) :: B_ptr
+  integer,         intent(in   ) :: ldb
+  type(c_ptr),     intent(inout) :: W_ptr
+  type(c_ptr),     intent(inout) :: work_ptr
+  integer,         intent(in   ) :: lwork
+  integer,         intent(inout) :: devInfo
+
+end subroutine gpu_xsygvd
+!!***
+
+!!****f* m_abi_gpu_linalg/gpu_xsygvd_bufferSize
+!! NAME
+!!  gpu_xsygvd_bufferSize
+!!
+!! FUNCTION
+!!  Compute required size for auxiliary work buffer used internally by cusolver
+!!  in cusolverDnDsygvd / cusolverDnZhegvd
+!!
+!! See cusolver documentation
+!! https://docs.nvidia.com/cuda/cusolver/index.html#cuSolverDN-lt-t-gt-sygvd
+!!
+!! INPUTS
+!!  cplx  = 1 if real 2 if complex
+!!  itype = integer, type of problem
+!!  jobz  = character, 'n'(eigenvalues only) or 'v' (eigenvalues + eigenvectors)
+!!  uplo  = character, 'u' or 'l'
+!!  A_nrows = matrix size
+!!  A_ptr = pointer to gpu memory location of matrix A
+!!  lda   = leading dimension of matrix A
+!!  B_ptr = pointer to gpu memory location of matrix B
+!!  ldb   = leading dimension of matrix B
+!!  W_ptr = pointer to gpu memory location of matrix W (output eigen values)
+!!  work_ptr =
+!!  lwork =
+!!  devInfo  =
+!!
+!! SOURCE
+subroutine gpu_xsygvd_buffersize(cplx, itype, jobz, uplo, A_nrows, &
+  &                              A_ptr, lda, &
+  &                              B_ptr, ldb, &
+  &                              W_ptr,      &
+  &                              lwork)
+
+  ! Arguments ------------------------------------
+  integer,         intent(in   ) :: cplx
+  integer,         intent(in   ) :: itype
+  character(len=1),intent(in   ) :: jobz
+  character(len=1),intent(in   ) :: uplo
+  integer,         intent(in   ) :: A_nrows
+  type(c_ptr),     intent(in   ) :: A_ptr
+  integer,         intent(in   ) :: lda
+  type(c_ptr),     intent(in   ) :: B_ptr
+  integer,         intent(in   ) :: ldb
+  type(c_ptr),     intent(inout) :: W_ptr
+  integer,         intent(in   ) :: lwork
+
+end subroutine gpu_xsygvd_bufferSize
+!!***
+
 
 #endif
 
