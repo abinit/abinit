@@ -1752,16 +1752,18 @@ end function crystal_symmetrize_cart_tens33
 !! FUNCTION
 !!  Return predefined list of 6 q-versors in reciprocal space reduced coordinates.
 !!  First 3 entries are along the recip. space lattice vectors, then along the Cartesian axis x,y,z.
+!!  The optional qlen argument, can be used to rescale the vectors. Default: 1
 !!
 !! INPUTS
 !!
 !! SOURCE
 
-subroutine get_redcart_qdirs(cryst, nq, qdirs)
+subroutine get_redcart_qdirs(cryst, nq, qdirs, qlen)
 
  class(crystal_t),intent(in) :: cryst
  integer,intent(out) :: nq
  real(dp),allocatable,intent(out) :: qdirs(:,:)
+ real(dp),optional,intent(in) :: qlen
 
 !Local variables-------------------------------
  integer :: iq
@@ -1782,9 +1784,12 @@ subroutine get_redcart_qdirs(cryst, nq, qdirs)
  qdirs(:,5) = matmul(qcart2red, [zero, one, zero]) ! (y)
  qdirs(:,6) = matmul(qcart2red, [zero, zero, one]) ! (z)
 
- do iq=1,nq ! normalization
+ ! normalization
+ do iq=1,nq
    qdirs(:,iq) = qdirs(:,iq) / normv(qdirs(:,iq), cryst%gmet, "G")
  end do
+
+ if (present(qlen)) qdirs = qlen * qdirs
 
 end subroutine get_redcart_qdirs
 !!***

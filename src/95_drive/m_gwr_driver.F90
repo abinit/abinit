@@ -650,7 +650,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
    end if
 
    ! Collect eigenvalues
-   ! CHECK THIS PART WITH MANY PROCS AS I'VE SEEN WEIRD RESULTS ON LUMI
+   ! TODO: CHECK THIS PART WITH MANY PROCS AS I'VE SEEN WEIRD RESULTS ON LUMI
    do spin=1,dtset%nsppol
      do ik_ibz=1,dtset%nkpt
        if (diago_pool%treats(ik_ibz, spin) .and. diago_pool%comm%me /= 0) owfk_ebands%eig(:, ik_ibz, spin) = zero
@@ -839,6 +839,15 @@ subroutine cc4cs()
 
  ABI_MALLOC(my_ur, (u_nfft * nspinor * ndat1))
  ABI_MALLOC(master_ur, (u_nfft * nspinor, ndat))
+
+ !block_size = min(48, gwr%ugb_nband)
+
+ !do band1_start=1, gwr%ugb_nband, block_size
+ !  nb = blocked_loop(band1_start, gwr%ugb_nband, block_size)
+ !  band1_stop = band1_start + nb - 1
+ !  call ugb_kibz%zcollect(npw_ki * nspinor, nb, [1, band1_start], ug1_block)
+ !  ABI_FREE(ug1_block)
+ !end if
 
  do master=0,nproc-1
 

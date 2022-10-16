@@ -580,28 +580,27 @@ end subroutine write_sigma_results
 !! gw_spectral_function
 !!
 !! FUNCTION
-!!  Compute the spectral function in the GW approximation
+!!  Compute the spectral function
 !!
 !! INPUTS
-!!  io,ib,ikibz,is=Frequency, band, k-point, spin index
+!!  io,ib,ikibz,spin=Frequency, band, k-point, spin index
 !!  Sr=sigma results datatype
 !!
 !! OUTPUT
 !!
 !! SOURCE
 
-real(dp) function gw_spectral_function(Sr,io,ib,ikibz,is) result(aw)
+real(dp) pure function gw_spectral_function(Sr, io, ib, ikibz, spin) result(aw)
 
 !Arguments ------------------------------------
-!scalars
- integer,intent(in) :: io,ib,ikibz,is
+ integer,intent(in) :: io,ib,ikibz,spin
  type(sigma_t),intent(in) :: Sr
 
 ! *********************************************************************
 
- aw = one / pi * abs(aimag(Sr%sigcme(ib,ikibz,io,is))) &
-   /( (real(Sr%omega_r(io) - Sr%hhartree(ib,ib,ikibz,is) - Sr%sigxcme(ib,ikibz,io,is)))**2 &
-     +(aimag(Sr%sigcme(ib,ikibz,io,is))) ** 2) / Ha_eV
+ aw = one / pi * abs(aimag(Sr%sigcme(ib,ikibz,io,spin))) &
+   /( (real(Sr%omega_r(io) - Sr%hhartree(ib,ib,ikibz,spin) - Sr%sigxcme(ib,ikibz,io,spin)))**2 &
+     +(aimag(Sr%sigcme(ib,ikibz,io,spin))) ** 2) / Ha_eV
 
 end function gw_spectral_function
 !!***

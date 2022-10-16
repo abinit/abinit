@@ -45,7 +45,7 @@ module m_vcoul
  use m_gsphere,         only : gsphere_t
  use m_dtfil,           only : isfile
 
-! Cut-off methods modules
+ ! Cut-off methods modules
  use m_cutoff_sphere,   only : cutoff_sphere
  use m_cutoff_surface,  only : cutoff_surface
  use m_cutoff_cylinder, only : cutoff_cylinder, K0cos
@@ -286,11 +286,11 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
 
    ! Mimicking the BerkeleyGW technique
    ! A Monte-Carlo sampling of each miniBZ surrounding each (q+G) point
-   ! However - extended to the multiple shifts
-   !         - with an adaptative number of MonteCarlo sampling points
+   ! However:
+   !    - extended to the multiple shifts
+   !    - with an adaptative number of MonteCarlo sampling points
 
-   !
-   ! Supercell defined by the k-points
+   ! Supercell defined by the k-mesh
    rprimd_sc(:,:) = MATMUL(Cryst%rprimd, Kmesh%kptrlatt)
    call metric(gmet_sc, gprimd_sc, -1, rmet_sc, rprimd_sc, ucvol_sc)
 
@@ -314,14 +314,15 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
    enddo
 
    ! Setup the random vectors for the Monte Carlo sampling of the miniBZ at q = 0
-   ABI_MALLOC(qran,(3,nmc_max))
+   ABI_MALLOC(qran,(3, nmc_max))
    call random_seed(size=nseed)
-   ABI_MALLOC(seed,(nseed))
+   ABI_MALLOC(seed, (nseed))
    do i1=1,nseed
      seed(i1) = NINT(SQRT(DBLE(i1) * 103731))
    end do
    call random_seed(put=seed)
    call random_number(qran)
+   ABI_FREE(seed)
 
    ! Overide the first "random vector" with 0
    qran(:,1) = zero
@@ -355,7 +356,7 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
 
    ! FB: Admittedly, it's a lot of duplication of code hereafter,
    !     but I think it's the clearest and fastest way
-   select case( TRIM(Vcp%mode))
+   select case (TRIM(Vcp%mode))
    case('MINIBZ')
 
      do iq_ibz=1,Vcp%nqibz
@@ -366,9 +367,9 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
          qpg2 = normv(qpg, gmet, 'G')**2
          nmc = adapt_nmc(nmc_max, qpg2)
          do imc=1,nmc
-           qpg(:) = Vcp%qibz(:,iq_ibz) +  gvec(:,ig) + qran(:,imc)
+           qpg(:) = Vcp%qibz(:,iq_ibz) + gvec(:,ig) + qran(:,imc)
            qpg2 = normv(qpg, gmet, 'G')**2
-           vcoul(ig, iq_ibz) = vcoul(ig, iq_ibz) + four_pi / qpg2 / REAL(nmc,dp)
+           vcoul(ig, iq_ibz) = vcoul(ig, iq_ibz) + four_pi / qpg2 / REAL(nmc, dp)
          end do
        end do
      end do ! iq_ibz
@@ -378,7 +379,7 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
      do imc=1,nmc_max
        qpg(:) = Vcp%qibz(:,1) + gvec(:,1) + qran(:,imc)
        qpg2 = normv(qpg, gmet, 'G')**2
-       if (qpg2 > q0sph ** 2) vcoul(1,1) = vcoul(1,1) + four_pi / qpg2 / REAL(nmc_max,dp)
+       if (qpg2 > q0sph ** 2) vcoul(1,1) = vcoul(1,1) + four_pi / qpg2 / REAL(nmc_max, dp)
      end do
 
      vcoul_lwl(:,:) = zero
@@ -386,11 +387,11 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
        do ig=1,ng
          qpg(:) = Vcp%qlwl(:,iq_ibz) + gvec(:,ig)
          qpg2 = normv(qpg, gmet, 'G')**2
-         nmc = adapt_nmc(nmc_max,qpg2)
+         nmc = adapt_nmc(nmc_max, qpg2)
          do imc=1,nmc
            qpg(:) = Vcp%qlwl(:,iq_ibz) + gvec(:,ig) + qran(:,imc)
            qpg2 = normv(qpg, gmet, 'G')**2
-           vcoul_lwl(ig,iq_ibz) = vcoul_lwl(ig,iq_ibz) + four_pi / qpg2 / REAL(nmc,dp)
+           vcoul_lwl(ig,iq_ibz) = vcoul_lwl(ig,iq_ibz) + four_pi / qpg2 / REAL(nmc, dp)
          end do
        end do
      end do ! iq_ibz
@@ -403,7 +404,7 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
 
          qpg(:) = Vcp%qibz(:,iq_ibz) + gvec(:,ig)
          qpg2 = normv(qpg, gmet, 'G')**2
-         nmc = adapt_nmc(nmc_max,qpg2)
+         nmc = adapt_nmc(nmc_max, qpg2)
          do imc=1,nmc
            qpg(:) = Vcp%qibz(:,iq_ibz) +  gvec(:,ig) + qran(:,imc)
            qpg2 = normv(qpg, gmet, 'G')**2
@@ -430,7 +431,7 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
        do ig=1,ng
          qpg(:) = Vcp%qlwl(:,iq_ibz) + gvec(:,ig)
          qpg2 = normv(qpg, gmet, 'G')**2
-         nmc = adapt_nmc(nmc_max,qpg2)
+         nmc = adapt_nmc(nmc_max, qpg2)
          do imc=1,nmc
            qpg(:) = Vcp%qlwl(:,iq_ibz) + gvec(:,ig) + qran(:,imc)
            qpg2 = normv(qpg, gmet, 'G')**2
@@ -448,7 +449,7 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
 
          qpg(:) = Vcp%qibz(:,iq_ibz) + gvec(:,ig)
          qpg2 = normv(qpg, gmet, 'G')**2
-         nmc = adapt_nmc(nmc_max,qpg2)
+         nmc = adapt_nmc(nmc_max, qpg2)
          do imc=1,nmc
            qpg(:) =  Vcp%qibz(:,iq_ibz) + gvec(:,ig) + qran(:,imc)
            qpg2 = normv(qpg, gmet, 'G')**2
@@ -475,7 +476,7 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
        do ig=1,ng
          qpg(:) = Vcp%qlwl(:,iq_ibz) + gvec(:,ig)
          qpg2 = normv(qpg, gmet, 'G')**2
-         nmc = adapt_nmc(nmc_max,qpg2)
+         nmc = adapt_nmc(nmc_max, qpg2)
          do imc=1,nmc
            qpg(:) = Vcp%qlwl(:,iq_ibz) + gvec(:,ig) + qran(:,imc)
            qpg2 = normv(qpg, gmet,'G')**2
@@ -488,9 +489,7 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
    end select
 
    Vcp%i_sz = vcoul(1,1)
-
    ABI_FREE(qran)
-   ABI_FREE(seed)
 
  CASE ('SPHERE')
    ! TODO check that L - d > R_c > d
@@ -502,7 +501,7 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
      call wrtout(std_out, msg)
    end if
 
-   Vcp%vcutgeo=zero
+   Vcp%vcutgeo = zero
    call cutoff_sphere(Qmesh%nibz, Qmesh%ibz, ng, gvec, gmet, Vcp%rcut, vcoul)
 
    ! q-points for optical limit.
@@ -547,10 +546,10 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
 
    ! === If Beigi, treat the limit q--> 0 ===
    if (opt_cylinder == 1) then
-     npar=8; npt=100 ; gamma_pt = RESHAPE(([0, 0, 0]), [3, 1])
-     ABI_MALLOC(qfit,(3,npt))
-     ABI_MALLOC(vcfit,(1,npt))
-     if (Qmesh%nibz==1) then
+     npar=8; npt=100; gamma_pt = RESHAPE(([0, 0, 0]), [3, 1])
+     ABI_MALLOC(qfit, (3, npt))
+     ABI_MALLOC(vcfit, (1, npt))
+     if (Qmesh%nibz == 1) then
        ABI_ERROR("nqibz == 1 not supported when Beigi's method is used")
      endif
      qfit(:,:)=zero
@@ -558,12 +557,12 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
      !step=(half/(Qmesh%nibz-1)/tol6)**(one/npt) ; qfit(3,:)=geop(tol6,step,npt)
      call cutoff_cylinder(npt,qfit,1,gamma_pt,Vcp%rcut,Vcp%hcyl,Vcp%pdir,Vcp%boxcenter,Cryst%rprimd,vcfit,opt_cylinder,comm)
 
-     ABI_MALLOC(xx,(npt))
-     ABI_MALLOC(yy,(npt))
-     ABI_MALLOC(sigma,(npt))
-     ABI_MALLOC(par,(npar))
-     ABI_MALLOC(var,(npar))
-     ABI_MALLOC(cov,(npar,npar))
+     ABI_MALLOC(xx, (npt))
+     ABI_MALLOC(yy, (npt))
+     ABI_MALLOC(sigma, (npt))
+     ABI_MALLOC(par, (npar))
+     ABI_MALLOC(var, (npar))
+     ABI_MALLOC(cov, (npar, npar))
      do ii=1,npt
        xx(ii) = normv(qfit(:,ii), gmet, 'G')
      end do
@@ -629,7 +628,7 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
    ! Beigi's method: the surface must be along x-y and R must be L_Z/2.
    if (opt_surface == 1) then
      msg = "2D geometry, Beigi method, the periodicity must be in the x-y plane. Modify vcutgeo or your geometry."
-     ABI_CHECK(ALL(Vcp%pdir == (/1,1,0/)), msg)
+     ABI_CHECK(all(Vcp%pdir == [1, 1, 0]), msg)
      Vcp%rcut = half*SQRT(DOT_PRODUCT(a3,a3))
    end if
 
@@ -645,10 +644,10 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
      ! Integrate numerically in the plane close to 0
      npt=100 ! Number of points in 1D
      gamma_pt=RESHAPE((/0,0,0/),(/3,1/)) ! Gamma point
-     ABI_MALLOC(qfit,(3,npt))
-     ABI_MALLOC(qcart,(3,npt))
-     ABI_MALLOC(vcfit,(1,npt))
-     if (Qmesh%nibz==1) then
+     ABI_MALLOC(qfit, (3,npt))
+     ABI_MALLOC(qcart, (3,npt))
+     ABI_MALLOC(vcfit, (1,npt))
+     if (Qmesh%nibz == 1) then
        ABI_ERROR("nqibz == 1 not supported when Beigi's method is used")
      endif
      qfit(:,:)=zero
@@ -676,8 +675,8 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
      ABI_MALLOC(yy,(npt))
      ABI_MALLOC(sigma,(npt))
      do ii=1,npt
-      !xx(ii)=qfit(1,:)
-      xx(ii) = normv(qfit(:,ii), gmet, 'G')
+       !xx(ii)=qfit(1,:)
+       xx(ii) = normv(qfit(:,ii), gmet, 'G')
      end do
      ABI_FREE(qfit)
      sigma=one
@@ -706,10 +705,8 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
    end if
 
  CASE ('AUXILIARY_FUNCTION')
-   !
    ! Numerical integration of the exact-exchange divergence through the
    ! auxiliary function of Carrier et al. PRB 75, 205126 (2007) [[cite:Carrier2007]].
-   !
    do iq_ibz=1,Vcp%nqibz
      call cmod_qpg(Vcp%nqibz, iq_ibz, Vcp%qibz, ng, gvec, gprimd, vcoul(:,iq_ibz))
 
@@ -894,8 +891,7 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
    ABI_BUG(sjoin('Unknown cutoff mode:', Vcp%mode))
  END SELECT
 
- ! === Store final results in complex array ===
- ! * Rozzi"s cutoff can give real negative values
+ ! Store final results in complex array as Rozzi"s cutoff can give real negative values
 
  ABI_MALLOC(Vcp%vc_sqrt, (ng, Vcp%nqibz))
  ABI_MALLOC(Vcp%vc_sqrt_resid, (ng,Vcp%nqibz))
@@ -1003,7 +999,7 @@ contains !===============================================================
 
  end function integratefaux
 
- real(dp) function faux(qq)
+ real(dp) pure function faux(qq)
 
   real(dp),intent(in) :: qq(3)
   real(dp) :: bb4sinpiqq1_2, bb4sinpiqq2_2, bb4sinpiqq3_2, sin2piqq1, sin2piqq2, sin2piqq3
@@ -1019,10 +1015,10 @@ contains !===============================================================
 
  end function faux
 
- real(dp) function faux_fast(qq, bb4sinpiqq1_2, bb4sinpiqq2_2, bb4sinpiqq3_2, sin2piqq1, sin2piqq2,sin2piqq3)
+ real(dp) pure function faux_fast(qq, bb4sinpiqq1_2, bb4sinpiqq2_2, bb4sinpiqq3_2, sin2piqq1, sin2piqq2,sin2piqq3)
 
   real(dp),intent(in) :: qq(3)
-  real(dp) :: bb4sinpiqq1_2, bb4sinpiqq2_2, bb4sinpiqq3_2, sin2piqq1, sin2piqq2, sin2piqq3
+  real(dp),intent(in) :: bb4sinpiqq1_2, bb4sinpiqq2_2, bb4sinpiqq3_2, sin2piqq1, sin2piqq2, sin2piqq3
 
   faux_fast= bb4sinpiqq1_2 + bb4sinpiqq2_2 + bb4sinpiqq3_2 &
        +two*( b1b2 * sin2piqq1*sin2piqq2 &
@@ -1037,20 +1033,29 @@ contains !===============================================================
 
  end function faux_fast
 
- integer function adapt_nmc(nmc_max, qpg2) result(nmc)
-
- real(dp),intent(in) :: qpg2
- integer,intent(in)  :: nmc_max
-
- ! Empirical law to decrease the Monte Carlo sampling
- ! for large q+G, for which the accuracy is not an issue
- nmc = NINT( nmc_max / ( 1.0_dp + 1.0_dp * qpg2**6 ) )
- nmc = MIN(nmc_max,nmc)
- nmc = MAX(1,nmc)
-
- end function adapt_nmc
-
 end subroutine vcoul_init
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_vcoul/adapt_nmc
+!! NAME
+!! adapt_nmc
+!!
+!! FUNCTION
+!! Empirical law to decrease the Monte Carlo sampling
+!! for large q+G, for which the accuracy is not an issue
+
+integer pure function adapt_nmc(nmc_max, qpg2) result(nmc)
+
+integer,intent(in)  :: nmc_max
+real(dp),intent(in) :: qpg2
+
+ nmc = NINT( nmc_max / ( 1.0_dp + 1.0_dp * qpg2**6 ) )
+ nmc = MIN(nmc_max, nmc)
+ nmc = MAX(1, nmc)
+
+end function adapt_nmc
 !!***
 
 !----------------------------------------------------------------------
