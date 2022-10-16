@@ -208,7 +208,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,qp_ebands,ks_ebands,Gsph_eps
  integer :: comm,ierr,my_wl,my_wr,iomegal,iomegar,gw_mgfft,dummy
  real(dp) :: cpu_time,wall_time,gflops
  real(dp) :: fac,fac1,fac2,fac3,fac4,spin_fact,deltaf_b1b2,weight,factor
- real(dp) :: max_rest,min_rest,my_max_rest,my_min_rest
+ real(dp) :: max_rest,min_rest,my_max_rest,my_min_rest, qlen
  real(dp) :: en_high,deltaeGW_enhigh_b2,wl,wr,numerator,deltaeGW_b1b2,gw_gsq,memreq
  complex(dpc) :: deltaeKS_b1b2
  logical :: qzero,luwindow,is_metallic
@@ -951,11 +951,12 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,qp_ebands,ks_ebands,Gsph_eps
    chi0(1,1,io) = vdotw(Ep%qlwl(:,1), chq, Cryst%gmet,"G")  ! Use user-defined small q
  end do
 
- if (wfd%my_rank == 0) then
-   call cryst%get_redcart_qdirs(nq, qdirs)
-   qdirs = qdirs * tol3
+ if (wfd%my_rank == 0 .and. dtset%prtvol > 1) then
+   qlen = tol3
+   call cryst%get_redcart_qdirs(nq, qdirs, qlen=qlen)
    ABI_MALLOC(head_qvals, (nq))
    call wrtout([std_out, ab_out], "Head of the irreducible polarizability for q --> 0", pre_newlines=1)
+   call wrtout([std_out, ab_out], sjoin(" q0_len:", ftoa(qlen), "(Bohr^-1)"))
    write(msg, "(*(a14))") "omega_re (eV)", "omega_im (eV)", "[100]", "[010]", "[001]", "x", "y", "z"
    call wrtout([std_out, ab_out], msg)
    do io=1,Ep%nomega

@@ -621,6 +621,7 @@ Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(o
 
 
  Head of the irreducible polarizability for q --> 0
+ q0_len: 1.000000E-03 (Bohr^-1)
    iomega (eV)         [100]         [010]         [001]             x             y             z
  8.68279E-01  -2.33688E-07  -2.33308E-07  -2.22325E-07  -2.32621E-07  -2.36130E-07  -2.22325E-07
  3.01645E+00  -2.05062E-07  -2.04739E-07  -1.96151E-07  -2.04319E-07  -2.06647E-07  -1.96151E-07

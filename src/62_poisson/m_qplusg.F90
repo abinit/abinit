@@ -75,12 +75,12 @@ subroutine cmod_qpg(nq,iq,q,npwvec,gvec,gprimd,qplusg)
  ! Compute reciprocal space metrics
  do ii=1,3
    gmet(ii,:)=gprimd(1,ii)*gprimd(1,:)+&
-&             gprimd(2,ii)*gprimd(2,:)+&
-&             gprimd(3,ii)*gprimd(3,:)
+              gprimd(2,ii)*gprimd(2,:)+&
+              gprimd(3,ii)*gprimd(3,:)
  end do
 
- if (ALL(ABS(q(:,iq))<tol3)) then ! FIXME avoid this, everything should be under the control of the programmer.
-   ! * Treat q as if it were zero except when G=0
+ if (ALL(ABS(q(:,iq)) < tol3)) then
+   ! Treat q as if it were zero except when G=0
    qplusg(1)=two_pi*SQRT(DOT_PRODUCT(q(:,iq),MATMUL(gmet,q(:,iq))))
    do ig=2,npwvec
      gpq(:)=gvec(:,ig)

@@ -1322,7 +1322,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    do spin=1,Sigp%nsppol
      do ik=1,Kmesh%nibz
        do ib=b1gw,b2gw
-         hdft(ib,ib,ik,spin) = ks_ebands%eig(ib,ik,spin)
+         hdft(ib, ib, ik, spin) = ks_ebands%eig(ib, ik, spin)
        end do
      end do
    end do
@@ -1378,30 +1378,34 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    end if
  end if
 
-!=== Initialize Sigma results ===
-!TODO it is better if we use ragged arrays indexed by the k-point
+ ! Initialize Sigma results ===
+ ! TODO it is better if we use ragged arrays indexed by the k-point
  call sigma_init(Sigp,Kmesh%nibz,Dtset%usepawu,Sr)
 
- ! Setup of the bare Hamiltonian := T + v_{loc} + v_{nl} + v_H.
+ ! Setup bare Hamiltonian := T + v_{loc} + v_{nl} + v_H.
+ !
  ! * The representation depends wheter we are updating the wfs or not.
  ! * ks_vUme is zero unless we are using DFT+U as starting point, see calc_vHxc_braket
- ! * Note that vH matrix elements are calculated using the true uncutted interaction.
+ ! * Note that vH matrix elements are calculated using the true uncutted interaction
+ !   This should be changed if the cutoff is also used in the GS run.
 
  if (gwcalctyp < 10) then
    ! For one-shot GW use the KS representation.
    Sr%hhartree = hdft - KS_me%vxcval
-   ! Additional goodies for PAW
+
+   ! Additional stuff for PAW
    !  * DFT +U Hamiltonian
    !  * LEXX.
    !  * Core contribution estimated using Fock exchange.
    if (Dtset%usepaw==1) then
-     if (Sigp%use_sigxcore==1) Sr%hhartree = hdft - (KS_me%vxc - KS_me%sxcore)
-     if (Dtset%usepawu/=0) Sr%hhartree=Sr%hhartree-KS_me%vu
-     if (Dtset%useexexch/=0) then
+     if (Sigp%use_sigxcore == 1) Sr%hhartree = hdft - (KS_me%vxc - KS_me%sxcore)
+     if (Dtset%usepawu /= 0) Sr%hhartree = Sr%hhartree - KS_me%vu
+     if (Dtset%useexexch /= 0) then
        ABI_ERROR("useexexch > 0 not implemented")
        Sr%hhartree = Sr%hhartree - KS_me%vlexx
      end if
    end if
+
  else
    ! Self-consistent on energies and|or wavefunctions.
    !   * For NC get the bare Hamiltonian  $H_{bare}= T+v_{loc}+ v_{nl}$ in the KS representation
@@ -1410,15 +1414,15 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    !     dij_eff = dij^0 + dij^hartree + dij^xc-dij^xc_val + dijhat - dijhat_val.
    !     In the above expression tn, tnhat are QP quantities.
    if (Dtset%usepaw==0) then
-     ABI_MALLOC(hbare,(b1gw:b2gw,b1gw:b2gw,Kmesh%nibz,Sigp%nsppol*Sigp%nsig_ab))
-     hbare=hdft-KS_me%vhartree-KS_me%vxcval
+     ABI_MALLOC(hbare, (b1gw:b2gw,b1gw:b2gw,Kmesh%nibz,Sigp%nsppol*Sigp%nsig_ab))
+     hbare = hdft - KS_me%vhartree - KS_me%vxcval
 
      ! Change basis from KS to QP, hbare is overwritten: A_{QP} = U^\dagger A_{KS} U
-     ABI_MALLOC(htmp, (b1gw:b2gw,b1gw:b2gw,Kmesh%nibz,Sigp%nsppol*Sigp%nsig_ab))
-     ABI_MALLOC(ctmp, (b1gw:b2gw,b1gw:b2gw))
-     ABI_MALLOC(uks2qp, (b1gw:b2gw,b1gw:b2gw))
+     ABI_MALLOC(htmp, (b1gw:b2gw,b1gw:b2gw, Kmesh%nibz, Sigp%nsppol*Sigp%nsig_ab))
+     ABI_MALLOC(ctmp, (b1gw:b2gw, b1gw:b2gw))
+     ABI_MALLOC(uks2qp, (b1gw:b2gw, b1gw:b2gw))
 
-     htmp=hbare; hbare=czero
+     htmp = hbare; hbare = czero
 
      do spin=1,Sigp%nsppol
        do ik=1,Kmesh%nibz
