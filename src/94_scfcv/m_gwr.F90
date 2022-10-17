@@ -1983,10 +1983,10 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
      npwsp = npw_k * gwr%nspinor
      ABI_CHECK(block_dist_1d(gwr%ugb_nband, gwr%gtau_comm%nproc, col_bsize, msg), msg)
      call gwr%ugb(ik_ibz, spin)%init(npwsp, gwr%ugb_nband, gwr%gtau_slkproc, istwfk1, size_blocs=[npwsp, col_bsize])
+     !call gwr%ugb(ik_ibz, spin)%init(npwsp, gwr%ugb_nband, gwr%gtau_slkproc, istwfk1, size_blocs=[npwsp, 1])
    end do
  end do
 
- !call wfk_open_read(wfk, wfk_path, formeig0, iomode_from_fname(wfk_path), get_unit(), gwr%comm%value)
  call wfk_open_read(wfk, wfk_path, formeig0, iomode_from_fname(wfk_path), get_unit(), gwr%gtau_comm%value)
 
  mpw = maxval(wfk_hdr%npwarr)
@@ -2008,6 +2008,7 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
 
      associate (ugb => gwr%ugb(ik_ibz, spin), desc_k => gwr%green_desc_kibz(ik_ibz))
      ABI_CHECK_IEQ(npw_k, desc_k%npw, "npw_k != desc_k%npw")
+
      my_bstart = ugb%loc2gcol(1)
      my_bstop = ugb%loc2gcol(ugb%sizeb_local(2))
      my_nband = my_bstop - my_bstart + 1
@@ -2016,18 +2017,18 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
 
      ! Read my bands
      call c_f_pointer(c_loc(ugb%buffer_cplx), cg_k, shape=[2, npwsp * my_nband])
-
      call wfk%read_band_block([my_bstart, my_bstop], ik_ibz, spin,  &
                               !xmpio_single, &
                               xmpio_collective, &
                               kg_k=kg_k, cg_k=cg_k)
 
-     ! TODO: use round-robin + use gtau_comm% for IO.
+     ! TODO: use round-robin distribution inside gtau_comm% for IO.
      !bks_mask = .False.
      !do il_b=1, ugb%sizeb_local(2)
      !  band = ugb%loc2gcol(il_b)
      !  bks_maks(band, ik_ibz, spin) = .True.
      !end do
+     !call c_f_pointer(c_loc(ugb%buffer_cplx), cg_k, shape=[2, npwsp * ugb%sizeb_local(2)])
      !call wfk%read_bmask(bks_mask, ik_ibz, spin, xmpio_single, & ! xmpio_collective,
      !                    kg_k=kg_k, cg_k=cg_k)
 
@@ -2047,6 +2048,8 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
 
  call cwtime_report(" gwr_read_ugb_from_wfk:", cpu, wall, gflops)
  call timab(1921, 2, tsec)
+
+ call gwr%print_mem(unit=std_out)
 
 end subroutine gwr_read_ugb_from_wfk
 !!***
@@ -2161,6 +2164,8 @@ subroutine gwr_build_green(gwr, free_ugb)
  if (gwr%dtset%prtvol > 0) call gwr_print_trace(gwr, "gt_kibz")
  call cwtime_report(" gwr_build_green:", cpu, wall, gflops)
  call timab(1922, 2, tsec)
+
+ call gwr%print_mem(unit=std_out)
 
 end subroutine gwr_build_green
 !!***
@@ -3464,16 +3469,29 @@ subroutine gwr_print_mem(gwr, unit)
  end if
  if (allocated(gwr%tchi_qibz)) then
    mem_mb = sum(slk_array_locmem_mb(gwr%tchi_qibz))
-   call wrtout(std_out, sjoin('- Local memory for tchi_qibz: ', ftoa(mem_mb, fmt="f8.1"), ' [Mb] <<< MEM'))
+   if (mem_mb > zero) then
+     call wrtout(std_out, sjoin('- Local memory for tchi_qibz: ', ftoa(mem_mb, fmt="f8.1"), ' [Mb] <<< MEM'))
+   end if
  end if
  if (allocated(gwr%wc_qibz)) then
    mem_mb = sum(slk_array_locmem_mb(gwr%wc_qibz))
-   call wrtout(std_out, sjoin('- Local memory for wc_iqbz: ', ftoa(mem_mb, fmt="f8.1"), ' [Mb] <<< MEM'))
+   if (mem_mb > zero) then
+     call wrtout(std_out, sjoin('- Local memory for wc_iqbz: ', ftoa(mem_mb, fmt="f8.1"), ' [Mb] <<< MEM'))
+   end if
  end if
  if (allocated(gwr%sigc_kibz)) then
    mem_mb = sum(slk_array_locmem_mb(gwr%sigc_kibz))
-   call wrtout(std_out, sjoin('- Local memory for sigc_kibz: ', ftoa(mem_mb, fmt="f8.1"), ' [Mb] <<< MEM'))
+   if (mem_mb > zero) then
+     call wrtout(std_out, sjoin('- Local memory for sigc_kibz: ', ftoa(mem_mb, fmt="f8.1"), ' [Mb] <<< MEM'))
+   end if
  end if
+ if (allocated(gwr%ugb)) then
+   mem_mb = sum(slk_array_locmem_mb(gwr%ugb))
+   if (mem_mb > zero) then
+     call wrtout(std_out, sjoin('- Local memory for ugb wavefunctions: ', ftoa(mem_mb, fmt="f8.1"), ' [Mb] <<< MEM'))
+   end if
+ end if
+ call wrtout(std_out, " ")
 
 end subroutine gwr_print_mem
 !!***
@@ -3535,6 +3553,7 @@ subroutine gwr_build_tchi(gwr)
 
  ! Allocate tchi matrices
  mask_qibz = 0; mask_qibz(gwr%my_qibz_inds(:)) = 1
+ call gwr%print_mem(unit=std_out)
  call gwr%malloc_free_mats(mask_qibz, "tchi", "malloc")
 
  max_abs_imag_chit = zero
@@ -3562,7 +3581,8 @@ subroutine gwr_build_tchi(gwr)
    call wrtout(std_out, sjoin(" gwr_boxcutmin:", ftoa(gwr%dtset%gwr_boxcutmin)))
    call wrtout(std_out, sjoin(" sc_ngfft:", ltoa(sc_ngfft(1:8))))
    call wrtout(std_out, sjoin(" my_ntau:", itoa(gwr%my_ntau), "ntau:", itoa(gwr%ntau)))
-   call wrtout(std_out, sjoin(" my_nkbz:", itoa(gwr%my_nkbz), "nkibz:", itoa(gwr%nkibz)))
+   call wrtout(std_out, sjoin(" my_nkbz:", itoa(gwr%my_nkbz), "nkbz:", itoa(gwr%nkbz)))
+   call wrtout(std_out, sjoin(" my_nkibz:", itoa(gwr%my_nkibz), "nkibz:", itoa(gwr%nkibz)))
    call wrtout(std_out, sjoin(" FFT uc_batch_size:", itoa(gwr%uc_batch_size), &
                               " FFT sc_batch_size:", itoa(gwr%sc_batch_size)), do_flush=.True.)
 
@@ -4581,10 +4601,12 @@ if (gwr%use_supercell_for_sigma) then
    bmax = maxval(gwr%bstop_ks(:, spin))
 
    ABI_MALLOC_OR_DIE(uc_psi_bk, (gwr%g_nfft * gwr%nspinor, bmin:bmax, gwr%nkcalc), ierr)
-   ABI_MALLOC_OR_DIE(sc_psi_bk, (sc_nfft * gwr%nspinor, bmin:bmax, gwr%nkcalc), ierr)
    ABI_MALLOC(ur, (gwr%g_nfft * gwr%nspinor))
-   ABI_MALLOC(sc_ceikr, (sc_nfft * gwr%nspinor))
    ABI_MALLOC(uc_ceikr, (gwr%g_nfft * gwr%nspinor))
+   ABI_MALLOC_OR_DIE(sc_psi_bk, (sc_nfft * gwr%nspinor, bmin:bmax, gwr%nkcalc), ierr)
+   ! FIXME [0] <var=sc_psi_bk, A@m_gwr.F90:4584, addr=0x14baea03d010, size_mb=637.875>
+
+   ABI_MALLOC(sc_ceikr, (sc_nfft * gwr%nspinor))
 
    do ikcalc=1,gwr%nkcalc
      kcalc_bz = gwr%kcalc(:, ikcalc)
@@ -6228,6 +6250,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  integer :: npwe, u_nfft, u_mgfft, u_mpw
  logical :: isirr_k, use_tr, is_metallic
  real(dp) :: spin_fact, weight, deltaf_b1b2, deltaeGW_b1b2, gwr_boxcutmin_c, zcut, qlen
+ real(dp) :: cpu_all, wall_all, gflops_all, cpu_k, wall_k, gflops_k
  complex(dpc) :: deltaeKS_b1b2
  type(matrix_scalapack),pointer :: ugb_kibz
  character(len=5000) :: msg
@@ -6257,6 +6280,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
 ! *************************************************************************
 
  call timab(1927, 1, tsec)
+ call cwtime(cpu_all, wall_all, gflops_all, "start")
  call wrtout(std_out, " Computing chi0 head and wings...", pre_newlines=1, do_flush=.True.)
 
  nspinor = gwr%nspinor; nsppol = gwr%nsppol; dtset => gwr%dtset; cryst => gwr%cryst
@@ -6343,7 +6367,6 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
    call Ltg_q%print(std_out, Dtset%prtvol)
  end if
  call wrtout(std_out, sjoin(' Calculation status: ', itoa(nkpt_summed), ' k-points to be completed'))
- !print *, "npwe", npwe
 
  ! ============================================
  ! === Begin big fat loop over transitions ====
@@ -6373,6 +6396,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
      if (dtset%symchi == 1) then
        if (Ltg_q%ibzq(ik_bz) /= 1) CYCLE ! Only IBZ_q
      end if
+     call cwtime(cpu_k, wall_k, gflops_k, "start")
 
      ! FIXME: Be careful with the symmetry conventions here!
      ! and the interplay between umklapp in q and FFT
@@ -6387,7 +6411,6 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
      npw_ki   =  desc_ki%npw
      istwf_ki =  desc_ki%istwfk
      kg_ki    => desc_ki%gvec
-
      !print *, "ik_ibz", ik_ibz, "npw_ki", npw_ki
 
      ABI_MALLOC(ug1, (npw_ki * nspinor))
@@ -6399,7 +6422,6 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
        call vkbr_init(vkbr(ik_ibz), cryst, gwr%psps, dtset%inclvkb, istwf_ki, npw_ki, kk_ibz, kg_ki)
        gradk_not_done(ik_ibz) = .FALSE.
      end if
-
 
      call chi0_bbp_mask(ik_ibz, ik_ibz, spin, spin_fact, use_tr, &
                         gwcomp0, spmeth0, gwr%ugb_nband, mband, now_ebands, bbp_mask)
@@ -6417,7 +6439,8 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
        band1_stop = band1_start + nb - 1
 
        ! Collect nb bands starting from band1_start on each proc.
-#if 1
+       ! FIXME: SIGSEV on lumi!
+#if 0
        call ugb_kibz%zcollect(npw_ki * nspinor, nb, [1, band1_start], ug1_block)
 #else
        ! Dump algorithm based on xmpi_sum. To be replaced by an all_gather
@@ -6429,8 +6452,6 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
          if (band1 >= band1_start .and. band1 <= band1_stop) ug1_block(:, ii) = ugb_kibz%buffer_cplx(:, il_b1)
        end do ! il_b1
        call xmpi_sum(ug1_block, ugb_kibz%processor%comm, ierr)
-       !ABI_FREE(ug1_block)
-       !cycle
 #endif
 
        ! FIXME: This part should be tested with tau/g-para
@@ -6527,6 +6548,8 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
 
      ABI_FREE(ug1)
      ABI_FREE(ug2)
+     write(msg,'(3(a,i0),a)')" my_ikf [", my_ikf, "/", gwr%my_nkbz, "] (tot: ", gwr%nkbz, ")"
+     call cwtime_report(msg, cpu_k, wall_k, gflops_k)
    end do ! my_ikf
  end do ! my_is
 
@@ -6594,8 +6617,8 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
    ABI_FREE(head_qvals)
  end if
 
- ! Save quantities for later use as this routine is usually called before build_tchi
- !if (gwr%kpt_comm%me == 0) then
+ ! Save quantities for later use as this routine must be called before build_tchi.
+ if (gwr%kpt_comm%me == 0) then
    ABI_MALLOC(gwr%chi0_head_myw, (3, 3, gwr%my_ntau))
    ABI_MALLOC(gwr%chi0_uwing_myw, (3, npwe, gwr%my_ntau))
    ABI_MALLOC(gwr%chi0_lwing_myw, (3, npwe, gwr%my_ntau))
@@ -6608,7 +6631,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
        gwr%chi0_lwing_myw(ii,:,my_it) = chi0_lwing(:,itau,ii)
      end do
    end do
- !end if
+ end if
 
  ABI_FREE(chi0_lwing)
  ABI_FREE(chi0_uwing)
@@ -6617,6 +6640,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  call Ltg_q%free()
  call gsph%free()
 
+ call cwtime_report(" gwr_build_chi0_head_and_wings:", cpu_all, wall_all, gflops_all)
  call timab(1927, 2, tsec)
 
  ! TODO: Mv m_ddk in 72_response below 70_gw or move gwr to higher level.
@@ -7089,7 +7113,7 @@ subroutine gwr_build_sigxme(gwr)
    ABI_FREE(sigxcme_tmp)
    ABI_FREE(sigx)
    call ltg_k%free()
-   call cwtime_report(" Sigx_nk:", cpu_k, wall_all, gflops_k)
+   call cwtime_report(" Sigx_nk:", cpu_k, wall_k, gflops_k)
  end do ! ikcalc
  end do ! my_is
 

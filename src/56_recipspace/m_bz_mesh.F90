@@ -2697,12 +2697,12 @@ subroutine littlegroup_print(Ltg, unit, prtvol, mode_paral)
 
  do itim=1,Ltg%timrev
    if (itim==1) then
-     write(msg,'(a,2(a,i2,a))')ch10,&
+     write(msg,'(2(a,i2,a))') &
        '  No time-reversal symmetry with zero umklapp: ',nop(1)-nopg0(1),ch10,&
        '  No time-reversal symmetry with non-zero umklapp: ',nopg0(1),ch10
      call wrtout(my_unt,msg,my_mode)
    else if (itim==2) then
-     write(msg,'(a,2(a,i2,a))')ch10,&
+     write(msg,'(2(a,i2,a))') &
        '  time-reversal symmetry with zero umklapp: ',nop(2)-nopg0(2),ch10,&
        '  time-reversal symmetry with non-zero umklapp: ',nopg0(2),ch10
      call wrtout(my_unt,msg,my_mode)

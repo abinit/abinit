@@ -555,7 +555,8 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
      qfit(:,:)=zero
      step=half/(npt*(Qmesh%nibz-1))              ; qfit(3,:)=arth(tol6,step,npt)
      !step=(half/(Qmesh%nibz-1)/tol6)**(one/npt) ; qfit(3,:)=geop(tol6,step,npt)
-     call cutoff_cylinder(npt,qfit,1,gamma_pt,Vcp%rcut,Vcp%hcyl,Vcp%pdir,Vcp%boxcenter,Cryst%rprimd,vcfit,opt_cylinder,comm)
+     call cutoff_cylinder(npt,qfit,1,gamma_pt,Vcp%rcut,Vcp%hcyl,Vcp%pdir,Vcp%boxcenter,&
+                          Cryst%rprimd,vcfit,opt_cylinder,comm)
 
      ABI_MALLOC(xx, (npt))
      ABI_MALLOC(yy, (npt))
@@ -643,7 +644,7 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
    if (opt_surface == 1) then
      ! Integrate numerically in the plane close to 0
      npt=100 ! Number of points in 1D
-     gamma_pt=RESHAPE((/0,0,0/),(/3,1/)) ! Gamma point
+     gamma_pt=RESHAPE([0, 0, 0], [3, 1]) ! Gamma point
      ABI_MALLOC(qfit, (3,npt))
      ABI_MALLOC(qcart, (3,npt))
      ABI_MALLOC(vcfit, (1,npt))
@@ -662,7 +663,7 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
 
      !step=half/(npt*(Qmesh%nibz-1))
      ! Let's take qpoints along 1 line, the vcut does depend only on the norm
-     qcart(1,:)=arth(tol6,step,npt)
+     qcart(1,:) = arth(tol6,step,npt)
 
      do ii = 1,npt
        qfit(:,ii) = MATMUL(TRANSPOSE(Cryst%rprimd),qcart(:,ii)) / (2*pi)
@@ -671,9 +672,9 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
      call cutoff_surface(npt, qfit, 1, gamma_pt, gprimd, Vcp%rcut, &
                          Vcp%boxcenter, Vcp%pdir, Vcp%alpha, vcfit, opt_surface)
 
-     ABI_MALLOC(xx,(npt))
-     ABI_MALLOC(yy,(npt))
-     ABI_MALLOC(sigma,(npt))
+     ABI_MALLOC(xx, (npt))
+     ABI_MALLOC(yy, (npt))
+     ABI_MALLOC(sigma, (npt))
      do ii=1,npt
        !xx(ii)=qfit(1,:)
        xx(ii) = normv(qfit(:,ii), gmet, 'G')
@@ -1011,7 +1012,7 @@ contains !===============================================================
   sin2piqq2=SIN(two_pi*qq(2))
   sin2piqq3=SIN(two_pi*qq(3))
 
-  faux=faux_fast(qq,bb4sinpiqq1_2,bb4sinpiqq2_2,bb4sinpiqq3_2,sin2piqq1,sin2piqq2,sin2piqq3)
+  faux = faux_fast(qq,bb4sinpiqq1_2,bb4sinpiqq2_2,bb4sinpiqq3_2,sin2piqq1,sin2piqq2,sin2piqq3)
 
  end function faux
 
@@ -1020,7 +1021,7 @@ contains !===============================================================
   real(dp),intent(in) :: qq(3)
   real(dp),intent(in) :: bb4sinpiqq1_2, bb4sinpiqq2_2, bb4sinpiqq3_2, sin2piqq1, sin2piqq2, sin2piqq3
 
-  faux_fast= bb4sinpiqq1_2 + bb4sinpiqq2_2 + bb4sinpiqq3_2 &
+  faux_fast = bb4sinpiqq1_2 + bb4sinpiqq2_2 + bb4sinpiqq3_2 &
        +two*( b1b2 * sin2piqq1*sin2piqq2 &
              +b2b3 * sin2piqq2*sin2piqq3 &
              +b3b1 * sin2piqq3*sin2piqq1 &
