@@ -978,12 +978,15 @@ subroutine chebfi_rayleighRitz(chebfi,nline)
   call xg_init(B_und_X,space,neigenpairs,neigenpairs,chebfi%spacecom)
 
   call timab(tim_RR_gemm_1,1,tsec)
-  call xgBlock_gemm(chebfi%AX%self%trans, chebfi%X%normal, 1.0d0, chebfi%AX%self, chebfi%X, 0.d0, A_und_X%self)
+  call xgBlock_gemm(chebfi%AX%self%trans, chebfi%X%normal, 1.0d0, chebfi%AX%self, chebfi%X, 0.d0, A_und_X%self, &
+    &               use_gpu_cuda=chebfi%use_gpu_cuda)
 
   if (chebfi%paw) then
-    call xgBlock_gemm(chebfi%BX%self%trans, chebfi%X%normal, 1.0d0, chebfi%BX%self, chebfi%X, 0.d0, B_und_X%self)
+    call xgBlock_gemm(chebfi%BX%self%trans, chebfi%X%normal, 1.0d0, chebfi%BX%self, chebfi%X, 0.d0, B_und_X%self, &
+      &               use_gpu_cuda=chebfi%use_gpu_cuda)
   else
-    call xgBlock_gemm(chebfi%X%trans, chebfi%X%normal, 1.0d0, chebfi%X, chebfi%X, 0.d0, B_und_X%self)
+    call xgBlock_gemm(chebfi%X%trans, chebfi%X%normal, 1.0d0, chebfi%X, chebfi%X, 0.d0, B_und_X%self, &
+       &              use_gpu_cuda=chebfi%use_gpu_cuda)
   end if
   call timab(tim_RR_gemm_1,2,tsec)
 
@@ -1012,7 +1015,8 @@ subroutine chebfi_rayleighRitz(chebfi,nline)
   call timab(tim_RR_hegv,1,tsec)
   select case (eigenSolver)
   case (EIGENVD)
-    call xgBlock_hegvd(eigenProblem, 'v','u', A_und_X%self, B_und_X%self, chebfi%eigenvalues, info)
+    call xgBlock_hegvd(eigenProblem, 'v','u', A_und_X%self, B_und_X%self, chebfi%eigenvalues, info, &
+      &              use_gpu_cuda=0*chebfi%use_gpu_cuda)
   case (EIGENV)
     call xgBlock_hegv(eigenProblem, 'v','u', A_und_X%self, B_und_X%self, chebfi%eigenvalues, info)
   case default
@@ -1031,7 +1035,7 @@ subroutine chebfi_rayleighRitz(chebfi,nline)
 
     call xg_setBlock(chebfi%X_NP,chebfi%X_next,1,spacedim,neigenpairs)
     call xg_setBlock(chebfi%X_NP,chebfi%X_prev,neigenpairs+1,spacedim,neigenpairs)
-    call xgBlock_zero(chebfi%X_NP%self)
+    call xgBlock_zero(chebfi%X_NP%self, chebfi%use_gpu_cuda)
   end if
   call timab(tim_RR_XNP_reset,2,tsec)
 
@@ -1042,7 +1046,7 @@ subroutine chebfi_rayleighRitz(chebfi,nline)
     call xgBlock_setBlock(chebfi%X_prev, chebfi%X_swap, 1, spacedim, neigenpairs)
 
     call xgBlock_gemm(chebfi%X%normal, A_und_X%self%normal, 1.0d0, &
-      chebfi%X, A_und_X%self, 0.d0, chebfi%X_swap)
+      chebfi%X, A_und_X%self, 0.d0, chebfi%X_swap, use_gpu_cuda=chebfi%use_gpu_cuda)
 
   else if (remainder == 2) then
     call xgBlock_setBlock(chebfi%X_prev, chebfi%AX_swap, 1, spacedim, neigenpairs)
@@ -1050,26 +1054,35 @@ subroutine chebfi_rayleighRitz(chebfi,nline)
     call xgBlock_setBlock(chebfi%X_next, chebfi%X_swap, 1, spacedim, neigenpairs)
 
     call xgBlock_gemm(chebfi%X%normal, A_und_X%self%normal, 1.0d0, &
-      chebfi%X, A_und_X%self, 0.d0, chebfi%X_swap)
+      chebfi%X, A_und_X%self, 0.d0, chebfi%X_swap, use_gpu_cuda=chebfi%use_gpu_cuda)
 
   else if (remainder == 0) then
     call xgBlock_setBlock(chebfi%X_prev, chebfi%AX_swap, 1, spacedim, neigenpairs)
     call xgBlock_setBlock(chebfi%X_next, chebfi%BX_swap, 1, spacedim, neigenpairs)
     call xgBlock_setBlock(chebfi%X, chebfi%X_swap, 1, spacedim, neigenpairs)
     call xgBlock_gemm(chebfi%X%normal, A_und_X%self%normal, 1.0d0, &
-      &                     chebfi%X, A_und_X%self, 0.d0, chebfi%X_next)
+      &               chebfi%X, A_und_X%self, 0.d0, chebfi%X_next, &
+      &               use_gpu_cuda=chebfi%use_gpu_cuda)
     call xgBlock_copy(chebfi%X_next,chebfi%X_swap, 1, 1)    !copy cannot be avoided :(
   end if
 
   call xgBlock_gemm(chebfi%AX%self%normal, A_und_X%self%normal, 1.0d0, &
-    chebfi%AX%self, A_und_X%self, 0.d0, chebfi%AX_swap)
+    &               chebfi%AX%self, A_und_X%self, 0.d0, chebfi%AX_swap, &
+    &               use_gpu_cuda=chebfi%use_gpu_cuda)
 
   if (chebfi%paw) then
     call xgBlock_gemm(chebfi%BX%self%normal, A_und_X%self%normal, 1.0d0, &
-      chebfi%BX%self, A_und_X%self, 0.d0, chebfi%BX_swap)
+      &               chebfi%BX%self, A_und_X%self, 0.d0, chebfi%BX_swap, &
+      &               use_gpu_cuda=chebfi%use_gpu_cuda)
   end if
 
   call timab(tim_RR_gemm_2,2,tsec)
+
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
+  if (chebfi%use_gpu_cuda==1) then
+    call gpu_device_synchronize()
+  end if
+#endif
 
   call xg_free(A_und_X)
   call xg_free(B_und_X)
@@ -1201,12 +1214,12 @@ subroutine chebfi_ampfactor(chebfi,eig,lambda_minus,lambda_plus,nline_bands)
     call xgBlock_setBlock(chebfi%xXColsRows, X_part, iband, chebfi%total_spacedim, 1)
     call xgBlock_setBlock(chebfi%xAXColsRows, AX_part, iband, chebfi%total_spacedim, 1)
 
-    call xgBlock_scale(X_part, 1/ampfactor, 1)
-    call xgBlock_scale(AX_part, 1/ampfactor, 1)
+    call xgBlock_scale(X_part, 1/ampfactor, 1, chebfi%use_gpu_cuda)
+    call xgBlock_scale(AX_part, 1/ampfactor, 1, chebfi%use_gpu_cuda)
 
     if(chebfi%paw) then
       call xgBlock_setBlock(chebfi%xBXColsRows, BX_part, iband, chebfi%total_spacedim, 1)
-      call xgBlock_scale(BX_part, 1/ampfactor, 1)
+      call xgBlock_scale(BX_part, 1/ampfactor, 1, chebfi%use_gpu_cuda)
     end if
   end do
 
