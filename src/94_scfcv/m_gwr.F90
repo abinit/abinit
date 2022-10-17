@@ -2355,7 +2355,8 @@ subroutine gwr_get_myk_green_gpr(gwr, itau, spin, desc_mykbz, gt_gpr)
 
 ! *************************************************************************
 
- if (gwr%timeit) call cwtime(cpu, wall, gflops, "start")
+ !if (gwr%timeit)
+ call cwtime(cpu, wall, gflops, "start")
 
  ABI_MALLOC(ceikr, (gwr%g_nfft * gwr%nspinor))
 
@@ -2412,7 +2413,8 @@ subroutine gwr_get_myk_green_gpr(gwr, itau, spin, desc_mykbz, gt_gpr)
 
  ABI_FREE(ceikr)
 
- if (gwr%timeit) call cwtime_report(" gwr_get_myk_green_gpr:", cpu, wall, gflops)
+ !if (gwr%timeit)
+ call cwtime_report(" gwr_get_myk_green_gpr:", cpu, wall, gflops)
 
 end subroutine gwr_get_myk_green_gpr
 !!***
@@ -3648,6 +3650,8 @@ subroutine gwr_build_tchi(gwr)
 
        ! G_k(g,g') --> G_k(g',r) e^{ik.r} for each k in the BZ treated by me.
        call gwr%get_myk_green_gpr(itau, spin, desc_mykbz, gt_gpr)
+       mem_mb = sum(slk_array_locmem_mb(gt_gpr))
+       call wrtout(std_out, sjoin(' Local memory for gt_gpr: ', ftoa(mem_mb, fmt="f8.1"), ' [Mb] <<< MEM'))
 
        ! Loop over r in the unit cell that is now MPI-distributed in g_comm.
        my_nr = gt_gpr(1,1)%sizeb_local(2)
@@ -4605,6 +4609,7 @@ if (gwr%use_supercell_for_sigma) then
    ABI_MALLOC_OR_DIE(uc_psi_bk, (gwr%g_nfft * gwr%nspinor, bmin:bmax, gwr%nkcalc), ierr)
    ABI_MALLOC(ur, (gwr%g_nfft * gwr%nspinor))
    ABI_MALLOC(uc_ceikr, (gwr%g_nfft * gwr%nspinor))
+
    ABI_MALLOC_OR_DIE(sc_psi_bk, (sc_nfft * gwr%nspinor, bmin:bmax, gwr%nkcalc), ierr)
    ! FIXME [0] <var=sc_psi_bk, A@m_gwr.F90:4584, addr=0x14baea03d010, size_mb=637.875>
 
@@ -4640,9 +4645,13 @@ if (gwr%use_supercell_for_sigma) then
 
      ! G_k(g,g') --> G_k(g',r) e^{ik.r} for each k in the BZ treated by me.
      call gwr%get_myk_green_gpr(itau, spin, desc_mykbz, gt_gpr)
+     mem_mb = sum(slk_array_locmem_mb(gt_gpr))
+     call wrtout(std_out, sjoin(' Local memory for gt_gpr: ', ftoa(mem_mb, fmt="f8.1"), ' [Mb] <<< MEM'))
 
      ! Wc_q(g,g') --> Wc_q(g',r) e^{iq.r} for each q in the BZ treated by me.
      call gwr%get_myq_wc_gpr(itau, spin, desc_myqbz, wc_gpr)
+     mem_mb = sum(slk_array_locmem_mb(wc_gpr))
+     call wrtout(std_out, sjoin(' Local memory for wc_gpr: ', ftoa(mem_mb, fmt="f8.1"), ' [Mb] <<< MEM'))
 
      my_nr = gt_gpr(1,1)%sizeb_local(2)
      ABI_CHECK(my_nr == wc_gpr(1)%sizeb_local(2), "my_nr != wc_gpr(1)%sizeb_local(2)")
@@ -4750,6 +4759,12 @@ if (gwr%use_supercell_for_sigma) then
              cpsi_r = conjg(uc_psi_bk(ir, band, ikcalc))
              sigc_pm(1) = sum(cpsi_r * gt_scbox(ibeg:iend, 1) * sc_psi_bk(:, band, ikcalc))
              sigc_pm(2) = sum(cpsi_r * gt_scbox(ibeg:iend, 2) * sc_psi_bk(:, band, ikcalc))
+
+             !call sc_sum(sc_ngfft, gwr%g_nfft, gwr%nspinor, kcalc_bz, cpsi_r, &
+             !   gt_scbox(ibeg:iend, 1), uc_psi_bk(:, band, ikcalc)), sigc_pm(1)
+             !call sc_sum(sc_ngfft, gwr%g_nfft, gwr%nspinor, kcalc_bz, cpsi_r, &
+             !  gt_scbox(ibeg:iend, 2), uc_psi_bk(:, band, ikcalc))  sigc_pm(2)
+
              sigc_it_diag_kcalc(:, itau, ibc, ikcalc, spin) = &
              sigc_it_diag_kcalc(:, itau, ibc, ikcalc, spin) + sigc_pm(:)
            end  do
