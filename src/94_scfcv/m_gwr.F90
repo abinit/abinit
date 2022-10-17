@@ -1887,7 +1887,7 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
 !scalars
  integer,parameter :: formeig0 = 0
  integer :: mband, min_nband, nkibz, nsppol, my_is, my_iki, spin, ik_ibz
- integer :: npw_k, mpw, istwf_k !, itau !, il_b band,
+ integer :: npw_k, mpw, istwf_k, il_b, band !, itau
  integer :: nbsum, npwsp, col_bsize, my_bstart, my_bstop, my_nband ! nband_k,
  real(dp) :: cpu, wall, gflops, cpu_green, wall_green, gflops_green
  character(len=5000) :: msg
@@ -1897,7 +1897,7 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
  type(dataset_type),pointer :: dtset
 !arrays
  integer,allocatable :: kg_k(:,:)
- logical,allocatable :: bks_mask(:,:,:)
+ logical,allocatable :: bmask(:)
  real(dp) :: kk_ibz(3), tsec(2)
  !real(dp),allocatable :: cgwork(:,:)
  real(dp),ABI_CONTIGUOUS pointer :: cg_k(:,:)
@@ -1981,9 +1981,9 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
      ik_ibz = gwr%my_kibz_inds(my_iki)
      npw_k = gwr%green_desc_kibz(ik_ibz)%npw
      npwsp = npw_k * gwr%nspinor
-     ABI_CHECK(block_dist_1d(gwr%ugb_nband, gwr%gtau_comm%nproc, col_bsize, msg), msg)
-     call gwr%ugb(ik_ibz, spin)%init(npwsp, gwr%ugb_nband, gwr%gtau_slkproc, istwfk1, size_blocs=[npwsp, col_bsize])
-     !call gwr%ugb(ik_ibz, spin)%init(npwsp, gwr%ugb_nband, gwr%gtau_slkproc, istwfk1, size_blocs=[npwsp, 1])
+     !ABI_CHECK(block_dist_1d(gwr%ugb_nband, gwr%gtau_comm%nproc, col_bsize, msg), msg)
+     !call gwr%ugb(ik_ibz, spin)%init(npwsp, gwr%ugb_nband, gwr%gtau_slkproc, istwfk1, size_blocs=[npwsp, col_bsize])
+     call gwr%ugb(ik_ibz, spin)%init(npwsp, gwr%ugb_nband, gwr%gtau_slkproc, istwfk1, size_blocs=[npwsp, 1])
    end do
  end do
 
@@ -1991,7 +1991,7 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
 
  mpw = maxval(wfk_hdr%npwarr)
  ABI_MALLOC(kg_k, (3, mpw))
- ABI_MALLOC(bks_mask, (mband, nkibz, nsppol))
+ ABI_MALLOC(bmask, (mband))
 
  do my_is=1,gwr%my_nspins
    spin = gwr%my_spins(my_is)
@@ -2009,28 +2009,30 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
      associate (ugb => gwr%ugb(ik_ibz, spin), desc_k => gwr%green_desc_kibz(ik_ibz))
      ABI_CHECK_IEQ(npw_k, desc_k%npw, "npw_k != desc_k%npw")
 
-     my_bstart = ugb%loc2gcol(1)
-     my_bstop = ugb%loc2gcol(ugb%sizeb_local(2))
-     my_nband = my_bstop - my_bstart + 1
-     ABI_CHECK(my_nband > 0, sjoin("my_nband:", itoa(my_nband), " decrease procs for G and tau parallelism."))
-     !print *, "my_bstart, my_bstop, nsum",  my_bstart, my_bstop, nbsum
+     !my_bstart = ugb%loc2gcol(1)
+     !my_bstop = ugb%loc2gcol(ugb%sizeb_local(2))
+     !my_nband = my_bstop - my_bstart + 1
+     !!print *, "my_bstart, my_bstop, nsum",  my_bstart, my_bstop, nbsum
+     !ABI_CHECK(my_nband > 0, sjoin("my_nband:", itoa(my_nband), " decrease procs for G and tau parallelism."))
 
-     ! Read my bands
-     call c_f_pointer(c_loc(ugb%buffer_cplx), cg_k, shape=[2, npwsp * my_nband])
-     call wfk%read_band_block([my_bstart, my_bstop], ik_ibz, spin,  &
-                              !xmpio_single, &
-                              xmpio_collective, &
-                              kg_k=kg_k, cg_k=cg_k)
+     !! Read my bands
+     !call c_f_pointer(c_loc(ugb%buffer_cplx), cg_k, shape=[2, npwsp * my_nband])
+     !call wfk%read_band_block([my_bstart, my_bstop], ik_ibz, spin,  &
+     !                         !xmpio_single, &
+     !                         xmpio_collective, &
+     !                         kg_k=kg_k, cg_k=cg_k)
 
      ! TODO: use round-robin distribution inside gtau_comm% for IO.
-     !bks_mask = .False.
-     !do il_b=1, ugb%sizeb_local(2)
-     !  band = ugb%loc2gcol(il_b)
-     !  bks_maks(band, ik_ibz, spin) = .True.
-     !end do
-     !call c_f_pointer(c_loc(ugb%buffer_cplx), cg_k, shape=[2, npwsp * ugb%sizeb_local(2)])
-     !call wfk%read_bmask(bks_mask, ik_ibz, spin, xmpio_single, & ! xmpio_collective,
-     !                    kg_k=kg_k, cg_k=cg_k)
+     bmask = .False.
+     do il_b=1, ugb%sizeb_local(2)
+       band = ugb%loc2gcol(il_b)
+       bmask(band) = .True.
+     end do
+     call c_f_pointer(c_loc(ugb%buffer_cplx), cg_k, shape=[2, npwsp * ugb%sizeb_local(2)])
+     call wfk%read_bmask(bmask, ik_ibz, spin, &
+                         !xmpio_single, &
+                         xmpio_collective, &
+                         kg_k=kg_k, cg_k=cg_k)
 
      ABI_CHECK(all(kg_k(:,1:npw_k) == desc_k%gvec), "kg_k != desc_k%gvec")
 
@@ -2041,7 +2043,7 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
  end do ! my_is
 
  ABI_FREE(kg_k)
- ABI_FREE(bks_mask)
+ ABI_FREE(bmask)
 
  call wfk%close()
  call wfk_hdr%free()
