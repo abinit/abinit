@@ -393,7 +393,7 @@ extern "C" void copy_gpu_to_gpu_(void **dest_gpu_ptr, void **src_gpu_ptr, int* s
 /*  None                                                                      */
 /*============================================================================*/
 
-extern "C" void gpu_memset_(void **gpu_ptr, const int32_t* value, const int32_t* size_in_bytes){
+extern "C" void gpu_memset_(void **gpu_ptr, const int32_t* value, const size_t* size_in_bytes){
   if(cudaMemset(*gpu_ptr, *value, *size_in_bytes)!=cudaSuccess){
     printf("ERROR: gpu_memset at address %p failed : %s\n",*gpu_ptr,cudaGetErrorString(cudaGetLastError()));
     fflush(stdout);
