@@ -255,7 +255,7 @@ module m_abi_linalg
       implicit none
       type(c_ptr),                    intent(inout) :: gpu_ptr
       integer(kind=c_int32_t),        intent(in)    :: val
-      integer(kind=c_int32_t),        intent(in)    :: size_in_bytes
+      integer(kind=c_size_t),         intent(in)    :: size_in_bytes
     end subroutine gpu_memset
 
     ! logical(kind=c_bool) function gpu_allocated(gpu_ptr) bind(c, name="gpu_allocated_")
