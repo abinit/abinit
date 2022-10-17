@@ -2987,8 +2987,8 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
      ! TODO: Determine batch_size automatically to avoid going OOM
      !batch_size = 4
      !batch_size = 1
-     !batch_size = 48
-     batch_size = loc2_size
+     batch_size = 24
+     !batch_size = loc2_size
 
      ABI_MALLOC(cwork_myit, (gwr%my_ntau, loc1_size, batch_size))
      ABI_MALLOC(glob_cwork, (gwr%ntau, loc1_size, batch_size))
