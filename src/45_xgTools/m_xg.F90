@@ -2880,23 +2880,47 @@ contains
   !! NAME
   !! xgBlock_zero
 
-  subroutine xgBlock_zero(xgBlock)
+  subroutine xgBlock_zero(xgBlock, use_gpu_cuda)
 
     type(xgBlock_t), intent(inout) :: xgBlock
-    integer :: i
+    integer        , intent(in   ), optional :: use_gpu_cuda
 
-    select case(xgBlock%space)
-    case (SPACE_R,SPACE_CR)
-      !$omp parallel do
-      do i = 1, xgBlock%cols
-        xgBlock%vecR(:,i) = 0.d0
-      end do
-    case (SPACE_C)
-      !$omp parallel do
-      do i = 1, xgBlock%cols
-        xgBlock%vecC(:,i) = dcmplx(0.d0)
-      end do
-    end select
+    integer :: i
+    integer :: l_use_gpu_cuda = 0
+    integer(C_SIZE_T) :: byte_count
+
+    ! if optional parameter is present, use it
+    ! else use default value, i.e. don't use GPU
+    if (present(use_gpu_cuda)) then
+      l_use_gpu_cuda = use_gpu_cuda
+    end if
+
+    if (l_use_gpu_cuda==1) then
+
+      select case(xgBlock%space)
+      case (SPACE_R,SPACE_CR)
+        byte_count = xgBlock%ldim * xgBlock%cols * dp
+        call gpu_memset(c_loc(xgBlock%vecR), 0, byte_count)
+      case (SPACE_C)
+        byte_count = xgBlock%ldim * xgBlock%cols * dpc
+        call gpu_memset(c_loc(xgBlock%vecC), 0, byte_count)
+      end select
+
+    else
+
+      select case(xgBlock%space)
+      case (SPACE_R,SPACE_CR)
+        !$omp parallel do
+        do i = 1, xgBlock%cols
+          xgBlock%vecR(:,i) = 0.d0
+        end do
+      case (SPACE_C)
+        !$omp parallel do
+        do i = 1, xgBlock%cols
+          xgBlock%vecC(:,i) = dcmplx(0.d0)
+        end do
+      end select
+    end if
 
   end subroutine xgBlock_zero
   !!***

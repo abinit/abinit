@@ -212,7 +212,7 @@ subroutine gpu_memset(gpu_ptr, val, array_size)
   !Arguments ------------------------------------
   type(c_ptr)                         :: gpu_ptr
   integer(kind=c_int32_t), intent(in) :: val
-  integer(kind=c_int32_t), intent(in) :: array_size
+  integer(kind=c_size_t),  intent(in) :: array_size
 
   ABI_UNUSED(gpu_ptr)
   ABI_UNUSED(val)
