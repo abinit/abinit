@@ -127,7 +127,7 @@ void xc_get_kind_constants(int *xc_cst_exchange,
  * It is kept here for historical reasons
  * ===============================================================
  */
-void xc_get_hybrid_constants(int *xc_cst_hyb_none,
+/*void xc_get_hybrid_constants(int *xc_cst_hyb_none,
 							 int *xc_cst_hyb_fock,
 							 int *xc_cst_hyb_pt2,
 							 int *xc_cst_hyb_erf_sr,
@@ -140,11 +140,10 @@ void xc_get_hybrid_constants(int *xc_cst_hyb_none,
 							 int *xc_cst_hyb_camg,
 							 int *xc_cst_hyb_double_hybrid,
 							 int *xc_cst_hyb_mixture)
-{
-/* This test should be always false */
-#if ( XC_MAJOR_VERSION > 50 )
+{*/
+//#if ( XC_MAJOR_VERSION > 7 )
 /* ==== libXC v6.0 and later ==== */
- *xc_cst_hyb_none          = XC_HYB_NONE;
+/* *xc_cst_hyb_none          = XC_HYB_NONE;
  *xc_cst_hyb_fock          = XC_HYB_FOCK;
  *xc_cst_hyb_pt2           = XC_HYB_PT2;
  *xc_cst_hyb_erf_sr        = XC_HYB_ERF_SR;
@@ -156,10 +155,10 @@ void xc_get_hybrid_constants(int *xc_cst_hyb_none,
  *xc_cst_hyb_camy          = XC_HYB_CAMY;
  *xc_cst_hyb_camg          = XC_HYB_CAMG;
  *xc_cst_hyb_double_hybrid = XC_HYB_DOUBLE_HYBRID;
- *xc_cst_hyb_mixture       = XC_HYB_MIXTURE;
-#else
+ *xc_cst_hyb_mixture       = XC_HYB_MIXTURE;*/
+//#else
 /* ==== Before libXC v6.0 ==== */
- *xc_cst_hyb_none      = -11; *xc_cst_hyb_fock          = -11;
+/* *xc_cst_hyb_none      = -11; *xc_cst_hyb_fock          = -11;
  *xc_cst_hyb_pt2       = -11; *xc_cst_hyb_erf_sr        = -11;
  *xc_cst_hyb_yukawa_sr = -11; *xc_cst_hyb_gaussian_sr   = -11;
  *xc_cst_hyb_semilocal = -11; *xc_cst_hyb_hybrid        = -11;
@@ -167,7 +166,7 @@ void xc_get_hybrid_constants(int *xc_cst_hyb_none,
  *xc_cst_hyb_camg      = -11; *xc_cst_hyb_double_hybrid = -11;
  *xc_cst_hyb_mixture   = -11;
 #endif
-}
+}*/
 
 /* ===============================================================
  * Allocate/free xc_func_type pointer
