@@ -200,6 +200,30 @@ module m_xg_kokkos
       type(c_ptr)            , value                :: res_ptr
     end subroutine computeColwiseDivision_complex
 
+    ! ========================================================================
+    ! ========================================================================
+    subroutine compute_colwiseCymax_scalar(A_ptr, da_ptr, B_ptr, W_ptr, rows, cols, ldim) &
+      & bind(c, name='compute_colwiseCymax_scalar_kokkos_cpp')
+      use, intrinsic :: iso_c_binding
+      implicit none
+      type(c_ptr)            , value             :: A_ptr
+      type(c_ptr)            , value             :: da_ptr
+      type(c_ptr)            , value             :: B_ptr
+      type(c_ptr)            , value             :: W_ptr
+      integer(kind=c_int32_t), value, intent(in) :: rows, cols, ldim
+    end subroutine compute_colwiseCymax_scalar
+
+    subroutine compute_colwiseCymax_cplx(A_ptr, da_ptr, B_ptr, W_ptr, rows, cols, ldim) &
+      & bind(c, name='compute_colwiseCymax_cplx_kokkos_cpp')
+      use, intrinsic :: iso_c_binding
+      implicit none
+      type(c_ptr)            , value             :: A_ptr
+      type(c_ptr)            , value             :: da_ptr
+      type(c_ptr)            , value             :: B_ptr
+      type(c_ptr)            , value             :: W_ptr
+      integer(kind=c_int32_t), value, intent(in) :: rows, cols, ldim
+    end subroutine compute_colwiseCymax_cplx
+
   end interface
 
 contains

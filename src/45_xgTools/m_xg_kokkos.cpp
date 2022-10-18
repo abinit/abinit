@@ -1,4 +1,4 @@
-#include <abi_common_kokkos.h>
+#include "m_xg_kokkos.h"
 
 /**
  * Compute dot product of multiple pair of vectors.
@@ -137,39 +137,6 @@ extern "C" void computeBatchedDotProduct_cplx_kokkos_cpp(
 // =====================================================================
 
 // =====================================================================
-/**
- * Kokkos/c++ max reduction on device.
- *
- * template parameter value_t can be double or Kokkos::complex<double>
- *
- * \note array size is stored on a 32 bit integer (<= 2**31, i.e. 2 10^9)
- * we may need to use 64 bit consistently here and in m_xg.F90
- *
- */
-template<typename value_t>
-void computeMax_kokkos_cpp(
-  const value_t *data_ptr,
-  const int32_t  size,
-  value_t       *res
-  )
-{
-  using policy_t = Kokkos::RangePolicy<>;
-
-  value_t reduced_value;
-  Kokkos::Max<value_t> max_reducer(reduced_value);
-
-  Kokkos::parallel_reduce(
-    "computeMax",
-    Kokkos::RangePolicy<>(0,size),
-    KOKKOS_LAMBDA(const int32_t i, value_t& tmp) {
-      value_t val = data_ptr[i];
-      max_reducer.join(tmp, val);
-    }, max_reducer);
-
-  *res = reduced_value;
-} // computeMax_kokkos_cpp
-
-// =====================================================================
 //! C wrapper for iso_c_binding
 extern "C"
 void computeMax_scalar_kokkos_cpp(
@@ -210,34 +177,6 @@ void computeMax_complex_kokkos_cpp(
 // =====================================================================
 // =====================================================================
 
-// =====================================================================
-/**
- * Kokkos/c++ min reduction on device.
- *
- * template parameter value_t can be double or Kokkos::complex<double>
- */
-template<typename value_t>
-void computeMin_kokkos_cpp(
-  const value_t *data_ptr,
-  const int32_t  size,
-  value_t       *res
-  )
-{
-  using policy_t = Kokkos::RangePolicy<>;
-
-  value_t reduced_value;
-  Kokkos::Min<value_t> min_reducer(reduced_value);
-
-  Kokkos::parallel_reduce(
-    "computeMin",
-    Kokkos::RangePolicy<>(0,size),
-    KOKKOS_LAMBDA(const int32_t i, value_t& tmp) {
-      value_t val = data_ptr[i];
-      min_reducer.join(tmp, val);
-    }, min_reducer);
-
-  *res = reduced_value;
-} // computeMin_kokkos_cpp
 
 // =====================================================================
 //! C wrapper for iso_c_binding
@@ -279,38 +218,6 @@ void computeMin_complex_kokkos_cpp(
 // =====================================================================
 // =====================================================================
 // =====================================================================
-
-// =====================================================================
-/**
- * Kokkos/c++ maxloc reduction on device.
- *
- * template parameter value_t can be double or Kokkos::complex<double>
- */
-template<typename value_t>
-void computeMaxloc_kokkos_cpp(
-  const value_t *data_ptr,
-  const int32_t  size,
-  int32_t       *res
-  )
-{
-  using policy_t = Kokkos::RangePolicy<>;
-
-  using reducer_value_t = typename Kokkos::MinLoc<value_t, int>::value_type;
-  reducer_value_t reduced_value;
-  Kokkos::MaxLoc<value_t,int> maxloc_reducer(reduced_value);
-
-  Kokkos::parallel_reduce(
-    "computeMaxloc",
-    Kokkos::RangePolicy<>(0,size),
-    KOKKOS_LAMBDA(const int32_t i, reducer_value_t& tmp) {
-      reducer_value_t val;
-      val.val = data_ptr[i];
-      val.loc = i;
-      maxloc_reducer.join(tmp, val);
-    }, maxloc_reducer);
-
-  *res = reduced_value.loc;
-} // computeMaxloc_kokkos_cpp
 
 // =====================================================================
 //! C wrapper for iso_c_binding
@@ -418,38 +325,6 @@ void computeMaxloc_complex_2d_kokkos_cpp(
 // =====================================================================
 
 // =====================================================================
-/**
- * Kokkos/c++ minloc reduction on device.
- *
- * template parameter value_t can be double or Kokkos::complex<double>
- */
-template<typename value_t>
-void computeMinloc_kokkos_cpp(
-  const value_t *data_ptr,
-  const int32_t  size,
-  int32_t       *res
-  )
-{
-  using policy_t = Kokkos::RangePolicy<>;
-
-  using reducer_value_t = typename Kokkos::MinLoc<value_t, int>::value_type;
-  reducer_value_t reduced_value;
-  Kokkos::MinLoc<value_t,int> minloc_reducer(reduced_value);
-
-  Kokkos::parallel_reduce(
-    "computeMinloc",
-    Kokkos::RangePolicy<>(0,size),
-    KOKKOS_LAMBDA(const int32_t i, reducer_value_t& tmp) {
-      reducer_value_t val;
-      val.val = data_ptr[i];
-      val.loc = i;
-      minloc_reducer.join(tmp, val);
-    }, minloc_reducer);
-
-  *res = reduced_value.loc;
-} // computeMinloc_kokkos_cpp
-
-// =====================================================================
 //! C wrapper for iso_c_binding
 extern "C"
 void computeMinloc_scalar_kokkos_cpp(
@@ -518,62 +393,6 @@ void computeMinloc_complex_kokkos_cpp(
 } // computeMinloc_complex_kokkos_cpp
 
 // =====================================================================
-// =====================================================================
-// =====================================================================
-// =====================================================================
-
-/**
- * Kokkos/c++ equivalent to xgBlock_colwiseDivision.
- *
- * template parameter value_t can be double or Kokkos::complex<double>
- */
-template<typename value_t>
-void computeColwiseDivision_kokkos_cpp(
-  const value_t *x_ptr,
-  const value_t *y_ptr,
-  const int32_t  size,
-  value_t       *res_ptr
-  )
-{
-  using policy_t = Kokkos::RangePolicy<>;
-
-  Kokkos::parallel_for(
-    "computeColwiseDivision",
-    Kokkos::RangePolicy<>(0,size),
-    KOKKOS_LAMBDA(const int32_t i)
-    {
-      res_ptr[i] = x_ptr[i] / y_ptr[i];
-    });
-
-} // computeColwiseDivision_kokkos_cpp
-
-// =====================================================================
-//! C wrapper for iso_c_binding
-extern "C"
-void computeColwiseDivision_scalar_kokkos_cpp(
-  const double *x_ptr,
-  const double *y_ptr,
-  const int32_t size,
-  double       *res_ptr
-  )
-{
-  computeColwiseDivision_kokkos_cpp<double>(x_ptr, y_ptr, size, res_ptr);
-} // computeColwiseDivision_scalar_kokkos_cpp
-
-// =====================================================================
-//! C wrapper for iso_c_binding
-extern "C"
-void computeColwiseDivision_complex_kokkos_cpp(
-  const cplx_t *x_ptr,
-  const cplx_t *y_ptr,
-  const int32_t size,
-  cplx_t       *res_ptr
-  )
-{
-  computeColwiseDivision_kokkos_cpp<cplx_t>(x_ptr, y_ptr, size, res_ptr);
-} // computeColwiseDivision_complex_kokkos_cpp
-
-// =====================================================================
 //! C wrapper for iso_c_binding
 extern "C"
 void computeMinloc_complex_2d_kokkos_cpp(
@@ -600,3 +419,67 @@ void computeMinloc_complex_2d_kokkos_cpp(
   res[1] += 1;
 
 } // computeMinloc_complex_2d_kokkos_cpp
+
+// =====================================================================
+// =====================================================================
+// =====================================================================
+
+// =====================================================================
+//! C wrapper for iso_c_binding
+extern "C"
+void computeColwiseDivision_scalar_kokkos_cpp(
+  const double *x_ptr,
+  const double *y_ptr,
+  const int32_t size,
+  double       *res_ptr
+  )
+{
+
+  computeColwiseDivision_kokkos_cpp<double>(x_ptr, y_ptr, size, res_ptr);
+
+} // computeColwiseDivision_scalar_kokkos_cpp
+
+// =====================================================================
+//! C wrapper for iso_c_binding
+extern "C"
+void computeColwiseDivision_complex_kokkos_cpp(
+  const cplx_t *x_ptr,
+  const cplx_t *y_ptr,
+  const int32_t size,
+  cplx_t       *res_ptr
+  )
+{
+
+  computeColwiseDivision_kokkos_cpp<cplx_t>(x_ptr, y_ptr, size, res_ptr);
+
+} // computeColwiseDivision_complex_kokkos_cpp
+
+// ================================================================
+extern "C" void compute_colwiseCymax_scalar_kokkos_cpp(
+  double        *A_ptr,
+  const double  *da_ptr,
+  const double  *B_ptr,
+  const double  *W_ptr,
+  const int32_t rows,
+  const int32_t cols,
+  const int32_t ldim)
+{
+
+  compute_colwiseCymax_kokkos_cpp<double>(A_ptr, da_ptr, B_ptr, W_ptr, rows, cols, ldim);
+
+} // compute_colwiseCymax_scalar_kokkos_cpp
+
+// ================================================================
+extern "C" void compute_colwiseCymax_cplx_kokkos_cpp(
+  cplx_t        *A_ptr,
+  const double  *da_ptr,
+  const cplx_t  *B_ptr,
+  const cplx_t  *W_ptr,
+  const int32_t  rows,
+  const int32_t  cols,
+  const int32_t  ldim)
+{
+
+  compute_colwiseCymax_kokkos_cpp<cplx_t>(A_ptr, da_ptr, B_ptr, W_ptr, rows, cols, ldim);
+
+} // compute_colwiseCymax_cplx_kokkos_cpp
