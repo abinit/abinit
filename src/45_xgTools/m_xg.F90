@@ -2093,13 +2093,17 @@ contains
   !! NAME
   !! xgBlock_colwiseCymax
 
-  subroutine xgBlock_colwiseCymax(xgBlockA, da, xgBlockB,xgBlockW)
+  subroutine xgBlock_colwiseCymax(xgBlockA, da, xgBlockB, xgBlockW, use_gpu_cuda)
 
     type(xgBlock_t), intent(inout) :: xgBlockA
     type(xgBlock_t), intent(in   ) :: da
     type(xgBlock_t), intent(in   ) :: xgBlockB
     type(xgBlock_t), intent(in   ) :: xgBlockW
+    integer        , intent(in   ), optional :: use_gpu_cuda
+
     integer :: iblock
+    integer          :: l_use_gpu_cuda = 0
+
 
     if ( xgBlockA%space /= xgBlockB%space .or. xgBlockA%space /= xgBlockW%space ) then
       ABI_ERROR("Must be same space for caxmy")
@@ -2114,22 +2118,43 @@ contains
       ABI_ERROR("Must have same cols for caxmy")
     end if
 
-    select case(xgBlockA%space)
-    case (SPACE_R,SPACE_CR)
-      !$omp parallel do shared(da,xgBlockB,xgBlockW,xgBlockA), &
-      !$omp& schedule(static)
-      do iblock = 1, xgBlockA%cols
-        xgBlockA%vecR(:,iblock) = - da%vecR(iblock,1) * xgBlockB%vecR(:,iblock) + xgBlockW%vecR(:,iblock)
-      end do
-      !$omp end parallel do
-    case (SPACE_C)
-      !$omp parallel do shared(da,xgBlockB,xgBlockW,xgBlockA), &
-      !$omp& schedule(static)
-      do iblock = 1, xgBlockA%cols
-        xgBlockA%vecC(:,iblock) = - da%vecR(iblock,1) * xgBlockB%vecC(:,iblock) + xgBlockW%vecC(:,iblock)
-      end do
-      !$omp end parallel do
-    end select
+    ! if optional parameter is present, use it
+    ! else use default value, i.e. don't use GPU
+    if (present(use_gpu_cuda)) then
+      l_use_gpu_cuda = use_gpu_cuda
+    end if
+
+    if (l_use_gpu_cuda==1) then
+
+      select case(xgBlockA%space)
+      case (SPACE_R,SPACE_CR)
+        call compute_colwiseCymax_scalar(c_loc(xgBlockA%vecR), c_loc(da%vecR), c_loc(xgBlockB%vecR), &
+          &                              c_loc(xgBlockW%vecR), xgBlockA%rows, xgBlockA%cols, xgBlockA%ldim)
+      case (SPACE_C)
+        call compute_colwiseCymax_cplx  (c_loc(xgBlockA%vecC), c_loc(da%vecR), c_loc(xgBlockB%vecC), &
+          &                              c_loc(xgBlockW%vecC), xgBlockA%rows, xgBlockA%cols, xgBlockA%ldim)
+      end select
+
+    else
+
+      select case(xgBlockA%space)
+      case (SPACE_R,SPACE_CR)
+        !$omp parallel do shared(da,xgBlockB,xgBlockW,xgBlockA), &
+        !$omp& schedule(static)
+        do iblock = 1, xgBlockA%cols
+          xgBlockA%vecR(:,iblock) = - da%vecR(iblock,1) * xgBlockB%vecR(:,iblock) + xgBlockW%vecR(:,iblock)
+        end do
+        !$omp end parallel do
+      case (SPACE_C)
+        !$omp parallel do shared(da,xgBlockB,xgBlockW,xgBlockA), &
+        !$omp& schedule(static)
+        do iblock = 1, xgBlockA%cols
+          xgBlockA%vecC(:,iblock) = - da%vecR(iblock,1) * xgBlockB%vecC(:,iblock) + xgBlockW%vecC(:,iblock)
+        end do
+        !$omp end parallel do
+      end select
+
+    end if
 
   end subroutine xgBlock_colwiseCymax
   !!***
