@@ -1454,13 +1454,13 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
        end if
        qphon_mq(:)=-qphon(:)
        if (dtset%nspden==4) then
-         call dfpt_nstdy(atindx,blkflg,cg_mq,cg1_mq,cplex,dtfil,dtset,d2bbb_mq,d2lo_mq,d2nl_mq,eigen0,eigen1_mq,gmet,&
+         call dfpt_nstdy(atindx,blkflg,cg,cg1_mq,cplex,dtfil,dtset,d2bbb_mq,d2lo_mq,d2nl_mq,eigen0,eigen1_mq,gmet,&
 &         gsqcut,idir,indkpt1,indsy1,ipert,istwfk_rbz,kg,kg1_mq,kpt_rbz,kxc,mband_mem_rbz,mkmem,mk1mem,mpert,mpi_enreg,&
 &         mpw,mpw1_mq,nattyp,nband_rbz,nfftf,ngfftf,nkpt,nkpt_rbz,nkxc,npwarr,npwar1_mq,nspden,&
 &         dtset%nsppol,nsym1,occ_rbz,ph1d,psps,qphon_mq,rhor1_mq,rmet,rprimd,symrc1,ucvol,&
 &         wtk_rbz,xred,ylm,ylm1,rhor=rhor,vxc=vxc)
        else
-         call dfpt_nstdy(atindx,blkflg,cg_mq,cg1_mq,cplex,dtfil,dtset,d2bbb_mq,d2lo_mq,d2nl_mq,eigen0,eigen1_mq,gmet,&
+         call dfpt_nstdy(atindx,blkflg,cg,cg1_mq,cplex,dtfil,dtset,d2bbb_mq,d2lo_mq,d2nl_mq,eigen0,eigen1_mq,gmet,&
 &         gsqcut,idir,indkpt1,indsy1,ipert,istwfk_rbz,kg,kg1_mq,kpt_rbz,kxc,mband_mem_rbz,mkmem,mk1mem,mpert,mpi_enreg,&
 &         mpw,mpw1_mq,nattyp,nband_rbz,nfftf,ngfftf,nkpt,nkpt_rbz,nkxc,npwarr,npwar1_mq,nspden,&
 &         dtset%nsppol,nsym1,occ_rbz,ph1d,psps,qphon_mq,rhor1_mq,rmet,rprimd,symrc1,ucvol,&
@@ -1468,12 +1468,12 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
        end if
 
        !Mix up (q,w) and (-q,-w) second-order derivatives
-       d2bbb(1,:,:,:,:,:)=half*(d2bbb_pq(1,:,:,:,:,:)+d2bbb_mq(1,:,:,:,:,:))
-       d2bbb(2,:,:,:,:,:)=half*(d2bbb_pq(2,:,:,:,:,:)-d2bbb_mq(2,:,:,:,:,:))
-       d2lo(1,:,:,:,:)=half*(d2lo_pq(1,:,:,:,:)+d2lo_mq(1,:,:,:,:))
-       d2lo(2,:,:,:,:)=half*(d2lo_pq(2,:,:,:,:)-d2lo_mq(2,:,:,:,:))
-       d2nl(1,:,:,:,:)=half*(d2nl_pq(1,:,:,:,:)+d2nl_mq(1,:,:,:,:))
-       d2nl(2,:,:,:,:)=half*(d2nl_pq(2,:,:,:,:)-d2nl_mq(2,:,:,:,:))
+       d2bbb(1,:,idir,ipert,:,:)=half*(d2bbb_pq(1,:,idir,ipert,:,:)+d2bbb_mq(1,:,idir,ipert,:,:))
+       d2bbb(2,:,idir,ipert,:,:)=half*(d2bbb_pq(2,:,idir,ipert,:,:)-d2bbb_mq(2,:,idir,ipert,:,:))
+       d2lo(1,:,:,idir,ipert)=half*(d2lo_pq(1,:,:,idir,ipert)+d2lo_mq(1,:,:,idir,ipert))
+       d2lo(2,:,:,idir,ipert)=half*(d2lo_pq(2,:,:,idir,ipert)-d2lo_mq(2,:,:,idir,ipert))
+       d2nl(1,:,:,idir,ipert)=half*(d2nl_pq(1,:,:,idir,ipert)+d2nl_mq(1,:,:,idir,ipert))
+       d2nl(2,:,:,idir,ipert)=half*(d2nl_pq(2,:,:,idir,ipert)-d2nl_mq(2,:,:,idir,ipert))
 
      end if
    end if
@@ -3510,10 +3510,10 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
 !        Get first-order local potential and first-order pseudo core density
          call dfpt_vlocal(atindx,cplex,gmet,gsqcut,idir1,ipert1,mpi_enreg,psps%mqgrid_ff,dtset%natom,&
 &         nattyp,nfft,ngfft,dtset%ntypat,n1,n2,n3,ph1d,psps%qgrid_ff,&
-&         phon,ucvol,psps%vlspl,vpsp1,xred)
+&         qphon,ucvol,psps%vlspl,vpsp1,xred)
          if(psps%n1xccc/=0)then
            call dfpt_mkcore(cplex,idir1,ipert1,dtset%natom,dtset%ntypat,n1,psps%n1xccc,&
-&           n2,n3,phon,rprimd,dtset%typat,ucvol,psps%xcccrc,psps%xccc1d,xccc3d1,xred)
+&           n2,n3,qphon,rprimd,dtset%typat,ucvol,psps%xcccrc,psps%xccc1d,xccc3d1,xred)
          end if
 
 !        Get first-order exchange-correlation potential (core-correction contribution only !)
@@ -3523,11 +3523,11 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
            if (nspden==4.and.present(rhor).and.present(vxc)) then
              optnc=1
              call dfpt_mkvxc_noncoll(cplex,dtset%ixc,kxc,mpi_enreg,nfft,ngfft,rhodummy,0,rhodummy,0,rhodummy,0,&
-&             nkxc,nmxc,nspden,n3xccc,optnc,option,phon,rhor,rhor1,&
+&             nkxc,nmxc,nspden,n3xccc,optnc,option,qphon,rhor,rhor1,&
 &             rprimd,0,vxc,vxc1,xccc3d1)
            else
              call dfpt_mkvxc(cplex,dtset%ixc,kxc,mpi_enreg,nfft,ngfft,rhodummy,0,rhodummy,0,&
-&             nkxc,nmxc,nspden,n3xccc,option,phon,rhodummy,&
+&             nkxc,nmxc,nspden,n3xccc,option,qphon,rhodummy,&
 &             rprimd,0,vxc1,xccc3d1)
            end if
          else
