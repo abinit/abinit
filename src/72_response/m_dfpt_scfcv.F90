@@ -415,7 +415,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  integer,allocatable :: dimcprj(:),pwindall(:,:,:)
  integer,pointer :: my_atmtab(:)
  real(dp) :: dielar(7)
- real(dp) :: favg(3),gmet(3,3),gprimd(3,3),q_cart(3),qphon2(3),qred2cart(3,3)
+ real(dp) :: favg(3),gmet(3,3),gprimd(3,3),q_cart(3),qphon2(3),qphon_mq(3),qred2cart(3,3)
  real(dp) :: rhomag(2,nspden),rmet(3,3),tollist(12),tsec(2)
  real(dp) :: zeff_red(3),zeff_bar(3,3)
  real(dp) :: intgden(dtset%nspden,dtset%natom),dentot(dtset%nspden)
@@ -1429,13 +1429,13 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
          call dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eigen0,eigen1,gmet,&
 &         gsqcut,idir,indkpt1,indsy1,ipert,istwfk_rbz,kg,kg1,kpt_rbz,kxc,mband_mem_rbz,mkmem,mk1mem,mpert,mpi_enreg,&
 &         mpw,mpw1,nattyp,nband_rbz,nfftf,ngfftf,nkpt,nkpt_rbz,nkxc,npwarr,npwar1,nspden,&
-&         dtset%nsppol,nsym1,occ_rbz,ph1d,psps,rhor1,rmet,rprimd,symrc1,ucvol,&
+&         dtset%nsppol,nsym1,occ_rbz,ph1d,psps,qphon,rhor1,rmet,rprimd,symrc1,ucvol,&
 &         wtk_rbz,xred,ylm,ylm1,rhor=rhor,vxc=vxc)
        else
          call dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eigen0,eigen1,gmet,&
 &         gsqcut,idir,indkpt1,indsy1,ipert,istwfk_rbz,kg,kg1,kpt_rbz,kxc,mband_mem_rbz,mkmem,mk1mem,mpert,mpi_enreg,&
 &         mpw,mpw1,nattyp,nband_rbz,nfftf,ngfftf,nkpt,nkpt_rbz,nkxc,npwarr,npwar1,nspden,&
-&         dtset%nsppol,nsym1,occ_rbz,ph1d,psps,rhor1,rmet,rprimd,symrc1,ucvol,&
+&         dtset%nsppol,nsym1,occ_rbz,ph1d,psps,qphon,rhor1,rmet,rprimd,symrc1,ucvol,&
 &         wtk_rbz,xred,ylm,ylm1)
        end if
      else if(.not.kramers_deg) then
@@ -1443,26 +1443,27 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
          call dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb_pq,d2lo_pq,d2nl_pq,eigen0,eigen1,gmet,&
 &         gsqcut,idir,indkpt1,indsy1,ipert,istwfk_rbz,kg,kg1,kpt_rbz,kxc,mband_mem_rbz,mkmem,mk1mem,mpert,mpi_enreg,&
 &         mpw,mpw1,nattyp,nband_rbz,nfftf,ngfftf,nkpt,nkpt_rbz,nkxc,npwarr,npwar1,nspden,&
-&         dtset%nsppol,nsym1,occ_rbz,ph1d,psps,rhor1_pq,rmet,rprimd,symrc1,ucvol,&
+&         dtset%nsppol,nsym1,occ_rbz,ph1d,psps,qphon,rhor1_pq,rmet,rprimd,symrc1,ucvol,&
 &         wtk_rbz,xred,ylm,ylm1,rhor=rhor,vxc=vxc)
        else
          call dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb_pq,d2lo_pq,d2nl_pq,eigen0,eigen1,gmet,&
 &         gsqcut,idir,indkpt1,indsy1,ipert,istwfk_rbz,kg,kg1,kpt_rbz,kxc,mband_mem_rbz,mkmem,mk1mem,mpert,mpi_enreg,&
 &         mpw,mpw1,nattyp,nband_rbz,nfftf,ngfftf,nkpt,nkpt_rbz,nkxc,npwarr,npwar1,nspden,&
-&         dtset%nsppol,nsym1,occ_rbz,ph1d,psps,rhor1_pq,rmet,rprimd,symrc1,ucvol,&
+&         dtset%nsppol,nsym1,occ_rbz,ph1d,psps,qphon,rhor1_pq,rmet,rprimd,symrc1,ucvol,&
 &         wtk_rbz,xred,ylm,ylm1)
        end if
+       qphon_mq(:)=-qphon(:)
        if (dtset%nspden==4) then
          call dfpt_nstdy(atindx,blkflg,cg_mq,cg1_mq,cplex,dtfil,dtset,d2bbb_mq,d2lo_mq,d2nl_mq,eigen0,eigen1_mq,gmet,&
 &         gsqcut,idir,indkpt1,indsy1,ipert,istwfk_rbz,kg,kg1_mq,kpt_rbz,kxc,mband_mem_rbz,mkmem,mk1mem,mpert,mpi_enreg,&
 &         mpw,mpw1_mq,nattyp,nband_rbz,nfftf,ngfftf,nkpt,nkpt_rbz,nkxc,npwarr,npwar1_mq,nspden,&
-&         dtset%nsppol,nsym1,occ_rbz,ph1d,psps,rhor1_mq,rmet,rprimd,symrc1,ucvol,&
+&         dtset%nsppol,nsym1,occ_rbz,ph1d,psps,qphon_mq,rhor1_mq,rmet,rprimd,symrc1,ucvol,&
 &         wtk_rbz,xred,ylm,ylm1,rhor=rhor,vxc=vxc)
        else
          call dfpt_nstdy(atindx,blkflg,cg_mq,cg1_mq,cplex,dtfil,dtset,d2bbb_mq,d2lo_mq,d2nl_mq,eigen0,eigen1_mq,gmet,&
 &         gsqcut,idir,indkpt1,indsy1,ipert,istwfk_rbz,kg,kg1_mq,kpt_rbz,kxc,mband_mem_rbz,mkmem,mk1mem,mpert,mpi_enreg,&
 &         mpw,mpw1_mq,nattyp,nband_rbz,nfftf,ngfftf,nkpt,nkpt_rbz,nkxc,npwarr,npwar1_mq,nspden,&
-&         dtset%nsppol,nsym1,occ_rbz,ph1d,psps,rhor1_mq,rmet,rprimd,symrc1,ucvol,&
+&         dtset%nsppol,nsym1,occ_rbz,ph1d,psps,qphon_mq,rhor1_mq,rmet,rprimd,symrc1,ucvol,&
 &         wtk_rbz,xred,ylm,ylm1)
        end if
 
@@ -3100,6 +3101,7 @@ end subroutine dfpt_nsteltwf
 !!   and k in the reduced Brillouin zone (usually =2)
 !!  ph1d(2,3*(2*mgfft+1)*natom)=one-dimensional structure factor information
 !!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
+!!  qphon(3)=reduced coordinates for the phonon wavelength
 !!  rhor1(cplex*nfft,nspden)=RF electron density in electrons/bohr**3.
 !!  rmet(3,3)=real space metric (bohr**2)
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
@@ -3125,7 +3127,7 @@ end subroutine dfpt_nsteltwf
 subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eigen0,eigen1,&
 &          gmet,gsqcut,idir,indkpt1,indsy1,ipert,istwfk_rbz,kg,kg1,kpt_rbz,kxc,mband_mem_rbz,mkmem,mk1mem,&
 &          mpert,mpi_enreg,mpw,mpw1,nattyp,nband_rbz,nfft,ngfft,nkpt,nkpt_rbz,nkxc,&
-&          npwarr,npwar1,nspden,nsppol,nsym1,occ_rbz,ph1d,psps,rhor1,rmet,rprimd,&
+&          npwarr,npwar1,nspden,nsppol,nsym1,occ_rbz,ph1d,psps,qphon,rhor1,rmet,rprimd,&
 &          symrc1,ucvol,wtk_rbz,xred,ylm,ylm1,rhor,vxc)
 
 !Arguments -------------------------------
@@ -3149,7 +3151,7 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
  real(dp),intent(in) :: eigen1(2*dtset%mband*dtset%mband*nkpt_rbz*nsppol)
  real(dp),intent(in) :: gmet(3,3),kpt_rbz(3,nkpt_rbz)
  real(dp),intent(in) :: kxc(nfft,nkxc),occ_rbz(dtset%mband*nkpt_rbz*nsppol)
- real(dp),intent(in) :: ph1d(2,3*(2*dtset%mgfft+1)*dtset%natom)
+ real(dp),intent(in) :: ph1d(2,3*(2*dtset%mgfft+1)*dtset%natom),qphon(3)
  real(dp),intent(in) :: rhor1(cplex*nfft,nspden),rmet(3,3),rprimd(3,3)
  real(dp),intent(in) :: wtk_rbz(nkpt_rbz),xred(3,dtset%natom)
  real(dp),intent(in) :: ylm(mpw*mkmem,psps%mpsang*psps%mpsang*psps%useylm)
@@ -3328,7 +3330,7 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
      ABI_MALLOC(occ_k,(nband_k))
      occ_k(:)=occ_rbz(1+bdtot_index:nband_k+bdtot_index)
      kpoint(:)=kpt_rbz(:,ikpt)
-     kpq(:)=kpoint(:)+dtset%qptn(:)
+     kpq(:)=kpoint(:)+qphon(:)
      wtk_k=wtk_rbz(ikpt)
      d2nl_k(:,:,:)=zero
      if(dtset%prtbbb==1)d2bbb_k(:,:,:,:)=zero
@@ -3439,7 +3441,7 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
      work1(2,idir1,ipert1)=d2nl(2,idir1,ipert1,idir,ipert)
    end do
  end do
- call dfpt_sygra(dtset%natom,d2nl(:,:,:,idir,ipert),work1,indsy1,ipert,nsym1,dtset%qptn,symrc1)
+ call dfpt_sygra(dtset%natom,d2nl(:,:,:,idir,ipert),work1,indsy1,ipert,nsym1,qphon,symrc1)
  ABI_FREE(work1)
 
 !Must also symmetrize the electric/magnetic field perturbation response !
@@ -3508,10 +3510,10 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
 !        Get first-order local potential and first-order pseudo core density
          call dfpt_vlocal(atindx,cplex,gmet,gsqcut,idir1,ipert1,mpi_enreg,psps%mqgrid_ff,dtset%natom,&
 &         nattyp,nfft,ngfft,dtset%ntypat,n1,n2,n3,ph1d,psps%qgrid_ff,&
-&         dtset%qptn,ucvol,psps%vlspl,vpsp1,xred)
+&         phon,ucvol,psps%vlspl,vpsp1,xred)
          if(psps%n1xccc/=0)then
            call dfpt_mkcore(cplex,idir1,ipert1,dtset%natom,dtset%ntypat,n1,psps%n1xccc,&
-&           n2,n3,dtset%qptn,rprimd,dtset%typat,ucvol,psps%xcccrc,psps%xccc1d,xccc3d1,xred)
+&           n2,n3,phon,rprimd,dtset%typat,ucvol,psps%xcccrc,psps%xccc1d,xccc3d1,xred)
          end if
 
 !        Get first-order exchange-correlation potential (core-correction contribution only !)
@@ -3521,11 +3523,11 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
            if (nspden==4.and.present(rhor).and.present(vxc)) then
              optnc=1
              call dfpt_mkvxc_noncoll(cplex,dtset%ixc,kxc,mpi_enreg,nfft,ngfft,rhodummy,0,rhodummy,0,rhodummy,0,&
-&             nkxc,nmxc,nspden,n3xccc,optnc,option,dtset%qptn,rhor,rhor1,&
+&             nkxc,nmxc,nspden,n3xccc,optnc,option,phon,rhor,rhor1,&
 &             rprimd,0,vxc,vxc1,xccc3d1)
            else
              call dfpt_mkvxc(cplex,dtset%ixc,kxc,mpi_enreg,nfft,ngfft,rhodummy,0,rhodummy,0,&
-&             nkxc,nmxc,nspden,n3xccc,option,dtset%qptn,rhodummy,&
+&             nkxc,nmxc,nspden,n3xccc,option,phon,rhodummy,&
 &             rprimd,0,vxc1,xccc3d1)
            end if
          else
