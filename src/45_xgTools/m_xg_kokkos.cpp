@@ -483,3 +483,48 @@ extern "C" void compute_colwiseCymax_cplx_kokkos_cpp(
   compute_colwiseCymax_kokkos_cpp<cplx_t>(A_ptr, da_ptr, B_ptr, W_ptr, rows, cols, ldim);
 
 } // compute_colwiseCymax_cplx_kokkos_cpp
+
+// ================================================================
+extern "C" void compute_colwiseMul_scalar_scalar_kokkos_cpp(
+  double        *data_ptr,
+  const double  *vec_ptr,
+  const int32_t  shift,
+  const int32_t  rows,
+  const int32_t  cols,
+  const int32_t  ldim,
+  const int32_t  vec_size)
+{
+
+  compute_colwiseMul_kokkos_cpp<double,double>(data_ptr, vec_ptr, shift, rows, cols, ldim, vec_size);
+
+} // compute_colwiseMul_scalar_scalar_kokkos_cpp
+
+// ================================================================
+extern "C" void compute_colwiseMul_cplx_scalar_kokkos_cpp(
+  cplx_t        *data_ptr,
+  const double  *vec_ptr,
+  const int32_t  shift,
+  const int32_t  rows,
+  const int32_t  cols,
+  const int32_t  ldim,
+  const int32_t  vec_size)
+{
+
+  compute_colwiseMul_kokkos_cpp<cplx_t,double>(data_ptr, vec_ptr, shift, rows, cols, ldim, vec_size);
+
+} // compute_colwiseMul_cplx_scalar_kokkos_cpp
+
+// ================================================================
+extern "C" void compute_colwiseMul_cplx_cplx_kokkos_cpp(
+  cplx_t        *data_ptr,
+  const cplx_t  *vec_ptr,
+  const int32_t  shift,
+  const int32_t  rows,
+  const int32_t  cols,
+  const int32_t  ldim,
+  const int32_t  vec_size)
+{
+
+  compute_colwiseMul_kokkos_cpp<cplx_t,cplx_t>(data_ptr, vec_ptr, shift, rows, cols, ldim, vec_size);
+
+} // compute_colwiseMul_cplx_cplx_kokkos_cpp

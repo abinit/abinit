@@ -2164,32 +2164,58 @@ contains
   !! NAME
   !! xgBlock_colwiseMulR
 
-  subroutine xgBlock_colwiseMulR(xgBlock, vec, shift)
+  subroutine xgBlock_colwiseMulR(xgBlock, vec, shift, use_gpu_cuda)
 
-    type(xgBlock_t) , intent(inout) :: xgBlock
-    double precision, intent(in   ) :: vec(:)
-    integer, intent(in   )          :: shift
+    type(xgBlock_t) , intent(inout)           :: xgBlock
+    double precision, intent(in   ), target   :: vec(:)
+    integer,          intent(in   )           :: shift
+    integer,          intent(in   ), optional :: use_gpu_cuda
+
     integer :: rows
     integer :: iblock
+    integer :: l_use_gpu_cuda = 0
 
     rows = size(vec,dim=1)
 
-    select case(xgBlock%space)
-    case (SPACE_R,SPACE_CR)
-      !$omp parallel do shared(xgBlock,vec), &
-      !$omp& schedule(static)
-      do iblock = 1, xgBlock%cols
-        xgBlock%vecR(shift+1:min(xgBlock%rows,shift+rows),iblock) = &
-          xgBlock%vecR(shift+1:min(xgBlock%rows,shift+rows),iblock) * vec(1:min(xgBlock%rows-shift,rows))
-      end do
-    case (SPACE_C)
-      !$omp parallel do shared(xgBlock,vec), &
-      !$omp& schedule(static)
-      do iblock = 1, xgBlock%cols
-        xgBlock%vecC(shift+1:min(xgBlock%rows,shift+rows),iblock) = &
-          xgBlock%vecC(shift+1:min(xgBlock%rows,shift+rows),iblock) * vec(1:min(xgBlock%rows-shift,rows))
-      end do
-    end select
+    ! if optional parameter is present, use it
+    ! else use default value, i.e. don't use GPU
+    if (present(use_gpu_cuda)) then
+      l_use_gpu_cuda = use_gpu_cuda
+    end if
+
+    if (l_use_gpu_cuda==1) then
+
+      select case(xgBlock%space)
+      case (SPACE_R,SPACE_CR)
+        call compute_colwiseMul_scalar_scalar(c_loc(xgBlock%vecR), c_loc(vec), &
+          &                                   shift, xgBlock%rows, xgBlock%cols, &
+          &                                   xgBlock%ldim, rows)
+      case (SPACE_C)
+        call compute_colwiseMul_cplx_scalar(c_loc(xgBlock%vecC), c_loc(vec), &
+          &                                 shift, xgBlock%rows, xgBlock%cols, &
+          &                                 xgBlock%ldim, rows)
+      end select
+
+    else
+
+      select case(xgBlock%space)
+      case (SPACE_R,SPACE_CR)
+        !$omp parallel do shared(xgBlock,vec), &
+        !$omp& schedule(static)
+        do iblock = 1, xgBlock%cols
+          xgBlock%vecR(shift+1:min(xgBlock%rows,shift+rows),iblock) = &
+            xgBlock%vecR(shift+1:min(xgBlock%rows,shift+rows),iblock) * vec(1:min(xgBlock%rows-shift,rows))
+        end do
+      case (SPACE_C)
+        !$omp parallel do shared(xgBlock,vec), &
+        !$omp& schedule(static)
+        do iblock = 1, xgBlock%cols
+          xgBlock%vecC(shift+1:min(xgBlock%rows,shift+rows),iblock) = &
+            xgBlock%vecC(shift+1:min(xgBlock%rows,shift+rows),iblock) * vec(1:min(xgBlock%rows-shift,rows))
+        end do
+      end select
+
+    end if
 
   end subroutine xgBlock_colwiseMulR
   !!***
@@ -2199,27 +2225,51 @@ contains
   !! NAME
   !! xgBlock_colwiseMulC
 
-  subroutine xgBlock_colwiseMulC(xgBlock, vec, shift)
+  subroutine xgBlock_colwiseMulC(xgBlock, vec, shift, use_gpu_cuda)
 
-    type(xgBlock_t), intent(inout) :: xgBlock
-    complex(kind=8), intent(in   ) :: vec(:)
-    integer, intent(in   )         :: shift
+    type(xgBlock_t), intent(inout)           :: xgBlock
+    complex(kind=8), intent(in   ), target   :: vec(:)
+    integer,         intent(in   )           :: shift
+    integer,         intent(in   ), optional :: use_gpu_cuda
+
     integer :: rows
     integer :: iblock
+    integer :: l_use_gpu_cuda = 0
 
     rows = size(vec,dim=1)
 
-    select case(xgBlock%space)
-    case (SPACE_R,SPACE_CR)
-      ABI_ERROR("Error colwiseMulC")
-    case (SPACE_C)
-      !$omp parallel do shared(xgBlock,vec), &
-      !$omp& schedule(static)
-      do iblock = 1, xgBlock%cols
-        xgBlock%vecC(shift+1:min(xgBlock%rows,shift+rows),iblock) = &
-          xgBlock%vecC(shift+1:min(xgBlock%rows,shift+rows),iblock) * vec(1:min(xgBlock%rows-shift,rows))
-      end do
-    end select
+    ! if optional parameter is present, use it
+    ! else use default value, i.e. don't use GPU
+    if (present(use_gpu_cuda)) then
+      l_use_gpu_cuda = use_gpu_cuda
+    end if
+
+    if (l_use_gpu_cuda==1) then
+
+      select case(xgBlock%space)
+      case (SPACE_R,SPACE_CR)
+        ABI_ERROR("Error colwiseMulC")
+      case (SPACE_C)
+        call compute_colwiseMul_cplx_cplx(c_loc(xgBlock%vecC), c_loc(vec), &
+          &                               shift, xgBlock%rows, xgBlock%cols, &
+          &                               xgBlock%ldim, rows)
+      end select
+
+    else
+
+      select case(xgBlock%space)
+      case (SPACE_R,SPACE_CR)
+        ABI_ERROR("Error colwiseMulC")
+      case (SPACE_C)
+        !$omp parallel do shared(xgBlock,vec), &
+        !$omp& schedule(static)
+        do iblock = 1, xgBlock%cols
+          xgBlock%vecC(shift+1:min(xgBlock%rows,shift+rows),iblock) = &
+            xgBlock%vecC(shift+1:min(xgBlock%rows,shift+rows),iblock) * vec(1:min(xgBlock%rows-shift,rows))
+        end do
+      end select
+
+    end if
 
   end subroutine xgBlock_colwiseMulC
   !!***

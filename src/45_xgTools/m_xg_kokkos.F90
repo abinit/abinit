@@ -224,6 +224,35 @@ module m_xg_kokkos
       integer(kind=c_int32_t), value, intent(in) :: rows, cols, ldim
     end subroutine compute_colwiseCymax_cplx
 
+    ! ========================================================================
+    ! ========================================================================
+    subroutine compute_colwiseMul_scalar_scalar(data_ptr, vec_ptr, shift, rows, cols, ldim, vec_size) &
+      & bind(c, name='compute_colwiseMul_scalar_scalar_kokkos_cpp')
+      use, intrinsic :: iso_c_binding
+      implicit none
+      type(c_ptr)            , value             :: data_ptr
+      type(c_ptr)            , value             :: vec_ptr
+      integer(kind=c_int32_t), value, intent(in) :: shift, rows, cols, ldim, vec_size
+    end subroutine compute_colwiseMul_scalar_scalar
+
+    subroutine compute_colwiseMul_cplx_scalar(data_ptr, vec_ptr, shift, rows, cols, ldim, vec_size) &
+      & bind(c, name='compute_colwiseMul_cplx_scalar_kokkos_cpp')
+      use, intrinsic :: iso_c_binding
+      implicit none
+      type(c_ptr)            , value             :: data_ptr
+      type(c_ptr)            , value             :: vec_ptr
+      integer(kind=c_int32_t), value, intent(in) :: shift, rows, cols, ldim, vec_size
+    end subroutine compute_colwiseMul_cplx_scalar
+
+    subroutine compute_colwiseMul_cplx_cplx(data_ptr, vec_ptr, shift, rows, cols, ldim, vec_size) &
+      & bind(c, name='compute_colwiseMul_cplx_cplx_kokkos_cpp')
+      use, intrinsic :: iso_c_binding
+      implicit none
+      type(c_ptr)            , value             :: data_ptr
+      type(c_ptr)            , value             :: vec_ptr
+      integer(kind=c_int32_t), value, intent(in) :: shift, rows, cols, ldim, vec_size
+    end subroutine compute_colwiseMul_cplx_cplx
+
   end interface
 
 contains

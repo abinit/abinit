@@ -189,7 +189,7 @@ void compute_colwiseCymax_kokkos_cpp(
   using policy = Kokkos::MDRangePolicy< Kokkos::Rank<2> >;
 
   Kokkos::parallel_for(
-    "add_array_kokkos_kernel",
+    "colwiseCymax_kokkos_kernel",
     policy({0,0},{rows,cols}),
     KOKKOS_LAMBDA(const int32_t i, const int32_t j)
     {
@@ -197,5 +197,46 @@ void compute_colwiseCymax_kokkos_cpp(
     });
 
 } // compute_colwiseCymax_kokkos_cpp
+
+// =====================================================================
+/**
+ * Compute colwiseMul (see fortran subroutine xgBlock_colwiseMulR / xgBlock_colwiseMulC in
+ * m_xg.F90).
+ *
+ * \param[in,out] data_ptr pointer to an array (xgBlock vecR / vecC)
+ * \param[in    ] vec_ptr pointer
+ * \param[in    ] shift
+ * \param[in    ] rows
+ * \param[in    ] cols
+ * \param[in    ] ldim
+ * \param[in    ] vec_size
+ */
+template<typename value_t, typename value2_t>
+void compute_colwiseMul_kokkos_cpp(
+  value_t        *data_ptr,
+  const value2_t *vec_ptr,
+  const int32_t  shift,
+  const int32_t  rows,
+  const int32_t  cols,
+  const int32_t  ldim,
+  const int32_t  vec_size)
+{
+
+  // create data views
+  auto data = AbiView_2d<value_t>       (data_ptr, ldim, cols);
+  auto vec  = AbiView_1d_const<value2_t>(vec_ptr, vec_size);
+
+  // perform parallel computation on device
+  using policy = Kokkos::MDRangePolicy< Kokkos::Rank<2> >;
+
+  Kokkos::parallel_for(
+    "colwiseMul_kokkos_kernel",
+    policy({shift,0}, {std::min(rows, shift+vec_size),cols}),
+    KOKKOS_LAMBDA(const int32_t i, const int32_t j)
+    {
+      data(i,j) *= vec(i-shift);
+    });
+
+} // compute_colwiseMul_kokkos_cpp
 
 #endif // M_XG_KOKKOS_H
