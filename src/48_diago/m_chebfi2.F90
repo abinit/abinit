@@ -499,9 +499,10 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,mpi_enreg)
    end subroutine getBm1X
  end interface
  interface
-   subroutine pcond(W)
+   subroutine pcond(W, use_gpu_cuda)
      use m_xg, only : xgBlock_t
-     type(xgBlock_t), intent(inout) :: W
+     type(xgBlock_t), intent(inout)           :: W
+     integer        , intent(in   ), optional :: use_gpu_cuda
    end subroutine pcond
  end interface
 
@@ -1031,10 +1032,10 @@ subroutine chebfi_rayleighRitz(chebfi,nline)
   if (chebfi%paral_kgb == 1 .and. xmpi_comm_size(chebfi%spacecom) > 1) then
     call xg_free(chebfi%X_NP)
 
-    call xg_init(chebfi%X_NP,space,spacedim,2*neigenpairs,chebfi%spacecom)
+    call xg_init(chebfi%X_NP, space, spacedim, 2*neigenpairs, chebfi%spacecom)
 
-    call xg_setBlock(chebfi%X_NP,chebfi%X_next,1,spacedim,neigenpairs)
-    call xg_setBlock(chebfi%X_NP,chebfi%X_prev,neigenpairs+1,spacedim,neigenpairs)
+    call xg_setBlock(chebfi%X_NP, chebfi%X_next,             1,spacedim,neigenpairs)
+    call xg_setBlock(chebfi%X_NP, chebfi%X_prev, neigenpairs+1,spacedim,neigenpairs)
     call xgBlock_zero(chebfi%X_NP%self, chebfi%use_gpu_cuda)
   end if
   call timab(tim_RR_XNP_reset,2,tsec)
@@ -1042,16 +1043,16 @@ subroutine chebfi_rayleighRitz(chebfi,nline)
   call timab(tim_RR_gemm_2,1,tsec)
   if (remainder == 1) then
     call xgBlock_setBlock(chebfi%X_next, chebfi%AX_swap, 1, spacedim, neigenpairs)
-    call xgBlock_setBlock(chebfi%X, chebfi%BX_swap, 1, spacedim, neigenpairs)
-    call xgBlock_setBlock(chebfi%X_prev, chebfi%X_swap, 1, spacedim, neigenpairs)
+    call xgBlock_setBlock(chebfi%X,      chebfi%BX_swap, 1, spacedim, neigenpairs)
+    call xgBlock_setBlock(chebfi%X_prev, chebfi%X_swap,  1, spacedim, neigenpairs)
 
     call xgBlock_gemm(chebfi%X%normal, A_und_X%self%normal, 1.0d0, &
       chebfi%X, A_und_X%self, 0.d0, chebfi%X_swap, use_gpu_cuda=chebfi%use_gpu_cuda)
 
   else if (remainder == 2) then
     call xgBlock_setBlock(chebfi%X_prev, chebfi%AX_swap, 1, spacedim, neigenpairs)
-    call xgBlock_setBlock(chebfi%X, chebfi%BX_swap, 1, spacedim, neigenpairs)
-    call xgBlock_setBlock(chebfi%X_next, chebfi%X_swap, 1, spacedim, neigenpairs)
+    call xgBlock_setBlock(chebfi%X,      chebfi%BX_swap, 1, spacedim, neigenpairs)
+    call xgBlock_setBlock(chebfi%X_next, chebfi%X_swap,  1, spacedim, neigenpairs)
 
     call xgBlock_gemm(chebfi%X%normal, A_und_X%self%normal, 1.0d0, &
       chebfi%X, A_und_X%self, 0.d0, chebfi%X_swap, use_gpu_cuda=chebfi%use_gpu_cuda)
@@ -1118,9 +1119,10 @@ real(dp) function chebfi_computeResidue(chebfi, residu, pcond)
   type(chebfi_t)  , intent(inout) :: chebfi
   type(xgBlock_t) , intent(inout) :: residu
   interface
-    subroutine pcond(W)
+    subroutine pcond(W, use_gpu_cuda)
       use m_xg, only : xgBlock_t
-      type(xgBlock_t), intent(inout) :: W
+      type(xgBlock_t), intent(inout)           :: W
+      integer        , intent(in   ), optional :: use_gpu_cuda
     end subroutine pcond
   end interface
 
@@ -1134,14 +1136,14 @@ real(dp) function chebfi_computeResidue(chebfi, residu, pcond)
   ! *********************************************************************
 
   if (chebfi%paw) then
-    call xgBlock_colwiseCymax(chebfi%AX_swap,chebfi%eigenvalues,chebfi%BX_swap,chebfi%AX_swap)
+    call xgBlock_colwiseCymax(chebfi%AX_swap, chebfi%eigenvalues, chebfi%BX_swap, chebfi%AX_swap, chebfi%use_gpu_cuda)
   else
-    call xgBlock_colwiseCymax(chebfi%AX_swap,chebfi%eigenvalues,chebfi%X_swap,chebfi%AX_swap)
+    call xgBlock_colwiseCymax(chebfi%AX_swap, chebfi%eigenvalues, chebfi%X_swap,  chebfi%AX_swap, chebfi%use_gpu_cuda)
   end if
 
   ! pcond call
   call timab(tim_pcond,1,tsec)
-  call pcond(chebfi%AX_swap)
+  call pcond(chebfi%AX_swap, chebfi%use_gpu_cuda)
   call timab(tim_pcond,2,tsec)
 
   call xgBlock_colwiseNorm2(chebfi%AX_swap, residu, max_val=maxResidu, max_elt=eigResiduMax,&

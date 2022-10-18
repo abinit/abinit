@@ -57,7 +57,12 @@ module m_chebfiwf
  use m_nvtx_data
 #endif
 
- use, intrinsic :: iso_c_binding, only: c_associated,c_loc,c_ptr,c_f_pointer
+#if defined(HAVE_YAKL)
+ use gator_mod
+ use m_gpu_toolbox
+#endif
+
+ use, intrinsic :: iso_c_binding, only: c_associated,c_loc,c_ptr,c_f_pointer,c_double,c_size_t
 
  use m_xmpi
  use m_xomp
@@ -85,7 +90,13 @@ module m_chebfiwf
  integer, save :: l_paral_kgb
  integer, save :: l_useria
  integer, save :: l_block_sliced
- real(dp), allocatable,save ::  l_pcon(:)
+
+#if defined HAVE_GPU && defined HAVE_YAKL
+ real(kind=c_double), ABI_CONTIGUOUS pointer, save :: l_pcon(:)
+#else
+ real(dp),            allocatable,            save :: l_pcon(:)
+#endif
+
  type(mpi_type),pointer,save :: l_mpi_enreg
  type(gs_hamiltonian_type),pointer,save :: l_gs_hamk
 
@@ -130,7 +141,7 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
 
  implicit none
 
-!Arguments ------------------------------------
+ ! Arguments ------------------------------------
  integer,intent(in) :: nband,npw,prtvol,nspinor
  type(mpi_type),target,intent(inout) :: mpi_enreg
  real(dp),target,intent(inout) :: cg(2,npw*nspinor*nband)
@@ -141,24 +152,29 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  type(dataset_type),intent(in) :: dtset
  type(gs_hamiltonian_type),target,intent(inout) :: gs_hamk
 
-!Local variables-------------------------------
-!scalars
+ ! Local variables-------------------------------
+ ! scalars
  integer, parameter :: tim_chebfiwf2 = 1750
  integer :: ipw,space,blockdim,nline,total_spacedim,ierr,nthreads
  real(dp) :: cputime,walltime,localmem
  type(c_ptr) :: cptr
  type(chebfi_t) :: chebfi
  type(xgBlock_t) :: xgx0,xgeigen,xgresidu
-!arrays
+ ! arrays
  real(dp) :: tsec(2),chebfiMem(2)
  real(dp),pointer :: eig_ptr(:,:) => NULL()
  real(dp),pointer :: resid_ptr(:,:) => NULL()
  real(dp), allocatable :: l_gvnlxc(:,:)
 
- !Stupid things for NC
+ ! Stupid things for NC
  integer,parameter :: choice=1, paw_opt=0, signs=1
  real(dp) :: gsc_dummy(0,0)
  type(pawcprj_type) :: cprj_dum(gs_hamk%natom,0)
+
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
+ ! other
+ integer(kind=c_size_t) :: l_pcon_size_bytes
+#endif
 
 ! *********************************************************************
 
@@ -220,8 +236,12 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
    write(std_out,'(4x,A,F10.6,1x,A)') "Temporary memory in m_chebfi : ",(chebfiMem(2))/1e9,"GB"
  end if
 
-!For preconditionning
+ !For preconditionning
+#if defined HAVE_GPU && defined HAVE_YAKL
+ ABI_MALLOC_MANAGED(l_pcon, (/l_icplx*npw/))
+#else
  ABI_MALLOC(l_pcon,(1:l_icplx*npw))
+#endif
 
 !$omp parallel do schedule(static), shared(l_pcon,kinpw)
  do ipw=1-1,l_icplx*npw-1
@@ -232,6 +252,14 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
 &    / (27+kinpw(ipw/l_icplx+1)*(18+kinpw(ipw/l_icplx+1)*(12+8*kinpw(ipw/l_icplx+1))) + 16*kinpw(ipw/l_icplx+1)**4)
    end if
  end do
+
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
+ if(l_gs_hamk%use_gpu_cuda==1) then
+   ! upload l_pcon to device / gpu
+   l_pcon_size_bytes =l_icplx * npw * dp
+   call gpu_data_prefetch_async(C_LOC(l_pcon), l_pcon_size_bytes)
+ end if
+#endif
 
  call xgBlock_map(xgx0,cg,space,l_icplx*l_npw*l_nspinor,nband,l_mpi_enreg%comm_bandspinorfft)
 
@@ -283,7 +311,11 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  call chebfi_run(chebfi,xgx0,getghc_gsc1,getBm1X,precond1,xgeigen,xgresidu,l_mpi_enreg)
 
 !Free preconditionning since not needed anymore
+#if defined HAVE_GPU && defined HAVE_YAKL
+ ABI_FREE_MANAGED(l_pcon)
+#else
  ABI_FREE(l_pcon)
+#endif
 
 !Compute enlout (nonlocal energy for each band if necessary) This is the best
 !  quick and dirty trick to compute this part in NC. gvnlc cannot be part of
@@ -574,22 +606,31 @@ end subroutine getBm1X
 !!
 !! SOURCE
 
-subroutine precond1(W)
+subroutine precond1(W, use_gpu_cuda)
 
  implicit none
 
-!Arguments ------------------------------------
- type(xgBlock_t), intent(inout) :: W
+ ! Arguments ------------------------------------
+ type(xgBlock_t), intent(inout)           :: W
+ integer        , intent(in   ), optional :: use_gpu_cuda
 
-!Local variables-------------------------------
-!scalars
+
+ ! Local variables-------------------------------
+ ! scalars
  integer :: ispinor
+ integer :: l_use_gpu_cuda = 0
 
-! *********************************************************************
+ ! *********************************************************************
 
-!Precondition resid_vec
+ ! if optional parameter is present, use it
+ ! else use default value, i.e. don't use GPU
+ if (present(use_gpu_cuda)) then
+   l_use_gpu_cuda = use_gpu_cuda
+ end if
+
+ ! Precondition resid_vec
  do ispinor = 1,l_nspinor
-   call xgBlock_colwiseMul(W,l_pcon,l_icplx*l_npw*(ispinor-1))
+   call xgBlock_colwiseMul(W, l_pcon, l_icplx*l_npw*(ispinor-1), l_use_gpu_cuda)
  end do
 
 end subroutine precond1
