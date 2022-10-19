@@ -389,22 +389,26 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  real(dp) :: dielar(7),dphase_k(3),kpoint(3),qpt(3),rhodum(1),tsec(2),ylmgr_dum(0,0,0)
  real(dp),allocatable :: EigMin(:,:),buffer1(:),buffer2(:),cgq(:,:)
  real(dp),allocatable :: cgrkxc(:,:),cgrvtrial(:,:),doccde(:)
- real(dp),allocatable :: dphasek(:,:),eig_k(:),ek_k(:),ek_k_nd(:,:,:),eknk(:),eknk_nd(:,:,:,:,:),end_k(:)
+ real(dp),allocatable :: dphasek(:,:),ek_k(:),ek_k_nd(:,:,:),eknk(:),eknk_nd(:,:,:,:,:),end_k(:)
  real(dp),allocatable :: enlx_k(:),enlxnk(:),focknk(:),fockfornk(:,:,:),ffnl(:,:,:,:),grnl_k(:,:), xcart(:,:)
  real(dp),allocatable :: grnlnk(:,:)
 
 #if defined HAVE_GPU && defined HAVE_YAKL
- real(c_double), ABI_CONTIGUOUS pointer :: kinpw(:)
+ real(c_double), ABI_CONTIGUOUS pointer :: kinpw(:) => null()
+ real(c_double), ABI_CONTIGUOUS pointer :: eig_k(:) => null()
 #else
  real(dp),allocatable :: kinpw(:)
+ real(dp),allocatable :: eig_k(:)
 #endif
 
  real(dp),allocatable :: kpg_k(:,:),occ_k(:),ph3d(:,:,:)
- real(dp),allocatable :: pwnsfacq(:,:),resid_k(:)
+ real(dp),allocatable :: pwnsfacq(:,:)
 
 #if defined HAVE_GPU && defined HAVE_YAKL
- real(real64), ABI_CONTIGUOUS pointer :: rhoaug(:,:,:,:) => null()
+ real(c_double), ABI_CONTIGUOUS pointer :: resid_k(:) => null()
+ real(c_double), ABI_CONTIGUOUS pointer :: rhoaug(:,:,:,:) => null()
 #else
+ real(dp),allocatable :: resid_k(:)
  real(dp),allocatable :: rhoaug(:,:,:,:)
 #endif
 
@@ -850,15 +854,21 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !         call bandfft_kpt_set_ikpt(ikpt,mpi_enreg)
 !       end if
 
-       ABI_MALLOC(eig_k,(nband_k))
        ABI_MALLOC(ek_k,(nband_k))
        ABI_MALLOC(end_k,(nband_k))
        ABI_MALLOC(enlx_k,(nband_k))
        ABI_MALLOC(ek_k_nd,(2,nband_k,nband_k*paw_dmft%use_dmft))
        ABI_MALLOC(occ_k,(nband_k))
-       ABI_MALLOC(resid_k,(nband_k))
        ABI_MALLOC(zshift,(nband_k))
        ABI_MALLOC(grnl_k,(3*natom,nband_k*optforces))
+
+#if defined HAVE_GPU && defined HAVE_YAKL
+       ABI_MALLOC_MANAGED(eig_k,(/nband_k/))
+       ABI_MALLOC_MANAGED(resid_k,(/nband_k/))
+#else
+       ABI_MALLOC(eig_k,(nband_k))
+       ABI_MALLOC(resid_k,(nband_k))
+#endif
 
        eig_k(:)=zero
        ek_k(:)=zero
@@ -1075,15 +1085,21 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
        call timab(985,2,tsec)
 
-       ABI_FREE(eig_k)
        ABI_FREE(ek_k)
        ABI_FREE(ek_k_nd)
        ABI_FREE(end_k)
        ABI_FREE(grnl_k)
        ABI_FREE(occ_k)
-       ABI_FREE(resid_k)
        ABI_FREE(zshift)
        ABI_FREE(enlx_k)
+
+#if defined HAVE_GPU && defined HAVE_YAKL
+       ABI_FREE_MANAGED(eig_k)
+       ABI_FREE_MANAGED(resid_k)
+#else
+       ABI_FREE(eig_k)
+       ABI_FREE(resid_k)
+#endif
 
 !      Keep track of total number of bands (all k points so far, even for k points not treated by me)
        bdtot_index=bdtot_index+nband_k
