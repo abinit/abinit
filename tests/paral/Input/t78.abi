@@ -59,6 +59,10 @@ kptgw3   0.0  0.0  0.0
 bdgw3    24  25
          24  25
 
+# Spectral function (very coarse grid to reduce txt file size)
+nfreqsp3 50
+freqspmax3 5 eV
+
 #################### COMMON PART #########################
 
 nstep    20
