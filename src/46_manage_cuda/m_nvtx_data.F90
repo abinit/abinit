@@ -28,7 +28,7 @@ module m_nvtx_data
 
   logical :: nvtx_activated = .false.
 
-  integer, parameter :: NUMBER_OF_NVTX_REGIONS = 35
+  integer, parameter :: NUMBER_OF_NVTX_REGIONS = 43
   character(len=32), dimension(NUMBER_OF_NVTX_REGIONS) :: nvtx_names
   integer          , dimension(NUMBER_OF_NVTX_REGIONS) :: nvtx_ids
 
@@ -67,6 +67,14 @@ module m_nvtx_data
   integer, parameter :: NVTX_VTOWFK_EXTRA1 = 33
   integer, parameter :: NVTX_VTOWFK_EXTRA2 = 34
   integer, parameter :: NVTX_VTORHO_EXTRA = 35
+  integer, parameter :: NVTX_SCFCV_PAWKNHAT = 36
+  integer, parameter :: NVTX_SCFCV_RHOTOV = 37
+  integer, parameter :: NVTX_SCFCV_NEWRHO = 38
+  integer, parameter :: NVTX_SCFCV_PAWDENPOT = 39
+  integer, parameter :: NVTX_SCFCV_ETOTFOR = 40
+  integer, parameter :: NVTX_SCFCV_SCPRQT = 41
+  integer, parameter :: NVTX_SCFCV_DIJ = 42
+  integer, parameter :: NVTX_SCFCV_SETVTR = 43
 
 contains
 
@@ -116,7 +124,15 @@ contains
          & "CHEBFI2_GET_AX_BX", &
          & "VTOWFK_EXTRA1", &
          & "VTOWFK_EXTRA2", &
-         & "VTORHO_EXTRA" &
+         & "VTORHO_EXTRA", &
+         & "SCFCV_PAWKNHAT", &
+         & "SCFCV_RHOTOV", &
+         & "SCFCV_NEWRHO", &
+         & "SCFCV_PAWDENPOT", &
+         & "SCFCV_ETOTFOR", &
+         & "SCFCV_SCPRQT", &
+         & "SCFCV_DIJ", &
+         & "SCFCV_SETVTR" &
          ]
 
     nvtx_ids(1) = NVTX_MAIN_COMPUTATION
@@ -154,6 +170,14 @@ contains
     nvtx_ids(33)= NVTX_VTOWFK_EXTRA1
     nvtx_ids(34)= NVTX_VTOWFK_EXTRA2
     nvtx_ids(35)= NVTX_VTORHO_EXTRA
+    nvtx_ids(36)= NVTX_SCFCV_PAWKNHAT
+    nvtx_ids(37)= NVTX_SCFCV_RHOTOV
+    nvtx_ids(38)= NVTX_SCFCV_NEWRHO
+    nvtx_ids(39)= NVTX_SCFCV_PAWDENPOT
+    nvtx_ids(40)= NVTX_SCFCV_ETOTFOR
+    nvtx_ids(41)= NVTX_SCFCV_SCPRQT
+    nvtx_ids(42)= NVTX_SCFCV_DIJ
+    nvtx_ids(42)= NVTX_SCFCV_SETVTR
 
   end subroutine nvtx_init
 
