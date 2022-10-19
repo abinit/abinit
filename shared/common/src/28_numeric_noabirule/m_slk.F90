@@ -3922,63 +3922,90 @@ end subroutine slk_zdhp_invert
 !! Beta is a scalar, sub( C ) is an m by n submatrix, and sub( A ) is an n by m submatrix.
 !!
 !! INPUTS
+!!  [ija(2)] : (global) The row and column indices in the distributed matrix in_mat indicating
+!!       the first row and the first column of the submatrix sub(A), respectively.
+!!  [ijc(2)]: (global) The row and column indices in the distributed matrix out_mat
+!!   indicating the first row and the first column of the submatrix sub(C), respectively.
 !!
 !! OUTPUT
 !!
 !! SOURCE
 
-subroutine slk_ptrans(in_mat, trans, out_mat)
+subroutine slk_ptrans(in_mat, trans, out_mat, &
+                      out_gshape, ija, ijc, size_blocs, alpha, beta) ! optional
 
 !Arguments ------------------------------------
  class(matrix_scalapack), intent(in) :: in_mat
  character(len=1),intent(in) :: trans
  class(matrix_scalapack), intent(inout) :: out_mat
+ integer,optional,intent(in) :: out_gshape(2), size_blocs(2), ija(2), ijc(2)
+ complex(dp),optional,intent(in) :: alpha, beta
 
 !Local variables-------------------------------
- integer :: istwf_k, sb, size_blocs(2)
- !real(dp) :: cpu, wall, gflops
+ integer :: istwf_k, sb, mm, nn, size_blocs__(2)
+ real(dp) :: ralpha__, rbeta__ !, cpu, wall, gflops
+ integer :: ija__(2), ijc__(2)
+ complex(dp) :: calpha__, cbeta__
 
 ! *************************************************************************
 
  !call cwtime(cpu, wall, gflops, "start")
-
  istwf_k = merge(1, 2, allocated(in_mat%buffer_cplx))
 
- size_blocs(1) = in_mat%sizeb_global(2)
- sb = in_mat%sizeb_global(1) / in_mat%processor%grid%dims(2)
- if (mod(in_mat%sizeb_global(1), in_mat%processor%grid%dims(2)) /= 0) sb = sb + 1
- size_blocs(2) = sb
+ ija__ = [1, 1]; if (present(ija)) ija__ = ija
+ ijc__ = [1, 1]; if (present(ijc)) ijc__ = ijc
 
- call out_mat%init(in_mat%sizeb_global(2), in_mat%sizeb_global(1), in_mat%processor, istwf_k, &
-                   size_blocs=size_blocs)
+ ! transposed output (sub)matrix has shape (nn, mm)
+ if (present(out_gshape)) then
+   nn = out_gshape(1)
+   mm = out_gshape(2)
+ else
+   nn = in_mat%sizeb_global(2)
+   mm = in_mat%sizeb_global(1)
+ end if
 
- ! prototype
- !call pdtran(m, n, alpha, a, ia, ja, desca, beta, c, ic, jc, descc)
+ if (present(size_blocs)) then
+   size_blocs__ = size_blocs
+ else
+   ! FIXME: This can cause problems if I start to use round-robin distribution in GWR!!!!!
+   size_blocs__(1) = in_mat%sizeb_global(2)
+   sb = in_mat%sizeb_global(1) / in_mat%processor%grid%dims(2)
+   if (mod(in_mat%sizeb_global(1), in_mat%processor%grid%dims(2)) /= 0) sb = sb + 1
+   size_blocs__(2) = sb
+   !size_blocs__(2) = in_mat%sizeb_blocs(1)
+   !size_blocs__(1) = in_mat%sizeb_blocs(2)
+ end if
+
+ call out_mat%init(nn, mm, in_mat%processor, istwf_k, size_blocs=size_blocs__)
+
+ ! prototype: call pdtran(m, n, alpha, a, ia, ja, desca, beta, c, ic, jc, descc)
 
  if (allocated(in_mat%buffer_cplx)) then
 #ifdef HAVE_LINALG_SCALAPACK
-   ! Transposes a complex distributed matrix, conjugated
-   ! sub(C) := beta * sub(C) + alpha * conjg(sub(A)')
    select case (trans)
    case ("N")
      ! sub(C):=beta*sub(C) + alpha*sub(A)',
-     !out_mat%buffer_cplx = transpose(in_mat%buffer_cplx); return
-     call pztranu(in_mat%sizeb_global(2), in_mat%sizeb_global(1), cone, in_mat%buffer_cplx, 1, 1, &
-                  in_mat%descript%tab, czero, out_mat%buffer_cplx, 1, 1, out_mat%descript%tab)
+     calpha__ = cone; if (present(alpha)) calpha__ = alpha
+     cbeta__ = czero; if (present(beta)) cbeta__ = beta
+     call pztranu(nn, mm, calpha__, in_mat%buffer_cplx, ija__(1), ija__(2), &
+                  in_mat%descript%tab, cbeta__, out_mat%buffer_cplx, ijc__(1), ijc__(2), out_mat%descript%tab)
 
    case ("C")
-     !out_mat%buffer_cplx = conjg(transpose(in_mat%buffer_cplx)); return
-     call pztranc(in_mat%sizeb_global(2), in_mat%sizeb_global(1), cone, in_mat%buffer_cplx, 1, 1, &
-                  in_mat%descript%tab, czero, out_mat%buffer_cplx, 1, 1, out_mat%descript%tab)
+     ! sub(C) := beta * sub(C) + alpha * conjg(sub(A)')
+     calpha__ = cone; if (present(alpha)) calpha__ = alpha
+     cbeta__ = czero; if (present(beta)) cbeta__ = beta
+     call pztranc(nn, mm, calpha__, in_mat%buffer_cplx, ija__(1), ija__(2), &
+                  in_mat%descript%tab, cbeta__, out_mat%buffer_cplx, ijc__(1), ijc__(2), out_mat%descript%tab)
 
    case default
      ABI_ERROR(sjoin("Invalid value for trans:", trans))
    end select
 
  else if (allocated(in_mat%buffer_real)) then
-
-     call pdtran(in_mat%sizeb_global(2), in_mat%sizeb_global(1), one, in_mat%buffer_real, 1, 1, &
-                 in_mat%descript%tab, zero, out_mat%buffer_real, 1, 1, out_mat%descript%tab)
+     ralpha__ = one; if (present(alpha)) ralpha__ = real(alpha)
+     rbeta__ = zero; if (present(beta)) rbeta__ = real(beta)
+     call pdtran(nn, mm, ralpha__, in_mat%buffer_real, ija__(1), ija__(2), &
+                 in_mat%descript%tab, rbeta__, out_mat%buffer_real, ijc__(1), ijc__(2), out_mat%descript%tab)
 #endif
  else
    ABI_ERROR("Neither buffer_cplx nor buffer_real are allocated!")
@@ -4181,7 +4208,7 @@ subroutine slk_take_from(out_mat, source, ija, ijb)
 
    ABI_CHECK_IEQ(istwfk_1, istwfk_2, "istwfk_mat /= istwfk_source")
    if (any(out_mat%sizeb_global /= source%sizeb_global)) then
-     msg = sjoin("Matrices should have same global shape! out_mat:", ltoa(out_mat%sizeb_global), &
+     msg = sjoin("Matrices should have same global shape but out_mat:", ltoa(out_mat%sizeb_global), &
                  "source:", ltoa(source%sizeb_global))
      ABI_ERROR(msg)
    end if
@@ -4239,8 +4266,7 @@ subroutine slk_zcollect(in_mat, mm, nn, ija, out_carr)
  if (in_mat%processor%grid%nbprocs == 1) then
    ! Copy buffer and return
    ABI_MALLOC(out_carr, (mm, nn))
-   out_carr(:,:) = in_mat%buffer_cplx(ija(1):ija(1)+mm-1, ija(2):ija(2)+nn-1)
-   return
+   out_carr(:,:) = in_mat%buffer_cplx(ija(1):ija(1)+mm-1, ija(2):ija(2)+nn-1); return
  end if
 
  ! Two-step algorithm:
@@ -4269,6 +4295,9 @@ subroutine slk_zcollect(in_mat, mm, nn, ija, out_carr)
    ABI_MALLOC(out_carr, (mm, nn))
  end if
 
+ !if (present(request)) then
+ !call xmpi_ibcast(out_carr, master, in_mat%processor%comm, request, ierr)
+ !else
  call xmpi_bcast(out_carr, master, in_mat%processor%comm, ierr)
 
 end subroutine slk_zcollect
