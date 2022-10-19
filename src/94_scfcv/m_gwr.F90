@@ -4634,10 +4634,9 @@ if (gwr%use_supercell_for_sigma) then
    ABI_MALLOC(ur, (gwr%g_nfft * gwr%nspinor))
    ABI_MALLOC(uc_ceikr, (gwr%g_nfft * gwr%nspinor))
 
-   ABI_MALLOC_OR_DIE(sc_psi_bk, (sc_nfft * gwr%nspinor, bmin:bmax, gwr%nkcalc), ierr)
+   !ABI_MALLOC_OR_DIE(sc_psi_bk, (sc_nfft * gwr%nspinor, bmin:bmax, gwr%nkcalc), ierr)
    ! FIXME [0] <var=sc_psi_bk, A@m_gwr.F90:4584, addr=0x14baea03d010, size_mb=637.875>
-
-   ABI_MALLOC(sc_ceikr, (sc_nfft * gwr%nspinor))
+   !ABI_MALLOC(sc_ceikr, (sc_nfft * gwr%nspinor))
 
    ! Precompute one-dimensional factors to get 3d e^{ik.L}
    call get_1d_scphases(gwr%ngkpt, gwr%nkcalc, gwr%kcalc, scph1d_kcalc)
@@ -4647,7 +4646,7 @@ if (gwr%use_supercell_for_sigma) then
      ikcalc_ibz = gwr%kcalc2ibz(ikcalc, 1)  ! TODO: Assuming wfs in IBZ
 
      ! Compute e^{ik.r} phases on the two FFT meshes: super cell and unit cell.
-     call calc_sc_ceikr(kcalc_bz, gwr%ngkpt, gwr%g_ngfft, gwr%nspinor, sc_ceikr)
+     !call calc_sc_ceikr(kcalc_bz, gwr%ngkpt, gwr%g_ngfft, gwr%nspinor, sc_ceikr)
      call calc_ceikr(kcalc_bz, gwr%g_ngfft, gwr%g_nfft, gwr%nspinor, uc_ceikr)
 
      do band=gwr%bstart_ks(ikcalc, spin), gwr%bstop_ks(ikcalc, spin)
@@ -4655,14 +4654,14 @@ if (gwr%use_supercell_for_sigma) then
        uc_psi_bk(:, band, ikcalc) = ur
 
        ! Multiply by the phases to get psi_nk(r) in the super cell.
-       call ur_to_scpsi(gwr%ngkpt, gwr%g_ngfft, gwr%g_nfft, gwr%nspinor, 1, &
-                        uc_psi_bk(:, band, ikcalc), czero, sc_ceikr, sc_psi_bk(:, band, ikcalc))
+       !call ur_to_scpsi(gwr%ngkpt, gwr%g_ngfft, gwr%g_nfft, gwr%nspinor, 1, &
+       !                 uc_psi_bk(:, band, ikcalc), czero, sc_ceikr, sc_psi_bk(:, band, ikcalc))
        uc_psi_bk(:, band, ikcalc) = uc_psi_bk(:, band, ikcalc) * uc_ceikr
      end do
    end do ! ikcalc
 
    ABI_FREE(ur)
-   ABI_FREE(sc_ceikr)
+   !ABI_FREE(sc_ceikr)
    ABI_FREE(uc_ceikr)
 
    ! Construct Sigma(itau) in the supercell.
@@ -4791,11 +4790,13 @@ if (gwr%use_supercell_for_sigma) then
              sigc_pm(2) = cpsi_r * sum(gt_scbox(ibeg:iend, 2) * sc_psi_bk(:, band, ikcalc))
 #else
 
-             call sc_sum(gwr%ngkpt, sc_nfft, gwr%g_ngfft, gwr%g_nfft, gwr%nspinor, scph1d_kcalc(:,:,ikcalc), &
-               cpsi_r, gt_scbox(ibeg:iend, 1), uc_psi_bk(:, band, ikcalc), sigc_pm(1))
+             do ipm=1,2
+               call sc_sum(gwr%ngkpt, sc_nfft, gwr%g_ngfft, gwr%g_nfft, gwr%nspinor, scph1d_kcalc(:,:,ikcalc), &
+                 cpsi_r, gt_scbox(ibeg:iend, ipm), uc_psi_bk(:, band, ikcalc), sigc_pm(ipm))
+             end do
 
-             call sc_sum(gwr%ngkpt, sc_nfft, gwr%g_ngfft, gwr%g_nfft, gwr%nspinor, scph1d_kcalc(:,:,ikcalc), &
-               cpsi_r, gt_scbox(ibeg:iend, 2), uc_psi_bk(:, band, ikcalc), sigc_pm(2))
+             !call sc_sum(gwr%ngkpt, sc_nfft, gwr%g_ngfft, gwr%g_nfft, gwr%nspinor, scph1d_kcalc(:,:,ikcalc), &
+             !  cpsi_r, gt_scbox(ibeg:iend, 2), uc_psi_bk(:, band, ikcalc), sigc_pm(2))
 #endif
 
              sigc_it_diag_kcalc(:, itau, ibc, ikcalc, spin) = &
@@ -4822,7 +4823,7 @@ if (gwr%use_supercell_for_sigma) then
    end do ! my_it
 
    ABI_FREE(scph1d_kcalc)
-   ABI_FREE(sc_psi_bk)
+   !ABI_FREE(sc_psi_bk)
    ABI_FREE(uc_psi_bk)
  end do ! my_is
 
@@ -7278,16 +7279,14 @@ subroutine sc_sum(sc_shape, sc_nfft, uc_ngfft, uc_nfft, nspinor, ph1d, alpha, sc
 
  integer,intent(in) :: sc_shape(3), sc_nfft, uc_ngfft(18), uc_nfft, nspinor
  complex(dp),intent(in) :: ph1d(maxval(sc_shape), 3)
- !complex(dp),intent(in) :: alpha, uc_psi(uc_nfft, nspinor)
  complex(dp),intent(in) :: alpha, uc_psi(uc_ngfft(1), uc_ngfft(2), uc_ngfft(3), nspinor)
- !complex(dp),intent(in) :: sc_data(sc_nfft, nspinor**2)
  complex(dp),intent(in) :: &
     sc_data(uc_ngfft(1), sc_shape(1), uc_ngfft(2), sc_shape(2), uc_ngfft(3), sc_shape(3), nspinor)
  complex(dp),intent(out) :: cout
 
 !Local variables-------------------------------
 !scalars
- integer :: il1, il2, il3, ir1, ir2, ir3, uc_ir, spinor, sc_base, uc_n1, uc_n2, uc_n3, ix, iy, iz
+ integer :: il1, il2, il3, ir1, ir2, ir3, spinor, uc_n1, uc_n2, uc_n3, ix, iy, iz, idat
  complex(dp) :: cphase, phl1, phl32, phl3
 
 ! *************************************************************************
@@ -7304,26 +7303,18 @@ subroutine sc_sum(sc_shape, sc_nfft, uc_ngfft, uc_nfft, nspinor, ph1d, alpha, sc
 
  do il3=1,sc_shape(3)
    phl3 = ph1d(il3, 3)
-   do il2=1,sc_shape(2)
-     phl32 = phl3 * ph1d(il2, 2)
-     do il1=1,sc_shape(1)
-       cphase = phl32 * ph1d(il1, 1)  ! e^{ik.L}
-
-       !sc_base = (il1-1) * uc_n1 + (il2-1) * uc_n1*uc_n2 + (il3-1) * uc_n1*uc_n2*uc_n3
-       !do uc_ir=1,uc_nfft
-       !  cout = cout + cphase * uc_psi(uc_ir, spinor) * sc_data(sc_base + uc_ir, spinor)
-       !end do
-
-       !uc_ir = 0
-       do iz=1,uc_n3
-         do iy=1,uc_n2
+   do iz=1,uc_n3
+     do il2=1,sc_shape(2)
+       phl32 = phl3 * ph1d(il2, 2)
+       do iy=1,uc_n2
+         do il1=1,sc_shape(1)
+           cphase = phl32 * ph1d(il1, 1)  ! e^{ik.L}
            do ix=1,uc_n1
-             !uc_ir = uc_ir + 1
-             cout = cout + cphase * uc_psi(ix, iy, iz, spinor) * sc_data(ix, il1, iy, il2, iz, il3, spinor)
+             cout = cout + &
+               cphase * uc_psi(ix, iy, iz, spinor) * sc_data(ix, il1, iy, il2, iz, il3, spinor)
            end do
          end do
        end do
-
      end do
    end do
  end do
