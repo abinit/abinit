@@ -28,7 +28,7 @@ module m_nvtx_data
 
   logical :: nvtx_activated = .false.
 
-  integer, parameter :: NUMBER_OF_NVTX_REGIONS = 32
+  integer, parameter :: NUMBER_OF_NVTX_REGIONS = 35
   character(len=32), dimension(NUMBER_OF_NVTX_REGIONS) :: nvtx_names
   integer          , dimension(NUMBER_OF_NVTX_REGIONS) :: nvtx_ids
 
@@ -64,6 +64,9 @@ module m_nvtx_data
   integer, parameter :: NVTX_CHEBFI2_NEXT_ORDER = 30
   integer, parameter :: NVTX_CHEBFI2_SWAP_BUF = 31
   integer, parameter :: NVTX_CHEBFI2_GET_AX_BX = 32
+  integer, parameter :: NVTX_VTOWFK_EXTRA1 = 33
+  integer, parameter :: NVTX_VTOWFK_EXTRA2 = 34
+  integer, parameter :: NVTX_VTORHO_EXTRA = 35
 
 contains
 
@@ -110,7 +113,10 @@ contains
          & "SUB_SPC_DIAGO", &
          & "CHEBFI2_NEXT_ORDER", &
          & "CHEBFI2_SWAP_BUF", &
-         & "CHEBFI2_GET_AX_BX" &
+         & "CHEBFI2_GET_AX_BX", &
+         & "VTOWFK_EXTRA1", &
+         & "VTOWFK_EXTRA2", &
+         & "VTORHO_EXTRA" &
          ]
 
     nvtx_ids(1) = NVTX_MAIN_COMPUTATION
@@ -145,6 +151,9 @@ contains
     nvtx_ids(30)= NVTX_CHEBFI2_NEXT_ORDER
     nvtx_ids(31)= NVTX_CHEBFI2_SWAP_BUF
     nvtx_ids(32)= NVTX_CHEBFI2_GET_AX_BX
+    nvtx_ids(33)= NVTX_VTOWFK_EXTRA1
+    nvtx_ids(34)= NVTX_VTOWFK_EXTRA2
+    nvtx_ids(35)= NVTX_VTORHO_EXTRA
 
   end subroutine nvtx_init
 
