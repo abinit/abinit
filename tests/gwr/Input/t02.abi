@@ -61,6 +61,10 @@ bdgw3       # calculate GW corrections for bands from 4 to 5
    4  5
    4  5
 
+# Spectral function (very coarse grid to reduce txt file size)
+nfreqsp3 50
+freqspmax3 5 eV
+
 ################################
 # Dataset 4: RPA energy 
 ################################

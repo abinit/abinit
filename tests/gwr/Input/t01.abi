@@ -38,7 +38,7 @@ prtsuscep3 1         # Write TCHI file.
 
 gwr_ntau3   6        # Number of imaginary-time points
 gwr_boxcutmin3  1.1  # This should be subject to convergence studies
-#mixprec3    1        # Mixed precision FFT.
+#mixprec3    1       # Mixed precision FFT.
 nband3      30       # Bands to be used in the screening calculation
 ecuteps3    4        # Cut-off energy of the planewave set to represent the dielectric matrix.
                      # It is important to adjust this parameter.
@@ -54,6 +54,10 @@ kptgw3               # k-points in reduced coordinates
 bdgw3       # calculate GW corrections for bands from 4 to 5
    4  5
    4  5
+
+# Spectral function (very coarse grid to reduce txt file size)
+nfreqsp3 50
+freqspmax3 5 eV
 
 ################################
 # Dataset 4: RPA energy 
@@ -109,7 +113,10 @@ pseudos "Pseudodojo_nc_sr_04_pbe_standard_psp8/Si.psp8"
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%   t01.abo, tolnlines = 25, tolabs = 1.1e-3, tolrel = 3.0e-3, fld_options = -medium
+#%%   t01.abo, tolnlines = 25, tolabs = 1.1e-3, tolrel = 3.0e-3, fld_options = -medium;
+#%%   t01o_DS3_SIGCIT, tolnlines=25, tolabs = 1.1e-3, tolrel = 3.0e-3, fld_options = -medium;
+#%%   t01o_DS3_SIGCIW, tolnlines=25, tolabs = 1.1e-3, tolrel = 3.0e-3, fld_options = -medium;
+#%%   t01o_DS3_SIGCIW, tolnlines=25, tolabs = 1.1e-3, tolrel = 3.0e-3, fld_options = -medium;
 #%% [paral_info]
 #%% max_nprocs = 12
 #%% [extra_info]

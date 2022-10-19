@@ -115,6 +115,14 @@ _ WF disk file :      0.080 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
          ecutsigx3     4.00000000E+00 Hartree
          ecutsigx4     0.00000000E+00 Hartree
 -          fftalg         312
+        freqspmax1     0.00000000E+00 Hartree
+        freqspmax2     0.00000000E+00 Hartree
+        freqspmax3     1.83746627E-01 Hartree
+        freqspmax4     0.00000000E+00 Hartree
+        freqspmin1    -0.00000000E+00 Hartree
+        freqspmin2    -0.00000000E+00 Hartree
+        freqspmin3    -1.83746627E-01 Hartree
+        freqspmin4    -0.00000000E+00 Hartree
            getden1          0
            getden2          1
            getden3          1
@@ -148,6 +156,10 @@ P           mkmem           3
             nband3         30
             nband4         30
            ndtset           4
+          nfreqsp1          0
+          nfreqsp2          0
+          nfreqsp3         50
+          nfreqsp4          0
             ngfft          15      15      15
              nkpt           3
            nkptgw1          0
@@ -825,6 +837,14 @@ Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(o
             fcart4     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
 -          fftalg         312
+        freqspmax1     0.00000000E+00 Hartree
+        freqspmax2     0.00000000E+00 Hartree
+        freqspmax3     1.83746627E-01 Hartree
+        freqspmax4     0.00000000E+00 Hartree
+        freqspmin1    -0.00000000E+00 Hartree
+        freqspmin2    -0.00000000E+00 Hartree
+        freqspmin3    -1.83746627E-01 Hartree
+        freqspmin4    -0.00000000E+00 Hartree
            getden1          0
            getden2          1
            getden3          1
@@ -858,6 +878,10 @@ P           mkmem           3
             nband3         30
             nband4         30
            ndtset           4
+          nfreqsp1          0
+          nfreqsp2          0
+          nfreqsp3         50
+          nfreqsp4          0
             ngfft          15      15      15
              nkpt           3
            nkptgw1          0
