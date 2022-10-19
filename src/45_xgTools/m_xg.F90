@@ -2447,7 +2447,7 @@ contains
   !! NAME
   !! xgBlock_colwiseNorm2
 
-  subroutine xgBlock_colwiseNorm2(xgBlock,dot,max_val,max_elt,min_val,min_elt)
+  subroutine xgBlock_colwiseNorm2(xgBlock, dot, max_val, max_elt, min_val, min_elt, use_gpu_cuda)
 
     type(xgBlock_t) , intent(in   ) :: xgBlock
     type(xgBlock_t) , intent(inout) :: dot
@@ -2455,48 +2455,97 @@ contains
     integer         , intent(  out), optional :: max_elt
     double precision, intent(  out), optional :: min_val
     integer         , intent(  out), optional :: min_elt
-    integer :: icol
+    integer         , intent(in   ), optional :: use_gpu_cuda
+
+    integer :: icol, ierr
     double precision,external :: ddot
+    integer      :: l_use_gpu_cuda = 0
 
 
     if ( dot%space /= SPACE_R ) then
       ABI_ERROR("error space")
     end if
 
-    select case(xgBlock%space)
-    case(SPACE_R,SPACE_CR)
-      !$omp parallel do shared(dot,xgBlock), &
-      !$omp& schedule(static)
-      do icol = 1, xgBlock%cols
-        dot%vecR(icol,1) = ddot(xgBlock%rows,xgBlock%vecR(:,icol),1,xgBlock%vecR(:,icol),1)
-      end do
-      !$omp end parallel do
-    case(SPACE_C)
-      !$omp parallel do shared(dot,xgBlock), &
-      !$omp& schedule(static)
-      do icol = 1, xgBlock%cols
-        ! Instead of calling a complex function to get only the real part of the
-        ! resuld
-        !dot%vecR(icol,1) = dble(zdotc(xgBlock%rows,xgBlock%vecC(:,icol),1,xgBlock%vecC(:,icol),1))
-        ! Directely call a real function which gives what we want.
-        dot%vecR(icol,1) = ddot(2*xgBlock%rows,xgBlock%vecC(:,icol),1,xgBlock%vecC(:,icol),1)
-      end do
-      !$omp end parallel do
-    end select
-    call xmpi_sum(dot%vecR,xgBlock%spacedim_comm,icol)
+    ! if optional parameter is present, use it
+    ! else use default value, i.e. don't use GPU
+    if (present(use_gpu_cuda)) then
+      l_use_gpu_cuda = use_gpu_cuda
+    end if
 
-    if ( present(max_val) ) then
-      max_val = maxval(dot%vecR(1:xgBlock%cols,1))
-    end if
-    if ( present(min_val) ) then
-      min_val = minval(dot%vecR(1:xgBlock%cols,1))
-    end if
-    if ( present(max_elt) ) then
-      max_elt = maxloc(dot%vecR(1:xgBlock%cols,1),dim=1)
-    end if
-    if ( present(min_elt) ) then
-      min_elt = minloc(dot%vecR(1:xgBlock%cols,1),dim=1)
-    end if
+    if (l_use_gpu_cuda==1) then
+
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS) && defined(HAVE_YAKL)
+
+      select case(xgBlock%space)
+      case(SPACE_R,SPACE_CR)
+        call computeBatchedDotProduct_scalar(c_loc(xgBlock%vecR), c_loc(xgBlock%vecR), &
+          & c_loc(dot%vecR), xgBlock%rows, xgBlock%cols, xgBlock%ldim)
+
+      case(SPACE_C)
+        call computeBatchedDotProduct_cplx_scalar(c_loc(xgBlock%vecC), c_loc(xgBlock%vecC), &
+          & c_loc(dot%vecR), xgBlock%rows, xgBlock%cols, xgBlock%ldim)
+
+      end select
+      call xmpi_sum(dot%vecR,xgBlock%spacedim_comm,ierr)
+
+      ! do reductions
+      if ( present(max_val) ) then
+        call computeMax_scalar(c_loc(dot%vecR(1,1)), xgBlock%cols, max_val)
+      end if
+      if ( present(min_val) ) then
+        call computeMin_scalar(c_loc(dot%vecR(1,1)), xgBlock%cols, min_val)
+      end if
+      if ( present(max_elt) ) then
+        call computeMaxloc_scalar(c_loc(dot%vecR(1,1)), xgBlock%cols, max_elt)
+      end if
+      if ( present(min_elt) ) then
+        call computeMinloc_scalar(c_loc(dot%vecR(1,1)), xgBlock%cols, min_elt)
+      end if
+
+#else
+      ! we shouldn't be here, it means use_gpu_cuda was wrongly set to 1 in
+      ! input parameter file
+#endif
+
+    else
+
+      select case(xgBlock%space)
+      case(SPACE_R,SPACE_CR)
+        !$omp parallel do shared(dot,xgBlock), &
+        !$omp& schedule(static)
+        do icol = 1, xgBlock%cols
+          dot%vecR(icol,1) = ddot(xgBlock%rows,xgBlock%vecR(:,icol),1,xgBlock%vecR(:,icol),1)
+        end do
+        !$omp end parallel do
+      case(SPACE_C)
+        !$omp parallel do shared(dot,xgBlock), &
+        !$omp& schedule(static)
+        do icol = 1, xgBlock%cols
+          ! Instead of calling a complex function to get only the real part of the
+          ! result
+          !dot%vecR(icol,1) = dble(zdotc(xgBlock%rows,xgBlock%vecC(:,icol),1,xgBlock%vecC(:,icol),1))
+          ! Directely call a real function which gives what we want.
+          dot%vecR(icol,1) = ddot(2*xgBlock%rows,xgBlock%vecC(:,icol),1,xgBlock%vecC(:,icol),1)
+        end do
+        !$omp end parallel do
+      end select
+      call xmpi_sum(dot%vecR,xgBlock%spacedim_comm,ierr)
+
+      if ( present(max_val) ) then
+        max_val = maxval(dot%vecR(1:xgBlock%cols,1))
+      end if
+      if ( present(min_val) ) then
+        min_val = minval(dot%vecR(1:xgBlock%cols,1))
+      end if
+      if ( present(max_elt) ) then
+        max_elt = maxloc(dot%vecR(1:xgBlock%cols,1),dim=1)
+      end if
+      if ( present(min_elt) ) then
+        min_elt = minloc(dot%vecR(1:xgBlock%cols,1),dim=1)
+      end if
+
+    end if ! if l_use_gpu_cuda==1
+
   end subroutine xgBlock_colwiseNorm2
   !!***
 
@@ -2533,7 +2582,7 @@ contains
       select case(xgBlockA%space)
       case(SPACE_R,SPACE_CR)
         call computeBatchedDotProduct_scalar(c_loc(xgBlockA%vecR), c_loc(xgBlockB%vecR), &
-          & c_loc(dot%vecR), xgBlockA%rows, xgBlockA%cols)
+          & c_loc(dot%vecR), xgBlockA%rows, xgBlockA%cols, xgBlockA%ldim)
 
         ! do reductions
         if ( present(max_val) ) then
@@ -2551,7 +2600,7 @@ contains
 
       case(SPACE_C)
         call computeBatchedDotProduct_cplx(c_loc(xgBlockA%vecC), c_loc(xgBlockB%vecC), &
-          & c_loc(dot%vecC), xgBlockA%rows, xgBlockA%cols)
+          & c_loc(dot%vecC), xgBlockA%rows, xgBlockA%cols, xgBlockA%ldim)
 
         ! do reductions
         if ( present(max_val) ) then
