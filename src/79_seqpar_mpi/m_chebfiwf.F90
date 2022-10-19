@@ -263,6 +263,7 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
 
  call xgBlock_map(xgx0,cg,space,l_icplx*l_npw*l_nspinor,nband,l_mpi_enreg%comm_bandspinorfft)
 
+ ABI_NVTX_START_RANGE(NVTX_CHEBFI2_SQRT2)
  if ( l_istwf == 2 ) then ! Real only
    ! Scale cg
    call xgBlock_scale(xgx0,sqrt2,1)  !ALL MPI processes do this
@@ -272,6 +273,8 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
    !MPI HANDLES THIS AUTOMATICALLY (only proc 0 is me_g0)
    if(l_mpi_enreg%me_g0 == 1) cg(:, 1:npw*nspinor*nband:npw) = cg(:, 1:npw*nspinor*nband:npw) * inv_sqrt2
  end if
+ ABI_NVTX_END_RANGE()
+
 
 !Trick with C is to change rank of arrays (:) to (:,:)
  cptr = c_loc(eig)
@@ -299,11 +302,13 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
    ABI_COMMENT(sjoin("You should set the number of threads to something close to",itoa(int(cputime/walltime)+1)))
  end if
 
+ ABI_NVTX_START_RANGE(NVTX_CHEBFI2_INIT)
  call chebfi_init(chebfi,nband,l_icplx*l_npw*l_nspinor,dtset%tolwfr,dtset%ecut, &
 &                 dtset%paral_kgb,l_mpi_enreg%nproc_band,l_mpi_enreg%bandpp, &
 &                 l_mpi_enreg%nproc_fft,nline, space,1,l_gs_hamk%istwf_k, &
 &                 l_mpi_enreg%comm_bandspinorfft,l_mpi_enreg%me_g0,l_paw, &
 &                 l_gs_hamk%use_gpu_cuda)
+ ABI_NVTX_END_RANGE()
 
 !################    RUUUUUUUN    #####################################
 !######################################################################
@@ -416,7 +421,7 @@ subroutine getghc_gsc1(X,AX,BX,transposer)
  call xgBlock_reverseMap(AX,ghc,l_icplx,spacedim*blockdim)
  call xgBlock_reverseMap(BX,gsc,l_icplx,spacedim*blockdim)
 
-!Scale back cg
+ !Scale back cg
  if(l_istwf == 2) then
    call xgBlock_scale(X,inv_sqrt2,1)
 
