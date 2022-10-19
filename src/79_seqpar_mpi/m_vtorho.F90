@@ -1115,7 +1115,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
      call timab(986,1,tsec)
 
-     !ABI_NVTX_START_RANGE(NVTX_FFTPAC)
      if (fixed_occ .and. mpi_enreg%paral_kgb==1) then
        call xmpi_sum(rhoaug,mpi_enreg%comm_bandspinorfft,ierr) !Sum the contributions over bands/FFT/spinors
      end if
@@ -1139,8 +1138,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          end if
        end if
      end if
-
-     !ABI_NVTX_END_RANGE()
 
      call timab(986,2,tsec)
 
@@ -1829,6 +1826,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
    end do
  end if
 
+ ABI_NVTX_START_RANGE(NVTX_VTORHO_EXTRA)
  if (iscf>0.or.iscf==-3 .or. (dtset%usewvl==1 .and. iscf==0)) then
 
 !  PAW: Build new rhoij quantities from new occ then symetrize them
@@ -1889,7 +1887,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        call pawrhoij_free(pawrhoij_unsym)
        ABI_FREE(pawrhoij_unsym)
      end if
-   end if
+   end if ! psps%usepaw==1
 
    if(paw_dmft%use_dmft==1) then
 !    == check noccmmp
@@ -1916,6 +1914,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
    end if
 
  end if ! iscf>0 or iscf=-3
+ ABI_NVTX_END_RANGE()
 
  if(psps%usepaw==1.and.(iscf>=0.or.iscf==-3))  then
    ABI_FREE(rhowfr)

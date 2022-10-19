@@ -381,6 +381,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  call timab(39,1,tsec) ! "vtowfk (loop)"
 
  do inonsc=1,nnsclo_now
+   ABI_NVTX_START_RANGE(NVTX_VTOWFK_EXTRA1)
    if (iscf < 0 .and. (inonsc <= enough .or. mod(inonsc, 10) == 0)) call cwtime(cpu, wall, gflops, "start")
 
    if (dtset%rmm_diis /= 0 .and. iscf < 0) then
@@ -426,6 +427,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
        call cprj_update_oneband(cwavef_iband,cprj_cwavef,gs_hamk,mpi_enreg,tim_getcprj)
      end if
    end do
+   ABI_NVTX_END_RANGE()
+
 
    ! JLJ 17/10/2014: If it is a GWLS calculation, construct the hamiltonian
    ! as in a usual GS calc., but skip any minimisation procedure.
@@ -622,6 +625,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    end if
    call timab(583,2,tsec)
 
+   ABI_NVTX_START_RANGE(NVTX_VTOWFK_EXTRA2)
+
    ! DEBUG seq==par comment next block
    ! Fix phases of all bands
    if (xmpi_paral/=1 .or. mpi_enreg%paral_kgb/=1) then
@@ -656,6 +661,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
        end if
      end if
    end if
+   ABI_NVTX_END_RANGE()
 
    ! Exit loop over inonsc if converged
    if (residk < dtset%tolwfr) then
@@ -709,6 +715,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    end if
  end if
 
+ ABI_NVTX_START_RANGE(NVTX_SCF_FOURWF)
  ABI_MALLOC(enlout,(nnlout*blocksize))
 
  ! Allocation of memory space for one block of waveforms containing blocksize waveforms
@@ -731,7 +738,6 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    end if
  end if
 
- ABI_NVTX_START_RANGE(NVTX_SCF_FOURWF)
 !The code below is more efficient if paral_kgb==1 (less MPI communications)
 !however OMP is not compatible with paral_kgb since we should define
 !which threads performs the call to MPI_ALL_REDUCE.
