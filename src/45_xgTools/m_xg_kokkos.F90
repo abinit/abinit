@@ -36,7 +36,7 @@ module m_xg_kokkos
 
     ! ========================================================================
     ! ========================================================================
-    subroutine computeBatchedDotProduct_scalar(x_ptr, y_ptr, res_ptr, nx, ny) &
+    subroutine computeBatchedDotProduct_scalar(x_ptr, y_ptr, res_ptr, nx, ny, ldim) &
       & bind(c, name='computeBatchedDotProduct_scalar_kokkos_cpp')
       use, intrinsic :: iso_c_binding
       implicit none
@@ -45,9 +45,10 @@ module m_xg_kokkos
       type(c_ptr)            , value             :: res_ptr
       integer(kind=c_int32_t), value, intent(in) :: nx
       integer(kind=c_int32_t), value, intent(in) :: ny
+      integer(kind=c_int32_t), value, intent(in) :: ldim
     end subroutine computeBatchedDotProduct_scalar
 
-    subroutine computeBatchedDotProduct_cplx(x_ptr, y_ptr, res_ptr, nx, ny) &
+    subroutine computeBatchedDotProduct_cplx(x_ptr, y_ptr, res_ptr, nx, ny, ldim) &
       & bind(c, name='computeBatchedDotProduct_cplx_kokkos_cpp')
       use, intrinsic :: iso_c_binding
       implicit none
@@ -56,7 +57,20 @@ module m_xg_kokkos
       type(c_ptr)            , value             :: res_ptr
       integer(kind=c_int32_t), value, intent(in) :: nx
       integer(kind=c_int32_t), value, intent(in) :: ny
+      integer(kind=c_int32_t), value, intent(in) :: ldim
     end subroutine computeBatchedDotProduct_cplx
+
+    subroutine computeBatchedDotProduct_cplx_scalar(x_ptr, y_ptr, res_ptr, nx, ny, ldim) &
+      & bind(c, name='computeBatchedDotProduct_cplx_scalar_kokkos_cpp')
+      use, intrinsic :: iso_c_binding
+      implicit none
+      type(c_ptr)            , value             :: x_ptr
+      type(c_ptr)            , value             :: y_ptr
+      type(c_ptr)            , value             :: res_ptr
+      integer(kind=c_int32_t), value, intent(in) :: nx
+      integer(kind=c_int32_t), value, intent(in) :: ny
+      integer(kind=c_int32_t), value, intent(in) :: ldim
+    end subroutine computeBatchedDotProduct_cplx_scalar
 
     ! ========================================================================
     ! ========================================================================

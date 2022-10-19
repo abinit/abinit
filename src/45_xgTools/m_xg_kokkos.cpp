@@ -14,8 +14,8 @@
  * An example of use of this functor is also available here:
  * https://github.com/pkestene/kokkos-proj-tmpl/blob/master/src/BatchedDotProduct.cpp
  *
- * \param[in] x_ptr pointer to a (nx,ny) 2d array
- * \param[in] y_ptr pointer to a (nx,ny) 2d array
+ * \param[in] x_ptr pointer to a (nx,ny) 2d array, with leading dimension ldim
+ * \param[in] y_ptr pointer to a (nx,ny) 2d array, with leading dimension ldim
  * \param[out] res_ptr pointer to the dot products, 1d array of size ny
  */
 extern "C" void computeBatchedDotProduct_scalar_kokkos_cpp(
@@ -23,12 +23,13 @@ extern "C" void computeBatchedDotProduct_scalar_kokkos_cpp(
   const double *y_ptr,
   double       *res_ptr,
   const int32_t nx,
-  const int32_t ny)
+  const int32_t ny,
+  const int32_t ldim)
 {
 
   // create data views
-  auto x   = AbiView_r64_2d_const(x_ptr, nx, ny);
-  auto y   = AbiView_r64_2d_const(y_ptr, nx, ny);
+  auto x   = AbiView_r64_2d_const(x_ptr,   ldim, ny);
+  auto y   = AbiView_r64_2d_const(y_ptr,   ldim, ny);
   auto res = AbiView_r64_1d      (res_ptr, ny);
 
   // perform parallel computation on device
@@ -82,12 +83,13 @@ extern "C" void computeBatchedDotProduct_cplx_kokkos_cpp(
   const cplx_t *y_ptr,
   cplx_t       *res_ptr,
   const int32_t nx,
-  const int32_t ny)
+  const int32_t ny,
+  const int32_t ldim)
 {
 
   // create data views
-  auto x   = AbiView_c64_2d_const(x_ptr, nx, ny);
-  auto y   = AbiView_c64_2d_const(y_ptr, nx, ny);
+  auto x   = AbiView_c64_2d_const(x_ptr,   ldim, ny);
+  auto y   = AbiView_c64_2d_const(y_ptr,   ldim, ny);
   auto res = AbiView_c64_1d      (res_ptr, ny);
 
   // perform parallel computation on device
@@ -131,6 +133,68 @@ extern "C" void computeBatchedDotProduct_cplx_kokkos_cpp(
   }
 
 } // computeBatchedDotProduct_cplx_kokkos_cpp
+
+/**
+ * Same as computeBatchedDotProduct_cplx_kokkos_cpp but results are real.
+ *
+ * TODO : refactor using template parameter to have one implementation for both
+ * scalar / complex data type
+ */
+extern "C" void computeBatchedDotProduct_cplx_scalar_kokkos_cpp(
+  const cplx_t *x_ptr,
+  const cplx_t *y_ptr,
+  double        *res_ptr,
+  const int32_t nx,
+  const int32_t ny,
+  const int32_t ldim)
+{
+
+  // create data views
+  auto x   = AbiView_c64_2d_const(x_ptr,   ldim, ny);
+  auto y   = AbiView_c64_2d_const(y_ptr,   ldim, ny);
+  auto res = AbiView_r64_1d      (res_ptr, ny);
+
+  // perform parallel computation on device
+  {
+    using team_policy_t = Kokkos::TeamPolicy<Kokkos::IndexType<int>>;
+    using member_t = team_policy_t::member_type;
+
+    // number of teams is the number of dot products to compute
+    int32_t nbTeams = ny;
+
+    // create a team policy
+    const team_policy_t policy(nbTeams, Kokkos::AUTO(), Kokkos::AUTO());
+
+    // define compute lambda
+    auto dot_prod_lambda = KOKKOS_LAMBDA (const member_t& member)
+    {
+      // inside team, compute dot product as a parallel reduce operation
+      cplx_t dot_prod = 0;
+      int32_t j = member.league_rank();
+
+      Kokkos::parallel_reduce(
+        Kokkos::TeamThreadRange(member, nx),
+          [&](const int32_t &i, cplx_t &update)
+          {
+            update += Kokkos::conj(x(i,j)) * y(i,j);
+          },
+          dot_prod);
+
+       // only one thread per team, collect the final reduction result, and write it
+       // the output view
+       Kokkos::single(Kokkos::PerTeam(member), [&]() { res(j) = dot_prod.real(); });
+    };
+
+    Kokkos::parallel_for(
+      "compute_dot_products_lambda",
+      policy,
+      dot_prod_lambda);
+
+    //Kokkos::fence();
+
+  }
+
+} // computeBatchedDotProduct_cplx_scalar_kokkos_cpp
 
 // =====================================================================
 // =====================================================================
