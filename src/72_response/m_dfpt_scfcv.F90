@@ -1013,7 +1013,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
          rhor1(2*ifft-1,2) = half*(rhor1_pq(2*ifft-1,2)+rhor1_mq(2*ifft-1,2))
          rhor1(2*ifft  ,2) = half*(rhor1_pq(2*ifft  ,2)-rhor1_mq(2*ifft  ,2))
        end do
-     end do
+     end if
      if (nspden > 2) then
        do ifft=1,nfftf
          rhor1(2*ifft-1,3) = half*(rhor1_pq(2*ifft-1,3)+rhor1_mq(2*ifft  ,4))
