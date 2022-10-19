@@ -1128,7 +1128,7 @@ real(dp) function chebfi_computeResidue(chebfi, residu, pcond)
 
   ! Local variables-------------------------------
   ! scalars
-  integer :: eigResiduMax,eigResiduMin
+  integer  :: eigResiduMax,eigResiduMin
   real(dp) :: maxResidu,minResidu
   !arrays
   real(dp) :: tsec(2)
@@ -1147,7 +1147,7 @@ real(dp) function chebfi_computeResidue(chebfi, residu, pcond)
   call timab(tim_pcond,2,tsec)
 
   call xgBlock_colwiseNorm2(chebfi%AX_swap, residu, max_val=maxResidu, max_elt=eigResiduMax,&
-    min_val=minResidu, min_elt=eigResiduMin)
+    min_val=minResidu, min_elt=eigResiduMin, use_gpu_cuda=chebfi%use_gpu_cuda)
 
   chebfi_computeResidue = maxResidu
 
