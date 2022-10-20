@@ -33,7 +33,7 @@
 
 module m_xg
 
-  use, intrinsic :: iso_c_binding, only: c_double, c_double_complex
+  use, intrinsic :: iso_c_binding, only: c_loc, c_double, c_double_complex, c_int32_t, c_size_t
 
   use m_errors
   use m_abicore
@@ -1728,7 +1728,8 @@ contains
 
     if (l_use_gpu_cuda==1) then
 
-      ! WIP : TO FINISH
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS) && defined(HAVE_YAKL)
+
       select case(xgBlockA%space)
 
       case (SPACE_R,SPACE_CR)
@@ -1775,6 +1776,12 @@ contains
           &             c_loc(cwork), bufferSize, info)
 
       end select
+#else
+      ! we shouldn't be here, it means use_gpu_cuda was wrongly set to 1 in
+      ! input parameter file
+      call wrtout(std_out,"We shouldn't be here : abinit was not compiled with GPU/CUDA support (Kokkos+YAKL).")
+      call abi_abort('COLL')
+#endif
 
     else
 
@@ -2135,6 +2142,8 @@ contains
 
     if (l_use_gpu_cuda==1) then
 
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS) && defined(HAVE_YAKL)
+
       select case(xgBlockA%space)
       case (SPACE_R,SPACE_CR)
         call compute_colwiseCymax_scalar(c_loc(xgBlockA%vecR), c_loc(da%vecR), c_loc(xgBlockB%vecR), &
@@ -2143,6 +2152,13 @@ contains
         call compute_colwiseCymax_cplx  (c_loc(xgBlockA%vecC), c_loc(da%vecR), c_loc(xgBlockB%vecC), &
           &                              c_loc(xgBlockW%vecC), xgBlockA%rows, xgBlockA%cols, xgBlockA%ldim)
       end select
+
+#else
+      ! we shouldn't be here, it means use_gpu_cuda was wrongly set to 1 in
+      ! input parameter file
+      call wrtout(std_out,"We shouldn't be here : abinit was not compiled with GPU/CUDA support (Kokkos+YAKL).")
+      call abi_abort('COLL')
+#endif
 
     else
 
@@ -2275,6 +2291,8 @@ contains
 
     if (l_use_gpu_cuda==1) then
 
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS) && defined(HAVE_YAKL)
+
       select case(xgBlock%space)
       case (SPACE_R,SPACE_CR)
         call compute_colwiseMul_scalar_scalar(c_loc(xgBlock%vecR), c_loc(vec), &
@@ -2285,6 +2303,13 @@ contains
           &                                 shift, xgBlock%rows, xgBlock%cols, &
           &                                 xgBlock%ldim, rows)
       end select
+
+#else
+      ! we shouldn't be here, it means use_gpu_cuda was wrongly set to 1 in
+      ! input parameter file
+      call wrtout(std_out,"We shouldn't be here : abinit was not compiled with GPU/CUDA support (Kokkos+YAKL).")
+      call abi_abort('COLL')
+#endif
 
     else
 
@@ -2336,6 +2361,8 @@ contains
 
     if (l_use_gpu_cuda==1) then
 
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS) && defined(HAVE_YAKL)
+
       select case(xgBlock%space)
       case (SPACE_R,SPACE_CR)
         ABI_ERROR("Error colwiseMulC")
@@ -2344,6 +2371,13 @@ contains
           &                               shift, xgBlock%rows, xgBlock%cols, &
           &                               xgBlock%ldim, rows)
       end select
+
+#else
+      ! we shouldn't be here, it means use_gpu_cuda was wrongly set to 1 in
+      ! input parameter file
+      call wrtout(std_out,"We shouldn't be here : abinit was not compiled with GPU/CUDA support (Kokkos+YAKL).")
+      call abi_abort('COLL')
+#endif
 
     else
 
