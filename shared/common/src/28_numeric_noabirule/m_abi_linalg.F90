@@ -287,6 +287,7 @@ module m_abi_linalg
  public :: gpu_xgemm
  public :: gpu_xtrsm
  public :: gpu_xaxpy
+ public :: gpu_xcopy
  public :: gpu_xscal
  public :: gpu_xsygvd
  public :: gpu_xsygvd_bufferSize
