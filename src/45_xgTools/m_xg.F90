@@ -383,6 +383,9 @@ contains
     integer   , intent(in   ) :: cols
     integer   , optional, intent(in) :: comm
 
+    integer(kind=c_int32_t), parameter :: izero = 0
+    integer(kind=c_size_t)             :: size_bytes
+
     if ( rows < 1 ) then
       ABI_ERROR("rows < 1 ")
     endif
@@ -398,14 +401,18 @@ contains
         ABI_FREE_MANAGED(xg%vecR)
       end if
       ABI_MALLOC_MANAGED_BOUNDS(xg%vecR,(/rows,cols/), (/1,1/))
-      xg%vecR(:,:) = zero
+      !xg%vecR(:,:) = zero
+      size_bytes = rows*cols*dp
+      call gpu_memset(c_loc(xg%vecR), izero, size_bytes)
       xg%trans = 't'
     case (SPACE_C)
       if ( associated(xg%vecC) ) then
         ABI_FREE_MANAGED(xg%vecC)
       end if
       ABI_MALLOC_MANAGED_BOUNDS(xg%vecC,(/rows,cols/), (/1,1/))
-      xg%vecC(:,:) = zero
+      !xg%vecC(:,:) = zero
+      size_bytes = rows*cols*dpc
+      call gpu_memset(c_loc(xg%vecC), izero, size_bytes)
       xg%trans = 'c'
     case default
       ABI_ERROR("Invalid space")
