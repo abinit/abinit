@@ -199,9 +199,14 @@ extern "C" void gpu_sphere_in_(const double *cg,
   bloc.x = BLOCK_SIZE;
   grid.x = min((cfft_size + bloc.x - 1 )/bloc.x,MAX_GRID_SIZE);
   grid.y = (cfft_size + bloc.x*grid.x - 1)/(bloc.x*grid.x);
-  kernel_set_zero<<<grid,bloc,0,*compute_stream>>>(cfft,cfft_size);
-  CUDA_KERNEL_CHECK("kernel_set_zero");
-
+  //kernel_set_zero<<<grid,bloc,0,*compute_stream>>>(cfft,cfft_size);
+  //CUDA_KERNEL_CHECK("kernel_set_zero");
+  if ( cudaMemsetAsync(cfft, 0, cfft_size*sizeof(double), *compute_stream) != cudaSuccess )
+    {
+      printf("ERROR: cudaMemsetAsync failed at address %p with error : %s\n",cfft,cudaGetErrorString(cudaGetLastError()));
+      fflush(stdout);
+      abi_cabort();
+    }
 
   //During GPU calculation we do some pre-calculation on symetries
   if((istwf_k==2) || (istwf_k==4) || (istwf_k==6) || (istwf_k==8)){
