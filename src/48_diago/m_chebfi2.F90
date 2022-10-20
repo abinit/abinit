@@ -190,7 +190,7 @@ subroutine chebfi_init(chebfi,neigenpairs,spacedim,tolerance,ecut,paral_kgb,npro
 
  implicit none
 
-!Arguments ------------------------------------
+ ! Arguments ------------------------------------
  integer       , intent(in   ) :: bandpp
  integer       , intent(in   ) :: eigenProblem
  integer       , intent(in   ) :: istwf_k
@@ -209,28 +209,28 @@ subroutine chebfi_init(chebfi,neigenpairs,spacedim,tolerance,ecut,paral_kgb,npro
  real(dp)      , intent(in   ) :: tolerance
  type(chebfi_t), intent(inout) :: chebfi
 
-!Local variables-------------------------------
- real(dp)                    :: tsec(2)
+ ! Local variables-------------------------------
+ real(dp)                      :: tsec(2)
 
-! *********************************************************************
+ ! *********************************************************************
 
  call timab(tim_init,1,tsec)
 
- chebfi%space = space
- chebfi%neigenpairs = neigenpairs
- chebfi%spacedim    = spacedim
- chebfi%tolerance   = tolerance
- chebfi%ecut        = ecut
- chebfi%paral_kgb   = paral_kgb
- chebfi%nproc_band  = nproc_band
- chebfi%bandpp      = bandpp
- chebfi%nproc_fft   = nproc_fft
- chebfi%nline       = nline
- chebfi%spacecom    = spacecom
+ chebfi%space        = space
+ chebfi%neigenpairs  = neigenpairs
+ chebfi%spacedim     = spacedim
+ chebfi%tolerance    = tolerance
+ chebfi%ecut         = ecut
+ chebfi%paral_kgb    = paral_kgb
+ chebfi%nproc_band   = nproc_band
+ chebfi%bandpp       = bandpp
+ chebfi%nproc_fft    = nproc_fft
+ chebfi%nline        = nline
+ chebfi%spacecom     = spacecom
  chebfi%eigenProblem = eigenProblem
- chebfi%istwf_k = istwf_k
- chebfi%me_g0 = me_g0
- chebfi%paw = paw
+ chebfi%istwf_k      = istwf_k
+ chebfi%me_g0        = me_g0
+ chebfi%paw          = paw
  chebfi%use_gpu_cuda = use_gpu_cuda
 
  call chebfi_allocateAll(chebfi)
@@ -262,16 +262,16 @@ subroutine chebfi_allocateAll(chebfi)
 
  implicit none
 
-!Arguments ------------------------------------
+ ! Arguments ------------------------------------
  type(chebfi_t)  , intent(inout) :: chebfi
 
-!Local variables-------------------------------
-!scalars
- integer :: neigenpairs
- integer :: space
- integer :: spacedim
- integer :: total_spacedim, ierr
-!arrays
+ ! Local variables-------------------------------
+ ! scalars
+ integer  :: neigenpairs
+ integer  :: space
+ integer  :: spacedim
+ integer  :: total_spacedim, ierr
+ ! arrays
  real(dp) :: tsec(2)
 
 ! *********************************************************************
@@ -286,22 +286,22 @@ subroutine chebfi_allocateAll(chebfi)
  if (chebfi%paral_kgb == 0) then
    chebfi%total_spacedim = spacedim
    call xg_init(chebfi%X_NP,space,spacedim,2*neigenpairs, chebfi%spacecom) !regular arrays
-   call xg_setBlock(chebfi%X_NP,chebfi%X_next,1,spacedim,neigenpairs)
-   call xg_setBlock(chebfi%X_NP,chebfi%X_prev,neigenpairs+1,spacedim,neigenpairs)
+   call xg_setBlock(chebfi%X_NP, chebfi%X_next,             1, spacedim, neigenpairs)
+   call xg_setBlock(chebfi%X_NP, chebfi%X_prev, neigenpairs+1, spacedim, neigenpairs)
  else
    total_spacedim = spacedim
    call xmpi_sum(total_spacedim,chebfi%spacecom,ierr)
    chebfi%total_spacedim = total_spacedim
    call xg_init(chebfi%X_NP,space,total_spacedim,2*chebfi%bandpp,chebfi%spacecom) !transposed arrays
-   call xg_setBlock(chebfi%X_NP,chebfi%X_next,1,total_spacedim,chebfi%bandpp)
-   call xg_setBlock(chebfi%X_NP,chebfi%X_prev,chebfi%bandpp+1,total_spacedim,chebfi%bandpp)
+   call xg_setBlock(chebfi%X_NP, chebfi%X_next,               1, total_spacedim, chebfi%bandpp)
+   call xg_setBlock(chebfi%X_NP, chebfi%X_prev, chebfi%bandpp+1, total_spacedim, chebfi%bandpp)
  end if
  call timab(tim_X_NP_init,2,tsec)
 
  call timab(tim_AX_BX_init,1,tsec)
  !transposer will handle these arrays automatically
- call xg_init(chebfi%AX,space,spacedim,neigenpairs,chebfi%spacecom)
- call xg_init(chebfi%BX,space,spacedim,neigenpairs,chebfi%spacecom)
+ call xg_init(chebfi%AX, space, spacedim, neigenpairs, chebfi%spacecom)
+ call xg_init(chebfi%BX, space, spacedim, neigenpairs, chebfi%spacecom)
  call timab(tim_AX_BX_init,2,tsec)
 
 end subroutine chebfi_allocateAll
