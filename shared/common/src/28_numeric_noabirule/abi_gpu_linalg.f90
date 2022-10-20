@@ -457,6 +457,36 @@ subroutine gpu_xaxpy(cplx, size, alpha, x_gpu, incrx, y_gpu, incry)
 end subroutine gpu_xaxpy
 !!***
 
+!!****f* m_abi_gpu_linalg/gpu_xcopy
+!! NAME
+!!  gpu_xcopy
+!!
+!! FUNCTION
+!!  Compute a BLAS-1 COPY operation on GPU
+!!  y = x (copy x into y)
+!!
+!! INPUTS
+!!  cplx   = 1 if real 2 if complex
+!!  size   = input vector size
+!!  x_gpu  = pointer to gpu memory location of array x
+!!  incrx  = stride between consecutive elements of x
+!!  y_gpu  = pointer to gpu memory location of array y
+!!  incry  = stride between consecutive elements of y
+!!
+!! SOURCE
+subroutine gpu_xcopy(cplx, size, x_gpu, incrx, y_gpu, incry)
+
+  ! !Arguments ------------------------------------
+  integer,      intent(in)    :: cplx
+  integer,      intent(in)    :: size
+  type(c_ptr),  intent(in)    :: x_gpu
+  integer,      intent(in)    :: incrx
+  type(c_ptr),  intent(inout) :: y_gpu
+  integer,      intent(in)    :: incry
+
+end subroutine gpu_xcopy
+!!***
+
 !!****f* m_abi_gpu_linalg/gpu_xscal
 !! NAME
 !!  gpu_xscal
