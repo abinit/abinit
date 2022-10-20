@@ -668,7 +668,8 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,mpi_enreg)
    call getAX_BX(chebfi%xXColsRows,chebfi%xAXColsRows,chebfi%xBXColsRows,chebfi%xgTransposerX)
    ABI_NVTX_END_RANGE()
    call timab(tim_getAX_BX,2,tsec)
- end do
+
+ end do ! iline
  ABI_NVTX_END_RANGE()
 
  if (chebfi%paral_kgb == 1) then
@@ -710,7 +711,12 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,mpi_enreg)
  ABI_FREE(nline_bands)
 
  if (xmpi_comm_size(chebfi%spacecom) > 1) then
-   call xgBlock_copy(chebfi%X_swap,chebfi%X, 1, 1)    !copy cannot be avoided :(
+   call xgBlock_copy(chebfi%X_swap,chebfi%X, 1, 1, chebfi%use_gpu_cuda)    !copy cannot be avoided :(
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
+   if (chebfi%use_gpu_cuda==1) then
+     call gpu_device_synchronize()
+   end if
+#endif
  end if
 
  call xg_free(DivResults)
@@ -854,7 +860,7 @@ subroutine chebfi_computeNextOrderChebfiPolynom(chebfi,iline,center,one_over_r,t
    ABI_NVTX_END_RANGE()
    call timab(tim_invovl, 2, tsec)
  else
-   call xgBlock_copy(chebfi%xAXColsRows,chebfi%X_next, 1, 1)
+   call xgBlock_copy(chebfi%xAXColsRows,chebfi%X_next, 1, 1, chebfi%use_gpu_cuda)
  end if
 
  ABI_NVTX_START_RANGE(NVTX_INVOVL_POST3)
@@ -1064,7 +1070,14 @@ subroutine chebfi_rayleighRitz(chebfi,nline)
     call xgBlock_gemm(chebfi%X%normal, A_und_X%self%normal, 1.0d0, &
       &               chebfi%X, A_und_X%self, 0.d0, chebfi%X_next, &
       &               use_gpu_cuda=chebfi%use_gpu_cuda)
-    call xgBlock_copy(chebfi%X_next,chebfi%X_swap, 1, 1)    !copy cannot be avoided :(
+    call xgBlock_copy(chebfi%X_next,chebfi%X_swap, 1, 1, use_gpu_cuda=chebfi%use_gpu_cuda)    !copy cannot be avoided :(
+
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
+    if (chebfi%use_gpu_cuda==1) then
+      call gpu_device_synchronize()
+    end if
+#endif
+
   end if
 
   call xgBlock_gemm(chebfi%AX%self%normal, A_und_X%self%normal, 1.0d0, &

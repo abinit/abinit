@@ -305,6 +305,38 @@ extern "C" void gpu_xaxpy_(int* cplx, int *N,
 
 /*=========================================================================*/
 // NAME
+//  gpu_xcopy
+//
+// FUNCTION
+//  Compute blas-1 COPY on GPU
+//  y = x (copy x into y)
+//
+// INPUTS / OUTPUTS
+//  cplx  = 1 if real 2 if complex
+//  N     = input vector size
+//  x     = input vector
+//  incrx = increment between two consecutive values of x
+//  y     = output vector
+//  incry = increment between two consecutive values of y
+//
+/*=========================================================================*/
+
+extern "C" void gpu_xcopy_(int* cplx, int *N,
+                           void **X_ptr, int *incrx,
+                           void **Y_ptr, int *incry)
+{
+
+  CUDA_API_CHECK( (*cplx==1) ?
+                  cublasDcopy(cublas_handle,*N,
+                              (const double *)(*X_ptr), *incrx,
+                              (      double *)(*Y_ptr), *incry) :
+                  cublasZcopy(cublas_handle, *N,
+                              (const cuDoubleComplex *)(*X_ptr), *incrx,
+                              (      cuDoubleComplex *)(*Y_ptr), *incry) );
+} // gpu_xcopy_
+
+/*=========================================================================*/
+// NAME
 //  gpu_xscal
 //
 // FUNCTION

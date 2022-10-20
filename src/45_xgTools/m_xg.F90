@@ -960,14 +960,18 @@ contains
   !! NAME
   !! xgBlock_copy
 
-  subroutine xgBlock_copy(xgBlockA, xgBlockB, inc1, inc2)
+  subroutine xgBlock_copy(xgBlockA, xgBlockB, inc1, inc2, use_gpu_cuda)
 
-    type(xgBlock_t), intent(inout) :: xgBlockA
-    type(xgBlock_t), intent(inout) :: xgBlockB
-    integer, optional :: inc1
-    integer, optional :: inc2
+    type(xgBlock_t),   intent(inout) :: xgBlockA
+    type(xgBlock_t),   intent(inout) :: xgBlockB
+    integer, optional, intent(in   ) :: inc1
+    integer, optional, intent(in   ) :: inc2
+    integer, optional, intent(in   ) :: use_gpu_cuda
+
     integer :: incx
     integer :: incy
+    integer :: l_use_gpu_cuda = 0
+
     integer :: size1
     integer :: size2
     integer :: size
@@ -976,6 +980,10 @@ contains
     call timab(tim_copy,1,tsec)
     incx = 1; if ( present(inc1) ) incx = inc1
     incy = 1; if ( present(inc2) ) incy = inc2
+    if (present(use_gpu_cuda)) then
+      l_use_gpu_cuda = use_gpu_cuda
+    end if
+
     if ( xgBlockA%space /= xgBlockB%space ) then
       ABI_ERROR("Not same space")
     end if
@@ -987,12 +995,26 @@ contains
     size2 = xgBlockB%LDim*xgBlockB%cols/incy ; if ( size2 * incy < xgBlockB%LDim*xgBlockB%cols ) size2 = size2+1
     size = min(size1,size2)
 
-    select case(xgBlockA%space)
-    case (SPACE_R,SPACE_CR)
-      call dcopy(size,xgBlockA%vecR,incx,xgBlockB%vecR,incy)
-    case(SPACE_C)
-      call zcopy(size,xgBlockA%vecC,incx,xgBlockB%vecC,incy)
-    end select
+    if (l_use_gpu_cuda==1) then
+
+      select case(xgBlockA%space)
+      case (SPACE_R,SPACE_CR)
+        call gpu_xcopy(1, size, c_loc(xgBlockA%vecR), incx, c_loc(xgBlockB%vecR), incy)
+      case(SPACE_C)
+        call gpu_xcopy(2, size, c_loc(xgBlockA%vecC), incx, c_loc(xgBlockB%vecC), incy)
+      end select
+
+    else
+
+      select case(xgBlockA%space)
+      case (SPACE_R,SPACE_CR)
+        call dcopy(size,xgBlockA%vecR,incx,xgBlockB%vecR,incy)
+      case(SPACE_C)
+        call zcopy(size,xgBlockA%vecC,incx,xgBlockB%vecC,incy)
+      end select
+
+    end if
+
     call timab(tim_copy,2,tsec)
 
   end subroutine xgBlock_copy

@@ -446,7 +446,14 @@ subroutine getghc_gsc1(X,AX,BX,transposer)
 
  ABI_FREE(l_gvnlxc)
 
-!Scale cg, ghc, gsc
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
+ !if (chebfi%use_gpu_cuda==1) then
+   call gpu_device_synchronize()
+ !end if
+#endif
+
+
+ !Scale cg, ghc, gsc
  if ( l_istwf == 2 ) then
    call xgBlock_scale(X,sqrt2,1)
    call xgBlock_scale(AX,sqrt2,1)
@@ -471,8 +478,8 @@ subroutine getghc_gsc1(X,AX,BX,transposer)
          gsc(:, 1:spacedim*blockdim:spacedim) = gsc(:, 1:spacedim*blockdim:spacedim) * inv_sqrt2
        end if
      end if
-   end if
- end if
+   end if ! l_paw
+ end if ! l_istwf==2
 
  if ( .not. l_paw ) call xgBlock_copy(X,BX)
 
