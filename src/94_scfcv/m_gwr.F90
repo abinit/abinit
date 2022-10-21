@@ -4550,6 +4550,7 @@ subroutine gwr_build_sigmac(gwr)
  complex(dp) :: sigc_iw_diag_kcalc(gwr%ntau, gwr%max_nbcalc, gwr%nkcalc, gwr%nsppol)
  complex(dp) :: sigc_e0_kcalc(gwr%max_nbcalc, gwr%nkcalc, gwr%nsppol)
  complex(dp) :: qpe_zlin_kcalc(gwr%max_nbcalc, gwr%nkcalc, gwr%nsppol), imag_zmesh(gwr%ntau)
+ complex(dp) :: qpe_pade_kcalc(gwr%max_nbcalc, gwr%nkcalc, gwr%nsppol)
  complex(dp) :: sigxc_rw_diag_kcalc(gwr%nwr, gwr%max_nbcalc, gwr%nkcalc, gwr%nsppol)
  type(ebands_t),pointer :: now_ebands
  type(sigma_pade_t) :: spade
@@ -4942,6 +4943,7 @@ end if
         ibc = band - gwr%bstart_ks(ikcalc, spin) + 1
         e0 = now_ebands%eig(band, ik_ibz, spin)
         sigx = gwr%x_mat(band, band, ikcalc, spin)
+        ! Note vxcval instea of vxc with model core charge.
         vxc_val = gwr%ks_me%vxcval(band, band, ik_ibz, spin)
         vu = zero
         if (gwr%dtset%usepawu /= 0) vu = gwr%ks_me%vu(band, band, ik_ibz, spin)
@@ -4956,15 +4958,16 @@ end if
 
         zz = cmplx(e0, zero)
         call spade%init(gwr%ntau, imag_zmesh, sigc_iw_diag_kcalc(:, ibc, ikcalc, spin), branch_cut=">")
-        call spade%eval(zz, sigc_e0, dzdval=dsigc_de0)
 
         ! Solve the QP equation with Newton-Rapson starting from e0
         call spade%qp_solve(e0, v_meanf, sigx, zz, zsc, msg, ierr)
+        qpe_pade_kcalc(ibc, ikcalc, spin) = zsc
         qp_solver_ierr(ibc, ikcalc, spin) = ierr
         if (ierr /= 0) then
           ABI_WARNING(msg)
         end if
 
+        call spade%eval(zz, sigc_e0, dzdval=dsigc_de0)
         ! Z = (1 - dSigma / domega(E0))^{-1}
         z_e0 = one / (one - dsigc_de0)
 
@@ -4975,7 +4978,6 @@ end if
 
         ! Linearized QP solution.
         qpe_zlin_kcalc(ibc, ikcalc, spin) = e0 + z_e0 * (sigc_e0 + sigx - v_meanf)
-        !qpe_zlin_kcalc(ibc, ikcalc, spin) = zsc
 
         ! Build linear mesh on the real axis **centered** around e0.
         rw_mesh = arth(e0 - gwr%wr_step * (gwr%nwr / 2), gwr%wr_step, gwr%nwr)
@@ -4985,7 +4987,7 @@ end if
           sig_xc = sigx + sigc_e0
           sigxc_rw_diag_kcalc(iw, ibc, ikcalc, spin) = sig_xc
 
-          ! TODO: Spectral function
+          ! Spectral function
           hhartree_bk = gwr%ks_ebands%eig(band, ik_ibz, spin) - v_meanf
           spfunc_diag_kcalc(iw, ibc, ikcalc, spin) = one / pi * abs(aimag(sigc_e0)) &
             /( (real(rw_mesh(iw) - hhartree_bk - sig_xc)) ** 2 + (aimag(sigc_e0)) ** 2) / Ha_eV
@@ -5008,11 +5010,13 @@ end if
  ! Master writes results to ab_out, std_out and GWR.nc
  if (gwr%comm%me == 0) then
 
-   if (any(qp_solver_ierr /= 0) then
+   if (any(qp_solver_ierr /= 0)) then
+     ! Write warning to QP solver failed.
      ierr = count(qp_solver_ierr /= 0)
-     call wrtout(std_out, "QP solver failed for:", itoa(ierr), "states")
+     call wrtout([ab_out, std_out], sjoin("QP solver failed for:", itoa(ierr), "states"))
    end if
 
+   ! TODO
    !is_metallic = ebands_has_metal_scheme(prev_ebands)
    !call write_notations([std_out, ab_out]
    ABI_MALLOC(ks_vbik, (gwr%ks_ebands%nkpt, gwr%ks_ebands%nsppol))
@@ -5145,6 +5149,7 @@ end if
      nctkarr_t("e0_kcalc", "dp", "max_nbcalc, nkcalc, nsppol"), &
      nctkarr_t("ze0_kcalc", "dp", "two, max_nbcalc, nkcalc, nsppol"), &
      nctkarr_t("qpe_zlin_kcalc", "dp", "two, max_nbcalc, nkcalc, nsppol"), &
+     nctkarr_t("qpe_pade_kcalc", "dp", "two, max_nbcalc, nkcalc, nsppol"), &
      nctkarr_t("qp_solver_ierr", "int", "max_nbcalc, nkcalc, nsppol"), &
      !nctkarr_t("sigx_kcalc", "dp", "max_nbcalc, nkcalc, nsppol"), &
      nctkarr_t("sigc_it_diag_kcalc", "dp", "two, two, ntau, max_nbcalc, nkcalc, nsppol"), &
@@ -5160,6 +5165,7 @@ end if
    NCF_CHECK(nf90_put_var(ncid, vid("ze0_kcalc"), c2r(ze0_kcalc)))
    !NCF_CHECK(nf90_put_var(ncid, vid("sigx_kcalc"), sigx_kcalc))
    NCF_CHECK(nf90_put_var(ncid, vid("qpe_zlin_kcalc"), c2r(qpe_zlin_kcalc)))
+   NCF_CHECK(nf90_put_var(ncid, vid("qpe_pade_kcalc"), c2r(qpe_pade_kcalc)))
    NCF_CHECK(nf90_put_var(ncid, vid("qp_solver_ierr"), qp_solver_ierr))
    NCF_CHECK(nf90_put_var(ncid, vid("sigc_it_diag_kcalc"), c2r(sigc_it_diag_kcalc)))
    NCF_CHECK(nf90_put_var(ncid, vid("sigc_iw_diag_kcalc"), c2r(sigc_iw_diag_kcalc)))
