@@ -157,6 +157,7 @@ subroutine solve_dyson(ikcalc,minbnd,maxbnd,nomega_sigc,Sigp,Kmesh,sigcme_tmp,qp
  complex(dpc) :: ctdpc,dct,dsigc,sigc,zz,phase
  logical :: converged,ltest
  character(len=500) :: msg
+ type(sigma_pade_t) :: spade
 !arrays
  real(dp) :: kbz_gw(3),tsec(2)
  real(dp),allocatable :: e0pde(:),eig(:),scme(:)
@@ -328,6 +329,9 @@ subroutine solve_dyson(ikcalc,minbnd,maxbnd,nomega_sigc,Sigp,Kmesh,sigcme_tmp,qp
         zz = CMPLX(qp_ene(jb,sk_ibz,spin), zero)
       end if
 
+      !call spade%init(sr%nomega_i, sr%omega_i, tmpcdp, branch_cut=">")
+      !call spade%eval(zz, sigc_e0, dzdval=dsigc_de0)
+
       ! Diagonal elements of sigcme_tmp
       ! if zz in 2 or 3 quadrant, avoid branch cut in the complex plane using Sigma(-iw) = Sigma(iw)*.
       do iab=1,Sr%nsig_ab
@@ -363,6 +367,14 @@ subroutine solve_dyson(ikcalc,minbnd,maxbnd,nomega_sigc,Sigp,Kmesh,sigcme_tmp,qp
         ! e0 is replaced by qp_ene which contains the updated energy eigenvalue.
         zz = CMPLX(qp_ene(jb,sk_ibz,spin),0.0)
       end if
+
+      ! Solve the QP equation with Newton-Rapson starting from e0
+      !call spade%qp_solve(e0, v_meanf, sigx, zz, zsc, msg, ierr)
+      !qpe_pade_kcalc(ibc, ikcalc, spin) = zsc
+      !qp_solver_ierr(ibc, ikcalc, spin) = ierr
+      !if (ierr /= 0) then
+      !  ABI_WARNING(msg)
+      !end if
 
       iter = 0; converged = .FALSE.; ctdpc = cone
       do while (ABS(ctdpc) > NR_ABS_ROOT_ERR .or. iter < NR_MAX_NITER)
