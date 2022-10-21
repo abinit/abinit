@@ -951,7 +951,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,qp_ebands,ks_ebands,Gsph_eps
    chi0(1,1,io) = vdotw(Ep%qlwl(:,1), chq, Cryst%gmet,"G")  ! Use user-defined small q
  end do
 
- if (wfd%my_rank == 0 .and. dtset%prtvol > 1) then
+ if (wfd%my_rank == 0 .and. dtset%prtvol > 20) then
    qlen = tol3
    call cryst%get_redcart_qdirs(nq, qdirs, qlen=qlen)
    ABI_MALLOC(head_qvals, (nq))
@@ -1172,7 +1172,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,qp_ebands,Gsph_epsG0,&
  integer :: ig1,ig2,iat1,iat2,iat,ik_bz,ik_ibz,ikmq_bz,ikmq_ibz
  integer :: io,iomegal,iomegar,ispinor1,ispinor2,isym_k,itypatcor,nfft,il1,il2
  integer :: isym_kmq,itim_k,itim_kmq,m1,m2,my_wl,my_wr,size_chi0
- integer :: nfound,nkpt_summed,nspinor,nsppol,mband,nq,iq
+ integer :: nfound,nkpt_summed,nspinor,nsppol,mband
  integer :: comm,gw_mgfft,use_padfft,gw_fftalga,lcor,mgfftf,use_padfftf
  integer :: my_nbbp,my_nbbpks,spin,nbmax,dummy
  real(dp) :: cpu_time,wall_time,gflops
