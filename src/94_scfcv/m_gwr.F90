@@ -181,6 +181,41 @@ module m_gwr
  private
 !!***
 
+
+!----------------------------------------------------------------------
+
+!!****t* m_gwr/sigma_pade_t
+!! NAME
+!! sigma_pade_t
+!!
+!! FUNCTION
+!!
+!! SOURCE
+
+ type, public :: sigma_pade_t
+
+    integer :: npts
+    character(len=1) :: branch_cut
+    complex(dp),pointer :: zmesh(:) => null(), sigc_cvals(:) => null()
+
+    integer :: NR_MAX_NITER = 1000
+    ! Max no of iterations in the Newton-Raphson method.
+
+    real(dp) :: NR_ABS_ROOT_ERR = 0.0001/Ha_eV
+    ! Tolerance on the absolute error on the Newton-Raphson root.
+
+ contains
+
+   procedure :: init => sigma_pade_init
+   ! Init object
+
+   procedure :: eval => sigma_pade_eval
+
+   procedure :: qp_solve => sigma_pade_qp_solve
+
+ end type sigma_pade_t
+!!***
+
 !----------------------------------------------------------------------
 
 !!****t* m_gwr/desc_t
@@ -960,7 +995,6 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  ABI_ICALLOC(ndeg_all, (gwr%nkcalc, gwr%nsppol))
 
  ierr = 0
-
  do ikcalc=1,gwr%nkcalc
 
    ! Note symrel and use_symrel.
@@ -4502,8 +4536,8 @@ subroutine gwr_build_sigmac(gwr)
  type(desc_t), target :: desc_mykbz(gwr%my_nkbz), desc_myqbz(gwr%my_nqbz)
  type(fftbox_plan3_t) :: gt_plan_gp2rp, wt_plan_gp2rp
  integer :: band_val, ibv, ncerr, unt_it, unt_iw, unt_rw
- real(dp) :: e0, ks_gap, qp_gap, sigx
- complex(dp) :: zz, sigc_e0, dsigc_de0, z_e0, sig_xc, hhartree_bk
+ real(dp) :: e0, ks_gap, qp_gap, sigx, vxc_val, vu, v_meanf
+ complex(dp) :: zz, zsc, sigc_e0, dsigc_de0, z_e0, sig_xc, hhartree_bk
  integer,allocatable :: ks_vbik(:,:), iperm(:)
  real(dp),allocatable :: sorted_qpe(:)
  real(dp) :: e0_kcalc(gwr%max_nbcalc, gwr%nkcalc, gwr%nsppol)
@@ -4511,12 +4545,14 @@ subroutine gwr_build_sigmac(gwr)
  real(dp) :: rw_mesh(gwr%nwr)
  !real(dp) :: sigx_kcalc(gwr%max_nbcalc, gwr%nkcalc, gwr%nsppol)
  !real(dp) :: ks_gap_kcalc(gwr%nkcalc, gwr%nsppol), qp_gap_kcalc(gwr%nkcalc, gwr%nsppol)
+ integer :: qp_solver_ierr(gwr%max_nbcalc, gwr%nkcalc, gwr%nsppol)
  complex(dp) :: ze0_kcalc(gwr%max_nbcalc, gwr%nkcalc, gwr%nsppol)
  complex(dp) :: sigc_iw_diag_kcalc(gwr%ntau, gwr%max_nbcalc, gwr%nkcalc, gwr%nsppol)
  complex(dp) :: sigc_e0_kcalc(gwr%max_nbcalc, gwr%nkcalc, gwr%nsppol)
- complex(dp) :: qpe_zlin_kcalc(gwr%max_nbcalc, gwr%nkcalc, gwr%nsppol), imag_zmesh(gwr%ntau, 2)
+ complex(dp) :: qpe_zlin_kcalc(gwr%max_nbcalc, gwr%nkcalc, gwr%nsppol), imag_zmesh(gwr%ntau)
  complex(dp) :: sigxc_rw_diag_kcalc(gwr%nwr, gwr%max_nbcalc, gwr%nkcalc, gwr%nsppol)
  type(ebands_t),pointer :: now_ebands
+ type(sigma_pade_t) :: spade
 
 ! *************************************************************************
 
@@ -4896,8 +4932,8 @@ end if
  !sigx_kcalc = zero
  sigc_iw_diag_kcalc = zero
 
- imag_zmesh(:,1) = j_dpc * gwr%iw_mesh
- imag_zmesh(:,2) = -j_dpc * gwr%iw_mesh
+ imag_zmesh(:) = j_dpc * gwr%iw_mesh
+ qp_solver_ierr = 0
 
  do spin=1,gwr%nsppol
    do ikcalc=1,gwr%nkcalc
@@ -4905,23 +4941,28 @@ end if
       do band=gwr%bstart_ks(ikcalc, spin), gwr%bstop_ks(ikcalc, spin)
         ibc = band - gwr%bstart_ks(ikcalc, spin) + 1
         e0 = now_ebands%eig(band, ik_ibz, spin)
+        sigx = gwr%x_mat(band, band, ikcalc, spin)
+        vxc_val = gwr%ks_me%vxcval(band, band, ik_ibz, spin)
+        vu = zero
+        if (gwr%dtset%usepawu /= 0) vu = gwr%ks_me%vu(band, band, ik_ibz, spin)
+        v_meanf = vxc_val + vu
 
-        associate (vals_pmt => sigc_it_diag_kcalc(:,:, ibc, ikcalc, spin))
         ! f(t) = E(t) + O(t) = (f(t) + f(-t)) / 2  + (f(t) - f(-t)) / 2
+        associate (vals_pmt => sigc_it_diag_kcalc(:,:, ibc, ikcalc, spin))
         even_t = (vals_pmt(1,:) + vals_pmt(2,:)) / two
         odd_t = (vals_pmt(1,:) - vals_pmt(2,:)) / two
         sigc_iw_diag_kcalc(:, ibc, ikcalc, spin) = matmul(gwr%cosft_wt, even_t) + j_dpc * matmul(gwr%sinft_wt, odd_t)
         end associate
 
-        ! if zz in 2 or 3 quadrant, avoid branch cut in the complex plane using Sigma(-iw) = Sigma(iw)*.
         zz = cmplx(e0, zero)
-        if (real(zz) > zero) then
-        !if (real(zz) < zero) then
-          sigc_e0 = pade(gwr%ntau, imag_zmesh(:,1), sigc_iw_diag_kcalc(:, ibc, ikcalc, spin), zz)
-          dsigc_de0 = dpade(gwr%ntau, imag_zmesh(:,1), sigc_iw_diag_kcalc(:, ibc, ikcalc, spin), zz)
-        else
-          sigc_e0 = pade(gwr%ntau, imag_zmesh(:,2), conjg(sigc_iw_diag_kcalc(:, ibc, ikcalc, spin)), zz)
-          dsigc_de0 = dpade(gwr%ntau, imag_zmesh(:,2), conjg(sigc_iw_diag_kcalc(:, ibc, ikcalc, spin)), zz)
+        call spade%init(gwr%ntau, imag_zmesh, sigc_iw_diag_kcalc(:, ibc, ikcalc, spin), branch_cut=">")
+        call spade%eval(zz, sigc_e0, dzdval=dsigc_de0)
+
+        ! Solve the QP equation with Newton-Rapson starting from e0
+        call spade%qp_solve(e0, v_meanf, sigx, zz, zsc, msg, ierr)
+        qp_solver_ierr(ibc, ikcalc, spin) = ierr
+        if (ierr /= 0) then
+          ABI_WARNING(msg)
         end if
 
         ! Z = (1 - dSigma / domega(E0))^{-1}
@@ -4933,25 +4974,19 @@ end if
         ze0_kcalc(ibc, ikcalc, spin) = z_e0
 
         ! Linearized QP solution.
-        sigx = gwr%x_mat(band, band, ikcalc, spin)
-        qpe_zlin_kcalc(ibc, ikcalc, spin) = e0 + &
-          z_e0 * (sigc_e0 + sigx - gwr%ks_me%vxcval(band, band, ik_ibz, spin))
+        qpe_zlin_kcalc(ibc, ikcalc, spin) = e0 + z_e0 * (sigc_e0 + sigx - v_meanf)
+        !qpe_zlin_kcalc(ibc, ikcalc, spin) = zsc
 
         ! Build linear mesh on the real axis **centered** around e0.
         rw_mesh = arth(e0 - gwr%wr_step * (gwr%nwr / 2), gwr%wr_step, gwr%nwr)
         do iw=1,gwr%nwr
           zz = rw_mesh(iw)
-          if (real(zz) > zero) then
-          !if (real(zz) < zero) then
-            sigc_e0 = pade(gwr%ntau, imag_zmesh(:,1), sigc_iw_diag_kcalc(:, ibc, ikcalc, spin), zz)
-          else
-            sigc_e0 = pade(gwr%ntau, imag_zmesh(:,2), conjg(sigc_iw_diag_kcalc(:, ibc, ikcalc, spin)), zz)
-          end if
+          call spade%eval(zz, sigc_e0)
           sig_xc = sigx + sigc_e0
           sigxc_rw_diag_kcalc(iw, ibc, ikcalc, spin) = sig_xc
 
           ! TODO: Spectral function
-          hhartree_bk = gwr%ks_ebands%eig(band, ik_ibz, spin) - gwr%ks_me%vxcval(band, band, ik_ibz, spin)
+          hhartree_bk = gwr%ks_ebands%eig(band, ik_ibz, spin) - v_meanf
           spfunc_diag_kcalc(iw, ibc, ikcalc, spin) = one / pi * abs(aimag(sigc_e0)) &
             /( (real(rw_mesh(iw) - hhartree_bk - sig_xc)) ** 2 + (aimag(sigc_e0)) ** 2) / Ha_eV
 
@@ -4963,13 +4998,6 @@ end if
           !    +(aimag(sigc_e0)) ** 2) / Ha_eV
         end do ! iw
 
-        ! TODO
-        !call sigma_pade%init(gwr%ntau, imag_zmesh, sigc_iw_diag_kcalc(:, ibc, ikcalc, spin), branch_cut=">")
-        !call sigma_pade%eval(zz, sigc_e0)
-        !call sigma_pade%eval_der1(zz, dsigc_de0)
-        !call sigma_pade%eval(rw_mesh, sigxc_rw_diag_kcalc(:, ibc, ikcalc, spin), add=sig_xc)
-        !call sigma_pade%free()
-
       end do ! band
    end do ! ikcalc
  end do ! spin
@@ -4977,8 +5005,13 @@ end if
  ! TODO: Update gwr%qp_ebands
  call ebands_copy(gwr%qp_ebands, gwr%qp_ebands_prev)
 
+ ! Master writes results to ab_out, std_out and GWR.nc
  if (gwr%comm%me == 0) then
-   ! Master writes results to ab_out, std_out and GWR.nc
+
+   if (any(qp_solver_ierr /= 0) then
+     ierr = count(qp_solver_ierr /= 0)
+     call wrtout(std_out, "QP solver failed for:", itoa(ierr), "states")
+   end if
 
    !is_metallic = ebands_has_metal_scheme(prev_ebands)
    !call write_notations([std_out, ab_out]
@@ -5068,7 +5101,7 @@ end if
    call write_units(units, "# Fermi energy set to zero. Energies in eV")
    call write_units(units, sjoin("# nkcalc:", itoa(gwr%nkcalc), ", nsppol:", itoa(gwr%nsppol)))
 
-   ! TODO: Finalize the implementation and put output files under test.
+   ! TODO: Improve file format. Compatibility with gnuplot format for datasets?
    do spin=1,gwr%nsppol
      do ikcalc=1,gwr%nkcalc
        ik_ibz = gwr%kcalc2ibz(ikcalc, 1)
@@ -5112,6 +5145,7 @@ end if
      nctkarr_t("e0_kcalc", "dp", "max_nbcalc, nkcalc, nsppol"), &
      nctkarr_t("ze0_kcalc", "dp", "two, max_nbcalc, nkcalc, nsppol"), &
      nctkarr_t("qpe_zlin_kcalc", "dp", "two, max_nbcalc, nkcalc, nsppol"), &
+     nctkarr_t("qp_solver_ierr", "int", "max_nbcalc, nkcalc, nsppol"), &
      !nctkarr_t("sigx_kcalc", "dp", "max_nbcalc, nkcalc, nsppol"), &
      nctkarr_t("sigc_it_diag_kcalc", "dp", "two, two, ntau, max_nbcalc, nkcalc, nsppol"), &
      nctkarr_t("sigc_iw_diag_kcalc", "dp", "two, ntau, max_nbcalc, nkcalc, nsppol"), &
@@ -5126,6 +5160,7 @@ end if
    NCF_CHECK(nf90_put_var(ncid, vid("ze0_kcalc"), c2r(ze0_kcalc)))
    !NCF_CHECK(nf90_put_var(ncid, vid("sigx_kcalc"), sigx_kcalc))
    NCF_CHECK(nf90_put_var(ncid, vid("qpe_zlin_kcalc"), c2r(qpe_zlin_kcalc)))
+   NCF_CHECK(nf90_put_var(ncid, vid("qp_solver_ierr"), qp_solver_ierr))
    NCF_CHECK(nf90_put_var(ncid, vid("sigc_it_diag_kcalc"), c2r(sigc_it_diag_kcalc)))
    NCF_CHECK(nf90_put_var(ncid, vid("sigc_iw_diag_kcalc"), c2r(sigc_iw_diag_kcalc)))
    NCF_CHECK(nf90_put_var(ncid, vid("sigxc_rw_diag_kcalc"), c2r(sigxc_rw_diag_kcalc)))
@@ -7180,8 +7215,21 @@ end subroutine gwr_get_u_ngfft
 
 !----------------------------------------------------------------------
 
+!!****f* m_gwr/get_1d_scphases
+!! NAME
+!!  get_1d_scphases
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
 subroutine get_1d_scphases(sc_shape, nkpt, kpts, ph1d)
 
+!Arguments ------------------------------------
  integer,intent(in) :: sc_shape(3), nkpt
  real(dp),intent(in) :: kpts(3, nkpt)
  complex(dp),allocatable,intent(out) :: ph1d(:,:,:)
@@ -7217,8 +7265,23 @@ subroutine get_1d_scphases(sc_shape, nkpt, kpts, ph1d)
 end subroutine get_1d_scphases
 !!***
 
+!----------------------------------------------------------------------
+
+!!****f* m_gwr/sc_sum
+!! NAME
+!!  sc_sum
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
 subroutine sc_sum(sc_shape, sc_nfft, uc_ngfft, uc_nfft, nspinor, ph1d, alpha, sc_data, uc_psi, cout)
 
+!Arguments ------------------------------------
  integer,intent(in) :: sc_shape(3), sc_nfft, uc_ngfft(18), uc_nfft, nspinor
  complex(dp),intent(in) :: ph1d(maxval(sc_shape), 3)
  complex(dp),intent(in) :: alpha, uc_psi(uc_ngfft(1), uc_ngfft(2), uc_ngfft(3), nspinor)
@@ -7233,9 +7296,7 @@ subroutine sc_sum(sc_shape, sc_nfft, uc_ngfft, uc_nfft, nspinor, ph1d, alpha, sc
 
 ! *************************************************************************
 
- uc_n1 = uc_ngfft(1)
- uc_n2 = uc_ngfft(2)
- uc_n3 = uc_ngfft(3)
+ uc_n1 = uc_ngfft(1); uc_n2 = uc_ngfft(2); uc_n3 = uc_ngfft(3)
 
  !do spinor=1,nspinor
  !end do
@@ -7264,6 +7325,135 @@ subroutine sc_sum(sc_shape, sc_nfft, uc_ngfft, uc_nfft, nspinor, ph1d, alpha, sc
  cout = alpha * cout
 
 end subroutine sc_sum
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_gwr/sigma_pade_init
+!! NAME
+!!  sigma_pade_init
+!!
+!! FUNCTION
+!!  Initialize the Pade' from the `npts` values of Sigma_c(iw) given on the mesh `zmesh`.
+!!
+!! SOURCE
+
+subroutine sigma_pade_init(self, npts, zmesh, sigc_cvals, branch_cut)
+
+!Arguments ------------------------------------
+ class(sigma_pade_t),intent(out) :: self
+ integer,intent(in) :: npts
+ complex(dp),target,intent(in) :: zmesh(npts), sigc_cvals(npts)
+ character(len=*),intent(in) :: branch_cut
+
+! *************************************************************************
+
+ self%npts = npts
+ self%branch_cut = branch_cut
+
+ self%zmesh => zmesh
+ self%sigc_cvals => sigc_cvals
+
+end subroutine sigma_pade_init
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_gwr/sigma_pade_eval
+!! NAME
+!!  sigma_pade_eval
+!!
+!! FUNCTION
+!!  Evaluate the Pade' at the complex point `zz`. Return result in val and, optional,
+!!  the derivative at zz in `dzdval`
+!!
+!! SOURCE
+
+subroutine sigma_pade_eval(self, zz, val, dzdval)
+
+!Arguments ------------------------------------
+ class(sigma_pade_t),intent(in) :: self
+ complex(dp),intent(in) :: zz
+ complex(dp),intent(out) :: val
+ complex(dp),optional,intent(out) :: dzdval
+
+! *************************************************************************
+
+ ! if zz in 2 or 3 quadrant, avoid branch cut in the complex plane using Sigma(-iw) = Sigma(iw)*.
+ if (real(zz) > zero) then
+ !if (real(zz) < zero) then
+   val = pade(self%npts, self%zmesh, self%sigc_cvals, zz)
+   if (present(dzdval)) dzdval = dpade(self%npts, self%zmesh, self%sigc_cvals, zz)
+ else
+   val = pade(self%npts, -self%zmesh, conjg(self%sigc_cvals), zz)
+   if (present(dzdval)) dzdval = dpade(self%npts, -self%zmesh, conjg(self%sigc_cvals), zz)
+ end if
+
+end subroutine sigma_pade_eval
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_gwr/sigma_pade_qp_solve
+!! NAME
+!!  sigma_pade_qp_solve
+!!
+!! FUNCTION
+!!  Use the Pade' approximant and Newton-Rapson method  to solve the QP equation
+!!  in the complex pane starting from the initial guess `z_guess`.
+!!
+!! INPUTS
+!!
+!! SOURCE
+
+subroutine sigma_pade_qp_solve(self, e0, v_meanf, sigx, z_guess, zsc, msg, ierr)
+
+!Arguments ------------------------------------
+ class(sigma_pade_t),intent(in) :: self
+ real(dp),intent(in) :: e0, v_meanf, sigx
+ complex(dp),intent(in) :: z_guess
+ complex(dp),intent(out) :: zsc
+ integer,intent(out) :: ierr
+
+!Local variables-------------------------------
+!scalars
+ integer :: iter
+ logical :: converged
+ complex(dpc) :: ctdpc, dct, dsigc, sigc
+ character(len=500) :: msg
+
+! *************************************************************************
+
+ ! Use Newton-Rapson to find the root of:
+ ! f(z) = e0 - zz + Sigma_xc(z) - v_meanf
+ ! f'(z) = -1 + Sigma_c'(z)
+
+ iter = 0; converged = .FALSE.; ctdpc = cone
+ zsc = z_guess
+ do while (ABS(ctdpc) > self%NR_ABS_ROOT_ERR .or. iter < self%NR_MAX_NITER)
+   iter = iter + 1
+
+   call self%eval(zsc, sigc, dzdval=dsigc)
+   ctdpc = e0 - v_meanf + sigx + sigc - zsc
+
+   !ctdpc = Sr%e0(jb,sk_ibz,spin) - Sr%vxcme(jb,sk_ibz,spin) - Sr%vUme(jb,sk_ibz,spin) + Sr%sigxme(jb,sk_ibz,spin) &
+   !        + sigc - zz
+   if (ABS(ctdpc) < self%NR_ABS_ROOT_ERR) then
+     converged=.TRUE.; EXIT
+   end if
+   dct = dsigc - one
+   zsc = newrap_step(zsc, ctdpc, dct)
+ end do
+
+ ierr = 0; msg = ""
+ if (.not. converged) then
+   write(msg,'(a,i0,3a,f8.4,a,f8.4)')&
+     'Newton-Raphson method not converged after ',self%NR_MAX_NITER,' iterations. ',ch10,&
+     'Absolute Error = ',ABS(ctdpc),' > ',self%NR_ABS_ROOT_ERR
+   ierr = 1
+ end if
+
+end subroutine sigma_pade_qp_solve
 !!***
 
 end module m_gwr

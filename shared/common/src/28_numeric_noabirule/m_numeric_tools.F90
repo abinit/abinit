@@ -4146,11 +4146,11 @@ end subroutine calculate_pade_a
 !!
 !! FUNCTION
 !!  Apply single step newton-raphson method to find the root of a complex function
-!!   z_k+1=z_k-f(z_k)/(df/dz(z_k))
+!!   z_k+1 = z_k - f(z_k) / (df/dz(z_k))
 !!
 !! SOURCE
 
-complex(dp) function newrap_step(z,f,df)
+complex(dp) function newrap_step(z, f, df)
 
 !Arguments ------------------------------------
 !scalars
@@ -4162,7 +4162,7 @@ complex(dp) function newrap_step(z,f,df)
 
  dfm2=ABS(df)*ABS(df)
 
- newrap_step= z - (f*CONJG(df))/dfm2
+ newrap_step = z - (f*CONJG(df))/dfm2
  !& z-one/(ABS(df)*ABS(df)) * CMPLX( REAL(f)*REAL(df)+AIMAG(f)*AIMAG(df), -REAL(f)*AIMAG(df)+AIMAG(f)*EAL(df) )
 
 end function newrap_step
