@@ -611,7 +611,8 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
 
        owfk_ebands%eig(1:nband_k, ik_ibz, spin) = eig_k(1:nband_k)
 
-       ! occupancies are set to zero. Client code is responsible for recomputing occ and fermie when reading this WFK.
+       ! occupancies are set to zero.
+       ! Client code is responsible for recomputing occ and fermie when reading this WFK.
        ABI_CALLOC(occ_k, (owfk%mband))
 
        sc_mode = merge(xmpio_single, xmpio_collective, ugb%has_idle_procs)
@@ -651,6 +652,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
 
    ! Collect eigenvalues
    ! TODO: CHECK THIS PART WITH MANY PROCS AS I'VE SEEN WEIRD RESULTS ON LUMI
+   ! Also, Si4x4x4 with gamma-only seems not to work
    do spin=1,dtset%nsppol
      do ik_ibz=1,dtset%nkpt
        if (diago_pool%treats(ik_ibz, spin) .and. diago_pool%comm%me /= 0) owfk_ebands%eig(:, ik_ibz, spin) = zero

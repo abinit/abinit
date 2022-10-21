@@ -5124,7 +5124,6 @@ logical function is_rectangular_grid(nproc, grid_dims) result (ans)
 
   grid_dims(1) = i
   grid_dims(2) = INT(nproc/i)
-
   ans = grid_dims(1) > 1 .and. grid_dims(2) > 1
 
 end function is_rectangular_grid

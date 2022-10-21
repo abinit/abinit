@@ -423,7 +423,7 @@ subroutine wfk_open_read(Wfk, fname, formeig, iomode, funt, comm, Hdr_out)
 #ifdef HAVE_MPI_IO
  case (IO_MODE_MPI)
    call MPI_FILE_OPEN(Wfk%comm, Wfk%fname, MPI_MODE_RDONLY, xmpio_info, Wfk%fh, mpierr)
-   ABI_CHECK_MPI(mpierr,"MPI_FILE_OPEN")
+   ABI_CHECK_MPI(mpierr, "MPI_FILE_OPEN")
    !call MPI_FILE_SET_VIEW(Wfk%fh,origin,MPI_BYTE,MPI_BYTE,'native',xmpio_info,mpierr)
 
    call hdr_mpio_skip(Wfk%fh,fform,Wfk%hdr_offset)
@@ -565,12 +565,12 @@ subroutine wfk_open_write(Wfk, Hdr, fname, formeig, iomode, funt, comm, write_hd
    !call MPI_FILE_OPEN(Wfk%comm, Wfk%fname, MPI_MODE_CREATE + MPI_MODE_WRONLY, xmpio_info, Wfk%fh, mpierr)
    !call MPI_FILE_OPEN(Wfk%comm, Wfk%fname, MPI_MODE_CREATE + MPI_MODE_RDWR, xmpio_info, Wfk%fh, mpierr)
    call MPI_FILE_OPEN(Wfk%comm, Wfk%fname,  MPI_MODE_RDWR, xmpio_info, Wfk%fh, mpierr)
-   ABI_CHECK_MPI(mpierr,"MPI_FILE_OPEN")
+   ABI_CHECK_MPI(mpierr, "MPI_FILE_OPEN")
 
    !call MPI_FILE_SET_VIEW(Wfk%fh,origin,MPI_BYTE,MPI_BYTE,'native',xmpio_info,mpierr)
    ! TODO
    !%% call MPI_File_set_size(Wfk%fh, MPI_Offset size, mpierr)
-   !ABI_CHECK_MPI(mpierr,"MPI_FILE_SET_SIZE")
+   !ABI_CHECK_MPI(mpierr, "MPI_FILE_SET_SIZE")
 
    hdroffset = -1
    if (Wfk%my_rank==Wfk%master) then
@@ -609,7 +609,7 @@ subroutine wfk_open_write(Wfk, Hdr, fname, formeig, iomode, funt, comm, write_hd
      ABI_CHECK(ierr == 0, "xmpio_write_frmarkers returned ierr!=0")
 
      !call MPI_FILE_SYNC(Wfk%fh,mpierr)
-     !ABI_CHECK_MPI(mpierr,"FILE_SYNC")
+     !ABI_CHECK_MPI(mpierr, "FILE_SYNC")
 
      if (Wfk%debug) then
        call xmpio_check_frmarkers(Wfk%fh,offset,sc_mode,nfrec,bsize_frecords,ierr)
@@ -698,19 +698,19 @@ subroutine wfk_close(Wfk, delete)
 
 #ifdef HAVE_MPI_IO
    case (IO_MODE_MPI)
-     call MPI_FILE_CLOSE(Wfk%fh,mpierr)
-     ABI_CHECK_MPI(mpierr,"FILE_CLOSE!")
+     call MPI_FILE_CLOSE(Wfk%fh, mpierr)
+     ABI_CHECK_MPI(mpierr, "FILE_CLOSE!")
 
      if (Wfk%debug .and. Wfk%my_rank == Wfk%master) then
        ! Check the fortran records.
        call MPI_FILE_OPEN(xmpi_comm_self, Wfk%fname, MPI_MODE_RDONLY, xmpio_info, Wfk%fh, mpierr)
-       ABI_CHECK_MPI(mpierr,"MPI_FILE_OPEN")
+       ABI_CHECK_MPI(mpierr, "MPI_FILE_OPEN")
        call hdr_bsize_frecords(Wfk%Hdr,Wfk%formeig,nfrec,bsize_frecords)
        call xmpio_check_frmarkers(Wfk%fh,Wfk%hdr_offset,xmpio_single,nfrec,bsize_frecords,ierr)
        ABI_CHECK(ierr==0,"xmpio_check_frmarkers returned ierr!=0")
        ABI_FREE(bsize_frecords)
        call MPI_FILE_CLOSE(Wfk%fh,mpierr)
-       ABI_CHECK_MPI(mpierr,"FILE_CLOSE!")
+       ABI_CHECK_MPI(mpierr, "FILE_CLOSE!")
      end if
 #endif
 
@@ -1303,7 +1303,7 @@ subroutine wfk_read_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg_
      my_offset = Wfk%offset_ks(ik_ibz,spin,REC_KG) + xmpio_bsize_frm
 
      call mpio_read_kg_k(Wfk%fh,my_offset,npw_disk,sc_mode,kg_k,mpierr)
-     ABI_CHECK_MPI(mpierr,"reading kg")
+     ABI_CHECK_MPI(mpierr, "reading kg")
    end if
 
    ! formeig=0 =>  Read both eig and occ in tmp_eigk
@@ -1314,7 +1314,7 @@ subroutine wfk_read_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg_
        my_offset = Wfk%offset_ks(ik_ibz,spin,REC_EIG) + xmpio_bsize_frm
 
        call mpio_read_eigocc_k(Wfk%fh,my_offset,nband_disk,Wfk%formeig,sc_mode,tmp_eigk,mpierr)
-       ABI_CHECK_MPI(mpierr,"reading eigocc")
+       ABI_CHECK_MPI(mpierr, "reading eigocc")
 
        if (present(eig_k)) eig_k(1:nband_disk) = tmp_eigk(1:nband_disk)
        if (present(occ_k)) occ_k(1:nband_disk) = tmp_eigk(nband_disk+1:2*nband_disk)
@@ -1340,14 +1340,14 @@ subroutine wfk_read_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg_
        types = [MPI_DOUBLE_COMPLEX, MPI_DOUBLE_COMPLEX]
 
        call xmpio_create_fstripes(nband_disk,sizes,types,gkk_type,my_offpad,mpierr)
-       ABI_CHECK_MPI(mpierr,"xmpio_create_fstripes")
+       ABI_CHECK_MPI(mpierr, "xmpio_create_fstripes")
 
        my_offset = Wfk%offset_ks(ik_ibz,spin,REC_EIG) + my_offpad
 
        call MPI_FILE_SET_VIEW(Wfk%fh,my_offset,MPI_BYTE,gkk_type,'native',xmpio_info,mpierr)
-       ABI_CHECK_MPI(mpierr,"")
+       ABI_CHECK_MPI(mpierr, "SET_VIEW")
        call MPI_TYPE_FREE(gkk_type,mpierr)
-       ABI_CHECK_MPI(mpierr,"")
+       ABI_CHECK_MPI(mpierr, "TYPE_FREE")
 
        bufsz = nband_disk**2
 
@@ -1358,7 +1358,7 @@ subroutine wfk_read_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg_
        else
          ABI_ERROR("Wrong sc_mode")
        end if
-       ABI_CHECK_MPI(mpierr,"FILE_READ")
+       ABI_CHECK_MPI(mpierr, "FILE_READ")
      end if
 
      if (present(cg_k)) then
@@ -1366,7 +1366,7 @@ subroutine wfk_read_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg_
        sizes = [npw_disk*nspinor_disk, nband_disk]
 
        call xmpio_create_fstripes(nb_block,sizes,types,cgblock_type,my_offpad,mpierr)
-       ABI_CHECK_MPI(mpierr,"xmpio_create_fstripes")
+       ABI_CHECK_MPI(mpierr, "xmpio_create_fstripes")
 
        ! Increment my_offset to account for previous eigen and cg records if band_block(1) != 1
        my_offset = Wfk%offset_ks(ik_ibz,spin,REC_CG) + my_offpad
@@ -1375,10 +1375,10 @@ subroutine wfk_read_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg_
           (2*nband_disk*xmpi_bsize_dp + 2*xmpio_bsize_frm) )
 
        call MPI_FILE_SET_VIEW(Wfk%fh,my_offset,MPI_BYTE,cgblock_type,'native',xmpio_info,mpierr)
-       ABI_CHECK_MPI(mpierr,"SET_VIEW")
+       ABI_CHECK_MPI(mpierr, "SET_VIEW")
 
        call MPI_TYPE_FREE(cgblock_type,mpierr)
-       ABI_CHECK_MPI(mpierr,"")
+       ABI_CHECK_MPI(mpierr, "TYPE_FREE")
 
        bufsz = npw_disk * nspinor_disk * nb_block
 
@@ -1389,7 +1389,7 @@ subroutine wfk_read_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg_
        else
          ABI_ERROR("Wrong sc_mode")
        end if
-       ABI_CHECK_MPI(mpierr,"FILE_READ")
+       ABI_CHECK_MPI(mpierr, "FILE_READ")
      end if
 
    case default
@@ -1606,12 +1606,12 @@ subroutine wfk_read_bks(wfk, band, ik_ibz, spin, sc_mode, cg_bks, eig1_bks)
      types = [MPI_DOUBLE_COMPLEX, MPI_DOUBLE_COMPLEX]
 
      call xmpio_create_fstripes(1,sizes,types,gkk_type,my_offpad,mpierr)
-     ABI_CHECK_MPI(mpierr,"xmpio_create_fstripes")
+     ABI_CHECK_MPI(mpierr, "xmpio_create_fstripes")
 
      !call MPI_TYPE_CONTIGUOUS(nband_disk,MPI_DOUBLE_COMPLEX,gkk_type,mpierr)
-     !ABI_CHECK_MPI(mpierr,"type_contigous")
+     !ABI_CHECK_MPI(mpierr, "type_contigous")
      !call MPI_TYPE_COMMIT(gkk_type,mpierr)
-     !ABI_CHECK_MPI(mpierr,"mpi_commit")
+     !ABI_CHECK_MPI(mpierr, "mpi_commit")
      !my_offpad = 0
 
      ! Increment my_offset to account for previous (iband -1) bands.
@@ -1644,9 +1644,9 @@ subroutine wfk_read_bks(wfk, band, ik_ibz, spin, sc_mode, cg_bks, eig1_bks)
 
 #else
      call MPI_FILE_SET_VIEW(wfk%fh,my_offset,MPI_BYTE,gkk_type,'native',xmpio_info,mpierr)
-     ABI_CHECK_MPI(mpierr,"")
-     call MPI_TYPE_FREE(gkk_type,mpierr)
-     ABI_CHECK_MPI(mpierr,"")
+     ABI_CHECK_MPI(mpierr, "SET_VIEW")
+     call MPI_TYPE_FREE(gkk_type, mpierr)
+     ABI_CHECK_MPI(mpierr, "TYPE_FREE")
 
      bufsz = nband_disk
      if (sc_mode==xmpio_collective) then
@@ -1656,7 +1656,7 @@ subroutine wfk_read_bks(wfk, band, ik_ibz, spin, sc_mode, cg_bks, eig1_bks)
      else
        ABI_ERROR("Wrong sc_mode")
      end if
-     ABI_CHECK_MPI(mpierr,"FILE_READ")
+     ABI_CHECK_MPI(mpierr, "FILE_READ")
 
      ! Read the cg_ks(G)
      ! Increment my_offset to account for the previous eigen and cg records of (iband-1) bands.
@@ -1666,14 +1666,14 @@ subroutine wfk_read_bks(wfk, band, ik_ibz, spin, sc_mode, cg_bks, eig1_bks)
         (2*nband_disk*xmpi_bsize_dp + 2*xmpio_bsize_frm) )
 
      call MPI_TYPE_CONTIGUOUS(npw_disk*nspinor_disk,MPI_DOUBLE_COMPLEX,cg_type,mpierr)
-     ABI_CHECK_MPI(mpierr,"type_contigous")
+     ABI_CHECK_MPI(mpierr, "type_contigous")
      call MPI_TYPE_COMMIT(cg_type,mpierr)
-     ABI_CHECK_MPI(mpierr,"mpi_commit")
+     ABI_CHECK_MPI(mpierr, "mpi_commit")
 
      call MPI_FILE_SET_VIEW(wfk%fh,my_offset,MPI_BYTE,cg_type,'native',xmpio_info,mpierr)
-     ABI_CHECK_MPI(mpierr,"")
+     ABI_CHECK_MPI(mpierr, "SET_VIEW")
      call MPI_TYPE_FREE(cg_type, mpierr)
-     ABI_CHECK_MPI(mpierr,"MPI_TYPE_FREE")
+     ABI_CHECK_MPI(mpierr, "MPI_TYPE_FREE")
 
      bufsz = npw_disk * nspinor_disk
      if (sc_mode==xmpio_collective) then
@@ -1683,7 +1683,7 @@ subroutine wfk_read_bks(wfk, band, ik_ibz, spin, sc_mode, cg_bks, eig1_bks)
      else
        ABI_ERROR("Wrong sc_mode")
      end if
-     ABI_CHECK_MPI(mpierr,"FILE_READ")
+     ABI_CHECK_MPI(mpierr, "FILE_READ")
 #endif
 #endif
 
@@ -1916,16 +1916,16 @@ subroutine wfk_write_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg
    my_offset = Wfk%offset_ks(ik_ibz,spin,REC_NPW) + xmpio_bsize_frm
 
    call MPI_TYPE_CONTIGUOUS(3, MPI_INTEGER, recnpw_type, mpierr)
-   ABI_CHECK_MPI(mpierr,"writing REC_NPW")
+   ABI_CHECK_MPI(mpierr, "writing REC_NPW")
 
    call MPI_TYPE_COMMIT(recnpw_type,mpierr)
-   ABI_CHECK_MPI(mpierr,"writing REC_NPW")
+   ABI_CHECK_MPI(mpierr, "writing REC_NPW")
 
    call MPI_FILE_SET_VIEW(Wfk%fh,my_offset,MPI_BYTE,recnpw_type,'native',xmpio_info,mpierr)
-   ABI_CHECK_MPI(mpierr,"writing REC_NPW")
+   ABI_CHECK_MPI(mpierr, "writing REC_NPW")
 
    call MPI_TYPE_FREE(recnpw_type,mpierr)
-   ABI_CHECK_MPI(mpierr,"writing REC_NPW")
+   ABI_CHECK_MPI(mpierr, "writing REC_NPW")
 
    dims = [npw_disk, nspinor_disk, nband_disk]
 
@@ -1936,7 +1936,7 @@ subroutine wfk_write_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg
    else
      ABI_ERROR("Wrong sc_mode")
    end if
-   ABI_CHECK_MPI(mpierr,"writing REC_NPW")
+   ABI_CHECK_MPI(mpierr, "writing REC_NPW")
 
 !----------------------------------------------------------------------------
 ! record 2 kg
@@ -1949,7 +1949,7 @@ subroutine wfk_write_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg
      my_offset = Wfk%offset_ks(ik_ibz,spin,REC_KG) + xmpio_bsize_frm
 
      call mpio_write_kg_k(Wfk%fh,my_offset,npw_disk,sc_mode,kg_k,mpierr)
-     ABI_CHECK_MPI(mpierr,"mpio_write_kg_k")
+     ABI_CHECK_MPI(mpierr, "mpio_write_kg_k")
    end if
 
 !----------------------------------------------------------------------------
@@ -1976,7 +1976,7 @@ subroutine wfk_write_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg
        tmp_eigk(nband_disk+1:) = occ_k(1:nband_disk)
 
        call mpio_write_eigocc_k(Wfk%fh,my_offset,nband_disk,Wfk%formeig,sc_mode,tmp_eigk,mpierr)
-       ABI_CHECK_MPI(mpierr,"mpio_write_eigocc_k")
+       ABI_CHECK_MPI(mpierr, "mpio_write_eigocc_k")
 
        ABI_FREE(tmp_eigk)
      end if
@@ -2003,9 +2003,7 @@ subroutine wfk_write_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg
        ABI_CHECK(mpierr == 0, "mpierr != 0")
      end if
 
-!----------------------------------------------------------------------------
-   else if (Wfk%formeig==1) then
-!----------------------------------------------------------------------------
+   else if (Wfk%formeig == 1) then
 
 !----------------------------------------------------------------------------
 ! record 3 eigk occk
@@ -2014,15 +2012,15 @@ subroutine wfk_write_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg
        sizes = [nband_disk,npw_disk*nspinor_disk]
 
        call xmpio_create_fstripes(nband_disk,sizes,types,gkk_type,my_offpad,mpierr)
-       ABI_CHECK_MPI(mpierr,"xmpio_create_fstripes")
+       ABI_CHECK_MPI(mpierr, "xmpio_create_fstripes")
 
        my_offset = Wfk%offset_ks(ik_ibz,spin,REC_EIG) + my_offpad
 
        call MPI_FILE_SET_VIEW(Wfk%fh,my_offset,MPI_BYTE,gkk_type,'native',xmpio_info,mpierr)
-       ABI_CHECK_MPI(mpierr,"SET_VIEW")
+       ABI_CHECK_MPI(mpierr, "SET_VIEW")
 
        call MPI_TYPE_FREE(gkk_type,mpierr)
-       ABI_CHECK_MPI(mpierr,"FREE")
+       ABI_CHECK_MPI(mpierr, "TYPE_FREE")
 
 ! NB: bufsz is not 2*nband**2 because we use COMPLEX below
        bufsz = (nband_disk**2)
@@ -2035,7 +2033,7 @@ subroutine wfk_write_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg
          ABI_ERROR("Wrong sc_mode")
        end if
 
-       ABI_CHECK_MPI(mpierr,"FILE_WRITE")
+       ABI_CHECK_MPI(mpierr, "FILE_WRITE")
      end if
 
 !----------------------------------------------------------------------------
@@ -2048,21 +2046,21 @@ subroutine wfk_write_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg
        sizes = [npw_disk*nspinor_disk, nband_disk]
 
        call xmpio_create_fstripes(nb_block,sizes,types,cgblock_type,my_offpad,mpierr)
-       ABI_CHECK_MPI(mpierr,"xmpio_create_fstripes")
+       ABI_CHECK_MPI(mpierr, "xmpio_create_fstripes")
 
 ! TODO: check that the following offset is correct
 !       check that the 4 * xmpio_bsize_frm is correct: 1 record marker for eigen and 1 for cg in principle!
 !         even if the cg is followed by 2 frm, and eig 1, then it should be 3, not 4
        my_offset = Wfk%offset_ks(ik_ibz,spin,REC_CG) + my_offpad &
-&         + (band_block(1)-1) * (2 * nband_disk * xmpi_bsize_dp &
-&                              + 2 * npw_disk * nspinor_disk * xmpi_bsize_dp &
-&                              + 4 * xmpio_bsize_frm)
+          + (band_block(1)-1) * (2 * nband_disk * xmpi_bsize_dp &
+                               + 2 * npw_disk * nspinor_disk * xmpi_bsize_dp &
+                               + 4 * xmpio_bsize_frm)
 
        call MPI_FILE_SET_VIEW(Wfk%fh,my_offset,MPI_BYTE,cgblock_type,'native',xmpio_info,mpierr)
-       ABI_CHECK_MPI(mpierr,"SET_VIEW")
+       ABI_CHECK_MPI(mpierr, "SET_VIEW")
 
        call MPI_TYPE_FREE(cgblock_type,mpierr)
-       ABI_CHECK_MPI(mpierr,"")
+       ABI_CHECK_MPI(mpierr, "TYPE_FREE")
 
        bufsz = npw_disk * nspinor_disk * nb_block
        if (sc_mode==xmpio_collective) then
@@ -2072,7 +2070,7 @@ subroutine wfk_write_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg
        else
          ABI_ERROR("Wrong sc_mode")
        end if
-       ABI_CHECK_MPI(mpierr,"FILE_WRITE")
+       ABI_CHECK_MPI(mpierr, "FILE_WRITE")
      end if
 
    else
@@ -2092,7 +2090,7 @@ subroutine wfk_write_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg
    end if
 
    ! Write eigenvalues and occupation factors.
-   if (Wfk%formeig==0) then
+   if (Wfk%formeig == 0) then
 
      if (present(eig_k)) then
        NCF_CHECK(nf90_inq_varid(wfk%fh, "eigenvalues", eig_varid))
@@ -2112,20 +2110,18 @@ subroutine wfk_write_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg
        NCF_CHECK_MSG(ncerr, "putting occ_k")
      end if
 
-   else if (Wfk%formeig==1) then
+   else if (Wfk%formeig == 1) then
      if (present(occ_k)) then
        ABI_ERROR("Don't pass occ_k when formeig==1 and ETSF-IO")
      end if
      if (present(eig_k)) then
        !ABI_WARNING("Don't pass eig_k when formeig==1 and ETSF-IO")
-
        NCF_CHECK(nf90_inq_varid(wfk%fh, "h1_matrix_elements", h1_varid))
        if (sc_mode == xmpio_collective .and. wfk%nproc > 1) then
          NCF_CHECK(nctk_set_collective(wfk%fh, h1_varid))
        end if
        ncerr = nf90_put_var(wfk%fh, h1_varid, eig_k, start=[1,1,1,ik_ibz,spin], count=[2, nband_disk, nband_disk, 1, 1])
        NCF_CHECK_MSG(ncerr, "puting h1mat_k")
-
      end if
 
    else
@@ -2141,7 +2137,7 @@ subroutine wfk_write_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg
      end if
 
      ncerr = nf90_put_var(wfk%fh, cg_varid, cg_k, start=[1,1,1,band_block(1),ik_ibz,spin], &
-                          count=[2,npw_disk,wfk%nspinor,nb_block,1,1])
+                          count=[2, npw_disk, wfk%nspinor, nb_block, 1, 1])
      NCF_CHECK_MSG(ncerr, "putting cg_k")
   end if
 
@@ -2279,7 +2275,7 @@ subroutine wfk_read_bmask(Wfk, bmask, ik_ibz, spin, sc_mode, kg_k, cg_k, eig_k, 
 
    if (any([npw_read, nspinor_read, nband_read] /= [npw_disk, nspinor_disk, nband_disk])) then
      write(msg,"(a,6(i0,2x))")"Mismatch between (npw, nspinor, nband) read from WFK and those found in HDR ",&
-&      npw_read, nspinor_read, nband_read, npw_disk, nspinor_disk, nband_disk
+       npw_read, nspinor_read, nband_read, npw_disk, nspinor_disk, nband_disk
      ABI_ERROR(msg)
    end if
 
@@ -2363,7 +2359,7 @@ subroutine wfk_read_bmask(Wfk, bmask, ik_ibz, spin, sc_mode, kg_k, cg_k, eig_k, 
      my_offset = Wfk%offset_ks(ik_ibz,spin,REC_KG) + xmpio_bsize_frm
 
      call mpio_read_kg_k(Wfk%fh,my_offset,npw_disk,sc_mode,kg_k,mpierr)
-     ABI_CHECK_MPI(mpierr,"mpio_read_kg_k")
+     ABI_CHECK_MPI(mpierr, "mpio_read_kg_k")
    end if
 
    ! The third record: eigenvalues and occupation factors.
@@ -2374,12 +2370,12 @@ subroutine wfk_read_bmask(Wfk, bmask, ik_ibz, spin, sc_mode, kg_k, cg_k, eig_k, 
      ! formeig=1 =>  Read (nband_k,nband_k) matrix of complex numbers.
      !
      call mpio_read_eigocc_k(Wfk%fh,my_offset,nband_disk,Wfk%formeig,sc_mode,tmp_eigk,mpierr)
-     ABI_CHECK_MPI(mpierr,"mpio_read_eigocc")
+     ABI_CHECK_MPI(mpierr, "mpio_read_eigocc")
 
-     if (Wfk%formeig==0) then
+     if (Wfk%formeig == 0) then
        if (present(eig_k)) eig_k(1:nband_disk) = tmp_eigk(1:nband_disk)
        if (present(occ_k)) occ_k(1:nband_disk) = tmp_eigk(nband_disk+1:)
-     else if (Wfk%formeig==1) then
+     else if (Wfk%formeig == 1) then
        if (present(eig_k)) eig_k(1:2*nband_disk**2) = tmp_eigk(1:2*nband_disk**2)
      else
        ABI_ERROR("formeig not in [0,1]")
@@ -2404,7 +2400,7 @@ subroutine wfk_read_bmask(Wfk, bmask, ik_ibz, spin, sc_mode, kg_k, cg_k, eig_k, 
            EXIT
          end if
        end do
-       call xmpi_max(my_maxb,max_nband,Wfk%comm,mpierr)
+       call xmpi_max(my_maxb, max_nband, Wfk%comm, mpierr)
        !max_nband = nband_disk
        !
        ! MPI-IO crashes if we try to read a large number of bands in a single call.
@@ -2458,12 +2454,12 @@ subroutine wfk_read_bmask(Wfk, bmask, ik_ibz, spin, sc_mode, kg_k, cg_k, eig_k, 
            types = [MPI_DOUBLE_COMPLEX, MPI_DOUBLE_COMPLEX]
 
            call xmpio_create_fstripes(nb,sizes,types,cg_type,my_offpad,mpierr)
-           ABI_CHECK_MPI(mpierr,"xmpio_create_fstripes")
+           ABI_CHECK_MPI(mpierr, "xmpio_create_fstripes")
 
            call MPI_FILE_SET_VIEW(wfk%fh,my_offset,MPI_BYTE,cg_type,'native',xmpio_info,mpierr)
-           ABI_CHECK_MPI(mpierr,"")
+           ABI_CHECK_MPI(mpierr, "SET_VIEW")
            call MPI_TYPE_FREE(cg_type,mpierr)
-           ABI_CHECK_MPI(mpierr,"")
+           ABI_CHECK_MPI(mpierr, "TYPE_FREE")
 
            if (sc_mode==xmpio_collective) then
              call MPI_FILE_READ_ALL(wfk%fh,buffer,bufsz,MPI_DOUBLE_COMPLEX,MPI_STATUS_IGNORE,mpierr)
@@ -2472,7 +2468,7 @@ subroutine wfk_read_bmask(Wfk, bmask, ik_ibz, spin, sc_mode, kg_k, cg_k, eig_k, 
            else
              ABI_ERROR("Wrong sc_mode")
            end if
-           ABI_CHECK_MPI(mpierr,"FILE_READ")
+           ABI_CHECK_MPI(mpierr, "FILE_READ")
          end if
 
          ! Extract my bands from buffer.
@@ -2488,16 +2484,16 @@ subroutine wfk_read_bmask(Wfk, bmask, ik_ibz, spin, sc_mode, kg_k, cg_k, eig_k, 
          ABI_FREE(buffer)
        end do
 
-     case (1,2)
+     case (1, 2)
        ABI_CHECK(wfk%formeig == 0, "formeig == 1 not coded")
        call MPI_TYPE_CONTIGUOUS(npw_disk*nspinor_disk,MPI_DOUBLE_COMPLEX,cg_type,mpierr)
-       ABI_CHECK_MPI(mpierr,"type_contigous")
+       ABI_CHECK_MPI(mpierr, "type_contigous")
 
-       if (method==1) then
+       if (method == 1) then
          ncount = nb_tot
-         ABI_MALLOC(block_length,(ncount+2))
-         ABI_MALLOC(block_type, (ncount+2))
-         ABI_MALLOC(block_displ,(ncount+2))
+         ABI_MALLOC(block_length, (ncount+2))
+         ABI_MALLOC(block_type,  (ncount+2))
+         ABI_MALLOC(block_displ, (ncount+2))
 
          block_length(1)=1
          block_displ (1)=0
@@ -2510,7 +2506,7 @@ subroutine wfk_read_bmask(Wfk, bmask, ik_ibz, spin, sc_mode, kg_k, cg_k, eig_k, 
              block_length(my_bcount) = 1
              block_type(my_bcount) = cg_type
              block_displ(my_bcount) = xmpio_bsize_frm + &
-&              (band-1) * (2*npw_disk*nspinor_disk*xmpi_bsize_dp + 2*xmpio_bsize_frm)
+               (band-1) * (2*npw_disk*nspinor_disk*xmpi_bsize_dp + 2*xmpio_bsize_frm)
            end if
          end do
 
@@ -2518,7 +2514,7 @@ subroutine wfk_read_bmask(Wfk, bmask, ik_ibz, spin, sc_mode, kg_k, cg_k, eig_k, 
          block_displ (ncount+2) = block_displ(my_bcount)
          block_type  (ncount+2) = MPI_UB
 
-       else if (method==2) then
+       else if (method == 2) then
          ! this file view is not efficient but it's similar to the
          ! one used in wff_readwrite. Let's see if MPI-IO likes it!
          ncount = nb_tot* nspinor_disk * npw_disk
@@ -2536,7 +2532,7 @@ subroutine wfk_read_bmask(Wfk, bmask, ik_ibz, spin, sc_mode, kg_k, cg_k, eig_k, 
          do band=1,Wfk%mband
            if (bmask(band)) then
              base_ofs =  xmpio_bsize_frm + &
-&              (band-1) * (2*npw_disk*nspinor_disk*xmpi_bsize_dp + 2*xmpio_bsize_frm)
+               (band-1) * (2*npw_disk*nspinor_disk*xmpi_bsize_dp + 2*xmpio_bsize_frm)
              do ipw=1,npw_disk*nspinor_disk
                cnt = cnt + 1
                block_length(cnt) = 1
@@ -2552,25 +2548,25 @@ subroutine wfk_read_bmask(Wfk, bmask, ik_ibz, spin, sc_mode, kg_k, cg_k, eig_k, 
        end if
 
        call xmpio_type_struct(ncount+2,block_length,block_displ,block_type,cgscatter_type,mpierr)
-       ABI_CHECK_MPI(mpierr,"type_struct")
+       ABI_CHECK_MPI(mpierr, "type_struct")
 
        ABI_FREE(block_length)
        ABI_FREE(block_type)
        ABI_FREE(block_displ)
 
        call MPI_TYPE_FREE(cg_type, mpierr)
-       ABI_CHECK_MPI(mpierr,"MPI_TYPE_FREE")
+       ABI_CHECK_MPI(mpierr, "MPI_TYPE_FREE")
 
        my_offset = Wfk%offset_ks(ik_ibz,spin,REC_CG)
 
        call MPI_FILE_SET_VIEW(Wfk%fh, my_offset, MPI_BYTE, cgscatter_type, 'native', xmpio_info, mpierr)
-       ABI_CHECK_MPI(mpierr,"SET_VIEW")
+       ABI_CHECK_MPI(mpierr, "SET_VIEW")
 
        call MPI_TYPE_FREE(cgscatter_type, mpierr)
-       ABI_CHECK_MPI(mpierr,"MPI_TYPE_FREE")
+       ABI_CHECK_MPI(mpierr, "MPI_TYPE_FREE")
 
        call MPI_FILE_READ_ALL(Wfk%fh, cg_k, npw_tot, MPI_DOUBLE_COMPLEX, MPI_STATUS_IGNORE, mpierr)
-       ABI_CHECK_MPI(mpierr,"FILE_READ_ALL")
+       ABI_CHECK_MPI(mpierr, "FILE_READ_ALL")
 
      case default
        ABI_ERROR("Wrong method")
@@ -3344,8 +3340,6 @@ end subroutine wfk_read_my_kptbands
 !!
 !! OUTPUT
 !!   writes to file
-!!
-!! NOTES
 !!
 !! SOURCE
 

@@ -940,8 +940,8 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  end if
 
  if (istwf_k == 2) then
-   ABI_WARNING("istwfk == 2 is still under development")
-   !ABI_ERROR("istwfk == 2 is still under development")
+   !ABI_WARNING("istwfk == 2 is still under development")
+   ABI_ERROR("istwfk == 2 is still under development")
  end if
 
  if (dtset%ixc < 0) then
@@ -1242,7 +1242,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  call proc_1d%free()
 
  ! Now transfer eigvec to ugb datastructure using 1d grid (block column distribution)
- call wrtout(std_out, "Moving to block column distribution...")
+ call wrtout(std_out, " Moving to PBLAS block column distribution...")
  call cwtime(cpu, wall, gflops, "start")
  call ugb%processor%init(comm, grid_dims=[1, nproc])
 

@@ -48,6 +48,40 @@ MODULE m_dyson_solver
  real(dp),private,parameter :: NR_ABS_ROOT_ERR = 0.0001/Ha_eV
   ! Tolerance on the absolute error on the Newton-Raphson root.
 
+!----------------------------------------------------------------------
+
+!!****t* m_dyson_solver/sigma_pade_t
+!! NAME
+!! sigma_pade_t
+!!
+!! FUNCTION
+!!
+!! SOURCE
+
+ type, public :: sigma_pade_t
+
+    integer :: npts
+    character(len=1) :: branch_cut
+    complex(dp),pointer :: zmesh(:) => null(), sigc_cvals(:) => null()
+
+    !integer :: NR_MAX_NITER = 1000
+    ! Max no of iterations in the Newton-Raphson method.
+
+    !real(dp) :: NR_ABS_ROOT_ERR = 0.0001/Ha_eV
+    ! Tolerance on the absolute error on the Newton-Raphson root.
+
+ contains
+
+   procedure :: init => sigma_pade_init
+   ! Init object
+
+   procedure :: eval => sigma_pade_eval
+
+   procedure :: qp_solve => sigma_pade_qp_solve
+
+ end type sigma_pade_t
+!!***
+
 CONTAINS  !====================================================================
 !!***
 
@@ -683,6 +717,136 @@ subroutine print_sigma_melems(ikcalc,ib1,ib2,nsp,htotal,hhartree,sigxme,sigcme,p
  close(temp_unit)
 
 end subroutine print_sigma_melems
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_dyson_solver/sigma_pade_init
+!! NAME
+!!  sigma_pade_init
+!!
+!! FUNCTION
+!!  Initialize the Pade' from the `npts` values of Sigma_c(iw) given on the mesh `zmesh`.
+!!
+!! SOURCE
+
+subroutine sigma_pade_init(self, npts, zmesh, sigc_cvals, branch_cut)
+
+!Arguments ------------------------------------
+ class(sigma_pade_t),intent(out) :: self
+ integer,intent(in) :: npts
+ complex(dp),target,intent(in) :: zmesh(npts), sigc_cvals(npts)
+ character(len=*),intent(in) :: branch_cut
+
+! *************************************************************************
+
+ self%npts = npts
+ self%branch_cut = branch_cut
+
+ self%zmesh => zmesh
+ self%sigc_cvals => sigc_cvals
+
+end subroutine sigma_pade_init
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_dyson_solver/sigma_pade_eval
+!! NAME
+!!  sigma_pade_eval
+!!
+!! FUNCTION
+!!  Evaluate the Pade' at the complex point `zz`. Return result in val and, optional,
+!!  the derivative at zz in `dzdval`
+!!
+!! SOURCE
+
+subroutine sigma_pade_eval(self, zz, val, dzdval)
+
+!Arguments ------------------------------------
+ class(sigma_pade_t),intent(in) :: self
+ complex(dp),intent(in) :: zz
+ complex(dp),intent(out) :: val
+ complex(dp),optional,intent(out) :: dzdval
+
+! *************************************************************************
+
+ ! if zz in 2 or 3 quadrant, avoid branch cut in the complex plane using Sigma(-iw) = Sigma(iw)*.
+ if (real(zz) > zero) then
+ !if (real(zz) < zero) then
+   val = pade(self%npts, self%zmesh, self%sigc_cvals, zz)
+   if (present(dzdval)) dzdval = dpade(self%npts, self%zmesh, self%sigc_cvals, zz)
+ else
+   val = pade(self%npts, -self%zmesh, conjg(self%sigc_cvals), zz)
+   if (present(dzdval)) dzdval = dpade(self%npts, -self%zmesh, conjg(self%sigc_cvals), zz)
+ end if
+
+end subroutine sigma_pade_eval
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_dyson_solver/sigma_pade_qp_solve
+!! NAME
+!!  sigma_pade_qp_solve
+!!
+!! FUNCTION
+!!  Use the Pade' approximant and Newton-Rapson method  to solve the QP equation
+!!  in the complex pane starting from the initial guess `z_guess`.
+!!
+!! INPUTS
+!!
+!! SOURCE
+
+subroutine sigma_pade_qp_solve(self, e0, v_meanf, sigx, z_guess, zsc, msg, ierr)
+
+!Arguments ------------------------------------
+ class(sigma_pade_t),intent(in) :: self
+ real(dp),intent(in) :: e0, v_meanf, sigx
+ complex(dp),intent(in) :: z_guess
+ complex(dp),intent(out) :: zsc
+ integer,intent(out) :: ierr
+
+!Local variables-------------------------------
+!scalars
+ integer :: iter
+ logical :: converged
+ complex(dpc) :: ctdpc, dct, dsigc, sigc
+ character(len=500) :: msg
+
+! *************************************************************************
+
+ ! Use Newton-Rapson to find the root of:
+ ! f(z) = e0 - zz + Sigma_xc(z) - v_meanf
+ ! f'(z) = -1 + Sigma_c'(z)
+
+ iter = 0; converged = .FALSE.; ctdpc = cone
+ zsc = z_guess
+ do while (ABS(ctdpc) > NR_ABS_ROOT_ERR .or. iter < NR_MAX_NITER)
+   iter = iter + 1
+
+   call self%eval(zsc, sigc, dzdval=dsigc)
+   ctdpc = e0 - v_meanf + sigx + sigc - zsc
+
+   !ctdpc = Sr%e0(jb,sk_ibz,spin) - Sr%vxcme(jb,sk_ibz,spin) - Sr%vUme(jb,sk_ibz,spin) + Sr%sigxme(jb,sk_ibz,spin) &
+   !        + sigc - zz
+   if (ABS(ctdpc) < NR_ABS_ROOT_ERR) then
+     converged=.TRUE.; EXIT
+   end if
+   dct = dsigc - one
+   zsc = newrap_step(zsc, ctdpc, dct)
+ end do
+
+ ierr = 0; msg = ""
+ if (.not. converged) then
+   write(msg,'(a,i0,3a,f8.4,a,f8.4)')&
+     'Newton-Raphson method not converged after ',NR_MAX_NITER,' iterations. ',ch10,&
+     'Absolute Error = ',ABS(ctdpc),' > ',NR_ABS_ROOT_ERR
+   ierr = 1
+ end if
+
+end subroutine sigma_pade_qp_solve
+!!***
 
 !----------------------------------------------------------------------
 
