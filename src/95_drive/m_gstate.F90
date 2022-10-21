@@ -783,6 +783,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    optorth=1   !if (psps%usepaw==1) optorth=0
    if(psps%usepaw==1 .and. dtfil%ireadwf==1)optorth=0
    hdr%rprimd=rprimd_for_kg ! We need the rprimd that was used to generate de G vectors
+   ABI_NVTX_START_RANGE(NVTX_INIT_INWFFIL2)
    call inwffil(ask_accurate,cg,dtset,dtset%ecut,ecut_eff,eigen,&
 &   dtset%exchn2n3d,formeig,hdr,dtfil%ireadwf,dtset%istwfk,kg,&
 &   dtset%kptns,dtset%localrdwf,dtset%mband,mcg,dtset%mkmem,mpi_enreg,&
@@ -790,6 +791,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 &   dtset%nsppol,dtset%nsym,occ,optorth,dtset%symafm,&
 &   dtset%symrel,dtset%tnons,dtfil%unkg,wff1,wffnow,dtfil%unwff1,&
 &   dtfil%fnamewffk,wvl)
+   ABI_NVTX_END_RANGE()
    hdr%rprimd=rprimd
  end if
 
