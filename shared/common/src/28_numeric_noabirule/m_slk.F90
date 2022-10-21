@@ -773,7 +773,7 @@ subroutine slk_set_head_and_wings(mat, head, low_wing, up_wing)
  complex(dp),intent(in) :: head, low_wing(mat%sizeb_global(1)), up_wing(mat%sizeb_global(2))
 
 !Local variables-------------------------------
- integer :: ierr, il_g1, il_g2, iglob1, iglob2
+ integer :: il_g1, il_g2, iglob1, iglob2
  logical :: is_cplx
 
 ! *********************************************************************

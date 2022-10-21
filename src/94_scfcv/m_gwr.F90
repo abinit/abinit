@@ -1882,7 +1882,7 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
  integer,parameter :: formeig0 = 0
  integer :: mband, min_nband, nkibz, nsppol, my_is, my_iki, spin, ik_ibz
  integer :: npw_k, mpw, istwf_k, il_b, band !, itau
- integer :: nbsum, npwsp, col_bsize, my_bstart, my_bstop, my_nband ! nband_k,
+ integer :: nbsum, npwsp !, col_bsize, my_bstart, my_bstop, my_nband ! nband_k,
  real(dp) :: cpu, wall, gflops, cpu_green, wall_green, gflops_green
  character(len=5000) :: msg
  type(ebands_t) :: wfk_ebands
@@ -3525,7 +3525,7 @@ subroutine gwr_build_tchi(gwr)
 !Local variables-------------------------------
 !scalars
  integer :: my_is, my_it, my_ikf, ig, my_ir, my_nr, npwsp, ncol_glob, col_bsize, my_iqi !, my_iki ! my_iqf,
- integer :: idat, ndat, sc_nfft, spin, ik_bz, iq_ibz, ierr, ipm, itau, ig2, ig1
+ integer :: idat, ndat, sc_nfft, spin, ik_bz, iq_ibz, ierr, ipm, itau, ig2 !, ig1
  real(dp) :: cpu_tau, wall_tau, gflops_tau, cpu_all, wall_all, gflops_all, cpu_ir, wall_ir, gflops_ir
  real(dp) :: tchi_rfact, mem_mb, local_max, max_abs_imag_chit !, spin_fact, sc_ucvol, ik_ibz,
  complex(dp) :: head_q
@@ -4266,7 +4266,7 @@ subroutine gwr_build_wc(gwr)
 !scalars
  integer,parameter :: master = 0
  integer :: my_iqi, my_it, my_is, iq_ibz, spin, itau, iw, ierr
- integer :: il_g1, il_g2, ig1, ig2, iglob1, iglob2, my_rank, ig0
+ integer :: il_g1, il_g2, ig1, ig2, iglob1, iglob2, ig0
  real(dp) :: cpu_all, wall_all, gflops_all, cpu_q, wall_q, gflops_q, q0_vol, i_sz, q0sph
  logical :: q_is_gamma, free_tchi
  character(len=5000) :: msg
@@ -4479,7 +4479,7 @@ subroutine gwr_build_sigmac(gwr)
 
 !Local variables-------------------------------
 !scalars
- integer :: my_is, my_it, spin, ik_ibz, ikcalc_ibz, sc_nfft, sc_mgfft, sc_size, my_ir, my_nr, iw, idat, ndat, my_rank !my_iki,
+ integer :: my_is, my_it, spin, ik_ibz, ikcalc_ibz, sc_nfft, sc_size, my_ir, my_nr, iw, idat, ndat !sc_mgfft,
  integer :: my_iqf, iq_ibz, iq_bz, itau, ierr, ibc, bmin, bmax, band, nbc ! col_bsize, npwsp, ib1, ib2,
  integer :: my_ikf, ipm, ik_bz, ig, ikcalc, uc_ir, ir, ncid, col_bsize, npwsp, ibeg, iend ! my_iqi, sc_ir,
  real(dp) :: cpu_tau, wall_tau, gflops_tau, cpu_all, wall_all, gflops_all !, cpu, wall, gflops
@@ -4957,7 +4957,6 @@ end if
           spfunc_diag_kcalc(iw, ibc, ikcalc, spin) = one / pi * abs(aimag(sigc_e0)) &
             /( (real(rw_mesh(iw) - hhartree_bk - sig_xc)) ** 2 + (aimag(sigc_e0)) ** 2) / Ha_eV
 
-          !spfunc_diag_kcalc(iw, ibc, ikcalc, spin) = zero
           !Sr%hhartree = hdft - KS_me%vxcval
           !spfunc_diag_kcalc(iw, ibc, ikcalc, spin) = &
           !  one / pi * abs(aimag(sigc_e0)) &
@@ -5288,7 +5287,7 @@ subroutine gwr_rpa_energy(gwr)
  real(dp) :: weight, qq_ibz(3), estep, aa, bb, rmsq, ecut_soft, damp, tsec(2)
  complex(dpc) :: vcs_g1, vcs_g2
  type(desc_t),pointer :: desc_q
- character(len=500) :: msg
+ !character(len=500) :: msg
 !arrays
  type(matrix_scalapack) :: chi_tmp, dummy_vec
  real(dp),allocatable :: eig(:), kin_qg(:), ec_rpa(:), ec_mp2(:), ecut_chi(:)
@@ -5312,7 +5311,7 @@ subroutine gwr_rpa_energy(gwr)
  ecut_chi = arth(gwr%dtset%ecuteps + tol12, estep, ncut)
 
  ! Polarizability has been summed over spins inside build_tchi.
- ! The loop over spins is needed to parallelize the loop over my_iqi if nsppol == 2
+ ! The loop over spins is needed to parallelize the loop over my_iqi if nsppol == 2.
  do my_is=1,gwr%my_nspins
    spin = gwr%my_spins(my_is)
    if (gwr%spin_comm%nproc == 1 .and. spin == 2) cycle
@@ -5418,7 +5417,7 @@ subroutine gwr_rpa_energy(gwr)
      write(ab_out, "(*(es16.8))") ecut_chi(icut), ecut_chi(icut) ** (-three/two), ec_rpa(icut) * Ha_eV, ec_rpa(icut)
    end do
    if (ncut > 1) then
-     ! Add last line with extrapolated value
+     ! Add last line with extrapolated value.
      rmsq = linfit(ncut, ecut_chi(:) ** (-three/two), ec_rpa, aa, bb)
      write(ab_out, "(2a16,*(es16.8))") "oo", "0", bb * Ha_eV, bb
    end if
@@ -5593,7 +5592,7 @@ subroutine gwr_ncwrite_tchi_wc(gwr, what, filepath)
 !scalars
  integer,parameter :: master = 0
  integer :: my_is, my_iqi, my_it, spin, iq_ibz, itau, npwtot_q, my_ncols, my_gcol_start
- integer :: ncid, ncerr, ierr
+ integer :: ncid, ncerr !, ierr
  real(dp) :: cpu, wall, gflops
 !arrays
  !integer :: dist_qibz(gwr%nqibz)
@@ -5755,7 +5754,7 @@ subroutine gsph2box(ngfft, npw, ndat, kg_k, cg, cfft)
 
 !Local variables-------------------------------
  integer :: n1, n2, n3, n4, n5, n6, i1, i2, i3, idat, ipw
- character(len=500) :: msg
+ !character(len=500) :: msg
 
 ! *************************************************************************
 
@@ -5817,7 +5816,7 @@ subroutine box2gsph(ngfft, npw, ndat, kg_k, cfft, cg)
 
 !Local variables-------------------------------
  integer :: n1, n2, n3, n4, n5, n6, i1, i2, i3, idat, ipw, ipwdat, i3dat
- character(len=500) :: msg
+ !character(len=500) :: msg
 
 ! *************************************************************************
 
@@ -6243,7 +6242,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  integer,parameter :: two_poles = 2, one_pole = 1, gwcomp0 = 0, spmeth0 = 0
  integer :: nsppol, nspinor, ierr, my_is, spin, my_ikf, itau, my_it
  integer :: ik_bz, ik_ibz, isym_k, trev_k, g0_k(3)
- integer :: iq_bz, iq_ibz, isym_q, trev_q, g0_q(3)
+ !integer :: iq_bz, iq_ibz, isym_q, trev_q, g0_q(3)
  integer :: nkpt_summed, use_umklp, band1, band2, band1_start, band1_stop
  integer :: ib, il_b1, il_b2, nb, block_size, ii, mband
  integer :: istwf_ki, npw_ki, nI, nJ, ig, nomega, io, iq, nq, dim_rtwg
@@ -6260,7 +6259,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  type(littlegroup_t) :: ltg_q
  type(desc_t),pointer :: desc_ki
 !arrays
- integer :: g0(3), gmax(3), spinor_padx(2,4), u_ngfft(18), work_ngfft(18)
+ integer :: g0(3), gmax(3), u_ngfft(18), work_ngfft(18) ! spinor_padx(2,4),
  integer,contiguous, pointer :: kg_ki(:,:)
  integer,allocatable :: gvec_q0(:,:), gbound_q0(:,:), u_gbound(:,:)
  real(dp) :: kk_ibz(3), kk_bz(3), tsec(2)
@@ -6268,7 +6267,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  real(dp),allocatable :: work(:,:,:,:), qdirs(:,:)
  logical :: gradk_not_done(gwr%nkibz)
  logical,allocatable :: bbp_mask(:,:)
- complex(dpc) :: chq(3), wng(3)
+ complex(dpc) :: chq(3) !, wng(3)
  complex(dp),allocatable :: ug1_block(:,:)
  complex(gwpc) :: rhotwx(3, gwr%nspinor**2)
  complex(gwpc),allocatable :: ug1(:), ug2(:), ur1_kibz(:), ur2_kibz(:), ur_prod(:), rhotwg(:)
@@ -7266,8 +7265,8 @@ subroutine sc_sum(sc_shape, sc_nfft, uc_ngfft, uc_nfft, nspinor, ph1d, alpha, sc
 
 !Local variables-------------------------------
 !scalars
- integer :: il1, il2, il3, ir1, ir2, ir3, spinor, uc_n1, uc_n2, uc_n3, ix, iy, iz, idat
- complex(dp) :: cphase, phl1, phl32, phl3
+ integer :: il1, il2, il3, spinor, uc_n1, uc_n2, uc_n3, ix, iy, iz, idat
+ complex(dp) :: cphase, phl32, phl3
 
 ! *************************************************************************
 

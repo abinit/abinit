@@ -3928,15 +3928,12 @@ subroutine sigma_tables(Sigp, Kmesh, esymm)
  integer :: ikcalc,ik_ibz
  logical :: sigc_is_herm, only_diago
 !arrays
- integer,allocatable :: sigc_bidx(:), sigx_bidx(:), kcalc2ibz(:)
+ integer,allocatable :: kcalc2ibz(:)
 
 ! *************************************************************************
 
  only_diago = sigp%gwcalctyp < 20
  sigc_is_herm = sigma_is_herm(Sigp)
-
- !nsppol = sigp%nsppol; nkptgw = sigp%nkptgw
- !minbnd => sigp%minbnd; maxbnd => sigp%maxbnd
 
  ABI_MALLOC(kcalc2ibz, (sigp%nkptgw))
  do ikcalc=1,sigp%nkptgw

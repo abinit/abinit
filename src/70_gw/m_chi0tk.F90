@@ -665,7 +665,7 @@ subroutine accumulate_chi0_q0(is_metallic,ik_bz,isym_kbz,itim_kbz,gwcomp,nspinor
 
    ! Multiply elements G1,G2 of rhotwg by green_w(io) and accumulate in chi0(G1,G2,io)
 
-!$OMP PARALLEL DO IF PRIVATE(dr, dd) IF (nomega > 2)
+!$OMP PARALLEL DO PRIVATE(dr, dd) IF (nomega > 2)
    do io=1,nomega
      ! Check if green_w(io) is real (=> pure imaginary omega)
      ! and that it is not a metal
@@ -784,7 +784,7 @@ subroutine accumulate_chi0_q0(is_metallic,ik_bz,isym_kbz,itim_kbz,gwcomp,nspinor
    end do !isym
 
    ! Multiply rhotwg_sym by green_w(io) and accumulate in chi0(G,Gp,io)
-!$OMP PARALLEL DO IF PRIVATE(dr, dd) IF (nomega > 2)
+!$OMP PARALLEL DO PRIVATE(dr, dd) IF (nomega > 2)
    do io=1,nomega
      ! Check if green_w(io) is real (=> pure imaginary omega) and that it is not a metal
      ! then the corresponding chi0(io) is hermitian

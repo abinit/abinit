@@ -39,14 +39,9 @@ MODULE m_dyson_solver
  implicit none
 
  private
+!!***
 
  public :: solve_dyson     ! Solve the Dyson equation for the QP energies.
-
- integer,private,parameter :: NR_MAX_NITER = 1000
-  ! Max no of iterations in the Newton-Raphson method.
-
- real(dp),private,parameter :: NR_ABS_ROOT_ERR = 0.0001/Ha_eV
-  ! Tolerance on the absolute error on the Newton-Raphson root.
 
 !----------------------------------------------------------------------
 
@@ -55,6 +50,8 @@ MODULE m_dyson_solver
 !! sigma_pade_t
 !!
 !! FUNCTION
+!!  Small object to perform the analytic continuation with Pade' and
+!!  find the QP solution with Newton-Rapson method
 !!
 !! SOURCE
 
@@ -64,23 +61,25 @@ MODULE m_dyson_solver
     character(len=1) :: branch_cut
     complex(dp),pointer :: zmesh(:) => null(), sigc_cvals(:) => null()
 
-    !integer :: NR_MAX_NITER = 1000
-    ! Max no of iterations in the Newton-Raphson method.
-
-    !real(dp) :: NR_ABS_ROOT_ERR = 0.0001/Ha_eV
-    ! Tolerance on the absolute error on the Newton-Raphson root.
-
  contains
 
    procedure :: init => sigma_pade_init
    ! Init object
 
    procedure :: eval => sigma_pade_eval
+   ! Eval self-energy and derivative
 
    procedure :: qp_solve => sigma_pade_qp_solve
+   ! Find the QP solution with Newton-Rapson method
 
  end type sigma_pade_t
 !!***
+
+ integer,private,parameter :: NR_MAX_NITER = 1000
+  ! Max no of iterations in the Newton-Raphson method.
+
+ real(dp),private,parameter :: NR_ABS_ROOT_ERR = 0.0001/Ha_eV
+  ! Tolerance on the absolute error on the Newton-Raphson root.
 
 CONTAINS  !====================================================================
 !!***
@@ -157,7 +156,7 @@ subroutine solve_dyson(ikcalc,minbnd,maxbnd,nomega_sigc,Sigp,Kmesh,sigcme_tmp,qp
  complex(dpc) :: ctdpc,dct,dsigc,sigc,zz,phase
  logical :: converged,ltest
  character(len=500) :: msg
- type(sigma_pade_t) :: spade
+ !type(sigma_pade_t) :: spade
 !arrays
  real(dp) :: kbz_gw(3),tsec(2)
  real(dp),allocatable :: e0pde(:),eig(:),scme(:)
@@ -840,8 +839,6 @@ subroutine sigma_pade_qp_solve(self, e0, v_meanf, sigx, z_guess, zsc, msg, ierr)
    call self%eval(zsc, sigc, dzdval=dsigc)
    ctdpc = e0 - v_meanf + sigx + sigc - zsc
 
-   !ctdpc = Sr%e0(jb,sk_ibz,spin) - Sr%vxcme(jb,sk_ibz,spin) - Sr%vUme(jb,sk_ibz,spin) + Sr%sigxme(jb,sk_ibz,spin) &
-   !        + sigc - zz
    if (ABS(ctdpc) < NR_ABS_ROOT_ERR) then
      converged=.TRUE.; EXIT
    end if

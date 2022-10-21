@@ -83,13 +83,9 @@ CONTAINS  !=====================================================================
 !! OUTPUT
 !!  (only writing)
 !!
-!! NOTES
-!!
 !! SOURCE
 
-subroutine outresid(dtset,kptns,mband,&
-&                nband,nkpt,&
-&                nsppol,resid)
+subroutine outresid(dtset,kptns,mband,nband,nkpt,nsppol,resid)
 
 !Arguments ------------------------------------
 !scalars
@@ -210,9 +206,9 @@ end subroutine outresid
 !! SOURCE
 
 subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
-&                mpi_enreg,mpw,natom,nband,nkpt,npwarr,&
-&                nsppol,occ,response,unwff2,&
-&                wfs,wvl,force_write)
+                mpi_enreg,mpw,natom,nband,nkpt,npwarr,&
+                nsppol,occ,response,unwff2,&
+                wfs,wvl,force_write) ! optional
 
 !Arguments ------------------------------------
 !scalars
@@ -233,7 +229,7 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
  real(dp), intent(in) :: occ(mband*nkpt*nsppol)
 
 !Local variables-------------------------------
- integer :: iomode,action,band_index,fform,formeig,iband,icg,iat,iproj
+ integer :: iomode,action,band_index,fform,formeig,iband,icg !,iat,iproj
  integer :: ierr,ikg,ikpt,spin,master,mcg_disk,me,me0,mtag,my_nspinor
  integer :: nband_k,nmaster,npw_k,option,rdwr,sender,source !npwtot_k,
  integer :: spaceComm,spaceComm_io,spacecomsender,spaceWorld,sread,sskip,tim_rwwf,xfdim2
@@ -254,6 +250,8 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
 !For readability of the source file, define a "me" variable also in the sequential case
 
  DBG_ENTER("COLL")
+
+ ABI_UNUSED(kptns(1,1))
 
  xfdim2 = natom+4
 !Init mpi_comm
