@@ -28,7 +28,7 @@ module m_nvtx_data
 
   logical :: nvtx_activated = .false.
 
-  integer, parameter :: NUMBER_OF_NVTX_REGIONS = 46
+  integer, parameter :: NUMBER_OF_NVTX_REGIONS = 47
   character(len=32), dimension(NUMBER_OF_NVTX_REGIONS) :: nvtx_names
   integer          , dimension(NUMBER_OF_NVTX_REGIONS) :: nvtx_ids
 
@@ -78,6 +78,7 @@ module m_nvtx_data
   integer, parameter :: NVTX_CHEBFI2_SQRT2 = 44
   integer, parameter :: NVTX_CHEBFI2_INIT = 45
   integer, parameter :: NVTX_INIT_INWFFIL = 46
+  integer, parameter :: NVTX_INIT_INWFFIL2 = 47
 
 contains
 
@@ -138,7 +139,8 @@ contains
          & "SCFCV_SETVTR", &
          & "CHEBFI2_SQRT2", &
          & "CHEBFI2_INIT", &
-         & "INIT_INWFFIL" &
+         & "INIT_INWFFIL", &
+         & "INIT_INWFFIL2" &
          ]
 
     nvtx_ids(1) = NVTX_MAIN_COMPUTATION
@@ -187,6 +189,7 @@ contains
     nvtx_ids(44)= NVTX_CHEBFI2_SQRT2
     nvtx_ids(45)= NVTX_CHEBFI2_INIT
     nvtx_ids(46)= NVTX_INIT_INWFFIL
+    nvtx_ids(47)= NVTX_INIT_INWFFIL2
 
   end subroutine nvtx_init
 

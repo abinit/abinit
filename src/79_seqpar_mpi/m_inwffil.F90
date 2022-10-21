@@ -27,6 +27,7 @@ module m_inwffil
  use m_wffile
  use m_wfk
  use m_errors
+ use m_xomp
  use m_xmpi
  use m_nctk
  use m_hdr
@@ -672,7 +673,7 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
 &     mband_eff,mcg,mcg_disk,mpi_enreg,mpi_enreg0,mpw,mpw0,&
 &     nband_eff,nband0_rd,ngfft,nkassoc,nkpt,nkpt0,npwarr,npwarr0,nspinor_eff,nspinor0,&
 &     nsppol_eff,nsppol0,nsym,occ,optorth,dtset%prtvol,randalg,restart,hdr%rprimd,sppoldbl_eff,squeeze,&
-&     symrel,tnons,wff1)
+&     symrel,tnons,wff1,dtset%use_gpu_cuda)
      if (nsppol2nspinor/=0)  then
        ABI_FREE(indkk_eff)
        ABI_FREE(nband_eff)
@@ -965,7 +966,8 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
 &   mband,mcg,mkmem0,mkmem,mpi_enreg0,mpi_enreg,&
 &   mpw0,mpw,my_nkpt,nband_eff,nband,ngfft0,ngfft,nkpt0,nkpt,npwarr0,npwarr,&
 &   nspinor_eff,dtset%nspinor,nsppol_eff,nsppol,nsym,occ,optorth,&
-&   dtset%prtvol,randalg,restart,hdr%rprimd,sppoldbl_eff,symrel,tnons,unkg,wff1,wffnow)
+&   dtset%prtvol,randalg,restart,hdr%rprimd,sppoldbl_eff,symrel,tnons,unkg,wff1,wffnow,&
+&   dtset%use_gpu_cuda)
 
    if (nsppol2nspinor/=0)  then
      ABI_FREE(indkk_eff)
@@ -1068,6 +1070,8 @@ end subroutine inwffil
 !!   of primitive translations
 !!  tnons(3,nsym)=nonsymmorphic translations for symmetry operations
 !!  wff1, structure information for input and output files
+!!  use_gpu_cuda=0 or 1; if gpu computation is enabled, wfconv will temporarily
+!!   modify the number of OpenMP threads
 !!
 !! OUTPUT
 !!  if ground state format (formeig=0):
@@ -1102,7 +1106,7 @@ subroutine wfsinp(cg,cg_disk,ecut,ecut0,ecut_eff,eigen,exchn2n3d,&
 &                  mcg,mcg_disk,mpi_enreg,mpi_enreg0,mpw,mpw0,nband,nban_dp_rd,&
 &                  ngfft,nkassoc,nkpt,nkpt0,npwarr,npwarr0,nspinor,&
 &                  nspinor0,nsppol,nsppol0,nsym,occ,optorth,prtvol,randalg,restart,rprimd,&
-&                  sppoldbl,squeeze,symrel,tnons,wff1)
+&                  sppoldbl,squeeze,symrel,tnons,wff1,use_gpu_cuda)
 
 !Arguments ------------------------------------
  integer, intent(in) :: exchn2n3d,formeig,headform0,localrdwf,mband,mcg,mcg_disk
@@ -1119,6 +1123,7 @@ subroutine wfsinp(cg,cg_disk,ecut,ecut0,ecut_eff,eigen,exchn2n3d,&
  real(dp), intent(out) :: eigen((2*mband)**formeig*mband*nkpt*nsppol)
  real(dp), intent(inout) :: cg(2,mcg),cg_disk(2,mcg_disk) !vz_i pw_ortho
  real(dp), intent(inout) :: occ(mband*nkpt*nsppol)
+ integer, intent(in)    :: use_gpu_cuda
 
 !Local variables-------------------------------
  integer :: band_index,band_index_trial,ceksp,debug,dim_eig_k,iband,icg
@@ -1652,7 +1657,7 @@ subroutine wfsinp(cg,cg_disk,ecut,ecut0,ecut_eff,eigen,exchn2n3d,&
 &                 nban_dp_rdk,nband_trial,ngfft,ngfft,nkpt0,nkpt,&
 &                 npw0_k,npw_ktrial,nspinor0,nspinor,nsym,&
 &                 occ0_k,occ_k,optorth,randalg,restart,rprimd,&
-&                 sppoldbl,symrel,tnons)
+&                 sppoldbl,symrel,tnons, use_gpu_cuda)
 
 !                  DEBUG
 !                  write(std_out,*)' wfsinp: ikpt_trial=',ikpt_trial
@@ -2006,6 +2011,8 @@ end subroutine initwf
 !!   sphere for each k point being considered (kptns2 set)
 !!  wffinp=structure info of input wf file unit number
 !!  wffout=structure info of output wf file unit number
+!!  use_gpu_cuda=0 or 1; if gpu computation is enabled, wfconv will temporarily
+!!   modify the number of OpenMP threads
 !!
 !! OUTPUT
 !!  (see side effects)
@@ -2042,7 +2049,7 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
 &                  mpi_enreg1,mpi_enreg2,mpw1,mpw2,my_nkpt2,nband1,nband2,&
 &                  ngfft1,ngfft2,nkpt1,nkpt2,npwarr1,npwarr2,nspinor1,nspinor2,&
 &                  nsppol1,nsppol2,nsym,occ,optorth,prtvol,randalg,restart,rprimd,&
-&                  sppoldbl,symrel,tnons,unkg2,wffinp,wffout)
+&                  sppoldbl,symrel,tnons,unkg2,wffinp,wffout,use_gpu_cuda)
 
 !Arguments ------------------------------------
 !scalars
@@ -2053,6 +2060,7 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
  real(dp),intent(in) :: ecut1,ecut2,ecut2_eff
  type(MPI_type),intent(inout) :: mpi_enreg1,mpi_enreg2
  type(wffile_type),intent(inout) :: wffinp,wffout
+ integer, intent(in) :: use_gpu_cuda
 !arrays
  integer,intent(in) :: indkk(nkpt2*sppoldbl,6),istwfk1(nkpt1),istwfk2(nkpt2)
  integer,intent(in) :: kg2(3,mpw2*mkmem2),nband1(nkpt1*nsppol1)
@@ -2431,7 +2439,8 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
 &       kg1,kg2_k,kptns1,kptns2,mband_rw,mband_rw,mcg,mcg,&
 &       mpi_enreg1,mpi_enreg2,mpw1,mpw2,nbd1_rd,nbd2,&
 &       ngfft1,ngfft2,nkpt1,nkpt2,npw1,npw2,nspinor1,nspinor2,nsym,&
-&       occ_k,occ_k,optorth,randalg,restart,rprimd,sppoldbl,symrel,tnons)
+&       occ_k,occ_k,optorth,randalg,restart,rprimd,sppoldbl,symrel,tnons,&
+&       use_gpu_cuda)
      else
        call wfconv(ceksp2,cg_aux,cg_aux,debug,ecut1,ecut2,ecut2_eff,&
 &       eig_k,eig_k,exchn2n3d,formeig,gmet1,gmet2,icg_aux,icg_aux,&
@@ -2439,7 +2448,8 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
 &       kg1,kg2_k,kptns1,kptns2,mband_rw,mband_rw,mcg,mcg,&
 &       mpi_enreg1,mpi_enreg2,mpw1,mpw2,nbd1_rd,nbd2,&
 &       ngfft1,ngfft2,nkpt1,nkpt2,npw1,npw2,nspinor1,nspinor2,nsym,&
-&       occ_k,occ_k,optorth,randalg,restart,rprimd,sppoldbl,symrel,tnons)
+&       occ_k,occ_k,optorth,randalg,restart,rprimd,sppoldbl,symrel,tnons,&
+&       use_gpu_cuda)
      end if
 
      call timab(784,2,tsec)
@@ -2585,6 +2595,8 @@ end subroutine newkpt
 !!  symrel(3,3,nsym)=symmetry operations in real space in terms
 !!   of primitive translations
 !!  tnons(3,nsym)=nonsymmorphic translations for symmetry operations
+!!  use_gpu_cuda=0 or 1; if gpu computation is enabled, wfconv will temporarily
+!!   modify the number of OpenMP threads
 !!
 !! OUTPUT
 !!  cg2(2,mcg2)=wavefunction array
@@ -2629,7 +2641,8 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
 & ikpt1,ikpt10,ikpt2,indkk,inplace,isppol2,istwfk1,istwfk2,&
 & kg1,kg2,kptns1,kptns2,mband1,mband2,mcg1,mcg2,mpi_enreg1,mpi_enreg2,&
 & mpw1,mpw2,nbd1,nbd2,ngfft1,ngfft2,nkpt1,nkpt2,npw1,npw2,nspinor1,nspinor2,&
-& nsym,occ_k1,occ_k2,optorth,randalg,restart,rprimd2,sppoldbl,symrel,tnons)
+& nsym,occ_k1,occ_k2,optorth,randalg,restart,rprimd2,sppoldbl,symrel,tnons,&
+& use_gpu_cuda)
 
 !Arguments ------------------------------------
 !scalars
@@ -2650,6 +2663,7 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
  real(dp),intent(inout) :: eig_k1(mband1*(2*mband1)**formeig)
  real(dp),intent(inout) :: eig_k2(mband2*(2*mband2)**formeig),occ_k1(mband1)
  real(dp),intent(inout) :: occ_k2(mband2)
+ integer, intent(in)    :: use_gpu_cuda
 
 !Local variables ------------------------------
 !scalars
@@ -2705,6 +2719,12 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
 &   'the initial quantities are nbd1,nspinor1=',nbd1,nspinor1,', and',ch10,&
 &   'the requested final quantities are nbd2,nspinor2=',nbd2,nspinor2,'.'
    ABI_BUG(message)
+ end if
+
+ if (use_gpu_cuda==1) then
+   ! temporarily change the number of threads (currently when GPU is enabled we use
+   ! OMP_NUM_THREADS=1 except in specific locations; wfconv is one of them)
+   call xomp_set_num_threads(1)
  end if
 
  ngfft_now(1:3)=ngfft1(1:3)
@@ -3214,6 +3234,11 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
    call pw_orthon(icg2,0,istwf2_k,mcg2,0,npw2*nspinor2_this_proc,nbd2,ortalgo,dum,0,cg2,&
 &   mpi_enreg2%me_g0,mpi_enreg2%comm_bandspinorfft)
    ABI_FREE(dum)
+ end if
+
+ if (use_gpu_cuda==1) then
+   ! restore OMP_NUM_THREADS=1
+   call xomp_set_num_threads(1)
  end if
 
 end subroutine wfconv
