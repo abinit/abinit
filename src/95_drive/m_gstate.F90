@@ -19,6 +19,9 @@
 
 #include "abi_common.h"
 
+! nvtx related macro definition
+#include "nvtx_macros.h"
+
 module m_gstate
 
  use defs_basis
@@ -104,6 +107,10 @@ module m_gstate
 
 #if defined HAVE_GPU_CUDA
  use m_manage_cuda
+#endif
+
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
+ use m_nvtx_data
 #endif
 
 #if defined HAVE_YAKL
@@ -667,6 +674,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
 !###########################################################
 !### 05. Calls inwffil
+ ABI_NVTX_START_RANGE(NVTX_INIT_INWFFIL)
 
  ! if paral_kgb == 0, it may happen that some processors are idle (no entry in proc_distrb)
  ! but mkmem == nkpt and this can cause integer overflow in mcg or allocation error.
@@ -797,6 +805,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  if (dtset%fft_count/=0.and.dtset%paral_kgb==0) then
    call fft_init_counters()
  end if
+ ABI_NVTX_END_RANGE()
 
 !###########################################################
 !### 06. Operations related to restartxf (Old version)
