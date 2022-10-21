@@ -609,6 +609,17 @@ end do
  end do
 #endif
 
+ dtsets(:)%use_gpu_openmp_threads=1
+#if defined HAVE_GPU_CUDA
+ do idtset=1,ndtset_alloc
+   dtsets(idtset)%use_gpu_openmp_threads=1
+
+   jdtset=dtsets(idtset)%jdtset ; if(ndtset==0)jdtset=0
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'use_gpu_openmp_threads',tread,'INT')
+   if(tread==1) dtsets(idtset)%use_gpu_openmp_threads=intarr(1)
+ end do
+#endif
+
  if (use_gpu_cuda==1) then
 #if defined HAVE_GPU_CUDA && defined HAVE_GPU_CUDA_DP
    if (ii<=0) then
