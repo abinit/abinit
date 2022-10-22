@@ -2414,10 +2414,12 @@ subroutine wfk_read_bmask(Wfk, bmask, ik_ibz, spin, sc_mode, kg_k, cg_k, eig_k, 
        nblocks = max_nband / nbxblock
        brest   = MOD(max_nband, nbxblock)
        if (brest /= 0) nblocks = nblocks + 1
-       !write(std_out,*)"in buffered bmask: "nb_tot",nb_tot,"nblocks",nblocks,"nbxblock",nbxblock
+
+       write(std_out, *) "full_size:", 2 * npw_disk *nspinor_disk *nbxblock * xmpi_bsize_dp, Wfk%chunk_bsize
+       write(std_out,*)"in buffered bmask with nblocks:", nblocks, ", nbxblock: ", nbxblock
 
        base_ofs = Wfk%offset_ks(ik_ibz, spin, REC_CG)
-       sizes = [npw_disk*nspinor_disk, nband_disk]
+       sizes = [npw_disk * nspinor_disk, nband_disk]
 
        my_bcnt = 0  ! index of my band in cg_k
        do block=1,nblocks
@@ -2425,7 +2427,7 @@ subroutine wfk_read_bmask(Wfk, bmask, ik_ibz, spin, sc_mode, kg_k, cg_k, eig_k, 
          bstop  = bstart + nbxblock - 1
          if (bstop > max_nband) bstop = max_nband
          nb = bstop - bstart + 1
-         !
+
          ! Allocate and read the buffer
          band_block = [bstart, bstop]
          ugsz = npw_disk*nspinor_disk
