@@ -278,7 +278,7 @@ module m_wfk
 
  integer,private,parameter :: FPTR_EOF(3) = [-1,-1,-1]
 
- integer(XMPI_OFFSET_KIND),private,parameter :: WFK_CHUNK_BSIZE = 2000 * (1024.0_dp**2)
+ integer(XMPI_OFFSET_KIND),private,parameter :: WFK_CHUNK_BSIZE = 1000 * (1024.0_dp**2)
    ! Maximum size (in bytes) of the block of wavefunctions that are (read|written)
    ! in a single MPI-IO call. (Some MPI-IO implementation crashes if we try to
    ! (read|write) a big chunk of data with a single call.
@@ -2405,8 +2405,8 @@ subroutine wfk_read_bmask(Wfk, bmask, ik_ibz, spin, sc_mode, kg_k, cg_k, eig_k, 
        !
        ! MPI-IO crashes if we try to read a large number of bands in a single call.
        nbxblock = max_nband
-       if ((2 * npw_disk *nspinor_disk *nbxblock * xmpi_bsize_dp) > Wfk%chunk_bsize) then
-         nbxblock = Wfk%chunk_bsize / (two*npw_disk*nspinor_disk*xmpi_bsize_dp)
+       if ((two * npw_disk *nspinor_disk * nbxblock * xmpi_bsize_dp) > Wfk%chunk_bsize) then
+         nbxblock = Wfk%chunk_bsize / (2*npw_disk*nspinor_disk*xmpi_bsize_dp)
          if (nbxblock == 0) nbxblock = 50
        end if
        !nbxblock = 2
@@ -2415,8 +2415,8 @@ subroutine wfk_read_bmask(Wfk, bmask, ik_ibz, spin, sc_mode, kg_k, cg_k, eig_k, 
        brest   = MOD(max_nband, nbxblock)
        if (brest /= 0) nblocks = nblocks + 1
 
-       write(std_out, *) "full_size:", 2 * npw_disk *nspinor_disk *nbxblock * xmpi_bsize_dp, Wfk%chunk_bsize
-       write(std_out,*)"in buffered bmask with nblocks:", nblocks, ", nbxblock: ", nbxblock
+       !write(std_out, *) "full_size:", 2 * npw_disk *nspinor_disk *nbxblock * xmpi_bsize_dp, Wfk%chunk_bsize
+       !write(std_out,*)"in buffered bmask with nblocks:", nblocks, ", nbxblock: ", nbxblock
 
        base_ofs = Wfk%offset_ks(ik_ibz, spin, REC_CG)
        sizes = [npw_disk * nspinor_disk, nband_disk]
@@ -2429,9 +2429,11 @@ subroutine wfk_read_bmask(Wfk, bmask, ik_ibz, spin, sc_mode, kg_k, cg_k, eig_k, 
          nb = bstop - bstart + 1
 
          ! Allocate and read the buffer
+         ! Note that in the API calls we mix real and complex.
+         ! bufsz is the size in terms of complex numbers.
          band_block = [bstart, bstop]
          ugsz = npw_disk*nspinor_disk
-         bufsz = 2 * ugsz * (bstop - bstart + 1)
+         bufsz = ugsz * (bstop - bstart + 1)
          !write(std_out,*)"  bstart, bstop:", band_block
          ABI_MALLOC_OR_DIE(buffer, (2, bufsz), ierr)
 
@@ -2441,8 +2443,16 @@ subroutine wfk_read_bmask(Wfk, bmask, ik_ibz, spin, sc_mode, kg_k, cg_k, eig_k, 
            starts = [1, bstart]
 
            call mpiotk_read_fsuba_dp2D(Wfk%fh,base_ofs,sizes,subsizes,starts,&
-              bufsz,buffer,Wfk%chunk_bsize,sc_mode,Wfk%comm,mpierr)
+              2 * bufsz,buffer,Wfk%chunk_bsize,sc_mode,Wfk%comm,mpierr)
            ABI_CHECK(mpierr == 0, "Fortran record too big")
+
+           ! New version based: master reads and broadcasts the buffer.
+           !if (wfk%my_rank == 0) then
+           !  call mpiotk_read_fsuba_dp2D(Wfk%fh,base_ofs,sizes,subsizes,starts,&
+           !     2 * bufsz,buffer,Wfk%chunk_bsize,xmpio_single,wfk%comm,mpierr)
+           !  ABI_CHECK(mpierr == 0, "Fortran record too big")
+           !end if
+           !call xmpi_bcast(buffer, 0, wfk%comm, ierr)
 
          else if (wfk%formeig == 1) then
 
