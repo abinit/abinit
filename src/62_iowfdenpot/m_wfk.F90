@@ -2207,7 +2207,7 @@ subroutine wfk_read_bmask(Wfk, bmask, ik_ibz, spin, sc_mode, kg_k, cg_k, eig_k, 
 !Local variables-------------------------------
 !scalars
  integer :: npw_disk,nspinor_disk,nband_disk,ipw,my_bcount,cnt,npwso,npw_tot,pt1,pt2,band
- integer :: npw_read,nspinor_read,nband_read,nb_tot,ncount,my_bcnt,my_maxb,base,nb
+ integer :: npw_read,nspinor_read,nband_read,nb_tot,ncount,my_bcnt,my_maxb,base,nb, ierr
  character(len=500) :: msg,errmsg
 !arrays
  real(dp),ABI_CONTIGUOUS pointer :: tmp_eigk(:),tmp_occk(:)
@@ -2405,8 +2405,8 @@ subroutine wfk_read_bmask(Wfk, bmask, ik_ibz, spin, sc_mode, kg_k, cg_k, eig_k, 
        !
        ! MPI-IO crashes if we try to read a large number of bands in a single call.
        nbxblock = max_nband
-       if ((2*npw_disk*nspinor_disk*nbxblock*xmpi_bsize_dp) > Wfk%chunk_bsize) then
-         nbxblock = Wfk%chunk_bsize / (2*npw_disk*nspinor_disk*xmpi_bsize_dp)
+       if ((2 * npw_disk *nspinor_disk *nbxblock * xmpi_bsize_dp) > Wfk%chunk_bsize) then
+         nbxblock = Wfk%chunk_bsize / (two*npw_disk*nspinor_disk*xmpi_bsize_dp)
          if (nbxblock == 0) nbxblock = 50
        end if
        !nbxblock = 2
@@ -2416,7 +2416,7 @@ subroutine wfk_read_bmask(Wfk, bmask, ik_ibz, spin, sc_mode, kg_k, cg_k, eig_k, 
        if (brest /= 0) nblocks = nblocks + 1
        !write(std_out,*)"in buffered bmask: "nb_tot",nb_tot,"nblocks",nblocks,"nbxblock",nbxblock
 
-       base_ofs = Wfk%offset_ks(ik_ibz,spin,REC_CG)
+       base_ofs = Wfk%offset_ks(ik_ibz, spin, REC_CG)
        sizes = [npw_disk*nspinor_disk, nband_disk]
 
        my_bcnt = 0  ! index of my band in cg_k
@@ -2429,18 +2429,18 @@ subroutine wfk_read_bmask(Wfk, bmask, ik_ibz, spin, sc_mode, kg_k, cg_k, eig_k, 
          ! Allocate and read the buffer
          band_block = [bstart, bstop]
          ugsz = npw_disk*nspinor_disk
-         bufsz = 2*ugsz*(bstop-bstart+1)
-         ABI_MALLOC(buffer, (2,bufsz))
-         !write(std_out,*)"  bstart,bstop, ",band_block
+         bufsz = 2 * ugsz * (bstop - bstart + 1)
+         !write(std_out,*)"  bstart, bstop:", band_block
+         ABI_MALLOC_OR_DIE(buffer, (2, bufsz), ierr)
 
          ! Read the cg_ks(G). different versions depending on formeig
          if (wfk%formeig == 0) then
-           subsizes = (/npw_disk*nspinor_disk, band_block(2)-band_block(1)+1/)
+           subsizes = [npw_disk*nspinor_disk, band_block(2)-band_block(1)+1]
            starts = [1, bstart]
 
            call mpiotk_read_fsuba_dp2D(Wfk%fh,base_ofs,sizes,subsizes,starts,&
               bufsz,buffer,Wfk%chunk_bsize,sc_mode,Wfk%comm,mpierr)
-           ABI_CHECK(mpierr==0,"Fortran record too big")
+           ABI_CHECK(mpierr == 0, "Fortran record too big")
 
          else if (wfk%formeig == 1) then
 
@@ -2461,9 +2461,9 @@ subroutine wfk_read_bmask(Wfk, bmask, ik_ibz, spin, sc_mode, kg_k, cg_k, eig_k, 
            call MPI_TYPE_FREE(cg_type,mpierr)
            ABI_CHECK_MPI(mpierr, "TYPE_FREE")
 
-           if (sc_mode==xmpio_collective) then
+           if (sc_mode == xmpio_collective) then
              call MPI_FILE_READ_ALL(wfk%fh,buffer,bufsz,MPI_DOUBLE_COMPLEX,MPI_STATUS_IGNORE,mpierr)
-           else if (sc_mode==xmpio_single) then
+           else if (sc_mode == xmpio_single) then
              call MPI_FILE_READ(wfk%fh,buffer,bufsz,MPI_DOUBLE_COMPLEX,MPI_STATUS_IGNORE,mpierr)
            else
              ABI_ERROR("Wrong sc_mode")
@@ -2519,9 +2519,9 @@ subroutine wfk_read_bmask(Wfk, bmask, ik_ibz, spin, sc_mode, kg_k, cg_k, eig_k, 
          ! one used in wff_readwrite. Let's see if MPI-IO likes it!
          ncount = nb_tot* nspinor_disk * npw_disk
 
-         ABI_MALLOC(block_length,(ncount+2))
+         ABI_MALLOC(block_length, (ncount+2))
          ABI_MALLOC(block_type, (ncount+2))
-         ABI_MALLOC(block_displ,(ncount+2))
+         ABI_MALLOC(block_displ, (ncount+2))
 
          block_length(1)=1
          block_displ (1)=0

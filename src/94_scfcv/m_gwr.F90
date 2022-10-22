@@ -1975,11 +1975,12 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
      ik_ibz = gwr%my_kibz_inds(my_iki)
      npw_k = gwr%green_desc_kibz(ik_ibz)%npw
      npwsp = npw_k * gwr%nspinor
+     call gwr%ugb(ik_ibz, spin)%init(npwsp, gwr%ugb_nband, gwr%gtau_slkproc, istwfk1, size_blocs=[npwsp, 1])
      !ABI_CHECK(block_dist_1d(gwr%ugb_nband, gwr%gtau_comm%nproc, col_bsize, msg), msg)
      !call gwr%ugb(ik_ibz, spin)%init(npwsp, gwr%ugb_nband, gwr%gtau_slkproc, istwfk1, size_blocs=[npwsp, col_bsize])
-     call gwr%ugb(ik_ibz, spin)%init(npwsp, gwr%ugb_nband, gwr%gtau_slkproc, istwfk1, size_blocs=[npwsp, 1])
    end do
  end do
+ call gwr%print_mem(unit=std_out)
 
  call wfk_open_read(wfk, wfk_path, formeig0, iomode_from_fname(wfk_path), get_unit(), gwr%gtau_comm%value)
 
@@ -2343,7 +2344,7 @@ subroutine gwr_get_myk_green_gpr(gwr, itau, spin, desc_mykbz, gt_gpr)
 !scalars
  integer :: my_ikf, ik_bz, ig2, ipm, npwsp, col_bsize, idat, ndat
  logical :: k_is_gamma
- real(dp) :: kk_bz(3), cpu, wall, gflops, mem_mb
+ real(dp) :: kk_bz(3), cpu, wall, gflops !, mem_mb
  character(len=500) :: msg
  type(matrix_scalapack) :: rgp, gt_pm(2)
  complex(dp),allocatable :: ceikr(:)
@@ -6245,7 +6246,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  !integer :: iq_bz, iq_ibz, isym_q, trev_q, g0_q(3)
  integer :: nkpt_summed, use_umklp, band1, band2, band1_start, band1_stop
  integer :: ib, il_b1, il_b2, nb, block_size, ii, mband
- integer :: istwf_ki, npw_ki, nI, nJ, ig, nomega, io, iq, nq, dim_rtwg
+ integer :: istwf_ki, npw_ki, nI, nJ, nomega, io, iq, nq, dim_rtwg !ig,
  integer :: npwe, u_nfft, u_mgfft, u_mpw
  logical :: isirr_k, use_tr, is_metallic
  real(dp) :: spin_fact, weight, deltaf_b1b2, deltaeGW_b1b2, gwr_boxcutmin_c, zcut, qlen
@@ -6259,7 +6260,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  type(littlegroup_t) :: ltg_q
  type(desc_t),pointer :: desc_ki
 !arrays
- integer :: g0(3), gmax(3), u_ngfft(18), work_ngfft(18) ! spinor_padx(2,4),
+ integer :: gmax(3), u_ngfft(18), work_ngfft(18) ! spinor_padx(2,4), g0(3),
  integer,contiguous, pointer :: kg_ki(:,:)
  integer,allocatable :: gvec_q0(:,:), gbound_q0(:,:), u_gbound(:,:)
  real(dp) :: kk_ibz(3), kk_bz(3), tsec(2)
@@ -6707,7 +6708,7 @@ subroutine gwr_build_sigxme(gwr)
 !arrays
  integer :: g0(3), gmax(3), spinor_padx(2,4), u_ngfft(18), work_ngfft(18)
  integer,allocatable :: gbound_kcalc(:,:), gvec_x(:,:), gbound_x(:,:), kg_k(:,:), gbound_ksum(:,:)
- real(dp) :: ksum(3), kk_ibz(3), kk_bz(3), kgw(3), kgw_m_ksum(3), qq_bz(3), tsec(2) !, q0(3) !, spinrot_kbz(4), spinrot_kgw(4)
+ real(dp) :: ksum(3), kk_ibz(3), kgw(3), kgw_m_ksum(3), qq_bz(3), tsec(2) !, kk_bz(3), q0(3) !, spinrot_kbz(4), spinrot_kgw(4)
  real(dp),contiguous, pointer :: qp_eig(:,:,:), qp_occ(:,:,:), cg1_ptr(:,:), cg2_ptr(:,:)
  real(dp),allocatable :: work(:,:,:,:)
  complex(dp),allocatable :: vc_sqrt_qbz(:), rhotwg(:), rhotwgp(:), rhotwg_ki(:,:)
@@ -7265,7 +7266,7 @@ subroutine sc_sum(sc_shape, sc_nfft, uc_ngfft, uc_nfft, nspinor, ph1d, alpha, sc
 
 !Local variables-------------------------------
 !scalars
- integer :: il1, il2, il3, spinor, uc_n1, uc_n2, uc_n3, ix, iy, iz, idat
+ integer :: il1, il2, il3, spinor, uc_n1, uc_n2, uc_n3, ix, iy, iz !, idat
  complex(dp) :: cphase, phl32, phl3
 
 ! *************************************************************************
