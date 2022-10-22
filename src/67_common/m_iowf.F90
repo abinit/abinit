@@ -240,7 +240,7 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
  logical :: ihave_data,iwrite,iam_master,done,prtwf
  character(len=500) :: msg
  type(wffile_type) :: wff2
- character(len=fnlen) :: path
+ !character(len=fnlen) :: path
 !arrays
  integer,allocatable :: kg_disk(:,:)
  real(dp) :: tsec(2)

@@ -146,7 +146,7 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, Sigp, 
 !Local variables ------------------------------
 !scalars
  integer,parameter :: ndat1 = 1, use_pawnhat0 = 0, ider0 = 0
- integer :: gwcalctyp,izero,iab,band_sum,ib,ierr,ig,ig_rot,ii,iik,itim_q,i2
+ integer :: gwcalctyp,izero,iab,band_sum,ierr,ig,ig_rot,ii,iik,itim_q,i2
  integer :: ik_bz, ik_ibz, isym_q, iq_bz, iq_ibz, spin, isym, jb, is_idx
  integer :: jik,jk_bz,jk_ibz,kb,nspinor,nsppol,ifft
  integer :: nq_summed,ibsp,dimcprj_gw,dim_rtwg, isym_kgw, isym_ki
