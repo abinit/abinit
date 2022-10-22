@@ -6437,6 +6437,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
 
      ! TODO: Logic to determine block_size from memory.
      block_size = min(48, gwr%ugb_nband)
+     block_size = min(200, gwr%ugb_nband)
      !block_size = 1
      do band1_start=1, gwr%ugb_nband, block_size
        if (all(.not. bbp_mask(band1_start:, :))) then
@@ -6449,6 +6450,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
 
        ! Collect nb bands starting from band1_start on each proc.
        ! FIXME: SIGSEV on lumi!
+       call wrtout(std_out, "begin collect")
 #if 0
        call ugb_kibz%zcollect(npw_ki * nspinor, nb, [1, band1_start], ug1_block)
 #else
@@ -6462,6 +6464,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
        end do ! il_b1
        call xmpi_sum(ug1_block, ugb_kibz%processor%comm, ierr)
 #endif
+       call wrtout(std_out, "end collect")
 
        ! FIXME: This part should be tested with tau/g-para
        ! Add support for symsigma = 0
@@ -6496,16 +6499,6 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
 
            ! Skip negligible transitions.
            if (abs(deltaf_b1b2) < GW_TOL_DOCC) CYCLE
-
-           ug2 = ugb_kibz%buffer_cplx(:, il_b2)
-           call fft_ug(npw_ki, u_nfft, nspinor, ndat1, u_mgfft, u_ngfft, istwf_ki, kg_ki, u_gbound, &
-                       ug2, ur2_kibz)
-
-           ! FIXME: nspinor 2 is wrong as we have a 2x2 matrix
-           ur_prod(:) = conjg(ur1_kibz(:)) * ur2_kibz
-           call fft_ur(npwe, u_nfft, nspinor, ndat1, u_mgfft, u_ngfft, istwfk1, gvec_q0, gbound_q0, &
-                       ur_prod, rhotwg)
-
            ! Adler-Wiser expression.
            ! Add small imaginary of the Time-Ordered response function but only for non-zero real omega
            ! FIXME What about metals?
@@ -6525,6 +6518,15 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
                if (band1 /= band2) green_w(io) = g0g0w(omega(io), deltaf_b1b2, deltaeGW_b1b2, zcut, GW_TOL_W0, two_poles)
              end do
            end if
+
+           ug2 = ugb_kibz%buffer_cplx(:, il_b2)
+           call fft_ug(npw_ki, u_nfft, nspinor, ndat1, u_mgfft, u_ngfft, istwf_ki, kg_ki, u_gbound, &
+                       ug2, ur2_kibz)
+
+           ! FIXME: nspinor 2 is wrong as we have a 2x2 matrix
+           ur_prod(:) = conjg(ur1_kibz(:)) * ur2_kibz
+           call fft_ur(npwe, u_nfft, nspinor, ndat1, u_mgfft, u_ngfft, istwfk1, gvec_q0, gbound_q0, &
+                       ur_prod, rhotwg)
 
            if (gwr%usepaw == 0) then
              ! Matrix elements of i[H,r] for NC pseudopotentials.
