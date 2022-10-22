@@ -6324,6 +6324,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  gradk_not_done = .TRUE.
 
  !mpw = maxval(wfd%npwarr)
+ ! TODO: Might become 1b
  ABI_MALLOC(bbp_mask, (mband, mband))
 
  ! =========================================
