@@ -12,6 +12,6 @@ keywords = [
 
 #: List of input files
 inp_files = [
-#"t01.abi",
-#"t02.abi",
+"t01.abi",
+"t02.abi",
 ]
