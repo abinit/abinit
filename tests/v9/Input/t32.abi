@@ -109,7 +109,7 @@ diemac  12.0
 #%%   t32o_DS4_SGM, tolnlines=25, tolabs = 1.1e-3, tolrel = 3.0e-3, fld_options = -medium;
 #%%   t32o_DS4_SGR, tolnlines=25, tolabs = 1.1e-3, tolrel = 3.0e-3, fld_options = -medium;
 #%%   t32o_DS4_SGR_SIGC, tolnlines=25, tolabs = 1.1e-3, tolrel = 3.0e-3, fld_options = -medium;
-#%%   t32o_DS4_SIG, tolnlines=25, tolabs = 1.1e-3, tolrel = 3.0e-3, fld_options = -medium;
+#%%   t32o_DS4_SIG, tolnlines=40, tolabs = 1.1e-3, tolrel = 3.0e-3, fld_options = -medium;
 #%% [paral_info]
 #%% max_nprocs = 8
 #%% [extra_info]
