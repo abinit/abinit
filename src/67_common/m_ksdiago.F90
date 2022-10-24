@@ -36,7 +36,7 @@ module m_ksdiago
  use m_dtset,             only : dataset_type
  use m_fstrings,          only : toupper, ktoa, itoa, sjoin, ftoa, ltoa
  use m_numeric_tools,     only : blocked_loop
- use m_time,              only : cwtime, cwtime_report
+ use m_time,              only : cwtime, cwtime_report, timab
  use m_geometry,          only : metric
  use m_hide_lapack,       only : xhegv_cplex, xheev_cplex, xheevx_cplex, xhegvx_cplex
  use m_slk,               only : matrix_scalapack, processor_scalapack, block_dist_1d, &
@@ -912,16 +912,16 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  type(matrix_scalapack) :: ghg_mat, gsg_mat, ghg_4diag, gsg_4diag, eigvec
  type(processor_scalapack) :: proc_1d, proc_4diag
 !arrays
- real(dp) :: kptns_(3,1), ylmgr_dum(1,1,1)
+ real(dp) :: kptns_(3,1), ylmgr_dum(1,1,1), tsec(2)
  real(dp),allocatable :: ph3d(:,:,:), ffnl(:,:,:,:), kinpw(:), kpg_k(:,:)
  real(dp),allocatable :: vlocal(:,:,:,:), ylm_k(:,:), dum_ylm_gr_k(:,:,:), eig_ene(:)
  real(dp),target,allocatable :: bras(:,:), ghc(:,:), gvnlxc(:,:), gsc(:,:)
- !real(dp),pointer :: cwavef(:,:)
  type(pawcprj_type),allocatable :: cwaveprj(:,:)
 
 ! *********************************************************************
 
  nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+ call timab(1919, 1, tsec)
 
  ! See sequence of calls in vtorho.
  ! Check that usekden is not 0 if want to use vxctau
@@ -1295,7 +1295,6 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
    !  Reorder the cprj (order is now the same as in input file)
    call pawcprj_reorder(ugb%cprj_k, gs_hamk%atindx1)
  end if ! usepaw
-
  call cwtime_report(" block column distribution", cpu, wall, gflops)
 
  ! Free memory.
@@ -1306,6 +1305,8 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
 
  call destroy_mpi_enreg(mpi_enreg_seq)
  call gs_hamk%free()
+
+ call timab(1919, 2, tsec)
 
 end subroutine ugb_from_diago
 !!***

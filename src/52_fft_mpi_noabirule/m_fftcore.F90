@@ -1565,8 +1565,9 @@ subroutine sphere(cg, ndat, npw, cfft, n1, n2, n3, n4, n5, n6, kg_k, istwf_k, if
 
  DBG_ENTER("COLL")
 
- !In the case of special k-points, invariant under time-reversal,
- !but not Gamma, initialize the inverse coordinates. !Remember indeed that
+ ! In the case of special k-points, invariant under time-reversal,
+ ! but not Gamma, initialize the inverse coordinates.
+ ! Remember that:
  !
  !  u_k(G) = u_{k+G0}(G-G0); u_{-k}(G) = u_k(G)^* and therefore:
  !  u_{G0/2}(G) = u_{G0/2}(-G-G0)^*.
