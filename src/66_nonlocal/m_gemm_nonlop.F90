@@ -52,10 +52,12 @@ module m_gemm_nonlop
  ! Use these routines in order: first call init, then call make_gemm_nonlop for each k point,
  ! then call gemm_nonlop to do the actual computation, and call destroy when done. See gstate and vtorho.
  public :: init_gemm_nonlop
+ public :: destroy_gemm_nonlop
  public :: make_gemm_nonlop
  public :: gemm_nonlop
- public :: destroy_gemm_nonlop
 !!***
+
+!----------------------------------------------------------------------
 
 !!****t* m_gemm_nonlop/gemm_nonlop_type
 !! NAME
@@ -98,6 +100,8 @@ module m_gemm_nonlop
 
 contains
 
+!----------------------------------------------------------------------
+
 !!****f* m_gemm_nonlop/init_gemm_nonlop
 !! NAME
 !! init_gemm_nonlop
@@ -126,12 +130,14 @@ contains
  end subroutine init_gemm_nonlop
 !!***
 
+!----------------------------------------------------------------------
+
 !!****f* m_gemm_nonlop/destroy_gemm_nonlop
 !! NAME
 !! destroy_gemm_nonlop
 !!
 !! FUNCTION
-!! Initalization of the gemm_nonlop_kpt array
+!! Destruction of the gemm_nonlop_kpt array
 !!
 !! INPUTS
 !! nkpt= number of k-points
@@ -144,20 +150,9 @@ contains
 
 ! *************************************************************************
 
-  ! TODO add cycling if kpt parallelism
+! TODO add cycling if kpt parallelism
   do ikpt = 1,nkpt
-    if(gemm_nonlop_kpt(ikpt)%nprojs /= -1) then
-      ABI_FREE(gemm_nonlop_kpt(ikpt)%projs)
-      ABI_FREE(gemm_nonlop_kpt(ikpt)%projs_r)
-      ABI_FREE(gemm_nonlop_kpt(ikpt)%projs_i)
-      gemm_nonlop_kpt(ikpt)%nprojs = -1
-      if(gemm_nonlop_kpt(ikpt)%ngrads /= -1) then
-        ABI_FREE(gemm_nonlop_kpt(ikpt)%dprojs)
-        ABI_FREE(gemm_nonlop_kpt(ikpt)%dprojs_r)
-        ABI_FREE(gemm_nonlop_kpt(ikpt)%dprojs_i)
-        gemm_nonlop_kpt(ikpt)%ngrads = -1
-      end if
-    end if
+    call free_gemm_nonlop_ikpt(ikpt)
   end do
 
  ABI_FREE(gemm_nonlop_kpt)
@@ -165,6 +160,54 @@ contains
  end subroutine destroy_gemm_nonlop
 !!***
 
+!----------------------------------------------------------------------
+
+!!****f* m_gemm_nonlop/free_gemm_nonlop_ikpt
+!! NAME
+!! free_destroy_gemm_nonlop_ikpt
+!!
+!! FUNCTION
+!! Release memory for one kpt value of the gemm_nonlop_kpt array
+!!
+!! INPUTS
+!! ikpt= index of gemm_nonlop_kptto be released
+!!
+!! SOURCE
+ subroutine free_gemm_nonlop_ikpt(ikpt)
+
+  integer,intent(in) :: ikpt
+
+! *************************************************************************
+
+ if(gemm_nonlop_kpt(ikpt)%nprojs /= -1) then
+   if (allocated(gemm_nonlop_kpt(ikpt)%projs)) then
+     ABI_FREE(gemm_nonlop_kpt(ikpt)%projs)
+   end if
+   if (allocated(gemm_nonlop_kpt(ikpt)%projs_r)) then
+     ABI_FREE(gemm_nonlop_kpt(ikpt)%projs_r)
+   end if
+   if (allocated(gemm_nonlop_kpt(ikpt)%projs_i)) then
+   ABI_FREE(gemm_nonlop_kpt(ikpt)%projs_i)
+   end if
+   gemm_nonlop_kpt(ikpt)%nprojs = -1
+   if(gemm_nonlop_kpt(ikpt)%ngrads /= -1) then
+     if (allocated(gemm_nonlop_kpt(ikpt)%dprojs)) then
+       ABI_FREE(gemm_nonlop_kpt(ikpt)%dprojs)
+     end if
+     if (allocated(gemm_nonlop_kpt(ikpt)%dprojs_r)) then
+       ABI_FREE(gemm_nonlop_kpt(ikpt)%dprojs_r)
+     end if
+     if (allocated(gemm_nonlop_kpt(ikpt)%dprojs_i)) then
+       ABI_FREE(gemm_nonlop_kpt(ikpt)%dprojs_i)
+     end if
+     gemm_nonlop_kpt(ikpt)%ngrads = -1
+   end if
+ end if
+
+ end subroutine free_gemm_nonlop_ikpt
+!!***
+
+!----------------------------------------------------------------------
 
 !!****f* m_gemm_nonlop/make_gemm_nonlop
 !! NAME
@@ -222,19 +265,7 @@ contains
 
   ABI_MALLOC(temp, (npw))
 
-  if(gemm_nonlop_kpt(ikpt)%nprojs /= -1) then
-    ! We have been here before, cleanup before remaking
-    ABI_FREE(gemm_nonlop_kpt(ikpt)%projs)
-    ABI_FREE(gemm_nonlop_kpt(ikpt)%projs_r)
-    ABI_FREE(gemm_nonlop_kpt(ikpt)%projs_i)
-    gemm_nonlop_kpt(ikpt)%nprojs = -1
-    if(gemm_nonlop_kpt(ikpt)%ngrads /= -1) then
-      ABI_FREE(gemm_nonlop_kpt(ikpt)%dprojs)
-      ABI_FREE(gemm_nonlop_kpt(ikpt)%dprojs_r)
-      ABI_FREE(gemm_nonlop_kpt(ikpt)%dprojs_i)
-      gemm_nonlop_kpt(ikpt)%ngrads = -1
-    end if
-  end if
+  call free_gemm_nonlop_ikpt(ikpt)
 
   ! build nprojs, ngrads
   nprojs = 0 ; ngrads = 0
@@ -246,14 +277,14 @@ contains
   if (nprojs>0) gemm_nonlop_kpt(ikpt)%nprojs = nprojs
   if (ngrads>0) gemm_nonlop_kpt(ikpt)%ngrads = ngrads
 
-  ABI_MALLOC(gemm_nonlop_kpt(ikpt)%projs, (2, npw, nprojs))
-  gemm_nonlop_kpt(ikpt)%projs = zero
-  if(ngrads>0) then
-    ABI_MALLOC(gemm_nonlop_kpt(ikpt)%dprojs, (2, npw, nprojs*ngrads))
-    gemm_nonlop_kpt(ikpt)%dprojs = zero
-  end if
-  if(istwf_k > 1) then
-    ! We still allocate the complex matrix, in case we need it for spinors. TODO could be avoided
+  if(istwf_k <= 1) then
+    ABI_MALLOC(gemm_nonlop_kpt(ikpt)%projs, (2, npw, nprojs))
+    gemm_nonlop_kpt(ikpt)%projs = zero
+    if(ngrads>0) then
+      ABI_MALLOC(gemm_nonlop_kpt(ikpt)%dprojs, (2, npw, nprojs*ngrads))
+      gemm_nonlop_kpt(ikpt)%dprojs = zero
+    end if
+  else
     ABI_MALLOC(gemm_nonlop_kpt(ikpt)%projs_r, (1, npw, nprojs))
     ABI_MALLOC(gemm_nonlop_kpt(ikpt)%projs_i, (1, npw, nprojs))
     gemm_nonlop_kpt(ikpt)%projs_r = zero
@@ -263,14 +294,6 @@ contains
       ABI_MALLOC(gemm_nonlop_kpt(ikpt)%dprojs_i, (1, npw, nprojs*ngrads))
       gemm_nonlop_kpt(ikpt)%dprojs_r = zero
       gemm_nonlop_kpt(ikpt)%dprojs_i = zero
-    end if
-  else
-    ! Still allocate so we can deallocate it in destroy_gemm_nonlop
-    ABI_MALLOC(gemm_nonlop_kpt(ikpt)%projs_r, (1, 1, 1))
-    ABI_MALLOC(gemm_nonlop_kpt(ikpt)%projs_i, (1, 1, 1))
-    if(ngrads>0) then
-      ABI_MALLOC(gemm_nonlop_kpt(ikpt)%dprojs_r, (1, 1, 1))
-      ABI_MALLOC(gemm_nonlop_kpt(ikpt)%dprojs_i, (1, 1, 1))
     end if
   end if
 
@@ -352,46 +375,76 @@ contains
       end if
 
       !! atom_projs is built, copy to projs / dprojs
-      gemm_nonlop_kpt(ikpt)%projs(:, :, shift+1:shift+nlmn) = atom_projs(:, :, 1:nlmn)
-      if(istwf_k > 1) then
+
+      if(istwf_k <= 1) then
+        gemm_nonlop_kpt(ikpt)%projs(1:2, :, shift+1:shift+nlmn) = atom_projs(:, :, 1:nlmn)
+        if(ngrads>0) then
+          igrad=0
+          if(my_compute_grad_strain) then
+            do idir=1,6
+              idir1=alpha(idir);idir2=beta(idir)
+              do ilmn=1,nlmn
+                do ipw=1,npw
+                  gemm_nonlop_kpt(ikpt)%dprojs(1:2, ipw, shift_grad+nlmn*igrad+ilmn) = &
+&                  -half*(atom_dprojs(1:2, ipw, idir1, ilmn)*kpg(ipw,idir2) &
+&                        +atom_dprojs(1:2, ipw, idir2, ilmn)*kpg(ipw,idir1))
+                end do
+              end do
+              igrad=igrad+1
+            end do
+          end if
+          if(my_compute_grad_atom) then
+            do idir=1,3
+              do ilmn=1,nlmn
+                do ipw=1,npw
+                  gemm_nonlop_kpt(ikpt)%dprojs(1, ipw, shift_grad+nlmn*igrad+ilmn) = &
+&                  +atom_projs(2, ipw, ilmn)*kpg(ipw,idir)*two_pi
+                  gemm_nonlop_kpt(ikpt)%dprojs(2, ipw, shift_grad+nlmn*igrad+ilmn) = &
+&                  -atom_projs(1, ipw, ilmn)*kpg(ipw,idir)*two_pi
+                end do
+              end do
+              igrad=igrad+1
+            end do
+          end if
+        end if
+
+      else ! istwf_k>1
         gemm_nonlop_kpt(ikpt)%projs_r(1, :, shift+1:shift+nlmn) = atom_projs(1, :, 1:nlmn)
         gemm_nonlop_kpt(ikpt)%projs_i(1, :, shift+1:shift+nlmn) = atom_projs(2, :, 1:nlmn)
-      end if
-      if(ngrads>0) then
-        igrad=0
-        if(my_compute_grad_strain) then
-          do idir=1,6
-            idir1=alpha(idir);idir2=beta(idir)
-            do ilmn=1,nlmn
-              do ipw=1,npw
-                gemm_nonlop_kpt(ikpt)%dprojs(:, ipw, shift_grad+nlmn*igrad+ilmn) = &
-&                  -half*(atom_dprojs(:, ipw, idir1, ilmn)*kpg(ipw,idir2) &
-&                        +atom_dprojs(:, ipw, idir2, ilmn)*kpg(ipw,idir1))
+        if(ngrads>0) then
+          igrad=0
+          if(my_compute_grad_strain) then
+            do idir=1,6
+              idir1=alpha(idir);idir2=beta(idir)
+              do ilmn=1,nlmn
+                do ipw=1,npw
+                  gemm_nonlop_kpt(ikpt)%dprojs_r(1, ipw, shift_grad+nlmn*igrad+ilmn) = &
+&                  -half*(atom_dprojs(1, ipw, idir1, ilmn)*kpg(ipw,idir2) &
+&                        +atom_dprojs(1, ipw, idir2, ilmn)*kpg(ipw,idir1))
+      
+                  gemm_nonlop_kpt(ikpt)%dprojs_i(1, ipw, shift_grad+nlmn*igrad+ilmn) = &
+&                  -half*(atom_dprojs(2, ipw, idir1, ilmn)*kpg(ipw,idir2) &
+&                        +atom_dprojs(2, ipw, idir2, ilmn)*kpg(ipw,idir1))
+                end do
               end do
+              igrad=igrad+1
             end do
-            igrad=igrad+1
-          end do
-        end if
-        if(my_compute_grad_atom) then
-          do idir=1,3
-           do ilmn=1,nlmn
-              do ipw=1,npw
-                gemm_nonlop_kpt(ikpt)%dprojs(1, ipw, shift_grad+nlmn*igrad+ilmn) = &
-&                     +atom_projs(2, ipw, ilmn)*kpg(ipw,idir)*two_pi
-                gemm_nonlop_kpt(ikpt)%dprojs(2, ipw, shift_grad+nlmn*igrad+ilmn) = &
-&                     -atom_projs(1, ipw, ilmn)*kpg(ipw,idir)*two_pi
+          end if
+          if(my_compute_grad_atom) then
+            do idir=1,3
+              do ilmn=1,nlmn
+                do ipw=1,npw
+                  gemm_nonlop_kpt(ikpt)%dprojs_r(1, ipw, shift_grad+nlmn*igrad+ilmn) = &
+&                  +atom_projs(2, ipw, ilmn)*kpg(ipw,idir)*two_pi
+                  gemm_nonlop_kpt(ikpt)%dprojs_i(1, ipw, shift_grad+nlmn*igrad+ilmn) = &
+&                  -atom_projs(1, ipw, ilmn)*kpg(ipw,idir)*two_pi
+                end do
               end do
+              igrad=igrad+1
             end do
-            igrad=igrad+1
-          end do
+          end if
         end if
-        if(istwf_k > 1) then
-          gemm_nonlop_kpt(ikpt)%dprojs_r(1, :, shift_grad+1:shift_grad+ngrads*nlmn) = &
-             gemm_nonlop_kpt(ikpt)%dprojs(1, :, shift_grad+1:shift_grad+ngrads*nlmn)
-          gemm_nonlop_kpt(ikpt)%dprojs_i(1, :, shift_grad+1:shift_grad+ngrads*nlmn) = &
-             gemm_nonlop_kpt(ikpt)%dprojs(2, :, shift_grad+1:shift_grad+ngrads*nlmn)
-        end if
-      end if
+      end if ! istwf_k
 
       shift = shift + nlmn
       shift_grad = shift_grad + ngrads*nlmn
@@ -410,6 +463,8 @@ contains
 
  end subroutine make_gemm_nonlop
 !!***
+
+!----------------------------------------------------------------------
 
 !!****f* m_gemm_nonlop/gemm_nonlop
 !! NAME
@@ -837,6 +892,8 @@ contains
 
  end subroutine gemm_nonlop
 !***
+
+!----------------------------------------------------------------------
 
 end module m_gemm_nonlop
 !!***
