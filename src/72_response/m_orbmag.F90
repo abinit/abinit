@@ -188,6 +188,7 @@ module m_orbmag
   private :: make_alt_d
   private :: make_d
   private :: sum_d
+  private :: check_eig_k
   private :: dterm_qij
   private :: dterm_vhnzc
   private :: dterm_vxc
@@ -527,6 +528,10 @@ subroutine orbmag_ptpaw(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_en
    !--------------------------------------------------------------------------------
    ! Finally ready to compute contributions to orbital magnetism and Berry curvature
    !--------------------------------------------------------------------------------
+
+   ! check aij against paw_ij 
+   call check_eig_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,&
+     & gs_hamk,ikpt,isppol,mcgk,mpi_enreg,my_nspinor,nband_k,npw_k,pawtab)
 
    ABI_MALLOC(ffc_k,(2,nband_k,3))
    ABI_MALLOC(ffv_k,(2,nband_k,3))
@@ -3361,6 +3366,116 @@ subroutine pack_pawrhoij(dtset,pawrhoij)
  
 end subroutine pack_pawrhoij
 !!***
+
+!!****f* ABINIT/check_eig_k
+!! NAME
+!! check_eig_k
+!!
+!! FUNCTION
+!! compute eig_k with paw_ij and dterm%aij, for comparison
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2021 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!!
+!! PARENTS
+!!      m_orbmag
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine check_eig_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,&
+    & gs_hamk,ikpt,isppol,mcgk,mpi_enreg,my_nspinor,nband_k,npw_k,pawtab)
+
+  !Arguments ------------------------------------
+  !scalars
+  integer :: ikpt,isppol,mcgk,my_nspinor,nband_k,npw_k
+  type(dataset_type),intent(in) :: dtset
+  type(dterm_type),intent(in) :: dterm
+  type(gs_hamiltonian_type),intent(inout) :: gs_hamk
+  type(MPI_type), intent(inout) :: mpi_enreg
+
+  !arrays
+  integer,intent(in) :: atindx(dtset%natom),dimlmn(dtset%natom)
+  real(dp),intent(in) :: cg_k(2,mcgk),eig_k(nband_k)
+  type(pawcprj_type),intent(in) :: cprj_k(dtset%natom,nband_k)
+  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
+
+  !Local variables -------------------------
+  !scalars
+  integer :: cpopt,ndat,nn,sij_opt,tim_getghc,type_calc
+  real(dp) :: dotr_ghc,dotr_kloc,eig_aij,lambda
+  complex(dpc) :: dij
+  !arrays
+  real(dp),allocatable :: cwave(:,:),ghc(:,:),gsc(:,:),gvnlxc(:,:)
+  type(pawcprj_type),allocatable :: cwaveprj(:,:)
+!--------------------------------------------------------------------
+
+ ABI_MALLOC(cwave,(2,npw_k))
+ ABI_MALLOC(ghc,(2,npw_k))
+ ABI_MALLOC(gsc,(2,npw_k))
+ ABI_MALLOC(gvnlxc,(2,npw_k))
+ ABI_MALLOC(cwaveprj,(dtset%natom,1))
+ call pawcprj_alloc(cwaveprj,0,dimlmn)
+ 
+ cpopt = 2 ! cprj available
+ lambda = zero
+ ndat = 1
+ sij_opt = 0 ! don't need <g|S|v>
+ tim_getghc = 0
+
+  do nn = 1, nband_k
+   
+    cwave(1:2,1:npw_k) = cg_k(1:2,(nn-1)*npw_k+1:nn*npw_k) 
+    call pawcprj_get(atindx,cwaveprj,cprj_k,dtset%natom,nn,0,ikpt,0,isppol,dtset%mband,&
+      & dtset%mkmem,dtset%natom,1,nband_k,my_nspinor,dtset%nsppol,0)
+    
+    type_calc = 0 ! full hamiltonian
+    call getghc(cpopt,cwave,cwaveprj,ghc,gsc,gs_hamk,gvnlxc,lambda,mpi_enreg,&
+      & ndat,dtset%prtvol,sij_opt,tim_getghc,type_calc)
+    dotr_ghc = DOT_PRODUCT(cwave(1,1:npw_k),ghc(1,1:npw_k))+&
+      &        DOT_PRODUCT(cwave(2,1:npw_k),ghc(2,1:npw_k))
+    
+    type_calc = 3 ! kinetic + local only
+    call getghc(cpopt,cwave,cwaveprj,ghc,gsc,gs_hamk,gvnlxc,lambda,mpi_enreg,&
+      & ndat,dtset%prtvol,sij_opt,tim_getghc,type_calc)
+    dotr_kloc = DOT_PRODUCT(cwave(1,1:npw_k),ghc(1,1:npw_k))+&
+      &         DOT_PRODUCT(cwave(2,1:npw_k),ghc(2,1:npw_k))
+    call tt_me(dterm%aij,atindx,cprj_k(:,nn),dtset,cprj_k(:,nn),&
+           & dterm%lmn2max,pawtab,dij)
+    eig_aij = dotr_kloc + REAL(dij)
+
+    write(std_out,'(a,i4,es16.8)')'   JWZ debug nn eig_k : ',nn,eig_k(nn)
+    write(std_out,'(a,i4,es16.8)')'     JWZ debug nn ghc : ',nn,dotr_ghc
+    write(std_out,'(a,i4,es16.8)')'JWZ debug nn kloc+aij : ',nn,eig_aij
+    write(std_out,'(2a)')'JWZ debug ',ch10
+
+  end do ! nn
+
+  ABI_FREE(cwave)
+  ABI_FREE(ghc)
+  ABI_FREE(gsc)
+  ABI_FREE(gvnlxc)
+  call pawcprj_free(cwaveprj)
+  ABI_FREE(cwaveprj)
+
+end subroutine check_eig_k
+!!***
+
 
 !!****f* ABINIT/sum_d
 !! NAME
