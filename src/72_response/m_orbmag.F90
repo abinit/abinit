@@ -113,6 +113,8 @@ module m_orbmag
     integer :: has_dqij=0
     integer :: has_p2=0
     integer :: has_dp2=0
+    integer :: has_vha=0
+    integer :: has_dvha=0
     integer :: has_vhnzc=0
     integer :: has_dvhnzc=0
     integer :: has_vxc=0
@@ -142,6 +144,14 @@ module m_orbmag
     ! dp2(natom,lmnmax,lmnmax,3)
     complex(dpc),allocatable :: dp2(:,:,:,:)
 
+    ! <phi|vH[n1+nc]|phi> - <tphi|vH[n1+nc]|tphi>
+    ! vha(natom,lmn2max)
+    complex(dpc),allocatable :: vha(:,:)
+    
+    ! <phi|r_alpha vH[n1+nc]|phi> - <tphi|r_alpha vH[n1+nc]|tphi>
+    ! dvha(natom,lmnmax,lmnmax,3)
+    complex(dpc),allocatable :: dvha(:,:,:,:)
+ 
     ! <phi|vH[nZc]|phi> - <tphi|vH[nZc]|tphi>
     ! vhnzc(natom,lmn2max)
     complex(dpc),allocatable :: vhnzc(:,:)
@@ -190,11 +200,11 @@ module m_orbmag
   private :: sum_d
   private :: check_eig_k
   private :: dterm_qij
+  private :: dterm_vha
   private :: dterm_vhnzc
   private :: dterm_vxc
   private :: dterm_p2
   private :: make_ddir_ap
-  private :: make_ddir_vha
   private :: make_ddir_vhnhat
   private :: tt_me
   private :: tdt_me
@@ -2436,12 +2446,12 @@ subroutine dterm_vxc(atindx,dterm,dtset,gntselect,gprimd,lmnmax,my_lmax,&
 end subroutine dterm_vxc
 
 
-!!****f* ABINIT/make_ddir_vha
+!!****f* ABINIT/dterm_vha
 !! NAME
-!! make_ddir_vha
+!! dterm_vha
 !!
 !! FUNCTION
-!! Compute onsite r*vhartree
+!! Compute onsite vhartree and r*vhartree
 !!
 !! COPYRIGHT
 !! Copyright (C) 2003-2021 ABINIT  group
@@ -2468,19 +2478,19 @@ end subroutine dterm_vxc
 !!
 !! SOURCE
 
-subroutine make_ddir_vha(atindx,ddir_vha,dtset,gntselect,gprimd,lmnmax,my_lmax,&
+subroutine dterm_vha(atindx,dterm,dtset,gntselect,gprimd,lmnmax,my_lmax,&
     & pawrad,pawsphden,pawtab,realgnt)
 
   !Arguments ------------------------------------
   !scalars
   integer,intent(in) :: lmnmax,my_lmax
+  type(dterm_type),intent(inout) :: dterm
   type(dataset_type),intent(in) :: dtset
 
   !arrays
   integer,intent(in) :: atindx(dtset%natom)
   integer,intent(in) :: gntselect((2*my_lmax-1)**2,my_lmax**2*(my_lmax**2+1)/2)
   real(dp),intent(in) :: gprimd(3,3),realgnt((2*my_lmax-1)**2*(my_lmax)**4)
-  complex(dpc),intent(out) :: ddir_vha(lmnmax,lmnmax,dtset%natom,3)
   type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
   type(paw_sph_den_type),intent(in) :: pawsphden(dtset%natom)
   type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
@@ -2490,7 +2500,7 @@ subroutine make_ddir_vha(atindx,ddir_vha,dtset,gntselect,gprimd,lmnmax,my_lmax,&
   integer :: adir,gint,g2int,iat,iatom,ilm,ilmn,ilmp,imesh,itypat
   integer :: jlmn,jmesh,klmadir,klmn,klm,kln,ll,lmin,lmax,lp
   integer :: mesh_size
-  real(dp) :: cdij,nl1,nlt1,rfac,rr,rp,vhaint,rrhokl
+  real(dp) :: cdij,dij,nl1,nlt1,rfac,rr,rp,vhaint,rrhokl
   real(dp) :: nterm
 
   !arrays
@@ -2500,7 +2510,8 @@ subroutine make_ddir_vha(atindx,ddir_vha,dtset,gntselect,gprimd,lmnmax,my_lmax,&
 !--------------------------------------------------------------------
 
  cdij = four_pi*sqrt(four_pi/3.0D0)
- ddir_vha = czero
+ dterm%vha = czero
+ dterm%dvha = czero
 
  do iat = 1, dtset%natom
    iatom = atindx(iat)
@@ -2519,13 +2530,51 @@ subroutine make_ddir_vha(atindx,ddir_vha,dtset,gntselect,gprimd,lmnmax,my_lmax,&
      ilmn = pawtab(itypat)%indklmn(7,klmn)
      jlmn = pawtab(itypat)%indklmn(8,klmn)
 
-     dij_cart = zero
+     dij=zero; dij_cart=zero
 
      do ll = lmin,lmax,2
        do ilm = ll**2+1,(ll+1)**2
          gint = gntselect(ilm,klm)
          if (gint .EQ. 0) cycle
+         
+         ! this loop is for the vha terms
 
+         ! construct integrand for rho1 vHa, trho1
+         ff = zero
+         do imesh = 2, mesh_size
+           rr = pawrad(itypat)%rad(imesh)
+             
+           ! for this mesh point, do the interior nonlocal integral over Hartree potential
+           ff1 = zero; fft1 = zero
+           do jmesh = 2, imesh
+             rp = pawrad(itypat)%rad(jmesh)
+             rfac = (rp**2)*(rp**ll)/(rr**(ll+1))
+             ff1(jmesh) = pawsphden(iatom)%rho1(jmesh,ilm,1)*rfac
+             fft1(jmesh) = pawsphden(iatom)%trho1(jmesh,ilm,1)*rfac
+           end do
+           do jmesh=imesh+1, mesh_size
+             rp = pawrad(itypat)%rad(jmesh)
+             rfac = (rp**2)*(rr**ll)/(rp**(ll+1))
+             ff1(jmesh) = pawsphden(iatom)%rho1(jmesh,ilm,1)*rfac
+             fft1(jmesh) = pawsphden(iatom)%trho1(jmesh,ilm,1)*rfac
+           end do
+
+           call pawrad_deducer0(ff1,mesh_size,pawrad(itypat))
+           call simp_gen(nl1,ff1,pawrad(itypat))
+           call pawrad_deducer0(fft1,mesh_size,pawrad(itypat))
+           call simp_gen(nlt1,fft1,pawrad(itypat))
+           
+           ff(imesh)=pawtab(itypat)%phiphj(imesh,kln)*nl1 - &
+             & pawtab(itypat)%tphitphj(imesh,kln)*nlt1
+         
+         end do ! end loop over imesh
+
+         call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
+         call simp_gen(vhaint,ff,pawrad(itypat))
+
+         dij=dij+realgnt(gint)*vhaint*four_pi/(two*ll+one)
+
+         ! this loop is for the r*vha terms
          do adir = 1, 3
 
            do lp = abs(ll-1), ll+1, 2
@@ -2579,9 +2628,11 @@ subroutine make_ddir_vha(atindx,ddir_vha,dtset,gntselect,gprimd,lmnmax,my_lmax,&
      dij_red = MATMUL(TRANSPOSE(gprimd),dij_cart)
 
      do adir = 1, 3
-       ddir_vha(ilmn,jlmn,iat,adir) = CMPLX(dij_red(adir),zero,KIND=dpc)
-       ddir_vha(jlmn,ilmn,iat,adir) = ddir_vha(ilmn,jlmn,iat,adir)
+       dterm%dvha(iatom,ilmn,jlmn,adir) = -j_dpc*dij_red(adir)
+       dterm%dvha(iatom,jlmn,ilmn,adir) = -j_dpc*dij_red(adir)
      end do
+
+     dterm%vha(iatom,klmn) = CMPLX(dij,zero)
 
    end do ! end loop over klmn
 
@@ -2590,8 +2641,11 @@ subroutine make_ddir_vha(atindx,ddir_vha,dtset,gntselect,gprimd,lmnmax,my_lmax,&
    ABI_FREE(fft1)
 
  end do ! end loop over iat
+
+ dterm%has_vha = 2
+ dterm%has_dvha = 2
  
-end subroutine make_ddir_vha
+end subroutine dterm_vha
 
 !!****f* ABINIT/dterm_p2
 !! NAME
@@ -2978,6 +3032,16 @@ subroutine dterm_free(dterm)
     ABI_FREE(dterm%dp2)
   end if
   dterm%has_dp2=0
+ 
+  if(allocated(dterm%vha)) then
+    ABI_FREE(dterm%vha)
+  end if
+  dterm%has_vha=0
+  
+  if(allocated(dterm%dvha)) then
+    ABI_FREE(dterm%dvha)
+  end if
+  dterm%has_dvha=0
   
   if(allocated(dterm%vhnzc)) then
     ABI_FREE(dterm%vhnzc)
@@ -3155,6 +3219,18 @@ subroutine dterm_alloc(dterm,lmnmax,lmn2max,natom)
   end if
   ABI_MALLOC(dterm%dp2,(natom,lmnmax,lmnmax,3))
   dterm%has_dp2=1
+ 
+  if(allocated(dterm%vha)) then
+    ABI_FREE(dterm%vha)
+  end if
+  ABI_MALLOC(dterm%vha,(natom,lmn2max))
+  dterm%has_vha=1
+  
+  if(allocated(dterm%dvha)) then
+    ABI_FREE(dterm%dvha)
+  end if
+  ABI_MALLOC(dterm%dvha,(natom,lmnmax,lmnmax,3))
+  dterm%has_dvha=1
  
   if(allocated(dterm%vhnzc)) then
     ABI_FREE(dterm%vhnzc)
@@ -3530,6 +3606,13 @@ subroutine sum_d(dterm)
     dterm%daij = dterm%daij + dterm%dp2
   end if
  
+  if (dterm%has_vha .EQ. 2) then
+    dterm%aij = dterm%aij + dterm%vha
+  end if
+  if (dterm%has_dvha .EQ. 2) then
+    dterm%daij = dterm%daij + dterm%dvha
+  end if
+ 
   if (dterm%has_vhnzc .EQ. 2) then
     dterm%aij = dterm%aij + dterm%vhnzc
   end if
@@ -3668,10 +3751,10 @@ subroutine make_d(atindx,atindx1,cprj,dimlmn,dterm,dtset,gprimd,&
 
  !! term idpa due to onsite A.p, not part of the roadmap paper but similar to term 1
  !call make_ddir_ap(dterms(idpa,:,:,:,:),dtset,gntselect,gprimd,psps%lmnmax,my_lmax,pawrad,pawtab,realgnt)
- !
- !! term idvha due to v_H[n1], corresponds to term 2a of roadmap paper
- !call make_ddir_vha(atindx,dterms(idvha,:,:,:,:),dtset,gntselect,gprimd,psps%lmnmax,my_lmax,&
- !  & pawrad,pawsphden,pawtab,realgnt)
+ 
+ ! term idvha due to v_H[n1], corresponds to term 2a of roadmap paper
+ call dterm_vha(atindx,dterm,dtset,gntselect,gprimd,psps%lmnmax,my_lmax,&
+   & pawrad,pawsphden,pawtab,realgnt)
 
  ! terms due to v_H[nZ], corresponds to term 2b of roadmap paper
  call dterm_vhnzc(atindx,dterm,dtset,gntselect,gprimd,my_lmax,pawrad,pawtab,realgnt)
