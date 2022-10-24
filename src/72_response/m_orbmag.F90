@@ -115,6 +115,8 @@ module m_orbmag
     integer :: has_dp2=0
     integer :: has_vhnzc=0
     integer :: has_dvhnzc=0
+    integer :: has_vxc=0
+    integer :: has_dvxc=0
 
     ! sum of \Delta A_ij
     ! aij(natom,lmn2max)
@@ -147,6 +149,14 @@ module m_orbmag
     ! <phi|r_alpha vH[nZc]|phi> - <tphi|r_alpha vH[nZc]|tphi>
     ! dvhnzc(natom,lmnmax,lmnmax,3)
     complex(dpc),allocatable :: dvhnzc(:,:,:,:)
+    
+    ! <phi|vxc[n1+nc]|phi> - <tphi|vxc[\tilde{n}^1+\tilde{nc}|tphi>
+    ! vxc(natom,lmn2max)
+    complex(dpc),allocatable :: vxc(:,:)
+    
+    ! <phi|r_a vxc[n1+nc]|phi> - <tphi|r_a vxc[\tilde{n}^1+\tilde{nc}|tphi>
+    ! dvxc(natom,lmnmax,lmnmax,3)
+    complex(dpc),allocatable :: dvxc(:,:,:,:)
 
   end type dterm_type
 
@@ -180,11 +190,11 @@ module m_orbmag
   private :: sum_d
   private :: dterm_qij
   private :: dterm_vhnzc
+  private :: dterm_vxc
   private :: dterm_p2
   private :: make_ddir_ap
   private :: make_ddir_vha
   private :: make_ddir_vhnhat
-  private :: make_ddir_vxc
   private :: tt_me
   private :: tdt_me
   private :: dtdt_me
@@ -2272,12 +2282,12 @@ subroutine make_ddir_vhnhat(atindx,ddir_vhnhat,dtset,gntselect,gprimd,lmnmax,my_
  
 end subroutine make_ddir_vhnhat
 
-!!****f* ABINIT/make_ddir_vxc
+!!****f* ABINIT/dterm_vxc
 !! NAME
-!! make_ddir_vxc
+!! dterm_vxc
 !!
 !! FUNCTION
-!! Compute onsite r*vxc
+!! Compute onsite vxc, r*vxc
 !!
 !! COPYRIGHT
 !! Copyright (C) 2003-2021 ABINIT  group
@@ -2304,12 +2314,13 @@ end subroutine make_ddir_vhnhat
 !!
 !! SOURCE
 
-subroutine make_ddir_vxc(atindx,ddir_vxc,dtset,gntselect,gprimd,lmnmax,my_lmax,&
+subroutine dterm_vxc(atindx,dterm,dtset,gntselect,gprimd,lmnmax,my_lmax,&
     & pawang,pawrad,pawsphden,pawtab,realgnt)
 
   !Arguments ------------------------------------
   !scalars
   integer,intent(in) :: lmnmax,my_lmax
+  type(dterm_type),intent(inout) :: dterm
   type(dataset_type),intent(in) :: dtset
   type(pawang_type),intent(in) :: pawang
 
@@ -2317,7 +2328,6 @@ subroutine make_ddir_vxc(atindx,ddir_vxc,dtset,gntselect,gprimd,lmnmax,my_lmax,&
   integer,intent(in) :: atindx(dtset%natom)
   integer,intent(in) :: gntselect((2*my_lmax-1)**2,my_lmax**2*(my_lmax**2+1)/2)
   real(dp),intent(in) :: gprimd(3,3),realgnt((2*my_lmax-1)**2*(my_lmax)**4)
-  complex(dpc),intent(out) :: ddir_vxc(lmnmax,lmnmax,dtset%natom,3)
   type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
   type(paw_sph_den_type),intent(in) :: pawsphden(dtset%natom)
   type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
@@ -2326,13 +2336,13 @@ subroutine make_ddir_vxc(atindx,ddir_vxc,dtset,gntselect,gprimd,lmnmax,my_lmax,&
   !scalars
   integer :: adir,iat,iatom,ilm,ilmn,imesh,ipt,itypat,jlm,jlmn
   integer :: klmn,kln,mesh_size,nkxc,nk3xc,usecore,usexcnhat,xc_option
-  real(dp) :: eexc,eexcdc,hyb_mixing,rr,xcint
+  real(dp) :: dij,eexc,eexcdc,hyb_mixing,rr,xcint,xcintr
   logical :: non_magnetic_xc
 
   !arrays
   real(dp) :: dij_cart(3),dij_red(3)
   real(dp),allocatable :: ff(:),kxc(:,:,:),k3xc(:,:,:)
-  real(dp),allocatable :: vxc(:,:,:),tvxc(:,:,:)
+  real(dp),allocatable :: rff(:),vxc(:,:,:),tvxc(:,:,:)
 
 !--------------------------------------------------------------------
 
@@ -2344,7 +2354,7 @@ subroutine make_ddir_vxc(atindx,ddir_vxc,dtset,gntselect,gprimd,lmnmax,my_lmax,&
  usecore = 1
  usexcnhat = 0
 
- ddir_vxc = zero
+ dterm%vxc = czero; dterm%dvxc = czero
 
  do iat = 1, dtset%natom
    iatom = atindx(iat)
@@ -2354,6 +2364,7 @@ subroutine make_ddir_vxc(atindx,ddir_vxc,dtset,gntselect,gprimd,lmnmax,my_lmax,&
    ABI_MALLOC(vxc,(mesh_size,pawang%angl_size,dtset%nspden))
    ABI_MALLOC(tvxc,(mesh_size,pawang%angl_size,dtset%nspden))
    ABI_MALLOC(ff,(mesh_size))
+   ABI_MALLOC(rff,(mesh_size))
          
    call pawxc(pawtab(itypat)%coredens,eexc,eexcdc,hyb_mixing,dtset%ixc,kxc,k3xc,&
      & pawsphden(iatom)%lm_size,pawsphden(iatom)%lmselectout,pawsphden(iatom)%nhat1,&
@@ -2376,37 +2387,48 @@ subroutine make_ddir_vxc(atindx,ddir_vxc,dtset,gntselect,gprimd,lmnmax,my_lmax,&
      
      kln  = pawtab(itypat)%indklmn(2,klmn)
 
-     dij_cart = zero
+     dij = zero; dij_cart = zero
      do ipt = 1, pawang%angl_size
        do imesh = 2, mesh_size
          rr = pawrad(itypat)%rad(imesh)
-         ff(imesh) = rr*vxc(imesh,ipt,1)*pawtab(itypat)%phiphj(imesh,kln) - &
-           & rr*tvxc(imesh,ipt,1)*pawtab(itypat)%tphitphj(imesh,kln)
+         ff(imesh) = vxc(imesh,ipt,1)*pawtab(itypat)%phiphj(imesh,kln) - &
+           & tvxc(imesh,ipt,1)*pawtab(itypat)%tphitphj(imesh,kln)
+         rff(imesh) = rr*ff(imesh)
        end do !imesh
        call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
        call simp_gen(xcint,ff,pawrad(itypat))
+       call pawrad_deducer0(rff,mesh_size,pawrad(itypat))
+       call simp_gen(xcintr,rff,pawrad(itypat))
 
+       dij = dij + &
+         & pawang%angwgth(ipt)*pawang%ylmr(ilm,ipt)*pawang%ylmr(jlm,ipt)*xcint
+       
        do adir = 1, 3
          dij_cart(adir) = dij_cart(adir) + &
            & pawang%angwgth(ipt)*pawang%ylmr(ilm,ipt)*pawang%ylmr(jlm,ipt)*&
-           & pawang%ylmr(pack1a(adir),ipt)*xcint
+           & pawang%ylmr(pack1a(adir),ipt)*xcintr
        end do ! adir
      end do ! ipt
 
-     dij_red = MATMUL(TRANSPOSE(gprimd),dij_cart)
+     dterm%vxc(iatom,klmn) = dij
 
-     ddir_vxc(ilmn,jlmn,iat,1:3) = dij_red(1:3)
-     ddir_vxc(jlmn,ilmn,iat,1:3) = dij_red(1:3)
+     dij_red = MATMUL(TRANSPOSE(gprimd),dij_cart)
+     dterm%dvxc(iatom,ilmn,jlmn,1:3) = -j_dpc*dij_red(1:3)
+     dterm%dvxc(iatom,jlmn,ilmn,1:3) = -j_dpc*dij_red(1:3)
 
    end do ! klmn
 
    ABI_FREE(vxc)
    ABI_FREE(tvxc)
    ABI_FREE(ff)
+   ABI_FREE(rff)
  
  end do !iat
 
-end subroutine make_ddir_vxc
+ dterm%has_vxc = 2
+ dterm%has_dvxc = 2
+
+end subroutine dterm_vxc
 
 
 !!****f* ABINIT/make_ddir_vha
@@ -2941,6 +2963,16 @@ subroutine dterm_free(dterm)
     ABI_FREE(dterm%dqij)
   end if
   dterm%has_dqij=0
+ 
+  if(allocated(dterm%p2)) then
+    ABI_FREE(dterm%p2)
+  end if
+  dterm%has_p2=0
+  
+  if(allocated(dterm%dp2)) then
+    ABI_FREE(dterm%dp2)
+  end if
+  dterm%has_dp2=0
   
   if(allocated(dterm%vhnzc)) then
     ABI_FREE(dterm%vhnzc)
@@ -2952,16 +2984,16 @@ subroutine dterm_free(dterm)
   end if
   dterm%has_dvhnzc=0
  
-  if(allocated(dterm%p2)) then
-    ABI_FREE(dterm%p2)
+  if(allocated(dterm%vxc)) then
+    ABI_FREE(dterm%vxc)
   end if
-  dterm%has_p2=0
+  dterm%has_vxc=0
   
-  if(allocated(dterm%dp2)) then
-    ABI_FREE(dterm%dp2)
+  if(allocated(dterm%dvxc)) then
+    ABI_FREE(dterm%dvxc)
   end if
-  dterm%has_dp2=0
- 
+  dterm%has_dvxc=0
+
 end subroutine dterm_free
 !!***
 
@@ -3107,18 +3139,6 @@ subroutine dterm_alloc(dterm,lmnmax,lmn2max,natom)
   ABI_MALLOC(dterm%dqij,(natom,lmnmax,lmnmax,3))
   dterm%has_dqij=1
   
-  if(allocated(dterm%vhnzc)) then
-    ABI_FREE(dterm%vhnzc)
-  end if
-  ABI_MALLOC(dterm%vhnzc,(natom,lmn2max))
-  dterm%has_vhnzc=1
-  
-  if(allocated(dterm%dvhnzc)) then
-    ABI_FREE(dterm%dvhnzc)
-  end if
-  ABI_MALLOC(dterm%dvhnzc,(natom,lmnmax,lmnmax,3))
-  dterm%has_dvhnzc=1
-  
   if(allocated(dterm%p2)) then
     ABI_FREE(dterm%p2)
   end if
@@ -3130,6 +3150,30 @@ subroutine dterm_alloc(dterm,lmnmax,lmn2max,natom)
   end if
   ABI_MALLOC(dterm%dp2,(natom,lmnmax,lmnmax,3))
   dterm%has_dp2=1
+ 
+  if(allocated(dterm%vhnzc)) then
+    ABI_FREE(dterm%vhnzc)
+  end if
+  ABI_MALLOC(dterm%vhnzc,(natom,lmn2max))
+  dterm%has_vhnzc=1
+  
+  if(allocated(dterm%dvhnzc)) then
+    ABI_FREE(dterm%dvhnzc)
+  end if
+  ABI_MALLOC(dterm%dvhnzc,(natom,lmnmax,lmnmax,3))
+  dterm%has_dvhnzc=1
+ 
+  if(allocated(dterm%vxc)) then
+    ABI_FREE(dterm%vxc)
+  end if
+  ABI_MALLOC(dterm%vxc,(natom,lmn2max))
+  dterm%has_vxc=1
+  
+  if(allocated(dterm%dvxc)) then
+    ABI_FREE(dterm%dvxc)
+  end if
+  ABI_MALLOC(dterm%dvxc,(natom,lmnmax,lmnmax,3))
+  dterm%has_dvxc=1
   
 end subroutine dterm_alloc
 !!***
@@ -3377,6 +3421,13 @@ subroutine sum_d(dterm)
   if (dterm%has_dvhnzc .EQ. 2) then
     dterm%daij = dterm%daij + dterm%dvhnzc
   end if
+  
+  if (dterm%has_vxc .EQ. 2) then
+    dterm%aij = dterm%aij + dterm%vxc
+  end if
+  if (dterm%has_dvxc .EQ. 2) then
+    dterm%daij = dterm%daij + dterm%dvxc
+  end if
 
 end subroutine sum_d
 !!***
@@ -3514,9 +3565,9 @@ subroutine make_d(atindx,atindx1,cprj,dimlmn,dterm,dtset,gprimd,&
  !call make_ddir_vhnhat(atindx,dterms(idvhnhat,:,:,:,:),dtset,gntselect,gprimd,psps%lmnmax,my_lmax,&
  !  & pawrad,pawsphden,pawtab,realgnt)
 
- !! term idvxc due to v_xc[n1+nc] corresponds to term 3a in roadmap paper
- !call make_ddir_vxc(atindx,dterms(idvxc,:,:,:,:),dtset,gntselect,gprimd,psps%lmnmax,my_lmax,&
- !   & pawang,pawrad,pawsphden,pawtab,realgnt)
+ ! term dvxc due to v_xc[n1+nc] corresponds to term 3a in roadmap paper
+ call dterm_vxc(atindx,dterm,dtset,gntselect,gprimd,psps%lmnmax,my_lmax,&
+    & pawang,pawrad,pawsphden,pawtab,realgnt)
 
  ABI_FREE(realgnt)
  ABI_FREE(gntselect)
