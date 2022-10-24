@@ -1148,6 +1148,7 @@ end function atof
 !! FUNCTION
 !!  Convert an integer into a string
 !!
+
 pure function itoa_1b(value)
 
  integer(c_int8_t),intent(in) :: value

@@ -2360,10 +2360,12 @@ subroutine ebands_update_occ(ebands, spinmagntarget, stmbias, prtvol, fermie_to_
    vtop = MAXVAL(valencetop)
    cbot = MINVAL(condbottom)
 
-   write(msg,'(a,f8.4,3a,f8.4,a)') &
-    ' Top of valence: ', vtop * Ha_eV," (eV)", ch10, &
-    ' Bottom of conduction: ', cbot * Ha_eV, " (eV)"
+   write(msg,'(3(a,f8.4,2a))') &
+    " Top of valence: ", vtop * Ha_eV," (eV)", ch10, &
+    " Bottom of conduction: ", cbot * Ha_eV, " (eV)", ch10, &
+    " Fundamental gap:",  (cbot - vtop) * Ha_eV, " (eV)", ch10
    call wrtout(std_out, msg)
+
    if (ebands%nsppol == 2) then
      if (ABS(vtop - MINVAL(valencetop)) > tol6) then
        call wrtout(std_out, sjoin(' Top of valence is spin: ', itoa(imax_loc(valencetop))))

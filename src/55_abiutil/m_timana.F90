@@ -1116,6 +1116,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  !names(1906)='mkkin'; basic(1906) = 1
 
  ! GWR code
+ names(1919)='ugb_from_diago'; basic(1919) = 1
  names(1920)='gwr_init'; basic(1920) = 1
  names(1921)='gwr_read_ugb_from_wfk'; basic(1921) = 1
  names(1922)='gwr_build_green'; basic(1922) = 1

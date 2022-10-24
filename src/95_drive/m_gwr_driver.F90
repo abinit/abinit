@@ -232,6 +232,12 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
   ABI_ERROR("GWR code requires scalapack library")
 #endif
 
+!#ifndef HAVE_MPI_IBCAST
+! do ii=1,5
+!   ABI_WARNING("Your MPI library does not provide MPI_IBCAST. Calculations parallelized over perturbations will be slow")
+! end do
+!#endif
+
  ! abirules!
  if (.False.) write(std_out,*)acell,codvsn,rprim,xred
 

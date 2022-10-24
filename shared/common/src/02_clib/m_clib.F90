@@ -32,7 +32,9 @@ MODULE m_clib
  public :: clib_mtrace
  public :: clib_print_mallinfo
  public :: clib_ulimit_stack    ! Set stack size limit to maximum allowed value.
+ public :: clib_getpid
  !public :: clib_usleep         ! Suspend calling thread for microseconds of clock time
+
 
 !FIXME the interfaces below have been commented out since abilint
 ! JB : because interface must have a name in abilint
@@ -54,21 +56,30 @@ MODULE m_clib
      import
      character(kind=c_char),intent(in) :: oldname(*)
      character(kind=c_char),intent(in) :: newname(*)
-   end function
+   end function c_rename
  end interface
 
  interface
    subroutine clib_cclock(cpu) bind(C, name="cclock")
      import
      real(c_double),intent(out) :: cpu
-   end subroutine
+   end subroutine clib_cclock
  end interface
 
  interface
    real(c_double) function clib_etime(tt) bind(C, name="etime") result(res)
      import
      real(c_float),intent(out) :: tt(2)
-   end function
+   end function clib_etime
+ end interface
+
+ interface
+   ! pid_t getpid().
+   ! The type of pid_t data is a signed integer type (signed int or we can say int).
+   function clib_getpid() bind(C, name='getpid')
+     import
+     integer(c_int) :: clib_getpid
+   end function clib_getpid
  end interface
 
 ! =================================================
@@ -77,7 +88,7 @@ MODULE m_clib
  interface
    subroutine clib_mallinfo(arena, hblkhd, usmblks, fsmblks, uordblks, fordblks) bind(C, name="clib_mallinfo")
      import
-     integer(c_long),intent(out) :: arena,hblkhd,usmblks,fsmblks,uordblks,fordblks
+     integer(c_long),intent(out) :: arena, hblkhd, usmblks, fsmblks, uordblks, fordblks
    end subroutine clib_mallinfo
  end interface
 

@@ -3926,20 +3926,22 @@ end subroutine slk_zdhp_invert
 !!       the first row and the first column of the submatrix sub(A), respectively.
 !!  [ijc(2)]: (global) The row and column indices in the distributed matrix out_mat
 !!   indicating the first row and the first column of the submatrix sub(C), respectively.
+!!  [free]: True to deallocate in_mat. Default: False
 !!
 !! OUTPUT
 !!
 !! SOURCE
 
 subroutine slk_ptrans(in_mat, trans, out_mat, &
-                      out_gshape, ija, ijc, size_blocs, alpha, beta) ! optional
+                      out_gshape, ija, ijc, size_blocs, alpha, beta, free) ! optional
 
 !Arguments ------------------------------------
- class(matrix_scalapack), intent(in) :: in_mat
+ class(matrix_scalapack),intent(inout) :: in_mat
  character(len=1),intent(in) :: trans
- class(matrix_scalapack), intent(inout) :: out_mat
+ class(matrix_scalapack),intent(inout) :: out_mat
  integer,optional,intent(in) :: out_gshape(2), size_blocs(2), ija(2), ijc(2)
  complex(dp),optional,intent(in) :: alpha, beta
+ logical,optional,intent(in) :: free
 
 !Local variables-------------------------------
  integer :: istwf_k, sb, mm, nn, size_blocs__(2)
@@ -4009,6 +4011,10 @@ subroutine slk_ptrans(in_mat, trans, out_mat, &
 #endif
  else
    ABI_ERROR("Neither buffer_cplx nor buffer_real are allocated!")
+ end if
+
+ if (present(free)) then
+   if (free) call in_mat%free()
  end if
 
  !call cwtime_report(" slk_ptrans:", cpu, wall, gflops)
@@ -4160,7 +4166,7 @@ end subroutine slk_cut
 !!  slk_take_from
 !!
 !! FUNCTION
-!!  Take values from source.
+!!  Take values from source
 !!  NB: This routine should be called by all procs owning mat and source.
 !!
 !! INPUTS
@@ -4169,7 +4175,8 @@ end subroutine slk_cut
 !!
 !! SOURCE
 
-subroutine slk_take_from(out_mat, source, ija, ijb)
+subroutine slk_take_from(out_mat, source, &
+                         ija, ijb) ! optional
 
 !Arguments ------------------------------------
  class(matrix_scalapack),intent(inout) :: out_mat
@@ -4296,7 +4303,7 @@ subroutine slk_zcollect(in_mat, mm, nn, ija, out_carr)
  end if
 
  !if (present(request)) then
- !call xmpi_ibcast(out_carr, master, in_mat%processor%comm, request, ierr)
+ !  call xmpi_ibcast(out_carr, master, in_mat%processor%comm, request, ierr)
  !else
  call xmpi_bcast(out_carr, master, in_mat%processor%comm, ierr)
 

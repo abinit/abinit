@@ -189,7 +189,7 @@ subroutine memory_eval(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 &   dtsets(idtset)%nimage,npsp,dtsets(idtset)%npspalch,ntypat,dtsets(idtset)%ntypalch,pspheads)
 
 !  Treatment of the effect of using a spin-orbit part
-!  Warning : mpspso is different for each dataset; not relevant for PAW
+!  Warning: mpspso is different for each dataset; not relevant for PAW
    mpspso=1
    if (dtsets(idtset)%usepaw==0) then
      do ii=1,npsp
