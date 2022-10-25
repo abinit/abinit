@@ -2544,7 +2544,7 @@ end subroutine midpoint_
 !!  The routine improves the resolution of the grid until a given accuracy is reached
 !!
 !! INPUTS
-!!  func(external)=the name of the function to be integrated
+!!  func(external)=the function to be integrated
 !!  xmin,xmax=the limits of integration
 !!  npts=Initial number of points, only for Gauss-Legendre. At each step this number is doubled
 !!  accuracy=fractional accuracy required
@@ -2741,7 +2741,7 @@ recursive subroutine quadrature(func,xmin,xmax,qopt,quad,ierr,ntrial,accuracy,np
  end select
 
  write(msg,'(a,i0,2(a,es14.6))')&
-&  "Results are not converged within the given accuracy. ntrial= ",NT,"; EPS= ",EPS,"; TOL= ",TOL
+  "Results are not converged within the given accuracy. ntrial= ",NT,"; EPS= ",EPS,"; TOL= ",TOL
  ABI_WARNING(msg)
  ierr = -1
 

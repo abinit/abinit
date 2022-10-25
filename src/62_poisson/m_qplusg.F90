@@ -54,7 +54,7 @@ CONTAINS
 !!
 !! SOURCE
 
-subroutine cmod_qpg(nq,iq,q,npwvec,gvec,gprimd,qplusg)
+subroutine cmod_qpg(nq, iq, q, npwvec, gvec, gprimd, qplusg)
 
 !Arguments ------------------------------------
 !scalars

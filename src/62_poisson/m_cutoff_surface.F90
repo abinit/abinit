@@ -96,16 +96,17 @@ subroutine cutoff_surface(nq,qpt,ng,gvec,gprimd,rcut,boxcenter,pdir,alpha,vc_cut
  ABI_UNUSED(pdir)
  ABI_UNUSED(boxcenter)
 
- ! === From reduced to cartesian coordinates ===
+ ! From reduced to cartesian coordinates.
  b1(:)=two_pi*gprimd(:,1)
  b2(:)=two_pi*gprimd(:,2)
  b3(:)=two_pi*gprimd(:,3)
+
  ABI_MALLOC(qcart,(3,nq))
  do iq=1,nq
    qcart(:,iq) = b1*qpt(1,iq) + b2*qpt(2,iq) + b3*qpt(3,iq)
  end do
 
- ! === Different approaches according to method ===
+ ! Different approaches according to method
  vc_cut(:,:)=zero
 
  SELECT CASE (method)
@@ -119,10 +120,10 @@ subroutine cutoff_surface(nq,qpt,ng,gvec,gprimd,rcut,boxcenter,pdir,alpha,vc_cut
      write(msg,'(5a)')&
       'Found q-points with non-zero component along non-periodic direction ',ch10,&
       'This is not allowed, see Notes in cutoff_surface.F90 ',ch10,&
-      'ACTION : Modify the q-point sampling '
+      'ACTION: Modify the q-point sampling'
      ABI_ERROR(msg)
    end if
-   !
+
    ! === Calculate truncated Coulomb interaction for a infinite surface ===
    ! Here I suppose that all the input q-points are different from zero
    do iq=1,nq

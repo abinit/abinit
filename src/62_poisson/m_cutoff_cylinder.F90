@@ -79,7 +79,7 @@ CONTAINS
 !!
 !! SOURCE
 
-subroutine cutoff_cylinder(nq,qpt,ng,gvec,rcut,hcyl,pdir,boxcenter,rprimd,vccut,method,comm)
+subroutine cutoff_cylinder(nq, qpt, ng, gvec, rcut, hcyl, pdir, boxcenter, rprimd, vccut, method, comm)
 
 !Arguments ------------------------------------
 !scalars
@@ -124,20 +124,20 @@ subroutine cutoff_cylinder(nq,qpt,ng,gvec,rcut,hcyl,pdir,boxcenter,rprimd,vccut,
   '  Max number of attempts = ',ntrial_,ch10,&
   '  Fractional accuracy    = ',accuracy_
  call wrtout(std_out, msg)
- !
- ! === From reduced to Cartesian coordinates ===
- call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
+
+ ! From reduced to Cartesian coordinates.
+ call metric(gmet, gprimd, -1, rmet, rprimd, ucvol)
  b1(:)=two_pi*gprimd(:,1)
  b2(:)=two_pi*gprimd(:,2)
  b3(:)=two_pi*gprimd(:,3)
 
- ABI_MALLOC(qcart,(3,nq))
+ ABI_MALLOC(qcart, (3, nq))
  do iq=1,nq
    qcart(:,iq)=b1(:)*qpt(1,iq)+b2(:)*qpt(2,iq)+b3(:)*qpt(3,iq)
  end do
 
  ntasks=nq*ng
- call xmpi_split_work(ntasks,comm,my_start,my_stop)
+ call xmpi_split_work(ntasks, comm, my_start, my_stop)
  !
  ! ================================================
  ! === Different approaches according to method ===
@@ -154,30 +154,29 @@ subroutine cutoff_cylinder(nq,qpt,ng,gvec,rcut,hcyl,pdir,boxcenter,rprimd,vccut,
    if (ANY(qcart(1:2,:)>SMALL)) then
      write(std_out,*)' qcart = ',qcart(:,:)
      write(msg,'(5a)')&
-&      ' found q-points with non zero components in the X-Y plane. ',ch10,&
-&      ' This is not allowed, see Notes in cutoff_cylinder.F90. ',ch10,&
-&      ' ACTION: Modify the q-point sampling. '
+      ' found q-points with non zero components in the X-Y plane. ',ch10,&
+      ' This is not allowed, see Notes in cutoff_cylinder.F90. ',ch10,&
+      ' ACTION: Modify the q-point sampling. '
      ABI_ERROR(msg)
    end if
    ! * Check if Bravais lattice is orthorombic and parallel to the Cartesian versors.
    !   In this case the intersection of the W-S cell with the x-y plane is a rectangle with -ha_<=x<=ha_ and -hb_<=y<=hb_
    if ( (ANY(ABS(rprimd(2:3,  1))>tol6)).or.&
-&       (ANY(ABS(rprimd(1:3:2,2))>tol6)).or.&
-&       (ANY(ABS(rprimd(1:2,  3))>tol6))    &
-&     ) then
-     msg = ' Bravais lattice should be orthorombic and parallel to the cartesian versors '
-     ABI_ERROR(msg)
+       (ANY(ABS(rprimd(1:3:2,2))>tol6)).or.&
+       (ANY(ABS(rprimd(1:2,  3))>tol6))    &
+     ) then
+     ABI_ERROR('Bravais lattice should be orthorombic and parallel to the cartesian versors')
    end if
 
    ha_=half*SQRT(DOT_PRODUCT(rprimd(:,1),rprimd(:,1)))
    hb_=half*SQRT(DOT_PRODUCT(rprimd(:,2),rprimd(:,2)))
    r0_=MIN(ha_,hb_)/N0
    !
-   ! === For each pair (q,G) evaluate the integral defining the cutoff Coulomb  ===
-   ! * Here the code assumes that all q-vectors are non zero and q_xy/=0.
+   ! For each (q,G) pair evaluate the integral defining the Coulomb cutoff.
+   ! NB: the code assumes that all q-vectors are non zero and q_xy/=0.
    do iq=1,nq
      igs=1
-     ! * Skip singularity at Gamma, it will be treated "by hand" in csigme.
+     ! Skip singularity at Gamma, it will be treated "by hand" in csigme.
      q_is_zero = (normv(qpt(:,iq),gmet,'G')<tol4)
      !if (q_is_zero) igs=2
      qc(:)=qcart(:,iq)
@@ -190,14 +189,14 @@ subroutine cutoff_cylinder(nq,qpt,ng,gvec,rcut,hcyl,pdir,boxcenter,rprimd,vccut,
        gcart(:)=b1(:)*gvec(1,ig)+b2(:)*gvec(2,ig)+b3(:)*gvec(3,ig)
        qpg(:)=qc(:)+gcart(:)
        qpgx_=qpg(1) ; qpgy_=qpg(2) ; qpg_para_=ABS(qpg(3))
-       write(std_out,*)"qpgx_=",qpgx_
-       write(std_out,*)"qpgy_=",qpgy_
-       write(std_out,*)"qpg_para=",qpg_para_
+       !write(std_out,*)"qpgx_=",qpgx_
+       !write(std_out,*)"qpgy_=",qpgy_
+       !write(std_out,*)"qpg_para=",qpg_para_
 
        ! Avoid singularity in K_0{qpg_para_\rho) by using a small q along the periodic dimension.
        if (q_is_zero.and.qpg_para_<tol6) then
          qpg_para_ = tol6
-         write(std_out,*)"setting qpg_para to=",qpg_para_
+         !write(std_out,*)"setting qpg_para to=",qpg_para_
        end if
        !
        ! * Calculate $ 2\int_{WS} dxdy K_0{qpg_para_\rho) cos(x.qpg_x + y.qpg_y) $
@@ -221,11 +220,10 @@ subroutine cutoff_cylinder(nq,qpt,ng,gvec,rcut,hcyl,pdir,boxcenter,rprimd,vccut,
        ! === More stable method: midpoint integration with Romberg extrapolation ===
        call quadrature(K0cos_dy,zero,ha_,qopt_,quad,ierr,ntrial_,accuracy_,npts_)
        !write(std_out,'(i8,a,es14.6)')ig,' 3 ',quad
-       if (ierr/=0) then
-         ABI_ERROR("Accuracy not reached")
-       end if
-       ! === Store final result ===
-       ! * Factor two comes from the replacement WS -> (1,4) quadrant thanks to symmetries of the integrad.
+       ABI_CHECK(ierr == 0, "Accuracy not reached in quadrature!")
+
+       ! Store final result
+       ! Factor two comes from the replacement WS -> (1,4) quadrant thanks to symmetries of the integrad.
        tmp=tmp+quad
        vccut(ig,iq)=two*(tmp*two)
      end do !ig
@@ -234,7 +232,7 @@ subroutine cutoff_cylinder(nq,qpt,ng,gvec,rcut,hcyl,pdir,boxcenter,rprimd,vccut,
  CASE (2)
    ! === Finite cylinder of length hcyl, from Rozzi et al ===
    ! TODO add check on hcyl value that should be smaller that 1/deltaq
-   if (hcyl_<zero) then
+   if (hcyl_ < zero) then
      write(msg,'(a,f8.4)')' Negative value for cylinder length hcyl_=',hcyl_
      ABI_BUG(msg)
    end if
@@ -336,8 +334,8 @@ subroutine cutoff_cylinder(nq,qpt,ng,gvec,rcut,hcyl,pdir,boxcenter,rprimd,vccut,
  CASE DEFAULT
    ABI_BUG(sjoin('Wrong value for method:',itoa(method)))
  END SELECT
- !
- ! === Collect vccut on each node ===
+
+ ! Collect vccut on each core
  call xmpi_sum(vccut, comm, ierr)
 
  ABI_FREE(qcart)
@@ -358,7 +356,7 @@ function F1(rho)
  real(dp) :: arg,bes,besp,bespp
 !************************************************************************
 
- !F1(\rho;z)= \rho*j_o(qpg_perp_*\rho)/sqrt(\rho**2+z**2)
+ ! F1(\rho;z)= \rho*j_o(qpg_perp_*\rho)/sqrt(\rho**2+z**2)
  arg=rho*qpg_perp_
  call paw_jbessel(bes,besp,bespp,ll,order,arg)
 
@@ -386,7 +384,7 @@ function F2(xx)
 
  zz_=xx
  call quadrature(F1,zero,rcut_,qopt_,intr,ierr,ntrial_,accuracy_,npts_)
- if (ierr/=0) then
+ if (ierr /= 0) then
    ABI_ERROR("Accuracy not reached")
  end if
 
@@ -433,7 +431,6 @@ function F4(rho)
 
 end function F4
 !!***
-
 
 !----------------------------------------------------------------------
 
@@ -486,6 +483,7 @@ function K0cos_dy(xx)
 
  real(dp),intent(in) :: xx
  real(dp) :: K0cos_dy
+
 !Local variables-------------------------------
 !scalars
  integer :: ierr

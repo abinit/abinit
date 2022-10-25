@@ -171,6 +171,7 @@ module m_gwr
  use m_wfk,           only : wfk_read_ebands, wfk_t, wfk_open_read
  use m_wfd,           only : wfd_init, wfd_t, wfdgw_t, wave_t, WFD_STORED
  use m_pawtab,        only : pawtab_type
+ use m_pawcprj,       only : pawcprj_type
  use m_sigx,          only : sigx_symmetrize
  use m_dyson_solver,  only : sigma_pade_t
 #ifdef __HAVE_GREENX
@@ -6267,7 +6268,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  integer,contiguous, pointer :: kg_ki(:,:)
  integer,allocatable :: gvec_q0(:,:), gbound_q0(:,:), u_gbound(:,:)
  real(dp) :: kk_ibz(3), kk_bz(3), tsec(2)
- real(dp),contiguous, pointer :: qp_eig(:,:,:), qp_occ(:,:,:), ks_eig(:,:,:)
+ real(dp),contiguous, pointer :: qp_eig(:,:,:), qp_occ(:,:,:), ks_eig(:,:,:), cwave(:,:)
  real(dp),allocatable :: work(:,:,:,:), qdirs(:,:)
  logical :: gradk_not_done(gwr%nkibz)
  logical,allocatable :: bbp_mask(:,:)
@@ -6279,6 +6280,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  complex(dpc),allocatable :: chi0_lwing(:,:,:), chi0_uwing(:,:,:), chi0_head(:,:,:), head_qvals(:)
  type(vkbr_t),allocatable :: vkbr(:)
  type(gsphere_t) :: gsph
+ type(pawcprj_type),allocatable :: cwaveprj(:,:)
 
 ! *************************************************************************
 
@@ -6288,8 +6290,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
              pre_newlines=1, do_flush=.True.)
 
  nspinor = gwr%nspinor; nsppol = gwr%nsppol; dtset => gwr%dtset; cryst => gwr%cryst
- use_tr = gwr%dtset%awtr == 1
- zcut = gwr%dtset%zcut ! well, it's not used in g0w0 when omega is complex.
+ use_tr = gwr%dtset%awtr == 1; zcut = gwr%dtset%zcut ! well, it's not used in g0w0 when omega is complex.
 
  ! Use KS or QP energies depending on the iteration state.
  if (gwr%scf_iteration == 0) then
@@ -6326,7 +6327,6 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  ABI_MALLOC(vkbr, (gwr%nkibz))
  gradk_not_done = .TRUE.
 
- !mpw = maxval(wfd%npwarr)
  ! TODO: Might become 1b
  ABI_MALLOC(bbp_mask, (mband, mband))
 
@@ -6454,7 +6454,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
 
        ! Collect nb bands starting from band1_start on each proc.
        ! FIXME: SIGSEV on lumi!
-       call wrtout(std_out, " begin collect")
+       !call wrtout(std_out, " begin collect")
 #if 0
        call ugb_kibz%zcollect(npw_ki * nspinor, nb, [1, band1_start], ug1_block)
 #else
@@ -6468,18 +6468,23 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
        end do ! il_b1
        call xmpi_sum(ug1_block, ugb_kibz%processor%comm, ierr)
 #endif
-       call wrtout(std_out, " end collect")
+       !call wrtout(std_out, " end collect")
 
        ! FIXME: This part should be tested with tau/g-para
        ! Add support for symsigma = 0
        ! TODO: Invert the loop order
 
+       !real(dp), allocatable :: gh1c_block(:,:,:,:)
+       !ABI_MALLOC(gh1c_block, (2, mpw*nspinor, 3, nb))
+       !ABI_FREE(gh1c_block)
+
        !ABI_MALLOC(cgwork, (2, npw_ki * nspinor))
        !do il_b1=1, ugb%sizeb_local(2)
        !  band = ugb%loc2gcol(il_b1)
-       !  eig_nk = gwr%ks_ebands%eig(band, ik_ibz, spin)
-       !  call c_f_pointer(c_loc(ugb%buffer_cplx(:,il_b1)), cwave, shape=[2, npwsp])
-       !  call ddkop%apply(eig_nk, npw_k, nspinor, cwave, cwaveprj)
+       !  eig_nk = gwr%ks_ebands%eig(band1, ik_ibz, spin)
+       !  call c_f_pointer(c_loc(ugb%buffer_cplx(:,il_b1)), cwave, shape=[2, npw_k1*nspinor])
+       !  call ddkop%apply(eig_nk, npw_k1, nspinor, cwave, cwaveprj)
+       !  gh1c_block(:,:,:, ib) = ddkop%gh1c
        !end do
        !ABI_FREE(cgwork)
 
@@ -6487,10 +6492,8 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
        !do band1=band1_start, band1_stop
        do ib=1,nb
          band1 = band1_start + ib - 1
-
          ug1 = ug1_block(:, ib)
-         call fft_ug(npw_ki, u_nfft, nspinor, ndat1, u_mgfft, u_ngfft, istwf_ki, kg_ki, u_gbound, &
-                     ug1, ur1_kibz)
+         call fft_ug(npw_ki, u_nfft, nspinor, ndat1, u_mgfft, u_ngfft, istwf_ki, kg_ki, u_gbound, ug1, ur1_kibz)
 
          ! Loop over "valence" states.
          !do band2=1,gwr%ugb_nband
@@ -6524,13 +6527,11 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
            end if
 
            ug2 = ugb_kibz%buffer_cplx(:, il_b2)
-           call fft_ug(npw_ki, u_nfft, nspinor, ndat1, u_mgfft, u_ngfft, istwf_ki, kg_ki, u_gbound, &
-                       ug2, ur2_kibz)
+           call fft_ug(npw_ki, u_nfft, nspinor, ndat1, u_mgfft, u_ngfft, istwf_ki, kg_ki, u_gbound, ug2, ur2_kibz)
 
            ! FIXME: nspinor 2 is wrong as we have a 2x2 matrix
            ur_prod(:) = conjg(ur1_kibz(:)) * ur2_kibz
-           call fft_ur(npwe, u_nfft, nspinor, ndat1, u_mgfft, u_ngfft, istwfk1, gvec_q0, gbound_q0, &
-                       ur_prod, rhotwg)
+           call fft_ur(npwe, u_nfft, nspinor, ndat1, u_mgfft, u_ngfft, istwfk1, gvec_q0, gbound_q0, ur_prod, rhotwg)
 
            if (gwr%usepaw == 0) then
              ! Matrix elements of i[H,r] for NC pseudopotentials.
@@ -6540,6 +6541,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
            end if
 
            ! Treat a possible degeneracy between v and c.
+           ! Adler-Wiser expression, to be consistent here we use the KS eigenvalues (?)
            if (abs(deltaeKS_b1b2) > GW_TOL_W0) then
              rhotwx = -rhotwx / deltaeKS_b1b2
            else
@@ -6555,11 +6557,6 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
                                         npwe, nomega, nI, nJ, dtset%symchi, &
                                         is_metallic, ik_bz, isym_k, trev_k, nspinor, cryst, Ltg_q, Gsph, &
                                         rhotwx, rhotwg, green_w, chi0_head, chi0_lwing, chi0_uwing)
-
-           ! Adler-Wiser expression, to be consistent here we use the KS eigenvalues (?)
-           !call accumulate_chi0_q0(is_metallic,ik_bz,isym_k,itim_k,Ep%gwcomp,nspinor,Ep%npwepG0,Ep,&
-           !  Cryst,Ltg_q,Gsph_epsG0,chi0,rhotwx,rhotwg,green_w,green_enhigh_w,deltaf_b1b2,chi0_head,chi0_lwing,chi0_uwing)
-
          end do ! band2
        end do ! band1
 

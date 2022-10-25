@@ -22,7 +22,9 @@ module m_cutoff_sphere
  private
 
  public ::  cutoff_sphere
+!!***
 
+CONTAINS  !========================================================================================
 !!***
 
 !!****f* m_cutoff/cutoff_sphere
@@ -30,8 +32,11 @@ module m_cutoff_sphere
 !! cutoff_sphere
 !!
 !! FUNCTION
-!!  Calculate the Fourier transform of the Coulomb interaction with a spherical cutoff:
+!!  Calculate the Fourier transform of the Coulomb interaction with a spherical cutoff in real-space.
+!!
 !!   $ v_{cut}(G)= \frac{4\pi}{|q+G|^2} [ 1-cos(|q+G|*R_cut) ] $  (1)
+!!
+!!  For |q|<small and G=0 we use 2pi.R_cut^2, namely we consider the limit q-->0 of Eq. (1)
 !!
 !! INPUTS
 !!  gmet(3,3)=Metric in reciprocal space.
@@ -44,14 +49,7 @@ module m_cutoff_sphere
 !! OUTPUT
 !!  vc_cut(ngvec,nqpt)=Fourier components of the effective Coulomb interaction.
 !!
-!! NOTES
-!!  For |q|<small and G=0 we use 2pi.R_cut^2, namely we consider the limit q-->0 of Eq. (1)
-!!
 !! SOURCE
-
-
-CONTAINS  !========================================================================================
-!!***
 
 subroutine cutoff_sphere(nqpt,qpt,ngvec,gvec,gmet,rcut,vc_cut)
 
@@ -89,18 +87,18 @@ subroutine cutoff_sphere(nqpt,qpt,ngvec,gvec,gmet,rcut,vc_cut)
  ! then they don't need to worry about the G-> 0 limit.
  !
 
- ltest=ALL(gvec(:,1)==0)
+ ltest = ALL(gvec(:,1) == 0)
  !ABI_CHECK(ltest,'The first G vector should be Gamma')
 
  do iqpt=1,nqpt
    igs=1
-   if (ltest .and. normv(qpt(:,iqpt),gmet,'G')<tol4) then ! For small q and G=0, use the limit q-->0.
+   if (ltest .and. normv(qpt(:,iqpt), gmet, 'G') < tol4) then ! For small q and G=0, use the limit q-->0.
      vc_cut(1,iqpt)=two_pi*rcut**2
      igs=2
    end if
    do ig=igs,ngvec
-     qpg=normv(qpt(:,iqpt)+gvec(:,ig),gmet,'G')
-     vc_cut(ig,iqpt)=four_pi*(one-COS(rcut*qpg))/qpg**2
+     qpg = normv(qpt(:,iqpt) + gvec(:,ig), gmet, 'G')
+     vc_cut(ig,iqpt) = four_pi* (one-COS(rcut*qpg)) / qpg**2
    end do
  end do
 
