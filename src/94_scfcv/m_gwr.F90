@@ -313,8 +313,6 @@ module m_gwr
   integer :: my_ntau = -1
   ! Number of imaginary time/frequency points treated by this MPI rank.
 
-  !integer :: nomega = -1, my_nomega = -1
-
   integer :: nkcalc
    ! Number of Sigma_nk k-points computed
    ! TODO: Should be spin dependent + max_nkcalc
@@ -337,7 +335,7 @@ module m_gwr
    ! List of k-points where the self-energy is computed.
 
   logical :: idle_proc = .False.
-  ! True if there idle procs i.e. if processes in the input_comm have been excluded.
+  ! True if there are idle procs i.e. if processes in the input_comm have been excluded.
 
   integer,allocatable :: bstart_ks(:,:)
    ! bstart_ks(nkcalc, nsppol)
@@ -558,9 +556,6 @@ module m_gwr
 
    integer :: ugb_nband = -1
 
-   !character(len=fnlen) :: wfk_path = ABI_NOFILE
-   ! Path to the WFK file with the KS wavefunctions.
-
    character(len=fnlen) :: gwrnc_path = ABI_NOFILE
    ! Path to the GWR.nc file with output results.
 
@@ -700,6 +695,7 @@ module m_gwr
    ! Compute matrix elements of exchange part.
 
    procedure :: get_u_ngfft => gwr_get_u_ngfft
+   ! Compute FFT mesh from boxcutmin
 
    procedure :: run_g0w0 => gwr_run_g0w0
    ! Compute QP corrections with G0W0.
@@ -1880,12 +1876,13 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: formeig0 = 0
- integer :: mband, min_nband, nkibz, nsppol, my_is, my_iki, spin, ik_ibz
- integer :: npw_k, mpw, istwf_k, il_b, band !, itau
- integer :: nbsum, npwsp !, col_bsize, my_bstart, my_bstop, my_nband ! nband_k,
+ integer,parameter :: formeig0 = 0, master = 0
+ integer :: mband, min_nband, nkibz, nsppol, my_is, my_iki, spin, ik_ibz, ierr
+ integer :: npw_k, mpw, istwf_k, il_b, ib, band, iloc !, itau
+ integer :: nbsum, npwsp, bstart, bstop, bstep, nb !my_nband ! nband_k,
  real(dp) :: cpu, wall, gflops, cpu_green, wall_green, gflops_green
  character(len=5000) :: msg
+ logical :: haveit
  type(ebands_t) :: wfk_ebands
  type(hdr_type) :: wfk_hdr
  type(wfk_t) :: wfk
@@ -1894,7 +1891,7 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
  integer,allocatable :: kg_k(:,:)
  logical,allocatable :: bmask(:)
  real(dp) :: kk_ibz(3), tsec(2)
- !real(dp),allocatable :: cgwork(:,:)
+ real(dp),target,allocatable :: cg_work(:,:,:)
  real(dp),ABI_CONTIGUOUS pointer :: cg_k(:,:)
 
 ! *************************************************************************
@@ -1981,12 +1978,13 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
  end do
  call gwr%print_mem(unit=std_out)
 
- call wfk_open_read(wfk, wfk_path, formeig0, iomode_from_fname(wfk_path), get_unit(), gwr%gtau_comm%value)
-
  mpw = maxval(wfk_hdr%npwarr)
  ABI_MALLOC(kg_k, (3, mpw))
  ABI_MALLOC(bmask, (mband))
 
+#if 0
+ call wrtout(std_out, "Using collective MPI-IO with wfk%read_bmask.")
+ call wfk_open_read(wfk, wfk_path, formeig0, iomode_from_fname(wfk_path), get_unit(), gwr%gtau_comm%value)
  do my_is=1,gwr%my_nspins
    spin = gwr%my_spins(my_is)
    do my_iki=1,gwr%my_nkibz
@@ -2017,18 +2015,75 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
 
      ABI_CHECK(all(kg_k(:,1:npw_k) == desc_k%gvec), "kg_k != desc_k%gvec")
 
-     write(msg,'(3(a,i0),a)')" Read ugb_k: ik_ibz [", my_iki, "/", gwr%my_nkibz, "] (tot: ", gwr%nkibz, ")"
+     write(msg,'(3(a,i0),a)')" Read ugb_k: my_iki [", my_iki, "/", gwr%my_nkibz, "] (tot: ", gwr%nkibz, ")"
      call cwtime_report(msg, cpu_green, wall_green, gflops_green)
      end associate
    end do ! my_iki
  end do ! my_is
+ call wfk%close()
+
+#else
+ call wrtout(std_out, "Using IO version based of master reads and brodcasts")
+ ! Master reads and broadcasts
+ if (gwr%comm%me == master) then
+   call wfk_open_read(wfk, wfk_path, formeig0, iomode_from_fname(wfk_path), get_unit(), xmpi_comm_self)
+ end if
+
+ ! This to be able to maximize the size of cg_work
+ !call xmpi_get_vmrss(vmem_mb, gwr%comm%value)
+
+ do spin=1,gwr%nsppol
+   do ik_ibz=1,gwr%nkibz
+     call cwtime(cpu_green, wall_green, gflops_green, "start")
+     npw_k = wfk_hdr%npwarr(ik_ibz)
+     istwf_k = wfk_hdr%istwfk(ik_ibz)
+     ! TODO
+     ABI_CHECK_IEQ(istwf_k, 1, "istwfk_k should be 1")
+     npwsp = npw_k * gwr%nspinor
+
+     bstep = memlimited_step(1, nbsum, 2 * npwsp, xmpi_bsize_dp, 1024.0_dp)
+     do bstart=1, nbsum, bstep
+       bstop = min(bstart + bstep - 1, nbsum)
+       nb = bstop - bstart + 1
+
+       ABI_MALLOC(cg_work, (2, npwsp, nb))
+       if (gwr%comm%me == master) then
+         call c_f_pointer(c_loc(cg_work), cg_k, shape=[2, npwsp * nb])
+         call wfk%read_band_block([bstart, bstop], ik_ibz, spin, xmpio_single, kg_k=kg_k, cg_k=cg_k)
+       end if
+
+       call xmpi_bcast(kg_k, master, gwr%comm%value, ierr)
+       call xmpi_bcast(cg_work, master, gwr%comm%value, ierr)
+
+       ! Copy my portion of cg_work to buffer_cplx if I treat this (spin, ik_ibz).
+       if (any(gwr%my_spins == spin) .and. any(gwr%my_kibz_inds == ik_ibz)) then
+         associate (ugb => gwr%ugb(ik_ibz, spin), desc_k => gwr%green_desc_kibz(ik_ibz))
+         ABI_CHECK(all(kg_k(:,1:npw_k) == desc_k%gvec), "kg_k != desc_k%gvec")
+         do band=bstart, bstop
+           ib = band - bstart + 1
+           call ugb%glob2loc(1, band, iloc, il_b, haveit)
+           if (.not. haveit) cycle
+           ABI_CHECK_IEQ(iloc, 1, "iloc should be 1")
+           ugb%buffer_cplx(:, il_b) = cmplx(cg_work(1,:,ib), cg_work(2,:,ib), kind=dp)
+         end do
+         end associate
+       end if
+
+       ABI_FREE(cg_work)
+     end do ! bstart
+
+     write(msg,'(2(a,i0),a)')" Read ugb_k: ik_ibz [", ik_ibz, "/", gwr%nkibz, "]"
+     call cwtime_report(msg, cpu_green, wall_green, gflops_green)
+
+   end do ! ik_ibz
+ end do ! spin
+ if (gwr%comm%me == master) call wfk%close()
+#endif
 
  ABI_FREE(kg_k)
  ABI_FREE(bmask)
 
- call wfk%close()
  call wfk_hdr%free()
-
  call gwr%print_mem(unit=std_out)
 
  call cwtime_report(" gwr_read_ugb_from_wfk:", cpu, wall, gflops)
@@ -7089,6 +7144,7 @@ end subroutine gwr_build_sigxme
 !!  gwr_get_u_ngfft
 !!
 !! FUNCTION
+!!  Compute FFT mesh from boxcutmin
 !!
 !! INPUTS
 !!
@@ -7249,6 +7305,17 @@ subroutine sc_sum(sc_shape, uc_ngfft, nspinor, ph1d, alpha, sc_data, uc_psi, cou
 
 end subroutine sc_sum
 !!***
+
+integer pure function memlimited_step(start, stop, num_items, bsize, maxmem_mb) result(step)
+  integer,intent(in) :: start, stop, num_items, bsize
+  real(dp),intent(in) :: maxmem_mb
+
+  real(dp) :: totmem_mb
+
+  totmem_mb = one * (stop - start + 1) * num_items * bsize
+  step = stop - start + 1
+  if (totmem_mb > maxmem_mb) step = floor(totmem_mb / maxmem_mb)
+end function memlimited_step
 
 end module m_gwr
 !!***
