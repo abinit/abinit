@@ -503,14 +503,18 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
    end if
 
    Vcp%vcutgeo = zero
-   call cutoff_sphere(nqibz, qibz, ng, gvec, gmet, Vcp%rcut, vcoul)
+   do iq_ibz=1,nqibz
+     call cutoff_sphere(qibz(:,iq_ibz), ng, gvec, gmet, Vcp%rcut, vcoul(:,iq_ibz))
+   end do
 
    ! q-points for optical limit.
-   call cutoff_sphere(nqlwl, qlwl, ng, gvec, gmet, Vcp%rcut, vcoul_lwl)
-   !
+   do iqlwl=1,nqlwl
+     call cutoff_sphere(qlwl(:,iqlwl), ng, gvec, gmet, Vcp%rcut, vcoul_lwl(:,iqlwl))
+   end do
+
    ! Treat the limit q --> 0
-   ! * The small cube is approximated by a sphere, while vc(q=0) = 2piR**2.
-   ! * if a single q-point is used, the expression for the volume is exact.
+   ! The small cube is approximated by a sphere, while vc(q=0) = 2piR**2.
+   ! if a single q-point is used, the expression for the volume is exact.
    Vcp%i_sz = two_pi * Vcp%rcut**2
    call Vcp%print(unit=ab_out)
 
@@ -538,12 +542,16 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
      ABI_ERROR("The cylinder must be along the z-axis")
    end if
 
+   !do iq_ibz=1,nqibz
    call cutoff_cylinder(nqibz, qibz, ng, gvec, Vcp%rcut, Vcp%hcyl, Vcp%pdir,&
                         Vcp%boxcenter, Cryst%rprimd, vcoul, opt_cylinder, comm)
+   !end do
 
    ! q-points for optical limit.
+   !do iqlwl=1,nqlwl
    call cutoff_cylinder(nqlwl, qlwl, ng, gvec, Vcp%rcut, Vcp%hcyl, Vcp%pdir,&
                         Vcp%boxcenter, Cryst%rprimd, vcoul_lwl, opt_cylinder, comm)
+   !end do
 
    ! If Beigi, treat the limit q--> 0.
    if (opt_cylinder == 1) then
@@ -556,8 +564,11 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
      qfit(:,:)=zero
      step=half/(npt * (nqibz-1))              ; qfit(3,:)=arth(tol6,step,npt)
      !step=(half/(nqibz-1)/tol6)**(one/npt) ; qfit(3,:)=geop(tol6,step,npt)
+
+     !do iq=1=npt
      call cutoff_cylinder(npt,qfit,1,gamma_pt,Vcp%rcut,Vcp%hcyl,Vcp%pdir,Vcp%boxcenter,&
                           Cryst%rprimd,vcfit,opt_cylinder,comm)
+     !end do
 
      ABI_MALLOC(xx, (npt))
      ABI_MALLOC(yy, (npt))
@@ -634,21 +645,25 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
      Vcp%rcut = half*SQRT(DOT_PRODUCT(a3,a3))
    end if
 
+   !do iq_ibz=1,nqibz
    call cutoff_surface(nqibz, qibz, ng, gvec, gprimd, Vcp%rcut, &
                        Vcp%boxcenter, Vcp%pdir, Vcp%alpha, vcoul, opt_surface)
+   !end do
 
    ! q-points for optical limit.
+   !do iqlwl=1,nqlwl
    call cutoff_surface(nqlwl, qlwl, ng, gvec, gprimd, Vcp%rcut, &
                        Vcp%boxcenter, Vcp%pdir, Vcp%alpha, vcoul_lwl, opt_surface)
+   !end do
 
    ! If Beigi, treat the limit q--> 0.
    if (opt_surface == 1) then
      ! Integrate numerically in the plane close to 0
      npt=100 ! Number of points in 1D
      gamma_pt=RESHAPE([0, 0, 0], [3, 1]) ! Gamma point
-     ABI_MALLOC(qfit, (3,npt))
-     ABI_MALLOC(qcart, (3,npt))
-     ABI_MALLOC(vcfit, (1,npt))
+     ABI_MALLOC(qfit, (3, npt))
+     ABI_MALLOC(qcart, (3, npt))
+     ABI_MALLOC(vcfit, (1, npt))
      if (nqibz == 1) then
        ABI_ERROR("nqibz == 1 not supported when Beigi's method is used")
      endif
@@ -670,8 +685,10 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
        qfit(:,ii) = MATMUL(TRANSPOSE(Cryst%rprimd),qcart(:,ii)) / (2*pi)
      end do
 
+     !do iq=1,nqpt
      call cutoff_surface(npt, qfit, 1, gamma_pt, gprimd, Vcp%rcut, &
                          Vcp%boxcenter, Vcp%pdir, Vcp%alpha, vcfit, opt_surface)
+     !end do
 
      ABI_MALLOC(xx, (npt))
      ABI_MALLOC(yy, (npt))
