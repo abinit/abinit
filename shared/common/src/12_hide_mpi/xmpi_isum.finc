@@ -148,3 +148,163 @@ subroutine xmpi_isum_ip_dp4d(xval, comm, request, ierr)
 
 end subroutine xmpi_isum_ip_dp4d
 !!***
+
+!!****f* ABINIT/xmpi_isum_ip_spc1d
+!! NAME
+!!  xmpi_isum_ip_spc1d
+!!
+!! FUNCTION
+!!  Combines values from all processes and distribute the result back to all processes.
+!!  Target: 1d single precision complex arrays. Non-blocking INPLACE version.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine xmpi_isum_ip_spc1d(xval, comm, request, ierr)
+
+!Arguments-------------------------
+ complex(sp) ABI_ASYNC, intent(inout) :: xval(:)
+ integer,intent(in) :: comm
+ integer,intent(out) :: ierr, request
+
+! *************************************************************************
+
+#ifdef HAVE_MPI_IALLREDUCE
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+   call MPI_IALLREDUCE(MPI_IN_PLACE, xval, product(shape(xval)), MPI_COMPLEX, MPI_SUM, comm, request, ierr)
+   xmpi_count_requests = xmpi_count_requests + 1
+   return
+ end if
+ request = xmpi_request_null
+ return
+#endif
+
+ ! Call the blocking version and return null request.
+ call xmpi_sum(xval, comm, ierr)
+ request = xmpi_request_null
+
+end subroutine xmpi_isum_ip_spc1d
+!!***
+
+!!****f* ABINIT/xmpi_isum_ip_dpc1d
+!! NAME
+!!  xmpi_isum_ip_dpc1d
+!!
+!! FUNCTION
+!!  Combines values from all processes and distribute the result back to all processes.
+!!  Target: 1d double precision complex arrays. Non-blocking INPLACE version.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine xmpi_isum_ip_dpc1d(xval, comm, request, ierr)
+
+!Arguments-------------------------
+ complex(dp) ABI_ASYNC, intent(inout) :: xval(:)
+ integer,intent(in) :: comm
+ integer,intent(out) :: ierr, request
+
+! *************************************************************************
+
+#ifdef HAVE_MPI_IALLREDUCE
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+   call MPI_IALLREDUCE(MPI_IN_PLACE, xval, product(shape(xval)), MPI_DOUBLE_COMPLEX, MPI_SUM, comm, request, ierr)
+   xmpi_count_requests = xmpi_count_requests + 1
+   return
+ end if
+ request = xmpi_request_null
+ return
+#endif
+
+ ! Call the blocking version and return null request.
+ call xmpi_sum(xval, comm, ierr)
+ request = xmpi_request_null
+
+end subroutine xmpi_isum_ip_dpc1d
+!!***
+
+!!****f* ABINIT/xmpi_isum_ip_spc2d
+!! NAME
+!!  xmpi_isum_ip_spc2d
+!!
+!! FUNCTION
+!!  Combines values from all processes and distribute the result back to all processes.
+!!  Target: 2d single precision complex arrays. Non-blocking INPLACE version.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine xmpi_isum_ip_spc2d(xval, comm, request, ierr)
+
+!Arguments-------------------------
+ complex(sp) ABI_ASYNC, intent(inout) :: xval(:,:)
+ integer,intent(in) :: comm
+ integer,intent(out) :: ierr, request
+
+! *************************************************************************
+
+#ifdef HAVE_MPI_IALLREDUCE
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+   call MPI_IALLREDUCE(MPI_IN_PLACE, xval, product(shape(xval)), MPI_COMPLEX, MPI_SUM, comm, request, ierr)
+   xmpi_count_requests = xmpi_count_requests + 1
+   return
+ end if
+ request = xmpi_request_null
+ return
+#endif
+
+ ! Call the blocking version and return null request.
+ call xmpi_sum(xval, comm, ierr)
+ request = xmpi_request_null
+
+end subroutine xmpi_isum_ip_spc2d
+!!***
+
+!!****f* ABINIT/xmpi_isum_ip_dpc2d
+!! NAME
+!!  xmpi_isum_ip_dpc2d
+!!
+!! FUNCTION
+!!  Combines values from all processes and distribute the result back to all processes.
+!!  Target: 2d double precision complex arrays. Non-blocking INPLACE version.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine xmpi_isum_ip_dpc2d(xval, comm, request, ierr)
+
+!Arguments-------------------------
+ complex(dp) ABI_ASYNC, intent(inout) :: xval(:,:)
+ integer,intent(in) :: comm
+ integer,intent(out) :: ierr, request
+
+! *************************************************************************
+
+#ifdef HAVE_MPI_IALLREDUCE
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+   call MPI_IALLREDUCE(MPI_IN_PLACE, xval, product(shape(xval)), MPI_DOUBLE_COMPLEX, MPI_SUM, comm, request, ierr)
+   xmpi_count_requests = xmpi_count_requests + 1
+   return
+ end if
+ request = xmpi_request_null
+ return
+#endif
+
+ ! Call the blocking version and return null request.
+ call xmpi_sum(xval, comm, ierr)
+ request = xmpi_request_null
+
+end subroutine xmpi_isum_ip_dpc2d
+!!***
