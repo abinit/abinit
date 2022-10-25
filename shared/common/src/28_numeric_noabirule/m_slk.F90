@@ -1325,7 +1325,7 @@ subroutine slk_glob2loc(mat, iglob, jglob, iloc, jloc, haveit)
 !Arguments ------------------------------------
  class(matrix_scalapack),intent(in) :: mat
  integer, intent(in) :: iglob, jglob
- integer, intent(in) :: iloc, jloc
+ integer, intent(out) :: iloc, jloc
  logical,intent(out) :: haveit
 
 !Local variables-------------------------------
@@ -1339,7 +1339,7 @@ subroutine slk_glob2loc(mat, iglob, jglob, iloc, jloc, haveit)
  call INFOG2L(iglob, jglob, mat%descript%tab, mat%processor%grid%dims(1), mat%processor%grid%dims(2), &
    mat%processor%coords(1), mat%processor%coords(2), iloc, jloc, row_src, col_src)
 
- haveit = all(mat%processor%coords /= [row_src, col_src])
+ haveit = all(mat%processor%coords == [row_src, col_src])
 #endif
 
 end subroutine slk_glob2loc
