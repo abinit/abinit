@@ -103,6 +103,8 @@ module m_orbmag
 
   ! local datatype for d_\alpha terms
   type,private :: dterm_type
+    ! "rdn" refers to term n in the road map paper (Torrent et al
+    ! Comp Mat Sci 42 337 (2008) Appendix E)
     ! scalars
     integer :: lmnmax
     integer :: lmn2max
@@ -111,8 +113,8 @@ module m_orbmag
     integer :: has_daij=0
     integer :: has_qij=0
     integer :: has_dqij=0
-    integer :: has_p2=0
-    integer :: has_dp2=0
+    integer :: has_rd1=0
+    integer :: has_drd1=0
     integer :: has_vha=0
     integer :: has_dvha=0
     integer :: has_vhnzc=0
@@ -135,14 +137,15 @@ module m_orbmag
     ! <phi|r_alpha|phi> - <tphi|r_alpha|tphi>
     ! dqij(natom,lmnmax,lmnmax,3)
     complex(dpc),allocatable :: dqij(:,:,:,:)
-    
+   
+    ! roadmap term 1 
     ! <phi|p2/2|phi> - <tphi|p2/2|tphi>
-    ! vhnzc(natom,lmn2max)
-    complex(dpc),allocatable :: p2(:,:)
+    ! rd1(natom,lmn2max)
+    complex(dpc),allocatable :: rd1(:,:)
     
     ! <phi|p2/2 r_alpha|phi> - <tphi|p2/2 r_alpha|tphi>
-    ! dp2(natom,lmnmax,lmnmax,3)
-    complex(dpc),allocatable :: dp2(:,:,:,:)
+    ! drd1(natom,lmnmax,lmnmax,3)
+    complex(dpc),allocatable :: drd1(:,:,:,:)
 
     ! <phi|vH[n1+nc]|phi> - <tphi|vH[n1+nc]|tphi>
     ! vha(natom,lmn2max)
@@ -203,7 +206,7 @@ module m_orbmag
   private :: dterm_vha
   private :: dterm_vhnzc
   private :: dterm_vxc
-  private :: dterm_p2
+  private :: dterm_rd1
   private :: make_ddir_ap
   private :: make_ddir_vhnhat
   private :: tt_me
@@ -414,7 +417,7 @@ subroutine orbmag_ptpaw(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_en
  call dterm_alloc(dterm,psps%lmnmax,lmn2max,dtset%natom)
 
  call make_d(atindx,atindx1,cprj,dimlmn,dterm,dtset,gprimd,mcprj,&
-   & mpi_enreg,occ,paw_an,pawang,pawrad,pawtab,psps)
+   & mpi_enreg,occ,paw_an,pawang,paw_ij,pawrad,pawtab,psps)
 
  call sum_d(dterm)
 
@@ -2330,7 +2333,7 @@ end subroutine make_ddir_vhnhat
 !! SOURCE
 
 subroutine dterm_vxc(atindx,dterm,dtset,gntselect,gprimd,lmnmax,my_lmax,&
-    & pawang,pawrad,pawsphden,pawtab,realgnt)
+    & pawang,paw_ij,pawrad,pawsphden,pawtab,realgnt)
 
   !Arguments ------------------------------------
   !scalars
@@ -2343,6 +2346,7 @@ subroutine dterm_vxc(atindx,dterm,dtset,gntselect,gprimd,lmnmax,my_lmax,&
   integer,intent(in) :: atindx(dtset%natom)
   integer,intent(in) :: gntselect((2*my_lmax-1)**2,my_lmax**2*(my_lmax**2+1)/2)
   real(dp),intent(in) :: gprimd(3,3),realgnt((2*my_lmax-1)**2*(my_lmax)**4)
+  type(paw_ij_type),intent(inout) :: paw_ij(dtset%natom)
   type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
   type(paw_sph_den_type),intent(in) :: pawsphden(dtset%natom)
   type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
@@ -2479,7 +2483,7 @@ end subroutine dterm_vxc
 !! SOURCE
 
 subroutine dterm_vha(atindx,dterm,dtset,gntselect,gprimd,lmnmax,my_lmax,&
-    & pawrad,pawsphden,pawtab,realgnt)
+    & paw_ij,pawrad,pawsphden,pawtab,realgnt)
 
   !Arguments ------------------------------------
   !scalars
@@ -2491,6 +2495,7 @@ subroutine dterm_vha(atindx,dterm,dtset,gntselect,gprimd,lmnmax,my_lmax,&
   integer,intent(in) :: atindx(dtset%natom)
   integer,intent(in) :: gntselect((2*my_lmax-1)**2,my_lmax**2*(my_lmax**2+1)/2)
   real(dp),intent(in) :: gprimd(3,3),realgnt((2*my_lmax-1)**2*(my_lmax)**4)
+  type(paw_ij_type),intent(inout) :: paw_ij(dtset%natom)
   type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
   type(paw_sph_den_type),intent(in) :: pawsphden(dtset%natom)
   type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
@@ -2647,12 +2652,13 @@ subroutine dterm_vha(atindx,dterm,dtset,gntselect,gprimd,lmnmax,my_lmax,&
  
 end subroutine dterm_vha
 
-!!****f* ABINIT/dterm_p2
+!!****f* ABINIT/dterm_rd1
 !! NAME
 !! dterm_p2
 !!
 !! FUNCTION
 !! Compute onsite p^2/2 and r*p^2/2
+!! roadmap term 1
 !!
 !! COPYRIGHT
 !! Copyright (C) 2003-2021 ABINIT  group
@@ -2679,7 +2685,7 @@ end subroutine dterm_vha
 !!
 !! SOURCE
 
-subroutine dterm_p2(atindx,dterm,dtset,gntselect,gprimd,my_lmax,pawrad,pawtab,realgnt)
+subroutine dterm_rd1(atindx,dterm,dtset,gntselect,gprimd,my_lmax,pawrad,pawtab,realgnt)
 
   !Arguments ------------------------------------
   !scalars
@@ -2709,7 +2715,7 @@ subroutine dterm_p2(atindx,dterm,dtset,gntselect,gprimd,my_lmax,pawrad,pawtab,re
 
   c1m = sqrt(four_pi/three)
 
-  dterm%p2 = czero; dterm%dp2 = czero
+  dterm%rd1 = czero; dterm%drd1 = czero
   do itypat=1,dtset%ntypat
     mesh_size=pawrad(itypat)%mesh_size
     !pwave_size=size(pawtab(itypat)%phiphj(:,1))
@@ -2763,9 +2769,14 @@ subroutine dterm_p2(atindx,dterm,dtset,gntselect,gprimd,my_lmax,pawrad,pawtab,re
         do iat = 1, dtset%natom
           iatom = atindx(iat)
           if (itypat .EQ. dtset%typat(iat)) then
-            dterm%p2(iatom,klmn) = CMPLX(-half*intg,zero)
+            dterm%rd1(iatom,klmn) = CMPLX(-half*intg,zero)
           end if
         end do !iat
+
+        if (pawtab(itypat)%has_kij .EQ. 2) then
+          write(std_out,'(a,2es16.8)')'JWZ debug kij dterm%rd1 ',&
+            & pawtab(itypat)%kij(klmn), real(dterm%rd1(iatom,klmn))
+        end if
 
       end do ! ilmn
     end do ! jlmn
@@ -2813,7 +2824,7 @@ subroutine dterm_p2(atindx,dterm,dtset,gntselect,gprimd,my_lmax,pawrad,pawtab,re
         do iat = 1, dtset%natom
           iatom = atindx(iat)
           if (dtset%typat(iat) .EQ. itypat) then
-            dterm%dp2(iatom,ilmn,jlmn,1:3) = -j_dpc*dij_red(1:3)
+            dterm%drd1(iatom,ilmn,jlmn,1:3) = -j_dpc*dij_red(1:3)
           end if
         end do !iat
       
@@ -2831,10 +2842,10 @@ subroutine dterm_p2(atindx,dterm,dtset,gntselect,gprimd,my_lmax,pawrad,pawtab,re
     ABI_FREE(tuj2der)
   end do !itypat 
 
-  dterm%has_p2 = 2
-  dterm%has_dp2 = 2
+  dterm%has_rd1 = 2
+  dterm%has_drd1 = 2
 
-end subroutine dterm_p2
+end subroutine dterm_rd1
 !!***
 
 !!****f* ABINIT/make_ddir_ap
@@ -3023,15 +3034,15 @@ subroutine dterm_free(dterm)
   end if
   dterm%has_dqij=0
  
-  if(allocated(dterm%p2)) then
-    ABI_FREE(dterm%p2)
+  if(allocated(dterm%rd1)) then
+    ABI_FREE(dterm%rd1)
   end if
-  dterm%has_p2=0
+  dterm%has_rd1=0
   
-  if(allocated(dterm%dp2)) then
-    ABI_FREE(dterm%dp2)
+  if(allocated(dterm%drd1)) then
+    ABI_FREE(dterm%drd1)
   end if
-  dterm%has_dp2=0
+  dterm%has_drd1=0
  
   if(allocated(dterm%vha)) then
     ABI_FREE(dterm%vha)
@@ -3208,17 +3219,17 @@ subroutine dterm_alloc(dterm,lmnmax,lmn2max,natom)
   ABI_MALLOC(dterm%dqij,(natom,lmnmax,lmnmax,3))
   dterm%has_dqij=1
   
-  if(allocated(dterm%p2)) then
-    ABI_FREE(dterm%p2)
+  if(allocated(dterm%rd1)) then
+    ABI_FREE(dterm%rd1)
   end if
-  ABI_MALLOC(dterm%p2,(natom,lmn2max))
-  dterm%has_p2=1
+  ABI_MALLOC(dterm%rd1,(natom,lmn2max))
+  dterm%has_rd1=1
   
-  if(allocated(dterm%dp2)) then
-    ABI_FREE(dterm%dp2)
+  if(allocated(dterm%drd1)) then
+    ABI_FREE(dterm%drd1)
   end if
-  ABI_MALLOC(dterm%dp2,(natom,lmnmax,lmnmax,3))
-  dterm%has_dp2=1
+  ABI_MALLOC(dterm%drd1,(natom,lmnmax,lmnmax,3))
+  dterm%has_drd1=1
  
   if(allocated(dterm%vha)) then
     ABI_FREE(dterm%vha)
@@ -3599,11 +3610,11 @@ subroutine sum_d(dterm)
 
   dterm%aij = czero; dterm%daij = czero
 
-  if (dterm%has_p2 .EQ. 2) then
-    dterm%aij = dterm%aij + dterm%p2
+  if (dterm%has_rd1 .EQ. 2) then
+    dterm%aij = dterm%aij + dterm%rd1
   end if
-  if (dterm%has_dp2 .EQ. 2) then
-    dterm%daij = dterm%daij + dterm%dp2
+  if (dterm%has_drd1 .EQ. 2) then
+    dterm%daij = dterm%daij + dterm%drd1
   end if
  
   if (dterm%has_vha .EQ. 2) then
@@ -3664,7 +3675,7 @@ end subroutine sum_d
 !! SOURCE
 
 subroutine make_d(atindx,atindx1,cprj,dimlmn,dterm,dtset,gprimd,&
-    & mcprj,mpi_enreg,occ,paw_an,pawang,pawrad,pawtab,psps)
+    & mcprj,mpi_enreg,occ,paw_an,pawang,paw_ij,pawrad,pawtab,psps)
 
   !Arguments ------------------------------------
   !scalars
@@ -3682,6 +3693,7 @@ subroutine make_d(atindx,atindx1,cprj,dimlmn,dterm,dtset,gprimd,&
   real(dp), intent(in) :: occ(dtset%mband*dtset%nkpt*dtset%nsppol)
   type(paw_an_type),intent(inout) :: paw_an(dtset%natom)
   type(pawcprj_type),intent(in) ::  cprj(dtset%natom,mcprj)
+  type(paw_ij_type),intent(inout) :: paw_ij(dtset%natom)
   type(pawrad_type),intent(in) :: pawrad(dtset%ntypat*psps%usepaw)
   type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
 
@@ -3747,14 +3759,14 @@ subroutine make_d(atindx,atindx1,cprj,dimlmn,dterm,dtset,gprimd,&
 
  !! term idp2 due to onsite p^2/2, corresponds to term 1 of Torrent PAW roadmap paper appendix E
  !! Comp. Mat. Sci. 42, 337-351 (2008)
- call dterm_p2(atindx,dterm,dtset,gntselect,gprimd,my_lmax,pawrad,pawtab,realgnt)
+ call dterm_rd1(atindx,dterm,dtset,gntselect,gprimd,my_lmax,pawrad,pawtab,realgnt)
 
  !! term idpa due to onsite A.p, not part of the roadmap paper but similar to term 1
  !call make_ddir_ap(dterms(idpa,:,:,:,:),dtset,gntselect,gprimd,psps%lmnmax,my_lmax,pawrad,pawtab,realgnt)
  
  ! term idvha due to v_H[n1], corresponds to term 2a of roadmap paper
  call dterm_vha(atindx,dterm,dtset,gntselect,gprimd,psps%lmnmax,my_lmax,&
-   & pawrad,pawsphden,pawtab,realgnt)
+   & paw_ij,pawrad,pawsphden,pawtab,realgnt)
 
  ! terms due to v_H[nZ], corresponds to term 2b of roadmap paper
  call dterm_vhnzc(atindx,dterm,dtset,gntselect,gprimd,my_lmax,pawrad,pawtab,realgnt)
@@ -3765,7 +3777,7 @@ subroutine make_d(atindx,atindx1,cprj,dimlmn,dterm,dtset,gprimd,&
 
  ! term dvxc due to v_xc[n1+nc] corresponds to term 3a in roadmap paper
  call dterm_vxc(atindx,dterm,dtset,gntselect,gprimd,psps%lmnmax,my_lmax,&
-    & pawang,pawrad,pawsphden,pawtab,realgnt)
+    & pawang,paw_ij,pawrad,pawsphden,pawtab,realgnt)
 
  ABI_FREE(realgnt)
  ABI_FREE(gntselect)
