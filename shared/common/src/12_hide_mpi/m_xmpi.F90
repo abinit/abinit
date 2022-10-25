@@ -700,6 +700,10 @@ end interface xmpi_isum
 interface xmpi_isum_ip
   module procedure xmpi_isum_ip_dp2d
   module procedure xmpi_isum_ip_dp4d
+  module procedure xmpi_isum_ip_spc1d
+  module procedure xmpi_isum_ip_dpc1d
+  module procedure xmpi_isum_ip_spc2d
+  module procedure xmpi_isum_ip_dpc2d
 end interface xmpi_isum_ip
 !!***
 

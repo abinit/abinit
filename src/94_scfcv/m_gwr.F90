@@ -1983,7 +1983,7 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
  ABI_MALLOC(bmask, (mband))
 
 #if 0
- call wrtout(std_out, "Using collective MPI-IO with wfk%read_bmask.")
+ call wrtout(std_out, " Using collective MPI-IO with wfk%read_bmask.")
  call wfk_open_read(wfk, wfk_path, formeig0, iomode_from_fname(wfk_path), get_unit(), gwr%gtau_comm%value)
  do my_is=1,gwr%my_nspins
    spin = gwr%my_spins(my_is)
@@ -2023,7 +2023,7 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
  call wfk%close()
 
 #else
- call wrtout(std_out, "Using IO version based of master reads and brodcasts")
+ call wrtout(std_out, " Using IO version based of master reads and brodcasts")
  ! Master reads and broadcasts
  if (gwr%comm%me == master) then
    call wfk_open_read(wfk, wfk_path, formeig0, iomode_from_fname(wfk_path), get_unit(), xmpi_comm_self)
@@ -3425,7 +3425,6 @@ subroutine gwr_print(gwr, header, unit)
  call ydoc%add_int("green_mpw", gwr%green_mpw)
  call ydoc%add_int("tchi_mpw", gwr%tchi_mpw)
  call ydoc%add_int1d("g_ngfft", gwr%g_ngfft(1:6))
- !call ydoc%add_int1d("P gwr_np_gtks", [gwr%g_comm%nproc, gwr%tau_comm%nproc, gwr%kpt_comm%nproc, gwr%spin_comm%nproc])
  call ydoc%add_int1d("P gwr_np_gtks", gwr%dtset%gwr_np_gtks)
  call ydoc%add_int1d("P np_kibz", gwr%np_kibz)
  call ydoc%add_int1d("P np_qibz", gwr%np_qibz)
@@ -3599,7 +3598,7 @@ subroutine gwr_build_tchi(gwr)
    !call init_distribfft_seq(tchi_mpi_enreg%distribfft, 'f', sc_ngfft(2), sc_ngfft(3), 'all')
 
    call wrtout(std_out, " Building chi0 with FFTs in the supercell:", pre_newlines=2)
-   call wrtout(std_out, sjoin("gwr_np_gtks:", ltoa(gwr%dtset%gwr_np_gtks)))
+   call wrtout(std_out, sjoin(" gwr_np_gtks:", ltoa(gwr%dtset%gwr_np_gtks)))
    call wrtout(std_out, sjoin(" ngkpt:", ltoa(gwr%ngkpt), " ngqpt:", ltoa(gwr%ngqpt)))
    call wrtout(std_out, sjoin(" gwr_boxcutmin:", ftoa(gwr%dtset%gwr_boxcutmin)))
    call wrtout(std_out, sjoin(" sc_ngfft:", ltoa(sc_ngfft(1:8))))
@@ -3707,8 +3706,8 @@ if (.True.) then
          ! TODO: Should block using nproc in kpt_comm, scatter data and perform multiple FFTs in parallel.
          if (gwr%kpt_comm%nproc > 1) call xmpi_sum(gt_scbox, gwr%kpt_comm%value, ierr)
 
-         !call xmpi_isum(gt_scbox(:,ipm), gwr%kpt_comm%value, request_ipm(ipm), ierr)
-         !call xmpi_wait(request_ipm(ipm), ierr)
+         !call xmpi_isum_ip(gt_scbox(:,ipm), gwr%kpt_comm%value, request_ipm(ipm), ierr)
+         !call xmpi_wait_all(request_ipm(ipm), ierr)
 
          !call cwtime_report("G part", cpu, wall, gflops)
 
@@ -4500,7 +4499,7 @@ subroutine gwr_build_sigmac(gwr)
  real(dp) :: cpu_tau, wall_tau, gflops_tau, cpu_all, wall_all, gflops_all !, cpu, wall, gflops
  real(dp) :: mem_mb, cpu_ir, wall_ir, gflops_ir
  real(dp) :: max_abs_imag_wct, max_abs_re_wct, sck_ucvol, scq_ucvol  !, spin_fact
- !logical :: k_is_gamma !, q_is_gamma
+ logical :: k_is_gamma !, q_is_gamma
  character(len=500) :: msg
  type(desc_t), pointer :: desc_q, desc_k
  type(yamldoc_t) :: ydoc
@@ -4511,8 +4510,8 @@ subroutine gwr_build_sigmac(gwr)
  !real(dp),allocatable :: inv_rmR(:), rylm_rmR(:,:)
  complex(dp) :: sigc_pm(2), cpsi_r, odd_t(gwr%ntau), even_t(gwr%ntau)
  complex(dp),target,allocatable :: sigc_it_diag_kcalc(:,:,:,:,:)
- complex(dp),allocatable :: gt_scbox(:,:), wct_scbox(:), uc_ceikr(:)
- complex(dp),allocatable :: uc_psi_bk(:,:,:), scph1d_kcalc(:,:,:)
+ complex(dp) ABI_ASYNC, allocatable :: gt_scbox(:,:), wct_scbox(:)
+ complex(dp),allocatable :: uc_psi_bk(:,:,:), scph1d_kcalc(:,:,:), uc_ceikr(:)
  complex(gwpc),allocatable :: ur(:)
  type(matrix_scalapack) :: gt_gpr(2, gwr%my_nkbz), gk_rpr_pm(2), sigc_rpr(2,gwr%nkcalc), wc_rpr, wc_gpr(gwr%my_nqbz)
  type(desc_t), target :: desc_mykbz(gwr%my_nkbz), desc_myqbz(gwr%my_nqbz)
@@ -4521,6 +4520,7 @@ subroutine gwr_build_sigmac(gwr)
  real(dp) :: e0, ks_gap, qp_gap, sigx, vxc_val, vu, v_meanf
  complex(dp) :: zz, zsc, sigc_e0, dsigc_de0, z_e0, sig_xc, hhartree_bk
  integer,allocatable :: ks_vbik(:,:), iperm(:)
+ integer :: gt_request, wct_request
  real(dp),allocatable :: sorted_qpe(:)
  real(dp) :: e0_kcalc(gwr%max_nbcalc, gwr%nkcalc, gwr%nsppol)
  real(dp) :: spfunc_diag_kcalc(gwr%nwr, gwr%max_nbcalc, gwr%nkcalc, gwr%nsppol)
@@ -4569,7 +4569,7 @@ subroutine gwr_build_sigmac(gwr)
  !sc_augsize = product(sc_ngfft(4:6))
 
  call wrtout(std_out, sjoin(" Building Sigma_c with FFTs in the supercell:", ltoa(sc_ngfft(1:3))), pre_newlines=2)
- call wrtout(std_out, sjoin("gwr_np_gtks:", ltoa(gwr%dtset%gwr_np_gtks)))
+ call wrtout(std_out, sjoin(" gwr_np_gtks:", ltoa(gwr%dtset%gwr_np_gtks)))
  call wrtout(std_out, sjoin(" ngkpt:", ltoa(gwr%ngkpt), " ngqpt:", ltoa(gwr%ngqpt)))
  call wrtout(std_out, sjoin(" gwr_boxcutmin:", ftoa(gwr%dtset%gwr_boxcutmin)))
  call wrtout(std_out, sjoin(" sc_ngfft:", ltoa(sc_ngfft(1:8))))
@@ -4690,12 +4690,8 @@ if (gwr%use_supercell_for_sigma) then
        end do ! my_ikf
 
        ! TODO: Should block using nproc in kpt_comm, scatter data and perform multiple FFTs in parallel.
-       call xmpi_sum(gt_scbox, gwr%kpt_comm%value, ierr)
-
-       ! G(G',r) --> G(R',r)
-       call gt_plan_gp2rp%execute_ip_dpc(gt_scbox)
-       gt_scbox = gt_scbox * (sc_nfft / sck_ucvol)
-       !call cwtime_report("G part", cpu, wall, gflops)
+       !if (gwr%kpt_comm%nproc > 1) call xmpi_sum(gt_scbox, gwr%kpt_comm%value, ierr)
+       if (gwr%kpt_comm%nproc > 1) call xmpi_isum_ip(gt_scbox, gwr%kpt_comm%value, gt_request, ierr)
 
        ! Insert Wc_q(g',r) in G'-space in the supercell FFT box for fixed r.
        ! Take the union of (q,g') for q in the BZ. Also, note ngqpt instead of ngkpt.
@@ -4717,13 +4713,18 @@ if (gwr%use_supercell_for_sigma) then
        end do ! my_iqf
 
        ! TODO: Should block using nproc in kpt_comm, scatter data and perform multiple FFTs in parallel.
-       call xmpi_sum(wct_scbox, gwr%kpt_comm%value, ierr)
-       !call cwtime_report("W part", cpu, wall, gflops)
+       !if (gwr%kpt_comm%nproc > 1) call xmpi_sum(wct_scbox, gwr%kpt_comm%value, ierr)
+       if (gwr%kpt_comm%nproc > 1) call xmpi_isum_ip(wct_scbox, gwr%kpt_comm%value, wct_request, ierr)
+
+       ! G(G',r) --> G(R',r)
+       if (gwr%kpt_comm%nproc > 1) call xmpi_wait(gt_request, ierr)
+       call gt_plan_gp2rp%execute_ip_dpc(gt_scbox)
+       gt_scbox = gt_scbox * (sc_nfft / sck_ucvol)
 
        ! Wc(G',r) --> Wc(R',r)
+       if (gwr%kpt_comm%nproc > 1) call xmpi_wait(wct_request, ierr)
        call wt_plan_gp2rp%execute_ip_dpc(wct_scbox)
        wct_scbox = wct_scbox * (sc_nfft / scq_ucvol)
-       !wct_scbox = wct_scbox * sc_nfft
        !if (itau == 1) print *, "W(r,r):", wct_scbox(uc_ir)
 
 !DEBUG
@@ -4737,13 +4738,13 @@ if (gwr%use_supercell_for_sigma) then
        gt_scbox(:, 1) = gt_scbox(:, 1) * wct_scbox(:)
        gt_scbox(:, 2) = gt_scbox(:, 2) * wct_scbox(:)
        !print *, "Maxval abs imag G:", maxval(abs(aimag(gt_scbox)))
-       !call cwtime_report("GW part", cpu, wall, gflops)
 
        ! Integrate self-energy matrix elements in the R-supercell for fixed set of r-points
        do ikcalc=1,gwr%nkcalc
+         k_is_gamma = normv(gwr%kcalc(:,ikcalc), gwr%cryst%gmet, "G") < GW_TOLQ0
          ! FIXME: Temporary hack till I find a better MPI algo for k-points.
          if (gwr%kpt_comm%skip(ikcalc)) cycle
-         !k_is_gamma = normv(gwr%kcalc(:,ikcalc), gwr%cryst%gmet, "G") < GW_TOLQ0
+
          do band=gwr%bstart_ks(ikcalc, spin), gwr%bstop_ks(ikcalc, spin)
            ibc = band - gwr%bstart_ks(ikcalc, spin) + 1
            do idat=1,ndat
@@ -4755,7 +4756,7 @@ if (gwr%use_supercell_for_sigma) then
              !sigc_pm(1) = cpsi_r * sum(gt_scbox(ibeg:iend, 1) * sc_psi_bk(:, band, ikcalc))
              !sigc_pm(2) = cpsi_r * sum(gt_scbox(ibeg:iend, 2) * sc_psi_bk(:, band, ikcalc))
              do ipm=1,2
-               call sc_sum(gwr%ngkpt, gwr%g_ngfft, gwr%nspinor, scph1d_kcalc(:,:,ikcalc), &
+               call sc_sum(gwr%ngkpt, gwr%g_ngfft, gwr%nspinor, scph1d_kcalc(:,:,ikcalc), k_is_gamma, &
                  cpsi_r, gt_scbox(ibeg:iend, ipm), uc_psi_bk(:, band, ikcalc), sigc_pm(ipm))
              end do
 
@@ -4791,6 +4792,7 @@ if (gwr%use_supercell_for_sigma) then
 
  ABI_FREE(gt_scbox)
  ABI_FREE(wct_scbox)
+
 else
 
  call wrtout(std_out, sjoin(" Building Sigma_c with convolutions in q-space:", ltoa(sc_ngfft(1:3))), pre_newlines=2)
@@ -4898,12 +4900,14 @@ end if
  ! Finally, perform analytic continuation with Pade' to go to the real-axis,
  ! and compute QP corrections and spectral functions.
 
- sigc_it_diag_kcalc = -sigc_it_diag_kcalc * (gwr%cryst%ucvol / gwr%g_nfft) ** 2 ! / (gwr%nkbz ** 2)
+ sigc_it_diag_kcalc = -sigc_it_diag_kcalc * (gwr%cryst%ucvol / gwr%g_nfft) ** 2
 
  call xmpi_sum(sigc_it_diag_kcalc, gwr%comm%value, ierr)
 
- ! TODO: Fake values for the exchange part.
- !sigx_kcalc = zero
+ ! Compute Sigma(w) on the real axis, QP corrections and spectral function A(w).
+ ! All procs execute this part as it's very cheap.
+
+ !sigx_kcalc = zero TODO: Fake values for the exchange part.
  sigc_iw_diag_kcalc = zero
 
  imag_zmesh(:) = j_dpc * gwr%iw_mesh
@@ -7258,11 +7262,12 @@ end subroutine get_1d_scphases
 !!
 !! SOURCE
 
-subroutine sc_sum(sc_shape, uc_ngfft, nspinor, ph1d, alpha, sc_data, uc_psi, cout)
+subroutine sc_sum(sc_shape, uc_ngfft, nspinor, ph1d, k_is_gamma, alpha, sc_data, uc_psi, cout)
 
 !Arguments ------------------------------------
  integer,intent(in) :: sc_shape(3), uc_ngfft(18), nspinor
  complex(dp),intent(in) :: ph1d(maxval(sc_shape), 3)
+ logical,intent(in) :: k_is_gamma
  complex(dp),intent(in) :: alpha, uc_psi(uc_ngfft(1), uc_ngfft(2), uc_ngfft(3), nspinor)
  complex(dp),intent(in) :: &
     sc_data(uc_ngfft(1), sc_shape(1), uc_ngfft(2), sc_shape(2), uc_ngfft(3), sc_shape(3), nspinor)
@@ -7283,23 +7288,43 @@ subroutine sc_sum(sc_shape, uc_ngfft, nspinor, ph1d, alpha, sc_data, uc_psi, cou
  spinor = 1
  cout = zero
 
- do il3=1,sc_shape(3)
-   phl3 = ph1d(il3, 3)
-   do iz=1,uc_n3
-     do il2=1,sc_shape(2)
-       phl32 = phl3 * ph1d(il2, 2)
-       do iy=1,uc_n2
-         do il1=1,sc_shape(1)
-           cphase = phl32 * ph1d(il1, 1)  ! e^{ik.L}
-           do ix=1,uc_n1
-             cout = cout + &
-               cphase * uc_psi(ix, iy, iz, spinor) * sc_data(ix, il1, iy, il2, iz, il3, spinor)
+ if (k_is_gamma) then
+   ! Don't need to multiply by ! e^{ik.L}
+
+   do il3=1,sc_shape(3)
+     do iz=1,uc_n3
+       do il2=1,sc_shape(2)
+         do iy=1,uc_n2
+           do il1=1,sc_shape(1)
+             do ix=1,uc_n1
+               cout = cout + uc_psi(ix, iy, iz, spinor) * sc_data(ix, il1, iy, il2, iz, il3, spinor)
+             end do
            end do
          end do
        end do
      end do
    end do
- end do
+
+ else
+
+   do il3=1,sc_shape(3)
+     phl3 = ph1d(il3, 3)
+     do iz=1,uc_n3
+       do il2=1,sc_shape(2)
+         phl32 = phl3 * ph1d(il2, 2)
+         do iy=1,uc_n2
+           do il1=1,sc_shape(1)
+             cphase = phl32 * ph1d(il1, 1)  ! e^{ik.L}
+             do ix=1,uc_n1
+               cout = cout + cphase * uc_psi(ix, iy, iz, spinor) * sc_data(ix, il1, iy, il2, iz, il3, spinor)
+             end do
+           end do
+         end do
+       end do
+     end do
+   end do
+
+ end if
 
  cout = alpha * cout
 
