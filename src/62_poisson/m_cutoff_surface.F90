@@ -40,15 +40,14 @@ CONTAINS  !=====================================================================
 !!  In this implementation rcut=L_z/2 where L_z is the periodicity along z
 !!
 !! INPUTS
-!!  nq=Number of q-points
-!!  qpt(3,nq)=q-points
+!!  qpt(3)=q-point
 !!  ng=Number of G vectors.
 !!  gvec(3,ng)=G vectors in reduced coordinates.
 !!  gprimd(3,3)=Dimensional primitive translations in reciprocal space ($\textrm{bohr}^{-1}$).
 !!  gmet(3,3)=Metric in reciprocal space.
 !!
 !! OUTPUT
-!!  vc_cut(ng,nq)=Fourier components of the effective Coulomb interaction.
+!!  vc_cut(ng)=Fourier components of the effective Coulomb interaction.
 !!
 !! NOTES
 !!  The Fourier expression for an interaction truncated along the z-direction (i.e non-zero only if |z|<R) is:
@@ -68,26 +67,25 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine cutoff_surface(nq, qpt, ng, gvec, gprimd, rcut, boxcenter, pdir, alpha, vc_cut, method)
+subroutine cutoff_surface(qpt, ng, gvec, gprimd, rcut, boxcenter, pdir, alpha, vc_cut, method)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: method,ng,nq
+ integer,intent(in) :: method,ng
  real(dp),intent(in) :: rcut
 !arrays
  integer,intent(in) :: gvec(3,ng),pdir(3)
- real(dp),intent(in) :: alpha(3),boxcenter(3),gprimd(3,3),qpt(3,nq)
- real(dp),intent(out) :: vc_cut(ng,nq)
+ real(dp),intent(in) :: alpha(3),boxcenter(3),gprimd(3,3),qpt(3)
+ real(dp),intent(out) :: vc_cut(ng)
 
 !Local variables-------------------------------
 !scalars
- integer :: ig,iq,igs
+ integer :: ig,igs
  real(dp),parameter :: SMALL=tol4  !@WC: was tol6
  real(dp) :: qpg2,qpg_para,qpg_perp
  character(len=500) :: msg
 !arrays
  real(dp) :: b1(3),b2(3),b3(3),gcart(3),qc(3),qpg(3)
- real(dp) :: qcart(3,nq)
 
 ! *************************************************************************
 
@@ -99,12 +97,10 @@ subroutine cutoff_surface(nq, qpt, ng, gvec, gprimd, rcut, boxcenter, pdir, alph
  b2(:)=two_pi*gprimd(:,2)
  b3(:)=two_pi*gprimd(:,3)
 
- do iq=1,nq
-   qcart(:,iq) = b1*qpt(1,iq) + b2*qpt(2,iq) + b3*qpt(3,iq)
- end do
+ qc = b1*qpt(1) + b2*qpt(2) + b3*qpt(3)
 
  ! Different approaches according to method
- vc_cut(:,:)=zero
+ vc_cut = zero
 
  select case (method)
 
@@ -112,8 +108,8 @@ subroutine cutoff_surface(nq, qpt, ng, gvec, gprimd, rcut, boxcenter, pdir, alph
    ! Beigi's expression.
    ! q-points with non-zero component along the z-axis are not allowed if
    ! the simplified Eq.1 for the Coulomb interaction is used.
-   if (ANY(ABS(qcart(3,:))>SMALL)) then
-     write(std_out,*)qcart(:,:)
+   if (ANY(ABS(qc) > SMALL)) then
+     write(std_out,*)qc
      write(msg,'(5a)')&
       'Found q-points with non-zero component along non-periodic direction ',ch10,&
       'This is not allowed, see Notes in cutoff_surface.F90 ',ch10,&
@@ -123,16 +119,13 @@ subroutine cutoff_surface(nq, qpt, ng, gvec, gprimd, rcut, boxcenter, pdir, alph
 
    ! Calculate truncated Coulomb interaction for a infinite surface
    ! supposing input q-points are different from zero.
-   do iq=1,nq
-     qc(:)=qcart(:,iq)
-     igs=1; if (SQRT(DOT_PRODUCT(qc,qc))<tol16) igs=2 ! avoid (q=0, G=0)
-     do ig=igs,ng
-       gcart(:) = b1(:)*gvec(1,ig)+b2(:)*gvec(2,ig)+b3(:)*gvec(3,ig)
-       qpg(:) = qc(:) + gcart(:)
-       qpg2  = DOT_PRODUCT(qpg(:),qpg(:))
-       qpg_para = SQRT(qpg(1)**2+qpg(2)**2) ; qpg_perp=qpg(3)
-       vc_cut(ig,iq) = four_pi/qpg2*(one-EXP(-qpg_para*rcut)*COS(qpg_perp*rcut))
-     end do
+   igs=1; if (SQRT(DOT_PRODUCT(qc,qc))<tol16) igs=2 ! avoid (q=0, G=0)
+   do ig=igs,ng
+     gcart(:) = b1(:)*gvec(1,ig)+b2(:)*gvec(2,ig)+b3(:)*gvec(3,ig)
+     qpg(:) = qc(:) + gcart(:)
+     qpg2  = DOT_PRODUCT(qpg(:),qpg(:))
+     qpg_para = SQRT(qpg(1)**2+qpg(2)**2) ; qpg_perp=qpg(3)
+     vc_cut(ig) = four_pi/qpg2*(one-EXP(-qpg_para*rcut)*COS(qpg_perp*rcut))
    end do
 
  case (2)
@@ -140,26 +133,23 @@ subroutine cutoff_surface(nq, qpt, ng, gvec, gprimd, rcut, boxcenter, pdir, alph
    ABI_ERROR("Work in progress")
    ABI_UNUSED(alpha) ! just to keep alpha as an argument
    !alpha=?? ; ap1sqrt=SQRT(one+alpha**2)
-   do iq=1,nq
-     qc(:)=qcart(:,iq)
-     do ig=1,ng
-       gcart(:) = b1(:)*gvec(1,ig)+b2(:)*gvec(2,ig)+b3(:)*gvec(3,ig)
-       qpg(:) = qc(:) + gcart(:)
-       qpg2  =DOT_PRODUCT(qpg(:),qpg(:))
-       qpg_para=SQRT(qpg(1)**2+qpg(2)**2) ; qpg_perp =qpg(3)
-       if (qpg_para>SMALL) then
-        vc_cut(ig,iq)=four_pi/qpg2*(one+EXP(-qpg_para*rcut)*(qpg_perp/qpg_para*SIN(qpg_perp*rcut)-COS(qpg_perp*rcut)))
+   do ig=1,ng
+     gcart(:) = b1(:)*gvec(1,ig)+b2(:)*gvec(2,ig)+b3(:)*gvec(3,ig)
+     qpg(:) = qc(:) + gcart(:)
+     qpg2  =DOT_PRODUCT(qpg(:),qpg(:))
+     qpg_para=SQRT(qpg(1)**2+qpg(2)**2) ; qpg_perp =qpg(3)
+     if (qpg_para>SMALL) then
+      vc_cut(ig)=four_pi/qpg2*(one+EXP(-qpg_para*rcut)*(qpg_perp/qpg_para*SIN(qpg_perp*rcut)-COS(qpg_perp*rcut)))
+     else
+       if (ABS(qpg_perp)>SMALL) then
+         vc_cut(ig)=four_pi/qpg_perp**2*(one-COS(qpg_perp*rcut)-qpg_perp*rcut*SIN(qpg_perp*rcut)) ! &
+         ! contribution due to finite surface
+         ! + 8*rcut*SIN(qpg_perp*rcut)/qpg_perp*LOG((alpha+ap1sqrt)*(one+ap1sqrt)/alpha)
        else
-         if (ABS(qpg_perp)>SMALL) then
-           vc_cut(ig,iq)=four_pi/qpg_perp**2*(one-COS(qpg_perp*rcut)-qpg_perp*rcut*SIN(qpg_perp*rcut)) ! &
-           ! contribution due to finite surface
-           ! + 8*rcut*SIN(qpg_perp*rcut)/qpg_perp*LOG((alpha+ap1sqrt)*(one+ap1sqrt)/alpha)
-         else
-           vc_cut(ig,iq)=-two_pi*rcut**2
-         end if
+         vc_cut(ig)=-two_pi*rcut**2
        end if
-     end do !ig
-   end do !iq
+     end if
+   end do !ig
 
  case default
    write(msg,'(a,i3)')' Wrong value of method: ',method

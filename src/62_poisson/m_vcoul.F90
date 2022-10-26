@@ -201,8 +201,8 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
 !scalars
  integer,parameter :: master=0, ncell=3, nmc_max=2500000
  integer :: nmc,nseed, i1,i2,i3,ig,imc, nqibz, nqbz
- integer :: ii,iqlwl,iq_bz,iq_ibz,npar,npt
- integer :: opt_cylinder,opt_surface,rank,nprocs ! test,
+ integer :: ii,iqlwl,iq_bz,iq_ibz,npar,npt,iq
+ integer :: opt_cylinder,opt_surface,rank,nprocs
  real(dp),parameter :: tolq0 = 1.d-3, tol999 = 999.0
  real(dp) :: b1b1,b2b2,b3b3,b1b2,b2b3,b3b1
  real(dp) :: bz_geometry_factor,bz_plane,check,dx,integ,q0_vol,q0_volsph
@@ -214,8 +214,7 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
  integer, allocatable :: seed(:)
  integer, contiguous, pointer :: gvec(:,:)
  real(dp) :: a1(3),a2(3),a3(3),bb(3),b1(3),b2(3),b3(3),gmet(3,3),gprimd(3,3)
- real(dp) :: qbz_cart(3),rmet(3,3)
- real(dp) :: qtmp(3),qmin(3),qmin_cart(3),qpg(3)
+ real(dp) :: qbz_cart(3),rmet(3,3),qtmp(3),qmin(3),qmin_cart(3),qpg(3)
  real(dp) :: rprimd_sc(3,3),gprimd_sc(3,3),gmet_sc(3,3),rmet_sc(3,3), qcart2red(3,3)
  real(dp),allocatable :: cov(:,:),par(:),qfit(:,:),sigma(:),var(:),qcart(:,:)
  real(dp),allocatable :: vcfit(:,:),vcoul(:,:),vcoul_lwl(:,:),xx(:),yy(:),qran(:,:)
@@ -521,8 +520,8 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
  case ('CYLINDER')
    ABI_CHECK(COUNT(ABS(Vcp%vcutgeo)>tol6) == 1, 'Wrong cutgeo for cylinder')
 
-   ! === Beigi method is the default one, i.e infinite cylinder of radius rcut ===
-   ! * Negative values to use Rozzi method with finite cylinder of extent hcyl.
+   ! Beigi's method is the default one, i.e infinite cylinder of radius rcut.
+   ! Negative values to use Rozzi method with finite cylinder of extent hcyl.
    opt_cylinder=1; Vcp%hcyl=zero; Vcp%pdir(:)=0
    do ii=1,3
      check=Vcp%vcutgeo(ii)
@@ -542,16 +541,16 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
      ABI_ERROR("The cylinder must be along the z-axis")
    end if
 
-   !do iq_ibz=1,nqibz
-   call cutoff_cylinder(nqibz, qibz, ng, gvec, Vcp%rcut, Vcp%hcyl, Vcp%pdir,&
-                        Vcp%boxcenter, Cryst%rprimd, vcoul, opt_cylinder, comm)
-   !end do
+   do iq_ibz=1,nqibz
+     call cutoff_cylinder(qibz(:,iq_ibz), ng, gvec, Vcp%rcut, Vcp%hcyl, Vcp%pdir,&
+                          Vcp%boxcenter, Cryst%rprimd, vcoul(:,iq_ibz), opt_cylinder, comm)
+   end do
 
    ! q-points for optical limit.
-   !do iqlwl=1,nqlwl
-   call cutoff_cylinder(nqlwl, qlwl, ng, gvec, Vcp%rcut, Vcp%hcyl, Vcp%pdir,&
-                        Vcp%boxcenter, Cryst%rprimd, vcoul_lwl, opt_cylinder, comm)
-   !end do
+   do iqlwl=1,nqlwl
+     call cutoff_cylinder(qlwl(:,iqlwl), ng, gvec, Vcp%rcut, Vcp%hcyl, Vcp%pdir,&
+                          Vcp%boxcenter, Cryst%rprimd, vcoul_lwl(:,iqlwl), opt_cylinder, comm)
+   end do
 
    ! If Beigi, treat the limit q--> 0.
    if (opt_cylinder == 1) then
@@ -565,10 +564,10 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
      step=half/(npt * (nqibz-1))              ; qfit(3,:)=arth(tol6,step,npt)
      !step=(half/(nqibz-1)/tol6)**(one/npt) ; qfit(3,:)=geop(tol6,step,npt)
 
-     !do iq=1=npt
-     call cutoff_cylinder(npt,qfit,1,gamma_pt,Vcp%rcut,Vcp%hcyl,Vcp%pdir,Vcp%boxcenter,&
-                          Cryst%rprimd,vcfit,opt_cylinder,comm)
-     !end do
+     do iq=1,npt
+       call cutoff_cylinder(qfit(:,iq),1,gamma_pt,Vcp%rcut,Vcp%hcyl,Vcp%pdir,Vcp%boxcenter,&
+                            Cryst%rprimd,vcfit(:,iq),opt_cylinder,comm)
+     end do
 
      ABI_MALLOC(xx, (npt))
      ABI_MALLOC(yy, (npt))
@@ -625,7 +624,7 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
 
    ABI_CHECK(COUNT(Vcp%vcutgeo /= zero) == 2, "Wrong vcutgeo")
 
-   ! Default is Beigi"s method
+   ! Default is Beigi's method.
    opt_surface=1; Vcp%alpha(:)=zero
    if (ANY(Vcp%vcutgeo<zero)) opt_surface=2
    Vcp%pdir(:)=zero
@@ -645,16 +644,16 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
      Vcp%rcut = half*SQRT(DOT_PRODUCT(a3,a3))
    end if
 
-   !do iq_ibz=1,nqibz
-   call cutoff_surface(nqibz, qibz, ng, gvec, gprimd, Vcp%rcut, &
-                       Vcp%boxcenter, Vcp%pdir, Vcp%alpha, vcoul, opt_surface)
-   !end do
+   do iq_ibz=1,nqibz
+     call cutoff_surface(qibz(:,iq_ibz), ng, gvec, gprimd, Vcp%rcut, &
+                         Vcp%boxcenter, Vcp%pdir, Vcp%alpha, vcoul(:,iq_ibz), opt_surface)
+   end do
 
    ! q-points for optical limit.
-   !do iqlwl=1,nqlwl
-   call cutoff_surface(nqlwl, qlwl, ng, gvec, gprimd, Vcp%rcut, &
-                       Vcp%boxcenter, Vcp%pdir, Vcp%alpha, vcoul_lwl, opt_surface)
-   !end do
+   do iqlwl=1,nqlwl
+     call cutoff_surface(qlwl(:,iq_ibz), ng, gvec, gprimd, Vcp%rcut, &
+                         Vcp%boxcenter, Vcp%pdir, Vcp%alpha, vcoul_lwl(:,iqlwl), opt_surface)
+   end do
 
    ! If Beigi, treat the limit q--> 0.
    if (opt_surface == 1) then
@@ -681,14 +680,11 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
      ! Let's take qpoints along 1 line, the vcut does depend only on the norm
      qcart(1,:) = arth(tol6,step,npt)
 
-     do ii = 1,npt
+     do ii=1,npt
        qfit(:,ii) = MATMUL(TRANSPOSE(Cryst%rprimd),qcart(:,ii)) / (2*pi)
+       call cutoff_surface(qfit(:,ii), 1, gamma_pt, gprimd, Vcp%rcut, &
+                           Vcp%boxcenter, Vcp%pdir, Vcp%alpha, vcfit(:,ii), opt_surface)
      end do
-
-     !do iq=1,nqpt
-     call cutoff_surface(npt, qfit, 1, gamma_pt, gprimd, Vcp%rcut, &
-                         Vcp%boxcenter, Vcp%pdir, Vcp%alpha, vcfit, opt_surface)
-     !end do
 
      ABI_MALLOC(xx, (npt))
      ABI_MALLOC(yy, (npt))
@@ -787,7 +783,7 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
    ! === Integration of 1/q^2 singularity ===
    ! We use the auxiliary function of a Gygi-Baldereschi variant [[cite:Gigy1986]]
    q0_vol = (two_pi)**3 / (Kmesh%nbz*ucvol) ; bz_geometry_factor=zero
-   ! the choice of alfa (the width of gaussian) is somehow empirical
+   ! the choice of alfa (the width of the gaussian) is somehow empirical
    alfa = 150.0 / ecut
 
    do iq_bz=1,nqbz
@@ -849,7 +845,7 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
      call cmod_qpg(nqibz, iq_ibz, qibz, ng, gvec, gprimd, vcoul(:,iq_ibz))
 
      ! The Fourier transform of the error function reads
-     if (iq_ibz==1) then
+     if (iq_ibz == 1) then
        vcoul(1, iq_ibz) = zero
        vcoul(2:,iq_ibz) = four_pi/(vcoul(2:,iq_ibz)**2) *  EXP( -0.25d0 * (Vcp%rcut*vcoul(2:,iq_ibz))**2 )
      else
@@ -874,8 +870,7 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
 
    bz_geometry_factor = bz_geometry_factor + integratefaux() * nqbz
 
-   write(msg,'(2a,2x,f12.4)')ch10,&
-     ' integrate q->0 : numerical BZ geometry factor = ',bz_geometry_factor*q0_vol**(2./3.)
+   write(msg,'(2a,2x,f12.4)')ch10,' integrate q->0 : numerical BZ geometry factor = ',bz_geometry_factor*q0_vol**(2./3.)
    call wrtout(std_out, msg)
    Vcp%i_sz = four_pi * bz_geometry_factor  ! Final result stored here
 

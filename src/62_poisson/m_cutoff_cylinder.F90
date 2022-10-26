@@ -73,33 +73,31 @@ CONTAINS
 !!  comm=MPI communicator.
 !!
 !! OUTPUT
-!!  vccut(ng,nq)= Fourier components of the effective Coulomb interaction
+!!  vc_cut(ng)= Fourier components of the effective Coulomb interaction
 !!
 !! SOURCE
 
-subroutine cutoff_cylinder(nq, qpt, ng, gvec, rcut, hcyl, pdir, boxcenter, rprimd, vccut, method, comm)
+subroutine cutoff_cylinder(qpt, ng, gvec, rcut, hcyl, pdir, boxcenter, rprimd, vc_cut, method, comm)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: ng,nq,method,comm
+ integer,intent(in) :: ng,method,comm
  real(dp),intent(in) :: rcut,hcyl
 !arrays
  integer,intent(in) :: gvec(3,ng),pdir(3)
- real(dp),intent(in) :: boxcenter(3),qpt(3,nq),rprimd(3,3)
- real(dp),intent(out) :: vccut(ng,nq)
+ real(dp),intent(in) :: boxcenter(3),qpt(3),rprimd(3,3)
+ real(dp),intent(out) :: vc_cut(ng)
 
 !Local variables-------------------------------
 !scalars
  integer,parameter :: N0=1000
- integer :: icount,ig,igs,iq
- integer :: ntasks,ierr,my_start,my_stop
+ integer :: icount,ig,igs,ierr, my_rank, nproc
  real(dp) :: j0,j1,k0,k1,qpg2,qpg_xy,tmp
  real(dp) :: qpg_z,quad,rcut2,hcyl2,c1,c2,ucvol,SMALL
  logical :: q_is_zero
  character(len=500) :: msg
 !arrays
  real(dp) :: qpg(3),b1(3),b2(3),b3(3),gmet(3,3),rmet(3,3),gprimd(3,3),qc(3),gcart(3)
- real(dp),allocatable :: qcart(:,:)
 !************************************************************************
 
  ABI_UNUSED(pdir)
@@ -116,12 +114,12 @@ subroutine cutoff_cylinder(nq, qpt, ng, gvec, rcut, hcyl, pdir, boxcenter, rprim
  rcut_    =rcut      ! Radial cutoff, used only if method==2
  hcyl_    =hcyl      ! Lenght of cylinder along z, only if method==2
 
- write(msg,'(3a,2(a,i5,a),a,f8.5)')ch10,&
-  ' cutoff_cylinder: Info on the quadrature method : ',ch10,&
-  '  Quadrature scheme      = ',qopt_,ch10,&
-  '  Max number of attempts = ',ntrial_,ch10,&
-  '  Fractional accuracy    = ',accuracy_
- call wrtout(std_out, msg)
+ !write(msg,'(3a,2(a,i5,a),a,f8.5)')ch10,&
+ ! ' cutoff_cylinder: Info on the quadrature method : ',ch10,&
+ ! '  Quadrature scheme      = ',qopt_,ch10,&
+ ! '  Max number of attempts = ',ntrial_,ch10,&
+ ! '  Fractional accuracy    = ',accuracy_
+ !call wrtout(std_out, msg)
 
  ! From reduced to Cartesian coordinates.
  call metric(gmet, gprimd, -1, rmet, rprimd, ucvol)
@@ -129,28 +127,23 @@ subroutine cutoff_cylinder(nq, qpt, ng, gvec, rcut, hcyl, pdir, boxcenter, rprim
  b2(:) =two_pi*gprimd(:,2)
  b3(:) =two_pi*gprimd(:,3)
 
- ABI_MALLOC(qcart, (3, nq))
- do iq=1,nq
-   qcart(:,iq)=b1(:)*qpt(1,iq)+b2(:)*qpt(2,iq)+b3(:)*qpt(3,iq)
- end do
+ qc = b1(:)*qpt(1) + b2(:)*qpt(2) + b3(:)*qpt(3)
 
- ntasks = nq * ng
- call xmpi_split_work(ntasks, comm, my_start, my_stop)
+ my_rank = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm)
 
  ! ================================================
  ! === Different approaches according to method ===
  ! ================================================
- vccut(:,:) = zero
+ vc_cut = zero
 
  select case (method)
 
  case (1)
    ! Infinite cylinder, interaction is zeroed outside the Wigner-Seitz cell.
-   ! * Beigi"s expression holds only if the BZ is sampled only along z.
-   call wrtout(std_out, 'cutoff_cylinder: Using Beigi''s Infinite cylinder')
+   ! NB: Beigi's expression holds only if the BZ is sampled only along z.
+   !call wrtout(std_out, 'cutoff_cylinder: Using Beigi''s Infinite cylinder')
 
-   if (ANY(qcart(1:2,:) > SMALL)) then
-     !write(std_out,*)' qcart = ',qcart(:,:)
+   if (ANY(qc(1:2) > SMALL)) then
      write(msg,'(5a)')&
       ' found q-points with non zero components in the X-Y plane. ',ch10,&
       ' This is not allowed, see Notes in cutoff_cylinder.F90. ',ch10,&
@@ -159,69 +152,63 @@ subroutine cutoff_cylinder(nq, qpt, ng, gvec, rcut, hcyl, pdir, boxcenter, rprim
    end if
 
    ! Check if Bravais lattice is orthorombic and parallel to the Cartesian versors.
-   ! In this case the intersection of the W-S cell with the x-y plane is a rectangle with -ha_<=x<=ha_ and -hb_<=y<=hb_
+   ! In this case the intersection of the WS cell with the x-y plane is a rectangle with -ha_<=x<=ha_ and -hb_<=y<=hb_
    if ((ANY(ABS(rprimd(2:3,  1)) > tol6)) .or. &
        (ANY(ABS(rprimd(1:3:2,2)) > tol6)) .or. &
        (ANY(ABS(rprimd(1:2,  3)) > tol6))) then
-     ABI_ERROR('Bravais lattice should be orthorombic and parallel to the cartesian versors')
+     ABI_ERROR('Bravais lattice should be orthorombic and parallel to the Cartesian versors')
    end if
 
-   ha_=half*SQRT(DOT_PRODUCT(rprimd(:,1),rprimd(:,1)))
-   hb_=half*SQRT(DOT_PRODUCT(rprimd(:,2),rprimd(:,2)))
-   r0_=MIN(ha_,hb_)/N0
-   !
+   ha_ = half*SQRT(DOT_PRODUCT(rprimd(:,1),rprimd(:,1)))
+   hb_ = half*SQRT(DOT_PRODUCT(rprimd(:,2),rprimd(:,2)))
+   r0_ = MIN(ha_,hb_)/N0
+
    ! For each (q,G) pair evaluate the integral defining the Coulomb cutoff.
    ! NB: the code assumes that all q-vectors are non zero and q_xy/=0.
-   do iq=1,nq
-     igs=1
-     ! Skip singularity at Gamma, it will be treated "by hand" in csigme.
-     q_is_zero = (normv(qpt(:,iq),gmet,'G')<tol4)
-     !if (q_is_zero) igs=2
-     qc(:)=qcart(:,iq)
-     !write(msg,'(2(a,i3))')' entering loop iq: ',iq,' with igs = ',igs
-     !call wrtout(std_out, msg)
+   igs=1
+   ! Skip singularity at Gamma, it will be treated "by hand" in csigme.
+   q_is_zero = (normv(qpt, gmet, 'G') < tol4)
 
-     do ig=igs,ng
-       icount=ig+(iq-1)*ng; if (icount<my_start.or.icount>my_stop) CYCLE
+   do ig=igs,ng
+     if (mod(ig, nproc) /= my_rank) cycle ! MPI parallelism
 
-       gcart(:)=b1(:)*gvec(1,ig)+b2(:)*gvec(2,ig)+b3(:)*gvec(3,ig)
-       qpg(:)=qc(:)+gcart(:)
-       qpgx_=qpg(1) ; qpgy_=qpg(2) ; qpg_para_=ABS(qpg(3))
-       !write(std_out,*)"qpgx_=",qpgx_, "qpgy_=",qpgy_, "qpg_para=",qpg_para_
+     gcart(:)=b1(:)*gvec(1,ig)+b2(:)*gvec(2,ig)+b3(:)*gvec(3,ig)
+     qpg(:)=qc(:)+gcart(:)
+     qpgx_=qpg(1); qpgy_=qpg(2); qpg_para_=ABS(qpg(3))
+     !write(std_out,*)"qpgx_=",qpgx_, "qpgy_=",qpgy_, "qpg_para=",qpg_para_
 
-       ! Avoid singularity in K_0{qpg_para_\rho) by using a small q along the periodic dimension.
-       if (q_is_zero .and. qpg_para_ < tol6) qpg_para_ = tol6
+     ! Avoid singularity in K_0{qpg_para_\rho) by using a small q along the periodic dimension.
+     if (q_is_zero .and. qpg_para_ < tol6) qpg_para_ = tol6
 
-       ! Calculate $ 2\int_{WS} dxdy K_0{qpg_para_\rho) cos(x.qpg_x + y.qpg_y) $
-       ! where WS is the Wigner-Seitz cell.
-       tmp=zero
+     ! Calculate $ 2\int_{WS} dxdy K_0{qpg_para_\rho) cos(x.qpg_x + y.qpg_y) $
+     ! where WS is the Wigner-Seitz cell.
+     tmp=zero
 
-       ! Difficult part, integrate on a small cirle of radius r0 using spherical coordinates
-       !call quadrature(K0cos_dth_r0,zero,r0_,qopt_,quad,ierr,ntrial_,accuracy_,npts_)
-       !ABI_CHECK(ierr == 0, "Accuracy not reached")
-       !write(std_out,'(i8,a,es14.6)')ig,' 1 ',quad
-       !tmp=tmp+quad
-       ! Add region with 0<=x<=r0 and y>=+-(SQRT(r0^2-x^2))since WS is rectangular
-       !call quadrature(K0cos_dy_r0,zero,r0_,qopt_,quad,ierr,ntrial_,accuracy_,npts_)
-       !ABI_CHECK(ierr == 0, "Accuracy not reached")
-       !write(std_out,'(i8,a,es14.6)')ig,' 2 ',quad
-       !tmp=tmp+quad
-       ! Get the in integral in the rectangle with x>=r0, should be the easiest but sometimes has problems to converge
-       !call quadrature(K0cos_dy,r0_,ha_,qopt_,quad,ierr,ntrial_,accuracy_,npts_)
-       !ABI_CHECK(ierr == 0, "Accuracy not reached")
-       !write(std_out,'(i8,a,es14.6)')ig,' 3 ',quad
-       !
-       ! More stable method: midpoint integration with Romberg extrapolation ===
-       call quadrature(K0cos_dy,zero,ha_,qopt_,quad,ierr,ntrial_,accuracy_,npts_)
-       !write(std_out,'(i8,a,es14.6)')ig,' 3 ',quad
-       ABI_CHECK(ierr == 0, "Accuracy not reached in quadrature!")
+     ! Difficult part, integrate on a small cirle of radius r0 using spherical coordinates
+     !call quadrature(K0cos_dth_r0,zero,r0_,qopt_,quad,ierr,ntrial_,accuracy_,npts_)
+     !ABI_CHECK(ierr == 0, "Accuracy not reached")
+     !write(std_out,'(i8,a,es14.6)')ig,' 1 ',quad
+     !tmp=tmp+quad
+     ! Add region with 0<=x<=r0 and y>=+-(SQRT(r0^2-x^2))since WS is rectangular
+     !call quadrature(K0cos_dy_r0,zero,r0_,qopt_,quad,ierr,ntrial_,accuracy_,npts_)
+     !ABI_CHECK(ierr == 0, "Accuracy not reached")
+     !write(std_out,'(i8,a,es14.6)')ig,' 2 ',quad
+     !tmp=tmp+quad
+     ! Get the in integral in the rectangle with x>=r0, should be the easiest but sometimes has problems to converge
+     !call quadrature(K0cos_dy,r0_,ha_,qopt_,quad,ierr,ntrial_,accuracy_,npts_)
+     !ABI_CHECK(ierr == 0, "Accuracy not reached")
+     !write(std_out,'(i8,a,es14.6)')ig,' 3 ',quad
+     !
+     ! More stable method: midpoint integration with Romberg extrapolation ===
+     call quadrature(K0cos_dy,zero,ha_,qopt_,quad,ierr,ntrial_,accuracy_,npts_)
+     !write(std_out,'(i8,a,es14.6)')ig,' 3 ',quad
+     ABI_CHECK(ierr == 0, "Accuracy not reached in quadrature!")
 
-       ! Store final result
-       ! Factor two comes from the replacement WS -> (1,4) quadrant thanks to symmetries of the integrad.
-       tmp=tmp+quad
-       vccut(ig,iq)=two*(tmp*two)
-     end do !ig
-   end do !iq
+     ! Store final result
+     ! Factor two comes from the replacement WS -> (1,4) quadrant thanks to symmetries of the integrad.
+     tmp = tmp+quad
+     vc_cut(ig) = two*(tmp*two)
+   end do ! ig
 
  case (2)
    ! Finite cylinder of length hcyl from Rozzi et al.
@@ -231,97 +218,89 @@ subroutine cutoff_cylinder(nq, qpt, ng, gvec, rcut, hcyl, pdir, boxcenter, rprim
      ABI_BUG(msg)
    end if
 
-   if (ABS(hcyl_)>tol12) then
-     !write(msg,'(2(a,f8.4))')' cutoff_cylinder: using finite cylinder of length= ',hcyl_,' rcut= ',rcut_
-     !call wrtout(std_out, msg)
+   if (ABS(hcyl_) > tol12) then
+     !write(std_out,'(2(a,f8.4))')' cutoff_cylinder: using finite cylinder of length= ',hcyl_,' rcut= ',rcut_
      hcyl2=hcyl_**2
      rcut2=rcut_**2
 
-     do iq=1,nq
-       qc(:)=qcart(:,iq)
+     ! No singularity occurs in finite cylinder, thus start from 1.
+     do ig=1,ng
+       if (mod(ig, nproc) /= my_rank) cycle ! MPI parallelism
 
-       do ig=1,ng
-         ! No singularity occurs in finite cylinder, thus start from 1.
-         icount=ig+(iq-1)*ng; if (icount<my_start.or.icount>my_stop) CYCLE ! MPI parallelism
+       gcart(:)=b1(:)*gvec(1,ig)+b2(:)*gvec(2,ig)+b3(:)*gvec(3,ig)
+       qpg(:)=qc(:)+gcart(:)
+       qpg_para_=ABS(qpg(3)) ; qpg_perp_=SQRT(qpg(1)**2+qpg(2)**2)
 
-         gcart(:)=b1(:)*gvec(1,ig)+b2(:)*gvec(2,ig)+b3(:)*gvec(3,ig)
-         qpg(:)=qc(:)+gcart(:)
-         qpg_para_=ABS(qpg(3)) ; qpg_perp_=SQRT(qpg(1)**2+qpg(2)**2)
+       if (qpg_perp_ /= zero .and. qpg_para_ /= zero) then
+         ! $ 4\pi\int_0^{R_c} d\rho\rho j_o(qpg_perp_.\rho)\int_0^hcyl dz\cos(qpg_para_*z)/sqrt(\rho^2+z^2) $
+         call quadrature(F2,zero,rcut_,qopt_,quad,ierr,ntrial_,accuracy_,npts_)
+         ABI_CHECK(ierr == 0, "Accuracy not reached")
+         vc_cut(ig) = four_pi*quad
 
-         if (qpg_perp_ /= zero .and. qpg_para_ /= zero) then
-           ! $ 4\pi\int_0^{R_c} d\rho\rho j_o(qpg_perp_.\rho)\int_0^hcyl dz\cos(qpg_para_*z)/sqrt(\rho^2+z^2) $
-           call quadrature(F2,zero,rcut_,qopt_,quad,ierr,ntrial_,accuracy_,npts_)
-           ABI_CHECK(ierr == 0, "Accuracy not reached")
-           vccut(ig,iq) = four_pi*quad
+       else if (qpg_perp_ == zero .and. qpg_para_ /= zero) then
+         ! $ \int_0^h sin(qpg_para_.z)/\sqrt(rcut^2+z^2)dz $
+         call quadrature(F3,zero,hcyl_,qopt_,quad,ierr,ntrial_,accuracy_,npts_)
+         ABI_CHECK(ierr == 0, "Accuracy not reached")
 
-         else if (qpg_perp_ == zero .and. qpg_para_ /= zero) then
-           ! $ \int_0^h sin(qpg_para_.z)/\sqrt(rcut^2+z^2)dz $
-           call quadrature(F3,zero,hcyl_,qopt_,quad,ierr,ntrial_,accuracy_,npts_)
-           ABI_CHECK(ierr == 0, "Accuracy not reached")
+         c1=one/qpg_para_**2-COS(qpg_para_*hcyl_)/qpg_para_**2-hcyl_*SIN(qpg_para_*hcyl_)/qpg_para_
+         c2=SIN(qpg_para_*hcyl_)*SQRT(hcyl2+rcut2)
+         vc_cut(ig) = four_pi*c1+four_pi*(c2-quad)/qpg_para_
 
-           c1=one/qpg_para_**2-COS(qpg_para_*hcyl_)/qpg_para_**2-hcyl_*SIN(qpg_para_*hcyl_)/qpg_para_
-           c2=SIN(qpg_para_*hcyl_)*SQRT(hcyl2+rcut2)
-           vccut(ig,iq) = four_pi*c1+four_pi*(c2-quad)/qpg_para_
+       else if (qpg_perp_ /= zero .and. qpg_para_ == zero) then
+         ! $ 4pi\int_0^rcut d\rho \rho J_o(qpg_perp_.\rho) ln((h+\sqrt(h^2+\rho^2))/\rho) $
+         call quadrature(F4,zero,rcut_,qopt_,quad,ierr,ntrial_,accuracy_,npts_)
+         ABI_CHECK(ierr == 0, "Accuracy not reached")
+         vc_cut(ig) = four_pi*quad
 
-         else if (qpg_perp_ /= zero .and. qpg_para_ == zero) then
-           ! $ 4pi\int_0^rcut d\rho \rho J_o(qpg_perp_.\rho) ln((h+\sqrt(h^2+\rho^2))/\rho) $
-           call quadrature(F4,zero,rcut_,qopt_,quad,ierr,ntrial_,accuracy_,npts_)
-           ABI_CHECK(ierr == 0, "Accuracy not reached")
-           vccut(ig,iq) = four_pi*quad
+       else if (qpg_perp_ == zero .and. qpg_para_ == zero) then
+         ! Use lim q+G --> 0
+         vc_cut(ig) = two_pi*(-hcyl2+hcyl_*SQRT(hcyl2+rcut2)+rcut2*LOG((hcyl_+SQRT(hcyl_+SQRT(hcyl2+rcut2)))/rcut_))
 
-         else if (qpg_perp_==zero.and.qpg_para_==zero) then
-           ! Use lim q+G --> 0
-           vccut(ig,iq)=two_pi*(-hcyl2+hcyl_*SQRT(hcyl2+rcut2)+rcut2*LOG((hcyl_+SQRT(hcyl_+SQRT(hcyl2+rcut2)))/rcut_))
+       else
+         ABI_BUG('You should not be here!')
+       end if
 
-         else
-           ABI_BUG('You should not be here!')
-         end if
-
-       end do !ig
-     end do !iq
+     end do !ig
 
    else
      ! Infinite cylinder.
-     call wrtout(std_out, ' cutoff_cylinder: using Rozzi''s method with infinite cylinder ')
-     do iq=1,nq
-       qc(:)=qcart(:,iq)
-       do ig=1,ng
-         icount=ig+(iq-1)*ng ; if (icount<my_start.or.icount>my_stop) CYCLE ! MPI parallelism
-         gcart(:)=b1(:)*gvec(1,ig)+b2(:)*gvec(2,ig)+b3(:)*gvec(3,ig)
-         qpg(:)=qc(:)+gcart(:)
-         qpg2  =DOT_PRODUCT(qpg,qpg)
-         qpg_z =ABS(qpg(3)) ; qpg_xy=SQRT(qpg(1)**2+qpg(2)**2)
+     !call wrtout(std_out, ' cutoff_cylinder: using Rozzi''s method with infinite cylinder ')
 
-         if (qpg_z > SMALL) then
-           ! === Analytic expression ===
-           call CALCK0(qpg_z *rcut_,k0,1)
-           call CALJY1(qpg_xy*rcut_,j1,0)
-           call CALJY0(qpg_xy*rcut_,j0,0)
-           call CALCK1(qpg_z *rcut_,k1,1)
-           vccut(iq,ig)=(four_pi/qpg2)*(one+rcut_*qpg_xy*j1*k0-qpg_z*rcut_*j0*k1)
+     do ig=1,ng
+       if (mod(ig, nproc) /= my_rank) cycle ! MPI parallelism
+
+       gcart(:)=b1(:)*gvec(1,ig)+b2(:)*gvec(2,ig)+b3(:)*gvec(3,ig)
+       qpg(:)=qc(:)+gcart(:)
+       qpg2  =DOT_PRODUCT(qpg,qpg)
+       qpg_z =ABS(qpg(3)) ; qpg_xy=SQRT(qpg(1)**2+qpg(2)**2)
+
+       if (qpg_z > SMALL) then
+         ! Analytic expression.
+         call CALCK0(qpg_z *rcut_, k0, 1)
+         call CALJY1(qpg_xy*rcut_, j1, 0)
+         call CALJY0(qpg_xy*rcut_, j0, 0)
+         call CALCK1(qpg_z *rcut_, k1, 1)
+         vc_cut(ig) = (four_pi/qpg2)*(one+rcut_*qpg_xy*j1*k0-qpg_z*rcut_*j0*k1)
+       else
+         if (qpg_xy > SMALL) then
+           ! Integrate r*Jo(G_xy r)log(r) from 0 up to rcut_
+           call quadrature(F5,zero,rcut_,qopt_,quad,ierr,ntrial_,accuracy_,npts_)
+           ABI_CHECK(ierr == 0, "Accuracy not reached")
+           vc_cut(ig)=-four_pi*quad
          else
-           if (qpg_xy > SMALL) then
-             ! Integrate r*Jo(G_xy r)log(r) from 0 up to rcut_
-             call quadrature(F5,zero,rcut_,qopt_,quad,ierr,ntrial_,accuracy_,npts_)
-             ABI_CHECK(ierr == 0, "Accuracy not reached")
-             vccut(ig,iq)=-four_pi*quad
-           else
-             ! Analytic expression
-             vccut(ig,iq)=-pi*rcut_**2*(two*LOG(rcut_)-one)
-           end if
+           ! Analytic expression
+           vc_cut(ig)=-pi*rcut_**2*(two*LOG(rcut_)-one)
          end if
-       end do !ig
-     end do !iq
+       end if
+     end do ! ig
    end if !finite/infinite
 
  case default
    ABI_BUG(sjoin('Wrong value for method:',itoa(method)))
  end select
 
- ! Collect vccut on each core
- call xmpi_sum(vccut, comm, ierr)
-
- ABI_FREE(qcart)
+ ! Collect vc_cut on each core
+ call xmpi_sum(vc_cut, comm, ierr)
 
 end subroutine cutoff_cylinder
 !!***
