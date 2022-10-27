@@ -2836,11 +2836,12 @@ subroutine dterm_rd1(atindx,dterm,dtset,gntselect,gprimd,my_lmax,pawrad,pawtab,r
   !scalars
   integer :: iat,iatom,itypat,ilmn,ilm,iln,imesh,jl,jlm,jlmn,jln
   integer :: klmn,mesh_size,pmesh_size
-  real(dp) :: angmom,intg,rr
+  real(dp) :: angmom,avgkij,intg,rr
 
   !arrays
   real(dp) :: dij_cart(3),dij_red(3)
-  real(dp),allocatable :: dtui(:),dtuj(:),dui(:),duj(:),ff(:),tui(:),tuj(:),ui(:),uj(:)
+  real(dp),allocatable :: dtuj(:),d2tuj(:),duj(:),d2uj(:),ff(:),kij(:,:)
+  real(dp),allocatable :: tui(:),tuj(:),ui(:),uj(:)
 
 !--------------------------------------------------------------------
 
@@ -2851,66 +2852,108 @@ subroutine dterm_rd1(atindx,dterm,dtset,gntselect,gprimd,my_lmax,pawrad,pawtab,r
     ABI_MALLOC(ff,(mesh_size))
     ABI_MALLOC(ui,(mesh_size))
     ABI_MALLOC(uj,(mesh_size))
-    ABI_MALLOC(dui,(mesh_size))
     ABI_MALLOC(duj,(mesh_size))
+    ABI_MALLOC(d2uj,(mesh_size))
     ABI_MALLOC(tui,(mesh_size))
     ABI_MALLOC(tuj,(mesh_size))
-    ABI_MALLOC(dtui,(mesh_size))
     ABI_MALLOC(dtuj,(mesh_size))
+    ABI_MALLOC(d2tuj,(mesh_size))
+    ABI_MALLOC(kij,(pawtab(itypat)%lmn_size,pawtab(itypat)%lmn_size))
 
-    do klmn=1,pawtab(itypat)%lmn2_size
+    kij = zero
+
+    do ilmn=1,pawtab(itypat)%lmn_size
+      do jlmn=1,pawtab(itypat)%lmn_size
+
+        ilm=pawtab(itypat)%indlmn(4,ilmn)
+        jlm=pawtab(itypat)%indlmn(4,jlmn)
+        klm=MATPACK(ilm,jlm)
+        iln=pawtab(itypat)%indlmn(5,ilmn)
+        jln=pawtab(itypat)%indlmn(5,jlmn)
+        il=pawtab(itypat)%indlmn(1,ilmn)
+        jl=pawtab(itypat)%indlmn(1,jlmn)
+
+        ui(1:mesh_size)=pawtab(itypat)%phi(1:mesh_size,iln)
+        tui(1:mesh_size)=pawtab(itypat)%tphi(1:mesh_size,iln)
+
+        ! ilm == jlm produces an rd1 term
+        if (ilm .EQ. jlm) then
+
+          uj(1:mesh_size)=pawtab(itypat)%phi(1:mesh_size,jln)
+          tuj(1:mesh_size)=pawtab(itypat)%tphi(1:mesh_size,jln)
+
+          call nderiv_gen(duj,uj,pawrad(itypat))
+          call nderiv_gen(d2uj,duj,pawrad(itypat))
+          call nderiv_gen(dtuj,tuj,pawrad(itypat))
+          call nderiv_gen(d2tuj,dtuj,pawrad(itypat))
+
+          do imesh=2,mesh_size
+            rr=pawrad(itypat)%rad(imesh)
+            angmom=jl*(jl+one)/(rr*rr)
+            ff(imesh)=ui(imesh)*d2uj(imesh)-tui(imesh)*d2tuj(imesh)
+            ff(imesh)=ff(imesh)-angmom*ui(imesh)*uj(imesh)
+            ff(imesh)=ff(imesh)+angmom*tui(imesh)*tuj(imesh)
+          end do
+
+          call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
+          call simp_gen(intg,ff,pawrad(itypat))
+
+          kij(ilmn,jlmn) = -half*intg
+
+        end if
+
+        dij_cart=zero
+        do adir = 1, 3
+          gint=gntselect(pack1a(adir),klm)
+          if (gint .NE. 0) then
+            do imesh=1,mesh_size
+              rr=pawrad(itypat)%rad(imesh)
+              uj(1:mesh_size)=pawtab(itypat)%phi(1:mesh_size,jln)*rr
+              tuj(1:mesh_size)=pawtab(itypat)%tphi(1:mesh_size,jln)*rr
+            end do
+            call nderiv_gen(duj,uj,pawrad(itypat))
+            call nderiv_gen(d2uj,duj,pawrad(itypat))
+            call nderiv_gen(dtuj,tuj,pawrad(itypat))
+            call nderiv_gen(d2tuj,dtuj,pawrad(itypat))
+            do imesh=2,mesh_size
+              rr=pawrad(itypat)%rad(imesh)
+              angmom=il*(il+one)/(rr*rr)
+              ff(imesh)=ui(imesh)*d2uj(imesh)-tui(imesh)*d2tuj(imesh)
+              ff(imesh)=ff(imesh)-angmom*ui(imesh)*uj(imesh)
+              ff(imesh)=ff(imesh)+angmom*tui(imesh)*tuj(imesh)
+            end do
+            call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
+            call simp_gen(intg,ff,pawrad(itypat))
+
+            dij_cart(adir) = -half*cdij*realgnt(gint)*intg
+          end if
+        end do
+
+      end do !jlmn
+    end do ! ilmn
+
+    do klmn = 1, pawtab(itypat)%lmn2_size
       ilmn=pawtab(itypat)%indklmn(7,klmn)
       jlmn=pawtab(itypat)%indklmn(8,klmn)
-
-      ilm=pawtab(itypat)%indlmn(4,ilmn)
-      jlm=pawtab(itypat)%indlmn(4,jlmn)
-      if (ilm .NE. jlm) cycle
-
-      iln=pawtab(itypat)%indlmn(5,ilmn)
-      jln=pawtab(itypat)%indlmn(5,jlmn)
-      jl=pawtab(itypat)%indlmn(1,jlmn)
-
-      ui(1:mesh_size)=pawtab(itypat)%phi(1:mesh_size,iln)
-      uj(1:mesh_size)=pawtab(itypat)%phi(1:mesh_size,jln)
-      tui(1:mesh_size)=pawtab(itypat)%tphi(1:mesh_size,iln)
-      tuj(1:mesh_size)=pawtab(itypat)%tphi(1:mesh_size,jln)
-
-      call nderiv_gen(dui,ui,pawrad(itypat))
-      call nderiv_gen(duj,uj,pawrad(itypat))
-      call nderiv_gen(dtui,tui,pawrad(itypat))
-      call nderiv_gen(dtuj,tuj,pawrad(itypat))
-
-      do imesh=2,mesh_size
-        rr=pawrad(itypat)%rad(imesh)
-        angmom=jl*(jl+one)/(rr*rr)
-        ff(imesh)=dui(imesh)*duj(imesh)-dtui(imesh)*dtuj(imesh)
-        ff(imesh)=ff(imesh)+angmom*ui(imesh)*uj(imesh)
-        ff(imesh)=ff(imesh)-angmom*tui(imesh)*tuj(imesh)
-      end do
-
-      if (pmesh_size .LT. mesh_size) ff(pmesh_size+1:mesh_size) = zero
-
-      call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
-      call simp_gen(intg,ff,pawrad(itypat))
-
-      do iat = 1, dtset%natom
+      avgkij = half*(kij(ilmn,jlmn)+kij(jlmn,ilmn))
+      do iat=1,dtset%natom
         iatom=atindx(iat)
         if (dtset%typat(iat) .EQ. itypat) then
-          dterm%rd1(iatom,klmn) = CMPLX(half*intg,zero)
+          dterm%rd1(iatom,klmn)=CMPLX(avgkij,zero)
         end if
       end do
- 
-    end do ! klmn
+    end do
   
     ABI_FREE(ff)
+    ABI_FREE(kij)
     ABI_FREE(ui)
     ABI_FREE(uj)
-    ABI_FREE(dui)
     ABI_FREE(duj)
+    ABI_FREE(d2uj)
     ABI_FREE(tui)
     ABI_FREE(tuj)
-    ABI_FREE(dtui)
     ABI_FREE(dtuj)
+    ABI_FREE(d2tuj)
 
   end do !itypat 
 
@@ -3651,6 +3694,8 @@ subroutine check_eig_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,&
     iatom=atindx(iat)
     itypat=dtset%typat(iat)
     do klmn=1,pawtab(itypat)%lmn2_size
+      !write(std_out,'(a,2es16.8)')'JWZ debug kij p2 ',&
+      !  & pawtab(itypat)%kij(klmn),real(dterm%rd1(iatom,klmn))
       write(std_out,'(a,2es16.8)')'JWZ debug dij0 aij ',&
         & pawtab(itypat)%dij0(klmn),real(dterm%aij(iatom,klmn))
     end do
