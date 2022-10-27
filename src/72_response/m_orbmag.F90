@@ -1,4 +1,4 @@
-!*** ABINIT/m_orbmag
+!!*** ABINIT/m_orbmag
 !! NAME
 !!  m_orbmag
 !!
@@ -2515,7 +2515,7 @@ subroutine dterm_rd3a(atindx,dterm,dtset,gntselect,gprimd,lmnmax,my_lmax,&
    ABI_MALLOC(tvxc,(mesh_size,pawang%angl_size,dtset%nspden))
    ABI_MALLOC(ff,(mesh_size))
    ABI_MALLOC(rff,(mesh_size))
-         
+
    call pawxc(pawtab(itypat)%coredens,eexc,eexcdc,hyb_mixing,dtset%ixc,kxc,k3xc,&
      & pawsphden(iatom)%lm_size,pawsphden(iatom)%lmselectout,pawsphden(iatom)%nhat1,&
      & nkxc,nk3xc,non_magnetic_xc,mesh_size,pawsphden(iatom)%nspden,&
@@ -2551,11 +2551,11 @@ subroutine dterm_rd3a(atindx,dterm,dtset,gntselect,gprimd,lmnmax,my_lmax,&
        call simp_gen(xcintr,rff,pawrad(itypat))
 
        dij = dij + &
-         & pawang%angwgth(ipt)*pawang%ylmr(ilm,ipt)*pawang%ylmr(jlm,ipt)*xcint
+         & four_pi*pawang%angwgth(ipt)*pawang%ylmr(ilm,ipt)*pawang%ylmr(jlm,ipt)*xcint
        
        do adir = 1, 3
          dij_cart(adir) = dij_cart(adir) + &
-           & pawang%angwgth(ipt)*pawang%ylmr(ilm,ipt)*pawang%ylmr(jlm,ipt)*&
+           & four_pi*pawang%angwgth(ipt)*pawang%ylmr(ilm,ipt)*pawang%ylmr(jlm,ipt)*&
            & pawang%ylmr(pack1a(adir),ipt)*xcintr
        end do ! adir
      end do ! ipt
@@ -2567,7 +2567,7 @@ subroutine dterm_rd3a(atindx,dterm,dtset,gntselect,gprimd,lmnmax,my_lmax,&
      dterm%drd3a(iatom,jlmn,ilmn,1:3) = -j_dpc*dij_red(1:3)
 
    end do ! klmn
-
+     
    ABI_FREE(vxc)
    ABI_FREE(tvxc)
    ABI_FREE(ff)
@@ -2834,17 +2834,18 @@ subroutine dterm_rd1(atindx,dterm,dtset,gntselect,gprimd,my_lmax,pawrad,pawtab,r
 
   !Local variables -------------------------
   !scalars
-  integer :: iat,iatom,itypat,ilmn,ilm,iln,imesh,jl,jlm,jlmn,jln
-  integer :: klmn,mesh_size,pmesh_size
-  real(dp) :: angmom,avgkij,intg,rr
+  integer :: adir,gint,iat,iatom,itypat,il,ilmn,ilm,iln,imesh,jl,jlm,jlmn,jln
+  integer :: klm,klmn,mesh_size,pmesh_size
+  real(dp) :: angmom,avgkij,cdij,intg,rr
 
   !arrays
   real(dp) :: dij_cart(3),dij_red(3)
-  real(dp),allocatable :: dtuj(:),d2tuj(:),duj(:),d2uj(:),ff(:),kij(:,:)
+  real(dp),allocatable :: dkij(:,:,:),dtuj(:),d2tuj(:),duj(:),d2uj(:),ff(:),kij(:,:)
   real(dp),allocatable :: tui(:),tuj(:),ui(:),uj(:)
 
 !--------------------------------------------------------------------
 
+  cdij = sqrt(four_pi/three)
   dterm%rd1 = czero; dterm%drd1 = czero
   do itypat=1,dtset%ntypat
     mesh_size=pawrad(itypat)%mesh_size
@@ -2859,8 +2860,10 @@ subroutine dterm_rd1(atindx,dterm,dtset,gntselect,gprimd,my_lmax,pawrad,pawtab,r
     ABI_MALLOC(dtuj,(mesh_size))
     ABI_MALLOC(d2tuj,(mesh_size))
     ABI_MALLOC(kij,(pawtab(itypat)%lmn_size,pawtab(itypat)%lmn_size))
+    ABI_MALLOC(dkij,(pawtab(itypat)%lmn_size,pawtab(itypat)%lmn_size,3))
 
     kij = zero
+    dkij = zero
 
     do ilmn=1,pawtab(itypat)%lmn_size
       do jlmn=1,pawtab(itypat)%lmn_size
@@ -2929,6 +2932,18 @@ subroutine dterm_rd1(atindx,dterm,dtset,gntselect,gprimd,my_lmax,pawrad,pawtab,r
           end if
         end do
 
+        ! convert to crystal frame
+        dij_red = MATMUL(TRANSPOSE(gprimd),dij_cart)
+        dkij(ilmn,jlmn,1:3) = dij_red(1:3)
+        !write(std_out,'(a,2i4,3es16.8)')'JWZ debug ilmn jlmn dkij ',ilmn,jlmn,&
+        !  & dij_red(1),dij_red(2),dij_red(3)
+        do iat=1,dtset%natom
+          iatom=atindx(iat)
+          if (dtset%typat(iat) .EQ. itypat) then
+            dterm%drd1(iatom,ilmn,jlmn,1:3)=-j_dpc*dij_red(1:3)
+          end if
+        end do
+
       end do !jlmn
     end do ! ilmn
 
@@ -2945,6 +2960,7 @@ subroutine dterm_rd1(atindx,dterm,dtset,gntselect,gprimd,my_lmax,pawrad,pawtab,r
     end do
   
     ABI_FREE(ff)
+    ABI_FREE(dkij)
     ABI_FREE(kij)
     ABI_FREE(ui)
     ABI_FREE(uj)
@@ -3696,8 +3712,8 @@ subroutine check_eig_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,&
     do klmn=1,pawtab(itypat)%lmn2_size
       !write(std_out,'(a,2es16.8)')'JWZ debug kij p2 ',&
       !  & pawtab(itypat)%kij(klmn),real(dterm%rd1(iatom,klmn))
-      write(std_out,'(a,2es16.8)')'JWZ debug dij0 aij ',&
-        & pawtab(itypat)%dij0(klmn),real(dterm%aij(iatom,klmn))
+      !write(std_out,'(a,2es16.8)')'JWZ debug dij0 aij ',&
+      !  & pawtab(itypat)%dij0(klmn),real(dterm%aij(iatom,klmn))
     end do
   end do
 
@@ -3934,8 +3950,8 @@ subroutine make_d(atindx,atindx1,cprj,dimlmn,dterm,dtset,gprimd,&
  !  & pawrad,pawsphden,pawtab,realgnt)
 
  ! term dvxc due to v_xc[n1+nc] corresponds to term 3a in roadmap paper
- !call dterm_rd3a(atindx,dterm,dtset,gntselect,gprimd,psps%lmnmax,my_lmax,&
- !   & pawang,paw_ij,pawrad,pawsphden,pawtab,realgnt)
+ call dterm_rd3a(atindx,dterm,dtset,gntselect,gprimd,psps%lmnmax,my_lmax,&
+    & pawang,paw_ij,pawrad,pawsphden,pawtab,realgnt)
 
  ABI_FREE(realgnt)
  ABI_FREE(gntselect)
