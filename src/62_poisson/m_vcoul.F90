@@ -307,9 +307,8 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
  ABI_MALLOC(vcoul    , (ng, nqibz))
  ABI_MALLOC(vcoul_lwl, (ng, nqlwl))
 
- a1 = Cryst%rprimd(:,1); b1 = two_pi * gprimd(:,1)
- a2 = Cryst%rprimd(:,2); b2 = two_pi * gprimd(:,2)
- a3 = Cryst%rprimd(:,3); b3 = two_pi * gprimd(:,3)
+ a1 = Cryst%rprimd(:,1); a2 = Cryst%rprimd(:,2); a3 = Cryst%rprimd(:,3)
+ b1 = two_pi * gprimd(:,1); b2 = two_pi * gprimd(:,2); b3 = two_pi * gprimd(:,3)
  b1b1 = dot_product(b1, b1); b2b2 = dot_product(b2, b2); b3b3 = dot_product(b3, b3)
  bb(1) = b1b1; bb(2) = b2b2; bb(3) = b3b3
  b1b2 = dot_product(b1, b2); b2b3 = dot_product(b2, b3); b3b1 = dot_product(b3, b1)
@@ -592,20 +591,15 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
    ! === Integration of 1/q^2 singularity ===
    ! * We use the auxiliary function from PRB 75, 205126 (2007) [[cite:Carrier2007]]
    q0_vol = (two_pi)**3 / (nkbz * ucvol); bz_geometry_factor = zero
-
-   ! It might be useful to perform the integration using the routine quadrature
-   ! so that we can control the accuracy of the integral and improve the
-   ! numerical stability of the GW results.
    do iq_bz=1,nqbz
      qbz_cart(:) = qbz(1,iq_bz)*b1(:) + qbz(2,iq_bz)*b2(:) + qbz(3,iq_bz)*b3(:)
      qbz_norm = SQRT(SUM(qbz_cart(:)**2))
      if (qbz_norm > tolq0) bz_geometry_factor = bz_geometry_factor - faux(qbz(:,iq_bz))
    end do
 
-   bz_geometry_factor = bz_geometry_factor + integratefaux() * nqbz
+   bz_geometry_factor = bz_geometry_factor + integratefaux(comm) * nqbz
 
-   write(msg,'(2a,2x,f8.4)')ch10,&
-     ' integrate q->0 : numerical BZ geometry factor = ',bz_geometry_factor*q0_vol**(2./3.)
+   write(msg,'(2a,2x,f8.4)')ch10,' integrate q->0 : numerical BZ geometry factor = ',bz_geometry_factor*q0_vol**(2./3.)
    call wrtout(std_out, msg)
 
    Vcp%i_sz = four_pi * bz_geometry_factor  ! Final result stored here
@@ -649,8 +643,7 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
 
    bz_geometry_factor = bz_geometry_factor + intfauxgb * nqbz
 
-   write(msg,'(2a,2x,f8.4)')ch10,&
-     ' integrate q->0: numerical BZ geometry factor = ',bz_geometry_factor*q0_vol**(2./3.)
+   write(msg,'(2a,2x,f8.4)')ch10,' integrate q->0: numerical BZ geometry factor = ',bz_geometry_factor*q0_vol**(2./3.)
    call wrtout(std_out, msg)
 
    Vcp%i_sz = four_pi*bz_geometry_factor
@@ -675,7 +668,6 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
    vcoul_lwl = four_pi/vcoul_lwl**2
    !
    ! === Integration of 1/q^2 singularity ===
-   ! * We use the auxiliary function from PRB 75, 205126 (2007) [[cite:Carrier2007]]
    q0_vol = (two_pi) **3 / (nkbz*ucvol); bz_geometry_factor=zero
 
    ! $$ MG: this is to restore the previous implementation, it will facilitate the merge
@@ -710,21 +702,22 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
 
    ! === Treat 1/q^2 singularity ===
    ! * We use the auxiliary function from PRB 75, 205126 (2007) [[cite:Carrier2007]]
-   q0_vol=(two_pi)**3/(nkbz*ucvol); bz_geometry_factor=zero
+   q0_vol = (two_pi)**3 / (nkbz * ucvol); bz_geometry_factor=zero
    do iq_bz=1,nqbz
      qbz_cart(:) = qbz(1,iq_bz)*b1(:) + qbz(2,iq_bz)*b2(:) + qbz(3,iq_bz)*b3(:)
      qbz_norm = SQRT(SUM(qbz_cart(:)**2))
-     if (qbz_norm > tolq0) bz_geometry_factor=bz_geometry_factor-faux(qbz(:,iq_bz))
+     if (qbz_norm > tolq0) bz_geometry_factor = bz_geometry_factor - faux(qbz(:,iq_bz))
    end do
 
-   bz_geometry_factor = bz_geometry_factor + integratefaux() * nqbz
+   bz_geometry_factor = bz_geometry_factor + integratefaux(comm) * nqbz
 
    write(msg,'(2a,2x,f12.4)')ch10,' integrate q->0 : numerical BZ geometry factor = ',bz_geometry_factor*q0_vol**(2./3.)
    call wrtout(std_out, msg)
+
    Vcp%i_sz = four_pi * bz_geometry_factor  ! Final result stored here
 
  case ('ERFC')
-   ! * Use a modified short-range only Coulomb interaction thanks to the complementar error function:
+   ! * Use a modified short-range only Coulomb interaction thanks to the complementary error function:
    !   $ V_c = [1-erf(r/r_{cut})]/r $
    ! * The Fourier transform of the error function reads
    !   vcoul=four_pi/(vcoul**2) * ( 1.d0 - exp( -0.25d0 * (Vcp%rcut*vcoul)**2 ) )
@@ -774,125 +767,144 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
 
 contains !===============================================================
 
- real(dp) function integratefaux()
+ real(dp) function integratefaux(comm)
+
+ integer,intent(in) :: comm
+ !real(dp),intent(in) :: rcut !, gprimd(3,3)
 
 !Local variables-------------------------------
-  integer,parameter :: nref = 3, nq = 50
-  integer :: ierr,iq,iqx1,iqy1,iqz1,iqx2,iqy2,iqz2,miniqy1,maxiqy1,nqhalf
-  real(dp) :: invnq,invnq3,qq,weightq,weightxy,weightxyz
-  real(dp) :: qq1(3),qq2(3),bb4sinpiqq_2(3,nq),sin2piqq(nq),bb4sinpiqq2_2(3,0:nq),sin2piqq2(3,0:nq)
+ integer,parameter :: nref = 3, nq = 50
+ integer :: ierr,iq,iqx1,iqy1,iqz1,iqx2,iqy2,iqz2,miniqy1,maxiqy1,nqhalf, nprocs
+ real(dp) :: invnq,invnq3,qq,weightq,weightxy,weightxyz
+ real(dp) :: qq1(3),qq2(3),bb4sinpiqq_2(3,nq),sin2piqq(nq),bb4sinpiqq2_2(3,0:nq),sin2piqq2(3,0:nq)
+ !real(dp) :: b1(3), b2(3), b3(3)
 
-  ! nq is the number of sampling points along each axis for the numerical integration
-  ! nref is the area where the mesh is refined
+ ! nq is the number of sampling points along each axis for the numerical integration
+ ! nref is the area where the mesh is refined
 
-  integratefaux=zero
-  invnq=one/DBLE(nq)
-  invnq3=invnq**3
-  nqhalf=nq/2
+ integratefaux = zero
+ invnq = one/DBLE(nq)
+ invnq3 = invnq**3
+ nqhalf = nq/2
 
-  ! In order to speed up the calculation, precompute the sines
-  do iq=1,nq
-    qq=DBLE(iq)*invnq-half
-    bb4sinpiqq_2(:,iq)=bb(:)*four*SIN(pi*qq)**2 ; sin2piqq(iq)=SIN(two_pi*qq)
-  end do
+ !b1 = two_pi * gprimd(:,1); b2 = two_pi * gprimd(:,2); b3 = two_pi * gprimd(:,3)
+ !b1b1 = dot_product(b1, b1); b2b2 = dot_product(b2, b2); b3b3 = dot_product(b3, b3)
+ !bb(1) = b1b1; bb(2) = b2b2; bb(3) = b3b3
+ !b1b2 = dot_product(b1, b2); b2b3 = dot_product(b2, b3); b3b1 = dot_product(b3, b1)
 
-  do iqx1=1,nq
-    if(modulo(iqx1, nprocs) /= rank) cycle
-    qq1(1)=DBLE(iqx1)*invnq-half
-    !Here take advantage of the q <=> -q symmetry:
-    ! arrange the sampling of qx, qy space to avoid duplicating calculations.
-    !Need weights to do this ...
-    !do iqy1=1,nq
-    miniqy1=nqhalf+1 ; maxiqy1=nq
-    if(iqx1>=nqhalf)miniqy1=nqhalf
-    if(iqx1>nqhalf .and. iqx1<nq)maxiqy1=nq-1
-    do iqy1=miniqy1,maxiqy1
-      qq1(2)=DBLE(iqy1)*invnq-half
-      !By default, the factor of two is for the q <=> -q symmetry
-      weightq=invnq3*two
-      !But not all qx qy lines have a symmetric one ...
-      if( (iqx1==nqhalf .or. iqx1==nq) .and. (iqy1==nqhalf .or. iqy1==nq))weightq=weightq*half
+ nprocs = xmpi_comm_size(comm)
 
-      do iqz1=1,nq
-        qq1(3)=DBLE(iqz1)*invnq-half
-        !
-        ! Refine the mesh for the point close to the origin
-        if( abs(iqx1-nqhalf)<=nref .and. abs(iqy1-nqhalf)<=nref .and. abs(iqz1-nqhalf)<=nref ) then
-          !Note that the set of point is symmetric around the central point, while weights are taken into account
-          do iq=0,nq
-            qq2(:)=qq1(:)+ (DBLE(iq)*invnq-half)*invnq
-            bb4sinpiqq2_2(:,iq)=bb(:)*four*SIN(pi*qq2(:))**2 ;  sin2piqq2(:,iq)=SIN(two_pi*qq2(:))
-          enddo
-          do iqx2=0,nq
-            qq2(1)=qq1(1) + (DBLE(iqx2)*invnq-half ) *invnq
-            do iqy2=0,nq
-              qq2(2)=qq1(2) + (DBLE(iqy2)*invnq-half ) *invnq
-              weightxy=invnq3*weightq
-              if(iqx2==0 .or. iqx2==nq)weightxy=weightxy*half
-              if(iqy2==0 .or. iqy2==nq)weightxy=weightxy*half
-              do iqz2=0,nq
-                qq2(3)=qq1(3) + (DBLE(iqz2)*invnq-half ) *invnq
-                weightxyz=weightxy
-                if(iqz2==0 .or. iqz2==nq)weightxyz=weightxy*half
-                !
-                ! Treat the remaining divergence in the origin as if it would be a spherical
-                ! integration of 1/q^2
-                if( iqx1/=nqhalf .or. iqy1/=nqhalf .or. iqz1/=nqhalf .or. iqx2/=nqhalf .or. iqy2/=nqhalf .or. iqz2/=nqhalf ) then
-!                 integratefaux=integratefaux+ faux(qq2) *invnq**6
-                  integratefaux=integratefaux+ faux_fast(qq2,bb4sinpiqq2_2(1,iqx2),bb4sinpiqq2_2(2,iqy2),bb4sinpiqq2_2(3,iqz2),&
-&                                                        sin2piqq2(1,iqx2),sin2piqq2(2,iqy2),sin2piqq2(3,iqz2)) * weightxyz
-                else
-                   integratefaux=integratefaux + 7.7955* ( (two_pi)**3/ucvol*invnq3*invnq3 )**(-2./3.) *invnq3*invnq3
-                end if
-              end do
-            end do
-          end do
-        else
-!        integratefaux=integratefaux+faux(qq1)*invnq**3
-         integratefaux=integratefaux+ faux_fast(qq1,bb4sinpiqq_2(1,iqx1),bb4sinpiqq_2(2,iqy1),bb4sinpiqq_2(3,iqz1),&
-&                                               sin2piqq(iqx1),sin2piqq(iqy1),sin2piqq(iqz1)) * weightq
-        end if
-      end do
-    end do
-  end do
+ ! In order to speed up the calculation, precompute the sines
+ do iq=1,nq
+   qq=DBLE(iq)*invnq-half
+   bb4sinpiqq_2(:,iq)=bb(:)*four*SIN(pi*qq)**2 ; sin2piqq(iq)=SIN(two_pi*qq)
+ end do
 
-  call xmpi_sum(integratefaux, comm, ierr)
+ do iqx1=1,nq
+   if (modulo(iqx1, nprocs) /= rank) cycle ! MPI parallelism
+   qq1(1)=DBLE(iqx1)*invnq-half
+   ! Here take advantage of the q <=> -q symmetry:
+   ! arrange the sampling of qx, qy space to avoid duplicating calculations. Need weights to do this ...
+   !do iqy1=1,nq
+   miniqy1 = nqhalf + 1; maxiqy1 = nq
+   if (iqx1 >= nqhalf) miniqy1 = nqhalf
+   if (iqx1 > nqhalf .and. iqx1 < nq) maxiqy1 = nq - 1
 
- end function integratefaux
+   do iqy1=miniqy1,maxiqy1
+     qq1(2) = DBLE(iqy1)*invnq - half
+     ! By default, the factor of two is for the q <=> -q symmetry
+     weightq = invnq3*two
+     ! But not all qx qy lines have a symmetric one ...
+     if( (iqx1 == nqhalf .or. iqx1 == nq) .and. (iqy1 == nqhalf .or. iqy1 == nq)) weightq = weightq*half
 
- real(dp) pure function faux(qq)
+     do iqz1=1,nq
+       qq1(3) = DBLE(iqz1)*invnq - half
 
-  real(dp),intent(in) :: qq(3)
-  real(dp) :: bb4sinpiqq1_2, bb4sinpiqq2_2, bb4sinpiqq3_2, sin2piqq1, sin2piqq2, sin2piqq3
+       ! Refine the mesh for the point close to the origin
+       if( abs(iqx1-nqhalf) <= nref .and. abs(iqy1-nqhalf) <= nref .and. abs(iqz1-nqhalf) <= nref ) then
+         ! Note that the set of point is symmetric around the central point, while weights are taken into account
+         do iq=0,nq
+           qq2(:) = qq1(:)+ (DBLE(iq)*invnq-half)*invnq
+           bb4sinpiqq2_2(:,iq) =bb(:)*four*SIN(pi*qq2(:))**2; sin2piqq2(:,iq)=SIN(two_pi*qq2(:))
+         end do
+         do iqx2=0,nq
+           qq2(1)=qq1(1) + (DBLE(iqx2)*invnq-half ) *invnq
+           do iqy2=0,nq
+             qq2(2)=qq1(2) + (DBLE(iqy2)*invnq-half ) *invnq
+             weightxy=invnq3*weightq
+             if (iqx2 == 0 .or. iqx2 == nq) weightxy = weightxy*half
+             if (iqy2 == 0 .or. iqy2 == nq) weightxy = weightxy*half
+             do iqz2=0,nq
+               qq2(3) = qq1(3) + (DBLE(iqz2)*invnq - half) * invnq
+               weightxyz = weightxy
+               if (iqz2 == 0 .or. iqz2 == nq) weightxyz = weightxy*half
+               !
+               ! Treat the remaining divergence in the origin as if it would be a spherical integration of 1/q^2
+               if (iqx1/=nqhalf .or. iqy1/=nqhalf .or. iqz1/=nqhalf .or. &
+                   iqx2/=nqhalf .or. iqy2/=nqhalf .or. iqz2/=nqhalf ) then
+                 !integratefaux=integratefaux+ faux(qq2) *invnq**6
+                 integratefaux = integratefaux + &
+                   faux_fast(qq2, bb4sinpiqq2_2(1,iqx2), bb4sinpiqq2_2(2,iqy2), bb4sinpiqq2_2(3,iqz2), &
+                             sin2piqq2(1,iqx2), sin2piqq2(2,iqy2), sin2piqq2(3,iqz2)) * weightxyz
+               else
+                  integratefaux = integratefaux + 7.7955* ((two_pi)**3/ucvol*invnq3*invnq3 )**(-2./3.) *invnq3*invnq3
+               end if
+             end do
+           end do
+         end do
+       else
+        ! integratefaux=integratefaux+faux(qq1)*invnq**3
+        integratefaux = integratefaux + &
+          faux_fast(qq1, bb4sinpiqq_2(1,iqx1), bb4sinpiqq_2(2,iqy1), bb4sinpiqq_2(3,iqz1), &
+                    sin2piqq(iqx1), sin2piqq(iqy1), sin2piqq(iqz1)) * weightq
+       end if
+     end do
+   end do
+ end do
 
-  bb4sinpiqq1_2=b1b1*four*SIN(pi*qq(1))**2
-  bb4sinpiqq2_2=b2b2*four*SIN(pi*qq(2))**2
-  bb4sinpiqq3_2=b3b3*four*SIN(pi*qq(3))**2
-  sin2piqq1=SIN(two_pi*qq(1))
-  sin2piqq2=SIN(two_pi*qq(2))
-  sin2piqq3=SIN(two_pi*qq(3))
+ call xmpi_sum(integratefaux, comm, ierr)
 
-  faux = faux_fast(qq,bb4sinpiqq1_2,bb4sinpiqq2_2,bb4sinpiqq3_2,sin2piqq1,sin2piqq2,sin2piqq3)
+end function integratefaux
 
- end function faux
+real(dp) pure function faux(qq)
 
- real(dp) pure function faux_fast(qq, bb4sinpiqq1_2, bb4sinpiqq2_2, bb4sinpiqq3_2, sin2piqq1, sin2piqq2,sin2piqq3)
+ real(dp),intent(in) :: qq(3)
+ !real(dp),intent(in) :: rcut
+ !real(dp),intent(in) :: b1(3), b2(3), b3(3)
 
-  real(dp),intent(in) :: qq(3)
-  real(dp),intent(in) :: bb4sinpiqq1_2, bb4sinpiqq2_2, bb4sinpiqq3_2, sin2piqq1, sin2piqq2, sin2piqq3
+ real(dp) :: bb4sinpiqq1_2, bb4sinpiqq2_2, bb4sinpiqq3_2, sin2piqq1, sin2piqq2, sin2piqq3
 
-  faux_fast = bb4sinpiqq1_2 + bb4sinpiqq2_2 + bb4sinpiqq3_2 &
-       +two*( b1b2 * sin2piqq1*sin2piqq2 &
-             +b2b3 * sin2piqq2*sin2piqq3 &
-             +b3b1 * sin2piqq3*sin2piqq1 &
-            )
-  if (Vcp%rcut > tol6) then
-    faux_fast=two_pi*two_pi/faux_fast * exp( -0.25d0*Vcp%rcut**2* sum( ( qq(1)*b1(:)+qq(2)*b2(:)+qq(3)*b3(:) )**2 ) )
-  else
-    faux_fast=two_pi*two_pi/faux_fast
-  endif
+ bb4sinpiqq1_2 = b1b1 * four * SIN(pi*qq(1))**2
+ bb4sinpiqq2_2 = b2b2 * four * SIN(pi*qq(2))**2
+ bb4sinpiqq3_2 = b3b3 * four * SIN(pi*qq(3))**2
+ sin2piqq1 = SIN(two_pi*qq(1))
+ sin2piqq2 = SIN(two_pi*qq(2))
+ sin2piqq3 = SIN(two_pi*qq(3))
 
- end function faux_fast
+ faux = faux_fast(qq, bb4sinpiqq1_2, bb4sinpiqq2_2, bb4sinpiqq3_2, sin2piqq1, sin2piqq2, sin2piqq3)
+
+end function faux
+
+real(dp) pure function faux_fast(qq, bb4sinpiqq1_2, bb4sinpiqq2_2, bb4sinpiqq3_2, sin2piqq1, sin2piqq2, sin2piqq3)
+
+ real(dp),intent(in) :: qq(3)
+ real(dp),intent(in) :: bb4sinpiqq1_2, bb4sinpiqq2_2, bb4sinpiqq3_2, sin2piqq1, sin2piqq2, sin2piqq3
+ !real(dp),intent(in) :: rcut
+ !real(dp),intent(in) :: b1(3), b2(3), b3(3)
+
+ faux_fast = bb4sinpiqq1_2 + bb4sinpiqq2_2 + bb4sinpiqq3_2 &
+      +two*( b1b2 * sin2piqq1*sin2piqq2 &
+            +b2b3 * sin2piqq2*sin2piqq3 &
+            +b3b1 * sin2piqq3*sin2piqq1 &
+           )
+
+ if (Vcp%rcut > tol6) then
+   faux_fast = two_pi*two_pi/faux_fast * exp( -0.25d0*Vcp%rcut**2* sum( ( qq(1)*b1(:)+qq(2)*b2(:)+qq(3)*b3(:) )**2 ) )
+ else
+   faux_fast = two_pi*two_pi/faux_fast
+ endif
+
+end function faux_fast
 
 end subroutine vcoul_init
 !!***
