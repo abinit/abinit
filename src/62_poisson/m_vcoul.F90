@@ -156,6 +156,35 @@ module m_vcoul
  real(dp),save :: xx_,rho_
  real(dp),save :: accuracy_
 
+!!****t* m_vcoul/mc_integrator_t
+!! NAME
+!!  mc_integrator_t
+!!
+!! FUNCTION
+!!
+!! SOURCE
+
+type mc_t
+
+   !integer :: ncell = 3
+   integer :: nmc_max = 2500000
+
+   real(dp) :: q0sph
+
+   real(dp) :: ucvol
+
+   real(dp) :: gmet(3,3)
+
+   real(dp),allocatable :: qran(:,:)
+   ! (3, nmc_max)
+
+contains
+  procedure :: init => mc_init
+  procedure :: integrate => mc_integrate
+  procedure :: free => mc_free
+end type mc_t
+
+
 CONTAINS  !========================================================================================
 !!***
 
@@ -199,26 +228,26 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: master=0, ncell=3, nmc_max=2500000
- integer :: nmc,nseed, i1,i2,i3,ig,imc, nqibz, nqbz
+ integer,parameter :: master=0
+ integer :: nmc,ig,imc, nqibz, nqbz, nkbz
  integer :: ii,iqlwl,iq_bz,iq_ibz,npar,npt,iq
  integer :: opt_cylinder,opt_surface,rank,nprocs
  real(dp),parameter :: tolq0 = 1.d-3, tol999 = 999.0
  real(dp) :: b1b1,b2b2,b3b3,b1b2,b2b3,b3b1
  real(dp) :: bz_geometry_factor,bz_plane,check,dx,integ,q0_vol,q0_volsph
  real(dp) :: qbz_norm,step,ucvol,intfauxgb, alfa
- real(dp) :: lmin,vlength,qpg2,rcut2, q0sph, ucvol_sc
+ real(dp) ::qpg2,rcut2
  character(len=500) :: msg
+ type(mc_t) :: mc
 !arrays
  integer :: gamma_pt(3,1)
- integer, allocatable :: seed(:)
+ !integer, allocatable :: seed(:)
  integer, contiguous, pointer :: gvec(:,:)
  real(dp) :: a1(3),a2(3),a3(3),bb(3),b1(3),b2(3),b3(3),gmet(3,3),gprimd(3,3)
- real(dp) :: qbz_cart(3),rmet(3,3),qtmp(3),qmin(3),qmin_cart(3),qpg(3)
- real(dp) :: rprimd_sc(3,3),gprimd_sc(3,3),gmet_sc(3,3),rmet_sc(3,3), qcart2red(3,3)
+ real(dp) :: qbz_cart(3),rmet(3,3),qpg(3)
  real(dp),allocatable :: cov(:,:),par(:),qfit(:,:),sigma(:),var(:),qcart(:,:)
- real(dp),allocatable :: vcfit(:,:),vcoul(:,:),vcoul_lwl(:,:),xx(:),yy(:),qran(:,:)
- real(dp), contiguous, pointer :: qibz(:,:), qbz(:,:)
+ real(dp),allocatable :: vcfit(:,:),vcoul(:,:),vcoul_lwl(:,:),xx(:),yy(:)
+ real(dp),contiguous, pointer :: qibz(:,:), qbz(:,:)
 
 ! *************************************************************************
 
@@ -234,9 +263,13 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
  nqibz = qmesh%nibz; nqbz = qmesh%nbz
  qibz => qmesh%ibz; qbz => qmesh%bz
 
+ !nkibz = kmehs%nibz
+ nkbz = kmesh%nbz
+ !kibz => kmesh%ibz; kbz => kmesh%bz
+
  ! Save dimension and other useful quantities in Vcp
  Vcp%ng        = ng                   ! Number of G-vectors in the Coulomb matrix elements.
- Vcp%nqibz     = Qmesh%nibz           ! Number of irred q-point.
+ Vcp%nqibz     = nqibz                ! Number of irred q-point.
  Vcp%nqlwl     = nqlwl                ! Number of small q-directions to deal with singularity and non Analytic behavior.
  Vcp%rcut      = rcut                 ! Cutoff radius for cylinder.
  Vcp%hcyl      = zero                 ! Length of finite cylinder (Rozzi"s method, default is Beigi).
@@ -291,211 +324,27 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
    !    - extended to the multiple shifts
    !    - with an adaptative number of MonteCarlo sampling points
 
-   ! Supercell defined by the k-mesh
-   rprimd_sc(:,:) = MATMUL(Cryst%rprimd, Kmesh%kptrlatt)
-   call metric(gmet_sc, gprimd_sc, -1, rmet_sc, rprimd_sc, ucvol_sc)
-
-   qcart2red(:,:) = two_pi * Cryst%gprimd(:,:)
-   call matrginv(qcart2red, 3, 3)
-
-   ! Find the largest sphere inside the miniBZ
-   ! in order to integrate the divergence analytically
-   q0sph = HUGE(one)
-   do i1 = -ncell+1, ncell
-     qtmp(1) = dble(i1) * 0.5_dp
-     do i2 = -ncell+1, ncell
-       qtmp(2) = dble(i2) * 0.5_dp
-       do i3 = -ncell+1, ncell
-         qtmp(3) = dble(i3) * 0.5_dp
-         if (i1 == 0 .AND. i2 == 0 .AND. i3 == 0) cycle
-         vlength = normv(qtmp, gmet_sc, 'G')
-         if (vlength < q0sph) q0sph = vlength
-       enddo
-     enddo
-   enddo
-
-   ! Setup the random vectors for the Monte Carlo sampling of the miniBZ at q = 0
-   ABI_MALLOC(qran,(3, nmc_max))
-   call random_seed(size=nseed)
-   ABI_MALLOC(seed, (nseed))
-   do i1=1,nseed
-     seed(i1) = NINT(SQRT(DBLE(i1) * 103731))
-   end do
-   call random_seed(put=seed)
-   call random_number(qran)
-   ABI_FREE(seed)
-
-   ! Overide the first "random vector" with 0
-   qran(:,1) = zero
-
-   ! Fold qran into the Wignez-Seitz cell around q = 0
-   do imc=2,nmc_max
-     lmin = HUGE(one)
-     do i1 = -ncell+1, ncell
-       qtmp(1) = qran(1,imc) + dble(i1)
-       do i2 = -ncell+1, ncell
-         qtmp(2) = qran(2,imc) + dble(i2)
-         do i3 = -ncell+1, ncell
-           qtmp(3) = qran(3,imc) + dble(i3)
-           vlength = normv(qtmp, gmet_sc, 'G')
-           if (vlength < lmin) then
-             lmin = vlength
-             ! Get the q-vector in cartesian coordinates
-             qmin_cart(:) = two_pi * MATMUL( gprimd_sc(:,:) , qtmp )
-             ! Transform it back to the reciprocal space
-             qmin(:) = MATMUL( qcart2red , qmin_cart )
-           end if
-         enddo
-       enddo
-     enddo
-
-     qran(:,imc) = qmin(:)
-   enddo
+   call mc%init(cryst%rprimd, cryst%ucvol, cryst%gprimd, cryst%gmet, kmesh%kptrlatt)
 
    rcut2 = Vcp%rcut**2
-   vcoul(:,:) = zero
 
-   ! FB: Admittedly, it's a lot of duplication of code hereafter,
-   !     but I think it's the clearest and fastest way
-   select case (TRIM(Vcp%mode))
-   case('MINIBZ')
+   do iq_ibz=1,nqibz
+     call mc%integrate(rcut2, nkbz, vcp%mode, qibz(:, iq_ibz), ng, gvec, vcoul(:, iq_ibz))
+   end do
 
-     do iq_ibz=1,nqibz
-       do ig=1,ng
-         if (iq_ibz == 1 .and. ig == 1) cycle
+   ! Treat the limit q --> 0
+   vcp%i_sz = vcoul(1, 1)
 
-         qpg(:) = qibz(:,iq_ibz) + gvec(:,ig)
-         qpg2 = normv(qpg, gmet, 'G')**2
-         nmc = adapt_nmc(nmc_max, qpg2)
-         do imc=1,nmc
-           qpg(:) = qibz(:,iq_ibz) + gvec(:,ig) + qran(:,imc)
-           qpg2 = normv(qpg, gmet, 'G')**2
-           vcoul(ig, iq_ibz) = vcoul(ig, iq_ibz) + four_pi / qpg2 / REAL(nmc, dp)
-         end do
-       end do
-     end do ! iq_ibz
+   do iqlwl=1,nqlwl
+     call mc%integrate(rcut2, nkbz, vcp%mode, qlwl(:, iqlwl), ng, gvec, vcoul_lwl(:, iqlwl))
+   end do
 
-     ! Override q=1, ig=1
-     vcoul(1,1) = four_pi**2 * Kmesh%nbz * ucvol / ( 8.0_dp * pi**3 ) * q0sph
-     do imc=1,nmc_max
-       qpg(:) = qibz(:,1) + gvec(:,1) + qran(:,imc)
-       qpg2 = normv(qpg, gmet, 'G')**2
-       if (qpg2 > q0sph ** 2) vcoul(1,1) = vcoul(1,1) + four_pi / qpg2 / REAL(nmc_max, dp)
-     end do
-
-     vcoul_lwl(:,:) = zero
-     do iq_ibz=1,nqlwl
-       do ig=1,ng
-         qpg(:) = qlwl(:,iq_ibz) + gvec(:,ig)
-         qpg2 = normv(qpg, gmet, 'G')**2
-         nmc = adapt_nmc(nmc_max, qpg2)
-         do imc=1,nmc
-           qpg(:) = qlwl(:,iq_ibz) + gvec(:,ig) + qran(:,imc)
-           qpg2 = normv(qpg, gmet, 'G')**2
-           vcoul_lwl(ig,iq_ibz) = vcoul_lwl(ig,iq_ibz) + four_pi / qpg2 / REAL(nmc, dp)
-         end do
-       end do
-     end do ! iq_ibz
-
-   case('MINIBZ-ERFC')
-
-     do iq_ibz=1,nqibz
-       do ig=1,ng
-         if (iq_ibz == 1 .AND. ig == 1) cycle
-
-         qpg(:) = qibz(:,iq_ibz) + gvec(:,ig)
-         qpg2 = normv(qpg, gmet, 'G')**2
-         nmc = adapt_nmc(nmc_max, qpg2)
-         do imc=1,nmc
-           qpg(:) = qibz(:,iq_ibz) +  gvec(:,ig) + qran(:,imc)
-           qpg2 = normv(qpg, gmet, 'G')**2
-           vcoul(ig,iq_ibz) = vcoul(ig,iq_ibz) + four_pi / qpg2 / REAL(nmc,dp) &
-                  * (  one - EXP( -0.25d0 * rcut2 * qpg2 ) )
-         end do
-       end do
-     end do ! iq_ibz
-
-     ! Override q=1, ig=1
-     vcoul(1,1) = four_pi**2 * Kmesh%nbz * ucvol / ( 8.0_dp * pi**3 ) &
-        * ( q0sph - SQRT(pi/rcut2) * abi_derf(0.5_dp*SQRT(rcut2)*q0sph) )
-     do imc=1,nmc_max
-       qpg(:) = qibz(:,1) + gvec(:,1) + qran(:,imc)
-       qpg2 = normv(qpg, gmet, 'G')**2
-       if (qpg2 > q0sph**2) then
-         vcoul(1,1) = vcoul(1,1) + four_pi / qpg2 / REAL(nmc_max,dp) &
-                      * (one - EXP( -0.25d0 * rcut2 * qpg2))
-       end if
-     end do
-
-     vcoul_lwl(:,:) = zero
-     do iq_ibz=1,nqlwl
-       do ig=1,ng
-         qpg(:) = qlwl(:,iq_ibz) + gvec(:,ig)
-         qpg2 = normv(qpg, gmet, 'G')**2
-         nmc = adapt_nmc(nmc_max, qpg2)
-         do imc=1,nmc
-           qpg(:) = qlwl(:,iq_ibz) + gvec(:,ig) + qran(:,imc)
-           qpg2 = normv(qpg, gmet, 'G')**2
-           vcoul_lwl(ig,iq_ibz) = vcoul_lwl(ig,iq_ibz) + four_pi / qpg2 / REAL(nmc,dp) &
-                  * (one - EXP( -0.25d0 * rcut2 * qpg2))
-         end do
-       end do
-     end do ! iq_ibz
-
-   case('MINIBZ-ERF')
-
-     do iq_ibz=1,nqibz
-       do ig=1,ng
-         if (iq_ibz == 1 .AND. ig == 1) cycle
-
-         qpg(:) = qibz(:,iq_ibz) + gvec(:,ig)
-         qpg2 = normv(qpg, gmet, 'G')**2
-         nmc = adapt_nmc(nmc_max, qpg2)
-         do imc=1,nmc
-           qpg(:) = qibz(:,iq_ibz) + gvec(:,ig) + qran(:,imc)
-           qpg2 = normv(qpg, gmet, 'G')**2
-           vcoul(ig,iq_ibz) = vcoul(ig,iq_ibz) + four_pi / qpg2 / REAL(nmc,dp) &
-                  * EXP( -0.25d0 * rcut2 * qpg2 )
-         end do
-       end do
-     end do ! iq_ibz
-
-     ! Override q=1, ig=1
-     vcoul(1,1) = four_pi**2 * Kmesh%nbz * ucvol / ( 8.0_dp * pi**3 ) &
-                  * SQRT(pi/rcut2) * abi_derf(0.5_dp*SQRT(rcut2)*q0sph)
-
-     do imc=1,nmc_max
-       qpg(:) = qibz(:,1) + gvec(:,1) + qran(:,imc)
-       qpg2 = normv(qpg, gmet, 'G')**2
-       if (qpg2 > q0sph**2) then
-         vcoul(1,1) = vcoul(1,1) + four_pi / qpg2 / REAL(nmc_max,dp) *  EXP( -0.25d0 * rcut2 * qpg2 )
-       end if
-     end do
-
-     vcoul_lwl(:,:) = zero
-     do iq_ibz=1,nqlwl
-       do ig=1,ng
-         qpg(:) = qlwl(:,iq_ibz) + gvec(:,ig)
-         qpg2 = normv(qpg, gmet, 'G')**2
-         nmc = adapt_nmc(nmc_max, qpg2)
-         do imc=1,nmc
-           qpg(:) = qlwl(:,iq_ibz) + gvec(:,ig) + qran(:,imc)
-           qpg2 = normv(qpg, gmet,'G')**2
-           vcoul_lwl(ig,iq_ibz) = vcoul_lwl(ig,iq_ibz) + four_pi / qpg2 / REAL(nmc,dp) &
-                  * EXP( -0.25d0 * rcut2 * qpg2 )
-         end do
-       end do
-     end do
-
-   end select
-
-   Vcp%i_sz = vcoul(1,1)
-   ABI_FREE(qran)
+   call mc%free()
 
  case ('SPHERE')
    ! A non-positive value of rcut imposes the recipe of Spencer & Alavi, PRB 77, 193110 (2008) [[cite:Spencer2008]].
    if (Vcp%rcut < tol12) then
-     Vcp%rcut = (ucvol*Kmesh%nbz*3.d0/four_pi)**third
+     Vcp%rcut = (ucvol*nkbz*3.d0/four_pi)**third
      write(msg,'(2a,2x,f8.4,a)')ch10,&
       ' Using calculated value for rcut: ',Vcp%rcut, ' to have the same volume as the BvK crystal'
      call wrtout(std_out, msg)
@@ -600,7 +449,7 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
      end do
      integ=integ+yy(npt-1)*dx*3.0/2.0
      !write(std_out,*)' simple integral',integ
-     q0_volsph = (two_pi)**3 / (Kmesh%nbz * ucvol)
+     q0_volsph = (two_pi)**3 / (nkbz * ucvol)
      q0_vol=bz_plane*two*xx(npt)
      !write(std_out,*)' q0 sphere : ',q0_volsph,' q0_vol cyl ',q0_vol
      Vcp%i_sz=bz_plane*two*integ/q0_vol
@@ -670,7 +519,7 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
      qcart(:,:)=zero
      ! Size of the third vector
      bz_plane=l2norm(b3)
-     q0_volsph=(two_pi)**3 / (Kmesh%nbz * ucvol)
+     q0_volsph=(two_pi)**3 / (nkbz * ucvol)
      ! radius that gives the same volume as q0_volsph
      ! Let's assume that c is perpendicular to the plane
      ! We also assume isotropic BZ around gamma
@@ -742,7 +591,7 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
    !
    ! === Integration of 1/q^2 singularity ===
    ! * We use the auxiliary function from PRB 75, 205126 (2007) [[cite:Carrier2007]]
-   q0_vol = (two_pi)**3 / (Kmesh%nbz * ucvol); bz_geometry_factor = zero
+   q0_vol = (two_pi)**3 / (nkbz * ucvol); bz_geometry_factor = zero
 
    ! It might be useful to perform the integration using the routine quadrature
    ! so that we can control the accuracy of the integral and improve the
@@ -782,7 +631,7 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
    !
    ! === Integration of 1/q^2 singularity ===
    ! We use the auxiliary function of a Gygi-Baldereschi variant [[cite:Gigy1986]]
-   q0_vol = (two_pi)**3 / (Kmesh%nbz*ucvol) ; bz_geometry_factor=zero
+   q0_vol = (two_pi)**3 / (nkbz*ucvol) ; bz_geometry_factor=zero
    ! the choice of alfa (the width of the gaussian) is somehow empirical
    alfa = 150.0 / ecut
 
@@ -827,7 +676,7 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
    !
    ! === Integration of 1/q^2 singularity ===
    ! * We use the auxiliary function from PRB 75, 205126 (2007) [[cite:Carrier2007]]
-   q0_vol = (two_pi) **3 / (Kmesh%nbz*ucvol); bz_geometry_factor=zero
+   q0_vol = (two_pi) **3 / (nkbz*ucvol); bz_geometry_factor=zero
 
    ! $$ MG: this is to restore the previous implementation, it will facilitate the merge
    ! Analytic integration of 4pi/q^2 over the volume element:
@@ -861,7 +710,7 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
 
    ! === Treat 1/q^2 singularity ===
    ! * We use the auxiliary function from PRB 75, 205126 (2007) [[cite:Carrier2007]]
-   q0_vol=(two_pi)**3/(Kmesh%nbz*ucvol); bz_geometry_factor=zero
+   q0_vol=(two_pi)**3/(nkbz*ucvol); bz_geometry_factor=zero
    do iq_bz=1,nqbz
      qbz_cart(:) = qbz(1,iq_bz)*b1(:) + qbz(2,iq_bz)*b2(:) + qbz(3,iq_bz)*b3(:)
      qbz_norm = SQRT(SUM(qbz_cart(:)**2))
@@ -1588,6 +1437,260 @@ real(dp) function int_I0ln(xx) result(res)
 &       )
 
 end function int_I0ln
+
+!----------------------------------------------------------------------
+
+!!****f* m_vcoul/mc_init
+!! NAME
+!! mc_init
+!!
+!! FUNCTION
+!!
+!! SOURCE
+
+subroutine mc_init(mc, rprimd, ucvol, gprimd, gmet, kptrlatt)
+
+!Arguments ------------------------------------
+ class(mc_t),intent(out) :: mc
+ real(dp),intent(in) :: rprimd(3,3), ucvol, gprimd(3,3), gmet(3,3)
+ integer,intent(in) :: kptrlatt(3,3)
+
+!Local variables-------------------------------
+ integer,parameter :: ncell=3
+ integer :: nmc,nseed, i1,i2,i3,ig,imc
+ real(dp) :: lmin,vlength, ucvol_sc
+ real(dp) :: rprimd_sc(3,3),gprimd_sc(3,3),gmet_sc(3,3),rmet_sc(3,3), qcart2red(3,3)
+ real(dp) :: qbz_cart(3),rmet(3,3),qtmp(3),qmin(3),qmin_cart(3),qpg(3)
+ integer, allocatable :: seed(:)
+
+! *************************************************************************
+
+ mc%gmet = gmet
+ mc%ucvol = ucvol
+
+ ! Supercell defined by the k-mesh
+ rprimd_sc(:,:) = MATMUL(rprimd, kptrlatt)
+ call metric(gmet_sc, gprimd_sc, -1, rmet_sc, rprimd_sc, ucvol_sc)
+
+ qcart2red(:,:) = two_pi * gprimd(:,:)
+ call matrginv(qcart2red, 3, 3)
+
+ ! Find the largest sphere inside the miniBZ
+ ! in order to integrate the divergence analytically
+ mc%q0sph = HUGE(one)
+ do i1 = -ncell+1, ncell
+   qtmp(1) = dble(i1) * 0.5_dp
+   do i2 = -ncell+1, ncell
+     qtmp(2) = dble(i2) * 0.5_dp
+     do i3 = -ncell+1, ncell
+       qtmp(3) = dble(i3) * 0.5_dp
+       if (i1 == 0 .AND. i2 == 0 .AND. i3 == 0) cycle
+       vlength = normv(qtmp, gmet_sc, 'G')
+       if (vlength < mc%q0sph) mc%q0sph = vlength
+     enddo
+   enddo
+ enddo
+
+ ! Setup the random vectors for the Monte Carlo sampling of the miniBZ at q = 0
+ mc%nmc_max = 2500000
+ ABI_MALLOC(mc%qran,(3, mc%nmc_max))
+ call random_seed(size=nseed)
+ ABI_MALLOC(seed, (nseed))
+ do i1=1,nseed
+   seed(i1) = NINT(SQRT(DBLE(i1) * 103731))
+ end do
+ call random_seed(put=seed)
+ call random_number(mc%qran)
+ ABI_FREE(seed)
+
+ ! Overide the first "random vector" with 0
+ mc%qran(:,1) = zero
+
+ ! Fold qran into the Wignez-Seitz cell around q = 0
+ do imc=2,mc%nmc_max
+   lmin = HUGE(one)
+   do i1 = -ncell+1, ncell
+     qtmp(1) = mc%qran(1,imc) + dble(i1)
+     do i2 = -ncell+1, ncell
+       qtmp(2) = mc%qran(2,imc) + dble(i2)
+       do i3 = -ncell+1, ncell
+         qtmp(3) = mc%qran(3,imc) + dble(i3)
+         vlength = normv(qtmp, gmet_sc, 'G')
+         if (vlength < lmin) then
+           lmin = vlength
+           ! Get the q-vector in cartesian coordinates
+           qmin_cart(:) = two_pi * MATMUL( gprimd_sc(:,:) , qtmp )
+           ! Transform it back to the reciprocal space
+           qmin(:) = MATMUL( qcart2red , qmin_cart )
+         end if
+       enddo
+     enddo
+   enddo
+
+   mc%qran(:,imc) = qmin(:)
+ enddo
+
+end subroutine mc_init
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_vcoul/mc_integrate
+!! NAME
+!! mc_integrate
+!!
+!! FUNCTION
+!!
+!! SOURCE
+
+subroutine mc_integrate(mc, rcut2, nkbz, mode, qibz, ng, gvec, vcoul)
+
+!Arguments ------------------------------------
+ class(mc_t),intent(in) :: mc
+ real(dp),intent(in) :: rcut2
+ integer,intent(in) :: nkbz, ng
+ character(len=*),intent(in) :: mode
+ real(dp),intent(in) :: qibz(3)
+ integer,intent(in) :: gvec(3, ng)
+ real(dp),intent(out) :: vcoul(ng)
+
+!Local variables-------------------------------
+ integer :: ig, ig0, imc, nmc
+ logical :: q_is_gamma
+ real(dp)  :: qpg2, qpg(3)
+
+! *************************************************************************
+
+ q_is_gamma = all(abs(qibz) < tol16)
+
+ ! Find index of G=0 in gvec.
+ ig0 = -1
+ do ig=1,ng
+   if (all(gvec(:, ig) == 0)) then
+      ig0 = ig; exit
+   end if
+ end do
+ ABI_CHECK(ig0 /= -1, "Cannot find G=0 in gvec!")
+
+ vcoul = zero
+
+ select case (trim(mode))
+ case('MINIBZ')
+
+   do ig=1,ng
+     if (q_is_gamma .and. ig == ig0) cycle
+     qpg(:) = qibz(:) + gvec(:,ig)
+     qpg2 = normv(qpg, mc%gmet, 'G')**2
+     nmc = adapt_nmc(mc%nmc_max, qpg2)
+     do imc=1,nmc
+       qpg(:) = qibz(:) + gvec(:,ig) + mc%qran(:,imc)
+       qpg2 = normv(qpg, mc%gmet, 'G')**2
+       vcoul(ig) = vcoul(ig) + four_pi / qpg2 / REAL(nmc, dp)
+     end do
+   end do ! ig
+
+   if (q_is_gamma) then
+     ! Override ig0 component
+     vcoul(ig0) = four_pi**2 * nkbz * mc%ucvol / ( 8.0_dp * pi**3 ) * mc%q0sph
+     do imc=1,mc%nmc_max
+       qpg(:) = qibz(:) + gvec(:,ig0) + mc%qran(:,imc)
+       qpg2 = normv(qpg, mc%gmet, 'G')**2
+       if (qpg2 > mc%q0sph ** 2) vcoul(ig0) = vcoul(ig0) + four_pi / qpg2 / REAL(mc%nmc_max, dp)
+     end do
+   end if
+
+ case('MINIBZ-ERFC')
+
+   do ig=1,ng
+     if (q_is_gamma .AND. ig == ig0) cycle
+     qpg(:) = qibz(:) + gvec(:,ig)
+     qpg2 = normv(qpg, mc%gmet, 'G')**2
+     nmc = adapt_nmc(mc%nmc_max, qpg2)
+     do imc=1,nmc
+       qpg(:) = qibz(:) +  gvec(:,ig) + mc%qran(:,imc)
+       qpg2 = normv(qpg, mc%gmet, 'G')**2
+       vcoul(ig) = vcoul(ig) + four_pi / qpg2 / REAL(nmc,dp) &
+              * (  one - EXP( -0.25d0 * rcut2 * qpg2 ) )
+     end do
+   end do ! ig
+
+
+   if (q_is_gamma) then
+     ! Override ig=ig0
+     vcoul(ig0) = four_pi**2 * nkbz * mc%ucvol / ( 8.0_dp * pi**3 ) &
+        * ( mc%q0sph - SQRT(pi/rcut2) * abi_derf(0.5_dp*SQRT(rcut2)*mc%q0sph) )
+     do imc=1,mc%nmc_max
+       qpg(:) = qibz(:) + gvec(:,ig0) + mc%qran(:,imc)
+       qpg2 = normv(qpg, mc%gmet, 'G')**2
+       if (qpg2 > mc%q0sph**2) then
+         vcoul(ig0) = vcoul(ig0) + four_pi / qpg2 / REAL(mc%nmc_max,dp) &
+                      * (one - EXP( -0.25d0 * rcut2 * qpg2))
+       end if
+     end do
+   end if
+
+ case('MINIBZ-ERF')
+
+   do ig=1,ng
+     if (q_is_gamma .AND. ig == ig0) cycle
+     qpg(:) = qibz(:) + gvec(:,ig)
+     qpg2 = normv(qpg, mc%gmet, 'G')**2
+     nmc = adapt_nmc(mc%nmc_max, qpg2)
+     do imc=1,nmc
+       qpg(:) = qibz(:) + gvec(:,ig) + mc%qran(:,imc)
+       qpg2 = normv(qpg, mc%gmet, 'G')**2
+       vcoul(ig) = vcoul(ig) + four_pi / qpg2 / REAL(nmc,dp) &
+              * EXP( -0.25d0 * rcut2 * qpg2 )
+     end do
+   end do ! ig
+
+   if (q_is_gamma) then
+     ! Override ig=ig0 component
+     vcoul(ig0) = four_pi**2 * nkbz * mc%ucvol / ( 8.0_dp * pi**3 ) &
+                  * SQRT(pi/rcut2) * abi_derf(0.5_dp*SQRT(rcut2)*mc%q0sph)
+
+     do imc=1,mc%nmc_max
+       qpg(:) = qibz(:) + gvec(:,ig0) + mc%qran(:,imc)
+       qpg2 = normv(qpg, mc%gmet, 'G')**2
+       if (qpg2 > mc%q0sph**2) then
+         vcoul(ig0) = vcoul(ig0) + four_pi / qpg2 / REAL(mc%nmc_max,dp) *  EXP( -0.25d0 * rcut2 * qpg2 )
+       end if
+     end do
+   end if
+
+ case default
+   ABI_ERROR(sjoin("Invalid mode:", mode))
+ end select
+
+ !call xmpi_sum(vcoul, comm, ierr)
+
+end subroutine mc_integrate
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_vcoul/mc_free
+!! NAME
+!! mc_free
+!!
+!! FUNCTION
+!!  Free memory
+!!
+!! SOURCE
+
+subroutine mc_free(mc)
+
+!Arguments ------------------------------------
+ class(mc_t),intent(inout) :: mc
+
+! *************************************************************************
+
+ ABI_SFREE(mc%qran)
+
+end subroutine mc_free
+!!***
+
+!----------------------------------------------------------------------
 
 end module m_vcoul
 !!***
