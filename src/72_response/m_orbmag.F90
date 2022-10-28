@@ -112,6 +112,10 @@ module m_orbmag
     integer :: natom
     integer :: has_aij=0
     integer :: has_daij=0
+    integer :: has_dij0=0
+    integer :: has_ddij0=0
+    integer :: has_dhartree=0
+    integer :: has_ddhartree=0
     integer :: has_qij=0
     integer :: has_dqij=0
     integer :: has_rd1=0
@@ -122,8 +126,12 @@ module m_orbmag
     integer :: has_drd2b=0
     integer :: has_rd2c=0
     integer :: has_drd2c=0
+    integer :: has_rd2d=0
+    integer :: has_drd2d=0
     integer :: has_rd2e=0
     integer :: has_drd2e=0
+    integer :: has_rd2f=0
+    integer :: has_drd2f=0
     integer :: has_rd3a=0
     integer :: has_drd3a=0
 
@@ -134,7 +142,23 @@ module m_orbmag
     ! sum of \Delta dA_ij
     ! daij(natom,lmnmax,lmnmax,3)
     complex(dpc),allocatable :: daij(:,:,:,:)
+ 
+    ! term 1 + 2b + 2e
+    ! negative sign in 2e included in routine
+    ! dij0(natom,lmn2max)
+    complex(dpc),allocatable :: dij0(:,:)
     
+    ! ddij0(natom,lmnmax,lmnmax,3)
+    complex(dpc),allocatable :: ddij0(:,:,:,:)
+  
+    ! term 2a + 2c + 2d + 2f
+    ! negative signs in c, d, f included in routines
+    ! dhartree(natom,lmn2max)
+    complex(dpc),allocatable :: dhartree(:,:)
+    
+    ! ddhartree(natom,lmnmax,lmnmax,3)
+    complex(dpc),allocatable :: ddhartree(:,:,:,:)
+   
     ! <phi|phi> - <tphi|tphi>
     ! qij(natom,lmn2max)
     complex(dpc),allocatable :: qij(:,:)
@@ -179,6 +203,15 @@ module m_orbmag
     ! drd2c(natom,lmnmax,lmnmax,3)
     complex(dpc),allocatable :: drd2c(:,:,:,:)
  
+    ! roadmap 2d 
+    !  -vH[\{n}1]Q^{LM}_{ij}
+    ! rd2d(natom,lmn2max)
+    complex(dpc),allocatable :: rd2d(:,:)
+    
+    !  - (-i) r_a vH[\{n}1]Q^{LM}_{ij}
+    ! drd2d(natom,lmnmax,lmnmax,3)
+    complex(dpc),allocatable :: drd2d(:,:,:,:)
+ 
     ! roadmap 2e 
     ! vH[\tilde{n}Zc]Q^{LM}_{ij}
     ! rd2e(natom,lmn2max)
@@ -187,6 +220,15 @@ module m_orbmag
     ! -i r_a vH[\tilde{n}Zc]Q^{LM}_{ij}
     ! drd2e(natom,lmnmax,lmnmax,3)
     complex(dpc),allocatable :: drd2e(:,:,:,:)
+ 
+    ! roadmap 2f
+    !  -vH[\hat{n}]Q^{LM}_{ij}
+    ! rd2f(natom,lmn2max)
+    complex(dpc),allocatable :: rd2f(:,:)
+    
+    !  - (-i) r_a vH[\hat{n}]Q^{LM}_{ij}
+    ! drd2f(natom,lmnmax,lmnmax,3)
+    complex(dpc),allocatable :: drd2f(:,:,:,:)
    
     ! roadmap 3a 
     ! <phi|vxc[n1+nc]|phi> - <tphi|vxc[\tilde{n}^1+\tilde{nc}|tphi>
@@ -235,7 +277,9 @@ module m_orbmag
   private :: dterm_rd2a
   private :: dterm_rd2b
   private :: dterm_rd2c
+  private :: dterm_rd2d
   private :: dterm_rd2e
+  private :: dterm_rd2f
   private :: dterm_rd3a
   private :: make_ddir_ap
   private :: tt_me
@@ -448,8 +492,6 @@ subroutine orbmag_ptpaw(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_en
 
  call make_d(atindx,atindx1,cprj,dimlmn,dterm,dtset,gprimd,mcprj,&
    & mpi_enreg,occ,paw_an,pawang,paw_ij,pawrad,pawtab,psps)
-
- call sum_d(dterm)
 
  ABI_MALLOC(mp2,(lmn2max,dtset%natom,3))
  call d2lr_p2(dtset,gprimd,lmn2max,mp2,pawrad,pawtab)
@@ -2286,6 +2328,224 @@ subroutine dterm_rd2b(atindx,dterm,dtset,gntselect,gprimd,&
  
 end subroutine dterm_rd2b
 
+!!****f* ABINIT/dterm_rd2f
+!! NAME
+!! dterm_rd2f
+!!
+!! FUNCTION
+!! Compute -vH[\hat{n}]Q^{LM}_ij, term 2f of roadmap paper
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2021 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!! computed in Cart directions then transformed to xtal coords
+!!
+!! PARENTS
+!!      m_orbmag
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine dterm_rd2f(atindx,dterm,dtset,gntselect,gprimd,lmnmax,my_lmax,&
+    & pawrad,pawsphden,pawtab,realgnt)
+
+  !Arguments ------------------------------------
+  !scalars
+  integer,intent(in) :: lmnmax,my_lmax
+  type(dataset_type),intent(in) :: dtset
+  type(dterm_type),intent(inout) :: dterm
+
+  !arrays
+  integer,intent(in) :: atindx(dtset%natom)
+  integer,intent(in) :: gntselect((2*my_lmax-1)**2,my_lmax**2*(my_lmax**2+1)/2)
+  real(dp),intent(in) :: gprimd(3,3),realgnt((2*my_lmax-1)**2*(my_lmax)**4)
+  type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
+  type(paw_sph_den_type),intent(in) :: pawsphden(dtset%natom)
+  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
+
+  !Local variables -------------------------
+  !scalars
+  integer :: gint,iat,iatom,ilm,imesh,itypat,klm,klmn,kln
+  integer :: ll,lmin,lmax,mesh_size
+  real(dp) :: dij,dijterm,qijlm,rr
+
+  !arrays
+  real(dp),allocatable :: ff(:),nlff(:)
+
+!--------------------------------------------------------------------
+
+ dterm%rd2f = czero; dterm%drd2f = czero
+
+ do iat = 1, dtset%natom
+   iatom = atindx(iat)
+   itypat = dtset%typat(iat)
+  
+   mesh_size=pawtab(itypat)%mesh_size
+   ABI_MALLOC(ff,(mesh_size))
+   ABI_MALLOC(nlff,(mesh_size))
+  
+   do klmn = 1, pawtab(itypat)%lmn2_size
+     klm = pawtab(itypat)%indklmn(1,klmn)
+     kln = pawtab(itypat)%indklmn(2,klmn)
+     lmin = pawtab(itypat)%indklmn(3,klmn)
+     lmax = pawtab(itypat)%indklmn(4,klmn)
+
+     dij=zero
+     do ll = lmin,lmax,2
+       do ilm = ll**2+1,(ll+1)**2
+         qijlm = pawtab(itypat)%qijl(ilm,klmn)
+         if (abs(qijlm) .LT. tol8) cycle
+
+         call nlint(pawsphden(iatom)%nhat1(:,ilm,1),ll,mesh_size,nlff,pawrad(itypat))
+         do imesh=2, mesh_size
+           rr=pawrad(itypat)%rad(imesh)
+           ff(imesh)=rr*rr*pawtab(itypat)%shapefunc(imesh,ll+1)*nlff(imesh)
+         end do
+         call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
+         call simp_gen(dijterm,ff,pawrad(itypat))
+         dij=dij-four_pi*qijlm*dijterm/(two*ll+one)
+
+       end do ! end loop over ilm
+     end do ! end loop over ll
+
+     dterm%rd2f(iatom,klmn) = CMPLX(dij,zero)
+
+   end do ! end loop over klmn
+
+   ABI_FREE(ff)
+   ABI_FREE(nlff)
+
+ end do ! end loop over iat
+
+ dterm%has_rd2f = 2
+ dterm%has_drd2f = 2
+
+end subroutine dterm_rd2f
+
+
+!!****f* ABINIT/dterm_rd2d
+!! NAME
+!! dterm_rd2d
+!!
+!! FUNCTION
+!! Compute -vH[\tilde{n}^1]Q^{LM}_ij, term 2d of roadmap paper
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2021 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!! computed in Cart directions then transformed to xtal coords
+!!
+!! PARENTS
+!!      m_orbmag
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine dterm_rd2d(atindx,dterm,dtset,gntselect,gprimd,lmnmax,my_lmax,&
+    & pawrad,pawsphden,pawtab,realgnt)
+
+  !Arguments ------------------------------------
+  !scalars
+  integer,intent(in) :: lmnmax,my_lmax
+  type(dataset_type),intent(in) :: dtset
+  type(dterm_type),intent(inout) :: dterm
+
+  !arrays
+  integer,intent(in) :: atindx(dtset%natom)
+  integer,intent(in) :: gntselect((2*my_lmax-1)**2,my_lmax**2*(my_lmax**2+1)/2)
+  real(dp),intent(in) :: gprimd(3,3),realgnt((2*my_lmax-1)**2*(my_lmax)**4)
+  type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
+  type(paw_sph_den_type),intent(in) :: pawsphden(dtset%natom)
+  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
+
+  !Local variables -------------------------
+  !scalars
+  integer :: gint,iat,iatom,ilm,imesh,itypat,klm,klmn,kln
+  integer :: ll,lmin,lmax,mesh_size
+  real(dp) :: dij,dijterm,qijlm,rr
+
+  !arrays
+  real(dp),allocatable :: ff(:),nlff(:)
+
+!--------------------------------------------------------------------
+
+ dterm%rd2d = czero; dterm%drd2d = czero
+
+ do iat = 1, dtset%natom
+   iatom = atindx(iat)
+   itypat = dtset%typat(iat)
+  
+   mesh_size=pawtab(itypat)%mesh_size
+   ABI_MALLOC(ff,(mesh_size))
+   ABI_MALLOC(nlff,(mesh_size))
+  
+   do klmn = 1, pawtab(itypat)%lmn2_size
+     klm = pawtab(itypat)%indklmn(1,klmn)
+     kln = pawtab(itypat)%indklmn(2,klmn)
+     lmin = pawtab(itypat)%indklmn(3,klmn)
+     lmax = pawtab(itypat)%indklmn(4,klmn)
+
+     dij=zero
+     do ll = lmin,lmax,2
+       do ilm = ll**2+1,(ll+1)**2
+         qijlm = pawtab(itypat)%qijl(ilm,klmn)
+         if (abs(qijlm) .LT. tol8) cycle
+
+         call nlint(pawsphden(iatom)%trho1(:,ilm,1),ll,mesh_size,nlff,pawrad(itypat))
+         do imesh=2, mesh_size
+           rr=pawrad(itypat)%rad(imesh)
+           ff(imesh)=rr*rr*pawtab(itypat)%shapefunc(imesh,ll+1)*nlff(imesh)
+         end do
+         call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
+         call simp_gen(dijterm,ff,pawrad(itypat))
+         dij=dij-four_pi*qijlm*dijterm/(two*ll+one)
+
+       end do ! end loop over ilm
+     end do ! end loop over ll
+
+     dterm%rd2d(iatom,klmn) = CMPLX(dij,zero)
+
+   end do ! end loop over klmn
+
+   ABI_FREE(ff)
+   ABI_FREE(nlff)
+
+ end do ! end loop over iat
+
+ dterm%has_rd2d = 2
+ dterm%has_drd2d = 2
+
+end subroutine dterm_rd2d
+
+
 !!****f* ABINIT/dterm_rd2c
 !! NAME
 !! dterm_rd2c
@@ -2597,15 +2857,12 @@ subroutine dterm_rd2a(atindx,dterm,dtset,gntselect,gprimd,lmnmax,my_lmax,&
 
   !Local variables -------------------------
   !scalars
-  integer :: adir,gint,g2int,iat,iatom,ilm,ilmn,ilmp,imesh,itypat
-  integer :: jlmn,jmesh,klmadir,klmn,klm,kln,ll,lmin,lmax,lp
-  integer :: mesh_size
-  real(dp) :: dij,nl1,nlt1,rfac,rr,rp,vhaint,rrhokl
-  real(dp) :: nterm
+  integer :: gint,iat,iatom,ilm,imesh,itypat,klm,klmn,kln
+  integer :: ll,lmin,lmax,mesh_size
+  real(dp) :: dij,dijterm
 
   !arrays
-  real(dp) :: dij_cart(3),dij_red(3)
-  real(dp),allocatable :: ff(:),ff1(:),fft1(:)
+  real(dp),allocatable :: ff(:),nlff(:)
 
 !--------------------------------------------------------------------
 
@@ -2618,126 +2875,41 @@ subroutine dterm_rd2a(atindx,dterm,dtset,gntselect,gprimd,lmnmax,my_lmax,&
   
    mesh_size=pawtab(itypat)%mesh_size
    ABI_MALLOC(ff,(mesh_size))
-   ABI_MALLOC(ff1,(mesh_size))
-   ABI_MALLOC(fft1,(mesh_size))
+   ABI_MALLOC(nlff,(mesh_size))
   
    do klmn = 1, pawtab(itypat)%lmn2_size
      klm = pawtab(itypat)%indklmn(1,klmn)
      kln = pawtab(itypat)%indklmn(2,klmn)
      lmin = pawtab(itypat)%indklmn(3,klmn)
      lmax = pawtab(itypat)%indklmn(4,klmn)
-     ilmn = pawtab(itypat)%indklmn(7,klmn)
-     jlmn = pawtab(itypat)%indklmn(8,klmn)
 
-     dij=zero; dij_cart=zero
-
+     dij=zero
      do ll = lmin,lmax,2
        do ilm = ll**2+1,(ll+1)**2
          gint = gntselect(ilm,klm)
          if (gint .EQ. 0) cycle
-         
-         ! this loop is for the vha terms
 
-         ! construct integrand for rho1 vHa, trho1
-         ff = zero
-         do imesh = 2, mesh_size
-           rr = pawrad(itypat)%rad(imesh)
-             
-           ! for this mesh point, do the interior nonlocal integral over Hartree potential
-           ff1 = zero; fft1 = zero
-           do jmesh = 2, imesh
-             rp = pawrad(itypat)%rad(jmesh)
-             rfac = (rp**2)*(rp**ll)/(rr**(ll+1))
-             ff1(jmesh) = pawsphden(iatom)%rho1(jmesh,ilm,1)*rfac
-             fft1(jmesh) = pawsphden(iatom)%trho1(jmesh,ilm,1)*rfac
-           end do
-           do jmesh=imesh+1, mesh_size
-             rp = pawrad(itypat)%rad(jmesh)
-             rfac = (rp**2)*(rr**ll)/(rp**(ll+1))
-             ff1(jmesh) = pawsphden(iatom)%rho1(jmesh,ilm,1)*rfac
-             fft1(jmesh) = pawsphden(iatom)%trho1(jmesh,ilm,1)*rfac
-           end do
-
-           call pawrad_deducer0(ff1,mesh_size,pawrad(itypat))
-           call simp_gen(nl1,ff1,pawrad(itypat))
-           call pawrad_deducer0(fft1,mesh_size,pawrad(itypat))
-           call simp_gen(nlt1,fft1,pawrad(itypat))
-           
-           ff(imesh)=pawtab(itypat)%phiphj(imesh,kln)*nl1 - &
-             & pawtab(itypat)%tphitphj(imesh,kln)*nlt1
-         
-         end do ! end loop over imesh
-
+         call nlint(pawsphden(iatom)%rho1(:,ilm,1),ll,mesh_size,nlff,pawrad(itypat))
+         do imesh=2, mesh_size
+           ff(imesh)=pawtab(itypat)%phiphj(imesh,kln)*nlff(imesh)
+         end do
+         call nlint(pawsphden(iatom)%trho1(:,ilm,1),ll,mesh_size,nlff,pawrad(itypat))
+         do imesh=2, mesh_size
+           ff(imesh)=ff(imesh) - pawtab(itypat)%tphitphj(imesh,kln)*nlff(imesh)
+         end do
          call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
-         call simp_gen(vhaint,ff,pawrad(itypat))
+         call simp_gen(dijterm,ff,pawrad(itypat))
+         dij=dij+four_pi*realgnt(gint)*dijterm/(two*ll+one)
 
-         dij=dij+realgnt(gint)*vhaint*four_pi/(two*ll+one)
-
-         ! this loop is for the r*vha terms
-         do adir = 1, 3
-
-           do lp = abs(ll-1), ll+1, 2
-             do ilmp=lp**2+1,(lp+1)**2
-               klmadir = MATPACK(ilm,pack1a(adir))
-               g2int = gntselect(ilmp,klmadir)
-               if (g2int .EQ. 0) cycle
-
-               ! construct integrand for rho1 vHa, trho1
-               ff = zero
-               do imesh = 2, mesh_size
-                 rr = pawrad(itypat)%rad(imesh)
-                   
-                 ! for this mesh point, do the interior nonlocal integral over Hartree potential
-                 ff1 = zero; fft1 = zero
-                 do jmesh = 2, imesh
-                   rp = pawrad(itypat)%rad(jmesh)
-                   rfac = (rp**2)*(rp**lp)/(rr**(lp+1))
-                   ff1(jmesh) = pawsphden(iatom)%rho1(jmesh,ilmp,1)*rfac
-                   fft1(jmesh) = pawsphden(iatom)%trho1(jmesh,ilmp,1)*rfac
-                 end do
-                 do jmesh=imesh+1, mesh_size
-                   rp = pawrad(itypat)%rad(jmesh)
-                   rfac = (rp**2)*(rr**lp)/(rp**(lp+1))
-                   ff1(jmesh) = pawsphden(iatom)%rho1(jmesh,ilmp,1)*rfac
-                   fft1(jmesh) = pawsphden(iatom)%trho1(jmesh,ilmp,1)*rfac
-                 end do
-
-                 call pawrad_deducer0(ff1,mesh_size,pawrad(itypat))
-                 call simp_gen(nl1,ff1,pawrad(itypat))
-                 call pawrad_deducer0(fft1,mesh_size,pawrad(itypat))
-                 call simp_gen(nlt1,fft1,pawrad(itypat))
-                 
-                 ff(imesh)=rr*pawtab(itypat)%phiphj(imesh,kln)*nl1 - &
-                   & rr*pawtab(itypat)%tphitphj(imesh,kln)*nlt1
-               
-               end do ! end loop over imesh
-
-               call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
-               call simp_gen(vhaint,ff,pawrad(itypat))
-
-               dij_cart(adir) = dij_cart(adir) + &
-                 & four_pi*cdij*realgnt(gint)*realgnt(g2int)*vhaint/(two*ll+one)
-               
-             end do ! end loop over ilmp
-           end do ! end loop over lp
-         end do ! end loop over adir
        end do ! end loop over ilm
      end do ! end loop over ll
-
-     dij_red = MATMUL(TRANSPOSE(gprimd),dij_cart)
-
-     do adir = 1, 3
-       dterm%drd2a(iatom,ilmn,jlmn,adir) = -j_dpc*dij_red(adir)
-       dterm%drd2a(iatom,jlmn,ilmn,adir) = -j_dpc*dij_red(adir)
-     end do
 
      dterm%rd2a(iatom,klmn) = CMPLX(dij,zero)
 
    end do ! end loop over klmn
 
    ABI_FREE(ff)
-   ABI_FREE(ff1)
-   ABI_FREE(fft1)
+   ABI_FREE(nlff)
 
  end do ! end loop over iat
 
@@ -3106,6 +3278,26 @@ subroutine dterm_free(dterm)
   !arrays
 !--------------------------------------------------------------------
 
+  if(allocated(dterm%dij0)) then
+    ABI_FREE(dterm%dij0)
+  end if
+  dterm%has_dij0=0
+
+  if(allocated(dterm%ddij0)) then
+    ABI_FREE(dterm%ddij0)
+  end if
+  dterm%has_ddij0=0
+ 
+  if(allocated(dterm%dhartree)) then
+    ABI_FREE(dterm%dhartree)
+  end if
+  dterm%has_dhartree=0
+
+  if(allocated(dterm%ddhartree)) then
+    ABI_FREE(dterm%ddhartree)
+  end if
+  dterm%has_ddhartree=0
+ 
   if(allocated(dterm%aij)) then
     ABI_FREE(dterm%aij)
   end if
@@ -3166,6 +3358,16 @@ subroutine dterm_free(dterm)
   end if
   dterm%has_drd2c=0
  
+  if(allocated(dterm%rd2d)) then
+    ABI_FREE(dterm%rd2d)
+  end if
+  dterm%has_rd2d=0
+  
+  if(allocated(dterm%drd2d)) then
+    ABI_FREE(dterm%drd2d)
+  end if
+  dterm%has_drd2d=0
+ 
   if(allocated(dterm%rd2e)) then
     ABI_FREE(dterm%rd2e)
   end if
@@ -3175,6 +3377,16 @@ subroutine dterm_free(dterm)
     ABI_FREE(dterm%drd2e)
   end if
   dterm%has_drd2e=0
+ 
+  if(allocated(dterm%rd2f)) then
+    ABI_FREE(dterm%rd2f)
+  end if
+  dterm%has_rd2f=0
+  
+  if(allocated(dterm%drd2f)) then
+    ABI_FREE(dterm%drd2f)
+  end if
+  dterm%has_drd2f=0
  
   if(allocated(dterm%rd3a)) then
     ABI_FREE(dterm%rd3a)
@@ -3319,6 +3531,30 @@ subroutine dterm_alloc(dterm,lmnmax,lmn2max,natom)
   ABI_MALLOC(dterm%daij,(natom,lmnmax,lmnmax,3))
   dterm%has_daij=1
  
+  if(allocated(dterm%dij0)) then
+    ABI_FREE(dterm%dij0)
+  end if
+  ABI_MALLOC(dterm%dij0,(natom,lmn2max))
+  dterm%has_dij0=1
+
+  if(allocated(dterm%ddij0)) then
+    ABI_FREE(dterm%ddij0)
+  end if
+  ABI_MALLOC(dterm%ddij0,(natom,lmnmax,lmnmax,3))
+  dterm%has_ddij0=1
+ 
+  if(allocated(dterm%dhartree)) then
+    ABI_FREE(dterm%dhartree)
+  end if
+  ABI_MALLOC(dterm%dhartree,(natom,lmn2max))
+  dterm%has_dhartree=1
+
+  if(allocated(dterm%ddhartree)) then
+    ABI_FREE(dterm%ddhartree)
+  end if
+  ABI_MALLOC(dterm%ddhartree,(natom,lmnmax,lmnmax,3))
+  dterm%has_ddhartree=1
+ 
   if(allocated(dterm%qij)) then
     ABI_FREE(dterm%qij)
   end if
@@ -3379,6 +3615,18 @@ subroutine dterm_alloc(dterm,lmnmax,lmn2max,natom)
   ABI_MALLOC(dterm%drd2c,(natom,lmnmax,lmnmax,3))
   dterm%has_drd2c=1
  
+  if(allocated(dterm%rd2d)) then
+    ABI_FREE(dterm%rd2d)
+  end if
+  ABI_MALLOC(dterm%rd2d,(natom,lmn2max))
+  dterm%has_rd2d=1
+  
+  if(allocated(dterm%drd2d)) then
+    ABI_FREE(dterm%drd2d)
+  end if
+  ABI_MALLOC(dterm%drd2d,(natom,lmnmax,lmnmax,3))
+  dterm%has_drd2d=1
+ 
   if(allocated(dterm%rd2e)) then
     ABI_FREE(dterm%rd2e)
   end if
@@ -3390,6 +3638,18 @@ subroutine dterm_alloc(dterm,lmnmax,lmn2max,natom)
   end if
   ABI_MALLOC(dterm%drd2e,(natom,lmnmax,lmnmax,3))
   dterm%has_drd2e=1
+ 
+  if(allocated(dterm%rd2f)) then
+    ABI_FREE(dterm%rd2f)
+  end if
+  ABI_MALLOC(dterm%rd2f,(natom,lmn2max))
+  dterm%has_rd2f=1
+  
+  if(allocated(dterm%drd2f)) then
+    ABI_FREE(dterm%drd2f)
+  end if
+  ABI_MALLOC(dterm%drd2f,(natom,lmnmax,lmnmax,3))
+  dterm%has_drd2f=1
  
   if(allocated(dterm%rd3a)) then
     ABI_FREE(dterm%rd3a)
@@ -3689,17 +3949,6 @@ subroutine check_eig_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,&
 
   end do ! nn
 
-  do iat=1,dtset%natom
-    iatom=atindx(iat)
-    itypat=dtset%typat(iat)
-    do klmn=1,pawtab(itypat)%lmn2_size
-      !write(std_out,'(a,2es16.8)')'JWZ debug kij p2 ',&
-      !  & pawtab(itypat)%kij(klmn),real(dterm%rd1(iatom,klmn))
-      !write(std_out,'(a,2es16.8)')'JWZ debug dij0 aij ',&
-      !  & pawtab(itypat)%dij0(klmn),real(dterm%aij(iatom,klmn))
-    end do
-  end do
-
   ABI_FREE(cwave)
   ABI_FREE(ghc)
   ABI_FREE(gsc)
@@ -3837,40 +4086,70 @@ subroutine sum_d(dterm)
 !--------------------------------------------------------------------
 
   dterm%aij = czero; dterm%daij = czero
+  dterm%dij0 = czero; dterm%ddij0 = czero
+  dterm%dhartree = czero; dterm%ddhartree = czero
 
   if (dterm%has_rd1 .EQ. 2) then
     dterm%aij = dterm%aij + dterm%rd1
+    dterm%dij0 = dterm%dij0 + dterm%rd1
   end if
   if (dterm%has_drd1 .EQ. 2) then
     dterm%daij = dterm%daij + dterm%drd1
+    dterm%ddij0 = dterm%ddij0 + dterm%drd1
   end if
  
   if (dterm%has_rd2a .EQ. 2) then
     dterm%aij = dterm%aij + dterm%rd2a
+    dterm%dhartree = dterm%dhartree + dterm%rd2a
   end if
   if (dterm%has_drd2a .EQ. 2) then
     dterm%daij = dterm%daij + dterm%drd2a
+    dterm%ddhartree = dterm%ddhartree + dterm%drd2a
   end if
  
   if (dterm%has_rd2b .EQ. 2) then
     dterm%aij = dterm%aij + dterm%rd2b
+    dterm%dij0 = dterm%dij0 + dterm%rd2b
   end if
   if (dterm%has_drd2b .EQ. 2) then
     dterm%daij = dterm%daij + dterm%drd2b
+    dterm%ddij0 = dterm%ddij0 + dterm%drd2b
   end if
  
   if (dterm%has_rd2c .EQ. 2) then
     dterm%aij = dterm%aij + dterm%rd2c
+    dterm%dhartree = dterm%dhartree + dterm%rd2c
   end if
   if (dterm%has_drd2c .EQ. 2) then
     dterm%daij = dterm%daij + dterm%drd2c
+    dterm%ddhartree = dterm%ddhartree + dterm%drd2c
+  end if
+ 
+  if (dterm%has_rd2d .EQ. 2) then
+    dterm%aij = dterm%aij + dterm%rd2d
+    dterm%dhartree = dterm%dhartree + dterm%rd2d
+  end if
+  if (dterm%has_drd2d .EQ. 2) then
+    dterm%daij = dterm%daij + dterm%drd2d
+    dterm%ddhartree = dterm%ddhartree + dterm%drd2d
   end if
  
   if (dterm%has_rd2e .EQ. 2) then
     dterm%aij = dterm%aij + dterm%rd2e
+    dterm%dij0 = dterm%dij0 + dterm%rd2e
   end if
   if (dterm%has_drd2e .EQ. 2) then
     dterm%daij = dterm%daij + dterm%drd2e
+    dterm%ddij0 = dterm%ddij0 + dterm%drd2e
+  end if
+ 
+  if (dterm%has_rd2f .EQ. 2) then
+    dterm%aij = dterm%aij + dterm%rd2f
+    dterm%dhartree = dterm%dhartree + dterm%rd2f
+  end if
+  if (dterm%has_drd2f .EQ. 2) then
+    dterm%daij = dterm%daij + dterm%drd2f
+    dterm%ddhartree = dterm%ddhartree + dterm%drd2f
   end if
   
   if (dterm%has_rd3a .EQ. 2) then
@@ -3940,11 +4219,11 @@ subroutine make_d(atindx,atindx1,cprj,dimlmn,dterm,dtset,gprimd,&
 
   !Local variables -------------------------
   !scalars
-  integer :: iat,iatom,iband,isel,itypat,ilmn,jlmn,klmn
+  integer :: iat,iatom,iband,isel,itypat,ijkl,ilmn,jlmn,klmn
   integer :: my_lmax,ngnt,nzlmopt
   integer :: opt_compch,opt_dens,opt_l,opt_print
   real(dp) :: compch_sph
-  complex(dpc) :: cpi,cpj,rhoij
+  complex(dpc) :: cdij,cpi,cpj,rhoij,rhokl
   type(paw_dmft_type) :: paw_dmft
  
   !arrays
@@ -4005,9 +4284,9 @@ subroutine make_d(atindx,atindx1,cprj,dimlmn,dterm,dtset,gprimd,&
  !! term idpa due to onsite A.p, not part of the roadmap paper but similar to term 1
  !call make_ddir_ap(dterms(idpa,:,:,:,:),dtset,gntselect,gprimd,psps%lmnmax,my_lmax,pawrad,pawtab,realgnt)
  
- ! term idvha due to v_H[n1], corresponds to term 2a of roadmap paper
- !call dterm_rd2a(atindx,dterm,dtset,gntselect,gprimd,psps%lmnmax,my_lmax,&
- !  & paw_ij,pawrad,pawsphden,pawtab,realgnt)
+ ! term idvha due to v_H[n1] and v_H[\tilde{n}1], corresponds to term 2a of roadmap paper
+ call dterm_rd2a(atindx,dterm,dtset,gntselect,gprimd,psps%lmnmax,my_lmax,&
+   & paw_ij,pawrad,pawsphden,pawtab,realgnt)
 
  ! terms due to v_H[nZ], corresponds to term 2b of roadmap paper
  call dterm_rd2b(atindx,dterm,dtset,gntselect,gprimd,my_lmax,pawrad,pawtab,realgnt)
@@ -4016,16 +4295,47 @@ subroutine make_d(atindx,atindx1,cprj,dimlmn,dterm,dtset,gprimd,&
  call dterm_rd2c(atindx,dterm,dtset,gntselect,gprimd,psps%lmnmax,my_lmax,&
    & pawrad,pawsphden,pawtab,realgnt)
  
+ ! term due to v_H[\tilde{n}^1]Q^{LM}_{ij}, corresponds to term 2d of roadmap paper
+ call dterm_rd2d(atindx,dterm,dtset,gntselect,gprimd,psps%lmnmax,my_lmax,&
+   & pawrad,pawsphden,pawtab,realgnt)
+ 
  ! terms due to v_H[\tilde{n}_Zc]Q^{LJM}_{ij}, corresponds to term 2e of roadmap paper
  call dterm_rd2e(atindx,dterm,dtset,gprimd,pawrad,pawtab)
+
+ ! term due to v_H[\hat{n}]Q^{LM}_{ij}, corresponds to term 2f of roadmap paper
+ call dterm_rd2f(atindx,dterm,dtset,gntselect,gprimd,psps%lmnmax,my_lmax,&
+   & pawrad,pawsphden,pawtab,realgnt)
 
  ! term dvxc due to v_xc[n1+nc] corresponds to term 3a in roadmap paper
  call dterm_rd3a(atindx,dterm,dtset,gntselect,gprimd,psps%lmnmax,my_lmax,&
     & pawang,paw_ij,pawrad,pawsphden,pawtab,realgnt)
 
+ call sum_d(dterm)
+
+ ! check terms against abinit GS  
+ do iat=1,dtset%natom
+   iatom=atindx(iat)
+   itypat=dtset%typat(iat)
+   do klmn=1,pawtab(itypat)%lmn2_size
+     !write(std_out,'(a,2es16.8)')'JWZ debug kij p2 ',&
+     !  & pawtab(itypat)%kij(klmn),real(dterm%rd1(iatom,klmn))
+     !write(std_out,'(a,2es16.8)')'JWZ debug dij0 my_dij0 ',&
+     !  & pawtab(itypat)%dij0(klmn),real(dterm%dij0(iatom,klmn))
+
+     cdij = czero
+     do ijkl=1,pawtab(itypat)%lmn2_size
+       rhokl=CMPLX(pawrhoij(iatom)%rhoij_(2*ijkl-1,1),pawrhoij(iatom)%rhoij_(2*ijkl,1))
+       cdij=cdij+rhokl*pawtab(itypat)%eijkl(klmn,ijkl)*pawtab(itypat)%dltij(ijkl)
+     end do
+     write(std_out,'(a,i4,4es16.8)')'JWZ debug klmn Ha_ij my_Ha_ij ',klmn,&
+       & real(cdij),aimag(cdij),&
+       & real(dterm%dhartree(iatom,klmn)),aimag(dterm%dhartree(iatom,klmn))
+   end do !klmn
+ end do !iat
+
  ABI_FREE(realgnt)
  ABI_FREE(gntselect)
-
+ 
  do iat = 1, dtset%natom
    call paw_sph_den_free(pawsphden(iat))
  end do
