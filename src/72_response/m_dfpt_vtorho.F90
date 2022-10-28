@@ -401,7 +401,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 
 !Initialisation of the wfdot file in case of electric field (or 2nd order Sternheimer equation)
  test_dot=0
- if (ipert==natom+2.and.sum((dtset%qptn(1:3))**2 )<=tol7.and.&
+ if (ipert==natom+2.and.sum((qphon(1:3))**2 )<=tol7.and.&
 & (dtset%berryopt/= 4.and.dtset%berryopt/= 6.and.dtset%berryopt/= 7.and.&
 & dtset%berryopt/=14.and.dtset%berryopt/=16.and.dtset%berryopt/=17).or.&
 & (ipert==natom+10.or.ipert==natom+11)) then
@@ -899,7 +899,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
    if (psps%usepaw==1) then
      call pawmkrho(1,arg,cplex,gprimd,idir,indsy1,ipert,mpi_enreg,&
 &     my_natom,natom,nspden,nsym1,ntypat,dtset%paral_kgb,pawang,pawfgr,pawfgrtab,&
-&     dtset%pawprtvol,pawrhoij1,pawrhoij1_unsym,pawtab,dtset%qptn,rho1wfg,rho1wfr,&
+&     dtset%pawprtvol,pawrhoij1,pawrhoij1_unsym,pawtab,qphon,rho1wfg,rho1wfr,&
 &     rhor1,rprimd,symaf1,symrc1,dtset%typat,ucvol,dtset%usewvl,xred,&
 &     pawang_sym=pawang1,pawnhat=nhat1,pawrhoij0=pawrhoij,rhog=rhog1)
      ABI_FREE(rho1wfr)
