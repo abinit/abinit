@@ -265,16 +265,15 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
  integer :: nmc, ig, imc, nqibz, nqbz, nkbz, ii, iqlwl, iq_bz, iq_ibz, npt, iq
  integer :: opt_cylinder,opt_surface,my_rank,nprocs
  real(dp),parameter :: tolq0 = 1.d-3, tol999 = 999.0
- real(dp) :: b1b1,b2b2,b3b3,b1b2,b2b3,b3b1
  real(dp) :: bz_geometry_factor,check,q0_vol
  real(dp) :: qbz_norm,ucvol,intfauxgb, alfa, qpg2,rcut2
  character(len=500) :: msg
  type(mc_t) :: mc
 !arrays
  integer, contiguous, pointer :: gvec(:,:)
- real(dp) :: a1(3),a2(3),a3(3),bb(3),b1(3),b2(3),b3(3),gmet(3,3),gprimd(3,3)
+ real(dp) :: a1(3),a2(3),a3(3),b1(3),b2(3),b3(3),gmet(3,3),gprimd(3,3)
  real(dp) :: qbz_cart(3),rmet(3,3),qpg(3)
- real(dp),allocatable :: vcoul(:,:),vcoul_lwl(:,:),xx(:),yy(:)
+ real(dp),allocatable :: vcoul(:,:),vcoul_lwl(:,:)
  real(dp),contiguous, pointer :: qibz(:,:), qbz(:,:)
 
 ! *************************************************************************
@@ -291,9 +290,7 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
  nqibz = qmesh%nibz; nqbz = qmesh%nbz
  qibz => qmesh%ibz; qbz => qmesh%bz
 
- !nkibz = kmehs%nibz
  nkbz = kmesh%nbz
- !kibz => kmesh%ibz; kbz => kmesh%bz
 
  ! Save dimension and other useful quantities in Vcp
  Vcp%ng        = ng                   ! Number of G-vectors in the Coulomb matrix elements.
@@ -325,9 +322,6 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
 
  a1 = Cryst%rprimd(:,1); a2 = Cryst%rprimd(:,2); a3 = Cryst%rprimd(:,3)
  b1 = two_pi * gprimd(:,1); b2 = two_pi * gprimd(:,2); b3 = two_pi * gprimd(:,3)
- b1b1 = dot_product(b1, b1); b2b2 = dot_product(b2, b2); b3b3 = dot_product(b3, b3)
- bb(1) = b1b1; bb(2) = b2b2; bb(3) = b3b3
- b1b2 = dot_product(b1, b2); b2b3 = dot_product(b2, b3); b3b1 = dot_product(b3, b1)
 
  select case (TRIM(vcp%mode))
 
@@ -336,7 +330,7 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
    ! Mimicking the BerkeleyGW technique
    ! A Monte-Carlo sampling of each miniBZ surrounding each (q+G) point
    ! However:
-   !    - extended to the multiple shifts
+   !    - extended to multiple shifts
    !    - with an adaptative number of MonteCarlo sampling points
 
    call mc%init(cryst%rprimd, cryst%ucvol, cryst%gprimd, cryst%gmet, kmesh%kptrlatt)
@@ -356,11 +350,11 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
    call mc%free()
 
  case ('SPHERE')
-   ! A non-positive value of rcut imposes the recipe of Spencer & Alavi, PRB 77, 193110 (2008) [[cite:Spencer2008]].
+   ! A non-positive value of rcut activates the recipe of Spencer & Alavi, PRB 77, 193110 (2008) [[cite:Spencer2008]].
    if (Vcp%rcut < tol12) then
      Vcp%rcut = (ucvol*nkbz*3.d0/four_pi)**third
      write(msg,'(2a,2x,f8.4,a)')ch10,&
-      ' Using calculated value for rcut: ',Vcp%rcut, ' to have the same volume as the BvK crystal'
+      ' Using calculated value for rcut: ',Vcp%rcut, ' to have same volume as the BvK crystal'
      call wrtout(std_out, msg)
    end if
 
@@ -384,7 +378,7 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
    ABI_CHECK(COUNT(ABS(Vcp%vcutgeo)>tol6) == 1, 'Wrong cutgeo for cylinder')
 
    ! Beigi's method is the default one, i.e infinite cylinder of radius rcut.
-   ! Negative values to use Rozzi method with finite cylinder of extent hcyl.
+   ! Negative values to use Rozzi's method with finite cylinder of extent hcyl.
    opt_cylinder=1; Vcp%hcyl=zero; Vcp%pdir(:)=0
    do ii=1,3
      check=Vcp%vcutgeo(ii)
@@ -420,7 +414,7 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
      npt =100
      call beigi_cylinder_limit(opt_cylinder, npt, cryst, nqibz, nkbz, vcp%rcut, vcp%hcyl, vcp%boxcenter, vcp%pdir, vcp%i_sz)
    else
-     ! In Rozzi"s method the lim q+G --> 0 is finite.
+     ! In Rozzi's method the lim q+G --> 0 is finite.
      Vcp%i_sz = vcoul(1,1)
    end if
 
@@ -491,22 +485,23 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
      call cmod_qpg(nqlwl, iqlwl, qlwl, ng, gvec, gprimd, vcoul_lwl(:,iqlwl))
    end do
    vcoul_lwl = four_pi/vcoul_lwl**2
-   !
+
    ! === Integration of 1/q^2 singularity ===
-   ! * We use the auxiliary function from PRB 75, 205126 (2007) [[cite:Carrier2007]]
-   q0_vol = (two_pi)**3 / (nkbz * ucvol); bz_geometry_factor = zero
+   ! We use the auxiliary function from PRB 75, 205126 (2007) [[cite:Carrier2007]]
+
+#if 1
+   vcp%i_sz = carrier_isz(cryst, nqbz, qbz, rcut, tolq0, comm)
+#else
+   bz_geometry_factor = zero
    do iq_bz=1,nqbz
      qbz_cart(:) = qbz(1,iq_bz)*b1(:) + qbz(2,iq_bz)*b2(:) + qbz(3,iq_bz)*b3(:)
      qbz_norm = SQRT(SUM(qbz_cart(:)**2))
-     if (qbz_norm > tolq0) bz_geometry_factor = bz_geometry_factor - faux(qbz(:,iq_bz))
+     if (qbz_norm > tolq0) bz_geometry_factor = bz_geometry_factor - faux(qbz(:,iq_bz), rcut, b1, b2, b3)
    end do
 
-   bz_geometry_factor = bz_geometry_factor + integratefaux(comm) * nqbz
-
-   write(msg,'(2a,2x,f8.4)')ch10,' integrate q->0 : numerical BZ geometry factor = ',bz_geometry_factor*q0_vol**(2./3.)
-   call wrtout(std_out, msg)
-
+   bz_geometry_factor = bz_geometry_factor + integratefaux(rcut, gprimd, ucvol, comm) * nqbz
    Vcp%i_sz = four_pi * bz_geometry_factor  ! Final result stored here
+#endif
 
  case ('AUX_GB')
    do iq_ibz=1,nqibz
@@ -529,10 +524,15 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
    !
    ! === Integration of 1/q^2 singularity ===
    ! We use the auxiliary function of a Gygi-Baldereschi variant [[cite:Gigy1986]]
-   q0_vol = (two_pi)**3 / (nkbz*ucvol) ; bz_geometry_factor=zero
+
+#if 1
+   vcp%i_sz = gygi_baldereschi_isz(cryst, nqbz, qbz, ecut, ng, gvec, tolq0)
+#else
+
    ! the choice of alfa (the width of the gaussian) is somehow empirical
    alfa = 150.0 / ecut
 
+   bz_geometry_factor=zero
    do iq_bz=1,nqbz
      do ig = 1,ng
        qpg(:) = qbz(:,iq_bz) + gvec(:,ig)
@@ -542,15 +542,9 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
    end do
 
    intfauxgb = ucvol/four_pi/SQRT(0.5*two_pi*alfa)
-   !write(msg,'(2a,2x,f12.4,2x,f12.4)')ch10, ' bz_geometry_factor, f(q) integral = ', bz_geometry_factor, intfauxgb
-   !call wrtout(std_out, msg)
-
    bz_geometry_factor = bz_geometry_factor + intfauxgb * nqbz
-
-   write(msg,'(2a,2x,f8.4)')ch10,' integrate q->0: numerical BZ geometry factor = ',bz_geometry_factor*q0_vol**(2./3.)
-   call wrtout(std_out, msg)
-
    Vcp%i_sz = four_pi*bz_geometry_factor
+#endif
 
  case ('CRYSTAL')
    do iq_ibz=1,nqibz
@@ -572,13 +566,11 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
    vcoul_lwl = four_pi/vcoul_lwl**2
    !
    ! === Integration of 1/q^2 singularity ===
-   q0_vol = (two_pi) **3 / (nkbz*ucvol); bz_geometry_factor=zero
-
-   ! $$ MG: this is to restore the previous implementation, it will facilitate the merge
    ! Analytic integration of 4pi/q^2 over the volume element:
    ! $4pi/V \int_V d^3q 1/q^2 =4pi bz_geometric_factor V^(-2/3)$
    ! i_sz=4*pi*bz_geometry_factor*q0_vol**(-two_thirds) where q0_vol= V_BZ/N_k
    ! bz_geometry_factor: sphere=7.79, fcc=7.44, sc=6.188, bcc=6.946, wz=5.255 (see gwa.pdf, appendix A.4)
+   q0_vol = (two_pi) **3 / (nkbz*ucvol); bz_geometry_factor=zero
    Vcp%i_sz = four_pi*7.44*q0_vol**(-two_thirds)
 
  case ('ERF')
@@ -605,19 +597,19 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
 
    ! === Treat 1/q^2 singularity ===
    ! * We use the auxiliary function from PRB 75, 205126 (2007) [[cite:Carrier2007]]
-   q0_vol = (two_pi)**3 / (nkbz * ucvol); bz_geometry_factor=zero
+#if 1
+   vcp%i_sz = carrier_isz(cryst, nqbz, qbz, rcut, tolq0, comm)
+#else
+   bz_geometry_factor=zero
    do iq_bz=1,nqbz
      qbz_cart(:) = qbz(1,iq_bz)*b1(:) + qbz(2,iq_bz)*b2(:) + qbz(3,iq_bz)*b3(:)
      qbz_norm = SQRT(SUM(qbz_cart(:)**2))
-     if (qbz_norm > tolq0) bz_geometry_factor = bz_geometry_factor - faux(qbz(:,iq_bz))
+     if (qbz_norm > tolq0) bz_geometry_factor = bz_geometry_factor - faux(qbz(:,iq_bz), rcut, b1, b2, b3)
    end do
 
-   bz_geometry_factor = bz_geometry_factor + integratefaux(comm) * nqbz
-
-   write(msg,'(2a,2x,f12.4)')ch10,' integrate q->0 : numerical BZ geometry factor = ',bz_geometry_factor*q0_vol**(2./3.)
-   call wrtout(std_out, msg)
-
+   bz_geometry_factor = bz_geometry_factor + integratefaux(rcut, gprimd, ucvol, comm) * nqbz
    Vcp%i_sz = four_pi * bz_geometry_factor  ! Final result stored here
+#endif
 
  case ('ERFC')
    ! * Use a modified short-range only Coulomb interaction thanks to the complementary error function:
@@ -640,16 +632,18 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
      call cmod_qpg(nqlwl, iqlwl, qlwl, ng, gvec, gprimd, vcoul_lwl(:,iqlwl))
    end do
    vcoul_lwl = four_pi/(vcoul_lwl**2) * ( one - EXP( -0.25d0 * (Vcp%rcut*vcoul_lwl)**2 ) )
-   !
+
    ! === Treat 1/q^2 singularity ===
    ! * There is NO singularity in this case.
    Vcp%i_sz = pi * Vcp%rcut**2 ! Final result stored here
 
  case default
-   ABI_BUG(sjoin('Unknown cutoff mode:', Vcp%mode))
+   ABI_BUG(sjoin('Unsupported cutoff mode:', Vcp%mode))
  end select
 
- ! Store final results in complex array as Rozzi"s cutoff can give real negative values
+ call wrtout(std_out, sjoin("vcp%i_sz", ftoa(vcp%i_sz)))
+
+ ! Store final results in complex array as Rozzi's cutoff can give real negative values
  ABI_MALLOC(Vcp%vc_sqrt, (ng, nqibz))
  ABI_MALLOC(Vcp%vc_sqrt_resid, (ng, nqibz))
  Vcp%vc_sqrt = CMPLX(vcoul, zero)
@@ -668,19 +662,23 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
 
  DBG_EXIT("COLL")
 
-contains !===============================================================
+end subroutine vcoul_init
+!!***
 
- real(dp) function integratefaux(comm)
+real(dp) function integratefaux(rcut, gprimd, ucvol, comm)
 
+ real(dp),intent(in) :: rcut, gprimd(3,3), ucvol
  integer,intent(in) :: comm
- !real(dp),intent(in) :: rcut !, gprimd(3,3)
 
 !Local variables-------------------------------
  integer,parameter :: nref = 3, nq = 50
- integer :: ierr,iq,iqx1,iqy1,iqz1,iqx2,iqy2,iqz2,miniqy1,maxiqy1,nqhalf, nprocs
+ integer :: ierr,iq,iqx1,iqy1,iqz1,iqx2,iqy2,iqz2,miniqy1,maxiqy1,nqhalf, nprocs, my_rank
  real(dp) :: invnq,invnq3,qq,weightq,weightxy,weightxyz
  real(dp) :: qq1(3),qq2(3),bb4sinpiqq_2(3,nq),sin2piqq(nq),bb4sinpiqq2_2(3,0:nq),sin2piqq2(3,0:nq)
- !real(dp) :: b1(3), b2(3), b3(3)
+ real(dp) :: b1(3), b2(3), b3(3), bb(3)
+ real(dp) :: b1b1,b2b2,b3b3,b1b2,b2b3,b3b1
+
+! *************************************************************************
 
  ! nq is the number of sampling points along each axis for the numerical integration
  ! nref is the area where the mesh is refined
@@ -690,12 +688,12 @@ contains !===============================================================
  invnq3 = invnq**3
  nqhalf = nq/2
 
- !b1 = two_pi * gprimd(:,1); b2 = two_pi * gprimd(:,2); b3 = two_pi * gprimd(:,3)
- !b1b1 = dot_product(b1, b1); b2b2 = dot_product(b2, b2); b3b3 = dot_product(b3, b3)
- !bb(1) = b1b1; bb(2) = b2b2; bb(3) = b3b3
- !b1b2 = dot_product(b1, b2); b2b3 = dot_product(b2, b3); b3b1 = dot_product(b3, b1)
+ b1 = two_pi * gprimd(:,1); b2 = two_pi * gprimd(:,2); b3 = two_pi * gprimd(:,3)
+ b1b1 = dot_product(b1, b1); b2b2 = dot_product(b2, b2); b3b3 = dot_product(b3, b3)
+ bb(1) = b1b1; bb(2) = b2b2; bb(3) = b3b3
+ b1b2 = dot_product(b1, b2); b2b3 = dot_product(b2, b3); b3b1 = dot_product(b3, b1)
 
- nprocs = xmpi_comm_size(comm)
+ nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
 
  ! In order to speed up the calculation, precompute the sines
  do iq=1,nq
@@ -745,10 +743,10 @@ contains !===============================================================
                ! Treat the remaining divergence in the origin as if it would be a spherical integration of 1/q^2
                if (iqx1/=nqhalf .or. iqy1/=nqhalf .or. iqz1/=nqhalf .or. &
                    iqx2/=nqhalf .or. iqy2/=nqhalf .or. iqz2/=nqhalf ) then
-                 !integratefaux=integratefaux+ faux(qq2) *invnq**6
+                 !integratefaux=integratefaux+ faux(qq2, rcut, b1, b2, b3) *invnq**6
                  integratefaux = integratefaux + &
                    faux_fast(qq2, bb4sinpiqq2_2(1,iqx2), bb4sinpiqq2_2(2,iqy2), bb4sinpiqq2_2(3,iqz2), &
-                             sin2piqq2(1,iqx2), sin2piqq2(2,iqy2), sin2piqq2(3,iqz2)) * weightxyz
+                             sin2piqq2(1,iqx2), sin2piqq2(2,iqy2), sin2piqq2(3,iqz2), rcut, b1, b2, b3) * weightxyz
                else
                   integratefaux = integratefaux + 7.7955* ((two_pi)**3/ucvol*invnq3*invnq3 )**(-2./3.) *invnq3*invnq3
                end if
@@ -756,10 +754,10 @@ contains !===============================================================
            end do
          end do
        else
-        ! integratefaux=integratefaux+faux(qq1)*invnq**3
+        ! integratefaux=integratefaux+faux(qq1, rcut, b1, b2, b3)*invnq**3
         integratefaux = integratefaux + &
           faux_fast(qq1, bb4sinpiqq_2(1,iqx1), bb4sinpiqq_2(2,iqy1), bb4sinpiqq_2(3,iqz1), &
-                    sin2piqq(iqx1), sin2piqq(iqy1), sin2piqq(iqz1)) * weightq
+                    sin2piqq(iqx1), sin2piqq(iqy1), sin2piqq(iqz1), rcut, b1, b2, b3) * weightq
        end if
      end do
    end do
@@ -769,13 +767,20 @@ contains !===============================================================
 
 end function integratefaux
 
-real(dp) pure function faux(qq)
+real(dp) pure function faux(qq, rcut, b1, b2, b3)
 
+!Arguments ------------------------------------
  real(dp),intent(in) :: qq(3)
- !real(dp),intent(in) :: rcut
- !real(dp),intent(in) :: b1(3), b2(3), b3(3)
+ real(dp),intent(in) :: rcut
+ real(dp),intent(in) :: b1(3), b2(3), b3(3)
 
+!Local variables-------------------------------
  real(dp) :: bb4sinpiqq1_2, bb4sinpiqq2_2, bb4sinpiqq3_2, sin2piqq1, sin2piqq2, sin2piqq3
+ real(dp) :: b1b1,b2b2,b3b3
+
+! *************************************************************************
+
+ b1b1 = dot_product(b1, b1); b2b2 = dot_product(b2, b2); b3b3 = dot_product(b3, b3)
 
  bb4sinpiqq1_2 = b1b1 * four * SIN(pi*qq(1))**2
  bb4sinpiqq2_2 = b2b2 * four * SIN(pi*qq(2))**2
@@ -784,16 +789,24 @@ real(dp) pure function faux(qq)
  sin2piqq2 = SIN(two_pi*qq(2))
  sin2piqq3 = SIN(two_pi*qq(3))
 
- faux = faux_fast(qq, bb4sinpiqq1_2, bb4sinpiqq2_2, bb4sinpiqq3_2, sin2piqq1, sin2piqq2, sin2piqq3)
+ faux = faux_fast(qq, bb4sinpiqq1_2, bb4sinpiqq2_2, bb4sinpiqq3_2, sin2piqq1, sin2piqq2, sin2piqq3, rcut, b1, b2, b3)
 
 end function faux
 
-real(dp) pure function faux_fast(qq, bb4sinpiqq1_2, bb4sinpiqq2_2, bb4sinpiqq3_2, sin2piqq1, sin2piqq2, sin2piqq3)
+real(dp) pure function faux_fast(qq, bb4sinpiqq1_2, bb4sinpiqq2_2, bb4sinpiqq3_2, sin2piqq1, sin2piqq2, sin2piqq3, &
+                                 rcut, b1, b2, b3)
 
+!Arguments ------------------------------------
  real(dp),intent(in) :: qq(3)
  real(dp),intent(in) :: bb4sinpiqq1_2, bb4sinpiqq2_2, bb4sinpiqq3_2, sin2piqq1, sin2piqq2, sin2piqq3
- !real(dp),intent(in) :: rcut
- !real(dp),intent(in) :: b1(3), b2(3), b3(3)
+ real(dp),intent(in) :: rcut
+ real(dp),intent(in) :: b1(3), b2(3), b3(3)
+
+!Local variables-------------------------------
+ real(dp) :: b1b2,b2b3,b3b1
+ b1b2 = dot_product(b1, b2); b2b3 = dot_product(b2, b3); b3b1 = dot_product(b3, b1)
+
+! *************************************************************************
 
  faux_fast = bb4sinpiqq1_2 + bb4sinpiqq2_2 + bb4sinpiqq3_2 &
       +two*( b1b2 * sin2piqq1*sin2piqq2 &
@@ -801,15 +814,13 @@ real(dp) pure function faux_fast(qq, bb4sinpiqq1_2, bb4sinpiqq2_2, bb4sinpiqq3_2
             +b3b1 * sin2piqq3*sin2piqq1 &
            )
 
- if (Vcp%rcut > tol6) then
-   faux_fast = two_pi*two_pi/faux_fast * exp( -0.25d0*Vcp%rcut**2* sum( ( qq(1)*b1(:)+qq(2)*b2(:)+qq(3)*b3(:) )**2 ) )
+ if (rcut > tol6) then
+   faux_fast = two_pi*two_pi/faux_fast * exp( -0.25d0*rcut**2* sum( ( qq(1)*b1(:)+qq(2)*b2(:)+qq(3)*b3(:) )**2 ) )
  else
    faux_fast = two_pi*two_pi/faux_fast
  endif
 
 end function faux_fast
-
-end subroutine vcoul_init
 !!***
 
 !----------------------------------------------------------------------
@@ -824,8 +835,11 @@ end subroutine vcoul_init
 
 integer pure function adapt_nmc(nmc_max, qpg2) result(nmc)
 
-integer,intent(in)  :: nmc_max
-real(dp),intent(in) :: qpg2
+!Arguments ------------------------------------
+ integer,intent(in)  :: nmc_max
+ real(dp),intent(in) :: qpg2
+
+! *************************************************************************
 
  nmc = NINT( nmc_max / ( 1.0_dp + 1.0_dp * qpg2**6 ) )
  nmc = MIN(nmc_max, nmc)
@@ -1556,15 +1570,13 @@ subroutine mc_integrate(mc, rcut2, nkbz, mode, qibz, ng, gvec, vcoul, comm)
      do imc=1,nmc
        qpg(:) = qibz(:) + gvec(:,ig) + mc%qran(:,imc)
        qpg2 = normv(qpg, mc%gmet, 'G')**2
-       vcoul(ig) = vcoul(ig) + four_pi / qpg2 / REAL(nmc,dp) &
-              * EXP( -0.25d0 * rcut2 * qpg2 )
+       vcoul(ig) = vcoul(ig) + four_pi / qpg2 / REAL(nmc,dp) * EXP( -0.25d0 * rcut2 * qpg2 )
      end do
    end do ! ig
 
    if (q_is_gamma .and. my_rank == master) then
      ! Override ig=ig0 component
-     vcoul(ig0) = four_pi**2 * nkbz * mc%ucvol / ( 8.0_dp * pi**3 ) &
-                  * SQRT(pi/rcut2) * abi_derf(0.5_dp*SQRT(rcut2)*mc%q0sph)
+     vcoul(ig0) = four_pi**2 * nkbz * mc%ucvol / ( 8.0_dp * pi**3 ) * SQRT(pi/rcut2) * abi_derf(0.5_dp*SQRT(rcut2)*mc%q0sph)
 
      do imc=1,mc%nmc_max
        qpg(:) = qibz(:) + gvec(:,ig0) + mc%qran(:,imc)
@@ -1783,6 +1795,69 @@ subroutine beigi_surface_limit(opt_surface, npt, cryst, nqibz, nkbz, rcut, alpha
  ABI_FREE(yy)
 
 end subroutine beigi_surface_limit
+!!***
+
+
+real(dp) function carrier_isz(cryst, nqbz, qbz, rcut, tolq0, comm) result(i_sz)
+
+!Arguments ------------------------------------
+ type(crystal_t),intent(in) :: cryst
+ integer,intent(in) :: nqbz, comm
+ real(dp), intent(in) :: qbz(3, nqbz), rcut, tolq0
+
+!Local variables-------------------------------
+ integer :: iq_bz
+ real(dp) :: qbz_norm, bz_geometry_factor, qbz_cart(3), b1(3), b2(3), b3(3)
+
+!************************************************************************
+
+ b1 = two_pi * cryst%gprimd(:,1); b2 = two_pi * cryst%gprimd(:,2); b3 = two_pi * cryst%gprimd(:,3)
+
+ bz_geometry_factor = zero
+ do iq_bz=1,nqbz
+   qbz_cart(:) = qbz(1,iq_bz)*b1(:) + qbz(2,iq_bz)*b2(:) + qbz(3,iq_bz)*b3(:)
+   qbz_norm = SQRT(SUM(qbz_cart(:)**2))
+   if (qbz_norm > tolq0) bz_geometry_factor = bz_geometry_factor - faux(qbz(:,iq_bz), rcut, b1, b2, b3)
+ end do
+
+ bz_geometry_factor = bz_geometry_factor + integratefaux(rcut, cryst%gprimd, cryst%ucvol, comm) * nqbz
+ i_sz = four_pi * bz_geometry_factor  ! Final result stored here
+
+end function carrier_isz
+!!***
+
+real(dp) function gygi_baldereschi_isz(cryst, nqbz, qbz, ecut, ng, gvec, tolq0) result(i_sz)
+
+!Arguments ------------------------------------
+ type(crystal_t),intent(in) :: cryst
+ integer,intent(in) :: nqbz, ng
+ real(dp), intent(in) :: qbz(3, nqbz), ecut, tolq0
+ integer,intent(in) :: gvec(3,ng)
+
+!Local variables-------------------------------
+ integer :: iq_bz, ig
+ real(dp) :: alpha, bz_geometry_factor, intfauxgb, alfa, qpg2, qpg(3)
+
+!************************************************************************
+
+ ! the choice of alfa (the width of the gaussian) is somehow empirical
+ alfa = 150.0 / ecut
+
+ bz_geometry_factor=zero
+ do iq_bz=1,nqbz
+   do ig = 1,ng
+     qpg(:) = qbz(:,iq_bz) + gvec(:,ig)
+     qpg2 = normv(qpg, cryst%gmet, 'G')**2
+     if (qpg2 > tolq0) bz_geometry_factor = bz_geometry_factor - EXP(-alfa*qpg2)/qpg2
+   end do
+ end do
+
+ intfauxgb = cryst%ucvol/four_pi/SQRT(0.5*two_pi*alfa)
+ bz_geometry_factor = bz_geometry_factor + intfauxgb * nqbz
+
+ i_sz = four_pi*bz_geometry_factor
+
+end function gygi_baldereschi_isz
 !!***
 
 !----------------------------------------------------------------------
