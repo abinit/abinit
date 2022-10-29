@@ -52,6 +52,8 @@ module m_vcoul
 
  implicit none
 
+ public :: gw_icutcoul_to_mode
+
  private
 !!***
 
@@ -164,9 +166,8 @@ module m_vcoul
 !!
 !! SOURCE
 
-type mc_t
+type, public :: mc_t
 
-   !integer :: ncell = 3
    integer :: nmc_max = 2500000
 
    real(dp) :: q0sph
@@ -186,6 +187,38 @@ end type mc_t
 
 
 CONTAINS  !========================================================================================
+!!***
+
+!!****f* m_vcoul/gw_icutcoul_to_mode
+!! NAME
+!! gw_icutcoul_to_mode
+!!
+!! FUNCTION
+!!
+!! SOURCE
+
+subroutine gw_icutcoul_to_mode(gw_icutcoul, mode)
+
+!Arguments ------------------------------------
+ integer,intent(in) :: gw_icutcoul
+ character(len=*),intent(out) :: mode
+
+! *************************************************************************
+
+ mode = 'NONE'
+ if (gw_icutcoul == 0) mode = 'SPHERE'
+ if (gw_icutcoul == 1) mode = 'CYLINDER'
+ if (gw_icutcoul == 2) mode = 'SURFACE'
+ if (gw_icutcoul == 3) mode = 'CRYSTAL'
+ if (gw_icutcoul == 4) mode = 'ERF'
+ if (gw_icutcoul == 5) mode = 'ERFC'
+ if (gw_icutcoul == 6) mode = 'AUXILIARY_FUNCTION'
+ if (gw_icutcoul == 7) mode = 'AUX_GB'
+ if (gw_icutcoul == 14) mode = 'MINIBZ-ERF'
+ if (gw_icutcoul == 15) mode = 'MINIBZ-ERFC'
+ if (gw_icutcoul == 16) mode = 'MINIBZ'
+
+end subroutine gw_icutcoul_to_mode
 !!***
 
 !!****f* m_vcoul/vcoul_init
@@ -229,24 +262,19 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0
- integer :: nmc,ig,imc, nqibz, nqbz, nkbz
- integer :: ii,iqlwl,iq_bz,iq_ibz,npar,npt,iq
- integer :: opt_cylinder,opt_surface,rank,nprocs
+ integer :: nmc, ig, imc, nqibz, nqbz, nkbz, ii, iqlwl, iq_bz, iq_ibz, npt, iq
+ integer :: opt_cylinder,opt_surface,my_rank,nprocs
  real(dp),parameter :: tolq0 = 1.d-3, tol999 = 999.0
  real(dp) :: b1b1,b2b2,b3b3,b1b2,b2b3,b3b1
- real(dp) :: bz_geometry_factor,bz_plane,check,dx,integ,q0_vol,q0_volsph
- real(dp) :: qbz_norm,step,ucvol,intfauxgb, alfa
- real(dp) ::qpg2,rcut2
+ real(dp) :: bz_geometry_factor,check,q0_vol
+ real(dp) :: qbz_norm,ucvol,intfauxgb, alfa, qpg2,rcut2
  character(len=500) :: msg
  type(mc_t) :: mc
 !arrays
- integer :: gamma_pt(3,1)
- !integer, allocatable :: seed(:)
  integer, contiguous, pointer :: gvec(:,:)
  real(dp) :: a1(3),a2(3),a3(3),bb(3),b1(3),b2(3),b3(3),gmet(3,3),gprimd(3,3)
  real(dp) :: qbz_cart(3),rmet(3,3),qpg(3)
- real(dp),allocatable :: cov(:,:),par(:),qfit(:,:),sigma(:),var(:),qcart(:,:)
- real(dp),allocatable :: vcfit(:,:),vcoul(:,:),vcoul_lwl(:,:),xx(:),yy(:)
+ real(dp),allocatable :: vcoul(:,:),vcoul_lwl(:,:),xx(:),yy(:)
  real(dp),contiguous, pointer :: qibz(:,:), qbz(:,:)
 
 ! *************************************************************************
@@ -256,7 +284,7 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
  ! === Test if the first q-point is zero ===
  ! FIXME this wont work if nqptdm/=0
  !if (normv(Qmesh%ibz(:,1),gmet,'G')<GW_TOLQ0)) STOP 'vcoul_init, non zero first point '
- rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
+ my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
 
  call metric(gmet, gprimd, -1, rmet, cryst%rprimd, ucvol)
 
@@ -280,19 +308,7 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
 
  gvec => Gsph%gvec
 
- ! Define geometry and cutoff radius (if used)
- Vcp%mode = 'NONE'
- if (gw_icutcoul == 0) Vcp%mode = 'SPHERE'
- if (gw_icutcoul == 1) Vcp%mode = 'CYLINDER'
- if (gw_icutcoul == 2) Vcp%mode = 'SURFACE'
- if (gw_icutcoul == 3) Vcp%mode = 'CRYSTAL'
- if (gw_icutcoul == 4) Vcp%mode = 'ERF'
- if (gw_icutcoul == 5) Vcp%mode = 'ERFC'
- if (gw_icutcoul == 6) Vcp%mode = 'AUXILIARY_FUNCTION'
- if (gw_icutcoul == 7) Vcp%mode = 'AUX_GB'
- if (gw_icutcoul == 14) Vcp%mode = 'MINIBZ-ERF'
- if (gw_icutcoul == 15) Vcp%mode = 'MINIBZ-ERFC'
- if (gw_icutcoul == 16) Vcp%mode = 'MINIBZ'
+ call gw_icutcoul_to_mode(gw_icutcoul, vcp%mode)
 
  ! === Calculate Fourier coefficient of Coulomb interaction ===
  ! * For the limit q --> 0 we consider ng vectors due to a possible anisotropy in case of a cutoff interaction
@@ -313,7 +329,7 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
  bb(1) = b1b1; bb(2) = b2b2; bb(3) = b3b3
  b1b2 = dot_product(b1, b2); b2b3 = dot_product(b2, b3); b3b1 = dot_product(b3, b1)
 
- select case (TRIM(Vcp%mode))
+ select case (TRIM(vcp%mode))
 
  case ('MINIBZ', 'MINIBZ-ERFC', 'MINIBZ-ERF')
 
@@ -326,16 +342,15 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
    call mc%init(cryst%rprimd, cryst%ucvol, cryst%gprimd, cryst%gmet, kmesh%kptrlatt)
 
    rcut2 = Vcp%rcut**2
-
    do iq_ibz=1,nqibz
-     call mc%integrate(rcut2, nkbz, vcp%mode, qibz(:, iq_ibz), ng, gvec, vcoul(:, iq_ibz))
+     call mc%integrate(rcut2, nkbz, vcp%mode, qibz(:, iq_ibz), ng, gvec, vcoul(:, iq_ibz), comm)
    end do
 
    ! Treat the limit q --> 0
    vcp%i_sz = vcoul(1, 1)
 
    do iqlwl=1,nqlwl
-     call mc%integrate(rcut2, nkbz, vcp%mode, qlwl(:, iqlwl), ng, gvec, vcoul_lwl(:, iqlwl))
+     call mc%integrate(rcut2, nkbz, vcp%mode, qlwl(:, iqlwl), ng, gvec, vcoul_lwl(:, iqlwl), comm)
    end do
 
    call mc%free()
@@ -377,7 +392,7 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
        Vcp%pdir(ii)=1
        if (check<zero) then  ! use Rozzi's method.
          Vcp%hcyl=ABS(check)*SQRT(SUM(Cryst%rprimd(:,ii)**2))
-         opt_cylinder=2
+         opt_cylinder = 2
          ! Check to enter the infinite Rozzi treatment
          if(Vcp%vcutgeo(3) <= -tol999) Vcp%hcyl=tol12
        end if
@@ -400,67 +415,10 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
                           Vcp%boxcenter, Cryst%rprimd, vcoul_lwl(:,iqlwl), opt_cylinder, comm)
    end do
 
-   ! If Beigi, treat the limit q--> 0.
+   ! If Beigi, treat the limit q --> 0.
    if (opt_cylinder == 1) then
-     npar=8; npt=100; gamma_pt = RESHAPE(([0, 0, 0]), [3, 1])
-     ABI_MALLOC(qfit, (3, npt))
-     ABI_MALLOC(vcfit, (1, npt))
-     if (nqibz == 1) then
-       ABI_ERROR("nqibz == 1 not supported when Beigi's method is used")
-     endif
-     qfit(:,:)=zero
-     step=half/(npt * (nqibz-1))              ; qfit(3,:)=arth(tol6,step,npt)
-     !step=(half/(nqibz-1)/tol6)**(one/npt) ; qfit(3,:)=geop(tol6,step,npt)
-
-     do iq=1,npt
-       call cutoff_cylinder(qfit(:,iq),1,gamma_pt,Vcp%rcut,Vcp%hcyl,Vcp%pdir,Vcp%boxcenter,&
-                            Cryst%rprimd,vcfit(:,iq),opt_cylinder,comm)
-     end do
-
-     ABI_MALLOC(xx, (npt))
-     ABI_MALLOC(yy, (npt))
-     ABI_MALLOC(sigma, (npt))
-     ABI_MALLOC(par, (npar))
-     ABI_MALLOC(var, (npar))
-     ABI_MALLOC(cov, (npar, npar))
-     do ii=1,npt
-       xx(ii) = normv(qfit(:,ii), gmet, 'G')
-     end do
-     ABI_FREE(qfit)
-     sigma=one ; yy(:)=vcfit(1,:)
-     ABI_FREE(vcfit)
-     !call llsfit_svd(xx,yy,sigma,npar,K0fit,chisq,par,var,cov,info)
-     !do ii=1,npt
-     ! write(99,*)xx(ii),yy(ii),DOT_PRODUCT(par,K0fit(xx(ii),npar))
-     !end do
-     bz_plane=l2norm(b1.x.b2)
-     !integ=K0fit_int(xx(npt),par,npar)
-     !write(std_out,*)' SVD fit : chi-square',chisq
-     !write(std_out,*)' fit-parameters : ',par
-     !write(std_out,*)' variance ',var
-     !write(std_out,*)' bz_plane ',bz_plane
-     !write(std_out,*)' SCD integ ',integ
-     ! Here Im assuming homogeneous mesh
-     dx=(xx(2)-xx(1))
-     integ=yy(2)*dx*3.0/2.0
-     do ii=3,npt-2
-       integ=integ+yy(ii)*dx
-     end do
-     integ=integ+yy(npt-1)*dx*3.0/2.0
-     !write(std_out,*)' simple integral',integ
-     q0_volsph = (two_pi)**3 / (nkbz * ucvol)
-     q0_vol=bz_plane*two*xx(npt)
-     !write(std_out,*)' q0 sphere : ',q0_volsph,' q0_vol cyl ',q0_vol
-     Vcp%i_sz=bz_plane*two*integ/q0_vol
-     !write(std_out,*)' spherical approximation ',four_pi*7.44*q0_volsph**(-two_thirds)
-     !write(std_out,*)' Cylindrical cutoff value ',Vcp%i_sz
-     !Vcp%i_sz=four_pi*7.44*q0_vol**(-two_thirds)
-     ABI_FREE(xx)
-     ABI_FREE(yy)
-     ABI_FREE(sigma)
-     ABI_FREE(par)
-     ABI_FREE(var)
-     ABI_FREE(cov)
+     npt =100
+     call beigi_cylinder_limit(opt_cylinder, npt, cryst, nqibz, nkbz, vcp%rcut, vcp%hcyl, vcp%boxcenter, vcp%pdir, vcp%i_sz)
    else
      ! In Rozzi"s method the lim q+G --> 0 is finite.
      Vcp%i_sz = vcoul(1,1)
@@ -503,65 +461,11 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
                          Vcp%boxcenter, Vcp%pdir, Vcp%alpha, vcoul_lwl(:,iqlwl), opt_surface)
    end do
 
-   ! If Beigi, treat the limit q--> 0.
+   ! If Beigi, treat the limit q --> 0.
    if (opt_surface == 1) then
      ! Integrate numerically in the plane close to 0
      npt=100 ! Number of points in 1D
-     gamma_pt=RESHAPE([0, 0, 0], [3, 1]) ! Gamma point
-     ABI_MALLOC(qfit, (3, npt))
-     ABI_MALLOC(qcart, (3, npt))
-     ABI_MALLOC(vcfit, (1, npt))
-     if (nqibz == 1) then
-       ABI_ERROR("nqibz == 1 not supported when Beigi's method is used")
-     endif
-     qfit(:,:)=zero
-     qcart(:,:)=zero
-     ! Size of the third vector
-     bz_plane=l2norm(b3)
-     q0_volsph=(two_pi)**3 / (nkbz * ucvol)
-     ! radius that gives the same volume as q0_volsph
-     ! Let's assume that c is perpendicular to the plane
-     ! We also assume isotropic BZ around gamma
-     step=sqrt((q0_volsph/bz_plane)/pi)/npt
-
-     !step=half/(npt*(nqibz-1))
-     ! Let's take qpoints along 1 line, the vcut does depend only on the norm
-     qcart(1,:) = arth(tol6,step,npt)
-
-     do ii=1,npt
-       qfit(:,ii) = MATMUL(TRANSPOSE(Cryst%rprimd),qcart(:,ii)) / (2*pi)
-       call cutoff_surface(qfit(:,ii), 1, gamma_pt, gprimd, Vcp%rcut, &
-                           Vcp%boxcenter, Vcp%pdir, Vcp%alpha, vcfit(:,ii), opt_surface)
-     end do
-
-     ABI_MALLOC(xx, (npt))
-     ABI_MALLOC(yy, (npt))
-     ABI_MALLOC(sigma, (npt))
-     do ii=1,npt
-       !xx(ii)=qfit(1,:)
-       xx(ii) = normv(qfit(:,ii), gmet, 'G')
-     end do
-     ABI_FREE(qfit)
-     sigma=one
-     yy(:)=vcfit(1,:)
-     !yy(:)=one
-     ABI_FREE(vcfit)
-     dx=(xx(2)-xx(1))
-     ! integ = \int dr r f(r)
-     integ=xx(2)*yy(2)*dx*3.0/2.0
-     do ii=3,npt-2
-       integ=integ+xx(ii)*yy(ii)*dx
-     end do
-     integ=integ+xx(npt-1)*yy(npt-1)*dx*3.0/2.0
-     !write(std_out,*)' simple integral',integ
-     q0_vol=bz_plane*pi*xx(npt)**2
-     !write(std_out,*)' q0 sphere : ',q0_volsph,' q0_vol cyl ',q0_vol
-     Vcp%i_sz=bz_plane*2*pi*integ/q0_vol
-     !write(std_out,*)' spherical approximation ',four_pi*7.44*q0_volsph**(-two_thirds)
-     !write(std_out,*)' Cylindrical cutoff value ',Vcp%i_sz
-     !Vcp%i_sz=four_pi*7.44*q0_vol**(-two_thirds)
-     ABI_FREE(xx)
-     ABI_FREE(yy)
+     call beigi_surface_limit(opt_surface, npt, cryst, nqibz, nkbz, vcp%rcut, vcp%alpha, vcp%boxcenter, vcp%pdir, vcp%i_sz)
    else
      ! In Rozzi"s method the lim q+G --> 0 is finite.
      Vcp%i_sz=vcoul(1,1)
@@ -674,9 +578,8 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
    ! Analytic integration of 4pi/q^2 over the volume element:
    ! $4pi/V \int_V d^3q 1/q^2 =4pi bz_geometric_factor V^(-2/3)$
    ! i_sz=4*pi*bz_geometry_factor*q0_vol**(-two_thirds) where q0_vol= V_BZ/N_k
-   ! bz_geometry_factor: sphere=7.79, fcc=7.44, sc=6.188, bcc=6.946, wz=5.255
-   ! (see gwa.pdf, appendix A.4)
-   Vcp%i_sz=four_pi*7.44*q0_vol**(-two_thirds)
+   ! bz_geometry_factor: sphere=7.79, fcc=7.44, sc=6.188, bcc=6.946, wz=5.255 (see gwa.pdf, appendix A.4)
+   Vcp%i_sz = four_pi*7.44*q0_vol**(-two_thirds)
 
  case ('ERF')
    ! Modified long-range only Coulomb interaction thanks to the error function:
@@ -801,7 +704,7 @@ contains !===============================================================
  end do
 
  do iqx1=1,nq
-   if (modulo(iqx1, nprocs) /= rank) cycle ! MPI parallelism
+   if (modulo(iqx1, nprocs) /= my_rank) cycle ! MPI parallelism
    qq1(1)=DBLE(iqx1)*invnq-half
    ! Here take advantage of the q <=> -q symmetry:
    ! arrange the sampling of qx, qy space to avoid duplicating calculations. Need weights to do this ...
@@ -961,7 +864,7 @@ subroutine vcoul_plot(Vcp, Qmesh, Gsph, ng, vc, comm)
 !scalars
  integer,parameter :: master = 0
  integer :: icount,idx_Sm1G,ierr,ig,igs,ii,iq_bz,iq_ibz,iqg,ir,isym,itim
- integer :: my_start,my_stop,nqbz,nqibz,nr,ntasks,rank,unt
+ integer :: my_start,my_stop,nqbz,nqibz,nr,ntasks,my_rank,unt
  real(dp) :: arg,fact,l1,l2,l3,lmax,step,tmp,vcft,vc_bare
  character(len=500) :: msg
  character(len=fnlen) :: filnam
@@ -974,7 +877,7 @@ subroutine vcoul_plot(Vcp, Qmesh, Gsph, ng, vc, comm)
 
  if (TRIM(Vcp%mode) /= 'CYLINDER') RETURN
 
- rank = xmpi_comm_rank(comm)
+ my_rank = xmpi_comm_rank(comm)
 
  nqibz=Vcp%nqibz; nqbz=Qmesh%nbz
  gmet=Gsph%gmet; gprimd=Gsph%gprimd
@@ -984,7 +887,7 @@ subroutine vcoul_plot(Vcp, Qmesh, Gsph, ng, vc, comm)
  b3(:)=two_pi*gprimd(:,3)
 
  ! Compare in Fourier space the true Coulomb with the cutted one.
- if (rank == master) then
+ if (my_rank == master) then
    ABI_MALLOC(insort, (nqibz * ng))
    ABI_MALLOC(qpg_mod, (nqibz * ng))
    iqg = 1
@@ -1016,7 +919,7 @@ subroutine vcoul_plot(Vcp, Qmesh, Gsph, ng, vc, comm)
    close(unt)
    ABI_FREE(insort)
    ABI_FREE(qpg_mod)
- end if ! rank==master
+ end if ! my_rank==master
 
  ! Fourier transform back to real space just to check cutoff implementation.
  ntasks= nqbz * ng
@@ -1067,7 +970,7 @@ subroutine vcoul_plot(Vcp, Qmesh, Gsph, ng, vc, comm)
  call xmpi_sum_master(vcr_cut,master,comm,ierr)
  call xmpi_sum_master(vcr    ,master,comm,ierr)
 
- if (rank == master) then
+ if (my_rank == master) then
    filnam='_VCoulR_'
    call isfile(filnam, 'new')
    if (open_file(filnam,msg,newunit=unt,status='new',form='formatted') /= 0) then
@@ -1555,25 +1458,27 @@ end subroutine mc_init
 !!
 !! SOURCE
 
-subroutine mc_integrate(mc, rcut2, nkbz, mode, qibz, ng, gvec, vcoul)
+subroutine mc_integrate(mc, rcut2, nkbz, mode, qibz, ng, gvec, vcoul, comm)
 
 !Arguments ------------------------------------
  class(mc_t),intent(in) :: mc
  real(dp),intent(in) :: rcut2
- integer,intent(in) :: nkbz, ng
+ integer,intent(in) :: nkbz, ng, comm
  character(len=*),intent(in) :: mode
  real(dp),intent(in) :: qibz(3)
  integer,intent(in) :: gvec(3, ng)
  real(dp),intent(out) :: vcoul(ng)
 
 !Local variables-------------------------------
- integer :: ig, ig0, imc, nmc
+ integer,parameter :: master = 0
+ integer :: ig, ig0, imc, nmc, my_rank, nprocs, ierr
  logical :: q_is_gamma
  real(dp)  :: qpg2, qpg(3)
 
 ! *************************************************************************
 
  q_is_gamma = all(abs(qibz) < tol16)
+ my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
 
  ! Find index of G=0 in gvec.
  ig0 = -1
@@ -1590,6 +1495,7 @@ subroutine mc_integrate(mc, rcut2, nkbz, mode, qibz, ng, gvec, vcoul)
  case('MINIBZ')
 
    do ig=1,ng
+     if (mod(ig, nprocs) /= my_rank) cycle ! MPI parallelism.
      if (q_is_gamma .and. ig == ig0) cycle
      qpg(:) = qibz(:) + gvec(:,ig)
      qpg2 = normv(qpg, mc%gmet, 'G')**2
@@ -1601,7 +1507,7 @@ subroutine mc_integrate(mc, rcut2, nkbz, mode, qibz, ng, gvec, vcoul)
      end do
    end do ! ig
 
-   if (q_is_gamma) then
+   if (q_is_gamma .and. my_rank == master) then
      ! Override ig0 component
      vcoul(ig0) = four_pi**2 * nkbz * mc%ucvol / ( 8.0_dp * pi**3 ) * mc%q0sph
      do imc=1,mc%nmc_max
@@ -1614,29 +1520,27 @@ subroutine mc_integrate(mc, rcut2, nkbz, mode, qibz, ng, gvec, vcoul)
  case('MINIBZ-ERFC')
 
    do ig=1,ng
-     if (q_is_gamma .AND. ig == ig0) cycle
+     if (mod(ig, nprocs) /= my_rank) cycle ! MPI parallelism.
+     if (q_is_gamma .and. ig == ig0) cycle
      qpg(:) = qibz(:) + gvec(:,ig)
      qpg2 = normv(qpg, mc%gmet, 'G')**2
      nmc = adapt_nmc(mc%nmc_max, qpg2)
      do imc=1,nmc
        qpg(:) = qibz(:) +  gvec(:,ig) + mc%qran(:,imc)
        qpg2 = normv(qpg, mc%gmet, 'G')**2
-       vcoul(ig) = vcoul(ig) + four_pi / qpg2 / REAL(nmc,dp) &
-              * (  one - EXP( -0.25d0 * rcut2 * qpg2 ) )
+       vcoul(ig) = vcoul(ig) + four_pi / qpg2 / REAL(nmc,dp) * (  one - EXP( -0.25d0 * rcut2 * qpg2 ) )
      end do
    end do ! ig
 
-
-   if (q_is_gamma) then
-     ! Override ig=ig0
+   if (q_is_gamma .and. my_rank == master) then
+     ! Override ig0 component
      vcoul(ig0) = four_pi**2 * nkbz * mc%ucvol / ( 8.0_dp * pi**3 ) &
         * ( mc%q0sph - SQRT(pi/rcut2) * abi_derf(0.5_dp*SQRT(rcut2)*mc%q0sph) )
      do imc=1,mc%nmc_max
        qpg(:) = qibz(:) + gvec(:,ig0) + mc%qran(:,imc)
        qpg2 = normv(qpg, mc%gmet, 'G')**2
        if (qpg2 > mc%q0sph**2) then
-         vcoul(ig0) = vcoul(ig0) + four_pi / qpg2 / REAL(mc%nmc_max,dp) &
-                      * (one - EXP( -0.25d0 * rcut2 * qpg2))
+         vcoul(ig0) = vcoul(ig0) + four_pi / qpg2 / REAL(mc%nmc_max,dp) * (one - EXP( -0.25d0 * rcut2 * qpg2))
        end if
      end do
    end if
@@ -1644,7 +1548,8 @@ subroutine mc_integrate(mc, rcut2, nkbz, mode, qibz, ng, gvec, vcoul)
  case('MINIBZ-ERF')
 
    do ig=1,ng
-     if (q_is_gamma .AND. ig == ig0) cycle
+     if (mod(ig, nprocs) /= my_rank) cycle ! MPI parallelism.
+     if (q_is_gamma .and. ig == ig0) cycle
      qpg(:) = qibz(:) + gvec(:,ig)
      qpg2 = normv(qpg, mc%gmet, 'G')**2
      nmc = adapt_nmc(mc%nmc_max, qpg2)
@@ -1656,7 +1561,7 @@ subroutine mc_integrate(mc, rcut2, nkbz, mode, qibz, ng, gvec, vcoul)
      end do
    end do ! ig
 
-   if (q_is_gamma) then
+   if (q_is_gamma .and. my_rank == master) then
      ! Override ig=ig0 component
      vcoul(ig0) = four_pi**2 * nkbz * mc%ucvol / ( 8.0_dp * pi**3 ) &
                   * SQRT(pi/rcut2) * abi_derf(0.5_dp*SQRT(rcut2)*mc%q0sph)
@@ -1674,7 +1579,7 @@ subroutine mc_integrate(mc, rcut2, nkbz, mode, qibz, ng, gvec, vcoul)
    ABI_ERROR(sjoin("Invalid mode:", mode))
  end select
 
- !call xmpi_sum(vcoul, comm, ierr)
+ call xmpi_sum(vcoul, comm, ierr)
 
 end subroutine mc_integrate
 !!***
@@ -1700,6 +1605,184 @@ subroutine mc_free(mc)
  ABI_SFREE(mc%qran)
 
 end subroutine mc_free
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_vcoul/beigi_cylinder_limit
+!! NAME
+!! beigi_cylinder_limit
+!!
+!! FUNCTION
+!!
+!! SOURCE
+
+subroutine beigi_cylinder_limit(opt_cylinder, npt, cryst, nqibz, nkbz, rcut, hcyl, boxcenter, pdir, i_sz)
+
+!Arguments ------------------------------------
+ integer,intent(in) :: opt_cylinder, npt, nqibz, nkbz, pdir(3)
+ type(crystal_t),intent(in) :: cryst
+ real(dp),intent(in) :: rcut, hcyl, boxcenter(3)
+ real(dp),intent(out) :: i_sz
+
+!Local variables-------------------------------
+ integer :: ii, iq, npar, gamma_pt(3,1)
+ real(dp) :: step, bz_plane, dx, integ, q0_vol, q0_volsph, b1(3),b2(3),b3(3)
+ real(dp),allocatable :: cov(:,:),par(:),qfit(:,:),sigma(:),var(:), vcfit(:,:),vcoul(:,:),xx(:),yy(:)
+
+! *************************************************************************
+
+ b1 = two_pi * cryst%gprimd(:,1); b2 = two_pi * cryst%gprimd(:,2); b3 = two_pi * cryst%gprimd(:,3)
+
+ npar=8; gamma_pt = RESHAPE(([0, 0, 0]), [3, 1])
+ ABI_MALLOC(qfit, (3, npt))
+ ABI_MALLOC(vcfit, (1, npt))
+ if (nqibz == 1) then
+   ABI_ERROR("nqibz == 1 not supported when Beigi's method is used")
+ endif
+ qfit(:,:)=zero
+ step=half/(npt * (nqibz-1))              ; qfit(3,:)=arth(tol6,step,npt)
+ !step=(half/(nqibz-1)/tol6)**(one/npt) ; qfit(3,:)=geop(tol6,step,npt)
+
+ do iq=1,npt
+   call cutoff_cylinder(qfit(:,iq),1,gamma_pt,rcut,hcyl,pdir,boxcenter,&
+                        Cryst%rprimd,vcfit(:,iq),opt_cylinder, xmpi_comm_self)
+ end do
+
+ ABI_MALLOC(xx, (npt))
+ ABI_MALLOC(yy, (npt))
+ ABI_MALLOC(sigma, (npt))
+ ABI_MALLOC(par, (npar))
+ ABI_MALLOC(var, (npar))
+ ABI_MALLOC(cov, (npar, npar))
+
+ do ii=1,npt
+   xx(ii) = normv(qfit(:,ii), cryst%gmet, 'G')
+ end do
+ ABI_FREE(qfit)
+ sigma=one ; yy(:)=vcfit(1,:)
+ ABI_FREE(vcfit)
+ !call llsfit_svd(xx,yy,sigma,npar,K0fit,chisq,par,var,cov,info)
+ !do ii=1,npt
+ ! write(99,*)xx(ii),yy(ii),DOT_PRODUCT(par,K0fit(xx(ii),npar))
+ !end do
+ bz_plane=l2norm(b1.x.b2)
+ !integ=K0fit_int(xx(npt),par,npar)
+ !write(std_out,*)' SVD fit : chi-square',chisq
+ !write(std_out,*)' fit-parameters : ',par
+ !write(std_out,*)' variance ',var
+ !write(std_out,*)' bz_plane ',bz_plane
+ !write(std_out,*)' SCD integ ',integ
+ ! Here Im assuming homogeneous mesh
+ dx=(xx(2)-xx(1))
+ integ=yy(2)*dx*3.0/2.0
+ do ii=3,npt-2
+   integ=integ+yy(ii)*dx
+ end do
+ integ=integ+yy(npt-1)*dx*3.0/2.0
+ !write(std_out,*)' simple integral',integ
+ q0_volsph = (two_pi)**3 / (nkbz * cryst%ucvol)
+ q0_vol=bz_plane*two*xx(npt)
+ !write(std_out,*)' q0 sphere : ',q0_volsph,' q0_vol cyl ',q0_vol
+ i_sz = bz_plane * two * integ / q0_vol
+ !write(std_out,*)' spherical approximation ',four_pi*7.44*q0_volsph**(-two_thirds)
+ !write(std_out,*)' Cylindrical cutoff value ',i_sz
+ !i_sz=four_pi*7.44*q0_vol**(-two_thirds)
+
+ ABI_FREE(xx)
+ ABI_FREE(yy)
+ ABI_FREE(sigma)
+ ABI_FREE(par)
+ ABI_FREE(var)
+ ABI_FREE(cov)
+
+end subroutine beigi_cylinder_limit
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_vcoul/beigi_surface_limit
+!! NAME
+!! beigi_surface_limit
+!!
+!! FUNCTION
+!!
+!! SOURCE
+
+subroutine beigi_surface_limit(opt_surface, npt, cryst, nqibz, nkbz, rcut, alpha, boxcenter, pdir, i_sz)
+
+!Arguments ------------------------------------
+ integer,intent(in) :: opt_surface, npt, nqibz, nkbz, pdir(3)
+ type(crystal_t),intent(in) :: cryst
+ real(dp),intent(in) :: rcut, alpha(3), boxcenter(3)
+ real(dp),intent(out) :: i_sz
+
+!Local variables-------------------------------
+ integer :: ii, iq, npar, gamma_pt(3,1)
+ real(dp) :: step, bz_plane, dx, integ, q0_vol, q0_volsph, b1(3),b2(3),b3(3)
+ real(dp),allocatable :: cov(:,:),par(:),qfit(:,:),sigma(:),var(:), vcfit(:,:),vcoul(:,:),xx(:),yy(:), qcart(:,:)
+
+! *************************************************************************
+
+ b1 = two_pi * cryst%gprimd(:,1); b2 = two_pi * cryst%gprimd(:,2); b3 = two_pi * cryst%gprimd(:,3)
+
+ gamma_pt=RESHAPE([0, 0, 0], [3, 1]) ! Gamma point
+ ABI_MALLOC(qfit, (3, npt))
+ ABI_MALLOC(qcart, (3, npt))
+ ABI_MALLOC(vcfit, (1, npt))
+ if (nqibz == 1) then
+   ABI_ERROR("nqibz == 1 not supported when Beigi's method is used")
+ endif
+ qfit(:,:)=zero
+ qcart(:,:)=zero
+ ! Size of the third vector
+ bz_plane=l2norm(b3)
+ q0_volsph=(two_pi)**3 / (nkbz * cryst%ucvol)
+ ! radius that gives the same volume as q0_volsph
+ ! Let's assume that c is perpendicular to the plane
+ ! We also assume isotropic BZ around gamma
+ step=sqrt((q0_volsph/bz_plane)/pi)/npt
+
+ !step=half/(npt*(nqibz-1))
+ ! Let's take qpoints along 1 line, the vcut does depend only on the norm
+ qcart(1,:) = arth(tol6,step,npt)
+
+ do ii=1,npt
+   qfit(:,ii) = MATMUL(TRANSPOSE(Cryst%rprimd),qcart(:,ii)) / (2*pi)
+   call cutoff_surface(qfit(:,ii), 1, gamma_pt, cryst%gprimd, rcut, &
+                       boxcenter, pdir, alpha, vcfit(:,ii), opt_surface)
+ end do
+
+ ABI_MALLOC(xx, (npt))
+ ABI_MALLOC(yy, (npt))
+ ABI_MALLOC(sigma, (npt))
+ do ii=1,npt
+   !xx(ii)=qfit(1,:)
+   xx(ii) = normv(qfit(:,ii), cryst%gmet, 'G')
+ end do
+ ABI_FREE(qfit)
+ sigma=one
+ yy(:)=vcfit(1,:)
+ !yy(:)=one
+ ABI_FREE(vcfit)
+ dx=(xx(2)-xx(1))
+ ! integ = \int dr r f(r)
+ integ=xx(2)*yy(2)*dx*3.0/2.0
+ do ii=3,npt-2
+   integ=integ+xx(ii)*yy(ii)*dx
+ end do
+ integ=integ+xx(npt-1)*yy(npt-1)*dx*3.0/2.0
+ !write(std_out,*)' simple integral',integ
+ q0_vol=bz_plane*pi*xx(npt)**2
+ !write(std_out,*)' q0 sphere : ',q0_volsph,' q0_vol cyl ',q0_vol
+ i_sz=bz_plane*2*pi*integ/q0_vol
+ !write(std_out,*)' spherical approximation ',four_pi*7.44*q0_volsph**(-two_thirds)
+ !write(std_out,*)' Cylindrical cutoff value ',i_sz
+ !i_sz=four_pi*7.44*q0_vol**(-two_thirds)
+ ABI_FREE(xx)
+ ABI_FREE(yy)
+
+end subroutine beigi_surface_limit
 !!***
 
 !----------------------------------------------------------------------

@@ -172,6 +172,7 @@ module m_gwr
  use m_wfd,           only : wfd_init, wfd_t, wfdgw_t, wave_t, WFD_STORED
  use m_pawtab,        only : pawtab_type
  use m_pawcprj,       only : pawcprj_type
+ !use m_vcoul,         only : gw_icutcoul_to_mode, mc_t
  use m_sigx,          only : sigx_symmetrize
  use m_dyson_solver,  only : sigma_pade_t
 #ifdef __HAVE_GREENX

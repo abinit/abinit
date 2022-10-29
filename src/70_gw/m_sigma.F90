@@ -1103,7 +1103,7 @@ real(dp) pure function sigma_get_exene(sigma, kmesh, bands) result(ex_energy)
      wtk = kmesh%wt(ik)
      do ib=sigma%b1gw,sigma%b2gw
        occ_bks = bands%occ(ib,ik,spin)
-       if (sigma%nsig_ab==1) then
+       if (sigma%nsig_ab == 1) then
          ex_energy = ex_energy + half * occ_bks * wtk * sigma%sigxme(ib,ik,spin)
        else
          ex_energy = ex_energy + half * occ_bks * wtk * SUM(sigma%sigxme(ib,ik,:))
