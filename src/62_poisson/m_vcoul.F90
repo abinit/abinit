@@ -324,7 +324,6 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
  b1 = two_pi * gprimd(:,1); b2 = two_pi * gprimd(:,2); b3 = two_pi * gprimd(:,3)
 
  select case (TRIM(vcp%mode))
-
  case ('MINIBZ', 'MINIBZ-ERFC', 'MINIBZ-ERF')
 
    ! Mimicking the BerkeleyGW technique
@@ -461,49 +460,11 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
      npt=100 ! Number of points in 1D
      call beigi_surface_limit(opt_surface, npt, cryst, nqibz, nkbz, vcp%rcut, vcp%alpha, vcp%boxcenter, vcp%pdir, vcp%i_sz)
    else
-     ! In Rozzi"s method the lim q+G --> 0 is finite.
+     ! In Rozzi's method the lim q+G --> 0 is finite.
      Vcp%i_sz=vcoul(1,1)
    end if
 
- case ('AUXILIARY_FUNCTION')
-   ! Numerical integration of the exact-exchange divergence through the
-   ! auxiliary function of Carrier et al. PRB 75, 205126 (2007) [[cite:Carrier2007]].
-   do iq_ibz=1,nqibz
-     call cmod_qpg(nqibz, iq_ibz, qibz, ng, gvec, gprimd, vcoul(:,iq_ibz))
-
-     if (iq_ibz == 1) then
-       ! The singularity is treated using vcoul_lwl.
-       vcoul(1, iq_ibz) = zero
-       vcoul(2:,iq_ibz) = four_pi/vcoul(2:,iq_ibz)**2
-     else
-       vcoul(:,iq_ibz) = four_pi/vcoul(:,iq_ibz)**2
-     end if
-   end do ! iq_ibz
-
-   ! q-points for optical limit.
-   do iqlwl=1,nqlwl
-     call cmod_qpg(nqlwl, iqlwl, qlwl, ng, gvec, gprimd, vcoul_lwl(:,iqlwl))
-   end do
-   vcoul_lwl = four_pi/vcoul_lwl**2
-
-   ! === Integration of 1/q^2 singularity ===
-   ! We use the auxiliary function from PRB 75, 205126 (2007) [[cite:Carrier2007]]
-
-#if 1
-   vcp%i_sz = carrier_isz(cryst, nqbz, qbz, rcut, tolq0, comm)
-#else
-   bz_geometry_factor = zero
-   do iq_bz=1,nqbz
-     qbz_cart(:) = qbz(1,iq_bz)*b1(:) + qbz(2,iq_bz)*b2(:) + qbz(3,iq_bz)*b3(:)
-     qbz_norm = SQRT(SUM(qbz_cart(:)**2))
-     if (qbz_norm > tolq0) bz_geometry_factor = bz_geometry_factor - faux(qbz(:,iq_bz), rcut, b1, b2, b3)
-   end do
-
-   bz_geometry_factor = bz_geometry_factor + integratefaux(rcut, gprimd, ucvol, comm) * nqbz
-   Vcp%i_sz = four_pi * bz_geometry_factor  ! Final result stored here
-#endif
-
- case ('AUX_GB')
+ case ('CRYSTAL', 'AUXILIARY_FUNCTION', "AUX_GB")
    do iq_ibz=1,nqibz
      call cmod_qpg(nqibz, iq_ibz, qibz, ng, gvec, gprimd, vcoul(:,iq_ibz))
 
@@ -521,57 +482,28 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
      call cmod_qpg(nqlwl, iqlwl, qlwl, ng, gvec, gprimd, vcoul_lwl(:,iqlwl))
    end do
    vcoul_lwl = four_pi/vcoul_lwl**2
-   !
-   ! === Integration of 1/q^2 singularity ===
-   ! We use the auxiliary function of a Gygi-Baldereschi variant [[cite:Gigy1986]]
 
-#if 1
-   vcp%i_sz = gygi_baldereschi_isz(cryst, nqbz, qbz, ecut, ng, gvec, tolq0)
-#else
+   ! Treatment of 1/q^2 singularity
 
-   ! the choice of alfa (the width of the gaussian) is somehow empirical
-   alfa = 150.0 / ecut
+   if (vcp%mode == "CRYSTAL") then
+     ! Analytic integration of 4pi/q^2 over the volume element:
+     ! $4pi/V \int_V d^3q 1/q^2 =4pi bz_geometric_factor V^(-2/3)$
+     ! i_sz=4*pi*bz_geometry_factor*q0_vol**(-two_thirds) where q0_vol= V_BZ/N_k
+     ! bz_geometry_factor: sphere=7.79, fcc=7.44, sc=6.188, bcc=6.946, wz=5.255 (see gwa.pdf, appendix A.4)
+     q0_vol = (two_pi) **3 / (nkbz*ucvol); bz_geometry_factor=zero
+     Vcp%i_sz = four_pi*7.44*q0_vol**(-two_thirds)
 
-   bz_geometry_factor=zero
-   do iq_bz=1,nqbz
-     do ig = 1,ng
-       qpg(:) = qbz(:,iq_bz) + gvec(:,ig)
-       qpg2 = normv(qpg, gmet, 'G')**2
-       if (qpg2 > tolq0) bz_geometry_factor = bz_geometry_factor - EXP(-alfa*qpg2)/qpg2
-     end do
-   end do
+   else if (vcp%mode == "AUXILIARY_FUNCTION") then
+     ! Numerical integration of the exact-exchange divergence through the
+     ! auxiliary function of Carrier et al. PRB 75, 205126 (2007) [[cite:Carrier2007]].
+     vcp%i_sz = carrier_isz(cryst, nqbz, qbz, rcut, tolq0, comm)
 
-   intfauxgb = ucvol/four_pi/SQRT(0.5*two_pi*alfa)
-   bz_geometry_factor = bz_geometry_factor + intfauxgb * nqbz
-   Vcp%i_sz = four_pi*bz_geometry_factor
-#endif
-
- case ('CRYSTAL')
-   do iq_ibz=1,nqibz
-     call cmod_qpg(nqibz, iq_ibz, qibz, ng, gvec, gprimd, vcoul(:,iq_ibz))
-
-     if (iq_ibz == 1) then
-       ! The singularity is treated using vcoul_lwl.
-       vcoul(1, iq_ibz) = zero
-       vcoul(2:,iq_ibz) = four_pi / vcoul(2:,iq_ibz)**2
-     else
-       vcoul(:,iq_ibz) = four_pi / vcoul(:,iq_ibz)**2
-     end if
-   end do ! iq_ibz
-
-   ! q-points for optical limit.
-   do iqlwl=1,nqlwl
-     call cmod_qpg(nqlwl, iqlwl, qlwl, ng, gvec, gprimd, vcoul_lwl(:,iqlwl))
-   end do
-   vcoul_lwl = four_pi/vcoul_lwl**2
-   !
-   ! === Integration of 1/q^2 singularity ===
-   ! Analytic integration of 4pi/q^2 over the volume element:
-   ! $4pi/V \int_V d^3q 1/q^2 =4pi bz_geometric_factor V^(-2/3)$
-   ! i_sz=4*pi*bz_geometry_factor*q0_vol**(-two_thirds) where q0_vol= V_BZ/N_k
-   ! bz_geometry_factor: sphere=7.79, fcc=7.44, sc=6.188, bcc=6.946, wz=5.255 (see gwa.pdf, appendix A.4)
-   q0_vol = (two_pi) **3 / (nkbz*ucvol); bz_geometry_factor=zero
-   Vcp%i_sz = four_pi*7.44*q0_vol**(-two_thirds)
+   else if (vcp%mode == "AUX_GB") then
+     ! We use the auxiliary function of a Gygi-Baldereschi variant [[cite:Gigy1986]]
+     vcp%i_sz = gygi_baldereschi_isz(cryst, nqbz, qbz, ecut, ng, gvec, tolq0)
+   else
+     ABI_ERROR("Need treatment of 1/q^2 singularity!")
+   end if
 
  case ('ERF')
    ! Modified long-range only Coulomb interaction thanks to the error function:
@@ -597,19 +529,7 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
 
    ! === Treat 1/q^2 singularity ===
    ! * We use the auxiliary function from PRB 75, 205126 (2007) [[cite:Carrier2007]]
-#if 1
    vcp%i_sz = carrier_isz(cryst, nqbz, qbz, rcut, tolq0, comm)
-#else
-   bz_geometry_factor=zero
-   do iq_bz=1,nqbz
-     qbz_cart(:) = qbz(1,iq_bz)*b1(:) + qbz(2,iq_bz)*b2(:) + qbz(3,iq_bz)*b3(:)
-     qbz_norm = SQRT(SUM(qbz_cart(:)**2))
-     if (qbz_norm > tolq0) bz_geometry_factor = bz_geometry_factor - faux(qbz(:,iq_bz), rcut, b1, b2, b3)
-   end do
-
-   bz_geometry_factor = bz_geometry_factor + integratefaux(rcut, gprimd, ucvol, comm) * nqbz
-   Vcp%i_sz = four_pi * bz_geometry_factor  ! Final result stored here
-#endif
 
  case ('ERFC')
    ! * Use a modified short-range only Coulomb interaction thanks to the complementary error function:
@@ -641,7 +561,7 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
    ABI_BUG(sjoin('Unsupported cutoff mode:', Vcp%mode))
  end select
 
- call wrtout(std_out, sjoin("vcp%i_sz", ftoa(vcp%i_sz)))
+ !call wrtout(std_out, sjoin("vcp%i_sz", ftoa(vcp%i_sz)))
 
  ! Store final results in complex array as Rozzi's cutoff can give real negative values
  ABI_MALLOC(Vcp%vc_sqrt, (ng, nqibz))
