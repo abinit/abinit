@@ -763,7 +763,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  integer :: comm_cart, me_cart, ierr, all_nproc, nps, my_rank, qprange_, gap_err, ncerr, omp_nt
  integer :: cnt, ikcalc, ndeg, mband, bstop, nbsum, it, iw ! jj,
  integer :: ik_ibz, ik_bz, isym_k, trev_k, g0_k(3)
- real(dp) :: cpu, wall, gflops, te_min, te_max, wmax, q0_vol
+ real(dp) :: cpu, wall, gflops, te_min, te_max, wmax, vc_ecut
  logical :: isirr_k, changed, q_is_gamma, reorder
  character(len=5000) :: msg
  type(krank_t) :: qrank, krank_ibz
@@ -1401,6 +1401,12 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
    call wrtout(std_out, sjoin(" FFT sc_batch_size:", itoa(gwr%sc_batch_size)))
  end if
 
+ vc_ecut = max(dtset%ecutsigx, dtset%ecuteps)
+ call gwr%vcgen%init(cryst, ks_ebands%kptrlatt, gwr%nkbz, gwr%nqibz, gwr%nqbz, gwr%qbz, &
+                     dtset%rcut, dtset%gw_icutcoul, dtset%vcutgeo, vc_ecut, gwr%comm%value)
+
+ gwr%i_sz = gwr%vcgen%i_sz
+
  ! Now we know the value of g_ngfft. Setup tables for zero-padded FFTs.
  ! Build descriptors for Green's functions and tchi and setup tables for zero-padded FFTs.
  ABI_MALLOC(gwr%green_desc_kibz, (gwr%nkibz))
@@ -1428,16 +1434,6 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
    call desc_q%get_vc_sqrt(qq_ibz, q_is_gamma, gwr, gwr%gtau_comm%value)
    end associate
  end do
-
- !call gwr%vcgen%init(dtset)
- !call gwr%vcgen%get_isz()
-
- ! TODO: This comes from Crystal mode in m_vcoul
- ! Value of the integration of the Coulomb singularity 4\pi/V_BZ \int_BZ d^3q 1/q^2
- ! Very crude approximation, see also m_vcoul
- !q0_vol = (two_pi)**3 / (gwr%nqbz * gwr%cryst%ucvol)
- !gwr%i_sz = four_pi*7.44*q0_vol**(-two_thirds)
- gwr%i_sz = carrier_isz(cryst, gwr%nqbz, gwr%qbz, dtset%rcut, gwr%comm%value)
 
  ! Init 1D PBLAS grid to block-distribute matrices along columns.
  call gwr%g_slkproc%init(gwr%g_comm%value, grid_dims=[1, gwr%g_comm%nproc])
@@ -3217,7 +3213,7 @@ subroutine desc_get_vc_sqrt(desc, qpt, q_is_gamma, gwr, comm)
    end if
  end do
 
- !call gwr%vcgen%get_vc_sqrt(qpt, desc%npw, desc%gvec, gwr%q0, desc%vc_sqrt, comm)
+ !call gwr%vcgen%get_vc_sqrt(qpt, desc%npw, desc%gvec, gwr%q0, gwr%cryst, desc%vc_sqrt, comm)
 
 end subroutine desc_get_vc_sqrt
 !!***
@@ -4337,7 +4333,7 @@ subroutine gwr_build_wc(gwr)
  integer,parameter :: master = 0
  integer :: my_iqi, my_it, my_is, iq_ibz, spin, itau, iw, ierr
  integer :: il_g1, il_g2, ig1, ig2, iglob1, iglob2, ig0
- real(dp) :: cpu_all, wall_all, gflops_all, cpu_q, wall_q, gflops_q, q0_vol !, q0sph
+ real(dp) :: cpu_all, wall_all, gflops_all, cpu_q, wall_q, gflops_q
  logical :: q_is_gamma, free_tchi
  character(len=5000) :: msg
  complex(dpc) :: vcs_g1, vcs_g2
@@ -4370,12 +4366,6 @@ subroutine gwr_build_wc(gwr)
  if (free_tchi) gwr%tchi_space = "none"
 
  em1_wq = zero; eps_wq = zero
-
- ! Value of the integration of the Coulomb singularity 4\pi/V_BZ \int_BZ d^3q 1/q^2
- ! Very crude approximation, see also m_vcoul
- !q0_vol = (two_pi)**3 / (gwr%nqbz * gwr%cryst%ucvol)
- !i_sz = four_pi*7.44*q0_vol**(-two_thirds)
- !q0sph = two_pi * (three / (four_pi * gwr%cryst%ucvol * gwr%nqbz)) ** third
 
  ! If possible, use 2d rectangular grid of processors for diagonalization.
  !call slkproc_4diag%init(gwr%g_comm%value)
@@ -6956,6 +6946,7 @@ subroutine gwr_build_sigxme(gwr)
      ! Get Fourier components of the Coulomb interaction in the BZ
      ! In 3D systems, neglecting umklapp,  vc(Sq,sG)=vc(q,G)=4pi/|q+G|
      ! The same relation holds for 0-D systems, but not in 1-D or 2D systems. It depends on S.
+#if 0
      ig_start = merge(2, 1, q_is_gamma); vc_sqrt_qbz(1) = zero
      do ig=ig_start,npwx
        !ig_rot = Gsph_x%rottb(ig, itim_q, isym_q)
@@ -6963,6 +6954,9 @@ subroutine gwr_build_sigxme(gwr)
        ! TODO: Check this part (qq_bz) but it should be OK
        vc_sqrt_qbz(ig) = sqrt(four_pi) / normv(qq_bz + gvec_x(:,ig), gwr%cryst%gmet, "G")
      end do
+#else
+     call gwr%vcgen%get_vc_sqrt(qq_bz, npwx, gvec_x, gwr%q0, gwr%cryst, vc_sqrt_qbz, gwr%gtau_comm%value)
+#endif
 
      desc_ki => gwr%green_desc_kibz(ik_ibz)
 
