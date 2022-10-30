@@ -195,10 +195,15 @@ end type mc_t
 
 type, public :: vcgen_t
 
+  integer :: nkbz = -1
+
   !integer :: nqibz = -1
    ! Number of irreducible q-points
 
-  !real(dp) :: alpha(3) = -one
+  integer :: opt_cylinder
+  integer :: opt_surface
+
+  real(dp) :: alpha(3) = -one
    ! Lenght of the finite surface.
 
   real(dp) :: rcut = -one
@@ -210,7 +215,7 @@ type, public :: vcgen_t
   character(len=50) :: mode
    ! String defining the cutoff mode
 
-  !integer :: pdir(3)
+  integer :: pdir(3)
    ! 1 if the system is periodic along this direction
 
   real(dp) :: boxcenter(3) = -1
@@ -300,15 +305,15 @@ end subroutine gw_icutcoul_to_mode
 !!  comm=MPI communicator.
 !!
 !! OUTPUT
-!!  Vcp=Datatype gathering information on the Coulomb interaction.
+!!  vcp=Datatype gathering information on the Coulomb interaction.
 !!
 !! SOURCE
 
-subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo, ecut, ng, nqlwl, qlwl, comm)
+subroutine vcoul_init(vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo, ecut, ng, nqlwl, qlwl, comm)
 
 !Arguments ------------------------------------
 !scalars
- class(vcoul_t),intent(out) :: Vcp
+ class(vcoul_t),intent(out) :: vcp
  integer,intent(in) :: ng,nqlwl, gw_icutcoul, comm
  real(dp),intent(in) :: rcut, ecut
  type(kmesh_t),target,intent(in) :: Kmesh, Qmesh
@@ -344,25 +349,25 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
  qibz => qmesh%ibz; qbz => qmesh%bz
  nkbz = kmesh%nbz
 
- ! Save dimension and other useful quantities in Vcp
- Vcp%ng        = ng                   ! Number of G-vectors in the Coulomb matrix elements.
- Vcp%nqibz     = nqibz                ! Number of irred q-point.
- Vcp%nqlwl     = nqlwl                ! Number of small q-directions to deal with singularity and non Analytic behavior.
- Vcp%rcut      = rcut                 ! Cutoff radius for cylinder.
- Vcp%hcyl      = zero                 ! Length of finite cylinder (Rozzi"s method, default is Beigi).
- Vcp%ucvol     = cryst%ucvol          ! Unit cell volume.
- Vcp%rprimd    = Cryst%rprimd(:,:)    ! Dimensional direct lattice.
- Vcp%boxcenter = zero                 ! Boxcenter at the moment is supposed to be at the origin.
- Vcp%vcutgeo   = vcutgeo(:)           ! Info on the orientation and extension of the cutoff region.
+ ! Save dimension and other useful quantities in vcp
+ vcp%ng        = ng                   ! Number of G-vectors in the Coulomb matrix elements.
+ vcp%nqibz     = nqibz                ! Number of irred q-point.
+ vcp%nqlwl     = nqlwl                ! Number of small q-directions to deal with singularity and non Analytic behavior.
+ vcp%rcut      = rcut                 ! Cutoff radius for cylinder.
+ vcp%hcyl      = zero                 ! Length of finite cylinder (Rozzi"s method, default is Beigi).
+ vcp%ucvol     = cryst%ucvol          ! Unit cell volume.
+ vcp%rprimd    = Cryst%rprimd(:,:)    ! Dimensional direct lattice.
+ vcp%boxcenter = zero                 ! Boxcenter at the moment is supposed to be at the origin.
+ vcp%vcutgeo   = vcutgeo(:)           ! Info on the orientation and extension of the cutoff region.
 
  gvec => Gsph%gvec
 
  call gw_icutcoul_to_mode(gw_icutcoul, vcp%mode)
 
- ABI_MALLOC(Vcp%qibz, (3, nqibz))
- Vcp%qibz = Qmesh%ibz(:,:)
- ABI_MALLOC(Vcp%qlwl, (3, nqlwl))
- Vcp%qlwl = qlwl(:,:)
+ ABI_MALLOC(vcp%qibz, (3, nqibz))
+ vcp%qibz = Qmesh%ibz(:,:)
+ ABI_MALLOC(vcp%qlwl, (3, nqlwl))
+ vcp%qlwl = qlwl(:,:)
 
  ! ===============================================
  ! == Calculation of the FT of the Coulomb term ==
@@ -377,7 +382,7 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
  case ('MINIBZ', 'MINIBZ-ERFC', 'MINIBZ-ERF')
    call mc%init(cryst%rprimd, cryst%ucvol, cryst%gprimd, cryst%gmet, kmesh%kptrlatt)
 
-   rcut2 = Vcp%rcut**2
+   rcut2 = vcp%rcut**2
    do iq_ibz=1,nqibz
      call mc%integrate(rcut2, nkbz, vcp%mode, qibz(:, iq_ibz), ng, gvec, vcoul(:, iq_ibz), comm)
    end do
@@ -393,64 +398,40 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
 
  case ('SPHERE')
    ! A non-positive value of rcut activates the recipe of Spencer & Alavi, PRB 77, 193110 (2008) [[cite:Spencer2008]].
-   if (Vcp%rcut < tol12) then
-     Vcp%rcut = (cryst%ucvol * nkbz * 3.d0 / four_pi) ** third
-     write(msg,'(2a,2x,f8.4,a)')ch10,' Using calculated rcut: ',Vcp%rcut,' to have same volume as the BvK crystal'
+   if (vcp%rcut < tol12) then
+     vcp%rcut = (cryst%ucvol * nkbz * 3.d0 / four_pi) ** third
+     write(msg,'(2a,2x,f8.4,a)')ch10,' Using calculated rcut: ',vcp%rcut,' to have same volume as the BvK crystal'
      call wrtout(std_out, msg)
    end if
-   Vcp%vcutgeo = zero
+   vcp%vcutgeo = zero
 
    do iq_ibz=1,nqibz
-     call cutoff_sphere(qibz(:,iq_ibz), ng, gvec, cryst%gmet, Vcp%rcut, vcoul(:,iq_ibz))
+     call cutoff_sphere(qibz(:,iq_ibz), ng, gvec, cryst%gmet, vcp%rcut, vcoul(:,iq_ibz))
    end do
 
    ! q-points for optical limit.
    do iqlwl=1,nqlwl
-     call cutoff_sphere(qlwl(:,iqlwl), ng, gvec, cryst%gmet, Vcp%rcut, vcoul_lwl(:,iqlwl))
+     call cutoff_sphere(qlwl(:,iqlwl), ng, gvec, cryst%gmet, vcp%rcut, vcoul_lwl(:,iqlwl))
    end do
 
    ! Treat the limit q --> 0
    ! The small cube is approximated by a sphere, while vc(q=0) = 2piR**2.
    ! if a single q-point is used, the expression for the volume is exact.
-   Vcp%i_sz = two_pi * Vcp%rcut**2
-   call Vcp%print(unit=ab_out)
+   vcp%i_sz = two_pi * vcp%rcut**2
+   call vcp%print(unit=ab_out)
 
  case ('CYLINDER')
-   !call cylinder_setup(cryst, vcp%vcutgeo, vcp%hcyl, pdir, opt_cylinder)
-
-   ABI_CHECK(count(abs(vcp%vcutgeo) > tol6) == 1, 'Wrong cutgeo for cylinder')
-
-   ! Beigi's method is the default one, i.e infinite cylinder of radius rcut.
-   ! Use negative values to use Rozzi's method with finite cylinder of extent hcyl.
-   opt_cylinder = 1; Vcp%hcyl = zero; Vcp%pdir(:) = 0
-   do ii=1,3
-     check = Vcp%vcutgeo(ii)
-     if (abs(check) > tol6) then
-       Vcp%pdir(ii) = 1
-       if (check < zero) then
-         ! use Rozzi's method.
-         Vcp%hcyl = ABS(check) *SQRT(SUM(Cryst%rprimd(:,ii)**2))
-         opt_cylinder = 2
-         ! Check to enter the infinite Rozzi treatment
-         if(Vcp%vcutgeo(3) <= -tol999) Vcp%hcyl = tol12
-       end if
-     end if
-   end do
-
-   ABI_CHECK((count(vcp%pdir == 1) == 1), 'Wrong pdir for cylinder')
-   if (vcp%pdir(3) /= 1) then
-     ABI_ERROR("The cylinder must be along the z-axis")
-   end if
+   call cylinder_setup(cryst, vcp%vcutgeo, vcp%hcyl, vcp%pdir, opt_cylinder)
 
    do iq_ibz=1,nqibz
-     call cutoff_cylinder(qibz(:,iq_ibz), ng, gvec, Vcp%rcut, Vcp%hcyl, Vcp%pdir,&
-                          Vcp%boxcenter, Cryst%rprimd, vcoul(:,iq_ibz), opt_cylinder, comm)
+     call cutoff_cylinder(qibz(:,iq_ibz), ng, gvec, vcp%rcut, vcp%hcyl, vcp%pdir,&
+                          vcp%boxcenter, Cryst%rprimd, vcoul(:,iq_ibz), opt_cylinder, comm)
    end do
 
    ! q-points for optical limit.
    do iqlwl=1,nqlwl
-     call cutoff_cylinder(qlwl(:,iqlwl), ng, gvec, Vcp%rcut, Vcp%hcyl, Vcp%pdir,&
-                          Vcp%boxcenter, Cryst%rprimd, vcoul_lwl(:,iqlwl), opt_cylinder, comm)
+     call cutoff_cylinder(qlwl(:,iqlwl), ng, gvec, vcp%rcut, vcp%hcyl, vcp%pdir,&
+                          vcp%boxcenter, Cryst%rprimd, vcoul_lwl(:,iqlwl), opt_cylinder, comm)
    end do
 
    ! If Beigi, treat the limit q --> 0.
@@ -458,53 +439,33 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
      call beigi_cylinder_limit(opt_cylinder, cryst, nqibz, nkbz, vcp%rcut, vcp%hcyl, vcp%boxcenter, vcp%pdir, vcp%i_sz)
    else
      ! In Rozzi's method the lim q+G --> 0 is finite.
-     Vcp%i_sz = vcoul(1,1)
+     vcp%i_sz = vcoul(1,1)
    end if
 
-   call Vcp%print(unit=ab_out)
+   call vcp%print(unit=ab_out)
 
  case ('SURFACE')
-   !call surface_setup(cryst, vcp%vcutgeo, vcp%alpha, vcp%rcut, pdir, opt_surface)
-
-   ABI_CHECK(count(Vcp%vcutgeo /= zero) == 2, "Wrong vcutgeo")
-
-   ! Default is Beigi's method.
-   opt_surface = 1; if (any(Vcp%vcutgeo < zero)) opt_surface = 2
-   Vcp%pdir(:) = zero; Vcp%alpha(:)=zero
-   do ii=1,3
-     check = Vcp%vcutgeo(ii)
-     if (abs(check) > zero) then
-       ! Use Rozzi's method with a finite surface along x-y
-       Vcp%pdir(ii) = 1
-       if (check < zero) Vcp%alpha(ii) = normv(check * cryst%rprimd(:,ii), cryst%rmet, 'R')
-     end if
-   end do
-
-   ! In Beigi's method, the surface must be along x-y and R must be L_Z/2.
-   if (opt_surface == 1) then
-     msg = "2D Beigi method, the periodicity must be in the x-y plane. Modify vcutgeo and/or your geometry."
-     ABI_CHECK(all(vcp%pdir == [1, 1, 0]), msg)
-     Vcp%rcut = half*SQRT(DOT_PRODUCT(a3, a3))
-   end if
+   call surface_setup(cryst, vcp%vcutgeo, vcp%alpha, vcp%rcut, vcp%pdir, opt_surface)
 
    do iq_ibz=1,nqibz
-     call cutoff_surface(qibz(:,iq_ibz), ng, gvec, cryst%gprimd, Vcp%rcut, &
-                         Vcp%boxcenter, Vcp%pdir, Vcp%alpha, vcoul(:,iq_ibz), opt_surface)
+     call cutoff_surface(qibz(:,iq_ibz), ng, gvec, cryst%gprimd, vcp%rcut, &
+                         vcp%boxcenter, vcp%pdir, vcp%alpha, vcoul(:,iq_ibz), opt_surface)
    end do
 
    ! q-points for optical limit.
    do iqlwl=1,nqlwl
-     call cutoff_surface(qlwl(:,iq_ibz), ng, gvec, cryst%gprimd, Vcp%rcut, &
-                         Vcp%boxcenter, Vcp%pdir, Vcp%alpha, vcoul_lwl(:,iqlwl), opt_surface)
+     call cutoff_surface(qlwl(:,iq_ibz), ng, gvec, cryst%gprimd, vcp%rcut, &
+                         vcp%boxcenter, vcp%pdir, vcp%alpha, vcoul_lwl(:,iqlwl), opt_surface)
    end do
 
    ! If Beigi, treat the limit q --> 0.
    if (opt_surface == 1) then
      ! Integrate numerically in the plane close to 0
-     call beigi_surface_limit(opt_surface, cryst, nqibz, nkbz, vcp%rcut, vcp%alpha, vcp%boxcenter, vcp%pdir, vcp%i_sz)
+     call beigi_surface_limit(opt_surface, cryst, nqibz, nkbz, vcp%rcut, vcp%alpha, &
+                              vcp%boxcenter, vcp%pdir, vcp%i_sz)
    else
      ! In Rozzi's method the lim q+G --> 0 is finite.
-     Vcp%i_sz=vcoul(1,1)
+     vcp%i_sz=vcoul(1,1)
    end if
 
  case ('CRYSTAL', 'AUXILIARY_FUNCTION', "AUX_GB")
@@ -534,7 +495,7 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
      ! i_sz=4*pi*bz_geometry_factor*q0_vol**(-two_thirds) where q0_vol= V_BZ/N_k
      ! bz_geometry_factor: sphere=7.79, fcc=7.44, sc=6.188, bcc=6.946, wz=5.255 (see gwa.pdf, appendix A.4)
      q0_vol = (two_pi) **3 / (nkbz*cryst%ucvol); bz_geometry_factor=zero
-     Vcp%i_sz = four_pi*7.44*q0_vol**(-two_thirds)
+     vcp%i_sz = four_pi*7.44*q0_vol**(-two_thirds)
 
    else if (vcp%mode == "AUXILIARY_FUNCTION") then
      ! Numerical integration of the exact-exchange divergence through the
@@ -559,9 +520,9 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
      ! The Fourier transform of the error function reads
      if (iq_ibz == 1) then
        vcoul(1, iq_ibz) = zero
-       vcoul(2:,iq_ibz) = four_pi/(vcoul(2:,iq_ibz)**2) *  EXP( -0.25d0 * (Vcp%rcut*vcoul(2:,iq_ibz))**2 )
+       vcoul(2:,iq_ibz) = four_pi/(vcoul(2:,iq_ibz)**2) *  EXP( -0.25d0 * (vcp%rcut*vcoul(2:,iq_ibz))**2 )
      else
-       vcoul(:,iq_ibz)  = four_pi/(vcoul(:, iq_ibz)**2) *  EXP( -0.25d0 * (Vcp%rcut*vcoul(: ,iq_ibz))**2 )
+       vcoul(:,iq_ibz)  = four_pi/(vcoul(:, iq_ibz)**2) *  EXP( -0.25d0 * (vcp%rcut*vcoul(: ,iq_ibz))**2 )
      end if
    end do
 
@@ -569,7 +530,7 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
    do iqlwl=1,nqlwl
      call cmod_qpg(nqlwl, iqlwl, qlwl, ng, gvec, cryst%gprimd, vcoul_lwl(:,iqlwl))
    end do
-   vcoul_lwl = four_pi/(vcoul_lwl**2) *  EXP( -0.25d0 * (Vcp%rcut*vcoul_lwl)**2 )
+   vcoul_lwl = four_pi/(vcoul_lwl**2) *  EXP( -0.25d0 * (vcp%rcut*vcoul_lwl)**2 )
 
    ! === Treat 1/q^2 singularity ===
    ! * We use the auxiliary function from PRB 75, 205126 (2007) [[cite:Carrier2007]]
@@ -579,15 +540,15 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
    ! * Use a modified short-range only Coulomb interaction thanks to the complementary error function:
    !   $ V_c = [1-erf(r/r_{cut})]/r $
    ! * The Fourier transform of the error function reads
-   !   vcoul=four_pi/(vcoul**2) * ( 1.d0 - exp( -0.25d0 * (Vcp%rcut*vcoul)**2 ) )
+   !   vcoul=four_pi/(vcoul**2) * ( 1.d0 - exp( -0.25d0 * (vcp%rcut*vcoul)**2 ) )
    do iq_ibz=1,nqibz
      call cmod_qpg(nqibz, iq_ibz, qibz,ng, gvec, cryst%gprimd, vcoul(:,iq_ibz))
 
      if (iq_ibz == 1) then
        vcoul(1 ,iq_ibz) = zero
-       vcoul(2:,iq_ibz) = four_pi/(vcoul(2:,iq_ibz)**2) * ( one - EXP( -0.25d0 * (Vcp%rcut*vcoul(2:,iq_ibz))**2 ) )
+       vcoul(2:,iq_ibz) = four_pi/(vcoul(2:,iq_ibz)**2) * ( one - EXP( -0.25d0 * (vcp%rcut*vcoul(2:,iq_ibz))**2 ) )
      else
-       vcoul(:, iq_ibz) = four_pi/(vcoul(:, iq_ibz)**2) * ( one - EXP( -0.25d0 * (Vcp%rcut*vcoul(:, iq_ibz))**2 ) )
+       vcoul(:, iq_ibz) = four_pi/(vcoul(:, iq_ibz)**2) * ( one - EXP( -0.25d0 * (vcp%rcut*vcoul(:, iq_ibz))**2 ) )
      end if
    end do ! iq_ibz
 
@@ -595,34 +556,33 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
    do iqlwl=1,nqlwl
      call cmod_qpg(nqlwl, iqlwl, qlwl, ng, gvec, cryst%gprimd, vcoul_lwl(:,iqlwl))
    end do
-   vcoul_lwl = four_pi/(vcoul_lwl**2) * ( one - EXP( -0.25d0 * (Vcp%rcut*vcoul_lwl)**2 ) )
+   vcoul_lwl = four_pi/(vcoul_lwl**2) * ( one - EXP( -0.25d0 * (vcp%rcut*vcoul_lwl)**2 ) )
 
    ! === Treat 1/q^2 singularity ===
    ! * There is NO singularity in this case.
-   Vcp%i_sz = pi * Vcp%rcut**2 ! Final result stored here
+   vcp%i_sz = pi * vcp%rcut**2 ! Final result stored here
 
  case default
-   ABI_BUG(sjoin('Unsupported cutoff mode:', Vcp%mode))
+   ABI_BUG(sjoin('Unsupported cutoff mode:', vcp%mode))
  end select
 
  !call wrtout(std_out, sjoin("vcp%i_sz", ftoa(vcp%i_sz)))
-
- Vcp%vc_sqrt_resid = Vcp%vc_sqrt
- Vcp%i_sz_resid = Vcp%i_sz
+ vcp%i_sz_resid = vcp%i_sz
 
  ! Store final results in complex array as Rozzi's cutoff can give real negative values
- ABI_MALLOC(Vcp%vc_sqrt, (ng, nqibz))
- ABI_MALLOC(Vcp%vc_sqrt_resid, (ng, nqibz))
- Vcp%vc_sqrt = CMPLX(vcoul, zero)
- Vcp%vc_sqrt = SQRT(Vcp%vc_sqrt)
+ ABI_MALLOC(vcp%vc_sqrt, (ng, nqibz))
+ ABI_MALLOC(vcp%vc_sqrt_resid, (ng, nqibz))
+ vcp%vc_sqrt = CMPLX(vcoul, zero)
+ vcp%vc_sqrt = SQRT(vcp%vc_sqrt)
+ vcp%vc_sqrt_resid = vcp%vc_sqrt
  ABI_FREE(vcoul)
 
- ABI_MALLOC(Vcp%vcqlwl_sqrt, (ng, nqlwl))
- Vcp%vcqlwl_sqrt = CMPLX(vcoul_lwl, zero)
- Vcp%vcqlwl_sqrt = SQRT(Vcp%vcqlwl_sqrt)
+ ABI_MALLOC(vcp%vcqlwl_sqrt, (ng, nqlwl))
+ vcp%vcqlwl_sqrt = CMPLX(vcoul_lwl, zero)
+ vcp%vcqlwl_sqrt = SQRT(vcp%vcqlwl_sqrt)
  ABI_FREE(vcoul_lwl)
 
- call Vcp%print(unit=std_out)
+ call vcp%print(unit=std_out)
 
 end subroutine vcoul_init
 !!***
@@ -698,7 +658,6 @@ subroutine surface_setup(cryst, vcutgeo, alpha, rcut, pdir, opt_surface)
  end do
 
  ! In Beigi's method, the surface must be along x-y and R must be L_Z/2.
- !rcut = zero
  if (opt_surface == 1) then
    msg = "2D Beigi method, the periodicity must be in the x-y plane. Modify vcutgeo and/or your geometry."
    ABI_CHECK(all(pdir == [1, 1, 0]), msg)
@@ -1917,41 +1876,44 @@ end function gygi_baldereschi_isz
 !!
 !! SOURCE
 
-subroutine vcgen_init(vcgen, cryst, kptrlatt, nkbz, nqbz, qbz, rcut, gw_icutcoul, vcutgeo, ecut, comm)
+subroutine vcgen_init(vcgen, cryst, kptrlatt, nkbz, nqibz, nqbz, qbz, rcut, gw_icutcoul, vcutgeo, ecut, comm)
 
 !Arguments ------------------------------------
  class(vcgen_t),intent(out) :: vcgen
  type(crystal_t),intent(in) :: cryst
- integer,intent(in) :: kptrlatt(3,3), nkbz, nqbz, gw_icutcoul
+ integer,intent(in) :: kptrlatt(3,3), nkbz, nqibz, nqbz, gw_icutcoul
  real(dp),intent(in) :: qbz(3,nqbz), rcut, ecut, vcutgeo(3)
  integer,intent(in) :: comm
 
 !Local variables-------------------------------
- real(dp) :: q0_vol, bz_geometry_factor
+ integer :: gvec0(3)
+ real(dp) :: q0_vol, bz_geometry_factor, rcut2
  character(len=500) :: msg
+ real(dp) :: vcoul0(1), q_gamma(3)
 
 ! *************************************************************************
 
  ! Save dimension and other useful quantities in Vcp
  vcgen%rcut      = rcut                 ! Cutoff radius for cylinder.
- vcgen%hcyl      = zero                 ! Length of finite cylinder (Rozzi"s method, default is Beigi).
+ vcgen%hcyl      = zero                 ! Length of finite cylinder (Rozzi's method, default is Beigi).
  vcgen%boxcenter = zero                 ! Boxcenter at the moment is supposed to be at the origin.
  vcgen%vcutgeo   = vcutgeo(:)           ! Info on the orientation and extension of the cutoff region.
+ vcgen%nkbz      = nkbz
 
  call gw_icutcoul_to_mode(gw_icutcoul, vcgen%mode)
+ q_gamma = zero
+ gvec0 = 0
 
  select case (trim(vcgen%mode))
  case ('MINIBZ', 'MINIBZ-ERFC', 'MINIBZ-ERF')
 
    call vcgen%mc%init(cryst%rprimd, cryst%ucvol, cryst%gprimd, cryst%gmet, kptrlatt)
 
-   !rcut2 = vcgen%rcut**2
-   !do iq_ibz=1,nqibz
-   !  call mc%integrate(rcut2, nkbz, vcgen%mode, qibz(:, iq_ibz), ng, gvec, vcoul(:, iq_ibz), comm)
-   !end do
+   rcut2 = vcgen%rcut**2
+   call vcgen%mc%integrate(rcut2, nkbz, vcgen%mode, q_gamma, 1, gvec0, vcoul0, xmpi_comm_self)
 
-   !! Treat the limit q --> 0
-   !vcgen%i_sz = vcoul(1, 1)
+   ! Treat the limit q --> 0.
+   vcgen%i_sz = vcoul0(1)
 
  case ('SPHERE')
 
@@ -1967,6 +1929,35 @@ subroutine vcgen_init(vcgen, cryst, kptrlatt, nkbz, nqbz, qbz, rcut, gw_icutcoul
    ! The small cube is approximated by a sphere, while vc(q=0) = 2piR**2.
    ! if a single q-point is used, the expression for the volume is exact.
    vcgen%i_sz = two_pi * vcgen%rcut**2
+
+ case ('CYLINDER')
+   call cylinder_setup(cryst, vcgen%vcutgeo, vcgen%hcyl, vcgen%pdir, vcgen%opt_cylinder)
+
+   ! If Beigi, treat the limit q --> 0.
+   if (vcgen%opt_cylinder == 1) then
+     call beigi_cylinder_limit(vcgen%opt_cylinder, cryst, nqibz, nkbz, &
+                               vcgen%rcut, vcgen%hcyl, vcgen%boxcenter, vcgen%pdir, vcgen%i_sz)
+   else
+     ! In Rozzi's method the lim q+G --> 0 is finite.
+     call cutoff_cylinder(q_gamma, 1, gvec0, vcgen%rcut, vcgen%hcyl, vcgen%pdir,&
+                          vcgen%boxcenter, cryst%rprimd, vcoul0, vcgen%opt_cylinder, xmpi_comm_self)
+     vcgen%i_sz = vcoul0(1)
+   end if
+
+ case ('SURFACE')
+   call surface_setup(cryst, vcgen%vcutgeo, vcgen%alpha, vcgen%rcut, vcgen%pdir, vcgen%opt_surface)
+
+   ! If Beigi, treat the limit q --> 0.
+   if (vcgen%opt_surface == 1) then
+     ! Integrate numerically in the plane close to 0
+     call beigi_surface_limit(vcgen%opt_surface, cryst, nqibz, nkbz, vcgen%rcut, vcgen%alpha, &
+                              vcgen%boxcenter, vcgen%pdir, vcgen%i_sz)
+   else
+     ! In Rozzi's method the lim q+G --> 0 is finite.
+     call cutoff_surface(q_gamma, 1, gvec0, cryst%gprimd, vcgen%rcut, &
+                         vcgen%boxcenter, vcgen%pdir, vcgen%alpha, vcoul0, vcgen%opt_surface)
+     vcgen%i_sz = vcoul0(1)
+   end if
 
  case ('CRYSTAL', 'AUXILIARY_FUNCTION', "AUX_GB")
 
@@ -1991,6 +1982,14 @@ subroutine vcgen_init(vcgen, cryst, kptrlatt, nkbz, nqbz, qbz, rcut, gw_icutcoul
    else
      ABI_ERROR(sjoin("Need treatment of 1/q^2 singularity! for mode", vcgen%mode))
    end if
+
+ case ('ERF')
+   vcgen%i_sz = carrier_isz(cryst, nqbz, qbz, rcut, xmpi_comm_self)
+
+ case ('ERFC')
+   ! === Treat 1/q^2 singularity ===
+   ! * There is NO singularity in this case.
+   vcgen%i_sz = pi * vcgen%rcut**2 ! Final result stored here
 
  case default
    ABI_BUG(sjoin('Unsupported cutoff mode:', vcgen%mode))
@@ -2022,6 +2021,7 @@ subroutine vcgen_get_vc_sqrt(vcgen, qpt, npw, gvec, q0, cryst, vc_sqrt, comm)
  integer :: ig, ig0
  real(dp) :: rcut2
  logical :: q_is_gamma
+ real(dp),allocatable :: vcoul(:)
 
 ! *************************************************************************
 
@@ -2036,26 +2036,53 @@ subroutine vcgen_get_vc_sqrt(vcgen, qpt, npw, gvec, q0, cryst, vc_sqrt, comm)
  end do
  ABI_CHECK(ig0 /= -1, "Cannot find G=0 in gvec!")
 
+ ABI_MALLOC(vcoul, (npw))
+
  select case (trim(vcgen%mode))
  case ('MINIBZ', 'MINIBZ-ERFC', 'MINIBZ-ERF')
+   rcut2 = vcgen%rcut**2
+   call vcgen%mc%integrate(rcut2, vcgen%nkbz, vcgen%mode, qpt, npw, gvec, vcoul, comm)
 
-   !rcut2 = vcgen%rcut**2
-   !call vcgen%mc%integrate(rcut2, nkbz, vcgen%mode, qibz(:, iq_ibz), ng, gvec, vcoul(:, iq_ibz), comm)
+ case ('SPHERE')
+   call cutoff_sphere(qpt, npw, gvec, cryst%gmet, vcgen%rcut, vcoul)
+
+ case ('CYLINDER')
+   call cutoff_cylinder(qpt, npw, gvec, vcgen%rcut, vcgen%hcyl, vcgen%pdir,&
+                        vcgen%boxcenter, cryst%rprimd, vcoul, vcgen%opt_cylinder, comm)
+
+ case ('SURFACE')
+    call cutoff_surface(qpt, npw, gvec, cryst%gprimd, vcgen%rcut, &
+                        vcgen%boxcenter, vcgen%pdir, vcgen%alpha, vcoul, vcgen%opt_surface)
 
  case ('CRYSTAL', 'AUXILIARY_FUNCTION', "AUX_GB")
+   !do ig=1,npw
+   !  !if (q_is_gamma) then
+   !  if (q_is_gamma .and. ig == ig0) then
+   !    vc_sqrt(ig) = sqrt(four_pi) / normv(q0 + gvec(:,ig), cryst%gmet, "G")
+   !  else
+   !    vc_sqrt(ig) = sqrt(four_pi) / normv(qpt + gvec(:,ig), cryst%gmet, "G")
+   !  end if
+   !end do
 
    do ig=1,npw
      !if (q_is_gamma) then
      if (q_is_gamma .and. ig == ig0) then
-       vc_sqrt(ig) = sqrt(four_pi) / normv(q0 + gvec(:,ig), cryst%gmet, "G")
+       vcoul(ig) = four_pi / normv(q0 + gvec(:,ig), cryst%gmet, "G") ** 2
      else
-       vc_sqrt(ig) = sqrt(four_pi) / normv(qpt + gvec(:,ig), cryst%gmet, "G")
+       vcoul(ig) = four_pi / normv(qpt + gvec(:,ig), cryst%gmet, "G") ** 2
      end if
    end do
+
+ !case ('ERF')
+ !case ('ERFC')
 
  case default
    ABI_BUG(sjoin('Unsupported cutoff mode:', vcgen%mode))
  end select
+
+ ! Store final results in complex array as Rozzi's cutoff can give real negative values
+ vc_sqrt = SQRT(CMPLX(vcoul, zero))
+ ABI_FREE(vcoul)
 
 end subroutine vcgen_get_vc_sqrt
 !!***
