@@ -172,7 +172,7 @@ module m_gwr
  use m_wfd,           only : wfd_init, wfd_t, wfdgw_t, wave_t, WFD_STORED
  use m_pawtab,        only : pawtab_type
  use m_pawcprj,       only : pawcprj_type
- !use m_vcoul,         only : gw_icutcoul_to_mode, mc_t
+ use m_vcoul,         only : carrier_isz, gw_icutcoul_to_mode, vcgen_t
  use m_sigx,          only : sigx_symmetrize
  use m_dyson_solver,  only : sigma_pade_t
 #ifdef __HAVE_GREENX
@@ -233,6 +233,9 @@ module m_gwr
 
    procedure :: copy => desc_copy
    ! Copy object.
+
+   procedure :: get_vc_sqrt => desc_get_vc_sqrt
+   ! Compute square root of vc(q, g).
 
    procedure :: free => desc_free
    ! Free memory.
@@ -325,6 +328,9 @@ module m_gwr
   integer :: nwr = -1
    ! Number of frequency points along the real axis for Sigma(w) and spectral function A(w)
    ! Odd number so that the mesh is centered on the KS energy.
+
+  real(dp) :: i_sz = huge(one)
+   ! Value of the integration of the Coulomb singularity 4\pi/V_BZ \int_BZ d^3q 1/q^2
 
   real(dp) :: wr_step = -one
    ! Step of the linear mesh along the real axis (Ha units).
@@ -558,6 +564,8 @@ module m_gwr
 
    integer :: ugb_nband = -1
 
+   type(vcgen_t) :: vcgen
+
    character(len=fnlen) :: gwrnc_path = ABI_NOFILE
    ! Path to the GWR.nc file with output results.
 
@@ -755,7 +763,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  integer :: comm_cart, me_cart, ierr, all_nproc, nps, my_rank, qprange_, gap_err, ncerr, omp_nt
  integer :: cnt, ikcalc, ndeg, mband, bstop, nbsum, it, iw ! jj,
  integer :: ik_ibz, ik_bz, isym_k, trev_k, g0_k(3)
- real(dp) :: cpu, wall, gflops, te_min, te_max, wmax
+ real(dp) :: cpu, wall, gflops, te_min, te_max, wmax, q0_vol
  logical :: isirr_k, changed, q_is_gamma, reorder
  character(len=5000) :: msg
  type(krank_t) :: qrank, krank_ibz
@@ -799,7 +807,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  !if (gwr%dtset%userib == 1) gwr%use_supercell_for_sigma = .False.
 
  if (dtset%gw_nqlwl /= 0) gwr%q0 = dtset%gw_qlwl(:, 1)
- call wrtout(std_out, sjoin("Using q0:", ktoa(gwr%q0)))
+ call wrtout(std_out, sjoin(" Using q0:", ktoa(gwr%q0), "for long-wavelenght limit"))
 
  mband = ks_ebands%mband
  nbsum = dtset%nband(1)
@@ -1414,18 +1422,22 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
    ! the extrapolation of the RPA energy as a function of ecut_chi
    call gwr%tchi_desc_qibz(iq_ibz)%init(qq_ibz, istwfk1, dtset%ecuteps, gwr, kin_sorted=.True.)
    associate (desc_q => gwr%tchi_desc_qibz(iq_ibz))
+
    ! Compute sqrt(v(q,G))
    !TODO: Implement cutoff in vc
-   ABI_MALLOC(desc_q%vc_sqrt, (desc_q%npw))
-   do ig=1,desc_q%npw
-     if (q_is_gamma .and. ig == desc_q%ig0) then
-       desc_q%vc_sqrt(ig) = sqrt(four_pi) / normv(gwr%q0, gwr%cryst%gmet, "G")
-     else
-       desc_q%vc_sqrt(ig) = sqrt(four_pi) / normv(qq_ibz + desc_q%gvec(:,ig), gwr%cryst%gmet, "G")
-     end if
-   end do
+   call desc_q%get_vc_sqrt(qq_ibz, q_is_gamma, gwr, gwr%gtau_comm%value)
    end associate
  end do
+
+ !call gwr%vcgen%init(dtset)
+ !call gwr%vcgen%get_isz()
+
+ ! TODO: This comes from Crystal mode in m_vcoul
+ ! Value of the integration of the Coulomb singularity 4\pi/V_BZ \int_BZ d^3q 1/q^2
+ ! Very crude approximation, see also m_vcoul
+ !q0_vol = (two_pi)**3 / (gwr%nqbz * gwr%cryst%ucvol)
+ !gwr%i_sz = four_pi*7.44*q0_vol**(-two_thirds)
+ gwr%i_sz = carrier_isz(cryst, gwr%nqbz, gwr%qbz, dtset%rcut, gwr%comm%value)
 
  ! Init 1D PBLAS grid to block-distribute matrices along columns.
  call gwr%g_slkproc%init(gwr%g_comm%value, grid_dims=[1, gwr%g_comm%nproc])
@@ -1733,6 +1745,8 @@ subroutine gwr_free(gwr)
  call gwr%ks_me%free()
 
  ! datatypes.
+ call gwr%vcgen%free()
+
  if (allocated(gwr%degtab)) then
    call degtab_array_free(gwr%degtab)
    ABI_FREE(gwr%degtab)
@@ -2641,7 +2655,7 @@ subroutine gwr_rotate_wc(gwr, iq_bz, itau, spin, desc_qbz, wc_qbz)
 !Local variables-------------------------------
 !scalars
  integer :: ig1, ig2, il_g1, il_g2, iq_ibz, isym_q, trev_q, g0_q(3), tsign_q
- logical :: isirr_q
+ logical :: isirr_q, q_is_gamma
 !arrays
  integer :: g1(3), g2(3)
  real(dp) :: tnon(3), qq_bz(3)
@@ -2651,10 +2665,9 @@ subroutine gwr_rotate_wc(gwr, iq_bz, itau, spin, desc_qbz, wc_qbz)
 
  ABI_CHECK(gwr%wc_space == "itau", sjoin("wc_space:", gwr%wc_space, " != itau"))
 
- !spin = gwr%my_spins(my_is)
- !itau = gwr%my_itaus(my_it)
  !iq_bz = gwr%my_qbz_inds(my_iqf)
  qq_bz = gwr%qbz(:, iq_bz)
+ q_is_gamma = normv(qq_bz, gwr%cryst%gmet, "G") < GW_TOLQ0
 
  iq_ibz = gwr%qbz2ibz(1, iq_bz); isym_q = gwr%qbz2ibz(2, iq_bz)
  trev_q = gwr%qbz2ibz(6, iq_bz); g0_q = gwr%qbz2ibz(3:5, iq_bz)
@@ -2690,9 +2703,7 @@ subroutine gwr_rotate_wc(gwr, iq_bz, itau, spin, desc_qbz, wc_qbz)
  ! TODO: rotate vc_sqrt
  ! vc(Sq, Sg) = vc(q, g)
  ! vc(-q, -g) = vc(q, g)
- do ig1=1,desc_qbz%npw
-   desc_qbz%vc_sqrt(ig1) = sqrt(four_pi) / normv(qq_bz + desc_qbz%gvec(:,ig1), gwr%cryst%gmet, "G")
- end do
+ call desc_qbz%get_vc_sqrt(qq_bz, q_is_gamma, gwr, gwr%gtau_comm%value)
 
  ! Get Wc_q with q in the BZ.
  tnon = gwr%cryst%tnons(:, isym_q)
@@ -3169,6 +3180,48 @@ subroutine desc_init(desc, kk, istwfk, ecut, gwr, kin_sorted)
 
 end subroutine desc_init
 !!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_gwr/desc_get_vc_sqrt
+!! NAME
+!!  desc_get_vc_sqrt
+!!
+!! FUNCTION
+!!   Compute square root of vc(q, g).
+!!
+!! SOURCE
+
+subroutine desc_get_vc_sqrt(desc, qpt, q_is_gamma, gwr, comm)
+
+!Arguments ------------------------------------
+ class(desc_t),intent(inout) :: desc
+ real(dp),intent(in) :: qpt(3)
+ logical, intent(in) :: q_is_gamma
+ class(gwr_t),intent(in) :: gwr
+ integer,intent(in) :: comm
+
+!Local variables-------------------------------
+ integer :: ig
+
+! *************************************************************************
+
+ ABI_REMALLOC(desc%vc_sqrt, (desc%npw))
+
+ do ig=1,desc%npw
+   !if (q_is_gamma) then
+   if (q_is_gamma .and. ig == desc%ig0) then
+     desc%vc_sqrt(ig) = sqrt(four_pi) / normv(gwr%q0 + desc%gvec(:,ig), gwr%cryst%gmet, "G")
+   else
+     desc%vc_sqrt(ig) = sqrt(four_pi) / normv(qpt + desc%gvec(:,ig), gwr%cryst%gmet, "G")
+   end if
+ end do
+
+ !call gwr%vcgen%get_vc_sqrt(qpt, desc%npw, desc%gvec, gwr%q0, desc%vc_sqrt, comm)
+
+end subroutine desc_get_vc_sqrt
+!!***
+
 !----------------------------------------------------------------------
 
 !!****f* m_gwr/desc_copy
@@ -4284,7 +4337,7 @@ subroutine gwr_build_wc(gwr)
  integer,parameter :: master = 0
  integer :: my_iqi, my_it, my_is, iq_ibz, spin, itau, iw, ierr
  integer :: il_g1, il_g2, ig1, ig2, iglob1, iglob2, ig0
- real(dp) :: cpu_all, wall_all, gflops_all, cpu_q, wall_q, gflops_q, q0_vol, i_sz, q0sph
+ real(dp) :: cpu_all, wall_all, gflops_all, cpu_q, wall_q, gflops_q, q0_vol !, q0sph
  logical :: q_is_gamma, free_tchi
  character(len=5000) :: msg
  complex(dpc) :: vcs_g1, vcs_g2
@@ -4320,9 +4373,9 @@ subroutine gwr_build_wc(gwr)
 
  ! Value of the integration of the Coulomb singularity 4\pi/V_BZ \int_BZ d^3q 1/q^2
  ! Very crude approximation, see also m_vcoul
- q0_vol = (two_pi)**3 / (gwr%nqbz * gwr%cryst%ucvol)
- i_sz = four_pi*7.44*q0_vol**(-two_thirds)
- q0sph = two_pi * (three / (four_pi * gwr%cryst%ucvol * gwr%nqbz)) ** third
+ !q0_vol = (two_pi)**3 / (gwr%nqbz * gwr%cryst%ucvol)
+ !i_sz = four_pi*7.44*q0_vol**(-two_thirds)
+ !q0sph = two_pi * (three / (four_pi * gwr%cryst%ucvol * gwr%nqbz)) ** third
 
  ! If possible, use 2d rectangular grid of processors for diagonalization.
  !call slkproc_4diag%init(gwr%g_comm%value)
@@ -4401,20 +4454,18 @@ subroutine gwr_build_wc(gwr)
            ! Subtract exchange part.
            if (iglob1 == iglob2) wc%buffer_cplx(il_g1, il_g2) = wc%buffer_cplx(il_g1, il_g2) - one
 
-#if 1
            ! Handle divergence in Wc for q --> 0
            if (q_is_gamma .and. (iglob1 == ig0 .or. iglob2 == ig0)) then
              if (iglob1 == ig0 .and. iglob2 == ig0) then
-               vcs_g1 = sqrt(i_sz); vcs_g2 = sqrt(i_sz)
+               vcs_g1 = sqrt(gwr%i_sz); vcs_g2 = sqrt(gwr%i_sz)
              else if (iglob1 == ig0) then
                !vcs_g1 = (four_pi) ** (three/two) * q0sph ** 2 / two
-               vcs_g1 = sqrt(i_sz)
+               vcs_g1 = sqrt(gwr%i_sz)
              else if (iglob2 == ig0) then
                !vcs_g2 = (four_pi) ** (three/two) * q0sph ** 2 / two
-               vcs_g2 = sqrt(i_sz)
+               vcs_g2 = sqrt(gwr%i_sz)
              end if
            end if
-#endif
 
            wc%buffer_cplx(il_g1, il_g2) = wc%buffer_cplx(il_g1, il_g2) * vcs_g1 * vcs_g2 / gwr%cryst%ucvol
          end do ! il_g1
@@ -6700,8 +6751,7 @@ subroutine gwr_build_sigxme(gwr)
  integer :: ik_bz, ik_ibz, isym_k, trev_k, g0_k(3)
  integer :: iq_bz, iq_ibz, isym_q, trev_q, g0_q(3)
  logical :: isirr_k, isirr_q, only_diago, sigc_is_herm
- real(dp) :: fact_spin, theta_mu_minus_esum, theta_mu_minus_esum2, tol_empty, tol_empty_in
- real(dp) :: gwr_boxcutmin_x, i_sz_resid, q0_vol
+ real(dp) :: fact_spin, theta_mu_minus_esum, theta_mu_minus_esum2, tol_empty, tol_empty_in, gwr_boxcutmin_x
  real(dp) :: cpu_k, wall_k, gflops_k, cpu_all, wall_all, gflops_all
  character(len=5000) :: msg
  logical :: q_is_gamma
@@ -6779,10 +6829,6 @@ subroutine gwr_build_sigxme(gwr)
  call ngfft_seq(work_ngfft, gmax)
  !write(std_out,*)"work_ngfft(1:3): ",work_ngfft(1:3)
  ABI_MALLOC(work, (2, work_ngfft(4), work_ngfft(5), work_ngfft(6)))
-
- ! TODO: This comes from Crystal mode in m_vcoul
- q0_vol = (two_pi) **3 / (gwr%nkbz * gwr%cryst%ucvol)
- i_sz_resid = four_pi*7.44*q0_vol**(-two_thirds)
 
  do my_is=1,gwr%my_nspins
  spin = gwr%my_spins(my_is)
@@ -6999,7 +7045,7 @@ subroutine gwr_build_sigxme(gwr)
 
            if (nspinor == 1) then
              rhotwg_ki(1, jb) = czero_gw
-             if (band_sum == jb) rhotwg_ki(1,jb) = cmplx(sqrt(i_sz_resid), 0.0_gwp)
+             if (band_sum == jb) rhotwg_ki(1,jb) = cmplx(sqrt(gwr%i_sz), 0.0_gwp)
              !rhotwg_ki(1,jb) = czero_gw ! DEBUG
 
            else
@@ -7012,9 +7058,9 @@ subroutine gwr_build_sigxme(gwr)
              !!  ABI_CHECK(wfd%get_wave_ptr(jb, jk_ibz, spin, wave_jb, msg) == 0, msg)
              !!  cg_jb  => wave_jb%ug
              !!  ctmp = xdotc(npw_k, cg_sum(1:), 1, cg_jb(1:), 1)
-             !!  rhotwg_ki(1, jb) = cmplx(sqrt(i_sz_resid), 0.0_gwp) * real(ctmp)
+             !!  rhotwg_ki(1, jb) = cmplx(sqrt(gwr%i_sz), 0.0_gwp) * real(ctmp)
              !!  ctmp = xdotc(npw_k, cg_sum(npw_k+1:), 1, cg_jb(npw_k+1:), 1)
-             !!  rhotwg_ki(npwx+1, jb) = cmplx(sqrt(i_sz_resid), 0.0_gwp) * real(ctmp)
+             !!  rhotwg_ki(npwx+1, jb) = cmplx(sqrt(gwr%i_sz), 0.0_gwp) * real(ctmp)
              !!end if
              !!!rhotwg_ki(1, jb) = zero; rhotwg_ki(npwx+1, jb) = zero
              !!! PAW is missing
