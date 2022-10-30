@@ -4274,8 +4274,6 @@ end subroutine paw_qpscgw
 !! Vcp_full<vcoul_t>= Datatype gathering information on the coulombian interaction and the cutoff technique.
 !! Vcp_ks<vcoul_t>= Datatype gathering information on the coulombian interaction and the cutoff technique.
 !! coef_hyb=real variable containing the amount of GLOBAL hybridization
-!!
-!!
 
 subroutine setup_vcp(Vcp_ks,Vcp_full,Dtset,Gsph_x,Gsph_c,Cryst,Qmesh,Kmesh,coef_hyb,comm)
 

@@ -1193,7 +1193,7 @@ end function det3r
 !!
 !! SOURCE
 
-subroutine metric(gmet,gprimd,iout,rmet,rprimd,ucvol)
+subroutine metric(gmet, gprimd, iout, rmet, rprimd, ucvol)
 
 !Arguments ------------------------------------
 !scalars

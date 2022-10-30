@@ -33,6 +33,9 @@ module m_cutoff_cylinder
 !!***
 
  public :: cutoff_cylinder, K0cos
+
+ !integer,public,parameter :: CYLINDER_BEIGI = 1
+ !integer,public,parameter :: CYLINDER_ROZZI = 2
 !!***
 
 ! private variables used for the integration needed by the cylindrical case.

@@ -18,12 +18,17 @@ module m_cutoff_surface
  use m_abicore
  use m_errors
 
+ use m_fstrings, only : sjoin, itoa
+
  implicit none
 
  private
 !!***
 
  public :: cutoff_surface
+
+ !integer,public,parameter :: SURFACE_BEIGI = 1
+ !integer,public,parameter :: SURFACE_ROZZI = 2
 
 CONTAINS  !========================================================================================
 !!***
@@ -152,8 +157,7 @@ subroutine cutoff_surface(qpt, ng, gvec, gprimd, rcut, boxcenter, pdir, alpha, v
    end do !ig
 
  case default
-   write(msg,'(a,i3)')' Wrong value of method: ',method
-   ABI_BUG(msg)
+   ABI_BUG(sjoin('Wrong value for method:', itoa(method)))
  end select
 
 end subroutine cutoff_surface
