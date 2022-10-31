@@ -235,7 +235,7 @@ module m_gwr
    ! Copy object.
 
    procedure :: get_vc_sqrt => desc_get_vc_sqrt
-   ! Compute square root of vc(q, g).
+   ! Compute square root of vc(q,g).
 
    procedure :: free => desc_free
    ! Free memory.
@@ -3184,7 +3184,7 @@ end subroutine desc_init
 !!  desc_get_vc_sqrt
 !!
 !! FUNCTION
-!!   Compute square root of vc(q, g).
+!!   Compute square root of Coulomb interaction vc(q,g).
 !!
 !! SOURCE
 
@@ -3204,6 +3204,7 @@ subroutine desc_get_vc_sqrt(desc, qpt, q_is_gamma, gwr, comm)
 
  ABI_REMALLOC(desc%vc_sqrt, (desc%npw))
 
+#if 1
  do ig=1,desc%npw
    !if (q_is_gamma) then
    if (q_is_gamma .and. ig == desc%ig0) then
@@ -3212,8 +3213,9 @@ subroutine desc_get_vc_sqrt(desc, qpt, q_is_gamma, gwr, comm)
      desc%vc_sqrt(ig) = sqrt(four_pi) / normv(qpt + desc%gvec(:,ig), gwr%cryst%gmet, "G")
    end if
  end do
-
- !call gwr%vcgen%get_vc_sqrt(qpt, desc%npw, desc%gvec, gwr%q0, gwr%cryst, desc%vc_sqrt, comm)
+#else
+ call gwr%vcgen%get_vc_sqrt(qpt, desc%npw, desc%gvec, gwr%q0, gwr%cryst, desc%vc_sqrt, comm)
+#endif
 
 end subroutine desc_get_vc_sqrt
 !!***
@@ -6733,7 +6735,7 @@ subroutine gwr_build_sigxme(gwr)
 
 !Local variables-------------------------------
 !scalars
- integer :: nsppol, nspinor, ierr, my_ikf, band_sum, ii, jj, kb, il_b, ig, ig_start, iab
+ integer :: nsppol, nspinor, ierr, my_ikf, band_sum, ii, jj, kb, il_b, ig, iab !ig_start,
  integer :: my_is, ikcalc, ikcalc_ibz, bmin, bmax, band, istwf_k, npw_k
  integer :: spin, isym, jb, is_idx, use_umklp
  integer :: spad, wtqm, wtqp, irow, spadx1, spadx2
@@ -6946,17 +6948,7 @@ subroutine gwr_build_sigxme(gwr)
      ! Get Fourier components of the Coulomb interaction in the BZ
      ! In 3D systems, neglecting umklapp,  vc(Sq,sG)=vc(q,G)=4pi/|q+G|
      ! The same relation holds for 0-D systems, but not in 1-D or 2D systems. It depends on S.
-#if 0
-     ig_start = merge(2, 1, q_is_gamma); vc_sqrt_qbz(1) = zero
-     do ig=ig_start,npwx
-       !ig_rot = Gsph_x%rottb(ig, itim_q, isym_q)
-       !vc_sqrt_qbz(ig_rot) = Vcp%vc_sqrt_resid(ig, iq_ibz)
-       ! TODO: Check this part (qq_bz) but it should be OK
-       vc_sqrt_qbz(ig) = sqrt(four_pi) / normv(qq_bz + gvec_x(:,ig), gwr%cryst%gmet, "G")
-     end do
-#else
      call gwr%vcgen%get_vc_sqrt(qq_bz, npwx, gvec_x, gwr%q0, gwr%cryst, vc_sqrt_qbz, gwr%gtau_comm%value)
-#endif
 
      desc_ki => gwr%green_desc_kibz(ik_ibz)
 

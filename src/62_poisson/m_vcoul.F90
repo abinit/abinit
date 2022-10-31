@@ -2039,6 +2039,7 @@ subroutine vcgen_get_vc_sqrt(vcgen, qpt, npw, gvec, q0, cryst, vc_sqrt, comm)
  ABI_MALLOC(vcoul, (npw))
 
  select case (trim(vcgen%mode))
+
  case ('MINIBZ', 'MINIBZ-ERFC', 'MINIBZ-ERF')
    rcut2 = vcgen%rcut**2
    call vcgen%mc%integrate(rcut2, vcgen%nkbz, vcgen%mode, qpt, npw, gvec, vcoul, comm)
@@ -2051,19 +2052,10 @@ subroutine vcgen_get_vc_sqrt(vcgen, qpt, npw, gvec, q0, cryst, vc_sqrt, comm)
                         vcgen%boxcenter, cryst%rprimd, vcoul, vcgen%opt_cylinder, comm)
 
  case ('SURFACE')
-    call cutoff_surface(qpt, npw, gvec, cryst%gprimd, vcgen%rcut, &
+   call cutoff_surface(qpt, npw, gvec, cryst%gprimd, vcgen%rcut, &
                         vcgen%boxcenter, vcgen%pdir, vcgen%alpha, vcoul, vcgen%opt_surface)
 
  case ('CRYSTAL', 'AUXILIARY_FUNCTION', "AUX_GB")
-   !do ig=1,npw
-   !  !if (q_is_gamma) then
-   !  if (q_is_gamma .and. ig == ig0) then
-   !    vc_sqrt(ig) = sqrt(four_pi) / normv(q0 + gvec(:,ig), cryst%gmet, "G")
-   !  else
-   !    vc_sqrt(ig) = sqrt(four_pi) / normv(qpt + gvec(:,ig), cryst%gmet, "G")
-   !  end if
-   !end do
-
    do ig=1,npw
      !if (q_is_gamma) then
      if (q_is_gamma .and. ig == ig0) then
