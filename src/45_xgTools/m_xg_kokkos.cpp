@@ -1,6 +1,46 @@
 #include "m_xg_kokkos.h"
 
 /**
+ * Helper utility routine to compute the prefered number of teams of threads
+ * when computing batched dot product.
+ *
+ * The following is directly adapted for KokkosKernels, see
+ * https://github.com/kokkos/kokkos-kernels/blob/master/src/blas/impl/KokkosBlas_util.hpp
+ */
+int32_t computeNbTeamsPerDot(int vector_length, int nbDots)
+{
+
+  constexpr int workPerTeam = 4096;  // desired amount of work per team
+  int32_t teamsPerDot = 1;
+
+  // approximate number of teams
+  int32_t approxNumTeams =
+      (vector_length * nbDots) / workPerTeam;
+
+  // Adjust approxNumTeams in case it is too small or too large
+  if (approxNumTeams < 1)    approxNumTeams = 1;
+  if (approxNumTeams > 1024) approxNumTeams = 1024;
+
+  // If there are more reductions than the number of teams,
+  // then set the number of teams to be number of reductions.
+  // We don't want a team to contribute to more than one reduction.
+  if (nbDots >= approxNumTeams) {
+    teamsPerDot = 1;
+  }
+  // If there are more teams than reductions, each reduction can
+  // potentially be performed by multiple teams. First, compute
+  // teamsPerDot as an integer (take the floor, not ceiling), then,
+  // compute actual number of teams by using this factor.
+  else {
+    teamsPerDot = approxNumTeams / nbDots;
+  }
+
+  return teamsPerDot;
+
+} // computeNbTeamsPerDot
+
+
+/**
  * Compute dot product of multiple pair of vectors.
  * Inputs are the column vectors of two 2d matrices x and y.
  * Results is a 1d vector containing of all (x dot y).
@@ -37,13 +77,16 @@ extern "C" void computeBatchedDotProduct_scalar_kokkos_cpp(
     using team_policy_t = Kokkos::TeamPolicy<Kokkos::IndexType<int>>;
     using member_t = team_policy_t::member_type;
 
+    // heuristic to determine the "best" number of teams per dot
+    int32_t nbTeamsPerDot = computeNbTeamsPerDot(nx,ny);
+
     // number of teams is the number of dot products to compute
-    int32_t nbTeams = ny;
+    int32_t nbTeams = nbTeamsPerDot * ny;
 
     // create a team policy
-    const team_policy_t policy(nbTeams, Kokkos::AUTO(), Kokkos::AUTO());
+    const team_policy_t policy(nbTeams, Kokkos::AUTO());
 
-    // define compute lambda
+    // define compute lambda to use when nbTeamsPerDot is 1
     auto dot_prod_lambda = KOKKOS_LAMBDA (const member_t& member)
     {
       // inside team, compute dot product as a parallel reduce operation
@@ -63,12 +106,60 @@ extern "C" void computeBatchedDotProduct_scalar_kokkos_cpp(
       Kokkos::single(Kokkos::PerTeam(member), [&]() { res(j) = dot_prod; });
     };
 
-    Kokkos::parallel_for(
-      "compute_dot_products_lambda",
-      policy,
-      dot_prod_lambda);
+    // define compute lambda to use when nbTeamsPerDot is > 1
+    auto dot_prod_lambda_v2 = KOKKOS_LAMBDA (const member_t& member)
+    {
 
-  }
+      // inside a team, compute dot product partial result as a parallel reduce operation
+      double partial_dot_prod = 0;
+      int teamId = member.league_rank();
+
+      // get column number
+      int32_t j     = teamId / nbTeamsPerDot;
+
+      // get the pieceId inside a given column
+      int pieceId   = teamId % nbTeamsPerDot;
+      int pieceSize = nx / nbTeamsPerDot;
+
+      // get the line index begin/end
+      int begin     =  pieceId      * pieceSize;
+      int end       = (pieceId + 1) * pieceSize;
+
+      // the last piece might be slightly larger
+      if (pieceId == nbTeamsPerDot - 1) end = nx;
+
+      Kokkos::parallel_reduce(
+        Kokkos::TeamThreadRange(member, begin, end),
+          [&](const int32_t &i, double &update)
+          {
+            update += x(i,j) * y(i,j);
+          },
+          partial_dot_prod);
+
+      // only one thread per team, collect the final reduction result, and write it
+      // the output view
+      Kokkos::single(Kokkos::PerTeam(member),
+                     [&]() { Kokkos::atomic_add(&res(j), partial_dot_prod); });
+    };
+
+    if (nbTeamsPerDot == 1)
+    {
+      Kokkos::parallel_for(
+        "compute_dot_products_lambda",
+        policy,
+        dot_prod_lambda);
+    }
+    else
+    {
+      double zero = 0;
+      Kokkos::deep_copy(res, zero);
+      Kokkos::parallel_for(
+        "compute_dot_products_lambda_v2",
+        policy,
+        dot_prod_lambda_v2);
+    }
+
+  } // end parallel computation on device
 
 } // computeBatchedDotProduct_scalar_kokkos_cpp
 
@@ -97,13 +188,16 @@ extern "C" void computeBatchedDotProduct_cplx_kokkos_cpp(
     using team_policy_t = Kokkos::TeamPolicy<Kokkos::IndexType<int>>;
     using member_t = team_policy_t::member_type;
 
+    // heuristic to determine the "best" number of teams per dot
+    int32_t nbTeamsPerDot = computeNbTeamsPerDot(nx,ny);
+
     // number of teams is the number of dot products to compute
-    int32_t nbTeams = ny;
+    int32_t nbTeams = nbTeamsPerDot * ny;
 
     // create a team policy
-    const team_policy_t policy(nbTeams, Kokkos::AUTO(), Kokkos::AUTO());
+    const team_policy_t policy(nbTeams, Kokkos::AUTO());
 
-    // define compute lambda
+    // define compute lambda to use when nbTeamsPerDot is 1
     auto dot_prod_lambda = KOKKOS_LAMBDA (const member_t& member)
     {
       // inside team, compute dot product as a parallel reduce operation
@@ -123,14 +217,62 @@ extern "C" void computeBatchedDotProduct_cplx_kokkos_cpp(
       Kokkos::single(Kokkos::PerTeam(member), [&]() { res(j) = dot_prod; });
     };
 
-    Kokkos::parallel_for(
-      "compute_dot_products_lambda",
-      policy,
-      dot_prod_lambda);
+    // define compute lambda to use when nbTeamsPerDot is > 1
+    auto dot_prod_lambda_v2 = KOKKOS_LAMBDA (const member_t& member)
+    {
+
+      // inside a team, compute dot product partial result as a parallel reduce operation
+      cplx_t partial_dot_prod = 0;
+      int teamId = member.league_rank();
+
+      // get column number
+      int32_t j     = teamId / nbTeamsPerDot;
+
+      // get the pieceId inside a given column
+      int pieceId   = teamId % nbTeamsPerDot;
+      int pieceSize = nx / nbTeamsPerDot;
+
+      // get the line index begin/end
+      int begin     =  pieceId      * pieceSize;
+      int end       = (pieceId + 1) * pieceSize;
+
+      // the last piece might be slightly larger
+      if (pieceId == nbTeamsPerDot - 1) end = nx;
+
+      Kokkos::parallel_reduce(
+        Kokkos::TeamThreadRange(member, begin, end),
+          [&](const int32_t &i, cplx_t &update)
+          {
+            update += Kokkos::conj(x(i,j)) * y(i,j);
+          },
+          partial_dot_prod);
+
+      // only one thread per team, collect the final reduction result, and write it
+      // the output view
+      Kokkos::single(Kokkos::PerTeam(member),
+                     [&]() { Kokkos::atomic_add(&res(j), partial_dot_prod); });
+    };
+
+    if (nbTeamsPerDot == 1)
+    {
+      Kokkos::parallel_for(
+        "compute_dot_products_lambda",
+        policy,
+        dot_prod_lambda);
+    }
+    else
+    {
+      cplx_t zero = 0;
+      Kokkos::deep_copy(res, zero);
+      Kokkos::parallel_for(
+        "compute_dot_products_lambda_v2",
+        policy,
+        dot_prod_lambda_v2);
+    }
 
     //Kokkos::fence();
 
-  }
+  } // end parallel computation on device
 
 } // computeBatchedDotProduct_cplx_kokkos_cpp
 
@@ -159,13 +301,16 @@ extern "C" void computeBatchedDotProduct_cplx_scalar_kokkos_cpp(
     using team_policy_t = Kokkos::TeamPolicy<Kokkos::IndexType<int>>;
     using member_t = team_policy_t::member_type;
 
+    // heuristic to determine the "best" number of teams per dot
+    int32_t nbTeamsPerDot = computeNbTeamsPerDot(nx,ny);
+
     // number of teams is the number of dot products to compute
-    int32_t nbTeams = ny;
+    int32_t nbTeams = nbTeamsPerDot * ny;
 
     // create a team policy
-    const team_policy_t policy(nbTeams, Kokkos::AUTO(), Kokkos::AUTO());
+    const team_policy_t policy(nbTeams, Kokkos::AUTO());
 
-    // define compute lambda
+    // define compute lambda to use when nbTeamsPerDot is 1
     auto dot_prod_lambda = KOKKOS_LAMBDA (const member_t& member)
     {
       // inside team, compute dot product as a parallel reduce operation
@@ -185,14 +330,62 @@ extern "C" void computeBatchedDotProduct_cplx_scalar_kokkos_cpp(
        Kokkos::single(Kokkos::PerTeam(member), [&]() { res(j) = dot_prod.real(); });
     };
 
-    Kokkos::parallel_for(
-      "compute_dot_products_lambda",
-      policy,
-      dot_prod_lambda);
+    // define compute lambda to use when nbTeamsPerDot is > 1
+    auto dot_prod_lambda_v2 = KOKKOS_LAMBDA (const member_t& member)
+    {
+
+      // inside a team, compute dot product partial result as a parallel reduce operation
+      cplx_t partial_dot_prod = 0;
+      int teamId = member.league_rank();
+
+      // get column number
+      int32_t j     = teamId / nbTeamsPerDot;
+
+      // get the pieceId inside a given column
+      int pieceId   = teamId % nbTeamsPerDot;
+      int pieceSize = nx / nbTeamsPerDot;
+
+      // get the line index begin/end
+      int begin     =  pieceId      * pieceSize;
+      int end       = (pieceId + 1) * pieceSize;
+
+      // the last piece might be slightly larger
+      if (pieceId == nbTeamsPerDot - 1) end = nx;
+
+      Kokkos::parallel_reduce(
+        Kokkos::TeamThreadRange(member, begin, end),
+          [&](const int32_t &i, cplx_t &update)
+          {
+            update += Kokkos::conj(x(i,j)) * y(i,j);
+          },
+          partial_dot_prod);
+
+      // only one thread per team, collect the final reduction result, and write it
+      // the output view
+      Kokkos::single(Kokkos::PerTeam(member),
+                     [&]() { Kokkos::atomic_add(&res(j), partial_dot_prod.real()); });
+    };
+
+    if (nbTeamsPerDot == 1)
+    {
+      Kokkos::parallel_for(
+        "compute_dot_products_lambda",
+        policy,
+        dot_prod_lambda);
+    }
+    else
+    {
+      double zero = 0;
+      Kokkos::deep_copy(res, zero);
+      Kokkos::parallel_for(
+        "compute_dot_products_lambda_v2",
+        policy,
+        dot_prod_lambda_v2);
+    }
 
     //Kokkos::fence();
 
-  }
+  } // end parallel computation on device
 
 } // computeBatchedDotProduct_cplx_scalar_kokkos_cpp
 
