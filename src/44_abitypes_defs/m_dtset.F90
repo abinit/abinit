@@ -3191,11 +3191,9 @@ subroutine macroin2(dtsets, ndtset_alloc)
      if ((dtsets(idtset)%macro_uj==2.or.dtsets(idtset)%macro_uj==3).and.dtsets(idtset)%nsppol==2) then
        dtsets(idtset)%atvshift(:,2,pawujat)=0_dp
      end if
-!# CHANGE TO CODE LM 2021
      if (dtsets(idtset)%macro_uj==4.and.dtsets(idtset)%nsppol==2) then
        dtsets(idtset)%atvshift(:,2,pawujat)= -dtsets(idtset)%pawujv
      end if
-!# END CHANGE LM 2021
    end if ! macro_uj
 
    if (dtsets(idtset)%optdriver == RUNL_EPH) then

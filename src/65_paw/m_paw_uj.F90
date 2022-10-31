@@ -491,11 +491,9 @@ subroutine pawuj_det(dtpawuj,ndtpawuj,ujdet_filename,ures)
      write(message,fmt='(2a)') ' pawuj_det: found macro_uj=3 and nspden=2,',&
 &     ' determination of J-parameter on single spin channel (experimental)'
    end if
-!# CHANGE TO CODE LM 2021
    else if (macro_uj==4.and.nspden==2) then
      write(message,fmt='(2a)') ' pawuj_det: found macro_uj=4 and nspden=2,',&
-&     ' correct J determination – L. MacEnulty August 2021'
-!# END CHANGE LM 2021
+&     ' Hunds J determination – L. MacEnulty August 2021'
 
    write (message,fmt='(a,i3,a,a)') ' All macro_uj ok and equal to ',macro_uj,ch10,trim(message)
    write (message,'(a,i3)') ' All macro_uj ok and equal to ',macro_uj
@@ -525,10 +523,8 @@ subroutine pawuj_det(dtpawuj,ndtpawuj,ujdet_filename,ures)
      chih(jdtset,1:nat_org)=dtpawuj(jdtset)%occ(1,:)
    else if (macro_uj==3.and.nspden==2) then
      chih(jdtset,1:nat_org)=dtpawuj(jdtset)%occ(2,:)
-!# CHANGE TO CODE LM 2021
    else if (macro_uj==4.and.nspden==2) then
      chih(jdtset,1:nat_org)=dtpawuj(jdtset)%occ(1,:)+dtpawuj(jdtset)%occ(2,:)
-!# END CHANGE LM 2021
    end if
    vsh(jdtset)=dtpawuj(jdtset)%vsh(1,pawujat)
    if (pawprtvol==3) then
