@@ -4324,8 +4324,14 @@ subroutine make_d(atindx,atindx1,cprj,dimlmn,dterm,dtset,gprimd,&
 
      cdij = czero
      do ijkl=1,pawtab(itypat)%lmn2_size
+       ilmn=pawtab(itypat)%indklmn(7,ijkl)
+       jlmn=pawtab(itypat)%indklmn(8,ijkl)
        rhokl=CMPLX(pawrhoij(iatom)%rhoij_(2*ijkl-1,1),pawrhoij(iatom)%rhoij_(2*ijkl,1))
-       cdij=cdij+rhokl*pawtab(itypat)%eijkl(klmn,ijkl)*pawtab(itypat)%dltij(ijkl)
+       if (ilmn .EQ. jlmn) then
+         cdij=cdij+rhokl*pawtab(itypat)%eijkl(klmn,ijkl)
+       else
+         cdij=cdij+(rhokl+CONJG(rhokl))*pawtab(itypat)%eijkl(klmn,ijkl)
+       end if
      end do
      write(std_out,'(a,i4,4es16.8)')'JWZ debug klmn Ha_ij my_Ha_ij ',klmn,&
        & real(cdij),aimag(cdij),&
