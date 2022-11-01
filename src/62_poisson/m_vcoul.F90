@@ -49,7 +49,7 @@ module m_vcoul
  ! Cut-off methods modules
  use m_cutoff_sphere,   only : cutoff_sphere
  use m_cutoff_surface,  only : cutoff_surface
- use m_cutoff_cylinder, only : cutoff_cylinder, K0cos
+ use m_cutoff_cylinder, only : cutoff_cylinder
 
  implicit none
 
@@ -196,11 +196,10 @@ end type mc_t
 type, public :: vcgen_t
 
   integer :: nkbz = -1
-
-  !integer :: nqibz = -1
-   ! Number of irreducible q-points
+   ! Number of k-points in full BZ.
 
   integer :: opt_cylinder
+
   integer :: opt_surface
 
   real(dp) :: alpha(3) = -one
@@ -231,23 +230,18 @@ type, public :: vcgen_t
    ! Value of the integration of the Coulomb singularity 4\pi/V_BZ \int_BZ d^3q 1/q^2
 
   type(mc_t) :: mc
+   ! Monte carlo integrator.
 
 contains
-  procedure :: init => vcgen_init
-  procedure :: get_vc_sqrt => vcgen_get_vc_sqrt
-  procedure :: free => vcgen_free
+  procedure :: init => vcgen_init                  ! Initialize the object
+  procedure :: get_vc_sqrt => vcgen_get_vc_sqrt    ! Compute sqrt(vc(q,g))
+  procedure :: free => vcgen_free                  ! Free
+  !procedure :: print => vcgen_print
 end type vcgen_t
 !!***
 
  ! private stuff
  real(dp),parameter :: TOLQ0 = 1.d-3
-
- ! variables used for the integration needed by the cylindrical case.
- integer,save :: npts_,ntrial_,qopt_
- real(dp),save :: hb_,r0_
- real(dp),save :: qpg_para_,qpgx_,qpgy_
- real(dp),save :: xx_,rho_
- real(dp),save :: accuracy_
 
 CONTAINS  !========================================================================================
 !!***
@@ -257,6 +251,7 @@ CONTAINS  !=====================================================================
 !! gw_icutcoul_to_mode
 !!
 !! FUNCTION
+!! Convert gw_icutcoul_to_mode to mode string.
 !!
 !! SOURCE
 
@@ -327,7 +322,6 @@ subroutine vcoul_init(vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
  integer,parameter :: master=0
  integer :: nmc, ig, imc, nqibz, nqbz, nkbz, ii, iqlwl, iq_bz, iq_ibz, npt, iq
  integer :: opt_cylinder,opt_surface,my_rank,nprocs
- real(dp),parameter :: tol999 = 999.0
  real(dp) :: bz_geometry_factor,check,q0_vol, qbz_norm,qpg2,rcut2
  character(len=500) :: msg
  type(mc_t) :: mc
@@ -384,14 +378,14 @@ subroutine vcoul_init(vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
 
    rcut2 = vcp%rcut**2
    do iq_ibz=1,nqibz
-     call mc%integrate(rcut2, nkbz, vcp%mode, qibz(:, iq_ibz), ng, gvec, vcoul(:, iq_ibz), comm)
+     call mc%integrate(vcp%mode, qibz(:, iq_ibz), ng, gvec, rcut2, nkbz, vcoul(:, iq_ibz), comm)
    end do
 
    ! Treat the limit q --> 0
    vcp%i_sz = vcoul(1, 1)
 
    do iqlwl=1,nqlwl
-     call mc%integrate(rcut2, nkbz, vcp%mode, qlwl(:, iqlwl), ng, gvec, vcoul_lwl(:, iqlwl), comm)
+     call mc%integrate(vcp%mode, qlwl(:, iqlwl), ng, gvec, rcut2, nkbz, vcoul_lwl(:, iqlwl), comm)
    end do
 
    call mc%free()
@@ -587,6 +581,15 @@ subroutine vcoul_init(vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
 end subroutine vcoul_init
 !!***
 
+
+!!****f* m_vcoul/cylinder_setup
+!! NAME
+!!  cylinder_setup
+!!
+!! FUNCTION
+!!
+!! SOURCE
+
 subroutine cylinder_setup(cryst, vcutgeo, hcyl, pdir, opt_cylinder)
 
  type(crystal_t),intent(in) :: cryst
@@ -628,6 +631,14 @@ subroutine cylinder_setup(cryst, vcutgeo, hcyl, pdir, opt_cylinder)
 end subroutine cylinder_setup
 !!***
 
+!!****f* m_vcoul/surface_setup
+!! NAME
+!!  surface_setup
+!!
+!! FUNCTION
+!!
+!! SOURCE
+
 subroutine surface_setup(cryst, vcutgeo, alpha, rcut, pdir, opt_surface)
 
  type(crystal_t),intent(in) :: cryst
@@ -666,6 +677,14 @@ subroutine surface_setup(cryst, vcutgeo, alpha, rcut, pdir, opt_surface)
 
 end subroutine surface_setup
 !!***
+
+!!****f* m_vcoul/integratefaux
+!! NAME
+!!  integratefaux
+!!
+!! FUNCTION
+!!
+!! SOURCE
 
 real(dp) function integratefaux(rcut, gprimd, ucvol, comm)
 
@@ -768,6 +787,7 @@ real(dp) function integratefaux(rcut, gprimd, ucvol, comm)
  call xmpi_sum(integratefaux, comm, ierr)
 
 end function integratefaux
+!!***
 
 real(dp) pure function faux(qq, rcut, b1, b2, b3)
 
@@ -1171,207 +1191,6 @@ end subroutine vcoul_free
 
 !----------------------------------------------------------------------
 
-real(dp) function K0cos_dy_r0(xx)
-
- real(dp),intent(in) :: xx
-
-!Local variables-------------------------------
-!scalars
- integer :: ierr
- real(dp) :: quad,yx
-!************************************************************************
-
- ! $ K0cos_dy_r0(x)= \int_{-b/2}^{-y(x)} K0(|qpg_z|\rho) cos(x.qpg_x+y.qpg_y)dy
- !                  +\int_{y(x)}^{b/2} K0(|qpg_z|\rho)cos(x.qpg_x+y.qpg_y)dy$
- ! where y(x)=SQRT(r0^2-x^2) and x<=r0
- !
- xx_=xx; yx=SQRT(r0_**2-xx**2)
- call quadrature(K0cos,-hb_,-yx,qopt_,quad,ierr,ntrial_,accuracy_,npts_)
- ABI_CHECK(ierr == 0, "Accuracy not reached in quadrature")
- K0cos_dy_r0=quad
-
- call quadrature(K0cos,+yx,+hb_,qopt_,quad,ierr,ntrial_,accuracy_,npts_)
- ABI_CHECK(ierr == 0, "Accuracy not reached in quadrature")
-
- K0cos_dy_r0=quad+K0cos_dy_r0
-
-end function K0cos_dy_r0
-!!***
-
-!----------------------------------------------------------------------
-
-real(dp) function K0cos_dth_r0(rho)
-
- real(dp),intent(in) :: rho
-
-!Local variables-------------------------------
-!scalars
- integer :: ierr
- real(dp) :: quad,arg,k0,tmp
-
-!************************************************************************
-
- ! $ K0cos_dth_r0(\rho)=
- ! \int_{0}^{2pi)} K0(|qpg_z|\rho)cos(\rho.cos(\theta).qpg_x+\rho.sin(\theta).qpg_y) d\theta $
- !
- ! where y(x)=SQRT(r0^2-x^2) and x<=r0
- !
- rho_=rho
- call quadrature(Fcos_th,zero,two_pi,qopt_,quad,ierr,ntrial_,accuracy_,npts_)
- ABI_CHECK(ierr == 0, "Accuracy not reached in quadrature")
-
- arg=qpg_para_*rho_
- tmp=zero
- if (arg>tol6) then
-   call CALCK0(arg,k0,1)
-   tmp=k0*rho_
- end if
- K0cos_dth_r0=quad*tmp
-
-end function K0cos_dth_r0
-!!***
-
-!----------------------------------------------------------------------
-
-pure real(dp) function Fcos_th(theta)
-
- real(dp),intent(in) :: theta
-
-!************************************************************************
-
- ! $ Fcos_th(\theta)=rho*K0(\rho*|qpg_z|)*COS(\rho.COS(\theta).qpg_x+\rho.SIN/(\theta)*qpg_y) $
-
- !arg=qpg_para_*rho_
- !call CALCK0(arg,k0,1)
- !tmp=k0*rho_
- Fcos_th=COS(rho_*COS(theta)*qpgx_+rho_*SIN(theta)*qpgy_)
-
-end function Fcos_th
-!!***
-
-!----------------------------------------------------------------------
-
-!the following functions should be used to deal with the singularity in the Cylindrical cutoff
-!TODO Not yet used and indeed are still private
-
-function K0fit(mq,nn) result(vals)
-
- integer,intent(in) :: nn
- real(dp),intent(in) :: mq
- real(dp) :: vals(nn)
-
-!Local variables-------------------------------
-!scalars
- integer :: ii
- real(dp) :: mqh
-!arrays
- real(dp),parameter :: cc(7)=(/-0.57721566,0.42278420,0.23069756, &
-                                0.03488590,0.00262698,0.00010750,0.00000740/)
- ! *************************************************************************
-
- if (nn>8.or.nn<1) then
-   ABI_ERROR("nn>8.or.nn<1 not implemented")
- end if
-
- ! === Eq 9.8.5 in Abramovitz ===
- vals(1)=-LOG(mq*half)*I0(mq)
- mqh=mq*half
- do ii=2,nn
-   vals(ii)=cc(ii-1)*mqh**(2*(ii-2))
- end do
-
-end function K0fit
-
-real(dp) function K0fit_int(mq,par,nn) result(integ)
-
- integer,intent(in) :: nn
- real(dp),intent(in) :: mq
- real(dp),intent(in) :: par(nn)
-
-!Local variables-------------------------------
-!scalars
- integer :: ii,aa
- real(dp) :: mqh
-!arrays
- real(dp),parameter :: cc(7)=(/-0.57721566,0.42278420,0.23069756,&
-&                               0.03488590,0.00262698,0.00010750,0.00000740/)
- ! *************************************************************************
-
- if (nn>8.or.nn<1) then
-   ABI_ERROR("nn>8.or.nn<1 not implemented")
- end if
-
- mqh=mq*half
- integ=-par(1)*int_I0ln(mqh)
- ! primitive of polynomial \sum_0^{N/2} cc_{2i} (x/2)^{2*i}
- do ii=2,nn
-  aa=(2*(ii-1)+1)
-  integ=integ+par(ii)*two*cc(ii-1)*(mqh**aa)/aa
- end do
-
-end function K0fit_int
-
-real(dp) function I0(xx)
-
- real(dp),intent(in) :: xx
-
-!Local variables-------------------------------
- real(dp) :: tt
-
-! *************************************************************************
-
- ! Eq 9.8.1 of Abramovitz, entering the expansion of K0 -->0
- ! Expansion holds for |x|<3.75, Error<1.6*10D-07
- tt=xx/3.75
- I0=one+3.5156229*tt**2+3.0899424*tt**4 +1.2067492*tt**6 &
-       +0.2659732*tt**8+0.0360768*tt**10+0.0045813*tt**12
-end function I0
-
-! Primitive of x^m Ln(x) for m/=-1
-real(dp) function int_xmln(xx,mm)  result(res)
-
- integer,intent(in) :: mm
- real(dp),intent(in) :: xx
-
-! *********************************************************************
-
- if (mm==-1) then
-   ABI_BUG('invalid value for mm')
- end if
-
- if (xx<=zero) then
-   ABI_BUG(' invalid value for xx')
- end if
-
- res= (xx**(mm+1))/(mm+1) * (LOG(xx) - one/(mm+1))
-
-end function int_xmln
-
-! Primitive function of ln(x/2)*I0(x) = sum_0^{N/2} 2^{2s+1} c_{2s} T(x/2,2s)
-! where T(x,s)=\int x^s ln(x)dx
-real(dp) function int_I0ln(xx) result(res)
-
-!Arguments ------------------------------------
- real(dp),intent(in) :: xx
-
-!Local variables-------------------------------
- real(dp) :: yy
-! *********************************************************************
-
- yy=xx*half
- res =  (       one*2    *int_xmln(yy,0)  &
-&        +3.5156229*2**3 *int_xmln(yy,2)  &
-&        +3.0899424*2**5 *int_xmln(yy,4)  &
-&        +1.2067492*2**7 *int_xmln(yy,6)  &
-&        +0.2659732*2**9 *int_xmln(yy,8)  &
-&        +0.0360768*2**11*int_xmln(yy,10) &
-&        +0.0045813*2**13*int_xmln(yy,12) &
-&       )
-
-end function int_I0ln
-
-!----------------------------------------------------------------------
-
 !!****f* m_vcoul/mc_init
 !! NAME
 !! mc_init
@@ -1475,7 +1294,7 @@ end subroutine mc_init
 !!
 !! SOURCE
 
-subroutine mc_integrate(mc, rcut2, nkbz, mode, qibz, ng, gvec, vcoul, comm)
+subroutine mc_integrate(mc, mode, qibz, ng, gvec, rcut2, nkbz, vcoul, comm)
 
 !Arguments ------------------------------------
  class(mc_t),intent(in) :: mc
@@ -1494,8 +1313,8 @@ subroutine mc_integrate(mc, rcut2, nkbz, mode, qibz, ng, gvec, vcoul, comm)
 
 ! *************************************************************************
 
- q_is_gamma = all(abs(qibz) < tol16)
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
+ q_is_gamma = all(abs(qibz) < tol16)
 
  ! Find index of G=0 in gvec.
  ig0 = -1
@@ -1803,6 +1622,13 @@ subroutine beigi_surface_limit(opt_surface, cryst, nqibz, nkbz, rcut, alpha, box
 end subroutine beigi_surface_limit
 !!***
 
+!!****f* m_vcoul/carrier_isz
+!! NAME
+!!  carrier_isz
+!!
+!! FUNCTION
+!!
+!! SOURCE
 
 real(dp) function carrier_isz(cryst, nqbz, qbz, rcut, comm) result(i_sz)
 
@@ -1831,6 +1657,14 @@ real(dp) function carrier_isz(cryst, nqbz, qbz, rcut, comm) result(i_sz)
 
 end function carrier_isz
 !!***
+
+!!****f* m_vcoul/gygi_baldereschi_isz
+!! NAME
+!!  gygi_baldereschi_isz
+!!
+!! FUNCTION
+!!
+!! SOURCE
 
 real(dp) function gygi_baldereschi_isz(cryst, nqbz, qbz, ecut, ng, gvec) result(i_sz)
 
@@ -1910,7 +1744,7 @@ subroutine vcgen_init(vcgen, cryst, kptrlatt, nkbz, nqibz, nqbz, qbz, rcut, gw_i
    call vcgen%mc%init(cryst%rprimd, cryst%ucvol, cryst%gprimd, cryst%gmet, kptrlatt)
 
    rcut2 = vcgen%rcut**2
-   call vcgen%mc%integrate(rcut2, nkbz, vcgen%mode, q_gamma, 1, gvec0, vcoul0, xmpi_comm_self)
+   call vcgen%mc%integrate(vcgen%mode, q_gamma, 1, gvec0, rcut2, nkbz, vcoul0, xmpi_comm_self)
 
    ! Treat the limit q --> 0.
    vcgen%i_sz = vcoul0(1)
@@ -2039,34 +1873,39 @@ subroutine vcgen_get_vc_sqrt(vcgen, qpt, npw, gvec, q0, cryst, vc_sqrt, comm)
  ABI_MALLOC(vcoul, (npw))
 
  select case (trim(vcgen%mode))
-
  case ('MINIBZ', 'MINIBZ-ERFC', 'MINIBZ-ERF')
    rcut2 = vcgen%rcut**2
-   call vcgen%mc%integrate(rcut2, vcgen%nkbz, vcgen%mode, qpt, npw, gvec, vcoul, comm)
+   call vcgen%mc%integrate(vcgen%mode, qpt, npw, gvec, rcut2, vcgen%nkbz, vcoul, comm)
 
  case ('SPHERE')
    call cutoff_sphere(qpt, npw, gvec, cryst%gmet, vcgen%rcut, vcoul)
 
  case ('CYLINDER')
-   call cutoff_cylinder(qpt, npw, gvec, vcgen%rcut, vcgen%hcyl, vcgen%pdir,&
+   call cutoff_cylinder(qpt, npw, gvec, vcgen%rcut, vcgen%hcyl, vcgen%pdir, &
                         vcgen%boxcenter, cryst%rprimd, vcoul, vcgen%opt_cylinder, comm)
 
  case ('SURFACE')
    call cutoff_surface(qpt, npw, gvec, cryst%gprimd, vcgen%rcut, &
-                        vcgen%boxcenter, vcgen%pdir, vcgen%alpha, vcoul, vcgen%opt_surface)
+                       vcgen%boxcenter, vcgen%pdir, vcgen%alpha, vcoul, vcgen%opt_surface)
 
- case ('CRYSTAL', 'AUXILIARY_FUNCTION', "AUX_GB")
+ case ('CRYSTAL', 'AUXILIARY_FUNCTION', "AUX_GB", "ERF", "ERFC")
+   ! Compute |q+G| with special treatment of (q=0, g=0).
    do ig=1,npw
      !if (q_is_gamma) then
      if (q_is_gamma .and. ig == ig0) then
-       vcoul(ig) = four_pi / normv(q0 + gvec(:,ig), cryst%gmet, "G") ** 2
+       vcoul(ig) = normv(q0 + gvec(:,ig), cryst%gmet, "G")
      else
-       vcoul(ig) = four_pi / normv(qpt + gvec(:,ig), cryst%gmet, "G") ** 2
+       vcoul(ig) = normv(qpt + gvec(:,ig), cryst%gmet, "G")
      end if
    end do
 
- !case ('ERF')
- !case ('ERFC')
+   if (vcgen%mode == "ERF") then
+     vcoul(:)  = four_pi/(vcoul(:)**2) *  EXP( -0.25d0 * (vcgen%rcut*vcoul(:))**2 )
+   else if (vcgen%mode == "ERFC") then
+     vcoul(:) = four_pi/(vcoul(:)**2) * ( one - EXP( -0.25d0 * (vcgen%rcut*vcoul(:))**2 ) )
+   else
+     vcoul = four_pi/vcoul**2
+   end if
 
  case default
    ABI_BUG(sjoin('Unsupported cutoff mode:', vcgen%mode))

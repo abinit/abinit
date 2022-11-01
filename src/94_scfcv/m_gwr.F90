@@ -1429,8 +1429,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
    call gwr%tchi_desc_qibz(iq_ibz)%init(qq_ibz, istwfk1, dtset%ecuteps, gwr, kin_sorted=.True.)
    associate (desc_q => gwr%tchi_desc_qibz(iq_ibz))
 
-   ! Compute sqrt(v(q,G))
-   !TODO: Implement cutoff in vc
+   ! Compute sqrt(vc(q,G))
    call desc_q%get_vc_sqrt(qq_ibz, q_is_gamma, gwr, gwr%gtau_comm%value)
    end associate
  end do
@@ -1738,9 +1737,8 @@ subroutine gwr_free(gwr)
  end if
  call gwr%gtau_slkproc%free()
 
- call gwr%ks_me%free()
-
  ! datatypes.
+ call gwr%ks_me%free()
  call gwr%vcgen%free()
 
  if (allocated(gwr%degtab)) then
@@ -2696,6 +2694,7 @@ subroutine gwr_rotate_wc(gwr, iq_bz, itau, spin, desc_qbz, wc_qbz)
 
  call sphereboundary(desc_qbz%gbound, desc_qbz%istwfk, desc_qbz%gvec, gwr%g_mgfft, desc_qbz%npw)
 
+ ! Compute sqrt(vc(q,G))
  ! TODO: rotate vc_sqrt
  ! vc(Sq, Sg) = vc(q, g)
  ! vc(-q, -g) = vc(q, g)
@@ -3202,20 +3201,10 @@ subroutine desc_get_vc_sqrt(desc, qpt, q_is_gamma, gwr, comm)
 
 ! *************************************************************************
 
- ABI_REMALLOC(desc%vc_sqrt, (desc%npw))
+ if (allocated(desc%vc_sqrt)) return
+ ABI_MALLOC(desc%vc_sqrt, (desc%npw))
 
-#if 1
- do ig=1,desc%npw
-   !if (q_is_gamma) then
-   if (q_is_gamma .and. ig == desc%ig0) then
-     desc%vc_sqrt(ig) = sqrt(four_pi) / normv(gwr%q0 + desc%gvec(:,ig), gwr%cryst%gmet, "G")
-   else
-     desc%vc_sqrt(ig) = sqrt(four_pi) / normv(qpt + desc%gvec(:,ig), gwr%cryst%gmet, "G")
-   end if
- end do
-#else
  call gwr%vcgen%get_vc_sqrt(qpt, desc%npw, desc%gvec, gwr%q0, gwr%cryst, desc%vc_sqrt, comm)
-#endif
 
 end subroutine desc_get_vc_sqrt
 !!***
@@ -6758,7 +6747,8 @@ subroutine gwr_build_sigxme(gwr)
  real(dp) :: ksum(3), kk_ibz(3), kgw(3), kgw_m_ksum(3), qq_bz(3), tsec(2) !, kk_bz(3), q0(3) !, spinrot_kbz(4), spinrot_kgw(4)
  real(dp),contiguous, pointer :: qp_eig(:,:,:), qp_occ(:,:,:), cg1_ptr(:,:), cg2_ptr(:,:)
  real(dp),allocatable :: work(:,:,:,:)
- complex(dp),allocatable :: vc_sqrt_qbz(:), rhotwg(:), rhotwgp(:), rhotwg_ki(:,:)
+ complex(gwpc),allocatable :: vc_sqrt_qbz(:)
+ complex(dp),allocatable :: rhotwg(:), rhotwgp(:), rhotwg_ki(:,:)
  complex(dp),allocatable :: ur_bdgw(:,:), ur_ksum(:), ur_prod(:), eig0r(:)
  complex(dp),target,allocatable :: ug_ksum(:)
  complex(dp),allocatable  :: sigxcme_tmp(:,:), sigxme_tmp(:,:,:), sigx(:,:,:,:)
