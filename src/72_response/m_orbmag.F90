@@ -2387,9 +2387,9 @@ subroutine dterm_rd2f(atindx,dterm,dtset,gntselect,gprimd,lmnmax,my_lmax,&
 
   !Local variables -------------------------
   !scalars
-  integer :: gint,iat,iatom,ilm,imesh,itypat,klm,klmn,kln
-  integer :: ll,lmin,lmax,mesh_size
-  real(dp) :: dij,dijterm,qijlm,rr
+  integer :: iat,iatom,igij,igkl,ijlm,ijlmax,ijlmin,ijlmn,ijln,itypat
+  integer :: kllm,kllmax,kllmin,kllmn,klln,ll,llmm,mesh_size,meshsz
+  real(dp) :: qij,qkl,vh1
 
   !arrays
   real(dp),allocatable :: ff(:),nlff(:)
@@ -2405,34 +2405,45 @@ subroutine dterm_rd2f(atindx,dterm,dtset,gntselect,gprimd,lmnmax,my_lmax,&
    mesh_size=pawtab(itypat)%mesh_size
    ABI_MALLOC(ff,(mesh_size))
    ABI_MALLOC(nlff,(mesh_size))
+ 
+   meshsz=pawrad(itypat)%int_meshsz
+   if (mesh_size>meshsz) ff(meshsz+1:mesh_size)=zero
+
+   do ijlmn = 1, pawtab(itypat)%lmn2_size
+     ijlm   = pawtab(itypat)%indklmn(1,ijlmn)
+     ijln   = pawtab(itypat)%indklmn(2,ijlmn)
+     ijlmin = pawtab(itypat)%indklmn(3,ijlmn)
+     ijlmax = pawtab(itypat)%indklmn(4,ijlmn)
+     do kllmn = 1, pawtab(itypat)%lmn2_size
+       kllm   = pawtab(itypat)%indklmn(1,kllmn)
+       klln   = pawtab(itypat)%indklmn(2,kllmn)
+       kllmin = pawtab(itypat)%indklmn(3,kllmn)
+       kllmax = pawtab(itypat)%indklmn(4,kllmn)
+
+       do ll = max(ijlmin,kllmin),min(ijlmax,kllmax)
+         do llmm = ll**2+1,(ll+1)**2
+           igij = gntselect(llmm,ijlm)
+           igkl = gntselect(llmm,kllm)
+           if ( (igij .EQ. 0) .OR. (igkl .EQ. 0) ) cycle
+
+           qij =pawtab(itypat)%qijl(llmm,ijlmn)
+           qkl =pawtab(itypat)%qijl(llmm,kllmn)
   
-   do klmn = 1, pawtab(itypat)%lmn2_size
-     klm = pawtab(itypat)%indklmn(1,klmn)
-     kln = pawtab(itypat)%indklmn(2,klmn)
-     lmin = pawtab(itypat)%indklmn(3,klmn)
-     lmax = pawtab(itypat)%indklmn(4,klmn)
+           ff(2:mesh_size)=pawtab(itypat)%shapefunc(2:mesh_size,ll+1)*&
+             &pawrad(itypat)%rad(2:mesh_size)**2
+           call poisson(ff,ll,pawrad(itypat),nlff)
+           
+           ff(1)=zero
+           ff(2:meshsz)= -pawtab(itypat)%shapefunc(2:mesh_size,ll+1)*nlff(2:meshsz)&
+             & *pawrad(itypat)%rad(2:meshsz)
+           call simp_gen(vh1,ff,pawrad(itypat))
 
-     dij=zero
-     do ll = lmin,lmax,2
-       do ilm = ll**2+1,(ll+1)**2
-         qijlm = pawtab(itypat)%qijl(ilm,klmn)
-         if (abs(qijlm) .LT. tol8) cycle
-
-         call nlint(pawsphden(iatom)%nhat1(:,ilm,1),ll,mesh_size,nlff,pawrad(itypat))
-         do imesh=2, mesh_size
-           rr=pawrad(itypat)%rad(imesh)
-           ff(imesh)=rr*rr*pawtab(itypat)%shapefunc(imesh,ll+1)*nlff(imesh)
-         end do
-         call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
-         call simp_gen(dijterm,ff,pawrad(itypat))
-         dij=dij-four_pi*qijlm*dijterm/(two*ll+one)
-
-       end do ! end loop over ilm
-     end do ! end loop over ll
-
-     dterm%rd2f(iatom,klmn) = CMPLX(dij,zero)
-
-   end do ! end loop over klmn
+           dterm%eijkl(iatom,ijlmn,kllmn)=dterm%eijkl(iatom,ijlmn,kllmn)+&
+             & four_pi*vh1*qij*qkl
+         end do !llmm
+       end do !ll
+     end do !kllmn
+   end do !ijlmn
 
    ABI_FREE(ff)
    ABI_FREE(nlff)
@@ -2496,9 +2507,9 @@ subroutine dterm_rd2d(atindx,dterm,dtset,gntselect,gprimd,lmnmax,my_lmax,&
 
   !Local variables -------------------------
   !scalars
-  integer :: gint,iat,iatom,ilm,imesh,itypat,klm,klmn,kln
-  integer :: ll,lmin,lmax,mesh_size
-  real(dp) :: dij,dijterm,qijlm,rr
+  integer :: iat,iatom,igij,igkl,ijlm,ijlmax,ijlmin,ijlmn,ijln,itypat
+  integer :: kllm,kllmax,kllmin,kllmn,klln,ll,llmm,mesh_size,meshsz
+  real(dp) :: rgkl,qij,vh1
 
   !arrays
   real(dp),allocatable :: ff(:),nlff(:)
@@ -2514,34 +2525,44 @@ subroutine dterm_rd2d(atindx,dterm,dtset,gntselect,gprimd,lmnmax,my_lmax,&
    mesh_size=pawtab(itypat)%mesh_size
    ABI_MALLOC(ff,(mesh_size))
    ABI_MALLOC(nlff,(mesh_size))
+ 
+   meshsz=pawrad(itypat)%int_meshsz
+   if (mesh_size>meshsz) ff(meshsz+1:mesh_size)=zero
+
+   do ijlmn = 1, pawtab(itypat)%lmn2_size
+     ijlm   = pawtab(itypat)%indklmn(1,ijlmn)
+     ijln   = pawtab(itypat)%indklmn(2,ijlmn)
+     ijlmin = pawtab(itypat)%indklmn(3,ijlmn)
+     ijlmax = pawtab(itypat)%indklmn(4,ijlmn)
+     do kllmn = 1, pawtab(itypat)%lmn2_size
+       kllm   = pawtab(itypat)%indklmn(1,kllmn)
+       klln   = pawtab(itypat)%indklmn(2,kllmn)
+       kllmin = pawtab(itypat)%indklmn(3,kllmn)
+       kllmax = pawtab(itypat)%indklmn(4,kllmn)
+
+       do ll = max(ijlmin,kllmin),min(ijlmax,kllmax)
+         do llmm = ll**2+1,(ll+1)**2
+           igij = gntselect(llmm,ijlm)
+           igkl = gntselect(llmm,kllm)
+           if ( (igij .EQ. 0) .OR. (igkl .EQ. 0) ) cycle
+
+           rgkl=realgnt(igkl)
+           qij =pawtab(itypat)%qijl(llmm,ijlmn)
   
-   do klmn = 1, pawtab(itypat)%lmn2_size
-     klm = pawtab(itypat)%indklmn(1,klmn)
-     kln = pawtab(itypat)%indklmn(2,klmn)
-     lmin = pawtab(itypat)%indklmn(3,klmn)
-     lmax = pawtab(itypat)%indklmn(4,klmn)
+           ff(2:meshsz) = pawtab(itypat)%tphitphj(2:meshsz,klln)
+           call poisson(ff,ll,pawrad(itypat),nlff)
+           
+           ff(1)=zero
+           ff(2:mesh_size)=-pawtab(itypat)%shapefunc(2:mesh_size,ll+1)*&
+             &nlff(2:mesh_size)*pawrad(itypat)%rad(2:mesh_size)
+           call simp_gen(vh1,ff,pawrad(itypat))
 
-     dij=zero
-     do ll = lmin,lmax,2
-       do ilm = ll**2+1,(ll+1)**2
-         qijlm = pawtab(itypat)%qijl(ilm,klmn)
-         if (abs(qijlm) .LT. tol8) cycle
-
-         call nlint(pawsphden(iatom)%trho1(:,ilm,1),ll,mesh_size,nlff,pawrad(itypat))
-         do imesh=2, mesh_size
-           rr=pawrad(itypat)%rad(imesh)
-           ff(imesh)=rr*rr*pawtab(itypat)%shapefunc(imesh,ll+1)*nlff(imesh)
-         end do
-         call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
-         call simp_gen(dijterm,ff,pawrad(itypat))
-         dij=dij-four_pi*qijlm*dijterm/(two*ll+one)
-
-       end do ! end loop over ilm
-     end do ! end loop over ll
-
-     dterm%rd2d(iatom,klmn) = CMPLX(dij,zero)
-
-   end do ! end loop over klmn
+           dterm%eijkl(iatom,ijlmn,kllmn)=dterm%eijkl(iatom,ijlmn,kllmn)+&
+             & four_pi*vh1*qij*rgkl
+         end do !llmm
+       end do !ll
+     end do !kllmn
+   end do !ijlmn
 
    ABI_FREE(ff)
    ABI_FREE(nlff)
@@ -4276,7 +4297,7 @@ subroutine make_d(atindx,atindx1,cprj,dimlmn,dterm,dtset,gprimd,&
   integer :: iat,iatom,iband,isel,itypat,ijlmn,kllmn
   integer :: my_lmax,ngnt,nzlmopt
   integer :: opt_compch,opt_dens,opt_l,opt_print
-  real(dp) :: compch_sph,eijkl,my_eijkl
+  real(dp) :: compch_sph,eijkl,hdij,my_eijkl,rrhokl
   complex(dpc) :: cdij,cpi,cpj,rhoij,rhokl
   type(paw_dmft_type) :: paw_dmft
  
@@ -4352,15 +4373,15 @@ subroutine make_d(atindx,atindx1,cprj,dimlmn,dterm,dtset,gprimd,&
    & pawrad,pawsphden,pawtab,realgnt)
  
  ! term due to v_H[\tilde{n}^1]Q^{LM}_{ij}, corresponds to term 2d of roadmap paper
- !call dterm_rd2d(atindx,dterm,dtset,gntselect,gprimd,psps%lmnmax,my_lmax,&
- !  & pawrad,pawsphden,pawtab,realgnt)
+ call dterm_rd2d(atindx,dterm,dtset,gntselect,gprimd,psps%lmnmax,my_lmax,&
+   & pawrad,pawsphden,pawtab,realgnt)
  
  ! terms due to v_H[\tilde{n}_Zc]Q^{LJM}_{ij}, corresponds to term 2e of roadmap paper
  call dterm_rd2e(atindx,dterm,dtset,gprimd,pawrad,pawtab)
 
  ! term due to v_H[\hat{n}]Q^{LM}_{ij}, corresponds to term 2f of roadmap paper
- !call dterm_rd2f(atindx,dterm,dtset,gntselect,gprimd,psps%lmnmax,my_lmax,&
- !  & pawrad,pawsphden,pawtab,realgnt)
+ call dterm_rd2f(atindx,dterm,dtset,gntselect,gprimd,psps%lmnmax,my_lmax,&
+   & pawrad,pawsphden,pawtab,realgnt)
 
  ! term dvxc due to v_xc[n1+nc] corresponds to term 3a in roadmap paper
  call dterm_rd3a(atindx,dterm,dtset,gntselect,gprimd,psps%lmnmax,my_lmax,&
@@ -4378,14 +4399,19 @@ subroutine make_d(atindx,atindx1,cprj,dimlmn,dterm,dtset,gprimd,&
      !write(std_out,'(a,2es16.8)')'JWZ debug dij0 my_dij0 ',&
      !  & pawtab(itypat)%dij0(klmn),real(dterm%dij0(iatom,klmn))
 
+     hdij = zero
      do kllmn=1,pawtab(itypat)%lmn2_size
        eijkl = pawtab(itypat)%eijkl(ijlmn,kllmn)
        my_eijkl = dterm%eijkl(iatom,ijlmn,kllmn)
-       if ( (abs(eijkl) .GT. tol12) .OR. (abs(my_eijkl) .GT. tol12) ) then
-         write(std_out,'(a,2i4,2es16.8)')'JWZ debug ijlmn kllmn eijkl ',ijlmn,kllmn,&
-           & eijkl,my_eijkl
-       end if
+       rrhokl=pawrhoij(iatom)%rhoij_(2*kllmn-1,1)
+       hdij=hdij+rrhokl*my_eijkl*pawtab(itypat)%dltij(kllmn)
+       !if ( (abs(eijkl) .GT. tol12) .AND. (abs(my_eijkl) .GT. tol12) ) then
+       !  write(std_out,'(a,2i4,2es16.8)')'JWZ debug ijlmn kllmn eijkl ',ijlmn,kllmn,&
+       !    & eijkl,my_eijkl
+       !end if
      end do !kllmn
+     write(std_out,'(a,i4,2es16.8)')'JWZ debug ijlmn my_hartree_ij dij ',ijlmn,hdij,&
+       & paw_ij(iatom)%dijhartree(ijlmn)
    end do !ijlmn
  end do !iat
 
