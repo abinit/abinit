@@ -42,7 +42,7 @@ module m_cutoff_cylinder
  integer,save :: npts_,ntrial_,qopt_
  real(dp),save :: ha_,hb_,r0_
  real(dp),save :: qpg_perp_,qpg_para_,qpgx_,qpgy_
- real(dp),save :: zz_,xx_
+ real(dp),save :: zz_,xx_, rho_
  real(dp),save :: hcyl_,rcut_,accuracy_
 
 CONTAINS
@@ -451,6 +451,211 @@ real(dp) function K0cos_dy(xx)
  K0cos_dy=quad
 
 end function K0cos_dy
+!!***
+
+
+
+
+!----------------------------------------------------------------------
+
+real(dp) function K0cos_dy_r0(xx)
+
+ real(dp),intent(in) :: xx
+
+!Local variables-------------------------------
+!scalars
+ integer :: ierr
+ real(dp) :: quad,yx
+!************************************************************************
+
+ ! $ K0cos_dy_r0(x)= \int_{-b/2}^{-y(x)} K0(|qpg_z|\rho) cos(x.qpg_x+y.qpg_y)dy
+ !                  +\int_{y(x)}^{b/2} K0(|qpg_z|\rho)cos(x.qpg_x+y.qpg_y)dy$
+ ! where y(x)=SQRT(r0^2-x^2) and x<=r0
+ !
+ xx_=xx; yx=SQRT(r0_**2-xx**2)
+ call quadrature(K0cos,-hb_,-yx,qopt_,quad,ierr,ntrial_,accuracy_,npts_)
+ ABI_CHECK(ierr == 0, "Accuracy not reached in quadrature")
+ K0cos_dy_r0=quad
+
+ call quadrature(K0cos,+yx,+hb_,qopt_,quad,ierr,ntrial_,accuracy_,npts_)
+ ABI_CHECK(ierr == 0, "Accuracy not reached in quadrature")
+
+ K0cos_dy_r0=quad+K0cos_dy_r0
+
+end function K0cos_dy_r0
+!!***
+
+!----------------------------------------------------------------------
+
+real(dp) function K0cos_dth_r0(rho)
+
+ real(dp),intent(in) :: rho
+
+!Local variables-------------------------------
+!scalars
+ integer :: ierr
+ real(dp) :: quad,arg,k0,tmp
+
+!************************************************************************
+
+ ! $ K0cos_dth_r0(\rho)=
+ ! \int_{0}^{2pi)} K0(|qpg_z|\rho)cos(\rho.cos(\theta).qpg_x+\rho.sin(\theta).qpg_y) d\theta $
+ !
+ ! where y(x)=SQRT(r0^2-x^2) and x<=r0
+ !
+ rho_=rho
+ call quadrature(Fcos_th,zero,two_pi,qopt_,quad,ierr,ntrial_,accuracy_,npts_)
+ ABI_CHECK(ierr == 0, "Accuracy not reached in quadrature")
+
+ arg=qpg_para_*rho_
+ tmp=zero
+ if (arg>tol6) then
+   call CALCK0(arg,k0,1)
+   tmp=k0*rho_
+ end if
+ K0cos_dth_r0=quad*tmp
+
+end function K0cos_dth_r0
+!!***
+
+!----------------------------------------------------------------------
+
+pure real(dp) function Fcos_th(theta)
+
+ real(dp),intent(in) :: theta
+
+!************************************************************************
+
+ ! $ Fcos_th(\theta)=rho*K0(\rho*|qpg_z|)*COS(\rho.COS(\theta).qpg_x+\rho.SIN/(\theta)*qpg_y) $
+
+ !arg=qpg_para_*rho_
+ !call CALCK0(arg,k0,1)
+ !tmp=k0*rho_
+ Fcos_th=COS(rho_*COS(theta)*qpgx_+rho_*SIN(theta)*qpgy_)
+
+end function Fcos_th
+!!***
+
+!----------------------------------------------------------------------
+
+!the following functions should be used to deal with the singularity in the Cylindrical cutoff
+!TODO Not yet used and indeed are still private
+
+function K0fit(mq,nn) result(vals)
+
+ integer,intent(in) :: nn
+ real(dp),intent(in) :: mq
+ real(dp) :: vals(nn)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ii
+ real(dp) :: mqh
+!arrays
+ real(dp),parameter :: cc(7)=(/-0.57721566,0.42278420,0.23069756, &
+                                0.03488590,0.00262698,0.00010750,0.00000740/)
+ ! *************************************************************************
+
+ if (nn>8.or.nn<1) then
+   ABI_ERROR("nn>8.or.nn<1 not implemented")
+ end if
+
+ ! === Eq 9.8.5 in Abramovitz ===
+ vals(1)=-LOG(mq*half)*I0(mq)
+ mqh=mq*half
+ do ii=2,nn
+   vals(ii)=cc(ii-1)*mqh**(2*(ii-2))
+ end do
+
+end function K0fit
+
+real(dp) function K0fit_int(mq,par,nn) result(integ)
+
+ integer,intent(in) :: nn
+ real(dp),intent(in) :: mq
+ real(dp),intent(in) :: par(nn)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ii,aa
+ real(dp) :: mqh
+!arrays
+ real(dp),parameter :: cc(7)=(/-0.57721566,0.42278420,0.23069756,&
+&                               0.03488590,0.00262698,0.00010750,0.00000740/)
+ ! *************************************************************************
+
+ if (nn>8.or.nn<1) then
+   ABI_ERROR("nn>8.or.nn<1 not implemented")
+ end if
+
+ mqh=mq*half
+ integ=-par(1)*int_I0ln(mqh)
+ ! primitive of polynomial \sum_0^{N/2} cc_{2i} (x/2)^{2*i}
+ do ii=2,nn
+  aa=(2*(ii-1)+1)
+  integ=integ+par(ii)*two*cc(ii-1)*(mqh**aa)/aa
+ end do
+
+end function K0fit_int
+
+real(dp) function I0(xx)
+
+ real(dp),intent(in) :: xx
+
+!Local variables-------------------------------
+ real(dp) :: tt
+
+! *************************************************************************
+
+ ! Eq 9.8.1 of Abramovitz, entering the expansion of K0 -->0
+ ! Expansion holds for |x|<3.75, Error<1.6*10D-07
+ tt=xx/3.75
+ I0=one+3.5156229*tt**2+3.0899424*tt**4 +1.2067492*tt**6 &
+       +0.2659732*tt**8+0.0360768*tt**10+0.0045813*tt**12
+end function I0
+
+! Primitive of x^m Ln(x) for m/=-1
+real(dp) function int_xmln(xx,mm)  result(res)
+
+ integer,intent(in) :: mm
+ real(dp),intent(in) :: xx
+
+! *********************************************************************
+
+ if (mm==-1) then
+   ABI_BUG('invalid value for mm')
+ end if
+
+ if (xx<=zero) then
+   ABI_BUG(' invalid value for xx')
+ end if
+
+ res= (xx**(mm+1))/(mm+1) * (LOG(xx) - one/(mm+1))
+
+end function int_xmln
+
+! Primitive function of ln(x/2)*I0(x) = sum_0^{N/2} 2^{2s+1} c_{2s} T(x/2,2s)
+! where T(x,s)=\int x^s ln(x)dx
+real(dp) function int_I0ln(xx) result(res)
+
+!Arguments ------------------------------------
+ real(dp),intent(in) :: xx
+
+!Local variables-------------------------------
+ real(dp) :: yy
+! *********************************************************************
+
+ yy=xx*half
+ res =  (       one*2    *int_xmln(yy,0)  &
+&        +3.5156229*2**3 *int_xmln(yy,2)  &
+&        +3.0899424*2**5 *int_xmln(yy,4)  &
+&        +1.2067492*2**7 *int_xmln(yy,6)  &
+&        +0.2659732*2**9 *int_xmln(yy,8)  &
+&        +0.0360768*2**11*int_xmln(yy,10) &
+&        +0.0045813*2**13*int_xmln(yy,12) &
+&       )
+
+end function int_I0ln
 !!***
 
 end module m_cutoff_cylinder
