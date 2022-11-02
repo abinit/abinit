@@ -414,6 +414,26 @@ subroutine gpu_xgemm(cplx,transa,transb,m,n,k,alpha,a_gpu,lda,b_gpu,ldb,beta,c_g
  end if
 
 end subroutine gpu_xgemm
+
+subroutine gpu_xgemm_omp(cplx,transa,transb,m,n,k,alpha,a_gpu,lda,b_gpu,ldb,beta,c_gpu,ldc)
+
+!Arguments ------------------------------------
+ integer,intent(in) :: cplx,lda,ldb,ldc,m,n,k
+ complex(dpc),intent(in) :: alpha,beta
+ character(len=1),intent(in) :: transa,transb
+ type(c_ptr),intent(in) :: a_gpu,b_gpu
+ type(c_ptr),intent(inout) :: c_gpu
+!Local variables ------------------------------
+ type(c_ptr) :: cptr
+
+! *********************************************************************
+
+ if (.false.) then
+   cptr=a_gpu;cptr=b_gpu;cptr=c_gpu
+   write(std_out,*) transa,transb,cplx,lda,ldb,ldc,m,n,k,alpha,beta
+ end if
+
+end subroutine gpu_xgemm_omp
 !!***
 
 !!****f* m_abi_gpu_linalg/gpu_xtrsm
@@ -517,6 +537,10 @@ subroutine gpu_xaxpy(cplx, size, alpha, x_gpu, incrx, y_gpu, incry)
   type(c_ptr),  intent(inout) :: y_gpu
   integer,      intent(in)    :: incry
 
+  ABI_UNUSED((/cplx,size,incrx,incry/))
+  ABI_UNUSED(alpha)
+  ABI_UNUSED_A(x_gpu)
+  ABI_UNUSED_A(y_gpu)
 end subroutine gpu_xaxpy
 !!***
 
@@ -547,6 +571,9 @@ subroutine gpu_xcopy(cplx, size, x_gpu, incrx, y_gpu, incry)
   type(c_ptr),  intent(inout) :: y_gpu
   integer,      intent(in)    :: incry
 
+  ABI_UNUSED((/cplx,size,incrx,incry/))
+  ABI_UNUSED_A(x_gpu)
+  ABI_UNUSED_A(y_gpu)
 end subroutine gpu_xcopy
 !!***
 
@@ -575,6 +602,9 @@ subroutine gpu_xscal(cplx, size, alpha, x_gpu, incrx)
   type(c_ptr),  intent(in)    :: x_gpu
   integer,      intent(in)    :: incrx
 
+  ABI_UNUSED((/cplx,size,incrx/))
+  ABI_UNUSED(alpha)
+  ABI_UNUSED_A(x_gpu)
 end subroutine gpu_xscal
 !!***
 
