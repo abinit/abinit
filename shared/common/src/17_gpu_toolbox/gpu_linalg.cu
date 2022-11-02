@@ -185,18 +185,47 @@ extern "C" void gpu_xgemm_(int* cplx, char *transA, char *transB, int *N, int *M
   cublasOperation_t opB = select_cublas_op(transB);
 
   (*cplx==1)?
-    cublasDgemm(cublas_handle, opA, opB, *N, *M, *K, &((*alpha).x),
+    CUDA_API_CHECK( cublasDgemm(cublas_handle, opA, opB, *N, *M, *K, &((*alpha).x),
                 (double *)(*A_ptr), *lda,
                 (double *)(*B_ptr), *ldb,
                 &((*beta).x),
-                (double *)(*C_ptr), *ldc) :
-    cublasZgemm(cublas_handle, opA, opB, *N, *M, *K, alpha,
+                (double *)(*C_ptr), *ldc)) :
+    CUDA_API_CHECK( cublasZgemm(cublas_handle, opA, opB, *N, *M, *K, alpha,
                 (cuDoubleComplex *)(*A_ptr), *lda,
                 (cuDoubleComplex *)(*B_ptr), *ldb,
                 beta,
-                (cuDoubleComplex *)(*C_ptr), *ldc);
+                (cuDoubleComplex *)(*C_ptr), *ldc));
 
 } // gpu_xgemm
+
+extern "C" void gpu_xgemm_omp_(int* cplx, char *transA, char *transB, int *N, int *M, int *K,
+                           cuDoubleComplex *alpha,
+                           void *A_ptr, int *lda, void* B_ptr, int *ldb,
+                           cuDoubleComplex *beta, void* C_ptr, int *ldc)
+{
+
+  cublasOperation_t opA = select_cublas_op(transA);
+  cublasOperation_t opB = select_cublas_op(transB);
+/*FIXME Delete this
+  int foo = 1;
+  CUDA_API_CHECK(cudaMemset((void*)(A_ptr), foo,*ldb));
+  CUDA_API_CHECK(cudaMemset((A_ptr), foo,*ldb));
+  CUDA_API_CHECK(cudaMemset((void*)(B_ptr), foo,*ldb));
+  CUDA_API_CHECK(cudaMemset((void*)(C_ptr), foo,*ldb));
+  abi_cabort();
+*/
+  (*cplx==1)?
+    CUDA_API_CHECK( cublasDgemm(cublas_handle, opA, opB, *N, *M, *K, &((*alpha).x),
+                (double *)(A_ptr), *lda,
+                (double *)(B_ptr), *ldb,
+                &((*beta).x),
+                (double *)(C_ptr), *ldc)) :
+    CUDA_API_CHECK( cublasZgemm(cublas_handle, opA, opB, *N, *M, *K, alpha,
+                (cuDoubleComplex *)(A_ptr), *lda,
+                (cuDoubleComplex *)(B_ptr), *ldb,
+                beta,
+                (cuDoubleComplex *)(C_ptr), *ldc));
+}
 
 /*=========================================================================*/
 // NAME
@@ -267,6 +296,28 @@ extern "C" void gpu_xtrsm_(int* cplx, char *side, char *uplo, char *transA, char
                 (cuDoubleComplex *)(*B_ptr), *ldB);
 } // gpu_xtrsm_
 
+extern "C" void gpu_xtrsm_omp_(int* cplx, char *side, char *uplo, char *transA, char *diag,
+                           int *N, int *M, cuDoubleComplex *alpha,
+                           void *A_ptr, int *ldA,
+                           void* B_ptr, int *ldB)
+{
+
+  cublasSideMode_t sideMode = select_cublas_side(side);
+  cublasFillMode_t fillMode = select_cublas_fill_mode(uplo);
+  cublasDiagType_t diagType = select_cublas_diag_type(diag);
+  cublasOperation_t opA     = select_cublas_op(transA);
+
+  (*cplx==1) ?
+    cublasDtrsm(cublas_handle, sideMode, fillMode, opA, diagType,
+                *N, *M, &((*alpha).x),
+                (double *)(A_ptr), *ldA,
+                (double *)(B_ptr), *ldB):
+    cublasZtrsm(cublas_handle, sideMode, fillMode, opA, diagType,
+                *N, *M, alpha,
+                (cuDoubleComplex *)(A_ptr), *ldA,
+                (cuDoubleComplex *)(B_ptr), *ldB);
+} // gpu_xtrsm_
+
 /*=========================================================================*/
 // NAME
 //  gpu_xaxpy
@@ -303,6 +354,22 @@ extern "C" void gpu_xaxpy_(int* cplx, int *N,
                               (cuDoubleComplex *)(*Y_ptr), *incry) );
 } // gpu_xaxpy_
 
+extern "C" void gpu_xaxpy_omp_(int* cplx, int *N,
+                           cuDoubleComplex *alpha,
+                           void *X_ptr, int *incrx, void* Y_ptr, int *incry)
+{
+
+  (*cplx==1) ?
+                  CUDA_API_CHECK( cublasDaxpy(cublas_handle,*N,
+                              &((*alpha).x),
+                              (double *)(X_ptr), *incrx,
+                              (double *)(Y_ptr), *incry)) :
+                  CUDA_API_CHECK( cublasZaxpy(cublas_handle, *N,
+                              alpha,
+                              (cuDoubleComplex *)(X_ptr), *incrx,
+                              (cuDoubleComplex *)(Y_ptr), *incry) );
+} // gpu_xaxpy_
+
 /*=========================================================================*/
 // NAME
 //  gpu_xcopy
@@ -333,6 +400,20 @@ extern "C" void gpu_xcopy_(int* cplx, int *N,
                   cublasZcopy(cublas_handle, *N,
                               (const cuDoubleComplex *)(*X_ptr), *incrx,
                               (      cuDoubleComplex *)(*Y_ptr), *incry) );
+} // gpu_xcopy_
+
+extern "C" void gpu_xcopy_omp_(int* cplx, int *N,
+                           void *X_ptr, int *incrx,
+                           void *Y_ptr, int *incry)
+{
+
+  CUDA_API_CHECK( (*cplx==1) ?
+                  cublasDcopy(cublas_handle,*N,
+                              (const double *)(X_ptr), *incrx,
+                              (      double *)(Y_ptr), *incry) :
+                  cublasZcopy(cublas_handle, *N,
+                              (const cuDoubleComplex *)(X_ptr), *incrx,
+                              (      cuDoubleComplex *)(Y_ptr), *incry) );
 } // gpu_xcopy_
 
 /*=========================================================================*/
@@ -367,6 +448,107 @@ extern "C" void gpu_xscal_(int* cplx, int *N,
                               alpha,
                               (cuDoubleComplex *)(*X_ptr), *incrx) );
 } // gpu_xscal_
+
+extern "C" void gpu_xscal_omp_(int* cplx, int *N,
+                           cuDoubleComplex *alpha,
+                           void *X_ptr, int *incrx)
+{
+
+  CUDA_API_CHECK( (*cplx==1) ?
+                  cublasDscal(cublas_handle,*N,
+                              &((*alpha).x),
+                              (double *)(X_ptr), *incrx) :
+                  cublasZscal(cublas_handle, *N,
+                              alpha,
+                              (cuDoubleComplex *)(X_ptr), *incrx) );
+} // gpu_xscal_
+
+/*=========================================================================*/
+// NAME
+//  gpu_xpotrf
+//
+// FUNCTION
+//  Compute a LAPACK SYGVD operation on GPU
+//  computes the Cholesky factorization of a Hermitian positive-definite matrix
+//
+// See LAPACK doc in reference implementation:
+// https://github.com/Reference-LAPACK/lapack/blob/master/SRC/dpotrf.f
+//
+// INPUTS
+//  uplo  = character, 'u' or 'l'
+//  n     = matrix size
+//  A_ptr = pointer to gpu memory location of matrix A
+//  lda   = leading dimension of matrix A
+//  work_ptr =
+//  lwork =
+//  devInfo  =
+//
+/*=========================================================================*/
+
+extern "C" void gpu_xpotrf_omp_(const int* cplx,
+                            const char* uplo,
+                            const int* n,
+                            void *A_ptr,
+                            const int *lda,
+                            void* work_ptr,
+                            int* lwork,
+                            int* info)
+{
+
+  const cublasFillMode_t  fillMode = select_cublas_fill_mode(uplo);
+
+  int* devInfo;
+  CUDA_API_CHECK( cudaMalloc( (void**) &devInfo, 1*sizeof(int)) );
+
+  if (*cplx == 1)
+    {
+      CUDA_API_CHECK( cusolverDnDpotrf(cusolverDn_handle,
+                                       fillMode, *n,
+                                       (double*)(A_ptr), *lda,
+                                       (double*)(work_ptr),
+                                       *lwork, devInfo) );
+    }
+  else
+    {
+      CUDA_API_CHECK( cusolverDnZpotrf(cusolverDn_handle,
+                                       fillMode, *n,
+                                       (cuDoubleComplex*)(A_ptr), *lda,
+                                       (cuDoubleComplex*)(work_ptr),
+                                       *lwork, devInfo) );
+    }
+
+  CUDA_API_CHECK( cudaMemcpy(info, devInfo, 1*sizeof(int), cudaMemcpyDefault) );
+
+  CUDA_API_CHECK( cudaFree(devInfo) );
+
+} // gpu_xpotrf_
+
+extern "C" void gpu_xpotrf_buffersize_omp_(const int* cplx,
+                                       const char* uplo,
+                                       const int* n,
+                                       void *A_ptr,
+                                       const int *lda,
+                                       int* lwork)
+{
+
+  const cublasFillMode_t  fillMode = select_cublas_fill_mode(uplo);
+
+  if (*cplx == 1)
+    {
+      CUDA_API_CHECK( cusolverDnDpotrf_bufferSize(cusolverDn_handle,
+                                                  fillMode, *n,
+                                                  (double*)(A_ptr), *lda,
+                                                  lwork) );
+    }
+  else
+    {
+      CUDA_API_CHECK( cusolverDnZpotrf_bufferSize(cusolverDn_handle,
+                                                  fillMode, *n,
+                                                  (cuDoubleComplex*)(A_ptr), *lda,
+                                                  lwork) );
+    }
+
+} // gpu_xpotrf_bufferSize_
 
 /*=========================================================================*/
 // NAME
@@ -445,6 +627,55 @@ extern "C" void gpu_xsygvd_(const int* cplx,
 
 } // gpu_xsygvd_
 
+extern "C" void gpu_xsygvd_omp_(const int* cplx,
+                            const int* itype,
+                            const char* jobz,
+                            const char* uplo,
+                            const int* A_nrows,
+                            void *A_ptr,
+                            const int *lda,
+                            void* B_ptr,
+                            const int* ldb,
+                            void* W_ptr,
+                            void* work_ptr,
+                            int* lwork,
+                            int* info)
+{
+
+  const cusolverEigType_t itype_cu = select_eigen_type(*itype);
+  const cusolverEigMode_t jobz_cu  = select_eigen_mode(jobz);
+  const cublasFillMode_t  fillMode = select_cublas_fill_mode(uplo);
+
+  int* devInfo;
+  CUDA_API_CHECK( cudaMalloc( (void**) &devInfo, 1*sizeof(int)) );
+
+  if (*cplx == 1)
+    {
+      CUDA_API_CHECK( cusolverDnDsygvd(cusolverDn_handle, itype_cu,
+                                       jobz_cu, fillMode, *A_nrows,
+                                       (double*)(A_ptr), *lda,
+                                       (double*)(B_ptr), *ldb,
+                                       (double*)(W_ptr),
+                                       (double*)(work_ptr),
+                                       *lwork, devInfo) );
+    }
+  else
+    {
+      CUDA_API_CHECK( cusolverDnZhegvd(cusolverDn_handle, itype_cu,
+                                       jobz_cu, fillMode, *A_nrows,
+                                       (cuDoubleComplex*)(A_ptr), *lda,
+                                       (cuDoubleComplex*)(B_ptr), *ldb,
+                                       (double*)(W_ptr),
+                                       (cuDoubleComplex*)(work_ptr),
+                                       *lwork, devInfo) );
+    }
+
+  CUDA_API_CHECK( cudaMemcpy(info, devInfo, 1*sizeof(int), cudaMemcpyDefault) );
+
+  CUDA_API_CHECK( cudaFree(devInfo) );
+
+} // gpu_xsygvd_
+
 extern "C" void gpu_xsygvd_buffersize_(const int* cplx,
                                        const int* itype,
                                        const char* jobz,
@@ -480,3 +711,140 @@ extern "C" void gpu_xsygvd_buffersize_(const int* cplx,
     }
 
 } // gpu_xsygvd_bufferSize_
+
+extern "C" void gpu_xsygvd_buffersize_omp_(const int* cplx,
+                                       const int* itype,
+                                       const char* jobz,
+                                       const char* uplo,
+                                       const int* A_nrows,
+                                       void *A_ptr,
+                                       const int *lda,
+                                       void* B_ptr,
+                                       const int* ldb,
+                                       void* W_ptr,
+                                       int* lwork)
+{
+
+  const cusolverEigType_t itype_cu = select_eigen_type(*itype);
+  const cusolverEigMode_t jobz_cu  = select_eigen_mode(jobz);
+  const cublasFillMode_t  fillMode = select_cublas_fill_mode(uplo);
+
+  if (*cplx == 1)
+    {
+      CUDA_API_CHECK( cusolverDnDsygvd_bufferSize(cusolverDn_handle, itype_cu,
+                                                  jobz_cu, fillMode, *A_nrows,
+                                                  (const double*)(A_ptr), *lda,
+                                                  (const double*)(B_ptr), *ldb,
+                                                  (const double*)(W_ptr), lwork) );
+    }
+  else
+    {
+      CUDA_API_CHECK( cusolverDnZhegvd_bufferSize(cusolverDn_handle, itype_cu,
+                                                  jobz_cu, fillMode, *A_nrows,
+                                                  (const cuDoubleComplex*)(A_ptr), *lda,
+                                                  (const cuDoubleComplex*)(B_ptr), *ldb,
+                                                  (const double*)(W_ptr), lwork) );
+    }
+
+} // gpu_xsygvd_bufferSize_
+
+/*=========================================================================*/
+// NAME
+//  gpu_xsyevd
+//
+// FUNCTION
+//  Compute a LAPACK SYGVD operation on GPU
+//  compute eigen values/vectors of a real generalized
+//  symmetric-definite eigenproblem
+//
+// See LAPACK doc in reference implementation:
+// https://github.com/Reference-LAPACK/lapack/blob/master/SRC/dsyevd.f
+//
+// INPUTS
+//  itype = integer, type of problem
+//  jobz  = character, 'n'(eigenvalues only) or 'v' (eigenvalues + eigenvectors)
+//  uplo  = character, 'u' or 'l'
+//  A_nrows = matrix size
+//  A_ptr = pointer to gpu memory location of matrix A
+//  lda   = leading dimension of matrix A
+//  B_ptr = pointer to gpu memory location of matrix B
+//  ldb   = leading dimension of matrix B
+//  W_ptr = pointer to gpu memory location of matrix W (output eigen values)
+//  work_ptr =
+//  lwork =
+//  devInfo  =
+//
+/*=========================================================================*/
+
+extern "C" void gpu_xsyevd_omp_(const int* cplx,
+                            const char* jobz,
+                            const char* uplo,
+                            const int* A_nrows,
+                            void *A_ptr,
+                            const int *lda,
+                            void* W_ptr,
+                            void* work_ptr,
+                            int* lwork,
+                            int* info)
+{
+
+  const cusolverEigMode_t jobz_cu  = select_eigen_mode(jobz);
+  const cublasFillMode_t  fillMode = select_cublas_fill_mode(uplo);
+
+  int* devInfo;
+  CUDA_API_CHECK( cudaMalloc( (void**) &devInfo, 1*sizeof(int)) );
+
+  if (*cplx == 1)
+    {
+      CUDA_API_CHECK( cusolverDnDsyevd(cusolverDn_handle,
+                                       jobz_cu, fillMode, *A_nrows,
+                                       (double*)(A_ptr), *lda,
+                                       (double*)(W_ptr),
+                                       (double*)(work_ptr),
+                                       *lwork, devInfo) );
+    }
+  else
+    {
+      CUDA_API_CHECK( cusolverDnZheevd(cusolverDn_handle,
+                                       jobz_cu, fillMode, *A_nrows,
+                                       (cuDoubleComplex*)(A_ptr), *lda,
+                                       (double*)(W_ptr),
+                                       (cuDoubleComplex*)(work_ptr),
+                                       *lwork, devInfo) );
+    }
+
+  CUDA_API_CHECK( cudaMemcpy(info, devInfo, 1*sizeof(int), cudaMemcpyDefault) );
+
+  CUDA_API_CHECK( cudaFree(devInfo) );
+
+} // gpu_xsyevd_
+
+extern "C" void gpu_xsyevd_buffersize_omp_(const int* cplx,
+                                       const char* jobz,
+                                       const char* uplo,
+                                       const int* A_nrows,
+                                       void *A_ptr,
+                                       const int *lda,
+                                       void* W_ptr,
+                                       int* lwork)
+{
+
+  const cusolverEigMode_t jobz_cu  = select_eigen_mode(jobz);
+  const cublasFillMode_t  fillMode = select_cublas_fill_mode(uplo);
+
+  if (*cplx == 1)
+    {
+      CUDA_API_CHECK( cusolverDnDsyevd_bufferSize(cusolverDn_handle,
+                                                  jobz_cu, fillMode, *A_nrows,
+                                                  (const double*)(A_ptr), *lda,
+                                                  (const double*)(W_ptr), lwork) );
+    }
+  else
+    {
+      CUDA_API_CHECK( cusolverDnZheevd_bufferSize(cusolverDn_handle,
+                                                  jobz_cu, fillMode, *A_nrows,
+                                                  (const cuDoubleComplex*)(A_ptr), *lda,
+                                                  (const double*)(W_ptr), lwork) );
+    }
+
+} // gpu_xsyevd_bufferSize_

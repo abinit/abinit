@@ -10,6 +10,7 @@
 
 #include <stdio.h>
 #include <abi_gpu_header_common.h>
+#include <cuda_runtime_api.h>
 #include "cuda_api_error_check.h"
 
 static __host__ int version_2_cores(int major, int minor);
@@ -368,6 +369,14 @@ extern "C" void copy_on_gpu_(void **cpu_ptr, void **gpu_ptr, const size_t* size)
   }
 }
 
+extern "C" void copy_on_gpu_omp_(void *ptr, void *gpu_ptr,int* size){
+  if(cudaMemcpy(gpu_ptr,ptr,*size,cudaMemcpyHostToDevice)!=cudaSuccess){
+    fprintf(stderr, "ERROR: copy_on_gpu failed : %s\n",cudaGetErrorString(cudaGetLastError()));
+    fflush(stderr);
+    abi_cabort();
+  }
+}
+
 /*============================================================================*/
 /* Copy size byte from gpu pointer to cpu pointer.                            */
 /* INPUTS                                                                     */
@@ -381,6 +390,14 @@ extern "C" void copy_from_gpu_(void **cpu_ptr, void **gpu_ptr, const size_t* siz
 {
   if (cudaMemcpy(*cpu_ptr, *gpu_ptr, *size, cudaMemcpyDeviceToHost) != cudaSuccess)
   {
+    fprintf(stderr, "ERROR: copy_from_gpu failed : %s\n",cudaGetErrorString(cudaGetLastError()));
+    fflush(stderr);
+    abi_cabort();
+  }
+}
+
+extern "C" void copy_from_gpu_omp_(void *ptr,void *gpu_ptr,int* size){
+  if(cudaMemcpy(ptr,gpu_ptr,*size,cudaMemcpyDeviceToHost)!=cudaSuccess){
     fprintf(stderr, "ERROR: copy_from_gpu failed : %s\n",cudaGetErrorString(cudaGetLastError()));
     fflush(stderr);
     abi_cabort();
@@ -415,7 +432,7 @@ extern "C" void copy_gpu_to_gpu_(void **dest_gpu_ptr, void **src_gpu_ptr, const 
 /* INPUTS                                                                     */
 /*  gpu_ptr = C_PTR on gpu memory location                                    */
 /*  value = integer used to initialize each bytes (should be in range [0,255])*/
-/*  size = size in bytes of the region to be set
+/*  size = size in bytes of the region to be set                              */
 /*                                                                            */
 /* OUTPUT                                                                     */
 /*  None                                                                      */
@@ -428,6 +445,11 @@ extern "C" void gpu_memset_(void **gpu_ptr, const int32_t* value, const size_t* 
     fflush(stderr);
     abi_cabort();
   }
+}
+
+extern "C" void gpu_memset_omp_(void *gpu_ptr, const int32_t* value, const size_t* size_in_bytes)
+{
+  CUDA_API_CHECK(cudaMemset(gpu_ptr, *value, *size_in_bytes));
 }
 
 /*============================================================================*/
