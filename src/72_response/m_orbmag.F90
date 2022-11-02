@@ -56,8 +56,10 @@ module m_orbmag
   use m_pawcprj,          only : pawcprj_type, pawcprj_alloc, pawcprj_free,pawcprj_getdim, pawcprj_get, pawcprj_put
   use m_paw_dmft,         only : paw_dmft_type
   use m_pawfgr,           only : pawfgr_type
+  use m_pawfgrtab,        only : pawfgrtab_type
   use m_paw_ij,           only : paw_ij_type
   use m_paw_denpot,       only : pawdensities
+  use m_pawdij,           only : pawdijhat,pawdijnd
   use m_paw_occupancies,  only : pawmkrhoij
   use m_pawrad,           only : nderiv_gen,pawrad_type,pawrad_deducer0,simp_gen,poisson
   use m_pawrhoij,         only : pawrhoij_alloc, pawrhoij_free, pawrhoij_type
@@ -136,6 +138,10 @@ module m_orbmag
     integer :: has_drd2f=0
     integer :: has_rd3a=0
     integer :: has_drd3a=0
+    integer :: has_dijhat=0
+    integer :: has_ddijhat=0
+    integer :: has_adotp=0
+    integer :: has_dadotp=0
 
     ! sum of \Delta A_ij
     ! aij(natom,lmn2max)
@@ -246,8 +252,25 @@ module m_orbmag
     ! <phi|-i r_a vxc[n1+nc]|phi> - <tphi|-i r_a vxc[\tilde{n}^1+\tilde{nc}|tphi>
     ! drd3a(natom,lmnmax,lmnmax,3)
     complex(dpc),allocatable :: drd3a(:,:,:,:)
-
+   
     ! no rd3b term because usexcnhat 0 is enforced
+   
+    ! \hat{D}_ij
+    ! dijhat(natom,lmn2max)
+    complex(dpc),allocatable :: dijhat(:,:)
+    
+    ! -i r_a \hat{D}_ij
+    ! ddijhat(natom,lmnmax,lmnmax,3)
+    complex(dpc),allocatable :: ddijhat(:,:,:,:)
+
+    ! onsite A.p dipole term
+    ! adotp(natom,lmn2max)
+    complex(dpc),allocatable :: adotp(:,:)
+    
+    ! -i r_a A.p
+    ! dadotp(natom,lmnmax,lmnmax,3)
+    complex(dpc),allocatable :: dadotp(:,:,:,:)
+
 
   end type dterm_type
 
@@ -289,6 +312,7 @@ module m_orbmag
   private :: dterm_rd2e
   private :: dterm_rd2f
   private :: dterm_rd3a
+  private :: dterm_dijhat
   private :: make_ddir_ap
   private :: tt_me
   private :: tdt_me
@@ -345,7 +369,8 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
 subroutine orbmag_ptpaw(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
-    & nfftf,ngfftf,npwarr,occ,paw_ij,paw_an,pawang,pawfgr,pawrad,pawtab,psps,rprimd,vtrial,xred,ylm,ylmgr)
+    & nfftf,ngfftf,npwarr,occ,paw_ij,paw_an,pawang,pawfgr,pawfgrtab,pawrad,&
+    & pawtab,psps,rprimd,vtrial,vxc,xred,ylm,ylmgr)
 
  !Arguments ------------------------------------
  !scalars
@@ -364,11 +389,13 @@ subroutine orbmag_ptpaw(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_en
  real(dp), intent(in) :: occ(dtset%mband*dtset%nkpt*dtset%nsppol)
  real(dp),intent(in) :: rprimd(3,3),xred(3,dtset%natom)
  real(dp),intent(inout) :: vtrial(nfftf,dtset%nspden)
+ real(dp),intent(inout) :: vxc(nfftf,dtset%nspden)
  real(dp),intent(in) :: ylm(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),intent(in) :: ylmgr(dtset%mpw*dtset%mkmem,3,psps%mpsang*psps%mpsang*psps%useylm)
  type(pawcprj_type),intent(in) ::  cprj(dtset%natom,mcprj)
  type(paw_ij_type),intent(inout) :: paw_ij(dtset%natom*psps%usepaw)
  type(paw_an_type),intent(inout) :: paw_an(dtset%natom)
+ type(pawfgrtab_type),intent(inout) :: pawfgrtab(dtset%natom)
  type(pawrad_type),intent(in) :: pawrad(dtset%ntypat*psps%usepaw)
  type(pawtab_type),intent(inout) :: pawtab(psps%ntypat*psps%usepaw)
 
@@ -498,8 +525,9 @@ subroutine orbmag_ptpaw(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_en
  ! note: in make_d, terms will be filled as iatom using atindx
  call dterm_alloc(dterm,psps%lmnmax,lmn2max,dtset%natom)
 
- call make_d(atindx,atindx1,cprj,dimlmn,dterm,dtset,gprimd,mcprj,&
-   & mpi_enreg,occ,paw_an,pawang,paw_ij,pawrad,pawtab,psps)
+ call make_d(atindx,atindx1,cprj,dimlmn,dterm,dtset,gprimd,mcprj,nfftf,&
+   & mpi_enreg,occ,paw_an,pawang,pawfgrtab,paw_ij,pawrad,pawtab,psps,&
+   & ucvol,vtrial,vxc,xred)
 
  ABI_MALLOC(mp2,(lmn2max,dtset%natom,3))
  call d2lr_p2(dtset,gprimd,lmn2max,mp2,pawrad,pawtab)
@@ -1465,7 +1493,7 @@ subroutine tt_me(aij,atindx,bcp,dtset,kcp,lmn2max,pawtab,tt)
   !Local variables -------------------------
   !scalars
   integer :: iat,iatom,itypat,ilmn,jlmn,klmn
-  complex(dpc) :: cpi,cpj
+  complex(dpc) :: cpi,cpj,dij
 
   !arrays
 
@@ -1475,14 +1503,17 @@ subroutine tt_me(aij,atindx,bcp,dtset,kcp,lmn2max,pawtab,tt)
   do iat = 1, dtset%natom
     iatom = atindx(iat)
     itypat=dtset%typat(iat)
-    do ilmn = 1, pawtab(itypat)%lmn_size
-      do jlmn = 1, pawtab(itypat)%lmn_size
-        klmn = MATPACK(ilmn,jlmn)
-        cpi =  CMPLX(bcp(iatom)%cp(1,ilmn),bcp(iatom)%cp(2,ilmn))
-        cpj =  CMPLX(kcp(iatom)%cp(1,jlmn),kcp(iatom)%cp(2,jlmn))
-        tt = tt + CONJG(cpi)*cpj*aij(iatom,klmn)
-      end do !jlmn
-    end do !ilmn
+    do klmn = 1, pawtab(itypat)%lmn2_size
+      ilmn = pawtab(itypat)%indklmn(7,klmn)
+      jlmn = pawtab(itypat)%indklmn(8,klmn)
+      cpi =  CMPLX(bcp(iatom)%cp(1,ilmn),bcp(iatom)%cp(2,ilmn))
+      cpj =  CMPLX(kcp(iatom)%cp(1,jlmn),kcp(iatom)%cp(2,jlmn))
+      dij = aij(iatom,klmn)
+      tt = tt + CONJG(cpi)*dij*cpj
+      if (ilmn .NE. jlmn) then
+        tt = tt + cpi*CONJG(cpj)*CONJG(dij)
+      end if
+    end do !klmn
   end do !iat
 
 end subroutine tt_me
@@ -1537,7 +1568,7 @@ subroutine tdt_me(aij,atindx,bcp,daij,dtset,idir,kcp,lmnmax,lmn2max,pawtab,tdt)
   !Local variables -------------------------
   !scalars
   integer :: iat,iatom,itypat,ilmn,jlmn,klmn
-  complex(dpc) :: cpi,cpj,dcpj
+  complex(dpc) :: cpi,cpj,dcpj,dij,ddij
 
   !arrays
 
@@ -1550,11 +1581,13 @@ subroutine tdt_me(aij,atindx,bcp,daij,dtset,idir,kcp,lmnmax,lmn2max,pawtab,tdt)
     do ilmn = 1, pawtab(itypat)%lmn_size
       do jlmn = 1, pawtab(itypat)%lmn_size
         klmn = MATPACK(ilmn,jlmn)
+        dij = aij(iatom,klmn)
+        if ( ilmn .LT. jlmn) dij = CONJG(dij)
+        ddij = daij(iatom,ilmn,jlmn,idir)
         cpi =  CMPLX(bcp(iatom)%cp(1,ilmn),bcp(iatom)%cp(2,ilmn))
         cpj =  CMPLX(kcp(iatom)%cp(1,jlmn),kcp(iatom)%cp(2,jlmn))
         dcpj = CMPLX(kcp(iatom)%dcp(1,idir,jlmn),kcp(iatom)%dcp(2,idir,jlmn))
-        tdt = tdt + CONJG(cpi)*dcpj*aij(iatom,klmn) + &
-          & CONJG(cpi)*cpj*daij(iatom,ilmn,jlmn,idir)
+        tdt = tdt + CONJG(cpi)*dcpj*dij+CONJG(cpi)*cpj*ddij
       end do !jlmn
     end do !ilmn
   end do !iat
@@ -1616,31 +1649,26 @@ subroutine dterm_qij(atindx,dterm,dtset,gprimd,pawtab)
  dterm%qij = czero; dterm%dqij = czero
  ! dij prefactor
  ! the pawtab%qijl moments do not have the sqrt(4\pi/3) factor we need here for
- ! normalization 
- do itypat = 1, dtset%ntypat
-   do ilmn = 1, pawtab(itypat)%lmn_size
-     do jlmn = 1, pawtab(itypat)%lmn_size
-       klmn = MATPACK(ilmn,jlmn)
-     
-       ! qij is not really a d term but it's convenient to have it 
-       ! in the same format as the d terms 
-       cqij=CMPLX(pawtab(itypat)%sij(klmn),zero)
+ ! normalization
 
-       do adir = 1, 3
-         ddir_cart(adir) = cdij*pawtab(itypat)%qijl(pack1a(adir),klmn)
-       end do !adir
-       ! now have ddir in cart coords, convert to crystal coords where ddk wavefunctions are
-       ddir_red = MATMUL(TRANSPOSE(gprimd),ddir_cart)
-       do iat = 1, dtset%natom
-         iatom = atindx(iat)
-         if (dtset%typat(iat) .EQ. itypat) then
-           dterm%dqij(iatom,ilmn,jlmn,1:3) = -j_dpc*ddir_red(1:3)
-           dterm%qij(iatom,klmn) = cqij
-         end if
-       end do !iat
-     end do !jlmn
-   end do ! ilmn
- end do ! itypat
+ do iat = 1, dtset%natom
+   iatom = atindx(iat)
+   itypat = dtset%typat(iat)
+   do klmn = 1, pawtab(itypat)%lmn2_size
+     ilmn = pawtab(itypat)%indklmn(7,klmn) 
+     jlmn = pawtab(itypat)%indklmn(8,klmn) 
+     
+     dterm%qij(iatom,klmn) = CMPLX(pawtab(itypat)%sij(klmn),zero)
+
+     do adir = 1, 3
+       ddir_cart(adir) = cdij*pawtab(itypat)%qijl(pack1a(adir),klmn)
+     end do !adir
+     ! now have ddir in cart coords, convert to crystal coords where ddk wavefunctions are
+     ddir_red = MATMUL(TRANSPOSE(gprimd),ddir_cart)
+     dterm%dqij(iatom,ilmn,jlmn,1:3) = -j_dpc*ddir_red(1:3)
+     dterm%dqij(iatom,jlmn,ilmn,1:3) = -j_dpc*ddir_red(1:3)
+   end do ! klmn
+ end do ! iat
  
 end subroutine dterm_qij
 !!***
@@ -2874,6 +2902,181 @@ subroutine dterm_rd3a(atindx,dterm,dtset,gntselect,gprimd,lmnmax,my_lmax,&
 
 end subroutine dterm_rd3a
 
+!!****f* ABINIT/dterm_adotp
+!! NAME
+!! dterm_adotp
+!!
+!! FUNCTION
+!! Compute onsite terms due to A.p nuclear dipole moment
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2021 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!! computed in Cart directions then transformed to xtal coords
+!!
+!! PARENTS
+!!      m_orbmag
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine dterm_adotp(atindx,dterm,dtset,pawrad,pawtab)
+
+  !Arguments ------------------------------------
+  !scalars
+  type(dterm_type),intent(inout) :: dterm
+  type(dataset_type),intent(in) :: dtset
+
+  !arrays
+  integer,intent(in) :: atindx(dtset%natom)
+  type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
+  type(pawtab_type),intent(inout) :: pawtab(dtset%ntypat)
+
+  !Local variables -------------------------
+  !scalars
+  integer :: cplex_dij,iat,iatom,ijlmn,itypat,ndij
+
+  !arrays
+  real(dp),allocatable :: dijnd(:,:)
+
+!--------------------------------------------------------------------
+
+ dterm%adotp = czero; dterm%dadotp = czero
+
+ cplex_dij = 2
+ ndij = 1
+
+ do iat=1,dtset%natom
+   iatom=atindx(iat)
+   itypat=dtset%typat(iat)
+
+   ABI_MALLOC(dijnd,(cplex_dij*pawtab(itypat)%lmn2_size,ndij))
+
+   call pawdijnd(dijnd,cplex_dij,ndij,dtset%nucdipmom(1:3,iat),pawrad(itypat),pawtab(itypat))
+
+   do ijlmn=1,pawtab(itypat)%lmn2_size
+     dterm%adotp(iatom,ijlmn) = CMPLX(dijnd(2*ijlmn-1,1),dijnd(2*ijlmn,1))
+   end do
+
+   ABI_FREE(dijnd)
+
+ end do !iat
+
+ dterm%has_adotp = 2
+ dterm%has_dadotp = 2
+
+end subroutine dterm_adotp
+
+
+!!****f* ABINIT/dterm_dijhat
+!! NAME
+!! dterm_dijhat
+!!
+!! FUNCTION
+!! Compute dijhat, ddijhat
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2021 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!! computed in Cart directions then transformed to xtal coords
+!!
+!! PARENTS
+!!      m_orbmag
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine dterm_dijhat(atindx,dterm,dtset,gprimd,nfftf,pawang,&
+    & pawfgrtab,pawtab,ucvol,vtrial,vxc,xred)
+
+  !Arguments ------------------------------------
+  !scalars
+  integer,intent(in) :: nfftf
+  real(dp),intent(in) :: ucvol
+  type(dterm_type),intent(inout) :: dterm
+  type(dataset_type),intent(in) :: dtset
+  type(pawang_type),intent(in) :: pawang
+
+  !arrays
+  integer,intent(in) :: atindx(dtset%natom)
+  real(dp),intent(in) :: gprimd(3,3),xred(3,3)
+  real(dp),intent(inout) :: vtrial(nfftf,dtset%nspden)
+  real(dp),intent(inout) :: vxc(nfftf,dtset%nspden)
+  type(pawfgrtab_type),intent(inout) :: pawfgrtab(dtset%natom)
+  type(pawtab_type),intent(inout) :: pawtab(dtset%ntypat)
+
+  !Local variables -------------------------
+  !scalars
+  integer :: cplex_dij,iat,iatom,ijlmn,itypat,ndij,qphase
+
+  !arrays
+  real(dp) :: qphon(3)
+  real(dp),allocatable :: dijhat(:,:),v_dijhat(:,:)
+
+!--------------------------------------------------------------------
+
+ dterm%dijhat = czero; dterm%ddijhat = czero
+
+ cplex_dij = 2
+ qphase = 1
+ ndij = 1
+ qphon(1:3) = zero
+
+ ABI_MALLOC(v_dijhat,(nfftf,dtset%nspden))
+ v_dijhat(1:nfftf,1:dtset%nspden) = vtrial(1:nfftf,1:dtset%nspden) - vxc(1:nfftf,1:dtset%nspden)
+
+ do iat=1,dtset%natom
+   iatom=atindx(iat)
+   itypat=dtset%typat(iat)
+
+   ABI_MALLOC(dijhat,(cplex_dij*qphase*pawtab(itypat)%lmn2_size,ndij))
+
+   call pawdijhat(dijhat,cplex_dij,qphase,gprimd,iatom,dtset%natom,ndij,nfftf,nfftf,&
+     & dtset%nspden,dtset%nsppol,pawang,pawfgrtab(iatom),pawtab(itypat),v_dijhat,qphon,ucvol,xred)
+
+   do ijlmn=1,pawtab(itypat)%lmn2_size
+     dterm%dijhat(iatom,ijlmn) = CMPLX(dijhat(2*ijlmn-1,1),dijhat(2*ijlmn,1))
+   end do
+
+   ABI_FREE(dijhat)
+
+ end do !iat
+
+ ABI_FREE(v_dijhat)
+
+ dterm%has_dijhat = 2
+ dterm%has_ddijhat = 2
+
+end subroutine dterm_dijhat
+
 
 !!****f* ABINIT/dterm_rd2a
 !! NAME
@@ -3502,6 +3705,28 @@ if(allocated(dterm%aij)) then
   end if
   dterm%has_drd3a=0
 
+  if(allocated(dterm%dijhat)) then
+    ABI_FREE(dterm%dijhat)
+  end if
+  dterm%has_dijhat=0
+  
+  if(allocated(dterm%ddijhat)) then
+    ABI_FREE(dterm%ddijhat)
+  end if
+  dterm%has_ddijhat=0
+
+  if(allocated(dterm%adotp)) then
+    ABI_FREE(dterm%adotp)
+  end if
+  dterm%has_adotp=0
+  
+  if(allocated(dterm%dadotp)) then
+    ABI_FREE(dterm%dadotp)
+  end if
+  dterm%has_dadotp=0
+
+
+
 end subroutine dterm_free
 !!***
 
@@ -3778,6 +4003,30 @@ subroutine dterm_alloc(dterm,lmnmax,lmn2max,natom)
   end if
   ABI_MALLOC(dterm%drd3a,(natom,lmnmax,lmnmax,3))
   dterm%has_drd3a=1
+ 
+  if(allocated(dterm%dijhat)) then
+    ABI_FREE(dterm%dijhat)
+  end if
+  ABI_MALLOC(dterm%dijhat,(natom,lmn2max))
+  dterm%has_dijhat=1
+  
+  if(allocated(dterm%ddijhat)) then
+    ABI_FREE(dterm%ddijhat)
+  end if
+  ABI_MALLOC(dterm%ddijhat,(natom,lmnmax,lmnmax,3))
+  dterm%has_ddijhat=1
+ 
+  if(allocated(dterm%adotp)) then
+    ABI_FREE(dterm%adotp)
+  end if
+  ABI_MALLOC(dterm%adotp,(natom,lmn2max))
+  dterm%has_adotp=1
+  
+  if(allocated(dterm%dadotp)) then
+    ABI_FREE(dterm%dadotp)
+  end if
+  ABI_MALLOC(dterm%dadotp,(natom,lmnmax,lmnmax,3))
+  dterm%has_dadotp=1
   
 end subroutine dterm_alloc
 !!***
@@ -4275,6 +4524,21 @@ subroutine sum_d(dterm)
     dterm%daij = dterm%daij + dterm%drd3a
   end if
 
+  if (dterm%has_dijhat .EQ. 2) then
+    dterm%aij = dterm%aij + dterm%dijhat
+  end if
+  if (dterm%has_ddijhat .EQ. 2) then
+    dterm%daij = dterm%daij + dterm%ddijhat
+  end if
+
+  if (dterm%has_adotp .EQ. 2) then
+    dterm%aij = dterm%aij + dterm%adotp
+  end if
+  if (dterm%has_dadotp .EQ. 2) then
+    dterm%daij = dterm%daij + dterm%dadotp
+  end if
+
+
 end subroutine sum_d
 !!***
 
@@ -4310,12 +4574,14 @@ end subroutine sum_d
 !!
 !! SOURCE
 
-subroutine make_d(atindx,atindx1,cprj,dimlmn,dterm,dtset,gprimd,&
-    & mcprj,mpi_enreg,occ,paw_an,pawang,paw_ij,pawrad,pawtab,psps)
+subroutine make_d(atindx,atindx1,cprj,dimlmn,dterm,dtset,gprimd,mcprj,nfftf,&
+    & mpi_enreg,occ,paw_an,pawang,pawfgrtab,paw_ij,pawrad,pawtab,psps,&
+    & ucvol,vtrial,vxc,xred)
 
   !Arguments ------------------------------------
   !scalars
-  integer,intent(in) :: mcprj
+  integer,intent(in) :: mcprj,nfftf
+  real(dp),intent(in) :: ucvol
   type(dterm_type),intent(inout) :: dterm
   type(dataset_type),intent(in) :: dtset
   type(MPI_type), intent(inout) :: mpi_enreg
@@ -4325,13 +4591,16 @@ subroutine make_d(atindx,atindx1,cprj,dimlmn,dterm,dtset,gprimd,&
   !arrays
   integer,intent(in) :: atindx(dtset%natom),atindx1(dtset%natom)
   integer,intent(in) :: dimlmn(dtset%natom)
-  real(dp),intent(in) :: gprimd(3,3)
+  real(dp),intent(in) :: gprimd(3,3),xred(3,3)
   real(dp), intent(in) :: occ(dtset%mband*dtset%nkpt*dtset%nsppol)
+  real(dp),intent(inout) :: vtrial(nfftf,dtset%nspden)
+  real(dp),intent(inout) :: vxc(nfftf,dtset%nspden)
   type(paw_an_type),intent(inout) :: paw_an(dtset%natom)
   type(pawcprj_type),intent(in) ::  cprj(dtset%natom,mcprj)
+  type(pawfgrtab_type),intent(inout) :: pawfgrtab(dtset%natom)
   type(paw_ij_type),intent(inout) :: paw_ij(dtset%natom)
   type(pawrad_type),intent(in) :: pawrad(dtset%ntypat*psps%usepaw)
-  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
+  type(pawtab_type),intent(inout) :: pawtab(dtset%ntypat)
 
   !Local variables -------------------------
   !scalars
@@ -4400,7 +4669,7 @@ subroutine make_d(atindx,atindx1,cprj,dimlmn,dterm,dtset,gprimd,&
  call dterm_rd1(atindx,dterm,dtset,gntselect,gprimd,my_lmax,pawrad,pawtab,realgnt)
 
  !! term idpa due to onsite A.p, not part of the roadmap paper but similar to term 1
- !call make_ddir_ap(dterms(idpa,:,:,:,:),dtset,gntselect,gprimd,psps%lmnmax,my_lmax,pawrad,pawtab,realgnt)
+ call dterm_adotp(atindx,dterm,dtset,pawrad,pawtab)
  
  ! term idvha due to v_H[n1] and v_H[\tilde{n}1], corresponds to term 2a of roadmap paper
  call dterm_rd2a(atindx,dterm,dtset,gntselect,gprimd,psps%lmnmax,my_lmax,&
@@ -4428,17 +4697,26 @@ subroutine make_d(atindx,atindx1,cprj,dimlmn,dterm,dtset,gprimd,&
  call dterm_rd3a(atindx,dterm,dtset,gntselect,gprimd,psps%lmnmax,my_lmax,&
     & pawang,paw_ij,pawrad,pawsphden,pawtab,realgnt)
 
+ ! term dijhat
+ call dterm_dijhat(atindx,dterm,dtset,gprimd,nfftf,pawang,pawfgrtab,pawtab,ucvol,&
+   & vtrial,vxc,xred)
+
  call sum_d(dterm)
 
  ! check terms against abinit GS  
- !do iat=1,dtset%natom
- !  iatom=atindx(iat)
- !  itypat=dtset%typat(iat)
- !  do ijlmn=1,pawtab(itypat)%lmn2_size
+ do iat=1,dtset%natom
+   iatom=atindx(iat)
+   itypat=dtset%typat(iat)
+   do ijlmn=1,pawtab(itypat)%lmn2_size
  !    !write(std_out,'(a,2es16.8)')'JWZ debug kij p2 ',&
  !    !  & pawtab(itypat)%kij(klmn),real(dterm%rd1(iatom,klmn))
- !    !write(std_out,'(a,2es16.8)')'JWZ debug dij0 my_dij0 ',&
- !    !  & pawtab(itypat)%dij0(klmn),real(dterm%dij0(iatom,klmn))
+ !    write(std_out,'(a,2es16.8)')'JWZ debug dij0 my_dij0 ',&
+ !      & pawtab(itypat)%dij0(ijlmn),real(dterm%dij0(iatom,ijlmn))
+     if (paw_ij(iatom)%has_dijhat .EQ. 2) then
+       write(std_out,'(a,i4,4es16.8)')'JWZ debug klmn dijhat my_dijhat ',ijlmn,&
+         & paw_ij(iatom)%dijhat(2*ijlmn-1,1),paw_ij(iatom)%dijhat(2*ijlmn,1),&
+         & real(dterm%dijhat(iatom,ijlmn)),aimag(dterm%dijhat(iatom,ijlmn))
+     end if
 
  !    !hdij = zero
  !    !do kllmn=1,pawtab(itypat)%lmn2_size
@@ -4454,8 +4732,8 @@ subroutine make_d(atindx,atindx1,cprj,dimlmn,dterm,dtset,gprimd,&
  !    write(std_out,'(a,i4,2es16.8)')'JWZ debug ijlmn my_hartree_ij dij ',ijlmn,&
  !      & real(dterm%dhartree(iatom,ijlmn)),&
  !      & paw_ij(iatom)%dijhartree(ijlmn)
- !  end do !ijlmn
- !end do !iat
+   end do !ijlmn
+ end do !iat
 
  ABI_FREE(realgnt)
  ABI_FREE(gntselect)

@@ -316,7 +316,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  real(dp),allocatable :: eigenq(:),gh1c_set(:,:),gh0c1_set(:,:),kpq(:,:)
  real(dp),allocatable :: kpq_rbz(:,:),kpt_rbz(:,:),occ_pert(:),occ_rbz(:),occkq(:),kpt_rbz_pert(:,:)
  real(dp),allocatable :: occ_disk(:)
- real(dp),allocatable :: vtrial_local(:,:)
+ real(dp),allocatable :: vtrial_local(:,:),vxc_local(:,:)
  real(dp),allocatable :: ph1d(:,:),ph1df(:,:),phnons1(:,:,:),resid(:),rhog1(:,:)
  real(dp),allocatable :: rhor1_save(:,:,:)
  real(dp),allocatable :: rhor1(:,:),rho1wfg(:,:),rho1wfr(:,:),tnons1(:,:),tnons1_tmp(:,:)
@@ -2188,13 +2188,20 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        ABI_MALLOC(vtrial_local,(nfftf,dtset%nspden))
      end if
      vtrial_local = vtrial
+     if ( .NOT. ALLOCATED(vxc_local)) then
+       ABI_MALLOC(vxc_local,(nfftf,dtset%nspden))
+     end if
+     vxc_local = vxc
      if((dtset%orbmag .GE. 1) .AND. (dtset%orbmag .LE. 4)) then
        call orbmag_ptpaw(cg,cg1_3,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
-         & nfftf,ngfftf,npwarr,occ,paw_ij,paw_an,pawang,pawfgr,pawrad,pawtab,psps,rprimd,&
-         & vtrial_local,xred,ylm,ylmgr)
+         & nfftf,ngfftf,npwarr,occ,paw_ij,paw_an,pawang,pawfgr,pawfgrtab,pawrad,pawtab,psps,rprimd,&
+         & vtrial_local,vxc_local,xred,ylm,ylmgr)
      end if 
      if( ALLOCATED(vtrial_local) ) then
        ABI_FREE(vtrial_local)
+     end if
+     if( ALLOCATED(vxc_local) ) then
+       ABI_FREE(vxc_local)
      end if
      if( ALLOCATED(cg1_3) ) then
        ABI_FREE(cg1_3)
