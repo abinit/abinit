@@ -1503,17 +1503,16 @@ subroutine tt_me(aij,atindx,bcp,dtset,kcp,lmn2max,pawtab,tt)
   do iat = 1, dtset%natom
     iatom = atindx(iat)
     itypat=dtset%typat(iat)
-    do klmn = 1, pawtab(itypat)%lmn2_size
-      ilmn = pawtab(itypat)%indklmn(7,klmn)
-      jlmn = pawtab(itypat)%indklmn(8,klmn)
-      cpi =  CMPLX(bcp(iatom)%cp(1,ilmn),bcp(iatom)%cp(2,ilmn))
-      cpj =  CMPLX(kcp(iatom)%cp(1,jlmn),kcp(iatom)%cp(2,jlmn))
-      dij = aij(iatom,klmn)
-      tt = tt + CONJG(cpi)*dij*cpj
-      if (ilmn .NE. jlmn) then
-        tt = tt + cpi*CONJG(cpj)*CONJG(dij)
-      end if
-    end do !klmn
+    do ilmn = 1, pawtab(itypat)%lmn_size
+      do jlmn = 1, pawtab(itypat)%lmn_size
+        klmn=MATPACK(ilmn,jlmn)
+        cpi =  CMPLX(bcp(iatom)%cp(1,ilmn),bcp(iatom)%cp(2,ilmn))
+        cpj =  CMPLX(kcp(iatom)%cp(1,jlmn),kcp(iatom)%cp(2,jlmn))
+        dij = aij(iatom,klmn)
+        if (jlmn .LT. ilmn) dij = CONJG(dij)
+        tt = tt + CONJG(cpi)*dij*cpj
+      end do !jlmn
+    end do !ilmn
   end do !iat
 
 end subroutine tt_me
