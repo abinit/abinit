@@ -3986,7 +3986,7 @@ subroutine slk_ptrans(in_mat, trans, out_mat, &
 #ifdef HAVE_LINALG_SCALAPACK
    select case (trans)
    case ("N")
-     ! sub(C):=beta*sub(C) + alpha*sub(A)',
+     ! sub(C) := beta*sub(C) + alpha*sub(A)',
      calpha__ = cone; if (present(alpha)) calpha__ = alpha
      cbeta__ = czero; if (present(beta)) cbeta__ = beta
      call pztranu(nn, mm, calpha__, in_mat%buffer_cplx, ija__(1), ija__(2), &
