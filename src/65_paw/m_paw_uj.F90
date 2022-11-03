@@ -490,10 +490,10 @@ subroutine pawuj_det(dtpawuj,ndtpawuj,ujdet_filename,ures)
    else if (macro_uj==3.and.nspden==2) then
      write(message,fmt='(2a)') ' pawuj_det: found macro_uj=3 and nspden=2,',&
 &     ' determination of J-parameter on single spin channel (experimental)'
-   end if
    else if (macro_uj==4.and.nspden==2) then
      write(message,fmt='(2a)') ' pawuj_det: found macro_uj=4 and nspden=2,',&
 &     ' Hunds J determination – L. MacEnulty August 2021'
+   end if
 
    write (message,fmt='(a,i3,a,a)') ' All macro_uj ok and equal to ',macro_uj,ch10,trim(message)
    write (message,'(a,i3)') ' All macro_uj ok and equal to ',macro_uj
@@ -549,7 +549,7 @@ subroutine pawuj_det(dtpawuj,ndtpawuj,ujdet_filename,ures)
  chi0_org=(chih(1,1:nat_org)-chih(3,1:nat_org))/(vsh(1)-vsh(3))/dtpawuj(1)%diemix
  chi_org=(chih(2,1:nat_org)-chih(4,1:nat_org))/(vsh(2)-vsh(4))
 
- if (pawprtvol==3) then
+ if (pawprtvol==-3) then
    write(message,fmt='(2a, 150f15.10)') ch10,' Chi_0n ',chi0_org
    call wrtout(std_out,message,'COLL')
    write(message,fmt='(a, 150f15.10)') ' Chi_n ',chi_org
@@ -573,7 +573,7 @@ subroutine pawuj_det(dtpawuj,ndtpawuj,ujdet_filename,ures)
    magv_org=(/(1,im1=1,nat_org)/)
  end if
 
- if (pawprtvol==3) then
+ if (pawprtvol==-3) then
    write(message,fmt='(3a, 150f4.1)') ch10,' Magnetization',trim(message),magv_org
    call wrtout(std_out,message,'COLL')
  end if
@@ -629,6 +629,7 @@ subroutine pawuj_det(dtpawuj,ndtpawuj,ujdet_filename,ures)
 & int(magv_org),distv_org,smult_org,sdistv_org,nsh_org,pawujat,pawprtvol)
 
  ii=1
+ write(message,*) 'The scalar U(J) from the two-point regression scheme is',ures
  write(message, fmt='(8a)') ' URES ','     ii','    nat','       r_max','    U(J)[eV]','   U_ASA[eV]','   U_inf[eV]',ch10
  write(message, fmt='(a,2i7,4f12.5)') trim(message)//' URES ',ii,nat_org,maxval(abs(distv_org)),ures,ures*exp(log(intg)*eyp),&
 & ures*exp(log(ph0phiint)*eyp)
