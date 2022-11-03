@@ -26,6 +26,10 @@
 
 #include "abi_common.h"
 
+! note: in a typical index over lmn2_size, think of it as row ilmn, column jlmn for element d_ij.
+! In pawinit line 356, klmn is constructed such that ilmn <= jlmn. Thus we have the upper triangular
+! part of the dij matrix. When looping over both ilmn and jlmn, element dij with i>j is constructed 
+! by symmetry from element dji.
 #define MATPACK(row,col) (MAX(row,col)*(MAX(row,col)-1)/2 + MIN(row,col))
 #define LMPACK(l,m) (l*l+l+1+m)
 
@@ -1420,7 +1424,7 @@ subroutine dtdt_me(aij,atindx,bcp,bdir,daij,dtdt,dtset,gdir,kcp,lmnmax,lmn2max,p
   !Local variables -------------------------
   !scalars
   integer :: iat,iatom,itypat,ilmn,jlmn,klmn
-  complex(dpc) :: cpi,cpj,dcpi,dcpj
+  complex(dpc) :: cpi,cpj,dcpi,dcpj,dij,ddij_b,ddij_g
 
   !arrays
 
@@ -1433,13 +1437,19 @@ subroutine dtdt_me(aij,atindx,bcp,bdir,daij,dtdt,dtset,gdir,kcp,lmnmax,lmn2max,p
     do ilmn = 1, pawtab(itypat)%lmn_size
       do jlmn = 1, pawtab(itypat)%lmn_size
         klmn = MATPACK(ilmn,jlmn)
+        dij = aij(iatom,klmn)
+        ! see note at top of file near definition of MATPACK macro
+        if (ilmn .GT. jlmn) dij = CONJG(dij)
+        ddij_b = daij(iatom,ilmn,jlmn,bdir)
+        ddij_g = daij(iatom,ilmn,jlmn,gdir)
         cpi =  CMPLX(bcp(iatom)%cp(1,ilmn),bcp(iatom)%cp(2,ilmn))
         cpj =  CMPLX(kcp(iatom)%cp(1,jlmn),kcp(iatom)%cp(2,jlmn))
         dcpi = CMPLX(bcp(iatom)%dcp(1,bdir,ilmn),bcp(iatom)%dcp(2,bdir,ilmn))
         dcpj = CMPLX(kcp(iatom)%dcp(1,gdir,jlmn),kcp(iatom)%dcp(2,gdir,jlmn))
-        dtdt = dtdt + CONJG(dcpi)*dcpj*aij(iatom,klmn)
-        dtdt = dtdt + CONJG(dcpi)*cpj*daij(iatom,ilmn,jlmn,gdir)
-        dtdt = dtdt + CONJG(cpi)*dcpj*CONJG(daij(iatom,ilmn,jlmn,bdir))
+
+        dtdt = dtdt + CONJG(dcpi)*dcpj*dij
+        dtdt = dtdt + CONJG(dcpi)*cpj*ddij_g
+        dtdt = dtdt + CONJG(cpi)*dcpj*CONJG(ddij_b)
       end do !jlmn
     end do !ilmn
   end do !iat
@@ -1509,7 +1519,8 @@ subroutine tt_me(aij,atindx,bcp,dtset,kcp,lmn2max,pawtab,tt)
         cpi =  CMPLX(bcp(iatom)%cp(1,ilmn),bcp(iatom)%cp(2,ilmn))
         cpj =  CMPLX(kcp(iatom)%cp(1,jlmn),kcp(iatom)%cp(2,jlmn))
         dij = aij(iatom,klmn)
-        if (jlmn .LT. ilmn) dij = CONJG(dij)
+        ! see note at top of file near definition of MATPACK macro
+        if (ilmn .GT. jlmn) dij = CONJG(dij)
         tt = tt + CONJG(cpi)*dij*cpj
       end do !jlmn
     end do !ilmn
@@ -1581,6 +1592,7 @@ subroutine tdt_me(aij,atindx,bcp,daij,dtset,idir,kcp,lmnmax,lmn2max,pawtab,tdt)
       do jlmn = 1, pawtab(itypat)%lmn_size
         klmn = MATPACK(ilmn,jlmn)
         dij = aij(iatom,klmn)
+        ! see note at top of file near definition of MATPACK macro
         if ( ilmn .LT. jlmn) dij = CONJG(dij)
         ddij = daij(iatom,ilmn,jlmn,idir)
         cpi =  CMPLX(bcp(iatom)%cp(1,ilmn),bcp(iatom)%cp(2,ilmn))
