@@ -2509,6 +2509,7 @@ subroutine pawuj_drive(scfcv_args, dtset,electronpositron,rhog,rhor,rprimd, xred
 !arrays
  real(dp), intent(inout) :: rprimd(3,3)
  real(dp), pointer :: rhog(:,:),rhor(:,:)
+! real(dp), allocatable :: saferhog(:,:),saferhor(:,:)
  real(dp), intent(inout) :: xred(3,dtset%natom),xred_old(3,dtset%natom)
 
 !Local variables -------------------------
@@ -2532,10 +2533,14 @@ subroutine pawuj_drive(scfcv_args, dtset,electronpositron,rhog,rhor,rprimd, xred
 
  ABI_MALLOC(dtpawuj,(0:ndtpawuj))
  ABI_MALLOC(cgstart,(2,scfcv_args%mcg))
+! ABI_MALLOC(saferhog,(2,dtset%nfft))
+! ABI_MALLOC(saferhor,(dtset%nfft,dtset%nspden))
 
  call pawuj_ini(dtpawuj,ndtpawuj)
 
  cgstart=scfcv_args%cg
+! saferhog=rhog
+! saferhor=rhor
  do iuj=1,ndtpawuj
 !  allocate(dtpawuj(iuj)%rprimd(3,3)) ! this has already been done in pawuj_ini
    dtpawuj(iuj)%macro_uj=dtset%macro_uj
@@ -2559,6 +2564,8 @@ subroutine pawuj_drive(scfcv_args, dtset,electronpositron,rhog,rhor,rprimd, xred
    !call scfcv_new(ab_scfcv_in,ab_scfcv_inout,dtset,electronpositron,&
 !&   paw_dmft,rhog,rhor,rprimd,wffnew,wffnow,xred,xred_old,conv_retcode)
    itimes(1)=itime0 ; itimes(2)=1
+!   rhor=saferhor
+!   rhog=saferhog
    call scfcv_run(scfcv_args,electronpositron,itimes,rhog,rhor,rprimd,xred,xred_old,conv_retcode)
 
    scfcv_args%fatvshift=scfcv_args%fatvshift*(-one)
@@ -2575,6 +2582,8 @@ subroutine pawuj_drive(scfcv_args, dtset,electronpositron,rhog,rhor,rprimd, xred
 
  ABI_FREE(dtpawuj)
  ABI_FREE(cgstart)
+! ABI_FREE(saferhog)
+! ABI_FREE(saferhor)
 
  DBG_EXIT("COLL")
 
