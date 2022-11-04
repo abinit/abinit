@@ -568,6 +568,7 @@ module m_gwr
    integer :: ugb_nband = -1
 
    type(vcgen_t) :: vcgen
+   ! Object used to compute vc(q,g)
 
    character(len=fnlen) :: gwrnc_path = ABI_NOFILE
    ! Path to the GWR.nc file with output results.
@@ -1870,7 +1871,7 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: formeig0 = 0, master = 0
- integer :: mband, min_nband, nkibz, nsppol, my_is, my_iki, spin, ik_ibz, ierr
+ integer :: mband, min_nband, nkibz, nsppol, my_is, my_iki, spin, ik_ibz, ierr, io_algo
  integer :: npw_k, mpw, istwf_k, il_b, ib, band, iloc !, itau
  integer :: nbsum, npwsp, bstart, bstop, bstep, nb !my_nband ! nband_k,
  real(dp) :: cpu, wall, gflops, cpu_green, wall_green, gflops_green
@@ -1975,104 +1976,106 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
  ABI_MALLOC(kg_k, (3, mpw))
  ABI_MALLOC(bmask, (mband))
 
-#if 0
- call wrtout(std_out, " Using collective MPI-IO with wfk%read_bmask.")
- call wfk_open_read(wfk, wfk_path, formeig0, iomode_from_fname(wfk_path), get_unit(), gwr%gtau_comm%value)
- do my_is=1,gwr%my_nspins
-   spin = gwr%my_spins(my_is)
-   do my_iki=1,gwr%my_nkibz
-     call cwtime(cpu_green, wall_green, gflops_green, "start")
-     ik_ibz = gwr%my_kibz_inds(my_iki)
-     kk_ibz = gwr%kibz(:, ik_ibz)
-     npw_k = wfk_hdr%npwarr(ik_ibz)
-     istwf_k = wfk_hdr%istwfk(ik_ibz)
-     ! TODO
-     ABI_CHECK_IEQ(istwf_k, 1, "istwfk_k should be 1")
-     npwsp = npw_k * gwr%nspinor
+ io_algo = 2
 
-     associate (ugb => gwr%ugb(ik_ibz, spin), desc_k => gwr%green_desc_kibz(ik_ibz))
-     ABI_CHECK_IEQ(npw_k, desc_k%npw, "npw_k != desc_k%npw")
+ if (io_algo == 1) then
+   call wrtout(std_out, " Using collective MPI-IO with wfk%read_bmask ...")
+   call wfk_open_read(wfk, wfk_path, formeig0, iomode_from_fname(wfk_path), get_unit(), gwr%gtau_comm%value)
+   do my_is=1,gwr%my_nspins
+     spin = gwr%my_spins(my_is)
+     do my_iki=1,gwr%my_nkibz
+       call cwtime(cpu_green, wall_green, gflops_green, "start")
+       ik_ibz = gwr%my_kibz_inds(my_iki)
+       kk_ibz = gwr%kibz(:, ik_ibz)
+       npw_k = wfk_hdr%npwarr(ik_ibz)
+       istwf_k = wfk_hdr%istwfk(ik_ibz)
+       ! TODO
+       ABI_CHECK_IEQ(istwf_k, 1, "istwfk_k should be 1")
+       npwsp = npw_k * gwr%nspinor
 
-     ! use round-robin distribution inside gtau_comm% for IO.
-     ! TODO: Optimize wfk_read_bmask and/or read WFK with all procs and master broadcasting.
-     bmask = .False.
-     do il_b=1, ugb%sizeb_local(2)
-       band = ugb%loc2gcol(il_b)
-       bmask(band) = .True.
-     end do
-     call c_f_pointer(c_loc(ugb%buffer_cplx), cg_k, shape=[2, npwsp * ugb%sizeb_local(2)])
-     call wfk%read_bmask(bmask, ik_ibz, spin, &
-                         !xmpio_single, &
-                         xmpio_collective, &
-                         kg_k=kg_k, cg_k=cg_k)
+       associate (ugb => gwr%ugb(ik_ibz, spin), desc_k => gwr%green_desc_kibz(ik_ibz))
+       ABI_CHECK_IEQ(npw_k, desc_k%npw, "npw_k != desc_k%npw")
 
-     ABI_CHECK(all(kg_k(:,1:npw_k) == desc_k%gvec), "kg_k != desc_k%gvec")
+       ! use round-robin distribution inside gtau_comm% for IO.
+       ! TODO: Optimize wfk_read_bmask and/or read WFK with all procs and master broadcasting.
+       bmask = .False.
+       do il_b=1, ugb%sizeb_local(2)
+         band = ugb%loc2gcol(il_b)
+         bmask(band) = .True.
+       end do
+       call c_f_pointer(c_loc(ugb%buffer_cplx), cg_k, shape=[2, npwsp * ugb%sizeb_local(2)])
+       call wfk%read_bmask(bmask, ik_ibz, spin, &
+                           !xmpio_single, &
+                           xmpio_collective, &
+                           kg_k=kg_k, cg_k=cg_k)
 
-     write(msg,'(3(a,i0),a)')" Read ugb_k: my_iki [", my_iki, "/", gwr%my_nkibz, "] (tot: ", gwr%nkibz, ")"
-     call cwtime_report(msg, cpu_green, wall_green, gflops_green)
-     end associate
-   end do ! my_iki
- end do ! my_is
- call wfk%close()
+       ABI_CHECK(all(kg_k(:,1:npw_k) == desc_k%gvec), "kg_k != desc_k%gvec")
 
-#else
- call wrtout(std_out, " Using IO version based of master reads and brodcasts")
- ! Master reads and broadcasts
- if (gwr%comm%me == master) then
-   call wfk_open_read(wfk, wfk_path, formeig0, iomode_from_fname(wfk_path), get_unit(), xmpi_comm_self)
- end if
+       write(msg,'(3(a,i0),a)')" Read ugb_k: my_iki [", my_iki, "/", gwr%my_nkibz, "] (tot: ", gwr%nkibz, ")"
+       call cwtime_report(msg, cpu_green, wall_green, gflops_green)
+       end associate
+     end do ! my_iki
+   end do ! my_is
+   call wfk%close()
 
- ! This to be able to maximize the size of cg_work
- !call xmpi_get_vmrss(vmem_mb, gwr%comm%value)
+ else
+   call wrtout(std_out, " Using IO version based of master reads and brodcasts ...")
+   ! Master reads and broadcasts
+   if (gwr%comm%me == master) then
+     call wfk_open_read(wfk, wfk_path, formeig0, iomode_from_fname(wfk_path), get_unit(), xmpi_comm_self)
+   end if
 
- do spin=1,gwr%nsppol
-   do ik_ibz=1,gwr%nkibz
-     call cwtime(cpu_green, wall_green, gflops_green, "start")
-     kk_ibz = gwr%kibz(:, ik_ibz)
-     npw_k = wfk_hdr%npwarr(ik_ibz)
-     istwf_k = wfk_hdr%istwfk(ik_ibz)
-     ! TODO
-     ABI_CHECK_IEQ(istwf_k, 1, "istwfk_k should be 1")
-     npwsp = npw_k * gwr%nspinor
+   ! This to be able to maximize the size of cg_work
+   !call xmpi_get_vmrss(vmem_mb, gwr%comm%value)
 
-     bstep = memlimited_step(1, nbsum, 2 * npwsp, xmpi_bsize_dp, 1024.0_dp)
-     do bstart=1, nbsum, bstep
-       bstop = min(bstart + bstep - 1, nbsum)
-       nb = bstop - bstart + 1
+   do spin=1,gwr%nsppol
+     do ik_ibz=1,gwr%nkibz
+       call cwtime(cpu_green, wall_green, gflops_green, "start")
+       kk_ibz = gwr%kibz(:, ik_ibz)
+       npw_k = wfk_hdr%npwarr(ik_ibz)
+       istwf_k = wfk_hdr%istwfk(ik_ibz)
+       ! TODO
+       ABI_CHECK_IEQ(istwf_k, 1, "istwfk_k should be 1")
+       npwsp = npw_k * gwr%nspinor
 
-       ABI_MALLOC(cg_work, (2, npwsp, nb))
-       if (gwr%comm%me == master) then
-         call c_f_pointer(c_loc(cg_work), cg_k, shape=[2, npwsp * nb])
-         call wfk%read_band_block([bstart, bstop], ik_ibz, spin, xmpio_single, kg_k=kg_k, cg_k=cg_k)
-       end if
+       bstep = memlimited_step(1, nbsum, 2 * npwsp, xmpi_bsize_dp, 1024.0_dp)
+       do bstart=1, nbsum, bstep
+         bstop = min(bstart + bstep - 1, nbsum)
+         nb = bstop - bstart + 1
 
-       call xmpi_bcast(kg_k, master, gwr%comm%value, ierr)
-       call xmpi_bcast(cg_work, master, gwr%comm%value, ierr)
+         ABI_MALLOC(cg_work, (2, npwsp, nb))
+         if (gwr%comm%me == master) then
+           call c_f_pointer(c_loc(cg_work), cg_k, shape=[2, npwsp * nb])
+           call wfk%read_band_block([bstart, bstop], ik_ibz, spin, xmpio_single, kg_k=kg_k, cg_k=cg_k)
+         end if
 
-       ! Copy my portion of cg_work to buffer_cplx if I treat this (spin, ik_ibz).
-       if (any(gwr%my_spins == spin) .and. any(gwr%my_kibz_inds == ik_ibz)) then
-         associate (ugb => gwr%ugb(ik_ibz, spin), desc_k => gwr%green_desc_kibz(ik_ibz))
-         ABI_CHECK(all(kg_k(:,1:npw_k) == desc_k%gvec), "kg_k != desc_k%gvec")
-         do band=bstart, bstop
-           ib = band - bstart + 1
-           call ugb%glob2loc(1, band, iloc, il_b, haveit)
-           if (.not. haveit) cycle
-           ABI_CHECK_IEQ(iloc, 1, "iloc should be 1")
-           ugb%buffer_cplx(:, il_b) = cmplx(cg_work(1,:,ib), cg_work(2,:,ib), kind=dp)
-         end do
-         end associate
-       end if
+         call xmpi_bcast(kg_k, master, gwr%comm%value, ierr)
+         call xmpi_bcast(cg_work, master, gwr%comm%value, ierr)
 
-       ABI_FREE(cg_work)
-     end do ! bstart
+         ! Copy my portion of cg_work to buffer_cplx if I treat this (spin, ik_ibz).
+         if (any(gwr%my_spins == spin) .and. any(gwr%my_kibz_inds == ik_ibz)) then
+           associate (ugb => gwr%ugb(ik_ibz, spin), desc_k => gwr%green_desc_kibz(ik_ibz))
+           ABI_CHECK(all(kg_k(:,1:npw_k) == desc_k%gvec), "kg_k != desc_k%gvec")
+           do band=bstart, bstop
+             ib = band - bstart + 1
+             call ugb%glob2loc(1, band, iloc, il_b, haveit)
+             if (.not. haveit) cycle
+             ABI_CHECK_IEQ(iloc, 1, "iloc should be 1")
+             ugb%buffer_cplx(:, il_b) = cmplx(cg_work(1,:,ib), cg_work(2,:,ib), kind=dp)
+           end do
+           end associate
+         end if
 
-     write(msg,'(2(a,i0),a)')" Read ugb_k: ik_ibz [", ik_ibz, "/", gwr%nkibz, "]"
-     call cwtime_report(msg, cpu_green, wall_green, gflops_green)
+         ABI_FREE(cg_work)
+       end do ! bstart
 
-   end do ! ik_ibz
- end do ! spin
- if (gwr%comm%me == master) call wfk%close()
-#endif
+       write(msg,'(2(a,i0),a)')" Read ugb_k: ik_ibz [", ik_ibz, "/", gwr%nkibz, "]"
+       call cwtime_report(msg, cpu_green, wall_green, gflops_green)
+
+     end do ! ik_ibz
+   end do ! spin
+   if (gwr%comm%me == master) call wfk%close()
+ end if ! io_algo
 
  ABI_FREE(kg_k)
  ABI_FREE(bmask)
@@ -6458,7 +6461,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
        ! Collect nb bands starting from band1_start on each proc.
        ! FIXME: SIGSEV on lumi!
        !call wrtout(std_out, " begin collect")
-#if 0
+#if 1
        call ugb_kibz%zcollect(npw_ki * nspinor, nb, [1, band1_start], ug1_block)
 #else
        ! Dump algorithm based on xmpi_sum. To be replaced by an all_gather
@@ -6478,8 +6481,8 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
          band1 = ugb_kibz%loc2gcol(il_b1)
          eig_nk = gwr%ks_ebands%eig(band1, ik_ibz, spin)
          call c_f_pointer(c_loc(ugb_kibz%buffer_cplx(:,il_b1)), cwave, shape=[2, npw_ki*nspinor])
-         call ddkop%apply(eig_nk, npw_ki, nspinor, cwave, cwaveprj)
-         gh1c_block(:,:,:,ib) = ddkop%gh1c(:, 1:npw_ki*nspinor,:)
+         !call ddkop%apply(eig_nk, npw_ki, nspinor, cwave, cwaveprj)
+         !gh1c_block(:,:,:,xx_ib) = ddkop%gh1c(:, 1:npw_ki*nspinor,:)
        end do
 
        ! Loop over "conduction" states.
@@ -6542,7 +6545,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
              rhotwx = czero_gw
            end if
 
-           new_rhotwx = zero
+           !new_rhotwx = zero
            !gh1c_block(:,:,:,ib) = ddkop%gh1c(:, 1:npw_ki*nspinor,:)
 
            ! NB: Using symrec conventions here

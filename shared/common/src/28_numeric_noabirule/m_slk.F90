@@ -4250,20 +4250,23 @@ end subroutine slk_take_from
 !! FUNCTION
 !!  Return on all processors the complex submatrix of shape (mm, nn) starting at position ija.
 !!  NB: `out_carr` is allocated by the routine.
+!!  If optional argument request is use, the routine uses non-blocking BCAST and client code is
+!!  supposed to wait before accessing out_carr.
 !!
 !! SOURCE
 
-subroutine slk_zcollect(in_mat, mm, nn, ija, out_carr)
+subroutine slk_zcollect(in_mat, mm, nn, ija, out_carr, request)
 
 !Arguments ------------------------------------
  class(matrix_scalapack),intent(in) :: in_mat
  integer,intent(in) :: mm, nn, ija(2)
- complex(dp),allocatable,intent(out) :: out_carr(:,:)
+ complex(dp) ABI_ASYNC, allocatable,intent(out) :: out_carr(:,:)
+ integer ABI_ASYNC, optional,intent(out) :: request
 
 !Local variables-------------------------------
  integer,parameter :: istwfk1 = 1, master = 0
  integer :: ierr
- type(processor_scalapack) :: processor
+ type(processor_scalapack) :: self_processor
  type(matrix_scalapack) :: out_mat
 
 ! *************************************************************************
@@ -4281,8 +4284,8 @@ subroutine slk_zcollect(in_mat, mm, nn, ija, out_carr)
  !     2) Master brodacasts submatrix.
 
  if (in_mat%processor%myproc == master) then
-   call processor%init(xmpi_comm_self)
-   call out_mat%init(mm, nn, in_mat%processor, istwfk1, size_blocs=[mm, nn])
+   call self_processor%init(xmpi_comm_self)
+   call out_mat%init(mm, nn, self_processor, istwfk1, size_blocs=[mm, nn])
  else
    out_mat%descript%tab(CTXT_) = -1
  end if
@@ -4297,15 +4300,16 @@ subroutine slk_zcollect(in_mat, mm, nn, ija, out_carr)
  if (in_mat%processor%myproc == master) then
    ABI_MOVE_ALLOC(out_mat%buffer_cplx, out_carr)
    call out_mat%free()
-   call processor%free()
+   call self_processor%free()
  else
    ABI_MALLOC(out_carr, (mm, nn))
  end if
 
- !if (present(request)) then
- !  call xmpi_ibcast(out_carr, master, in_mat%processor%comm, request, ierr)
- !else
- call xmpi_bcast(out_carr, master, in_mat%processor%comm, ierr)
+ if (present(request)) then
+   call xmpi_ibcast(out_carr, master, in_mat%processor%comm, request, ierr)
+ else
+   call xmpi_bcast(out_carr, master, in_mat%processor%comm, ierr)
+ end if
 
 end subroutine slk_zcollect
 !!***
