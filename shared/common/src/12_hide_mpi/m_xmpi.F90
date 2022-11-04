@@ -474,6 +474,7 @@ interface xmpi_ibcast
   module procedure xmpi_ibcast_dp2d
   module procedure xmpi_ibcast_dp3d
   module procedure xmpi_ibcast_dp4d
+  module procedure xmpi_ibcast_dpc2d
 end interface xmpi_ibcast
 
 !----------------------------------------------------------------------
