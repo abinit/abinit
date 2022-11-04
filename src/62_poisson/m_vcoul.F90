@@ -44,6 +44,7 @@ module m_vcoul
  use m_crystal,         only : crystal_t
  use m_bz_mesh,         only : kmesh_t
  use m_gsphere,         only : gsphere_t
+ use m_fftcore,         only : get_kg
  use m_dtfil,           only : isfile
 
  ! Cut-off methods modules
@@ -320,14 +321,14 @@ subroutine vcoul_init(vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0
- integer :: nmc, ig, imc, nqibz, nqbz, nkbz, ii, iqlwl, iq_bz, iq_ibz, npt, iq
+ integer :: nqibz, nqbz, nkbz, iqlwl, iq_ibz
  integer :: opt_cylinder,opt_surface,my_rank,nprocs
- real(dp) :: bz_geometry_factor,check,q0_vol, qbz_norm,qpg2,rcut2
+ real(dp) :: bz_geometry_factor,q0_vol, rcut2
  character(len=500) :: msg
  type(mc_t) :: mc
 !arrays
  integer, contiguous, pointer :: gvec(:,:)
- real(dp) :: a1(3),a2(3),a3(3),b1(3),b2(3),b3(3),qbz_cart(3),qpg(3)
+ real(dp) :: a1(3),a2(3),a3(3),b1(3),b2(3),b3(3)
  real(dp),allocatable :: vcoul(:,:),vcoul_lwl(:,:)
  real(dp),contiguous, pointer :: qibz(:,:), qbz(:,:)
 
@@ -1208,10 +1209,10 @@ subroutine mc_init(mc, rprimd, ucvol, gprimd, gmet, kptrlatt)
 
 !Local variables-------------------------------
  integer,parameter :: ncell=3
- integer :: nmc,nseed, i1,i2,i3,ig,imc
+ integer :: nseed, i1,i2,i3,imc
  real(dp) :: lmin,vlength, ucvol_sc
  real(dp) :: rprimd_sc(3,3),gprimd_sc(3,3),gmet_sc(3,3),rmet_sc(3,3), qcart2red(3,3)
- real(dp) :: qbz_cart(3),qtmp(3),qmin(3),qmin_cart(3),qpg(3)
+ real(dp) :: qtmp(3),qmin(3),qmin_cart(3)
  integer, allocatable :: seed(:)
 
 ! *************************************************************************
@@ -1463,7 +1464,7 @@ subroutine beigi_cylinder_limit(opt_cylinder, cryst, nqibz, nkbz, rcut, hcyl, bo
 !Local variables-------------------------------
  integer :: ii, iq, npar, npt, gamma_pt(3,1)
  real(dp) :: step, bz_plane, dx, integ, q0_vol, q0_volsph, b1(3),b2(3),b3(3)
- real(dp),allocatable :: cov(:,:),par(:),qfit(:,:),sigma(:),var(:), vcfit(:,:),vcoul(:,:),xx(:),yy(:)
+ real(dp),allocatable :: cov(:,:),par(:),qfit(:,:),sigma(:),var(:), vcfit(:,:),xx(:),yy(:)
 
 ! *************************************************************************
 
@@ -1554,9 +1555,9 @@ subroutine beigi_surface_limit(opt_surface, cryst, nqibz, nkbz, rcut, alpha, box
  real(dp),intent(out) :: i_sz
 
 !Local variables-------------------------------
- integer :: ii, iq, npar, npt, gamma_pt(3,1)
+ integer :: ii, npt, gamma_pt(3,1)
  real(dp) :: step, bz_plane, dx, integ, q0_vol, q0_volsph, b1(3),b2(3),b3(3)
- real(dp),allocatable :: cov(:,:),par(:),qfit(:,:),sigma(:),var(:), vcfit(:,:),vcoul(:,:),xx(:),yy(:), qcart(:,:)
+ real(dp),allocatable :: qfit(:,:),sigma(:),vcfit(:,:),xx(:),yy(:), qcart(:,:)
 
 ! *************************************************************************
 
@@ -1676,7 +1677,7 @@ real(dp) function gygi_baldereschi_isz(cryst, nqbz, qbz, ecut, ng, gvec) result(
 
 !Local variables-------------------------------
  integer :: iq_bz, ig
- real(dp) :: alpha, bz_geometry_factor, intfauxgb, alfa, qpg2, qpg(3)
+ real(dp) :: bz_geometry_factor, intfauxgb, alfa, qpg2, qpg(3)
 
 !************************************************************************
 
@@ -1720,10 +1721,12 @@ subroutine vcgen_init(vcgen, cryst, kptrlatt, nkbz, nqibz, nqbz, qbz, rcut, gw_i
  integer,intent(in) :: comm
 
 !Local variables-------------------------------
- integer :: gvec0(3)
+ integer,parameter :: istwfk1 = 1
+ integer :: npw_, gvec0(3)
  real(dp) :: q0_vol, bz_geometry_factor, rcut2
  character(len=500) :: msg
  real(dp) :: vcoul0(1), q_gamma(3)
+ integer,allocatable :: gvec_(:,:)
 
 ! *************************************************************************
 
@@ -1811,7 +1814,9 @@ subroutine vcgen_init(vcgen, cryst, kptrlatt, nkbz, nqibz, nqbz, qbz, rcut, gw_i
    else if (vcgen%mode == "AUX_GB") then
      ! We use the auxiliary function of a Gygi-Baldereschi variant [[cite:Gigy1986]]
      ABI_ERROR("AUX_GB not implemented in vcgen_init")
-     !vcgen%i_sz = gygi_baldereschi_isz(cryst, nqbz, qbz, ecut, ng, gvec)
+     !call get_kg(kk_bz, istwfk1, ecut, cryst%gmet, npw_, gvec_)
+     !vcgen%i_sz = gygi_baldereschi_isz(cryst, nqbz, qbz, ecut, ng, gvec_)
+     !ABI_FREE(gvec_)
 
    else
      ABI_ERROR(sjoin("Need treatment of 1/q^2 singularity! for mode", vcgen%mode))

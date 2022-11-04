@@ -94,7 +94,7 @@ subroutine cutoff_cylinder(qpt, ng, gvec, rcut, hcyl, pdir, boxcenter, rprimd, v
 !Local variables-------------------------------
 !scalars
  integer,parameter :: N0=1000
- integer :: icount,ig,igs,ierr, my_rank, nproc
+ integer :: ig,igs,ierr, my_rank, nproc
  real(dp) :: j0,j1,k0,k1,qpg2,qpg_xy,tmp
  real(dp) :: qpg_z,quad,rcut2,hcyl2,c1,c2,ucvol,SMALL
  logical :: q_is_zero

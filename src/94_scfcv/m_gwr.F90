@@ -1079,29 +1079,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
 
  gwr%ntau = dtset%gwr_ntau
 
-#ifndef __HAVE_GREENX
- ABI_MALLOC(gwr%tau_mesh, (gwr%ntau))
- ABI_MALLOC(gwr%tau_wgs, (gwr%ntau))
- ABI_MALLOC(gwr%iw_mesh, (gwr%ntau))
- ABI_MALLOC(gwr%iw_wgs, (gwr%ntau))
- gwr%iw_mesh = arth(zero, te_max, gwr%ntau)
- gwr%iw_wgs = te_max / (gwr%ntau - 1)
- gwr%tau_mesh = arth(zero, two_pi * gwr%iw_mesh(2), gwr%ntau)
- gwr%tau_wgs = one / gwr%ntau
-
- ABI_MALLOC(gwr%cosft_tw, (gwr%ntau, gwr%ntau))
- ABI_MALLOC(gwr%cosft_wt, (gwr%ntau, gwr%ntau))
- ABI_MALLOC(gwr%sinft_wt, (gwr%ntau, gwr%ntau))
-
- do it=1, gwr%ntau
-   do iw=1, gwr%ntau
-      gwr%cosft_tw(it,iw) = cos(gwr%iw_mesh(iw) * gwr%tau_mesh(it)) * two * gwr%iw_mesh(gwr%ntau) / (gwr%ntau - 1)
-      gwr%cosft_wt(iw,it) = cos(gwr%iw_mesh(iw) * gwr%tau_mesh(it)) * two * gwr%tau_mesh(gwr%ntau) / (gwr%ntau - 1)
-   end do
- end do
- gwr%sinft_wt = one
-
-#else
+#ifdef __HAVE_GREENX
  call gx_minimax_grid(gwr%ntau, te_min, te_max, &  ! in
                       gwr%tau_mesh, gwr%tau_wgs, gwr%iw_mesh, gwr%iw_wgs, & ! out args allocated by the routine.
                       gwr%cosft_wt, gwr%cosft_tw, gwr%sinft_wt, &
@@ -1113,6 +1091,8 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
 
  call wrtout(std_out, sjoin(" Max_{ij} |CT CT^{-1} - I|", ftoa(gwr%cosft_duality_error)))
  call wrtout(std_out, sjoin(" ft_max_error", ltoa(gwr%ft_max_error)))
+#else
+ ABI_ERROR("GWR code requires Green-X library!")
 #endif
 
  call ks_gaps%free()
@@ -2048,6 +2028,7 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
  do spin=1,gwr%nsppol
    do ik_ibz=1,gwr%nkibz
      call cwtime(cpu_green, wall_green, gflops_green, "start")
+     kk_ibz = gwr%kibz(:, ik_ibz)
      npw_k = wfk_hdr%npwarr(ik_ibz)
      istwf_k = wfk_hdr%istwfk(ik_ibz)
      ! TODO
@@ -3198,9 +3179,6 @@ subroutine desc_get_vc_sqrt(desc, qpt, q_is_gamma, gwr, comm)
  logical, intent(in) :: q_is_gamma
  class(gwr_t),intent(in) :: gwr
  integer,intent(in) :: comm
-
-!Local variables-------------------------------
- integer :: ig
 
 ! *************************************************************************
 
@@ -6501,7 +6479,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
          eig_nk = gwr%ks_ebands%eig(band1, ik_ibz, spin)
          call c_f_pointer(c_loc(ugb_kibz%buffer_cplx(:,il_b1)), cwave, shape=[2, npw_ki*nspinor])
          call ddkop%apply(eig_nk, npw_ki, nspinor, cwave, cwaveprj)
-         !gh1c_block(:,:,:,ib) = ddkop%gh1c(:, 1:npw_ki*nspinor,:)
+         gh1c_block(:,:,:,ib) = ddkop%gh1c(:, 1:npw_ki*nspinor,:)
        end do
 
        ! Loop over "conduction" states.
@@ -6574,13 +6552,13 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
 
            call accumulate_head_wings_imagw( &
                                         npwe, nomega, nI, nJ, dtset%symchi, &
-                                        is_metallic, ik_bz, isym_k, trev_k, nspinor, cryst, ltg_q, Gsph, &
+                                        is_metallic, ik_bz, isym_k, trev_k, nspinor, cryst, ltg_q, gsph, &
                                         rhotwx, rhotwg, green_w, chi0_head, chi0_lwing, chi0_uwing)
          end do ! band2
        end do ! band1
 
        ABI_FREE(ug1_block)
-       ABI_FREE(gh1c_block)
+       ABI_SFREE(gh1c_block)
      end do ! band1_start
 
      !if (gwr%usepaw == 0 .and. dtset%inclvkb /= 0 .and. dtset%symchi == 1) then
@@ -6628,7 +6606,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  ! Reconstruct $chi0{\down,\down}$ from $chi0{\up,\up}$.
  ! Works only in the case of magnetic group Shubnikov type IV.
  if (cryst%use_antiferro) then
-   call symmetrize_afm_chi0(Cryst, Gsph, ltg_q, npwe, nomega, &
+   call symmetrize_afm_chi0(Cryst, gsph, ltg_q, npwe, nomega, &
      chi0_head=chi0_head, chi0_lwing=chi0_lwing, chi0_uwing=chi0_uwing)
  end if
 
@@ -6711,7 +6689,7 @@ subroutine gwr_build_sigxme(gwr)
 
 !Local variables-------------------------------
 !scalars
- integer :: nsppol, nspinor, ierr, my_ikf, band_sum, ii, jj, kb, il_b, ig, iab !ig_start,
+ integer :: nsppol, nspinor, ierr, my_ikf, band_sum, ii, jj, kb, il_b, iab !ig_start, ig,
  integer :: my_is, ikcalc, ikcalc_ibz, bmin, bmax, band, istwf_k, npw_k
  integer :: spin, isym, jb, is_idx, use_umklp
  integer :: spad, wtqm, wtqp, irow, spadx1, spadx2

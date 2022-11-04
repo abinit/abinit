@@ -5175,7 +5175,7 @@ subroutine xmpi_get_pid_vmrss(mem_mb, ierr)
 
   integer :: unit
   integer(c_int) :: pid
-  logical :: exist
+  !logical :: exist
   character(len=500) :: line
   character(len=500) :: spid
 
@@ -5216,7 +5216,7 @@ subroutine parse_str_with_mem_units(str, mem_mb)
   character(len=*),intent(in) :: str
   real(dp),intent(out) :: mem_mb
 
-  integer :: istart, istop, istart_mem, istop_mb, iostat
+  integer :: istart, istop, istart_mem, iostat !istop_mb,
   real(dp) :: mem_fact
 
   istart = index(str, ":")
