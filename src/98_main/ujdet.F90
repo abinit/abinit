@@ -299,10 +299,10 @@ program ujdet
 
  end do ! jdtset
 
-!Not yet really parallelized ...
- if (iam_master) then
-   call pawuj_det(dtpawuj,ndtset, filnam(2)//"_UJDET.nc",ures)
- end if
+!Not yet really parallelized ... 
+! if (iam_master) then
+!   call pawuj_det(dtpawuj,ndtset, filnam(2)//"_UJDET.nc",ures)
+! end if
 
 !Close files
  if (iam_master) then
