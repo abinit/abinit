@@ -3026,7 +3026,7 @@ end subroutine dterm_adotp
 !! SOURCE
 
 subroutine dterm_dijhat(atindx,dterm,dtset,gprimd,nfftf,pawang,&
-    & pawfgrtab,pawtab,ucvol,vtrial,vxc,xred)
+    & pawfgrtab,pawtab,ucvol,vtrial,vxc)
 
   !Arguments ------------------------------------
   !scalars
@@ -3038,7 +3038,7 @@ subroutine dterm_dijhat(atindx,dterm,dtset,gprimd,nfftf,pawang,&
 
   !arrays
   integer,intent(in) :: atindx(dtset%natom)
-  real(dp),intent(in) :: gprimd(3,3),xred(3,3)
+  real(dp),intent(in) :: gprimd(3,3)
   real(dp),intent(inout) :: vtrial(nfftf,dtset%nspden)
   real(dp),intent(inout) :: vxc(nfftf,dtset%nspden)
   type(pawfgrtab_type),intent(inout) :: pawfgrtab(dtset%natom)
@@ -3046,38 +3046,61 @@ subroutine dterm_dijhat(atindx,dterm,dtset,gprimd,nfftf,pawang,&
 
   !Local variables -------------------------
   !scalars
-  integer :: cplex_dij,iat,iatom,ijlmn,itypat,ndij,qphase
+  integer :: cplex_dij,iat,iatom,ic,ijlmn,ils,ilslm,isel,itypat
+  integer :: klm,klmn,lmax,lm_size,lmin
+  real(dp) :: dijhat,vr
 
   !arrays
-  real(dp) :: qphon(3)
-  real(dp),allocatable :: dijhat(:,:),v_dijhat(:,:)
+  real(dp),allocatable :: prod(:),v_dijhat(:,:)
 
 !--------------------------------------------------------------------
 
  dterm%dijhat = czero; dterm%ddijhat = czero
 
  cplex_dij = 2
- qphase = 1
- ndij = 1
- qphon(1:3) = zero
 
  ABI_MALLOC(v_dijhat,(nfftf,dtset%nspden))
+ ! as usexcnhat 0 is enforced, there is no vxc in interaction term in \hat{Dij}
  v_dijhat(1:nfftf,1:dtset%nspden) = vtrial(1:nfftf,1:dtset%nspden) - vxc(1:nfftf,1:dtset%nspden)
 
  do iat=1,dtset%natom
    iatom=atindx(iat)
    itypat=dtset%typat(iat)
+   lm_size=pawtab(itypat)%lcut_size**2
 
-   ABI_MALLOC(dijhat,(cplex_dij*qphase*pawtab(itypat)%lmn2_size,ndij))
+   ABI_MALLOC(prod,(lm_size))
 
-   call pawdijhat(dijhat,cplex_dij,qphase,gprimd,iatom,dtset%natom,ndij,nfftf,nfftf,&
-     & dtset%nspden,dtset%nsppol,pawang,pawfgrtab(iatom),pawtab(itypat),v_dijhat,qphon,ucvol,xred)
+   !call pawdijhat(dijhat,cplex_dij,qphase,gprimd,iatom,dtset%natom,ndij,nfftf,nfftf,&
+   !  & dtset%nspden,dtset%nsppol,pawang,pawfgrtab(iatom),pawtab(itypat),v_dijhat,qphon,ucvol,xred)
 
-   do ijlmn=1,pawtab(itypat)%lmn2_size
-     dterm%dijhat(iatom,ijlmn) = CMPLX(dijhat(2*ijlmn-1,1),dijhat(2*ijlmn,1))
+   ! compute Int[V(r).g_l(r).Y_lm(r)]
+   prod=zero
+   do ilslm=1,lm_size
+     do ic=1,pawfgrtab(iatom)%nfgd
+       vr=v_dijhat(pawfgrtab(iatom)%ifftsph(ic),1)
+       prod(ilslm)=prod(ilslm)+vr*pawfgrtab(iatom)%gylm(ic,ilslm)
+     end do
    end do
+   !scaling factor (unit volume)
+   prod=prod*ucvol/dble(nfftf)
 
-   ABI_FREE(dijhat)
+   !compute Sum_(i,j)_LM { q_ij^L Int[V(r).g_l(r).Y_lm(r)] }
+   do klmn=1,pawtab(itypat)%lmn2_size
+     klm =pawtab(itypat)%indklmn(1,klmn)
+     lmin=pawtab(itypat)%indklmn(3,klmn)
+     lmax=pawtab(itypat)%indklmn(4,klmn)
+     dijhat = zero
+     do ils=lmin,lmax,2
+       do ilslm=ils**2+1,(ils+1)**2
+         isel=pawang%gntselect(ilslm,klm)
+         if (isel>0) dijhat=dijhat &
+           & +prod(ilslm)*pawtab(itypat)%qijl(ilslm,klmn)
+       end do !ilslm
+     end do ! ils
+     dterm%dijhat(iatom,klmn) = CMPLX(dijhat,zero)
+   end do ! klmn
+ 
+   ABI_FREE(prod)
 
  end do !iat
 
@@ -4710,7 +4733,7 @@ subroutine make_d(atindx,atindx1,cprj,dimlmn,dterm,dtset,gprimd,mcprj,nfftf,&
 
  ! term dijhat
  call dterm_dijhat(atindx,dterm,dtset,gprimd,nfftf,pawang,pawfgrtab,pawtab,ucvol,&
-   & vtrial,vxc,xred)
+   & vtrial,vxc)
 
  call sum_d(dterm)
 
