@@ -3171,7 +3171,7 @@ subroutine macroin2(dtsets, ndtset_alloc)
  integer,intent(in) :: ndtset_alloc
 !arrays
  type(dataset_type),intent(inout) :: dtsets(0:ndtset_alloc)
-
+ character(len=500) :: msg
 !Local variables -------------------------------
 !scalars
  integer :: idtset,pawujat
@@ -3181,8 +3181,12 @@ subroutine macroin2(dtsets, ndtset_alloc)
  do idtset=1,ndtset_alloc
    ! Set first PAW+U atom to perform atomic level shift
    if (dtsets(idtset)%typat(1)==0) cycle
+!LMac Here is where the pawujat is perturbed.
    pawujat=dtsets(idtset)%pawujat
    pawujat=pawujat-count(dtsets(idtset)%lpawu( dtsets(idtset)%typat( 1:pawujat ))<0)
+
+   write(msg,*)"LMac pawujat is: ",pawujat
+   call wrtout(std_out,msg)
 
    if (dtsets(idtset)%macro_uj>0) then
      ! Level shift atom with amplitude pawujv

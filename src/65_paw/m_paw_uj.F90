@@ -53,8 +53,7 @@ MODULE m_paw_uj
 !! FUNCTION
 !! This data type contains the potential shifts and the occupations
 !! for the determination of U and J for the DFT+U calculations.
-!! iuj=1,2: non-selfconsistent calculations. iuj=3,4 selfconsistent calculations.
-!! iuj=2,4  => pawujsh<0 ; iuj=1,3 => pawujsh >0,
+!! iuj=1,3: non-selfconsistent calculations. iuj=2,4 selfconsistent calculations.
 !!
 !! SOURCE
 
@@ -73,6 +72,7 @@ MODULE m_paw_uj
 
 ! Real
   real(dp) :: diemix    ! mixing parameter
+  real(dp) :: diemixmag ! magnetic mixing parameter
   real(dp) :: mdist     ! maximal distance of ions
   real(dp) :: pawujga   ! gamma for inversion of singular matrices
   real(dp) :: ph0phiint ! integral of phi(:,1)*phi(:,1)
@@ -157,10 +157,10 @@ subroutine pawuj_ini(dtpawuj,ndtset)
 ! *********************************************************************
 
  DBG_ENTER("COLL")
-
  do iuj=0,ndtset
    !write(std_out,*)'pawuj_ini iuj ',iuj
    dtpawuj(iuj)%diemix=0.45_dp
+   dtpawuj(iuj)%diemixmag=0.45_dp
    dtpawuj(iuj)%iuj=0
    dtpawuj(iuj)%nat=0
    dtpawuj(iuj)%ndtset=1
@@ -171,7 +171,7 @@ subroutine pawuj_ini(dtpawuj,ndtset)
    dtpawuj(iuj)%pawujga=one
    dtpawuj(iuj)%pawprtvol=1
    dtpawuj(iuj)%ph0phiint=one
-   dtpawuj(iuj)%dmatpuopt=3
+   dtpawuj(iuj)%dmatpuopt=2
    dtpawuj(iuj)%pawujrad=3.0_dp
    dtpawuj(iuj)%pawrad=20.0_dp
    !Allocate arrays
@@ -247,7 +247,10 @@ end subroutine pawuj_free
 !! FUNCTION
 !!  From the complete dtpawuj-dataset determines U (or J) parameter for
 !!  PAW+U calculations
-!!  Relevant only for automatic determination of U in PAW+U context
+!!  Relevant only for automatic determination of Hubbard Parameters in
+!!  PAW+U context.
+!!  Hubbard U = diemix/chi0-1/chi
+!!  Hund's J = 1/chi-diemixmag/chi0
 !!
 !! INPUTS
 !!  dtpawuj=potential shifts (vsh) and atomic occupations (occ)
@@ -275,18 +278,20 @@ subroutine pawuj_det(dtpawuj,ndtpawuj,ujdet_filename,ures)
  integer                     :: ii,jj,nat_org,jdtset,nspden,macro_uj,kdtset,marr
  integer                     :: im1,ndtuj,idtset, nsh_org, nsh_sc,nat_sc,maxnat
  integer                     :: pawujat,pawprtvol,pawujoption
- integer                     :: dmatpuopt,invopt
- real(dp)                    :: pawujga,ph0phiint,intg,fcorr,eyp
+ integer                     :: dmatpuopt,invopt,ipert
+ real(dp)                    :: pawujga,ph0phiint,intg,fcorr,eyp,diem,signum
 
  character(len=500)          :: message
  character(len=2)            :: hstr
+ character(len=5)            :: pertname
+ character(len=1)            :: parname
 !arrays
  integer                     :: ext(3)
  real(dp)                    :: rprimd_sc(3,3),vsh(ndtpawuj),a(5),b(5)
  integer,allocatable         :: narrm(:)
  integer,allocatable         :: idum2(:,:),jdtset_(:),smult_org(:),smult_sc(:)
- real(dp),allocatable        :: chih(:,:),dqarr(:,:),dqarrr(:,:),dparr(:,:),dparrr(:,:),xred_org(:,:),drarr(:,:)
- real(dp),allocatable        :: magv_org(:),magv_sc(:),chi_org(:),chi0_org(:),chi0_sc(:), chi_sc(:), xred_sc(:,:)
+ real(dp),allocatable        :: luocc(:,:),dqarr(:,:),dqarrr(:,:),dparr(:,:),dparrr(:,:),xred_org(:,:),drarr(:,:)
+ real(dp),allocatable        :: magv_org(:),magv_sc(:),chi(:),chi0(:),chi0_sc(:), chi_sc(:), xred_sc(:,:)
  real(dp),allocatable        :: sdistv_org(:),sdistv_sc(:),distv_org(:),distv_sc(:)
  integer                     :: ncid=0
 ! *********************************************************************
@@ -298,15 +303,15 @@ subroutine pawuj_det(dtpawuj,ndtpawuj,ujdet_filename,ures)
 !### 01. Allocations
 
 !Initializations
- ndtuj=count(dtpawuj(:)%iuj/=-1)-1 ! number of datasets initialized by pawuj_red
+ ndtuj=count(dtpawuj(:)%iuj/=-1) ! number of datasets initialized by pawuj_red
  ABI_MALLOC(jdtset_,(0:ndtuj))
  jdtset_(0:ndtuj)=pack(dtpawuj(:)%iuj,dtpawuj(:)%iuj/=-1)
  jdtset=maxval(dtpawuj(:)%iuj)
 
 !DEBUG
-!write(message,'(10(a,i3))')'pawuj_det jdtset ',jdtset,&
-!& ' ndtuj ', ndtuj,' ndtpawuj ',ndtpawuj
-!call wrtout(std_out,message,'COLL')
+write(message,'(10(a,i3))')'pawuj_det jdtset ',jdtset,&
+& ' ndtuj ', ndtuj,' ndtpawuj ',ndtpawuj
+call wrtout(std_out,message,'COLL')
 !call flush_unit(6)
 !END DEBUG
 
@@ -324,13 +329,13 @@ subroutine pawuj_det(dtpawuj,ndtpawuj,ujdet_filename,ures)
  if (dmatpuopt==1) eyp=eyp+3.0_dp
  if (dmatpuopt>=3) eyp=(eyp+3.0_dp-dmatpuopt)
 
- ABI_MALLOC(chih,(ndtpawuj,nat_org))
+ ABI_MALLOC(luocc,(ndtpawuj,nat_org))
  ABI_MALLOC(idum2,(marr,0:ndtuj))
  ABI_MALLOC(drarr,(marr,0:ndtuj))
  ABI_MALLOC(magv_org,(nat_org))
  ABI_MALLOC(xred_org,(3,nat_org))
- ABI_MALLOC(chi0_org,(nat_org))
- ABI_MALLOC(chi_org,(nat_org))
+ ABI_MALLOC(chi0,(nat_org))
+ ABI_MALLOC(chi,(nat_org))
  ABI_MALLOC(dparr,(marr,0:ndtuj))
  ABI_MALLOC(dparrr,(marr,0:ndtuj))
  ABI_MALLOC(dqarr,(marr,0:ndtuj))
@@ -343,17 +348,17 @@ subroutine pawuj_det(dtpawuj,ndtpawuj,ujdet_filename,ures)
 !call wrtout(std_out,message,'COLL')
 !END DEBUG
  idum2=1 ; drarr=one
- chih=zero
+ luocc=zero
 
 !write(std_out,*) 'pawuj 02'
 !###########################################################
-!### 02. Create the file UJDET.nc
+!### 02. Create the file UJDET.nc for the OMac ujdet utility
 
  if(.false.)write(std_out,*)ujdet_filename ! This is for the abirules
 
 !write(std_out,*) 'pawuj 03'
 !###########################################################
-!### 03. Write out the Input for UJDET
+!### 03. Write out the Input for the Amadon ujdet utility
 
  write(message, '(3a)' ) ch10,&
 & ' # input for ujdet, cut it using ''sed -n "/MARK/,/MARK/p" abi.out > ujdet.in ''------- ',ch10
@@ -404,44 +409,19 @@ subroutine pawuj_det(dtpawuj,ndtpawuj,ujdet_filename,ures)
  kdtset=0
 
  do idtset=0,ndtpawuj
-!  DEBUG
-!  write(message,fmt='((a,i3,a))')'pawuj_det m2, idtset ',idtset,ch10
-!  call wrtout(std_out,message,'COLL')
-!  call flush_unit(6)
-!  END DEBUG
    if (dtpawuj(idtset)%iuj/=-1) then
      dparr(1:nspden*nat_org,kdtset)=reshape(dtpawuj(idtset)%vsh,(/nspden*nat_org/))
      dparrr(1:nspden*nat_org,kdtset)=reshape(dtpawuj(idtset)%occ,(/nspden*nat_org/))
-!    DEBUG
-!    write(message,fmt='((a,i3,a))')'pawuj_det m3, idtset ',idtset,ch10
-!    call wrtout(std_out,message,'COLL')
-!    write(std_out,*)' marr,narrm,ncid,ndtuj,nat_org,kdtset,idtset=',marr,narrm,ncid,ndtuj,nat_org,kdtset,idtset
-!    write(std_out,*)' dtpawuj(idtset)%xred=',dtpawuj(idtset)%xred
-!    call flush_unit(6)
-!    END DEBUG
      dqarr(1:nat_org*3,kdtset)=reshape(dtpawuj(idtset)%xred,(/nat_org*3/))
      dqarrr(1:3*3,kdtset)=reshape(dtpawuj(idtset)%rprimd,(/3*3/))
      idum2(1:3,kdtset)=reshape(dtpawuj(idtset)%scdim,(/3/))
      drarr(1:nwfchr,kdtset)=reshape(dtpawuj(idtset)%wfchr,(/nwfchr/))
-!    DEBUG
-!    write(message,fmt='((a,i3,a))')'pawuj_det m4, idtset ',idtset,ch10
-!    call wrtout(std_out,message,'COLL')
-!    call flush_unit(6)
-!    END DEBUG
      kdtset=kdtset+1
    end if
  end do
 
-!DEBUG
-!write(message,fmt='((a,i3,a))')'pawuj_det m5'
-!call wrtout(std_out,message,'COLL')
-!END DEBUG
  call prttagm(dparr,idum2,ab_out,jdtset_,2,marr,nspden*nat_org,narrm,ncid,ndtuj,'vsh'//trim(hstr),'DPR',0)
  call prttagm(dparrr,idum2,ab_out,jdtset_,2,marr,nspden*nat_org,narrm,ncid,ndtuj,'occ'//trim(hstr),'DPR',0)
-!DEBUG
-!write(message,fmt='((a,i3,a))')'pawuj_det m6'
-!call wrtout(std_out,message,'COLL')
-!END DEBUG
  call prttagm(dqarr,idum2,ab_out,jdtset_,2,marr,nat_org*3,narrm,ncid,ndtuj,'xred'//trim(hstr),'DPR',0)
  call prttagm(dqarrr,idum2,ab_out,jdtset_,2,marr,3*3,narrm,ncid,ndtuj,'rprimd'//trim(hstr),'DPR',0)
  call prttagm(dqarrr,idum2,ab_out,jdtset_,2,marr,3,narrm,ncid,ndtuj,'scdim'//trim(hstr),'INT',0)
@@ -457,15 +437,15 @@ subroutine pawuj_det(dtpawuj,ndtpawuj,ujdet_filename,ures)
 & ' # ------- end input for ujdet: end-MARK  -------- ',ch10
  call wrtout(ab_out,message,'COLL')
 
-!write(std_out,*) 'pawuj 04'
 !###########################################################
-!### 04. Test
+!### 04. Testing consistency of parameters and outputting info
 
  if (ndtuj/=4)  return
 
  write(message, '(3a)' ) ch10,' ---------- calculate U, (J) start ---------- ',ch10
  call wrtout(ab_out,message,'COLL')
 
+!Tests if perturbed atom is consistent with ujdet atom
  if (all(dtpawuj(1:ndtpawuj)%pawujat==pawujat)) then
    write (message,fmt='(a,i3)') ' All pawujat  ok and equal to ',pawujat
    call wrtout(ab_out,message,'COLL')
@@ -476,35 +456,26 @@ subroutine pawuj_det(dtpawuj,ndtpawuj,ujdet_filename,ures)
    return
  end if
 
- if (all(dtpawuj(1:ndtpawuj)%macro_uj==macro_uj)) then
-   if (nspden==1) then
-     write(message,fmt='(2a)') ' pawuj_det found nspden==1, determination',&
-&     ' of U-parameter for unpol. struct. (non standard)'
-   else if (macro_uj==1.and.nspden==2) then
-     write(message,fmt='(2a)') ' pawuj_det: found macro_uj=1 and nspden=2:',&
-&     ' standard determination of U-parameter'
-   else if (macro_uj==2.and.nspden==2) then
-     write(message,fmt='(2a)') ' pawuj_det: found macro_uj=2 and nspden=2:',&
-&     ' determination of U on single spin channel (experimental)'
-
-   else if (macro_uj==3.and.nspden==2) then
-     write(message,fmt='(2a)') ' pawuj_det: found macro_uj=3 and nspden=2,',&
-&     ' determination of J-parameter on single spin channel (experimental)'
-   else if (macro_uj==4.and.nspden==2) then
-     write(message,fmt='(2a)') ' pawuj_det: found macro_uj=4 and nspden=2,',&
-&     ' Hunds J determination – L. MacEnulty August 2021'
-   end if
-
-   write (message,fmt='(a,i3,a,a)') ' All macro_uj ok and equal to ',macro_uj,ch10,trim(message)
-   write (message,'(a,i3)') ' All macro_uj ok and equal to ',macro_uj
-   call wrtout(ab_out,message,'COLL')
- else
-   write (message,fmt='(a,10i3)') ' Differing values of macro_uj were found: ',dtpawuj(:)%macro_uj
-   write (message,fmt='(3a)')trim(message),ch10,' No determination of U.'
-   call wrtout(ab_out,message,'COLL')
-   return
+!Tests consistency of macro_uj, then writes message about macro_uj procedure selected. LMac
+ if (nspden==1) then
+   write(message,fmt='(2a)') ' nspden==1, determination',&
+&   ' of U-parameter for unpolarized structure (non standard)'
+ else if (macro_uj==1.and.nspden==2) then
+   write(message,fmt='(2a)') ' macro_uj=1 and nspden=2:',&
+&   ' standard determination of Hubbard U-parameter'
+ else if (macro_uj==2.and.nspden==2) then
+   write(message,fmt='(2a)') ' macro_uj=2 and nspden=2:',&
+&   ' determination of parameter on single spin channel (experimental)'
+ else if (macro_uj==3.and.nspden==2) then
+   write(message,fmt='(2a)') ' macro_uj=3 and nspden=2,',&
+&   ' determination of (not Hunds) J-parameter on single spin channel (experimental)'
+ else if (macro_uj==4.and.nspden==2) then
+   write(message,fmt='(2a)') ' macro_uj=4 and nspden=2,',&
+&   ' Hunds J determination – L. MacEnulty August 2021'
  end if
+ call wrtout(ab_out,message,'COLL')
 
+!Tests compatibility of nspden and macro_uj
  if (macro_uj>1.and.nspden==1) then
    write (message,'(4a,2a)') ' U on a single spin channel (or J) can only be determined for nspden=2 ,',ch10,&
 &   'No determination of U.'
@@ -513,27 +484,40 @@ subroutine pawuj_det(dtpawuj,ndtpawuj,ujdet_filename,ures)
  end if
 
 !Calculation of response matrix
-
+ diem=dtpawuj(1)%diemix !Unscreened response in Hubbard U impacted by diemix
+ pertname='alpha' !Hubbard U perturbation; applied equally to spins up and down
+ parname='U'
+ signum=1.0d0 !Hubbard U is signum*(1/chi0-1/chi)
  do jdtset=1,4
    if (nspden==1) then
-     chih(jdtset,1:nat_org)=dtpawuj(jdtset)%occ(1,:)
+     luocc(jdtset,1:nat_org)=dtpawuj(jdtset)%occ(1,:)
+   !Hubbard U: uses sum of spin up and spin down occupancies
    else if (macro_uj==1.and.nspden==2) then
-     chih(jdtset,1:nat_org)=dtpawuj(jdtset)%occ(1,:)+dtpawuj(jdtset)%occ(2,:)
+     luocc(jdtset,1:nat_org)=dtpawuj(jdtset)%occ(1,:)+dtpawuj(jdtset)%occ(2,:) !Total occupation
    else if (macro_uj==2.and.nspden==2) then
-     chih(jdtset,1:nat_org)=dtpawuj(jdtset)%occ(1,:)
+     luocc(jdtset,1:nat_org)=dtpawuj(jdtset)%occ(1,:)
    else if (macro_uj==3.and.nspden==2) then
-     chih(jdtset,1:nat_org)=dtpawuj(jdtset)%occ(2,:)
+     luocc(jdtset,1:nat_org)=dtpawuj(jdtset)%occ(2,:)
+     parname='J'
+   !Hund's J: uses difference of spin up and spin down occupancies
    else if (macro_uj==4.and.nspden==2) then
-     chih(jdtset,1:nat_org)=dtpawuj(jdtset)%occ(1,:)+dtpawuj(jdtset)%occ(2,:)
+     luocc(jdtset,1:nat_org)=dtpawuj(jdtset)%occ(1,:)-dtpawuj(jdtset)%occ(2,:) !Magnetization
+     diem=dtpawuj(1)%diemixmag !Unscreened response in Hund's J impacted by diemixmag
+     pertname='beta ' !Hund's J perturbation: +beta to spin up, -beta to down
+     parname='J'
+     signum=-1.0d0 !Hund's J is -1*(1/chi0-1/chi)
    end if
    vsh(jdtset)=dtpawuj(jdtset)%vsh(1,pawujat)
-   if (pawprtvol==3) then
+   if (pawprtvol==-3) then
      write(message,fmt='(2a,i3,a,f15.12)') ch10,' Potential shift vsh(',jdtset,') =',vsh(jdtset)
      call wrtout(std_out,message,'COLL')
-     write(message,fmt='( a,i3,a,120f15.9)') ' Occupations occ(',jdtset,') ',chih(jdtset,1:nat_org)
+     write(message,fmt='( a,i3,a,120f15.9)') ' Occupations occ(',jdtset,') ',luocc(jdtset,1:nat_org)
      call wrtout(std_out,message,'COLL')
    end if
  end do
+
+ write(message,fmt='( a)') 'Occupations assigned.'
+ call wrtout(std_out,message,'COLL')
 
  if (any(abs((/(vsh(ii)-vsh(ii+2), ii=1,2) /))<0.00000001)) then
    write(message, '(2a,18f10.7,a)' )  ch10,' vshift is too small: ',abs((/(vsh(ii)-vsh(ii+2), ii=1,2) /))
@@ -541,20 +525,12 @@ subroutine pawuj_det(dtpawuj,ndtpawuj,ujdet_filename,ures)
    return
  end if
 
-!DEBUG
-!write(message,fmt='(a)')'pawuj_det: after test vsh'
-!call wrtout(std_out,message,'COLL')
-!END DEBUG
+ !Two-point linear regression of response matrices.
+ chi0=(luocc(1,1:nat_org)-luocc(3,1:nat_org))/(vsh(1)-vsh(3))/diem
+ chi=(luocc(2,1:nat_org)-luocc(4,1:nat_org))/(vsh(2)-vsh(4))
 
- chi0_org=(chih(1,1:nat_org)-chih(3,1:nat_org))/(vsh(1)-vsh(3))/dtpawuj(1)%diemix
- chi_org=(chih(2,1:nat_org)-chih(4,1:nat_org))/(vsh(2)-vsh(4))
-
- if (pawprtvol==-3) then
-   write(message,fmt='(2a, 150f15.10)') ch10,' Chi_0n ',chi0_org
-   call wrtout(std_out,message,'COLL')
-   write(message,fmt='(a, 150f15.10)') ' Chi_n ',chi_org
-   call wrtout(std_out,message,'COLL')
- end if
+ write(message,fmt='( a)') ' Response matrices calculated successfully.'
+ call wrtout(std_out,message,'COLL')
 
  write(message,fmt='(a)')': '
  if (nspden==2) then
@@ -579,7 +555,6 @@ subroutine pawuj_det(dtpawuj,ndtpawuj,ujdet_filename,ures)
  end if
 
 !Case of extrapolation to larger r_paw: calculate intg
-
  if (all(dtpawuj(1)%wfchr(:)/=0).and.ph0phiint/=1) then
    if (dtpawuj(1)%pawujrad<20.and.dtpawuj(1)%pawujrad>dtpawuj(1)%pawrad) then
      fcorr=(1-ph0phiint)/(IRadFnH(dtpawuj(1)%pawrad,20.0_dp,nint(dtpawuj(1)%wfchr(2)),&
@@ -611,13 +586,17 @@ subroutine pawuj_det(dtpawuj,ndtpawuj,ujdet_filename,ures)
    intg=one
  end if
 
+ write(message,fmt='(a)') 'Amadon stuff computed.'
+ call wrtout(std_out,message,'COLL')
 
 !Determine U in primitive cell
-
  write(message,fmt='(a)')' pawuj_det: determine U in primitive cell'
  call wrtout(std_out,message,'COLL')
 
- call lcalcu(int(magv_org),nat_org,dtpawuj(1)%rprimd,dtpawuj(1)%xred,chi_org,chi0_org,pawujat,ures,pawprtvol,pawujga,pawujoption)
+ call lcalcu(int(magv_org),nat_org,dtpawuj(1)%rprimd,dtpawuj(1)%xred,chi,chi0,pawujat,ures,pawprtvol,pawujga,pawujoption)
+
+ write(message,fmt='(a)') 'U calculated successfully.'
+ call wrtout(std_out,message,'COLL')
 
 !Begin calculate U in supercell
 
@@ -628,11 +607,46 @@ subroutine pawuj_det(dtpawuj,ndtpawuj,ujdet_filename,ures)
  call shellstruct(dtpawuj(1)%xred,dtpawuj(1)%rprimd,nat_org,&
 & int(magv_org),distv_org,smult_org,sdistv_org,nsh_org,pawujat,pawprtvol)
 
+
+!LMac: Printing relevant information about the Hubbard parameter just calculated.
+ write(message,'(4a)') ch10,'***********************  Linear Response ',parname,'  *******************',ch10
+ call wrtout(std_out,message,'COLL')
+ call wrtout(ab_out,message,'COLL')
+ write(message, '(a,i7)' ) 'Info printed for perturbed atom: ',pawujat
+ call wrtout(std_out,message,'COLL')
+ call wrtout(ab_out,message,'COLL')
+ write(message, fmt='(6a)') '         ',pertname,' [eV]','            n_0','               n',ch10
+ call wrtout(std_out,message,'COLL')
+ call wrtout(ab_out,message,'COLL')
+ do ipert=1,2
+   write(message, fmt='(3f15.10)') vsh(ipert*2-1)*Ha_eV,luocc(ipert,pawujat),luocc(ipert+1,pawujat)
+   call wrtout(std_out,message,'COLL')
+   call wrtout(ab_out,message,'COLL')
+ end do
+ write(message,'(a)') 'Scalar response functions: '
+ call wrtout(std_out,message,'COLL')
+ call wrtout(ab_out,message,'COLL')
+ write(message,fmt='(2a,f12.5)') ch10,' Chi0 [eV^-1]: ',chi0(pawujat)/Ha_eV
+ call wrtout(std_out,message,'COLL')
+ call wrtout(ab_out,message,'COLL')
+ write(message,fmt='(2a,f12.5)') ch10,' Chi [eV^-1]:  ',chi(pawujat)/Ha_eV
+ call wrtout(std_out,message,'COLL') 
+ call wrtout(ab_out,message,'COLL')
+ write(message,'(2a,f6.2,a)') 'The scalar ',parname,' from the two-point regression scheme is ',signum*ures,' eV.'
+ call wrtout(std_out,message,'COLL')
+ call wrtout(ab_out,message,'COLL')
+ write(message,'(3a)') ch10,'**************************************************************************',ch10
+ call wrtout(std_out,message,'COLL')
+ call wrtout(ab_out,message,'COLL')
+ write(message,'(2a)') 'Note: For more reliable linear regressions of the response matrices, it is ',&
+'advised that you have more than two points. See the OMac protocol for more information.'
+ call wrtout(std_out,message,'COLL')
+ call wrtout(ab_out,message,'COLL')
+
  ii=1
- write(message,*) 'The scalar U(J) from the two-point regression scheme is',ures
  write(message, fmt='(8a)') ' URES ','     ii','    nat','       r_max','    U(J)[eV]','   U_ASA[eV]','   U_inf[eV]',ch10
- write(message, fmt='(a,2i7,4f12.5)') trim(message)//' URES ',ii,nat_org,maxval(abs(distv_org)),ures,ures*exp(log(intg)*eyp),&
-& ures*exp(log(ph0phiint)*eyp)
+ write(message, fmt='(a,2i7,4f12.5)') trim(message)//' URES ',ii,nat_org,maxval(abs(distv_org)),signum*ures,signum*ures*exp(log(intg)*eyp),&
+& signum*ures*exp(log(ph0phiint)*eyp)
  call wrtout(std_out,message,'COLL')
  call wrtout(ab_out,message,'COLL')
 
@@ -704,9 +718,9 @@ subroutine pawuj_det(dtpawuj,ndtpawuj,ujdet_filename,ures)
      invopt=1
    end if
 
-   call chiscwrt(chi0_org,distv_org,nat_org,sdistv_org,smult_org,nsh_org,&
+   call chiscwrt(chi0,distv_org,nat_org,sdistv_org,smult_org,nsh_org,&
 &   chi0_sc,distv_sc,nat_sc,smult_sc,nsh_sc,invopt,pawprtvol)
-   call chiscwrt(chi_org,distv_org,nat_org,sdistv_org,smult_org,nsh_org,&
+   call chiscwrt(chi,distv_org,nat_org,sdistv_org,smult_org,nsh_org,&
 &   chi_sc,distv_sc,nat_sc,smult_sc,nsh_sc,invopt,pawprtvol)
 
 !  Calculate U in supercell
@@ -716,8 +730,8 @@ subroutine pawuj_det(dtpawuj,ndtpawuj,ujdet_filename,ures)
 !  END DEBUG
    call lcalcu(int(magv_sc),nat_sc,rprimd_sc,xred_sc,chi_sc,chi0_sc,pawujat,ures,pawprtvol,pawujga,pawujoption)
 
-   write(message, fmt='(a,2i7,4f12.5)') ' URES ',ii,nat_sc,maxval(abs(distv_sc)),ures,ures*exp(log(intg)*eyp),&
-&   ures*exp(log(ph0phiint)*eyp)
+   write(message, fmt='(a,2i7,4f12.5)') ' URES ',ii,nat_sc,maxval(abs(distv_sc)),signum*ures,signum*ures*exp(log(intg)*eyp),&
+&   signum*ures*exp(log(ph0phiint)*eyp)
    call wrtout(std_out,message,'COLL')
    call wrtout(ab_out,message,'COLL')
 
@@ -752,11 +766,11 @@ subroutine pawuj_det(dtpawuj,ndtpawuj,ujdet_filename,ures)
  ABI_FREE(dqarr)
  ABI_FREE(dqarrr)
  ABI_FREE(jdtset_)
- ABI_FREE(chi_org)
- ABI_FREE(chi0_org)
+ ABI_FREE(chi)
+ ABI_FREE(chi0)
  ABI_FREE(smult_org)
  ABI_FREE(sdistv_org)
- ABI_FREE(chih)
+ ABI_FREE(luocc)
  ABI_FREE(idum2)
  ABI_FREE(drarr)
  ABI_FREE(dparr)
@@ -789,7 +803,7 @@ end subroutine pawuj_det
 !!  pawtab(ntypat*usepaw) <type(pawtab_type)>=paw tabulated starting data
 !!
 !! OUTPUT
-!!  dtpawuj(0:ndtpawuj) (initialization of fields vsh, occ, iuj,nnat)
+!!  dtpawuj(0:ndtpawuj) (initialization of fields vsh, occ, occ0, iuj,nnat)
 !!
 !! SOURCE
 
@@ -807,12 +821,12 @@ subroutine pawuj_red(dtset,dtpawuj,fatvshift,my_natom,natom,ntypat,paw_ij,pawrad
  type(pawtab_type),intent(in)       :: pawtab(ntypat)
  type(pawrad_type),intent(in)       :: pawrad(ntypat)
  type(dataset_type),intent(in)      :: dtset
- type(macro_uj_type),intent(inout)  :: dtpawuj(0:ndtpawuj)
+ type(macro_uj_type),intent(inout)  :: dtpawuj(1:ndtpawuj)
 
 !Local variables-------------------------------
 !scalars
  integer,parameter           :: natmax=2,ncoeff=3
- integer                     :: iatom,iatom_tot,ierr,im1,im2,ispden,itypat,ll,nspden,nsppol,iuj
+ integer                     :: iatom,iatom_tot,ierr,im1,im2,ispden,itypat,ll,nspden,nsppol,iuj,ncyc,icyc
  integer                     :: my_comm_atom,nnat,natpawu,natvshift,pawujat,ndtset,typawujat
  logical                     :: usepawu !antiferro,
  logical                     :: my_atmtab_allocated,paral_atom
@@ -885,106 +899,103 @@ subroutine pawuj_red(dtset,dtpawuj,fatvshift,my_natom,natom,ntypat,paw_ij,pawrad
    !write(std_out,*)' pawuj_red: iuj',iuj
    !write(std_out,*)' pawuj_red: dtpawuj(:)%iuj ',dtpawuj(:)%iuj
 
-   if (iuj==1.or.iuj==3) then  ! 1 and 3: non-scf steps
-     dtpawuj(iuj+1)%iuj=iuj+1
-   end if
-
-   ! TODO: check that this is correct: this point is passed several times
-   ! for a given value of iuj - should the stuff be accumulated instead of replaced?
-   if(allocated(dtpawuj(iuj)%vsh))  then
-     ABI_FREE(dtpawuj(iuj)%vsh)
-   end if
-   ABI_MALLOC(dtpawuj(iuj)%vsh,(nspden,nnat))
-   if(allocated(dtpawuj(iuj)%occ))  then
-     ABI_FREE(dtpawuj(iuj)%occ)
-   end if
-   ABI_MALLOC(dtpawuj(iuj)%occ,(nspden,nnat))
-   if(allocated(dtpawuj(iuj)%xred))  then
-     ABI_FREE(dtpawuj(iuj)%xred)
-   end if
-   ABI_MALLOC(dtpawuj(iuj)%xred,(3,nnat))
-
+   !If this is the unperturbed state, then unscreened and screened occupancies
+   !are the same. Also set perturbation vsh to zero.
+   !If this is the unperturbed case, then do everything twice; once for iuj=1
+   !and the same for iuj=2. If this is the perturbed case, do everything only
+   !once. LMac
    if (iuj==1) then
-     ABI_MALLOC(dtpawuj(0)%vsh,(nspden,nnat))
-     ABI_MALLOC(dtpawuj(0)%occ,(nspden,nnat))
-     ABI_MALLOC(dtpawuj(0)%xred,(3,nnat))
-     dtpawuj(0)%vsh=0
-     dtpawuj(0)%occ=0
-     dtpawuj(0)%xred=0
+     ncyc=2
+   else
+     ncyc=iuj
    end if
 
-   rrtab=(/0.75_dp,0.815_dp,1.0_dp/)*pawtab(typawujat)%rpaw
-   wftab=pawtab(typawujat)%phi(pawtab(typawujat)%mesh_size,pawtab(typawujat)%lnproju(1))
+   do icyc=iuj,ncyc
 
-!  DEBUG
-!  write(std_out,*)' pawuj_red: rrtab ',rrtab
-!  write(std_out,*)' pawuj_red: wftab ',wftab
-!  END DEBUG
-
-   do im1=1,ncoeff
-!    DEBUG
-!    write(std_out,*)' pawuj_red: ncoeff ',ncoeff,' im1 ',im1
-!    END DEBUG
-     if (pawrad(typawujat)%mesh_type==1) then
-       im2=nint(rrtab(im1)/pawrad(typawujat)%rstep+1)
-     else if (pawrad(typawujat)%mesh_type==2) then
-       im2=nint(log(rrtab(im1)/pawrad(typawujat)%rstep+1)/pawrad(typawujat)%lstep+1)
-     else if (pawrad(typawujat)%mesh_type==3) then
-       im2=nint(log(rrtab(im1)/pawrad(typawujat)%rstep)/pawrad(typawujat)%lstep+1)
-     else if (pawrad(typawujat)%mesh_type==4) then
-       im2=nint(pawtab(typawujat)%mesh_size*(1-exp((-one)*rrtab(im1)/pawrad(typawujat)%rstep))+1)
+     if (icyc==1) then  ! 1 and 3: non-scf steps
+       dtpawuj(icyc+1)%iuj=icyc+1
+       dtpawuj(icyc+2)%iuj=icyc+2
+     else if (icyc==3) then
+       dtpawuj(icyc+1)%iuj=icyc+1
      end if
 
-!    DEBUG
-!    write(std_out,*)' pawuj_red: im2 ',im2
-!    END DEBUG
+     ! TODO: check that this is correct: this point is passed several times
+     ! for a given value of iuj - should the stuff be accumulated instead of replaced?
+     if(allocated(dtpawuj(icyc)%vsh))  then
+       ABI_FREE(dtpawuj(icyc)%vsh)
+     end if
+     ABI_MALLOC(dtpawuj(icyc)%vsh,(nspden,nnat))
+     !Allocate screened occupancy array: LMac
+     if(allocated(dtpawuj(icyc)%occ))  then
+       ABI_FREE(dtpawuj(icyc)%occ)
+     end if
+     ABI_MALLOC(dtpawuj(icyc)%occ,(nspden,nnat))
+     if(allocated(dtpawuj(icyc)%xred))  then
+       ABI_FREE(dtpawuj(icyc)%xred)
+     end if
+     ABI_MALLOC(dtpawuj(icyc)%xred,(3,nnat))
 
-     rrtab(im1)=pawrad(typawujat)%rad(im2)
-     wftab(im1)=pawtab(typawujat)%phi(im2,pawtab(typawujat)%lnproju(1))
+
+     rrtab=(/0.75_dp,0.815_dp,1.0_dp/)*pawtab(typawujat)%rpaw
+     wftab=pawtab(typawujat)%phi(pawtab(typawujat)%mesh_size,pawtab(typawujat)%lnproju(1))
+
+     do im1=1,ncoeff
+       if (pawrad(typawujat)%mesh_type==1) then
+         im2=nint(rrtab(im1)/pawrad(typawujat)%rstep+1)
+       else if (pawrad(typawujat)%mesh_type==2) then
+         im2=nint(log(rrtab(im1)/pawrad(typawujat)%rstep+1)/pawrad(typawujat)%lstep+1)
+       else if (pawrad(typawujat)%mesh_type==3) then
+         im2=nint(log(rrtab(im1)/pawrad(typawujat)%rstep)/pawrad(typawujat)%lstep+1)
+       else if (pawrad(typawujat)%mesh_type==4) then
+         im2=nint(pawtab(typawujat)%mesh_size*(1-exp((-one)*rrtab(im1)/pawrad(typawujat)%rstep))+1)
+       end if
+
+       rrtab(im1)=pawrad(typawujat)%rad(im2)
+       wftab(im1)=pawtab(typawujat)%phi(im2,pawtab(typawujat)%lnproju(1))
+     end do
+     write(message,fmt='(a,i3,a,10f10.5)')' pawuj_red: mesh_type',pawrad(typawujat)%mesh_type,' rrtab:', rrtab
+     call wrtout(std_out,message,'COLL')
+     write(message,fmt='(a,10f10.5)')' pawuj_red: wftab', wftab
+     call wrtout(std_out,message,'COLL')
+     a=reshape((/ (( rrtab(im2)**(im1-1), im1=1,3)  ,im2=1,3 )/),(/ncoeff,ncoeff/))
+     write(messg,fmt='(a)')'A'
+     call linvmat(a,b,ncoeff,messg,2,0.0_dp,3) ! linvmat(inmat,oumat,nat,nam,option,gam,prtvol)
+     write(std_out,*) 'pawuj_red: a,b ', a,b
+     wftab=matmul(wftab,b)
+     write(std_out,*) 'pawuj_red: wftab ', wftab
+     dtpawuj(icyc)%wfchr(4:6)=wftab
+
+     dtpawuj(icyc)%nat=nnat
+     write(std_out,*) 'pawuj_red: m1'
+     dtpawuj(icyc)%vsh=reshape(pack(atvshift,atvshmusk),(/ nspden,nnat /))
+     !factor in next line to compensate nocctot contains just occ of 1 spin channel for nspden=1
+     write(std_out,*) 'pawuj_red: m2'
+     dtpawuj(icyc)%occ=reshape(pack(nnocctot,dmusk),(/nspden,nnat/))*(3-nspden)
+     write(std_out,*) 'pawuj_red: m3'
+
+     write(std_out,*) 'pawuj_red: occ ', dtpawuj(icyc)%occ
+
+     dtpawuj(icyc)%xred=reshape(pack(dtset%xred_orig(:,:,1),musk),(/3,nnat/))
+     dtpawuj(icyc)%ph0phiint=pawtab(typawujat)%ph0phiint(1)
+     dtpawuj(icyc)%wfchr(1:3)=(/ pawtab(typawujat)%zioneff(1)*(dtset%lpawu(typawujat)+2),&
+&     one*(dtset%lpawu(typawujat)+1),one*(dtset%lpawu(typawujat))/)
+     dtpawuj(icyc)%pawrad=pawtab(typawujat)%rpaw
+
+     write(std_out,*) 'pawuj_red: wfchr ',dtpawuj(icyc)%wfchr
+
+
+     write (hstr,'(I0)') icyc
+     write(message,'(a,a,I3,a)') ch10, '---------- MARK ------ ',icyc,ch10
+     call wrtout(std_out,message,'COLL')
+     write(message,fmt='(a)') 'vsh'//trim(hstr)
+     call wrtout(std_out,message,'COLL')
+     call prmat(dtpawuj(icyc)%vsh(:,:),1,nnat*nspden,1)
+     write(message,fmt='(a)') 'occ'//trim(hstr)
+     call wrtout(std_out,message,'COLL')
+     call prmat(dtpawuj(icyc)%occ(:,:),1,nnat*nspden,1)
+     write(message, '(3a)' )'---------- MARK ---------- ',ch10
+     call wrtout(std_out,message,'COLL')
    end do
-   write(message,fmt='(a,i3,a,10f10.5)')' pawuj_red: mesh_type',pawrad(typawujat)%mesh_type,' rrtab:', rrtab
-   call wrtout(std_out,message,'COLL')
-   write(message,fmt='(a,10f10.5)')' pawuj_red: wftab', wftab
-   call wrtout(std_out,message,'COLL')
-   a=reshape((/ (( rrtab(im2)**(im1-1), im1=1,3)  ,im2=1,3 )/),(/ncoeff,ncoeff/))
-   write(messg,fmt='(a)')'A'
-   call linvmat(a,b,ncoeff,messg,2,0.0_dp,3) ! linvmat(inmat,oumat,nat,nam,option,gam,prtvol)
-   write(std_out,*) 'pawuj_red: a,b ', a,b
-   wftab=matmul(wftab,b)
-   write(std_out,*) 'pawuj_red: wftab ', wftab
-   dtpawuj(iuj)%wfchr(4:6)=wftab
-
-   dtpawuj(iuj)%nat=nnat
-   write(std_out,*) 'pawuj_red: m1'
-   dtpawuj(iuj)%vsh=reshape(pack(atvshift,atvshmusk),(/ nspden,nnat /))
-!  factor in next line to compensate nocctot contains just occ of 1 spin channel for nspden=1
-   write(std_out,*) 'pawuj_red: m2'
-   dtpawuj(iuj)%occ=reshape(pack(nnocctot,dmusk),(/nspden,nnat/))*(3-nspden)
-   write(std_out,*) 'pawuj_red: m3'
-!  dtpawuj(iuj)%occ=dtpawuj(iuj)%occ/pawtab(typawujat)%ph0phiint(1)
-
-   write(std_out,*) 'pawuj_red: occ ', dtpawuj(iuj)%occ
-
-   dtpawuj(iuj)%xred=reshape(pack(dtset%xred_orig(:,:,1),musk),(/3,nnat/))
-   dtpawuj(iuj)%ph0phiint=pawtab(typawujat)%ph0phiint(1)
-   dtpawuj(iuj)%wfchr(1:3)=(/ pawtab(typawujat)%zioneff(1)*(dtset%lpawu(typawujat)+2),&
-&   one*(dtset%lpawu(typawujat)+1),one*(dtset%lpawu(typawujat))/)
-   dtpawuj(iuj)%pawrad=pawtab(typawujat)%rpaw
-
-   write(std_out,*) 'pawuj_red: wfchr ',dtpawuj(iuj)%wfchr
-
-
-   write (hstr,'(I0)') iuj
-   write(message,'(a,a,I3,I3,a)') ch10, '---------- MARK ------ ',iuj,maxval(dtpawuj(:)%iuj) ,ch10
-   call wrtout(std_out,message,'COLL')
-   write(message,fmt='(a)') 'vsh'//trim(hstr)
-   call wrtout(std_out,message,'COLL')
-   call prmat(dtpawuj(iuj)%vsh(:,:),1,nnat*nspden,1)
-   write(message,fmt='(a)') 'occ'//trim(hstr)
-   call wrtout(std_out,message,'COLL')
-   call prmat(dtpawuj(iuj)%occ(:,:),1,nnat*nspden,1)
-   write(message, '(3a)' )'---------- MARK ---------- ',ch10
-   call wrtout(std_out,message,'COLL')
  end if !usepawu
 
  ABI_FREE(nnocctot)
