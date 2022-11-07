@@ -4482,91 +4482,91 @@ subroutine sum_d(dterm)
     dterm%aij = dterm%aij + dterm%rd1
     dterm%onsite_like = dterm%onsite_like + dterm%rd1
   end if
-  if (dterm%has_drd1 .EQ. 2) then
-    dterm%daij = dterm%daij + dterm%drd1
-    dterm%donsite_like = dterm%donsite_like + dterm%drd1
-  end if
+  !if (dterm%has_drd1 .EQ. 2) then
+  !  dterm%daij = dterm%daij + dterm%drd1
+  !  dterm%donsite_like = dterm%donsite_like + dterm%drd1
+  !end if
  
   if (dterm%has_rd1a .EQ. 2) then
     dterm%aij = dterm%aij + dterm%rd1a
     dterm%onsite_like = dterm%onsite_like + dterm%rd1a
   end if
-  if (dterm%has_drd1a .EQ. 2) then
-    dterm%daij = dterm%daij + dterm%drd1a
-    dterm%donsite_like = dterm%donsite_like + dterm%drd1a
-  end if
+  !if (dterm%has_drd1a .EQ. 2) then
+  !  dterm%daij = dterm%daij + dterm%drd1a
+  !  dterm%donsite_like = dterm%donsite_like + dterm%drd1a
+  !end if
 
   if (dterm%has_rd2a .EQ. 2) then
     dterm%aij = dterm%aij + dterm%rd2a
     dterm%onsite_like = dterm%onsite_like + dterm%rd2a
   end if
-  if (dterm%has_drd2a .EQ. 2) then
-    dterm%daij = dterm%daij + dterm%drd2a
-    dterm%donsite_like = dterm%donsite_like + dterm%drd2a
-  end if
+  !if (dterm%has_drd2a .EQ. 2) then
+  !  dterm%daij = dterm%daij + dterm%drd2a
+  !  dterm%donsite_like = dterm%donsite_like + dterm%drd2a
+  !end if
  
   if (dterm%has_rd2b .EQ. 2) then
     dterm%aij = dterm%aij + dterm%rd2b
     dterm%onsite_like = dterm%onsite_like + dterm%rd2b
   end if
-  if (dterm%has_drd2b .EQ. 2) then
-    dterm%daij = dterm%daij + dterm%drd2b
-    dterm%donsite_like = dterm%donsite_like + dterm%drd2b
-  end if
+  !if (dterm%has_drd2b .EQ. 2) then
+  !  dterm%daij = dterm%daij + dterm%drd2b
+  !  dterm%donsite_like = dterm%donsite_like + dterm%drd2b
+  !end if
  
   if (dterm%has_rd2c .EQ. 2) then
     dterm%aij = dterm%aij + dterm%rd2c
     dterm%onsite_like = dterm%onsite_like + dterm%rd2c
   end if
-  if (dterm%has_drd2c .EQ. 2) then
-    dterm%daij = dterm%daij + dterm%drd2c
-    dterm%donsite_like = dterm%donsite_like + dterm%drd2c
-  end if
+  !if (dterm%has_drd2c .EQ. 2) then
+  !  dterm%daij = dterm%daij + dterm%drd2c
+  !  dterm%donsite_like = dterm%donsite_like + dterm%drd2c
+  !end if
  
   if (dterm%has_rd2d .EQ. 2) then
     dterm%aij = dterm%aij + dterm%rd2d
     dterm%hat_like = dterm%hat_like + dterm%rd2d
   end if
-  if (dterm%has_drd2d .EQ. 2) then
-    dterm%daij = dterm%daij + dterm%drd2d
-    dterm%dhat_like = dterm%dhat_like + dterm%drd2d
-  end if
+  !if (dterm%has_drd2d .EQ. 2) then
+  !  dterm%daij = dterm%daij + dterm%drd2d
+  !  dterm%dhat_like = dterm%dhat_like + dterm%drd2d
+  !end if
  
   if (dterm%has_rd2e .EQ. 2) then
     dterm%aij = dterm%aij + dterm%rd2e
     dterm%hat_like = dterm%hat_like + dterm%rd2e
   end if
-  if (dterm%has_drd2e .EQ. 2) then
-    dterm%daij = dterm%daij + dterm%drd2e
-    dterm%dhat_like = dterm%dhat_like + dterm%drd2e
-  end if
+  !if (dterm%has_drd2e .EQ. 2) then
+  !  dterm%daij = dterm%daij + dterm%drd2e
+  !  dterm%dhat_like = dterm%dhat_like + dterm%drd2e
+  !end if
  
   if (dterm%has_rd2f .EQ. 2) then
     dterm%aij = dterm%aij + dterm%rd2f
     dterm%hat_like = dterm%hat_like + dterm%rd2f
   end if
-  if (dterm%has_drd2f .EQ. 2) then
-    dterm%daij = dterm%daij + dterm%drd2f
-    dterm%dhat_like = dterm%dhat_like + dterm%drd2f
-  end if
+  !if (dterm%has_drd2f .EQ. 2) then
+  !  dterm%daij = dterm%daij + dterm%drd2f
+  !  dterm%dhat_like = dterm%dhat_like + dterm%drd2f
+  !end if
   
   if (dterm%has_rd3a .EQ. 2) then
     dterm%aij = dterm%aij + dterm%rd3a
     dterm%onsite_like = dterm%onsite_like + dterm%rd3a
   end if
-  if (dterm%has_drd3a .EQ. 2) then
-    dterm%daij = dterm%daij + dterm%drd3a
-    dterm%donsite_like = dterm%donsite_like + dterm%drd3a
-  end if
+  !if (dterm%has_drd3a .EQ. 2) then
+  !  dterm%daij = dterm%daij + dterm%drd3a
+  !  dterm%donsite_like = dterm%donsite_like + dterm%drd3a
+  !end if
 
   if (dterm%has_dijhat .EQ. 2) then
     dterm%aij = dterm%aij + dterm%dijhat
     dterm%hat_like = dterm%hat_like + dterm%dijhat
   end if
-  if (dterm%has_ddijhat .EQ. 2) then
-    dterm%daij = dterm%daij + dterm%ddijhat
-    dterm%dhat_like = dterm%dhat_like + dterm%ddijhat
-  end if
+  !if (dterm%has_ddijhat .EQ. 2) then
+  !  dterm%daij = dterm%daij + dterm%ddijhat
+  !  dterm%dhat_like = dterm%dhat_like + dterm%ddijhat
+  !end if
 
 end subroutine sum_d
 !!***
