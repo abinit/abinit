@@ -118,10 +118,6 @@ module m_orbmag
     integer :: natom
     integer :: has_aij=0
     integer :: has_daij=0
-    integer :: has_eijkl=0
-    integer :: has_deijkl=0
-    integer :: has_dhartree=0
-    integer :: has_ddhartree=0
     integer :: has_qij=0
     integer :: has_dqij=0
     integer :: has_rd1=0
@@ -153,20 +149,6 @@ module m_orbmag
     ! daij(natom,lmnmax,lmnmax,3)
     complex(dpc),allocatable :: daij(:,:,:,:)
  
-    ! eijkl(natom,lmn2max,lmn2max)
-    real(dp),allocatable :: eijkl(:,:,:)
-    
-    ! deijkl(natom,lmn2max,lmn2max,3)
-    real(dp),allocatable :: deijkl(:,:,:,:)
-  
-    ! term 2a + 2c + 2d + 2f
-    ! negative signs in c, d, f included in routines
-    ! dhartree(natom,lmn2max)
-    complex(dpc),allocatable :: dhartree(:,:)
-    
-    ! ddhartree(natom,lmnmax,lmnmax,3)
-    complex(dpc),allocatable :: ddhartree(:,:,:,:)
-   
     ! <phi|phi> - <tphi|tphi>
     ! qij(natom,lmn2max)
     complex(dpc),allocatable :: qij(:,:)
@@ -2502,9 +2484,6 @@ subroutine dterm_rd2f(atindx,dterm,dtset,gntselect,gprimd,lmnmax,my_lmax,&
              & *pawrad(itypat)%rad(2:meshsz)
            call simp_gen(vh1,ff,pawrad(itypat))
 
-           dterm%eijkl(iatom,ijlmn,kllmn)=dterm%eijkl(iatom,ijlmn,kllmn)+&
-             & four_pi*vh1*qij*qkl
-
            eijkl = eijkl + four_pi*vh1*qij*qkl
          end do !llmm
        end do !ll
@@ -2631,9 +2610,6 @@ subroutine dterm_rd2d(atindx,dterm,dtset,gntselect,gprimd,lmnmax,my_lmax,&
              &nlff(2:mesh_size)*pawrad(itypat)%rad(2:mesh_size)
            call simp_gen(vh1,ff,pawrad(itypat))
 
-           dterm%eijkl(iatom,ijlmn,kllmn)=dterm%eijkl(iatom,ijlmn,kllmn)+&
-             & four_pi*vh1*qij*rgkl
-             
            eijkl = eijkl + four_pi*vh1*qij*rgkl
          end do !llmm
        end do !ll
@@ -2760,9 +2736,6 @@ subroutine dterm_rd2c(atindx,dterm,dtset,gntselect,gprimd,lmnmax,my_lmax,&
            ff(2:meshsz)= -pawtab(itypat)%tphitphj(2:meshsz,ijln)*nlff(2:meshsz)&
              & /pawrad(itypat)%rad(2:meshsz)
            call simp_gen(vh1,ff,pawrad(itypat))
-
-           dterm%eijkl(iatom,ijlmn,kllmn)=dterm%eijkl(iatom,ijlmn,kllmn)+&
-             & four_pi*vh1*rgij*qkl
 
            eijkl = eijkl + four_pi*vh1*rgij*qkl
          end do !llmm
@@ -3244,9 +3217,6 @@ subroutine dterm_rd2a(atindx,dterm,dtset,gntselect,gprimd,lmnmax,my_lmax,&
              & /pawrad(itypat)%rad(2:meshsz)
            call simp_gen(vh1,ff,pawrad(itypat))
 
-           dterm%eijkl(iatom,ijlmn,kllmn)=dterm%eijkl(iatom,ijlmn,kllmn)+&
-             & four_pi*vh1*rgij*rgkl
-
            eijkl = eijkl + four_pi*vh1*rgij*rgkl
 
          end do !llmm
@@ -3641,26 +3611,6 @@ if(allocated(dterm%aij)) then
   end if
   dterm%has_daij=0
  
-  if(allocated(dterm%eijkl)) then
-    ABI_FREE(dterm%eijkl)
-  end if
-  dterm%has_eijkl=0
-
-  if(allocated(dterm%deijkl)) then
-    ABI_FREE(dterm%deijkl)
-  end if
-  dterm%has_deijkl=0
- 
-  if(allocated(dterm%dhartree)) then
-    ABI_FREE(dterm%dhartree)
-  end if
-  dterm%has_dhartree=0
-
-  if(allocated(dterm%ddhartree)) then
-    ABI_FREE(dterm%ddhartree)
-  end if
-  dterm%has_ddhartree=0
-
   if(allocated(dterm%qij)) then
     ABI_FREE(dterm%qij)
   end if
@@ -3903,30 +3853,6 @@ subroutine dterm_alloc(dterm,lmnmax,lmn2max,natom)
   end if
   ABI_MALLOC(dterm%daij,(natom,lmnmax,lmnmax,3))
   dterm%has_daij=1
- 
-  if(allocated(dterm%eijkl)) then
-    ABI_FREE(dterm%eijkl)
-  end if
-  ABI_MALLOC(dterm%eijkl,(natom,lmn2max,lmn2max))
-  dterm%has_eijkl=1
-
-  if(allocated(dterm%deijkl)) then
-    ABI_FREE(dterm%deijkl)
-  end if
-  ABI_MALLOC(dterm%deijkl,(natom,lmn2max,lmn2max,3))
-  dterm%has_deijkl=1
- 
-  if(allocated(dterm%dhartree)) then
-    ABI_FREE(dterm%dhartree)
-  end if
-  ABI_MALLOC(dterm%dhartree,(natom,lmn2max))
-  dterm%has_dhartree=1
-
-  if(allocated(dterm%ddhartree)) then
-    ABI_FREE(dterm%ddhartree)
-  end if
-  ABI_MALLOC(dterm%ddhartree,(natom,lmnmax,lmnmax,3))
-  dterm%has_ddhartree=1
  
   if(allocated(dterm%qij)) then
     ABI_FREE(dterm%qij)
@@ -4484,7 +4410,6 @@ subroutine sum_d(dterm)
 !--------------------------------------------------------------------
 
   dterm%aij = czero; dterm%daij = czero
-  dterm%dhartree = czero; dterm%ddhartree = czero
 
   if (dterm%has_rd1 .EQ. 2) then
     dterm%aij = dterm%aij + dterm%rd1
@@ -4502,11 +4427,9 @@ subroutine sum_d(dterm)
 
   if (dterm%has_rd2a .EQ. 2) then
     dterm%aij = dterm%aij + dterm%rd2a
-    dterm%dhartree = dterm%dhartree + dterm%rd2a
   end if
   if (dterm%has_drd2a .EQ. 2) then
     dterm%daij = dterm%daij + dterm%drd2a
-    dterm%ddhartree = dterm%ddhartree + dterm%drd2a
   end if
  
   if (dterm%has_rd2b .EQ. 2) then
@@ -4518,20 +4441,16 @@ subroutine sum_d(dterm)
  
   if (dterm%has_rd2c .EQ. 2) then
     dterm%aij = dterm%aij + dterm%rd2c
-    dterm%dhartree = dterm%dhartree + dterm%rd2c
   end if
   if (dterm%has_drd2c .EQ. 2) then
     dterm%daij = dterm%daij + dterm%drd2c
-    dterm%ddhartree = dterm%ddhartree + dterm%drd2c
   end if
  
   if (dterm%has_rd2d .EQ. 2) then
     dterm%aij = dterm%aij + dterm%rd2d
-    dterm%dhartree = dterm%dhartree + dterm%rd2d
   end if
   if (dterm%has_drd2d .EQ. 2) then
     dterm%daij = dterm%daij + dterm%drd2d
-    dterm%ddhartree = dterm%ddhartree + dterm%drd2d
   end if
  
   if (dterm%has_rd2e .EQ. 2) then
@@ -4543,11 +4462,9 @@ subroutine sum_d(dterm)
  
   if (dterm%has_rd2f .EQ. 2) then
     dterm%aij = dterm%aij + dterm%rd2f
-    dterm%dhartree = dterm%dhartree + dterm%rd2f
   end if
   if (dterm%has_drd2f .EQ. 2) then
     dterm%daij = dterm%daij + dterm%drd2f
-    dterm%ddhartree = dterm%ddhartree + dterm%drd2f
   end if
   
   if (dterm%has_rd3a .EQ. 2) then
@@ -4685,8 +4602,6 @@ subroutine make_d(atindx,atindx1,cprj,dimlmn,dterm,dtset,gprimd,mcprj,nfftf,&
 
  ! generate d terms
 
- dterm%eijkl = zero;dterm%deijkl=zero
-
  call dterm_qij(atindx,dterm,dtset,gntselect,gprimd,my_lmax,pawrad,pawtab,realgnt)
 
  !! term idp2 due to onsite p^2/2, corresponds to term 1 of Torrent PAW roadmap paper appendix E
@@ -4741,20 +4656,6 @@ subroutine make_d(atindx,atindx1,cprj,dimlmn,dterm,dtset,gprimd,mcprj,nfftf,&
          & real(dterm%dijhat(iatom,ijlmn)),aimag(dterm%dijhat(iatom,ijlmn))
      end if
 
- !    !hdij = zero
- !    !do kllmn=1,pawtab(itypat)%lmn2_size
- !    !  eijkl = pawtab(itypat)%eijkl(ijlmn,kllmn)
- !    !  my_eijkl = dterm%eijkl(iatom,ijlmn,kllmn)
- !    !  rrhokl=pawrhoij(iatom)%rhoij_(2*kllmn-1,1)
- !    !  hdij=hdij+rrhokl*my_eijkl*pawtab(itypat)%dltij(kllmn)
- !    !  !if ( (abs(eijkl) .GT. tol12) .AND. (abs(my_eijkl) .GT. tol12) ) then
- !    !  !  write(std_out,'(a,2i4,2es16.8)')'JWZ debug ijlmn kllmn eijkl ',ijlmn,kllmn,&
- !    !  !    & eijkl,my_eijkl
- !    !  !end if
- !    !end do !kllmn
- !    write(std_out,'(a,i4,2es16.8)')'JWZ debug ijlmn my_hartree_ij dij ',ijlmn,&
- !      & real(dterm%dhartree(iatom,ijlmn)),&
- !      & paw_ij(iatom)%dijhartree(ijlmn)
    end do !ijlmn
  end do !iat
 
