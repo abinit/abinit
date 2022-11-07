@@ -118,6 +118,10 @@ module m_orbmag
     integer :: natom
     integer :: has_aij=0
     integer :: has_daij=0
+    integer :: has_onsite_like=0
+    integer :: has_donsite_like=0
+    integer :: has_hat_like=0
+    integer :: has_dhat_like=0
     integer :: has_qij=0
     integer :: has_dqij=0
     integer :: has_rd1=0
@@ -148,6 +152,22 @@ module m_orbmag
     ! sum of \Delta dA_ij
     ! daij(natom,lmnmax,lmnmax,3)
     complex(dpc),allocatable :: daij(:,:,:,:)
+ 
+    ! sum of \Delta A_ij restricted to terms with |phi> functions
+    ! onsite_like(natom,lmn2max)
+    complex(dpc),allocatable :: onsite_like(:,:)
+    
+    ! sum of \Delta dA_ij
+    ! donsite_like(natom,lmnmax,lmnmax,3)
+    complex(dpc),allocatable :: donsite_like(:,:,:,:)
+ 
+    ! sum of \Delta A_ij restricted to terms without |phi> functions
+    ! hat_like(natom,lmn2max)
+    complex(dpc),allocatable :: hat_like(:,:)
+    
+    ! sum of \Delta dA_ij
+    ! dhat_like(natom,lmnmax,lmnmax,3)
+    complex(dpc),allocatable :: dhat_like(:,:,:,:)
  
     ! <phi|phi> - <tphi|tphi>
     ! qij(natom,lmn2max)
@@ -3611,6 +3631,26 @@ if(allocated(dterm%aij)) then
   end if
   dterm%has_daij=0
  
+  if(allocated(dterm%onsite_like)) then
+    ABI_FREE(dterm%onsite_like)
+  end if
+  dterm%has_onsite_like=0
+
+  if(allocated(dterm%donsite_like)) then
+    ABI_FREE(dterm%donsite_like)
+  end if
+  dterm%has_donsite_like=0
+ 
+  if(allocated(dterm%hat_like)) then
+    ABI_FREE(dterm%hat_like)
+  end if
+  dterm%has_hat_like=0
+
+  if(allocated(dterm%dhat_like)) then
+    ABI_FREE(dterm%dhat_like)
+  end if
+  dterm%has_dhat_like=0
+ 
   if(allocated(dterm%qij)) then
     ABI_FREE(dterm%qij)
   end if
@@ -3853,6 +3893,30 @@ subroutine dterm_alloc(dterm,lmnmax,lmn2max,natom)
   end if
   ABI_MALLOC(dterm%daij,(natom,lmnmax,lmnmax,3))
   dterm%has_daij=1
+ 
+  if(allocated(dterm%onsite_like)) then
+    ABI_FREE(dterm%onsite_like)
+  end if
+  ABI_MALLOC(dterm%onsite_like,(natom,lmn2max))
+  dterm%has_onsite_like=1
+
+  if(allocated(dterm%donsite_like)) then
+    ABI_FREE(dterm%donsite_like)
+  end if
+  ABI_MALLOC(dterm%donsite_like,(natom,lmnmax,lmnmax,3))
+  dterm%has_donsite_like=1
+ 
+  if(allocated(dterm%hat_like)) then
+    ABI_FREE(dterm%hat_like)
+  end if
+  ABI_MALLOC(dterm%hat_like,(natom,lmn2max))
+  dterm%has_hat_like=1
+
+  if(allocated(dterm%dhat_like)) then
+    ABI_FREE(dterm%dhat_like)
+  end if
+  ABI_MALLOC(dterm%dhat_like,(natom,lmnmax,lmnmax,3))
+  dterm%has_dhat_like=1
  
   if(allocated(dterm%qij)) then
     ABI_FREE(dterm%qij)
@@ -4262,9 +4326,12 @@ subroutine check_eig_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,&
       & ndat,dtset%prtvol,sij_opt,tim_getghc,type_calc)
     dotr_kloc = DOT_PRODUCT(cwave(1,1:npw_k),ghc(1,1:npw_k))+&
       &         DOT_PRODUCT(cwave(2,1:npw_k),ghc(2,1:npw_k))
-    call tt_me(dterm%aij,atindx,cprj_k(:,nn),dtset,cprj_k(:,nn),&
+    call tt_me(dterm%onsite_like,atindx,cprj_k(:,nn),dtset,cprj_k(:,nn),&
            & dterm%lmn2max,pawtab,dij)
     eig_aij = dotr_kloc + REAL(dij)
+    call tt_me(dterm%hat_like,atindx,cprj_k(:,nn),dtset,cprj_k(:,nn),&
+           & dterm%lmn2max,pawtab,dij)
+    eig_aij = eig_aij + REAL(dij)
 
     write(std_out,'(a,i4,es16.8)')'   JWZ debug nn eig_k : ',nn,eig_k(nn)
     write(std_out,'(a,i4,es16.8)')'     JWZ debug nn ghc : ',nn,dotr_ghc
@@ -4413,72 +4480,92 @@ subroutine sum_d(dterm)
 
   if (dterm%has_rd1 .EQ. 2) then
     dterm%aij = dterm%aij + dterm%rd1
+    dterm%onsite_like = dterm%onsite_like + dterm%rd1
   end if
   if (dterm%has_drd1 .EQ. 2) then
     dterm%daij = dterm%daij + dterm%drd1
+    dterm%donsite_like = dterm%donsite_like + dterm%drd1
   end if
  
   if (dterm%has_rd1a .EQ. 2) then
     dterm%aij = dterm%aij + dterm%rd1a
+    dterm%onsite_like = dterm%onsite_like + dterm%rd1a
   end if
   if (dterm%has_drd1a .EQ. 2) then
     dterm%daij = dterm%daij + dterm%drd1a
+    dterm%donsite_like = dterm%donsite_like + dterm%drd1a
   end if
 
   if (dterm%has_rd2a .EQ. 2) then
     dterm%aij = dterm%aij + dterm%rd2a
+    dterm%onsite_like = dterm%onsite_like + dterm%rd2a
   end if
   if (dterm%has_drd2a .EQ. 2) then
     dterm%daij = dterm%daij + dterm%drd2a
+    dterm%donsite_like = dterm%donsite_like + dterm%drd2a
   end if
  
   if (dterm%has_rd2b .EQ. 2) then
     dterm%aij = dterm%aij + dterm%rd2b
+    dterm%onsite_like = dterm%onsite_like + dterm%rd2b
   end if
   if (dterm%has_drd2b .EQ. 2) then
     dterm%daij = dterm%daij + dterm%drd2b
+    dterm%donsite_like = dterm%donsite_like + dterm%drd2b
   end if
  
   if (dterm%has_rd2c .EQ. 2) then
     dterm%aij = dterm%aij + dterm%rd2c
+    dterm%onsite_like = dterm%onsite_like + dterm%rd2c
   end if
   if (dterm%has_drd2c .EQ. 2) then
     dterm%daij = dterm%daij + dterm%drd2c
+    dterm%donsite_like = dterm%donsite_like + dterm%drd2c
   end if
  
   if (dterm%has_rd2d .EQ. 2) then
     dterm%aij = dterm%aij + dterm%rd2d
+    dterm%hat_like = dterm%hat_like + dterm%rd2d
   end if
   if (dterm%has_drd2d .EQ. 2) then
     dterm%daij = dterm%daij + dterm%drd2d
+    dterm%dhat_like = dterm%dhat_like + dterm%drd2d
   end if
  
   if (dterm%has_rd2e .EQ. 2) then
     dterm%aij = dterm%aij + dterm%rd2e
+    dterm%hat_like = dterm%hat_like + dterm%rd2e
   end if
   if (dterm%has_drd2e .EQ. 2) then
     dterm%daij = dterm%daij + dterm%drd2e
+    dterm%dhat_like = dterm%dhat_like + dterm%drd2e
   end if
  
   if (dterm%has_rd2f .EQ. 2) then
     dterm%aij = dterm%aij + dterm%rd2f
+    dterm%hat_like = dterm%hat_like + dterm%rd2f
   end if
   if (dterm%has_drd2f .EQ. 2) then
     dterm%daij = dterm%daij + dterm%drd2f
+    dterm%dhat_like = dterm%dhat_like + dterm%drd2f
   end if
   
   if (dterm%has_rd3a .EQ. 2) then
     dterm%aij = dterm%aij + dterm%rd3a
+    dterm%onsite_like = dterm%onsite_like + dterm%rd3a
   end if
   if (dterm%has_drd3a .EQ. 2) then
     dterm%daij = dterm%daij + dterm%drd3a
+    dterm%donsite_like = dterm%donsite_like + dterm%drd3a
   end if
 
   if (dterm%has_dijhat .EQ. 2) then
     dterm%aij = dterm%aij + dterm%dijhat
+    dterm%hat_like = dterm%hat_like + dterm%dijhat
   end if
   if (dterm%has_ddijhat .EQ. 2) then
     dterm%daij = dterm%daij + dterm%ddijhat
+    dterm%dhat_like = dterm%dhat_like + dterm%ddijhat
   end if
 
 end subroutine sum_d
