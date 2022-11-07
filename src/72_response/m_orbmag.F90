@@ -118,8 +118,6 @@ module m_orbmag
     integer :: natom
     integer :: has_aij=0
     integer :: has_daij=0
-    integer :: has_dij0=0
-    integer :: has_ddij0=0
     integer :: has_eijkl=0
     integer :: has_deijkl=0
     integer :: has_dhartree=0
@@ -128,6 +126,8 @@ module m_orbmag
     integer :: has_dqij=0
     integer :: has_rd1=0
     integer :: has_drd1=0
+    integer :: has_rd1a=0
+    integer :: has_drd1a=0
     integer :: has_rd2a=0
     integer :: has_drd2a=0
     integer :: has_rd2b=0
@@ -144,8 +144,6 @@ module m_orbmag
     integer :: has_drd3a=0
     integer :: has_dijhat=0
     integer :: has_ddijhat=0
-    integer :: has_adotp=0
-    integer :: has_dadotp=0
 
     ! sum of \Delta A_ij
     ! aij(natom,lmn2max)
@@ -154,14 +152,6 @@ module m_orbmag
     ! sum of \Delta dA_ij
     ! daij(natom,lmnmax,lmnmax,3)
     complex(dpc),allocatable :: daij(:,:,:,:)
- 
-    ! term 1 + 2b + 2e
-    ! negative sign in 2e included in routine
-    ! dij0(natom,lmn2max)
-    complex(dpc),allocatable :: dij0(:,:)
-    
-    ! ddij0(natom,lmnmax,lmnmax,3)
-    complex(dpc),allocatable :: ddij0(:,:,:,:)
  
     ! eijkl(natom,lmn2max,lmn2max)
     real(dp),allocatable :: eijkl(:,:,:)
@@ -193,6 +183,14 @@ module m_orbmag
     ! <phi|p2/2 -i r_alpha|phi> - <tphi|p2/2 -i r_alpha|tphi>
     ! drd1(natom,lmnmax,lmnmax,3)
     complex(dpc),allocatable :: drd1(:,:,:,:)
+
+    ! onsite A.p dipole term
+    ! rd1a(natom,lmn2max)
+    complex(dpc),allocatable :: rd1a(:,:)
+    
+    ! -i r_a A.p
+    ! drd1a(natom,lmnmax,lmnmax,3)
+    complex(dpc),allocatable :: drd1a(:,:,:,:)
 
     ! roadmap 2a
     ! <phi|vH[n1+nc]|phi> - <tphi|vH[n1+nc]|tphi>
@@ -266,15 +264,6 @@ module m_orbmag
     ! -i r_a \hat{D}_ij
     ! ddijhat(natom,lmnmax,lmnmax,3)
     complex(dpc),allocatable :: ddijhat(:,:,:,:)
-
-    ! onsite A.p dipole term
-    ! adotp(natom,lmn2max)
-    complex(dpc),allocatable :: adotp(:,:)
-    
-    ! -i r_a A.p
-    ! dadotp(natom,lmnmax,lmnmax,3)
-    complex(dpc),allocatable :: dadotp(:,:,:,:)
-
 
   end type dterm_type
 
@@ -2946,9 +2935,9 @@ subroutine dterm_rd3a(atindx,dterm,dtset,gntselect,gprimd,lmnmax,my_lmax,&
 
 end subroutine dterm_rd3a
 
-!!****f* ABINIT/dterm_adotp
+!!****f* ABINIT/dterm_rd1a
 !! NAME
-!! dterm_adotp
+!! dterm_rd1a
 !!
 !! FUNCTION
 !! Compute onsite terms due to A.p nuclear dipole moment
@@ -2978,7 +2967,7 @@ end subroutine dterm_rd3a
 !!
 !! SOURCE
 
-subroutine dterm_adotp(atindx,dterm,dtset,pawrad,pawtab)
+subroutine dterm_rd1a(atindx,dterm,dtset,pawrad,pawtab)
 
   !Arguments ------------------------------------
   !scalars
@@ -2999,7 +2988,7 @@ subroutine dterm_adotp(atindx,dterm,dtset,pawrad,pawtab)
 
 !--------------------------------------------------------------------
 
- dterm%adotp = czero; dterm%dadotp = czero
+ dterm%rd1a = czero; dterm%drd1a = czero
 
  cplex_dij = 2
  ndij = 1
@@ -3013,17 +3002,17 @@ subroutine dterm_adotp(atindx,dterm,dtset,pawrad,pawtab)
    call pawdijnd(dijnd,cplex_dij,ndij,dtset%nucdipmom(1:3,iat),pawrad(itypat),pawtab(itypat))
 
    do ijlmn=1,pawtab(itypat)%lmn2_size
-     dterm%adotp(iatom,ijlmn) = CMPLX(dijnd(2*ijlmn-1,1),dijnd(2*ijlmn,1))
+     dterm%rd1a(iatom,ijlmn) = CMPLX(dijnd(2*ijlmn-1,1),dijnd(2*ijlmn,1))
    end do
 
    ABI_FREE(dijnd)
 
  end do !iat
 
- dterm%has_adotp = 2
- dterm%has_dadotp = 2
+ dterm%has_rd1a = 2
+ dterm%has_drd1a = 2
 
-end subroutine dterm_adotp
+end subroutine dterm_rd1a
 
 
 !!****f* ABINIT/dterm_dijhat
@@ -3652,16 +3641,6 @@ if(allocated(dterm%aij)) then
   end if
   dterm%has_daij=0
  
-  if(allocated(dterm%dij0)) then
-    ABI_FREE(dterm%dij0)
-  end if
-  dterm%has_dij0=0
-
-  if(allocated(dterm%ddij0)) then
-    ABI_FREE(dterm%ddij0)
-  end if
-  dterm%has_ddij0=0
- 
   if(allocated(dterm%eijkl)) then
     ABI_FREE(dterm%eijkl)
   end if
@@ -3702,6 +3681,16 @@ if(allocated(dterm%aij)) then
   end if
   dterm%has_drd1=0
  
+  if(allocated(dterm%rd1a)) then
+    ABI_FREE(dterm%rd1a)
+  end if
+  dterm%has_rd1a=0
+  
+  if(allocated(dterm%drd1a)) then
+    ABI_FREE(dterm%drd1a)
+  end if
+  dterm%has_drd1a=0
+
   if(allocated(dterm%rd2a)) then
     ABI_FREE(dterm%rd2a)
   end if
@@ -3781,18 +3770,6 @@ if(allocated(dterm%aij)) then
     ABI_FREE(dterm%ddijhat)
   end if
   dterm%has_ddijhat=0
-
-  if(allocated(dterm%adotp)) then
-    ABI_FREE(dterm%adotp)
-  end if
-  dterm%has_adotp=0
-  
-  if(allocated(dterm%dadotp)) then
-    ABI_FREE(dterm%dadotp)
-  end if
-  dterm%has_dadotp=0
-
-
 
 end subroutine dterm_free
 !!***
@@ -3927,18 +3904,6 @@ subroutine dterm_alloc(dterm,lmnmax,lmn2max,natom)
   ABI_MALLOC(dterm%daij,(natom,lmnmax,lmnmax,3))
   dterm%has_daij=1
  
-  if(allocated(dterm%dij0)) then
-    ABI_FREE(dterm%dij0)
-  end if
-  ABI_MALLOC(dterm%dij0,(natom,lmn2max))
-  dterm%has_dij0=1
-
-  if(allocated(dterm%ddij0)) then
-    ABI_FREE(dterm%ddij0)
-  end if
-  ABI_MALLOC(dterm%ddij0,(natom,lmnmax,lmnmax,3))
-  dterm%has_ddij0=1
- 
   if(allocated(dterm%eijkl)) then
     ABI_FREE(dterm%eijkl)
   end if
@@ -3986,6 +3951,18 @@ subroutine dterm_alloc(dterm,lmnmax,lmn2max,natom)
   end if
   ABI_MALLOC(dterm%drd1,(natom,lmnmax,lmnmax,3))
   dterm%has_drd1=1
+ 
+  if(allocated(dterm%rd1a)) then
+    ABI_FREE(dterm%rd1a)
+  end if
+  ABI_MALLOC(dterm%rd1a,(natom,lmn2max))
+  dterm%has_rd1a=1
+  
+  if(allocated(dterm%drd1a)) then
+    ABI_FREE(dterm%drd1a)
+  end if
+  ABI_MALLOC(dterm%drd1a,(natom,lmnmax,lmnmax,3))
+  dterm%has_drd1a=1
  
   if(allocated(dterm%rd2a)) then
     ABI_FREE(dterm%rd2a)
@@ -4083,18 +4060,7 @@ subroutine dterm_alloc(dterm,lmnmax,lmn2max,natom)
   ABI_MALLOC(dterm%ddijhat,(natom,lmnmax,lmnmax,3))
   dterm%has_ddijhat=1
  
-  if(allocated(dterm%adotp)) then
-    ABI_FREE(dterm%adotp)
-  end if
-  ABI_MALLOC(dterm%adotp,(natom,lmn2max))
-  dterm%has_adotp=1
-  
-  if(allocated(dterm%dadotp)) then
-    ABI_FREE(dterm%dadotp)
-  end if
-  ABI_MALLOC(dterm%dadotp,(natom,lmnmax,lmnmax,3))
-  dterm%has_dadotp=1
-  
+ 
 end subroutine dterm_alloc
 !!***
 
@@ -4518,18 +4484,22 @@ subroutine sum_d(dterm)
 !--------------------------------------------------------------------
 
   dterm%aij = czero; dterm%daij = czero
-  dterm%dij0 = czero; dterm%ddij0 = czero
   dterm%dhartree = czero; dterm%ddhartree = czero
 
   if (dterm%has_rd1 .EQ. 2) then
     dterm%aij = dterm%aij + dterm%rd1
-    dterm%dij0 = dterm%dij0 + dterm%rd1
   end if
   if (dterm%has_drd1 .EQ. 2) then
     dterm%daij = dterm%daij + dterm%drd1
-    dterm%ddij0 = dterm%ddij0 + dterm%drd1
   end if
  
+  if (dterm%has_rd1a .EQ. 2) then
+    dterm%aij = dterm%aij + dterm%rd1a
+  end if
+  if (dterm%has_drd1a .EQ. 2) then
+    dterm%daij = dterm%daij + dterm%drd1a
+  end if
+
   if (dterm%has_rd2a .EQ. 2) then
     dterm%aij = dterm%aij + dterm%rd2a
     dterm%dhartree = dterm%dhartree + dterm%rd2a
@@ -4541,11 +4511,9 @@ subroutine sum_d(dterm)
  
   if (dterm%has_rd2b .EQ. 2) then
     dterm%aij = dterm%aij + dterm%rd2b
-    dterm%dij0 = dterm%dij0 + dterm%rd2b
   end if
   if (dterm%has_drd2b .EQ. 2) then
     dterm%daij = dterm%daij + dterm%drd2b
-    dterm%ddij0 = dterm%ddij0 + dterm%drd2b
   end if
  
   if (dterm%has_rd2c .EQ. 2) then
@@ -4568,11 +4536,9 @@ subroutine sum_d(dterm)
  
   if (dterm%has_rd2e .EQ. 2) then
     dterm%aij = dterm%aij + dterm%rd2e
-    dterm%dij0 = dterm%dij0 + dterm%rd2e
   end if
   if (dterm%has_drd2e .EQ. 2) then
     dterm%daij = dterm%daij + dterm%drd2e
-    dterm%ddij0 = dterm%ddij0 + dterm%drd2e
   end if
  
   if (dterm%has_rd2f .EQ. 2) then
@@ -4597,14 +4563,6 @@ subroutine sum_d(dterm)
   if (dterm%has_ddijhat .EQ. 2) then
     dterm%daij = dterm%daij + dterm%ddijhat
   end if
-
-  if (dterm%has_adotp .EQ. 2) then
-    dterm%aij = dterm%aij + dterm%adotp
-  end if
-  if (dterm%has_dadotp .EQ. 2) then
-    dterm%daij = dterm%daij + dterm%dadotp
-  end if
-
 
 end subroutine sum_d
 !!***
@@ -4736,7 +4694,7 @@ subroutine make_d(atindx,atindx1,cprj,dimlmn,dterm,dtset,gprimd,mcprj,nfftf,&
  call dterm_rd1(atindx,dterm,dtset,gntselect,gprimd,my_lmax,pawrad,pawtab,realgnt)
 
  !! term idpa due to onsite A.p, not part of the roadmap paper but similar to term 1
- call dterm_adotp(atindx,dterm,dtset,pawrad,pawtab)
+ call dterm_rd1a(atindx,dterm,dtset,pawrad,pawtab)
  
  ! term idvha due to v_H[n1] and v_H[\tilde{n}1], corresponds to term 2a of roadmap paper
  call dterm_rd2a(atindx,dterm,dtset,gntselect,gprimd,psps%lmnmax,my_lmax,&
@@ -4777,8 +4735,6 @@ subroutine make_d(atindx,atindx1,cprj,dimlmn,dterm,dtset,gprimd,mcprj,nfftf,&
    do ijlmn=1,pawtab(itypat)%lmn2_size
  !    !write(std_out,'(a,2es16.8)')'JWZ debug kij p2 ',&
  !    !  & pawtab(itypat)%kij(klmn),real(dterm%rd1(iatom,klmn))
- !    write(std_out,'(a,2es16.8)')'JWZ debug dij0 my_dij0 ',&
- !      & pawtab(itypat)%dij0(ijlmn),real(dterm%dij0(iatom,ijlmn))
      if (paw_ij(iatom)%has_dijhat .EQ. 2) then
        write(std_out,'(a,i4,4es16.8)')'JWZ debug klmn dijhat my_dijhat ',ijlmn,&
          & paw_ij(iatom)%dijhat(2*ijlmn-1,1),paw_ij(iatom)%dijhat(2*ijlmn,1),&
