@@ -1635,50 +1635,83 @@ end subroutine tdt_me
 !!
 !! SOURCE
 
-subroutine dterm_qij(atindx,dterm,dtset,gprimd,pawtab)
+subroutine dterm_qij(atindx,dterm,dtset,gntselect,gprimd,my_lmax,pawrad,pawtab,realgnt)
 
   !Arguments ------------------------------------
   !scalars
+  integer :: my_lmax
   type(dterm_type),intent(inout) :: dterm
   type(dataset_type),intent(in) :: dtset
 
   !arrays
   integer,intent(in) :: atindx(dtset%natom)
-  real(dp),intent(in) :: gprimd(3,3)
+  integer,intent(in) :: gntselect((2*my_lmax-1)**2,my_lmax**2*(my_lmax**2+1)/2)
+  real(dp),intent(in) :: gprimd(3,3),realgnt((2*my_lmax-1)**2*(my_lmax)**4)
+  type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
   type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
 
   !Local variables -------------------------
   !scalars
-  integer :: adir,iat,iatom,itypat,ilmn,jlmn,klmn
+  integer :: adir,iat,iatom,isel,itypat,ilm,ilmn,jlm,jlmn
+  integer :: klm,klmn,kln,mesh_size
+  real(dp) :: dqij,dqijfac,qij
   complex(dpc) :: cqij
 
   !arrays
   real(dp) :: ddir_cart(3),ddir_red(3)
+  real(dp),allocatable :: ff(:)
 
 !--------------------------------------------------------------------
 
  dterm%qij = czero; dterm%dqij = czero
- ! dij prefactor
- ! the pawtab%qijl moments do not have the sqrt(4\pi/3) factor we need here for
- ! normalization
 
  do iat = 1, dtset%natom
    iatom = atindx(iat)
    itypat = dtset%typat(iat)
+
+   mesh_size = pawtab(itypat)%mesh_size
+   ABI_MALLOC(ff,(mesh_size))
+
    do klmn = 1, pawtab(itypat)%lmn2_size
+     klm  = pawtab(itypat)%indklmn(1,klmn)
+     kln  = pawtab(itypat)%indklmn(2,klmn)
      ilmn = pawtab(itypat)%indklmn(7,klmn) 
+     ilm  = pawtab(itypat)%indlmn(4,ilmn)
      jlmn = pawtab(itypat)%indklmn(8,klmn) 
-     
-     dterm%qij(iatom,klmn) = CMPLX(pawtab(itypat)%sij(klmn),zero)
+     jlm  = pawtab(itypat)%indlmn(4,jlmn)
+
+     qij = zero
+     if (ilm .EQ. jlm) then
+       ff(2:mesh_size) = pawtab(itypat)%phiphj(2:mesh_size,kln)
+       ff(2:mesh_size) = ff(2:mesh_size) - &
+         & pawtab(itypat)%tphitphj(2:mesh_size,kln)
+       call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
+       call simp_gen(qij,ff,pawrad(itypat))
+     end if
+     dterm%qij(iatom,klmn) = CMPLX(qij,zero)
 
      do adir = 1, 3
-       ddir_cart(adir) = cdij*pawtab(itypat)%qijl(pack1a(adir),klmn)
+       dqij = zero
+       isel = gntselect(pack1a(adir),klm)
+       if (isel .GT. 0) then
+         ff(2:mesh_size) = pawtab(itypat)%phiphj(2:mesh_size,kln)
+         ff(2:mesh_size) = ff(2:mesh_size) - &
+           & pawtab(itypat)%tphitphj(2:mesh_size,kln)
+         ff(2:mesh_size) = ff(2:mesh_size)*pawrad(itypat)%rad(2:mesh_size)
+         call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
+         call simp_gen(dqijfac,ff,pawrad(itypat))
+         dqij = dqijfac*realgnt(isel)*cdij
+       end if
+       ddir_cart(adir) = dqij
      end do !adir
      ! now have ddir in cart coords, convert to crystal coords where ddk wavefunctions are
      ddir_red = MATMUL(TRANSPOSE(gprimd),ddir_cart)
      dterm%dqij(iatom,ilmn,jlmn,1:3) = -j_dpc*ddir_red(1:3)
      dterm%dqij(iatom,jlmn,ilmn,1:3) = -j_dpc*ddir_red(1:3)
    end do ! klmn
+
+   ABI_FREE(ff)
+
  end do ! iat
  
 end subroutine dterm_qij
@@ -4696,7 +4729,7 @@ subroutine make_d(atindx,atindx1,cprj,dimlmn,dterm,dtset,gprimd,mcprj,nfftf,&
 
  dterm%eijkl = zero;dterm%deijkl=zero
 
- call dterm_qij(atindx,dterm,dtset,gprimd,pawtab)
+ call dterm_qij(atindx,dterm,dtset,gntselect,gprimd,my_lmax,pawrad,pawtab,realgnt)
 
  !! term idp2 due to onsite p^2/2, corresponds to term 1 of Torrent PAW roadmap paper appendix E
  !! Comp. Mat. Sci. 42, 337-351 (2008)
