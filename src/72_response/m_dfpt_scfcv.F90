@@ -286,7 +286,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &  kramers_deg,&
 &  cg_mq,cg1_mq,cg1_active_mq,docckde_mq,eigen_mq,eigen1_mq,gh0c1_set_mq,gh1c_set_mq,&
 &  kg1_mq,npwar1_mq,occk_mq,resid_mq,residm_mq,rhog1_pq,rhog1_mq,rhor1_pq,rhor1_mq,&
-&  vpsp1_mq,ylm1_mq,ylmgr1_mq)
+&  vpsp1_mq,xccc3d1_mq,ylm1_mq,ylmgr1_mq)
 
 !Arguments ------------------------------------
  type(dataset_type),intent(in) :: dtset
@@ -361,6 +361,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  real(dp),intent(in) :: vpsp1(cplex*nfftf),vxc(nfftf,nspden)
  real(dp),optional,intent(in) :: vpsp1_mq(cplex*nfftf)
  real(dp),intent(in) :: wtk_rbz(nkpt_rbz),xccc3d1(cplex*n3xccc)
+ real(dp),optional,intent(in) :: xccc3d1_mq(cplex*n3xccc)
  real(dp),intent(in) :: ylm(mpw*mkmem,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),intent(in) :: ylm1(mpw1*mk1mem,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),intent(in) :: ylmgr(mpw*mkmem,3,psps%mpsang*psps%mpsang*psps%useylm*useylmgr)

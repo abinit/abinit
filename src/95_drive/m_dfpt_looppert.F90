@@ -325,7 +325,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  real(dp),allocatable :: cg1_active_mq(:,:),occk_mq(:)                 !
  real(dp),allocatable :: kmq(:,:),kmq_rbz(:,:),gh0c1_set_mq(:,:)        !
  real(dp),allocatable :: eigen_mq(:),gh1c_set_mq(:,:),docckde_mq(:),eigen1_mq(:)          !
- real(dp),allocatable :: vpsp1(:),work(:),wtk_folded(:),wtk_rbz(:),xccc3d1(:)
+ real(dp),allocatable :: vpsp1(:),work(:),wtk_folded(:),wtk_rbz(:),xccc3d1(:),xccc3d1_mq(:)
  real(dp),allocatable :: ylm(:,:),ylm1(:,:),ylmgr(:,:,:),ylmgr1(:,:,:),zeff(:,:,:)
  real(dp),allocatable :: vpsp1_mq(:),ylm1_mq(:,:),ylmgr1_mq(:,:,:)
  real(dp),allocatable :: phasecg(:,:),gauss(:,:)
@@ -1241,8 +1241,13 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      ABI_MALLOC(ylm1_mq,(mpw1_mq*mk1mem_rbz,psps%mpsang*psps%mpsang*psps%useylm))
      ABI_MALLOC(ylmgr1_mq,(mpw1_mq*mk1mem_rbz,nylmgr1,psps%mpsang*psps%mpsang*psps%useylm*useylmgr1))
      if (psps%useylm==1) then
-       call initylmg(gprimd,kg1_mq,kmq_rbz,mk1mem_rbz,mpi_enreg,psps%mpsang,mpw1_mq,nband_rbz,nkpt_rbz,&
-&     npwar1_mq,dtset%nsppol,option,rprimd,ylm1_mq,ylmgr1_mq)
+       if (sum(dtset%qptn(1:3)**2) < 1.d-14) then
+         ylm1_mq(:,:)=ylm1(:,:)
+         ylmgr1_mq(:,:,:)=ylmgr1(:,:,:)
+       else
+         call initylmg(gprimd,kg1_mq,kmq_rbz,mk1mem_rbz,mpi_enreg,psps%mpsang,mpw1_mq,nband_rbz,nkpt_rbz,&
+&        npwar1_mq,dtset%nsppol,option,rprimd,ylm1_mq,ylmgr1_mq)
+       end if
      end if
    end if
 
@@ -1656,6 +1661,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    ABI_MALLOC(vpsp1,(cplex*nfftf))
    if (.not.kramers_deg) then
      ABI_MALLOC(vpsp1_mq,(cplex*nfftf))
+     ABI_MALLOC(xccc3d1_mq,(cplex*n3xccc))
    end if
 
 !  PAW: compute Vloc(1) and core(1) together in reciprocal space
@@ -1685,18 +1691,29 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        call dfpt_vlocal(atindx,cplex,gmet,gsqcut,idir,ipert,mpi_enreg,psps%mqgrid_vl,dtset%natom,&
 &       nattyp,nfftf,ngfftf,ntypat,ngfftf(1),ngfftf(2),ngfftf(3),ph1df,psps%qgrid_vl,&
 &       dtset%qptn,ucvol,psps%vlspl,vpsp1,xred)
-       if (.not.kramers_deg) 
-         qphon_mq(:)=dtset%qptn(:)
-         call dfpt_vlocal(atindx,cplex,gmet,gsqcut,idir,ipert,mpi_enreg,psps%mqgrid_vl,dtset%natom,&
-&        nattyp,nfftf,ngfftf,ntypat,ngfftf(1),ngfftf(2),ngfftf(3),ph1df,psps%qgrid_vl,&
-&        qphon_mq,ucvol,psps%vlspl,vpsp1_mq,xred)
+       if (.not.kramers_deg) then
+         if (sum(dtset%qptn(1:3)**2) < 1.d-14) then
+           vpsp1_mq(:)=vpsp1(:)
+         else
+           qphon_mq(:)=-dtset%qptn(:)
+           call dfpt_vlocal(atindx,cplex,gmet,gsqcut,idir,ipert,mpi_enreg,psps%mqgrid_vl,dtset%natom,&
+&          nattyp,nfftf,ngfftf,ntypat,ngfftf(1),ngfftf(2),ngfftf(3),ph1df,psps%qgrid_vl,&
+&          qphon_mq,ucvol,psps%vlspl,vpsp1_mq,xred)
+         end if
        end if
      end if
 
      if(psps%n1xccc/=0)then
        call dfpt_mkcore(cplex,idir,ipert,dtset%natom,ntypat,ngfftf(1),psps%n1xccc,&
 &       ngfftf(2),ngfftf(3),dtset%qptn,rprimd,dtset%typat,ucvol,psps%xcccrc,psps%xccc1d,xccc3d1,xred)
-       !SPr: same here, need xccc3d1 for -q as well for phonon pert.. to be done later
+       if (.not.kramers_deg) then
+         if (sum(dtset%qptn(1:3)**2) < 1.d-14) then
+           xccc3d1_mq(:)=xccc3d1(:)
+         else
+           call dfpt_mkcore(cplex,idir,ipert,dtset%natom,ntypat,ngfftf(1),psps%n1xccc,&
+&          ngfftf(2),ngfftf(3),qphon_mq,rprimd,dtset%typat,ucvol,psps%xcccrc,psps%xccc1d,xccc3d1_mq,xred)
+         end if
+       end if
      end if ! psps%n1xccc/=0
    end if ! usepaw
 
@@ -1958,7 +1975,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &       eigen1_mq=eigen1_mq,gh0c1_set_mq=gh0c1_set_mq,gh1c_set_mq=gh1c_set_mq,&
 &       kg1_mq=kg1_mq,npwar1_mq=npwar1_mq,occk_mq=occk_mq,resid_mq=resid_mq,residm_mq=residm_mq,&
 &       rhog1_pq=rhog1_pq,rhog1_mq=rhog1_mq,rhor1_pq=rhor1_pq,rhor1_mq=rhor1_mq,&
-&       vpsp1_mq=vpsp1_mq,ylm1_mq=ylm1_mq,ylmgr1_mq=ylmgr1_mq)
+&       vpsp1_mq=vpsp1_mq,xccc3d1_mq=xccc3d1_mq,ylm1_mq=ylm1_mq,ylmgr1_mq=ylmgr1_mq)
      end if
 
      _IBM6("after dfpt_scfcv")
@@ -2352,6 +2369,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      ABI_FREE(rhog1_pq)
      ABI_FREE(rhog1_mq)
      ABI_FREE(vpsp1_mq)
+     ABI_FREE(xccc3d1_mq)
      ABI_FREE(ylm1_mq)
      ABI_FREE(ylmgr1_mq)
    end if
