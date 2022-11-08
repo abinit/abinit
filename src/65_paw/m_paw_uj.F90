@@ -279,12 +279,14 @@ subroutine pawuj_det(dtpawuj,ndtpawuj,ujdet_filename,ures)
  integer                     :: im1,ndtuj,idtset, nsh_org, nsh_sc,nat_sc,maxnat
  integer                     :: pawujat,pawprtvol,pawujoption
  integer                     :: dmatpuopt,invopt,ipert
- real(dp)                    :: pawujga,ph0phiint,intg,fcorr,eyp,diem,signum
+ real(dp)                    :: pawujga,ph0phiint,intg,fcorr,eyp
+ real(dp)                    :: diem,signum,scalarHP !LMac quantities
 
  character(len=500)          :: message
  character(len=2)            :: hstr
  character(len=5)            :: pertname
  character(len=1)            :: parname
+ character(len=14)           :: occmag
 !arrays
  integer                     :: ext(3)
  real(dp)                    :: rprimd_sc(3,3),vsh(ndtpawuj),a(5),b(5)
@@ -303,7 +305,7 @@ subroutine pawuj_det(dtpawuj,ndtpawuj,ujdet_filename,ures)
 !### 01. Allocations
 
 !Initializations
- ndtuj=count(dtpawuj(:)%iuj/=-1) ! number of datasets initialized by pawuj_red
+ ndtuj=count(dtpawuj(:)%iuj/=-1)-1 ! number of datasets initialized by pawuj_red
  ABI_MALLOC(jdtset_,(0:ndtuj))
  jdtset_(0:ndtuj)=pack(dtpawuj(:)%iuj,dtpawuj(:)%iuj/=-1)
  jdtset=maxval(dtpawuj(:)%iuj)
@@ -440,7 +442,8 @@ call wrtout(std_out,message,'COLL')
 !###########################################################
 !### 04. Testing consistency of parameters and outputting info
 
- if (ndtuj/=4)  return
+!LMac
+! if (ndtuj/=4)  return
 
  write(message, '(3a)' ) ch10,' ---------- calculate U, (J) start ---------- ',ch10
  call wrtout(ab_out,message,'COLL')
@@ -487,6 +490,7 @@ call wrtout(std_out,message,'COLL')
  diem=dtpawuj(1)%diemix !Unscreened response in Hubbard U impacted by diemix
  pertname='alpha' !Hubbard U perturbation; applied equally to spins up and down
  parname='U'
+ occmag='  Occupations'
  signum=1.0d0 !Hubbard U is signum*(1/chi0-1/chi)
  do jdtset=1,4
    if (nspden==1) then
@@ -505,6 +509,7 @@ call wrtout(std_out,message,'COLL')
      diem=dtpawuj(1)%diemixmag !Unscreened response in Hund's J impacted by diemixmag
      pertname='beta ' !Hund's J perturbation: +beta to spin up, -beta to down
      parname='J'
+     occmag='Magnetizations'
      signum=-1.0d0 !Hund's J is -1*(1/chi0-1/chi)
    end if
    vsh(jdtset)=dtpawuj(jdtset)%vsh(1,pawujat)
@@ -519,8 +524,8 @@ call wrtout(std_out,message,'COLL')
  write(message,fmt='( a)') 'Occupations assigned.'
  call wrtout(std_out,message,'COLL')
 
- if (any(abs((/(vsh(ii)-vsh(ii+2), ii=1,2) /))<0.00000001)) then
-   write(message, '(2a,18f10.7,a)' )  ch10,' vshift is too small: ',abs((/(vsh(ii)-vsh(ii+2), ii=1,2) /))
+ if (abs(vsh(3))<0.00000001) then
+   write(message, '(2a,18f10.7,a)' )  ch10,' vshift is too small: ',abs(vsh(1)-vsh(3))
    call wrtout(ab_out,message,'COLL')
    return
  end if
@@ -529,8 +534,15 @@ call wrtout(std_out,message,'COLL')
  chi0=(luocc(1,1:nat_org)-luocc(3,1:nat_org))/(vsh(1)-vsh(3))/diem
  chi=(luocc(2,1:nat_org)-luocc(4,1:nat_org))/(vsh(2)-vsh(4))
 
- write(message,fmt='( a)') ' Response matrices calculated successfully.'
- call wrtout(std_out,message,'COLL')
+ if ((abs(chi0(pawujat))<0.0000001).or.(abs(chi(pawujat))<0.0000001)) then
+   write(message, '(2a,2f12.5,a)' ) ch10,'Chi0 or Chi is too small for inversion.',&
+     &chi0(pawujat),chi(pawujat),ch10
+   call wrtout(ab_out,message,'COLL')
+   return
+ end if
+
+ !LMac: Scalar Hubbard Parameter
+ scalarHP=signum*(1.0d0/chi0(pawujat)-1.0d0/chi(pawujat))*Ha_eV
 
  write(message,fmt='(a)')': '
  if (nspden==2) then
@@ -586,17 +598,11 @@ call wrtout(std_out,message,'COLL')
    intg=one
  end if
 
- write(message,fmt='(a)') 'Amadon stuff computed.'
- call wrtout(std_out,message,'COLL')
-
 !Determine U in primitive cell
  write(message,fmt='(a)')' pawuj_det: determine U in primitive cell'
  call wrtout(std_out,message,'COLL')
 
  call lcalcu(int(magv_org),nat_org,dtpawuj(1)%rprimd,dtpawuj(1)%xred,chi,chi0,pawujat,ures,pawprtvol,pawujga,pawujoption)
-
- write(message,fmt='(a)') 'U calculated successfully.'
- call wrtout(std_out,message,'COLL')
 
 !Begin calculate U in supercell
 
@@ -609,37 +615,45 @@ call wrtout(std_out,message,'COLL')
 
 
 !LMac: Printing relevant information about the Hubbard parameter just calculated.
- write(message,'(4a)') ch10,'***********************  Linear Response ',parname,'  *******************',ch10
+ write(message,'(3a)') ch10,ch10,'*********************************************************************'
  call wrtout(std_out,message,'COLL')
  call wrtout(ab_out,message,'COLL')
- write(message, '(a,i7)' ) 'Info printed for perturbed atom: ',pawujat
+ write(message,'(4a)') '************************  Linear Response ',parname,'  ************************',ch10
  call wrtout(std_out,message,'COLL')
  call wrtout(ab_out,message,'COLL')
- write(message, fmt='(6a)') '         ',pertname,' [eV]','            n_0','               n',ch10
+ write(message, '(a,i4,a)' ) ' Info printed for perturbed atom: ',pawujat,ch10
+ call wrtout(std_out,message,'COLL')
+ call wrtout(ab_out,message,'COLL')
+ write(message, fmt='(10a)')'  Perturbations         ',occmag,ch10,&
+' --------------- -----------------------------',ch10,&
+'    ',pertname,' [eV]     Unscreened      Screened',ch10,&
+' --------------- -----------------------------'
  call wrtout(std_out,message,'COLL')
  call wrtout(ab_out,message,'COLL')
  do ipert=1,2
-   write(message, fmt='(3f15.10)') vsh(ipert*2-1)*Ha_eV,luocc(ipert,pawujat),luocc(ipert+1,pawujat)
+   write(message, fmt='(3f15.10)') vsh(ipert*2-1)*Ha_eV,luocc(ipert*2-1,pawujat),luocc(ipert*2,pawujat)
    call wrtout(std_out,message,'COLL')
    call wrtout(ab_out,message,'COLL')
  end do
- write(message,'(a)') 'Scalar response functions: '
+ write(message,'(2a)') ch10,'                    Scalar response functions:'
  call wrtout(std_out,message,'COLL')
  call wrtout(ab_out,message,'COLL')
- write(message,fmt='(2a,f12.5)') ch10,' Chi0 [eV^-1]: ',chi0(pawujat)/Ha_eV
+ write(message,fmt='(a,f12.5)') '                    Chi0 [eV^-1]: ',chi0(pawujat)/Ha_eV
  call wrtout(std_out,message,'COLL')
  call wrtout(ab_out,message,'COLL')
- write(message,fmt='(2a,f12.5)') ch10,' Chi [eV^-1]:  ',chi(pawujat)/Ha_eV
+ write(message,fmt='(a,f12.5)') '                    Chi [eV^-1]:  ',chi(pawujat)/Ha_eV
  call wrtout(std_out,message,'COLL') 
  call wrtout(ab_out,message,'COLL')
- write(message,'(2a,f6.2,a)') 'The scalar ',parname,' from the two-point regression scheme is ',signum*ures,' eV.'
+ write(message,'(4a,f9.5,a)') ch10,' The scalar ',parname,' from the two-point regression scheme is ',scalarHP,' eV.'
  call wrtout(std_out,message,'COLL')
  call wrtout(ab_out,message,'COLL')
- write(message,'(3a)') ch10,'**************************************************************************',ch10
+ write(message,'(3a)') '*********************************************************************',ch10,&
+'*********************************************************************'
  call wrtout(std_out,message,'COLL')
  call wrtout(ab_out,message,'COLL')
- write(message,'(2a)') 'Note: For more reliable linear regressions of the response matrices, it is ',&
-'advised that you have more than two points. See the OMac protocol for more information.'
+ write(message,'(7a)') 'Note: For more reliable linear regressions of the response',ch10,&
+'matrices, it is advised that you have more than two points.',ch10,&
+'See the OMac protocol for more information.',ch10,ch10
  call wrtout(std_out,message,'COLL')
  call wrtout(ab_out,message,'COLL')
 
@@ -821,7 +835,7 @@ subroutine pawuj_red(dtset,dtpawuj,fatvshift,my_natom,natom,ntypat,paw_ij,pawrad
  type(pawtab_type),intent(in)       :: pawtab(ntypat)
  type(pawrad_type),intent(in)       :: pawrad(ntypat)
  type(dataset_type),intent(in)      :: dtset
- type(macro_uj_type),intent(inout)  :: dtpawuj(1:ndtpawuj)
+ type(macro_uj_type),intent(inout)  :: dtpawuj(0:ndtpawuj)
 
 !Local variables-------------------------------
 !scalars
@@ -905,6 +919,12 @@ subroutine pawuj_red(dtset,dtpawuj,fatvshift,my_natom,natom,ntypat,paw_ij,pawrad
    !and the same for iuj=2. If this is the perturbed case, do everything only
    !once. LMac
    if (iuj==1) then
+     ABI_MALLOC(dtpawuj(0)%vsh,(nspden,nnat))
+     ABI_MALLOC(dtpawuj(0)%occ,(nspden,nnat))
+     ABI_MALLOC(dtpawuj(0)%xred,(3,nnat))
+     dtpawuj(0)%vsh=0
+     dtpawuj(0)%occ=0
+     dtpawuj(0)%xred=0
      ncyc=2
    else
      ncyc=iuj
@@ -983,6 +1003,7 @@ subroutine pawuj_red(dtset,dtpawuj,fatvshift,my_natom,natom,ntypat,paw_ij,pawrad
 
      write(std_out,*) 'pawuj_red: wfchr ',dtpawuj(icyc)%wfchr
 
+     if (icyc.le.2) dtpawuj(icyc)%vsh=0.0d0
 
      write (hstr,'(I0)') icyc
      write(message,'(a,a,I3,a)') ch10, '---------- MARK ------ ',icyc,ch10
@@ -1364,14 +1385,17 @@ subroutine lcalcu(magv,natom,rprimd,xred,chi,chi0,pawujat,ures,prtvol,gam,opt)
 
  write(message,fmt='(a)')'response chi_0'
  call linvmat(tab(1,1:natom,1:natom),tab(3,1:nnatom,1:nnatom),natom,message,optt,gamm,prtvoll)
+ call wrtout(std_out,message,'COLL')
 
  write(message,fmt='(a)')'response chi'
  call linvmat(tab(2,1:natom,1:natom),tab(4,1:nnatom,1:nnatom),natom,message,optt,gamm,prtvoll)
+ call wrtout(std_out,message,'COLL')
 
  tab(1,1:nnatom,1:nnatom)=(tab(3,1:nnatom,1:nnatom)-tab(4,1:nnatom,1:nnatom))*Ha_eV
 
  write(message,fmt='(a,i3,a)')' (chi_0)^(-1)-(chi)^(-1) (eV)'
  call lprtmat(message,2,prtvoll,tab(1,1:nnatom,1:nnatom),nnatom)
+ call wrtout(std_out,message,'COLL')
 
  ures=tab(1,1,pawujat)
 
