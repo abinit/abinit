@@ -605,6 +605,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  vtrial1_tmp => vtrial1   ! this is to avoid errors when vtrial1_tmp is unused
 
  if (.not.kramers_deg) then
+   ABI_MALLOC(vhartr1_mq,(cplex*nfftf))
    ABI_MALLOC(vxc1_mq,(cplex*nfftf,nspden*(1-usexcnhat)))
  end if
 
@@ -722,6 +723,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  omega=-dtset%rfomega
  if (.not.kramers_deg) then
    omega_mq=dtset%rfomega
+   qphon_mq(:)=-qphon(:)
  end if
 
  call timab(154,2,tsec)
@@ -821,17 +823,16 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      option=1;optene=0;if (iscf_mod==-2) optene=1
      call dfpt_rhotov(cplex,ehart01,ehart1,elpsp1,exc1,elmag1,gsqcut,idir,ipert,&
 &     dtset%ixc,kxc,mpi_enreg,dtset%natom,nfftf,ngfftf,nhat,nhat1,nhat1gr,nhat1grdim,&
-&     nkxc,nspden,n3xccc,nmxc,optene,option,dtset%qptn,&
+&     nkxc,nspden,n3xccc,nmxc,optene,option,qphon,&
 &     rhog,rhog1,rhor,rhor1,rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1,vpsp1,&
 &     nvresid1,res2,vtrial1,vxc,vxc1,xccc3d1,dtset%ixcrot)
-!     if (.not.kramers_deg) then
-!       call dfpt_rhotov(cplex,ehart01,ehart1,elpsp1,exc1,elmag1,gsqcut,idir,ipert,&
-!&       dtset%ixc,kxc,mpi_enreg,dtset%natom,nfftf,ngfftf,nhat,nhat1,nhat1gr,nhat1grdim,&
-!&       nkxc,nspden,n3xccc,nmxc,optene,option,dtset%qptn,&
-!&       rhog,rhog1,rhor,rhor1,rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1,vpsp1,&
-!&       nvresid1,res2,vtrial1_mq,vxc,vxc1,xccc3d1,dtset%ixcrot)
-!
-!     end if
+     if (.not.kramers_deg) then
+       call dfpt_rhotov(cplex,ehart01_mq,ehart1_mq,elpsp1_mq,exc1_mq,elmag1_mq,gsqcut,idir,ipert,&
+&       dtset%ixc,kxc,mpi_enreg,dtset%natom,nfftf,ngfftf,nhat,nhat1,nhat1gr,nhat1grdim,&
+&       nkxc,nspden,n3xccc,nmxc,optene,option,qphon_mq,&
+&       rhog,rhog1_mq,rhor,rhor1_mq,rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1_mq,vpsp1_mq,&
+&       nvresid1,res2_mq,vtrial1_mq,vxc,vxc1_mq,xccc3d1_mq,dtset%ixcrot)
+     end if
 
 !    For Q=0 and metallic occupation, initialize quantities needed to
 !    compute the first-order Fermi energy
@@ -1483,7 +1484,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &         dtset%nsppol,nsym1,occ_rbz,ph1d,psps,qphon,rhor1_pq,rmet,rprimd,symrc1,ucvol,&
 &         wtk_rbz,xred,ylm,ylm1)
        end if
-       qphon_mq(:)=-qphon(:)
        if (dtset%nspden==4) then
          call dfpt_nstdy(atindx,blkflg,cg,cg1_mq,cplex,dtfil,dtset,d2bbb_mq,d2lo_mq,d2nl_mq,eigen0,eigen1_mq,gmet,&
 &         gsqcut,idir,indkpt1,indsy1,ipert,istwfk_rbz,kg,kg1_mq,kpt_rbz,kxc,mband_mem_rbz,mkmem,mk1mem,mpert,mpi_enreg,&
@@ -1674,6 +1674,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  ABI_FREE(fcart)
  ABI_FREE(vtrial1)
  if (.not.kramers_deg) then
+   ABI_FREE(vhartr1_mq)
    ABI_FREE(vxc1_mq)
    ABI_FREE(vtrial1_mq)
    ABI_FREE(d2bbb_mq)
