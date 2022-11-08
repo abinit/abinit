@@ -285,7 +285,8 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &  wtk_rbz,xccc3d1,xred,ylm,ylm1,ylmgr,ylmgr1,zeff,conv_retcode,&
 &  kramers_deg,&
 &  cg_mq,cg1_mq,cg1_active_mq,docckde_mq,eigen_mq,eigen1_mq,gh0c1_set_mq,gh1c_set_mq,&
-&  kg1_mq,npwar1_mq,occk_mq,resid_mq,residm_mq,rhog1_pq,rhog1_mq,rhor1_pq,rhor1_mq)
+&  kg1_mq,npwar1_mq,occk_mq,resid_mq,residm_mq,rhog1_pq,rhog1_mq,rhor1_pq,rhor1_mq,&
+&  ylm1_mq,ylmgr1_mq)
 
 !Arguments ------------------------------------
  type(dataset_type),intent(in) :: dtset
@@ -363,6 +364,8 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  real(dp),intent(in) :: ylm1(mpw1*mk1mem,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),intent(in) :: ylmgr(mpw*mkmem,3,psps%mpsang*psps%mpsang*psps%useylm*useylmgr)
  real(dp),intent(in) :: ylmgr1(mpw1*mk1mem,3+6*((ipert-dtset%natom)/10),psps%mpsang*psps%mpsang*psps%useylm*useylmgr1)
+ real(dp),optional,intent(in) :: ylm1_mq(mpw1_mq*mk1mem,psps%mpsang*psps%mpsang*psps%useylm)
+ real(dp),optional,intent(in) :: ylmgr1_mq(mpw1_mq*mk1mem,3+6*((ipert-dtset%natom)/10),psps%mpsang*psps%mpsang*psps%useylm*useylmgr1)
  real(dp),intent(in) :: zeff(3,3,dtset%natom)
  type(pawcprj_type),intent(in) :: cprj(dtset%natom,dtset%nspinor*mband_mem_rbz*mkmem*dtset%nsppol*usecprj)
  type(pawcprj_type),intent(in) :: cprjq(dtset%natom,dtset%nspinor*mband_mem_rbz*mkqmem*dtset%nsppol*usecprj)
@@ -859,7 +862,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &         nspden,dtset%nsppol,nsym1,occk_mq,occ_rbz,&
 &         paw_ij,pawang,pawang1,pawfgr,pawfgrtab,pawrad,pawrhoijfermi,pawtab,&
 &         phnons1,ph1d,dtset%prtvol,psps,rhorfermi_mq,rmet,rprimd,symaf1,symrc1,symrl1,tnons1,&
-&         ucvol,usecprj,useylmgr1,vtrial,vxc,wtk_rbz,xred,ylm,ylm1,ylmgr1)
+&         ucvol,usecprj,useylmgr1,vtrial,vxc,wtk_rbz,xred,ylm,ylm1_mq,ylmgr1_mq)
        end if
 
      end if
@@ -1003,7 +1006,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &     occk_mq,occ_rbz,optres,paw_ij,paw_ij1,pawang,pawang1,pawfgr,pawfgrtab,pawrhoij,&
 &     pawrhoij1,pawtab,phnons1,ph1d,dtset%prtvol,psps,pwindall,qmat,resid_mq,residm_mq,rhog1_mq,&
 &     rhor1_mq,rmet,rprimd,symaf1,symrc1,symrl1,tnons1,ucvol,usecprj,useylmgr1,ddk_f,&
-&     vectornd,vtrial,vtrial1_mq,with_vectornd,wtk_rbz,xred,ylm,ylm1,ylmgr1,omega=omega_mq)
+&     vectornd,vtrial,vtrial1_mq,with_vectornd,wtk_rbz,xred,ylm,ylm1_mq,ylmgr1_mq,omega=omega_mq)
 
 !   write(*,*) "ITERATION -:", istep,ek0_mq,edocc_mq,eeig0_mq,eloc0_mq,enl0_mq,enl1_mq
 
@@ -1476,13 +1479,13 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &         gsqcut,idir,indkpt1,indsy1,ipert,istwfk_rbz,kg,kg1_mq,kpt_rbz,kxc,mband_mem_rbz,mkmem,mk1mem,mpert,mpi_enreg,&
 &         mpw,mpw1_mq,nattyp,nband_rbz,nfftf,ngfftf,nkpt,nkpt_rbz,nkxc,npwarr,npwar1_mq,nspden,&
 &         dtset%nsppol,nsym1,occ_rbz,ph1d,psps,qphon_mq,rhor1_mq,rmet,rprimd,symrc1,ucvol,&
-&         wtk_rbz,xred,ylm,ylm1,rhor=rhor,vxc=vxc)
+&         wtk_rbz,xred,ylm,ylm1_mq,rhor=rhor,vxc=vxc)
        else
          call dfpt_nstdy(atindx,blkflg,cg,cg1_mq,cplex,dtfil,dtset,d2bbb_mq,d2lo_mq,d2nl_mq,eigen0,eigen1_mq,gmet,&
 &         gsqcut,idir,indkpt1,indsy1,ipert,istwfk_rbz,kg,kg1_mq,kpt_rbz,kxc,mband_mem_rbz,mkmem,mk1mem,mpert,mpi_enreg,&
 &         mpw,mpw1_mq,nattyp,nband_rbz,nfftf,ngfftf,nkpt,nkpt_rbz,nkxc,npwarr,npwar1_mq,nspden,&
 &         dtset%nsppol,nsym1,occ_rbz,ph1d,psps,qphon_mq,rhor1_mq,rmet,rprimd,symrc1,ucvol,&
-&         wtk_rbz,xred,ylm,ylm1)
+&         wtk_rbz,xred,ylm,ylm1_mq)
        end if
 
        !Mix up (q,w) and (-q,-w) second-order derivatives

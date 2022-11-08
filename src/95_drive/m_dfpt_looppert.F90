@@ -327,6 +327,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  real(dp),allocatable :: eigen_mq(:),gh1c_set_mq(:,:),docckde_mq(:),eigen1_mq(:)          !
  real(dp),allocatable :: vpsp1(:),work(:),wtk_folded(:),wtk_rbz(:),xccc3d1(:)
  real(dp),allocatable :: ylm(:,:),ylm1(:,:),ylmgr(:,:,:),ylmgr1(:,:,:),zeff(:,:,:)
+ real(dp),allocatable :: ylm1_mq(:,:),ylmgr1_mq(:,:,:)
  real(dp),allocatable :: phasecg(:,:),gauss(:,:)
  real(dp),allocatable :: gkk(:,:,:,:,:)
  logical :: has_cg1_3(3)
@@ -1190,7 +1191,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    if (.not.kramers_deg) then
      call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kmq_rbz,mpi_enreg,mpw1_mq,nkpt_rbz)
      !number of plane waves at k+q and k-q should be in principle the same to reconstruct rhor1_pq (?)
-     !mpw1=max(mpw1,mpw1_tmp)
+     mpw1=max(mpw1,mpw1_mq)
+     mpw1_mq=mpw1
    else
      mpw1_mq=0
    end if
@@ -1235,7 +1237,14 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      call initylmg(gprimd,kg1,kpq_rbz,mk1mem_rbz,mpi_enreg,psps%mpsang,mpw1,nband_rbz,nkpt_rbz,&
 &     npwar1,dtset%nsppol,option,rprimd,ylm1,ylmgr1)
    end if
-!  SPr: do the same for k-q if kramers_deg=.false.
+   if (.not.kramers_deg) then
+     ABI_MALLOC(ylm1_mq,(mpw1_mq*mk1mem_rbz,psps%mpsang*psps%mpsang*psps%useylm))
+     ABI_MALLOC(ylmgr1_mq,(mpw1_mq*mk1mem_rbz,nylmgr1,psps%mpsang*psps%mpsang*psps%useylm*useylmgr1))
+     if (psps%useylm==1) then
+       call initylmg(gprimd,kg1_mq,kmq_rbz,mk1mem_rbz,mpi_enreg,psps%mpsang,mpw1_mq,nband_rbz,nkpt_rbz,&
+&     npwar1_mq,dtset%nsppol,option,rprimd,ylm1_mq,ylmgr1_mq)
+     end if
+   end if
 
 !  Print a separator in output file
    write(msg, '(a,a)' )'--------------------------------------------------------------------------------',ch10
@@ -1940,7 +1949,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &       cg_mq=cg_mq,cg1_mq=cg1_mq,cg1_active_mq=cg1_active_mq,docckde_mq=docckde_mq,eigen_mq=eigen_mq,&
 &       eigen1_mq=eigen1_mq,gh0c1_set_mq=gh0c1_set_mq,gh1c_set_mq=gh1c_set_mq,&
 &       kg1_mq=kg1_mq,npwar1_mq=npwar1_mq,occk_mq=occk_mq,resid_mq=resid_mq,residm_mq=residm_mq,&
-&       rhog1_pq=rhog1_pq,rhog1_mq=rhog1_mq,rhor1_pq=rhor1_pq,rhor1_mq=rhor1_mq)
+&       rhog1_pq=rhog1_pq,rhog1_mq=rhog1_mq,rhor1_pq=rhor1_pq,rhor1_mq=rhor1_mq,&
+&       ylm1_mq=ylm1_mq,ylmgr1_mq=ylmgr1_mq)
      end if
 
      _IBM6("after dfpt_scfcv")
@@ -2333,6 +2343,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      ABI_FREE(rhor1_mq)
      ABI_FREE(rhog1_pq)
      ABI_FREE(rhog1_mq)
+     ABI_FREE(ylm1_mq)
+     ABI_FREE(ylmgr1_mq)
    end if
    if (psps%usepaw==1) then
      call pawang_free(pawang1)
