@@ -826,12 +826,11 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &     nkxc,nspden,n3xccc,nmxc,optene,option,qphon,&
 &     rhog,rhog1,rhor,rhor1,rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1,vpsp1,&
 &     nvresid1,res2,vtrial1,vxc,vxc1,xccc3d1,dtset%ixcrot)
+
+     !Compute vtrial1 at (+q,+omega) and (-q,-omega) with specific local part if q/=0
      if (.not.kramers_deg) then
-       call dfpt_rhotov(cplex,ehart01_mq,ehart1_mq,elpsp1_mq,exc1_mq,elmag1_mq,gsqcut,idir,ipert,&
-&       dtset%ixc,kxc,mpi_enreg,dtset%natom,nfftf,ngfftf,nhat,nhat1,nhat1gr,nhat1grdim,&
-&       nkxc,nspden,n3xccc,nmxc,optene,option,qphon_mq,&
-&       rhog,rhog1_mq,rhor,rhor1_mq,rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1_mq,vpsp1_mq,&
-&       nvresid1,res2_mq,vtrial1_mq,vxc,vxc1_mq,xccc3d1_mq,dtset%ixcrot)
+       call dfpt_vtrial1_pmq(cplex,nfftf,dtset%nspden,nvresid1,nvresid1_mq,qphon,&
+     & vpsp1,vpsp1_mq,vtrial1,vtrial1_mq)
      end if
 
 !    For Q=0 and metallic occupation, initialize quantities needed to
@@ -954,37 +953,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !  No need to continue and call dfpt_vtorho, when nstep==0
    if(nstep==0) exit
 
-   !Initializations 
-   if (.not.kramers_deg) then
-
-     !same problem as with density reconstruction, TODO proper fft parallelization...
-     do ifft=1,nfftf
-       vtrial1_mq(2*ifft-1,1)=+vtrial1(2*ifft-1,1)
-       vtrial1_mq(2*ifft  ,1)=-vtrial1(2*ifft  ,1)
-       nvresid1_mq(2*ifft-1,1)=+nvresid1(2*ifft-1,1)
-       nvresid1_mq(2*ifft  ,1)=-nvresid1(2*ifft  ,1)
-     end do
-     if (nspden >= 2) then
-       do ifft=1,nfftf
-         vtrial1_mq(2*ifft-1,2)=+vtrial1(2*ifft-1,2)
-         vtrial1_mq(2*ifft  ,2)=-vtrial1(2*ifft  ,2)
-         nvresid1_mq(2*ifft-1,2)=+nvresid1(2*ifft-1,2)
-         nvresid1_mq(2*ifft  ,2)=-nvresid1(2*ifft  ,2)
-       end do
-     end if
-     if (nspden > 2) then
-       do ifft=1,nfftf
-         vtrial1_mq(2*ifft-1,3)= vtrial1(2*ifft  ,4) !Re[V^12]
-         vtrial1_mq(2*ifft  ,3)= vtrial1(2*ifft-1,4) !Im[V^12],see definition of v(:,4) cplex=2 case
-         vtrial1_mq(2*ifft  ,4)= vtrial1(2*ifft-1,3) !Re[V^21]=Re[V^12]
-         vtrial1_mq(2*ifft-1,4)= vtrial1(2*ifft  ,3) !Re[V^21]=Re[V^12]
-         nvresid1_mq(2*ifft-1,3)= nvresid1(2*ifft  ,4) !Re[V^12]
-         nvresid1_mq(2*ifft  ,3)= nvresid1(2*ifft-1,4) !Im[V^12],see definition of v(:,4) cplex=2 case
-         nvresid1_mq(2*ifft  ,4)= nvresid1(2*ifft-1,3) !Re[V^21]=Re[V^12]
-         nvresid1_mq(2*ifft-1,4)= nvresid1(2*ifft  ,3) !Re[V^21]=Re[V^12]
-       end do
-     end if
-   end if
 
 !  #######################e1magh###############################################
 !  Compute the 1st-order density rho1 from the 1st-order trial potential
@@ -4583,6 +4551,86 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
  DBG_EXIT('COLL')
 
 end subroutine dfpt_wfkfermi
+!!***
+
+!!****f* ABINIT/dfpt_vtrial1_pmq
+!! NAME
+!! dfpt_vtrial1_pmq
+!!
+!! FUNCTION
+!! This routine computes the self-consistent potential at (-q,-omega).
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine dfpt_vtrial1_pmq(cplex,nfftf,nspden,nvresid1,nvresid1_mq,qphon,&
+&            vpsp1,vpsp1_mq,vtrial1,vtrial1_mq)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: cplex,nfftf,nspden
+!arrays
+ real(dp),intent(in) :: qphon(3)
+ real(dp),intent(in) :: vpsp1(cplex*nfftf), vpsp1_mq(cplex*nfftf)
+ real(dp),intent(inout) :: nvresid1(cplex*nfftf,nspden),vtrial1(cplex*nfftf,nspden)
+ real(dp),intent(inout) :: nvresid1_mq(cplex*nfftf,nspden),vtrial1_mq(cplex*nfftf,nspden)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ifft,ispden,qzero
+!arrays
+
+! *********************************************************************
+
+ DBG_ENTER('COLL')
+
+!TODO: proper fft parallelization...
+ do ifft=1,nfftf
+   vtrial1_mq(2*ifft-1,1)=+vtrial1(2*ifft-1,1)
+   vtrial1_mq(2*ifft  ,1)=-vtrial1(2*ifft  ,1)
+   nvresid1_mq(2*ifft-1,1)=+nvresid1(2*ifft-1,1)
+   nvresid1_mq(2*ifft  ,1)=-nvresid1(2*ifft  ,1)
+ end do
+ if (nspden >= 2) then
+   do ifft=1,nfftf
+     vtrial1_mq(2*ifft-1,2)=+vtrial1(2*ifft-1,2)
+     vtrial1_mq(2*ifft  ,2)=-vtrial1(2*ifft  ,2)
+     nvresid1_mq(2*ifft-1,2)=+nvresid1(2*ifft-1,2)
+     nvresid1_mq(2*ifft  ,2)=-nvresid1(2*ifft  ,2)
+   end do
+ end if
+ if (nspden > 2) then
+   do ifft=1,nfftf
+     vtrial1_mq(2*ifft-1,3)= vtrial1(2*ifft  ,4) !Re[V^12]
+     vtrial1_mq(2*ifft  ,3)= vtrial1(2*ifft-1,4) !Im[V^12],see definition of v(:,4) cplex=2 case
+     vtrial1_mq(2*ifft  ,4)= vtrial1(2*ifft-1,3) !Re[V^21]=Re[V^12]
+     vtrial1_mq(2*ifft-1,4)= vtrial1(2*ifft  ,3) !Re[V^21]=Re[V^12]
+     nvresid1_mq(2*ifft-1,3)= nvresid1(2*ifft  ,4) !Re[V^12]
+     nvresid1_mq(2*ifft  ,3)= nvresid1(2*ifft-1,4) !Im[V^12],see definition of v(:,4) cplex=2 case
+     nvresid1_mq(2*ifft  ,4)= nvresid1(2*ifft-1,3) !Re[V^21]=Re[V^12]
+     nvresid1_mq(2*ifft-1,4)= nvresid1(2*ifft  ,3) !Re[V^21]=Re[V^12]
+   end do
+ end if
+
+ qzero=0; if(qphon(1)**2+qphon(2)**2+qphon(3)**2 < tol14) qzero=1
+ if (qzero==0) then
+
+   !The local potential might be different at -q
+   do ispden=1,min(nspden,2)
+     do ifft=1,nfftf
+       vtrial1_mq(2*ifft-1,ispden)= vtrial1_mq(2*ifft-1,ispden)-vpsp1(2*ifft-1)+vpsp1_mq(2*ifft-1)
+       vtrial1_mq(2*ifft  ,ispden)= vtrial1_mq(2*ifft  ,ispden)+vpsp1(2*ifft  )+vpsp1_mq(2*ifft  )
+     end do
+   end do
+
+ end if
+
+ DBG_EXIT('COLL')
+
+end subroutine dfpt_vtrial1_pmq
 !!***
 
 end module m_dfpt_scfcv
