@@ -657,6 +657,16 @@ call wrtout(std_out,message,'COLL')
  call wrtout(std_out,message,'COLL')
  call wrtout(ab_out,message,'COLL')
 
+!NOTES FOR MATTEO: List of things for printing to netcdf file
+!pawujat
+!macro_uj
+!dtpawuj(1)%diemix
+!dtpawuj(1)%diemixmag
+!ph0phiint
+!ndtset
+!for all idtset in ndtset
+!   vsh(idtset*2-1)*Ha_eV,luocc(idtset*2-1,pawujat),luocc(idtset*2,pawujat)
+
  ii=1
  write(message, fmt='(8a)') ' URES ','     ii','    nat','       r_max','    U(J)[eV]','   U_ASA[eV]','   U_inf[eV]',ch10
  write(message, fmt='(a,2i7,4f12.5)') trim(message)//' URES ',ii,nat_org,maxval(abs(distv_org)),signum*ures,signum*ures*exp(log(intg)*eyp),&
