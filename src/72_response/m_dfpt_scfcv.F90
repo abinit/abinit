@@ -830,7 +830,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      !Compute vtrial1 at (+q,+omega) and (-q,-omega) with specific local part if q/=0
      if (.not.kramers_deg) then
        call dfpt_vtrial1_pmq(cplex,elpsp1,elpsp1_mq,nfftf,ngfftf,dtset%nspden,nvresid1,nvresid1_mq,optene,qphon,&
-&       rhor1_mq,rhor1_pq,ucvol,vpsp1,vpsp1_mq,vtrial1,vtrial1_mq)
+&       rhor1,rhor1_mq,rhor1_pq,ucvol,vpsp1,vpsp1_mq,vtrial1,vtrial1_mq,vxc1)
      end if
 
 !    For Q=0 and metallic occupation, initialize quantities needed to
@@ -1067,7 +1067,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &     rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1,vpsp1,nvresid1,res2,vtrial1,vxc,vxc1,xccc3d1,dtset%ixcrot)
 
      call dfpt_vtrial1_pmq(cplex,elpsp1,elpsp1_mq,nfftf,ngfftf,dtset%nspden,nvresid1,nvresid1_mq,optene,qphon,&
-&     rhor1_mq,rhor1_pq,ucvol,vpsp1,vpsp1_mq,vtrial1,vtrial1_mq)
+&     rhor1,rhor1_mq,rhor1_pq,ucvol,vpsp1,vpsp1_mq,vtrial1,vtrial1_mq,vxc1)
 
    end if
 
@@ -1077,10 +1077,16 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &     efrloc,efrnl,efrx1,efrx2,ehart1,ek0,ek1,eii,elast,eloc0,elpsp1,&
 &     end0,end1,enl0,enl1,epaw1,etotal,evar,evdw,exc1,ipert,dtset%natom,optene)
      call timab(152,1,tsec)
+     write(100,*) ek0,edocc,eeig0,eloc0,enl0
+     write(100,*) ehart1,exc1,enl1,epaw1,elpsp1
+     write(100,*) 
      if(.not.kramers_deg) then
        call dfpt_etot(dtset%berryopt,deltae_mq,eberry_mq,edocc_mq,eeig0_mq,eew,efrhar,efrkin,&
 &        efrloc,efrnl,efrx1,efrx2,ehart1,ek0_mq,ek1_mq,eii,elast_mq,eloc0_mq,elpsp1_mq,&
 &        end0_mq,end1_mq,enl0_mq,enl1_mq,epaw1_mq,etotal_mq,evar_mq,evdw,exc1,ipert,dtset%natom,optene)
+     write(101,*) ek0_mq,edocc_mq,eeig0_mq,eloc0_mq,enl0_mq
+     write(101,*) ehart1,exc1,enl1_mq,epaw1_mq,elpsp1_mq
+     write(101,*) 
 
        !Implicictly avoids double counting of SCF and local energies
        etotal=half*(etotal+etotal_mq)
@@ -1157,10 +1163,16 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &     end0,end1,enl0,enl1,epaw1,etotal,evar,evdw,exc1,ipert,dtset%natom,optene)
 !&     enl0,enl1,epaw1,etotal,evar,evdw,exc1,elmag1,ipert,dtset%natom,optene)
 !    !debug: compute the d2E/d-qd+q energy, should be equal to the one from previous line
+     write(100,*) ek0,edocc,eeig0,eloc0,enl0
+     write(100,*) ehart1,exc1,enl1,epaw1,elpsp1
+     write(100,*) 
      if(.not.kramers_deg) then
        call dfpt_etot(dtset%berryopt,deltae_mq,eberry_mq,edocc_mq,eeig0_mq,eew,efrhar,efrkin,&
 &        efrloc,efrnl,efrx1,efrx2,ehart1,ek0_mq,ek1_mq,eii,elast_mq,eloc0_mq,elpsp1_mq,&
 &        end0_mq,end1_mq,enl0_mq,enl1_mq,epaw1_mq,etotal_mq,evar_mq,evdw,exc1,ipert,dtset%natom,optene)
+     write(101,*) ek0_mq,edocc_mq,eeig0_mq,eloc0_mq,enl0_mq
+     write(101,*) ehart1,exc1,enl1_mq,epaw1_mq,elpsp1_mq
+     write(101,*) 
 
        !Implicictly avoids double counting of SCF and local energies
        etotal=half*(etotal+etotal_mq)
@@ -4571,7 +4583,7 @@ end subroutine dfpt_wfkfermi
 !! SOURCE
 
 subroutine dfpt_vtrial1_pmq(cplex,elpsp1,elpsp1_mq,nfftf,ngfftf,nspden,nvresid1,nvresid1_mq,optene,qphon,&
-&            rhor1_mq,rhor1_pq,ucvol,vpsp1,vpsp1_mq,vtrial1,vtrial1_mq)
+&            rhor1,rhor1_mq,rhor1_pq,ucvol,vpsp1,vpsp1_mq,vtrial1,vtrial1_mq,vxc1)
 
 !Arguments ------------------------------------
 !scalars
@@ -4582,15 +4594,17 @@ subroutine dfpt_vtrial1_pmq(cplex,elpsp1,elpsp1_mq,nfftf,ngfftf,nspden,nvresid1,
 !arrays
  integer,intent(in) :: ngfftf(18)
  real(dp),intent(in) :: qphon(3)
+ real(dp), intent(in) :: rhor1(cplex*nfftf,nspden)
  real(dp), intent(in) :: rhor1_mq(cplex*nfftf,nspden),rhor1_pq(cplex*nfftf,nspden)
  real(dp),intent(in) :: vpsp1(cplex*nfftf), vpsp1_mq(cplex*nfftf)
  real(dp),intent(inout) :: nvresid1(cplex*nfftf,nspden),vtrial1(cplex*nfftf,nspden)
  real(dp),intent(inout) :: nvresid1_mq(cplex*nfftf,nspden),vtrial1_mq(cplex*nfftf,nspden)
+ real(dp),intent(in) :: vxc1(cplex*nfftf,nspden)
 
 !Local variables-------------------------------
 !scalars
  integer :: ifft,ispden,nfftot,qzero
- real(dp) :: doti
+ real(dp) :: doti,elpsp10
 !arrays
 
 ! *********************************************************************
@@ -4640,8 +4654,11 @@ subroutine dfpt_vtrial1_pmq(cplex,elpsp1,elpsp1_mq,nfftf,ngfftf,nspden,nvresid1,
    end do
 
    if (optene==1) then
+     call dotprod_vn(cplex,rhor1,elpsp10,doti,nfftt,nfftot,nspden,1,vxc1_,ucvol)
      call dotprod_vn(cplex,rhor1_pq,elpsp1 ,doti,nfftf,nfftot,1     ,1,vpsp1,ucvol)
      call dotprod_vn(cplex,rhor1_mq,elpsp1_mq,doti,nfftf,nfftot,1     ,1,vpsp1_mq,ucvol)
+     elpsp1=two*(elpsp1+elpsp10)
+     elpsp1_mq=two*(elpsp1_mq+elpsp10)
    end if
 
  end if
