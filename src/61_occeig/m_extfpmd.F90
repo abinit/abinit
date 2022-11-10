@@ -42,7 +42,7 @@ module m_extfpmd
   use m_spacepar,       only : meanvalue_g
 
   implicit none
-  public :: dip12,djp12,dip32,djp32,extfpmd_dos,extfpmd_e_fg
+  public :: dip12,djp12,dip32,djp32,extfpmd_dos,extfpmd_e_fg,extfpmd_e_tf
   !!***
 
   !----------------------------------------------------------------------
@@ -56,10 +56,11 @@ module m_extfpmd
   !!
   !! SOURCE
   type,public :: extfpmd_type
-    integer :: bcut,nbcut,nfftf,nspden,version
+    integer :: bcut,nbcut,nbdbuf,nfft,nspden,version
     real(dp) :: e_bcut,edc_kinetic,e_kinetic,entropy
     real(dp) :: nelect,shiftfactor,ucvol
     real(dp),allocatable :: vtrial(:,:)
+    real(dp),allocatable :: nelectarr(:,:)
   contains
     procedure :: compute_e_kinetic
     procedure :: compute_entropy
@@ -83,6 +84,7 @@ contains
   !!  this=extfpmd_type object concerned
   !!  mband=maximum number of bands
   !!  nbcut=number of states used to average the constant potential value
+  !!  nbdbuf=Number of bands in the buffer to converge scf cycle with extfpmd models
   !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
   !!  version=extfpmd implementation version
   !!
@@ -90,11 +92,11 @@ contains
   !!  this=extfpmd_type object concerned
   !!
   !! SOURCE
-  subroutine init(this,mband,nbcut,nfftf,nspden,rprimd,version)
+  subroutine init(this,mband,nbcut,nbdbuf,nfft,nspden,rprimd,version)
     ! Arguments -------------------------------
     ! Scalars
     class(extfpmd_type),intent(inout) :: this
-    integer,intent(in) :: mband,nbcut,nfftf,nspden,version
+    integer,intent(in) :: mband,nbcut,nbdbuf,nfft,nspden,version
     ! Arrays
     real(dp),intent(in) :: rprimd(3,3)
 
@@ -104,18 +106,21 @@ contains
 
     ! *********************************************************************
 
-    this%bcut=mband
+    this%bcut=mband-nbdbuf
     this%nbcut=nbcut
+    this%nbdbuf=nbdbuf
     this%version=version
-    ABI_MALLOC(this%vtrial,(nfftf,nspden))
+    ABI_MALLOC(this%vtrial,(nfft,nspden))
     this%vtrial(:,:)=zero
-    this%nfftf=nfftf
+    this%nfft=nfft
     this%nspden=nspden
     this%e_bcut=zero
     this%edc_kinetic=zero
     this%e_kinetic=zero
     this%entropy=zero
     this%nelect=zero
+    ABI_MALLOC(this%nelectarr,(nfft,nspden))
+    this%nelectarr(:,:)=zero
     this%shiftfactor=zero
     call metric(gmet,gprimd,-1,rmet,rprimd,this%ucvol)
   end subroutine init
@@ -145,10 +150,13 @@ contains
 
     this%vtrial(:,:)=zero
     ABI_FREE(this%vtrial)
-    this%nfftf=0
+    this%nelectarr(:,:)=zero
+    ABI_FREE(this%nelectarr)
+    this%nfft=0
     this%nspden=0
     this%bcut=0
     this%nbcut=0
+    this%nbdbuf=0
     this%version=1
     this%e_bcut=zero
     this%edc_kinetic=zero
@@ -205,7 +213,7 @@ contains
     ! potentials (vtrial), averaging over all space.
     ! Simplest and most precise way to evaluate U_0.
     if(this%version==1) then
-      this%shiftfactor=sum(this%vtrial)/(this%nfftf*this%nspden)
+      this%shiftfactor=sum(this%vtrial)/(this%nfft*this%nspden)
 
       ! Computes the relative error of the model vs last eigenvalues
       if(me==0) then
@@ -215,11 +223,11 @@ contains
         do isppol=1,nsppol
           do ikpt=1,nkpt
             nband_k=nband(ikpt+(isppol-1)*nkpt)
-            rel_err=rel_err+wtk(ikpt)*abs((eigen(band_index+nband_k)-&
-            & extfpmd_e_fg(dble(nband_k),this%ucvol)-this%shiftfactor)/&
-            & eigen(band_index+nband_k))
-            abs_err=abs_err+wtk(ikpt)*abs(eigen(band_index+nband_k)-&
-            & extfpmd_e_fg(dble(nband_k),this%ucvol)-this%shiftfactor)
+            rel_err=rel_err+wtk(ikpt)*abs((eigen(band_index+nband_k-this%nbdbuf)-&
+            & extfpmd_e_fg(dble(nband_k-this%nbdbuf),this%ucvol)-this%shiftfactor)/&
+            & eigen(band_index+nband_k-this%nbdbuf))
+            abs_err=abs_err+wtk(ikpt)*abs(eigen(band_index+nband_k-this%nbdbuf)-&
+            & extfpmd_e_fg(dble(nband_k-this%nbdbuf),this%ucvol)-this%shiftfactor)
             band_index=band_index+nband_k
           end do
         end do
@@ -244,7 +252,7 @@ contains
       do isppol=1,nsppol
         do ikpt=1,nkpt
           nband_k=nband(ikpt+(isppol-1)*nkpt)
-          do ii=nband_k-this%nbcut+1,nband_k
+          do ii=nband_k-this%nbdbuf-this%nbcut+1,nband_k-this%nbdbuf
             this%shiftfactor=this%shiftfactor+&
             & wtk(ikpt)*(eigen(band_index+ii)-extfpmd_e_fg(dble(ii),this%ucvol))
           end do
@@ -264,15 +272,33 @@ contains
       do isppol=1,nsppol
         do ikpt=1,nkpt
           nband_k=nband(ikpt+(isppol-1)*nkpt)
-          do ii=nband_k-this%nbcut+1,nband_k
+          do ii=nband_k-this%nbdbuf-this%nbcut+1,nband_k-this%nbdbuf
             this%shiftfactor=this%shiftfactor+&
             & wtk(ikpt)*(eigen(band_index+ii)-eknk(band_index+ii))
           end do
-          this%e_bcut=this%e_bcut+wtk(ikpt)*eigen(band_index+nband_k)
+          this%e_bcut=this%e_bcut+wtk(ikpt)*eigen(band_index+nband_k-this%nbdbuf)
           band_index=band_index+nband_k
         end do
       end do
       this%shiftfactor=this%shiftfactor/this%nbcut
+    end if
+
+
+    ! Computes U_0 from the sum of local
+    ! potentials (vtrial), averaging over all space.
+    ! Should not be required to compute quantities in
+    ! this case.
+    if(this%version==4) then
+      this%shiftfactor=sum(this%vtrial)/(this%nfft*this%nspden)
+      this%e_bcut=0
+      band_index=0
+      do isppol=1,nsppol
+        do ikpt=1,nkpt
+          nband_k=nband(ikpt+(isppol-1)*nkpt)
+          this%e_bcut=this%e_bcut+wtk(ikpt)*eigen(band_index+nband_k-this%nbdbuf)
+          band_index=band_index+nband_k
+        end do
+      end do
     end if
   end subroutine compute_shiftfactor
   !!***
@@ -305,7 +331,7 @@ contains
 
     ! Local variables -------------------------
     ! Scalars
-    integer :: ifftf,ispden
+    integer :: ifft,ispden
     real(dp) :: factor,gamma,xcut
 
     ! *********************************************************************
@@ -334,13 +360,15 @@ contains
     ! of Fermi gas contributions for each point of the fftf grid.
     ! Warning: This is not yet operational. Work in progress.
     if(this%version==4) then
-      do ifftf=1,this%nfftf
+      do ifft=1,this%nfft
         do ispden=1,this%nspden
-          gamma=(fermie-this%vtrial(ifftf,ispden))/tsmear
-          xcut=extfpmd_e_fg(dble(this%bcut),this%ucvol)/tsmear
-          nelect=nelect+factor*djp12(xcut,gamma)/(this%nfftf*this%nspden)
+          gamma=(fermie-this%vtrial(ifft,ispden))/tsmear
+          ! xcut=(this%e_bcut-this%vtrial(ifft,ispden))/tsmear
+          xcut=(extfpmd_e_fg(dble(this%bcut),this%ucvol)+this%shiftfactor-this%vtrial(ifft,ispden))/tsmear
+          this%nelectarr(ifft,ispden)=factor*djp12(xcut,gamma)
         end do
       end do
+      nelect=nelect+sum(this%nelectarr)/(this%nfft*this%nspden)
     end if
   end subroutine compute_nelect
   !!***
@@ -371,7 +399,7 @@ contains
 
     ! Local variables -------------------------
     ! Scalars
-    integer :: ifftf,ispden
+    integer :: ifft,ispden
     real(dp) :: factor,gamma,xcut
 
     ! *********************************************************************
@@ -401,12 +429,13 @@ contains
     ! of Fermi gas contributions for each point of the fftf grid.
     ! Warning: This is not yet operational. Work in progress.
     if(this%version==4) then
-      do ifftf=1,this%nfftf
+      do ifft=1,this%nfft
         do ispden=1,this%nspden
-          gamma=(fermie-this%vtrial(ifftf,ispden))/tsmear
-          xcut=extfpmd_e_fg(dble(this%bcut),this%ucvol)/tsmear
+          gamma=(fermie-this%vtrial(ifft,ispden))/tsmear
+          ! xcut=(this%e_bcut-this%vtrial(ifft,ispden))/tsmear
+          xcut=(extfpmd_e_fg(dble(this%bcut),this%ucvol)+this%shiftfactor-this%vtrial(ifft,ispden))/tsmear
           this%e_kinetic=this%e_kinetic+factor*djp32(xcut,gamma)/&
-          & (this%nfftf*this%nspden)
+          & (this%nfft*this%nspden)
         end do
       end do
     end if
@@ -414,7 +443,17 @@ contains
     ! Computes the double counting term from the shiftfactor, and
     ! from the contributions to the kinetic energy and
     ! the number of electrons
-    this%edc_kinetic=this%e_kinetic+this%nelect*this%shiftfactor
+    if(this%version==1.or.this%version==2.or.this%version==3) then
+      this%edc_kinetic=this%e_kinetic+this%nelect*this%shiftfactor
+    else if(this%version==4) then
+      this%edc_kinetic=zero
+      do ifft=1,this%nfft
+        do ispden=1,this%nspden
+          this%edc_kinetic=this%edc_kinetic+(this%e_kinetic+this%nelectarr(ifft,ispden)*&
+          & this%vtrial(ifft,ispden))/(this%nfft*this%nspden)
+        end do
+      end do
+    end if
   end subroutine compute_e_kinetic
   !!***
 
@@ -444,8 +483,8 @@ contains
 
     ! Local variables -------------------------
     ! Scalars
-    integer :: ii,ifftf,ispden
-    real(dp) :: ix,step,factor,fn,gamma,minocc
+    integer :: ii,ifft,ispden
+    real(dp) :: ix,step,factor,fn,gamma
     ! Arrays
     real(dp),dimension(:),allocatable :: valuesent
 
@@ -456,7 +495,7 @@ contains
     ! Computes extfpmd contribution to the entropy integrating
     ! over accessible states with Fermi-Dirac complete integrals and
     ! substracting 0 to bcut contribution with numeric integration.
-    if(this%version==1.or.this%version==2) then
+    if(this%version==1.or.this%version==2.or.this%version==4) then
       factor=sqrt(2.)/(PI*PI)*this%ucvol*tsmear**(2.5)
       gamma=(fermie-this%shiftfactor)/tsmear
       ABI_MALLOC(valuesent,(this%bcut+1))
@@ -507,8 +546,7 @@ contains
       ! We need at least 6 elements in valuesent to call simpson function.
       if(size(valuesent)>=6) then
         this%entropy=5./3.*factor*dip32(gamma)/tsmear-&
-        & gamma*factor*dip12(gamma)/tsmear-&
-        simpson(step,valuesent)
+        & gamma*factor*dip12(gamma)/tsmear-simpson(step,valuesent)
       end if
       ABI_FREE(valuesent)
     end if
@@ -517,37 +555,39 @@ contains
     ! of Fermi gas contributions for each point of the fftf grid,
     ! as we do for version=1 and version=2.
     ! Warning: This is not yet operational. Work in progress.
-    if(this%version==4) then
-      step=one
-      do ifftf=1,this%nfftf
+    if(this%version==5) then
+      this%entropy=zero
+      do ifft=1,this%nfft
         do ispden=1,this%nspden
-          ! Dynamic array find size
-          ix=dble(this%bcut)
-          ii=0
-          fn=fermi_dirac(extfpmd_e_fg(ix,this%ucvol)+&
-          & this%vtrial(ifftf,ispden),fermie,tsmear)
-          minocc=tol16
-          do while(fn>minocc)
-            fn=fermi_dirac(extfpmd_e_fg(ix,this%ucvol)+&
-            & this%vtrial(ifftf,ispden),fermie,tsmear)
-            ii=ii+1
-            ix=ix+step
+          factor=sqrt(2.)/(PI*PI)*this%ucvol*tsmear**(2.5)
+          gamma=(fermie-this%vtrial(ifft,ispden))/tsmear
+          ABI_MALLOC(valuesent,(this%bcut+1))
+
+          ! step=(this%e_bcut-this%vtrial(ifft,ispden))/(this%bcut)
+          !$OMP PARALLEL DO PRIVATE(fn,ix) SHARED(valuesent)
+          do ii=1,this%bcut+1
+            ! ix=this%vtrial(ifft,ispden)+(dble(ii)-one)*step
+            ! fn=fermi_dirac(ix,fermie,tsmear)
+            ix=dble(ii)-one
+            fn=fermi_dirac(extfpmd_e_fg(ix,this%ucvol)+this%vtrial(ifft,ispden),fermie,tsmear)
+            if(fn>tol16.and.(one-fn)>tol16) then
+              ! valuesent(ii)=-(fn*log(fn)+(one-fn)*log(one-fn))*&
+              ! & extfpmd_dos(ix,this%vtrial(ifft,ispden),this%ucvol)
+              valuesent(ii)=-two*(fn*log(fn)+(one-fn)*log(one-fn))
+            else
+              valuesent(ii)=zero
+            end if
           end do
-          ABI_MALLOC(valuesent,(ii))
-          ix=dble(this%bcut)
-          ii=0
-          fn=fermi_dirac(extfpmd_e_fg(ix,this%ucvol)+&
-          & this%vtrial(ifftf,ispden),fermie,tsmear)
-          do while(fn>minocc)
-            fn=fermi_dirac(extfpmd_e_fg(ix,this%ucvol)+&
-            & this%vtrial(ifftf,ispden),fermie,tsmear)
-            ii=ii+1
-            valuesent(ii)=-2*(fn*log(fn)+(1.-fn)*log(1.-fn))
-            ix=ix+step
-          end do
-          if (ii>1) then
-            this%entropy=this%entropy+simpson(step,valuesent)/&
-            & (this%nfftf*this%nspden)
+          !$OMP END PARALLEL DO
+
+          ! We need at least 6 elements in valuesent to call simpson function.
+          if(size(valuesent)>=6) then
+            ! this%entropy=this%entropy+(5./3.*factor*dip32(gamma)/tsmear-&
+            ! & gamma*factor*dip12(gamma)/tsmear-simpson(step,valuesent))/&
+            ! & (this%nfft*this%nspden)
+            this%entropy=this%entropy+(5./3.*factor*dip32(gamma)/tsmear-&
+            & gamma*factor*dip12(gamma)/tsmear-simpson(one,valuesent))/&
+            & (this%nfft*this%nspden)
           end if
           ABI_FREE(valuesent)
         end do
@@ -1017,6 +1057,37 @@ contains
 
     extfpmd_e_fg=.5*(iband*6*PI*PI/ucvol)**(2./3.)
   end function extfpmd_e_fg
+  !!***
+
+  !!****f* ABINIT/m_extfpmd/extfpmd_e_tf
+  !! NAME
+  !!  extfpmd_e_tf
+  !!
+  !! FUNCTION
+  !!  Returns the Thomas-Fermi energy for a given number of
+  !!  accessible states.
+  !!
+  !! INPUTS
+  !!  iband=number of accessible states
+  !!
+  !! OUTPUT
+  !!  extfpmd_e_tf=energy of non homogeneous electron gas for a given number of accessible states
+  !!
+  !! PARENTS
+  !!
+  !! CHILDREN
+  !!
+  !! SOURCE
+  function extfpmd_e_tf(iband)
+    ! Arguments -------------------------------
+    ! Scalars
+    real(dp),intent(in) :: iband
+    real(dp) :: extfpmd_e_tf
+
+    ! *********************************************************************
+
+    extfpmd_e_tf=(iband*6*PI*PI*PI/(2*sqrt(8.)))**(2./3.)
+  end function extfpmd_e_tf
   !!***
 
 end module m_extfpmd
