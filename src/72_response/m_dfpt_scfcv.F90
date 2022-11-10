@@ -829,8 +829,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 
      !Compute vtrial1 at (+q,+omega) and (-q,-omega) with specific local part if q/=0
      if (.not.kramers_deg) then
-       call dfpt_vtrial1_pmq(cplex,elpsp1,elpsp1_mq,nfftf,ngfftf,dtset%nspden,nvresid1,nvresid1_mq,optene,qphon,&
-&       rhor1,rhor1_mq,rhor1_pq,ucvol,vpsp1,vpsp1_mq,vtrial1,vtrial1_mq)
+       call dfpt_vtrial1_mq(cplex,nfftf,dtset%nspden,nvresid1,nvresid1_mq,vtrial1,vtrial1_mq)
      end if
 
 !    For Q=0 and metallic occupation, initialize quantities needed to
@@ -931,6 +930,11 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
    if(iscf_mod>0.and.nstep>0)then
      write(msg, '(a,a,i4)' )ch10,' ITER STEP NUMBER  ',istep
      call wrtout(std_out,msg,'COLL')
+   end if
+
+!  Update vtrial1_mq
+   if (nstep>1.and..not.kramers_deg) then
+     call dfpt_vtrial1_mq(cplex,nfftf,dtset%nspden,nvresid1,nvresid1_mq,vtrial1,vtrial1_mq)
    end if
 
 !  For Q=0 and metallic occupation, calculate the first-order Fermi energy
@@ -1066,8 +1070,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &     nspden,n3xccc,nmxc,optene,optres,dtset%qptn,rhog,rhog1,rhor,rhor1,&
 &     rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1,vpsp1,nvresid1,res2,vtrial1,vxc,vxc1,xccc3d1,dtset%ixcrot)
 
-     call dfpt_vtrial1_pmq(cplex,elpsp1,elpsp1_mq,nfftf,ngfftf,dtset%nspden,nvresid1,nvresid1_mq,optene,qphon,&
-&     rhor1,rhor1_mq,rhor1_pq,ucvol,vpsp1,vpsp1_mq,vtrial1,vtrial1_mq)
 
    end if
 
@@ -1079,7 +1081,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      call timab(152,1,tsec)
      if(.not.kramers_deg) then
        call dfpt_etot(dtset%berryopt,deltae_mq,eberry_mq,edocc_mq,eeig0_mq,eew,efrhar,efrkin,&
-&        efrloc,efrnl,efrx1,efrx2,ehart1,ek0_mq,ek1_mq,eii,elast_mq,eloc0_mq,elpsp1_mq,&
+&        efrloc,efrnl,efrx1,efrx2,ehart1,ek0_mq,ek1_mq,eii,elast_mq,eloc0_mq,elpsp1,&
 &        end0_mq,end1_mq,enl0_mq,enl1_mq,epaw1_mq,etotal_mq,evar_mq,evdw,exc1,ipert,dtset%natom,optene)
 
        !Implicictly avoids double counting of SCF and local energies
@@ -1159,7 +1161,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !    !debug: compute the d2E/d-qd+q energy, should be equal to the one from previous line
      if(.not.kramers_deg) then
        call dfpt_etot(dtset%berryopt,deltae_mq,eberry_mq,edocc_mq,eeig0_mq,eew,efrhar,efrkin,&
-&        efrloc,efrnl,efrx1,efrx2,ehart1,ek0_mq,ek1_mq,eii,elast_mq,eloc0_mq,elpsp1_mq,&
+&        efrloc,efrnl,efrx1,efrx2,ehart1,ek0_mq,ek1_mq,eii,elast_mq,eloc0_mq,elpsp1,&
 &        end0_mq,end1_mq,enl0_mq,enl1_mq,epaw1_mq,etotal_mq,evar_mq,evdw,exc1,ipert,dtset%natom,optene)
 
        !Implicictly avoids double counting of SCF and local energies
@@ -1215,12 +1217,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &       mpi_enreg,my_natom,nfftf,nfftmix,ngfftf,ngfftmix,npawmix,pawrhoij1,&
 &       qphon,rhor1,rprimd,psps%usepaw,nvresid1,vtrial1)
         initialized=1
-       if (.not.kramers_deg) then
-         call dfpt_newvtr(cplex,dbl_nnsclo_mq,dielar,dtset,etotal,pawfgr%fintocoa,&
-&         initialized,iscf_mod,ispmix,istep,mix,pawfgr%coatofin,&
-&         mpi_enreg,my_natom,nfftf,nfftmix,ngfftf,ngfftmix,npawmix,pawrhoij1,&
-&         qphon_mq,rhor1,rprimd,psps%usepaw,nvresid1_mq,vtrial1_mq)
-       end if
      end if
    end if
 
@@ -4563,9 +4559,9 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
 end subroutine dfpt_wfkfermi
 !!***
 
-!!****f* ABINIT/dfpt_vtrial1_pmq
+!!****f* ABINIT/dfpt_vtrial1_mq
 !! NAME
-!! dfpt_vtrial1_pmq
+!! dfpt_vtrial1_mq
 !!
 !! FUNCTION
 !! This routine computes the self-consistent potential at (-q,-omega).
@@ -4576,36 +4572,24 @@ end subroutine dfpt_wfkfermi
 !!
 !! SOURCE
 
-subroutine dfpt_vtrial1_pmq(cplex,elpsp1,elpsp1_mq,nfftf,ngfftf,nspden,nvresid1,nvresid1_mq,optene,qphon,&
-&            rhor1,rhor1_mq,rhor1_pq,ucvol,vpsp1,vpsp1_mq,vtrial1,vtrial1_mq)
+subroutine dfpt_vtrial1_mq(cplex,nfftf,nspden,nvresid1,nvresid1_mq,vtrial1,vtrial1_mq)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: cplex,nfftf,nspden,optene
- real(dp),intent(inout) :: elpsp1,elpsp1_mq
- real(dp),intent(in) :: ucvol
+ integer,intent(in) :: cplex,nfftf,nspden
 
 !arrays
- integer,intent(in) :: ngfftf(18)
- real(dp),intent(in) :: qphon(3)
- real(dp), intent(in) :: rhor1(cplex*nfftf,nspden)
- real(dp), intent(in) :: rhor1_mq(cplex*nfftf,nspden),rhor1_pq(cplex*nfftf,nspden)
- real(dp),intent(in) :: vpsp1(cplex*nfftf), vpsp1_mq(cplex*nfftf)
- real(dp),intent(inout) :: nvresid1(cplex*nfftf,nspden),vtrial1(cplex*nfftf,nspden)
- real(dp),intent(inout) :: nvresid1_mq(cplex*nfftf,nspden),vtrial1_mq(cplex*nfftf,nspden)
+ real(dp),intent(in) :: nvresid1(cplex*nfftf,nspden),vtrial1(cplex*nfftf,nspden)
+ real(dp),intent(out) :: nvresid1_mq(cplex*nfftf,nspden),vtrial1_mq(cplex*nfftf,nspden)
 
 !Local variables-------------------------------
 !scalars
- integer :: ifft,ispden,nfftot,qzero
- real(dp) :: doti,elpsp1_pq,elpsp1_tot,twoelpsp10
+ integer :: ifft
 !arrays
 
 ! *********************************************************************
 
  DBG_ENTER('COLL')
-
-!Get size of FFT grid
- nfftot=ngfftf(1)*ngfftf(2)*ngfftf(3)
 
 !TODO: proper fft parallelization...
  do ifft=1,nfftf
@@ -4635,33 +4619,9 @@ subroutine dfpt_vtrial1_pmq(cplex,elpsp1,elpsp1_mq,nfftf,ngfftf,nspden,nvresid1,
    end do
  end if
 
- qzero=0; if(qphon(1)**2+qphon(2)**2+qphon(3)**2 < tol14) qzero=1
- if (qzero==0) then
-
-   !The local potential might be different at -q
-   do ispden=1,min(nspden,2)
-     do ifft=1,nfftf
-       vtrial1_mq(2*ifft-1,ispden)= vtrial1_mq(2*ifft-1,ispden)-vpsp1(2*ifft-1)+vpsp1_mq(2*ifft-1)
-       vtrial1_mq(2*ifft  ,ispden)= vtrial1_mq(2*ifft  ,ispden)+vpsp1(2*ifft  )+vpsp1_mq(2*ifft  )
-     end do
-   end do
-
-   if (optene==1) then
-     call dotprod_vn(cplex,rhor1,elpsp1_tot,doti,nfftf,nfftot,1,1,vpsp1,ucvol)
-     call dotprod_vn(cplex,rhor1_pq,elpsp1_pq,doti,nfftf,nfftot,1,1,vpsp1,ucvol)
-     call dotprod_vn(cplex,rhor1_mq,elpsp1_mq,doti,nfftf,nfftot,1,1,vpsp1_mq,ucvol)
-     twoelpsp10=elpsp1-two*elpsp1_tot
-     elpsp1=twoelpsp10+two*elpsp1_pq
-     elpsp1_mq=twoelpsp10+two*elpsp1_mq
-   end if
-
- end if
-
- if (qzero==1.and.optene==1) elpsp1_mq=elpsp1
-
  DBG_EXIT('COLL')
 
-end subroutine dfpt_vtrial1_pmq
+end subroutine dfpt_vtrial1_mq
 !!***
 
 end module m_dfpt_scfcv
