@@ -28,7 +28,10 @@ MODULE m_paw_uj
  use m_linalg_interfaces
  use m_xmpi
  use m_dtset
+ use netcdf
+ use m_nctk
 
+ use m_fstrings,      only : strcat
  use m_pptools,       only : prmat
  use m_special_funcs, only : iradfnh
  use m_geometry,      only : shellstruct,ioniondist
@@ -38,6 +41,8 @@ MODULE m_paw_uj
  use m_pawtab,        only : pawtab_type
  use m_paw_ij,        only : paw_ij_type
  use m_paral_atom,    only : get_my_atmtab, free_my_atmtab
+ use m_dtfil,         only : datafiles_type
+ use m_crystal,       only : crystal_t
 
  implicit none
 
@@ -254,7 +259,6 @@ end subroutine pawuj_free
 !!
 !! INPUTS
 !!  dtpawuj=potential shifts (vsh) and atomic occupations (occ)
-!!  ujdet_filename= Filename for write (Using NetCDF format)
 !!
 !! OUTPUT
 !!  only printing
@@ -262,15 +266,16 @@ end subroutine pawuj_free
 !!
 !! SOURCE
 
-subroutine pawuj_det(dtpawuj,ndtpawuj,ujdet_filename,ures)
+subroutine pawuj_det(dtpawuj,ndtpawuj,dtset,dtfil,ures,comm)
 
 !Arguments ------------------------------------
 !scalars
 !arrays
- integer                        :: ndtpawuj
+ integer                        :: ndtpawuj, comm
  type(macro_uj_type),intent(in) :: dtpawuj(0:ndtpawuj)
+ type(dataset_type),intent(in)      :: dtset
+ type(datafiles_type),intent(in) :: dtfil
  real(dp),intent(out)           :: ures
- character(len=*),intent(in)    :: ujdet_filename
 
 !Local variables-------------------------------
 !scalars
@@ -279,6 +284,7 @@ subroutine pawuj_det(dtpawuj,ndtpawuj,ujdet_filename,ures)
  integer                     :: im1,ndtuj,idtset, nsh_org, nsh_sc,nat_sc,maxnat
  integer                     :: pawujat,pawprtvol,pawujoption
  integer                     :: dmatpuopt,invopt,ipert
+ integer                     :: my_rank, ncid, ncerr
  real(dp)                    :: pawujga,ph0phiint,intg,fcorr,eyp
  real(dp)                    :: diem,signum,scalarHP !LMac quantities
 
@@ -287,6 +293,7 @@ subroutine pawuj_det(dtpawuj,ndtpawuj,ujdet_filename,ures)
  character(len=5)            :: pertname
  character(len=1)            :: parname
  character(len=14)           :: occmag
+ type(crystal_t) :: cryst
 !arrays
  integer                     :: ext(3)
  real(dp)                    :: rprimd_sc(3,3),vsh(ndtpawuj),a(5),b(5)
@@ -295,10 +302,12 @@ subroutine pawuj_det(dtpawuj,ndtpawuj,ujdet_filename,ures)
  real(dp),allocatable        :: luocc(:,:),dqarr(:,:),dqarrr(:,:),dparr(:,:),dparrr(:,:),xred_org(:,:),drarr(:,:)
  real(dp),allocatable        :: magv_org(:),magv_sc(:),chi(:),chi0(:),chi0_sc(:), chi_sc(:), xred_sc(:,:)
  real(dp),allocatable        :: sdistv_org(:),sdistv_sc(:),distv_org(:),distv_sc(:)
- integer                     :: ncid=0
+ integer,parameter           :: ncid0 = 0, master = 0
 ! *********************************************************************
 
  DBG_ENTER("COLL")
+
+ my_rank = xmpi_comm_rank(comm)
 
 !write(std_out,*) 'pawuj 01'
 !###########################################################
@@ -356,7 +365,6 @@ call wrtout(std_out,message,'COLL')
 !###########################################################
 !### 02. Create the file UJDET.nc for the OMac ujdet utility
 
- if(.false.)write(std_out,*)ujdet_filename ! This is for the abirules
 
 !write(std_out,*) 'pawuj 03'
 !###########################################################
@@ -373,40 +381,40 @@ call wrtout(std_out,message,'COLL')
  end if
  if (ndtuj>=2.or.jdtset==1) then
    idum2(1,1:ndtuj)=4 !dtpawuj(:)%ndtuj
-   call prttagm(dparr,idum2,ab_out,jdtset_,1,marr,1,narrm,ncid,ndtuj,'ndtset','INT',0)
+   call prttagm(dparr,idum2,ab_out,jdtset_,1,marr,1,narrm,ncid0,ndtuj,'ndtset','INT',0)
  end if
  idum2(1,0:ndtuj)=pack(dtpawuj(:)%nat,dtpawuj(:)%iuj/=-1)
- call prttagm(dparr,idum2,ab_out,jdtset_,1,marr,1,narrm,ncid,ndtuj,'nat'//trim(hstr),'INT',0)
+ call prttagm(dparr,idum2,ab_out,jdtset_,1,marr,1,narrm,ncid0,ndtuj,'nat'//trim(hstr),'INT',0)
 
  idum2(1,0:ndtuj)=pack(dtpawuj(:)%nspden,dtpawuj(:)%iuj/=-1)
- call prttagm(dparr,idum2,ab_out,jdtset_,1,marr,1,narrm,ncid,ndtuj,'nspden'//trim(hstr),'INT',0)
+ call prttagm(dparr,idum2,ab_out,jdtset_,1,marr,1,narrm,ncid0,ndtuj,'nspden'//trim(hstr),'INT',0)
 
  idum2(1,0:ndtuj)=pack(dtpawuj(:)%macro_uj,dtpawuj(:)%iuj/=-1)
- call prttagm(dparr,idum2,ab_out,jdtset_,1,marr,1,narrm,ncid,ndtuj,'macro_uj'//trim(hstr),'INT',0)
+ call prttagm(dparr,idum2,ab_out,jdtset_,1,marr,1,narrm,ncid0,ndtuj,'macro_uj'//trim(hstr),'INT',0)
 
  idum2(1,0:ndtuj)=pack(dtpawuj(:)%pawujat,dtpawuj(:)%iuj/=-1)
- call prttagm(dparr,idum2,ab_out,jdtset_,1,marr,1,narrm,ncid,ndtuj,'pawujat'//trim(hstr),'INT',0)
+ call prttagm(dparr,idum2,ab_out,jdtset_,1,marr,1,narrm,ncid0,ndtuj,'pawujat'//trim(hstr),'INT',0)
 
  dparr(1,0:ndtuj)=pack(dtpawuj(:)%pawujga,dtpawuj(:)%iuj/=-1)
- call prttagm(dparr,idum2,ab_out,jdtset_,1,marr,1,narrm,ncid,ndtuj,'pawujga'//trim(hstr),'DPR',0)
+ call prttagm(dparr,idum2,ab_out,jdtset_,1,marr,1,narrm,ncid0,ndtuj,'pawujga'//trim(hstr),'DPR',0)
 
  dparr(1,0:ndtuj)=pack(dtpawuj(:)%pawujrad,dtpawuj(:)%iuj/=-1)
- call prttagm(dparr,idum2,ab_out,jdtset_,1,marr,1,narrm,ncid,ndtuj,'pawujrad'//trim(hstr),'DPR',0)
+ call prttagm(dparr,idum2,ab_out,jdtset_,1,marr,1,narrm,ncid0,ndtuj,'pawujrad'//trim(hstr),'DPR',0)
 
  dparr(1,0:ndtuj)=pack(dtpawuj(:)%pawrad,dtpawuj(:)%iuj/=-1)
- call prttagm(dparr,idum2,ab_out,jdtset_,1,marr,1,narrm,ncid,ndtuj,'pawrad'//trim(hstr),'DPR',0)
+ call prttagm(dparr,idum2,ab_out,jdtset_,1,marr,1,narrm,ncid0,ndtuj,'pawrad'//trim(hstr),'DPR',0)
 
  dparr(1,0:ndtuj)=pack(dtpawuj(:)%ph0phiint,dtpawuj(:)%iuj/=-1)
- call prttagm(dparr,idum2,ab_out,jdtset_,1,marr,1,narrm,ncid,ndtuj,'ph0phiint'//trim(hstr),'DPR',0)
+ call prttagm(dparr,idum2,ab_out,jdtset_,1,marr,1,narrm,ncid0,ndtuj,'ph0phiint'//trim(hstr),'DPR',0)
 
  idum2(1,0:ndtuj)=pack(dtpawuj(:)%pawprtvol,dtpawuj(:)%iuj/=-1)
- call prttagm(dparr,idum2,ab_out,jdtset_,1,marr,1,narrm,ncid,ndtuj,'pawprtvol'//trim(hstr),'INT',0)
+ call prttagm(dparr,idum2,ab_out,jdtset_,1,marr,1,narrm,ncid0,ndtuj,'pawprtvol'//trim(hstr),'INT',0)
 
  idum2(1,0:ndtuj)=pack(dtpawuj(:)%option,dtpawuj(:)%iuj/=-1)
- call prttagm(dparr,idum2,ab_out,jdtset_,1,marr,1,narrm,ncid,ndtuj,'pawujopt'//trim(hstr),'INT',0)
+ call prttagm(dparr,idum2,ab_out,jdtset_,1,marr,1,narrm,ncid0,ndtuj,'pawujopt'//trim(hstr),'INT',0)
 
  idum2(1,0:ndtuj)=pack(dtpawuj(:)%dmatpuopt,dtpawuj(:)%iuj/=-1)
- call prttagm(dparr,idum2,ab_out,jdtset_,1,marr,1,narrm,ncid,ndtuj,'dmatpuopt'//trim(hstr),'INT',0)
+ call prttagm(dparr,idum2,ab_out,jdtset_,1,marr,1,narrm,ncid0,ndtuj,'dmatpuopt'//trim(hstr),'INT',0)
 
  kdtset=0
 
@@ -422,12 +430,12 @@ call wrtout(std_out,message,'COLL')
    end if
  end do
 
- call prttagm(dparr,idum2,ab_out,jdtset_,2,marr,nspden*nat_org,narrm,ncid,ndtuj,'vsh'//trim(hstr),'DPR',0)
- call prttagm(dparrr,idum2,ab_out,jdtset_,2,marr,nspden*nat_org,narrm,ncid,ndtuj,'occ'//trim(hstr),'DPR',0)
- call prttagm(dqarr,idum2,ab_out,jdtset_,2,marr,nat_org*3,narrm,ncid,ndtuj,'xred'//trim(hstr),'DPR',0)
- call prttagm(dqarrr,idum2,ab_out,jdtset_,2,marr,3*3,narrm,ncid,ndtuj,'rprimd'//trim(hstr),'DPR',0)
- call prttagm(dqarrr,idum2,ab_out,jdtset_,2,marr,3,narrm,ncid,ndtuj,'scdim'//trim(hstr),'INT',0)
- call prttagm(drarr,idum2,ab_out,jdtset_,2,marr,nwfchr,narrm,ncid,ndtuj,'wfchr'//trim(hstr),'DPR',0)
+ call prttagm(dparr,idum2,ab_out,jdtset_,2,marr,nspden*nat_org,narrm,ncid0,ndtuj,'vsh'//trim(hstr),'DPR',0)
+ call prttagm(dparrr,idum2,ab_out,jdtset_,2,marr,nspden*nat_org,narrm,ncid0,ndtuj,'occ'//trim(hstr),'DPR',0)
+ call prttagm(dqarr,idum2,ab_out,jdtset_,2,marr,nat_org*3,narrm,ncid0,ndtuj,'xred'//trim(hstr),'DPR',0)
+ call prttagm(dqarrr,idum2,ab_out,jdtset_,2,marr,3*3,narrm,ncid0,ndtuj,'rprimd'//trim(hstr),'DPR',0)
+ call prttagm(dqarrr,idum2,ab_out,jdtset_,2,marr,3,narrm,ncid0,ndtuj,'scdim'//trim(hstr),'INT',0)
+ call prttagm(drarr,idum2,ab_out,jdtset_,2,marr,nwfchr,narrm,ncid0,ndtuj,'wfchr'//trim(hstr),'DPR',0)
  ABI_FREE(narrm)
 
  write(message, '( 15a )'  ) ch10,' # further possible options: ',ch10,&
@@ -642,7 +650,7 @@ call wrtout(std_out,message,'COLL')
  call wrtout(std_out,message,'COLL')
  call wrtout(ab_out,message,'COLL')
  write(message,fmt='(a,f12.5)') '                    Chi [eV^-1]:  ',chi(pawujat)/Ha_eV
- call wrtout(std_out,message,'COLL') 
+ call wrtout(std_out,message,'COLL')
  call wrtout(ab_out,message,'COLL')
  write(message,'(4a,f9.5,a)') ch10,' The scalar ',parname,' from the two-point regression scheme is ',scalarHP,' eV.'
  call wrtout(std_out,message,'COLL')
@@ -666,6 +674,68 @@ call wrtout(std_out,message,'COLL')
 !ndtset
 !for all idtset in ndtset
 !   vsh(idtset*2-1)*Ha_eV,luocc(idtset*2-1,pawujat),luocc(idtset*2,pawujat)
+
+ if (my_rank == master) then
+   ! First call:
+   !  - Create NC file, define dimensions, scalars and arrays.
+   !  - Add crystal structure and metadata required to post-process the data.
+   NCF_CHECK(nctk_open_create(ncid, strcat(dtfil%filnam_ds(4), "_LRUJ.nc"), xmpi_comm_self))
+
+   cryst = dtset%get_crystal(1)
+   NCF_CHECK(cryst%ncwrite(ncid))
+   call cryst%free()
+
+   ! Define dimensions.
+   ncerr = nctk_def_dims(ncid, [ &
+     nctkdim_t("nnat", nat_org), &
+     nctkdim_t("ndtpawuj", ndtpawuj), &
+     nctkdim_t("nspden", dtset%nspden), &
+     nctkdim_t("nsppol", dtset%nsppol) ], &
+     defmode=.True.)
+   NCF_CHECK(ncerr)
+
+   ! Define integer scalars
+   ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: &
+     "usepaw", "macro_uj", "pawujat", "dmatpuopt"  &
+   ])
+
+   ! Define double precision scalars
+   ! @lmacenul: Here I write pawujv so that one can order the results by alpha in the post-processing tool.
+   ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: &
+     "diemix", "diemixmag", "ph0phiint", "uj_pert" &
+   ])
+   NCF_CHECK(ncerr)
+
+   ! Define arrays with results.
+   ! TODO: Here I need an extra dimension to store results with different iuj and/or different names.
+   ncerr = nctk_def_arrays(ncid, [ &
+     nctkarr_t("luocc", "dp", "ndtpawuj, nnat") &
+     !nctkarr_t("vsh", "dp", "nspden, nnat") &
+   ])
+   NCF_CHECK(ncerr)
+
+   ! ===========================================
+   ! Write metadata that does not depend on icyc
+   ! ===========================================
+   NCF_CHECK(nctk_set_datamode(ncid))
+
+   ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: &
+     "usepaw", "macro_uj", "pawujat", "dmatpuopt"],  &
+     [dtset%usepaw, macro_uj, pawujat, dmatpuopt])
+   NCF_CHECK(ncerr)
+
+   associate (dt => dtpawuj(1))
+   ncerr = nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: &
+     "diemix", "diemixmag", "ph0phiint", "uj_pert" ], &
+     [dt%diemix, dt%diemixmag, ph0phiint, vsh(3)])
+   NCF_CHECK(ncerr)
+   end associate
+
+   ! Write arrays
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "luocc"), luocc))
+
+   NCF_CHECK(nf90_close(ncid))
+ end if
 
  ii=1
  write(message, fmt='(8a)') ' URES ','     ii','    nat','       r_max','    U(J)[eV]','   U_ASA[eV]','   U_inf[eV]',ch10
@@ -816,6 +886,9 @@ end subroutine pawuj_det
 !!  Store atomic occupancies, potential shift, positions in dtpawuj datastructure.
 !!
 !! INPUTS
+!!  istep: SCF iteration step
+!!  pert_state: 0 if the routine is called with unperturbed occupancies
+!!              1 if the routine is called after having applied the perturbation.
 !!  fatvshift=factor that multiplies atvshift
 !!  mpi_atmtab(:)=--optional-- indexes of the atoms treated by current proc
 !!  comm_atom=--optional-- MPI communicator over atoms
@@ -825,18 +898,20 @@ end subroutine pawuj_det
 !!  paw_ij(my_natom) <type(paw_ij_type)>=paw arrays given on (i,j) channels
 !!  pawprtvol= printing volume
 !!  pawtab(ntypat*usepaw) <type(pawtab_type)>=paw tabulated starting data
+!!  comm=MPI commuicator
 !!
 !! OUTPUT
 !!  dtpawuj(0:ndtpawuj) (initialization of fields vsh, occ, occ0, iuj,nnat)
 !!
 !! SOURCE
 
-subroutine pawuj_red(dtset,dtpawuj,fatvshift,my_natom,natom,ntypat,paw_ij,pawrad,pawtab,ndtpawuj,&
+subroutine pawuj_red(istep, pert_state, dtfil, &
+                     dtset,dtpawuj,fatvshift,my_natom,natom,ntypat,paw_ij,pawrad,pawtab,ndtpawuj, comm, &
 &                    mpi_atmtab,comm_atom) ! optional arguments (parallelism)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in)                 :: my_natom,natom,ntypat,ndtpawuj
+ integer,intent(in)                 :: istep, pert_state, my_natom,natom,ntypat,ndtpawuj, comm
  integer,optional,intent(in)        :: comm_atom
  real(dp),intent(in)                :: fatvshift
 !arrays
@@ -845,13 +920,15 @@ subroutine pawuj_red(dtset,dtpawuj,fatvshift,my_natom,natom,ntypat,paw_ij,pawrad
  type(pawtab_type),intent(in)       :: pawtab(ntypat)
  type(pawrad_type),intent(in)       :: pawrad(ntypat)
  type(dataset_type),intent(in)      :: dtset
+ type(datafiles_type),intent(in) :: dtfil
  type(macro_uj_type),intent(inout)  :: dtpawuj(0:ndtpawuj)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter           :: natmax=2,ncoeff=3
+ integer,parameter           :: natmax=2,ncoeff=3, master = 0
  integer                     :: iatom,iatom_tot,ierr,im1,im2,ispden,itypat,ll,nspden,nsppol,iuj,ncyc,icyc
  integer                     :: my_comm_atom,nnat,natpawu,natvshift,pawujat,ndtset,typawujat
+ !integer                     :: my_rank, ncid, ncerr
  logical                     :: usepawu !antiferro,
  logical                     :: my_atmtab_allocated,paral_atom
  character(len=1000)         :: message,hstr
@@ -871,6 +948,8 @@ subroutine pawuj_red(dtset,dtpawuj,fatvshift,my_natom,natom,ntypat,paw_ij,pawrad
  if (my_natom>0) then
    nspden=paw_ij(1)%nspden ; nsppol=paw_ij(1)%nsppol
  end if
+
+ !my_rank = xmpi_comm_rank(comm)
 
  natvshift=dtset%natvshift
  pawujat=dtset%pawujat
@@ -920,8 +999,8 @@ subroutine pawuj_red(dtset,dtpawuj,fatvshift,my_natom,natom,ntypat,paw_ij,pawrad
    end if
 
    iuj=maxval(dtpawuj(:)%iuj)
-   !write(std_out,*)' pawuj_red: iuj',iuj
-   !write(std_out,*)' pawuj_red: dtpawuj(:)%iuj ',dtpawuj(:)%iuj
+   write(std_out,*)' pawuj_red: iuj',iuj
+   write(std_out,*)' pawuj_red: dtpawuj(:)%iuj ',dtpawuj(:)%iuj
 
    !If this is the unperturbed state, then unscreened and screened occupancies
    !are the same. Also set perturbation vsh to zero.
