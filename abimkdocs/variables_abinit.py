@@ -15996,11 +15996,18 @@ Variable(
     mnemonics="PRinT the STM density",
     added_in_version="before_v9",
     text=r"""
-If set to 1 or a larger value, provide output of the electron density in real
+If set to 1, provide output of the electron density in real
 space rho(r), made only from the electrons close to the Fermi energy, in a
 range of energy (positive or negative), determined by the (positive or
 negative, but non-zero) value of the STM bias [[stmbias]].
-This is a very approximate way to obtain STM profiles: one can choose an
+Specifying a non-zero negative value is also allowed, and will produce also
+the output of an electron density in real space, like the above, but moreover
+will additionally filter it to have the contribution of one band only, 
+whose number is the absolute value of [[prtstm]]. Obviously abs([[prtstm]])
+must be smaller or equal to [[nband]].
+
+The electron density obtained from [[prtstm]]=1,
+is a very approximate way to obtain STM profiles: one can choose an
 equidensity surface, and consider that the STM tip will follow this surface.
 Such equidensity surface might be determined with the help of Cut3D, and
 further post-processing of it (to be implemented). The big approximations of
@@ -16009,11 +16016,16 @@ independent transfer matrix elements between the tip and the surface.
 The charge density is provided in units of electrons/Bohr^3. The name of the
 STM density file will be the root output name, followed by _STM. Like a _DEN
 file, it can be analyzed by cut3d.
+
+The negative values of [[prtstm]] allows one to perform a detailed band-by-band
+analysis of the [[prtstm]]=1 result.
+
 The file structure of this unformatted output file is described in [[help:abinit#denfile|this section]].
 For the STM charge density to be generated, one must give, as an input file,
 the converged wavefunctions obtained from a previous run, at exactly the same
 k-points and cut-off energy, self-consistently determined, using the
 occupation numbers from [[occopt]] = 7.
+
 In the run with positive [[prtstm]], one has to use:
 
   * positive [[iscf]]
@@ -16027,7 +16039,6 @@ Note that you might have to adjust the value of [[nband]] as well, for the
 treatment of unoccupied states, because the automatic determination of
 [[nband]] will often not include enough unoccupied states.
 When [[prtstm]] is non-zero, the stress tensor is set to zero.
-No output of _STM file is provided by [[prtstm]] lower or equal to 0.
 No other printing variables for density or potentials should be activated
 (e.g. [[prtden]] has to be set to zero).
 """,
@@ -22919,6 +22930,13 @@ Enables the calculation of contributions to the energy, entropy, stresses,
 number of electrons and chemical potential using the extended first principle
 molecular dynamics model for high temperature simulations.
 
+For now, ExtFPMD is only available with [[occopt]] = 3, with [[tsmear]] defined
+as the electronic temperature. More occupation options will be supported in the
+future.
+
+In case of electronic SCF cycle convergency problems, try to set a number of
+unoccupied bands in the buffer with [[extfpmd_nbdbuf]] input variable.
+
   * **useextfpmd** = 1 *(Recommanded)*, the energy shift will be evaluated
 by making an integration of the trial potential over the real space and the
 contributions will be computed with integrals over the band number.
@@ -22948,7 +22966,33 @@ Variable(
 Specifies the number of bands to use when averaging over last bands to get the
 energy shift when [[useextfpmd]] = 2 or 3.
 
-**extfpmd_nbcut** must be less than [[nband]].
+**extfpmd_nbcut** must be less than or equal to [[nband]].
+""",
+),
+
+Variable(
+    abivarname="extfpmd_nbdbuf",
+    varset="gstate",
+    vartype="integer",
+    topics=['ExtFPMD_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="EXTended FPMD: Number of BanDs for the BUFfer",
+    added_in_version="9.9.0",
+    text=r"""
+Specifies the number of bands to use for the buffer when [[useextfpmd]] /= 0.
+Among the total number of bands [[nband]], last [[extfpmd_nbdbuf]] bands
+occupation will be set to 0, and ExtFPMD model will take charge of computing
+electronic contributions starting from [[nband]] - [[extfpmd_nbdbuf]].
+
+In some cases, setting this input variable to a positive number can solve
+convergency problems due to high variations of electron density within the SCF
+cycle.
+
+Moreover, setting [[extfpmd_nbdbuf]] = [[nband]] should theoretically give
+access to Fermi gas orbital free calculations (not tested yet).
+
+**extfpmd_nbdbuf** must be less than or equal to [[nband]].
 """,
 ),
 

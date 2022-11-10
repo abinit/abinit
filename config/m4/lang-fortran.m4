@@ -79,7 +79,6 @@ AC_DEFUN([_ABI_FC_CHECK_ARM],[
 ]) # _ABI_FC_CHECK_ARM
 
 
-
 # _ABI_FC_CHECK_GNU(COMPILER)
 # ---------------------------
 #
@@ -1601,6 +1600,11 @@ AC_DEFUN([ABI_PROG_FC],[
 
   if test "${abi_fc_vendor}" = "unknown"; then
     _ABI_FC_CHECK_AOCC(${FC})
+  fi
+  echo "${fc_info_string}" >>"${tmp_fc_info_file}"
+
+  if test "${abi_fc_vendor}" = "unknown"; then
+    _AFB_CHECK_FC_CRAY(${FC})
   fi
   echo "${fc_info_string}" >>"${tmp_fc_info_file}"
 

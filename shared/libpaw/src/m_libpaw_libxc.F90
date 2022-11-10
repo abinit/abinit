@@ -85,6 +85,7 @@ module m_libpaw_libxc_funcs
  integer,public,save :: LIBPAW_XC_FAMILY_OEP           = 16
  integer,public,save :: LIBPAW_XC_FAMILY_HYB_GGA       = 32
  integer,public,save :: LIBPAW_XC_FAMILY_HYB_MGGA      = 64
+ integer,public,save :: LIBPAW_XC_FAMILY_HYB_LDA       =128
  integer,public,save :: LIBPAW_XC_FLAGS_HAVE_EXC       =  1
  integer,public,save :: LIBPAW_XC_FLAGS_HAVE_VXC       =  2
  integer,public,save :: LIBPAW_XC_FLAGS_HAVE_FXC       =  4
@@ -95,19 +96,6 @@ module m_libpaw_libxc_funcs
  integer,public,save :: LIBPAW_XC_CORRELATION          =  1
  integer,public,save :: LIBPAW_XC_EXCHANGE_CORRELATION =  2
  integer,public,save :: LIBPAW_XC_KINETIC              =  3
- integer,public,save :: LIBPAW_XC_HYB_NONE             =  0
- integer,public,save :: LIBPAW_XC_HYB_FOCK             =  1
- integer,public,save :: LIBPAW_XC_HYB_PT2              =  2
- integer,public,save :: LIBPAW_XC_HYB_ERF_SR           =  4
- integer,public,save :: LIBPAW_XC_HYB_YUKAWA_SR        =  8
- integer,public,save :: LIBPAW_XC_HYB_GAUSSIAN_SR      = 16
- integer,public,save :: LIBPAW_XC_HYB_SEMILOCAL        =  0
- integer,public,save :: LIBPAW_XC_HYB_HYBRID           =  1
- integer,public,save :: LIBPAW_XC_HYB_CAM              =  2
- integer,public,save :: LIBPAW_XC_HYB_CAMY             =  3
- integer,public,save :: LIBPAW_XC_HYB_CAMG             =  4
- integer,public,save :: LIBPAW_XC_HYB_DOUBLE_HYBRID    =  5
- integer,public,save :: LIBPAW_XC_HYB_MIXTURE          = 32768
  integer,public,save :: LIBPAW_XC_SINGLE_PRECISION     =  0
  logical,private,save :: libpaw_xc_constants_initialized=.false.
 
@@ -261,11 +249,13 @@ module m_libpaw_libxc_funcs
 !
  interface
    subroutine libpaw_xc_get_family_constants(xc_cst_unknown,xc_cst_lda,xc_cst_gga, &
-&             xc_cst_mgga,xc_cst_lca,xc_cst_oep,xc_cst_hyb_gga,xc_cst_hyb_mgga) &
+&             xc_cst_mgga,xc_cst_lca,xc_cst_oep,xc_cst_hyb_gga,xc_cst_hyb_mgga, &
+&             xc_cst_hyb_lda) &
 &             bind(C,name="libpaw_xc_get_family_constants")
      use iso_c_binding, only : C_INT
      integer(C_INT) :: xc_cst_unknown,xc_cst_lda,xc_cst_gga,xc_cst_mgga, &
-&                      xc_cst_lca,xc_cst_oep,xc_cst_hyb_gga,xc_cst_hyb_mgga
+&                      xc_cst_lca,xc_cst_oep,xc_cst_hyb_gga,xc_cst_hyb_mgga, &
+&                      xc_cst_hyb_lda
    end subroutine libpaw_xc_get_family_constants
  end interface
 !
@@ -288,20 +278,6 @@ module m_libpaw_libxc_funcs
      integer(C_INT) :: xc_cst_exchange,xc_cst_correlation, &
 &                      xc_cst_exchange_correlation,xc_cst_kinetic
    end subroutine libpaw_xc_get_kind_constants
- end interface
-!
- interface
-   subroutine libpaw_xc_get_hybrid_constants(xc_cst_hyb_none, &
-              xc_cst_hyb_fock,xc_cst_hyb_pt2,xc_cst_hyb_erf_sr,xc_cst_hyb_yukawa_sr, &
-              xc_cst_hyb_gaussian_sr,xc_cst_hyb_semilocal, xc_cst_hyb_hybrid,xc_cst_hyb_cam, &
-              xc_cst_hyb_camy,xc_cst_hyb_camg,xc_cst_hyb_double_hybrid, &
-              xc_cst_hyb_mixture) bind(C,name="libpaw_xc_get_hybrid_constants")
-     use iso_c_binding, only : C_INT
-     integer(C_INT) :: xc_cst_hyb_none, xc_cst_hyb_fock,xc_cst_hyb_pt2, xc_cst_hyb_erf_sr, &
-                       xc_cst_hyb_yukawa_sr,xc_cst_hyb_gaussian_sr,xc_cst_hyb_semilocal, &
-                       xc_cst_hyb_hybrid,xc_cst_hyb_cam,xc_cst_hyb_camy,xc_cst_hyb_camg, &
-                       xc_cst_hyb_double_hybrid,xc_cst_hyb_mixture
-   end subroutine libpaw_xc_get_hybrid_constants
  end interface
 !
  interface
@@ -371,7 +347,7 @@ contains
 
 !Local variables-------------------------------
 #if defined LIBPAW_HAVE_LIBXC && defined LIBPAW_ISO_C_BINDING
- integer(C_INT) :: i1,i2,i3,i4,i5,i6,i7,i8,i9,i10,i11,i12,i13
+ integer(C_INT) :: i1,i2,i3,i4,i5,i6,i7,i8,i9
 #endif
 
 ! *************************************************************************
@@ -379,7 +355,7 @@ contains
 #if defined LIBPAW_HAVE_LIBXC && defined LIBPAW_ISO_C_BINDING
   call libpaw_xc_get_singleprecision_constant(i1)
   LIBPAW_XC_SINGLE_PRECISION     = int(i1)
-  call libpaw_xc_get_family_constants(i1,i2,i3,i4,i5,i6,i7,i8)
+  call libpaw_xc_get_family_constants(i1,i2,i3,i4,i5,i6,i7,i8,i9)
   LIBPAW_XC_FAMILY_UNKNOWN       = int(i1)
   LIBPAW_XC_FAMILY_LDA           = int(i2)
   LIBPAW_XC_FAMILY_GGA           = int(i3)
@@ -388,6 +364,7 @@ contains
   LIBPAW_XC_FAMILY_OEP           = int(i6)
   LIBPAW_XC_FAMILY_HYB_GGA       = int(i7)
   LIBPAW_XC_FAMILY_HYB_MGGA      = int(i8)
+  LIBPAW_XC_FAMILY_HYB_LDA       = int(i9)
   call libpaw_xc_get_flags_constants(i1,i2,i3,i4,i5,i6)
   LIBPAW_XC_FLAGS_HAVE_EXC       = int(i1)
   LIBPAW_XC_FLAGS_HAVE_VXC       = int(i2)
@@ -400,20 +377,6 @@ contains
   LIBPAW_XC_CORRELATION          = int(i2)
   LIBPAW_XC_EXCHANGE_CORRELATION = int(i3)
   LIBPAW_XC_KINETIC              = int(i4)
-  call libpaw_xc_get_hybrid_constants(i1,i2,i3,i4,i5,i6,i7,i8,i9,i10,i11,i12,i13)
-  LIBPAW_XC_HYB_NONE             = int(i1)
-  LIBPAW_XC_HYB_FOCK             = int(i2)
-  LIBPAW_XC_HYB_PT2              = int(i3)
-  LIBPAW_XC_HYB_ERF_SR           = int(i4)
-  LIBPAW_XC_HYB_YUKAWA_SR        = int(i5)
-  LIBPAW_XC_HYB_GAUSSIAN_SR      = int(i6)
-  LIBPAW_XC_HYB_SEMILOCAL        = int(i7)
-  LIBPAW_XC_HYB_HYBRID           = int(i8)
-  LIBPAW_XC_HYB_CAM              = int(i9)
-  LIBPAW_XC_HYB_CAMY             = int(i10)
-  LIBPAW_XC_HYB_CAMG             = int(i11)
-  LIBPAW_XC_HYB_DOUBLE_HYBRID    = int(i12)
-  LIBPAW_XC_HYB_MIXTURE          = int(i13)
   libpaw_xc_constants_initialized=.true.
 #endif
 
