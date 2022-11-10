@@ -2554,13 +2554,11 @@ subroutine pawuj_drive(scfcv_args, dtset,electronpositron,rhog,rhor,rprimd, xred
  scfcv_args%ndtpawuj=>ndtpawuj
  scfcv_args%dtpawuj=>dtpawuj
 
-   !call scfcv_new(ab_scfcv_in,ab_scfcv_inout,dtset,electronpositron,&
-!&   paw_dmft,rhog,rhor,rprimd,wffnew,wffnow,xred,xred_old,conv_retcode)
  itimes(1)=itime0 ; itimes(2)=1
  call scfcv_run(scfcv_args,electronpositron,itimes,rhog,rhor,rprimd,xred,xred_old,conv_retcode)
 
 !Calculate Hubbard U (or J)
- call pawuj_det(dtpawuj,ndtpawuj,trim(scfcv_args%dtfil%filnam_ds(4))//"_UJDET.nc",ures)
+ call pawuj_det(dtpawuj, ndtpawuj, dtset, scfcv_args%dtfil, ures, scfcv_args%mpi_enreg%comm_cell)
  dtset%upawu(dtset%typat(dtset%pawujat),1)=ures/Ha_eV
 
 !Deallocations

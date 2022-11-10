@@ -5009,6 +5009,7 @@ type(crystal_t) function hdr_get_crystal(hdr, gw_timrev, remove_inv) result(crys
    !my_timrev = kpts_timrev_from_kptopt(hdr%kptopt) + 1
    my_timrev = 1; if (any(hdr%kptopt == [3, 4])) my_timrev = 0
    my_timrev = my_timrev + 1
+   !print *, "my_timrev", my_timrev
  else
    my_timrev = gw_timrev
  end if
