@@ -28,7 +28,10 @@ MODULE m_paw_uj
  use m_linalg_interfaces
  use m_xmpi
  use m_dtset
+ use netcdf
+ use m_nctk
 
+ use m_fstrings,      only : strcat
  use m_pptools,       only : prmat
  use m_special_funcs, only : iradfnh
  use m_geometry,      only : shellstruct,ioniondist
@@ -38,6 +41,8 @@ MODULE m_paw_uj
  use m_pawtab,        only : pawtab_type
  use m_paw_ij,        only : paw_ij_type
  use m_paral_atom,    only : get_my_atmtab, free_my_atmtab
+ use m_dtfil,         only : datafiles_type
+ use m_crystal,       only : crystal_t
 
  implicit none
 
@@ -642,7 +647,7 @@ call wrtout(std_out,message,'COLL')
  call wrtout(std_out,message,'COLL')
  call wrtout(ab_out,message,'COLL')
  write(message,fmt='(a,f12.5)') '                    Chi [eV^-1]:  ',chi(pawujat)/Ha_eV
- call wrtout(std_out,message,'COLL') 
+ call wrtout(std_out,message,'COLL')
  call wrtout(ab_out,message,'COLL')
  write(message,'(4a,f9.5,a)') ch10,' The scalar ',parname,' from the two-point regression scheme is ',scalarHP,' eV.'
  call wrtout(std_out,message,'COLL')
@@ -816,6 +821,9 @@ end subroutine pawuj_det
 !!  Store atomic occupancies, potential shift, positions in dtpawuj datastructure.
 !!
 !! INPUTS
+!!  istep: SCF iteration step
+!!  pert_state: 0 if the routine is called with unperturbed occupancies
+!!              1 if the routine is called after having applied the perturbation.
 !!  fatvshift=factor that multiplies atvshift
 !!  mpi_atmtab(:)=--optional-- indexes of the atoms treated by current proc
 !!  comm_atom=--optional-- MPI communicator over atoms
@@ -825,18 +833,20 @@ end subroutine pawuj_det
 !!  paw_ij(my_natom) <type(paw_ij_type)>=paw arrays given on (i,j) channels
 !!  pawprtvol= printing volume
 !!  pawtab(ntypat*usepaw) <type(pawtab_type)>=paw tabulated starting data
+!!  comm=MPI commuicator
 !!
 !! OUTPUT
 !!  dtpawuj(0:ndtpawuj) (initialization of fields vsh, occ, occ0, iuj,nnat)
 !!
 !! SOURCE
 
-subroutine pawuj_red(dtset,dtpawuj,fatvshift,my_natom,natom,ntypat,paw_ij,pawrad,pawtab,ndtpawuj,&
+subroutine pawuj_red(istep, pert_state, dtfil, &
+                     dtset,dtpawuj,fatvshift,my_natom,natom,ntypat,paw_ij,pawrad,pawtab,ndtpawuj, comm, &
 &                    mpi_atmtab,comm_atom) ! optional arguments (parallelism)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in)                 :: my_natom,natom,ntypat,ndtpawuj
+ integer,intent(in)                 :: istep, pert_state, my_natom,natom,ntypat,ndtpawuj, comm
  integer,optional,intent(in)        :: comm_atom
  real(dp),intent(in)                :: fatvshift
 !arrays
@@ -845,17 +855,20 @@ subroutine pawuj_red(dtset,dtpawuj,fatvshift,my_natom,natom,ntypat,paw_ij,pawrad
  type(pawtab_type),intent(in)       :: pawtab(ntypat)
  type(pawrad_type),intent(in)       :: pawrad(ntypat)
  type(dataset_type),intent(in)      :: dtset
+ type(datafiles_type),intent(in) :: dtfil
  type(macro_uj_type),intent(inout)  :: dtpawuj(0:ndtpawuj)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter           :: natmax=2,ncoeff=3
+ integer,parameter           :: natmax=2,ncoeff=3, master = 0
  integer                     :: iatom,iatom_tot,ierr,im1,im2,ispden,itypat,ll,nspden,nsppol,iuj,ncyc,icyc
  integer                     :: my_comm_atom,nnat,natpawu,natvshift,pawujat,ndtset,typawujat
+ integer                     :: my_rank, ncid, ncerr
  logical                     :: usepawu !antiferro,
  logical                     :: my_atmtab_allocated,paral_atom
  character(len=1000)         :: message,hstr
  character(len=500)          :: messg
+ type(crystal_t) :: cryst
 !arrays
  logical                     :: musk(3,natom)
  integer,pointer             :: my_atmtab(:)
@@ -871,6 +884,8 @@ subroutine pawuj_red(dtset,dtpawuj,fatvshift,my_natom,natom,ntypat,paw_ij,pawrad
  if (my_natom>0) then
    nspden=paw_ij(1)%nspden ; nsppol=paw_ij(1)%nsppol
  end if
+
+ my_rank = xmpi_comm_rank(comm)
 
  natvshift=dtset%natvshift
  pawujat=dtset%pawujat
@@ -920,8 +935,8 @@ subroutine pawuj_red(dtset,dtpawuj,fatvshift,my_natom,natom,ntypat,paw_ij,pawrad
    end if
 
    iuj=maxval(dtpawuj(:)%iuj)
-   !write(std_out,*)' pawuj_red: iuj',iuj
-   !write(std_out,*)' pawuj_red: dtpawuj(:)%iuj ',dtpawuj(:)%iuj
+   write(std_out,*)' pawuj_red: iuj',iuj
+   write(std_out,*)' pawuj_red: dtpawuj(:)%iuj ',dtpawuj(:)%iuj
 
    !If this is the unperturbed state, then unscreened and screened occupancies
    !are the same. Also set perturbation vsh to zero.
@@ -1036,6 +1051,67 @@ subroutine pawuj_red(dtset,dtpawuj,fatvshift,my_natom,natom,ntypat,paw_ij,pawrad
 
 !Destroy atom table used for parallelism
  call free_my_atmtab(my_atmtab,my_atmtab_allocated)
+
+ if (my_rank == master .and. istep == 1 .and. pert_state == 0) then
+   ! First call:
+   !  - Create NC file, define dimensions, scalars and arrays.
+   !  - Add crystal structure and metadata required to post-process the data.
+   NCF_CHECK(nctk_open_create(ncid, strcat(dtfil%filnam_ds(4), "_LRUJ.nc"), xmpi_comm_self))
+
+   cryst = dtset%get_crystal(1)
+   NCF_CHECK(cryst%ncwrite(ncid))
+   call cryst%free()
+
+   ! Define dimensions.
+   ncerr = nctk_def_dims(ncid, [ &
+     nctkdim_t("nnat", nnat), &
+     nctkdim_t("nspden", nspden), &
+     nctkdim_t("nsppol", nsppol) ], &
+     defmode=.True.)
+   NCF_CHECK(ncerr)
+
+   ! Define integer scalars
+   ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: &
+     "usepaw", "macro_uj", "pawuijat", "dmatpuopt"  &
+   ])
+
+   ! Define double precision scalars
+   ! @lmacenul: Here I write pawujv so that one can order the results by alpha in the post-processing tool.
+   ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: &
+     "diemix", "diemixmag", "ph0phiint", "pawujv" &
+   ])
+   NCF_CHECK(ncerr)
+
+   ! Define arrays with results.
+   ! TODO: Here I need an extra dimension to store results with different iuj and/or different names.
+   ncerr = nctk_def_arrays(ncid, [ &
+     nctkarr_t("occ", "dp", "nspden, nnat"), &
+     nctkarr_t("vsh", "dp", "nspden, nnat") &
+   ])
+   NCF_CHECK(ncerr)
+
+   ! ===========================================
+   ! Write metadata that does not depend on icyc
+   ! ===========================================
+   NCF_CHECK(nctk_set_datamode(ncid))
+
+   ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: &
+     "usepaw", "macro_uj", "pawuijat", "dmatpuopt"],  &
+     [dtset%usepaw, dtset%macro_uj, dtset%pawujat, dtset%dmatpuopt])
+   NCF_CHECK(ncerr)
+
+   associate (dt => dtpawuj(0))
+   ncerr = nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: &
+     "diemix", "diemixmag", "ph0phiint", "pawujv" ], &
+     [dt%diemix, dt%diemixmag, pawtab(typawujat)%ph0phiint(1), dtset%pawujv])
+   NCF_CHECK(ncerr)
+   end associate
+
+   !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ngqpt"), gwr%ngqpt))
+
+   NCF_CHECK(nf90_close(ncid))
+   !stop
+ end if
 
 end subroutine pawuj_red
 !!***
