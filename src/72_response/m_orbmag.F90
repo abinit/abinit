@@ -300,6 +300,7 @@ module m_orbmag
   private :: check_eig_k
   private :: dterm_qij
   private :: dterm_rd1
+  private :: dterm_rd1a
   private :: dterm_rd2a
   private :: dterm_drd2a
   private :: dterm_rd2b
@@ -4634,9 +4635,15 @@ subroutine check_eig_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,&
       & ndat,dtset%prtvol,sij_opt,tim_getghc,type_calc)
     dotr_kloc = DOT_PRODUCT(cwave(1,1:npw_k),ghc(1,1:npw_k))+&
       &         DOT_PRODUCT(cwave(2,1:npw_k),ghc(2,1:npw_k))
+    eig_aij = dotr_kloc
+
+    !call tt_me(dterm%aij,atindx,cprj_k(:,nn),dtset,cprj_k(:,nn),&
+    !       & dterm%lmn2max,pawtab,dij)
+    !eig_aij = dotr_kloc + REAL(dij)
+    
     call tt_me(dterm%onsite_like,atindx,cprj_k(:,nn),dtset,cprj_k(:,nn),&
            & dterm%lmn2max,pawtab,dij)
-    eig_aij = dotr_kloc + REAL(dij)
+    eig_aij = eig_aij + REAL(dij)
     call tt_me(dterm%hat_like,atindx,cprj_k(:,nn),dtset,cprj_k(:,nn),&
            & dterm%lmn2max,pawtab,dij)
     eig_aij = eig_aij + REAL(dij)
@@ -4785,6 +4792,8 @@ subroutine sum_d(dterm)
 !--------------------------------------------------------------------
 
   dterm%aij = czero; dterm%daij = czero
+  dterm%onsite_like = czero; dterm%donsite_like = czero
+  dterm%hat_like = czero; dterm%dhat_like = czero
 
   if (dterm%has_rd1 .EQ. 2) then
     dterm%aij = dterm%aij + dterm%rd1
