@@ -511,7 +511,8 @@ end subroutine end_scalapack
 !!  nbli_global= total number of lines
 !!  nbco_global= total number of columns
 !!  istwf_k= 2 if we have a real matrix else complex.
-!!  size_blocs= custom block sizes.
+!!  [size_blocs]= custom block sizes. Use -1 to use global size along that direction.
+!!    Useful to distribute only rows or columns. Obviously, [-1, -1] is not allowed.
 !!
 !! OUTPUT
 !!  matrix= the matrix to process
@@ -558,8 +559,17 @@ subroutine init_matrix_scalapack(matrix, nbli_global, nbco_global, processor, is
 
  ! Use custom block sizes.
  if (present(size_blocs)) then
-   matrix%sizeb_blocs(1) = MIN(size_blocs(1), nbli_global)
-   matrix%sizeb_blocs(2) = MIN(size_blocs(2), nbco_global)
+   ABI_CHECK(.not. all(size_blocs == -1), "size_blocs [-1, -1]  is not allowed")
+   if (size_blocs(1) == -1) then
+     matrix%sizeb_blocs(1) = nbli_global
+   else
+     matrix%sizeb_blocs(1) = MIN(size_blocs(1), nbli_global)
+   end if
+   if (size_blocs(2) == -1) then
+     matrix%sizeb_blocs(2) = nbco_global
+   else
+     matrix%sizeb_blocs(2) = MIN(size_blocs(2), nbco_global)
+   end if
  end if
 
  matrix%sizeb_global(1) = nbli_global
@@ -3854,6 +3864,7 @@ end subroutine slk_zinvert
 !!  uplo(global input)
 !!    = 'U':  Upper triangle of sub( A ) is stored;
 !!    = 'L':  Lower triangle of sub( A ) is stored.
+!!  [full]: If full PBLAS matrix is neeeded. Default: True
 !!
 !! SIDE EFFECTS
 !!  Slk_mat<type(matrix_scalapack)>=The object storing the local buffer, the array descriptor, the context
@@ -3867,17 +3878,21 @@ end subroutine slk_zinvert
 !!
 !! SOURCE
 
-subroutine slk_zdhp_invert(Slk_mat, uplo)
+subroutine slk_zdhp_invert(Slk_mat, uplo, full)
 
 !Arguments ------------------------------------
 !scalars
  character(len=*),intent(in) :: uplo
  class(matrix_scalapack),intent(inout) :: Slk_mat
+ logical,optional,intent(in) :: full
 
 #ifdef HAVE_LINALG_SCALAPACK
 !Local variables ------------------------------
 !scalars
- integer :: info
+ integer :: info, mm
+ integer :: il1, il2, iglob1, iglob2
+ type(matrix_scalapack) :: work_mat
+ logical :: full__
  !character(len=500) :: msg
 
 !************************************************************************
@@ -3887,14 +3902,50 @@ subroutine slk_zdhp_invert(Slk_mat, uplo)
  ! ZPOTRF computes the Cholesky factorization of a complex Hermitian positive definite.
  !  A = U**H * U,   if UPLO = 'U', or
  !  A = L  * L**H,  if UPLO = 'L',
- call PZPOTRF(uplo, Slk_mat%sizeb_global(1), Slk_mat%buffer_cplx, 1, 1, Slk_mat%descript%tab, info)
+ mm = Slk_mat%sizeb_global(1)
+ call PZPOTRF(uplo, mm, Slk_mat%buffer_cplx, 1, 1, Slk_mat%descript%tab, info)
  ABI_CHECK(info == 0, sjoin("PZPOTRF returned info:", itoa(info)))
 
  ! PZPOTRI computes the inverse of a complex Hermitian positive definite
  ! distributed matrix sub( A ) = A(IA:IA+N-1,JA:JA+N-1) using the
  ! Cholesky factorization sub( A ) = U**H*U or L*L**H computed by PZPOTRF.
- call PZPOTRI(uplo, Slk_mat%sizeb_global, Slk_mat%buffer_cplx, 1, 1, Slk_mat%descript%tab, info)
+ call PZPOTRI(uplo, mm, Slk_mat%buffer_cplx, 1, 1, Slk_mat%descript%tab, info)
  ABI_CHECK(info == 0, sjoin("PZPOTRI returned info:", itoa(info)))
+
+ full__ = .True.; if (present(full)) full__ = full
+ if (full__) then
+   ! Only the uplo part contains the inverse so we need to fill the other triangular part.
+   !     1)  Fill the missing triangle with zeros and copy results to work_mat
+   !     2)  Call pzgeadd to compute: sub(C) := beta*sub(C) + alpha*op(sub(A))
+   !     3)  Divide diagonal elements by two.
+
+   !call slk_mat%uplo_set(merge("L", "U", uplo=="U")  czero)
+   do il2=1,slk_mat%sizeb_local(2)
+     iglob2 = slk_mat%loc2gcol(il2)
+     do il1=1,slk_mat%sizeb_local(1)
+       iglob1 = slk_mat%loc2grow(il1)
+       if (uplo == "L" .and. iglob2 > iglob1) slk_mat%buffer_cplx(il1, il2) = zero
+       if (uplo == "U" .and. iglob2 < iglob1) slk_mat%buffer_cplx(il1, il2) = zero
+     end do
+   end do
+
+   call slk_mat%copy(work_mat, empty=.False.)
+
+   ! call pzgeadd(trans, m, n, alpha, a, ia, ja, desca, beta, c, ic, jc, descc)
+   ! sub(C) := beta*sub(C) + alpha*op(sub(A))
+   call pzgeadd("C", mm, mm, cone, work_mat%buffer_cplx, 1, 1, work_mat%descript%tab, &
+         cone, slk_mat%buffer_cplx, 1, 1, Slk_mat%descript%tab)
+   call work_mat%free()
+
+   do il2=1,slk_mat%sizeb_local(2)
+     iglob2 = slk_mat%loc2gcol(il2)
+     do il1=1,slk_mat%sizeb_local(1)
+       iglob1 = slk_mat%loc2grow(il1)
+       if (iglob2 == iglob1) slk_mat%buffer_cplx(il1, il2) = half * slk_mat%buffer_cplx(il1, il2)
+     end do
+   end do
+ end if ! full__
+
 #endif
 
 end subroutine slk_zdhp_invert
@@ -4170,18 +4221,20 @@ end subroutine slk_cut
 !!  NB: This routine should be called by all procs owning mat and source.
 !!
 !! INPUTS
+!!  [free]: True if source should be deallocated. Default: False
 !!
 !! OUTPUT
 !!
 !! SOURCE
 
 subroutine slk_take_from(out_mat, source, &
-                         ija, ijb) ! optional
+                         ija, ijb, free) ! optional
 
 !Arguments ------------------------------------
  class(matrix_scalapack),intent(inout) :: out_mat
- class(matrix_scalapack),intent(in) :: source
+ class(matrix_scalapack),intent(inout) :: source
  integer,optional,intent(in) :: ija(2), ijb(2)
+ logical,optional,intent(in) :: free
 
 !Local variables-------------------------------
  integer :: mm, nn, istwfk_1, istwfk_2
@@ -4236,6 +4289,10 @@ subroutine slk_take_from(out_mat, source, &
 #endif
  else
    ABI_ERROR("Neither buffer_cplx nor buffer_real are allocated!")
+ end if
+
+ if (present(free)) then
+   if (free) call source%free()
  end if
 
 end subroutine slk_take_from
