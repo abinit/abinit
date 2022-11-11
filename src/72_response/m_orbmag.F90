@@ -3621,29 +3621,33 @@ subroutine dterm_rd1(atindx,dterm,dtset,gntselect,gprimd,my_lmax,pawrad,pawtab,r
   !Local variables -------------------------
   !scalars
   integer :: adir,gint,iat,iatom,itypat,il,ilmn,ilm,iln,imesh,jl,jlm,jlmn,jln
-  integer :: klm,klmn,mesh_size,pmesh_size
-  real(dp) :: angmom,avgkij,intg,rr
+  integer :: klm,klmn,msz,pmesh_size
+  real(dp) :: angmom,avgkij,intff,intrff,rr
 
   !arrays
   real(dp) :: dij_cart(3),dij_red(3)
   real(dp),allocatable :: dkij(:,:,:),dtuj(:),d2tuj(:),duj(:),d2uj(:),ff(:),kij(:,:)
-  real(dp),allocatable :: tui(:),tuj(:),ui(:),uj(:)
+  real(dp),allocatable :: rff(:),tui(:),tuj(:),ui(:),uj(:)
 
 !--------------------------------------------------------------------
 
   dterm%rd1 = czero; dterm%drd1 = czero
-  do itypat=1,dtset%ntypat
-    mesh_size=pawrad(itypat)%mesh_size
+  do iat = 1, dtset%natom
+    iatom = atindx(iat)
+    itypat = dtset%typat(iat)
+
+    msz=pawrad(itypat)%mesh_size
     pmesh_size=pawtab(itypat)%partialwave_mesh_size
-    ABI_MALLOC(ff,(mesh_size))
-    ABI_MALLOC(ui,(mesh_size))
-    ABI_MALLOC(uj,(mesh_size))
-    ABI_MALLOC(duj,(mesh_size))
-    ABI_MALLOC(d2uj,(mesh_size))
-    ABI_MALLOC(tui,(mesh_size))
-    ABI_MALLOC(tuj,(mesh_size))
-    ABI_MALLOC(dtuj,(mesh_size))
-    ABI_MALLOC(d2tuj,(mesh_size))
+    ABI_MALLOC(ff,(msz))
+    ABI_MALLOC(rff,(msz))
+    ABI_MALLOC(ui,(msz))
+    ABI_MALLOC(uj,(msz))
+    ABI_MALLOC(duj,(msz))
+    ABI_MALLOC(d2uj,(msz))
+    ABI_MALLOC(tui,(msz))
+    ABI_MALLOC(tuj,(msz))
+    ABI_MALLOC(dtuj,(msz))
+    ABI_MALLOC(d2tuj,(msz))
     ABI_MALLOC(kij,(pawtab(itypat)%lmn_size,pawtab(itypat)%lmn_size))
     ABI_MALLOC(dkij,(pawtab(itypat)%lmn_size,pawtab(itypat)%lmn_size,3))
 
@@ -3651,83 +3655,51 @@ subroutine dterm_rd1(atindx,dterm,dtset,gntselect,gprimd,my_lmax,pawrad,pawtab,r
     dkij = zero
 
     do ilmn=1,pawtab(itypat)%lmn_size
+      il =pawtab(itypat)%indlmn(1,ilmn)
+      ilm=pawtab(itypat)%indlmn(4,ilmn)
+      iln=pawtab(itypat)%indlmn(5,ilmn)
+      ui(1:msz)=pawtab(itypat)%phi(1:msz,iln)
+      tui(1:msz)=pawtab(itypat)%tphi(1:msz,iln)
+
       do jlmn=1,pawtab(itypat)%lmn_size
-
-        ilm=pawtab(itypat)%indlmn(4,ilmn)
+        jl =pawtab(itypat)%indlmn(1,jlmn)
         jlm=pawtab(itypat)%indlmn(4,jlmn)
-        klm=MATPACK(ilm,jlm)
-        iln=pawtab(itypat)%indlmn(5,ilmn)
         jln=pawtab(itypat)%indlmn(5,jlmn)
-        il=pawtab(itypat)%indlmn(1,ilmn)
-        jl=pawtab(itypat)%indlmn(1,jlmn)
+        klm=MATPACK(ilm,jlm)
 
-        ui(1:mesh_size)=pawtab(itypat)%phi(1:mesh_size,iln)
-        tui(1:mesh_size)=pawtab(itypat)%tphi(1:mesh_size,iln)
+        uj(1:msz) =pawtab(itypat)%phi(1:msz,jln)
+        call nderiv_gen(duj,uj,pawrad(itypat),d2uj)
+
+        tuj(1:msz)=pawtab(itypat)%tphi(1:msz,jln)
+        call nderiv_gen(dtuj,tuj,pawrad(itypat),d2tuj)
+
+        do imesh=2,msz
+          rr = pawrad(itypat)%rad(imesh)
+          angmom = jl*(jl+one)/(rr**2)
+          ff(imesh) = ui(imesh)*(d2uj(imesh) - angmom*uj(imesh))
+          ff(imesh)=ff(imesh) - &
+            & tui(imesh)*(d2tuj(imesh) - angmom*tuj(imesh))
+          rff(imesh) = rr*ff(imesh)
+        end do
+
+        call pawrad_deducer0(ff,msz,pawrad(itypat))
+        call simp_gen(intff,ff,pawrad(itypat))
+        
+        call pawrad_deducer0(rff,msz,pawrad(itypat))
+        call simp_gen(intrff,rff,pawrad(itypat))
 
         ! ilm == jlm produces an rd1 term
-        if (ilm .EQ. jlm) then
-
-          uj(1:mesh_size)=pawtab(itypat)%phi(1:mesh_size,jln)
-          tuj(1:mesh_size)=pawtab(itypat)%tphi(1:mesh_size,jln)
-
-          call nderiv_gen(duj,uj,pawrad(itypat))
-          call nderiv_gen(d2uj,duj,pawrad(itypat))
-          call nderiv_gen(dtuj,tuj,pawrad(itypat))
-          call nderiv_gen(d2tuj,dtuj,pawrad(itypat))
-
-          do imesh=2,mesh_size
-            rr=pawrad(itypat)%rad(imesh)
-            angmom=jl*(jl+one)/(rr*rr)
-            ff(imesh)=ui(imesh)*d2uj(imesh)-tui(imesh)*d2tuj(imesh)
-            ff(imesh)=ff(imesh)-angmom*ui(imesh)*uj(imesh)
-            ff(imesh)=ff(imesh)+angmom*tui(imesh)*tuj(imesh)
-          end do
-
-          call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
-          call simp_gen(intg,ff,pawrad(itypat))
-
-          kij(ilmn,jlmn) = -half*intg
-
-        end if
+        if (ilm .EQ. jlm) kij(ilmn,jlmn) = -half*intff
 
         dij_cart=zero
         do adir = 1, 3
           gint=gntselect(pack1a(adir),klm)
-          if (gint .NE. 0) then
-            do imesh=1,mesh_size
-              rr=pawrad(itypat)%rad(imesh)
-              uj(1:mesh_size)=pawtab(itypat)%phi(1:mesh_size,jln)*rr
-              tuj(1:mesh_size)=pawtab(itypat)%tphi(1:mesh_size,jln)*rr
-            end do
-            call nderiv_gen(duj,uj,pawrad(itypat))
-            call nderiv_gen(d2uj,duj,pawrad(itypat))
-            call nderiv_gen(dtuj,tuj,pawrad(itypat))
-            call nderiv_gen(d2tuj,dtuj,pawrad(itypat))
-            do imesh=2,mesh_size
-              rr=pawrad(itypat)%rad(imesh)
-              angmom=il*(il+one)/(rr*rr)
-              ff(imesh)=ui(imesh)*d2uj(imesh)-tui(imesh)*d2tuj(imesh)
-              ff(imesh)=ff(imesh)-angmom*ui(imesh)*uj(imesh)
-              ff(imesh)=ff(imesh)+angmom*tui(imesh)*tuj(imesh)
-            end do
-            call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
-            call simp_gen(intg,ff,pawrad(itypat))
-
-            dij_cart(adir) = -half*cdij*realgnt(gint)*intg
-          end if
+          if (gint .NE. 0) dij_cart(adir) = -half*cdij*realgnt(gint)*intrff
         end do
 
         ! convert to crystal frame
         dij_red = MATMUL(TRANSPOSE(gprimd),dij_cart)
         dkij(ilmn,jlmn,1:3) = dij_red(1:3)
-        !write(std_out,'(a,2i4,3es16.8)')'JWZ debug ilmn jlmn dkij ',ilmn,jlmn,&
-        !  & dij_red(1),dij_red(2),dij_red(3)
-        do iat=1,dtset%natom
-          iatom=atindx(iat)
-          if (dtset%typat(iat) .EQ. itypat) then
-            dterm%drd1(iatom,ilmn,jlmn,1:3)=-j_dpc*dij_red(1:3)
-          end if
-        end do
 
       end do !jlmn
     end do ! ilmn
@@ -3736,15 +3708,16 @@ subroutine dterm_rd1(atindx,dterm,dtset,gntselect,gprimd,my_lmax,pawrad,pawtab,r
       ilmn=pawtab(itypat)%indklmn(7,klmn)
       jlmn=pawtab(itypat)%indklmn(8,klmn)
       avgkij = half*(kij(ilmn,jlmn)+kij(jlmn,ilmn))
-      do iat=1,dtset%natom
-        iatom=atindx(iat)
-        if (dtset%typat(iat) .EQ. itypat) then
-          dterm%rd1(iatom,klmn)=CMPLX(avgkij,zero)
-        end if
-      end do
-    end do
+      dterm%rd1(iatom,klmn)=CMPLX(avgkij,zero)
+      do adir = 1, 3
+        avgkij = half*(dkij(ilmn,jlmn,adir)+dkij(jlmn,ilmn,adir))
+        dterm%drd1(iatom,ilmn,jlmn,adir) = -j_dpc*avgkij
+        dterm%drd1(iatom,jlmn,ilmn,adir) = -j_dpc*avgkij
+      end do ! adir
+    end do ! klmn
   
     ABI_FREE(ff)
+    ABI_FREE(rff)
     ABI_FREE(dkij)
     ABI_FREE(kij)
     ABI_FREE(ui)
@@ -3756,7 +3729,7 @@ subroutine dterm_rd1(atindx,dterm,dtset,gntselect,gprimd,my_lmax,pawrad,pawtab,r
     ABI_FREE(dtuj)
     ABI_FREE(d2tuj)
 
-  end do !itypat 
+  end do !iat
 
   dterm%has_rd1 = 2
   dterm%has_drd1 = 2
@@ -4799,10 +4772,10 @@ subroutine sum_d(dterm)
     dterm%aij = dterm%aij + dterm%rd1
     dterm%onsite_like = dterm%onsite_like + dterm%rd1
   end if
-  !if (dterm%has_drd1 .EQ. 2) then
-  !  dterm%daij = dterm%daij + dterm%drd1
-  !  dterm%donsite_like = dterm%donsite_like + dterm%drd1
-  !end if
+  if (dterm%has_drd1 .EQ. 2) then
+    dterm%daij = dterm%daij + dterm%drd1
+    dterm%donsite_like = dterm%donsite_like + dterm%drd1
+  end if
  
   if (dterm%has_rd1a .EQ. 2) then
     dterm%aij = dterm%aij + dterm%rd1a
