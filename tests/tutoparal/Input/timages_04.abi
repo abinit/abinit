@@ -42,8 +42,10 @@ pawecutdg     40
 
 # Control of the SCF cycle
 # ========================
-toldff        5.0d-7   # Stopping criterion of SCF cycle
-nstep         50       # Maximal number of SCF steps
+# In order to obtain portability of the test, a much too stringent value for toldff is asked, and the limitation of the number of steps
+# is governed by a relatively low nstep. In real production conditions, the commented values would be better.
+toldff        1.0d-9 # 5.0d-7   # Stopping criterion of SCF cycle
+nstep         12     #   50       # Maximal number of SCF steps
 
 # Parallelization
 # ===============
