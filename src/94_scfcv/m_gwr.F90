@@ -911,6 +911,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  ks_gaps = ebands_get_gaps(ks_ebands, gap_err)
  if (my_rank == master) then
    !call ebands_print(ks_ebands, header="KS band structure", unit=std_out, prtvol=gwr%dtset%prtvol)
+   !call ebands_print_gaps(ks_ebands, ab_out, header="KS gaps (Fermi energy set to zero)")
    msg = "Kohn-Sham gaps and band edges from IBZ mesh"
    call ks_gaps%print(unit=std_out, header=msg)
    call ks_gaps%print(unit=ab_out, header=msg)
@@ -6214,7 +6215,7 @@ end subroutine load_head_wings_from_sus_file__
 !!  gwr_build_chi0_head_and_wings
 !!
 !! FUNCTION
-!!  Compute head and wings of chi0 on the minimax frequency grid
+!!  Compute head and wings of chi0 on the minimax frequency grid.
 !!
 !! SOURCE
 
@@ -6328,7 +6329,9 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  !write(std_out,*)"work_ngfft(1:3): ",work_ngfft(1:3)
  ABI_MALLOC(work, (2, work_ngfft(4), work_ngfft(5), work_ngfft(6)))
 
- if (gwr%comm%me == 0) call print_ngfft(u_ngfft, header="FFT mesh for chi0 head/wings computation", unit=std_out)
+ if (gwr%comm%me == 0) then
+   call print_ngfft(u_ngfft, header="FFT mesh for chi0 head/wings computation", unit=std_out)
+ endif
 
  ! Need to broacast G-vectors at q = 0 if k/q-point parallelism is on,
  if (gwr%kpt_comm%me == 0) then
@@ -6366,6 +6369,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  ! compute max_nband from this.
 
  ! Loop on spin to calculate $\chi_{\up,\up} + \chi_{\down,\down}$
+ ! TODO: Spinor
  nI = 1; nJ = 1; nomega = gwr%ntau
  omega(:) = j_dpc * gwr%iw_mesh(:)
  ABI_CALLOC(chi0_lwing, (npwe*nI, nomega, 3))
@@ -6383,7 +6387,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
    spin = gwr%my_spins(my_is)
 
    ! TODO:
-   ddkop = ddkop_new(dtset, gwr%cryst, gwr%pawtab, gwr%psps, gwr%mpi_enreg, u_mpw, u_ngfft)
+   !ddkop = ddkop_new(dtset, gwr%cryst, gwr%pawtab, gwr%psps, gwr%mpi_enreg, u_mpw, u_ngfft)
 
    ! Loop over my k-points in the BZ.
    do my_ikf=1,gwr%my_nkbz
@@ -6419,7 +6423,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
        gradk_not_done(ik_ibz) = .FALSE.
      end if
 
-     call ddkop%setup_spin_kpoint(gwr%dtset, gwr%cryst, gwr%psps, spin, kk_ibz, istwf_ki, npw_ki, kg_ki)
+     !call ddkop%setup_spin_kpoint(gwr%dtset, gwr%cryst, gwr%psps, spin, kk_ibz, istwf_ki, npw_ki, kg_ki)
 
      call chi0_bbp_mask(ik_ibz, ik_ibz, spin, spin_fact, use_tr, &
                         gwcomp0, spmeth0, gwr%ugb_nband, mband, now_ebands, bbp_mask)
@@ -6560,7 +6564,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
      call cwtime_report(msg, cpu_k, wall_k, gflops_k)
    end do ! my_ikf
 
-   call ddkop%free()
+   !call ddkop%free()
  end do ! my_is
 
  ABI_FREE(bbp_mask)
@@ -6979,19 +6983,19 @@ subroutine gwr_build_sigxme(gwr)
              !rhotwg_ki(1,jb) = czero_gw ! DEBUG
 
            else
-             ABI_ERROR("Not implemented Error")
+             !ABI_ERROR("Not implemented Error")
              !!npw_k = wfd%npwarr(ik_ibz)
-             !!rhotwg_ki(1, jb) = zero; rhotwg_ki(npwx+1, jb) = zero
-             !!if (band_sum == jb) then
-             !!  ABI_CHECK(wfd%get_wave_ptr(band_sum, ik_ibz, spin, wave_sum, msg) == 0, msg)
-             !!  cg_sum => wave_sum%ug
-             !!  ABI_CHECK(wfd%get_wave_ptr(jb, jk_ibz, spin, wave_jb, msg) == 0, msg)
-             !!  cg_jb  => wave_jb%ug
-             !!  ctmp = xdotc(npw_k, cg_sum(1:), 1, cg_jb(1:), 1)
-             !!  rhotwg_ki(1, jb) = cmplx(sqrt(gwr%vcgen%i_sz), 0.0_gwp) * real(ctmp)
-             !!  ctmp = xdotc(npw_k, cg_sum(npw_k+1:), 1, cg_jb(npw_k+1:), 1)
-             !!  rhotwg_ki(npwx+1, jb) = cmplx(sqrt(gwr%vcgen%i_sz), 0.0_gwp) * real(ctmp)
-             !!end if
+             rhotwg_ki(1, jb) = zero; rhotwg_ki(npwx+1, jb) = zero
+             if (band_sum == jb) then
+               !ABI_CHECK(wfd%get_wave_ptr(band_sum, ik_ibz, spin, wave_sum, msg) == 0, msg)
+               !cg_sum => wave_sum%ug
+               !ABI_CHECK(wfd%get_wave_ptr(jb, jk_ibz, spin, wave_jb, msg) == 0, msg)
+               !cg_jb  => wave_jb%ug
+               !ctmp = xdotc(npw_k, cg_sum(1:), 1, cg_jb(1:), 1)
+               rhotwg_ki(1, jb) = cmplx(sqrt(gwr%vcgen%i_sz), 0.0_gwp)  !* real(ctmp)
+               !ctmp = xdotc(npw_k, cg_sum(npw_k+1:), 1, cg_jb(npw_k+1:), 1)
+               rhotwg_ki(npwx+1, jb) = cmplx(sqrt(gwr%vcgen%i_sz), 0.0_gwp) ! * real(ctmp)
+             end if
              !!!rhotwg_ki(1, jb) = zero; rhotwg_ki(npwx+1, jb) = zero
              !!! PAW is missing
            end if
@@ -7122,7 +7126,7 @@ end subroutine gwr_build_sigxme
 !!  gwr_get_u_ngfft
 !!
 !! FUNCTION
-!!  Compute FFT mesh from boxcutmin
+!!  Compute FFT mesh from boxcutmin.
 !!
 !! INPUTS
 !!
@@ -7147,6 +7151,7 @@ subroutine gwr_get_u_ngfft(gwr, boxcutmin, u_ngfft, u_nfft, u_mgfft, u_mpw, gmax
  ! All the procs execute this part.
  ! Note the loops over the full BZ to compute u_mpw
  ! FIXME: umklapp, ecutsigx and q-centered G-sphere
+ ! TODO: Write new routine that computes the best FFT mesh for ecut1 + ecut1. Set set_mesh from GW code.
 
  u_ngfft = gwr%dtset%ngfft ! This to allow users to specify fftalg
 

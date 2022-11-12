@@ -522,6 +522,21 @@ meta: {optdriver: 6, }
 --------------------------------------------------------------------------------
 
 
+ === KS gaps after direct diagonalization ===
+ >>>> For spin 1
+ Indirect band gap semiconductor
+ Fundamental gap:     0.903 (eV)
+   VBM:     4.649 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     5.552 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
+ Direct gap:         2.454 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ >>>> For spin 2
+ Indirect band gap semiconductor
+ Fundamental gap:     0.903 (eV)
+   VBM:     4.649 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     5.552 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
+ Direct gap:         2.454 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+
+
 ================================================================================
 == DATASET  3 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
