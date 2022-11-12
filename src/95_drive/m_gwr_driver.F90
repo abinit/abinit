@@ -484,7 +484,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  !========================================
  nhatgrdim = 0
  if (dtset%usepaw == 1) then
-   ABI_ERROR("Not Implemented")
+   ABI_ERROR("PAW in GWR not yet implemented.")
  else
    ABI_MALLOC(ks_nhatgr, (0, 0, 0))
    ABI_MALLOC(ks_paw_ij, (0))
@@ -666,7 +666,11 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
    end do
    call xmpi_sum(owfk_ebands%eig, comm, ierr)
 
-   call ebands_update_occ(owfk_ebands, dtset%spinmagntarget, prtvol=dtset%prtvol, fermie_to_zero=.True.)
+   call ebands_update_occ(owfk_ebands, dtset%spinmagntarget, prtvol=dtset%prtvol, fermie_to_zero=.False.)
+
+   if (my_rank == master) then
+     call ebands_print_gaps(owfk_ebands, ab_out, header="KS gaps after direct diagonalization")
+   end if
 
    ABI_FREE(npwarr_ik)
    ABI_FREE(istwfk_ik)

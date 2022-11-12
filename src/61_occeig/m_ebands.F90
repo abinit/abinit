@@ -367,7 +367,7 @@ CONTAINS  !=====================================================================
 !! ebands_print_gaps
 !!
 !! FUNCTION
-!!  Helper function to print gaps directrly from ebands.
+!!  Helper function to print gaps directly from ebands.
 !!
 !! INPUTS
 !!  ebands<ebands_t>=Info on the band structure, the smearing technique and the physical temperature used.
@@ -379,13 +379,11 @@ CONTAINS  !=====================================================================
 subroutine ebands_print_gaps(ebands, unit, header)
 
 !Arguments ------------------------------------
-!scalars
  class(ebands_t),intent(in)  :: ebands
  integer,intent(in) :: unit
  character(len=*),optional,intent(in) :: header
 
 !Local variables-------------------------------
-!scalars
  integer :: ierr, spin
  type(gaps_t) :: gaps
 
@@ -396,14 +394,14 @@ subroutine ebands_print_gaps(ebands, unit, header)
  gaps = ebands_get_gaps(ebands, ierr)
  if (ierr /= 0) then
    do spin=1, ebands%nsppol
-     write(unit, "(2a)")"WARNING: " // trim(gaps%errmsg_spin(spin))
+     write(unit, "(a)")trim(gaps%errmsg_spin(spin))
    end do
  end if
 
  if (present(header)) then
-   call gaps%print(unit=std_out, header=header)
+   call gaps%print(unit=unit, header=header)
  else
-   call gaps%print(unit=std_out, header=header)
+   call gaps%print(unit=unit)
  end if
  call gaps%free()
 
@@ -1207,7 +1205,7 @@ subroutine ebands_print(ebands, header, unit, prtvol)
    end if
 
    do spin=1,ebands%nsppol
-     if (ebands%nsppol==2) then
+     if (ebands%nsppol == 2) then
        write(msg,'(a,i9,a,i0)')' New occ. numbers for occopt= ',ebands%occopt,', spin ',spin
        call wrtout(unt, msg)
      end if

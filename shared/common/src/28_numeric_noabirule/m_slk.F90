@@ -3189,7 +3189,7 @@ subroutine slk_pzheev(Slk_mat, jobz, uplo, Slk_vec, w, &
 
  call PZHEEV(jobz, uplo, nn, Slk_mat%buffer_cplx, ija__(1), ija__(2), Slk_mat%descript%tab, &
              w, Slk_vec%buffer_cplx, ijz__(1), ijz__(2), Slk_vec%descript%tab, work, lwork, rwork, lrwork, info)
- ABI_CHECK(info == 0, sjoin("Error during the calculation of the workspace size, info:", itoa(info)))
+ ABI_CHECK(info == 0, sjoin("Error in the calculation of the workspace size, info:", itoa(info)))
 
  lwork = NINT(real(work(1))); lrwork= NINT(rwork(1)) !*2
  ABI_FREE(work)
@@ -3336,7 +3336,7 @@ subroutine slk_pzheevx(Slk_mat, jobz, range, uplo, vl, vu, il, iu, abstol, Slk_v
  ABI_MALLOC(iwork, (1))
  ABI_MALLOC(rwork, (3))
  ! This is clearly seen in the source in which rwork(1:3) is accessed
- ! during the calculation of the workspace size.
+ ! in the calculation of the workspace size.
 
   ! prototype
   !call pzheevx(jobz, range, uplo, n, a, ia, ja, desca, vl, vu, il, iu, abstol, m, nz, w,
@@ -3661,7 +3661,7 @@ subroutine slk_pzhegvx(Slk_matA, ibtype, jobz, range, uplo, Slk_matB, vl, vu, il
  ABI_MALLOC(iwork,(1))
  ABI_MALLOC(rwork,(3))
  ! This is clearly seen in the source in which rwork(1:3) is accessed
- ! during the calcuation of the workspace size.
+ ! in the calcuation of the workspace size.
 
  call pzhegvx(ibtype,jobz,range,uplo, Slk_matA%sizeb_global(2),Slk_matA%buffer_cplx,1,1,Slk_matA%descript%tab,&
    Slk_matB%buffer_cplx,1,1,Slk_matB%descript%tab,&
