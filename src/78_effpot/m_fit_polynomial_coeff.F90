@@ -152,7 +152,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  integer :: rank_to_send,unit_anh,fit_iatom_in,unit_GF_val,nfix_and_impose,nfixcoeff_corr
  integer :: ncopy_terms
  real(dp) :: cutoff,factor,time,tolMSDF,tolMSDS,tolMSDE,tolMSDFS,tolGF,check_value
- real(dp),parameter :: HaBohr_meVAng = 27.21138386 / 0.529177249
+ real(dp),parameter :: HaBohr_eVAng = 27.21138386d0 / 0.529177249d0
  type(effective_potential_type) :: eff_pot_fixed
  logical :: iam_master,need_verbose,need_positive,converge,file_opened
  logical :: need_anharmstr,need_spcoupling,ditributed_coefficients,need_prt_anh
@@ -754,13 +754,13 @@ endif
 !&               gf_values(4,1)*factor*(Ha_EV*1000)**2  ,ch10,&
 &                    ' Goal function values at the begining of the fit process (eV^2/A^2):',ch10,&
 &                    '   Energy          : ',&
-&               gf_values(4,1)*(HaBohr_meVAng)**2,ch10,&
+&               gf_values(4,1)*(HaBohr_eVAng)**2,ch10,&
 &                    '   Forces+Stresses : ',&
-&               gf_values(1,1)*(HaBohr_meVAng)**2,ch10,&
+&               gf_values(1,1)*(HaBohr_eVAng)**2,ch10,&
 &                    '   Forces          : ',&
-&               gf_values(2,1)*(HaBohr_meVAng)**2,ch10,&
+&               gf_values(2,1)*(HaBohr_eVAng)**2,ch10,&
 &                    '   Stresses        : ',&
-&               gf_values(3,1)*(HaBohr_meVAng)**2,ch10
+&               gf_values(3,1)*(HaBohr_eVAng)**2,ch10
  if(need_verbose)then
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,message,'COLL')
@@ -889,18 +889,18 @@ endif
            write (j_char, '(i7)') my_coeffindexes(icoeff)
            write(message, '(4x,a,3x,4ES18.10)') adjustl(j_char),&
 !&                                   gf_values(4,icoeff)*factor*(1000*Ha_ev)**2 ,&
-&                                   gf_values(4,icoeff)*HaBohr_meVAng**2,&
-&                                   gf_values(1,icoeff)*HaBohr_meVAng**2,&
-&                                   gf_values(2,icoeff)*HaBohr_meVAng**2,&
-&                                   gf_values(3,icoeff)*HaBohr_meVAng**2
+&                                   gf_values(4,icoeff)*HaBohr_eVAng**2,&
+&                                   gf_values(1,icoeff)*HaBohr_eVAng**2,&
+&                                   gf_values(2,icoeff)*HaBohr_eVAng**2,&
+&                                   gf_values(3,icoeff)*HaBohr_eVAng**2
            if(need_prt_GF_csv)then
              write(message2, '(I7.7,3a,ES18.10,a,ES18.10,a,ES18.10,a,ES18.10)') my_coeffindexes(icoeff),",",&
 !&                                   gf_values(4,icoeff)*factor*(1000*Ha_ev)**2,",",&
 &                                   trim(my_coeffs(icoeff)%name),",",&
-&                                   gf_values(4,icoeff)*HaBohr_meVAng**2,",",&
-&                                   gf_values(1,icoeff)*HaBohr_meVAng**2,",",&
-&                                   gf_values(2,icoeff)*HaBohr_meVAng**2,",",&
-&                                   gf_values(3,icoeff)*HaBohr_meVAng**2
+&                                   gf_values(4,icoeff)*HaBohr_eVAng**2,",",&
+&                                   gf_values(1,icoeff)*HaBohr_eVAng**2,",",&
+&                                   gf_values(2,icoeff)*HaBohr_eVAng**2,",",&
+&                                   gf_values(3,icoeff)*HaBohr_eVAng**2
            end if
          end if
        else!In this case the matrix is singular
@@ -1023,10 +1023,10 @@ endif
        write (j_char, '(i7)') list_coeffs(icycle)
        write(message, '(a,a,3x,a,3x,4ES18.10)') " ",adjustl(i_char),adjustl(j_char),&
 !&                                    mingf(4)* factor * (Ha_eV *1000)**2,&
-&                                    mingf(4)*HaBohr_meVAng**2,&
-&                                    mingf(1)*HaBohr_meVAng**2,&
-&                                    mingf(2)*HaBohr_meVAng**2,&
-&                                    mingf(3)*HaBohr_meVAng**2
+&                                    mingf(4)*HaBohr_eVAng**2,&
+&                                    mingf(1)*HaBohr_eVAng**2,&
+&                                    mingf(2)*HaBohr_eVAng**2,&
+&                                    mingf(3)*HaBohr_eVAng**2
        call wrtout(ab_out,message,'COLL')
      end if
 
@@ -1056,25 +1056,25 @@ endif
        end if
      end if
      if(tolMSDF  > zero) then
-       if(abs(tolMSDF) > abs(mingf(2)*HaBohr_meVAng**2))then
+       if(abs(tolMSDF) > abs(mingf(2)*HaBohr_eVAng**2))then
          write(message,'(2a,ES18.10,a,ES18.10,a)') ch10," Fit process complete =>",&
-&                                                  mingf(2)*HaBohr_meVAng**2 ," < ",tolMSDF,&
+&                                                  mingf(2)*HaBohr_eVAng**2 ," < ",tolMSDF,&
 &                                              ' for MSDF'
          converge = .true.
        end if
      end if
      if(tolMSDS  > zero) then
-       if(abs(tolMSDS) > abs(mingf(3)*HaBohr_meVAng**2))then
+       if(abs(tolMSDS) > abs(mingf(3)*HaBohr_eVAng**2))then
          write(message,'(2a,ES18.10,a,ES18.10,a)') ch10," Fit process complete =>",&
-&                                                  mingf(3)*HaBohr_meVAng**2 ," < ",tolMSDS,&
+&                                                  mingf(3)*HaBohr_eVAng**2 ," < ",tolMSDS,&
 &                                              ' for MSDS'
          converge = .true.
        end if
      end if
      if(tolMSDFS > zero)then
-       if(abs(tolMSDFS) > abs(mingf(1)*HaBohr_meVAng**2))then
+       if(abs(tolMSDFS) > abs(mingf(1)*HaBohr_eVAng**2))then
          write(message,'(2a,ES18.10,a,ES18.10,a)') ch10," Fit process complete =>",&
-&                                                  mingf(1)*HaBohr_meVAng**2 ," < ",tolMSDFS,&
+&                                                  mingf(1)*HaBohr_eVAng**2 ," < ",tolMSDFS,&
 &                                              ' for MSDFS'
          converge = .true.
        end if
@@ -1167,9 +1167,9 @@ endif
 
          write(message, '(4x,a,3x,4ES18.10)') adjustl(j_char),&
 &                                   gf_values(4,1)* (1000*Ha_ev)**2 *factor,&
-&                                   gf_values(1,1)*HaBohr_meVAng**2,&
-&                                   gf_values(2,1)*HaBohr_meVAng**2,&
-&                                   gf_values(3,1)*HaBohr_meVAng**2
+&                                   gf_values(1,1)*HaBohr_eVAng**2,&
+&                                   gf_values(2,1)*HaBohr_eVAng**2,&
+&                                   gf_values(3,1)*HaBohr_eVAng**2
          if(need_verbose) call wrtout(std_out,message,'COLL')
        else
          list_coeffs_tmp2(1:icycle_tmp) = list_coeffs(1:icycle_tmp)
@@ -1273,13 +1273,13 @@ endif
 !&               gf_values(4,1)*(Ha_EV*1000)**2 *factor ,ch10,&
 &                    ' Goal function values at the end of the fit process (eV^2/A^2):',ch10,&
 &                    '   Energy          : ',&
-&               gf_values(4,1)*(HaBohr_meVAng)**2,ch10,&
+&               gf_values(4,1)*(HaBohr_eVAng)**2,ch10,&
 &                    '   Forces+Stresses : ',&
-&               gf_values(1,1)*(HaBohr_meVAng)**2,ch10,&
+&               gf_values(1,1)*(HaBohr_eVAng)**2,ch10,&
 &                    '   Forces          : ',&
-&               gf_values(2,1)*(HaBohr_meVAng)**2,ch10,&
+&               gf_values(2,1)*(HaBohr_eVAng)**2,ch10,&
 &                    '   Stresses        : ',&
-&               gf_values(3,1)*(HaBohr_meVAng)**2,ch10
+&               gf_values(3,1)*(HaBohr_eVAng)**2,ch10
      call wrtout(ab_out,message,'COLL')
      call wrtout(std_out,message,'COLL')
    end if
@@ -1345,11 +1345,11 @@ endif
 ! &               gf_values(4,1)*Ha_EV*1000/ ncell ,ch10,&
 ! &                    ' Goal function values at the end of the fit process (eV^2/A^2):',ch10,&
 ! &                    '   Forces+Stresses : ',&
-! &               (gf_values(1,1)+gf_values(2,1))*(HaBohr_meVAng)**2,ch10,&
+! &               (gf_values(1,1)+gf_values(2,1))*(HaBohr_eVAng)**2,ch10,&
 ! &                    '   Forces          : ',&
-! &               gf_values(2,1)*(HaBohr_meVAng)**2,ch10,&
+! &               gf_values(2,1)*(HaBohr_eVAng)**2,ch10,&
 ! &                    '   Stresses        : ',&
-! &               gf_values(3,1)*(HaBohr_meVAng)**2,ch10
+! &               gf_values(3,1)*(HaBohr_eVAng)**2,ch10
 !      call wrtout(ab_out,message,'COLL')
 !      call wrtout(std_out,message,'COLL')
 !    end if
@@ -2731,7 +2731,7 @@ subroutine fit_polynomial_coeff_testEffPot(eff_pot,hist,master,comm,print_anharm
 !reals
   real(dp) :: factor,mse,msef,mses
   real(dp),allocatable :: sqomega(:),ucvol(:)
-  real(dp),parameter :: HaBohr_meVAng = 27.21138386 / 0.529177249
+  real(dp),parameter :: HaBohr_eVAng = 27.21138386d0 / 0.529177249d0
 !scalar
   integer :: itime,unit_anh
   integer :: natom,ntime,ncoeff,my_rank
@@ -2793,13 +2793,13 @@ subroutine fit_polynomial_coeff_testEffPot(eff_pot,hist,master,comm,print_anharm
 &                    ' Goal function values of the effective.potential',ch10,&
 &                    ' with respect to the test-set (eV^2/A^2):',ch10,&
 &                    '   Energy          : ',&
-&               (mse)*(HaBohr_meVAng)**2,ch10,&
+&               (mse)*(HaBohr_eVAng)**2,ch10,&
 &                    '   Forces+Stresses : ',&
-&               (msef+mses)*(HaBohr_meVAng)**2,ch10,&
+&               (msef+mses)*(HaBohr_eVAng)**2,ch10,&
 &                    '   Forces          : ',&
-&               msef*(HaBohr_meVAng)**2,ch10,&
+&               msef*(HaBohr_eVAng)**2,ch10,&
 &                    '   Stresses        : ',&
-&               mses*(HaBohr_meVAng)**2,ch10
+&               mses*(HaBohr_eVAng)**2,ch10
      call wrtout(ab_out,message,'COLL')
      call wrtout(std_out,message,'COLL')
 
