@@ -665,16 +665,6 @@ call wrtout(std_out,message,'COLL')
  call wrtout(std_out,message,'COLL')
  call wrtout(ab_out,message,'COLL')
 
-!NOTES FOR MATTEO: List of things for printing to netcdf file
-!pawujat
-!macro_uj
-!dtpawuj(1)%diemix
-!dtpawuj(1)%diemixmag
-!ph0phiint
-!ndtset
-!for all idtset in ndtset
-!   vsh(idtset*2-1)*Ha_eV,luocc(idtset*2-1,pawujat),luocc(idtset*2,pawujat)
-
  if (my_rank == master) then
    ! First call:
    !  - Create NC file, define dimensions, scalars and arrays.
@@ -696,7 +686,7 @@ call wrtout(std_out,message,'COLL')
 
    ! Define integer scalars
    ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: &
-     "usepaw", "macro_uj", "pawujat", "dmatpuopt"  &
+     "usepaw", "macro_uj", "pawujat", "nspden", "dmatpuopt"  &
    ])
 
    ! Define double precision scalars
@@ -720,8 +710,8 @@ call wrtout(std_out,message,'COLL')
    NCF_CHECK(nctk_set_datamode(ncid))
 
    ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: &
-     "usepaw", "macro_uj", "pawujat", "dmatpuopt"],  &
-     [dtset%usepaw, macro_uj, pawujat, dmatpuopt])
+     "usepaw", "macro_uj", "pawujat", "nspden", "dmatpuopt"],  &
+     [dtset%usepaw, macro_uj, pawujat, nspden, dmatpuopt])
    NCF_CHECK(ncerr)
 
    associate (dt => dtpawuj(1))
