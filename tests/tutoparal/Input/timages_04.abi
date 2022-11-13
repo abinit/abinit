@@ -42,8 +42,10 @@ pawecutdg     40
 
 # Control of the SCF cycle
 # ========================
-toldff        5.0d-7   # Stopping criterion of SCF cycle
-nstep         50       # Maximal number of SCF steps
+# In order to obtain portability of the test, a much too stringent value for toldff is asked, and the limitation of the number of steps
+# is governed by a relatively low nstep. In real production conditions, the commented values would be better.
+toldff        1.0d-9 # 5.0d-7   # Stopping criterion of SCF cycle
+nstep         12     #   50       # Maximal number of SCF steps
 
 # Parallelization
 # ===============
@@ -87,11 +89,11 @@ dynimage      0 10*1 0   # Keep first and last images fixed
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = max2_gnu_6.5_mpich
+#%% exclude_builders = max2_gnu_6.5_mpich, scope_gnu_12.2_mpich
 #%% [files]
 #%% [NCPU_10]
 #%% files_to_test = 
-#%%   timages_04_MPI10.abo, tolnlines = 7100, tolabs = 1.100e-03, tolrel = 4.000e-02
+#%%   timages_04_MPI10.abo, tolnlines = 0, tolabs = 0.0e-0, tolrel = 0.0e-0, fld_options = -easy;
 #%% [paral_info]
 #%% nprocs_to_test = 10
 #%% max_nprocs = 10
