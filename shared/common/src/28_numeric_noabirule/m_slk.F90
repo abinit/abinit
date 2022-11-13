@@ -33,7 +33,7 @@ module m_slk
 #endif
 
  use m_fstrings,      only : firstchar, toupper, itoa, sjoin, ltoa
- use m_copy,          only : alloc_copy
+ !use m_copy,          only : alloc_copy
  use m_time,          only : cwtime, cwtime_report
  use m_numeric_tools, only : blocked_loop !, print_arr
 
@@ -304,8 +304,6 @@ module m_slk
 
  public :: slk_array_set                       ! Elemental routine to set the value of the buffer to a costant value `cvalue`.
  public :: slk_array_locmem_mb                 ! Compute memory allocated for an array of matrix_scalapack elements
-
-
 
 CONTAINS  !==============================================================================
 !!***

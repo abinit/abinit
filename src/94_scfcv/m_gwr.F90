@@ -505,7 +505,7 @@ module m_gwr
    type(crystal_t), pointer :: cryst => null()
    ! Crystal structure.
 
-   integer :: scf_iteration = 0
+   integer :: scf_iteration = 1
    ! Internal counter used to implement self-consistency (not yet implemented)
 
    type(ebands_t), pointer :: ks_ebands => null()
@@ -714,6 +714,12 @@ module m_gwr
    procedure :: run_g0w0 => gwr_run_g0w0
    ! Compute QP corrections with G0W0.
 
+   procedure :: run_energy_scf_gw => gwr_run_energy_scf_gw
+   ! Compute QP corrections with energy-only self-consistent GW
+
+   procedure :: check_scf_cycle => gwr_check_scf_cycle
+   ! Check SCF cycle for convergence.
+
    procedure :: ncwrite_tchi_wc => gwr_ncwrite_tchi_wc
    ! Write tchi or wc to netcdf file
 
@@ -763,9 +769,9 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
 !scalars
  integer,parameter :: qptopt1 = 1, qtimrev1 = 1, master = 0, ndims = 4
  integer :: my_it, my_ikf, my_iqf, ii, ebands_timrev, my_iki, my_iqi, itau, spin
- integer :: my_nshiftq, iq_bz, iq_ibz, npw_, ncid, ig
+ integer :: my_nshiftq, iq_bz, iq_ibz, npw_, ncid !, ig
  integer :: comm_cart, me_cart, ierr, all_nproc, nps, my_rank, qprange_, gap_err, ncerr, omp_nt
- integer :: cnt, ikcalc, ndeg, mband, bstop, nbsum, it, iw ! jj,
+ integer :: cnt, ikcalc, ndeg, mband, bstop, nbsum !, it, iw ! jj,
  integer :: ik_ibz, ik_bz, isym_k, trev_k, g0_k(3)
  real(dp) :: cpu, wall, gflops, te_min, te_max, wmax, vc_ecut
  logical :: isirr_k, changed, q_is_gamma, reorder
@@ -2129,17 +2135,21 @@ subroutine gwr_build_green(gwr, free_ugb)
  call timab(1922, 1, tsec)
 
  ! Use KS or QP energies depending on the iteration state.
- if (gwr%scf_iteration == 0) then
+ if (gwr%scf_iteration == 1) then
    qp_eig => gwr%ks_ebands%eig; qp_occ => gwr%ks_ebands%occ
-   ABI_CHECK(abs(gwr%ks_ebands%fermie) < tol12, "Fermie should have been set to zero!")
+   msg = sjoin("Fermi energy is not set to zero! fermie:", ftoa(gwr%ks_ebands%fermie))
+   ABI_CHECK(abs(gwr%ks_ebands%fermie) < tol12, msg)
  else
    qp_eig => gwr%qp_ebands%eig; qp_occ => gwr%qp_ebands%occ
-   ABI_CHECK(abs(gwr%qp_ebands%fermie) < tol12, "Fermie should have been set to zero!")
+   msg = sjoin("Fermi energy is not set to zero! fermie:", ftoa(gwr%qp_ebands%fermie))
+   ABI_CHECK(abs(gwr%qp_ebands%fermie) < tol12, msg)
  end if
 
- ! Allocate Green's functions
- mask_kibz = 0; mask_kibz(gwr%my_kibz_inds(:)) = 1
- call gwr%malloc_free_mats(mask_kibz, "green", "malloc")
+ ! Allocate Green's functions if this is the first iteration
+ if (gwr%scf_iteration == 1) then
+   mask_kibz = 0; mask_kibz(gwr%my_kibz_inds(:)) = 1
+   call gwr%malloc_free_mats(mask_kibz, "green", "malloc")
+ end if
 
  do my_is=1,gwr%my_nspins
    spin = gwr%my_spins(my_is)
@@ -3209,6 +3219,8 @@ subroutine desc_copy(in_desc, new_desc)
 
 ! *************************************************************************
 
+ call new_desc%free()
+
  new_desc%istwfk = in_desc%istwfk
  new_desc%npw = in_desc%npw
  new_desc%ig0 = in_desc%ig0
@@ -3809,7 +3821,7 @@ end if
          end do ! my_iqi
          !call cwtime_report("chiq part", cpu, wall, gflops)
 
-         if (my_ir <= 6 * gwr%sc_batch_size .or. mod(my_ir, PRINT_MODR) == 0) then
+         if (my_ir <= 3 * gwr%sc_batch_size .or. mod(my_ir, PRINT_MODR) == 0) then
            write(msg,'(4x, 3(a,i0),a)')" tChi my ir [", my_ir, "/", my_nr, "] (tot: ", gwr%g_nfft, ")"
            if (gwr%comm%me == 0) call cwtime_report(msg, cpu_ir, wall_ir, gflops_ir)
          end if
@@ -4515,6 +4527,7 @@ subroutine gwr_build_sigmac(gwr)
 
 !Local variables-------------------------------
 !scalars
+ integer,parameter :: master = 0
  integer :: my_is, my_it, spin, ik_ibz, ikcalc_ibz, sc_nfft, sc_size, my_ir, my_nr, iw, idat, ndat !sc_mgfft,
  integer :: my_iqf, iq_ibz, iq_bz, itau, ierr, ibc, bmin, bmax, band, nbc ! col_bsize, npwsp, ib1, ib2,
  integer :: my_ikf, ipm, ik_bz, ig, ikcalc, uc_ir, ir, ncid, col_bsize, npwsp, ibeg, iend ! my_iqi, sc_ir,
@@ -4538,8 +4551,8 @@ subroutine gwr_build_sigmac(gwr)
  type(desc_t), target :: desc_mykbz(gwr%my_nkbz), desc_myqbz(gwr%my_nqbz)
  type(fftbox_plan3_t) :: gt_plan_gp2rp, wt_plan_gp2rp
  integer :: band_val, ibv, ncerr, unt_it, unt_iw, unt_rw
- real(dp) :: e0, ks_gap, qp_gap, sigx, vxc_val, vu, v_meanf
- complex(dp) :: zz, zsc, sigc_e0, dsigc_de0, z_e0, sig_xc, hhartree_bk
+ real(dp) :: e0, ks_gap, qp_gap, sigx, vxc_val, vu, v_meanf, eshift, qp_occ
+ complex(dp) :: zz, zsc, sigc_e0, dsigc_de0, z_e0, sig_xc, hhartree_bk, qp_ene, qp_ene_prev
  integer,allocatable :: ks_vbik(:,:), iperm(:)
  integer :: gt_request, wct_request
  real(dp),allocatable :: sorted_qpe(:)
@@ -4554,7 +4567,7 @@ subroutine gwr_build_sigmac(gwr)
  complex(dp) :: qpe_zlin_kcalc(gwr%max_nbcalc, gwr%nkcalc, gwr%nsppol), imag_zmesh(gwr%ntau)
  complex(dp) :: qpe_pade_kcalc(gwr%max_nbcalc, gwr%nkcalc, gwr%nsppol)
  complex(dp) :: sigxc_rw_diag_kcalc(gwr%nwr, gwr%max_nbcalc, gwr%nkcalc, gwr%nsppol)
- type(ebands_t),pointer :: now_ebands
+ !type(ebands_t),pointer :: now_ebands
  type(sigma_pade_t) :: spade
 
 ! *************************************************************************
@@ -4568,11 +4581,11 @@ subroutine gwr_build_sigmac(gwr)
  !call gwr%malloc_free_mats(mask_kibz, "sigma" "malloc")
 
  ! Use KS or QP energies depending on the iteration state.
- if (gwr%scf_iteration == 0) then
-   now_ebands => gwr%ks_ebands
- else
-   now_ebands => gwr%qp_ebands
- end if
+ !if (gwr%scf_iteration == 1) then
+ !  now_ebands => gwr%ks_ebands
+ !else
+ !  now_ebands => gwr%qp_ebands
+ !end if
 
  ! Set FFT mesh in the supercell.
  ! Be careful when using the FFT plan as ndat can change inside the loop if we start to block.
@@ -4681,7 +4694,7 @@ if (gwr%use_supercell_for_sigma) then
 
      ! Loop over r in the unit cell that is now MPI-distributed in g_comm.
      do my_ir=1, my_nr, gwr%sc_batch_size
-       if (my_ir <= 6 * gwr%sc_batch_size .or. mod(my_ir, PRINT_MODR) == 0) then
+       if (my_ir <= 3 * gwr%sc_batch_size .or. mod(my_ir, PRINT_MODR) == 0) then
          call cwtime(cpu_ir, wall_ir, gflops_ir, "start")
        end if
        ndat = blocked_loop(my_ir, my_nr, gwr%sc_batch_size)
@@ -4785,7 +4798,7 @@ if (gwr%use_supercell_for_sigma) then
        end do ! ikcalc
        !call cwtime_report("Sig Matrix part", cpu, wall, gflops)
 
-       if (my_ir <= 6 * gwr%sc_batch_size .or. mod(my_ir, PRINT_MODR) == 0) then
+       if (my_ir <= 3 * gwr%sc_batch_size .or. mod(my_ir, PRINT_MODR) == 0) then
          write(msg,'(4x,3(a,i0),a)')" Sigma_c my_ir [", my_ir, "/", my_nr, "] (tot: ", gwr%g_nfft, ")"
          if (gwr%comm%me == 0) call cwtime_report(msg, cpu_ir, wall_ir, gflops_ir)
        end if
@@ -4928,12 +4941,18 @@ end if
  qp_solver_ierr = 0
  sigc_iw_diag_kcalc = zero
 
+ ! Save previous QP bands in qp_ebands_prev (needed for self-consistency)
+ ! In the loop below, master updated gwr%qp_ebands%eig with the QP results.
+ call ebands_copy(gwr%qp_ebands, gwr%qp_ebands_prev)
+
  do spin=1,gwr%nsppol
    do ikcalc=1,gwr%nkcalc
       ik_ibz = gwr%kcalc2ibz(ikcalc, 1)
+
       do band=gwr%bstart_ks(ikcalc, spin), gwr%bstop_ks(ikcalc, spin)
         ibc = band - gwr%bstart_ks(ikcalc, spin) + 1
-        e0 = now_ebands%eig(band, ik_ibz, spin)
+        !e0 = now_ebands%eig(band, ik_ibz, spin)
+        e0 = gwr%ks_ebands%eig(band, ik_ibz, spin)
         sigx = gwr%x_mat(band, band, ikcalc, spin)
         ! Note vxcval instead of vxc with model core charge.
         vxc_val = gwr%ks_me%vxcval(band, band, ik_ibz, spin)
@@ -4964,10 +4983,14 @@ end if
         z_e0 = one / (one - dsigc_de0)
 
         ! Linearized QP solution + store results
-        qpe_zlin_kcalc(ibc, ikcalc, spin) = e0 + z_e0 * (sigc_e0 + sigx - v_meanf)
+        qp_ene =  e0 + z_e0 * (sigc_e0 + sigx - v_meanf)
+        qpe_zlin_kcalc(ibc, ikcalc, spin) = qp_ene
         e0_kcalc(ibc, ikcalc, spin) = e0
         sigc_e0_kcalc(ibc, ikcalc, spin) = sigc_e0
         ze0_kcalc(ibc, ikcalc, spin) = z_e0
+
+        ! IMPORTANT: Here update qp_ebands%eig with the new results.
+        gwr%qp_ebands%eig(band, ik_ibz, spin) = real(qp_ene)
 
         ! Build linear mesh on the real axis **centered** around e0.
         rw_mesh = arth(e0 - gwr%wr_step * (gwr%nwr / 2), gwr%wr_step, gwr%nwr)
@@ -4993,12 +5016,31 @@ end if
    end do ! ikcalc
  end do ! spin
 
- ! TODO: Update gwr%qp_ebands
- call ebands_copy(gwr%qp_ebands, gwr%qp_ebands_prev)
+ if (gwr%nkcalc == gwr%nkibz) then
+
+#if 0
+   ! Here I correct that empty bands that are not explictly included in the SCF calculation.
+   do spin=1,gwr%nsppol
+     do ikcalc=1,gwr%nkcalc
+        ik_ibz = gwr%kcalc2ibz(ikcalc, 1)
+        !gwr%bstart_ks(ikcalc, spin)
+        band = gwr%bstop_ks(ikcalc, spin)
+        if (band + 1 <= size(gwr%qp_ebands%eig, dim=1)) then
+          eshift = gwr%qp_ebands%eig(band, ik_ibz, spin) - gwr%ks_ebands%eig(band, ik_ibz, spin)
+          !eshift = gwr%qp_ebands%eig(band, ik_ibz, spin) - gwr%qp_ebands_prev%eig(band, ik_ibz, spin)
+          call wrtout(std_out, sjoin( "Correcting bands >= ", itoa(band+1), "with eshift:", ftoa(eshift * Ha_meV), "(meV)"))
+          gwr%qp_ebands%eig(band + 1:, ik_ibz, spin) = gwr%qp_ebands%eig(band + 1:, ik_ibz, spin) + eshift
+        end if
+     end do
+   end do
+#endif
+
+   !call xmpi_bcast(gwr%qp_ebands%eig, master, gwr%comm%value, ierr)
+   call ebands_update_occ(gwr%qp_ebands, gwr%dtset%spinmagntarget, prtvol=gwr%dtset%prtvol, fermie_to_zero=.True.)
+ end if
 
  ! Master writes results to ab_out, std_out and GWR.nc
  if (gwr%comm%me == 0) then
-
    if (any(qp_solver_ierr /= 0)) then
      ! Write warning if QP solver failed.
      ierr = count(qp_solver_ierr /= 0)
@@ -5013,62 +5055,73 @@ end if
 
    do spin=1,gwr%nsppol
      do ikcalc=1,gwr%nkcalc
-        ik_ibz = gwr%kcalc2ibz(ikcalc, 1)
+       ik_ibz = gwr%kcalc2ibz(ikcalc, 1)
 
-        ydoc = yamldoc_open('GWR_SelfEnergy_ee', width=11, real_fmt='(3f8.3)')
-        call ydoc%add_real1d('kpoint', gwr%kcalc(:, ikcalc))
-        call ydoc%add_int('spin', spin, int_fmt="(i1)")
+       ydoc = yamldoc_open('GWR_SelfEnergy_ee', width=11, real_fmt='(3f8.3)')
+       call ydoc%add_real1d('kpoint', gwr%kcalc(:, ikcalc))
+       call ydoc%add_int('spin', spin, int_fmt="(i1)")
+       call ydoc%add_int('gwr_scf_iteration', gwr%scf_iteration)
+       call ydoc%add_string('gwr_task', gwr%dtset%gwr_task)
 
-        ! Compute Gaps
-        band_val = ks_vbik(ik_ibz, spin)
-        nbc = gwr%bstop_ks(ikcalc, spin) - gwr%bstart_ks(ikcalc, spin) + 1
+       ! Compute Gaps
+       band_val = ks_vbik(ik_ibz, spin)
+       nbc = gwr%bstop_ks(ikcalc, spin) - gwr%bstart_ks(ikcalc, spin) + 1
 
-        if (band_val >= gwr%bstart_ks(ikcalc, spin) .and. band_val + 1 <= gwr%bstop_ks(ikcalc, spin)) then
-          ibv = band_val - gwr%bstart_ks(ikcalc, spin) + 1
-          ks_gap = e0_kcalc(ibv+1, ikcalc, spin) - e0_kcalc(ibv, ikcalc, spin)
+       if (band_val >= gwr%bstart_ks(ikcalc, spin) .and. band_val + 1 <= gwr%bstop_ks(ikcalc, spin)) then
+         ibv = band_val - gwr%bstart_ks(ikcalc, spin) + 1
+         ks_gap = e0_kcalc(ibv+1, ikcalc, spin) - e0_kcalc(ibv, ikcalc, spin)
 
-          ! This to detect possible band inversion in the QP energies.
-          ! and compute qp_gaps accordingly.
-          call sort_rvals(nbc, real(qpe_zlin_kcalc(:, ikcalc, spin)), iperm, sorted_qpe, tol=tol12)
+         ! This to detect possible band inversion in the QP energies.
+         ! and compute qp_gaps accordingly.
+         call sort_rvals(nbc, real(qpe_zlin_kcalc(:, ikcalc, spin)), iperm, sorted_qpe, tol=tol12)
 
-          if (iperm(ibv) /= ibv .or. iperm(ibv + 1) /= ibv + 1) then
-            call ydoc%add_int('QP_VBM_band', iperm(ibv) + gwr%bstart_ks(ikcalc, spin) - 1)
-            call ydoc%add_int('QP_CBM_band', iperm(ibv+1) + gwr%bstart_ks(ikcalc, spin) - 1)
-            qp_gap = sorted_qpe(ibv+1) - sorted_qpe(ibv)
-          else
-            call ydoc%add_int('QP_VBM_band', ibv + gwr%bstart_ks(ikcalc, spin) - 1)
-            call ydoc%add_int('QP_CBM_band', ibv+1 + gwr%bstart_ks(ikcalc, spin) - 1)
-            qp_gap = real(qpe_zlin_kcalc(ibv+1, ikcalc, spin) - qpe_zlin_kcalc(ibv, ikcalc, spin))
-          end if
-          ABI_FREE(iperm)
-          ABI_FREE(sorted_qpe)
+         if (iperm(ibv) /= ibv .or. iperm(ibv + 1) /= ibv + 1) then
+           call ydoc%add_int('QP_VBM_band', iperm(ibv) + gwr%bstart_ks(ikcalc, spin) - 1)
+           call ydoc%add_int('QP_CBM_band', iperm(ibv+1) + gwr%bstart_ks(ikcalc, spin) - 1)
+           qp_gap = sorted_qpe(ibv+1) - sorted_qpe(ibv)
+         else
+           call ydoc%add_int('QP_VBM_band', ibv + gwr%bstart_ks(ikcalc, spin) - 1)
+           call ydoc%add_int('QP_CBM_band', ibv+1 + gwr%bstart_ks(ikcalc, spin) - 1)
+           qp_gap = real(qpe_zlin_kcalc(ibv+1, ikcalc, spin) - qpe_zlin_kcalc(ibv, ikcalc, spin))
+         end if
+         ABI_FREE(iperm)
+         ABI_FREE(sorted_qpe)
 
-          call ydoc%add_real('KS_gap', ks_gap * Ha_eV)
-          call ydoc%add_real('QP_gap', qp_gap * Ha_eV)
-          call ydoc%add_real('Delta_QP_KS', (qp_gap - ks_gap) * Ha_eV)
-        end if
+         call ydoc%add_real('KS_gap', ks_gap * Ha_eV)
+         call ydoc%add_real('QP_gap', qp_gap * Ha_eV)
+         call ydoc%add_real('Delta_QP_KS', (qp_gap - ks_gap) * Ha_eV)
 
-        call ydoc%open_tabular('data') !, tag='SigmaeeData')
-        msg = " Band      E0 <VxcDFT>   SigX SigC(E0)     Z1      Z2  E-E0       E"
-        call ydoc%add_tabular_line(msg)
+       end if
 
-        do band=gwr%bstart_ks(ikcalc, spin), gwr%bstop_ks(ikcalc, spin)
-          ibc = band - gwr%bstart_ks(ikcalc, spin) + 1
-          e0 = e0_kcalc(ibc, ikcalc, spin)
-          write(msg,'(i5, *(f8.3))') &
-            band, &                                                        ! Band
-            e0 * Ha_eV, &                                                  ! E0
-            real(gwr%ks_me%vxcval(band, band, ik_ibz, spin)) * Ha_eV, &    ! <VxcDFT>
-            real(gwr%x_mat(band, band, ikcalc, spin)) * Ha_eV, &           ! SigX
-            real(sigc_e0_kcalc(ibc, ikcalc, spin)) * Ha_eV, &              ! SigC(E0)
-            real(ze0_kcalc(ibc, ikcalc, spin)), &                          ! Z1
-            aimag(ze0_kcalc(ibc, ikcalc, spin)), &                         ! Z2
-            (real(qpe_zlin_kcalc(ibc, ikcalc, spin)) - e0) * Ha_eV, &      ! E-E0
-            real(qpe_zlin_kcalc(ibc, ikcalc, spin)) * Ha_eV                ! E
-          call ydoc%add_tabular_line(msg)
-        end do
+       call ydoc%open_tabular('data') !, tag='SigmaeeData')
+       write(msg, "(a5, *(a9))") &
+         "Band", "E0", "E", "Z", "E-E0", "E-Eprev", "SigX", "SigC(E0)", "<VxcDFT>", "Occ(E)"
+       call ydoc%add_tabular_line(msg)
 
-        call ydoc%write_units_and_free([std_out, ab_out])
+       do band=gwr%bstart_ks(ikcalc, spin), gwr%bstop_ks(ikcalc, spin)
+         ibc = band - gwr%bstart_ks(ikcalc, spin) + 1
+         e0 = e0_kcalc(ibc, ikcalc, spin)
+
+         qp_ene = gwr%qp_ebands%eig(band, ik_ibz, spin)
+         qp_occ = gwr%qp_ebands%occ(band, ik_ibz, spin)
+         qp_ene_prev = gwr%qp_ebands_prev%eig(band, ik_ibz, spin)
+
+         write(msg,'(i5, *(f9.3))') &
+           band, &                                                        ! Band
+           e0 * Ha_eV, &                                                  ! E0
+           real(qp_ene) * Ha_eV, &                                        ! E
+           real(ze0_kcalc(ibc, ikcalc, spin)), &                          ! Z
+           !aimag(ze0_kcalc(ibc, ikcalc, spin)), &                        ! Z2
+           (real(qp_ene - e0)) * Ha_eV, &                                 ! E-E0
+           real(qp_ene - qp_ene_prev) * Ha_eV, &                          ! E-Eprev
+           real(gwr%x_mat(band, band, ikcalc, spin)) * Ha_eV, &           ! SigX
+           real(sigc_e0_kcalc(ibc, ikcalc, spin)) * Ha_eV, &              ! SigC(E0)
+           real(gwr%ks_me%vxcval(band, band, ik_ibz, spin)) * Ha_eV, &    ! <VxcDFT>
+           qp_occ                                                         ! Occ(E)
+         call ydoc%add_tabular_line(msg)
+       end do
+
+       call ydoc%write_units_and_free([std_out, ab_out])
      end do ! ikcalc
    end do ! spin
 
@@ -5164,7 +5217,7 @@ end if
    NCF_CHECK(nf90_close(ncid))
  end if
 
- call xmpi_barrier(gwr%comm%value)
+ !call xmpi_barrier(gwr%comm%value)
 
  ABI_FREE(sigc_it_diag_kcalc)
  call cwtime_report(" gwr_build_sigmac:", cpu_all, wall_all, gflops_all)
@@ -5201,7 +5254,10 @@ subroutine write_notations(units)
    write(unt,"(a)")repeat("=", 80)
    write(unt,"(a)")" QP results in eV."
    write(unt,"(a)")" Notations:"
-   !write(unt,"(a)")"     eKS: Kohn-Sham energy. eQP: quasi-particle energy."
+   !write(unt,"(a)")"     E0: Kohn-Sham energy. eQP: quasi-particle energy."
+   !write(unt,"(a)")"     <VxcDFT>: Matrix elements of Vxc[n_val] without model core charge (if any)"
+   !write(unt,"(a)")"     SigX: Matrix elements of Sigma_x
+   !write(unt,"(a)")"     SigC(E0): Matrix elements of Sigma_c computed at the KS energy
    !write(unt,"(a)")"     eQP - eKS: Difference between the QP and the KS energy."
    !write(unt,"(a)")"     SE1(eKS): Real part of the self-energy computed at the KS energy, SE2 for imaginary part."
    !write(unt,"(a)")"     Z(eKS): Renormalization factor."
@@ -5462,7 +5518,7 @@ end subroutine gwr_rpa_energy
 !!  gwr_run_g0w0
 !!
 !! FUNCTION
-!!  Compute QP energies withing the G0W0 approximation and minimax meshes along the imaginary axis.
+!!  Compute QP energies within the G0W0 approximation and minimax meshes along the imaginary axis.
 !!
 !! INPUTS
 !!  [free_ugb]: True if array with empty KS states should freed as soon as possibile. Default: True
@@ -5478,7 +5534,6 @@ subroutine gwr_run_g0w0(gwr, free_ugb)
  logical,optional,intent(in) :: free_ugb
 
 !Local variables-------------------------------
-!scalars
  logical :: free_ugb__
 
 ! *************************************************************************
@@ -5492,49 +5547,100 @@ subroutine gwr_run_g0w0(gwr, free_ugb)
  call gwr%build_wc()
  call gwr%build_sigmac()
 
+end subroutine gwr_run_g0w0
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_gwr/gwr_run_energy_scf_gw
+!! NAME
+!!  gwr_run_energy_scf_gw
+!!
+!! FUNCTION
+!!  Compute QP energies within energy-only self-consistent GW approximation
+!!  and minimax meshes along the imaginary axis.
+!!
+!! INPUTS
+!!  [free_ugb]: True if array with empty KS states should freed as soon as possibile. Default: True
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine gwr_run_energy_scf_gw(gwr, free_ugb)
+
+!Arguments ------------------------------------
+ class(gwr_t),intent(inout) :: gwr
+ logical,optional,intent(in) :: free_ugb
+
+!Local variables-------------------------------
+ integer :: gwr_max_niter = 50
+ logical :: converged
+ integer :: units(2)
+
+! *************************************************************************
+
  ! Sketching energy-only self-consistency:
- ! Possibe values:
  !   - G0W0
  !   - eGeW
  !   - eGW0
  !   - G0eW
 
- ! To implement restart capabilities we need to read scf_iteration, qp_ebands and gwr_task from GWR
+ ! TODO:
+ ! To implement restart capabilities we need to read scf_iteration, qp_ebands and gwr_task from GWR.nc
  ! build_sigmac is responsible for writing checkpoint data with qp_ebands at each iteration.
+ units = [std_out, ab_out]
 
- !select case (dtset%gwr_task)
- !case ("eGeW")
- !  converged = .False.
- !  do while (.not. converged)
- !    call gwr%run_g0w0(free_ugb=.False.)
- !    gwr%scf_iteration = gwr%scf_iteration + 1
- !    call gwr%check_scf_cycle(converged)
- !  end do
+ if (gwr%nkcalc /= gwr%nkibz) then
+   ABI_ERROR("For energy-only GW, one should compute QP energies for all k-points in the IBZ")
+ end if
 
- !case ("eGW0")
- !  call gwr%run_g0w0(free_ugb=.False.)
- !  converged = .False.
- !  do while (.not. converged)
- !    call gwr%build_sigxme()  ! This should not change in semiconductors
- !    call gwr%build_sigmac()
- !    gwr%scf_iteration = gwr%scf_iteration + 1
- !    call gwr%check_scf_cycle(converged)
- !  end do
+ select case (gwr%dtset%gwr_task)
+ case ("EGEW")
+   converged = .False.
+   call wrtout(units, " Begin energy-only self-consistency in both G and W (EGEW)")
+   do while (.not. converged .and. gwr%scf_iteration < gwr_max_niter)
+     call gwr%run_g0w0(free_ugb=.False.)
+     call gwr%check_scf_cycle(converged)
+     gwr%scf_iteration = gwr%scf_iteration + 1
+   end do
 
- !case ("G0eW")
- !  call gwr%run_g0w0(free_ugb=.False.)
- !  converged = .False.
- !  do while (.not. converged)
- !    call gwr%build_tchi()
- !    call gwr%build_wc()
- !    call gwr%build_sigmac()
- !    gwr%scf_iteration = gwr%scf_iteration + 1
- !    call gwr%check_scf_cycle(converged)
- !  end do
+ case ("EGW0")
+   call wrtout(units, " Begin energy-only self-consistency in G (EGW0)")
+   call gwr%run_g0w0(free_ugb=.False.)
+   gwr%scf_iteration = gwr%scf_iteration + 1
+   converged = .False.
+   do while (.not. converged .and. gwr%scf_iteration < gwr_max_niter)
+     call gwr%build_green(free_ugb=.False.)
+     call gwr%build_sigxme()  ! NB: This should not change in semiconductors
+     call gwr%build_sigmac()
+     call gwr%check_scf_cycle(converged)
+     gwr%scf_iteration = gwr%scf_iteration + 1
+   end do
 
- !end select
+ case ("G0EW")
+   !This is more complex to implement as we need to store G0 and eG
+   !and use G only in the chi/W part and not in Sigma
+   call wrtout(units, " Begin energy-only self-consistency in W (G0EW)")
+   ABI_ERROR("G0WE is not yet implemented")
+   !call gwr%run_g0w0(free_ugb=.False.)
+   !gwr%scf_iteration = gwr%scf_iteration + 1
+   !converged = .False.
+   !do while (.not. converged .and. gwr%scf_iteration < gwr_max_niter)
+   !  call gwr%build_green(free_ugb=.False.)
+   !  call gwr%build_chi0_head_and_wings()
+   !  call gwr%build_tchi()
+   !  call gwr%build_wc()
+   !  call gwr%build_sigmac()
+   !  call gwr%check_scf_cycle(converged)
+   !  gwr%scf_iteration = gwr%scf_iteration + 1
+   !end do
 
-end subroutine gwr_run_g0w0
+ case default
+   ABI_ERROR(sjoin("Invalid gwr_task:", gwr%dtset%gwr_task))
+ end select
+
+end subroutine gwr_run_energy_scf_gw
 !!***
 
 !----------------------------------------------------------------------
@@ -5551,30 +5657,43 @@ end subroutine gwr_run_g0w0
 !!
 !! SOURCE
 
-subroutine check_scf_cycle(gwr, converged)
+subroutine gwr_check_scf_cycle(gwr, converged)
 
 !Arguments ------------------------------------
- class(gwr_t),intent(inout) :: gwr
+ class(gwr_t),intent(in) :: gwr
  logical,intent(out) :: converged
 
 !Local variables-------------------------------
- integer :: spin, ik_ibz, band, nband_k
+ integer :: spin, ikcalc, ik_ibz, band, ib, jb
+ character(len=500) :: msg
  real(dp) :: etol, max_adiff, adiff(gwr%qp_ebands%mband)
+ integer :: units(2)
 
 ! *************************************************************************
 
- etol = 0.005_dp * eV_Ha; max_adiff = -one; converged = .True.
+ etol = 0.01_dp * eV_Ha; max_adiff = -one; converged = .True.
+ units = [std_out, ab_out]
 
+ if (gwr%comm%me == 0) then
+   call wrtout(units, sjoin(" Checking for convergence at iteration:", itoa(gwr%scf_iteration)))
+ end if
+
+ ! TODO: Handle the case in which diffs are almost constant.
  associate (now => gwr%qp_ebands, prev => gwr%qp_ebands_prev)
  do spin=1,gwr%nsppol
-   do ik_ibz=1,now%nkpt
-     nband_k = now%nband(ik_ibz + (spin-1)*now%nkpt)
-     adiff(1:nband_k) = abs(now%eig(1:nband_k, ik_ibz, spin) - prev%eig(1:nband_k, ik_ibz, spin))
-     band = maxloc(adiff(1:nband_k), dim=1)
+   do ikcalc=1,gwr%nkcalc ! TODO: Should be spin dependent!
+     ik_ibz = gwr%kcalc2ibz(ikcalc, 1)
+     ib = gwr%bstart_ks(ikcalc, spin); jb = gwr%bstop_ks(ikcalc, spin)
+     adiff = zero
+     adiff(ib:jb) = abs(now%eig(ib:jb, ik_ibz, spin) - prev%eig(ib:jb, ik_ibz, spin))
+     band = maxloc(adiff, dim=1)
      max_adiff = max(max_adiff, adiff(band))
      if (adiff(band) > etol) converged = .False.
      if (gwr%comm%me == 0) then
-       !write(ab_out, *)
+       write(msg, "(a,i0,1x,2a,i0)") " For k-point: ", ik_ibz, trim(ktoa(now%kptns(:,ik_ibz))),", spin: ", spin
+       call wrtout(units, msg)
+       write(msg, "(a, es12.5,a)")" max_adiff: ", adiff(band) * Ha_meV, " (meV)"
+       call wrtout(units, msg)
      end if
    end do
  end do
@@ -5584,12 +5703,18 @@ subroutine check_scf_cycle(gwr, converged)
  call xmpi_land(converged, gwr%comm%value)
 
  if (gwr%comm%me == 0) then
+   call ebands_print_gaps(gwr%qp_ebands, std_out, header="QP gaps (Fermi energy set to zero)")
+   call ebands_print_gaps(gwr%qp_ebands, ab_out, header="QP gaps (Fermi energy set to zero)")
    if (converged) then
+     call wrtout(units, sjoin(" Convergence achieved at iteration", itoa(gwr%scf_iteration)))
    else
+     call wrtout(units," Not converged --> start new iteration ...")
    end if
  end if
 
-end subroutine check_scf_cycle
+ !if (gwr%scf_iteration == 2) stop "iteration 2"
+
+end subroutine gwr_check_scf_cycle
 !!***
 
 !----------------------------------------------------------------------
@@ -6256,15 +6381,15 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  logical,allocatable :: bbp_mask(:,:)
  complex(dpc) :: chq(3) !, wng(3)
  complex(dp),allocatable :: ug1_block(:,:)
- complex(gwpc) :: rhotwx(3, gwr%nspinor**2), new_rhotwx(3, gwr%nspinor**2)
+ complex(gwpc) :: rhotwx(3, gwr%nspinor**2) !, new_rhotwx(3, gwr%nspinor**2)
  complex(gwpc),allocatable :: ug1(:), ug2(:), ur1_kibz(:), ur2_kibz(:), ur_prod(:), rhotwg(:)
  complex(dpc) :: green_w(gwr%ntau), omega(gwr%ntau)
  complex(dpc),allocatable :: chi0_lwing(:,:,:), chi0_uwing(:,:,:), chi0_head(:,:,:), head_qvals(:)
  real(dp), allocatable :: gh1c_block(:,:,:,:)
  type(vkbr_t),allocatable :: vkbr(:)
  type(gsphere_t) :: gsph
- type(ddkop_t) :: ddkop
- type(pawcprj_type),allocatable :: cwaveprj(:,:)
+ !type(ddkop_t) :: ddkop
+ !type(pawcprj_type),allocatable :: cwaveprj(:,:)
 
 ! *************************************************************************
 
@@ -6277,7 +6402,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  use_tr = gwr%dtset%awtr == 1; zcut = gwr%dtset%zcut ! well, it's not used in g0w0 when omega is complex.
 
  ! Use KS or QP energies depending on the iteration state.
- if (gwr%scf_iteration == 0) then
+ if (gwr%scf_iteration == 1) then
    qp_eig => gwr%ks_ebands%eig; qp_occ => gwr%ks_ebands%occ
    now_ebands => gwr%ks_ebands
  else
@@ -6432,7 +6557,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
      ! FIXME: This part should be tested with tau/g-para
      ! TODO:
      !  1) Logic to determine block_size from memory.
-     !  2) Add support for symsigma = 0
+     !  2) Add support for symchi = 0
      !  3) Invert the loops
 
      block_size = min(48, gwr%ugb_nband)
@@ -6633,9 +6758,9 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
 
  ! Save quantities for later use as this routine must be called before build_tchi.
  if (gwr%kpt_comm%me == 0) then
-   ABI_MALLOC(gwr%chi0_head_myw, (3, 3, gwr%my_ntau))
-   ABI_MALLOC(gwr%chi0_uwing_myw, (3, npwe, gwr%my_ntau))
-   ABI_MALLOC(gwr%chi0_lwing_myw, (3, npwe, gwr%my_ntau))
+   ABI_REMALLOC(gwr%chi0_head_myw, (3, 3, gwr%my_ntau))
+   ABI_REMALLOC(gwr%chi0_uwing_myw, (3, npwe, gwr%my_ntau))
+   ABI_REMALLOC(gwr%chi0_lwing_myw, (3, npwe, gwr%my_ntau))
 
    do my_it=1,gwr%my_ntau
      itau = gwr%my_itaus(my_it)
@@ -6703,7 +6828,7 @@ subroutine gwr_build_sigxme(gwr)
  integer :: g0(3), gmax(3), spinor_padx(2,4), u_ngfft(18), work_ngfft(18)
  integer,allocatable :: gbound_kcalc(:,:), gvec_x(:,:), gbound_x(:,:), kg_k(:,:), gbound_ksum(:,:)
  real(dp) :: ksum(3), kk_ibz(3), kgw(3), kgw_m_ksum(3), qq_bz(3), tsec(2) !, kk_bz(3), q0(3) !, spinrot_kbz(4), spinrot_kgw(4)
- real(dp),contiguous, pointer :: qp_eig(:,:,:), qp_occ(:,:,:), cg1_ptr(:,:), cg2_ptr(:,:)
+ real(dp),contiguous, pointer :: ks_eig(:,:,:), qp_eig(:,:,:), qp_occ(:,:,:), cg1_ptr(:,:), cg2_ptr(:,:)
  real(dp),allocatable :: work(:,:,:,:)
  complex(gwpc),allocatable :: vc_sqrt_qbz(:)
  complex(dp),allocatable :: rhotwg(:), rhotwgp(:), rhotwg_ki(:,:)
@@ -6722,10 +6847,14 @@ subroutine gwr_build_sigxme(gwr)
  nsppol = gwr%nsppol; nspinor = gwr%nspinor; cryst => gwr%cryst; dtset => gwr%dtset
  nsig_ab = nspinor ** 2
 
- if (gwr%scf_iteration == 0) then
+ ks_eig => gwr%ks_ebands%eig
+ if (gwr%scf_iteration == 1) then
    qp_eig => gwr%ks_ebands%eig; qp_occ => gwr%ks_ebands%occ
  else
+   ! Here there's a problem in case of self-consistency as SigX breaks QP symmetries
    qp_eig => gwr%qp_ebands%eig; qp_occ => gwr%qp_ebands%occ
+   !qp_eig => gwr%ks_ebands%eig
+   !qp_occ => gwr%ks_ebands%occ
  end if
 
  ! Allocate array with Sigma_x matrix elements.
@@ -6984,7 +7113,6 @@ subroutine gwr_build_sigxme(gwr)
 
            else
              !ABI_ERROR("Not implemented Error")
-             !!npw_k = wfd%npwarr(ik_ibz)
              rhotwg_ki(1, jb) = zero; rhotwg_ki(npwx+1, jb) = zero
              if (band_sum == jb) then
                !ABI_CHECK(wfd%get_wave_ptr(band_sum, ik_ibz, spin, wave_sum, msg) == 0, msg)
@@ -7072,12 +7200,18 @@ subroutine gwr_build_sigxme(gwr)
    sigx        = (one / (cryst%ucvol * gwr%nkbz)) * sigx        ! * Sigp%sigma_mixing
 
    ! If we have summed over the IBZ_q, we have to average over degenerate states.
-   ! NOTE: Presently only diagonal terms are considered
+   ! Presently only diagonal terms are considered
+   ! Note that we pass ks_eig to sigx_symmetrize instead of qp_eig.
+   ! The reason is that we use the eigenvalues to detect degeneracies and qp_eig may break them
+   ! while ks_eig are much more accurate.
+
    ! TODO QP-SCGW required a more involved approach, there is a check in sigma
    ! TODO it does not work if spinor == 2.
 
    if (gwr%dtset%symsigma == 1) then
-     call sigx_symmetrize(ikcalc_ibz, spin, bmin, bmax, nsppol, nspinor, nsig_ab, qp_eig, sigx, sigxme_tmp)
+     call sigx_symmetrize(ikcalc_ibz, spin, bmin, bmax, nsppol, nspinor, nsig_ab, ks_eig, sigx, sigxme_tmp)
+     !do ii=bmin, bmax; print *, "qp_eig:", ii, qp_eig(ii, ikcalc_ibz, spin) * Ha_eV; end do
+     !call sigx_symmetrize(ikcalc_ibz, spin, bmin, bmax, nsppol, nspinor, nsig_ab, qp_eig, sigx, sigxme_tmp)
    end if
 
    ! Reconstruct the full sigma_x matrix from the upper triangle.

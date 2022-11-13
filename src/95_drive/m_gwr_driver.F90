@@ -768,8 +768,8 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
    case ("G0W0")
      call gwr%run_g0w0()
 
-   !case ("eGeW", "eGW0", "G0eW")
-   !  call gwr%run_scf_gw()
+   case ("EGEW", "EGW0", "G0EW")
+     call gwr%run_energy_scf_gw()
 
    !case ("CHI0_HEAD_WINGS")
    !  call compute_chi0_head_wings(wfk_path)

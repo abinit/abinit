@@ -759,15 +759,17 @@ iteration_state: {dtset: 3, }
 iteration_state: {dtset: 3, }
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
+gwr_scf_iteration: 1
+gwr_task   : G0W0
 QP_VBM_band: 24
 QP_CBM_band: 25
 KS_gap     :    3.170
 QP_gap     :    4.887
 Delta_QP_KS:    1.717
 data: !Tabular |
-     Band      E0 <VxcDFT>   SigX SigC(E0)     Z1      Z2  E-E0       E
-       24  -1.797 -17.192 -21.510   3.719   0.803  -0.019  -0.481  -2.277
-       25   1.374 -10.429  -6.238  -2.731   0.847  -0.016   1.236   2.610
+     Band       E0        E        Z     E-E0  E-Eprev     SigX SigC(E0) <VxcDFT>   Occ(E)
+       24   -1.797   -2.277    0.803   -0.481   -0.481  -21.510    3.719  -17.192    2.000
+       25    1.374    2.610    0.847    1.236    1.236   -6.238   -2.731  -10.429    0.000
 ...
 
 
@@ -775,15 +777,17 @@ data: !Tabular |
 iteration_state: {dtset: 3, }
 kpoint     : [   0.500,    0.000,    0.000, ]
 spin       : 1
+gwr_scf_iteration: 1
+gwr_task   : G0W0
 QP_VBM_band: 24
 QP_CBM_band: 25
 KS_gap     :    6.036
 QP_gap     :    8.115
 Delta_QP_KS:    2.079
 data: !Tabular |
-     Band      E0 <VxcDFT>   SigX SigC(E0)     Z1      Z2  E-E0       E
-       24  -1.500 -17.930 -22.117   3.819   0.801  -0.018  -0.295  -1.795
-       25   4.536 -12.131  -7.077  -2.948   0.847  -0.020   1.783   6.319
+     Band       E0        E        Z     E-E0  E-Eprev     SigX SigC(E0) <VxcDFT>   Occ(E)
+       24   -1.500   -1.795    0.801   -0.295   -0.295  -22.117    3.819  -17.930    2.000
+       25    4.536    6.319    0.847    1.783    1.783   -7.077   -2.948  -12.131    0.000
 ...
 
 

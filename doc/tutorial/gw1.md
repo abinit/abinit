@@ -73,7 +73,7 @@ In order to perform a standard one-shot GW calculation one has to:
 
   2. Perform a non self-consistent run to compute the KS eigenvalues and the eigenfunctions
      including several empty states. Note that, unlike standard band structure calculations,
-     here the KS states *must* be computed on a regular grid of **k**-points. 
+     here the KS states *must* be computed on a regular grid of **k**-points.
      (This limitation is also present with hybrid functional calculations).
 
   3. Use [[optdriver]] = 3 to compute the independent-particle susceptibility $\chi^0$ on a regular grid of
@@ -104,14 +104,14 @@ So, you can edit this *tgw1_1.abi* file.
 
 {% dialog tests/tutorial/Input/tgw1_1.abi %}
 
-In the first half of the file, 
+In the first half of the file,
 you will find specialized input variables for the datasets 1 to 4.
 
 In the second half of the file,
 one find the dataset-independent information, namely,
 input variables describing the cell, atom types,
 number, position, planewave cut-off energy, SCF convergence parameters driving
-the KS band structure calculation. 
+the KS band structure calculation.
 
 ### 1.b Generating the Kohn-Sham band structure: the WFK file.
 
@@ -125,10 +125,10 @@ The 20 highest energy states are simply not considered when checking the converg
     ###########
     # Dataset 1
     ############
-    # SCF-GS run 
+    # SCF-GS run
     nband1  6
     tolvrs1 1.0e-10
-    
+
     ############
     # Dataset 2
     ############
@@ -137,7 +137,7 @@ The 20 highest energy states are simply not considered when checking the converg
     nbdbuf2     20       # Do not apply the convergence criterium to the last 20 bands (faster)
     iscf2       -2
     getden2     -1
-    tolwfr2  1.0d-12     # Will stop when this tolerance is achieved 
+    tolwfr2  1.0d-12     # Will stop when this tolerance is achieved
 ```
 
 !!! important
@@ -244,7 +244,7 @@ minimum/maximum band whose energies are calculated for each selected **k**-point
     if you wish the GW correction in a particular **k**-point, you should choose a
     grid containing it. Usually this is done by taking the **k**-point grid where the
     convergence is achieved and shifting it such as at least one k-point is placed
-    on the wished position in the Brillouin zone. 
+    on the wished position in the Brillouin zone.
 
 There is an additional parameter, called [[zcut]], (not studied here) related to the self-energy
 computation. It is meant to avoid some divergences that might occur in the
@@ -430,8 +430,8 @@ correction. For that state, the correlation correction is small, and the
 difference between KS and GW energies is also small (0.128 eV). By
 contrast, the exchange self-energy is much smaller than the average Kohn-Sham
 potential for the state 5 (a conduction state), but the correlation correction
-is much larger than for state 4. 
-On the whole, the difference between Kohn-Sham and GW energies is not very large, 
+is much larger than for state 4.
+On the whole, the difference between Kohn-Sham and GW energies is not very large,
 but nevertheless, it is quite
 important when compared with the size of the gap.
 
@@ -500,7 +500,7 @@ order to keep the CPU time at a reasonable level, we will use fake WFK and SCR
 data. We will focus on the GW correction for $\Gamma$ point to determine the values of the GW parameters needed
 to reach the convergence.
 Indeed, we will use a coarse **k**-point grid with one shift only, and we will not vary [[ecut]].
-This is a common strategy to find the adequate specific GW parameters before the final calculations, that should be 
+This is a common strategy to find the adequate specific GW parameters before the final calculations, that should be
 done with a sufficiently fine **k**-point grid, and an adequate [[ecut]], in addition to adequate specific GW parameters.
 
 In directory *Work_gw1*, copy the file *tgw1_2.abi*:
@@ -527,15 +527,15 @@ As mentioned above, the global convergence with respect to [[ecut]] and to the n
 to be monitored as well, but the determination of the adequate parameters can be done independently from
 the determination of the adequate values for [[ecuteps]] and [[nband]]. Altogether, one has to determine the
 adequate values of four parameters in GW calculations, instead of only two in ground-state calculations ([[ecut]] and the number of k points).
-The adequate values of [[ecut]] and the number of k points for converged results *might* perhaps be the same as for ground-state 
+The adequate values of [[ecut]] and the number of k points for converged results *might* perhaps be the same as for ground-state
 calculations, but this is not always the case !
 
 We will test the convergence with respect to [[nband]] and [[ecuteps]], simultaneously for [[optdriver]]=3 and =4.
-As a side note, there are actually other technical parameters like [[ecutwfn]] or [[ecutsigx]]. 
+As a side note, there are actually other technical parameters like [[ecutwfn]] or [[ecutsigx]].
 However, for them, one can use the default value of [[ecut]].
 For PAW, [[pawecutdg]] can be tuned as well.
 
-We begin by the convergence study with respect to [[nband]], the most important parameter needed in the self-energy 
+We begin by the convergence study with respect to [[nband]], the most important parameter needed in the self-energy
 calculation, [[optdriver]] = 4.
 This is because for the self-energy calculation, we will not need a double dataset loop to check
 this convergence (as [[ecuteps]] is not a parameter of the [[optdriver]] = 4 calculation), and we will rely on the previously determined SCR file.
@@ -543,7 +543,7 @@ this convergence (as [[ecuteps]] is not a parameter of the [[optdriver]] = 4 cal
 ## 3 Convergence of the self-energy with respect to the number of bands
 
 Let us check the convergence of the band gap with respect to the number of bands in the calculation of $\Sigma_c$
-with a fixed screening file.  This convergence study is very important. 
+with a fixed screening file.  This convergence study is very important.
 *However* most of the time, the converged [[nband]] is similar for $\Sigma_c$ and for $\chi_0$ so that the same
 value is taken for both. Here we will proceed carefully and converge the two occurences of [[nband]] independently.
 
@@ -619,25 +619,25 @@ $ abicomp.py sigres tgw1_3o_*_SIGRES.nc -e -sns
 
 Output of robot.get_dataframe():
                        nsppol     qpgap  nspinor  nspden  nband  nkpt  \
-tgw1_3o_DS1_SIGRES.nc       1  3.142871        1       1     50     3   
-tgw1_3o_DS2_SIGRES.nc       1  3.148588        1       1    100     3   
-tgw1_3o_DS3_SIGRES.nc       1  3.151012        1       1    150     3   
-tgw1_3o_DS4_SIGRES.nc       1  3.151603        1       1    200     3   
-tgw1_3o_DS5_SIGRES.nc       1  3.151485        1       1    250     3   
+tgw1_3o_DS1_SIGRES.nc       1  3.142871        1       1     50     3
+tgw1_3o_DS2_SIGRES.nc       1  3.148588        1       1    100     3
+tgw1_3o_DS3_SIGRES.nc       1  3.151012        1       1    150     3
+tgw1_3o_DS4_SIGRES.nc       1  3.151603        1       1    200     3
+tgw1_3o_DS5_SIGRES.nc       1  3.151485        1       1    250     3
 
                        ecutwfn   ecuteps  ecutsigx  scr_nband  sigma_nband  \
-tgw1_3o_DS1_SIGRES.nc      8.0  5.062893       8.0         60           50   
-tgw1_3o_DS2_SIGRES.nc      8.0  5.062893       8.0         60          100   
-tgw1_3o_DS3_SIGRES.nc      8.0  5.062893       8.0         60          150   
-tgw1_3o_DS4_SIGRES.nc      8.0  5.062893       8.0         60          200   
-tgw1_3o_DS5_SIGRES.nc      8.0  5.062893       8.0         60          250   
+tgw1_3o_DS1_SIGRES.nc      8.0  5.062893       8.0         60           50
+tgw1_3o_DS2_SIGRES.nc      8.0  5.062893       8.0         60          100
+tgw1_3o_DS3_SIGRES.nc      8.0  5.062893       8.0         60          150
+tgw1_3o_DS4_SIGRES.nc      8.0  5.062893       8.0         60          200
+tgw1_3o_DS5_SIGRES.nc      8.0  5.062893       8.0         60          250
 
-                       gwcalctyp  scissor_ene  
-tgw1_3o_DS1_SIGRES.nc          0          0.0  
-tgw1_3o_DS2_SIGRES.nc          0          0.0  
-tgw1_3o_DS3_SIGRES.nc          0          0.0  
-tgw1_3o_DS4_SIGRES.nc          0          0.0  
-tgw1_3o_DS5_SIGRES.nc          0          0.0  
+                       gwcalctyp  scissor_ene
+tgw1_3o_DS1_SIGRES.nc          0          0.0
+tgw1_3o_DS2_SIGRES.nc          0          0.0
+tgw1_3o_DS3_SIGRES.nc          0          0.0
+tgw1_3o_DS4_SIGRES.nc          0          0.0
+tgw1_3o_DS5_SIGRES.nc          0          0.0
 ```
 
 ![](gw1_assets/abicomp_sigres_tgw1_3o.png)
@@ -927,7 +927,7 @@ more accurate than 0.1 eV, in the present state of the art. But this goes also
 with the other source of inaccuracy, the choice of the pseudopotential, that
 can arrive up to even 0.2 eV. This can also be taken into account when
 choosing the level of accuracy for the convergence parameters in the GW calculation.
-As a reasonable target, the numerical sources of errors, due to insufficient [[ecuteps]], [[nband]], k point grid, 
+As a reasonable target, the numerical sources of errors, due to insufficient [[ecuteps]], [[nband]], k point grid,
 should be kept lower than 0.02 or 0.03 eV.
 
 ## 7 How to compute GW band structures
