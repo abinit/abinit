@@ -202,6 +202,7 @@ nav:
         - GW1: tutorial/gw1.md
         - GW2: tutorial/gw2.md
         - Bethe-Salpeter: tutorial/bse.md
+        #- GWR1: tutorial/gwr1.md
     - Parallelism:
         - Base: tutorial/basepar.md
         - GSPW: tutorial/paral_gspw.md

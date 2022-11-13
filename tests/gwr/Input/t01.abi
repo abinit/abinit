@@ -2,11 +2,13 @@
 # Dataset 1: ground state calculation to get the density
 # Dataset 2: Direct diagonalization to produce the WFK file with empty states.
 # Dataset 3: one-shot G0W0 calculation in real-space and imaginary-time.
-# Dataset 4: RPA energy calculation within ACFD
+# Dataset 4: RPA energy calculation within ACFDT
 
 ndtset      4
 timopt 1
-#nsym 1 kptopt 3
+#nsym 1 
+#kptopt 3
+#kptopt 2
 
 ####################
 # Dataset 1: SCF run

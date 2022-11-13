@@ -1,14 +1,17 @@
 # Crystalline silicon. Calculation of the G0W0 corrections with the GWR code
+# Similar to gwr/t01.abi but with nsppol 2. Should produce similar results
+#
 # Dataset 1: ground state calculation to get the density
 # Dataset 2: Direct diagonalization to produce the WFK file with empty states.
 # Dataset 3: one-shot G0W0 calculation in real-space and imaginary-time.
-# Dataset 4: RPA energy calculation within ACFD
-# Similar to t01.abi but with nsppol 2. Should produce similar results
+# Dataset 4: RPA energy calculation within ACFDT
 
 ndtset      4
 timopt 1
 nsppol      2 spinmagntarget 0.0
-#nsym 1 kptopt 3
+#nsym 1 
+#kptopt 3
+#kptopt 2
 
 
 ####################
