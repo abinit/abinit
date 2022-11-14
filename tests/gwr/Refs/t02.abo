@@ -639,6 +639,10 @@ Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(o
 ...
 
 
+ Computing chi0 head and wings with inclvkb: 2
+ Using KS orbitals and KS energies...
+
+
  Head of the irreducible polarizability for q --> 0
  q0_len: 1.000000E-03 (Bohr^-1)
    iomega (eV)         [100]         [010]         [001]             x             y             z
@@ -648,6 +652,14 @@ Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(o
  6.60744E+00  -7.12771E-07  -7.12771E-07  -7.12771E-07  -7.12770E-07  -7.12772E-07  -7.12772E-07
  1.67933E+01  -1.42760E-07  -1.42760E-07  -1.42760E-07  -1.42759E-07  -1.42761E-07  -1.42761E-07
  5.07396E+01  -1.67325E-08  -1.67325E-08  -1.67325E-08  -1.67320E-08  -1.67327E-08  -1.67327E-08
+
+
+ Computing matrix elements of Sigma_x
+ Using KS orbitals and KS energies...
+
+
+
+ Building Green's functions from KS orbitals and KS energies...
 
  Trace of: gt_kibz for ipm: 1 , spin: 1 for testing purposes:
  (ik_ibz, itau) table
@@ -757,6 +769,9 @@ Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(o
     3  -2.872  -2.672  -2.407  -1.946  -1.176  -0.327
         0.000   0.000   0.000   0.000   0.000   0.000
 
+
+
+ Building correlated screening Wc
 
 --- !EMACRO_WITHOUT_LOCAL_FIELDS
 iteration_state: {dtset: 3, }
@@ -992,6 +1007,14 @@ Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(o
     5 2.57181E+01   2.20388E+01   6.17144E-01   2.43896E+00
     6 6.02384E+01   5.21457E+01   1.86465E+00   9.78845E+00
 ...
+
+
+ Computing chi0 head and wings with inclvkb: 2
+ Using KS orbitals and KS energies...
+
+
+
+ Building Green's functions from KS orbitals and KS energies...
 
         ecut_chi ecut_chi^(-3/2)     RPA Ec (eV)     RPA Ec (Ha)
   3.20000000E+00  1.74692811E-01 -3.35622933E+01 -1.23339164E+00

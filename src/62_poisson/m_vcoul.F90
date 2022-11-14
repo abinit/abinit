@@ -1937,7 +1937,7 @@ end subroutine vcgen_get_vc_sqrt
 subroutine vcgen_free(vcgen)
 
 !Arguments ------------------------------------
- class(vcgen_t),intent(out) :: vcgen
+ class(vcgen_t),intent(inout) :: vcgen
 
 ! *************************************************************************
 

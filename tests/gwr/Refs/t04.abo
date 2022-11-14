@@ -525,6 +525,10 @@ Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(o
 
  Begin energy-only self-consistency in G (EGW0)
 
+ Computing chi0 head and wings with inclvkb: 2
+ Using KS orbitals and KS energies...
+
+
  Head of the irreducible polarizability for q --> 0
  q0_len: 1.000000E-03 (Bohr^-1)
    iomega (eV)         [100]         [010]         [001]             x             y             z
@@ -534,6 +538,14 @@ Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(o
  1.17300E+01  -6.22559E-07  -6.22559E-07  -6.22559E-07  -6.22559E-07  -6.22559E-07  -6.22559E-07
  2.59361E+01  -1.36165E-07  -1.36165E-07  -1.36165E-07  -1.36165E-07  -1.36165E-07  -1.36165E-07
  6.82527E+01  -2.00592E-08  -2.00592E-08  -2.00592E-08  -2.00592E-08  -2.00592E-08  -2.00592E-08
+
+
+ Computing matrix elements of Sigma_x
+ Using KS orbitals and KS energies...
+
+
+
+ Building Green's functions from KS orbitals and KS energies...
 
  Trace of: gt_kibz for ipm: 1 , spin: 1 for testing purposes:
  (ik_ibz, itau) table
@@ -565,6 +577,9 @@ Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(o
     1  -4.016  -3.017  -2.087  -1.374  -0.726  -0.192
         0.000  -0.000  -0.000   0.000  -0.000  -0.000
 
+
+
+ Building correlated screening Wc
 
 --- !EMACRO_WITHOUT_LOCAL_FIELDS
 iteration_state: {dtset: 3, }
@@ -627,6 +642,10 @@ data: !Tabular |
        14    9.587    9.025    0.852   -0.562   -0.562   -1.381   -6.714   -7.330    0.000
 ...
 
+
+
+ Building Green's functions from KS orbitals and QP energies...
+
  Trace of: gt_kibz for ipm: 1 , spin: 1 for testing purposes:
  (ik_ibz, itau) table
 
@@ -639,7 +658,11 @@ data: !Tabular |
 
        1       2       3       4       5       6
     1   3.898   3.496   2.902   2.261   1.560   0.748
-        0.000  -0.000  -0.000   0.000  -0.000  -0.000
+        0.000  -0.000  -0.000  -0.000   0.000   0.000
+
+
+ Computing matrix elements of Sigma_x
+ Using KS orbitals and QP energies...
 
 
 --- !GWR_SelfEnergy_ee
@@ -683,6 +706,10 @@ data: !Tabular |
  Direct gap:         2.651 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 
  Not converged --> start new iteration ...
+
+
+ Building Green's functions from KS orbitals and QP energies...
+
  Trace of: gt_kibz for ipm: 1 , spin: 1 for testing purposes:
  (ik_ibz, itau) table
 
@@ -695,7 +722,11 @@ data: !Tabular |
 
        1       2       3       4       5       6
     1   3.897   3.494   2.896   2.252   1.548   0.736
-       -0.000  -0.000  -0.000   0.000  -0.000  -0.000
+       -0.000  -0.000   0.000  -0.000  -0.000  -0.000
+
+
+ Computing matrix elements of Sigma_x
+ Using KS orbitals and QP energies...
 
 
 --- !GWR_SelfEnergy_ee
@@ -739,6 +770,10 @@ data: !Tabular |
  Direct gap:         2.653 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 
  Not converged --> start new iteration ...
+
+
+ Building Green's functions from KS orbitals and QP energies...
+
  Trace of: gt_kibz for ipm: 1 , spin: 1 for testing purposes:
  (ik_ibz, itau) table
 
@@ -752,6 +787,10 @@ data: !Tabular |
        1       2       3       4       5       6
     1   3.897   3.493   2.896   2.252   1.547   0.735
        -0.000   0.000  -0.000  -0.000  -0.000  -0.000
+
+
+ Computing matrix elements of Sigma_x
+ Using KS orbitals and QP energies...
 
 
 --- !GWR_SelfEnergy_ee
@@ -878,6 +917,10 @@ Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(o
 
  Begin energy-only self-consistency in both G and W (EGEW)
 
+ Computing chi0 head and wings with inclvkb: 2
+ Using KS orbitals and KS energies...
+
+
  Head of the irreducible polarizability for q --> 0
  q0_len: 1.000000E-03 (Bohr^-1)
    iomega (eV)         [100]         [010]         [001]             x             y             z
@@ -887,6 +930,14 @@ Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(o
  1.17300E+01  -6.22559E-07  -6.22559E-07  -6.22559E-07  -6.22559E-07  -6.22559E-07  -6.22559E-07
  2.59361E+01  -1.36165E-07  -1.36165E-07  -1.36165E-07  -1.36165E-07  -1.36165E-07  -1.36165E-07
  6.82527E+01  -2.00592E-08  -2.00592E-08  -2.00592E-08  -2.00592E-08  -2.00592E-08  -2.00592E-08
+
+
+ Computing matrix elements of Sigma_x
+ Using KS orbitals and KS energies...
+
+
+
+ Building Green's functions from KS orbitals and KS energies...
 
  Trace of: gt_kibz for ipm: 1 , spin: 1 for testing purposes:
  (ik_ibz, itau) table
@@ -918,6 +969,9 @@ Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(o
     1  -4.016  -3.017  -2.087  -1.374  -0.726  -0.192
         0.000  -0.000  -0.000   0.000  -0.000  -0.000
 
+
+
+ Building correlated screening Wc
 
 --- !EMACRO_WITHOUT_LOCAL_FIELDS
 iteration_state: {dtset: 4, }
@@ -993,6 +1047,10 @@ data: !Tabular |
 
  Not converged --> start new iteration ...
 
+ Computing chi0 head and wings with inclvkb: 2
+ Using KS orbitals and QP energies...
+
+
  Head of the irreducible polarizability for q --> 0
  q0_len: 1.000000E-03 (Bohr^-1)
    iomega (eV)         [100]         [010]         [001]             x             y             z
@@ -1002,6 +1060,14 @@ data: !Tabular |
  1.17300E+01  -6.97699E-07  -6.97420E-07  -6.97142E-07  -6.97181E-07  -6.97324E-07  -6.97467E-07
  2.59361E+01  -1.54456E-07  -1.54390E-07  -1.54324E-07  -1.54338E-07  -1.54367E-07  -1.54396E-07
  6.82527E+01  -2.28189E-08  -2.28091E-08  -2.27992E-08  -2.28016E-08  -2.28057E-08  -2.28098E-08
+
+
+ Computing matrix elements of Sigma_x
+ Using KS orbitals and QP energies...
+
+
+
+ Building Green's functions from KS orbitals and QP energies...
 
  Trace of: gt_kibz for ipm: 1 , spin: 1 for testing purposes:
  (ik_ibz, itau) table
@@ -1033,6 +1099,9 @@ data: !Tabular |
     1  -3.769  -2.987  -2.107  -1.383  -0.729  -0.194
         0.000  -0.000  -0.000  -0.000  -0.000  -0.000
 
+
+
+ Building correlated screening Wc
 
 --- !EMACRO_WITHOUT_LOCAL_FIELDS
 iteration_state: {dtset: 4, }
@@ -1108,6 +1177,10 @@ data: !Tabular |
 
  Not converged --> start new iteration ...
 
+ Computing chi0 head and wings with inclvkb: 2
+ Using KS orbitals and QP energies...
+
+
  Head of the irreducible polarizability for q --> 0
  q0_len: 1.000000E-03 (Bohr^-1)
    iomega (eV)         [100]         [010]         [001]             x             y             z
@@ -1117,6 +1190,14 @@ data: !Tabular |
  1.17300E+01  -6.94111E-07  -6.93849E-07  -6.93587E-07  -6.93623E-07  -6.93754E-07  -6.93884E-07
  2.59361E+01  -1.53592E-07  -1.53530E-07  -1.53467E-07  -1.53481E-07  -1.53507E-07  -1.53533E-07
  6.82527E+01  -2.26895E-08  -2.26802E-08  -2.26710E-08  -2.26733E-08  -2.26769E-08  -2.26805E-08
+
+
+ Computing matrix elements of Sigma_x
+ Using KS orbitals and QP energies...
+
+
+
+ Building Green's functions from KS orbitals and QP energies...
 
  Trace of: gt_kibz for ipm: 1 , spin: 1 for testing purposes:
  (ik_ibz, itau) table
@@ -1148,6 +1229,9 @@ data: !Tabular |
     1  -3.777  -2.984  -2.101  -1.379  -0.729  -0.194
        -0.000   0.000   0.000  -0.000  -0.000   0.000
 
+
+
+ Building correlated screening Wc
 
 --- !EMACRO_WITHOUT_LOCAL_FIELDS
 iteration_state: {dtset: 4, }
@@ -1223,6 +1307,10 @@ data: !Tabular |
 
  Not converged --> start new iteration ...
 
+ Computing chi0 head and wings with inclvkb: 2
+ Using KS orbitals and QP energies...
+
+
  Head of the irreducible polarizability for q --> 0
  q0_len: 1.000000E-03 (Bohr^-1)
    iomega (eV)         [100]         [010]         [001]             x             y             z
@@ -1232,6 +1320,14 @@ data: !Tabular |
  1.17300E+01  -6.93689E-07  -6.93427E-07  -6.93164E-07  -6.93200E-07  -6.93331E-07  -6.93462E-07
  2.59361E+01  -1.53487E-07  -1.53425E-07  -1.53363E-07  -1.53377E-07  -1.53403E-07  -1.53429E-07
  6.82527E+01  -2.26740E-08  -2.26648E-08  -2.26555E-08  -2.26578E-08  -2.26614E-08  -2.26651E-08
+
+
+ Computing matrix elements of Sigma_x
+ Using KS orbitals and QP energies...
+
+
+
+ Building Green's functions from KS orbitals and QP energies...
 
  Trace of: gt_kibz for ipm: 1 , spin: 1 for testing purposes:
  (ik_ibz, itau) table
@@ -1263,6 +1359,9 @@ data: !Tabular |
     1  -3.775  -2.981  -2.097  -1.377  -0.729  -0.195
         0.000   0.000   0.000  -0.000  -0.000   0.000
 
+
+
+ Building correlated screening Wc
 
 --- !EMACRO_WITHOUT_LOCAL_FIELDS
 iteration_state: {dtset: 4, }
