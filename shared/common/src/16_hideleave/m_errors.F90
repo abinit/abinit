@@ -684,6 +684,7 @@ subroutine msg_hndl(message, level, mode_paral, file, line, NODUMP, NOSTOP, unit
 
 !Local variables-------------------------------
  integer :: f90line,ierr,unit_
+ logical :: is_open_unit
  character(len=10) :: lnum
  character(len=500) :: f90name
  character(len=LEN(message)) :: my_msg
@@ -745,6 +746,10 @@ subroutine msg_hndl(message, level, mode_paral, file, line, NODUMP, NOSTOP, unit
      "message: |",ch10,TRIM(indent(my_msg)),ch10,&
      "...",ch10
    call wrtout(unit_, sbuf, mode_paral)
+
+   ! Write error message to ab_out is unit is connected.
+   inquire(unit=ab_out, opened=is_open_unit)
+   if (is_open_unit) call wrtout(ab_out, sbuf) !, mode_paral="PERS")
 
    if (.not.present(NOSTOP)) then
      ! The first MPI proc that gets here, writes the ABI_MPIABORTFILE with the message!

@@ -506,7 +506,8 @@ module m_gwr
    ! Crystal structure.
 
    integer :: scf_iteration = 1
-   ! Internal counter used to implement self-consistency (not yet implemented)
+   ! Internal counter used to implement self-consistency
+   ! For the time being, only self-consistency in energies is supported.
 
    type(ebands_t), pointer :: ks_ebands => null()
    ! initial KS energies
@@ -1664,15 +1665,7 @@ subroutine gwr_free(gwr)
  ABI_SFREE(gwr%itreat_ikibz)
  ABI_SFREE(gwr%np_qibz)
  ABI_SFREE(gwr%itreat_iqibz)
-#ifndef __HAVE_GREENX
- ABI_SFREE(gwr%tau_mesh)
- ABI_SFREE(gwr%tau_wgs)
- ABI_SFREE(gwr%iw_mesh)
- ABI_SFREE(gwr%iw_wgs)
- ABI_SFREE(gwr%cosft_tw)
- ABI_SFREE(gwr%cosft_wt)
- ABI_SFREE(gwr%sinft_wt)
-#else
+!#ifdef __HAVE_GREENX
  ABI_SFREE_NOCOUNT(gwr%tau_mesh)
  ABI_SFREE_NOCOUNT(gwr%tau_wgs)
  ABI_SFREE_NOCOUNT(gwr%iw_mesh)
@@ -1680,7 +1673,7 @@ subroutine gwr_free(gwr)
  ABI_SFREE_NOCOUNT(gwr%cosft_tw)
  ABI_SFREE_NOCOUNT(gwr%cosft_wt)
  ABI_SFREE_NOCOUNT(gwr%sinft_wt)
-#endif
+!#endif
  ABI_SFREE(gwr%kcalc)
  ABI_SFREE(gwr%bstart_ks)
  ABI_SFREE(gwr%bstop_ks)
@@ -2131,25 +2124,28 @@ subroutine gwr_build_green(gwr, free_ugb)
 
 ! *************************************************************************
 
- call wrtout(std_out, " Building Green's functions ...", do_flush=.True.)
  call cwtime(cpu, wall, gflops, "start")
  call timab(1922, 1, tsec)
 
  ! Use KS or QP energies depending on the iteration state.
  if (gwr%scf_iteration == 1) then
+   call wrtout([std_out, ab_out], " Building Green's functions from KS orbitals and KS energies...", &
+               pre_newlines=2, newlines=1, do_flush=.True.)
+
    qp_eig => gwr%ks_ebands%eig; qp_occ => gwr%ks_ebands%occ
    msg = sjoin("Fermi energy is not set to zero! fermie:", ftoa(gwr%ks_ebands%fermie))
    ABI_CHECK(abs(gwr%ks_ebands%fermie) < tol12, msg)
+
+   ! Allocate Green's functions if this is the first iteration
+   mask_kibz = 0; mask_kibz(gwr%my_kibz_inds(:)) = 1
+   call gwr%malloc_free_mats(mask_kibz, "green", "malloc")
+
  else
+   call wrtout([std_out, ab_out], " Building Green's functions from KS orbitals and QP energies...", &
+               pre_newlines=2, newlines=1, do_flush=.True.)
    qp_eig => gwr%qp_ebands%eig; qp_occ => gwr%qp_ebands%occ
    msg = sjoin("Fermi energy is not set to zero! fermie:", ftoa(gwr%qp_ebands%fermie))
    ABI_CHECK(abs(gwr%qp_ebands%fermie) < tol12, msg)
- end if
-
- ! Allocate Green's functions if this is the first iteration
- if (gwr%scf_iteration == 1) then
-   mask_kibz = 0; mask_kibz(gwr%my_kibz_inds(:)) = 1
-   call gwr%malloc_free_mats(mask_kibz, "green", "malloc")
  end if
 
  ABI_CHECK(allocated(gwr%ugb), "gwr%ugb array should be allocated!")
@@ -4341,7 +4337,7 @@ subroutine gwr_build_wc(gwr)
 
  call cwtime(cpu_all, wall_all, gflops_all, "start")
  call timab(1924, 1, tsec)
- call wrtout(std_out, " Building correlated screening Wc from irreducible chi ...", pre_newlines=2)
+ call wrtout([std_out, ab_out], " Building correlated screening Wc", pre_newlines=2)
 
  ABI_CHECK(gwr%tchi_space == "iomega", sjoin("tchi_space: ", gwr%tchi_space, " != iomega"))
 
@@ -4578,7 +4574,6 @@ subroutine gwr_build_sigmac(gwr)
  complex(dp) :: qpe_zlin_kcalc(gwr%max_nbcalc, gwr%nkcalc, gwr%nsppol), imag_zmesh(gwr%ntau)
  complex(dp) :: qpe_pade_kcalc(gwr%max_nbcalc, gwr%nkcalc, gwr%nsppol)
  complex(dp) :: sigxc_rw_diag_kcalc(gwr%nwr, gwr%max_nbcalc, gwr%nkcalc, gwr%nsppol)
- !type(ebands_t),pointer :: now_ebands
  type(sigma_pade_t) :: spade
 
 ! *************************************************************************
@@ -4591,11 +4586,8 @@ subroutine gwr_build_sigmac(gwr)
  !mask_kibz = 0; mask_kibz(gwr%my_kibz_inds(:)) = 1
  !call gwr%malloc_free_mats(mask_kibz, "sigma" "malloc")
 
- ! Use KS or QP energies depending on the iteration state.
  !if (gwr%scf_iteration == 1) then
- !  now_ebands => gwr%ks_ebands
  !else
- !  now_ebands => gwr%qp_ebands
  !end if
 
  ! Set FFT mesh in the supercell.
@@ -5552,8 +5544,11 @@ subroutine gwr_run_g0w0(gwr, free_ugb)
 
  free_ugb__ = .True.; if (present(free_ugb)) free_ugb__ = free_ugb
 
+ ! Use ugb wavefunctions and Lehmann representation to compute head/wings and Sigma_x
  call gwr%build_chi0_head_and_wings()
  call gwr%build_sigxme()
+
+ ! Now compute G(itau) from ugb and start the GWR algorithm.
  call gwr%build_green(free_ugb=free_ugb__)
  call gwr%build_tchi()
  call gwr%build_wc()
@@ -6413,20 +6408,23 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
 
  call timab(1927, 1, tsec)
  call cwtime(cpu_all, wall_all, gflops_all, "start")
- call wrtout(std_out, sjoin(" Computing chi0 head and wings with inclvkb:", itoa(gwr%dtset%inclvkb)), &
-             pre_newlines=1, do_flush=.True.)
+ call wrtout([std_out, ab_out], sjoin(" Computing chi0 head and wings with inclvkb:", itoa(gwr%dtset%inclvkb)), &
+             pre_newlines=1)
 
  nspinor = gwr%nspinor; nsppol = gwr%nsppol; dtset => gwr%dtset; cryst => gwr%cryst
  use_tr = gwr%dtset%awtr == 1; zcut = gwr%dtset%zcut ! well, it's not used in g0w0 when omega is complex.
 
  ! Use KS or QP energies depending on the iteration state.
  if (gwr%scf_iteration == 1) then
+   call wrtout([std_out, ab_out], " Using KS orbitals and KS energies...", newlines=1, do_flush=.True.)
    qp_eig => gwr%ks_ebands%eig; qp_occ => gwr%ks_ebands%occ
    now_ebands => gwr%ks_ebands
  else
+   call wrtout([std_out, ab_out], " Using KS orbitals and QP energies...", newlines=1, do_flush=.True.)
    qp_eig => gwr%qp_ebands%eig; qp_occ => gwr%qp_ebands%occ
    now_ebands => gwr%qp_ebands
  end if
+
  ks_eig => gwr%ks_ebands%eig
  mband = gwr%ks_ebands%mband
 
@@ -6858,21 +6856,21 @@ subroutine gwr_build_sigxme(gwr)
 
 ! *************************************************************************
 
- call wrtout(std_out, " Computing matrix elements of Sigma_x ...", do_flush=.True.)
  call timab(1920, 1, tsec)
  call cwtime(cpu_all, wall_all, gflops_all, "start")
 
  nsppol = gwr%nsppol; nspinor = gwr%nspinor; cryst => gwr%cryst; dtset => gwr%dtset
  nsig_ab = nspinor ** 2
 
+ call wrtout([std_out, ab_out], " Computing matrix elements of Sigma_x", pre_newlines=1)
+
  ks_eig => gwr%ks_ebands%eig
  if (gwr%scf_iteration == 1) then
+   call wrtout([std_out, ab_out], " Using KS orbitals and KS energies...", newlines=1, do_flush=.True.)
    qp_eig => gwr%ks_ebands%eig; qp_occ => gwr%ks_ebands%occ
  else
-   ! Here there's a problem in case of self-consistency as SigX breaks QP symmetries
+   call wrtout([std_out, ab_out], " Using KS orbitals and QP energies...", newlines=1, do_flush=.True.)
    qp_eig => gwr%qp_ebands%eig; qp_occ => gwr%qp_ebands%occ
-   !qp_eig => gwr%ks_ebands%eig
-   !qp_occ => gwr%ks_ebands%occ
  end if
 
  ! Allocate array with Sigma_x matrix elements.
@@ -7219,9 +7217,10 @@ subroutine gwr_build_sigxme(gwr)
 
    ! If we have summed over the IBZ_q, we have to average over degenerate states.
    ! Presently only diagonal terms are considered
-   ! Note that we pass ks_eig to sigx_symmetrize instead of qp_eig.
-   ! The reason is that we use the eigenvalues to detect degeneracies and qp_eig may break them
-   ! while ks_eig are much more accurate.
+   ! Note that here we pass ks_eig to sigx_symmetrize instead of qp_eig.
+   ! The reason is that we use the eigenvalues to detect degeneracies before averaging
+   ! and qp_eig may break degeneracies while ks_eig are much more accurate.
+   ! Most of the breaking comes from the correlated part, likey due to the treatment of q --> 0.
 
    ! TODO QP-SCGW required a more involved approach, there is a check in sigma
    ! TODO it does not work if spinor == 2.

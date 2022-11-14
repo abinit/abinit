@@ -37,6 +37,9 @@ gw_qprange +8
 gwr_nstep  4        # Max number of iteration (default 50, so one might omit it)   
 gwr_tolqpe 0.02 eV  # Will stop if all abs differences between QP energies computed at two 
                     # consecutive iteration steps are smaller than this value.
+                    #
+#gw_icutcoul   16    # Monte-Carlo integration in the mini-Brillouin zone for Full Coulomb interaction.
+#gw_icutcoul   0     # Spherical cutoff
 
 # Spectral function (very coarse grid to reduce txt file size)
 nfreqsp 50
