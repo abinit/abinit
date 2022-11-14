@@ -6250,20 +6250,19 @@ vectors of the reciprocal lattice and the three Cartesian axis).
 ),
 
 Variable(
-    abivarname="gw_nstep",
+    abivarname="gwr_nstep",
     varset="gw",
     vartype="integer",
     topics=['GW_basic'],
     dimensions="scalar",
-    defaultval=30,
-    mnemonics="GW Number of self-consistent STEPs",
-    requires="[[optdriver]] == 8",
-    added_in_version="before_v9",
+    defaultval=50,
+    mnemonics="GWR Number of self-consistent STEPs",
+    requires="[[optdriver]] == 6",
+    added_in_version="9.9.0",
     text=r"""
-Gives the maximum number of self-consistent GW cycles (or "iterations") in
-which G and/or W will be updated until the quasi-particle energies are
-converged within [[gw_toldfeig]]. [[gwcalctyp]] and [[gw_sctype]] are used to
-define the type of self-consistency.
+Gives the maximum number of self-consistent iterations in
+which G and/or W will be updated until the quasi-particle energies are converged within [[gwr_tolqpe]].
+[[gwr_task]] defines the type of self-consistency.
 """,
 ),
 
@@ -6395,19 +6394,19 @@ contribution to sigma.
 ),
 
 Variable(
-    abivarname="gw_toldfeig",
+    abivarname="gwr_tolqpe",
     varset="gw",
     vartype="real",
     topics=['GW_basic'],
     dimensions="scalar",
-    defaultval=ValueWithUnit(units='eV', value=0.1),
-    mnemonics="GW TOLerance on the DiFference of the EIGenvalues",
+    defaultval=ValueWithUnit(units='eV', value=0.01),
+    mnemonics="GWR TOLerance on the difference of the QP Energies",
     characteristics=['[[ENERGY]]'],
-    requires="[[optdriver]] == 8",
-    added_in_version="before_v9",
+    requires="[[optdriver]] == 6",
+    added_in_version="9.6.2",
     text=r"""
-Sets a tolerance for absolute differences of QP energies that will cause one
-self-consistent GW cycle to stop.
+Sets a tolerance for absolute differences of QP energies between to consecutive iterations
+that will cause the self-consistent GWR cycle to stop.
 Can be specified in Ha (the default), Ry, eV or Kelvin, since **toldfe** has
 the [[ENERGY]] characteristics (1 Ha = 27.2113845 eV)
 """,

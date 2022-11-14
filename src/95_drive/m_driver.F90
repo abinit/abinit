@@ -170,7 +170,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
  integer :: mtypalch,mu,mxnimage,nimage,openexit,paw_size,prtvol, omp_nthreads
  real(dp) :: etotal, cpu, wall, gflops
  character(len=500) :: msg, dilatmx_errmsg
- logical :: converged,results_gathered,test_img,use_results_all
+ logical :: results_gathered,test_img,use_results_all
  type(dataset_type) :: dtset
  type(datafiles_type) :: dtfil
  type(pawang_type) :: pawang
@@ -784,7 +784,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
      call screening(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim)
 
    case(RUNL_SIGMA)
-     call sigma(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,converged)
+     call sigma(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim)
 
    case(RUNL_NONLINEAR)
      call nonlinear(codvsn,dtfil,dtset,etotal,mpi_enregs(idtset),npwtot,occ,pawang,pawrad,pawtab,psps,xred)

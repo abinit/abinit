@@ -15,4 +15,5 @@ inp_files = [
 "t01.abi",
 "t02.abi",
 "t03.abi",
+"t04.abi",
 ]

@@ -147,7 +147,6 @@ contains
 !! rprim(3,3)=dimensionless real space primitive translations
 !!
 !! OUTPUT
-!!  Converged=.TRUE. if degw are within the user-specified tolerance.
 !!  Output is written on the main abinit output file. Some results are stored in external files
 !!
 !! NOTES
@@ -169,11 +168,10 @@ contains
 !!
 !! SOURCE
 
-subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,converged)
+subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
 !Arguments ------------------------------------
 !scalars
- logical,intent(out) :: converged
  character(len=8),intent(in) :: codvsn
  type(Datafiles_type),intent(in) :: Dtfil
  type(Dataset_type),intent(inout) :: Dtset
@@ -347,7 +345,6 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  ! In case of gwpara==1 memory is not parallelized.
  ! If gwpara==2, bands are divided among processors but each proc has all the states where GW corrections are required.
  comm = xmpi_world; my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
- converged = .FALSE.
 
  if (my_rank == master) then
    wfk_fname = dtfil%fnamewffk
@@ -2767,7 +2764,6 @@ endif
 
      ! Report the MAX variation for each kptgw and spin
      call wrtout(ab_out,ch10//' Convergence of QP corrections ')
-     converged=.TRUE.
      do spin=1,Sigp%nsppol
        write(msg,'(a,i2,a)')' >>>>> For spin ',spin,' <<<<< '
        call wrtout(ab_out, msg)
@@ -2778,7 +2774,6 @@ endif
          max_degw = Sr%degw(ii,ik_ibz,spin)
          write(msg,('(a,i3,a,2f8.3,a,i3)'))'.  kptgw no:',ikcalc,'; Maximum DeltaE = (',max_degw*Ha_eV,') for band index:',ii
          call wrtout(ab_out, msg)
-         converged = (converged .and. ABS(max_degw) < Dtset%gw_toldfeig)
        end do
      end do
    end if

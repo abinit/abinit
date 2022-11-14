@@ -389,11 +389,11 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gw_sctype',tread,'INT')
  if(tread==1) dtset%gw_sctype=intarr(1)
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gw_nstep',tread,'INT')
- if(tread==1) dtset%gw_nstep=intarr(1)
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwr_nstep',tread,'INT')
+ if(tread==1) dtset%gwr_nstep=intarr(1)
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gw_toldfeig',tread,'ENE')
- if(tread==1) dtset%gw_toldfeig=dprarr(1)
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwr_tolqpe',tread,'ENE')
+ if(tread==1) dtset%gwr_tolqpe=dprarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwls_stern_kmax',tread,'INT')
  if(tread==1) dtset%gwls_stern_kmax=intarr(1)

@@ -276,12 +276,11 @@ type, public :: dataset_type
  integer :: gw_icutcoul
  integer :: gw_invalid_freq
  integer :: gw_nqlwl
- ! TODO: REMOVE?
- integer :: gw_nstep = 30
  integer :: gw_qprange
- integer :: gw_sctype
+ integer :: gw_sctype  ! TODO: REMOVE?
  integer :: gw_sigxcore = 0
 
+ integer :: gwr_nstep = 50
  integer :: gwr_ntau = 12
  real(dp) :: gwr_boxcutmin = two
  character(len=fnlen) :: gwr_task = "G0W0"
@@ -778,7 +777,7 @@ type, public :: dataset_type
  real(dp) :: ga_opt_percent
  real(dp) :: gwencomp = 2.0_dp
  real(dp) :: gwls_model_parameter         ! Parameter used in dielectric function model
- real(dp) :: gw_toldfeig
+ real(dp) :: gwr_tolqpe = 0.01 * eV_Ha
  real(dp) :: hyb_mixing
  real(dp) :: hyb_mixing_sr
  real(dp) :: hyb_range_dft
@@ -1610,7 +1609,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%gw_customnfreqsp   = dtin%gw_customnfreqsp
  dtout%gw_icutcoul        = dtin%gw_icutcoul
  dtout%gw_nqlwl           = dtin%gw_nqlwl
- dtout%gw_nstep           = dtin%gw_nstep
+ dtout%gwr_nstep           = dtin%gwr_nstep
  dtout%gw_frqim_inzgrid   = dtin%gw_frqim_inzgrid
  dtout%gw_frqre_inzgrid   = dtin%gw_frqre_inzgrid
  dtout%gw_frqre_tangrid   = dtin%gw_frqre_tangrid
@@ -1618,7 +1617,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%gw_qprange         = dtin%gw_qprange
  dtout%gw_sctype          = dtin%gw_sctype
  dtout%gw_sigxcore        = dtin%gw_sigxcore
- dtout%gw_toldfeig        = dtin%gw_toldfeig
+ dtout%gwr_tolqpe         = dtin%gwr_tolqpe
 
  dtout%gwls_stern_kmax      = dtin%gwls_stern_kmax
  dtout%gwls_npt_gauss_quad  = dtin%gwls_npt_gauss_quad
@@ -3331,8 +3330,8 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' gw_frqim_inzgrid gw_frqre_inzgrid gw_frqre_tangrid gw_freqsp'
  list_vars=trim(list_vars)//' gw_invalid_freq'
  list_vars=trim(list_vars)//' gw_icutcoul'
- list_vars=trim(list_vars)//' gw_qprange gw_nqlwl gw_nstep gw_qlwl'
- list_vars=trim(list_vars)//' gw_sctype gw_sigxcore gw_toldfeig'
+ list_vars=trim(list_vars)//' gw_qprange gw_nqlwl gwr_nstep gw_qlwl'
+ list_vars=trim(list_vars)//' gw_sctype gw_sigxcore gwr_tolqpe'
  list_vars=trim(list_vars)//' gwls_stern_kmax gwls_kmax_complement gwls_kmax_poles'
  list_vars=trim(list_vars)//' gwls_kmax_analytic gwls_kmax_numeric'
  list_vars=trim(list_vars)//' gwls_list_proj_freq gwls_nseeds gwls_n_proj_freq gwls_recycle'

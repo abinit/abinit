@@ -1329,8 +1329,8 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  intarr(1,:)=dtsets(:)%gw_nqlwl
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gw_nqlwl','INT',0)
 
- intarr(1,:)=dtsets(:)%gw_nstep
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gw_nstep','INT',0)
+ intarr(1,:)=dtsets(:)%gwr_nstep
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gwr_nstep','INT',0)
 
 !gw_qlwl
  narr=3*dtsets(1)%gw_nqlwl ! default size for all datasets
@@ -1361,8 +1361,8 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  intarr(1,:)=dtsets(:)%gw_icutcoul
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gw_icutcoul','INT',0)
 
- dprarr(1,:)=dtsets(:)%gw_toldfeig
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'gw_toldfeig','ENE',0)
+ dprarr(1,:)=dtsets(:)%gwr_tolqpe
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'gwr_tolqpe','ENE',0)
 
  intarr(1,:)=dtsets(:)%hmcsst
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'hmcsst','INT',0)
