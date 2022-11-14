@@ -277,7 +277,6 @@ type, public :: dataset_type
  integer :: gw_invalid_freq
  integer :: gw_nqlwl
  integer :: gw_qprange
- integer :: gw_sctype  ! TODO: REMOVE?
  integer :: gw_sigxcore = 0
 
  integer :: gwr_nstep = 50
@@ -1615,7 +1614,6 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%gw_frqre_tangrid   = dtin%gw_frqre_tangrid
  dtout%gw_invalid_freq    = dtin%gw_invalid_freq
  dtout%gw_qprange         = dtin%gw_qprange
- dtout%gw_sctype          = dtin%gw_sctype
  dtout%gw_sigxcore        = dtin%gw_sigxcore
  dtout%gwr_tolqpe         = dtin%gwr_tolqpe
 
@@ -3331,7 +3329,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' gw_invalid_freq'
  list_vars=trim(list_vars)//' gw_icutcoul'
  list_vars=trim(list_vars)//' gw_qprange gw_nqlwl gwr_nstep gw_qlwl'
- list_vars=trim(list_vars)//' gw_sctype gw_sigxcore gwr_tolqpe'
+ list_vars=trim(list_vars)//' gw_sigxcore gwr_tolqpe'
  list_vars=trim(list_vars)//' gwls_stern_kmax gwls_kmax_complement gwls_kmax_poles'
  list_vars=trim(list_vars)//' gwls_kmax_analytic gwls_kmax_numeric'
  list_vars=trim(list_vars)//' gwls_list_proj_freq gwls_nseeds gwls_n_proj_freq gwls_recycle'
