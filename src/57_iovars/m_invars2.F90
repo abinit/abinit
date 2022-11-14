@@ -386,9 +386,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwmem',tread,'INT')
  if(tread==1) dtset%gwmem=intarr(1)
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gw_sctype',tread,'INT')
- if(tread==1) dtset%gw_sctype=intarr(1)
-
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwr_nstep',tread,'INT')
  if(tread==1) dtset%gwr_nstep=intarr(1)
 

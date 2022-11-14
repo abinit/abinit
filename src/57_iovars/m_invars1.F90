@@ -2312,7 +2312,6 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%gw_icutcoul=6
    dtsets(idtset)%gw_qprange=0
    dtsets(idtset)%gw_sigxcore=0
-   dtsets(idtset)%gw_sctype = GWSC_one_shot
    dtsets(idtset)%gwls_stern_kmax=1
    dtsets(idtset)%gwls_model_parameter=1.0_dp
    dtsets(idtset)%gwls_npt_gauss_quad=10

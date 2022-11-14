@@ -6323,40 +6323,6 @@ have to provide the three variables [[nkptgw]], [[kptgw]], and [[bdgw]].
 ),
 
 Variable(
-    abivarname="gw_sctype",
-    varset="gw",
-    vartype="integer",
-    topics=['GW_basic'],
-    dimensions="scalar",
-    defaultval=1,
-    mnemonics="GW, Self-Consistency TYPE",
-    requires="[[optdriver]] in [3,4]",
-    added_in_version="before_v9",
-    text=r"""
-This variable is used to partially define the kind of self-consistency for GW
-calculations. The other piece of information is given by [[gwcalctyp]] that
-defines the particular approximation for the self-energy operator as well as
-whether the wavefunctions have to replaced by quasi-particle amplitudes.
-
-If [[gw_sctype]] is specified in the input file, the code will perform an
-iterative update of the quantities entering the GW equations until the quasi-
-particle energies are converged within [[gw_toldfeig]]. The maximum number of
-iterations is specified by [[gw_nstep]]. Possible values are:
-
-  * 1 --> standard one-shot method (one screening calculation followed by a single sigma run)
-  * 2 --> self-consistency only on W (iterative update of W followed by a sigma run in which G is approximated with the Kohn-Sham independent-particle Green's function G0)
-  * 3 --> self-consistency only of G (a single screening calculation to obtain the Kohn-Sham polarizability followed by an iterative update of the Green's functions in the self-energy)
-  * 4 --> fully self-consistent algorithm (iterative update of both G and W)
-
-It is possible to initialize the self-consistent procedure by reading a
-previously calculated SCR or SUSC file via the variables [[getscr]] or
-[[getsuscep]], respectively. [[getqps]] can be used to read a previous QPS
-file thus initializing the Green functions to be used in the first self-
-consistent iteration.
-""",
-),
-
-Variable(
     abivarname="gw_sigxcore",
     varset="gw",
     vartype="integer",
