@@ -20,7 +20,7 @@ tolvrs1 1.e-8
 # Dataset 2: Direct diago with empty states
 ###########################################
 optdriver2  6        # Activate GWR code
-gwr_task2 "HDIAGO"   # One-shot calculation
+gwr_task2 "HDIAGO"   # Direct diagonalization
 getden2       1
 nband2     40        # Number of (occ + empty) bands
 
@@ -29,9 +29,9 @@ nband2     40        # Number of (occ + empty) bands
 # Dataset 3: G0W0 with GWR code
 ################################
 optdriver3  6        # Activate GWR code
-gwr_task3 "G0W0"     # Direct diagonalization
+gwr_task3 "G0W0"     # One-shot calculation
 getden3 1
-getwfk3 2 # WFK file with empty states
+getwfk3 2            # WFK file with empty states
 
 prtvol3 1            # Write additional stuff to abo file for testing purposes.
                      # DO NOT USE this option for production runs!

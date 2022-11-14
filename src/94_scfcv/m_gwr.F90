@@ -804,6 +804,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
 
  ! Initialize qp_ebands with KS values.
  call ebands_copy(ks_ebands, gwr%qp_ebands)
+ call ebands_copy(ks_ebands, gwr%qp_ebands_prev)
 
  gwr%nspinor = dtset%nspinor
  gwr%nsppol = dtset%nsppol
@@ -2150,6 +2151,8 @@ subroutine gwr_build_green(gwr, free_ugb)
    mask_kibz = 0; mask_kibz(gwr%my_kibz_inds(:)) = 1
    call gwr%malloc_free_mats(mask_kibz, "green", "malloc")
  end if
+
+ ABI_CHECK(allocated(gwr%ugb), "gwr%ugb array should be allocated!")
 
  do my_is=1,gwr%my_nspins
    spin = gwr%my_spins(my_is)
@@ -4341,7 +4344,17 @@ subroutine gwr_build_wc(gwr)
  call wrtout(std_out, " Building correlated screening Wc from irreducible chi ...", pre_newlines=2)
 
  ABI_CHECK(gwr%tchi_space == "iomega", sjoin("tchi_space: ", gwr%tchi_space, " != iomega"))
+
+ if (allocated(gwr%wc_qibz)) then
+   call slk_array_free(gwr%wc_qibz)
+   ABI_FREE(gwr%wc_qibz)
+   gwr%wc_space = "none"
+ end if
+
+ !if (gwr%scf_iteration == 1) then
  ABI_CHECK(gwr%wc_space == "none", sjoin("wc_space: ", gwr%wc_space, " != none"))
+ !end if
+
  gwr%wc_space = "iomega"
 
  ! =======================================
@@ -4350,11 +4363,9 @@ subroutine gwr_build_wc(gwr)
  ! Note that we have already summed tchi over spin.
  ! Also, G=0 corresponds to iglob = 1 since only q-points in the IBZ are treated.
  ! This is not true for ther other q-points in the full BZ as we may have a non-zero umklapp g0_q
-
  ABI_MALLOC(gwr%wc_qibz, (gwr%nqibz, gwr%ntau, gwr%nsppol))
 
- free_tchi = .True.
- if (free_tchi) gwr%tchi_space = "none"
+ free_tchi = .True.; if (free_tchi) gwr%tchi_space = "none"
 
  em1_wq = zero; eps_wq = zero
 
@@ -4943,7 +4954,10 @@ end if
 
  ! Save previous QP bands in qp_ebands_prev (needed for self-consistency)
  ! In the loop below, master updated gwr%qp_ebands%eig with the QP results.
- call ebands_copy(gwr%qp_ebands, gwr%qp_ebands_prev)
+ !call ebands_copy(gwr%qp_ebands, gwr%qp_ebands_prev)
+
+ gwr%qp_ebands_prev%eig = gwr%qp_ebands%eig
+ gwr%qp_ebands_prev%occ = gwr%qp_ebands%occ
 
  do spin=1,gwr%nsppol
    do ikcalc=1,gwr%nkcalc
@@ -4951,7 +4965,6 @@ end if
 
       do band=gwr%bstart_ks(ikcalc, spin), gwr%bstop_ks(ikcalc, spin)
         ibc = band - gwr%bstart_ks(ikcalc, spin) + 1
-        !e0 = now_ebands%eig(band, ik_ibz, spin)
         e0 = gwr%ks_ebands%eig(band, ik_ibz, spin)
         sigx = gwr%x_mat(band, band, ikcalc, spin)
         ! Note vxcval instead of vxc with model core charge.
@@ -4989,7 +5002,7 @@ end if
         sigc_e0_kcalc(ibc, ikcalc, spin) = sigc_e0
         ze0_kcalc(ibc, ikcalc, spin) = z_e0
 
-        ! IMPORTANT: Here update qp_ebands%eig with the new results.
+        ! IMPORTANT: Here we update qp_ebands%eig with the new results.
         gwr%qp_ebands%eig(band, ik_ibz, spin) = real(qp_ene)
 
         ! Build linear mesh on the real axis **centered** around e0.
@@ -5026,8 +5039,8 @@ end if
         !gwr%bstart_ks(ikcalc, spin)
         band = gwr%bstop_ks(ikcalc, spin)
         if (band + 1 <= size(gwr%qp_ebands%eig, dim=1)) then
-          eshift = gwr%qp_ebands%eig(band, ik_ibz, spin) - gwr%ks_ebands%eig(band, ik_ibz, spin)
-          !eshift = gwr%qp_ebands%eig(band, ik_ibz, spin) - gwr%qp_ebands_prev%eig(band, ik_ibz, spin)
+          !eshift = gwr%qp_ebands%eig(band, ik_ibz, spin) - gwr%ks_ebands%eig(band, ik_ibz, spin)
+          eshift = gwr%qp_ebands%eig(band, ik_ibz, spin) - gwr%qp_ebands_prev%eig(band, ik_ibz, spin)
           call wrtout(std_out, sjoin( "Correcting bands >= ", itoa(band+1), "with eshift:", ftoa(eshift * Ha_meV), "(meV)"))
           gwr%qp_ebands%eig(band + 1:, ik_ibz, spin) = gwr%qp_ebands%eig(band + 1:, ik_ibz, spin) + eshift
         end if
@@ -5216,7 +5229,6 @@ end if
    NCF_CHECK(nf90_put_var(ncid, vid("spfunc_diag_kcalc"), spfunc_diag_kcalc))
    NCF_CHECK(nf90_close(ncid))
  end if
-
  !call xmpi_barrier(gwr%comm%value)
 
  ABI_FREE(sigc_it_diag_kcalc)
@@ -5574,7 +5586,8 @@ subroutine gwr_run_energy_scf_gw(gwr, free_ugb)
  logical,optional,intent(in) :: free_ugb
 
 !Local variables-------------------------------
- integer :: gwr_max_niter = 50
+ integer,parameter :: master = 0
+ integer :: gwr_nstep
  logical :: converged
  integer :: units(2)
 
@@ -5588,57 +5601,66 @@ subroutine gwr_run_energy_scf_gw(gwr, free_ugb)
 
  ! TODO:
  ! To implement restart capabilities we need to read scf_iteration, qp_ebands and gwr_task from GWR.nc
- ! build_sigmac is responsible for writing checkpoint data with qp_ebands at each iteration.
+ ! build_sigmac should be responsible for writing checkpoint data with qp_ebands at each iteration.
  units = [std_out, ab_out]
+ gwr_nstep = gwr%dtset%gwr_nstep
 
  if (gwr%nkcalc /= gwr%nkibz) then
-   ABI_ERROR("For energy-only GW, one should compute QP energies for all k-points in the IBZ")
+   ABI_ERROR("For energy-only GW, one should include all k-points in the IBZ")
  end if
 
  select case (gwr%dtset%gwr_task)
  case ("EGEW")
    converged = .False.
    call wrtout(units, " Begin energy-only self-consistency in both G and W (EGEW)")
-   do while (.not. converged .and. gwr%scf_iteration < gwr_max_niter)
+   do while (.not. converged .and. gwr%scf_iteration <= gwr_nstep)
      call gwr%run_g0w0(free_ugb=.False.)
-     call gwr%check_scf_cycle(converged)
      gwr%scf_iteration = gwr%scf_iteration + 1
+     call gwr%check_scf_cycle(converged)
    end do
 
  case ("EGW0")
    call wrtout(units, " Begin energy-only self-consistency in G (EGW0)")
    call gwr%run_g0w0(free_ugb=.False.)
-   gwr%scf_iteration = gwr%scf_iteration + 1
    converged = .False.
-   do while (.not. converged .and. gwr%scf_iteration < gwr_max_niter)
+   do while (.not. converged .and. gwr%scf_iteration <= gwr_nstep)
+     gwr%scf_iteration = gwr%scf_iteration + 1
      call gwr%build_green(free_ugb=.False.)
      call gwr%build_sigxme()  ! NB: This should not change in semiconductors
      call gwr%build_sigmac()
      call gwr%check_scf_cycle(converged)
-     gwr%scf_iteration = gwr%scf_iteration + 1
    end do
 
  case ("G0EW")
-   !This is more complex to implement as we need to store G0 and eG
-   !and use G only in the chi/W part and not in Sigma
+   ! This is more complex to implement as we need to store G0 and eG
+   ! and then use G only for chi/W part and not in Sigma
    call wrtout(units, " Begin energy-only self-consistency in W (G0EW)")
    ABI_ERROR("G0WE is not yet implemented")
-   !call gwr%run_g0w0(free_ugb=.False.)
-   !gwr%scf_iteration = gwr%scf_iteration + 1
-   !converged = .False.
-   !do while (.not. converged .and. gwr%scf_iteration < gwr_max_niter)
-   !  call gwr%build_green(free_ugb=.False.)
-   !  call gwr%build_chi0_head_and_wings()
-   !  call gwr%build_tchi()
-   !  call gwr%build_wc()
-   !  call gwr%build_sigmac()
-   !  call gwr%check_scf_cycle(converged)
-   !  gwr%scf_iteration = gwr%scf_iteration + 1
-   !end do
+   call gwr%run_g0w0(free_ugb=.False.)
+   converged = .False.
+   do while (.not. converged .and. gwr%scf_iteration <= gwr_nstep)
+     gwr%scf_iteration = gwr%scf_iteration + 1
+     !call gwr%build_green(free_ugb=.False.)
+     call gwr%build_chi0_head_and_wings()
+     call gwr%build_tchi()
+     call gwr%build_wc()
+     call gwr%build_sigmac()
+     call gwr%check_scf_cycle(converged)
+   end do
 
  case default
    ABI_ERROR(sjoin("Invalid gwr_task:", gwr%dtset%gwr_task))
  end select
+
+ if (gwr%comm%me == master) then
+   !call ebands_print_gaps(gwr%qp_ebands, std_out, header="QP gaps (Fermi energy set to zero)")
+   !call ebands_print_gaps(gwr%qp_ebands, ab_out, header="QP gaps (Fermi energy set to zero)")
+   if (converged) then
+     call wrtout(units, sjoin(" Convergence achieved at iteration", itoa(gwr%scf_iteration)))
+   else
+     call wrtout(units," QP corrections are not converged!!!!!!!")
+   end if
+ end if
 
 end subroutine gwr_run_energy_scf_gw
 !!***
@@ -5664,32 +5686,30 @@ subroutine gwr_check_scf_cycle(gwr, converged)
  logical,intent(out) :: converged
 
 !Local variables-------------------------------
+ integer,parameter :: master = 0
  integer :: spin, ikcalc, ik_ibz, band, ib, jb
  character(len=500) :: msg
- real(dp) :: etol, max_adiff, adiff(gwr%qp_ebands%mband)
+ real(dp) :: max_adiff, adiff(gwr%qp_ebands%mband)
  integer :: units(2)
 
 ! *************************************************************************
 
- etol = 0.01_dp * eV_Ha; max_adiff = -one; converged = .True.
- units = [std_out, ab_out]
+ max_adiff = -one; converged = .True.; units = [std_out, ab_out]
 
- if (gwr%comm%me == 0) then
+ if (gwr%comm%me == master) then
    call wrtout(units, sjoin(" Checking for convergence at iteration:", itoa(gwr%scf_iteration)))
  end if
 
- ! TODO: Handle the case in which diffs are almost constant.
  associate (now => gwr%qp_ebands, prev => gwr%qp_ebands_prev)
  do spin=1,gwr%nsppol
    do ikcalc=1,gwr%nkcalc ! TODO: Should be spin dependent!
      ik_ibz = gwr%kcalc2ibz(ikcalc, 1)
      ib = gwr%bstart_ks(ikcalc, spin); jb = gwr%bstop_ks(ikcalc, spin)
-     adiff = zero
-     adiff(ib:jb) = abs(now%eig(ib:jb, ik_ibz, spin) - prev%eig(ib:jb, ik_ibz, spin))
+     adiff = zero; adiff(ib:jb) = abs(now%eig(ib:jb, ik_ibz, spin) - prev%eig(ib:jb, ik_ibz, spin))
      band = maxloc(adiff, dim=1)
      max_adiff = max(max_adiff, adiff(band))
-     if (adiff(band) > etol) converged = .False.
-     if (gwr%comm%me == 0) then
+     if (adiff(band) > gwr%dtset%gwr_tolqpe) converged = .False.
+     if (gwr%comm%me == master) then
        write(msg, "(a,i0,1x,2a,i0)") " For k-point: ", ik_ibz, trim(ktoa(now%kptns(:,ik_ibz))),", spin: ", spin
        call wrtout(units, msg)
        write(msg, "(a, es12.5,a)")" max_adiff: ", adiff(band) * Ha_meV, " (meV)"
@@ -5699,20 +5719,18 @@ subroutine gwr_check_scf_cycle(gwr, converged)
  end do
  end associate
 
- ! Just to make sure that all MPI procs agree!
+ ! Just to make sure that all MPI procs agree on this!
  call xmpi_land(converged, gwr%comm%value)
 
- if (gwr%comm%me == 0) then
+ if (gwr%comm%me == master) then
    call ebands_print_gaps(gwr%qp_ebands, std_out, header="QP gaps (Fermi energy set to zero)")
    call ebands_print_gaps(gwr%qp_ebands, ab_out, header="QP gaps (Fermi energy set to zero)")
-   if (converged) then
-     call wrtout(units, sjoin(" Convergence achieved at iteration", itoa(gwr%scf_iteration)))
-   else
+   if (.not. converged) then
      call wrtout(units," Not converged --> start new iteration ...")
+   !else
+   !  call wrtout(units, sjoin(" Convergence achieved at iteration", itoa(gwr%scf_iteration)))
    end if
  end if
-
- !if (gwr%scf_iteration == 2) stop "iteration 2"
 
 end subroutine gwr_check_scf_cycle
 !!***
