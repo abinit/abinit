@@ -128,6 +128,7 @@ program lruj
  end do
 
  write(std_out,*) 'nargs',nargs
+ write(std_out,*) 'nfiles',nfiles
 
  do ii=1,command_argument_count()
    call get_command_argument(ii, arg)
@@ -242,6 +243,7 @@ program lruj
      occs(ii)=luocc(4,ii)
    end if
  end do
+
 !##########################################################################################################
 !####################################  Tests on input information  ########################################
 
@@ -340,7 +342,6 @@ program lruj
  end if
 
  write(std_out,*) 'Program will calculate all polynomials up to degree ',mdegree,'.'
-
  !Allocate the response and error arrays
  ABI_MALLOC(chi0err,(mdegree))
  ABI_MALLOC(chierr,(mdegree))
@@ -353,12 +354,10 @@ program lruj
  do degree=1,mdegree
    ABI_MALLOC(chi0coeffs,(degree+1))
    ABI_MALLOC(chicoeffs,(degree+1))
-   write(std_out,*) 'Size of chierr',size(chierr)
    call polynomial_regression(ndata,perts,occs0,degree,chi0coeffs,chi0err(degree))
    call polynomial_regression(ndata,perts,occs,degree,chicoeffs,chierr(degree))
-   write(std_out,*) 'Size of chierr',size(chierr)
    chi0(degree)=chi0coeffs(2)/diem   !The derivative of all polynomial regressions at pert=0.0
-   chi(degree)=chicoeffs(2)     !is just the second coefficient.
+   chi(degree)=chicoeffs(2)          !is just the second coefficient.
    hubpar(degree)=signum*(1.0d0/chi0(degree)-1.0d0/chi(degree))*Ha2eV
    hubparerr(degree)=sqrt(chi0err(degree)/chi0(degree)**2+chierr(degree)/chi(degree)**2)
    ABI_FREE(chi0coeffs)
@@ -558,9 +557,10 @@ subroutine polynomial_regression(npoints,xvals,yvals,degree,coeffs,RMSerr)
   ABI_MALLOC(ATA,(ncoeffs,ncoeffs))
 
   !Prepare the matrix A
-  do icoeff=0,ncoeffs
+  do icoeff=0,ncoeffs-1
     do ipoint=1,size(xvals)
        A(ipoint,icoeff+1) = xvals(ipoint)**icoeff
+       write(std_out,*) 'icoeff,ipoint,xvals(ipoint),A(ipoint,icoeff+1)',icoeff,ipoint,xvals(ipoint),A(ipoint,icoeff+1)
     end do
   end do
 
@@ -582,6 +582,7 @@ subroutine polynomial_regression(npoints,xvals,yvals,degree,coeffs,RMSerr)
   end if
 
   coeffs = matmul(matmul(ATA,AT),yvals)
+!  write(std_out,*) 'Size coeffs inside subroutine',size(coeffs)
 
 !####################################################################
 !##############  RMS error on the polynomial fit  ###################
