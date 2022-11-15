@@ -713,9 +713,9 @@ module m_gwr
    ! Compute FFT mesh from boxcutmin
 
    procedure :: run_g0w0 => gwr_run_g0w0
-   ! Compute QP corrections with G0W0.
+   ! Compute QP corrections with one-shot G0W0.
 
-   procedure :: run_energy_scf_gw => gwr_run_energy_scf_gw
+   procedure :: run_energy_scf => gwr_run_energy_scf
    ! Compute QP corrections with energy-only self-consistent GW
 
    procedure :: check_scf_cycle => gwr_check_scf_cycle
@@ -785,6 +785,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  real(dp) :: my_shiftq(3,1), kk_ibz(3), kk_bz(3), qq_bz(3), qq_ibz(3), kk(3), tsec(2)
  real(dp),allocatable :: wtk(:), kibz(:,:)
  logical :: periods(ndims), keepdim(ndims)
+ !real(dp), pointer :: test(:)
 
 ! *************************************************************************
 
@@ -802,6 +803,9 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  gwr%kibz => ks_ebands%kptns
  gwr%wtk => ks_ebands%wtk
  gwr%mpi_enreg => mpi_enreg
+
+ !test(1:1) => ks_ebands%eig(1:1,1,1)
+ !test(2:2) => ks_ebands%eig(3:3,1,1)
 
  ! Initialize qp_ebands with KS values.
  call ebands_copy(ks_ebands, gwr%qp_ebands)
@@ -1394,6 +1398,8 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
    call wrtout(std_out, sjoin(" FFT sc_batch_size:", itoa(gwr%sc_batch_size)))
  end if
 
+ ! TODO: MC technique does not seem to work as expected, even in the legacy code.
+
  vc_ecut = max(dtset%ecutsigx, dtset%ecuteps)
  call gwr%vcgen%init(cryst, ks_ebands%kptrlatt, gwr%nkbz, gwr%nqibz, gwr%nqbz, gwr%qbz, &
                      dtset%rcut, dtset%gw_icutcoul, dtset%vcutgeo, vc_ecut, gwr%comm%value)
@@ -1456,10 +1462,10 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
      ], defmode=.True.)
    NCF_CHECK(ncerr)
 
-   !ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: &
-   !  "eph_task", "symsigma", "nbsum", "bsum_start", "bsum_stop", "symdynmat", &
-   !  "imag_only", "symv1scf", "dvdb_add_lr", "mrta", "ibte_prep", "eph_prtscratew"])
-   !NCF_CHECK(ncerr)
+   ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: &
+     "symsigma", "scf_iteration"])
+   NCF_CHECK(ncerr)
+
    ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: &
      "wr_step" & ! "eph_fsewin", "eph_fsmear", "eph_extrael", "eph_fermie", &
    ])
@@ -1497,13 +1503,11 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
    ! ======================================================
    NCF_CHECK(nctk_set_datamode(ncid))
    !ii = 0; if (gwr%imag_only) ii = 1
-   !ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: &
-   !  "eph_task", "symsigma", "nbsum", "bsum_start", "bsum_stop", &
-   !  "eph_transport", "imag_only", "symv1scf", "dvdb_add_lr", "mrta", "ibte_prep", "eph_prtscratew"], &
-   !  [dtset%eph_task, gwr%symsigma, gwr%nbsum, gwr%bsum_start, gwr%bsum_stop, &
-   !  dtset%symdynmat, dtset%ph_intmeth, dtset%eph_intmeth, gwr%qint_method, &
-   !  dtset%eph_transport, ii, dtset%symv1scf, dtset%dvdb_add_lr, gwr%mrta, dtset%ibte_prep, dtset%eph_prtscratew])
-   !NCF_CHECK(ncerr)
+   ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: &
+     "symsigma", "scf_iteration"], &
+     [gwr%dtset%symsigma, gwr%scf_iteration])
+   NCF_CHECK(ncerr)
+
    ncerr = nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: &
      "wr_step"], &
      [gwr%wr_step])
@@ -3018,9 +3022,9 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
      !
      ! batch_size in terms of columns
      ! TODO: Determine batch_size automatically to avoid going OOM
-     !batch_size = 4
      !batch_size = 1
      batch_size = 24
+     batch_size = 48
      !batch_size = loc2_size
 
      ABI_MALLOC(cwork_myit, (gwr%my_ntau, loc1_size, batch_size))
@@ -3041,7 +3045,6 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
        end do
 
        ! Compute contribution to itau matrix
-       !!$OMP PARALLEL DO
        do idat=1,ndat
 #if 0
          do ig1=1,mats(it0)%sizeb_local(1)
@@ -4558,7 +4561,7 @@ subroutine gwr_build_sigmac(gwr)
  type(desc_t), target :: desc_mykbz(gwr%my_nkbz), desc_myqbz(gwr%my_nqbz)
  type(fftbox_plan3_t) :: gt_plan_gp2rp, wt_plan_gp2rp
  integer :: band_val, ibv, ncerr, unt_it, unt_iw, unt_rw
- real(dp) :: e0, ks_gap, qp_gap, sigx, vxc_val, vu, v_meanf, eshift, qp_occ
+ real(dp) :: e0, ks_gap, qp_gap, sigx, vxc_val, vu, v_meanf, eshift
  complex(dp) :: zz, zsc, sigc_e0, dsigc_de0, z_e0, sig_xc, hhartree_bk, qp_ene, qp_ene_prev
  integer,allocatable :: ks_vbik(:,:), iperm(:)
  integer :: gt_request, wct_request
@@ -4567,6 +4570,7 @@ subroutine gwr_build_sigmac(gwr)
  real(dp) :: spfunc_diag_kcalc(gwr%nwr, gwr%max_nbcalc, gwr%nkcalc, gwr%nsppol)
  real(dp) :: rw_mesh(gwr%nwr)
  !real(dp) :: sigx_kcalc(gwr%max_nbcalc, gwr%nkcalc, gwr%nsppol)
+ logical :: define
  integer :: qp_solver_ierr(gwr%max_nbcalc, gwr%nkcalc, gwr%nsppol)
  complex(dp) :: ze0_kcalc(gwr%max_nbcalc, gwr%nkcalc, gwr%nsppol)
  complex(dp) :: sigc_iw_diag_kcalc(gwr%ntau, gwr%max_nbcalc, gwr%nkcalc, gwr%nsppol)
@@ -4946,8 +4950,7 @@ end if
 
  ! Save previous QP bands in qp_ebands_prev (needed for self-consistency)
  ! In the loop below, master updated gwr%qp_ebands%eig with the QP results.
- !call ebands_copy(gwr%qp_ebands, gwr%qp_ebands_prev)
-
+ ! then we recompute occ/fermie
  gwr%qp_ebands_prev%eig = gwr%qp_ebands%eig
  gwr%qp_ebands_prev%occ = gwr%qp_ebands%occ
 
@@ -4959,7 +4962,8 @@ end if
         ibc = band - gwr%bstart_ks(ikcalc, spin) + 1
         e0 = gwr%ks_ebands%eig(band, ik_ibz, spin)
         sigx = gwr%x_mat(band, band, ikcalc, spin)
-        ! Note vxcval instead of vxc with model core charge.
+
+        ! Note vxc[n_val] instead of vxc[n_val + n_nlcc] with the model core charge.
         vxc_val = gwr%ks_me%vxcval(band, band, ik_ibz, spin)
         vu = zero
         if (gwr%dtset%usepawu /= 0) vu = gwr%ks_me%vu(band, band, ik_ibz, spin)
@@ -4988,7 +4992,7 @@ end if
         z_e0 = one / (one - dsigc_de0)
 
         ! Linearized QP solution + store results
-        qp_ene =  e0 + z_e0 * (sigc_e0 + sigx - v_meanf)
+        qp_ene = e0 + z_e0 * (sigc_e0 + sigx - v_meanf)
         qpe_zlin_kcalc(ibc, ikcalc, spin) = qp_ene
         e0_kcalc(ibc, ikcalc, spin) = e0
         sigc_e0_kcalc(ibc, ikcalc, spin) = sigc_e0
@@ -5022,42 +5026,46 @@ end if
  end do ! spin
 
  if (gwr%nkcalc == gwr%nkibz) then
+   ! In the case of self-consistency.
 
-#if 0
-   ! Here I correct that empty bands that are not explictly included in the SCF calculation.
+   ! Here I shift empty bands that are not explictly included in the SCF calculation.
+   ! using the correction evaluated at bstop_ks
    do spin=1,gwr%nsppol
      do ikcalc=1,gwr%nkcalc
         ik_ibz = gwr%kcalc2ibz(ikcalc, 1)
-        !gwr%bstart_ks(ikcalc, spin)
         band = gwr%bstop_ks(ikcalc, spin)
         if (band + 1 <= size(gwr%qp_ebands%eig, dim=1)) then
-          !eshift = gwr%qp_ebands%eig(band, ik_ibz, spin) - gwr%ks_ebands%eig(band, ik_ibz, spin)
           eshift = gwr%qp_ebands%eig(band, ik_ibz, spin) - gwr%qp_ebands_prev%eig(band, ik_ibz, spin)
           call wrtout(std_out, sjoin( "Correcting bands >= ", itoa(band+1), "with eshift:", ftoa(eshift * Ha_meV), "(meV)"))
           gwr%qp_ebands%eig(band + 1:, ik_ibz, spin) = gwr%qp_ebands%eig(band + 1:, ik_ibz, spin) + eshift
         end if
+        band = gwr%bstart_ks(ikcalc, spin)
+        if (band > 1) then ! unlikely
+          eshift = gwr%qp_ebands%eig(band, ik_ibz, spin) - gwr%qp_ebands_prev%eig(band, ik_ibz, spin)
+          call wrtout(std_out, sjoin( "Correcting bands < ", itoa(band), "with eshift:", ftoa(eshift * Ha_meV), "(meV)"))
+          gwr%qp_ebands%eig(:band - 1, ik_ibz, spin) = gwr%qp_ebands%eig(:band - 1, ik_ibz, spin) + eshift
+        end if
      end do
    end do
-#endif
 
-   !call xmpi_bcast(gwr%qp_ebands%eig, master, gwr%comm%value, ierr)
+   ! Recompute occ
+   ! FIXME: Possible problem here if the QP energies are not ordered!
    call ebands_update_occ(gwr%qp_ebands, gwr%dtset%spinmagntarget, prtvol=gwr%dtset%prtvol, fermie_to_zero=.True.)
  end if
 
  ! Master writes results to ab_out, std_out and GWR.nc
  if (gwr%comm%me == 0) then
+
    if (any(qp_solver_ierr /= 0)) then
      ! Write warning if QP solver failed.
      ierr = count(qp_solver_ierr /= 0)
      call wrtout([ab_out, std_out], sjoin("QP solver failed for:", itoa(ierr), "states"))
    end if
 
-   ! TODO
-   !is_metallic = ebands_has_metal_scheme(prev_ebands)
-   !call write_notations([std_out, ab_out]
    ABI_MALLOC(ks_vbik, (gwr%ks_ebands%nkpt, gwr%ks_ebands%nsppol))
    ks_vbik(:,:) = ebands_get_valence_idx(gwr%ks_ebands)
 
+   call write_notations([std_out, ab_out])
    do spin=1,gwr%nsppol
      do ikcalc=1,gwr%nkcalc
        ik_ibz = gwr%kcalc2ibz(ikcalc, 1)
@@ -5075,6 +5083,7 @@ end if
        if (band_val >= gwr%bstart_ks(ikcalc, spin) .and. band_val + 1 <= gwr%bstop_ks(ikcalc, spin)) then
          ibv = band_val - gwr%bstart_ks(ikcalc, spin) + 1
          ks_gap = e0_kcalc(ibv+1, ikcalc, spin) - e0_kcalc(ibv, ikcalc, spin)
+         !ks_gap = gwr%ks_ebands%eig(ibv+1, ik_ibz, spin) - gwr%ks_ebands%eig((ibv, ik_ibz, spin)
 
          ! This to detect possible band inversion in the QP energies.
          ! and compute qp_gaps accordingly.
@@ -5095,34 +5104,32 @@ end if
          call ydoc%add_real('KS_gap', ks_gap * Ha_eV)
          call ydoc%add_real('QP_gap', qp_gap * Ha_eV)
          call ydoc%add_real('Delta_QP_KS', (qp_gap - ks_gap) * Ha_eV)
-
        end if
 
        call ydoc%open_tabular('data') !, tag='SigmaeeData')
        write(msg, "(a5, *(a9))") &
-         "Band", "E0", "E", "Z", "E-E0", "E-Eprev", "SigX", "SigC(E0)", "<VxcDFT>", "Occ(E)"
+         "Band", "E0", "<VxcDFT>", "SigX", "SigC(E0)", "Z", "E-E0", "E-Eprev", "E", "Occ(E)"
        call ydoc%add_tabular_line(msg)
 
        do band=gwr%bstart_ks(ikcalc, spin), gwr%bstop_ks(ikcalc, spin)
          ibc = band - gwr%bstart_ks(ikcalc, spin) + 1
          e0 = e0_kcalc(ibc, ikcalc, spin)
-
+         !e0 = gwr%ks_ebands%eig(band, ik_ibz, spin)
          qp_ene = gwr%qp_ebands%eig(band, ik_ibz, spin)
-         qp_occ = gwr%qp_ebands%occ(band, ik_ibz, spin)
          qp_ene_prev = gwr%qp_ebands_prev%eig(band, ik_ibz, spin)
 
          write(msg,'(i5, *(f9.3))') &
            band, &                                                        ! Band
            e0 * Ha_eV, &                                                  ! E0
-           real(qp_ene) * Ha_eV, &                                        ! E
+           real(gwr%ks_me%vxcval(band, band, ik_ibz, spin)) * Ha_eV, &    ! <VxcDFT>
+           real(gwr%x_mat(band, band, ikcalc, spin)) * Ha_eV, &           ! SigX
+           real(sigc_e0_kcalc(ibc, ikcalc, spin)) * Ha_eV, &              ! SigC(E0)
            real(ze0_kcalc(ibc, ikcalc, spin)), &                          ! Z
            !aimag(ze0_kcalc(ibc, ikcalc, spin)), &                        ! Z2
            (real(qp_ene - e0)) * Ha_eV, &                                 ! E-E0
            real(qp_ene - qp_ene_prev) * Ha_eV, &                          ! E-Eprev
-           real(gwr%x_mat(band, band, ikcalc, spin)) * Ha_eV, &           ! SigX
-           real(sigc_e0_kcalc(ibc, ikcalc, spin)) * Ha_eV, &              ! SigC(E0)
-           real(gwr%ks_me%vxcval(band, band, ik_ibz, spin)) * Ha_eV, &    ! <VxcDFT>
-           qp_occ                                                         ! Occ(E)
+           real(qp_ene) * Ha_eV, &                                        ! E
+           gwr%qp_ebands%occ(band, ik_ibz, spin)                          ! Occ(E)
          call ydoc%add_tabular_line(msg)
        end do
 
@@ -5192,20 +5199,23 @@ end if
    NCF_CHECK(nctk_open_modify(ncid, gwr%gwrnc_path, xmpi_comm_self))
 
    ! Define arrays with results.
-   ncerr = nctk_def_arrays(ncid, [ &
-     nctkarr_t("e0_kcalc", "dp", "max_nbcalc, nkcalc, nsppol"), &
-     nctkarr_t("ze0_kcalc", "dp", "two, max_nbcalc, nkcalc, nsppol"), &
-     nctkarr_t("qpe_zlin_kcalc", "dp", "two, max_nbcalc, nkcalc, nsppol"), &
-     nctkarr_t("qpe_pade_kcalc", "dp", "two, max_nbcalc, nkcalc, nsppol"), &
-     nctkarr_t("qp_solver_ierr", "int", "max_nbcalc, nkcalc, nsppol"), &
-     ! TODO: Write exchage part
-     !nctkarr_t("sigx_kcalc", "dp", "max_nbcalc, nkcalc, nsppol"), &
-     nctkarr_t("sigc_it_diag_kcalc", "dp", "two, two, ntau, max_nbcalc, nkcalc, nsppol"), &
-     nctkarr_t("sigc_iw_diag_kcalc", "dp", "two, ntau, max_nbcalc, nkcalc, nsppol"), &
-     nctkarr_t("sigxc_rw_diag_kcalc", "dp", "two, nwr, max_nbcalc, nkcalc, nsppol"), &
-     nctkarr_t("spfunc_diag_kcalc", "dp", "nwr, max_nbcalc, nkcalc, nsppol") &
-   ])
-   NCF_CHECK(ncerr)
+   define = .True.
+   if (define) then
+     ncerr = nctk_def_arrays(ncid, [ &
+       nctkarr_t("e0_kcalc", "dp", "max_nbcalc, nkcalc, nsppol"), &
+       nctkarr_t("ze0_kcalc", "dp", "two, max_nbcalc, nkcalc, nsppol"), &
+       nctkarr_t("qpe_zlin_kcalc", "dp", "two, max_nbcalc, nkcalc, nsppol"), &
+       nctkarr_t("qpe_pade_kcalc", "dp", "two, max_nbcalc, nkcalc, nsppol"), &
+       nctkarr_t("qp_solver_ierr", "int", "max_nbcalc, nkcalc, nsppol"), &
+       ! TODO: Write exchage part
+       !nctkarr_t("sigx_kcalc", "dp", "max_nbcalc, nkcalc, nsppol"), &
+       nctkarr_t("sigc_it_diag_kcalc", "dp", "two, two, ntau, max_nbcalc, nkcalc, nsppol"), &
+       nctkarr_t("sigc_iw_diag_kcalc", "dp", "two, ntau, max_nbcalc, nkcalc, nsppol"), &
+       nctkarr_t("sigxc_rw_diag_kcalc", "dp", "two, nwr, max_nbcalc, nkcalc, nsppol"), &
+       nctkarr_t("spfunc_diag_kcalc", "dp", "nwr, max_nbcalc, nkcalc, nsppol") &
+     ])
+     NCF_CHECK(ncerr)
+   end if
 
    ! Write data.
    NCF_CHECK(nctk_set_datamode(ncid))
@@ -5233,6 +5243,9 @@ integer function vid(vname)
  vid = nctk_idname(ncid, vname)
 end function vid
 
+end subroutine gwr_build_sigmac
+!!***
+
 subroutine write_units(units, str, newlines)
  character(len=*),intent(in) :: str
  integer,intent(in) :: units(:)
@@ -5256,23 +5269,23 @@ subroutine write_notations(units)
  do ii=1,size(units)
    unt = units(ii)
    write(unt,"(a)")repeat("=", 80)
-   write(unt,"(a)")" QP results in eV."
+   write(unt,"(a)")" QP results (energies in eV)"
    write(unt,"(a)")" Notations:"
-   !write(unt,"(a)")"     E0: Kohn-Sham energy. eQP: quasi-particle energy."
-   !write(unt,"(a)")"     <VxcDFT>: Matrix elements of Vxc[n_val] without model core charge (if any)"
-   !write(unt,"(a)")"     SigX: Matrix elements of Sigma_x
-   !write(unt,"(a)")"     SigC(E0): Matrix elements of Sigma_c computed at the KS energy
-   !write(unt,"(a)")"     eQP - eKS: Difference between the QP and the KS energy."
+   write(unt,"(a)")"     E0: Kohn-Sham energy"
+   write(unt,"(a)")"     <VxcDFT>: Matrix elements of Vxc[n_val] without non-linear core correction (if any)"
+   write(unt,"(a)")"     SigX: Matrix elements of Sigma_x"
+   write(unt,"(a)")"     SigC(E0): Matrix elements of Sigma_c at E0"
+   write(unt,"(a)")"     Z: Renormalization factor"
+   write(unt,"(a)")"     E-E0: Difference between the QP and the KS energy."
+   write(unt,"(a)")"     E-Eprev: Difference between QP energy at iteration i and i-1"
+   write(unt,"(a)")"     E: Quasi-particle energy"
+   write(unt,"(a)")"     Occ(E): Occupancy of QP state"
    !write(unt,"(a)")"     SE1(eKS): Real part of the self-energy computed at the KS energy, SE2 for imaginary part."
-   !write(unt,"(a)")"     Z(eKS): Renormalization factor."
    !write(unt,"(a)")"     TAU(eKS): Lifetime in femtoseconds computed at the KS energy."
    write(unt,"(a)")" "
    write(unt,"(a)")" "
  end do
 end subroutine write_notations
-
-end subroutine gwr_build_sigmac
-!!***
 
 !----------------------------------------------------------------------
 
@@ -5559,9 +5572,9 @@ end subroutine gwr_run_g0w0
 
 !----------------------------------------------------------------------
 
-!!****f* m_gwr/gwr_run_energy_scf_gw
+!!****f* m_gwr/gwr_run_energy_scf
 !! NAME
-!!  gwr_run_energy_scf_gw
+!!  gwr_run_energy_scf
 !!
 !! FUNCTION
 !!  Compute QP energies within energy-only self-consistent GW approximation
@@ -5574,7 +5587,7 @@ end subroutine gwr_run_g0w0
 !!
 !! SOURCE
 
-subroutine gwr_run_energy_scf_gw(gwr, free_ugb)
+subroutine gwr_run_energy_scf(gwr, free_ugb)
 
 !Arguments ------------------------------------
  class(gwr_t),intent(inout) :: gwr
@@ -5657,7 +5670,7 @@ subroutine gwr_run_energy_scf_gw(gwr, free_ugb)
    end if
  end if
 
-end subroutine gwr_run_energy_scf_gw
+end subroutine gwr_run_energy_scf
 !!***
 
 !----------------------------------------------------------------------

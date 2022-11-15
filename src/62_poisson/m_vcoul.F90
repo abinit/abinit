@@ -561,7 +561,7 @@ subroutine vcoul_init(vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
    ABI_BUG(sjoin('Unsupported cutoff mode:', vcp%mode))
  end select
 
- !call wrtout(std_out, sjoin("vcp%i_sz", ftoa(vcp%i_sz)))
+ call wrtout(std_out, sjoin("vcp%i_sz", ftoa(vcp%i_sz)))
  vcp%i_sz_resid = vcp%i_sz
 
  ! Store final results in complex array as Rozzi's cutoff can give real negative values
@@ -1363,7 +1363,7 @@ subroutine mc_integrate(mc, mode, qibz, ng, gvec, rcut2, nkbz, vcoul, comm)
      qpg2 = normv(qpg, mc%gmet, 'G')**2
      nmc = adapt_nmc(mc%nmc_max, qpg2)
      do imc=1,nmc
-       qpg(:) = qibz(:) +  gvec(:,ig) + mc%qran(:,imc)
+       qpg(:) = qibz(:) + gvec(:,ig) + mc%qran(:,imc)
        qpg2 = normv(qpg, mc%gmet, 'G')**2
        vcoul(ig) = vcoul(ig) + four_pi / qpg2 / REAL(nmc,dp) * (  one - EXP( -0.25d0 * rcut2 * qpg2 ) )
      end do
@@ -1833,6 +1833,8 @@ subroutine vcgen_init(vcgen, cryst, kptrlatt, nkbz, nqibz, nqbz, qbz, rcut, gw_i
  case default
    ABI_BUG(sjoin('Unsupported cutoff mode:', vcgen%mode))
  end select
+
+ call wrtout(std_out, sjoin("vcgen%i_sz", ftoa(vcgen%i_sz)))
 
 end subroutine vcgen_init
 !!***
