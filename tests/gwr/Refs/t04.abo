@@ -724,9 +724,9 @@ data: !Tabular |
 
  Checking for convergence at iteration: 2
  For k-point: 1 [ 0.0000E+00,  0.0000E+00,  0.0000E+00], spin: 1
- max_adiff:  1.89620E+02 (meV)
+     max(abs(E_i - E_{i-1})):  1.89620E+02 (meV) for band: 11
 
- === QP gaps (Fermi energy set to zero) ===
+ === QP gaps at iteration: 2 (Fermi energy set to zero) ===
  Direct band gap semiconductor
  Fundamental gap:     2.654 (eV)
    VBM:    -1.329 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
@@ -802,9 +802,9 @@ data: !Tabular |
 
  Checking for convergence at iteration: 3
  For k-point: 1 [ 0.0000E+00,  0.0000E+00,  0.0000E+00], spin: 1
- max_adiff:  3.63453E+01 (meV)
+     max(abs(E_i - E_{i-1})):  3.63453E+01 (meV) for band: 14
 
- === QP gaps (Fermi energy set to zero) ===
+ === QP gaps at iteration: 3 (Fermi energy set to zero) ===
  Direct band gap semiconductor
  Fundamental gap:     2.657 (eV)
    VBM:    -1.330 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
@@ -880,16 +880,17 @@ data: !Tabular |
 
  Checking for convergence at iteration: 4
  For k-point: 1 [ 0.0000E+00,  0.0000E+00,  0.0000E+00], spin: 1
- max_adiff:  8.36856E+00 (meV)
+     max(abs(E_i - E_{i-1})):  8.36856E+00 (meV) for band: 14
 
- === QP gaps (Fermi energy set to zero) ===
+ === QP gaps at iteration: 4 (Fermi energy set to zero) ===
  Direct band gap semiconductor
  Fundamental gap:     2.657 (eV)
    VBM:    -1.330 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
    CBM:     1.327 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
  Direct gap:         2.657 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 
- Convergence achieved at iteration 4
+ EGW0 self-consistent loop:
+ Convergence achieved at iteration: 4 with gwr_tolqpe:   20.000 (meV)
 
 ================================================================================
 == DATASET  4 ==================================================================
@@ -1106,9 +1107,9 @@ data: !Tabular |
 
  Checking for convergence at iteration: 2
  For k-point: 1 [ 0.0000E+00,  0.0000E+00,  0.0000E+00], spin: 1
- max_adiff:  1.12349E+03 (meV)
+     max(abs(E_i - E_{i-1})):  1.12349E+03 (meV) for band: 11
 
- === QP gaps (Fermi energy set to zero) ===
+ === QP gaps at iteration: 2 (Fermi energy set to zero) ===
  Direct band gap semiconductor
  Fundamental gap:     2.620 (eV)
    VBM:    -1.311 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
@@ -1250,9 +1251,9 @@ data: !Tabular |
 
  Checking for convergence at iteration: 3
  For k-point: 1 [ 0.0000E+00,  0.0000E+00,  0.0000E+00], spin: 1
- max_adiff:  1.98291E+02 (meV)
+     max(abs(E_i - E_{i-1})):  1.98291E+02 (meV) for band: 11
 
- === QP gaps (Fermi energy set to zero) ===
+ === QP gaps at iteration: 3 (Fermi energy set to zero) ===
  Direct band gap semiconductor
  Fundamental gap:     2.602 (eV)
    VBM:    -1.302 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
@@ -1394,9 +1395,9 @@ data: !Tabular |
 
  Checking for convergence at iteration: 4
  For k-point: 1 [ 0.0000E+00,  0.0000E+00,  0.0000E+00], spin: 1
- max_adiff:  2.84099E+01 (meV)
+     max(abs(E_i - E_{i-1})):  2.84099E+01 (meV) for band: 14
 
- === QP gaps (Fermi energy set to zero) ===
+ === QP gaps at iteration: 4 (Fermi energy set to zero) ===
  Direct band gap semiconductor
  Fundamental gap:     2.600 (eV)
    VBM:    -1.301 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
@@ -1538,16 +1539,17 @@ data: !Tabular |
 
  Checking for convergence at iteration: 5
  For k-point: 1 [ 0.0000E+00,  0.0000E+00,  0.0000E+00], spin: 1
- max_adiff:  6.81379E+00 (meV)
+     max(abs(E_i - E_{i-1})):  6.81379E+00 (meV) for band: 14
 
- === QP gaps (Fermi energy set to zero) ===
+ === QP gaps at iteration: 5 (Fermi energy set to zero) ===
  Direct band gap semiconductor
  Fundamental gap:     2.600 (eV)
    VBM:    -1.301 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
    CBM:     1.299 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
  Direct gap:         2.600 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 
- Convergence achieved at iteration 5
+ EGEW self-consistent loop:
+ Convergence achieved at iteration: 5 with gwr_tolqpe:   20.000 (meV)
 
 == END DATASET(S) ==============================================================
 ================================================================================

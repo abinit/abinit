@@ -4949,8 +4949,7 @@ end if
  sigc_iw_diag_kcalc = zero
 
  ! Save previous QP bands in qp_ebands_prev (needed for self-consistency)
- ! In the loop below, master updated gwr%qp_ebands%eig with the QP results.
- ! then we recompute occ/fermie
+ ! In the loop below, we also update gwr%qp_ebands%eig with the QP results and recompute occ/fermie.
  gwr%qp_ebands_prev%eig = gwr%qp_ebands%eig
  gwr%qp_ebands_prev%occ = gwr%qp_ebands%occ
 
@@ -4991,7 +4990,7 @@ end if
         ! Z = (1 - dSigma / domega(E0))^{-1}
         z_e0 = one / (one - dsigc_de0)
 
-        ! Linearized QP solution + store results
+        ! Compute linearized QP solution and store results
         qp_ene = e0 + z_e0 * (sigc_e0 + sigx - v_meanf)
         qpe_zlin_kcalc(ibc, ikcalc, spin) = qp_ene
         e0_kcalc(ibc, ikcalc, spin) = e0
@@ -5001,7 +5000,7 @@ end if
         ! IMPORTANT: Here we update qp_ebands%eig with the new results.
         gwr%qp_ebands%eig(band, ik_ibz, spin) = real(qp_ene)
 
-        ! Build linear mesh on the real axis **centered** around e0.
+        ! Compute Spectral function using linear mesh **centered** around KS e0.
         rw_mesh = arth(e0 - gwr%wr_step * (gwr%nwr / 2), gwr%wr_step, gwr%nwr)
         hhartree_bk = gwr%ks_ebands%eig(band, ik_ibz, spin) - v_meanf
         do iw=1,gwr%nwr
@@ -5010,7 +5009,6 @@ end if
           sig_xc = sigx + sigc_e0
           sigxc_rw_diag_kcalc(iw, ibc, ikcalc, spin) = sig_xc
 
-          ! Spectral function
           spfunc_diag_kcalc(iw, ibc, ikcalc, spin) = one / pi * abs(aimag(sigc_e0)) &
             /( (real(rw_mesh(iw) - hhartree_bk - sig_xc)) ** 2 + (aimag(sigc_e0)) ** 2) / Ha_eV
 
@@ -5026,10 +5024,9 @@ end if
  end do ! spin
 
  if (gwr%nkcalc == gwr%nkibz) then
-   ! In the case of self-consistency.
 
-   ! Here I shift empty bands that are not explictly included in the SCF calculation.
-   ! using the correction evaluated at bstop_ks
+   ! Here I shift the bands that are not explictly included in the SCF calculation.
+   ! using the correction evaluated at bstop_ks/bstart_ks to accelerate self-consistent calculations.
    do spin=1,gwr%nsppol
      do ikcalc=1,gwr%nkcalc
         ik_ibz = gwr%kcalc2ibz(ikcalc, 1)
@@ -5048,7 +5045,7 @@ end if
      end do
    end do
 
-   ! Recompute occ
+   ! Recompute occupancies and set fermie to zero.
    ! FIXME: Possible problem here if the QP energies are not ordered!
    call ebands_update_occ(gwr%qp_ebands, gwr%dtset%spinmagntarget, prtvol=gwr%dtset%prtvol, fermie_to_zero=.True.)
  end if
@@ -5082,11 +5079,9 @@ end if
 
        if (band_val >= gwr%bstart_ks(ikcalc, spin) .and. band_val + 1 <= gwr%bstop_ks(ikcalc, spin)) then
          ibv = band_val - gwr%bstart_ks(ikcalc, spin) + 1
-         ks_gap = e0_kcalc(ibv+1, ikcalc, spin) - e0_kcalc(ibv, ikcalc, spin)
-         !ks_gap = gwr%ks_ebands%eig(ibv+1, ik_ibz, spin) - gwr%ks_ebands%eig((ibv, ik_ibz, spin)
+         ks_gap = gwr%ks_ebands%eig(band_val+1, ik_ibz, spin) - gwr%ks_ebands%eig(band_val, ik_ibz, spin)
 
-         ! This to detect possible band inversion in the QP energies.
-         ! and compute qp_gaps accordingly.
+         ! This to detect possible band inversion in the QP energies and compute qp_gaps accordingly.
          call sort_rvals(nbc, real(qpe_zlin_kcalc(:, ikcalc, spin)), iperm, sorted_qpe, tol=tol12)
 
          if (iperm(ibv) /= ibv .or. iperm(ibv + 1) /= ibv + 1) then
@@ -5096,7 +5091,8 @@ end if
          else
            call ydoc%add_int('QP_VBM_band', ibv + gwr%bstart_ks(ikcalc, spin) - 1)
            call ydoc%add_int('QP_CBM_band', ibv+1 + gwr%bstart_ks(ikcalc, spin) - 1)
-           qp_gap = real(qpe_zlin_kcalc(ibv+1, ikcalc, spin) - qpe_zlin_kcalc(ibv, ikcalc, spin))
+           !qp_gap = real(qpe_zlin_kcalc(ibv+1, ikcalc, spin) - qpe_zlin_kcalc(ibv, ikcalc, spin))
+           qp_gap = gwr%qp_ebands%eig(band_val+1, ik_ibz, spin) - gwr%qp_ebands%eig(band_val, ik_ibz, spin)
          end if
          ABI_FREE(iperm)
          ABI_FREE(sorted_qpe)
@@ -5107,14 +5103,12 @@ end if
        end if
 
        call ydoc%open_tabular('data') !, tag='SigmaeeData')
-       write(msg, "(a5, *(a9))") &
-         "Band", "E0", "<VxcDFT>", "SigX", "SigC(E0)", "Z", "E-E0", "E-Eprev", "E", "Occ(E)"
+       write(msg, "(a5, *(a9))") "Band", "E0", "<VxcDFT>", "SigX", "SigC(E0)", "Z", "E-E0", "E-Eprev", "E", "Occ(E)"
        call ydoc%add_tabular_line(msg)
 
        do band=gwr%bstart_ks(ikcalc, spin), gwr%bstop_ks(ikcalc, spin)
          ibc = band - gwr%bstart_ks(ikcalc, spin) + 1
-         e0 = e0_kcalc(ibc, ikcalc, spin)
-         !e0 = gwr%ks_ebands%eig(band, ik_ibz, spin)
+         e0 = gwr%ks_ebands%eig(band, ik_ibz, spin)
          qp_ene = gwr%qp_ebands%eig(band, ik_ibz, spin)
          qp_ene_prev = gwr%qp_ebands_prev%eig(band, ik_ibz, spin)
 
@@ -5166,7 +5160,8 @@ end if
        call write_units(units, sjoin("# kpt:", ktoa(gwr%kcalc(:, ikcalc)), "spin:", itoa(spin)))
        do band=gwr%bstart_ks(ikcalc, spin), gwr%bstop_ks(ikcalc, spin)
          ibc = band - gwr%bstart_ks(ikcalc, spin) + 1
-         e0 = e0_kcalc(ibc, ikcalc, spin)
+         !e0 = e0_kcalc(ibc, ikcalc, spin)
+         e0 = gwr%ks_ebands%eig(band, ik_ibz, spin)
          sigx = gwr%x_mat(band, band, ikcalc, spin)
          call write_units(units, sjoin("# band:", itoa(band), ", spin:", itoa(spin)))
 
@@ -5195,7 +5190,9 @@ end if
 
    close(unt_it); close(unt_iw); close(unt_rw)
 
+   ! ======================
    ! Add results to GWR.nc
+   ! ======================
    NCF_CHECK(nctk_open_modify(ncid, gwr%gwrnc_path, xmpi_comm_self))
 
    ! Define arrays with results.
@@ -5595,17 +5592,11 @@ subroutine gwr_run_energy_scf(gwr, free_ugb)
 
 !Local variables-------------------------------
  integer,parameter :: master = 0
- integer :: gwr_nstep
+ integer :: gwr_nstep, units(2)
  logical :: converged
- integer :: units(2)
+ character(len=500) :: msg
 
 ! *************************************************************************
-
- ! Sketching energy-only self-consistency:
- !   - G0W0
- !   - eGeW
- !   - eGW0
- !   - G0eW
 
  ! TODO:
  ! To implement restart capabilities we need to read scf_iteration, qp_ebands and gwr_task from GWR.nc
@@ -5641,7 +5632,7 @@ subroutine gwr_run_energy_scf(gwr, free_ugb)
 
  case ("G0EW")
    ! This is more complex to implement as we need to store G0 and eG
-   ! and then use G only for chi/W part and not in Sigma
+   ! and then use G only for chi and not in Sigma
    call wrtout(units, " Begin energy-only self-consistency in W (G0EW)")
    ABI_ERROR("G0WE is not yet implemented")
    call gwr%run_g0w0(free_ugb=.False.)
@@ -5661,12 +5652,18 @@ subroutine gwr_run_energy_scf(gwr, free_ugb)
  end select
 
  if (gwr%comm%me == master) then
-   !call ebands_print_gaps(gwr%qp_ebands, std_out, header="QP gaps (Fermi energy set to zero)")
-   !call ebands_print_gaps(gwr%qp_ebands, ab_out, header="QP gaps (Fermi energy set to zero)")
    if (converged) then
-     call wrtout(units, sjoin(" Convergence achieved at iteration", itoa(gwr%scf_iteration)))
+     write(msg, "(1x,4a,i0,a,f8.3,a)") &
+       trim(gwr%dtset%gwr_task), " self-consistent loop:", ch10, &
+       " Convergence achieved at iteration: ", gwr%scf_iteration, &
+       " with gwr_tolqpe: ",gwr%dtset%gwr_tolqpe * Ha_meV, " (meV)"
+     call wrtout(units, msg)
    else
-     call wrtout(units," QP corrections are not converged!!!!!!!")
+     write(msg, "(1x,4a,f8.3,3a,i0,a)") &
+       trim(gwr%dtset%gwr_task), " self-consistent loop:", ch10, &
+       " WARNING: Could not converge with gwr_tolqpe: ",gwr%dtset%gwr_tolqpe * Ha_meV, " (meV)", ch10, &
+       " after: ", gwr_nstep, " steps"
+     call wrtout(units, msg)
    end if
  end if
 
@@ -5711,6 +5708,7 @@ subroutine gwr_check_scf_cycle(gwr, converged)
  associate (now => gwr%qp_ebands, prev => gwr%qp_ebands_prev)
  do spin=1,gwr%nsppol
    do ikcalc=1,gwr%nkcalc ! TODO: Should be spin dependent!
+     ! Compute max abs difference between QP at iteration i and i-1.
      ik_ibz = gwr%kcalc2ibz(ikcalc, 1)
      ib = gwr%bstart_ks(ikcalc, spin); jb = gwr%bstop_ks(ikcalc, spin)
      adiff = zero; adiff(ib:jb) = abs(now%eig(ib:jb, ik_ibz, spin) - prev%eig(ib:jb, ik_ibz, spin))
@@ -5718,9 +5716,10 @@ subroutine gwr_check_scf_cycle(gwr, converged)
      max_adiff = max(max_adiff, adiff(band))
      if (adiff(band) > gwr%dtset%gwr_tolqpe) converged = .False.
      if (gwr%comm%me == master) then
+       ! Write info
        write(msg, "(a,i0,1x,2a,i0)") " For k-point: ", ik_ibz, trim(ktoa(now%kptns(:,ik_ibz))),", spin: ", spin
        call wrtout(units, msg)
-       write(msg, "(a, es12.5,a)")" max_adiff: ", adiff(band) * Ha_meV, " (meV)"
+       write(msg, "(4x,a,es12.5,a,i0)")" max(abs(E_i - E_{i-1})): ", adiff(band) * Ha_meV, " (meV) for band: ", band
        call wrtout(units, msg)
      end if
    end do
@@ -5731,8 +5730,9 @@ subroutine gwr_check_scf_cycle(gwr, converged)
  call xmpi_land(converged, gwr%comm%value)
 
  if (gwr%comm%me == master) then
-   call ebands_print_gaps(gwr%qp_ebands, std_out, header="QP gaps (Fermi energy set to zero)")
-   call ebands_print_gaps(gwr%qp_ebands, ab_out, header="QP gaps (Fermi energy set to zero)")
+   write(msg, "(a,i0,a)") "QP gaps at iteration: ",gwr%scf_iteration," (Fermi energy set to zero)"
+   call ebands_print_gaps(gwr%qp_ebands, std_out, header=msg)
+   call ebands_print_gaps(gwr%qp_ebands, ab_out, header=msg)
    if (.not. converged) then
      call wrtout(units," Not converged --> start new iteration ...")
    !else
