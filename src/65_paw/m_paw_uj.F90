@@ -328,6 +328,8 @@ call wrtout(std_out,message,'COLL')
 
  nspden=dtpawuj(jdtset)%nspden
  nat_org=dtpawuj(jdtset)%nat
+ ABI_CHECK(nat_org == 1, "MG: I'm not sure we access data with the right index if nat_org > 1")
+
  macro_uj=dtpawuj(jdtset)%macro_uj
  pawujat=dtpawuj(jdtset)%pawujat
  pawprtvol=dtpawuj(jdtset)%pawprtvol
@@ -520,7 +522,14 @@ call wrtout(std_out,message,'COLL')
      occmag='Magnetizations'
      signum=-1.0d0 !Hund's J is -1*(1/chi0-1/chi)
    end if
-   vsh(jdtset)=dtpawuj(jdtset)%vsh(1,pawujat)
+   ! MG: Cannot use pawujat index to extract vsh as we have used:
+   !
+   !  dtpawuj(icyc)%vsh=reshape(pack(atvshift,atvshmusk),(/ nspden,nnat /))
+
+   ! thus the pawujat atom in the atvshift array becomes the first one in %vsh
+   !
+   !vsh(jdtset)=dtpawuj(jdtset)%vsh(1,pawujat)
+   vsh(jdtset)=dtpawuj(jdtset)%vsh(1,1)
    if (pawprtvol==-3) then
      write(message,fmt='(2a,i3,a,f15.12)') ch10,' Potential shift vsh(',jdtset,') =',vsh(jdtset)
      call wrtout(std_out,message,'COLL')
@@ -542,15 +551,16 @@ call wrtout(std_out,message,'COLL')
  chi0=(luocc(1,1:nat_org)-luocc(3,1:nat_org))/(vsh(1)-vsh(3))/diem
  chi=(luocc(2,1:nat_org)-luocc(4,1:nat_org))/(vsh(2)-vsh(4))
 
- if ((abs(chi0(pawujat))<0.0000001).or.(abs(chi(pawujat))<0.0000001)) then
+ ! MG: pawujat replaced by 1 because arrays are dimensioned with nat_org (usually 1) and not natom!
+ if ((abs(chi0(1))<0.0000001).or.(abs(chi(1))<0.0000001)) then
    write(message, '(2a,2f12.5,a)' ) ch10,'Chi0 or Chi is too small for inversion.',&
-     &chi0(pawujat),chi(pawujat),ch10
+     &chi0(1),chi(1),ch10
    call wrtout(ab_out,message,'COLL')
    return
  end if
 
  !LMac: Scalar Hubbard Parameter
- scalarHP=signum*(1.0d0/chi0(pawujat)-1.0d0/chi(pawujat))*Ha_eV
+ scalarHP=signum*(1.0d0/chi0(1)-1.0d0/chi(1))*Ha_eV
 
  write(message,fmt='(a)')': '
  if (nspden==2) then
@@ -638,18 +648,19 @@ call wrtout(std_out,message,'COLL')
 ' --------------- -----------------------------'
  call wrtout(std_out,message,'COLL')
  call wrtout(ab_out,message,'COLL')
+ ! MG: pawujat --> 1.
  do ipert=1,2
-   write(message, fmt='(3f15.10)') vsh(ipert*2-1)*Ha_eV,luocc(ipert*2-1,pawujat),luocc(ipert*2,pawujat)
+   write(message, fmt='(3f15.10)') vsh(ipert*2-1)*Ha_eV,luocc(ipert*2-1,1),luocc(ipert*2,1)
    call wrtout(std_out,message,'COLL')
    call wrtout(ab_out,message,'COLL')
  end do
  write(message,'(2a)') ch10,'                    Scalar response functions:'
  call wrtout(std_out,message,'COLL')
  call wrtout(ab_out,message,'COLL')
- write(message,fmt='(a,f12.5)') '                    Chi0 [eV^-1]: ',chi0(pawujat)/Ha_eV
+ write(message,fmt='(a,f12.5)') '                    Chi0 [eV^-1]: ',chi0(1)/Ha_eV
  call wrtout(std_out,message,'COLL')
  call wrtout(ab_out,message,'COLL')
- write(message,fmt='(a,f12.5)') '                    Chi [eV^-1]:  ',chi(pawujat)/Ha_eV
+ write(message,fmt='(a,f12.5)') '                    Chi [eV^-1]:  ',chi(1)/Ha_eV
  call wrtout(std_out,message,'COLL')
  call wrtout(ab_out,message,'COLL')
  write(message,'(4a,f9.5,a)') ch10,' The scalar ',parname,' from the two-point regression scheme is ',scalarHP,' eV.'
