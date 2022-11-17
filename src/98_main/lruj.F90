@@ -109,6 +109,7 @@ program lruj
  call abimem_init(0)
 #endif
 
+ !No MPI functionality needed for main procedure.
  if (my_rank /= master) goto 100
 
 !##########################################################################################################
@@ -117,6 +118,7 @@ program lruj
  !Syntax: ./lruj  FILE1 FILE2 FILE3 ... [-d 5]
  !i.e. list of netcdf files come first, followed by options
 
+ !Count arguments and number of files (= #perturbations)
  nargs = command_argument_count()
  ABI_MALLOC(file_paths, (nargs))
  nfiles = 0
@@ -127,9 +129,7 @@ program lruj
    file_paths(nfiles) = trim(arg)
  end do
 
- write(std_out,*) 'nargs',nargs
- write(std_out,*) 'nfiles',nfiles
-
+ !Assess options
  do ii=1,command_argument_count()
    call get_command_argument(ii, arg)
    if (arg == "--version") then
@@ -141,6 +141,7 @@ program lruj
    end if
  end do
 
+ !If no files found, exit program.
  if (nfiles == 0) then
    write(std_out, *) "Empty file list!"
    goto 100
@@ -158,13 +159,13 @@ program lruj
 !##########################################################################################################
 !######################################  Read *DSi*_LRUJ.nc files  ########################################
 
- !Read uj_pert from each file and sort file_paths accordingly.
  ABI_MALLOC(uj_perts,(nfiles))
  ABI_MALLOC(macrouj_file, (nfiles))
 
+ !Read perturbation strengths, parameter type, #spins and #atoms
+ !from each file.
  do ii=1,nfiles
    NCF_CHECK(nctk_open_read(ncid, file_paths(ii), xmpi_comm_self))
-
    NCF_CHECK(nf90_get_var(ncid, vid("uj_pert"), uj_perts(ii)))
    NCF_CHECK(nf90_get_var(ncid, vid("macro_uj"), macrouj_file(ii)))
    macro_uj=macrouj_file(1)
@@ -176,14 +177,14 @@ program lruj
    NCF_CHECK(nf90_close(ncid))
  end do
 
- !Comment this section if you don't need to sort files by uj_pert
+ !Sort files by perturbation magnitude.
  ABI_MALLOC(iperm, (nfiles))
  iperm = [(ii, ii=1,nfiles)]
  call sort_dp(nfiles, uj_perts, iperm, tol12)
  file_paths(1:nfiles) = file_paths(iperm(:))
  ABI_FREE(iperm)
 
- !Now read data and perform basic consistency check
+ !Allocate main data-holding arrays.
  ABI_MALLOC(luocc, (ndtpawuj, nfiles))
  ABI_MALLOC(luocc_nnat, (ndtpawuj, nnat))
  ABI_MALLOC(pawujat_file, (nfiles))
@@ -192,7 +193,7 @@ program lruj
  ABI_MALLOC(ph0phiint_file, (nfiles))
  ABI_MALLOC(nspden_file, (nfiles))
 
-
+ !Set macro_uj-specific variables, strings and constants.
  Ha2eV=27.2113961318d0
  if (macro_uj==4) then         !Calculation of the Hunds J parameter
    diem_token="diemixmag"     !Unscreened response in Hund's J impacted by diemixmag
@@ -208,13 +209,16 @@ program lruj
    signum=1.0d0               !Hubbard U is 1*(1/chi0-1/chi)
  end if
 
+ !Allocate perturbation and occupation arrays. Set the first
+ !to the unperturbed case (i.e., when perturbation=0.0d0).
  ABI_MALLOC(perts,(0:nfiles))
  ABI_MALLOC(occs0,(0:nfiles))
  ABI_MALLOC(occs,(0:nfiles))
- perts(0)=0.0d0
+ perts(0)=0.0d0               !Unperturbed case.
 
- write(std_out,'(a,i2)') 'Number of perturbations detected: ',nfiles
+ write(std_out,'(a,i2)') ' Number of perturbations detected: ',nfiles
 
+ !Open _LRUJ.nc files and read in the relevant data.
  do ii=1,nfiles
    NCF_CHECK(nctk_open_read(ncid, file_paths(ii), xmpi_comm_self))
    NCF_CHECK(nf90_get_var(ncid, vid("pawujat"), pawujat_file(ii)))
@@ -229,14 +233,20 @@ program lruj
    dmatpuopt=dmatpuopt_file(1)
    NCF_CHECK(nf90_get_var(ncid, vid("ph0phiint"), ph0phiint_file(ii)))
    ph0phiint=ph0phiint_file(1)
-!   write(message,*) "luocc for file: ", ii, " with uj_pert ", uj_perts(ii), " (Ha) ", ch10, luocc(:,ii)
-!   call wrtout(std_out,message,'COLL')
    NCF_CHECK(nf90_close(ncid))
+   !Testing if the unperturbed occupancies are equal across each run. If they
+   !aren't, then exit. If they are equal, then save them in appropriate arrays.
    if ((ii>1).and.((occs0(0)/=luocc(1,ii)).or.(occs(0)/=luocc(2,ii)))) then
-     ABI_ERROR(sjoin("Unperturbed ground state occupations across LRUJ datasets are not equal.",ch10,&
-&         "Make sure your perturbative calculations are reading in the same WFK file."))
+     write(std_out,'(a)') "ERROR: Unperturbed ground state occupations across LRUJ datasets are not equal."
+     write(std_out,'(a)') "Check the consistency of input variables in your perturbative calculations:"
+     write(std_out,'(a)') "    1. Are they each reading in the same WFK file?"
+     write(std_out,'(a)') "    2. Are macro-uj, pawujat, dmatpuopt, diemix(mag) consistent"
+     write(std_out,'(a)') "       across all perturbations?"
+     write(std_out,'(a)') "If not, relaunch perturburbative Abinit calculations, then"
+     write(std_out,'(a)') "reexecute lruj utility. Exiting."
+     goto 100
    else
-     perts(ii)=uj_perts(ii)
+     perts(ii)=uj_perts(ii)*Ha2eV
      occs0(0)=luocc(1,ii)
      occs(0)=luocc(2,ii)
      occs0(ii)=luocc(3,ii)
@@ -247,9 +257,9 @@ program lruj
 !##########################################################################################################
 !####################################  Tests on input information  ########################################
 
- !Tests if we have enough data points to conduct distinct regression.
+ !Tests if we have enough data points (at least 3) to conduct distinct regression.
  ndata=nfiles+1
- write(std_out,'(a,i2,a)') 'Including unperturbed state, we have ',ndata,' datapoints.'
+ write(std_out,'(a,i2,a)') ' Including unperturbed state, we have ',ndata,' data points.'
  if (ndata==0) then
    ABI_ERROR('No linear response data points found.')
  else if (ndata==1) then
@@ -259,7 +269,7 @@ program lruj
  else if (ndata==2) then
    ABI_ERROR(sjoin('Only two data points found. The scalar Hubbard Parameter from',ch10,&
 &    'the two-point linear regression scheme has already been printed in your .abo file. Try bashing',ch10,&
-&    '     grep "two-point regression" <run_name.abo> ',ch10,'to find the result of this calculation.'))
+&    '==>   grep "two-point regression" <run_name.abo> ',ch10,'to find the result of this calculation.'))
  end if
 
  !pawujat consistency check.
@@ -319,7 +329,6 @@ program lruj
 !##########################################################################################################
 !###############################  Calculation of the Response Functions  ##################################
 
- write(std_out,*) 'degarg',degarg
  !Test compatibility of polynomial degree (if present as an argument) with
  !number of data points. Otherwise, default to the following:
  !If we have 3 data points, conduct at maximum a linear regression.
@@ -327,9 +336,10 @@ program lruj
  !If more than 5 data points, conduct linear, quadratic and cubic regressions.
  if (degarg/=1) then
    if (degarg>ndata-2) then
-     write(std_out,'(3a,i2,3a,i2,a)') 'Your chosen polynomial degree is too large. The resulting',ch10,&
-&       'parameters will certainly be overfitted. Either conduct ',degarg+2,' perturbations,',ch10,&
-&       'or execute this utility again with -d ',ndata-2,' or smaller.'
+     write(std_out,'(4a,i2,3a,i2,2a)') ch10,' ERROR: Your chosen polynomial degree is too large. The resulting',ch10,&
+&       ' parameters will certainly be overfitted. Either conduct ',degarg+1,' perturbations,',ch10,&
+&       ' or execute this utility again with --d',ndata-2,' or smaller. Exiting program.',ch10
+     goto 100
    else
      mdegree=degarg
    end if
@@ -340,8 +350,8 @@ program lruj
      mdegree=3
    end if
  end if
+ write(std_out,'(a,i2)') ' Maximum degree of polynomials analyzed: ',mdegree
 
- write(std_out,*) 'Program will calculate all polynomials up to degree ',mdegree,'.'
  !Allocate the response and error arrays
  ABI_MALLOC(chi0err,(mdegree))
  ABI_MALLOC(chierr,(mdegree))
@@ -356,9 +366,10 @@ program lruj
    ABI_MALLOC(chicoeffs,(degree+1))
    call polynomial_regression(ndata,perts,occs0,degree,chi0coeffs,chi0err(degree))
    call polynomial_regression(ndata,perts,occs,degree,chicoeffs,chierr(degree))
-   chi0(degree)=chi0coeffs(2)/diem   !The derivative of all polynomial regressions at pert=0.0
-   chi(degree)=chicoeffs(2)          !is just the second coefficient.
-   hubpar(degree)=signum*(1.0d0/chi0(degree)-1.0d0/chi(degree))*Ha2eV
+   chi0(degree)=chi0coeffs(2)/diem         !The derivative of all polynomial regressions
+   chi(degree)=chicoeffs(2)                !at pert=0.0 is just the second coefficient.
+   chi0err(degree)=chi0err(degree)/diem    !Chi0 error divided by diem also.
+   hubpar(degree)=signum*(1.0d0/chi0(degree)-1.0d0/chi(degree))
    hubparerr(degree)=sqrt(chi0err(degree)/chi0(degree)**2+chierr(degree)/chi(degree)**2)
    ABI_FREE(chi0coeffs)
    ABI_FREE(chicoeffs)
@@ -389,7 +400,7 @@ program lruj
 ' --------------- -----------------------------'
  call wrtout(std_out,message,'COLL')
  do ipert=0,nfiles
-   write(message, fmt='(3f15.10)') perts(ipert)*Ha2eV,occs0(ipert),occs(ipert)
+   write(message, fmt='(3f15.10)') perts(ipert),occs0(ipert),occs(ipert)
    call wrtout(std_out,message,'COLL')
  end do
 
@@ -409,8 +420,8 @@ program lruj
      write(degreename,'(i2)') degree
      regname=' Degree'//degreename//': '
    end if
-   write(message,fmt='(a,3f14.7,a,3f13.7)') regname,chi0(degree)/Ha2eV,chi(degree)/Ha2eV,hubpar(degree),&
-&     '  |',chi0err(degree)/Ha2eV,chierr(degree)/Ha2eV,hubparerr(degree)
+   write(message,fmt='(a,3f14.7,a,3f13.7)') regname,chi0(degree),chi(degree),hubpar(degree),&
+&     '  |',chi0err(degree),chierr(degree),hubparerr(degree)
    call wrtout(std_out,message,'COLL')
  end do
 
@@ -443,6 +454,7 @@ program lruj
  ABI_FREE(uj_perts)
  ABI_FREE(file_paths)
 
+ !Ending herald.
  write(std_out,*) ch10,'Linear Response UJ (LRUJ) program complete. Live long and prosper. ~LMac',ch10
  goto 100
 
@@ -470,21 +482,26 @@ contains
 
 subroutine lruj_show_help()
 
+  write(std_out,"(a)")" "
+  write(std_out,"(a)")"           Linear Response Hubbard U and Hund's J (LRUJ) Utility"
+  write(std_out,"(a)")"-----------------------------------------------------------------------------"
+  write(std_out,"(a)")"To execute the LRUJ utility, execute: "
+  write(std_out,"(a)")"   ./lruj  FILE1 FILE2 FILE3 ... [options]"
+  write(std_out,"(2a)")"             ^ input files must be _LRUJ.nc from Abinit run",ch10
   write(std_out,"(a)")" --version              Show version number and exit."
   write(std_out,"(a)")" -h, --help             Show this help and exit."
-  write(std_out,"(a)")" -v                     Increase verbosity level"
-
-  !write(std_out,"(2a)")ch10,"=== HEADER ==="
-  !write(std_out,"(a)")"hdr_print FILE [--prtvol 0]  Print ABINIT header."
-
-  !write(std_out,"(2a)")ch10,"=== KPOINTS ==="
-  !write(std_out,"(a)")"ibz FILE --ngkpt 2 2 2 or --kptrlatt [--kptopt 1] [--shiftk 0.5 0.5 0.5] [--chksymbreak 1]"
+  write(std_out,"(a)")" --d <n>                Set the maximum degree n polynomial calculated for"
+  write(std_out,"(a)")"                           the response functions chi and chi0."
+  write(std_out,"(a)")"                           (i.e., 1=linear, 2=quadratic, 3=cubic, etc.)"
+  write(std_out,"(a)")"                           NOTE: a degree n polynomial will require at minimum"
+  write(std_out,"(a)")"                           n+2 points (n+1 perturbations and the unperturbed"
+  write(std_out,"(a)")"                           case) or more so as to avoid overfitting."
 
 end subroutine lruj_show_help
 !!***
 
 
-
+ !Function to simplify reading in of variables from netcdf files.
  integer function vid(vname)
    character(len=*),intent(in) :: vname
    vid = nctk_idname(ncid, vname)
@@ -560,7 +577,6 @@ subroutine polynomial_regression(npoints,xvals,yvals,degree,coeffs,RMSerr)
   do icoeff=0,ncoeffs-1
     do ipoint=1,size(xvals)
        A(ipoint,icoeff+1) = xvals(ipoint)**icoeff
-       write(std_out,*) 'icoeff,ipoint,xvals(ipoint),A(ipoint,icoeff+1)',icoeff,ipoint,xvals(ipoint),A(ipoint,icoeff+1)
     end do
   end do
 
@@ -571,18 +587,15 @@ subroutine polynomial_regression(npoints,xvals,yvals,degree,coeffs,RMSerr)
   call DGETRF(ncoeffs,ncoeffs,ATA,ncoeffs,ipiv,info)
   if (info/=0) then
     ABI_ERROR('Problem returned from LAPACK DGETRF in polynomial regression routine.')
-    call wrtout(std_out,message,'COLL')
     return
   end if
   call DGETRI(ncoeffs,ATA,ncoeffs,ipiv,work,ncoeffs,info)
   if (info/=0) then
     ABI_ERROR('Problem returned from LAPACK DGETRI in polynomial regression routine.')
-    call wrtout(std_out,message,'COLL')
     return
   end if
 
   coeffs = matmul(matmul(ATA,AT),yvals)
-!  write(std_out,*) 'Size coeffs inside subroutine',size(coeffs)
 
 !####################################################################
 !##############  RMS error on the polynomial fit  ###################
