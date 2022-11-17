@@ -1,6 +1,0 @@
-# YAML support is available, but is disabled for this test.
-# Start legacy fldiff comparison report
-3
-< +DDB, Version number    100401
-> +DDB, Version number    100401
-Summary t23.ddb.out: no significant difference has been found.
