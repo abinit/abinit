@@ -310,6 +310,7 @@ module m_orbmag
   private :: dterm_drd2d
   private :: dterm_rd2e
   private :: dterm_rd2f
+  private :: dterm_drd2f
   private :: dterm_rd3a
   private :: dterm_dijhat
   private :: make_ddir_ap
@@ -2437,7 +2438,7 @@ end subroutine dterm_rd2b
 !!
 !! SOURCE
 
-subroutine dterm_rd2f(atindx,dterm,dtset,gntselect,gprimd,lmnmax,my_lmax,&
+subroutine dterm_rd2f(atindx,dterm,dtset,gntselect,lmnmax,my_lmax,&
     & pawrad,pawrhoij,pawtab,realgnt)
 
   !Arguments ------------------------------------
@@ -2449,7 +2450,7 @@ subroutine dterm_rd2f(atindx,dterm,dtset,gntselect,gprimd,lmnmax,my_lmax,&
   !arrays
   integer,intent(in) :: atindx(dtset%natom)
   integer,intent(in) :: gntselect((2*my_lmax-1)**2,my_lmax**2*(my_lmax**2+1)/2)
-  real(dp),intent(in) :: gprimd(3,3),realgnt((2*my_lmax-1)**2*(my_lmax)**4)
+  real(dp),intent(in) :: realgnt((2*my_lmax-1)**2*(my_lmax)**4)
   type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
   type(pawrhoij_type),intent(in) :: pawrhoij(dtset%natom)
   type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
@@ -2465,7 +2466,7 @@ subroutine dterm_rd2f(atindx,dterm,dtset,gntselect,gprimd,lmnmax,my_lmax,&
 
 !--------------------------------------------------------------------
 
- dterm%rd2f = czero; dterm%drd2f = czero
+ dterm%rd2f = czero
 
  do iat = 1, dtset%natom
    iatom = atindx(iat)
@@ -2527,9 +2528,164 @@ subroutine dterm_rd2f(atindx,dterm,dtset,gntselect,gprimd,lmnmax,my_lmax,&
  end do ! end loop over iat
 
  dterm%has_rd2f = 2
- dterm%has_drd2f = 2
 
 end subroutine dterm_rd2f
+
+!!****f* ABINIT/dterm_drd2f
+!! NAME
+!! dterm_drd2f
+!!
+!! FUNCTION
+!! Compute -vH[\hat{n}]Q^{LM}_ij*(-i)r_a, deriv of 2d of roadmap paper
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2021 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!! computed in Cart directions then transformed to xtal coords
+!!
+!! PARENTS
+!!      m_orbmag
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine dterm_drd2f(atindx,dterm,dtset,gntselect,gprimd,lmnmax,my_lmax,&
+    & pawrad,pawrhoij,pawtab,realgnt)
+
+  !Arguments ------------------------------------
+  !scalars
+  integer,intent(in) :: lmnmax,my_lmax
+  type(dataset_type),intent(in) :: dtset
+  type(dterm_type),intent(inout) :: dterm
+
+  !arrays
+  integer,intent(in) :: atindx(dtset%natom)
+  integer,intent(in) :: gntselect((2*my_lmax-1)**2,my_lmax**2*(my_lmax**2+1)/2)
+  real(dp),intent(in) :: gprimd(3,3),realgnt((2*my_lmax-1)**2*(my_lmax)**4)
+  type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
+  type(pawrhoij_type),intent(in) :: pawrhoij(dtset%natom)
+  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
+
+  !Local variables -------------------------
+  !scalars
+  integer :: adir,alm,iat,iatom,ijlm,ijlmn,ijmax,ijmin,ilmn,isel1,isel2,isel3,itypat,jlmn
+  integer :: kllm,kllmn,klmax,klmin,klln,klmn,ll,llmm,llmn,lp,lpmp,mesh_size,meshsz
+  real(dp) :: rgla,qij,qkl,vh1
+  complex(dpc) :: rhokl
+
+  !arrays
+  real(dp) :: dij_cart(3),dij_red(3),eijkl(3)
+  real(dp),allocatable :: ff(:),nltff(:)
+
+!--------------------------------------------------------------------
+
+ dterm%drd2f = czero
+
+ do iat = 1, dtset%natom
+   iatom = atindx(iat)
+   itypat = dtset%typat(iat)
+  
+   mesh_size=pawtab(itypat)%mesh_size
+   ABI_MALLOC(ff,(mesh_size))
+   ABI_MALLOC(nltff,(mesh_size))
+ 
+   meshsz=pawrad(itypat)%int_meshsz
+   if (mesh_size>meshsz) ff(meshsz+1:mesh_size)=zero
+
+   do ilmn = 1, pawtab(itypat)%lmn_size
+     do jlmn = 1, pawtab(itypat)%lmn_size
+       ijlmn = MATPACK(ilmn,jlmn)
+       ijlm = pawtab(itypat)%indklmn(1,ijlmn)
+       ijmin = pawtab(itypat)%indklmn(3,ijlmn)
+       ijmax = pawtab(itypat)%indklmn(4,ijlmn)
+
+       dij_cart(1:3) = czero
+
+       do klmn = 1, pawtab(itypat)%lmn_size
+         do llmn = 1, pawtab(itypat)%lmn_size
+           kllmn = MATPACK(klmn,llmn)
+           kllm = pawtab(itypat)%indklmn(1,kllmn)
+           klln = pawtab(itypat)%indklmn(2,kllmn)
+           klmin = pawtab(itypat)%indklmn(3,kllmn)
+           klmax = pawtab(itypat)%indklmn(4,kllmn)
+
+           rhokl = CMPLX(pawrhoij(iatom)%rhoij_(2*kllmn-1,1),pawrhoij(iatom)%rhoij_(2*kllmn,1))
+           ! see note at top of file near definition of MATPACK macro
+           if (klmn .GT. llmn) rhokl = CONJG(rhokl)
+
+           eijkl(1:3) = zero
+
+           do lp = klmin,klmax,2
+             ff(1:meshsz)=pawtab(itypat)%shapefunc(2:meshsz,lp+1)*&
+               & pawrad(itypat)%rad(2:meshsz)*pawrad(itypat)%rad(2:meshsz)
+             call poisson(ff,lp,pawrad(itypat),nltff)
+ 
+             do ll = ijmin,ijmax,2
+               ff(1)=zero
+               ff(2:meshsz)=-pawtab(itypat)%shapefunc(2:meshsz,ll+1)*&
+                 & nltff(2:meshsz)*&
+                 & pawrad(itypat)%rad(2:meshsz)*pawrad(itypat)%rad(2:meshsz)
+               call simp_gen(vh1,ff,pawrad(itypat))
+
+               do llmm = ll**2+1,(ll+1)**2
+                 isel1 = gntselect(llmm,ijlm)
+                 if (isel1 .EQ. 0) cycle
+                 qij = pawtab(itypat)%qijl(llmm,ijlmn)
+
+                 do lpmp = lp**2+1,(lp+1)**2
+                   isel2 = gntselect(lpmp,kllm)
+                   if (isel2 .EQ. 0) cycle
+                   qkl = pawtab(itypat)%qijl(lpmp,kllmn)
+                   
+                   do adir = 1, 3
+                     alm = MATPACK(pack1a(adir),llmm)
+                     isel3 = gntselect(lpmp,alm)
+                     if (isel3 .EQ. 0) cycle
+                     rgla = realgnt(isel3)
+                     
+                     eijkl(adir) = eijkl(adir) + four_pi*cdij*vh1*&
+                       & qij*qkl*rgla
+                 
+                   end do !adir
+                 end do !lpmp
+               end do !llmm
+             end do ! ll
+           end do ! lp
+
+           dij_cart(1:3) = dij_cart(1:3) + rhokl*eijkl(1:3)
+
+         end do ! llmn
+       end do ! klmn
+
+       dij_red = MATMUL(TRANSPOSE(gprimd),dij_cart)
+       dterm%drd2f(iatom,ilmn,jlmn,1:3) = -j_dpc*dij_red(1:3)
+
+     end do ! jlmn
+   end do ! ilmn
+
+   ABI_FREE(ff)
+   ABI_FREE(nltff)
+
+ end do ! end loop over iat
+
+ dterm%has_drd2f = 2
+
+end subroutine dterm_drd2f
+
 
 !!****f* ABINIT/dterm_drd2d
 !! NAME
@@ -3528,12 +3684,13 @@ subroutine dterm_dijhat(atindx,dterm,dtset,gprimd,nfftf,pawang,&
 
   !Local variables -------------------------
   !scalars
-  integer :: cplex_dij,iat,iatom,ic,ijlmn,ils,ilslm,isel,itypat
-  integer :: klm,klmn,lmax,lm_size,lmin
+  integer :: adir,cplex_dij,iat,iatom,ic,ilmn,ils,ilslm,isel,itypat
+  integer :: jlmn,klm,klmn,lmax,lm_size,lmin
   real(dp) :: dijhat,vr
 
   !arrays
-  real(dp),allocatable :: prod(:),v_dijhat(:,:)
+  real(dp) :: dij_cart(3),dij_red(3)
+  real(dp),allocatable :: prod(:),prod3(:,:),v_dijhat(:,:)
 
 !--------------------------------------------------------------------
 
@@ -3551,35 +3708,52 @@ subroutine dterm_dijhat(atindx,dterm,dtset,gprimd,nfftf,pawang,&
    lm_size=pawtab(itypat)%lcut_size**2
 
    ABI_MALLOC(prod,(lm_size))
+   ABI_MALLOC(prod3,(lm_size,3))
 
    !call pawdijhat(dijhat,cplex_dij,qphase,gprimd,iatom,dtset%natom,ndij,nfftf,nfftf,&
    !  & dtset%nspden,dtset%nsppol,pawang,pawfgrtab(iatom),pawtab(itypat),v_dijhat,qphon,ucvol,xred)
 
    ! compute Int[V(r).g_l(r).Y_lm(r)]
-   prod=zero
+   prod=zero; prod3 = zero
    do ilslm=1,lm_size
      do ic=1,pawfgrtab(iatom)%nfgd
        vr=v_dijhat(pawfgrtab(iatom)%ifftsph(ic),1)
        prod(ilslm)=prod(ilslm)+vr*pawfgrtab(iatom)%gylm(ic,ilslm)
+       do adir = 1, 3
+         prod3(ilslm,adir)=prod3(ilslm,adir)+&
+           & vr*pawfgrtab(iatom)%gylm(ic,ilslm)*&
+           & pawfgrtab(iatom)%rfgd(adir,ic)
+       end do ! adir
      end do
    end do
    !scaling factor (unit volume)
    prod=prod*ucvol/dble(nfftf)
+   prod3(:,:)=prod3(:,:)*ucvol/dble(nfftf)
 
    !compute Sum_(i,j)_LM { q_ij^L Int[V(r).g_l(r).Y_lm(r)] }
    do klmn=1,pawtab(itypat)%lmn2_size
      klm =pawtab(itypat)%indklmn(1,klmn)
      lmin=pawtab(itypat)%indklmn(3,klmn)
      lmax=pawtab(itypat)%indklmn(4,klmn)
-     dijhat = zero
+     ilmn=pawtab(itypat)%indklmn(7,klmn)
+     jlmn=pawtab(itypat)%indklmn(8,klmn)
+
+     dijhat = zero; dij_cart = zero
      do ils=lmin,lmax,2
        do ilslm=ils**2+1,(ils+1)**2
          isel=pawang%gntselect(ilslm,klm)
-         if (isel>0) dijhat=dijhat &
-           & +prod(ilslm)*pawtab(itypat)%qijl(ilslm,klmn)
+         if (isel>0) then 
+           dijhat=dijhat+prod(ilslm)*pawtab(itypat)%qijl(ilslm,klmn)
+           dij_cart(1:3)=dij_cart(1:3)+prod3(ilslm,1:3)*pawtab(itypat)%qijl(ilslm,klmn)
+         end if
        end do !ilslm
      end do ! ils
      dterm%dijhat(iatom,klmn) = CMPLX(dijhat,zero)
+     
+     dij_red = MATMUL(TRANSPOSE(gprimd),dij_cart)
+     dterm%ddijhat(iatom,ilmn,jlmn,1:3) = -j_dpc*dij_red(1:3)
+     dterm%ddijhat(iatom,jlmn,ilmn,1:3) = -j_dpc*dij_red(1:3)
+
    end do ! klmn
  
    ABI_FREE(prod)
@@ -4982,19 +5156,19 @@ subroutine sum_d(dterm)
     dterm%aij = dterm%aij + dterm%rd2e
     dterm%hat_like = dterm%hat_like + dterm%rd2e
   end if
-  !if (dterm%has_drd2e .EQ. 2) then
-  !  dterm%daij = dterm%daij + dterm%drd2e
-  !  dterm%dhat_like = dterm%dhat_like + dterm%drd2e
-  !end if
+  if (dterm%has_drd2e .EQ. 2) then
+    dterm%daij = dterm%daij + dterm%drd2e
+    dterm%dhat_like = dterm%dhat_like + dterm%drd2e
+  end if
  
   if (dterm%has_rd2f .EQ. 2) then
     dterm%aij = dterm%aij + dterm%rd2f
     dterm%hat_like = dterm%hat_like + dterm%rd2f
   end if
-  !if (dterm%has_drd2f .EQ. 2) then
-  !  dterm%daij = dterm%daij + dterm%drd2f
-  !  dterm%dhat_like = dterm%dhat_like + dterm%drd2f
-  !end if
+  if (dterm%has_drd2f .EQ. 2) then
+    dterm%daij = dterm%daij + dterm%drd2f
+    dterm%dhat_like = dterm%dhat_like + dterm%drd2f
+  end if
   
   if (dterm%has_rd3a .EQ. 2) then
     dterm%aij = dterm%aij + dterm%rd3a
@@ -5009,10 +5183,13 @@ subroutine sum_d(dterm)
     dterm%aij = dterm%aij + dterm%dijhat
     dterm%hat_like = dterm%hat_like + dterm%dijhat
   end if
-  !if (dterm%has_ddijhat .EQ. 2) then
-  !  dterm%daij = dterm%daij + dterm%ddijhat
-  !  dterm%dhat_like = dterm%dhat_like + dterm%ddijhat
-  !end if
+  if (dterm%has_ddijhat .EQ. 2) then
+    dterm%daij = dterm%daij + dterm%ddijhat
+    dterm%dhat_like = dterm%dhat_like + dterm%ddijhat
+  end if
+
+  !dterm%daij = dterm%donsite_like
+  !dterm%aij = dterm%onsite_like
 
 end subroutine sum_d
 !!***
@@ -5169,7 +5346,9 @@ subroutine make_d(atindx,atindx1,cprj,dimlmn,dterm,dtset,gprimd,mcprj,nfftf,&
  call dterm_rd2e(atindx,dterm,dtset,gprimd,pawrad,pawtab)
 
  ! term due to v_H[\hat{n}]Q^{LM}_{ij}, corresponds to term 2f of roadmap paper
- call dterm_rd2f(atindx,dterm,dtset,gntselect,gprimd,psps%lmnmax,my_lmax,&
+ call dterm_rd2f(atindx,dterm,dtset,gntselect,psps%lmnmax,my_lmax,&
+   & pawrad,pawrhoij,pawtab,realgnt)
+ call dterm_drd2f(atindx,dterm,dtset,gntselect,gprimd,psps%lmnmax,my_lmax,&
    & pawrad,pawrhoij,pawtab,realgnt)
 
  ! term dvxc due to v_xc[n1+nc] corresponds to term 3a in roadmap paper
