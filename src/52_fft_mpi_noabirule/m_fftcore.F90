@@ -447,7 +447,7 @@ end subroutine ngfft_seq
 !!
 !! SOURCE
 
-subroutine print_ngfft(ngfft,header,unit,mode_paral,prtvol)
+subroutine print_ngfft(ngfft, header, unit, mode_paral, prtvol)
 
 !Arguments ------------------------------------
 !scalars
@@ -458,7 +458,6 @@ subroutine print_ngfft(ngfft,header,unit,mode_paral,prtvol)
  integer,intent(in) :: ngfft(18)
 
 !Local variables-------------------------------
-!scalars
  integer :: my_unt,my_prtvol
  character(len=4) :: my_mode
  character(len=500) :: msg
@@ -475,11 +474,11 @@ subroutine print_ngfft(ngfft,header,unit,mode_paral,prtvol)
  write(msg,'(2(a,3i5,a),a,i5,2a,i5)')&
   '  FFT mesh divisions ........................ ',ngfft(1),ngfft(2),ngfft(3),ch10,&
   '  Augmented FFT divisions ................... ',ngfft(4),ngfft(5),ngfft(6),ch10,&
-  '  FFT algorithm ............................. ',ngfft(7),ch10,&
-  '  FFT cache size ............................ ',ngfft(8)
+  '- FFT algorithm ............................. ',ngfft(7),ch10,&
+  '- FFT cache size ............................ ',ngfft(8)
  call wrtout(my_unt,msg,my_mode)
 
- if (my_prtvol>0) then
+ if (my_prtvol > 0) then
    write(msg,'(6(a,i5,a),a,4i5)')&
     '  FFT parallelization level ................. ',ngfft(9),ch10,&
     '  Number of processors in my FFT group ...... ',ngfft(10),ch10,&

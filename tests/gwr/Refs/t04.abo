@@ -415,7 +415,7 @@ band_energy         :  7.10790649664394E-01
 
 --- !DatasetInfo
 iteration_state: {dtset: 2, }
-dimensions: {natom: 2, nkpt: 1, mband: 40, nsppol: 1, nspinor: 1, nspden: 1, mpw: 57, }
+dimensions: {natom: 2, nkpt: 1, mband: 30, nsppol: 1, nspinor: 1, nspden: 1, mpw: 57, }
 cutoff_energies: {ecut:   4.0, pawecutdg:  -1.0, }
 electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 6, }
@@ -492,6 +492,12 @@ meta: {optdriver: 6, }
    CBM:     1.136 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
  Direct gap:         2.271 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 
+
+ ==== FFT mesh for Green's function ====
+  FFT mesh divisions ........................     8    8    8
+  Augmented FFT divisions ...................     8    8    8
+- FFT algorithm .............................   312
+- FFT cache size ............................    16
  ==== Info on the GWR object ====
 
 --- !GWR_params
@@ -529,6 +535,12 @@ Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(o
  Using KS orbitals and KS energies...
 
 
+ ==== FFT mesh for chi0 head/wings computation ====
+  FFT mesh divisions ........................    15   15   15
+  Augmented FFT divisions ...................    15   15   15
+- FFT algorithm .............................   312
+- FFT cache size ............................    16
+
  Head of the irreducible polarizability for q --> 0
  q0_len: 1.000000E-03 (Bohr^-1)
    iomega (eV)         [100]         [010]         [001]             x             y             z
@@ -543,6 +555,12 @@ Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(o
  Computing diagonal matrix elements of Sigma_x
  Using KS orbitals and KS energies...
 
+
+ ==== FFT mesh for Sigma_x ====
+  FFT mesh divisions ........................    15   15   15
+  Augmented FFT divisions ...................    15   15   15
+- FFT algorithm .............................   312
+- FFT cache size ............................    16
 
 
  Building Green's functions from KS orbitals and KS energies...
@@ -678,6 +696,12 @@ data: !Tabular |
  Computing diagonal matrix elements of Sigma_x
  Using KS orbitals and QP energies...
 
+
+ ==== FFT mesh for Sigma_x ====
+  FFT mesh divisions ........................    15   15   15
+  Augmented FFT divisions ...................    15   15   15
+- FFT algorithm .............................   312
+- FFT cache size ............................    16
 ================================================================================
  QP results (energies in eV)
  Notations:
@@ -756,6 +780,12 @@ data: !Tabular |
  Computing diagonal matrix elements of Sigma_x
  Using KS orbitals and QP energies...
 
+
+ ==== FFT mesh for Sigma_x ====
+  FFT mesh divisions ........................    15   15   15
+  Augmented FFT divisions ...................    15   15   15
+- FFT algorithm .............................   312
+- FFT cache size ............................    16
 ================================================================================
  QP results (energies in eV)
  Notations:
@@ -834,6 +864,12 @@ data: !Tabular |
  Computing diagonal matrix elements of Sigma_x
  Using KS orbitals and QP energies...
 
+
+ ==== FFT mesh for Sigma_x ====
+  FFT mesh divisions ........................    15   15   15
+  Augmented FFT divisions ...................    15   15   15
+- FFT algorithm .............................   312
+- FFT cache size ............................    16
 ================================================================================
  QP results (energies in eV)
  Notations:
@@ -941,6 +977,12 @@ meta: {optdriver: 6, }
    CBM:     1.136 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
  Direct gap:         2.271 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 
+
+ ==== FFT mesh for Green's function ====
+  FFT mesh divisions ........................     8    8    8
+  Augmented FFT divisions ...................     8    8    8
+- FFT algorithm .............................   312
+- FFT cache size ............................    16
  ==== Info on the GWR object ====
 
 --- !GWR_params
@@ -978,6 +1020,12 @@ Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(o
  Using KS orbitals and KS energies...
 
 
+ ==== FFT mesh for chi0 head/wings computation ====
+  FFT mesh divisions ........................    15   15   15
+  Augmented FFT divisions ...................    15   15   15
+- FFT algorithm .............................   312
+- FFT cache size ............................    16
+
  Head of the irreducible polarizability for q --> 0
  q0_len: 1.000000E-03 (Bohr^-1)
    iomega (eV)         [100]         [010]         [001]             x             y             z
@@ -992,6 +1040,12 @@ Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(o
  Computing diagonal matrix elements of Sigma_x
  Using KS orbitals and KS energies...
 
+
+ ==== FFT mesh for Sigma_x ====
+  FFT mesh divisions ........................    15   15   15
+  Augmented FFT divisions ...................    15   15   15
+- FFT algorithm .............................   312
+- FFT cache size ............................    16
 
 
  Building Green's functions from KS orbitals and KS energies...
@@ -1122,6 +1176,12 @@ data: !Tabular |
  Using KS orbitals and QP energies...
 
 
+ ==== FFT mesh for chi0 head/wings computation ====
+  FFT mesh divisions ........................    15   15   15
+  Augmented FFT divisions ...................    15   15   15
+- FFT algorithm .............................   312
+- FFT cache size ............................    16
+
  Head of the irreducible polarizability for q --> 0
  q0_len: 1.000000E-03 (Bohr^-1)
    iomega (eV)         [100]         [010]         [001]             x             y             z
@@ -1136,6 +1196,12 @@ data: !Tabular |
  Computing diagonal matrix elements of Sigma_x
  Using KS orbitals and QP energies...
 
+
+ ==== FFT mesh for Sigma_x ====
+  FFT mesh divisions ........................    15   15   15
+  Augmented FFT divisions ...................    15   15   15
+- FFT algorithm .............................   312
+- FFT cache size ............................    16
 
 
  Building Green's functions from KS orbitals and QP energies...
@@ -1266,6 +1332,12 @@ data: !Tabular |
  Using KS orbitals and QP energies...
 
 
+ ==== FFT mesh for chi0 head/wings computation ====
+  FFT mesh divisions ........................    15   15   15
+  Augmented FFT divisions ...................    15   15   15
+- FFT algorithm .............................   312
+- FFT cache size ............................    16
+
  Head of the irreducible polarizability for q --> 0
  q0_len: 1.000000E-03 (Bohr^-1)
    iomega (eV)         [100]         [010]         [001]             x             y             z
@@ -1280,6 +1352,12 @@ data: !Tabular |
  Computing diagonal matrix elements of Sigma_x
  Using KS orbitals and QP energies...
 
+
+ ==== FFT mesh for Sigma_x ====
+  FFT mesh divisions ........................    15   15   15
+  Augmented FFT divisions ...................    15   15   15
+- FFT algorithm .............................   312
+- FFT cache size ............................    16
 
 
  Building Green's functions from KS orbitals and QP energies...
@@ -1410,6 +1488,12 @@ data: !Tabular |
  Using KS orbitals and QP energies...
 
 
+ ==== FFT mesh for chi0 head/wings computation ====
+  FFT mesh divisions ........................    15   15   15
+  Augmented FFT divisions ...................    15   15   15
+- FFT algorithm .............................   312
+- FFT cache size ............................    16
+
  Head of the irreducible polarizability for q --> 0
  q0_len: 1.000000E-03 (Bohr^-1)
    iomega (eV)         [100]         [010]         [001]             x             y             z
@@ -1424,6 +1508,12 @@ data: !Tabular |
  Computing diagonal matrix elements of Sigma_x
  Using KS orbitals and QP energies...
 
+
+ ==== FFT mesh for Sigma_x ====
+  FFT mesh divisions ........................    15   15   15
+  Augmented FFT divisions ...................    15   15   15
+- FFT algorithm .............................   312
+- FFT cache size ............................    16
 
 
  Building Green's functions from KS orbitals and QP energies...
@@ -1597,7 +1687,7 @@ data: !Tabular |
 P           mkmem           1
             natom           2
             nband1          6
-            nband2         40
+            nband2         30
             nband3         30
             nband4         30
            ndtset           4
@@ -1613,8 +1703,6 @@ P           mkmem           1
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000
               occ3     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000

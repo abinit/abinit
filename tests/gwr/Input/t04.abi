@@ -16,9 +16,8 @@ tolvrs1 1.e-8
 # Dataset 2: Direct diago with empty states
 ###########################################
 optdriver2  6        # Activate GWR code
-gwr_task2 "HDIAGO"   # One-shot calculation
+gwr_task2 "HDIAGO_FULL"   # Direct Diagonalization with nband == npw
 getden2       1
-nband2     40        # Number of (occ + empty) bands
 
 
 #########################################

@@ -557,7 +557,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
 
  call cwtime_report(" prepare gwr_driver_init", cpu, wall, gflops)
 
- if (dtset%gwr_task == "HDIAGO") then
+ if (dtset%gwr_task == "HDIAGO" .or. dtset%gwr_task == "HDIAGO_FULL") then
    ! ==========================================
    ! Direct diagonalization of the Hamiltonian
    ! ==========================================
@@ -571,7 +571,10 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
      call get_kg(dtset%kptns(:,ik_ibz), istwfk_ik(ik_ibz), dtset%ecut, cryst%gmet, npwarr_ik(ik_ibz), gvec_)
      ABI_FREE(gvec_)
    end do
-   nband_iks(:,:) = maxval(dtset%nband)
+
+   ! Use input nband or min of npwarr_ik to set the number of bands.
+   if (dtset%gwr_task == "HDIAGO") nband_iks(:,:) = maxval(dtset%nband)
+   if (dtset%gwr_task == "HDIAGO_FULL") nband_iks(:,:) = minval(npwarr_ik)
 
    ! Build header with new npwarr and nband.
    owfk_ebands = ebands_from_dtset(dtset, npwarr_ik, nband=nband_iks)
