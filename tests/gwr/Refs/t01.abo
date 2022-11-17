@@ -588,7 +588,7 @@ Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(o
  5.07397E+01  -1.67324E-08  -1.67324E-08  -1.67324E-08  -1.67319E-08  -1.67327E-08  -1.67327E-08
 
 
- Computing matrix elements of Sigma_x
+ Computing diagonal matrix elements of Sigma_x
  Using KS orbitals and KS energies...
 
 

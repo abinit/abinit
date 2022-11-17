@@ -509,6 +509,10 @@ module m_gwr
    ! Internal counter used to implement self-consistency
    ! For the time being, only self-consistency in energies is supported.
 
+   integer,allocatable :: ks_vbik(:,:)
+   ! (gwr%ks_ebands%nkpt, gwr%ks_ebands%nsppol)
+   ! KS valence band indices.
+
    type(ebands_t), pointer :: ks_ebands => null()
    ! initial KS energies
 
@@ -804,12 +808,12 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  gwr%wtk => ks_ebands%wtk
  gwr%mpi_enreg => mpi_enreg
 
- !test(1:1) => ks_ebands%eig(1:1,1,1)
- !test(2:2) => ks_ebands%eig(3:3,1,1)
-
  ! Initialize qp_ebands with KS values.
  call ebands_copy(ks_ebands, gwr%qp_ebands)
  call ebands_copy(ks_ebands, gwr%qp_ebands_prev)
+
+ ABI_MALLOC(gwr%ks_vbik, (gwr%ks_ebands%nkpt, gwr%ks_ebands%nsppol))
+ gwr%ks_vbik(:,:) = ebands_get_valence_idx(gwr%ks_ebands)
 
  gwr%nspinor = dtset%nspinor
  gwr%nsppol = dtset%nsppol
@@ -1647,6 +1651,7 @@ subroutine gwr_free(gwr)
 
 ! *************************************************************************
 
+ ABI_SFREE(gwr%ks_vbik)
  ABI_SFREE(gwr%kbz)
  ABI_SFREE(gwr%kbz2ibz)
  ABI_SFREE(gwr%kbz2ibz_symrel)
@@ -4563,7 +4568,7 @@ subroutine gwr_build_sigmac(gwr)
  integer :: band_val, ibv, ncerr, unt_it, unt_iw, unt_rw
  real(dp) :: e0, ks_gap, qp_gap, sigx, vxc_val, vu, v_meanf, eshift
  complex(dp) :: zz, zsc, sigc_e0, dsigc_de0, z_e0, sig_xc, hhartree_bk, qp_ene, qp_ene_prev
- integer,allocatable :: ks_vbik(:,:), iperm(:)
+ integer,allocatable :: iperm(:)
  integer :: gt_request, wct_request
  real(dp),allocatable :: sorted_qpe(:)
  real(dp) :: e0_kcalc(gwr%max_nbcalc, gwr%nkcalc, gwr%nsppol)
@@ -4937,7 +4942,7 @@ end if
 
  ! Store matrix elements of Sigma_c(it), separate even and odd part
  ! then use sine/cosine transform to get Sigma_c(i omega).
- ! Finally, perform analytic continuation with Pade' to go to the real-axis,
+ ! Finally, perform analytic continuation with Pade' to go to the real-axis
  ! and compute QP corrections and spectral functions.
  ! All procs execute this part as it's very cheap.
 
@@ -5059,9 +5064,6 @@ end if
      call wrtout([ab_out, std_out], sjoin("QP solver failed for:", itoa(ierr), "states"))
    end if
 
-   ABI_MALLOC(ks_vbik, (gwr%ks_ebands%nkpt, gwr%ks_ebands%nsppol))
-   ks_vbik(:,:) = ebands_get_valence_idx(gwr%ks_ebands)
-
    call write_notations([std_out, ab_out])
    do spin=1,gwr%nsppol
      do ikcalc=1,gwr%nkcalc
@@ -5073,8 +5075,8 @@ end if
        call ydoc%add_int('gwr_scf_iteration', gwr%scf_iteration)
        call ydoc%add_string('gwr_task', gwr%dtset%gwr_task)
 
-       ! Compute Gaps
-       band_val = ks_vbik(ik_ibz, spin)
+       ! Compute Gaps using KS band indices.
+       band_val = gwr%ks_vbik(ik_ibz, spin)
        nbc = gwr%bstop_ks(ikcalc, spin) - gwr%bstart_ks(ikcalc, spin) + 1
 
        if (band_val >= gwr%bstart_ks(ikcalc, spin) .and. band_val + 1 <= gwr%bstop_ks(ikcalc, spin)) then
@@ -5091,7 +5093,6 @@ end if
          else
            call ydoc%add_int('QP_VBM_band', ibv + gwr%bstart_ks(ikcalc, spin) - 1)
            call ydoc%add_int('QP_CBM_band', ibv+1 + gwr%bstart_ks(ikcalc, spin) - 1)
-           !qp_gap = real(qpe_zlin_kcalc(ibv+1, ikcalc, spin) - qpe_zlin_kcalc(ibv, ikcalc, spin))
            qp_gap = gwr%qp_ebands%eig(band_val+1, ik_ibz, spin) - gwr%qp_ebands%eig(band_val, ik_ibz, spin)
          end if
          ABI_FREE(iperm)
@@ -5131,8 +5132,6 @@ end if
      end do ! ikcalc
    end do ! spin
 
-   ABI_FREE(ks_vbik)
-
    if (open_file(strcat(gwr%dtfil%filnam_ds(4), '_SIGCIT'), msg, newunit=unt_it, action="write") /= 0) then
      ABI_ERROR(msg)
    end if
@@ -5160,7 +5159,6 @@ end if
        call write_units(units, sjoin("# kpt:", ktoa(gwr%kcalc(:, ikcalc)), "spin:", itoa(spin)))
        do band=gwr%bstart_ks(ikcalc, spin), gwr%bstop_ks(ikcalc, spin)
          ibc = band - gwr%bstart_ks(ikcalc, spin) + 1
-         !e0 = e0_kcalc(ibc, ikcalc, spin)
          e0 = gwr%ks_ebands%eig(band, ik_ibz, spin)
          sigx = gwr%x_mat(band, band, ikcalc, spin)
          call write_units(units, sjoin("# band:", itoa(band), ", spin:", itoa(spin)))
@@ -5227,7 +5225,8 @@ end if
    NCF_CHECK(nf90_put_var(ncid, vid("sigxc_rw_diag_kcalc"), c2r(sigxc_rw_diag_kcalc)))
    NCF_CHECK(nf90_put_var(ncid, vid("spfunc_diag_kcalc"), spfunc_diag_kcalc))
    NCF_CHECK(nf90_close(ncid))
- end if
+ end if ! master
+
  !call xmpi_barrier(gwr%comm%value)
 
  ABI_FREE(sigc_it_diag_kcalc)
@@ -6829,10 +6828,11 @@ end subroutine gwr_build_chi0_head_and_wings
 !!
 !! SOURCE
 
-subroutine gwr_build_sigxme(gwr)
+subroutine gwr_build_sigxme(gwr, compute_qp)
 
 !Arguments ------------------------------------
  class(gwr_t),target,intent(inout) :: gwr
+ logical,optional,intent(in) :: compute_qp
 
 !Local variables-------------------------------
 !scalars
@@ -6843,7 +6843,7 @@ subroutine gwr_build_sigxme(gwr)
  integer :: npwx, u_nfft, u_mgfft, u_mpw, nsig_ab
  integer :: ik_bz, ik_ibz, isym_k, trev_k, g0_k(3)
  integer :: iq_bz, iq_ibz, isym_q, trev_q, g0_q(3)
- logical :: isirr_k, isirr_q, only_diago, sigc_is_herm
+ logical :: isirr_k, isirr_q, only_diago, sigc_is_herm, compute_qp__
  real(dp) :: fact_spin, theta_mu_minus_esum, theta_mu_minus_esum2, tol_empty, tol_empty_in, gwr_boxcutmin_x
  real(dp) :: cpu_k, wall_k, gflops_k, cpu_all, wall_all, gflops_all
  character(len=5000) :: msg
@@ -6875,7 +6875,24 @@ subroutine gwr_build_sigxme(gwr)
  nsppol = gwr%nsppol; nspinor = gwr%nspinor; cryst => gwr%cryst; dtset => gwr%dtset
  nsig_ab = nspinor ** 2
 
- call wrtout([std_out, ab_out], " Computing matrix elements of Sigma_x", pre_newlines=1)
+ ! Allocate array with Sigma_x matrix elements.
+ ii = minval(gwr%bstart_ks); jj = maxval(gwr%bstop_ks)
+ ABI_RECALLOC(gwr%x_mat, (ii:jj, ii:jj, gwr%nkcalc, gwr%nsppol * nsig_ab))
+
+ ! Table for \Sigmax_ij matrix elements.
+ only_diago = .True.
+ sigc_is_herm = .False.
+ call sigtk_sigma_tables(gwr%nkcalc, gwr%nkibz, gwr%nsppol, gwr%bstart_ks, gwr%bstop_ks, gwr%kcalc2ibz(:,1), &
+                         only_diago, sigc_is_herm, sigxij_tab, sigcij_tab)
+
+ call sigijtab_free(Sigcij_tab)
+ ABI_FREE(Sigcij_tab)
+
+ if (only_diago) then
+   call wrtout([std_out, ab_out], " Computing diagonal matrix elements of Sigma_x", pre_newlines=1)
+ else
+   call wrtout([std_out, ab_out], " Computing diagonal + off-diagonal matrix elements of Sigma_x", pre_newlines=1)
+ end if
 
  ks_eig => gwr%ks_ebands%eig
  if (gwr%scf_iteration == 1) then
@@ -6885,18 +6902,6 @@ subroutine gwr_build_sigxme(gwr)
    call wrtout([std_out, ab_out], " Using KS orbitals and QP energies...", newlines=1, do_flush=.True.)
    qp_eig => gwr%qp_ebands%eig; qp_occ => gwr%qp_ebands%occ
  end if
-
- ! Allocate array with Sigma_x matrix elements.
- ii = minval(gwr%bstart_ks); jj = maxval(gwr%bstop_ks)
- ABI_RECALLOC(gwr%x_mat, (ii:jj, ii:jj, gwr%nkcalc, gwr%nsppol * nsig_ab))
-
- ! Table for \Sigmax_ij matrix elements.
- only_diago = .True.; sigc_is_herm = .False.
- call sigtk_sigma_tables(gwr%nkcalc, gwr%nkibz, gwr%nsppol, gwr%bstart_ks, gwr%bstop_ks, gwr%kcalc2ibz(:,1), &
-                         only_diago, sigc_is_herm, sigxij_tab, sigcij_tab)
-
- call sigijtab_free(Sigcij_tab)
- ABI_FREE(Sigcij_tab)
 
  ! MRM allow lower occ numbers
  ! Normalization of theta_mu_minus_esum. If nsppol==2, qp_occ $\in [0,1]$
@@ -7251,7 +7256,7 @@ subroutine gwr_build_sigxme(gwr)
    !  ABI_WARNING("Should hermitianize non-collinear sigma!")
    !end if
 
-   ! Save full exchange matrix in gwr%x_mat
+   ! Save exchange matrix in gwr%x_mat
    if (gwr%nspinor == 1) then
      gwr%x_mat(bmin:bmax, bmin:bmax, ikcalc, spin) = sigxme_tmp(bmin:bmax, bmin:bmax, spin)
    else
@@ -7279,6 +7284,13 @@ subroutine gwr_build_sigxme(gwr)
 
  call cwtime_report(" gwr_build_sigxme:", cpu_all, wall_all, gflops_all)
  call timab(1920, 2, tsec)
+
+ ! Compute QP results. Done usually when gwr_task is G0v i.e. Hartree-Fock.
+ compute_qp__ = .False.; if (present(compute_qp)) compute_qp__ = compute_qp
+ if (compute_qp__ .and. gwr%comm%me == 0) then
+   call write_notations([std_out, ab_out])
+ end if
+
 
 end subroutine gwr_build_sigxme
 !!***
