@@ -361,14 +361,9 @@ call wrtout(std_out,message,'COLL')
  idum2=1 ; drarr=one
  luocc=zero
 
-!write(std_out,*) 'pawuj 02'
-!###########################################################
-!### 02. Create the file UJDET.nc for the OMac ujdet utility
-
-
 !write(std_out,*) 'pawuj 03'
 !###########################################################
-!### 03. Write out the Input for the Amadon ujdet utility
+!### 03. Write out the input for the ujdet utility
 
  write(message, '(3a)' ) ch10,&
 & ' # input for ujdet, cut it using ''sed -n "/MARK/,/MARK/p" abi.out > ujdet.in ''------- ',ch10
@@ -521,22 +516,16 @@ call wrtout(std_out,message,'COLL')
      signum=-1.0d0 !Hund's J is -1*(1/chi0-1/chi)
    end if
    vsh(jdtset)=dtpawuj(jdtset)%vsh(1,pawujat)
-   if (pawprtvol==-3) then
+!   if (pawprtvol==-3) then
      write(message,fmt='(2a,i3,a,f15.12)') ch10,' Potential shift vsh(',jdtset,') =',vsh(jdtset)
      call wrtout(std_out,message,'COLL')
      write(message,fmt='( a,i3,a,120f15.9)') ' Occupations occ(',jdtset,') ',luocc(jdtset,1:nat_org)
      call wrtout(std_out,message,'COLL')
-   end if
+!   end if
  end do
 
  write(message,fmt='( a)') 'Occupations assigned.'
  call wrtout(std_out,message,'COLL')
-
- if (abs(vsh(3))<0.00000001) then
-   write(message, '(2a,18f10.7,a)' )  ch10,' vshift is too small: ',abs(vsh(1)-vsh(3))
-   call wrtout(ab_out,message,'COLL')
-   return
- end if
 
  !Two-point linear regression of response matrices.
  chi0=(luocc(1,1:nat_org)-luocc(3,1:nat_org))/(vsh(1)-vsh(3))/diem
@@ -661,9 +650,12 @@ call wrtout(std_out,message,'COLL')
  call wrtout(ab_out,message,'COLL')
  write(message,'(7a)') 'Note: For more reliable linear regressions of the response',ch10,&
 'matrices, it is advised that you have more than two points.',ch10,&
-'See the OMac protocol for more information.',ch10,ch10
+'See the LRUJ protocol for more information.',ch10,ch10
  call wrtout(std_out,message,'COLL')
  call wrtout(ab_out,message,'COLL')
+
+!###########################################################
+!### Create the file LRUJ.nc for the LRUJ ujdet utility
 
  if (my_rank == master) then
    ! First call:
