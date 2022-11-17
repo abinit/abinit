@@ -540,7 +540,7 @@ Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(o
  6.82527E+01  -2.00592E-08  -2.00592E-08  -2.00592E-08  -2.00592E-08  -2.00592E-08  -2.00592E-08
 
 
- Computing matrix elements of Sigma_x
+ Computing diagonal matrix elements of Sigma_x
  Using KS orbitals and KS energies...
 
 
@@ -675,7 +675,7 @@ data: !Tabular |
         0.000  -0.000  -0.000  -0.000   0.000   0.000
 
 
- Computing matrix elements of Sigma_x
+ Computing diagonal matrix elements of Sigma_x
  Using KS orbitals and QP energies...
 
 ================================================================================
@@ -753,7 +753,7 @@ data: !Tabular |
        -0.000   0.000   0.000  -0.000  -0.000   0.000
 
 
- Computing matrix elements of Sigma_x
+ Computing diagonal matrix elements of Sigma_x
  Using KS orbitals and QP energies...
 
 ================================================================================
@@ -831,7 +831,7 @@ data: !Tabular |
        -0.000  -0.000  -0.000  -0.000  -0.000   0.000
 
 
- Computing matrix elements of Sigma_x
+ Computing diagonal matrix elements of Sigma_x
  Using KS orbitals and QP energies...
 
 ================================================================================
@@ -989,7 +989,7 @@ Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(o
  6.82527E+01  -2.00592E-08  -2.00592E-08  -2.00592E-08  -2.00592E-08  -2.00592E-08  -2.00592E-08
 
 
- Computing matrix elements of Sigma_x
+ Computing diagonal matrix elements of Sigma_x
  Using KS orbitals and KS energies...
 
 
@@ -1133,7 +1133,7 @@ data: !Tabular |
  6.82527E+01  -2.28159E-08  -2.28061E-08  -2.27963E-08  -2.27987E-08  -2.28028E-08  -2.28068E-08
 
 
- Computing matrix elements of Sigma_x
+ Computing diagonal matrix elements of Sigma_x
  Using KS orbitals and QP energies...
 
 
@@ -1277,7 +1277,7 @@ data: !Tabular |
  6.82527E+01  -2.26897E-08  -2.26804E-08  -2.26711E-08  -2.26735E-08  -2.26771E-08  -2.26807E-08
 
 
- Computing matrix elements of Sigma_x
+ Computing diagonal matrix elements of Sigma_x
  Using KS orbitals and QP energies...
 
 
@@ -1421,7 +1421,7 @@ data: !Tabular |
  6.82527E+01  -2.26751E-08  -2.26658E-08  -2.26565E-08  -2.26589E-08  -2.26625E-08  -2.26662E-08
 
 
- Computing matrix elements of Sigma_x
+ Computing diagonal matrix elements of Sigma_x
  Using KS orbitals and QP energies...
 
 
