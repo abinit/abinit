@@ -532,7 +532,7 @@ call wrtout(std_out,message,'COLL')
      call wrtout(std_out,message,'COLL')
      write(message,fmt='( a,i3,a,120f15.9)') ' Occupations occ(',jdtset,') ',luocc(jdtset,1:nat_org)
      call wrtout(std_out,message,'COLL')
-!   end if
+   end if
  end do
 
  write(message,fmt='( a)') 'Occupations assigned.'
