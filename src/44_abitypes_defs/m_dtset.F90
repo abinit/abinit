@@ -282,7 +282,7 @@ type, public :: dataset_type
  integer :: gwr_nstep = 50
  integer :: gwr_ntau = 12
  real(dp) :: gwr_boxcutmin = two
- character(len=fnlen) :: gwr_task = "G0W0"
+ character(len=fnlen) :: gwr_task = "None"
 !H
  integer :: hmcsst
  integer :: hmctt

@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 10 Oct 2022.
-- ( at 14h38 )
+.Starting date : Thu 17 Nov 2022.
+- ( at 20h01 )
   
 - input  file    -> /Users/gmatteo/git_repos/abinit_gwr/_build/tests/Test_suite/paral_t78_MPI4/t78.abi
 - output file    -> t78_MPI4.abo
@@ -605,6 +605,12 @@ meta: {optdriver: 6, }
    CBM:     1.374 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
  Direct gap:         3.170 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 
+
+ ==== FFT mesh for Green's function ====
+  FFT mesh divisions ........................    12   12   15
+  Augmented FFT divisions ...................    12   12   15
+- FFT algorithm .............................   312
+- FFT cache size ............................    16
  ==== Info on the GWR object ====
 
 --- !GWR_params
@@ -641,6 +647,12 @@ Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(o
  Using KS orbitals and KS energies...
 
 
+ ==== FFT mesh for chi0 head/wings computation ====
+  FFT mesh divisions ........................    24   24   30
+  Augmented FFT divisions ...................    25   25   30
+- FFT algorithm .............................   312
+- FFT cache size ............................    16
+
  Head of the irreducible polarizability for q --> 0
  q0_len: 1.000000E-03 (Bohr^-1)
    iomega (eV)         [100]         [010]         [001]             x             y             z
@@ -655,6 +667,12 @@ Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(o
  Computing diagonal matrix elements of Sigma_x
  Using KS orbitals and KS energies...
 
+
+ ==== FFT mesh for Sigma_x ====
+  FFT mesh divisions ........................    24   24   30
+  Augmented FFT divisions ...................    25   25   30
+- FFT algorithm .............................   312
+- FFT cache size ............................    16
 
 
  Building Green's functions from KS orbitals and KS energies...

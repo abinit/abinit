@@ -23241,7 +23241,7 @@ Variable(
     vartype="string",
     topics=['GWR_basic'],
     dimensions=[1],
-    defaultval="G0W0",
+    defaultval="None",
     mnemonics="GWR TASK",
     requires="[[optdriver]] == 6",
     added_in_version="9.6.2",

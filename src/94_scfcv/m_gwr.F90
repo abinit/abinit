@@ -1398,6 +1398,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
 
  if (my_rank == master) then
    call print_ngfft(gwr%g_ngfft, header="FFT mesh for Green's function", unit=std_out)
+   call print_ngfft(gwr%g_ngfft, header="FFT mesh for Green's function", unit=ab_out)
    call wrtout(std_out, sjoin(" FFT uc_batch_size:", itoa(gwr%uc_batch_size)))
    call wrtout(std_out, sjoin(" FFT sc_batch_size:", itoa(gwr%sc_batch_size)))
  end if
@@ -3462,6 +3463,7 @@ subroutine gwr_print(gwr, header, unit)
  call ydoc%add_int1d("ngqpt", gwr%ngqpt)
  call ydoc%add_int("nqbz", gwr%nqbz)
  call ydoc%add_int("nqibz", gwr%nqibz)
+ !call ydoc%add_int("gw_icutcoul", gwr%dtset%gw_icutcoul)
  call ydoc%add_int("green_mpw", gwr%green_mpw)
  call ydoc%add_int("tchi_mpw", gwr%tchi_mpw)
  call ydoc%add_int1d("g_ngfft", gwr%g_ngfft(1:6))
@@ -6484,6 +6486,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
 
  if (gwr%comm%me == 0) then
    call print_ngfft(u_ngfft, header="FFT mesh for chi0 head/wings computation", unit=std_out)
+   call print_ngfft(u_ngfft, header="FFT mesh for chi0 head/wings computation", unit=ab_out)
  endif
 
  ! Need to broacast G-vectors at q = 0 if k/q-point parallelism is on,
@@ -6602,22 +6605,17 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
        band1_stop = band1_start + nb - 1
 
        ! Collect nb bands starting from band1_start on each proc.
-       ! FIXME: SIGSEV on lumi!
-       !call wrtout(std_out, " begin collect")
-#if 1
        call ugb_kibz%zcollect(npw_ki * nspinor, nb, [1, band1_start], ug1_block)
-#else
+
        ! Dump algorithm based on xmpi_sum. To be replaced by an all_gather
        ! The advantage is that it works indipendently of the PBLAS distribution.
-       ABI_CALLOC(ug1_block, (npw_ki * nspinor, nb))
-       do il_b1=1, ugb_kibz%sizeb_local(2)
-         band1 = ugb_kibz%loc2gcol(il_b1)
-         ii = band1 - band1_start + 1
-         if (band1 >= band1_start .and. band1 <= band1_stop) ug1_block(:, ii) = ugb_kibz%buffer_cplx(:, il_b1)
-       end do ! il_b1
-       call xmpi_sum(ug1_block, ugb_kibz%processor%comm, ierr)
-#endif
-       !call wrtout(std_out, " end collect")
+       !ABI_CALLOC(ug1_block, (npw_ki * nspinor, nb))
+       !do il_b1=1, ugb_kibz%sizeb_local(2)
+       !  band1 = ugb_kibz%loc2gcol(il_b1)
+       !  ii = band1 - band1_start + 1
+       !  if (band1 >= band1_start .and. band1 <= band1_stop) ug1_block(:, ii) = ugb_kibz%buffer_cplx(:, il_b1)
+       !end do ! il_b1
+       !call xmpi_sum(ug1_block, ugb_kibz%processor%comm, ierr)
 
        ABI_MALLOC(gh1c_block, (2, npw_ki*nspinor, 3, nb))
        do il_b1=1, ugb_kibz%sizeb_local(2)
@@ -6924,7 +6922,10 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
  gwr_boxcutmin_x = two
  call gwr%get_u_ngfft(gwr_boxcutmin_x, u_ngfft, u_nfft, u_mgfft, u_mpw, gmax)
 
- if (gwr%comm%me == 0) call print_ngfft(u_ngfft, header="FFT mesh for Sigma_x", unit=std_out)
+ if (gwr%comm%me == 0) then
+   call print_ngfft(u_ngfft, header="FFT mesh for Sigma_x", unit=std_out)
+   call print_ngfft(u_ngfft, header="FFT mesh for Sigma_x", unit=ab_out)
+ end if
 
  ! Init work_ngfft
  gmax = gmax + 4 ! FIXME: this is to account for umklapp, shouls also consider Gamma-only and istwfk
