@@ -243,7 +243,7 @@ program lruj
      write(std_out,'(a)') "    2. Are macro-uj, pawujat, dmatpuopt, diemix(mag) consistent"
      write(std_out,'(a)') "       across all perturbations?"
      write(std_out,'(a)') "If not, relaunch perturburbative Abinit calculations, then"
-     write(std_out,'(a)') "reexecute lruj utility. Exiting."
+     write(std_out,'(2a)') "reexecute lruj utility. Exiting.",ch10
      goto 100
    else
      perts(ii)=uj_perts(ii)*Ha2eV
