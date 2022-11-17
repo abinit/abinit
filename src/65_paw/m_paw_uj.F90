@@ -303,11 +303,13 @@ subroutine pawuj_det(dtpawuj,ndtpawuj,dtset,dtfil,ures,comm)
  real(dp),allocatable        :: magv_org(:),magv_sc(:),chi(:),chi0(:),chi0_sc(:), chi_sc(:), xred_sc(:,:)
  real(dp),allocatable        :: sdistv_org(:),sdistv_sc(:),distv_org(:),distv_sc(:)
  integer,parameter           :: ncid0 = 0, master = 0
+ integer :: units(2)
 ! *********************************************************************
 
  DBG_ENTER("COLL")
 
  my_rank = xmpi_comm_rank(comm)
+ units = [std_out, ab_out]
 
 !write(std_out,*) 'pawuj 01'
 !###########################################################
@@ -634,47 +636,36 @@ call wrtout(std_out,message,'COLL')
 
 !LMac: Printing relevant information about the Hubbard parameter just calculated.
  write(message,'(3a)') ch10,ch10,'*********************************************************************'
- call wrtout(std_out,message,'COLL')
- call wrtout(ab_out,message,'COLL')
+ call wrtout(units,message)
  write(message,'(4a)') '************************  Linear Response ',parname,'  ************************',ch10
- call wrtout(std_out,message,'COLL')
- call wrtout(ab_out,message,'COLL')
+ call wrtout(units,message)
  write(message, '(a,i4,a)' ) ' Info printed for perturbed atom: ',pawujat,ch10
- call wrtout(std_out,message,'COLL')
- call wrtout(ab_out,message,'COLL')
+ call wrtout(units,message)
  write(message, fmt='(10a)')'  Perturbations         ',occmag,ch10,&
 ' --------------- -----------------------------',ch10,&
 '    ',pertname,' [eV]     Unscreened      Screened',ch10,&
 ' --------------- -----------------------------'
- call wrtout(std_out,message,'COLL')
- call wrtout(ab_out,message,'COLL')
+ call wrtout(units,message)
  ! MG: pawujat --> 1.
  do ipert=1,2
    write(message, fmt='(3f15.10)') vsh(ipert*2-1)*Ha_eV,luocc(ipert*2-1,1),luocc(ipert*2,1)
-   call wrtout(std_out,message,'COLL')
-   call wrtout(ab_out,message,'COLL')
+   call wrtout(units,message)
  end do
  write(message,'(2a)') ch10,'                    Scalar response functions:'
- call wrtout(std_out,message,'COLL')
- call wrtout(ab_out,message,'COLL')
+ call wrtout(units,message)
  write(message,fmt='(a,f12.5)') '                    Chi0 [eV^-1]: ',chi0(1)/Ha_eV
- call wrtout(std_out,message,'COLL')
- call wrtout(ab_out,message,'COLL')
+ call wrtout(units,message)
  write(message,fmt='(a,f12.5)') '                    Chi [eV^-1]:  ',chi(1)/Ha_eV
- call wrtout(std_out,message,'COLL')
- call wrtout(ab_out,message,'COLL')
+ call wrtout(units,message)
  write(message,'(4a,f9.5,a)') ch10,' The scalar ',parname,' from the two-point regression scheme is ',scalarHP,' eV.'
- call wrtout(std_out,message,'COLL')
- call wrtout(ab_out,message,'COLL')
+ call wrtout(units,message)
  write(message,'(3a)') '*********************************************************************',ch10,&
 '*********************************************************************'
- call wrtout(std_out,message,'COLL')
- call wrtout(ab_out,message,'COLL')
+ call wrtout(units,message)
  write(message,'(7a)') 'Note: For more reliable linear regressions of the response',ch10,&
 'matrices, it is advised that you have more than two points.',ch10,&
 'See the OMac protocol for more information.',ch10,ch10
- call wrtout(std_out,message,'COLL')
- call wrtout(ab_out,message,'COLL')
+ call wrtout(units,message)
 
  if (my_rank == master) then
    ! First call:
@@ -742,8 +733,7 @@ call wrtout(std_out,message,'COLL')
  write(message, fmt='(8a)') ' URES ','     ii','    nat','       r_max','    U(J)[eV]','   U_ASA[eV]','   U_inf[eV]',ch10
  write(message, fmt='(a,2i7,4f12.5)') trim(message)//' URES ',ii,nat_org,maxval(abs(distv_org)),signum*ures,signum*ures*exp(log(intg)*eyp),&
 & signum*ures*exp(log(ph0phiint)*eyp)
- call wrtout(std_out,message,'COLL')
- call wrtout(ab_out,message,'COLL')
+ call wrtout(units,message)
 
  if (pawprtvol>1) then
    write(message,fmt='(a, 150f10.5)')' pawuj_det: ionic distances in original cell (distv_org) ', distv_org
@@ -827,8 +817,7 @@ call wrtout(std_out,message,'COLL')
 
    write(message, fmt='(a,2i7,4f12.5)') ' URES ',ii,nat_sc,maxval(abs(distv_sc)),signum*ures,signum*ures*exp(log(intg)*eyp),&
 &   signum*ures*exp(log(ph0phiint)*eyp)
-   call wrtout(std_out,message,'COLL')
-   call wrtout(ab_out,message,'COLL')
+   call wrtout(units,message)
 
    ABI_FREE(chi0_sc)
    ABI_FREE(chi_sc)
