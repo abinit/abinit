@@ -1,0 +1,18 @@
+# YAML support is available, but is disabled for this test.
+# Start legacy fldiff comparison report
+2
+< .Version 9.3.1 of ABINIT 
+> .Version 9.9.0 of ABINIT 
+3
+< .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+> .(MPI version, prepared for a x86_64_linux_gnu11.3 computer) 
+17
+< .Starting date : Tue 10 Nov 2020.
+> .Starting date : Thu 17 Nov 2022.
+5352
+< .Delivered  53 WARNINGs and  64 COMMENTs to log file.
+> .Delivered  48 WARNINGs and  65 COMMENTs to log file.
+5353
+< +Overall time at end (sec) : cpu=          9.5  wall=          9.7
+> +Overall time at end (sec) : cpu=          6.1  wall=          7.4
+Summary t54.abo: no significant difference has been found.
