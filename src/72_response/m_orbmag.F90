@@ -43,6 +43,7 @@ module m_orbmag
 
   use defs_datatypes,     only : pseudopotential_type
   use defs_abitypes,      only : MPI_type
+  use m_dfpt_nstwf,       only : gaugetransfo
   use m_cgprj,            only : getcprj
   use m_cgtools,          only : projbd
   use m_dfpt_nstwf,       only : gaugetransfo
@@ -368,7 +369,7 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine orbmag_ptpaw(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
+subroutine orbmag_ptpaw(cg,cg1,cprj,dtset,eigen0,eigen1_3,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
     & nfftf,ngfftf,npwarr,occ,paw_ij,paw_an,pawang,pawfgr,pawfgrtab,pawrad,&
     & pawtab,psps,rprimd,vtrial,vxc,xred,ylm,ylmgr)
 
@@ -386,6 +387,7 @@ subroutine orbmag_ptpaw(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_en
  integer,intent(in) :: kg(3,dtset%mpw*dtset%mkmem),ngfftf(18),npwarr(dtset%nkpt)
  real(dp),intent(in) :: cg(2,mcg),cg1(2,mcg1,3)
  real(dp),intent(in) :: eigen0(dtset%mband*dtset%nkpt*dtset%nsppol)
+ real(dp),intent(in) :: eigen1_3(2*dtset%mband*dtset%mband*dtset%nkpt*dtset%nsppol,3)
  real(dp), intent(in) :: occ(dtset%mband*dtset%nkpt*dtset%nsppol)
  real(dp),intent(in) :: rprimd(3,3),xred(3,dtset%natom)
  real(dp),intent(inout) :: vtrial(nfftf,dtset%nspden)
@@ -414,14 +416,15 @@ subroutine orbmag_ptpaw(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_en
  integer,allocatable :: atindx(:),atindx1(:),dimlmn(:),gntselect(:,:),kg_k(:,:),nattyp(:)
  real(dp) :: gmet(3,3),gprimd(3,3),kpoint(3),omlamb(2,3),rhodum(1),rmet(3,3)
  real(dp),allocatable :: buffer1(:),buffer2(:)
- real(dp),allocatable :: cg_k(:,:),cg1_k(:,:,:),cgrvtrial(:,:),cwavef(:,:)
- real(dp),allocatable :: eig_k(:),ffc_k(:,:,:),ffv_k(:,:,:),ffnl_k(:,:,:,:)
+ real(dp),allocatable :: cg_k(:,:),cg1_k(:,:,:),cgrvtrial(:,:),cwavef(:,:),cwavef_d(:,:)
+ real(dp),allocatable :: eig_k(:),eig1_k(:),ffc_k(:,:,:),ffv_k(:,:,:),ffnl_k(:,:,:,:)
  real(dp),allocatable :: gg_k(:,:,:),hhc_k(:,:,:),hhv_k(:,:,:)
- real(dp),allocatable :: kinpw(:),kpg_k(:,:),orbmag_terms(:,:,:,:),orbmag_trace(:,:,:)
+ real(dp),allocatable :: kinpw(:),kpg_k(:,:),occ_k(:),orbmag_terms(:,:,:,:),orbmag_trace(:,:,:)
  real(dp),allocatable :: pcg1_k(:,:,:),ph1d(:,:),ph3d(:,:,:),phkxred(:,:),realgnt(:)
  real(dp),allocatable :: vectornd(:,:),vectornd_pac(:,:,:,:,:),vlocal(:,:,:,:)
  real(dp),allocatable :: ylm_k(:,:),ylmgr_k(:,:,:)
  complex(dpc),allocatable :: mp2(:,:,:),mpan(:,:,:)
+ logical,allocatable :: distrb_cycle(:)
  type(pawcprj_type),allocatable :: cprj_k(:,:),cprj1_k(:,:,:),cwaveprj(:,:)
 
  !----------------------------------------------
@@ -440,6 +443,8 @@ subroutine orbmag_ptpaw(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_en
  ecut_eff = dtset%ecut*(dtset%dilatmx)**2
  exchn2n3d = 0; ikg1 = 0
 
+ ABI_MALLOC(distrb_cycle,(nband_k))
+ 
  !Definition of atindx array
  !Generate an index table of atoms, in order for them to be used type after type.
  ABI_MALLOC(atindx,(dtset%natom))
@@ -549,6 +554,8 @@ subroutine orbmag_ptpaw(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_en
 
    ! if the current kpt is not on the current processor, cycle
    if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,-1,me)) cycle
+   
+   distrb_cycle = (mpi_enreg%proc_distrb(ikpt,1:nband_k,isppol) /= mpi_enreg%me_kpt)
 
    ! trace norm: assume occupation of two for each band and weight by kpts.
    ! division by ucvol arises from integration over BZ (so multiplication by 
@@ -569,6 +576,10 @@ subroutine orbmag_ptpaw(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_en
      ylmgr_k(1:npw_k,1:3,ilm)=ylmgr(1+ikg:npw_k+ikg,1:3,ilm)
    end do
 
+   ! retrieve occupation numbers at this k point
+   ABI_MALLOC(occ_k,(nband_k))
+   occ_k(1:nband_k) = occ((ikpt-1)*nband_k+1:ikpt*nband_k)
+   
    ! Compute kinetic energy at kpt
    kinpw(:) = zero
    call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg_k,kinpw,kpoint,npw_k,0,0)
@@ -618,16 +629,40 @@ subroutine orbmag_ptpaw(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_en
 
    ! retrieve zeroth order eigenvalues
    ABI_MALLOC(eig_k,(nband_k))
-   eig_k(1:nband_k) = eigen0(nband_k*(ikpt-1)+1:nband_k*ikpt)
-
+   eig_k(1:nband_k) = eigen0(nband_k*(ikpt-1)+1:nband_k*ikpt)   
+   
+   ! change cg1 from parallel to diagonal gauge
+   if (dtset%userib == 2190) then
+     ABI_MALLOC(eig1_k,(2*nband_k*nband_k))
+     ABI_MALLOC(cwavef,(2,npw_k))
+     ABI_MALLOC(cwavef_d,(2,npw_k))
+     do adir = 1, 3
+       eig1_k(1:2*nband_k**2) = eigen1_3(2*nband_k**2*(ikpt-1)+1:2*nband_k**2*ikpt,adir)
+       do nn = 1, nband_k 
+         cwavef(1:2,1:npw_k) = cg1_k(1:2,(nn-1)*npw_k+1:nn*npw_k,adir)
+         call gaugetransfo(cg_k,cwavef,cwavef_d,mpi_enreg%comm_band,distrb_cycle,eig_k,eig1_k,nn,nband_k,&
+           & dtset%mband,dtset%mband_mem,npw_k,npw_k,dtset%nspinor,dtset%nsppol,mpi_enreg%nproc_band,occ_k)
+         cg1_k(1:2,(nn-1)*npw_k+1:nn*npw_k,adir) = cwavef_d(1:2,1:npw_k)
+       end do
+     end do
+     ABI_FREE(eig1_k)
+     ABI_FREE(cwavef)
+     ABI_FREE(cwavef_d)
+   end if
+ 
    ! retrieve cprj_k
    call pawcprj_get(atindx,cprj_k,cprj,dtset%natom,1,icprj,ikpt,0,isppol,dtset%mband,&
      & dtset%mkmem,dtset%natom,nband_k,nband_k,my_nspinor,dtset%nsppol,0)
 
    ! compute P_c|cg1>
    ABI_MALLOC(pcg1_k,(2,mcgk,3))
-   call make_pcg1(atindx,cg_k,cg1_k,cprj_k,dimlmn,dtset,gs_hamk,ikpt,isppol,&
-     & mcgk,mpi_enreg,nband_k,npw_k,my_nspinor,pcg1_k)
+   ! no projection if userid == 2190, for testing
+   if (dtset%userid .EQ. 2190) then
+     pcg1_k(:,:,:) = cg1_k(:,:,:)
+   else
+     call make_pcg1(atindx,cg_k,cg1_k,cprj_k,dimlmn,dtset,gs_hamk,ikpt,isppol,&
+       & mcgk,mpi_enreg,nband_k,npw_k,my_nspinor,pcg1_k)
+   end if
 
    ! compute <p|Pc cg1> cprjs
    ABI_MALLOC(cwavef,(2,npw_k))
@@ -703,6 +738,7 @@ subroutine orbmag_ptpaw(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_en
    ABI_FREE(cg1_k)
    ABI_FREE(pcg1_k)
    ABI_FREE(eig_k)
+   ABI_FREE(occ_k)
    ABI_FREE(ylm_k)
    ABI_FREE(ylmgr_k)
    ABI_FREE(kpg_k)
@@ -806,6 +842,8 @@ call orbmag_ptpaw_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace)
 
  ABI_FREE(mp2)
  ABI_FREE(mpan)
+ 
+ ABI_FREE(distrb_cycle)
  
  ABI_FREE(orbmag_terms)
  ABI_FREE(orbmag_trace)
@@ -1292,15 +1330,10 @@ subroutine make_pcg1(atindx,cg_k,cg1_k,cprj_k,dimlmn,dtset,gs_hamk,&
         vcg1(2,:) = vcg1(2,:) - half*( dotr*cwavef(2,:) + doti*cwavef(1,:))
       end do
    
-      if (dtset%userid .EQ. 219) then 
-        ! here's the unprojected version, for testing purposes
-        pcg1_k(1:2,(iband-1)*npw_k+1:iband*npw_k,adir) =cg1_k(1:2,(iband-1)*npw_k+1:iband*npw_k,adir)
-      else
-        ! subtract vcg1 from cg1_k to obtain pcg1, the conduction band part of cg1 
-        pcg1_k(1:2,(iband-1)*npw_k+1:iband*npw_k,adir) =cg1_k(1:2,(iband-1)*npw_k+1:iband*npw_k,adir)-&
-          &  vcg1(1:2,1:npw_k)
-      end if
-
+      ! subtract vcg1 from cg1_k to obtain pcg1, the conduction band part of cg1 
+      pcg1_k(1:2,(iband-1)*npw_k+1:iband*npw_k,adir) =cg1_k(1:2,(iband-1)*npw_k+1:iband*npw_k,adir)-&
+        &  vcg1(1:2,1:npw_k)
+    
     end do
   end do
 
