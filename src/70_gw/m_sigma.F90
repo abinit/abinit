@@ -435,11 +435,11 @@ subroutine write_sigma_results(ikcalc,ikibz,Sigp,Sr,KS_BSt)
  gwcalctyp=Sigp%gwcalctyp
  mod10=MOD(Sigp%gwcalctyp,10)
 
- !unt_gw:  File with GW corrections.
- !unt_sig: Self-energy as a function of frequency.
- !unt_sgr: Derivative wrt omega of the Self-energy.
- !unt_sigc: Sigma_c(eik) MRM
- !unt_sgm: Sigma on the Matsubara axis (imag axis)
+ ! unt_gw:  File with GW corrections.
+ ! unt_sig: Self-energy as a function of frequency.
+ ! unt_sgr: Derivative wrt omega of the Self-energy.
+ ! unt_sigc: Sigma_c(eik) MRM
+ ! unt_sgm: Sigma on the Matsubara axis (imag axis)
 
  tag_spin=(/'            ','            '/); if (Sr%nsppol==2) tag_spin=(/',  SPIN UP  ',',  SPIN DOWN'/)
 
@@ -485,7 +485,7 @@ subroutine write_sigma_results(ikcalc,ikibz,Sigp,Sr,KS_BSt)
    write(unt_sigc,'("# b = ",2i10)')Sigp%minbnd(ikcalc,is),Sigp%maxbnd(ikcalc,is)
 
    do ib=Sigp%minbnd(ikcalc,is),Sigp%maxbnd(ikcalc,is)
-     if (gwcalctyp>=10) then
+     if (gwcalctyp >= 10) then
        call print_Sigma_QPSC(Sr,ikibz,ib,is,KS_BSt,unit=dev_null, ydoc=ydoc)
        call print_Sigma_QPSC(Sr,ikibz,ib,is,KS_BSt,unit=std_out,prtvol=1)
 
@@ -506,7 +506,7 @@ subroutine write_sigma_results(ikcalc,ikibz,Sigp,Sr,KS_BSt)
        call print_Sigma_perturbative(Sr,ikibz,ib,is,unit=std_out,prtvol=1)
      end if
 
-     write(unt_gw,'(i6,3f9.4)')          &
+     write(unt_gw,'(i6,3f9.4)')         &
       ib,                               &
       REAL (Sr%egw (ib,ikibz,is))*Ha_eV,&
       REAL (Sr%degw(ib,ikibz,is))*Ha_eV,&
@@ -556,7 +556,8 @@ subroutine write_sigma_results(ikcalc,ikibz,Sigp,Sr,KS_BSt)
      end do
    end do
    !
-   if (mod10==1) then ! For AC, write sigma matrix elements along the imaginary axis
+   if (mod10 == 1) then
+     ! For AC, write sigma matrix elements along the imaginary axis
      do ib=Sigp%minbnd(ikcalc,is),Sigp%maxbnd(ikcalc,is)
        write(unt_sgm,'("# ik, ib",2i5)')ikibz,ib
        do io=1,Sr%nomega_i
