@@ -1,0 +1,21 @@
+# YAML support is available, but is disabled for this test.
+# Start legacy fldiff comparison report
+2
+< .Version 9.7.4 of ABINIT 
+> .Version 9.9.0 of ABINIT 
+3
+< .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+> .(MPI version, prepared for a x86_64_linux_gnu11.3 computer) 
+17
+< .Starting date : Wed  4 May 2022.
+> .Starting date : Thu 17 Nov 2022.
+630
+<  ETOT  2  -12.953451070219    -3.365E-01 9.125E-06 1.546E+00
+>  ETOT  2  -12.953451070219    -3.365E-01 9.125E-06 1.545E+00
+4124
+< .Delivered  15 WARNINGs and  31 COMMENTs to log file.
+> .Delivered  21 WARNINGs and  31 COMMENTs to log file.
+4125
+< +Overall time at end (sec) : cpu=          7.0  wall=          7.3
+> +Overall time at end (sec) : cpu=          1.7  wall=          2.0
+Summary t37.abo: different lines=1, max abs_diff=1.000e-03 (l.630), max rel_diff=3.235e-04 (l.630).

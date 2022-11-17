@@ -1,0 +1,15 @@
+# YAML support is available, but is disabled for this test.
+# Start legacy fldiff comparison report
+2
+< .Version 9.3.1 of ANADDB 
+> .Version 9.9.0 of ANADDB 
+3
+< .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+> .(MPI version, prepared for a x86_64_linux_gnu11.3 computer) 
+17
+< .Starting date : Tue 10 Nov 2020.
+> .Starting date : Thu 17 Nov 2022.
+1192
+< +Total cpu time      0.171  and wall time      0.174 sec
+> +Total cpu time      0.103  and wall time      0.104 sec
+Summary t19.abo: no significant difference has been found.
