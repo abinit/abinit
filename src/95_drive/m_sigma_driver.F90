@@ -1947,37 +1947,57 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  if (wfd%my_rank == master) then
    ! Write info on the run on ab_out, then open files to store final results.
    call ebands_report_gap(ks_ebands,header='KS Band Gaps',unit=ab_out)
-   if(dtset%ucrpa==0) then
+   if(dtset%ucrpa == 0) then
      call write_sigma_header(Sigp,Er,Cryst,Kmesh,Qmesh)
    end if
 
-   if (open_file(Dtfil%fnameabo_gw,msg,unit=unt_gw,status='unknown',form='formatted') /=0) then
+   ! unt_gw:  File with GW corrections.
+   ! unt_sig: Self-energy as a function of frequency.
+   ! unt_sgr: Derivative wrt omega of the Self-energy.
+   ! unt_sigc: Sigma_c(eik) MRM
+   ! unt_sgm: Sigma on the Matsubara axis (imag axis)
+
+   if (open_file(Dtfil%fnameabo_gw, msg, unit=unt_gw, status='unknown', form='formatted') /= 0) then
      ABI_ERROR(msg)
    end if
-   write(unt_gw,*)Sigp%nkptgw,Sigp%nsppol
+   write(unt_gw,"(a)")"# QP energies E in eV"
+   write(unt_gw,"(a)")"# Format:"
+   write(unt_gw,"(a)")"#     kpoint"
+   write(unt_gw,"(a)")"#     number of bands computed"
+   write(unt_gw,"(2a)")"#     band index, Re(E), E-E0, Im(E)", ch10
+   write(unt_gw,"(2(i0,1x),a)")Sigp%nkptgw,Sigp%nsppol, "# nkptgw, nsppol"
 
-   if (open_file(Dtfil%fnameabo_gwdiag,msg,unit=unt_gwdiag,status='unknown',form='formatted') /= 0) then
+   if (open_file(Dtfil%fnameabo_gwdiag, msg, unit=unt_gwdiag, status='unknown', form='formatted') /= 0) then
      ABI_ERROR(msg)
    end if
    write(unt_gwdiag,*)Sigp%nkptgw,Sigp%nsppol
 
-   if (open_file(Dtfil%fnameabo_sig,msg,unit=unt_sig,status='unknown',form='formatted') /= 0) then
+   if (open_file(Dtfil%fnameabo_sig, msg, unit=unt_sig, status='unknown', form='formatted') /= 0) then
      ABI_ERROR(msg)
    end if
-   if (open_file(Dtfil%fnameabo_sgr,msg,unit=unt_sgr,status='unknown',form='formatted') /= 0) then
+   write(unt_sig,"(a)")"# Sigma_xc and spectral function A along the real frequency axis in eV units"
+   write(unt_sig,"(a)")"# Format:"
+   write(unt_sig,"(a)")"#   kpoint"
+   write(unt_sig,"(a)")"#   min_band(k) max_band(k)"
+   write(unt_sig,"(a)")"#   For each frequency w:"
+   write(unt_sig,"(2a)")"#       w, {Re(Sigma_b(w)), Im(Sigma_b(w), A_b(w) for b in [min_band, max_band]}",ch10
+
+   if (open_file(Dtfil%fnameabo_sgr, msg, unit=unt_sgr, status='unknown', form='formatted') /= 0) then
+     ABI_ERROR(msg)
+   end if
+   write(unt_sgr,"(a)")"# Derivatives of Sigma_c(omega) wrt omega in eV units"
+
+   !  Sigma_c(eik) MRM
+   if (open_file(trim(Dtfil%fnameabo_sgr)//'_SIGC', msg, unit=unt_sigc, status='unknown', form='formatted') /= 0) then
      ABI_ERROR(msg)
    end if
 
-   ! Sigma_c(w)
-   if (open_file(trim(Dtfil%fnameabo_sgr)//'_SIGC',msg,unit=unt_sigc,status='unknown',form='formatted') /= 0) then
-     ABI_ERROR(msg)
-   end if
-
-   if (mod10==SIG_GW_AC) then
+   if (mod10 == SIG_GW_AC) then
      ! Sigma along the imaginary axis.
-     if (open_file(Dtfil%fnameabo_sgm,msg,unit=unt_sgm,status='unknown',form='formatted') /= 0) then
+     if (open_file(Dtfil%fnameabo_sgm, msg, unit=unt_sgm, status='unknown', form='formatted') /= 0) then
        ABI_ERROR(msg)
      end if
+     write(unt_sgm,"(a)")"# Sigma_xc along the imaginary frequency axis in eV units"
    end if
  end if
 

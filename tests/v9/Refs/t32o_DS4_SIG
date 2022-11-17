@@ -1,3 +1,10 @@
+# Sigma_xc and spectral function A along the real frequency axis in eV units
+# Format:
+#   kpoint
+#   min_band(k) max_band(k)
+#   For each frequency w:
+#       w, {Re(Sigma_b(w)), Im(Sigma_b(w), A_b(w) for b in [min_band, max_band]}
+
 # k =   0.000000  0.000000  0.000000
 # b =          1         7
 -0.50000E+01  -0.13180E+02  -0.28274E+00   0.12219E-01  -0.99772E+01  -0.12101E+01   0.20551E-02  -0.99772E+01  -0.12101E+01   0.20551E-02  -0.99772E+01  -0.12101E+01   0.20551E-02  -0.78966E+01   0.10172E-01   0.11255E-04  -0.78966E+01   0.10172E-01   0.11255E-04  -0.78966E+01   0.10172E-01   0.11255E-04
