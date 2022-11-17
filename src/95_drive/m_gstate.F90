@@ -2520,7 +2520,7 @@ subroutine pawuj_drive(scfcv_args, dtset,electronpositron,rhog,rhor,rprimd, xred
  real(dp) :: ures
  !character(len=500) :: msg
 !arrays
- real(dp),allocatable :: cgstart(:,:)
+ !real(dp),allocatable :: cgstart(:,:)
  type(macro_uj_type),allocatable,target :: dtpawuj(:)
 ! *********************************************************************
 
@@ -2532,11 +2532,11 @@ subroutine pawuj_drive(scfcv_args, dtset,electronpositron,rhog,rhor,rprimd, xred
  end if
 
  ABI_MALLOC(dtpawuj,(0:ndtpawuj))
- ABI_MALLOC(cgstart,(2,scfcv_args%mcg))
+ !ABI_MALLOC(cgstart,(2,scfcv_args%mcg))
 
  call pawuj_ini(dtpawuj,ndtpawuj)
 
- cgstart=scfcv_args%cg
+ !cgstart=scfcv_args%cg
  do iuj=1,ndtpawuj
 !  allocate(dtpawuj(iuj)%rprimd(3,3)) ! this has already been done in pawuj_ini
    dtpawuj(iuj)%macro_uj=dtset%macro_uj
@@ -2567,7 +2567,7 @@ subroutine pawuj_drive(scfcv_args, dtset,electronpositron,rhog,rhor,rprimd, xred
  end do
 
  ABI_FREE(dtpawuj)
- ABI_FREE(cgstart)
+ !ABI_FREE(cgstart)
 
  DBG_EXIT("COLL")
 

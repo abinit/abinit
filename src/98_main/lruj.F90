@@ -9,8 +9,8 @@
 !!  atom and the resulting occupations/magnetizations. The procedure implemented
 !!  is that of the SCF linear response for the Hubbard U (Phys. Rev. B 71,035105)
 !!  and the Hund's J (Phys. Rev. B 98, 235157) parameters.
-!!  This protocol was coded up in November 2022 by Lorien MacEnulty (macenulty.com), 
-!!  doctoral student in the Quantum Theory of Materials group (theoryofmaterials.com) 
+!!  This protocol was coded up in November 2022 by Lorien MacEnulty (macenulty.com),
+!!  doctoral student in the Quantum Theory of Materials group (theoryofmaterials.com)
 !!  at Trinity College Dublin, headed by Dr. David O'Regan.
 !!
 !! COPYRIGHT
@@ -91,7 +91,7 @@ program lruj
 
 !##########################################################################################################
 !##################################  Set up MPI architecture (unused)  ####################################
- 
+
  !Change communicator for I/O (mandatory!)
  call abi_io_redirect(new_io_comm=xmpi_world)
 
@@ -263,9 +263,10 @@ program lruj
  if (ndata==0) then
    ABI_ERROR('No linear response data points found.')
  else if (ndata==1) then
-   ABI_ERROR(sjoin('Only one data point found. This utility needs',ch10,&
-&    'at least three (3) data points (two non-zero perturbations and one unperturbed) to compute',ch10,&
-&    'the Hubbard parameter.'))
+   msg = sjoin('Only one data point found. This utility needs',ch10,&
+    'at least three (3) data points (two non-zero perturbations and one unperturbed) to compute',ch10,&
+    'the Hubbard parameter.')
+  ABI_ERROR(msg)
  else if (ndata==2) then
    ABI_ERROR(sjoin('Only two data points found. The scalar Hubbard Parameter from',ch10,&
 &    'the two-point linear regression scheme has already been printed in your .abo file. Try bashing',ch10,&
@@ -274,26 +275,30 @@ program lruj
 
  !pawujat consistency check.
  if (any(pawujat_file /= pawujat_file(1))) then
-   ABI_ERROR(sjoin("Found different values of pawujat in files: ", ltoa(pawujat_file),ch10,&
-&         "Perturbed atom has to be consistent across perturbations to compute U or J."))
+   msg = sjoin("Found different values of pawujat in files: ", ltoa(pawujat_file),ch10,&
+         "Perturbed atom has to be consistent across perturbations to compute U or J.")
+  ABI_ERROR(msg)
  end if
 
  !dmatpuopt consistency check
  if (any(dmatpuopt_file /= dmatpuopt_file(1))) then
-   ABI_ERROR(sjoin("Found different values of dmatpuopt in files: ", ltoa(dmatpuopt_file),ch10,&
-&          "PAW projector must be consistent across perturbations to compute U or J."))
+   msg = sjoin("Found different values of dmatpuopt in files: ", ltoa(dmatpuopt_file),ch10,&
+           "PAW projector must be consistent across perturbations to compute U or J.")
+  ABI_ERROR(msg)
  end if
 
  !macro_uj consistency check
  if (any(macrouj_file /= macrouj_file(1))) then
-   ABI_ERROR(sjoin("Found different values of macro_uj in files: ",ltoa(macrouj_file),ch10,&
-&          "Perturbation protocol and occupancy monitoring must be consistent to compute U or J."))
+   msg = sjoin("Found different values of macro_uj in files: ",ltoa(macrouj_file),ch10,&
+           "Perturbation protocol and occupancy monitoring must be consistent to compute U or J.")
+  ABI_ERROR(msg)
  end if
 
  !diemix/diemixmag consistency check
  if (any(diem_file /= diem_file(1))) then
-   ABI_ERROR(sjoin("Found different values of mixing constant in files: ",ltoa(diem_file),ch10,&
-&          "Unscreened response functions will factor into U (J) incorrectly."))
+   msg = sjoin("Found different values of mixing constant in files: ",ltoa(diem_file),ch10,&
+          "Unscreened response functions will factor into U (J) incorrectly.")
+  ABI_ERROR(msg)
  end if
 
  !Tests consistency of macro_uj, then writes message about macro_uj procedure selected.
@@ -316,14 +321,16 @@ program lruj
 
  !Tests compatibility of nspden and macro_uj
  if (macro_uj>1.and.nspden==1) then
-   ABI_ERROR(sjoin('U on a single spin channel (or J) can only be determined for nspden=2 ,',ch10,&
-&   'Cannot calculate the chosen Hubbard parameter.'))
+   msg = sjoin('U on a single spin channel (or J) can only be determined for nspden=2 ,',ch10,&
+    'Cannot calculate the chosen Hubbard parameter.')
+   ABI_ERROR(msg)
  end if
 
  !Tests if perturbations are too small.
  if (maxval(abs(uj_perts))<0.00000001) then
-   ABI_ERROR(sjoin('Perturbation magnitudes are too small.',ch10,&
-&    'Rerun perturbative Abinit calculations with pawujv >> 1d-8.'))
+   msg = sjoin('Perturbation magnitudes are too small.',ch10,&
+     'Rerun perturbative Abinit calculations with pawujv >> 1d-8.')
+   ABI_ERROR(msg)
  end if
 
 !##########################################################################################################
@@ -518,7 +525,7 @@ end subroutine lruj_show_help
 !!  Perform a polynomial regression on incoming data points, the
 !!  x-values of which are stored in array xvals and the y-values
 !!  stored in array yvals. Returns a one dimensional array with
-!!  fit coefficients (coeffs) and the unbiased RMS error of the 
+!!  fit coefficients (coeffs) and the unbiased RMS error of the
 !!  fit as a scalar (RMSerr).
 !!
 !! INPUTS
