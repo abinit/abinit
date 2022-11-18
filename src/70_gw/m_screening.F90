@@ -1389,21 +1389,21 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
    ABI_ERROR("nI or nJ=/1 not yet implemented")
  end if
 
- nprocs  = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+ nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
 
  ! MG TODO We use comm_self for the inversion as the single precision version is not yet available
  comm_self = xmpi_comm_self
 
  call metric(gmet,gprimd,-1,rmet,Vcp%rprimd,ucvol)
 
- is_qeq0 = (normv(Vcp%qibz(:,iqibz),gmet,'G')<GW_TOLQ0)
+ is_qeq0 = normv(Vcp%qibz(:,iqibz),gmet,'G') < GW_TOLQ0
 
  omega_distrb = my_rank
  use_MPI = .FALSE.
- use_MPI = (nprocs>=nomega)  ! Parallelism is not used
+ use_MPI = nprocs >= nomega  ! Parallelism is not used
 
  if (use_MPI) then
-   ! * Initialize distribution table for frequencies.
+   ! Initialize distribution table for frequencies.
    ABI_MALLOC(istart,(nprocs))
    ABI_MALLOC(istop,(nprocs))
    call xmpi_split_work2_i4b(nomega,nprocs,istart,istop)

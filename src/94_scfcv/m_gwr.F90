@@ -5134,17 +5134,19 @@ end if
      end do ! ikcalc
    end do ! spin
 
-   if (open_file(strcat(gwr%dtfil%filnam_ds(4), '_SIGCIT'), msg, newunit=unt_it, action="write") /= 0) then
+   if (open_file(strcat(gwr%dtfil%filnam_ds(4), '_SIGC_IT'), msg, newunit=unt_it, action="write") /= 0) then
      ABI_ERROR(msg)
    end if
    write(unt_it, "(a)")"# Diagonal elements of Sigma_c(i tau, +/-) in atomic units"
    write(unt_it, "(a)")"# tau Re/Im Sigma_c(+itau) Re/Im Sigma_c(-itau)"
-   if (open_file(strcat(gwr%dtfil%filnam_ds(4), '_SIGCIW'), msg, newunit=unt_iw, action="write") /= 0) then
+
+   if (open_file(strcat(gwr%dtfil%filnam_ds(4), '_SIGXC_IW'), msg, newunit=unt_iw, action="write") /= 0) then
      ABI_ERROR(msg)
    end if
-   write(unt_iw, "(a)")"# Diagonal elements of Sigma_c(i omega) in eV units"
+   write(unt_iw, "(a)")"# Diagonal elements of Sigma_xc(i omega) in eV units"
    write(unt_iw, "(a)")"# omega Re/Im Sigma_c(i omega)"
-   if (open_file(strcat(gwr%dtfil%filnam_ds(4), '_SIGCRW'), msg, newunit=unt_rw, action="write") /= 0) then
+
+   if (open_file(strcat(gwr%dtfil%filnam_ds(4), '_SIGXC_RW'), msg, newunit=unt_rw, action="write") /= 0) then
      ABI_ERROR(msg)
    end if
    write(unt_rw, "(a)")"# Diagonal elements of Sigma_xc(omega) in eV units and spectral function A(omega)"
@@ -5175,7 +5177,7 @@ end if
              c2r(sigc_it_diag_kcalc(2, itau, ibc, ikcalc, spin))
            write(unt_iw, "(*(es16.8))") &
              gwr%iw_mesh(itau) * Ha_eV, &
-             c2r(sigc_iw_diag_kcalc(itau, ibc, ikcalc, spin)) * Ha_eV
+             (c2r(sigc_iw_diag_kcalc(itau, ibc, ikcalc, spin)) + sigx) * Ha_eV
          end do
 
          ! Write Sigma_xc(omega) and A(omega)
@@ -5246,23 +5248,31 @@ end function vid
 end subroutine gwr_build_sigmac
 !!***
 
-
 !!****f* m_gwr/write_units
 !! NAME
 !!  write_units
 !!
 !! FUNCTION
-!!  Write `string` to a list of `units`. Add `newlines` newlines after string if optional arg is present
+!!  Write `string` to a list of `units`.
+!!
+!! INPUTS
+!!  [newlines]: Number of new lines added after message. Default 0
+!!  [pre_newlines]: Number of new lines added vefore message. Default 0
 !!
 !! SOURCE
 
-subroutine write_units(units, string, newlines)
+subroutine write_units(units, string, newlines, pre_newlines)
  character(len=*),intent(in) :: string
  integer,intent(in) :: units(:)
- integer,optional,intent(in) :: newlines
+ integer,optional,intent(in) :: newlines, pre_newlines
  integer :: ii, unt
 
  do unt=1,size(units)
+   if (present(pre_newlines)) then
+     do ii=1,pre_newlines
+       write(units(unt), "(a)") " "
+     end do
+   end if
    write(units(unt), "(a)") trim(string)
    if (present(newlines)) then
      do ii=1,newlines
@@ -5271,6 +5281,16 @@ subroutine write_units(units, string, newlines)
    end if
  end do
 end subroutine write_units
+!!***
+
+!!****f* m_gwr/write_notations
+!! NAME
+!!  write_notations
+!!
+!! FUNCTION
+!!  Write meaning of the different columns.
+!!
+!! SOURCE
 
 subroutine write_notations(units)
  integer,intent(in) :: units(:)
@@ -5296,6 +5316,7 @@ subroutine write_notations(units)
    write(unt,"(a)")" "
  end do
 end subroutine write_notations
+!!***
 
 !----------------------------------------------------------------------
 
@@ -5533,7 +5554,7 @@ subroutine gwr_rpa_energy(gwr)
  ABI_FREE(ec_mp2)
  ABI_FREE(ecut_chi)
 
- call timab(1928, 1, tsec)
+ call timab(1928, 2, tsec)
 
 end subroutine gwr_rpa_energy
 !!***
