@@ -48,7 +48,7 @@ _ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
     occopt =       1   xclevel =       2
--    mband =          40        mffmem =           1         mkmem =           1
+-    mband =          30        mffmem =           1         mkmem =           1
        mpw =          57          nfft =        3375          nkpt =           1
 ================================================================================
 P This job should need less than                       1.848 Mbytes of memory.
@@ -131,7 +131,7 @@ _ WF disk file :      0.028 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 P           mkmem           1
             natom           2
             nband1          6
-            nband2         40
+            nband2         30
             nband3         30
             nband4         30
            ndtset           4
@@ -147,8 +147,6 @@ P           mkmem           1
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000
               occ3     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
