@@ -1,7 +1,7 @@
 # Crystalline silicon. 
 # Calculation of the GW corrections with GWR code and energy-only self-consistency
 
-ndtset      4
+ndtset      5
 #nsym 1 
 #kptopt 3
 #kptopt 2
@@ -66,6 +66,17 @@ getden4 1
 getwfk4 2            # WFK file with empty states
 
 prtvol4 1            # Write additional stuff to abo file for testing purposes.
+
+
+################################
+# Dataset 4: HF with the GWR code
+################################
+optdriver5  6        # Activate GWR code
+gwr_task5 "G0V"      # HF with KS states 
+
+getden5 1
+getwfk5 2            # WFK file with empty states
+
 
 # Definition of the k-point grid
 # IMPORTANT: GWR requires Gamma-centered k-meshes

@@ -26,7 +26,6 @@ module m_sigc
  use m_splines
  use m_dtset
 
-
  use defs_datatypes,  only : pseudopotential_type, ebands_t
  use m_hide_blas,     only : xdotc, xgemv, xgemm, xherk
  use m_hide_lapack,   only : xheev
@@ -908,7 +907,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
        call timab(437,2,tsec) ! rho_tw_g
        call timab(443,1,tsec) ! ac_lrk_appl
 
-       if (mod10==SIG_GW_AC) then
+       if (mod10 == SIG_GW_AC) then
          rhotw_epsm1_rhotw(:,:,:) = czero_gw
          do iiw=1,Er%nomega_i
            ABI_MALLOC(epsm1_sqrt_rhotw, (neig(iiw), minbnd:maxbnd))

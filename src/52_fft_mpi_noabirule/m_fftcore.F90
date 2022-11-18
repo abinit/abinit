@@ -474,8 +474,8 @@ subroutine print_ngfft(ngfft, header, unit, mode_paral, prtvol)
  write(msg,'(2(a,3i5,a),a,i5,2a,i5)')&
   '  FFT mesh divisions ........................ ',ngfft(1),ngfft(2),ngfft(3),ch10,&
   '  Augmented FFT divisions ................... ',ngfft(4),ngfft(5),ngfft(6),ch10,&
-  '- FFT algorithm ............................. ',ngfft(7),ch10,&
-  '- FFT cache size ............................ ',ngfft(8)
+  '  FFT algorithm ............................. ',ngfft(7),ch10,&
+  '  FFT cache size ............................ ',ngfft(8)
  call wrtout(my_unt,msg,my_mode)
 
  if (my_prtvol > 0) then

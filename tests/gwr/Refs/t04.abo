@@ -90,6 +90,23 @@ P This job should need less than                       1.831 Mbytes of memory.
 _ WF disk file :      0.028 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
+
+ DATASET    5 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
+================================================================================
+ Values of the parameters that define the memory need for DATASET  5.
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       6
+     lnmax =       6     mgfft =      15  mpssoang =       3    mqgrid =    3001
+     natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
+    nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
+    occopt =       1   xclevel =       2
+-    mband =          30        mffmem =           1         mkmem =           1
+       mpw =          57          nfft =        3375          nkpt =           1
+================================================================================
+P This job should need less than                       1.831 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      0.028 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
+================================================================================
+
 --------------------------------------------------------------------------------
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
@@ -114,10 +131,12 @@ _ WF disk file :      0.028 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
            getden2          1
            getden3          1
            getden4          1
+           getden5          1
            getwfk1          0
            getwfk2          0
            getwfk3          2
            getwfk4          2
+           getwfk5          2
     gwr_boxcutmin      1.10000000E+00
          gwr_ntau           6
        gw_qprange           8
@@ -125,7 +144,7 @@ _ WF disk file :      0.028 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
        gwr_tolqpe      7.34986508E-04 Hartree
            istwfk        2
               ixc          11
-           jdtset        1    2    3    4
+           jdtset        1    2    3    4    5
          kptrlatt        1    0    0      0    1    0      0    0    1
           kptrlen      7.25491557E+00
 P           mkmem           1
@@ -134,7 +153,8 @@ P           mkmem           1
             nband2         30
             nband3         30
             nband4         30
-           ndtset           4
+            nband5         30
+           ndtset           5
           nfreqsp          50
             ngfft          15      15      15
              nkpt           1
@@ -157,14 +177,21 @@ P           mkmem           1
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+              occ5     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
         optdriver1          0
         optdriver2          6
         optdriver3          6
         optdriver4          6
+        optdriver5          6
            prtvol1          0
            prtvol2          0
            prtvol3          1
            prtvol4          1
+           prtvol5          0
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
@@ -221,6 +248,7 @@ P           mkmem           1
            tolvrs2     0.00000000E+00
            tolvrs3     0.00000000E+00
            tolvrs4     0.00000000E+00
+           tolvrs5     0.00000000E+00
             typat      1  1
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        1.3573395400E+00  1.3573395400E+00  1.3573395400E+00
@@ -239,6 +267,8 @@ P           mkmem           1
  chkinp: Checking input parameters for consistency, jdtset=   3.
 
  chkinp: Checking input parameters for consistency, jdtset=   4.
+
+ chkinp: Checking input parameters for consistency, jdtset=   5.
 
 ================================================================================
 == DATASET  1 ==================================================================
@@ -494,8 +524,8 @@ meta: {optdriver: 6, }
  ==== FFT mesh for Green's function ====
   FFT mesh divisions ........................     8    8    8
   Augmented FFT divisions ...................     8    8    8
-- FFT algorithm .............................   312
-- FFT cache size ............................    16
+  FFT algorithm .............................   312
+  FFT cache size ............................    16
  ==== Info on the GWR object ====
 
 --- !GWR_params
@@ -536,8 +566,8 @@ Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(o
  ==== FFT mesh for chi0 head/wings computation ====
   FFT mesh divisions ........................    15   15   15
   Augmented FFT divisions ...................    15   15   15
-- FFT algorithm .............................   312
-- FFT cache size ............................    16
+  FFT algorithm .............................   312
+  FFT cache size ............................    16
 
  Head of the irreducible polarizability for q --> 0
  q0_len: 1.000000E-03 (Bohr^-1)
@@ -557,8 +587,8 @@ Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(o
  ==== FFT mesh for Sigma_x ====
   FFT mesh divisions ........................    15   15   15
   Augmented FFT divisions ...................    15   15   15
-- FFT algorithm .............................   312
-- FFT cache size ............................    16
+  FFT algorithm .............................   312
+  FFT cache size ............................    16
 
 
  Building Green's functions from KS orbitals and KS energies...
@@ -698,8 +728,8 @@ data: !Tabular |
  ==== FFT mesh for Sigma_x ====
   FFT mesh divisions ........................    15   15   15
   Augmented FFT divisions ...................    15   15   15
-- FFT algorithm .............................   312
-- FFT cache size ............................    16
+  FFT algorithm .............................   312
+  FFT cache size ............................    16
 ================================================================================
  QP results (energies in eV)
  Notations:
@@ -782,8 +812,8 @@ data: !Tabular |
  ==== FFT mesh for Sigma_x ====
   FFT mesh divisions ........................    15   15   15
   Augmented FFT divisions ...................    15   15   15
-- FFT algorithm .............................   312
-- FFT cache size ............................    16
+  FFT algorithm .............................   312
+  FFT cache size ............................    16
 ================================================================================
  QP results (energies in eV)
  Notations:
@@ -866,8 +896,8 @@ data: !Tabular |
  ==== FFT mesh for Sigma_x ====
   FFT mesh divisions ........................    15   15   15
   Augmented FFT divisions ...................    15   15   15
-- FFT algorithm .............................   312
-- FFT cache size ............................    16
+  FFT algorithm .............................   312
+  FFT cache size ............................    16
 ================================================================================
  QP results (energies in eV)
  Notations:
@@ -979,8 +1009,8 @@ meta: {optdriver: 6, }
  ==== FFT mesh for Green's function ====
   FFT mesh divisions ........................     8    8    8
   Augmented FFT divisions ...................     8    8    8
-- FFT algorithm .............................   312
-- FFT cache size ............................    16
+  FFT algorithm .............................   312
+  FFT cache size ............................    16
  ==== Info on the GWR object ====
 
 --- !GWR_params
@@ -1021,8 +1051,8 @@ Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(o
  ==== FFT mesh for chi0 head/wings computation ====
   FFT mesh divisions ........................    15   15   15
   Augmented FFT divisions ...................    15   15   15
-- FFT algorithm .............................   312
-- FFT cache size ............................    16
+  FFT algorithm .............................   312
+  FFT cache size ............................    16
 
  Head of the irreducible polarizability for q --> 0
  q0_len: 1.000000E-03 (Bohr^-1)
@@ -1042,8 +1072,8 @@ Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(o
  ==== FFT mesh for Sigma_x ====
   FFT mesh divisions ........................    15   15   15
   Augmented FFT divisions ...................    15   15   15
-- FFT algorithm .............................   312
-- FFT cache size ............................    16
+  FFT algorithm .............................   312
+  FFT cache size ............................    16
 
 
  Building Green's functions from KS orbitals and KS energies...
@@ -1177,8 +1207,8 @@ data: !Tabular |
  ==== FFT mesh for chi0 head/wings computation ====
   FFT mesh divisions ........................    15   15   15
   Augmented FFT divisions ...................    15   15   15
-- FFT algorithm .............................   312
-- FFT cache size ............................    16
+  FFT algorithm .............................   312
+  FFT cache size ............................    16
 
  Head of the irreducible polarizability for q --> 0
  q0_len: 1.000000E-03 (Bohr^-1)
@@ -1198,8 +1228,8 @@ data: !Tabular |
  ==== FFT mesh for Sigma_x ====
   FFT mesh divisions ........................    15   15   15
   Augmented FFT divisions ...................    15   15   15
-- FFT algorithm .............................   312
-- FFT cache size ............................    16
+  FFT algorithm .............................   312
+  FFT cache size ............................    16
 
 
  Building Green's functions from KS orbitals and QP energies...
@@ -1333,8 +1363,8 @@ data: !Tabular |
  ==== FFT mesh for chi0 head/wings computation ====
   FFT mesh divisions ........................    15   15   15
   Augmented FFT divisions ...................    15   15   15
-- FFT algorithm .............................   312
-- FFT cache size ............................    16
+  FFT algorithm .............................   312
+  FFT cache size ............................    16
 
  Head of the irreducible polarizability for q --> 0
  q0_len: 1.000000E-03 (Bohr^-1)
@@ -1354,8 +1384,8 @@ data: !Tabular |
  ==== FFT mesh for Sigma_x ====
   FFT mesh divisions ........................    15   15   15
   Augmented FFT divisions ...................    15   15   15
-- FFT algorithm .............................   312
-- FFT cache size ............................    16
+  FFT algorithm .............................   312
+  FFT cache size ............................    16
 
 
  Building Green's functions from KS orbitals and QP energies...
@@ -1489,8 +1519,8 @@ data: !Tabular |
  ==== FFT mesh for chi0 head/wings computation ====
   FFT mesh divisions ........................    15   15   15
   Augmented FFT divisions ...................    15   15   15
-- FFT algorithm .............................   312
-- FFT cache size ............................    16
+  FFT algorithm .............................   312
+  FFT cache size ............................    16
 
  Head of the irreducible polarizability for q --> 0
  q0_len: 1.000000E-03 (Bohr^-1)
@@ -1510,8 +1540,8 @@ data: !Tabular |
  ==== FFT mesh for Sigma_x ====
   FFT mesh divisions ........................    15   15   15
   Augmented FFT divisions ...................    15   15   15
-- FFT algorithm .............................   312
-- FFT cache size ............................    16
+  FFT algorithm .............................   312
+  FFT cache size ............................    16
 
 
  Building Green's functions from KS orbitals and QP energies...
@@ -1639,6 +1669,103 @@ data: !Tabular |
  EGEW self-consistent loop:
  Convergence achieved at iteration: 5 with gwr_tolqpe:   20.000 (meV)
 
+================================================================================
+== DATASET  5 ==================================================================
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 5, }
+dimensions: {natom: 2, nkpt: 1, mband: 30, nsppol: 1, nspinor: 1, nspden: 1, mpw: 57, }
+cutoff_energies: {ecut:   4.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 6, }
+...
+
+ mkfilename : getwfk/=0, take file _WFK from output of DATASET   2.
+
+ mkfilename : getden/=0, take file _DEN from output of DATASET   1.
+
+ Exchange-correlation functional for the present dataset will be:
+  GGA: Perdew-Burke-Ernzerhof functional - ixc=11
+ Citation for XC functional:
+  J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
+
+- Reading GS density from: t04o_DS1_DEN
+
+
+
+--------------------------------------------------------------------------------
+
+- Reading GS states from WFK file: t04o_DS2_WFK
+  Mapping kBZ --> kIBZ
+ Legend: bz = TS(ibz) + g0 where isym is the index of the symrec operation S and itim is 1 if TR is used.
+        BZ                                       IBZ                                       ibz  isym  itim  g0
+     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]     1     1     0  [0, 0, 0]
+
+
+  Mapping qBZ --> qIBZ
+ Legend: bz = TS(ibz) + g0 where isym is the index of the symrec operation S and itim is 1 if TR is used.
+        BZ                                       IBZ                                       ibz  isym  itim  g0
+     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]     1     1     0  [0, 0, 0]
+
+
+
+ === Kohn-Sham gaps and band edges from IBZ mesh ===
+ Direct band gap semiconductor
+ Fundamental gap:     2.271 (eV)
+   VBM:    -1.136 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     1.136 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Direct gap:         2.271 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+
+
+ ==== FFT mesh for Green's function ====
+  FFT mesh divisions ........................     8    8    8
+  Augmented FFT divisions ...................     8    8    8
+  FFT algorithm .............................   312
+  FFT cache size ............................    16
+ ==== Info on the GWR object ====
+
+--- !GWR_params
+iteration_state: {dtset: 5, }
+gwr_task: G0V
+ntau: 6
+ngkpt: [1, 1, 1, ]
+nkbz: 1
+nkibz: 1
+ngqpt: [1, 1, 1, ]
+nqbz: 1
+nqibz: 1
+green_mpw: 113
+tchi_mpw: 113
+g_ngfft: [8, 8, 8, 8, 8, 8, ]
+P gwr_np_gtks: [1, 1, 1, 1, ]
+P np_kibz: [1, ]
+P np_qibz: [1, ]
+ft_max_err_t2w_cos:   3.38096265E-03
+ft_max_err_w2t_cos:   1.13989232E-04
+ft_max_err_t2w_sin:   5.99630147E-02
+cosft_duality_error:   5.42525308E-04
+Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(omega)
+    1 1.68072E-01   4.38518E-01   2.63761E-02   2.18800E-01
+    2 9.54129E-01   1.18556E+00   9.16320E-02   3.24426E-01
+    3 2.71685E+00   2.47696E+00   2.03417E-01   6.12353E-01
+    4 6.32000E+00   5.02257E+00   4.31071E-01   1.31275E+00
+    5 1.36195E+01   1.02031E+01   9.53132E-01   3.20658E+00
+    6 2.88861E+01   2.23629E+01   2.50824E+00   1.20067E+01
+...
+
+
+ Computing diagonal matrix elements of Sigma_x
+ Using KS orbitals and KS energies...
+
+
+ ==== FFT mesh for Sigma_x ====
+  FFT mesh divisions ........................    15   15   15
+  Augmented FFT divisions ...................    15   15   15
+  FFT algorithm .............................   312
+  FFT cache size ............................    16
+
 == END DATASET(S) ==============================================================
 ================================================================================
   
@@ -1653,6 +1780,7 @@ data: !Tabular |
            etotal2     0.0000000000E+00
            etotal3     0.0000000000E+00
            etotal4     0.0000000000E+00
+           etotal5     0.0000000000E+00
             fcart1    -1.0077736508E-26  7.5583023808E-27  2.5194341269E-27
                        1.0077736508E-26 -7.5583023808E-27 -2.5194341269E-27
             fcart2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -1661,6 +1789,8 @@ data: !Tabular |
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart4     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+            fcart5     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
 -          fftalg         312
         freqspmax      1.83746627E-01 Hartree
         freqspmin     -1.83746627E-01 Hartree
@@ -1668,10 +1798,12 @@ data: !Tabular |
            getden2          1
            getden3          1
            getden4          1
+           getden5          1
            getwfk1          0
            getwfk2          0
            getwfk3          2
            getwfk4          2
+           getwfk5          2
     gwr_boxcutmin      1.10000000E+00
          gwr_ntau           6
        gw_qprange           8
@@ -1679,7 +1811,7 @@ data: !Tabular |
        gwr_tolqpe      7.34986508E-04 Hartree
            istwfk        2
               ixc          11
-           jdtset        1    2    3    4
+           jdtset        1    2    3    4    5
          kptrlatt        1    0    0      0    1    0      0    0    1
           kptrlen      7.25491557E+00
 P           mkmem           1
@@ -1688,7 +1820,8 @@ P           mkmem           1
             nband2         30
             nband3         30
             nband4         30
-           ndtset           4
+            nband5         30
+           ndtset           5
           nfreqsp          50
             ngfft          15      15      15
              nkpt           1
@@ -1711,14 +1844,21 @@ P           mkmem           1
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+              occ5     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
         optdriver1          0
         optdriver2          6
         optdriver3          6
         optdriver4          6
+        optdriver5          6
            prtvol1          0
            prtvol2          0
            prtvol3          1
            prtvol4          1
+           prtvol5          0
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
@@ -1730,6 +1870,8 @@ P           mkmem           1
            strten3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten4     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+           strten5     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
                        0 -1  1   0 -1  0   1 -1  0       0  1 -1   0  1  0  -1  1  0
@@ -1783,6 +1925,7 @@ P           mkmem           1
            tolvrs2     0.00000000E+00
            tolvrs3     0.00000000E+00
            tolvrs4     0.00000000E+00
+           tolvrs5     0.00000000E+00
             typat      1  1
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        1.3573395400E+00  1.3573395400E+00  1.3573395400E+00
@@ -1886,7 +2029,7 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          5.5  wall=          5.5
+- Proc.   0 individual time (sec): cpu=          6.4  wall=          6.8
 
 ================================================================================
 
