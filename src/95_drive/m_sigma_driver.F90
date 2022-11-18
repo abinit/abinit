@@ -398,8 +398,9 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  call timab(403,2,tsec) ! setup_sigma
  call timab(402,1,tsec) ! Init1
 
- if (nprocs>Sigp%nbnds) then
-   ABI_ERROR("Impossible to continue when the number of MPI procs is greater than nband")
+ if (nprocs > Sigp%nbnds) then
+   write(msg,"(2(a,i0))")"The number of MPI procs:", nprocs, " is greater than nband:", sigp%nbnds
+   ABI_ERROR(msg)
  end if
 
  pole_screening = .FALSE.

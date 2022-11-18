@@ -5163,7 +5163,9 @@ end if
          ibc = band - gwr%bstart_ks(ikcalc, spin) + 1
          e0 = gwr%ks_ebands%eig(band, ik_ibz, spin)
          sigx = gwr%x_mat(band, band, ikcalc, spin)
+
          call write_units(units, sjoin("# band:", itoa(band), ", spin:", itoa(spin)))
+         call write_units(units, sjoin("# sigx_ev:", ftoa(sigx * Ha_eV)))
 
          ! Write Sigma_c(i tau) and Sigma_c(i omega)
          do itau=1,gwr%ntau
@@ -5244,14 +5246,24 @@ end function vid
 end subroutine gwr_build_sigmac
 !!***
 
-subroutine write_units(units, str, newlines)
- character(len=*),intent(in) :: str
+
+!!****f* m_gwr/write_units
+!! NAME
+!!  write_units
+!!
+!! FUNCTION
+!!  Write `string` to a list of `units`. Add `newlines` newlines after string if optional arg is present
+!!
+!! SOURCE
+
+subroutine write_units(units, string, newlines)
+ character(len=*),intent(in) :: string
  integer,intent(in) :: units(:)
  integer,optional,intent(in) :: newlines
  integer :: ii, unt
 
  do unt=1,size(units)
-   write(units(unt), "(a)") trim(str)
+   write(units(unt), "(a)") trim(string)
    if (present(newlines)) then
      do ii=1,newlines
        write(units(unt), "(a)") " "
