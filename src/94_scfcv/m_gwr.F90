@@ -5523,15 +5523,17 @@ subroutine gwr_rpa_energy(gwr)
          ! TODO: ELPA
          !call compute_eigen_problem(processor, matrix, results, eigen, comm, istwf_k, nev)
 
-         weight = gwr%wtq(iq_ibz) * gwr%iw_wgs(itau) / two_pi
-         do ii=1,mat_size
-           ec_rpa(icut) = ec_rpa(icut) + weight * (log(one - eig(ii)) + eig(ii))
-           ! second order Moeller Plesset.
-           ec_mp2(icut) = ec_mp2(icut) - weight * eig(ii) ** 2 / two
-           !if (eig(ii) > zero) then
-           !  write(msg, "(a, es16.8)")"Positive eigenvalue:", eig(ii)
-           !  ABI_ERROR(msg)
-           !end if
+         if (xmpi_comm_rank(chi_tmp%processor%comm) == 0) then
+           weight = gwr%wtq(iq_ibz) * gwr%iw_wgs(itau) / two_pi
+           do ii=1,mat_size
+             ec_rpa(icut) = ec_rpa(icut) + weight * (log(one - eig(ii)) + eig(ii))
+             ! second order Moeller Plesset.
+             ec_mp2(icut) = ec_mp2(icut) - weight * eig(ii) ** 2 / two
+             !if (eig(ii) > zero) then
+             !  write(msg, "(a, es16.8)")"Positive eigenvalue:", eig(ii)
+             !  ABI_ERROR(msg)
+             !end if
+           end do
          end do
        end do ! icut
 
