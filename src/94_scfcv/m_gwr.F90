@@ -3060,7 +3060,7 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
          end do
 #else
          call ZGEMM("N", "N", gwr%ntau, loc1_size, gwr%my_ntau, cone, &
-                    wgt_globmy, gwr%ntau, cwork_myit(:,:,idat), gwr%my_ntau, czero, glob_cwork(:,:,idat), gwr%ntau)
+                    wgt_globmy, gwr%ntau, cwork_myit(1,1,idat), gwr%my_ntau, czero, glob_cwork(1,1,idat), gwr%ntau)
 #endif
 
          !call xmpi_isum_ip(glob_cwork(:,:,idat), gwr%tau_comm%value, requests(idat), ierr)
@@ -3831,7 +3831,7 @@ end if
          !call cwtime_report("chiq part", cpu, wall, gflops)
 
          if (my_ir <= 3 * gwr%sc_batch_size .or. mod(my_ir, PRINT_MODR) == 0) then
-           write(msg,'(4x, 3(a,i0),a)')" tChi my ir [", my_ir, "/", my_nr, "] (tot: ", gwr%g_nfft, ")"
+           write(msg,'(4x, 3(a,i0),a)')" tChi my_ir [", my_ir, "/", my_nr, "] (tot: ", gwr%g_nfft, ")"
            if (gwr%comm%me == 0) call cwtime_report(msg, cpu_ir, wall_ir, gflops_ir)
          end if
        end do ! my_ir
@@ -5171,13 +5171,14 @@ end if
 
          ! Write Sigma_c(i tau) and Sigma_c(i omega)
          do itau=1,gwr%ntau
+           ! FIXME itau is not ordered
            write(unt_it, "(*(es16.8))") &
              gwr%tau_mesh(itau), &
              c2r(sigc_it_diag_kcalc(1, itau, ibc, ikcalc, spin)), &
              c2r(sigc_it_diag_kcalc(2, itau, ibc, ikcalc, spin))
            write(unt_iw, "(*(es16.8))") &
              gwr%iw_mesh(itau) * Ha_eV, &
-             (c2r(sigc_iw_diag_kcalc(itau, ibc, ikcalc, spin)) + sigx) * Ha_eV
+             (c2r(sigc_iw_diag_kcalc(itau, ibc, ikcalc, spin) + sigx)) * Ha_eV
          end do
 
          ! Write Sigma_xc(omega) and A(omega)
@@ -5415,7 +5416,8 @@ subroutine gwr_rpa_energy(gwr)
  type(desc_t),pointer :: desc_q
  !character(len=500) :: msg
 !arrays
- type(matrix_scalapack) :: chi_tmp, dummy_vec
+ type(matrix_scalapack) :: chi_tmp, dummy_vec, chi_4diag
+ type(processor_scalapack) :: proc_4diag
  real(dp),allocatable :: eig(:), kin_qg(:), ec_rpa(:), ec_mp2(:), ecut_chi(:)
 
 ! *************************************************************************
@@ -5506,7 +5508,20 @@ subroutine gwr_rpa_energy(gwr)
          ! Eq (6) 10.1103/PhysRevB.81.115126
          ! NB: have to build chi_tmp inside loop over icut as matrix is destroyed by pzheev.
          mat_size = bisect(kin_qg, ecut_chi(icut))
+
+#if 0
          call chi_tmp%pzheev("N", "U", dummy_vec, eig, mat_size=mat_size)
+#else
+         ! Change size block and, if possible, use 2D rectangular grid of processors for diagonalization
+         call proc_4diag%init(chi_tmp%processor%comm)
+         call chi_tmp%change_size_blocs(chi_4diag, processor=proc_4diag)
+         call chi_4diag%pzheev("N", "U", dummy_vec, eig, mat_size=mat_size)
+         call chi_4diag%free()
+         call proc_4diag%free()
+#endif
+
+         ! TODO: ELPA
+         !call compute_eigen_problem(processor, matrix, results, eigen, comm, istwf_k, nev)
 
          weight = gwr%wtq(iq_ibz) * gwr%iw_wgs(itau) / two_pi
          do ii=1,mat_size

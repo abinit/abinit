@@ -52,7 +52,7 @@ module m_slk
  integer,private,parameter :: M_ = 3       ! nb global lines
  integer,private,parameter :: N_ = 4       ! nb global columns
  integer,private,parameter :: MB_ = 5      ! nb lines of a block
- integer,private,parameter :: NB_ = 6      ! nb columns of a bloc
+ integer,private,parameter :: NB_ = 6      ! nb columns of a block
  integer,private,parameter :: RSRC_ = 7    ! line of processors at the beginning
  integer,private,parameter :: CSRC_ = 8    ! column of processors at the beginning
  integer,private,parameter :: LLD_ = 9     ! local number of lines
