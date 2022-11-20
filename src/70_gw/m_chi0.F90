@@ -433,7 +433,8 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,qp_ebands,ks_ebands,Gsph_eps
  ! TODO this table can be calculated for each k-point
  my_nbbpks=0; allup="All"; got=0
  ABI_MALLOC(bbp_ks_distrb,(mband,mband,Kmesh%nbz,nsppol))
- call wrtout(std_out, sjoin(' Memory needed for bbp_ks_distrb: ', ftoa(four*mband**2*Kmesh%nbz*nsppol*b2Mb), ' [Mb] <<< MEM'))
+ call wrtout(std_out, sjoin(' Memory needed for bbp_ks_distrb: ', &
+             ftoa(four*mband**2*Kmesh%nbz*nsppol*b2Mb, fmt="f8.1"), ' [Mb] <<< MEM'))
 
  ABI_MALLOC(bbp_mask, (mband, mband))
 
@@ -1319,7 +1320,8 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,qp_ebands,Gsph_epsG0,&
  ! TODO this table can be calculated for each k-point
  my_nbbpks=0; allup="All"; got=0
  ABI_MALLOC(bbp_ks_distrb,(mband,mband,Kmesh%nbz,nsppol))
- call wrtout(std_out, sjoin(' Memory needed for bbp_ks_distrb: ', ftoa(four*mband**2*Kmesh%nbz*nsppol*b2Mb), ' [Mb] <<< MEM'))
+ call wrtout(std_out, sjoin(' Memory needed for bbp_ks_distrb: ', &
+             ftoa(four*mband**2*Kmesh%nbz*nsppol*b2Mb, fmt="f8.1"), ' [Mb] <<< MEM'))
 
  ABI_MALLOC(bbp_mask,(mband, mband))
 
