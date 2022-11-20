@@ -1102,6 +1102,8 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
                       gwr%tau_mesh, gwr%tau_wgs, gwr%iw_mesh, gwr%iw_wgs, & ! out args allocated by the routine.
                       gwr%cosft_wt, gwr%cosft_tw, gwr%sinft_wt, &
                       gwr%ft_max_error, gwr%cosft_duality_error, ierr)
+
+ !gwr%iw_wgs = gwr%iw_wgs * te_min
  if (ierr /= 0) then
    call gx_get_error_message(msg)
    ABI_ERROR(msg)
@@ -4383,6 +4385,7 @@ subroutine gwr_build_wc(gwr)
    iq_ibz = gwr%my_qibz_inds(my_iqi)
    qq_ibz = gwr%qibz(:, iq_ibz)
    q_is_gamma = normv(qq_ibz, gwr%cryst%gmet, "G") < GW_TOLQ0
+
    associate (desc_q => gwr%tchi_desc_qibz(iq_ibz))
    ig0 = desc_q%ig0
 
@@ -5449,14 +5452,16 @@ subroutine gwr_rpa_energy(gwr)
      iq_ibz = gwr%my_qibz_inds(my_iqi)
      qq_ibz = gwr%qibz(:, iq_ibz)
      q_is_gamma = normv(qq_ibz, gwr%cryst%gmet, "G") < GW_TOLQ0
+     !if (q_is_gamma) then
+     !  call wrtout([std_out, ab_out], "RPA: Ignoring q==0"); cycle
+     !end if
 
      ! iq_ibz might be replicated inside gwr%kpt_comm.
      if (.not. gwr%itreat_iqibz(iq_ibz)) cycle
 
      desc_q => gwr%tchi_desc_qibz(iq_ibz)
      ABI_CHECK(desc_q%kin_sorted, "g-vectors are not sorted by |q+g|^2/2 !")
-     npw_q = desc_q%npw
-     ig0 = desc_q%ig0
+     npw_q = desc_q%npw; ig0 = desc_q%ig0
 
      ABI_MALLOC(kin_qg, (npw_q))
      do ig=1,npw_q
@@ -5484,7 +5489,8 @@ subroutine gwr_rpa_energy(gwr)
          ! TODO: Contribution due to head for q --> 0 is ignored.
          ! This is not optimal but consistent with calc_rpa_functional
          do il_g2=1,tchi%sizeb_local(2)
-           ig2 = mod(tchi%loc2gcol(il_g2) - 1, desc_q%npw) + 1
+           !ig2 = mod(tchi%loc2gcol(il_g2) - 1, desc_q%npw) + 1
+           ig2 = tchi%loc2gcol(il_g2)
            damp = one
            !if (kin_qg(ig2) > ecut_soft) then
            !  damp = sqrt(half * (one + cos(pi * (kin_qg(ig2) - ecut_soft) / (ecut_chi(icut) - ecut_soft))))
@@ -5493,13 +5499,15 @@ subroutine gwr_rpa_energy(gwr)
            if (q_is_gamma .and. ig2 == ig0) vcs_g2 = zero
 
            do il_g1=1,tchi%sizeb_local(1)
-             ig1 = mod(tchi%loc2grow(il_g1) - 1, desc_q%npw) + 1
+             !ig1 = mod(tchi%loc2grow(il_g1) - 1, desc_q%npw) + 1
+             ig1 = tchi%loc2grow(il_g1)
              damp = one
              !if (kin_qg(ig1) > ecut_soft) then
              !  damp = sqrt(half * (one + cos(pi * (kin_qg(ig1) - ecut_soft) / (ecut_chi(icut) - ecut_soft))))
              !end if
              vcs_g1 = desc_q%vc_sqrt(ig1) * damp
              if (q_is_gamma .and. ig1 == ig0) vcs_g1 = zero
+
              chi_tmp%buffer_cplx(il_g1, il_g2) = tchi%buffer_cplx(il_g1, il_g2) * vcs_g1 * vcs_g2
            end do
          end do
@@ -5534,7 +5542,7 @@ subroutine gwr_rpa_energy(gwr)
              !  ABI_ERROR(msg)
              !end if
            end do
-         end do
+         end if
        end do ! icut
 
        if (my_it == gwr%my_ntau) then
@@ -5554,8 +5562,13 @@ subroutine gwr_rpa_energy(gwr)
  call xmpi_sum_master(ec_rpa, master, gwr%comm%value, ierr)
  call xmpi_sum_master(ec_mp2, master, gwr%comm%value, ierr)
 
+ ! FIXME: It seems this factor is needed to reproduce the quartic-scaling version
+ ! Perhaps the definition of the weights is now I was expecting
+ ec_rpa = ec_rpa / four
+
  if (gwr%comm%me == master) then
    ! Print results to ab_out.
+   ! TODO: Add metadata: nband, nqbz...
    write(ab_out, "(4a16)")"ecut_chi", "ecut_chi^(-3/2)", "RPA Ec (eV)", "RPA Ec (Ha)"
    do icut=ncut,1,-1
      write(ab_out, "(*(es16.8))") ecut_chi(icut), ecut_chi(icut) ** (-three/two), ec_rpa(icut) * Ha_eV, ec_rpa(icut)

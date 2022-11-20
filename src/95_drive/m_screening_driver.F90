@@ -2622,7 +2622,7 @@ subroutine calc_rpa_functional(gwrpacorr,gwgmcorr,iqcalc,iq,Ep,Pvc,Qmesh,Dtfil,g
  integer :: ig1,ig2,ilambda,io,master,rank,nprocs,unt,ierr
  real(dp) :: ecorr,ecorr_gm
  real(dp) :: lambda
- logical :: qeq0
+ logical :: q_is_gamma
  character(len=500) :: msg
 !arrays
  real(dp),allocatable :: z(:),zl(:),zlw(:),zw(:)
@@ -2641,7 +2641,7 @@ subroutine calc_rpa_functional(gwrpacorr,gwgmcorr,iqcalc,iq,Ep,Pvc,Qmesh,Dtfil,g
  !if (rank==master) then ! presently only master has chi0 in screening
 
  ! vc_sqrt contains vc^{1/2}(q,G), complex-valued to allow for a possible cutoff
- qeq0=(normv(Qmesh%ibz(:,iq),gmet,'G')<GW_TOLQ0)
+ q_is_gamma = normv(Qmesh%ibz(:,iq),gmet,'G')<GW_TOLQ0
 
  ! Calculate Gauss-Legendre quadrature knots and weights for the omega integration
  ABI_MALLOC(zw, (Ep%nomegaei))
@@ -2662,6 +2662,9 @@ subroutine calc_rpa_functional(gwrpacorr,gwgmcorr,iqcalc,iq,Ep,Pvc,Qmesh,Dtfil,g
  end if
 
  do io=2,Ep%nomega
+   !if (q_is_gamma) then
+   !  call wrtout([std_out, ab_out], "RPA: Ignoring q==0"); cycle
+   !end if
 
    if(gwrpacorr==1) then ! exact integration over the coupling constant
 
@@ -2672,8 +2675,9 @@ subroutine calc_rpa_functional(gwrpacorr,gwgmcorr,iqcalc,iq,Ep,Pvc,Qmesh,Dtfil,g
          chitmp(ig1,ig2) = Pvc%vc_sqrt(ig1,iq) * Pvc%vc_sqrt(ig2,iq) * chi0(ig1,ig2,io)
        end do !ig1
      end do !ig2
+
      ABI_MALLOC(eig,(Ep%npwe))
-     call xheev('V','U',Ep%npwe,chitmp,eig)
+     call xheev('N','U',Ep%npwe,chitmp,eig)
 
      do ig1=1,Ep%npwe
        ec_rpa(:) = ec_rpa(:) &
