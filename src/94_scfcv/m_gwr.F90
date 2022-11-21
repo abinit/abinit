@@ -778,7 +778,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  integer :: comm_cart, me_cart, ierr, all_nproc, nps, my_rank, qprange_, gap_err, ncerr, omp_nt
  integer :: cnt, ikcalc, ndeg, mband, bstop, nbsum !, it, iw ! jj,
  integer :: ik_ibz, ik_bz, isym_k, trev_k, g0_k(3)
- real(dp) :: cpu, wall, gflops, te_min, te_max, wmax, vc_ecut
+ real(dp) :: cpu, wall, gflops, te_min, te_max, wmax, vc_ecut, delta, abs_rerr, exact_int, eval_int
  logical :: isirr_k, changed, q_is_gamma, reorder
  character(len=5000) :: msg
  type(krank_t) :: qrank, krank_ibz
@@ -1103,17 +1103,43 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
                       gwr%cosft_wt, gwr%cosft_tw, gwr%sinft_wt, &
                       gwr%ft_max_error, gwr%cosft_duality_error, ierr)
 
- !gwr%iw_wgs = gwr%iw_wgs * te_min
  if (ierr /= 0) then
    call gx_get_error_message(msg)
    ABI_ERROR(msg)
  end if
+
+ ! FIXME: Here we need to rescale the weights because greenx convention is now what we expect!
+ gwr%iw_wgs(:) = gwr%iw_wgs(:) / four
 
  call wrtout(std_out, sjoin(" Max_{ij} |CT CT^{-1} - I|", ftoa(gwr%cosft_duality_error)))
  call wrtout(std_out, sjoin(" ft_max_error", ltoa(gwr%ft_max_error)))
 #else
  ABI_ERROR("GWR code requires Green-X library!")
 #endif
+
+ if (gwr%comm%me == 0) then
+   write(std_out, "(3a)")ch10, " Computing F(delta) = \int_0^{\infty} dw / (w^2 + delta^2) = pi/2/delta ", ch10
+   write(std_out, "(*(a12,2x))")"delta", "numeric", "exact", "abs_rerr (%)"
+   do ii=1,10
+     delta = (ii * te_min)
+     eval_int = sum(gwr%iw_wgs(:) / (gwr%iw_mesh(:)**2 + delta**2))
+     exact_int = pi / (two * delta)
+     abs_rerr = 100 * abs(eval_int - exact_int) / exact_int
+     write(std_out, "(*(es12.5,2x))") delta, eval_int, exact_int, abs_rerr
+   end do
+
+   write(std_out, "(3a)")ch10," Computing F(w) = \int_0^{\infty} e^{-w tau} dtau", ch10
+   write(std_out, "(*(a12,2x))")"w", "numeric", "exact", "abs_rerr (%)"
+   do itau=1,gwr%ntau
+     eval_int = sum(gwr%tau_wgs(:) * exp(-gwr%tau_mesh(:) * gwr%iw_mesh(itau)))
+     exact_int = one / gwr%iw_mesh(itau)
+     abs_rerr = 100 * abs(eval_int - exact_int) / exact_int
+     write(std_out, "(*(es12.5,2x))") gwr%iw_mesh(itau), eval_int, exact_int, abs_rerr
+   end do
+   write(std_out, "(a)")
+
+ endif
+ !stop
 
  call ks_gaps%free()
 
@@ -5561,10 +5587,6 @@ subroutine gwr_rpa_energy(gwr)
  ! Collect results on the master node.
  call xmpi_sum_master(ec_rpa, master, gwr%comm%value, ierr)
  call xmpi_sum_master(ec_mp2, master, gwr%comm%value, ierr)
-
- ! FIXME: It seems this factor is needed to reproduce the quartic-scaling version
- ! Perhaps the definition of the weights is now I was expecting
- ec_rpa = ec_rpa / four
 
  if (gwr%comm%me == master) then
    ! Print results to ab_out.
