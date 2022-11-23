@@ -1431,6 +1431,11 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getgam_eig2nkq',tread,'INT')
  if(tread==1) dtset%getgam_eig2nkq=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getwfmq',tread,'INT')
+ if(tread==1) dtset%getwfmq=intarr(1)
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getwfmq_filepath',tread,'KEY', key_value=key_value)
+ if(tread==1) dtset%getwfmq_filepath = key_value
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getwfq',tread,'INT')
  if(tread==1) dtset%getwfq=intarr(1)
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getwfq_filepath',tread,'KEY', key_value=key_value)
@@ -2028,6 +2033,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'optcell',tread,'INT')
  if(tread==1) dtset%optcell=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'irdwfmq',tread,'INT')
+ if(tread==1) dtset%irdwfmq=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'irdwfq',tread,'INT')
  if(tread==1) dtset%irdwfq=intarr(1)

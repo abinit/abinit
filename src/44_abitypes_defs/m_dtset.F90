@@ -219,6 +219,7 @@ type, public :: dataset_type
  integer :: getvel = 0
  integer :: getwfk = 0
  integer :: getwfkfine = 0
+ integer :: getwfmq = 0
  integer :: getwfq = 0
  integer :: getxcart = 0
  integer :: getxred = 0
@@ -321,6 +322,7 @@ type, public :: dataset_type
  integer :: irdvdw = 0
  integer :: irdwfk = 0
  integer :: irdwfkfine = 0
+ integer :: irdwfmq = 0
  integer :: irdwfq = 0
  integer :: ird1den = 0
  integer :: ird1wf = 0
@@ -973,6 +975,7 @@ type, public :: dataset_type
  character(len=fnlen) :: getdvdb_filepath = ABI_NOFILE
  character(len=fnlen) :: getwfk_filepath = ABI_NOFILE
  character(len=fnlen) :: getwfkfine_filepath = ABI_NOFILE
+ character(len=fnlen) :: getwfmq_filepath = ABI_NOFILE
  character(len=fnlen) :: getwfq_filepath = ABI_NOFILE
  character(len=fnlen) :: getkerange_filepath = ABI_NOFILE
  character(len=fnlen) :: getpot_filepath = ABI_NOFILE
@@ -1576,6 +1579,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%getscr_filepath        = dtin%getscr_filepath
  dtout%getwfk_filepath        = dtin%getwfk_filepath
  dtout%getwfkfine_filepath    = dtin%getwfkfine_filepath
+ dtout%getwfmq_filepath        = dtin%getwfmq_filepath
  dtout%getwfq_filepath        = dtin%getwfq_filepath
  dtout%getqps             = dtin%getqps
  dtout%getscr             = dtin%getscr
@@ -1583,6 +1587,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%getvel             = dtin%getvel
  dtout%getwfk             = dtin%getwfk
  dtout%getwfkfine         = dtin%getwfkfine
+ dtout%getwfmq             = dtin%getwfmq
  dtout%getwfq             = dtin%getwfq
  dtout%getxcart           = dtin%getxcart
  dtout%getxred            = dtin%getxred
@@ -1682,6 +1687,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%irdvdw             = dtin%irdvdw
  dtout%irdwfk             = dtin%irdwfk
  dtout%irdwfkfine         = dtin%irdwfkfine
+ dtout%irdwfmq            = dtin%irdwfmq
  dtout%irdwfq             = dtin%irdwfq
  dtout%ird1den            = dtin%ird1den
  dtout%ird1wf             = dtin%ird1wf
@@ -3318,7 +3324,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' gethaydock getocc getpawden getpot_filepath getsigeph_filepath getgstore_filepath'
  list_vars=trim(list_vars)//' getqps getscr getscr_filepath'
  list_vars=trim(list_vars)//' getwfkfine getwfkfine_filepath getsuscep'
- list_vars=trim(list_vars)//' getvel getwfk getwfk_filepath getwfq getwfq_filepath getxcart getxred'
+ list_vars=trim(list_vars)//' getvel getwfk getwfk_filepath getwfmq getwfmq_filepath getwfq getwfq_filepath getxcart getxred'
  list_vars=trim(list_vars)//' get1den get1wf goprecon goprecprm'
  list_vars=trim(list_vars)//' gpu_devices gpu_linalg_limit gwaclowrank gwcalctyp gwcomp gwencomp gwgamma gwmem'
  list_vars=trim(list_vars)//' gstore_cplex gstore_with_vk gstore_kzone gstore_qzone gstore_kfilter gstore_brange gstore_erange'
@@ -3343,7 +3349,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' iprcel iprcfc irandom irdbscoup'
  list_vars=trim(list_vars)//' irdbseig irdbsreso irdchkprdm irdddb irdddk irdden irddvdb irdefmas'
  list_vars=trim(list_vars)//' irdhaydock irdpawden irdqps'
- list_vars=trim(list_vars)//' irdscr irdsuscep irdwfk irdwfq ird1den'
+ list_vars=trim(list_vars)//' irdscr irdsuscep irdwfk irdwfmq irdwfq ird1den'
  list_vars=trim(list_vars)//' irdwfkfine'
  list_vars=trim(list_vars)//' ird1wf iscf isecur istatimg istatr'
  list_vars=trim(list_vars)//' istatshft istwfk ixc ixc_sigma ixcpositron ixcrot'

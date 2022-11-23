@@ -1128,6 +1128,9 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  intarr(1,:)=dtsets(:)%getwfkfine
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'getwfkfine','INT',0)
 
+ intarr(1,:)=dtsets(:)%getwfmq
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'getwfmq','INT',0)
+
  intarr(1,:)=dtsets(:)%getwfq
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'getwfq','INT',0)
 
