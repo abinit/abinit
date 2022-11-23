@@ -1,6 +1,6 @@
 # LiF Very rough 2x2x2 q-point grid; low ecut.
 
-ndtset 10
+ndtset 11
 
 getwfk_filepath  "t60o_DS20_WFK"
 getddb_filepath  "t60o_DS20_DDB"
@@ -157,6 +157,16 @@ ph_qpath9
 # Interpolate DFPT potentials, produce v1qavg file along q-path
 eph_task10 -15
 getdvdb_filepath10  "t60o_DS20_DVDB"
+
+############
+# DATASET 11
+############
+eph_task11 9
+getsigeph_filepath11 "t60o_DS8_SIGEPH.nc"
+eph_intmeth11          1
+eph_ngqpt_fine11       4    4    4
+
+
 
 ############################################################################################
 #                                         STRUCTURE
