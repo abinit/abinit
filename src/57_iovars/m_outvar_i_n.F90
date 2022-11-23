@@ -418,6 +418,9 @@ subroutine outvar_i_n (dtsets,iout,&
  intarr(1,:)=dtsets(:)%irdwfkfine
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'irdwfkfine','INT',0)
 
+ intarr(1,:)=dtsets(:)%irdwfmq
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'irdwfmq','INT',0)
+
  intarr(1,:)=dtsets(:)%irdwfq
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'irdwfq','INT',0)
 
