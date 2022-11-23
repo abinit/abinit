@@ -3001,6 +3001,7 @@ end subroutine cgpaw_gramschmidt
 !!  1) MPIWF Might have to be recoded for efficient paralellism
 !!
 !!  2) The new version employs BLAS2 routine so that the OMP parallelism is delegated to BLAS library.
+!!     May use BLAS3 if multiple wavefunctions are optimized at the same time.
 !!
 !!  3) Note for PAW: ref.= PRB 73, 235101 (2006) [[cite:Audouze2006]], equations (71) and (72):
 !!     in normal use, projbd applies P_c projector

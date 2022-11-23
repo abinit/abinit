@@ -3015,6 +3015,7 @@ subroutine wfk_read_my_kptbands(inpath_, distrb_flags, comm, ecut_eff_in, &
  end if
 
  call xmpi_bcast(inpath, master, comm, ierr)
+ call wrtout(std_out, sjoin("About to read wavefunctions from:", inpath))
 
  ! now attack the cg reading
  iomode = iomode_from_fname(inpath)
@@ -3079,7 +3080,7 @@ subroutine wfk_read_my_kptbands(inpath_, distrb_flags, comm, ecut_eff_in, &
    sppoldbl, cryst%symafm, cryst%symrel, cryst%timrev-1, xmpi_comm_self, use_symrec=.False.)
 
  if (ask_accurate == 1) then
-   ABI_CHECK(dksqmax < tol8, " WF file read but k-points too far from requested set")
+   ABI_CHECK(dksqmax < tol8, " WFK file read but k-points too far from requested set")
  end if
 
  ! More efficienct algorithm based on random access IO:
@@ -3137,6 +3138,12 @@ subroutine wfk_read_my_kptbands(inpath_, distrb_flags, comm, ecut_eff_in, &
 
 
  ! main loop reading in wfk and spinning them out to all kptns_in which need them
+
+ ! MG TODO: I believe this is not the most efficient way to implement the algorithm
+ ! On might have only the master proc read all the (ik_ibz, spin, mband) states
+ ! perhaps blocking on the band dimension to reduce memory and then broadcast.
+ ! At this point, each proc can rotate the wavefunctions and store it in memory if these states are needed.
+
  do spin=1,nsppol
    ! for nsppol=1 input and nsppol=2 run, no need to continue the spin loop
    if (convnsppol1to2 .and. spin > 1) exit
@@ -3324,6 +3331,8 @@ subroutine wfk_read_my_kptbands(inpath_, distrb_flags, comm, ecut_eff_in, &
  call cryst%free()
  call wfk_disk%close()
 
+ call cwtime_report(" wfk_read_my_kptbands:", cpu, wall, gflops)
+
 end subroutine wfk_read_my_kptbands
 !!***
 
@@ -3498,7 +3507,7 @@ subroutine wfk_write_my_kptbands(outpath_, distrb_flags, comm, formeig, hdr,&
 
  call wfk_disk%close()
 
- call cwtime_report(" MY_KPT_BANDS part of WFK written to file. ", cpu, wall, gflops)
+ call cwtime_report(" wfk_write_my_kptbands. ", cpu, wall, gflops)
 
  ABI_FREE(icg)
  ABI_FREE(ikg)
@@ -3950,11 +3959,11 @@ subroutine wfk_show_offsets(Wfk)
    do spin=1,Wfk%nsppol
      do ik_ibz=1,Wfk%nkpt
        write(std_out,"(a,2(i0,2x),a,4(a,i0,a))")                   &
-&        "(ik_ibz, spin) ",ik_ibz,spin,ch10,                       &
-&        "  recn(REC_NPW): ",Wfk%recn_ks(ik_ibz,spin,REC_NPW),ch10,&
-&        "  recn(REC_KG) : ",Wfk%recn_ks(ik_ibz,spin,REC_KG), ch10,&
-&        "  recn(REC_EIG): ",Wfk%recn_ks(ik_ibz,spin,REC_EIG),ch10,&
-&        "  recn(REC_CG) : ",Wfk%recn_ks(ik_ibz,spin,REC_CG),ch10
+        "(ik_ibz, spin) ",ik_ibz,spin,ch10,                       &
+        "  recn(REC_NPW): ",Wfk%recn_ks(ik_ibz,spin,REC_NPW),ch10,&
+        "  recn(REC_KG) : ",Wfk%recn_ks(ik_ibz,spin,REC_KG), ch10,&
+        "  recn(REC_EIG): ",Wfk%recn_ks(ik_ibz,spin,REC_EIG),ch10,&
+        "  recn(REC_CG) : ",Wfk%recn_ks(ik_ibz,spin,REC_CG),ch10
      end do
    end do
 
@@ -3966,11 +3975,11 @@ subroutine wfk_show_offsets(Wfk)
    do spin=1,Wfk%nsppol
      do ik_ibz=1,Wfk%nkpt
        write(std_out,"(a,2(i0,2x),a,4(a,i0,a))")                       &
-&        "(ik_ibz, spin) ",ik_ibz,spin,ch10,                           &
-&        "  offset(REC_NPW): ",Wfk%offset_ks(ik_ibz,spin,REC_NPW),ch10,&
-&        "  offset(REC_KG) : ",Wfk%offset_ks(ik_ibz,spin,REC_KG), ch10,&
-&        "  offset(REC_EIG): ",Wfk%offset_ks(ik_ibz,spin,REC_EIG),ch10,&
-&        "  offset(REC_CG) : ",Wfk%offset_ks(ik_ibz,spin,REC_CG),ch10
+        "(ik_ibz, spin) ",ik_ibz,spin,ch10,                           &
+        "  offset(REC_NPW): ",Wfk%offset_ks(ik_ibz,spin,REC_NPW),ch10,&
+        "  offset(REC_KG) : ",Wfk%offset_ks(ik_ibz,spin,REC_KG), ch10,&
+        "  offset(REC_EIG): ",Wfk%offset_ks(ik_ibz,spin,REC_EIG),ch10,&
+        "  offset(REC_CG) : ",Wfk%offset_ks(ik_ibz,spin,REC_CG),ch10
      end do ! ik_ibz
    end do ! spin
    !
