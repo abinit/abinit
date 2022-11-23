@@ -830,6 +830,7 @@ type, public :: dataset_type
  real(dp) :: td_scthr
  real(dp) :: tfw_toldfe
  real(dp) :: tl_radius
+ real(dp) :: tolcum = zero
  real(dp) :: toldfe
  real(dp) :: tolmxde
  real(dp) :: toldff
@@ -2109,6 +2110,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%tl_radius          = dtin%tl_radius
  dtout%tl_nprccg          = dtin%tl_nprccg
  dtout%td_maxene          = dtin%td_maxene
+ dtout%tolcum             = dtin%tolcum
  dtout%toldfe             = dtin%toldfe
  dtout%tolmxde            = dtin%tolmxde
  dtout%toldff             = dtin%toldff
@@ -3482,7 +3484,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' td_exp_order td_maxene td_mexcit td_scnmax td_prtstr td_restart td_propagator td_scthr'
  list_vars=trim(list_vars)//' tfkinfunc temperature test_effpot test_prt_ph tfw_toldfe tim1rev timopt'
  list_vars=trim(list_vars)//' tmesh tmpdata_prefix transport_ngkpt'
- list_vars=trim(list_vars)//' tl_nprccg tl_radius tnons toldfe tolmxde toldff tolimg tolmxf tolrde tolrff tolsym'
+ list_vars=trim(list_vars)//' tl_nprccg tl_radius tnons tolcum toldfe tolmxde toldff tolimg tolmxf tolrde tolrff tolsym'
  list_vars=trim(list_vars)//' tolvrs tolwfr tphysel ts_option tsmear typat'
 !U
  list_vars=trim(list_vars)//' ucrpa ucrpa_bands ucrpa_window udtset upawu usepead usedmatpu '

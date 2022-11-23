@@ -3683,10 +3683,12 @@ type(sigmaph_t) function sigmaph_read(path, dtset, comm, msg, ierr, keep_open, &
  NCF_CHECK(nf90_get_var(ncid, vid("eph_intmeth"), eph_intmeth))
  NCF_CHECK(nf90_get_var(ncid, vid("eph_transport"), eph_transport))
 
- ABI_CHECK_IEQ(symdynmat, dtset%symdynmat, "netcdf symdynmat != input file")
- ABI_CHECK_IEQ(ph_intmeth, dtset%ph_intmeth, "netcdf ph_intmeth != input file")
- ABI_CHECK_IEQ(eph_intmeth, dtset%eph_intmeth, "netcdf eph_intmeth != input file")
- ABI_CHECK_IEQ(eph_transport, dtset%eph_transport, "netcdf eph_transport != input file")
+ if (dtset%eph_task==-4 .or. dtset%eph_task==4) then
+   ABI_CHECK_IEQ(symdynmat, dtset%symdynmat, "netcdf symdynmat != input file")
+   ABI_CHECK_IEQ(ph_intmeth, dtset%ph_intmeth, "netcdf ph_intmeth != input file")
+   ABI_CHECK_IEQ(eph_intmeth, dtset%eph_intmeth, "netcdf eph_intmeth != input file")
+   ABI_CHECK_IEQ(eph_transport, dtset%eph_transport, "netcdf eph_transport != input file")
+ endif
 
  !NCF_CHECK(nf90_get_var(ncid, vid("frohl_params"), frohl_params))
  NCF_CHECK(nf90_get_var(ncid, vid("eph_ngqpt_fine"), eph_ngqpt_fine))
