@@ -1248,36 +1248,28 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  call MPI_CART_COORDS(comm_cart, me_cart, ndims, gwr%coords_gtks, ierr)
 
  ! Create communicator for g-vectors
- keepdim = .False.; keepdim(1) = .True.
- call gwr%g_comm%from_cart_sub(comm_cart, keepdim)
+ keepdim = .False.; keepdim(1) = .True.; call gwr%g_comm%from_cart_sub(comm_cart, keepdim)
 
  ! Create communicator for tau
- keepdim = .False.; keepdim(2) = .True.
- call gwr%tau_comm%from_cart_sub(comm_cart, keepdim)
+ keepdim = .False.; keepdim(2) = .True.; call gwr%tau_comm%from_cart_sub(comm_cart, keepdim)
 
  ! Create communicator for k-points
- keepdim = .False.; keepdim(3) = .True.
- call gwr%kpt_comm%from_cart_sub(comm_cart, keepdim)
+ keepdim = .False.; keepdim(3) = .True.; call gwr%kpt_comm%from_cart_sub(comm_cart, keepdim)
 
  ! Create communicator for spin
- keepdim = .False.; keepdim(4) = .True.
- call gwr%spin_comm%from_cart_sub(comm_cart, keepdim)
+ keepdim = .False.; keepdim(4) = .True.; call gwr%spin_comm%from_cart_sub(comm_cart, keepdim)
 
  ! Create communicator for the (g, tau) 2D grid.
- keepdim = .False.; keepdim(1) = .True.; keepdim(2) = .True.
- call gwr%gtau_comm%from_cart_sub(comm_cart, keepdim)
+ keepdim = .False.; keepdim(1) = .True.; keepdim(2) = .True.; call gwr%gtau_comm%from_cart_sub(comm_cart, keepdim)
 
  ! Create communicator for the (g, tau) 2D grid.
- keepdim = .False.; keepdim(1) = .True.; keepdim(3) = .True.
- call gwr%gk_comm%from_cart_sub(comm_cart, keepdim)
+ keepdim = .False.; keepdim(1) = .True.; keepdim(3) = .True.; call gwr%gk_comm%from_cart_sub(comm_cart, keepdim)
 
  ! Create communicator for the (g, tau, k) 3D subgrid.
- keepdim = .True.; keepdim(4) = .False.
- call gwr%gtk_comm%from_cart_sub(comm_cart, keepdim)
+ keepdim = .True.; keepdim(4) = .False.; call gwr%gtk_comm%from_cart_sub(comm_cart, keepdim)
 
  ! Create communicator for the (tau, k, spin) 3D subgrid.
- keepdim = .True.; keepdim(1) = .False.
- call gwr%tks_comm%from_cart_sub(comm_cart, keepdim)
+ keepdim = .True.; keepdim(1) = .False.; call gwr%tks_comm%from_cart_sub(comm_cart, keepdim)
 
  call xmpi_comm_free(comm_cart)
 #endif
