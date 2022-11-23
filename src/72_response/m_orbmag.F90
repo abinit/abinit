@@ -3790,6 +3790,7 @@ subroutine dterm_dijhat(atindx,dterm,dtset,gprimd,nfftf,pawang,&
    end do ! klmn
  
    ABI_FREE(prod)
+   ABI_FREE(prod3)
 
  end do !iat
 
