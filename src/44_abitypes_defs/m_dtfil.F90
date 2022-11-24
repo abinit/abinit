@@ -571,7 +571,6 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
                    getpath=dtset%getwfmq_filepath)
    ! If fnamewffmq is not initialized thanks to getwfmq or irdwfmq, use fnamewffk
    if(will_read==0) fnamewffmq = fnamewffk
-   
 
    ! According to get1wf and ird1wf, build _1WF file name, referred as fnamewff1
    stringfile='_1WF' ; stringvar='1wf'
