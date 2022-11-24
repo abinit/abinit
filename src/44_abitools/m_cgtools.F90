@@ -2901,7 +2901,7 @@ end subroutine cgpaw_gsortho
 
 !!****f* m_cgtools/cgpaw_gramschmidt
 !! NAME
-!!  cgpaw_grortho
+!!  cgpaw_gramschmidt
 !!
 !! FUNCTION
 !!  Gram-Schmidt orthonormalization of the vectors stored in cg

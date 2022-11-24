@@ -487,7 +487,6 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
              call mkrdim(acell_img(:,iimage),rprim_img(:,:,iimage),rprimd)
              call chkdilatmx(dtset%chkdilatmx,dtset%dilatmx,rprimd,&
 &             dtset%rprimd_orig(1:3,1:3,iimage), dilatmx_errmsg)
-             _IBM6("dilatxm_errmsg: "//TRIM(dilatmx_errmsg))
              if (LEN_TRIM(dilatmx_errmsg) /= 0) then
                acell_img(1,iimage) = sqrt(sum(rprimd(:,1)**2))
                acell_img(2,iimage) = sqrt(sum(rprimd(:,2)**2))

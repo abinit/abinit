@@ -219,7 +219,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  integer :: initialized,ipert,ipert2,ireadwf0,iscf,iscf_eff,ispden,isppol
  integer :: itypat,izero,mcg,me,mgfftf,mk1mem,mkqmem,mpert,mu
  integer :: my_natom,n1,natom,n3xccc,nband_k,nfftf,nfftot,nfftotf,nhatdim,nhatgrdim
- integer :: nkpt_eff,nkpt_max,nkpt_rbz,nkxc,nkxc1,nspden_rhoij,ntypat,nzlmopt,openexit
+ integer :: nkpt_eff,nkpt_rbz,nkxc,nkxc1,nspden_rhoij,ntypat,nzlmopt,openexit !nkpt_max,
  integer :: optcut,option,optgr0,optgr1,optgr2,optorth,optrad
  integer :: optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv
  integer :: outd2,pawbec,pawpiezo,prtbbb,psp_gencond,qzero,rdwr,rdwrpaw
@@ -288,7 +288,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  call timab(133,1,tsec)
 
 !Some data for parallelism
- nkpt_max=50;if(xmpi_paral==1)nkpt_max=-1
+
  my_natom=mpi_enreg%my_natom
  paral_atom=(my_natom/=dtset%natom)
 !Define FFT grid(s) sizes (be careful !)
@@ -298,7 +298,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 !Structured debugging if dtset%prtvol==-level
  if(dtset%prtvol==-level)then
    write(message,'(80a,a,a)')  ('=',ii=1,80),ch10,' respfn : enter , debug mode '
-   call wrtout(std_out,message,'COLL')
+   call wrtout(std_out,message)
  end if
 
 !Option input variables
@@ -472,29 +472,30 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  call timab(135,2,tsec)
  call timab(136,1,tsec)
 
-!Report on eigen0 values   ! Should use prteigrs.F90
- write(message, '(a,a)' )
- call wrtout(std_out,ch10//' respfn : eigen0 array','COLL')
- nkpt_eff=dtset%nkpt
- if( (dtset%prtvol==0.or.dtset%prtvol==1.or.dtset%prtvol==2) .and. dtset%nkpt>nkpt_max ) nkpt_eff=nkpt_max
- band_index=0
- do isppol=1,dtset%nsppol
-   do ikpt=1,dtset%nkpt
-     nband_k=dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
-     if(ikpt<=nkpt_eff)then
-       write(message, '(a,i2,a,i5)' )'  isppol=',isppol,', k point number',ikpt
-       call wrtout(std_out,message,'COLL')
-       do iband=1,nband_k,4
-         write(message, '(a,4es16.6)')'  ',eigen0(iband+band_index:min(iband+3,nband_k)+band_index)
-         call wrtout(std_out,message,'COLL')
-       end do
-     else if(ikpt==nkpt_eff+1)then
-       write(message,'(a,a)' )'  respfn : prtvol=0, 1 or 2, stop printing eigen0.',ch10
-       call wrtout(std_out,message,'COLL')
-     end if
-     band_index=band_index+nband_k
-   end do
- end do
+ ! Report on eigen0 values   ! Should use prteigrs.F90
+ !write(message, '(a,a)' )
+ !call wrtout(std_out,ch10//' respfn : eigen0 array')
+ !nkpt_eff=dtset%nkpt
+ !nkpt_max=50;if(xmpi_paral==1)nkpt_max=-1
+ !if( (dtset%prtvol==0.or.dtset%prtvol==1.or.dtset%prtvol==2) .and. dtset%nkpt>nkpt_max ) nkpt_eff=nkpt_max
+ !band_index=0
+ !do isppol=1,dtset%nsppol
+ !  do ikpt=1,dtset%nkpt
+ !    nband_k=dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
+ !    if(ikpt<=nkpt_eff)then
+ !      write(message, '(a,i2,a,i5)' )'  isppol=',isppol,', k point number',ikpt
+ !      call wrtout(std_out,message)
+ !      do iband=1,nband_k,4
+ !        write(message, '(a,4es16.6)')'  ',eigen0(iband+band_index:min(iband+3,nband_k)+band_index)
+ !        call wrtout(std_out,message)
+ !      end do
+ !    else if(ikpt==nkpt_eff+1)then
+ !      write(message,'(a,a)' )'  respfn : prtvol=0, 1 or 2, stop printing eigen0.',ch10
+ !      call wrtout(std_out,message)
+ !    end if
+ !    band_index=band_index+nband_k
+ !  end do
+ !end do
 
 !Allocation for forces and atomic positions (should be taken away, also argument ... )
  ABI_MALLOC(grxc,(3,natom))
@@ -585,7 +586,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  ecutf=dtset%ecut
  if (psps%usepaw==1) then
    ecutf=dtset%pawecutdg
-   call wrtout(std_out,ch10//' FFT (fine) grid used in SCF cycle:','COLL')
+   call wrtout(std_out,ch10//' FFT (fine) grid used in SCF cycle:')
  end if
 
  call getcut(boxcut,ecutf,gmet,gsqcut,dtset%iboxcut,std_out,k0,ngfftf)
@@ -861,8 +862,6 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  ABI_MALLOC(kxc,(nfftf,nkxc))
  ABI_MALLOC(vxc,(nfftf,dtset%nspden))
 
- _IBM6("Before rhotoxc")
-
  call xcdata_init(xcdata,dtset=dtset)
  non_magnetic_xc=(dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
  call rhotoxc(enxc,kxc,mpi_enreg,nfftf,ngfftf,&
@@ -885,9 +884,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  end if
  ABI_FREE(vhartr)
 
- if(dtset%prtvol==-level)then
-   call wrtout(std_out,' respfn: ground-state density and potential set up.','COLL')
- end if
+ if(dtset%prtvol==-level) call wrtout(std_out,' respfn: ground-state density and potential set up.')
 
 !PAW: compute Dij quantities (psp strengths)
  if (psps%usepaw==1)then
@@ -987,8 +984,6 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 &   dtset%qptn,rhog,rprimd,symq,symrec,dtset%typat,ucvol,&
 &   psps%usepaw,psps%vlspl,vxc,psps%xcccrc,psps%xccc1d,xccc3d,xred)
 
-   _IBM6("Before dfpt_ewald")
-
 !  Compute Ewald (q=0) contribution
    sumg0=0;qphon(:)=zero
    call dfpt_ewald(dyew,gmet,my_natom,natom,qphon,rmet,sumg0,dtset%typat,ucvol,xred,psps%ziontypat,&
@@ -1079,9 +1074,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  ABI_FREE(vpsp)
  ABI_FREE(xccc3d)
 
- if(dtset%prtvol==-level)then
-   call wrtout(std_out,' respfn: frozen wavef. and Ewald(q=0) part of 2DTE done.','COLL')
- end if
+ if(dtset%prtvol==-level) call wrtout(std_out,' respfn: frozen wavef. and Ewald(q=0) part of 2DTE done.')
 
  call timab(136,2,tsec)
 
@@ -1090,8 +1083,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  call timab(137,1,tsec)
 
  write(message,'(3a)')ch10,' ==>  initialize data related to q vector <== ',ch10
- call wrtout(std_out,message,'COLL')
- call wrtout(ab_out,message,'COLL')
+ call wrtout([std_out, ab_out] ,message)
 
  qphon(:)=dtset%qptn(:)
  sumg0=1
@@ -1103,7 +1095,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    write(message,'(3a)')&
 &   ' respfn : the norm of the phonon wavelength (as input) was small (<1.d-7).',ch10,&
 &   '  q has been set exactly to (0 0 0)'
-   call wrtout(std_out,message,'COLL')
+   call wrtout(std_out,message)
    sumg0=0
    qzero=1
  else
@@ -1123,8 +1115,6 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    end if
  end if
 
- _IBM6("Before irreducible_set_pert")
-
 !Determine the symmetrical perturbations
  ABI_MALLOC(pertsy,(3,natom+6))
  call irreducible_set_pert(indsym,natom+6,natom,dtset%nsym,pertsy,rfdir,rfpert,symq,symrec,dtset%symrel)
@@ -1140,16 +1130,14 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  endif
 
  write(message,'(a)') ' The list of irreducible perturbations for this q vector is:'
- call wrtout(ab_out,message,'COLL')
- call wrtout(std_out,message,'COLL')
+ call wrtout([std_out, ab_out] ,message)
  ii=1
  do ipert=1,natom+6
    do idir=1,3
      if(rfpert(ipert)==1.and.rfdir(idir)==1)then
        if( pertsy(idir,ipert)==1 )then
          write(message, '(i5,a,i2,a,i4)' )ii,')    idir=',idir,'    ipert=',ipert
-         call wrtout(ab_out,message,'COLL')
-         call wrtout(std_out,message,'COLL')
+         call wrtout([std_out, ab_out] ,message)
          ii=ii+1
        end if
      end if
@@ -1161,7 +1149,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    write(message,'(5a)')ch10,&
 &   ' WARNING: no perturbations to be done at this q-point.',ch10,&
 &   ' You may have forgotten to set the rfdir or rfatpol variables. Continuing normally.',ch10
-   call wrtout(ab_out,message,'COLL')
+   call wrtout(ab_out,message)
    ABI_WARNING(message)
  end if
 
@@ -1176,11 +1164,10 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    write(message, '(a,a,a,a,a)' ) ch10, &
 &   ' The list of irreducible elements of the Raman and non-linear',&
 &   ch10,' optical susceptibility tensors is:',ch10
-   call wrtout(std_out,message,'COLL')
+   call wrtout(std_out,message)
 
-   write(message,'(12x,a)')&
-&   'i1pert  i1dir   i2pert  i2dir   i3pert  i3dir'
-   call wrtout(std_out,message,'COLL')
+   write(message,'(12x,a)')'i1pert  i1dir   i2pert  i2dir   i3pert  i3dir'
+   call wrtout(std_out,message)
    n1 = 0
    rf2_dirs_from_rfpert_nl(:,:) = 0
    do i1pert = 1, natom + 2
@@ -1191,9 +1178,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
              do i3dir = 1,3
                if (rfpert_nl(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1) then
                  n1 = n1 + 1
-                 write(message,'(2x,i4,a,6(5x,i3))') n1,')', &
-&                 i1pert,i1dir,i2pert,i2dir,i3pert,i3dir
-                 call wrtout(std_out,message,'COLL')
+                 write(message,'(2x,i4,a,6(5x,i3))') n1,')', i1pert,i1dir,i2pert,i2dir,i3pert,i3dir
+                 call wrtout(std_out,message)
                  if (i2pert==natom+2) then
                    if (i3pert==natom+2) then
                      rf2_dirs_from_rfpert_nl(i3dir,i2dir) = 1
@@ -1209,14 +1195,13 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
      end do
    end do
    write(message,'(a,a)') ch10,ch10
-   call wrtout(std_out,message,'COLL')
+   call wrtout(std_out,message)
 
-   write(message,'(a)') 'rf2_dirs_from_rfpert_nl :'
-   call wrtout(std_out,message,'COLL')
+   call wrtout(std_out,'rf2_dirs_from_rfpert_nl :')
    do i1dir = 1, 3
      do i2dir = 1, 3
        write(message,'(3(a,i1))') ' ',i1dir,' ',i2dir,' : ',rf2_dirs_from_rfpert_nl(i1dir,i2dir)
-       call wrtout(std_out,message,'COLL')
+       call wrtout(std_out,message)
      end do
    end do
  end if
@@ -1305,13 +1290,10 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 !TEMPORARY: for testing purpose only
 ! if (rfstrs/=0.and.dtset%usepaw==1) iexit=1
 
- _IBM6("Before dfpt_looppert")
-
  if (iexit==0) then
 !  #######################################################################
    write(message,'(a,80a)')ch10,('=',mu=1,80)
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+   call wrtout([std_out, ab_out], message)
 
    ddkfil(:)=0
 
@@ -1351,9 +1333,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  call timab(138,1,tsec)
 
  write(message, '(80a,a,a,a,a)' ) ('=',mu=1,80),ch10,ch10,&
-& ' ---- first-order wavefunction calculations are completed ----',ch10
- call wrtout(ab_out,message,'COLL')
- call wrtout(std_out,message,'COLL')
+  ' ---- first-order wavefunction calculations are completed ----',ch10
+ call wrtout([std_out, ab_out], message)
 
  ABI_FREE(vxc)
 
@@ -1374,16 +1355,14 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  if(rfphon==0 .and. (rf2_dkdk/=0 .or. rf2_dkde/=0 .or. rfddk/=0 .or. rfelfd==2) .and. rfstrs==0 .and. rfuser==0 .and. rfmagn==0)then
 
    write(message,'(a,a)' )ch10,' respfn : d/dk was computed, but no 2DTE, so no DDB output.'
-   call wrtout(std_out,message,'COLL')
-   call wrtout(ab_out,message,'COLL')
+   call wrtout([std_out, ab_out], message)
 
 !  If 2DTE were computed, only one processor must output them and compute
 !  frequencies.
  else if(me==0)then
 
    write(message,'(a,a)' )ch10,' ==> Compute Derivative Database <== '
-   call wrtout(std_out,message,'COLL')
-   call wrtout(ab_out,message,'COLL')
+   call wrtout([std_out, ab_out], message)
 
 !  In the RESPFN code, dfpt_nstdy and stady3 were called here
    d2nfr(:,:,:,:,:)=d2lo(:,:,:,:,:)+d2nl(:,:,:,:,:)
@@ -1595,27 +1574,22 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 &         ' Warning : the total shift must be computed through anaddb,                  ',ch10,&
 &         ' here, only the contribution of one q point is printed.                      ',ch10,&
 &         ' Print first the electronic eigenvalues, then the q-dependent Fan shift of eigenvalues.'
-         call wrtout(ab_out,message,'COLL')
-         call wrtout(std_out,  message,'COLL')
+         call wrtout([std_out, ab_out], message)
 
          if(qeq0)then
-           write(message, '(a)' )&
-&           ' Phonons at gamma, also compute the Diagonal Debye-Waller shift of eigenvalues.'
-           call wrtout(ab_out,message,'COLL')
-           call wrtout(std_out,message,'COLL')
+           write(message, '(a)' )' Phonons at gamma, also compute the Diagonal Debye-Waller shift of eigenvalues.'
+           call wrtout([std_out, ab_out], message)
          end if
 
          write(message, '(a)' ) ' '
-         call wrtout(ab_out,message,'COLL')
-         call wrtout(std_out,message,'COLL')
+         call wrtout([std_out, ab_out], message)
 
          call prteigrs(eigen0,dtset%enunit,fermie,fermih,dtfil%fnameabo_eig,ab_out,-1,dtset%kptns,dtset%kptopt,&
 &         dtset%mband,dtset%nband,dtset%nbdbuf,dtset%nkpt,1,dtset%nsppol,occ,dtset%occopt,3,0,dtset%prtvol,&
 &         eigen0,zero,zero,dtset%wtk)
 
          write(message, '(a)' ) ch10
-         call wrtout(ab_out,message,'COLL')
-         call wrtout(std_out,message,'COLL')
+         call wrtout([std_out, ab_out], message)
 
 !        Compute and print Fan contribution
          ABI_MALLOC(eigen_fan,(dtset%mband*dtset%nkpt*dtset%nsppol))
@@ -1630,8 +1604,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
          if(qeq0 .or. dtset%getgam_eig2nkq>0)then
 
            write(message, '(a)' ) ch10
-           call wrtout(ab_out,message,'COLL')
-           call wrtout(std_out,message,'COLL')
+           call wrtout([std_out, ab_out], message)
 
 !          Compute and print Diagonal Debye-Waller contribution
            ABI_MALLOC(eigen_ddw,(dtset%mband*dtset%nkpt*dtset%nsppol))
@@ -1663,8 +1636,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 &           dtset%mband,dtset%nband,dtset%nbdbuf,dtset%nkpt,1,dtset%nsppol,occ,dtset%occopt,6,0,dtset%prtvol,&
 &           eigen0,zero,zero,dtset%wtk)
            write(message, '(a)' ) ch10
-           call wrtout(ab_out,message,'COLL')
-           call wrtout(std_out,message,'COLL')
+           call wrtout([std_out, ab_out], message)
 
 !          Print sum of mean Fan and DDW
            ABI_MALLOC(eigen_fanddw,(dtset%mband*dtset%nkpt*dtset%nsppol))
@@ -1720,18 +1692,10 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  end if ! master node
 
 !Deallocate arrays
- if (allocated(displ)) then
-   ABI_FREE(displ)
- end if
- if (allocated(eigval)) then
-   ABI_FREE(eigval)
- end if
- if (allocated(eigvec)) then
-   ABI_FREE(eigvec)
- end if
- if (allocated(phfrq)) then
-   ABI_FREE(phfrq)
- end if
+ ABI_SFREE(displ)
+ ABI_SFREE(eigval)
+ ABI_SFREE(eigvec)
+ ABI_SFREE(phfrq)
 
  ABI_FREE(clflg)
  ABI_FREE(atindx)
@@ -1909,10 +1873,8 @@ subroutine wrtloctens(blkflg,d2bbb,d2nl,mband,mpert,natom,prtbbb,rprimd,usepaw)
 
  if (prtbbb == 1) then
 
-   write(message,'(a,a)')ch10, &
-&   ' Band by band decomposition of the localisation tensor (bohr^2)'
-   call wrtout(std_out,message,'COLL')
-   call wrtout(ab_out,message,'COLL')
+   write(message,'(a,a)')ch10, ' Band by band decomposition of the localisation tensor (bohr^2)'
+   call wrtout([std_out, ab_out], message)
 
    do iband = 1,mband
      do jband = 1,mband
@@ -1927,18 +1889,17 @@ subroutine wrtloctens(blkflg,d2bbb,d2nl,mband,mpert,natom,prtbbb,rprimd,usepaw)
 
 
        write(message,'(a,a,i5,a,i5,a)')ch10, &
-&       ' Localisation tensor (bohr^2) for band ',iband,',',jband, &
-&       ' in cartesian coordinates'
-       call wrtout(std_out,message,'COLL')
-       call wrtout(ab_out,message,'COLL')
+       ' Localisation tensor (bohr^2) for band ',iband,',',jband, &
+       ' in cartesian coordinates'
+       call wrtout([std_out, ab_out], message)
 
        write(ab_out,*)'     direction              matrix element'
        write(ab_out,*)'  alpha     beta       real part   imaginary part'
        do idir2 = 1,3
          do idir = 1,3
            write(ab_out,'(5x,i1,8x,i1,3x,2f16.10)')idir2,idir,&
-&           loctenscart_bbb(1,idir2,idir,iband,jband),&
-&           loctenscart_bbb(2,idir2,idir,iband,jband)
+           loctenscart_bbb(1,idir2,idir,iband,jband),&
+           loctenscart_bbb(2,idir2,idir,iband,jband)
          end do
        end do
 
@@ -1957,8 +1918,7 @@ subroutine wrtloctens(blkflg,d2bbb,d2nl,mband,mpert,natom,prtbbb,rprimd,usepaw)
 &   '  WARNING : probably wrong for PAW (printing for testing purpose)',ch10,&
 &   '  WARNING : still subject to testing - especially symmetries.'
  end if
- call wrtout(std_out,message,'COLL')
- call wrtout(ab_out,message,'COLL')
+ call wrtout([std_out, ab_out], message)
 
  write(ab_out,*)'     direction              matrix element'
  write(ab_out,*)'  alpha     beta       real part   imaginary part'
@@ -1975,13 +1935,10 @@ subroutine wrtloctens(blkflg,d2bbb,d2nl,mband,mpert,natom,prtbbb,rprimd,usepaw)
 &   ' WARNING : Localization tensor calculation (this does not apply to other properties).',ch10,&
 &   '  Not all d/dk perturbations were computed. So the localization tensor in reciprocal space is incomplete,',ch10,&
 &   '  and transformation to cartesian coordinates may be wrong. Check input variable rfdir.'
-   call wrtout(std_out,message,'COLL')
-   call wrtout(ab_out,message,'COLL')
+   call wrtout([std_out, ab_out], message)
  end if
 
- if (prtbbb == 1) then
-   ABI_FREE(loctenscart_bbb)
- end if
+ ABI_SFREE(loctenscart_bbb)
 
 end subroutine wrtloctens
 !!***
@@ -1990,16 +1947,12 @@ end subroutine wrtloctens
 !! NAME
 !! dfpt_dyout
 !!
-!!
 !! FUNCTION
 !! Output of all quantities related to the 2nd-order matrix:
-!! Ewald part, local and non-local frozen wf part,
-!! core contributions,
-!! local and non-local variational part, 2nd-order
-!! matrix itself, and, for the phonon part,
+!! Ewald part, local and non-local frozen wf part, core contributions,
+!! local and non-local variational part, 2nd-order matrix itself, and, for the phonon part,
 !! eigenfrequencies, in Hartree, meV and cm-1.
-!! Also output unformatted 2nd-order matrix for later
-!! use in the Brillouin-zone interpolation
+!! Also output unformatted 2nd-order matrix for later use in the Brillouin-zone interpolation
 !!
 !! INPUTS
 !!  becfrnl(3,natom,3*pawbec)=NL frozen contribution to Born Effective Charges (PAW only)
@@ -2605,16 +2558,14 @@ subroutine dfpt_dyout(becfrnl,berryopt,blkflg,carflg,ddkfil,dyew,dyfrlo,dyfrnl,&
        write(iout,*)' dir pert dir pert     real part   imaginary part'
        do ipert1=natom+3,natom+4
          do idir1=1,3
-           if ( (rfpert(ipert1)==1.and.rfdir(idir1)==1)&
-&           .or.   outd2==1                           )then
+           if ( (rfpert(ipert1)==1.and.rfdir(idir1)==1) .or.   outd2==1)then
              ii=idir1+3*(ipert1-natom-3)
              write(iout,*)' '
              do ipert2=natom+3,natom+4
                do idir2=1,3
                  if (rfpert(ipert2)==1.and.rfdir(idir2)==1)then
                    jj=idir2+3*(ipert2-natom-3)
-                   write(iout,'(2(i4,i5),2(1x,f20.10))')idir1,ipert1,idir2,ipert2,&
-&                   eltvdw(ii,jj),zero
+                   write(iout,'(2(i4,i5),2(1x,f20.10))')idir1,ipert1,idir2,ipert2,eltvdw(ii,jj),zero
                  end if
                end do
              end do
@@ -2629,16 +2580,14 @@ subroutine dfpt_dyout(becfrnl,berryopt,blkflg,carflg,ddkfil,dyew,dyfrlo,dyfrnl,&
        write(iout,*)' dir pert dir pert     real part   imaginary part'
        do ipert1=1,natom
          do idir1=1,3
-           if ( (rfpert(ipert1)==1.and.rfdir(idir1)==1)&
-&           .or.   outd2==1                           )then
+           if ( (rfpert(ipert1)==1.and.rfdir(idir1)==1) .or. outd2==1 )then
              ii=idir1+6+3*(ipert1-1)
              write(iout,*)' '
              do ipert2=natom+3,natom+4
                do idir2=1,3
                  if (rfpert(ipert2)==1.and.rfdir(idir2)==1)then
                    jj=idir2+3*(ipert2-natom-3)
-                   write(iout,'(2(i4,i5),2(1x,f20.10))')idir1,ipert1,idir2,ipert2,&
-&                   eltvdw(ii,jj),zero
+                   write(iout,'(2(i4,i5),2(1x,f20.10))')idir1,ipert1,idir2,ipert2,eltvdw(ii,jj),zero
                  end if
                end do
              end do
@@ -2647,8 +2596,7 @@ subroutine dfpt_dyout(becfrnl,berryopt,blkflg,carflg,ddkfil,dyew,dyfrlo,dyfrnl,&
        end do
      end if ! usevdw
 
-!    End of the strain condition
-   end if
+   end if  ! strain condition
 
 !  Now the local nonstationary nonfrozenwf part
    if (outd2==1)then
@@ -2782,8 +2730,7 @@ subroutine dfpt_dyout(becfrnl,berryopt,blkflg,carflg,ddkfil,dyew,dyfrlo,dyfrnl,&
 !  Now the stationary 0-order eigenvalue nonfrozenwf part
    if (outd2==2)then
      write(iout,*)' '
-     write(iout,*)' Stationary 0-order eigenvalue part of the'&
-&     ,' 2nd-order matrix'
+     write(iout,*)' Stationary 0-order eigenvalue part of the' ,' 2nd-order matrix'
      write(iout,*)'    j1       j2             matrix element'
      write(iout,*)' dir pert dir pert     real part   imaginary part'
      do ipert1=1,mpert

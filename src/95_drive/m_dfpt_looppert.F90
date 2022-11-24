@@ -344,8 +344,6 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 
  DBG_ENTER("COLL")
 
- _IBM6("In dfpt_looppert")
-
  call timab(141,1,tsec)
 
 !Structured debugging if prtvol==-level
@@ -662,7 +660,6 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 !Loop on perturbations
 !==========================================================================
  do icase=1,ipert_cnt
-   _IBM6("In loop on perts")
 
 !  %%%% Parallelization over perturbations %%%%%
 !  Select the perturbations treated by curent processor
@@ -701,7 +698,6 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    me=mpi_enreg%me_cell
 
 !  ===== Describe the perturbation in output/log file
-   _IBM6("IBM6 before print perturbation")
 
    write(msg, '(a,80a,a,a,3f10.6)' ) ch10,('-',ii=1,80),ch10,&
     ' Perturbation wavevector (in red.coord.) ',dtset%qptn(:)
@@ -958,7 +954,6 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      end do
    end do
 
-   _IBM6("IBM6 in dfpt_looppert before getmpw")
 
 !  Compute maximum number of planewaves at k
    call timab(142,1,tsec)
@@ -990,8 +985,6 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    ABI_MALLOC(distrb_flags,(nkpt_rbz,dtset%mband,dtset%nsppol))
    distrb_flags = (mpi_enreg%proc_distrb == mpi_enreg%me_kpt)
 
-   _IBM6("IBM6 before kpgio")
-
 !  Set up the basis sphere of planewaves at k
    ABI_MALLOC(kg,(3,mpw*mkmem_rbz))
    call timab(143,1,tsec)
@@ -1015,8 +1008,6 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      call initylmg(gprimd,kg,kpt_rbz,mkmem_rbz,mpi_enreg,psps%mpsang,mpw,nband_rbz,nkpt_rbz,&
 &     npwarr,dtset%nsppol,option,rprimd,ylm,ylmgr)
    end if
-
-   _IBM6("Before ieig2rf > 0")
 
 !  Set up occupations for this perturbation
    if (dtset%ieig2rf>0) then
@@ -1046,17 +1037,11 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    bantot_rbz=sum(nband_rbz(1:nkpt_rbz*dtset%nsppol))
    ABI_MALLOC(eigen0,(bantot_rbz))
    eigen0(:)=zero
-   ! CP modified
-   !call ebands_init(bantot_rbz,ebands_k,dtset%nelect,doccde_rbz,eigen0,istwfk_rbz,kpt_rbz,&
-   !  nband_rbz,nkpt_rbz,npwarr,dtset%nsppol,dtset%nspinor,dtset%tphysel,dtset%tsmear,dtset%occopt,occ_rbz,wtk_rbz,&
-   !  dtset%cellcharge(1), dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
-   !  dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
    call ebands_init(bantot_rbz,ebands_k,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,&
      doccde_rbz,eigen0,istwfk_rbz,kpt_rbz,&
      nband_rbz,nkpt_rbz,npwarr,dtset%nsppol,dtset%nspinor,dtset%tphysel,dtset%tsmear,dtset%occopt,occ_rbz,wtk_rbz,&
      dtset%cellcharge(1), dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
      dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
-   ! End CP modified
    ABI_FREE(eigen0)
 
 !  Initialize header, update it with evolving variables
@@ -1064,14 +1049,9 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    call hdr_init(ebands_k,codvsn,dtset,hdr0,pawtab,gscase,psps,wvl%descr,&
      comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
 
-   ! CP modified
-   !call hdr0%update(bantot_rbz,etotal,fermie,&
-   !  residm,rprimd,occ_rbz,pawrhoij_pert,xred,dtset%amu_orig(:,1),&
-   !  comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
    call hdr0%update(bantot_rbz,etotal,fermie,fermie,& ! CP: duplicated fermie to fit new def of hdr_update
      residm,rprimd,occ_rbz,pawrhoij_pert,xred,dtset%amu_orig(:,1),&
      comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
-   ! End CP modified
 
 !  Initialize GS wavefunctions at k
    ireadwf0=1; formeig=0 ; ask_accurate=1 ; optorth=0
@@ -1859,7 +1839,6 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    if (iexit/=0.and.(.not.kramers_deg)) eigen1_mq(:)=zero
 
    if (iexit==0) then
-     _IBM6("before dfpt_scfcv")
 
 !    Main calculation: get 1st-order wavefunctions from Sternheimer equation (SCF cycle)
 !    if ipert==natom+10 or natom+11 : get 2nd-order wavefunctions
@@ -1906,8 +1885,6 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &       kg1_mq=kg1_mq,npwar1_mq=npwar1_mq,occk_mq=occk_mq,resid_mq=resid_mq,residm_mq=residm_mq,&
 &       rhog1_pq=rhog1_pq,rhog1_mq=rhog1_mq,rhor1_pq=rhor1_pq,rhor1_mq=rhor1_mq)
      end if
-
-     _IBM6("after dfpt_scfcv")
 
 !    2nd-order eigenvalues stuff
      if (dtset%ieig2rf>0) then

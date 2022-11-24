@@ -686,7 +686,6 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  ! ==== Compute KS PAW Dij ====
  ! ============================
  if (Wfd%usepaw==1) then
-   _IBM6("Another silly write for IBM6")
    call timab(561,1,tsec)
    !
    ! Calculate the unsymmetrized Dij.

@@ -879,8 +879,6 @@ end if
  ABI_MALLOC(k3xc,(nfftf,nk3xc))
  ABI_MALLOC(vxc,(nfftf,dtset%nspden))
 
- _IBM6("Before rhotoxc")
-
  call xcdata_init(xcdata,dtset=dtset)
  nmxc=(dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
  call rhotoxc(enxc,kxc,mpi_enreg,nfftf,ngfftf,&

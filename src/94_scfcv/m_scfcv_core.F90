@@ -404,8 +404,6 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 
 ! *********************************************************************
 
- _IBM6("Hello, I'm running on IBM6")
-
 !DEBUG
 !write(std_out,'(a,5i4)')' scfcv_core, enter : itimes(1:2)=',itimes(1:2)
 !ENDDEBUG
