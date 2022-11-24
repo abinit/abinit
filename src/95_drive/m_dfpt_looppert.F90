@@ -284,7 +284,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  logical,parameter :: paral_pert_inplace=.true.,remove_inv=.false.
  logical :: first_entry,found_eq_gkk,t_exist,paral_atom,write_1wfk,init_rhor1
  logical :: kramers_deg
- character(len=fnlen) :: dscrpt,fiden1i,fiwf1i,fiwf1o,fiwf1o_mq,fiwfddk,fnamewff(4),gkkfilnam,fname,filnam
+ character(len=fnlen) :: dscrpt,fiden1i,fiwf1i,fiwf1o,fiwf1o_mq,fiwfddk,fnamewff(4),gkkfilnam,fname,filnam, fnamewffmq_
  character(len=500) :: msg
  type(crystal_t) :: crystal,ddb_crystal
  type(dataset_type), pointer :: dtset_tmp
@@ -1345,14 +1345,14 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        cg_mq = cg
        eigen_mq = eigen0
      else
-       !SPr: later "make" a separate WFQ file for "-q"
        call timab(144,1,tsec)
-       call wfk_read_my_kptbands(dtfil%fnamewffq, distrb_flags, spacecomm,dtset%ecut*(dtset%dilatmx)**2, &
+       fnamewffmq_=dtfil%fnamewffq
+       if (dtset%getwfmq/=0) fnamewffmq_=dtfil%fnamewffmq
+       call wfk_read_my_kptbands(fnamewffmq_, distrb_flags, spacecomm,dtset%ecut*(dtset%dilatmx)**2, &
 &          formeig, istwfk_rbz, kmq_rbz, mcgmq, dtset%mband, mband_mem_rbz, mkqmem_rbz, mpw1_mq,&
 &          dtset%natom, nkpt_rbz, npwar1_mq, dtset%nspinor, dtset%nsppol, dtset%usepaw,&
 &          cg_mq, eigen=eigen_mq, occ=occ_disk)
        call timab(144,2,tsec)
-
      end if
    end if
    ABI_FREE(occ_disk)
