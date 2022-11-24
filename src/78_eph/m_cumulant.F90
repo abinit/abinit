@@ -25,9 +25,6 @@
 module m_cumulant
 
 
-#ifdef HAVE_DFTI
-use MKL_DFTI
-#endif
  use defs_basis
  use m_abicore
  use m_xmpi
@@ -835,22 +832,23 @@ subroutine cumulant_compute(self)
  real(dp),allocatable :: time_mesh(:), time_mesh_temp(:)
  real(dp) :: output_value, output_c3, output_test2r, output_test2i
  real(dp) :: m_fit_re, b_fit_re, m_fit_im, b_fit_im, res_re, res_im
- !real(kind= DFTI_DOUBLE), allocatable ::  betaoverw2(:)
- !complex(kind=DFTI_DOUBLE), allocatable :: c1(:)
  complex(dpc),allocatable :: c1(:), ct_temp(:), c_temp(:)
  complex(dpc),allocatable :: c2(:), ct(:), gt(:), gw(:), g1(:)
  complex(dpc) :: output_test, output_test2
-! type(DFTI_DESCRIPTOR), POINTER :: My_Desc1_Handle
  Integer :: sts, itest
-! character(LEN=DFTI_MAX_MESSAGE_LENGTH) :: error_message
  integer :: fftalg
+ logical :: use_fft
 
 !************************************************************************
 
+! Initialization of parallel variables
  comm = self%comm
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
+
  call wrtout(std_out, " Computing cumulant. This may take some time depending on the dims of the problem...")
  call cwtime(cpu_kloop, wall_kloop, gflops_kloop, "start")
+
+ ! Initialization of variables and allocation of arrays
  nwr = self%nwr
  nwr_ce = self%nwr_ce
  ABI_CALLOC(c1, (nwr))
@@ -885,7 +883,7 @@ subroutine cumulant_compute(self)
    spin = self%my_spins(my_spin)
    do my_ik=1,self%my_nkcalc
      ikcalc= self%my_ikcalc(my_ik)
-     !if (ikcalc /= 1) cycle
+     !if (ikcalc /= 1) cycle ! For debugging purpose
      nbands = self%nbcalc_ks(ikcalc, spin)
      call cwtime(cpu, wall, gflops, "start")
 
@@ -950,7 +948,8 @@ subroutine cumulant_compute(self)
 
          temp_r(:,1) = betaoverw2(:)
 
-         if (fftalg_isavailable(fftalg)) then
+         use_fft = .True.       
+         if (use_fft) then
            call fourdp(1, temp_g, temp_r, -1, self%ce_mpi_enreg, nwr, 1, self%ce_ngfft , 0 )
            c1(:) = temp_g(1, :, 1) + j_dpc* temp_g(2, :, 1)
            c1 = c1 * wr_step * nwr
@@ -1001,8 +1000,8 @@ subroutine cumulant_compute(self)
            self%gt_vals(:, itemp, ib, my_ik, spin) = gt(:)
          end if
 
-
-         if (fftalg_isavailable(fftalg)) then
+         use_fft = .True.
+         if (use_fft) then
            
            ! Fast Fourier Transform to obtain the Green's function in frequency
            ! domain
@@ -1194,6 +1193,7 @@ subroutine cumulant_kubo_transport(self, dtset, cryst)
 
  comm = self%comm
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
+ 
  call wrtout(std_out, " Computing conductivity using Kubo-Greenwood method.")
  call cwtime(cpu_kloop, wall_kloop, gflops_kloop, "start")
 
