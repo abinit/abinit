@@ -74,7 +74,7 @@ module m_wfk
  use defs_wvltypes,  only : wvl_internal_type
  use m_geometry,     only : metric
  use m_time,         only : cwtime, cwtime_report, asctime
- use m_fstrings,     only : sjoin, strcat, endswith, itoa, ktoa
+ use m_fstrings,     only : sjoin, strcat, endswith, itoa, ktoa, ftoa
  use m_io_tools,     only : get_unit, mvrecord, iomode_from_fname, iomode2str, open_file, close_unit, delete_file, file_exists
  use m_numeric_tools,only : mask2blocks, stats_t, stats_eval, wrap2_pmhalf
  use m_cgtk,         only : cgtk_rotate, cgtk_rotate_symrec
@@ -3015,7 +3015,7 @@ subroutine wfk_read_my_kptbands(inpath_, distrb_flags, comm, ecut_eff_in, &
  end if
 
  call xmpi_bcast(inpath, master, comm, ierr)
- call wrtout(std_out, sjoin("About to read wavefunctions from:", inpath))
+ call wrtout(std_out, sjoin(" About to read wavefunctions from:", inpath))
 
  ! now attack the cg reading
  iomode = iomode_from_fname(inpath)
@@ -3075,12 +3075,11 @@ subroutine wfk_read_my_kptbands(inpath_, distrb_flags, comm, ecut_eff_in, &
  ! with q along a path --> max_linear_density in krank becomes large e.g. 1440
  ! and the computation of the rank overflows.
  ! Note also that ctgk_rotate assumes use_symrec=False and symrel in input.
- dksqmax = zero
  call listkk(dksqmax, cryst%gmet, rbz2disk, wfk_disk%hdr%kptns, kptns_in, wfk_disk%hdr%nkpt, nkpt_in, cryst%nsym, &
    sppoldbl, cryst%symafm, cryst%symrel, cryst%timrev-1, xmpi_comm_self, use_symrec=.False.)
 
  if (ask_accurate == 1) then
-   ABI_CHECK(dksqmax < tol8, " WFK file read but k-points too far from requested set")
+   ABI_CHECK(dksqmax < tol8, sjoin("WFK file read but k-points too far from requested set, dksqmax:", ftoa(dksqmax)))
  end if
 
  ! More efficienct algorithm based on random access IO:
@@ -3139,10 +3138,10 @@ subroutine wfk_read_my_kptbands(inpath_, distrb_flags, comm, ecut_eff_in, &
 
  ! main loop reading in wfk and spinning them out to all kptns_in which need them
 
- ! MG TODO: I believe this is not the most efficient way to implement the algorithm
- ! On might have only the master proc read all the (ik_ibz, spin, mband) states
- ! perhaps blocking on the band dimension to reduce memory and then broadcast.
- ! At this point, each proc can rotate the wavefunctions and store it in memory if these states are needed.
+ ! MG TODO: I believe this is not the most efficient way to implement the IO algorithm
+ ! On might have only the master proc reading all the (ik_ibz, spin, mband) states
+ ! perhaps blocking on the band dimension to reduce memory and then broadcast the block of bands.
+ ! At this point, each proc rotates the wavefunctions and store it in memory if these states are needed.
 
  do spin=1,nsppol
    ! for nsppol=1 input and nsppol=2 run, no need to continue the spin loop
@@ -3309,20 +3308,16 @@ subroutine wfk_read_my_kptbands(inpath_, distrb_flags, comm, ecut_eff_in, &
  if(present(occ)) call xmpi_sum(occ,comm,mpierr)
  if(present(kg)) call xmpi_sum(kg,comm,mpierr)
 
- if(present(pawrhoij) .and. usepaw_in==1) then
-   call pawrhoij_copy(wfk_disk%hdr%pawrhoij,pawrhoij)
- end if
+ if(present(pawrhoij) .and. usepaw_in==1) call pawrhoij_copy(wfk_disk%hdr%pawrhoij,pawrhoij)
 
  ABI_FREE(icg)
  ABI_FREE(ikg)
  ABI_FREE(ibdeig)
  ABI_FREE(ibdocc)
-
  ABI_FREE(symrelT)
  ABI_FREE(iperm)
  ABI_FREE(rbz2disk_sort)
  ABI_FREE(rbz2disk)
-
  ABI_FREE(kg_disk)
  ABI_FREE(cg_disk)
  ABI_FREE(eig_disk)

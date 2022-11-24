@@ -462,14 +462,9 @@ module m_gwr
    integer :: coords_gtks(4) = 0
    ! Cartesian coordinates of this processor in the Cartesian grid.
 
-   !integer :: comm
-   ! Initial MPI communicator with all procs involved in the calculation
-   ! NB: gwr%comm is not necessarly the same as the input_comm
-   ! as we might have removed some cores in input_comm to have nproc divisible by ntau * nsppol.
-
    type(xcomm_t) :: comm
    ! Communicator with all MPI procs involved in the computation
-   ! Does not necessarly correspond to the input commumicator as
+   ! NB: gwr%comm%value is not necessarly the same as the input_comm
    ! we may decide to remove some procs from input_comm before createring the Cartesian grid.
 
    type(xcomm_t) :: spin_comm
@@ -4987,6 +4982,8 @@ end if
 
       do band=gwr%bstart_ks(ikcalc, spin), gwr%bstop_ks(ikcalc, spin)
         ibc = band - gwr%bstart_ks(ikcalc, spin) + 1
+
+        ! NB: e0 is always set to the KS energy even in case of self-consistency.
         e0 = gwr%ks_ebands%eig(band, ik_ibz, spin)
         sigx = gwr%x_mat(band, band, ikcalc, spin)
 

@@ -373,25 +373,9 @@ Use if statement instead of Fortran merge. See https://software.intel.com/en-us/
 #  define GWPC_CMPLX(re,im) CMPLX(re,im)
 #endif
 
-/* Macros used for particular slaves of the Abinit tests farm */
 
-/* 
- * IBM6 has a very problematic IO. Flushing the IO buffer helps avoid segmentation fault 
- * To disable these tricks, comment the three lines below.
- * */
-#ifdef FC_IBM
-#define HAVE_IBM6
-#endif
-
-#ifdef HAVE_IBM6
-#define _IBM6(message) call wrtout(std_out,message,"COLL",do_flush=.True.)
-#else
-#define _IBM6(message)
-#endif
-
-
-#define __HAVE_GREENX
 /* Temporary hack to use GREENX library 
+#define __HAVE_GREENX
 #define __HAVE_GREENX
 */
 
