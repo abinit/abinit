@@ -5227,7 +5227,7 @@ end if
        nctkarr_t("qpe_zlin_kcalc", "dp", "two, max_nbcalc, nkcalc, nsppol"), &
        nctkarr_t("qpe_pade_kcalc", "dp", "two, max_nbcalc, nkcalc, nsppol"), &
        nctkarr_t("qp_solver_ierr", "int", "max_nbcalc, nkcalc, nsppol"), &
-       ! TODO: Write exchage part
+       ! TODO: Write exchange matrix?
        !nctkarr_t("sigx_kcalc", "dp", "max_nbcalc, nkcalc, nsppol"), &
        nctkarr_t("sigc_it_diag_kcalc", "dp", "two, two, ntau, max_nbcalc, nkcalc, nsppol"), &
        nctkarr_t("sigc_iw_diag_kcalc", "dp", "two, ntau, max_nbcalc, nkcalc, nsppol"), &
@@ -5307,7 +5307,7 @@ end subroutine write_units
 !!  write_notations
 !!
 !! FUNCTION
-!!  Write meaning of the different columns.
+!!  Write the meaning of the different columns.
 !!
 !! SOURCE
 

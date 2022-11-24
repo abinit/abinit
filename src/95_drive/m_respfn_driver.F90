@@ -1,5 +1,3 @@
-! CP modified
-
 !!****m* ABINIT/m_respfn_driver
 !! NAME
 !!  m_respfn_driver
@@ -212,14 +210,15 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  integer,parameter :: formeig=0,level=10
  integer,parameter :: response=1,syuse=0,master=0,cplex1=1
  integer :: nk3xc
- integer :: analyt,ask_accurate,band_index,bantot,bdeigrf,coredens_method,cplex,cplex_rhoij
+ integer :: analyt,ask_accurate,bantot,bdeigrf,coredens_method,cplex,cplex_rhoij
+ !integer :: nkpt_eff, band_index, ikpt, isppol, nkpt_max, nband_k,
  integer :: dim_eig2nkq,dim_eigbrd,dyfr_cplex,dyfr_nondiag,gnt_option
- integer :: gscase,has_dijnd,has_diju,has_kxc,iatom,iatom_tot,iband,idir,ider,ierr,ifft,ii,ikpt,indx
+ integer :: gscase,has_dijnd,has_diju,has_kxc,iatom,iatom_tot,iband,idir,ider,ierr,ifft,ii,indx
  integer :: i1dir,i1pert,i2dir,i2pert,i3dir,i3pert
- integer :: initialized,ipert,ipert2,ireadwf0,iscf,iscf_eff,ispden,isppol
+ integer :: initialized,ipert,ipert2,ireadwf0,iscf,iscf_eff,ispden
  integer :: itypat,izero,mcg,me,mgfftf,mk1mem,mkqmem,mpert,mu
- integer :: my_natom,n1,natom,n3xccc,nband_k,nfftf,nfftot,nfftotf,nhatdim,nhatgrdim
- integer :: nkpt_eff,nkpt_rbz,nkxc,nkxc1,nspden_rhoij,ntypat,nzlmopt,openexit !nkpt_max,
+ integer :: my_natom,n1,natom,n3xccc,nfftf,nfftot,nfftotf,nhatdim,nhatgrdim
+ integer :: nkpt_rbz,nkxc,nkxc1,nspden_rhoij,ntypat,nzlmopt,openexit
  integer :: optcut,option,optgr0,optgr1,optgr2,optorth,optrad
  integer :: optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv
  integer :: outd2,pawbec,pawpiezo,prtbbb,psp_gencond,qzero,rdwr,rdwrpaw
@@ -430,14 +429,9 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 !Here, rprimd, xred and occ are available
  etot=hdr%etot ; fermie=hdr%fermie ; fermih=hdr%fermih ; residm=hdr%residm ! CP added fermih
 !If parallelism over atom, hdr is distributed
- ! CP modified
- !call hdr%update(bantot,etot,fermie,&
- !  residm,rprimd,occ,pawrhoij,xred,dtset%amu_orig(:,1), &
- !  comm_atom=mpi_enreg%comm_atom, mpi_atmtab=mpi_enreg%my_atmtab)
  call hdr%update(bantot,etot,fermie,fermih,&
    residm,rprimd,occ,pawrhoij,xred,dtset%amu_orig(:,1), &
    comm_atom=mpi_enreg%comm_atom, mpi_atmtab=mpi_enreg%my_atmtab)
- ! End CP modified
 
 !Clean band structure datatype (should use it more in the future !)
  call ebands_free(bstruct)
@@ -1644,7 +1638,6 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
            call prteigrs(eigen_fanddw,dtset%enunit,fermie,fermih,dtfil%fnameabo_eig,ab_out,-1,dtset%kptns,dtset%kptopt,&
 &           dtset%mband,dtset%nband,dtset%nbdbuf,dtset%nkpt,1,dtset%nsppol,occ,dtset%occopt,7,0,dtset%prtvol,&
 &           eigen0,zero,zero,dtset%wtk)
-           ! End CP modified
 
            ABI_FREE(eigen_ddw)
            ABI_FREE(eigen_ddw_mean)
