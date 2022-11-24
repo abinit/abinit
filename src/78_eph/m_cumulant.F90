@@ -1199,8 +1199,8 @@ subroutine cumulant_kubo_transport(self, dtset, cryst)
 
 
  ABI_MALLOC(kernel, (self%nwr))
- ABI_MALLOC(test_Aw, (self%ntemp))
- ABI_MALLOC(test_dfdw, (self%ntemp))
+! ABI_MALLOC(test_Aw, (self%ntemp))
+! ABI_MALLOC(test_dfdw, (self%ntemp))
  ABI_MALLOC(Aw, (self%nwr))
  ABI_MALLOC(dfdw_acc, (self%nwr))
  ABI_MALLOC(Aw_l0, (self%ntemp))
@@ -1285,10 +1285,10 @@ subroutine cumulant_kubo_transport(self, dtset, cryst)
                 !  Preparing all elements needed for conductivity
                 omega = self%wrmesh_b(iw,ib_eph,my_ik,my_spin)
                 sp_func = -aimag (self%gw_vals(iw, itemp, ib_eph, my_ik, my_spin) ) / pi
-                test_Aw(itemp) = test_Aw(itemp) + sp_func
+!                test_Aw(itemp) = test_Aw(itemp) + sp_func
                 dfdw = occ_dfde(omega, self%kTmesh(itemp), self%mu_e(itemp))
                 self%print_dfdw(iw,itemp) = dfdw
-                test_dfdw(itemp) = test_dfdw(itemp) + dfdw
+!                test_dfdw(itemp) = test_dfdw(itemp) + dfdw
                 kernel(iw) = - dfdw * sp_func**2 
                 Aw(iw) = sp_func**2
                 dfdw_acc(iw) = dfdw
@@ -1352,8 +1352,8 @@ subroutine cumulant_kubo_transport(self, dtset, cryst)
  call cwtime_report(" cumulant_kubo_transport", cpu_kloop, wall_kloop, gflops_kloop)
 
  ABI_SFREE(kernel)
- ABI_SFREE(test_Aw)
- ABI_SFREE(test_dfdw)
+! ABI_SFREE(test_Aw)
+! ABI_SFREE(test_dfdw)
  ABI_SFREE(Aw)
  ABI_SFREE(dfdw_acc)
  ABI_SFREE(Aw_l0)
