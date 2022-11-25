@@ -1958,7 +1958,7 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
  !         - Init nb states with random numbers and orthogonalize wrt the nband states found in the WFK file
  !         - Compute <i|H|j> in the subspace spanned by the perp states
  !         - Diagonalize H in the subspace to get variational approximation to the KS states
- !         - Add these approximated eigenstats to G.
+ !         - Add these approximated eigenstates to G.
  !
 
  ! Select occupied or empty G.
@@ -2329,9 +2329,9 @@ subroutine gwr_rotate_gpm(gwr, ik_bz, itau, spin, desc_kbz, gt_pm)
  !
  ! For time-reversal, we have u_{-k}(g) = u_{k}{-g}^*
  !
- !      G_{-k}(-g,-g') = [G_{k}(g,g')]*
+ !      G_{-k}(-g,-g') = [G_k(g,g')]*
 
- !ABI_WARNING_IF(trev_k == 0, "green: trev_k /= 0 not yet coded")
+ ABI_WARNING_IF(trev_k == 0, "green: trev_k /= 0 should be tested")
 
  ! Rotate gvec, recompute gbound and rotate vc_sqrt
  ! TODO: 1) Handle TR and routine to rotate tchi/W including vc_sqrt
@@ -2697,7 +2697,7 @@ subroutine gwr_rotate_wc(gwr, iq_bz, itau, spin, desc_qbz, wc_qbz)
    call gwr%wc_qibz(iq_ibz, itau, spin)%copy(wc_qbz); return
  end if
 
- !ABI_WARNING_IF(trev_q == 0, "wc_rotate: trev_q /= 0 not yet coded")
+ ABI_WARNING_IF(trev_q == 0, "trev_q should be tested")
 
  ! rotate gvec, recompute gbound and rotate vc_sqrt.
  ! TODO: 1) Handle TR and routine to rotate tchi/W including vc_sqrt
@@ -4686,7 +4686,7 @@ if (gwr%use_supercell_for_sigma) then
    ABI_MALLOC(uc_ceikr, (gwr%g_nfft * gwr%nspinor))
 
    ! Precompute one-dimensional factors to get 3d e^{ik.L}
-   call get_1d_scphases(gwr%ngkpt, gwr%nkcalc, gwr%kcalc, scph1d_kcalc)
+   call get_1d_sc_phases(gwr%ngkpt, gwr%nkcalc, gwr%kcalc, scph1d_kcalc)
 
    do ikcalc=1,gwr%nkcalc
      kcalc_bz = gwr%kcalc(:, ikcalc)
@@ -5532,16 +5532,12 @@ subroutine gwr_rpa_energy(gwr)
          ! NB: have to build chi_tmp inside loop over icut as matrix is destroyed by pzheev.
          mat_size = bisect(kin_qg, ecut_chi(icut))
 
-#if 0
-         call chi_tmp%pzheev("N", "U", dummy_vec, eig, mat_size=mat_size)
-#else
          ! Change size block and, if possible, use 2D rectangular grid of processors for diagonalization
          call proc_4diag%init(chi_tmp%processor%comm)
          call chi_tmp%change_size_blocs(chi_4diag, processor=proc_4diag)
          call chi_4diag%pzheev("N", "U", dummy_vec, eig, mat_size=mat_size)
          call chi_4diag%free()
          call proc_4diag%free()
-#endif
 
          ! TODO: ELPA
          !call compute_eigen_problem(processor, matrix, results, eigen, comm, istwf_k, nev)
@@ -5706,7 +5702,7 @@ subroutine gwr_run_energy_scf(gwr, free_ugb)
    end do
 
  case ("G0EW")
-   ! This is more complex to implement as we need to store G0 and eG
+   ! This is more difficult to implement as we need to store G0 and eG
    ! and then use G only for chi and not in Sigma
    call wrtout(units, " Begin energy-only self-consistency in W (G0EW)")
    ABI_ERROR("G0WE is not yet implemented")
@@ -5842,8 +5838,7 @@ subroutine gwr_ncwrite_tchi_wc(gwr, what, filepath)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0
- integer :: my_is, my_iqi, my_it, spin, iq_ibz, itau, npwtot_q, my_ncols, my_gcol_start
- integer :: ncid, ncerr !, ierr
+ integer :: my_is, my_iqi, my_it, spin, iq_ibz, itau, npwtot_q, my_ncols, my_gcol_start, ncid, ncerr !, ierr
  real(dp) :: cpu, wall, gflops
 !arrays
  real(dp), ABI_CONTIGUOUS pointer :: fptr(:,:,:)
@@ -6563,7 +6558,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
    call print_ngfft(u_ngfft, header="FFT mesh for chi0 head/wings computation", unit=ab_out)
  endif
 
- ! Need to broacast G-vectors at q = 0 if k/q-point parallelism is on,
+ ! Need to broacast G-vectors at q = 0 if k/q-point parallelism is activated.
  if (gwr%kpt_comm%me == 0) then
    npwe = gwr%tchi_desc_qibz(1)%npw
    ABI_CHECK(gwr%tchi_desc_qibz(1)%kin_sorted, "g-vectors are not sorted by |q+g|^2/2 !")
@@ -7191,7 +7186,7 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
        ! Get all <k-q,band_sum,s|e^{-i(q+G).r}|s,jb,k>
        do jb=bmin,bmax
 
-         ! FIXME: nspinor 2 is wrong as we have 2x2 matrix
+         ! FIXME: nspinor 2 is wrong as we have a 2x2 matrix
          ur_prod(:) = conjg(ur_ksum(:)) * ur_bdgw(:,jb)
          call fft_ur(npwx, u_nfft, nspinor, ndat1, u_mgfft, u_ngfft, istwfk1, gvec_x, gbound_x, &
                      ur_prod, rhotwg_ki(:,jb))
@@ -7360,12 +7355,11 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
  call cwtime_report(" gwr_build_sigxme:", cpu_all, wall_all, gflops_all)
  call timab(1920, 2, tsec)
 
- ! Compute QP results. Done usually when gwr_task is G0v i.e. Hartree-Fock.
+ ! Compute QP results. Done usually when gwr_task == G0v i.e. Hartree-Fock with KS states.
  compute_qp__ = .False.; if (present(compute_qp)) compute_qp__ = compute_qp
  if (compute_qp__ .and. gwr%comm%me == 0) then
    call write_notations([std_out, ab_out])
  end if
-
 
 end subroutine gwr_build_sigxme
 !!***
@@ -7399,10 +7393,10 @@ subroutine gwr_get_u_ngfft(gwr, boxcutmin, u_ngfft, u_nfft, u_mgfft, u_mpw, gmax
 
 ! *************************************************************************
 
- ! All the procs execute this part.
+ ! All procs execute this part.
  ! Note the loops over the full BZ to compute u_mpw
  ! FIXME: umklapp, ecutsigx and q-centered G-sphere
- ! TODO: Write new routine that computes the best FFT mesh for ecut1 + ecut1. Set set_mesh from GW code.
+ ! TODO: Write new routine to compute best FFT mesh for ecut1 + ecut1. See set_mesh from GW code.
 
  u_ngfft = gwr%dtset%ngfft ! This to allow users to specify fftalg
 
@@ -7428,9 +7422,9 @@ end subroutine gwr_get_u_ngfft
 
 !----------------------------------------------------------------------
 
-!!****f* m_gwr/get_1d_scphases
+!!****f* m_gwr/get_1d_sc_phases
 !! NAME
-!!  get_1d_scphases
+!!  get_1d_sc_phases
 !!
 !! FUNCTION
 !!
@@ -7440,7 +7434,7 @@ end subroutine gwr_get_u_ngfft
 !!
 !! SOURCE
 
-subroutine get_1d_scphases(sc_shape, nkpt, kpts, ph1d)
+subroutine get_1d_sc_phases(sc_shape, nkpt, kpts, ph1d)
 
 !Arguments ------------------------------------
  integer,intent(in) :: sc_shape(3), nkpt
@@ -7475,7 +7469,7 @@ subroutine get_1d_scphases(sc_shape, nkpt, kpts, ph1d)
    end do
  end do ! ikpt
 
-end subroutine get_1d_scphases
+end subroutine get_1d_sc_phases
 !!***
 
 !----------------------------------------------------------------------
