@@ -440,7 +440,7 @@ subroutine cumulant_driver(dtfil, dtset, ebands, cryst, comm)
  ! Output netcdf file with cumulant results e.g. A_nk(w).
  ! Use EPH prefix because we may also have EE and PHE cumulants.
  path = strcat(dtfil%filnam_ds(4), "_EPH_CUMULANT.nc")
- call cumulant%ncwrite(path, cryst, ebands)
+ call cumulant%ncwrite(path, cryst, ebands, dtset)
 
  !if (my_rank == master) then
  !  ! Print cumulant expansion results to stdout and other external txt files (for the test suite)
@@ -1475,17 +1475,19 @@ end subroutine cumulant_sigmaph_ncread
 !!
 !! SOURCE
 
-subroutine cumulant_ncwrite(self, path, cryst, ebands)
+subroutine cumulant_ncwrite(self, path, cryst, ebands, dtset)
 
 !Arguments --------------------------------------
  class(cumulant_t),intent(in) :: self
  type(crystal_t),intent(in) :: cryst
  type(ebands_t),intent(in) :: ebands
+ type(dataset_type),intent(in) :: dtset
  character(len=*),intent(in) :: path
 
 !Local variables --------------------------------
  integer,parameter :: master = 0
- integer :: ncerr, ncid, my_rank, ikcalc, spin, comm, my_ik, ib, itemp
+ integer :: ncerr, ncid, my_rank, ikcalc, spin, comm, my_ik, ib, itemp, ntemp
+ integer :: ii, jj
  real(dp) :: cpu, wall, gflops
 
 !************************************************************************
@@ -1569,11 +1571,11 @@ subroutine cumulant_ncwrite(self, path, cryst, ebands)
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "bstart_ks"), self%bstart_ks))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kcalc2ibz"), self%kcalc2ibz))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "dfdw"), self%print_dfdw))
-   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "conductivity_mu"), self%conductivity_mu))
-   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "mobility_mu"), self%mobility_mu))
-   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "seebeck"), self%seebeck))
-   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kappa"), self%kappa))
    ! FIXME This part is wrong since these arrays are MPI distributed
+   !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "conductivity_mu"), self%conductivity_mu))
+   !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "mobility_mu"), self%mobility_mu))
+   !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "seebeck"), self%seebeck))
+   !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kappa"), self%kappa))
    !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "wrmesh_b"), self%wrmesh_b))
    !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vals_wr"), c2r(self%vals_wr)))
    !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ks_enes"), self%e0vals))
@@ -1607,7 +1609,24 @@ subroutine cumulant_ncwrite(self, path, cryst, ebands)
  ncerr = nf90_var_par_access(ncid, nctk_idname(ncid, "dw_vals"), nf90_collective)
  NCF_CHECK(ncerr)
 
+if (any(abs(dtset%sigma_erange) > zero)) then
+   ncerr = nf90_var_par_access(ncid, nctk_idname(ncid, "dfdw"), nf90_collective)
+   NCF_CHECK(ncerr)
 
+   ncerr = nf90_var_par_access(ncid, nctk_idname(ncid, "conductivity_mu"), nf90_collective)
+   NCF_CHECK(ncerr)
+
+   ncerr = nf90_var_par_access(ncid, nctk_idname(ncid, "mobility_mu"), nf90_collective)
+   NCF_CHECK(ncerr)
+
+   ncerr = nf90_var_par_access(ncid, nctk_idname(ncid, "seebeck"), nf90_collective)
+   NCF_CHECK(ncerr)
+
+   ncerr = nf90_var_par_access(ncid, nctk_idname(ncid, "kappa"), nf90_collective)
+   NCF_CHECK(ncerr)
+
+
+end if
 
  if (self%debug == 1) then
    ncerr = nf90_var_par_access(ncid, nctk_idname(ncid, "time_mesh"), nf90_collective)
@@ -1636,57 +1655,81 @@ subroutine cumulant_ncwrite(self, path, cryst, ebands)
 
  ncerr = nf90_put_var(ncid, nctk_idname(ncid, "gw_vals"), c2r(self%gw_vals), &
                       start=[1,1,1,1,ikcalc,spin], &
-                      count=[2, self%nwr, self%ntemp, self%max_nbcalc, self%my_nkcalc, self%nsppol])
+                      count=[2, self%nwr, self%ntemp, self%max_nbcalc, self%my_nkcalc, self%my_nspins])
  NCF_CHECK(ncerr)
 
  ncerr = nf90_put_var(ncid, nctk_idname(ncid, "wrmesh_b"), self%wrmesh_b, &
                       start=[1,1,ikcalc,spin], &
-                      count=[self%nwr, self%max_nbcalc, self%my_nkcalc, self%nsppol])
+                      count=[self%nwr, self%max_nbcalc, self%my_nkcalc, self%my_nspins])
  NCF_CHECK(ncerr)
 
  ncerr = nf90_put_var(ncid, nctk_idname(ncid, "ks_enes"), self%e0vals, &
                       start=[1,ikcalc,spin], &
-                      count=[self%max_nbcalc, self%my_nkcalc, self%nsppol])
+                      count=[self%max_nbcalc, self%my_nkcalc, self%my_nspins])
  NCF_CHECK(ncerr)
 
  ncerr = nf90_put_var(ncid, nctk_idname(ncid, "dw_vals"), self%dw_vals, &
                       start=[1,1,ikcalc,spin], &
-                      count=[self%ntemp, self%max_nbcalc, self%my_nkcalc, self%nsppol])
+                      count=[self%ntemp, self%max_nbcalc, self%my_nkcalc, self%my_nspins])
  NCF_CHECK(ncerr)
 
 
+if (any(abs(dtset%sigma_erange) > zero)) then
+
+ ncerr = nf90_put_var(ncid, nctk_idname(ncid, "seebeck"), self%seebeck, &
+                      start=[1,1,1,spin,1], &
+                      count=[3, 3, 2, self%my_nspins , self%ntemp])
+ NCF_CHECK(ncerr)
+
+ ncerr = nf90_put_var(ncid, nctk_idname(ncid, "kappa"), self%kappa, &
+                      start=[1,1,1,spin,1], &
+                      count=[3, 3, 2, self%my_nspins , self%ntemp])
+ NCF_CHECK(ncerr)
+
+
+ ncerr = nf90_put_var(ncid, nctk_idname(ncid, "mobility_mu"), self%mobility_mu, &
+                      start=[1,1,1,spin,1], &
+                      count=[3, 3, 2, self%my_nspins , self%ntemp])
+ NCF_CHECK(ncerr)
+
+ ncerr = nf90_put_var(ncid, nctk_idname(ncid, "condutivity_mu"), self%conductivity_mu, &
+                      start=[1,1,1,spin,1], &
+                      count=[3, 3, 2, self%my_nspins , self%ntemp])
+ NCF_CHECK(ncerr)
+
+end if
 
 
  if (self%debug == 1) then
 
    ncerr = nf90_put_var(ncid, nctk_idname(ncid, "time_mesh"), self%time_mesh, &
                         start=[1,1,1,ikcalc,spin], &
-                        count=[self%nwr, self%ntemp, self%max_nbcalc, self%my_nkcalc, self%nsppol])
+                        count=[self%nwr, self%ntemp, self%max_nbcalc, self%my_nkcalc, self%my_nspins])
    NCF_CHECK(ncerr)
 
    ncerr = nf90_put_var(ncid, nctk_idname(ncid, "ct_vals"), c2r(self%ct_vals), &
                         start=[1,1,1,1,ikcalc,spin], &
-                        count=[2, self%nwr, self%ntemp, self%max_nbcalc, self%my_nkcalc, self%nsppol])
+                        count=[2, self%nwr, self%ntemp, self%max_nbcalc, self%my_nkcalc, self%my_nspins])
    NCF_CHECK(ncerr)
 
    ncerr = nf90_put_var(ncid, nctk_idname(ncid, "c1"), c2r(self%c1), &
                         start=[1,1,1,1,ikcalc,spin], &
-                        count=[2, self%nwr, self%ntemp, self%max_nbcalc, self%my_nkcalc, self%nsppol])
+                        count=[2, self%nwr, self%ntemp, self%max_nbcalc, self%my_nkcalc, self%my_nspins])
    NCF_CHECK(ncerr)
 
    ncerr = nf90_put_var(ncid, nctk_idname(ncid, "c2"), c2r(self%c2), &
                         start=[1,1,1,1,ikcalc,spin], &
-                        count=[2, self%nwr, self%ntemp, self%max_nbcalc, self%my_nkcalc, self%nsppol])
+                        count=[2, self%nwr, self%ntemp, self%max_nbcalc, self%my_nkcalc, self%my_nspins])
    NCF_CHECK(ncerr)
 
    ncerr = nf90_put_var(ncid, nctk_idname(ncid, "c3"), c2r(self%c3), &
                         start=[1,1,1,1,ikcalc,spin], &
-                        count=[2, self%nwr, self%ntemp, self%max_nbcalc, self%my_nkcalc, self%nsppol])
+                        count=[2, self%nwr, self%ntemp, self%max_nbcalc, self%my_nkcalc, self%my_nspins])
    NCF_CHECK(ncerr)
 
    ncerr = nf90_put_var(ncid, nctk_idname(ncid, "gt_vals"), c2r(self%gt_vals), &
                         start=[1,1,1,1,ikcalc,spin], &
-                        count=[2, self%nwr, self%ntemp, self%max_nbcalc, self%my_nkcalc, self%nsppol])
+                        count=[2, self%nwr, self%ntemp, self%max_nbcalc, self%my_nkcalc, self%my_nspins])
    NCF_CHECK(ncerr)
  endif
 
@@ -1694,7 +1737,7 @@ subroutine cumulant_ncwrite(self, path, cryst, ebands)
 
  ! Write to ab_out for automatic testing.
  if (xmpi_comm_rank(self%comm) == master .and. is_open(ab_out)) then
-   write(ab_out, "(/,a)")" Print first 10 frequenciew in gw_vals array (re-im) for testing purposes:"
+   write(ab_out, "(/,a)")" Print first 10 frequencies in gw_vals array (re-im) for testing purposes:"
    write(ab_out, "(2(a, i0))")" spin: ", spin, ", ikcalc: ", ikcalc
    my_ik = 1
    do ib=1,self%nbcalc_ks(ikcalc, spin)
@@ -1705,6 +1748,24 @@ subroutine cumulant_ncwrite(self, path, cryst, ebands)
      end do
   end do
  end if
+if (xmpi_comm_rank(self%comm) == master .and. is_open(ab_out) .and. any(abs(dtset%sigma_erange) > zero)) then
+   write(ab_out, "(/,a)")" Print 5 temperatures in mobility_mu array (el-holes) for testing purposes:"
+   write(ab_out, "(2(a, i0))")" spin: ", spin
+   if (self%ntemp > 5) then
+     ntemp = 5
+   else
+     ntemp = self%ntemp
+   end if
+   do ii=1,3
+     do jj=1,3
+       do itemp=1,ntemp
+         write(ab_out, "(2(a,i0))")" gw_vals for itemp:", itemp
+         write(ab_out, "(*(es13.5))")dble(self%mobility_mu(ii, jj, 1, spin, itemp))
+         write(ab_out, "(*(es13.5))")dble(self%mobility_mu(ii, jj, 2, spin, itemp))
+       end do
+     end do
+   end do
+end if
 
  100 call cwtime_report(" cumulant_ncwrite", cpu, wall, gflops)
 #endif
