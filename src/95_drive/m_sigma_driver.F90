@@ -4134,8 +4134,6 @@ end subroutine sigma_bksmask
 !!  QP_paw_an(Cryst%natom)<Paw_an_type>=Various arrays related to the Hamiltonian given
 !!   on ANgular mesh or ANgular moments.
 !!
-!! SIDE EFFECTS
-!!
 !! SOURCE
 
 subroutine paw_qpscgw(Wfd,nscf,nfftf,ngfftf,Dtset,Cryst,Kmesh,Psps,qp_ebands, &

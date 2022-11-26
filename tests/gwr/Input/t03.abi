@@ -10,7 +10,11 @@ ndtset      2
 #ndtset      4  # TODO
 timopt 1
 nspinor 2 nspden 4
-#nsym 1 kptopt 3
+
+# This to compute QP without symmetries for debugging purposes
+#nsym 1 
+#kptopt 3
+#kptopt 2
 
 # inclvbk 2 with SOC not yet coded
 inclvkb 0

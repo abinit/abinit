@@ -2,10 +2,12 @@
 # Calculation of the GW corrections with GWR code and energy-only self-consistency
 
 ndtset      5
+
+# This to compute QP without symmetries for debugging purposes
 #nsym 1 
 #kptopt 3
 #kptopt 2
-
+#
 ####################
 # Dataset 1: SCF run
 ####################

@@ -9,6 +9,8 @@
 ndtset      4
 timopt 1
 nsppol      2 spinmagntarget 0.0
+
+# This to compute QP without symmetries for debugging purposes
 #nsym 1 
 #kptopt 3
 #kptopt 2
@@ -128,7 +130,7 @@ pseudos "Pseudodojo_nc_sr_04_pbe_standard_psp8/Si.psp8"
 #%%   t02.abo, tolnlines = 25, tolabs = 1.1e-3, tolrel = 3.0e-3, fld_options = -medium;
 #%%   t02o_DS3_SIGC_IT, tolnlines=100, tolabs = 1.1e-3, tolrel = 3.0e-3, fld_options = -medium;
 #%%   t02o_DS3_SIGXC_IW, tolnlines=100, tolabs = 1.1e-3, tolrel = 3.0e-3, fld_options = -medium;
-#%%   t02o_DS3_SIGXC_RW, tolnlines=100, tolabs = 1.1e-3, tolrel = 3.0e-3, fld_options = -medium;
+#%%   t02o_DS3_SIGXC_RW, tolnlines=400, tolabs = 1.1e-3, tolrel = 3.0e-3, fld_options = -medium;
 #%% [paral_info]
 #%% max_nprocs = 12
 #%% [extra_info]

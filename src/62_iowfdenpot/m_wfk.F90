@@ -3078,6 +3078,7 @@ subroutine wfk_read_my_kptbands(inpath_, distrb_flags, comm, ecut_eff_in, &
  call listkk(dksqmax, cryst%gmet, rbz2disk, wfk_disk%hdr%kptns, kptns_in, wfk_disk%hdr%nkpt, nkpt_in, cryst%nsym, &
    sppoldbl, cryst%symafm, cryst%symrel, cryst%timrev-1, xmpi_comm_self, use_symrec=.False.)
 
+ !call xmpi_barrier(comm)
  if (ask_accurate == 1) then
    ABI_CHECK(dksqmax < tol8, sjoin("WFK file read but k-points too far from requested set, dksqmax:", ftoa(dksqmax)))
  end if
