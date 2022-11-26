@@ -1067,6 +1067,25 @@ subroutine listkk(dksqmax, gmet, indkk, kptns1, kptns2, nkpt1, nkpt2, nsym, sppo
        ABI_BUG(msg)
      end if
 
+     ! DEBUG SECTION
+     !if (dksqmn > tol5) then
+     !   if (present(use_symrec)) then
+     !     if (use_symrec) then
+     !       kpt1a(:) = MATMUL(symmat(:,:,jsym),kptns1(:,jkpt1))
+     !     else
+     !       kpt1a(:) = MATMUL(TRANSPOSE(symmat(:,:,jsym)),kptns1(:,jkpt1))
+     !     end if
+     !   else
+     !     kpt1a(:) = MATMUL(TRANSPOSE(symmat(:,:,jsym)),kptns1(:,jkpt1))
+     !   end if
+     !   kpt1a(:)=(1-2*jtime)*kpt1a(:)
+     !   print *, "Cannot find k2: ", k2(:)
+     !   print *, "Rotated TS(k1): ", kpt1a(:)
+     !   print *, "with k1:        ", kptns1(:, jkpt1)
+     !   print *, "dksqmn:         ", dksqmn
+     !end if
+     !END DEBUG
+
      !write(std_out,'(a,i6,i2,2x,i6,5i3,es24.14)' )' listkk: ikpt2,isppol,indkk(isk,:)=',ikpt2,isppol,indkk(isk,:),dksqmn
    end do ! ikpt2
  end do ! isppol

@@ -2241,6 +2241,8 @@ end function my_locc
 !!  matrix2= second ScaLAPACK matrix (matrix B)
 !!  alpha= scalar multiplicator for the A*B product
 !!  beta= scalar multiplicator for the C matrix
+!!  [ija, ijb, ijc]:  (global). The row and column indices in the distributed matrix A/B/C
+!!    indicating the first row and the first column of the submatrix, respectively. Default [1, 1]
 !!
 !! OUTPUT
 !!  results= ScaLAPACK matrix coming out of the operation
@@ -2252,18 +2254,24 @@ end function my_locc
 !!
 !! SOURCE
 
-subroutine slk_pzgemm(transa, transb, matrix1, alpha, matrix2, beta, results)
+subroutine slk_pzgemm(transa, transb, matrix1, alpha, matrix2, beta, results, &
+                      ija, ijb, ijc) ! optional
 
 !Arguments ------------------------------------
  character(len=1),intent(in) :: transa, transb
  type(matrix_scalapack),intent(in) :: matrix1, matrix2
  type(matrix_scalapack),intent(inout) :: results
  complex(dpc),intent(in) :: alpha, beta
+ integer,optional,intent(in) :: ija(2), ijb(2), ijc(2)
 
 !Local variables-------------------------------
- integer :: mm, nn, kk
+ integer :: mm, nn, kk, ija__(2), ijb__(2), ijc__(2)
 
 !************************************************************************
+
+ ija__ = [1, 1]; if (present(ija)) ija__ = ija
+ ijb__ = [1, 1]; if (present(ijb)) ijb__ = ijb
+ ijc__ = [1, 1]; if (present(ijc)) ijc__ = ijc
 
  mm  = matrix1%sizeb_global(1)
  nn  = matrix2%sizeb_global(2)
@@ -2276,10 +2284,11 @@ subroutine slk_pzgemm(transa, transb, matrix1, alpha, matrix2, beta, results)
  if (toupper(transb) /= 'N') nn = matrix2%sizeb_global(1)
 
 #ifdef HAVE_LINALG_SCALAPACK
+ ! pzgemm(transa, transb, m, n, k, alpha, a, ia, ja, desca, b, ib, jb, descb, beta, c, ic, jc, descc)
  call PZGEMM(transa, transb, mm, nn, kk, alpha, &
-             matrix1%buffer_cplx, 1, 1, matrix1%descript%tab, &
-             matrix2%buffer_cplx, 1, 1, matrix2%descript%tab, &
-             beta, results%buffer_cplx, 1, 1, results%descript%tab)
+             matrix1%buffer_cplx, ija__(1), ija__(2), matrix1%descript%tab, &
+             matrix2%buffer_cplx, ijb__(1), ijb__(2), matrix2%descript%tab, &
+             beta, results%buffer_cplx, ijc__(1), ijc__(2), results%descript%tab)
 #endif
 
 end subroutine slk_pzgemm

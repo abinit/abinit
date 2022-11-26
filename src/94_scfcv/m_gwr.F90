@@ -44,18 +44,13 @@
 !!
 !! Differences with respect to the GW code in frequency-domain:
 !!
-!!  - in GWR, the k-mesh for G must be Gamma-centered.
+!!  - in GWR, the k-mesh must be Gamma-centered.
 !!  - All the two-point functions are defined on k/q-centered g-spheres while GW uses a single Gamma-centered sphere.
-!!  - At present only one-shot GW is supported.
-!!  - It is not clear if it makes sense to support all the options of the GW code, e.g. COHSEX, SEX, etc.
-!!  - No plasmopole model in GWR. In principle it is possible but where is the point?
 !!  - The frequency/tau meshes are automatically defined by ntau and the KS spectrum (minimax meshes)
 !!
 !! Technical properties:
 !!
-!!   - Integration of vcoul_t is not easy (q-centered gvec vs single sphere, memory is not MPI distributed)
-!!     Solution: extract reusable components from vcoul_t that can be called inside the loop over q in IBZ.
-!!     Also it's not clear to me that one can use vc(Sq, SG) when a cutoff is used as the cutoff breaks
+!!   - it's not clear to me that one can use vc(Sq, SG) when a cutoff is used as the cutoff breaks
 !!     the spherical symmetry of vc(r). Besides, when symmetries are used to reconstruct the term for q in the BZ,
 !!     one might have to take into account umklapps. Use cache?
 !!
@@ -108,6 +103,12 @@
 !!      [5] <var=wct_scbox, A@m_gwr.F90:4339, addr=0x14aa43876010, size_mb=189.844>
 !!      [6] <var=xsum, A@xmpi_sum.finc:2476, addr=0x14aa31bb0010, size_mb=189.844>
 !!      [7] <var=cg_k, A@m_wfd.F90:4623, addr=0x14aa64535010, size_mb=108.932>
+!!
+!!  TODO
+!!
+!!  - Remove cryst%timrev, use kptopt and qptopt
+!!
+!!  - Sig_c breaks QP degeneracies due to q0.
 !!
 !!
 !! COPYRIGHT
@@ -195,8 +196,7 @@ module m_gwr
 !!
 !! FUNCTION
 !!  Parameters related to a two-point function such as
-!!  gvectors, tables used for zero padded FFTs and matrix elements
-!!  of the coulomb interaction.
+!!  gvectors, tables used for zero padded FFTs and matrix elements of the Coulomb interaction.
 !!
 !! SOURCE
 
@@ -560,7 +560,7 @@ module m_gwr
 
    type(matrix_scalapack),allocatable :: ugb(:,:)
    ! (nkibz, nsppol)
-   ! Fourier components of the KS wavefunctions.
+   ! Fourier components of the KS wavefunctions stored in a PBLAS matrix
    ! Bands are distributed inside the gtau_comm in a round-robin fashion.
 
    type(processor_scalapack) :: gtau_slkproc
@@ -640,7 +640,7 @@ module m_gwr
    ! Initialize the object.
 
    procedure :: rotate_gpm => gwr_rotate_gpm
-   ! Reconstruct the Green's functions in the kBZ from the IBZ.
+   ! Reconstruct the Green's functions in the BZ from the IBZ.
 
    procedure :: get_myk_green_gpr => gwr_get_myk_green_gpr
     ! G_k(g,g') --> G_k(g',r) for each k in the BZ treated by this MPI proc for given spin and tau.
@@ -1954,12 +1954,7 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
  !
  ! TODO:
  !     1) Make sure that gvec in gwr and wfd agree with each other.
- !     2) May implement the following trick to accelerate convergence wrt nband:
- !         - Init nb states with random numbers and orthogonalize wrt the nband states found in the WFK file
- !         - Compute <i|H|j> in the subspace spanned by the perp states
- !         - Diagonalize H in the subspace to get variational approximation to the KS states
- !         - Add these approximated eigenstates to G.
- !
+ !     2) May implement trick used in gwst to add empty states approximated with LC of PWs.
 
  ! Select occupied or empty G.
  ! if (eig_nk < -tol6) then
@@ -1982,6 +1977,7 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
 
  ! Init set of (npwsp, nbsum) PBLAS matrix distributed within the gtau communicator.
  ! and distribute it over bands so that each proc reads a subset of bands in read_band_block
+ ! Note size_blocs below that corresponds to roud-robin distribution along band axis.
 
  ABI_MALLOC(gwr%ugb, (gwr%nkibz, gwr%nsppol))
  gwr%ugb_nband = nbsum
@@ -2037,7 +2033,7 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
 
        ABI_CHECK(all(kg_k(:,1:npw_k) == desc_k%gvec), "kg_k != desc_k%gvec")
 
-       write(msg,'(3(a,i0),a)')" Read ugb_k: my_iki [", my_iki, "/", gwr%my_nkibz, "] (tot: ", gwr%nkibz, ")"
+       write(msg,'(4x, 3(a,i0),a)')" Read ugb_k: my_iki [", my_iki, "/", gwr%my_nkibz, "] (tot: ", gwr%nkibz, ")"
        call cwtime_report(msg, cpu_green, wall_green, gflops_green)
        end associate
      end do ! my_iki
@@ -2045,13 +2041,13 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
    call wfk%close()
 
  else
+   ! Master reads and broadcasts. Much faster on lumi
    call wrtout(std_out, " Using IO version based of master reads and brodcasts ...")
-   ! Master reads and broadcasts
    if (gwr%comm%me == master) then
      call wfk_open_read(wfk, wfk_path, formeig0, iomode_from_fname(wfk_path), get_unit(), xmpi_comm_self)
    end if
 
-   ! This to be able to maximize the size of cg_work
+   ! TODO This to be able to maximize the size of cg_work
    !call xmpi_get_vmrss(vmem_mb, gwr%comm%value)
 
    do spin=1,gwr%nsppol
@@ -2095,22 +2091,22 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
          ABI_FREE(cg_work)
        end do ! bstart
 
-       write(msg,'(2(a,i0),a)')" Read ugb_k: ik_ibz [", ik_ibz, "/", gwr%nkibz, "]"
+       write(msg,'(4x,2(a,i0),a)')" Read ugb_k: ik_ibz [", ik_ibz, "/", gwr%nkibz, "]"
        call cwtime_report(msg, cpu_green, wall_green, gflops_green)
-
      end do ! ik_ibz
    end do ! spin
    if (gwr%comm%me == master) call wfk%close()
+
  end if ! io_algo
+
+ call cwtime_report(" gwr_read_ugb_from_wfk:", cpu, wall, gflops)
+ call timab(1921, 2, tsec)
 
  ABI_FREE(kg_k)
  ABI_FREE(bmask)
 
  call wfk_hdr%free()
  call gwr%print_mem(unit=std_out)
-
- call cwtime_report(" gwr_read_ugb_from_wfk:", cpu, wall, gflops)
- call timab(1921, 2, tsec)
 
 end subroutine gwr_read_ugb_from_wfk
 !!***
@@ -2122,7 +2118,8 @@ end subroutine gwr_read_ugb_from_wfk
 !!  gwr_build_green
 !!
 !! FUNCTION
-!!  Build Green's function in imaginary time from gwr%ugb stored in memory.
+!!  Build Green's function in imaginary time from the gwr%ugb matrices stored in memory.
+!!  Store only k-points in the IBZ treated by this proc.
 !!
 !! INPUTS
 !!  free_ugb: True if gwr%ugb wavefunctions should be deallocated.
@@ -2177,7 +2174,7 @@ subroutine gwr_build_green(gwr, free_ugb)
 
  do my_is=1,gwr%my_nspins
    spin = gwr%my_spins(my_is)
-   do my_iki=1,gwr%my_nkibz
+   do my_iki=1,gwr%my_nkibz ! my IBZ
      call cwtime(cpu_green, wall_green, gflops_green, "start")
      ik_ibz = gwr%my_kibz_inds(my_iki)
      associate (ugb => gwr%ugb(ik_ibz, spin), desc_k => gwr%green_desc_kibz(ik_ibz))
@@ -2213,7 +2210,7 @@ subroutine gwr_build_green(gwr, free_ugb)
 
          ! Build G(g,g',ipm)
          isgn = merge(1, -1, ipm == 2)
-         call slk_pzgemm("N", "C", work, isgn * cone, work, czero, green)
+         call slk_pzgemm("N", "C", work, isgn * cone, work, czero, green) ! TODO ija=, ijb=
 
          ! Here we redistribute the data between two different communicators: gtau_comm -> g_comm.
          call gwr%gt_kibz(ipm, ik_ibz, itau, spin)%take_from(green)
@@ -2224,7 +2221,7 @@ subroutine gwr_build_green(gwr, free_ugb)
      call green%free()
      if (free_ugb) call ugb%free()
 
-     write(msg,'(3(a,i0),a)')" G_k [", my_iki, "/", gwr%my_nkibz, "] (tot: ", gwr%nkibz, ")"
+     write(msg,'(4x, 3(a,i0),a)')" G_ikbz [", my_iki, "/", gwr%my_nkibz, "] (tot: ", gwr%nkibz, ")"
      call cwtime_report(msg, cpu_green, wall_green, gflops_green)
      end associate
    end do ! my_iki
@@ -2366,9 +2363,6 @@ subroutine gwr_rotate_gpm(gwr, ik_bz, itau, spin, desc_kbz, gt_pm)
        if (trev_k == 1) gk_f%buffer_cplx(il_g1, il_g2) = conjg(gk_f%buffer_cplx(il_g1, il_g2))
      end do
    end do
-   !TODO
-   !if (trev_k == 1) then ! TR
-   !call gkf%ptrans_ip("C", -cone)
    end associate
  end do
  end associate
@@ -2492,7 +2486,7 @@ end subroutine gwr_get_myk_green_gpr
 !!  gwr_get_gk_rpr_pm
 !!
 !! FUNCTION
-!!  Compute G_k(r',r) from G_k(g,g') for k in the BZ and given spin and tau.
+!!  Compute G_k(r',r) from G_k(g,g') for my k in the BZ and given spin and tau.
 !!  Note that output matrix is transposed i.e. (r',r) instead of (r,r').
 !!
 !! INPUTS
@@ -7073,8 +7067,7 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
      ! Find the symmetrical image of ksum in the IBZ
      !call kmesh%get_BZ_item(ik_bz, ksum, ik_ibz, isym_ki, iik, ph_mkt)
 
-     ! FIXME: Be careful with the symmetry conventions here!
-     ! and the interplay between umklapp in q and FFT
+     ! FIXME: Be careful with the symmetry conventions here and the interplay between umklapp in q and FFT
      ik_ibz = gwr%kbz2ibz_symrel(1, ik_bz); isym_k = gwr%kbz2ibz_symrel(2, ik_bz)
      trev_k = gwr%kbz2ibz_symrel(6, ik_bz); g0_k = gwr%kbz2ibz_symrel(3:5, ik_bz)
      isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
@@ -7348,18 +7341,17 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
  if (gwr%spin_comm%nproc > 1) call xmpi_sum(gwr%x_mat, gwr%spin_comm%value, ierr)
 
  ABI_FREE(work)
-
  call sigijtab_free(Sigxij_tab)
  ABI_FREE(Sigxij_tab)
-
- call cwtime_report(" gwr_build_sigxme:", cpu_all, wall_all, gflops_all)
- call timab(1920, 2, tsec)
 
  ! Compute QP results. Done usually when gwr_task == G0v i.e. Hartree-Fock with KS states.
  compute_qp__ = .False.; if (present(compute_qp)) compute_qp__ = compute_qp
  if (compute_qp__ .and. gwr%comm%me == 0) then
    call write_notations([std_out, ab_out])
  end if
+
+ call cwtime_report(" gwr_build_sigxme:", cpu_all, wall_all, gflops_all)
+ call timab(1920, 2, tsec)
 
 end subroutine gwr_build_sigxme
 !!***

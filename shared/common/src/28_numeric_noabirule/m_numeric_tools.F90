@@ -4244,7 +4244,7 @@ end function l2norm_rdp
 !!
 !! FUNCTION
 !!  Given an initial set of elements, set_in, return the subset of inequivalent items
-!!  packed in the firt n_out positions of set_in. Use the logical function is_equal
+!!  packed in the first n_out positions of set_in. Use the logical function is_equal
 !!  to define whether two items are equivalent.
 !!
 !! INPUTS
@@ -4265,13 +4265,12 @@ end function l2norm_rdp
 !!
 !! SOURCE
 
-subroutine remove_copies(n_in,set_in,n_out,is_equal)
+subroutine remove_copies(n_in, set_in, n_out, is_equal)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: n_in
  integer,intent(out) :: n_out
-
 !arrays
  real(dp),target,intent(inout) :: set_in(3,n_in)
 
