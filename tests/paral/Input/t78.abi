@@ -42,7 +42,7 @@ prtsuscep3 1         # Write TCHI file.
 getden3 1
 getwfk3 2
 gwr_ntau3   6         # Number of imaginary-time points
-gwr_np_gtks 2 1 2 1   # G and tau parallelism
+gwr_np_kgts 1 2 2 1   # G and tau parallelism
 
 gwr_boxcutmin3  1.0  # This should be subject to convergence studies
 #mixprec3    1

@@ -1171,11 +1171,11 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  dprarr(1,:) = dtsets(:)%gwr_boxcutmin
  call prttagm(dprarr, intarr, iout, jdtset_, 1, marr, narr, narrm, ncid, ndtset_alloc, 'gwr_boxcutmin', 'DPR', 0)
 
- narr = size(dtsets(0)%gwr_np_gtks)
+ narr = size(dtsets(0)%gwr_np_kgts)
  do idtset=0,ndtset_alloc
-   intarr(1:narr,idtset) = dtsets(idtset)%gwr_np_gtks
+   intarr(1:narr,idtset) = dtsets(idtset)%gwr_np_kgts
  end do
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,narrm,ncid,ndtset_alloc,'gwr_np_gtks','INT',0, firstchar="-")
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,narrm,ncid,ndtset_alloc,'gwr_np_kgts','INT',0, firstchar="-")
 
  intarr(1,:) = dtsets(:)%gwr_ntau
  call prttagm(dprarr, intarr, iout, jdtset_, 2, marr, 1, narrm, ncid, ndtset_alloc, 'gwr_ntau', 'INT', 0)

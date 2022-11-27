@@ -562,7 +562,7 @@ nqibz: 3
 green_mpw: 113
 tchi_mpw: 113
 g_ngfft: [8, 8, 8, 8, 8, 8, ]
-P gwr_np_gtks: [1, 1, 1, 1, ]
+P gwr_np_kgts: [1, 1, 1, 1, ]
 P np_kibz: [1, 1, 1, ]
 P np_qibz: [1, 1, 1, ]
 ft_max_err_t2w_cos:   1.69754129E-02
@@ -848,7 +848,7 @@ nqibz: 3
 green_mpw: 113
 tchi_mpw: 113
 g_ngfft: [8, 8, 8, 8, 8, 8, ]
-P gwr_np_gtks: [1, 1, 1, 1, ]
+P gwr_np_kgts: [1, 1, 1, 1, ]
 P np_kibz: [1, 1, 1, ]
 P np_qibz: [1, 1, 1, ]
 ft_max_err_t2w_cos:   1.69754129E-02

@@ -281,6 +281,7 @@ END TYPE my_matrix
    real(dp) :: chi_rg = zero
    real(dp) :: ugb = zero
    real(dp) :: total = zero
+   real(dp) :: efficiency = zero
 
    !type(my_matrix(k=dp)),allocatable :: foo(:)
    !type(my_matrix),allocatable :: foo(:)
@@ -518,13 +519,13 @@ END TYPE my_matrix
    type(xcomm_t) :: gtau_comm
    ! MPI communicator for g/tau 2D subgrid.
 
-   type(xcomm_t) :: gk_comm
-   ! MPI communicator for g/k 2D subgrid.
+   type(xcomm_t) :: kg_comm
+   ! MPI communicator for g/g 2D subgrid.
 
-   type(xcomm_t) :: tks_comm
+   type(xcomm_t) :: kts_comm
    ! MPI communicator for tau/kpoint/spin 3D grid
 
-   type(xcomm_t) :: gtk_comm
+   type(xcomm_t) :: kgt_comm
    ! MPI communicator for g/tau/kpoint 3D grid
 
    type(dataset_type), pointer :: dtset => null()
@@ -809,16 +810,17 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  integer :: comm_cart, me_cart, ierr, all_nproc, np_work, my_rank, qprange_, gap_err, ncerr, omp_nt
  integer :: cnt, ikcalc, ndeg, mband, bstop, nbsum !, it, iw ! jj,
  integer :: ik_ibz, ik_bz, isym_k, trev_k, g0_k(3)
- integer :: np_g, np_k, np_t, np_s !, np_tot
+ integer :: ip_g, ip_k, ip_t, ip_s, np_g, np_k, np_t, np_s
  real(dp) :: cpu, wall, gflops, te_min, te_max, wmax, vc_ecut, delta, abs_rerr, exact_int, eval_int
+ real(dp) :: mem_per_cpu_mb, efficiency
  !real(dp) :: mem_green_gg, mem_green_rg, mem_chi_gg, mem_chi_rg, mem_ugb
  logical :: isirr_k, changed, q_is_gamma, reorder
  character(len=5000) :: msg
  type(krank_t) :: qrank, krank_ibz
  type(gaps_t) :: ks_gaps
- !type(mem_t) :: tot_mem
+ type(mem_t) :: tot_mem, proc_mem
 !arrays
- integer :: qptrlatt(3,3), dims(ndims), indkk_k(6,1)
+ integer :: qptrlatt(3,3), dims_kgts(ndims), try_dims_kgts(ndims), indkk_k(6,1)
  integer,allocatable :: gvec_(:,:),degblock(:,:), degblock_all(:,:,:,:), ndeg_all(:,:), iwork(:,:), got(:)
  real(dp) :: my_shiftq(3,1), kk_ibz(3), kk_bz(3), qq_bz(3), qq_ibz(3), kk(3), tsec(2)
  real(dp),allocatable :: wtk(:), kibz(:,:)
@@ -1219,16 +1221,12 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  gwr%sc_batch_size = max(1, gwr%dtset%userie * omp_nt)
  !gwr%uc_batch_size = 4; gwr%sc_batch_size = 4
 
- ! Now we can estimate the total memory in Mb.
- !call gwr%estimate_mem("total", [1,1,1,1], tot_mem)
- !call tot_mem%print([ab_out, std_out], "Total memory in Mb")
-
-
  if (my_rank == master) then
    call print_ngfft(gwr%g_ngfft, header="FFT mesh for Green's function", unit=std_out)
    call print_ngfft(gwr%g_ngfft, header="FFT mesh for Green's function", unit=ab_out)
 
-   ! Print estimate for total memory.
+   ! Now we can estimate the total memory in Mb.
+   !call estimate_mem(gwr, [1,1,1,1], tot_mem, units=[std_out, ab_out], header="Total memory required in Mb")
 
    call wrtout(std_out, sjoin(" FFT uc_batch_size:", itoa(gwr%uc_batch_size)))
    call wrtout(std_out, sjoin(" FFT sc_batch_size:", itoa(gwr%sc_batch_size)))
@@ -1237,20 +1235,21 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  ! ========================
  ! === MPI DISTRIBUTION ===
  ! ========================
- ! Here we define:
- !  - np_g, np_t, np_k, np_s
+ ! Here we define the following quantities:
+ !
+ !  - np_k, np_g, np_t, np_s
  !  - gwr%comm and gwr%idle_proc
  !
  ! NB: Do not use input_comm after this section as idle processors return immediately.
 
- if (any(dtset%gwr_np_gtks /= 0)) then
+ if (any(dtset%gwr_np_kgts /= 0)) then
    ! Use MPI parameters from input file.
-   np_g = dtset%gwr_np_gtks(1)
-   np_t = dtset%gwr_np_gtks(2)
-   np_k = dtset%gwr_np_gtks(3)
-   np_s = dtset%gwr_np_gtks(4)
+   np_k = dtset%gwr_np_kgts(1)
+   np_g = dtset%gwr_np_kgts(2)
+   np_t = dtset%gwr_np_kgts(3)
+   np_s = dtset%gwr_np_kgts(4)
 
-   !call xmpi_comm_multiple_of(product(dtset%gwr_np_gtks), input_comm, gwr%idle_proc, gwr%comm)
+   !call xmpi_comm_multiple_of(product(dtset%gwr_np_kgts), input_comm, gwr%idle_proc, gwr%comm)
    !if (gwr%idle_proc) return
    gwr%comm = xcomm_from_mpi_int(input_comm)
    all_nproc = gwr%comm%nproc
@@ -1271,8 +1270,39 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
    !if (gwr%idle_proc) return
    !all_nproc = xmpi_comm_size(gwr%comm)
 
-   !call find_np_gtks(try_np_gtks)
+   mem_per_cpu_mb = two * 1024**2
 
+#if 1
+   ! Start a from configuration that minimizes memory i.e all procs in g-parallelism.
+   ! and check whether it's possible to move some procs to the other levels
+   ! without spoiling parallel efficiency and/or increasing memory per MPI proc.
+   dims_kgts = [1, all_nproc, 1, 1]
+   call estimate_mem(gwr, dims_kgts, proc_mem)
+   efficiency = proc_mem%efficiency
+
+   do ip_s=1,gwr%nsppol
+     do ip_t=1,gwr%ntau
+       if (mod(gwr%ntau, ip_t) /= 0) cycle ! ip_t should divide gwr%ntau.
+       do ip_k=1,gwr%nkbz
+         if (mod(gwr%nkbz, ip_k) /= 0) cycle ! ip_k is should divide gwr%nkbz.
+         do ip_g=1,gwr%green_mpw
+           try_dims_kgts = [ip_k, ip_g, ip_t, ip_s]
+           if (product(try_dims_kgts) /= all_nproc) cycle
+           call estimate_mem(gwr, try_dims_kgts, proc_mem)
+           if (proc_mem%total <= mem_per_cpu_mb * 0.8_dp .and. proc_mem%efficiency >= efficiency) then
+             efficiency = proc_mem%efficiency; dims_kgts = try_dims_kgts
+           end if
+         end do
+       end do
+     end do
+   end do
+
+   np_k = dims_kgts(1)
+   np_g = dims_kgts(2)
+   np_t = dims_kgts(3)
+   np_s = dims_kgts(4)
+
+#else
    ! Determine number of processors for the spin axis. if all_nproc is odd, spin is not distributed when nsppol == 2
    np_s = 1
    if (gwr%nsppol == 2 .and. all_nproc > 1) then
@@ -1291,15 +1321,14 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
 
    if (ii == 1 .and. np_work > 1) then
      ! No divisor found.
-
      if (gwr%nkbz > 1) then
        ! Give priority to tau/kbz
        call xmpi_distrib_2d(np_work, "12", gwr%ntau, gwr%nkbz, np_t, np_k, ierr)
-       ABI_CHECK(ierr == 0, sjoin("Cannot distribute nprocs:", itoa(np_work), " with priority: tau/kbz"))
+       ABI_CHECK(ierr == 0, sjoin("Cannot distribute nprocs:", itoa(np_work), "with priority: tau/kbz"))
      else
        ! Give priority to tau/g
        call xmpi_distrib_2d(np_work, "12", gwr%ntau, gwr%green_mpw, np_t, np_k, ierr)
-       ABI_CHECK(ierr == 0, sjoin("Cannot distribute nprocs:", itoa(np_work), " with priority: tau/g"))
+       ABI_CHECK(ierr == 0, sjoin("Cannot distribute nprocs:", itoa(np_work), "with priority: tau/g"))
      end if
 
    else
@@ -1315,7 +1344,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
        end do
        if (ii == 1 .and. np_work > 1) then
          call xmpi_distrib_2d(np_work, "12", gwr%nkbz, gwr%green_mpw, np_k, np_k, ierr)
-         ABI_CHECK(ierr == 0, sjoin("Cannot distribute nprocs:", itoa(np_work), " with priority: k/g"))
+         ABI_CHECK(ierr == 0, sjoin("Cannot distribute nprocs:", itoa(np_work), "with priority: k/g"))
        else
          ! In this case, ii divides both nkbz and np_work.
          np_k = ii; np_g = np_work / ii
@@ -1323,17 +1352,19 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
      end if
 
    end if
+#endif
+
  end if
 
  ! ================================
  ! Build MPI grid and communicators
  ! ================================
- dims = [np_g, np_t, np_k, np_s]
- gwr%dtset%gwr_np_gtks = dims
- periods(:) = .False.; reorder = .False.
+ dims_kgts = [np_k, np_g, np_t, np_s]
+ gwr%dtset%gwr_np_kgts = dims_kgts
+ periods(:) = .False.; reorder = .True.
 
  ! Consistency check.
- if (product(dims) /= all_nproc) then
+ if (product(dims_kgts) /= all_nproc) then
    write(msg, "(a,i0,3a, 5(a,1x,i0))") &
      "Cannot create 4D Cartesian grid with total nproc: ", all_nproc, ch10, &
      "Idle MPI processes are not supported. The product of the `nproc_*` vars should be equal to nproc.", ch10, &
@@ -1341,32 +1372,33 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
    ABI_ERROR(msg)
  end if
 
- !call gwr%estimate_mem("proc", proc_mem)
- !call proct_mem%print([ab_out, std_out], "Total memory in Mb")
+ !if (my_rank == master) then
+ !  call estimate_mem(gwr, dims_kgts, proc_mem, units=[std_out, ab_out], header="Estimated memory per MPI proc in Mb")
+ !end if
 
 #ifdef HAVE_MPI
- call MPI_CART_CREATE(gwr%comm%value, ndims, dims, periods, reorder, comm_cart, ierr)
+ call MPI_CART_CREATE(gwr%comm%value, ndims, dims_kgts, periods, reorder, comm_cart, ierr)
 
  ! Find the index and coordinates of the current processor
  call MPI_COMM_RANK(comm_cart, me_cart, ierr)
  call MPI_CART_COORDS(comm_cart, me_cart, ndims, gwr%coords_gtks, ierr)
 
- ! Create communicator for g-vectors
- keepdim = .False.; keepdim(1) = .True.; call gwr%g_comm%from_cart_sub(comm_cart, keepdim)
- ! Create communicator for tau
- keepdim = .False.; keepdim(2) = .True.; call gwr%tau_comm%from_cart_sub(comm_cart, keepdim)
- ! Create communicator for k-points
- keepdim = .False.; keepdim(3) = .True.; call gwr%kpt_comm%from_cart_sub(comm_cart, keepdim)
- ! Create communicator for spin
+ ! k-point communicator
+ keepdim = .False.; keepdim(1) = .True.; call gwr%kpt_comm%from_cart_sub(comm_cart, keepdim)
+ ! g-communicator
+ keepdim = .False.; keepdim(2) = .True.; call gwr%g_comm%from_cart_sub(comm_cart, keepdim)
+ ! tau-communicator
+ keepdim = .False.; keepdim(3) = .True.; call gwr%tau_comm%from_cart_sub(comm_cart, keepdim)
+ ! spin-communicator
  keepdim = .False.; keepdim(4) = .True.; call gwr%spin_comm%from_cart_sub(comm_cart, keepdim)
- ! Create communicator for the (g, tau) 2D grid.
- keepdim = .False.; keepdim(1) = .True.; keepdim(2) = .True.; call gwr%gtau_comm%from_cart_sub(comm_cart, keepdim)
- ! Create communicator for the (g, tau) 2D grid.
- keepdim = .False.; keepdim(1) = .True.; keepdim(3) = .True.; call gwr%gk_comm%from_cart_sub(comm_cart, keepdim)
- ! Create communicator for the (g, tau, k) 3D subgrid.
- keepdim = .True.; keepdim(4) = .False.; call gwr%gtk_comm%from_cart_sub(comm_cart, keepdim)
- ! Create communicator for the (tau, k, spin) 3D subgrid.
- keepdim = .True.; keepdim(1) = .False.; call gwr%tks_comm%from_cart_sub(comm_cart, keepdim)
+ ! Communicator for the (X, g, tau, X) 2D grid.
+ keepdim = .False.; keepdim(2) = .True.; keepdim(3) = .True.; call gwr%gtau_comm%from_cart_sub(comm_cart, keepdim)
+ ! Communicator for the (k, g, X, X) 2D grid.
+ keepdim = .False.; keepdim(1) = .True.; keepdim(2) = .True.; call gwr%kg_comm%from_cart_sub(comm_cart, keepdim)
+ ! Communicator for the (k, g, tau, X) 3D subgrid.
+ keepdim = .True.; keepdim(4) = .False.; call gwr%kgt_comm%from_cart_sub(comm_cart, keepdim)
+ ! Communicator for the (k, X, tau, spin) 3D subgrid.
+ keepdim = .True.; keepdim(2) = .False.; call gwr%kts_comm%from_cart_sub(comm_cart, keepdim)
  call xmpi_comm_free(comm_cart)
 #endif
 
@@ -1460,6 +1492,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
    iwork(gwr%kpt_comm%me + 1, iq_ibz) = 1
  end do
  call xmpi_sum(iwork, gwr%kpt_comm%value, ierr)
+
  ABI_MALLOC(gwr%itreat_iqibz, (gwr%nqibz))
  gwr%itreat_iqibz = .False.
  do iq_ibz=1,gwr%nqibz
@@ -1603,32 +1636,39 @@ end subroutine gwr_init
 
 !----------------------------------------------------------------------
 
-!!****f* m_gwr/gwr_estimate_mem
+!!****f* m_gwr/estimate_mem
 !! NAME
-!! gwr_estimate_mem
+!! estimate_mem
 !!
 !! FUNCTION
 !!
 !! SOURCE
 
-subroutine gwr_estimate_mem(gwr, np_gtks, mem)
+subroutine estimate_mem(gwr, np_kgts, mem, units, header)
 
 !Arguments ------------------------------------
  class(gwr_t), intent(in) :: gwr
- integer,intent(in) :: np_gtks(4)
+ integer,intent(in) :: np_kgts(4)
  type(mem_t),intent(out) :: mem
+ integer,optional,intent(in) :: units(:)
+ character(len=*),optional,intent(in) :: header
 
 !Local variables-------------------------------
- integer :: np_tot
+ real(dp) :: np_k, np_g, np_t, np_s, np_tot
+ character(len=5000) :: header__
+ type(yamldoc_t) :: ydoc
 
 ! *************************************************************************
 
- associate (np_g => np_gtks(1), np_t => np_gtks(2), np_k => np_gtks(3), np_s => np_gtks(4))
- np_tot = product(np_gtks)
+ np_k = np_kgts(1) ! Use real quantities to avoid int division
+ np_g = np_kgts(2)
+ np_t = np_kgts(3)
+ np_s = np_kgts(4)
+ np_tot = product(real(np_kgts))
 
  ! NB: arrays dimensions with nkibz and nqibz do not scale as 1/np_k as we distribute the full BZ.
 
- ! Resident memory for G(g,g',+/-tau) and chi(g,g',tau)
+ ! Resident memory needed to store G(g,g',+/-tau) and chi(g,g',tau)
  mem%green_gg = two * two * (one*gwr%nspinor*gwr%green_mpw)**2 * two*gwr%ntau * gwr%nkibz * gwr%nsppol * dp*b2Mb / np_tot
  mem%chi_gg = two * (one*gwr%tchi_mpw)**2 * gwr%ntau * gwr%nqibz * dp*b2Mb / (np_g * np_t * np_k)
  mem%ugb = two * gwr%green_mpw * gwr%nspinor * gwr%dtset%nband(1) * gwr%nkibz * gwr%nsppol * dp*b2Mb / np_tot
@@ -1639,9 +1679,19 @@ subroutine gwr_estimate_mem(gwr, np_gtks, mem)
  mem%chi_rg = two * gwr%tchi_mpw * gwr%g_nfft * gwr%nqbz * dp*b2Mb / (np_g * np_k)
 
  mem%total = mem%green_gg + mem%chi_gg + mem%ugb + mem%green_rg + mem%chi_rg
- end associate
 
-end subroutine gwr_estimate_mem
+ ! Estimate parallel efficiency
+ mem%efficiency = (gwr%nkbz / np_k) * (gwr%nspinor * gwr%green_mpw / np_g) * (gwr%ntau / np_t) * (gwr%nsppol / np_s)
+ mem%efficiency = (one / mem%efficiency) / np_tot
+
+ if (present(units)) then
+   header__ = "unknown"; if (present(header)) header__ = header
+   ydoc = yamldoc_open(header__) !, width=11, real_fmt='(3f8.3)')
+   call ydoc%add_real('total_memory_mb', mem%total)
+   call ydoc%write_units_and_free(units)
+ end if
+
+end subroutine estimate_mem
 !!***
 
 !----------------------------------------------------------------------
@@ -1853,9 +1903,9 @@ subroutine gwr_free(gwr)
  call gwr%tau_comm%free()
  call gwr%kpt_comm%free()
  call gwr%gtau_comm%free()
- call gwr%gk_comm%free()
- call gwr%gtk_comm%free()
- call gwr%tks_comm%free()
+ call gwr%kg_comm%free()
+ call gwr%kgt_comm%free()
+ call gwr%kts_comm%free()
  call gwr%comm%free()
 
 end subroutine gwr_free
@@ -3569,7 +3619,7 @@ subroutine gwr_print(gwr, header, unit)
  call ydoc%add_int("green_mpw", gwr%green_mpw)
  call ydoc%add_int("tchi_mpw", gwr%tchi_mpw)
  call ydoc%add_int1d("g_ngfft", gwr%g_ngfft(1:6))
- call ydoc%add_int1d("P gwr_np_gtks", gwr%dtset%gwr_np_gtks)
+ call ydoc%add_int1d("P gwr_np_kgts", gwr%dtset%gwr_np_kgts)
  call ydoc%add_int1d("P np_kibz", gwr%np_kibz)
  call ydoc%add_int1d("P np_qibz", gwr%np_qibz)
  ! Print Max error due to inhomogeneous FT.
@@ -3742,7 +3792,7 @@ subroutine gwr_build_tchi(gwr)
    !call init_distribfft_seq(tchi_mpi_enreg%distribfft, 'f', sc_ngfft(2), sc_ngfft(3), 'all')
 
    call wrtout(std_out, " Building chi0 with FFTs in the supercell:", pre_newlines=2)
-   call wrtout(std_out, sjoin(" gwr_np_gtks:", ltoa(gwr%dtset%gwr_np_gtks)))
+   call wrtout(std_out, sjoin(" gwr_np_kgts:", ltoa(gwr%dtset%gwr_np_kgts)))
    call wrtout(std_out, sjoin(" ngkpt:", ltoa(gwr%ngkpt), " ngqpt:", ltoa(gwr%ngqpt)))
    call wrtout(std_out, sjoin(" gwr_boxcutmin:", ftoa(gwr%dtset%gwr_boxcutmin)))
    call wrtout(std_out, sjoin(" sc_ngfft:", ltoa(sc_ngfft(1:8))))
@@ -4359,7 +4409,7 @@ subroutine gwr_print_trace(gwr, what)
      end do
    end do
 
-   call xmpi_sum_master(ctrace3, 0, gwr%tks_comm%value, ierr)
+   call xmpi_sum_master(ctrace3, 0, gwr%kts_comm%value, ierr)
 
    if (gwr%comm%me == master) then
      do spin=1,gwr%nsppol
@@ -4389,7 +4439,7 @@ subroutine gwr_print_trace(gwr, what)
    end do
    comment = " (ik_ibz, itau) table"
 
-   call xmpi_sum_master(ctrace4, master, gwr%tks_comm%value, ierr)
+   call xmpi_sum_master(ctrace4, master, gwr%kts_comm%value, ierr)
 
    if (gwr%comm%me == master) then
      do spin=1,gwr%nsppol
@@ -4583,8 +4633,8 @@ subroutine gwr_build_wc(gwr)
 
  !call slkproc_4diag%free()
 
- call xmpi_sum_master(em1_wq, master, gwr%gtk_comm%value, ierr)
- call xmpi_sum_master(eps_wq, master, gwr%gtk_comm%value, ierr)
+ call xmpi_sum_master(em1_wq, master, gwr%kgt_comm%value, ierr)
+ call xmpi_sum_master(eps_wq, master, gwr%kgt_comm%value, ierr)
 
  if (gwr%comm%me == master) then
    ydoc = yamldoc_open('EMACRO_WITHOUT_LOCAL_FIELDS') !, width=11, real_fmt='(3f8.3)')
@@ -4719,7 +4769,7 @@ subroutine gwr_build_sigmac(gwr)
  !sc_augsize = product(sc_ngfft(4:6))
 
  call wrtout(std_out, sjoin(" Building Sigma_c with FFTs in the supercell:", ltoa(sc_ngfft(1:3))), pre_newlines=2)
- call wrtout(std_out, sjoin(" gwr_np_gtks:", ltoa(gwr%dtset%gwr_np_gtks)))
+ call wrtout(std_out, sjoin(" gwr_np_kgts:", ltoa(gwr%dtset%gwr_np_kgts)))
  call wrtout(std_out, sjoin(" ngkpt:", ltoa(gwr%ngkpt), " ngqpt:", ltoa(gwr%ngqpt)))
  call wrtout(std_out, sjoin(" gwr_boxcutmin:", ftoa(gwr%dtset%gwr_boxcutmin)))
  call wrtout(std_out, sjoin(" sc_ngfft:", ltoa(sc_ngfft(1:8))))
@@ -7138,7 +7188,7 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
    end if
 
    ! Collect and rescale
-   call xmpi_sum(ur_bdgw, gwr%gtk_comm%value, ierr)
+   call xmpi_sum(ur_bdgw, gwr%kgt_comm%value, ierr)
    ur_bdgw = ur_bdgw / gwr%np_kibz(ikcalc_ibz)
 
    ABI_MALLOC(ur_prod, (u_nfft * nspinor))
@@ -7380,9 +7430,9 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
    end do ! my_ikf Got all diagonal (off-diagonal) matrix elements.
 
    ! Gather contributions from all the CPUs.
-   call xmpi_sum(sigxme_tmp, gwr%gtk_comm%value, ierr)
-   call xmpi_sum(sigxcme_tmp, gwr%gtk_comm%value, ierr)
-   call xmpi_sum(sigx, gwr%gtk_comm%value, ierr)
+   call xmpi_sum(sigxme_tmp, gwr%kgt_comm%value, ierr)
+   call xmpi_sum(sigxcme_tmp, gwr%kgt_comm%value, ierr)
+   call xmpi_sum(sigx, gwr%kgt_comm%value, ierr)
 
    ! Multiply by constants. For 3D systems sqrt(4pi) is included in vc_sqrt_qbz.
    sigxme_tmp  = (one / (cryst%ucvol * gwr%nkbz)) * sigxme_tmp  ! * Sigp%sigma_mixing
