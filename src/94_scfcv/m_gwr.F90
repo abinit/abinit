@@ -256,6 +256,42 @@ module m_gwr
  end interface desc_array_free
 !!***
 
+
+! See also https://fortran-lang.discourse.group/t/a-gfortran-issue-with-parameterized-derived-types/213/17
+TYPE my_matrix (k)
+  INTEGER, KIND :: k = dp
+  REAL (k),allocatable :: buffer(:,:)
+END TYPE my_matrix
+
+!----------------------------------------------------------------------
+
+!!****t* m_gwr/mem_t
+!! NAME
+!! mem_t
+!!
+!! FUNCTION
+!!
+!! SOURCE
+
+ type, public :: mem_t
+
+   real(dp) :: green_gg = zero
+   real(dp) :: green_rg = zero
+   real(dp) :: chi_gg = zero
+   real(dp) :: chi_rg = zero
+   real(dp) :: ugb = zero
+   real(dp) :: total = zero
+
+   !type(my_matrix(k=dp)),allocatable :: foo(:)
+   !type(my_matrix),allocatable :: foo(:)
+
+ !contains
+   !procedure :: print => mem_print
+   ! Init object
+
+ end type mem_t
+!!***
+
 !----------------------------------------------------------------------
 
 !!****t* m_gwr/gwr_t
@@ -770,21 +806,23 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  integer,parameter :: qptopt1 = 1, qtimrev1 = 1, master = 0, ndims = 4
  integer :: my_it, my_ikf, my_iqf, ii, ebands_timrev, my_iki, my_iqi, itau, spin
  integer :: my_nshiftq, iq_bz, iq_ibz, npw_, ncid !, ig
- integer :: comm_cart, me_cart, ierr, all_nproc, nps, my_rank, qprange_, gap_err, ncerr, omp_nt
+ integer :: comm_cart, me_cart, ierr, all_nproc, np_work, my_rank, qprange_, gap_err, ncerr, omp_nt
  integer :: cnt, ikcalc, ndeg, mband, bstop, nbsum !, it, iw ! jj,
  integer :: ik_ibz, ik_bz, isym_k, trev_k, g0_k(3)
+ integer :: np_g, np_k, np_t, np_s !, np_tot
  real(dp) :: cpu, wall, gflops, te_min, te_max, wmax, vc_ecut, delta, abs_rerr, exact_int, eval_int
+ !real(dp) :: mem_green_gg, mem_green_rg, mem_chi_gg, mem_chi_rg, mem_ugb
  logical :: isirr_k, changed, q_is_gamma, reorder
  character(len=5000) :: msg
  type(krank_t) :: qrank, krank_ibz
  type(gaps_t) :: ks_gaps
+ !type(mem_t) :: tot_mem
 !arrays
  integer :: qptrlatt(3,3), dims(ndims), indkk_k(6,1)
  integer,allocatable :: gvec_(:,:),degblock(:,:), degblock_all(:,:,:,:), ndeg_all(:,:), iwork(:,:), got(:)
  real(dp) :: my_shiftq(3,1), kk_ibz(3), kk_bz(3), qq_bz(3), qq_ibz(3), kk(3), tsec(2)
  real(dp),allocatable :: wtk(:), kibz(:,:)
  logical :: periods(ndims), keepdim(ndims)
- !real(dp), pointer :: test(:)
 
 ! *************************************************************************
 
@@ -1138,102 +1176,173 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
 
  call ks_gaps%free()
 
+ ! =========================================
+ ! Find FFT mesh and max number of g-vectors
+ ! =========================================
+ ! Note the usage of gwr_boxcutmin and the loops over the full BZ.
+ ! All the procs execute this part.
+
+ gwr%g_ngfft = gwr%dtset%ngfft ! Allow user to specify fftalg
+ gwr%g_ngfft(1:6) = 0
+
+ gwr%green_mpw = -1
+ do ik_bz=1,gwr%nkbz
+   kk_bz = gwr%kbz(:, ik_bz)
+   call get_kg(kk_bz, istwfk1, dtset%ecut, gwr%cryst%gmet, npw_, gvec_)
+   ABI_FREE(gvec_)
+   call getng(dtset%gwr_boxcutmin, dtset%chksymtnons, dtset%ecut, cryst%gmet, &
+              kk_bz, me_fft0, gwr%g_mgfft, gwr%g_nfft, gwr%g_ngfft, nproc_fft1, cryst%nsym, paral_fft0, &
+              cryst%symrel, cryst%tnons, unit=dev_null)
+   gwr%green_mpw = max(gwr%green_mpw, npw_)
+ end do
+
+ gwr%tchi_mpw = -1
+ do iq_bz=1,gwr%nqbz
+   qq_bz = gwr%qbz(:, iq_bz)
+   call get_kg(qq_bz, istwfk1, dtset%ecuteps, gwr%cryst%gmet, npw_, gvec_)
+   ABI_FREE(gvec_)
+   call getng(dtset%gwr_boxcutmin, dtset%chksymtnons, dtset%ecuteps, cryst%gmet, &
+              qq_bz, me_fft0, gwr%g_mgfft, gwr%g_nfft, gwr%g_ngfft, nproc_fft1, cryst%nsym, &
+              paral_fft0, cryst%symrel, cryst%tnons, unit=dev_null)
+   gwr%tchi_mpw = max(gwr%tchi_mpw, npw_)
+   if (iq_bz == 1) then
+     ABI_CHECK(all(abs(qq_bz) < tol16), "First qpoint in qbz should be Gamma!")
+   end if
+ end do
+
+ ! TODO: For the time being no augmentation
+ gwr%g_ngfft(4:6) = gwr%g_ngfft(1:3)
+
+ ! Define batch sizes for FFT transforms, use multiples of OpenMP threads.
+ omp_nt = xomp_get_num_threads(open_parallel=.True.)
+ gwr%uc_batch_size = max(1, gwr%dtset%userid * omp_nt)
+ gwr%sc_batch_size = max(1, gwr%dtset%userie * omp_nt)
+ !gwr%uc_batch_size = 4; gwr%sc_batch_size = 4
+
+ ! Now we can estimate the total memory in Mb.
+ !call gwr%estimate_mem("total", [1,1,1,1], tot_mem)
+ !call tot_mem%print([ab_out, std_out], "Total memory in Mb")
+
+
+ if (my_rank == master) then
+   call print_ngfft(gwr%g_ngfft, header="FFT mesh for Green's function", unit=std_out)
+   call print_ngfft(gwr%g_ngfft, header="FFT mesh for Green's function", unit=ab_out)
+
+   ! Print estimate for total memory.
+
+   call wrtout(std_out, sjoin(" FFT uc_batch_size:", itoa(gwr%uc_batch_size)))
+   call wrtout(std_out, sjoin(" FFT sc_batch_size:", itoa(gwr%sc_batch_size)))
+ end if
+
  ! ========================
  ! === MPI DISTRIBUTION ===
  ! ========================
- ! NB: Here we define gwr%comm and gwr%idle_proc
- ! Do not use input_comm after this section as idle processors return immediately.
+ ! Here we define:
+ !  - np_g, np_t, np_k, np_s
+ !  - gwr%comm and gwr%idle_proc
+ !
+ ! NB: Do not use input_comm after this section as idle processors return immediately.
 
  if (any(dtset%gwr_np_gtks /= 0)) then
    ! Use MPI parameters from input file.
-   gwr%g_comm%nproc    = dtset%gwr_np_gtks(1)
-   gwr%tau_comm%nproc  = dtset%gwr_np_gtks(2)
-   gwr%kpt_comm%nproc  = dtset%gwr_np_gtks(3)
-   gwr%spin_comm%nproc = dtset%gwr_np_gtks(4)
+   np_g = dtset%gwr_np_gtks(1)
+   np_t = dtset%gwr_np_gtks(2)
+   np_k = dtset%gwr_np_gtks(3)
+   np_s = dtset%gwr_np_gtks(4)
 
-   !call xmpi_comm_multiple_of(gwr%tau_comm%nproc * gwr%spin_comm%nproc, input_comm, gwr%idle_proc, gwr%comm)
+   !call xmpi_comm_multiple_of(product(dtset%gwr_np_gtks), input_comm, gwr%idle_proc, gwr%comm)
    !if (gwr%idle_proc) return
    gwr%comm = xcomm_from_mpi_int(input_comm)
    all_nproc = gwr%comm%nproc
+
  else
    ! Automatic grid generation.
    !
    !   Priorities        |  MPI Scalability                | Memory
    ! ==================================================================================================
    !   spin (if any)     |  excellent                      | scales
+   !   g/r (PBLAS)       |  network-intensive              ! scales
    !   tau               |  excellent                      | scales
-   !   kbz               |  to be optimized!               | scales (depends on the BZ -> IBZ mapping)
-   !   g/r (PBLAS)       |  network intensive              ! scales
-   !
+   !   kbz               |  newtwork-intensive             | scales (depends on the BZ -> IBZ mapping)
+
    gwr%comm = xcomm_from_mpi_int(input_comm)
    all_nproc = gwr%comm%nproc
    !call xmpi_comm_multiple_of(gwr%ntau * gwr%dtset%nsppol, input_comm, gwr%idle_proc, gwr%comm)
    !if (gwr%idle_proc) return
    !all_nproc = xmpi_comm_size(gwr%comm)
 
-   gwr%spin_comm%nproc = 1
-   !if (gwr%nsppol == 2 .and. all_nproc > 1) then
-   !  ABI_CHECK(mod(all_nproc, 2) == 0, "when nsppol == 2, nprocs should be even!")
-   !  gwr%spin_comm%nproc = 2
-   !end if
+   !call find_np_gtks(try_np_gtks)
 
-   nps = all_nproc / gwr%spin_comm%nproc
-   do ii=nps,1,-1
-     if (mod(gwr%ntau, ii) == 0 .and. mod(nps, ii) == 0) exit
+   ! Determine number of processors for the spin axis. if all_nproc is odd, spin is not distributed when nsppol == 2
+   np_s = 1
+   if (gwr%nsppol == 2 .and. all_nproc > 1) then
+     if (mod(all_nproc, 2) == 0) then
+       np_s = 2
+     else
+       ABI_WARNING("When nsppol == 2, it's reconmended to use an even number of MPI nprocs!")
+     end if
+   end if
+   np_work = all_nproc / np_s
+
+   ! Try to find divisor of ntau and np_work
+   do ii=np_work,1,-1
+     if (mod(gwr%ntau, ii) == 0 .and. mod(np_work, ii) == 0) exit
    end do
 
-   if (ii == 1 .and. nps > 1) then
+   if (ii == 1 .and. np_work > 1) then
+     ! No divisor found.
+
      if (gwr%nkbz > 1) then
        ! Give priority to tau/kbz
-       call xmpi_distrib_2d(nps, "12", gwr%ntau, gwr%nkbz, gwr%tau_comm%nproc, gwr%kpt_comm%nproc, ierr)
-       ABI_CHECK(ierr == 0, sjoin("Cannot distribute nprocs:", itoa(nps), " with priority: tau/kbz"))
+       call xmpi_distrib_2d(np_work, "12", gwr%ntau, gwr%nkbz, np_t, np_k, ierr)
+       ABI_CHECK(ierr == 0, sjoin("Cannot distribute nprocs:", itoa(np_work), " with priority: tau/kbz"))
      else
        ! Give priority to tau/g
-       call xmpi_distrib_2d(nps, "12", gwr%ntau, gwr%green_mpw, gwr%tau_comm%nproc, gwr%g_comm%nproc, ierr)
-       ABI_CHECK(ierr == 0, sjoin("Cannot distribute nprocs:", itoa(nps), " with priority: tau/g"))
+       call xmpi_distrib_2d(np_work, "12", gwr%ntau, gwr%green_mpw, np_t, np_k, ierr)
+       ABI_CHECK(ierr == 0, sjoin("Cannot distribute nprocs:", itoa(np_work), " with priority: tau/g"))
      end if
-   else
-     ! ii divides ntau and nps.
-     gwr%tau_comm%nproc = ii
-     nps = nps / gwr%tau_comm%nproc
 
-     gwr%kpt_comm%nproc = 1  ! Init values assuming Gamma-only sampling.
-     gwr%g_comm%nproc = nps
+   else
+     ! ii divides ntau and np_work.
+     np_t = ii; np_work = np_work / np_t
+
+     ! Init values assuming Gamma-only sampling.
+     np_k = 1; np_g = np_work
 
      if (gwr%nkbz > 1) then
-       do ii=nps,1,-1
-         if (mod(gwr%nkbz, ii) == 0 .and. mod(nps, ii) == 0) exit
+       do ii=np_work,1,-1
+         if (mod(gwr%nkbz, ii) == 0 .and. mod(np_work, ii) == 0) exit
        end do
-       if (ii == 1 .and. nps > 1) then
-         call xmpi_distrib_2d(nps, "12", gwr%nkbz, gwr%green_mpw, gwr%kpt_comm%nproc, gwr%g_comm%nproc, ierr)
-         ABI_CHECK(ierr == 0, sjoin("Cannot distribute nprocs:", itoa(nps), " with priority: k/g"))
+       if (ii == 1 .and. np_work > 1) then
+         call xmpi_distrib_2d(np_work, "12", gwr%nkbz, gwr%green_mpw, np_k, np_k, ierr)
+         ABI_CHECK(ierr == 0, sjoin("Cannot distribute nprocs:", itoa(np_work), " with priority: k/g"))
        else
-         ! In this case, ii divides nkbz and nps.
-         gwr%kpt_comm%nproc = ii
-         gwr%g_comm%nproc = nps / ii
+         ! In this case, ii divides both nkbz and np_work.
+         np_k = ii; np_g = np_work / ii
        end if
      end if
 
    end if
  end if
 
+ ! ================================
+ ! Build MPI grid and communicators
+ ! ================================
+ dims = [np_g, np_t, np_k, np_s]
+ gwr%dtset%gwr_np_gtks = dims
+ periods(:) = .False.; reorder = .False.
+
  ! Consistency check.
- if (gwr%g_comm%nproc * gwr%tau_comm%nproc * gwr%kpt_comm%nproc * gwr%spin_comm%nproc /= all_nproc) then
+ if (product(dims) /= all_nproc) then
    write(msg, "(a,i0,3a, 5(a,1x,i0))") &
-     "Cannot create 4d Cartesian grid with total nproc: ", all_nproc, ch10, &
-     "Idle processes are not supported. The product of the `nproc_*` vars should be equal to nproc.", ch10, &
-     "g_nproc (", gwr%g_comm%nproc, ") x tau_nproc (", gwr%tau_comm%nproc, ")  x kpt_nproc (", gwr%kpt_comm%nproc, &
-     ")  x spin_nproc (", gwr%spin_comm%nproc, ") != ", all_nproc
+     "Cannot create 4D Cartesian grid with total nproc: ", all_nproc, ch10, &
+     "Idle MPI processes are not supported. The product of the `nproc_*` vars should be equal to nproc.", ch10, &
+     "g_nproc (", np_g, ") x tau_nproc (", np_t, ") x kpt_nproc (", np_k,") x spin_nproc (", np_s, ") != ", all_nproc
    ABI_ERROR(msg)
  end if
 
- ! ==========================
- ! MPI grid and communicators
- ! ==========================
-
- dims = [gwr%g_comm%nproc, gwr%tau_comm%nproc, gwr%kpt_comm%nproc, gwr%spin_comm%nproc]
- gwr%dtset%gwr_np_gtks = dims
- periods(:) = .False.; reorder = .False.
+ !call gwr%estimate_mem("proc", proc_mem)
+ !call proct_mem%print([ab_out, std_out], "Total memory in Mb")
 
 #ifdef HAVE_MPI
  call MPI_CART_CREATE(gwr%comm%value, ndims, dims, periods, reorder, comm_cart, ierr)
@@ -1244,28 +1353,20 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
 
  ! Create communicator for g-vectors
  keepdim = .False.; keepdim(1) = .True.; call gwr%g_comm%from_cart_sub(comm_cart, keepdim)
-
  ! Create communicator for tau
  keepdim = .False.; keepdim(2) = .True.; call gwr%tau_comm%from_cart_sub(comm_cart, keepdim)
-
  ! Create communicator for k-points
  keepdim = .False.; keepdim(3) = .True.; call gwr%kpt_comm%from_cart_sub(comm_cart, keepdim)
-
  ! Create communicator for spin
  keepdim = .False.; keepdim(4) = .True.; call gwr%spin_comm%from_cart_sub(comm_cart, keepdim)
-
  ! Create communicator for the (g, tau) 2D grid.
  keepdim = .False.; keepdim(1) = .True.; keepdim(2) = .True.; call gwr%gtau_comm%from_cart_sub(comm_cart, keepdim)
-
  ! Create communicator for the (g, tau) 2D grid.
  keepdim = .False.; keepdim(1) = .True.; keepdim(3) = .True.; call gwr%gk_comm%from_cart_sub(comm_cart, keepdim)
-
  ! Create communicator for the (g, tau, k) 3D subgrid.
  keepdim = .True.; keepdim(4) = .False.; call gwr%gtk_comm%from_cart_sub(comm_cart, keepdim)
-
  ! Create communicator for the (tau, k, spin) 3D subgrid.
  keepdim = .True.; keepdim(1) = .False.; call gwr%tks_comm%from_cart_sub(comm_cart, keepdim)
-
  call xmpi_comm_free(comm_cart)
 #endif
 
@@ -1368,58 +1469,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  ABI_FREE(got)
  ABI_FREE(iwork)
 
- ! =========================================
- ! Find FFT mesh and max number of g-vectors
- ! =========================================
- ! Note the usage of gwr_boxcutmin and the loops over the full BZ.
- ! All the procs execute this part.
-
- gwr%g_ngfft = gwr%dtset%ngfft ! Allow user to specify fftalg
- gwr%g_ngfft(1:6) = 0
-
- gwr%green_mpw = -1
- do ik_bz=1,gwr%nkbz
-   kk_bz = gwr%kbz(:, ik_bz)
-   call get_kg(kk_bz, istwfk1, dtset%ecut, gwr%cryst%gmet, npw_, gvec_)
-   ABI_FREE(gvec_)
-   call getng(dtset%gwr_boxcutmin, dtset%chksymtnons, dtset%ecut, cryst%gmet, &
-              kk_bz, me_fft0, gwr%g_mgfft, gwr%g_nfft, gwr%g_ngfft, nproc_fft1, cryst%nsym, paral_fft0, &
-              cryst%symrel, cryst%tnons, unit=dev_null)
-   gwr%green_mpw = max(gwr%green_mpw, npw_)
- end do
-
- gwr%tchi_mpw = -1
- do iq_bz=1,gwr%nqbz
-   qq_bz = gwr%qbz(:, iq_bz)
-   call get_kg(qq_bz, istwfk1, dtset%ecuteps, gwr%cryst%gmet, npw_, gvec_)
-   ABI_FREE(gvec_)
-   call getng(dtset%gwr_boxcutmin, dtset%chksymtnons, dtset%ecuteps, cryst%gmet, &
-              qq_bz, me_fft0, gwr%g_mgfft, gwr%g_nfft, gwr%g_ngfft, nproc_fft1, cryst%nsym, &
-              paral_fft0, cryst%symrel, cryst%tnons, unit=dev_null)
-   gwr%tchi_mpw = max(gwr%tchi_mpw, npw_)
-   if (iq_bz == 1) then
-     ABI_CHECK(all(abs(qq_bz) < tol16), "First qpoint in qbz should be Gamma!")
-   end if
- end do
-
- ! TODO: For the time being no augmentation
- gwr%g_ngfft(4:6) = gwr%g_ngfft(1:3)
-
- ! Define batch sizes for FFT transforms, use multiples of OpenMP threads.
- omp_nt = xomp_get_num_threads(open_parallel=.True.)
- gwr%uc_batch_size = max(1, gwr%dtset%userid * omp_nt)
- gwr%sc_batch_size = max(1, gwr%dtset%userie * omp_nt)
- !gwr%uc_batch_size = 4; gwr%sc_batch_size = 4
-
- if (my_rank == master) then
-   call print_ngfft(gwr%g_ngfft, header="FFT mesh for Green's function", unit=std_out)
-   call print_ngfft(gwr%g_ngfft, header="FFT mesh for Green's function", unit=ab_out)
-   call wrtout(std_out, sjoin(" FFT uc_batch_size:", itoa(gwr%uc_batch_size)))
-   call wrtout(std_out, sjoin(" FFT sc_batch_size:", itoa(gwr%sc_batch_size)))
- end if
-
  ! TODO: MC technique does not seem to work as expected, even in the legacy code.
-
  vc_ecut = max(dtset%ecutsigx, dtset%ecuteps)
  call gwr%vcgen%init(cryst, ks_ebands%kptrlatt, gwr%nkbz, gwr%nqibz, gwr%nqbz, gwr%qbz, &
                      dtset%rcut, dtset%gw_icutcoul, dtset%vcutgeo, vc_ecut, gwr%comm%value)
@@ -1549,6 +1599,49 @@ integer function vid(vname)
 end function vid
 
 end subroutine gwr_init
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_gwr/gwr_estimate_mem
+!! NAME
+!! gwr_estimate_mem
+!!
+!! FUNCTION
+!!
+!! SOURCE
+
+subroutine gwr_estimate_mem(gwr, np_gtks, mem)
+
+!Arguments ------------------------------------
+ class(gwr_t), intent(in) :: gwr
+ integer,intent(in) :: np_gtks(4)
+ type(mem_t),intent(out) :: mem
+
+!Local variables-------------------------------
+ integer :: np_tot
+
+! *************************************************************************
+
+ associate (np_g => np_gtks(1), np_t => np_gtks(2), np_k => np_gtks(3), np_s => np_gtks(4))
+ np_tot = product(np_gtks)
+
+ ! NB: arrays dimensions with nkibz and nqibz do not scale as 1/np_k as we distribute the full BZ.
+
+ ! Resident memory for G(g,g',+/-tau) and chi(g,g',tau)
+ mem%green_gg = two * two * (one*gwr%nspinor*gwr%green_mpw)**2 * two*gwr%ntau * gwr%nkibz * gwr%nsppol * dp*b2Mb / np_tot
+ mem%chi_gg = two * (one*gwr%tchi_mpw)**2 * gwr%ntau * gwr%nqibz * dp*b2Mb / (np_g * np_t * np_k)
+ mem%ugb = two * gwr%green_mpw * gwr%nspinor * gwr%dtset%nband(1) * gwr%nkibz * gwr%nsppol * dp*b2Mb / np_tot
+
+ ! Temporary memory allocated inside the tau loops.
+ ! This is the chunck we have to minimize by increasing np_g and/or np_k to avoid going OOM.
+ mem%green_rg = two * two * gwr%nspinor**2 * gwr%green_mpw * gwr%g_nfft * gwr%nkbz * gwr%nsppol * dp*b2Mb / (np_g * np_k)
+ mem%chi_rg = two * gwr%tchi_mpw * gwr%g_nfft * gwr%nqbz * dp*b2Mb / (np_g * np_k)
+
+ mem%total = mem%green_gg + mem%chi_gg + mem%ugb + mem%green_rg + mem%chi_rg
+ end associate
+
+end subroutine gwr_estimate_mem
 !!***
 
 !----------------------------------------------------------------------

@@ -1075,7 +1075,7 @@ logical function block_dist_1d(mat_size, nproc, block_size, msg) result (ok)
    ok = .False.
    write(msg, "(2(a,i0), 2a)") &
      "The number of MPI processors: ", nproc, " exceeeds the number of rows (columms) of the matrix: ", mat_size, ch10, &
-     "Please decrease the number of MPI processes for the scalapack level."
+     "Decrease the number of MPI processes for the scalapack level."
    return
  end if
 

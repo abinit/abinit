@@ -4989,21 +4989,25 @@ pure logical function xcomm_skip(self, iter)
   integer,intent(in) :: iter
   xcomm_skip = mod(iter, self%nproc) /= self%me
 end function xcomm_skip
+
 subroutine xcomm_set_to_self(self)
   class(xcomm_t),intent(inout) :: self
   call self%free()
   self%value = xmpi_comm_self; self%me = 0; self%nproc = 1
 end subroutine xcomm_set_to_self
+
 subroutine xcomm_set_to_null(self)
   class(xcomm_t),intent(inout) :: self
   call self%free()
   self%value = xmpi_comm_null
 end subroutine xcomm_set_to_null
+
 subroutine xcomm_free(self)
   class(xcomm_t),intent(inout) :: self
   call xmpi_comm_free(self%value)
   self%me = -1; self%nproc = 0
 end subroutine xcomm_free
+
 ! Helper function to build sub-communicators in a Cartesian grid.
 subroutine xcomm_from_cart_sub(self, comm_cart, keepdim)
  class(xcomm_t),intent(out) :: self
