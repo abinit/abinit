@@ -613,7 +613,7 @@ nqibz: 8
 green_mpw: 138
 tchi_mpw: 92
 g_ngfft: [8, 8, 8, 8, 8, 8, ]
-P gwr_np_gtks: [1, 1, 1, 1, ]
+P gwr_np_kgts: [1, 1, 1, 1, ]
 P np_kibz: [1, 1, 1, 1, 1, 1, 1, 1, ]
 P np_qibz: [1, 1, 1, 1, 1, 1, 1, 1, ]
 ft_max_err_t2w_cos:   3.98125814E-02

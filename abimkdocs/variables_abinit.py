@@ -23210,13 +23210,13 @@ Note that [[gstore_erange]] is not compatible with [[gstore_brange]].
 ),
 
 Variable(
-    abivarname="gwr_np_gtks",
+    abivarname="gwr_np_kgts",
     varset="gw",
     vartype="integer",
     topics=['GWR_expert'],
     dimensions=[4],
     defaultval=0,
-    mnemonics="GWR Number of Processors for G-vectors, Tau-points, K-points, Spin.",
+    mnemonics="GWR Number of Processors for K-vectors, G-vectors, Tau-points, Spin.",
     requires="[[optdriver]] == 6",
     added_in_version="9.6.2",
     text=r"""
@@ -23228,7 +23228,7 @@ and the basic dimensions of the job computed at runtime.
 
     The total number of MPI processes must be equal to the product of the different entries.
 
-    Note also that the GWR code implements its own MPI-algorithm and [[gwr_np_gtks]] is
+    Note also that the GWR code implements its own MPI-algorithm and [[gwr_np_kgts]] is
     the **only variable** that should be used to change the default behaviour.
     Other variables such as [[npband]], [[npfft]], [[npkpt]] and [[paral_kgb]]
     are **not used** in the GWR subdriver.
