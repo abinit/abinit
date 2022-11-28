@@ -299,6 +299,9 @@ module m_orbmag
   private :: make_d
   private :: sum_d
   private :: check_eig_k
+  private :: check_pv_term
+  private :: check_deriv_me
+  private :: make_u1
   private :: dterm_qij
   private :: dterm_rd1
   private :: dterm_rd1a
@@ -417,7 +420,7 @@ subroutine orbmag_ptpaw(cg,cg1,cprj,dtset,eigen0,eigen1_3,gsqcut,kg,mcg,mcg1,mcp
  real(dp) :: gmet(3,3),gprimd(3,3),kpoint(3),omlamb(2,3),rhodum(1),rmet(3,3)
  real(dp),allocatable :: buffer1(:),buffer2(:)
  real(dp),allocatable :: cg_k(:,:),cg1_k(:,:,:),cgrvtrial(:,:),cwavef(:,:),cwavef_d(:,:)
- real(dp),allocatable :: eig_k(:),eig1_k(:),ffc_k(:,:,:),ffv_k(:,:,:),ffnl_k(:,:,:,:)
+ real(dp),allocatable :: eig_k(:),eig1_k(:,:),ffc_k(:,:,:),ffv_k(:,:,:),ffnl_k(:,:,:,:)
  real(dp),allocatable :: gg_k(:,:,:),hhc_k(:,:,:),hhv_k(:,:,:)
  real(dp),allocatable :: kinpw(:),kpg_k(:,:),occ_k(:),orbmag_terms(:,:,:,:),orbmag_trace(:,:,:)
  real(dp),allocatable :: pcg1_k(:,:,:),ph1d(:,:),ph3d(:,:,:),phkxred(:,:),realgnt(:)
@@ -627,25 +630,24 @@ subroutine orbmag_ptpaw(cg,cg1,cprj,dtset,eigen0,eigen1_3,gsqcut,kg,mcg,mcg1,mcp
    ABI_MALLOC(cg1_k,(2,mcgk,3))
    cg1_k = cg1(1:2,icg+1:icg+mcgk,1:3)
 
-   ! retrieve zeroth order eigenvalues
+   ! retrieve zeroth order and first order eigenvalues
    ABI_MALLOC(eig_k,(nband_k))
+   ABI_MALLOC(eig1_k,(2*nband_k*nband_k,3))
    eig_k(1:nband_k) = eigen0(nband_k*(ikpt-1)+1:nband_k*ikpt)   
+   eig1_k(1:2*nband_k**2,1:3) = eigen1_3(2*nband_k**2*(ikpt-1)+1:2*nband_k**2*ikpt,1:3)
    
    ! change cg1 from parallel to diagonal gauge
    if (dtset%userib == 2190) then
-     ABI_MALLOC(eig1_k,(2*nband_k*nband_k))
      ABI_MALLOC(cwavef,(2,npw_k))
      ABI_MALLOC(cwavef_d,(2,npw_k))
      do adir = 1, 3
-       eig1_k(1:2*nband_k**2) = eigen1_3(2*nband_k**2*(ikpt-1)+1:2*nband_k**2*ikpt,adir)
        do nn = 1, nband_k 
          cwavef(1:2,1:npw_k) = cg1_k(1:2,(nn-1)*npw_k+1:nn*npw_k,adir)
-         call gaugetransfo(cg_k,cwavef,cwavef_d,mpi_enreg%comm_band,distrb_cycle,eig_k,eig1_k,nn,nband_k,&
+         call gaugetransfo(cg_k,cwavef,cwavef_d,mpi_enreg%comm_band,distrb_cycle,eig_k,eig1_k(:,adir),nn,nband_k,&
            & dtset%mband,dtset%mband_mem,npw_k,npw_k,dtset%nspinor,dtset%nsppol,mpi_enreg%nproc_band,occ_k)
          cg1_k(1:2,(nn-1)*npw_k+1:nn*npw_k,adir) = cwavef_d(1:2,1:npw_k)
        end do
      end do
-     ABI_FREE(eig1_k)
      ABI_FREE(cwavef)
      ABI_FREE(cwavef_d)
    end if
@@ -686,8 +688,14 @@ subroutine orbmag_ptpaw(cg,cg1,cprj,dtset,eigen0,eigen1_3,gsqcut,kg,mcg,mcg1,mcp
    !--------------------------------------------------------------------------------
 
    ! check aij against paw_ij 
-   call check_eig_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,&
-     & gs_hamk,ikpt,isppol,mcgk,mpi_enreg,my_nspinor,nband_k,npw_k,pawtab)
+   !call check_eig_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,&
+   !  & gs_hamk,ikpt,isppol,mcgk,mpi_enreg,my_nspinor,nband_k,npw_k,pawtab)
+
+   call check_pv_term(atindx,cg_k,cprj_k,cprj1_k,dterm,dtset,eig_k,&
+     & ikpt,mcgk,nband_k,npw_k,pawtab,pcg1_k)
+   call check_deriv_me(atindx,cg_k,cprj_k,cprj1_k,dterm,dtset,eig_k,&
+     & ikpt,mcgk,nband_k,npw_k,pawtab,pcg1_k)
+   !call make_u1(atindx,cg_k,cprj_k,cprj1_k,dterm,dtset,ikpt,mcgk,nband_k,npw_k,pawtab,pcg1_k)
 
    ABI_MALLOC(ffc_k,(2,nband_k,3))
    ABI_MALLOC(ffv_k,(2,nband_k,3))
@@ -738,6 +746,7 @@ subroutine orbmag_ptpaw(cg,cg1,cprj,dtset,eigen0,eigen1_3,gsqcut,kg,mcg,mcg1,mcp
    ABI_FREE(cg1_k)
    ABI_FREE(pcg1_k)
    ABI_FREE(eig_k)
+   ABI_FREE(eig1_k)
    ABI_FREE(occ_k)
    ABI_FREE(ylm_k)
    ABI_FREE(ylmgr_k)
@@ -1099,6 +1108,319 @@ subroutine make_g_k(atindx,cprj_k,cprj1_k,dimlmn,dterm,dtset,eig_k,ggc_k,ggv_k,g
  ABI_FREE(cwaveprj)
  
 end subroutine make_g_k
+!!***
+
+!!****f* ABINIT/make_u1
+!! NAME
+!! make_u1
+!!
+!! FUNCTION
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2021 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!!
+!! SOURCE
+
+subroutine make_u1(atindx,cg_k,cprj_k,cprj1_k,dterm,dtset,ikpt,mcgk,nband_k,npw_k,pawtab,pcg1_k)
+
+  !Arguments ------------------------------------
+  !scalars
+  integer,intent(in) :: ikpt,mcgk,nband_k,npw_k
+  type(dterm_type),intent(in) :: dterm
+  type(dataset_type),intent(in) :: dtset
+
+  !arrays
+  integer,intent(in) :: atindx(dtset%natom)
+  real(dp),intent(in) :: cg_k(2,mcgk)
+  real(dp),intent(in) :: pcg1_k(2,mcgk,3)
+  type(pawcprj_type),intent(in) :: cprj_k(dtset%natom,nband_k)
+  type(pawcprj_type),intent(in) :: cprj1_k(dtset%natom,nband_k,3)
+  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
+
+  !Local variables -------------------------
+  !scalars
+  integer :: adir,bdir,gdir,nn,np
+  real(dp) :: doti,dotr,epsabg
+  complex(dpc) :: prefac,t1,t2,t3,t4
+  !arrays
+  real(dp),allocatable :: bwave(:,:),gwave(:,:)
+  complex(dpc),allocatable :: u1(:,:,:)
+
+!--------------------------------------------------------------------
+
+ ABI_MALLOC(bwave,(2,npw_k))
+ ABI_MALLOC(gwave,(2,npw_k))
+
+ ABI_MALLOC(u1,(nband_k,nband_k,3))
+
+ do adir = 1, 3
+   do nn = 1, nband_k
+    do np = 1, nband_k
+
+      bwave(1:2,1:npw_k) = pcg1_k(1:2,(nn-1)*npw_k+1:nn*npw_k,adir)
+      gwave(1:2,1:npw_k) = cg_k(1:2,(np-1)*npw_k+1:np*npw_k)
+      dotr = DOT_PRODUCT(bwave(1,:),gwave(1,:))+DOT_PRODUCT(bwave(2,:),gwave(2,:))
+      doti = DOT_PRODUCT(bwave(1,:),gwave(2,:))-DOT_PRODUCT(bwave(2,:),gwave(1,:))
+
+      ! term 1 onsite
+      call tt_me(dterm%qij,atindx,cprj1_k(:,nn,adir),dtset,cprj_k(:,np),&
+        & dterm%lmn2max,pawtab,t1)
+      t1 = t1 + CMPLX(dotr,doti)
+
+      bwave(1:2,1:npw_k) = cg_k(1:2,(nn-1)*npw_k+1:nn*npw_k)
+      gwave(1:2,1:npw_k) = pcg1_k(1:2,(np-1)*npw_k+1:np*npw_k,adir)
+      dotr = DOT_PRODUCT(bwave(1,:),gwave(1,:))+DOT_PRODUCT(bwave(2,:),gwave(2,:))
+      doti = DOT_PRODUCT(bwave(1,:),gwave(2,:))-DOT_PRODUCT(bwave(2,:),gwave(1,:))
+
+      ! term 2 onsite
+      call tt_me(dterm%qij,atindx,cprj_k(:,nn),dtset,cprj1_k(:,np,adir),&
+        & dterm%lmn2max,pawtab,t2)
+      t2 = t2 + CMPLX(dotr,doti)
+
+      ! term3 
+      call tdt_me(dterm%qij,atindx,cprj_k(:,np),dterm%dqij,dtset,adir,cprj_k(:,nn),&
+        & dterm%lmnmax,dterm%lmn2max,pawtab,t3)
+      ! term4
+      call tdt_me(dterm%qij,atindx,cprj_k(:,nn),dterm%dqij,dtset,adir,cprj_k(:,np),&
+        & dterm%lmnmax,dterm%lmn2max,pawtab,t4)
+
+      u1(nn,np,adir) = (t1 + t2 + CONJG(t3) + t4)/two_pi
+
+      write(std_out,'(a,3i4,2es16.8)')'JWZ debug adir nn np u1 ',adir,nn,np,real(u1(nn,np,adir)),aimag(u1(nn,np,adir))
+
+    end do !np
+  end do ! nn 
+ end do !adir
+
+ ABI_FREE(bwave)
+ ABI_FREE(gwave)
+
+ ABI_FREE(u1)
+ 
+end subroutine make_u1
+!!***
+
+!!****f* ABINIT/check_deriv_me
+!! NAME
+!! check_deriv_me
+!!
+!! FUNCTION
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2021 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!!
+!! SOURCE
+
+subroutine check_deriv_me(atindx,cg_k,cprj_k,cprj1_k,dterm,dtset,eig_k,&
+    & ikpt,mcgk,nband_k,npw_k,pawtab,pcg1_k)
+
+  !Arguments ------------------------------------
+  !scalars
+  integer,intent(in) :: ikpt,mcgk,nband_k,npw_k
+  type(dterm_type),intent(in) :: dterm
+  type(dataset_type),intent(in) :: dtset
+
+  !arrays
+  integer,intent(in) :: atindx(dtset%natom)
+  real(dp),intent(in) :: cg_k(2,mcgk),eig_k(nband_k)
+  real(dp),intent(in) :: pcg1_k(2,mcgk,3)
+  type(pawcprj_type),intent(in) :: cprj_k(dtset%natom,nband_k)
+  type(pawcprj_type),intent(in) :: cprj1_k(dtset%natom,nband_k,3)
+  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
+
+  !Local variables -------------------------
+  !scalars
+  integer :: adir,bdir,gdir,nn,np
+  real(dp) :: doti,dotr,epsabg
+  complex(dpc) :: t1,t2
+  !arrays
+  real(dp),allocatable :: bwave(:,:),gwave(:,:)
+
+!--------------------------------------------------------------------
+
+ ABI_MALLOC(bwave,(2,npw_k))
+ ABI_MALLOC(gwave,(2,npw_k))
+
+ do adir = 1, 3
+
+   do nn = 1, nband_k
+     do np = 1, nband_k
+
+       bwave(1:2,1:npw_k) = cg_k(1:2,(np-1)*npw_k+1:np*npw_k)
+       gwave(1:2,1:npw_k) = pcg1_k(1:2,(nn-1)*npw_k+1:nn*npw_k,adir)
+       dotr = DOT_PRODUCT(bwave(1,:),gwave(1,:))+DOT_PRODUCT(bwave(2,:),gwave(2,:))
+       doti = DOT_PRODUCT(bwave(1,:),gwave(2,:))-DOT_PRODUCT(bwave(2,:),gwave(1,:))
+
+       ! term 2 onsite
+       call tt_me(dterm%qij,atindx,cprj_k(:,np),dtset,cprj1_k(:,nn,adir),&
+         & dterm%lmn2max,pawtab,t2)
+       t2 = t2 + CMPLX(dotr,doti)
+
+       ! term1 
+       call tdt_me(dterm%qij,atindx,cprj_k(:,np),dterm%dqij,dtset,adir,cprj_k(:,nn),&
+         & dterm%lmnmax,dterm%lmn2max,pawtab,t1)
+
+       write(std_out,'(a,3i4,6es16.8)')'JWZ debug n np adir t1 t2 t1+t2 ',nn,np,adir,&
+         & real(t1),aimag(t1),real(t2),aimag(t2),real(t1+t2),aimag(t1+t2)
+
+     end do !np
+   end do ! nn 
+ end do !adir
+
+ ABI_FREE(bwave)
+ ABI_FREE(gwave)
+ 
+end subroutine check_deriv_me
+!!***
+
+
+!!****f* ABINIT/check_pv_term
+!! NAME
+!! check_pv_term
+!!
+!! FUNCTION
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2021 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!!
+!! SOURCE
+
+subroutine check_pv_term(atindx,cg_k,cprj_k,cprj1_k,dterm,dtset,eig_k,&
+    & ikpt,mcgk,nband_k,npw_k,pawtab,pcg1_k)
+
+  !Arguments ------------------------------------
+  !scalars
+  integer,intent(in) :: ikpt,mcgk,nband_k,npw_k
+  type(dterm_type),intent(in) :: dterm
+  type(dataset_type),intent(in) :: dtset
+
+  !arrays
+  integer,intent(in) :: atindx(dtset%natom)
+  real(dp),intent(in) :: cg_k(2,mcgk),eig_k(nband_k)
+  real(dp),intent(in) :: pcg1_k(2,mcgk,3)
+  type(pawcprj_type),intent(in) :: cprj_k(dtset%natom,nband_k)
+  type(pawcprj_type),intent(in) :: cprj1_k(dtset%natom,nband_k,3)
+  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
+
+  !Local variables -------------------------
+  !scalars
+  integer :: adir,bdir,gdir,nn,np
+  real(dp) :: doti,dotr,epsabg
+  complex(dpc) :: prefac_f,prefac_h,t1,t2,t3,t4
+  !arrays
+  real(dp),allocatable :: bwave(:,:),gwave(:,:)
+  complex(dpc) :: fk(3),gk(3),hk(3)
+
+!--------------------------------------------------------------------
+
+ ABI_MALLOC(bwave,(2,npw_k))
+ ABI_MALLOC(gwave,(2,npw_k))
+
+ do adir = 1, 3
+
+   fk(adir)=czero
+   gk(adir)=czero
+   hk(adir)=czero
+   do bdir = 1, 3
+     do gdir = 1, 3
+       epsabg = eijk(adir,bdir,gdir)
+       if (ABS(epsabg) .LT. half) cycle
+       prefac_f = cbc*c2*epsabg
+       prefac_h = com*c2*epsabg
+
+       do nn = 1, nband_k
+         do np = 1, nband_k
+
+           bwave(1:2,1:npw_k) = pcg1_k(1:2,(nn-1)*npw_k+1:nn*npw_k,bdir)
+           gwave(1:2,1:npw_k) = cg_k(1:2,(np-1)*npw_k+1:np*npw_k)
+           dotr = DOT_PRODUCT(bwave(1,:),gwave(1,:))+DOT_PRODUCT(bwave(2,:),gwave(2,:))
+           doti = DOT_PRODUCT(bwave(1,:),gwave(2,:))-DOT_PRODUCT(bwave(2,:),gwave(1,:))
+
+           ! term 2 onsite
+           call tt_me(dterm%qij,atindx,cprj1_k(:,nn,bdir),dtset,cprj_k(:,np),&
+             & dterm%lmn2max,pawtab,t2)
+           t2 = t2 + CMPLX(dotr,doti)
+
+           bwave(1:2,1:npw_k) = cg_k(1:2,(np-1)*npw_k+1:np*npw_k)
+           gwave(1:2,1:npw_k) = pcg1_k(1:2,(nn-1)*npw_k+1:nn*npw_k,gdir)
+           dotr = DOT_PRODUCT(bwave(1,:),gwave(1,:))+DOT_PRODUCT(bwave(2,:),gwave(2,:))
+           doti = DOT_PRODUCT(bwave(1,:),gwave(2,:))-DOT_PRODUCT(bwave(2,:),gwave(1,:))
+
+           ! term 4 onsite
+           call tt_me(dterm%qij,atindx,cprj_k(:,np),dtset,cprj1_k(:,nn,gdir),&
+             & dterm%lmn2max,pawtab,t4)
+           t4 = t4 + CMPLX(dotr,doti)
+
+           ! term1 
+           call tdt_me(dterm%qij,atindx,cprj_k(:,np),dterm%dqij,dtset,bdir,cprj_k(:,nn),&
+             & dterm%lmnmax,dterm%lmn2max,pawtab,t1)
+           ! term3 
+           call tdt_me(dterm%qij,atindx,cprj_k(:,np),dterm%dqij,dtset,gdir,cprj_k(:,nn),&
+             & dterm%lmnmax,dterm%lmn2max,pawtab,t3)
+
+           fk(adir) = fk(adir) + prefac_f*(CONJG(t1)+t2)*(t3+t4)
+           gk(adir) = gk(adir) + prefac_h*eig_k(np)*(CONJG(t1)+t2)*(t3+t4)
+           hk(adir) = hk(adir) + prefac_h*eig_k(nn)*(CONJG(t1)+t2)*(t3+t4)
+
+         end do !np
+       end do ! nn 
+     end do !gdir
+   end do !bdir
+ end do !adir
+
+ write(std_out,'(a,3es16.8)')'JWZ debug fk_term_check real ',&
+   & real(fk(1)),real(fk(2)),real(fk(3))
+ write(std_out,'(a,3es16.8)')'JWZ debug hk_term_check real ',&
+   & real(hk(1)),real(hk(2)),real(hk(3))
+ write(std_out,'(a,3es16.8)')'JWZ debug gk_term_check real ',&
+   & real(gk(1)),real(gk(2)),real(gk(3))
+
+ ABI_FREE(bwave)
+ ABI_FREE(gwave)
+ 
+end subroutine check_pv_term
 !!***
 
 
