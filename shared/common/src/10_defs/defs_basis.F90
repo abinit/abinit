@@ -123,7 +123,7 @@ module defs_basis
  integer,public,parameter :: MAX_NSHIFTK = 210
  ! Maximun number of shifts in input k-mesh.
 
-!Real constants
+!Real dp constants
  real(dp), parameter :: zero=0._dp
  real(dp), parameter :: one=1._dp
  real(dp), parameter :: two=2._dp
@@ -136,6 +136,7 @@ module defs_basis
  real(dp), parameter :: nine=9._dp
  real(dp), parameter :: ten=10._dp
 
+!Real sp constants
  real(sp), parameter :: zero_sp=0._sp
  real(sp), parameter :: one_sp=1._sp
 
@@ -171,7 +172,6 @@ module defs_basis
 !real(dp), parameter :: third_pi=pi*third
 !real(dp), parameter :: quarter_pi=pi*quarter
 !real(dp), parameter :: two_thirds_pi=two_thirds*pi
-
 
 !Real precision
  real(dp), parameter :: greatest_real = huge(one)
@@ -214,6 +214,11 @@ module defs_basis
  ! e.g. stress tensor in NSCF calculations. The sentinel is used the yaml routines to print "undef" instead of the
  ! numerical value.
  real(dp),parameter :: MAGIC_UNDEF = 9.9999999999D+99
+
+ ! Max Memory in Mb available for a MPI processor
+ ! This quantity might be used at runtime to determine how to distribute memory.
+ ! The default value (2Gb) can be changed at runtime via the command line interface.
+ real(dp), protected :: mem_per_cpu_mb = two * 1024_dp
 
 !Real physical constants
 !Revised fundamental constants from http://physics.nist.gov/cuu/Constants/index.html
@@ -426,19 +431,17 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
- subroutine abi_log_status_state(new_do_write_log,new_do_write_status)
+subroutine abi_log_status_state(new_do_write_log,new_do_write_status)
 
 !Arguments ------------------------------------
-!scalars
  logical,optional,intent(in) :: new_do_write_log,new_do_write_status
-!Local variables ------------------------------
 
 !************************************************************************
 
  if (PRESENT(new_do_write_log))    do_write_log   =new_do_write_log
  if (PRESENT(new_do_write_status)) do_write_status=new_do_write_status
 
- end subroutine abi_log_status_state
+end subroutine abi_log_status_state
 !!***
 
 !----------------------------------------------------------------------
@@ -459,10 +462,9 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
- subroutine abi_io_redirect(new_ab_out,new_std_out,new_io_comm)
+subroutine abi_io_redirect(new_ab_out,new_std_out,new_io_comm)
 
 !Arguments ------------------------------------
-!scalars
  integer,optional,intent(in) :: new_std_out,new_ab_out,new_io_comm
 
 !************************************************************************
@@ -471,7 +473,7 @@ CONTAINS  !=====================================================================
  if (PRESENT(new_std_out)) std_out = new_std_out
  if (PRESENT(new_io_comm)) abinit_comm_output = new_io_comm
 
- end subroutine abi_io_redirect
+end subroutine abi_io_redirect
 !!***
 
 !----------------------------------------------------------------------
@@ -486,48 +488,43 @@ CONTAINS  !=====================================================================
 !! INPUTS
 !!   unit = Unit number for output file.
 !!
-!! OUTPUT
-!!   Only printing.
-!!
 !! SOURCE
 
- subroutine print_kinds(unit)
+subroutine print_kinds(unit)
 
 !Arguments-------------------------------------
-!scalars
  integer,optional,intent(in) :: unit
 
 !Local variables-------------------------------
-!scalars
  integer :: my_unt
 
- ! *********************************************************************
+! *********************************************************************
 
-  my_unt=std_out; if (PRESENT(unit)) my_unt = unit
+ my_unt=std_out; if (PRESENT(unit)) my_unt = unit
 
-  write(my_unt,'(a)')' DATA TYPE INFORMATION: '
+ write(my_unt,'(a)')' DATA TYPE INFORMATION: '
 
-  write(my_unt,'(a,/,2(a,i6,/),2(a,e15.8e3,/),a,e15.8e3)')&
-    ' REAL:      Data type name: REAL(DP) ',&
-    '            Kind value: ',KIND(0.0_dp),&
-    '            Precision:  ',PRECISION(0.0_dp),&
-    '            Smallest nonnegligible quantity relative to 1: ',EPSILON(0.0_dp),&
-    '            Smallest positive number:                      ',TINY(0.0_dp),&
-    '            Largest representable number:                  ',HUGE(0.0_dp)
+ write(my_unt,'(a,/,2(a,i6,/),2(a,e15.8e3,/),a,e15.8e3)')&
+   ' REAL:      Data type name: REAL(DP) ',&
+   '            Kind value: ',KIND(0.0_dp),&
+   '            Precision:  ',PRECISION(0.0_dp),&
+   '            Smallest nonnegligible quantity relative to 1: ',EPSILON(0.0_dp),&
+   '            Smallest positive number:                      ',TINY(0.0_dp),&
+   '            Largest representable number:                  ',HUGE(0.0_dp)
 
-  write(my_unt,'(a,/,2(a,i0,/),a,i0)')&
-    ' INTEGER:   Data type name: INTEGER(default) ', &
-    '            Kind value: ',KIND(0),              &
-    '            Bit size:   ',BIT_SIZE(0),          &
-    '            Largest representable number: ',HUGE(0)
+ write(my_unt,'(a,/,2(a,i0,/),a,i0)')&
+   ' INTEGER:   Data type name: INTEGER(default) ', &
+   '            Kind value: ',KIND(0),              &
+   '            Bit size:   ',BIT_SIZE(0),          &
+   '            Largest representable number: ',HUGE(0)
 
-  write(my_unt,'(a,/,a,i0)')&
-    ' LOGICAL:   Data type name: LOGICAL ',&
-    '            Kind value: ',KIND(.TRUE.)
+ write(my_unt,'(a,/,a,i0)')&
+   ' LOGICAL:   Data type name: LOGICAL ',&
+   '            Kind value: ',KIND(.TRUE.)
 
-  write(my_unt,'(2a,i0)')&
-   ' CHARACTER: Data type name: CHARACTER ',&
-   '            Kind value: ',KIND('C')
+ write(my_unt,'(2a,i0)')&
+  ' CHARACTER: Data type name: CHARACTER ',&
+  '            Kind value: ',KIND('C')
 
 end subroutine print_kinds
 !!***
@@ -573,6 +570,30 @@ integer pure function str2wfktask(str) result(wfk_task)
  end select
 
 end function str2wfktask
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* defs_basis/set_mem_per_cpu_mb
+!! NAME
+!! set_mem_per_cpu_mb
+!!
+!! FUNCTION
+!!  Set the value of global variable `mem_per_cpu_mb`
+!!
+!! SOURCE
+
+subroutine set_mem_per_cpu_mb(mem_mb)
+
+!Arguments-------------------------------------
+ real(dp),intent(in) :: mem_mb
+
+! *********************************************************************
+
+ print *, "Setting mem_per_cpu_mb to", mem_mb
+ mem_per_cpu_mb = mem_mb
+
+end subroutine set_mem_per_cpu_mb
 !!***
 
 !----------------------------------------------------------------------
