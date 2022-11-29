@@ -72,6 +72,7 @@ MODULE m_fstrings
  public :: char_count      ! Count the occurrences of a character in a string.
  public :: next_token      ! Tokenize a string made of whitespace-separated tokens.
  public :: inupper         ! Maps all characters in string to uppercase except for tokens between quotation marks.
+ public :: find_and_select ! Find substring and select value in list depending on substring
 
  !TODO method to center a string
  interface itoa
@@ -2005,6 +2006,69 @@ subroutine inupper(string)
  end do
 
 end subroutine inupper
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_fstrings/find_and_select
+!! NAME
+!!  find_and_select
+!!
+!! FUNCTION
+!! Find substring and select value in list depending on substring.
+!!
+!! Usage example:
+!!
+!!   istop = find_and_select(arg, &
+!!                           ["K", "M", "G", "T"], &
+!!                           [one/1024._dp, one, 1024._dp, 1024._dp ** 2], fact, err_msg, default=one)
+!!
+!!   ABI_CHECK(istop /= -1, err_msg)
+!!
+!! SOURCE
+
+integer function find_and_select(string, choices, values, out_val, err_msg, default, back) result(iend)
+
+!Arguments ------------------------------------
+ character(len=*),intent(in) :: string
+ character(len=*),intent(in) :: choices(:)
+ real(dp),intent(in) :: values(:)
+ real(dp),optional,intent(in) :: default
+ real(dp),intent(out) :: out_val
+ character(len=*),intent(out) :: err_msg
+ logical,optional,intent(in) :: back
+
+!Local variables-------------------------------
+ integer :: ic
+ logical :: back__
+! *************************************************************************
+
+ if (size(values) /= size(choices)) then
+   err_msg = "BUG in API call: size(values) /= size(choices))"
+   iend = -1; return
+ end if
+
+ back__ = .True.; if (present(back)) back__ = back
+ do ic=1,size(choices)
+   iend = index(string, trim(choices(ic)), back=back__)
+   if (iend /= 0) then
+     if (trim(string(iend:)) /= choices(ic)) then
+       err_msg = sjoin("Invalid token:", trim(string(iend:)))
+       iend = -1; return
+     end if
+     out_val = values(ic); return
+   end if
+ end do
+
+ if (present(default)) then
+   iend = 0
+   out_val = default
+ else
+   iend = -1
+   err_msg = "Cannot find `choices` in string and `default` optional argument is not set!"
+ end if
+
+end function find_and_select
 !!***
 
 end module m_fstrings
