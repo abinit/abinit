@@ -115,7 +115,7 @@ contains
 !!  args_parser
 !!
 !! FUNCTION
-!!  Simple command line argument parser for abinit.
+!!  Simple command line argument parser for abinit and other main programs.
 !!
 !! SOURCE
 

@@ -638,7 +638,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer :: n1,n2,n3,n4,n5,n6,nspden,nu, iang
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1
  integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg1,nq,cnt,imyp, q_start, q_stop, restart
- integer :: nlines_done, nline_in, grad_berry_size_mpw1, enough_stern
+ integer :: nlines_done, nline_in, grad_berry_size_mpw1, enough_stern, my_nb
  integer :: nbcalc_ks,nbsum,bsum_start, bsum_stop, bstart_ks,my_ikcalc,ikcalc,bstart,bstop,iatom
  integer :: comm_rpt, osc_npw
  integer :: ffnlk_request, ffnl1_request
@@ -676,7 +676,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  real(dp),allocatable :: grad_berry(:,:),kinpw1(:),kpg1_k(:,:),kpg_k(:,:),dkinpw(:)
  real(dp),allocatable :: ffnlk(:,:,:,:),ffnl1(:,:,:,:),ph3d(:,:,:),ph3d1(:,:,:),v1scf(:,:,:,:)
  real(dp),allocatable :: gkq_atm(:,:,:),gkq_nu(:,:,:),gkq0_atm(:,:,:,:), gaussw_qnu(:)
- real(dp),allocatable :: cgq(:,:,:), gscq(:,:,:), out_eig1_k(:), cg1s_kq(:,:,:,:), h1kets_kq_allperts(:,:,:,:)
+ real(dp),allocatable :: cgq(:,:,:), gscq(:,:,:), out_eig1_k(:), cg1s_kq(:,:,:,:), h1kets_kq_allperts(:,:,:,:), send_cgq(:,:,:)
  real(dp),allocatable :: dcwavef(:, :), gh1c_n(:, :), ghc(:,:), gsc(:,:), stern_ppb(:,:,:,:), stern_dw(:,:,:,:)
  logical,allocatable :: ihave_ikibz_spin(:,:), bks_mask(:,:,:),keep_ur(:,:,:)
  real(dp),allocatable :: bra_kq(:,:),kets_k(:,:,:),h1kets_kq(:,:,:,:),cgwork(:,:)
@@ -1071,7 +1071,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    call read_rhor(dtfil%filpotin, cplex1, nspden, nfftf, ngfftf, pawread0, mpi_enreg, vtrial, pot_hdr, pawrhoij, comm, &
                   allow_interp=.True.)
    pot_cryst = pot_hdr%get_crystal()
-   if (cryst%compare(pot_cryst, header="Comparing input crystal with POT crystal") /= 0) then
+   if (cryst%compare(pot_cryst, header=" Comparing input crystal with POT crystal") /= 0) then
      ABI_ERROR("Crystal structure from WFK and POT do not agree! Check messages above!")
    end if
    call pot_cryst%free()
@@ -1507,6 +1507,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            !stern_mpi_enreg%nproc_band = sigma%bsum_comm%nproc
            !nband_me = sigma%my_bsum_stop - sigma%my_bsum_start + 1
 
+           my_nb = sigma%my_bsum_stop - sigma%my_bsum_start + 1
+           ABI_CALLOC(send_cgq, (2, npw_kq * nspinor, my_nb))
+
            mcgq = npw_kq * nspinor * nband_me
            mgscq = npw_kq * nspinor * nband_me * psps%usepaw
            ABI_CALLOC(cgq, (2, npw_kq * nspinor, nband_me))
@@ -1525,11 +1528,22 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                                  npw_kqirr, wfd%kdata(ikq_ibz)%kg_k, &
                                  npw_kq, kg_kq, istwf_kqirr, istwf_kq, cgwork, bra_kq, work_ngfft, work)
               end if
+#if 0
               cgq(:, :, ibsum_kq) = bra_kq
-              !ii = ibsum_kq - sigma%my_bsum_start + 1
+#else
+              ii = ibsum_kq - sigma%my_bsum_start + 1
+              send_cgq(:,:, ii) = bra_kq
               !cgq(:,:,ii) = bra_kq
+#endif
            end do
+
+#if 0
            call xmpi_sum(cgq, sigma%bsum_comm%value, ierr)
+#else
+           ! Use allgather instead of a naive xmpi_sum for efficiency reasons.
+           call xmpi_allgather(send_cgq, size(send_cgq), cgq, sigma%bsum_comm%value, ierr)
+#endif
+           ABI_FREE(send_cgq)
 
            ABI_CALLOC(out_eig1_k, (2*nband_kq**2))
            ABI_MALLOC(dcwavef, (2, npw_kq*nspinor*usedcwavef0))
@@ -1605,7 +1619,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                !write(std_out,*)" |psi1|^2", cg_real_zdotc(npw_kq*nspinor, cg1s_kq(:, :, ipc, ib_k), cg1s_kq(:, :, ipc, ib_k))
                enough_stern = enough_stern + 1
              end if
-             call wrtout(std_out, sjoin("Stern nlines_done:", ioat(nlines_done))
+             call wrtout(std_out, sjoin("Stern nlines_done:", itoa(nlines_done)))
 
            end do ! ib_k
 

@@ -192,8 +192,11 @@ module m_gwr
 !! pstat_t
 !!
 !! FUNCTION
-!! NB: This file is only available on Linux.
+!! This object stores the most important quantites reported in the /proc/{pid}/status file
+!! in particular the virtual memory VmRSS that can be used at runtime to define block sizes
 !! See https://docs.kernel.org/filesystems/proc.html
+!!
+!! NB: This file is only available on Linux.
 !!
 !! SOURCE
 
@@ -7801,34 +7804,34 @@ subroutine pstat_from_file(pstat, filepath)
   character(len=500) :: line, spid, iomsg
   integer :: istart, istop, iostat
 
-  !ierr = 0; mem_mb = 1024_dp
-
   !inquire(file="/proc/"//trim(spid)//'/status', exist=exist)
   !if (.not. exist) then
   !  ierr = 1; return
   !end if
 
+  pstat%ok = .False.
   open(newunit=unit, file=filepath, action="read", status='old', iostat=ierr)
   if (ierr /= 0) return
 
   do
     read(unit, "(a)", iostat=ierr, end=10) line
-    !print *, trim(line)
     if (ierr > 0) then
       close(unit)
       return
     end if
+
+    ! Parse useful integers
     if (index(line, "Pid:") == 1) call get_int(line, pstat%pid)
     if (index(line, "Threads:") == 1) call get_int(line, pstat%threads)
     if (index(line, "FDSize:") == 1) call get_int(line, pstat%fdsize)
 
+    ! Parse memory entries
     if (index(line, "VmRSS:") == 1) call get_mem_mb(line, pstat%vmrss_mb)
     if (index(line, "VmPeak:") == 1) call get_mem_mb(line, pstat%vmpeak_mb)
     if (index(line, "VmStk:") == 1) call get_mem_mb(line, pstat%vmstk_mb)
   end do
 
 10  close(unit)
-
   pstat%ok = .True.
 
 contains
@@ -7840,6 +7843,7 @@ subroutine get_mem_mb(str, mem_mb)
 
   real(dp) :: mem_fact
 
+  ! Generic mem entry has format:
   !VmRSS: 2492 kB
   istart = index(str, ":") + 1
   istop = find_and_select(str, &
@@ -7851,11 +7855,11 @@ subroutine get_mem_mb(str, mem_mb)
   mem_mb = mem_mb * mem_fact
 end subroutine get_mem_mb
 
-subroutine get_int(str, ival)
+subroutine get_int(str, out_ival)
   character(len=*),intent(in) :: str
-  integer,intent(out) :: ival
+  integer,intent(out) :: out_ival
   istart = index(str, ":") + 1
-  read(str(istart+1:), fmt=*, iostat=iostat, iomsg=iomsg) ival
+  read(str(istart+1:), fmt=*, iostat=iostat, iomsg=iomsg) out_ival
   ABI_CHECK(iostat == 0, iomsg)
 end subroutine get_int
 
@@ -7886,21 +7890,19 @@ subroutine pstat_print(pstat, units, header)
 end subroutine pstat_print
 !!***
 
-subroutine pstat_gather(pstat, vmrss_mb, comm, ierr)
+subroutine pstat_gather(pstat, vmrss_mb, comm)
 
  class(pstat_t),intent(out) :: pstat
  real(dp),intent(out) :: vmrss_mb
  integer,intent(in) :: comm
- integer,intent(out) :: ierr
+ !integer,intent(out) :: ierr
 
- !integer :: my_ierr, ii
- integer :: int_list(5)
+ integer :: ierr, int_list(5)
  real(dp) :: real_list(3)
 
  call pstat%from_pid()
  real_list = [pstat%vmrss_mb, pstat%vmpeak_mb, pstat%vmstk_mb]
- !call xmpi_max_ip(my_ierr, ierr, comm, ii)
- !call xmpi_max_ip(mem_mb, comm, ii)
+ !call xmpi_max_ip(real_list, comm, ierr)
 
 end subroutine pstat_gather
 
