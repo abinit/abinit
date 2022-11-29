@@ -38,7 +38,7 @@ module m_xmpi
 #ifdef FC_NAG
  use f90_unix_proc
 #endif
- use m_clib, only : clib_ulimit_stack, clib_getpid !, clib_usleep
+ use m_clib, only : clib_ulimit_stack !, clib_getpid !, clib_usleep
 
  implicit none
 
@@ -5158,104 +5158,6 @@ subroutine pool2d_free(pool)
  call pool%comm%free()
 
 end subroutine pool2d_free
-!!***
-
-!subroutine xmpi_get_vmrss(mem_mb, comm, ierr)
-!
-!  real(dp),intent(out) :: mem_mb
-!  integer,intent(out) :: ierr
-!
-!  integer :: my_ierr, ii
-!
-!  call xmpi_get_pid_vmrss(mem_mb, my_ierr)
-!  call xmpi_max_ip(my_ierr, ierr, comm, ii)
-!  call xmpi_max_ip(mem_mb, comm, ii)
-!
-!end subroutine xmpi_get_vmrss
-
-subroutine xmpi_get_pid_vmrss(mem_mb, ierr)
-
-  real(dp),intent(out) :: mem_mb
-  integer,intent(out) :: ierr
-
-  integer :: unit
-  integer(c_int) :: pid
-  !logical :: exist
-  character(len=500) :: line
-  character(len=500) :: spid
-
-  ierr = 0; mem_mb = 1024_dp
-
-  pid = clib_getpid()
-  write(spid, "(i0)") pid
-  spid = adjustl(spid)
-
-  !inquire(file="/proc/"//trim(spid)//'/status', exist=exist)
-  !if (.not. exist) then
-  !  ierr = 1; return
-  !end if
-
-  open(newunit=unit, file='/proc/'//trim(spid)//'/status', action="read", status='old', iostat=ierr)
-  if (ierr /= 0) return
-
-  do
-    read(unit, "(a)", iostat=ierr, end=10) line
-    if (ierr > 0) then
-      close(unit)
-      return
-    end if
-    ! https://docs.kernel.org/filesystems/proc.html
-    !VmRSS:      2492 kB
-    if (index(line, "VmRSS:") > 0) then
-      call parse_str_with_mem_units(line, mem_mb)
-      exit
-    end if
-  end do
-
-10  close(unit)
-
-contains
-
-subroutine parse_str_with_mem_units(str, mem_mb)
-
-  character(len=*),intent(in) :: str
-  real(dp),intent(out) :: mem_mb
-
-  integer :: istart, istop, istart_mem, iostat !istop_mb,
-  real(dp) :: mem_fact
-
-  istart = index(str, ":")
-
-  ! find units of memory, note upper case
-  istop = -1
-  istart_mem = index(str, "kB")
-  if (istart_mem > 0) then
-    istop = istart_mem - 1
-    mem_fact = 0.001_dp
-  end if
-  if (istop == -1) then
-    istart_mem = index(str, "mB")
-    if (istart_mem > 0) then
-      istop = istart_mem - 1
-      mem_fact = 1.0_dp
-    end if
-  end if
-
-  mem_mb = 1024_dp
-  if (istop == -1) return
-
-  read(unit=str(istart+1:istop), fmt=*, iostat=iostat) mem_mb
-  if (iostat == 0) mem_mb = mem_mb * mem_fact
-
-  !!istop = find_and_select(arg, &
-  !!                           ["kb", "mb"], &
-  !!                           [one/1024._dp, one, 1024._dp, 1024._dp ** 2], one, fact, err_msg)
-  !!ABI_CHECK(istop /= -1, err_msg)
-
-
-end subroutine parse_str_with_mem_units
-
-end subroutine xmpi_get_pid_vmrss
 !!***
 
 end module m_xmpi

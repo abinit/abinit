@@ -1551,8 +1551,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            ! still it's clear that the treatment of this array must be completely refactored in the DFPT code.
            !
            grad_berry_size_mpw1 = 0
-
            call cwtime(cpu_stern, wall_stern, gflops_stern, "start")
+
            do ib_k=1,nbcalc_ks
              ! MPI parallelism inside bsum_comm (not very efficient).
              ! TODO: To be replaced by MPI parallellism over bands in projbd inside dfpt_cgwf
@@ -1605,10 +1605,12 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                !write(std_out,*)" |psi1|^2", cg_real_zdotc(npw_kq*nspinor, cg1s_kq(:, :, ipc, ib_k), cg1s_kq(:, :, ipc, ib_k))
                enough_stern = enough_stern + 1
              end if
+             call wrtout(std_out, sjoin("Stern nlines_done:", ioat(nlines_done))
 
            end do ! ib_k
 
-           if (dtset%prtvol > 10) call cwtime_report("dfpt_cgwf", cpu_stern, wall_stern, gflops_stern)
+           !if (dtset%prtvol > 10)
+           call cwtime_report("dfpt_cgwf", cpu_stern, wall_stern, gflops_stern)
 
            ABI_FREE(band_procs)
            ABI_FREE(cgq)
@@ -4996,7 +4998,7 @@ subroutine sigmaph_print(self, dtset, unt)
  if (.not. (self%qint_method == 1 .and. self%imag_only)) then
    write(unt,"(a)")sjoin(" Imaginary shift in the denominator (zcut): ", ftoa(aimag(self%ieta) * Ha_eV, fmt="f5.3"), "[eV]")
  end if
- msg = " Standard quadrature"; if (self%qint_method == 1) msg = " Tetrahedron method"
+ msg = " Standard quadrature with zcut"; if (self%qint_method == 1) msg = " Tetrahedron method"
  write(unt, "(2a)")sjoin(" Method for q-space integration:", msg)
  if (self%qint_method == 1) then
    ndiv = 1; if (self%use_doublegrid) ndiv = self%eph_doublegrid%ndiv

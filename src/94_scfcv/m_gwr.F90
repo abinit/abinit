@@ -187,6 +187,45 @@ module m_gwr
 
 !----------------------------------------------------------------------
 
+!!****t* m_gwr/pstat_t
+!! NAME
+!! pstat_t
+!!
+!! FUNCTION
+!! NB: This file is only available on Linux.
+!! See https://docs.kernel.org/filesystems/proc.html
+!!
+!! SOURCE
+
+ type, public :: pstat_t
+
+  logical :: ok = .False.
+
+  integer :: pid = -1
+
+  integer :: threads = -1
+  ! number of threads
+
+  integer :: fdsize = -1
+   ! number of file descriptor slots currently allocated
+
+  real(dp) :: vmrss_mb = -one
+  ! size of memory portions. It contains the three following parts (VmRSS = RssAnon + RssFile + RssShmem)
+
+  real(dp) :: vmpeak_mb = -one
+  ! peak virtual memory size
+
+  real(dp) :: vmstk_mb = -one
+  ! size of stack segments
+
+ contains
+   procedure :: from_pid => pstat_from_pid     ! Init object from process identifier (main entry point)
+   procedure :: from_file => pstat_from_file   ! Init object from file (useful for debugging)
+   procedure :: print => pstat_print           ! Print object
+ end type pstat_t
+
+!----------------------------------------------------------------------
+
 !!****t* m_gwr/desc_t
 !! NAME
 !! desc_t
@@ -262,22 +301,23 @@ END TYPE my_matrix
 
 !----------------------------------------------------------------------
 
-!!****t* m_gwr/mem_t
+!!****t* m_gwr/est_t
 !! NAME
-!! mem_t
+!! est_t
 !!
 !! FUNCTION
+!! Memory is given in Mb
 !!
 !! SOURCE
 
- type, public :: mem_t
+ type, public :: est_t
 
-   real(dp) :: green_gg = zero
-   real(dp) :: green_rg = zero
-   real(dp) :: chi_gg = zero
-   real(dp) :: chi_rg = zero
-   real(dp) :: ugb = zero
-   real(dp) :: total = zero
+   real(dp) :: mem_green_gg = zero
+   real(dp) :: mem_green_rg = zero
+   real(dp) :: mem_chi_gg = zero
+   real(dp) :: mem_chi_rg = zero
+   real(dp) :: mem_ugb = zero
+   real(dp) :: mem_total = zero
    real(dp) :: efficiency = zero
    real(dp) :: speedup = zero
 
@@ -288,7 +328,7 @@ END TYPE my_matrix
    !procedure :: print => mem_print
    ! Init object
 
- end type mem_t
+ end type est_t
 !!***
 
 !----------------------------------------------------------------------
@@ -669,6 +709,8 @@ END TYPE my_matrix
    ! Matrix elements of $\<nks|\Sigma_x|nk's\>$ with
    ! b1gw = minval(gwr%bstart_ks); b2gw = maxval(gwr%bstop_ks)
 
+   !type(pstat_t) :: pstat
+
  contains
 
    procedure :: init => gwr_init
@@ -810,13 +852,13 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  integer :: ik_ibz, ik_bz, isym_k, trev_k, g0_k(3)
  integer :: ip_g, ip_k, ip_t, ip_s, np_g, np_k, np_t, np_s
  real(dp) :: cpu, wall, gflops, te_min, te_max, wmax, vc_ecut, delta, abs_rerr, exact_int, eval_int
- real(dp) :: efficiency
- !real(dp) :: mem_green_gg, mem_green_rg, mem_chi_gg, mem_chi_rg, mem_ugb
+ real(dp) :: prev_efficiency, prev_speedup
  logical :: isirr_k, changed, q_is_gamma, reorder
  character(len=5000) :: msg
  type(krank_t) :: qrank, krank_ibz
  type(gaps_t) :: ks_gaps
- type(mem_t) :: tot_mem, proc_mem
+ type(est_t) :: est
+ type(pstat_t) :: ps
 !arrays
  integer :: qptrlatt(3,3), dims_kgts(ndims), try_dims_kgts(ndims), indkk_k(6,1), units(2)
  integer,allocatable :: gvec_(:,:),degblock(:,:), degblock_all(:,:,:,:), ndeg_all(:,:), iwork(:,:), got(:)
@@ -1223,7 +1265,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
    call print_ngfft(gwr%g_ngfft, header="FFT mesh for Green's function", unit=ab_out)
 
    ! Now we can estimate the total memory in Mb.
-   !call estimate_mem(gwr, [1,1,1,1], tot_mem, units=[std_out, ab_out], header="Total memory required in Mb")
+   !call estimate(gwr, [1,1,1,1], tot_mem, units=[std_out, ab_out], header="Total memory required in Mb")
 
    call wrtout(std_out, sjoin(" FFT uc_batch_size:", itoa(gwr%uc_batch_size)))
    call wrtout(std_out, sjoin(" FFT sc_batch_size:", itoa(gwr%sc_batch_size)))
@@ -1271,15 +1313,15 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
    ! Only master rank works here for consistency reasons.
    if (my_rank == master) then
      dims_kgts = [1, all_nproc, 1, 1]
-     call estimate_mem(gwr, dims_kgts, proc_mem)
-     efficiency = proc_mem%efficiency
+     call estimate(gwr, dims_kgts, est)
+     prev_efficiency = est%efficiency; prev_speedup = est%speedup
      call wrtout(units, sjoin("- Optimizing MPI grid with mem_per_cpu_mb:", ftoa(mem_per_cpu_mb), "[Mb]"), pre_newlines=1)
      call wrtout(units, "- Use `abinit run.abi --mem-per-cpu=4G` to set mem_per_cpu_mb in the submission script", newlines=1)
      write(msg, "(a,4(a4,2x),3(a12,2x))") "- ", "np_k", "np_g", "np_t", "np_s", "memb_per_cpu", "efficiency", "speedup"
      call wrtout(units, msg)
      ip_k = dims_kgts(1); ip_g = dims_kgts(2); ip_t = dims_kgts(3); ip_s = dims_kgts(4)
      write(msg, "(a,4(i4,2x),3(es12.5,2x))") &
-       "- ", ip_k, ip_g, ip_t, ip_s, proc_mem%total, proc_mem%efficiency, proc_mem%speedup
+       "- ", ip_k, ip_g, ip_t, ip_s, est%mem_total, est%efficiency, est%speedup
      call wrtout(units, msg)
 
      do ip_s=1,gwr%nsppol
@@ -1292,29 +1334,34 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
              if (product(try_dims_kgts) /= all_nproc .or. all(try_dims_kgts == dims_kgts)) cycle
              !npwps
              !ABI_CHECK(block_dist_1d(npwsp, ip_g, col_bsize, msg), msg)
-             call estimate_mem(gwr, try_dims_kgts, proc_mem)
-             if (proc_mem%total < mem_per_cpu_mb * 0.8_dp .and. proc_mem%efficiency > efficiency) then
-               efficiency = proc_mem%efficiency; dims_kgts = try_dims_kgts
+             call estimate(gwr, try_dims_kgts, est)
+             !if (est%mem_total < mem_per_cpu_mb * 0.8_dp .and. est%efficiency > prev_efficiency) then
+             if (est%mem_total < mem_per_cpu_mb * 0.8_dp .and. est%speedup > prev_speedup) then
+               prev_efficiency = est%efficiency; prev_speedup = est%speedup; dims_kgts = try_dims_kgts
              end if
              write(msg, "(a,4(i4,2x),3(es12.5,2x))") &
-               "- ", ip_k, ip_g, ip_t, ip_s, proc_mem%total, proc_mem%efficiency, proc_mem%speedup
+               "- ", ip_k, ip_g, ip_t, ip_s, est%mem_total, est%efficiency, est%speedup
              call wrtout(units, msg)
            end do
          end do
        end do
      end do
 
-     call estimate_mem(gwr, dims_kgts, proc_mem)
+     call estimate(gwr, dims_kgts, est)
      call wrtout(units, "Selected configuration:", pre_newlines=1)
      ip_k = dims_kgts(1); ip_g = dims_kgts(2); ip_t = dims_kgts(3); ip_s = dims_kgts(4)
      write(msg, "(a,4(i4,2x),3(es12.5,2x))") &
-       "- ", ip_k, ip_g, ip_t, ip_s, proc_mem%total, proc_mem%efficiency, proc_mem%speedup
+       "- ", ip_k, ip_g, ip_t, ip_s, est%mem_total, est%efficiency, est%speedup
      call wrtout(units, msg, newlines=1)
      !stop
    end if ! master
 
    call xmpi_bcast(dims_kgts, master, gwr%comm%value, ierr)
    np_k = dims_kgts(1); np_g = dims_kgts(2); np_t = dims_kgts(3); np_s = dims_kgts(4)
+
+   call ps%from_file("status")
+   call ps%print([std_out])
+   !stop
 
 #else
    ! Determine number of processors for the spin axis. if all_nproc is odd, spin is not distributed when nsppol == 2
@@ -1386,7 +1433,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  end if
 
  !if (my_rank == master) then
- !  call estimate_mem(gwr, dims_kgts, proc_mem, units=[std_out, ab_out], header="Estimated memory per MPI proc in Mb")
+ !  call estimate(gwr, dims_kgts, est, units=[std_out, ab_out], header="Estimated memory per MPI proc in Mb")
  !end if
 
 #ifdef HAVE_MPI
@@ -1649,26 +1696,26 @@ end subroutine gwr_init
 
 !----------------------------------------------------------------------
 
-!!****f* m_gwr/estimate_mem
+!!****f* m_gwr/estimate
 !! NAME
-!! estimate_mem
+!! estimate
 !!
 !! FUNCTION
 !!
 !! SOURCE
 
-subroutine estimate_mem(gwr, np_kgts, mem, units, header)
+subroutine estimate(gwr, np_kgts, est, units, header)
 
 !Arguments ------------------------------------
  class(gwr_t), intent(in) :: gwr
  integer,intent(in) :: np_kgts(4)
- type(mem_t),intent(out) :: mem
+ type(est_t),intent(out) :: est
  integer,optional,intent(in) :: units(:)
  character(len=*),optional,intent(in) :: header
 
 !Local variables-------------------------------
  real(dp) :: np_k, np_g, np_t, np_s, w_k, w_g, w_t, w_s, np_tot
- character(len=5000) :: header__
+ character(len=500) :: header__
  type(yamldoc_t) :: ydoc
 
 ! *************************************************************************
@@ -1680,27 +1727,28 @@ subroutine estimate_mem(gwr, np_kgts, mem, units, header)
  !     and IBZ points might be replicated.
 
  ! Resident memory needed to store G(g,g',+/-tau) and chi(g,g',tau)
- mem%green_gg = two * two * (one*gwr%nspinor*gwr%green_mpw)**2 * two*gwr%ntau * gwr%nkibz * gwr%nsppol * dp*b2Mb / np_tot
- mem%chi_gg = two * (one*gwr%tchi_mpw)**2 * gwr%ntau * gwr%nqibz * dp*b2Mb / (np_g * np_t * np_k)
- mem%ugb = two * gwr%green_mpw * gwr%nspinor * gwr%dtset%nband(1) * gwr%nkibz * gwr%nsppol * dp*b2Mb / np_tot
+ est%mem_green_gg = two * two * (one*gwr%nspinor*gwr%green_mpw)**2 * two*gwr%ntau * gwr%nkibz * gwr%nsppol * dp*b2Mb / np_tot
+ est%mem_chi_gg = two * (one*gwr%tchi_mpw)**2 * gwr%ntau * gwr%nqibz * dp*b2Mb / (np_g * np_t * np_k)
+ est%mem_ugb = two * gwr%green_mpw * gwr%nspinor * gwr%dtset%nband(1) * gwr%nkibz * gwr%nsppol * dp*b2Mb / np_tot
 
  ! Temporary memory allocated inside the tau loops.
  ! This is the chunck we have to minimize by increasing np_g and/or np_k to avoid going OOM.
- mem%green_rg = two * two * gwr%nspinor**2 * gwr%green_mpw * gwr%g_nfft * gwr%nkbz * gwr%nsppol * dp*b2Mb / (np_g * np_k)
- mem%chi_rg = two * gwr%tchi_mpw * gwr%g_nfft * gwr%nqbz * dp*b2Mb / (np_g * np_k)
+ est%mem_green_rg = two * two * gwr%nspinor**2 * gwr%green_mpw * gwr%g_nfft * gwr%nkbz * gwr%nsppol * dp*b2Mb / (np_g * np_k)
+ est%mem_chi_rg = two * gwr%tchi_mpw * gwr%g_nfft * gwr%nqbz * dp*b2Mb / (np_g * np_k)
 
- mem%total = mem%green_gg + mem%chi_gg + mem%ugb + mem%green_rg + mem%chi_rg
+ est%mem_total = est%mem_green_gg + est%mem_chi_gg + est%mem_ugb + est%mem_green_rg + est%mem_chi_rg
 
- ! Estimate speedup and parallel efficiency. Note how we use g_nfft instead of green_mpw.
- w_k = 0.8_dp; w_g = 0.9_dp; w_t = one; w_s = one
- mem%speedup = speedup(gwr%nkbz, nint(np_k), w_k) * speedup(gwr%g_nfft, nint(np_g), w_g) * &
+ ! Estimate speedup and parallel efficiency using heurist weights.
+ ! Note how we use g_nfft instead of green_mpw.
+ w_k = 0.799_dp; w_g = 0.899_dp; w_t = 1.1_dp; w_s = 1.2_dp
+ est%speedup = speedup(gwr%nkbz, nint(np_k), w_k) * speedup(gwr%g_nfft, nint(np_g), w_g) * &
                speedup(gwr%ntau, nint(np_t), w_t) * speedup(gwr%nsppol, nint(np_s), w_s)
- mem%efficiency = mem%speedup / np_tot
+ est%efficiency = est%speedup / np_tot
 
  if (present(units)) then
    header__ = "unknown"; if (present(header)) header__ = header
    ydoc = yamldoc_open(header__) !, width=11, real_fmt='(3f8.3)')
-   call ydoc%add_real('total_memory_mb', mem%total)
+   call ydoc%add_real('total_memory_mb', est%mem_total)
    call ydoc%write_units_and_free(units)
  end if
 
@@ -1717,7 +1765,7 @@ real(dp) pure function speedup(size, np, weight)
   end if
 end function speedup
 
-end subroutine estimate_mem
+end subroutine estimate
 !!***
 
 !----------------------------------------------------------------------
@@ -7724,7 +7772,137 @@ integer pure function memlimited_step(start, stop, num_items, bsize, maxmem_mb) 
   totmem_mb = one * (stop - start + 1) * num_items * bsize
   step = stop - start + 1
   if (totmem_mb > maxmem_mb) step = floor(totmem_mb / maxmem_mb)
+
 end function memlimited_step
+
+subroutine pstat_from_pid(pstat)
+
+  use m_clib, only : clib_getpid
+  class(pstat_t),intent(out) :: pstat
+
+  integer(c_int) :: pid
+  character(len=500) :: spid
+
+  pid = clib_getpid()
+  write(spid, "(i0)") pid
+  spid = adjustl(spid)
+  call pstat%from_file('/proc/'//trim(spid)//'/status')
+
+end subroutine pstat_from_pid
+
+subroutine pstat_from_file(pstat, filepath)
+
+  class(pstat_t),intent(out) :: pstat
+  character(len=*),intent(in) :: filepath
+
+  integer :: unit, ierr
+  integer(c_int) :: pid
+  !logical :: exist
+  character(len=500) :: line, spid, iomsg
+  integer :: istart, istop, iostat
+
+  !ierr = 0; mem_mb = 1024_dp
+
+  !inquire(file="/proc/"//trim(spid)//'/status', exist=exist)
+  !if (.not. exist) then
+  !  ierr = 1; return
+  !end if
+
+  open(newunit=unit, file=filepath, action="read", status='old', iostat=ierr)
+  if (ierr /= 0) return
+
+  do
+    read(unit, "(a)", iostat=ierr, end=10) line
+    !print *, trim(line)
+    if (ierr > 0) then
+      close(unit)
+      return
+    end if
+    if (index(line, "Pid:") == 1) call get_int(line, pstat%pid)
+    if (index(line, "Threads:") == 1) call get_int(line, pstat%threads)
+    if (index(line, "FDSize:") == 1) call get_int(line, pstat%fdsize)
+
+    if (index(line, "VmRSS:") == 1) call get_mem_mb(line, pstat%vmrss_mb)
+    if (index(line, "VmPeak:") == 1) call get_mem_mb(line, pstat%vmpeak_mb)
+    if (index(line, "VmStk:") == 1) call get_mem_mb(line, pstat%vmstk_mb)
+  end do
+
+10  close(unit)
+
+  pstat%ok = .True.
+
+contains
+
+subroutine get_mem_mb(str, mem_mb)
+  use m_fstrings, only : find_and_select
+  character(len=*),intent(in) :: str
+  real(dp),intent(out) :: mem_mb
+
+  real(dp) :: mem_fact
+
+  !VmRSS: 2492 kB
+  istart = index(str, ":") + 1
+  istop = find_and_select(str, &
+                         ["kB", "mB"], &
+                         [one/1024._dp, one], mem_fact, iomsg) !default=one,
+  ABI_CHECK(istop /= -1, iomsg)
+  read(str(istart+1:istop-1), fmt=*, iostat=iostat, iomsg=iomsg) mem_mb
+  ABI_CHECK(iostat == 0, iomsg)
+  mem_mb = mem_mb * mem_fact
+end subroutine get_mem_mb
+
+subroutine get_int(str, ival)
+  character(len=*),intent(in) :: str
+  integer,intent(out) :: ival
+  istart = index(str, ":") + 1
+  read(str(istart+1:), fmt=*, iostat=iostat, iomsg=iomsg) ival
+  ABI_CHECK(iostat == 0, iomsg)
+end subroutine get_int
+
+end subroutine pstat_from_file
+!!***
+
+subroutine pstat_print(pstat, units, header)
+ class(pstat_t),intent(in) :: pstat
+ integer,intent(in) :: units(:)
+ character(len=*),optional,intent(in) :: header
+
+!Local variables-------------------------------
+ character(len=500) :: header__
+ type(yamldoc_t) :: ydoc
+
+ header__ = "unknown"; if (present(header)) header__ = header
+ ydoc = yamldoc_open(header__) !, width=11, real_fmt='(3f8.3)')
+
+ call ydoc%add_int("pid", pstat%pid)
+ call ydoc%add_int("threads", pstat%threads)
+ call ydoc%add_int("fdsize", pstat%fdsize)
+ call ydoc%add_real("vmrss_mb", pstat%vmrss_mb)
+ call ydoc%add_real("vmpeak_mb", pstat%vmpeak_mb)
+ call ydoc%add_real("vmstk_mb", pstat%vmstk_mb)
+
+ call ydoc%write_units_and_free(units)
+
+end subroutine pstat_print
+!!***
+
+subroutine pstat_gather(pstat, vmrss_mb, comm, ierr)
+
+ class(pstat_t),intent(out) :: pstat
+ real(dp),intent(out) :: vmrss_mb
+ integer,intent(in) :: comm
+ integer,intent(out) :: ierr
+
+ !integer :: my_ierr, ii
+ integer :: int_list(5)
+ real(dp) :: real_list(3)
+
+ call pstat%from_pid()
+ real_list = [pstat%vmrss_mb, pstat%vmpeak_mb, pstat%vmstk_mb]
+ !call xmpi_max_ip(my_ierr, ierr, comm, ii)
+ !call xmpi_max_ip(mem_mb, comm, ii)
+
+end subroutine pstat_gather
 
 end module m_gwr
 !!***

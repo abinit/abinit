@@ -590,7 +590,7 @@ subroutine set_mem_per_cpu_mb(mem_mb)
 
 ! *********************************************************************
 
- print *, "Setting mem_per_cpu_mb to", mem_mb
+ !print *, "Setting mem_per_cpu_mb to", mem_mb
  mem_per_cpu_mb = mem_mb
 
 end subroutine set_mem_per_cpu_mb

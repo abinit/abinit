@@ -967,7 +967,7 @@ subroutine getng(boxcutmin, chksymtnons, ecut, gmet, kpt, me_fft, mgfft, nfft, n
        npower(3,ipower)=npower(3,ipower)+1
      end do
      if(nn/=1)then
-       ABI_ERROR('nproc_fft is not a multiple of 2, 3, 5, 7 or 11 ')
+       ABI_ERROR(sjoin("nproc_fft: ", itoa(nn), "is not a multiple of 2, 3, 5, 7 or 11"))
      endif
    enddo
    npower(2,:)=npower(3,:)

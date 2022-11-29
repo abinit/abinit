@@ -37,7 +37,7 @@ module m_argparse
  use m_io_tools,        only : open_file, file_exists, enforce_fortran_io
  use m_cppopts_dumper,  only : dump_cpp_options
  use m_optim_dumper,    only : dump_optim
- use m_fstrings,        only : atoi, atof, itoa, firstchar, startswith, endswith, sjoin
+ use m_fstrings,        only : atoi, atof, itoa, firstchar, startswith, endswith, sjoin, find_and_select
  use m_time,            only : str2sec
  use m_libpaw_tools,    only : libpaw_log_flag_set
  use m_ipi,             only : ipi_setup
@@ -122,9 +122,9 @@ contains
 type(args_t) function args_parser() result(args)
 
 !Local variables-------------------------------
- integer :: ii, ierr
+ integer :: ii, ierr, ntasks_per_node = -1
  logical :: iam_master, verbose
- real(dp) :: timelimit
+ real(dp) :: timelimit, memb_per_node = -one, memb_per_cpu = -one
  character(len=500) :: arg !,msg
 
 ! *************************************************************************
@@ -241,7 +241,15 @@ type(args_t) function args_parser() result(args)
      call enforce_fortran_io(.True.)
 
    else if (begins_with(arg, "--mem-per-cpu=")) then
-     call set_mem_per_cpu_mb(parse_slurm_mem(arg, "--mem-per-cpu="))
+     memb_per_cpu = parse_slurm_mem(arg, "--mem-per-cpu=")
+     call set_mem_per_cpu_mb(memb_per_cpu)
+
+   else if (begins_with(arg, "--mem=")) then
+     memb_per_node = parse_slurm_mem(arg, "--mem=")
+
+   else if (begins_with(arg, "--ntasks-per-node=")) then
+     call get_command_argument(ii + 1, arg)
+     ntasks_per_node = atoi(arg)
 
    else if (arg == "--F03") then
      ! For multibinit only
@@ -271,7 +279,7 @@ type(args_t) function args_parser() result(args)
        write(std_out,*)"--enforce-fortran-io       Use Fortran-IO instead of MPI-IO when operating on Fortran files"
        write(std_out,*)"                           Useful to read files when the MPI-IO library is not efficient."
        write(std_out,*)"                           DON'T USE this option when the code needs to write large files e.g. WFK"
-       write(std_out,*)"-t, --timelimit            Set the timelimit for the run. Accepts time in Slurm notation:"
+       write(std_out,*)"-t, --timelimit            Set the timelimit for the run. Accepts time in Slurm syntax:"
        write(std_out,*)"                               days-hours"
        write(std_out,*)"                               days-hours:minutes"
        write(std_out,*)"                               days-hours:minutes:seconds"
@@ -281,7 +289,9 @@ type(args_t) function args_parser() result(args)
        write(std_out,*)"                           At present only GS, relaxations and MD runs support this option"
        write(std_out,*)"--mem-per-cpu=<size>[units] Set memory per cpu using Slurm syntax. Default units are megabytes."
        write(std_out,*)"                           Different units can be specified using the suffix [K|M|G|T]."
-       write(std_out,*)"                           e.g. 1024, 1024M, 1G. NB: No space is allowed between size and units."
+       write(std_out,*)"--mem=<size>[units]        Set memory per node using Slurm syntax. Default units are megabytes."
+       write(std_out,*)"                           Requires `ntasks-per-node`. Not compatibile with `-mem-per-cpu`."
+       write(std_out,*)"--ntasks-per-node=INT      Set number of tasks per node. Used in conjunction with --mem`"
        write(std_out,*)"--verbose                  Enable verbose mode in argparse"
        write(std_out,*)"-h, --help                 Show this help and exit."
 
@@ -313,6 +323,13 @@ type(args_t) function args_parser() result(args)
      end if
    end if
  end do
+
+ if (ntasks_per_node /= -1 .or. memb_per_node /= -one) then
+   ABI_CHECK(ntasks_per_node /= -1, "`mem-per-node` requires `ntasks-per-node`")
+   ABI_CHECK(memb_per_node /= -one, "`ntasks-per-node` requires `mem-per-node`")
+   ABI_CHECK(memb_per_cpu == -one, "`mem-per-cpu` and `mem-per-node` are mutually exclusive!")
+   call set_mem_per_cpu_mb(memb_per_node / ntasks_per_node)
+ end if
 
 #endif
 
@@ -391,6 +408,9 @@ end function parse_yesno
 !!
 !!  Default units are megabytes. Different units can be specified using the suffix [K|M|G|T].
 !!
+!!  For a list of slurm env variables that can be used to pass options to Abinit via the submission script, see:
+!!  https://docs.hpc.shef.ac.uk/en/latest/referenceinfo/scheduler/SLURM/SLURM-environment-variables.html
+!!
 !! SOURCE
 
 real(dp) function parse_slurm_mem(arg, optname) result(mem_mb)
@@ -407,71 +427,17 @@ real(dp) function parse_slurm_mem(arg, optname) result(mem_mb)
  fact = one
  istop = find_and_select(arg, &
                          ["K", "M", "G", "T"], &
-                         [one/1024._dp, one, 1024._dp, 1024._dp ** 2], one, fact, iomsg)
+                         [one/1024._dp, one, 1024._dp, 1024._dp ** 2], fact, iomsg, default=one)
 
  ABI_CHECK(istop /= -1, iomsg)
  istop = merge(len_trim(arg), istop - 1, istop == 0)
 
- read(arg(len(optname)+1: istop), *, iostat=istat, iomsg=iomsg) mem_mb
+ read(arg(len(optname) + 1: istop), *, iostat=istat, iomsg=iomsg) mem_mb
  ABI_CHECK(istat == 0, sjoin("Invalid syntax for memory string:", arg, ch10, "iomsg", iomsg))
+ ABI_CHECK(mem_mb > zero, "mem_mb must be positive!")
  mem_mb = mem_mb * fact
 
 end function parse_slurm_mem
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_argparse/find_and_select
-!! NAME
-!!  find_and_select
-!!
-!! FUNCTION
-!!
-!! Usage example:
-!!
-!!   istop = find_and_select(arg, &
-!!                           ["K", "M", "G", "T"], &
-!!                           [one/1024._dp, one, 1024._dp, 1024._dp ** 2], one, fact, err_msg)
-!!
-!!   ABI_CHECK(istop /= -1, err_msg)
-!!
-!! SOURCE
-
-integer function find_and_select(string, choices, values, default, out_val, err_msg, back) result(iend)
-
-!Arguments ------------------------------------
- character(len=*),intent(in) :: string
- character(len=*),intent(in) :: choices(:)
- real(dp),intent(in) :: values(:), default
- real(dp),intent(out) :: out_val
- character(len=*),intent(out) :: err_msg
- logical,optional,intent(in) :: back
-
-!Local variables-------------------------------
- integer :: ic
- logical :: back__
-! *************************************************************************
-
- if (size(values) /= size(choices)) then
-   err_msg = "BUG in API call: size(values) /= size(choices))"
-   iend = -1; return
- end if
-
- back__ = .True.; if (present(back)) back__ = back
- do ic=1,size(choices)
-   iend = index(string, trim(choices(ic)), back=back__)
-   if (iend /= 0) then
-     if (trim(string(iend:)) /= choices(ic)) then
-       err_msg = sjoin("Invalid token:", trim(string(iend:)))
-       iend = -1; return
-     end if
-     out_val = values(ic); return
-   end if
- end do
-
- iend = 0; out_val = default
-
-end function find_and_select
 !!***
 
 !----------------------------------------------------------------------
