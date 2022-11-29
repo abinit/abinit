@@ -5247,6 +5247,12 @@ subroutine parse_str_with_mem_units(str, mem_mb)
   read(unit=str(istart+1:istop), fmt=*, iostat=iostat) mem_mb
   if (iostat == 0) mem_mb = mem_mb * mem_fact
 
+  !!istop = find_and_select(arg, &
+  !!                           ["kb", "mb"], &
+  !!                           [one/1024._dp, one, 1024._dp, 1024._dp ** 2], one, fact, err_msg)
+  !!ABI_CHECK(istop /= -1, err_msg)
+
+
 end subroutine parse_str_with_mem_units
 
 end subroutine xmpi_get_pid_vmrss

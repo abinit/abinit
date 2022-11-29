@@ -1948,14 +1948,13 @@ end subroutine mpi_setup
 
  DBG_EXIT("COLL")
 
- contains
+contains
 
-   function speedup_fdp(nn,mm)
-   !Expected linear speedup for a nn-sized problem and mm processes
-   real(dp) :: speedup_fdp
-   integer,intent(in) :: nn,mm
-   speedup_fdp=(one*nn)/(one*((nn/mm)+merge(0,1,mod(nn,mm)==0)))
- end function speedup_fdp
+real(dp) pure function speedup_fdp(nn, mm)
+  ! Expected linear speedup for a nn-sized problem and mm processes
+  integer,intent(in) :: nn, mm
+  speedup_fdp = (one*nn) / (one* ((nn / mm) + merge(0, 1, mod(nn, mm) == 0)))
+end function speedup_fdp
 
 end subroutine finddistrproc
 !!***

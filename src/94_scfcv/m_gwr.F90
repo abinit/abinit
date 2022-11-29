@@ -6,108 +6,105 @@
 !!  Objects and procedures implementing GW in real-space and imaginary time.
 !!
 !! NOTES
+!!   Memory and workload are distributed using a 4D cartesian grid: (g/r, tau, k-points, spin).
 !!
-!! Memory and workload are distributed using a 4D cartesian grid: (g/r, tau, k-points, spin).
+!!   Inside the g/r communicator, we use PBLAS matrices to store G, tchi and W.
+!!   using a 1D processor grid with block distribution along columns.
+!!   A 2D grid, indeed, would require MPI-FFT or some communication before performing the FFTs.
 !!
-!! Inside the g/r communicator, we use PBLAS matrices to store G, tchi and W.
-!! using a 1D processor grid with block distribution along columns.
-!! A 2D grid, indeed, would require MPI-FFT or some communication before performing the FFTs.
+!!   Let's assume for simplicity that we have only two MPI procs in the g/r communicator.
+!!   Matrices in (g,g') space are distributed along columns so that the g-index is local
+!!   and we can use sequential zero-padded FFTs to transform from g to r in the unit cell:
 !!
-!! Let's assume for simplicity that we have only two MPI procs in the g/r communicator.
-!! Matrices in (g,g') space are distributed along columns so that the g-index is local
-!! and we can use sequential zero-padded FFTs to transform from g to r in the unit cell:
+!!                       g'-axis
+!!                |--------------------
+!!                |         |         |
+!!       g-axis   |   P0    |   P1    |
+!!                |         |         |
+!!                |--------------------
 !!
-!!                     g'-axis
-!!              |--------------------
-!!              |         |         |
-!!     g-axis   |   P0    |   P1    |
-!!              |         |         |
-!!              |--------------------
+!!   The results of the FFT transform along g are stored in another PBLAS matrix with the same layout:
 !!
-!! The results of the FFT transform along g are stored in another PBLAS matrix with the same layout:
+!!                       g'-axis
+!!                |--------------------
+!!                |         |         |
+!!       r-axis   |   P0    |   P1    |
+!!                |         |         |
+!!                |--------------------
 !!
-!!                     g'-axis
-!!              |--------------------
-!!              |         |         |
-!!     r-axis   |   P0    |   P1    |
-!!              |         |         |
-!!              |--------------------
+!!   At this point, we use ptrans to MPI transpose the (r, g') matrix, and we end up with:
 !!
-!! At this point, we use ptrans to MPI transpose the (r, g') matrix, and we end up with:
+!!                       r-axis
+!!                |--------------------
+!!                |         |         |
+!!       g'-axis  |   P0    |   P1    |
+!!                |         |         |
+!!                |--------------------
 !!
-!!                     r-axis
-!!              |--------------------
-!!              |         |         |
-!!     g'-axis  |   P0    |   P1    |
-!!              |         |         |
-!!              |--------------------
+!!   Differences with respect to the GW code in frequency-domain:
 !!
-!! Differences with respect to the GW code in frequency-domain:
+!!    - in GWR, the k-mesh must be Gamma-centered.
+!!    - All the two-point functions are defined on k/q-centered g-spheres while GW uses a single Gamma-centered sphere.
+!!    - The frequency/tau meshes are automatically defined by ntau and the KS spectrum (minimax meshes)
 !!
-!!  - in GWR, the k-mesh must be Gamma-centered.
-!!  - All the two-point functions are defined on k/q-centered g-spheres while GW uses a single Gamma-centered sphere.
-!!  - The frequency/tau meshes are automatically defined by ntau and the KS spectrum (minimax meshes)
+!!   Technical properties:
 !!
-!! Technical properties:
+!!     - it's not clear to me that one can use vc(Sq, SG) when a cutoff is used as the cutoff breaks
+!!       the spherical symmetry of vc(r). Besides, when symmetries are used to reconstruct the term for q in the BZ,
+!!       one might have to take into account umklapps. Use cache?
 !!
-!!   - it's not clear to me that one can use vc(Sq, SG) when a cutoff is used as the cutoff breaks
-!!     the spherical symmetry of vc(r). Besides, when symmetries are used to reconstruct the term for q in the BZ,
-!!     one might have to take into account umklapps. Use cache?
+!!     - Treatment of the anisotropic behaviour of Wc. This part is badly coded in GW, in the sense that
+!!       we use a finite small q when computing Wc for q --> 0. This breaks the symmetry of the system
+!!       and QP degeneracies. The equations needed to express the angular dependency of W(q) for q --> 0
+!!       are well known but one has to pass through the Adler-Wiser expression.
+!!       Solution: Compute heads and wings using a WFK_fine wavefunction file with dense k-mesh and less bands.
+!!       The dipole matrix elements are computed with the DFPT routines, still we need to
+!!       recode a lot of stuff that is already done in cchi0q0, especially symmetries.
+!!       Note, however, that tchi is Hermitian along the imaginary axis, expect for omega = 0 in metals
+!!       but I don't think the minmax grids contain omega = 0.
 !!
-!!   - Treatment of the anisotropic behaviour of Wc. This part is badly coded in GW, in the sense that
-!!     we use a finite small q when computing Wc for q --> 0. This breaks the symmetry of the system
-!!     and QP degeneracies. The equations needed to express the angular dependency of W(q) for q --> 0
-!!     are well known but one has to pass through the Adler-Wiser expression.
-!!     Solution: Compute heads and wings using a WFK_fine wavefunction file with dense k-mesh and less bands.
-!!     The dipole matrix elements are computed with the DFPT routines, still we need to
-!!     recode a lot of stuff that is already done in cchi0q0, especially symmetries.
-!!     Note, however, that tchi is Hermitian along the imaginary axis, expect for omega = 0 in metals
-!!     but I don't think the minmax grids contain omega = 0.
+!!    - In principle, it's possible to compute QP correction along a k-path is a new WFK file is provided.
+!!      The correlated part is evaluated in real-space in the super-cell.
+!!      For Sigma_x, we need a specialized routine that can handle arbitrary q, especially at the level of v(q, G)
+!!      but I don't know if this approach will give smooth bands
+!!      as we don't have q --> 0 when k does not belong to the k-mesh.
 !!
-!!  - In principle, it's possible to compute QP correction along a k-path is a new WFK file is provided.
-!!    The correlated part is evaluated in real-space in the super-cell.
-!!    For Sigma_x, we need a specialized routine that can handle arbitrary q, especially at the level of v(q, G)
-!!    but I don't know if this approach will give smooth bands
-!!    as we don't have q --> 0 when k does not belong to the k-mesh.
+!!    - New routine to compute oscillator matrix elements with NC/PAW and PBLAS matrices.
+!!      It can be used to compute tchi head/wings as well as Sigma_x + interface with coupled-cluster codes.
 !!
-!!  - New routine to compute oscillator matrix elements with NC/PAW and PBLAS matrices.
-!!    It can be used to compute tchi head/wings as well as Sigma_x + interface with coupled-cluster codes.
+!!    - Decide whether we should use VASP conventions for G and the analytic continuation or the "standard" ones by Godby.
+!!      The standard ones are consistent with Hedin's notations and correspond to the ones used in the legacy GW code.
+!!      On the other hand, VASP notations make life easier if one has to implement PAW.
 !!
-!!  - Decide whether we should use VASP conventions for G and the analytic continuation or the "standard" ones by Godby.
-!!    The standard ones are consistent with Hedin's notations and correspond to the ones used in the legacy GW code.
-!!    On the other hand, VASP notations make life easier if one has to implement PAW.
+!!    - Address nspinor = 2 and PBLAS distribution as MPI proc can have both spinors in memory
+!!      In other words, we should store the first/last index in gvec for each spinor
 !!
-!!  - Address nspinor = 2 and PBLAS distribution as MPI proc can have both spinors in memory
-!!    In other words, we should store the first/last index in gvec for each spinor
+!!    - Optimization for Gamma-only. Memory and c -> r FFTs
 !!
-!!  - Optimization for Gamma-only. Memory and c -> r FFTs
+!!    - Need to extend FFT API to avoid scaling if isign = -1. Also fft_ug and fft_ur should accept isign
+!!      optional argument. Refactoring of all the FFT routines used in the GW code is needed
+!!      in order to exploit R2C, C2R (e.g. chi0(q=0) and GPU version.
 !!
-!!  - Need to extend FFT API to avoid scaling if isign = -1. Also fft_ug and fft_ur should accept isign
-!!    optional argument. Refactoring of all the FFT routines used in the GW code is needed
-!!    in order to exploit R2C, C2R (e.g. chi0(q=0) and GPU version.
+!!    - Possible incompatibilities between gwpc, slk matrices that are always in dp and GW machinery
+!!      Single precision for scalapack matrices?
 !!
-!!  - Possible incompatibilities between gwpc, slk matrices that are always in dp and GW machinery
-!!    Single precision for scalapack matrices?
+!!    - Use round-robin distribution instead of blocked-distribution to improve load balance.
 !!
-!!  - Use round-robin distribution instead of blocked-distribution to improve load balance.
+!!    - Memory peaks:
 !!
-!!  - Memory peaks:
-!!
-!!      (env3.9) [magianto@uan01 /scratch/project_465000061/magianto/DDIAGO_ZnO]
-!!      $~/git_repos/abinit/tests/Scripts/abimem.py peaks abimem_rank0.mocc
-!!      [0] <var=gt_scbox, A@m_gwr.F90:3395, addr=0x14aa53673010, size_mb=379.688>
-!!      [1] <var=xsum, A@xmpi_sum.finc:2551, addr=0x14aa2fce9010, size_mb=379.688>
-!!      [2] <var=gt_scbox, A@m_gwr.F90:4338, addr=0x14aa4f64f010, size_mb=379.688>
-!!      [3] <var=allcg_k, A@m_wfd.F90:4631, addr=0x14aa56b57010, size_mb=217.865>
-!!      [4] <var=chit_scbox, A@m_gwr.F90:3396, addr=0x14aa4789a010, size_mb=189.844>
-!!      [5] <var=wct_scbox, A@m_gwr.F90:4339, addr=0x14aa43876010, size_mb=189.844>
-!!      [6] <var=xsum, A@xmpi_sum.finc:2476, addr=0x14aa31bb0010, size_mb=189.844>
-!!      [7] <var=cg_k, A@m_wfd.F90:4623, addr=0x14aa64535010, size_mb=108.932>
+!!        (env3.9) [magianto@uan01 /scratch/project_465000061/magianto/DDIAGO_ZnO]
+!!        $~/git_repos/abinit/tests/Scripts/abimem.py peaks abimem_rank0.mocc
+!!        [0] <var=gt_scbox, A@m_gwr.F90:3395, addr=0x14aa53673010, size_mb=379.688>
+!!        [1] <var=xsum, A@xmpi_sum.finc:2551, addr=0x14aa2fce9010, size_mb=379.688>
+!!        [2] <var=gt_scbox, A@m_gwr.F90:4338, addr=0x14aa4f64f010, size_mb=379.688>
+!!        [3] <var=allcg_k, A@m_wfd.F90:4631, addr=0x14aa56b57010, size_mb=217.865>
+!!        [4] <var=chit_scbox, A@m_gwr.F90:3396, addr=0x14aa4789a010, size_mb=189.844>
+!!        [5] <var=wct_scbox, A@m_gwr.F90:4339, addr=0x14aa43876010, size_mb=189.844>
+!!        [6] <var=xsum, A@xmpi_sum.finc:2476, addr=0x14aa31bb0010, size_mb=189.844>
+!!        [7] <var=cg_k, A@m_wfd.F90:4623, addr=0x14aa64535010, size_mb=108.932>
 !!
 !!  TODO
-!!
 !!  - Remove cryst%timrev, use kptopt and qptopt
-!!
 !!  - Sig_c breaks QP degeneracies due to q0.
 !!
 !!
@@ -282,6 +279,7 @@ END TYPE my_matrix
    real(dp) :: ugb = zero
    real(dp) :: total = zero
    real(dp) :: efficiency = zero
+   real(dp) :: speedup = zero
 
    !type(my_matrix(k=dp)),allocatable :: foo(:)
    !type(my_matrix),allocatable :: foo(:)
@@ -812,7 +810,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  integer :: ik_ibz, ik_bz, isym_k, trev_k, g0_k(3)
  integer :: ip_g, ip_k, ip_t, ip_s, np_g, np_k, np_t, np_s
  real(dp) :: cpu, wall, gflops, te_min, te_max, wmax, vc_ecut, delta, abs_rerr, exact_int, eval_int
- real(dp) :: mem_per_cpu_mb, efficiency
+ real(dp) :: efficiency
  !real(dp) :: mem_green_gg, mem_green_rg, mem_chi_gg, mem_chi_rg, mem_ugb
  logical :: isirr_k, changed, q_is_gamma, reorder
  character(len=5000) :: msg
@@ -820,7 +818,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  type(gaps_t) :: ks_gaps
  type(mem_t) :: tot_mem, proc_mem
 !arrays
- integer :: qptrlatt(3,3), dims_kgts(ndims), try_dims_kgts(ndims), indkk_k(6,1)
+ integer :: qptrlatt(3,3), dims_kgts(ndims), try_dims_kgts(ndims), indkk_k(6,1), units(2)
  integer,allocatable :: gvec_(:,:),degblock(:,:), degblock_all(:,:,:,:), ndeg_all(:,:), iwork(:,:), got(:)
  real(dp) :: my_shiftq(3,1), kk_ibz(3), kk_bz(3), qq_bz(3), qq_ibz(3), kk(3), tsec(2)
  real(dp),allocatable :: wtk(:), kibz(:,:)
@@ -829,6 +827,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
 ! *************************************************************************
 
  all_nproc = xmpi_comm_size(input_comm); my_rank = xmpi_comm_rank(input_comm)
+ units = [std_out, ab_out]
 
  call cwtime(cpu, wall, gflops, "start")
  call timab(1920, 1, tsec)
@@ -912,8 +911,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  call kpts_pack_in_stars(gwr%nkbz, gwr%kbz, gwr%kbz2ibz)
 
  if (my_rank == master) then
-   call kpts_map_print([std_out, ab_out], " Mapping kBZ --> kIBZ", "symrec", &
-                       gwr%kbz, kibz, gwr%kbz2ibz, gwr%dtset%prtvol)
+   call kpts_map_print(units, " Mapping kBZ --> kIBZ", "symrec", gwr%kbz, kibz, gwr%kbz2ibz, gwr%dtset%prtvol)
  end if
 
  !call get_ibz2bz(gwr%nkibz, gwr%nkbz, gwr%kbz2ibz, kibz2bz, ierr)
@@ -952,8 +950,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  ! Order qbz by stars and rearrange entries in qbz2ibz table.
  call kpts_pack_in_stars(gwr%nqbz, gwr%qbz, gwr%qbz2ibz)
  if (my_rank == master) then
-   call kpts_map_print([std_out, ab_out], " Mapping qBZ --> qIBZ", "symrec", &
-                       gwr%qbz, gwr%qibz, gwr%qbz2ibz, gwr%dtset%prtvol)
+   call kpts_map_print(units, " Mapping qBZ --> qIBZ", "symrec", gwr%qbz, gwr%qibz, gwr%qbz2ibz, gwr%dtset%prtvol)
  end if
 
  ! ==========================
@@ -1244,10 +1241,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
 
  if (any(dtset%gwr_np_kgts /= 0)) then
    ! Use MPI parameters from input file.
-   np_k = dtset%gwr_np_kgts(1)
-   np_g = dtset%gwr_np_kgts(2)
-   np_t = dtset%gwr_np_kgts(3)
-   np_s = dtset%gwr_np_kgts(4)
+   np_k = dtset%gwr_np_kgts(1); np_g = dtset%gwr_np_kgts(2); np_t = dtset%gwr_np_kgts(3); np_s = dtset%gwr_np_kgts(4)
 
    !call xmpi_comm_multiple_of(product(dtset%gwr_np_kgts), input_comm, gwr%idle_proc, gwr%comm)
    !if (gwr%idle_proc) return
@@ -1270,37 +1264,57 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
    !if (gwr%idle_proc) return
    !all_nproc = xmpi_comm_size(gwr%comm)
 
-   mem_per_cpu_mb = two * 1024**2
-
 #if 1
-   ! Start a from configuration that minimizes memory i.e all procs in g-parallelism.
-   ! and check whether it's possible to move some procs to the other levels
+   ! Start from a configuration that minimizes memory i.e use all procs for g-parallelism,
+   ! then check whether it's possible to move some procs to the other levels
    ! without spoiling parallel efficiency and/or increasing memory per MPI proc.
-   dims_kgts = [1, all_nproc, 1, 1]
-   call estimate_mem(gwr, dims_kgts, proc_mem)
-   efficiency = proc_mem%efficiency
+   ! Only master rank works here for consistency reasons.
+   if (my_rank == master) then
+     dims_kgts = [1, all_nproc, 1, 1]
+     call estimate_mem(gwr, dims_kgts, proc_mem)
+     efficiency = proc_mem%efficiency
+     call wrtout(units, sjoin("- Optimizing MPI grid with mem_per_cpu_mb:", ftoa(mem_per_cpu_mb), "[Mb]"), pre_newlines=1)
+     call wrtout(units, "- Use `abinit run.abi --mem-per-cpu=4G` to set mem_per_cpu_mb in the submission script", newlines=1)
+     write(msg, "(a,4(a4,2x),3(a12,2x))") "- ", "np_k", "np_g", "np_t", "np_s", "memb_per_cpu", "efficiency", "speedup"
+     call wrtout(units, msg)
+     ip_k = dims_kgts(1); ip_g = dims_kgts(2); ip_t = dims_kgts(3); ip_s = dims_kgts(4)
+     write(msg, "(a,4(i4,2x),3(es12.5,2x))") &
+       "- ", ip_k, ip_g, ip_t, ip_s, proc_mem%total, proc_mem%efficiency, proc_mem%speedup
+     call wrtout(units, msg)
 
-   do ip_s=1,gwr%nsppol
-     do ip_t=1,gwr%ntau
-       if (mod(gwr%ntau, ip_t) /= 0) cycle ! ip_t should divide gwr%ntau.
-       do ip_k=1,gwr%nkbz
-         if (mod(gwr%nkbz, ip_k) /= 0) cycle ! ip_k is should divide gwr%nkbz.
-         do ip_g=1,gwr%green_mpw
-           try_dims_kgts = [ip_k, ip_g, ip_t, ip_s]
-           if (product(try_dims_kgts) /= all_nproc) cycle
-           call estimate_mem(gwr, try_dims_kgts, proc_mem)
-           if (proc_mem%total <= mem_per_cpu_mb * 0.8_dp .and. proc_mem%efficiency >= efficiency) then
-             efficiency = proc_mem%efficiency; dims_kgts = try_dims_kgts
-           end if
+     do ip_s=1,gwr%nsppol
+       do ip_t=1,gwr%ntau
+         if (mod(gwr%ntau, ip_t) /= 0) cycle ! ip_t should divide gwr%ntau.
+         do ip_k=1,gwr%nkbz
+           if (mod(gwr%nkbz, ip_k) /= 0) cycle ! ip_k is should divide gwr%nkbz.
+           do ip_g=1,gwr%green_mpw
+             try_dims_kgts = [ip_k, ip_g, ip_t, ip_s]
+             if (product(try_dims_kgts) /= all_nproc .or. all(try_dims_kgts == dims_kgts)) cycle
+             !npwps
+             !ABI_CHECK(block_dist_1d(npwsp, ip_g, col_bsize, msg), msg)
+             call estimate_mem(gwr, try_dims_kgts, proc_mem)
+             if (proc_mem%total < mem_per_cpu_mb * 0.8_dp .and. proc_mem%efficiency > efficiency) then
+               efficiency = proc_mem%efficiency; dims_kgts = try_dims_kgts
+             end if
+             write(msg, "(a,4(i4,2x),3(es12.5,2x))") &
+               "- ", ip_k, ip_g, ip_t, ip_s, proc_mem%total, proc_mem%efficiency, proc_mem%speedup
+             call wrtout(units, msg)
+           end do
          end do
        end do
      end do
-   end do
 
-   np_k = dims_kgts(1)
-   np_g = dims_kgts(2)
-   np_t = dims_kgts(3)
-   np_s = dims_kgts(4)
+     call estimate_mem(gwr, dims_kgts, proc_mem)
+     call wrtout(units, "Selected configuration:", pre_newlines=1)
+     ip_k = dims_kgts(1); ip_g = dims_kgts(2); ip_t = dims_kgts(3); ip_s = dims_kgts(4)
+     write(msg, "(a,4(i4,2x),3(es12.5,2x))") &
+       "- ", ip_k, ip_g, ip_t, ip_s, proc_mem%total, proc_mem%efficiency, proc_mem%speedup
+     call wrtout(units, msg, newlines=1)
+     !stop
+   end if ! master
+
+   call xmpi_bcast(dims_kgts, master, gwr%comm%value, ierr)
+   np_k = dims_kgts(1); np_g = dims_kgts(2); np_t = dims_kgts(3); np_s = dims_kgts(4)
 
 #else
    ! Determine number of processors for the spin axis. if all_nproc is odd, spin is not distributed when nsppol == 2
@@ -1334,7 +1348,6 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
    else
      ! ii divides ntau and np_work.
      np_t = ii; np_work = np_work / np_t
-
      ! Init values assuming Gamma-only sampling.
      np_k = 1; np_g = np_work
 
@@ -1654,19 +1667,17 @@ subroutine estimate_mem(gwr, np_kgts, mem, units, header)
  character(len=*),optional,intent(in) :: header
 
 !Local variables-------------------------------
- real(dp) :: np_k, np_g, np_t, np_s, np_tot
+ real(dp) :: np_k, np_g, np_t, np_s, w_k, w_g, w_t, w_s, np_tot
  character(len=5000) :: header__
  type(yamldoc_t) :: ydoc
 
 ! *************************************************************************
-
- np_k = np_kgts(1) ! Use real quantities to avoid int division
- np_g = np_kgts(2)
- np_t = np_kgts(3)
- np_s = np_kgts(4)
+! Use real quantities to avoid int division
+ np_k = np_kgts(1); np_g = np_kgts(2); np_t = np_kgts(3); np_s = np_kgts(4)
  np_tot = product(real(np_kgts))
 
- ! NB: arrays dimensions with nkibz and nqibz do not scale as 1/np_k as we distribute the full BZ.
+ ! NB: array dimensioned with nkibz and nqibz do not scale as 1/np_k as we distribute the full BZ.
+ !     and IBZ points might be replicated.
 
  ! Resident memory needed to store G(g,g',+/-tau) and chi(g,g',tau)
  mem%green_gg = two * two * (one*gwr%nspinor*gwr%green_mpw)**2 * two*gwr%ntau * gwr%nkibz * gwr%nsppol * dp*b2Mb / np_tot
@@ -1680,9 +1691,11 @@ subroutine estimate_mem(gwr, np_kgts, mem, units, header)
 
  mem%total = mem%green_gg + mem%chi_gg + mem%ugb + mem%green_rg + mem%chi_rg
 
- ! Estimate parallel efficiency
- mem%efficiency = (gwr%nkbz / np_k) * (gwr%nspinor * gwr%green_mpw / np_g) * (gwr%ntau / np_t) * (gwr%nsppol / np_s)
- mem%efficiency = (one / mem%efficiency) / np_tot
+ ! Estimate speedup and parallel efficiency. Note how we use g_nfft instead of green_mpw.
+ w_k = 0.8_dp; w_g = 0.9_dp; w_t = one; w_s = one
+ mem%speedup = speedup(gwr%nkbz, nint(np_k), w_k) * speedup(gwr%g_nfft, nint(np_g), w_g) * &
+               speedup(gwr%ntau, nint(np_t), w_t) * speedup(gwr%nsppol, nint(np_s), w_s)
+ mem%efficiency = mem%speedup / np_tot
 
  if (present(units)) then
    header__ = "unknown"; if (present(header)) header__ = header
@@ -1690,6 +1703,19 @@ subroutine estimate_mem(gwr, np_kgts, mem, units, header)
    call ydoc%add_real('total_memory_mb', mem%total)
    call ydoc%write_units_and_free(units)
  end if
+
+contains
+
+real(dp) pure function speedup(size, np, weight)
+  ! Expected speedup for a size problem and np processes
+  integer,intent(in) :: size, np
+  real(dp),intent(in) :: weight
+  if (np == 1) then
+    speedup = one
+  else
+    speedup = (weight*size) / (one* ((size / np) + merge(0, 1, mod(size, np) == 0)))
+  end if
+end function speedup
 
 end subroutine estimate_mem
 !!***

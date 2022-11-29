@@ -1499,18 +1499,13 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
            ABI_MALLOC (band_procs, (nband_kq))
            band_procs = 0
-           !call proc_distrb_band(band_procs,mpi_enreg%proc_distrb,ik_ibz,1,nbcalc_ks,&
-           !    mpi_enreg%me_band,mpi_enreg%me_kpt,mpi_enreg%comm_band)
            nband_me = nband_kq
-           !nband_me = proc_distrb_nband(mpi_enreg%proc_distrb, ikpt, nband_kq, spin, me)
 
-           !mpi_enreg%comm_band = sigma%bsum_comm%value
-           !mpi_enreg%me_band = sigma%bsum_comm%me
-           !mpi_enreg%nproc_band = sigma%bsum_comm%nproc
-           !ABI_REMALLOC(mpi_enreg%proc_distrb, (dtset%mband, nkpt, nsppol))
-           !mpi_enreg%proc_distrb = -1
-           !mpi_enreg%proc_distrb, (sigma%my_bsum_start:sigma%my_bsum_stop, nkpt, nsppol) = sigma%bsum_comm%me
-           !nband_me = sigma%my_bsum_stop - sigma%my_bsum_stop + 1
+           !stern_mpi_enreg%comm_band = sigma%bsum_comm%value
+           !call MPI_Comm_dup(sigma%bsum_comm%value, stern_mpi_enreg%comm_band, ierr)
+           !stern_mpi_enreg%me_band = sigma%bsum_comm%me
+           !stern_mpi_enreg%nproc_band = sigma%bsum_comm%nproc
+           !nband_me = sigma%my_bsum_stop - sigma%my_bsum_start + 1
 
            mcgq = npw_kq * nspinor * nband_me
            mgscq = npw_kq * nspinor * nband_me * psps%usepaw
@@ -1532,7 +1527,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
               end if
               cgq(:, :, ibsum_kq) = bra_kq
               !ii = ibsum_kq - sigma%my_bsum_start + 1
-              !cgq(:, :, ii) = bra_kq
+              !cgq(:,:,ii) = bra_kq
            end do
            call xmpi_sum(cgq, sigma%bsum_comm%value, ierr)
 
@@ -1556,10 +1551,11 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            ! still it's clear that the treatment of this array must be completely refactored in the DFPT code.
            !
            grad_berry_size_mpw1 = 0
+
+           call cwtime(cpu_stern, wall_stern, gflops_stern, "start")
            do ib_k=1,nbcalc_ks
              ! MPI parallelism inside bsum_comm (not very efficient).
              ! TODO: To be replaced by MPI parallellism over bands in projbd inside dfpt_cgwf
-             ! (pass optional communicator and band range treated by me.
              if (sigma%bsum_comm%skip(ib_k)) cycle
              band_ks = ib_k + bstart_ks - 1
              eig0nk = ebands%eig(band_ks, ik_ibz, spin)
@@ -1567,23 +1563,19 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
              nline_in = min(100, npw_kq); if (dtset%nline > nline_in) nline_in = min(dtset%nline, npw_kq)
              nlines_done = 0
 
-             ! Save u1 in cg1s_kq
+             ! Iniit output u1 in cg1s_kq
              cg1s_kq(:, :, ipc, ib_k) = zero
 
-             call cwtime(cpu_stern, wall_stern, gflops_stern, "start")
-
              !TODO: band parallelize this routine, and call dfpt_cgwf with only limited cg arrays
-             !       in the meanwhile should make a test for paralbd, to exclude it, I think
+             ! in the meanwhile should make a test for paralbd, to exclude it, I think
              band_me = band_ks
-             !nband_me = proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,nband_kq,isppol,me)
              nband_me = nband_kq
 
-!TODO: to distribute cgq and kets memory, use mband_mem per core in band comm, but coordinate everyone with
-! the following array (as opposed to the distribution of cg1 which is done in the normal dfpt calls
-             ABI_MALLOC(bands_treated_now, (nband_kq))
-             bands_treated_now = 0
+             !TODO: to distribute cgq and kets memory, use mband_mem per core in band comm, but coordinate everyone with
+             ! the following array (as opposed to the distribution of cg1 which is done in the normal dfpt calls
+             ABI_ICALLOC(bands_treated_now, (nband_kq))
              bands_treated_now(band_ks) = 1
-             call xmpi_sum(bands_treated_now,mpi_enreg%comm_band,ierr)
+             call xmpi_sum(bands_treated_now, mpi_enreg%comm_band, ierr)
 
              call dfpt_cgwf(band_ks, band_me, band_procs, bands_treated_now, berryopt0, &
                cgq, cg1s_kq(:,:,ipc, ib_k), kets_k(:,:,ib_k), &
@@ -1597,8 +1589,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                usedcwavef0, dtset%wfoptalg, nlines_done)
 
              ABI_FREE(bands_treated_now)
-
-             call cwtime(cpu_stern, wall_stern, gflops_stern, "stop")
 
              ! Handle possible convergence error.
              if (out_resid > dtset%tolwfr) then
@@ -1617,6 +1607,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
              end if
 
            end do ! ib_k
+
+           if (dtset%prtvol > 10) call cwtime_report("dfpt_cgwf", cpu_stern, wall_stern, gflops_stern)
 
            ABI_FREE(band_procs)
            ABI_FREE(cgq)
@@ -2949,32 +2941,19 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  call MPI_CART_COORDS(comm_cart, me_cart, ndims, new%coords_pqbks, ierr)
 
  ! Create communicator to distribute natom3 perturbations.
- keepdim = .False.; keepdim(1) = .True.
- call new%pert_comm%from_cart_sub(comm_cart, keepdim)
-
+ keepdim = .False.; keepdim(1) = .True.; call new%pert_comm%from_cart_sub(comm_cart, keepdim)
  ! Create communicator for qpoints in self-energy integration.
- keepdim = .False.; keepdim(2) = .True.
- call new%qpt_comm%from_cart_sub(comm_cart, keepdim)
-
+ keepdim = .False.; keepdim(2) = .True.; call new%qpt_comm%from_cart_sub(comm_cart, keepdim)
  ! Create communicator for bands for self-energy summation
- keepdim = .False.; keepdim(3) = .True.
- call new%bsum_comm%from_cart_sub(comm_cart, keepdim)
-
+ keepdim = .False.; keepdim(3) = .True.; call new%bsum_comm%from_cart_sub(comm_cart, keepdim)
  ! Create communicator for kpoints.
- keepdim = .False.; keepdim(4) = .True.
- call new%kcalc_comm%from_cart_sub(comm_cart, keepdim)
-
+ keepdim = .False.; keepdim(4) = .True.; call new%kcalc_comm%from_cart_sub(comm_cart, keepdim)
  ! Create communicator for spins.
- keepdim = .False.; keepdim(5) = .True.
- call new%spin_comm%from_cart_sub(comm_cart, keepdim)
-
+ keepdim = .False.; keepdim(5) = .True.; call new%spin_comm%from_cart_sub(comm_cart, keepdim)
  ! Create communicator for the (band_sum, qpoint_sum) loops
- keepdim = .False.; keepdim(2:3) = .True.
- call new%qb_comm%from_cart_sub(comm_cart, keepdim)
-
+ keepdim = .False.; keepdim(2:3) = .True.; call new%qb_comm%from_cart_sub(comm_cart, keepdim)
  ! Create communicator for the (perturbation, band_sum, qpoint_sum)
- keepdim = .False.; keepdim(1:3) = .True.
- call new%pqb_comm%from_cart_sub(comm_cart, keepdim)
+ keepdim = .False.; keepdim(1:3) = .True.; call new%pqb_comm%from_cart_sub(comm_cart, keepdim)
 
  call xmpi_comm_free(comm_cart)
 #endif
