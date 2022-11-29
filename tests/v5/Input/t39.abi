@@ -5,9 +5,9 @@
 ## Fe bcc structure - ferromagnetic PAW                 DJA 2010 ##
 ###################################################################
 
-# 2 atomic supercell
+# 2 atom cell
       acell  3*5.42
-    chkprim  0                  # 0: do not check if uc primitive
+    chkprim  0                    # 0: do not check if uc primitive
       rprim  1.00 0.00 0.00
              0.00 1.00 0.00
              0.00 0.00 1.00
@@ -19,15 +19,15 @@
 
 #Definition of the atoms
       natom  2
-      typat  2*1               # atomic types
+      typat  2*1                  # atomic types
        xred
              0.0 0.0 0.0
              0.5 0.5 0.5
-       ecut  8                   # Energy cutoff
-  pawecutdg  40                  # pawecutdg > 2*ecut
-      nband  25                  # Fe_2 minband=17
-     nbdbuf  2                   # This is to improve the portability (the residual of degenerate states with indices nband 
-                                 # and nband+1 is not portable).
+       ecut  8                    # Energy cutoff
+  pawecutdg  40                   # pawecutdg > 2*ecut
+      nband  25                   # Fe_2 minband=17
+     nbdbuf  2                    # This is to improve the portability (the residual of degenerate states with indices nband 
+                                  # and nband+1 is not portable).
 
 #Definition of the k-point grid
      kptopt  1                    # 1:  automatic generation of k points
@@ -69,7 +69,7 @@
               0  0 -1   0 -1  0   1  0  0       0  0  1   0  1  0  -1  0  0
               0  0  1   0 -1  0  -1  0  0       0  0 -1   0  1  0   1  0  0
     pawujat  1                    # default, the atom on which U is determined
-     pawujv  0.1 eV               # default, size of the potential shift
+     pawujv  0.1 eV               # 0.1 eV = default size of the potential shift
    macro_uj  1                    # activate determination of U
    pawujrad  2.66866              # optional, radius ASA-sphere to which U should be extrapolated
 
@@ -86,21 +86,26 @@
      prtden  0
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "26fe.paw"
+    pseudos "26fe.paw"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = t38.abi, t39.abi, t40.abi
+#%% test_chain = t38.abi,t39.abi,t39j.abi,t40.abi
 #%% need_cpp_vars = 
 #%% [files]
 #%% files_to_test = 
 #%%   t39.abo, tolnlines = 15, tolabs = 2.0e-04, tolrel = 1.0e+00, fld_options =  -medium
+#%% [shell]
+#%% post_commands = 
+#%%   lruj *_LRUJ.nc --d 3 > lruj.out
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
-#%% authors = M. Torrent, D.J. Adams
+#%% authors = M. Torrent, D.J. Adams, L. MacEnulty
 #%% keywords = 
-#%% description = Compute U in bcc Fe in 2 atomic supercell.
+#%% description = Compute U in bcc Fe in 2 atomic supercell, once with the ujdet
+#%%    intrinsic subroutine (using a two-point linear regression), and then with
+#%%    the lruj post-processing utility
 #%% topics = DFT+U
 #%%<END TEST_INFO>

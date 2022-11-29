@@ -24,6 +24,7 @@ subsuites = [
 "spin",
 "tddft",
 "udet",
+"lruj",
 "fold2bloch",
 ]
 
@@ -100,6 +101,8 @@ inp_files = [
 "tudet_1.abi",
 "tudet_2.abi",
 "tudet_3.abi",
+"tlruj_1.abi",
+"tlruj_2.abi",
 "tfold2bloch_1.abi",
 "tfold2bloch_2.abi",
 ]
