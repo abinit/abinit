@@ -988,15 +988,15 @@ subroutine wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,mband,nband,nkibz,nsppol,bks_m
  write(msg,'(a,f8.1,a)')' Memory needed for Fourier components u(G): ',two*gwpc*ug_size*b2Mb, ' [Mb] <<< MEM'
  call wrtout(std_out, msg)
 #ifdef HAVE_GW_DPC
- call wrtout(std_out, ' Storing wavefunctions in double precision array as `enable_gw_dpc="no"`')
- call wrtout(std_out, ' Recompile the code with `enable_gw_dpc="no"` to halve the memory requirements for the WFs')
+ call wrtout(std_out, ' Storing wavefunctions in double precision as `enable_gw_dpc="no"`')
+ call wrtout(std_out, ' Recompile the code with `enable_gw_dpc="no"` to halve memory requirements for the WFs')
 #else
- call wrtout(std_out, ' Storing wavefunctions in single precision array as `enable_gw_dpc="no"`')
+ call wrtout(std_out, ' Storing wavefunctions in single precision as `enable_gw_dpc="no"`')
 #endif
 
  if (Wfd%usepaw==1) then
    cprj_size = one * nspinor*SUM(Wfd%nlmn_atm)*COUNT(bks_mask)
-   write(msg,'(a,f8.1,a)')' Memory needed for PAW projections Cprj: ',dp*cprj_size*b2Mb,' [Mb] <<< MEM'
+   write(msg,'(a,f8.1,a)')' Memory needed for PAW projections cprj: ',dp*cprj_size*b2Mb,' [Mb] <<< MEM'
    call wrtout(std_out, msg)
  end if
 

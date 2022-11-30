@@ -87,8 +87,8 @@ module m_argparse
    integer :: dry_run = 0
     ! /= 0 to exit after the validation of the input file.
 
-   real(dp) :: abimem_limit_mb = 20_dp
-    ! Optional memory limit in Mb. used when abime,_level == 3
+   real(dp) :: abimem_limit_mb = 20.0_dp
+    ! Optional memory limit in Mb. used when abimem_level == 3
 
    character(len=500) :: cmdline = ""
     ! The entire command line
@@ -189,7 +189,7 @@ type(args_t) function args_parser() result(args)
      call get_command_argument(ii + 1, arg)
      timelimit = str2sec(arg)
      if (timelimit < zero) then
-       write(std_out,*)"Wrong timelimit argument:",trim(arg)
+       write(std_out,*)"Wrong timelimit argument: ",trim(arg)
        args%exit = args%exit + 1
      else
        call exit_init(timelimit)
@@ -325,6 +325,7 @@ type(args_t) function args_parser() result(args)
  end do
 
  if (ntasks_per_node /= -1 .or. memb_per_node /= -one) then
+   ! Set mem_per_cpu from node info.
    ABI_CHECK(ntasks_per_node /= -1, "`mem-per-node` requires `ntasks-per-node`")
    ABI_CHECK(memb_per_node /= -one, "`ntasks-per-node` requires `mem-per-node`")
    ABI_CHECK(memb_per_cpu == -one, "`mem-per-cpu` and `mem-per-node` are mutually exclusive!")

@@ -172,6 +172,7 @@ module m_xmpi
    procedure :: set_to_self => xcomm_set_to_self
    procedure :: free => xcomm_free
    procedure :: from_cart_sub => xcomm_from_cart_sub     ! Helper function to build sub-communicators in a Cartesian grid.
+   procedure :: print_names => xcomm_print_names
  end type xcomm_t
 
  public :: xcomm_from_mpi_int
@@ -1824,32 +1825,32 @@ end subroutine xmpi_barrier
 !!  xmpi_name
 !!
 !! FUNCTION
+!!  Returns the name of the processor
 !!  Hides MPI_GET_PROCESSOR_NAME from MPI library.
 !!
-!! OUTPUT
-!!  name= the host name transformed to integer variable.
-!!  mpierr=Status error.
+!! For the MPI standard:
+!!    The name returned should identify a particular piece of hardware; the exact format is implementation defined.
+!!    This name may or may not be the same as might be returned by gethostname, uname, or sysinfo.
 !!
 !! SOURCE
 
-subroutine xmpi_name(name_ch, mpierr)
+subroutine xmpi_name(name_ch, ierr)
 
 !Arguments-------------------------
- integer,intent(out) ::  mpierr
  character(20),intent(out) :: name_ch
+ integer,intent(out) ::  ierr
 
 !Local variables-------------------
- integer :: name,len
+ integer :: len
 ! character(len=MPI_MAX_PROCESSOR_NAME) :: name_ch
 
 ! *************************************************************************
 !Get the name of this processor (usually the hostname)
 
- name   = 0
- mpierr = 0
+ ierr = 0
 
 #ifdef HAVE_MPI
- call MPI_GET_PROCESSOR_NAME(name_ch, len, mpierr)
+ call MPI_GET_PROCESSOR_NAME(name_ch, len, ierr)
  name_ch = trim(name_ch)
 
 #else
@@ -5020,8 +5021,28 @@ subroutine xcomm_from_cart_sub(self, comm_cart, keepdim)
 #endif
  self%me = xmpi_comm_rank(self%value)
  self%nproc = xmpi_comm_size(self%value)
-
 end subroutine xcomm_from_cart_sub
+
+! Debugging tool to print the hostname of the procs in the communicator
+subroutine xcomm_print_names(self)
+ class(xcomm_t),intent(in) :: self
+
+!Local variables-------------------
+ integer :: ip, ierr
+ character(20) :: my_name, names(self%nproc)
+!----------------------------------------------------------------------
+
+ call xmpi_name(my_name, ierr)
+ call xmpi_allgather(my_name, names, self%value, ierr)
+
+ if (self%me == 0) then
+   write(std_out, "(a5,2x,a20)")"rank", "hostname"
+   do ip=0,self%nproc-1
+     write(std_out, "(i5,2x,a20)")ip, trim(names(ip+1))
+   end do
+ end if
+end subroutine xcomm_print_names
+
 
 !!****f* m_xmpi/pool2d_from_dims
 !! NAME

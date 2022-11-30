@@ -144,6 +144,7 @@ module m_gwr
  use m_gwdefs,        only : GW_TOL_DOCC, GW_TOLQ0, GW_TOL_W0, GW_Q0_DEFAULT, czero_gw, sigijtab_t, sigijtab_free, g0g0w
  use m_time,          only : cwtime, cwtime_report, sec2str, timab
  use m_io_tools,      only : iomode_from_fname, get_unit, file_exists, open_file
+ use m_pstat,         only : pstat_t
  use m_numeric_tools, only : blocked_loop, get_diag, isdiagmat, arth, print_arr, imin_loc, imax_loc, &
                              c2r, linfit, bisect, hermitianize
  use m_copy,          only : alloc_copy
@@ -185,49 +186,6 @@ module m_gwr
  private
 !!***
 
-!----------------------------------------------------------------------
-
-!!****t* m_gwr/pstat_t
-!! NAME
-!! pstat_t
-!!
-!! FUNCTION
-!! This object stores the most important quantites reported in the /proc/{pid}/status file
-!! in particular the virtual memory VmRSS that can be used at runtime to define block sizes
-!! See https://docs.kernel.org/filesystems/proc.html
-!!
-!! NB: This file is only available on Linux.
-!!
-!! SOURCE
-
- type, public :: pstat_t
-
-  logical :: ok = .False.
-
-  integer :: pid = -1
-
-  integer :: threads = -1
-  ! number of threads
-
-  integer :: fdsize = -1
-   ! number of file descriptor slots currently allocated
-
-  real(dp) :: vmrss_mb = -one
-  ! size of memory portions. It contains the three following parts (VmRSS = RssAnon + RssFile + RssShmem)
-
-  real(dp) :: vmpeak_mb = -one
-  ! peak virtual memory size
-
-  real(dp) :: vmstk_mb = -one
-  ! size of stack segments
-
- contains
-   procedure :: from_pid => pstat_from_pid     ! Init object from process identifier (main entry point)
-   procedure :: from_file => pstat_from_file   ! Init object from file (useful for debugging)
-   procedure :: print => pstat_print           ! Print object
- end type pstat_t
-
-!----------------------------------------------------------------------
 
 !!****t* m_gwr/desc_t
 !! NAME
@@ -1434,10 +1392,6 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
      "g_nproc (", np_g, ") x tau_nproc (", np_t, ") x kpt_nproc (", np_k,") x spin_nproc (", np_s, ") != ", all_nproc
    ABI_ERROR(msg)
  end if
-
- !if (my_rank == master) then
- !  call estimate(gwr, dims_kgts, est, units=[std_out, ab_out], header="Estimated memory per MPI proc in Mb")
- !end if
 
 #ifdef HAVE_MPI
  call MPI_CART_CREATE(gwr%comm%value, ndims, dims_kgts, periods, reorder, comm_cart, ierr)
@@ -7777,134 +7731,7 @@ integer pure function memlimited_step(start, stop, num_items, bsize, maxmem_mb) 
   if (totmem_mb > maxmem_mb) step = floor(totmem_mb / maxmem_mb)
 
 end function memlimited_step
-
-subroutine pstat_from_pid(pstat)
-
-  use m_clib, only : clib_getpid
-  class(pstat_t),intent(out) :: pstat
-
-  integer(c_int) :: pid
-  character(len=500) :: spid
-
-  pid = clib_getpid()
-  write(spid, "(i0)") pid
-  spid = adjustl(spid)
-  call pstat%from_file('/proc/'//trim(spid)//'/status')
-
-end subroutine pstat_from_pid
-
-subroutine pstat_from_file(pstat, filepath)
-
-  class(pstat_t),intent(out) :: pstat
-  character(len=*),intent(in) :: filepath
-
-  integer :: unit, ierr
-  integer(c_int) :: pid
-  !logical :: exist
-  character(len=500) :: line, spid, iomsg
-  integer :: istart, istop, iostat
-
-  !inquire(file="/proc/"//trim(spid)//'/status', exist=exist)
-  !if (.not. exist) then
-  !  ierr = 1; return
-  !end if
-
-  pstat%ok = .False.
-  open(newunit=unit, file=filepath, action="read", status='old', iostat=ierr)
-  if (ierr /= 0) return
-
-  do
-    read(unit, "(a)", iostat=ierr, end=10) line
-    if (ierr > 0) then
-      close(unit)
-      return
-    end if
-
-    ! Parse useful integers
-    if (index(line, "Pid:") == 1) call get_int(line, pstat%pid)
-    if (index(line, "Threads:") == 1) call get_int(line, pstat%threads)
-    if (index(line, "FDSize:") == 1) call get_int(line, pstat%fdsize)
-
-    ! Parse memory entries
-    if (index(line, "VmRSS:") == 1) call get_mem_mb(line, pstat%vmrss_mb)
-    if (index(line, "VmPeak:") == 1) call get_mem_mb(line, pstat%vmpeak_mb)
-    if (index(line, "VmStk:") == 1) call get_mem_mb(line, pstat%vmstk_mb)
-  end do
-
-10  close(unit)
-  pstat%ok = .True.
-
-contains
-
-subroutine get_mem_mb(str, mem_mb)
-  use m_fstrings, only : find_and_select
-  character(len=*),intent(in) :: str
-  real(dp),intent(out) :: mem_mb
-
-  real(dp) :: mem_fact
-
-  ! Generic mem entry has format:
-  !VmRSS: 2492 kB
-  istart = index(str, ":") + 1
-  istop = find_and_select(str, &
-                         ["kB", "mB"], &
-                         [one/1024._dp, one], mem_fact, iomsg) !default=one,
-  ABI_CHECK(istop /= -1, iomsg)
-  read(str(istart+1:istop-1), fmt=*, iostat=iostat, iomsg=iomsg) mem_mb
-  ABI_CHECK(iostat == 0, iomsg)
-  mem_mb = mem_mb * mem_fact
-end subroutine get_mem_mb
-
-subroutine get_int(str, out_ival)
-  character(len=*),intent(in) :: str
-  integer,intent(out) :: out_ival
-  istart = index(str, ":") + 1
-  read(str(istart+1:), fmt=*, iostat=iostat, iomsg=iomsg) out_ival
-  ABI_CHECK(iostat == 0, iomsg)
-end subroutine get_int
-
-end subroutine pstat_from_file
 !!***
-
-subroutine pstat_print(pstat, units, header)
- class(pstat_t),intent(in) :: pstat
- integer,intent(in) :: units(:)
- character(len=*),optional,intent(in) :: header
-
-!Local variables-------------------------------
- character(len=500) :: header__
- type(yamldoc_t) :: ydoc
-
- header__ = "unknown"; if (present(header)) header__ = header
- ydoc = yamldoc_open(header__) !, width=11, real_fmt='(3f8.3)')
-
- call ydoc%add_int("pid", pstat%pid)
- call ydoc%add_int("threads", pstat%threads)
- call ydoc%add_int("fdsize", pstat%fdsize)
- call ydoc%add_real("vmrss_mb", pstat%vmrss_mb)
- call ydoc%add_real("vmpeak_mb", pstat%vmpeak_mb)
- call ydoc%add_real("vmstk_mb", pstat%vmstk_mb)
-
- call ydoc%write_units_and_free(units)
-
-end subroutine pstat_print
-!!***
-
-subroutine pstat_gather(pstat, vmrss_mb, comm)
-
- class(pstat_t),intent(out) :: pstat
- real(dp),intent(out) :: vmrss_mb
- integer,intent(in) :: comm
- !integer,intent(out) :: ierr
-
- integer :: ierr, int_list(5)
- real(dp) :: real_list(3)
-
- call pstat%from_pid()
- real_list = [pstat%vmrss_mb, pstat%vmpeak_mb, pstat%vmstk_mb]
- !call xmpi_max_ip(real_list, comm, ierr)
-
-end subroutine pstat_gather
 
 end module m_gwr
 !!***
