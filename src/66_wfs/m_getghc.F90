@@ -40,6 +40,7 @@ module m_getghc
  use m_fock_getghc, only : fock_getghc, fock_ACE_getghc
  use m_nonlop,      only : nonlop
  use m_fft,         only : fourwf
+ use m_getghc_ompgpu,  only : getghc_ompgpu
 
 #if defined HAVE_GPU_CUDA
  use m_gpu_toolbox
@@ -259,6 +260,12 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 
  DBG_ENTER("COLL")
 
+ if(gs_ham%use_gpu_impl==666) then
+   call getghc_ompgpu(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,ndat,&
+                  prtvol,sij_opt,tim_getghc,type_calc,&
+                  kg_fft_k,kg_fft_kp,select_k,cwavef_r)
+   return
+ end if
 !Keep track of total time spent in getghc:
  call timab(350+tim_getghc,1,tsec)
 
