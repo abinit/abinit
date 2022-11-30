@@ -2374,9 +2374,9 @@ end subroutine xmpi_split_list
 !!  The output arrays istart(1:nprocs) and istop(1:nprocs)
 !!  report the starting and final task index for each CPU.
 !!  Namely CPU with rank ii has to perform all the tasks between
-!!  istart(ii+1) and istop(ii+1). Note the Fortran convention of using
-!!  1 as first index of the array.
+!!  istart(ii+1) and istop(ii+1). Note the Fortran convention of using 1 as first index of the array.
 !!  Note, moreover, that if a proc has rank > ntasks then:
+!!
 !!   istart(rank+1)=ntasks+1
 !!   istop(rank+1)=ntask
 !!
@@ -2401,7 +2401,7 @@ end subroutine xmpi_split_list
 subroutine xmpi_split_work2_i4b(ntasks, nprocs, istart, istop)
 
 !Arguments ------------------------------------
- integer,intent(in)  :: ntasks,nprocs
+ integer,intent(in) :: ntasks,nprocs
  integer,intent(inout) :: istart(nprocs), istop(nprocs)
 
 !Local variables-------------------------------
