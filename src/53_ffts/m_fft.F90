@@ -54,6 +54,7 @@ MODULE m_fft
  !use m_manage_cuda
 #endif
  use, intrinsic :: iso_c_binding
+ use m_ompgpu_fourwf
 
  implicit none
 
@@ -2300,10 +2301,10 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
 !scalars
  integer :: fftalg,fftalga,fftalgc,fftcache,i1,i2,i2_local,i3,i3_local,i3_glob,idat,ier
  integer :: iflag,ig,comm_fft,me_g0,me_fft,n1,n2,n3,nd2proc,nd3proc
- integer :: nfftot,nproc_fft,option_ccfft,paral_kgb
+ integer :: nfftot,nproc_fft,option_ccfft,paral_kgb,use_gpu_cuda_
  real(dp) :: fim,fre,xnorm
  character(len=500) :: msg
- logical :: luse_gpu_cuda,luse_ndo
+ logical :: luse_ndo
 !arrays
  integer,parameter :: shiftg0(3)=0
  integer,parameter :: symmE(3,3)=reshape([1,0,0,0,1,0,0,0,1],[3,3])
@@ -2312,6 +2313,7 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
  real(dp) :: tsec(2)
  real(dp),allocatable :: work1(:,:,:,:),work2(:,:,:,:),work3(:,:,:,:)
  real(dp),allocatable :: work4(:,:,:,:),work_sum(:,:,:,:)
+ real(dp) :: weight_array_r(ndat), weight_array_i(ndat)
 
 ! *************************************************************************
 
@@ -2347,16 +2349,25 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
  !end if
 
 !Cuda version of fourwf
- luse_gpu_cuda=PRESENT(use_gpu_cuda)
- if (luse_gpu_cuda) luse_gpu_cuda=(luse_gpu_cuda.and.(use_gpu_cuda==1))
+ use_gpu_cuda_=0
+ if (PRESENT(use_gpu_cuda)) use_gpu_cuda_=use_gpu_cuda
 
- if(luse_gpu_cuda) then
+ if(option==1) then
+   weight_array_r(:)=weight_r
+   weight_array_i(:)=weight_i
+ end if
+ if(use_gpu_cuda_==1) then
 #if defined HAVE_GPU_CUDA
    call gpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
      kg_kin,kg_kout,mgfft,mpi_enreg,ndat,ngfft,npwin,npwout,n4,n5,n6,option,&
-     paral_kgb,tim_fourwf,weight_r,weight_i) !,&
+     paral_kgb,tim_fourwf,weight_array_r,weight_array_i) !,&
 !  &  use_ndo,fofginb)
 #endif
+   call timab(840+tim_fourwf,2,tsec); return
+ else if(use_gpu_cuda_==666) then
+   call ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
+     kg_kin,kg_kout,mgfft,ndat,ngfft,npwin,npwout,n4,n5,n6,option,&
+     weight_array_r,weight_array_i)
    call timab(840+tim_fourwf,2,tsec); return
  end if
 

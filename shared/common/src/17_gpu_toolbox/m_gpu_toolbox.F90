@@ -74,6 +74,27 @@ module m_gpu_toolbox
     enumerator :: CUDA_MEM_ADVISE_UNSET_ACCESSED_BY        = 6
   end enum
 
+  ! CUFFT Transform Types
+  ! Replicates cuFFT_type enum.
+  ! We could use enum from official CUDA Fortran interface but it is only
+  ! accessible using NVHPC compiler.
+  ! Only Z2Z is mostly used so an assert on its value will check for enum changes
+  ! if any.
+  enum, bind(C)
+    enumerator :: FFT_R2C = 42   !  z'2a'     ! Real to Complex (interleaved)
+    enumerator :: FFT_C2R = 44   !  z'2c'     ! Complex (interleaved) to Real
+    enumerator :: FFT_C2C = 41   !  z'29'     ! Complex to Complex, interleaved
+    enumerator :: FFT_D2Z = 106  !  z'6a'     ! Double to Double-Complex
+    enumerator :: FFT_Z2D = 108  !  z'6c'     ! Double-Complex to Double
+    enumerator :: FFT_Z2Z = 105  !  z'69'     ! Double-Complex to Double-Complex
+  end enum
+
+  ! CUFFT Direction enum
+  enum, bind(C)
+    enumerator :: FFT_INVERSE =  1
+    enumerator :: FFT_FORWARD = -1
+  end enum
+
   interface
 
     !  integer(C_INT) function cuda_func() bind(C)
@@ -108,6 +129,37 @@ module m_gpu_toolbox
       integer(kind=C_INT),               value :: advice
       integer(kind=C_INT32_T),           value :: deviceId
     end subroutine gpu_memory_advise_f
+
+    !!! FFT related routines
+    subroutine gpu_fft_plan_destroy() bind(c, name='gpu_fft_plan_many_cpp')
+      use, intrinsic :: iso_c_binding
+      implicit none
+    end subroutine gpu_fft_plan_destroy
+
+    subroutine gpu_fft_stream_synchronize() bind(c, name='gpu_fft_stream_synchronize_cpp')
+      use, intrinsic :: iso_c_binding
+      implicit none
+    end subroutine gpu_fft_stream_synchronize
+
+    subroutine gpu_fft_plan_many(rank, n,&
+        inembed, istride, idist,&
+        onembed, ostride, odist,&
+        ffttype, batch ) bind(c, name='gpu_fft_plan_many_cpp')
+      use, intrinsic :: iso_c_binding
+      implicit none
+      integer    , intent(in)  :: rank
+      type(c_ptr), intent(in)  :: n
+      type(c_ptr), intent(in)  :: inembed, onembed
+      integer    , intent(in)  :: istride, idist, ostride, odist
+      integer    , intent(in)  :: ffttype, batch
+    end subroutine gpu_fft_plan_many
+
+    subroutine gpu_fft_exec_z2z(idata, odata, direction) bind(c, name='gpu_fft_exec_z2z_cpp')
+      use, intrinsic :: iso_c_binding
+      implicit none
+      type(c_ptr), intent(in)    :: idata, odata
+      integer    , intent(in)    :: direction
+    end subroutine gpu_fft_exec_z2z
 
   end interface
 
