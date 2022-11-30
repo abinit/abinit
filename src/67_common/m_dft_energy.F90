@@ -753,7 +753,7 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
      end if
 
 #if defined HAVE_GPU_CUDA
-     if(dtset%use_gpu_cuda==1) then
+     if(dtset%use_gpu_cuda/=0) then
        call gpu_finalize_ffnl_ph3d()
      end if
 #endif

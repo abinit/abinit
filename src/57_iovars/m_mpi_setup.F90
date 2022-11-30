@@ -771,7 +771,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
        if (mpi_enregs(idtset)%nproc_cell>0) then
          if(mpi_enregs(idtset)%paral_kgb == 1) then
 
-           if((dtsets(idtset)%use_gpu_cuda==1).and.(mpi_enregs(idtset)%nproc_fft/=1))then
+           if((dtsets(idtset)%use_gpu_cuda/=0).and.(mpi_enregs(idtset)%nproc_fft/=1))then
              write(msg,'(3a,i0)') &
              'When use_gpu_cuda is on, the number of FFT processors, npfft, must be 1',ch10,&
              'However, npfft=',mpi_enregs(idtset)%nproc_fft
@@ -970,7 +970,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 
 !  In case of the use of a GPU (Cuda), some defaults can change
 !  according to a threshold on matrix sizes
-   if (dtsets(idtset)%use_gpu_cuda==1.or.dtsets(idtset)%use_gpu_cuda==-1) then
+   if (dtsets(idtset)%use_gpu_cuda/=0.or.dtsets(idtset)%use_gpu_cuda==-1) then
      if (optdriver==RUNL_GSTATE.or.optdriver==RUNL_GWLS) then
        vectsize=dtsets(idtset)%mpw*dtsets(idtset)%nspinor/dtsets(idtset)%npspinor
        if (all(dtsets(idtset)%istwfk(:)==2)) vectsize=2*vectsize
@@ -1274,7 +1274,7 @@ end subroutine mpi_setup
    end if
    npf_max=min(npf_max,ngmin(2))
    ! Deactivate MPI FFT parallelism for GPU
-   if (dtset%use_gpu_cuda==1) then
+   if (dtset%use_gpu_cuda/=0) then
      npf_min=1;npf_max=1
    end if
    !Deactivate MPI FFT parallelism for GPU

@@ -1063,7 +1063,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    call chkint_eq(0,0,cond_string,cond_values,ierr,'goprecon',dt%goprecon,4,[0,1,2,3],iout)
 
    ! gpu_devices
-   if (dt%use_gpu_cuda==1) then
+   if (dt%use_gpu_cuda/=0) then
      if (all(gpu_devices(:)==-2)) then
        gpu_devices(:)=dt%gpu_devices(:)
      else if (any(dt%gpu_devices(:)/=gpu_devices(:))) then
@@ -3693,8 +3693,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    end if
 
 !  use_gpu_cuda
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'use_gpu_cuda',dt%use_gpu_cuda,2,(/0,1/),iout)
-   if (dt%use_gpu_cuda==1) then
+!   call chkint_eq(0,0,cond_string,cond_values,ierr,'use_gpu_cuda',dt%use_gpu_cuda,3,(/0,1,666/),iout)
+   if (dt%use_gpu_cuda/=0) then
      if (dt%nspinor==2) then
        write(msg,'(3a)')&
 &       'Use of GPU is not allowed when nspinor==2 !',ch10,&
