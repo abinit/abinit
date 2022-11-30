@@ -644,6 +644,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer :: ffnlk_request, ffnl1_request
  real(dp) :: cpu,wall,gflops,cpu_all,wall_all,gflops_all,cpu_ks,wall_ks,gflops_ks,cpu_dw,wall_dw,gflops_dw
  real(dp) :: cpu_setk, wall_setk, gflops_setk, cpu_qloop, wall_qloop, gflops_qloop, gf_val, cpu_stern, wall_stern, gflops_stern
+ real(dp) :: cpu_cgwf, wall_cgwf, gflops_cgwf
  real(dp) :: ecut,eshift,weight_q,rfact,gmod2,hmod2,ediff,weight, inv_qepsq, simag, q0rad, out_resid
  real(dp) :: vkk_norm, vkq_norm, osc_ecut
  complex(dpc) :: cfact,dka,dkap,dkpa,dkpap, cnum, sig_cplx
@@ -1496,6 +1497,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          if (dtset%eph_stern == 1 .and. .not. sigma%imag_only) then
            ! Activate Sternheimer. Note that we are still inside the MPI loop over my_npert.
            ! NB: Assume adiabatic AHC expression to compute the contribution of states above nband_kq.
+           call cwtime(cpu_stern, wall_stern, gflops_stern, "start")
 
            ABI_MALLOC (band_procs, (nband_kq))
            band_procs = 0
@@ -1508,12 +1510,18 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            !nband_me = sigma%my_bsum_stop - sigma%my_bsum_start + 1
 
            my_nb = sigma%my_bsum_stop - sigma%my_bsum_start + 1
-           ABI_CALLOC(send_cgq, (2, npw_kq * nspinor, my_nb))
+
 
            mcgq = npw_kq * nspinor * nband_me
            mgscq = npw_kq * nspinor * nband_me * psps%usepaw
            ABI_CALLOC(cgq, (2, npw_kq * nspinor, nband_me))
            ABI_MALLOC(gscq, (2, npw_kq * nspinor, nband_me*psps%usepaw))
+
+#define __old
+
+#ifndef __old
+           ABI_MALLOC(send_cgq, (2, npw_kq * nspinor, my_nb))
+#endif
 
            ! Build global array with cg_kq wavefunctions to prepare call to dfpt_cgwf.
            ! TODO: Ideally, dfpt_cgwf should be modified so that we can pass cgq that is MPI distributed over nband_kq
@@ -1528,7 +1536,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                                  npw_kqirr, wfd%kdata(ikq_ibz)%kg_k, &
                                  npw_kq, kg_kq, istwf_kqirr, istwf_kq, cgwork, bra_kq, work_ngfft, work)
               end if
-#if 0
+#ifdef __old
               cgq(:, :, ibsum_kq) = bra_kq
 #else
               ii = ibsum_kq - sigma%my_bsum_start + 1
@@ -1537,13 +1545,14 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 #endif
            end do
 
-#if 0
+#ifdef __old
            call xmpi_sum(cgq, sigma%bsum_comm%value, ierr)
 #else
            ! Use allgather instead of a naive xmpi_sum for efficiency reasons.
            call xmpi_allgather(send_cgq, size(send_cgq), cgq, sigma%bsum_comm%value, ierr)
-#endif
+           !call xmpi_allgatherv(send_cgq, size(send_cgq), cgq, recvcounts, displs, sigma%bsum_comm%value, ierr)
            ABI_FREE(send_cgq)
+#endif
 
            ABI_CALLOC(out_eig1_k, (2*nband_kq**2))
            ABI_MALLOC(dcwavef, (2, npw_kq*nspinor*usedcwavef0))
@@ -1565,8 +1574,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            ! still it's clear that the treatment of this array must be completely refactored in the DFPT code.
            !
            grad_berry_size_mpw1 = 0
-           call cwtime(cpu_stern, wall_stern, gflops_stern, "start")
 
+           call cwtime(cpu_cgwf, wall_cgwf, gflops_cgwf, "start")
            do ib_k=1,nbcalc_ks
              ! MPI parallelism inside bsum_comm (not very efficient).
              ! TODO: To be replaced by MPI parallellism over bands in projbd inside dfpt_cgwf
@@ -1622,9 +1631,10 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
              call wrtout(std_out, sjoin("Stern nlines_done:", itoa(nlines_done)))
 
            end do ! ib_k
+           call cwtime_report(" cgwf", cpu_cgwf, wall_cgwf, gflops_cgwf)
 
            !if (dtset%prtvol > 10)
-           call cwtime_report("dfpt_cgwf", cpu_stern, wall_stern, gflops_stern)
+           call cwtime_report(" stern", cpu_stern, wall_stern, gflops_stern)
 
            ABI_FREE(band_procs)
            ABI_FREE(cgq)
@@ -2168,10 +2178,13 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      if (.not. sigma%imag_only) then
        call cwtime(cpu_dw, wall_dw, gflops_dw, "start", msg=" Computing Debye-Waller within rigid ion approximation...")
        ! Collect gkq0_atm inside qpt_comm
-       ! In principle it's sufficient to broadcast from itreated_q0 inside qpt_comm
+       ! FIXME: In principle it's sufficient to broadcast from itreated_q0 inside qpt_comm
        ! Yet, q-points are not equally distributed so this synch is detrimental.
+
+       call cwtime(cpu, wall, gflops, "start")
        call xmpi_sum(gkq0_atm, sigma%qpt_comm%value, ierr)
        if (dtset%eph_stern == 1) call xmpi_sum(stern_dw, sigma%qpt_comm%value, ierr)
+       call cwtime_report("DW MPI comm first", cpu, wall, gflops)
 
        ! Integral over IBZ(k) distributed inside qpt_comm
        nq = sigma%nqibz; if (sigma%symsigma == 0) nq = sigma%nqbz
@@ -3041,6 +3054,8 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
    if (new%my_bsum_start == new%nbsum + 1) then
      ABI_ERROR("sigmaph code does not support idle processes! Decrease ncpus or increase nband or use eph_np_pqbks input var.")
    end if
+   !call xmpi_split_work2_i4b(new%nbsum, new%bsum_comm%nproc, bsum_proc(:,1), bsum_proc(:,2))
+
    new%my_bsum_start = new%bsum_start + new%my_bsum_start - 1
    new%my_bsum_stop = new%bsum_start + new%my_bsum_stop - 1
  end if
