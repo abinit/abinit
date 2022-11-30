@@ -519,7 +519,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  call init_hamiltonian(gs_hamkq,psps,pawtab,nspinor,nsppol,nspden,dtset%natom,&
 & dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,ph1d=ph1d,&
 & paw_ij=paw_ij,mpi_atmtab=my_atmtab,comm_atom=my_comm_atom,mpi_spintab=mpi_enreg%my_isppoltab,&
-& usecprj=usecprj,nucdipmom=dtset%nucdipmom,use_gpu_cuda=dtset%use_gpu_cuda)
+& usecprj=usecprj,nucdipmom=dtset%nucdipmom,use_gpu_impl=dtset%use_gpu_cuda)
  
 has_vectornd = (with_vectornd .EQ. 1)
  if(has_vectornd) then

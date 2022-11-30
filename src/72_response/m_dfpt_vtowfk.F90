@@ -501,7 +501,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
          ! ndat hard-coded as 1
          call getghc_nucdip(cwavef,ghc_vectornd,gs_hamkq%gbound_k,gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kpt_k,&
 &          gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,npw_k,gs_hamkq%nvloc,&
-&          gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,nspinor,gs_hamkq%vectornd,gs_hamkq%use_gpu_cuda)
+&          gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,nspinor,gs_hamkq%vectornd,gs_hamkq%use_gpu_impl)
 !        There is an additional factor of 2 with respect to the bare matrix element
          end0_k(iband)=energy_factor*(DOT_PRODUCT(cwavef(1,1:npw_k*nspinor),ghc_vectornd(1,1:npw_k*nspinor))+&
            & DOT_PRODUCT(cwavef(2,1:npw_k*nspinor),ghc_vectornd(2,1:npw_k*nspinor)))
@@ -515,7 +515,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
          ! ndat hard-coded as 1
          call getgh1ndc(cwave1,ghc_vectornd,gs_hamkq%gbound_k,gs_hamkq%istwf_k,gs_hamkq%kg_k,&
            & gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,npw1_k,gs_hamkq%nvloc,&
-           & gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,nspinor,rf_hamkq%vectornd,gs_hamkq%use_gpu_cuda)
+           & gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,nspinor,rf_hamkq%vectornd,gs_hamkq%use_gpu_impl)
 !        There is an additional factor of 4 with respect to the bare matrix element
          end1_k(iband)=two*energy_factor*(DOT_PRODUCT(cwave0(1,1:npw_k*nspinor),ghc_vectornd(1,1:npw_k*nspinor))+&
            & DOT_PRODUCT(cwave0(2,1:npw_k*nspinor),ghc_vectornd(2,1:npw_k*nspinor)))
