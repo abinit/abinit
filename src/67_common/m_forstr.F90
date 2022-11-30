@@ -32,6 +32,7 @@ module m_forstr
  use m_xcdata
  use m_dtset
  use m_extfpmd
+ use m_ompgpu_utils
 
  use defs_datatypes,     only : pseudopotential_type
  use defs_abitypes,      only : MPI_type
@@ -63,6 +64,7 @@ module m_forstr
  use m_nonlop,           only : nonlop
  use m_gemm_nonlop,      only : make_gemm_nonlop,gemm_nonlop_use_gemm, &
 &                               gemm_nonlop_ikpt_this_proc_being_treated
+ use m_gemm_nonlop_ompgpu,  only : make_gemm_nonlop_ompgpu
  use m_fock_getghc,      only : fock_getghc
  use m_prep_kgb,         only : prep_nonlop
  use m_paw_nhat,         only : pawmknhat
@@ -944,11 +946,19 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 !    Setup gemm_nonlop
      if (gemm_nonlop_use_gemm) then
        gemm_nonlop_ikpt_this_proc_being_treated = my_ikpt
-       call make_gemm_nonlop(my_ikpt,gs_hamk%npw_fft_k,gs_hamk%lmnmax,gs_hamk%ntypat, &
+       if ( use_gpu_cuda == 0) then
+         call make_gemm_nonlop(my_ikpt,gs_hamk%npw_fft_k,gs_hamk%lmnmax,gs_hamk%ntypat, &
 &            gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%istwf_k, gs_hamk%ucvol, &
 &            gs_hamk%ffnl_k, gs_hamk%ph3d_k, gs_hamk%kpt_k, gs_hamk%kg_k, gs_hamk%kpg_k, &
 &            use_gemm_nonlop_gpu, &
 &            compute_grad_strain=(stress_needed>0),compute_grad_atom=(optfor>0))
+       else if ( use_gpu_cuda == 666) then
+         call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp,bandfft_kpt(my_ikpt)%kg_k_gather)
+         call make_gemm_nonlop_ompgpu(my_ikpt,gs_hamk%npw_fft_k,gs_hamk%lmnmax,gs_hamk%ntypat, &
+&            gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%istwf_k, gs_hamk%ucvol, &
+&            gs_hamk%ffnl_k, gs_hamk%ph3d_k, gs_hamk%kpt_k, gs_hamk%kg_k, gs_hamk%kpg_k, &
+&            compute_grad_strain=(stress_needed>0),compute_grad_atom=(optfor>0))
+       end if
      end if
 
 !    Loop over (blocks of) bands; accumulate forces and/or stresses
@@ -1100,6 +1110,9 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
              call timab(926,2,tsec)
            end if
          end if ! usefock_loc
+       end if
+       if ( use_gpu_cuda == 666) then
+         call ompgpu_free_hamilt_buffers()
        end if
 
      end do ! End of loop on block of bands

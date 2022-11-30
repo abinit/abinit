@@ -26,6 +26,7 @@ module m_nonlop
  use m_xmpi
  use m_cgtools
  use m_gemm_nonlop
+ use m_gemm_nonlop_ompgpu
 
  use defs_abitypes, only : MPI_type
  use m_time,        only : timab
@@ -701,7 +702,18 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 
  if(use_gemm_nonlop) then
 
-   if ( .not. use_gemm_nonlop_gpu) then
+   !FIXME Settle this
+   if(hamk%use_gpu_impl==666) then
+     call gemm_nonlop_ompgpu(atindx1_,choice,cpopt,cprjin_,dimenl1,dimenl2_,dimekbq,&
+&      dimffnlin,dimffnlout,enl_,enlout,ffnlin_,ffnlout_,hamk%gmet,hamk%gprimd,&
+&      idir,indlmn_,istwf_k,kgin,kgout,kpgin,kpgout,kptin,kptout,lambda,&
+&      hamk%lmnmax,matblk_,hamk%mgfft,mpi_enreg,hamk%mpsang,hamk%mpssoang,&
+&      natom_,nattyp_,ndat,hamk%ngfft,nkpgin,nkpgout,nloalg_,&
+&      nnlout,npwin,npwout,my_nspinor,hamk%nspinor,ntypat_,only_SO_,paw_opt,&
+&      phkxredin_,phkxredout_,ph1d_,ph3din_,ph3dout_,signs,sij_,svectout,&
+&      tim_nonlop,hamk%ucvol,hamk%useylm,vectin,vectout,hamk%use_gpu_impl)
+
+   else if ( .not. use_gemm_nonlop_gpu) then
 
      !call wrtout(std_out, "Calling gemm_nonlop")
      call gemm_nonlop(atindx1_,choice,cpopt,cprjin_,dimenl1,dimenl2_,dimekbq,&

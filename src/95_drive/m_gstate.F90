@@ -41,6 +41,7 @@ module m_gstate
  use m_bandfft_kpt
  use m_invovl
  use m_gemm_nonlop
+ use m_gemm_nonlop_ompgpu
  use m_wfk
  use m_nctk
  use m_hdr
@@ -460,6 +461,12 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  else
    gemm_nonlop_use_kokkos = .false.
  endif
+
+ !TODO OpenMP GPU GEMM nonlop "poses" as regular CPU GEMM nonlop, are we fine with it ?
+ if(dtset%use_gpu_cuda == 666) then
+   gemm_nonlop_use_gemm = .true.
+   call init_gemm_nonlop_ompgpu(dtset%nkpt)
+ end if
 
 !Set up the Ylm for each k point
  if ( dtset%tfkinfunc /= 2) then
@@ -1796,6 +1803,10 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    call destroy_invovl(dtset%nkpt,dtset%use_gpu_cuda)
  end if
 
+ if(dtset%use_gpu_cuda == 666) then
+   call destroy_gemm_nonlop_ompgpu()
+   gemm_nonlop_use_gemm = .false.
+ end if
  if(gemm_nonlop_use_gemm) then
    call destroy_gemm_nonlop(dtset%nkpt)
    gemm_nonlop_use_gemm = .false.
