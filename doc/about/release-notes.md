@@ -1,3 +1,275 @@
+## v9.8
+
+Version 9.8, released on December 9, 2022.
+List of changes with respect to version 9.6.
+<!-- Release notes updated on November 30, 2022. -->
+
+Many thanks to the contributors to the ABINIT project between
+October 2021 and August 2022 ! These release notes
+are relative to modifications/improvements of ABINIT v9.8 with respect to v9.6.
+<!-- Merge requests up to and including MR874. Also, MR881, 882, and 885 are taken into account. -->
+
+The list of contributors includes:
+<!-- TO BE UPDATED 
+L. Baguet, J.-M. Beuken, J. Bieder, A. Blanchet,
+J. Clerouin, C. Espejo, M. Giantomassi, O. Gingras, X. Gonze, F. Goudreault,
+B. Guster, Ch. Paillard,
+Y. Pouillon, M. Rodriguez-Mayorga, M. Royo, F. Soubiran,
+M. Torrent, M. Verstraete, J. Zwanziger.
+-->
+
+It is worth to read carefully all the modifications that are mentioned in the present file,
+and examine the links to help files or test cases.
+This might take some time ...
+
+Xavier
+
+### **A.** Important remarks and warnings.
+
+**A.1** Warning : the input variables prtefg and prtfc have been renamed [[nucefg]] and [[nucfc]].
+
+By J. Zwanziger (MR850)
+
+* * *
+
+### **B.** Most noticeable achievements
+
+**B.1** Lattice Wannier functions can be computed, using the SCDM-k algorithm, or the projected Wannier function algorithm.
+
+The [[tutorial:lattice_wannier]] has been written to teach how to construct such lattice Wannier functions. 
+They are used in localized bases for atomic distortions. 
+One typical use case is to build an effective Hamiltonian of atomic displacement (see the next achievement). 
+In many phenomena, only a few distortion modes are important.
+
+Related input variables : 
+[[lwfflag@anaddb]],
+[[lwf_anchor_ibands@anaddb]],
+[[lwf_anchor_proj@anaddb]],
+[[lwf_anchor_qpt@anaddb]],
+[[lwf_disentangle@anaddb]],
+[[lwf_mu@anaddb]],
+[[lwf_ngqpt@anaddb]],
+[[lwf_nwann@anaddb]],
+[[lwf_projector@anaddb]],
+[[lwf_sigma@anaddb]].
+See tests [[test:lwf_1]], [[test:v9_110]], and [[test:v9_111]].
+
+By He Xu (MR844)
+
+**B.2** Lattice Wannier function dynamics is available inside the second-principle engine MULTIBINIT.
+
+Once Lattice Wannier functions are available, they can be used with different dynamical algorithm to deduce heat capacity, susceptibility, structural phase transition, critical temperature, instead of doing standard molecular dynamics with all atoms.
+Related input variables :
+[[lwf_constraint@multibinit]],
+[[lwf_dt@multibinit]],
+[[lwf_dynamics@multibinit]],
+[[lwf_init_state@multibinit]],
+[[lwf_init_hist_fname@multibinit]],
+lwf_mc_avg_amp@multibinit,
+[[lwf_nctime@multibinit]],
+[[lwf_ntime@multibinit]],
+[[lwf_pot_fname@multibinit]],
+[[lwf_taut@multibinit]],
+lwf_temperature@multibinit,
+[[lwf_temperature_end@multibinit]],
+[[lwf_temperature_nstep@multibinit]],
+[[lwf_temperature_start@multibinit]],
+[[lwf_var_temperature@multibinit]].
+
+See the tutorial [[tutorial:lwf_model]] and related tests.
+By He XI (MR ??)
+
+**B.3** Numerous miscellaneous improvements of the second-principle engine MULTIBINIT.
+
+The MULTIBINIT tutorial have been improved (TO BE MENTIONED).
+The following MULTIBINIT features and input variables have been introduced :
+use of the new syntax for launching multibinit ([[outdata_prefix@multibinit]]),
+define oblique supercells ([[ncellmat@multibinit]]), print Goal-Function values in CSV format ([[prt_GF_csv@multibinit]]), 
+impose the seed for MULTIBINIT spin/LWF dynamics to obtain reproducible results ([[randomseed@multibinit]]),
+specify the spin-lattice-coupling potential file name in the coupled spin-lattice multibinit dynamics calculation
+([[slc_pot_fname@multibinit]]),
+specify the initial state of the multibinit spin dynamics calculation ([[spin_init_hist_fname@multibinit]],
+specify the spin potential file name in the multibinit spin dynamics calculation ([[spin_pot_fname@multibinit]]),
+specify three weights for Energy, Forces and Stresses in the calculation of the Goal Function ([[bound_factors@multibinit]]),
+specify three weights for Energy, Forces and Stresses in the calculation of the Goal Function during the fit process ([[fit_factors@multibinit]]),
+specify three weights for Energy, Forces and Stresses in the calculation of the Goal Function during the optimization process ([[opt_factors@multibinit]]),
+specify the relative penalty for the determination of bounding coefficient values ([[bound_penalty@multibinit]]),
+activate the generation of pure displacement coefficients ([[fit_dispterms@multibinit]]), 
+specify the number of anharmonic coefficients per symmetric irreducible atom to add during fit process ([[fit_ncoeff_per_iatom@multibinit]]),
+specify the number of coefficients imposed with fixed value as in the input xml during the fit process for the mode
+([[fit_nimposecoeff@multibinit]]),
+specify the indices of the imposed coefficients with fixed coefficient value during the fit process for the model ([[fit_imposecoeff@multibinit]]),
+
+See the tests in which these input variables are used. 
+By He XI (MR ??)
+
+
+**B.3** The TDEP formalism implemented in ABINIT (aTDEP), allowing to compute temperature-dependent phonon band structures,
+ has been made more robust, and tested extensively. One tutorial ([[tutorial:atdep1]]) is now available.
+See the thirtyy-seven tests from [[test:atdep_01]] to [[test:atdep_37] and the tests mentioned in the 
+tutorial [[tutorial:atdep1]]. Related publication, see [[cite:Bottin2020]].
+
+By F. Bottin, J. Bieder and J. Bouchet (MR ???).
+
+
+
+**B.1** Band-parallel implementation of DFPT: the memory footprint is now distributed over different processors.
+
+Previously, the memory was distributed only for k-point parallelism.
+This is automatically managed, no user action is to be taken to activate this memory saving.
+
+See test [[test:dfpt_04]].
+
+By M. Verstraete (MR784, 803)
+
+**B.2** The Iterative Boltzmann Transport Equation (IBTE) to compute the electric conductivity has been implemented.
+To activate the IBTE, use [[ibte_prep]] = 1 with [[eph_task]] -4.
+The IBTE solver can also be invoked in standalone mode by providing a SIGEPH file with [[eph_task]] = 8.
+Related input variables: [[ibte_niter]], [[ibte_abs_tol]] and [[ibte_alpha_mix]].
+See test [[test:v9_65]].
+
+By M. Giantomassi (MR794)
+
+**B.3** The computation of dynamical quadrupoles and flexoelectricity is now available within the GGA.
+Test for GGA + longwaves [[test:v9_46]].
+
+Also, the usage of the quadrupoles has been rationalized (and made easier) in anaddb
+as the default value of [[dipquad@anaddb]] and [[quadquad@anaddb]] has been changed to 1.
+This means that dipole-quadrupole and quadrupole-quadrupole contributions are always included
+in the Fourier interpolation of the dynamical matrix provided the DDB provides these terms.
+
+This "default behaviour" is similar to the one used for the dipole-dipole treatment.
+Indeed, the default value of [[dipdip@anaddb]] is 1 hence the dipolar term is automatically included
+if the DDB contains the Born effective charges and the electronic dielectric tensor.
+Still, the user can deactivate the inclusion of the different terms by setting the corresponding
+variable to zero for testing purposes.
+See the ANADDB input variables and test [[test:lw_6]]
+
+**B.4** Stresses are available within cDFT (constrained DFT).
+See tests [[test:v9_01]], [[test:v9_02]] and [[test:v9_03]].
+
+By X. Gonze (MR802)
+
+
+**B.5** The computation of effective mass renormalization due to electron-phonon coupling, treated in the generalized Frohlich model,
+is now available, for cubic materials. An article has been submitted, see <https:arxiv.org/abs/2109.12594>.
+Activate it using [[eph_task]]=10.
+
+See test [[test:v9_66]].
+
+By B. Guster (MR800)
+
+**B.6** Important speed-up of the PAW calculations is allowed thanks to the storage of "cprj" coefficients.
+See the input variable [[cprj_update_lvl]]. However, at present this is only possible for ground-state
+calculations, with several restrictions, spelled in [[cprj_update_lvl]]. So, this is not activated by default.
+There is also an internal variable [[cprj_in_memory]] exposed in the documentation.
+Other input variables have been introduced in the development process : [[fft_count]] and [[nonlop_ylm_count]].
+They allow one to monitor better the number of FFTs and non-local operator applications.
+
+See tests [[test:v9_71]], [[test:v9_72]], [[test:v9_73]] and [[test:v9_74]].
+
+By L. Baguet (MR793).
+
+**B.7** The Extended First-Principles Molecular Dynamics has been implemented.
+This method allows one to drastically reduce the needed number of bands for high temperature simulations,
+using pure single plane waves description based on the Fermi gas model beyond explicitly computed bands.
+The implementation and usage will be described in an upcoming paper which is currently under review (Authors: *A. Blanchet, J. Clérouin, M. Torrent, F. Soubiran*).
+
+See [[topic:ExtFPMD]], as well as the input variables [[useextfpmd]] and [[extfpmd_nbcut]],
+and test [[test:v9_92]].
+
+By A. Blanchet, J. Clérouin, M. Torrent, F. Soubiran. (MR788).
+
+
+* * *
+
+### **C.** Changes for the developers (including information about compilers)
+
+**C.1** Supported compilers
+
+* gfort (GNU) compiler: v11 newly supported.
+* ifort (Intel) compiler: v21.4 newly supported.
+Two new bots introduced in the test farm : alps_intel_21.4_elpa and graphene_gnu_11.2_macports .
+
+By JM Beuken
+
+* * *
+
+### **D.**  Other changes (or on-going developments, not yet finalized)
+
+**D.1** New input variable for "optic": [[prtlincompmatrixelements@optic]].
+
+Added this flag in order to make it possible to print the different elements that are used to build the susceptibility of the linear component of the dielectric tensor.
+These elements are namely: the matrix elements, the renormalized electronic eigenvalues, the occupations and the kpt weights.
+Everything is dumped into the _OPTIC.nc file by the main process. Thus optimization could be done memory-wise and speed wise if MPI-IO is implemented for this nc file.
+
+[[test:v9_49]] was created which is the same as [[test:v9_48]] except with the aforementioned flag set to 1.
+This test checks that everything works well even though we print the matrix elements.
+It does not test that matrix elements are well printed because that would require testing of the OPTIC.nc file.
+Although it is possible to check that it works well using a simple python script (see the figure in the merge request on Gitlab).
+(Note that the tests v9_13 and v9_14 have been moved to v9_47 and v9_48 in this change).
+
+By F. Goudreault (MR776)
+
+**D.2** New radial sine transform for the vdW-DF kernel.
+
+By C. Espejo (MR 797)
+
+
+**D.3** New test of orbital magnetism, [[test:v9_37]].
+Also, on-going work on orbital magnetism, including use with DDK wavefunctions.
+
+By J. Zwanziger (MR767, MR775, MR779 and MR787)
+
+**D.4** Migration to mkdocs==1.1.2 and  mkdocs-material==7.0.6.
+mksite.py now requires python >= 3.6 .
+Activated search capabilities, available in the new mkdocs version.
+
+By M. Giantomassi (MR774)
+
+**D.5** Fixed bug in make_efg_onsite for [[nspden]]=2 case.
+
+By J. Zwanziger (MR783)
+
+**D.6** Correction of tutorials Rf1 and Rf2 for version 9
+
+By O. Gingras (MR785)
+
+**D.7** Fixed errors and bugs detected by using -ftrapuv intel option
+
+By M. Giantomassi (MR789)
+
+**D.8** Bug fix in [[nspden]]=4 DFPT for Fe
+
+By M. Verstraete (MR790)
+
+**D.9** Fixed a spurious test line 711 of m_occ.F90 that caused abinit to abort in the case of [[occopt]]=9,
+if the number of conduction bands was enough to accommodate nqFD but not enough to accommodate nelect.
+
+By Ch. Paillard (MR791)
+
+**D.10** GW methodology with Kohn-Sham density matrix.
+Solving a bug producing a segmentation fault when using [[bdgw]] and [[gw1rdm]].
+New test [[test:v9_37]].
+
+By M. Rodriguez-Mayorga (MR792)
+
+**D.11** Introduced new input variable use_oldchi.
+This input variable is temporary, for testing purposes. It is documented, but not tested.
+
+By Wei Chen (modified line 743 in src/95_drive/screening.F90 on 23 April 2021).
+
+**D.12** The input variable [[rfstrs_ref]] has been introduced, but not yet documented and tested, as this is on-going work.
+
+By M. Royo
+
+
+**D.13** Miscellaneous additional bug fixes, or upgrade of build system.
+in the upgrade of tutorials).
+By J. Bieder, M. Giantomassi, Y. Pouillon, M. Torrent, J. Zwanziger.
+
+* * *
+
 ## v9.6
 
 Version 9.6, released on October 4, 2021.
