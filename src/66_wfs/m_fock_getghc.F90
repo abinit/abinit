@@ -232,7 +232,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
  call timab(1515,2,tsec) ; call timab(1541,-2,tsec) ; call timab(1512,-1,tsec)
  call fourwf(0,rhodum0,cwavef,rhodum,cwavef_r,gboundf,gboundf,gs_ham%istwf_k,gs_ham%kg_k,gs_ham%kg_k,&
 & mgfftf,mpi_enreg,ndat1,ngfftf,npw,1,n4f,n5f,n6f,0,tim_fourwf_fock_getghc,weight1,weight1,&
-& use_gpu_cuda=gs_ham%use_gpu_cuda)
+& use_gpu_cuda=gs_ham%use_gpu_impl)
  call timab(1512,2,tsec) ; call timab(1515,-1,tsec) ; call timab(1541,-1,tsec)
  cwavef_r=cwavef_r*invucvol
 
@@ -329,7 +329,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
        call timab(1515,2,tsec) ; call timab(1512,-1,tsec) ; call timab(1542,-2,tsec)
        call fourwf(1,rhodum0,fockbz%cgocc(:,1+jcg+npwj*(jband-1):jcg+jband*npwj,my_jsppol),rhodum,cwaveocc_r, &
 &       gbound_kp,gbound_kp,jstwfk,kg_occ,kg_occ,mgfftf,mpi_enreg,ndat1,ngfftf,&
-&       npwj,1,n4f,n5f,n6f,0,tim_fourwf_fock_getghc,weight1,weight1,use_gpu_cuda=gs_ham%use_gpu_cuda)
+&       npwj,1,n4f,n5f,n6f,0,tim_fourwf_fock_getghc,weight1,weight1,use_gpu_cuda=gs_ham%use_gpu_impl)
        call timab(1512,2,tsec) ; call timab(1515,-1,tsec) ; call timab(1542,-1,tsec)
        cwaveocc_r=cwaveocc_r*invucvol
      end if
@@ -669,7 +669,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
    call timab(1515,2,tsec) ; call timab(1512,-1,tsec) ; call timab(1547,-2,tsec)
    call fourwf(0,rhodum0,rhodum,ghc1,psilocal,gboundf,gboundf,gs_ham%istwf_k,gs_ham%kg_k,gs_ham%kg_k,&
 &   mgfftf,mpi_enreg,ndat1,ngfftf,1,npw,n4f,n5f,n6f,3,tim_fourwf_fock_getghc,weight1,weight1,&
-&   use_gpu_cuda=gs_ham%use_gpu_cuda)
+&   use_gpu_cuda=gs_ham%use_gpu_impl)
    call timab(1512,2,tsec) ; call timab(1515,-1,tsec) ; call timab(1547,-1,tsec)
    ABI_FREE(psilocal)
 
@@ -889,7 +889,7 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
 & typat,xred,nfft,mgfft,ngfft,rprimd,nloalg,usecprj=usecprj,&
 & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab,&
 & paw_ij=paw_ij,ph1d=ph1d,fock=fock,&
-& use_gpu_cuda=use_gpu_cuda)
+& use_gpu_impl=use_gpu_cuda)
  rmet = MATMUL(TRANSPOSE(rprimd),rprimd)
  fockcommon%use_ACE=use_ACE_old
 

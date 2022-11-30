@@ -739,7 +739,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 & typat,xred,nfft,mgfft,ngfft,rprimd,nloalg,usecprj=usecprj_local,&
 & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab,&
 & paw_ij=paw_ij,ph1d=ph1d,electronpositron=electronpositron,fock=fock,&
-& nucdipmom=nucdipmom,use_gpu_cuda=use_gpu_cuda)
+& nucdipmom=nucdipmom,use_gpu_impl=use_gpu_cuda)
  rmet = MATMUL(TRANSPOSE(rprimd),rprimd)
 
 !need to reorder cprj=<p_lmn|Cnk> (from unsorted to atom-sorted)

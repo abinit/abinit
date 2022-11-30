@@ -486,12 +486,12 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
          call fourwf(1,gs_ham%vlocal,cwavef_fft,cwavef_fft,work,gbound_k1,gbound_k2,&
 &         gs_ham%istwf_k,kg_k_fft,kg_k_fft,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
 &         npw_fft,npw_fft,gs_ham%n4,gs_ham%n5,gs_ham%n6,option_fft,tim_fourwf,&
-&         weight,weight,use_gpu_cuda=gs_ham%use_gpu_cuda)
+&         weight,weight,use_gpu_cuda=gs_ham%use_gpu_impl)
        else
          call fourwf(1,gs_ham%vlocal,cwavef,ghc,work,gbound_k1,gbound_k2,&
 &         gs_ham%istwf_k,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
 &         npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,option_fft,tim_fourwf,&
-&         weight,weight,use_gpu_cuda=gs_ham%use_gpu_cuda)
+&         weight,weight,use_gpu_cuda=gs_ham%use_gpu_impl)
        end if
 
      else
@@ -512,7 +512,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
          call fourwf(1,gs_ham%vlocal,cwavef1,ghc1,work,gbound_k1,gbound_k2,&
 &         gs_ham%istwf_k,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
 &         npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,option_fft,tim_fourwf,&
-&         weight,weight,use_gpu_cuda=gs_ham%use_gpu_cuda)
+&         weight,weight,use_gpu_cuda=gs_ham%use_gpu_impl)
          do idat=1,ndat
            do ipw =1, npw_k2
              ghc(1:2,ipw+(idat-1)*my_nspinor*npw_k2)=ghc1(1:2,ipw+(idat-1)*npw_k2)
@@ -536,7 +536,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
          call fourwf(1,gs_ham%vlocal,cwavef2,ghc2,work,gbound_k1,gbound_k2,&
 &         gs_ham%istwf_k,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
 &         npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,option_fft,tim_fourwf,weight,weight,&
-&         use_gpu_cuda=gs_ham%use_gpu_cuda)
+&         use_gpu_cuda=gs_ham%use_gpu_impl)
          do idat=1,ndat
            do ipw=1,npw_k2
              ghc(1:2,ipw+(idat-1)*my_nspinor*npw_k2+shift2)=ghc2(1:2,ipw+(idat-1)*npw_k2)
@@ -587,7 +587,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
        call fourwf(1,vlocal_tmp,cwavef1,ghc1,work,gbound_k1,gbound_k2,&
 &       gs_ham%istwf_k,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
 &       npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,option_fft,tim_fourwf,weight,weight,&
-&       use_gpu_cuda=gs_ham%use_gpu_cuda)
+&       use_gpu_cuda=gs_ham%use_gpu_impl)
      end if
 !    ghc2=v22*phi2
      if (nspinor2TreatedByThisProc) then
@@ -616,7 +616,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
        call fourwf(1,vlocal_tmp,cwavef2,ghc2,work,gbound_k1,gbound_k2,&
 &       gs_ham%istwf_k,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
 &       npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,option_fft,tim_fourwf,weight,weight,&
-&       use_gpu_cuda=gs_ham%use_gpu_cuda)
+&       use_gpu_cuda=gs_ham%use_gpu_impl)
      end if
      ABI_FREE(vlocal_tmp)
      cplex=2
@@ -649,7 +649,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
        call fourwf(cplex,vlocal_tmp,cwavef1,ghc3,work,gbound_k1,gbound_k2,&
 &       gs_ham%istwf_k,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
 &       npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,option_fft,tim_fourwf,weight,weight,&
-&       use_gpu_cuda=gs_ham%use_gpu_cuda)
+&       use_gpu_cuda=gs_ham%use_gpu_impl)
      end if
 !    ghc4=(re(v12)+im(v12))*phi2
      if (nspinor2TreatedByThisProc) then
@@ -675,7 +675,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
        call fourwf(cplex,vlocal_tmp,cwavef2,ghc4,work,gbound_k1,gbound_k2,&
 &       gs_ham%istwf_k,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
 &       npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,option_fft,tim_fourwf,weight,weight,&
-&       use_gpu_cuda=gs_ham%use_gpu_cuda)
+&       use_gpu_cuda=gs_ham%use_gpu_impl)
      end if
      ABI_FREE(vlocal_tmp)
 !    Build ghc from pieces
@@ -754,7 +754,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
      ABI_MALLOC(ghc_mGGA,(2,npw_k2*my_nspinor*ndat))
      call getghc_mGGA(cwavef,ghc_mGGA,gbound_k1,gs_ham%gprimd,gs_ham%istwf_k,kg_k1,kpt_k1,&
 &     gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,npw_k1,gs_ham%nvloc,&
-&     gs_ham%n4,gs_ham%n5,gs_ham%n6,my_nspinor,gs_ham%vxctaulocal,gs_ham%use_gpu_cuda)
+&     gs_ham%n4,gs_ham%n5,gs_ham%n6,my_nspinor,gs_ham%vxctaulocal,gs_ham%use_gpu_impl)
      ghc(1:2,1:npw_k2*my_nspinor*ndat)=ghc(1:2,1:npw_k2*my_nspinor*ndat)+ghc_mGGA(1:2,1:npw_k2*my_nspinor*ndat)
      ABI_FREE(ghc_mGGA)
    end if
@@ -771,7 +771,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
      ghc_vectornd=zero
      call getghc_nucdip(cwavef,ghc_vectornd,gbound_k1,gs_ham%istwf_k,kg_k1,kpt_k1,&
 &     gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,npw_k1,gs_ham%nvloc,&
-&     gs_ham%n4,gs_ham%n5,gs_ham%n6,my_nspinor,gs_ham%vectornd,gs_ham%use_gpu_cuda)
+&     gs_ham%n4,gs_ham%n5,gs_ham%n6,my_nspinor,gs_ham%vectornd,gs_ham%use_gpu_impl)
      ghc(1:2,1:npw_k2*my_nspinor*ndat)=ghc(1:2,1:npw_k2*my_nspinor*ndat)+ghc_vectornd(1:2,1:npw_k2*my_nspinor*ndat)
      ABI_FREE(ghc_vectornd)
    end if
@@ -862,7 +862,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
    ABI_NVTX_START_RANGE(NVTX_GETGHC_KIN)
 
 #if defined(HAVE_FC_ISO_C_BINDING) && defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
-   if (gs_ham%use_gpu_cuda == 1) then
+   if (gs_ham%use_gpu_impl == 1) then
      call assemble_energy_contribution_kokkos(c_loc(ghc), &
        & c_loc(gsc), c_loc(kinpw_k2), c_loc(cwavef), c_loc(gvnlxc_), &
        & ndat, my_nspinor, npw_k2, sij_opt, k1_eq_k2, hugevalue)
@@ -872,7 +872,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
    end if
 #endif
 
-   if (gs_ham%use_gpu_cuda == 0) then
+   if (gs_ham%use_gpu_impl == 0) then
      !  Assemble modified kinetic, local and nonlocal contributions
      !  to <G|H|C(n,k)>. Take also into account build-in debugging.
      if(prtvol/=-level)then
@@ -964,7 +964,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
          end do ! ispinor
        end do ! idat
      end if
-   end if ! gs_ham%use_gpu_cuda == 0
+   end if ! gs_ham%use_gpu_impl == 0
    ABI_NVTX_END_RANGE()
 
 !  Special case of PAW + Fock : only return Fock operator contribution in gvnlxc_
