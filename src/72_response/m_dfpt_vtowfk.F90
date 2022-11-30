@@ -538,7 +538,7 @@ unit_me = 6
          call sqnorm_g(scprod,gs_hamkq%istwf_k,npw1_k*nspinor,cwavef,mpi_enreg%me_g0,&
 &         mpi_enreg%comm_fft)
        end if
-       eeig0_k(iband)=-energy_factor*(eig0_k(iband)- (dtset%dfpt_sciss) -omega_)*scprod
+       eeig0_k(iband)=-energy_factor*(eig0_k(iband)- (dtset%dfpt_sciss) +omega_)*scprod
 
 !      Compute nonlocal psp contributions to nonlocal energy:
 !      <G|Vnl+VFockACE|C1nk(perp)> is contained in gvnlxc (with cwavef)

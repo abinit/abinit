@@ -258,7 +258,7 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
 
  ! Remove omega for a finite-frequency calculation
  omega_=zero ; if (present(omega)) omega_=omega
- eshift=eshift-omega_
+ eshift=eshift+omega_
 
  ! Additional initializations
  istwf_k=gs_hamkq%istwf_k
