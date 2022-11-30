@@ -254,7 +254,7 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  end do
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
- if(l_gs_hamk%use_gpu_cuda==1) then
+ if(l_gs_hamk%use_gpu_impl==1) then
    ! upload l_pcon to device / gpu
    l_pcon_size_bytes =l_icplx * npw * dp
    call gpu_data_prefetch_async(C_LOC(l_pcon), l_pcon_size_bytes)
@@ -307,7 +307,7 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
 &                 dtset%paral_kgb,l_mpi_enreg%nproc_band,l_mpi_enreg%bandpp, &
 &                 l_mpi_enreg%nproc_fft,nline, space,1,l_gs_hamk%istwf_k, &
 &                 l_mpi_enreg%comm_bandspinorfft,l_mpi_enreg%me_g0,l_paw, &
-&                 l_gs_hamk%use_gpu_cuda, &
+&                 l_gs_hamk%use_gpu_impl, &
 &                 gpu_num_openmp_threads=dtset%use_gpu_openmp_threads)
  ABI_NVTX_END_RANGE()
 

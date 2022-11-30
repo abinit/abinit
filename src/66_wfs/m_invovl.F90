@@ -607,7 +607,7 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
 #if defined(HAVE_FC_ISO_C_BINDING) && defined(HAVE_GPU_CUDA)
 
  ! upload inverse overlap matrices (sij and s_approx) to GPU memory
- if (ham%use_gpu_cuda==1) then
+ if (ham%use_gpu_impl==1) then
    ! allocate memory for sij and s_approx on GPU
    write(message,'(a,a,i12,a,a,i6,a,a,i6,a,a,es12.4,a)') &
      & 'Allocate GPU memory for inverse overlap computations (sij and s_approx) : ',&
@@ -722,7 +722,7 @@ subroutine apply_invovl(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_enreg, 
 
   !! memory allocation of data used in solve_inner_gpu
   !! note : this is actually done only once
-  if (ham%use_gpu_cuda==1) then
+  if (ham%use_gpu_impl==1) then
 
 #ifdef DEBUG_VERBOSE_GPU
     if(xmpi_comm_rank(xmpi_world) == 0) then
@@ -761,7 +761,7 @@ subroutine apply_invovl(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_enreg, 
     call prep_nonlop(choice,cpopt,cwaveprj_in,enlout,ham,idir,lambda_block,ndat,mpi_enreg,&
       &                   nnlout,paw_opt,signs,sm1cwavef,tim_nonlop,cwavef,gvnlxc,&
       &                   already_transposed=.true.,&
-      &                   use_gpu_cuda=ham%use_gpu_cuda)
+      &                   use_gpu_cuda=ham%use_gpu_impl)
   else
     call nonlop(choice,cpopt,cwaveprj_in,enlout,ham,idir,lambda_block,mpi_enreg,ndat,&
       &              nnlout,paw_opt,signs,sm1cwavef,tim_nonlop,cwavef,gvnlxc)
@@ -784,7 +784,7 @@ subroutine apply_invovl(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_enreg, 
   !multiply by S^1
   ABI_NVTX_START_RANGE(NVTX_INVOVL_INNER)
   ! TODO : when solve_inner_gpu is ready, update the following to activate GPU computation
-  if (ham%use_gpu_cuda == 1) then
+  if (ham%use_gpu_impl == 1) then
 
 #if defined(HAVE_FC_ISO_C_BINDING) && defined(HAVE_GPU_CUDA)
 
@@ -847,7 +847,7 @@ subroutine apply_invovl(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_enreg, 
     end do
   end do
 
-  if (ham%use_gpu_cuda==1) then
+  if (ham%use_gpu_impl==1) then
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS) && defined(HAVE_YAKL)
     cwavef_size = 2*npw*nspinor*ndat
     call add_array_kokkos(c_loc(sm1cwavef), c_loc(cwavef), cwavef_size)

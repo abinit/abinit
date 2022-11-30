@@ -525,7 +525,7 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
 & dtset%natom,dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,&
 & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab,&
 & paw_ij=paw_ij,ph1d=ph1d,electronpositron=electronpositron,&
-& nucdipmom=dtset%nucdipmom,use_gpu_cuda=dtset%use_gpu_cuda)
+& nucdipmom=dtset%nucdipmom,use_gpu_impl=dtset%use_gpu_cuda)
 
  ABI_MALLOC(vlocal,(n4,n5,n6,gs_hamk%nvloc))
  if (with_vxctau) then

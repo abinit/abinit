@@ -187,8 +187,11 @@ module m_hamiltonian
   integer :: n4,n5,n6
    ! same as ngfft(4:6)
 
-  integer :: use_gpu_cuda
+  integer :: use_gpu_impl
   ! governs wheter we do the hamiltonian calculation on gpu or not
+  !        = 0 ==> do not use GPU
+  !        = 1 ==> use CUDA GPU implementation of hamiltonian operators
+  !        = 666 ==> use openMP GPU implementation of hamiltonian operators
 
   integer :: usecprj
    ! usecprj= 1 if cprj projected WF are stored in memory
@@ -646,7 +649,7 @@ subroutine destroy_hamiltonian(Ham)
  if (associated(Ham%fockACE_k)) nullify(Ham%fockACE_k)
  if (associated(Ham%fockbz)) nullify(Ham%fockbz)
 #if defined HAVE_GPU_CUDA
- if(Ham%use_gpu_cuda==1) then
+ if(Ham%use_gpu_impl==1) then
    call gpu_finalize_ham_data()
  end if
 #endif
@@ -706,12 +709,12 @@ end subroutine destroy_hamiltonian
 subroutine init_hamiltonian(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
 &                           xred,nfft,mgfft,ngfft,rprimd,nloalg,&
 &                           ph1d,usecprj,comm_atom,mpi_atmtab,mpi_spintab,paw_ij,&  ! optional
-&                           electronpositron,fock,nucdipmom,use_gpu_cuda)           ! optional
+&                           electronpositron,fock,nucdipmom,use_gpu_impl)           ! optional
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfft,natom,nspinor,nsppol,nspden,mgfft
- integer,optional,intent(in) :: comm_atom,usecprj,use_gpu_cuda
+ integer,optional,intent(in) :: comm_atom,usecprj,use_gpu_impl
  class(gs_hamiltonian_type),intent(inout),target :: ham
  type(electronpositron_type),optional,pointer :: electronpositron
  type(fock_type),optional,pointer :: fock
@@ -806,7 +809,7 @@ subroutine init_hamiltonian(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
  ham%usepaw     =psps%usepaw
  ham%ucvol      =ucvol
  ham%useylm     =psps%useylm
- ham%use_gpu_cuda=0 ; if(PRESENT(use_gpu_cuda)) ham%use_gpu_cuda=use_gpu_cuda
+ ham%use_gpu_impl=0 ; if(PRESENT(use_gpu_impl)) ham%use_gpu_impl=use_gpu_impl
 
  ham%pspso(:)   =psps%pspso(1:psps%ntypat)
  if (psps%usepaw==1) then
@@ -869,7 +872,7 @@ subroutine init_hamiltonian(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
 
 !  Update enl on GPU (will do it later for PAW)
 #if defined HAVE_GPU_CUDA
-   if (ham%use_gpu_cuda==1) then
+   if (ham%use_gpu_impl==1) then
      call gpu_update_ham_data(&
        & ham%ekb(:,:,:,1), INT(size(ham%ekb),   c_int64_t), &
        & ham%sij,          INT(size(ham%sij),   c_int64_t), &
@@ -1304,7 +1307,7 @@ subroutine copy_hamiltonian(gs_hamk_out,gs_hamk_in)
  gs_hamk_out%n4 = gs_hamk_in%n4
  gs_hamk_out%n5 = gs_hamk_in%n5
  gs_hamk_out%n6 = gs_hamk_in%n6
- gs_hamk_out%use_gpu_cuda = gs_hamk_in%use_gpu_cuda
+ gs_hamk_out%use_gpu_impl = gs_hamk_in%use_gpu_impl
  gs_hamk_out%usecprj = gs_hamk_in%usecprj
  gs_hamk_out%usepaw = gs_hamk_in%usepaw
  gs_hamk_out%useylm = gs_hamk_in%useylm
@@ -1478,7 +1481,7 @@ subroutine load_spin_hamiltonian(Ham,isppol,vectornd,vlocal,vxctaulocal,with_non
 
  ! Update enl and sij on GPU
 #if defined HAVE_GPU_CUDA
- if (Ham%use_gpu_cuda==1) then
+ if (Ham%use_gpu_impl==1) then
    call gpu_update_ham_data(&
      & Ham%ekb(:,:,:,1), INT(size(Ham%ekb),   c_int64_t), &
      & Ham%sij,          INT(size(Ham%sij),   c_int64_t), &
