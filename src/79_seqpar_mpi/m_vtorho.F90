@@ -36,10 +36,12 @@ module m_vtorho
  use m_efield
  use m_cgtools
  use m_gemm_nonlop
+ use m_gemm_nonlop_ompgpu
  use m_hdr
  use m_dtset
  use m_dtfil
  use m_extfpmd
+ use m_ompgpu_utils
 
  use defs_datatypes,       only : pseudopotential_type
  use defs_abitypes,        only : MPI_type
@@ -966,10 +968,18 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          gemm_nonlop_ikpt_this_proc_being_treated = my_ikpt
          if (istep <= 1) then
            !Init the arrays
-           call make_gemm_nonlop(my_ikpt,gs_hamk%npw_fft_k,gs_hamk%lmnmax, &
-&           gs_hamk%ntypat, gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%istwf_k, gs_hamk%ucvol, gs_hamk%ffnl_k,&
-&           gs_hamk%ph3d_k,gs_hamk%kpt_k,gs_hamk%kg_k,gs_hamk%kpg_k,dtset%use_gemm_nonlop_gpu,&
-&           compute_grad_atom=(optforces>0))
+           !FIXME Settle this
+           if ( dtset%use_gpu_cuda /= 666) then
+             call make_gemm_nonlop(my_ikpt,gs_hamk%npw_fft_k,gs_hamk%lmnmax, &
+&             gs_hamk%ntypat, gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%istwf_k, gs_hamk%ucvol, gs_hamk%ffnl_k,&
+&             gs_hamk%ph3d_k,gs_hamk%kpt_k,gs_hamk%kg_k,gs_hamk%kpg_k,dtset%use_gemm_nonlop_gpu,&
+&             compute_grad_atom=(optforces>0))
+           else if ( dtset%use_gpu_cuda == 666) then
+             call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp,bandfft_kpt(my_ikpt)%kg_k_gather_sym)
+             call make_gemm_nonlop_ompgpu(my_ikpt,gs_hamk%npw_fft_k,gs_hamk%lmnmax, &
+&             gs_hamk%ntypat, gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%istwf_k, gs_hamk%ucvol, gs_hamk%ffnl_k,&
+&             gs_hamk%ph3d_k,gs_hamk%kpt_k,gs_hamk%kg_k,gs_hamk%kpg_k,compute_grad_atom=(optforces>0))
+           end if
          end if
        end if
 
@@ -1092,6 +1102,9 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          end if
        end if
 
+       if ( dtset%use_gpu_cuda == 666) then
+         call ompgpu_free_hamilt_buffers()
+       end if
        call timab(985,2,tsec)
 
        ABI_FREE(ek_k)
