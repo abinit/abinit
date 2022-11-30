@@ -1169,6 +1169,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
  ! Loop over k-points in Sigma_nk. Loop over spin is internal as we operate on nspden components at once.
  do my_ikcalc=1,sigma%my_nkcalc
+   if (my_ikcalc > 1) exit
    ikcalc = sigma%my_ikcalc(my_ikcalc)
 
    ! Check if this (kpoint, spin) was already calculated
@@ -1497,7 +1498,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          if (dtset%eph_stern == 1 .and. .not. sigma%imag_only) then
            ! Activate Sternheimer. Note that we are still inside the MPI loop over my_npert.
            ! NB: Assume adiabatic AHC expression to compute the contribution of states above nband_kq.
-           call cwtime(cpu_stern, wall_stern, gflops_stern, "start")
+           !call cwtime(cpu_stern, wall_stern, gflops_stern, "start")
+           call timab(1908, 1, tsec)
 
            ABI_MALLOC (band_procs, (nband_kq))
            band_procs = 0
@@ -1510,7 +1512,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            !nband_me = sigma%my_bsum_stop - sigma%my_bsum_start + 1
 
            my_nb = sigma%my_bsum_stop - sigma%my_bsum_start + 1
-
 
            mcgq = npw_kq * nspinor * nband_me
            mgscq = npw_kq * nspinor * nband_me * psps%usepaw
@@ -1548,8 +1549,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 #ifdef __old
            call xmpi_sum(cgq, sigma%bsum_comm%value, ierr)
 #else
-           ! Use allgather instead of a naive xmpi_sum for efficiency reasons.
+           ! Use allgatherv instead of a naive xmpi_sum for efficiency reasons.
            call xmpi_allgather(send_cgq, size(send_cgq), cgq, sigma%bsum_comm%value, ierr)
+           ! TODO: Need to know nb_rank(rank)
            !call xmpi_allgatherv(send_cgq, size(send_cgq), cgq, recvcounts, displs, sigma%bsum_comm%value, ierr)
            ABI_FREE(send_cgq)
 #endif
@@ -1575,7 +1577,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            !
            grad_berry_size_mpw1 = 0
 
-           call cwtime(cpu_cgwf, wall_cgwf, gflops_cgwf, "start")
+           !call cwtime(cpu_cgwf, wall_cgwf, gflops_cgwf, "start")
            do ib_k=1,nbcalc_ks
              ! MPI parallelism inside bsum_comm (not very efficient).
              ! TODO: To be replaced by MPI parallellism over bands in projbd inside dfpt_cgwf
@@ -1628,13 +1630,14 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                !write(std_out,*)" |psi1|^2", cg_real_zdotc(npw_kq*nspinor, cg1s_kq(:, :, ipc, ib_k), cg1s_kq(:, :, ipc, ib_k))
                enough_stern = enough_stern + 1
              end if
-             call wrtout(std_out, sjoin("Stern nlines_done:", itoa(nlines_done)))
+             !call wrtout(std_out, sjoin(" Stern nlines_done:", itoa(nlines_done)))
 
            end do ! ib_k
-           call cwtime_report(" cgwf", cpu_cgwf, wall_cgwf, gflops_cgwf)
+           !call cwtime_report(" cgwf", cpu_cgwf, wall_cgwf, gflops_cgwf)
 
            !if (dtset%prtvol > 10)
-           call cwtime_report(" stern", cpu_stern, wall_stern, gflops_stern)
+           !call cwtime_report(" stern", cpu_stern, wall_stern, gflops_stern)
+           call timab(1908, 2, tsec)
 
            ABI_FREE(band_procs)
            ABI_FREE(cgq)
@@ -1667,6 +1670,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        if (dtset%eph_stern == 1 .and. .not. sigma%imag_only) then
          ! Add contribution to Fan-Migdal self-energy coming from Sternheimer.
          ! All procs inside bsum_comm, pert_comm enter here!
+         call timab(1909, 1, tsec)
          call xmpi_sum(cg1s_kq, sigma%bsum_comm%value, ierr)
          call xmpi_sum(cg1s_kq, sigma%pert_comm%value, ierr)
 
@@ -1729,6 +1733,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          ABI_FREE(cg1s_kq)
          ABI_FREE(h1kets_kq_allperts)
          ABI_FREE(stern_ppb)
+         call timab(1909, 2, tsec)
        end if ! eph_stern == 1
 
        ! ================
@@ -2176,7 +2181,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      ! Compute Debye-Waller term
      ! =========================
      if (.not. sigma%imag_only) then
-       call cwtime(cpu_dw, wall_dw, gflops_dw, "start", msg=" Computing Debye-Waller within rigid ion approximation...")
+       call cwtime(cpu_dw, wall_dw, gflops_dw, "start", msg=" Computing Debye-Waller within the rigid ion approximation...")
        ! Collect gkq0_atm inside qpt_comm
        ! FIXME: In principle it's sufficient to broadcast from itreated_q0 inside qpt_comm
        ! Yet, q-points are not equally distributed so this synch is detrimental.
