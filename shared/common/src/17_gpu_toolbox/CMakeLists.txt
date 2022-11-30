@@ -4,6 +4,7 @@
 add_library(17_gpu_toolbox STATIC
   abi_gpu_header_common.h
   dev_spec.cu
+  gpu_fft.cu
   gpu_linalg.cu
   m_gpu_detect.F90
   m_gpu_toolbox.F90

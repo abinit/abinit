@@ -48,6 +48,10 @@ module m_prep_kgb
  use m_gpu_toolbox, only : CPU_DEVICE_ID, gpu_device_synchronize, gpu_data_prefetch_async
 #endif
 
+#if defined HAVE_OPENMP_OFFLOAD
+ use m_ompgpu_fourwf
+#endif
+
  implicit none
 
  private
@@ -1317,7 +1321,7 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
 !  Fourier calculation
 !  -------------------
 !  Cuda version
-   if(use_gpu_cuda_==1) then
+   if(use_gpu_cuda_/=0) then
      ABI_MALLOC(weight_t,(bandpp))
      do iibandpp=1,bandpp
 !      Compute the index of the band
@@ -1328,14 +1332,25 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
      end do
 !    Accumulate time because it is not done in gpu_fourwf
      call timab(240+tim_fourwf,1,tsec)
+     if(use_gpu_cuda_==1) then
 #if defined HAVE_GPU_CUDA
-     call gpu_fourwf(1,rhoaug,&
-&     cwavef_alltoall1,&
-&     dummy,wfraug,gbound_,gbound_,&
-&     istwf_k_,kg_k_gather,kg_k_gather,mgfft,mpi_enreg,bandpp,&
-&     ngfft,ndatarecv,1,n4,n5,n6,option_fourwf,mpi_enreg%paral_kgb,&
-&     tim_fourwf,weight_t,weight_t)
+       call gpu_fourwf(1,rhoaug,&
+&       cwavef_alltoall1,&
+&       dummy,wfraug,gbound_,gbound_,&
+&       istwf_k_,kg_k_gather,kg_k_gather,mgfft,mpi_enreg,bandpp,&
+&       ngfft,ndatarecv,1,n4,n5,n6,option_fourwf,mpi_enreg%paral_kgb,&
+&       tim_fourwf,weight_t,weight_t)
 #endif
+     else if(use_gpu_cuda_==666) then
+#ifdef HAVE_OPENMP_OFFLOAD
+       call ompgpu_fourwf    (1,rhoaug,&
+&       cwavef_alltoall1,&
+&       dummy,wfraug,gbound_,gbound_,&
+&       istwf_k_,kg_k_gather,kg_k_gather,mgfft,bandpp,&
+&       ngfft,ndatarecv,1,n4,n5,n6,option_fourwf,&
+&       weight_t,weight_t)
+#endif
+     end if ! use_gpu_cuda_
      call timab(240+tim_fourwf,2,tsec)
      ABI_FREE(weight_t)
 
@@ -1417,7 +1432,7 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
 !  Fourier calculation
 !  ------------------------------------------------------------
 !  Cuda version
-   if (use_gpu_cuda_==1) then
+   if (use_gpu_cuda_/=0) then
      ABI_MALLOC(weight1_t,(bandpp_sym))
      ABI_MALLOC(weight2_t,(bandpp_sym))
      do iibandpp=1,bandpp_sym
@@ -1432,14 +1447,25 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
        weight2_t(iibandpp) = occ_k(ind_occ2)*wtk/ucvol
      end do
      call timab(240+tim_fourwf,1,tsec)
+     if (use_gpu_cuda_==1) then
 #if defined HAVE_GPU_CUDA
-     call gpu_fourwf(1,rhoaug,&
-&     ewavef_alltoall_sym,&
-&     dummy,wfraug,gbound_,gbound_,&
-&     istwf_k_,kg_k_gather_sym,kg_k_gather_sym,mgfft,mpi_enreg,bandpp_sym,&
-&     ngfft,ndatarecv_tot,1,n4,n5,n6,option_fourwf,mpi_enreg%paral_kgb,&
-&     tim_fourwf,weight1_t,weight2_t)
+       call gpu_fourwf(1,rhoaug,&
+&       ewavef_alltoall_sym,&
+&       dummy,wfraug,gbound_,gbound_,&
+&       istwf_k_,kg_k_gather_sym,kg_k_gather_sym,mgfft,mpi_enreg,bandpp_sym,&
+&       ngfft,ndatarecv_tot,1,n4,n5,n6,option_fourwf,mpi_enreg%paral_kgb,&
+&       tim_fourwf,weight1_t,weight2_t)
 #endif
+     else if (use_gpu_cuda_==666) then
+#ifdef HAVE_OPENMP_OFFLOAD
+       call ompgpu_fourwf(1,rhoaug,&
+&       ewavef_alltoall_sym,&
+&       dummy,wfraug,gbound_,gbound_,&
+&       istwf_k_,kg_k_gather_sym,kg_k_gather_sym,mgfft,bandpp_sym,&
+&       ngfft,ndatarecv_tot,1,n4,n5,n6,option_fourwf,&
+&       weight1_t,weight2_t)
+#endif
+     end if ! use_gpu_cuda_
      call timab(240+tim_fourwf,2,tsec)
      ABI_FREE(weight1_t)
      ABI_FREE(weight2_t)

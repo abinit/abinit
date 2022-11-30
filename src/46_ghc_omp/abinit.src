@@ -8,7 +8,7 @@
 #
 
 #
-# Source files making up the 67_recursion library
+# Source files making up the 4wfs library
 #
 
 # Source file attributes
@@ -18,18 +18,7 @@ ABI_SRC_DEP = 2     # The file depends on other files
 
 # Source files
 sources = [
- "abi_gpu_header_common.h",
- "dev_spec.cu",
- "gpu_fft.cu",
- "gpu_linalg.cu",
- "m_gpu_detect.F90",
- "m_gpu_toolbox.F90",
- "m_initcuda.F90",
- "m_nvtx.F90",
- "timing_cuda.cu"
+ "m_ompgpu_fourwf.F90",
 ]
-
-
-
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
 # This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.
