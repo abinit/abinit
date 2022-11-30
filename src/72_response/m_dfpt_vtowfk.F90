@@ -174,7 +174,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 & mpi_enreg,mpw,mpw1,natom,nband_k,ncpgr,&
 & nnsclo_now,npw_k,npw1_k,nspinor,nsppol,&
 & n4,n5,n6,occ_k,pawrhoij1,prtvol,psps,resid_k,rf_hamkq,rf_hamk_dir2,rhoaug1,rocceig,&
-& ddk_f,wtk_k,nlines_done,cg1_out,omega)
+& ddk_f,wtk_k,nlines_done,cg1_out,eta,omega)
 
 !Arguments ------------------------------------
 !scalars
@@ -188,7 +188,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
  integer,intent(in) :: nband_k,npw1_k,npw_k
  integer,intent(inout) :: nlines_done
  real(dp),intent(in) :: fermie1,wtk_k
- real(dp),optional,intent(in) :: omega
+ real(dp),optional,intent(in) :: eta,omega
  type(MPI_type),intent(in) :: mpi_enreg
  type(datafiles_type),intent(in) :: dtfil
  type(dataset_type),intent(in) :: dtset
@@ -227,7 +227,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
  integer :: iorder_cprj,iorder_cprj1,ipw,iscf_mod,ispinor,me,mgscq,nkpt_max
  integer :: option,opt_gvnlx1,quit,test_ddk
  integer :: tocceig,usedcwavef,ptr,shift_band
- real(dp) :: aa,ai,ar,eig0nk,omega_,resid,residk,scprod,energy_factor
+ real(dp) :: aa,ai,ar,eig0nk,eta_,omega_,resid,residk,scprod,energy_factor
  character(len=500) :: message
  type(rf2_t) :: rf2
 !arrays
@@ -278,6 +278,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
  end if
 
  omega_=zero; if(present(omega))omega_=omega
+ eta_=zero; if(present(eta))eta_=eta
 
 !Read the npw and kg records of wf files
  test_ddk=0
@@ -443,7 +444,7 @@ unit_me = 6
  &       eig0_k,eig0_kq,eig1_k,gh0c1,gh1c_n,grad_berry,gsc,gscq,gs_hamkq,gvnlxc,gvnlx1,icgq,&
  &       idir,ipert,igscq,mcgq,mgscq,mpi_enreg,mpw1,natom,nband_k,nband_me,dtset%nbdbuf,dtset%nline,&
  &       npw_k,npw1_k,nspinor,opt_gvnlx1,prtvol,quit,resid,rf_hamkq,dtset%dfpt_sciss,dtset%tolrde,&
- &       dtset%tolwfr,usedcwavef,dtset%wfoptalg,nlines_done,omega=omega_)
+ &       dtset%tolwfr,usedcwavef,dtset%wfoptalg,nlines_done,eta=eta_,omega=omega_)
          resid_k(iband)=resid
        end if
        

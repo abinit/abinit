@@ -400,12 +400,12 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  logical :: need_fermie1,nmxc,paral_atom,use_nhat_gga
  real(dp) :: wtime_step,now,prev
  real(dp) :: born,born_bar,boxcut,deltae,diffor,diel_q,dum,ecut,ecutf,elast
- real(dp) :: epawdc1_dum,evar,fe1fixed,fermie1,gsqcut,omega,qphon_norm,maxfor,renorm,res2,res3,residm2
+ real(dp) :: epawdc1_dum,eta,evar,fe1fixed,fermie1,gsqcut,omega,qphon_norm,maxfor,renorm,res2,res3,residm2
  real(dp) :: ucvol,vxcavg,elmag1
  real(dp) :: res2_mq,fe1fixed_mq,elast_mq
  real(dp) :: eberry_mq,edocc_mq,eeig0_mq,ehart01_mq,ehart1_mq,ek0_mq,ek1_mq,eloc0_mq,elpsp1_mq
  real(dp) :: end0_mq,end1_mq,enl0_mq,enl1_mq,eovl1_mq,epaw1_mq,exc1_mq,fermie1_mq,deltae_mq,elmag1_mq
- real(dp) :: etotal_mq,evar_mq,omega_mq
+ real(dp) :: eta_mq,etotal_mq,evar_mq,omega_mq
  character(len=500) :: msg
  character(len=500),parameter :: MY_NAME="dfpt_scfcv"
  character(len=fnlen) :: fi1o
@@ -719,8 +719,10 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 
  ! Set the value of omega for a finite-frequency calculation
  omega=dtset%rfomega
+ eta=dtset%rfeta
  if (.not.kramers_deg) then
    omega_mq=-dtset%rfomega
+   eta_mq=-dtset%rfeta
    qphon_mq(:)=-qphon(:)
  end if
 
@@ -968,7 +970,8 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &   occkq,occ_rbz,optres,paw_ij,paw_ij1,pawang,pawang1,pawfgr,pawfgrtab,pawrhoij,&
 &   pawrhoij1,pawtab,phnons1,ph1d,dtset%prtvol,psps,pwindall,qmat,resid,residm,rhog1,&
 &   rhor1,rmet,rprimd,symaf1,symrc1,symrl1,tnons1,ucvol,usecprj,useylmgr1,ddk_f,&
-&   vectornd,vtrial,vtrial1,with_vectornd,wtk_rbz,xred,ylm,ylm1,ylmgr1,omega=omega)
+&   vectornd,vtrial,vtrial1,with_vectornd,wtk_rbz,xred,ylm,ylm1,ylmgr1,&
+&   eta=eta,omega=omega) !optional arguments for finite-w calculation
 
 !   write(*,*) "ITERATION +:", istep,ek0,edocc,eeig0,eloc0,enl0,enl1
 
@@ -987,7 +990,8 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &     occk_mq,occ_rbz,optres,paw_ij,paw_ij1,pawang,pawang1,pawfgr,pawfgrtab,pawrhoij,&
 &     pawrhoij1,pawtab,phnons1,ph1d,dtset%prtvol,psps,pwindall,qmat,resid_mq,residm_mq,rhog1_mq,&
 &     rhor1_mq,rmet,rprimd,symaf1,symrc1,symrl1,tnons1,ucvol,usecprj,useylmgr1,ddk_f,&
-&     vectornd,vtrial,vtrial1_mq,with_vectornd,wtk_rbz,xred,ylm,ylm1_mq,ylmgr1_mq,omega=omega_mq)
+&     vectornd,vtrial,vtrial1_mq,with_vectornd,wtk_rbz,xred,ylm,ylm1_mq,ylmgr1_mq,&
+&     eta=eta_mq,omega=omega_mq) !optional arguments for finite-w calculation
 
 !   write(*,*) "ITERATION -:", istep,ek0_mq,edocc_mq,eeig0_mq,eloc0_mq,enl0_mq,enl1_mq
 
