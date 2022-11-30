@@ -370,7 +370,7 @@ program abinit
 #if defined HAVE_GPU_CUDA
  gpu_devices(:)=-1
  do ii=1,ndtset_alloc
-   if (dtsets(ii)%use_gpu_cuda==1) then
+   if (dtsets(ii)%use_gpu_cuda/=0) then
      use_gpu_cuda=1
      gpu_devices(:)=dtsets(ii)%gpu_devices(:)
    end if

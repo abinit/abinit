@@ -577,7 +577,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
    jdtset=dtsets(idtset)%jdtset ; if(ndtset==0)jdtset=0
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'use_gpu_cuda',tread,'INT')
    if(tread==1)dtsets(idtset)%use_gpu_cuda=intarr(1)
-   if (dtsets(idtset)%use_gpu_cuda==1) use_gpu_cuda=1
+   if (dtsets(idtset)%use_gpu_cuda/=0) use_gpu_cuda=1
 end do
 
  dtsets(:)%use_nvtx=0
@@ -620,7 +620,7 @@ end do
  end do
 #endif
 
- if (use_gpu_cuda==1) then
+ if (use_gpu_cuda/=0) then
 #if defined HAVE_GPU_CUDA && defined HAVE_GPU_CUDA_DP
    if (ii<=0) then
      write(msg,'(5a)')&

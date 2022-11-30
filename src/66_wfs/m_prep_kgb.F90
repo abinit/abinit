@@ -1377,7 +1377,7 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
          end if
        end if
      end do
-   end if ! (use_gpu_cuda==1)
+   end if ! (use_gpu_cuda/=0)
 
 !  -----------------------------------------------------
 !  Sorting waves functions below the processors
@@ -1488,7 +1488,7 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
      if (option_fourwf==0.and.bandpp>1) then
        ABI_FREE(wfraug_ptr)
      end if
-   end if ! (use_gpu_cuda==1)
+   end if ! (use_gpu_cuda/=0)
 
 !  ------------------------------------------------------------
 !  We dissociate each wave function in two waves functions
