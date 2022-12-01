@@ -176,20 +176,16 @@ end function get_unit_from_fname
 !!  file_exists
 !!
 !! FUNCTION
-!!  Return .TRUE. if file existent (function version of inquire).
-!!
-!! INPUTS
-!!  fname=The name of the file.
+!!  Return .TRUE. if file `filepath` exists (function version of inquire).
 !!
 !! SOURCE
 
-logical function file_exists(fname)
+logical function file_exists(filepath)
 
- character(len=*),intent(in) :: fname
-
+ character(len=*),intent(in) :: filepath
 ! *********************************************************************
 
- inquire(file=fname, exist=file_exists)
+ inquire(file=filepath, exist=file_exists)
 
 end function file_exists
 !!***

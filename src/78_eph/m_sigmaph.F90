@@ -1169,7 +1169,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
  ! Loop over k-points in Sigma_nk. Loop over spin is internal as we operate on nspden components at once.
  do my_ikcalc=1,sigma%my_nkcalc
-   if (my_ikcalc > 1) exit
+   !if (my_ikcalc > 2) exit
    ikcalc = sigma%my_ikcalc(my_ikcalc)
 
    ! Check if this (kpoint, spin) was already calculated
@@ -1579,16 +1579,15 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
            !call cwtime(cpu_cgwf, wall_cgwf, gflops_cgwf, "start")
            do ib_k=1,nbcalc_ks
-             ! MPI parallelism inside bsum_comm (not very efficient).
              ! TODO: To be replaced by MPI parallellism over bands in projbd inside dfpt_cgwf
-             if (sigma%bsum_comm%skip(ib_k)) cycle
+             if (sigma%bsum_comm%skip(ib_k)) cycle ! MPI parallelism inside bsum (not very efficient).
              band_ks = ib_k + bstart_ks - 1
              eig0nk = ebands%eig(band_ks, ik_ibz, spin)
 
              nline_in = min(100, npw_kq); if (dtset%nline > nline_in) nline_in = min(dtset%nline, npw_kq)
              nlines_done = 0
 
-             ! Iniit output u1 in cg1s_kq
+             ! Init output u1 in cg1s_kq
              cg1s_kq(:, :, ipc, ib_k) = zero
 
              !TODO: band parallelize this routine, and call dfpt_cgwf with only limited cg arrays
@@ -1635,8 +1634,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            end do ! ib_k
            !call cwtime_report(" cgwf", cpu_cgwf, wall_cgwf, gflops_cgwf)
 
-           !if (dtset%prtvol > 10)
-           !call cwtime_report(" stern", cpu_stern, wall_stern, gflops_stern)
+           !if (dtset%prtvol > 10) call cwtime_report(" stern", cpu_stern, wall_stern, gflops_stern)
            call timab(1908, 2, tsec)
 
            ABI_FREE(band_procs)
@@ -1656,7 +1654,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          ABI_FREE(dkinpw)
          ABI_FREE(ph3d)
          ABI_SFREE(ph3d1)
-       end do ! imyp
+       end do ! imyp  (loop over perturbations)
        !call timab(1902, 2, tsec)
 
        ABI_FREE(gs1c)
@@ -4081,10 +4079,10 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, ebands, ikcalc, prtvol, comm)
  call wrtout(std_out, sjoin(" Computing self-energy matrix elements for k-point:", ktoa(kk), msg))
  ! TODO Integrate with spin parallelism.
  spin = 1
- write(msg, "(3(a, i0))")" Treating ", self%nbcalc_ks(ikcalc, spin), " band(s) between: ", &
+ write(msg, "(3(a, i0))")" Treating ", self%nbcalc_ks(ikcalc, spin), " band(s) in Sigma_nk between: ", &
    self%bstart_ks(ikcalc, spin)," and: ", self%bstart_ks(ikcalc, spin) + self%nbcalc_ks(ikcalc, spin) - 1
  call wrtout(std_out, msg)
- write(msg, "(2(a,i0))")"P Allocating and treating bands from my_bsum_start: ", self%my_bsum_start, &
+ write(msg, "(2(a,i0))")"P Allocating and summing bands from my_bsum_start: ", self%my_bsum_start, &
      " up to my_bsum_stop: ", self%my_bsum_stop
  call wrtout(std_out, msg)
  if (.not. self%imag_only .and. dtset%eph_stern == 1) call wrtout(std_out, " Sternheimer method activated")
