@@ -3438,7 +3438,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' prtdensph prtdipole prtdos prtdosm'
  list_vars=trim(list_vars)//' prtebands prtefg prtefmas prteig prteliash prtelf prtevk'
  list_vars=trim(list_vars)//' prtfull1wf prtfsurf prtgden prtgeo prtgsr prtgkk prthist prtkden prtkpt prtlden'
- list_vars=trim(list_vars)//' prt_GF_csv prt_model prtnabla prtnest prtphbands prtocc prtphdos prtphsurf prtposcar'
+ list_vars=trim(list_vars)//' prt_GF_csv prt_model prtnabla prtnest prtocc prtphbands prtphdos prtphsurf prtposcar'
  list_vars=trim(list_vars)//' prtprocar prtpot prtpsps'
  list_vars=trim(list_vars)//' prtspcur prtstm prtsuscep prtvclmb prtvha prtvdw prtvhxc prtkbff'
  list_vars=trim(list_vars)//' prtvol prtvolimg prtvpsp prtvxc prtwant prtwf prtwf_full prtxml prt1dm'
