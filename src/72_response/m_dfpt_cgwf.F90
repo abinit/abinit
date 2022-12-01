@@ -71,7 +71,7 @@ contains
 !!
 !! INPUTS
 !!  band=which particular band we are converging (LOCAL)
-!!  band_me=cpu-local index of band which we are converging.
+!!  band_me=cpu-local index in cgq array of band which we are converging.
 !!  berryopt=option for Berry phase
 !!  cgq(2,mcgq)=wavefunction coefficients for MY bands at k+Q
 !!  cwave0(2,npw*nspinor)=GS wavefunction at k, in reciprocal space
@@ -190,7 +190,7 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
  integer,parameter :: level=15,tim_getgh1c=1,tim_getghc=2,tim_projbd=2
  integer,save :: nskip=0
  integer :: cpopt,iband,igs,iline,indx_cgq,ipw,me_g0,comm_fft
- integer :: iband_me, jband_me, ierr, me_band, band_off, unit_me
+ integer :: iband_me, jband_me, ierr, me_band, band_off !, unit_me
  integer :: ipws,ispinor,istwf_k,jband,nline,optlocal,optnl,dc_shift_band,sij_opt
  integer :: test_is_ok,useoverlap,usepaw,usevnl,usetolrde
  real(dp) :: d2edt2,d2te,d2teold,dedt,deltae,deold,dotgg
@@ -250,7 +250,7 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
 
  me_band = mpi_enreg%me_band
  !unit_me = 300+band
- unit_me = 6
+ !unit_me = 6
 
  skipme = 0
 
