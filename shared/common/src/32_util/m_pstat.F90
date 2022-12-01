@@ -3,6 +3,7 @@
 !! m_pstat
 !!
 !! FUNCTION
+!! Interface to the /proc/{pid}/status file available on Linux.
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2017-2022 ABINIT group (MG)
@@ -27,7 +28,7 @@ module m_pstat
  use m_yaml
 
  use m_fstrings, only : find_and_select
- use m_clib, only : clib_getpid
+ use m_clib,     only : clib_getpid
 
  implicit none
 
@@ -70,6 +71,8 @@ module m_pstat
   real(dp) :: vmstk_mb = -one
   ! size of stack segments
 
+  character(len=500) :: iomsg = ""
+
  contains
    procedure :: from_pid => pstat_from_pid     ! Init object from process identifier (main entry point).
    procedure :: from_file => pstat_from_file   ! Init object from file (useful for debugging).
@@ -90,10 +93,10 @@ contains
 !!
 !! SOURCE
 
-subroutine pstat_from_pid(pstat)
+subroutine pstat_from_pid(ps)
 
 !Arguments ------------------------------------
- class(pstat_t),intent(out) :: pstat
+ class(pstat_t),intent(out) :: ps
 
 !Local variables-------------------------------
  integer(c_int) :: pid
@@ -103,13 +106,7 @@ subroutine pstat_from_pid(pstat)
  pid = clib_getpid()
  write(spid, "(i0)") pid
  spid = adjustl(spid)
-
-
-
-
-
-
- call pstat%from_file('/proc/'//trim(spid)//'/status')
+ call ps%from_file('/proc/'//trim(spid)//'/status')
 
 end subroutine pstat_from_pid
 !!***
@@ -123,47 +120,49 @@ end subroutine pstat_from_pid
 !!
 !! SOURCE
 
-subroutine pstat_from_file(pstat, filepath)
+subroutine pstat_from_file(ps, filepath)
 
 !Arguments ------------------------------------
- class(pstat_t),intent(out) :: pstat
+ class(pstat_t),intent(out) :: ps
  character(len=*),intent(in) :: filepath
 
 !Local variables-------------------------------
  integer :: unit, ierr
- character(len=500) :: line, spid, iomsg
+ character(len=500) :: line, spid
  integer :: istart, istop, iostat
 ! *************************************************************************
 
- !inquire(file=filepath, exist=exist)
+ ps%ok = .False.
+
+ !inquire(file=trim(filepath), exist=exist)
  !if (.not. exist) then
  !  ierr = 1; return
  !end if
-
- pstat%ok = .False.
- open(newunit=unit, file=filepath, action="read", status='old', iostat=ierr)
- if (ierr /= 0) return
+ open(newunit=unit, file=trim(filepath), action="read", status='old', iostat=ierr, iomsg=ps%iomsg)
+ if (ierr /= 0) then
+   close(unit)
+   return
+ end if
 
  do
    read(unit, "(a)", iostat=ierr, end=10) line
-   if (ierr > 0) then
-     close(unit)
-     return
+   if (ierr > 0) then ! EOF
+     close(unit); return
    end if
 
    ! Parse useful integers
-   if (index(line, "Pid:") == 1) call get_int(line, pstat%pid)
-   if (index(line, "Threads:") == 1) call get_int(line, pstat%threads)
-   if (index(line, "FDSize:") == 1) call get_int(line, pstat%fdsize)
+   if (index(line, "Pid:") == 1) call get_int(line, ps%pid)
+   if (index(line, "Threads:") == 1) call get_int(line, ps%threads)
+   if (index(line, "FDSize:") == 1) call get_int(line, ps%fdsize)
 
    ! Parse memory entries
-   if (index(line, "VmRSS:") == 1) call get_mem_mb(line, pstat%vmrss_mb)
-   if (index(line, "VmPeak:") == 1) call get_mem_mb(line, pstat%vmpeak_mb)
-   if (index(line, "VmStk:") == 1) call get_mem_mb(line, pstat%vmstk_mb)
+   if (index(line, "VmRSS:") == 1) call get_mem_mb(line, ps%vmrss_mb)
+   if (index(line, "VmPeak:") == 1) call get_mem_mb(line, ps%vmpeak_mb)
+   if (index(line, "VmStk:") == 1) call get_mem_mb(line, ps%vmstk_mb)
  end do
 
 10  close(unit)
-  pstat%ok = .True.
+  ps%ok = .True.
 
 contains
 
@@ -177,10 +176,10 @@ subroutine get_mem_mb(str, mem_mb)
  istart = index(str, ":") + 1
  istop = find_and_select(str, &
                         ["kB", "mB"], &
-                        [one/1024._dp, one], mem_fact, iomsg) !default=one,
- ABI_CHECK(istop /= -1, iomsg)
- read(str(istart+1:istop-1), fmt=*, iostat=iostat, iomsg=iomsg) mem_mb
- ABI_CHECK(iostat == 0, iomsg)
+                        [one/1024._dp, one], mem_fact, ps%iomsg) !default=one,
+ ABI_CHECK(istop /= -1, ps%iomsg)
+ read(str(istart+1:istop-1), fmt=*, iostat=iostat, iomsg=ps%iomsg) mem_mb
+ ABI_CHECK(iostat == 0, ps%iomsg)
  mem_mb = mem_mb * mem_fact
 end subroutine get_mem_mb
 
@@ -188,8 +187,8 @@ subroutine get_int(str, out_ival)
  character(len=*),intent(in) :: str
  integer,intent(out) :: out_ival
  istart = index(str, ":") + 1
- read(str(istart+1:), fmt=*, iostat=iostat, iomsg=iomsg) out_ival
- ABI_CHECK(iostat == 0, iomsg)
+ read(str(istart+1:), fmt=*, iostat=iostat, iomsg=ps%iomsg) out_ival
+ ABI_CHECK(iostat == 0, ps%iomsg)
 end subroutine get_int
 
 end subroutine pstat_from_file
@@ -204,9 +203,9 @@ end subroutine pstat_from_file
 !!
 !! SOURCE
 
-subroutine pstat_print(pstat, units, header)
+subroutine pstat_print(ps, units, header)
 
- class(pstat_t),intent(in) :: pstat
+ class(pstat_t),intent(in) :: ps
  integer,intent(in) :: units(:)
  character(len=*),optional,intent(in) :: header
 
@@ -218,12 +217,12 @@ subroutine pstat_print(pstat, units, header)
  header__ = "unknown"; if (present(header)) header__ = header
  ydoc = yamldoc_open(header__) !, width=11, real_fmt='(3f8.3)')
 
- call ydoc%add_int("pid", pstat%pid)
- call ydoc%add_int("threads", pstat%threads)
- call ydoc%add_int("fdsize", pstat%fdsize)
- call ydoc%add_real("vmrss_mb", pstat%vmrss_mb)
- call ydoc%add_real("vmpeak_mb", pstat%vmpeak_mb)
- call ydoc%add_real("vmstk_mb", pstat%vmstk_mb)
+ call ydoc%add_int("pid", ps%pid)
+ call ydoc%add_int("threads", ps%threads)
+ call ydoc%add_int("fdsize", ps%fdsize)
+ call ydoc%add_real("vmrss_mb", ps%vmrss_mb)
+ call ydoc%add_real("vmpeak_mb", ps%vmpeak_mb)
+ call ydoc%add_real("vmstk_mb", ps%vmstk_mb)
 
  call ydoc%write_units_and_free(units)
 
@@ -242,9 +241,9 @@ end subroutine pstat_print
 !!
 !! SOURCE
 
-subroutine pstat_gather(pstat, vmrss_mb, comm)
+subroutine pstat_gather(ps, vmrss_mb, comm)
 
- class(pstat_t),intent(out) :: pstat
+ class(pstat_t),intent(out) :: ps
  real(dp),intent(out) :: vmrss_mb
  integer,intent(in) :: comm
  !integer,intent(out) :: ierr
@@ -252,8 +251,8 @@ subroutine pstat_gather(pstat, vmrss_mb, comm)
  integer :: ierr, int_list(5)
  real(dp) :: real_list(3)
 
- call pstat%from_pid()
- real_list = [pstat%vmrss_mb, pstat%vmpeak_mb, pstat%vmstk_mb]
+ call ps%from_pid()
+ real_list = [ps%vmrss_mb, ps%vmpeak_mb, ps%vmstk_mb]
  !call xmpi_max_ip(real_list, comm, ierr)
 
 end subroutine pstat_gather

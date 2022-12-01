@@ -5042,7 +5042,7 @@ subroutine xcomm_print_names(self)
    end do
  end if
 end subroutine xcomm_print_names
-
+!!***
 
 !!****f* m_xmpi/pool2d_from_dims
 !! NAME
@@ -5140,22 +5140,20 @@ subroutine pool2d_from_dims(pool, n1, n2, input_comm, rectangular)
 contains
 
 logical function is_rectangular_grid(nproc, grid_dims) result (ans)
-  integer,intent(in) :: nproc
-  integer,intent(out) :: grid_dims(2)
+ integer,intent(in) :: nproc
+ integer,intent(out) :: grid_dims(2)
+!----------------------------------------------------------------------
+ integer :: i
+ ! Search for a rectangular grid of processors
+ i=INT(SQRT(float(nproc)))
+ do while (MOD(nproc,i) /= 0)
+   i = i-1
+ end do
+ i=max(i,1)
 
-  integer :: i
-
-  ! Search for a rectangular grid of processors
-  i=INT(SQRT(float(nproc)))
-  do while (MOD(nproc,i) /= 0)
-    i = i-1
-  end do
-  i=max(i,1)
-
-  grid_dims(1) = i
-  grid_dims(2) = INT(nproc/i)
-  ans = grid_dims(1) > 1 .and. grid_dims(2) > 1
-
+ grid_dims(1) = i
+ grid_dims(2) = INT(nproc/i)
+ ans = grid_dims(1) > 1 .and. grid_dims(2) > 1
 end function is_rectangular_grid
 
 end subroutine pool2d_from_dims
@@ -5172,7 +5170,6 @@ subroutine pool2d_free(pool)
 
 !Arguments-------------------------
  class(xmpi_pool2d_t),intent(inout) :: pool
-
 !----------------------------------------------------------------------
 
  ABI_SFREE(pool%treats)

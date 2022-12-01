@@ -1316,7 +1316,6 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
      call ps%from_pid()
      !call ps%from_file("status")
      call ps%print([std_out])
-     !stop
    end if ! master
 
    call xmpi_bcast(dims_kgts, master, gwr%comm%value, ierr)
