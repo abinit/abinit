@@ -2895,6 +2895,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  else if (dtset%write_files.ne.'none' .or. dtset%write_files.ne.'all' .or. dtset%write_files.ne.'default' ) then
    if (INDEX(dtset%write_files,'ddb') .gt. 0) then
       dtset%prtddb = 1
+   else
       dtset%prtddb = 0
    end if       
    if (INDEX(dtset%write_files,'den_1') .gt. 0) then
@@ -2931,6 +2932,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    end if   
    if ( (INDEX(dtset%write_files,'dosm_1') .gt. 0) .AND. (dtset%prtdos .eq. 3 ) )then
       dtset%prtdosm = 1
+      dtset%prtdos  = 3
    else
       dtset%prtdosm = 0
    end if         
