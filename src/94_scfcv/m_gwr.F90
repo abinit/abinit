@@ -1270,7 +1270,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
    ! Only master rank works here for consistency reasons.
    if (my_rank == master) then
      dims_kgts = [1, all_nproc, 1, 1]
-     call estimate(gwr, dims_kgts, est)
+     est = estimate(gwr, dims_kgts)
      prev_efficiency = est%efficiency; prev_speedup = est%speedup
      call wrtout(units, sjoin("- Optimizing MPI grid with mem_per_cpu_mb:", ftoa(mem_per_cpu_mb), "[Mb]"), pre_newlines=1)
      call wrtout(units, "- Use `abinit run.abi --mem-per-cpu=4G` to set mem_per_cpu_mb in the submission script", newlines=1)
@@ -1291,7 +1291,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
              if (product(try_dims_kgts) /= all_nproc .or. all(try_dims_kgts == dims_kgts)) cycle
              !npwps
              !ABI_CHECK(block_dist_1d(npwsp, ip_g, col_bsize, msg), msg)
-             call estimate(gwr, try_dims_kgts, est)
+             est = estimate(gwr, try_dims_kgts)
              !if (est%mem_total < mem_per_cpu_mb * 0.8_dp .and. est%efficiency > prev_efficiency) then
              if (est%mem_total < mem_per_cpu_mb * 0.8_dp .and. est%speedup > prev_speedup) then
                prev_efficiency = est%efficiency; prev_speedup = est%speedup; dims_kgts = try_dims_kgts
@@ -1304,7 +1304,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
        end do
      end do
 
-     call estimate(gwr, dims_kgts, est)
+     est = estimate(gwr, dims_kgts)
      call wrtout(units, "Selected configuration:", pre_newlines=1)
      ip_k = dims_kgts(1); ip_g = dims_kgts(2); ip_t = dims_kgts(3); ip_s = dims_kgts(4)
      write(msg, "(a,4(a4,2x),3(a12,2x))") "- ", "np_k", "np_g", "np_t", "np_s", "memb_per_cpu", "efficiency", "speedup"
@@ -1417,8 +1417,8 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  call xmpi_comm_free(comm_cart)
 #endif
 
- call gwr%kpt_comm%print_names()
- call gwr%g_comm%print_names()
+ !call gwr%kpt_comm%print_names()
+ !call gwr%g_comm%print_names()
 
  ! Block-distribute dimensions and allocate redirection table: local index --> global index.
  call xmpi_split_block(gwr%ntau, gwr%tau_comm%value, gwr%my_ntau, gwr%my_itaus)
@@ -1659,15 +1659,15 @@ end subroutine gwr_init
 !! estimate
 !!
 !! FUNCTION
+!!  Try to estimate the memory requirements and the parallel speedup of a given `np_kgts` configuration.
 !!
 !! SOURCE
 
-subroutine estimate(gwr, np_kgts, est)
+type(est_t) pure function estimate(gwr, np_kgts) result(est)
 
 !Arguments ------------------------------------
  class(gwr_t), intent(in) :: gwr
  integer,intent(in) :: np_kgts(4)
- type(est_t),intent(out) :: est
 
 !Local variables-------------------------------
  real(dp) :: np_k, np_g, np_t, np_s, w_k, w_g, w_t, w_s, np_tot
@@ -1692,9 +1692,10 @@ subroutine estimate(gwr, np_kgts, est)
 
  est%mem_total = est%mem_green_gg + est%mem_chi_gg + est%mem_ugb + est%mem_green_rg + est%mem_chi_rg
 
- ! Estimate speedup and parallel efficiency using heurist weights. Note g_nfft instead of green_mpw.
+ ! Estimate speedup and parallel efficiency using heuristic weights. Note g_nfft instead of green_mpw.
  w_k = 0.799_dp; w_g = 0.899_dp; w_t = 1.1_dp; w_s = 1.2_dp
- if (gwr%nkbz > 5**3) w_k = 0.855_dp
+ ! Promote kpt parallelism under particular circustamnces.
+ if (gwr%nkbz > 4**3) w_k = w_g + tol2 * merge(+1, -1, np_k < 5)
 
  est%speedup = speedup(gwr%nkbz, nint(np_k), w_k) * speedup(gwr%g_nfft, nint(np_g), w_g) * &
                speedup(gwr%ntau, nint(np_t), w_t) * speedup(gwr%nsppol, nint(np_s), w_s)
@@ -1713,7 +1714,7 @@ real(dp) pure function speedup(size, np, weight)
  end if
 end function speedup
 
-end subroutine estimate
+end function estimate
 !!***
 
 !----------------------------------------------------------------------

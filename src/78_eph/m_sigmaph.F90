@@ -1527,6 +1527,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            ! Build global array with cg_kq wavefunctions to prepare call to dfpt_cgwf.
            ! TODO: Ideally, dfpt_cgwf should be modified so that we can pass cgq that is MPI distributed over nband_kq
            ! bsum_range is not compatible with Sternheimer. There's a check at the level of the parser in chkinp.
+           call timab(1909, 1, tsec)
            do ibsum_kq=sigma%my_bsum_start, sigma%my_bsum_stop
              if (isirr_kq) then
                 call wfd%copy_cg(ibsum_kq, ikq_ibz, spin, bra_kq)
@@ -1632,10 +1633,10 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
              !call wrtout(std_out, sjoin(" Stern nlines_done:", itoa(nlines_done)))
 
            end do ! ib_k
-           !call cwtime_report(" cgwf", cpu_cgwf, wall_cgwf, gflops_cgwf)
-
-           !if (dtset%prtvol > 10) call cwtime_report(" stern", cpu_stern, wall_stern, gflops_stern)
+           call timab(1909, 2, tsec)
            call timab(1908, 2, tsec)
+           !call cwtime_report(" cgwf", cpu_cgwf, wall_cgwf, gflops_cgwf)
+           !if (dtset%prtvol > 10) call cwtime_report(" stern", cpu_stern, wall_stern, gflops_stern)
 
            ABI_FREE(band_procs)
            ABI_FREE(cgq)
@@ -1668,7 +1669,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        if (dtset%eph_stern == 1 .and. .not. sigma%imag_only) then
          ! Add contribution to Fan-Migdal self-energy coming from Sternheimer.
          ! All procs inside bsum_comm, pert_comm enter here!
-         call timab(1909, 1, tsec)
+         call timab(1910, 1, tsec)
          call xmpi_sum(cg1s_kq, sigma%bsum_comm%value, ierr)
          call xmpi_sum(cg1s_kq, sigma%pert_comm%value, ierr)
 
@@ -1679,6 +1680,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            h1kets_kq_allperts(:, :, ipc, :) = h1kets_kq(:, :, imyp, :)
          end do
          call xmpi_sum(h1kets_kq_allperts, sigma%pert_comm%value, ierr)
+         call timab(1910, 2, tsec)
+         call timab(1911, 1, tsec)
 
          ! Compute S_pp' = <D_{qp} vscf u_nk|u'_{nk+q p'}>
          ABI_CALLOC(stern_ppb, (2, natom3, natom3, nbcalc_ks))
@@ -1731,7 +1734,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          ABI_FREE(cg1s_kq)
          ABI_FREE(h1kets_kq_allperts)
          ABI_FREE(stern_ppb)
-         call timab(1909, 2, tsec)
+         call timab(1911, 2, tsec)
        end if ! eph_stern == 1
 
        ! ================
@@ -3052,15 +3055,16 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  call ephtk_set_phmodes_skip(dtset%natom, dtset%eph_phrange, new%phmodes_skip)
 
  if (.not. new%imag_only) then
-   ! Split bands among the procs inside bsum_comm (block distribution)_
+   ! Split bands among the procs inside bsum_comm using block distribution.
    call xmpi_split_work(new%nbsum, new%bsum_comm%value, new%my_bsum_start, new%my_bsum_stop)
    if (new%my_bsum_start == new%nbsum + 1) then
      ABI_ERROR("sigmaph code does not support idle processes! Decrease ncpus or increase nband or use eph_np_pqbks input var.")
    end if
-   !call xmpi_split_work2_i4b(new%nbsum, new%bsum_comm%nproc, bsum_proc(:,1), bsum_proc(:,2))
-
    new%my_bsum_start = new%bsum_start + new%my_bsum_start - 1
    new%my_bsum_stop = new%bsum_start + new%my_bsum_stop - 1
+   !nb = new%my_bsum_stop - new%my_bsum_start + 1
+   !ABI_MALLOC(new%bsum_rank, (new%bsum_comm%nproc))
+   !call xmpi_allgather(nb, new%nbsum_rank, self%bsum_comm%value, ierr)
  end if
 
  call wrtout(std_out, sjoin(" Global bands for self-energy sum, bsum_start: ", itoa(new%bsum_start), &
