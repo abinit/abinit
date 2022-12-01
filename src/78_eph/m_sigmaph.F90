@@ -1169,7 +1169,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
  ! Loop over k-points in Sigma_nk. Loop over spin is internal as we operate on nspden components at once.
  do my_ikcalc=1,sigma%my_nkcalc
-   !if (my_ikcalc > 2) exit
+   !if (my_ikcalc > 1) exit
+   if (my_ikcalc > 2) exit
    ikcalc = sigma%my_ikcalc(my_ikcalc)
 
    ! Check if this (kpoint, spin) was already calculated
@@ -1670,16 +1671,11 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          ! Add contribution to Fan-Migdal self-energy coming from Sternheimer.
          ! All procs inside bsum_comm, pert_comm enter here!
          call timab(1910, 1, tsec)
-         call xmpi_sum(cg1s_kq, sigma%bsum_comm%value, ierr)
-         call xmpi_sum(cg1s_kq, sigma%pert_comm%value, ierr)
+         !call xmpi_sum(cg1s_kq, sigma%bsum_comm%value, ierr)
+         !call xmpi_sum(cg1s_kq, sigma%pert_comm%value, ierr)
 
          ! h1kets_kq are MPI distributed inside pert_comm but we need off-diagonal pp' terms --> collect results.
          ABI_CALLOC(h1kets_kq_allperts, (2, npw_kq*nspinor, natom3, nbcalc_ks))
-         do imyp=1,my_npert
-           ipc = sigma%my_pinfo(3, imyp)
-           h1kets_kq_allperts(:, :, ipc, :) = h1kets_kq(:, :, imyp, :)
-         end do
-         call xmpi_sum(h1kets_kq_allperts, sigma%pert_comm%value, ierr)
          call timab(1910, 2, tsec)
          call timab(1911, 1, tsec)
 
@@ -1687,6 +1683,13 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          ABI_CALLOC(stern_ppb, (2, natom3, natom3, nbcalc_ks))
          do ib_k=1,nbcalc_ks
            if (sigma%bsum_comm%skip(ib_k)) cycle ! MPI parallelism inside bsum
+           call xmpi_sum(cg1s_kq(:,:,:,ib_k), sigma%pert_comm%value, ierr)
+
+           do imyp=1,my_npert
+             ipc = sigma%my_pinfo(3, imyp)
+             h1kets_kq_allperts(:, :, ipc, ib_k) = h1kets_kq(:, :, imyp, ib_k)
+           end do
+           call xmpi_sum(h1kets_kq_allperts(:,:,:,ib_k), sigma%pert_comm%value, ierr)
 
            call cg_zgemm("C", "N", npw_kq*nspinor, natom3, natom3, &
              h1kets_kq_allperts(:,:,:,ib_k), cg1s_kq(:,:,:,ib_k), stern_ppb(:,:,:,ib_k))
