@@ -1038,11 +1038,12 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
        gh_direc(1:2,ipw)=gh_direc(1:2,ipw)-eshift*sconjgr(1:2,ipw)
      end do
    else
-!!$OMP PARALLEL DO
-!     do ipw=1,npw1*nspinor
+!$OMP PARALLEL DO
+     do ipw=1,npw1*nspinor
 !       gh_direc(1:2,ipw)=gh_direc(1:2,ipw)-eshift*conjgr(1:2,ipw)
-!     end do
-      call cg_zaxpy(npw1*nspinor, [-eshift, -eta_], conjgr, ghc)
+       gh_direc(1,ipw)=gh_direc(1,ipw)-eshift*conjgr(1,ipw)+eta_*conjgr(2,ipw)
+       gh_direc(2,ipw)=gh_direc(2,ipw)-eshift*conjgr(2,ipw)-eta_*conjgr(1,ipw)
+     end do
    end if
 
    ! compute d2edt2, Eq.(30) of of PRB55, 10337 (1997) [[cite:Gonze1997]],
