@@ -156,6 +156,7 @@ module m_sigmaph
 
   integer :: my_npert
    ! Number of atomic perturbations or phonon modes treated by this MPI rank.
+   ! Note that natom3 are equally distributed. This allows us to use allgather instead of allgatherv
 
   type(xcomm_t) :: pert_comm
    ! MPI communicator for parallelism over atomic perturbations.
@@ -1170,7 +1171,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ! Loop over k-points in Sigma_nk. Loop over spin is internal as we operate on nspden components at once.
  do my_ikcalc=1,sigma%my_nkcalc
    !if (my_ikcalc > 1) exit
-   if (my_ikcalc > 2) exit
+   !if (my_ikcalc > 2) exit
    ikcalc = sigma%my_ikcalc(my_ikcalc)
 
    ! Check if this (kpoint, spin) was already calculated
@@ -1685,11 +1686,14 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            if (sigma%bsum_comm%skip(ib_k)) cycle ! MPI parallelism inside bsum
            call xmpi_sum(cg1s_kq(:,:,:,ib_k), sigma%pert_comm%value, ierr)
 
-           do imyp=1,my_npert
-             ipc = sigma%my_pinfo(3, imyp)
-             h1kets_kq_allperts(:, :, ipc, ib_k) = h1kets_kq(:, :, imyp, ib_k)
-           end do
-           call xmpi_sum(h1kets_kq_allperts(:,:,:,ib_k), sigma%pert_comm%value, ierr)
+           !do imyp=1,my_npert
+           !  ipc = sigma%my_pinfo(3, imyp)
+           !  h1kets_kq_allperts(:, :, ipc, ib_k) = h1kets_kq(:, :, imyp, ib_k)
+           !end do
+           !call xmpi_sum(h1kets_kq_allperts(:,:,:,ib_k), sigma%pert_comm%value, ierr)
+
+           call xmpi_allgather(h1kets_kq(:,:,:,ib_k), 2*npw_kq*nspinor*sigma%my_npert, &
+                               h1kets_kq_allperts(:,:,:,ib_k), sigma%pert_comm%value, ierr)
 
            call cg_zgemm("C", "N", npw_kq*nspinor, natom3, natom3, &
              h1kets_kq_allperts(:,:,:,ib_k), cg1s_kq(:,:,:,ib_k), stern_ppb(:,:,:,ib_k))
@@ -1698,6 +1702,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            ! Save data for Debye-Waller that is performed outside the q-loop.
            if (is_qzero) stern_dw(:,:,:,ib_k) = stern_ppb(:,:,:,ib_k)
          end do
+         ABI_FREE(cg1s_kq)
+         ABI_FREE(h1kets_kq_allperts)
+
          if (is_qzero) call xmpi_sum(stern_dw, sigma%bsum_comm%value, ierr)
 
          ! Compute contribution to Fan-Migdal for M > sigma%nbsum
@@ -1734,8 +1741,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            end do
          end do
 
-         ABI_FREE(cg1s_kq)
-         ABI_FREE(h1kets_kq_allperts)
+
          ABI_FREE(stern_ppb)
          call timab(1911, 2, tsec)
        end if ! eph_stern == 1
