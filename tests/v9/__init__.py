@@ -137,4 +137,7 @@ inp_files = [
 
     # GS PAW Hybrid functionals
     "t120.abi",  # test PBE0 and related functionals with PAW
+
+    # write_files behaviour
+    "t130.abi",  # test the behaviour of supravariable write_files
 ]
