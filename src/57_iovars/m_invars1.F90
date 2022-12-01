@@ -2695,7 +2695,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%wvl_nprccg  = 10
    dtsets(idtset)%w90iniprj   = 1
    dtsets(idtset)%w90prtunk   = 0
-
+   dtsets(idtset)%write_files = "default"
 !  X
    dtsets(idtset)%xclevel  = 0
    dtsets(idtset)%xc_denpos = tol14

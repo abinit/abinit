@@ -1581,9 +1581,11 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
      call ddb%set_etotal(results_gs%etotal, 2)
    end if
 
-   ! Write the DDB
-   ddbnm=trim(dtfil%filnam_ds(4))//'_DDB'
-   call ddb%write_txt(ddb_hdr, ddbnm, fullinit=0)
+   if (dtset%prtddb==1) then
+    ! Write the DDB
+    ddbnm=trim(dtfil%filnam_ds(4))//'_DDB'
+    call ddb%write_txt(ddb_hdr, ddbnm, fullinit=0)
+   endif  
 
    ! Deallocate
    call ddb_hdr%free()
