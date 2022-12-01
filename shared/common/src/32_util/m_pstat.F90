@@ -135,7 +135,7 @@ subroutine pstat_from_file(pstat, filepath)
  integer :: istart, istop, iostat
 ! *************************************************************************
 
- !inquire(file="/proc/"//trim(spid)//'/status', exist=exist)
+ !inquire(file=filepath, exist=exist)
  !if (.not. exist) then
  !  ierr = 1; return
  !end if
@@ -168,30 +168,28 @@ subroutine pstat_from_file(pstat, filepath)
 contains
 
 subroutine get_mem_mb(str, mem_mb)
+ character(len=*),intent(in) :: str
+ real(dp),intent(out) :: mem_mb
 
-  character(len=*),intent(in) :: str
-  real(dp),intent(out) :: mem_mb
-
-  real(dp) :: mem_fact
-
-  ! Generic mem entry has format:
-  !VmRSS: 2492 kB
-  istart = index(str, ":") + 1
-  istop = find_and_select(str, &
-                         ["kB", "mB"], &
-                         [one/1024._dp, one], mem_fact, iomsg) !default=one,
-  ABI_CHECK(istop /= -1, iomsg)
-  read(str(istart+1:istop-1), fmt=*, iostat=iostat, iomsg=iomsg) mem_mb
-  ABI_CHECK(iostat == 0, iomsg)
-  mem_mb = mem_mb * mem_fact
+ ! Generic mem entry has format:
+ !VmRSS: 2492 kB
+ real(dp) :: mem_fact
+ istart = index(str, ":") + 1
+ istop = find_and_select(str, &
+                        ["kB", "mB"], &
+                        [one/1024._dp, one], mem_fact, iomsg) !default=one,
+ ABI_CHECK(istop /= -1, iomsg)
+ read(str(istart+1:istop-1), fmt=*, iostat=iostat, iomsg=iomsg) mem_mb
+ ABI_CHECK(iostat == 0, iomsg)
+ mem_mb = mem_mb * mem_fact
 end subroutine get_mem_mb
 
 subroutine get_int(str, out_ival)
-  character(len=*),intent(in) :: str
-  integer,intent(out) :: out_ival
-  istart = index(str, ":") + 1
-  read(str(istart+1:), fmt=*, iostat=iostat, iomsg=iomsg) out_ival
-  ABI_CHECK(iostat == 0, iomsg)
+ character(len=*),intent(in) :: str
+ integer,intent(out) :: out_ival
+ istart = index(str, ":") + 1
+ read(str(istart+1:), fmt=*, iostat=iostat, iomsg=iomsg) out_ival
+ ABI_CHECK(iostat == 0, iomsg)
 end subroutine get_int
 
 end subroutine pstat_from_file

@@ -1224,10 +1224,6 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  if (my_rank == master) then
    call print_ngfft(gwr%g_ngfft, header="FFT mesh for Green's function", unit=std_out)
    call print_ngfft(gwr%g_ngfft, header="FFT mesh for Green's function", unit=ab_out)
-
-   ! Now we can estimate the total memory in Mb.
-   !call estimate(gwr, [1,1,1,1], tot_mem, units=[std_out, ab_out], header="Total memory required in Mb")
-
    call wrtout(std_out, sjoin(" FFT uc_batch_size:", itoa(gwr%uc_batch_size)))
    call wrtout(std_out, sjoin(" FFT sc_batch_size:", itoa(gwr%sc_batch_size)))
  end if
@@ -1311,18 +1307,20 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
      call estimate(gwr, dims_kgts, est)
      call wrtout(units, "Selected configuration:", pre_newlines=1)
      ip_k = dims_kgts(1); ip_g = dims_kgts(2); ip_t = dims_kgts(3); ip_s = dims_kgts(4)
+     write(msg, "(a,4(a4,2x),3(a12,2x))") "- ", "np_k", "np_g", "np_t", "np_s", "memb_per_cpu", "efficiency", "speedup"
+     call wrtout(units, msg)
      write(msg, "(a,4(i4,2x),3(es12.5,2x))") &
        "- ", ip_k, ip_g, ip_t, ip_s, est%mem_total, est%efficiency, est%speedup
      call wrtout(units, msg, newlines=1)
+
+     call ps%from_pid()
+     !call ps%from_file("status")
+     call ps%print([std_out])
      !stop
    end if ! master
 
    call xmpi_bcast(dims_kgts, master, gwr%comm%value, ierr)
    np_k = dims_kgts(1); np_g = dims_kgts(2); np_t = dims_kgts(3); np_s = dims_kgts(4)
-
-   call ps%from_file("status")
-   call ps%print([std_out])
-   !stop
 
 #else
    ! Determine number of processors for the spin axis. if all_nproc is odd, spin is not distributed when nsppol == 2
@@ -1418,6 +1416,9 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  keepdim = .True.; keepdim(2) = .False.; call gwr%kts_comm%from_cart_sub(comm_cart, keepdim)
  call xmpi_comm_free(comm_cart)
 #endif
+
+ call gwr%kpt_comm%print_names()
+ call gwr%g_comm%print_names()
 
  ! Block-distribute dimensions and allocate redirection table: local index --> global index.
  call xmpi_split_block(gwr%ntau, gwr%tau_comm%value, gwr%my_ntau, gwr%my_itaus)
@@ -1661,27 +1662,23 @@ end subroutine gwr_init
 !!
 !! SOURCE
 
-subroutine estimate(gwr, np_kgts, est, units, header)
+subroutine estimate(gwr, np_kgts, est)
 
 !Arguments ------------------------------------
  class(gwr_t), intent(in) :: gwr
  integer,intent(in) :: np_kgts(4)
  type(est_t),intent(out) :: est
- integer,optional,intent(in) :: units(:)
- character(len=*),optional,intent(in) :: header
 
 !Local variables-------------------------------
  real(dp) :: np_k, np_g, np_t, np_s, w_k, w_g, w_t, w_s, np_tot
- character(len=500) :: header__
- type(yamldoc_t) :: ydoc
 
 ! *************************************************************************
-! Use real quantities to avoid int division
+
+! Use real quantities to avoid integer division
  np_k = np_kgts(1); np_g = np_kgts(2); np_t = np_kgts(3); np_s = np_kgts(4)
  np_tot = product(real(np_kgts))
 
- ! NB: array dimensioned with nkibz and nqibz do not scale as 1/np_k as we distribute the full BZ.
- !     and IBZ points might be replicated.
+ ! NB: array dimensioned with nkibz and nqibz do not scale as 1/np_k as we distribute the BZ, IBZ points might be replicated.
 
  ! Resident memory needed to store G(g,g',+/-tau) and chi(g,g',tau)
  est%mem_green_gg = two * two * (one*gwr%nspinor*gwr%green_mpw)**2 * two*gwr%ntau * gwr%nkibz * gwr%nsppol * dp*b2Mb / np_tot
@@ -1695,31 +1692,25 @@ subroutine estimate(gwr, np_kgts, est, units, header)
 
  est%mem_total = est%mem_green_gg + est%mem_chi_gg + est%mem_ugb + est%mem_green_rg + est%mem_chi_rg
 
- ! Estimate speedup and parallel efficiency using heurist weights.
- ! Note how we use g_nfft instead of green_mpw.
+ ! Estimate speedup and parallel efficiency using heurist weights. Note g_nfft instead of green_mpw.
  w_k = 0.799_dp; w_g = 0.899_dp; w_t = 1.1_dp; w_s = 1.2_dp
+ if (gwr%nkbz > 5**3) w_k = 0.855_dp
+
  est%speedup = speedup(gwr%nkbz, nint(np_k), w_k) * speedup(gwr%g_nfft, nint(np_g), w_g) * &
                speedup(gwr%ntau, nint(np_t), w_t) * speedup(gwr%nsppol, nint(np_s), w_s)
  est%efficiency = est%speedup / np_tot
 
- if (present(units)) then
-   header__ = "unknown"; if (present(header)) header__ = header
-   ydoc = yamldoc_open(header__) !, width=11, real_fmt='(3f8.3)')
-   call ydoc%add_real('total_memory_mb', est%mem_total)
-   call ydoc%write_units_and_free(units)
- end if
-
 contains
 
 real(dp) pure function speedup(size, np, weight)
-  ! Expected speedup for a size problem and np processes
-  integer,intent(in) :: size, np
-  real(dp),intent(in) :: weight
-  if (np == 1) then
-    speedup = one
-  else
-    speedup = (weight*size) / (one* ((size / np) + merge(0, 1, mod(size, np) == 0)))
-  end if
+ ! Expected speedup for a `size` problem and `np` processes
+ integer,intent(in) :: size, np
+ real(dp),intent(in) :: weight
+ if (np == 1) then
+   speedup = one
+ else
+   speedup = (weight*size) / (one* ((size / np) + merge(0, 1, mod(size, np) == 0)))
+ end if
 end function speedup
 
 end subroutine estimate
@@ -2502,7 +2493,7 @@ subroutine gwr_rotate_gpm(gwr, ik_bz, itau, spin, desc_kbz, gt_pm)
  !
  !      G_{-k}(-g,-g') = [G_k(g,g')]*
 
- ABI_WARNING_IF(trev_k == 0, "green: trev_k /= 0 should be tested")
+ !ABI_WARNING_IF(trev_k == 0, "green: trev_k /= 0 should be tested")
 
  ! Rotate gvec, recompute gbound and rotate vc_sqrt
  ! TODO: 1) Handle TR and routine to rotate tchi/W including vc_sqrt
@@ -2865,7 +2856,7 @@ subroutine gwr_rotate_wc(gwr, iq_bz, itau, spin, desc_qbz, wc_qbz)
    call gwr%wc_qibz(iq_ibz, itau, spin)%copy(wc_qbz); return
  end if
 
- ABI_WARNING_IF(trev_q == 0, "trev_q should be tested")
+ !ABI_WARNING_IF(trev_q == 0, "trev_q should be tested")
 
  ! rotate gvec, recompute gbound and rotate vc_sqrt.
  ! TODO: 1) Handle TR and routine to rotate tchi/W including vc_sqrt
