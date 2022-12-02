@@ -255,10 +255,10 @@ module m_gwr
 
 
 ! See also https://fortran-lang.discourse.group/t/a-gfortran-issue-with-parameterized-derived-types/213/17
-TYPE my_matrix (k)
-  INTEGER, KIND :: k = dp
-  REAL (k),allocatable :: buffer(:,:)
-END TYPE my_matrix
+!TYPE my_matrix (k)
+!  INTEGER, KIND :: k = dp
+!  REAL (k),allocatable :: buffer(:,:)
+!END TYPE my_matrix
 
 !----------------------------------------------------------------------
 

@@ -421,6 +421,8 @@ subroutine cgtk_change_gsphere(ndat, npw1, istwf1, kg1, cg1, npw2, istwf2, kg2, 
  n1 = work_ngfft(1); n2 = work_ngfft(2); n3 = work_ngfft(3)
  n4 = work_ngfft(4); n5 = work_ngfft(5); n6 = work_ngfft(6)
 
+ !print *, "npw1", npw1, "npw2", npw2
+
  do idat=1,ndat
    ! Insert cg1 in work array taking into account istwf1 (intent in)
    call sphere(cg1(:,:,idat),1,npw1,work,n1,n2,n3,n4,n5,n6,kg1,istwf1,to_box,me_g0,no_shift,identity_3d,one)
