@@ -24,6 +24,9 @@ module m_sigmaph
  use defs_basis
  use iso_c_binding
  use m_abicore
+#ifdef HAVE_MPI2
+ use mpi
+#endif
  use m_xmpi
  use m_mpinfo
  use m_errors
@@ -85,6 +88,10 @@ module m_sigmaph
 
  private
 !!***
+
+#ifdef HAVE_MPI1
+ include 'mpif.h'
+#endif
 
  ! Tables for degenerated KS states.
  !type bids_t
@@ -372,11 +379,16 @@ module m_sigmaph
    ! (%nqibz))
    ! Mapping dvdb%ibz --> %ibz
 
-   integer, allocatable :: lgk_sym2glob(:, :)
+  integer, allocatable :: lgk_sym2glob(:, :)
    ! lgk_sym2glob(2, lgk_nsym)
    ! Mapping isym_lg --> [isym, itime]
    ! where isym is the index of the operation in the global array **crystal%symrec**
    ! and itim is 2 if time-reversal T must be included else 1. Depends on ikcalc
+
+  integer,allocatable :: nbsum_rank(:)
+   ! (%bsum_comm%nproc)
+   ! Number of bands treated by each proc in %bsum_comm. Used for gatherv operations.
+   ! Available only if .not. imag_only
 
   real(dp),allocatable :: kcalc(:,:)
    ! kcalc(3, nkcalc)
@@ -654,7 +666,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer :: nlines_done, nline_in, grad_berry_size_mpw1, enough_stern
  integer :: nbcalc_ks,nbsum,bsum_start, bsum_stop, bstart_ks,my_ikcalc,ikcalc,bstart,bstop,iatom
  integer :: comm_rpt, osc_npw
- integer :: ffnlk_request, ffnl1_request
+ integer :: ffnlk_request, ffnl1_request, nelem
  real(dp) :: cpu,wall,gflops,cpu_all,wall_all,gflops_all,cpu_ks,wall_ks,gflops_ks,cpu_dw,wall_dw,gflops_dw
  real(dp) :: cpu_setk, wall_setk, gflops_setk, cpu_qloop, wall_qloop, gflops_qloop, gf_val
  real(dp) :: ecut,eshift,weight_q,rfact,gmod2,hmod2,ediff,weight, inv_qepsq, simag, q0rad, out_resid
@@ -681,6 +693,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer,allocatable :: gbound_kq(:,:), osc_gbound_q(:,:), osc_gvecq(:,:), osc_indpw(:)
  integer, allocatable :: band_procs(:)
  integer,allocatable :: ibzspin_2ikcalc(:,:)
+ integer, allocatable :: recvcounts(:), displs(:)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3),qpt_cart(3),phfrq(3*cryst%natom), dotri(2),qq_ibz(3)
  real(dp) :: vk(3), vkq(3), tsec(2), eminmax(2)
  real(dp) :: frohl_sphcorr(3*cryst%natom), vec_natom3(2, 3*cryst%natom)
@@ -1534,6 +1547,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            ! NB: bsum_range is not compatible with Sternheimer.
            ! There's a check at the level of the parser in chkinp.
 
+
            do ibsum_kq=sigma%my_bsum_start, sigma%my_bsum_stop
              if (isirr_kq) then
                 call wfd%copy_cg(ibsum_kq, ikq_ibz, spin, bra_kq)
@@ -1548,7 +1562,29 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
               !ii = ibsum_kq - sigma%my_bsum_start + 1
               !cgq(:,:,ii) = bra_kq
            end do
+
+#if 0
            call xmpi_sum(cgq, sigma%bsum_comm%value, ierr)
+#else
+           if (sigma%bsum_comm%nproc > 1) then
+             ABI_CALLOC(recvcounts, (sigma%bsum_comm%nproc))
+             ABI_MALLOC(displs, (sigma%bsum_comm%nproc))
+
+             nelem = 2 * npw_kq * nspinor
+             recvcounts(:) = sigma%nbsum_rank(:) * nelem
+             displs(1) = 0
+             do ii=2,sigma%bsum_comm%nproc
+               displs(ii) = sum(sigma%nbsum_rank(1:ii-1)) * nelem
+             end do
+             nelem = 2 * npw_kq * nspinor * (sigma%my_bsum_stop - sigma%my_bsum_start + 1)
+
+             call MPI_ALLGATHERV(MPI_IN_PLACE, nelem, MPI_DOUBLE_PRECISION, cgq, recvcounts, displs, &
+                                 MPI_DOUBLE_PRECISION, sigma%bsum_comm%value, ierr)
+
+             ABI_FREE(recvcounts)
+             ABI_FREE(displs)
+           end if
+#endif
 
            ABI_CALLOC(out_eig1_k, (2*nband_kq**2))
            ABI_MALLOC(dcwavef, (2, npw_kq*nspinor*usedcwavef0))
@@ -1589,8 +1625,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
              u1c_ib_k = u1c%find_band(band_ks)
              if (u1c_ib_k /= -1) then
                !print *, "cache hit for ikcalc", ikcalc, "imyq", imyq
-               !print *, "shape1", shape(u1c%prev_cg1s_kq(:,:,ipc,u1c_ib_k))
-               !print *, "shape2", shape(cg1s_kq(:,:,ipc,ib_k))
                call cgtk_change_gsphere(nspinor, &
                                         u1c%prev_npw_kq, istwfk1, u1c%prev_kg_kq, u1c%prev_cg1s_kq(1,1,ipc,u1c_ib_k), &
                                         npw_kq, istwfk1, kg_kq, cg1s_kq(1,1,ipc,ib_k), work_ngfft, work)
@@ -3081,9 +3115,9 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
    end if
    new%my_bsum_start = new%bsum_start + new%my_bsum_start - 1
    new%my_bsum_stop = new%bsum_start + new%my_bsum_stop - 1
-   !nb = new%my_bsum_stop - new%my_bsum_start + 1
-   !ABI_MALLOC(new%bsum_rank, (new%bsum_comm%nproc))
-   !call xmpi_allgather(nb, new%nbsum_rank, self%bsum_comm%value, ierr)
+   ABI_MALLOC(new%nbsum_rank, (new%bsum_comm%nproc))
+   ii = new%my_bsum_stop - new%my_bsum_start + 1
+   call xmpi_allgather(ii, new%nbsum_rank, new%bsum_comm%value, ierr)
  end if
 
  call wrtout(std_out, sjoin(" Global bands for self-energy sum, bsum_start: ", itoa(new%bsum_start), &
@@ -3985,6 +4019,7 @@ subroutine sigmaph_free(self)
  ABI_SFREE(self%ind_ibzk2ibz)
  ABI_SFREE(self%qibz2dvdb)
  ABI_SFREE(self%lgk_sym2glob)
+ ABI_SFREE(self%nbsum_rank)
 
  ! real
  ABI_SFREE(self%kcalc)
