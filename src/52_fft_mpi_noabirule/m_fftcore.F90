@@ -2094,7 +2094,6 @@ end subroutine sphere_fft1
 
 subroutine change_istwfk(from_npw,from_kg,from_istwfk,to_npw,to_kg,to_istwfk,n1,n2,n3,ndat,from_cg,to_cg)
 
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: from_npw,from_istwfk,to_npw,to_istwfk,n1,n2,n3,ndat

@@ -63,7 +63,7 @@ module m_sigmaph
  use m_numeric_tools,  only : arth, c2r, get_diag, linfit, iseven, simpson_cplx, simpson, print_arr
  use m_io_tools,       only : iomode_from_fname, file_exists, is_open, open_file
  use m_special_funcs,  only : gaussian
- use m_fftcore,        only : ngfft_seq, sphereboundary, get_kg, kgindex
+ use m_fftcore,        only : ngfft_seq, sphereboundary, get_kg, kgindex, sphere
  use m_cgtk,           only : cgtk_rotate
  use m_cgtools,        only : cg_zdotc, cg_real_zdotc, cg_zgemm, fxphas_seq
  use m_crystal,        only : crystal_t
@@ -564,6 +564,17 @@ module m_sigmaph
 
  real(dp),private,parameter :: TOL_EDIFF = 0.001_dp * eV_Ha
 
+ type, private :: psi1_cache_t
+   integer :: npw_kq
+   real(dp) :: qpt(3)
+   integer, allocatable :: kg_kq(:,:)
+   real(dp),allocatable :: cg1s_kq(:,:,:,:)
+ contains
+   procedure :: store => psi1_cache_store
+   procedure :: free => psi1_cache_free
+   procedure :: transfer => psi1_cache_transfer
+ end type psi1_cache_t
+
 !----------------------------------------------------------------------
 
 contains  !=====================================================
@@ -658,6 +669,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  type(crystal_t) :: pot_cryst
  type(hdr_type) :: pot_hdr
  type(phstore_t) :: phstore
+ type(psi1_cache_t) :: psi1_cache
  character(len=5000) :: msg
  character(len=fnlen) :: sigeph_filepath
 !arrays
@@ -1562,17 +1574,28 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            ! the following array (as opposed to the distribution of cg1 which is done in the normal dfpt calls
            ABI_MALLOC(bands_treated_now, (nband_kq))
 
+           nline_in = min(100, npw_kq); if (dtset%nline > nline_in) nline_in = min(dtset%nline, npw_kq)
+
            call timab(1909, 1, tsec)
            do ib_k=1,nbcalc_ks
-
              ! TODO: To be replaced by MPI parallellism over bands in projbd inside dfpt_cgwf
              if (sigma%bsum_comm%skip(ib_k)) cycle ! MPI parallelism inside bsum (not very efficient).
 
              band_ks = ib_k + bstart_ks - 1
-             !eig0nk = ebands%eig(band_ks, ik_ibz, spin)
 
              ! Init output u1 in cg1s_kq
-             cg1s_kq(:,:,ipc, ib_k) = zero
+             !if (allocated(psi1_cache%ks_kq) then
+             !call psi1_cache%transfer(npw_kq, kg_kq, cg1s_kq)
+             ! Insert wavef1 in work array.
+             !call sphere(psi1_cache%cg1s_kq(:,:,ipc,ib_k), ndat1, psi1_cache%npw_kq, &
+             !            work, n1, n2, n3, n4, n5, n6, psi1_cache%ks_kq, istwfk1, &
+             !            to_box, me_g0, no_shift, identity_3d, one)
+             !call sphere(cg1s_kq(:,:,ipc,ib_k), ndat1, npw_kq,
+             !            work, n1, n2, n3, n4, n5, n6, kg_kq, istwfk1, &
+             !            to_sph, me_g0, no_shift, identity_3d, one)
+             !else
+             cg1s_kq(:,:,ipc,ib_k) = zero
+             !end if
 
              !TODO: band parallelize this routine, and call dfpt_cgwf with only limited cg arrays
              ! in the meanwhile should make a test for paralbd, to exclude it, I think
@@ -1588,7 +1611,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                !band_procs(band_ks) = sigma%bsum%me
              !endif
 
-             nline_in = min(100, npw_kq); if (dtset%nline > nline_in) nline_in = min(dtset%nline, npw_kq)
              nlines_done = 0
 
              call dfpt_cgwf(band_ks, band_me, band_procs, bands_treated_now, berryopt0, &
@@ -1646,6 +1668,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          ABI_FREE(dkinpw)
          ABI_FREE(ph3d)
          ABI_SFREE(ph3d1)
+
+         !call psi1_cache%store(qpt, kg_kq, cg1s_kq)
        end do ! imyp  (loop over perturbations)
        !call timab(1902, 2, tsec)
 
@@ -1655,14 +1679,12 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        ABI_FREE(v1scf)
 
        ! Wait from phonon frequencies and displacements inside pert_comm
-       call phstore%wait(cryst, phfrq, displ_cart,  displ_red)
+       call phstore%wait(cryst, phfrq, displ_cart, displ_red)
 
        if (dtset%eph_stern == 1 .and. .not. sigma%imag_only) then
          ! Add contribution to Fan-Migdal self-energy coming from Sternheimer.
          ! All procs inside bsum_comm, pert_comm enter here!
          call timab(1910, 1, tsec)
-         !call xmpi_sum(cg1s_kq, sigma%bsum_comm%value, ierr)
-         !call xmpi_sum(cg1s_kq, sigma%pert_comm%value, ierr)
 
          ! h1kets_kq are MPI distributed inside pert_comm but we need off-diagonal pp' terms --> collect results.
          ABI_CALLOC(h1kets_kq_allperts, (2, npw_kq*nspinor, natom3, nbcalc_ks))
@@ -1675,14 +1697,10 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            if (sigma%bsum_comm%skip(ib_k)) cycle ! MPI parallelism inside bsum
            call xmpi_sum(cg1s_kq(:,:,:,ib_k), sigma%pert_comm%value, ierr)
 
-           !do imyp=1,my_npert
-           !  ipc = sigma%my_pinfo(3, imyp)
-           !  h1kets_kq_allperts(:, :, ipc, ib_k) = h1kets_kq(:, :, imyp, ib_k)
-           !end do
-           !call xmpi_sum(h1kets_kq_allperts(:,:,:,ib_k), sigma%pert_comm%value, ierr)
-
+           !if (sigma%pert_comm%nproc > 1) then
            call xmpi_allgather(h1kets_kq(:,:,:,ib_k), 2*npw_kq*nspinor*sigma%my_npert, &
                                h1kets_kq_allperts(:,:,:,ib_k), sigma%pert_comm%value, ierr)
+           !end if
 
            call cg_zgemm("C", "N", npw_kq*nspinor, natom3, natom3, &
              h1kets_kq_allperts(:,:,:,ib_k), cg1s_kq(:,:,:,ib_k), stern_ppb(:,:,:,ib_k))
@@ -2453,6 +2471,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  call pawcprj_free(cwaveprj)
  ABI_FREE(cwaveprj)
  call phstore%free()
+ call psi1_cache%free()
  call sigma%free()
 
  ! This to make sure that the parallel output of SIGEPH is completed
@@ -5420,6 +5439,29 @@ subroutine qpoints_oracle(sigma, cryst, ebands, qpts, nqpt, nqbz, qbz, qselect, 
 
 end subroutine qpoints_oracle
 !!***
+
+subroutine psi1_cache_store(p1c, qpt, kg_kq, cg1s_kq)
+ class(psi1_cache_t),intent(inout) :: p1c
+ real(dp),intent(in) :: qpt(3)
+ integer,intent(in) :: kg_kq(:,:)
+ real(dp),intent(in) :: cg1s_kq(:,:,:,:) ! (2, npw_kq*nspinor, natom3, nbcalc_ks))
+
+ call p1c%free()
+ p1c%qpt = qpt
+ p1c%npw_kq = size(kg_kq, dim=2)
+ call alloc_copy(kg_kq, p1c%kg_kq)
+ call alloc_copy(cg1s_kq, p1c%cg1s_kq)
+end subroutine psi1_cache_store
+
+subroutine psi1_cache_free(p1c)
+ class(psi1_cache_t),intent(inout) :: p1c
+ ABI_SFREE(p1c%kg_kq)
+ ABI_SFREE(p1c%cg1s_kq)
+end subroutine psi1_cache_free
+
+subroutine psi1_cache_transfer(p1c)
+  class(psi1_cache_t),intent(in) :: p1c
+end subroutine psi1_cache_transfer
 
 end module m_sigmaph
 !!***
