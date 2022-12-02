@@ -638,7 +638,7 @@ subroutine orbmag_ptpaw(cg,cg1,cprj,dtset,eigen0,eigen1_3,gsqcut,kg,mcg,mcg1,mcp
    eig1_k(1:2*nband_k**2,1:3) = eigen1_3(2*nband_k**2*(ikpt-1)+1:2*nband_k**2*ikpt,1:3)
    
    ! change cg1 from parallel to diagonal gauge
-   if (dtset%userib == 2190) then
+   if ( (dtset%userib == 2190) .OR. (dtset%userib == 2192) ) then
      ABI_MALLOC(cwavef,(2,npw_k))
      ABI_MALLOC(cwavef_d,(2,npw_k))
      do adir = 1, 3
@@ -658,7 +658,7 @@ subroutine orbmag_ptpaw(cg,cg1,cprj,dtset,eigen0,eigen1_3,gsqcut,kg,mcg,mcg1,mcp
      & dtset%mkmem,dtset%natom,nband_k,nband_k,my_nspinor,dtset%nsppol,0)
    
    ! change cg1 from PTPAW gauge to AE Parallel gauge
-   if (dtset%userib == 2191) then
+   if ( (dtset%userib == 2191) .OR. (dtset%userib == 2192) ) then
      call ptpaw_gauge(atindx,cg_k,cprj_k,dterm,dtset,mcgk,nband_k,npw_k,pawtab,cg1_k)
    end if
 
@@ -1175,11 +1175,14 @@ subroutine ptpaw_gauge(atindx,cg_k,cprj_k,dterm,dtset,mcgk,nband_k,npw_k,pawtab,
      dun(1:2,1:npw_k) = pcg1_k(1:2,(nn-1)*npw_k+1:nn*npw_k,adir)
 
      do mm = 1, nband_k
+       if (mm == nn) cycle
        call tdt_me(dterm%qij,atindx,cprj_k(:,mm),dterm%dqij,dtset,adir,cprj_k(:,nn),&
          & dterm%lmnmax,dterm%lmn2max,pawtab,t1)
        call tdt_me(dterm%qij,atindx,cprj_k(:,nn),dterm%dqij,dtset,adir,cprj_k(:,mm),&
          & dterm%lmnmax,dterm%lmn2max,pawtab,t2)
+       
        umn = half*(t1 - CONJG(t2))
+       
        um(1:2,1:npw_k) = cg_k(1:2,(mm-1)*npw_k+1:mm*npw_k)
        dun(1,1:npw_k) = dun(1,1:npw_k) - REAL(umn)*um(1,1:npw_k) + AIMAG(umn)*um(2,1:npw_k)
        dun(2,1:npw_k) = dun(2,1:npw_k) - REAL(umn)*um(2,1:npw_k) - AIMAG(umn)*um(1,1:npw_k)
