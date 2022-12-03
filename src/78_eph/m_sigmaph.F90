@@ -668,7 +668,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer :: tot_nlines_done, nlines_done, nline_in, grad_berry_size_mpw1, enough_stern
  integer :: nbcalc_ks,nbsum,bsum_start, bsum_stop, bstart_ks,my_ikcalc,ikcalc,bstart,bstop,iatom
  integer :: comm_rpt, osc_npw
- integer :: ffnlk_request, ffnl1_request, nelem
+ integer :: ffnlk_request, ffnl1_request, nelem, cgq_request
  real(dp) :: cpu,wall,gflops,cpu_all,wall_all,gflops_all,cpu_ks,wall_ks,gflops_ks,cpu_dw,wall_dw,gflops_dw
  real(dp) :: cpu_setk, wall_setk, gflops_setk, cpu_qloop, wall_qloop, gflops_qloop, gf_val
  real(dp) :: ecut,eshift,weight_q,rfact,gmod2,hmod2,ediff,weight, inv_qepsq, simag, q0rad, out_resid
@@ -1485,6 +1485,78 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
        if (dtset%eph_stern /= 0 .and. .not. sigma%imag_only) then
          ABI_CALLOC(cg1s_kq, (2, npw_kq*nspinor, natom3, nbcalc_ks))
+           nband_me = nbsum
+           !nband_me = sigma%my_bsum_stop - sigma%my_bsum_start + 1
+
+!if (imyp == 1) then
+           ABI_CALLOC(cgq, (2, npw_kq * nspinor, nband_me))
+           ABI_MALLOC(gscq, (2, npw_kq * nspinor, nband_me*psps%usepaw))
+           ! Build global array with cg_kq wavefunctions to prepare call to dfpt_cgwf.
+           ! NB: bsum_range is not compatible with Sternheimer.
+           ! There's a check at the level of the parser in chkinp.
+           do ibsum_kq=sigma%my_bsum_start, sigma%my_bsum_stop
+             if (isirr_kq) then
+                call wfd%copy_cg(ibsum_kq, ikq_ibz, spin, bra_kq)
+              else
+                ! Reconstruct u_kq(G) from the IBZ image.
+                call wfd%copy_cg(ibsum_kq, ikq_ibz, spin, cgwork)
+                call cgtk_rotate(cryst, kq_ibz, isym_kq, trev_kq, g0_kq, nspinor, ndat1, &
+                                 npw_kqirr, wfd%kdata(ikq_ibz)%kg_k, &
+                                 npw_kq, kg_kq, istwf_kqirr, istwf_kq, cgwork, bra_kq, work_ngfft, work)
+              end if
+              cgq(:, :, ibsum_kq) = bra_kq
+              !ii = ibsum_kq - sigma%my_bsum_start + 1
+              !cgq(:,:,ii) = bra_kq
+           end do
+
+#if 1
+           !call xmpi_sum(cgq, sigma%bsum_comm%value, ierr)
+           call xmpi_isum_ip(cgq, sigma%bsum_comm%value, cgq_request, ierr)
+           !print *, "After xmpi_isum"
+
+           !if (my_rank == master) then
+           !  write(666,*)"nbsum_rank", sigma%nbsum_rank
+           !  do ib_k=1,nband_me
+           !  write(666,*)"ib", ib_k, "nbsum", nbsum
+           !  do ii=1,npw_k*nspinor
+           !    write(666,*) cgq(:,ii,ib_k)
+           !  end do
+           !  end do
+           !  close(666)
+           !end if
+#else
+           if (sigma%bsum_comm%nproc > 1) then
+             !call sigma%bsum_comm%prep_gatherv(nelem, sigma%nbsum_nrank, recvcounts, displs)
+             ABI_CALLOC(recvcounts, (sigma%bsum_comm%nproc))
+             ABI_MALLOC(displs, (sigma%bsum_comm%nproc))
+
+             nelem = 2 * npw_kq * nspinor
+             recvcounts(:) = nelem * sum(sigma%nbsum_rank)
+             displs(1) = 0
+             do ii=2,sigma%bsum_comm%nproc
+               displs(ii) = nelem * sum(sigma%nbsum_rank(1:ii-1))
+             end do
+             nelem = 2 * npw_kq * nspinor * (sigma%my_bsum_stop - sigma%my_bsum_start + 1)
+
+             call MPI_ALLGATHERV(MPI_IN_PLACE, nelem, MPI_DOUBLE_PRECISION, cgq, recvcounts, displs, &
+                                 MPI_DOUBLE_PRECISION, sigma%bsum_comm%value, ierr)
+
+             ABI_FREE(recvcounts)
+             ABI_FREE(displs)
+           end if
+
+           !if (my_rank == master) then
+           !  write(777,*)"nbsum_rank", sigma%nbsum_rank
+           !  do ib_k=1,nband_me
+           !  write(777,*)"ib", ib_k, "nbsum", nbsum
+           !  do ii=1,npw_k*nspinor
+           !    write(777,*) cgq(:,ii,ib_k)
+           !  end do
+           !  end do
+           !  close(777)
+           !end if
+#endif
+!endif ! myip == 1
        end if
 
        ! Loop over all 3*natom perturbations (Each CPU prepares its own potentials)
@@ -1536,78 +1608,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            !mpi_enreg%me_band = sigma%bsum_comm%me
            !mpi_enreg%nproc_band = sigma%bsum_comm%nproc
 
-           nband_me = nbsum
-           !nband_me = sigma%my_bsum_stop - sigma%my_bsum_start + 1
-           mcgq = npw_kq * nspinor * nband_me
-           mgscq = npw_kq * nspinor * nband_me * psps%usepaw
-
-if (imyp == 1) then
-           ABI_CALLOC(cgq, (2, npw_kq * nspinor, nband_me))
-           ABI_MALLOC(gscq, (2, npw_kq * nspinor, nband_me*psps%usepaw))
-           ! Build global array with cg_kq wavefunctions to prepare call to dfpt_cgwf.
-           ! NB: bsum_range is not compatible with Sternheimer.
-           ! There's a check at the level of the parser in chkinp.
-           do ibsum_kq=sigma%my_bsum_start, sigma%my_bsum_stop
-             if (isirr_kq) then
-                call wfd%copy_cg(ibsum_kq, ikq_ibz, spin, bra_kq)
-              else
-                ! Reconstruct u_kq(G) from the IBZ image.
-                call wfd%copy_cg(ibsum_kq, ikq_ibz, spin, cgwork)
-                call cgtk_rotate(cryst, kq_ibz, isym_kq, trev_kq, g0_kq, nspinor, ndat1, &
-                                 npw_kqirr, wfd%kdata(ikq_ibz)%kg_k, &
-                                 npw_kq, kg_kq, istwf_kqirr, istwf_kq, cgwork, bra_kq, work_ngfft, work)
-              end if
-              cgq(:, :, ibsum_kq) = bra_kq
-              !ii = ibsum_kq - sigma%my_bsum_start + 1
-              !cgq(:,:,ii) = bra_kq
-           end do
-
-#if 1
-           call xmpi_sum(cgq, sigma%bsum_comm%value, ierr)
-           !if (my_rank == master) then
-           !  write(666,*)"nbsum_rank", sigma%nbsum_rank
-           !  do ib_k=1,nband_me
-           !  write(666,*)"ib", ib_k, "nbsum", nbsum
-           !  do ii=1,npw_k*nspinor
-           !    write(666,*) cgq(:,ii,ib_k)
-           !  end do
-           !  end do
-           !  close(666)
-           !end if
-#else
-           if (sigma%bsum_comm%nproc > 1) then
-             !call sigma%bsum_comm%prep_gatherv(nelem, sigma%nbsum_nrank, recvcounts, displs)
-             ABI_CALLOC(recvcounts, (sigma%bsum_comm%nproc))
-             ABI_MALLOC(displs, (sigma%bsum_comm%nproc))
-
-             nelem = 2 * npw_kq * nspinor
-             recvcounts(:) = nelem * sum(sigma%nbsum_rank)
-             displs(1) = 0
-             do ii=2,sigma%bsum_comm%nproc
-               displs(ii) = nelem * sum(sigma%nbsum_rank(1:ii-1))
-             end do
-             nelem = 2 * npw_kq * nspinor * (sigma%my_bsum_stop - sigma%my_bsum_start + 1)
-
-             call MPI_ALLGATHERV(MPI_IN_PLACE, nelem, MPI_DOUBLE_PRECISION, cgq, recvcounts, displs, &
-                                 MPI_DOUBLE_PRECISION, sigma%bsum_comm%value, ierr)
-
-             ABI_FREE(recvcounts)
-             ABI_FREE(displs)
-           end if
-
-           if (my_rank == master) then
-             write(777,*)"nbsum_rank", sigma%nbsum_rank
-             do ib_k=1,nband_me
-             write(777,*)"ib", ib_k, "nbsum", nbsum
-             do ii=1,npw_k*nspinor
-               write(777,*) cgq(:,ii,ib_k)
-             end do
-             end do
-             close(777)
-           end if
-#endif
-endif ! myip == 1
-
            ABI_CALLOC(out_eig1_k, (2*nbsum**2))
            ABI_MALLOC(dcwavef, (2, npw_kq*nspinor*usedcwavef0))
            ABI_MALLOC(gh1c_n, (2, npw_kq*nspinor))
@@ -1636,8 +1636,12 @@ endif ! myip == 1
            band_procs = 0
 
            nline_in = min(100, npw_kq); if (dtset%nline > nline_in) nline_in = min(dtset%nline, npw_kq)
+           !print *, " Before wait"
+           if (cgq_request /= xmpi_request_null) call xmpi_wait(cgq_request, ierr)
+           !print *, " After wait"
 
            call timab(1909, 1, tsec)
+
            do ib_k=1,nbcalc_ks
              ! TODO: To be replaced by MPI parallellism over bands in projbd inside dfpt_cgwf
              if (sigma%bsum_comm%skip(ib_k)) cycle ! MPI parallelism inside bsum (not very efficient).
@@ -1673,7 +1677,10 @@ endif ! myip == 1
                !band_procs(band_ks) = sigma%bsum%me
              !endif
 
+             mcgq = npw_kq * nspinor * nband_me
+             mgscq = npw_kq * nspinor * nband_me * psps%usepaw
              nlines_done = 0
+
              call dfpt_cgwf(band_ks, band_me, band_procs, bands_treated_now, berryopt0, &
                cgq, cg1s_kq(:,:,ipc,ib_k), kets_k(:,:,ib_k), &  ! Important stuff
                cwaveprj, cwaveprj0, rf2, dcwavef, &
@@ -1863,9 +1870,8 @@ endif ! myip == 1
          !call cg_zgemm("H", "N", npw_kq*nspinor, ii, ii, bra_kq, h1kets_kq, gkq_atm)
 
          ! Get gkk(kcalc, q, nu) in the phonon representation.
-         ! Use allgather instead of a naive xmpi_sum for efficiency reasons.
+         ! Need to gather all perts distributed in pert_comm
          if (sigma%pert_comm%nproc > 1) then
-           !call xmpi_sum(gkq_atm, sigma%pert_comm%value, ierr)
            call xmpi_allgather(gkq_allgather(:,:,1), 2 * nbcalc_ks * my_npert, gkq_allgather(:,:,2), &
                                sigma%pert_comm%value, ierr)
            do cnt=1,nbcalc_ks*natom3
