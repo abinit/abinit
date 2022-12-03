@@ -664,12 +664,12 @@ subroutine orbmag_ptpaw(cg,cg1,cprj,dtset,eigen0,eigen1_3,gsqcut,kg,mcg,mcg1,mcp
 
    ! compute P_c|cg1>
    ABI_MALLOC(pcg1_k,(2,mcgk,3))
-   ! no projection if userid == 2190, for testing
+   ! projection if userid == 2190
    if (dtset%userid .EQ. 2190) then
-     pcg1_k(:,:,:) = cg1_k(:,:,:)
-   else
      call make_pcg1(atindx,cg_k,cg1_k,cprj_k,dimlmn,dtset,gs_hamk,ikpt,isppol,&
        & mcgk,mpi_enreg,nband_k,npw_k,my_nspinor,pcg1_k)
+   else
+     pcg1_k(:,:,:) = cg1_k(:,:,:)
    end if
 
    ! compute <p|Pc cg1> cprjs
@@ -694,8 +694,8 @@ subroutine orbmag_ptpaw(cg,cg1,cprj,dtset,eigen0,eigen1_3,gsqcut,kg,mcg,mcg1,mcp
    !--------------------------------------------------------------------------------
 
    ! check aij against paw_ij 
-   !call check_eig_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,&
-   !  & gs_hamk,ikpt,isppol,mcgk,mpi_enreg,my_nspinor,nband_k,npw_k,pawtab)
+   call check_eig_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,&
+     & gs_hamk,ikpt,isppol,mcgk,mpi_enreg,my_nspinor,nband_k,npw_k,pawtab)
 
    !call check_pv_term(atindx,cg_k,cprj_k,cprj1_k,dterm,dtset,eig_k,&
    !  & ikpt,mcgk,nband_k,npw_k,pawtab,pcg1_k)
@@ -1085,17 +1085,17 @@ subroutine make_g_k(atindx,cprj_k,cprj1_k,dimlmn,dterm,dtset,eig_k,ggc_k,ggv_k,g
            & gdir,cprj_k(:,nn),dterm%lmnmax,dterm%lmn2max,pawtab)
          cgc = cgc + prefac*dtdt
 
-         !! term 4: -P_v correction
-         !t4term=czero
-         !do np = 1, nband_k
-         !  call tdt_me(dterm%qij,atindx,cprj_k(:,np),dterm%dqij,dtset,gdir,cprj_k(:,nn),&
-         !    & dterm%lmnmax,dterm%lmn2max,pawtab,tdt)
-         !  
-         !  call tdt_me(dterm%qij,atindx,cprj_k(:,np),dterm%dqij,dtset,bdir,cprj_k(:,nn),&
-         !    & dterm%lmnmax,dterm%lmn2max,pawtab,tdtp)
-         !  t4term = t4term + CONJG(tdtp)*eig_k(np)*tdt
-         !end do !np
-         !cgv = cgv - prefac*t4term
+         ! term 4: -P_v correction
+         t4term=czero
+         do np = 1, nband_k
+           call tdt_me(dterm%qij,atindx,cprj_k(:,np),dterm%dqij,dtset,gdir,cprj_k(:,nn),&
+             & dterm%lmnmax,dterm%lmn2max,pawtab,tdt)
+           
+           call tdt_me(dterm%qij,atindx,cprj_k(:,np),dterm%dqij,dtset,bdir,cprj_k(:,nn),&
+             & dterm%lmnmax,dterm%lmn2max,pawtab,tdtp)
+           t4term = t4term + CONJG(tdtp)*eig_k(np)*tdt
+         end do !np
+         cgv = cgv - prefac*t4term
  
        end do !gdir
      end do !bdir
@@ -1637,17 +1637,17 @@ subroutine make_fh_k(atindx,cprj_k,cprj1_k,dterm,dtset,eig_k,ffc_k,ffv_k,&
          chc = chc + prefac_h*dtdt
 
          ! term 4: -P_v correction
-         !t4term=czero
-         !do np = 1, nband_k
-         !  call tdt_me(dterm%qij,atindx,cprj_k(:,np),dterm%dqij,dtset,gdir,cprj_k(:,nn),&
-         !    & dterm%lmnmax,dterm%lmn2max,pawtab,tdt)
-         !  
-         !  call tdt_me(dterm%qij,atindx,cprj_k(:,np),dterm%dqij,dtset,bdir,cprj_k(:,nn),&
-         !    & dterm%lmnmax,dterm%lmn2max,pawtab,tdtp)
-         !  t4term = t4term + CONJG(tdtp)*tdt
-         !end do !np
-         !cfv = cfv - prefac_f*t4term
-         !chv = chv - prefac_h*t4term
+         t4term=czero
+         do np = 1, nband_k
+           call tdt_me(dterm%qij,atindx,cprj_k(:,np),dterm%dqij,dtset,gdir,cprj_k(:,nn),&
+             & dterm%lmnmax,dterm%lmn2max,pawtab,tdt)
+           
+           call tdt_me(dterm%qij,atindx,cprj_k(:,np),dterm%dqij,dtset,bdir,cprj_k(:,nn),&
+             & dterm%lmnmax,dterm%lmn2max,pawtab,tdtp)
+           t4term = t4term + CONJG(tdtp)*tdt
+         end do !np
+         cfv = cfv - prefac_f*t4term
+         chv = chv - prefac_h*t4term
  
        end do !gdir
      end do !bdir
