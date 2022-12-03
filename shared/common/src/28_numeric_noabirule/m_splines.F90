@@ -95,9 +95,6 @@ subroutine splfit(arg, derfun, fun, ider, newarg, newfun, numarg, numnew)
 
 ! *************************************************************************
 
- ! Keep track of time spent in mkffnl
- !call timab(1905, 1, tsec)
-
  ! argmin is smallest x value in spline fit; de is uniform spacing of spline argument
  argmin = arg(1)
  de = (arg(numarg) - argmin) / dble(numarg-1)
@@ -191,8 +188,6 @@ subroutine splfit(arg, derfun, fun, ider, newarg, newfun, numarg, numnew)
  case default
    ABI_ERROR(sjoin("Invalid ider:", itoa(ider)))
  end select
-
- !call timab(1905, 2, tsec)
 
 end subroutine splfit
 !!***
