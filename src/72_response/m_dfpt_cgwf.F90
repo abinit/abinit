@@ -912,6 +912,8 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
    end if
    d2teold=d2te
 
+   !write(msg, *)"iline, resid, skipme", iline, resid, skipme; call wrtout(std_out, msg)
+
    !DEBUG Keep this debugging feature !
    !call sqnorm_g(dotr,istwf_k,npw1*nspinor,direc,me_g0,comm_fft)
    !write(std_out,*)' dfpt_cgwf : before precon, direc**2=',dotr
