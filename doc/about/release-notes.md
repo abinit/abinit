@@ -2,7 +2,7 @@
 
 Version 9.8, released on December 9, 2022.
 List of changes with respect to version 9.6.
-<!-- Release notes updated on November 30, 2022. -->
+<!-- Release notes updated on December 3, 2022. -->
 
 Many thanks to the contributors to the ABINIT project between
 October 2021 and October 2022 ! These release notes
@@ -143,24 +143,6 @@ The writing of documentation and tutorial is in progress.
 
 By M. Torrent and N. Brouwer (MR849).
 
-**B.6** Improvements related to electron-phonon interaction.
-
-A new type of file 'GSTORE' has been introduced,  for the electron-phonon matrix element storage, where it is taken advantage
-of filters (on energy or band or wavevectors) to reduce (drastically) the size compared to the more usual EIG1 file type.
-It contains also the related metadata.
-Related input variables : [[getgstore_filepath]], [[gstore_cplex]], [[gstore_with_vk]], [[gstore_kzone]], [[gstore_qzone]],
-[[gstore_kfilter]], [[gstore_brange]], [[gstore_erange]].
-
-A new tutorial [[tutorial:eph4isotc]] is available, 
-to demonstrate the computation of superconducting properties within the isotropic Eliashberg formalism.
-
-Miscellaneous improvement of the electron-phonon part of ABINIT (documentation, bug fixes, improved parallelism)
-
-See tests in the [[tutorial:eph4isotc]].
-
-By M. Giantomassi (MR870)
-
-
 * * *
 
 ### **C.** Changes for the developers (including information about compilers)
@@ -200,6 +182,16 @@ They were not maintained automatically anymore, so many had become misleading.
 
 From X. Gonze (MR874)
 
+**C.6**  
+A new type of file 'GSTORE' has been introduced,  for the electron-phonon matrix element storage, where it is taken advantage
+of filters (on energy or band or wavevectors) to reduce the size compared to the more usual EIG1 file type.
+It contains also the related metadata.
+Related input variables : [[getgstore_filepath]], [[gstore_cplex]], [[gstore_with_vk]], [[gstore_kzone]], [[gstore_qzone]],
+[[gstore_kfilter]], [[gstore_brange]], [[gstore_erange]].
+
+By M. Giantomassi (MR870)
+
+
 * * *
 
 ### **D.**  Other changes (or on-going developments, not yet finalized)
@@ -238,83 +230,93 @@ From B. Sataric, J. Bieder, and M. Torrent (MR 826)
 
 From M. Giantomassi (MR821)
 
-**D.8** Improvements of the cRPA determination of the U and J parameters (default keywords, tests and tutos). 
+**D.8** Improvements related to electron-phonon interaction.
+
+Miscellaneous improvement of the electron-phonon part of ABINIT (documentation, bug fixes, improved parallelism)
+
+Work in progress : a new tutorial [[tutorial:eph4isotc]] 
+to demonstrate the computation of superconducting properties within the isotropic Eliashberg formalism.
+See tests in the [[tutorial:eph4isotc]].
+
+By M. Giantomassi (MR870)
+
+**D.9** Improvements of the cRPA determination of the U and J parameters (default keywords, tests and tutos). 
 
 From R. Outerovich (MR835)
 
-**D.9** Work on Real-time Time-Dependent Density Functional Theory implementation within ABINIT.
+**D.10** Work on Real-time Time-Dependent Density Functional Theory implementation within ABINIT.
 
 From F. Brieuc (MR853)
 
-**D.10** Test of the Zero-point renormalization for hexagonal systems (Frohlich generalized model). See [[test:v8_60]].
+**D.11** Test of the Zero-point renormalization for hexagonal systems (Frohlich generalized model). See [[test:v8_60]].
 
 From B. Guster (MR815)
 
-**D.11** Implement [[chksymtnons]]=3 : FFT grid and spatial symmetry operations are coherent.
+**D.12** Implement [[chksymtnons]]=3 : FFT grid and spatial symmetry operations are coherent.
 
 From X. Gonze (MR828)
 
-**D.12** Improvement of VdW-DF.
+**D.13** Improvement of VdW-DF.
 Corrections to the implementation of vdW-DF non-local functional found in files 56_xc_/m_xc_vdw.F90 and 98_main/vdw_kernelgen have been done, also several debugging lines have been included. From a careful comparison of the computed quantities from a pre-calculated density and gradient obtained with Siesta, it has been observed that Abinit is getting the correct numbers up to the final 3D FFTs which still present differences that lead to incorrect values for the vdW-DF correlation energy.
 
 From C. Espejo (MR829)
 
-**D.13** 
+**D.14** 
 Make use of gvnlxc optional in getghc, which allows memory savings in lobpcg2 and chebfi2. Could be useful in other parts of the code.
 
 From L. Baguet (MR831)
 
-**D.14**
+**D.15**
 Miscellaneous changes in DMFT: keyword for Wannier orthonormalisation, 
 implementation of calculation of the weight of configuration in CTMQC, 
 double counting for chargeonly DFT+DMFT ([[dmft_dc]]=6), work in progress concerning alternate calculation of electronic entropy in DMFT. 
 
 From B. Amadon and R. Outerovich (MR833) 
 
-**D.15**
+**D.16**
 Move DDK reading outside of loop for non var matrix element calculations. Should be much more efficient IO.
 
 From M. Verstraete (MR840)
 
-**D.16**
+**D.17**
 Use wfdgw_t subclass in GW/BSE code. This is needed so that the wfd in EPH does not allocate bks_tab whose size scales badly with nprocs and nkibz.
  
 From M. Giantomassi (MR841)
 
-**D.17**
+**D.18**
 Add spinat to GSR.nc
 
 From M. Giantomassi (MR842)
 
-**D.18** Orbital magnetism progress 
+**D.19** Orbital magnetism progress 
 
 From J. Zwanziger (MR847)
 
-**D.19** Fix [[prtwf]] and [[prtpot]] in DFPT 
+**D.20** Fix [[prtwf]] and [[prtpot]] in DFPT 
 
 From M. Giantomassi (MR848).
 
-**D.20** Improved ABINIT+TRIQS python invocation interface.
+**D.21** Improved ABINIT+TRIQS python invocation interface.
 
 From O. Gingras (MR851)
 
-**D.21** Bug fixes for PAW+Hybrid
+**D.22** Bug fixes for PAW+Hybrid
 
 From F. Bruneval and F. Soubiran (MR854)
 
-**D.22** Improvements of the Frohlich model implementation (e.g. dielectric average decomposition).
+**D.23** Improvements of the Frohlich model implementation (e.g. dielectric average decomposition).
 
 From B. Guster (MR860)
 
-**D.23** Bug fix of DFT+U in the non-collinear case
+**D.24** Bug fix of DFT+U in the non-collinear case
 
 From E. Bousquet (MR881)
 
-**D.24** GPU coding : inverse overlap matrix, and non-local operator
+**D.25** GPU coding : inverse overlap matrix, and non-local operator
 
 From P. Kestener (MR843 and 869)
 
-**D.25** Miscellaneous additional bug fixes, typos fixes, or upgrade of build system.
+**D.26** Miscellaneous additional bug fixes, typos fixes, or upgrade of build system.
 
 By F. Goudreault (MR816), M. Giantomassi (MR821 and 845), P. Kestener (MR827 and 843), 
 A. Blanchet (MR832), C. Paillard (MR834), M. Verstraete (MR837),
