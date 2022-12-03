@@ -101,7 +101,7 @@ subroutine opt_effpot(eff_pot,opt_ncoeff,opt_coeff,hist,opt_on,opt_factors,comm,
  integer :: ii, info,natom_sc,ntime,unit_anh1,unit_anh2
  integer :: master,nproc,my_rank 
  real(dp) :: factor,mse,msef,mses
- real(dp),parameter :: HaBohr_meVAng = 27.21138386 / 0.529177249
+ real(dp),parameter :: HaBohr_eVAng = 27.21138386 / 0.529177249
 !arrays 
  integer :: sc_size(3)
  integer :: coeff_inds(opt_ncoeff)
@@ -163,7 +163,7 @@ subroutine opt_effpot(eff_pot,opt_ncoeff,opt_coeff,hist,opt_on,opt_factors,comm,
  &                                     compute_anharmonic=.TRUE.,print_file=.TRUE.,filename=fn_bf)
 
 
- !  Print the standard devition of initial model 
+ !  Print the standard deviation of initial model 
       write(message,'(6a,ES24.16,6a,ES24.16,2a,ES24.16,2a,ES24.16,a)' )ch10,&
  &                    ' Mean Standard Deviation values of the effective-potential',ch10,&
  &                    ' with respect to the training-set before optimization (meV^2/atm):',&
@@ -172,11 +172,11 @@ subroutine opt_effpot(eff_pot,opt_ncoeff,opt_coeff,hist,opt_on,opt_factors,comm,
  &                    ' Goal function values of the effective.potential',ch10,& 
  &                    ' with respect to the test-set (eV^2/A^2):',ch10,&
  &                    '   Forces+Stresses : ',&
- &               (msef+mses)*(HaBohr_meVAng)**2,ch10,&
+ &               (msef+mses)*(HaBohr_eVAng)**2,ch10,&
  &                    '   Forces          : ',&
- &               msef*(HaBohr_meVAng)**2,ch10,&
+ &               msef*(HaBohr_eVAng)**2,ch10,&
  &                    '   Stresses        : ',&
- &               mses*(HaBohr_meVAng)**2,ch10
+ &               mses*(HaBohr_eVAng)**2,ch10
       call wrtout(ab_out,message,'COLL')
       call wrtout(std_out,message,'COLL')
 
@@ -219,11 +219,11 @@ subroutine opt_effpot(eff_pot,opt_ncoeff,opt_coeff,hist,opt_on,opt_factors,comm,
  &                    ' Goal function values of the effective.potential',ch10,& 
  &                    ' with respect to the test-set (eV^2/A^2):',ch10,&
  &                    '   Forces+Stresses : ',&
- &               (msef+mses)*(HaBohr_meVAng)**2,ch10,&
+ &               (msef+mses)*(HaBohr_eVAng)**2,ch10,&
  &                    '   Forces          : ',&
- &               msef*(HaBohr_meVAng)**2,ch10,&
+ &               msef*(HaBohr_eVAng)**2,ch10,&
  &                    '   Stresses        : ',&
- &               mses*(HaBohr_meVAng)**2,ch10
+ &               mses*(HaBohr_eVAng)**2,ch10
       call wrtout(ab_out,message,'COLL')
       call wrtout(std_out,message,'COLL')
 
@@ -298,11 +298,11 @@ subroutine opt_effpot(eff_pot,opt_ncoeff,opt_coeff,hist,opt_on,opt_factors,comm,
      &                    ' Goal function values of the effective.potential',ch10,& 
      &                    ' with respect to the test-set (eV^2/A^2):',ch10,&
      &                    '   Forces+Stresses : ',&
-     &               (msef+mses)*(HaBohr_meVAng)**2,ch10,&
+     &               (msef+mses)*(HaBohr_eVAng)**2,ch10,&
      &                    '   Forces          : ',&
-     &               msef*(HaBohr_meVAng)**2,ch10,&
+     &               msef*(HaBohr_eVAng)**2,ch10,&
      &                    '   Stresses        : ',&
-     &               mses*(HaBohr_meVAng)**2,ch10
+     &               mses*(HaBohr_eVAng)**2,ch10
           call wrtout(ab_out,message,'COLL')
           call wrtout(std_out,message,'COLL')
   end if 
@@ -374,7 +374,7 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
  !1406
  real(dp) :: factor,mse_ini,msef_ini,mses_ini,mse,msef,mses,coeff_ini=0.1
  real(dp) :: coeff_tmp
- real(dp),parameter :: HaBohr_meVAng = 27.21138386 / 0.529177249
+ real(dp),parameter :: HaBohr_eVAng = 27.21138386 / 0.529177249
 !arrays 
  integer :: sc_size(3)
  integer,allocatable :: terms(:)
@@ -459,7 +459,7 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
  &                                     compute_anharmonic=.TRUE.,print_file=.FALSE.)
 
 
- !  Print the standard devition of initial model 
+ !  Print the standard deviation of initial model 
       write(message,'(6a,ES24.16,6a,ES24.16,2a,ES24.16,2a,ES24.16,a)' )ch10,&
  &                    ' Mean Standard Deviation values of the effective-potential',ch10,&
  &                    ' with respect to the training-set before attempted bounding (meV^2/atm):',&
@@ -468,11 +468,11 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
  &                    ' Goal function values of the effective.potential',ch10,& 
  &                    ' with respect to the test-set (eV^2/A^2):',ch10,&
  &                    '   Forces+Stresses : ',&
- &               (msef_ini+mses_ini)*(HaBohr_meVAng)**2,ch10,&
+ &               (msef_ini+mses_ini)*(HaBohr_eVAng)**2,ch10,&
  &                    '   Forces          : ',&
- &               msef_ini*(HaBohr_meVAng)**2,ch10,&
+ &               msef_ini*(HaBohr_eVAng)**2,ch10,&
  &                    '   Stresses        : ',&
- &               mses_ini*(HaBohr_meVAng)**2,ch10
+ &               mses_ini*(HaBohr_eVAng)**2,ch10
       call wrtout(ab_out,message,'COLL')
       call wrtout(std_out,message,'COLL')
 
@@ -728,7 +728,7 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
       call wrtout(std_out,message,'COLL') 
  !  call opt_effpot(eff_pot,nterm,terms,hist,comm,print_anh=.FALSE.)
 
-!  Print the standard devition of final model 
+!  Print the standard deviation of final model 
       write(message,'(6a,ES24.16,6a,ES24.16,2a,ES24.16,2a,ES24.16,a)' )ch10,&
  &                    ' Mean Standard Deviation values of the effective-potential',ch10,&
  &                    ' with respect to the training-set after attempted bounding (meV^2/atm):',&
@@ -737,11 +737,11 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
  &                    ' Goal function values of the effective.potential',ch10,& 
  &                    ' with respect to the test-set (eV^2/A^2):',ch10,&
  &                    '   Forces+Stresses : ',&
- &               (msef_ini+mses_ini)*(HaBohr_meVAng)**2,ch10,&
+ &               (msef_ini+mses_ini)*(HaBohr_eVAng)**2,ch10,&
  &                    '   Forces          : ',&
- &               msef_ini*(HaBohr_meVAng)**2,ch10,&
+ &               msef_ini*(HaBohr_eVAng)**2,ch10,&
  &                    '   Stresses        : ',&
- &               mses_ini*(HaBohr_meVAng)**2,ch10
+ &               mses_ini*(HaBohr_eVAng)**2,ch10
       call wrtout(ab_out,message,'COLL')
       call wrtout(std_out,message,'COLL')
 
