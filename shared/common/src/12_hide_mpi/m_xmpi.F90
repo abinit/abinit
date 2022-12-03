@@ -134,7 +134,7 @@ module m_xmpi
 
  integer,save, public ABI_PROTECTED :: xmpi_count_requests = 0
  ! Count number of requests (+1 for each call to non-blocking API, -1 for each call to xmpi_wait)
- ! This counter should be zero at the end of the run if all requests have been released)
+ ! This counter should be zero at the end of the run if all requests have been released.
 
  logical,save, private :: xmpi_use_inplace_operations = .False.
  ! Enable/disable usage of MPI_IN_PLACE in e.g. xmpi_sum

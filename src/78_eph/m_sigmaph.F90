@@ -1316,6 +1316,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      ! Note: One should rotate the wavefunctions if kk is not in the IBZ (not implemented)
      ABI_MALLOC(kets_k, (2, npw_k*nspinor, nbcalc_ks))
      ABI_MALLOC(sigma%e0vals, (nbcalc_ks))
+
      if (osc_ecut /= zero) then
        ABI_MALLOC(ur_k, (wfd%nfft*nspinor, nbcalc_ks))
        ABI_MALLOC(ur_kq, (wfd%nfft*nspinor))
@@ -1512,10 +1513,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
          cgq_request = xmpi_request_null
          if (sigma%bsum_comm%nproc > 1) then
-#if 0
            !call xmpi_sum(cgq, sigma%bsum_comm%value, ierr)
-           call xmpi_isum_ip(cgq, sigma%bsum_comm%value, cgq_request, ierr)
-#else
+           !call xmpi_isum_ip(cgq, sigma%bsum_comm%value, cgq_request, ierr)
 
            !call sigma%bsum_comm%prep_gatherv(nelem, sigma%nbsum_nrank, recvcounts, displs)
            ABI_MALLOC(recvcounts, (sigma%bsum_comm%nproc))
@@ -1529,16 +1528,18 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            end do
            nelem = 2 * npw_kq * nspinor * (sigma%my_bsum_stop - sigma%my_bsum_start + 1)
 
-           call MPI_ALLGATHERV(MPI_IN_PLACE, nelem, MPI_DOUBLE_PRECISION, cgq, recvcounts, displs, &
-                               MPI_DOUBLE_PRECISION, sigma%bsum_comm%value, ierr)
+#ifdef HAVE_MPI
+           !call MPI_ALLGATHERV(MPI_IN_PLACE, nelem, MPI_DOUBLE_PRECISION, cgq, recvcounts, displs, &
+           !                    MPI_DOUBLE_PRECISION, sigma%bsum_comm%value, ierr)
 
            !cgq_request = xmpi_request_null
-           !call MPI_IALLGATHERV(MPI_IN_PLACE, nelem, MPI_DOUBLE_PRECISION, cgq, recvcounts, displs, &
-           !                     MPI_DOUBLE_PRECISION, sigma%bsum_comm%value, cgq_request, ierr)
+           call MPI_IALLGATHERV(MPI_IN_PLACE, nelem, MPI_DOUBLE_PRECISION, cgq, recvcounts, displs, &
+                                MPI_DOUBLE_PRECISION, sigma%bsum_comm%value, cgq_request, ierr)
+           !xmpi_count_requests = xmpi_count_requests + 1
+#endif
 
            ABI_FREE(recvcounts)
            ABI_FREE(displs)
-#endif
          end if
          call timab(1908, 2, tsec)
        end if  ! eph_stern
@@ -1572,6 +1573,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
          ! Compute H(1) applied to GS wavefunction Psi_nk(0)
          do ib_k=1,nbcalc_ks
+           !if (sigma%bsum_comm%skip(ib_k)) cycle ! MPI parallelism inside bsum
            band_ks = ib_k + bstart_ks - 1
            eig0nk = ebands%eig(band_ks, ik_ibz, spin)
            ! Use scissor shift on 0-order eigenvalue
@@ -1622,14 +1624,12 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            nline_in = min(100, npw_kq); if (dtset%nline > nline_in) nline_in = min(dtset%nline, npw_kq)
            !if (cgq_request /= xmpi_request_null) call xmpi_wait(cgq_request, ierr)
 
-           call timab(1910, 1, tsec)
            do ib_k=1,nbcalc_ks
              ! TODO: To be replaced by MPI parallellism over bands in projbd inside dfpt_cgwf
              if (sigma%bsum_comm%skip(ib_k)) cycle ! MPI parallelism inside bsum (not very efficient).
-
              band_ks = ib_k + bstart_ks - 1
 
-             ! Init output u1 in cg1s_kq
+             ! Init entry in cg1s_kq, either from cache or with zero.
              if (use_u1c_cache) then
                u1c_ib_k = u1c%find_band(band_ks)
                if (u1c_ib_k /= -1) then
@@ -1685,17 +1685,14 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                ABI_ERROR(sjoin(" resid: ", ftoa(out_resid), ", nlines_done:", itoa(nlines_done)))
              end if
 
-             if (my_rank == master) then
-             !if (my_rank == master .and. (enough_stern <= 5 .or. dtset%prtvol > 10)) then
+             !if (my_rank == master) then
+             if (my_rank == master .and. (enough_stern <= 5 .or. dtset%prtvol > 10)) then
                write(std_out, "(2(a,es13.5),a,i0)") &
                  " Sternheimer converged with resid: ", out_resid, " <= tolwfr: ", dtset%tolwfr, &
-                 " after ", nlines_done !, " iterations. wall-time: ", trim(sec2str(wall_stern))
-               !write(std_out,*)" |psi1|^2", cg_real_zdotc(npw_kq*nspinor, cg1s_kq(:, :, ipc, ib_k), cg1s_kq(:, :, ipc, ib_k))
+                 " after nlines_done: ", nlines_done
                enough_stern = enough_stern + 1
              end if
-             !call wrtout(std_out, sjoin(" Stern nlines_done:", itoa(nlines_done)))
            end do ! ib_k
-           call timab(1910, 2, tsec)
 
            ! Revert changes in mpi_enreg.
            !mpi_enreg%comm_band = xmpi_comm_self
@@ -1734,7 +1731,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        call phstore%wait(cryst, phfrq, displ_cart, displ_red)
 
        if (dtset%eph_stern /= 0 .and. .not. sigma%imag_only) then
-         call timab(1911, 1, tsec)
+         call timab(1910, 1, tsec)
          ! Add contribution to Fan-Migdal self-energy coming from Sternheimer.
          ! NB: All procs inside (bsum_comm x pert_comm) enter here!
 
@@ -1800,7 +1797,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          end do
 
          ABI_FREE(stern_ppb)
-         call timab(1911, 2, tsec)
+         call timab(1910, 2, tsec)
        end if ! eph_stern /= 0
 
        ! ================
@@ -2255,7 +2252,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        call cwtime(cpu, wall, gflops, "start")
        call xmpi_sum(gkq0_atm, sigma%qpt_comm%value, ierr)
        if (dtset%eph_stern /= 0) call xmpi_sum(stern_dw, sigma%qpt_comm%value, ierr)
-       call cwtime_report("DW MPI comm first", cpu, wall, gflops)
+       call cwtime_report(" DW MPI comm first", cpu, wall, gflops)
 
        ! Integral over IBZ(k) distributed inside qpt_comm
        nq = sigma%nqibz; if (sigma%symsigma == 0) nq = sigma%nqbz
@@ -2966,7 +2963,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
    ABI_CHECK(new%my_npert > 0, "pert_comm_nproc cannot be greater than 3 * natom.")
    ABI_CHECK(mod(natom3, new%pert_comm%nproc) == 0, "pert_comm_nproc must divide 3 * natom.")
    if (new%imag_only .and. new%bsum_comm%nproc /= 1) then
-     ABI_ERROR("bsum_comm_nproc should be 1 when computing Imag(Sigma)")
+     ABI_ERROR("Nprocs in bsum_comm should be 1 when computing Imag(Sigma)")
    end if
  else
    ! Automatic grid generation.
@@ -3038,6 +3035,8 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  ! FIXME: Fix spin
  periods(:) = .False.; reorder = .False.
  dims = [new%pert_comm%nproc, new%qpt_comm%nproc, new%bsum_comm%nproc, new%kcalc_comm%nproc, new%spin_comm%nproc]
+ ! Try New distrib ?
+ !dims = [new%pert_comm%nproc, new%bsum_comm%nproc, new%qpt_comm%nproc, new%kcalc_comm%nproc, new%spin_comm%nproc]
 
  call MPI_CART_CREATE(comm, ndims, dims, periods, reorder, comm_cart, ierr)
  ! Find the index and coordinates of the current processor
