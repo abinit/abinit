@@ -1198,7 +1198,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
  ! Loop over k-points in Sigma_nk. Loop over spin is internal as we operate on nspden components at once.
  do my_ikcalc=1,sigma%my_nkcalc
-   !if (my_ikcalc > 1) exit
+   if (my_ikcalc > 1) exit
    !if (my_ikcalc > 2) exit
    ikcalc = sigma%my_ikcalc(my_ikcalc)
 
@@ -1484,12 +1484,12 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                         comm=sigma%pert_comm%value, request=ffnl1_request)
 
        if (dtset%eph_stern /= 0 .and. .not. sigma%imag_only) then
+         call timab(1908, 1, tsec)
          ABI_CALLOC(cg1s_kq, (2, npw_kq*nspinor, natom3, nbcalc_ks))
 
          nband_me = nbsum
          !nband_me = sigma%my_bsum_stop - sigma%my_bsum_start + 1
 
-!if (imyp == 1) then
          ABI_CALLOC(cgq, (2, npw_kq * nspinor, nband_me))
          ABI_MALLOC(gscq, (2, npw_kq * nspinor, nband_me*psps%usepaw))
          ! Build global array with cg_kq wavefunctions to prepare call to dfpt_cgwf.
@@ -1510,26 +1510,15 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
             !cgq(:,:,ii) = bra_kq
          end do
 
+         cgq_request = xmpi_request_null
          if (sigma%bsum_comm%nproc > 1) then
 #if 0
            !call xmpi_sum(cgq, sigma%bsum_comm%value, ierr)
            call xmpi_isum_ip(cgq, sigma%bsum_comm%value, cgq_request, ierr)
-           !print *, "After xmpi_isum"
-
-           !if (my_rank == master) then
-           !  write(666,*)"nbsum_rank", sigma%nbsum_rank
-           !  do ib_k=1,nband_me
-           !  write(666,*)"ib", ib_k, "nbsum", nbsum
-           !  do ii=1,npw_k*nspinor
-           !    write(666,*) cgq(:,ii,ib_k)
-           !  end do
-           !  end do
-           !  close(666)
-           !end if
 #else
 
            !call sigma%bsum_comm%prep_gatherv(nelem, sigma%nbsum_nrank, recvcounts, displs)
-           ABI_CALLOC(recvcounts, (sigma%bsum_comm%nproc))
+           ABI_MALLOC(recvcounts, (sigma%bsum_comm%nproc))
            ABI_MALLOC(displs, (sigma%bsum_comm%nproc))
 
            nelem = 2 * npw_kq * nspinor
@@ -1543,30 +1532,19 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            call MPI_ALLGATHERV(MPI_IN_PLACE, nelem, MPI_DOUBLE_PRECISION, cgq, recvcounts, displs, &
                                MPI_DOUBLE_PRECISION, sigma%bsum_comm%value, ierr)
 
-           cgq_request = xmpi_request_null
+           !cgq_request = xmpi_request_null
            !call MPI_IALLGATHERV(MPI_IN_PLACE, nelem, MPI_DOUBLE_PRECISION, cgq, recvcounts, displs, &
            !                     MPI_DOUBLE_PRECISION, sigma%bsum_comm%value, cgq_request, ierr)
 
            ABI_FREE(recvcounts)
            ABI_FREE(displs)
-
-           !if (my_rank == master) then
-           !  write(777,*)"nbsum_rank", sigma%nbsum_rank
-           !  do ib_k=1,nband_me
-           !  write(777,*)"ib", ib_k, "nbsum", nbsum
-           !  do ii=1,npw_k*nspinor
-           !    write(777,*) cgq(:,ii,ib_k)
-           !  end do
-           !  end do
-           !  close(777)
-           !end if
 #endif
          end if
-!endif ! myip == 1
+         call timab(1908, 2, tsec)
        end if  ! eph_stern
 
-       ! Loop over all 3*natom perturbations (Each CPU prepares its own potentials)
-       ! In the inner loop, I calculate H1 * psi_k, stored in h1kets_kq on the k+q sphere.
+       ! Loop over all 3*natom perturbations (Each core prepares its own potentials)
+       ! In the inner loop, we calculate H1 * psi_k, stored in h1kets_kq on the k+q sphere.
        do imyp=1,my_npert
          idir = sigma%my_pinfo(1, imyp); ipert = sigma%my_pinfo(2, imyp); ipc = sigma%my_pinfo(3, imyp)
 
@@ -1605,9 +1583,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          end do
 
          if (dtset%eph_stern /= 0 .and. .not. sigma%imag_only) then
+           call timab(1909, 1, tsec)
            ! Activate Sternheimer. Note that we are still inside the MPI loop over my_npert.
            ! NB: Assume adiabatic AHC expression to compute the contribution of states above nbsum.
-           call timab(1908, 1, tsec)
 
            ! Prepare band parallelism in dfpt_cgwf via mpi_enreg.
            !mpi_enreg%comm_band = sigma%bsum_comm%value
@@ -1642,12 +1620,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            band_procs = 0
 
            nline_in = min(100, npw_kq); if (dtset%nline > nline_in) nline_in = min(dtset%nline, npw_kq)
-           !print *, " Before wait"
-           if (cgq_request /= xmpi_request_null) call xmpi_wait(cgq_request, ierr)
-           !print *, " After wait"
+           !if (cgq_request /= xmpi_request_null) call xmpi_wait(cgq_request, ierr)
 
-           call timab(1909, 1, tsec)
-
+           call timab(1910, 1, tsec)
            do ib_k=1,nbcalc_ks
              ! TODO: To be replaced by MPI parallellism over bands in projbd inside dfpt_cgwf
              if (sigma%bsum_comm%skip(ib_k)) cycle ! MPI parallelism inside bsum (not very efficient).
@@ -1708,7 +1683,10 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                ABI_ERROR(msg)
              else if (out_resid < zero) then
                ABI_ERROR(sjoin(" resid: ", ftoa(out_resid), ", nlines_done:", itoa(nlines_done)))
-             else if (my_rank == master .and. (enough_stern <= 5 .or. dtset%prtvol > 10)) then
+             end if
+
+             if (my_rank == master) then
+             !if (my_rank == master .and. (enough_stern <= 5 .or. dtset%prtvol > 10)) then
                write(std_out, "(2(a,es13.5),a,i0)") &
                  " Sternheimer converged with resid: ", out_resid, " <= tolwfr: ", dtset%tolwfr, &
                  " after ", nlines_done !, " iterations. wall-time: ", trim(sec2str(wall_stern))
@@ -1717,9 +1695,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
              end if
              !call wrtout(std_out, sjoin(" Stern nlines_done:", itoa(nlines_done)))
            end do ! ib_k
-
-           call timab(1909, 2, tsec)
-           call timab(1908, 2, tsec)
+           call timab(1910, 2, tsec)
 
            ! Revert changes in mpi_enreg.
            !mpi_enreg%comm_band = xmpi_comm_self
@@ -1738,10 +1714,10 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
              ABI_FREE(cgq)
              ABI_FREE(gscq)
            end if
+           call timab(1909, 2, tsec)
          end if ! sternheimer
 
          call rf_hamkq%free()
-
          ABI_FREE(kinpw1)
          ABI_FREE(dkinpw)
          ABI_FREE(ph3d)
@@ -1758,16 +1734,15 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        call phstore%wait(cryst, phfrq, displ_cart, displ_red)
 
        if (dtset%eph_stern /= 0 .and. .not. sigma%imag_only) then
+         call timab(1911, 1, tsec)
          ! Add contribution to Fan-Migdal self-energy coming from Sternheimer.
-         ! All procs inside bsum_comm, pert_comm enter here!
-         call timab(1910, 1, tsec)
+         ! NB: All procs inside (bsum_comm x pert_comm) enter here!
+
+         ! Store |Psi_1> to init Sternheimer solver for the next q-point.
+         call u1c%store(qpt, npw_kq, nspinor, natom3, bstart_ks, nbcalc_ks, kg_kq, cg1s_kq)
 
          ! h1kets_kq are MPI distributed inside pert_comm but we need off-diagonal pp' terms --> collect results.
          ABI_CALLOC(h1kets_kq_allperts, (2, npw_kq*nspinor, natom3, nbcalc_ks))
-         call timab(1910, 2, tsec)
-         call timab(1911, 1, tsec)
-
-         call u1c%store(qpt, npw_kq, nspinor, natom3, bstart_ks, nbcalc_ks, kg_kq, cg1s_kq)
 
          ! Compute S_pp' = <D_{qp} vscf u_nk|u'_{nk+q p'}>
          ABI_CALLOC(stern_ppb, (2, natom3, natom3, nbcalc_ks))
