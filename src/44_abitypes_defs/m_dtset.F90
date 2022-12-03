@@ -3191,7 +3191,7 @@ subroutine macroin2(dtsets, ndtset_alloc)
    end if ! macro_uj
 
    if (dtsets(idtset)%optdriver == RUNL_EPH) then
-     if (dtsets(idtset)%eph_stern == 1) then
+     if (abs(dtsets(idtset)%eph_stern) == 1) then
        ! Default values for the Sternheimer method in the EPH code if not provided.
        if (dtsets(idtset)%tolwfr == zero) dtsets(idtset)%tolwfr = tol16
        if (dtsets(idtset)%nline <= 4) dtsets(idtset)%nline = 100
