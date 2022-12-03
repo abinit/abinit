@@ -701,6 +701,7 @@ end interface xmpi_isum
 ! Non-blocking in-place version
 interface xmpi_isum_ip
   module procedure xmpi_isum_ip_dp2d
+  module procedure xmpi_isum_ip_dp3d
   module procedure xmpi_isum_ip_dp4d
   module procedure xmpi_isum_ip_spc1d
   module procedure xmpi_isum_ip_dpc1d
