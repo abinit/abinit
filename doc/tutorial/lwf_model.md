@@ -7,7 +7,7 @@ authors: xuhe
 
 ## Build a LWF model and run LWF dynamics in MULTIBINIT
 
-This lesson aims at showing how to build a LWF model and run a spin dynamics calculation.
+This lesson aims at showing how to build a LWF model and run a LWF dynamics calculation.
 
 **Before beginning, we recommend the reading of the theory on Lattice Wannier functions in the literature [[cite:rabe1995]]. The construction of LWF from the phonon band structure is covered in another [tutorial](/tutorial/lattice_wannier). **
 
@@ -54,7 +54,7 @@ multibinit tmulti6_1.abi --F03 > tmulti6_1.log
 ```
 
 For each temperature point, the temperature, kinetic energy, potential energy, and
-total energy will be outputed for every lwf_nctime steps. 
+total energy will be output for every lwf_nctime step. 
 
 ```
  Iteration     temperature(K)        Ekin(Ha/uc)        Epot(Ha/uc)        ETOT(Ha/uc)
@@ -64,7 +64,10 @@ total energy will be outputed for every lwf_nctime steps.
       ......
 ```
 
-A file ends with "_lwfhist.nc", which contains the trajectory of the LWF amplitudes, will be generated. By analyzing it, we 
-can extract the information like heat capacity and susceptibility. If there is structural phase transition, the critical temperature can also 
-be found. The tools for doing these analysis are still under development. 
+A file ending with "_lwfhist.nc", which contains the trajectory of the LWF amplitudes, will be generated. 
+By analyzing it, we 
+can extract the information like heat capacity and susceptibility. 
+If there is a structural phase transition, the critical temperature can also 
+be found. 
+The tools for doing these analyses are still under development. 
 
