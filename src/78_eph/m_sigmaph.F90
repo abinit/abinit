@@ -1494,8 +1494,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          nband_me = nbsum
          !nband_me = sigma%my_bsum_stop - sigma%my_bsum_start + 1
 
-         ABI_CALLOC(cgq, (2, npw_kq * nspinor, nband_me))
+         ABI_MALLOC(cgq, (2, npw_kq * nspinor, nband_me))
          ABI_MALLOC(gscq, (2, npw_kq * nspinor, nband_me*psps%usepaw))
+
          do ibsum_kq=sigma%my_bsum_start, sigma%my_bsum_stop
            if (isirr_kq) then
               call wfd%copy_cg(ibsum_kq, ikq_ibz, spin, bra_kq)
@@ -1514,23 +1515,13 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          cgq_request = xmpi_request_null
          if (sigma%bsum_comm%nproc > 1) then
            ! If band parallelism, need to gather all bands nbsum bands.
-           ! FIXME: This part is network intensive
+           ! FIXME: This part is network intensive, one can avoid it by calling dfpt_cgwf in band-para mode.
 
            !call xmpi_sum(cgq, sigma%bsum_comm%value, ierr)
            !call xmpi_isum_ip(cgq, sigma%bsum_comm%value, cgq_request, ierr)
 
+           nelem = 2 * npw_kq * nspinor
            call sigma%bsum_comm%prep_gatherv(nelem, sigma%nbsum_rank, sendcount, recvcounts, displs)
-
-           !ABI_MALLOC(recvcounts, (sigma%bsum_comm%nproc))
-           !ABI_MALLOC(displs, (sigma%bsum_comm%nproc))
-           !nelem = 2 * npw_kq * nspinor
-           !recvcounts(:) = nelem * sigma%nbsum_rank
-           !displs(1) = 0
-           !do ii=2,sigma%bsum_comm%nproc
-           !  displs(ii) = nelem * sum(sigma%nbsum_rank(1:ii-1))
-           !end do
-           !sendcount = nelem * (sigma%my_bsum_stop - sigma%my_bsum_start + 1)
-
 #ifdef HAVE_MPI
            !call MPI_ALLGATHERV(MPI_IN_PLACE, sendcount, MPI_DOUBLE_PRECISION, cgq, recvcounts, displs, &
            !                    MPI_DOUBLE_PRECISION, sigma%bsum_comm%value, ierr)
@@ -1625,7 +1616,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
            nline_in = min(100, npw_kq); if (dtset%nline > nline_in) nline_in = min(dtset%nline, npw_kq)
 
-           ! Wait for gather operation
+           ! Wait for gatherv operation
            if (cgq_request /= xmpi_request_null) call xmpi_wait(cgq_request, ierr)
 
            do ib_k=1,nbcalc_ks
@@ -1633,7 +1624,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
              if (sigma%bsum_comm%skip(ib_k)) cycle ! MPI parallelism inside bsum (not very efficient).
              band_ks = ib_k + bstart_ks - 1
 
-             ! Init entry in cg1s_kq, either from cache or with zero.
+             ! Init entry in cg1s_kq, either from cache or with zeros.
              if (use_u1c_cache) then
                u1c_ib_k = u1c%find_band(band_ks)
                if (u1c_ib_k /= -1) then
@@ -1804,9 +1795,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          call timab(1910, 2, tsec)
        end if ! eph_stern /= 0
 
-       ! ================
-       ! Sum over m bands
-       ! ================
+       ! ==============================================
+       ! Sum over m bands parallelized inside bsum_comm
+       ! ==============================================
        call timab(1903, 1, tsec)
        do ibsum_kq=sigma%my_bsum_start, sigma%my_bsum_stop
 
