@@ -172,7 +172,6 @@ subroutine polynomial_coeff_init(coefficient,nterm,polynomial_coeff,terms,name,c
  real(dp) :: weights(nterm)
  character(len=200) :: name_tmp
 ! *************************************************************************
-!print*,'tol5', tol5,tol16
 !First free before initilisation
  call polynomial_coeff_free(polynomial_coeff)
  check_in = .false.
@@ -232,7 +231,6 @@ subroutine polynomial_coeff_init(coefficient,nterm,polynomial_coeff,terms,name,c
 !Initilisation
  polynomial_coeff%name = name_tmp
  polynomial_coeff%nterm = nterm_tmp
-! print*,'polynomial_coeff%nterm1',polynomial_coeff%nterm
  polynomial_coeff%coefficient = coefficient_tmp
  ABI_MALLOC(polynomial_coeff%terms,(polynomial_coeff%nterm))
  iterm1 = 0
@@ -244,7 +242,6 @@ subroutine polynomial_coeff_init(coefficient,nterm,polynomial_coeff,terms,name,c
 &                              terms(ii)%power_strain,terms(ii)%strain,terms(ii)%weight)
    end if
  end do
-!print*,'polynomial_coeff%nterm2',polynomial_coeff%nterm
 end subroutine polynomial_coeff_init
 !!***
 
@@ -466,7 +463,6 @@ subroutine polynomial_coeff_getName(name,polynomial_coeff,symbols,recompute,iter
  else
    if(need_recompute)then
      iterm_in = -1
-     !     print*,'polynomial_coeff%nterm',polynomial_coeff%nterm
      do ii=1,polynomial_coeff%nterm
        !      Find the index of the ref
        if(iterm_in==-1) then !Need to find the reference term
@@ -2015,29 +2011,6 @@ list_symcoeff_tmp = list_symcoeff_tmp3
  !ABI_FREE(xcart)
  !ABI_FREE(xred )
  ABI_FREE(wkdist)
-
-
- if(.False.) then
-   block
-     integer :: isym, icoeff
-
-     print *, "Cell:"
-     do irpt=1, nrpt
-       print *, "irpt=", irpt, "rpt=", cell(:, irpt)
-     end do
-
-     print *, "list_symcoeff"
-     do icoeff =1, size(list_symcoeff, 2)
-       do isym=1, nsym
-         if (list_symcoeff(4, icoeff, isym)==3) then
-           print *, "isym=",isym, list_symcoeff(:, icoeff, isym)
-         end if
-       end do
-     end do
-   end block
-
- end if
-
 end subroutine polynomial_coeff_getList
 !!***
 
