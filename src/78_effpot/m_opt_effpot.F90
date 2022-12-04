@@ -519,34 +519,20 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
            & term1%nstrain /= 0)then
            ! output HOcrossdisp_terms, ncombi2.
            call opt_getHOcrossdisp(HOcrossdisp_terms,ncombi2,eff_pot%anharmonics_terms%coefficients(iterm),order_ran)
-
          endif
        end associate
        !Copy everything together
+       ! first add the single disp terms
        ABI_MALLOC(my_coeffs,(size(eff_pot%anharmonics_terms%coefficients)+size(HOsingledisp_terms)))
        my_coeffs = eff_pot%anharmonics_terms%coefficients + HOsingledisp_terms
        if(allocated(HOsingledisp_terms)) call polynomial_coeff_list_free(HOsingledisp_terms)
 
-       !Test
-       !do i=1,size(eff_pot%anharmonics_terms%coefficients)+size(HOsingledisp_terms)
-       !  if(i<=size(eff_pot%anharmonics_terms%coefficients))then
-       !    ! set as the original one.
-       !    call polynomial_coeff_init(coeff_ini,eff_pot%anharmonics_terms%coefficients(i)%nterm,my_coeffs(i),&
-       !      & eff_pot%anharmonics_terms%coefficients(i)%terms,eff_pot%anharmonics_terms%coefficients(i)%name,check=.TRUE.)
-       !  else
-       !    ! set as the higher order single disp terms.
-       !    j=i-size(eff_pot%anharmonics_terms%coefficients)
-       !    call polynomial_coeff_init(coeff_ini,HOsingledisp_terms(j)%nterm,my_coeffs(i),HOsingledisp_terms(j)%terms,&
-       !      HOsingledisp_terms(j)%name,check=.TRUE.)
-       !  endif
-       !enddo
-
-       ! Add the crossdisp terms.
+       ! then add the crossdisp terms.
        if(ncombi2 > 0)then
          call coeffs_list_conc_onsite(my_coeffs, HOcrossdisp_terms, check=.True.)
          if(allocated(HOcrossdisp_terms)) call polynomial_coeff_list_free(HOcrossdisp_terms)
        endif
-     else
+     else  ! to_skip
        ncombi2=0
        ncombi1=0
        ABI_MALLOC(my_coeffs,(size(eff_pot%anharmonics_terms%coefficients)))
@@ -769,17 +755,12 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
        ABI_SFREE(list_symcoeff)
        ABI_SFREE(list_symstr)
        if(allocated(my_coeffs_tmp)) call polynomial_coeff_list_free(my_coeffs_tmp)
-       !if(temp_cntr/=0) then
-         ABI_MALLOC(my_coeffs_tmp,(nterm_start+temp_cntr))
-         !call coeffs_list_copy(my_coeffs_tmp, my_coeffs)
-         print *, "temp_cntr:", temp_cntr
-         my_coeffs_tmp=my_coeffs(1:nterm_start+temp_cntr)
-         if(allocated(my_coeffs)) call polynomial_coeff_list_free(my_coeffs)
-
-         ABI_MALLOC(my_coeffs,(size(my_coeffs_tmp)))
-         my_coeffs=my_coeffs_tmp
-         if(allocated(my_coeffs_tmp)) call polynomial_coeff_list_free(my_coeffs_tmp)
-       !end if
+       ABI_MALLOC(my_coeffs_tmp,(nterm_start+temp_cntr))
+       my_coeffs_tmp=my_coeffs(1:nterm_start+temp_cntr)
+       if(allocated(my_coeffs)) call polynomial_coeff_list_free(my_coeffs)
+       ABI_MALLOC(my_coeffs,(size(my_coeffs_tmp)))
+       my_coeffs=my_coeffs_tmp
+       if(allocated(my_coeffs_tmp)) call polynomial_coeff_list_free(my_coeffs_tmp)
      end block
    else
      temp_cntr=ncombi
