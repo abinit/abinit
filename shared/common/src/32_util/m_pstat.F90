@@ -78,13 +78,14 @@ module m_pstat
    procedure :: from_file => pstat_from_file   ! Init object from file (useful for debugging).
    procedure :: print => pstat_print           ! Print object.
  end type pstat_t
+!!***
 
 !----------------------------------------------------------------------
 
 contains
 !!***
 
-!!****f* m_gwr/pstat_from_pid
+!!****f* m_pstat/pstat_from_pid
 !! NAME
 !!  pstat_from_pid
 !!
@@ -111,7 +112,7 @@ subroutine pstat_from_pid(ps)
 end subroutine pstat_from_pid
 !!***
 
-!!****f* m_gwr/pstat_from_file
+!!****f* m_pstat/pstat_from_file
 !! NAME
 !!  pstat_from_file
 !!
@@ -128,7 +129,7 @@ subroutine pstat_from_file(ps, filepath)
 
 !Local variables-------------------------------
  integer :: unit, ierr
- character(len=500) :: line, spid
+ character(len=500) :: line !, spid
  integer :: istart, istop, iostat
 ! *************************************************************************
 
@@ -194,7 +195,7 @@ end subroutine get_int
 end subroutine pstat_from_file
 !!***
 
-!!****f* m_gwr/pstat_print
+!!****f* m_pstat/pstat_print
 !! NAME
 !!  pstat_print
 !!
@@ -229,7 +230,7 @@ subroutine pstat_print(ps, units, header)
 end subroutine pstat_print
 !!***
 
-!!****f* m_gwr/pstat_gather
+!!****f* m_pstat/pstat_gather
 !! NAME
 !!  pstat_gather
 !!
@@ -246,9 +247,8 @@ subroutine pstat_gather(ps, vmrss_mb, comm)
  class(pstat_t),intent(out) :: ps
  real(dp),intent(out) :: vmrss_mb
  integer,intent(in) :: comm
- !integer,intent(out) :: ierr
 
- integer :: ierr, int_list(5)
+ !integer :: ierr, int_list(5)
  real(dp) :: real_list(3)
 
  call ps%from_pid()

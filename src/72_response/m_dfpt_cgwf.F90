@@ -297,9 +297,9 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
    !  ===== Check <Psi_k+q^(0)|S(0)|Psi_k+q^(0)>=delta_{ij}
    if (.not.gen_eigenpb) work1(:,:)=cgq(:,1+npw1*nspinor*(band_me-1)+icgq:npw1*nspinor*band_me+icgq)
    if (     gen_eigenpb) work1(:,:)=gscq(:,1+npw1*nspinor*(band_me-1)+igscq:npw1*nspinor*band_me+igscq)
-! NB: this loop is not band-block diagonal
-!  the present logic does a lot of communication: 1 for each band.
-!  Could be grouped outside the jband loop into 1 big one, but if the wf are big this is a waste. Tradeoffs...
+   ! NB: this loop is not band-block diagonal
+   ! the present logic does a lot of communication: 1 for each band.
+   ! Could be grouped outside the jband loop into 1 big one, but if the wf are big this is a waste. Tradeoffs...
    jband_me = 0
    do jband=1,nband
      if (bands_treated_now(jband) == 0) cycle
@@ -307,7 +307,7 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
        jband_me = jband_me + 1
        work(:,:)=cgq(:,1+npw1*nspinor*(jband_me-1)+icgq:npw1*nspinor*jband_me+icgq)
      end if
-! send to everyone else, who is also working on jband right now
+     ! send to everyone else, who is also working on jband right now
      call xmpi_bcast(work,band_procs(jband),mpi_enreg%comm_band,ierr)
 
      call dotprod_g(dotr,doti,istwf_k,npw1*nspinor,2,work1,work,me_g0,mpi_enreg%comm_spinorfft)
@@ -334,21 +334,21 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
        jband_me = jband_me + 1
        work(:,:)=cgq(:,1+npw1*nspinor*(jband_me-1)+icgq:npw1*nspinor*jband_me+icgq)
      end if
-! send to everyone else, who is also working on jband right now
+     ! send to everyone else, who is also working on jband right now
      call xmpi_bcast(work,band_procs(jband),mpi_enreg%comm_band,ierr)
      work1 = work
 
      call projbd(cgq,work,-1,icgq,igscq,istwf_k,mcgq,mgscq,nband_me,npw1,nspinor,&
        gscq,scprod,0,tim_projbd,useoverlap,me_g0,comm_fft)
 
-!
-! if bands are parallelized, I have only projected against bands on my cpu
-!   Pc|work>  = |work> - Sum_l <psi_{k+q, l}|work> |psi_{k+q, l}>
-!             = Sum_nproc_band (|work> - Sum_{my l} <psi_{k+q, l}|work> |psi_{k+q, l}>) - (nproc_band-1) |work>
-!
+     !
+     ! if bands are parallelized, I have only projected against bands on my cpu
+     !   Pc|work>  = |work> - Sum_l <psi_{k+q, l}|work> |psi_{k+q, l}>
+     !             = Sum_nproc_band (|work> - Sum_{my l} <psi_{k+q, l}|work> |psi_{k+q, l}>) - (nproc_band-1) |work>
+     !
      if (mpi_enreg%nproc_band > 1) then
        call xmpi_sum(work,mpi_enreg%comm_band,ierr)
-!TODO: make this a blas call? zaxpy
+       !TODO: make this a blas call? zaxpy
        work = work - (mpi_enreg%nproc_band-1)*work1
      end if
 
@@ -367,7 +367,7 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
      if (iband == band) then
        work(:,:)=cwave0(:,:)
      end if
-! send to everyone else, who is also working on jband right now
+     ! send to everyone else, who is also working on jband right now
      call xmpi_bcast(work,band_procs(iband),mpi_enreg%comm_band,ierr)
      work1 = work
      call projbd(cgq,work,-1,icgq,igscq,istwf_k,mcgq,mgscq,nband_me,npw1,nspinor,&
@@ -375,7 +375,7 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
 
      if (mpi_enreg%nproc_band > 1) then
        call xmpi_sum(work,mpi_enreg%comm_band,ierr)
-!TODO: make this a blas call? zaxpy
+       !TODO: make this a blas call? zaxpy
        work = work - (mpi_enreg%nproc_band-1)*work1
      end if
 
@@ -395,7 +395,7 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
        if (iband == band) then
          work(:,:)=rf2%dcwavef(:,1+dc_shift_band:npw1*nspinor+dc_shift_band)
        end if
-! send to everyone else, who is also working on jband right now
+       ! send to everyone else, who is also working on jband right now
        call xmpi_bcast(work,band_procs(iband),mpi_enreg%comm_band,ierr)
        work1 = work
        call projbd(cgq,work,-1,icgq,igscq,istwf_k,mcgq,mgscq,nband_me,npw1,nspinor,&
@@ -403,7 +403,7 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
 
        if (mpi_enreg%nproc_band > 1) then
          call xmpi_sum(work,mpi_enreg%comm_band,ierr)
-!TODO: make this a blas call? zaxpy
+         !TODO: make this a blas call? zaxpy
          work = work - (mpi_enreg%nproc_band-1)*work1
        end if
 
@@ -425,7 +425,7 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
          jband_me = jband_me + 1
          work(:,:)=gscq(:,1+npw1*nspinor*(jband_me-1)+igscq:npw1*nspinor*jband_me+igscq)
        end if
-! send to everyone else, who is also working on jband right now
+       ! send to everyone else, who is also working on jband right now
        call xmpi_bcast(work,band_procs(jband),mpi_enreg%comm_band,ierr)
        work1 = work
 
@@ -434,7 +434,7 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
 
        if (mpi_enreg%nproc_band > 1) then
          call xmpi_sum(work,mpi_enreg%comm_band,ierr)
-!TODO: make this a blas call? zaxpy
+         !TODO: make this a blas call? zaxpy
          work = work - (mpi_enreg%nproc_band-1)*work1
        end if
 
@@ -528,14 +528,14 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
      call xmpi_bcast(work,band_procs(iband),mpi_enreg%comm_band,ierr)
      cwwork=work
 
-   ! -Apply Pc^*
+     ! -Apply Pc^*
      call projbd(gscq,cwwork,-1,igscq,icgq,istwf_k,mgscq,mcgq,nband_me,npw1,nspinor,&
        cgq,scprod,0,tim_projbd,useoverlap,me_g0,comm_fft)
 
      call xmpi_sum(cwwork,mpi_enreg%comm_band,ierr)
 
      if (mpi_enreg%nproc_band > 1) then
-!TODO: make this a blas call? zaxpy
+       !TODO: make this a blas call? zaxpy
        cwwork = cwwork - (mpi_enreg%nproc_band-1)*work
      end if
 
@@ -573,7 +573,7 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
        dummy,scprod,0,tim_projbd,useoverlap,me_g0,comm_fft)
    end if
 
-! sum projections against all bands k+q
+   ! sum projections against all bands k+q
    call xmpi_sum(work,mpi_enreg%comm_band,ierr)
 
    ! scprod now contains scalar products of band iband (runs over all bands in current queue) with local bands j
@@ -584,9 +584,9 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
      eig1_k_loc(:,jband,iband)=scprod(:,jband_me)
    end do
 
-! save this for me only
+   ! save this for me only
    if (iband == band) then
-!TODO: make this a blas call? zaxpy
+     !TODO: make this a blas call? zaxpy
      gh1c = work - (mpi_enreg%nproc_band-1)*gh1c
    end if
 
@@ -609,10 +609,10 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
        if (iband==band) then
          work = gs1c
        end if
-     ! for iband on this proc, bcast to all others to get full line of iband,jband pairs
+       ! for iband on this proc, bcast to all others to get full line of iband,jband pairs
        call xmpi_bcast(work,band_procs(iband),mpi_enreg%comm_band,ierr)
 
-     ! add PAW overlap correction term to present iband (all procs) and local jband elements
+       ! add PAW overlap correction term to present iband (all procs) and local jband elements
        indx_cgq=icgq
        do jband=1,nband
          if (band_procs(jband) /= me_band) cycle
@@ -634,7 +634,7 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
    ! must only do this once for eig1_k_loc: now have all jband for current ibands on all procs
    call xmpi_sum(eig1_k_loc,mpi_enreg%comm_band,ierr)
 
-! TODO: I think this is just a reshape
+   ! TODO: I think this is just a reshape
    do iband=1,nband
      if (bands_treated_now(iband) == 0) cycle
      band_off=(iband-1)*2*nband
@@ -646,7 +646,7 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
  end if ! ipert/=natom+10.and.ipert/=natom+11
 
  ! Filter the wavefunctions for large modified kinetic energy (see routine mkkin.f)
-! TODO: should this also be applied to cwaveq for the preconditioning with kinpw1 below?
+ ! TODO: should this also be applied to cwaveq for the preconditioning with kinpw1 below?
  do ispinor=1,nspinor
    ipws=(ispinor-1)*npw1
 !$OMP PARALLEL DO PRIVATE(ipw) SHARED(cwavef,kinpw1,ipws,npw1)
@@ -672,9 +672,9 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
 
    call xmpi_sum(work,mpi_enreg%comm_band,ierr)
 
-! save this for me_band only
+   ! save this for me_band only
    if (iband == band) then
-!TODO: make this a blas call? zaxpy
+     !TODO: make this a blas call? zaxpy
      cwavef = work - (mpi_enreg%nproc_band-1)*cwavef
    end if
  end do
@@ -818,9 +818,9 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
 
      call xmpi_sum(work,mpi_enreg%comm_band,ierr)
 
-! save this for me_band only
+     ! save this for me_band only
      if (iband == band) then
-!TODO: make this a blas call? zaxpy
+       !TODO: make this a blas call? zaxpy
        gresid = work - (mpi_enreg%nproc_band-1)*gresid
      end if
    end do
@@ -869,7 +869,7 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
      ! Number of one-way 3D ffts skipped
      nskip=nskip+(nline-iline+1)
 
-!DEBUG     exit ! Exit from the loop on iline
+     !DEBUG exit ! Exit from the loop on iline
      skipme = 1
    end if
 
@@ -891,7 +891,7 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
        call wrtout(std_out,msg)
      end if
      nskip=nskip+(nline-iline+1)  ! Number of two-way 3D ffts skipped
-!DEBUG     exit                         ! Exit from the loop on iline
+     !DEBUG exit                         ! Exit from the loop on iline
      skipme = 1
    end if
 
@@ -933,8 +933,7 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
    ! If wfoptalg>=10, the precondition matrix is kept constant
    ! during iteration; otherwise it is recomputed
    if (wfoptalg<10.or.iline==1) then
-     !print *, 'cwaveq cg_precon ', cwaveq
-     !print *, 'direc cg_precon ', direc
+     !print *, 'cwaveq cg_precon ', cwaveq; print *, 'direc cg_precon ', direc
      call cg_precon(cwaveq,zero,istwf_k,kinpw1,npw1,nspinor,me_g0,0,pcon,direc,mpi_enreg%comm_fft)
    else
      do ispinor=1,nspinor
@@ -970,9 +969,9 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
 
      call xmpi_sum(work,mpi_enreg%comm_band,ierr)
 
-! save this for me_band only
+     ! save this for me_band only
      if (iband == band) then
-!TODO: make this a blas call? zaxpy
+       !TODO: make this a blas call? zaxpy
        direc = work - (mpi_enreg%nproc_band-1)*direc
      end if
    end do
@@ -1101,7 +1100,7 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
      end if
      nskip=nskip+2*(nline-iline) ! Number of one-way 3D ffts skipped
      skipme = 1
-!DEBUG     exit                        ! Exit from the loop on iline
+     !DEBUG exit                        ! Exit from the loop on iline
    end if
 
    ! ======================================================================
@@ -1110,7 +1109,7 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
 
    if (skipme == 0) then
      call cg_zaxpy(npw1*nspinor, [theta, zero], conjgr,cwavef)
- ! Filter the wavefunctions for large modified kinetic energy (see routine mkkin.f)
+     ! Filter the wavefunctions for large modified kinetic energy (see routine mkkin.f)
      do ispinor=1,nspinor
        ipws=(ispinor-1)*npw1
 !$OMP PARALLEL DO PRIVATE(ipw) SHARED(cwavef,kinpw1,ipws,npw1)
@@ -1155,7 +1154,7 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
        end if
        nskip=nskip+2*(nline-iline) ! Number of one-way 3D ffts skipped
        skipme = 1
-!DEBUG       exit                        ! Exit from the loop on iline
+       !DEBUG exit                        ! Exit from the loop on iline
      end if
    end if
 
@@ -1163,11 +1162,11 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
    bands_skipped_now(band) = skipme
    call xmpi_sum(bands_skipped_now,mpi_enreg%comm_band,ierr)
 
-!   bands_skipped_now = bands_skipped_now - bands_treated_now
+   ! bands_skipped_now = bands_skipped_now - bands_treated_now
 
-! if all bands are skippable, we can exit the iline loop for good.
-!   otherwise, all procs are needed for the projbd and other operations,
-!   even if the present band will not be updated
+   ! if all bands are skippable, we can exit the iline loop for good.
+   ! otherwise, all procs are needed for the projbd and other operations,
+   ! even if the present band will not be updated
 
    if (sum(abs(bands_skipped_now - bands_treated_now)) == 0) then
      exit
@@ -1230,12 +1229,12 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
      end if
      dotr=sqrt(dotr**2+doti**2)
      if(dotr>tol10) then
-!         if (gen_eigenpb) then
-!           write(msg,'(2a,i3,a,2es22.15)') 'CGWF3_WARNING : <Psi^(1)_i,k,q|S^(0)|Psi^(0)_j,k+q>',&
-!             '+ 1/2<Psi^(0)_i,k|S^(1)|Psi^(0)_j,k+q>, for j= ',iband,' is ',dotr,doti
-!         else
+       !if (gen_eigenpb) then
+       !  write(msg,'(2a,i3,a,2es22.15)') 'CGWF3_WARNING : <Psi^(1)_i,k,q|S^(0)|Psi^(0)_j,k+q>',&
+       !    '+ 1/2<Psi^(0)_i,k|S^(1)|Psi^(0)_j,k+q>, for j= ',iband,' is ',dotr,doti
+       !else
        write(msg,'(a,i3,a,es22.15)') 'CGWF3_WARNING : |<Psi^(0)_i,k+q|Psi^(1)_j,k,q>+amn(i,j)/2|, for j= ',iband,' is ',dotr
-!         end if
+       !end if
        call wrtout(std_out,msg)
      end if
    end do
@@ -1267,9 +1266,9 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
 
      call xmpi_sum(cwwork,mpi_enreg%comm_band,ierr)
 
-! save this for me_band only
+     ! save this for me_band only
      if (iband == band) then
-!TODO: make this a blas call? zaxpy
+       !TODO: make this a blas call? zaxpy
        cwwork = cwwork - (mpi_enreg%nproc_band-1)*cwavef
      end if
    end do
@@ -1282,12 +1281,12 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
    call sqnorm_g(dotr,istwf_k,npw1*nspinor,cwwork,me_g0,comm_fft)
    ABI_FREE(cwwork)
    if(sqrt(dotr)>tol10) then
-!       if (gen_eigenpb) then
-!         write(msg,'(a,i3,a,es22.15)') &
-!         'CGWF3_WARNING : |(Pc.Psi^(1)_i,k,q + delta_Psi^(1)_i,k) - Psi^(1)_i,k,q|^2 (band ',band,')=',dotr
-!       else
+     !if (gen_eigenpb) then
+     !  write(msg,'(a,i3,a,es22.15)') &
+     !  'CGWF3_WARNING : |(Pc.Psi^(1)_i,k,q + delta_Psi^(1)_i,k) - Psi^(1)_i,k,q|^2 (band ',band,')=',dotr
+     !else
      write(msg,'(a,es22.15)') 'CGWF3_WARNING : |(Pc.Psi^(1)_i,k,q + delta_Psi^(1)_i,k) - Psi^(1)_i,k,q| = ',sqrt(dotr)
-!       end if
+     !end if
      call wrtout(std_out,msg)
    end if
  end if  ! prtvol==-level.or.prtvol==-19
@@ -1313,9 +1312,9 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
 
      call xmpi_sum(cwwork,mpi_enreg%comm_band,ierr)
 
-! save this for me_band only
+     ! save this for me_band only
      if (iband == band) then
-!TODO: make this a blas call? zaxpy
+      !TODO: make this a blas call? zaxpy
       cwwork = cwwork - (mpi_enreg%nproc_band-1)*cwavef
      end if
    end do
@@ -1356,9 +1355,9 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
 
      call xmpi_sum(work,mpi_enreg%comm_band,ierr)
 
-! save this for me_band only
+     ! save this for me_band only
      if (iband == band) then
-!TODO: make this a blas call? zaxpy
+       !TODO: make this a blas call? zaxpy
        cwwork = cwwork - (mpi_enreg%nproc_band-1)*work
      end if
    end do
