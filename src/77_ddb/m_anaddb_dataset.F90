@@ -2387,7 +2387,7 @@ subroutine anaddb_chkvars(string)
  list_vars = trim(list_vars)//' kptrlatt kptrlatt_fine'
 !L
 
- list_vars = trim(list_vars)//' lwf_anchor_iband lwf_anchor_qpt lwf_anchor_proj'
+ list_vars = trim(list_vars)//' lwf_anchor_iband lwf_anchor_proj lwf_anchor_qpt'
  list_vars = trim(list_vars)//' lwf_disentangle lwf_mu lwf_ngqpt lwf_nwann lwf_projector lwf_sigma'
  list_vars = trim(list_vars)//' lwfflag'
 !M
@@ -2429,8 +2429,8 @@ subroutine anaddb_chkvars(string)
 
 !Extra token, also admitted:
 !<ANADDB_UNITS>
- list_vars = trim(list_vars)//' au Angstr Angstrom Angstroms Bohr Bohrs eV Ha'
- list_vars = trim(list_vars)//' Hartree Hartrees K nm Ry Rydberg Rydbergs T Tesla'
+ list_vars = trim(list_vars)//' au Angstr Angstrom Angstroms Bohr Bohrs eV meV Ha'
+ list_vars = trim(list_vars)//' Hartree Hartrees K nm Ry Rydberg Rydbergs S Sec Second T Tesla'
 !</ANADDB_UNITS>
 
 !<ANADDB_OPERATORS>
