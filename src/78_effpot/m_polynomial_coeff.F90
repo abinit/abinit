@@ -2186,82 +2186,7 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
     fit_iatom_in = -1
  endif
 
-!  natom  = crystal%natom
-!  nsym   = crystal%nsym
   rprimd = crystal%rprimd
-
-!  ABI_MALLOC(xcart,(3,natom))
-!  ABI_MALLOC(xred,(3,natom))
-!  xcart(:,:) = crystal%xcart(:,:)
-!  xred(:,:)  = crystal%xred(:,:)
-
-! !Compute the max range of the ifc with respect to the trainning set
-!  range_ifc(:) = zero
-!  do ii=1,3
-!    norm = sqrt(rprimd(ii,1)**2+ rprimd(ii,2)**2+rprimd(ii,3)**2)
-!    range_ifc(ii) = range_ifc(ii) + norm * sc_size(ii) / 2.0
-!  end do
-
-
-! !compute new ncell
-!  ncell = sc_size
-!  lim1=((ncell(1)/2)) + 1
-!  lim2=((ncell(2)/2)) + 1
-!  lim3=((ncell(3)/2)) + 1
-!  if(mod(ncell(1),2)/=0) lim1=lim1+1
-!  if(mod(ncell(2),2)/=0) lim2=lim2+1
-!  if(mod(ncell(3),2)/=0) lim3=lim3+1
-!  nrpt=(2*lim1+1)*(2*lim2+1)*(2*lim3+1)
-
-!  ncell(1) = 2*lim1+1
-!  ncell(2) = 2*lim2+1
-!  ncell(3) = 2*lim3+1
-
-!  !Build the rpt point
-!  ABI_MALLOC(rpt,(3,nrpt))
-!  ABI_MALLOC(cell,(3,nrpt))
-
-! !WARNING:
-! !Put the reference cell into the first element
-! !the code will first deal with the atoms of the first cell
-!  irpt = 1
-!  irpt_ref = 1
-!  rpt(:,1) = zero
-!  cell(:,irpt)=0
-! !Fill other rpt:
-!  do r1=lim1,-lim1,-1
-!    do r2=lim2,-lim2,-1
-!      do r3=lim3,-lim3,-1
-!        if(r1==0.and.r2==0.and.r3==0) then
-!          cycle
-!        end if
-!        irpt=irpt+1
-!        rpt(1,irpt)=r1*rprimd(1,1)+r2*rprimd(1,2)+r3*rprimd(1,3)
-!        rpt(2,irpt)=r1*rprimd(2,1)+r2*rprimd(2,2)+r3*rprimd(2,3)
-!        rpt(3,irpt)=r1*rprimd(3,1)+r2*rprimd(3,2)+r3*rprimd(3,3)
-!        cell(1,irpt)=r1;cell(2,irpt)=r2;cell(3,irpt)=r3
-!      end do
-!    end do
-!  end do
-
-!  ABI_MALLOC(symbols,(natom))
-!  call symbols_crystal(crystal%natom,crystal%ntypat,crystal%npsp,&
-! &                     symbols,crystal%typat,crystal%znucl)
-
-! !Compute the distances between atoms
-! !Now dist(3,ia,ib,irpt) contains the distance from atom ia to atom ib in unit cell irpt.
-!  ABI_MALLOC(dist,(3,natom,natom,nrpt))
-!  dist = zero
-!  do ia=1,natom
-!    do ib=1,natom
-!      do irpt=1,nrpt
-!        dist(1,ia,ib,irpt) = xcart(1,ib)-xcart(1,ia)+rpt(1,irpt)
-!        dist(2,ia,ib,irpt) = xcart(2,ib)-xcart(2,ia)+rpt(2,irpt)
-!        dist(3,ia,ib,irpt) = xcart(3,ib)-xcart(3,ia)+rpt(3,irpt)
-!      end do
-!    end do
-!  end do
-
 
  !=
 call prepare_for_getList(crystal,sc_size, dist, cell, natom, nsym, nrpt, range_ifc , symbols)
@@ -2340,15 +2265,21 @@ ncoeff_symsym = size(list_symcoeff(1,:,1))
        ! Here it checks: for two pairs of atom with icoeff (a-b)  and icoeff2 (c-d).
        !. (a) a-d along x. (b) a-d along y. (c) a-d along z are within the range.
        ! TODO: But why is a-c not checked?
+       ! Note dist(1, ia, ib, irpt)
+
+       if(list_symcoeff(2,icoeff,1)/= list_symcoeff(2,icoeff2,1)) then
+         ABI_BUG("a is not c!")
+       end if
+
        if(icoeff<=ncoeff_symsym.and.icoeff2<=ncoeff_symsym)then !Check combination of irreducible bodies and their symmetric equivalent
-          if(abs(dist(1,list_symcoeff(2,icoeff,1),list_symcoeff(3,icoeff,1),list_symcoeff(4,icoeff,1)) &
-&            -dist(1,list_symcoeff(2,icoeff,1),list_symcoeff(3,icoeff2,1),list_symcoeff(4,icoeff2,1))) &
+          if(abs(dist(1,list_symcoeff(2,icoeff,1),list_symcoeff(3,icoeff,1),list_symcoeff(4,icoeff,1)) & ! rx(a, b)
+&            -dist(1,list_symcoeff(2,icoeff,1),list_symcoeff(3,icoeff2,1),list_symcoeff(4,icoeff2,1))) & ! rx(a, d )
 &            >= (rprimd(1,1) + rprimd(1,2) + rprimd(1,3))*sc_size(1)  .or. &
-             abs(dist(2,list_symcoeff(2,icoeff,1),list_symcoeff(3,icoeff,1),list_symcoeff(4,icoeff,1)) &
-&            -dist(2,list_symcoeff(2,icoeff,1),list_symcoeff(3,icoeff2,1),list_symcoeff(4,icoeff2,1))) &
+             abs(dist(2,list_symcoeff(2,icoeff,1),list_symcoeff(3,icoeff,1),list_symcoeff(4,icoeff,1)) &  ! ry(a, b)
+&            -dist(2,list_symcoeff(2,icoeff,1),list_symcoeff(3,icoeff2,1),list_symcoeff(4,icoeff2,1))) &  ! ry(a, d)
 &            >= (rprimd(2,1) + rprimd(2,2) + rprimd(2,3))*sc_size(2)  .or. &
-             abs(dist(3,list_symcoeff(2,icoeff,1),list_symcoeff(3,icoeff,1),list_symcoeff(4,icoeff,1)) &
-&            -dist(3,list_symcoeff(2,icoeff,1),list_symcoeff(3,icoeff2,1),list_symcoeff(4,icoeff2,1))) &
+             abs(dist(3,list_symcoeff(2,icoeff,1),list_symcoeff(3,icoeff,1),list_symcoeff(4,icoeff,1)) &  ! rz(a, b)
+&            -dist(3,list_symcoeff(2,icoeff,1),list_symcoeff(3,icoeff2,1),list_symcoeff(4,icoeff2,1))) &  ! rz(a, d)
 &            >= (rprimd(3,1) + rprimd(3,2) + rprimd(3,3))*sc_size(3))then
              compatibleCoeffs(icoeff,icoeff2) = 0
              compatibleCoeffs(icoeff2,icoeff) = 0
@@ -4041,15 +3972,9 @@ function coeffs_compare(c1,c2) result (res)
 !variable
   integer :: iterm1,iterm2
 !array
-  integer,allocatable :: blkval(:,:)
+  !integer,allocatable :: blkval(:,:)
+  integer :: blkval(2, maxval([c1%nterm, c2%nterm]))
 ! *************************************************************************
-
-  if(c1%nterm >= c2%nterm)then
-    ABI_MALLOC(blkval,(2,c1%nterm))
-  else
-    ABI_MALLOC(blkval,(2,c2%nterm))
-  endif
-
   res = .false.
   blkval = 0
   do iterm1=1,c1%nterm
@@ -4063,8 +3988,6 @@ function coeffs_compare(c1,c2) result (res)
     end do
   end do
   if(.not.any(blkval(:,:)==0))res = .true.
-
-  ABI_FREE(blkval)
 
 end function coeffs_compare
 !!***
