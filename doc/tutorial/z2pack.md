@@ -3,7 +3,7 @@ authors: O. Gingras, V. Brousseau-Couture
 acknowledgments: M. Hirsbrunner
 ---
 
-# Tutorial on the use of Z2Pack
+# Z2Pack postprocessor
 
 ## The Z2Pack interface tutorial
 
