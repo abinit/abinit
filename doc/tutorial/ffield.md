@@ -2,7 +2,7 @@
 authors: JWZ, PhG, MVeithen, XG
 ---
 
-# Tutorial on polarization and finite electric fields
+# Polarization and finite electric fields
 
 ## Polarization, and responses to finite electric fields for AlP.
 
