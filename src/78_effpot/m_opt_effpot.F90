@@ -582,7 +582,6 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
        integer :: nstr_sym, ncoeff_sym, ncoeff_symsym
        real(dp) :: cutoff, range_ifc(3)
 
-       print *, nterm_start+1, size(my_coeffs)
 
        ABI_MALLOC(my_coeffs_tmp,(size(my_coeffs)))
        my_coeffs_tmp=my_coeffs
@@ -604,7 +603,6 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
        temp_cntr =0
 
        ! For each combi
-       print *, "ncombi=", ncombi
        do icombi=1,ncombi
          temp_term = my_coeffs_tmp(nterm_start+icombi)%terms(1)
          !
@@ -625,13 +623,9 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
            false_reverse(:)=.False.
            counter=0
            do idisp=1,temp_term%ndisp
-             print *, "idisp=", idisp, "cell1=", temp_term%cell(:, 1, idisp), "cell2=", temp_term%cell(:, 2, idisp)
              my_nrpt=find_irpt(cells=cell, cell=temp_term%cell(:, 2, idisp))
-             !print *, [temp_term%direction(idisp),temp_term%atindx(1,idisp), &
-             !    & temp_term%atindx(2,idisp),my_nrpt,int(temp_term%weight)]
              tmp_list(:) = (/temp_term%direction(idisp),temp_term%atindx(1,idisp), &
                & temp_term%atindx(2,idisp),my_nrpt,int(temp_term%weight) /)
-             print *, "tmp_list=", tmp_list
              found=.False.
              reverse_i=.False.
              do list_cntr=1,size(list_symcoeff, 2)
@@ -646,13 +640,9 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
              end do
              if(.not. found) then
                reverse_i=.True.
-               print *, " Not found! list:",  tmp_list
                my_nrpt=find_irpt(cells=cell, cell=-temp_term%cell(:, 2, idisp))
-               !print *, [temp_term%direction(idisp),temp_term%atindx(1,idisp), &
-               !    & temp_term%atindx(2,idisp),my_nrpt,int(temp_term%weight)]
                tmp_list(:) = (/temp_term%direction(idisp),temp_term%atindx(2,idisp), &
                  & temp_term%atindx(1,idisp),my_nrpt,-int(temp_term%weight) /)
-               !print *, "tmp_list=", tmp_list
                do list_cntr=1,size(list_symcoeff, 2)
                  do isym=1, nsym
                    if (all(tmp_list(:4)==list_symcoeff(:4,list_cntr,1))) then
@@ -666,27 +656,25 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
              end if
 
              if (found )then
-               print *, " found! list:",  tmp_list, " number_coeff:", number_coeff
                do pwr=1,temp_term%power_disp(idisp)
                  counter=counter+1
                  list_disp(counter) = number_coeff
                  reverse(counter) = reverse_i
                end do
              else
-               print *, "Not found! list:",  tmp_list
-               if(.True.) then
-               block
-                integer :: iii, jjj
-                do iii=1, nsym
-                  print *, "isym: ", iii
-                  print *, "=================================="
-                  do jjj=1, size(list_symcoeff, 2)
-                     print *, "jjj= ", jjj, "list: ", list_symcoeff(:, jjj, iii)
-                  end do
-                end do
-               end block
-               end if
-               ABI_BUG("The pair is not found. Please report this to the developers.  ")
+               !if(.False.) then
+               !  block
+               !    integer :: iii, jjj
+               !    do iii=1, nsym
+               !      !print *, "isym: ", iii
+               !      !print *, "=================================="
+               !      do jjj=1, size(list_symcoeff, 2)
+               !        !print *, "jjj= ", jjj, "list: ", list_symcoeff(:, jjj, iii)
+               !      end do
+               !    end do
+               !  end block
+               !end if
+               ABI_BUG("The pair is not found during checking of the SAT in generated bounding terms. Please report this to the developers.  ")
              end if
            end do
 
@@ -696,44 +684,32 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
                list_disp(counter) = temp_term%strain(idisp)+size(list_symcoeff,2)
              end do
            end do
-           print *, "list_disp:", list_disp
 
-           print *, "Generating terms from list:"
            nterm=eff_pot%crystal%nsym
            ABI_MALLOC(terms2, (nterm))
-           print *, "reverse:", reverse
 
            call generateTermsFromList(cell,list_disp,list_symcoeff, &
              &list_symstr,ncoeff_symsym,tot_power,nrpt,nstr_sym,nsym,nterm,terms2, reverse=false_reverse)
-           print *, "Initializing coeff:"
            call polynomial_coeff_init(one,nterm,temp_coeff, &
              &terms2(1:nterm),check=.true.)
 
-           print *, "GET NAME:"
            call polynomial_coeff_getName(name, &
              & temp_coeff,symbols,recompute=.TRUE.)
-           print *, 'name = ',name
 
            block ! check if the terms already exists. if not, add to my_coeffs.
              logical :: exists(nterm_start+icombi-1)
              exists=.False.
-             print *, "Checking if the terms are already there."
              do jterm=1,(nterm_start+icombi-1)
                exists(jterm) = coeffs_compare(my_coeffs(jterm),temp_coeff)
              enddo !jterm
-             print *, "exists:", exists
-             print *, "All False:", .not. any(exists)
 
              if (.not. any(exists)) then
                temp_cntr = temp_cntr+1
-               print *, "Setting terms into my_coeffs"
-               print *, "nterm:", nterm
                do i=1, nterm
                  call polynomial_term_free(terms2(iterm))
                end do
                call generateTermsFromList(cell,list_disp,list_symcoeff, &
                  &list_symstr,ncoeff_symsym,tot_power,nrpt,nstr_sym,nsym,nterm,terms2, reverse=reverse)
-               print *, "Initializing coeff:"
                call polynomial_coeff_free(temp_coeff)
                call polynomial_coeff_init(one,nterm,temp_coeff, &
                  &terms2(1:nterm),check=.true.)
@@ -769,10 +745,8 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
 
 
 
-   print *,temp_cntr
    if (temp_cntr>0) then
      do icombi=1,temp_cntr
-       print *,'icombi = ',icombi
        ! Copy all the terms in eff pot
        ! Get new name of term and set new terms to potential
        !write(*,*) 'ndisp of term', my_coeffs(nterm_start+icombi)%nterm
@@ -780,7 +754,6 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
        !write(std_out,*) 'get name in main bound'
        call polynomial_coeff_getName(name, &
          & my_coeffs(nterm_start+icombi),symbols,recompute=.TRUE.)
-       print *, name
        call polynomial_coeff_SetName(name,my_coeffs(nterm_start+icombi))
 
 
