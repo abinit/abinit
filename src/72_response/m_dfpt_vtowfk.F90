@@ -221,7 +221,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
  integer,parameter :: level=14,tim_fourwf=5
  integer,save :: nskip=0
  integer :: iband,idir0,ierr,igs,igscq,ii,dim_dcwf,inonsc
- integer :: iband_me,nband_me, unit_me
+ integer :: iband_me,nband_me !, unit_me
  integer :: iorder_cprj,iorder_cprj1,ipw,iscf_mod,ispinor,me,mgscq,nkpt_max
  integer :: option,opt_gvnlx1,quit,test_ddk
  integer :: tocceig,usedcwavef,ptr,shift_band
@@ -343,7 +343,6 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
    iband_me = iband_me + 1
 
 !unit_me = 300+iband
-unit_me = 6
 !  Get ground-state wavefunctions
    ptr = 1+(iband_me-1)*npw_k*nspinor+icg
    call cg_zcopy(npw_k*nspinor,cg(1,ptr),cwave0)

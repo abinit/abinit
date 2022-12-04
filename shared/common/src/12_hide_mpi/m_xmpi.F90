@@ -171,7 +171,8 @@ module m_xmpi
    procedure :: set_to_null => xcomm_set_to_null
    procedure :: set_to_self => xcomm_set_to_self
    procedure :: free => xcomm_free
-   procedure :: from_cart_sub => xcomm_from_cart_sub     ! Helper function to build sub-communicators in a Cartesian grid.
+   procedure :: from_cart_sub => xcomm_from_cart_sub   ! Helper function to build sub-communicators in a Cartesian grid.
+   procedure :: prep_gatherv => xcomm_prep_gatherv     ! Helper function to prepare a typical gatherv operation.
    procedure :: print_names => xcomm_print_names
  end type xcomm_t
 
@@ -234,6 +235,7 @@ module m_xmpi
  public :: xmpi_wait                  ! Hides MPI_WAIT from MPI library.
  public :: xmpi_waitall               ! Hides MPI_WAITALL from MPI library.
  public :: xmpi_request_free          ! Hides MPI_REQUEST_FREE from MPI library.
+ public :: xmpi_requests_add          ! Increase/decrement xmpi_count_requests internal counter
  public :: xmpi_comm_set_errhandler   ! Hides MPI_COMM_SET_ERRHANDLER from MPI library.
  public :: xmpi_error_string          ! Return a string describing the error from ierr.
  public :: xmpi_split_work            ! Splits tasks inside communicator using blocks
@@ -2066,6 +2068,26 @@ subroutine xmpi_request_free(requests,mpierr)
 #endif
 
 end subroutine xmpi_request_free
+!!***
+
+!!****f* m_xmpi/xmpi_requests_add
+!! NAME
+!!  xmpi_requests_add
+!!
+!! FUNCTION
+!!  Increase/decrement xmpi_count_requests internal counter
+!!
+!! SOURCE
+
+subroutine xmpi_requests_add(count)
+
+!Arguments-------------------------
+ integer,intent(in) :: count
+! *************************************************************************
+
+ xmpi_count_requests = xmpi_count_requests + count
+
+end subroutine xmpi_requests_add
 !!***
 
 !----------------------------------------------------------------------
@@ -5023,6 +5045,33 @@ subroutine xcomm_from_cart_sub(self, comm_cart, keepdim)
  self%me = xmpi_comm_rank(self%value)
  self%nproc = xmpi_comm_size(self%value)
 end subroutine xcomm_from_cart_sub
+
+! Helper function to prepare a typical gatherv operation in which each MPI rank sends
+! `nitems_per_rank(rank+1)` items and each item has length `nelem_per_item`.
+! Final results are packed according to the rank of the processor.
+
+subroutine xcomm_prep_gatherv(self, nelem_per_item, nitems_per_rank, sendcount, recvcounts, displs)
+ class(xcomm_t),intent(in) :: self
+ integer,intent(in) :: nelem_per_item, nitems_per_rank(self%nproc)
+ integer,intent(out) :: sendcount
+ integer, allocatable, intent(out) :: recvcounts(:), displs(:)
+
+!Local variables-------------------
+ integer :: ii
+!----------------------------------------------------------------------
+
+ ABI_MALLOC(recvcounts, (self%nproc))
+ ABI_MALLOC(displs, (self%nproc))
+
+ sendcount = nelem_per_item * nitems_per_rank(self%me + 1)
+
+ recvcounts(:) = nelem_per_item * nitems_per_rank
+ displs(1) = 0
+ do ii=2,self%nproc
+   displs(ii) = nelem_per_item * sum(nitems_per_rank(1:ii-1))
+ end do
+end subroutine xcomm_prep_gatherv
+!!***
 
 ! Debugging tool to print the hostname of the procs in the communicator
 subroutine xcomm_print_names(self)

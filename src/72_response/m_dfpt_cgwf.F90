@@ -933,8 +933,8 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
    ! If wfoptalg>=10, the precondition matrix is kept constant
    ! during iteration; otherwise it is recomputed
    if (wfoptalg<10.or.iline==1) then
-!print *, 'cwaveq cg_precon ', cwaveq
-!print *, 'direc cg_precon ', direc
+     !print *, 'cwaveq cg_precon ', cwaveq
+     !print *, 'direc cg_precon ', direc
      call cg_precon(cwaveq,zero,istwf_k,kinpw1,npw1,nspinor,me_g0,0,pcon,direc,mpi_enreg%comm_fft)
    else
      do ispinor=1,nspinor
