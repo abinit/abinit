@@ -666,7 +666,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1
  integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg1,nq,cnt,imyp, q_start, q_stop, restart
  integer :: tot_nlines_done, nlines_done, nline_in, grad_berry_size_mpw1, enough_stern
- integer :: nbcalc_ks,nbsum,bsum_start, bsum_stop, bstart_ks,my_ikcalc,ikcalc,bstart,bstop,iatom
+ integer :: nbcalc_ks,nbsum,bsum_start, bsum_stop, bstart_ks,my_ikcalc,ikcalc,bstart,bstop,iatom, sendcount
  integer :: comm_rpt, osc_npw
  integer :: ffnlk_request, ffnl1_request, nelem, cgq_request
  real(dp) :: cpu,wall,gflops,cpu_all,wall_all,gflops_all,cpu_ks,wall_ks,gflops_ks,cpu_dw,wall_dw,gflops_dw
@@ -1198,7 +1198,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
  ! Loop over k-points in Sigma_nk. Loop over spin is internal as we operate on nspden components at once.
  do my_ikcalc=1,sigma%my_nkcalc
-   if (my_ikcalc > 1) exit
+   !if (my_ikcalc > 1) exit
    !if (my_ikcalc > 2) exit
    ikcalc = sigma%my_ikcalc(my_ikcalc)
 
@@ -1485,6 +1485,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                         comm=sigma%pert_comm%value, request=ffnl1_request)
 
        if (dtset%eph_stern /= 0 .and. .not. sigma%imag_only) then
+         ! Build global array with GS wavefunctions cg_kq at k+q to prepare call to dfpt_cgwf.
+         ! NB: bsum_range is not compatible with Sternheimer.
+         ! There's a check at the level of the parser in chkinp.
          call timab(1908, 1, tsec)
          ABI_CALLOC(cg1s_kq, (2, npw_kq*nspinor, natom3, nbcalc_ks))
 
@@ -1493,9 +1496,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
          ABI_CALLOC(cgq, (2, npw_kq * nspinor, nband_me))
          ABI_MALLOC(gscq, (2, npw_kq * nspinor, nband_me*psps%usepaw))
-         ! Build global array with cg_kq wavefunctions to prepare call to dfpt_cgwf.
-         ! NB: bsum_range is not compatible with Sternheimer.
-         ! There's a check at the level of the parser in chkinp.
          do ibsum_kq=sigma%my_bsum_start, sigma%my_bsum_stop
            if (isirr_kq) then
               call wfd%copy_cg(ibsum_kq, ikq_ibz, spin, bra_kq)
@@ -1513,29 +1513,31 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
          cgq_request = xmpi_request_null
          if (sigma%bsum_comm%nproc > 1) then
+           ! If band parallelism, need to gather all bands nbsum bands.
+           ! FIXME: This part is network intensive
+
            !call xmpi_sum(cgq, sigma%bsum_comm%value, ierr)
            !call xmpi_isum_ip(cgq, sigma%bsum_comm%value, cgq_request, ierr)
 
-           !call sigma%bsum_comm%prep_gatherv(nelem, sigma%nbsum_nrank, recvcounts, displs)
-           ABI_MALLOC(recvcounts, (sigma%bsum_comm%nproc))
-           ABI_MALLOC(displs, (sigma%bsum_comm%nproc))
+           call sigma%bsum_comm%prep_gatherv(nelem, sigma%nbsum_rank, sendcount, recvcounts, displs)
 
-           nelem = 2 * npw_kq * nspinor
-           recvcounts(:) = nelem * sigma%nbsum_rank
-           displs(1) = 0
-           do ii=2,sigma%bsum_comm%nproc
-             displs(ii) = nelem * sum(sigma%nbsum_rank(1:ii-1))
-           end do
-           nelem = 2 * npw_kq * nspinor * (sigma%my_bsum_stop - sigma%my_bsum_start + 1)
+           !ABI_MALLOC(recvcounts, (sigma%bsum_comm%nproc))
+           !ABI_MALLOC(displs, (sigma%bsum_comm%nproc))
+           !nelem = 2 * npw_kq * nspinor
+           !recvcounts(:) = nelem * sigma%nbsum_rank
+           !displs(1) = 0
+           !do ii=2,sigma%bsum_comm%nproc
+           !  displs(ii) = nelem * sum(sigma%nbsum_rank(1:ii-1))
+           !end do
+           !sendcount = nelem * (sigma%my_bsum_stop - sigma%my_bsum_start + 1)
 
 #ifdef HAVE_MPI
-           !call MPI_ALLGATHERV(MPI_IN_PLACE, nelem, MPI_DOUBLE_PRECISION, cgq, recvcounts, displs, &
+           !call MPI_ALLGATHERV(MPI_IN_PLACE, sendcount, MPI_DOUBLE_PRECISION, cgq, recvcounts, displs, &
            !                    MPI_DOUBLE_PRECISION, sigma%bsum_comm%value, ierr)
 
-           !cgq_request = xmpi_request_null
-           call MPI_IALLGATHERV(MPI_IN_PLACE, nelem, MPI_DOUBLE_PRECISION, cgq, recvcounts, displs, &
+           call MPI_IALLGATHERV(MPI_IN_PLACE, sendcount, MPI_DOUBLE_PRECISION, cgq, recvcounts, displs, &
                                 MPI_DOUBLE_PRECISION, sigma%bsum_comm%value, cgq_request, ierr)
-           !xmpi_count_requests = xmpi_count_requests + 1
+           call xmpi_requests_add(+1)
 #endif
 
            ABI_FREE(recvcounts)
@@ -1622,7 +1624,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            band_procs = 0
 
            nline_in = min(100, npw_kq); if (dtset%nline > nline_in) nline_in = min(dtset%nline, npw_kq)
-           !if (cgq_request /= xmpi_request_null) call xmpi_wait(cgq_request, ierr)
+
+           ! Wait for gather operation
+           if (cgq_request /= xmpi_request_null) call xmpi_wait(cgq_request, ierr)
 
            do ib_k=1,nbcalc_ks
              ! TODO: To be replaced by MPI parallellism over bands in projbd inside dfpt_cgwf
@@ -2466,9 +2470,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      if (my_rank == master) then
        if (ignore_kq /= 0) write(std_out, "(a, 1x, i0)")" Number of ignored k+q points:", ignore_kq
        if (ignore_ibsum_kq /= 0) write(std_out, "(a, 1x, i0)")" Number of ignored (k+q, m) states:", ignore_ibsum_kq
-       if (dtset%eph_stern /= 0 .and. .not. sigma%imag_only) then
-         call wrtout(std_out, sjoin(" Total number of NSCF Sternheimer iterations:", itoa(tot_nlines_done)))
-       end if
+       !if (dtset%eph_stern /= 0 .and. .not. sigma%imag_only) then
+       !  call wrtout(std_out, sjoin(" Total number of NSCF Sternheimer iterations:", itoa(tot_nlines_done)))
+       !end if
      end if
 
      ! Collect results inside pqb_comm and write results for this (k-point, spin) to NETCDF file.
@@ -3133,7 +3137,6 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
    ABI_MALLOC(new%nbsum_rank, (new%bsum_comm%nproc))
    ii = new%my_bsum_stop - new%my_bsum_start + 1
    call xmpi_allgather(ii, new%nbsum_rank, new%bsum_comm%value, ierr)
-   print *, "new%nbsum_rank", new%nbsum_rank
  end if
 
  call wrtout(std_out, sjoin(" Global bands for self-energy sum, bsum_start: ", itoa(new%bsum_start), &
@@ -4671,13 +4674,14 @@ subroutine sigmaph_gather_and_write(self, dtset, ebands, ikcalc, spin, comm)
    ! Only the number of q-points changes across the qpt-procs and this is the last dimension.
    ! nq_ibzk_eff is the total number of effective q-points in the IBZ(k).
    ABI_CALLOC(nq_rank, (self%qpt_comm%nproc))
-   ABI_CALLOC(recvcounts, (self%qpt_comm%nproc))
-   ABI_MALLOC(displs, (self%qpt_comm%nproc))
-
    call xmpi_allgather(self%my_nqibz_k, nq_rank, self%qpt_comm%value, ierr)
 
    nq_ibzk_eff = sum(nq_rank)
    nelem = self%nbsum * self%nbcalc_ks(ikcalc, spin) * self%ntemp
+   !call self%qpt_comm%prep_gatherv(nelem, nq_rank, recvcounts, displs)
+   ABI_MALLOC(recvcounts, (self%qpt_comm%nproc))
+   ABI_MALLOC(displs, (self%qpt_comm%nproc))
+
    recvcounts = nelem * nq_rank(:)
    displs(1) = 0
    do ii=2,self%qpt_comm%nproc
@@ -4697,28 +4701,17 @@ subroutine sigmaph_gather_and_write(self, dtset, ebands, ikcalc, spin, comm)
    ABI_MALLOC(my_kq_symtab, (6, self%my_nqibz_k))
    do imyq=1,self%my_nqibz_k
      iq_ibz_k = self%myq2ibz_k(imyq)
-     !qpt = sigma%qibz_k(:, iq_ibz_k)
-     !is_qzero = sum(qpt**2) < tol14
-
-     !iq_ibz = sigma%ind_ibzk2ibz(1, iq_ibz_k)
-     !isym_q = sigma%ind_ibzk2ibz(2, iq_ibz_k)
-     !trev_q = sigma%ind_ibzk2ibz(6, iq_ibz_k)
-
-     !kq = kk + qpt
-     !ikq_ibz = sigma%indkk_kq(1, iq_ibz_k); isym_kq = sigma%indkk_kq(2, iq_ibz_k)
-     !trev_kq = sigma%indkk_kq(6, iq_ibz_k); g0_kq = sigma%indkk_kq(3:5, iq_ibz_k)
-     !isirr_kq = (isym_kq == 1 .and. trev_kq == 0 .and. all(g0_kq == 0))
-     !kq_ibz = ebands%kptns(:, ikq_ibz)
      my_kq_symtab(:, imyq) = self%indkk_kq(:, iq_ibz_k)
    end do
 
+   !call self%qpt_comm%prep_gatherv(nelem, nq_rank, recvcounts, displs)
    displs(1) = 0; nelem = 6
    do ii=2,self%qpt_comm%nproc
      displs(ii) = sum(nq_rank(1:ii-1)) * nelem
    end do
    recvcounts = nq_rank * nelem
-   ABI_MALLOC(kq_symtab, (nelem, nq_ibzk_eff))
 
+   ABI_MALLOC(kq_symtab, (nelem, nq_ibzk_eff))
    call xmpi_gatherv(my_kq_symtab, nelem * self%my_nqibz_k, kq_symtab, recvcounts, displs, master, self%qpt_comm%value, ierr)
    !ABI_CHECK(all(abs(kq_symtab - my_kq_symtab) < tol12), "kq_symtab")
 
@@ -5106,7 +5099,7 @@ subroutine sigmaph_print(self, dtset, unt)
  if (.not. (self%qint_method == 1 .and. self%imag_only)) then
    write(unt,"(a)")sjoin(" Imaginary shift in the denominator (zcut): ", ftoa(aimag(self%ieta) * Ha_eV, fmt="f5.3"), "[eV]")
  end if
- msg = " Standard quadrature with zcut"; if (self%qint_method == 1) msg = " Tetrahedron method"
+ msg = " Standard quadrature"; if (self%qint_method == 1) msg = " Tetrahedron method"
  write(unt, "(2a)")sjoin(" Method for q-space integration:", msg)
  if (self%qint_method == 1) then
    ndiv = 1; if (self%use_doublegrid) ndiv = self%eph_doublegrid%ndiv
