@@ -444,9 +444,13 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  end if
 
  if(dtset%use_gemm_nonlop_gpu == 1 .and. dtset%use_gpu_cuda ==1 ) then
+#if defined HAVE_GPU_CUDA
    ! set global variable
    gemm_nonlop_use_gemm_gpu = .true.
    call init_gemm_nonlop_gpu(dtset%nkpt)
+#else
+   ABI_ERROR("abinit was not compiled with GPU support")
+#endif
  else
    gemm_nonlop_use_gemm_gpu = .false.
  end if

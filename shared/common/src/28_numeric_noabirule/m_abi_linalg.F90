@@ -281,7 +281,7 @@ module m_abi_linalg
  public :: copy_gpu_to_gpu
  public :: dealloc_on_gpu
  public :: gpu_memset
- public :: gpu_allocated_cuda
+ public :: gpu_allocated_impl
  public :: gpu_linalg_init
  public :: gpu_linalg_shutdown
  public :: gpu_xgemm
