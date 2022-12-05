@@ -38,6 +38,8 @@ MODULE m_errors
  use ifcore
 #endif
 
+ use iso_c_binding,     only : c_ptr, c_size_t
+
  use m_io_tools,        only : flush_unit, lock_and_write, file_exists, num_opened_units, show_units, open_file
  use m_fstrings,        only : toupper, basename, indent, lstrip, atoi, strcat, itoa
  use m_build_info,      only : dump_config, abinit_version
@@ -104,6 +106,8 @@ include "fexcp.h"
    module procedure unused_logical
    module procedure unused_logical1B
    module procedure unused_ch
+   module procedure unused_c_ptr
+   module procedure unused_c_size_t
  end interface unused_var
 
 CONTAINS  !===========================================================
@@ -1116,6 +1120,71 @@ elemental subroutine unused_ch(var)
  dummy = var
 
 end subroutine unused_ch
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_errors/unused_c_ptr
+!! NAME
+!!  unused_c_ptr
+!!
+!! FUNCTION
+!!  Helper function used to silence compiler warnings due to unused variables.
+!!  Interfaced via the ABI_UNUSED macro.
+!!
+!! INPUTS
+!!  var=type(c_ptr) value
+!!
+!! OUTPUT
+!!  None
+!!
+!! SOURCE
+
+elemental subroutine unused_c_ptr(var)
+
+!Arguments ------------------------------------
+type(c_ptr), intent(IN) :: var
+
+!Local variables-------------------------------
+type(c_ptr) :: dummy
+! *********************************************************************
+
+ dummy = var
+
+end subroutine unused_c_ptr
+!!***
+
+
+!----------------------------------------------------------------------
+
+!!****f* m_errors/unused_c_size_t
+!! NAME
+!!  unused_c_size_t
+!!
+!! FUNCTION
+!!  Helper function used to silence compiler warnings due to unused variables.
+!!  Interfaced via the ABI_UNUSED macro.
+!!
+!! INPUTS
+!!  var=type(c_size_t) value
+!!
+!! OUTPUT
+!!  None
+!!
+!! SOURCE
+
+elemental subroutine unused_c_size_t(var)
+
+!Arguments ------------------------------------
+integer(kind=c_size_t), intent(IN) :: var
+
+!Local variables-------------------------------
+integer(kind=c_size_t) :: dummy
+! *********************************************************************
+
+ dummy = var
+
+end subroutine unused_c_size_t
 !!***
 
 !----------------------------------------------------------------------

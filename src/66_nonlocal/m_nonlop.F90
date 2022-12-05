@@ -706,6 +706,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 
    else
 
+#if defined HAVE_GPU_CUDA
      !call wrtout(std_out, "Calling gemm_nonlop_gpu")
      call gemm_nonlop_gpu(atindx1_, choice, cpopt, cprjin_, dimenl1, dimenl2_, dimekbq, &
        &                  dimffnlin,dimffnlout, &
@@ -716,6 +717,9 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
        &                  sij_,svectout, &
        &                  hamk%useylm, vectin, vectout, &
        &                  hamk%use_gpu_cuda)
+#else
+   ABI_ERROR("abinit was not compiled with GPU support")
+#endif
 
    end if
 
