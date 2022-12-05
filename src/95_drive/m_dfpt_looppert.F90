@@ -727,6 +727,11 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    write(msg, '(a,80a,a,a,3f10.6)' ) ch10,('-',ii=1,80),ch10,&
     ' Perturbation wavevector (in red.coord.) ',dtset%qptn(:)
    call wrtout([std_out, ab_out],msg)
+   if (dtset%rfomega > tol20) then
+     write(msg, '(a,80a,a,a,3f10.6)' ) ch10,('-',ii=1,80),ch10,&
+      ' Perturbation frequency (in hartree a.u.) ',dtset%rfomega
+     call wrtout([std_out, ab_out],msg)
+   end if
    if(ipert>=1 .and. ipert<=dtset%natom)then
      write(msg, '(a,i4,a,i4)' )' Perturbation : displacement of atom',ipert,'   along direction',idir
      call wrtout([std_out, ab_out], msg)
