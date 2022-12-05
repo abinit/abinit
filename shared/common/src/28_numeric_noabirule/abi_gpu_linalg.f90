@@ -144,12 +144,12 @@ end subroutine copy_on_gpu
 subroutine copy_gpu_to_gpu(cpu_ptr,gpu_ptr,size_in_bytes)
 
   !Arguments ------------------------------------
-  type(c_ptr)                         :: dest_cpu_ptr
-  type(c_ptr)                         :: src_gpu_ptr
+  type(c_ptr)                         :: cpu_ptr
+  type(c_ptr)                         :: gpu_ptr
   integer(kind=c_int32_t), intent(in) :: size_in_bytes ! size in byte (to be transfered)
 
-  ABI_UNUSED(dest_gpu_ptr)
-  ABI_UNUSED(src_gpu_ptr)
+  ABI_UNUSED(gpu_ptr)
+  ABI_UNUSED(gpu_ptr)
   ABI_UNUSED(size_in_bytes)
 
 end subroutine copy_gpu_to_gpu
@@ -247,9 +247,11 @@ subroutine gpu_allocated_impl(gpu_ptr, is_allocated)
 
   !Arguments ------------------------------------
   type(c_ptr)                       :: gpu_ptr
-  logical(kind=c_bool), intent(out) :: is_allocated = .false.
+  logical(kind=c_bool), intent(out) :: is_allocated
 
   ABI_UNUSED(gpu_ptr)
+
+  is_allocated = .false.
 
 end subroutine gpu_allocated_impl
 !!***

@@ -433,9 +433,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  integer :: occopt_bigdft
 #endif
 
+#if defined(HAVE_GPU_CUDA)
  type(gemm_nonlop_gpu_type) :: gemm_nonlop_gpu_obj
- integer(kind=c_int32_t) :: kk1 = 10
- integer(kind=c_int32_t) :: kk2 = 100
+#endif
+
 
 ! *********************************************************************
 

@@ -307,7 +307,9 @@ contains
     gemm_nonlop_kpt(ikpt)%ngrads = -1
   end do
 
+#if defined(HAVE_KOKKOS)
   gemm_nonlop_kokkos % allocated = .false.
+#endif
 
  end subroutine init_gemm_nonlop
 !!***
