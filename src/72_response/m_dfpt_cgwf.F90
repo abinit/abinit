@@ -741,9 +741,9 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
 
  ! ghc also includes the eigenvalue shift
  if (gen_eigenpb) then
-   call cg_zaxpy(npw1*nspinor, [-eshift,  eta_], gsc,ghc)
+   call cg_zaxpy(npw1*nspinor, [-eshift, -eta_], gsc,ghc)
  else
-   call cg_zaxpy(npw1*nspinor, [-eshift,  eta_], cwavef,ghc)
+   call cg_zaxpy(npw1*nspinor, [-eshift, -eta_], cwavef,ghc)
  end if
 
  ! Initialize resid, in case of nline==0
@@ -1041,8 +1041,8 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
 !$OMP PARALLEL DO
      do ipw=1,npw1*nspinor
 !       gh_direc(1:2,ipw)=gh_direc(1:2,ipw)-eshift*conjgr(1:2,ipw)
-       gh_direc(1,ipw)=gh_direc(1,ipw)-eshift*conjgr(1,ipw)-eta_*conjgr(2,ipw)
-       gh_direc(2,ipw)=gh_direc(2,ipw)-eshift*conjgr(2,ipw)+eta_*conjgr(1,ipw)
+       gh_direc(1,ipw)=gh_direc(1,ipw)-eshift*conjgr(1,ipw)+eta_*conjgr(2,ipw)
+       gh_direc(2,ipw)=gh_direc(2,ipw)-eshift*conjgr(2,ipw)-eta_*conjgr(1,ipw)
      end do
    end if
 
