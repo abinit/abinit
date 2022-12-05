@@ -1004,12 +1004,14 @@ contains
 
     if (l_use_gpu_cuda==1) then
 
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS) && defined(HAVE_YAKL)
       select case(xgBlockA%space)
       case (SPACE_R,SPACE_CR)
         call gpu_xcopy(1, size, c_loc(xgBlockA%vecR), incx, c_loc(xgBlockB%vecR), incy)
       case(SPACE_C)
         call gpu_xcopy(2, size, c_loc(xgBlockA%vecC), incx, c_loc(xgBlockB%vecC), incy)
       end select
+#endif
 
     else
 
@@ -1164,12 +1166,14 @@ contains
 
     case (SPACE_R,SPACE_CR)
       if (l_use_gpu_cuda==1) then
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS) && defined(HAVE_YAKL)
         call gpu_xgemm(1, transa, transb, xgBlockW%rows, xgBlockW%cols, K, &
           calpha, &
           c_loc(xgBlockA%vecR), xgBlockA%LDim, &
           c_loc(xgBlockB%vecR), xgBlockB%LDim, &
           cbeta, &
           c_loc(xgBlockW%vecR), xgBlockW%LDim)
+#endif
       else
         call dgemm(transa, transb, xgBlockW%rows, xgBlockW%cols, K, &
           alpha, &
@@ -1193,12 +1197,14 @@ contains
     case(SPACE_C)
 
       if (l_use_gpu_cuda==1) then
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS) && defined(HAVE_YAKL)
         call gpu_xgemm(2, transa, transb, xgBlockW%rows, xgBlockW%cols, K, &
           calpha, &
           c_loc(xgBlockA%vecC), xgBlockA%LDim, &
           c_loc(xgBlockB%vecC), xgBlockB%LDim, &
           cbeta, &
           c_loc(xgBlockW%vecC), xgBlockW%LDim)
+#endif
       else
         call zgemm(transa, transb, xgBlockW%rows, xgBlockW%cols, K, &
           calpha, &
@@ -1267,12 +1273,14 @@ contains
     end if
 
     if (l_use_gpu_cuda==1) then
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS) && defined(HAVE_YAKL)
       call gpu_xgemm(2, transa, transb, xgBlockW%rows, xgBlockW%cols, K, &
         alpha, &
         c_loc(xgBlockA%vecC), xgBlockA%LDim, &
         c_loc(xgBlockB%vecC), xgBlockB%LDim, &
         beta, &
         c_loc(xgBlockW%vecC), xgBlockW%LDim)
+#endif
     else
       call zgemm(transa, transb, xgBlockW%rows, xgBlockW%cols, K, &
         alpha, &
@@ -2372,6 +2380,7 @@ contains
 
     if (l_use_gpu_cuda==1) then
 
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS) && defined(HAVE_YAKL)
       select case(xgBlock1%space)
       case (SPACE_R,SPACE_CR)
         call gpu_xaxpy(1, xgBlock1%cols*xgBlock1%LDim, da_cplx, c_loc(xgBlock2%vecR),1,c_loc(xgBlock1%vecR),1)
@@ -2380,6 +2389,7 @@ contains
         call gpu_xaxpy(2, xgBlock1%cols*xgBlock1%LDim, da_cplx, c_loc(xgBlock2%vecC),1,c_loc(xgBlock1%vecC),1)
         !call zaxpy(xgBlock1%cols*xgBlock1%LDim,dcmplx(da,0.d0),xgBlock2%vecC,1,xgBlock1%vecC,1)
       end select
+#endif
 
     else
 
@@ -2429,7 +2439,9 @@ contains
     end if
 
     if (l_use_gpu_cuda==1) then
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS) && defined(HAVE_YAKL)
       call gpu_xaxpy(2, xgBlock1%cols*xgBlock1%LDim, da, c_loc(xgBlock2%vecC), 1, c_loc(xgBlock1%vecC), 1)
+#endif
     else
       call zaxpy(xgBlock1%cols*xgBlock1%LDim, da, xgBlock2%vecC, 1, xgBlock1%vecC, 1)
     end if
@@ -2899,6 +2911,7 @@ contains
 
     if (l_use_gpu_cuda==1) then
 
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS) && defined(HAVE_YAKL)
       if ( xgBlock%ldim .eq. xgBlock%rows ) then
         select case(xgBlock%space)
         case (SPACE_R,SPACE_CR)
@@ -2912,6 +2925,12 @@ contains
         ABI_ERROR("Scaling a xgBlock when xgBlock%ldim != xgBlock%rows is not implemented for GPU. FIX ME if needed.")
 
       end if
+#else
+      ! we shouldn't be here, it means use_gpu_cuda was wrongly set to 1 in
+      ! input parameter file
+      call wrtout(std_out,"We shouldn't be here : abinit was not compiled with GPU/CUDA support (Kokkos+YAKL).")
+      call abi_abort('COLL')
+#endif
 
     else
 
@@ -2965,6 +2984,7 @@ contains
 
     if (l_use_gpu_cuda==1) then
 
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS) && defined(HAVE_YAKL)
       if ( xgBlock%ldim .eq. xgBlock%rows ) then
         select case(xgBlock%space)
         case (SPACE_R,SPACE_CR)
@@ -2978,6 +2998,12 @@ contains
         ABI_ERROR("Scaling a xgBlock when xgBlock%ldim != xgBlock%rows is not implemented for GPU. FIX ME if needed.")
 
       end if
+#else
+      ! we shouldn't be here, it means use_gpu_cuda was wrongly set to 1 in
+      ! input parameter file
+      call wrtout(std_out,"We shouldn't be here : abinit was not compiled with GPU/CUDA support (Kokkos+YAKL).")
+      call abi_abort('COLL')
+#endif
 
     else
 
@@ -3084,14 +3110,16 @@ contains
 
     if (l_use_gpu_cuda==1) then
 
-      select case(xgBlock%space)
+#if defined HAVE_GPU
+       select case(xgBlock%space)
       case (SPACE_R,SPACE_CR)
         byte_count = xgBlock%ldim * xgBlock%cols * dp
         call gpu_memset(c_loc(xgBlock%vecR), 0, byte_count)
       case (SPACE_C)
         byte_count = xgBlock%ldim * xgBlock%cols * dpc
         call gpu_memset(c_loc(xgBlock%vecC), 0, byte_count)
-      end select
+     end select
+#endif
 
     else
 
