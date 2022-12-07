@@ -236,6 +236,7 @@ subroutine herald(code_name,code_version,iout)
    '- and https://docs.abinit.org/theory/bibliography/#sharma2004'
  end if
 
+
  write(iout, '(a,/,a,/,a,/,a,/,a)' ) &
  ' ABINIT is a project of the Universite Catholique de Louvain,',&
  ' Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .',&

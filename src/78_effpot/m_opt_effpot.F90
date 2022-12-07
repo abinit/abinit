@@ -401,6 +401,8 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
  character(len=200):: name
  character(len=1000) :: message
  character(len=fnlen) :: fn_bf='before_opt_diff'!, fn_af='after_opt_diff'
+ ! types
+ type(SymPairs_t) :: sympairs
  !*************************************************************************
  !MPI variables
  master = 0
@@ -485,6 +487,10 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
  ! single displacement terms with second order only.
  call opt_getSingleDispTerms(singledisp_terms,eff_pot%crystal, sc_size,comm)
 
+
+ ! create pair list:
+ call sympairs%init(eff_pot%crystal, sc_size)
+
  !For the moment order loop commented
  !do iorder=order(1),order(2),2, Order will be done per term
  !Loop over all original terms + 1
@@ -568,179 +574,47 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
 
 !!! call the new function to get the data required to call polynomial_coeff_getList
 
-   if (.True.) then
-     block
-       integer, allocatable :: list_disp(:)
-       integer, allocatable :: cell(:,:)
-       type(polynomial_term_type) :: temp_term
-       type(polynomial_term_type), allocatable :: terms2(:)
-       real(dp), allocatable :: dist(:, :, :, :)
-       integer :: natom, nsym, nrpt
-       character(5), allocatable :: symbols2(:)
-       integer, allocatable :: list_symcoeff(:, :, :) ,list_symstr(:,:,:)
+   block
+     integer, allocatable :: list_disp(:)
+     integer, allocatable :: cell(:,:)
+     type(polynomial_term_type) :: temp_term
+     real(dp), allocatable :: dist(:, :, :, :)
+     integer :: natom, nsym, nrpt
+     character(5), allocatable :: symbols2(:)
+     integer, allocatable :: list_symcoeff(:, :, :) ,list_symstr(:,:,:)
 
-       integer :: nstr_sym, ncoeff_sym, ncoeff_symsym
-       real(dp) :: cutoff, range_ifc(3)
+     integer :: nstr_sym, ncoeff_sym, ncoeff_symsym
+     real(dp) :: cutoff, range_ifc(3)
 
 
-       ABI_MALLOC(my_coeffs_tmp,(size(my_coeffs)))
-       my_coeffs_tmp=my_coeffs
-       !if(allocated(my_coeffs)) call polynomial_coeff_list_free(my_coeffs)
-       !ABI_MALLOC(my_coeffs,(size(my_coeffs_tmp)))
-       do i=nterm_start+1, size(my_coeffs_tmp)
-         call polynomial_coeff_free(my_coeffs(i))
-       end do
+     ABI_MALLOC(my_coeffs_tmp,(size(my_coeffs)))
+     my_coeffs_tmp=my_coeffs
+     do i=nterm_start+1, size(my_coeffs_tmp)
+       call polynomial_coeff_free(my_coeffs(i))
+     end do
 
-       call prepare_for_getList(eff_pot%crystal,sc_size, dist, cell, natom, nsym, nrpt, range_ifc , symbols2)
-       ABI_FREE(symbols2)
-       cutoff= get_crystal_cutoff(eff_pot%crystal)
+     ncoeff_symsym =  size(sympairs%list_symcoeff, 2) !size(list_symcoeff(1,:,1))
 
-       call polynomial_coeff_getList(cell,eff_pot%crystal,dist,list_symcoeff,list_symstr,&
-         &                       natom,nstr_sym,ncoeff_sym,nrpt,range_ifc,cutoff,sc_size)
+     temp_cntr =0
 
-       ncoeff_symsym =  size(list_symcoeff, 2) !size(list_symcoeff(1,:,1))
+     ! For each combi
+     do icombi=1,ncombi
+       !call foo1(myterm=my_coeffs_tmp(nterm_start+icombi)%terms(1), )
+     end do
 
-       temp_cntr =0
+     ABI_SFREE(cell)
+     ABI_SFREE(dist)
+     ABI_SFREE(list_symcoeff)
+     ABI_SFREE(list_symstr)
 
-       ! For each combi
-       do icombi=1,ncombi
-         temp_term = my_coeffs_tmp(nterm_start+icombi)%terms(1)
-         !
-         block
-           integer :: idisp, my_nrpt, list_cntr, number_coeff, isym
-           integer :: tmp_list(5), pwr
-           logical :: found=.False.
-           logical :: reverse_i=.False.
-           logical, allocatable :: reverse(:), false_reverse(:)
-           integer :: counter, nterm, tot_power
-           type(polynomial_coeff_type):: temp_coeff
-
-           tot_power=sum(temp_term%power_disp) + sum(temp_term%power_strain)
-           ABI_MALLOC(list_disp, (tot_power))
-           ABI_MALLOC(reverse, (tot_power))
-           ABI_MALLOC(false_reverse, (tot_power))
-           reverse(:)=.False.
-           false_reverse(:)=.False.
-           counter=0
-           do idisp=1,temp_term%ndisp
-             my_nrpt=find_irpt(cells=cell, cell=temp_term%cell(:, 2, idisp))
-             tmp_list(:) = (/temp_term%direction(idisp),temp_term%atindx(1,idisp), &
-               & temp_term%atindx(2,idisp),my_nrpt,int(temp_term%weight) /)
-             found=.False.
-             reverse_i=.False.
-             do list_cntr=1,size(list_symcoeff, 2)
-               do isym=1, nsym
-                 if (all(tmp_list(:4)==list_symcoeff(:4,list_cntr,1))) then
-                   number_coeff = list_symcoeff(6,list_cntr,1)
-                   found = .True.
-                   if (found) exit
-                 end if
-               end do
-               if(found) exit
-             end do
-             if(.not. found) then
-               reverse_i=.True.
-               my_nrpt=find_irpt(cells=cell, cell=-temp_term%cell(:, 2, idisp))
-               tmp_list(:) = (/temp_term%direction(idisp),temp_term%atindx(2,idisp), &
-                 & temp_term%atindx(1,idisp),my_nrpt,-int(temp_term%weight) /)
-               do list_cntr=1,size(list_symcoeff, 2)
-                 do isym=1, nsym
-                   if (all(tmp_list(:4)==list_symcoeff(:4,list_cntr,1))) then
-                     number_coeff = list_symcoeff(6,list_cntr,1)
-                     found = .True.
-                     if (found) exit
-                   end if
-                 end do
-                 if(found) exit
-               end do
-             end if
-
-             if (found )then
-               do pwr=1,temp_term%power_disp(idisp)
-                 counter=counter+1
-                 list_disp(counter) = number_coeff
-                 reverse(counter) = reverse_i
-               end do
-             else
-               !if(.False.) then
-               !  block
-               !    integer :: iii, jjj
-               !    do iii=1, nsym
-               !      !print *, "isym: ", iii
-               !      !print *, "=================================="
-               !      do jjj=1, size(list_symcoeff, 2)
-               !        !print *, "jjj= ", jjj, "list: ", list_symcoeff(:, jjj, iii)
-               !      end do
-               !    end do
-               !  end block
-               !end if
-               ABI_BUG("The pair is not found during checking of the SAT in generated bounding terms. Please report this to the developers.  ")
-             end if
-           end do
-
-           do idisp=1,temp_term%nstrain
-             do pwr=1,temp_term%power_strain(idisp)
-               counter = counter+1
-               list_disp(counter) = temp_term%strain(idisp)+size(list_symcoeff,2)
-             end do
-           end do
-
-           nterm=eff_pot%crystal%nsym
-           ABI_MALLOC(terms2, (nterm))
-
-           call generateTermsFromList(cell,list_disp,list_symcoeff, &
-             &list_symstr,ncoeff_symsym,tot_power,nrpt,nstr_sym,nsym,nterm,terms2, reverse=false_reverse)
-           call polynomial_coeff_init(one,nterm,temp_coeff, &
-             &terms2(1:nterm),check=.true.)
-
-           call polynomial_coeff_getName(name, &
-             & temp_coeff,symbols,recompute=.TRUE.)
-
-           block ! check if the terms already exists. if not, add to my_coeffs.
-             logical :: exists(nterm_start+icombi-1)
-             exists=.False.
-             do jterm=1,(nterm_start+icombi-1)
-               exists(jterm) = coeffs_compare(my_coeffs(jterm),temp_coeff)
-             enddo !jterm
-
-             if (.not. any(exists)) then
-               temp_cntr = temp_cntr+1
-               do i=1, nterm
-                 call polynomial_term_free(terms2(iterm))
-               end do
-               call generateTermsFromList(cell,list_disp,list_symcoeff, &
-                 &list_symstr,ncoeff_symsym,tot_power,nrpt,nstr_sym,nsym,nterm,terms2, reverse=reverse)
-               call polynomial_coeff_free(temp_coeff)
-               call polynomial_coeff_init(one,nterm,temp_coeff, &
-                 &terms2(1:nterm),check=.true.)
-
-
-               call polynomial_coeff_init(one,nterm, &
-                 & my_coeffs(nterm_start+temp_cntr),terms2(1:nterm),check=.true.)
-             end if
-           end block
-           ABI_SFREE(list_disp)
-           ABI_SFREE(reverse)
-           ABI_SFREE(false_reverse)
-           ABI_SFREE(terms2)
-         end block
-       end do
-
-       ABI_SFREE(cell)
-       ABI_SFREE(dist)
-       ABI_SFREE(list_symcoeff)
-       ABI_SFREE(list_symstr)
-       if(allocated(my_coeffs_tmp)) call polynomial_coeff_list_free(my_coeffs_tmp)
-       ABI_MALLOC(my_coeffs_tmp,(nterm_start+temp_cntr))
-       my_coeffs_tmp=my_coeffs(1:nterm_start+temp_cntr)
-       if(allocated(my_coeffs)) call polynomial_coeff_list_free(my_coeffs)
-       ABI_MALLOC(my_coeffs,(size(my_coeffs_tmp)))
-       my_coeffs=my_coeffs_tmp
-       if(allocated(my_coeffs_tmp)) call polynomial_coeff_list_free(my_coeffs_tmp)
-     end block
-   else
-     temp_cntr=ncombi
-   end if
+     if(allocated(my_coeffs_tmp)) call polynomial_coeff_list_free(my_coeffs_tmp)
+     ABI_MALLOC(my_coeffs_tmp,(nterm_start+temp_cntr))
+     my_coeffs_tmp=my_coeffs(1:nterm_start+temp_cntr)
+     if(allocated(my_coeffs)) call polynomial_coeff_list_free(my_coeffs)
+     ABI_MALLOC(my_coeffs,(size(my_coeffs_tmp)))
+     my_coeffs=my_coeffs_tmp
+     if(allocated(my_coeffs_tmp)) call polynomial_coeff_list_free(my_coeffs_tmp)
+   end block
    !--------------------------------------------- Modification ends here.
 
 
@@ -949,6 +823,123 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
 
  !ABI_FREE(my_coeffs)
  call fit_data_free(fit_data)
+ call sympairs%free()
+
+contains
+
+  subroutine foo1(myterm, cell, list_symcoeff, nsym)
+    ! check if myterm
+    type(polynomial_term_type), intent(in) :: myterm
+    integer, intent(in) :: cell(:,:),list_symcoeff(:, :, :), nsym
+    type(polynomial_term_type), allocatable :: terms2(:)
+    integer :: idisp, my_nrpt, list_cntr, number_coeff, isym
+    integer :: tmp_list(5), pwr
+    logical :: found=.False.
+    logical :: reverse_i=.False.
+    logical, allocatable :: reverse(:), false_reverse(:)
+    integer :: counter, nterm, tot_power
+    type(polynomial_coeff_type):: temp_coeff
+    integer, allocatable :: list_disp(:)
+
+    tot_power=sum(myterm%power_disp) + sum(myterm%power_strain)
+    ABI_MALLOC(list_disp, (tot_power))
+    ABI_MALLOC(reverse, (tot_power))
+    ABI_MALLOC(false_reverse, (tot_power))
+    reverse(:)=.False.
+    false_reverse(:)=.False.
+    counter=0
+    ! put the indices of the disp terms into a list
+    do idisp=1,myterm%ndisp
+      ! for each disp, find its index in the pair list.
+      my_nrpt=find_irpt(cells=cell, cell=myterm%cell(:, 2, idisp))
+      tmp_list(:) = (/myterm%direction(idisp),myterm%atindx(1,idisp), &
+        & myterm%atindx(2,idisp),my_nrpt,int(myterm%weight) /)
+      found=.False.
+      reverse_i=.False.
+      do list_cntr=1,size(list_symcoeff, 2)
+        do isym=1, nsym
+          if (all(tmp_list(:4)==list_symcoeff(:4,list_cntr,1))) then
+            number_coeff = list_symcoeff(6,list_cntr,1)
+            found = .True.
+            if (found) exit
+          end if
+        end do
+        if(found) exit
+      end do
+      if(.not. found) then
+        reverse_i=.True.
+        my_nrpt=find_irpt(cells=cell, cell=-myterm%cell(:, 2, idisp))
+        tmp_list(:) = (/myterm%direction(idisp),myterm%atindx(2,idisp), &
+          & myterm%atindx(1,idisp),my_nrpt,-int(myterm%weight) /)
+        do list_cntr=1,size(list_symcoeff, 2)
+          do isym=1, nsym
+            if (all(tmp_list(:4)==list_symcoeff(:4,list_cntr,1))) then
+              number_coeff = list_symcoeff(6,list_cntr,1)
+              found = .True.
+              if (found) exit
+            end if
+          end do
+          if(found) exit
+        end do
+      end if
+
+      if (found )then
+        do pwr=1,myterm%power_disp(idisp)
+          counter=counter+1
+          list_disp(counter) = number_coeff
+          reverse(counter) = reverse_i
+        end do
+      else
+        ABI_BUG("The pair is not found during checking of the SAT in generated bounding terms. Please report this to the developers.  ")
+      end if
+    end do
+
+    do idisp=1,myterm%nstrain
+      do pwr=1,myterm%power_strain(idisp)
+        counter = counter+1
+        list_disp(counter) = myterm%strain(idisp)+size(list_symcoeff,2)
+      end do
+    end do
+
+    nterm=eff_pot%crystal%nsym
+    ABI_MALLOC(terms2, (nterm))
+    !call generateTermsFromList(cell,list_disp,list_symcoeff, &
+    !  &list_symstr,ncoeff_symsym,tot_power,nrpt,nstr_sym,nsym,nterm,terms2, reverse=false_reverse)
+    call polynomial_coeff_init(one,nterm,temp_coeff, &
+      &terms2(1:nterm),check=.true.)
+
+    call polynomial_coeff_getName(name, &
+      & temp_coeff,symbols,recompute=.TRUE.)
+
+    block ! check if the terms already exists. if not, add to my_coeffs.
+      logical :: exists(nterm_start+icombi-1)
+      exists=.False.
+      do jterm=1,(nterm_start+icombi-1)
+        exists(jterm) = coeffs_compare(my_coeffs(jterm),temp_coeff)
+      enddo !jterm
+
+      if (.not. any(exists)) then
+        temp_cntr = temp_cntr+1
+        do iterm=1, nterm
+          call polynomial_term_free(terms2(iterm))
+        end do
+        !call generateTermsFromList(cell,list_disp,list_symcoeff, &
+        !  &list_symstr,ncoeff_symsym,tot_power,nrpt,nstr_sym,nsym,nterm,terms2, reverse=reverse)
+        call sympairs%generateTerms(list_disp,  tot_power, nterm, terms2, reverse=reverse)
+        call polynomial_coeff_free(temp_coeff)
+        call polynomial_coeff_init(one,nterm,temp_coeff, &
+          &terms2(1:nterm),check=.true.)
+
+        call polynomial_coeff_init(one,nterm, &
+          & my_coeffs(nterm_start+temp_cntr),terms2(1:nterm),check=.true.)
+      end if
+    end block
+    ABI_SFREE(list_disp)
+    ABI_SFREE(reverse)
+    ABI_SFREE(false_reverse)
+    ABI_SFREE(terms2)
+  end subroutine foo1
+
 end subroutine opt_effpotbound
 !!***
 

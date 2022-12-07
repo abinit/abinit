@@ -43,6 +43,26 @@ module m_polynomial_coeff
 
  implicit none
 
+ type,public :: SymPairs_t
+   !subroutine prepare_for_getList(crystal,sc_size, dist,  cell, natom, nsym, nrpt, range_ifc, symbols )
+   integer :: ncoeff_sym,nstr_sym
+   integer,allocatable :: list_symcoeff(:,:,:),list_symstr(:,:,:)
+   integer :: natom,nrpt, nsym
+   real(dp)   :: cutoff
+   !arrays
+   type(crystal_t), pointer :: crystal
+   integer, allocatable :: cell(:,:)
+   real(dp), allocatable:: dist(:, :, :, :)
+   character(len=5),allocatable :: symbols(:)
+   integer :: sc_size(3)
+   real(dp):: range_ifc(3)
+   integer :: fit_iatom=-1
+ contains
+   procedure :: init => SymPairs_t_init
+   procedure :: free => SymPairs_t_free
+   procedure :: generateTerms => SymPairs_t_generateTerms
+ end type SymPairs_T
+
  public :: polynomial_coeff_broadcast
  public :: polynomial_coeff_evaluate
  public :: polynomial_coeff_free
@@ -2237,14 +2257,14 @@ ncoeff_symsym = size(list_symcoeff(1,:,1))
        ! to compare.
        ! Here it checks: for two pairs of atom with icoeff (a-b)  and icoeff2 (c-d).
        !. (a) a-d along x. (b) a-d along y. (c) a-d along z are within the range.
-       ! TODO: But why is a-c not checked?
-       ! Note dist(1, ia, ib, irpt)
+       ! As a-b and c-d are within the cutoff, and a==c, there is no more need to check.
 
-       if(list_symcoeff(2,icoeff,1)/= list_symcoeff(2,icoeff2,1)) then
-         ABI_BUG("a is not c!")
-       end if
 
        if(icoeff<=ncoeff_symsym.and.icoeff2<=ncoeff_symsym)then !Check combination of irreducible bodies and their symmetric equivalent
+         if(list_symcoeff(2,icoeff,1)/= list_symcoeff(2,icoeff2,1)) then
+           ABI_BUG("The first components of the pairs in the coefficient are not equivalent.")
+         end if
+
           if(abs(dist(1,list_symcoeff(2,icoeff,1),list_symcoeff(3,icoeff,1),list_symcoeff(4,icoeff,1)) & ! rx(a, b)
 &            -dist(1,list_symcoeff(2,icoeff,1),list_symcoeff(3,icoeff2,1),list_symcoeff(4,icoeff2,1))) & ! rx(a, d )
 &            >= (rprimd(1,1) + rprimd(1,2) + rprimd(1,3))*sc_size(1)  .or. &
@@ -4053,20 +4073,8 @@ subroutine coeffs_list_conc_onsite(coeff_list1,coeff_list2, check)
  ! allocate new list1
  call polynomial_coeff_list_free(coeff_list1)
  ABI_MALLOC(coeff_list1,(ncoeff_out))
-
- ! ! copy to list1
- ! do i=1,ncoeff_out
- !   if(i<=ncoeff1)then
- !     call polynomial_coeff_init(coeff_list_tmp(i)%coefficient,coeff_list_tmp(i)%nterm,coeff_list1(i),coeff_list_tmp(i)%terms,&
- !       &                                 coeff_list_tmp(i)%name,check=check)
- !   else
- !     j=i-ncoeff1
- !     call polynomial_coeff_init(coeff_list2(j)%coefficient,coeff_list2(j)%nterm,coeff_list1(i),coeff_list2(j)%terms,&
- !       &                                 coeff_list2(j)%name,check=check)
- !   endif
- ! enddo
  coeff_list1=coeff_list_tmp + coeff_list2
- ! free tmp
+
  call polynomial_coeff_list_free(coeff_list_tmp)
 
 end subroutine coeffs_list_conc_onsite
@@ -4444,6 +4452,55 @@ function find_opposite_irpt(cells, irpt) result(n)
   integer :: n
   n=find_irpt(cells, -cells(:, irpt))
 end function find_opposite_irpt
+
+subroutine SymPairs_t_init(self, crystal, sc_size, fit_iatom_in)
+  class(SymPairs_t), intent(inout) ::self
+  type(crystal_t), target, intent(inout) :: crystal
+  integer, intent(in) :: sc_size(3)
+  integer, intent(in), optional :: fit_iatom_in
+  self%crystal=> crystal
+  self%sc_size(:) = sc_size(:)
+  if(present(fit_iatom_in)) self%fit_iatom = fit_iatom_in
+  call prepare_for_getList(crystal, sc_size, self%dist, self%cell, self%natom, self%nsym, self%nrpt, self%range_ifc, self%symbols)
+  call polynomial_coeff_getList(self%cell,self%crystal,self%dist, &
+    &self%list_symcoeff,self%list_symstr,&
+    &self%natom,self%nstr_sym,self%ncoeff_sym,self%nrpt, &
+    &self%range_ifc,self%cutoff,sc_size=self%sc_size,&
+    &fit_iatom=fit_iatom_in)
+end subroutine SymPairs_t_init
+
+subroutine SymPairs_t_free(self)
+  class(SymPairs_t), intent(inout) ::self
+  nullify(self%crystal)
+  ABI_FREE(self%list_symcoeff)
+  ABI_FREE(self%list_symstr)
+  ABI_FREE(self%cell)
+  ABI_FREE(self%dist)
+  ABI_FREE(self%symbols)
+end subroutine SymPairs_t_free
+
+subroutine SymPairs_t_generateTerms(self, index_coeff,  power, nterm, terms, reverse)
+  class(SymPairs_t), intent(inout) ::self
+  integer,intent(in) ::  index_coeff(:)
+  integer, intent(in) :: power
+  integer, intent(out) :: nterm
+  type(polynomial_term_type),intent(out) :: terms(self%nsym)
+  logical, optional, intent(in) :: reverse(power)
+  logical  :: reverse_a(power)
+  integer :: ndisp_max
+
+  if(present(reverse))then
+    reverse_a(:) = reverse(:)
+  else
+    reverse_a(:) = .False.
+  end if
+  ndisp_max=size(index_coeff)
+  call generateTermsFromList(self%cell,index_coeff,self%list_symcoeff, &
+    &self%list_symstr,self%ncoeff_sym,power,self%nrpt,self%nstr_sym,self%nsym, &
+    &nterm,terms, reverse=reverse_a)
+end subroutine SymPairs_t_generateTerms
+
+!subroutine find_pair_index(self, rpt,  )
 
 
 end module m_polynomial_coeff
