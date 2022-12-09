@@ -375,6 +375,7 @@ has_fock=.false.
 !============================================================
 ! Application of the local potential
 !============================================================
+ ABI_NVTX_START_RANGE(NVTX_GETGHC_LOCPOT)
 
  if (any(type_calc == [0, 1, 3])) then
 
@@ -431,12 +432,10 @@ has_fock=.false.
          end do
        end if
        !$OMP TASKWAIT
-       ABI_NVTX_START_RANGE(NVTX_GETGHC_FOURWF)
        call fourwf(1,gs_ham%vlocal,cwavef,ghc,work,gbound_k1,gbound_k2,&
 &       gs_ham%istwf_k,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
 &       npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,option_fft,tim_fourwf,&
 &       weight,weight,use_gpu_cuda=gs_ham%use_gpu_impl)
-       ABI_NVTX_END_RANGE()
 
      else
        ! nspinortot==2
@@ -453,12 +452,10 @@ has_fock=.false.
            end do
          end if
          ABI_MALLOC(ghc1,(2,npw_k2*ndat))
-         ABI_NVTX_START_RANGE(NVTX_GETGHC_FOURWF)
          call fourwf(1,gs_ham%vlocal,cwavef1,ghc1,work,gbound_k1,gbound_k2,&
 &         gs_ham%istwf_k,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
 &         npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,option_fft,tim_fourwf,&
 &         weight,weight,use_gpu_cuda=gs_ham%use_gpu_impl)
-         ABI_NVTX_END_RANGE()
          do idat=1,ndat
            do ipw =1, npw_k2
              ghc(1:2,ipw+(idat-1)*my_nspinor*npw_k2)=ghc1(1:2,ipw+(idat-1)*npw_k2)
@@ -479,12 +476,10 @@ has_fock=.false.
            end do
          end if
          ABI_MALLOC(ghc2,(2,npw_k2*ndat))
-         ABI_NVTX_START_RANGE(NVTX_GETGHC_FOURWF)
          call fourwf(1,gs_ham%vlocal,cwavef2,ghc2,work,gbound_k1,gbound_k2,&
 &         gs_ham%istwf_k,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
 &         npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,option_fft,tim_fourwf,weight,weight,&
 &         use_gpu_cuda=gs_ham%use_gpu_impl)
-         ABI_NVTX_END_RANGE()
          do idat=1,ndat
            do ipw=1,npw_k2
              ghc(1:2,ipw+(idat-1)*my_nspinor*npw_k2+shift2)=ghc2(1:2,ipw+(idat-1)*npw_k2)
@@ -532,12 +527,10 @@ has_fock=.false.
            end do
          end do
        end if
-       ABI_NVTX_START_RANGE(NVTX_GETGHC_FOURWF)
        call fourwf(1,vlocal_tmp,cwavef1,ghc1,work,gbound_k1,gbound_k2,&
 &       gs_ham%istwf_k,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
 &       npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,option_fft,tim_fourwf,weight,weight,&
 &       use_gpu_cuda=gs_ham%use_gpu_impl)
-       ABI_NVTX_END_RANGE()
      end if
 !    ghc2=v22*phi2
      if (nspinor2TreatedByThisProc) then
@@ -563,12 +556,10 @@ has_fock=.false.
            end do
          end do
        end if
-       ABI_NVTX_START_RANGE(NVTX_GETGHC_FOURWF)
        call fourwf(1,vlocal_tmp,cwavef2,ghc2,work,gbound_k1,gbound_k2,&
 &       gs_ham%istwf_k,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
 &       npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,option_fft,tim_fourwf,weight,weight,&
 &       use_gpu_cuda=gs_ham%use_gpu_impl)
-       ABI_NVTX_END_RANGE()
      end if
      ABI_FREE(vlocal_tmp)
      cplex=2
@@ -598,12 +589,10 @@ has_fock=.false.
            end do
          end do
        end if
-       ABI_NVTX_START_RANGE(NVTX_GETGHC_FOURWF)
        call fourwf(cplex,vlocal_tmp,cwavef1,ghc3,work,gbound_k1,gbound_k2,&
 &       gs_ham%istwf_k,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
 &       npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,option_fft,tim_fourwf,weight,weight,&
 &       use_gpu_cuda=gs_ham%use_gpu_impl)
-       ABI_NVTX_END_RANGE()
      end if
 !    ghc4=(re(v12)+im(v12))*phi2
      if (nspinor2TreatedByThisProc) then
@@ -626,12 +615,10 @@ has_fock=.false.
            end do
          end do
        end if
-       ABI_NVTX_START_RANGE(NVTX_GETGHC_FOURWF)
        call fourwf(cplex,vlocal_tmp,cwavef2,ghc4,work,gbound_k1,gbound_k2,&
 &       gs_ham%istwf_k,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
 &       npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,option_fft,tim_fourwf,weight,weight,&
 &       use_gpu_cuda=gs_ham%use_gpu_impl)
-       ABI_NVTX_END_RANGE()
      end if
      ABI_FREE(vlocal_tmp)
 !    Build ghc from pieces
@@ -679,6 +666,7 @@ has_fock=.false.
 
    !$OMP TARGET EXIT DATA MAP(release:work)
  end if ! type_calc
+ ABI_NVTX_END_RANGE()
 
 
  if (any(type_calc == [0, 2, 3])) then
@@ -686,7 +674,7 @@ has_fock=.false.
 !============================================================
 ! Application of the non-local potential and the Fock potential
 !============================================================
-
+   ABI_NVTX_START_RANGE(NVTX_GETGHC_NLOCPOT)
    if (type_calc==2) then
      !$OMP TARGET UPDATE TO(gvnlxc_)
      if(transfer_omp_args) then
@@ -700,21 +688,20 @@ has_fock=.false.
      lambda_ndat = lambda
 
      !$OMP TASKWAIT
-     ABI_NVTX_START_RANGE(NVTX_GETGHC_NONLOP)
      call nonlop(choice,cpopt_here,cwaveprj_nonlop,enlout,gs_ham,idir,lambda_ndat,mpi_enreg,ndat,&
 &     nnlout,paw_opt,signs,gsc_ptr,tim_nonlop,cwavef,gvnlxc_,select_k=select_k_)
-     ABI_NVTX_END_RANGE()
 
    else if (type_calc == 3) then
      ! for kinetic and local only, nonlocal and vfock should be zero
      gvnlxc_(:,:) = zero
    end if ! if(type_calc...
+   ABI_NVTX_END_RANGE()
 
 !============================================================
 ! Assemble kinetic, local, nonlocal and Fock contributions
 !============================================================
 
-   ABI_NVTX_START_RANGE(NVTX_GETGHC_KINETIC)
+   ABI_NVTX_START_RANGE(NVTX_GETGHC_KIN)
 !  Assemble modified kinetic, local and nonlocal contributions
    !  to <G|H|C(n,k)>. Take also into account build-in debugging.
    if(prtvol/=-level)then
