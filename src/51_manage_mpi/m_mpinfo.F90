@@ -1421,9 +1421,9 @@ subroutine initmpi_grid(mpi_enreg)
 
 !* Write some data
    write(msg,'(a,2(1x,i0))') 'nphf and np_spkpt: ',mpi_enreg%nproc_hf, mpi_enreg%nproc_spkpt
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(std_out,msg)
    write(msg,'(a,2(1x,i0))') 'me_hf, me_kpt: ',mpi_enreg%me_hf, mpi_enreg%me_kpt
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(std_out,msg)
  end if
 #endif
 
@@ -2103,10 +2103,9 @@ subroutine initmpi_band(mkmem,mpi_enreg,nband,nkpt,nsppol)
              if (.not.allocated(ranks)) then
                ABI_MALLOC(ranks,(nrank))
                if (nrank>0) ranks=(/((iproc_min+irank-1),irank=1,nrank)/)
-! TODO MJV: still can not lift this restriction...
              else if (nrank/=size(ranks)) then
-               msg='Number of bands per proc should be the same for all k-points!'
-               ABI_BUG(msg)
+               ! TODO MJV: still can not lift this restriction...
+               ABI_BUG('Number of bands per proc should be the same for all k-points!')
              end if
            end if
          end if
@@ -2129,14 +2128,14 @@ subroutine initmpi_band(mkmem,mpi_enreg,nband,nkpt,nsppol)
         ' This is inefficient (load unbalancing). Adjust nband to have a divisor <= nproc/nkpt/nsppol',ch10
        ABI_WARNING(msg)
      end if
-! NB: everyone in spacecomm has to call subcomm, even if it is a trivial call with self_comm for the subcomm
+     ! NB: everyone in spacecomm has to call subcomm, even if it is a trivial call with self_comm for the subcomm
      mpi_enreg%comm_band=xmpi_subcomm(spacecomm,nrank,ranks, my_rank_in_group=mpi_enreg%me_band)
      mpi_enreg%nproc_band=nrank
-!     mpi_enreg%me_band=mod(me, nrank)
+    ! mpi_enreg%me_band=mod(me, nrank)
 
-     write(msg,'(4(a,i6))') ' Present parallel dimensions: nkpt= ',nkpt,' nsppol ',nsppol,&
-&     ' nband per processor= ', nb_per_proc, ' npband= ',nrank
-     call wrtout(std_out,msg,'COLL')
+     write(msg,'(4(a,i0))') 'P Present parallel dimensions: nkpt= ',nkpt,' nsppol ',nsppol,&
+      ' nband per processor= ', nb_per_proc, ' npband= ',nrank
+     call wrtout(std_out,msg)
 
      ABI_FREE(ranks)
    end if

@@ -4608,7 +4608,7 @@ subroutine gwr_build_wc(gwr)
        !call wrtout(std_out, sjoin(" e-1 at q:", ktoa(qq_ibz), "i omega:", ftoa(gwr%iw_mesh(itau) * Ha_eV), "eV"))
        !call print_arr(wc%buffer_cplx, unit=std_out)
 
-       ! Build Wc(q, iw) = [e^{-1}_q(g,g',iw) - delta_{gg'} v_q(g,g') by removing bare vc
+       ! Build Wc(q, iw) = e^{-1}_q(g,g',iw) - delta_{gg'} v_q(g,g') by removing bare vc
        do il_g2=1,wc%sizeb_local(2)
          iglob2 = wc%loc2gcol(il_g2)
          ig2 = mod(iglob2 - 1, desc_q%npw) + 1
