@@ -41,6 +41,9 @@ module m_getghc
  use m_nonlop,      only : nonlop
  use m_fft,         only : fourwf
  use m_getghc_ompgpu,  only : getghc_ompgpu
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
+ use m_nvtx_data
+#endif
 
 #if defined HAVE_GPU_CUDA
  use m_gpu_toolbox
@@ -268,6 +271,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
  end if
 !Keep track of total time spent in getghc:
  call timab(350+tim_getghc,1,tsec)
+ ABI_NVTX_START_RANGE(NVTX_GETGHC)
 
 !Structured debugging if prtvol==-level
  if(prtvol==-level)then
@@ -1010,6 +1014,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
  call timab(350+tim_getghc,2,tsec)
 
  DBG_EXIT("COLL")
+ ABI_NVTX_END_RANGE()
 
 end subroutine getghc
 !!***
