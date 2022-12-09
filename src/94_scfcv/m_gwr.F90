@@ -5430,11 +5430,11 @@ end subroutine gwr_build_sigmac
 !!  write_units
 !!
 !! FUNCTION
-!!  Write `string` to a list of `units`.
+!!  Write `string` to a list of Fortran `units`.
 !!
 !! INPUTS
-!!  [newlines]: Number of new lines added after message. Default 0
-!!  [pre_newlines]: Number of new lines added vefore message. Default 0
+!!  [newlines]: Number of newlines added after string. Default 0
+!!  [pre_newlines]: Number of newlines added before string. Default 0
 !!
 !! SOURCE
 

@@ -1722,11 +1722,11 @@ subroutine vcgen_init(vcgen, cryst, kptrlatt, nkbz, nqibz, nqbz, qbz, rcut, gw_i
 
 !Local variables-------------------------------
  integer,parameter :: istwfk1 = 1
- integer :: npw_, gvec0(3)
+ integer :: gvec0(3) ! npw_,
  real(dp) :: q0_vol, bz_geometry_factor, rcut2
  character(len=500) :: msg
  real(dp) :: vcoul0(1), q_gamma(3)
- integer,allocatable :: gvec_(:,:)
+ !integer,allocatable :: gvec_(:,:)
 
 ! *************************************************************************
 
