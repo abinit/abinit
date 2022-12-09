@@ -68,6 +68,9 @@ EXTERNAL_MODS = {
     # Kokkos fortran interoperability
     "flcl_mod",
     "flcl_util_kokkos_mod",
+    "m_xg_kokkos",
+    # YAKL module
+    "gator_mod",
 }
 
 
@@ -920,6 +923,7 @@ class AbinitProject(NotebookWriter):
 
             prog_name = prog_file.programs[0].name
             if prog_name.lower() == "fold2bloch": prog_name = "fold2Bloch"
+            if prog_name.lower() == "fortran_gator": continue
             config.set(prog_name, "libraries", "\n" + "\n".join(dirnames))
             # py3k
             #config[prog_name]["libraries"] = "\n" + "\n".join(dirnames)
