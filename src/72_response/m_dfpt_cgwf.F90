@@ -190,7 +190,7 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
  integer,parameter :: level=15,tim_getgh1c=1,tim_getghc=2,tim_projbd=2
  integer,save :: nskip=0
  integer :: cpopt,iband,igs,iline,indx_cgq,ipw,me_g0,comm_fft
- integer :: iband_me, jband_me, ierr, me_band, band_off !, unit_me
+ integer :: iband_me, jband_me, ierr, me_band, np_band, band_off !, unit_me
  integer :: ipws,ispinor,istwf_k,jband,nline,optlocal,optnl,dc_shift_band,sij_opt
  integer :: test_is_ok,useoverlap,usepaw,usevnl,usetolrde
  real(dp) :: d2edt2,d2te,d2teold,dedt,deltae,deold,dotgg
@@ -247,8 +247,8 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
 
  me_g0 = mpi_enreg%me_g0
  comm_fft = mpi_enreg%comm_fft
-
  me_band = mpi_enreg%me_band
+ np_band = mpi_enreg%nproc_band
  !unit_me = 300+band
  !unit_me = 6
 
@@ -364,9 +364,8 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
    do iband = 1, nband
      if (bands_treated_now(iband) == 0) cycle
      !if (band_procs(iband) == me_band) then ! these 2 conditions should be the same
-     if (iband == band) then
-       work(:,:)=cwave0(:,:)
-     end if
+     if (iband == band) work(:,:)=cwave0(:,:)
+
      ! send to everyone else, who is also working on jband right now
      call xmpi_bcast(work,band_procs(iband),mpi_enreg%comm_band,ierr)
      work1 = work
@@ -559,10 +558,7 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
  eig1_k_loc = zero
  do iband = 1, nband
    if (bands_treated_now(iband) == 0) cycle
-   work = zero
-   if (iband == band) then
-     work = gh1c
-   end if
+   if (iband == band) work = gh1c
    call xmpi_bcast(work,band_procs(iband),mpi_enreg%comm_band,ierr)
 
    if(gen_eigenpb)then
@@ -574,7 +570,7 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
    end if
 
    ! sum projections against all bands k+q
-   call xmpi_sum(work,mpi_enreg%comm_band,ierr)
+   call xmpi_sum_master(work, band_procs(iband), mpi_enreg%comm_band, ierr)
 
    ! scprod now contains scalar products of band iband (runs over all bands in current queue) with local bands j
    jband_me = 0
@@ -585,8 +581,8 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
    end do
 
    ! save this for me only
+   !TODO: make this a blas call? zaxpy
    if (iband == band) then
-     !TODO: make this a blas call? zaxpy
      gh1c = work - (mpi_enreg%nproc_band-1)*gh1c
    end if
 
@@ -605,10 +601,7 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
    if (gen_eigenpb) then
      do iband=1,nband
        if (bands_treated_now(iband) == 0) cycle
-       work = zero
-       if (iband==band) then
-         work = gs1c
-       end if
+       if (iband==band) work = gs1c
        ! for iband on this proc, bcast to all others to get full line of iband,jband pairs
        call xmpi_bcast(work,band_procs(iband),mpi_enreg%comm_band,ierr)
 
@@ -662,19 +655,18 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
  ! (this is needed when there are some partially or unoccupied states)
  do iband = 1, nband
    if (bands_treated_now(iband) == 0) cycle
-   if (iband == band) then
-     work = cwavef
-   end if
+
+   if (iband == band) work = cwavef
    call xmpi_bcast(work,band_procs(iband),mpi_enreg%comm_band,ierr)
 
    call projbd(cgq,work,-1,icgq,igscq,istwf_k,mcgq,mgscq,nband_me,npw1,nspinor,&
      gscq,scprod,0,tim_projbd,useoverlap,me_g0,comm_fft)
 
-   call xmpi_sum(work,mpi_enreg%comm_band,ierr)
+   call xmpi_sum_master(work, band_procs(iband), mpi_enreg%comm_band, ierr)
 
    ! save this for me_band only
+   !TODO: make this a blas call? zaxpy
    if (iband == band) then
-     !TODO: make this a blas call? zaxpy
      cwavef = work - (mpi_enreg%nproc_band-1)*cwavef
    end if
  end do
@@ -764,7 +756,7 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
    ! ================= COMPUTE THE RESIDUAL ===============================
    ! ======================================================================
    ! Note that gresid (=steepest-descent vector, Eq.(26) of PRB 55, 10337 (1996) [[cite:Gonze1997]])
-   ! is precomputed to garantee cancellation of errors
+   ! is precomputed to guarantee cancellation of errors
    ! and allow residuals to reach values as small as 1.0d-24 or better.
    if (berryopt== 4.or.berryopt== 6.or.berryopt== 7.or. berryopt==14.or.berryopt==16.or.berryopt==17) then
      if (ipert==natom+2) then
@@ -801,11 +793,8 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
    ! -For the generalized eigenPb, S|cgq> is used in place of |cgq>,
    ! in order to apply P_c+ projector (see PRB 73, 235101 (2006) [[cite:Audouze2006]], Eq. (71), (72)
    do iband = 1, nband
-     work = zero
      if (bands_treated_now(iband) == 0) cycle
-     if (iband == band) then
-       work = gresid
-     end if
+     if (iband == band) work = gresid
      call xmpi_bcast(work,band_procs(iband),mpi_enreg%comm_band,ierr)
 
      if(gen_eigenpb)then
@@ -816,11 +805,11 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
          dummy,scprod,0,tim_projbd,useoverlap,me_g0,comm_fft)
      end if
 
-     call xmpi_sum(work,mpi_enreg%comm_band,ierr)
+     call xmpi_sum_master(work, band_procs(iband), mpi_enreg%comm_band, ierr)
 
      ! save this for me_band only
+     !TODO: make this a blas call? zaxpy
      if (iband == band) then
-       !TODO: make this a blas call? zaxpy
        gresid = work - (mpi_enreg%nproc_band-1)*gresid
      end if
    end do
@@ -869,7 +858,6 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
      ! Number of one-way 3D ffts skipped
      nskip=nskip+(nline-iline+1)
 
-     !DEBUG exit ! Exit from the loop on iline
      skipme = 1
    end if
 
@@ -891,7 +879,6 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
        call wrtout(std_out,msg)
      end if
      nskip=nskip+(nline-iline+1)  ! Number of two-way 3D ffts skipped
-     !DEBUG exit                  ! Exit from the loop on iline
      skipme = 1
    end if
 
@@ -959,19 +946,18 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
    ! -For the simple eigenPb, gscq is used as dummy argument
    do iband = 1, nband
      if (bands_treated_now(iband) == 0) cycle
-     if (iband == band) then
-       work = direc
-     end if
+
+     if (iband == band) work = direc
      call xmpi_bcast(work,band_procs(iband),mpi_enreg%comm_band,ierr)
 
      call projbd(cgq,work,-1,icgq,igscq,istwf_k,mcgq,mgscq,nband_me,npw1,nspinor,&
        gscq,scprod,0,tim_projbd,useoverlap,me_g0,comm_fft)
 
-     call xmpi_sum(work,mpi_enreg%comm_band,ierr)
+     call xmpi_sum_master(work, band_procs(iband), mpi_enreg%comm_band, ierr)
 
      ! save this for me_band only
+     !TODO: make this a blas call? zaxpy
      if (iband == band) then
-       !TODO: make this a blas call? zaxpy
        direc = work - (mpi_enreg%nproc_band-1)*direc
      end if
    end do
@@ -1100,7 +1086,6 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
      end if
      nskip=nskip+2*(nline-iline) ! Number of one-way 3D ffts skipped
      skipme = 1
-     !DEBUG exit                        ! Exit from the loop on iline
    end if
 
    ! ======================================================================
@@ -1154,7 +1139,6 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
        end if
        nskip=nskip+2*(nline-iline) ! Number of one-way 3D ffts skipped
        skipme = 1
-       !DEBUG exit                 ! Exit from the loop on iline
      end if
    end if
 
@@ -1172,12 +1156,6 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
      exit
    end if
 
-
-   ! ======================================================================
-   ! ================== END LOOP FOR GIVEN BAND ===========================
-   ! ======================================================================
-
-   ! Note that there are five "exit" instruction inside the loop.
    nlines_done = nlines_done + 1
  end do ! iline
 
@@ -1267,8 +1245,8 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
      call xmpi_sum(cwwork,mpi_enreg%comm_band,ierr)
 
      ! save this for me_band only
+     !TODO: make this a blas call? zaxpy
      if (iband == band) then
-       !TODO: make this a blas call? zaxpy
        cwwork = cwwork - (mpi_enreg%nproc_band-1)*cwavef
      end if
    end do
@@ -1297,9 +1275,8 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
    ! -Apply Pc to Psi^(1)
    do iband = 1, nband
      if (bands_treated_now(iband) == 0) cycle
-     if (iband == band) then
-       cwwork=cwavef
-     end if
+
+     if (iband == band) cwwork=cwavef
      call xmpi_bcast(cwwork,band_procs(iband),mpi_enreg%comm_band,ierr)
 
      if(gen_eigenpb)then
@@ -1310,11 +1287,11 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
          dummy,scprod,0,tim_projbd,useoverlap,me_g0,comm_fft)
      end if
 
-     call xmpi_sum(cwwork,mpi_enreg%comm_band,ierr)
+     call xmpi_sum_master(cwwork, band_procs(iband), mpi_enreg%comm_band, ierr)
 
      ! save this for me_band only
+     !TODO: make this a blas call? zaxpy
      if (iband == band) then
-      !TODO: make this a blas call? zaxpy
       cwwork = cwwork - (mpi_enreg%nproc_band-1)*cwavef
      end if
    end do
@@ -1356,8 +1333,8 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
      call xmpi_sum(work,mpi_enreg%comm_band,ierr)
 
      ! save this for me_band only
+     !TODO: make this a blas call? zaxpy
      if (iband == band) then
-       !TODO: make this a blas call? zaxpy
        cwwork = cwwork - (mpi_enreg%nproc_band-1)*work
      end if
    end do
