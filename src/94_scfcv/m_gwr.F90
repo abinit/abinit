@@ -808,7 +808,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  integer,parameter :: qptopt1 = 1, qtimrev1 = 1, master = 0, ndims = 4
  integer :: my_it, my_ikf, my_iqf, ii, ebands_timrev, my_iki, my_iqi, itau, spin
  integer :: my_nshiftq, iq_bz, iq_ibz, npw_, ncid !, ig
- integer :: comm_cart, me_cart, ierr, all_nproc, np_work, my_rank, qprange_, gap_err, ncerr, omp_nt
+ integer :: comm_cart, me_cart, ierr, all_nproc, my_rank, qprange_, gap_err, ncerr, omp_nt !np_work,
  integer :: cnt, ikcalc, ndeg, mband, bstop, nbsum !, it, iw ! jj,
  integer :: ik_ibz, ik_bz, isym_k, trev_k, g0_k(3)
  integer :: ip_g, ip_k, ip_t, ip_s, np_g, np_k, np_t, np_s
@@ -1314,7 +1314,6 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
      call wrtout(units, msg, newlines=1)
 
      call ps%from_pid()
-     !call ps%from_file("status")
      call ps%print([std_out])
    end if ! master
 
@@ -2207,7 +2206,7 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
 
  else
    ! Master reads and broadcasts. Much faster on lumi
-   call wrtout(std_out, " Using IO version based of master reads and brodcasts ...")
+   call wrtout(std_out, " Using IO version based on master reads and brodcasts ...")
    if (gwr%comm%me == master) then
      call wfk_open_read(wfk, wfk_path, formeig0, iomode_from_fname(wfk_path), get_unit(), xmpi_comm_self)
    end if
@@ -3357,7 +3356,7 @@ end subroutine desc_init
 !!  desc_get_vc_sqrt
 !!
 !! FUNCTION
-!!   Compute square root of Coulomb interaction vc(q,g).
+!!  Compute square root of Coulomb interaction vc(q,g).
 !!
 !! SOURCE
 
@@ -5808,17 +5807,15 @@ end subroutine gwr_run_g0w0
 !!  and minimax meshes along the imaginary axis.
 !!
 !! INPUTS
-!!  [free_ugb]: True if array with empty KS states should freed as soon as possibile. Default: True
 !!
 !! OUTPUT
 !!
 !! SOURCE
 
-subroutine gwr_run_energy_scf(gwr, free_ugb)
+subroutine gwr_run_energy_scf(gwr)
 
 !Arguments ------------------------------------
  class(gwr_t),intent(inout) :: gwr
- logical,optional,intent(in) :: free_ugb
 
 !Local variables-------------------------------
  integer,parameter :: master = 0
@@ -5827,6 +5824,8 @@ subroutine gwr_run_energy_scf(gwr, free_ugb)
  character(len=500) :: msg
 
 ! *************************************************************************
+
+ !  [free_ugb]: True if array with empty KS states should freed as soon as possibile. Default: True
 
  ! TODO:
  ! To implement restart capabilities we need to read scf_iteration, qp_ebands and gwr_task from GWR.nc
@@ -5956,7 +5955,7 @@ subroutine gwr_check_scf_cycle(gwr, converged)
  end do
  end associate
 
- ! Just to make sure that all MPI procs agree on this!
+ ! Just to make sure that all MPI procs agree!
  call xmpi_land(converged, gwr%comm%value)
 
  if (gwr%comm%me == master) then

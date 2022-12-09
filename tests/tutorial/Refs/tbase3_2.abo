@@ -25,7 +25,7 @@
 
 --- !BUG
 src_file: m_kpts.F90
-src_line: 1647
+src_line: 1666
 mpi_rank: 0
 message: |
     The argument nkpt = 2, does not match

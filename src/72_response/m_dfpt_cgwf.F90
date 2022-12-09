@@ -54,7 +54,7 @@ contains
 !! FUNCTION
 !! Update one single wavefunction (cwavef), non self-consistently.
 !! Uses a conjugate-gradient algorithm.
-!! Try to keep close to the formulas in PRB55, 10337 (1997) [[cite:Gonze1997]], for the
+!! Try to keep close to the formulas in PRB 55, 10337 (1997) [[cite:Gonze1997]], for the
 !! non-self-consistent case, except that we are computing here
 !! the second-derivative of the total energy, and not E(2). There
 !! is a factor of 2 between the two quantities.
@@ -891,7 +891,7 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
        call wrtout(std_out,msg)
      end if
      nskip=nskip+(nline-iline+1)  ! Number of two-way 3D ffts skipped
-     !DEBUG exit                         ! Exit from the loop on iline
+     !DEBUG exit                  ! Exit from the loop on iline
      skipme = 1
    end if
 
@@ -1154,7 +1154,7 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
        end if
        nskip=nskip+2*(nline-iline) ! Number of one-way 3D ffts skipped
        skipme = 1
-       !DEBUG exit                        ! Exit from the loop on iline
+       !DEBUG exit                 ! Exit from the loop on iline
      end if
    end if
 

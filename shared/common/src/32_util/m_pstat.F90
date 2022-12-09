@@ -129,7 +129,7 @@ subroutine pstat_from_file(ps, filepath)
 
 !Local variables-------------------------------
  integer :: unit, ierr
- character(len=500) :: line !, spid
+ character(len=500) :: line
  integer :: istart, istop, iostat
 ! *************************************************************************
 
@@ -242,6 +242,8 @@ end subroutine pstat_print
 !!
 !! SOURCE
 
+#if 0
+
 subroutine pstat_gather(ps, vmrss_mb, comm)
 
  class(pstat_t),intent(out) :: ps
@@ -257,6 +259,8 @@ subroutine pstat_gather(ps, vmrss_mb, comm)
 
 end subroutine pstat_gather
 !!***
+
+#endif
 
 end module m_pstat
 !!***
