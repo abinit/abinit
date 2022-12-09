@@ -33,6 +33,7 @@ module m_pstat
  implicit none
 
  private
+!!***
 
 !----------------------------------------------------------------------
 
@@ -42,8 +43,7 @@ module m_pstat
 !!
 !! FUNCTION
 !! This object stores the most important quantites reported in the /proc/{pid}/status file
-!! in particular the virtual memory VmRSS that can be used at runtime to define block sizes
-!! See https://docs.kernel.org/filesystems/proc.html
+!! in particular the virtual memory VmRSS. See https://docs.kernel.org/filesystems/proc.html
 !!
 !! NB: This file is only available on Linux hence one should always check the value of pstat%ok
 !! before using quantities such as vmrss_mb.

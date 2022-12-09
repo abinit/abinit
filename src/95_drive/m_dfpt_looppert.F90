@@ -1057,16 +1057,16 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    ireadwf0=1; formeig=0 ; ask_accurate=1 ; optorth=0
    mcg=mpw*dtset%nspinor*mband_mem_rbz*mkmem_rbz*dtset%nsppol
 
-  call wrtout(std_out, sjoin(" Memory required for psi0_k, psi0_kq psi1_kq: ", &
+  call wrtout(std_out, sjoin(" Memory required for psi0_k, psi0_kq, psi1_kq: ", &
     ftoa(3 * two * mcg * dp * b2Mb, fmt="f8.1"), "[Mb] <<< MEM"))
 
    if (one*mpw*dtset%nspinor*mband_mem_rbz*mkmem_rbz*dtset%nsppol > huge(1)) then
      write (msg,'(4a, 5(a,i0), 2a)')&
-&     "Default integer is not wide enough to store the size of the GS wavefunction array (WF0, mcg).",ch10,&
-&     "Action: increase the number of processors. Consider also OpenMP threads.",ch10,&
-&     "nspinor: ",dtset%nspinor, "mpw: ",mpw, "mband_mem_rbz: ",mband_mem_rbz, "mkmem_rbz: ",&
-&     mkmem_rbz, "nsppol: ",dtset%nsppol,ch10,&
-&     'Note: Compiling with large int (int64) requires a full software stack (MPI/FFTW/BLAS/LAPACK...) compiled in int64 mode'
+      "Default integer is not wide enough to store the size of the GS wavefunction array (WF0, mcg).",ch10,&
+      "Action: increase the number of processors. Consider also OpenMP threads.",ch10,&
+      "nspinor: ",dtset%nspinor, "mpw: ",mpw, "mband_mem_rbz: ",mband_mem_rbz, "mkmem_rbz: ",&
+      mkmem_rbz, "nsppol: ",dtset%nsppol,ch10,&
+      'Note: Compiling with large int (int64) requires a full software stack (MPI/FFTW/BLAS/LAPACK...) compiled in int64 mode'
      ABI_ERROR(msg)
    end if
    ABI_MALLOC_OR_DIE(cg,(2,mcg), ierr)
@@ -1195,30 +1195,18 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    ABI_MALLOC(eigenq,(bantot_rbz))
    ABI_MALLOC(doccde_tmp,(dtset%mband*nkpt_rbz*dtset%nsppol))
    eigenq(:)=zero
-   ! CP modified
-   !call ebands_init(bantot_rbz,ebands_kq,dtset%nelect,doccde_rbz,eigenq,istwfk_rbz,kpq_rbz,&
-!&   nband_rbz,nkpt_rbz,npwar1,dtset%nsppol,dtset%nspinor,dtset%tphysel,dtset%tsmear,dtset%occopt,occ_rbz,wtk_rbz,&
-!&   dtset%cellcharge(1), dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
-!&   dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
    call ebands_init(bantot_rbz,ebands_kq,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,&
 &   doccde_tmp,eigenq,istwfk_rbz,kpq_rbz,&
 &   nband_rbz,nkpt_rbz,npwar1,dtset%nsppol,dtset%nspinor,dtset%tphysel,dtset%tsmear,dtset%occopt,occ_rbz,wtk_rbz,&
 &   dtset%cellcharge(1), dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
 &   dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
-   ! End CP modified
    if (.not.kramers_deg) then
      eigenq(:)=zero
-     ! CP modified
-     ! call ebands_init(bantot_rbz,ebands_kmq,dtset%nelect,doccde_rbz,eigenq,istwfk_rbz,kmq_rbz,&
-!&     nband_rbz,nkpt_rbz,npwar1_mq,dtset%nsppol,dtset%nspinor,dtset%tphysel,dtset%tsmear,dtset%occopt,occ_rbz,wtk_rbz,&
-!&     dtset%cellcharge(1), dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
-!&     dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
      call ebands_init(bantot_rbz,ebands_kmq,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,&
 &     doccde_tmp,eigenq,istwfk_rbz,kmq_rbz,&
 &     nband_rbz,nkpt_rbz,npwar1_mq,dtset%nsppol,dtset%nspinor,dtset%tphysel,dtset%tsmear,dtset%occopt,occ_rbz,wtk_rbz,&
 &     dtset%cellcharge(1), dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
 &     dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
-      ! End CP modified
    end if
    ABI_FREE(eigenq)
    ABI_FREE(doccde_tmp)
@@ -1367,28 +1355,18 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      option=1
      dosdeltae=zero ! the DOS is not computed with option=1
      maxocc=two/(dtset%nspinor*dtset%nsppol)
-     ! CP modified
-     !call getnel(docckqde,dosdeltae,eigenq,entropy,fermie,maxocc,dtset%mband,&
-     !  nband_rbz,nelectkq,nkpt_rbz,dtset%nsppol,occkq,dtset%occopt,option,&
-     !  dtset%tphysel,dtset%tsmear,fake_unit,wtk_rbz)
      call getnel(docckqde,dosdeltae,eigenq,entropy,fermie,fermie,maxocc,dtset%mband,&
        nband_rbz,nelectkq,nkpt_rbz,dtset%nsppol,occkq,dtset%occopt,option,&
        dtset%tphysel,dtset%tsmear,fake_unit,wtk_rbz,1,dtset%nband(1)) ! CP: added 1, nband(0) to fit new def of getnel
-     ! End CP modified
 !    Compare nelect at k and nelelect at k+q
      write(msg, '(a,a,a,es16.6,a,es16.6,a)')&
        ' dfpt_looppert : total number of electrons, from k and k+q',ch10,&
        '  fully or partially occupied states are',dtset%nelect,' and',nelectkq,'.'
      call wrtout([std_out, ab_out], msg)
      if (.not.kramers_deg) then
-       ! CP modified
-       !call getnel(docckde_mq,dosdeltae,eigen_mq,entropy,fermie,maxocc,dtset%mband,&
-       !  nband_rbz,nelectkq,nkpt_rbz,dtset%nsppol,occk_mq,dtset%occopt,option,&
-       !  dtset%tphysel,dtset%tsmear,fake_unit,wtk_rbz)
        call getnel(docckde_mq,dosdeltae,eigen_mq,entropy,fermie,fermie,maxocc,dtset%mband,&
          nband_rbz,nelectkq,nkpt_rbz,dtset%nsppol,occk_mq,dtset%occopt,option,&
          dtset%tphysel,dtset%tsmear,fake_unit,wtk_rbz,1,dtset%nband(1))
-       ! End CP modified
 !      Compare nelect at k and nelelect at k-q
        write(msg, '(a,a,a,es16.6,a,es16.6,a)')&
          ' dfpt_looppert : total number of electrons, from k and k-q',ch10,&
@@ -2009,19 +1987,12 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      ! MG FIXME: Here there's a bug because eigen0 is dimensioned with nkpt_rbz i.e. IBZ(q)
      ! but the ebands_t object is constructed with dimensions taken from hdr0 i.e. the IBZ(q=0).
      bantot= dtset%mband*dtset%nkpt*dtset%nsppol
-     ! CP modified
-     !call ebands_init(bantot,gkk_ebands,dtset%nelect,doccde,eigen0,hdr0%istwfk,hdr0%kptns,&
-!&     hdr0%nband, hdr0%nkpt,hdr0%npwarr,hdr0%nsppol,hdr0%nspinor,&
-!&     hdr0%tphysel,hdr0%tsmear,hdr0%occopt,hdr0%occ,hdr0%wtk,&
-!&     hdr0%cellcharge, hdr0%kptopt, hdr0%kptrlatt_orig, hdr0%nshiftk_orig, hdr0%shiftk_orig, &
-!&     hdr0%kptrlatt, hdr0%nshiftk, hdr0%shiftk)
      call ebands_init(bantot,gkk_ebands,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,&
 &     doccde,eigen0,hdr0%istwfk,hdr0%kptns,&
 &     hdr0%nband, hdr0%nkpt,hdr0%npwarr,hdr0%nsppol,hdr0%nspinor,&
 &     hdr0%tphysel,hdr0%tsmear,hdr0%occopt,hdr0%occ,hdr0%wtk,&
 &     hdr0%cellcharge, hdr0%kptopt, hdr0%kptrlatt_orig, hdr0%nshiftk_orig, hdr0%shiftk_orig, &
 &     hdr0%kptrlatt, hdr0%nshiftk, hdr0%shiftk)
-      ! End CP modified
 
      ! Init a gkk_t object
      call gkk_init(gkk,gkk2d,dtset%mband,dtset%nsppol,nkpt_rbz,1,1)
@@ -2408,19 +2379,12 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 
 !        Electronic band energies.
          bantot= dtset%mband*dtset%nkpt*dtset%nsppol
-         ! CP modified
-         !call ebands_init(bantot,gkk_ebands,dtset%nelect,doccde,eigen0_pert,hdr0%istwfk,hdr0%kptns,&
-!&         hdr0%nband, hdr0%nkpt,hdr0%npwarr,hdr0%nsppol,hdr0%nspinor,&
-!&         hdr0%tphysel,hdr0%tsmear,hdr0%occopt,hdr0%occ,hdr0%wtk,&
-!&         hdr0%cellcharge, hdr0%kptopt, hdr0%kptrlatt_orig, hdr0%nshiftk_orig, hdr0%shiftk_orig, &
-!&         hdr0%kptrlatt, hdr0%nshiftk, hdr0%shiftk)
          call ebands_init(bantot,gkk_ebands,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,&
 &         doccde,eigen0_pert,hdr0%istwfk,hdr0%kptns,&
 &         hdr0%nband, hdr0%nkpt,hdr0%npwarr,hdr0%nsppol,hdr0%nspinor,&
 &         hdr0%tphysel,hdr0%tsmear,hdr0%occopt,hdr0%occ,hdr0%wtk,&
 &         hdr0%cellcharge, hdr0%kptopt, hdr0%kptrlatt_orig, hdr0%nshiftk_orig, hdr0%shiftk_orig, &
 &         hdr0%kptrlatt, hdr0%nshiftk, hdr0%shiftk)
-          ! End CP modified
 
 !        Second order derivative EIGR2D (real and Im)
          call eigr2d_init(eig2nkq,eigr2d,dtset%mband,hdr0%nsppol,nkpt_rbz,dtset%natom)
