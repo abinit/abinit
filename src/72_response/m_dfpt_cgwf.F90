@@ -70,7 +70,7 @@ contains
 !! are supposed to call dfpt_cgwf with the same values.
 !!
 !! INPUTS
-!!  band=which particular band we are converging (LOCAL)
+!!  u1_band=which particular band we are converging (LOCAL)
 !!  band_me=cpu-local index in cgq array of band which we are converging.
 !!  berryopt=option for Berry phase
 !!  cgq(2,mcgq)=wavefunction coefficients for MY bands at k+Q
@@ -147,7 +147,7 @@ contains
 !!
 !! SOURCE
 
-subroutine dfpt_cgwf(band,band_me,rank_band,bands_treated_now,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,&
+subroutine dfpt_cgwf(u1_band,band_me,rank_band,bands_treated_now,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,&
 & rf2,dcwavef,&
 & eig0_k,eig0_kq,eig1_k,ghc,gh1c_n,grad_berry,gsc,gscq,&
 & gs_hamkq,gvnlxc,gvnlx1,icgq,idir,ipert,igscq,&
@@ -157,7 +157,7 @@ subroutine dfpt_cgwf(band,band_me,rank_band,bands_treated_now,berryopt,cgq,cwave
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: band,berryopt
+ integer,intent(in) :: u1_band,berryopt
  integer,intent(in) :: band_me, nband_me
  integer,intent(in) :: icgq,idir,igscq,ipert,mcgq,mgscq,mpw1,natom,nband
  integer,intent(in) :: nbdbuf,nline_in,npw,npw1,nspinor,opt_gvnlx1
@@ -241,7 +241,7 @@ subroutine dfpt_cgwf(band,band_me,rank_band,bands_treated_now,berryopt,cgq,cwave
 
  if (prtvol>=10) then
    !Tell us what is going on:
-   write(msg,'(a,i6,2x,a,i3,a)')' --- dfpt_cgwf is called for band',band,'for',nline,' lines'
+   write(msg,'(a,i6,2x,a,i3,a)')' --- dfpt_cgwf is called for band',u1_band,'for',nline,' lines'
    call wrtout(std_out,msg)
  end if
 
@@ -249,8 +249,7 @@ subroutine dfpt_cgwf(band,band_me,rank_band,bands_treated_now,berryopt,cgq,cwave
  comm_fft = mpi_enreg%comm_fft
  me_band = mpi_enreg%me_band
  np_band = mpi_enreg%nproc_band
- !unit_me = 300+band
- !unit_me = 6
+ !unit_me = 300+u1_band
 
  skipme = 0
 
@@ -260,7 +259,7 @@ subroutine dfpt_cgwf(band,band_me,rank_band,bands_treated_now,berryopt,cgq,cwave
  useoverlap=0;if (gen_eigenpb) useoverlap=1
 
  ! Use scissor shift on 0-order eigenvalue
- eshift=eig0_k(band)-dfpt_sciss
+ eshift=eig0_k(u1_band)-dfpt_sciss
 
  ! Additional initializations
  istwf_k=gs_hamkq%istwf_k
@@ -277,13 +276,13 @@ subroutine dfpt_cgwf(band,band_me,rank_band,bands_treated_now,berryopt,cgq,cwave
 
  if (berryopt== 4.or.berryopt== 6.or.berryopt== 7.or. berryopt==14.or.berryopt==16.or.berryopt==17) then
    ABI_MALLOC(gberry,(2,npw1*nspinor))
-   gberry(:,1:npw1*nspinor)=grad_berry(:,1:npw1*nspinor,band)
+   gberry(:,1:npw1*nspinor)=grad_berry(:,1:npw1*nspinor,u1_band)
  else
    ABI_MALLOC(gberry,(0,0))
  end if
 
-!TODO MJV: this should probably be adjusted as well for natom+10/11 perts: set to band_me instead of band
- dc_shift_band=(band-1)*npw1*nspinor
+!TODO MJV: this should probably be adjusted as well for natom+10/11 perts: set to band_me instead of u1_band
+ dc_shift_band=(u1_band-1)*npw1*nspinor
 
 ! this is used many times - no use de and re allocating
  ABI_MALLOC(work,(2,npw1*nspinor))
@@ -312,7 +311,7 @@ subroutine dfpt_cgwf(band,band_me,rank_band,bands_treated_now,berryopt,cgq,cwave
 
      call dotprod_g(dotr,doti,istwf_k,npw1*nspinor,2,work1,work,me_g0,mpi_enreg%comm_spinorfft)
      test_is_ok=1
-     if(jband==band) then
+     if(jband==u1_band) then
        if(abs(dotr-one)>tol12) test_is_ok=0
      else
        if(abs(dotr)>tol12) test_is_ok=0
@@ -378,7 +377,7 @@ subroutine dfpt_cgwf(band,band_me,rank_band,bands_treated_now,berryopt,cgq,cwave
 
      call sqnorm_g(dotr,istwf_k,npw1*nspinor,work,me_g0,comm_fft)
      if(sqrt(dotr)>tol12) then
-       write(msg,'(a,i3,a,es22.15)') "CGWF3_WARNING : Norm of Pc.Psi_k^(0) for band ",band," is ",sqrt(dotr)
+       write(msg,'(a,i3,a,es22.15)') "CGWF3_WARNING : Norm of Pc.Psi_k^(0) for band ",u1_band," is ",sqrt(dotr)
        call wrtout(std_out,msg)
      end if
    end do
@@ -405,14 +404,14 @@ subroutine dfpt_cgwf(band,band_me,rank_band,bands_treated_now,berryopt,cgq,cwave
 
        call sqnorm_g(dotr,istwf_k,npw1*nspinor,work,me_g0,comm_fft)
        if(sqrt(dotr)>tol10) then
-         write(msg,'(a,i3,a,es22.15)') "CGWF3_WARNING : Norm of Pc.dcwavef for band ",band," is ",sqrt(dotr)
+         write(msg,'(a,i3,a,es22.15)') "CGWF3_WARNING : Norm of Pc.dcwavef for band ",u1_band," is ",sqrt(dotr)
          call wrtout(std_out,msg)
        end if
      end do
    end if
 
    ! ===== Check Pc^*.S(0).Psi_k+q^(0)=0
-   ! NB: here again does not depend on input "band"
+   ! NB: here again does not depend on input "u1_band"
    if (gen_eigenpb) then
      jband_me = 0
      do jband=1,nband
@@ -492,7 +491,7 @@ subroutine dfpt_cgwf(band,band_me,rank_band,bands_treated_now,berryopt,cgq,cwave
      ! dcwavef is delta_Psi(1)=-1/2.Sum_{j}[<C0_k+q_j|S(1)|C0_k_i>.|C0_k+q_j>]
      ! see PRB 78, 035105 (2008) [[cite:Audouze2008]], Eq. (42)
      if (usedcwavef==2) then
-       call getdc1(band,rank_band,bands_treated_now,cgq,cprj_dummy,dcwavef,cprj_dummy,&
+       call getdc1(u1_band,rank_band,bands_treated_now,cgq,cprj_dummy,dcwavef,cprj_dummy,&
 &           0,icgq,istwf_k,mcgq,0,&
 &           mpi_enreg,natom,nband,nband_me,npw1,nspinor,0,gs1c)
      end if
@@ -537,7 +536,7 @@ subroutine dfpt_cgwf(band,band_me,rank_band,bands_treated_now,berryopt,cgq,cwave
 
      call sqnorm_g(dotr,istwf_k,npw1*nspinor,cwwork,me_g0,comm_fft)
      if(sqrt(dotr)>tol12) then
-       write(msg,'(a,i3,a,es22.15)') 'CGWF3_WARNING : |Pc^*.(H^(0)-E.S^(0)).delta_Psi^(1)| (band ',band,')=',sqrt(dotr)
+       write(msg,'(a,i3,a,es22.15)') 'CGWF3_WARNING : |Pc^*.(H^(0)-E.S^(0)).delta_Psi^(1)| (band ',u1_band,')=',sqrt(dotr)
        call wrtout(std_out,msg)
      end if
    end do
@@ -598,7 +597,6 @@ subroutine dfpt_cgwf(band,band_me,rank_band,bands_treated_now,berryopt,cgq,cwave
    if (gen_eigenpb) then
      do iband=1,nband
        if (bands_treated_now(iband) == 0) cycle
-       !if (iband==band) work = gs1c
        if (rank_band(iband) == me_band) work = gs1c
        ! for iband on this proc, bcast to all others to get full line of iband,jband pairs
        call xmpi_bcast(work,rank_band(iband),mpi_enreg%comm_band,ierr)
@@ -685,7 +683,7 @@ subroutine dfpt_cgwf(band,band_me,rank_band,bands_treated_now,berryopt,cgq,cwave
    end do
  end if
 
- if(band>max(1,nband-nbdbuf))then
+ if (u1_band>max(1,nband-nbdbuf))then
    ! Treat the case of buffer bands
    cwavef=zero
    ghc   =zero
@@ -700,7 +698,7 @@ subroutine dfpt_cgwf(band,band_me,rank_band,bands_treated_now,berryopt,cgq,cwave
    nskip=nskip+nline
 
    ! At the end of the treatment of a set of bands, write the number of one-way 3D ffts skipped
-   if (xmpi_paral==1 .and. band==nband .and. prtvol>=10) then
+   if (xmpi_paral==1 .and. u1_band==nband .and. prtvol>=10) then
      write(msg,'(a,i0)')' dfpt_cgwf: number of one-way 3D ffts skipped in cgwf3 until now =',nskip
      call wrtout(std_out,msg)
    end if
@@ -741,7 +739,7 @@ subroutine dfpt_cgwf(band,band_me,rank_band,bands_treated_now,berryopt,cgq,cwave
  resid=zero
 
  bands_skipped_now = 0
- bands_skipped_now(band) = skipme
+ bands_skipped_now(u1_band) = skipme
  call xmpi_sum(bands_skipped_now,mpi_enreg%comm_band,ierr)
 
  ! ======================================================================
@@ -873,7 +871,8 @@ subroutine dfpt_cgwf(band,band_me,rank_band,bands_treated_now,berryopt,cgq,cwave
    ! If residual sufficiently small stop line minimizations
    if (resid<tolwfr .and. skipme == 0) then
      if(prtvol>=10)then
-       write(msg,'(a,i4,a,i2,a,es12.4)')' dfpt_cgwf: band',band,' converged after ',iline,' line minimizations: resid = ',resid
+       write(msg,'(a,i4,a,i2,a,es12.4)')&
+           ' dfpt_cgwf: band',u1_band,' converged after ',iline,' line minimizations: resid = ',resid
        call wrtout(std_out,msg)
      end if
      nskip=nskip+(nline-iline+1)  ! Number of two-way 3D ffts skipped
@@ -882,7 +881,7 @@ subroutine dfpt_cgwf(band,band_me,rank_band,bands_treated_now,berryopt,cgq,cwave
 
    ! If user require exiting the job, stop line minimisations
    if (quit==1) then
-     write(msg,'(a,i0)')' dfpt_cgwf: user require exiting => skip update of band ',band
+     write(msg,'(a,i0)')' dfpt_cgwf: user require exiting => skip update of band ',u1_band
      call wrtout(std_out,msg)
      nskip=nskip+(nline-iline+1)  ! Number of two-way 3D ffts skipped
      exit                         ! Exit from the loop on iline
@@ -904,7 +903,7 @@ subroutine dfpt_cgwf(band,band_me,rank_band,bands_treated_now,berryopt,cgq,cwave
    !write(std_out,*)' dfpt_cgwf : before precon, direc**2=',dotr
    !if (gen_eigenpb) then
    !call dotprod_g(dotr,doti,istwf_k,npw1*nspinor,1,cwaveq,&
-   !&                 gscq(:,1+npw1*nspinor*(band-1)+igscq:npw1*nspinor*band+igscq),me_g0,mpi_enreg%comm_spinorfft)
+   !&                 gscq(:,1+npw1*nspinor*(u1_band-1)+igscq:npw1*nspinor*u1_band+igscq),me_g0,mpi_enreg%comm_spinorfft)
    !else
    !call sqnorm_g(dotr,istwf_k,npw1*nspinor,cwaveq,me_g0,comm_fft)
    !end if
@@ -1141,7 +1140,7 @@ subroutine dfpt_cgwf(band,band_me,rank_band,bands_treated_now,berryopt,cgq,cwave
    end if
 
    bands_skipped_now = 0
-   bands_skipped_now(band) = skipme
+   bands_skipped_now(u1_band) = skipme
    call xmpi_sum(bands_skipped_now,mpi_enreg%comm_band,ierr)
 
    ! bands_skipped_now = bands_skipped_now - bands_treated_now
@@ -1197,8 +1196,8 @@ subroutine dfpt_cgwf(band,band_me,rank_band,bands_treated_now,berryopt,cgq,cwave
        dotr=prod1+half*dotr
        doti=prod2+half*doti
      else if(prtvol==-19) then ! 2nd order case
-       dotr=prod1+half*rf2%amn(1,iband+(band-1)*nband)
-       doti=prod2+half*rf2%amn(2,iband+(band-1)*nband)
+       dotr=prod1+half*rf2%amn(1,iband+(u1_band-1)*nband)
+       doti=prod2+half*rf2%amn(2,iband+(u1_band-1)*nband)
      else
        write(msg,'(a)') 'CGWF3_WARNING : Use prtvol=-19 to test orthogonality for ipert=natom+10 or +11'
        call wrtout(std_out,msg,'COLL')
@@ -1258,7 +1257,7 @@ subroutine dfpt_cgwf(band,band_me,rank_band,bands_treated_now,berryopt,cgq,cwave
    if(sqrt(dotr)>tol10) then
      !if (gen_eigenpb) then
      !  write(msg,'(a,i3,a,es22.15)') &
-     !  'CGWF3_WARNING : |(Pc.Psi^(1)_i,k,q + delta_Psi^(1)_i,k) - Psi^(1)_i,k,q|^2 (band ',band,')=',dotr
+     !  'CGWF3_WARNING : |(Pc.Psi^(1)_i,k,q + delta_Psi^(1)_i,k) - Psi^(1)_i,k,q|^2 (band ',u1_band,')=',dotr
      !else
      write(msg,'(a,es22.15)') 'CGWF3_WARNING : |(Pc.Psi^(1)_i,k,q + delta_Psi^(1)_i,k) - Psi^(1)_i,k,q| = ',sqrt(dotr)
      !end if
@@ -1339,7 +1338,7 @@ subroutine dfpt_cgwf(band,band_me,rank_band,bands_treated_now,berryopt,cgq,cwave
    call sqnorm_g(dotr,istwf_k,npw1*nspinor,cwwork,me_g0,comm_fft)
    ABI_FREE(cwwork)
    write(msg,'(a,i3,a,es22.15,2a,i4)') &
-     '*** CGWF3 Sternheimer equation test for band ',band,'=',sqrt(dotr),ch10,&
+     '*** CGWF3 Sternheimer equation test for band ',u1_band,'=',sqrt(dotr),ch10,&
      'It should go to zero for large nline : nlines_done = ',nlines_done
    call wrtout(std_out,msg)
  end if ! prtvol==-level.or.prtvol==-19.or.prtvol==-20
@@ -1363,7 +1362,7 @@ subroutine dfpt_cgwf(band,band_me,rank_band,bands_treated_now,berryopt,cgq,cwave
    ABI_FREE(work1)
    ABI_FREE(work2)
    cwwork=cwwork+gh1c_n
-   jband=(band-1)*2*nband
+   jband=(u1_band-1)*2*nband
    iband_me = 0
    do iband=1,nband
      if (bands_treated_now(iband) == 0) cycle
@@ -1379,7 +1378,7 @@ subroutine dfpt_cgwf(band,band_me,rank_band,bands_treated_now,berryopt,cgq,cwave
      dotr = sqrt(dotr**2+doti**2)
      if (dotr > tol8) then
        write(msg,'(2(a,i3),a,es22.15)') &
-         'CGWF3_WARNING < Psi^(0) | ( H^(0)-eps^(0) S^(0) ) | Psi^(1) > for i=',iband,' j=',band,&
+         'CGWF3_WARNING < Psi^(0) | ( H^(0)-eps^(0) S^(0) ) | Psi^(1) > for i=',iband,' j=',u1_band,&
        ' : ',sqrt(dotr**2+doti**2)
        call wrtout(std_out,msg)
      end if
@@ -1406,14 +1405,14 @@ subroutine dfpt_cgwf(band,band_me,rank_band,bands_treated_now,berryopt,cgq,cwave
  end if
  ABI_FREE(conjgrprj)
 
- if(band>max(1,nband-nbdbuf))then
+ if(u1_band>max(1,nband-nbdbuf))then
    ! A small negative residual will be associated with these
    ! in the present algorithm all bands need to be in the loops over cgq etc... for the parallelization
    resid=-0.1_dp
  end if
 
  ! At the end of the treatment of a set of bands, write the number of one-way 3D ffts skipped
- if (xmpi_paral==1 .and. band==nband .and. prtvol>=10) then
+ if (xmpi_paral==1 .and. u1_band==nband .and. prtvol>=10) then
    write(msg,'(a,i0)')' dfpt_cgwf: number of one-way 3D ffts skipped in cgwf3 until now =',nskip
    call wrtout(std_out,msg)
  end if
