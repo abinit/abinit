@@ -64,7 +64,7 @@ module m_sigmaph
  use m_time,           only : cwtime, cwtime_report, timab, sec2str
  use m_fstrings,       only : itoa, ftoa, sjoin, ktoa, ltoa, strcat
  use m_numeric_tools,  only : arth, c2r, get_diag, linfit, iseven, simpson_cplx, simpson, print_arr, inrange
- use m_io_tools,       only : iomode_from_fname, file_exists, is_open, open_file
+ use m_io_tools,       only : iomode_from_fname, file_exists, is_open, open_file, flush_unit
  use m_special_funcs,  only : gaussian
  use m_fftcore,        only : ngfft_seq, sphereboundary, get_kg, kgindex
  use m_cgtk,           only : cgtk_rotate, cgtk_change_gsphere
@@ -1630,19 +1630,19 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
              band_ks = ib_k + bstart_ks - 1
 
              ! Init entry in cg1s_kq, either from cache or with zeros.
-             if (use_u1c_cache) then
-               u1c_ib_k = u1c%find_band(band_ks)
-               if (u1c_ib_k /= -1) then
-                 call cgtk_change_gsphere(nspinor, &
-                                          u1c%prev_npw_kq, istwfk1, u1c%prev_kg_kq, u1c%prev_cg1s_kq(1,1,ipc,u1c_ib_k), &
-                                          npw_kq, istwfk1, kg_kq, cg1s_kq(1,1,ipc,ib_k), work_ngfft, work)
-               else
-                 cg1s_kq(:,:,ipc,ib_k) = zero
-               end if
+             !if (use_u1c_cache) then
+             !  u1c_ib_k = u1c%find_band(band_ks)
+             !  if (u1c_ib_k /= -1) then
+             !    call cgtk_change_gsphere(nspinor, &
+             !                             u1c%prev_npw_kq, istwfk1, u1c%prev_kg_kq, u1c%prev_cg1s_kq(1,1,ipc,u1c_ib_k), &
+             !                             npw_kq, istwfk1, kg_kq, cg1s_kq(1,1,ipc,ib_k), work_ngfft, work)
+             !  else
+             !    cg1s_kq(:,:,ipc,ib_k) = zero
+             !  end if
 
-             else
+             !else
                cg1s_kq(:,:,ipc,ib_k) = zero
-             end if
+             !end if
 
              bands_treated_now(:) = 0; bands_treated_now(band_ks) = 1
              !band_me = band_ks; u1_band  = band_ks
@@ -1658,16 +1658,20 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
              if (inrange(band_ks, [sigma%my_bsum_start, sigma%my_bsum_stop])) then
                band_me = band_ks - sigma%my_bsum_start + 1
                u1_band = band_ks
-               !print *, "band_ks", band_ks, "treated by bsum me", sigma%bsum_comm%me
              else
                band_me = 1
                u1_band = -band_ks
-               !u1_band = +band_ks
              end if
 
              mcgq = npw_kq * nspinor * nband_me
              mgscq = npw_kq * nspinor * nband_me * psps%usepaw
              nlines_done = 0
+
+             ! MG TRICK: attempt to accelerate Sternheimer in STO
+             if (nspinor == 2 .and. mod(ib_k, 2) == 0) then
+               cg1s_kq(:,1:npw_kq,ipc,ib_k) = cg1s_kq(:,npw_kq+1:,ipc,ib_k-1)
+               cg1s_kq(:,npw_kq+1:,ipc,ib_k) = cg1s_kq(:,1:npw_kq,ipc,ib_k-1)
+             end if
 
              call dfpt_cgwf(u1_band, band_me, rank_band, bands_treated_now, berryopt0, &
                cgq, cg1s_kq(:,:,ipc,ib_k), kets_k(:,:,ib_k), &  ! Important stuff
@@ -1697,7 +1701,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                  ABI_ERROR(sjoin(" resid: ", ftoa(out_resid), ", nlines_done:", itoa(nlines_done)))
                end if
 
-               !if (my_rank == master) then
                if (my_rank == master .and. (enough_stern <= 5 .or. dtset%prtvol > 10)) then
                  write(std_out, "(2(a,es13.5),a,i0)") &
                    " Sternheimer converged with resid: ", out_resid, " <= tolwfr: ", dtset%tolwfr, &
@@ -4958,6 +4961,8 @@ subroutine sigmaph_gather_and_write(self, dtset, ebands, ikcalc, spin, comm)
      write(ab_out, "(a)")ch10
    end if
  end if
+
+ call flush_unit(ab_out)
 
  ! Write self-energy matrix elements for this (kpt, spin)
  ! NB: Only master writes
