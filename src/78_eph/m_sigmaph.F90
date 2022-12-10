@@ -1491,8 +1491,13 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          call timab(1908, 1, tsec)
          ABI_CALLOC(cg1s_kq, (2, npw_kq*nspinor, natom3, nbcalc_ks))
 
-         !nband_me = nbsum
+!#define _BAND_PARA
+
+#ifdef _BAND_PARA
          nband_me = sigma%my_bsum_stop - sigma%my_bsum_start + 1
+#else
+         nband_me = nbsum
+#endif
 
          ABI_MALLOC(cgq, (2, npw_kq * nspinor, nband_me))
          ABI_MALLOC(gscq, (2, npw_kq * nspinor, nband_me*psps%usepaw))
@@ -1507,17 +1512,21 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                                npw_kqirr, wfd%kdata(ikq_ibz)%kg_k, &
                                npw_kq, kg_kq, istwf_kqirr, istwf_kq, cgwork, bra_kq, work_ngfft, work)
             end if
-            !cgq(:, :, ibsum_kq) = bra_kq
+
+#ifdef _BAND_PARA
             ii = ibsum_kq - sigma%my_bsum_start + 1
             cgq(:,:,ii) = bra_kq
+#else
+            cgq(:, :, ibsum_kq) = bra_kq
+#endif
          end do
 
          cgq_request = xmpi_request_null
-#if 0
+
+#ifndef _BAND_PARA
          if (sigma%bsum_comm%nproc > 1) then
            ! If band parallelism, need to gather all bands nbsum bands.
            ! FIXME: This part is network intensive, one can avoid it by calling dfpt_cgwf in band-para mode.
-
            !call xmpi_sum(cgq, sigma%bsum_comm%value, ierr)
            !call xmpi_isum_ip(cgq, sigma%bsum_comm%value, cgq_request, ierr)
 
@@ -1585,9 +1594,11 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            ! NB: Assume adiabatic AHC expression to compute the contribution of states above nbsum.
 
            ! Prepare band parallelism in dfpt_cgwf via mpi_enreg.
+#ifdef _BAND_PARA
            mpi_enreg%comm_band = sigma%bsum_comm%value
            mpi_enreg%me_band = sigma%bsum_comm%me
            mpi_enreg%nproc_band = sigma%bsum_comm%nproc
+#endif
 
            ABI_CALLOC(out_eig1_k, (2*nbsum**2))
            ABI_MALLOC(dcwavef, (2, npw_kq*nspinor*usedcwavef0))
@@ -1619,34 +1630,15 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            nline_in = min(100, npw_kq); if (dtset%nline > nline_in) nline_in = min(dtset%nline, npw_kq)
 
            ! Wait for gatherv operation
-           !if (cgq_request /= xmpi_request_null) call xmpi_wait(cgq_request, ierr)
+#ifndef _BAND_PARA
+           if (cgq_request /= xmpi_request_null) call xmpi_wait(cgq_request, ierr)
+#endif
 
            do ib_k=1,nbcalc_ks
-             ! TODO: To be replaced by MPI parallellism over bands in projbd inside dfpt_cgwf
-             !TODO: band parallelize this routine, and call dfpt_cgwf with only limited cg arrays
-             ! in the meanwhile should make a test for paralbd, to exclude it, I think
-
-             !if (sigma%bsum_comm%skip(ib_k)) cycle ! MPI parallelism inside bsum (not very efficient).
              band_ks = ib_k + bstart_ks - 1
-
-             ! Init entry in cg1s_kq, either from cache or with zeros.
-             !if (use_u1c_cache) then
-             !  u1c_ib_k = u1c%find_band(band_ks)
-             !  if (u1c_ib_k /= -1) then
-             !    call cgtk_change_gsphere(nspinor, &
-             !                             u1c%prev_npw_kq, istwfk1, u1c%prev_kg_kq, u1c%prev_cg1s_kq(1,1,ipc,u1c_ib_k), &
-             !                             npw_kq, istwfk1, kg_kq, cg1s_kq(1,1,ipc,ib_k), work_ngfft, work)
-             !  else
-             !    cg1s_kq(:,:,ipc,ib_k) = zero
-             !  end if
-
-             !else
-               cg1s_kq(:,:,ipc,ib_k) = zero
-             !end if
-
              bands_treated_now(:) = 0; bands_treated_now(band_ks) = 1
-             !band_me = band_ks; u1_band  = band_ks
 
+#ifdef _BAND_PARA
              ! Init rank_band and band_me from nbsum_rank.
              rank_band = -1; band_me = 1
              do ip=1,sigma%bsum_comm%nproc
@@ -1662,16 +1654,37 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                band_me = 1
                u1_band = -band_ks
              end if
+#else
+             rank_band = 0
+             band_me = band_ks
+             u1_band  = band_ks
+             if (sigma%bsum_comm%skip(ib_k)) cycle ! MPI parallelism inside bsum (not very efficient).
+#endif
+
+             ! Init entry in cg1s_kq, either from cache or with zeros.
+             if (use_u1c_cache) then
+               u1c_ib_k = u1c%find_band(band_ks)
+               if (u1c_ib_k /= -1) then
+                 call cgtk_change_gsphere(nspinor, &
+                                          u1c%prev_npw_kq, istwfk1, u1c%prev_kg_kq, u1c%prev_cg1s_kq(1,1,ipc,u1c_ib_k), &
+                                          npw_kq, istwfk1, kg_kq, cg1s_kq(1,1,ipc,ib_k), work_ngfft, work)
+               else
+                 cg1s_kq(:,:,ipc,ib_k) = zero
+               end if
+
+             else
+              cg1s_kq(:,:,ipc,ib_k) = zero
+             end if
+
+             ! MG TRICK: attempt to accelerate Sternheimer in STO
+             !if (nspinor == 2 .and. mod(band_ks, 2) == 0 .and. ib_k > 1 .and. u1_band > 0) then
+             !  cg1s_kq(:,1:npw_kq,ipc,ib_k) = cg1s_kq(:,npw_kq+1:,ipc,ib_k-1)
+             !  cg1s_kq(:,npw_kq+1:,ipc,ib_k) = cg1s_kq(:,1:npw_kq,ipc,ib_k-1)
+             !end if
 
              mcgq = npw_kq * nspinor * nband_me
              mgscq = npw_kq * nspinor * nband_me * psps%usepaw
              nlines_done = 0
-
-             ! MG TRICK: attempt to accelerate Sternheimer in STO
-             if (nspinor == 2 .and. mod(ib_k, 2) == 0) then
-               cg1s_kq(:,1:npw_kq,ipc,ib_k) = cg1s_kq(:,npw_kq+1:,ipc,ib_k-1)
-               cg1s_kq(:,npw_kq+1:,ipc,ib_k) = cg1s_kq(:,1:npw_kq,ipc,ib_k-1)
-             end if
 
              call dfpt_cgwf(u1_band, band_me, rank_band, bands_treated_now, berryopt0, &
                cgq, cg1s_kq(:,:,ipc,ib_k), kets_k(:,:,ib_k), &  ! Important stuff
@@ -1686,11 +1699,12 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
              tot_nlines_done = tot_nlines_done + nlines_done
 
+#ifdef _BAND_PARA
              call xmpi_bcast(cg1s_kq(:,:,ipc,ib_k), u1_master, sigma%bsum_comm%value, ierr)
+#endif
 
              ! Handle possible convergence error.
-             if (inrange(band_ks, [sigma%my_bsum_start, sigma%my_bsum_stop])) then
-             !if (u1_band > 0) then
+             if (u1_band > 0) then
                if (out_resid > dtset%tolwfr) then
                  write(msg, "(a,i0,a, 2(a,es13.5), 2a,i0,a)") &
                    " Sternheimer didn't convergence for band: ", band_ks, ch10, &
@@ -1710,10 +1724,12 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
              end if
            end do ! ib_k
 
+#ifdef _BAND_PARA
            ! Revert changes in mpi_enreg.
            mpi_enreg%comm_band = xmpi_comm_self
            mpi_enreg%me_band = 0
            mpi_enreg%nproc_band = 1
+#endif
 
            ABI_FREE(bands_treated_now)
            ABI_FREE(rank_band)
@@ -2229,6 +2245,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
        if (sigma%nqibz_k < 1000 .or. (sigma%nqibz_k > 1000 .and. mod(iq_ibz_k, 200) == 0) .or. iq_ibz_k <= nprocs) then
          write(msg,'(4(a,i0),a,f8.2)') " k-point [",ikcalc,"/",sigma%nkcalc, "] q-point [",iq_ibz_k,"/",sigma%nqibz_k,"]"
+         !write(msg,'(2(a,i0),a)') " my q-point [",imyq,"/",sigma%my_nqibz_k,"]"
          call cwtime_report(msg, cpu, wall, gflops)
        end if
      end do ! iq_ibz_k (sum over q-points in IBZ_k)
