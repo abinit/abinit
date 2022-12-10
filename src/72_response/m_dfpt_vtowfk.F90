@@ -230,8 +230,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
  type(rf2_t) :: rf2
 !arrays
  logical,allocatable :: cycle_bands(:)
- integer :: band_procs(nband_k)
- integer :: bands_treated_now(nband_k)
+ integer :: rank_band(nband_k), bands_treated_now(nband_k)
  real(dp) :: tsec(2)
  real(dp),allocatable :: cwave0(:,:),cwave1(:,:),cwavef(:,:)
  real(dp),allocatable :: dcwavef(:,:),gh1c_n(:,:),gh0c1(:,:),ghc_vectornd(:,:)
@@ -332,7 +331,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 !==================  LOOP OVER BANDS ==================================
 !======================================================================
 
- call proc_distrb_band(band_procs,mpi_enreg%proc_distrb,ikpt,isppol,mband,&
+ call proc_distrb_band(rank_band,mpi_enreg%proc_distrb,ikpt,isppol,mband,&
 &  mpi_enreg%me_band,mpi_enreg%me_kpt,mpi_enreg%comm_band)
 
  iband_me = 0
@@ -429,7 +428,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
        bands_treated_now(iband) = 1
        call xmpi_sum(bands_treated_now,mpi_enreg%comm_band,ierr)
 
-       call dfpt_cgwf(iband,iband_me,band_procs,bands_treated_now,dtset%berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,&
+       call dfpt_cgwf(iband,iband_me,rank_band,bands_treated_now,dtset%berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,&
 &       rf2,dcwavef,&
 &       eig0_k,eig0_kq,eig1_k,gh0c1,gh1c_n,grad_berry,gsc,gscq,gs_hamkq,gvnlxc,gvnlx1,icgq,&
 &       idir,ipert,igscq,mcgq,mgscq,mpi_enreg,mpw1,natom,nband_k,nband_me,dtset%nbdbuf,dtset%nline,&

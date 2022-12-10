@@ -808,7 +808,7 @@ subroutine proc_distrb_kptband(kpt_band_procs,distrb,ikpt,isppol)
  kpt_band_procs=-1
  if (allocated(distrb)) then
    if (isppol==-1) then
-! TODO : should raise error here - the output rank will be all wrong for isppol 2!
+     ! TODO : should raise error here - the output rank will be all wrong for isppol 2!
      kpt_band_procs=distrb(ikpt,:,1)
      write (msg, "(a)") " for the moment proc_distrb_kptband does not handle the 'any spin' option nsppol -1"
      ABI_ERROR(msg)
@@ -825,39 +825,38 @@ end subroutine proc_distrb_kptband
 !!  proc_distrb_band
 !!
 !! FUNCTION
-!!  return vector of processor me indices for each band, within the band communicator
+!!  return `rank_band` array with the rank of the processor in comm_band treating `band`
 !!
 !! INPUTS
 !!
 !! SOURCE
 
-subroutine proc_distrb_band(band_procs,distrib,ikpt,isppol,nband,me_band,me_kpt,comm_band)
+subroutine proc_distrb_band(rank_band,distrib,ikpt,isppol,nband,me_band,me_kpt,comm_band)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nband, ikpt, isppol
  integer,intent(in) :: me_band,me_kpt,comm_band
  integer,allocatable,intent(in) :: distrib(:,:,:)
- integer,intent(out) :: band_procs(nband)
+ integer,intent(out) :: rank_band(nband)
 
  integer :: ierr, iband
-! character(len=500) :: msg
 
 ! *************************************************************************
 
- band_procs = 0
+ rank_band = 0
 
  if (allocated(distrib)) then
    do iband=1, nband
-! is this band k spin on current proc?
+     ! is this (k, band, spin) on current proc?
      if (distrib(ikpt,iband,isppol)/=me_kpt) cycle
-! if so save rank in band subcommunicator
-     band_procs(iband) = me_band+1
+     ! if so save rank in band subcommunicator
+     rank_band(iband) = me_band+1
    end do
-   call xmpi_sum(band_procs,comm_band,ierr)
+   call xmpi_sum(rank_band,comm_band,ierr)
  end if
 
- band_procs = band_procs-1
+ rank_band = rank_band-1
 
 end subroutine proc_distrb_band
 !!***

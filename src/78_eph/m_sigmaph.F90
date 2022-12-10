@@ -385,9 +385,10 @@ module m_sigmaph
    ! where isym is the index of the operation in the global array **crystal%symrec**
    ! and itim is 2 if time-reversal T must be included else 1. Depends on ikcalc
 
-  integer,allocatable :: nbsum_rank(:)
-   ! (%bsum_comm%nproc)
-   ! Number of bands treated by each proc in %bsum_comm. Used for gatherv operations.
+  integer,allocatable :: nbsum_rank(:,:)
+   ! (%bsum_comm%nproc, 2)
+   ! (rank+1, 1): Number of bands treated by rank in %bsum_comm.
+   ! (rank+1, 2): bsum_start of MPI rank
    ! Available only if .not. imag_only
 
   real(dp),allocatable :: kcalc(:,:)
@@ -655,7 +656,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 ! integer,parameter :: ngvecs = 1
  integer :: my_rank,nsppol,nkpt,iq_ibz,iq_ibz_k,iq_ibz_frohl,iq_bz_frohl,my_npert
  integer :: cplex,db_iqpt,natom,natom3,ipc,nspinor,nprocs
- integer :: ibsum_kq, ib_k, u1c_ib_k, band_ks, ibsum, ii, jj, iw !ib_kq,
+ integer :: ibsum_kq, ib_k, u1c_ib_k, band_ks, ibsum, ii, jj, iw, ip !ib_kq,
  integer :: mcgq, mgscq, ig, ispinor, ifft !nband_kq,
  integer :: idir,ipert,ip1,ip2,idir1,ipert1,idir2,ipert2
  integer :: ik_ibz,ikq_ibz,isym_k,isym_kq,trev_k,trev_kq, isym_q, trev_q
@@ -692,8 +693,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer,allocatable :: bands_treated_now(:)
  integer(i1b),allocatable :: itreatq_dvdb(:)
  integer,allocatable :: gtmp(:,:),kg_k(:,:),kg_kq(:,:),nband(:,:), qselect(:), wfd_istwfk(:)
- integer,allocatable :: gbound_kq(:,:), osc_gbound_q(:,:), osc_gvecq(:,:), osc_indpw(:)
- integer, allocatable :: band_procs(:)
+ integer,allocatable :: gbound_kq(:,:), osc_gbound_q(:,:), osc_gvecq(:,:), osc_indpw(:), rank_band(:)
  integer,allocatable :: ibzspin_2ikcalc(:,:)
  integer, allocatable :: recvcounts(:), displs(:)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3),qpt_cart(3),phfrq(3*cryst%natom), dotri(2),qq_ibz(3)
@@ -1521,7 +1521,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            !call xmpi_isum_ip(cgq, sigma%bsum_comm%value, cgq_request, ierr)
 
            nelem = 2 * npw_kq * nspinor
-           call sigma%bsum_comm%prep_gatherv(nelem, sigma%nbsum_rank, sendcount, recvcounts, displs)
+           call sigma%bsum_comm%prep_gatherv(nelem, sigma%nbsum_rank(:,1), sendcount, recvcounts, displs)
 #ifdef HAVE_MPI
            !call MPI_ALLGATHERV(MPI_IN_PLACE, sendcount, MPI_DOUBLE_PRECISION, cgq, recvcounts, displs, &
            !                    MPI_DOUBLE_PRECISION, sigma%bsum_comm%value, ierr)
@@ -1611,8 +1611,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            !TODO: to distribute cgq and kets memory, use mband_mem per core in band comm, but coordinate everyone with
            ! the following array (as opposed to the distribution of cg1 which is done in the normal dfpt calls
            ABI_MALLOC(bands_treated_now, (nbsum))
-           ABI_MALLOC (band_procs, (nbsum))
-           band_procs = 0
+           ABI_MALLOC (rank_band, (nbsum))
+           rank_band = 0
 
            nline_in = min(100, npw_kq); if (dtset%nline > nline_in) nline_in = min(dtset%nline, npw_kq)
 
@@ -1621,6 +1621,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
            do ib_k=1,nbcalc_ks
              ! TODO: To be replaced by MPI parallellism over bands in projbd inside dfpt_cgwf
+             !TODO: band parallelize this routine, and call dfpt_cgwf with only limited cg arrays
+             ! in the meanwhile should make a test for paralbd, to exclude it, I think
+
              if (sigma%bsum_comm%skip(ib_k)) cycle ! MPI parallelism inside bsum (not very efficient).
              band_ks = ib_k + bstart_ks - 1
 
@@ -1639,25 +1642,24 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                cg1s_kq(:,:,ipc,ib_k) = zero
              end if
 
-             !TODO: band parallelize this routine, and call dfpt_cgwf with only limited cg arrays
-             ! in the meanwhile should make a test for paralbd, to exclude it, I think
+             bands_treated_now(:) = 0; bands_treated_now(band_ks) = 1
              band_me = band_ks
-             !nband_me = nbsum
-             !band_me = band-ks - sigma%my_bsum_start + 1
 
-             bands_treated_now(:) = 0
-             bands_treated_now(band_ks) = 1
-             !call xmpi_sum(bands_treated_now, mpi_enreg%comm_band, ierr)
-             !band_procs = -1
-             !if (mod(ib_k, sigma%bsum%nproc) == self%%bsum%me) then
-               !band_procs(band_ks) = sigma%bsum%me
-             !endif
+             ! Init rank_band and band_me from nbsum_rank.
+             !rank_band = -1; band_me = 1
+             !do ip=1,sigma%bsum_comm%nproc
+             !  ii = sigma%nbsum_rank(ip,2)
+             !  jj = sigma%nbsum_rank(ip,2) + sigma%nbsum_rank(ip,1) -1
+             !  rank_band(ii:jj) = ip - 1
+             !end do
+             !band_me = 1
+             !if (inrange(band_ks, [sigma%my_bsum_start, sigma%my_bsum_stop]) band_me = band_ks - sigma%my_bsum_start + 1
 
              mcgq = npw_kq * nspinor * nband_me
              mgscq = npw_kq * nspinor * nband_me * psps%usepaw
              nlines_done = 0
 
-             call dfpt_cgwf(band_ks, band_me, band_procs, bands_treated_now, berryopt0, &
+             call dfpt_cgwf(band_ks, band_me, rank_band, bands_treated_now, berryopt0, &
                cgq, cg1s_kq(:,:,ipc,ib_k), kets_k(:,:,ib_k), &  ! Important stuff
                cwaveprj, cwaveprj0, rf2, dcwavef, &
                ebands%eig(:, ik_ibz, spin), ebands%eig(:, ikq_ibz, spin), out_eig1_k, &
@@ -1695,7 +1697,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            !mpi_enreg%nproc_band = 1
 
            ABI_FREE(bands_treated_now)
-           ABI_FREE(band_procs)
+           ABI_FREE(rank_band)
            ABI_FREE(out_eig1_k)
            ABI_FREE(dcwavef)
            ABI_FREE(gh1c_n)
@@ -3125,9 +3127,11 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
    end if
    new%my_bsum_start = new%bsum_start + new%my_bsum_start - 1
    new%my_bsum_stop = new%bsum_start + new%my_bsum_stop - 1
-   ABI_MALLOC(new%nbsum_rank, (new%bsum_comm%nproc))
+   ABI_MALLOC(new%nbsum_rank, (new%bsum_comm%nproc, 3))
    ii = new%my_bsum_stop - new%my_bsum_start + 1
-   call xmpi_allgather(ii, new%nbsum_rank, new%bsum_comm%value, ierr)
+   call xmpi_allgather(ii, new%nbsum_rank(:,1), new%bsum_comm%value, ierr)
+   ii = new%my_bsum_start
+   call xmpi_allgather(ii, new%nbsum_rank(:,2), new%bsum_comm%value, ierr)
  end if
 
  call wrtout(std_out, sjoin(" Global bands for self-energy sum, bsum_start: ", itoa(new%bsum_start), &
