@@ -61,7 +61,7 @@ module m_dfpt_loopert
  use m_kg,         only : getcut, getmpw, kpgio, getph
  use m_iowf,       only : outwf, outresid
  use m_ioarr,      only : read_rhor
- use m_orbmag,     only : orbmag_gipaw
+ use m_orbmag,     only : orbmag
  use m_pawang,     only : pawang_type, pawang_init, pawang_free
  use m_pawrad,     only : pawrad_type
  use m_pawtab,     only : pawtab_type
@@ -2090,7 +2090,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      call wrtout(ab_out," dfpt_looppert: DFPT cycle converged with prtwf=-1. Will skip output of the 1st-order WFK file.")
    end if
 
-   ! store DDK wavefunctions in memory for later call to orbmag-ddk
+   ! store DDK wavefunctions in memory for later call to orbmag
    ! only relevant for DDK pert with orbmag calculation
    if( (dtset%orbmag .NE. 0) .AND. (ipert .EQ. dtset%natom+1) ) then
      cg1_3(:,:,idir) = cg1(:,:)
@@ -2181,7 +2181,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    end if
 
    ! call orbmag if needed
-   if ( (dtset%orbmag .GT. 0) .AND. (dtset%rfddk .EQ. 1) .AND. &
+   if ( (dtset%orbmag .NE. 0) .AND. (dtset%rfddk .EQ. 1) .AND. &
      & (COUNT(has_cg1_3) .EQ. 3) ) then
 
      if ( .NOT. ALLOCATED(vtrial_local)) then
@@ -2192,8 +2192,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        ABI_MALLOC(vxc_local,(nfftf,dtset%nspden))
      end if
      vxc_local = vxc
-     if((dtset%orbmag .GE. 1) .AND. (dtset%orbmag .LE. 4)) then
-       call orbmag_gipaw(cg,cg1_3,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
+     if(dtset%orbmag .NE. 0) then
+       call orbmag(cg,cg1_3,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
          & nfftf,ngfftf,npwarr,occ,paw_ij,paw_an,pawang,pawfgr,pawfgrtab,pawrad,pawtab,psps,rprimd,&
          & vtrial_local,vxc_local,xred,ylm,ylmgr)
      end if 
