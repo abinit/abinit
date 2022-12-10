@@ -253,7 +253,7 @@ pure subroutine cg_kfilter(npw_k, my_nspinor, nband_k, kinpw, cg)
    do iband=1,nband_k
      iwavef=(iband-1)*npw_k*my_nspinor
      do ipw=1+igs,npw_k+igs
-       if(kinpw(ipw-igs)>huge(zero)*1.d-11)then
+       if (kinpw(ipw-igs)>huge(zero)*1.d-11)then
          cg(1,ipw+iwavef)=zero
          cg(2,ipw+iwavef)=zero
        end if

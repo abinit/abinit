@@ -1069,7 +1069,7 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
      ! A negative residual will be the signal of this problem ...
      resid=-two
      if (prtvol > 0 .and. u1_band_ > 0) then
-       call wrtout(std_out,' dfpt_cgwf: problem of minimisation (likely metallic), set esid to -2')
+       call wrtout(std_out,' dfpt_cgwf: problem of minimisation (likely metallic), set resid to -2')
      end if
    else if (d2edt2 > 1.d-40) then
      ! Here, the value of theta that gives the minimum
@@ -1083,7 +1083,7 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
    ! Check that result is above machine precision
    if (one+theta==one) then
      if (prtvol > 0 .and. u1_band_ > 0) then
-       write(msg, '(a,es16.4)' ) ' dfpt_cgwf: converged with theta=',theta
+       write(msg, '(a,es16.4)' )' dfpt_cgwf: converged with theta= ',theta
        call wrtout(std_out,msg)
      end if
      nskip=nskip+2*(nline-iline) ! Number of one-way 3D ffts skipped
