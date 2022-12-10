@@ -70,7 +70,7 @@ contains
 !! are supposed to call dfpt_cgwf with the same values.
 !!
 !! INPUTS
-!!  u1_band=which particular band we are converging (LOCAL)
+!!  u1_band_=which particular band we are converging (LOCAL)
 !!  band_me=cpu-local index in cgq array of band which we are converging.
 !!  berryopt=option for Berry phase
 !!  cgq(2,mcgq)=wavefunction coefficients for MY bands at k+Q
@@ -147,7 +147,7 @@ contains
 !!
 !! SOURCE
 
-subroutine dfpt_cgwf(u1_band,band_me,rank_band,bands_treated_now,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,&
+subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,&
 & rf2,dcwavef,&
 & eig0_k,eig0_kq,eig1_k,ghc,gh1c_n,grad_berry,gsc,gscq,&
 & gs_hamkq,gvnlxc,gvnlx1,icgq,idir,ipert,igscq,&
@@ -157,7 +157,7 @@ subroutine dfpt_cgwf(u1_band,band_me,rank_band,bands_treated_now,berryopt,cgq,cw
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: u1_band,berryopt
+ integer,intent(in) :: u1_band_,berryopt
  integer,intent(in) :: band_me, nband_me
  integer,intent(in) :: icgq,idir,igscq,ipert,mcgq,mgscq,mpw1,natom,nband
  integer,intent(in) :: nbdbuf,nline_in,npw,npw1,nspinor,opt_gvnlx1
@@ -190,7 +190,7 @@ subroutine dfpt_cgwf(u1_band,band_me,rank_band,bands_treated_now,berryopt,cgq,cw
  integer,parameter :: level=15,tim_getgh1c=1,tim_getghc=2,tim_projbd=2
  integer,save :: nskip=0
  integer :: cpopt,iband,igs,iline,indx_cgq,ipw,me_g0,comm_fft
- integer :: iband_me, jband_me, ierr, me_band, np_band, band_off !, unit_me
+ integer :: iband_me, jband_me, ierr, me_band, np_band, band_off, u1_band !, unit_me
  integer :: ipws,ispinor,istwf_k,jband,nline,optlocal,optnl,dc_shift_band,sij_opt
  integer :: test_is_ok,useoverlap,usepaw,usevnl,usetolrde
  real(dp) :: d2edt2,d2te,d2teold,dedt,deltae,deold,dotgg
@@ -219,6 +219,8 @@ subroutine dfpt_cgwf(u1_band,band_me,rank_band,bands_treated_now,berryopt,cgq,cw
  !======================================================================
  !========= LOCAL VARIABLES DEFINITIONS AND ALLOCATIONS ================
  !====================================================================
+
+ u1_band = abs(u1_band_)
 
  nline = nline_in
  usetolrde = 1
@@ -889,8 +891,8 @@ subroutine dfpt_cgwf(u1_band,band_me,rank_band,bands_treated_now,berryopt,cgq,cw
 
    ! Check that d2te is decreasing on succeeding lines:
    if (iline/=1) then
-     if (d2te>d2teold+tol6) then
-       write(msg,'(a,i0,a,e14.6,a,e14.6)')'New trial energy at line ',iline,'=',d2te,'is higher than former:',d2teold
+     if (d2te>d2teold+tol6 .and. u1_band_ > 0) then
+       write(msg,'(a,i0,a,e14.6,a,e14.6)')'New trial energy at line ',iline,' = ',d2te,'is higher than former: ',d2teold
        ABI_WARNING(msg)
      end if
    end if
@@ -1003,7 +1005,9 @@ subroutine dfpt_cgwf(u1_band,band_me,rank_band,bands_treated_now,berryopt,cgq,cw
    call dotprod_g(dedt,doti,istwf_k,npw1*nspinor,1,conjgr,gresid,me_g0,mpi_enreg%comm_spinorfft)
    dedt=-two*two*dedt
 
-   if((prtvol==-level.or.prtvol==-19.or.prtvol==-20).and.dedt-tol14>0) call wrtout(std_out,' CGWF3_WARNING : dedt>0')
+   if((prtvol==-level.or.prtvol==-19.or.prtvol==-20).and.dedt-tol14>0) then
+     call wrtout(std_out,' DFPT_CG_WARNING : dedt>0')
+   end if
    ABI_MALLOC(gvnlx_direc,(2,npw1*nspinor))
    ABI_MALLOC(gh_direc,(2,npw1*nspinor))
    if (gen_eigenpb)  then
@@ -1064,20 +1068,21 @@ subroutine dfpt_cgwf(u1_band,band_me,rank_band,bands_treated_now,berryopt,cgq,cw
      end if
      ! A negative residual will be the signal of this problem ...
      resid=-two
-     if (prtvol > 0) call wrtout(std_out,' dfpt_cgwf: problem of minimisation (likely metallic), set resid to -2')
+     if (prtvol > 0 .and. u1_band_ > 0) then
+       call wrtout(std_out,' dfpt_cgwf: problem of minimisation (likely metallic), set esid to -2')
+     end if
    else if (d2edt2 > 1.d-40) then
      ! Here, the value of theta that gives the minimum
      theta=-dedt/d2edt2
      !write(std_out,*)' dfpt_cgwf: dedt,d2edt2=',dedt,d2edt2
    else
-     write(msg,'(a)') 'DFPT_CGWF WARNING : d2edt2 is zero, skipping update'
-     call wrtout(std_out,msg,'COLL')
+     if (u1_band_ > 0) call wrtout(std_out, "DFPT_CGWF WARNING: d2edt2 is zero, skipping update")
      theta=zero
    end if
 
    ! Check that result is above machine precision
    if (one+theta==one) then
-     if (prtvol > 0) then
+     if (prtvol > 0 .and. u1_band_ > 0) then
        write(msg, '(a,es16.4)' ) ' dfpt_cgwf: converged with theta=',theta
        call wrtout(std_out,msg)
      end if
@@ -1139,16 +1144,15 @@ subroutine dfpt_cgwf(u1_band,band_me,rank_band,bands_treated_now,berryopt,cgq,cw
      end if
    end if
 
-   bands_skipped_now = 0
-   bands_skipped_now(u1_band) = skipme
-   call xmpi_sum(bands_skipped_now,mpi_enreg%comm_band,ierr)
-
-   ! bands_skipped_now = bands_skipped_now - bands_treated_now
-
    ! if all bands are skippable, we can exit the iline loop for good.
    ! otherwise, all procs are needed for the projbd and other operations,
    ! even if the present band will not be updated
+   bands_skipped_now = 0
+   bands_skipped_now(u1_band) = skipme
+   if (u1_band_ < 0) bands_skipped_now(u1_band) = 0
+   call xmpi_sum(bands_skipped_now,mpi_enreg%comm_band,ierr)
 
+   ! bands_skipped_now = bands_skipped_now - bands_treated_now
    if (sum(abs(bands_skipped_now - bands_treated_now)) == 0) then
      exit
    end if

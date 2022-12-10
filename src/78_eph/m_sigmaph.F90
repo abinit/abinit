@@ -63,7 +63,7 @@ module m_sigmaph
  use defs_datatypes,   only : ebands_t, pseudopotential_type
  use m_time,           only : cwtime, cwtime_report, timab, sec2str
  use m_fstrings,       only : itoa, ftoa, sjoin, ktoa, ltoa, strcat
- use m_numeric_tools,  only : arth, c2r, get_diag, linfit, iseven, simpson_cplx, simpson, print_arr
+ use m_numeric_tools,  only : arth, c2r, get_diag, linfit, iseven, simpson_cplx, simpson, print_arr, inrange
  use m_io_tools,       only : iomode_from_fname, file_exists, is_open, open_file
  use m_special_funcs,  only : gaussian
  use m_fftcore,        only : ngfft_seq, sphereboundary, get_kg, kgindex
@@ -641,7 +641,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  type(pawfgr_type),intent(in) :: pawfgr
  type(ifc_type),intent(in) :: ifc
  type(hdr_type),intent(in) :: wfk_hdr
- type(mpi_type),intent(in) :: mpi_enreg
+ type(mpi_type),intent(inout) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18),ngfftf(18)
  type(pawrad_type),intent(in) :: pawrad(psps%ntypat*psps%usepaw)
@@ -656,7 +656,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 ! integer,parameter :: ngvecs = 1
  integer :: my_rank,nsppol,nkpt,iq_ibz,iq_ibz_k,iq_ibz_frohl,iq_bz_frohl,my_npert
  integer :: cplex,db_iqpt,natom,natom3,ipc,nspinor,nprocs
- integer :: ibsum_kq, ib_k, u1c_ib_k, band_ks, ibsum, ii, jj, iw, ip !ib_kq,
+ integer :: ibsum_kq, ib_k, u1c_ib_k, band_ks, u1_band, u1_master, ibsum, ii, jj, iw, ip !ib_kq,
  integer :: mcgq, mgscq, ig, ispinor, ifft !nband_kq,
  integer :: idir,ipert,ip1,ip2,idir1,ipert1,idir2,ipert2
  integer :: ik_ibz,ikq_ibz,isym_k,isym_kq,trev_k,trev_kq, isym_q, trev_q
@@ -1491,8 +1491,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          call timab(1908, 1, tsec)
          ABI_CALLOC(cg1s_kq, (2, npw_kq*nspinor, natom3, nbcalc_ks))
 
-         nband_me = nbsum
-         !nband_me = sigma%my_bsum_stop - sigma%my_bsum_start + 1
+         !nband_me = nbsum
+         nband_me = sigma%my_bsum_stop - sigma%my_bsum_start + 1
 
          ABI_MALLOC(cgq, (2, npw_kq * nspinor, nband_me))
          ABI_MALLOC(gscq, (2, npw_kq * nspinor, nband_me*psps%usepaw))
@@ -1507,12 +1507,13 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                                npw_kqirr, wfd%kdata(ikq_ibz)%kg_k, &
                                npw_kq, kg_kq, istwf_kqirr, istwf_kq, cgwork, bra_kq, work_ngfft, work)
             end if
-            cgq(:, :, ibsum_kq) = bra_kq
-            !ii = ibsum_kq - sigma%my_bsum_start + 1
-            !cgq(:,:,ii) = bra_kq
+            !cgq(:, :, ibsum_kq) = bra_kq
+            ii = ibsum_kq - sigma%my_bsum_start + 1
+            cgq(:,:,ii) = bra_kq
          end do
 
          cgq_request = xmpi_request_null
+#if 0
          if (sigma%bsum_comm%nproc > 1) then
            ! If band parallelism, need to gather all bands nbsum bands.
            ! FIXME: This part is network intensive, one can avoid it by calling dfpt_cgwf in band-para mode.
@@ -1534,6 +1535,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            ABI_FREE(recvcounts)
            ABI_FREE(displs)
          end if
+#endif
          call timab(1908, 2, tsec)
        end if  ! eph_stern
 
@@ -1583,9 +1585,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            ! NB: Assume adiabatic AHC expression to compute the contribution of states above nbsum.
 
            ! Prepare band parallelism in dfpt_cgwf via mpi_enreg.
-           !mpi_enreg%comm_band = sigma%bsum_comm%value
-           !mpi_enreg%me_band = sigma%bsum_comm%me
-           !mpi_enreg%nproc_band = sigma%bsum_comm%nproc
+           mpi_enreg%comm_band = sigma%bsum_comm%value
+           mpi_enreg%me_band = sigma%bsum_comm%me
+           mpi_enreg%nproc_band = sigma%bsum_comm%nproc
 
            ABI_CALLOC(out_eig1_k, (2*nbsum**2))
            ABI_MALLOC(dcwavef, (2, npw_kq*nspinor*usedcwavef0))
@@ -1617,14 +1619,14 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            nline_in = min(100, npw_kq); if (dtset%nline > nline_in) nline_in = min(dtset%nline, npw_kq)
 
            ! Wait for gatherv operation
-           if (cgq_request /= xmpi_request_null) call xmpi_wait(cgq_request, ierr)
+           !if (cgq_request /= xmpi_request_null) call xmpi_wait(cgq_request, ierr)
 
            do ib_k=1,nbcalc_ks
              ! TODO: To be replaced by MPI parallellism over bands in projbd inside dfpt_cgwf
              !TODO: band parallelize this routine, and call dfpt_cgwf with only limited cg arrays
              ! in the meanwhile should make a test for paralbd, to exclude it, I think
 
-             if (sigma%bsum_comm%skip(ib_k)) cycle ! MPI parallelism inside bsum (not very efficient).
+             !if (sigma%bsum_comm%skip(ib_k)) cycle ! MPI parallelism inside bsum (not very efficient).
              band_ks = ib_k + bstart_ks - 1
 
              ! Init entry in cg1s_kq, either from cache or with zeros.
@@ -1643,23 +1645,31 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
              end if
 
              bands_treated_now(:) = 0; bands_treated_now(band_ks) = 1
-             band_me = band_ks
+             !band_me = band_ks; u1_band  = band_ks
 
              ! Init rank_band and band_me from nbsum_rank.
-             !rank_band = -1; band_me = 1
-             !do ip=1,sigma%bsum_comm%nproc
-             !  ii = sigma%nbsum_rank(ip,2)
-             !  jj = sigma%nbsum_rank(ip,2) + sigma%nbsum_rank(ip,1) -1
-             !  rank_band(ii:jj) = ip - 1
-             !end do
-             !band_me = 1
-             !if (inrange(band_ks, [sigma%my_bsum_start, sigma%my_bsum_stop]) band_me = band_ks - sigma%my_bsum_start + 1
+             rank_band = -1; band_me = 1
+             do ip=1,sigma%bsum_comm%nproc
+               ii = sigma%nbsum_rank(ip,2)
+               jj = sigma%nbsum_rank(ip,2) + sigma%nbsum_rank(ip,1) -1
+               rank_band(ii:jj) = ip - 1
+               if (inrange(band_ks, [ii, jj])) u1_master = ip - 1
+             end do
+             if (inrange(band_ks, [sigma%my_bsum_start, sigma%my_bsum_stop])) then
+               band_me = band_ks - sigma%my_bsum_start + 1
+               u1_band = band_ks
+               !print *, "band_ks", band_ks, "treated by bsum me", sigma%bsum_comm%me
+             else
+               band_me = 1
+               u1_band = -band_ks
+               !u1_band = +band_ks
+             end if
 
              mcgq = npw_kq * nspinor * nband_me
              mgscq = npw_kq * nspinor * nband_me * psps%usepaw
              nlines_done = 0
 
-             call dfpt_cgwf(band_ks, band_me, rank_band, bands_treated_now, berryopt0, &
+             call dfpt_cgwf(u1_band, band_me, rank_band, bands_treated_now, berryopt0, &
                cgq, cg1s_kq(:,:,ipc,ib_k), kets_k(:,:,ib_k), &  ! Important stuff
                cwaveprj, cwaveprj0, rf2, dcwavef, &
                ebands%eig(:, ik_ibz, spin), ebands%eig(:, ikq_ibz, spin), out_eig1_k, &
@@ -1672,29 +1682,35 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
              tot_nlines_done = tot_nlines_done + nlines_done
 
-             ! Handle possible convergence error.
-             if (out_resid > dtset%tolwfr) then
-               write(msg, "(2(a, es13.5), a, i0, a)") &
-                 " Sternheimer didn't convergence: resid:", out_resid, " >= tolwfr: ", dtset%tolwfr, &
-                 " after nline: ", nlines_done, " iterations. Increase nline and/or tolwfr."
-               ABI_ERROR(msg)
-             else if (out_resid < zero) then
-               ABI_ERROR(sjoin(" resid: ", ftoa(out_resid), ", nlines_done:", itoa(nlines_done)))
-             end if
+             call xmpi_bcast(cg1s_kq(:,:,ipc,ib_k), u1_master, sigma%bsum_comm%value, ierr)
 
-             !if (my_rank == master) then
-             if (my_rank == master .and. (enough_stern <= 5 .or. dtset%prtvol > 10)) then
-               write(std_out, "(2(a,es13.5),a,i0)") &
-                 " Sternheimer converged with resid: ", out_resid, " <= tolwfr: ", dtset%tolwfr, &
-                 " after nlines_done: ", nlines_done
-               enough_stern = enough_stern + 1
+             ! Handle possible convergence error.
+             if (inrange(band_ks, [sigma%my_bsum_start, sigma%my_bsum_stop])) then
+             !if (u1_band > 0) then
+               if (out_resid > dtset%tolwfr) then
+                 write(msg, "(a,i0,a, 2(a,es13.5), 2a,i0,a)") &
+                   " Sternheimer didn't convergence for band: ", band_ks, ch10, &
+                   " resid:", out_resid, " >= tolwfr: ", dtset%tolwfr, ch10, &
+                   " after nline: ", nlines_done, " iterations. Increase nline and/or tolwfr."
+                 ABI_ERROR(msg)
+               else if (out_resid < zero) then
+                 ABI_ERROR(sjoin(" resid: ", ftoa(out_resid), ", nlines_done:", itoa(nlines_done)))
+               end if
+
+               !if (my_rank == master) then
+               if (my_rank == master .and. (enough_stern <= 5 .or. dtset%prtvol > 10)) then
+                 write(std_out, "(2(a,es13.5),a,i0)") &
+                   " Sternheimer converged with resid: ", out_resid, " <= tolwfr: ", dtset%tolwfr, &
+                   " after nlines_done: ", nlines_done
+                 enough_stern = enough_stern + 1
+               end if
              end if
            end do ! ib_k
 
            ! Revert changes in mpi_enreg.
-           !mpi_enreg%comm_band = xmpi_comm_self
-           !mpi_enreg%me_band = 0
-           !mpi_enreg%nproc_band = 1
+           mpi_enreg%comm_band = xmpi_comm_self
+           mpi_enreg%me_band = 0
+           mpi_enreg%nproc_band = 1
 
            ABI_FREE(bands_treated_now)
            ABI_FREE(rank_band)
