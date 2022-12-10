@@ -335,8 +335,8 @@ module m_sigmaph
   integer(i1b),allocatable :: itreat_qibz(:)
    ! itreat_qibz(nqibz)
    ! Table used to distribute potentials over q-points in the IBZ.
-   ! The loop over qpts in the IBZ(k) is MPI distributed inside qpt_comm accordinging to this table.
-   ! 0 if this IBZ point is not reated by this proc.
+   ! The loop over qpts in the IBZ(k) is MPI distributed inside qpt_comm according to this table.
+   ! 0 if this IBZ point is not treated by this proc.
    ! 1 if this IBZ is treated.
 
   integer,allocatable :: my_pinfo(:,:)
@@ -649,7 +649,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: tim_getgh1c = 1, berryopt0 = 0, istw1 = 1, ider0 = 0, idir0 = 0, istwfk1 = 1
+ integer,parameter :: tim_getgh1c1 = 1, berryopt0 = 0, istw1 = 1, ider0 = 0, idir0 = 0, istwfk1 = 1
  integer,parameter :: useylmgr = 0, useylmgr1 =0, master = 0, ndat1 = 1, ngvecs = 1
  integer,parameter :: igscq0 = 0, icgq0 = 0, usedcwavef0 = 0, nbdbuf0 = 0, quit0 = 0, cplex1 = 1, pawread0 = 0
  integer :: band_me, nband_me
@@ -693,7 +693,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer,allocatable :: bands_treated_now(:)
  integer(i1b),allocatable :: itreatq_dvdb(:)
  integer,allocatable :: gtmp(:,:),kg_k(:,:),kg_kq(:,:),nband(:,:), qselect(:), wfd_istwfk(:)
- integer,allocatable :: gbound_kq(:,:), osc_gbound_q(:,:), osc_gvecq(:,:), osc_indpw(:), rank_band(:)
+ integer,allocatable :: gbound_kq(:,:), osc_gbound_q(:,:), osc_gvecq(:,:), osc_indpw(:), rank_band(:), root_bcalc(:)
  integer,allocatable :: ibzspin_2ikcalc(:,:)
  integer, allocatable :: recvcounts(:), displs(:)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3),qpt_cart(3),phfrq(3*cryst%natom), dotri(2),qq_ibz(3)
@@ -1260,6 +1260,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      nbcalc_ks = sigma%nbcalc_ks(ikcalc, spin)
      bsum_start = sigma%bsum_start; bsum_stop = sigma%bsum_stop
      nbsum = sigma%nbsum
+     ABI_MALLOC(root_bcalc, (nbcalc_ks))
 
      ! Zero self-energy matrix elements. Build frequency mesh for nk states.
      sigma%vals_e0ks = zero; sigma%dvals_de0ks = zero; sigma%dw_vals = zero
@@ -1388,7 +1389,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          call dvdb%readsym_qbz(cryst, qpt, sigma%ind_q2dvdb_k(:,iq_ibz_k), cplex, nfftf, ngfftf, v1scf, sigma%pert_comm%value)
        end if
 
-       ! Rotate phonon frequencies and displacements for q in BZ (non-blocking operation inside pert_comm
+       ! Rotate phonon frequencies and displacements for q in BZ. Non-blocking operation inside pert_comm
        !call timab(1901, 1, tsec)
 
        call phstore%async_rotate(cryst, ifc, iq_ibz, sigma%qibz(:, iq_ibz), qpt, isym_q, trev_q)
@@ -1577,15 +1578,21 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
          ! Compute H(1) applied to GS wavefunction Psi_nk(0)
          do ib_k=1,nbcalc_ks
-           !if (sigma%bsum_comm%skip(ib_k)) cycle ! MPI parallelism inside bsum
+           root_bcalc(ib_k) = mod(ib_k, sigma%bsum_comm%nproc)
+           if (sigma%bsum_comm%skip(ib_k)) cycle ! MPI parallelism inside bsum
+
            band_ks = ib_k + bstart_ks - 1
            eig0nk = ebands%eig(band_ks, ik_ibz, spin)
            ! Use scissor shift on 0-order eigenvalue
            eshift = eig0nk - dtset%dfpt_sciss
 
-           call getgh1c(berryopt0, kets_k(:,:,ib_k), cwaveprj0, h1kets_kq(:, :, imyp, ib_k), &
+           call getgh1c(berryopt0, kets_k(:,:,ib_k), cwaveprj0, h1kets_kq(:,:,imyp, ib_k), &
              grad_berry, gs1c, gs_hamkq, gvnlx1, idir, ipert, eshift, mpi_enreg, optlocal, &
-             optnl, opt_gvnlx1, rf_hamkq, sij_opt, tim_getgh1c, usevnl)
+             optnl, opt_gvnlx1, rf_hamkq, sij_opt, tim_getgh1c1, usevnl)
+         end do
+
+         do ib_k=1,nbcalc_ks
+           call xmpi_bcast(h1kets_kq(:,:,imyp,ib_k), root_bcalc(ib_k), sigma%bsum_comm%value, ierr)
          end do
 
          if (dtset%eph_stern /= 0 .and. .not. sigma%imag_only) then
@@ -1685,6 +1692,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
              mcgq = npw_kq * nspinor * nband_me
              mgscq = npw_kq * nspinor * nband_me * psps%usepaw
              nlines_done = 0
+             call timab(1909, 2, tsec)
 
              call dfpt_cgwf(u1_band, band_me, rank_band, bands_treated_now, berryopt0, &
                cgq, cg1s_kq(:,:,ipc,ib_k), kets_k(:,:,ib_k), &  ! Important stuff
@@ -1743,7 +1751,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
              ABI_FREE(cgq)
              ABI_FREE(gscq)
            end if
-           call timab(1909, 2, tsec)
+           !call timab(1909, 2, tsec)
          end if ! sternheimer
 
          call rf_hamkq%free()
@@ -2508,6 +2516,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      call sigma%gather_and_write(dtset, ebands, ikcalc, spin, sigma%pqb_comm%value)
 
      ABI_SFREE(alpha_mrta)
+     ABI_SFREE(root_bcalc)
    end do ! spin
 
    ABI_FREE(kg_k)
