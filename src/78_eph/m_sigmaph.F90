@@ -650,10 +650,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 !Local variables ------------------------------
 !scalars
  integer,parameter :: tim_getgh1c1 = 1, berryopt0 = 0, istw1 = 1, ider0 = 0, idir0 = 0, istwfk1 = 1
- integer,parameter :: useylmgr = 0, useylmgr1 =0, master = 0, ndat1 = 1, ngvecs = 1
+ integer,parameter :: useylmgr = 0, useylmgr1 =0, master = 0, ndat1 = 1
  integer,parameter :: igscq0 = 0, icgq0 = 0, usedcwavef0 = 0, nbdbuf0 = 0, quit0 = 0, cplex1 = 1, pawread0 = 0
  integer :: band_me, nband_me
-! integer,parameter :: ngvecs = 1
  integer :: my_rank,nsppol,nkpt,iq_ibz,iq_ibz_k,iq_ibz_frohl,iq_bz_frohl,my_npert
  integer :: cplex,db_iqpt,natom,natom3,ipc,nspinor,nprocs
  integer :: ibsum_kq, ib_k, u1c_ib_k, band_ks, u1_band, u1_master, ibsum, ii, jj, iw, ip !ib_kq,
@@ -705,7 +704,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  real(dp),allocatable :: grad_berry(:,:),kinpw1(:),kpg1_k(:,:),kpg_k(:,:),dkinpw(:)
  real(dp),allocatable :: ffnlk(:,:,:,:),ffnl1(:,:,:,:),ph3d(:,:,:),ph3d1(:,:,:),v1scf(:,:,:,:)
  real(dp),allocatable :: gkq_atm(:,:,:),gkq_nu(:,:,:),gkq0_atm(:,:,:,:), gaussw_qnu(:)
- real(dp),allocatable :: cgq(:,:,:), gscq(:,:,:), out_eig1_k(:), cg1s_kq(:,:,:,:), h1kets_kq_allperts(:,:,:,:) !, send_cgq(:,:,:)
+ real(dp),allocatable :: cgq(:,:,:), gscq(:,:,:), out_eig1_k(:), cg1s_kq(:,:,:,:), h1kets_kq_allperts(:,:,:,:)
  real(dp),allocatable :: dcwavef(:, :), gh1c_n(:, :), ghc(:,:), gsc(:,:), stern_ppb(:,:,:,:), stern_dw(:,:,:,:)
  logical,allocatable :: ihave_ikibz_spin(:,:), bks_mask(:,:,:),keep_ur(:,:,:)
  real(dp),allocatable :: bra_kq(:,:),kets_k(:,:,:),h1kets_kq(:,:,:,:),cgwork(:,:)
@@ -1200,6 +1199,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  do my_ikcalc=1,sigma%my_nkcalc
    !if (my_ikcalc > 1) exit
    !if (my_ikcalc > 2) exit
+   !if (my_ikcalc > 3) exit
    ikcalc = sigma%my_ikcalc(my_ikcalc)
 
    ! Check if this (kpoint, spin) was already calculated
@@ -1504,6 +1504,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          ABI_MALLOC(gscq, (2, npw_kq * nspinor, nband_me*psps%usepaw))
 
          do ibsum_kq=sigma%my_bsum_start, sigma%my_bsum_stop
+
            if (isirr_kq) then
               call wfd%copy_cg(ibsum_kq, ikq_ibz, spin, bra_kq)
             else
@@ -1578,9 +1579,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
          ! Compute H(1) applied to GS wavefunction Psi_nk(0)
          do ib_k=1,nbcalc_ks
-           root_bcalc(ib_k) = mod(ib_k, sigma%bsum_comm%nproc)
-           if (sigma%bsum_comm%skip(ib_k)) cycle ! MPI parallelism inside bsum
-
+           if (sigma%bsum_comm%skip(ib_k, root=root_bcalc(ib_k))) cycle ! MPI parallelism inside bsum_comm
+                                                                        ! Store rank treating ib_k in root_bcalc
            band_ks = ib_k + bstart_ks - 1
            eig0nk = ebands%eig(band_ks, ik_ibz, spin)
            ! Use scissor shift on 0-order eigenvalue
@@ -1600,8 +1600,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            ! Activate Sternheimer. Note that we are still inside the MPI loop over my_npert.
            ! NB: Assume adiabatic AHC expression to compute the contribution of states above nbsum.
 
-           ! Prepare band parallelism in dfpt_cgwf via mpi_enreg.
 #ifdef _BAND_PARA
+           ! Prepare band parallelism in dfpt_cgwf via mpi_enreg.
            mpi_enreg%comm_band = sigma%bsum_comm%value
            mpi_enreg%me_band = sigma%bsum_comm%me
            mpi_enreg%nproc_band = sigma%bsum_comm%nproc
@@ -1665,7 +1665,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
              rank_band = 0
              band_me = band_ks
              u1_band  = band_ks
-             if (sigma%bsum_comm%skip(ib_k)) cycle ! MPI parallelism inside bsum (not very efficient).
+             if (sigma%bsum_comm%skip(ib_k)) cycle ! MPI parallelism inside bsum_comm
 #endif
 
              ! Init entry in cg1s_kq, either from cache or with zeros.
@@ -1680,14 +1680,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                end if
 
              else
-              cg1s_kq(:,:,ipc,ib_k) = zero
+               cg1s_kq(:,:,ipc,ib_k) = zero
              end if
-
-             ! MG TRICK: attempt to accelerate Sternheimer in STO
-             !if (nspinor == 2 .and. mod(band_ks, 2) == 0 .and. ib_k > 1 .and. u1_band > 0) then
-             !  cg1s_kq(:,1:npw_kq,ipc,ib_k) = cg1s_kq(:,npw_kq+1:,ipc,ib_k-1)
-             !  cg1s_kq(:,npw_kq+1:,ipc,ib_k) = cg1s_kq(:,1:npw_kq,ipc,ib_k-1)
-             !end if
 
              mcgq = npw_kq * nspinor * nband_me
              mgscq = npw_kq * nspinor * nband_me * psps%usepaw
@@ -1760,8 +1754,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          ABI_FREE(ph3d)
          ABI_SFREE(ph3d1)
        end do ! imyp  (loop over perturbations)
-       !call timab(1902, 2, tsec)
 
+       !call timab(1902, 2, tsec)
        ABI_FREE(gs1c)
        ABI_FREE(gvnlx1)
        ABI_FREE(vlocal1)
@@ -1783,20 +1777,27 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
          ! Compute S_pp' = <D_{qp} vscf u_nk|u'_{nk+q p'}>
          ABI_CALLOC(stern_ppb, (2, natom3, natom3, nbcalc_ks))
+
          do ib_k=1,nbcalc_ks
-           if (sigma%bsum_comm%skip(ib_k)) cycle ! MPI parallelism inside bsum
+           if (sigma%bsum_comm%skip(ib_k)) cycle ! MPI parallelism inside bsum_comm
+
            call xmpi_sum(cg1s_kq(:,:,:,ib_k), sigma%pert_comm%value, ierr)
+
+           ! TODO
+           !nelem = 2*npw_kq*nspinor*sigma%my_npert
+           !call MPI_ALLGATHER(MPI_IN_PLACE, nelem, MPI_DOUBLE_PRECISION, cg1s_kq(:,:,:,ib_k), nelem, &
+           !                   MPI_DOUBLE_PRECISION, sigma%pert_comm%value, ierr)
 
            call xmpi_allgather(h1kets_kq(:,:,:,ib_k), 2*npw_kq*nspinor*sigma%my_npert, &
                                h1kets_kq_allperts(:,:,:,ib_k), sigma%pert_comm%value, ierr)
 
            call cg_zgemm("C", "N", npw_kq*nspinor, natom3, natom3, &
              h1kets_kq_allperts(:,:,:,ib_k), cg1s_kq(:,:,:,ib_k), stern_ppb(:,:,:,ib_k))
-             !cg1s_kq(:,:,:,ib_k), h1kets_kq_allperts(:,:,:,ib_k), stern_ppb(:,:,:,ib_k))
 
            ! Save data for Debye-Waller that is performed outside the q-loop.
            if (is_qzero) stern_dw(:,:,:,ib_k) = stern_ppb(:,:,:,ib_k)
          end do
+
          ABI_FREE(cg1s_kq)
          ABI_FREE(h1kets_kq_allperts)
 
@@ -1811,7 +1812,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            nqnu_tlist = occ_be(wqnu, sigma%kTmesh(:), zero)
 
            do ib_k=1,nbcalc_ks
-             if (sigma%bsum_comm%skip(ib_k)) cycle ! MPI parallelism inside bsum
+             if (sigma%bsum_comm%skip(ib_k)) cycle ! MPI parallelism inside bsum_comm
 
              ! sum_{pp'} d_p* Stern_{pp'} d_p' with d = displ_red(:,:,:,nu) and S = stern_ppb(:,:,:,ib_k)
              vec_natom3 = zero
@@ -1844,8 +1845,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        ! Sum over m bands parallelized inside bsum_comm
        ! ==============================================
        call timab(1903, 1, tsec)
-       do ibsum_kq=sigma%my_bsum_start, sigma%my_bsum_stop
 
+       do ibsum_kq=sigma%my_bsum_start, sigma%my_bsum_stop
          call timab(1904, 1, tsec)
          ! This can happen if we have loaded the wavefunctions inside the energy range.
          if (sigma%imag_only .and. sigma%qint_method == 1) then
@@ -2251,9 +2252,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          ABI_FREE(workq_ug)
        end if
 
-       if (sigma%nqibz_k < 1000 .or. (sigma%nqibz_k > 1000 .and. mod(iq_ibz_k, 200) == 0) .or. iq_ibz_k <= nprocs) then
-         write(msg,'(4(a,i0),a,f8.2)') " k-point [",ikcalc,"/",sigma%nkcalc, "] q-point [",iq_ibz_k,"/",sigma%nqibz_k,"]"
-         !write(msg,'(2(a,i0),a)') " my q-point [",imyq,"/",sigma%my_nqibz_k,"]"
+       if (imyq < 10 .or. mod(imyq, 100) == 0) then
+         write(msg,'(4(a,i0),a)') " k-point [",my_ikcalc,"/",sigma%my_nkcalc, "] q-point [",imyq,"/",sigma%my_nqibz_k,"]"
          call cwtime_report(msg, cpu, wall, gflops)
        end if
      end do ! iq_ibz_k (sum over q-points in IBZ_k)
@@ -2433,8 +2433,10 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
          end do ! nu
 
-         if (nq < 1000 .or. (nq > 1000 .and. mod(iq_ibz_k, 200) == 0) .or. iq_ibz_k <= nprocs) then
-           write(msg,'(4(a,i0),a,f8.2)') " k-point [",ikcalc,"/",sigma%nkcalc, "] q-point [",iq_ibz_k,"/",nq,"]"
+         !if (nq < 1000 .or. (nq > 1000 .and. mod(iq_ibz_k, 200) == 0) .or. iq_ibz_k <= nprocs) then
+         ii = iq_ibz_k - q_start
+         if (ii < 10 .or. mod(ii, 100) == 0) then
+           write(msg,'(4(a,i0),a,f8.2)') " k-point [",my_ikcalc,"/",sigma%my_nkcalc, "] q-point [",iq_ibz_k,"/",nq,"]"
            call cwtime_report(msg, cpu, wall, gflops)
          end if
        end do ! iq_ibz_k
@@ -3307,7 +3309,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
 
  ! Build object used to compute integration weights taking into account double-grid.
  ! Note that we compute the weights only for the states included in the sum
- ! bstart and new%bsum select the band range.
+ ! bstart and new%bsum_comm select the band range.
  ! TODO:
  !  1) Should recheck the case bstart > 1 with star functions as I got weird results.
  !  2) Should refactor ephwg so that only my_npert phonons are stored in the datatype.

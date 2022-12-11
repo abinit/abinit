@@ -167,12 +167,12 @@ module m_xmpi
    integer :: nproc = 1
    integer :: me = 0
  contains
-   procedure :: skip => xcomm_skip
+   procedure :: skip => xcomm_skip                     ! Skip iteration according to rank
    procedure :: set_to_null => xcomm_set_to_null
    procedure :: set_to_self => xcomm_set_to_self
    procedure :: free => xcomm_free
-   procedure :: from_cart_sub => xcomm_from_cart_sub   ! Helper function to build sub-communicators in a Cartesian grid.
-   procedure :: prep_gatherv => xcomm_prep_gatherv     ! Helper function to prepare a typical gatherv operation.
+   procedure :: from_cart_sub => xcomm_from_cart_sub   ! Build sub-communicators in a Cartesian grid.
+   procedure :: prep_gatherv => xcomm_prep_gatherv     ! Prepare a typical gatherv operation.
    procedure :: print_names => xcomm_print_names
  end type xcomm_t
 
@@ -4997,42 +4997,51 @@ end subroutine xmpi_distrib_2d
 !!***
 
 type(xcomm_t) function xcomm_from_mpi_int(comm_int) result(new)
-   integer,intent(in) :: comm_int
-   integer :: new_comm, ierr
-   new%value = comm_int; new%me = 0; new%nproc = 1
+  integer,intent(in) :: comm_int
+  integer :: new_comm, ierr
+  new%value = comm_int; new%me = 0; new%nproc = 1
 #ifdef HAVE_MPI
-   call MPI_Comm_dup(comm_int, new_comm, ierr)
-   new%value = new_comm
-   new%nproc = xmpi_comm_size(new_comm)
-   new%me = xmpi_comm_rank(new_comm)
+  call MPI_Comm_dup(comm_int, new_comm, ierr)
+  new%value = new_comm
+  new%nproc = xmpi_comm_size(new_comm)
+  new%me = xmpi_comm_rank(new_comm)
 #endif
 end function xcomm_from_mpi_int
 
-pure logical function xcomm_skip(self, iter)
-  class(xcomm_t),intent(in) :: self
-  integer,intent(in) :: iter
-  xcomm_skip = mod(iter, self%nproc) /= self%me
+! Skip iteration `iter` according to rank in self.
+! [root]: Rank of the proc treating iteration `iter`
+
+logical function xcomm_skip(self, iter, root)
+ class(xcomm_t),intent(in) :: self
+ integer,intent(in) :: iter
+ integer,optional,intent(out) :: root
+
+ integer :: root__
+
+ root__ = mod(iter, self%nproc)
+ xcomm_skip = root__ /= self%me
+ if (present(root)) root = root__
 end function xcomm_skip
 
 subroutine xcomm_set_to_self(self)
-  class(xcomm_t),intent(inout) :: self
-  call self%free()
-  self%value = xmpi_comm_self; self%me = 0; self%nproc = 1
+ class(xcomm_t),intent(inout) :: self
+ call self%free()
+ self%value = xmpi_comm_self; self%me = 0; self%nproc = 1
 end subroutine xcomm_set_to_self
 
 subroutine xcomm_set_to_null(self)
-  class(xcomm_t),intent(inout) :: self
-  call self%free()
-  self%value = xmpi_comm_null
+ class(xcomm_t),intent(inout) :: self
+ call self%free()
+ self%value = xmpi_comm_null
 end subroutine xcomm_set_to_null
 
 subroutine xcomm_free(self)
-  class(xcomm_t),intent(inout) :: self
-  call xmpi_comm_free(self%value)
-  self%me = -1; self%nproc = 0
+ class(xcomm_t),intent(inout) :: self
+ call xmpi_comm_free(self%value)
+ self%me = -1; self%nproc = 0
 end subroutine xcomm_free
 
-! Helper function to build sub-communicators in a Cartesian grid.
+! Build sub-communicators in a Cartesian grid.
 subroutine xcomm_from_cart_sub(self, comm_cart, keepdim)
  class(xcomm_t),intent(out) :: self
  integer,intent(in) :: comm_cart
@@ -5046,7 +5055,7 @@ subroutine xcomm_from_cart_sub(self, comm_cart, keepdim)
  self%nproc = xmpi_comm_size(self%value)
 end subroutine xcomm_from_cart_sub
 
-! Helper function to prepare a typical gatherv operation in which each MPI rank sends
+! Prepare a typical gatherv operation in which each MPI rank sends
 ! `nitems_per_rank(rank+1)` items and each item has length `nelem_per_item`.
 ! Final results are packed according to the rank of the processor.
 

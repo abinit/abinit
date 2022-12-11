@@ -715,7 +715,7 @@ end subroutine cg_zaxpy
 !!
 !! SOURCE
 
-subroutine cg_zaxpby(n, a, x ,b, y)
+subroutine cg_zaxpby(n, a, x, b, y)
 
 !Arguments ------------------------------------
 !scalars
@@ -1034,9 +1034,7 @@ subroutine dotprod_g(dotr, doti, istwf_k, npw, option, vect1, vect2, me_g0, comm
  real(dp),intent(in) :: vect1(2,npw),vect2(2,npw)
 
 !Local variables-------------------------------
-!scalars
  integer :: ierr
-!arrays
  real(dp) :: dotarr(2)
 
 ! *************************************************************************
