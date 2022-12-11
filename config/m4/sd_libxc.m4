@@ -368,7 +368,7 @@ AC_DEFUN([_SD_LIBXC_CHECK_USE], [
   AC_LANG_POP([C])
   AC_MSG_RESULT([${sd_libxc_kxc_ok}])
   if test "${sd_libxc_kxc_ok}" = "no"; then
-    AC_MSG_ERROR([The LibXC package does not provide the
+    AC_MSG_WARN([The LibXC package does not provide the
      3rd derivatives of energy! You should recompile it
      using --enable-kxc configure option.])
   fi
@@ -382,8 +382,7 @@ AC_DEFUN([_SD_LIBXC_CHECK_USE], [
       sd_libxc_ok="yes"
     fi
   else
-    if test "${sd_libxc_c_ok}" = "yes" -a \
-            "${sd_libxc_kxc_ok}" = "yes"; then
+    if test "${sd_libxc_c_ok}" = "yes"; then
       sd_libxc_ok="yes"
     fi
   fi
