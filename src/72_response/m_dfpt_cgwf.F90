@@ -1039,6 +1039,7 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
    d2edt2 = zero
    call dotprod_g(d2edt2,doti,istwf_k,npw1*nspinor,1,conjgr,gh_direc,me_g0,mpi_enreg%comm_spinorfft)
    d2edt2=two*two*d2edt2
+
    if(prtvol==-level.or.prtvol==-19)then
      write(msg,'(a,2es14.6)') 'dfpt_cgwf: dedt,d2edt2=',dedt,d2edt2
      call wrtout(std_out,msg)

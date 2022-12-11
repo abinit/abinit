@@ -191,8 +191,8 @@ function xomp_get_num_threads(open_parallel) result(nthreads)
 ! *************************************************************************
 
  do_open = .FALSE.; if (PRESENT(open_parallel)) do_open = open_parallel
-#ifdef HAVE_OPENMP
 
+#ifdef HAVE_OPENMP
  if (do_open .and. .not.xomp_in_parallel()) then
 !$OMP PARALLEL
 !$OMP SINGLE

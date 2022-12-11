@@ -1217,8 +1217,10 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
 
  ! Define batch sizes for FFT transforms, use multiples of OpenMP threads.
  omp_nt = xomp_get_num_threads(open_parallel=.True.)
- gwr%uc_batch_size = max(1, gwr%dtset%userid * omp_nt)
- gwr%sc_batch_size = max(1, gwr%dtset%userie * omp_nt)
+ !gwr%uc_batch_size = max(1, gwr%dtset%userid * omp_nt)
+ !gwr%sc_batch_size = max(1, gwr%dtset%userie * omp_nt)
+ gwr%uc_batch_size = 4 * omp_nt
+ gwr%sc_batch_size = 4 * omp_nt
  !gwr%uc_batch_size = 4; gwr%sc_batch_size = 4
 
  if (my_rank == master) then
@@ -1272,13 +1274,12 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
      dims_kgts = [1, all_nproc, 1, 1]
      est = estimate(gwr, dims_kgts)
      prev_efficiency = est%efficiency; prev_speedup = est%speedup
-     call wrtout(units, sjoin("- Optimizing MPI grid with mem_per_cpu_mb:", ftoa(mem_per_cpu_mb), "[Mb]"), pre_newlines=1)
-     call wrtout(units, "- Use `abinit run.abi --mem-per-cpu=4G` to set mem_per_cpu_mb in the submission script", newlines=1)
+     call wrtout(units, sjoin("- Optimizing MPI grid with mem_per_cpu_mb:", ftoa(mem_per_cpu_mb), "[Mb]"))
+     call wrtout(units, "- Use `abinit run.abi --mem-per-cpu=4G` to set mem_per_cpu_mb in the submission script")
      write(msg, "(a,4(a4,2x),3(a12,2x))") "- ", "np_k", "np_g", "np_t", "np_s", "memb_per_cpu", "efficiency", "speedup"
      call wrtout(units, msg)
      ip_k = dims_kgts(1); ip_g = dims_kgts(2); ip_t = dims_kgts(3); ip_s = dims_kgts(4)
-     write(msg, "(a,4(i4,2x),3(es12.5,2x))") &
-       "- ", ip_k, ip_g, ip_t, ip_s, est%mem_total, est%efficiency, est%speedup
+     write(msg, "(a,4(i4,2x),3(es12.5,2x))") "- ", ip_k, ip_g, ip_t, ip_s, est%mem_total, est%efficiency, est%speedup
      call wrtout(units, msg)
 
      do ip_s=1,gwr%nsppol
@@ -1296,8 +1297,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
              if (est%mem_total < mem_per_cpu_mb * 0.8_dp .and. est%speedup > prev_speedup) then
                prev_efficiency = est%efficiency; prev_speedup = est%speedup; dims_kgts = try_dims_kgts
              end if
-             write(msg, "(a,4(i4,2x),3(es12.5,2x))") &
-               "- ", ip_k, ip_g, ip_t, ip_s, est%mem_total, est%efficiency, est%speedup
+             write(msg,"(a,4(i4,2x),3(es12.5,2x))")"- ", ip_k, ip_g, ip_t, ip_s, est%mem_total, est%efficiency, est%speedup
              call wrtout(units, msg)
            end do
          end do
@@ -1305,16 +1305,16 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
      end do
 
      est = estimate(gwr, dims_kgts)
-     call wrtout(units, "Selected configuration:", pre_newlines=1)
+     call wrtout(units, "-")
+     call wrtout(units, "- Selected MPI grid:")
      ip_k = dims_kgts(1); ip_g = dims_kgts(2); ip_t = dims_kgts(3); ip_s = dims_kgts(4)
      write(msg, "(a,4(a4,2x),3(a12,2x))") "- ", "np_k", "np_g", "np_t", "np_s", "memb_per_cpu", "efficiency", "speedup"
      call wrtout(units, msg)
-     write(msg, "(a,4(i4,2x),3(es12.5,2x))") &
-       "- ", ip_k, ip_g, ip_t, ip_s, est%mem_total, est%efficiency, est%speedup
+     write(msg, "(a,4(i4,2x),3(es12.5,2x))")"- ", ip_k, ip_g, ip_t, ip_s, est%mem_total, est%efficiency, est%speedup
      call wrtout(units, msg, newlines=1)
 
-     call ps%from_pid()
-     call ps%print([std_out])
+     !call ps%from_pid()
+     !call ps%print([std_out])
    end if ! master
 
    call xmpi_bcast(dims_kgts, master, gwr%comm%value, ierr)
@@ -2356,20 +2356,20 @@ subroutine gwr_build_green(gwr, free_ugb)
          ! Multiply columns by exponentials in imaginary time.
          work%buffer_cplx = ugb%buffer_cplx
 
-         !!$OMP PARALLEL DO PRIVATE(band, f_nk, eig_nk, gt_cfact)
+         !$OMP PARALLEL DO PRIVATE(band, f_nk, eig_nk, gt_cfact)
          do il_b=1, work%sizeb_local(2)
-          band = work%loc2gcol(il_b)
-          f_nk = qp_occ(band, ik_ibz, spin)
-          eig_nk = qp_eig(band, ik_ibz, spin)
-          gt_cfact = zero
-          if (ipm == 2) then
-            if (eig_nk < -tol6) gt_cfact = exp(gwr%tau_mesh(itau) * eig_nk)
-          else
-            if (eig_nk > tol6) gt_cfact = exp(-gwr%tau_mesh(itau) * eig_nk)
-          end if
+           band = work%loc2gcol(il_b)
+           f_nk = qp_occ(band, ik_ibz, spin)
+           eig_nk = qp_eig(band, ik_ibz, spin)
+           gt_cfact = zero
+           if (ipm == 2) then
+             if (eig_nk < -tol6) gt_cfact = exp(gwr%tau_mesh(itau) * eig_nk)
+           else
+             if (eig_nk > tol6) gt_cfact = exp(-gwr%tau_mesh(itau) * eig_nk)
+           end if
 
-          work%buffer_cplx(:,il_b) = work%buffer_cplx(:,il_b) * sqrt(real(gt_cfact))
-          !call xscal(npwsp, work%buffer_cplx(:,il_b), cone * sqrt(real(gt_cfact)), 1)
+           work%buffer_cplx(:,il_b) = work%buffer_cplx(:,il_b) * sqrt(real(gt_cfact))
+           !call xscal(npwsp, work%buffer_cplx(:,il_b), cone * sqrt(real(gt_cfact)), 1)
          end do ! il_b
 
          ! Build G(g,g',ipm)
@@ -2509,10 +2509,10 @@ subroutine gwr_rotate_gpm(gwr, ik_bz, itau, spin, desc_kbz, gt_pm)
 
  ! Get G_k with k in the BZ.
  tnon = gwr%cryst%tnons(:, isym_k)
- !print *, "tnon:", tnon
  do ipm=1,2
    associate (gk_i => gwr%gt_kibz(ipm, ik_ibz, itau, spin), gk_f => gt_pm(ipm))
    call gk_i%copy(gk_f)
+   !!$OMP PARALLEL DO PRIVATE(ig1, g2, ph2, ig1, g2, ph1)
    do il_g2=1, gk_f%sizeb_local(2)
      ig2 = mod(gk_f%loc2gcol(il_g2) - 1, desc_kbz%npw) + 1
      g2 = desc_kbz%gvec(:,ig2)
@@ -2880,6 +2880,8 @@ subroutine gwr_rotate_wc(gwr, iq_bz, itau, spin, desc_qbz, wc_qbz)
  tnon = gwr%cryst%tnons(:, isym_q)
  associate (wq_i => gwr%wc_qibz(iq_ibz, itau, spin), wq_f => wc_qbz)
  call wq_i%copy(wc_qbz)
+
+ !!!$OMP PARALLEL DO PRIVATE(ig2, g2, phs2, ig1, g2, ph1)
  do il_g2=1, wq_f%sizeb_local(2)
    ig2 = mod(wq_f%loc2gcol(il_g2) - 1, desc_qbz%npw) + 1
    g2 = desc_qbz%gvec(:,ig2)
@@ -3225,24 +3227,21 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
 
        ! Compute contribution to itau matrix
        do idat=1,ndat
-#if 0
-         do ig1=1,mats(it0)%sizeb_local(1)
-          do itau=1,gwr%ntau
-            glob_cwork(itau, ig1, idat) = dot_product(wgt_globmy(itau, :), cwork_myit(:, ig1, idat))
-          end do
-         end do
-#else
+         !do ig1=1,mats(it0)%sizeb_local(1)
+         ! do itau=1,gwr%ntau
+         !   glob_cwork(itau, ig1, idat) = dot_product(wgt_globmy(itau, :), cwork_myit(:, ig1, idat))
+         ! end do
+         !end do
          call ZGEMM("N", "N", gwr%ntau, loc1_size, gwr%my_ntau, cone, &
                     wgt_globmy, gwr%ntau, cwork_myit(1,1,idat), gwr%my_ntau, czero, glob_cwork(1,1,idat), gwr%ntau)
-#endif
-
          !call xmpi_isum_ip(glob_cwork(:,:,idat), gwr%tau_comm%value, requests(idat), ierr)
        end do
 
        !call xmpi_waitall_1d(requests(1:ndat), ierr)
        call xmpi_sum(glob_cwork, gwr%tau_comm%value, ierr)
 
-       ! Update my local (g1,g2) entry to have it in imaginary-frequency.
+       ! Update my local (g1, g2) entry to have it in imaginary-frequency.
+       !!!$OMP PARALLEL DO PRIVATE(itau)
        do idat=1,ndat
          do my_it=1,gwr%my_ntau
            itau = gwr%my_itaus(my_it)
