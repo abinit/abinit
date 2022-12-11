@@ -293,11 +293,13 @@ subroutine check_kxc(ixc,optdriver,check_k3xc)
    end if
    ABI_ERROR(msg)
  else if (check_k3xc_.and.(.not.k3xc_available)) then
-   write(msg,'(9a)') trim(msg),ch10,&
+   write(msg,'(13a)') trim(msg),ch10,&
 &   'However, with the current input options, ABINIT needs K3xc.',ch10,&
-&   '>Possible action:',ch10,&
-&   '- Change the XC functional in psp file or input file,',ch10,&
-&   '- Recompile libXC using --enable-kxc.'
+&   '>Possible actions:',ch10,&
+&   '- Recompile libXC using --enable-kxc.',ch10,&
+&   '  or',ch10,&
+&   '- Change the XC functional in psp file or input file:',ch10,&
+&   '  use one of the internal LDA (ixc=3, 7 to 15, 23, 24).'
    ABI_ERROR(msg)
  end if
 
