@@ -25,6 +25,7 @@ AC_DEFUN([SD_LIBXC_INIT], [
   sd_libxc_init="unknown"
   sd_libxc_c_ok="unknown"
   sd_libxc_fortran_ok="unknown"
+  sd_libxc_kxc_ok="unknown"
   sd_libxc_ok="unknown"
 
   # Set adjustable parameters
@@ -330,15 +331,59 @@ AC_DEFUN([_SD_LIBXC_CHECK_USE], [
   fi
   unset tmp_incs
 
+  # Check old LibXC C API
+  if test "${sd_libxc_c_ok}" != "yes"; then
+    AC_MSG_CHECKING([whether the LibXC library has an old API])
+    AC_LANG_PUSH([C])
+    AC_LINK_IFELSE([AC_LANG_PROGRAM(
+      [[
+#include <xc.h>
+      ]],
+      [[
+        int ma, mi;
+        xc_version(&ma, &mi);
+      ]])], [sd_libxc_c_ok="yes"], [sd_libxc_c_ok="no"])
+    AC_LANG_POP([C])
+    AC_MSG_RESULT([${sd_libxc_c_ok}])
+  fi 
+
+  # Check if LibXC was compiled with KXC
+  AC_MSG_CHECKING([whether the LibXC was compiled with Kxc derivatives])
+  AC_LANG_PUSH([C])
+  AC_RUN_IFELSE([AC_LANG_PROGRAM(
+    [[
+#include <stdlib.h>
+#include <xc.h>
+    ]],
+    [[
+  xc_func_type func;
+  int has_kxc = 1, func_id = 1;
+  if (XC_MAJOR_VERSION >4) {
+    xc_func_init(&func, func_id, XC_UNPOLARIZED);
+    has_kxc=(XC_FLAGS_HAVE_KXC & func.info->flags)>0;
+    xc_func_end(&func);
+  }
+  if (! has_kxc) {exit(EXIT_FAILURE);}
+    ]])], [sd_libxc_kxc_ok="yes"], [sd_libxc_kxc_ok="no"])
+  AC_LANG_POP([C])
+  AC_MSG_RESULT([${sd_libxc_kxc_ok}])
+  if test "${sd_libxc_kxc_ok}" = "no"; then
+    AC_MSG_ERROR([The LibXC package does not provide the
+     3rd derivatives of energy! You should recompile it
+     using --enable-kxc configure option.])
+  fi
+
   # Combine the available results
   sd_libxc_ok="no"
   if test "${sd_libxc_enable_fc}" = "yes"; then
     if test "${sd_libxc_c_ok}" = "yes" -a \
-            "${sd_libxc_fortran_ok}" = "yes"; then
+            "${sd_libxc_fortran_ok}" = "yes" -a \
+            "${sd_libxc_kxc_ok}" = "yes"; then
       sd_libxc_ok="yes"
     fi
   else
-    if test "${sd_libxc_c_ok}" = "yes"; then
+    if test "${sd_libxc_c_ok}" = "yes" -a \
+            "${sd_libxc_kxc_ok}" = "yes"; then
       sd_libxc_ok="yes"
     fi
   fi
