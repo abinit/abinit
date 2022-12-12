@@ -253,13 +253,6 @@ module m_gwr
  end interface desc_array_free
 !!***
 
-
-! See also https://fortran-lang.discourse.group/t/a-gfortran-issue-with-parameterized-derived-types/213/17
-!TYPE my_matrix (k)
-!  INTEGER, KIND :: k = dp
-!  REAL (k),allocatable :: buffer(:,:)
-!END TYPE my_matrix
-
 !----------------------------------------------------------------------
 
 !!****t* m_gwr/est_t
@@ -670,7 +663,7 @@ module m_gwr
    ! Matrix elements of $\<nks|\Sigma_x|nk's\>$ with
    ! b1gw = minval(gwr%bstart_ks); b2gw = maxval(gwr%bstop_ks)
 
-   !type(pstat_t) :: pstat
+   !type(pstat_t) :: ps
 
  contains
 
@@ -819,7 +812,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  type(krank_t) :: qrank, krank_ibz
  type(gaps_t) :: ks_gaps
  type(est_t) :: est
- type(pstat_t) :: ps
+ !type(pstat_t) :: ps
 !arrays
  integer :: qptrlatt(3,3), dims_kgts(ndims), try_dims_kgts(ndims), indkk_k(6,1), units(2)
  integer,allocatable :: gvec_(:,:),degblock(:,:), degblock_all(:,:,:,:), ndeg_all(:,:), iwork(:,:), got(:)
@@ -3370,6 +3363,8 @@ subroutine desc_get_vc_sqrt(desc, qpt, q_is_gamma, gwr, comm)
 
 ! *************************************************************************
 
+ ABI_UNUSED([q_is_gamma])
+
  if (allocated(desc%vc_sqrt)) return
  ABI_MALLOC(desc%vc_sqrt, (desc%npw))
 
@@ -3420,18 +3415,13 @@ end subroutine desc_copy
 !!  desc_calc_gnorm_table
 !!
 !! FUNCTION
+!!  Mainly used to compare data with legacy code
 !!
 !! INPUTS
 !!
 !! OUTPUT
-!!integer, allocatable :: gvec2gsort(:)
-!! (npw)
-!! Mapping the gvec array and the sorted one.
-!! Computed by calling desc_calc_gnorm_table. Mainly used to compare data with legacy code
-!!real(dp), allocatable :: sorted_gnorm(:)
-!! (npw)
-!! Sorted list with the norm of the gvector
-!! Computed by calling desc_calc_gnorm_table.
+!!  gvec2gsort(npw): Mapping the gvec array and the sorted one.
+!!  sorted_gnorm(npw): Sorted list with the norm of the gvector
 !!
 !! SOURCE
 
@@ -6920,6 +6910,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
            trev_k = gwr%kbz2ibz(6, ik_bz); g0_k = gwr%kbz2ibz(3:5, ik_bz)
            trev_k = trev_k + 1  ! NB: GW routines assume trev in [1, 2]
 
+           ! TODO: Metals
            call accumulate_head_wings_imagw( &
                                         npwe, nomega, nI, nJ, dtset%symchi, &
                                         is_metallic, ik_bz, isym_k, trev_k, nspinor, cryst, ltg_q, gsph, &

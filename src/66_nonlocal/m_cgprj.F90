@@ -28,6 +28,7 @@ module m_cgprj
 
  use defs_abitypes, only : MPI_type
  use defs_datatypes, only : pseudopotential_type
+ use m_fstrings, only : itoa, sjoin
  use m_kg,       only : ph1d3d, mkkpg
  use m_geometry, only : strconv
  use m_mkffnl,   only : mkffnl
@@ -569,10 +570,10 @@ contains
 
 !Check sizes
  if (mpw*mband_cg*my_nspinor*mkmem*my_nsppol>mcg) then
-   ABI_BUG('Bad mcg value!')
+   ABI_BUG(sjoin('Bad mcg value!', itoa(mcg)))
  end if
  if (mband_cprj*my_nspinor*mkmem*my_nsppol>mcprj) then
-   ABI_BUG('Bad mcprj value!')
+   ABI_BUG(sjoin('Bad mcprj value!', itoa(mcprj)))
  end if
 
  !Check sizes for cprj (distribution is tricky)

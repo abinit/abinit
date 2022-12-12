@@ -1730,6 +1730,8 @@ subroutine vcgen_init(vcgen, cryst, kptrlatt, nkbz, nqibz, nqbz, qbz, rcut, gw_i
 
 ! *************************************************************************
 
+ ABI_UNUSED([ecut])
+
  ! Save dimension and other useful quantities in Vcp
  vcgen%rcut      = rcut                 ! Cutoff radius for cylinder.
  vcgen%hcyl      = zero                 ! Length of finite cylinder (Rozzi's method, default is Beigi).
