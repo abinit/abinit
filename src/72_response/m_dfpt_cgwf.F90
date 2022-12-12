@@ -71,6 +71,8 @@ contains
 !!
 !! INPUTS
 !!  u1_band_=which particular band we are converging (LOCAL)
+!!    A negative value is used when the routine is called in band-mode with MPI-distributed cgq
+!!    to indicate that this proc is not optimizing abs(u1_band). Used when calling dfpt_cgw in EPH.
 !!  band_me=cpu-local index in cgq array of band which we are converging.
 !!  berryopt=option for Berry phase
 !!  cgq(2,mcgq)=wavefunction coefficients for MY bands at k+Q
@@ -1150,7 +1152,7 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
    ! even if the present band will not be updated
    bands_skipped_now = 0
    bands_skipped_now(u1_band) = skipme
-   if (u1_band_ < 0) bands_skipped_now(u1_band) = 0
+   if (u1_band_ < 0) bands_skipped_now(u1_band) = 0  ! Handle negative index
    call xmpi_sum(bands_skipped_now,mpi_enreg%comm_band,ierr)
 
    ! bands_skipped_now = bands_skipped_now - bands_treated_now

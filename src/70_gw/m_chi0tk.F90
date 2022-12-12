@@ -847,6 +847,8 @@ subroutine accumulate_head_wings_imagw( &
 
 !************************************************************************
 
+ ABI_UNUSED([is_metallic])
+
  select case (symchi)
  case (0)
    ! Do not use symmetries.

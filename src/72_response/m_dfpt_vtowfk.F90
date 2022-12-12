@@ -31,7 +31,6 @@ module m_dfpt_vtowfk
  use m_dtset
  use m_dtfil
 
-
  use defs_datatypes, only : pseudopotential_type
  use defs_abitypes,  only : MPI_type
  use m_rf2_init,     only : rf2_init
@@ -248,9 +247,8 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
  nkpt_max=50; if (xmpi_paral==1) nkpt_max=-1
 
  if(prtvol>2 .or. ikpt<=nkpt_max)then
-   write(message,'(2a,i5,2x,a,3f9.5,2x,a)')ch10,' Non-SCF iterations; k pt #',ikpt,'k=',&
-&   gs_hamkq%kpt_k(:),'band residuals:'
-   call wrtout(std_out,message,'PERS')
+   write(message,'(2a,i5,2x,a,3f9.5,2x,a)')ch10,' Non-SCF iterations; k pt #',ikpt,'k=',gs_hamkq%kpt_k(:),'band residuals:'
+   call wrtout(std_out,message)
  end if
 
 !Initializations and allocations
@@ -565,7 +563,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 
      end if ! End of non-zero occupation
 
-!    Exit loop over inonsc if converged and if non-self-consistent
+!    Exit loop over inonsc if converged and non-self-consistent
      if (iscf_mod<0 .and. resid<dtset%tolwfr) exit
 
    end do ! End loop over inonsc
@@ -611,18 +609,15 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 ! NB: no need to sum eXX_k over band communicator here, as it is a sub-comm of kpt,
 !   and full mpi_sum will be done higher up.
 
-
-
 !For rf2 perturbation
  if(ipert==natom+10.or.ipert==natom+11) call rf2_destroy(rf2)
-
 
 !Find largest resid over bands at this k point
  residk=maxval(resid_k(:))
  if (prtvol>2 .or. ikpt<=nkpt_max) then
    do ii=0,(nband_k-1)/8
      write(message,'(1p,8e10.2)')(resid_k(iband),iband=1+ii*8,min(nband_k,8+ii*8))
-     call wrtout(std_out,message,'PERS')
+     call wrtout(std_out,message)
    end do
  end if
 
@@ -658,12 +653,12 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
  call xmpi_sum(nskip,mpi_enreg%comm_band,ierr)
  if (iscf_mod>0 .and. (prtvol>2 .or. ikpt<=nkpt_max)) then
    write(message,'(a,i0)')' dfpt_vtowfk : number of one-way 3D ffts skipped in vtowfk3 until now =',nskip
-   call wrtout(std_out,message,'PERS')
+   call wrtout(std_out,message)
  end if
 
  if (prtvol<=2 .and. ikpt==nkpt_max+1) then
    write(message,'(3a)') ch10,' dfpt_vtowfk : prtvol=0, 1 or 2, do not print more k-points.',ch10
-   call wrtout(std_out,message,'PERS')
+   call wrtout(std_out,message)
  end if
 
  if (residk>dtset%tolwfr .and. iscf_mod<=0 .and. iscf_mod/=-3) then
