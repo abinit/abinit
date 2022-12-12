@@ -1,19 +1,20 @@
-# Crystalline alpha-quartz with NC pseudos. Test band parallelism in DFPT
+# Crystalline alpha-quartz with PAW. Test band parallelism in DFPT
 # Dataset 1: ground state calculation to get the density
 # Dataset 2: DFPT with band parallelism
 
 ndtset 2
 #timopt 1
 
-ecut      25
-nband      24       # number of (occ and empty) bands to be computed. 48 electrons
+ecut      12
+pawecutdg 24
+nband     24       # number of (occ and empty) bands to be computed. 48 electrons
 
 ####################
 # Dataset 1: SCF run
 ####################
 # Parallel settings for dataset 1. NB: These variables are not used in the GWR code.
 paral_kgb1  1
-rmm_diis1   1
+#rmm_diis1   1
 npband1     4
 bandpp1     6
 npfft1      1
@@ -72,7 +73,7 @@ rprim   5.0000000000e-01 -8.6602540378e-01  0.0000000000e+00
         0.0000000000e+00  0.0000000000e+00  1.0000000000e+00
 
 pp_dirpath "$ABI_PSPDIR"
-pseudos "Si-GGA.psp8, O-GGA.psp8"
+pseudos "Pseudodojo_paw_pw_standard/Si.xml, Pseudodojo_paw_pw_standard/O.xml"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
@@ -81,10 +82,10 @@ pseudos "Si-GGA.psp8, O-GGA.psp8"
 #%% nprocs_to_test = 4
 #%% max_nprocs = 4
 #%% [NCPU_4]
-#%% files_to_test = t65_MPI4.abo, tolnlines = 25, tolabs = 1.1e-03, tolrel = 6.0e-03, fld_options = -medium
+#%% files_to_test = t66_MPI4.abo, tolnlines = 25, tolabs = 1.1e-03, tolrel = 6.0e-03, fld_options = -medium
 #%% [extra_info]
 #%% authors =  M. Giantomassi
 #%% keywords = NC, DFPT
 #%% description =
-#%%   Test band parallelism in DFPT with NC pseudos
+#%%   Test band parallelism in DFPT with PAW
 #%%<END TEST_INFO>
