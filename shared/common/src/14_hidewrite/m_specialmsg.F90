@@ -208,6 +208,15 @@ subroutine herald(code_name,code_version,iout)
  mm_rel=07
 !END OF RELEASE TIME
 
+if(trim(code_name)=="MULTIBINIT") then
+ write(iout, '(a,/,a,/,a,/,a,/,/)' ) &
+'******************************************************************************************', &
+'                                Welcome to MULTIBINIT,                         ', &
+' a software platform designed for the construction and use of second-principles models', &
+'                   for lattice, spin and electron degrees of freedom.'
+ end if
+
+
 !The technique used hereafter is the only one that we have found to obtain
 !perfect transferability across platforms and OS.
  write(iout, '(/,a,a,a,a,a)' ) '.Version ',trim(code_version),' of ',trim(code_name),' '
@@ -216,6 +225,8 @@ subroutine herald(code_name,code_version,iout)
 #else
  write(iout, '(a,a,a,/)' ) '.(sequential version, prepared for a ',build_target,' computer) '
 #endif
+
+
 
 !GNU GPL license
  write(iout, '(a,/,a,a,a,/,a,/,a,/,a,/)' ) &
@@ -236,13 +247,33 @@ subroutine herald(code_name,code_version,iout)
    '- and https://docs.abinit.org/theory/bibliography/#sharma2004'
  end if
 
-
+ 
+if(trim(code_name)/="MULTIBINIT") then
  write(iout, '(a,/,a,/,a,/,a,/,a)' ) &
  ' ABINIT is a project of the Universite Catholique de Louvain,',&
  ' Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .',&
  ' Please read https://docs.abinit.org/theory/acknowledgments for suggested',&
  ' acknowledgments of the ABINIT effort.',&
  ' For more information, see https://www.abinit.org .'
+endif
+
+
+if(trim(code_name)=="MULTIBINIT") then
+ write(iout, '(a,/,a,/,/,a,/,/,a,/,/,a,/, a,/,/, a,/, a,/, a,/,/, a,/,/, a/,/)' ) &
+' MULTIBINIT is a software project of the University of Liège', &
+' (PHYTHEMA & NANOMAT groups), in collaboration with other partners.', &
+'-----------------------------------------------------------------------------------------', &
+'                          MULTIBINIT – LATTICE MODELS                   ', &
+' Project initiated and coordinated by Philippe GHOSEZ and his group at ULiège', &
+'   (Philippe.Ghosez@uliege.be).',  &
+' Main contributors: Alexandre MARTIN, Jordan BIEDER, Michael Marcus SCHMITT,', & 
+'   Louis BASTOGNE, Xu HE, Alireza SASANI, Huazhang ZHANG, Subhadeep BANDYOPADHYAY,', &
+'   Philippe GHOSEZ.', &
+' Technical support : Xu HE (X.He@uliege.be)', &
+'*****************************************************************************************' 
+ end if
+
+
 
 !Get year, month and day
  call date_and_time(strdat,strtime,strzone,values)
