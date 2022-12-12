@@ -1692,7 +1692,7 @@ if (any(abs(dtset%sigma_erange) > zero)) then
                       count=[3, 3, 2, self%my_nspins , self%ntemp])
  NCF_CHECK(ncerr)
 
- ncerr = nf90_put_var(ncid, nctk_idname(ncid, "condutivity_mu"), self%conductivity_mu, &
+ ncerr = nf90_put_var(ncid, nctk_idname(ncid, "conductivity_mu"), self%conductivity_mu, &
                       start=[1,1,1,spin,1], &
                       count=[3, 3, 2, self%my_nspins , self%ntemp])
  NCF_CHECK(ncerr)
