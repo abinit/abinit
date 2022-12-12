@@ -94,7 +94,7 @@ module m_orbmag
   integer,parameter :: pack1a(3) = (/4,2,3/)
 
   ! these parameters name the various output terms                                             
-  integer,parameter :: ib1=1,ib2=2
+  integer,parameter :: ibcc=1,ibvv=2
   integer,parameter :: imcc=3,imvv=4,imnl=8,imden1=9
   integer,parameter :: igp2=5,igap=6
   integer,parameter :: iomlmb=7
@@ -221,13 +221,10 @@ module m_orbmag
 
   public :: orbmag
 
-  private :: make_mbare_k
   private :: orbmag_cc_k
   private :: orbmag_vv_k
-  private :: make_v2b_k
   private :: orbmag_nl_k
   private :: make_m1_k
-!  private :: make_alt_d
   private :: make_d
   private :: sum_d
   private :: check_eig_k
@@ -342,9 +339,9 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
  integer,allocatable :: atindx(:),atindx1(:),dimlmn(:),gntselect(:,:),kg_k(:,:),nattyp(:)
  real(dp) :: gmet(3,3),gprimd(3,3),kpoint(3),omlamb(2,3),rhodum(1),rmet(3,3)
  real(dp),allocatable :: buffer1(:),buffer2(:)
- real(dp),allocatable :: b1_k(:,:,:),b2_k(:,:,:)
+ real(dp),allocatable :: b1_k(:,:,:)
  real(dp),allocatable :: cg_k(:,:),cg1_k(:,:,:),cgrvtrial(:,:),cwavef(:,:),cwavef_d(:,:)
- real(dp),allocatable :: eig_k(:),ffnl_k(:,:,:,:),kinpw(:),kpg_k(:,:),m1_k(:,:,:),m2_k(:,:,:)
+ real(dp),allocatable :: eig_k(:),ffnl_k(:,:,:,:),kinpw(:),kpg_k(:,:),m1_k(:,:,:)
  real(dp),allocatable :: occ_k(:),orbmag_terms(:,:,:,:),orbmag_trace(:,:,:)
  real(dp),allocatable :: pcg1_k(:,:,:),ph1d(:,:),ph3d(:,:,:),phkxred(:,:),realgnt(:)
  real(dp),allocatable :: vectornd(:,:),vectornd_pac(:,:,:,:,:),vlocal(:,:,:,:)
@@ -588,34 +585,22 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
    !--------------------------------------------------------------------------------
 
    ! check aij against paw_ij 
-   call check_eig_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,&
-     & gs_hamk,ikpt,isppol,mcgk,mpi_enreg,my_nspinor,nband_k,npw_k,pawtab)
+   !call check_eig_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,&
+   !  & gs_hamk,ikpt,isppol,mcgk,mpi_enreg,my_nspinor,nband_k,npw_k,pawtab)
 
    ABI_MALLOC(b1_k,(2,nband_k,3))
-   ABI_MALLOC(b2_k,(2,nband_k,3))
    ABI_MALLOC(m1_k,(2,nband_k,3))
-   ABI_MALLOC(m2_k,(2,nband_k,3))
    
-   call orbmag_cc_k(atindx,cprj1_k,dimlmn,dtset,eig_k,gs_hamk,ikpt,isppol,m1_k,&
+   call orbmag_cc_k(atindx,b1_k,cprj1_k,dimlmn,dtset,eig_k,gs_hamk,ikpt,isppol,m1_k,&
     & mcgk,mpi_enreg,my_nspinor,nband_k,npw_k,pawtab,pcg1_k)
+   orbmag_terms(:,:,:,ibcc) = orbmag_terms(:,:,:,ibcc) + trnrm*b1_k(:,:,:)
    orbmag_terms(:,:,:,imcc) = orbmag_terms(:,:,:,imcc) + trnrm*m1_k(:,:,:)
 
-   call orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,gs_hamk,&
+   call orbmag_vv_k(atindx,b1_k,cg_k,cprj_k,dimlmn,dtset,eig_k,gs_hamk,&
     & ikpt,isppol,m1_k,mcgk,mpi_enreg,my_nspinor,nband_k,npw_k,pawtab,pcg1_k)
+   orbmag_terms(:,:,:,ibvv) = orbmag_terms(:,:,:,ibvv) + trnrm*b1_k(:,:,:)
    orbmag_terms(:,:,:,imvv) = orbmag_terms(:,:,:,imvv) + trnrm*m1_k(:,:,:)
    
-   !call make_mbare_k(atindx,b1_k,b2_k,cg_k,cprj_k,cprj1_k,dimlmn,dterm,dtset,eig_k,&
-   ! & gs_hamk,ikpt,isppol,m1_k,m2_k,mcgk,mpi_enreg,my_nspinor,nband_k,npw_k,pawtab,pcg1_k)
-   !
-   !orbmag_terms(:,:,:,ib1) = orbmag_terms(:,:,:,ib1) + trnrm*b1_k(:,:,:)
-   !orbmag_terms(:,:,:,ib2) = orbmag_terms(:,:,:,ib2) + trnrm*b2_k(:,:,:)
-   !orbmag_terms(:,:,:,imcc) = orbmag_terms(:,:,:,imcc) + trnrm*m1_k(:,:,:)
-   !orbmag_terms(:,:,:,imvv) = orbmag_terms(:,:,:,imvv) + trnrm*m2_k(:,:,:)
-
-   !call make_v2b_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,gs_hamk,&
-   ! & ikpt,isppol,mcgk,mpi_enreg,m1_k,my_nspinor,nband_k,npw_k,pawtab)
-   !orbmag_terms(:,:,:,imvv) = orbmag_terms(:,:,:,imvv) + trnrm*m1_k(:,:,:)
-
    call orbmag_nl_k(atindx,cprj_k,dterm,dtset,eig_k,m1_k,nband_k,paw_ij,pawtab)
    orbmag_terms(:,:,:,imnl) = orbmag_terms(:,:,:,imnl) + trnrm*m1_k(:,:,:)
    
@@ -635,9 +620,7 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
    orbmag_terms(:,:,:,igap) = orbmag_terms(:,:,:,igap) + trnrm*m1_k
    
    ABI_FREE(b1_k)
-   ABI_FREE(b2_k)
    ABI_FREE(m1_k)
-   ABI_FREE(m2_k)
 
    icg = icg + npw_k*nband_k
    ikg = ikg + npw_k
@@ -696,8 +679,8 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
  !! Berry curvature terms are ignored
  !! Lamb term ignored
  do iterm = 1, nterms
-   if (iterm .EQ. ib1) cycle
-   if (iterm .EQ. ib2) cycle
+   if (iterm .EQ. ibcc) cycle
+   if (iterm .EQ. ibvv) cycle
    if (iterm .EQ. iomlmb) cycle
    orbmag_terms(:,:,:,iterm) = ucvol*orbmag_terms(:,:,:,iterm)
  end do
@@ -904,135 +887,6 @@ subroutine orbmag_nl_k(atindx,cprj_k,dterm,dtset,eig_k,m1_k,nband_k,paw_ij,pawta
 end subroutine orbmag_nl_k
 !!***
 
-!!****f* ABINIT/make_v2b_k
-!! NAME
-!! make_v2b_k
-!!
-!! FUNCTION
-!! make v2b at k
-!!
-!! COPYRIGHT
-!! Copyright (C) 2003-2021 ABINIT  group
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! SIDE EFFECTS
-!!
-!! TODO
-!!
-!! NOTES
-!!
-!! SOURCE
-
-subroutine make_v2b_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,gs_hamk,&
-    & ikpt,isppol,mcgk,mpi_enreg,mv2b_k,my_nspinor,nband_k,npw_k,pawtab)
-
-  !Arguments ------------------------------------
-  !scalars
-  integer,intent(in) :: ikpt,isppol,mcgk,my_nspinor,nband_k,npw_k
-  type(dterm_type),intent(in) :: dterm
-  type(dataset_type),intent(in) :: dtset
-  type(gs_hamiltonian_type),intent(inout) :: gs_hamk
-  type(MPI_type), intent(inout) :: mpi_enreg
-
-  !arrays
-  integer,intent(in) :: atindx(dtset%natom),dimlmn(dtset%natom)
-  real(dp),intent(in) :: cg_k(2,mcgk),eig_k(nband_k)
-  real(dp),intent(out) :: mv2b_k(2,nband_k,3)
-  type(pawcprj_type),intent(in) :: cprj_k(dtset%natom,nband_k)
-  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
-
-  !Local variables -------------------------
-  !scalars
-  integer :: adir,bdir,choice,cpopt,gdir,ndat,nn,nnlout,np
-  integer :: paw_opt,sij_opt,signs,tim_nonlop
-  real(dp) :: doti,dotr,epsabg
-  complex(dpc) :: mb,mg,mv2b,prefac_m
-  !arrays
-  real(dp) :: enlout(1),lamv(1)
-  real(dp),allocatable :: bra(:,:),ket(:,:),svectoutb(:,:)
-  real(dp),allocatable :: svectoutg(:,:),vectout(:,:)
-  type(pawcprj_type),allocatable :: cwaveprj(:,:)
-
-!--------------------------------------------------------------------
-
- mv2b_k = zero
- 
- ABI_MALLOC(bra,(2,npw_k))
- ABI_MALLOC(ket,(2,npw_k))
- ABI_MALLOC(vectout,(2,npw_k))
- ABI_MALLOC(svectoutg,(2,npw_k))
- ABI_MALLOC(svectoutb,(2,npw_k))
- ABI_MALLOC(cwaveprj,(dtset%natom,1))
- call pawcprj_alloc(cwaveprj,cprj_k(1,1)%ncpgr,dimlmn)
-
- tim_nonlop = 0
- lamv = zero
- ndat = 1
- choice = 5
- paw_opt = 3
- signs = 2 
- nnlout = 1
-
- do adir = 1, 3
-   do nn = 1, nband_k
-
-     mv2b = czero
-
-     do bdir = 1, 3
-       do gdir = 1, 3
-         epsabg = eijk(adir,bdir,gdir)
-         if (ABS(epsabg) .LT. half) cycle
-         prefac_m = com*c2*epsabg
-         
-         cpopt = 4
-         ket(1:2,1:npw_k) = cg_k(1:2,(nn-1)*npw_k+1:nn*npw_k)
-         call pawcprj_get(atindx,cwaveprj,cprj_k,dtset%natom,nn,0,ikpt,0,isppol,dtset%mband,&
-           & dtset%mkmem,dtset%natom,1,nband_k,my_nspinor,dtset%nsppol,0)
-         call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,gdir,lamv,mpi_enreg,ndat,nnlout,&
-           & paw_opt,signs,svectoutg,tim_nonlop,ket,vectout)
-         call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,bdir,lamv,mpi_enreg,ndat,nnlout,&
-           & paw_opt,signs,svectoutb,tim_nonlop,ket,vectout)
-
-         do np = 1, nband_k
-
-           bra(1:2,1:npw_k) = cg_k(1:2,(np-1)*npw_k+1:np*npw_k)
-       
-           dotr = DOT_PRODUCT(bra(1,:),svectoutg(1,:))+DOT_PRODUCT(bra(2,:),svectoutg(2,:))
-           doti = DOT_PRODUCT(bra(1,:),svectoutg(2,:))-DOT_PRODUCT(bra(2,:),svectoutg(1,:))
-           mg = CMPLX(dotr,doti)
-
-           dotr = DOT_PRODUCT(bra(1,:),svectoutb(1,:))+DOT_PRODUCT(bra(2,:),svectoutb(2,:))
-           doti = DOT_PRODUCT(bra(1,:),svectoutb(2,:))-DOT_PRODUCT(bra(2,:),svectoutb(1,:))
-           mb = CMPLX(dotr,doti)
-
-           mv2b = mv2b - prefac_m*CONJG(mb)*mg*eig_k(nn)
-         end do ! np
-       end do !gdir
-     end do !bdir
-
-     mv2b_k(1,nn,adir) = real(mv2b); mv2b_k(2,nn,adir) = aimag(mv2b)
-
-   end do !nn
- end do !adir
-
- ABI_FREE(bra)
- ABI_FREE(ket)
- ABI_FREE(vectout)
- ABI_FREE(svectoutg)
- ABI_FREE(svectoutb)
- call pawcprj_free(cwaveprj)
- ABI_FREE(cwaveprj)
- 
-end subroutine make_v2b_k
-!!***
-
 !!****f* ABINIT/orbmag_cc_k
 !! NAME
 !! orbmag_cc_k
@@ -1059,8 +913,8 @@ end subroutine make_v2b_k
 !!
 !! SOURCE
 
-subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dtset,eig_k,gs_hamk,ikpt,isppol,m1_k,&
-    & mcgk,mpi_enreg,my_nspinor,nband_k,npw_k,pawtab,pcg1_k)
+subroutine orbmag_cc_k(atindx,b1_k,cprj1_k,dimlmn,dtset,eig_k,gs_hamk,ikpt,isppol,&
+    & m1_k,mcgk,mpi_enreg,my_nspinor,nband_k,npw_k,pawtab,pcg1_k)
 
   !Arguments ------------------------------------
   !scalars
@@ -1072,7 +926,7 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dtset,eig_k,gs_hamk,ikpt,isppol,m1_
   !arrays
   integer,intent(in) :: atindx(dtset%natom),dimlmn(dtset%natom)
   real(dp),intent(in) :: eig_k(nband_k),pcg1_k(2,mcgk,3)
-  real(dp),intent(out) :: m1_k(2,nband_k,3)
+  real(dp),intent(out) :: b1_k(2,nband_k,3),m1_k(2,nband_k,3)
   type(pawcprj_type),intent(in) :: cprj1_k(dtset%natom,nband_k,3)
   type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
 
@@ -1080,7 +934,7 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dtset,eig_k,gs_hamk,ikpt,isppol,m1_
   !scalars
   integer :: adir,bdir,cpopt,gdir,ndat,nn,sij_opt,tim_getghc,type_calc
   real(dp) :: doti,dotr,epsabg,lams
-  complex(dpc) :: m1,prefac_m
+  complex(dpc) :: b1,m1,prefac_b,prefac_m
   !arrays
   real(dp),allocatable :: bra(:,:),ghc(:,:),gsc(:,:),gvnlxc(:,:),ket(:,:)
   type(pawcprj_type),allocatable :: cwaveprj1(:,:)
@@ -1106,12 +960,13 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dtset,eig_k,gs_hamk,ikpt,isppol,m1_
  do adir = 1, 3
    do nn = 1, nband_k
 
-     m1 = czero
+     b1 = czero; m1 = czero
 
      do bdir = 1, 3
        do gdir = 1, 3
          epsabg = eijk(adir,bdir,gdir)
          if (ABS(epsabg) .LT. half) cycle
+         prefac_b = cbc*c2*epsabg
          prefac_m = com*c2*epsabg
          
          cpopt = 2
@@ -1129,11 +984,13 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dtset,eig_k,gs_hamk,ikpt,isppol,m1_
          
          dotr = DOT_PRODUCT(bra(1,:),gsc(1,:))+DOT_PRODUCT(bra(2,:),gsc(2,:))
          doti = DOT_PRODUCT(bra(1,:),gsc(2,:))-DOT_PRODUCT(bra(2,:),gsc(1,:))
+         b1 = b1 + prefac_b*CMPLX(dotr,doti)
          m1 = m1 + prefac_m*CMPLX(dotr,doti)*eig_k(nn)
          
        end do !gdir
      end do !bdir
 
+     b1_k(1,nn,adir) = real(b1); b1_k(2,nn,adir) = aimag(b1)
      m1_k(1,nn,adir) = real(m1); m1_k(2,nn,adir) = aimag(m1)
 
    end do !nn
@@ -1176,7 +1033,7 @@ end subroutine orbmag_cc_k
 !!
 !! SOURCE
 
-subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,gs_hamk,&
+subroutine orbmag_vv_k(atindx,b1_k,cg_k,cprj_k,dimlmn,dtset,eig_k,gs_hamk,&
     & ikpt,isppol,m1_k,mcgk,mpi_enreg,my_nspinor,nband_k,npw_k,pawtab,pcg1_k)
 
   !Arguments ------------------------------------
@@ -1189,7 +1046,7 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,gs_hamk,&
   !arrays
   integer,intent(in) :: atindx(dtset%natom),dimlmn(dtset%natom)
   real(dp),intent(in) :: cg_k(2,mcgk),eig_k(nband_k),pcg1_k(2,mcgk,3)
-  real(dp),intent(out) :: m1_k(2,nband_k,3)
+  real(dp),intent(out) :: b1_k(2,nband_k,3),m1_k(2,nband_k,3)
   type(pawcprj_type),intent(in) :: cprj_k(dtset%natom,nband_k)
   type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
 
@@ -1198,7 +1055,7 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,gs_hamk,&
   integer :: adir,bdir,choice,cpopt,gdir,ndat,nn,nnlout,np
   integer :: paw_opt,signs,tim_getghc
   real(dp) :: doti,dotr,epsabg
-  complex(dpc) :: m1,mb,mg,mv2b,prefac_m
+  complex(dpc) :: b1,bv2b,m1,mb,mg,mv2b,prefac_b,prefac_m
   !arrays
   real(dp) :: enlout(1),lamv(1)
   real(dp),allocatable :: bra(:,:),ket(:,:),svectoutb(:,:),svectoutg(:,:),vectout(:,:)
@@ -1206,7 +1063,7 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,gs_hamk,&
 
 !--------------------------------------------------------------------
 
- m1_k = zero
+ b1_k = zero; m1_k = zero
  
  ABI_MALLOC(bra,(2,npw_k))
  ABI_MALLOC(ket,(2,npw_k))
@@ -1228,12 +1085,14 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,gs_hamk,&
  do adir = 1, 3
    do nn = 1, nband_k
 
+     b1 = czero; bv2b = czero
      m1 = czero; mv2b = czero
 
      do bdir = 1, 3
        do gdir = 1, 3
          epsabg = eijk(adir,bdir,gdir)
          if (ABS(epsabg) .LT. half) cycle
+         prefac_b = cbc*c2*epsabg
          prefac_m = com*c2*epsabg
         
          ! extract |u_nk> 
@@ -1254,6 +1113,7 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,gs_hamk,&
          dotr = DOT_PRODUCT(bra(1,:),svectoutg(1,:))+DOT_PRODUCT(bra(2,:),svectoutg(2,:))
          doti = DOT_PRODUCT(bra(1,:),svectoutg(2,:))-DOT_PRODUCT(bra(2,:),svectoutg(1,:))
          ! add <Pc du/dk_b|dS/dk_g|u_nk>*E_nk
+         b1 = b1 + prefac_b*CMPLX(dotr,doti)
          m1 = m1 + prefac_m*CMPLX(dotr,doti)*eig_k(nn)
 
          ! extract |Pc du/dk_g>         
@@ -1262,6 +1122,7 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,gs_hamk,&
          dotr = DOT_PRODUCT(bra(1,:),svectoutb(1,:))+DOT_PRODUCT(bra(2,:),svectoutb(2,:))
          doti = DOT_PRODUCT(bra(1,:),svectoutb(2,:))-DOT_PRODUCT(bra(2,:),svectoutb(1,:))
          ! add CONJG(<Pc du/dk_b|dS/dk_g|u_nk>)*E_nk
+         !b1 = b1 + prefac_b*CMPLX(dotr,-doti)
          m1 = m1 + prefac_m*CMPLX(dotr,-doti)*eig_k(nn)
          
          do np = 1, nband_k
@@ -1276,12 +1137,14 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,gs_hamk,&
            doti = DOT_PRODUCT(bra(1,:),svectoutb(2,:))-DOT_PRODUCT(bra(2,:),svectoutb(1,:))
            mb = CMPLX(dotr,doti)
 
+           !bv2b = bv2b - prefac_b*CONJG(mb)*mg
            mv2b = mv2b - prefac_m*CONJG(mb)*mg*eig_k(nn)
          end do ! np
  
        end do !gdir
      end do !bdir
 
+     b1_k(1,nn,adir) = real(b1+bv2b); b1_k(2,nn,adir) = aimag(b1+bv2b)
      m1_k(1,nn,adir) = real(m1+mv2b); m1_k(2,nn,adir) = aimag(m1+mv2b)
 
    end do !nn
@@ -1296,167 +1159,6 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,gs_hamk,&
  ABI_FREE(cwaveprj)
  
 end subroutine orbmag_vv_k
-!!***
-
-
-
-
-!!****f* ABINIT/make_mbare_k
-!! NAME
-!! make_mbare_k
-!!
-!! FUNCTION
-!! make mbare at k
-!!
-!! COPYRIGHT
-!! Copyright (C) 2003-2021 ABINIT  group
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! SIDE EFFECTS
-!!
-!! TODO
-!!
-!! NOTES
-!!
-!! SOURCE
-
-subroutine make_mbare_k(atindx,b1_k,b2_k,cg_k,cprj_k,cprj1_k,dimlmn,dterm,dtset,eig_k,gs_hamk,&
-    & ikpt,isppol,m1_k,m2_k,mcgk,mpi_enreg,my_nspinor,nband_k,npw_k,pawtab,pcg1_k)
-
-  !Arguments ------------------------------------
-  !scalars
-  integer,intent(in) :: ikpt,isppol,mcgk,my_nspinor,nband_k,npw_k
-  type(dterm_type),intent(in) :: dterm
-  type(dataset_type),intent(in) :: dtset
-  type(gs_hamiltonian_type),intent(inout) :: gs_hamk
-  type(MPI_type), intent(inout) :: mpi_enreg
-
-  !arrays
-  integer,intent(in) :: atindx(dtset%natom),dimlmn(dtset%natom)
-  real(dp),intent(in) :: cg_k(2,mcgk),eig_k(nband_k),pcg1_k(2,mcgk,3)
-  real(dp),intent(out) :: b1_k(2,nband_k,3),b2_k(2,nband_k,3)
-  real(dp),intent(out) :: m1_k(2,nband_k,3),m2_k(2,nband_k,3)
-  type(pawcprj_type),intent(in) :: cprj_k(dtset%natom,nband_k)
-  type(pawcprj_type),intent(in) :: cprj1_k(dtset%natom,nband_k,3)
-  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
-
-  !Local variables -------------------------
-  !scalars
-  integer :: adir,bdir,choice,cpopt,gdir,ndat,nn,nnlout,np
-  integer :: paw_opt,sij_opt,signs,tim_getghc,type_calc
-  real(dp) :: doti,dotr,epsabg,lams
-  complex(dpc) :: b1,b2,m1,m2,prefac_b,prefac_m
-  !arrays
-  real(dp) :: enlout(1),lamv(1)
-  real(dp),allocatable :: bra(:,:),ghc(:,:),gsc(:,:),gvnlxc(:,:),ket(:,:),svectout(:,:)
-  type(pawcprj_type),allocatable :: cwaveprj(:,:),cwaveprj1(:,:)
-
-!--------------------------------------------------------------------
-
- b1_k = zero; b2_k = zero
- m1_k = zero; m2_k = zero
- 
- ABI_MALLOC(bra,(2,npw_k))
- ABI_MALLOC(ket,(2,npw_k))
- ABI_MALLOC(ghc,(2,npw_k))
- ABI_MALLOC(gsc,(2,npw_k))
- ABI_MALLOC(svectout,(2,npw_k))
- ABI_MALLOC(gvnlxc,(2,npw_k))
- ABI_MALLOC(cwaveprj,(dtset%natom,1))
- call pawcprj_alloc(cwaveprj,cprj_k(1,1)%ncpgr,dimlmn)
- ABI_MALLOC(cwaveprj1,(dtset%natom,1))
- call pawcprj_alloc(cwaveprj1,0,dimlmn)
-
- tim_getghc = 0
- lams = zero; lamv = zero
- ndat = 1
- sij_opt = 1
- type_calc = 0
- choice = 5
- paw_opt = 3
- signs = 2 
- nnlout = 1
-
- do adir = 1, 3
-   do nn = 1, nband_k
-
-     m1 = czero; b1 = czero
-     m2 = czero; b2 = czero
-
-     do bdir = 1, 3
-       do gdir = 1, 3
-         epsabg = eijk(adir,bdir,gdir)
-         if (ABS(epsabg) .LT. half) cycle
-         prefac_m = com*c2*epsabg
-         prefac_b = cbc*c2*epsabg
-         
-         cpopt = 2
-         ket(1:2,1:npw_k) = pcg1_k(1:2,(nn-1)*npw_k+1:nn*npw_k,gdir)
-         call pawcprj_get(atindx,cwaveprj1,cprj1_k(:,:,gdir),dtset%natom,nn,0,ikpt,0,isppol,dtset%mband,&
-           & dtset%mkmem,dtset%natom,1,nband_k,my_nspinor,dtset%nsppol,0)
-         call getghc(cpopt,ket,cwaveprj1,ghc,gsc,gs_hamk,gvnlxc,lams,mpi_enreg,&
-           & ndat,dtset%prtvol,sij_opt,tim_getghc,type_calc)
-         
-         cpopt = 4
-         ket(1:2,1:npw_k) = cg_k(1:2,(nn-1)*npw_k+1:nn*npw_k)
-         call pawcprj_get(atindx,cwaveprj,cprj_k,dtset%natom,nn,0,ikpt,0,isppol,dtset%mband,&
-           & dtset%mkmem,dtset%natom,1,nband_k,my_nspinor,dtset%nsppol,0)
-
-         bra(1:2,1:npw_k) = pcg1_k(1:2,(nn-1)*npw_k+1:nn*npw_k,bdir)
-       
-         dotr = DOT_PRODUCT(bra(1,:),ghc(1,:))+DOT_PRODUCT(bra(2,:),ghc(2,:))
-         doti = DOT_PRODUCT(bra(1,:),ghc(2,:))-DOT_PRODUCT(bra(2,:),ghc(1,:))
-         m1 = m1 + prefac_m*CMPLX(dotr,doti)
-         
-         dotr = DOT_PRODUCT(bra(1,:),gsc(1,:))+DOT_PRODUCT(bra(2,:),gsc(2,:))
-         doti = DOT_PRODUCT(bra(1,:),gsc(2,:))-DOT_PRODUCT(bra(2,:),gsc(1,:))
-         m2 = m2 + prefac_m*CMPLX(dotr,doti)*eig_k(nn)
-         b1 = b1 + prefac_b*CMPLX(dotr,doti)
-         
-         call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,gdir,lamv,mpi_enreg,ndat,nnlout,&
-           & paw_opt,signs,svectout,tim_getghc,ket,gvnlxc)
-         dotr = DOT_PRODUCT(bra(1,:),svectout(1,:))+DOT_PRODUCT(bra(2,:),svectout(2,:))
-         doti = DOT_PRODUCT(bra(1,:),svectout(2,:))-DOT_PRODUCT(bra(2,:),svectout(1,:))
-         m2 = m2 + prefac_m*CMPLX(dotr,doti)*eig_k(nn)
-         b2 = b2 + prefac_b*CMPLX(dotr,doti)
-
-         call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,bdir,lamv,mpi_enreg,ndat,nnlout,&
-           & paw_opt,signs,svectout,tim_getghc,ket,gvnlxc)
-         bra(1:2,1:npw_k) = pcg1_k(1:2,(nn-1)*npw_k+1:nn*npw_k,gdir)
-         dotr = DOT_PRODUCT(bra(1,:),svectout(1,:))+DOT_PRODUCT(bra(2,:),svectout(2,:))
-         doti = DOT_PRODUCT(bra(1,:),svectout(2,:))-DOT_PRODUCT(bra(2,:),svectout(1,:))
-         m2 = m2 + prefac_m*CMPLX(dotr,-doti)*eig_k(nn)
-         
-       end do !gdir
-     end do !bdir
-
-     m1_k(1,nn,adir) = real(m1); m1_k(2,nn,adir) = aimag(m1)
-     b1_k(1,nn,adir) = real(b1); b1_k(2,nn,adir) = aimag(b1)
-     m2_k(1,nn,adir) = real(m2); m2_k(2,nn,adir) = aimag(m2)
-     b2_k(1,nn,adir) = real(b2); b2_k(2,nn,adir) = aimag(b2)
-
-   end do !nn
- end do !adir
-
- ABI_FREE(bra)
- ABI_FREE(ket)
- ABI_FREE(ghc)
- ABI_FREE(gsc)
- ABI_FREE(svectout)
- ABI_FREE(gvnlxc)
- call pawcprj_free(cwaveprj)
- ABI_FREE(cwaveprj)
- call pawcprj_free(cwaveprj1)
- ABI_FREE(cwaveprj1)
- 
-end subroutine make_mbare_k
 !!***
 
 !!****f* ABINIT/make_pcg1
@@ -2008,7 +1710,7 @@ subroutine apply_d2lr_term_k(atindx,cprj_k,dtset,iterm,lmn2max,mterm,nband_k,omm
 
 !--------------------------------------------------------------------
 ! iterm <= ifpv is berry type, others are orb mag type
-  if ( iterm <= ib2 ) then
+  if ( iterm <= ibvv ) then
     cpre = cbc
   else
     cpre = com
@@ -2221,14 +1923,14 @@ subroutine orbmag_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace)
  ! ***********************************************************************
 
  orbmag_bb=zero;orbmag_total=zero
- do iterms = ib2+1, nterms
+ do iterms = ibvv+1, nterms
    orbmag_total(1:2,1:3)=orbmag_total(1:2,1:3) + orbmag_trace(1:2,1:3,iterms)
    do iband=1, nband_k
      orbmag_bb(1:2,iband,1:3) = orbmag_bb(1:2,iband,1:3) + orbmag_terms(1:2,iband,1:3,iterms)
    end do
  end do
  berry_bb=zero;berry_total=zero
- do iterms = ib1,ib2
+ do iterms = ibcc,ibvv
    berry_total(1:2,1:3)=berry_total(1:2,1:3) + orbmag_trace(1:2,1:3,iterms)
    do iband=1, nband_k
      berry_bb(1:2,iband,1:3) = berry_bb(1:2,iband,1:3) + orbmag_terms(1:2,iband,1:3,iterms)
@@ -2273,9 +1975,9 @@ subroutine orbmag_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace)
    call wrtout(ab_out,message,'COLL')
    write(message,'(a)')' Berry curvature, term-by-term breakdown : '
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)') ' B1 : ',(orbmag_trace(1,adir,ib1),adir=1,3)
+   write(message,'(a,3es16.8)') ' bc CC : ',(orbmag_trace(1,adir,ibcc),adir=1,3)
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)') ' B2 : ',(orbmag_trace(1,adir,ib2),adir=1,3)
+   write(message,'(a,3es16.8)') ' bc VV : ',(orbmag_trace(1,adir,ibvv),adir=1,3)
    call wrtout(ab_out,message,'COLL')
  end if
 
@@ -2309,9 +2011,9 @@ subroutine orbmag_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace)
      call wrtout(ab_out,message,'COLL')
      write(message,'(a,3es16.8)') ' Berry curvature : ',(berry_bb(1,iband,adir),adir=1,3)
      call wrtout(ab_out,message,'COLL')
-     write(message,'(a,3es16.8)') ' B1 : ',(orbmag_terms(1,iband,adir,ib1),adir=1,3)
+     write(message,'(a,3es16.8)') ' bc CC : ',(orbmag_terms(1,iband,adir,ibcc),adir=1,3)
      call wrtout(ab_out,message,'COLL')
-     write(message,'(a,3es16.8)') ' B2 : ',(orbmag_terms(1,iband,adir,ib2),adir=1,3)
+     write(message,'(a,3es16.8)') ' bc VV : ',(orbmag_terms(1,iband,adir,ibvv),adir=1,3)
      call wrtout(ab_out,message,'COLL')
    end do
  end if
