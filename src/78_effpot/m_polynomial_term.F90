@@ -353,9 +353,17 @@ subroutine polynomial_term_free(polynomial_term)
    ABI_FREE(polynomial_term%strain)
  end if
 
-
 end subroutine polynomial_term_free
 !!***
+
+subroutine polynomial_term_list_free(terms)
+  type(polynomial_term_type), allocatable, intent(inout) :: terms(:)
+  integer :: iterm
+  do iterm=1, size(terms)
+    call polynomial_term_free(terms(iterm))
+  end do
+  ABI_FREE(terms)
+end subroutine polynomial_term_list_free
 
 !!****f* m_polynomial_term/terms_compare
 !! NAME

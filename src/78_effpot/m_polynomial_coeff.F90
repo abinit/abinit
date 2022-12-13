@@ -130,9 +130,9 @@ module m_polynomial_coeff
    module procedure coeffs_compare
  end interface operator (==)
 
- interface operator (+)
+interface operator (+)
    module procedure coeffs_list_conc
- end interface operator (+)
+end interface operator (+)
 
  interface assignment (=)
    module procedure coeffs_list_copy
@@ -346,14 +346,15 @@ subroutine polynomial_coeff_list_free(polynomial_coeff_list)
  if(allocated(polynomial_coeff_list))then
    ncoeff = size(polynomial_coeff_list)
    do i=1,ncoeff
-      !if(allocated(polynomial_coeff_list(i)%terms))write(std_out,*) "This shit is allocated!"
       call polynomial_coeff_free(polynomial_coeff_list(i))
-   enddo
+    enddo
    ABI_FREE(polynomial_coeff_list)
  endif
 
 end subroutine polynomial_coeff_list_free
 !!***
+
+
 
 !!****f* m_polynomial_coeff/polynomial_coeff_setCoefficient
 !!
@@ -2403,7 +2404,6 @@ if(need_compute_symmetric)then
   if(my_ncombi /= 0)then
     do i=1,my_nirred
        my_list_combination(:,1+(i-1)*(nsym**(power_disps(2)-1))) = my_list_combination_tmp(:,i)
-       !print *,my_list_combination(:,1+(i-1)*(nsym**power_disps(2)))
        my_index_irredcomb(i) = 1+(i-1)*(nsym**(power_disps(2)-1))
     end do
   endif
@@ -3113,7 +3113,7 @@ recursive subroutine computeCombinationFromList(cell,compatibleCoeffs,list_coeff
  integer,allocatable :: index_coeff(:)
 ! *************************************************************************
 
-!Set the inputs
+ !Set the inputs
  need_compute = .TRUE.
  need_anharmstr = .TRUE.
  need_spcoupling = .TRUE.
@@ -3132,49 +3132,49 @@ recursive subroutine computeCombinationFromList(cell,compatibleCoeffs,list_coeff
 
  if(power_disp <= power_disp_max)then
 
-!  Initialisation of variables
+   !  Initialisation of variables
    ABI_MALLOC(index_coeff,(power_disp))
    index_coeff(1:power_disp-1) = index_coeff_in(:)
-!   write(std_out,*) "DEBUG index_coff in recursive CCL: ", index_coeff
-!  Loop over ncoeff+nstr
+   !   write(std_out,*) "DEBUG index_coff in recursive CCL: ", index_coeff
+   !  Loop over ncoeff+nstr
    do icoeff1=icoeff,ncoeff+nstr
 
-!    Reset the flag compatible and possible
+     !    Reset the flag compatible and possible
      compatible = .TRUE.
      possible   = .TRUE.
 
-!    If the power_disp is one, we need to set icoeff to icoeff1
+     !    If the power_disp is one, we need to set icoeff to icoeff1
      if(power_disp==1) then
        if(icoeff1<=ncoeff .and. compatibleCoeffs(icoeff,icoeff1)==0)then
          ! is_displacement and compatible
          compatible = .FALSE.
        end if
      end if
-!    If the distance between the 2 coefficients is superior than the cut-off, we cycle.
-    do icoeff2=1,power_disp-1
-!      write(std_out,*) "icoeff1: ", icoeff1
-!      write(std_out,*) "icoeff2: ", icoeff2, "index_icoeff2: ", index_coeff(icoeff2)
-      if(icoeff1 <= ncoeff .and. index_coeff(icoeff2) <=ncoeff)then
-        if(compatibleCoeffs(index_coeff(icoeff2),icoeff1)==0)then
-          compatible = .FALSE.
-        end if
-      endif
-    end do
+     !    If the distance between the 2 coefficients is superior than the cut-off, we cycle.
+     do icoeff2=1,power_disp-1
+       !      write(std_out,*) "icoeff1: ", icoeff1
+       !      write(std_out,*) "icoeff2: ", icoeff2, "index_icoeff2: ", index_coeff(icoeff2)
+       if(icoeff1 <= ncoeff .and. index_coeff(icoeff2) <=ncoeff)then
+         if(compatibleCoeffs(index_coeff(icoeff2),icoeff1)==0)then
+           compatible = .FALSE.
+         end if
+       endif
+     end do
 
      if (.not.compatible) cycle !The distance is not compatible
 
-!    Set the index of the new coeff in the list
+     !    Set the index of the new coeff in the list
      index_coeff(power_disp) = icoeff1
-!    Do some checks
-!    -------------
-!    1-Check if the coefficient is full anharmonic strain and if we need to compute it
+     !    Do some checks
+     !    -------------
+     !    1-Check if the coefficient is full anharmonic strain and if we need to compute it
      if(all(index_coeff > ncoeff))then
        compatible = (need_anharmstr .or. need_spcoupling)
        possible = need_anharmstr
      end if
-!    2-Check if the coefficient is strain-coupling and if we need to compute it
+     !    2-Check if the coefficient is strain-coupling and if we need to compute it
      if(any(index_coeff <= ncoeff) .and. any(index_coeff > ncoeff))then
-!       write(std_out,*) "index_coeff", index_coeff,"need_spcoupling",need_spcoupling
+       !       write(std_out,*) "index_coeff", index_coeff,"need_spcoupling",need_spcoupling
        possible   = need_spcoupling
        compatible = need_spcoupling
        if(count(index_coeff > ncoeff) > max_power_strain)then
@@ -3182,27 +3182,27 @@ recursive subroutine computeCombinationFromList(cell,compatibleCoeffs,list_coeff
          compatible = .false.
        end if
      end if
-!    3-Check if the coefficient is only disp and if we need to compute it
+     !    3-Check if the coefficient is only disp and if we need to compute it
      if(all(index_coeff <= ncoeff))then
-!       write(std_out,*) "index_coeff", index_coeff,"need_dis",need_disp
+       !       write(std_out,*) "index_coeff", index_coeff,"need_dis",need_disp
        compatible = (need_disp .or. need_spcoupling)
        possible = need_disp
      end if
-!    4-Count number of Strain and number of displacements for compute symmetric terms
+     !    4-Count number of Strain and number of displacements for compute symmetric terms
      nstrain = 0
      ndisp_out = 0
      do ii=1,power_disp
-        if(index_coeff(ii) > 0 .and. index_coeff(ii) <= ncoeff)then
-           ndisp_out = ndisp_out + 1
-        else
-           nstrain = nstrain +1
-           index_coeff(ii) = index_coeff(ii) - ncoeff + ncoeff_sym
-        end if
+       if(index_coeff(ii) > 0 .and. index_coeff(ii) <= ncoeff)then
+         ndisp_out = ndisp_out + 1
+       else
+         nstrain = nstrain +1
+         index_coeff(ii) = index_coeff(ii) - ncoeff + ncoeff_sym
+       end if
      end do
 
      if(power_disp >= power_disp_min) then
 
-!      count the number of body
+       !      count the number of body
        powers(:) = 1
        do ii=1,power_disp
          do jj=ii+1,power_disp
@@ -3214,16 +3214,16 @@ recursive subroutine computeCombinationFromList(cell,compatibleCoeffs,list_coeff
          end do
        end do
        nbody_count = count(powers /= 0)
-!       write(std_out,*) "powers: ", powers
-!       write(std_out,*) "nbody_count: ", nbody_count
-!      check the only_odd and only_even flags
+       !       write(std_out,*) "powers: ", powers
+       !       write(std_out,*) "nbody_count: ", nbody_count
+       !      check the only_odd and only_even flags
        if(any(mod(powers(1:power_disp),2) /=0) .and. need_only_even_power) then
          possible = .false.
        end if
        if(any(mod(powers(1:power_disp),2) ==0) .and. need_only_odd_power)then
          possible = .false.
        end if
-!      Check the nbody flag
+       !      Check the nbody flag
        if(nbody_in /= 0)then
          if(power_disp-count(powers==0) > nbody_in) then
            possible = .false.
@@ -3232,56 +3232,56 @@ recursive subroutine computeCombinationFromList(cell,compatibleCoeffs,list_coeff
        end if
 
        if(possible) then
-!        increase coefficients and set it
-!         nmodel_tot = nmodel_tot + 1
-!         if(need_compute)then
-!           list_combination(1:power_disp,nmodel_tot) = index_coeff
-!         end if
+         !        increase coefficients and set it
+         !         nmodel_tot = nmodel_tot + 1
+         !         if(need_compute)then
+         !           list_combination(1:power_disp,nmodel_tot) = index_coeff
+         !         end if
          !nmodel_tot_test = 0
-!         !Start from second symmetry in Symmetric Combinations
-!         isym_in_test = 2
-!         idisp_in_test = power_disp
-!         ndisp_test = power_disp
-!         index_coeff_tmp = index_coeff
+         !         !Start from second symmetry in Symmetric Combinations
+         !         isym_in_test = 2
+         !         idisp_in_test = power_disp
+         !         ndisp_test = power_disp
+         !         index_coeff_tmp = index_coeff
          !Count anharmonic strain terms
          if(ndisp_out == 0 .and. nstrain > 0)then
-            nirred_comb = nirred_comb +1
-            iirred_comb = iirred_comb +1
-            if(need_compute)then
-               list_combination(1:power_disp,iirred_comb) = index_coeff
-            endif
+           nirred_comb = nirred_comb +1
+           iirred_comb = iirred_comb +1
+           if(need_compute)then
+             list_combination(1:power_disp,iirred_comb) = index_coeff
+           endif
          else !Else counst symmetric terms of atomic displacement (pure disp or disp/strain)
-              !Store index for each combination of irreducible terms to later parallely compute symmetric combinations
-            nirred_comb = nirred_comb +1
-            iirred_comb = iirred_comb +1
-            !write(std_out,*) "DEBUG index_coeff: ", index_coeff
-            !write(std_out,*) "DEBUG ndisp_out: ", ndisp_out
-            !write(std_out,*) "DEBUG nstrain: ", nstrain
-            !write(std_out,*) "DEBUG nmodel_start: ", nmodel_start
-            if(need_compute)then
-               list_combination(:,iirred_comb) = 0
-               list_combination(:ndisp_out+nstrain,iirred_comb) = index_coeff
-            endif
+           !Store index for each combination of irreducible terms to later parallely compute symmetric combinations
+           nirred_comb = nirred_comb +1
+           iirred_comb = iirred_comb +1
+           !write(std_out,*) "DEBUG index_coeff: ", index_coeff
+           !write(std_out,*) "DEBUG ndisp_out: ", ndisp_out
+           !write(std_out,*) "DEBUG nstrain: ", nstrain
+           !write(std_out,*) "DEBUG nmodel_start: ", nmodel_start
+           if(need_compute)then
+             list_combination(:,iirred_comb) = 0
+             list_combination(:ndisp_out+nstrain,iirred_comb) = index_coeff
+           endif
          end if !ndisp_out == 0 .and.n nstrain >0
        end if!possible
      end if!end if power_disp < power_disp_min
 
      !Change back to irreducible terms ncoeff_limit
      do ii=1,power_disp
-        if(index_coeff(ii) > ncoeff_sym)then
-           index_coeff(ii) = index_coeff(ii) + ncoeff - ncoeff_sym
-        end if
+       if(index_coeff(ii) > ncoeff_sym)then
+         index_coeff(ii) = index_coeff(ii) + ncoeff - ncoeff_sym
+       end if
      end do
 
-!    If the model is still compatbile with the input flags, we continue.
+     !    If the model is still compatbile with the input flags, we continue.
      if(compatible)then
        call computeCombinationFromList(cell,compatibleCoeffs,list_coeff,list_str,&
-&                                     index_coeff,list_combination,icoeff1,max_power_strain,&
-&                                     natom,ncoeff,ncoeff_sym,iirred_comb,nirred_comb,nstr,nmodel,nrpt,nsym,power_disp+1,&
-&                                     power_disp_min,power_disp_max,symbols,comm,nbody=nbody_in,&
-&                                     compute=need_compute,anharmstr=need_anharmstr,&
-&                                     spcoupling=need_spcoupling,only_odd_power=need_only_odd_power,&
-&                                     only_even_power=need_only_even_power,disp=need_disp)
+         &                                     index_coeff,list_combination,icoeff1,max_power_strain,&
+         &                                     natom,ncoeff,ncoeff_sym,iirred_comb,nirred_comb,nstr,nmodel,nrpt,nsym,power_disp+1,&
+         &                                     power_disp_min,power_disp_max,symbols,comm,nbody=nbody_in,&
+         &                                     compute=need_compute,anharmstr=need_anharmstr,&
+         &                                     spcoupling=need_spcoupling,only_odd_power=need_only_odd_power,&
+         &                                     only_even_power=need_only_even_power,disp=need_disp)
      end if
    end do
    ABI_FREE(index_coeff)
@@ -3535,6 +3535,10 @@ subroutine computeSymmetricCombinations(ncombi, list_combination, &
   integer :: isymlist
   !Source
 
+  ABI_UNUSED(ncombinations)
+  ABI_UNUSED(compute)
+  ABI_UNUSED(comm)
+
   !ncombi=0
 
 
@@ -3776,7 +3780,6 @@ subroutine generateTermsFromList(cell,index_coeff,list_coeff,list_str,ncoeff,ndi
        cells(:,1,idisp) = (/0,0,0/)
        cells(:,2,idisp) = cell(:,irpt)
      else
-       !print *, "idisp=", idisp, "index_coeff(idsp)", index_coeff(idisp), "isym", isym, "ncoeff:", ncoeff
        nstrain = nstrain + 1
        icoeff_str = index_coeff(idisp)-ncoeff
        strain(nstrain) = list_str(icoeff_str,isym,1)
@@ -4193,14 +4196,13 @@ end function coeffs_list_conc
 !! OUTPUT
 !!
 !! SOURCE
-subroutine coeffs_list_conc_onsite(coeff_list1,coeff_list2, check)
+subroutine coeffs_list_conc_onsite(coeff_list1,coeff_list2)
 !Arguments ------------------------------------
  implicit none
 
 !Arguments ------------------------------------
  type(polynomial_coeff_type), allocatable, intent(inout) :: coeff_list1(:)
- type(polynomial_coeff_type), intent(inout) ::coeff_list2(:)
- logical, intent(in) :: check
+ type(polynomial_coeff_type), intent(in) ::coeff_list2(:)
  !local
  !variable
  integer :: ncoeff1,ncoeff2,ncoeff_out
@@ -4219,7 +4221,10 @@ subroutine coeffs_list_conc_onsite(coeff_list1,coeff_list2, check)
  ! allocate new list1
  call polynomial_coeff_list_free(coeff_list1)
  ABI_MALLOC(coeff_list1,(ncoeff_out))
- coeff_list1=coeff_list_tmp + coeff_list2
+ !coeff_list1=coeff_list_tmp + coeff_list2
+ !coeff_list1 = coeffs_list_conc(coeff_list_tmp, coeff_list2)
+ coeff_list1(1:ncoeff1) = coeff_list_tmp
+ coeff_list1(ncoeff1+1:ncoeff_out) = coeff_list2
  call polynomial_coeff_list_free(coeff_list_tmp)
 
 end subroutine coeffs_list_conc_onsite
@@ -4269,9 +4274,6 @@ subroutine coeffs_list_append(coeff_list,coeff, check)
 end subroutine coeffs_list_append
 !!***
 
-
-
-
 !!****f* m_polynomial_coeff/coeffs_list_copy
 !! NAME
 !! coeff_list_copy
@@ -4318,7 +4320,6 @@ subroutine coeffs_list_copy(coeff_list_out,coeff_list_in)
     call polynomial_coeff_init(coeff_list_in(ii)%coefficient,coeff_list_in(ii)%nterm,&
 &                             coeff_list_out(ii),coeff_list_in(ii)%terms,coeff_list_in(ii)%name,check)
  enddo
-
 end subroutine coeffs_list_copy
 !!***
 
@@ -4652,8 +4653,6 @@ subroutine SymPairs_t_generateTerms(self, index_coeff,  power, nterm, terms, rev
     reverse_a(:) = .False.
   end if
   ndisp_max=size(index_coeff)
-  !print *, "self%ncoeff_symsym:", size(self%list_symcoeff, 2)
-  !print *, "self%ncoeff_sym:", self%ncoeff_sym
   ! Note that ncoeff_sym is not the same as ncoeff_symsym
   call generateTermsFromList(self%cell,index_coeff,self%list_symcoeff, &
     &self%list_symstr,size(self%list_symcoeff, 2),power,self%nrpt,self%nstr_sym,self%nsym, &
