@@ -53,7 +53,6 @@ By X. Gonze (MR852)
 The [[tutorial:lattice_wannier]] has been written to teach how to construct such lattice Wannier functions. 
 They are used in localized bases for atomic distortions. 
 One typical use case is to build an effective Hamiltonian of collective, localized, atomic displacements (see the next achievement). 
-In many phenomena, only a few distortion modes are important.
 
 A script (compare_phbands.py) to compare phonon/LWF band structures is added to the scripts/post_processing directory.
 
@@ -71,6 +70,8 @@ Related input variables :
 
 Related topic [[topic:LWFModel]].
 See tests [[test:lwf_1]], [[test:v9_110]], and [[test:v9_111]].
+
+This feature is still under heavy development. The current version should be regarded as a "technology preview". 
 
 By He Xu (MR844)
 
@@ -95,6 +96,8 @@ lwf_temperature@multibinit,
 [[lwf_var_temperature@multibinit]].
 
 See the tutorial [[tutorial:lwf_model]] and related tests.
+
+This feature is still under heavy development. The current version should be regarded as a "technology preview". 
 
 By He Xu (MR851)
 
