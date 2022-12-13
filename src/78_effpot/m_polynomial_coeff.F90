@@ -44,7 +44,6 @@ module m_polynomial_coeff
  implicit none
 
  type,public :: SymPairs_t
-   !subroutine prepare_for_getList(crystal,sc_size, dist,  cell, natom, nsym, nrpt, range_ifc, symbols )
    integer :: ncoeff_sym,nstr_sym
    integer,allocatable :: list_symcoeff(:,:,:),list_symstr(:,:,:)
    integer :: natom,nrpt, nsym
@@ -1330,7 +1329,9 @@ subroutine prepare_for_getList(crystal,sc_size, dist,  cell, natom, nsym, nrpt, 
    end do
  end do
 
- if (.not.(allocated(symbols)))  ABI_MALLOC(symbols,(natom))
+ if (.not.(allocated(symbols)))  then
+    ABI_MALLOC(symbols,(natom))
+ endif
  call symbols_crystal(crystal%natom,crystal%ntypat,crystal%npsp,&
 &                     symbols,crystal%typat,crystal%znucl)
 
@@ -3491,7 +3492,7 @@ subroutine gen_symlist(nsym, power, list)
   integer :: i, j, res,d
 
   s=nsym**(power-1)
-  allocate(list(power, s))
+  ABI_MALLOC(list, (power, s))
   list(:, :) = 0
   list(1, :) = 1
 

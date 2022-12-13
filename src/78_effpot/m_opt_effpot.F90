@@ -1264,10 +1264,17 @@ subroutine opt_filterdisp(term,nterm_of_term)
 
   do iterm_of_term=1,nterm_of_term
     !terms(iterm_of_term) = term%terms(iterm_of_term)
-    call polynomial_term_init(term%terms(iterm_of_term)%atindx, term%terms(iterm_of_term)%cell, term%terms(iterm_of_term)%direction,&
-      &                            term%terms(iterm_of_term)%ndisp, term%terms(iterm_of_term)%nstrain, terms(iterm_of_term),&
-      &                            term%terms(iterm_of_term)%power_disp, term%terms(iterm_of_term)%power_strain,&
-      &                            term%terms(iterm_of_term)%strain, term%terms(iterm_of_term)%weight, check=.TRUE.)
+    call polynomial_term_init(term%terms(iterm_of_term)%atindx, &
+      & term%terms(iterm_of_term)%cell,&
+      & term%terms(iterm_of_term)%direction,&
+      & term%terms(iterm_of_term)%ndisp, &
+      & term%terms(iterm_of_term)%nstrain, &
+      & terms(iterm_of_term),&
+      & term%terms(iterm_of_term)%power_disp, &
+      & term%terms(iterm_of_term)%power_strain,&
+      & term%terms(iterm_of_term)%strain, &
+      & term%terms(iterm_of_term)%weight, &
+      & check=.TRUE.)
     terms(iterm_of_term)%nstrain = 0
     terms(iterm_of_term)%power_strain = 0
     terms(iterm_of_term)%strain = 0
@@ -2102,7 +2109,7 @@ subroutine generate_bounding_term_and_add_to_list(sympairs, nterm_start, ncombi,
           reverse(counter) = reverse_i
         end do
       else
-        ABI_BUG("The pair is not found during checking of the SAT in generated bounding terms. Please report this to the developers.  ")
+        ABI_BUG("The pair is not found generated bounding terms.")
       end if
     end do
 
