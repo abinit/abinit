@@ -209,7 +209,7 @@ subroutine herald(code_name,code_version,iout)
 !END OF RELEASE TIME
 
 if(trim(code_name)=="MULTIBINIT") then
- write(iout, '(a,/,a,/,a,/,a,/,/)' ) &
+ write(iout, '(a,/,a,/,a,/,a)' ) &
 '******************************************************************************************', &
 '                                Welcome to MULTIBINIT,                         ', &
 ' a software platform designed for the construction and use of second-principles models', &
