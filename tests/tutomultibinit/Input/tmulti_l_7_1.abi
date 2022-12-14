@@ -28,8 +28,7 @@ bound_penalty = 1.001  # Penalty on the Goal Function (GF_new/GF_init) can't be 
 #%% input_ddb = tmulti_l_6_DDB
 #%% need_cpp_vars = HAVE_XML
 #%% system_xml = no
-#%% exclude_builders = .*_nag_7.[01]_.*
-#%% coeff_xml = tmulti_l_6_1_coeffs.xml
+#%% coeff_xml = tmulti_l_7_1_coeffs.xml
 #%% md_hist = tmulti_l_6_HIST.nc
 #%% [files]
 #%% files_to_test =
@@ -39,7 +38,7 @@ bound_penalty = 1.001  # Penalty on the Goal Function (GF_new/GF_init) can't be 
 #%% max_nprocs = 10
 #%% [extra_info]
 #%% authors = L. BASTOGNE
-#%% keywords = Effective potential, multibinit
+#%% keywords = Effective potential, multibinit, effpot
 #%% description = 
 #%%   Bounding an existing model
 #%% topics = LatticeModel

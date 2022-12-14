@@ -1249,7 +1249,7 @@ function get_crystal_cutoff(crystal) result(cutoff)
   real(dp) :: cutoff
   integer :: ii
   ! XXX: hexu: why cutoff + sum of axis lengths?
-  cutoff=0
+  cutoff=0.1
   do ii=1,3
     cutoff = cutoff + sqrt(crystal%rprimd(ii,1)**2 + &
       &                            crystal%rprimd(ii,2)**2 + &
