@@ -2394,7 +2394,7 @@ if(need_compute_symmetric)then
 
 
  if (my_nirred /= 0 ) then
-     my_ncombi = my_nirred*(nsym**(power_disps(2)))
+     my_ncombi = my_nirred*(nsym**(power_disps(2)-1))
  end if
 
   !Copy irreducible combinations from list_combination tmp into my_list_combination on rank i
@@ -3470,14 +3470,14 @@ subroutine gen_symlist(nsym, power, list)
   integer, allocatable :: list(:, :)
   integer :: i, j, res,d
 
-  s=nsym**(power)
+  s=nsym**(power-1)
   ABI_MALLOC(list, (power, s))
   list(:, :) = 0
   if(power>0) then
     list(1, :) = 1
     do i=1, s
       d=i-1
-      do j=1, power
+      do j=1, power-1
         res=mod(d, nsym)
 
         d=d/nsym
