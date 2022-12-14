@@ -154,7 +154,7 @@ endif
  if (lattmode) then
    write(iout, '(a,/,/,a,/,/,a,/, a,/,/, a,/, a,/, a,/,/, a,/,/, a/,/)' ) &
 '-----------------------------------------------------------------------------------------', &
-'                          MULTIBINIT – LATTICE MODELS                   ', &
+'                          MULTIBINIT - LATTICE MODELS                   ', &
 ' Project initiated and coordinated by Philippe GHOSEZ and his group at ULiege', &
 '   (Philippe.Ghosez@uliege.be).',  &
 ' Main contributors: Alexandre MARTIN, Jordan BIEDER, Michael Marcus SCHMITT,', &
