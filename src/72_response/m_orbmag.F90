@@ -130,6 +130,7 @@ module m_orbmag
     integer :: has_rd2f=0
     integer :: has_rd3a=0
     integer :: has_dijhat=0
+    integer :: has_LR=0
 
     ! sum of \Delta A_ij
     ! aij(natom,lmn2max)
@@ -196,6 +197,11 @@ module m_orbmag
     ! dijhat(natom,lmn2max)
     complex(dpc),allocatable :: dijhat(:,:)
     
+    ! onsite L_R/2
+    ! <phi|L_R/2|phi> - <tphi|L_R/2|tphi>
+    ! LR(natom,lmn2max,3)
+    complex(dpc),allocatable :: LR(:,:,:)
+
   end type dterm_type
 
   ! local datatype for pawdensities
@@ -224,6 +230,7 @@ module m_orbmag
   private :: orbmag_cc_k
   private :: orbmag_vv_k
   private :: orbmag_nl_k
+  private :: orbmag_nl1_k
   private :: make_m1_k
   private :: make_d
   private :: sum_d
@@ -610,7 +617,8 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
    !!--------------------------------------------------------------------------------
    !! onsite <phi|r_b p^2/2 r_g>
    !!--------------------------------------------------------------------------------
-   call apply_d2lr_term_k(atindx,cprj_k,dtset,igp2,lmn2max,mp2,nband_k,m1_k,pawtab)
+   !call apply_d2lr_term_k(atindx,cprj_k,dtset,igp2,lmn2max,mp2,nband_k,m1_k,pawtab)
+   call orbmag_nl1_k(atindx,cprj_k,dterm,dtset,m1_k,nband_k,pawtab)
    orbmag_terms(:,:,:,igp2) = orbmag_terms(:,:,:,igp2) + trnrm*m1_k
    !
    !!--------------------------------------------------------------------------------
@@ -804,6 +812,73 @@ subroutine make_m1_k(atindx,cprj_k,dterm,dtset,m1_k,nband_k,pawtab)
 
 end subroutine make_m1_k
 !!***
+
+!!****f* ABINIT/orbmag_nl1_k
+!! NAME
+!! orbmag_nl1_k
+!!
+!! FUNCTION
+!! make NL(1) term at k
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2021 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!!
+!! SOURCE
+
+subroutine orbmag_nl1_k(atindx,cprj_k,dterm,dtset,m1_k,nband_k,pawtab)
+
+  !Arguments ------------------------------------
+  !scalars
+  integer,intent(in) :: nband_k
+  type(dterm_type),intent(in) :: dterm
+  type(dataset_type),intent(in) :: dtset
+
+  !arrays
+  integer,intent(in) :: atindx(dtset%natom)
+  real(dp),intent(out) :: m1_k(2,nband_k,3)
+  type(pawcprj_type),intent(in) :: cprj_k(dtset%natom,nband_k)
+  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
+
+  !Local variables -------------------------
+  !scalars
+  integer :: adir,nn
+  complex(dpc) :: m1,tt
+  !arrays
+
+!--------------------------------------------------------------------
+
+ m1_k = zero
+ 
+ do adir = 1, 3
+   do nn = 1, nband_k
+
+     m1 = czero
+         
+     call tt_me(dterm%LR,atindx,cprj_k(:,nn),dtset,cprj_k(:,nn),&
+       & dterm%lmn2max,pawtab,tt)
+         
+     m1_k(1,nn,adir) = real(tt); m1_k(2,nn,adir) = aimag(tt)
+
+   end do !nn
+ end do !adir
+
+end subroutine orbmag_nl1_k
+!!***
+
 
 !!****f* ABINIT/orbmag_nl_k
 !! NAME
@@ -1564,6 +1639,108 @@ subroutine dterm_qij(atindx,dterm,dtset,pawrad,pawtab)
  
 end subroutine dterm_qij
 !!***
+
+!!****f* ABINIT/dterm_LR
+!! NAME
+!! dterm_LR
+!!
+!! FUNCTION
+!! Compute onsite <L_R/2>
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2021 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!!
+!! SOURCE
+
+subroutine dterm_LR(atindx,dterm,dtset,gprimd,pawrad,pawtab)
+
+  !Arguments ------------------------------------
+  !scalars
+  type(dterm_type),intent(inout) :: dterm
+  type(dataset_type),intent(in) :: dtset
+
+  !arrays
+  integer,intent(in) :: atindx(dtset%natom)
+  real(dp),intent(in) :: gprimd(3,3)
+  type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
+  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
+
+  !Local variables -------------------------
+  !scalars
+  integer :: adir,iat,iatom,ilmn,il,im,itypat,jlmn,jl,jm
+  integer :: klmn,kln,mesh_size,pwave_size
+  real(dp) :: intg
+  complex(dpc) :: orbl_me
+
+  !arrays
+  complex(dpc) :: dij_cart(3),dij_red(3)
+  real(dp),allocatable :: ff(:)
+
+!--------------------------------------------------------------------
+
+  dterm%LR = czero
+
+  do itypat=1,dtset%ntypat
+    mesh_size=pawtab(itypat)%mesh_size
+    pwave_size=size(pawtab(itypat)%phiphj(:,1))
+    ABI_MALLOC(ff,(mesh_size))
+    do klmn=1, pawtab(itypat)%lmn2_size
+
+      ilmn = pawtab(itypat)%indklmn(7,klmn)
+      il=pawtab(itypat)%indlmn(1,ilmn)
+      im=pawtab(itypat)%indlmn(2,ilmn)
+
+      jlmn = pawtab(itypat)%indklmn(8,klmn)
+      jl=pawtab(itypat)%indlmn(1,jlmn)
+      jm=pawtab(itypat)%indlmn(2,jlmn)
+
+      if ( il /= jl ) cycle ! <l'm'|L|lm> = 0 if l' /= l
+      if ( il == 0 ) cycle ! <00|L|00> = 0
+
+      kln = pawtab(itypat)%indklmn(2,klmn) 
+      ff=0
+      ff(2:pwave_size) = pawtab(itypat)%phiphj(2:pwave_size,kln)-pawtab(itypat)%tphitphj(2:pwave_size,kln)
+      call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
+      call simp_gen(intg,ff,pawrad(itypat))
+
+      do adir = 1, 3
+      ! compute <L_dir>/2
+        call slxyzs(il,im,adir,jl,jm,orbl_me)
+        dij_cart(adir) = -half*orbl_me*intg
+      end do ! end loop over adir
+
+      ! convert to crystal frame
+      dij_red = MATMUL(TRANSPOSE(gprimd),dij_cart)
+
+      do iat=1,dtset%natom
+        iatom = atindx(iat)
+        if(dtset%typat(iat) .EQ. itypat) then
+          dterm%LR(iatom,klmn,1:3) = dij_red(1:3)
+        end if
+      end do
+    end do ! end loop over klmn
+    ABI_FREE(ff)
+  end do ! end loop over itypat
+
+  dterm%has_LR = 2
+ 
+end subroutine dterm_LR
+!!***
+
 
 !!****f* ABINIT/d2lr_p2
 !! NAME
@@ -3578,6 +3755,11 @@ subroutine dterm_free(dterm)
   end if
   dterm%has_dijhat=0
   
+  if(allocated(dterm%LR)) then
+    ABI_FREE(dterm%LR)
+  end if
+  dterm%has_LR=0
+  
 end subroutine dterm_free
 !!***
 
@@ -3782,6 +3964,12 @@ subroutine dterm_alloc(dterm,lmnmax,lmn2max,natom)
   end if
   ABI_MALLOC(dterm%dijhat,(natom,lmn2max))
   dterm%has_dijhat=1
+ 
+  if(allocated(dterm%LR)) then
+    ABI_FREE(dterm%LR)
+  end if
+  ABI_MALLOC(dterm%LR,(natom,lmn2max,3))
+  dterm%has_LR=1
   
 end subroutine dterm_alloc
 !!***
@@ -4272,44 +4460,46 @@ subroutine make_d(atindx,atindx1,cprj,dimlmn,dterm,dtset,gprimd,mcprj,nfftf,&
 
  call dterm_qij(atindx,dterm,dtset,pawrad,pawtab)
 
- !! term idp2 due to onsite p^2/2, corresponds to term 1 of Torrent PAW roadmap paper appendix E
- !! Comp. Mat. Sci. 42, 337-351 (2008)
- call dterm_rd1(atindx,dterm,dtset,pawrad,pawtab)
+ call dterm_LR(atindx,dterm,dtset,gprimd,pawrad,pawtab)
 
- !! term idpa due to onsite A.p, not part of the roadmap paper but similar to term 1
- call dterm_rd1a(atindx,dterm,dtset,pawrad,pawtab)
- 
- ! term idvha due to v_H[n1] and v_H[\tilde{n}1], corresponds to term 2a of roadmap paper
- call dterm_rd2a(atindx,dterm,dtset,gntselect,psps%lmnmax,my_lmax,&
-   & pawrad,pawrhoij,pawtab,realgnt)
- !call dterm_rd2a1(atindx,dterm,dtset,gntselect,gprimd,psps%lmnmax,my_lmax,&
- !  & pawrad,pawrhoij1,pawtab,realgnt)
+ !!! term idp2 due to onsite p^2/2, corresponds to term 1 of Torrent PAW roadmap paper appendix E
+ !!! Comp. Mat. Sci. 42, 337-351 (2008)
+ !call dterm_rd1(atindx,dterm,dtset,pawrad,pawtab)
 
- ! terms due to v_H[nZ], corresponds to term 2b of roadmap paper
- call dterm_rd2b(atindx,dterm,dtset,pawrad,pawtab)
- 
- ! term due to v_H[nhat], corresponds to term 2c of roadmap paper
- call dterm_rd2c(atindx,dterm,dtset,gntselect,psps%lmnmax,my_lmax,&
-   & pawrad,pawrhoij,pawtab,realgnt)
- 
- ! term due to v_H[\tilde{n}^1]Q^{LM}_{ij}, corresponds to term 2d of roadmap paper
- call dterm_rd2d(atindx,dterm,dtset,gntselect,psps%lmnmax,my_lmax,&
-   & pawrad,pawrhoij,pawtab,realgnt)
- 
- ! terms due to v_H[\tilde{n}_Zc]Q^{LJM}_{ij}, corresponds to term 2e of roadmap paper
- call dterm_rd2e(atindx,dterm,dtset,pawrad,pawtab)
+ !!! term idpa due to onsite A.p, not part of the roadmap paper but similar to term 1
+ !call dterm_rd1a(atindx,dterm,dtset,pawrad,pawtab)
+ !
+ !! term idvha due to v_H[n1] and v_H[\tilde{n}1], corresponds to term 2a of roadmap paper
+ !call dterm_rd2a(atindx,dterm,dtset,gntselect,psps%lmnmax,my_lmax,&
+ !  & pawrad,pawrhoij,pawtab,realgnt)
+ !!call dterm_rd2a1(atindx,dterm,dtset,gntselect,gprimd,psps%lmnmax,my_lmax,&
+ !!  & pawrad,pawrhoij1,pawtab,realgnt)
 
- ! term due to v_H[\hat{n}]Q^{LM}_{ij}, corresponds to term 2f of roadmap paper
- call dterm_rd2f(atindx,dterm,dtset,gntselect,psps%lmnmax,my_lmax,&
-   & pawrad,pawrhoij,pawtab,realgnt)
+ !! terms due to v_H[nZ], corresponds to term 2b of roadmap paper
+ !call dterm_rd2b(atindx,dterm,dtset,pawrad,pawtab)
+ !
+ !! term due to v_H[nhat], corresponds to term 2c of roadmap paper
+ !call dterm_rd2c(atindx,dterm,dtset,gntselect,psps%lmnmax,my_lmax,&
+ !  & pawrad,pawrhoij,pawtab,realgnt)
+ !
+ !! term due to v_H[\tilde{n}^1]Q^{LM}_{ij}, corresponds to term 2d of roadmap paper
+ !call dterm_rd2d(atindx,dterm,dtset,gntselect,psps%lmnmax,my_lmax,&
+ !  & pawrad,pawrhoij,pawtab,realgnt)
+ !
+ !! terms due to v_H[\tilde{n}_Zc]Q^{LJM}_{ij}, corresponds to term 2e of roadmap paper
+ !call dterm_rd2e(atindx,dterm,dtset,pawrad,pawtab)
 
- ! term dvxc due to v_xc[n1+nc] corresponds to term 3a in roadmap paper
- call dterm_rd3a(atindx,dterm,dtset,gntselect,gprimd,psps%lmnmax,my_lmax,&
-    & pawang,paw_ij,pawrad,pawsphden,pawtab,realgnt)
+ !! term due to v_H[\hat{n}]Q^{LM}_{ij}, corresponds to term 2f of roadmap paper
+ !call dterm_rd2f(atindx,dterm,dtset,gntselect,psps%lmnmax,my_lmax,&
+ !  & pawrad,pawrhoij,pawtab,realgnt)
 
- ! term dijhat
- call dterm_dijhat(atindx,dterm,dtset,gprimd,nfftf,pawang,pawfgrtab,pawtab,ucvol,&
-   & vtrial,vxc)
+ !! term dvxc due to v_xc[n1+nc] corresponds to term 3a in roadmap paper
+ !call dterm_rd3a(atindx,dterm,dtset,gntselect,gprimd,psps%lmnmax,my_lmax,&
+ !   & pawang,paw_ij,pawrad,pawsphden,pawtab,realgnt)
+
+ !! term dijhat
+ !call dterm_dijhat(atindx,dterm,dtset,gprimd,nfftf,pawang,pawfgrtab,pawtab,ucvol,&
+ !  & vtrial,vxc)
 
  call sum_d(atindx,dterm,dtset,paw_ij,pawtab)
 
