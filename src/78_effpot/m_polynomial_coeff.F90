@@ -1253,7 +1253,7 @@ function get_crystal_cutoff(crystal) result(cutoff)
   do ii=1,3
     cutoff = cutoff + sqrt(crystal%rprimd(ii,1)**2 + &
       &                            crystal%rprimd(ii,2)**2 + &
-      &                            crystal%rprimd(ii,3)**2)/3
+      &                            crystal%rprimd(ii,3)**2)
   enddo
 end function get_crystal_cutoff
 
@@ -1867,10 +1867,10 @@ subroutine polynomial_coeff_getList(cell,crystal,dist,list_symcoeff,list_symstr,
 
          ! FIXME: hexu: cell(mu, irpt). But why -1?
          ! The if above looks sufficient.
-         if(cell(mu,list_symcoeff_tmp2(4,icoeff,1)) < -1)then
-           list_symcoeff_tmp2(:,icoeff,:)=0
-           exit
-         end if
+         !if(cell(mu,list_symcoeff_tmp2(4,icoeff,1)) < -1)then
+         list_symcoeff_tmp2(:,icoeff,:)=0
+         exit
+         !end if
        end if
      end do
    end if
@@ -3473,17 +3473,18 @@ subroutine gen_symlist(nsym, power, list)
   s=nsym**(power-1)
   ABI_MALLOC(list, (power, s))
   list(:, :) = 0
-  list(1, :) = 1
+  if(power>0) then
+    list(1, :) = 1
+    do i=1, s
+      d=i-1
+      do j=1, power-1
+        res=mod(d, nsym)
 
-  do i=1, s
-    d=i-1
-    do j=1, power-1
-      res=mod(d, nsym)
-
-      d=d/nsym
-      list(power-j+1, i) = res+1
+        d=d/nsym
+        list(power-j+1, i) = res+1
+      end do
     end do
-  end do
+  endif
 end subroutine gen_symlist
 
 

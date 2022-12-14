@@ -1710,7 +1710,7 @@ subroutine opt_getSingleDispTerms(terms,crystal, sc_size,comm)
         ! note: when iatom>1, terms is already initialized.
         nterm1 = size(terms)
         ABI_MALLOC(terms_tmp2,(nterm1))
-       terms_tmp2 = terms
+        terms_tmp2 = terms
         terms_to_copy = .TRUE.
         do iterm1=1,size(terms_tmp)
           do iterm2=1,size(terms)
@@ -2052,7 +2052,6 @@ subroutine generate_bounding_term_and_add_to_list(sympairs, nterm_start, ncombi,
   call polynomial_coeff_list_free(my_coeffs)
   ABI_MALLOC(my_coeffs, (ncoeff))
   my_coeffs(1:nterm_start) = my_coeffs_tmp(1:nterm_start)
-
 
 
   temp_cntr =0
