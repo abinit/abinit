@@ -2,7 +2,7 @@
 authors: DJA
 ---
 
-# Calculation of *U* and J using Cococcioni's approach
+# Calculation of U and J using Cococcioni's approach
 
 ## How to determine *U* for DFT+*U* in ABINIT? Cococcioni's approach.
 

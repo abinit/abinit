@@ -88,6 +88,7 @@
 
      pp_dirpath "$ABI_PSPDIR"
      pseudos "Pseudodojo_paw_pbe_standard/Fe.xml"
+     ixc 11   # Imposing use of internal PBE for portability purposes
 
 ##############################################################
 # This section is used only for regression testing of ABINIT #

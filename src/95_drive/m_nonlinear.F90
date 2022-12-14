@@ -71,6 +71,7 @@ module m_nonlinear
  use m_pspini,      only : pspini
  use m_atm2fft,     only : atm2fft
  use m_rhotoxc,     only : rhotoxc
+ use m_drivexc,     only : check_kxc
  use m_mpinfo,      only : proc_distrb_cycle
  use m_mklocl,      only : mklocl
  use m_common,      only : setup1
@@ -875,6 +876,7 @@ end if
  if(dtset%xclevel==2.and.dtset%nspden==1) nkxc=7  ! non-polarized GGA
  if(dtset%xclevel==2.and.dtset%nspden==2) nkxc=19 ! polarized GGA
  nk3xc=3*dtset%nspden-2
+ call check_kxc(dtset%ixc,dtset%optdriver,check_k3xc=.true.)
  ABI_MALLOC(kxc,(nfftf,nkxc))
  ABI_MALLOC(k3xc,(nfftf,nk3xc))
  ABI_MALLOC(vxc,(nfftf,dtset%nspden))

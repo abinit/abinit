@@ -128,21 +128,21 @@ void xc_get_kind_constants(int *xc_cst_exchange,
  * ===============================================================
  */
 /*void xc_get_hybrid_constants(int *xc_cst_hyb_none,
-							 int *xc_cst_hyb_fock,
-							 int *xc_cst_hyb_pt2,
-							 int *xc_cst_hyb_erf_sr,
-							 int *xc_cst_hyb_yukawa_sr,
-							 int *xc_cst_hyb_gaussian_sr,
-							 int *xc_cst_hyb_semilocal,
-							 int *xc_cst_hyb_hybrid,
-							 int *xc_cst_hyb_cam,
-							 int *xc_cst_hyb_camy,
-							 int *xc_cst_hyb_camg,
-							 int *xc_cst_hyb_double_hybrid,
-							 int *xc_cst_hyb_mixture)
+                               int *xc_cst_hyb_fock, 
+                               int *xc_cst_hyb_pt2,
+                               int *xc_cst_hyb_erf_sr,
+                               int *xc_cst_hyb_yukawa_sr,
+                               int *xc_cst_hyb_gaussian_sr,
+                               int *xc_cst_hyb_semilocal,
+                               int *xc_cst_hyb_hybrid,
+                               int *xc_cst_hyb_cam,
+                               int *xc_cst_hyb_camy,
+                               int *xc_cst_hyb_camg,
+                               int *xc_cst_hyb_double_hybrid,
+                               int *xc_cst_hyb_mixture)
 {*/
 //#if ( XC_MAJOR_VERSION > 7 )
-/* ==== libXC v6.0 and later ==== */
+/* ==== libXC vx.0 and later ==== */
 /* *xc_cst_hyb_none          = XC_HYB_NONE;
  *xc_cst_hyb_fock          = XC_HYB_FOCK;
  *xc_cst_hyb_pt2           = XC_HYB_PT2;
@@ -157,7 +157,7 @@ void xc_get_kind_constants(int *xc_cst_exchange,
  *xc_cst_hyb_double_hybrid = XC_HYB_DOUBLE_HYBRID;
  *xc_cst_hyb_mixture       = XC_HYB_MIXTURE;*/
 //#else
-/* ==== Before libXC v6.0 ==== */
+/* ==== Before libXC vx.0 ==== */
 /* *xc_cst_hyb_none      = -11; *xc_cst_hyb_fock          = -11;
  *xc_cst_hyb_pt2       = -11; *xc_cst_hyb_erf_sr        = -11;
  *xc_cst_hyb_yukawa_sr = -11; *xc_cst_hyb_gaussian_sr   = -11;
@@ -333,8 +333,10 @@ void xc_func_set_params(XC(func_type) *xc_func, double *ext_params, int n_ext_pa
  }
 
 /* ===============================================================
- * Wrapper to xc_func_set_dens_threshold for backward compatibility
- *    Allows to change the zero-density threshold of a XC functional
+ * Wrapper to xc_func_set_dens_threshold
+ *    and xc_func_set_sigma_threshold for backward compatibility
+ *    Allows to change the zero-density (zero-gradient) threshold
+ *    of a XC functional
  *    Only available from libXC v4
  * ===============================================================
  */
@@ -344,6 +346,14 @@ void xc_func_set_density_threshold(XC(func_type) *xc_func, double *dens_threshol
    {XC(func_set_dens_threshold)(xc_func, *dens_threshold);}
 #else
    {fprintf(stderr, "WARNING: setting density threshold not available for libXC<4.0!\n");}
+#endif
+
+void xc_func_set_grad_sig_threshold(XC(func_type) *xc_func, double *sigma_threshold)
+#if ( XC_MAJOR_VERSION > 4 )
+/* ==== libXC v5.0 and later ==== */
+   {XC(func_set_sigma_threshold)(xc_func, *sigma_threshold);}
+#else
+   {fprintf(stderr, "WARNING: setting sigma threshold not available for libXC<4.0!\n");}
 #endif
 
 /* ===============================================================
