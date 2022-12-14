@@ -260,11 +260,11 @@ endif
 
 if(trim(code_name)=="MULTIBINIT") then
  write(iout, '(a,/,a,/,/,a,/,/,a,/,/,a,/, a,/,/, a,/, a,/, a,/,/, a,/,/, a/,/)' ) &
-' MULTIBINIT is a software project of the University of Liège', &
+' MULTIBINIT is a software project of the University of Liege', &
 ' (PHYTHEMA & NANOMAT groups), in collaboration with other partners.', &
 '-----------------------------------------------------------------------------------------', &
 '                          MULTIBINIT – LATTICE MODELS                   ', &
-' Project initiated and coordinated by Philippe GHOSEZ and his group at ULiège', &
+' Project initiated and coordinated by Philippe GHOSEZ and his group at ULiege', &
 '   (Philippe.Ghosez@uliege.be).',  &
 ' Main contributors: Alexandre MARTIN, Jordan BIEDER, Michael Marcus SCHMITT,', & 
 '   Louis BASTOGNE, Xu HE, Alireza SASANI, Huazhang ZHANG, Subhadeep BANDYOPADHYAY,', &
