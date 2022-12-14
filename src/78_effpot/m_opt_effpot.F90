@@ -126,10 +126,10 @@ subroutine opt_effpot(eff_pot,opt_ncoeff,opt_coeff,hist,opt_on,opt_factors,comm,
   ntime = hist%mxhist
   natom_sc = size(hist%xred,2)
   factor   = 1._dp/natom_sc
-  need_print_anh =0
+  need_print_anh =.False.
   
-  if(present(present_anh)) then
-    if(print_anh) need_print_anh=1
+  if(present(print_anh)) then
+    if(print_anh) need_print_anh=.True.
   end if
   !if the number of atoms in reference supercell into effpot is not correct,
   !wrt to the number of atom in the hist, we set map the hist and set the good supercell
@@ -424,6 +424,7 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
   natom_sc = size(hist%xred,2)
   factor   = 1._dp/natom_sc
   nterm =eff_pot%anharmonics_terms%ncoeff
+  need_print_anh=.False.
   if(present(print_anh))then
     if(print_anh) need_print_anh = .True.
   endif
