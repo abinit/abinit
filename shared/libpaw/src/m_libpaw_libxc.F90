@@ -116,10 +116,24 @@ module m_libpaw_libxc_funcs
    real(dp) :: hyb_mixing_sr   ! Hybrid functional: mixing factor of SR Fock contribution (default=0)
    real(dp) :: hyb_range       ! Range (for separation) for a hybrid functional (default=0)
    real(dp) :: xc_tb09_c       ! Special TB09 functional parameter
+   real(dp) :: sigma_threshold ! Value of a threshold to be applied on density gradient (sigma)
+                               ! (temporary dur to a libxc bug) - If <0, apply no filter
 #ifdef LIBPAW_ISO_C_BINDING
    type(C_PTR),pointer :: conf => null() ! C pointer to the functional itself
 #endif
  end type libpaw_libxc_type
+
+!List of functionals on which a filter has to be applied on sigma (density gradient)
+!  This should be done by libXC via _set_sigma_threshold but this is not (libXC 6)
+ real(dp),parameter :: libpaw_sigma_threshold_def = 1.0e-25_dp
+ integer,parameter :: libpaw_n_sigma_filtered = 17
+ character(len=28) :: libpaw_sigma_filtered(libpaw_n_sigma_filtered) = &
+&  ['XC_HYB_GGA_XC_HSE03         ','XC_HYB_GGA_XC_HSE06         ','XC_HYB_GGA_XC_HJS_PBE       ',&
+&   'XC_HYB_GGA_XC_HJS_PBE_SOL   ','XC_HYB_GGA_XC_HJS_B88       ','XC_HYB_GGA_XC_HJS_B97X      ',&
+&   'XC_HYB_GGA_XC_LRC_WPBEH     ','XC_HYB_GGA_XC_LRC_WPBE      ','XC_HYB_GGA_XC_LC_WPBE       ',&
+&   'XC_HYB_GGA_XC_HSE12         ','XC_HYB_GGA_XC_HSE12S        ','XC_HYB_GGA_XC_HSE_SOL       ',&
+&   'XC_HYB_GGA_XC_LC_WPBE_WHS   ','XC_HYB_GGA_XC_LC_WPBEH_WHS  ','XC_HYB_GGA_XC_LC_WPBE08_WHS ',&
+&   'XC_HYB_GGA_XC_LC_WPBESOL_WHS','XC_HYB_GGA_XC_WHPBE0        ']
 
 !----------------------------------------------------------------------
 
@@ -230,6 +244,14 @@ module m_libpaw_libxc_funcs
      real(C_DOUBLE) :: dens_threshold
      type(C_PTR) :: xc_func
    end subroutine libpaw_xc_func_set_density_threshold
+ end interface
+!
+ interface
+   subroutine libpaw_xc_func_set_sig_threshold(xc_func,sigma_threshold) bind(C)
+     use iso_c_binding, only : C_DOUBLE,C_PTR
+     real(C_DOUBLE) :: sigma_threshold
+     type(C_PTR) :: xc_func
+   end subroutine libpaw_xc_func_set_sig_threshold
  end interface
 !
  interface
@@ -464,7 +486,7 @@ contains
  real(dp),intent(in),optional :: xc_tb09_c
  type(libpaw_libxc_type),intent(inout),optional,target :: xc_functionals(2)
 !Local variables-------------------------------
- integer :: ii,nspden_eff
+ integer :: ii,jj,nspden_eff
  character(len=500) :: msg
  type(libpaw_libxc_type),pointer :: xc_func
 #if defined LIBPAW_HAVE_LIBXC && defined LIBPAW_ISO_C_BINDING
@@ -516,6 +538,7 @@ contains
    xc_func%hyb_mixing_sr=zero
    xc_func%hyb_range=zero
    xc_func%xc_tb09_c=99.99_dp
+   xc_func%sigma_threshold=-one
 
    if (xc_func%id<=0) cycle
 
@@ -589,7 +612,17 @@ contains
      xc_func%hyb_range=real(omega_c,kind=dp)
    end if
 
-!  Dump functional information
+!  Some functionals need a filter to be applied on sigma (density gradient)
+!   because libXC v6 doesn't implement sigma_threshold
+   if (xc_func%is_hybrid) then
+     do jj=1,libpaw_n_sigma_filtered
+       if (xc_func%id==libpaw_libxc_getid(trim(libpaw_sigma_filtered(jj)))) then
+         xc_func%sigma_threshold=libpaw_sigma_threshold_def
+       end if
+     end do
+   end if
+
+   !  Dump functional information
    call c_f_pointer(libpaw_xc_get_info_name(xc_func%conf),strg_c)
    call char_c_to_f(strg_c,msg)
    call wrtout(std_out,msg,'COLL')
@@ -664,6 +697,7 @@ end subroutine libpaw_libxc_init
    xc_func%hyb_mixing_sr=zero
    xc_func%hyb_range=zero
    xc_func%xc_tb09_c=99.99_dp
+   xc_func%sigma_threshold=-one
 #if defined LIBPAW_HAVE_LIBXC && defined LIBPAW_ISO_C_BINDING
    if (associated(xc_func%conf)) then
      call xc_func_end(xc_func%conf)
@@ -1265,8 +1299,9 @@ end function libpaw_libxc_nspin
 !Local variables -------------------------------
 !scalars
  integer  :: ii,ipts
- logical :: is_gga,is_mgga,needs_laplacian
+ logical :: is_gga,is_mgga,needs_laplacian,has_sigma_threshold
  character(len=500) :: msg
+ real(dp) :: sigma_threshold_max
 #if defined LIBPAW_HAVE_LIBXC && defined LIBPAW_ISO_C_BINDING
  type(C_PTR) :: rho_c,sigma_c,lrho_c,tau_c
 #endif
@@ -1296,6 +1331,9 @@ end function libpaw_libxc_nspin
  is_gga =libpaw_libxc_isgga (xc_funcs)
  is_mgga=libpaw_libxc_ismgga(xc_funcs)
  needs_laplacian=(libpaw_libxc_needs_laplacian(xc_funcs).and.present(lrho))
+
+ sigma_threshold_max=maxval(xc_funcs(:)%sigma_threshold,mask=(xc_funcs(:)%id>0))
+ has_sigma_threshold=(sigma_threshold_max>zero)
 
  if (is_gga.and.(.not.present(grho2))) then
    msg='GGA needs gradient of density!'
@@ -1403,6 +1441,12 @@ end function libpaw_libxc_nspin
        sigma(1) = grho2(ipts,1)
        sigma(2) = (grho2(ipts,3) - grho2(ipts,1) - grho2(ipts,2))/two
        sigma(3) = grho2(ipts,2)
+     end if
+     ! Apply a threshold on sigma (cannot be done in libxc6, at present)
+     if (has_sigma_threshold) then
+       do ii=1,2*nspden-1
+         if (abs(sigma(ii))<=sigma_threshold_max) sigma(ii)=sigma_threshold_max
+       end do
      end if
    end if
    if (is_mgga) then
@@ -2055,23 +2099,26 @@ module m_libpaw_libxc
 
 #else
  use m_libpaw_libxc_funcs, only : &
-& libxc_functionals_check            => libpaw_libxc_check, &
-& libxc_functionals_init             => libpaw_libxc_init, &
-& libxc_functionals_end              => libpaw_libxc_end, &
-& libxc_functionals_fullname         => libpaw_libxc_fullname, &
-& libxc_functionals_getid            => libpaw_libxc_getid, &
-& libxc_functionals_family_from_id   => libpaw_libxc_family_from_id, &
-& libxc_functionals_ixc              => libpaw_libxc_ixc, &
-& libxc_functionals_getvxc           => libpaw_libxc_getvxc, &
-& libxc_functionals_isgga            => libpaw_libxc_isgga, &
-& libxc_functionals_ismgga           => libpaw_libxc_ismgga, &
-& libxc_functionals_needs_laplacian  => libpaw_libxc_needs_laplacian, &
-& libxc_functionals_is_hybrid        => libpaw_libxc_is_hybrid, &
-& libxc_functionals_has_kxc          => libpaw_libxc_has_kxc, &
-& libxc_functionals_nspin            => libpaw_libxc_nspin, &
-& libxc_functionals_get_hybridparams => libpaw_libxc_get_hybridparams, &
-& libxc_functionals_set_hybridparams => libpaw_libxc_set_hybridparams, &
-& libxc_functionals_gga_from_hybrid  => libpaw_libxc_gga_from_hybrid
+& libxc_functionals_check             => libpaw_libxc_check, &
+& libxc_functionals_init              => libpaw_libxc_init, &
+& libxc_functionals_end               => libpaw_libxc_end, &
+& libxc_functionals_fullname          => libpaw_libxc_fullname, &
+& libxc_functionals_getid             => libpaw_libxc_getid, &
+& libxc_functionals_getrefs           => libpaw_libxc_getrefs, &
+& libxc_functionals_family_from_id    => libpaw_libxc_family_from_id, &
+& libxc_functionals_ixc               => libpaw_libxc_ixc, &
+& libxc_functionals_getvxc            => libpaw_libxc_getvxc, &
+& libxc_functionals_isgga             => libpaw_libxc_isgga, &
+& libxc_functionals_ismgga            => libpaw_libxc_ismgga, &
+& libxc_functionals_needs_laplacian   => libpaw_libxc_needs_laplacian, &
+& libxc_functionals_is_hybrid         => libpaw_libxc_is_hybrid, &
+& libxc_functionals_has_kxc           => libpaw_libxc_has_kxc, &
+& libxc_functionals_has_k3xc          => libpaw_libxc_has_k3xc, &
+& libxc_functionals_nspin             => libpaw_libxc_nspin, &
+& libxc_functionals_get_hybridparams  => libpaw_libxc_get_hybridparams, &
+& libxc_functionals_set_hybridparams  => libpaw_libxc_set_hybridparams, &
+& libxc_functionals_gga_from_hybrid   => libpaw_libxc_gga_from_hybrid, &
+& libxc_functionals_is_hybrid_from_id => libpaw_libxc_is_hybrid_from_id
 #endif
 
  implicit none

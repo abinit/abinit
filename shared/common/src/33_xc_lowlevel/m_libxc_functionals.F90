@@ -128,10 +128,25 @@ module libxc_functionals
    real(dp) :: hyb_mixing_sr   ! Hybrid functional: mixing factor of SR Fock contribution (default=0)
    real(dp) :: hyb_range       ! Range (for separation) for a hybrid functional (default=0)
    real(dp) :: xc_tb09_c       ! Special TB09 functional parameter
+   real(dp) :: sigma_threshold ! Value of a threshold to be applied on density gradient (sigma)
+                               ! (temporary dur to a libxc bug) - If <0, apply no filter
 #ifdef HAVE_FC_ISO_C_BINDING
    type(C_PTR),pointer :: conf => null() ! C pointer to the functional itself
 #endif
  end type libxc_functional_type
+
+!List of functionals on which a filter has to be applied on sigma (density gradient)
+!  This should be done by libXC via _set_sigma_threshold but this is not (libXC 6)
+!  This threshold has been evaluated from pbeh functional...
+ real(dp),parameter :: sigma_threshold_def = 1.0e-25_dp
+ integer,parameter :: n_sigma_filtered = 17
+ character(len=28) :: sigma_filtered(n_sigma_filtered) = &
+&  ['XC_HYB_GGA_XC_HSE03         ','XC_HYB_GGA_XC_HSE06         ','XC_HYB_GGA_XC_HJS_PBE       ',&
+&   'XC_HYB_GGA_XC_HJS_PBE_SOL   ','XC_HYB_GGA_XC_HJS_B88       ','XC_HYB_GGA_XC_HJS_B97X      ',&
+&   'XC_HYB_GGA_XC_LRC_WPBEH     ','XC_HYB_GGA_XC_LRC_WPBE      ','XC_HYB_GGA_XC_LC_WPBE       ',&
+&   'XC_HYB_GGA_XC_HSE12         ','XC_HYB_GGA_XC_HSE12S        ','XC_HYB_GGA_XC_HSE_SOL       ',&
+&   'XC_HYB_GGA_XC_LC_WPBE_WHS   ','XC_HYB_GGA_XC_LC_WPBEH_WHS  ','XC_HYB_GGA_XC_LC_WPBE08_WHS ',&
+&   'XC_HYB_GGA_XC_LC_WPBESOL_WHS','XC_HYB_GGA_XC_WHPBE0        ']
 
 !----------------------------------------------------------------------
 
@@ -235,6 +250,14 @@ module libxc_functionals
      real(C_DOUBLE) :: dens_threshold
      type(C_PTR) :: xc_func
    end subroutine xc_func_set_density_threshold
+ end interface
+!
+ interface
+   subroutine xc_func_set_sig_threshold(xc_func,sigma_threshold) bind(C)
+     use iso_c_binding, only : C_DOUBLE,C_PTR
+     real(C_DOUBLE) :: sigma_threshold
+     type(C_PTR) :: xc_func
+   end subroutine xc_func_set_sig_threshold
  end interface
 !
  interface
@@ -462,7 +485,7 @@ contains
  real(dp),intent(in),optional :: xc_tb09_c
  type(libxc_functional_type),intent(inout),optional,target :: xc_functionals(2)
 !Local variables-------------------------------
- integer :: ii,nspden_eff
+ integer :: ii,jj,nspden_eff
  character(len=500) :: msg
  type(libxc_functional_type),pointer :: xc_func
 #if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
@@ -514,6 +537,7 @@ contains
    xc_func%hyb_mixing_sr=zero
    xc_func%hyb_range=zero
    xc_func%xc_tb09_c=99.99_dp
+   xc_func%sigma_threshold=-one
 
    if (xc_func%id<=0) cycle
 
@@ -585,6 +609,16 @@ contains
      xc_func%hyb_mixing=real(alpha_c,kind=dp)
      xc_func%hyb_mixing_sr=real(beta_c,kind=dp)
      xc_func%hyb_range=real(omega_c,kind=dp)
+   end if
+
+!  Some functionals need a filter to be applied on sigma (density gradient)
+!   because libXC v6 doesn't implement sigma_threshold
+   if (xc_func%is_hybrid) then
+     do jj=1,n_sigma_filtered
+       if (xc_func%id==libxc_functionals_getid(trim(sigma_filtered(jj)))) then
+         xc_func%sigma_threshold=sigma_threshold_def
+       end if
+     end do
    end if
 
 !  Dump functional information
@@ -669,6 +703,7 @@ end subroutine libxc_functionals_init
    xc_func%hyb_mixing_sr=zero
    xc_func%hyb_range=zero
    xc_func%xc_tb09_c=99.99_dp
+   xc_func%sigma_threshold=-one
 #if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
    if (associated(xc_func%conf)) then
      call xc_func_end(xc_func%conf)
@@ -1271,9 +1306,10 @@ end function libxc_functionals_nspin
 !Local variables -------------------------------
 !scalars
  integer  :: ii,ipts
- logical :: is_gga,is_mgga,needs_laplacian
+ logical :: is_gga,is_mgga,needs_laplacian,has_sigma_threshold
  real(dp),target :: exctmp
  character(len=500) :: msg
+ real(dp) :: sigma_threshold_max
 #if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
  type(C_PTR) :: rho_c,sigma_c,lrho_c,tau_c
 #endif
@@ -1303,6 +1339,9 @@ end function libxc_functionals_nspin
  is_gga =libxc_functionals_isgga (xc_funcs)
  is_mgga=libxc_functionals_ismgga(xc_funcs)
  needs_laplacian=(libxc_functionals_needs_laplacian(xc_funcs).and.present(lrho))
+
+ sigma_threshold_max=maxval(xc_funcs(:)%sigma_threshold,mask=(xc_funcs(:)%id>0))
+ has_sigma_threshold=(sigma_threshold_max>zero)
 
  if (is_gga.and.(.not.present(grho2))) then
    msg='GGA needs gradient of density!'
@@ -1410,6 +1449,12 @@ end function libxc_functionals_nspin
        sigma(1) = grho2(ipts,1)
        sigma(2) = (grho2(ipts,3) - grho2(ipts,1) - grho2(ipts,2))/two
        sigma(3) = grho2(ipts,2)
+     end if
+     ! Apply a threshold on sigma (cannot be done in libxc6, at present)
+     if (has_sigma_threshold) then
+       do ii=1,2*nspden-1
+         if (abs(sigma(ii))<=sigma_threshold_max) sigma(ii)=sigma_threshold_max
+       end do
      end if
    end if
    if (is_mgga) then

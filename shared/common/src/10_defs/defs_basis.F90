@@ -196,7 +196,7 @@ module defs_basis
  real(dp), parameter :: tol18=0.000000000000000001_dp
  real(dp), parameter :: tol19=0.0000000000000000001_dp
  real(dp), parameter :: tol20=0.00000000000000000001_dp
- real(dp), parameter :: tol30=1.0d-30
+ real(dp), parameter :: tol30=1.0e-30_dp
 
 !real constants derived from sqrt(n.)
  real(dp), parameter :: sqrt2=1.4142135623730950488016887242096939_dp
