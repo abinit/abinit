@@ -139,7 +139,7 @@ program multibinit
      end if
      !  Call open_file(unit=ab_out,file=tmpfilename,form='formatted',status='new')
      rewind (unit=ab_out)
-     call herald(codename,abinit_version,ab_out)
+     call herald_multibinit(codename,abinit_version,ab_out, args%multibinit_F03_mode/=1)
      !  Print the number of cpus in output
      write(message,'(a,i5,a)') '-  nproc =',nproc
      call wrtout(ab_out,message,'COLL')
