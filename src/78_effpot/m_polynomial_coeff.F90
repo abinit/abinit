@@ -3461,27 +3461,6 @@ endif!(isym <= nsym)
 end subroutine computeSymmetricCombinations_old
 !!***
 
-
-!subroutine generate_sym_list()
-!
-!end subroutine generate_sym_list
-!
-!subroutine  computeSymmetricCombinations_oneterm( symlist, npower, term)
-!  integer :: symlist(npower)
-!end subroutine computeSymmetricCombinations_oneterm
-!
-!
-!subroutine add_to_list(term_list, term)
-!end subroutine add_to_list
-!
-!subroutine computeSymmetricCombinations()
-!  call generate_sym_list(symlist)
-!  do i=1, nlist
-!    call computeSymmetricCombinations_oneterm( symlist, npower, term)
-!    call add_to_list(term_list, term)
-!  end do
-!end subroutine computeSymmetricCombinations
-
 ! create a list of symmetry operatings to one term.
 ! nysm: number
 !
@@ -3520,7 +3499,8 @@ subroutine computeSymmetricCombinations(ncombi, list_combination, &
   logical,optional,intent(in) :: only_even
   !scalar
   !arrays
-  integer,intent(inout) :: list_combination(ndisp_max, nsym**(ndisp-1) )
+  !integer,intent(inout) ::
+  integer,intent(inout) :: list_combination(:, : ) ! list_combination(ndisp_max, nirred*nsym**(ndisp-1))
   integer,intent(in)    :: list_symcoeff(6,ncoeff,nsym),index_coeff_in(ndisp+nstrain)
   integer,intent(in)    :: list_symstr(6,nsym,2),compatibleCoeffs(ncoeff+nsym_str,ncoeff+nsym_str)
   integer,intent(inout),allocatable :: index_irred(:)
@@ -3540,13 +3520,9 @@ subroutine computeSymmetricCombinations(ncombi, list_combination, &
   ABI_UNUSED(compute)
   ABI_UNUSED(comm)
 
-  !ncombi=0
-
-
   need_only_even = .FALSE.
   if(present(only_even))need_only_even=only_even
   symcoeff_found = 0
-
 
   irreducible = .TRUE.
   !Only start the function if start-symmetry is smaller than maximum symmetry
