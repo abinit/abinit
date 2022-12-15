@@ -873,8 +873,9 @@ subroutine orbmag_nl1_k(atindx,cprj_k,dterm,dtset,m1_k,nband_k,pawtab)
   !Local variables -------------------------
   !scalars
   integer :: adir,nn
-  complex(dpc) :: m1,tt
+  complex(dpc) :: tt
   !arrays
+  complex(dpc) :: m1(3)
 
 !--------------------------------------------------------------------
 
@@ -884,8 +885,8 @@ subroutine orbmag_nl1_k(atindx,cprj_k,dterm,dtset,m1_k,nband_k,pawtab)
    do nn = 1, nband_k
 
      m1 = czero
-         
-     call tt_me(dterm%LR,atindx,cprj_k(:,nn),dtset,cprj_k(:,nn),&
+        
+     call tt_me(dterm%LR(:,:,adir),atindx,cprj_k(:,nn),dtset,cprj_k(:,nn),&
        & dterm%lmn2max,pawtab,tt)
          
      m1_k(1,nn,adir) = real(tt); m1_k(2,nn,adir) = aimag(tt)
