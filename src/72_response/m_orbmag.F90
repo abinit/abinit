@@ -984,7 +984,7 @@ subroutine orbmag_cc_k(atindx,b1_k,cprj1_k,dimlmn,dtset,eig_k,gs_hamk,ikpt,isppo
          
          dotr = DOT_PRODUCT(bra(1,:),gsc(1,:))+DOT_PRODUCT(bra(2,:),gsc(2,:))
          doti = DOT_PRODUCT(bra(1,:),gsc(2,:))-DOT_PRODUCT(bra(2,:),gsc(1,:))
-         b1 = b1 + prefac_b*CMPLX(dotr,doti)
+         b1 = b1 -two*prefac_b*CMPLX(dotr,doti)
          m1 = m1 + prefac_m*CMPLX(dotr,doti)*eig_k(nn)
          
        end do !gdir
@@ -1113,7 +1113,7 @@ subroutine orbmag_vv_k(atindx,b1_k,cg_k,cprj_k,dimlmn,dtset,eig_k,gs_hamk,&
          dotr = DOT_PRODUCT(bra(1,:),svectoutg(1,:))+DOT_PRODUCT(bra(2,:),svectoutg(2,:))
          doti = DOT_PRODUCT(bra(1,:),svectoutg(2,:))-DOT_PRODUCT(bra(2,:),svectoutg(1,:))
          ! add <Pc du/dk_b|dS/dk_g|u_nk>*E_nk
-         b1 = b1 + prefac_b*CMPLX(dotr,doti)
+         b1 = b1 - prefac_b*CMPLX(dotr,doti)
          m1 = m1 + prefac_m*CMPLX(dotr,doti)*eig_k(nn)
 
          ! extract |Pc du/dk_g>         
@@ -1122,7 +1122,7 @@ subroutine orbmag_vv_k(atindx,b1_k,cg_k,cprj_k,dimlmn,dtset,eig_k,gs_hamk,&
          dotr = DOT_PRODUCT(bra(1,:),svectoutb(1,:))+DOT_PRODUCT(bra(2,:),svectoutb(2,:))
          doti = DOT_PRODUCT(bra(1,:),svectoutb(2,:))-DOT_PRODUCT(bra(2,:),svectoutb(1,:))
          ! add CONJG(<Pc du/dk_b|dS/dk_g|u_nk>)*E_nk
-         !b1 = b1 + prefac_b*CMPLX(dotr,-doti)
+         b1 = b1 - prefac_b*CMPLX(dotr,-doti)
          m1 = m1 + prefac_m*CMPLX(dotr,-doti)*eig_k(nn)
          
          do np = 1, nband_k
@@ -1137,7 +1137,7 @@ subroutine orbmag_vv_k(atindx,b1_k,cg_k,cprj_k,dimlmn,dtset,eig_k,gs_hamk,&
            doti = DOT_PRODUCT(bra(1,:),svectoutb(2,:))-DOT_PRODUCT(bra(2,:),svectoutb(1,:))
            mb = CMPLX(dotr,doti)
 
-           !bv2b = bv2b - prefac_b*CONJG(mb)*mg
+           bv2b = bv2b + prefac_b*CONJG(mb)*mg
            mv2b = mv2b - prefac_m*CONJG(mb)*mg*eig_k(nn)
          end do ! np
  
