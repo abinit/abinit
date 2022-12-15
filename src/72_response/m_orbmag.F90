@@ -1155,7 +1155,7 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dtset,eig_k,gs_hamk,ikpt,isppol,m1_
   !scalars
   integer :: adir,bdir,cpopt,gdir,ndat,nn,sij_opt,tim_getghc,type_calc
   real(dp) :: doti,dotr,epsabg,lams
-  complex(dpc) :: m1,prefac_m
+  complex(dpc) :: b1,m1,prefac_b,prefac_m
   !arrays
   real(dp),allocatable :: bra(:,:),ghc(:,:),gsc(:,:),gvnlxc(:,:),ket(:,:)
   type(pawcprj_type),allocatable :: cwaveprj1(:,:)
@@ -1187,6 +1187,7 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dtset,eig_k,gs_hamk,ikpt,isppol,m1_
        do gdir = 1, 3
          epsabg = eijk(adir,bdir,gdir)
          if (ABS(epsabg) .LT. half) cycle
+         prefac_b = cbc*c2*epsabg
          prefac_m = com*c2*epsabg
          
          cpopt = 2
@@ -1274,7 +1275,7 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,gs_hamk,&
   integer :: adir,bdir,choice,cpopt,gdir,ndat,nn,nnlout,np
   integer :: paw_opt,signs,tim_getghc
   real(dp) :: doti,dotr,epsabg
-  complex(dpc) :: m1,mb,mg,mv2b,prefac_m
+  complex(dpc) :: b1,bv2b,m1,mb,mg,mv2b,prefac_b,prefac_m
   !arrays
   real(dp) :: enlout(1),lamv(1)
   real(dp),allocatable :: bra(:,:),ket(:,:),svectoutb(:,:),svectoutg(:,:),vectout(:,:)
@@ -1310,6 +1311,7 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,gs_hamk,&
        do gdir = 1, 3
          epsabg = eijk(adir,bdir,gdir)
          if (ABS(epsabg) .LT. half) cycle
+         prefac_b = cbc*c2*epsabg
          prefac_m = com*c2*epsabg
         
          ! extract |u_nk> 
