@@ -196,7 +196,7 @@ module m_xgScalapack
     end if
 
     if ( xgScalapack%comms(M__SLK) /= xmpi_comm_null ) then
-      call build_grid_scalapack(xgScalapack%grid, xgScalapack%size(M__SLK), xgScalapack%comms(M__SLK))
+      call xgScalapack%grid%init(xgScalapack%size(M__SLK), xgScalapack%comms(M__SLK))
       call BLACS_GridInfo(xgScalapack%grid%ictxt, &
         xgScalapack%grid%dims(M__ROW), xgScalapack%grid%dims(M__COL),&
         xgScalapack%coords(M__ROW), xgScalapack%coords(M__COL))

@@ -364,13 +364,15 @@ Use if statement instead of Fortran merge. See https://software.intel.com/en-us/
 #define DFTI_CHECK(status) if (status /= 0) call dfti_check_status(status _FILE_LINE_ARGS_)
 
 
-/* Macros used in the GW code */
+/* Macros used in the GW/GWR code */
 #ifdef HAVE_GW_DPC
 #  define GWPC_CONJG(cvar)  DCONJG(cvar)
 #  define GWPC_CMPLX(re,im) DCMPLX(re,im)
+#  define __slkmat_t matrix_scalapack
 #else
 #  define GWPC_CONJG(cvar)  CONJG(cvar)
 #  define GWPC_CMPLX(re,im) CMPLX(re,im)
+#  define __slkmat_t matrix_scalapack
 #endif
 
 

@@ -41,6 +41,11 @@ module m_cgtk
  private
 !!***
 
+ !interface cgtk_rotate
+ !  module procedure cgtk_rotate_dp
+ !  module procedure cgtk_rotate_sp
+ !end interface cgtk_rotate
+
  public :: cgtk_rotate         ! Recostruct wfs in the BZ from IBZ using symmetry tables generated
                                ! with the the symrel^T conventions.
  public :: cgtk_rotate_symrec  ! Similat to cgtk_rotate but assumes symrec conventions.
