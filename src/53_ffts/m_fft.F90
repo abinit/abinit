@@ -133,6 +133,7 @@ MODULE m_fft
    !integer :: nthreads=-1    ! The number of threads associated to the plan.
    integer :: dims(3) = -1    ! The number of FFT divisions.
    integer :: embed(3) = -1   ! Leading dimensions of the input,output arrays.
+   !integer :: use_gpu = 0    ! 1 if FFTs should be offloaded to the GPUs.
 
  contains
 

@@ -275,13 +275,8 @@ module m_gwr
    real(dp) :: efficiency = zero
    real(dp) :: speedup = zero
 
-   !type(my_matrix(k=dp)),allocatable :: foo(:)
-   !type(my_matrix),allocatable :: foo(:)
-
  !contains
    !procedure :: print => mem_print
-   ! Init object
-
  end type est_t
 !!***
 
