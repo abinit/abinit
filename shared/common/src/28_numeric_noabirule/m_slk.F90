@@ -3,7 +3,7 @@
 !! m_slk
 !!
 !! FUNCTION
-!! This module contains high-level objects and wrappers around the ScaLAPACK and ELPA API.
+!!  High-level objects and wrappers around the ScaLAPACK and ELPA API.
 !!
 !! COPYRIGHT
 !! Copyright (C) 2004-2022 ABINIT group (CS,GZ,FB,MG)
@@ -45,7 +45,7 @@ module m_slk
 
  private
 
- ! parameters of the scaLAPACK array descriptor.
+ ! scaLAPACK array descriptor.
  integer,private,parameter :: DLEN_ = 9    ! length
  integer,private,parameter :: Dtype_ = 1   ! type
  integer,private,parameter :: CTXT_ = 2    ! BLACS context
@@ -99,13 +99,13 @@ module m_slk
  type,public :: processor_scalapack
 
    integer :: myproc = -1
-   ! number of the processor
+   ! rank the processor
 
    integer :: comm = xmpi_comm_null
    ! MPI communicator underlying the BLACS grid.
 
    integer :: coords(2) = -1
-   ! The coordinates of the processor in the grid.
+   ! Coordinates of the processor in the grid.
 
    type(grid_scalapack) :: grid
    ! the grid to which the processor is associated to.
@@ -113,11 +113,11 @@ module m_slk
  contains
 
    procedure :: init => init_scalapack        ! Initializes an instance of processor ScaLAPACK from an MPI communicator.
-   procedure :: free => end_scalapack         ! Removes a processor from the ScaLAPACK grid.
+   procedure :: free => end_scalapack         ! Free the object
 
  end type processor_scalapack
 
- private :: build_processor_scalapack     ! Builds a processor descriptor for ScaLAPACK.
+ private :: build_processor_scalapack     ! Build a ScaLAPACK processor descriptor
 !!***
 
 !----------------------------------------------------------------------
@@ -140,9 +140,10 @@ module m_slk
 
 !!****t* m_slk/matrix_scalapack
 !! NAME
+!!  matrix_scalapack
 !!
 !! FUNCTION
-!! The local buffer with the ScaLAPACK matrix
+!!  high-level interface to ScaLAPACK matrix
 !!
 !! SOURCE
 
@@ -171,23 +172,22 @@ module m_slk
  contains
 
    procedure :: init => init_matrix_scalapack
-    ! Initialisation of a SCALAPACK matrix
+    ! Constructor
 
    procedure :: locmem_mb => locmem_mb
     ! Return memory allocated for the local buffer in Mb.
 
    procedure :: print => slkmat_print
-    ! Print info on scalapack matrix.
+    ! Print info on the object.
 
    procedure :: glob2loc => slk_glob2loc
-   ! Determine the local indices of an element from its global indices and return haveit bool flag.
+    ! Determine the local indices of an element from its global indices and return haveit bool flag.
 
    procedure :: loc2glob => slk_matrix_loc2glob
     ! Return global indices of a matrix element from the local indices.
 
-   procedure :: loc2grow => slk_matrix_loc2grow
-   procedure :: loc2gcol => slk_matrix_loc2gcol
-    ! Determine the global (row|column) index from the local index
+   procedure :: loc2grow => slk_matrix_loc2grow, loc2gcol => slk_matrix_loc2gcol
+    ! Determine the global (row | column) index from the local index
 
    procedure :: get_head_and_wings => slk_get_head_and_wings
     ! Return global arrays with the head and the wings of the matrix.
@@ -211,7 +211,7 @@ module m_slk
     ! Transpose matrix
 
    procedure :: change_size_blocs => slk_change_size_blocs
-    ! Change the block sizes and the processor, return new matrix
+    ! Change the block sizes and the processor, return new object.
 
    procedure :: cut => slk_cut
     ! Extract submatrix and create new matrix with `size_blocs` and `processor`
@@ -229,10 +229,10 @@ module m_slk
     ! Set the imaginary part of the diagonal to zero.
 
    procedure :: pzheev => slk_pzheev
-    ! Eigenvalues and, optionally, eigenvectors of an Hermitian matrix A. A * X = lambda * X
+    ! Compute eigenvalues and, optionally, eigenvectors of an Hermitian matrix A. A * X = lambda * X
 
    procedure :: pzheevx => slk_pzheevx
-    ! Eigenvalues and, optionally, eigenvectors of a complex Hermitian matrix A. ! A * X = lambda *  X
+    ! Compute Eigenvalues and, optionally, eigenvectors of a complex Hermitian matrix A. ! A * X = lambda *  X
 
    procedure :: pzhegvx => slk_pzhegvx
      ! Eigenvalues and, optionally, eigenvectors of a complex
@@ -313,8 +313,7 @@ CONTAINS  !=====================================================================
 !!  build_grid_scalapack
 !!
 !! FUNCTION
-!!  Set up the processor grid for ScaLAPACK as a function of the total number
-!!  of processors attributed to the grid.
+!!  Set up the ScaLAPACKgrid given the total number of processors.
 !!
 !! INPUTS
 !!  nbprocs= total number of processors
@@ -329,8 +328,8 @@ CONTAINS  !=====================================================================
 subroutine build_grid_scalapack(grid, nbprocs, comm, grid_dims)
 
 !Arguments ------------------------------------
+ class(grid_scalapack),intent(out) :: grid
  integer,intent(in) :: nbprocs,comm
- type(grid_scalapack),intent(out) :: grid
  integer,optional,intent(in) :: grid_dims(2)
 
 !Local variables-------------------------------
@@ -374,7 +373,7 @@ end subroutine build_grid_scalapack
 !!  build_processor_scalapack
 !!
 !! FUNCTION
-!!  Builds a processor descriptor for ScaLAPACK.
+!!  Builds a ScaLAPACK processor descriptor.
 !!  Build of the data related to one processor in a grid
 !!
 !! INPUTS
@@ -391,8 +390,8 @@ subroutine build_processor_scalapack(processor, grid, myproc, comm)
 
 !Arguments ------------------------------------
  integer,intent(in) :: myproc,comm
- type(processor_scalapack),intent(inout) :: processor
- type(grid_scalapack),intent(in) :: grid
+ class(processor_scalapack),intent(inout) :: processor
+ class(grid_scalapack),intent(in) :: grid
 
 ! *********************************************************************
 
@@ -502,7 +501,7 @@ end subroutine end_scalapack
 !!  init_matrix_scalapack
 !!
 !! FUNCTION
-!!  Initialisation of a SCALAPACK matrix (each proc initialize its own part of the matrix)
+!!  Initialisation of a SCALAPACK matrix (each proc initializes its own part of the matrix)
 !!
 !! INPUTS
 !!  processor= descriptor of a processor
@@ -615,7 +614,7 @@ end subroutine init_matrix_scalapack
 !!  locmem_mb
 !!
 !! FUNCTION
-!!  Return memory allocated for the local buffer in Mb.
+!!  Returns memory allocated for the local buffer in Mb.
 !!
 !! SOURCE
 
@@ -647,9 +646,6 @@ end function locmem_mb
 !!  [unit]=Unit number (default: std_out)
 !!  [header]=title for info
 !!  [prtvol]=Verbosity level (default: 0)
-!!
-!! OUTPUT
-!!  Only writing
 !!
 !! SOURCE
 
@@ -701,7 +697,7 @@ end subroutine slkmat_print
 !!  slk_get_head_and_wings
 !!
 !! FUNCTION
-!!  Return global arrays with the head and the wings of the matrix.
+!!  Return global arrays with head and wings of the matrix.
 !!  If call_mpi if False, global MPI sum is postponed.
 !!  Useful to reduce the number of MPI calls if one has to operate on multiple matrices.
 !!
@@ -820,6 +816,7 @@ subroutine slk_set_head_and_wings(mat, head, low_wing, up_wing)
 
 end subroutine slk_set_head_and_wings
 !!***
+
 !----------------------------------------------------------------------
 
 !!****f* m_slk/matrix_scalapack_copy
@@ -872,7 +869,7 @@ end subroutine matrix_scalapack_copy
 !!  matrix_scalapack_free
 !!
 !! FUNCTION
-!!  Destroys a matrix descriptor for ScaLAPACK.
+!!  Free dynamic memory
 !!
 !! SOURCE
 
@@ -1006,8 +1003,6 @@ elemental subroutine slk_array_set(mat, cvalue)
  class(matrix_scalapack),intent(inout) :: mat
  complex(dp),intent(in)  :: cvalue
 
-!Local variables-------------------------------
-
  if (allocated(mat%buffer_cplx)) mat%buffer_cplx = cvalue
  if (allocated(mat%buffer_real)) mat%buffer_real = real(cvalue)
 
@@ -1021,7 +1016,7 @@ end subroutine slk_array_set
 !!  slk_array_locmem_mb
 !!
 !! FUNCTION
-!!  Elemental function ot tompute memory allocated for an array of matrix_scalapack elements
+!!  Elemental function to compute the memory allocated for an array of matrix_scalapack elements
 !!  Usage: mem_mb = sum(mat_array)
 !!
 !! SOURCE
@@ -1461,7 +1456,7 @@ integer pure function loc_glob__(matrix, proc, idx, lico)
 
 !Arguments ------------------------------------
  class(matrix_scalapack),intent(in) :: matrix
- type(processor_scalapack),intent(in) :: proc
+ class(processor_scalapack),intent(in) :: proc
  integer, intent(in) :: idx,lico
 
 !Local variables-------------------------------
@@ -1800,7 +1795,6 @@ subroutine matrix_to_complexmatrix(matrix, reference, istwf_k)
 
 !Local variables-------------------------------
  integer  :: i,j,iglob,jglob
- !real(dp) :: err
 
 ! *********************************************************************
 
@@ -1894,7 +1888,7 @@ subroutine slk_matrix_from_global_dpc_2D(Slk_mat, uplo, glob_mat)
 
 !Arguments ------------------------------------
 !scalars
- type(matrix_scalapack),intent(inout)  :: Slk_mat
+ class(matrix_scalapack),intent(inout)  :: Slk_mat
  character(len=*),intent(in) :: uplo
 !array
  complex(dpc),intent(in) :: glob_mat(:,:)
@@ -1980,8 +1974,8 @@ subroutine slk_matrix_from_global_dpc_1Dp(Slk_mat,uplo,glob_pmat)
 
 !Arguments ------------------------------------
 !scalars
+ class(matrix_scalapack),intent(inout)  :: Slk_mat
  character(len=*),intent(in) :: uplo
- type(matrix_scalapack),intent(inout)  :: Slk_mat
 !array
  complex(dpc),intent(in) :: glob_pmat(:)
 
@@ -2148,8 +2142,7 @@ end subroutine slk_matrix_to_global_dpc_2D
 integer function my_locr(Slk_mat)
 
 !Arguments ------------------------------------
-!scalars
- type(matrix_scalapack),intent(in) :: Slk_mat
+ class(matrix_scalapack),intent(in) :: Slk_mat
 
 !Local variables-------------------------------
 #ifdef HAVE_LINALG_SCALAPACK
@@ -2203,11 +2196,10 @@ end function my_locr
 integer function my_locc(Slk_mat)
 
 !Arguments ------------------------------------
-!scalars
- type(matrix_scalapack),intent(in) :: Slk_mat
+ class(matrix_scalapack),intent(in) :: Slk_mat
 
-!Local variables-------------------------------
 #ifdef HAVE_LINALG_SCALAPACK
+!Local variables-------------------------------
  integer :: N, NB_A, MYCOL, CSRC_A, NPCOL
  integer,external :: NUMROC
 
@@ -2233,7 +2225,6 @@ end function my_locc
 !!
 !! FUNCTION
 !!  Extended matrix * matrix product: C := alpha*A*B + beta*C
-!!
 !!  For a simple matrix vector product, one can simply pass alpha = cone and beta = czero
 !!
 !! INPUTS
@@ -2248,8 +2239,8 @@ end function my_locc
 !!  results= ScaLAPACK matrix coming out of the operation
 !!
 !! NOTES
-!! The ESLL manual says that "matrices matrix1 and matrix2 must have no common elements;
-!! otherwise, results are unpredictable."
+!! The ESLL manual says that
+!!      "matrices matrix1 and matrix2 must have no common elements otherwise, results are unpredictable."
 !! However the official scaLAPACK documentation does not report this (severe) limitation.
 !!
 !! SOURCE
@@ -2259,8 +2250,8 @@ subroutine slk_pzgemm(transa, transb, matrix1, alpha, matrix2, beta, results, &
 
 !Arguments ------------------------------------
  character(len=1),intent(in) :: transa, transb
- type(matrix_scalapack),intent(in) :: matrix1, matrix2
- type(matrix_scalapack),intent(inout) :: results
+ class(matrix_scalapack),intent(in) :: matrix1, matrix2
+ class(matrix_scalapack),intent(inout) :: results
  complex(dpc),intent(in) :: alpha, beta
  integer,optional,intent(in) :: ija(2), ijb(2), ijc(2)
 
@@ -2301,8 +2292,7 @@ end subroutine slk_pzgemm
 !!  compute_eigen_problem
 !!
 !! FUNCTION
-!!  Calculation of eigenvalues and eigenvectors: A * X = lambda * X
-!!  complex and real cases.
+!!  Calculation of eigenvalues and eigenvectors: A * X = lambda * X, complex and real cases.
 !!
 !! INPUTS
 !!  processor= descriptor of a processor
@@ -2323,9 +2313,9 @@ subroutine compute_eigen_problem(processor, matrix, results, eigen, comm, istwf_
 
 #ifdef HAVE_LINALG_ELPA
   !Arguments ------------------------------------
-  type(processor_scalapack),intent(in) :: processor
-  type(matrix_scalapack),intent(inout) :: matrix
-  type(matrix_scalapack),intent(inout) :: results
+  class(processor_scalapack),intent(in) :: processor
+  class(matrix_scalapack),intent(inout) :: matrix
+  class(matrix_scalapack),intent(inout) :: results
   DOUBLE PRECISION,intent(inout) :: eigen(:)
   integer,intent(in)  :: comm,istwf_k
   integer,optional,intent(in) :: nev
@@ -2352,9 +2342,9 @@ subroutine compute_eigen_problem(processor, matrix, results, eigen, comm, istwf_
 
 #else
   !Arguments ------------------------------------
-  type(processor_scalapack),intent(in)       :: processor
-  type(matrix_scalapack),intent(in)          :: matrix
-  type(matrix_scalapack),intent(inout)       :: results
+  class(processor_scalapack),intent(in)       :: processor
+  class(matrix_scalapack),intent(in)          :: matrix
+  class(matrix_scalapack),intent(inout)       :: results
   DOUBLE PRECISION,intent(inout) :: eigen(:)
   integer,intent(in)  :: comm,istwf_k
   integer,optional,intent(in) :: nev
@@ -2512,8 +2502,7 @@ end subroutine compute_eigen_problem
 !!  solve_gevp_complex
 !!
 !! FUNCTION
-!!  Calculation of eigenvalues and eigenvectors:
-!!  A * X = lambda * B * X
+!!  Calculation of eigenvalues and eigenvectors: A * X = lambda * B * X
 !!  complex and real cases.
 !!
 !! INPUTS
@@ -2684,9 +2673,9 @@ subroutine compute_generalized_eigen_problem(processor,matrix1,matrix2,results,e
 
 #ifdef HAVE_LINALG_ELPA
 !Arguments ------------------------------------
-  type(processor_scalapack),intent(in)       :: processor
-  type(matrix_scalapack),intent(in)          :: matrix1,matrix2
-  type(matrix_scalapack),intent(inout)       :: results
+  class(processor_scalapack),intent(in)       :: processor
+  class(matrix_scalapack),intent(in)          :: matrix1,matrix2
+  class(matrix_scalapack),intent(inout)       :: results
   DOUBLE PRECISION,intent(inout) :: eigen(:)
   integer,intent(in)  :: comm,istwf_k
   integer,optional,intent(in) :: nev
@@ -2722,9 +2711,9 @@ subroutine compute_generalized_eigen_problem(processor,matrix1,matrix2,results,e
 
 #else
 !Arguments ------------------------------------
-  type(processor_scalapack),intent(in)       :: processor
-  type(matrix_scalapack),intent(in)          :: matrix1,matrix2
-  type(matrix_scalapack),intent(inout)       :: results
+  class(processor_scalapack),intent(in)       :: processor
+  class(matrix_scalapack),intent(in)          :: matrix1,matrix2
+  class(matrix_scalapack),intent(inout)       :: results
   DOUBLE PRECISION,intent(inout) :: eigen(:)
   integer,intent(in)  :: comm,istwf_k
   integer,optional,intent(in) :: nev
@@ -2876,8 +2865,7 @@ end subroutine compute_generalized_eigen_problem
 !!  compute_eigen1
 !!
 !! FUNCTION
-!!  Calculation of eigenvalues and eigenvectors.
-!!  complex and real cases.
+!!  Calculation of eigenvalues and eigenvectors. complex and real cases.
 !!
 !! INPUTS
 !!  comm= MPI communicator
@@ -2904,7 +2892,7 @@ subroutine compute_eigen1(comm,processor,cplex,nbli_global,nbco_global,matrix,ve
  integer,intent(in) :: comm
  integer,intent(in) :: cplex,nbli_global,nbco_global
  integer,intent(in) :: istwf_k
- type(processor_scalapack),intent(in) :: processor
+ class(processor_scalapack),intent(in) :: processor
 !arrays
  real(dp),intent(inout) :: matrix(cplex*nbli_global,nbco_global)
  real(dp),intent(inout) :: vector(:)
@@ -2996,8 +2984,7 @@ end subroutine compute_eigen1
 !!  compute_eigen2
 !!
 !! FUNCTION
-!!  Calculation of eigenvalues and eigenvectors:
-!!  A * X = lambda * B * X
+!!  Calculation of eigenvalues and eigenvectors: A * X = lambda * B * X
 !!  complex and real cases.
 !!
 !! INPUTS
@@ -3009,9 +2996,6 @@ end subroutine compute_eigen1
 !!  matrix2= second ScaLAPACK matrix (matrix B)
 !!  vector=
 !!  istwf_k= 2 if we have a real matrix else complex.
-!!
-!! OUTPUT
-!!  None
 !!
 !! SIDE EFFECTS
 !!  results= ScaLAPACK matrix coming out of the operation
@@ -3026,7 +3010,7 @@ subroutine compute_eigen2(comm,processor,cplex,nbli_global,nbco_global,matrix1,m
  integer,intent(in) :: cplex,nbli_global,nbco_global
  integer,intent(in) :: comm
  integer,intent(in) :: istwf_k
- type(processor_scalapack),intent(in) :: processor
+ class(processor_scalapack),intent(in) :: processor
 !arrays
  real(dp),intent(inout) :: matrix1(cplex*nbli_global,nbco_global)
  real(dp),intent(inout) :: matrix2(cplex*nbli_global,nbco_global)
@@ -3980,7 +3964,7 @@ end subroutine slk_zdhp_invert
 !! Beta is a scalar, sub( C ) is an m by n submatrix, and sub( A ) is an n by m submatrix.
 !!
 !! INPUTS
-!!  [ija(2)] : (global) The row and column indices in the distributed matrix in_mat indicating
+!!  [ija(2)]: (global) The row and column indices in the distributed matrix in_mat indicating
 !!       the first row and the first column of the submatrix sub(A), respectively.
 !!  [ijc(2)]: (global) The row and column indices in the distributed matrix out_mat
 !!   indicating the first row and the first column of the submatrix sub(C), respectively.
@@ -4074,7 +4058,6 @@ subroutine slk_ptrans(in_mat, trans, out_mat, &
  if (present(free)) then
    if (free) call in_mat%free()
  end if
-
  !call cwtime_report(" slk_ptrans:", cpu, wall, gflops)
 
 end subroutine slk_ptrans
@@ -4102,7 +4085,7 @@ subroutine slk_change_size_blocs(in_mat, out_mat, &
  class(matrix_scalapack),target,intent(in) :: in_mat
  class(matrix_scalapack),intent(out) :: out_mat
  integer,optional,intent(in) :: size_blocs(2)
- type(processor_scalapack), target, optional,intent(in) :: processor
+ class(processor_scalapack), target, optional,intent(in) :: processor
 
 !Local variables-------------------------------
  integer :: istwf_k
@@ -4169,7 +4152,7 @@ subroutine slk_cut(in_mat, glob_nrows, glob_ncols, out_mat, &
  integer,intent(in) :: glob_nrows, glob_ncols
  class(matrix_scalapack),intent(out) :: out_mat
  integer,optional,intent(in) :: size_blocs(2)
- type(processor_scalapack), target, optional,intent(in) :: processor
+ class(processor_scalapack), target, optional,intent(in) :: processor
  integer,optional,intent(in) :: ija(2), ijb(2)
 
 !Local variables-------------------------------
@@ -4743,7 +4726,7 @@ subroutine slk_read(Slk_mat,uplo,symtype,is_fortran_file,fname,mpi_fh,offset,fla
  character(len=*),optional,intent(in) :: fname
  character(len=*),intent(in) :: uplo,symtype
  logical,intent(in) :: is_fortran_file
- type(matrix_scalapack),intent(inout) :: Slk_mat
+ class(matrix_scalapack),intent(inout) :: Slk_mat
 
 !Local variables ------------------------------
 #if defined HAVE_LINALG_SCALAPACK && defined HAVE_MPI_IO
@@ -4920,7 +4903,7 @@ subroutine slk_single_fview_read_mask(Slk_mat,mask_of_glob,offset_of_glob,nsbloc
  integer,intent(in) :: nsblocks
  integer,intent(out) :: my_nel,offset_err,slk_type,etype
  logical,optional,intent(in) :: is_fortran_file
- type(matrix_scalapack),intent(in) :: Slk_mat
+ class(matrix_scalapack),intent(in) :: Slk_mat
 !arrays
  integer,intent(in) :: sub_block(2,2,nsblocks)
  integer,pointer :: myel2loc(:,:)
