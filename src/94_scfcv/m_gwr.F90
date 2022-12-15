@@ -107,6 +107,11 @@
 !!  - Remove cryst%timrev, use kptopt and qptopt
 !!  - Sig_c breaks QP degeneracies due to q0.
 !!
+!! NOTES:
+!!
+!!  1) _slk_mat_t is a Macro defined in abi_common.h that allows us to use single/double precision version.
+!!     Be careful when using c_f_pointer because there's no type checking
+!!
 !!
 !! COPYRIGHT
 !! Copyright (C) 1999-2021 ABINIT group (MG)
@@ -239,12 +244,6 @@ module m_gwr
 
    procedure :: free => desc_free
    ! Free memory.
-
-   procedure :: calc_gnorm_table => desc_calc_gnorm_table
-   ! Compute mapping used to loop over G-vectors ordered by norm.
-
-   procedure :: calc_ginv_map => desc_calc_ginv_map
-   ! Compute mapping g --> -g
 
  end type desc_t
 
@@ -552,18 +551,18 @@ module m_gwr
 
    type(processor_scalapack) :: g_slkproc
 
-   type(matrix_scalapack),allocatable :: gt_kibz(:,:,:,:)
+   type(__slkmat_t),allocatable :: gt_kibz(:,:,:,:)
    ! (2, nkibz, ntau, nsppol)
    ! Occupied/Empty Green's function G_k(g,g')
 
-   type(matrix_scalapack),allocatable :: tchi_qibz(:,:,:)
+   type(__slkmat_t),allocatable :: tchi_qibz(:,:,:)
    ! (nqibz, ntau, nsppol)
    ! Irreducible polarizability tchi_q(g,g')
 
    character(len=10) :: tchi_space = "none"
    ! "none", "itau", "iomega"
 
-   type(matrix_scalapack),allocatable :: wc_qibz(:,:,:)
+   type(__slkmat_t),allocatable :: wc_qibz(:,:,:)
    ! (nqibz, ntau, nsppol)
    ! Correlated screened Coulomb interaction summed over collinear spins
    ! Replicated across spin_comm if nsppol == 2.
@@ -571,18 +570,18 @@ module m_gwr
    character(len=10) :: wc_space = "none"
    ! "none", "itau", "iomega"
 
-   !type(matrix_scalapack),allocatable :: em1_qibz(:,:,:)
+   !type(__slkmat_t),allocatable :: em1_qibz(:,:,:)
    ! Inverse dielectric matrix at omega = 0
    ! (nqibz, nsppol)
    ! Replicated across the tau comm and the spin comm if nsppol == 2.
 
-   type(matrix_scalapack),allocatable :: sigc_kibz(:,:,:,:)
+   type(__slkmat_t),allocatable :: sigc_kibz(:,:,:,:)
    ! (2, nkibz, ntau, nsppol)
 
    character(len=10) :: sigc_space = "none"
    ! "none", "itau", "iomega"
 
-   type(matrix_scalapack),allocatable :: ugb(:,:)
+   type(__slkmat_t),allocatable :: ugb(:,:)
    ! (nkibz, nsppol)
    ! Fourier components of the KS wavefunctions stored in a PBLAS matrix
    ! Bands are distributed inside the gtau_comm in a round-robin fashion.
@@ -1723,7 +1722,7 @@ subroutine gwr_malloc_free_mats(gwr, mask_ibz, what, action)
 
 !Local variables-------------------------------
  integer :: my_is, my_it, ipm, npwsp, col_bsize, itau, spin, ik_ibz, iq_ibz
- type(matrix_scalapack), pointer :: mat
+ type(__slkmat_t), pointer :: mat
  character(len=500) :: msg
 
 ! *************************************************************************
@@ -2290,7 +2289,7 @@ subroutine gwr_build_green(gwr, free_ugb)
  real(dp) :: f_nk, eig_nk, cpu, wall, gflops, cpu_green, wall_green, gflops_green
  character(len=500) :: msg
  complex(dp) :: gt_cfact
- type(matrix_scalapack), target :: work, green
+ type(__slkmat_t), target :: work, green
 !arrays
  integer :: mask_kibz(gwr%nkibz)
  real(dp) :: tsec(2)
@@ -2431,7 +2430,7 @@ subroutine gwr_rotate_gpm(gwr, ik_bz, itau, spin, desc_kbz, gt_pm)
  class(gwr_t),intent(in) :: gwr
  integer,intent(in) :: ik_bz, spin, itau
  type(desc_t),intent(out) :: desc_kbz
- type(matrix_scalapack),intent(out) :: gt_pm(2)
+ type(__slkmat_t),intent(out) :: gt_pm(2)
 
 !Local variables-------------------------------
 !scalars
@@ -2555,7 +2554,7 @@ subroutine gwr_get_myk_green_gpr(gwr, itau, spin, desc_mykbz, gt_gpr)
  class(gwr_t),intent(in) :: gwr
  integer,intent(in) :: itau, spin
  type(desc_t),intent(out) :: desc_mykbz(gwr%my_nkbz)
- type(matrix_scalapack),intent(inout) :: gt_gpr(2, gwr%my_nkbz)
+ type(__slkmat_t),intent(inout) :: gt_gpr(2, gwr%my_nkbz)
 
 !Local variables-------------------------------
 !scalars
@@ -2563,7 +2562,7 @@ subroutine gwr_get_myk_green_gpr(gwr, itau, spin, desc_mykbz, gt_gpr)
  logical :: k_is_gamma
  real(dp) :: kk_bz(3), cpu, wall, gflops !, mem_mb
  character(len=500) :: msg
- type(matrix_scalapack) :: rgp, gt_pm(2)
+ type(__slkmat_t) :: rgp, gt_pm(2)
  complex(dp),allocatable :: ceikr(:)
 
 ! *************************************************************************
@@ -2652,13 +2651,13 @@ subroutine gwr_get_gk_rpr_pm(gwr, my_ikf, itau, spin, gk_rpr_pm)
 !Arguments ------------------------------------
  class(gwr_t),intent(in) :: gwr
  integer,intent(in) :: my_ikf, itau, spin
- type(matrix_scalapack),intent(inout) :: gk_rpr_pm(2)
+ type(__slkmat_t),intent(inout) :: gk_rpr_pm(2)
 
 !Local variables-------------------------------
 !scalars
  integer :: ik_bz, ig2, ipm, npwsp, col_bsize, ir1, ndat
  real(dp) :: cpu, wall, gflops
- type(matrix_scalapack) :: rgp, gt_pm(2), gpr
+ type(__slkmat_t) :: rgp, gt_pm(2), gpr
  type(desc_t) :: desc_k
  character(len=500) :: msg
 
@@ -2746,13 +2745,13 @@ subroutine gwr_ggp_to_rpr(gwr, desc, ggp, rpr)
 !Arguments ------------------------------------
  class(gwr_t),intent(in) :: gwr
  type(desc_t),intent(in) :: desc
- type(matrix_scalapack),intent(in) :: ggp
- type(matrix_scalapack),intent(inout) :: rpr
+ type(__slkmat_t),intent(in) :: ggp
+ type(__slkmat_t),intent(inout) :: rpr
 
 !Local variables-------------------------------
 !scalars
  integer :: ig2, npwsp, col_bsize, ir1, ndat
- type(matrix_scalapack) :: rgp, gpr
+ type(__slkmat_t) :: rgp, gpr
  character(len=500) :: msg
 
 ! *************************************************************************
@@ -2808,7 +2807,7 @@ subroutine gwr_rotate_wc(gwr, iq_bz, itau, spin, desc_qbz, wc_qbz)
  class(gwr_t),intent(inout) :: gwr
  integer,intent(in) :: iq_bz, itau, spin
  type(desc_t),intent(out) :: desc_qbz
- type(matrix_scalapack),intent(inout) :: wc_qbz
+ type(__slkmat_t),intent(inout) :: wc_qbz
 
 !Local variables-------------------------------
 !scalars
@@ -2918,7 +2917,7 @@ subroutine gwr_get_myq_wc_gpr(gwr, itau, spin, desc_myqbz, wc_gpr)
  class(gwr_t),intent(inout) :: gwr
  integer,intent(in) :: itau, spin
  type(desc_t),target,intent(out) :: desc_myqbz(gwr%my_nqbz)
- type(matrix_scalapack),intent(inout) :: wc_gpr(gwr%my_nqbz)
+ type(__slkmat_t),intent(inout) :: wc_gpr(gwr%my_nqbz)
 
 !Local variables-------------------------------
 !scalars
@@ -2926,7 +2925,7 @@ subroutine gwr_get_myq_wc_gpr(gwr, itau, spin, desc_myqbz, wc_gpr)
  real(dp) :: cpu, wall, gflops, qq_bz(3)
  logical :: q_is_gamma
  character(len=500) :: msg
- type(matrix_scalapack) :: rgp, wc_qbz
+ type(__slkmat_t) :: rgp, wc_qbz
  complex(dp),allocatable :: ceiqr(:)
 
 ! *************************************************************************
@@ -3008,7 +3007,7 @@ subroutine gwr_get_wc_rpr_qbz(gwr, qq_bz, itau, spin, wc_rpr)
  class(gwr_t),intent(inout) :: gwr
  real(dp),intent(in) :: qq_bz(3)
  integer,intent(in) :: itau, spin
- type(matrix_scalapack),intent(inout) :: wc_rpr
+ type(__slkmat_t),intent(inout) :: wc_rpr
 
 !Local variables-------------------------------
 !scalars
@@ -3016,7 +3015,7 @@ subroutine gwr_get_wc_rpr_qbz(gwr, qq_bz, itau, spin, wc_rpr)
  !logical :: q_is_gamma
  character(len=500) :: msg
  type(desc_t) :: desc_q
- type(matrix_scalapack) :: wc_ggp, rgp, gpr
+ type(__slkmat_t) :: wc_ggp, rgp, gpr
  complex(dp),allocatable :: ceiqr(:)
 
 ! *************************************************************************
@@ -3124,7 +3123,7 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
  real(dp), pointer :: weights_ptr(:,:)
  complex(dp) :: wgt_globmy(gwr%ntau, gwr%my_ntau)  ! Use complex instead of real to be able to call ZGEMM.
  complex(dp),allocatable :: cwork_myit(:,:,:), glob_cwork(:,:,:)
- type(matrix_scalapack), pointer :: mats(:)
+ type(__slkmat_t), pointer :: mats(:)
 
 ! *************************************************************************
 
@@ -3405,96 +3404,6 @@ end subroutine desc_copy
 
 !----------------------------------------------------------------------
 
-!!****f* m_gwr/desc_calc_gnorm_table
-!! NAME
-!!  desc_calc_gnorm_table
-!!
-!! FUNCTION
-!!  Mainly used to compare data with legacy code
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!  gvec2gsort(npw): Mapping the gvec array and the sorted one.
-!!  sorted_gnorm(npw): Sorted list with the norm of the gvector
-!!
-!! SOURCE
-
-subroutine desc_calc_gnorm_table(desc, cryst, gvec2gsort, sorted_gnorm)
-
-!Arguments ------------------------------------
- class(desc_t),intent(inout) :: desc
- class(crystal_t),intent(in) :: cryst
- integer, allocatable,intent(out) :: gvec2gsort(:)
- real(dp),allocatable,intent(out) :: sorted_gnorm(:)
-
-!Local variables-------------------------------
- integer :: ig, isort
- integer, allocatable :: gsort2gvec(:)
-
-! *************************************************************************
-
- ABI_MALLOC(sorted_gnorm, (desc%npw))
- ABI_MALLOC(gvec2gsort, (desc%npw))
- ABI_MALLOC(gsort2gvec, (desc%npw))
-
- do ig=1,desc%npw
-   sorted_gnorm(ig) = normv(desc%gvec(:,ig), cryst%gmet, "G")
-   gsort2gvec(ig) = ig
- end do
-
- call sort_dp(desc%npw, sorted_gnorm, gsort2gvec, tol16)
-
- ! Invert the mapping.
- do isort=1,desc%npw
-   ig = gsort2gvec(isort)
-   gvec2gsort(ig) = isort
- end do
-
- ABI_FREE(gsort2gvec)
-
-end subroutine desc_calc_gnorm_table
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_gwr/desc_calc_ginv_map
-!! NAME
-!!  desc_calc_ginv_map
-!!
-!! FUNCTION
-!!
-!! OUTPUT
-!!  ginv: index of -g
-!!
-!! SOURCE
-
-subroutine desc_calc_ginv_map(desc, ginv)
-
-!Arguments ------------------------------------
- class(desc_t),intent(inout) :: desc
- integer, allocatable, intent(out) :: ginv(:)
-
-!Local variables-------------------------------
- integer :: nmiss
- integer, allocatable :: inv_gvec(:,:)
-
-! *************************************************************************
-
- ABI_MALLOC(inv_gvec, (3, desc%npw))
- inv_gvec = -desc%gvec
-
- ABI_MALLOC(ginv, (desc%npw))
- call kg_map(desc%npw, desc%gvec, desc%npw, inv_gvec, ginv, nmiss)
- ABI_FREE(inv_gvec)
-
- ABI_CHECK(nmiss == 0, "nmiss > 0, Cannot find -g in gvec, perhaps q != 0")
-
-end subroutine desc_calc_ginv_map
-!!***
-
-!----------------------------------------------------------------------
-
 !!****f* m_gwr/desc_free
 !! NAME
 !!  desc_free
@@ -3516,65 +3425,6 @@ subroutine desc_free(desc)
  ABI_SFREE(desc%vc_sqrt)
 
 end subroutine desc_free
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_gwr/print_gsort_
-!! NAME
-!!  print_gsort_
-!!
-!! FUNCTION
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! SOURCE
-
-subroutine print_gsort_(mat, desc, cryst, times_ucvol)
-
-!Arguments ------------------------------------
- class(matrix_scalapack),intent(inout) :: mat
- class(desc_t),intent(inout) :: desc
- class(crystal_t),intent(in) :: cryst
- logical,intent(in) :: times_ucvol
-
-!Local variables-------------------------------
- integer :: il_g1, il_g2, ig1, ig2, iglob1, iglob2, is1, is2
- real(dp) :: fact
- integer, allocatable :: gvec2gsort(:)
- real(dp), allocatable :: sorted_gnorm(:)
- complex(dp),allocatable :: cwork(:,:)
-
-! *************************************************************************
-
- call desc%calc_gnorm_table(cryst, gvec2gsort, sorted_gnorm)
-
- ! FIXME: It won't work if nspinor == 2
- ABI_MALLOC(cwork, (mat%sizeb_local(1), mat%sizeb_local(2)))
- cwork = huge(one)
- fact = one; if (times_ucvol) fact = cryst%ucvol
-
- do il_g2=1,mat%sizeb_local(2)
-   iglob2 = mat%loc2gcol(il_g2)
-   ig2 = mod(iglob2 -1 , desc%npw) + 1
-   is2 = gvec2gsort(ig2)
-   do il_g1=1,mat%sizeb_local(1)
-     iglob1 = mat%loc2grow(il_g1)
-     ig1 = mod(iglob1 - 1, desc%npw) + 1
-     is1 = gvec2gsort(ig1)
-     cwork(is1, is2) = mat%buffer_cplx(il_g1, il_g2) * fact
-   end do
- end do
-
- ABI_FREE(gvec2gsort)
- ABI_FREE(sorted_gnorm)
-
- call print_arr(cwork)
- ABI_FREE(cwork)
-
-end subroutine print_gsort_
 !!***
 
 !----------------------------------------------------------------------
@@ -3747,7 +3597,7 @@ subroutine gwr_build_tchi(gwr)
  logical :: q_is_gamma
  character(len=5000) :: msg
  type(desc_t),pointer :: desc_k, desc_q
- type(matrix_scalapack) :: chi_rgp
+ type(__slkmat_t) :: chi_rgp
  !type(mpi_type) :: tchi_mpi_enreg
 !arrays
  integer :: sc_ngfft(18), gg(3)
@@ -3757,9 +3607,9 @@ subroutine gwr_build_tchi(gwr)
  !logical :: need_gt_kibz(gwr%nkibz), got_gt_kibz(gwr%nkibz)
  complex(dp),allocatable :: gt_scbox(:,:), chit_scbox(:) !, gt_ucbox(:,:)
  complex(dp),allocatable :: low_wing_q(:), up_wing_q(:), cemiqr(:) !, sc_ceimkr(:,:) !, uc_ceikr(:)
- !type(matrix_scalapack) :: gt_gpr(2, gwr%my_nkbz), chiq_gpr(gwr%my_nqibz), gk_rpr_pm(2)
+ !type(__slkmat_t) :: gt_gpr(2, gwr%my_nkbz), chiq_gpr(gwr%my_nqibz), gk_rpr_pm(2)
  !type(desc_t), target :: desc_mykbz(gwr%my_nkbz)
- type(matrix_scalapack),allocatable :: gt_gpr(:,:), chiq_gpr(:), gk_rpr_pm(:)
+ type(__slkmat_t),allocatable :: gt_gpr(:,:), chiq_gpr(:), gk_rpr_pm(:)
  type(desc_t), target, allocatable :: desc_mykbz(:)
  type(fftbox_plan3_t) :: plan_gp2rp, plan_rp2gp
 
@@ -4158,9 +4008,6 @@ end if
    ABI_FREE(low_wing_q)
  end if
 
- ! TODO: Remove
- !call load_head_wings_from_sus_file__(gwr, "AW_CD/runo_DS3_SUS.nc")
-
  ! Print trace of chi_q(i omega) matrices for testing purposes.
  if (gwr%dtset%prtvol > 0) call gwr%print_trace("tchi_qibz")
 
@@ -4379,7 +4226,7 @@ subroutine gwr_print_trace(gwr, what)
  character(len=5000) :: comment !, msg
  integer :: units(2)
  complex(dp),allocatable :: ctrace3(:,:,:), ctrace4(:,:,:,:)
- type(matrix_scalapack),pointer :: mats(:,:,:)
+ type(__slkmat_t),pointer :: mats(:,:,:)
 
 ! *************************************************************************
 
@@ -4494,7 +4341,7 @@ subroutine gwr_build_wc(gwr)
  logical :: q_is_gamma, free_tchi
  character(len=5000) :: msg
  complex(dpc) :: vcs_g1, vcs_g2
- type(matrix_scalapack) :: em1
+ type(__slkmat_t) :: em1
  type(yamldoc_t) :: ydoc
 !arrays
  real(dp) :: qq_ibz(3), tsec(2)
@@ -4722,7 +4569,7 @@ subroutine gwr_build_sigmac(gwr)
  complex(dp) ABI_ASYNC, allocatable :: gt_scbox(:,:), wct_scbox(:)
  complex(dp),allocatable :: uc_psi_bk(:,:,:), scph1d_kcalc(:,:,:), uc_ceikr(:)
  complex(gwpc),allocatable :: ur(:)
- type(matrix_scalapack) :: gt_gpr(2, gwr%my_nkbz), gk_rpr_pm(2), sigc_rpr(2,gwr%nkcalc), wc_rpr, wc_gpr(gwr%my_nqbz)
+ type(__slkmat_t) :: gt_gpr(2, gwr%my_nkbz), gk_rpr_pm(2), sigc_rpr(2,gwr%nkcalc), wc_rpr, wc_gpr(gwr%my_nqbz)
  type(desc_t), target :: desc_mykbz(gwr%my_nkbz), desc_myqbz(gwr%my_nqbz)
  type(fftbox_plan3_t) :: gt_plan_gp2rp, wt_plan_gp2rp
  integer :: band_val, ibv, ncerr, unt_it, unt_iw, unt_rw
@@ -5500,7 +5347,7 @@ subroutine diag_braket(trans, mat, nfftsp, u_glob, cout, do_mpi_sum)
 !Arguments ------------------------------------
  character(len=*),intent(in) :: trans
  integer,intent(in) :: nfftsp
- class(matrix_scalapack),intent(in) :: mat
+ class(__slkmat_t),intent(in) :: mat
  complex(dp),intent(in) :: u_glob(nfftsp)
  complex(dp),intent(out) :: cout
  logical,optional,intent(in) :: do_mpi_sum
@@ -5576,7 +5423,7 @@ subroutine gwr_rpa_energy(gwr)
  type(desc_t),pointer :: desc_q
  !character(len=500) :: msg
 !arrays
- type(matrix_scalapack) :: chi_tmp, dummy_vec, chi_4diag
+ type(__slkmat_t) :: chi_tmp, dummy_vec, chi_4diag
  type(processor_scalapack) :: proc_4diag
  real(dp),allocatable :: eig(:), kin_qg(:), ec_rpa(:), ec_mp2(:), ecut_chi(:)
 
@@ -5984,7 +5831,7 @@ subroutine gwr_ncwrite_tchi_wc(gwr, what, filepath)
  real(dp) :: cpu, wall, gflops
 !arrays
  real(dp), ABI_CONTIGUOUS pointer :: fptr(:,:,:)
- type(matrix_scalapack), pointer :: mats(:)
+ type(__slkmat_t), pointer :: mats(:)
 
 ! *************************************************************************
 
@@ -6361,218 +6208,6 @@ end subroutine calc_sc_ceikr
 
 !----------------------------------------------------------------------
 
-!!****f* m_gwr/load_head_wings_from_sus_file__
-!! NAME
-!!  load_head_wings_from_sus_file__
-!!
-!! FUNCTION
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! SOURCE
-
-subroutine load_head_wings_from_sus_file__(gwr, filepath)
-
-!Arguments ------------------------------------
-!scalars
- class(gwr_t),intent(inout) :: gwr
- character(len=*),intent(in) :: filepath
-
-!Local variables-------------------------------
-!scalars
- integer, parameter :: master = 0
- integer :: sus_npw, sus_nomega, ncerr, ncid, nmiss, ig_sus, ig, ierr, ig0
- integer :: my_iqi, my_it, my_is, iq_ibz, spin, itau, iw, il_g1, il_g2, ig1, ig2, iglob1, iglob2, ig1_inv, ig2_inv
- real(dp) :: max_err
- logical :: q_is_gamma
-!arrays
- !integer :: g1(3), g2(3)
- integer,allocatable :: sus_gvec(:,:), g2sus(:), ginv(:)
- real(dp) :: qq_ibz(3)
- real(dp),ABI_CONTIGUOUS pointer :: fptr2(:,:), fptr4(:,:,:,:)
- complex(dp),target,allocatable :: sus_head(:,:,:), sus_lwing(:,:,:), sus_uwing(:,:,:), sus_freqs(:)
-
-! *************************************************************************
-
- call wrtout(std_out, sjoin(" Loading head and wings from:", filepath))
-
- ABI_WARNING("Returning without checking for file!")
- return
-
- if (.not. file_exists(filepath)) then
-   ABI_WARNING("Cannot find file with head and wings. Results are WRONG. Returning.")
-   return
- end if
-
- ! Read head and wings from SUS file as we are still not able to compute
- ! these quantities in GWR.
- if (gwr%comm%me == master) then
-   NCF_CHECK(nctk_open_read(ncid, filepath, xmpi_comm_self))
-
-   !NCF_CHECK(nctk_set_datamode(ncid))
-   NCF_CHECK(nctk_get_dim(ncid, "number_of_coefficients_dielectric_function", sus_npw))
-   NCF_CHECK(nctk_get_dim(ncid, "number_of_frequencies_dielectric_function", sus_nomega))
-   ABI_CHECK_IEQ(sus_nomega, gwr%ntau + 1, sjoin("sus_nomega: ", itoa(sus_nomega), "should be equal to ntau + 1"))
-   !print *, "sus_npw, sus_nomega", sus_npw, sus_nomega
-
-   ABI_MALLOC(sus_freqs, (sus_nomega))
-   call c_f_pointer(c_loc(sus_freqs), fptr2, shape=[2, sus_nomega])
-   NCF_CHECK(nf90_get_var(ncid, vid('frequencies_dielectric_function'), fptr2))
-   max_err = maxval(abs(gwr%iw_mesh - aimag(sus_freqs(2:))))
-   if (max_err > tol3) then
-     do iw=1,gwr%ntau
-       write(std_out, *) gwr%iw_mesh(iw), aimag(sus_freqs(iw+1))
-     end do
-     ABI_ERROR("Mismatch in imaginary frequency mesh")
-   end if
-   write(std_out, *)"max_err in frequency meshes:", max_err
-   ABI_FREE(sus_freqs)
-
-   ! (number_of_reduced_dimensions, number_of_coefficients_dielectric_function, number_of_qpoints_dielectric_function')
-   ABI_MALLOC(sus_gvec, (3, sus_npw))
-   ncerr = nf90_get_var(ncid, vid("reduced_coordinates_plane_waves_dielectric_function"), sus_gvec, &
-                         start=[1, 1, 1], count=[3, sus_npw, 1])
-   NCF_CHECK(ncerr)
-
-   ABI_MALLOC(sus_head, (3, 3, sus_nomega))
-   call c_f_pointer(c_loc(sus_head), fptr4, shape=[2, 3, 3, sus_nomega])
-   NCF_CHECK(nf90_get_var(ncid, vid("sus_head"), fptr4))
-
-   ABI_MALLOC(sus_lwing, (3, sus_npw, sus_nomega))
-   call c_f_pointer(c_loc(sus_lwing), fptr4, shape=[2, 3, sus_npw, sus_nomega])
-   NCF_CHECK(nf90_get_var(ncid, vid("sus_lower_wing"), fptr4))
-
-   ABI_MALLOC(sus_uwing, (3, sus_npw, sus_nomega))
-   call c_f_pointer(c_loc(sus_uwing), fptr4, shape=[2, 3, sus_npw, sus_nomega])
-   NCF_CHECK(nf90_get_var(ncid, vid("sus_upper_wing"), fptr4))
-
-   NCF_CHECK(nf90_close(ncid))
- end if
-
- call xmpi_bcast(sus_npw, master, gwr%comm%value, ierr)
- call xmpi_bcast(sus_nomega, master, gwr%comm%value, ierr)
-
- if (gwr%comm%me /= master) then
-   ABI_MALLOC(sus_gvec, (3, sus_npw))
-   ABI_MALLOC(sus_head, (3, 3, sus_nomega))
-   ABI_MALLOC(sus_lwing, (3, sus_npw, sus_nomega))
-   ABI_MALLOC(sus_uwing, (3, sus_npw, sus_nomega))
- end if
-
- call xmpi_bcast(sus_gvec, master, gwr%comm%value, ierr)
- call xmpi_bcast(sus_head, master, gwr%comm%value, ierr)
- call xmpi_bcast(sus_lwing, master, gwr%comm%value, ierr)
- call xmpi_bcast(sus_uwing, master, gwr%comm%value, ierr)
-
- do my_is=1,gwr%my_nspins
-   spin = gwr%my_spins(my_is)
-   do my_iqi=1,gwr%my_nqibz
-     iq_ibz = gwr%my_qibz_inds(my_iqi)
-     qq_ibz = gwr%qibz(:, iq_ibz)
-     q_is_gamma = normv(qq_ibz, gwr%cryst%gmet, "G") < GW_TOLQ0
-     if (.not. q_is_gamma) cycle
-
-     associate (desc_q => gwr%tchi_desc_qibz(iq_ibz))
-     ig0 = desc_q%ig0
-     ABI_CALLOC(gwr%chi0_head_myw, (3, 3, gwr%my_ntau))
-     ABI_CALLOC(gwr%chi0_uwing_myw, (3, desc_q%npw, gwr%my_ntau))
-     ABI_CALLOC(gwr%chi0_lwing_myw, (3, desc_q%npw, gwr%my_ntau))
-
-     ! NB: The imaginary frequency points in the SUS file starts at 2 when AC is used so use itau + 1
-     do my_it=1,gwr%my_ntau
-       itau = gwr%my_itaus(my_it)
-       gwr%chi0_head_myw(:,:,my_it) = sus_head(:,:,itau + 1)
-     end do
-
-     ABI_MALLOC(g2sus, (desc_q%npw))
-     call kg_map(sus_npw, sus_gvec, desc_q%npw, desc_q%gvec, g2sus, nmiss)
-     call wrtout(std_out, sjoin(" nmiss:", itoa(nmiss), "out of:", itoa(desc_q%npw)))
-     ABI_CHECK_IEQ(nmiss, 0, "nmiss > 0, increase ecuteps in legacy GW code to have more G-vectors!")
-
-     do ig=1,desc_q%npw
-       ig_sus = g2sus(ig)
-       do my_it=1,gwr%my_ntau
-         itau = gwr%my_itaus(my_it)
-         gwr%chi0_uwing_myw(:, ig, my_it) = sus_uwing(:, ig_sus, itau + 1)
-         gwr%chi0_lwing_myw(:, ig, my_it) = sus_lwing(:, ig_sus, itau + 1)
-       end do
-     end do
-
-     ! Now use head and wings to obtain tchi(q) for finite q. See also cchi0q.
-     ! Note that along the imaginary axis the matrix is hermitian.
-     ! Moreover at q == 0, one has M(-g,-g') = M(g,g')^*
-     do my_it=1,gwr%my_ntau
-       itau = gwr%my_itaus(my_it)
-       associate (chi => gwr%tchi_qibz(iq_ibz, itau, spin))
-       do il_g2=1,chi%sizeb_local(2)
-         iglob2 = chi%loc2gcol(il_g2)
-         ig2 = mod(iglob2 - 1, desc_q%npw) + 1
-         do il_g1=1,chi%sizeb_local(1)
-           iglob1 = chi%loc2grow(il_g1)
-           ig1 = mod(iglob1 - 1, desc_q%npw) + 1
-
-           if (iglob1 == ig0 .and. iglob2 == ig0) then
-             chi%buffer_cplx(il_g1, il_g2) = &
-               vdotw(gwr%q0, matmul(gwr%chi0_head_myw(:,:,my_it), gwr%q0), gwr%cryst%gmet, "G")
-           else if (iglob2 == ig0) then
-             chi%buffer_cplx(il_g1, il_g2) = &
-               vdotw(gwr%q0, gwr%chi0_lwing_myw(:, ig1, my_it), gwr%cryst%gmet, "G")
-               !vdotw(gwr%q0, conjg(gwr%chi0_uwing_myw(:, ig1, my_it)), gwr%cryst%gmet, "G")
-           else if (iglob1 == ig0) then
-             chi%buffer_cplx(il_g1, il_g2) = &
-               vdotw(gwr%q0, gwr%chi0_uwing_myw(:, ig2, my_it), gwr%cryst%gmet, "G")
-           end if
-
-         end do ! il_ig1
-       end do ! il_ig2
-
-       call desc_q%calc_ginv_map(ginv)
-       ierr = 0
-       do ig2=1,chi%sizeb_global(2)
-         !g2 = desc_q%gvec(:, ig2)
-         ig2_inv = ginv(ig2)
-         do ig1=1,chi%sizeb_global(2)
-           !g1 = desc_q%gvec(:, ig1)
-           ig1_inv = ginv(ig1)
-           !print *, ig1_inv, ig2_inv
-           !write(std_out, *) real(chi%buffer_cplx(ig1, ig2)), real(chi%buffer_cplx(ig1_inv, ig2_inv))
-
-           if (abs(aimag(chi%buffer_cplx(ig1, ig2)) + aimag(chi%buffer_cplx(ig1_inv, ig2_inv))) > tol6) then
-             ierr = ierr + 1
-             !write(std_out, *) aimag(chi%buffer_cplx(ig1, ig2)), aimag(chi%buffer_cplx(ig1_inv, ig2_inv))
-             !write(std_out, *) desc_q%gvec(:, ig1), desc_q%gvec(:, ig2)
-           end if
-         end do
-       end do
-       ABI_FREE(ginv)
-       write(std_out, *)" Found: ", ierr, "pairs over: ", desc_q%npw ** 2, "that do not fulfill g --> -g symmetry"
-       !stop
-       end associate
-
-     end do ! my_it
-     end associate
-     ABI_FREE(g2sus)
-   end do ! my_iqi
- end do ! my_is
-
- ABI_FREE(sus_gvec)
- ABI_FREE(sus_head)
- ABI_FREE(sus_lwing)
- ABI_FREE(sus_uwing)
-
-contains
-integer function vid(vname)
-  character(len=*),intent(in) :: vname
-  vid = nctk_idname(ncid, vname)
-end function vid
-
-end subroutine load_head_wings_from_sus_file__
-!!***
-
-!----------------------------------------------------------------------
-
 !!****f* m_gwr/gwr_build_chi0_head_and_wings
 !! NAME
 !!  gwr_build_chi0_head_and_wings
@@ -6601,7 +6236,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  real(dp) :: spin_fact, weight, deltaf_b1b2, deltaeGW_b1b2, gwr_boxcutmin_c, zcut, qlen, eig_nk
  real(dp) :: cpu_all, wall_all, gflops_all, cpu_k, wall_k, gflops_k
  complex(dpc) :: deltaeKS_b1b2
- type(matrix_scalapack),pointer :: ugb_kibz
+ type(__slkmat_t),pointer :: ugb_kibz
  character(len=5000) :: msg
  type(crystal_t),pointer :: cryst
  type(dataset_type),pointer :: dtset
@@ -6816,7 +6451,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
        band1_stop = band1_start + nb - 1
 
        ! Collect nb bands starting from band1_start on each proc.
-       call ugb_kibz%zcollect(npw_ki * nspinor, nb, [1, band1_start], ug1_block)
+       call ugb_kibz%collect(npw_ki * nspinor, nb, [1, band1_start], ug1_block)
 
        ! Dump algorithm based on xmpi_sum. To be replaced by an all_gather
        ! The advantage is that it works indipendently of the PBLAS distribution.
@@ -7058,7 +6693,7 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
  real(dp) :: cpu_k, wall_k, gflops_k, cpu_all, wall_all, gflops_all
  character(len=5000) :: msg
  logical :: q_is_gamma
- type(matrix_scalapack),pointer :: ugb_kibz
+ type(__slkmat_t),pointer :: ugb_kibz
  type(crystal_t),pointer :: cryst
  type(dataset_type),pointer :: dtset
  type(littlegroup_t) :: ltg_k
@@ -7568,6 +7203,7 @@ end subroutine gwr_get_u_ngfft
 !!  get_1d_sc_phases
 !!
 !! FUNCTION
+!!  Compute one-dimensional factors in the supercell.
 !!
 !! INPUTS
 !!

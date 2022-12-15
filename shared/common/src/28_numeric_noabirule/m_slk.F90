@@ -80,9 +80,9 @@ module m_slk
    integer :: ictxt = xmpi_comm_null
    ! BLACS context i.e. MPI communicator.
 
+ contains
+   procedure :: init =>  grid_init  ! Set up the processor grid for ScaLAPACK.
  end type grid_scalapack
-
- public :: build_grid_scalapack  ! Set up the processor grid for ScaLAPACK.
 !!***
 
 !----------------------------------------------------------------------
@@ -111,10 +111,8 @@ module m_slk
    ! the grid to which the processor is associated to.
 
  contains
-
-   procedure :: init => init_scalapack        ! Initializes an instance of processor ScaLAPACK from an MPI communicator.
-   procedure :: free => end_scalapack         ! Free the object
-
+   procedure :: init => processor_init        ! Initializes an instance of processor ScaLAPACK from an MPI communicator.
+   procedure :: free => processor_free        ! Free the object
  end type processor_scalapack
 
  private :: build_processor_scalapack     ! Build a ScaLAPACK processor descriptor
@@ -219,8 +217,8 @@ module m_slk
    procedure :: take_from => slk_take_from
     ! Take values from source
 
-   procedure :: zcollect => slk_zcollect
-    ! Return on all processors the complex submatrix of shape (mm, nn) starting at position ija.
+   procedure :: collect => slk_collect
+    ! Return on all processors the submatrix of shape (mm, nn) starting at position ija.
 
    procedure :: get_trace => slk_get_trace
     ! Compute the trace of an N-by-N distributed matrix.
@@ -243,6 +241,8 @@ module m_slk
    procedure :: symmetrize => slk_symmetrize
      ! Symmetrizes a square scaLAPACK matrix.
 
+   procedure :: bsize_and_type => slk_bsize_and_type  ! Returns the byte size and the MPI datatype
+
  end type matrix_scalapack
 
  public :: block_dist_1d                   ! Return block size for one-dimensional block column/row distribution
@@ -254,8 +254,8 @@ module m_slk
  public :: matrix_set_local_real           ! Sets a local matrix coefficient of double precision type.
  public :: idx_loc                         ! Local indices of an entry
                                            ! from its global indices, independently of the processor.
- !public :: glob_loc__                      ! Return global location of a matrix coefficient.
- !public :: loc_glob__                        ! Return global index from a local index (row or column)
+ !public :: glob_loc__                     ! Return global location of a matrix coefficient.
+ !public :: loc_glob__                     ! Return global index from a local index (row or column)
                                            ! as a function of a given processor
  public :: matrix_from_global              ! Fills SCALAPACK matrix from full matrix.
  public :: matrix_from_global_sym          ! Fills SCALAPACK matrix from a full matrix.
@@ -286,13 +286,11 @@ module m_slk
  public :: slk_single_fview_read_mask        ! Returns an MPI datatype that can be used to read a scaLAPACK matrix from
                                              ! a binary file using MPI-IO.
                                              ! The view is created using the user-defined mask function
-
  public :: slk_single_fview_read             ! Returns an MPI datatype to read a scaLAPACK distributed matrix
                                              ! from a binary file using MPI-IO.
  public :: slk_single_fview_write            ! Returns an MPI datatype to write a scaLAPACK distributed matrix
                                              ! to a binary file using MPI-IO.
- public :: slk_bsize_and_type                ! Returns the byte size and the MPI datatype associated to the matrix elements
-                                             ! that are stored in the ScaLAPACK_matrix
+
 
  public :: slk_array_free                    !  Deallocate array of matrix_scalapack elements
  interface slk_array_free
@@ -308,9 +306,9 @@ module m_slk
 CONTAINS  !==============================================================================
 !!***
 
-!!****f* m_slk/build_grid_scalapack
+!!****f* m_slk/grid_init
 !! NAME
-!!  build_grid_scalapack
+!!  grid_init
 !!
 !! FUNCTION
 !!  Set up the ScaLAPACKgrid given the total number of processors.
@@ -325,7 +323,7 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine build_grid_scalapack(grid, nbprocs, comm, grid_dims)
+subroutine grid_init(grid, nbprocs, comm, grid_dims)
 
 !Arguments ------------------------------------
  class(grid_scalapack),intent(out) :: grid
@@ -363,7 +361,7 @@ subroutine build_grid_scalapack(grid, nbprocs, comm, grid_dims)
  call BLACS_GRIDINIT(grid%ictxt, 'R', grid%dims(1), grid%dims(2))
 #endif
 
-end subroutine build_grid_scalapack
+end subroutine grid_init
 !!***
 
 !----------------------------------------------------------------------
@@ -389,8 +387,8 @@ end subroutine build_grid_scalapack
 subroutine build_processor_scalapack(processor, grid, myproc, comm)
 
 !Arguments ------------------------------------
- integer,intent(in) :: myproc,comm
  class(processor_scalapack),intent(inout) :: processor
+ integer,intent(in) :: myproc,comm
  class(grid_scalapack),intent(in) :: grid
 
 ! *********************************************************************
@@ -414,9 +412,9 @@ end subroutine build_processor_scalapack
 
 !----------------------------------------------------------------------
 
-!!****f* m_slk/init_scalapack
+!!****f* m_slk/processor_init
 !! NAME
-!!  init_scalapack
+!!  processor_init
 !!
 !! FUNCTION
 !!  Initializes an instance of processor ScaLAPACK from an MPI communicator.
@@ -430,7 +428,7 @@ end subroutine build_processor_scalapack
 !!
 !! SOURCE
 
-subroutine init_scalapack(processor, comm, grid_dims)
+subroutine processor_init(processor, comm, grid_dims)
 
 !Arguments ------------------------------------
  class(processor_scalapack),intent(out) :: processor
@@ -447,37 +445,28 @@ subroutine init_scalapack(processor, comm, grid_dims)
  myproc = xmpi_comm_rank(comm)
 
  if (present(grid_dims)) then
-   call build_grid_scalapack(grid, nbproc, comm, grid_dims=grid_dims)
+   call grid%init(nbproc, comm, grid_dims=grid_dims)
  else
-   call build_grid_scalapack(grid, nbproc, comm)
+   call grid%init(nbproc, comm)
  end if
 
  call build_processor_scalapack(processor, grid, myproc, comm)
 
-end subroutine init_scalapack
+end subroutine processor_init
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_slk/end_scalapack
+!!****f* m_slk/processor_free
 !! NAME
-!!  end_scalapack
+!!  processor_free
 !!
 !! FUNCTION
 !!  Removes a processor from the ScaLAPACK grid.
 !!
-!! INPUTS
-!!  None
-!!
-!! OUTPUT
-!!  None
-!!
-!! SIDE EFFECTS
-!!  processor= descriptor of a processor
-!!
 !! SOURCE
 
-subroutine end_scalapack(processor)
+subroutine processor_free(processor)
 
 !Arguments ------------------------------------
  class(processor_scalapack),intent(inout) :: processor
@@ -491,7 +480,7 @@ subroutine end_scalapack(processor)
  end if
 #endif
 
-end subroutine end_scalapack
+end subroutine processor_free
 !!***
 
 !----------------------------------------------------------------------
@@ -4290,9 +4279,9 @@ end subroutine slk_take_from
 
 !----------------------------------------------------------------------
 
-!!****f* m_slk/slk_zcollect
+!!****f* m_slk/slk_collect
 !! NAME
-!!  slk_zcollect
+!!  slk_collect
 !!
 !! FUNCTION
 !!  Return on all processors the complex submatrix of shape (mm, nn) starting at position ija.
@@ -4302,7 +4291,7 @@ end subroutine slk_take_from
 !!
 !! SOURCE
 
-subroutine slk_zcollect(in_mat, mm, nn, ija, out_carr, request)
+subroutine slk_collect(in_mat, mm, nn, ija, out_carr, request)
 
 !Arguments ------------------------------------
  class(matrix_scalapack),intent(in) :: in_mat
@@ -4358,7 +4347,7 @@ subroutine slk_zcollect(in_mat, mm, nn, ija, out_carr, request)
    call xmpi_bcast(out_carr, master, in_mat%processor%comm, ierr)
  end if
 
-end subroutine slk_zcollect
+end subroutine slk_collect
 !!***
 
 !----------------------------------------------------------------------
@@ -4494,7 +4483,8 @@ end subroutine slk_set_imag_diago_to_zero
 !!    output: New offset incremented with the byte size of the matrix that has been read (Fortran
 !!            markers are included if is_fortran_file=.TRUE.)
 !! TODO
-!!  * Generalize the implementation adding the writing the real buffer.
+!!  - Generalize the implementation adding the writing the real buffer.
+!!  - This routine should be removed and replaced by hdf5 + mpi-io
 !!
 !! SOURCE
 
@@ -4554,7 +4544,7 @@ subroutine slk_write(Slk_mat, uplo, is_fortran_file, fname,mpi_fh, offset, flags
  ncols_glob=Slk_mat%sizeb_global(1)
  buffer_size= PRODUCT(Slk_mat%sizeb_local(1:2))
 
- call slk_bsize_and_type(Slk_mat,bsize_elm,mpi_type_elm)
+ call slk_mat%bsize_and_type(bsize_elm, mpi_type_elm)
 
  if (do_open) then !Open the file.
    my_flags=MPI_MODE_CREATE + MPI_MODE_WRONLY + MPI_MODE_APPEND
@@ -4587,10 +4577,12 @@ subroutine slk_write(Slk_mat, uplo, is_fortran_file, fname,mpi_fh, offset, flags
  call MPI_type_FREE(slk_type,ierr)
  ABI_CHECK_MPI(ierr,"MPI_type_FREE")
 
- if (nelw==buffer_size) then ! Dump Slk_mat% immediately.
+ if (nelw==buffer_size) then
+   ! Dump Slk_mat% immediately.
    call MPI_FILE_WRITE_ALL(my_fh, Slk_mat%buffer_cplx, buffer_size, MPI_DOUBLE_complex, MPI_STATUS_IGNORE, ierr)
    ABI_CHECK_MPI(ierr,"WRITE_ALL")
- else ! Have to extract the data to be written.
+ else
+   ! Have to extract the data to be written.
    ABI_MALLOC(buffer1_cplx,(nelw))
    do elw=1,nelw
      iloc = elw2slk(1,elw)
@@ -4698,10 +4690,10 @@ end subroutine slk_write
 !!            markers are included if is_fortran_file=.TRUE.)
 !!
 !! TODO
-!!  Generalize the implementation adding the reading of the real buffer.
+!!  - Generalize the implementation adding the reading of the real buffer.
 !!
-!!  This routine is not portable as this kind of access pattern is not supported by all MPI implementations
-!!  E.g. with MPICH we have
+!!  - This routine is not portable as this kind of access pattern is not supported by all MPI implementations
+!!    E.g. with MPICH we have
 !!
 !! --- !ERROR
 !! src_file: m_slk.F90
@@ -4713,7 +4705,7 @@ end subroutine slk_write
 !!     ADIO_Set_view(48):  **iobadoverlap displacements of filetype must be in a monotonically nondecreasing order
 !! ...
 !!
-!! FIXME: This routine should be removed and replaced by hdf5 + mpi-io
+!! - This routine should be removed and replaced by hdf5 + mpi-io
 !!
 !! SOURCE
 
@@ -4805,7 +4797,7 @@ subroutine slk_read(Slk_mat,uplo,symtype,is_fortran_file,fname,mpi_fh,offset,fla
  call MPI_type_FREE(slk_type,ierr)
  ABI_CHECK_MPI(ierr,"MPI_type_FREE")
 
- call slk_bsize_and_type(Slk_mat,bsize_elm,mpi_type_elm)
+ call slk_mat%bsize_and_type(bsize_elm, mpi_type_elm)
 
 !It seems that personal call makes the code stuck
 !if (is_fortran_file .and. check_frm .and. Slk_mat%Processor%myproc==0) then ! Master checks the Fortran markers.
@@ -4946,7 +4938,7 @@ subroutine slk_single_fview_read_mask(Slk_mat,mask_of_glob,offset_of_glob,nsbloc
  end if
 
  ! Byte size of the matrix element.
- call slk_bsize_and_type(Slk_mat,bsize_elm,mpi_type_elm)
+ call slk_mat%bsize_and_type(bsize_elm, mpi_type_elm)
 
  ! Find the number of local matrix elements to be read, then create the table myel2loc.
  do sweep=1,2
@@ -5204,7 +5196,7 @@ subroutine slk_single_fview_read(Slk_mat,uplo,etype,slk_type,offset_err,is_fortr
    if (.not.is_fortran_file) bsize_frm = 0
  end if
 
- call slk_bsize_and_type(Slk_mat,bsize_elm,mpi_type_elm)
+ call slk_mat%bsize_and_type(bsize_elm, mpi_type_elm)
 
  ! Global dimensions.
  nrows_glob=Slk_mat%sizeb_global(1)
@@ -5409,7 +5401,7 @@ subroutine slk_single_fview_write(Slk_mat,uplo,nelw,elw2slk,etype,slk_type,offse
    ABI_ERROR("glob_subarray should not be used when uplo/=All")
  end if
 
- call slk_bsize_and_type(Slk_mat,bsize_elm,mpi_type_elm)
+ call slk_mat%bsize_and_type(bsize_elm, mpi_type_elm)
 
  ! Global dimensions.
  nrows_glob=Slk_mat%sizeb_global(1)
@@ -5559,7 +5551,7 @@ end subroutine slk_single_fview_write
 !!
 !! SOURCE
 
-subroutine slk_bsize_and_type(Slk_mat,bsize_elm,mpi_type_elm)
+subroutine slk_bsize_and_type(Slk_mat, bsize_elm, mpi_type_elm)
 
 !Arguments ------------------------------------
 !scalars
@@ -5596,116 +5588,6 @@ subroutine slk_bsize_and_type(Slk_mat,bsize_elm,mpi_type_elm)
  end if
 
 end subroutine slk_bsize_and_type
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_slk/slk_my_rclist
-!! NAME
-!!  slk_my_rclist
-!!
-!! FUNCTION
-!!  Returns a list with the (row|column) indices of the global matrix that are treated by this node.
-!!
-!! INPUTS
-!!  Slk_mat<matrix_scalapack>=Structured datatype defining the scaLAPACK distribution.
-!!  rc_str= "C" if the list of columns is wanted. "R" for rows.
-!!
-!! OUTPUT
-!!  how_many=Number of (rows|columns) treated by this node.
-!!
-!! SIDE EFFECTS
-!!  rc_list
-!!    input: pointer to null
-!!    output: rc_list(ii=1,how_many) gives the global indices treated by this node.
-!!
-!! TODO
-!!  Likely there's a much faster way to retrieve the list of indices using scaLAPACK primitives.
-!!
-!! SOURCE
-
-subroutine slk_my_rclist(Slk_mat,rc_str,how_many,rc_list)
-
-!Arguments ------------------------------------
-!scalars
- class(matrix_scalapack),intent(in) :: Slk_mat
- integer,intent(out) :: how_many
- character(len=*),intent(in) :: rc_str
-!scalars
- integer,pointer :: rc_list(:)
-
-!Local variables ------------------------------
-!scalars
- integer :: col_loc,row_loc,row_glob,col_glob,nseen,nrow_glob,ncol_glob
- !character(len=500) :: msg
-! arrays
- integer,allocatable :: seen(:)
-
-!************************************************************************
-
-!@matrix_scalapack
- how_many=0
-
- nrow_glob = Slk_mat%sizeb_global(1)
- ncol_glob = Slk_mat%sizeb_global(2)
-
- select case (toupper(rc_str(1:1)))
-
- case ("C")
-   ABI_MALLOC(seen,(ncol_glob))
-   nseen=0
-   !
-   do col_loc=1,Slk_mat%sizeb_local(2)
-     do row_loc=1,Slk_mat%sizeb_local(1)
-       call slk_mat%loc2glob(row_loc, col_loc, row_glob, col_glob)
-
-       if (col_glob==1.and.row_loc==1) then
-         nseen = nseen+1
-         seen(nseen) = col_glob
-       else
-        if ( ALL(col_glob /= seen(1:nseen)) ) then
-         nseen = nseen+1
-         seen(nseen) = col_glob
-        end if
-       end if
-     end do
-   end do
-
-   how_many = nseen
-   ABI_MALLOC(rc_list,(nseen))
-   rc_list = seen(1:nseen)
-   ABI_FREE(seen)
-
- case ("R")
-   ABI_MALLOC(seen,(nrow_glob))
-   nseen=0
-   !
-   do col_loc=1,Slk_mat%sizeb_local(2)
-     do row_loc=1,Slk_mat%sizeb_local(1)
-       call slk_mat%loc2glob(row_loc, col_loc, row_glob, col_glob)
-       !
-       if (col_glob==1.and.row_loc==1) then
-         nseen = nseen+1
-         seen(nseen) = row_glob
-       else
-        if ( ALL(row_glob /= seen(1:nseen)) ) then
-         nseen = nseen+1
-         seen(nseen) = row_glob
-        end if
-       end if
-     end do
-   end do
-
-   how_many = nseen
-   ABI_MALLOC(rc_list,(nseen))
-   rc_list = seen(1:nseen)
-   ABI_FREE(seen)
-
- case default
-   ABI_ERROR(" Wrong rc_str: "//TRIM(rc_str))
- end select
-
-end subroutine slk_my_rclist
 !!***
 
 end module m_slk
