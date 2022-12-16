@@ -88,8 +88,8 @@ subroutine ewald(eew,gmet,grewtn,gsqcut,icutcoul,natom,ngfft,nkpt,ntypat,rcut,rm
  real(dp) :: fraca1,fraca2,fraca3,fracb1,fracb2,fracb3,gsq,gsum,phi,phr,r1
  real(dp) :: minexparg
  real(dp) :: r1a1d,r2,r2a2d,r3,r3a3d,recip,reta,rmagn,rsq,sumg,summi,summr,sumr
- real(dp) :: t1,term ,zcut
- !character(len=500) :: message
+ real(dp) :: t1,term ,zcut, gcart_para, gcart_perp
+ character(len=500) :: msg
 !arrays
  real(dp),allocatable :: gcutoff(:)
 
@@ -144,6 +144,7 @@ if(icutcoul.eq.1) then
  !ABI_MALLOC(gcutoff,(ngfft(1)*ngfft(2)*ngfft(3)))
  call termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
 
+if (icutcoul.eq.3) then
 !Sum over G space, done shell after shell until all
 !contributions are too small.
  ng=0
@@ -245,6 +246,133 @@ if(icutcoul.eq.1) then
    if (newg==0) exit
 
  end do !  End the loop on ng (new shells). Note that there is one exit from this loop.
+endif
+
+write(*,*)"This is gmet",gmet
+
+if (icutcoul.eq.2) then
+!Sum over G space, done shell after shell until all
+!contributions are too small.
+ ng=0
+ do
+   ng=ng+1
+   newg=0
+!   Instead of this warning that most normal users do not understand (because they are doing GS calculations, and not RF calculations),
+!   one should optimize this routine. But usually this is a very small fraction of any ABINIT run.
+!   if (ng > 20 .and. mod(ng,10)==0) then
+!      write (msg,'(3a,I10)') "Very large box of G neighbors in ewald: you probably do not want to do this.", ch10,&
+!&       " If you have a metal consider setting dipdip 0.  ng = ", ng
+!      ABI_WARNING(msg)
+!   end if
+   ii=1
+   do ig1=-ng,ng
+     do ig2=-ng,ng
+       do ig3=-ng,ng
+!        Exclude shells previously summed over
+         if(abs(ig1)==ng .or. abs(ig2)==ng .or. abs(ig3)==ng .or. ng==1) then
+
+!          gsq is G dot G = |G|^2
+           gsq=gmet(1,1)*dble(ig1*ig1)+gmet(2,2)*dble(ig2*ig2)+&
+&           gmet(3,3)*dble(ig3*ig3)+2._dp*(gmet(2,1)*dble(ig1*ig2)+&
+&           gmet(3,1)*dble(ig1*ig3)+gmet(3,2)*dble(ig3*ig2))
+
+!          Skip g=0:
+           if (gsq>1.0d-20) then
+             arg=fac*gsq
+
+!            Larger arg gives 0 contribution because of exp(-arg)
+             if (arg <= -minexparg ) then
+!              When any term contributes then include next shell
+               newg=1
+
+               if((abs(ig1).lt.n1).and.&
+                 &(abs(ig2).lt.n2).and.&
+                 &(abs(ig3).lt.n3)) then
+                  ig23=n1*(abs(ig2)+n2*(abs(ig3)))
+                  ii=abs(ig1)+ig23+1
+ !              gcart_para = sqrt(gmet(1,1)*dble(ig1*ig1)+gmet(2,2)*dble(ig2*ig2)+2.0_dp*gmet(2,1)*dble(ig1*ig2) )
+ !              gcart_perp = sqrt(gmet(3,3)*dble(ig3*ig3) )
+               !No worries here about the perpendicular direction
+               !Enforced 90 degrees with the in-plane vectors in gtermcutoff
+               term= ( exp(-arg) + gcutoff(ii) - 1.0_dp)/gsq
+
+!               term= ( exp(-arg) - exp(-gcart_para*zcut)*cos(gcart_perp*zcut) )/gsq
+
+ 
+               endif
+
+
+!               if((abs(ig1).lt.n1).and.&
+!                 &(abs(ig2).lt.n2).and.&
+!                 &(abs(ig3).lt.n3)) then
+
+!                 ig23=n1*(abs(ig2)+n2*(abs(ig3)))
+!                 ii=abs(ig1)+ig23+1
+!              gcutoff(ii)=one-EXP(-gcart_para*rcut_loc)*COS(gcart_perp*rcut_loc)
+!               gcart_para = sqrt(gmet(1,1)*dble(ig1*ig1)+gmet(2,2)*dble(ig2*ig2)+gmet(2,1)*dble(ig1*ig2)+ gmet(1,2)*dble(ig1*ig2) )
+!               gcart_perp = sqrt(gmet(3,3)*dble(ig3*ig3) )
+               !No worries here about the perpendicular direction
+               !Enforced 90 degrees with the in-plane vectors in gtermcutoff
+!               term= ( exp(-arg) + gcutoff(ii) - 1.0_dp)/gsq
+
+!               term= ( exp(-arg) - exp(-gcart_para*zcut)*cos(gcart_perp*zcut) )/gsq
+!               endif
+               
+               summr = 0.0_dp
+               summi = 0.0_dp
+
+
+!              XG 20180531  : the two do-loops on ia should be merged, in order to spare
+!              the waste of computing twice the sin and cos.
+
+!              Note that if reduced atomic coordinates xred drift outside
+!              of unit cell (outside [0,1)) it is irrelevant in the following
+!              term, which only computes a phase.
+               do ia=1,natom
+                 arg=two_pi*(ig1*xred(1,ia)+ig2*xred(2,ia)+ig3*xred(3,ia))
+!                Sum real and imaginary parts (avoid complex variables)
+                 summr=summr+zion(typat(ia))*cos(arg)
+                 summi=summi+zion(typat(ia))*sin(arg)
+               end do
+
+!              The following two checks avoid an annoying underflow error msg
+               if (abs(summr)<1.d-16) summr=0.0_dp
+               if (abs(summi)<1.d-16) summi=0.0_dp
+
+!              The product of term and summr**2 or summi**2 below
+!              can underflow if not for checks above
+               t1=term*(summr*summr+summi*summi)
+               gsum=gsum+t1
+
+               do ia=1,natom
+!                Again only phase is computed so xred may fall outside [0,1).
+                 arg=two_pi*(ig1*xred(1,ia)+ig2*xred(2,ia)+ig3*xred(3,ia))
+                 phr= cos(arg)
+                 phi=-sin(arg)
+!                (note: do not need real part, commented out)
+!                c1r=(phr*summr-phi*summi)*(term*zion(typat(ia)))
+                 c1i=(phi*summr+phr*summi)*(term*zion(typat(ia)))
+!                compute coordinate gradients
+                 grewtn(1,ia)=grewtn(1,ia)-c1i*ig1
+                 grewtn(2,ia)=grewtn(2,ia)-c1i*ig2
+                 grewtn(3,ia)=grewtn(3,ia)-c1i*ig3
+               end do
+
+             end if ! End condition of not larger than -minexparg
+           end if ! End skip g=0
+         end if ! End triple loop over G s and associated new shell condition
+
+       end do
+     end do
+   end do
+
+!  Check if new shell must be calculated
+   if (newg==0) exit
+
+ end do !  End the loop on ng (new shells). Note that there is one exit from this loop.
+endif
+
+
 
  sumg=gsum/(two_pi*ucvol)
 
