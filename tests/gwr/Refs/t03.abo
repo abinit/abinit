@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 12 Nov 2022.
-- ( at 00h17 )
+.Starting date : Sat 17 Dec 2022.
+- ( at 15h34 )
   
 - input  file    -> /Users/gmatteo/git_repos/abinit_gwr/_build/tests/Test_suite/gwr_t03/t03.abi
 - output file    -> t03.abo
@@ -378,6 +378,8 @@ meta: {optdriver: 6, }
   GGA: Perdew-Burke-Ernzerhof functional - ixc=11
  Citation for XC functional:
   J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
+
+.Using single precision arithmetic; gwpc =  4
 
 - Reading GS density from: t03o_DS1_DEN
 

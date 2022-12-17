@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 11 Oct 2022.
-- ( at 15h51 )
+.Starting date : Sat 17 Dec 2022.
+- ( at 15h33 )
   
 - input  file    -> /Users/gmatteo/git_repos/abinit_gwr/_build/tests/Test_suite/gwr_t02/t02.abi
 - output file    -> t02.abo
@@ -515,6 +515,8 @@ meta: {optdriver: 6, }
  Citation for XC functional:
   J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
 
+.Using single precision arithmetic; gwpc =  4
+
 - Reading GS density from: t02o_DS1_DEN
 
 
@@ -558,6 +560,8 @@ meta: {optdriver: 6, }
   GGA: Perdew-Burke-Ernzerhof functional - ixc=11
  Citation for XC functional:
   J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
+
+.Using single precision arithmetic; gwpc =  4
 
 - Reading GS density from: t02o_DS1_DEN
 
@@ -960,6 +964,8 @@ meta: {optdriver: 6, }
   GGA: Perdew-Burke-Ernzerhof functional - ixc=11
  Citation for XC functional:
   J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
+
+.Using single precision arithmetic; gwpc =  4
 
 - Reading GS density from: t02o_DS1_DEN
 
