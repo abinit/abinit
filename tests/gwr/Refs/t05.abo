@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 25 Nov 2022.
-- ( at 15h49 )
+.Starting date : Sat 17 Dec 2022.
+- ( at 15h34 )
   
 - input  file    -> /Users/gmatteo/git_repos/abinit_gwr/_build/tests/Test_suite/gwr_t05/t05.abi
 - output file    -> t05.abo
@@ -402,6 +402,8 @@ meta: {optdriver: 6, }
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
 
+.Using single precision arithmetic; gwpc =  4
+
 - Reading GS density from: t05o_DS1_DEN
 
 
@@ -438,6 +440,8 @@ meta: {optdriver: 6, }
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
+
+.Using single precision arithmetic; gwpc =  4
 
 - Reading GS density from: t05o_DS1_DEN
 

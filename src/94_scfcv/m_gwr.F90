@@ -1686,14 +1686,14 @@ type(est_t) pure function estimate(gwr, np_kgts) result(est)
  ! NB: array dimensioned with nkibz and nqibz do not scale as 1/np_k as we distribute the BZ, IBZ points might be replicated.
 
  ! Resident memory needed to store G(g,g',+/-tau) and chi(g,g',tau)
- est%mem_green_gg = two * two * (one*gwr%nspinor*gwr%green_mpw)**2 * two*gwr%ntau * gwr%nkibz * gwr%nsppol * dp*b2Mb / np_tot
- est%mem_chi_gg = two * (one*gwr%tchi_mpw)**2 * gwr%ntau * gwr%nqibz * dp*b2Mb / (np_g * np_t * np_k)
- est%mem_ugb = two * gwr%green_mpw * gwr%nspinor * gwr%dtset%nband(1) * gwr%nkibz * gwr%nsppol * dp*b2Mb / np_tot
+ est%mem_green_gg = two * two * (one*gwr%nspinor*gwr%green_mpw)**2 * two*gwr%ntau * gwr%nkibz * gwr%nsppol * gwp*b2Mb / np_tot
+ est%mem_chi_gg = two * (one*gwr%tchi_mpw)**2 * gwr%ntau * gwr%nqibz * gwp*b2Mb / (np_g * np_t * np_k)
+ est%mem_ugb = two * gwr%green_mpw * gwr%nspinor * gwr%dtset%nband(1) * gwr%nkibz * gwr%nsppol * gwp*b2Mb / np_tot
 
  ! Temporary memory allocated inside the tau loops.
  ! This is the chunck we have to minimize by increasing np_g and/or np_k to avoid going OOM.
- est%mem_green_rg = two * two * gwr%nspinor**2 * gwr%green_mpw * gwr%g_nfft * gwr%nkbz * gwr%nsppol * dp*b2Mb / (np_g * np_k)
- est%mem_chi_rg = two * gwr%tchi_mpw * gwr%g_nfft * gwr%nqbz * dp*b2Mb / (np_g * np_k)
+ est%mem_green_rg = two * two * gwr%nspinor**2 * gwr%green_mpw * gwr%g_nfft * gwr%nkbz * gwr%nsppol * gwp*b2Mb / (np_g * np_k)
+ est%mem_chi_rg = two * gwr%tchi_mpw * gwr%g_nfft * gwr%nqbz * gwp*b2Mb / (np_g * np_k)
 
  est%mem_total = est%mem_green_gg + est%mem_chi_gg + est%mem_ugb + est%mem_green_rg + est%mem_chi_rg
 
@@ -5947,12 +5947,16 @@ subroutine gwr_ncwrite_tchi_wc(gwr, what, filepath)
        my_gcol_start = mats(itau)%loc2gcol(1)
 
        ! FIXME: This is wrong if spc
-       call c_f_pointer(c_loc(mats(itau)%buffer_cplx), fptr, shape=[2, npwtot_q, my_ncols])
+       !call c_f_pointer(c_loc(mats(itau)%buffer_cplx), fptr, shape=[2, npwtot_q, my_ncols])
+       ABI_MALLOC(fptr, (2, npwtot_q, my_ncols))
+       fptr(1,:,:) = dble(mats(itau)%buffer_cplx)
+       fptr(2,:,:) = aimag(mats(itau)%buffer_cplx)
 
        ncerr = nf90_put_var(ncid, vid("mats"), fptr, &
                             start=[1, 1, my_gcol_start, itau, iq_ibz, spin], &
                             count=[2, npwtot_q, my_ncols, 1, 1, 1])
                             !stride=[1, gwr%g_comm%nproc, 1, 1, 1])
+       ABI_FREE(fptr)
        NCF_CHECK(ncerr)
      end do
      end associate
