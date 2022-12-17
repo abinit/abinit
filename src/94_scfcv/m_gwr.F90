@@ -85,7 +85,7 @@
 !!      optional argument. Refactoring of all the FFT routines used in the GW code is needed
 !!      in order to exploit R2C, C2R (e.g. chi0(q=0) and GPU version.
 !!
-!!    - Possible incompatibilities between gwpc, slk matrices that are always in dp and GW machinery
+!!    - TODO: Possible incompatibilities between gwpc, slk matrices that are always in dp and GW machinery
 !!      Single precision for scalapack matrices?
 !!
 !!    - Use round-robin distribution instead of blocked-distribution to improve load balance.
@@ -109,7 +109,7 @@
 !!
 !! NOTES:
 !!
-!!  1) _slk_mat_t is a Macro defined in abi_common.h that allows us to use single/double precision version.
+!!  1) _slk_mat_t is a macro defined in abi_common.h that allows us to use PBLAS in single/double precision
 !!     Be careful when using c_f_pointer because there's no type checking
 !!
 !! COPYRIGHT
