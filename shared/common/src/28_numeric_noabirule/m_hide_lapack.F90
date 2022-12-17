@@ -390,7 +390,7 @@ subroutine wrap_ZHEEV(jobz, uplo, n, a, w, comm)
    end if
 
    ! Solve the problem with scaLAPACK.
-   call slk_mat%pzheev(jobz, uplo, Slk_vec, w)
+   call slk_mat%heev(jobz, uplo, Slk_vec, w)
    call Slk_mat%free()
 
    if (want_eigenvectors) then ! A is overwritten with the eigenvectors
@@ -568,7 +568,7 @@ subroutine xheev_cplex(jobz, uplo, cplex, n, a, w, msg, ierr, comm)
    !end if
    !
    !! Solve the problem with scaLAPACK.
-   !call slk_mat%pzheev(jobz,uplo,Slk_vec,w)
+   !call slk_mat%heev(jobz,uplo,Slk_vec,w)
    !call Slk_mat%free()
    !
    !if (want_eigenvectors) then ! A is overwritten with the eigenvectors
@@ -828,7 +828,7 @@ subroutine wrap_ZHPEV(jobz, uplo, n, ap, w, z, ldz, comm)
    end if
 
    ! Solve the problem with scaLAPACK.
-   call slk_mat%pzheev(jobz,uplo,Slk_vec,w)
+   call slk_mat%heev(jobz,uplo,Slk_vec,w)
    call Slk_mat%free()
 
    if (want_eigenvectors) then ! Collect the eigenvectors.
@@ -2789,7 +2789,7 @@ subroutine zginv(a, n, comm)
    call slk_matrix_from_global_dpc_2D(Slk_mat,"All",a)
 
    ! Perform the calculation with scaLAPACK.
-   call Slk_mat%zinvert()
+   call Slk_mat%invert()
 
    ! Reconstruct the global matrix from the distributed one.
    a = czero

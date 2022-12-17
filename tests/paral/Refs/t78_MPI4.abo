@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 17 Nov 2022.
-- ( at 20h01 )
+.Starting date : Sat 17 Dec 2022.
+- ( at 12h20 )
   
 - input  file    -> /Users/gmatteo/git_repos/abinit_gwr/_build/tests/Test_suite/paral_t78_MPI4/t78.abi
 - output file    -> t78_MPI4.abo
@@ -117,7 +117,7 @@ _ WF disk file :      2.033 Mbytes ; DEN or POT disk file :      0.134 Mbytes.
     gwr_boxcutmin1     2.00000000E+00
     gwr_boxcutmin2     2.00000000E+00
     gwr_boxcutmin3     1.00000000E+00
--     gwr_np_gtks        2    1    2    1
+-     gwr_np_kgts        1    2    2    1
          gwr_ntau1         12
          gwr_ntau2         12
          gwr_ntau3          6
@@ -626,7 +626,7 @@ nqibz: 4
 green_mpw: 832
 tchi_mpw: 303
 g_ngfft: [12, 12, 15, 12, 12, 15, ]
-P gwr_np_gtks: [2, 1, 2, 1, ]
+P gwr_np_kgts: [1, 2, 2, 1, ]
 P np_kibz: [1, 1, 1, 1, ]
 P np_qibz: [1, 1, 1, 1, ]
 ft_max_err_t2w_cos:   2.76116668E-03
@@ -905,7 +905,7 @@ data: !Tabular |
     gwr_boxcutmin1     2.00000000E+00
     gwr_boxcutmin2     2.00000000E+00
     gwr_boxcutmin3     1.00000000E+00
--     gwr_np_gtks        2    1    2    1
+-     gwr_np_kgts        1    2    2    1
          gwr_ntau1         12
          gwr_ntau2         12
          gwr_ntau3          6

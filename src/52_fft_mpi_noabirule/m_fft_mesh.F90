@@ -64,6 +64,12 @@ MODULE m_fft_mesh
    module procedure calc_ceigr_dpc
  end interface calc_ceigr
 
+ interface calc_ceikr
+   module procedure calc_ceikr_spc
+   module procedure calc_ceikr_dpc
+ end interface calc_ceikr
+
+
  !interface times_eikr
  !  module procedure times_eikr_dp
  !  module procedure ctimes_eikr_dpc
@@ -1350,35 +1356,35 @@ end subroutine calc_eigr
 
 !----------------------------------------------------------------------
 
-!!****f* m_fft_mesh/calc_ceikr
-!! NAME
-!! calc_ceikr
+!!****f* m_fft_mesh/calc_ceikr_dpc
+!! name
+!! calc_ceikr_dpc
 !!
-!! FUNCTION
-!!  Calculate e^{ik.r} on the FFT mesh.
+!! function
+!!  calculate e^{ik.r} on the fft mesh.
 !!
-!! INPUTS
+!! inputs
 !!  kk(3)=k-point in reduced coordinates.
-!!  nfft=Total number of points in the FFT mesh.
-!!  ngfft(18)=information about 3D FFT,
-!!  nspinor=Number of spinor components.
+!!  nfft=total number of points in the fft mesh.
+!!  ngfft(18)=information about 3d fft,
+!!  nspinor=number of spinor components.
 !!
-!! OUTPUT
-!!  ceikr(nfft, nspinor) = e^{ik.r} on the FFT mesh.
+!! output
+!!  ceikr(nfft*nspinor) = e^{ik.r} on the fft mesh.
 !!
-!! SOURCE
+!! source
 
-pure subroutine calc_ceikr(kk, ngfft, nfft, nspinor, ceikr)
+pure subroutine calc_ceikr_dpc(kk, ngfft, nfft, nspinor, ceikr)
 
-!Arguments ------------------------------------
+!arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfft, nspinor
 !arrays
  real(dp),intent(in) :: kk(3)
  integer,intent(in) :: ngfft(18)
- complex(dpc),intent(out) :: ceikr(nfft, nspinor)
+ complex(dpc),intent(out) :: ceikr(nfft*nspinor)
 
-!Local variables-------------------------------
+!local variables-------------------------------
 !scalars
  integer :: ix, iy, iz, fft_idx
  real(dp) :: kdotr
@@ -1397,18 +1403,73 @@ pure subroutine calc_ceikr(kk, ngfft, nfft, nspinor, ceikr)
                        +kk(2) * (iy / dble(ngfft(2))) &
                        +kk(3) * (iz / dble(ngfft(3))) )
        fft_idx = fft_idx + 1
-       ceikr(fft_idx, 1) = DCMPLX(cos(kdotr), sin(kdotr))
+       ceikr(fft_idx) = dcmplx(cos(kdotr), sin(kdotr))
      end do
    end do
  end do
 
- if (nspinor > 1) then
-   do ix=2,nspinor
-     ceikr(:, ix) = ceikr(fft_idx, 1)
-   end do
+ if (nspinor > 1) ceikr(nfft+1:) = ceikr(1:nfft)
+
+end subroutine calc_ceikr_dpc
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_fft_mesh/calc_ceikr_spc
+!! name
+!! calc_ceikr_spc
+!!
+!! function
+!!  calculate e^{ik.r} on the fft mesh.
+!!
+!! inputs
+!!  kk(3)=k-point in reduced coordinates.
+!!  nfft=total number of points in the fft mesh.
+!!  ngfft(18)=information about 3d fft,
+!!  nspinor=number of spinor components.
+!!
+!! output
+!!  ceikr(nfft*nspinor) = e^{ik.r} on the fft mesh.
+!!
+!! source
+
+pure subroutine calc_ceikr_spc(kk, ngfft, nfft, nspinor, ceikr)
+
+!arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nfft, nspinor
+!arrays
+ real(dp),intent(in) :: kk(3)
+ integer,intent(in) :: ngfft(18)
+ complex(spc),intent(out) :: ceikr(nfft*nspinor)
+
+!local variables-------------------------------
+!scalars
+ integer :: ix, iy, iz, fft_idx
+ real(dp) :: kdotr
+
+! *************************************************************************
+
+ if (all(abs(kk) < tol12)) then
+   ceikr = cone; return
  end if
 
-end subroutine calc_ceikr
+ fft_idx = 0
+ do iz=0,ngfft(3)-1
+   do iy=0,ngfft(2)-1
+     do ix=0,ngfft(1)-1
+       kdotr = two_pi*( kk(1) * (ix / dble(ngfft(1))) &
+                       +kk(2) * (iy / dble(ngfft(2))) &
+                       +kk(3) * (iz / dble(ngfft(3))) )
+       fft_idx = fft_idx + 1
+       ceikr(fft_idx) = cmplx(cos(kdotr), sin(kdotr), kind=spc)
+     end do
+   end do
+ end do
+
+ if (nspinor > 1) ceikr(nfft+1:) = ceikr(1:nfft)
+
+end subroutine calc_ceikr_spc
 !!***
 
 !----------------------------------------------------------------------
