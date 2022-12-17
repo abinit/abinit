@@ -173,8 +173,11 @@ module m_slk
    procedure :: loc2glob => slk_matrix_loc2glob
     ! Return global indices of a matrix element from the local indices.
 
-   procedure :: loc2grow => slk_matrix_loc2grow, loc2gcol => slk_matrix_loc2gcol
-    ! Determine the global (row | column) index from the local index
+   procedure :: loc2grow => slk_matrix_loc2grow
+    ! Determine the global row index from the local index
+
+   procedure :: loc2gcol => slk_matrix_loc2gcol
+    ! Determine the global column index from the local index
 
    procedure :: locmem_mb => locmem_mb
     ! Return memory allocated for the local buffer in Mb.
@@ -195,7 +198,7 @@ module m_slk
     ! Set the imaginary part of the diagonal to zero.
 
    procedure :: invert => slk_invert
-    ! Inverse of a complex matrix in double precision
+    ! Inverse of a complex matrix.
 
  end type basemat_t
 !!***
