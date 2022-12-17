@@ -5964,7 +5964,6 @@ subroutine gwr_ncwrite_tchi_wc(gwr, what, filepath)
  end do ! my_is
 
  NCF_CHECK(nf90_close(ncid))
-
  call cwtime_report(" gwr_ncwrite_tchi_wc:", cpu, wall, gflops)
 
 contains
