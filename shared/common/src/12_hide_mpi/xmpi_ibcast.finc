@@ -294,7 +294,7 @@ end subroutine xmpi_ibcast_dp4d
 !!
 !! FUNCTION
 !!  Sends data from one processor to others inside comm without blocking
-!!  Target: double two-dimensional complex arrays.
+!!  Target: double precision two-dimensional complex arrays.
 !!
 !! INPUTS
 !!  root: rank of broadcast root (integer)
@@ -331,4 +331,49 @@ subroutine xmpi_ibcast_dpc2d(xval, root, comm, request, ierr)
  request = xmpi_request_null
 
 end subroutine xmpi_ibcast_dpc2d
+!!***
+
+!!****f* ABINIT/xmpi_ibcast_spc2d
+!! NAME
+!!  xmpi_ibcast_spc2d
+!!
+!! FUNCTION
+!!  Sends data from one processor to others inside comm without blocking
+!!  Target: single precision two-dimensional complex arrays.
+!!
+!! INPUTS
+!!  root: rank of broadcast root (integer)
+!!  comm: MPI communicator
+!!
+!! OUTPUT
+!!  ierr= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  xval= buffer array
+!!
+!! SOURCE
+
+subroutine xmpi_ibcast_spc2d(xval, root, comm, request, ierr)
+
+!Arguments-------------------------
+ complex(sp) ABI_ASYNC, intent(inout) :: xval(:, :)
+ integer, intent(in) :: root, comm
+ integer, intent(out) :: request, ierr
+
+! *************************************************************************
+
+ ierr=0
+#ifdef HAVE_MPI_IBCAST
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+   call MPI_IBCAST(xval, product(shape(xval)), MPI_COMPLEX, root, comm, request, ierr)
+   xmpi_count_requests = xmpi_count_requests + 1
+   return
+ end if
+#endif
+
+ ! Call the blocking version and return null request.
+ call xmpi_bcast(xval, root, comm, ierr)
+ request = xmpi_request_null
+
+end subroutine xmpi_ibcast_spc2d
 !!***

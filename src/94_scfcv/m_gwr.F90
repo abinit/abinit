@@ -112,7 +112,6 @@
 !!  1) _slk_mat_t is a Macro defined in abi_common.h that allows us to use single/double precision version.
 !!     Be careful when using c_f_pointer because there's no type checking
 !!
-!!
 !! COPYRIGHT
 !! Copyright (C) 1999-2021 ABINIT group (MG)
 !! This file is distributed under the terms of the
@@ -146,7 +145,8 @@ module m_gwr
 
  use defs_datatypes,  only : pseudopotential_type, ebands_t
  use defs_abitypes,   only : mpi_type
- use m_gwdefs,        only : GW_TOL_DOCC, GW_TOLQ0, GW_TOL_W0, GW_Q0_DEFAULT, czero_gw, sigijtab_t, sigijtab_free, g0g0w
+ use m_gwdefs,        only : GW_TOL_DOCC, GW_TOLQ0, GW_TOL_W0, GW_Q0_DEFAULT, cone_gw, czero_gw, sigijtab_t, &
+                             sigijtab_free, g0g0w
  use m_time,          only : cwtime, cwtime_report, sec2str, timab
  use m_io_tools,      only : iomode_from_fname, get_unit, file_exists, open_file
  use m_pstat,         only : pstat_t
@@ -170,8 +170,8 @@ module m_gwr
  use m_gsphere,       only : kg_map, gsphere_t
  use m_melemts,       only : melements_t
  use m_ioarr,         only : read_rhor
- use m_slk,           only : matrix_scalapack, processor_scalapack, slk_array_free, slk_array_set, slk_array_locmem_mb, &
-                             block_dist_1d, slk_pzgemm
+ use m_slk,           only : matrix_scalapack, slkmat_sp_t, processor_scalapack, slk_array_free, slk_array_set, &
+                             slk_array_locmem_mb, block_dist_1d, slk_pgemm
  use m_wfk,           only : wfk_read_ebands, wfk_t, wfk_open_read
  use m_wfd,           only : wfd_init, wfd_t, wfdgw_t, wave_t, WFD_STORED
  use m_ddk,           only : ddkop_t, ddkop_new
@@ -750,6 +750,26 @@ module m_gwr
 
  end type gwr_t
 !!***
+
+ interface gsph2box
+   module procedure gsph2box_dpc
+   module procedure gsph2box_spc
+ end interface gsph2box
+
+ interface box2gsph
+   module procedure box2gsph_dpc
+   module procedure box2gsph_spc
+ end interface box2gsph
+
+ interface get_1d_sc_phases
+   module procedure get_1d_sc_phases_dpc
+   module procedure get_1d_sc_phases_spc
+ end interface get_1d_sc_phases
+
+ interface sc_sum
+   module procedure sc_sum_dpc
+   module procedure sc_sum_spc
+ end interface sc_sum
 
  ! private parameters.
  integer,private,parameter :: PRINT_MODR = 500
@@ -2176,6 +2196,7 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
          band = ugb%loc2gcol(il_b)
          bmask(band) = .True.
        end do
+       ! FIXME: This is wrong is spc
        call c_f_pointer(c_loc(ugb%buffer_cplx), cg_k, shape=[2, npwsp * ugb%sizeb_local(2)])
        call wfk%read_bmask(bmask, ik_ibz, spin, &
                            !xmpio_single, &
@@ -2234,7 +2255,7 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
              call ugb%glob2loc(1, band, iloc, il_b, haveit)
              if (.not. haveit) cycle
              ABI_CHECK_IEQ(iloc, 1, "iloc should be 1")
-             ugb%buffer_cplx(:, il_b) = cmplx(cg_work(1,:,ib), cg_work(2,:,ib), kind=dp)
+             ugb%buffer_cplx(:, il_b) = cmplx(cg_work(1,:,ib), cg_work(2,:,ib), kind=gwpc)
            end do
            end associate
          end if
@@ -2361,7 +2382,7 @@ subroutine gwr_build_green(gwr, free_ugb)
 
          ! Build G(g,g',ipm)
          isgn = merge(1, -1, ipm == 2)
-         call slk_pzgemm("N", "C", work, isgn * cone, work, czero, green) ! TODO ija=, ijb=
+         call slk_pgemm("N", "C", work, isgn * cone_gw, work, czero_gw, green) ! TODO ija=, ijb=
 
          ! Here we redistribute the data between two different communicators: gtau_comm -> g_comm.
          call gwr%gt_kibz(ipm, ik_ibz, itau, spin)%take_from(green)
@@ -2563,7 +2584,7 @@ subroutine gwr_get_myk_green_gpr(gwr, itau, spin, desc_mykbz, gt_gpr)
  real(dp) :: kk_bz(3), cpu, wall, gflops !, mem_mb
  character(len=500) :: msg
  type(__slkmat_t) :: rgp, gt_pm(2)
- complex(dp),allocatable :: ceikr(:)
+ complex(gwpc),allocatable :: ceikr(:)
 
 ! *************************************************************************
 
@@ -2926,7 +2947,7 @@ subroutine gwr_get_myq_wc_gpr(gwr, itau, spin, desc_myqbz, wc_gpr)
  logical :: q_is_gamma
  character(len=500) :: msg
  type(__slkmat_t) :: rgp, wc_qbz
- complex(dp),allocatable :: ceiqr(:)
+ complex(gwpc),allocatable :: ceiqr(:)
 
 ! *************************************************************************
 
@@ -3588,12 +3609,12 @@ subroutine gwr_build_tchi(gwr)
 
 !Local variables-------------------------------
 !scalars
- integer :: my_is, my_it, my_ikf, ig, my_ir, my_nr, npwsp, ncol_glob, col_bsize, my_iqi !, my_iki ! my_iqf,
+ integer :: my_is, my_it, my_ikf, ig, my_ir, my_nr, npwsp, ncol_glob, col_bsize, my_iqi, ii !, my_iki ! my_iqf,
  integer :: idat, ndat, sc_nfft, spin, ik_bz, iq_ibz, ierr, ipm, itau, ig2 !, ig1
  real(dp) :: cpu_tau, wall_tau, gflops_tau, cpu_all, wall_all, gflops_all, cpu_ir, wall_ir, gflops_ir
  real(dp) :: tchi_rfact, mem_mb, local_max, max_abs_imag_chit !, spin_fact, sc_ucvol, ik_ibz,
- complex(dp) :: head_q
- complex(dpc) :: chq(3), wng(3)
+ complex(gwpc) :: head_q
+ complex(dp) :: chq(3), wng(3)
  logical :: q_is_gamma
  character(len=5000) :: msg
  type(desc_t),pointer :: desc_k, desc_q
@@ -3605,8 +3626,8 @@ subroutine gwr_build_tchi(gwr)
  integer :: mask_qibz(gwr%nqibz)
  real(dp) :: kk_bz(3), kpq_bz(3), qq_ibz(3), tsec(2) !, qq_bz(3) ! kk_ibz(3),
  !logical :: need_gt_kibz(gwr%nkibz), got_gt_kibz(gwr%nkibz)
- complex(dp),allocatable :: gt_scbox(:,:), chit_scbox(:) !, gt_ucbox(:,:)
- complex(dp),allocatable :: low_wing_q(:), up_wing_q(:), cemiqr(:) !, sc_ceimkr(:,:) !, uc_ceikr(:)
+ complex(gwpc),allocatable :: gt_scbox(:), chit_scbox(:) !, gt_ucbox(:,:) gt_scbox(:,:),
+ complex(gwpc),allocatable :: low_wing_q(:), up_wing_q(:), cemiqr(:) !, sc_ceimkr(:,:) !, uc_ceikr(:)
  !type(__slkmat_t) :: gt_gpr(2, gwr%my_nkbz), chiq_gpr(gwr%my_nqibz), gk_rpr_pm(2)
  !type(desc_t), target :: desc_mykbz(gwr%my_nkbz)
  type(__slkmat_t),allocatable :: gt_gpr(:,:), chiq_gpr(:), gk_rpr_pm(:)
@@ -3660,7 +3681,7 @@ subroutine gwr_build_tchi(gwr)
    ! Be careful when using the FFT plan with ndat as ndat can change inside the loop if we start to block.
    ! Perhaps the safest approach would be to generate the plan on the fly.
    ndat = gwr%sc_batch_size
-   ABI_CALLOC(gt_scbox, (sc_nfft * gwr%nspinor * ndat, 2))
+   ABI_CALLOC(gt_scbox, (sc_nfft * gwr%nspinor * ndat * 2))
    ABI_CALLOC(chit_scbox, (sc_nfft * gwr%nspinor * ndat))
    mem_mb = (sc_nfft * gwr%nspinor * ndat * 3 * 2 * dp) * b2Mb
    call wrtout(std_out, sjoin(" Memory for scbox arrays:", ftoa(mem_mb, fmt="f8.1"), ' [Mb] <<< MEM'))
@@ -3745,10 +3766,12 @@ if (.True.) then
            do ipm=1,2
              !ABI_CHECK_IEQ(size(gt_gpr(ipm, my_ikf)%buffer_cplx, dim=2), my_nr, "my_nr!")
              !ABI_CHECK_IEQ(size(gt_gpr(ipm, my_ikf)%buffer_cplx, dim=1), desc_k%npw, "desc_k!")
+             ii = 1 + (ipm - 1) * sc_nfft * gwr%nspinor * ndat
 
              call gsph2box(sc_ngfft, desc_k%npw, gwr%nspinor * ndat, green_scg, &
                            gt_gpr(ipm, my_ikf)%buffer_cplx(:, my_ir), &  ! in
-                           gt_scbox(:, ipm))                             ! inout
+                           gt_scbox(ii:))                             ! inout
+                           !gt_scbox(:,ipm))                             ! inout
            end do
          end do ! my_ikf
 
@@ -3761,7 +3784,7 @@ if (.True.) then
          !call cwtime_report("G part", cpu, wall, gflops)
 
          ! G(G',r) --> G(R',r) = sum_{k,g'} e^{-i(k+g').R'} G_k(g',r)
-         call plan_gp2rp%execute_ip_dpc(gt_scbox)
+         call plan_gp2rp%execute(gt_scbox)
          gt_scbox = gt_scbox * sc_nfft
 
 else
@@ -3798,7 +3821,8 @@ else
 end if
 
          ! Compute tchi(R',r) for this r. Note that results are real so one might use r2c
-         chit_scbox(:) = gt_scbox(:, 1) * conjg(gt_scbox(:, 2))
+         !chit_scbox(:) = gt_scbox(:, 1) * conjg(gt_scbox(:, 2))
+         chit_scbox(:) = gt_scbox(1:sc_nfft * gwr%nspinor * ndat) * conjg(gt_scbox(sc_nfft * gwr%nspinor * ndat + 1:))
          !max_abs_imag_chit = max(max_abs_imag_chit, maxval(abs(aimag(chit_scbox))))
 
          ! Back to tchi(G'=q+g',r) space immediately with isign + 1.
@@ -4425,13 +4449,13 @@ subroutine gwr_build_wc(gwr)
 
        ! Invert symmetrized epsilon.
        ! NB: PZGETRF requires square block cyclic decomposition along the two axis
-       ! hence we neeed to redistribute the data before calling zinvert.
+       ! hence we neeed to redistribute the data before calling invert.
 
        !call wrtout(std_out, "Printing wc%buffer_cplex before inversion")
        !call print_arr(wc%buffer_cplx, unit=std_out)
 
        call wc%change_size_blocs(em1) ! processor=slkproc_4diag
-       call em1%zinvert()
+       call em1%invert()
        ! TODO: Can call zhdp
        !call em1%zdhp_invert("U")
        call wc%take_from(em1, free=.True.)  ! processor=wc%processor)
@@ -4550,7 +4574,7 @@ subroutine gwr_build_sigmac(gwr)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0
- integer :: my_is, my_it, spin, ik_ibz, ikcalc_ibz, sc_nfft, sc_size, my_ir, my_nr, iw, idat, ndat !sc_mgfft,
+ integer :: my_is, my_it, spin, ik_ibz, ikcalc_ibz, sc_nfft, sc_size, my_ir, my_nr, iw, idat, ndat, ii !sc_mgfft,
  integer :: my_iqf, iq_ibz, iq_bz, itau, ierr, ibc, bmin, bmax, band, nbc ! col_bsize, npwsp, ib1, ib2,
  integer :: my_ikf, ipm, ik_bz, ig, ikcalc, uc_ir, ir, ncid, col_bsize, npwsp, ibeg, iend ! my_iqi, sc_ir,
  real(dp) :: cpu_tau, wall_tau, gflops_tau, cpu_all, wall_all, gflops_all !, cpu, wall, gflops
@@ -4564,10 +4588,11 @@ subroutine gwr_build_sigmac(gwr)
  integer :: sc_ngfft(18), need_qibz(gwr%nqibz),  got_qibz(gwr%nqibz), units(3), gg(3)
  integer,allocatable :: green_scg(:,:), wc_scg(:,:)
  real(dp) :: kk_bz(3), kcalc_bz(3), qq_bz(3), tsec(2)  !, qq_ibz(3)
- complex(dp) :: sigc_pm(2), cpsi_r, odd_t(gwr%ntau), even_t(gwr%ntau)
+ complex(gwpc) :: cpsi_r, sigc_pm(2)
+ complex(dp) :: odd_t(gwr%ntau), even_t(gwr%ntau)
  complex(dp),target,allocatable :: sigc_it_diag_kcalc(:,:,:,:,:)
- complex(dp) ABI_ASYNC, allocatable :: gt_scbox(:,:), wct_scbox(:)
- complex(dp),allocatable :: uc_psi_bk(:,:,:), scph1d_kcalc(:,:,:), uc_ceikr(:)
+ complex(gwpc) ABI_ASYNC, allocatable :: gt_scbox(:), wct_scbox(:) !, gt_scbox(:,:),
+ complex(gwpc),allocatable :: uc_psi_bk(:,:,:), scph1d_kcalc(:,:,:), uc_ceikr(:)
  complex(gwpc),allocatable :: ur(:)
  type(__slkmat_t) :: gt_gpr(2, gwr%my_nkbz), gk_rpr_pm(2), sigc_rpr(2,gwr%nkcalc), wc_rpr, wc_gpr(gwr%my_nqbz)
  type(desc_t), target :: desc_mykbz(gwr%my_nkbz), desc_myqbz(gwr%my_nqbz)
@@ -4656,7 +4681,7 @@ if (gwr%use_supercell_for_sigma) then
  ! The second option is interesting if we need to compute several matrix elements, including off-diagonal terms.
 
  ndat = gwr%sc_batch_size
- ABI_CALLOC(gt_scbox, (sc_nfft * gwr%nspinor * ndat, 2))
+ ABI_CALLOC(gt_scbox, (sc_nfft * gwr%nspinor * ndat * 2))
  ABI_CALLOC(wct_scbox, (sc_nfft * gwr%nspinor * ndat))
 
  ! (ngfft, ndat, isign)
@@ -4735,9 +4760,11 @@ if (gwr%use_supercell_for_sigma) then
          end do
 
          do ipm=1,2
+           ii = 1 + (ipm - 1) * sc_nfft * gwr%nspinor * ndat
            call gsph2box(sc_ngfft, desc_k%npw, gwr%nspinor * ndat, green_scg, &
                          gt_gpr(ipm, my_ikf)%buffer_cplx(:, my_ir), &  ! in
-                         gt_scbox(:, ipm))                             ! inout
+                         gt_scbox(ii:))                                ! inout
+                         !gt_scbox(:, ipm))                             ! inout
          end do
        end do ! my_ikf
 
@@ -4768,12 +4795,12 @@ if (gwr%use_supercell_for_sigma) then
 
        ! G(G',r) --> G(R',r)
        if (gwr%kpt_comm%nproc > 1) call xmpi_wait(gt_request, ierr)
-       call gt_plan_gp2rp%execute_ip_dpc(gt_scbox)
+       call gt_plan_gp2rp%execute(gt_scbox)
        gt_scbox = gt_scbox * (sc_nfft / sck_ucvol)
 
        ! Wc(G',r) --> Wc(R',r)
        if (gwr%kpt_comm%nproc > 1) call xmpi_wait(wct_request, ierr)
-       call wt_plan_gp2rp%execute_ip_dpc(wct_scbox)
+       call wt_plan_gp2rp%execute(wct_scbox)
        wct_scbox = wct_scbox * (sc_nfft / scq_ucvol)
 
        !DEBUG
@@ -4785,8 +4812,9 @@ if (gwr%use_supercell_for_sigma) then
        !END DEBUG
 
        ! Use gt_scbox to store GW (R',r, +/- i tau) for this r.
-       gt_scbox(:, 1) = gt_scbox(:, 1) * wct_scbox(:)
-       gt_scbox(:, 2) = gt_scbox(:, 2) * wct_scbox(:)
+       ii = sc_nfft * gwr%nspinor * ndat
+       gt_scbox(1:ii) = gt_scbox(1:ii) * wct_scbox(:)
+       gt_scbox(ii+1:) = gt_scbox(ii+1:) * wct_scbox(:)
        !print *, "Maxval abs imag G:", maxval(abs(aimag(gt_scbox)))
 
        ! Integrate self-energy matrix elements in the R-supercell for fixed set of r-points
@@ -4799,15 +4827,15 @@ if (gwr%use_supercell_for_sigma) then
            ibc = band - gwr%bstart_ks(ikcalc, spin) + 1
            do idat=1,ndat
              ir = uc_ir + idat - 1
-             ibeg = 1 + (idat - 1) * sc_nfft * gwr%nspinor
-             iend = ibeg + sc_nfft * gwr%nspinor - 1
-
              cpsi_r = conjg(uc_psi_bk(ir, band, ikcalc))
              !sigc_pm(1) = cpsi_r * sum(gt_scbox(ibeg:iend, 1) * sc_psi_bk(:, band, ikcalc))
              !sigc_pm(2) = cpsi_r * sum(gt_scbox(ibeg:iend, 2) * sc_psi_bk(:, band, ikcalc))
              do ipm=1,2
+               ibeg = 1 + (idat - 1) * sc_nfft * gwr%nspinor + (ipm - 1) * sc_nfft * gwr%nspinor * ndat
+               iend = ibeg + sc_nfft * gwr%nspinor - 1
                call sc_sum(gwr%ngkpt, gwr%g_ngfft, gwr%nspinor, scph1d_kcalc(:,:,ikcalc), k_is_gamma, &
-                 cpsi_r, gt_scbox(ibeg:iend, ipm), uc_psi_bk(:, band, ikcalc), sigc_pm(ipm))
+                 cpsi_r, gt_scbox(ibeg:), uc_psi_bk(:, band, ikcalc), sigc_pm(ipm))
+                 !cpsi_r, gt_scbox(ibeg:iend, ipm), uc_psi_bk(:, band, ikcalc), sigc_pm(ipm))
              end do
 
              sigc_it_diag_kcalc(:, itau, ibc, ikcalc, spin) = &
@@ -4839,7 +4867,6 @@ if (gwr%use_supercell_for_sigma) then
 
  !call wrtout(std_out, sjoin(" Maxval abs re W:", ftoa(max_abs_re_wct)))
  !call wrtout(std_out, sjoin(" Maxval abs imag W:", ftoa(max_abs_imag_wct)))
-
  ABI_FREE(gt_scbox)
  ABI_FREE(wct_scbox)
 
@@ -5425,7 +5452,8 @@ subroutine gwr_rpa_energy(gwr)
 !arrays
  type(__slkmat_t) :: chi_tmp, dummy_vec, chi_4diag
  type(processor_scalapack) :: proc_4diag
- real(dp),allocatable :: eig(:), kin_qg(:), ec_rpa(:), ec_mp2(:), ecut_chi(:)
+ real(gwp),allocatable :: eig(:)
+ real(dp),allocatable :: kin_qg(:), ec_rpa(:), ec_mp2(:), ecut_chi(:)
 
 ! *************************************************************************
 
@@ -5524,7 +5552,7 @@ subroutine gwr_rpa_energy(gwr)
          ! Change size block and, if possible, use 2D rectangular grid of processors for diagonalization
          call proc_4diag%init(chi_tmp%processor%comm)
          call chi_tmp%change_size_blocs(chi_4diag, processor=proc_4diag)
-         call chi_4diag%pzheev("N", "U", dummy_vec, eig, mat_size=mat_size)
+         call chi_4diag%heev("N", "U", dummy_vec, eig, mat_size=mat_size)
          call chi_4diag%free()
          call proc_4diag%free()
 
@@ -5913,10 +5941,12 @@ subroutine gwr_ncwrite_tchi_wc(gwr, what, filepath)
      do my_it=1,gwr%my_ntau
        itau = gwr%my_itaus(my_it)
 
-       ! FIXME: Assuming PBLAS matrix distributed in contigous blocks along the column index.
+       ! FIXME: Assuming PBLAS matrix distributed in contiguous blocks along the column index.
        ! This part must be changed if we use round robin distribution.
        my_ncols = mats(itau)%sizeb_local(2)
        my_gcol_start = mats(itau)%loc2gcol(1)
+
+       ! FIXME: This is wrong if spc
        call c_f_pointer(c_loc(mats(itau)%buffer_cplx), fptr, shape=[2, npwtot_q, my_ncols])
 
        ncerr = nf90_put_var(ncid, vid("mats"), fptr, &
@@ -5944,9 +5974,9 @@ end subroutine gwr_ncwrite_tchi_wc
 
 !----------------------------------------------------------------------
 
-!!****f* m_gwr/gsph2box
+!!****f* m_gwr/gsph2box_dpc
 !! NAME
-!! gsph2box
+!! gsph2box_dpc
 !!
 !! FUNCTION
 !! Insert cg_k array defined on the k-centered g-sphere with npw vectors inside the FFT box.
@@ -5967,7 +5997,7 @@ end subroutine gwr_ncwrite_tchi_wc
 !!
 !! SOURCE
 
-subroutine gsph2box(ngfft, npw, ndat, kg_k, cg, cfft)
+subroutine gsph2box_dpc(ngfft, npw, ndat, kg_k, cg, cfft)
 
 !Arguments ------------------------------------
 !scalars
@@ -5975,16 +6005,18 @@ subroutine gsph2box(ngfft, npw, ndat, kg_k, cg, cfft)
 !arrays
  integer,intent(in) :: kg_k(3, npw)
  complex(dp),intent(in) :: cg(npw * ndat)
- complex(dp),intent(inout) :: cfft(ngfft(4), ngfft(5), ngfft(6) * ndat)
+ complex(dp),target,intent(inout) :: cfft(ngfft(4)*ngfft(5)*ngfft(6)*ndat)
 
 !Local variables-------------------------------
  integer :: n1, n2, n3, n4, n5, n6, i1, i2, i3, idat, ipw
+ complex(dp),contiguous,pointer :: cfft_ptr(:,:,:,:)
  !character(len=500) :: msg
 
 ! *************************************************************************
 
  n1 = ngfft(1); n2 = ngfft(2); n3 = ngfft(3)
  n4 = ngfft(4); n5 = ngfft(5); n6 = ngfft(6)
+ call c_f_pointer(c_loc(cfft), cfft_ptr, shape=[n4, n5, n6, ndat])
 
  ! Insert cg into cfft
 !$OMP PARALLEL DO PRIVATE(i1, i2, i3) IF (ndat > 1)
@@ -5999,18 +6031,84 @@ subroutine gsph2box(ngfft, npw, ndat, kg_k, cg, cfft)
      !  ABI_ERROR(msg)
      !end if
 
-     cfft(i1,i2,i3+n6*(idat-1)) = cg(ipw+npw*(idat-1))
+     cfft_ptr(i1,i2,i3,idat) = cg(ipw+npw*(idat-1))
    end do
  end do
 
-end subroutine gsph2box
+end subroutine gsph2box_dpc
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_gwr/box2gsph
+!!****f* m_gwr/gsph2box_spc
 !! NAME
-!! box2gsph
+!! gsph2box_spc
+!!
+!! FUNCTION
+!! Insert cg_k array defined on the k-centered g-sphere with npw vectors inside the FFT box.
+!! The main difference wrt to sphere is that cfft is not initialized to zero. See notes below.
+!!
+!! INPUTS
+!! ngfft:
+!!   n1,n2,n3=physical dimension of the FFT box
+!!   n4,n5,n6=memory dimension of cfft
+!! npw=number of G vectors in basis at this k point
+!! ndat=number of items to process
+!! kg_k(3,npw)=integer coordinates of G vectors in basis sphere
+!! cg(npw*ndat)= contains values for npw G vectors in basis sphere
+!!
+!! OUTPUT
+!! cfft(n4,n5,n6*ndat) = array on FFT box filled with cg data
+!!      Note that cfft is intent(inout) so that we can add contributions from different k-points.
+!!
+!! SOURCE
+
+subroutine gsph2box_spc(ngfft, npw, ndat, kg_k, cg, cfft)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: ngfft(6), npw, ndat
+!arrays
+ integer,intent(in) :: kg_k(3, npw)
+ complex(sp),intent(in) :: cg(npw * ndat)
+ complex(sp),target,intent(inout) :: cfft(ngfft(4)*ngfft(5)*ngfft(6)*ndat)
+
+!Local variables-------------------------------
+ integer :: n1, n2, n3, n4, n5, n6, i1, i2, i3, idat, ipw
+ complex(sp),contiguous,pointer :: cfft_ptr(:,:,:,:)
+ !character(len=500) :: msg
+
+! *************************************************************************
+
+ n1 = ngfft(1); n2 = ngfft(2); n3 = ngfft(3)
+ n4 = ngfft(4); n5 = ngfft(5); n6 = ngfft(6)
+ call c_f_pointer(c_loc(cfft), cfft_ptr, shape=[n4, n5, n6, ndat])
+
+ ! Insert cg into cfft
+!$OMP PARALLEL DO PRIVATE(i1, i2, i3) IF (ndat > 1)
+ do idat=1,ndat
+   do ipw=1,npw
+     i1 = modulo(kg_k(1, ipw), n1) + 1
+     i2 = modulo(kg_k(2, ipw), n2) + 1
+     i3 = modulo(kg_k(3, ipw), n3) + 1
+
+     !if (any(kg_k(:,ipw) > ngfft(1:3)/2) .or. any(kg_k(:,ipw) < -(ngfft(1:3)-1)/2) ) then
+     !  write(msg,'(a,3(i0,1x),a)')" The G-vector: ",kg_k(:, ipw)," falls outside the FFT box. Increase boxcutmin (?)"
+     !  ABI_ERROR(msg)
+     !end if
+
+     cfft_ptr(i1,i2,i3,idat) = cg(ipw+npw*(idat-1))
+   end do
+ end do
+
+end subroutine gsph2box_spc
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_gwr/box2gsph_dpc
+!! NAME
+!! box2gsph_dpc
 !!
 !! FUNCTION
 !! Extract cg_k array defined on the k-centered g-sphere with npw vectors from the FFT box.
@@ -6029,27 +6127,29 @@ end subroutine gsph2box
 !!
 !! SOURCE
 
-subroutine box2gsph(ngfft, npw, ndat, kg_k, cfft, cg)
+subroutine box2gsph_dpc(ngfft, npw, ndat, kg_k, cfft, cg)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ngfft(6), npw, ndat
 !arrays
  integer,intent(in) :: kg_k(3, npw)
- complex(dp),intent(in) :: cfft(ngfft(4), ngfft(5), ngfft(6), ndat)
- complex(dp),intent(out) :: cg(npw, ndat)
+ complex(dp),target,intent(in) :: cfft(ngfft(4)*ngfft(5)*ngfft(6)*ndat)
+ complex(dp),intent(out) :: cg(npw*ndat)
 
 !Local variables-------------------------------
- integer :: n1, n2, n3, n4, n5, n6, i1, i2, i3, idat, ipw
+ integer :: n1, n2, n3, n4, n5, n6, i1, i2, i3, idat, ipw, icg
+ complex(dp),contiguous,pointer :: cfft_ptr(:,:,:,:)
  !character(len=500) :: msg
 
 ! *************************************************************************
 
  n1 = ngfft(1); n2 = ngfft(2); n3 = ngfft(3)
  n4 = ngfft(4); n5 = ngfft(5); n6 = ngfft(6)
+ call c_f_pointer(c_loc(cfft), cfft_ptr, shape=[n4, n5, n6, ndat])
 
  ! Extract cg from cfft, ignoring components outside range of cg sphere
-!$OMP PARALLEL DO PRIVATE(i1, i2, i3) IF (ndat > 1)
+ !$OMP PARALLEL DO PRIVATE(i1, i2, i3, icg) IF (ndat > 1)
  do idat=1,ndat
    do ipw=1,npw
      i1 = modulo(kg_k(1, ipw), n1) + 1
@@ -6061,11 +6161,77 @@ subroutine box2gsph(ngfft, npw, ndat, kg_k, cfft, cg)
      !  ABI_ERROR(msg)
      !end if
 
-     cg(ipw, idat) = cfft(i1, i2, i3, idat)
+     icg = ipw + (idat - 1) * npw
+     cg(icg) = cfft_ptr(i1, i2, i3, idat)
    end do
  end do
 
-end subroutine box2gsph
+end subroutine box2gsph_dpc
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_gwr/box2gsph_spc
+!! NAME
+!! box2gsph_spc
+!!
+!! FUNCTION
+!! Extract cg_k array defined on the k-centered g-sphere with npw vectors from the FFT box.
+!!
+!! INPUTS
+!! ngfft:
+!!   n1,n2,n3=physical dimension of the FFT box
+!!   n4,n5,n6=memory dimension of cfft
+!! npw=number of G vectors in basis at this k point
+!! ndat=number of items to process
+!! kg_k(3,npw)=integer coordinates of G vectors in basis sphere
+!! cfft(n4,n5,n6, ndat) = array on FFT box
+!!
+!! OUTPUT
+!! cg(npw*ndat)= contains values for npw G vectors in basis sphere
+!!
+!! SOURCE
+
+subroutine box2gsph_spc(ngfft, npw, ndat, kg_k, cfft, cg)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: ngfft(6), npw, ndat
+!arrays
+ integer,intent(in) :: kg_k(3, npw)
+ complex(sp),target,intent(in) :: cfft(ngfft(4)*ngfft(5)*ngfft(6)*ndat)
+ complex(sp),intent(out) :: cg(npw*ndat)
+
+!Local variables-------------------------------
+ integer :: n1, n2, n3, n4, n5, n6, i1, i2, i3, idat, ipw, icg
+ complex(sp),contiguous,pointer :: cfft_ptr(:,:,:,:)
+ !character(len=500) :: msg
+
+! *************************************************************************
+
+ n1 = ngfft(1); n2 = ngfft(2); n3 = ngfft(3)
+ n4 = ngfft(4); n5 = ngfft(5); n6 = ngfft(6)
+ call c_f_pointer(c_loc(cfft), cfft_ptr, shape=[n4, n5, n6, ndat])
+
+ ! Extract cg from cfft, ignoring components outside range of cg sphere
+ !$OMP PARALLEL DO PRIVATE(i1, i2, i3, icg) IF (ndat > 1)
+ do idat=1,ndat
+   do ipw=1,npw
+     i1 = modulo(kg_k(1, ipw), n1) + 1
+     i2 = modulo(kg_k(2, ipw), n2) + 1
+     i3 = modulo(kg_k(3, ipw), n3) + 1
+
+     !if (any(kg_k(:,ipw) > ngfft(1:3)/2) .or. any(kg_k(:,ipw) < -(ngfft(1:3)-1)/2) ) then
+     !  write(msg,'(a,3(i0,1x),a)')" The G-vector: ",kg_k(:, ipw)," falls outside the FFT box. Increase boxcutmin (?)"
+     !  ABI_ERROR(msg)
+     !end if
+
+     icg = ipw + (idat - 1) * npw
+     cg(icg) = cfft_ptr(i1, i2, i3, idat)
+   end do
+ end do
+
+end subroutine box2gsph_spc
 !!***
 
 !----------------------------------------------------------------------
@@ -6253,9 +6419,9 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  logical :: gradk_not_done(gwr%nkibz)
  logical,allocatable :: bbp_mask(:,:)
  complex(dpc) :: chq(3) !, wng(3)
- complex(dp),allocatable :: ug1_block(:,:)
+ !complex(dp),allocatable :: ug1_block(:,:)
  complex(gwpc) :: rhotwx(3, gwr%nspinor**2) !, new_rhotwx(3, gwr%nspinor**2)
- complex(gwpc),allocatable :: ug1(:), ug2(:), ur1_kibz(:), ur2_kibz(:), ur_prod(:), rhotwg(:)
+ complex(gwpc),allocatable :: ug2(:), ur1_kibz(:), ur2_kibz(:), ur_prod(:), rhotwg(:), ug1_block(:,:), ug1(:)
  complex(dpc) :: green_w(gwr%ntau), omega(gwr%ntau)
  complex(dpc),allocatable :: chi0_lwing(:,:,:), chi0_uwing(:,:,:), chi0_head(:,:,:), head_qvals(:)
  real(dp), allocatable :: gh1c_block(:,:,:,:)
@@ -6451,7 +6617,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
        band1_stop = band1_start + nb - 1
 
        ! Collect nb bands starting from band1_start on each proc.
-       call ugb_kibz%collect(npw_ki * nspinor, nb, [1, band1_start], ug1_block)
+       call ugb_kibz%collect_cplx(npw_ki * nspinor, nb, [1, band1_start], ug1_block)
 
        ! Dump algorithm based on xmpi_sum. To be replaced by an all_gather
        ! The advantage is that it works indipendently of the PBLAS distribution.
@@ -6467,6 +6633,8 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
        do il_b1=1, ugb_kibz%sizeb_local(2)
          band1 = ugb_kibz%loc2gcol(il_b1)
          eig_nk = gwr%ks_ebands%eig(band1, ik_ibz, spin)
+
+         ! FIXME: This is wrong if spc
          call c_f_pointer(c_loc(ugb_kibz%buffer_cplx(:,il_b1)), cwave, shape=[2, npw_ki*nspinor])
          !call ddkop%apply(eig_nk, npw_ki, nspinor, cwave, cwaveprj)
          !gh1c_block(:,:,:,xx_ib) = ddkop%gh1c(:, 1:npw_ki*nspinor,:)
@@ -6478,6 +6646,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
          band1 = band1_start + ib - 1
          ug1 = ug1_block(:, ib)
          call fft_ug(npw_ki, u_nfft, nspinor, ndat1, u_mgfft, u_ngfft, istwf_ki, kg_ki, u_gbound, ug1, ur1_kibz)
+         !call fft_ug(npw_ki, u_nfft, nspinor, ndat1, u_mgfft, u_ngfft, istwf_ki, kg_ki, u_gbound, ug1_block(:,ib), ur1_kibz)
 
          ! Loop over "valence" states.
          !do band2=1,gwr%ugb_nband
@@ -6703,10 +6872,11 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
  integer,allocatable :: gbound_kcalc(:,:), gvec_x(:,:), gbound_x(:,:), kg_k(:,:), gbound_ksum(:,:)
  real(dp) :: ksum(3), kk_ibz(3), kgw(3), kgw_m_ksum(3), qq_bz(3), tsec(2) !, kk_bz(3), q0(3) !, spinrot_kbz(4), spinrot_kgw(4)
  real(dp),contiguous, pointer :: ks_eig(:,:,:), qp_eig(:,:,:), qp_occ(:,:,:), cg1_ptr(:,:), cg2_ptr(:,:)
- real(dp),allocatable :: work(:,:,:,:)
+ real(dp),allocatable :: work(:,:,:,:), cg1_ibz(:,:) !, cg2_bz(:,:)
  complex(gwpc),allocatable :: vc_sqrt_qbz(:)
  complex(dp),allocatable :: rhotwg(:), rhotwgp(:), rhotwg_ki(:,:)
- complex(dp),allocatable :: ur_bdgw(:,:), ur_ksum(:), ur_prod(:), eig0r(:)
+ complex(gwpc),allocatable :: ur_bdgw(:,:)
+ complex(dp),allocatable :: ur_ksum(:), ur_prod(:), eig0r(:)
  complex(dp),target,allocatable :: ug_ksum(:)
  complex(dp),allocatable  :: sigxcme_tmp(:,:), sigxme_tmp(:,:,:), sigx(:,:,:,:)
  complex(dp) :: gwpc_sigxme, gwpc_sigxme2, xdot_tmp
@@ -6919,7 +7089,10 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
        istwf_k = 1
        call get_kg(ksum, istwf_k, dtset%ecut, cryst%gmet, npw_k, kg_k)
      end if
+
      ABI_MALLOC(ug_ksum, (npw_k * nspinor))
+     ABI_MALLOC(cg1_ibz, (2, desc_ki%npw * nspinor))
+     !ABI_MALLOC(cg2_bz, (2, npw_k * nspinor))
 
      ABI_MALLOC(gbound_ksum, (2*u_mgfft+8, 2))
      call sphereboundary(gbound_ksum, istwf_k, kg_k, u_mgfft, npw_k)
@@ -6948,11 +7121,19 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
          ! Reconstruct u_kq(G) from the IBZ image.
          !call wfd%copy_cg(ibsum_kq, ikq_ibz, spin, cgwork)
 
-         call c_f_pointer(c_loc(ugb_kibz%buffer_cplx(:, il_b)), cg1_ptr, shape=[2, desc_ki%npw * nspinor])
+         ! FIXME: This is wrong if spc
          call c_f_pointer(c_loc(ug_ksum), cg2_ptr, shape=[2, npw_k * nspinor])
+
+         !call c_f_pointer(c_loc(ugb_kibz%buffer_cplx(:, il_b)), cg1_ptr, shape=[2, desc_ki%npw * nspinor])
+         !call cgtk_rotate(cryst, kk_ibz, isym_k, trev_k, g0_k, nspinor, ndat1, &
+         !                 desc_ki%npw, desc_ki%gvec, &
+         !                 npw_k, kg_k, desc_ki%istwfk, istwf_k, cg1_ptr, cg2_ptr, work_ngfft, work)
+
+         cg1_ibz(1,:) = real(ugb_kibz%buffer_cplx(:, il_b))
+         cg1_ibz(2,:) = aimag(ugb_kibz%buffer_cplx(:, il_b))
          call cgtk_rotate(cryst, kk_ibz, isym_k, trev_k, g0_k, nspinor, ndat1, &
                           desc_ki%npw, desc_ki%gvec, &
-                          npw_k, kg_k, desc_ki%istwfk, istwf_k, cg1_ptr, cg2_ptr, work_ngfft, work)
+                          npw_k, kg_k, desc_ki%istwfk, istwf_k, cg1_ibz, cg2_ptr, work_ngfft, work)
        end if
 
        call fft_ug(npw_k, u_nfft, nspinor, ndat1, u_mgfft, u_ngfft, istwf_k, kg_k, gbound_ksum, &
@@ -7062,6 +7243,8 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
      ABI_FREE(gbound_x)
      ABI_FREE(kg_k)
      ABI_FREE(ug_ksum)
+     ABI_FREE(cg1_ibz)
+     !ABI_FREE(cg2_bz)
      ABI_FREE(gbound_ksum)
      ABI_FREE(gvec_x)
      ABI_FREE(rhotwg_ki)
@@ -7198,9 +7381,9 @@ end subroutine gwr_get_u_ngfft
 
 !----------------------------------------------------------------------
 
-!!****f* m_gwr/get_1d_sc_phases
+!!****f* m_gwr/get_1d_sc_phases_dpc
 !! NAME
-!!  get_1d_sc_phases
+!!  get_1d_sc_phases_dpc
 !!
 !! FUNCTION
 !!  Compute one-dimensional factors in the supercell.
@@ -7211,7 +7394,7 @@ end subroutine gwr_get_u_ngfft
 !!
 !! SOURCE
 
-subroutine get_1d_sc_phases(sc_shape, nkpt, kpts, ph1d)
+subroutine get_1d_sc_phases_dpc(sc_shape, nkpt, kpts, ph1d)
 
 !Arguments ------------------------------------
  integer,intent(in) :: sc_shape(3), nkpt
@@ -7219,7 +7402,6 @@ subroutine get_1d_sc_phases(sc_shape, nkpt, kpts, ph1d)
  complex(dp),allocatable,intent(out) :: ph1d(:,:,:)
 
 !Local variables-------------------------------
-!scalars
  integer :: ikpt, ix, iy, iz
  real(dp) :: arg, fact, kk(3)
 
@@ -7246,14 +7428,66 @@ subroutine get_1d_sc_phases(sc_shape, nkpt, kpts, ph1d)
    end do
  end do ! ikpt
 
-end subroutine get_1d_sc_phases
+end subroutine get_1d_sc_phases_dpc
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_gwr/sc_sum
+!!****f* m_gwr/get_1d_sc_phases_spc
 !! NAME
-!!  sc_sum
+!!  get_1d_sc_phases_spc
+!!
+!! FUNCTION
+!!  Compute one-dimensional factors in the supercell.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine get_1d_sc_phases_spc(sc_shape, nkpt, kpts, ph1d)
+
+!Arguments ------------------------------------
+ integer,intent(in) :: sc_shape(3), nkpt
+ real(dp),intent(in) :: kpts(3, nkpt)
+ complex(spc),allocatable,intent(out) :: ph1d(:,:,:)
+
+!Local variables-------------------------------
+ integer :: ikpt, ix, iy, iz
+ real(dp) :: arg, fact, kk(3)
+
+! *************************************************************************
+
+ ABI_MALLOC(ph1d, (maxval(sc_shape), 3, nkpt))
+
+ do ikpt=1,nkpt
+   kk = kpts(:, ikpt)
+   fact = two_pi * kk(1)
+   do ix=0,sc_shape(1) - 1
+     arg = fact * ix
+     ph1d(ix + 1, 1, ikpt) = cmplx(cos(arg), sin(arg), kind=sp)
+   end do
+   fact = two_pi * kk(2)
+   do iy=0,sc_shape(2) - 1
+     arg = fact * iy
+     ph1d(iy + 1, 2, ikpt) = cmplx(cos(arg), sin(arg), kind=sp)
+   end do
+   fact = two_pi * kk(3)
+   do iz=0,sc_shape(3) - 1
+     arg = fact * iz
+     ph1d(iz + 1, 3, ikpt) = cmplx(cos(arg), sin(arg), kind=sp)
+   end do
+ end do ! ikpt
+
+end subroutine get_1d_sc_phases_spc
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_gwr/sc_sum_dpc
+!! NAME
+!!  sc_sum_dpc
 !!
 !! FUNCTION
 !!
@@ -7263,25 +7497,29 @@ end subroutine get_1d_sc_phases
 !!
 !! SOURCE
 
-subroutine sc_sum(sc_shape, uc_ngfft, nspinor, ph1d, k_is_gamma, alpha, sc_data, uc_psi, cout)
+subroutine sc_sum_dpc(sc_shape, uc_ngfft, nspinor, ph1d, k_is_gamma, alpha, sc_data, uc_psi, cout)
 
 !Arguments ------------------------------------
  integer,intent(in) :: sc_shape(3), uc_ngfft(18), nspinor
  complex(dp),intent(in) :: ph1d(maxval(sc_shape), 3)
  logical,intent(in) :: k_is_gamma
- complex(dp),intent(in) :: alpha, uc_psi(uc_ngfft(1), uc_ngfft(2), uc_ngfft(3), nspinor)
- complex(dp),intent(in) :: &
-    sc_data(uc_ngfft(1), sc_shape(1), uc_ngfft(2), sc_shape(2), uc_ngfft(3), sc_shape(3), nspinor)
+ complex(dp),target,intent(in) :: alpha, uc_psi(uc_ngfft(1)*uc_ngfft(2)*uc_ngfft(3)*nspinor)
+ complex(dp),target,intent(in) :: &
+    sc_data(uc_ngfft(1)*sc_shape(1)*uc_ngfft(2)*sc_shape(2)*uc_ngfft(3)*sc_shape(3)*nspinor)
  complex(dp),intent(out) :: cout
 
 !Local variables-------------------------------
-!scalars
  integer :: il1, il2, il3, spinor, uc_n1, uc_n2, uc_n3, ix, iy, iz !, idat
  complex(dp) :: cphase, phl32, phl3
+ complex(dp),contiguous,pointer :: uc_psi_ptr(:,:,:,:), sc_data_ptr(:,:,:,:,:,:,:)
 
 ! *************************************************************************
 
  uc_n1 = uc_ngfft(1); uc_n2 = uc_ngfft(2); uc_n3 = uc_ngfft(3)
+
+ call c_f_pointer(c_loc(uc_psi), uc_psi_ptr, shape=[uc_n1, uc_n2, uc_n3, nspinor])
+ call c_f_pointer(c_loc(sc_data), sc_data_ptr, &
+                  shape=[uc_n1, sc_shape(1), uc_n2, sc_shape(2), uc_n3, sc_shape(3), nspinor])
 
  !do spinor=1,nspinor
  !end do
@@ -7298,7 +7536,7 @@ subroutine sc_sum(sc_shape, uc_ngfft, nspinor, ph1d, k_is_gamma, alpha, sc_data,
          do iy=1,uc_n2
            do il1=1,sc_shape(1)
              do ix=1,uc_n1
-               cout = cout + uc_psi(ix, iy, iz, spinor) * sc_data(ix, il1, iy, il2, iz, il3, spinor)
+               cout = cout + uc_psi_ptr(ix, iy, iz, spinor) * sc_data_ptr(ix, il1, iy, il2, iz, il3, spinor)
              end do
            end do
          end do
@@ -7317,7 +7555,7 @@ subroutine sc_sum(sc_shape, uc_ngfft, nspinor, ph1d, k_is_gamma, alpha, sc_data,
            do il1=1,sc_shape(1)
              cphase = phl32 * ph1d(il1, 1)  ! e^{ik.L}
              do ix=1,uc_n1
-               cout = cout + cphase * uc_psi(ix, iy, iz, spinor) * sc_data(ix, il1, iy, il2, iz, il3, spinor)
+               cout = cout + cphase * uc_psi_ptr(ix, iy, iz, spinor) * sc_data_ptr(ix, il1, iy, il2, iz, il3, spinor)
              end do
            end do
          end do
@@ -7329,7 +7567,93 @@ subroutine sc_sum(sc_shape, uc_ngfft, nspinor, ph1d, k_is_gamma, alpha, sc_data,
 
  cout = alpha * cout
 
-end subroutine sc_sum
+end subroutine sc_sum_dpc
+!!***
+
+!!****f* m_gwr/sc_sum_spc
+!! NAME
+!!  sc_sum_spc
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine sc_sum_spc(sc_shape, uc_ngfft, nspinor, ph1d, k_is_gamma, alpha, sc_data, uc_psi, cout)
+
+!Arguments ------------------------------------
+ integer,intent(in) :: sc_shape(3), uc_ngfft(18), nspinor
+ complex(sp),intent(in) :: ph1d(maxval(sc_shape), 3)
+ logical,intent(in) :: k_is_gamma
+ complex(sp),target,intent(in) :: alpha, uc_psi(uc_ngfft(1)*uc_ngfft(2)*uc_ngfft(3)*nspinor)
+ complex(sp),target,intent(in) :: &
+    sc_data(uc_ngfft(1)*sc_shape(1)*uc_ngfft(2)*sc_shape(2)*uc_ngfft(3)*sc_shape(3)*nspinor)
+ complex(sp),intent(out) :: cout
+
+!Local variables-------------------------------
+ integer :: il1, il2, il3, spinor, uc_n1, uc_n2, uc_n3, ix, iy, iz !, idat
+ complex(sp) :: cphase, phl32, phl3
+ complex(sp),contiguous,pointer :: uc_psi_ptr(:,:,:,:), sc_data_ptr(:,:,:,:,:,:,:)
+
+! *************************************************************************
+
+ uc_n1 = uc_ngfft(1); uc_n2 = uc_ngfft(2); uc_n3 = uc_ngfft(3)
+
+ call c_f_pointer(c_loc(uc_psi), uc_psi_ptr, shape=[uc_n1, uc_n2, uc_n3, nspinor])
+ call c_f_pointer(c_loc(sc_data), sc_data_ptr, &
+                  shape=[uc_n1, sc_shape(1), uc_n2, sc_shape(2), uc_n3, sc_shape(3), nspinor])
+
+
+ !do spinor=1,nspinor
+ !end do
+ ABI_CHECK(nspinor == 1, "nspinor 2 not coded")
+ spinor = 1
+ cout = zero
+
+ if (k_is_gamma) then
+   ! Don't need to multiply by ! e^{ik.L}
+
+   do il3=1,sc_shape(3)
+     do iz=1,uc_n3
+       do il2=1,sc_shape(2)
+         do iy=1,uc_n2
+           do il1=1,sc_shape(1)
+             do ix=1,uc_n1
+               cout = cout + uc_psi_ptr(ix, iy, iz, spinor) * sc_data_ptr(ix, il1, iy, il2, iz, il3, spinor)
+             end do
+           end do
+         end do
+       end do
+     end do
+   end do
+
+ else
+
+   do il3=1,sc_shape(3)
+     phl3 = ph1d(il3, 3)
+     do iz=1,uc_n3
+       do il2=1,sc_shape(2)
+         phl32 = phl3 * ph1d(il2, 2)
+         do iy=1,uc_n2
+           do il1=1,sc_shape(1)
+             cphase = phl32 * ph1d(il1, 1)  ! e^{ik.L}
+             do ix=1,uc_n1
+               cout = cout + cphase * uc_psi_ptr(ix, iy, iz, spinor) * sc_data_ptr(ix, il1, iy, il2, iz, il3, spinor)
+             end do
+           end do
+         end do
+       end do
+     end do
+   end do
+
+ end if
+
+ cout = alpha * cout
+
+end subroutine sc_sum_spc
 !!***
 
 integer pure function memlimited_step(start, stop, num_items, bsize, maxmem_mb) result(step)

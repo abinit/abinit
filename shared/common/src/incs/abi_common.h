@@ -372,7 +372,7 @@ Use if statement instead of Fortran merge. See https://software.intel.com/en-us/
 #else
 #  define GWPC_CONJG(cvar)  CONJG(cvar)
 #  define GWPC_CMPLX(re,im) CMPLX(re,im)
-#  define __slkmat_t matrix_scalapack
+#  define __slkmat_t slkmat_sp_t
 #endif
 
 
