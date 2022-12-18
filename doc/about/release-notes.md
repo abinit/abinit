@@ -5,17 +5,15 @@ List of changes with respect to version 9.6.
 <!-- Release notes updated on December 3, 2022. -->
 
 Many thanks to the contributors to the ABINIT project between
-October 2021 and October 2022 ! These release notes
+October 2021 and August 2022, and some late contributions up to December 2022 ! These release notes
 are relative to modifications/improvements of ABINIT v9.8 with respect to v9.6.
-<!-- Merge requests up to and including MR874. Also, MR881, 882, and 885 are taken into account. -->
+<!-- Merge requests up to and including MR874. Also, MR881, 882, 885, 891, 892, and 894 are taken into account. -->
 
 The list of contributors includes:
-B. Amadon, G. Antonius, L. Baguet, L. Bastogne, J.-M. Beuken, 
-J. Bieder, A. Blanchet, 
+B. Amadon, G. Antonius, L. Baguet, S. Bandyopadhyay, L. Bastogne, J.-M. Beuken, J. Bieder, A. Blanchet, 
 F. Bottin, J. Bouchet, E. Bousquet, F. Brieuc, V. Brousseau-Couture, N. Brouwer, F. Bruneval, M. Cote, 
-C. Espejo, Ph. Ghosez, M. Giantomassi, O. Gingras, X. Gonze, 
-B. Guster, P. Kesterner, R. Outerovich, Ch. Paillard,
-M. Royo, B. Sataric, M. Schmitt, F. Soubiran, 
+C. Espejo, Ph. Ghosez, M. Giantomassi, O. Gingras, X. Gonze, B. Guster, P. Kesterner, 
+R. Outerovich, Ch. Paillard, M. Royo, A. Sasani, B. Sataric, M. Schmitt, F. Soubiran, 
 M. Torrent, M. Verstraete, He Xu, J. Zwanziger.
 
 It is worth to read carefully all the modifications that are mentioned in the present file,
@@ -128,7 +126,7 @@ specify the indices of the imposed coefficients with fixed coefficient value dur
 
 See the tests in which these input variables are used. 
 
-By He Xu, L. Bastogne, M. Schmitt and P. Ghosez (MR812, 851, 868)
+By He Xu, M. Schmitt, A. Sasani, L. Bastogne, S. Bandyopadhyay, and P. Ghosez (MR812, 851, 868, 894)
 
 
 **B.4** The TDEP formalism implemented in ABINIT (aTDEP), allowing to compute temperature-dependent phonon band structures,
