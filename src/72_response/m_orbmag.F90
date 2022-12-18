@@ -94,11 +94,10 @@ module m_orbmag
   integer,parameter :: pack1a(3) = (/4,2,3/)
 
   ! these parameters name the various output terms                                             
-  integer,parameter :: ibcc=1,ibvv=2
-  integer,parameter :: imcc=3,imvv=4,imnl=8,imden1=9
-  integer,parameter :: imlr=5,imbm=6
-  integer,parameter :: iomlmb=7
-  integer,parameter :: nterms=9
+  integer,parameter :: ibcc=1,ibvv1=2,ibvv2=3,imcc=4,imvv1=5,imvv2=6
+  integer,parameter :: imnl=7,imden1=8,imlr=9,imbm=10
+  integer,parameter :: iomlmb=11
+  integer,parameter :: nterms=11
 
   ! these parameters are constants used repeatedly
   
@@ -590,9 +589,9 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
    ! Finally ready to compute contributions to orbital magnetism and Berry curvature
    !--------------------------------------------------------------------------------
 
-   ! check aij against paw_ij 
-   call check_eig_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,&
-     & gs_hamk,ikpt,isppol,mcgk,mpi_enreg,my_nspinor,nband_k,npw_k,pawtab)
+   !! check aij against paw_ij 
+   !call check_eig_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,&
+   !  & gs_hamk,ikpt,isppol,mcgk,mpi_enreg,my_nspinor,nband_k,npw_k,pawtab)
 
    ABI_MALLOC(b1_k,(2,nband_k,3))
    ABI_MALLOC(b2_k,(2,nband_k,3))
@@ -604,23 +603,13 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
    orbmag_terms(:,:,:,ibcc) = orbmag_terms(:,:,:,ibcc) + trnrm*b1_k(:,:,:)
    orbmag_terms(:,:,:,imcc) = orbmag_terms(:,:,:,imcc) + trnrm*m1_k(:,:,:)
 
-   call orbmag_vv_k(atindx,b1_k,cg_k,cprj_k,dimlmn,dtset,eig_k,gs_hamk,&
-    & ikpt,isppol,m1_k,mcgk,mpi_enreg,my_nspinor,nband_k,npw_k,pawtab,pcg1_k)
-   orbmag_terms(:,:,:,ibvv) = orbmag_terms(:,:,:,ibvv) + trnrm*b1_k(:,:,:)
-   orbmag_terms(:,:,:,imvv) = orbmag_terms(:,:,:,imvv) + trnrm*m1_k(:,:,:)
+   call orbmag_vv_k(atindx,b1_k,b2_k,cg_k,cprj_k,dimlmn,dtset,eig_k,gs_hamk,&
+    & ikpt,isppol,m1_k,m2_k,mcgk,mpi_enreg,my_nspinor,nband_k,npw_k,pawtab,pcg1_k)
+   orbmag_terms(:,:,:,ibvv1) = orbmag_terms(:,:,:,ibvv1) + trnrm*b1_k(:,:,:)
+   orbmag_terms(:,:,:,ibvv2) = orbmag_terms(:,:,:,ibvv2) + trnrm*b2_k(:,:,:)
+   orbmag_terms(:,:,:,imvv1) = orbmag_terms(:,:,:,imvv1) + trnrm*m1_k(:,:,:)
+   orbmag_terms(:,:,:,imvv2) = orbmag_terms(:,:,:,imvv2) + trnrm*m2_k(:,:,:)
    
-   !call make_mbare_k(atindx,b1_k,b2_k,cg_k,cprj_k,cprj1_k,dimlmn,dterm,dtset,eig_k,&
-   ! & gs_hamk,ikpt,isppol,m1_k,m2_k,mcgk,mpi_enreg,my_nspinor,nband_k,npw_k,pawtab,pcg1_k)
-   !
-   !orbmag_terms(:,:,:,ib1) = orbmag_terms(:,:,:,ib1) + trnrm*b1_k(:,:,:)
-   !orbmag_terms(:,:,:,ib2) = orbmag_terms(:,:,:,ib2) + trnrm*b2_k(:,:,:)
-   !orbmag_terms(:,:,:,imcc) = orbmag_terms(:,:,:,imcc) + trnrm*m1_k(:,:,:)
-   !orbmag_terms(:,:,:,imvv) = orbmag_terms(:,:,:,imvv) + trnrm*m2_k(:,:,:)
-
-   !call make_v2b_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,gs_hamk,&
-   ! & ikpt,isppol,mcgk,mpi_enreg,m1_k,my_nspinor,nband_k,npw_k,pawtab)
-   !orbmag_terms(:,:,:,imvv) = orbmag_terms(:,:,:,imvv) + trnrm*m1_k(:,:,:)
-
    call orbmag_nl_k(atindx,cprj_k,dterm,dtset,eig_k,m1_k,nband_k,paw_ij,pawtab)
    orbmag_terms(:,:,:,imnl) = orbmag_terms(:,:,:,imnl) + trnrm*m1_k(:,:,:)
    
@@ -697,7 +686,8 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
  !! Lamb term ignored
  do iterm = 1, nterms
    if (iterm .EQ. ibcc) cycle
-   if (iterm .EQ. ibvv) cycle
+   if (iterm .EQ. ibvv1) cycle
+   if (iterm .EQ. ibvv2) cycle
    if (iterm .EQ. iomlmb) cycle
    orbmag_terms(:,:,:,iterm) = ucvol*orbmag_terms(:,:,:,iterm)
  end do
@@ -1252,8 +1242,8 @@ end subroutine orbmag_cc_k
 !!
 !! SOURCE
 
-subroutine orbmag_vv_k(atindx,b1_k,cg_k,cprj_k,dimlmn,dtset,eig_k,gs_hamk,&
-    & ikpt,isppol,m1_k,mcgk,mpi_enreg,my_nspinor,nband_k,npw_k,pawtab,pcg1_k)
+subroutine orbmag_vv_k(atindx,b1_k,b2_k,cg_k,cprj_k,dimlmn,dtset,eig_k,gs_hamk,&
+    & ikpt,isppol,m1_k,m2_k,mcgk,mpi_enreg,my_nspinor,nband_k,npw_k,pawtab,pcg1_k)
 
   !Arguments ------------------------------------
   !scalars
@@ -1265,7 +1255,8 @@ subroutine orbmag_vv_k(atindx,b1_k,cg_k,cprj_k,dimlmn,dtset,eig_k,gs_hamk,&
   !arrays
   integer,intent(in) :: atindx(dtset%natom),dimlmn(dtset%natom)
   real(dp),intent(in) :: cg_k(2,mcgk),eig_k(nband_k),pcg1_k(2,mcgk,3)
-  real(dp),intent(out) :: b1_k(2,nband_k,3),m1_k(2,nband_k,3)
+  real(dp),intent(out) :: b1_k(2,nband_k,3),b2_k(2,nband_k,3)
+  real(dp),intent(out) :: m1_k(2,nband_k,3),m2_k(2,nband_k,3)
   type(pawcprj_type),intent(in) :: cprj_k(dtset%natom,nband_k)
   type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
 
@@ -1282,7 +1273,8 @@ subroutine orbmag_vv_k(atindx,b1_k,cg_k,cprj_k,dimlmn,dtset,eig_k,gs_hamk,&
 
 !--------------------------------------------------------------------
 
- m1_k = zero
+ m1_k = zero; m2_k = zero
+ b1_k = zero; b2_k = zero
  
  ABI_MALLOC(bra,(2,npw_k))
  ABI_MALLOC(ket,(2,npw_k))
@@ -1363,8 +1355,10 @@ subroutine orbmag_vv_k(atindx,b1_k,cg_k,cprj_k,dimlmn,dtset,eig_k,gs_hamk,&
        end do !gdir
      end do !bdir
 
-     b1_k(1,nn,adir) = real(b1+bv2b); b1_k(2,nn,adir) = aimag(b1+bv2b)
-     m1_k(1,nn,adir) = real(m1+mv2b); m1_k(2,nn,adir) = aimag(m1+mv2b)
+     b1_k(1,nn,adir) = real(b1); b1_k(2,nn,adir) = aimag(b1)
+     b2_k(1,nn,adir) = real(bv2b); b2_k(2,nn,adir) = aimag(bv2b)
+     m1_k(1,nn,adir) = real(m1); m1_k(2,nn,adir) = aimag(m1)
+     m2_k(1,nn,adir) = real(mv2b); m2_k(2,nn,adir) = aimag(mv2b)
 
    end do !nn
  end do !adir
@@ -2254,14 +2248,14 @@ subroutine orbmag_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace)
  ! ***********************************************************************
 
  orbmag_bb=zero;orbmag_total=zero
- do iterms = ibvv+1, nterms
+ do iterms = ibvv2+1, nterms
    orbmag_total(1:2,1:3)=orbmag_total(1:2,1:3) + orbmag_trace(1:2,1:3,iterms)
    do iband=1, nband_k
      orbmag_bb(1:2,iband,1:3) = orbmag_bb(1:2,iband,1:3) + orbmag_terms(1:2,iband,1:3,iterms)
    end do
  end do
  berry_bb=zero;berry_total=zero
- do iterms = ibcc,ibvv
+ do iterms = ibcc,ibvv2
    berry_total(1:2,1:3)=berry_total(1:2,1:3) + orbmag_trace(1:2,1:3,iterms)
    do iband=1, nband_k
      berry_bb(1:2,iband,1:3) = berry_bb(1:2,iband,1:3) + orbmag_terms(1:2,iband,1:3,iterms)
@@ -2280,7 +2274,7 @@ subroutine orbmag_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace)
  call wrtout(ab_out,message,'COLL')
  write(message,'(a)')ch10
  call wrtout(ab_out,message,'COLL')
- write(message,'(a)')' Integral of Berry curvature, Cartesian directions : '
+ write(message,'(a)')' Chern vector, Cartesian directions : '
  call wrtout(ab_out,message,'COLL')
  write(message,'(3es16.8)') (berry_total(1,adir),adir=1,3)
  call wrtout(ab_out,message,'COLL')
@@ -2292,7 +2286,9 @@ subroutine orbmag_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace)
    call wrtout(ab_out,message,'COLL')
    write(message,'(a,3es16.8)') '     rho(1) CC : ',(orbmag_trace(1,adir,imcc),adir=1,3)
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)') '     rho(1) VV : ',(orbmag_trace(1,adir,imvv),adir=1,3)
+   write(message,'(a,3es16.8)') '    rho(1) VV1 : ',(orbmag_trace(1,adir,imvv1),adir=1,3)
+   call wrtout(ab_out,message,'COLL')
+   write(message,'(a,3es16.8)') '    rho(1) VV2 : ',(orbmag_trace(1,adir,imvv2),adir=1,3)
    call wrtout(ab_out,message,'COLL')
    write(message,'(a,3es16.8)') '     rho(0) NL : ',(orbmag_trace(1,adir,imnl),adir=1,3)
    call wrtout(ab_out,message,'COLL')
@@ -2304,11 +2300,13 @@ subroutine orbmag_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace)
    call wrtout(ab_out,message,'COLL')
    write(message,'(a,3es16.8)') '    Lamb terms : ',(orbmag_trace(1,adir,iomlmb),adir=1,3)
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a)')' Berry curvature, term-by-term breakdown : '
+   write(message,'(a)')' Chern vector, term-by-term breakdown : '
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)') ' BC cc : ',(orbmag_trace(1,adir,ibcc),adir=1,3)
+   write(message,'(a,3es16.8)') '  Ch CC : ',(orbmag_trace(1,adir,ibcc),adir=1,3)
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)') ' BC vv : ',(orbmag_trace(1,adir,ibvv),adir=1,3)
+   write(message,'(a,3es16.8)') ' Ch vv1 : ',(orbmag_trace(1,adir,ibvv1),adir=1,3)
+   call wrtout(ab_out,message,'COLL')
+   write(message,'(a,3es16.8)') ' Ch vv2 : ',(orbmag_trace(1,adir,ibvv2),adir=1,3)
    call wrtout(ab_out,message,'COLL')
  end if
 
@@ -2326,7 +2324,9 @@ subroutine orbmag_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace)
      call wrtout(ab_out,message,'COLL')
      write(message,'(a,3es16.8)') '     rho(1) CC : ',(orbmag_terms(1,iband,adir,imcc),adir=1,3)
      call wrtout(ab_out,message,'COLL')
-     write(message,'(a,3es16.8)') '     rho(1) VV : ',(orbmag_terms(1,iband,adir,imvv),adir=1,3)
+     write(message,'(a,3es16.8)') '    rho(1) VV1 : ',(orbmag_terms(1,iband,adir,imvv1),adir=1,3)
+     call wrtout(ab_out,message,'COLL')
+     write(message,'(a,3es16.8)') '    rho(1) VV2 : ',(orbmag_terms(1,iband,adir,imvv2),adir=1,3)
      call wrtout(ab_out,message,'COLL')
      write(message,'(a,3es16.8)') '     rho(0) NL : ',(orbmag_terms(1,iband,adir,imnl),adir=1,3)
      call wrtout(ab_out,message,'COLL')
@@ -2340,11 +2340,13 @@ subroutine orbmag_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace)
      call wrtout(ab_out,message,'COLL')
      write(message,'(a)')ch10
      call wrtout(ab_out,message,'COLL')
-     write(message,'(a,3es16.8)') ' Berry curvature : ',(berry_bb(1,iband,adir),adir=1,3)
+     write(message,'(a,3es16.8)') ' Chern vector : ',(berry_bb(1,iband,adir),adir=1,3)
      call wrtout(ab_out,message,'COLL')
-     write(message,'(a,3es16.8)') ' BC cc : ',(orbmag_terms(1,iband,adir,ibcc),adir=1,3)
+     write(message,'(a,3es16.8)') '  Ch CC : ',(orbmag_terms(1,iband,adir,ibcc),adir=1,3)
      call wrtout(ab_out,message,'COLL')
-     write(message,'(a,3es16.8)') ' BC vv : ',(orbmag_terms(1,iband,adir,ibvv),adir=1,3)
+     write(message,'(a,3es16.8)') ' Ch VV1 : ',(orbmag_terms(1,iband,adir,ibvv1),adir=1,3)
+     call wrtout(ab_out,message,'COLL')
+     write(message,'(a,3es16.8)') ' Ch VV2 : ',(orbmag_terms(1,iband,adir,ibvv2),adir=1,3)
      call wrtout(ab_out,message,'COLL')
    end do
  end if
