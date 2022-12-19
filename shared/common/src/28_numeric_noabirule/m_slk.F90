@@ -2246,6 +2246,7 @@ subroutine compute_eigen1(comm,processor,cplex,nbli_global,nbco_global,matrix,ve
  real(dp),intent(inout) :: vector(:)
 
 !Local variables-------------------------------
+ integer :: i,j
  integer :: ierr
  type(matrix_scalapack) :: sca_matrix1
  type(matrix_scalapack) :: sca_matrix2
@@ -2366,6 +2367,7 @@ subroutine compute_eigen2(comm,processor,cplex,nbli_global,nbco_global,matrix1,m
  real(dp),intent(inout) :: vector(:)
 
 !Local variables-------------------------------
+ integer :: i,j
  integer :: ierr
  type(matrix_scalapack) :: sca_matrix1
  type(matrix_scalapack) :: sca_matrix2
