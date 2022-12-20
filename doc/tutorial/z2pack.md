@@ -7,7 +7,9 @@ acknowledgments: M. Hirsbrunner
 
 ## The Z2Pack interface tutorial
 
-This tutorial aims at showing how to use the Z2Pack interface to compute
+This tutorial aims at showing how to use the
+[Z2Pack](https://z2pack.greschd.ch/en/latest/index.html) application
+with an interface to ABINIT, to compute
 the Z2 topological invariant and find topologically non-trivial insulators.
 
 You will learn how to use Wannier90 and Z2Pack to follow Wannier charge centers
@@ -160,7 +162,11 @@ that we will now compute using Z2Pack.
 
 ## 3. Computing the Z2 invariant using Z2Pack
 
-For this example, you need to download first four files from GitHub, 
+You need first to install Z2Pack, if not yet available on your computer.
+Please, see [Z2Pack home](https://z2pack.greschd.ch/en/latest/index.html), or directly
+the [Installation and setup information](https://z2pack.greschd.ch/en/latest/tutorial/installation.html).
+
+Then, to run the example presented in this section, you need to download four big files from GitHub, 
 <https://github.com/abinit/abinit_assets/tree/main/tests/tutoplugs/Input/results_tz2_3> ,
 and store them in the directory results_tz2_3, such that
 
@@ -185,13 +191,13 @@ We need two time-reversal invariant planes, in this case the $k_z=0$ and $k_z=\p
 This function also runs the calculation. It will create a directory where for each new line on the
 surface, corresponding to different points in the x
 direction, a computation using ABINIT+Wannier90 is performed.
-This data is preserved and if you want to add line, you can use the argument load=True which will restart the calculation
+This data is preserved and if you want to add a line, you can use the argument load=True which will restart the calculation
 and perform only the lines that were not already done.
 This is what is done in this tutorial, as in order for this calculation to be sufficiently converged, it takes too much time.
 
 * The surface invariant is stored in the z2pack.invariant.z2 variable.
 
-The script writes:
+The script delivers:
 
     for 0 GPa:
     z2 topological invariant at kz = 0.0: 0
@@ -222,7 +228,7 @@ To calculate this invariant on a coarse k-mesh, we consider the points marking t
 of the largest gap at each $k_x$ value rather than a horizontal line.
 These points are marked by blue diamonds above.
 Whenever the location of the middle of the gap changes between two adjacent $k_x$ values,
-we count the number of HWCC that exist between the two gap centers and sum this number for all the crossings as $k_x$ goes from 0 to $pi/a_x$.
+we count the number of HWCC that exist between the two gap centers and sum this number for all the crossings as $k_x$ goes from 0 to $\pi/a_x$.
 If this value is even, $\Delta=0$, and if it is odd, $\Delta=1$.
 Performing this counting procedure for both $k_z$ planes produces $\Delta=0$ for each case
 besides $k_z=0.5$ with $P=5$ GPa, indicating that the 0 Gpa phase is trivial and the 5 GPa phase is topological.
