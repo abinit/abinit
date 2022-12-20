@@ -1056,11 +1056,12 @@ if test ! -z "${status}" -o ! -z "${mandatory}"; then
 fi
 
 # Always generate a build script for required fallbacks
-AC_CONFIG_FILES([fallbacks/INSTALL fallbacks/README])
+#AC_CONFIG_FILES([fallbacks/INSTALL fallbacks/README])
 # AC_CONFIG_FILES([fallbacks/build-abinit-fallbacks.sh])
-AC_CONFIG_COMMANDS([chmod +x fallbacks/build-abinit-fallbacks.sh])
-AC_OUTPUT
+#AC_CONFIG_COMMANDS([chmod +x fallbacks/build-abinit-fallbacks.sh])
+#AC_OUTPUT
 # Old formulation: AC_OUTPUT([fallbacks/INSTALL fallbacks/README fallbacks/build-abinit-fallbacks.sh],[chmod +x fallbacks/build-abinit-fallbacks.sh])
+AC_OUTPUT([fallbacks/INSTALL fallbacks/README fallbacks/build-abinit-fallbacks.sh],[chmod +x fallbacks/build-abinit-fallbacks.sh])
 
 # Check that we have all required fallbacks
 ABI_FALLBACKS_VALIDATE([${abi_fbk_required}])
