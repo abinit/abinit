@@ -234,7 +234,7 @@ module m_slk
    procedure :: copy => matrix_scalapack_copy
     ! Copy object
 
-   procedure :: zdhp_invert => slk_zdhp_invert
+   procedure :: hpd_invert => slk_hpd_invert
     ! Inverse of a Hermitian positive definite matrix.
 
    procedure :: ptrans => slk_ptrans
@@ -268,6 +268,7 @@ module m_slk
     ! Returns the byte size and the MPI datatype
 
  end type matrix_scalapack
+!!***
 
 !!****t* m_slk/slkmat_sp_t
 !! NAME
@@ -310,7 +311,11 @@ module m_slk
    procedure :: heev => slkmat_sp_heev
     ! Compute eigenvalues and, optionally, eigenvectors of an Hermitian matrix A. A * X = lambda * X
 
+   procedure :: hpd_invert => slkmat_sp_hpd_invert
+    ! Inverse of a Hermitian positive definite matrix.
+
  end type slkmat_sp_t
+!!***
 
  public :: block_dist_1d                   ! Return block size for one-dimensional block column/row distribution
  public :: slk_has_elpa                    ! Return True if ELPA support is activated
@@ -2071,16 +2076,16 @@ end subroutine matrix_to_reference
 !!    = "A":  Full matrix (used for general complex matrices)
 !!
 !! SIDE EFFECTS
-!!  Slk_mat<matrix_scalapack>=The distributed matrix.
+!!  mat<matrix_scalapack>=The distributed matrix.
 !!    %buffer_cplx=Local buffer containg the value this node is dealing with.
 !!
 !! SOURCE
 
-subroutine slk_matrix_from_global_dpc_2D(Slk_mat, uplo, glob_mat)
+subroutine slk_matrix_from_global_dpc_2D(mat, uplo, glob_mat)
 
 !Arguments ------------------------------------
 !scalars
- class(matrix_scalapack),intent(inout)  :: Slk_mat
+ class(matrix_scalapack),intent(inout)  :: mat
  character(len=*),intent(in) :: uplo
 !array
  complex(dpc),intent(in) :: glob_mat(:,:)
@@ -2090,41 +2095,41 @@ subroutine slk_matrix_from_global_dpc_2D(Slk_mat, uplo, glob_mat)
 
 !************************************************************************
 
- ABI_CHECK(allocated(Slk_mat%buffer_cplx), "%buffer_cplx not allocated")
+ ABI_CHECK(allocated(mat%buffer_cplx), "%buffer_cplx not allocated")
 
  select case (uplo(1:1))
 
  case ("A", "a")
    ! Full global matrix is used.
-   do jj=1,Slk_mat%sizeb_local(2)
-     do ii=1,Slk_mat%sizeb_local(1)
-       call slk_mat%loc2glob(ii, jj, iglob, jglob)
-       Slk_mat%buffer_cplx(ii,jj) = glob_mat(iglob,jglob)
+   do jj=1,mat%sizeb_local(2)
+     do ii=1,mat%sizeb_local(1)
+       call mat%loc2glob(ii, jj, iglob, jglob)
+       mat%buffer_cplx(ii,jj) = glob_mat(iglob,jglob)
      end do
    end do
 
  case ("U", "u")
    ! Only the upper triangle of the global matrix is used.
-   do jj=1,Slk_mat%sizeb_local(2)
-     do ii=1,Slk_mat%sizeb_local(1)
-       call slk_mat%loc2glob(ii, jj, iglob, jglob)
+   do jj=1,mat%sizeb_local(2)
+     do ii=1,mat%sizeb_local(1)
+       call mat%loc2glob(ii, jj, iglob, jglob)
        if (jglob>=iglob) then
-         Slk_mat%buffer_cplx(ii,jj) =        glob_mat(iglob,jglob)
+         mat%buffer_cplx(ii,jj) =        glob_mat(iglob,jglob)
        else
-         Slk_mat%buffer_cplx(ii,jj) = DCONJG(glob_mat(jglob,iglob))
+         mat%buffer_cplx(ii,jj) = DCONJG(glob_mat(jglob,iglob))
        end if
      end do
    end do
 
  case ("L", "l")
    ! Only the lower triangle of the global matrix is used.
-   do jj=1,Slk_mat%sizeb_local(2)
-     do ii=1,Slk_mat%sizeb_local(1)
-       call slk_mat%loc2glob(ii, jj, iglob, jglob)
+   do jj=1,mat%sizeb_local(2)
+     do ii=1,mat%sizeb_local(1)
+       call mat%loc2glob(ii, jj, iglob, jglob)
        if (jglob<=iglob) then
-         Slk_mat%buffer_cplx(ii,jj) =        glob_mat(iglob,jglob)
+         mat%buffer_cplx(ii,jj) =        glob_mat(iglob,jglob)
        else
-         Slk_mat%buffer_cplx(ii,jj) = DCONJG(glob_mat(jglob,iglob))
+         mat%buffer_cplx(ii,jj) = DCONJG(glob_mat(jglob,iglob))
        end if
      end do
    end do
@@ -2157,16 +2162,16 @@ end subroutine slk_matrix_from_global_dpc_2D
 !!    = "L":  Lower triangular
 !!
 !! SIDE EFFECTS
-!!  Slk_mat<matrix_scalapack>=The distributed matrix.
+!!  mat<matrix_scalapack>=The distributed matrix.
 !!    %buffer_cplx=Local buffer containg the value this node is dealing with.
 !!
 !! SOURCE
 
-subroutine slk_matrix_from_global_dpc_1Dp(Slk_mat,uplo,glob_pmat)
+subroutine slk_matrix_from_global_dpc_1Dp(mat,uplo,glob_pmat)
 
 !Arguments ------------------------------------
 !scalars
- class(matrix_scalapack),intent(inout)  :: Slk_mat
+ class(matrix_scalapack),intent(inout)  :: mat
  character(len=*),intent(in) :: uplo
 !array
  complex(dpc),intent(in) :: glob_pmat(:)
@@ -2177,7 +2182,7 @@ subroutine slk_matrix_from_global_dpc_1Dp(Slk_mat,uplo,glob_pmat)
 
 !************************************************************************
 
- ABI_CHECK(allocated(Slk_mat%buffer_cplx), "%buffer_cplx not allocated")
+ ABI_CHECK(allocated(mat%buffer_cplx), "%buffer_cplx not allocated")
 
  szm = SIZE(glob_pmat)
  n = NINT( (-1 + SQRT(one+8*szm) )*half )
@@ -2189,16 +2194,16 @@ subroutine slk_matrix_from_global_dpc_1Dp(Slk_mat,uplo,glob_pmat)
 
  case ("U", "u")
    ! Only the upper triangle of the global matrix is used.
-   do jj=1,Slk_mat%sizeb_local(2)
-     do ii=1,Slk_mat%sizeb_local(1)
-       call slk_mat%loc2glob(ii, jj, iglob, jglob)
+   do jj=1,mat%sizeb_local(2)
+     do ii=1,mat%sizeb_local(1)
+       call mat%loc2glob(ii, jj, iglob, jglob)
 
        if (jglob>=iglob) then
          ind = iglob + jglob*(jglob-1)/2
-         Slk_mat%buffer_cplx(ii,jj) =        glob_pmat(ind)
+         mat%buffer_cplx(ii,jj) =        glob_pmat(ind)
        else
          ind = jglob + iglob*(iglob-1)/2
-         Slk_mat%buffer_cplx(ii,jj) = DCONJG( glob_pmat(ind) )
+         mat%buffer_cplx(ii,jj) = DCONJG( glob_pmat(ind) )
        end if
 
      end do
@@ -2206,16 +2211,16 @@ subroutine slk_matrix_from_global_dpc_1Dp(Slk_mat,uplo,glob_pmat)
 
  case ("L", "l")
    ! Only the lower triangle of the global matrix is used.
-   do jj=1,Slk_mat%sizeb_local(2)
-     do ii=1,Slk_mat%sizeb_local(1)
-       call slk_mat%loc2glob(ii, jj, iglob, jglob)
+   do jj=1,mat%sizeb_local(2)
+     do ii=1,mat%sizeb_local(1)
+       call mat%loc2glob(ii, jj, iglob, jglob)
 
        if (jglob<=iglob) then
          ind = iglob + (jglob-1)*(2*n-jglob)/2
-         Slk_mat%buffer_cplx(ii,jj) =        glob_pmat(ind)
+         mat%buffer_cplx(ii,jj) =        glob_pmat(ind)
        else
          ind = jglob + (iglob-1)*(2*n-iglob)/2
-         Slk_mat%buffer_cplx(ii,jj) = DCONJG( glob_pmat(ind) )
+         mat%buffer_cplx(ii,jj) = DCONJG( glob_pmat(ind) )
        end if
 
      end do
@@ -2251,11 +2256,11 @@ end subroutine slk_matrix_from_global_dpc_1Dp
 !!
 !! SOURCE
 
-subroutine slk_matrix_to_global_dpc_2D(Slk_mat, uplo, glob_mat)
+subroutine slk_matrix_to_global_dpc_2D(mat, uplo, glob_mat)
 
 !Arguments ------------------------------------
 !scalaras
- class(matrix_scalapack),intent(in) :: Slk_mat
+ class(matrix_scalapack),intent(in) :: mat
  character(len=*),intent(in) :: uplo
 !arrays
  complex(dpc),intent(inout) :: glob_mat(:,:)
@@ -2269,28 +2274,28 @@ subroutine slk_matrix_to_global_dpc_2D(Slk_mat, uplo, glob_mat)
 
  case ("A", "a")
    ! Full global matrix has to be filled.
-   do jj=1,Slk_mat%sizeb_local(2)
-     do ii=1,Slk_mat%sizeb_local(1)
-       call slk_mat%loc2glob(ii, jj, iglob, jglob)
-       glob_mat(iglob,jglob) = Slk_mat%buffer_cplx(ii,jj)
+   do jj=1,mat%sizeb_local(2)
+     do ii=1,mat%sizeb_local(1)
+       call mat%loc2glob(ii, jj, iglob, jglob)
+       glob_mat(iglob,jglob) = mat%buffer_cplx(ii,jj)
      end do
    end do
 
  case ("U", "u")
    ! Only the upper triangle of the global matrix is filled.
-   do jj=1,Slk_mat%sizeb_local(2)
-     do ii=1,Slk_mat%sizeb_local(1)
-       call slk_mat%loc2glob(ii, jj, iglob, jglob)
-       if (jglob>=iglob) glob_mat(iglob,jglob) = Slk_mat%buffer_cplx(ii,jj)
+   do jj=1,mat%sizeb_local(2)
+     do ii=1,mat%sizeb_local(1)
+       call mat%loc2glob(ii, jj, iglob, jglob)
+       if (jglob>=iglob) glob_mat(iglob,jglob) = mat%buffer_cplx(ii,jj)
      end do
    end do
 
  case ("L", "l")
    ! Only the lower triangle of the global matrix is filled.
-   do jj=1,Slk_mat%sizeb_local(2)
-     do ii=1,Slk_mat%sizeb_local(1)
-       call slk_mat%loc2glob(ii, jj, iglob, jglob)
-       if (jglob<=iglob) glob_mat(iglob,jglob) = Slk_mat%buffer_cplx(ii,jj)
+   do jj=1,mat%sizeb_local(2)
+     do ii=1,mat%sizeb_local(1)
+       call mat%loc2glob(ii, jj, iglob, jglob)
+       if (jglob<=iglob) glob_mat(iglob,jglob) = mat%buffer_cplx(ii,jj)
      end do
    end do
 
@@ -4240,22 +4245,21 @@ end subroutine slk_invert
 
 !----------------------------------------------------------------------
 
-!!****f* m_slk/slk_zdhp_invert
+!!****f* m_slk/slk_hpd_invert
 !! NAME
-!! slk_zdhp_invert
+!! slk_hpd_invert
 !!
 !! FUNCTION
 !!  Compute the inverse of an Hermitian positive definite matrix.
 !!
 !! INPUTS
-!!  uplo(global input)
+!!  uplo: global input
 !!    = 'U':  Upper triangle of sub( A ) is stored;
 !!    = 'L':  Lower triangle of sub( A ) is stored.
 !!  [full]: If full PBLAS matrix is neeeded. Default: True
 !!
 !! SIDE EFFECTS
-!!  Slk_mat<type(matrix_scalapack)>=The object storing the local buffer, the array descriptor, the context
-!!    and other quantities needed to call ScaLAPACK routines.
+!!  mat= The object storing the local buffer, the array descriptor, the context, etc.
 !!    On entry, this array contains the local pieces of the N-by-N Hermitian distributed matrix sub( A ) to be factored.
 !!    If UPLO = 'U', the leading N-by-N upper triangular part of sub( A ) contains the upper triangular part of the matrix,
 !!    and its strictly lower triangular part is not referenced.
@@ -4265,38 +4269,35 @@ end subroutine slk_invert
 !!
 !! SOURCE
 
-subroutine slk_zdhp_invert(Slk_mat, uplo, full)
+subroutine slk_hpd_invert(mat, uplo, full)
 
 !Arguments ------------------------------------
-!scalars
  character(len=*),intent(in) :: uplo
- class(matrix_scalapack),intent(inout) :: Slk_mat
+ class(matrix_scalapack),intent(inout) :: mat
  logical,optional,intent(in) :: full
 
 #ifdef HAVE_LINALG_SCALAPACK
 !Local variables ------------------------------
 !scalars
- integer :: info, mm
- integer :: il1, il2, iglob1, iglob2
+ integer :: info, mm, il1, il2, iglob1, iglob2
  type(matrix_scalapack) :: work_mat
  logical :: full__
- !character(len=500) :: msg
 
 !************************************************************************
 
- ABI_CHECK(allocated(Slk_mat%buffer_cplx), "buffer_cplx not allocated")
+ ABI_CHECK(allocated(mat%buffer_cplx), "buffer_cplx not allocated")
 
  ! ZPOTRF computes the Cholesky factorization of a complex Hermitian positive definite.
  !  A = U**H * U,   if UPLO = 'U', or
  !  A = L  * L**H,  if UPLO = 'L',
- mm = Slk_mat%sizeb_global(1)
- call PZPOTRF(uplo, mm, Slk_mat%buffer_cplx, 1, 1, Slk_mat%descript%tab, info)
+ mm = mat%sizeb_global(1)
+ call PZPOTRF(uplo, mm, mat%buffer_cplx, 1, 1, mat%descript%tab, info)
  ABI_CHECK(info == 0, sjoin("PZPOTRF returned info:", itoa(info)))
 
  ! PZPOTRI computes the inverse of a complex Hermitian positive definite
  ! distributed matrix sub( A ) = A(IA:IA+N-1,JA:JA+N-1) using the
  ! Cholesky factorization sub( A ) = U**H*U or L*L**H computed by PZPOTRF.
- call PZPOTRI(uplo, mm, Slk_mat%buffer_cplx, 1, 1, Slk_mat%descript%tab, info)
+ call PZPOTRI(uplo, mm, mat%buffer_cplx, 1, 1, mat%descript%tab, info)
  ABI_CHECK(info == 0, sjoin("PZPOTRI returned info:", itoa(info)))
 
  full__ = .True.; if (present(full)) full__ = full
@@ -4306,36 +4307,128 @@ subroutine slk_zdhp_invert(Slk_mat, uplo, full)
    !     2)  Call pzgeadd to compute: sub(C) := beta*sub(C) + alpha*op(sub(A))
    !     3)  Divide diagonal elements by two.
 
-   !call slk_mat%uplo_set(merge("L", "U", uplo=="U")  czero)
-   do il2=1,slk_mat%sizeb_local(2)
-     iglob2 = slk_mat%loc2gcol(il2)
-     do il1=1,slk_mat%sizeb_local(1)
-       iglob1 = slk_mat%loc2grow(il1)
-       if (uplo == "L" .and. iglob2 > iglob1) slk_mat%buffer_cplx(il1, il2) = zero
-       if (uplo == "U" .and. iglob2 < iglob1) slk_mat%buffer_cplx(il1, il2) = zero
+   do il2=1,mat%sizeb_local(2)
+     iglob2 = mat%loc2gcol(il2)
+     do il1=1,mat%sizeb_local(1)
+       iglob1 = mat%loc2grow(il1)
+       if (uplo == "L" .and. iglob2 > iglob1) mat%buffer_cplx(il1, il2) = zero
+       if (uplo == "U" .and. iglob2 < iglob1) mat%buffer_cplx(il1, il2) = zero
      end do
    end do
 
-   call slk_mat%copy(work_mat, empty=.False.)
+   call mat%copy(work_mat, empty=.False.)
 
    ! call pzgeadd(trans, m, n, alpha, a, ia, ja, desca, beta, c, ic, jc, descc)
    ! sub(C) := beta*sub(C) + alpha*op(sub(A))
    call pzgeadd("C", mm, mm, cone, work_mat%buffer_cplx, 1, 1, work_mat%descript%tab, &
-         cone, slk_mat%buffer_cplx, 1, 1, Slk_mat%descript%tab)
+         cone, mat%buffer_cplx, 1, 1, mat%descript%tab)
    call work_mat%free()
 
-   do il2=1,slk_mat%sizeb_local(2)
-     iglob2 = slk_mat%loc2gcol(il2)
-     do il1=1,slk_mat%sizeb_local(1)
-       iglob1 = slk_mat%loc2grow(il1)
-       if (iglob2 == iglob1) slk_mat%buffer_cplx(il1, il2) = half * slk_mat%buffer_cplx(il1, il2)
+   do il2=1,mat%sizeb_local(2)
+     iglob2 = mat%loc2gcol(il2)
+     do il1=1,mat%sizeb_local(1)
+       iglob1 = mat%loc2grow(il1)
+       if (iglob2 == iglob1) mat%buffer_cplx(il1, il2) = half * mat%buffer_cplx(il1, il2)
      end do
    end do
  end if ! full__
-
 #endif
 
-end subroutine slk_zdhp_invert
+end subroutine slk_hpd_invert
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_slk/slkmat_sp_hpd_invert
+!! NAME
+!! slkmat_sp_hpd_invert
+!!
+!! FUNCTION
+!!  Compute the inverse of an Hermitian positive definite matrix.
+!!
+!! INPUTS
+!!  uplo: global input
+!!    = 'U':  Upper triangle of sub( A ) is stored;
+!!    = 'L':  Lower triangle of sub( A ) is stored.
+!!  [full]: If full PBLAS matrix is neeeded. Default: True
+!!
+!! SIDE EFFECTS
+!!  mat= The object storing the local buffer, the array descriptor, the context, etc.
+!!    On entry, this array contains the local pieces of the N-by-N Hermitian distributed matrix sub( A ) to be factored.
+!!    If UPLO = 'U', the leading N-by-N upper triangular part of sub( A ) contains the upper triangular part of the matrix,
+!!    and its strictly lower triangular part is not referenced.
+!!    If UPLO = 'L', the leading N-by-N lower triangular part of sub( A ) contains the lower triangular part of the distribu-
+!!    ted matrix, and its strictly upper triangular part is not referenced.
+!!    On exit, the local pieces of the upper or lower triangle of the (Hermitian) inverse of sub( A )
+!!
+!! SOURCE
+
+subroutine slkmat_sp_hpd_invert(mat, uplo, full)
+
+!Arguments ------------------------------------
+ character(len=*),intent(in) :: uplo
+ class(slkmat_sp_t),intent(inout) :: mat
+ logical,optional,intent(in) :: full
+
+#ifdef HAVE_LINALG_SCALAPACK
+!Local variables ------------------------------
+!scalars
+ integer :: info, mm, il1, il2, iglob1, iglob2
+ type(slkmat_sp_t) :: work_mat
+ logical :: full__
+
+!************************************************************************
+
+ ABI_CHECK(allocated(mat%buffer_cplx), "buffer_cplx not allocated")
+
+ ! ZPOTRF computes the Cholesky factorization of a complex Hermitian positive definite.
+ !  A = U**H * U,   if UPLO = 'U', or
+ !  A = L  * L**H,  if UPLO = 'L',
+ mm = mat%sizeb_global(1)
+ call PCPOTRF(uplo, mm, mat%buffer_cplx, 1, 1, mat%descript%tab, info)
+ ABI_CHECK(info == 0, sjoin("PCPOTRF returned info:", itoa(info)))
+
+ ! PZPOTRI computes the inverse of a complex Hermitian positive definite
+ ! distributed matrix sub( A ) = A(IA:IA+N-1,JA:JA+N-1) using the
+ ! Cholesky factorization sub( A ) = U**H*U or L*L**H computed by PZPOTRF.
+ call PCPOTRI(uplo, mm, mat%buffer_cplx, 1, 1, mat%descript%tab, info)
+ ABI_CHECK(info == 0, sjoin("PCPOTRI returned info:", itoa(info)))
+
+ full__ = .True.; if (present(full)) full__ = full
+ if (full__) then
+   ! Only the uplo part contains the inverse so we need to fill the other triangular part.
+   !     1)  Fill the missing triangle with zeros and copy results to work_mat
+   !     2)  Call pzgeadd to compute: sub(C) := beta*sub(C) + alpha*op(sub(A))
+   !     3)  Divide diagonal elements by two.
+
+   do il2=1,mat%sizeb_local(2)
+     iglob2 = mat%loc2gcol(il2)
+     do il1=1,mat%sizeb_local(1)
+       iglob1 = mat%loc2grow(il1)
+       if (uplo == "L" .and. iglob2 > iglob1) mat%buffer_cplx(il1, il2) = zero_sp
+       if (uplo == "U" .and. iglob2 < iglob1) mat%buffer_cplx(il1, il2) = zero_sp
+     end do
+   end do
+
+   call mat%copy(work_mat, empty=.False.)
+
+   ! call pzgeadd(trans, m, n, alpha, a, ia, ja, desca, beta, c, ic, jc, descc)
+   ! sub(C) := beta*sub(C) + alpha*op(sub(A))
+   call pcgeadd("C", mm, mm, cone_sp, work_mat%buffer_cplx, 1, 1, work_mat%descript%tab, &
+         cone_sp, mat%buffer_cplx, 1, 1, mat%descript%tab)
+   call work_mat%free()
+
+   do il2=1,mat%sizeb_local(2)
+     iglob2 = mat%loc2gcol(il2)
+     do il1=1,mat%sizeb_local(1)
+       iglob1 = mat%loc2grow(il1)
+       if (iglob2 == iglob1) mat%buffer_cplx(il1, il2) = 0.5_sp * mat%buffer_cplx(il1, il2)
+     end do
+   end do
+ end if ! full__
+#endif
+
+end subroutine slkmat_sp_hpd_invert
 !!***
 
 !----------------------------------------------------------------------
@@ -4449,7 +4542,6 @@ subroutine slk_ptrans(in_mat, trans, out_mat, &
 
 end subroutine slk_ptrans
 !!***
-
 
 !!****f* m_slk/slkmat_sp_ptrans
 !! NAME

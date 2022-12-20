@@ -1615,7 +1615,7 @@ subroutine exc_diago_coupling_hegv(Bsp,BS_files,Hdr_bse,prtvol,comm)
 !!END DEBUG
 !
 !#else
-   ! call Slk_ovlp%zdhp_invert(uplo)
+   ! call Slk_ovlp%hpd_invert(uplo)
    ! call hermitianize(Slk_ovlp%buffer_cplx,uplo)
    ! !call slk_symmetrize(Slk_ovlp,uplo,"Hermitian")
 

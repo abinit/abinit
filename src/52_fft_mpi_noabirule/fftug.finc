@@ -1,6 +1,6 @@
 !Local variables-------------------------------
 !scalars
- integer,parameter :: me_g0=1,ndat1=1,option0=0,cplex0=0,npwout0=0
+ integer,parameter :: ndat1 = 1, option0 = 0, cplex0 = 0, npwout0 = 0
  integer :: ldxyz,gsp_pt,box_pt,nthreads,dat,ug_ptr,ur_ptr
  real(dp),parameter :: weight1_i=one, weight1_r=one
  logical :: use_fftrisc
@@ -53,8 +53,8 @@
  else
 
    nthreads = xomp_get_num_threads(open_parallel=.TRUE.)
+
    if (.not. SPAWN_THREADS_HERE(ndat, nthreads)) then
-    
      ! Insert fg in fg_aug defined on the (augmented) FFT mesh
      call TK_PREF(gsph2box) (nx,ny,nz,ldx,ldy,ldz,ndat,npw_k,istwf_k,kg_k,ug,ur)
 
@@ -75,5 +75,4 @@
        call FFT_PREF(fftpad) (ur(box_pt:),nx,ny,nz,ldx,ldy,ldz,ndat1,mgfft,+1,gbound)
      end do
    end if
-   !
  end if

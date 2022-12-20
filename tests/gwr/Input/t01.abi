@@ -122,8 +122,8 @@ pseudos "Pseudodojo_nc_sr_04_pbe_standard_psp8/Si.psp8"
 #%% files_to_test =
 #%%   t01.abo, tolnlines = 25, tolabs = 1.1e-3, tolrel = 3.0e-3, fld_options = -medium;
 #%%   t01o_DS3_SIGC_IT, tolnlines=50, tolabs = 1.1e-3, tolrel = 3.0e-3, fld_options = -medium;
-#%%   t01o_DS3_SIGXC_IW, tolnlines=50, tolabs = 1.1e-3, tolrel = 3.0e-3, fld_options = -medium;
-#%%   t01o_DS3_SIGXC_RW, tolnlines=200, tolabs = 1.1e-3, tolrel = 3.0e-3, fld_options = -medium;
+#%%   t01o_DS3_SIGXC_IW, tolnlines=80, tolabs = 1.1e-3, tolrel = 3.0e-3, fld_options = -medium;
+#%%   t01o_DS3_SIGXC_RW, tolnlines=500, tolabs = 1.1e-3, tolrel = 3.0e-3, fld_options = -medium;
 #%% [paral_info]
 #%% max_nprocs = 12
 #%% [extra_info]

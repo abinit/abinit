@@ -16,17 +16,17 @@
  fftalga=fftalg/100; fftalgc=MOD(fftalg,10)
  nx=ngfft(1); ny=ngfft(2); nz=ngfft(3)
 
- SELECT CASE (fftalga)
+ select case (fftalga)
 
- CASE (FFT_FFTW3) 
+ case (FFT_FFTW3) 
    ldx=nx; ldy=ny; ldz=nz ! No augmentation, the caller does not support it.
    call fftw3_fftug(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,nspinor*ndat,istwf_k,mgfft,kg_k,gbound_k,ug,ur)
 
- CASE (FFT_DFTI) 
+ case (FFT_DFTI) 
    ldx=nx; ldy=ny; ldz=nz ! No augmentation, the caller does not support it.
    call dfti_fftug(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,nspinor*ndat,istwf_k,mgfft,kg_k,gbound_k,ug,ur)
 
- CASE (FFT_SG, FFT_SG2002) 
+ case (FFT_SG, FFT_SG2002) 
    ldx=ngfft(4); ldy=ngfft(5); ldz=ngfft(6) ! Here augmentation is supported.
    ABI_MALLOC(fofgin,(2,npw_k))
    ABI_MALLOC(fofr,(2,ldx,ldy,ldz))
@@ -46,7 +46,7 @@
 
        !this is not thread-safe! use ndat1
        call sg_fftrisc(cplex0,dum_denpot,fofgin,dum_fofgout,fofr,gbound_k,gbound_k,istwf_k,&
-&        kg_k,dum_kg_kout,mgfft,ndat1,ngfft,npw_k,0,ldx,ldy,ldz,option0,weight1_r,weight1_i)
+                       kg_k,dum_kg_kout,mgfft,ndat1,ngfft,npw_k,0,ldx,ldy,ldz,option0,weight1_r,weight1_i)
 
        ! Fill the output array on the ngfft(1:3) mesh.
        do iz=1,nz  
@@ -91,13 +91,12 @@
        end do
      end do
      ABI_FREE(ftarr)
-     !
    end if
 
    ABI_FREE(fofgin)
    ABI_FREE(fofr)
 
- CASE DEFAULT
-   write(msg,"(a,i0)")"Wrong fftalga= ",fftalga
+ case default
+   write(msg,"(a,i0)")"Wrong fftalga: ",fftalga
    ABI_ERROR(msg)
- END SELECT
+ end select

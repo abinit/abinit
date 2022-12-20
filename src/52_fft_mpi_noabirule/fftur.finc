@@ -1,6 +1,6 @@
 !Local variables-------------------------------
 !scalars
- integer,parameter :: ndat1=1,option3=3,cplex0=0,npwin0=0
+ integer,parameter :: ndat1 = 1, option3 = 3, cplex0 = 0, npwin0 = 0
  integer :: ldxyz,gsp_pt,box_pt,nthreads,dat,ug_ptr,ur_ptr
  real(dp),parameter :: weight_i=one,weight_r=one
  logical :: use_fftrisc
@@ -14,7 +14,7 @@
 
  ! TODO ndat > 1 with threads and istwf_k == 2.
  !use_fftrisc = (mod(fftalg,10)==2 .and. istwf_k==1 .and. ndat==1)
- use_fftrisc = (mod(fftalg,10)==2 .and. istwf_k==1)
+ use_fftrisc = (mod(fftalg, 10) == 2 .and. istwf_k == 1)
 
  if (use_fftrisc) then
    !call wrtout(std_out, "fft_ug: using_fftrisc")
