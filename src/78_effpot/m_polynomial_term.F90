@@ -113,7 +113,7 @@ CONTAINS  !=====================================================================
 !!                                          power_disp. For example:
 !!                                          ((Sr_y-O1_y)^1(Sr_y-O1_y)^1 => (Sr_y-O1_y)^2)
 !!                                 if FALSE, default, do nothing
-!!                                         
+!!
 !! OUTPUT
 !! polynomial_term<type(polynomial_term)> = polynomial_term datatype is now initialized
 !!
@@ -170,11 +170,21 @@ subroutine polynomial_term_init(atindx,cell,direction,ndisp,nstrain,polynomial_t
    write(msg,'(a)')' power_strain and nstrain have not the same size'
    ABI_ERROR(msg)
  end if
- 
+
  if (size(strain) /= nstrain) then
    write(msg,'(a)')' strain and nstrain have not the same size'
    ABI_ERROR(msg)
  end if
+
+ ! FIXME: hexu: check why this does not work?
+! if (ndisp>1) then
+!   print *, "atinx(1, 1:ndisp)", atindx(1, 1:ndisp)
+!   if (.not. all(atindx(1, 1:ndisp)-atindx(1,1)==0)) then
+!     write(msg,'(a)')' Not all displacement pairs start with the same atom.'
+!     print *, "atinx(1, 1:ndisp)", atindx(1, 1:ndisp)
+!     ABI_ERROR(msg)
+!   end if
+! end if
 
 !First free datatype before init
  call polynomial_term_free(polynomial_term)
@@ -183,12 +193,12 @@ subroutine polynomial_term_init(atindx,cell,direction,ndisp,nstrain,polynomial_t
 !Copy the power array before check
  power_disp_tmp(:) = power_disp(:)
  power_strain_tmp(:) = power_strain(:)
- 
+
  if(present(check)) check_in = check
 
  if(check_in)then
 !Check if displacement are identical, in this case
-!increase the power_disp 
+!increase the power_disp
    do idisp1=1,ndisp
      do idisp2=idisp1,ndisp
        if (idisp1/=idisp2.and.&
@@ -252,27 +262,27 @@ subroutine polynomial_term_init(atindx,cell,direction,ndisp,nstrain,polynomial_t
  ABI_MALLOC(polynomial_term%power_strain,(polynomial_term%nstrain))
  ABI_MALLOC(polynomial_term%strain,(polynomial_term%nstrain))
 
-!Transfert displacement 
+!Transfert displacement
  idisp2 = 0
  do idisp1=1,ndisp
    if(power_disp_tmp(idisp1) > zero)then
      idisp2 =  idisp2 + 1
      polynomial_term%direction(idisp2)  =  direction(idisp1)
      polynomial_term%power_disp(idisp2) =  power_disp_tmp(idisp1)
-     polynomial_term%atindx(:,idisp2)   =  atindx(:,idisp1) 
+     polynomial_term%atindx(:,idisp2)   =  atindx(:,idisp1)
      polynomial_term%cell(:,:,idisp2)   =  cell(:,:,idisp1)
      polynomial_term%power_disp(idisp2) =  power_disp_tmp(idisp1)
    end if
  end do
 
-!Transfert strain 
+!Transfert strain
  idisp2 = 0
  do idisp1=1,nstrain
    if(power_strain_tmp(idisp1) > zero)then
      idisp2 =  idisp2 + 1
      polynomial_term%power_strain(idisp2) = power_strain_tmp(idisp1)
      polynomial_term%strain(idisp2) = strain(idisp1)
-   end if   
+   end if
  end do
 
 end subroutine polynomial_term_init
@@ -343,9 +353,17 @@ subroutine polynomial_term_free(polynomial_term)
    ABI_FREE(polynomial_term%strain)
  end if
 
-
 end subroutine polynomial_term_free
 !!***
+
+subroutine polynomial_term_list_free(terms)
+  type(polynomial_term_type), allocatable, intent(inout) :: terms(:)
+  integer :: iterm
+  do iterm=1, size(terms)
+    call polynomial_term_free(terms(iterm))
+  end do
+  ABI_FREE(terms)
+end subroutine polynomial_term_list_free
 
 !!****f* m_polynomial_term/terms_compare
 !! NAME
@@ -359,8 +377,8 @@ end subroutine polynomial_term_free
 !! t2<type(polynomial_term)> =  datatype of the second term
 !!
 !! OUTPUT
-!! res = logical 
-!!  
+!! res = logical
+!!
 !! SOURCE
 
 pure function terms_compare(t1,t2) result (res)
@@ -380,7 +398,7 @@ pure function terms_compare(t1,t2) result (res)
   res = .true.
   blkval(:,:) = 0
   if(t1%ndisp==t2%ndisp.and.t1%nstrain==t2%nstrain)then
-!   Check strain    
+!   Check strain
     blkval(:,:) = 0
     do idisp1=1,t1%nstrain
       if(blkval(1,t1%ndisp+idisp1)==1)cycle!already found
@@ -392,7 +410,7 @@ pure function terms_compare(t1,t2) result (res)
           found=.true.
         end if
         if(found)then
-          blkval(1,t1%ndisp+idisp1) = 1 
+          blkval(1,t1%ndisp+idisp1) = 1
           blkval(2,t1%ndisp+idisp2) = 1
         end if
       end do
@@ -421,7 +439,7 @@ pure function terms_compare(t1,t2) result (res)
             end do
           end do
           if(found)then
-            blkval(1,idisp1) = 1 
+            blkval(1,idisp1) = 1
             blkval(2,idisp2) = 1
           end if
         end if

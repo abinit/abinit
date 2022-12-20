@@ -4,14 +4,24 @@ authors: xuhe
 
 # Lattice Wannier function (LWF) model in MULTIBINIT
 
+!!! tip
 
-## Build a LWF model and run LWF dynamics in MULTIBINIT
+    This feature is still under heavy development. Tests and feedbacks are welcome! 
+    It is not recommended to be used in production at this stage.
+    Please contact the developers (x.he@uliege.be) for feedbacks and help.
+
+
+
+## LWF dynamics in MULTIBINIT
 
 This lesson aims at showing how to build a LWF model and run a LWF dynamics calculation.
 
 **Before beginning, we recommend the reading of the theory on Lattice Wannier functions in the literature [[cite:rabe1995]]. The construction of LWF from the phonon band structure is covered in another [tutorial](/tutorial/lattice_wannier). **
 
+
 With this lesson, you will learn to:
+
+  * Building of the LWF model.
 
   * Run the dynamics of LWF.
 
@@ -20,7 +30,12 @@ With this lesson, you will learn to:
 *Before trying to run the LWF dynamics, you might consider to work in a subdirectory for this tutorial. Why not Work_lwfdyn?*
 
 
-### Basic: how to use MULTIBINIT to run LWF dynamics
+### How to build LWF models.
+The LWF model consists of second order (harmonic) and higher order (anharmonic) interaction between the LWF's.
+The first step of building the LWF model is to construct the LWF and the harmonic Hamiltonian from the phonon band structure, which is covered in this [tutorial](/tutorial/lattice_wannier). The tools for getting the anharmonic interaction are not ready for usage in the version 9.8. They will be released in the future. 
+
+
+### How to use MULTIBINIT to run LWF dynamics
 
 With the LWF model built and saved into a netcf file, we can run LWF dynamics calculation with MULTIBINIT.  The input files for an example can be found at  ~abinit/tests/tutomultibinit/Input/ .
 The input file can also be downloaded from:

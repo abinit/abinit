@@ -20,6 +20,10 @@ In this tutorial, we make the hypothesis that you have already acquired a practi
 In particular, DFPT is a key feature of ABINIT directly exploited by MULTIBINIT. In order to learn how to use the DFPT (producing the related DDB) and the associated code to merge different DDB files, please have a look at the tutorials on [[lesson:rf1| phonon response]], [[lesson:elastic|strain response]] and [[lesson:rf2| mrgddb]]. After these tutorials, you should be able to perform a full DFPT calculation in order to produce DDB file.
 In this tutorial will not provide the inputs for ABINIT DFPT calculations (that you can be found in the previously cited tutorials) but instead the final DDB resulting from them.
 
+!!!tips
+
+    Note: The models generated in this tutorial are not supposed to be used in production.
+
 
 The [AGATE](https://github.com/piti-diablotin/agate) software is also required for this tutorial, as a tool for the analysis of the results. You can install it on debian with:
 
