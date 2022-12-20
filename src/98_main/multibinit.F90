@@ -42,7 +42,7 @@ program multibinit
   use m_effective_potential_file
   use m_abihist
 
-  use m_specialmsg, only : specialmsg_getcount, herald
+  use m_specialmsg, only : specialmsg_getcount
   use m_io_tools,   only : flush_unit, open_file
   use m_time,       only : asctime, timein
   use m_dtfil,      only : isfile
@@ -52,7 +52,7 @@ program multibinit
   use m_init10,              only : init10
   use m_multibinit_unittest, only: mb_test_main
   use m_multibinit_driver
-  use m_multibinit_main2, only: multibinit_main2
+  use m_multibinit_main2, only: multibinit_main2, herald_multibinit
 
   implicit none
 
@@ -64,7 +64,7 @@ program multibinit
   real(dp) :: tsec(2)
   character(len=24) :: codename,start_datetime
   character(len=fnlen) :: filnam(18),tmpfilename
-  character(len=500) :: message 
+  character(len=500) :: message
   type(args_t) :: args
   integer :: ii
   integer :: master, my_rank, comm, nproc, ierr
@@ -104,7 +104,7 @@ program multibinit
 
   if (iam_master) then
      codename='MULTIBINIT'//repeat(' ',14)
-     call herald(codename,abinit_version,std_out)
+     call herald_multibinit(codename,abinit_version,std_out, args%multibinit_F03_mode/=1)
   end if
 
   start_datetime = asctime()
@@ -139,7 +139,7 @@ program multibinit
      end if
      !  Call open_file(unit=ab_out,file=tmpfilename,form='formatted',status='new')
      rewind (unit=ab_out)
-     call herald(codename,abinit_version,ab_out)
+     call herald_multibinit(codename,abinit_version,ab_out, args%multibinit_F03_mode/=1)
      !  Print the number of cpus in output
      write(message,'(a,i5,a)') '-  nproc =',nproc
      call wrtout(ab_out,message,'COLL')

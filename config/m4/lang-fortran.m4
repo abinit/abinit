@@ -1573,6 +1573,12 @@ AC_DEFUN([ABI_PROG_FC],[
   echo "${fc_info_string}" >>"${tmp_fc_info_file}"
 
   if test "${abi_fc_vendor}" = "unknown"; then
+    echo "CHECK CRAY..."
+    _AFB_CHECK_FC_CRAY(${FC})
+  fi
+  echo "${fc_info_string}" >>"${tmp_fc_info_file}"
+
+  if test "${abi_fc_vendor}" = "unknown"; then
     _ABI_FC_CHECK_PGI(${FC})
   fi
   echo "${fc_info_string}" >>"${tmp_fc_info_file}"

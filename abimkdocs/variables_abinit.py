@@ -19487,12 +19487,13 @@ Variable(
     topics=['parallelism_expert'],
     dimensions="scalar",
     defaultval=0,
-    mnemonics="activate USE of NVTX tracing/profiling (only meaningful use_gpu_cuda=1)",
+    mnemonics="activate USE of NVTX tracing/profiling",
     added_in_version="9.7.2",
     text=r"""
-Only available if ABINIT executable has been compiled with cuda nvcc compiler.
+Only available if ABINIT executable has been compiled with cuda nvcc compiler,
+and only meaningful when [[use_gpu_cuda]]=1.
 This parameter activates the use of nvtx tracing/profiling if present.
-If [[use_nvtx]] = 1, when profiling with nsys, additional information with be added in report.
+If [[use_nvtx]] = 1, when profiling with nsys, additional information with be added in the report.
 If [[use_nvtx]] = 0, nothing happens.
 """,
 ),
