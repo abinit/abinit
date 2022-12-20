@@ -643,7 +643,7 @@ module m_gwr
    ! Note that spins have been summed over.
 
    type(wfdgw_t) :: kcalc_wfd
-   ! wavefunction descriptors with the KS states where QP corrections are wanted.
+   ! wavefunction descriptor with the KS states where QP corrections are wanted.
 
    type(melements_t) :: ks_me !, qp_me
    ! Matrix elements of the different potentials in the KS basis set.
@@ -731,7 +731,7 @@ module m_gwr
    ! Compute head and wings of chi0
 
    procedure :: build_sigxme => gwr_build_sigxme
-   ! Compute matrix elements of exchange part.
+   ! Compute matrix elements of the exchange part.
 
    procedure :: get_u_ngfft => gwr_get_u_ngfft
    ! Compute FFT mesh from boxcutmin
@@ -1224,10 +1224,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
 
  ! Define batch sizes for FFT transforms, use multiples of OpenMP threads.
  omp_nt = xomp_get_num_threads(open_parallel=.True.)
- !gwr%uc_batch_size = max(1, gwr%dtset%userid * omp_nt)
- !gwr%sc_batch_size = max(1, gwr%dtset%userie * omp_nt)
- gwr%uc_batch_size = 4 * omp_nt
- gwr%sc_batch_size = 4 * omp_nt
+ gwr%uc_batch_size = omp_nt; gwr%sc_batch_size = omp_nt
  !gwr%uc_batch_size = 4; gwr%sc_batch_size = 4
 
  if (my_rank == master) then
@@ -1281,7 +1278,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
      dims_kgts = [1, all_nproc, 1, 1]
      est = estimate(gwr, dims_kgts)
      prev_efficiency = est%efficiency; prev_speedup = est%speedup
-     call wrtout(units, sjoin("- Optimizing MPI grid with mem_per_cpu_mb:", ftoa(mem_per_cpu_mb), "[Mb]"))
+     call wrtout(units, sjoin("- Optimizing MPI grid with mem_per_cpu_mb:", ftoa(mem_per_cpu_mb), "[Mb]"), pre_newlines=1)
      call wrtout(units, "- Use `abinit run.abi --mem-per-cpu=4G` to set mem_per_cpu_mb in the submission script")
      write(msg, "(a,4(a4,2x),3(a12,2x))") "- ", "np_k", "np_g", "np_t", "np_s", "memb_per_cpu", "efficiency", "speedup"
      call wrtout(units, msg)
@@ -2377,7 +2374,6 @@ subroutine gwr_build_green(gwr, free_ugb)
            end if
 
            work%buffer_cplx(:,il_b) = work%buffer_cplx(:,il_b) * sqrt(real(gt_cfact))
-           !call xscal(npwsp, work%buffer_cplx(:,il_b), cone * sqrt(real(gt_cfact)), 1)
          end do ! il_b
 
          ! Build G(g,g',ipm)
@@ -2590,7 +2586,7 @@ subroutine gwr_get_myk_green_gpr(gwr, itau, spin, desc_mykbz, gt_gpr)
 
  call cwtime(cpu, wall, gflops, "start")
 
- !mem_mb = two * gwr%my_nkbz * two * dp * gwr%g_nfft * gwr%gree_mpw * b2Mb /  gwr%g_slkproc%nbprocs
+ !mem_mb = two * gwr%my_nkbz * two * gwpc * gwr%g_nfft * gwr%gree_mpw * b2Mb /  gwr%g_slkproc%nbprocs
  !call wrtout(std_out, sjoin("Local memory for Green's functions: ", ftoa(mem_mb, fmt="f8.1"), ' [Mb] <<< MEM'))
 
  ABI_MALLOC(ceikr, (gwr%g_nfft * gwr%nspinor))
@@ -3290,7 +3286,7 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
               ! Spins are distributed thus we have to sum them.
               call xmpi_sum(mats(itau)%buffer_cplx, gwr%spin_comm%value, ierr)
             else
-              ! Spins are not distributed (this should happen only if sequential execution).
+              ! Spins are not distributed (this should happen only in sequential execution).
               if (spin == 1) then
                 mats(itau)%buffer_cplx = mats(itau)%buffer_cplx + gwr%tchi_qibz(iq_ibz,itau,spin+1)%buffer_cplx
                 gwr%tchi_qibz(iq_ibz,itau,spin+1)%buffer_cplx = mats(itau)%buffer_cplx
@@ -3619,14 +3615,13 @@ subroutine gwr_build_tchi(gwr)
  character(len=5000) :: msg
  type(desc_t),pointer :: desc_k, desc_q
  type(__slkmat_t) :: chi_rgp
- !type(mpi_type) :: tchi_mpi_enreg
 !arrays
  integer :: sc_ngfft(18), gg(3)
- integer,allocatable :: green_scg(:,:), chi_scg(:,:)
+ integer,allocatable :: green_scgvec(:,:), chi_scgvec(:,:)
  integer :: mask_qibz(gwr%nqibz)
  real(dp) :: kk_bz(3), kpq_bz(3), qq_ibz(3), tsec(2) !, qq_bz(3) ! kk_ibz(3),
  !logical :: need_gt_kibz(gwr%nkibz), got_gt_kibz(gwr%nkibz)
- complex(gwpc),allocatable :: gt_scbox(:), chit_scbox(:) !, gt_ucbox(:,:) gt_scbox(:,:),
+ complex(gwpc),allocatable :: gt_scbox(:), chit_scbox(:)
  complex(gwpc),allocatable :: low_wing_q(:), up_wing_q(:), cemiqr(:) !, sc_ceimkr(:,:) !, uc_ceikr(:)
  !type(__slkmat_t) :: gt_gpr(2, gwr%my_nkbz), chiq_gpr(gwr%my_nqibz), gk_rpr_pm(2)
  !type(desc_t), target :: desc_mykbz(gwr%my_nkbz)
@@ -3661,11 +3656,6 @@ subroutine gwr_build_tchi(gwr)
    sc_nfft = product(sc_ngfft(1:3))
    !sck_ucvol = gwr%cryst%ucvol * product(gwr%ngkpt)
    !scq_ucvol = gwr%cryst%ucvol * product(gwr%ngqpt)
-   !sc_augsize = product(sc_ngfft(4:6))
-
-   !call initmpi_seq(tchi_mpi_enreg)
-   !call init_distribfft_seq(tchi_mpi_enreg%distribfft, 'c', sc_ngfft(2), sc_ngfft(3), 'all')
-   !call init_distribfft_seq(tchi_mpi_enreg%distribfft, 'f', sc_ngfft(2), sc_ngfft(3), 'all')
 
    call wrtout(std_out, " Building chi0 with FFTs in the supercell:", pre_newlines=2)
    call wrtout(std_out, sjoin(" gwr_np_kgts:", ltoa(gwr%dtset%gwr_np_kgts)))
@@ -3694,8 +3684,8 @@ subroutine gwr_build_tchi(gwr)
    call plan_rp2gp%from_ngfft(sc_ngfft, gwr%nspinor * ndat,     +1)
 
    ! The g-vectors in the supercell for G and tchi.
-   ABI_MALLOC(green_scg, (3, gwr%green_mpw))
-   ABI_MALLOC(chi_scg, (3, gwr%tchi_mpw))
+   ABI_MALLOC(green_scgvec, (3, gwr%green_mpw))
+   ABI_MALLOC(chi_scgvec, (3, gwr%tchi_mpw))
 
    ! The phase e^{-iq.r} in the unit cell.
    ABI_MALLOC(cemiqr, (gwr%g_nfft * gwr%nspinor))
@@ -3741,6 +3731,7 @@ subroutine gwr_build_tchi(gwr)
 
        ! Loop over r in the unit cell that is now MPI-distributed in g_comm.
        my_nr = gt_gpr(1, 1)%sizeb_local(2)
+
        do my_ir=1, my_nr, gwr%sc_batch_size
          ndat = blocked_loop(my_ir, my_nr, gwr%sc_batch_size)
          if (my_ir <= 6 * gwr%sc_batch_size .or. mod(my_ir, PRINT_MODR) == 0) then
@@ -3760,7 +3751,7 @@ if (.True.) then
            desc_k => desc_mykbz(my_ikf)
            gg = nint(gwr%kbz(:, ik_bz) * gwr%ngkpt)
            do ig=1,desc_k%npw
-             green_scg(:,ig) = gg + gwr%ngkpt * desc_k%gvec(:,ig)
+             green_scgvec(:,ig) = gg + gwr%ngkpt * desc_k%gvec(:,ig)
            end do
 
            do ipm=1,2
@@ -3768,7 +3759,7 @@ if (.True.) then
              !ABI_CHECK_IEQ(size(gt_gpr(ipm, my_ikf)%buffer_cplx, dim=1), desc_k%npw, "desc_k!")
              ii = 1 + (ipm - 1) * sc_nfft * gwr%nspinor * ndat
 
-             call gsph2box(sc_ngfft, desc_k%npw, gwr%nspinor * ndat, green_scg, &
+             call gsph2box(sc_ngfft, desc_k%npw, gwr%nspinor * ndat, green_scgvec, &
                            gt_gpr(ipm, my_ikf)%buffer_cplx(:, my_ir), &  ! in
                            gt_scbox(ii:))                             ! inout
                            !gt_scbox(:,ipm))                             ! inout
@@ -3842,11 +3833,11 @@ end if
            ! Compute q+g vectors.
            gg = nint(qq_ibz * gwr%ngqpt)
            do ig=1,desc_q%npw
-             chi_scg(:,ig) = gg + gwr%ngqpt(:) * desc_q%gvec(:,ig)
+             chi_scgvec(:,ig) = gg + gwr%ngqpt(:) * desc_q%gvec(:,ig)
            end do
 
            !ABI_CHECK_IEQ(size(chiq_gpr(my_iqi)%buffer_cplx, dim=1), desc_q%npw, "desc_q!")
-           call box2gsph(sc_ngfft, desc_q%npw, gwr%nspinor * ndat, chi_scg, &
+           call box2gsph(sc_ngfft, desc_q%npw, gwr%nspinor * ndat, chi_scgvec, &
                          chit_scbox, &                            ! in
                          chiq_gpr(my_iqi)%buffer_cplx(:, my_ir))  ! out
 
@@ -3888,11 +3879,9 @@ end if
 
          ! MPI-transposition: tchi_q(g',r) => tchi_q(r,g')
          call chiq_gpr(my_iqi)%ptrans("N", chi_rgp)
-
          !ABI_CHECK_IEQ(size(gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx, dim=2), size(chi_rgp%buffer_cplx, dim=2), "len2")
 
-         ! FFT r --> g along the first dimension: tchi_q(r,g') --> tchi_q(g,g')
-         ! Results stored in gwr%tchi_qibz.
+         ! FFT r --> g along the first dimension: tchi_q(r,g') --> tchi_q(g,g'). Results stored in gwr%tchi_qibz.
          do ig2=1,chi_rgp%sizeb_local(2), gwr%uc_batch_size
            ndat = blocked_loop(ig2, chi_rgp%sizeb_local(2), gwr%uc_batch_size)
 
@@ -3929,19 +3918,17 @@ end if
 
    ABI_FREE(gt_scbox)
    ABI_FREE(chit_scbox)
-   ABI_FREE(green_scg)
-   ABI_FREE(chi_scg)
+   ABI_FREE(green_scgvec)
+   ABI_FREE(chi_scgvec)
    ABI_FREE(cemiqr)
+   ABI_FREE(gt_gpr)
+   ABI_FREE(gk_rpr_pm)
+   ABI_FREE(desc_mykbz)
    !ABI_SFREE(gt_ucbox)
    !ABI_SFREE(sc_ceimkr)
 
    call slk_array_free(chiq_gpr)
-   !call destroy_mpi_enreg(tchi_mpi_enreg)
-
-   ABI_FREE(gt_gpr)
    ABI_FREE(chiq_gpr)
-   ABI_FREE(gk_rpr_pm)
-   ABI_FREE(desc_mykbz)
 
   else
     ! ===================================================================
@@ -4385,10 +4372,7 @@ subroutine gwr_build_wc(gwr)
    gwr%wc_space = "none"
  end if
 
- !if (gwr%scf_iteration == 1) then
  ABI_CHECK(gwr%wc_space == "none", sjoin("wc_space: ", gwr%wc_space, " != none"))
- !end if
-
  gwr%wc_space = "iomega"
 
  ! =======================================
@@ -4415,7 +4399,7 @@ subroutine gwr_build_wc(gwr)
    associate (desc_q => gwr%tchi_desc_qibz(iq_ibz))
    ig0 = desc_q%ig0
 
-   ! The spin loop is needed so that procs in different pools operate
+   ! The spin loop is needed so that procs in different pools can operate
    ! on their own matrix that has been already summed over (collinear) spins.
    do my_is=1,gwr%my_nspins
      spin = gwr%my_spins(my_is)
@@ -4451,13 +4435,9 @@ subroutine gwr_build_wc(gwr)
        ! NB: PZGETRF requires square block cyclic decomposition along the two axis
        ! hence we neeed to redistribute the data before calling invert.
 
-       !call wrtout(std_out, "Printing wc%buffer_cplex before inversion")
-       !call print_arr(wc%buffer_cplx, unit=std_out)
-
        call wc%change_size_blocs(em1) ! processor=slkproc_4diag
-       call em1%invert()
-       ! TODO: Can call zhdp
-       !call em1%zdhp_invert("U")
+       !call em1%invert()
+       call em1%hpd_invert("U") ! TODO: Can call hpd_invert
        call wc%take_from(em1, free=.True.)  ! processor=wc%processor)
 
        !call wrtout(std_out, sjoin(" e-1 at q:", ktoa(qq_ibz), "i omega:", ftoa(gwr%iw_mesh(itau) * Ha_eV), "eV"))
@@ -4586,14 +4566,13 @@ subroutine gwr_build_sigmac(gwr)
  type(yamldoc_t) :: ydoc
 !arrays
  integer :: sc_ngfft(18), need_qibz(gwr%nqibz),  got_qibz(gwr%nqibz), units(3), gg(3)
- integer,allocatable :: green_scg(:,:), wc_scg(:,:)
+ integer,allocatable :: green_scgvec(:,:), wc_scgvec(:,:)
  real(dp) :: kk_bz(3), kcalc_bz(3), qq_bz(3), tsec(2)  !, qq_ibz(3)
  complex(gwpc) :: cpsi_r, sigc_pm(2)
  complex(dp) :: odd_t(gwr%ntau), even_t(gwr%ntau)
  complex(dp),target,allocatable :: sigc_it_diag_kcalc(:,:,:,:,:)
  complex(gwpc) ABI_ASYNC, allocatable :: gt_scbox(:), wct_scbox(:) !, gt_scbox(:,:),
- complex(gwpc),allocatable :: uc_psi_bk(:,:,:), scph1d_kcalc(:,:,:), uc_ceikr(:)
- complex(gwpc),allocatable :: ur(:)
+ complex(gwpc),allocatable :: uc_psi_bk(:,:,:), scph1d_kcalc(:,:,:), uc_ceikr(:), ur(:)
  type(__slkmat_t) :: gt_gpr(2, gwr%my_nkbz), gk_rpr_pm(2), sigc_rpr(2,gwr%nkcalc), wc_rpr, wc_gpr(gwr%my_nqbz)
  type(desc_t), target :: desc_mykbz(gwr%my_nkbz), desc_myqbz(gwr%my_nqbz)
  type(fftbox_plan3_t) :: gt_plan_gp2rp, wt_plan_gp2rp
@@ -4643,7 +4622,6 @@ subroutine gwr_build_sigmac(gwr)
  !sc_mgfft = maxval(sc_ngfft(1:3))
  sck_ucvol = gwr%cryst%ucvol * product(gwr%ngkpt)
  scq_ucvol = gwr%cryst%ucvol * product(gwr%ngqpt)
- !sc_augsize = product(sc_ngfft(4:6))
 
  call wrtout(std_out, sjoin(" Building Sigma_c with FFTs in the supercell:", ltoa(sc_ngfft(1:3))), pre_newlines=2)
  call wrtout(std_out, sjoin(" gwr_np_kgts:", ltoa(gwr%dtset%gwr_np_kgts)))
@@ -4656,8 +4634,8 @@ subroutine gwr_build_sigmac(gwr)
                             " FFT sc_batch_size:", itoa(gwr%sc_batch_size)), do_flush=.True.)
 
  ! The g-vectors in the supercell for G and tchi.
- ABI_MALLOC(green_scg, (3, gwr%green_mpw))
- ABI_MALLOC(wc_scg, (3, gwr%tchi_mpw))
+ ABI_MALLOC(green_scgvec, (3, gwr%green_mpw))
+ ABI_MALLOC(wc_scgvec, (3, gwr%tchi_mpw))
 
  ! Set FFT mesh used to compute u(r) in the unit cell.
  call gwr%kcalc_wfd%change_ngfft(gwr%cryst, gwr%psps, gwr%g_ngfft)
@@ -4756,12 +4734,12 @@ if (gwr%use_supercell_for_sigma) then
          desc_k => desc_mykbz(my_ikf)
          gg = nint(gwr%kbz(:, ik_bz) * gwr%ngkpt)
          do ig=1,desc_k%npw
-           green_scg(:,ig) = gg + gwr%ngkpt * desc_k%gvec(:,ig)
+           green_scgvec(:,ig) = gg + gwr%ngkpt * desc_k%gvec(:,ig)
          end do
 
          do ipm=1,2
            ii = 1 + (ipm - 1) * sc_nfft * gwr%nspinor * ndat
-           call gsph2box(sc_ngfft, desc_k%npw, gwr%nspinor * ndat, green_scg, &
+           call gsph2box(sc_ngfft, desc_k%npw, gwr%nspinor * ndat, green_scgvec, &
                          gt_gpr(ipm, my_ikf)%buffer_cplx(:, my_ir), &  ! in
                          gt_scbox(ii:))                                ! inout
                          !gt_scbox(:, ipm))                             ! inout
@@ -4782,10 +4760,10 @@ if (gwr%use_supercell_for_sigma) then
          desc_q => desc_myqbz(my_iqf)
          gg = nint(gwr%qbz(:, iq_bz) * gwr%ngqpt)
          do ig=1,desc_q%npw
-           wc_scg(:,ig) = gg + gwr%ngqpt * desc_q%gvec(:,ig)
+           wc_scgvec(:,ig) = gg + gwr%ngqpt * desc_q%gvec(:,ig)
          end do
 
-         call gsph2box(sc_ngfft, desc_q%npw, gwr%nspinor * ndat, wc_scg, &
+         call gsph2box(sc_ngfft, desc_q%npw, gwr%nspinor * ndat, wc_scgvec, &
                        wc_gpr(my_iqf)%buffer_cplx(:, my_ir), & ! in
                        wct_scbox)                              ! inout
        end do ! my_iqf
@@ -4828,14 +4806,11 @@ if (gwr%use_supercell_for_sigma) then
            do idat=1,ndat
              ir = uc_ir + idat - 1
              cpsi_r = conjg(uc_psi_bk(ir, band, ikcalc))
-             !sigc_pm(1) = cpsi_r * sum(gt_scbox(ibeg:iend, 1) * sc_psi_bk(:, band, ikcalc))
-             !sigc_pm(2) = cpsi_r * sum(gt_scbox(ibeg:iend, 2) * sc_psi_bk(:, band, ikcalc))
              do ipm=1,2
                ibeg = 1 + (idat - 1) * sc_nfft * gwr%nspinor + (ipm - 1) * sc_nfft * gwr%nspinor * ndat
                iend = ibeg + sc_nfft * gwr%nspinor - 1
                call sc_sum(gwr%ngkpt, gwr%g_ngfft, gwr%nspinor, scph1d_kcalc(:,:,ikcalc), k_is_gamma, &
                  cpsi_r, gt_scbox(ibeg:), uc_psi_bk(:, band, ikcalc), sigc_pm(ipm))
-                 !cpsi_r, gt_scbox(ibeg:iend, ipm), uc_psi_bk(:, band, ikcalc), sigc_pm(ipm))
              end do
 
              sigc_it_diag_kcalc(:, itau, ibc, ikcalc, spin) = &
@@ -4971,8 +4946,8 @@ else
 
 end if
 
- ABI_FREE(green_scg)
- ABI_FREE(wc_scg)
+ ABI_FREE(green_scgvec)
+ ABI_FREE(wc_scgvec)
 
  ! Store matrix elements of Sigma_c(it), separate even and odd part
  ! then use sine/cosine transform to get Sigma_c(i omega).
@@ -6874,7 +6849,7 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
  integer :: g0(3), gmax(3), spinor_padx(2,4), u_ngfft(18), work_ngfft(18)
  integer,allocatable :: gbound_kcalc(:,:), gvec_x(:,:), gbound_x(:,:), kg_k(:,:), gbound_ksum(:,:)
  real(dp) :: ksum(3), kk_ibz(3), kgw(3), kgw_m_ksum(3), qq_bz(3), tsec(2) !, kk_bz(3), q0(3) !, spinrot_kbz(4), spinrot_kgw(4)
- real(dp),contiguous, pointer :: ks_eig(:,:,:), qp_eig(:,:,:), qp_occ(:,:,:), cg1_ptr(:,:), cg2_ptr(:,:)
+ real(dp),contiguous, pointer :: ks_eig(:,:,:), qp_eig(:,:,:), qp_occ(:,:,:), cg2_ptr(:,:) ! cg1_ptr(:,:),
  real(dp),allocatable :: work(:,:,:,:), cg1_ibz(:,:) !, cg2_bz(:,:)
  complex(gwpc),allocatable :: vc_sqrt_qbz(:)
  complex(dp),allocatable :: rhotwg(:), rhotwgp(:), rhotwg_ki(:,:)

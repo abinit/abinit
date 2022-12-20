@@ -109,7 +109,6 @@ end subroutine xomp_show_info
 function xomp_get_max_threads()
 
 !Arguments ------------------------------------
-!scalars
  integer :: xomp_get_max_threads
 
 ! *************************************************************************

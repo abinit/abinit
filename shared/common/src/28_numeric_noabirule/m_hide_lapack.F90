@@ -2921,7 +2921,7 @@ subroutine zhpd_invert(uplo, a, n, comm)
    call slk_matrix_from_global_dpc_2D(Slk_mat,uplo,a)
 
    ! Perform the calculation with scaLAPACK.
-   call Slk_mat%zdhp_invert(uplo, full=.False.)
+   call Slk_mat%hpd_invert(uplo, full=.False.)
 
    ! Reconstruct the global matrix from the distributed one.
    a = czero
