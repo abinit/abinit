@@ -34,6 +34,7 @@ sources = [
  "gpu_mkkpg.cu",
  "gpu_nonlop.cu",
  "gpu_sphere.cu",
+ "gpu_fftbox.cpp",
  "prt_utils_rec.cu",
  "rec_dens_calc.cu",
  "rec_kernels.cu",

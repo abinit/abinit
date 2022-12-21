@@ -3679,9 +3679,9 @@ subroutine gwr_build_tchi(gwr)
    ! This for the version with my_nkbz FFTs in the unit cell
    !ABI_CALLOC(gt_ucbox, (gwr%g_nfft * gwr%nspinor * ndat, 2))
 
-   ! (ngfft, ndat, isign)
-   call plan_gp2rp%from_ngfft(sc_ngfft, gwr%nspinor * ndat * 2, gwr%dtset%use_gpu_cuda, -1)
-   call plan_rp2gp%from_ngfft(sc_ngfft, gwr%nspinor * ndat,     gwr%dtset%use_gpu_cuda, +1)
+   ! (ngfft, ndat)
+   call plan_gp2rp%from_ngfft(sc_ngfft, gwr%nspinor * ndat * 2, gwr%dtset%use_gpu_cuda)
+   call plan_rp2gp%from_ngfft(sc_ngfft, gwr%nspinor * ndat,     gwr%dtset%use_gpu_cuda)
 
    ! The g-vectors in the supercell for G and tchi.
    ABI_MALLOC(green_scgvec, (3, gwr%green_mpw))
@@ -3775,7 +3775,7 @@ if (.True.) then
          !call cwtime_report("G part", cpu, wall, gflops)
 
          ! G(G',r) --> G(R',r) = sum_{k,g'} e^{-i(k+g').R'} G_k(g',r)
-         call plan_gp2rp%execute(gt_scbox)
+         call plan_gp2rp%execute(gt_scbox, -1)
          gt_scbox = gt_scbox * sc_nfft
 
 else
@@ -3817,7 +3817,7 @@ end if
          !max_abs_imag_chit = max(max_abs_imag_chit, maxval(abs(aimag(chit_scbox))))
 
          ! Back to tchi(G'=q+g',r) space immediately with isign + 1.
-         call plan_rp2gp%execute(chit_scbox)
+         call plan_rp2gp%execute(chit_scbox, +1)
 
          ! The GG part is the hotspot
          !call cwtime_report("GG part", cpu, wall, gflops)
@@ -4665,9 +4665,9 @@ if (gwr%use_supercell_for_sigma) then
  ABI_CALLOC(gt_scbox, (sc_nfft * gwr%nspinor * ndat * 2))
  ABI_CALLOC(wct_scbox, (sc_nfft * gwr%nspinor * ndat))
 
- ! (ngfft, ndat, isign)
- call gt_plan_gp2rp%from_ngfft(sc_ngfft, gwr%nspinor * ndat * 2, gwr%dtset%use_gpu_cuda, -1)
- call wt_plan_gp2rp%from_ngfft(sc_ngfft, gwr%nspinor * ndat,     gwr%dtset%use_gpu_cuda, -1)
+ ! (ngfft, ndat)
+ call gt_plan_gp2rp%from_ngfft(sc_ngfft, gwr%nspinor * ndat * 2, gwr%dtset%use_gpu_cuda)
+ call wt_plan_gp2rp%from_ngfft(sc_ngfft, gwr%nspinor * ndat,     gwr%dtset%use_gpu_cuda)
 
  do my_is=1,gwr%my_nspins
    spin = gwr%my_spins(my_is)
@@ -4776,12 +4776,12 @@ if (gwr%use_supercell_for_sigma) then
 
        ! G(G',r) --> G(R',r)
        if (gwr%kpt_comm%nproc > 1) call xmpi_wait(gt_request, ierr)
-       call gt_plan_gp2rp%execute(gt_scbox)
+       call gt_plan_gp2rp%execute(gt_scbox, -1)
        gt_scbox = gt_scbox * (sc_nfft / sck_ucvol)
 
        ! Wc(G',r) --> Wc(R',r)
        if (gwr%kpt_comm%nproc > 1) call xmpi_wait(wct_request, ierr)
-       call wt_plan_gp2rp%execute(wct_scbox)
+       call wt_plan_gp2rp%execute(wct_scbox, -1)
        wct_scbox = wct_scbox * (sc_nfft / scq_ucvol)
 
        !DEBUG

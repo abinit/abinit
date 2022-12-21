@@ -1,3 +1,5 @@
+block 
+
 !Local variables ------------------------------
 !scalars
  integer :: ifft,ix,iy,iz,nx,ny,nz,ldx,ldy,ldz,dat,fftalga,padat
@@ -12,15 +14,14 @@
  ldx = plan%embed(1); ldy=plan%embed(2); ldz=plan%embed(3)
  fftalga = plan%fftalg/100
 
- SELECT CASE (fftalga)
+ select case (fftalga)
+ case (FFT_FFTW3) 
+   call fftw3_c2c_op(nx, ny, nz, ldx, ldy, ldz, plan%ndat, isign, ff, gg)
 
- CASE (FFT_FFTW3) 
-   call fftw3_c2c_op(nx,ny,nz,ldx,ldy,ldz,plan%ndat,plan%isign,ff,gg)
+ case (FFT_DFTI) 
+   call dfti_c2c_op(nx, ny, nz, ldx, ldy, ldz, plan%ndat, isign, ff, gg)
 
- CASE (FFT_DFTI) 
-   call dfti_c2c_op(nx,ny,nz,ldx,ldy,ldz,plan%ndat,plan%isign,ff,gg)
-
- CASE (FFT_SG, FFT_SG2002)
+ case (FFT_SG, FFT_SG2002)
    ! Fallback to sg_fft_cc 
    ! 1) we have to change shape and type complex -> double because we have an explicit interface. 
    ! 2) Cannot use [ZC]copy: this is a template used both for single and double precision.
@@ -43,9 +44,9 @@
      end do
 
      ! c2c with ndat = 1
-     call sg_fft_cc(plan%fftcache,nx,ny,nz,ldx,ldy,ldz,1,plan%isign,arr,ftarr)
+     call sg_fft_cc(plan%fftcache,nx,ny,nz,ldx,ldy,ldz,1,isign,arr,ftarr)
 
-     if (plan%isign==-1) then  
+     if (isign == -1) then  
        ! Copy and scale the transform
        fact = one/plan%nfft
        do iz=1,nz
@@ -74,7 +75,9 @@
    ABI_FREE(arr)
    ABI_FREE(ftarr)
 
- CASE DEFAULT
+ case default
    write(msg,'(a,i0)')"Wrong fftalga ",fftalga
    ABI_ERROR(msg)
- END SELECT
+ end select
+
+end block

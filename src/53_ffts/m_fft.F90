@@ -117,7 +117,7 @@ MODULE m_fft
 !! fftbox_plan3_t
 !!
 !! FUNCTION
-!!  Stores the options passed to the fftbox_* routines.
+!!  Options passed to the fftbox_* routines.
 !!
 !! SOURCE
 
@@ -126,14 +126,13 @@ MODULE m_fft
    private
    integer :: fftalg = 112    ! Flag defining the library to call.
    integer :: fftcache = 16   ! Size of the cache (kB). Only used in SG routines.
-   integer :: isign = 0       ! Sign of the exponential in the FFT
    integer :: nfft            ! Total number of points in the FFT box.
    integer :: ldxyz = -1      ! Physical dimension of the array to transform
    integer :: ndat = -1       ! Number of FFTs associated to the plan.
    integer :: dims(3) = -1    ! The number of FFT divisions.
    integer :: embed(3) = -1   ! Leading dimensions of the input,output arrays.
 
-   integer :: use_gpu = 0     ! /= 0  if FFTs should be offloaded to the GPUs.
+   integer :: use_gpu = 0     ! /= 0 if FFTs should be offloaded to the GPU.
 
    type(c_ptr) :: gpu_plan_ip_spc = c_null_ptr
    type(c_ptr) :: gpu_data_ip_spc = c_null_ptr
@@ -168,6 +167,26 @@ MODULE m_fft
 
  end type fftbox_plan3_t
 !!***
+
+!#if defined HAVE_GPU_CUDA
+! interface
+!   subroutine xgpu_fftbox_c2c_ip(f_dims, f_embed, ndat, isign, kind, h_ff, plan_ptr, d_ff) bind(C)
+!     use iso_c_binding
+!     integer(c_int),intent(in) :: f_dims(3), f_embed(3)
+!     integer(c_int),value, intent(in) :: ndat, isign, kind
+!     type(c_ptr),intent(in) :: h_ff
+!     type(c_ptr),intent(inout) :: plan_ptr, d_ff
+!   end subroutine xgpu_fftbox_c2c_ip
+!   subroutine gpu_plan_free(plan_ptr) bind(C)
+!     use iso_c_binding
+!     type(c_ptr),intent(inout) :: plan_ptr
+!   end subroutine gpu_plan_free
+!   subroutine devptr_free(dev_ptr) bind(C)
+!     use iso_c_binding
+!     type(c_ptr),intent(inout) :: dev_ptr
+!   end subroutine devptr_free
+! end interface
+!endif
 
 !----------------------------------------------------------------------
 
@@ -230,12 +249,12 @@ end subroutine fft_allow_ialltoall
 !!
 !! SOURCE
 
-subroutine fftbox_plan3_init(plan, ndat, dims, embed, fftalg, fftcache, use_gpu, isign)
+subroutine fftbox_plan3_init(plan, ndat, dims, embed, fftalg, fftcache, use_gpu)
 
 !Arguments ------------------------------------
 !scalars
  class(fftbox_plan3_t),intent(out) :: plan
- integer,intent(in) :: ndat, fftalg, fftcache, use_gpu, isign
+ integer,intent(in) :: ndat, fftalg, fftcache, use_gpu
 !arrays
  integer,intent(in) :: dims(3), embed(3)
 
@@ -247,7 +266,6 @@ subroutine fftbox_plan3_init(plan, ndat, dims, embed, fftalg, fftcache, use_gpu,
  plan%fftalg   = fftalg                     ! ngfft(7)
  if (fftcache > 0) plan%fftcache = fftcache ! ngfft(8)
  plan%use_gpu  = use_gpu
- plan%isign    = isign
 
  plan%nfft  = product(plan%dims)
  plan%ldxyz = product(plan%embed)
@@ -262,19 +280,19 @@ end subroutine fftbox_plan3_init
 !!  fftbox_plan3_from_ngfft
 !!
 !! FUNCTION
-!!  Initialize plan for ndat 3d FFTs with isign from ngfft array.
+!!  Initialize plan for ndat 3d FFTs from ngfft array.
 !!
 !! SOURCE
 
-subroutine fftbox_plan3_from_ngfft(plan, ngfft, ndat, use_gpu, isign)
+subroutine fftbox_plan3_from_ngfft(plan, ngfft, ndat, use_gpu)
 
 !Arguments ------------------------------------
  class(fftbox_plan3_t),intent(out) :: plan
- integer,intent(in) :: ngfft(18), ndat, use_gpu, isign
+ integer,intent(in) :: ngfft(18), ndat, use_gpu
 
 ! *************************************************************************
 
- call plan%init(ndat, ngfft(1:3), ngfft(4:6), ngfft(7), ngfft(8), use_gpu, isign)
+ call plan%init(ndat, ngfft(1:3), ngfft(4:6), ngfft(7), ngfft(8), use_gpu)
 
 end subroutine fftbox_plan3_from_ngfft
 !!***
@@ -297,29 +315,29 @@ subroutine fftbox_plan3_free(plan)
 
 ! *************************************************************************
 
-#define _SFREE_PLAN(gpu_plan) if (c_associated(gpu_plan)) call gpu_plan_free(gpu_plan)
-#define _SFREE_DEVPTR(dev_ptr) if (c_associated(dev_ptr)) call devptr_free(dev_ptr)
+!#define _SFREE_PLAN(gpu_plan) if (c_associated(gpu_plan)) call gpu_plan_free(gpu_plan)
+!#define _SFREE_DEVPTR(dev_ptr) if (c_associated(dev_ptr)) call devptr_free(dev_ptr)
+!
+! _SFREE_PLAN(plan%gpu_plan_ip_spc)
+! _SFREE_DEVPTR(plan%gpu_data_ip_spc)
+! _SFREE_PLAN(plan%gpu_plan_ip_dpc)
+! _SFREE_DEVPTR(plan%gpu_data_ip_dpc)
+! _SFREE_PLAN(plan%gpu_plan_op_spc)
+! _SFREE_DEVPTR(plan%gpu_idata_op_spc)
+! _SFREE_DEVPTR(plan%gpu_odata_op_spc)
+! _SFREE_PLAN(plan%gpu_plan_op_dpc)
+! _SFREE_DEVPTR(plan%gpu_idata_op_dpc)
+! _SFREE_DEVPTR(plan%gpu_odata_op_dpc)
 
- _SFREE_PLAN(plan%gpu_plan_ip_spc)
- _SFREE_DEVPTR(plan%gpu_data_ip_spc)
- _SFREE_PLAN(plan%gpu_plan_ip_dpc)
- _SFREE_DEVPTR(plan%gpu_data_ip_dpc)
- _SFREE_PLAN(plan%gpu_plan_op_spc)
- _SFREE_DEVPTR(plan%gpu_idata_op_spc)
- _SFREE_DEVPTR(plan%gpu_odata_op_spc)
- _SFREE_PLAN(plan%gpu_plan_op_dpc)
- _SFREE_DEVPTR(plan%gpu_idata_op_dpc)
- _SFREE_DEVPTR(plan%gpu_odata_op_dpc)
-
-contains
-subroutine gpu_plan_free(gpu_plan)
-  type(c_ptr),intent(inout) :: gpu_plan
-  gpu_plan = c_null_ptr
-end subroutine gpu_plan_free
-subroutine devptr_free(dev_ptr)
-  type(c_ptr),intent(inout) :: dev_ptr
-  dev_ptr = c_null_ptr
-end subroutine devptr_free
+!contains
+!subroutine gpu_plan_free(gpu_plan)
+!  type(c_ptr),intent(inout) :: gpu_plan
+!  gpu_plan = c_null_ptr
+!end subroutine gpu_plan_free
+!subroutine devptr_free(dev_ptr)
+!  type(c_ptr),intent(inout) :: dev_ptr
+!  dev_ptr = c_null_ptr
+!end subroutine devptr_free
 
 end subroutine fftbox_plan3_free
 !!***
@@ -337,6 +355,7 @@ end subroutine fftbox_plan3_free
 !!
 !! INPUTS
 !!  plan<fftbox_plan3_t>=Structure with the parameters defining the transform.
+!!  isign= Sign of the exponential in the FFT
 !!
 !! SIDE EFFECTS
 !!  ff(plan%ldxyz*plan%ndat) =
@@ -345,16 +364,23 @@ end subroutine fftbox_plan3_free
 !!
 !! SOURCE
 
-subroutine fftbox_execute_ip_spc(plan, ff)
+subroutine fftbox_execute_ip_spc(plan, ff, isign)
 
 !Arguments ------------------------------------
 !scalars
- class(fftbox_plan3_t),intent(in) :: plan
+ class(fftbox_plan3_t),intent(inout) :: plan
+ integer,intent(in) :: isign
 !arrays
  complex(spc),intent(inout) :: ff(plan%ldxyz*plan%ndat)
 
 ! *************************************************************************
 
+ !if (plan%use_gpu /= 0) then
+ !  call xgpu_fftbox_c2c_ip(plan%dims, plan%embed, plan%ndat, isign, 4, ff, plan%gpu_plan_ip_spc, plan%gpu_data_ip_spc)
+ !  return
+ !end if
+
+ ! Cpu version
 #include "fftbox_ip_driver.finc"
 
 end subroutine fftbox_execute_ip_spc
@@ -373,6 +399,7 @@ end subroutine fftbox_execute_ip_spc
 !!
 !! INPUTS
 !!  plan<fftbox_plan3_t>=Structure with the parameters defining the transform.
+!!  isign= Sign of the exponential in the FFT
 !!
 !! SIDE EFFECTS
 !!  ff(plan%ldxyz*plan%ndat) =
@@ -381,16 +408,23 @@ end subroutine fftbox_execute_ip_spc
 !!
 !! SOURCE
 
-subroutine fftbox_execute_ip_dpc(plan, ff)
+subroutine fftbox_execute_ip_dpc(plan, ff, isign)
 
 !Arguments ------------------------------------
 !scalars
- class(fftbox_plan3_t),intent(in) :: plan
+ class(fftbox_plan3_t),intent(inout) :: plan
+ integer,intent(in) :: isign
 !arrays
  complex(dpc),intent(inout) :: ff(plan%ldxyz*plan%ndat)
 
 ! *************************************************************************
 
+ !if (plan%use_gpu /= 0) then
+ !  call xgpu_fftbox_c2c_ip(plan%dims, plan%embed, plan%ndat, isign, 8, ff, plan%gpu_plan_ip_dpc, plan%gpu_data_ip_dpc)
+ !  return
+ !end if
+
+ ! Cpu version
 #include "fftbox_ip_driver.finc"
 
 end subroutine fftbox_execute_ip_dpc
@@ -410,23 +444,32 @@ end subroutine fftbox_execute_ip_dpc
 !! INPUTS
 !! plan<fftbox_plan3_t>=Structure with the parameters defining the transform.
 !! ff(plan%ldxyz*plan%ndat)=The input array to be transformed.
+!!  isign= Sign of the exponential in the FFT
 !!
 !! OUTPUT
 !!  gg(plan%ldxyz*plan%ndat)= The FFT results.
 !!
 !! SOURCE
 
-subroutine fftbox_execute_op_spc(plan, ff, gg)
+subroutine fftbox_execute_op_spc(plan, ff, gg, isign)
 
 !Arguments ------------------------------------
 !scalars
- class(fftbox_plan3_t),intent(in) :: plan
+ class(fftbox_plan3_t),intent(inout) :: plan
+ integer,intent(in) :: isign
 !arrays
  complex(spc),intent(in) :: ff(plan%ldxyz*plan%ndat)
  complex(spc),intent(inout) :: gg(plan%ldxyz*plan%ndat)
 
 ! *************************************************************************
 
+ !if (plan%use_gpu /= 0) then
+ !  call xgpu_c2c_op(plan%dims, plan%embed, plan%ndat, isign, ff, gg, &
+ !                   plan%gpu_plan_op_spc, plan%gpu_idata_op_spc, plan%gpu_odata_op_spc)
+ !  return
+ !end if
+
+ ! Cpu version
 #include "fftbox_op_driver.finc"
 
 end subroutine fftbox_execute_op_spc
@@ -442,6 +485,7 @@ end subroutine fftbox_execute_op_spc
 !!  Out-of-place FFT transform of complex arrays.
 !!  Call (FFTW3|DFTI) routines if available, otherwise fallback to SG routines
 !!  TARGET: dpc arrays
+!!  isign= Sign of the exponential in the FFT
 !!
 !! INPUTS
 !! plan<fftbox_plan3_t>=Structure with the parameters defining the transform.
@@ -452,17 +496,25 @@ end subroutine fftbox_execute_op_spc
 !!
 !! SOURCE
 
-subroutine fftbox_execute_op_dpc(plan, ff, gg)
+subroutine fftbox_execute_op_dpc(plan, ff, gg, isign)
 
 !Arguments ------------------------------------
 !scalars
- class(fftbox_plan3_t),intent(in) :: plan
+ class(fftbox_plan3_t),intent(inout) :: plan
+ integer,intent(in) :: isign
 !arrays
  complex(dpc),intent(in) :: ff(plan%ldxyz*plan%ndat)
  complex(dpc),intent(inout) :: gg(plan%ldxyz*plan%ndat)
 
 ! *************************************************************************
 
+ !if (plan%use_gpu /= 0) then
+ !  call xgpu_c2c_op(plan%dims, plan%embed, plan%ndat, isign, ff, gg, &
+ !                   plan%gpu_plan_op_dpc, plan%gpu_idata_op_dpc, plan%gpu_odata_op_dpc)
+ !  return
+ !end if
+
+ ! Cpu version
 #include "fftbox_op_driver.finc"
 
 end subroutine fftbox_execute_op_dpc
@@ -1119,8 +1171,8 @@ function fftbox_utests(fftalg, ndat, nthreads, unit) result(nfailed)
    !write(std_out,*)pars(1:6,iset)
 
    ! Create the FFT plans.
-   call bw_plan%init(ndat, pars(1,iset), pars(4,iset), fftalg, fftcache0, use_gpu0, +1)
-   call fw_plan%init(ndat, pars(1,iset), pars(4,iset), fftalg, fftcache0, use_gpu0, -1)
+   call bw_plan%init(ndat, pars(1,iset), pars(4,iset), fftalg, fftcache0, use_gpu0)
+   call fw_plan%init(ndat, pars(1,iset), pars(4,iset), fftalg, fftcache0, use_gpu0)
 
    ldxyz = ldx*ldy*ldz
    !
@@ -1142,8 +1194,8 @@ function fftbox_utests(fftalg, ndat, nthreads, unit) result(nfailed)
    ffsp = ff_refsp
 
    ! in-place version.
-   call bw_plan%execute(ffsp)
-   call fw_plan%execute(ffsp)
+   call bw_plan%execute(ffsp, +1)
+   call fw_plan%execute(ffsp, -1)
 
    ierr = COUNT(ABS(ffsp - ff_refsp) > ATOL_SP)
    nfailed = nfailed + ierr
@@ -1158,8 +1210,8 @@ function fftbox_utests(fftalg, ndat, nthreads, unit) result(nfailed)
    call wrtout(ount,sjoin(info,msg))
 
    ffsp = ff_refsp
-   call bw_plan%execute(ffsp, ggsp)
-   call fw_plan%execute(ggsp, ffsp)
+   call bw_plan%execute(ffsp, ggsp, +1)
+   call fw_plan%execute(ggsp, ffsp, -1)
 
    ierr = COUNT(ABS(ffsp - ff_refsp) > ATOL_SP)
    nfailed = nfailed + ierr
@@ -1194,8 +1246,8 @@ function fftbox_utests(fftalg, ndat, nthreads, unit) result(nfailed)
    call cplx_setaug_zero_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,ff_ref)
    ff = ff_ref
 
-   call bw_plan%execute(ff)
-   call fw_plan%execute(ff)
+   call bw_plan%execute(ff, +1)
+   call fw_plan%execute(ff, -1)
 
    ierr = COUNT(ABS(ff - ff_ref) > ATOL_DP)
    nfailed = nfailed + ierr
@@ -1210,8 +1262,8 @@ function fftbox_utests(fftalg, ndat, nthreads, unit) result(nfailed)
    call wrtout(ount,sjoin(info, msg))
 
    ff = ff_ref
-   call bw_plan%execute(ff, gg)
-   call fw_plan%execute(gg, ff)
+   call bw_plan%execute(ff, gg, +1)
+   call fw_plan%execute(gg, ff, -1)
 
    ierr = COUNT(ABS(ff - ff_ref) > ATOL_DP)
    nfailed = nfailed + ierr
