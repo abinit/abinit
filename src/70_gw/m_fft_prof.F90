@@ -827,7 +827,7 @@ subroutine time_fftbox(Ftest,isign,inplace,header,Ftprof)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: nspinor1=1
+ integer,parameter :: nspinor1 = 1, fftcache0 = 0, use_gpu0 = 0
  integer :: icall,i1,i2,i3,n1,n2,n3,ifft,ndat,nfft,dat,padat
  real(dp) :: cpu_time,wall_time,gflops,gsq
  character(len=500) :: msg
@@ -894,7 +894,7 @@ subroutine time_fftbox(Ftest,isign,inplace,header,Ftprof)
  call cwtime(cpu_time,wall_time,gflops,"start")
 
  ! No augmentation here.
- call plan%many(ndat, Ftest%ngfft(1:3), Ftest%ngfft(1:3), Ftest%ngfft(7), isign)
+ call plan%init(ndat, Ftest%ngfft(1:3), Ftest%ngfft(1:3), Ftest%ngfft(7), fftcache0, use_gpu0, isign)
 
  select case (inplace)
  case (0)
@@ -918,6 +918,7 @@ subroutine time_fftbox(Ftest,isign,inplace,header,Ftprof)
 
  call cwtime(cpu_time,wall_time,gflops,"stop")
 
+ call plan%free()
  ABI_FREE(ffc)
  ABI_FREE(ggc)
 

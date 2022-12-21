@@ -110,7 +110,7 @@
 !! NOTES:
 !!
 !!  1) _slk_mat_t is a macro defined in abi_common.h that allows us to use PBLAS in single/double precision
-!!     Be careful when using c_f_pointer because there's no type checking
+!!     Be careful when using c_f_pointer because there's no type checking.
 !!
 !! COPYRIGHT
 !! Copyright (C) 1999-2021 ABINIT group (MG)
@@ -3680,8 +3680,8 @@ subroutine gwr_build_tchi(gwr)
    !ABI_CALLOC(gt_ucbox, (gwr%g_nfft * gwr%nspinor * ndat, 2))
 
    ! (ngfft, ndat, isign)
-   call plan_gp2rp%from_ngfft(sc_ngfft, gwr%nspinor * ndat * 2, -1)
-   call plan_rp2gp%from_ngfft(sc_ngfft, gwr%nspinor * ndat,     +1)
+   call plan_gp2rp%from_ngfft(sc_ngfft, gwr%nspinor * ndat * 2, gwr%dtset%use_gpu_cuda, -1)
+   call plan_rp2gp%from_ngfft(sc_ngfft, gwr%nspinor * ndat,     gwr%dtset%use_gpu_cuda, +1)
 
    ! The g-vectors in the supercell for G and tchi.
    ABI_MALLOC(green_scgvec, (3, gwr%green_mpw))
@@ -3866,7 +3866,7 @@ end if
        ! For each IBZ q-point treated by this MPI proc, do:
        !
        !     1) MPI transpose to have tchi_q(r,g')
-       !     2) FFT along first dimension to have tchi_q(g,g') stored in gwr%tchi_qibz
+       !     2) FFT along the first dimension to get tchi_q(g,g') stored in gwr%tchi_qibz
        !
        tchi_rfact = one / gwr%g_nfft / gwr%cryst%ucvol / (gwr%nkbz * gwr%nqbz)
        do my_iqi=1,gwr%my_nqibz
@@ -3929,6 +3929,9 @@ end if
 
    call slk_array_free(chiq_gpr)
    ABI_FREE(chiq_gpr)
+
+   call plan_gp2rp%free()
+   call plan_rp2gp%free()
 
   else
     ! ===================================================================
@@ -4663,8 +4666,8 @@ if (gwr%use_supercell_for_sigma) then
  ABI_CALLOC(wct_scbox, (sc_nfft * gwr%nspinor * ndat))
 
  ! (ngfft, ndat, isign)
- call gt_plan_gp2rp%from_ngfft(sc_ngfft, gwr%nspinor * ndat * 2, -1)
- call wt_plan_gp2rp%from_ngfft(sc_ngfft, gwr%nspinor * ndat, -1)
+ call gt_plan_gp2rp%from_ngfft(sc_ngfft, gwr%nspinor * ndat * 2, gwr%dtset%use_gpu_cuda, -1)
+ call wt_plan_gp2rp%from_ngfft(sc_ngfft, gwr%nspinor * ndat,     gwr%dtset%use_gpu_cuda, -1)
 
  do my_is=1,gwr%my_nspins
    spin = gwr%my_spins(my_is)
@@ -4844,6 +4847,9 @@ if (gwr%use_supercell_for_sigma) then
  !call wrtout(std_out, sjoin(" Maxval abs imag W:", ftoa(max_abs_imag_wct)))
  ABI_FREE(gt_scbox)
  ABI_FREE(wct_scbox)
+
+ call gt_plan_gp2rp%free()
+ call wt_plan_gp2rp%free()
 
 else
 

@@ -130,21 +130,31 @@ MODULE m_fft
    integer :: nfft            ! Total number of points in the FFT box.
    integer :: ldxyz = -1      ! Physical dimension of the array to transform
    integer :: ndat = -1       ! Number of FFTs associated to the plan.
-   !integer :: nthreads=-1    ! The number of threads associated to the plan.
    integer :: dims(3) = -1    ! The number of FFT divisions.
    integer :: embed(3) = -1   ! Leading dimensions of the input,output arrays.
-   !integer :: use_gpu = 0    ! 1 if FFTs should be offloaded to the GPUs.
+
+   integer :: use_gpu = 0     ! /= 0  if FFTs should be offloaded to the GPUs.
+
+   type(c_ptr) :: gpu_plan_ip_spc = c_null_ptr
+   type(c_ptr) :: gpu_data_ip_spc = c_null_ptr
+   type(c_ptr) :: gpu_plan_ip_dpc = c_null_ptr
+   type(c_ptr) :: gpu_data_ip_dpc = c_null_ptr
+   type(c_ptr) :: gpu_plan_op_spc = c_null_ptr
+   type(c_ptr) :: gpu_idata_op_spc = c_null_ptr
+   type(c_ptr) :: gpu_odata_op_spc = c_null_ptr
+   type(c_ptr) :: gpu_plan_op_dpc = c_null_ptr
+   type(c_ptr) :: gpu_idata_op_dpc = c_null_ptr
+   type(c_ptr) :: gpu_odata_op_dpc = c_null_ptr
 
  contains
 
    procedure :: init => fftbox_plan3_init                 ! Low-level constructor
    procedure :: from_ngfft => fftbox_plan3_from_ngfft     ! Build object from ngfft.
-   procedure :: many => fftbox_plan3_many                 ! Advanced interface
 
-   procedure :: execute_ip_spc  => fftbox_execute_ip_spc
-   procedure :: execute_ip_dpc  => fftbox_execute_ip_dpc
-   procedure :: execute_op_spc  => fftbox_execute_op_spc
-   procedure :: execute_op_dpc  => fftbox_execute_op_dpc
+   procedure :: execute_ip_spc => fftbox_execute_ip_spc
+   procedure :: execute_ip_dpc => fftbox_execute_ip_dpc
+   procedure :: execute_op_spc => fftbox_execute_op_spc
+   procedure :: execute_op_dpc => fftbox_execute_op_dpc
 
    ! Main entry point for performing FFTs on the full box
    ! complex-to-complex version, operating on complex arrays
@@ -152,6 +162,9 @@ MODULE m_fft
                          execute_ip_dpc, &
                          execute_op_spc, &
                          execute_op_dpc
+
+   procedure :: free => fftbox_plan3_free
+   ! Free dynamic memory allocated on the GPU
 
  end type fftbox_plan3_t
 !!***
@@ -204,40 +217,6 @@ end subroutine fft_allow_ialltoall
 
 !----------------------------------------------------------------------
 
-!!****f* m_fft/fftbox_plan3_many
-!! NAME
-!!  fftbox_plan3_many
-!!
-!! FUNCTION
-!!  Advanced interface to construct fftbox_plan3_t
-!!
-!! INPUTS
-!!  See fftbox_plan3_t
-!!
-!! SOURCE
-
-subroutine fftbox_plan3_many(plan, ndat, dims, embed, fftalg, isign)
-
-!Arguments ------------------------------------
-!scalars
- class(fftbox_plan3_t),intent(out) :: plan
- integer,intent(in) :: fftalg, isign, ndat
-!arrays
- integer,intent(in) :: dims(3),embed(3)
-
-!Local variables-------------------------------
-!scalars
- integer,parameter :: fftcache0 = 0
-
-! *************************************************************************
-
- call fftbox_plan3_init(plan, ndat, dims, embed, fftalg, fftcache0, isign)
-
-end subroutine fftbox_plan3_many
-!!***
-
-!----------------------------------------------------------------------
-
 !!****f* m_fft/fftbox_plan3_init
 !! NAME
 !!  fftbox_plan3_init
@@ -251,12 +230,12 @@ end subroutine fftbox_plan3_many
 !!
 !! SOURCE
 
-subroutine fftbox_plan3_init(plan, ndat, dims, embed, fftalg, fftcache, isign)
+subroutine fftbox_plan3_init(plan, ndat, dims, embed, fftalg, fftcache, use_gpu, isign)
 
 !Arguments ------------------------------------
 !scalars
  class(fftbox_plan3_t),intent(out) :: plan
- integer,intent(in) :: ndat,fftalg,fftcache,isign !,nthreads
+ integer,intent(in) :: ndat, fftalg, fftcache, use_gpu, isign
 !arrays
  integer,intent(in) :: dims(3), embed(3)
 
@@ -267,11 +246,11 @@ subroutine fftbox_plan3_init(plan, ndat, dims, embed, fftalg, fftcache, isign)
  plan%embed    = embed                      ! ngfft(4:6)
  plan%fftalg   = fftalg                     ! ngfft(7)
  if (fftcache > 0) plan%fftcache = fftcache ! ngfft(8)
+ plan%use_gpu  = use_gpu
  plan%isign    = isign
- !plan%nthreads = nthreads
 
- plan%nfft  = PRODUCT(plan%dims)
- plan%ldxyz = PRODUCT(plan%embed)
+ plan%nfft  = product(plan%dims)
+ plan%ldxyz = product(plan%embed)
 
 end subroutine fftbox_plan3_init
 !!***
@@ -287,17 +266,62 @@ end subroutine fftbox_plan3_init
 !!
 !! SOURCE
 
-subroutine fftbox_plan3_from_ngfft(plan, ngfft, ndat, isign)
+subroutine fftbox_plan3_from_ngfft(plan, ngfft, ndat, use_gpu, isign)
 
 !Arguments ------------------------------------
  class(fftbox_plan3_t),intent(out) :: plan
- integer,intent(in) :: ngfft(18), ndat, isign
+ integer,intent(in) :: ngfft(18), ndat, use_gpu, isign
 
 ! *************************************************************************
 
- call plan%init(ndat, ngfft(1:3), ngfft(4:6), ngfft(7), ngfft(8), isign)
+ call plan%init(ndat, ngfft(1:3), ngfft(4:6), ngfft(7), ngfft(8), use_gpu, isign)
 
 end subroutine fftbox_plan3_from_ngfft
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_fft/fftbox_plan3_free
+!! NAME
+!!  fftbox_plan3_free
+!!
+!! FUNCTION
+!!  Free dynamic memory allocated on the GPU
+!!
+!! SOURCE
+
+subroutine fftbox_plan3_free(plan)
+
+!Arguments ------------------------------------
+ class(fftbox_plan3_t),intent(inout) :: plan
+
+! *************************************************************************
+
+#define _SFREE_PLAN(gpu_plan) if (c_associated(gpu_plan)) call gpu_plan_free(gpu_plan)
+#define _SFREE_DEVPTR(dev_ptr) if (c_associated(dev_ptr)) call devptr_free(dev_ptr)
+
+ _SFREE_PLAN(plan%gpu_plan_ip_spc)
+ _SFREE_DEVPTR(plan%gpu_data_ip_spc)
+ _SFREE_PLAN(plan%gpu_plan_ip_dpc)
+ _SFREE_DEVPTR(plan%gpu_data_ip_dpc)
+ _SFREE_PLAN(plan%gpu_plan_op_spc)
+ _SFREE_DEVPTR(plan%gpu_idata_op_spc)
+ _SFREE_DEVPTR(plan%gpu_odata_op_spc)
+ _SFREE_PLAN(plan%gpu_plan_op_dpc)
+ _SFREE_DEVPTR(plan%gpu_idata_op_dpc)
+ _SFREE_DEVPTR(plan%gpu_odata_op_dpc)
+
+contains
+subroutine gpu_plan_free(gpu_plan)
+  type(c_ptr),intent(inout) :: gpu_plan
+  gpu_plan = c_null_ptr
+end subroutine gpu_plan_free
+subroutine devptr_free(dev_ptr)
+  type(c_ptr),intent(inout) :: dev_ptr
+  dev_ptr = c_null_ptr
+end subroutine devptr_free
+
+end subroutine fftbox_plan3_free
 !!***
 
 !----------------------------------------------------------------------
@@ -953,7 +977,7 @@ end subroutine fftpad_dpc
 !!
 !! SOURCE
 
-subroutine fft_poisson(ngfft,cplex,nx,ny,nz,ldx,ldy,ldz,ndat,vg,nr)
+subroutine fft_poisson(ngfft, cplex, nx, ny, nz, ldx, ldy, ldz, ndat, vg, nr)
 
 !Arguments ------------------------------------
 !scalars
@@ -964,7 +988,6 @@ subroutine fft_poisson(ngfft,cplex,nx,ny,nz,ldx,ldy,ldz,ndat,vg,nr)
  real(dp),intent(in) :: vg(nx*ny*nz)
 
 !Local variables-------------------------------
-!scalars
  integer :: fftalga, fftcache
 
 ! *************************************************************************
@@ -1039,7 +1062,7 @@ end subroutine fft_use_lib_threads
 !!
 !! SOURCE
 
-function fftbox_utests(fftalg,ndat,nthreads,unit) result(nfailed)
+function fftbox_utests(fftalg, ndat, nthreads, unit) result(nfailed)
 
 !Arguments -----------------------------------
 !scalars
@@ -1049,7 +1072,7 @@ function fftbox_utests(fftalg,ndat,nthreads,unit) result(nfailed)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: NSETS=6
+ integer,parameter :: NSETS=6, use_gpu0 = 0, fftcache0 = 0
  integer :: ifft,ierr,ldxyz,old_nthreads,ount,cplex
  integer :: iset,nx,ny,nz,ldx,ldy,ldz,fftalga,fftalgc
  !integer :: ix,iy,iz,padat,dat
@@ -1096,8 +1119,8 @@ function fftbox_utests(fftalg,ndat,nthreads,unit) result(nfailed)
    !write(std_out,*)pars(1:6,iset)
 
    ! Create the FFT plans.
-   call bw_plan%many(ndat, pars(1,iset), pars(4,iset), fftalg, +1)
-   call fw_plan%many(ndat, pars(1,iset), pars(4,iset), fftalg, -1)
+   call bw_plan%init(ndat, pars(1,iset), pars(4,iset), fftalg, fftcache0, use_gpu0, +1)
+   call fw_plan%init(ndat, pars(1,iset), pars(4,iset), fftalg, fftcache0, use_gpu0, -1)
 
    ldxyz = ldx*ldy*ldz
    !
@@ -1206,6 +1229,9 @@ function fftbox_utests(fftalg,ndat,nthreads,unit) result(nfailed)
    ABI_FREE(ff)
    ABI_FREE(gg)
 
+   call bw_plan%free()
+   call fw_plan%free()
+
    do cplex=1,2
      !if (fftalga == FFT_FFTW3 .and. ndat > 1 .and. cplex==1) then
      !  call wrtout(ount,"Warning: fourdp with FFTW3-wrappers, cplex=2 and ndat>1, might crash if MKL is used")
@@ -1276,7 +1302,7 @@ end function fftbox_utests
 !!
 !! SOURCE
 
-function fftu_utests(ecut,ngfft,rprimd,ndat,nthreads,unit) result(nfailed)
+function fftu_utests(ecut, ngfft, rprimd, ndat, nthreads, unit) result(nfailed)
 
 !Arguments ------------------------------------
 !scalars
@@ -1517,7 +1543,7 @@ end function fftu_utests
 !!
 !! SOURCE
 
-function fftbox_mpi_utests(fftalg,cplex,ndat,nthreads,comm_fft,unit) result(nfailed)
+function fftbox_mpi_utests(fftalg, cplex, ndat, nthreads, comm_fft, unit) result(nfailed)
 
 !Arguments -----------------------------------
 !scalars
@@ -1676,7 +1702,7 @@ end function fftbox_mpi_utests
 !!
 !! SOURCE
 
-function fftu_mpi_utests(fftalg,ecut,rprimd,ndat,nthreads,comm_fft,paral_kgb,unit) result(nfailed)
+function fftu_mpi_utests(fftalg, ecut, rprimd, ndat, nthreads, comm_fft, paral_kgb, unit) result(nfailed)
 
 !Arguments ------------------------------------
 !scalars

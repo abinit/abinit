@@ -107,6 +107,7 @@ subroutine rho_tw_g(nspinor, npwvec, nr, ndat, ngfft, map2sphere, use_padfft, ig
 
 !Local variables-------------------------------
 !scalars
+ integer :: fftcache0 = 0, use_gpu0 = 0
  integer :: ig,igfft,iab,spad1,spad2,spad0,nx,ny,nz,ldx,ldy,ldz,mgfft
  type(fftbox_plan3_t) :: plan
 !arrays
@@ -148,8 +149,9 @@ subroutine rho_tw_g(nspinor, npwvec, nr, ndat, ngfft, map2sphere, use_padfft, ig
      SELECT CASE (map2sphere)
      CASE (0)
        ! Need results on the full FFT box thus cannot use zero-padded FFT.
-       call plan%many(ndat, ngfft(1:3), ngfft(1:3), ngfft(7), -1)
+       call plan%init(ndat, ngfft(1:3), ngfft(1:3), ngfft(7), fftcache0, use_gpu0, -1)
        call plan%execute(u12prod)
+       call plan%free()
        if (dim_rtwg == 1) then
          rhotwg(1:npwvec) = rhotwg(1:npwvec) + u12prod
        else
@@ -163,8 +165,9 @@ subroutine rho_tw_g(nspinor, npwvec, nr, ndat, ngfft, map2sphere, use_padfft, ig
          ldx = nx; ldy = ny; ldz = nz
          call fftpad(u12prod, ngfft, nx, ny, nz, ldx, ldy, ldz, ndat, mgfft, -1, gbound)
        else
-         call plan%many(ndat, ngfft(1:3), ngfft(1:3), ngfft(7), -1)
+         call plan%init(ndat, ngfft(1:3), ngfft(1:3), ngfft(7), fftcache0, use_gpu0, -1)
          call plan%execute(u12prod)
+         call plan%free()
        end if
 
        ! Have to map FFT to G-sphere.
@@ -248,6 +251,7 @@ subroutine ts_usug_kkp_bz(npw, nr, ndat, ngfft, map2sphere, use_padfft, igfftg0,
 
 !Local variables-------------------------------
 !scalars
+ integer :: fftcache0 = 0, use_gpu0 = 0
  integer :: nx,ny,nz,ldx,ldy,ldz,mgfft
  type(fftbox_plan3_t) :: plan
 !arrays
@@ -269,8 +273,9 @@ subroutine ts_usug_kkp_bz(npw, nr, ndat, ngfft, map2sphere, use_padfft, igfftg0,
  SELECT CASE (map2sphere)
  CASE (0)
    ! Need results on the full FFT box thus cannot use zero-padded FFT.
-   call plan%many(ndat, ngfft(1:3), ngfft(1:3), ngfft(7), -1)
+   call plan%init(ndat, ngfft(1:3), ngfft(1:3), ngfft(7), fftcache0, use_gpu0, -1)
    call plan%execute(u12prod)
+   call plan%free()
    call xcopy(nr*ndat,u12prod,1,usug,1)
 
  CASE (1)
@@ -280,8 +285,9 @@ subroutine ts_usug_kkp_bz(npw, nr, ndat, ngfft, map2sphere, use_padfft, igfftg0,
      ldx=nx; ldy=ny; ldz=nz
      call fftpad(u12prod,ngfft,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,-1,gbound)
    else
-     call plan%many(ndat, ngfft(1:3), ngfft(1:3), ngfft(7), -1)
+     call plan%init(ndat, ngfft(1:3), ngfft(1:3), ngfft(7), fftcache0, use_gpu0, -1)
      call plan%execute(u12prod)
+     call plan%free()
    end if
 
    ! From the FFT to the G-sphere.
@@ -558,7 +564,7 @@ subroutine calc_wfwfg(ktabr_k, ktabi_k, spinrot, nr, nspinor, ngfft_gw, wfr_jb, 
  complex(gwpc),intent(out) :: wfg2_jk(nr*nspinor)
 
 !Local variables-------------------------------
- integer,parameter :: ndat1=1
+ integer,parameter :: ndat1 = 1, fftcache0 = 0, use_gpu0 = 0
  type(fftbox_plan3_t) :: plan
 !arrays
  complex(gwpc),allocatable :: wfr2_dpcplx(:),ujb_bz(:),ukb_bz(:)
@@ -595,8 +601,9 @@ subroutine calc_wfwfg(ktabr_k, ktabi_k, spinrot, nr, nspinor, ngfft_gw, wfr_jb, 
  end if
 
  ! Transform to Fourier space (result in wfg2_jk)
- call plan%many(nspinor, ngfft_gw(1:3), ngfft_gw(1:3), ngfft_gw(7), -1)
+ call plan%init(nspinor, ngfft_gw(1:3), ngfft_gw(1:3), ngfft_gw(7), fftcache0, use_gpu0, -1)
  call plan%execute(wfr2_dpcplx, wfg2_jk)
+ call plan%free()
  ABI_FREE(wfr2_dpcplx)
 
 end subroutine calc_wfwfg
