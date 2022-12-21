@@ -174,9 +174,8 @@ getsigeph_filepath12 "t60o_DS11_SIGEPH.nc"
 eph_intmeth12          1
 eph_ngqpt_fine12       4    4    4
 sigma_erange12  0.5 0.5 eV
-eph_doping -1e20
-occopt 3
-tsmear 0.0001
+eph_doping12 -1e20
+occopt12 3
 
 
 ############################################################################################
