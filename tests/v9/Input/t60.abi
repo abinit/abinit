@@ -1,6 +1,6 @@
 # LiF Very rough 2x2x2 q-point grid; low ecut.
 
-ndtset 11
+ndtset 12
 
 getwfk_filepath  "t60o_DS20_WFK"
 getddb_filepath  "t60o_DS20_DDB"
@@ -161,11 +161,22 @@ getdvdb_filepath10  "t60o_DS20_DVDB"
 ############
 # DATASET 11
 ############
-eph_task11 9
-getsigeph_filepath11 "t60o_DS8_SIGEPH.nc"
-eph_intmeth11          1
+eph_task11  4
+sigma_ngkpt11 2 2 2
+sigma_erange11  0.5 0.5 eV
 eph_ngqpt_fine11       4    4    4
 
+############
+# DATASET 12
+############
+eph_task12 9
+getsigeph_filepath12 "t60o_DS11_SIGEPH.nc"
+eph_intmeth12          1
+eph_ngqpt_fine12       4    4    4
+sigma_erange12  0.5 0.5 eV
+eph_doping -1e20
+occopt 3
+tsmear 0.0001
 
 
 ############################################################################################
