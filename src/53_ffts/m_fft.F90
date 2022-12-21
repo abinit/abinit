@@ -33,7 +33,7 @@ MODULE m_fft
  use m_sg2002
  use m_fftw3
  use m_dfti
- use iso_c_binding
+
 #if defined HAVE_MPI2
  use mpi
 #endif
@@ -51,8 +51,10 @@ MODULE m_fft
  use m_distribfft,    only : distribfft_type, init_distribfft, destroy_distribfft
 
 #if defined HAVE_GPU_CUDA
- use m_manage_cuda
+ ! MG: Had to comment this line to avoid "Ambiguous reference to c_ptr on buda2 with CUDA
+ !use m_manage_cuda
 #endif
+ use iso_c_binding
 
  implicit none
 
