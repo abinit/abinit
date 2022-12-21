@@ -816,7 +816,7 @@ end subroutine time_fourdp
 !!
 !! SOURCE
 
-subroutine time_fftbox(Ftest,isign,inplace,header,Ftprof)
+subroutine time_fftbox(Ftest, isign, inplace, header, Ftprof)
 
 !Arguments -----------------------------------
 !scalars
@@ -834,7 +834,7 @@ subroutine time_fftbox(Ftest,isign,inplace,header,Ftprof)
  character(len=TNAME_LEN) :: test_name
  type(fftbox_plan3_t) :: plan
 !arrays
- integer,parameter :: g0(3) = (/1,-2,1/)
+ integer,parameter :: g0(3) = [1,-2,1]
  integer :: gg(3)
  complex(dpc),allocatable :: ffc(:),ggc(:),results(:)
 ! *********************************************************************
@@ -894,20 +894,20 @@ subroutine time_fftbox(Ftest,isign,inplace,header,Ftprof)
  call cwtime(cpu_time,wall_time,gflops,"start")
 
  ! No augmentation here.
- call plan%init(ndat, Ftest%ngfft(1:3), Ftest%ngfft(1:3), Ftest%ngfft(7), fftcache0, use_gpu0, isign)
+ call plan%init(ndat, Ftest%ngfft(1:3), Ftest%ngfft(1:3), Ftest%ngfft(7), fftcache0, use_gpu0)
 
  select case (inplace)
  case (0)
    do icall=1,NCALLS_FOR_TEST
      ifft = empty_cache(CACHE_KBSIZE)
-     call plan%execute(ffc, ggc)
+     call plan%execute(ffc, ggc, isign)
      ! Store results at the first call.
      if (icall==1) results = ggc
    end do
  case (1)
    do icall=1,NCALLS_FOR_TEST
      ifft = empty_cache(CACHE_KBSIZE)
-     call plan%execute(ffc)
+     call plan%execute(ffc, isign)
      ! Store results at the first call.
      if (icall==1) results = ffc
    end do
@@ -965,7 +965,7 @@ subroutine time_fourwf(Ftest,cplex,option_fourwf,header,Ftprof)
  character(len=500) :: msg
  character(len=TNAME_LEN) :: test_name
 !arrays
- integer,parameter :: g0(3)=(/1,-1,2/) !g0(3)=(/1,0,0/)
+ integer,parameter :: g0(3)=[1,-1,2] !g0(3)=[1,0,0]
  integer :: gg(3)
  integer,allocatable :: gbound_in(:,:),gbound_out(:,:)
  real(dp),allocatable :: denpot(:,:,:),fofg_in(:,:)
@@ -1232,7 +1232,6 @@ end subroutine time_fourwf
 subroutine fftprof_ncalls_per_test(ncalls)
 
 !Arguments -----------------------------------
-!scalars
  integer,intent(in) :: ncalls
 
 ! *********************************************************************
@@ -1279,16 +1278,13 @@ subroutine time_rhotwg(Ftest,map2sphere,use_padfft,osc_npw,osc_gvec,header,Ftpro
  logical :: not_implemented
  type(MPI_type) :: MPI_enreg_seq
 !arrays
- !integer,parameter :: g1(3)=(/1,1,2/),g2(3)=(/-1,-2,-1/)
- integer,parameter :: g1(3)=(/-1,0,0/),g2(3)=(/1,0,0/)
- integer,allocatable :: gbound(:,:)
- integer,allocatable :: ktabr1(:),ktabr2(:)
- integer,allocatable :: igfftg0(:)
+ !integer,parameter :: g1(3)=[1,1,2],g2(3)=[-1,-2,-1]
+ integer,parameter :: g1(3)=[-1,0,0], g2(3)=[1,0,0]
+ integer,allocatable :: gbound(:,:), ktabr1(:), ktabr2(:), igfftg0(:)
  real(dp),parameter :: spinrot1(4)=(/one,zero,zero,one/),spinrot2(4)=(/one,zero,zero,one/)
  logical,allocatable :: mask(:)
  complex(dpc),allocatable :: results(:)
- complex(gwpc),allocatable :: rhotwg(:)
- complex(gwpc),allocatable :: wfn1(:),wfn2(:)
+ complex(gwpc),allocatable :: rhotwg(:), wfn1(:), wfn2(:)
 
 ! *********************************************************************
 
@@ -1402,7 +1398,7 @@ end subroutine time_rhotwg
 !!
 !! SOURCE
 
-subroutine time_fftu(Ftest,isign,header,Ftprof)
+subroutine time_fftu(Ftest, isign, header, Ftprof)
 
 !Arguments -----------------------------------
 !scalars
@@ -1421,7 +1417,7 @@ subroutine time_fftu(Ftest,isign,header,Ftprof)
  character(len=500) :: msg
  character(len=TNAME_LEN) :: test_name
 !arrays
- integer,parameter :: g0(3) = (/1,-2,1/)
+ integer,parameter :: g0(3) = [1,-2,1]
  integer :: gg(3)
  integer,allocatable :: kg_k(:,:),gbound(:,:)
  complex(dpc),allocatable :: ug(:),results(:),ur(:)
