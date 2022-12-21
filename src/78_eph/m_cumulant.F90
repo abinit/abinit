@@ -529,6 +529,7 @@ if (any(abs(dtset%sigma_erange) > zero)) tmp_ebands = sigmaph%get_ebands(cryst, 
  self%eph_extrael = extrael_fermie(1)
  self%eph_fermie = extrael_fermie(2)
 
+ ABI_MALLOC(self%mu_e, (self%ntemp))
  ! Possibility to increase nwr in case of interpolation in cumulant to add extra points
  ! TODO: not working yet
  self%nwr_ce = self%nwr!*4 -1 ! Odd
@@ -1221,7 +1222,6 @@ subroutine cumulant_kubo_transport(self, dtset, cryst)
  ABI_MALLOC(self%transport_mu_e, (self%ntemp))
 
  ABI_CALLOC(self%n_ehst, (2, self%nsppol, self%ntemp))
-
  self%transport_fermie = dtset%eph_fermie
  self%transport_extrael = dtset%eph_extrael
  self%transport_mu_e = self%mu_e
@@ -1239,7 +1239,6 @@ subroutine cumulant_kubo_transport(self, dtset, cryst)
    ! Compute Fermi level for different T values.
    call ebands_get_muT_with_fd(self%ebands, self%ntemp, self%kTmesh, dtset%spinmagntarget, dtset%prtvol, self%transport_mu_e, comm)
  end if
-
 
  call ebands_get_carriers(self%ebands, self%ntemp, self%kTmesh, self%transport_mu_e, self%n_ehst)
 
@@ -1749,7 +1748,7 @@ end if
   end do
  end if
 if (xmpi_comm_rank(self%comm) == master .and. is_open(ab_out) .and. any(abs(dtset%sigma_erange) > zero)) then
-   write(ab_out, "(/,a)")" Print 5 temperatures in mobility_mu array (el-holes) for testing purposes:"
+   write(ab_out, "(/,a)")" Print 5 temperatures in mobility_mu array (electrons) for testing purposes:"
    write(ab_out, "(2(a, i0))")" spin: ", spin
    if (self%ntemp > 5) then
      ntemp = 5
@@ -1759,9 +1758,8 @@ if (xmpi_comm_rank(self%comm) == master .and. is_open(ab_out) .and. any(abs(dtse
    do ii=1,3
      do jj=1,3
        do itemp=1,ntemp
-         write(ab_out, "(2(a,i0))")" gw_vals for itemp:", itemp
+         write(ab_out, "(2(a,i0))")" mobility_mu for itemp:", itemp
          write(ab_out, "(*(es13.5))")dble(self%mobility_mu(ii, jj, 1, spin, itemp))
-         write(ab_out, "(*(es13.5))")dble(self%mobility_mu(ii, jj, 2, spin, itemp))
        end do
      end do
    end do
