@@ -6,14 +6,10 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2021 ABINIT group (DRH, DCA, XG, GM, AR, MB)
+!! Copyright (C) 1998-2022 ABINIT group (DRH, DCA, XG, GM, AR, MB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -29,7 +25,6 @@ module m_dfpt_elt
  use m_abicore
  use m_errors
  use m_xmpi
- use m_mpinfo
  use m_dtset
 
  use defs_datatypes, only : pseudopotential_type
@@ -46,10 +41,10 @@ module m_dfpt_elt
  use m_atm2fft,     only : atm2fft, dfpt_atm2fft
  use m_mkcore,      only : dfpt_mkcore
  use m_dfpt_mkvxcstr, only : dfpt_mkvxcstr
- use m_paral_atom, only : get_my_atmtab, free_my_atmtab
- use m_mpinfo,  only : ptabs_fourdp, proc_distrb_cycle
+ use m_paral_atom,   only : get_my_atmtab, free_my_atmtab
+ use m_mpinfo,       only : ptabs_fourdp, proc_distrb_cycle, proc_distrb_nband
  use m_fftcore,      only : sphereboundary
- use m_fft,             only : fourdp
+ use m_fft,          only : fourdp
 
  implicit none
 
@@ -127,12 +122,6 @@ contains
 !! NOTES
 !!      Much of the code in versions of this routine prior to 4.4.5
 !!      has been transfered to its child eltxccore.
-!!
-!! PARENTS
-!!      m_respfn_driver
-!!
-!! CHILDREN
-!!      free_my_atmtab,get_my_atmtab,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -666,7 +655,7 @@ end subroutine dfpt_eltfrxc
 !! over the second strain and over all atomic displacements.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2021 ABINIT group (DRH, DCA, XG, GMR)
+!! Copyright (C) 1998-2022 ABINIT group (DRH, DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -702,12 +691,6 @@ end subroutine dfpt_eltfrxc
 !!
 !! NOTES
 !! Note that this routine is related to the mkcore.f routine
-!!
-!! PARENTS
-!!      m_dfpt_elt
-!!
-!! CHILDREN
-!!      free_my_atmtab,get_my_atmtab,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1043,12 +1026,6 @@ end subroutine eltxccore
 !! OUTPUT
 !!  eltfrloc(6+3*natom,6)=non-symmetrized local pseudopotenial contribution
 !!   to the elastic tensor and internal strain.
-!!
-!! PARENTS
-!!      m_respfn_driver
-!!
-!! CHILDREN
-!!      free_my_atmtab,get_my_atmtab,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1390,12 +1367,6 @@ end subroutine dfpt_eltfrloc
 !!  eltfrkin(6,6)=non-symmetrized kinetic energy contribution to the
 !!                    elastic tensor
 !!
-!! PARENTS
-!!      m_respfn_driver
-!!
-!! CHILDREN
-!!      free_my_atmtab,get_my_atmtab,timab,xmpi_sum
-!!
 !! SOURCE
 
 subroutine dfpt_eltfrkin(cg,eltfrkin,ecut,ecutsm,effmass_free,&
@@ -1583,12 +1554,6 @@ subroutine dfpt_eltfrkin(cg,eltfrkin,ecut,ecutsm,effmass_free,&
 !! cut-off energy). The smearing factor is $x^2 (3-2x)$, where
 !! x = (ecut- unmodified energy)/ecutsm.
 !!
-!! PARENTS
-!!      m_dfpt_elt
-!!
-!! CHILDREN
-!!      free_my_atmtab,get_my_atmtab,timab,xmpi_sum
-!!
 !! SOURCE
 
 subroutine d2kindstr2(cwavef,ecut,ecutsm,effmass_free,ekinout,gmet,gprimd,&
@@ -1747,12 +1712,6 @@ end subroutine dfpt_eltfrkin
 !!                    elastic tensor
 !! NOTES
 !! *based largely on hartre.f
-!!
-!! PARENTS
-!!      m_respfn_driver
-!!
-!! CHILDREN
-!!      free_my_atmtab,get_my_atmtab,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1957,12 +1916,6 @@ end subroutine dfpt_eltfrhar
 !!
 !! OUTPUT
 !! elteew(6+3*natom,6)=2nd derivatives of Ewald energy wrt strain
-!!
-!! PARENTS
-!!      m_respfn_driver
-!!
-!! CHILDREN
-!!      free_my_atmtab,get_my_atmtab,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -2379,12 +2332,6 @@ end subroutine elt_ewald
 !! dyew(2,3,natom,3,natom)= Ewald part of the dynamical matrix,
 !!    second energy derivative wrt xred(3,natom), Hartrees.
 !!
-!! PARENTS
-!!      m_respfn_driver
-!!
-!! CHILDREN
-!!      free_my_atmtab,get_my_atmtab,timab,xmpi_sum
-!!
 !! SOURCE
 
 subroutine dfpt_ewald(dyew,gmet,my_natom,natom,qphon,rmet,sumg0,typat,ucvol,xred,zion, &
@@ -2649,7 +2596,7 @@ end subroutine dfpt_ewald
 !! If q=0 is asked, sumg0 should be put to 0. Otherwise, it should be put to 1.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2021 ABINIT group (MR, MS)
+!! Copyright (C) 1998-2022 ABINIT group (MR, MS)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2674,18 +2621,10 @@ end subroutine dfpt_ewald
 !! dyewdq(2,3,natom,3,natom,3)= First q-gradient of Ewald part of the dynamical matrix,
 !!    second energy derivative wrt xred(3,natom), Hartrees.
 !!
-!! PARENTS
-!!      m_longwave
-!!
-!! CHILDREN
-!!      free_my_atmtab,get_my_atmtab,timab,xmpi_sum
-!!
 !! SOURCE
 
 subroutine dfpt_ewalddq(dyewdq,gmet,my_natom,natom,qphon,rmet,sumg0,typat,ucvol,xred,zion, &
 &                 mpi_atmtab,comm_atom ) ! optional arguments (parallelism))
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -2784,7 +2723,7 @@ subroutine dfpt_ewalddq(dyewdq,gmet,my_natom,natom,qphon,rmet,sumg0,typat,ucvol,
                    arg=arga-argb
                    c1r=cos(arg)*term
                    c1i=sin(arg)*term
-  
+
                    do iq=1,3
                      gpqdq=gmet(iq,1)*gpq(1)+gmet(iq,2)*gpq(2)+gmet(iq,3)*gpq(3)
                      do mu=1,3
@@ -2801,7 +2740,7 @@ subroutine dfpt_ewalddq(dyewdq,gmet,my_natom,natom,qphon,rmet,sumg0,typat,ucvol,
                        end do
                      end do
                    end do
-  
+
                  end do
                end do
              end if
@@ -2841,7 +2780,7 @@ subroutine dfpt_ewalddq(dyewdq,gmet,my_natom,natom,qphon,rmet,sumg0,typat,ucvol,
  do
    nr=nr+1
    newr=0
- 
+
    do ir3=-nr,nr
      do ir2=-nr,nr
        do ir1=-nr,nr
@@ -2883,7 +2822,7 @@ subroutine dfpt_ewalddq(dyewdq,gmet,my_natom,natom,qphon,rmet,sumg0,typat,ucvol,
                    rq(1)=rmet(1,1)*r1+rmet(1,2)*r2+rmet(1,3)*r3
                    rq(2)=rmet(2,1)*r1+rmet(2,2)*r2+rmet(2,3)*r3
                    rq(3)=rmet(3,1)*r1+rmet(3,2)*r2+rmet(3,3)*r3
-                   do iq=1,3               
+                   do iq=1,3
                      do mu=1,3
 !                       do nu=1,3
                        do nu=1,mu
@@ -2921,7 +2860,7 @@ subroutine dfpt_ewalddq(dyewdq,gmet,my_natom,natom,qphon,rmet,sumg0,typat,ucvol,
  do ia0=1,my_natom
    ia=ia0;if(paral_atom)ia=my_atmtab(ia0)
    do ib=1,ia
-     do iq=1,3               
+     do iq=1,3
        do mu=1,3
          do nu=1,mu
            do ii=1,2
@@ -2987,7 +2926,7 @@ end subroutine dfpt_ewalddq
 !! If q=0 is asked, sumg0 should be put to 0. Otherwise, it should be put to 1.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2021 ABINIT group (MR, MS)
+!! Copyright (C) 1998-2022 ABINIT group (MR, MS)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -3012,18 +2951,10 @@ end subroutine dfpt_ewalddq
 !! dyewdqdq(2,3,natom,3,3,3)= First q-gradient of Ewald part of the dynamical matrix,
 !!    sumed over second atomic sublattice.
 !!
-!! PARENTS
-!!      m_longwave
-!!
-!! CHILDREN
-!!      free_my_atmtab,get_my_atmtab,timab,xmpi_sum
-!!
 !! SOURCE
 
 subroutine dfpt_ewalddqdq(dyewdqdq,gmet,my_natom,natom,qphon,rmet,sumg0,typat,ucvol,xred,zion, &
 &                 mpi_atmtab,comm_atom ) ! optional arguments (parallelism))
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -3161,11 +3092,11 @@ subroutine dfpt_ewalddqdq(dyewdqdq,gmet,my_natom,natom,qphon,rmet,sumg0,typat,uc
                            term1=term1+gpq(mu)*gpq(nu)*gmet(iq1,iq2)
                            term1=-term1*(fac2+2.0_dp/gsq)
 
-                           term2=delag*delbd + delbg*delad 
+                           term2=delag*delbd + delbg*delad
 
                            term3=gpqdq1*gpqdq2*gpq(mu)*gpq(nu)
                            term3=term3*(fac8/gsq + fac2sqr + 8.0_dp/gsqsq)
-   
+
                            gterms=term1+term2+term3
                            work(re,mu,ia,nu,ib,iq1,iq2)=work(re,mu,ia,nu,ib,iq1,iq2)+gterms*c1r
                            work(im,mu,ia,nu,ib,iq1,iq2)=work(im,mu,ia,nu,ib,iq1,iq2)+gterms*c1i
@@ -3256,8 +3187,8 @@ subroutine dfpt_ewalddqdq(dyewdqdq,gmet,my_natom,natom,qphon,rmet,sumg0,typat,uc
                    rq(1)=rmet(1,1)*r1+rmet(1,2)*r2+rmet(1,3)*r3
                    rq(2)=rmet(2,1)*r1+rmet(2,2)*r2+rmet(2,3)*r3
                    rq(3)=rmet(3,1)*r1+rmet(3,2)*r2+rmet(3,3)*r3
-                   do iq2=1,3               
-                     do iq1=1,3               
+                   do iq2=1,3
+                     do iq1=1,3
                        do mu=1,3
 !                         do nu=1,3
                          do nu=1,mu
@@ -3296,8 +3227,8 @@ subroutine dfpt_ewalddqdq(dyewdqdq,gmet,my_natom,natom,qphon,rmet,sumg0,typat,uc
  do ia0=1,my_natom
    ia=ia0;if(paral_atom)ia=my_atmtab(ia0)
    do ib=1,ia
-     do iq2=1,3               
-       do iq1=1,3               
+     do iq2=1,3
+       do iq1=1,3
          do mu=1,3
            do nu=1,mu
              do ii=1,2
@@ -3370,7 +3301,7 @@ subroutine dfpt_ewalddqdq(dyewdqdq,gmet,my_natom,natom,qphon,rmet,sumg0,typat,uc
    end do
  end do
  ABI_FREE(work)
- 
+
 !Destroy atom table used for parallelism
  call free_my_atmtab(my_atmtab,my_atmtab_allocated)
 

@@ -7,14 +7,10 @@
 !!  on the sphere using lebedev-laikov angular grids.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2021 ABINIT group (MG)
+!! Copyright (C) 2008-2022 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -122,12 +118,6 @@ contains  !===========================================================
 !! OUTPUT
 !!  Lgrid<lebedev_t>=The grid fully initialized.
 !!
-!! PARENTS
-!!      m_lebedev
-!!
-!! CHILDREN
-!!      gen_oh
-!!
 !! SOURCE
 
 type(lebedev_t) function lebedev_new(seq_idx) result(new)
@@ -164,12 +154,6 @@ end function lebedev_new
 !! FUNCTION
 !!  Free an instance of lebedev_t
 !!
-!! PARENTS
-!!      m_ifc
-!!
-!! CHILDREN
-!!      gen_oh
-!!
 !! SOURCE
 
 subroutine lebedev_free(lgrid)
@@ -204,12 +188,6 @@ end subroutine lebedev_free
 !!  npts=Number of points
 !!  xx(npts),yy(npts),zz(npts)=The Cartesian coordinates of the knots.
 !!  ww(npts)=The weights.
-!!
-!! PARENTS
-!!      m_lebedev
-!!
-!! CHILDREN
-!!      gen_oh
 !!
 !! SOURCE
 
@@ -316,12 +294,6 @@ end subroutine build_lebedev_grid
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_lebedev
-!!
-!! CHILDREN
-!!      gen_oh
 !!
 !! SOURCE
 

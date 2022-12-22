@@ -1,6 +1,6 @@
 # -*- Autoconf -*-
 #
-# Copyright (C) 2005-2021 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2022 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -384,7 +384,7 @@ AC_DEFUN([ABI_PROG_CC],[
       fi
     fi
   fi
-  AC_PROG_CC
+  AC_PROG_CC([ mpiicc mpicc icc xlc CC cc gcc ])
 
   # Fail if no C compiler is available
   if test "${CC}" = ""; then

@@ -6,14 +6,10 @@
 !!   Atomic data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2000-2021 ABINIT group (XG, MJV, MT, MG)
+!!  Copyright (C) 2000-2022 ABINIT group (XG, MJV, MT, MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! TODO
 !!  * Use module global lookup table.
@@ -91,13 +87,6 @@ contains
 !! amu=atomic mass (Masses beyond element 103 are fixed at 260)
 !! rcov=covalent radius   (Elements beyond 86 have an estimated covalent radius)
 !! character(len=2) symbol=atomic symbol
-!!
-!! PARENTS
-!!      m_abimover,m_atomdata,m_crystal,m_effective_potential_file,m_epjdos
-!!      m_forces,m_geometry,m_ingeo,m_invars1,m_mlwfovlp,m_multipoles
-!!      m_vdw_dftd2,m_vdw_dftd3
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -359,11 +348,6 @@ end subroutine atomdata_from_znucl
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_atomdata,m_parser,m_pspheads,m_upf2abinit
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine atomdata_from_symbol(atom,symbol)
@@ -615,10 +599,6 @@ end subroutine atomdata_from_symbol
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 function znucl2symbol(znucl) result(symbol)
@@ -648,10 +628,6 @@ end function znucl2symbol
 !!   Return znucl from the symbol
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -690,11 +666,6 @@ end function symbol2znucl
 !!
 !! OUTPUT
 !! length=decay lenth
-!!
-!! PARENTS
-!!      extraprho,fresidrsp,initro
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -818,11 +789,6 @@ end function atom_length
 !!
 !! OUTPUT
 !! gauss(2,ntypat)=Gaussian parameters.
-!!
-!! PARENTS
-!!      m_dfpt_looppert
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

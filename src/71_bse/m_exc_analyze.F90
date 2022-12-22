@@ -7,14 +7,10 @@
 !!
 !! COPYRIGHT
 !!  Copyright (C) 1992-2009 EXC group (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida)
-!!  Copyright (C) 2009-2021 ABINIT group (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, M.Giantomassi)
+!!  Copyright (C) 2009-2022 ABINIT group (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, M.Giantomassi)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -35,9 +31,9 @@ module m_exc_analyze
  use defs_datatypes,      only : pseudopotential_type, ebands_t
  use m_io_tools,          only : open_file
  use m_numeric_tools,     only : iseven, wrap2_zero_one
- use m_bz_mesh,           only : kmesh_t, get_BZ_item
+ use m_bz_mesh,           only : kmesh_t
  use m_crystal,           only : crystal_t
- use m_wfd,               only : wfd_t
+ use m_wfd,               only : wfdgw_t
  use m_bse_io,            only : exc_read_eigen
  use m_pptools,           only : printxsf
  use m_pawrad,            only : pawrad_type
@@ -74,7 +70,7 @@ contains
 !! Pawtab(Cryst%ntypat*usepaw)<pawtab_type>=PAW tabulated starting data
 !! Pawrad(ntypat*usepaw)<type(pawrad_type)>=paw radial mesh and related data.
 !! Psps <pseudopotential_type>=variables related to pseudopotentials.
-!! Wfd<wfd_t>=Handler for the wavefunctions.
+!! Wfd<wfdgw_t>=Handler for the wavefunctions.
 !! ngfftf(18)=Info on the dense FFT mesh used for plotting the excitonic wavefunctions.
 !! nrcell(3)=Number of cell replicas (the code will enforce odd number so that the e or the
 !!  h can be centered in the bix box.
@@ -84,11 +80,6 @@ contains
 !! paw_add_onsite=.TRUE. if the onsite contribution is taken into account.
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      wfd%get_ur,wrtout
 !!
 !! SOURCE
 
@@ -103,7 +94,7 @@ subroutine exc_plot(Bsp,Bs_files,Wfd,Kmesh,Cryst,Psps,Pawtab,Pawrad,paw_add_onsi
  type(kmesh_t),intent(in) :: Kmesh
  type(crystal_t),intent(in) :: Cryst
  type(pseudopotential_type),intent(in) :: Psps
- type(wfd_t),intent(inout) :: Wfd
+ type(wfdgw_t),intent(inout) :: Wfd
 !arrays
  integer,intent(in) :: ngfftf(18),nrcell(3)
  real(dp),intent(in) :: eh_rcoord(3)
@@ -427,12 +418,6 @@ end subroutine exc_plot
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_bethe_salpeter
-!!
-!! CHILDREN
-!!      wfd%get_ur,wrtout
-!!
 !! SOURCE
 
 subroutine exc_den(BSp,BS_files,ngfft,nfftot,Kmesh,ktabr,Wfd)
@@ -443,7 +428,7 @@ subroutine exc_den(BSp,BS_files,ngfft,nfftot,Kmesh,ktabr,Wfd)
  type(excparam),intent(in) :: BSp
  type(excfiles),intent(in) :: BS_files
  type(kmesh_t),intent(in) :: Kmesh
- type(wfd_t),intent(inout) :: Wfd
+ type(wfdgw_t),intent(inout) :: Wfd
 !arrays
  integer,intent(in) :: ngfft(18)
  integer,intent(in) :: ktabr(nfftot,BSp%nkbz)

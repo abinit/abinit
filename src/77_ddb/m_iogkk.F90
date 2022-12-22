@@ -6,14 +6,10 @@
 !!  IO routines for GKK files
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2021 ABINIT group (MVer)
+!!  Copyright (C) 2008-2022 ABINIT group (MVer)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -84,12 +80,6 @@ contains
 !!        1 -> element is from symmetric pert
 !!        2 -> element is kptsym of gkk file
 !!        3 -> element was read from gkk file
-!!
-!! PARENTS
-!!      m_elphon
-!!
-!! CHILDREN
-!!      gam_mult_displ
 !!
 !! SOURCE
 
@@ -705,12 +695,6 @@ end subroutine read_gkk
 !!  hdr1 = RF header
 !!  mpi_enreg=information about MPI parallelization
 !!
-!! PARENTS
-!!      m_dfpt_looppert
-!!
-!! CHILDREN
-!!      gam_mult_displ
-!!
 !! SOURCE
 
 subroutine outgkk(bantot0,bantot1,outfile,eigen0,eigen1,hdr0,hdr1,mpi_enreg,phasecg)
@@ -819,12 +803,6 @@ end subroutine outgkk
 !!  only writes to a file
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_iogkk
-!!
-!! CHILDREN
-!!      gam_mult_displ
 !!
 !! SOURCE
 
@@ -998,7 +976,7 @@ end subroutine prt_gkk_yambo
 !! then maps them into the FS kpt states
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2021 ABINIT group (JPCroc) based on conducti
+!! Copyright (C) 2002-2022 ABINIT group (JPCroc) based on conducti
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1011,12 +989,6 @@ end subroutine prt_gkk_yambo
 !!
 !! OUTPUT
 !! el_veloc(nkpt_in,nband_in,3)
-!!
-!! PARENTS
-!!      m_elphon
-!!
-!! CHILDREN
-!!      gam_mult_displ
 !!
 !! SOURCE
 
@@ -1162,12 +1134,6 @@ end subroutine read_el_veloc
 !! OUTPUT
 !!  eigen1 = response function 1st order eigenvalue matrix
 !!
-!! PARENTS
-!!      m_iogkk
-!!
-!! CHILDREN
-!!      gam_mult_displ
-!!
 !! SOURCE
 
 subroutine inpgkk(eigen1,filegkk,hdr1)
@@ -1279,12 +1245,6 @@ end subroutine inpgkk
 !! OUTPUT
 !!   h1_mat_el_sq = irreducible matrix elements squared and completed
 !!   gkk_flag = changed on output
-!!
-!! PARENTS
-!!      m_iogkk
-!!
-!! CHILDREN
-!!      gam_mult_displ
 !!
 !! SOURCE
 
@@ -1427,12 +1387,6 @@ end subroutine completeperts
 !! OUTPUT
 !!   elph_ds%gkq filled
 !!   qdata(elph_ds%nbranch,elph_ds%nsppol,3) = array containing the phonon frequency, the linewidth and $\lambda_{q,\nu}$.
-!!
-!! PARENTS
-!!      m_iogkk
-!!
-!! CHILDREN
-!!      gam_mult_displ
 !!
 !! SOURCE
 
@@ -1637,12 +1591,6 @@ end subroutine normsq_gkq
 !!   accum_mat = matrix for accumulating FS average of gkk (gamma matrix -> linewidths)
 !!   accum_mat2 = matrix for accumulating FS average of gamma matrix with good prefactors
 !!
-!! PARENTS
-!!      m_iogkk
-!!
-!! CHILDREN
-!!      gam_mult_displ
-!!
 !! SOURCE
 
 subroutine nmsq_gam (accum_mat,accum_mat2,displ_red,eigvec,elph_ds,FSfullpqtofull,&
@@ -1787,12 +1735,6 @@ end subroutine nmsq_gam
 !! OUTPUT
 !!   accum_mat = matrix for accumulating FS average of gkk (gamma matrix -> linewidths)
 !!   accum_mat2 = matrix for accumulating FS average of gamma matrix with good prefactors
-!!
-!! PARENTS
-!!      m_iogkk
-!!
-!! CHILDREN
-!!      gam_mult_displ
 !!
 !! SOURCE
 
@@ -1946,12 +1888,6 @@ end subroutine nmsq_gam_sumFS
 !!   accum_mat = matrix for accumulating FS average of gkk (gamma matrix -> linewidths)
 !!   accum_mat2 = complex array whose real part contains the phonon linewidth
 !!
-!! PARENTS
-!!      m_iogkk
-!!
-!! CHILDREN
-!!      gam_mult_displ
-!!
 !! SOURCE
 
 subroutine nmsq_pure_gkk(accum_mat,accum_mat2,displ_red,elph_ds,FSfullpqtofull,&
@@ -2076,12 +2012,6 @@ end subroutine nmsq_pure_gkk
 !! OUTPUT
 !!   accum_mat = matrix for accumulating FS average of gkk (gamma matrix -> linewidths)
 !!   accum_mat2 = complex array whose real part contains the phonon linewidth
-!!
-!! PARENTS
-!!      m_iogkk
-!!
-!! CHILDREN
-!!      gam_mult_displ
 !!
 !! SOURCE
 

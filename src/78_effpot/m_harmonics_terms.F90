@@ -7,7 +7,7 @@
 !! Module with datatype and tools for the harmonics terms
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2021 ABINIT group (AM)
+!! Copyright (C) 2010-2022 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -117,12 +117,6 @@ CONTAINS  !=====================================================================
 !!
 !! OUTPUT
 !! harmonics_terms<type(harmonics_terms_type)> = harmonics_terms datatype to be initialized
-!!
-!! PARENTS
-!!      m_effective_potential
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -261,12 +255,6 @@ end subroutine harmonics_terms_init
 !! OUTPUT
 !! harmonics_terms<type(harmonics_terms_type)> = harmonics_terms datatype to be free
 !!
-!! PARENTS
-!!      m_effective_potential,m_harmonics_terms
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine harmonics_terms_free(harmonics_terms)
@@ -332,12 +320,6 @@ end subroutine harmonics_terms_free
 !! OUTPUT
 !! harmonics_terms<type(harmonics_terms_type)> = harmonics_terms datatype
 !!
-!! PARENTS
-!!      m_effective_potential,m_harmonics_terms
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine harmonics_terms_setInternalStrain(harmonics_terms,natom,strain_coupling)
@@ -391,12 +373,6 @@ end subroutine harmonics_terms_setInternalStrain
 !!
 !! OUTPUT
 !! harmonics_terms<type(harmonics_terms_type)> = harmonics_terms datatype
-!!
-!! PARENTS
-!!      m_effective_potential,m_harmonics_terms
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -453,12 +429,6 @@ end subroutine harmonics_terms_setEffectiveCharges
 !!
 !! OUTPUT
 !! harmonics_terms<type(harmonics_terms_type)> = harmonics_terms datatype
-!!
-!! PARENTS
-!!      m_effective_potential,m_harmonics_terms
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -560,12 +530,6 @@ end subroutine harmonics_terms_setDynmat
 !!
 !! PARENT
 !!   effective_potential_evaluate
-!!
-!! PARENTS
-!!      m_effective_potential
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -673,12 +637,6 @@ end subroutine harmonics_terms_evaluateIFC
 !!   fcart(3,natom) = contribution to the forces
 !!   strten(6) = contribution to the stress tensor
 !!
-!! PARENTS
-!!      m_effective_potential
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 !!
 subroutine harmonics_terms_evaluateElastic(elastic_constants,disp,energy,fcart,natom,natom_uc,ncell,&
@@ -760,12 +718,6 @@ end subroutine  harmonics_terms_evaluateElastic
 !!
 !! OUTPUT
 !! ifc<type(ifc_type)> = interatomic forces constants
-!!
-!! PARENTS
-!!      m_compute_anharmonics,m_effective_potential
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 

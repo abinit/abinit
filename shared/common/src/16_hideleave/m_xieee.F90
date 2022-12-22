@@ -6,17 +6,13 @@
 !!   Debugging tools and helper functions providing access to IEEE exceptions
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2021 ABINIT group (MG)
+!!  Copyright (C) 2014-2022 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! NOTES
 !!   See F2003 standard and http://www.nag.com/nagware/np/r51_doc/ieee_exceptions.html
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -54,12 +50,6 @@ contains
 !!
 !! INPUTS
 !!  halt= If the value is true, the exceptions will cause halting; otherwise, execution will continue after this exception.
-!!
-!! PARENTS
-!!      m_argparse
-!!
-!! CHILDREN
-!!      ieee_set_flag
 !!
 !! SOURCE
 
@@ -105,12 +95,6 @@ end subroutine xieee_halt_ifexc
 
 !! INPUTS
 !!  flag= If the value is true, the exceptions will be signalled
-!!
-!! PARENTS
-!!      m_argparse
-!!
-!! CHILDREN
-!!      ieee_set_flag
 !!
 !! SOURCE
 

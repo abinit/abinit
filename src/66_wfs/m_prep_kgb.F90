@@ -7,14 +7,10 @@
 !!  or to perform the FFT of the wavefunctions when the orbitals are distributed in linalg mode (paral_kgb = 1).
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2021 ABINIT group (FBottin,MT,GZ,MD,FDahm)
+!!  Copyright (C) 1998-2022 ABINIT group (FBottin,MT,GZ,MD,FDahm)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -91,11 +87,6 @@ contains
 !!  ====== if gs_hamk%usepaw==1
 !!  cwaveprj(natom,my_nspinor*bandpp)= wave functions at k projected with nl projectors
 !!
-!! PARENTS
-!!      m_chebfi,m_dft_energy,m_lobpcgwf,m_lobpcgwf_old,m_rmm_diis
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine prep_getghc(cwavef, gs_hamk, gvnlxc, gwavef, swavef, lambda, blocksize, &
@@ -120,7 +111,7 @@ subroutine prep_getghc(cwavef, gs_hamk, gvnlxc, gwavef, swavef, lambda, blocksiz
  integer :: bandpp,bandpp_sym,idatarecv0,ier,ikpt_this_proc,iscalc,mcg,my_nspinor
  integer :: nbval,ndatarecv,ndatarecv_tot,ndatasend_sym,nproc_band,nproc_fft
  integer :: old_me_g0,spaceComm
- logical :: flag_inv_sym, do_transpose
+ logical :: flag_inv_sym, do_transpose, local_gvnlxc
  !character(len=500) :: msg
 !arrays
  integer,allocatable :: index_wavef_band(:),index_wavef_send(:),index_wavef_spband(:)
@@ -172,7 +163,11 @@ subroutine prep_getghc(cwavef, gs_hamk, gvnlxc, gwavef, swavef, lambda, blocksiz
  if (size(gwavef)<mcg) then
    ABI_BUG('wrong size for gwavef!')
  end if
- if (size(gvnlxc)<mcg) then
+ local_gvnlxc = .false.
+ if (size(gvnlxc)==0) then
+   local_gvnlxc = .true.
+ end if
+ if ((.not.local_gvnlxc).and.size(gvnlxc)<mcg) then
    ABI_BUG('wrong size for gvnlxc!')
  end if
  if (sij_opt==1) then
@@ -225,20 +220,28 @@ subroutine prep_getghc(cwavef, gs_hamk, gvnlxc, gwavef, swavef, lambda, blocksiz
    ABI_MALLOC(cwavef_alltoall1,(2,ndatarecv*my_nspinor*bandpp))
    ABI_MALLOC(gwavef_alltoall1,(2,ndatarecv*my_nspinor*bandpp))
    ABI_MALLOC(swavef_alltoall1,(2,ndatarecv*my_nspinor*bandpp))
-   ABI_MALLOC(gvnlxc_alltoall1,(2,ndatarecv*my_nspinor*bandpp))
+   if (local_gvnlxc) then
+     ABI_MALLOC(gvnlxc_alltoall1,(0,0))
+   else
+     ABI_MALLOC(gvnlxc_alltoall1,(2,ndatarecv*my_nspinor*bandpp))
+   end if
    swavef_alltoall1(:,:)=zero
-   gvnlxc_alltoall1(:,:)=zero
    cwavef_alltoall1(:,:)=zero
    gwavef_alltoall1(:,:)=zero
+   if (.not.local_gvnlxc) gvnlxc_alltoall1(:,:)=zero
  end if
  ABI_MALLOC(cwavef_alltoall2,(2,ndatarecv*my_nspinor*bandpp))
  ABI_MALLOC(gwavef_alltoall2,(2,ndatarecv*my_nspinor*bandpp))
  ABI_MALLOC(swavef_alltoall2,(2,ndatarecv*my_nspinor*bandpp))
- ABI_MALLOC(gvnlxc_alltoall2,(2,ndatarecv*my_nspinor*bandpp))
+ if (local_gvnlxc) then
+   ABI_MALLOC(gvnlxc_alltoall2,(0,0))
+ else
+   ABI_MALLOC(gvnlxc_alltoall2,(2,ndatarecv*my_nspinor*bandpp))
+ end if
  swavef_alltoall2(:,:)=zero
- gvnlxc_alltoall2(:,:)=zero
  cwavef_alltoall2(:,:)=zero
  gwavef_alltoall2(:,:)=zero
+ if (.not.local_gvnlxc) gvnlxc_alltoall2(:,:)=zero
 
  recvcountsloc(:)=recvcounts(:)*2*my_nspinor*bandpp
  rdisplsloc(:)=rdispls(:)*2*my_nspinor*bandpp
@@ -291,7 +294,7 @@ subroutine prep_getghc(cwavef, gs_hamk, gvnlxc, gwavef, swavef, lambda, blocksiz
      call timab(634,3,tsec)
      gwavef_alltoall1(:,index_wavef_spband)=gwavef_alltoall2(:,:)
      if (sij_opt==1) swavef_alltoall1(:,index_wavef_spband)=swavef_alltoall2(:,:)
-     gvnlxc_alltoall1(:,index_wavef_spband)=gvnlxc_alltoall2(:,:)
+     if (.not.local_gvnlxc) gvnlxc_alltoall1(:,index_wavef_spband)=gvnlxc_alltoall2(:,:)
      ABI_FREE(index_wavef_spband)
      call timab(634,2,tsec)
    end if
@@ -327,7 +330,7 @@ subroutine prep_getghc(cwavef, gs_hamk, gvnlxc, gwavef, swavef, lambda, blocksiz
      call timab(634,3,tsec)
      gwavef_alltoall1(:,index_wavef_band) = gwavef_alltoall2(:,:)
      if (sij_opt==1) swavef_alltoall1(:,index_wavef_band) = swavef_alltoall2(:,:)
-     gvnlxc_alltoall1(:,index_wavef_band)  = gvnlxc_alltoall2(:,:)
+     if (.not.local_gvnlxc) gvnlxc_alltoall1(:,index_wavef_band)  = gvnlxc_alltoall2(:,:)
      ABI_FREE(index_wavef_band)
      call timab(634,2,tsec)
    end if
@@ -368,11 +371,14 @@ subroutine prep_getghc(cwavef, gs_hamk, gvnlxc, gwavef, swavef, lambda, blocksiz
 !  ------------------------------------------------------------
    ABI_MALLOC(gwavef_alltoall_sym,(2,ndatarecv_tot*bandpp_sym))
    ABI_MALLOC(swavef_alltoall_sym,(2,(ndatarecv_tot*bandpp_sym)*iscalc))
-   ABI_MALLOC(gvnlxc_alltoall_sym ,(2,ndatarecv_tot*bandpp_sym))
-
+   if (local_gvnlxc) then
+     ABI_MALLOC(gvnlxc_alltoall_sym ,(0,0))
+   else
+     ABI_MALLOC(gvnlxc_alltoall_sym ,(2,ndatarecv_tot*bandpp_sym))
+   end if
    gwavef_alltoall_sym(:,:)=zero
    swavef_alltoall_sym(:,:)=zero
-   gvnlxc_alltoall_sym(:,:)=zero
+   if (.not.local_gvnlxc) gvnlxc_alltoall_sym(:,:)=zero
 
    call timab(632,2,tsec)
 
@@ -409,7 +415,7 @@ subroutine prep_getghc(cwavef, gs_hamk, gvnlxc, gwavef, swavef, lambda, blocksiz
 &     swavef_alltoall_sym,&
 &     index_wavef_send)
    end if
-   call prep_wavef_sym_undo(mpi_enreg,bandpp,my_nspinor,&
+   if (.not.local_gvnlxc) call prep_wavef_sym_undo(mpi_enreg,bandpp,my_nspinor,&
 &   ndatarecv,&
 &   ndatarecv_tot,ndatasend_sym,idatarecv0,&
 &   gvnlxc_alltoall2,&
@@ -455,7 +461,7 @@ subroutine prep_getghc(cwavef, gs_hamk, gvnlxc, gwavef, swavef, lambda, blocksiz
 !    cwavef_alltoall(:,index_wavef_band) = cwavef_alltoall(:,:)   ! NOT NEEDED
      gwavef_alltoall1(:,index_wavef_band) = gwavef_alltoall2(:,:)
      if (sij_opt==1) swavef_alltoall1(:,index_wavef_band) = swavef_alltoall2(:,:)
-     gvnlxc_alltoall1(:,index_wavef_band)  = gvnlxc_alltoall2(:,:)
+     if (.not.local_gvnlxc) gvnlxc_alltoall1(:,index_wavef_band)  = gvnlxc_alltoall2(:,:)
      ABI_FREE(index_wavef_band)
      call timab(634,2,tsec)
    end if
@@ -474,7 +480,7 @@ subroutine prep_getghc(cwavef, gs_hamk, gvnlxc, gwavef, swavef, lambda, blocksiz
        call xmpi_alltoallv(swavef_alltoall1,recvcountsloc,rdisplsloc,swavef,&
 &       sendcountsloc,sdisplsloc,spaceComm,ier)
      end if
-     call xmpi_alltoallv(gvnlxc_alltoall1,recvcountsloc,rdisplsloc,gvnlxc,&
+     if (.not.local_gvnlxc) call xmpi_alltoallv(gvnlxc_alltoall1,recvcountsloc,rdisplsloc,gvnlxc,&
 &     sendcountsloc,sdisplsloc,spaceComm,ier)
      call xmpi_alltoallv(gwavef_alltoall1,recvcountsloc,rdisplsloc,gwavef,&
 &     sendcountsloc,sdisplsloc,spaceComm,ier)
@@ -483,7 +489,7 @@ subroutine prep_getghc(cwavef, gs_hamk, gvnlxc, gwavef, swavef, lambda, blocksiz
        call xmpi_alltoallv(swavef_alltoall2,recvcountsloc,rdisplsloc,swavef,&
 &       sendcountsloc,sdisplsloc,spaceComm,ier)
      end if
-     call xmpi_alltoallv(gvnlxc_alltoall2,recvcountsloc,rdisplsloc,gvnlxc,&
+     if (.not.local_gvnlxc) call xmpi_alltoallv(gvnlxc_alltoall2,recvcountsloc,rdisplsloc,gvnlxc,&
 &     sendcountsloc,sdisplsloc,spaceComm,ier)
      call xmpi_alltoallv(gwavef_alltoall2,recvcountsloc,rdisplsloc,gwavef,&
 &     sendcountsloc,sdisplsloc,spaceComm,ier)
@@ -494,7 +500,7 @@ subroutine prep_getghc(cwavef, gs_hamk, gvnlxc, gwavef, swavef, lambda, blocksiz
    if(sij_opt == 1) then
      call DCOPY(2*ndatarecv*my_nspinor*bandpp, swavef_alltoall2, 1, swavef, 1)
    end if
-   call DCOPY(2*ndatarecv*my_nspinor*bandpp, gvnlxc_alltoall2, 1, gvnlxc, 1)
+   if (.not.local_gvnlxc) call DCOPY(2*ndatarecv*my_nspinor*bandpp, gvnlxc_alltoall2, 1, gvnlxc, 1)
    call DCOPY(2*ndatarecv*my_nspinor*bandpp, gwavef_alltoall2, 1, gwavef, 1)
  end if
 
@@ -587,11 +593,6 @@ end subroutine prep_getghc
 !!                     if cpopt= 2  <p_lmn|in> are already in memory;
 !!                                  only derivatives are computed here and not saved
 !! (if useylm=0, should have cpopt=-1)
-!!
-!! PARENTS
-!!      m_dft_energy,m_forstr,m_invovl,m_lobpcgwf,m_rmm_diis,m_vtowfk
-!!
-!! CHILDREN
 !!
 !! NOTES
 !!  cprj (as well as cg) is distributed over band processors.
@@ -889,11 +890,6 @@ end subroutine prep_nonlop
 !!  gwavef=(2,npw*ndat)=matrix elements <G|H|C>.
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
-!!      m_mkrho,m_positron,m_vtowfk
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1382,11 +1378,6 @@ end subroutine prep_fourwf
 !!
 !! SIDE EFFECTS
 !!
-!! PARENTS
-!!      m_prep_kgb
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine prep_wavef_sym_do(mpi_enreg,bandpp,nspinor,&
@@ -1648,11 +1639,6 @@ end subroutine prep_wavef_sym_do
 !!  gwavef_alltoall     = planewave coefficients of wavefunction
 !!                        ( for of the processor + to send to other processors band)
 !!
-!! PARENTS
-!!      m_prep_kgb
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine prep_wavef_sym_undo(mpi_enreg,bandpp,nspinor,&
@@ -1872,11 +1858,6 @@ end subroutine prep_wavef_sym_undo
 !! OUTPUT
 !!  index_wavef_band = position of the sorted values
 !!
-!! PARENTS
-!!      m_chebfi,m_prep_kgb
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine prep_index_wavef_bandpp(nproc_band,bandpp,&
@@ -1958,11 +1939,6 @@ end subroutine prep_index_wavef_bandpp
 !!
 !! OUTPUT
 !!  index_wavef(:)=array containing the sorted indexes (pointer, allocated in this routine)
-!!
-!! PARENTS
-!!      m_prep_kgb
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

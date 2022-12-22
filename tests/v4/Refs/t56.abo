@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.7.4 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h26 )
+.Starting date : Wed  4 May 2022.
+- ( at 01h23 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v4_t56-t57/t56.in
-- output file    -> t56.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/v4_t56-t57/t56.abi
+- output file    -> t56.abo
 - root for input  files -> t56i
 - root for output files -> t56o
 
@@ -34,7 +34,7 @@
 -    mband =           4        mffmem =           1         mkmem =           2
        mpw =         117          nfft =        3375          nkpt =           2
 ================================================================================
-P This job should need less than                       1.505 Mbytes of memory.
+P This job should need less than                       1.603 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.016 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
@@ -51,7 +51,7 @@ _ WF disk file :      0.016 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 -    mband =          50        mffmem =           1         mkmem =          16
        mpw =         117          nfft =        3375          nkpt =          16
 ================================================================================
-P This job should need less than                       2.711 Mbytes of memory.
+P This job should need less than                       2.809 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      1.430 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
@@ -289,8 +289,13 @@ P          mk1mem5         16
         optdriver3          1
         optdriver4          1
         optdriver5          1
-            rfdir1          0       0       0
-            rfdir2          0       0       0
+           prtpot1          0
+           prtpot2          0
+           prtpot3          1
+           prtpot4          1
+           prtpot5          1
+            rfdir1          1       1       1
+            rfdir2          1       1       1
             rfdir3          1       0       0
             rfdir4          0       1       0
             rfdir5          0       0       1
@@ -378,8 +383,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      4.000   => boxcut(ratio)=   2.08519
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/31ga.SGS_mod
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/31ga.SGS_mod
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/31ga.SGS_mod
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/31ga.SGS_mod
 -   pspot from prpsa - Bachelet or Stumpf table ( !! OLD, only for tests )
 - 31.00000   3.00000    900101                znucl, zion, pspdat
     5    3    2    2       267   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -397,8 +402,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              1   -0.525725
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/33as.SGS_mod
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/33as.SGS_mod
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/33as.SGS_mod
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/33as.SGS_mod
 -   pspot from prpsa - Bachelet or Stumpf table ( !! OLD, for testing purposes only )
 - 33.00000   5.00000    900101                znucl, zion, pspdat
     5    3    2    2       269   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -602,24 +607,24 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   1.6110E+00  1.6597E+00  1.6599E+00  1.6838E+00  1.7014E+00  1.7397E+00
   1.7964E+00  1.8032E+00  1.8210E+00  1.8838E+00  1.8857E+00  1.9079E+00
   1.9362E+00  2.0229E+00
-  prteigrs : nnsclo,ikpt=   15    1 max resid (incl. the buffer)=  2.91402E-08
+  prteigrs : nnsclo,ikpt=   15    1 max resid (excl. the buffer)=  2.91402E-08
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-  prteigrs : nnsclo,ikpt=   15    2 max resid (incl. the buffer)=  6.99248E-07
-  prteigrs : nnsclo,ikpt=   15    3 max resid (incl. the buffer)=  2.81721E-07
-  prteigrs : nnsclo,ikpt=   15    4 max resid (incl. the buffer)=  2.34412E-08
-  prteigrs : nnsclo,ikpt=   15    5 max resid (incl. the buffer)=  1.14006E-07
-  prteigrs : nnsclo,ikpt=   15    6 max resid (incl. the buffer)=  2.67513E-09
-  prteigrs : nnsclo,ikpt=   15    7 max resid (incl. the buffer)=  4.38335E-08
-  prteigrs : nnsclo,ikpt=   15    8 max resid (incl. the buffer)=  3.25760E-08
-  prteigrs : nnsclo,ikpt=   15    9 max resid (incl. the buffer)=  5.71179E-08
-  prteigrs : nnsclo,ikpt=   15   10 max resid (incl. the buffer)=  1.64476E-07
-  prteigrs : nnsclo,ikpt=   15   11 max resid (incl. the buffer)=  5.98656E-08
-  prteigrs : nnsclo,ikpt=   15   12 max resid (incl. the buffer)=  1.50520E-08
-  prteigrs : nnsclo,ikpt=   15   13 max resid (incl. the buffer)=  1.97288E-06
-  prteigrs : nnsclo,ikpt=   15   14 max resid (incl. the buffer)=  1.94694E-07
-  prteigrs : nnsclo,ikpt=   15   15 max resid (incl. the buffer)=  2.22128E-08
-  prteigrs : nnsclo,ikpt=   15   16 max resid (incl. the buffer)=  6.31122E-07
+  prteigrs : nnsclo,ikpt=   15    2 max resid (excl. the buffer)=  6.99248E-07
+  prteigrs : nnsclo,ikpt=   15    3 max resid (excl. the buffer)=  2.81721E-07
+  prteigrs : nnsclo,ikpt=   15    4 max resid (excl. the buffer)=  2.34412E-08
+  prteigrs : nnsclo,ikpt=   15    5 max resid (excl. the buffer)=  1.14006E-07
+  prteigrs : nnsclo,ikpt=   15    6 max resid (excl. the buffer)=  2.67513E-09
+  prteigrs : nnsclo,ikpt=   15    7 max resid (excl. the buffer)=  4.38335E-08
+  prteigrs : nnsclo,ikpt=   15    8 max resid (excl. the buffer)=  3.25760E-08
+  prteigrs : nnsclo,ikpt=   15    9 max resid (excl. the buffer)=  5.71179E-08
+  prteigrs : nnsclo,ikpt=   15   10 max resid (excl. the buffer)=  1.64476E-07
+  prteigrs : nnsclo,ikpt=   15   11 max resid (excl. the buffer)=  5.98656E-08
+  prteigrs : nnsclo,ikpt=   15   12 max resid (excl. the buffer)=  1.50520E-08
+  prteigrs : nnsclo,ikpt=   15   13 max resid (excl. the buffer)=  1.97288E-06
+  prteigrs : nnsclo,ikpt=   15   14 max resid (excl. the buffer)=  1.94694E-07
+  prteigrs : nnsclo,ikpt=   15   15 max resid (excl. the buffer)=  2.22128E-08
+  prteigrs : nnsclo,ikpt=   15   16 max resid (excl. the buffer)=  6.31122E-07
 
 
  scprqt:  WARNING -
@@ -712,7 +717,6 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=      4.000   => boxcut(ratio)=   2.08519
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t56o_DS2_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -729,7 +733,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t56o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -745,18 +748,18 @@ tolerances: {tolwfr: 1.00E-22, }
 -ETOT  1  -11.304682535668     -1.130E+01 3.171E+00 0.000E+00
  ETOT  2  -11.304690554595     -8.019E-06 6.260E-01 0.000E+00
  ETOT  3  -11.304690558173     -3.577E-09 1.306E-01 0.000E+00
- ETOT  4  -11.304690558173     -3.553E-15 1.780E-02 0.000E+00
- ETOT  5  -11.304690558173     -5.329E-15 1.721E-02 0.000E+00
+ ETOT  4  -11.304690558173     -5.329E-15 1.780E-02 0.000E+00
+ ETOT  5  -11.304690558173     -3.553E-15 1.721E-02 0.000E+00
  ETOT  6  -11.304690558173      0.000E+00 3.452E-03 0.000E+00
- ETOT  7  -11.304690558173      3.553E-15 3.273E-03 0.000E+00
- ETOT  8  -11.304690558173     -5.329E-15 7.080E-04 0.000E+00
- ETOT  9  -11.304690558173      1.776E-15 6.585E-04 0.000E+00
- ETOT 10  -11.304690558173      3.553E-15 1.500E-04 0.000E+00
+ ETOT  7  -11.304690558173      0.000E+00 3.273E-03 0.000E+00
+ ETOT  8  -11.304690558173      0.000E+00 7.080E-04 0.000E+00
+ ETOT  9  -11.304690558173      5.329E-15 6.585E-04 0.000E+00
+ ETOT 10  -11.304690558173     -1.776E-15 1.500E-04 0.000E+00
  ETOT 11  -11.304690558173     -3.553E-15 1.371E-04 0.000E+00
- ETOT 12  -11.304690558173      0.000E+00 3.249E-05 0.000E+00
- ETOT 13  -11.304690558173      1.776E-15 2.918E-05 0.000E+00
- ETOT 14  -11.304690558173      5.329E-15 7.153E-06 0.000E+00
- ETOT 15  -11.304690558173     -7.105E-15 6.307E-06 0.000E+00
+ ETOT 12  -11.304690558173      7.105E-15 3.249E-05 0.000E+00
+ ETOT 13  -11.304690558173     -5.329E-15 2.918E-05 0.000E+00
+ ETOT 14  -11.304690558173     -1.776E-15 7.153E-06 0.000E+00
+ ETOT 15  -11.304690558173      0.000E+00 6.307E-06 0.000E+00
 
  scprqt:  WARNING -
   nstep=   15 was not enough SCF cycles to converge;
@@ -816,7 +819,7 @@ tolerances: {tolwfr: 1.00E-22, }
 
  WARNING : Localization tensor calculation (this does not apply to other properties).
   Not all d/dk perturbations were computed. So the localization tensor in reciprocal space is incomplete,
-  and transformation to cartesian coordinates may be wrong.
+  and transformation to cartesian coordinates may be wrong. Check input variable rfdir.
 
  respfn : d/dk was computed, but no 2DTE, so no DDB output.
 
@@ -850,7 +853,6 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=      4.000   => boxcut(ratio)=   2.08519
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t56o_DS2_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -867,7 +869,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t56o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -883,18 +884,18 @@ tolerances: {tolwfr: 1.00E-22, }
 -ETOT  1  -11.304682716132     -1.130E+01 3.161E+00 0.000E+00
  ETOT  2  -11.304690733766     -8.018E-06 6.260E-01 0.000E+00
  ETOT  3  -11.304690737349     -3.583E-09 1.293E-01 0.000E+00
- ETOT  4  -11.304690737349     -1.243E-14 1.825E-02 0.000E+00
+ ETOT  4  -11.304690737349     -1.066E-14 1.825E-02 0.000E+00
  ETOT  5  -11.304690737349      8.882E-15 1.779E-02 0.000E+00
- ETOT  6  -11.304690737349      0.000E+00 3.548E-03 0.000E+00
- ETOT  7  -11.304690737349      1.776E-15 3.391E-03 0.000E+00
+ ETOT  6  -11.304690737349      1.776E-15 3.548E-03 0.000E+00
+ ETOT  7  -11.304690737349      0.000E+00 3.391E-03 0.000E+00
  ETOT  8  -11.304690737349     -1.776E-15 7.290E-04 0.000E+00
  ETOT  9  -11.304690737349      0.000E+00 6.839E-04 0.000E+00
  ETOT 10  -11.304690737349      0.000E+00 1.547E-04 0.000E+00
  ETOT 11  -11.304690737349      0.000E+00 1.426E-04 0.000E+00
  ETOT 12  -11.304690737349      0.000E+00 3.354E-05 0.000E+00
  ETOT 13  -11.304690737349      0.000E+00 3.039E-05 0.000E+00
- ETOT 14  -11.304690737349     -1.776E-15 7.386E-06 0.000E+00
- ETOT 15  -11.304690737349      1.776E-15 6.575E-06 0.000E+00
+ ETOT 14  -11.304690737349      0.000E+00 7.386E-06 0.000E+00
+ ETOT 15  -11.304690737349      0.000E+00 6.575E-06 0.000E+00
 
  scprqt:  WARNING -
   nstep=   15 was not enough SCF cycles to converge;
@@ -954,7 +955,7 @@ tolerances: {tolwfr: 1.00E-22, }
 
  WARNING : Localization tensor calculation (this does not apply to other properties).
   Not all d/dk perturbations were computed. So the localization tensor in reciprocal space is incomplete,
-  and transformation to cartesian coordinates may be wrong.
+  and transformation to cartesian coordinates may be wrong. Check input variable rfdir.
 
  respfn : d/dk was computed, but no 2DTE, so no DDB output.
 
@@ -988,7 +989,6 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=      4.000   => boxcut(ratio)=   2.08519
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t56o_DS2_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -1005,7 +1005,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t56o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1025,14 +1024,14 @@ tolerances: {tolwfr: 1.00E-22, }
  ETOT  5  -11.304690390820      1.776E-15 1.693E-02 0.000E+00
  ETOT  6  -11.304690390820      0.000E+00 3.407E-03 0.000E+00
  ETOT  7  -11.304690390820     -1.776E-15 3.215E-03 0.000E+00
- ETOT  8  -11.304690390820      1.776E-15 6.980E-04 0.000E+00
+ ETOT  8  -11.304690390820     -1.776E-15 6.980E-04 0.000E+00
  ETOT  9  -11.304690390820      0.000E+00 6.461E-04 0.000E+00
- ETOT 10  -11.304690390820     -3.553E-15 1.478E-04 0.000E+00
- ETOT 11  -11.304690390820      0.000E+00 1.344E-04 0.000E+00
+ ETOT 10  -11.304690390820      1.776E-15 1.478E-04 0.000E+00
+ ETOT 11  -11.304690390820      1.776E-15 1.344E-04 0.000E+00
  ETOT 12  -11.304690390820      0.000E+00 3.200E-05 0.000E+00
- ETOT 13  -11.304690390820      0.000E+00 2.859E-05 0.000E+00
+ ETOT 13  -11.304690390820     -3.553E-15 2.859E-05 0.000E+00
  ETOT 14  -11.304690390820      1.776E-15 7.044E-06 0.000E+00
- ETOT 15  -11.304690390820      0.000E+00 6.178E-06 0.000E+00
+ ETOT 15  -11.304690390820     -1.776E-15 6.178E-06 0.000E+00
 
  scprqt:  WARNING -
   nstep=   15 was not enough SCF cycles to converge;
@@ -1092,7 +1091,7 @@ tolerances: {tolwfr: 1.00E-22, }
 
  WARNING : Localization tensor calculation (this does not apply to other properties).
   Not all d/dk perturbations were computed. So the localization tensor in reciprocal space is incomplete,
-  and transformation to cartesian coordinates may be wrong.
+  and transformation to cartesian coordinates may be wrong. Check input variable rfdir.
 
  respfn : d/dk was computed, but no 2DTE, so no DDB output.
 
@@ -1274,8 +1273,13 @@ P          mk1mem5         16
         optdriver3          1
         optdriver4          1
         optdriver5          1
-            rfdir1          0       0       0
-            rfdir2          0       0       0
+           prtpot1          0
+           prtpot2          0
+           prtpot3          1
+           prtpot4          1
+           prtpot5          1
+            rfdir1          1       1       1
+            rfdir2          1       1       1
             rfdir3          1       0       0
             rfdir4          0       1       0
             rfdir5          0       0       1
@@ -1411,10 +1415,10 @@ P          mk1mem5         16
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         24.2  wall=         24.3
+- Proc.   0 individual time (sec): cpu=         33.4  wall=         33.8
 
 ================================================================================
 
  Calculation completed.
-.Delivered  36 WARNINGs and   9 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         24.2  wall=         24.3
+.Delivered  33 WARNINGs and  10 COMMENTs to log file.
++Overall time at end (sec) : cpu=         33.4  wall=         33.8

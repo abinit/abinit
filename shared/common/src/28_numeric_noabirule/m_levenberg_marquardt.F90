@@ -13,14 +13,10 @@
 !!        evaluations.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2021 ABINIT group (MS)
+!!  Copyright (C) 2008-2022 ABINIT group (MS)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -63,10 +59,6 @@ CONTAINS  !=====================================================================
 !! OUTPUT
 !!
 !! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -233,10 +225,6 @@ CONTAINS  !=====================================================================
 !! OUTPUT
 !!
 !! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -691,10 +679,6 @@ CONTAINS  !=====================================================================
 !!
 !! NOTES
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine lmpar(n, r, ipvt, diag, qtb, delta, par, x, sdiag)
@@ -953,10 +937,6 @@ CONTAINS  !=====================================================================
 !!
 !! NOTES
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine qrfac(m, n, a, pivot, ipvt, rdiag, acnorm)
@@ -1131,10 +1111,6 @@ CONTAINS  !=====================================================================
 !! OUTPUT
 !!
 !! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1336,10 +1312,6 @@ CONTAINS  !=====================================================================
 !!
 !! NOTES
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  function enorm(n,x) result(fn_val)
@@ -1465,10 +1437,6 @@ CONTAINS  !=====================================================================
 !! OUTPUT
 !!
 !! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1608,10 +1576,6 @@ CONTAINS  !=====================================================================
 !! OUTPUT
 !!
 !! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 subroutine lm_fit_print_info(info,msg)

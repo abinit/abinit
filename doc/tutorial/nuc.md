@@ -2,9 +2,9 @@
 authors: JWZ, XG
 ---
 
-# Tutorial on properties at the nuclei
+# Properties at the nucleus
 
-## Observables near the atomic nuclei.
+## Observables near the atomic nucleus.
 
 The purpose of this tutorial is to show how to compute several observables of
 interest in M&ouml;ssbauer, NMR, and NQR spectroscopy, namely:
@@ -54,7 +54,7 @@ and takes almost no additional time.
 The tutorial file is for stishovite, a polymorph of SiO$_2$. In addition to typical ground state
 variables, only two additional variables are added:
 
-    prtefg  2
+    nucefg  2
     quadmom 0.0 -0.02558
 
 {% dialog tests/tutorial/Input/tnuc_1.abi %}
@@ -154,7 +154,7 @@ SnO$_2$, which, like stishovite studied above, has the rutile structure.
 In addition to typical ground state
 variables, only one additional variable is needed:
 
-    prtfc  1
+    nucfc  1
 
 {% dialog tests/tutorial/Input/tnuc_2.abi %}
 

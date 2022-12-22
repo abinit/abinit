@@ -6,14 +6,10 @@
 !!  Routines to initialize (wavelet) wavefunctions
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2021 ABINIT group (DC)
+!!  Copyright (C) 1998-2022 ABINIT group (DC)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -85,13 +81,6 @@ contains
 !!
 !! SIDE EFFECTS
 !!  wfs <type(wvl_projector_type)>=wavefunctions information for wavelets.
-!!
-!! PARENTS
-!!      m_inwffil
-!!
-!! CHILDREN
-!!      input_wf_diag,mklocl_wavelets,wrtout,wvl_occ_abi2big,wvl_occopt_abi2big
-!!      xred2xcart
 !!
 !! SOURCE
 
@@ -233,13 +222,6 @@ end subroutine wvl_wfsinp_disk
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_mover
-!!
-!! CHILDREN
-!!      input_wf_diag,mklocl_wavelets,wrtout,wvl_occ_abi2big,wvl_occopt_abi2big
-!!      xred2xcart
 !!
 !! SOURCE
 
@@ -441,13 +423,6 @@ end subroutine wvl_wfsinp_reformat
 !!
 !! SIDE EFFECTS
 !!  wvl <type(wvl_data)>=wavefunctions & projectors information for wavelets.
-!!
-!! PARENTS
-!!      m_inwffil
-!!
-!! CHILDREN
-!!      input_wf_diag,mklocl_wavelets,wrtout,wvl_occ_abi2big,wvl_occopt_abi2big
-!!      xred2xcart
 !!
 !! SOURCE
 

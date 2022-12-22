@@ -8,13 +8,11 @@
 !!  wrt k, and the corresponding wave functions
 !!
 !! COPYRIGHT
-!! Copyright (C) 2016-2021 ABINIT group (MJV, HM, MG)
+!! Copyright (C) 2016-2022 ABINIT group (MJV, HM, MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -42,9 +40,7 @@ MODULE m_ddk
  use m_ebands
  use m_pawcprj
  use m_getgh1c
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
 
  use m_fstrings,      only : strcat, sjoin, itoa, ktoa
  use m_io_tools,      only : iomode_from_fname
@@ -138,6 +134,9 @@ MODULE m_ddk
    procedure :: get_vdiag => ddkop_get_vdiag
     ! Compute diagonal matrix element (real) in cartesian coords.
 
+   procedure :: get_vnondiag => ddkop_get_vnondiag
+    ! Compute off diagonal matrix elements in cartesian coords.
+
    procedure :: free => ddkop_free
     ! Free memory.
 
@@ -207,10 +206,6 @@ CONTAINS
 !! INPUTS
 !!  prefix: Prefix for output EVK file. Empty if output files are not wanted
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine ddkstore_compute_ddk(ds, wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
@@ -232,9 +227,7 @@ subroutine ddkstore_compute_ddk(ds, wfk_path, prefix, dtset, psps, pawtab, ngfft
  integer :: mband, nbcalc, nsppol, ib_v, ib_c, mpw, spin, nspinor, nkpt, nband_k, npw_k
  integer :: ii, ik, bmin, bmax, istwf_k, idir, my_rank, nproc, ierr, bstop
  real(dp) :: cpu, wall, gflops, cpu_all, wall_all, gflops_all
-#ifdef HAVE_NETCDF
  integer :: ncerr, ncid
-#endif
  character(len=500) :: msg
  character(len=fnlen) :: fname
  logical :: write_ncfile
@@ -266,10 +259,7 @@ subroutine ddkstore_compute_ddk(ds, wfk_path, prefix, dtset, psps, pawtab, ngfft
  ebands = wfk_read_ebands(wfk_path, comm, out_hdr=hdr)
  cryst = hdr%get_crystal()
 
- ! Extract important dimensions from the header of the WFK file
- ! so that we avoid depending on the values stored in dtset%.
- ! For instance, the number of k-points in the header may differ from dtset%nkpt
- ! if we have used wfk_tofullbz to generate a WFK in the full BZ
+ ! Extract important dimensions from hdr%
  nkpt    = hdr%nkpt
  nsppol  = hdr%nsppol
  nspinor = hdr%nspinor
@@ -542,7 +532,6 @@ subroutine ddkstore_compute_ddk(ds, wfk_path, prefix, dtset, psps, pawtab, ngfft
  end if
 
  ! Write matrix elements to disk.
-#ifdef HAVE_NETCDF
 
  ! Output EVK file in netcdf format.
  if (my_rank == master .and. write_ncfile) then
@@ -591,7 +580,6 @@ subroutine ddkstore_compute_ddk(ds, wfk_path, prefix, dtset, psps, pawtab, ngfft
    end do
    call tmp_hdr%free()
  end if
-#endif
 
  if (my_rank == master .and. dtset%prtvol > 0) then
    write(ab_out, "(2a)")ch10,"Writing velocity matrix elements (only diagonal terms, real part) for testing purpose:"
@@ -632,10 +620,6 @@ end subroutine ddkstore_compute_ddk
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine ddkstore_free(self)
@@ -666,10 +650,6 @@ end subroutine ddkstore_free
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 pure subroutine ddk_red2car(rprimd, vred, vcar)
@@ -683,9 +663,8 @@ pure subroutine ddk_red2car(rprimd, vred, vcar)
  real(dp) :: vtmp(2,3)
 
 !************************************************************************
- ! vcar = vred; return
 
- ! Go to cartesian coordinates (same as pmat2cart routine)
+ ! Go to Cartesian coordinates (same as pmat2cart routine)
  ! V_cart = 1/(2pi) * Rprimd x V_red
  ! where V_red is the derivative computed in the DFPT routines (derivative wrt reduced component).
  vtmp(1,:) = rprimd(:,1)*vred(1,1) &
@@ -718,10 +697,6 @@ end subroutine ddk_red2car
 !! ngfft(18)=contain all needed information about 3D FFT
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -801,10 +776,6 @@ end function ddkop_new
 !!  istwkf_k: defines storage of wavefunctions for this k-point
 !!  npw_k: Number of planewaves.
 !!  kg_k(3,npw_k)=reduced planewave coordinates.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -899,10 +870,6 @@ end subroutine ddkop_setup_spin_kpoint
 !!  gh1c(2,npw1*nspinor)= <G|H^(1)|C> or  <G|H^(1)-lambda.S^(1)|C> on the k+q sphere
 !!                        (only kinetic+non-local parts if optlocal=0)
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine ddkop_apply(self, eig0nk, npw_k, nspinor, cwave, cwaveprj)
@@ -981,10 +948,6 @@ end subroutine ddkop_apply
 !!  nspinor: Number of spinor components.
 !!  brag(2,npw_k*nspinor)=input wavefunction in reciprocal space
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 function ddkop_get_braket(self, eig0mk, istwf_k, npw_k, nspinor, brag, mode) result(vk)
@@ -1057,10 +1020,6 @@ end function ddkop_get_braket
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 function ddkop_get_vdiag(self, eig0nk, istwf_k, npw_k, nspinor, cwave, cwaveprj, mode) result(vk)
@@ -1091,6 +1050,43 @@ function ddkop_get_vdiag(self, eig0nk, istwf_k, npw_k, nspinor, cwave, cwaveprj,
 end function ddkop_get_vdiag
 !!***
 
+!!****f* m_ddk/ddkop_get_vnondiag
+!! NAME
+!!  ddkop_get_vdiag
+!!
+!! FUNCTION
+!!  Simplified interface to compute the off-diagonal matrix elemente of the velocity operator in cartesian coords.
+!!
+!! INPUTS
+!!
+!! SOURCE
+
+function ddkop_get_vnondiag(self, eig0nk_bra, istwf_k, npw_k, nspinor, cwave_bra, cwave_ket, cwaveprj, mode) result(cvk)
+
+!Arguments ------------------------------------
+!scalars
+ class(ddkop_t),intent(inout) :: self
+ integer,intent(in) :: istwf_k, npw_k, nspinor
+ real(dp),intent(in) :: eig0nk_bra
+ character(len=*),optional,intent(in) :: mode
+!arrays
+ real(dp),intent(inout) :: cwave_bra(2,npw_k*nspinor),cwave_ket(2,npw_k*nspinor)
+ type(pawcprj_type),intent(inout) :: cwaveprj(:,:)
+ real(dp) :: cvk(2,3)
+
+!Local variables-------------------------------
+ character(len=50) :: my_mode
+!arrays
+
+!************************************************************************
+
+ my_mode = "cart"; if (present(mode)) my_mode = mode
+ call self%apply(eig0nk_bra, npw_k, nspinor, cwave_ket, cwaveprj)
+ cvk = self%get_braket(eig0nk_bra, istwf_k, npw_k, nspinor, cwave_bra, mode=my_mode)
+
+end function ddkop_get_vnondiag
+!!***
+
 !----------------------------------------------------------------------
 
 !!****f* m_ddk/ddkop_free
@@ -1101,10 +1097,6 @@ end function ddkop_get_vdiag
 !!  Free memory
 !!
 !! INPUTS
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1142,10 +1134,6 @@ end subroutine ddkop_free
 !! FUNCTION
 !!
 !! INPUTS
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

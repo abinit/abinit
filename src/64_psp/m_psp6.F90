@@ -6,14 +6,10 @@
 !! Initialize pspcod=6 (Pseudopotentials from the fhi98pp code):
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2021 ABINIT group (XG, AF, GJ,FJ,MT, DRH)
+!!  Copyright (C) 1999-2022 ABINIT group (XG, AF, GJ,FJ,MT, DRH)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -92,12 +88,6 @@ contains
 !!  vlspl(mqgrid,2)=q^2 Vloc(q) and second derivatives from spline fit
 !!  xcccrc=XC core correction cutoff radius (bohr)
 !!  xccc1d(n1xccc,6)=1D core charge function and five derivatives, from psp file
-!!
-!! PARENTS
-!!      m_pspini
-!!
-!! CHILDREN
-!!      cc_derivatives
 !!
 !! SOURCE
 
@@ -352,12 +342,6 @@ end subroutine psp6in
 !!                    (pseudized [n_Z+n_core], where n_Z=ions, n_core=core electrons)
 !!                    using a simple pseudization scheme
 !!
-!! PARENTS
-!!      m_psp6
-!!
-!! CHILDREN
-!!      cc_derivatives
-!!
 !! SOURCE
 
 subroutine psp6cc(mmax,n1xccc,rchrg,xccc1d,znucl,&
@@ -550,12 +534,6 @@ end subroutine psp6cc
 !! NOTES
 !!    ff=exp(-(a+b.r^2+c.r^4))
 !!
-!! PARENTS
-!!      m_psp6
-!!
-!! CHILDREN
-!!      cc_derivatives
-!!
 !! SOURCE
 
 subroutine psden(ilog,ff,mesh,nc,rc,rad,ff1,ff2)
@@ -680,12 +658,6 @@ end subroutine psden
 !! OUTPUT
 !!  vhtnzc(mesh) = hartree potential induced by density tild[n_Z+n_core] (pseudo core density + nucleus)
 !!
-!! PARENTS
-!!      m_psp6
-!!
-!! CHILDREN
-!!      cc_derivatives
-!!
 !! SOURCE
 
 subroutine vhtnzc(nc,rc,vh_tnzc,mesh,rad,znucl)
@@ -791,12 +763,6 @@ end subroutine vhtnzc
 !!
 !! OUTPUT
 !!  xccc1d(n1xccc,6)= 1D core charge function and its five first derivatives
-!!
-!! PARENTS
-!!      m_psp6
-!!
-!! CHILDREN
-!!      cc_derivatives
 !!
 !! NOTES
 !! Test version by DRH - requires very smooth model core charge

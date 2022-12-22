@@ -7,14 +7,10 @@
 !! the irreducible representations associated to electronic eigenstates.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2021 ABINIT group (MG)
+!!  Copyright (C) 2008-2022 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -244,12 +240,6 @@ CONTAINS  !=====================================================================
 !! NOTES
 !!   The present implementation does NOT work at zone border if the little group of
 !!   kpt_in is non-symmorphic namely thers is at lest a symmetry operation with non-zero tnons.
-!!
-!! PARENTS
-!!      m_classify_bands
-!!
-!! CHILDREN
-!!      xgeev,xginv,zpotrf,ztrsm
 !!
 !! SOURCE
 
@@ -834,12 +824,6 @@ end subroutine esymm_init
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_classify_bands
-!!
-!! CHILDREN
-!!      xgeev,xginv,zpotrf,ztrsm
-!!
 !! SOURCE
 
 subroutine esymm_print(esymm,unit,mode_paral,prtvol)
@@ -948,12 +932,6 @@ end subroutine esymm_print
 !! FUNCTION
 !!  Deallocate the memory allocated in the esymm_t datatype (scalar version)
 !!
-!! PARENTS
-!!      m_esymm
-!!
-!! CHILDREN
-!!      xgeev,xginv,zpotrf,ztrsm
-!!
 !! SOURCE
 
 subroutine esymm_free_0D(esymm)
@@ -1001,11 +979,6 @@ end subroutine esymm_free_0D
 !! FUNCTION
 !!  Deallocate the memory allocated in the esymm_t datatype (2D version)
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xgeev,xginv,zpotrf,ztrsm
-!!
 !! SOURCE
 
 subroutine esymm_free_2D(esymm)
@@ -1038,12 +1011,6 @@ end subroutine esymm_free_2D
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_classify_bands
-!!
-!! CHILDREN
-!!      xgeev,xginv,zpotrf,ztrsm
 !!
 !! SOURCE
 
@@ -1297,8 +1264,6 @@ end subroutine esymm_finalize
 !!  trace(%nsym_gk)=The trace of the representation to be compared with the internal database (if present).
 !!  tolerr=Absolute error on the character.
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 function which_irrep(esymm,trace,tolerr)
@@ -1340,12 +1305,6 @@ end function which_irrep
 !!
 !! INPUTS
 !!  esymm<esymm_t>
-!!
-!! PARENTS
-!!      m_cohsex,m_sigc,m_sigx
-!!
-!! CHILDREN
-!!      xgeev,xginv,zpotrf,ztrsm
 !!
 !! SOURCE
 
@@ -1440,8 +1399,6 @@ end subroutine esymm_symmetrize_mels
 !! INPUTS
 !!  esymm<esymm_t>
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 function esymm_failed(esymm)
@@ -1467,12 +1424,6 @@ end function esymm_failed
 !! FUNCTION
 !!
 !! INPUTS
-!!
-!! PARENTS
-!!      m_esymm
-!!
-!! CHILDREN
-!!      xgeev,xginv,zpotrf,ztrsm
 !!
 !! SOURCE
 

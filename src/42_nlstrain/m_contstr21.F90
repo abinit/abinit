@@ -11,7 +11,7 @@
 !! tensors.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2021 ABINIT group (DRH)
+!! Copyright (C) 1998-2022 ABINIT group (DRH)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -36,11 +36,6 @@
 !! WEIGHT IS INCLUDED in the output tensor element to simplify later
 !! contractions with other tensors of the same rank and form, i.e. the
 !! next contraction is then simply a dot product over the unique elements.
-!!
-!! PARENTS
-!!      m_nonlop_pl
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

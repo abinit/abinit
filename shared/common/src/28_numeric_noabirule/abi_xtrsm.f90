@@ -15,7 +15,7 @@
 !! *  The matrix X is overwritten on B.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2021 ABINIT group (LNguyen,FDahm (CS))
+!!  Copyright (C) 2001-2022 ABINIT group (LNguyen,FDahm (CS))
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~ABINIT/Infos/copyright
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -31,8 +31,6 @@
 !! FUNCTION
 !!
 !! INPUTS
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -83,8 +81,6 @@ end subroutine abi_ztrsm
 !! FUNCTION
 !!
 !! INPUTS
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -148,8 +144,6 @@ end subroutine abi_dtrsm
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!
 !! SOURCE
 
  subroutine abi_d2ztrsm(side,uplo,transa,diag,m,n,alpha,a,lda,b,ldb,&
@@ -211,8 +205,6 @@ end subroutine abi_d2ztrsm
 !! FUNCTION
 !!
 !! INPUTS
-!!
-!! PARENTS
 !!
 !! SOURCE
 !!

@@ -5,12 +5,10 @@
 !!  Ccomputation of phonon-electron self-energy.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2021 ABINIT group (GKA)
+!!  Copyright (C) 2008-2022 ABINIT group (GKA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -92,11 +90,6 @@ contains  !=====================================================================
 !! comm=MPI communicator.
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_eph_driver
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -607,12 +600,7 @@ end subroutine eph_phpi
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_phpi
-!!
 !! NOTES
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -661,12 +649,7 @@ end subroutine out_phpi
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_phpi
-!!
 !! NOTES
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

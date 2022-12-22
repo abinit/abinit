@@ -7,7 +7,7 @@
 !! different q-vectors and perturbations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2021 ABINIT group (MVer, MG)
+!! Copyright (C) 2004-2022 ABINIT group (MVer, MG)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,14 +28,6 @@
 !!   for each perturbation
 !!      1WF header = hdr1
 !!      1st order eigenvalues = eigen1
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      abi_io_redirect,abimem_init,abinit_doctor,flush_unit,gs_wfk%close
-!!      gs_wfk%hdr%echo,gs_wfk%hdr%fort_write,gs_wfk%read_eigk,hdr%free
-!!      hdr1%echo,hdr1%fort_write,hdr1%free,hdr_fort_read,herald,ph_wfk%close
-!!      ph_wfk%read_eigk,wfk_open_read,wrtout,xmpi_end,xmpi_init
 !!
 !! SOURCE
 

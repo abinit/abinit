@@ -8,14 +8,10 @@
 !!  Mainly printing routines.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2021 ABINIT group (DCA, XG, AF, GMR, LBoeri, MT)
+!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, AF, GMR, LBoeri, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -169,14 +165,6 @@ contains
 !! OUTPUT
 !!  quit= 0 if the SCF cycle is not finished; 1 otherwise.
 !!  conv_retcode=Only if choice==3, != 0 if convergence is not achieved.
-!!
-!! PARENTS
-!!      m_afterscfloop,m_dfpt_scfcv,m_scfcv_core
-!!
-!! CHILDREN
-!!      hdr%free,hdr_ncread,hdr_read_from_fname,indefo,inpspheads,invars0
-!!      invars1m,invars2m,macroin,macroin2,parsefile,pspheads_comm,timab
-!!      time_set_papiopt,wfk_read_eigenvalues
 !!
 !! SOURCE
 
@@ -523,18 +511,10 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
    ! Print eigenvalues every step if dtset%prtvol>=10 and GS case
    if (my_rank == master .and. (dtset%prtvol>=10 .and. response==0 .and. dtset%tfkinfunc==0 .and. dtset%usewvl==0)) then
      option=1
-     ! CP modified
-!     call prteigrs(eigen,dtset%enunit,fermie,fname_eig,ab_out,iscf,kpt,dtset%kptopt,dtset%mband,&
-!&     nband,nkpt,dtset%nnsclo,dtset%nsppol,occ,dtset%occopt,option,dtset%prteig,dtset%prtvol,resid,tolwfr,vxcavg,wtk)
-!
-!     call prteigrs(eigen,dtset%enunit,fermie,fname_eig,std_out,iscf,kpt,dtset%kptopt,dtset%mband,&
-!&     nband,nkpt,dtset%nnsclo,dtset%nsppol,occ,dtset%occopt,option,dtset%prteig,dtset%prtvol,resid,tolwfr,vxcavg,wtk)
      call prteigrs(eigen,dtset%enunit,fermie,fermih,fname_eig,ab_out,iscf,kpt,dtset%kptopt,dtset%mband,&
-&     nband,nkpt,dtset%nnsclo,dtset%nsppol,occ,dtset%occopt,option,dtset%prteig,dtset%prtvol,resid,tolwfr,vxcavg,wtk)
-
+&     nband,dtset%nbdbuf,nkpt,dtset%nnsclo,dtset%nsppol,occ,dtset%occopt,option,dtset%prteig,dtset%prtvol,resid,tolwfr,vxcavg,wtk)
      call prteigrs(eigen,dtset%enunit,fermie,fermih,fname_eig,std_out,iscf,kpt,dtset%kptopt,dtset%mband,&
-&     nband,nkpt,dtset%nnsclo,dtset%nsppol,occ,dtset%occopt,option,dtset%prteig,dtset%prtvol,resid,tolwfr,vxcavg,wtk)
-     ! End CP modified
+&     nband,dtset%nbdbuf,nkpt,dtset%nnsclo,dtset%nsppol,occ,dtset%occopt,option,dtset%prteig,dtset%prtvol,resid,tolwfr,vxcavg,wtk)
    end if
 
    if(response==0)then
@@ -997,14 +977,6 @@ end subroutine scprqt
 !! NOTES
 !! SHOULD BE CLEANED !
 !!
-!! PARENTS
-!!      m_gstate,m_longwave,m_nonlinear,m_respfn_driver
-!!
-!! CHILDREN
-!!      hdr%free,hdr_ncread,hdr_read_from_fname,indefo,inpspheads,invars0
-!!      invars1m,invars2m,macroin,macroin2,parsefile,pspheads_comm,timab
-!!      time_set_papiopt,wfk_read_eigenvalues
-!!
 !! SOURCE
 
 subroutine setup1(acell,bantot,dtset,ecut_eff,ecutc_eff,gmet,&
@@ -1126,6 +1098,7 @@ end subroutine setup1
 !!  kptopt=option for the generation of k points
 !!  mband=maximum number of bands
 !!  nband(nkpt)=number of bands at each k point
+!!  nbdbuf= number of buffer bands
 !!  nkpt=number of k points
 !!  nnsclo_now=number of non-self-consistent loops for the current vtrial
 !!    (often 1 for SCF calculation, =nstep for non-SCF calculations)
@@ -1143,25 +1116,17 @@ end subroutine setup1
 !! OUTPUT
 !!  (only writing)
 !!
-!! PARENTS
-!!      m_common,m_dfpt_looppert,m_gstate,m_respfn_driver,m_vtorho
-!!
-!! CHILDREN
-!!      hdr%free,hdr_ncread,hdr_read_from_fname,indefo,inpspheads,invars0
-!!      invars1m,invars2m,macroin,macroin2,parsefile,pspheads_comm,timab
-!!      time_set_papiopt,wfk_read_eigenvalues
-!!
 !! SOURCE
 
 !CP added fermih to argument list
 subroutine prteigrs(eigen,enunit,fermie,fermih,fname_eig,iout,iscf,kptns,kptopt,mband,nband,&
-&  nkpt,nnsclo_now,nsppol,occ,occopt,option,prteig,prtvol,resid,tolwfr,vxcavg,wtk)
+&  nbdbuf,nkpt,nnsclo_now,nsppol,occ,occopt,option,prteig,prtvol,resid,tolwfr,vxcavg,wtk)
 
  use m_io_tools,  only : open_file
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: enunit,iout,iscf,kptopt,mband,nkpt,nnsclo_now,nsppol
+ integer,intent(in) :: enunit,iout,iscf,kptopt,mband,nbdbuf,nkpt,nnsclo_now,nsppol
  integer,intent(in) :: occopt,option,prteig,prtvol
  real(dp),intent(in) :: fermie,fermih,tolwfr,vxcavg ! CP added fermih
  character(len=*),intent(in) :: fname_eig
@@ -1405,12 +1370,12 @@ subroutine prteigrs(eigen,enunit,fermie,fermih,fname_eig,iout,iscf,kptns,kptopt,
          end if
        end if
 
-       ! MG: I don't understand why we should include the buffer in the output.
+       ! MG: I don't understand why we should include the buffer in the output.   XG 20220209 : Fixed !
        ! It's already difficult to make the tests pass for the residuals without the buffer if nband >> nbocc
-       residk=maxval(resid(band_index+1:band_index+nband_k))
+       residk=maxval(resid(band_index+1:band_index+nband_k-nbdbuf))
        if (residk>tolwfr) then
          write(msg, '(1x,a,2i5,a,1p,e13.5)' ) &
-&         ' prteigrs : nnsclo,ikpt=',nnsclo_now,ikpt,' max resid (incl. the buffer)=',residk
+&         ' prteigrs : nnsclo,ikpt=',nnsclo_now,ikpt,' max resid (excl. the buffer)=',residk
          call wrtout(iout,msg)
        end if
 
@@ -1450,14 +1415,6 @@ end subroutine prteigrs
 !!
 !! OUTPUT
 !!  (only writing)
-!!
-!! PARENTS
-!!      m_gstate,m_scfcv_core
-!!
-!! CHILDREN
-!!      hdr%free,hdr_ncread,hdr_read_from_fname,indefo,inpspheads,invars0
-!!      invars1m,invars2m,macroin,macroin2,parsefile,pspheads_comm,timab
-!!      time_set_papiopt,wfk_read_eigenvalues
 !!
 !! SOURCE
 
@@ -1757,14 +1714,6 @@ end subroutine prtene
 !!  pspheads(npsp)=<type pspheader_type>=all the important information from the
 !!   pseudopotential file headers, as well as the psp file names
 !!
-!! PARENTS
-!!      abinit
-!!
-!! CHILDREN
-!!      hdr%free,hdr_ncread,hdr_read_from_fname,indefo,inpspheads,invars0
-!!      invars1m,invars2m,macroin,macroin2,parsefile,pspheads_comm,timab
-!!      time_set_papiopt,wfk_read_eigenvalues
-!!
 !! SOURCE
 
 subroutine get_dtsets_pspheads(input_path, path, ndtset, lenstr, string, timopt, dtsets, pspheads, mx, dmatpuflag, comm)
@@ -1954,10 +1903,6 @@ end subroutine get_dtsets_pspheads
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 
@@ -2012,10 +1957,6 @@ end function ebands_from_file
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

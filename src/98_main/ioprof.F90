@@ -6,7 +6,7 @@
 !! Tool for profiling and and testing the IO routines used in abinit
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2021 ABINIT group (MG)
+!! Copyright (C) 2004-2022 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -15,14 +15,6 @@
 !!  (main program)
 !!
 !! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      abi_io_redirect,abimem_init,abinit_doctor,delete_file
-!!      get_command_argument,hdr%echo,hdr%free,hdr_read_from_fname,herald
-!!      wfk%close,wfk%print,wfk_check_wfkfile,wfk_create_wfkfile,wfk_nc2fort
-!!      wfk_open_read,wfk_prof,wrtout,xmpi_init
 !!
 !! SOURCE
 

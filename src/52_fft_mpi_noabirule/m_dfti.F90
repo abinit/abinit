@@ -6,7 +6,7 @@
 !!  This module provides wrappers for the MKL DFTI routines: in-place and out-of-place version.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2021 ABINIT group (MG)
+!! Copyright (C) 2009-2022 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -198,12 +198,6 @@ CONTAINS  !===========================================================
 !! OUTPUT
 !! fofr(cplex,ldx*ldy*ldz*ndat)=The FFT of fofg
 !!
-!! PARENTS
-!!      m_fft
-!!
-!! CHILDREN
-!!      c_f_pointer
-!!
 !! SOURCE
 
 subroutine dfti_seqfourdp(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,isign,fofg,fofr)
@@ -347,12 +341,6 @@ end subroutine dfti_seqfourdp
 !! for option==3, fofr(2,ldx,ldy,ldz*ndat) contains the input real space wavefunction;
 !!                fofgout(2,npwout*ndat) contains its output Fourier transform;
 !!                no use of fofgin and npwin.
-!!
-!! PARENTS
-!!      m_fft
-!!
-!! CHILDREN
-!!      c_f_pointer
 !!
 !! SOURCE
 
@@ -582,11 +570,6 @@ end subroutine dfti_seqfourwf
 !! in both directions. Also accomplish some post-processing.
 !! See dfti_fftrisc_dp for API doc.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
-!!
 !! SOURCE
 
 subroutine dfti_fftrisc_sp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,kg_kin,kg_kout,&
@@ -703,12 +686,6 @@ end subroutine dfti_fftrisc_sp
 !!                 fofgout(2,npwout) contains its Fourier transform;
 !!                 no use of fofgin and npwin.
 !!
-!! PARENTS
-!!      m_dfti
-!!
-!! CHILDREN
-!!      c_f_pointer
-!!
 !! SOURCE
 
 subroutine dfti_fftrisc_dp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,kg_kin,kg_kout,&
@@ -766,12 +743,6 @@ end subroutine dfti_fftrisc_dp
 !! in both directions. Also accomplish some post-processing.
 !! This is the Mixed Precision version (dp in input, FFT done with sp data, output is dp)
 !! See dfti_fftrisc_dp for API doc.
-!!
-!! PARENTS
-!!      m_dfti
-!!
-!! CHILDREN
-!!      c_f_pointer
 !!
 !! SOURCE
 
@@ -849,12 +820,6 @@ end subroutine dfti_fftrisc_mixprec
 !! OUTPUT
 !!  ur(ldx*ldy*ldz*ndat)=wavefunctions in real space.
 !!
-!! PARENTS
-!!      m_dfti
-!!
-!! CHILDREN
-!!      c_f_pointer
-!!
 !! SOURCE
 
 subroutine dfti_fftug_dp(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k,gbound,ug,ur)
@@ -919,11 +884,6 @@ end subroutine dfti_fftug_dp
 !! OUTPUT
 !!  ur(ldx*ldy*ldz*ndat)=wavefunctions in real space.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
-!!
 !! SOURCE
 
 subroutine dfti_fftug_spc(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k,gbound,ug,ur)
@@ -987,11 +947,6 @@ end subroutine dfti_fftug_spc
 !!
 !! OUTPUT
 !!  ur(ldx*ldy*ldz*ndat)=wavefunctions in real space.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
 !!
 !! SOURCE
 
@@ -1059,11 +1014,6 @@ end subroutine dfti_fftug_dpc
 !!                         Destroyed in output. Do not use ur anymore!
 !! OUTPUT
 !! ug(2,npw_k*ndat)=wavefunctions in reciprocal space.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
 !!
 !! SOURCE
 
@@ -1134,11 +1084,6 @@ end subroutine dfti_fftur_dp
 !! OUTPUT
 !! ug(npw_k*ndat)=wavefunctions in reciprocal space.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
-!!
 !! SOURCE
 
 subroutine dfti_fftur_spc(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k,gbound,ur,ug)
@@ -1207,11 +1152,6 @@ end subroutine dfti_fftur_spc
 !! OUTPUT
 !! ug(npw_k*ndat)=wavefunctions in reciprocal space
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
-!!
 !! SOURCE
 
 subroutine dfti_fftur_dpc(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k,gbound,ur,ug)
@@ -1271,12 +1211,6 @@ end subroutine dfti_fftur_dpc
 !!    In input: the complex array to be transformed.
 !!    In output: the Fourier transform in the space specified by isign.
 !!
-!! PARENTS
-!!      m_dfti
-!!
-!! CHILDREN
-!!      c_f_pointer
-!!
 !! SOURCE
 
 subroutine dfti_c2c_ip_spc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,ff)
@@ -1318,11 +1252,6 @@ end subroutine dfti_c2c_ip_spc
 !!    In input: the complex array to be transformed.
 !!    In output: the Fourier transformed in the space specified by isign.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
-!!
 !! SOURCE
 
 subroutine dfti_c2c_ip_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,ff)
@@ -1363,11 +1292,6 @@ end subroutine dfti_c2c_ip_dpc
 !!
 !! OUTPUT
 !!   gg(ldx*ldy*ldz*ndat)=The FFT of ff.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
 !!
 !! SOURCE
 
@@ -1411,11 +1335,6 @@ end subroutine dfti_c2c_op_spc
 !! OUTPUT
 !!   gg(ldx*ldy*ldz*ndat)=The FFT of ff.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
-!!
 !! SOURCE
 
 subroutine dfti_c2c_op_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,ff,gg)
@@ -1458,12 +1377,6 @@ end subroutine dfti_c2c_op_dpc
 !!
 !! OUTPUT
 !! fout(2,ldx*ldy*ldz*ndat)=The Fourier transform of fin.
-!!
-!! PARENTS
-!!      m_dfti
-!!
-!! CHILDREN
-!!      c_f_pointer
 !!
 !! SOURCE
 
@@ -1527,11 +1440,6 @@ end subroutine dfti_many_dft_op
 !!   In input: The complex array to be transformed.
 !!   In output: The FFT results.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
-!!
 !! SOURCE
 
 subroutine dfti_many_dft_ip(nx,ny,nz,ldx,ldy,ldz,ndat,isign,finout)
@@ -1591,12 +1499,6 @@ end subroutine dfti_many_dft_ip
 !!   ff(2*ldx*ldy*ldz*ndat)=
 !!     input: The array with the data to be transformed.
 !!     output: The results of the FFT.
-!!
-!! PARENTS
-!!      m_dfti
-!!
-!! CHILDREN
-!!      c_f_pointer
 !!
 !! SOURCE
 
@@ -1660,12 +1562,6 @@ end subroutine dfti_fftpad_dp
 !!     input: The array with the data to be transformed.
 !!     output: The results of the FFT.
 !!
-!! PARENTS
-!!      m_dfti
-!!
-!! CHILDREN
-!!      c_f_pointer
-!!
 !! SOURCE
 
 subroutine dfti_fftpad_dpc(ff,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
@@ -1724,11 +1620,6 @@ end subroutine dfti_fftpad_dpc
 !!     input: The array with the data to be transformed.
 !!     output: The results of the FFT.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
-!!
 !! SOURCE
 
 subroutine dfti_fftpad_spc(ff,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
@@ -1776,12 +1667,6 @@ end subroutine dfti_fftpad_spc
 !!
 !! OUTPUT
 !! gg(ldx*ldy*ldz*ndat)=The forward FFT of ff (complex valued)
-!!
-!! PARENTS
-!!      m_dfti
-!!
-!! CHILDREN
-!!      c_f_pointer
 !!
 !! SOURCE
 
@@ -1906,11 +1791,6 @@ end subroutine dfti_r2c_op_dpc
 !! OUTPUT
 !! gg(2*ldx*ldy*ldz*ndat)=The forward FFT of ff (real valued)
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
-!!
 !! SOURCE
 
 subroutine dfti_r2c_op_dp(nx,ny,nz,ldx,ldy,ldz,ndat,ff,gg)
@@ -1963,12 +1843,6 @@ end subroutine dfti_r2c_op_dp
 !!
 !! OUTPUT
 !! gg(2,ldx*ldy*ldz*ndat)=The backwards real FFT of ff.
-!!
-!! PARENTS
-!!      m_dfti
-!!
-!! CHILDREN
-!!      c_f_pointer
 !!
 !! SOURCE
 
@@ -2067,11 +1941,6 @@ end subroutine dfti_c2r_op_dpc
 !! OUTPUT
 !! gg(ldx*ldy*ldz*ndat)=The backwards real FFT of ff.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
-!!
 !! SOURCE
 
 subroutine dfti_c2r_op_dp(nx,ny,nz,ldx,ldy,ldz,ndat,ff,gg)
@@ -2119,11 +1988,6 @@ end subroutine dfti_c2r_op_dp
 !!  status = status error reported by dfti.
 !!  [file] = file name
 !!  [line] = line number
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
 !!
 !! SOURCE
 
@@ -2187,8 +2051,6 @@ end subroutine dfti_check_status
 !!  ndat=Number of FFT transforms to do
 !!  nthreads = Number of threads available
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 function dfti_spawn_threads_here(ndat,nthreads) result(ans)
@@ -2221,12 +2083,6 @@ end function dfti_spawn_threads_here
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!      m_fft
-!!
-!! CHILDREN
-!!      c_f_pointer
-!!
 !! SOURCE
 
 subroutine dfti_use_lib_threads(logvar)
@@ -2253,11 +2109,6 @@ end subroutine dfti_use_lib_threads
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
 !!
 !! SOURCE
 
@@ -2298,11 +2149,6 @@ end subroutine dfti_alloc_real_dp
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
-!!
 !! SOURCE
 
 #ifdef HAVE_DFTI
@@ -2341,11 +2187,6 @@ end subroutine dfti_alloc_complex_spc
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
 !!
 !! SOURCE
 

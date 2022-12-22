@@ -6,14 +6,10 @@
 !!  .
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2021 ABINIT group (JLJ, BR, MC)
+!! Copyright (C) 2009-2022 ABINIT group (JLJ, BR, MC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -115,14 +111,6 @@ contains
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_gwls_ComputeCorrelationEnergy
-!!
-!! CHILDREN
-!!      cpu_time,extract_svd,g_to_r,gr_to_g,hpsik,pc_k_valence_kernel
-!!      setup_pk_model,sqmr,sqrt_vc_k,wf_block_distribute
-!!      write_text_block_in_timing_log,write_timing_log,xmpi_sum,zgemm,zgesv
-!!
 !! SOURCE
 
 subroutine generate_frequencies_and_weights(npt_gauss)
@@ -184,14 +172,6 @@ end subroutine generate_frequencies_and_weights
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gwls_ComputeCorrelationEnergy
-!!
-!! CHILDREN
-!!      cpu_time,extract_svd,g_to_r,gr_to_g,hpsik,pc_k_valence_kernel
-!!      setup_pk_model,sqmr,sqrt_vc_k,wf_block_distribute
-!!      write_text_block_in_timing_log,write_timing_log,xmpi_sum,zgemm,zgesv
 !!
 !! SOURCE
 
@@ -298,14 +278,6 @@ end subroutine compute_eps_m1_minus_eps_model_m1
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_gwls_ComputeCorrelationEnergy
-!!
-!! CHILDREN
-!!      cpu_time,extract_svd,g_to_r,gr_to_g,hpsik,pc_k_valence_kernel
-!!      setup_pk_model,sqmr,sqrt_vc_k,wf_block_distribute
-!!      write_text_block_in_timing_log,write_timing_log,xmpi_sum,zgemm,zgesv
-!!
 !! SOURCE
 
 subroutine compute_eps_m1_minus_one(lmax, npt_gauss)
@@ -393,14 +365,6 @@ end subroutine compute_eps_m1_minus_one
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gwls_ComputeCorrelationEnergy
-!!
-!! CHILDREN
-!!      cpu_time,extract_svd,g_to_r,gr_to_g,hpsik,pc_k_valence_kernel
-!!      setup_pk_model,sqmr,sqrt_vc_k,wf_block_distribute
-!!      write_text_block_in_timing_log,write_timing_log,xmpi_sum,zgemm,zgesv
 !!
 !! SOURCE
 
@@ -994,14 +958,6 @@ end subroutine compute_eps_model_m1_minus_one
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_gwls_ComputeCorrelationEnergy
-!!
-!! CHILDREN
-!!      cpu_time,extract_svd,g_to_r,gr_to_g,hpsik,pc_k_valence_kernel
-!!      setup_pk_model,sqmr,sqrt_vc_k,wf_block_distribute
-!!      write_text_block_in_timing_log,write_timing_log,xmpi_sum,zgemm,zgesv
-!!
 !! SOURCE
 
 subroutine cleanup_projected_Sternheimer_epsilon
@@ -1053,14 +1009,6 @@ end subroutine cleanup_projected_Sternheimer_epsilon
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gwls_ComputeCorrelationEnergy
-!!
-!! CHILDREN
-!!      cpu_time,extract_svd,g_to_r,gr_to_g,hpsik,pc_k_valence_kernel
-!!      setup_pk_model,sqmr,sqrt_vc_k,wf_block_distribute
-!!      write_text_block_in_timing_log,write_timing_log,xmpi_sum,zgemm,zgesv
 !!
 !! SOURCE
 

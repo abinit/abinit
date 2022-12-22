@@ -3,20 +3,18 @@
 !!  m_gsphere
 !!
 !! FUNCTION
-!!   The Gsphere data type defines the set of G-vectors
-!!   centered on Gamma used to describe (chi0|epsilon|W) in the GW code.
-!!   Note that, unlike the kg_k arrays used for wavefunctions, here the
-!!   G-vectors are ordered in shells (increasing length). Moreover
-!!   the sphere can be enlarged to take into account umklapps for which
-!!   one need the knowledge of several quantities at G-G0.
+!!  The Gsphere data type defines the set of G-vectors
+!!  centered on Gamma used to describe (chi0|epsilon|W) in the GW code.
+!!  Note that, unlike the kg_k arrays used for wavefunctions, here the
+!!  G-vectors are ordered in shells (increasing length). Moreover
+!!  the sphere can be enlarged to take into account umklapps for which
+!!  one need the knowledge of several quantities at G-G0.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2021 ABINIT group (MG, GMR, VO, LR, RWG, MT, XG)
+!! Copyright (C) 1999-2022 ABINIT group (MG, GMR, VO, LR, RWG, MT, XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -26,7 +24,7 @@
 
 #include "abi_common.h"
 
-MODULE m_gsphere
+module m_gsphere
 
  use defs_basis
  use m_abicore
@@ -79,7 +77,7 @@ MODULE m_gsphere
 !! Note that, unlike the GS part, the basis set does not depend on the k-point.
 !!
 !! NOTES
-!! To indicate the indices in the arrays grottb, grottbm1 we use the following notation :
+!! To indicate the indices in the arrays grottb, grottbm1 we use the following notation:
 !!
 !!  g defines the index of the reciprocal lattice vector in the array gvec
 !!  s  indicates the index of the symmetry operation in reciprocal space
@@ -158,17 +156,19 @@ MODULE m_gsphere
   ! phmSGt(ng,nsym)
   ! Phase factor e^{-i2\pi(SG.\tau)} where S is one of the symmetry properties in reciprocal space.
 
- end type gsphere_t
+  contains
 
- public :: gsph_init          ! Initialize the G-sphere.
- public :: gsph_fft_tabs      ! Returns useful tables for FFT (with or without padding).
- public :: gsph_in_fftbox     ! Initialize the largest Gsphere contained in the FFT box.
- public :: print_gsphere      ! Printout of basic dimensions.
- public :: gsph_free          ! Free memory allocated in the object.
- public :: gsph_g_idx         ! Returns the index of G from its reduced coordinates.
- public :: gsph_gmg_idx       ! Returns the index of G1-G2 from their indeces
- public :: gsph_gmg_fftidx    ! Returns the index of G1-G2 in the FFT mesh defined by ngfft.
- public :: gsph_extend        ! Construct a new gsphere_t with a larger cutoff energy
+   procedure  :: init        => gsph_init           ! Initialize the G-sphere.
+   procedure  :: fft_tabs    => gsph_fft_tabs       ! Returns useful tables for FFT (with or without padding).
+   procedure  :: in_fftbox   => gsph_in_fftbox      ! Initialize the largest Gsphere contained in the FFT box.
+   procedure  :: print       => gsph_print          ! Printout of basic dimensions.
+   procedure  :: free        => gsph_free           ! Free memory allocated in the object.
+   procedure  :: g_idx       => gsph_g_idx          ! Returns the index of G from its reduced coordinates.
+   procedure  :: gmg_idx     => gsph_gmg_idx        ! Returns the index of G1-G2 from their indeces
+   procedure  :: gmg_fftidx  => gsph_gmg_fftidx     ! Returns the index of G1-G2 in the FFT mesh defined by ngfft.
+   procedure  :: extend      => gsph_extend         ! Construct a new gsphere_t with a larger cutoff energy
+
+ end type gsphere_t
 !!***
 
 CONTAINS  !=================================================================================
@@ -198,11 +198,6 @@ CONTAINS  !=====================================================================
 !! NOTES:
 !!  I is either the identity or the inversion (time reversal in reciprocal space).
 !!  S is one of the symmetry operation in reciprocal space belonging to the Space group.
-!!
-!! PARENTS
-!!      m_gsphere
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -245,9 +240,9 @@ subroutine setup_G_rotation(nsym,symrec,timrev,npw,gvec,g2sh,nsh,shlim,grottb,gr
        end do
        if (.not.found) then
          write(msg,'(3a,i5,a,i5,1x,2(3i5,a),a,i3,a,i3)')&
-&         'G-shell not closed',ch10,&
-&         '  Initial G vector ',ig1,'/',npw,gbase(:),' Rotated G vector ',grot(:),ch10,&
-&         '  Through sym ',isym,' and itim ',itim
+          'G-shell not closed',ch10,&
+          '  Initial G vector ',ig1,'/',npw,gbase(:),' Rotated G vector ',grot(:),ch10,&
+          '  Through sym ',isym,' and itim ',itim
          ABI_ERROR(msg)
        end if
      end do
@@ -269,11 +264,6 @@ end subroutine setup_G_rotation
 !!
 !! INPUTS
 !!  Cryst<crystal_t> = Info on unit cell and its symmetries
-!!     %nsym=number of symmetry operations
-!!     %symrec(3,3,nsym)=symmetry operations in reciprocal space
-!!     %tnons(3,nsym)=fractional translations
-!!     %gmet(3,3)=reciprocal space metric (bohr**-2).
-!!     %gprimd(3,3)=dimensional reciprocal space primitive translations
 !!  ng=number of G vectors, needed only if gvec is passed.
 !!  [gvec(3,ng)]=coordinates of G vectors
 !!  [ecut]=Cutoff energy for G-sphere. gvec and ecut are mutually exclusive.
@@ -285,22 +275,17 @@ end subroutine setup_G_rotation
 !! NOTES
 !!  gvec are supposed to be ordered with increasing norm.
 !!
-!! PARENTS
-!!      m_bethe_salpeter,m_gsphere,m_gwls_hamiltonian,m_screening_driver
-!!      m_sigma_driver,mrgscr
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
-subroutine gsph_init(Gsph,Cryst,ng,gvec,ecut)
+subroutine gsph_init(Gsph, Cryst, ng, gvec, ecut)
 
 !Arguments ------------------------------------
 !scalars
+ class(gsphere_t),intent(out) :: Gsph
  integer,intent(in) :: ng
  real(dp),optional,intent(in) :: ecut
  type(crystal_t),target,intent(in) :: Cryst
- type(gsphere_t),intent(out) :: Gsph
+
 !arrays
  integer,optional,intent(in) :: gvec(3,ng)
 !Local variables-------------------------------
@@ -453,7 +438,7 @@ subroutine gsph_init(Gsph,Cryst,ng,gvec,ecut)
    gsph%g2mg(ig) = img
  end do
 
- !call print_gsphere(Gsph,unit=std_out,prtvol=1)
+ !call Gsph%print(unit=std_out,prtvol=1)
 
  DBG_EXIT("COLL")
 
@@ -482,20 +467,15 @@ end subroutine gsph_init
 !! NOTES
 !!  The routine will stop if any G-G0 happens to be outside the FFT box.
 !!
-!! PARENTS
-!!      m_chi0,m_cohsex,m_exc_build,m_prep_calc_ucrpa,m_sigc,m_sigx
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
-subroutine gsph_fft_tabs(Gsph,g0,mgfft,ngfft,use_padfft,gmg0_gbound,gmg0_ifft)
+subroutine gsph_fft_tabs(Gsph, g0, mgfft, ngfft, use_padfft, gmg0_gbound, gmg0_ifft)
 
 !Arguments ------------------------------------
 !scalars
+ class(gsphere_t),intent(in) :: Gsph
  integer,intent(in) :: mgfft
  integer,intent(out) :: use_padfft
- type(gsphere_t),intent(in) :: Gsph
 !arrays
  integer,intent(in) :: g0(3),ngfft(18)
  integer,intent(out) :: gmg0_gbound(2*mgfft+8,2),gmg0_ifft(Gsph%ng)
@@ -572,19 +552,14 @@ end subroutine gsph_fft_tabs
 !!  Gsph<gsphere_t>=Data type containing information related to the set of G vectors
 !!   completetly initialized in output.
 !!
-!! PARENTS
-!!      m_chi0
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
-subroutine gsph_in_fftbox(Gsph,Cryst,ngfft)
+subroutine gsph_in_fftbox(Gsph, Cryst, ngfft)
 
 !Arguments ------------------------------------
 !scalars
+ class(gsphere_t),intent(out) :: Gsph
  type(crystal_t),intent(in) :: Cryst
- type(gsphere_t),intent(out) :: Gsph
 !arrays
  integer,intent(in) :: ngfft(18)
 
@@ -628,7 +603,7 @@ subroutine gsph_in_fftbox(Gsph,Cryst,ngfft)
  end do
  !
  ! Init sphere from ecut.
- call gsph_init(Gsph,Cryst,0,ecut=ecut)
+ call Gsph%init(Cryst, 0, ecut=ecut)
  !
  ! Make sure that Gsph does not contain G vectors outside the FFT box.
  ! kpgsph might return G whose energy is larger than the input ecut.
@@ -645,9 +620,9 @@ subroutine gsph_in_fftbox(Gsph,Cryst,ngfft)
  if (npw<Gsph%ng) then
    ABI_COMMENT("Have to reinit Gpshere")
    ABI_MALLOC(gvec,(3,npw))
-   gvec =Gsph%gvec(:,1:npw)
-   call gsph_free(Gsph)
-   call gsph_init(Gsph,Cryst,npw,gvec=gvec)
+   gvec = Gsph%gvec(:,1:npw)
+   call Gsph%free()
+   call Gsph%init(Cryst, npw, gvec=gvec)
    ABI_FREE(gvec)
  end if
 
@@ -656,9 +631,9 @@ end subroutine gsph_in_fftbox
 
 !----------------------------------------------------------------------
 
-!!****f* m_gsphere/print_gsphere
+!!****f* m_gsphere/gsph_print
 !! NAME
-!! print_gsphere
+!! gsph_print
 !!
 !! FUNCTION
 !!  Print the content of a gvectors data type
@@ -672,20 +647,15 @@ end subroutine gsph_in_fftbox
 !! OUTPUT
 !!  Only writing.
 !!
-!! PARENTS
-!!      m_bethe_salpeter,m_chi0,m_gwls_hamiltonian
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
-subroutine print_gsphere(Gsph,unit,prtvol,mode_paral)
+subroutine gsph_print(Gsph, unit, prtvol, mode_paral)
 
 !Arguments ------------------------------------
 !scalars
+ class(gsphere_t),intent(in) :: Gsph
  integer,intent(in),optional :: prtvol,unit
  character(len=4),intent(in),optional :: mode_paral
- type(gsphere_t),intent(in) :: Gsph
 
 !Local variables-------------------------------
 !scalars
@@ -701,9 +671,9 @@ subroutine print_gsphere(Gsph,unit,prtvol,mode_paral)
  my_mode   ='COLL' ; if (PRESENT(mode_paral)) my_mode   =mode_paral
 
  write(msg,'(3a,2(a,i8,a))')ch10,&
-& ' ==== Info on the G-sphere ==== ',ch10,&
-& '  Number of G vectors ... ',Gsph%ng,ch10,&
-& '  Number of shells ...... ',Gsph%nsh,ch10
+   ' ==== Info on the G-sphere ==== ',ch10,&
+   '  Number of G vectors ... ',Gsph%ng,ch10,&
+   '  Number of shells ...... ',Gsph%nsh,ch10
  call wrtout(my_unt,msg,my_mode)
 
  SELECT CASE (Gsph%timrev)
@@ -728,7 +698,7 @@ subroutine print_gsphere(Gsph,unit,prtvol,mode_paral)
    call wrtout(my_unt,ch10,my_mode)
  end if
 
-end subroutine print_gsphere
+end subroutine gsph_print
 !!***
 
 !----------------------------------------------------------------------
@@ -743,19 +713,12 @@ end subroutine print_gsphere
 !! INPUTS
 !!   Gsph = datatype to be freed
 !!
-!! PARENTS
-!!      m_bethe_salpeter,m_chi0,m_gsphere,m_gwls_hamiltonian,m_screening_driver
-!!      m_sigma_driver,mrgscr
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine gsph_free(Gsph)
 
 !Arguments ------------------------------------
-!scalars
- type(gsphere_t),intent(inout) :: Gsph
+ class(gsphere_t),intent(inout) :: Gsph
 
 ! *************************************************************************
 
@@ -798,15 +761,13 @@ end subroutine gsph_free
 !! NOTES
 !!  The function assumes that the G-vectors are ordered with increasing length.
 !!
-!! PARENTS
-!!
 !! SOURCE
 
-pure function gsph_g_idx(Gsph,gg) result(g_idx)
+pure function gsph_g_idx(Gsph, gg) result(g_idx)
 
 !Arguments ------------------------------------
 !scalars
- type(gsphere_t),intent(in) :: Gsph
+ class(gsphere_t),intent(in) :: Gsph
  integer :: g_idx
 !arrays
  integer,intent(in) :: gg(3)
@@ -856,15 +817,13 @@ end function gsph_g_idx
 !! NOTES
 !!  The function assumes that the G-vectors are ordered with increasing length.
 !!
-!! PARENTS
-!!
 !! SOURCE
 
-pure function gsph_gmg_idx(Gsph,ig1,ig2) result(ig1mg2)
+pure function gsph_gmg_idx(Gsph, ig1, ig2) result(ig1mg2)
 
 !Arguments ------------------------------------
 !scalars
- type(gsphere_t),intent(in) :: Gsph
+ class(gsphere_t),intent(in) :: Gsph
  integer,intent(in) :: ig1,ig2
  integer :: ig1mg2
 
@@ -916,15 +875,13 @@ end function gsph_gmg_idx
 !!  ig1,ig2 index of g1 and g2 in the G-sphere.
 !!  ngfft(18)=Info on the FFT mesh.
 !!
-!! PARENTS
-!!
 !! SOURCE
 
-pure function gsph_gmg_fftidx(Gsph,ig1,ig2,ngfft) result(fft_idx)
+pure function gsph_gmg_fftidx(Gsph, ig1, ig2, ngfft) result(fft_idx)
 
 !Arguments ------------------------------------
 !scalars
- type(gsphere_t),intent(in) :: Gsph
+ class(gsphere_t),intent(in) :: Gsph
  integer,intent(in) :: ig1,ig2
  integer :: fft_idx
 !arrays
@@ -983,11 +940,6 @@ end function gsph_gmg_fftidx
 !!    in input : pointer to NULL
 !!    in output: shlim_p(nbase)=Cumulative number of G-vectors for each shell.
 !!               where nbase is the number of irreducible G"s found.
-!!
-!! PARENTS
-!!      m_gsphere,m_io_kss,m_sigma_driver
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1257,11 +1209,6 @@ end subroutine merge_and_sort_kg
 !!  cnorm is a bit redundant since it can be calculated from gbase. However this procedure
 !!  is called by outkss in which cnorm is already calculated and we dont want to do it twice
 !!
-!! PARENTS
-!!      m_gsphere
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine getfullg(nbase,nsym,pinv,sizepw,gbase,symrec,cnorm,maxpw,gbig,shlim,ierr)
@@ -1400,11 +1347,6 @@ end subroutine getfullg
 !! NOTES
 !!  The search can be optimized by looping over shells. See m_skw for a faster algo
 !!
-!! PARENTS
-!!      m_gsphere,m_skw
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine get_irredg(npw_k,nsym,pinv,gprimd,symrec,gcurr,nbasek,gbasek,cnormk)
@@ -1495,11 +1437,6 @@ end subroutine get_irredg
 !! gbase(3,sizepw)=irreducible G found in reciprocal coordinates
 !! cnorm(sizepw)=Norm of each irred G vector
 !! ierr= Exit status, if /=0 the number of G vectors found exceeds sizepw
-!!
-!! PARENTS
-!!      m_gsphere
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1598,11 +1535,6 @@ end subroutine merge_kgirr
 !!  ecut=cut-off energy for plane wave basis sphere (Ha)
 !!  npw=number of plane waves
 !!  nsh=number of shells
-!!
-!! PARENTS
-!!      m_invars2,m_screening_driver,m_sigma_driver
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1867,11 +1799,6 @@ end subroutine setshells
 !!                Set to 0 if kg2(:,ig) not in kg1
 !!   nmiss = Number of G-vectors in kg2 not found in kg1
 !!
-!! PARENTS
-!!      m_wfd
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine kg_map(npw1,kg1,npw2,kg2,g2g1,nmiss)
@@ -1944,10 +1871,6 @@ end subroutine kg_map
 !!     u_k(G) = u_{k+G0}(G-G0); u_{-k}(G) = u_k(G)^*
 !!   and therefore:
 !!     u_{G0/2}(G) = u_{G0/2}(-G-G0)^*.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2047,12 +1970,6 @@ end subroutine make_istwfk_table
 !!  ierr=Status error. It gives the number of G of kg_k not contained in gbig.
 !!  gamma2k(maxpw)=Mapping gbig -> kg_k
 !!
-!! PARENTS
-!!      m_io_kss
-!!
-!! CHILDREN
-!!      gsph_free,gsph_init
-!!
 !! SOURCE
 
 pure subroutine table_gbig2kg(npw_k,kg_k,maxpw,gbig,gamma2k,ierr)
@@ -2109,22 +2026,16 @@ end subroutine table_gbig2kg
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_bethe_salpeter
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
-subroutine gsph_extend(in_Gsph,Cryst,new_ecut,new_Gsph)
+subroutine gsph_extend(in_Gsph, Cryst, new_ecut, new_Gsph)
 
 !Arguments ------------------------------------
 !scalars
- real(dp),intent(in) :: new_ecut
+ class(gsphere_t),intent(in) :: in_Gsph
  type(crystal_t),intent(in) :: Cryst
- type(gsphere_t),intent(in) :: in_Gsph
- type(gsphere_t),intent(out) :: new_Gsph
-!arrays
+ real(dp),intent(in) :: new_ecut
+ class(gsphere_t),intent(out) :: new_Gsph
 
 !Local variables-------------------------------
 !scalars
@@ -2134,7 +2045,7 @@ subroutine gsph_extend(in_Gsph,Cryst,new_ecut,new_Gsph)
 
 ! *********************************************************************
 
- call gsph_init(new_Gsph,Cryst,0,ecut=new_ecut)
+ call new_Gsph%init(Cryst, 0, ecut=new_ecut)
 
  if (new_Gsph%ng > in_Gsph%ng) then
 
@@ -2166,8 +2077,8 @@ subroutine gsph_extend(in_Gsph,Cryst,new_ecut,new_Gsph)
    new_gvec = new_Gsph%gvec
    new_gvec(:,1:in_ng) = in_Gsph%gvec
 
-   call gsph_free(new_Gsph)
-   call gsph_init(new_Gsph,Cryst,new_ng,gvec=new_gvec)
+   call new_Gsph%free()
+   call new_Gsph%init(Cryst, new_ng, gvec=new_gvec)
    ABI_FREE(new_gvec)
 
  else
@@ -2201,11 +2112,6 @@ end subroutine gsph_extend
 !!
 !! OUTPUT
 !!  kpgnorm(npw_k)=norms of the k+G vectors
-!!
-!! PARENTS
-!!      m_cut3d,m_epjdos
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2282,11 +2188,6 @@ end subroutine getkpgnorm
 !! (could save a bit of space by suppressing isym=1, since the
 !! corresponding symmetry is the identity)
 !! tmrev_g(npwdiel)=index list of inverted G vectors (time-reversed)
-!!
-!! PARENTS
-!!      m_suscep_stat
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2387,5 +2288,5 @@ subroutine symg(kg_diel,npwdiel,nsym,phdiel,sym_g,symrel,tmrev_g,tnons)
 end subroutine symg
 !!***
 
-END MODULE m_gsphere
+end module m_gsphere
 !!***

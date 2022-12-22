@@ -7,14 +7,10 @@
 !!      N(\qq) = \sum_{mn\kk} \delta(\ee_{\kpq m}) \delta(\ee_{\kk n})
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2021 ABINIT group (MG, MJV)
+!! Copyright (C) 2008-2022 ABINIT group (MG, MJV)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -75,12 +71,6 @@ CONTAINS  !=====================================================================
 !! Inspired to nmsq_gam_sumfs and mkqptequiv
 !!  TODO : better use of symmetries to reduce the computational effort
 !! Must be called with kpt = full grid! Reduction by symmetry is not possible for q-dependent quantities (or not easy :)
-!!
-!! PARENTS
-!!      m_elphon,m_nesting
-!!
-!! CHILDREN
-!!      make_path,printxsf,wrap2_zero_one
 !!
 !! SOURCE
 
@@ -164,12 +154,6 @@ end subroutine bfactor
 !!
 !! OUTPUT
 !!   Write data to file.
-!!
-!! PARENTS
-!!      m_ebands,m_elphon
-!!
-!! CHILDREN
-!!      make_path,printxsf,wrap2_zero_one
 !!
 !! SOURCE
 
@@ -324,12 +308,6 @@ end subroutine mknesting
 !!
 !! OUTPUT
 !!  only write to file
-!!
-!! PARENTS
-!!      m_nesting
-!!
-!! CHILDREN
-!!      make_path,printxsf,wrap2_zero_one
 !!
 !! SOURCE
 

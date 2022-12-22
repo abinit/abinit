@@ -6,14 +6,10 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, JYR, MKV, MT, FJ, MB, DJA)
+!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, JYR, MKV, MT, FJ, MB, DJA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -55,7 +51,7 @@ module m_gstate
  use m_symtk,            only : matr3inv
  use m_io_tools,         only : open_file
  use m_occ,              only : newocc, getnel
- use m_ddb_hdr,          only : ddb_hdr_type, ddb_hdr_init
+ use m_ddb_hdr,          only : ddb_hdr_type
  use m_fstrings,         only : strcat, sjoin
  use m_geometry,         only : fixsym, mkradim, metric
  use m_kpts,             only : tetra_from_kptrlatt
@@ -77,7 +73,6 @@ module m_gstate
  use m_paw_init,         only : pawinit,paw_gencond
  use m_paw_correlations, only : pawpuxinit
  use m_paw_uj,           only : pawuj_ini,pawuj_free,pawuj_det, macro_uj_type
- use m_orbmag,           only : initorbmag,destroy_orbmag,orbmag_type
  use m_data4entropyDMFT, only : data4entropyDMFT_t, data4entropyDMFT_init, data4entropyDMFT_destroy
  use m_electronpositron, only : electronpositron_type,init_electronpositron,destroy_electronpositron, &
                                 electronpositron_calctype
@@ -227,13 +222,6 @@ contains
 !! TODO
 !! Not yet possible to use restartxf in parallel when localrdwf==0
 !!
-!! PARENTS
-!!      m_gstateimg
-!!
-!! CHILDREN
-!!      xderiveread,xderiverrecend,xderiverrecinit,xderivewrecend
-!!      xderivewrecinit,xderivewrite
-!!
 !! SOURCE
 
 subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
@@ -296,7 +284,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  type(hdr_type) :: hdr,hdr_den
  type(extfpmd_type),pointer :: extfpmd => null()
  type(macro_uj_type) :: dtpawuj(1)
- type(orbmag_type) :: dtorbmag
  type(paw_dmft_type) :: paw_dmft
  type(pawfgr_type) :: pawfgr
  type(recursion_type) ::rec_set
@@ -432,7 +419,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    npwtot(:) = 0
  end if
 
- if(dtset%wfoptalg == 1 .and. psps%usepaw == 1) then
+ if((dtset%wfoptalg == 1 .or. dtset%wfoptalg == 111) .and. psps%usepaw == 1) then
    call init_invovl(dtset%nkpt)
  end if
 
@@ -452,7 +439,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
      ylm_option=0
      if (dtset%prtstm==0.and.dtset%iscf>0.and.dtset%positron/=1) ylm_option=1 ! compute gradients of YLM
      if (dtset%berryopt==4 .and. dtset%optstress /= 0 .and. psps%usepaw==1) ylm_option = 1 ! compute gradients of YLM
-     if ((dtset%orbmag.LT.0) .AND. (psps%usepaw==1)) ylm_option = 1 ! compute gradients of YLM
      call initylmg(gprimd,kg,dtset%kptns,dtset%mkmem,mpi_enreg,&
 &     psps%mpsang,dtset%mpw,dtset%nband,dtset%nkpt,&
 &     npwarr,dtset%nsppol,ylm_option,rprimd,ylm,ylmgr)
@@ -867,15 +853,29 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
 !Initialize (eventually) extfpmd object
  if(dtset%useextfpmd>=1.and.dtset%occopt==3) then
-   if(dtset%useextfpmd/=1.and.dtset%mband<dtset%extfpmd_nbcut) then
-     write(msg,'(3a,i0,a,i0,3a)') "Not enough bands to activate extfpmd routines.",ch10,&
-     & "nband=",dtset%mband," < extfpmd_nbcut=",dtset%extfpmd_nbcut,".",ch10,&
-     & "Action: Increase nband or decrease extfpmd_nbcut."
+   if(dtset%useextfpmd/=1.and.dtset%extfpmd_nbcut>dtset%mband) then
+     write(msg,'(3a,i0,a,i0,3a)') "Not enough bands to activate ExtFPMD routines.",ch10,&
+&     "extfpmd_nbcut = ",dtset%extfpmd_nbcut," should be less than or equal to nband = ",dtset%mband,".",ch10,&
+&     "Action: Increase nband or decrease extfpmd_nbcut."
      ABI_ERROR(msg)
    else
+     if(dtset%useextfpmd/=1.and.(dtset%extfpmd_nbdbuf+dtset%extfpmd_nbcut)>dtset%mband) then
+       write(msg,'(a,i0,a,i0,a,i0,2a,i0,3a)') "(extfpmd_nbdbuf = ",dtset%extfpmd_nbdbuf," + extfpmd_nbcut = ",&
+&       dtset%extfpmd_nbcut,") = ",dtset%extfpmd_nbdbuf+dtset%extfpmd_nbcut,ch10,&
+&       "should be less than or equal to nband = ",dtset%mband,".",ch10,&
+&       "Assume experienced user. Execution will continue with extfpmd_nbdbuf = 0."
+       ABI_WARNING(msg)
+       dtset%extfpmd_nbdbuf = 0
+     else if(dtset%extfpmd_nbdbuf>dtset%mband) then
+       write(msg,'(a,i0,a,i0,3a)') "extfpmd_nbdbuf = ",dtset%extfpmd_nbdbuf,&
+&       " should be less than or equal to nband = ",dtset%mband,".",ch10,&
+&       "Assume experienced user. Execution will continue with extfpmd_nbdbuf = 0."
+       ABI_WARNING(msg)
+       dtset%extfpmd_nbdbuf = 0
+     end if
      ABI_MALLOC(extfpmd,)
-     call extfpmd%init(dtset%mband,dtset%extfpmd_nbcut,nfftf,&
-&     dtset%nspden,rprimd,dtset%useextfpmd)
+     call extfpmd%init(dtset%mband,dtset%extfpmd_nbcut,dtset%extfpmd_nbdbuf,&
+&     dtset%nfft,dtset%nspden,rprimd,dtset%useextfpmd)
    end if
  end if
 
@@ -900,19 +900,12 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    ABI_MALLOC(doccde,(dtset%mband*dtset%nkpt*dtset%nsppol))
 !  Warning : ideally, results_gs%entropy should not be set up here XG 20011007
 !  Do not take into account the possible STM bias
-! CP modified
-!   call newocc(doccde,eigen,results_gs%energies%entropy,&
-!&   results_gs%energies%e_fermie,&
-!&   dtset%spinmagntarget,dtset%mband,dtset%nband,&
-!&   dtset%nelect,dtset%nkpt,dtset%nspinor,dtset%nsppol,occ,&
-!&   dtset%occopt,dtset%prtvol,zero,dtset%tphysel,dtset%tsmear,dtset%wtk)
    call newocc(doccde,eigen,results_gs%energies%entropy,&
 &   results_gs%energies%e_fermie,results_gs%energies%e_fermih,dtset%ivalence,&
 &   dtset%spinmagntarget,dtset%mband,dtset%nband,&
 &   dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%nkpt,dtset%nspinor,dtset%nsppol,occ,&
-&   dtset%occopt,dtset%prtvol,zero,dtset%tphysel,dtset%tsmear,dtset%wtk,&
-&   extfpmd)
-! End CP modified
+&   dtset%occopt,dtset%prtvol,dtset%tphysel,dtset%tsmear,dtset%wtk,&
+&   extfpmd=extfpmd)
    if (dtset%dmftcheck>=0.and.dtset%usedmft>=1.and.(sum(args_gs%upawu(:))>=tol8.or.  &
 &   sum(args_gs%jpawu(:))>tol8).and.dtset%dmft_entropy==0) results_gs%energies%entropy=zero
    ABI_FREE(doccde)
@@ -921,8 +914,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
      extfpmd%nelect=zero
      call extfpmd%compute_nelect(results_gs%energies%e_fermie,extfpmd%nelect,&
 &     dtset%tsmear)
-     call extfpmd%compute_e_kinetic(results_gs%energies%e_fermie,nfftf,dtset%nspden,&
-&     dtset%tsmear,extfpmd%vtrial)
+     call extfpmd%compute_e_kinetic(results_gs%energies%e_fermie,dtset%tsmear)
    end if
 
 !  Transfer occupations to bigdft object:
@@ -1105,7 +1097,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
      call ctocprj(atindx,cg,choice,cprj,gmet,gprimd,iatom,idir,&
 &   iorder_cprj,dtset%istwfk,kg,dtset%kptns,mcg,mcprj,dtset%mgfft,dtset%mkmem,mpi_enreg,psps%mpsang,&
 &   dtset%mpw,dtset%natom,nattyp,dtset%nband,ncprj,ngfft,dtset%nkpt,dtset%nloalg,npwarr,dtset%nspinor,&
-&   dtset%nsppol,psps%ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,ucvol,dtfil%unpaw,xred,ylm,ylmgr)
+&   dtset%nsppol,dtset%nsppol,psps%ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,ucvol,dtfil%unpaw,&
+&   xred,ylm,ylmgr)
      call wrtout(std_out,' cprj is computed')
      ABI_FREE(ph1d)
    end if
@@ -1320,14 +1313,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 & mpi_enreg,npwarr,occ,pawang,pawrad,pawtab,psps,&
 & pwind,pwind_alloc,pwnsfac,rprimd,symrec,xred)
 
- !! orbital magnetization initialization, discretized wavefunction case
- if (dtset%orbmag .LT. 0) then
-   dtorbmag%orbmag = dtset%orbmag
-   call initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
-&                   pawtab,psps,pwind,pwind_alloc,pwnsfac,&
-&                   rprimd,symrec,xred)
- end if
-
  fatvshift=one
 
 !Check whether exiting was required by the user. If found then do not start minimization steps
@@ -1360,7 +1345,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    call timab(1225,3,tsec)
 
    call scfcv_init(scfcv_args,atindx,atindx1,cg,cprj,cpus,&
-&   args_gs%dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj,dtset,ecore,eigen,hdr,extfpmd,&
+&   args_gs%dmatpawu,dtefield,dtfil,dtpawuj,dtset,ecore,eigen,hdr,extfpmd,&
 &   indsym,initialized,irrzon,kg,mcg,mcprj,mpi_enreg,my_natom,nattyp,ndtpawuj,&
 &   nfftf,npwarr,occ,pawang,pawfgr,pawrad,pawrhoij,&
 &   pawtab,phnons,psps,pwind,pwind_alloc,pwnsfac,rec_set,&
@@ -1556,84 +1541,54 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  call timab(1229,2,tsec)
  call timab(1230,3,tsec)
 
-!Open the formatted derivative database file, and write the preliminary information
-!In the // case, only one processor writes the energy and the gradients to the DDB
-
+!In the // case, only master writes the energy and the gradients to the DDB
  if (me==0.and.dtset%nimage==1.and.((dtset%iscf > 0).or.&
 & (dtset%berryopt == -1).or.(dtset%berryopt) == -3)) then
 
+   ! DDB dimensions
    if (dtset%iscf > 0) then
-     nblok = 2          ! 1st blok = energy, 2nd blok = gradients
+     nblok = 2  ! 1st blok = gradients, 2nd blok = energy
    else
-     nblok = 1
+     nblok = 1  ! 1st blok = gradients
    end if
+   mpert = dtset%natom + 6
+   msize = 3*mpert
 
+   ! Create header and ddb objects
    dscrpt=' Note : temporary (transfer) database '
-   ddbnm=trim(dtfil%filnam_ds(4))//'_DDB'
+   call ddb_hdr%init(dtset,psps,pawtab,dscrpt,nblok,&
+&                    xred=xred,occ=occ,ngfft=ngfft)
 
-   call ddb_hdr_init(ddb_hdr,dtset,psps,pawtab,DDB_VERSION,dscrpt,&
-&   nblok,xred=xred,occ=occ,ngfft=ngfft)
+   call ddb%init(dtset, nblok, mpert, msize)
 
-   call ddb_hdr%open_write(ddbnm,dtfil%unddb,fullinit=0)
-
-   call ddb_hdr%free()
-
-   choice=2
-   mpert = dtset%natom + 6 ; msize = 3*mpert
-
-!  create a ddb structure with just one blok
-   call ddb%malloc(msize,1,dtset%natom,dtset%ntypat)
-
-   ddb%flg = 0
-   ddb%qpt = zero
-   ddb%nrm = one
-   ddb%val = zero
-
-!  Write total energy to the DDB
+   ! Write gradients to the DDB
    if (dtset%iscf > 0) then
-     ddb%typ(1) = 0
-     ddb%val(1,1,1) = results_gs%etotal
-     ddb%flg(1,1) = 1
-     call ddb%write_block(1,choice,dtset%mband,mpert,msize,dtset%nkpt,dtfil%unddb)
+     call ddb%set_gred(results_gs%gred, 1)
    end if
 
-!  Write gradients to the DDB
-   ddb%typ = 4
-   ddb%flg = 0
-   ddb%val = zero
-   indx = 0
-   if (dtset%iscf > 0) then
-     do iatom = 1, dtset%natom
-       do idir = 1, 3
-         indx = indx + 1
-         ddb%flg(indx,1) = 1
-         ddb%val(1,indx,1) = results_gs%gred(idir,iatom)
-       end do
-     end do
-   end if
-
-   indx = 3*dtset%natom + 3
+   ! Set the electronic polarization
    if ((abs(dtset%berryopt) == 1).or.(abs(dtset%berryopt) == 3)) then
-     do idir = 1, 3
-       indx = indx + 1
-       if (dtset%rfdir(idir) == 1) then
-         ddb%flg(indx,1) = 1
-         ddb%val(1,indx,1) = results_gs%pel(idir)
-       end if
-     end do
+     call ddb%set_pel(results_gs%pel, dtset%rfdir, 1)
    end if
 
-   indx = 3*dtset%natom + 6
+   ! Set the stress tensor
    if (dtset%iscf > 0) then
-     ddb%flg(indx+1:indx+6,1) = 1
-     ddb%val(1,indx+1:indx+6,1) = results_gs%strten(1:6)
+     call ddb%set_strten(results_gs%strten, 1)
    end if
 
-   call ddb%write_block(1,choice,dtset%mband,mpert,msize,dtset%nkpt,dtfil%unddb)
+   ! Set the total energy
+   if (dtset%iscf > 0) then
+     call ddb%set_etotal(results_gs%etotal, 2)
+   end if
+
+   ! Write the DDB
+   ddbnm=trim(dtfil%filnam_ds(4))//'_DDB'
+   call ddb%write_txt(ddb_hdr, ddbnm, fullinit=0)
+
+   ! Deallocate
+   call ddb_hdr%free()
    call ddb%free()
 
-!  Close DDB
-   close(dtfil%unddb)
  end if
 
  call timab(1230,2,tsec)
@@ -1775,9 +1730,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  ! deallocate efield
  call destroy_efield(dtefield)
 
- ! deallocate dtorbmag
- call destroy_orbmag(dtorbmag)
-
 !deallocate Recursion
  if (dtset%userec == 1) then
    call CleanRec(rec_set)
@@ -1798,8 +1750,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    call bandfft_kpt_destroy_array(bandfft_kpt,mpi_enreg)
  end if
 
- if(dtset%wfoptalg == 1 .and. psps%usepaw == 1) then
-   call destroy_invovl(dtset%nkpt)
+ if((dtset%wfoptalg == 1 .or. dtset%wfoptalg == 111)  .and. psps%usepaw == 1) then
+   call destroy_invovl(dtset%nkpt,dtset%use_gpu_cuda)
  end if
 
  if(gemm_nonlop_use_gemm) then
@@ -1848,13 +1800,6 @@ end subroutine gstate
 !!
 !! OUTPUT
 !!  start(3,natom)=copy of starting xred
-!!
-!! PARENTS
-!!      m_gstate
-!!
-!! CHILDREN
-!!      xderiveread,xderiverrecend,xderiverrecinit,xderivewrecend
-!!      xderivewrecinit,xderivewrite
 !!
 !! SOURCE
 
@@ -1978,13 +1923,6 @@ subroutine setup2(dtset,npwtot,start,wfs,xred)
 !! OUTPUT
 !!  (only print and write to disk)
 !!
-!! PARENTS
-!!      m_gstate
-!!
-!! CHILDREN
-!!      xderiveread,xderiverrecend,xderiverrecinit,xderivewrecend
-!!      xderivewrecinit,xderivewrite
-!!
 !! SOURCE
 ! CP added fermih to the list of arguments
 subroutine clnup1(acell,dtset,eigen,fermie,fermih, fnameabo_dos,fnameabo_eig,gred,&
@@ -2087,28 +2025,16 @@ subroutine clnup1(acell,dtset,eigen,fermie,fermih, fnameabo_dos,fnameabo_eig,gre
 
  if(dtset%tfkinfunc==0)then
    if (me == master) then
-     ! CP modified
-     !call prteigrs(eigen,dtset%enunit,fermie,fnameabo_eig,ab_out,&
-!&     iscf_dum,dtset%kptns,dtset%kptopt,dtset%mband,&
-!&     dtset%nband,dtset%nkpt,nnonsc,dtset%nsppol,occ,&
-!&     dtset%occopt,option,dtset%prteig,dtset%prtvol,resid,tolwf,&
-!&     vxcavg,dtset%wtk)
-!     call prteigrs(eigen,dtset%enunit,fermie,fnameabo_eig,std_out,&
-!&     iscf_dum,dtset%kptns,dtset%kptopt,dtset%mband,&
-!&     dtset%nband,dtset%nkpt,nnonsc,dtset%nsppol,occ,&
-!&     dtset%occopt,option,dtset%prteig,dtset%prtvol,resid,tolwf,&
-!&     vxcavg,dtset%wtk)
      call prteigrs(eigen,dtset%enunit,fermie,fermih,fnameabo_eig,ab_out,&
 &     iscf_dum,dtset%kptns,dtset%kptopt,dtset%mband,&
-&     dtset%nband,dtset%nkpt,nnonsc,dtset%nsppol,occ,&
+&     dtset%nband,dtset%nbdbuf,dtset%nkpt,nnonsc,dtset%nsppol,occ,&
 &     dtset%occopt,option,dtset%prteig,dtset%prtvol,resid,tolwf,&
 &     vxcavg,dtset%wtk)
      call prteigrs(eigen,dtset%enunit,fermie,fermih,fnameabo_eig,std_out,&
 &     iscf_dum,dtset%kptns,dtset%kptopt,dtset%mband,&
-&     dtset%nband,dtset%nkpt,nnonsc,dtset%nsppol,occ,&
+&     dtset%nband,dtset%nbdbuf,dtset%nkpt,nnonsc,dtset%nsppol,occ,&
 &     dtset%occopt,option,dtset%prteig,dtset%prtvol,resid,tolwf,&
 &     vxcavg,dtset%wtk)
-      ! End CP modified
    end if
 
 #if defined HAVE_NETCDF
@@ -2185,13 +2111,6 @@ end subroutine clnup1
 !!
 !! OUTPUT
 !!  (data written to unit iout)
-!!
-!! PARENTS
-!!      m_gstate
-!!
-!! CHILDREN
-!!      xderiveread,xderiverrecend,xderiverrecinit,xderivewrecend
-!!      xderivewrecinit,xderivewrite
 !!
 !! SOURCE
 
@@ -2352,13 +2271,6 @@ end subroutine prtxf
 !!
 !! OUTPUT
 !!  (only print)
-!!
-!! PARENTS
-!!      m_gstate
-!!
-!! CHILDREN
-!!      xderiveread,xderiverrecend,xderiverrecinit,xderivewrecend
-!!      xderivewrecinit,xderivewrite
 !!
 !! SOURCE
 
@@ -2584,13 +2496,6 @@ end subroutine clnup2
 !!  xred_old(3,natom)= at input, previous reduced dimensionless atomic coordinates
 !!                     at output, current xred is transferred to xred_old
 !!
-!! PARENTS
-!!      m_gstate
-!!
-!! CHILDREN
-!!      xderiveread,xderiverrecend,xderiverrecinit,xderivewrecend
-!!      xderivewrecinit,xderivewrite
-!!
 !! SOURCE
 
 subroutine pawuj_drive(scfcv_args, dtset,electronpositron,rhog,rhor,rprimd, xred,xred_old)
@@ -2628,9 +2533,6 @@ subroutine pawuj_drive(scfcv_args, dtset,electronpositron,rhog,rhor,rprimd, xred
  ABI_MALLOC(dtpawuj,(0:ndtpawuj))
  ABI_MALLOC(cgstart,(2,scfcv_args%mcg))
 
-!DEBUG
-!write(std_out,*)'pawuj_drive: before ini dtpawuj(:)%iuj ', dtpawuj(:)%iuj
-!END DEBUG
  call pawuj_ini(dtpawuj,ndtpawuj)
 
  cgstart=scfcv_args%cg
@@ -2648,10 +2550,6 @@ subroutine pawuj_drive(scfcv_args, dtset,electronpositron,rhog,rhor,rprimd, xred
 
  do iuj=1,2
    if (iuj>1) scfcv_args%cg(:,:)=cgstart(:,:)
-
-!  DEBUG
-!  write(std_out,*)'drive_pawuj before count dtpawuj(:)%iuj ', dtpawuj(:)%iuj
-!  END DEBUG
 
    dtpawuj(iuj*2-1)%iuj=iuj*2-1
 
@@ -2691,7 +2589,7 @@ end subroutine pawuj_drive
 !!  read/write xfhist
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2021 ABINIT group (MB)
+!! Copyright (C) 2003-2022 ABINIT group (MB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2716,13 +2614,6 @@ end subroutine pawuj_drive
 !!  wff2 = structured info for wavefunctions
 !!  xfhist(3,natom+4,2,ab_xfh%mxfh) = (x,f) history array, also including
 !!   rprim and stress
-!!
-!! PARENTS
-!!      m_gstate
-!!
-!! CHILDREN
-!!      xderiveread,xderiverrecend,xderiverrecinit,xderivewrecend
-!!      xderivewrecinit,xderivewrite
 !!
 !! SOURCE
 
@@ -2758,9 +2649,6 @@ subroutine outxfhist(ab_xfh,natom,option,wff2,ios)
 
 ! *************************************************************************
 
-!DEBUG
-!write(std_out,*)'outxfhist  : enter, option = ', option
-!ENDDEBUG
  ncid_hdr = wff2%unwff
  xfdim2 = natom+4
 

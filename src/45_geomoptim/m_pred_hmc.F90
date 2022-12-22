@@ -5,14 +5,10 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2017-2021 ABINIT group (SPr)
+!!  Copyright (C) 2017-2022 ABINIT group (SPr)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -62,13 +58,6 @@ contains
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_precpred_1geo
-!!
-!! CHILDREN
-!!      generate_random_velocities,hist2var,metropolis_check,pred_velverlet
-!!      var2hist,wrtout
 !!
 !! SOURCE
 

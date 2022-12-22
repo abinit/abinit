@@ -6,14 +6,10 @@
 !! Determine the space group from the number and type of symmetry operations
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2021 ABINIT group (RC)
+!!  Copyright (C) 2008-2022 ABINIT group (RC)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -64,11 +60,6 @@ contains
 !! TODO
 !! For the time being there are several groups where uncertainties still exist
 !! This will be solved in the very next ABINIT version
-!!
-!! PARENTS
-!!      m_symfind
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -502,11 +493,6 @@ end subroutine symlist_prim
 !! For the time being there are several groups where uncertainties still exist
 !! This will be solved in the very next ABINIT version
 !!
-!! PARENTS
-!!      m_symfind
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine symlist_bcc(additional_info,nsym,n_axes,spgroup)
@@ -687,11 +673,6 @@ end subroutine symlist_bcc
 !! For the time being there are several groups where uncertainties still exist
 !! This will be solved in the very next ABINIT version
 !!
-!! PARENTS
-!!      m_symfind
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine symlist_fcc(nsym,n_axes,spgroup)
@@ -799,11 +780,6 @@ end subroutine symlist_fcc
 !! TODO
 !! For the time being there are several groups where uncertainties still exist
 !! This will be solved in the very next ABINIT version
-!!
-!! PARENTS
-!!      m_symfind
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

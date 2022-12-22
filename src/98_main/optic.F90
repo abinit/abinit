@@ -7,7 +7,7 @@
 !! the linear and non-linear optical responses in the RPA.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2021 ABINIT group (SSharma,MVer,VRecoules,YG,NAP)
+!! Copyright (C) 2002-2022 ABINIT group (SSharma,MVer,VRecoules,YG,NAP)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,17 +29,6 @@
 !!  occopt==option for occupancies
 !!  broadening=smearing width (or temperature) in Hartree
 !!  maxomega=frequency windows for computations of sigma
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      abi_io_redirect,abimem_init,abinit_doctor,cryst%free,crystal_init
-!!      ebands_copy,ebands_free,ebands_init,ebands_update_occ,eprenorms_bcast
-!!      eprenorms_free,eprenorms_from_epnc,flush_unit,hdr%bcast,hdr%free
-!!      hdr_copy,hdr_ddk,hdr_ncread,herald,int2char4,linelop,linopt,mati3inv
-!!      matr3inv,metric,nctk_fort_or_ncfile,nlinopt,nonlinopt,pmat2cart
-!!      pmat_renorm,renorm_bst,sym2cart,timein,wfk0%close,wfk0%read_eigk
-!!      wfk_open_read,wfks,wrtout,xmpi_bcast,xmpi_init,xmpi_sum
 !!
 !! SOURCE
 

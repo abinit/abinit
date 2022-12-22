@@ -6,7 +6,7 @@
 !!  Several libPAW tools: message printing, error handling, string handling...
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2021 ABINIT group (MT, MG, ...)
+!!  Copyright (C) 2014-2022 ABINIT group (MT, MG, ...)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -105,12 +105,6 @@ CONTAINS !===========================================================
 !! NOTES
 !!  This routine comes directly from the WRTOUT routine delivered with ABINIT.
 !!
-!! PARENTS
-!!      m_libpaw_tools
-!!
-!! CHILDREN
-!!      flush,flush_
-!!
 !! SOURCE
 
 subroutine libpaw_wrtout(unit,msg,mode_paral)
@@ -176,12 +170,6 @@ end subroutine libpaw_wrtout
 !! NOTES
 !!  This routine comes directly from the WRTOUT_MYPROC routine delivered with ABINIT.
 !!
-!! PARENTS
-!!      m_libpaw_tools
-!!
-!! CHILDREN
-!!      flush,flush_
-!!
 !! SOURCE
 
 subroutine libpaw_wrtout_myproc(unit,msg)
@@ -242,12 +230,6 @@ end subroutine libpaw_wrtout_myproc
 !!
 !! NOTES
 !!  This routine comes directly from the WRITE_LINES routine delivered with ABINIT.
-!!
-!! PARENTS
-!!      m_libpaw_tools
-!!
-!! CHILDREN
-!!      flush,flush_
 !!
 !! SOURCE
 
@@ -339,12 +321,6 @@ end subroutine libpaw_write_lines
 !! NOTES
 !!  This routine comes directly from the MSG_HNDL routine delivered with ABINIT.
 !!
-!! PARENTS
-!!      m_libpaw_tools
-!!
-!! CHILDREN
-!!      flush,flush_
-!!
 !! SOURCE
 
 subroutine libpaw_msg_hndl(msg,level,mode_paral,file,line)
@@ -414,12 +390,6 @@ end subroutine libpaw_msg_hndl
 !! NOTES
 !!  This routine comes directly from the SPECIALMSG_GETCOUNT routine delivered with ABINIT.
 !!
-!! PARENTS
-!!      abinit
-!!
-!! CHILDREN
-!!      flush,flush_
-!!
 !! SOURCE
 
 subroutine libpaw_spmsg_getcount(ncomment,nwarning,nexit)
@@ -455,12 +425,6 @@ end subroutine libpaw_spmsg_getcount
 !!
 !! NOTES
 !!  This routine comes directly from the SPECIALMSG_MPISUM routine delivered with ABINIT.
-!!
-!! PARENTS
-!!      m_gstateimg
-!!
-!! CHILDREN
-!!      flush,flush_
 !!
 !! SOURCE
 
@@ -500,12 +464,6 @@ end subroutine libpaw_spmsg_mpisum
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_driver,m_io_redirect,m_memeval,m_mpi_setup,m_mpinfo
-!!
-!! CHILDREN
-!!      flush,flush_
-!!
 !! SOURCE
 
 subroutine libpaw_write_comm_set(new_write_comm)
@@ -536,12 +494,6 @@ end subroutine libpaw_write_comm_set
 !!            True: the log file is filled; False: no the log file
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_argparse,m_dtfil
-!!
-!! CHILDREN
-!!      flush,flush_
 !!
 !! SOURCE
 
@@ -576,11 +528,6 @@ end subroutine libpaw_log_flag_set
 !!
 !! NOTES
 !!  This routine is usually interfaced with the macros defined in libpaw.h
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      flush,flush_
 !!
 !! SOURCE
 
@@ -649,12 +596,6 @@ end subroutine libpaw_netcdf_check
 !!  This routine comes directly from the LEAVE_NEW routine delivered with ABINIT.
 !!  By default, it uses "call exit(1)", that is not completely portable.
 !!
-!! PARENTS
-!!      m_libpaw_tools
-!!
-!! CHILDREN
-!!      flush,flush_
-!!
 !! SOURCE
 
 subroutine libpaw_leave(mode_paral,exit_status)
@@ -701,12 +642,6 @@ end subroutine libpaw_leave
 !!
 !! NOTES
 !!  This routine comes directly from the DIE routine delivered with ABINIT.
-!!
-!! PARENTS
-!!      m_libpaw_tools
-!!
-!! CHILDREN
-!!      flush,flush_
 !!
 !! SOURCE
 
@@ -755,12 +690,6 @@ end subroutine libpaw_die
 !!  filename= Name of the file.
 !!  string= Input string.
 !!
-!! PARENTS
-!!      m_libpaw_tools
-!!
-!! CHILDREN
-!!      flush,flush_
-!!
 !! SOURCE
 
 subroutine libpaw_lock_and_write(filename,string)
@@ -805,10 +734,6 @@ end subroutine libpaw_lock_and_write
 !!  Raises:
 !!   -1 if no logical unit is free (!)
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 integer function libpaw_get_free_unit()
@@ -852,12 +777,6 @@ end function libpaw_get_free_unit
 !!
 !! NOTES
 !!  This routine comes directly from the FLUSH_UNIT routine delivered with ABINIT.
-!!
-!! PARENTS
-!!      m_pawrhoij
-!!
-!! CHILDREN
-!!      flush,flush_
 !!
 !! SOURCE
 

@@ -7,12 +7,10 @@
 !!  Tools for the computiation of electronic PJDOSes
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2021 ABINIT group (MVer, XG, SM, MT, BAmadon, MG, MB)
+!!  Copyright (C) 2008-2022 ABINIT group (MVer, XG, SM, MT, BAmadon, MG, MB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -169,8 +167,6 @@ contains  !============================================================
 !!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
 !!  pawtab(ntypat*usepaw) <type(pawtab_type)>=paw tabulated starting data
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 type(epjdos_t) function epjdos_new(dtset, psps, pawtab) result(new)
@@ -280,11 +276,6 @@ end function epjdos_new
 !! FUNCTION
 !!  deallocate memory
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      pawcprj_alloc,pawcprj_free,simp_gen,timab,xmpi_sum
-!!
 !! SOURCE
 
 subroutine epjdos_free(self)
@@ -338,12 +329,6 @@ end subroutine epjdos_free
 !!
 !! OUTPUT
 !!  (no explicit output)
-!!
-!! PARENTS
-!!      m_outscfcv
-!!
-!! CHILDREN
-!!      pawcprj_alloc,pawcprj_free,simp_gen,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -907,12 +892,6 @@ end subroutine dos_calcnwrite
 !!    because the caller can easily call the routine inside a loop over spinors and then sum the
 !!    different contributions outside the loop thus reducing the number of MPI calls.
 !!
-!! PARENTS
-!!      m_cut3d,m_epjdos
-!!
-!! CHILDREN
-!!      pawcprj_alloc,pawcprj_free,simp_gen,timab,xmpi_sum
-!!
 !! SOURCE
 
 subroutine recip_ylm (bess_fit, cg_1band, istwfk, mpi_enreg, nradint, nradintmax, mlang,&
@@ -1265,12 +1244,6 @@ end subroutine recip_ylm
 !! WARNING
 !!  cg should not be modified by fourwf.
 !!
-!! PARENTS
-!!      m_cut3d
-!!
-!! CHILDREN
-!!      pawcprj_alloc,pawcprj_free,simp_gen,timab,xmpi_sum
-!!
 !! SOURCE
 
 subroutine dens_in_sph(cmax,cg,gmet,istwfk,kg_k,natom,ngfft,mpi_enreg,npw_k,&
@@ -1459,12 +1432,6 @@ end subroutine dens_in_sph
 !! OUTPUT
 !!  sphfofg(2,nfft)=convoluted function, in reciprocal space
 !!
-!! PARENTS
-!!      m_epjdos
-!!
-!! CHILDREN
-!!      pawcprj_alloc,pawcprj_free,simp_gen,timab,xmpi_sum
-!!
 !! SOURCE
 
 subroutine sphericaldens(fofg,gnorm,nfft,rmax,sphfofg)
@@ -1526,12 +1493,6 @@ end subroutine sphericaldens
 !!
 !! NOTES
 !!  This routine should be called by master only
-!!
-!! PARENTS
-!!      m_outscfcv
-!!
-!! CHILDREN
-!!      pawcprj_alloc,pawcprj_free,simp_gen,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1760,12 +1721,6 @@ end subroutine prtfatbands
 !! OUTPUT
 !!  Only writing
 !!
-!! PARENTS
-!!      m_outscfcv
-!!
-!! CHILDREN
-!!      pawcprj_alloc,pawcprj_free,simp_gen,timab,xmpi_sum
-!!
 !! SOURCE
 
 subroutine fatbands_ncwrite(dos, crystal, ebands, hdr, dtset, psps, pawtab, ncid)
@@ -1950,12 +1905,6 @@ end subroutine fatbands_ncwrite
 !!                                  2 Im[u_k(G) e^{i(k+G).R_atom}]  if L = 2n + 1
 !!
 !!  where the sum over G is done on the reduced G-sphere and w(G) = 1/2 if G=G0 else 1.
-!!
-!! PARENTS
-!!      m_outscfcv
-!!
-!! CHILDREN
-!!      pawcprj_alloc,pawcprj_free,simp_gen,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -2477,12 +2426,6 @@ end subroutine partial_dos_fractions
 !!  == if prtdosm==1
 !!  dos%fractions_m(ikpt,iband,isppol,ndosfraction*mbesslang*prtdosm) =
 !!              m discretization of partial DOS fractions
-!!
-!! PARENTS
-!!      m_outscfcv
-!!
-!! CHILDREN
-!!      pawcprj_alloc,pawcprj_free,simp_gen,timab,xmpi_sum
 !!
 !! SOURCE
 

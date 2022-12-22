@@ -5,14 +5,10 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2021 ABINIT group (XG, DC, GMR)
+!!  Copyright (C) 2008-2022 ABINIT group (XG, DC, GMR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -95,12 +91,6 @@ contains
 !! FUNCTION
 !!  Initialize the object
 !!
-!! PARENTS
-!!      m_ab7_mixing
-!!
-!! CHILDREN
-!!      dotprodm_vn
-!!
 !! SOURCE
 
 subroutine init_(mix)
@@ -132,12 +122,6 @@ end subroutine init_
 !!
 !! FUNCTION
 !!  Nullify the pointers
-!!
-!! PARENTS
-!!      m_ab7_mixing
-!!
-!! CHILDREN
-!!      dotprodm_vn
 !!
 !! SOURCE
 
@@ -171,12 +155,6 @@ end subroutine nullify_
 !! OUTPUT
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_dfpt_scfcv,m_scfcv_core
-!!
-!! CHILDREN
-!!      dotprodm_vn
 !!
 !! SOURCE
 
@@ -363,12 +341,6 @@ end subroutine ab7_mixing_new
 !! NOTES
 !!  Obsolete?
 !!
-!! PARENTS
-!!      m_dfpt_scfcv,m_scfcv_core
-!!
-!! CHILDREN
-!!      dotprodm_vn
-!!
 !! SOURCE
 
 subroutine ab7_mixing_use_disk_cache(mix, fnametmp_fft)
@@ -404,12 +376,6 @@ end subroutine ab7_mixing_use_disk_cache
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_newrho,m_newvtr
-!!
-!! CHILDREN
-!!      dotprodm_vn
-!!
 !! SOURCE
 
 subroutine ab7_mixing_use_moving_atoms(mix, natom, xred, dtn_pc)
@@ -444,12 +410,6 @@ end subroutine ab7_mixing_use_moving_atoms
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_dfpt_scfcv,m_newrho,m_newvtr
-!!
-!! CHILDREN
-!!      dotprodm_vn
 !!
 !! SOURCE
 subroutine ab7_mixing_copy_current_step(mix, arr_resid, errid, errmess, &
@@ -519,12 +479,6 @@ end subroutine ab7_mixing_copy_current_step
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_dfpt_scfcv,m_newrho,m_newvtr
-!!
-!! CHILDREN
-!!      dotprodm_vn
 !!
 !! SOURCE
 
@@ -603,12 +557,6 @@ subroutine ab7_mixing_eval_allocate(mix, istep)
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_dfpt_scfcv,m_newrho,m_newvtr
-!!
-!! CHILDREN
-!!      dotprodm_vn
-!!
 !! SOURCE
 
  subroutine ab7_mixing_eval_deallocate(mix)
@@ -669,12 +617,6 @@ end subroutine ab7_mixing_eval_deallocate
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_dfpt_scfcv,m_newrho,m_newvtr
-!!
-!! CHILDREN
-!!      dotprodm_vn
 !!
 !! SOURCE
 
@@ -833,12 +775,6 @@ end subroutine ab7_mixing_eval
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_dfpt_scfcv,m_scfcv_core
-!!
-!! CHILDREN
-!!      dotprodm_vn
-!!
 !! SOURCE
 
 subroutine ab7_mixing_deallocate(mix)
@@ -961,12 +897,6 @@ end subroutine ab7_mixing_deallocate
 !! TODO
 !! This routine is much too difficult to read ! Should be rewritten ...
 !! Maybe make separate subroutines for line search and CG step ?!
-!!
-!! PARENTS
-!!      m_ab7_mixing
-!!
-!! CHILDREN
-!!      dotprodm_vn
 !!
 !! SOURCE
 
@@ -1762,12 +1692,6 @@ end subroutine scfcge
 !!  vrespc(nfft,nspden)=the input preconditioned residual potential
 !!  work(nfft,nspden,2)=work space
 !!
-!! PARENTS
-!!      m_ab7_mixing
-!!
-!! CHILDREN
-!!      dotprodm_vn
-!!
 !! SOURCE
 
 subroutine scfeig(istep,nfft,nspden,vrespc,vtrial,vtrial0,work,errid,errmess)
@@ -1952,12 +1876,6 @@ end subroutine scfeig
 !!    vpaw(npawmix*usepaw)=at input, the aug. occupancies (rhoij) that gave
 !!                               the input preconditioned residual potential
 !!                           at output, it is the new aug. occupancies.
-!!
-!! PARENTS
-!!      m_ab7_mixing
-!!
-!! CHILDREN
-!!      dotprodm_vn
 !!
 !! SOURCE
 
@@ -2334,12 +2252,6 @@ end subroutine scfopt
 !!         1 if negative second derivative
 !!         2 if some other problem
 !!
-!! PARENTS
-!!      m_ab7_mixing
-!!
-!! CHILDREN
-!!      dotprodm_vn
-!!
 !! SOURCE
 
 subroutine findminscf(choice,dedv_1,dedv_2,dedv_predict,&
@@ -2478,12 +2390,6 @@ end subroutine findminscf
 !!   cplex=2:
 !!     opt_storage=0: V are stored as : V^11, V^22, V^12, i.V^21 (complex)
 !!     opt_storage=1: V are stored as : V, B_x, B_y, B_z         (complex)
-!!
-!! PARENTS
-!!      m_ab7_mixing
-!!
-!! CHILDREN
-!!      dotprodm_vn
 !!
 !! SOURCE
 
@@ -2653,12 +2559,6 @@ end subroutine dotprodm_v
 !!   cplex=2:
 !!     V are stored as : V^11, V^22, V^12, i.V^21 (complex)
 !!     N are stored as : n, m_x, m_y, mZ          (complex)
-!!
-!! PARENTS
-!!      m_ab7_mixing
-!!
-!! CHILDREN
-!!      dotprodm_vn
 !!
 !! SOURCE
 
@@ -2942,12 +2842,6 @@ end subroutine dotprodm_vn
 !! OUTPUT
 !!  norm2(mult)= value of the square of the norm of the different potentials
 !!
-!! PARENTS
-!!      m_ab7_mixing
-!!
-!! CHILDREN
-!!      dotprodm_vn
-!!
 !! SOURCE
 
 subroutine sqnormm_v(cplex,index,mpicomm, mpi_summarize,mult,nfft,norm2,npot,nspden,opt_storage,potarr)
@@ -3062,12 +2956,6 @@ end subroutine sqnormm_v
 !!
 !! NOTES
 !! Should be OpenMP parallelized
-!!
-!! PARENTS
-!!      m_ab7_mixing
-!!
-!! CHILDREN
-!!      dotprodm_vn
 !!
 !! SOURCE
 

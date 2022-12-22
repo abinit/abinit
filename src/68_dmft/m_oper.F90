@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2021 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2022 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -13,10 +13,6 @@
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -119,13 +115,6 @@ CONTAINS  !=====================================================================
 !! OUTPUTS
 !! oper  = operator of type oper_type
 !!
-!! PARENTS
-!!      m_datafordmft,m_forctqmc,m_green,m_hubbard_one,m_outscfcv,m_self
-!!      m_vtorho
-!!
-!! CHILDREN
-!!      prod_matlu
-!!
 !! SOURCE
 
 subroutine init_oper(paw_dmft,oper,nkpt,wtk,opt_ksloc)
@@ -219,13 +208,6 @@ end subroutine init_oper
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_datafordmft,m_forctqmc,m_green,m_hubbard_one,m_outscfcv,m_self
-!!      m_vtorho
-!!
-!! CHILDREN
-!!      prod_matlu
-!!
 !! SOURCE
 
 subroutine destroy_oper(oper)
@@ -273,12 +255,6 @@ end subroutine destroy_oper
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_datafordmft,m_green
-!!
-!! CHILDREN
-!!      prod_matlu
 !!
 !! SOURCE
 
@@ -336,12 +312,6 @@ end subroutine copy_oper
 !!         9
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_green,m_self
-!!
-!! CHILDREN
-!!      prod_matlu
 !!
 !! SOURCE
 
@@ -480,12 +450,6 @@ end subroutine print_oper
 !! OUTPUT
 !!  oper <type(oper_type)>= operator inverted
 !!
-!! PARENTS
-!!      m_dmft,m_forctqmc,m_green
-!!
-!! CHILDREN
-!!      prod_matlu
-!!
 !! SOURCE
 
 subroutine inverse_oper(oper,option,prtopt,procb,iproc)
@@ -567,12 +531,6 @@ end subroutine inverse_oper
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_datafordmft,m_green
-!!
-!! CHILDREN
-!!      prod_matlu
-!!
 !! SOURCE
 
 subroutine loc_oper(oper,paw_dmft,option,jkpt,procb,iproc)
@@ -617,10 +575,10 @@ subroutine loc_oper(oper,paw_dmft,option,jkpt,procb,iproc)
  mbandc=oper%mbandc
  nspinor=oper%nspinor
 
-
  do iatom=1,natom
    oper%matlu(iatom)%mat=czero
  enddo
+
  do isppol=1,nsppol
   do ikpt=1,nkpt
    ikpt1=ikpt
@@ -680,12 +638,6 @@ end subroutine loc_oper
 !!  psichi=<chi|psi> !
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_green
-!!
-!! CHILDREN
-!!      prod_matlu
 !!
 !! SOURCE
 
@@ -796,12 +748,6 @@ end subroutine upfold_oper
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_datafordmft
-!!
-!! CHILDREN
-!!      prod_matlu
-!!
 !! SOURCE
 
 subroutine identity_oper(oper,option)
@@ -882,12 +828,6 @@ end subroutine identity_oper
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_datafordmft,m_dmft
-!!
-!! CHILDREN
-!!      prod_matlu
-!!
 !! SOURCE
 
 subroutine diff_oper(char1,char2,occup1,occup2,option,toldiff)
@@ -954,12 +894,6 @@ end subroutine diff_oper
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_dmft,m_green
-!!
-!! CHILDREN
-!!      prod_matlu
-!!
 !! SOURCE
 
 subroutine trace_oper(oper,trace_ks,trace_loc,opt_ksloc)
@@ -1020,12 +954,6 @@ end subroutine trace_oper
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_datafordmft
-!!
-!! CHILDREN
-!!      prod_matlu
 !!
 !! SOURCE
 

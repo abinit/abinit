@@ -6,7 +6,7 @@
 !!  XC+PAW related operations
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (MT, FJ, TR, GJ, TD)
+!!  Copyright (C) 2013-2022 ABINIT group (MT, FJ, TR, GJ, TD)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -128,12 +128,6 @@ CONTAINS !===========================================================
 !!         [4] M.J. Puska, A.P. Seitsonen and R.M. Nieminen, Phys. Rev. B 52, 10947 (1994) [[cite:Puska1994]].
 !!         [5] B. Barbiellini, M.J. Puska, T. Torsti and R.M.Nieminen, Phys. Rev. B 51, 7341 (1995) [[cite:Barbiellini1995]]
 !!
-!! PARENTS
-!!      m_pawxc
-!!
-!! CHILDREN
-!!      rotate_back_mag_dfpt
-!!
 !! SOURCE
 
 subroutine pawxc_xcpositron_wrapper(fnxc,grhoe2,ixcpositron,ngr,npt,posdensity0_limit,&
@@ -171,12 +165,6 @@ contains
 !! FUNCTION
 !!  ABINIT version of electron-positron correlation
 !!
-!! PARENTS
-!!      m_pawxc
-!!
-!! CHILDREN
-!!      rotate_back_mag_dfpt
-!!
 !! SOURCE
 
 subroutine pawxc_xcpositron_abinit()
@@ -207,12 +195,6 @@ end subroutine pawxc_xcpositron_abinit
 !! FUNCTION
 !!  Local version of electron-positron correlation (to use outside ABINIT)
 !!  NOT AVAILABLE
-!!
-!! PARENTS
-!!      m_pawxc
-!!
-!! CHILDREN
-!!      rotate_back_mag_dfpt
 !!
 !! SOURCE
 
@@ -263,12 +245,6 @@ end subroutine pawxc_xcpositron_wrapper
 !!  [ndvxc]= size of the array dvxc(npts,ndvxc) (second derivatives of Exc wrt to density and gradient)
 !!  [nd2vxc]= size of the array d2vxc(npts,nd2vxc) (third derivatives of Exc wrt density)
 !!
-!! PARENTS
-!!      m_pawxc
-!!
-!! CHILDREN
-!!      rotate_back_mag_dfpt
-!!
 !! SOURCE
 
 subroutine pawxc_size_dvxc_wrapper(ixc,order,nspden,&
@@ -313,12 +289,6 @@ contains
 !!
 !! FUNCTION
 !!  Local version of size_dvxc routine (to use outside ABINIT)
-!!
-!! PARENTS
-!!      m_pawxc
-!!
-!! CHILDREN
-!!      rotate_back_mag_dfpt
 !!
 !! SOURCE
 
@@ -453,12 +423,6 @@ end subroutine pawxc_size_dvxc_wrapper
 !!    rhonow(:,:,2:4) has been multiplied by the proper factor,
 !!    described above.
 !!
-!! PARENTS
-!!      m_pawxc
-!!
-!! CHILDREN
-!!      rotate_back_mag_dfpt
-!!
 !! SOURCE
 
 subroutine pawxc_xcmult_wrapper(depsxc,nfft,ngrad,nspden,nspgrad,rhonow)
@@ -489,12 +453,6 @@ contains
 !!
 !! FUNCTION
 !!  Local version of xcmult routine (to use outside ABINIT)
-!!
-!! PARENTS
-!!      m_pawxc
-!!
-!! CHILDREN
-!!      rotate_back_mag_dfpt
 !!
 !! SOURCE
 
@@ -563,12 +521,6 @@ end subroutine pawxc_xcmult_wrapper
 !!     either on the unshifted grid (if ishift==0,
 !!     then equal to rhor),or on the shifted grid
 !!
-!! PARENTS
-!!      m_pawxc
-!!
-!! CHILDREN
-!!      rotate_back_mag_dfpt
-!!
 !! SOURCE
 
 subroutine pawxc_mkdenpos_wrapper(iwarn,nfft,nspden,option,rhonow,xc_denpos)
@@ -600,12 +552,6 @@ contains
 !!
 !! FUNCTION
 !!  Local version of mkdenpos routine (to use outside ABINIT)
-!!
-!! PARENTS
-!!      m_pawxc
-!!
-!! CHILDREN
-!!      rotate_back_mag_dfpt
 !!
 !! SOURCE
 
@@ -920,14 +866,8 @@ end function pawxc_get_uselaplacian
 !!                          k3xc(:,3)=d3Exc/drho_up drho_dn drho_dn
 !!                          k3xc(:,4)=d3Exc/drho_dn drho_dn drho_dn
 !!
-!! PARENTS
-!!      m_paw_denpot,m_pawpsp
-!!
-!! CHILDREN
-!!      rotate_back_mag_dfpt
-!!
 !! SOURCE
-subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3xc,non_magnetic_xc,&
+subroutine pawxc(corexc,enxc,enxcdc,hyb_mixing,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3xc,non_magnetic_xc,&
 &                nrad,nspden,option,pawang,pawrad,rhor,usecore,usexcnhat,vxc,xclevel,xc_denpos,&
 &                coretau,taur,vxctau) ! optional arguments
 
@@ -935,7 +875,7 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
 !scalars
  integer,intent(in) :: ixc,lm_size,nkxc,nk3xc,nrad,nspden,option,usecore,usexcnhat,xclevel
  logical,intent(in) :: non_magnetic_xc
- real(dp),intent(in) :: xc_denpos
+ real(dp),intent(in) :: hyb_mixing,xc_denpos
  real(dp),intent(out) :: enxc,enxcdc
  type(pawang_type),intent(in) :: pawang
  type(pawrad_type),intent(in) :: pawrad
@@ -992,8 +932,8 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
    msg='nkxc must be non-zero if nk3xc is!'
    LIBPAW_ERROR(msg)
  end if
- if(nspden==4.and.xclevel==2) then
-   msg='GGA/mGGA for nspden=4 not implemented!'
+ if(nspden==4.and.xclevel==2.and..not.non_magnetic_xc) then
+   msg='GGA/mGGA for nspden=4 not fully implemented! (only works if usepawu=4 or pawxcdev/=0)'
    LIBPAW_ERROR(msg)
  end if
  if(pawang%angl_size==0) then
@@ -1317,14 +1257,19 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
      else if (nspden==4) then
        mag_ => rhonow(1:nrad,2:4,1)
        mag(1:nrad,ipts,1:3)=mag_(1:nrad,1:3)
-       call pawxc_rotate_mag(rhonow(:,:,1),rho_updn,mag_,nrad)
+       call pawxc_rotate_mag(rhonow(:,:,1),rho_updn,mag_,nrad) ! Note : gradients are not computed there
+       if (non_magnetic_xc.and.xclevel==2) then ! In this case grho2_updn is easy to compute
+         grho2_updn(1:nrad,1)=quarter*(rhonow(1:nrad,1,2)**2+rhonow(1:nrad,1,3)**2+rhonow(1:nrad,1,4)**2)
+         grho2_updn(1:nrad,2)=grho2_updn(1:nrad,1)
+         grho2_updn(1:nrad,3)=rhonow(1:nrad,1,2)**2+rhonow(1:nrad,1,3)**2+rhonow(1:nrad,1,4)**2
+       end if
      end if
 
 !    Make the density positive everywhere (but do not care about gradients)
      call pawxc_mkdenpos_wrapper(iwarn,nrad,nspden_updn,0,rho_updn,xc_denpos)
 
 !    Call to main XC driver
-     call pawxc_drivexc_wrapper(ixc,order,nrad,nspden_updn,&
+     call pawxc_drivexc_wrapper(hyb_mixing,ixc,order,nrad,nspden_updn,&
 &          usegradient,uselaplacian,usekden,rho_updn,exci,vxci,&
 &          nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc,&
 &          grho2=grho2_updn,vxcgrho=vxci_grho,&
@@ -1808,12 +1753,6 @@ end subroutine pawxc
 !! SIDE EFFECTS
 !!  electronpositron <type(electronpositron_type)>=quantities for the electron-positron annihilation
 !!
-!! PARENTS
-!!      m_paw_denpot
-!!
-!! CHILDREN
-!!      rotate_back_mag_dfpt
-!!
 !! SOURCE
 
 subroutine pawxcpositron(calctype,corexc,enxc,enxcdc,ixcpositron,lm_size,lmselect,lmselect_ep,&
@@ -2117,12 +2056,6 @@ end subroutine pawxcpositron
 !!       kxc(:,19)=gradz(rho_dn)
 !!    if nspden==4:
 !!       kxc(:,20:22)= (m_x, m_y, m_z) (magnetization)
-!!
-!! PARENTS
-!!      m_paw_denpot,m_paw_dfpt
-!!
-!! CHILDREN
-!!      rotate_back_mag_dfpt
 !!
 !! SOURCE
 
@@ -2972,19 +2905,14 @@ end subroutine pawxc_dfpt
 !!                  kxc(:,2)=d2Exc/drho_up drho_dn
 !!                  kxc(:,3)=d2Exc/drho_dn drho_dn
 !!
-!! PARENTS
-!!      m_pawxc
-!!
-!! CHILDREN
-!!      rotate_back_mag_dfpt
-!!
 !! SOURCE
 
- subroutine pawxcsph(exc,exexch,ixc,kxc,nkxc,nrad,nspden,pawrad,rho_updn,vxc,xclevel)
+ subroutine pawxcsph(exc,exexch,hyb_mixing,ixc,kxc,nkxc,nrad,nspden,pawrad,rho_updn,vxc,xclevel)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: exexch,ixc,nkxc,nrad,nspden,xclevel
+ real(dp),intent(in) :: hyb_mixing
  type(pawrad_type),intent(in) :: pawrad
 !arrays
  real(dp),intent(in) :: rho_updn(nrad,nspden)
@@ -3063,7 +2991,7 @@ end subroutine pawxc_dfpt
  LIBPAW_ALLOCATE(dvxcdgr,(nrad,nvxcdgr))
 
 !Call to main XC driver
- call pawxc_drivexc_wrapper(ixc,order,nrad,nspden,&
+ call pawxc_drivexc_wrapper(hyb_mixing,ixc,order,nrad,nspden,&
 &          usegradient,uselaplacian,usekden,rho_updn,exc,vxc,&
 &          nvxcdgr,0,0,ndvxc,0,grho2=grho2,vxcgrho=dvxcdgr,&
 &          dvxc=dvxci,d2vxc=d2vxc,exexch=exexch)
@@ -3244,11 +3172,6 @@ end subroutine pawxcsph
 !! OUTPUT
 !!  vxc1((nrad,nspden)= XC 1st-order potential
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      rotate_back_mag_dfpt
-!!
 !! SOURCE
 
 
@@ -3269,6 +3192,7 @@ subroutine pawxcsph_dfpt(cplex_den,cplex_vxc,ixc,nrad,nspden,pawrad,rho_updn,rho
 !real(dp) :: coeff_grho_corr,coeff_grho_dn,coeff_grho_up,fact
 !real(dp) :: grho_grho1,grho_grho1_dn,grho_grho1_up
  character(len=500) :: msg
+ real(dp),parameter :: hyb_mixing_ = 0.0_dp
 !arrays
  integer,parameter :: ikxc(4)=(/1,2,2,3/),irho(4)=(/1,2,1,2/)
  real(dp),allocatable :: dff(:),dgg(:),dvxcdgr(:,:),dvxc(:,:),exc(:),ff(:),gg(:)
@@ -3358,7 +3282,7 @@ subroutine pawxcsph_dfpt(cplex_den,cplex_vxc,ixc,nrad,nspden,pawrad,rho_updn,rho
  LIBPAW_ALLOCATE(dvxcdgr,(nrad,nvxcdgr))
 
 !Call to main XC driver
- call pawxc_drivexc_wrapper(ixc,order,nrad,nspden,usegradient,0,0,&
+ call pawxc_drivexc_wrapper(hyb_mixing_,ixc,order,nrad,nspden,usegradient,0,0,&
 &             rho_updn,exc,vxc,nvxcdgr,0,0,ndvxc,0,&
 &             grho2=grho2,vxcgrho=dvxcdgr,dvxc=dvxc)
 
@@ -3555,12 +3479,6 @@ end subroutine pawxcsph_dfpt
 !!  vxce(nrad)= electron-positron XC potential for the electron
 !!  vxcp(nrad)= electron-positron XC potential for the positron
 !!
-!! PARENTS
-!!      m_pawxc
-!!
-!! CHILDREN
-!!      rotate_back_mag_dfpt
-!!
 !! SOURCE
 
  subroutine pawxcsphpositron(calctype,fxc,ixcpositron,nrad,pawrad,posdensity0_limit,rho,rho_ep,vxce,vxcp)
@@ -3675,12 +3593,6 @@ end subroutine pawxcsphpositron
 !!  sum1(cplexsum*nrad,nsums)=first order sums
 !!  === if option>=2
 !!    sum2(cplexsum*nrad,lm_size,nsums)=second order sums
-!!
-!! PARENTS
-!!      m_pawxc,m_positron
-!!
-!! CHILDREN
-!!      rotate_back_mag_dfpt
 !!
 !! SOURCE
 
@@ -4057,15 +3969,9 @@ end subroutine pawxcsphpositron
 !!    if nspden==4:
 !!       kxc(:,20:22)= (m_x, m_y, m_z) (magnetization)
 !!
-!! PARENTS
-!!      m_paw_denpot,m_pawpsp
-!!
-!! CHILDREN
-!!      rotate_back_mag_dfpt
-!!
 !! SOURCE
 
- subroutine pawxcm(corexc,enxc,enxcdc,exexch,ixc,kxc,lm_size,lmselect,nhat,nkxc,&
+ subroutine pawxcm(corexc,enxc,enxcdc,exexch,hyb_mixing,ixc,kxc,lm_size,lmselect,nhat,nkxc,&
 &                  non_magnetic_xc,nrad,nspden,option,pawang,pawrad,pawxcdev,rhor,&
 &                  usecore,usexcnhat,vxc,xclevel,xc_denpos)
 
@@ -4074,7 +3980,7 @@ end subroutine pawxcsphpositron
  integer,intent(in) :: exexch,ixc,lm_size,nkxc,nrad,nspden,option,pawxcdev,usecore
  integer,intent(in) :: usexcnhat,xclevel
  logical,intent(in) :: non_magnetic_xc
- real(dp),intent(in) :: xc_denpos
+ real(dp),intent(in) :: hyb_mixing,xc_denpos
  real(dp),intent(out) :: enxc,enxcdc
  type(pawang_type),intent(in) :: pawang
  type(pawrad_type),intent(in) :: pawrad
@@ -4224,7 +4130,7 @@ end subroutine pawxcsphpositron
  LIBPAW_ALLOCATE(exci,(nrad))
  LIBPAW_ALLOCATE(vxci,(nrad,nspden_updn))
  LIBPAW_ALLOCATE(kxci,(nrad,nkxc))
- call pawxcsph(exci,exexch,ixc,kxci,nkxc,nrad,nspden_updn,pawrad,rhosph,vxci,xclevel)
+ call pawxcsph(exci,exexch,hyb_mixing,ixc,kxci,nkxc,nrad,nspden_updn,pawrad,rhosph,vxci,xclevel)
 
 !----------------------------------------------------------------------
 !----- Compute numerical derivatives of Vxc,Kxc (by finite diff. scheme)
@@ -4240,13 +4146,13 @@ end subroutine pawxcsphpositron
    LIBPAW_ALLOCATE(vxc1,(nrad,nspden_updn))
    LIBPAW_ALLOCATE(kxc1,(nrad,nkxc))
    rho_(:,1)=(one+delta)*rhosph(:,1)
-   call pawxcsph(exc_,exexch,ixc,kxc1,nkxc,nrad,nspden_updn,pawrad,rho_,vxc1,xclevel)
+   call pawxcsph(exc_,exexch,hyb_mixing,ixc,kxc1,nkxc,nrad,nspden_updn,pawrad,rho_,vxc1,xclevel)
 
 !  Compute Exc, Vxc for rho-delta_rho
    LIBPAW_ALLOCATE(vxc2,(nrad,nspden_updn))
    LIBPAW_ALLOCATE(kxc2,(nrad,nkxc))
    rho_(:,1)=(one-delta)*rhosph(:,1)
-   call pawxcsph(exc_,exexch,ixc,kxc2,nkxc,nrad,nspden_updn,pawrad,rho_,vxc2,xclevel)
+   call pawxcsph(exc_,exexch,hyb_mixing,ixc,kxc2,nkxc,nrad,nspden_updn,pawrad,rho_,vxc2,xclevel)
 
 !  Additional terms for spin-polarized systems
    if (nspden_updn==2) then
@@ -4256,13 +4162,13 @@ end subroutine pawxcsphpositron
      LIBPAW_ALLOCATE(vxcdn1,(nrad,nspden_updn))
      LIBPAW_ALLOCATE(kxcdn1,(nrad,nkxc))
      rho_(:,2)=(one+delta)*rhosph(:,2)
-     call pawxcsph(exc_,exexch,ixc,kxcdn1,nkxc,nrad,nspden_updn,pawrad,rho_,vxcdn1,xclevel)
+     call pawxcsph(exc_,exexch,hyb_mixing,ixc,kxcdn1,nkxc,nrad,nspden_updn,pawrad,rho_,vxcdn1,xclevel)
 
 !    Compute Exc, Vxc for rho-delta_rho_down
      LIBPAW_ALLOCATE(vxcdn2,(nrad,nspden_updn))
      LIBPAW_ALLOCATE(kxcdn2,(nrad,nkxc))
      rho_(:,2)=(one-delta)*rhosph(:,2)
-     call pawxcsph(exc_,exexch,ixc,kxcdn2,nkxc,nrad,nspden_updn,pawrad,rho_,vxcdn2,xclevel)
+     call pawxcsph(exc_,exexch,hyb_mixing,ixc,kxcdn2,nkxc,nrad,nspden_updn,pawrad,rho_,vxcdn2,xclevel)
 
    end if !nspden_updn==2
    LIBPAW_DEALLOCATE(exc_)
@@ -4849,12 +4755,6 @@ end subroutine pawxcsphpositron
 !!      Unused if option==2
 !!      Input  if option==3
 !!
-!! PARENTS
-!!      m_paw_denpot,m_paw_dfpt
-!!
-!! CHILDREN
-!!      rotate_back_mag_dfpt
-!!
 !! SOURCE
 
  subroutine pawxcm_dfpt(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselect,nhat1,&
@@ -5198,12 +5098,6 @@ end subroutine pawxcsphpositron
 !!       (spin up in 1st half and spin-down in 2nd half if nspden=2)
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_paw_denpot
-!!
-!! CHILDREN
-!!      rotate_back_mag_dfpt
 !!
 !! SOURCE
 
@@ -5699,12 +5593,6 @@ end subroutine pawxcmpositron
 !!    if nspden==4:
 !!       kxc(:,20:22)= (m_x, m_y, m_z) (magnetization)
 !!
-!! PARENTS
-!!      m_nonlinear,m_pawxc,m_respfn_driver
-!!
-!! CHILDREN
-!!      rotate_back_mag_dfpt
-!!
 !! SOURCE
 
  subroutine pawxc_get_nkxc(nkxc,nspden,xclevel)
@@ -5760,15 +5648,9 @@ end subroutine pawxcmpositron
 !! Probably use better interfaces of fortran 2003 to avoid
 !! numerous if/then sentences.
 !!
-!! PARENTS
-!!      m_pawxc
-!!
-!! CHILDREN
-!!      rotate_back_mag_dfpt
-!!
 !! SOURCE
 
- subroutine pawxc_drivexc_wrapper(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
+ subroutine pawxc_drivexc_wrapper(hyb_mixing,ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
 &          rho,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc, & ! mandatory arguments
 &          grho2,vxcgrho,lrho,vxclrho,tau,vxctau,dvxc,d2vxc, &      ! optional arguments
 &          exexch,el_temp,fxcT)                                     ! optional arguments
@@ -5777,12 +5659,13 @@ end subroutine pawxcmpositron
 !scalars
  integer,intent(in) :: ixc,ndvxc,nd2vxc,npts,nspden,nvxcgrho,nvxclrho,nvxctau,order
  integer,intent(in) :: usegradient,uselaplacian,usekden
+ real(dp),intent(in) :: hyb_mixing
 !arrays
  real(dp),intent(in) :: rho(npts,nspden)
  real(dp),intent(out) :: exc(npts),vxcrho(npts,nspden)
  integer,intent(in),optional :: exexch
  real(dp),intent(in),optional :: el_temp
- real(dp),intent(in),optional :: grho2(npts,(2*nspden)*usegradient)
+ real(dp),intent(in),optional :: grho2(npts,(2*nspden-1)*usegradient)
  real(dp),intent(in),optional :: lrho(npts,nspden*uselaplacian)
  real(dp),intent(in),optional :: tau(npts,nspden*usekden)
  real(dp),intent(out),optional:: dvxc(npts,ndvxc),d2vxc(npts,nd2vxc),fxcT(npts)
@@ -5792,6 +5675,7 @@ end subroutine pawxcmpositron
  character(len=100) :: msg
 
 ! *************************************************************************
+
 
 !One could add here a section for other codes (i.e. BigDFT, ...)
 #if defined HAVE_LIBPAW_ABINIT
@@ -5818,12 +5702,6 @@ contains
 !! FUNCTION
 !!  ABINIT version of XC driving routine
 !!
-!! PARENTS
-!!      m_pawxc
-!!
-!! CHILDREN
-!!      rotate_back_mag_dfpt
-!!
 !! SOURCE
 
 subroutine pawxc_drivexc_abinit()
@@ -5848,19 +5726,19 @@ subroutine pawxc_drivexc_abinit()
 &            grho2_updn=grho2,vxcgrho=vxcgrho,&
 &            lrho_updn=lrho,vxclrho=vxclrho,&
 &            tau_updn=tau,vxctau=vxctau,&
-&            dvxc=dvxc,d2vxc=d2vxc)
+&            dvxc=dvxc,d2vxc=d2vxc,hyb_mixing=hyb_mixing)
    else if (uselaplacian==1) then
      call drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
 &            rho,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc, &
 &            grho2_updn=grho2,vxcgrho=vxcgrho,&
 &            lrho_updn=lrho,vxclrho=vxclrho,&
-&            dvxc=dvxc,d2vxc=d2vxc)
+&            dvxc=dvxc,d2vxc=d2vxc,hyb_mixing=hyb_mixing)
    else if (usekden==1) then
      call drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
 &            rho,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc, &
 &            grho2_updn=grho2,vxcgrho=vxcgrho,&
 &            tau_updn=tau,vxctau=vxctau,&
-&            dvxc=dvxc,d2vxc=d2vxc)
+&            dvxc=dvxc,d2vxc=d2vxc,hyb_mixing=hyb_mixing)
    end if
  else if (usegradient==1) then
    if (present(exexch)) then
@@ -5868,17 +5746,17 @@ subroutine pawxc_drivexc_abinit()
 &            rho,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc, &
 &            grho2_updn=grho2,vxcgrho=vxcgrho,&
 &            dvxc=dvxc,d2vxc=d2vxc,&
-&            exexch=exexch)
+&            exexch=exexch,hyb_mixing=hyb_mixing)
    else
      call drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
 &            rho,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc, &
 &            grho2_updn=grho2,vxcgrho=vxcgrho,&
-&            dvxc=dvxc,d2vxc=d2vxc)
+&            dvxc=dvxc,d2vxc=d2vxc,hyb_mixing=hyb_mixing)
    end if
  else
    call drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
 &            rho,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc, &
-&            dvxc=dvxc,d2vxc=d2vxc)
+&            dvxc=dvxc,d2vxc=d2vxc,hyb_mixing=hyb_mixing)
  end if
 
 end subroutine pawxc_drivexc_abinit
@@ -5892,12 +5770,6 @@ end subroutine pawxc_drivexc_abinit
 !!
 !! FUNCTION
 !!  LibXC version of XC driving routine
-!!
-!! PARENTS
-!!      m_pawxc
-!!
-!! CHILDREN
-!!      rotate_back_mag_dfpt
 !!
 !! SOURCE
 
@@ -6015,12 +5887,6 @@ end subroutine pawxc_drivexc_wrapper
 !! OUTPUT
 !!  rho_out(vectsize,2)=output (projected, collinear) density
 !!  [mag_norm_out(vectsize)]= --optional-- norm of mag(:) at each point of the grid
-!! PARENTS
-!!      m_pawxc
-!!
-!! CHILDREN
-!!      rotate_back_mag_dfpt
-!!
 !! SOURCE
 
  subroutine pawxc_rotate_mag(rho_in,rho_out,mag,vectsize,mag_norm_out,rho_out_format)
@@ -6105,12 +5971,6 @@ end subroutine pawxc_rotate_mag
 !! OUTPUT
 !!  vxc_out(vectsize,4)=output non-collinear XC potential
 !!
-!! PARENTS
-!!      m_pawxc
-!!
-!! CHILDREN
-!!      rotate_back_mag_dfpt
-!!
 !! SOURCE
 
  subroutine pawxc_rotate_back_mag(vxc_in,vxc_out,mag,vectsize)
@@ -6177,12 +6037,6 @@ end subroutine pawxc_rotate_back_mag
 !!
 !! OUTPUT
 !!  vxc1_out(vectsize,4)=output 1st-order non-collinear XC potential
-!!
-!! PARENTS
-!!      m_pawxc
-!!
-!! CHILDREN
-!!      rotate_back_mag_dfpt
 !!
 !! SOURCE
 

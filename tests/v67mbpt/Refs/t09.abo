@@ -2,7 +2,7 @@
 .Version 9.3.1 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -381,6 +381,21 @@ meta: {optdriver: 4, gwcalctyp: 25, }
  R(3)=  7.5000000  7.5000000  0.0000000  G(3)=  0.0666667  0.0666667 -0.0666667
  Unit cell volume ucvol=  8.4375000E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+
+--- Pseudopotential description ------------------------------------------------
+- pspini: atom type   1  psp file is /home/bruneval/devel/abinit-develop/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
+- pspatm: opening atomic psp file    /home/bruneval/devel/abinit-develop/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
+-  Troullier-Martins psp for element  H         Thu Oct 27 17:28:54 EDT 1994
+-  1.00000   1.00000    940714                znucl, zion, pspdat
+    1    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
+    0   7.740  11.990    0   1.5855604        l,e99.0,e99.9,nproj,rcpsp
+   0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
+    0.00000000000000    0.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
+ Note: local psp for atom with Z=  1.0
+  pspatm : epsatm=    0.04198703
+         --- l  ekb(1:nproj) -->
+ pspatm: atomic psp has been read  and splines computed
+
 --------------------------------------------------------------------------------
 
  ==== K-mesh for the wavefunctions ====

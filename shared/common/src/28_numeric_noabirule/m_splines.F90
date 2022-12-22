@@ -6,14 +6,10 @@
 !!  This module contains routines for spline interpolation.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2010-2021 ABINIT group (YP, BAmadon)
+!!  Copyright (C) 2010-2022 ABINIT group (YP, BAmadon)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -82,11 +78,6 @@ contains
 !!        if ider=0, compute only the function (contained in fun)
 !!        if ider=1, compute the function (contained in fun) and its first derivative (in derfun)
 !!        if ider=2, compute only the second derivative of the function (in derfun)
-!!
-!! PARENTS
-!!      m_mkffnl,m_mklocl,m_occ,m_pawpwij,m_psptk
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -232,14 +223,6 @@ end subroutine splfit
 !! OUTPUT
 !!    Output, double precision YPP(N), the second derivatives of the cubic spline.
 !!    Work space, double precision DIAG(N) - should be removed ...
-!!
-!! PARENTS
-!!      m_a2ftr,m_bader,m_dens,m_entropyDMFT,m_mkrho,m_occ,m_outscfcv
-!!      m_paw_atomorb,m_paw_init,m_paw_mkrho,m_paw_slater,m_predict_string
-!!      m_psp1,m_psp5,m_psp6,m_psp8,m_psp9,m_psp_hgh,m_psptk,m_screening_driver
-!!      m_sigc,m_special_funcs,m_spin_current,m_splines,m_upf2abinit
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -466,11 +449,6 @@ end subroutine spline
 !! NOTES
 !!  Adapted from Numerical Recipes and libbci.
 !!
-!! PARENTS
-!!      m_xc_vdw
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine spline_bicubic(n1,n2,x1,x2,y,der1_x1,der1_x2,der2_x1x2,spl_c)
@@ -545,11 +523,6 @@ end subroutine spline_bicubic
 !! OUTPUT
 !!  splined_lo  = spline  (on the 2nd grid)
 !!
-!! PARENTS
-!!      m_green
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine spline_c( nomega_lo, nomega_li, omega_lo, omega_li, splined_li, tospline_lo)
@@ -603,11 +576,6 @@ end subroutine spline_c
 !!
 !! OUTPUT
 !!    Output, complex YPP(N), the second derivatives of the cubic spline.
-!!
-!! PARENTS
-!!      m_paw_dmft,m_splines
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -672,14 +640,6 @@ end subroutine spline_complex
 !!  yfit(nfit): function on output mesh
 !!  [ierr]=A non-zero value is used to signal that some points in xfit exceed xspline(nspline).
 !!    The input value is incremented by the number of such points.
-!!
-!! PARENTS
-!!      m_a2ftr,m_cut3d,m_entropyDMFT,m_epjdos,m_mkrho,m_outscfcv,m_paw_atomorb
-!!      m_paw_mkrho,m_paw_slater,m_predict_string,m_psp6,m_psptk
-!!      m_screening_driver,m_sigc,m_special_funcs,m_spin_current,m_splines
-!!      m_wvl_rho
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -760,11 +720,6 @@ end subroutine splint
 !! OUTPUT
 !!  yfit(nfit): complex function on output mesh
 !!
-!! PARENTS
-!!      m_paw_dmft,m_splines
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine splint_complex (nspline,xspline,yspline,ysplin2,nfit,xfit,yfit)
@@ -824,11 +779,6 @@ end subroutine splint_complex
 !!
 !! OUTPUT
 !!  integral= integral of the input function
-!!
-!! PARENTS
-!!      test_spline_integrate
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -905,10 +855,6 @@ end subroutine spline_integrate
 !!
 !! NOTES
 !!   This routine is deprecated and will be replaced by the other routines of this module.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

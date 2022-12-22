@@ -5,14 +5,10 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2021 ABINIT group (MVeithen)
+!!  Copyright (C) 1999-2022 ABINIT group (MVeithen)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -95,12 +91,6 @@ contains
 !!   are symmetrized before computing the new atomic positions and cell parameters.
 !! - In case relaxat = 0 and relaxstr = 0, the routine only
 !!   computes the polarization in cartesian coordinates.
-!!
-!! PARENTS
-!!      anaddb
-!!
-!! CHILDREN
-!!      dzgedi,dzgefa,matr3inv,polcart,symdyma,xcart2xred
 !!
 !! SOURCE
 

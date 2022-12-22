@@ -9,7 +9,7 @@
 !!    - pawpwij_t: Onsite matrix elements of a plane wave for a given atom type.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2021 ABINIT group (MG,GKA)
+!! Copyright (C) 2008-2022 ABINIT group (MG,GKA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -36,7 +36,7 @@ MODULE m_pawpwij
  use m_paw_numeric,    only : paw_jbessel_4spline, paw_spline
  use m_splines,        only : splfit
  use m_pawang,         only : pawang_type
- use m_paw_sphharm,     only : realgaunt
+ use m_paw_sphharm,    only : realgaunt
  use m_pawrad,         only : pawrad_type, pawrad_init, pawrad_free, pawrad_copy, simp_gen
  use m_pawtab,         only : pawtab_type
  use m_pawcprj,        only : pawcprj_type
@@ -169,17 +169,9 @@ CONTAINS  !=====================================================================
 !! OUTPUT
 !!  Paw_pwff(%ntypat) <pawpwff_t>=Object storing the form factors
 !!                                    for the spline used in pawpwij_init.
-!! PARENTS
-!!      m_bethe_salpeter,m_screening_driver,m_sigma_driver
-!!
-!! CHILDREN
-!!      fftbox_execute,fftbox_plan3_many,fftpad
-!!
 !! SOURCE
 
 subroutine pawpwff_init(Paw_pwff,method,nq_spl,qmax,gmet,Pawrad,Pawtab,Psps)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -254,17 +246,9 @@ end subroutine pawpwff_init
 !! SIDE EFFECTS
 !!  Paw_pwff(:)=<pawpwff_t>=Object storing form factors for the spline of wf into PAW spheres
 !!
-!! PARENTS
-!!      m_bethe_salpeter,m_screening_driver,m_sigma_driver
-!!
-!! CHILDREN
-!!      fftbox_execute,fftbox_plan3_many,fftpad
-!!
 !! SOURCE
 
 subroutine pawpwff_free(Paw_pwff)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -317,17 +301,9 @@ end subroutine pawpwff_free
 !!  Pwij(%ntypat)<pawpwij_t>=Structure containing the onsite matrix elements of e^{-i(q+G).r}.
 !!   Completely initialized in output.
 !!
-!! PARENTS
-!!      m_chi0,m_cohsex,m_exc_build,m_prep_calc_ucrpa,m_sigc,m_sigx
-!!
-!! CHILDREN
-!!      fftbox_execute,fftbox_plan3_many,fftpad
-!!
 !! SOURCE
 
 subroutine pawpwij_init(Pwij,npw,qpt_in,gvec,rprimd,Psps,Pawtab,Paw_pwff)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -438,17 +414,9 @@ end subroutine pawpwij_init
 !! SIDE EFFECTS
 !!  Paw_pwij(:)=<pawpwij_t>=Structure containing the onsite matrix elements of e^{-i(q+G).r}
 !!
-!! PARENTS
-!!      m_pawpwij
-!!
-!! CHILDREN
-!!      fftbox_execute,fftbox_plan3_many,fftpad
-!!
 !! SOURCE
 
 subroutine pawpwij_free_d1(Pwij)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -482,16 +450,9 @@ end subroutine pawpwij_free_d1
 !! SIDE EFFECTS
 !!  Paw_pwij(:)=<pawpwij_t>=Structure containing the onsite matrix elements of e^{-i(q+G).r}
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fftbox_execute,fftbox_plan3_many,fftpad
-!!
 !! SOURCE
 
 subroutine pawpwij_free_d2(Pwij)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -556,17 +517,9 @@ end subroutine pawpwij_free_d2
 !! TODO
 !!  One might save CPU time taking into account Gaunt selection rules!
 !!
-!! PARENTS
-!!      m_pawpwij
-!!
-!! CHILDREN
-!!      fftbox_execute,fftbox_plan3_many,fftpad
-!!
 !! SOURCE
 
 subroutine paw_mkrhox_spl(itypat,ntypat,method,dim1,dim2,nq_spl,qgrid_spl,Pawrad,Pawtab,pwff_spl)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -867,18 +820,10 @@ end subroutine paw_mkrhox_spl
 !!  paw_rhox(2,npw,lmn2_size): $<phj|e^{-i(q+G).r}|phi>-<tphj|e^{-i(q+G).r}|tphi>$ in packed form for
 !!    a type itypat (phase factor arising from atom position is not included)
 !!
-!! PARENTS
-!!      m_pawpwij
-!!
-!! CHILDREN
-!!      fftbox_execute,fftbox_plan3_many,fftpad
-!!
 !! SOURCE
 
 subroutine paw_mkrhox(itypat,lmn2_size,method,dim1,dim2,nq_spl,qgrid_spl,pwff_spl,&
 &  gmet,qpt,npw,gvec,ylm_q,Psps,Pawtab,paw_rhox)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1111,17 +1056,9 @@ end subroutine paw_mkrhox
 !! SIDE EFFECTS
 !!  rhotwg(npw*dim_rtwg)=Updated oscillator strengths with the on-site PAW contributions added.
 !!
-!! PARENTS
-!!      calc_sigc_me,calc_sigx_me,cchi0,cchi0q0,cchi0q0_intraband
-!!      check_completeness,cohsex_me,exc_build_block,exc_build_ham,m_shirley
-!!      prep_calc_ucrpa
-!!
 !! SOURCE
 
-
 pure subroutine paw_rho_tw_g(npw,dim_rtwg,nspinor,natom,ntypat,typat,xred,gvec,Cprj_kmqb1,Cprj_kb2,Pwij,rhotwg)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1217,20 +1154,12 @@ end subroutine paw_rho_tw_g
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_chi0,m_prep_calc_ucrpa,m_sigc,m_sigx
-!!
-!! CHILDREN
-!!      fftbox_execute,fftbox_plan3_many,fftpad
-!!
 !! SOURCE
 
 subroutine paw_cross_rho_tw_g(nspinor,npwvec,nr,ngfft,map2sphere,use_padfft,igfftg0,gbound,&
 & ur_ae1,ur_ae_onsite1,ur_ps_onsite1,i1,ktabr1,ktabp1,spinrot1,&
 & ur_ae2,ur_ae_onsite2,ur_ps_onsite2,i2,ktabr2,ktabp2,spinrot2,&
 & dim_rtwg,rhotwg)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1274,10 +1203,10 @@ subroutine paw_cross_rho_tw_g(nspinor,npwvec,nr,ngfft,map2sphere,use_padfft,igff
 
    SELECT CASE (map2sphere)
 
-   CASE (0) ! Need results on the full FFT box thus cannot use zero-padded FFT.
-
-     call fftbox_plan3_many(plan,ndat1,ngfft(1:3),ngfft(1:3),ngfft(7),-1)
-     call fftbox_execute(plan,rho)
+   CASE (0)
+     ! Need results on the full FFT box thus cannot use zero-padded FFT.
+     call plan%many(ndat1, ngfft(1:3), ngfft(1:3), ngfft(7), -1)
+     call plan%execute(rho)
 
      rhotwg=rhotwg + rho
 
@@ -1289,8 +1218,8 @@ subroutine paw_cross_rho_tw_g(nspinor,npwvec,nr,ngfft,map2sphere,use_padfft,igff
        call fftpad(rho,ngfft,nx,ny,nz,ldx,ldy,ldz,ndat1,mgfft,-1,gbound)
      else
 
-       call fftbox_plan3_many(plan,ndat1,ngfft(1:3),ngfft(1:3),ngfft(7),-1)
-       call fftbox_execute(plan,rho)
+       call plan%many(ndat1, ngfft(1:3), ngfft(1:3), ngfft(7), -1)
+       call plan%execute(rho)
      end if
 
      do ig=1,npwvec       ! Have to map FFT to G-sphere.

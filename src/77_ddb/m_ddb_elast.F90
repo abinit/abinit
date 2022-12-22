@@ -6,14 +6,10 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2021 ABINIT group (XW, DW)
+!!  Copyright (C) 1999-2022 ABINIT group (XW, DW)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -87,12 +83,6 @@ contains
 !! The elastic (compliance) tensors calculated here are under boundary conditions of
 !! fixed Electric Field, different from those in ddb_piezo.F90 which are under fixed
 !! Displacement Field and incorporate piezoelectric corrections.
-!!
-!! PARENTS
-!!      anaddb
-!!
-!! CHILDREN
-!!      asria_corr,matrginv,wrtout,zhpev
 !!
 !! SOURCE
 

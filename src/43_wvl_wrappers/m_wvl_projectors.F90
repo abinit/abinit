@@ -6,14 +6,10 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2021 ABINIT group (DC)
+!!  Copyright (C) 2008-2022 ABINIT group (DC)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -70,12 +66,6 @@ contains
 !!   | keys=its access keys for compact storage.
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
-!!      m_gstate,m_wvl_wfsinp
-!!
-!! CHILDREN
-!!      free_dft_psp_projectors
 !!
 !! SOURCE
 
@@ -173,12 +163,6 @@ end subroutine wvl_projectors_set
 !!
 !! SIDE EFFECTS
 !!  proj <type(wvl_projectors_type)>=projectors information in a wavelet basis.
-!!
-!! PARENTS
-!!      m_gstate,m_wvl_wfsinp
-!!
-!! CHILDREN
-!!      free_dft_psp_projectors
 !!
 !! SOURCE
 

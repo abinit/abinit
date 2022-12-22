@@ -15,7 +15,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2021 ABINIT group (hexu)
+!! Copyright (C) 2001-2022 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -134,16 +134,15 @@ contains
   !>
   !> @param[in]  mode: a integer to define the kind of initial state.
   !----------------------------------------------------------------------
-  subroutine set_initial_state(self, mode, restart_hist_fname)
+  subroutine set_initial_state(self, mode)
     ! set initial positions, spin, etc
     class(abstract_mover_t), intent(inout) :: self
     integer, optional, intent(in) :: mode
-    character(len=*), optional, intent(in) :: restart_hist_fname
 
     ABI_ERROR("set_initial_state not implemented for this mover")
     ABI_UNUSED_A(self)
     ABI_UNUSED(mode)
-    ABI_UNUSED(restart_hist_fname)
+
   end subroutine set_initial_state
 
   !-------------------------------------------------------------------!

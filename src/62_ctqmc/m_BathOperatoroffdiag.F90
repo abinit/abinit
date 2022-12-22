@@ -12,18 +12,12 @@
 !!  simgle Anderson Impurity Model
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (J. Bieder, J. Denier, B. Amadon)
+!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder, J. Denier, B. Amadon)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -67,7 +61,7 @@ IMPLICIT NONE
 !!  This structured datatype contains the necessary data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -208,7 +202,7 @@ CONTAINS
 !!  Initialize and allocate data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -226,12 +220,6 @@ CONTAINS
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -296,7 +284,7 @@ END SUBROUTINE BathOperatoroffdiag_init
 !!  Reset all internal variables
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -309,12 +297,6 @@ END SUBROUTINE BathOperatoroffdiag_init
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -359,7 +341,7 @@ END SUBROUTINE BathOperatoroffdiag_reset
 !!  It is better to use the macro defined in defs.h
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -373,12 +355,6 @@ END SUBROUTINE BathOperatoroffdiag_reset
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -410,7 +386,7 @@ END SUBROUTINE BathOperatoroffdiag_activateParticle
 !!  is trying to be added and store some array for setMAdd
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -427,12 +403,6 @@ END SUBROUTINE BathOperatoroffdiag_activateParticle
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 DOUBLE PRECISION  FUNCTION BathOperatoroffdiag_getDetAdd(op,CdagC_1, position, particle)
@@ -672,7 +642,7 @@ END FUNCTION BathOperatoroffdiag_getDetAdd
 !!  is trying to be removed 
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -687,12 +657,6 @@ END FUNCTION BathOperatoroffdiag_getDetAdd
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -761,7 +725,7 @@ END FUNCTION BathOperatoroffdiag_getDetRemove
 !!  used for Gloval moves only
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -777,12 +741,6 @@ END FUNCTION BathOperatoroffdiag_getDetRemove
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -868,7 +826,7 @@ END FUNCTION BathOperatoroffdiag_getDetF
 !!  Update de M matrix inserting a row and a column
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -882,12 +840,6 @@ END FUNCTION BathOperatoroffdiag_getDetF
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -1282,7 +1234,7 @@ END SUBROUTINE BathOperatoroffdiag_setMAdd
 !!  delete one row and one column of the M matrix
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1296,12 +1248,6 @@ END SUBROUTINE BathOperatoroffdiag_setMAdd
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -1491,7 +1437,7 @@ END SUBROUTINE BathOperatoroffdiag_setMRemove
 !!  Recompute 2 M matrix swaping the segments (used for Global moves)
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1506,12 +1452,6 @@ END SUBROUTINE BathOperatoroffdiag_setMRemove
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -1616,7 +1556,7 @@ END SUBROUTINE BathOperatoroffdiag_swap
 !!  Copy input hybridization functions from a file
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1631,12 +1571,6 @@ END SUBROUTINE BathOperatoroffdiag_swap
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -1671,7 +1605,7 @@ END SUBROUTINE BathOperatoroffdiag_initF
 !!  Copy F from input array
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1685,12 +1619,6 @@ END SUBROUTINE BathOperatoroffdiag_initF
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -1730,7 +1658,7 @@ END SUBROUTINE BathOperatoroffdiag_setF
 !!  print F function
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1744,12 +1672,6 @@ END SUBROUTINE BathOperatoroffdiag_setF
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -1795,7 +1717,7 @@ END SUBROUTINE BathOperatoroffdiag_printF
 !!  print M =F^{-1} matrix
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1810,12 +1732,6 @@ END SUBROUTINE BathOperatoroffdiag_printF
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -1843,7 +1759,7 @@ END SUBROUTINE BathOperatoroffdiag_printM
 !!  print M =F^{-1} matrix
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1858,12 +1774,6 @@ END SUBROUTINE BathOperatoroffdiag_printM
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -1907,7 +1817,7 @@ END SUBROUTINE BathOperatoroffdiag_printM_matrix
 !!  Deallocate and reset every thing
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1920,12 +1830,6 @@ END SUBROUTINE BathOperatoroffdiag_printM_matrix
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -1967,7 +1871,7 @@ END SUBROUTINE BathOperatoroffdiag_destroy
 !!  Just store if we perfom check for updates of M
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1981,12 +1885,6 @@ END SUBROUTINE BathOperatoroffdiag_destroy
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -2010,7 +1908,7 @@ END SUBROUTINE BathOperatoroffdiag_doCheck
 !!  with the already computed M matrix
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2024,12 +1922,6 @@ END SUBROUTINE BathOperatoroffdiag_doCheck
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -2170,7 +2062,7 @@ END SUBROUTINE BathOperatoroffdiag_checkM
 !!  compute from scratch the M matrix 
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (B. Amadon)
+!!  Copyright (C) 2013-2022 ABINIT group (B. Amadon)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2184,12 +2076,6 @@ END SUBROUTINE BathOperatoroffdiag_checkM
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -2297,7 +2183,7 @@ END SUBROUTINE BathOperatoroffdiag_recomputeM
 !!  compute a percentage error / checkM
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2311,12 +2197,6 @@ END SUBROUTINE BathOperatoroffdiag_recomputeM
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 

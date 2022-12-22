@@ -6,15 +6,11 @@
 !! Interface with want code.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2021 ABINIT group (CMorari)
+!! Copyright (C) 2005-2022 ABINIT group (CMorari)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -88,12 +84,6 @@ contains
 !!
 !! OUTPUT
 !!  (only writing)
-!!
-!! PARENTS
-!!      m_outscfcv
-!!
-!! CHILDREN
-!!      matr3inv,wrtout
 !!
 !! SOURCE
 

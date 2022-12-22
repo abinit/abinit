@@ -9,7 +9,7 @@
 !!  symmetric or hermitian matrix A in packed storage
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2021 ABINIT group (LNguyen,FDahm,MT)
+!!  Copyright (C) 2001-2022 ABINIT group (LNguyen,FDahm,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~ABINIT/Infos/copyright
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -25,8 +25,6 @@
 !! FUNCTION
 !!
 !! INPUTS
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -68,8 +66,8 @@
    dim_evec1= 2*n/istwf_k_
    ABI_MALLOC(tmp_evec,(dim_evec1,n))
    tmp_evec = zero
-   call init_matrix_scalapack(sca_a,n,n,slk_processor,istwf_k_, tbloc=10)
-   call init_matrix_scalapack(sca_ev,n,n,slk_processor,istwf_k_, tbloc=10)
+   call sca_a%init(n,n,slk_processor,istwf_k_)
+   call sca_ev%init(n,n,slk_processor,istwf_k_)
 #ifdef HAVE_LINALG_ELPA
    call matrix_from_global_sym(sca_a,a,istwf_k_)
 #else
@@ -107,8 +105,6 @@ end subroutine abi_dhpev
 !! FUNCTION
 !!
 !! INPUTS
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -164,8 +160,6 @@ end subroutine abi_chpev
 !! FUNCTION
 !!
 !! INPUTS
-!!
-!! PARENTS
 !!
 !! SOURCE
 

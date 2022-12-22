@@ -31,8 +31,8 @@
 #Specific for RF
  xred4  0.0 0.0  0.1155     0.0 0.0 -0.1155
   rfphon4  1
- rfatpol4  1 1
-   rfdir4  0 0 1
+ rfatpol   1 1
+   rfdir   0 0 1
     nqpt4  1
      qpt4  0.0 0.0 0.0
   getwfk4  2

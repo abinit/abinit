@@ -6,14 +6,10 @@
 !!  This module contains procedures to calculate the oscillator matrix elements used in the GW code.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2021 ABINIT group (MG)
+!! Copyright (C) 2008-2022 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -23,7 +19,7 @@
 
 #include "abi_common.h"
 
-MODULE m_oscillators
+module m_oscillators
 
  use defs_basis
  use m_errors
@@ -43,9 +39,9 @@ MODULE m_oscillators
 
 !----------------------------------------------------------------------
 
- public :: rho_tw_g           ! Calculate rhotwg(G) = <wfn1| exp(-i(q+G).r) |wfn2>
- public :: calc_wfwfg         ! Calculate the Fourier transform of the product u_{bk}^*(r).u_{b"k}(r) at an arbitrary k in the BZ.
- public :: sym_rhotwgq0       ! Symmetrize the oscillator matrix elements in the BZ in the special case of q=0.
+ public :: rho_tw_g       ! Calculate rhotwg(G) = <wfn1| exp(-i(q+G).r) |wfn2>
+ public :: calc_wfwfg     ! Calculate the Fourier transform of the product u_{bk}^*(r).u_{b"k}(r) at an arbitrary k in the BZ.
+ public :: sym_rhotwgq0   ! Symmetrize the oscillator matrix elements in the BZ in the special case of q = 0.
 !!***
 
 !----------------------------------------------------------------------
@@ -89,22 +85,17 @@ CONTAINS
 !! OUTPUT
 !! rhotwg(npwvec)=density of a pair of states, in reciprocal space
 !!
-!! PARENTS
-!!      m_chi0,m_cohsex,m_exc_build,m_fft_prof,m_prep_calc_ucrpa,m_sigc,m_sigx
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
-subroutine rho_tw_g(nspinor,npwvec,nr,ndat,ngfft,map2sphere,use_padfft,igfftg0,gbound,&
-& wfn1,i1,ktabr1,ktabp1,spinrot1,&
-& wfn2,i2,ktabr2,ktabp2,spinrot2,&
-& dim_rtwg,rhotwg) !& nhat12)
+subroutine rho_tw_g(nspinor, npwvec, nr, ndat, ngfft, map2sphere, use_padfft, igfftg0, gbound, &
+                    wfn1, i1, ktabr1, ktabp1, spinrot1, &
+                    wfn2, i2, ktabr2, ktabp2, spinrot2, &
+                    dim_rtwg, rhotwg) !& nhat12)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: i1,i2,npwvec,nr,nspinor,dim_rtwg,map2sphere,use_padfft,ndat
- complex(dpc),intent(in) :: ktabp1,ktabp2
+ complex(dpc),intent(in) :: ktabp1, ktabp2
 !arrays
  integer,intent(in) :: gbound(:,:) !gbound(2*mgfft+8,2)
  integer,intent(in) :: igfftg0(npwvec*map2sphere),ngfft(18)
@@ -157,8 +148,8 @@ subroutine rho_tw_g(nspinor,npwvec,nr,ndat,ngfft,map2sphere,use_padfft,igfftg0,g
      SELECT CASE (map2sphere)
      CASE (0)
        ! Need results on the full FFT box thus cannot use zero-padded FFT.
-       call fftbox_plan3_many(plan,ndat,ngfft(1:3),ngfft(1:3),ngfft(7),-1)
-       call fftbox_execute(plan,u12prod)
+       call plan%many(ndat, ngfft(1:3), ngfft(1:3), ngfft(7), -1)
+       call plan%execute(u12prod)
        if (dim_rtwg == 1) then
          rhotwg(1:npwvec) = rhotwg(1:npwvec) + u12prod
        else
@@ -172,8 +163,8 @@ subroutine rho_tw_g(nspinor,npwvec,nr,ndat,ngfft,map2sphere,use_padfft,igfftg0,g
          ldx = nx; ldy = ny; ldz = nz
          call fftpad(u12prod, ngfft, nx, ny, nz, ldx, ldy, ldz, ndat, mgfft, -1, gbound)
        else
-         call fftbox_plan3_many(plan, ndat, ngfft(1:3), ngfft(1:3), ngfft(7), -1)
-         call fftbox_execute(plan,u12prod)
+         call plan%many(ndat, ngfft(1:3), ngfft(1:3), ngfft(7), -1)
+         call plan%execute(u12prod)
        end if
 
        ! Have to map FFT to G-sphere.
@@ -238,16 +229,11 @@ end subroutine rho_tw_g
 !! OUTPUT
 !! usug(npw*ndat)=density of a pair of states, in reciprocal space
 !!
-!! PARENTS
-!!      m_oscillators
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
-subroutine ts_usug_kkp_bz(npw,nr,ndat,ngfft,map2sphere,use_padfft,igfftg0,gbound,&
-& u1,time1,ktabr1,ktabp1,&
-& u2,time2,ktabr2,ktabp2,usug) !& nhat12)
+subroutine ts_usug_kkp_bz(npw, nr, ndat, ngfft, map2sphere, use_padfft, igfftg0, gbound, &
+                          u1, time1, ktabr1, ktabp1, &
+                          u2, time2, ktabr2, ktabp2, usug) !& nhat12)
 
 !Arguments ------------------------------------
 !scalars
@@ -282,8 +268,8 @@ subroutine ts_usug_kkp_bz(npw,nr,ndat,ngfft,map2sphere,use_padfft,igfftg0,gbound
  SELECT CASE (map2sphere)
  CASE (0)
    ! Need results on the full FFT box thus cannot use zero-padded FFT.
-   call fftbox_plan3_many(plan,ndat,ngfft(1:3),ngfft(1:3),ngfft(7),-1)
-   call fftbox_execute(plan,u12prod)
+   call plan%many(ndat, ngfft(1:3), ngfft(1:3), ngfft(7), -1)
+   call plan%execute(u12prod)
    call xcopy(nr*ndat,u12prod,1,usug,1)
 
  CASE (1)
@@ -293,8 +279,8 @@ subroutine ts_usug_kkp_bz(npw,nr,ndat,ngfft,map2sphere,use_padfft,igfftg0,gbound
      ldx=nx; ldy=ny; ldz=nz
      call fftpad(u12prod,ngfft,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,-1,gbound)
    else
-     call fftbox_plan3_many(plan,ndat,ngfft(1:3),ngfft(1:3),ngfft(7),-1)
-     call fftbox_execute(plan,u12prod)
+     call plan%many(ndat, ngfft(1:3), ngfft(1:3), ngfft(7), -1)
+     call plan%execute(u12prod)
    end if
 
    ! From the FFT to the G-sphere.
@@ -331,14 +317,9 @@ end subroutine ts_usug_kkp_bz
 !! OUTPUT
 !!  u12prod(nr*dat) = u1_kbz^*(r) u2_kbz(r) for the ndat pairs.
 !!
-!! PARENTS
-!!      m_oscillators
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
-subroutine usur_kkp_bz(nr,ndat,time1,ktabr1,ktabp1,u1,time2,ktabr2,ktabp2,u2,u12prod)
+subroutine usur_kkp_bz(nr, ndat, time1, ktabr1, ktabp1, u1, time2, ktabr2, ktabp2, u2, u12prod)
 
 !Arguments ------------------------------------
 !scalars
@@ -496,14 +477,9 @@ end subroutine usur_kkp_bz
 !! OUTPUT
 !! oarrsph(npw*ndat)=output array on the sphere.
 !!
-!! PARENTS
-!!      m_oscillators
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
-subroutine gw_box2gsph(nr,ndat,npw,igfftg0,iarrbox,oarrsph)
+subroutine gw_box2gsph(nr, ndat, npw, igfftg0, iarrbox, oarrsph)
 
 !Arguments ------------------------------------
 !scalars
@@ -567,14 +543,9 @@ end subroutine gw_box2gsph
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_chi0,m_cohsex,m_sigc
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
-subroutine calc_wfwfg(ktabr_k,ktabi_k,spinrot,nr,nspinor,ngfft_gw,wfr_jb,wfr_kb,wfg2_jk)
+subroutine calc_wfwfg(ktabr_k, ktabi_k, spinrot, nr, nspinor, ngfft_gw, wfr_jb, wfr_kb, wfg2_jk)
 
 !Arguments ------------------------------------
 !scalars
@@ -623,8 +594,8 @@ subroutine calc_wfwfg(ktabr_k,ktabi_k,spinrot,nr,nspinor,ngfft_gw,wfr_jb,wfr_kb,
  end if
 
  ! Transform to Fourier space (result in wfg2_jk)
- call fftbox_plan3_many(plan, nspinor, ngfft_gw(1:3), ngfft_gw(1:3), ngfft_gw(7), -1)
- call fftbox_execute(plan, wfr2_dpcplx, wfg2_jk)
+ call plan%many(nspinor, ngfft_gw(1:3), ngfft_gw(1:3), ngfft_gw(7), -1)
+ call plan%execute(wfr2_dpcplx, wfg2_jk)
  ABI_FREE(wfr2_dpcplx)
 
 end subroutine calc_wfwfg
@@ -660,13 +631,9 @@ end subroutine calc_wfwfg
 !!  1) M_{ SG}( Sk) = e^{-iSG.t} M_{G}   (k)
 !!  2) M_{-SG}(-Sk) = e^{+iSG.t} M_{G}^* (k)
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
-function sym_rhotwgq0(itim_k,isym_k,dim_rtwg,npw,rhxtwg_in,Gsph) result(rhxtwg_sym)
+function sym_rhotwgq0(itim_k, isym_k, dim_rtwg, npw, rhxtwg_in, Gsph) result(rhxtwg_sym)
 
 !Arguments ------------------------------------
 !scalars
@@ -734,11 +701,6 @@ end function sym_rhotwgq0
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_oscillators
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine rotate_spinor(itim_kbz, ktabr_kbz, ktabp_kbz, spinrot, nr, nspinor, ndat, ug_ibz, cwork, oug_bz)
@@ -797,5 +759,5 @@ subroutine rotate_spinor(itim_kbz, ktabr_kbz, ktabp_kbz, spinrot, nr, nspinor, n
 end subroutine rotate_spinor
 !!***
 
-END MODULE m_oscillators
+end module m_oscillators
 !!***

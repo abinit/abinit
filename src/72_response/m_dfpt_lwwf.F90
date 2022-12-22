@@ -6,16 +6,12 @@
 !!  First-order response function contributions to the quadrupole and flexoelectric tensors
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2018-2021 ABINIT group (MR,MS)
+!!  Copyright (C) 2018-2022 ABINIT group (MR,MS)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -138,14 +134,6 @@ contains
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_dfpt_lw
-!!
-!! CHILDREN
-!!      dfpt_vlocaldq,dfpt_vlocaldqdq,dotprod_g,getgh1dqc,getgh1dqc_setup
-!!      init_rf_hamiltonian,mkkpg,rf_hamkq%free,rf_hamkq%load_spin
-!!      rf_transgrid_and_pack
 !!
 !! SOURCE
 
@@ -1021,14 +1009,6 @@ end subroutine dfpt_qdrpwf
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_dfpt_lw
-!!
-!! CHILDREN
-!!      dfpt_vlocaldq,dfpt_vlocaldqdq,dotprod_g,getgh1dqc,getgh1dqc_setup
-!!      init_rf_hamiltonian,mkkpg,rf_hamkq%free,rf_hamkq%load_spin
-!!      rf_transgrid_and_pack
 !!
 !! SOURCE
 
@@ -1910,14 +1890,6 @@ end subroutine dfpt_ciflexowf
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_dfpt_lw
-!!
-!! CHILDREN
-!!      dfpt_vlocaldq,dfpt_vlocaldqdq,dotprod_g,getgh1dqc,getgh1dqc_setup
-!!      init_rf_hamiltonian,mkkpg,rf_hamkq%free,rf_hamkq%load_spin
-!!      rf_transgrid_and_pack
-!!
 !! SOURCE
 
 subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
@@ -2558,14 +2530,6 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_dfpt_lw
-!!
-!! CHILDREN
-!!      dfpt_vlocaldq,dfpt_vlocaldqdq,dotprod_g,getgh1dqc,getgh1dqc_setup
-!!      init_rf_hamiltonian,mkkpg,rf_hamkq%free,rf_hamkq%load_spin
-!!      rf_transgrid_and_pack
 !!
 !! SOURCE
 
@@ -3509,14 +3473,6 @@ end subroutine dfpt_isdqwf
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_dfpt_lw
-!!
-!! CHILDREN
-!!      dfpt_vlocaldq,dfpt_vlocaldqdq,dotprod_g,getgh1dqc,getgh1dqc_setup
-!!      init_rf_hamiltonian,mkkpg,rf_hamkq%free,rf_hamkq%load_spin
-!!      rf_transgrid_and_pack
 !!
 !! SOURCE
 

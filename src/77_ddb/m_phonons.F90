@@ -8,7 +8,7 @@
 !! as well as the central mkphdos
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2021 ABINIT group (XG, MG, MJV, GMR)
+!! Copyright (C) 1999-2022 ABINIT group (XG, MG, MJV, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -53,7 +53,7 @@ module m_phonons
  use m_bz_mesh,         only : isamek, make_path, kpath_t, kpath_new
  use m_ifc,             only : ifc_type
  use m_anaddb_dataset,  only : anaddb_dataset_type
- use m_kpts,            only : kpts_ibz_from_kptrlatt, get_full_kgrid
+ use m_kpts,            only : kpts_ibz_from_kptrlatt, get_full_kgrid, kpts_map
  use m_special_funcs,   only : bose_einstein
  use m_sort,            only : sort_dp
  use m_symfind,         only : symanal
@@ -245,9 +245,9 @@ module m_phonons
  end type phstore_t
 !!***
 
- public :: phstore_new   ! Creation method (allocates memory, initialize data from input vars).
-
- public :: test_phrotation
+ public :: pheigvec_rotate      ! Obtain phonon eigenvectors for q in the BZ from the symmetrical image in the IBZ.
+ public :: phstore_new          ! Creation method (allocates memory, initialize data from input vars).
+ public :: test_phrotation      ! Validate pheigvec_rotate routine.
 
 contains  !=====================================================
 !!***
@@ -266,13 +266,6 @@ contains  !=====================================================
 !!
 !! OUTPUT
 !!  Only writing.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      cg_zgemm,ifc%fourq,kpts_ibz_from_kptrlatt,massmult_and_breaksym
-!!      pheigvec_rotate,print_arr,qrank%free,qrank%get_mapping,sg_multable
-!!      wrtout
 !!
 !! SOURCE
 
@@ -396,13 +389,6 @@ end subroutine phdos_print
 !! OUTPUT
 !!  Only writing.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      cg_zgemm,ifc%fourq,kpts_ibz_from_kptrlatt,massmult_and_breaksym
-!!      pheigvec_rotate,print_arr,qrank%free,qrank%get_mapping,sg_multable
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine phdos_print_debye(PHdos, ucvol)
@@ -501,13 +487,6 @@ end subroutine phdos_print_debye
 !!
 !! OUTPUT
 !!  Only writing.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      cg_zgemm,ifc%fourq,kpts_ibz_from_kptrlatt,massmult_and_breaksym
-!!      pheigvec_rotate,print_arr,qrank%free,qrank%get_mapping,sg_multable
-!!      wrtout
 !!
 !! SOURCE
 
@@ -616,13 +595,6 @@ end subroutine phdos_print_thermo
 !! INPUTS
 !! PHdos= container object for phonon DOS
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      cg_zgemm,ifc%fourq,kpts_ibz_from_kptrlatt,massmult_and_breaksym
-!!      pheigvec_rotate,print_arr,qrank%free,qrank%get_mapping,sg_multable
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine phdos_free(PHdos)
@@ -658,14 +630,6 @@ end subroutine phdos_free
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_phonons
-!!
-!! CHILDREN
-!!      cg_zgemm,ifc%fourq,kpts_ibz_from_kptrlatt,massmult_and_breaksym
-!!      pheigvec_rotate,print_arr,qrank%free,qrank%get_mapping,sg_multable
-!!      wrtout
 !!
 !! SOURCE
 
@@ -756,14 +720,6 @@ end subroutine phdos_init
 !!   In input: min and max value of frequency mesh. Used only if minmax(2) > minmax(1)
 !!    else values are taken from ifc%omega_minmax (computed from ab-initio mesh + pad)
 !!   In output: min and max frequency obtained after interpolating the IFCs on the dense q-mesh dos_ngqpt
-!!
-!! PARENTS
-!!      anaddb,m_eph_driver,m_tdep_phdos
-!!
-!! CHILDREN
-!!      cg_zgemm,ifc%fourq,kpts_ibz_from_kptrlatt,massmult_and_breaksym
-!!      pheigvec_rotate,print_arr,qrank%free,qrank%get_mapping,sg_multable
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1279,14 +1235,6 @@ end subroutine mkphdos
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      anaddb
-!!
-!! CHILDREN
-!!      cg_zgemm,ifc%fourq,kpts_ibz_from_kptrlatt,massmult_and_breaksym
-!!      pheigvec_rotate,print_arr,qrank%free,qrank%get_mapping,sg_multable
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine zacharias_supercell_make(Crystal, Ifc, ntemper, rlatt, tempermin, temperinc, thm_scells)
@@ -1337,7 +1285,7 @@ subroutine zacharias_supercell_make(Crystal, Ifc, ntemper, rlatt, tempermin, tem
 
  ! This call will set nqibz, IBZ and BZ arrays
  call kpts_ibz_from_kptrlatt(crystal, rlatt, qptopt1, 1, qshft, &
-&   nqibz, qibz, wtq_ibz, nqbz, qbz) ! new_kptrlatt, new_shiftk)  ! Optional
+    nqibz, qibz, wtq_ibz, nqbz, qbz) ! new_kptrlatt, new_shiftk)  ! Optional
  ABI_FREE(qshft)
 
  ! allocate arrays with all of the q, omega, and displacement vectors
@@ -1457,14 +1405,6 @@ end subroutine zacharias_supercell_make
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_generate_training_set
-!!
-!! CHILDREN
-!!      cg_zgemm,ifc%fourq,kpts_ibz_from_kptrlatt,massmult_and_breaksym
-!!      pheigvec_rotate,print_arr,qrank%free,qrank%get_mapping,sg_multable
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine thermal_supercell_make(amplitudes,Crystal, Ifc,namplitude, nconfig,option,&
@@ -1517,7 +1457,7 @@ subroutine thermal_supercell_make(amplitudes,Crystal, Ifc,namplitude, nconfig,op
 
  ! This call will set nqibz, IBZ and BZ arrays
  call kpts_ibz_from_kptrlatt(crystal, rlatt, qptopt1, 1, qshft, &
-&   nqibz, qibz, wtqibz, nqbz, qbz) ! new_kptrlatt, new_shiftk)  ! Optional
+                              nqibz, qibz, wtqibz, nqbz, qbz) ! new_kptrlatt, new_shiftk)  ! Optional
  ABI_FREE(qshft)
 
  ! allocate arrays wzith all of the q, omega, and displacement vectors
@@ -1654,14 +1594,6 @@ end subroutine thermal_supercell_make
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      anaddb,m_generate_training_set
-!!
-!! CHILDREN
-!!      cg_zgemm,ifc%fourq,kpts_ibz_from_kptrlatt,massmult_and_breaksym
-!!      pheigvec_rotate,print_arr,qrank%free,qrank%get_mapping,sg_multable
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine thermal_supercell_free(nscells, thm_scells)
@@ -1695,14 +1627,6 @@ end subroutine thermal_supercell_free
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      anaddb
-!!
-!! CHILDREN
-!!      cg_zgemm,ifc%fourq,kpts_ibz_from_kptrlatt,massmult_and_breaksym
-!!      pheigvec_rotate,print_arr,qrank%free,qrank%get_mapping,sg_multable
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1747,13 +1671,6 @@ end subroutine zacharias_supercell_print
 !! OUTPUT
 !!
 !! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      cg_zgemm,ifc%fourq,kpts_ibz_from_kptrlatt,massmult_and_breaksym
-!!      pheigvec_rotate,print_arr,qrank%free,qrank%get_mapping,sg_multable
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1801,13 +1718,6 @@ end subroutine thermal_supercell_print
 !!
 !! NOTES
 !!  Frequencies are in eV, DOS are in states/eV.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      cg_zgemm,ifc%fourq,kpts_ibz_from_kptrlatt,massmult_and_breaksym
-!!      pheigvec_rotate,print_arr,qrank%free,qrank%get_mapping,sg_multable
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1892,14 +1802,6 @@ end subroutine phdos_ncwrite
 !!
 !! OUTPUT
 !!  Only writing.
-!!
-!! PARENTS
-!!      anaddb
-!!
-!! CHILDREN
-!!      cg_zgemm,ifc%fourq,kpts_ibz_from_kptrlatt,massmult_and_breaksym
-!!      pheigvec_rotate,print_arr,qrank%free,qrank%get_mapping,sg_multable
-!!      wrtout
 !!
 !! SOURCE
 
@@ -2198,14 +2100,6 @@ end subroutine mkphbs
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_phonons
-!!
-!! CHILDREN
-!!      cg_zgemm,ifc%fourq,kpts_ibz_from_kptrlatt,massmult_and_breaksym
-!!      pheigvec_rotate,print_arr,qrank%free,qrank%get_mapping,sg_multable
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine phdos_calc_vsound(eigvec,gmet,natom,phfrq,qphon,speedofsound)
@@ -2268,14 +2162,6 @@ end subroutine phdos_calc_vsound
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_phonons
-!!
-!! CHILDREN
-!!      cg_zgemm,ifc%fourq,kpts_ibz_from_kptrlatt,massmult_and_breaksym
-!!      pheigvec_rotate,print_arr,qrank%free,qrank%get_mapping,sg_multable
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine phdos_print_vsound(iunit,ucvol,speedofsound)
@@ -2335,13 +2221,6 @@ end subroutine phdos_print_vsound
 !!
 !! OUTPUT
 !!   to file only
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      cg_zgemm,ifc%fourq,kpts_ibz_from_kptrlatt,massmult_and_breaksym
-!!      pheigvec_rotate,print_arr,qrank%free,qrank%get_mapping,sg_multable
-!!      wrtout
 !!
 !! SOURCE
 
@@ -2499,14 +2378,6 @@ end subroutine phdos_print_msqd
 !! OUTPUT
 !!  Only writing
 !!
-!! PARENTS
-!!      m_phonons
-!!
-!! CHILDREN
-!!      cg_zgemm,ifc%fourq,kpts_ibz_from_kptrlatt,massmult_and_breaksym
-!!      pheigvec_rotate,print_arr,qrank%free,qrank%get_mapping,sg_multable
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine phonons_ncwrite(ncid,natom,nqpts,qpoints,weights,phfreq,phdispl_cart)
@@ -2581,14 +2452,6 @@ end subroutine phonons_ncwrite
 !!
 !! OUTPUT
 !!  Only writing
-!!
-!! PARENTS
-!!      m_phonons
-!!
-!! CHILDREN
-!!      cg_zgemm,ifc%fourq,kpts_ibz_from_kptrlatt,massmult_and_breaksym
-!!      pheigvec_rotate,print_arr,qrank%free,qrank%get_mapping,sg_multable
-!!      wrtout
 !!
 !! SOURCE
 
@@ -2684,14 +2547,6 @@ end subroutine phonons_write_phfrq
 !!
 !! OUTPUT
 !!  Only writing
-!!
-!! PARENTS
-!!      m_phonons
-!!
-!! CHILDREN
-!!      cg_zgemm,ifc%fourq,kpts_ibz_from_kptrlatt,massmult_and_breaksym
-!!      pheigvec_rotate,print_arr,qrank%free,qrank%get_mapping,sg_multable
-!!      wrtout
 !!
 !! SOURCE
 
@@ -2813,14 +2668,6 @@ end subroutine phonons_write_xmgrace
 !! OUTPUT
 !!  Only writing
 !!
-!! PARENTS
-!!      m_phonons
-!!
-!! CHILDREN
-!!      cg_zgemm,ifc%fourq,kpts_ibz_from_kptrlatt,massmult_and_breaksym
-!!      pheigvec_rotate,print_arr,qrank%free,qrank%get_mapping,sg_multable
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine phonons_write_gnuplot(prefix, natom, nqpts, qpts, phfreqs, qptbounds)
@@ -2941,14 +2788,6 @@ end subroutine phonons_write_gnuplot
 !!
 !! OUTPUT
 !!  Only writing.
-!!
-!! PARENTS
-!!      m_eph_driver
-!!
-!! CHILDREN
-!!      cg_zgemm,ifc%fourq,kpts_ibz_from_kptrlatt,massmult_and_breaksym
-!!      pheigvec_rotate,print_arr,qrank%free,qrank%get_mapping,sg_multable
-!!      wrtout
 !!
 !! SOURCE
 
@@ -3104,14 +2943,6 @@ end subroutine ifc_mkphbs
 !! symrel(3,3,nsym)=matrices of the group symmetries (real space)
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_phonons
-!!
-!! CHILDREN
-!!      cg_zgemm,ifc%fourq,kpts_ibz_from_kptrlatt,massmult_and_breaksym
-!!      pheigvec_rotate,print_arr,qrank%free,qrank%get_mapping,sg_multable
-!!      wrtout
 !!
 !! SOURCE
 
@@ -3332,14 +3163,6 @@ end subroutine dfpt_symph
 !! freeze_displ could be determined automatically from a temperature and the phonon frequency,
 !! as the average displacement of the mode with a Bose distribution.
 !!
-!! PARENTS
-!!      m_phonons
-!!
-!! CHILDREN
-!!      cg_zgemm,ifc%fourq,kpts_ibz_from_kptrlatt,massmult_and_breaksym
-!!      pheigvec_rotate,print_arr,qrank%free,qrank%get_mapping,sg_multable
-!!      wrtout
-!!
 !! SOURCE
 !!
 
@@ -3386,31 +3209,38 @@ end subroutine freeze_displ_allmodes
 !!***
 
 !----------------------------------------------------------------------
+
 !!****f* m_phonons/pheigvec_rotate
 !! NAME
 !! pheigvec_rotate
 !!
 !! FUNCTION
-!!  Obtain phonon frequencies and eigenvectors for q in the BZ from the symmetrical image in the IBZ.
+!!  Return phonon eigenvectors for q in the BZ from the symmetrical image in the IBZ.
 !!
 !! INPUTS
 !!  cryst: crystal structure
-!!  q: q-point in the IBZ
-!!  sq: q-point in the BZ. sq = TS q_ibz
+!!  qq_ibz: q-point in the IBZ
 !!  isym
 !!  itimrev
-!!  eigvec_in: Input ph eigenvectors at q_ibz.
+!!  eigvec_ibz: Input phonon eigenvectors at qq_ibz.
 !!
 !! OUTPUT
-!!  eigvec_out: Otput ph eigenvectors at q_bz.
+!!  eigvec_bz: phonon eigenvectors at q_bz.
+!!  displ_cart_qbz: phonon displacement at q_bz in Cartesian coordinates.
+!!  [displ_red_qbz]: phonon displacement at q_bz in reduced coordinates.
 !!
 
-subroutine pheigvec_rotate(cryst, q, sq, isym, itimrev, eigvec_in, eigvec_out)
+subroutine pheigvec_rotate(cryst, qq_ibz, isym, itimrev, eigvec_ibz, eigvec_qbz, displ_cart_qbz, &
+                           displ_red_qbz) ! Optional
 
+!Arguments ------------------------------------
+!scalars
  type(crystal_t),intent(in) :: cryst
  integer,intent(in) :: isym, itimrev
- real(dp),intent(in) :: q(3), sq(3), eigvec_in(2,3*cryst%natom,3*cryst%natom)
- real(dp),intent(out) :: eigvec_out(2,3*cryst%natom,3*cryst%natom)
+ real(dp),intent(in) :: qq_ibz(3), eigvec_ibz(2,3*cryst%natom,3*cryst%natom)
+ real(dp),intent(out) :: eigvec_qbz(2,3*cryst%natom,3*cryst%natom)
+ real(dp),intent(out) :: displ_cart_qbz(2,3*cryst%natom,3*cryst%natom)
+ real(dp),optional,intent(out) :: displ_red_qbz(2,3*cryst%natom,3*cryst%natom)
 
 !Local variables-------------------------------
 !scalars
@@ -3418,40 +3248,28 @@ subroutine pheigvec_rotate(cryst, q, sq, isym, itimrev, eigvec_in, eigvec_out)
  real(dp) :: arg
 !arrays
  integer :: r0(3)
- real(dp) :: gamma_matrix(2,3,cryst%natom,3,cryst%natom) !, gamma2(2,3,cryst%natom,3,cryst%natom)
- real(dp) :: symat(3,3), phase(2) !, dum(0, 0)
+ real(dp) :: gamma_matrix(2,3,cryst%natom,3,cryst%natom)
+ real(dp) :: symat(3,3), phase(2) !, dum(0, 0), gamma2(2,3,cryst%natom,3,cryst%natom)
 
 !************************************************************************
 
  natom = cryst%natom
  natom3 = cryst%natom * 3
 
- !isym_inv = toinv(1, isym)
  symat = cryst%symrel_cart(:,:,isym)
- !symat = transpose(cryst%symrel_cart(:,:,isym))
- !symat = cryst%symrel_cart(:,:,isym_inv)
 
  ! Build Gamma matrix in Cartesian coordinates.
- ! e(Sq) = Gamma({S, v}) e(q)
+ ! e(S q_ibz) = Gamma({S, v}) e(q_ibz)
  gamma_matrix = zero
  do iat=1,natom
    !do iat_sym=1,natom
    ! $ R^{-1} (xred(:,iat)-\tau) = xred(:,iat_sym) + R_0 $
-   ! * indsym(4,  isym,iat) gives iat_sym in the original unit cell.
-   ! * indsym(1:3,isym,iat) gives the lattice vector $R_0$.
+   !   indsym(4,  isym,iat) gives iat_sym in the original unit cell.
+   !   indsym(1:3,isym,iat) gives the lattice vector $R_0$.
    iat_sym = cryst%indsym(4, isym, iat)
    r0 = cryst%indsym(1:3, isym, iat)
-   !r0 = cryst%indsym(1:3, isym_inv, iat)
-   !iat_sym = cryst%indsym(4, isym_inv, iat)
-   !r0 = -cryst%indsym(1:3, isym_inv, iat)
-   !r0 = matmul(cryst%symrec(:,:, isym), r0)
-   !r0 = matmul(transpose(cryst%symrec(:,:, isym)), r0)
-   !r0 = matmul(cryst%symrel(:,:, isym), r0)
-   !r0 = matmul(transpose(cryst%symrel(:,:, isym)), r0)
-   !arg = two_pi * dot_product(sq, r0)
-   arg = two_pi * dot_product(q, real(r0))
-   phase(:) = [cos(arg), sin(arg)]
-   !write(std_out, *)" ro: ", r0, "phase: " ,phase, "qibz: ", q
+   arg = two_pi * dot_product(qq_ibz, real(r0))
+   phase(:) = [cos(arg), sin(arg)] !; write(std_out, *)" ro: ", r0, "phase: " ,phase, "qq_ibz: ", qq_ibz
    do jdir=1,3
      do idir=1,3
        gamma_matrix(:, idir, iat, jdir, iat_sym) = symat(idir, jdir) * phase(:)
@@ -3459,30 +3277,30 @@ subroutine pheigvec_rotate(cryst, q, sq, isym, itimrev, eigvec_in, eigvec_out)
    end do
  end do
 
- !write(std_out, "(2a)")" Gamma_matrix for sq:", trim(ktoa(sq))
+ !write(std_out, "(2a)")" Gamma_matrix for qq_bz:", trim(ktoa(qq_bz))
  !call print_arr(reshape(cmplx(gamma_matrix(1,:,:,:,:), gamma_matrix(2,:,:,:,:)), [natom3, natom3]))
-
  !gamma2 = gamma_matrix
- !call cg_zgemm("C", "N", natom3, natom3, natom3, gamma_matrix, gamma2, eigvec_out)
+ !call cg_zgemm("C", "N", natom3, natom3, natom3, gamma_matrix, gamma2, eigvec_qbz)
  !write(std_out, "(a)")" gamma^H gamma:"
- !call print_arr(reshape(cmplx(eigvec_out(1,:,:), eigvec_out(2,:,:)), [natom3, natom3]))
+ !call print_arr(reshape(cmplx(eigvec_qbz(1,:,:), eigvec_qbz(2,:,:)), [natom3, natom3]))
  !call cg_check_unitary(natom3, gamm_matrix)
 
- call cg_zgemm("N", "N", natom3, natom3, natom3, gamma_matrix, eigvec_in, eigvec_out)
- if (itimrev == 1) eigvec_out(2,:,:) = -eigvec_out(2,:,:)
+ call cg_zgemm("N", "N", natom3, natom3, natom3, gamma_matrix, eigvec_ibz, eigvec_qbz)
+ if (itimrev == 1) eigvec_qbz(2,:,:) = -eigvec_qbz(2,:,:)
 
  ! Fix the phase of the eigenvectors
- !call fxphas_seq(eigvec_out, dum, 0, 0, 1, 3*natom*3*natom, 0, 3*natom, 3*natom, 0)
+ !call fxphas_seq(eigvec_qbz, dum, 0, 0, 1, 3*natom*3*natom, 0, 3*natom, 3*natom, 0)
 
  ! Normalise the eigenvectors
- !call pheigvec_normalize(natom, eigvec_out)
+ !call pheigvec_normalize(natom, eigvec_qbz)
 
- ! Get the phonon displacements
- !call phdispl_from_eigvec(natom, ntypat, typat, amu, eigvec_out, displ)
+ ! phonon displacements in Cartesian coordinates
+ call phdispl_from_eigvec(cryst%natom, cryst%ntypat, cryst%typat, cryst%amu, eigvec_qbz, displ_cart_qbz)
 
- ! Return phonon displacement in reduced coordinates.
- !call phdispl_cart2red(natom, crystal%gprimd, displ_cart, out_displ_red)
- ABI_UNUSED(sq(1))
+ if (present(displ_red_qbz)) then
+   ! phonon displacements in reduced coordinates.
+   call phdispl_cart2red(cryst%natom, cryst%gprimd, displ_cart_qbz, displ_red_qbz)
+ end if
 
 end subroutine pheigvec_rotate
 !!***
@@ -3621,8 +3439,7 @@ subroutine phstore_async_rotate(self, cryst, ifc, iq_ibz, qpt_ibz, qpt_bz, isym_
 
  if (self%use_ifc_fourq) then
    ! Debugging section.
-   call ifc%fourq(cryst, qpt_bz, self%phfrq, self%displ_cart)
-   return
+   call ifc%fourq(cryst, qpt_bz, self%phfrq, self%displ_cart); return
  end if
 
  ! Find the rank MPI storing the q-point in the IBZ.
@@ -3638,7 +3455,10 @@ subroutine phstore_async_rotate(self, cryst, ifc, iq_ibz, qpt_ibz, qpt_bz, isym_
  call xmpi_ibcast(self%phfrq, master, self%comm, self%requests(1), ierr)
 
  ! Rotate eigvectors at q_ibz to get eigenvector at q_bz
- ! Don't test if umklapp == 0 because we use the periodic gauge: phfreq(q+G) = phfreq(q) and eigvec(q) = eigvec(q+G)
+ ! Don't test if umklapp == 0 because we use the periodic gauge:
+ !
+ !   phfreq(q+G) = phfreq(q) and eigvec(q) = eigvec(q+G)
+ !
  isirr_q = (isym_q == 1 .and. trev_q == 0)
 
  if (self%my_rank == master) then
@@ -3648,9 +3468,9 @@ subroutine phstore_async_rotate(self, cryst, ifc, iq_ibz, qpt_ibz, qpt_bz, isym_
      call phdispl_from_eigvec(cryst%natom, cryst%ntypat, cryst%typat, cryst%amu, &
                               self%pheigvec_qibz(:,:,:,iq_ibz), self%displ_cart)
    else
-     ! q in BZ --> rotatee phonon eigenvectors.
-     call pheigvec_rotate(cryst, self%qibz(:, iq_ibz), qpt_bz, isym_q, trev_q, self%pheigvec_qibz(:,:,:,iq_ibz), eigvec_qpt)
-     call phdispl_from_eigvec(cryst%natom, cryst%ntypat, cryst%typat, cryst%amu, eigvec_qpt, self%displ_cart)
+     ! q in BZ --> rotate phonon eigenvectors.
+     call pheigvec_rotate(cryst, self%qibz(:, iq_ibz), isym_q, trev_q, self%pheigvec_qibz(:,:,:,iq_ibz), &
+                          eigvec_qpt, self%displ_cart)
    end if
  end if
 
@@ -3716,11 +3536,11 @@ subroutine test_phrotation(ifc, cryst, ngqpt, comm)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: qptopt1 = 1, nqshft1 = 1, master = 0
+ integer,parameter :: qptopt1 = 1, nqshft1 = 1, master = 0, timrev1 = 1
  integer :: nqibz, iq_bz, iq_ibz, nqbz, ii, natom, natom3, ierr
  integer :: isym, itimrev, ierr_freq, ierr_eigvec, prtvol
  real(dp), parameter ::  tol_phfreq_meV = tol3, tol_eigvec = tol6
- real(dp) :: dksqmax, maxerr_phfreq, err_phfreq, maxerr_eigvec ! err_eigvec
+ real(dp) :: maxerr_phfreq, err_phfreq, maxerr_eigvec ! err_eigvec
  logical :: isirr_q
  character(len=500) :: msg, fmt_freqs, fmt_eigvec
  type(krank_t) :: qrank
@@ -3728,8 +3548,8 @@ subroutine test_phrotation(ifc, cryst, ngqpt, comm)
  integer :: in_qptrlatt(3,3), new_qptrlatt(3,3), g0(3)
  integer,allocatable :: bz2ibz(:,:), bz2ibz_listkk(:,:), toinv(:,:)
  real(dp) :: qshift(3, nqshft1), phfrq(3*cryst%natom), work(3*cryst%natom)
- real(dp) :: eigvec_out(2,3*cryst%natom,3*cryst%natom) !eigvec_in(2,3*cryst%natom,3*cryst%natom),
- real(dp) :: eigvec_bz(2,3*cryst%natom,3*cryst%natom)
+ real(dp) :: eigvec_out(2,3*cryst%natom,3*cryst%natom) !eigvec_ibz(2,3*cryst%natom,3*cryst%natom),
+ real(dp) :: eigvec_bz(2,3*cryst%natom,3*cryst%natom), displ_cart_qbz(2,3*cryst%natom,3*cryst%natom)
  real(dp) :: d2cart(2,3*cryst%natom,3*cryst%natom), d2tmp(2,3*cryst%natom,3*cryst%natom)
  real(dp),allocatable :: wtq_ibz(:), qbz(:,:), qibz(:,:)
  real(dp),allocatable :: displ_cart(:,:,:,:),displ_red(:,:,:,:)
@@ -3751,6 +3571,7 @@ subroutine test_phrotation(ifc, cryst, ngqpt, comm)
 
  call kpts_ibz_from_kptrlatt(cryst, in_qptrlatt, qptopt1, nqshft1, qshift, &
                              nqibz, qibz, wtq_ibz, nqbz, qbz, new_kptrlatt=new_qptrlatt, bz2ibz=bz2ibz)
+ ABI_FREE(bz2ibz)
 
  !write(std_out, "(2(a, i0))")" nqibz: ", nqibz, ", nqbz:", nqbz
  !write(std_out, "(a)") " qibz_list:"
@@ -3765,16 +3586,13 @@ subroutine test_phrotation(ifc, cryst, ngqpt, comm)
  ABI_MALLOC(bz2ibz_listkk, (6, nqbz))
 
  qrank = krank_from_kptrlatt(nqibz, qibz, in_qptrlatt, compute_invrank=.False.)
- call qrank%get_mapping(nqbz, qbz, dksqmax, cryst%gmet, bz2ibz_listkk, &
-                        cryst%nsym, cryst%symafm, cryst%symrec, cryst%timrev - 1, use_symrec=.True.)
- call qrank%free()
 
- if (dksqmax > tol12) then
-    write(msg, '(3a,es16.6)' ) &
-     "Error mapping BZ to IBZ",ch10,&
-     "The q-point could not be generated from a symmetrical one. dksqmax: ",dksqmax
-    ABI_ERROR(msg)
+ if (kpts_map("symrec", timrev1, cryst, qrank, nqbz, qbz, bz2ibz_listkk) /= 0) then
+   write(msg, '(3a)' ) "Error mapping BZ to IBZ",ch10,"The q-point could not be generated from a symmetrical one"
+   ABI_ERROR(msg)
  end if
+
+ call qrank%free()
 
  ! Compute ph freqs in the IBZ.
  ABI_CALLOC(phfreqs_qibz, (natom3, nqibz))
@@ -3821,7 +3639,8 @@ subroutine test_phrotation(ifc, cryst, ngqpt, comm)
    end if
 
    ! Rotate and compare eigenvectors
-   call pheigvec_rotate(cryst, qibz(:, iq_ibz), qbz(:, iq_bz), isym, itimrev, eigvec_ibz(:,:,:,iq_ibz), eigvec_out)
+   call pheigvec_rotate(cryst, qibz(:, iq_ibz), isym, itimrev, eigvec_ibz(:,:,:,iq_ibz), &
+                        eigvec_out, displ_cart_qbz)
 
    ! e^H D e = w**2 I
    call massmult_and_breaksym(natom, cryst%ntypat, cryst%typat, cryst%amu, d2cart)
@@ -3882,7 +3701,6 @@ subroutine test_phrotation(ifc, cryst, ngqpt, comm)
  ABI_SFREE(bz2ibz_listkk)
  ABI_SFREE(qbz)
  ABI_SFREE(qibz)
- ABI_SFREE(bz2ibz)
  ABI_SFREE(wtq_ibz)
  ABI_FREE(phfreqs_qibz)
  ABI_FREE(displ_cart_ibz)

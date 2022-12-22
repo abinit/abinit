@@ -1,4 +1,4 @@
-# MgB2: Computation of the isotropic Migdal-Eliashberg Tc 
+# MgB2: Computation of the isotropic Migdal-Eliashberg Tc
 optdriver 7
 eph_task  1
 
@@ -27,7 +27,7 @@ boxcutmin 1.1
 # K-mesh: must be consistent with the one used to generate the WFK file
 ngkpt   12 12 12
 nshiftk 1
-shiftk  0.0 0.0 0.0 
+shiftk  0.0 0.0 0.0
 
 # Compute phonon bands along this q-path.
 #prtnest   1
@@ -44,7 +44,7 @@ ph_qpath
 
 
 # COMMON INPUT DATA###########################################################
-ecut    38.0  
+ecut    38.0
 nband   8
 occopt  4              # Marzari smearing
 tsmear 0.02
@@ -58,7 +58,8 @@ pseudos "Mg-low.psp8, B.psp8"
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = teph4isotc_1.abi, teph4isotc_2.abi, teph4isotc_3.abi, teph4isotc_4.abi, teph4isotc_5.abi, 
+#%% test_chain = teph4isotc_1.abi, teph4isotc_2.abi, teph4isotc_3.abi, teph4isotc_4.abi,
+#%%              teph4isotc_5.abi, teph4isotc_6.abi, teph4isotc_7.abi,
 #%% [files]
 #%% use_git_submodule = MgB2_eph4isotc
 #%% files_to_test =

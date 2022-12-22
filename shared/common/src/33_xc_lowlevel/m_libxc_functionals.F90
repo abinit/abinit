@@ -9,7 +9,7 @@
 !!  Also contains basic container datatype for LibXC interfacing.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2021 ABINIT group (MOliveira,LHH,FL,GMR,MT)
+!! Copyright (C) 2008-2022 ABINIT group (MOliveira,LHH,FL,GMR,MT)
 !! This file is distributed under the terms of the
 !! GNU Gener_al Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -35,10 +35,6 @@
 !!    argument (called xc_funcs in this example):
 !!    !!!!! call libxc_functionals_init(ixc,nspden,xc_funcs)
 !!    !!!!! call libxc_functionals_end(xc_funcs)
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -101,6 +97,7 @@ module libxc_functionals
  integer,public,save :: XC_FAMILY_OEP           = 16
  integer,public,save :: XC_FAMILY_HYB_GGA       = 32
  integer,public,save :: XC_FAMILY_HYB_MGGA      = 64
+ integer,public,save :: XC_FAMILY_HYB_LDA       =128
  integer,public,save :: XC_FLAGS_HAVE_EXC       =  1
  integer,public,save :: XC_FLAGS_HAVE_VXC       =  2
  integer,public,save :: XC_FLAGS_HAVE_FXC       =  4
@@ -111,19 +108,6 @@ module libxc_functionals
  integer,public,save :: XC_CORRELATION          =  1
  integer,public,save :: XC_EXCHANGE_CORRELATION =  2
  integer,public,save :: XC_KINETIC              =  3
- integer,public,save :: XC_HYB_NONE             =  0
- integer,public,save :: XC_HYB_FOCK             =  1
- integer,public,save :: XC_HYB_PT2              =  2
- integer,public,save :: XC_HYB_ERF_SR           =  4
- integer,public,save :: XC_HYB_YUKAWA_SR        =  8
- integer,public,save :: XC_HYB_GAUSSIAN_SR      = 16
- integer,public,save :: XC_HYB_SEMILOCAL        =  0
- integer,public,save :: XC_HYB_HYBRID           =  1
- integer,public,save :: XC_HYB_CAM              =  2
- integer,public,save :: XC_HYB_CAMY             =  3
- integer,public,save :: XC_HYB_CAMG             =  4
- integer,public,save :: XC_HYB_DOUBLE_HYBRID    =  5
- integer,public,save :: XC_HYB_MIXTURE          = 32768
  integer,public,save :: XC_SINGLE_PRECISION     =  0
  logical,private,save :: libxc_constants_initialized=.false.
 
@@ -269,11 +253,12 @@ module libxc_functionals
 !
  interface
    subroutine xc_get_family_constants(xc_cst_unknown,xc_cst_lda,xc_cst_gga,xc_cst_mgga, &
-&                                     xc_cst_lca,xc_cst_oep,xc_cst_hyb_gga,xc_cst_hyb_mgga) &
-&                                     bind(C)
+&                                     xc_cst_lca,xc_cst_oep,xc_cst_hyb_gga, &
+&                                     xc_cst_hyb_mgga,xc_cst_hyb_lda) bind(C)
      use iso_c_binding, only : C_INT
      integer(C_INT) :: xc_cst_unknown,xc_cst_lda,xc_cst_gga,xc_cst_mgga, &
-&                      xc_cst_lca,xc_cst_oep,xc_cst_hyb_gga,xc_cst_hyb_mgga
+&                      xc_cst_lca,xc_cst_oep,xc_cst_hyb_gga,xc_cst_hyb_mgga, &
+&                      xc_cst_hyb_lda
    end subroutine xc_get_family_constants
  end interface
 !
@@ -294,20 +279,6 @@ module libxc_functionals
      integer(C_INT) :: xc_cst_exchange,xc_cst_correlation, &
 &                      xc_cst_exchange_correlation,xc_cst_kinetic
    end subroutine xc_get_kind_constants
- end interface
-!
- interface
-   subroutine xc_get_hybrid_constants(xc_cst_hyb_none, &
-              xc_cst_hyb_fock,xc_cst_hyb_pt2,xc_cst_hyb_erf_sr,xc_cst_hyb_yukawa_sr, &
-              xc_cst_hyb_gaussian_sr,xc_cst_hyb_semilocal, xc_cst_hyb_hybrid,xc_cst_hyb_cam, &
-              xc_cst_hyb_camy,xc_cst_hyb_camg,xc_cst_hyb_double_hybrid, &
-              xc_cst_hyb_mixture) bind(C)
-     use iso_c_binding, only : C_INT
-     integer(C_INT) :: xc_cst_hyb_none, xc_cst_hyb_fock,xc_cst_hyb_pt2, xc_cst_hyb_erf_sr, &
-                       xc_cst_hyb_yukawa_sr,xc_cst_hyb_gaussian_sr,xc_cst_hyb_semilocal, &
-                       xc_cst_hyb_hybrid,xc_cst_hyb_cam,xc_cst_hyb_camy,xc_cst_hyb_camg, &
-                       xc_cst_hyb_double_hybrid,xc_cst_hyb_mixture
-   end subroutine xc_get_hybrid_constants
  end interface
 !
  interface
@@ -365,18 +336,13 @@ contains
 !! FUNCTION
 !!  Load libXC constants from C headers
 !!
-!! PARENTS
-!!      m_libxc_functionals
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine libxc_functionals_constants_load()
 
 !Local variables-------------------------------
 #if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
- integer(C_INT) :: i1,i2,i3,i4,i5,i6,i7,i8,i9,i10,i11,i12,i13
+ integer(C_INT) :: i1,i2,i3,i4,i5,i6,i7,i8,i9
 #endif
 
 ! *************************************************************************
@@ -384,7 +350,7 @@ contains
 #if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
   call xc_get_singleprecision_constant(i1)
   XC_SINGLE_PRECISION     = int(i1)
-  call xc_get_family_constants(i1,i2,i3,i4,i5,i6,i7,i8)
+  call xc_get_family_constants(i1,i2,i3,i4,i5,i6,i7,i8,i9)
   XC_FAMILY_UNKNOWN       = int(i1)
   XC_FAMILY_LDA           = int(i2)
   XC_FAMILY_GGA           = int(i3)
@@ -393,6 +359,7 @@ contains
   XC_FAMILY_OEP           = int(i6)
   XC_FAMILY_HYB_GGA       = int(i7)
   XC_FAMILY_HYB_MGGA      = int(i8)
+  XC_FAMILY_HYB_LDA       = int(i9)
   call xc_get_flags_constants(i1,i2,i3,i4,i5,i6)
   XC_FLAGS_HAVE_EXC       = int(i1)
   XC_FLAGS_HAVE_VXC       = int(i2)
@@ -405,21 +372,7 @@ contains
   XC_CORRELATION          = int(i2)
   XC_EXCHANGE_CORRELATION = int(i3)
   XC_KINETIC              = int(i4)
-  call xc_get_hybrid_constants(i1,i2,i3,i4,i5,i6,i7,i8,i9,i10,i11,i12,i13)
-  XC_HYB_NONE             = int(i1)
-  XC_HYB_FOCK             = int(i2)
-  XC_HYB_PT2              = int(i3)
-  XC_HYB_ERF_SR           = int(i4)
-  XC_HYB_YUKAWA_SR        = int(i5)
-  XC_HYB_GAUSSIAN_SR      = int(i6)
-  XC_HYB_SEMILOCAL        = int(i7)
-  XC_HYB_HYBRID           = int(i8)
-  XC_HYB_CAM              = int(i9)
-  XC_HYB_CAMY             = int(i10)
-  XC_HYB_CAMG             = int(i11)
-  XC_HYB_DOUBLE_HYBRID    = int(i12)
-  XC_HYB_MIXTURE          = int(i13)
- libxc_constants_initialized=.true.
+  libxc_constants_initialized=.true.
 #endif
 
  end subroutine libxc_functionals_constants_load
@@ -436,10 +389,6 @@ contains
 !!
 !! INPUTS
 !! [stop_if_error]=optional flag; if TRUE the code stops if libXC is not correctly used
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -501,12 +450,6 @@ contains
 !! SIDE EFFECTS
 !! [xc_functionals(2)]=<type(libxc_functional_type)>, optional argument
 !!                     Handle for XC functionals
-!!
-!! PARENTS
-!!      m_driver,m_drivexc,m_invars2,m_kxc,m_rhotoxc,m_vhxc_me,m_xc_vdw
-!!      m_xchybrid
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -689,12 +632,6 @@ end subroutine libxc_functionals_init
 !! [xc_functionals(2)]=<type(libxc_functional_type)>, optional argument
 !!                     Handle for XC functionals
 !!
-!! PARENTS
-!!      m_driver,m_drivexc,m_invars2,m_kxc,m_rhotoxc,m_vhxc_me,m_xc_vdw
-!!      m_xchybrid
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine libxc_functionals_end(xc_functionals)
@@ -758,10 +695,6 @@ end subroutine libxc_functionals_init
 !!                     Handle for XC functionals
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -835,10 +768,6 @@ end subroutine libxc_functionals_init
 !! OUTPUT
 !! xcrefs(:)= references(s) of the functional
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine libxc_functionals_getrefs(xcrefs,xc_functional)
@@ -886,10 +815,6 @@ end subroutine libxc_functionals_getrefs
 !! INPUTS
 !!  xcid= id of a LibXC functional
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  function libxc_functionals_family_from_id(xcid)
@@ -927,10 +852,6 @@ end function libxc_functionals_family_from_id
 !!
 !! INPUTS
 !!  xcname= string containing the name of a XC functional
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -980,10 +901,6 @@ end function libxc_functionals_getid
 !! [xc_functionals(2)]=<type(libxc_functional_type)>, optional argument
 !!                     Handle for XC functionals
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  function libxc_functionals_ixc(xc_functionals)
@@ -1016,10 +933,6 @@ end function libxc_functionals_ixc
 !! INPUTS
 !! [xc_functionals(2)]=<type(libxc_functional_type)>, optional argument
 !!                     Handle for XC functionals
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1059,10 +972,6 @@ end function libxc_functionals_isgga
 !! [xc_functionals(2)]=<type(libxc_functional_type)>, optional argument
 !!                     Handle for XC functionals
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 function libxc_functionals_ismgga(xc_functionals)
@@ -1101,10 +1010,6 @@ end function libxc_functionals_ismgga
 !! [xc_functionals(2)]=<type(libxc_functional_type)>, optional argument
 !!                     Handle for XC functionals
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  function libxc_functionals_needs_laplacian(xc_functionals)
@@ -1141,10 +1046,6 @@ end function libxc_functionals_ismgga
 !! [xc_functionals(2)]=<type(libxc_functional_type)>, optional argument
 !!                     Handle for XC functionals
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  function libxc_functionals_is_hybrid(xc_functionals)
@@ -1177,10 +1078,6 @@ end function libxc_functionals_is_hybrid
 !!
 !! INPUTS
 !!  xcid= id of a LibXC functional
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1221,10 +1118,6 @@ end function libxc_functionals_is_hybrid_from_id
 !! [xc_functionals(2)]=<type(libxc_functional_type)>, optional argument
 !!                     Handle for XC functionals
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 function libxc_functionals_has_kxc(xc_functionals)
@@ -1264,10 +1157,6 @@ end function libxc_functionals_has_kxc
 !! [xc_functionals(2)]=<type(libxc_functional_type)>, optional argument
 !!                     Handle for XC functionals
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 function libxc_functionals_has_k3xc(xc_functionals)
@@ -1305,10 +1194,6 @@ end function libxc_functionals_has_k3xc
 !! INPUTS
 !! [xc_functionals(2)]=<type(libxc_functional_type)>, optional argument
 !!                     Handle for XC functionals
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1364,11 +1249,6 @@ end function libxc_functionals_nspin
 !! SIDE EFFECTS
 !! [xc_functionals(2)]=<type(libxc_functional_type)>, optional argument
 !!                     Handle for XC functionals
-!!
-!! PARENTS
-!!      m_drivexc,m_pawxc,m_xc_vdw
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1689,11 +1569,6 @@ end subroutine libxc_functionals_getvxc
 !!  [hyb_mixing_sr]= mixing factor of short-range Fock contribution
 !!  [hyb_range]    = Range (for separation)
 !!
-!! PARENTS
-!!      m_invars2,m_rhotoxc
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine libxc_functionals_get_hybridparams(hyb_mixing,hyb_mixing_sr,hyb_range,xc_functionals)
@@ -1779,11 +1654,6 @@ end subroutine libxc_functionals_get_hybridparams
 !!                     Handle for XC functionals
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_fock,m_vhxc_me
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2026,11 +1896,6 @@ end function libxc_functionals_gga_from_hybrid
 !! [xc_functionals(2)]=<type(libxc_functional_type)>, optional argument
 !!                     Handle for XC functionals
 !!
-!! PARENTS
-!!      m_libxc_functionals
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine libxc_functionals_compute_tb09(npts,nspden,rho,grho2,xc_functionals)
@@ -2176,11 +2041,6 @@ end function xc_char_to_c
 !!
 !! OUTPUT
 !!  f_string=Fortran string
-!!
-!! PARENTS
-!!      m_libxc_functionals
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

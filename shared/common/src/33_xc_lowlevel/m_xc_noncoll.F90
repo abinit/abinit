@@ -7,7 +7,7 @@
 !!  (rotation of the magnetization in order to align it)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2021 ABINIT group (EB, MT, FR, SPr)
+!! Copyright (C) 2001-2022 ABINIT group (EB, MT, FR, SPr)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -15,10 +15,6 @@
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -86,12 +82,6 @@ CONTAINS
 !!       rho_out(1) = rho_in(1)
 !!       rho_out(2) = half*( rho_in(1) + (mag,rho_in(2:4))/|mag|)
 !!
-!!
-!! PARENTS
-!!      m_dfpt_mkvxc,m_pawxc
-!!
-!! CHILDREN
-!!      rotate_back_mag_dfpt
 !!
 !! SOURCE
 
@@ -225,12 +215,6 @@ end subroutine rotate_mag
 !! OUTPUT
 !!  vxc_out(vectsize,4)=output non-collinear XC potential
 !!
-!! PARENTS
-!!      m_dfpt_mkvxc,m_pawxc
-!!
-!! CHILDREN
-!!      rotate_back_mag_dfpt
-!!
 !! SOURCE
 
 subroutine rotate_back_mag(vxc_in,vxc_out,mag,vectsize,&
@@ -314,12 +298,6 @@ end subroutine rotate_back_mag
 !!
 !! OUTPUT
 !!  vxc1_out(vectsize,4)=output 1st-order non-collinear XC potential
-!!
-!! PARENTS
-!!      m_dfpt_mkvxc,m_pawxc,m_xc_noncoll
-!!
-!! CHILDREN
-!!      rotate_back_mag_dfpt
 !!
 !! SOURCE
 
@@ -877,11 +855,6 @@ end subroutine rotate_back_mag_dfpt
 !! NOTES
 !!
 !!  For debug purposes
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      rotate_back_mag_dfpt
 !!
 !! SOURCE
 

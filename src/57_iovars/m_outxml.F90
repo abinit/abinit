@@ -5,15 +5,11 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR)
+!! Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt.
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -58,12 +54,6 @@ contains
 !! INPUTS
 !!  filename=the name of the file to write to.
 !!
-!! PARENTS
-!!      abinit
-!!
-!! CHILDREN
-!!      xred2xcart
-!!
 !! SOURCE
 
 subroutine outxml_open(filename)
@@ -105,12 +95,6 @@ end subroutine outxml_open
 !! INPUTS
 !!  tsec=the cpu time and the wall time in seconds.
 !!  values=the date values returned by date_and_time() intrinsic Fortran routine.
-!!
-!! PARENTS
-!!      abinit
-!!
-!! CHILDREN
-!!      xred2xcart
 !!
 !! SOURCE
 
@@ -156,12 +140,6 @@ end subroutine outxml_finalise
 !!  results_gs <type(results_gs_type)>=results (energy and its components,
 !!   forces and its components, the stress tensor) of a ground-state computation.
 !!  usepaw= 0 for non paw calculation; =1 for paw calculation
-!!
-!! PARENTS
-!!      m_scfcv_core
-!!
-!! CHILDREN
-!!      xred2xcart
 !!
 !! SOURCE
 
@@ -270,12 +248,6 @@ end subroutine out_resultsgs_XML
 !!  natom=number of atoms.
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
-!!
-!! PARENTS
-!!      m_scfcv_core
-!!
-!! CHILDREN
-!!      xred2xcart
 !!
 !! SOURCE
 

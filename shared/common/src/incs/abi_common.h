@@ -1,7 +1,7 @@
 /* abi_common.h */
 
 /*
- * Copyright (C) 2008-2021 ABINIT Group (MG)
+ * Copyright (C) 2008-2022 ABINIT Group (MG)
  *
  * This file is part of the ABINIT software package. For license information,
  * please see the COPYING file in the top-level directory of the ABINIT source
@@ -107,7 +107,7 @@
 #define ABI_CHECK_IRANGE(int, start, stop, msg) if (int < start .or. int > stop) ABI_ERROR(sjoin(msg, itoa(int), "not in [", itoa(start), itoa(stop), "]"))
 
 #define ABI_CHECK_NOSTOP(expr, msg, ierr) \
-   if (.not. (expr)) then NEWLINE ierr=ierr + 1; call msg_hndl(msg, "ERROR", "PERS", NOSTOP=.TRUE. _FILE_LINE_ARGS_) NEWLINE endif
+   if (.not. (expr)) then NEWLINE ierr = ierr + 1; call msg_hndl(msg, "ERROR", "PERS", NOSTOP=.TRUE. _FILE_LINE_ARGS_) NEWLINE endif
 
 /* Stop execution with message if MPI call returned error exit code */
 #define ABI_CHECK_MPI(ierr, msg) call check_mpi_ierr(ierr, msg _FILE_LINE_ARGS_)

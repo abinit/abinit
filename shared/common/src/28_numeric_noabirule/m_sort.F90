@@ -6,7 +6,7 @@
 !! Sorting algorithms.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2021 ABINIT group (XG)
+!!  Copyright (C) 2008-2022 ABINIT group (XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -60,16 +60,6 @@ CONTAINS  !=====================================================================
 !!  list(n)  sorted list
 !!  iperm(n) index of permutation giving the right ascending order:
 !!      the i-th element of the ouput ordered list had index iperm(i) in the input list.
-!!
-!! PARENTS
-!!      m_bader,m_bz_mesh,m_chi0tk,m_cut3d,m_ebands,m_epjdos,m_exc_diago
-!!      m_geometry,m_gsphere,m_ifc,m_ingeo,m_io_screening,m_kpts,m_lgroup
-!!      m_mkcore,m_mkrho,m_mlwfovlp_qp,m_mpi_setup,m_outscfcv,m_paw_mkrho
-!!      m_paw_pwaves_lmn,m_phonons,m_polynomial_coeff,m_screen,m_skw,m_sort
-!!      m_symkpt,m_tddft,m_thmeig,m_use_ga,m_vcoul,m_wvl_rho,mkcore_wvl
-!!
-!! CHILDREN
-!!      move_alloc,sort_dp
 !!
 !! SOURCE
 
@@ -178,16 +168,9 @@ end subroutine sort_dp
 !!  iperm(n): index of permutation given the right ascending order
 !!      the i-th element of the ouput ordered list had index iperm(i) in the input list.
 !!
-!! PARENTS
-!!      m_dvdb,m_elphon,m_fftcore,m_geometry,m_hdr,m_invars2,m_mpi_setup
-!!      m_mpinfo,m_nesting,m_rec,m_spacepar,m_wfk
-!!
-!! CHILDREN
-!!      move_alloc,sort_dp
-!!
 !! SOURCE
 
-subroutine sort_int(n,list,iperm)
+subroutine sort_int(n, list, iperm)
 
 !Arguments ------------------------------------
 !scalars
@@ -292,12 +275,6 @@ end subroutine sort_int
 !!      the i-th element of the ordered list had index iperm(i) in rpts.
 !!  [rmod(n)]= list of sorted |r| values.
 !!
-!! PARENTS
-!!      m_dvdb,m_sigmaph
-!!
-!! CHILDREN
-!!      move_alloc,sort_dp
-!!
 !! SOURCE
 
 subroutine sort_rpts(n, rpts, metric, iperm, tol, rmod)
@@ -358,11 +335,6 @@ end subroutine sort_rpts
 !!  iperm(n) index of permutation giving the right ascending order:
 !!      the i-th element of the ordered list had index iperm(i) in weights.
 !!  [sorted_weights(n)]= list of sorted weigts.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      move_alloc,sort_dp
 !!
 !! SOURCE
 
