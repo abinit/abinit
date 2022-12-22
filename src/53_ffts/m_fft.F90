@@ -170,25 +170,25 @@ MODULE m_fft
  end type fftbox_plan3_t
 !!***
 
-!#if defined HAVE_GPU_CUDA
-! interface
-!   subroutine xgpu_fftbox_c2c_ip(f_dims, f_embed, ndat, isign, kind, h_ff, plan_ptr, d_ff) bind(C)
-!     use iso_c_binding
-!     integer(c_int),intent(in) :: f_dims(3), f_embed(3)
-!     integer(c_int),value, intent(in) :: ndat, isign, kind
-!     type(c_ptr),intent(in) :: h_ff
-!     type(c_ptr),intent(inout) :: plan_ptr, d_ff
-!   end subroutine xgpu_fftbox_c2c_ip
-!   subroutine gpu_plan_free(plan_ptr) bind(C)
-!     use iso_c_binding
-!     type(c_ptr),intent(inout) :: plan_ptr
-!   end subroutine gpu_plan_free
-!   subroutine devptr_free(dev_ptr) bind(C)
-!     use iso_c_binding
-!     type(c_ptr),intent(inout) :: dev_ptr
-!   end subroutine devptr_free
-! end interface
-!endif
+#if defined HAVE_GPU_CUDA
+ interface
+   subroutine xgpu_fftbox_c2c_ip(f_dims, f_embed, ndat, isign, kind, h_ff, plan_pp, d_ff) bind(C)
+     use iso_c_binding
+     integer(c_int),intent(in) :: f_dims(3), f_embed(3)
+     integer(c_int),value, intent(in) :: ndat, isign, kind
+     type(c_ptr),intent(in) :: h_ff
+     type(c_ptr),intent(inout) :: plan_pp, d_ff
+   end subroutine xgpu_fftbox_c2c_ip
+   subroutine gpu_planpp_free(plan_pp) bind(C)
+     use iso_c_binding
+     type(c_ptr),intent(inout) :: plan_pp
+   end subroutine gpu_planpp_free
+   subroutine devptr_free(dev_ptr) bind(C)
+     use iso_c_binding
+     type(c_ptr),intent(inout) :: dev_ptr
+   end subroutine devptr_free
+ end interface
+#endif
 
 !----------------------------------------------------------------------
 
@@ -317,29 +317,19 @@ subroutine fftbox_plan3_free(plan)
 
 ! *************************************************************************
 
-!#define _SFREE_PLAN(gpu_plan) if (c_associated(gpu_plan)) call gpu_plan_free(gpu_plan)
-!#define _SFREE_DEVPTR(dev_ptr) if (c_associated(dev_ptr)) call devptr_free(dev_ptr)
-!
-! _SFREE_PLAN(plan%gpu_plan_ip_spc)
-! _SFREE_DEVPTR(plan%gpu_data_ip_spc)
-! _SFREE_PLAN(plan%gpu_plan_ip_dpc)
-! _SFREE_DEVPTR(plan%gpu_data_ip_dpc)
-! _SFREE_PLAN(plan%gpu_plan_op_spc)
-! _SFREE_DEVPTR(plan%gpu_idata_op_spc)
-! _SFREE_DEVPTR(plan%gpu_odata_op_spc)
-! _SFREE_PLAN(plan%gpu_plan_op_dpc)
-! _SFREE_DEVPTR(plan%gpu_idata_op_dpc)
-! _SFREE_DEVPTR(plan%gpu_odata_op_dpc)
+#define _SFREE_PLAN(gpu_plan) if (c_associated(gpu_plan)) call gpu_planpp_free(gpu_plan)
+#define _SFREE_DEVPTR(dev_ptr) if (c_associated(dev_ptr)) call devptr_free(dev_ptr)
 
-!contains
-!subroutine gpu_plan_free(gpu_plan)
-!  type(c_ptr),intent(inout) :: gpu_plan
-!  gpu_plan = c_null_ptr
-!end subroutine gpu_plan_free
-!subroutine devptr_free(dev_ptr)
-!  type(c_ptr),intent(inout) :: dev_ptr
-!  dev_ptr = c_null_ptr
-!end subroutine devptr_free
+ _SFREE_PLAN(plan%gpu_plan_ip_spc)
+ _SFREE_DEVPTR(plan%gpu_data_ip_spc)
+ _SFREE_PLAN(plan%gpu_plan_ip_dpc)
+ _SFREE_DEVPTR(plan%gpu_data_ip_dpc)
+ _SFREE_PLAN(plan%gpu_plan_op_spc)
+ _SFREE_DEVPTR(plan%gpu_idata_op_spc)
+ _SFREE_DEVPTR(plan%gpu_odata_op_spc)
+ _SFREE_PLAN(plan%gpu_plan_op_dpc)
+ _SFREE_DEVPTR(plan%gpu_idata_op_dpc)
+ _SFREE_DEVPTR(plan%gpu_odata_op_dpc)
 
 end subroutine fftbox_plan3_free
 !!***
@@ -373,14 +363,15 @@ subroutine fftbox_execute_ip_spc(plan, ff, isign)
  class(fftbox_plan3_t),intent(inout) :: plan
  integer,intent(in) :: isign
 !arrays
- complex(spc),intent(inout) :: ff(plan%ldxyz*plan%ndat)
+ complex(spc),target,intent(inout) :: ff(plan%ldxyz*plan%ndat)
 
 ! *************************************************************************
 
- !if (plan%use_gpu /= 0) then
- !  call xgpu_fftbox_c2c_ip(plan%dims, plan%embed, plan%ndat, isign, 4, ff, plan%gpu_plan_ip_spc, plan%gpu_data_ip_spc)
- !  return
- !end if
+ if (plan%use_gpu /= 0) then
+   call xgpu_fftbox_c2c_ip(plan%dims, plan%embed, plan%ndat, isign, 4, c_loc(ff), &
+                           plan%gpu_plan_ip_spc, plan%gpu_data_ip_spc)
+   return
+ end if
 
  ! Cpu version
 #include "fftbox_ip_driver.finc"
@@ -417,14 +408,15 @@ subroutine fftbox_execute_ip_dpc(plan, ff, isign)
  class(fftbox_plan3_t),intent(inout) :: plan
  integer,intent(in) :: isign
 !arrays
- complex(dpc),intent(inout) :: ff(plan%ldxyz*plan%ndat)
+ complex(dpc),target,intent(inout) :: ff(plan%ldxyz*plan%ndat)
 
 ! *************************************************************************
 
- !if (plan%use_gpu /= 0) then
- !  call xgpu_fftbox_c2c_ip(plan%dims, plan%embed, plan%ndat, isign, 8, ff, plan%gpu_plan_ip_dpc, plan%gpu_data_ip_dpc)
- !  return
- !end if
+ if (plan%use_gpu /= 0) then
+   call xgpu_fftbox_c2c_ip(plan%dims, plan%embed, plan%ndat, isign, 8, c_loc(ff), &
+                           plan%gpu_plan_ip_dpc, plan%gpu_data_ip_dpc)
+   return
+ end if
 
  ! Cpu version
 #include "fftbox_ip_driver.finc"
