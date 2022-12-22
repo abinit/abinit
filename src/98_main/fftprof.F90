@@ -233,7 +233,7 @@ program fftprof
  if (use_gpu /= 0) then
    gpu_devices(:)=-1
    call setdevice_cuda(gpu_devices, use_gpu)
-   ABI_CHECK(use_gpu == 0, "Cannot find any free GPU device!")
+   ABI_CHECK(use_gpu /= 0, "Cannot find any free GPU device!")
  end if
 #endif
 

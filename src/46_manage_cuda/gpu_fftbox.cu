@@ -23,7 +23,7 @@ extern "C" void devptr_free(void *dev_ptr) {
 
 
 extern "C" void xgpu_fftbox_c2c_ip(int *f_dims, int *f_embed, int ndat, int isign, int kind,
-                                   void *h_ff, void **plan_pp, void *d_ff) {
+                                   void **h_ff, void **plan_pp, void *d_ff) {
                                    //cufftComplex *h_ff, cufftHandle *plan_pp, cufftComplex *d_ff) {
 
   const int RANK = 3, stride = 1;
@@ -62,12 +62,13 @@ extern "C" void xgpu_fftbox_c2c_ip(int *f_dims, int *f_embed, int ndat, int isig
     abi_cabort();
   }
 
-  if (d_ff == NULL) {
-    printf("Calling cudaMalloc");
+  //if (d_ff == NULL) {
+    printf("Calling cudaMalloc\n");
+    //return;
     CHECK_CUDA_ERROR(cudaMalloc((void**) &d_ff, nbytes));
-  }
+  //}
 
-  CHECK_CUDA_ERROR(cudaMemcpy(d_ff, h_ff, nbytes, cudaMemcpyHostToDevice));
+  CHECK_CUDA_ERROR(cudaMemcpy(d_ff, *h_ff, nbytes, cudaMemcpyHostToDevice));
 
   /* Create a 3D FFT plan.
   cufftResult = cufftPlanMany(cufftHandle *plan, int rank, int *c_dims,
@@ -76,13 +77,14 @@ extern "C" void xgpu_fftbox_c2c_ip(int *f_dims, int *f_embed, int ndat, int isig
                               cufftType type, int batch);
   */
 
-  if (*plan_pp == NULL) {
-    printf("Building plan");
+  //if (*plan_pp == NULL) {
+  if (1) {
+    printf("Building plan\n");
     CHECK_CUDA_ERROR(cufftPlanMany(&plan, RANK, c_dims, c_embed, stride, dist, c_embed, stride, dist, type, ndat));
-	  //*plan_pp = (void **) &plan;
+    //*plan_pp = (void **) &plan;
   }
   else {
-    printf("Reusing plan");
+    printf("Reusing plan\n");
 	  plan = * ((cufftHandle *) (*plan_pp));
 	}
 
@@ -95,7 +97,7 @@ extern "C" void xgpu_fftbox_c2c_ip(int *f_dims, int *f_embed, int ndat, int isig
 	}
 
   CHECK_CUDA_ERROR(cudaDeviceSynchronize());
-  CHECK_CUDA_ERROR(cudaMemcpy(h_ff, d_ff, nbytes, cudaMemcpyDeviceToHost));
+  CHECK_CUDA_ERROR(cudaMemcpy(*h_ff, d_ff, nbytes, cudaMemcpyDeviceToHost));
   CHECK_CUDA_ERROR(cudaFree(d_ff));
   CHECK_CUDA_ERROR(cufftDestroy(plan));
 #endif

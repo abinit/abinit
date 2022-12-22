@@ -371,6 +371,7 @@ subroutine fftbox_execute_ip_spc(plan, ff, isign)
  if (plan%use_gpu /= 0) then
    call xgpu_fftbox_c2c_ip(plan%dims, plan%embed, plan%ndat, isign, 4, c_loc(ff), &
                            c_loc(plan%gpu_plan_ip_spc), plan%gpu_data_ip_spc)
+   if (isign == -1) ff = ff / product(plan%dims)
    return
  end if
 #endif
@@ -418,6 +419,7 @@ subroutine fftbox_execute_ip_dpc(plan, ff, isign)
  if (plan%use_gpu /= 0) then
    call xgpu_fftbox_c2c_ip(plan%dims, plan%embed, plan%ndat, isign, 8, c_loc(ff), &
                            c_loc(plan%gpu_plan_ip_dpc), plan%gpu_data_ip_dpc)
+   if (isign == -1) ff = ff / product(plan%dims)
    return
  end if
 #endif
@@ -1121,7 +1123,7 @@ integer function fftbox_utests(fftalg, ndat, nthreads, unit) result(nfailed)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: NSETS=6, fftcache0 = 0, use_gpu0 = 1
+ integer,parameter :: NSETS=6, fftcache0 = 0, use_gpu0 = 0 !,  use_gpu0 = 1
  integer :: ifft,ierr,ldxyz,old_nthreads,ount,cplex
  integer :: iset,nx,ny,nz,ldx,ldy,ldz,fftalga,fftalgc
  !integer :: ix,iy,iz,padat,dat
