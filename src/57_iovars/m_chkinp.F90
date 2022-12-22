@@ -3641,10 +3641,10 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !    call wrtout(std_out,msg)
 !    ierr=ierr+1
 !    end if
-     if (dt%useylm==0) then
+     if (dt%useylm == 0 .and. dt%optdriver /= RUNL_GWR) then
        write(msg,'(3a)')&
-&       'Use of GPU is not allowed when useylm==0 !',ch10,&
-&       'Action: impose uselym=1 in your input file.'
+        'Use of GPU is not allowed when useylm==0 !',ch10,&
+        'Action: impose uselym=1 in your input file.'
        ABI_ERROR_NOSTOP(msg, ierr)
      end if
      if (dt%tfkinfunc>0) then

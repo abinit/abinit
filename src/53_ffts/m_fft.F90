@@ -317,19 +317,19 @@ subroutine fftbox_plan3_free(plan)
 
 ! *************************************************************************
 
-#define _SFREE_PLAN(gpu_plan) if (c_associated(gpu_plan)) call gpu_planpp_free(gpu_plan)
-#define _SFREE_DEVPTR(dev_ptr) if (c_associated(dev_ptr)) call devptr_free(dev_ptr)
-
- _SFREE_PLAN(plan%gpu_plan_ip_spc)
- _SFREE_DEVPTR(plan%gpu_data_ip_spc)
- _SFREE_PLAN(plan%gpu_plan_ip_dpc)
- _SFREE_DEVPTR(plan%gpu_data_ip_dpc)
- _SFREE_PLAN(plan%gpu_plan_op_spc)
- _SFREE_DEVPTR(plan%gpu_idata_op_spc)
- _SFREE_DEVPTR(plan%gpu_odata_op_spc)
- _SFREE_PLAN(plan%gpu_plan_op_dpc)
- _SFREE_DEVPTR(plan%gpu_idata_op_dpc)
- _SFREE_DEVPTR(plan%gpu_odata_op_dpc)
+!#define _SFREE_PLAN(gpu_plan) if (c_associated(gpu_plan)) call gpu_planpp_free(gpu_plan)
+!#define _SFREE_DEVPTR(dev_ptr) if (c_associated(dev_ptr)) call devptr_free(dev_ptr)
+!
+! _SFREE_PLAN(plan%gpu_plan_ip_spc)
+! _SFREE_DEVPTR(plan%gpu_data_ip_spc)
+! _SFREE_PLAN(plan%gpu_plan_ip_dpc)
+! _SFREE_DEVPTR(plan%gpu_data_ip_dpc)
+! _SFREE_PLAN(plan%gpu_plan_op_spc)
+! _SFREE_DEVPTR(plan%gpu_idata_op_spc)
+! _SFREE_DEVPTR(plan%gpu_odata_op_spc)
+! _SFREE_PLAN(plan%gpu_plan_op_dpc)
+! _SFREE_DEVPTR(plan%gpu_idata_op_dpc)
+! _SFREE_DEVPTR(plan%gpu_odata_op_dpc)
 
 end subroutine fftbox_plan3_free
 !!***
@@ -367,11 +367,13 @@ subroutine fftbox_execute_ip_spc(plan, ff, isign)
 
 ! *************************************************************************
 
+#if defined HAVE_GPU_CUDA
  if (plan%use_gpu /= 0) then
    call xgpu_fftbox_c2c_ip(plan%dims, plan%embed, plan%ndat, isign, 4, c_loc(ff), &
-                           plan%gpu_plan_ip_spc, plan%gpu_data_ip_spc)
+                           c_loc(plan%gpu_plan_ip_spc), plan%gpu_data_ip_spc)
    return
  end if
+#endif
 
  ! Cpu version
 #include "fftbox_ip_driver.finc"
@@ -412,11 +414,13 @@ subroutine fftbox_execute_ip_dpc(plan, ff, isign)
 
 ! *************************************************************************
 
+#if defined HAVE_GPU_CUDA
  if (plan%use_gpu /= 0) then
    call xgpu_fftbox_c2c_ip(plan%dims, plan%embed, plan%ndat, isign, 8, c_loc(ff), &
-                           plan%gpu_plan_ip_dpc, plan%gpu_data_ip_dpc)
+                           c_loc(plan%gpu_plan_ip_dpc), plan%gpu_data_ip_dpc)
    return
  end if
+#endif
 
  ! Cpu version
 #include "fftbox_ip_driver.finc"
