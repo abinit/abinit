@@ -1,0 +1,23 @@
+5                              # flag for PAW run conducti
+t102o
+0.073119 0.0000001 5.00 1000 1 0.1 0.1 # delta_freq, min_freq, max_freq(in atomic units), nfreq, iatom
+
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = conducti
+#%% test_chain = t102.abi, t103.abi
+#%% [files]
+#%% files_to_test =
+#%%  t103_sigX,  tolnlines =10, tolabs = 2.1e-10, tolrel = 1.0e-07, fld_options = -easy;
+#%% extra_inputs =
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = N. Brouwer, M. Torrent
+#%% keywords =
+#%% description =
+#%%   Tests a PAW conductivity calculation.
+#%%   It tests the following parts of the code:
+#%%     conducti, conducti_paw_core
+#%%<END TEST_INFO>

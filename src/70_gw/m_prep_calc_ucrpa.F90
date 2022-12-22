@@ -6,7 +6,7 @@
 !! Prepare data for the calculation of U with the CRPA method: oscillators strenghs and k-points.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2021 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2022 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -14,10 +14,6 @@
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -43,8 +39,8 @@ MODULE m_prep_calc_ucrpa
  use m_geometry,      only : normv
  use m_crystal,       only : crystal_t
  use m_fft_mesh,      only : rotate_FFT_mesh
- use m_bz_mesh,       only : kmesh_t, get_BZ_item, findqg0, has_IBZ_item
- use m_gsphere,       only : gsphere_t, gsph_fft_tabs
+ use m_bz_mesh,       only : kmesh_t, findqg0
+ use m_gsphere,       only : gsphere_t
  use m_io_tools,      only : flush_unit, open_file
  use m_vcoul,         only : vcoul_t
  use m_pawpwij,       only : pawpwff_t, pawpwij_t, pawpwij_init, pawpwij_free, paw_rho_tw_g, paw_cross_rho_tw_g
@@ -78,7 +74,7 @@ contains
 !! Prepare data for the calculation of U with the CRPA method: oscillators strenghs and k-points.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2021 ABINIT group (FB, GMR, VO, LR, RWG, MG, RShaltaf,TApplencourt,BAmadon)
+!! Copyright (C) 1999-2022 ABINIT group (FB, GMR, VO, LR, RWG, MG, RShaltaf,TApplencourt,BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -150,16 +146,6 @@ contains
 !!     where the QP energies are required into complexes. Note however that this approach is not
 !!     based on group theory, and it might lead to spurious results in case of accidental degeneracies.
 !!
-!! PARENTS
-!!      m_sigma_driver
-!!
-!! CHILDREN
-!!      findqg0,flush_unit,get_bz_item,gsph_fft_tabs,paw_cross_rho_tw_g
-!!      paw_rho_tw_g,paw_symcprj,pawcprj_alloc,pawcprj_copy,pawcprj_free
-!!      pawmknhat_psipsi,pawpwij_free,pawpwij_init,read_plowannier,rho_tw_g
-!!      rotate_fft_mesh,timab,wfd%change_ngfft,wfd%get_cprj,wfd%get_ur
-!!      wfdf%paw_get_aeur,wrtout
-!!
 !! SOURCE
 
 subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Gsph_x,Vcp,Kmesh,Qmesh,lpawu,&
@@ -186,7 +172,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
  type(Pseudopotential_type),intent(in) :: Psps
  type(sigparams_t),target,intent(in) :: Sigp
  type(pawang_type),intent(in) :: Pawang
- type(wfd_t),target,intent(inout) :: Wfd,Wfdf
+ class(wfd_t),target,intent(inout) :: Wfd,Wfdf
 !arrays
  complex(dpc), intent(out) :: rhot1_q_m(cryst%nattyp(itypatcor),Wfd%nspinor,Wfd%nspinor,2*lpawu+1,2*lpawu+1,sigp%npwx,Qmesh%nibz)
  complex(dpc), intent(out) :: M1_q_m(cryst%nattyp(itypatcor),Wfd%nspinor,Wfd%nspinor,2*lpawu+1,2*lpawu+1,sigp%npwx,Qmesh%nibz)
@@ -303,7 +289,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
  !write(6,*) "ikcalc",Kmesh%bz(:,ikcalc)
  !write(6,*) "jk_bz",Kmesh%bz(:,jk_bz)
 ! jk_bz=ikcalc
- call get_BZ_item(Kmesh,jk_bz,kgw,jk_ibz,isym_kgw,jik,ph_mkgwt)
+ call kmesh%get_BZ_item(jk_bz,kgw,jk_ibz,isym_kgw,jik,ph_mkgwt)
 ! write(6,*) "jk_ibz",Kmesh%ibz(:,jk_ibz)
 ! write(6,*) "jk_bz,jk_ibz",jk_bz,jk_ibz,isym_kgw,itim
  !%call get_IBZ_item(Kmesh,jk_ibz,kibz,wtk)
@@ -574,7 +560,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
 !     write(6,*) "BB",Wfd%my_rank,spin,ik_bz
      !
      ! * Find the corresponding irreducible k-point
-     call get_BZ_item(Kmesh,ik_bz,ksum,ik_ibz,isym_ki,iik,ph_mkt)
+     call kmesh%get_BZ_item(ik_bz,ksum,ik_ibz,isym_ki,iik,ph_mkt)
      spinrot_kbz(:)=Cryst%spinrot(:,isym_ki)
 !     write(6,'(a,6i4)')"indices" ,jk_bz,jk_ibz,ik_bz,ik_ibz,spin
 
@@ -605,8 +591,8 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
 
      !
      ! * Find the corresponding irreducible q-point.
-     call get_BZ_item(Qmesh,iq_bz,qbz,iq_ibz,isym_q,itim_q)
-     q_is_gamma = (normv(qbz,Cryst%gmet,"G") < GW_TOL_W0)
+     call qmesh%get_BZ_item(iq_bz,qbz,iq_ibz,isym_q,itim_q)
+     q_is_gamma = (normv(qbz,Cryst%gmet,"G") < GW_TOLQ0)
 
 !!*******************************************
 !!    Check if qbz belongs to IBZ.
@@ -615,7 +601,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
 !!*******************************************
 !      write(6,*) "kkk1",ik_bz,jk_bz,iq_ibz
 
-      if (.NOT.has_IBZ_item(Qmesh,qbz,iq_ibz_dump,g0_dump)) then
+      if (.NOT. qmesh%has_IBZ_item(qbz,iq_ibz_dump,g0_dump)) then
         cycle
       end if
 
@@ -641,7 +627,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
      ! Tables for the FFT of the oscillators.
      !  a) FFT index of the G-G0.
      ABI_MALLOC(gwx_gbound,(2*gwx_mgfft+8,2))
-     call gsph_fft_tabs(Gsph_x,g0,gwx_mgfft,gwx_ngfft,use_padfft,gwx_gbound,igfftxg0)
+     call Gsph_x%fft_tabs(g0,gwx_mgfft,gwx_ngfft,use_padfft,gwx_gbound,igfftxg0)
 
      if ( ANY(gwx_fftalga == (/2,4/)) ) use_padfft=0 ! Pad-FFT is not coded in rho_tw_g
 #ifdef FC_IBM
@@ -656,7 +642,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
      if (pawcross==1) then
        ABI_MALLOC(gboundf,(2*mgfftf+8,2))
        ABI_MALLOC(igfftfxg0,(Gsph_x%ng))
-       call gsph_fft_tabs(Gsph_x,g0,mgfftf,ngfftf,use_padfftf,gboundf,igfftfxg0)
+       call Gsph_x%fft_tabs(g0,mgfftf,ngfftf,use_padfftf,gboundf,igfftfxg0)
        if ( ANY(gwx_fftalga == (/2,4/)) ) use_padfftf=0
        if (use_padfftf==0) then
          ABI_FREE(gboundf)

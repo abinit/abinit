@@ -6,14 +6,10 @@
 !!  .
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2021 ABINIT group (JLJ, BR, MC)
+!! Copyright (C) 2009-2022 ABINIT group (JLJ, BR, MC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -86,15 +82,6 @@ contains
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gwls_ComputeCorrelationEnergy
-!!
-!! CHILDREN
-!!      cleanup_lanczosresolvents
-!!      compute_resolvent_column_shift_lanczos_right_vectors
-!!      invert_general_matrix,setup_lanczosresolvents,wf_block_distribute
-!!      xmpi_allgather,xmpi_sum,zgemm,zgemv
 !!
 !! SOURCE
 
@@ -470,15 +457,6 @@ end subroutine compute_projected_BT_shift_Lanczos
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gwls_ComputeCorrelationEnergy
-!!
-!! CHILDREN
-!!      cleanup_lanczosresolvents
-!!      compute_resolvent_column_shift_lanczos_right_vectors
-!!      invert_general_matrix,setup_lanczosresolvents,wf_block_distribute
-!!      xmpi_allgather,xmpi_sum,zgemm,zgemv
 !!
 !! SOURCE
 

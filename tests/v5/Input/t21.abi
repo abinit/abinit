@@ -4,6 +4,11 @@
 
    ndtset 7    jdtset 1  2 3 4  12 13 14
 
+
+  rfatpol  3 3        # Treat displacements of atom three
+    rfdir  0 0 1      # Do third direction (symmetry will be used)
+
+
   tolvrs1   1.0d-12      # SCF stopping criterion (modify default)
   prtden1   1
 
@@ -19,8 +24,6 @@
    getwfk3  1          # Use k wave functions from dataset 1
    getwfq3  2          # Use k+q wave function from dataset 2
    rfphon3  1          # Do phonon response
-  rfatpol3  3 3        # Treat displacements of atom three
-    rfdir3  0 0 1      # Do third direction (symmetry will be used)
    tolvrs3  1.0d-8     # This default is active for sets 3-10
 
      nqpt4  1
@@ -28,8 +31,6 @@
    getwfk4  1          # Use k wave functions from dataset 1
    getwfq4  2          # Use k+q wave function from dataset 2
    rfphon4  1          # Do phonon response
-  rfatpol4  3 3        # Treat displacements of atom three
-    rfdir4  0 0 1      # Do third direction (symmetry will be used)
    tolvrs4  1.0d-8     # This default is active for sets 3-10
      nsym4  1          # Suppress the symmetries
 
@@ -46,8 +47,6 @@
    getwfk13  1          # Use k wave functions from dataset 1
    getwfq13  12         # Use k+q wave function from dataset 2
    rfphon13  1          # Do phonon response
-  rfatpol13  3 3        # Treat displacements of atom three
-    rfdir13  0 0 1      # Do third direction (symmetry will be used)
    tolvrs13  1.0d-8     # This default is active for sets 3-10
 
      nqpt14  1
@@ -55,8 +54,6 @@
    getwfk14  1          # Use k wave functions from dataset 1
    getwfq14  12         # Use k+q wave function from dataset 2
    rfphon14  1          # Do phonon response
-  rfatpol14  3 3        # Treat displacements of atom three
-    rfdir14  0 0 1      # Do third direction (symmetry will be used)
    tolvrs14  1.0d-8     # This default is active for sets 3-10
      nsym14  1          # Suppress the symmetries
 

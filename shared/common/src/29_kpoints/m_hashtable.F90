@@ -6,14 +6,10 @@
 !!  A dictionary like structure for integers
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2010-2021 ABINIT group (HM)
+!!  Copyright (C) 2010-2022 ABINIT group (HM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

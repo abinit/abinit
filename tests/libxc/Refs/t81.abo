@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.7.4 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h18 )
+.Starting date : Wed  4 May 2022.
+- ( at 01h21 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/libxc_t81/t81.in
-- output file    -> t81.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/libxc_t81/t81.abi
+- output file    -> t81.abo
 - root for input  files -> t81i
 - root for output files -> t81o
 
@@ -34,7 +34,7 @@
 -    mband =           5        mffmem =           1         mkmem =           2
        mpw =          69          nfft =        1728          nkpt =           2
 ================================================================================
-P This job should need less than                       1.149 Mbytes of memory.
+P This job should need less than                       1.198 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.013 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
@@ -51,7 +51,7 @@ _ WF disk file :      0.013 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           5        mffmem =           1         mkmem =           2
        mpw =          69          nfft =        1728          nkpt =           2
 ================================================================================
-P This job should need less than                       1.149 Mbytes of memory.
+P This job should need less than                       1.198 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.013 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
@@ -102,7 +102,7 @@ _ WF disk file :      0.013 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           5        mffmem =           1         mkmem =           2
        mpw =          69          nfft =        1728          nkpt =           2
 ================================================================================
-P This job should need less than                       1.149 Mbytes of memory.
+P This job should need less than                       1.198 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.013 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
@@ -119,7 +119,7 @@ _ WF disk file :      0.013 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           5        mffmem =           1         mkmem =           2
        mpw =          69          nfft =        1728          nkpt =           2
 ================================================================================
-P This job should need less than                       1.149 Mbytes of memory.
+P This job should need less than                       1.198 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.013 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
@@ -136,7 +136,7 @@ _ WF disk file :      0.013 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           5        mffmem =           1         mkmem =           2
        mpw =          69          nfft =        1728          nkpt =           2
 ================================================================================
-P This job should need less than                       1.149 Mbytes of memory.
+P This job should need less than                       1.198 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.013 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
@@ -931,13 +931,35 @@ P          mk1mem37        16
         optdriver35         1
         optdriver36         1
         optdriver37         1
-            rfdir11         0       0       0
-            rfdir12         0       0       0
-            rfdir13         0       0       0
-            rfdir14         0       0       0
-            rfdir15         0       0       0
-            rfdir16         0       0       0
-            rfdir17         0       0       0
+           prtpot11         0
+           prtpot12         0
+           prtpot13         0
+           prtpot14         0
+           prtpot15         0
+           prtpot16         0
+           prtpot17         0
+           prtpot21         1
+           prtpot22         1
+           prtpot23         1
+           prtpot24         1
+           prtpot25         1
+           prtpot26         1
+           prtpot27         1
+           prtpot31         1
+           prtpot32         1
+           prtpot33         1
+           prtpot34         1
+           prtpot35         1
+           prtpot36         1
+           prtpot37         1
+          rfatpol           1       1
+            rfdir11         1       1       1
+            rfdir12         1       1       1
+            rfdir13         1       1       1
+            rfdir14         1       1       1
+            rfdir15         1       1       1
+            rfdir16         1       1       1
+            rfdir17         1       1       1
             rfdir21         1       0       0
             rfdir22         1       0       0
             rfdir23         1       0       0
@@ -1220,8 +1242,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1387,8 +1409,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1558,8 +1580,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1724,8 +1746,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1895,8 +1917,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2061,8 +2083,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2227,8 +2249,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2401,8 +2423,8 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2417,7 +2439,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t81o_DS11_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -2434,7 +2455,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t81o_DS11_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -2508,7 +2528,7 @@ tolerances: {tolwfr: 1.00E-22, }
 
  WARNING : Localization tensor calculation (this does not apply to other properties).
   Not all d/dk perturbations were computed. So the localization tensor in reciprocal space is incomplete,
-  and transformation to cartesian coordinates may be wrong.
+  and transformation to cartesian coordinates may be wrong. Check input variable rfdir.
 
  respfn : d/dk was computed, but no 2DTE, so no DDB output.
 
@@ -2539,8 +2559,8 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2555,7 +2575,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t81o_DS11_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -2572,7 +2591,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t81o_DS11_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -2646,7 +2664,7 @@ tolerances: {tolwfr: 1.00E-22, }
 
  WARNING : Localization tensor calculation (this does not apply to other properties).
   Not all d/dk perturbations were computed. So the localization tensor in reciprocal space is incomplete,
-  and transformation to cartesian coordinates may be wrong.
+  and transformation to cartesian coordinates may be wrong. Check input variable rfdir.
 
  respfn : d/dk was computed, but no 2DTE, so no DDB output.
 
@@ -2682,8 +2700,8 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2698,7 +2716,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t81o_DS13_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -2715,7 +2732,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t81o_DS13_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -2789,7 +2805,7 @@ tolerances: {tolwfr: 1.00E-22, }
 
  WARNING : Localization tensor calculation (this does not apply to other properties).
   Not all d/dk perturbations were computed. So the localization tensor in reciprocal space is incomplete,
-  and transformation to cartesian coordinates may be wrong.
+  and transformation to cartesian coordinates may be wrong. Check input variable rfdir.
 
  respfn : d/dk was computed, but no 2DTE, so no DDB output.
 
@@ -2820,8 +2836,8 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2836,7 +2852,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t81o_DS13_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -2853,7 +2868,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t81o_DS13_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -2927,7 +2941,7 @@ tolerances: {tolwfr: 1.00E-22, }
 
  WARNING : Localization tensor calculation (this does not apply to other properties).
   Not all d/dk perturbations were computed. So the localization tensor in reciprocal space is incomplete,
-  and transformation to cartesian coordinates may be wrong.
+  and transformation to cartesian coordinates may be wrong. Check input variable rfdir.
 
  respfn : d/dk was computed, but no 2DTE, so no DDB output.
 
@@ -2963,8 +2977,8 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2979,7 +2993,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t81o_DS15_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -2996,7 +3009,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t81o_DS15_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -3070,7 +3082,7 @@ tolerances: {tolwfr: 1.00E-22, }
 
  WARNING : Localization tensor calculation (this does not apply to other properties).
   Not all d/dk perturbations were computed. So the localization tensor in reciprocal space is incomplete,
-  and transformation to cartesian coordinates may be wrong.
+  and transformation to cartesian coordinates may be wrong. Check input variable rfdir.
 
  respfn : d/dk was computed, but no 2DTE, so no DDB output.
 
@@ -3101,8 +3113,8 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3117,7 +3129,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t81o_DS15_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -3134,7 +3145,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t81o_DS15_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -3208,7 +3218,7 @@ tolerances: {tolwfr: 1.00E-22, }
 
  WARNING : Localization tensor calculation (this does not apply to other properties).
   Not all d/dk perturbations were computed. So the localization tensor in reciprocal space is incomplete,
-  and transformation to cartesian coordinates may be wrong.
+  and transformation to cartesian coordinates may be wrong. Check input variable rfdir.
 
  respfn : d/dk was computed, but no 2DTE, so no DDB output.
 
@@ -3239,8 +3249,8 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3255,7 +3265,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t81o_DS15_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -3272,7 +3281,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t81o_DS15_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -3346,7 +3354,7 @@ tolerances: {tolwfr: 1.00E-22, }
 
  WARNING : Localization tensor calculation (this does not apply to other properties).
   Not all d/dk perturbations were computed. So the localization tensor in reciprocal space is incomplete,
-  and transformation to cartesian coordinates may be wrong.
+  and transformation to cartesian coordinates may be wrong. Check input variable rfdir.
 
  respfn : d/dk was computed, but no 2DTE, so no DDB output.
 
@@ -3384,8 +3392,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3400,7 +3408,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t81o_DS11_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -3418,7 +3425,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t81o_DS11_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -3685,8 +3691,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3701,7 +3707,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t81o_DS11_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -3719,7 +3724,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t81o_DS11_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -3991,8 +3995,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4007,7 +4011,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t81o_DS13_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -4025,7 +4028,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t81o_DS13_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -4292,8 +4294,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4308,7 +4310,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t81o_DS13_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -4326,7 +4327,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t81o_DS13_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -4598,8 +4598,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4614,7 +4614,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t81o_DS15_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -4632,7 +4631,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t81o_DS15_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -4899,8 +4897,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4915,7 +4913,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t81o_DS15_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -4933,7 +4930,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t81o_DS15_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -5200,8 +5196,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5216,7 +5212,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t81o_DS15_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -5234,7 +5229,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t81o_DS15_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -6052,13 +6046,35 @@ P          mk1mem37        16
         optdriver35         1
         optdriver36         1
         optdriver37         1
-            rfdir11         0       0       0
-            rfdir12         0       0       0
-            rfdir13         0       0       0
-            rfdir14         0       0       0
-            rfdir15         0       0       0
-            rfdir16         0       0       0
-            rfdir17         0       0       0
+           prtpot11         0
+           prtpot12         0
+           prtpot13         0
+           prtpot14         0
+           prtpot15         0
+           prtpot16         0
+           prtpot17         0
+           prtpot21         1
+           prtpot22         1
+           prtpot23         1
+           prtpot24         1
+           prtpot25         1
+           prtpot26         1
+           prtpot27         1
+           prtpot31         1
+           prtpot32         1
+           prtpot33         1
+           prtpot34         1
+           prtpot35         1
+           prtpot36         1
+           prtpot37         1
+          rfatpol           1       1
+            rfdir11         1       1       1
+            rfdir12         1       1       1
+            rfdir13         1       1       1
+            rfdir14         1       1       1
+            rfdir15         1       1       1
+            rfdir16         1       1       1
+            rfdir17         1       1       1
             rfdir21         1       0       0
             rfdir22         1       0       0
             rfdir23         1       0       0
@@ -6354,7 +6370,7 @@ P          mk1mem37        16
 -
 - [5] Ab initio pseudopotentials for electronic structure calculations of poly-atomic systems, 
 - using density-functional theory.
-- M. Fuchs, M. Scheffler, Comput. Phys. Commun. 119, 67 (1999).
+- M. Fuchs and, M. Scheffler, Comput. Phys. Commun. 119, 67 (1999).
 - Comment: Some pseudopotential generated using the FHI code were used.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#fuchs1999
 -
@@ -6393,10 +6409,10 @@ P          mk1mem37        16
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          8.7  wall=          9.0
+- Proc.   0 individual time (sec): cpu=         11.1  wall=         11.9
 
 ================================================================================
 
  Calculation completed.
-.Delivered  90 WARNINGs and 109 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          8.7  wall=          9.0
+.Delivered  53 WARNINGs and  26 COMMENTs to log file.
++Overall time at end (sec) : cpu=         11.1  wall=         11.9

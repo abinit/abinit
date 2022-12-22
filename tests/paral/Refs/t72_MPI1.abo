@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.7.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h18 )
+.Starting date : Thu 10 Feb 2022.
+- ( at 14h07 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/paral_t72_MPI1/t72.in
-- output file    -> t72_MPI1.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/TestBot_MPI1/paral_t72_MPI1/t72.abi
+- output file    -> t72_MPI1.abo
 - root for input  files -> t72_MPI1i
 - root for output files -> t72_MPI1o
 
@@ -34,7 +34,7 @@
 -    mband =           5        mffmem =           1         mkmem =           2
        mpw =         214          nfft =        5832          nkpt =           2
 ================================================================================
-P This job should need less than                       2.242 Mbytes of memory.
+P This job should need less than                       2.411 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.035 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 ================================================================================
@@ -51,7 +51,7 @@ _ WF disk file :      0.035 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 -    mband =         105        mffmem =           1         mkmem =           6
        mpw =         222          nfft =        5832          nkpt =           6
 ================================================================================
-P This job should need less than                       4.006 Mbytes of memory.
+P This job should need less than                       4.174 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      2.136 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 ================================================================================
@@ -68,7 +68,7 @@ _ WF disk file :      2.136 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 -    mband =         100        mffmem =           1         mkmem =           6
        mpw =         137          nfft =        3375          nkpt =           6
 ================================================================================
-P This job should need less than                       3.092 Mbytes of memory.
+P This job should need less than                       3.189 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      1.256 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
@@ -85,7 +85,7 @@ _ WF disk file :      1.256 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 -    mband =         100        mffmem =           1         mkmem =           6
        mpw =         137          nfft =        3375          nkpt =           6
 ================================================================================
-P This job should need less than                       3.092 Mbytes of memory.
+P This job should need less than                       3.189 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      1.256 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
@@ -363,8 +363,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.500   => boxcut(ratio)=   2.16822
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -575,14 +575,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   3.4238E+00  3.4509E+00  3.4834E+00  3.5342E+00  3.5342E+00  3.5435E+00
   3.5837E+00  3.5927E+00  3.5981E+00  3.5981E+00  3.6630E+00  3.6845E+00
   3.7101E+00  3.7120E+00  3.7125E+00
-  prteigrs : nnsclo,ikpt=  150    1 max resid (incl. the buffer)=  1.29902E-05
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-  prteigrs : nnsclo,ikpt=  150    2 max resid (incl. the buffer)=  2.64931E-07
-  prteigrs : nnsclo,ikpt=  150    3 max resid (incl. the buffer)=  7.68444E-09
-  prteigrs : nnsclo,ikpt=  150    4 max resid (incl. the buffer)=  2.00823E-07
-  prteigrs : nnsclo,ikpt=  150    5 max resid (incl. the buffer)=  1.53718E-05
-  prteigrs : nnsclo,ikpt=  150    6 max resid (incl. the buffer)=  1.15697E-11
 
 
 --- !ResultsGS
@@ -681,8 +675,8 @@ meta: {optdriver: 3, gwcalctyp: 0, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1368,10 +1362,10 @@ P           mkmem4          6
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         17.0  wall=         17.1
+- Proc.   0 individual time (sec): cpu=         17.3  wall=         17.4
 
 ================================================================================
 
  Calculation completed.
-.Delivered   7 WARNINGs and   9 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         17.0  wall=         17.1
+.Delivered   4 WARNINGs and  10 COMMENTs to log file.
++Overall time at end (sec) : cpu=         17.3  wall=         17.4

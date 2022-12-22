@@ -36,10 +36,11 @@ sources = [
  "m_dvdb.F90",
  "m_efmas.F90",
  "m_eig2d.F90",
- "m_rf2.F90",
+ "m_orbmag.F90",
  "m_paral_pert.F90",
- "m_strain.F90",
+ "m_rf2.F90",
  "m_rf2_init.F90",
+ "m_strain.F90",
 ]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
 # This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.

@@ -8,7 +8,7 @@
 !! to the next generation. Those are chosen from ga_opt_percent% best fit and (1-ga_opt_percent)% from Genetic rules
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2021 ABINIT group (XG, AHR)
+!! Copyright (C) 2009-2022 ABINIT group (XG, AHR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -45,13 +45,6 @@
 !!   results_img(:,:)%xred(3,natom)
 !!    at input, history of the values of xred for all images
 !!    at output, the predicted values of xred for all images
-!!
-!! PARENTS
-!!      m_gstateimg
-!!
-!! CHILDREN
-!!      convert_coortogen,convert_gentocoor,initialize_perm,metric,mkradim
-!!      mkrdim,randomize_parent,sort_dp,swap,symanal,symfind,symlatt
 !!
 !! SOURCE
 

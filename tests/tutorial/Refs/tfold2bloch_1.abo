@@ -1,8 +1,8 @@
 
-.Version 9.3.4 of ABINIT 
-.(MPI version, prepared for a x86_64_darwin18.7.0_gnu9.3 computer) 
+.Version 9.7.2 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,16 +14,16 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri  5 Feb 2021.
-- ( at 15h32 )
+.Starting date : Thu 10 Feb 2022.
+- ( at 14h15 )
   
-- input  file    -> /Users/gonze/_Research/ABINIT_git/gonze/tests/Test_suite/tutorial_tfold2bloch_1-tfold2bloch_2/tfold2bloch_1.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/TestBot_MPI1/tutorial_tfold2bloch_1-tfold2bloch_2/tfold2bloch_1.abi
 - output file    -> tfold2bloch_1.abo
 - root for input  files -> tfold2bloch_1i
 - root for output files -> tfold2bloch_1o
 
 - inpspheads : Reading pseudopotential header in XML form from 
--   /Users/gonze/_Research/ABINIT_git/gonze/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/H.xml
+-   /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/H.xml
 
  DATASET    1 : the unit cell is not primitive
 ================================================================================
@@ -38,7 +38,7 @@
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        54    nfftf =     34992
 ================================================================================
-P This job should need less than                       8.657 Mbytes of memory.
+P This job should need less than                       9.011 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.175 Mbytes ; DEN or POT disk file :      0.269 Mbytes.
 ================================================================================
@@ -57,7 +57,7 @@ _ WF disk file :      0.175 Mbytes ; DEN or POT disk file :      0.269 Mbytes.
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        54    nfftf =     34992
 ================================================================================
-P This job should need less than                       8.652 Mbytes of memory.
+P This job should need less than                       9.010 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      1.768 Mbytes ; DEN or POT disk file :      0.269 Mbytes.
 ================================================================================
@@ -282,9 +282,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     40.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /Users/gonze/_Research/ABINIT_git/gonze/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/H.xml
-- pspatm: opening atomic psp file    /Users/gonze/_Research/ABINIT_git/gonze/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/H.xml
-- pspatm : Reading pseudopotential header in XML form from /Users/gonze/_Research/ABINIT_git/gonze/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/H.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/H.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/H.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/H.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  3 (lmn_size=  5), orbitals=   0   0   1
  Spheres core radius: rc_sph= 0.89889493
@@ -318,8 +318,8 @@ tolerances: {tolvrs: 1.00E-06, }
      iter   Etot(hartree)      deltaE(h)  residm     nres2
  ETOT  1  -3.0165741308957    -3.017E+00 1.612E-02 1.174E-01
  ETOT  2  -3.0210969300359    -4.523E-03 1.629E-08 2.335E-02
- ETOT  3  -3.0211193400804    -2.241E-05 2.932E-10 1.232E-04
- ETOT  4  -3.0211195443785    -2.043E-07 5.158E-12 7.636E-06
+ ETOT  3  -3.0211193400803    -2.241E-05 2.932E-10 1.232E-04
+ ETOT  4  -3.0211195443786    -2.043E-07 5.158E-12 7.636E-06
  ETOT  5  -3.0211195746957    -3.032E-08 1.831E-13 9.339E-09
 
  At SCF step    5       nres2   =  9.34E-09 < tolvrs=  1.00E-06 =>converged.
@@ -379,8 +379,8 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =      0.049690285800927
- Compensation charge over fine fft grid    =      0.049693008364837
+ Compensation charge over spherical meshes =      0.049690285800944
+ Compensation charge over fine fft grid    =      0.049693008364842
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -472,28 +472,28 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  2.82106323227890E+00
-hartree             :  9.56303663563902E-02
-xc                  : -1.83138018010609E+00
+kinetic             :  2.82106323227909E+00
+hartree             :  9.56303663549342E-02
+xc                  : -1.83138018010469E+00
 Ewald energy        : -2.83729747948063E+00
-psp_core            :  1.39562159979746E-02
-local_psp           : -1.27151555005348E+00
-spherical_terms     : -1.15918982834263E-02
-total_energy        : -3.02113529329036E+00
-total_energy_eV     : -8.22092721587177E+01
+psp_core            :  1.39562159979751E-02
+local_psp           : -1.27151555004677E+00
+spherical_terms     : -1.15918982821219E-02
+total_energy        : -3.02113529328221E+00
+total_energy_eV     : -8.22092721584959E+01
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 1, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -6.68173900778988E-01
+band_energy         : -6.68173900779656E-01
 Ewald energy        : -2.83729747948063E+00
-psp_core            :  1.39562159979746E-02
-xc_dc               :  4.62368084556007E-01
-spherical_terms     :  8.02750500991178E-03
-total_energy_dc     : -3.02111957469572E+00
-total_energy_dc_eV  : -8.22088444340052E+01
+psp_core            :  1.39562159979751E-02
+xc_dc               :  4.62368084556992E-01
+spherical_terms     :  8.02750500957261E-03
+total_energy_dc     : -3.02111957469574E+00
+total_energy_dc_eV  : -8.22088444340058E+01
 ...
 
 
@@ -556,7 +556,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   1.70E-13  2.97E-14  2.00E-13  5.61E-14
  -3.7397E-01 -2.2199E-01 -1.4827E-01 -1.4827E-01
  Non-SCF case, kpt    5 (  0.00000 -0.30000  0.00000), residuals and eigenvalues=
-  6.33E-13  3.99E-13  6.31E-13  3.40E-14
+  6.33E-13  3.99E-13  6.32E-13  3.40E-14
  -3.9085E-01 -1.8944E-01 -1.6492E-01 -1.6492E-01
  Non-SCF case, kpt    6 (  0.00000 -0.25000  0.00000), residuals and eigenvalues=
   8.56E-13  1.21E-13  7.30E-14  8.32E-14
@@ -604,32 +604,26 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   1.96E-13  4.52E-14  1.74E-13  5.70E-13
  -3.3265E-01 -2.8166E-01 -1.0760E-01 -1.0760E-01
  Non-SCF case, kpt   21 (  0.00000  0.50000  0.00000), residuals and eigenvalues=
-  3.36E-14  8.13E-13  9.28E-15  2.64E-13
+  3.36E-14  8.13E-13  9.29E-15  2.64E-13
  -3.0834E-01 -3.0834E-01 -8.3709E-02 -8.3709E-02
  Non-SCF case, kpt   22 (  0.00000  0.00000 -0.50000), residuals and eigenvalues=
   1.74E-13  8.84E-13  8.54E-09  5.27E-13
  -3.7990E-01 -3.7990E-01 -2.9365E-02  2.6283E-02
-  prteigrs : nnsclo,ikpt=  100   22 max resid (incl. the buffer)=  8.54477E-09
  Non-SCF case, kpt   23 (  0.00000  0.00000 -0.45000), residuals and eigenvalues=
   3.74E-13  4.83E-13  2.42E-08  1.70E-06
  -3.9087E-01 -3.6779E-01 -3.3059E-02  1.5865E-02
-  prteigrs : nnsclo,ikpt=  100   23 max resid (incl. the buffer)=  1.69970E-06
  Non-SCF case, kpt   24 (  0.00000  0.00000 -0.40000), residuals and eigenvalues=
   2.30E-14  2.67E-14  6.72E-11  3.15E-10
  -4.0071E-01 -3.5457E-01 -4.3483E-02  6.5044E-03
-  prteigrs : nnsclo,ikpt=  100   24 max resid (incl. the buffer)=  3.15233E-10
  Non-SCF case, kpt   25 (  0.00000  0.00000 -0.35000), residuals and eigenvalues=
   2.54E-13  6.33E-13  6.43E-10  1.46E-08
  -4.0941E-01 -3.4025E-01 -5.9083E-02 -1.7826E-03
-  prteigrs : nnsclo,ikpt=  100   25 max resid (incl. the buffer)=  1.46407E-08
  Non-SCF case, kpt   26 (  0.00000  0.00000 -0.30000), residuals and eigenvalues=
   2.18E-13  3.66E-13  2.99E-12  9.74E-10
  -4.1697E-01 -3.2485E-01 -7.8171E-02 -8.9852E-03
-  prteigrs : nnsclo,ikpt=  100   26 max resid (incl. the buffer)=  9.74233E-10
  Non-SCF case, kpt   27 (  0.00000  0.00000 -0.25000), residuals and eigenvalues=
   2.49E-14  9.86E-13  2.54E-13  4.29E-11
  -4.2336E-01 -3.0838E-01 -9.9365E-02 -1.5094E-02
-  prteigrs : nnsclo,ikpt=  100   27 max resid (incl. the buffer)=  4.28843E-11
  Non-SCF case, kpt   28 (  0.00000  0.00000 -0.20000), residuals and eigenvalues=
   2.88E-14  6.90E-13  2.16E-13  1.15E-13
  -4.2860E-01 -2.9083E-01 -1.2167E-01 -2.0102E-02
@@ -651,38 +645,30 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
  Non-SCF case, kpt   34 (  0.00000  0.00000  0.10000), residuals and eigenvalues=
   4.07E-13  2.15E-13  3.46E-13  2.09E-12
  -4.3562E-01 -2.5289E-01 -1.6714E-01 -2.6791E-02
-  prteigrs : nnsclo,ikpt=  100   34 max resid (incl. the buffer)=  2.09176E-12
  Non-SCF case, kpt   35 (  0.00000  0.00000  0.15000), residuals and eigenvalues=
   5.04E-13  1.11E-13  1.06E-13  1.57E-13
  -4.3271E-01 -2.7234E-01 -1.4442E-01 -2.4002E-02
  Non-SCF case, kpt   36 (  0.00000  0.00000  0.20000), residuals and eigenvalues=
   5.49E-13  7.29E-13  3.75E-13  7.96E-11
  -4.2860E-01 -2.9083E-01 -1.2167E-01 -2.0102E-02
-  prteigrs : nnsclo,ikpt=  100   36 max resid (incl. the buffer)=  7.96125E-11
  Non-SCF case, kpt   37 (  0.00000  0.00000  0.25000), residuals and eigenvalues=
   2.35E-13  6.32E-13  2.05E-13  5.14E-12
  -4.2336E-01 -3.0838E-01 -9.9365E-02 -1.5094E-02
-  prteigrs : nnsclo,ikpt=  100   37 max resid (incl. the buffer)=  5.14107E-12
  Non-SCF case, kpt   38 (  0.00000  0.00000  0.30000), residuals and eigenvalues=
   7.22E-13  5.46E-14  1.07E-12  1.05E-08
  -4.1697E-01 -3.2485E-01 -7.8171E-02 -8.9852E-03
-  prteigrs : nnsclo,ikpt=  100   38 max resid (incl. the buffer)=  1.05322E-08
  Non-SCF case, kpt   39 (  0.00000  0.00000  0.35000), residuals and eigenvalues=
   2.61E-13  7.28E-13  2.30E-11  1.03E-07
  -4.0941E-01 -3.4025E-01 -5.9083E-02 -1.7825E-03
-  prteigrs : nnsclo,ikpt=  100   39 max resid (incl. the buffer)=  1.02740E-07
  Non-SCF case, kpt   40 (  0.00000  0.00000  0.40000), residuals and eigenvalues=
   6.90E-14  3.76E-14  5.56E-13  4.76E-09
  -4.0071E-01 -3.5457E-01 -4.3483E-02  6.5044E-03
-  prteigrs : nnsclo,ikpt=  100   40 max resid (incl. the buffer)=  4.75701E-09
  Non-SCF case, kpt   41 (  0.00000  0.00000  0.45000), residuals and eigenvalues=
   6.69E-14  4.04E-13  2.82E-08  1.21E-05
  -3.9087E-01 -3.6779E-01 -3.3059E-02  1.5869E-02
-  prteigrs : nnsclo,ikpt=  100   41 max resid (incl. the buffer)=  1.21111E-05
  Non-SCF case, kpt   42 (  0.00000  0.00000  0.50000), residuals and eigenvalues=
   7.53E-13  2.29E-13  8.08E-10  7.39E-13
  -3.7990E-01 -3.7990E-01 -2.9365E-02  2.6283E-02
-  prteigrs : nnsclo,ikpt=  100   42 max resid (incl. the buffer)=  8.08075E-10
 
 
 --- !ResultsGS
@@ -724,7 +710,7 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
- Compensation charge over spherical meshes =      0.049694322366303
+ Compensation charge over spherical meshes =      0.049694322366308
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -1137,10 +1123,10 @@ P           mkmem2         42
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          3.7  wall=          3.9
+- Proc.   0 individual time (sec): cpu=          4.4  wall=          4.5
 
 ================================================================================
 
  Calculation completed.
-.Delivered   1 WARNINGs and   7 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.7  wall=          3.9
+.Delivered   2 WARNINGs and   7 COMMENTs to log file.
++Overall time at end (sec) : cpu=          4.4  wall=          4.5

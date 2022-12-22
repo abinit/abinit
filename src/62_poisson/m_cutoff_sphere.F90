@@ -4,10 +4,6 @@
 !!
 !! FUNCTION
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -50,11 +46,6 @@ module m_cutoff_sphere
 !!
 !! NOTES
 !!  For |q|<small and G=0 we use 2pi.R_cut^2, namely we consider the limit q-->0 of Eq. (1)
-!!
-!! PARENTS
-!!      m_vcoul
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

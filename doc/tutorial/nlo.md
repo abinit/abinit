@@ -2,7 +2,7 @@
 authors: JWZ, PhG,  MVeithen,  XG, NAP
 ---
 
-# Tutorial on static non-linear properties
+# Static non-linear properties
 
 ## Electronic non-linear susceptibility, non-resonant Raman tensor, electro-optic effect.
 
@@ -184,22 +184,23 @@ optdriver5    5
   d3e_pert1_elfd5    1
   d3e_pert1_phon5    1
  d3e_pert1_atpol5    1 2
-   d3e_pert1_dir5    1 1 1
   d3e_pert2_elfd5    1
-   d3e_pert2_dir5    1 1 1
   d3e_pert3_elfd5    1
-   d3e_pert3_dir5    1 1 1
 ```
 The first three lines retrieve the ground state and first-order densities and wavefunctions.
-[[optdriver]] 5 triggers the 3rd-order energy calculation. Finally, the `d3e` input
+[[optdriver]] 5 triggers the 3rd-order energy calculation. 
+
+The `d3e` input
 variables determine the 3 perturbations of the 3rd order derivatives, and their
 directions. Notice that we compute three derivatives with respect to electric field:
 [[d3e_pert1_elfd]], [[d3e_pert2_elfd]], and [[d3e_pert3_elfd]]. These will be combined
 to give the necessary data for the nonlinear optical susceptibility. We also
-include [[d3e_pert1_phon]], for both atoms in the unit cell ([[d3e_pert1_atpol]]). When combined
+include [[d3e_pert1_phon]], for both atoms in the unit cell (see [[d3e_pert1_atpol]], for which we stick to the default).  
+When combined
 later with the electric field perturbations 2 and 3, this will yield the necessary
 information for the Raman tensor. Finally, for all three perturbation classes, we compute
-the perturbations in all three spatial directions.
+the perturbations in all three spatial directions 
+(see [[d3e_pert1_dir]], [[d3e_pert2_dir]] and [[d3e_pert3_dir]], for which we stick to the default).
 
 If it was not done at the beginning of this tutorial, you can now make the
 run. You can have a quick look to the output file to verify that everything is

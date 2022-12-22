@@ -11,8 +11,8 @@ import mkdocs.__main__
 if sys.version_info < (3, 6):
     warnings.warn("Python >= 3.6 is STRONGLY recommended when building the Abinit documentation\n" * 20)
 
-#if sys.version_info >= (3, 7):
-#    warnings.warn("Python >= 3.7 is not yet supported. Please use py3.6 to build the Abinit documentation\n" * 20)
+if sys.version_info >= (3, 10):
+    warnings.warn("Python >= 3.10 is not yet supported. Please use py <= 3.9 to build the Abinit documentation\n" * 20)
 
 #if sys.mkdocs.__version__
 

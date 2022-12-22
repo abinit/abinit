@@ -1,5 +1,5 @@
 ---
-authors: BAmadon
+authors: BAmadon, ROuterovitch
 ---
 
 # Calculation of U and J using cRPA
@@ -14,7 +14,7 @@ It might be useful that you already know how to do PAW calculations using
 ABINIT but it is not mandatory (you can follow the two tutorials on PAW in
 ABINIT ([PAW1](/tutorial/paw1), [PAW2](/tutorial/paw2))).
 The DFT+_U_ tutorial in ABINIT ([DFT+U](/tutorial/dftu)) might be useful to know some
-basic variables about correlated orbitals.
+basic variables related to correlated orbitals.
 
 The first GW tutorial in ABINIT ([GW](/tutorial/gw1)) is useful to learn how
 to compute the screening, and how to converge the relevant parameters
@@ -44,19 +44,21 @@ of this method using Projected Local Orbitals Wannier orbitals in ABINIT (The
 implementation of cRPA in ABINIT is described in [[cite:Amadon2014]] and projected
 local orbitals Wannier functions are presented in [[cite:Amadon2008]]). The
 discussion about the localization of Wannier orbitals has some similarities
-with the beginning on the DMFT tutorial (see [here](dmft.md#1) and [there](dmft.md#2))
+with the beginning of the DMFT tutorial (see [here](dmft.md#1) and [there](dmft.md#2))
 
 Several parameters (both physical and technical) are important for the cRPA calculation:
 
-  * **The definition of correlated orbitals.** The first part of the tutorial is similar to the DMFT tutorial
-    and explains the electronic structure of SrVO<sub>3</sub> and will be used to understand the definition of
-    Wannier orbitals with various extensions. Wannier functions are unitarily related to a selected
-    set of Kohn Sham (KS) wavefunctions, specified in ABINIT by band index [[dmftbandi]], and [[dmftbandf]].
-    Thus, as empty bands are necessary to build Wannier functions, it is required in DMFT or cRPA calculations
+  * **The definition of correlated orbitals.** The first part of the tutorial is similar to the DMFT tutorial but uses
+	different keywords to calculate the correlated orbitals basis.
+    It explains the electronic structure of SrVO<sub>3</sub> and will be used to understand the definition of
+    Wannier orbitals with various extensions. 
+	Wannier functions are unitarily related to a selected set of Kohn Sham (KS) wavefunctions, specified in ABINIT by 
+	band index [[plowan_bandi]], and [[plowan_bandf]]. 
+    As empty bands are necessary to build Wannier functions, it is required in DMFT or cRPA calculations
     that the KS Hamiltonian is correctly diagonalized: use high values for [[nnsclo]], and [[nline]]
     for cRPA and DMFT calculations and preceding DFT calculations. Another solution used in the present tutorial
-    is to use a specific non self-consistent calculation to diagonalize the hamiltonian, as in _GW_ calculations.
-    Concerning the localization or correlated orbitals, generally, the larger [[dmftbandf]]-[[dmftbandi]] is,
+	is to use a specific non self-consistent calculation to diagonalize the hamiltonian, as in _GW_ calculations.
+    Concerning the localization or correlated orbitals, generally, the larger [[plowan_bandf]]-[[plowan_bandi]] is,
     the more localized is the radial part of the Wannier orbital. Finally, note that Wannier orbitals
     are used in DMFT and cRPA implementations but this is not the most usual choice of correlated orbitals
     in the DFT+_U_ implementation in particular in ABINIT (see [[cite:Amadon2008a]]).
@@ -171,7 +173,7 @@ B-like character. Moreover, A refers to the definition of screening and B
 refers to the definition of correlated orbitals. To clarify this definition,
 we give below some examples:
 
-  * ( ***t<sub>2g</sub>-t<sub>2g</sub>***) model (or _t<sub>2g</sub>_ model): The correlated orbitals are defined with only _t<sub>2g</sub>_-like bands (bands 21, 22 and 23). The screening inside these bands is not taken into account to built the constrained polarizability. Note that if this case (and in the ( _d-d_ ) and ( _dp-dp_ ) models), using [[ucrpa]]=1 or 2 give the same results, provided one uses [[ucrpa_bands]] equal to ([[dmftbandi]] [[dmftbandf]] ).
+  * ( ***t<sub>2g</sub>-t<sub>2g</sub>***) model (or _t<sub>2g</sub>_ model): The correlated orbitals are defined with only _t<sub>2g</sub>_-like bands (bands 21, 22 and 23). The screening inside these bands is not taken into account to built the constrained polarizability. Note that if this case (and in the ( _d-d_ ) and ( _dp-dp_ ) models), using [[ucrpa]]=1 or 2 give the same results, provided one uses [[ucrpa_bands]] equal to ([[plowan_bandi]] [[plowan_bandf]] ).
   * ( ***d-d*** ) model (or d model): The correlated orbitals are defined with only _d_ -like bands (bands 21 to 25). The screening inside these bands is not taken into account.
   * ( ***dp-dp*** ) model (or dp model): The correlated orbitals are defined with only _d_ -like and Op-like bands (bands 12 to 23). The screening inside these bands is not taken into account.
   * ( ***d-dp (a)***) model: In this scheme the Wannier orbitals are constructed as in the ( _dp-dp_ ) model. However, in this scheme, one only supresses the screening inside _d_ -like bands ([[ucrpa]]=1). It is coherent with the fact that the DMFT will only be applied to the d orbitals: so the screening for Op-like bands need to be taken into account.
@@ -220,22 +222,25 @@ important physical parameters relevant to this dataset.
 
   * Diagonalization of Kohn-Sham Hamiltonian: As in the case of DFT+DMFT or _GW_ calculation, a cRPA calculation requires that the LDA is perfectly converged and the Kohn Sham eigenstates are precisely determined, including the empty states. Indeed these empty states are necessary both to build Wannier functions and to compute the polarizability. For this reason we choose a very low value of [[tolwfr]] in the input file tucrpa_1.abi.
 
-  * Wannier functions: Once the calculation is converged, we compute Wannier functions, as in a DFT+DMFT calculation. To do this, we only precise that we are using the DFT+DMFT implementation (usedmft=0), but only with the Wannier keywords ([[dmftbandi]] and [[dmftbandf]]). We emphasize that with respect to the discussion on models on section 3.1, [[dmftbandi]] and [[dmftbandf]] are used to define the so called A bands. We will see in dataset 2 how B bands are defined. In our case, as we are in the _d-d_ model, we choose only the _d_ -like bands as a starting point and [[dmftbandi]] and [[dmftbandf]] are thus equal to the first and last _d_ -like bands, namely 21 and 25.
+  * Wannier functions: Once the calculation is converged, we compute Wannier functions, triggered using the [[plowan_compute]] keyword. In addition to the KS bands (defined using [[plowan_bandi]] and [[plowan_bandf]]), we use the ([PLO-Wannier](/topics/Wannier)) keywords to define on which atom and on which orbital the Wannier functions are calculated.  
+	For this tutorial we will only look at cases with only one orbital for the Wannier functions and thus the cRPA, but note 
+	that the implementation allow to use multiple orbitals. We emphasize that with respect to the discussion on models on section 3.1, [[plowan_bandi]] and [[plowan_bandf]] are used to define the so called A bands. We will see in dataset 2 how B bands are defined. In our case, as we are in the _d-d_ model, we choose only the _d_ -like bands as a starting point and [[plowan_bandi]] and [[plowan_bandf]] are thus equal to the first and last _d_ -like bands, namely 21 and 25.
 
 ```
-    iscf2          -2    # Perform a non self-consistent calculation
-    nbandkss2      -1    # Number of bands in KSS file (-1 means the
-                         #   maximum possible)
-    kssform         3    # Format of the Wavefunction file (should be 3)
-    nbdbuf2         4    # The last four bands will not be perfectly
-                         # diagonalized
-    tolwfr2   1.0d-18    # The criterion to stop diagonalization
+	getden2        -1
+	# == Compute empty bands precisely
+	iscf2          -2
+	tolwfr2   1.0d-18     # Will stop when this tolerance is achieved
 
-    # Compute Wannier functions
-    usedmft2        1    # Mandatory to enable the calculation of Wannier
-                         #  functions as in DMFT.
-    dmftbandi2     21    # Precise the definition of Wannier functions
-    dmftbandf2     25    # Precise the definition of Wannier functions
+	# == Compute Projected Wannier functions
+	plowan_compute2 1 # Activate the computation of Wannier functions
+	plowan_bandi 21 # First band for Wannier functions
+	plowan_bandf 25 # Last band for Wannier functions
+	plowan_natom 1 # Number of atoms
+	plowan_iatom 1  # Index of atoms
+	plowan_nbl 1  # Number of orbitals on each atoms
+	plowan_lcalc 2  # Index of the orbitals (2 -> d)
+	plowan_projcalc 5  # Projector for the orbitals (see pseudo-potential file)
 ```
 
 ##### 3.2.2. The third DATASET: Compute the constrained polarizability and dielectric function
@@ -247,6 +252,7 @@ peculiar to this dataset.
 We add some comments here on three most important topics
 
   * Definition of constrained polarizability: As in the discussion on models on section 3.1, the constrained polarizability is defined thanks to B-like bands. The keywords related to this definition is [[ucrpa_bands]]. According to the value of ucrpa, [[ucrpa_bands]] defined the bands for which the transitions are neglected, or (if ucrpa=2), it defined Wannier functions that are used in the weighting scheme (see Eq. (5) and (7) of section II of [[cite:Amadon2014]]). Alternatively and only if ucrpa=1, an energy windows can be defined (with variable [[ucrpa_window]]) to exclude the transition. In our case, as we are in the _d-d_ model, we neglect transitions inside the _d_ -like bands, so we choose [[ucrpa_bands]]= 21 25.
+  * Reading of the Wannier functions : [[plowan_compute]] defined to 10 reads the Wannier functions in file ''data.plowann''. 
   * Convergence of the polarizability: [[nband]] and [[ecuteps]] are the two main variables that should be converged. Note that one must study the role of these variables directly on the effective interaction parameters to determine their relevant values.
   * Frequency mesh  of the polarizability: Can be useful if one wants to plot the frequency dependence of the effective interactions (as in e.g. [[cite:Amadon2014]]).
 
@@ -268,6 +274,8 @@ nfreqim3       0     # Number of  imaginary frequencies
 
 # -- Ucrpa: screening
 ucrpa_bands3  21 25  # Define the bands corresponding to the _d_ contribution
+
+plowan_compute3 10 # Read Wannier functions
 
 # -- Parallelism
 gwpara3        1
@@ -297,7 +305,7 @@ We add some comments on convergence properties
      getwfk4     1      # Obtain WFK file from dataset 1
      getscr4     2      # Obtain SCR file from previous dataset
      ecutsigx4  30.0    # Dimension of the G sum in Sigma_x.
-
+	 plowan_compute4 10 # Read Wannier functions
      # -- Frequencies for effective interactions
      nfreqsp4    1
      freqspmax4 10 eV
@@ -370,9 +378,9 @@ interaction computed on Wannier orbitals.
 
  * First we see that diagonal interactions are larger than off-diagonal terms,
    which is logical, because electron interaction is larger if electrons are located in the same orbital.
- * We recover in these interaction matrix the degeneracy of _d_ orbitals in the cubic symmetry
+ * We recover in this interaction matrix the degeneracy of _d_ orbitals in the cubic symmetry
    (we remind, as listed in [[dmatpawu]], that the order of orbitals in ABINIT are _xy_, _yz_,
-   _z<sup>2<\sup>_, _xy_, _x<sup>2</sup>-y<sup>2</sup>_).
+   _z<sup>2</sup>_, _xy_, _x<sup>2</sup>-y<sup>2</sup>_).
  * We note also that the interaction for _t<sub>2g</sub>_ and _e<sub>g</sub>_ orbitals are not the same.
    This effect is compared in e.g. Appendix C.1 of [[cite:Vaugier2012]] to the usual
    Slater parametrization of interaction matrices.
@@ -413,7 +421,7 @@ interaction computed on Wannier orbitals.
 ```
 
 
-  * Then, the cRPA effective interactions are given for all frequency.
+  * Then, the cRPA effective interactions are given for all frequencies.
      The first frequency is zero and the cRPA interactions are:
 
 ```
@@ -542,23 +550,23 @@ computational cost. In this case, we find values of _U_ and _J_ of 2.75 eV and
 
 In this section, we compute, using the converged values of parameters, the
 value of effective interactions for the models discussed in section and 3.1.
-The table below gives for each model, the values of [[dmftbandi]],
-[[dmftbandf]] and [[ucrpa_bands]] that must be used, and it sums up the value
+The table below gives for each model, the values of [[plowan_bandi]],
+[[plowan_bandf]] and [[ucrpa_bands]] that must be used, and it sums up the value
 of bare and effective interactions.
 
 <center>
 
-model                        | _d - d_ |   _t<sub>2g</sub>-t<sub>2g</sub>_  |_dp-dp_  |  _d -dp_ (a) |  _d -dp_ (b)
------------------------------|---------|------------------------------------|---------|--------------|---------------
-[[ucrpa]]                    |    1    |     1                              |    1    |     1        |     2
-[[dmftbandi]]/[[dmftbandf]]  |   21/25 |    23/25                           |    12/25|    12/25     |    12/25
-[[ucrpa_bands]]              |   21 25 |    23 25                           |    12 25|    21 25     |    12 25
-_U_<sub>bare</sub> (eV)      |   15.4  |    15.3                            |    19.4 |    19.4      |    19.4
-_U_<sub>bare diag</sub> (eV) |   16.3  |    16.0                            |    20.6 |    20.6      |    20.6
-_J_<sub>bare</sub> (eV)      |   0.66  |    0.86                            |   0.96  |    0.96      |    0.96
-_U_ (eV)                     |   2.8   |    2.8                             |    10.8 |    3.4       |    1.6
-_U_<sub>diag</sub> (eV)      |   3.5   |    3.4                             |    12.0 |    4.4       |    2.6
-_J_ (eV)                     |   0.60  |    0.76                            |     0.91|    0.87      |    0.86
+model                              | _d - d_ |   _t<sub>2g</sub>-t<sub>2g</sub>_  |_dp-dp_  |  _d -dp_ (a) |  _d -dp_ (b)
+-----------------------------------|---------|------------------------------------|---------|--------------|---------------
+[[ucrpa]]                          |    1    |     1                              |    1    |     1        |     2
+[[plowan_bandi]]/[[plowan_bandf]]  |   21/25 |    23/25                           |    12/25|    12/25     |    12/25
+[[ucrpa_bands]]                    |   21 25 |    23 25                           |    12 25|    21 25     |    12 25
+_U_<sub>bare</sub> (eV)            |   15.4  |    15.3                            |    19.4 |    19.4      |    19.4
+_U_<sub>bare diag</sub> (eV)       |   16.3  |    16.0                            |    20.6 |    20.6      |    20.6
+_J_<sub>bare</sub> (eV)            |   0.66  |    0.86                            |   0.96  |    0.96      |    0.96
+_U_ (eV)                           |   2.8   |    2.8                             |    10.8 |    3.4       |    1.6
+_U_<sub>diag</sub> (eV)            |   3.5   |    3.4                             |    12.0 |    4.4       |    2.6
+_J_ (eV)                           |   0.60  |    0.76                            |     0.91|    0.87      |    0.86
 
 
 </center>

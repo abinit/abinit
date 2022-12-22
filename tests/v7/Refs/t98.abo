@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.7.4 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h33 )
+.Starting date : Wed  4 May 2022.
+- ( at 01h25 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v7_t98/t98.in
-- output file    -> t98.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/v7_t98/t98.abi
+- output file    -> t98.abo
 - root for input  files -> t98i
 - root for output files -> t98o
 
@@ -69,7 +69,7 @@ _ WF disk file :      0.720 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =         108
        mpw =          92          nfft =        3375          nkpt =         108
 ================================================================================
-P This job should need less than                       2.695 Mbytes of memory.
+P This job should need less than                       2.794 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      1.518 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
@@ -345,14 +345,14 @@ P          mk1mem4        108
         optdriver2          1
         optdriver3          0
         optdriver4          1
+           prtpot1          0
+           prtpot2          1
+           prtpot3          0
+           prtpot4          1
               qpt1     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt2     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt3     0.00000000E+00  0.00000000E+00  5.00000000E-01
               qpt4     0.00000000E+00  0.00000000E+00  5.00000000E-01
-            rfdir1          0       0       0
-            rfdir2          1       1       1
-            rfdir3          0       0       0
-            rfdir4          1       1       1
            rfphon1          0
            rfphon2          1
            rfphon3          0
@@ -500,8 +500,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/18ar.revpbe
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/18ar.revpbe
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/18ar.revpbe
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/18ar.revpbe
 -   Ar  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 18.00000   8.00000  20100419                znucl, zion, pspdat
     6    7    1    1       800   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -675,7 +675,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t98o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -703,7 +702,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t98o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -717,15 +715,15 @@ tolerances: {tolvrs: 1.00E-16, }
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   125.82563329346     -2.694E+02 2.390E+00 3.264E+04
- ETOT  2   3.9983129038409     -1.218E+02 2.392E-01 1.414E+03
- ETOT  3  3.86699483085380E-02 -3.960E+00 4.047E-03 6.983E+00
- ETOT  4  3.44464239874327E-02 -4.224E-03 3.043E-05 7.400E-02
- ETOT  5  3.43696470693402E-02 -7.678E-05 2.882E-07 9.419E-04
- ETOT  6  3.43691845381926E-02 -4.625E-07 5.638E-09 3.433E-06
- ETOT  7  3.43692091184238E-02  2.458E-08 1.683E-11 1.262E-08
- ETOT  8  3.43692118724306E-02  2.754E-09 4.310E-14 4.393E-11
- ETOT  9  3.43692116910432E-02 -1.814E-10 4.081E-16 9.356E-14
- ETOT 10  3.43692116386904E-02 -5.235E-11 1.268E-18 3.517E-15
+ ETOT  2   3.9983129038412     -1.218E+02 2.392E-01 1.414E+03
+ ETOT  3  3.86699483083106E-02 -3.960E+00 4.047E-03 6.983E+00
+ ETOT  4  3.44464239877169E-02 -4.224E-03 3.043E-05 7.400E-02
+ ETOT  5  3.43696470695676E-02 -7.678E-05 2.882E-07 9.419E-04
+ ETOT  6  3.43691845383063E-02 -4.625E-07 5.638E-09 3.433E-06
+ ETOT  7  3.43692091186512E-02  2.458E-08 1.683E-11 1.262E-08
+ ETOT  8  3.43692118724874E-02  2.754E-09 4.310E-14 4.393E-11
+ ETOT  9  3.43692116913843E-02 -1.811E-10 4.081E-16 9.356E-14
+ ETOT 10  3.43692116386904E-02 -5.269E-11 1.268E-18 3.517E-15
 
  scprqt:  WARNING -
   nstep=   10 was not enough SCF cycles to converge;
@@ -804,14 +802,14 @@ tolerances: {tolvrs: 1.00E-16, }
   
    1    1   1    1         0.0007141795         0.0000000000
    1    1   2    1        -0.0000000000         0.0000000000
-   1    1   3    1         0.0000000000         0.0000000000
+   1    1   3    1        -0.0000000000         0.0000000000
   
-   2    1   1    1         0.0000000000         0.0000000000
+   2    1   1    1        -0.0000000000         0.0000000000
    2    1   2    1         0.0007141795         0.0000000000
    2    1   3    1        -0.0000000000         0.0000000000
   
-   3    1   1    1         0.0000000000         0.0000000000
-   3    1   2    1        -0.0000000000         0.0000000000
+   3    1   1    1        -0.0000000000         0.0000000000
+   3    1   2    1         0.0000000000         0.0000000000
    3    1   3    1         0.0007141795         0.0000000000
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
@@ -866,116 +864,11 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   1.52E-25  1.18E-17
  -1.0113E+00 -2.5506E-01 -2.3203E-01 -2.2902E-01  1.9702E-01  2.9546E-01
   2.9575E-01  4.1960E-01  4.7615E-01  5.4248E-01
-  prteigrs : nnsclo,ikpt=   10    1 max resid (incl. the buffer)=  1.18273E-17
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-  prteigrs : nnsclo,ikpt=   10    2 max resid (incl. the buffer)=  3.15456E-18
-  prteigrs : nnsclo,ikpt=   10    3 max resid (incl. the buffer)=  1.04197E-20
-  prteigrs : nnsclo,ikpt=   10    4 max resid (incl. the buffer)=  1.03876E-10
-  prteigrs : nnsclo,ikpt=   10    5 max resid (incl. the buffer)=  4.32487E-09
-  prteigrs : nnsclo,ikpt=   10    6 max resid (incl. the buffer)=  4.69995E-17
-  prteigrs : nnsclo,ikpt=   10    7 max resid (incl. the buffer)=  1.43051E-07
-  prteigrs : nnsclo,ikpt=   10    8 max resid (incl. the buffer)=  3.22499E-09
-  prteigrs : nnsclo,ikpt=   10    9 max resid (incl. the buffer)=  1.86114E-20
-  prteigrs : nnsclo,ikpt=   10   10 max resid (incl. the buffer)=  1.83996E-11
-  prteigrs : nnsclo,ikpt=   10   11 max resid (incl. the buffer)=  4.16884E-18
-  prteigrs : nnsclo,ikpt=   10   12 max resid (incl. the buffer)=  2.05539E-21
-  prteigrs : nnsclo,ikpt=   10   13 max resid (incl. the buffer)=  4.46245E-20
-  prteigrs : nnsclo,ikpt=   10   14 max resid (incl. the buffer)=  5.61745E-09
-  prteigrs : nnsclo,ikpt=   10   15 max resid (incl. the buffer)=  3.93546E-11
-  prteigrs : nnsclo,ikpt=   10   16 max resid (incl. the buffer)=  2.94050E-17
-  prteigrs : nnsclo,ikpt=   10   17 max resid (incl. the buffer)=  1.31219E-08
-  prteigrs : nnsclo,ikpt=   10   18 max resid (incl. the buffer)=  2.61395E-23
-  prteigrs : nnsclo,ikpt=   10   19 max resid (incl. the buffer)=  4.65571E-09
-  prteigrs : nnsclo,ikpt=   10   20 max resid (incl. the buffer)=  3.78103E-09
-  prteigrs : nnsclo,ikpt=   10   21 max resid (incl. the buffer)=  1.04521E-09
-  prteigrs : nnsclo,ikpt=   10   22 max resid (incl. the buffer)=  5.62689E-17
-  prteigrs : nnsclo,ikpt=   10   23 max resid (incl. the buffer)=  5.33589E-08
-  prteigrs : nnsclo,ikpt=   10   24 max resid (incl. the buffer)=  4.16932E-11
-  prteigrs : nnsclo,ikpt=   10   25 max resid (incl. the buffer)=  1.17101E-22
-  prteigrs : nnsclo,ikpt=   10   26 max resid (incl. the buffer)=  1.24067E-18
-  prteigrs : nnsclo,ikpt=   10   27 max resid (incl. the buffer)=  1.47469E-19
-  prteigrs : nnsclo,ikpt=   10   28 max resid (incl. the buffer)=  8.27600E-19
-  prteigrs : nnsclo,ikpt=   10   29 max resid (incl. the buffer)=  5.11758E-10
-  prteigrs : nnsclo,ikpt=   10   30 max resid (incl. the buffer)=  2.41348E-18
-  prteigrs : nnsclo,ikpt=   10   31 max resid (incl. the buffer)=  8.53645E-09
-  prteigrs : nnsclo,ikpt=   10   32 max resid (incl. the buffer)=  1.50685E-09
-  prteigrs : nnsclo,ikpt=   10   33 max resid (incl. the buffer)=  4.88469E-17
-  prteigrs : nnsclo,ikpt=   10   34 max resid (incl. the buffer)=  1.70630E-08
-  prteigrs : nnsclo,ikpt=   10   35 max resid (incl. the buffer)=  6.22279E-22
-  prteigrs : nnsclo,ikpt=   10   36 max resid (incl. the buffer)=  9.10996E-19
-  prteigrs : nnsclo,ikpt=   10   37 max resid (incl. the buffer)=  9.64727E-18
-  prteigrs : nnsclo,ikpt=   10   38 max resid (incl. the buffer)=  1.04337E-18
-  prteigrs : nnsclo,ikpt=   10   39 max resid (incl. the buffer)=  2.87588E-11
-  prteigrs : nnsclo,ikpt=   10   40 max resid (incl. the buffer)=  2.75069E-17
-  prteigrs : nnsclo,ikpt=   10   41 max resid (incl. the buffer)=  6.13915E-23
-  prteigrs : nnsclo,ikpt=   10   42 max resid (incl. the buffer)=  2.20530E-17
-  prteigrs : nnsclo,ikpt=   10   43 max resid (incl. the buffer)=  7.75290E-24
-  prteigrs : nnsclo,ikpt=   10   44 max resid (incl. the buffer)=  1.13191E-10
-  prteigrs : nnsclo,ikpt=   10   45 max resid (incl. the buffer)=  2.58135E-23
-  prteigrs : nnsclo,ikpt=   10   46 max resid (incl. the buffer)=  3.64953E-19
-  prteigrs : nnsclo,ikpt=   10   47 max resid (incl. the buffer)=  1.20244E-22
-  prteigrs : nnsclo,ikpt=   10   48 max resid (incl. the buffer)=  2.64256E-12
-  prteigrs : nnsclo,ikpt=   10   49 max resid (incl. the buffer)=  3.07495E-10
-  prteigrs : nnsclo,ikpt=   10   50 max resid (incl. the buffer)=  5.96718E-22
-  prteigrs : nnsclo,ikpt=   10   51 max resid (incl. the buffer)=  1.48323E-11
-  prteigrs : nnsclo,ikpt=   10   52 max resid (incl. the buffer)=  2.56318E-11
-  prteigrs : nnsclo,ikpt=   10   53 max resid (incl. the buffer)=  5.47793E-17
-  prteigrs : nnsclo,ikpt=   10   54 max resid (incl. the buffer)=  1.03969E-19
-  prteigrs : nnsclo,ikpt=   10   55 max resid (incl. the buffer)=  1.05756E-22
-  prteigrs : nnsclo,ikpt=   10   56 max resid (incl. the buffer)=  1.27440E-11
-  prteigrs : nnsclo,ikpt=   10   57 max resid (incl. the buffer)=  1.09820E-23
-  prteigrs : nnsclo,ikpt=   10   58 max resid (incl. the buffer)=  1.37745E-18
-  prteigrs : nnsclo,ikpt=   10   59 max resid (incl. the buffer)=  3.43342E-21
-  prteigrs : nnsclo,ikpt=   10   60 max resid (incl. the buffer)=  7.22780E-18
-  prteigrs : nnsclo,ikpt=   10   61 max resid (incl. the buffer)=  3.17199E-11
-  prteigrs : nnsclo,ikpt=   10   62 max resid (incl. the buffer)=  9.75491E-09
-  prteigrs : nnsclo,ikpt=   10   63 max resid (incl. the buffer)=  2.73169E-23
-  prteigrs : nnsclo,ikpt=   10   64 max resid (incl. the buffer)=  8.75866E-10
-  prteigrs : nnsclo,ikpt=   10   65 max resid (incl. the buffer)=  3.13705E-08
-  prteigrs : nnsclo,ikpt=   10   66 max resid (incl. the buffer)=  4.20322E-21
-  prteigrs : nnsclo,ikpt=   10   67 max resid (incl. the buffer)=  1.69254E-11
-  prteigrs : nnsclo,ikpt=   10   68 max resid (incl. the buffer)=  8.12030E-10
-  prteigrs : nnsclo,ikpt=   10   69 max resid (incl. the buffer)=  2.00917E-19
-  prteigrs : nnsclo,ikpt=   10   70 max resid (incl. the buffer)=  3.35264E-10
-  prteigrs : nnsclo,ikpt=   10   71 max resid (incl. the buffer)=  1.26511E-08
-  prteigrs : nnsclo,ikpt=   10   72 max resid (incl. the buffer)=  1.31862E-15
-  prteigrs : nnsclo,ikpt=   10   73 max resid (incl. the buffer)=  2.63290E-23
-  prteigrs : nnsclo,ikpt=   10   74 max resid (incl. the buffer)=  4.49658E-19
-  prteigrs : nnsclo,ikpt=   10   75 max resid (incl. the buffer)=  4.24499E-19
-  prteigrs : nnsclo,ikpt=   10   76 max resid (incl. the buffer)=  4.40404E-19
-  prteigrs : nnsclo,ikpt=   10   77 max resid (incl. the buffer)=  4.55523E-23
-  prteigrs : nnsclo,ikpt=   10   78 max resid (incl. the buffer)=  1.11174E-09
-  prteigrs : nnsclo,ikpt=   10   79 max resid (incl. the buffer)=  5.28012E-10
-  prteigrs : nnsclo,ikpt=   10   80 max resid (incl. the buffer)=  2.71192E-17
-  prteigrs : nnsclo,ikpt=   10   81 max resid (incl. the buffer)=  3.72803E-11
-  prteigrs : nnsclo,ikpt=   10   82 max resid (incl. the buffer)=  1.70718E-08
-  prteigrs : nnsclo,ikpt=   10   83 max resid (incl. the buffer)=  2.08748E-10
-  prteigrs : nnsclo,ikpt=   10   84 max resid (incl. the buffer)=  2.68335E-22
-  prteigrs : nnsclo,ikpt=   10   85 max resid (incl. the buffer)=  1.13584E-21
-  prteigrs : nnsclo,ikpt=   10   86 max resid (incl. the buffer)=  1.22209E-18
-  prteigrs : nnsclo,ikpt=   10   87 max resid (incl. the buffer)=  7.29115E-09
-  prteigrs : nnsclo,ikpt=   10   88 max resid (incl. the buffer)=  2.22788E-21
-  prteigrs : nnsclo,ikpt=   10   89 max resid (incl. the buffer)=  8.45468E-09
-  prteigrs : nnsclo,ikpt=   10   90 max resid (incl. the buffer)=  1.16275E-09
-  prteigrs : nnsclo,ikpt=   10   91 max resid (incl. the buffer)=  9.86661E-23
-  prteigrs : nnsclo,ikpt=   10   92 max resid (incl. the buffer)=  6.15944E-20
-  prteigrs : nnsclo,ikpt=   10   93 max resid (incl. the buffer)=  1.19170E-18
-  prteigrs : nnsclo,ikpt=   10   94 max resid (incl. the buffer)=  4.30012E-22
-  prteigrs : nnsclo,ikpt=   10   95 max resid (incl. the buffer)=  9.70005E-18
-  prteigrs : nnsclo,ikpt=   10   96 max resid (incl. the buffer)=  2.26975E-08
-  prteigrs : nnsclo,ikpt=   10   97 max resid (incl. the buffer)=  4.86125E-22
-  prteigrs : nnsclo,ikpt=   10   98 max resid (incl. the buffer)=  1.45800E-08
-  prteigrs : nnsclo,ikpt=   10   99 max resid (incl. the buffer)=  5.06041E-09
-  prteigrs : nnsclo,ikpt=   10  100 max resid (incl. the buffer)=  5.64163E-18
-  prteigrs : nnsclo,ikpt=   10  101 max resid (incl. the buffer)=  6.47907E-24
-  prteigrs : nnsclo,ikpt=   10  102 max resid (incl. the buffer)=  2.07541E-09
-  prteigrs : nnsclo,ikpt=   10  103 max resid (incl. the buffer)=  1.19238E-19
-  prteigrs : nnsclo,ikpt=   10  104 max resid (incl. the buffer)=  2.76533E-16
-  prteigrs : nnsclo,ikpt=   10  105 max resid (incl. the buffer)=  1.50843E-18
-  prteigrs : nnsclo,ikpt=   10  106 max resid (incl. the buffer)=  8.44829E-20
-  prteigrs : nnsclo,ikpt=   10  107 max resid (incl. the buffer)=  1.67539E-15
-  prteigrs : nnsclo,ikpt=   10  108 max resid (incl. the buffer)=  5.67657E-09
+  prteigrs : nnsclo,ikpt=   10   35 max resid (excl. the buffer)=  6.22279E-22
+  prteigrs : nnsclo,ikpt=   10   47 max resid (excl. the buffer)=  1.20244E-22
+  prteigrs : nnsclo,ikpt=   10   50 max resid (excl. the buffer)=  5.96718E-22
 
 
  scprqt:  WARNING -
@@ -1063,7 +956,6 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      3.308   => boxcut(ratio)=   2.15442
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t98o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -1086,10 +978,8 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t98o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t98o_DS3_WFQ
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -1103,13 +993,13 @@ tolerances: {tolvrs: 1.00E-16, }
 -ETOT  1   141.27214406721     -2.610E+02 2.180E+00 3.842E+04
  ETOT  2   4.1776359664938     -1.371E+02 1.927E-01 1.562E+03
  ETOT  3 -0.43793081928013     -4.616E+00 4.160E-03 7.869E+00
- ETOT  4 -0.44329185061193     -5.361E-03 1.071E-04 9.519E-02
- ETOT  5 -0.44342873339620     -1.369E-04 1.056E-06 5.296E-04
- ETOT  6 -0.44342909169880     -3.583E-07 2.807E-08 7.450E-06
+ ETOT  4 -0.44329185061182     -5.361E-03 1.071E-04 9.519E-02
+ ETOT  5 -0.44342873339614     -1.369E-04 1.056E-06 5.296E-04
+ ETOT  6 -0.44342909169868     -3.583E-07 2.807E-08 7.450E-06
  ETOT  7 -0.44342910100446     -9.306E-09 4.782E-10 4.952E-07
- ETOT  8 -0.44342910173979     -7.353E-10 1.761E-11 1.241E-08
- ETOT  9 -0.44342910174269     -2.899E-12 9.566E-13 1.188E-09
- ETOT 10 -0.44342910174331     -6.253E-13 5.232E-14 2.765E-11
+ ETOT  8 -0.44342910173990     -7.354E-10 1.761E-11 1.241E-08
+ ETOT  9 -0.44342910174246     -2.558E-12 9.566E-13 1.188E-09
+ ETOT 10 -0.44342910174297     -5.116E-13 5.232E-14 2.765E-11
 
  scprqt:  WARNING -
   nstep=   10 was not enough SCF cycles to converge;
@@ -1151,10 +1041,8 @@ tolerances: {tolvrs: 1.00E-16, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t98o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t98o_DS3_WFQ
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -1167,14 +1055,14 @@ tolerances: {tolvrs: 1.00E-16, }
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   574.08992811510      8.315E+01 2.547E+00 3.802E+05
  ETOT  2   39.085924018180     -5.350E+02 6.760E-01 1.856E+04
- ETOT  3  -1.0810336669884     -4.017E+01 2.860E-02 6.964E+02
- ETOT  4  -1.6890572380260     -6.080E-01 9.843E-04 6.707E+00
+ ETOT  3  -1.0810336669888     -4.017E+01 2.860E-02 6.964E+02
+ ETOT  4  -1.6890572380259     -6.080E-01 9.843E-04 6.707E+00
  ETOT  5  -1.6963029246119     -7.246E-03 4.282E-05 2.212E-01
- ETOT  6  -1.6964484545018     -1.455E-04 1.943E-06 3.580E-03
+ ETOT  6  -1.6964484545016     -1.455E-04 1.943E-06 3.580E-03
  ETOT  7  -1.6964496038682     -1.149E-06 5.428E-08 7.864E-05
- ETOT  8  -1.6964496623939     -5.853E-08 3.168E-10 2.748E-07
- ETOT  9  -1.6964496626010     -2.071E-10 1.561E-11 9.433E-10
- ETOT 10  -1.6964496625978      3.126E-12 1.150E-13 6.474E-11
+ ETOT  8  -1.6964496623940     -5.853E-08 3.168E-10 2.748E-07
+ ETOT  9  -1.6964496626012     -2.073E-10 1.561E-11 9.433E-10
+ ETOT 10  -1.6964496625982      3.070E-12 1.150E-13 6.474E-11
 
  scprqt:  WARNING -
   nstep=   10 was not enough SCF cycles to converge;
@@ -1506,14 +1394,14 @@ P          mk1mem4        108
         optdriver2          1
         optdriver3          0
         optdriver4          1
+           prtpot1          0
+           prtpot2          1
+           prtpot3          0
+           prtpot4          1
               qpt1     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt2     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt3     0.00000000E+00  0.00000000E+00  5.00000000E-01
               qpt4     0.00000000E+00  0.00000000E+00  5.00000000E-01
-            rfdir1          0       0       0
-            rfdir2          1       1       1
-            rfdir3          0       0       0
-            rfdir4          1       1       1
            rfphon1          0
            rfphon2          1
            rfphon3          0
@@ -1679,7 +1567,7 @@ P          mk1mem4        108
 -
 - [5] Ab initio pseudopotentials for electronic structure calculations of poly-atomic systems, 
 - using density-functional theory.
-- M. Fuchs, M. Scheffler, Comput. Phys. Commun. 119, 67 (1999).
+- M. Fuchs and, M. Scheffler, Comput. Phys. Commun. 119, 67 (1999).
 - Comment: Some pseudopotential generated using the FHI code were used.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#fuchs1999
 -
@@ -1718,10 +1606,10 @@ P          mk1mem4        108
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         15.2  wall=         15.3
+- Proc.   0 individual time (sec): cpu=         19.5  wall=         19.7
 
 ================================================================================
 
  Calculation completed.
-.Delivered  13 WARNINGs and  37 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         15.2  wall=         15.3
+.Delivered  10 WARNINGs and  18 COMMENTs to log file.
++Overall time at end (sec) : cpu=         19.5  wall=         19.7

@@ -6,14 +6,10 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2000-2021 ABINIT group (RC, XG)
+!!  Copyright (C) 2000-2022 ABINIT group (RC, XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -65,12 +61,6 @@ contains
 !!  spgroup=space group number
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_memeval
-!!
-!! CHILDREN
-!!      symdet
 !!
 !! SOURCE
 
@@ -380,12 +370,6 @@ end subroutine prtspgroup
 !! (e.g. spgaxor=-1;spgorig=-1) at input.
 !! When this has a bearing on some of the output variables (even brvsb or intsb !),
 !! these are mentioned as being X, unknown, or to be determined.
-!!
-!! PARENTS
-!!      m_ab7_symmetry,m_crystal,m_spgdata,m_symfind,m_symsg
-!!
-!! CHILDREN
-!!      symdet
 !!
 !! SOURCE
 
@@ -2130,12 +2114,6 @@ end subroutine spgdata
 !! OUTPUT
 !! ptgrpmasb= symbol
 !!
-!! PARENTS
-!!      m_spgdata
-!!
-!! CHILDREN
-!!      symdet
-!!
 !! SOURCE
 
 subroutine ptgmadata(ptgroupma,ptgrpmasb)
@@ -2292,12 +2270,6 @@ end subroutine ptgmadata
 !! OUTPUT
 !! ptgroupma = magnetic point group number
 !!
-!! PARENTS
-!!      m_symfind
-!!
-!! CHILDREN
-!!      symdet
-!!
 !! SOURCE
 
 subroutine getptgroupma(ptgroup,ptgroupha,ptgroupma)
@@ -2429,12 +2401,6 @@ end subroutine getptgroupma
 !! OUTPUT
 !! iholohedry=holohedry number
 !! ptgroup=symmetry point group
-!!
-!! PARENTS
-!!      m_symfind
-!!
-!! CHILDREN
-!!      symdet
 !!
 !! SOURCE
 

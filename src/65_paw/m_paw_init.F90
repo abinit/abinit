@@ -6,7 +6,7 @@
 !!  This module contains routines related tp PAW calculations initialization.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2021 ABINIT group (FJ, MT)
+!! Copyright (C) 2018-2022 ABINIT group (FJ, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -76,7 +76,7 @@ CONTAINS  !=====================================================================
 !! 7-Compute Ex-correlation energy for the core density
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2021 ABINIT group (FJ, MT)
+!! Copyright (C) 1998-2022 ABINIT group (FJ, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -159,12 +159,6 @@ CONTAINS  !=====================================================================
 !!     %shapefncg(mqgrid_shp,l_size)=normalized radial shape function in reciprocal space
 !!     %sij(lmn2_size)=nonlocal part of the overlap operator
 !!     %tphitphj(:,:)=useful product tPhi(:,i)*tPhi(:,j)
-!!
-!! PARENTS
-!!      m_bethe_salpeter,m_gstate,m_nonlinear,m_respfn_driver
-!!      m_screening_driver,m_sigma_driver,m_wfk_analyze
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -736,12 +730,6 @@ end subroutine pawinit
 !! SIDE EFFECTS
 !!  mode=="save" updates the internal variables.
 !!        "reset" reset the internal variables to -1
-!!
-!! PARENTS
-!!      m_bethe_salpeter,m_gstate,m_nonlinear,m_respfn_driver
-!!      m_screening_driver,m_sigma_driver,m_wfk_analyze
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

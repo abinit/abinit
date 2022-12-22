@@ -8,12 +8,10 @@
 !!      - Define list of k-points and bands in sel-energy matrix elements from input variables.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2021 ABINIT group (MG)
+!!  Copyright (C) 2008-2022 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -44,7 +42,7 @@ module m_sigtk
  use defs_datatypes, only : ebands_t, pseudopotential_type
  use defs_wvltypes,  only : wvl_internal_type
  use m_pawtab,       only : pawtab_type
- use m_kpts,         only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt
+ use m_kpts,         only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, kpts_map
 
  implicit none
 
@@ -55,6 +53,19 @@ module m_sigtk
  public :: sigtk_kcalc_from_gaps
  public :: sigtk_kcalc_from_erange
  public :: sigtk_kpts_in_erange
+!!***
+
+
+ ! Tables for degenerated KS states.
+ type, public :: bids_t
+   integer, allocatable :: vals(:)
+ end type bids_t
+
+ type, public :: degtab_t
+   type(bids_t), allocatable :: bids(:)
+ end type degtab_t
+
+ public :: degtab_array_free   ! Free array of degtab_t objects.
 !!***
 
 contains  !=====================================================
@@ -76,14 +87,6 @@ contains  !=====================================================
 !!  kcalc(3, nkcalc): List of k-points where the self-energy is computed.
 !!  bstart_ks(nkcalc, nsppol): Initial KS band index included in self-energy matrix elements for each k-point in kcalc.
 !!  nbcalc_ks(nkcalc, nsppol): Number of bands included in self-energy matrix elements for each k-point in kcalc.
-!!
-!! PARENTS
-!!      m_sigmaph
-!!
-!! CHILDREN
-!!      ebands_free,ebands_print,ebands_update_occ,fine_gaps%free
-!!      fine_gaps%print,fine_hdr%free,gaps%free,gaps%print,hdr_init_lowlvl
-!!      wrtout
 !!
 !! SOURCE
 
@@ -159,14 +162,6 @@ end subroutine sigtk_kcalc_from_nkptgw
 !!  kcalc(3, nkcalc): List of k-points where the self-energy is computed.
 !!  bstart_ks(nkcalc, nsppol): Initial KS band index included in self-energy matrix elements for each k-point in kcalc.
 !!  nbcalc_ks(nkcalc, nsppol): Number of bands included in self-energy matrix elements for each k-point in kcalc.
-!!
-!! PARENTS
-!!      m_sigmaph
-!!
-!! CHILDREN
-!!      ebands_free,ebands_print,ebands_update_occ,fine_gaps%free
-!!      fine_gaps%print,fine_hdr%free,gaps%free,gaps%print,hdr_init_lowlvl
-!!      wrtout
 !!
 !! SOURCE
 
@@ -261,14 +256,6 @@ end subroutine sigtk_kcalc_from_qprange
 !!  bstart_ks(nkcalc, nsppol): Initial KS band index included in self-energy matrix elements for each k-point in kcalc.
 !!  nbcalc_ks(nkcalc, nsppol): Number of bands included in self-energy matrix elements for each k-point in kcalc.
 !!
-!! PARENTS
-!!      m_sigmaph
-!!
-!! CHILDREN
-!!      ebands_free,ebands_print,ebands_update_occ,fine_gaps%free
-!!      fine_gaps%print,fine_hdr%free,gaps%free,gaps%print,hdr_init_lowlvl
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine sigtk_kcalc_from_gaps(dtset, ebands, gaps, nkcalc, kcalc, bstart_ks, nbcalc_ks)
@@ -360,14 +347,6 @@ end subroutine sigtk_kcalc_from_gaps
 !!  bstart_ks(nkcalc, nsppol): Initial KS band index included in self-energy matrix elements for each k-point in kcalc.
 !!  nbcalc_ks(nkcalc, nsppol): Number of bands included in self-energy matrix elements for each k-point in kcalc.
 !!
-!! PARENTS
-!!      m_sigmaph
-!!
-!! CHILDREN
-!!      ebands_free,ebands_print,ebands_update_occ,fine_gaps%free
-!!      fine_gaps%print,fine_hdr%free,gaps%free,gaps%print,hdr_init_lowlvl
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine sigtk_kcalc_from_erange(dtset, cryst, ebands, gaps, nkcalc, kcalc, bstart_ks, nbcalc_ks, comm)
@@ -389,7 +368,7 @@ subroutine sigtk_kcalc_from_erange(dtset, cryst, ebands, gaps, nkcalc, kcalc, bs
  integer,parameter :: master = 0
  integer :: spin, ik, band, ii, ic, nsppol, tmp_nkpt, timrev, sigma_nkbz, my_rank
  logical :: found
- real(dp) :: cmin, vmax, ee, dksqmax
+ real(dp) :: cmin, vmax, ee
  logical :: assume_gap
  character(len=500) :: msg
  type(krank_t) :: krank
@@ -431,16 +410,15 @@ subroutine sigtk_kcalc_from_erange(dtset, cryst, ebands, gaps, nkcalc, kcalc, bs
     ABI_MALLOC(indkk, (6, tmp_nkpt))
 
     krank = krank_from_kptrlatt(ebands%nkpt, ebands%kptns, ebands%kptrlatt, compute_invrank=.False.)
-    call krank%get_mapping(tmp_nkpt, tmp_kcalc, dksqmax, cryst%gmet, indkk, &
-                           cryst%nsym, cryst%symafm, cryst%symrec, timrev, use_symrec=.True.)
-    call krank%free()
 
-    if (dksqmax > tol12) then
-      write(msg, '(a,es16.6,2a)' )&
-        "At least one of the k-points could not be generated from a symmetrical one in the WFK. dksqmax: ",dksqmax, ch10,&
+    if (kpts_map("symrec", timrev, cryst, krank, tmp_nkpt, tmp_kcalc, indkk) /= 0) then
+      write(msg, '(3a)' )&
+        "At least one of the k-points could not be generated from a symmetrical one in the WFK.",ch10,&
         'Action: check your WFK file and the value of sigma_nkpt, sigma_shiftk in the input file.'
       ABI_ERROR(msg)
     end if
+
+    call krank%free()
 
     ABI_MALLOC(sigmak2ebands, (tmp_nkpt))
     sigmak2ebands = indkk(1, :)
@@ -574,14 +552,6 @@ end subroutine sigtk_kcalc_from_erange
 !!  prefix=Prefix for output file.
 !!  comm: MPI communicator.
 !!
-!! PARENTS
-!!      m_wfk_analyze
-!!
-!! CHILDREN
-!!      ebands_free,ebands_print,ebands_update_occ,fine_gaps%free
-!!      fine_gaps%print,fine_hdr%free,gaps%free,gaps%print,hdr_init_lowlvl
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm)
@@ -700,14 +670,6 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
 
  ! Build new header with fine k-mesh (note kptrlatt_orig == kptrlatt)
  codvsn = ABINIT_VERSION
- ! CP modified
-! call hdr_init_lowlvl(fine_hdr, fine_ebands, psps, pawtab, dummy_wvl, codvsn, pertcase0, &
-!   dtset%natom, dtset%nsym, dtset%nspden, dtset%ecut, dtset%pawecutdg, dtset%ecutsm, dtset%dilatmx, &
-!   dtset%intxc, dtset%ixc, dtset%stmbias, dtset%usewvl, dtset%pawcpxocc, dtset%pawspnorb, dtset%ngfft, dtset%ngfftdg, &
-!   dtset%so_psp, dtset%qptn, cryst%rprimd, cryst%xred, cryst%symrel, cryst%tnons, cryst%symafm, cryst%typat, &
-!   dtset%amu_orig(:, image1), dtset%icoulomb, &
-!   dtset%kptopt, dtset%nelect, dtset%cellcharge(1), fine_kptrlatt, fine_kptrlatt, &
-!   dtset%sigma_nshiftk, dtset%sigma_nshiftk, dtset%sigma_shiftk, dtset%sigma_shiftk)
  call hdr_init_lowlvl(fine_hdr, fine_ebands, psps, pawtab, dummy_wvl, codvsn, pertcase0, &
    dtset%natom, dtset%nsym, dtset%nspden, dtset%ecut, dtset%pawecutdg, dtset%ecutsm, dtset%dilatmx, &
    dtset%intxc, dtset%ixc, dtset%stmbias, dtset%usewvl, dtset%pawcpxocc, dtset%pawspnorb, dtset%ngfft, dtset%ngfftdg, &
@@ -715,7 +677,6 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
    dtset%amu_orig(:, image1), dtset%icoulomb, &
    dtset%kptopt, dtset%nelect, dtset%ne_qFD, dtset%nh_qFD, dtset%ivalence, dtset%cellcharge(1), &
    fine_kptrlatt, fine_kptrlatt, dtset%sigma_nshiftk, dtset%sigma_nshiftk, dtset%sigma_shiftk, dtset%sigma_shiftk)
-! End CP modified
 
  ! Find k-points inside sigma_erange energy window.
  ! Set entry to the number of states inside the pocket at (ikpt, spin)
@@ -833,5 +794,23 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
 end subroutine sigtk_kpts_in_erange
 !!***
 
+subroutine degtab_array_free(degtab)
+ type(degtab_t),intent(inout) :: degtab(:,:)
+
+ integer :: jj, ii, ideg
+
+ do jj=1,size(degtab, dim=2)
+   do ii=1,size(degtab, dim=1)
+     do ideg=1,size(degtab(ii, jj)%bids)
+       ABI_FREE(degtab(ii, jj)%bids(ideg)%vals)
+     end do
+     ABI_FREE(degtab(ii, jj)%bids)
+   end do
+ end do
+
+end subroutine degtab_array_free
+!!***
+
 end module m_sigtk
 !!***
+

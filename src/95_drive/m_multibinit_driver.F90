@@ -7,7 +7,7 @@
 !! Main routine MULTIBINIT.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2021 ABINIT group (AM, hexu)
+!! Copyright (C) 1999-2022 ABINIT group (AM, hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -22,20 +22,6 @@
 !! Should be
 !! 1 moved to somewhere else
 !! 2 be replaced with the new implementation multibinit_main2.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      abi_io_redirect,abihist_bcast,abihist_free
-!!      abimem_init,abinit_doctor,compute_anharmonics
-!!      effective_potential_file_getdimsystem,effective_potential_file_gettype
-!!      effective_potential_file_maphisttoref,effective_potential_file_read
-!!      effective_potential_file_readmdfile,effective_potential_free
-!!      effective_potential_setconfinement,effective_potential_writenetcdf
-!!      effective_potential_writexml,fit_polynomial_coeff_fit
-!!      fit_polynomial_printsystemfiles,flush_unit,herald,init10,instrng
-!!      inupper,invars10,isfile,mover_effpot,multibinit_dtset_free
-!!      outvars_multibinit,timein,wrtout,xmpi_bcast,xmpi_init,xmpi_sum
 !!
 !! SOURCE
 
@@ -78,7 +64,7 @@ module m_multibinit_driver
 #endif
   !use m_generate_training_set, only : generate_training_set
   use m_compute_anharmonics, only : compute_anharmonics
-  use m_init10,              only : init10
+  use m_init10,              only : init10, postfix_fnames
   use m_parser,     only : instrng
   use m_fstrings,   only : replace, inupper
   use m_dtset,      only : chkvars
@@ -98,42 +84,28 @@ contains
   !!
   !! OUTPUT
   !!
-  !! PARENTS
-!!      multibinit
-!!
-  !! CHILDREN
-!!      abihist_bcast,abihist_free,chkvars,compute_anharmonics
-!!      effective_potential_file_getdimsystem,effective_potential_file_gettype
-!!      effective_potential_file_maphisttoref,effective_potential_file_read
-!!      effective_potential_file_readmdfile,effective_potential_free
-!!      effective_potential_setconfinement,effective_potential_writenetcdf
-!!      effective_potential_writexml,fit_polynomial_coeff_fit
-!!      fit_polynomial_coeff_testeffpot,fit_polynomial_printsystemfiles
-!!      global_set_print_bands,global_set_print_parameters
-!!      global_set_scf_parameters,instrng,inupper,invars10,manager%finalize
-!!      manager%initialize,manager%run,mover_effpot,multibinit_dtset_free
-!!      opt_effpot,opt_effpotbound,outvars_multibinit,scup_kpath_new
-!!      scup_kpath_print,wrtout,xmpi_bcast,xmpi_end
-!!
   !! SOURCE
-  subroutine multibinit_main(filnam, dry_run)
-    character(len=fnlen), intent(inout) :: filnam(17)
+  subroutine multibinit_main(input_path, filnam, dry_run)
+    character(len=fnlen), intent(inout) :: input_path
+    character(len=fnlen), intent(inout) :: filnam(18)
     integer, intent(in) :: dry_run
     type(multibinit_dtset_type), target :: inp
     type(effective_potential_type) :: reference_effective_potential
     type(abihist) :: hist, hist_tes
 
-    ! data for spin
     !type(spin_model_t) :: spin_model
-    type(mb_manager_t) :: manager
     character(len=strlen) :: string, raw_string
     character(len=500) :: message
     character(len=fnlen) :: name
+    character(len=fnlen) :: sys_fname
 
     integer :: filetype,ii,lenstr,iiter,niter
     integer :: natom,nph1l,nrpt,ntypat
     integer :: option
     logical :: need_analyze_anh_pot,need_prt_files
+
+    ! Whether the "new" MULTIBNIT framework should be used.
+    logical :: need_new_multibinit
 ! MS
 ! temporary variables for testing SCALE-UP with Multibinit
   !Variable to pass to effpot_evaluate routine of multibinit
@@ -173,39 +145,57 @@ contains
     my_rank = xmpi_comm_rank(comm)
     iam_master = (my_rank == master)
 
-
-    !To automate a maximum calculation, multibinit reads the number of atoms
-    !in the file (ddb or xml). If DDB file is present in input, the ifc calculation
-    !will be initilaze array to the maximum of atoms (natifc=natom,atifc=1,natom...) in invars10
-
-    !TODO: hexu comment: why no if(iam_master) ?
-    write(message, '(6a)' )' Read the information in the reference structure in ',ch10,&
-         & '-',trim(filnam(3)),ch10,' to initialize the multibinit input'
-    call wrtout(ab_out,message,'COLL')
-    call wrtout(std_out,message,'COLL')
-
-    call effective_potential_file_getDimSystem(filnam(3),natom,ntypat,nph1l,nrpt)
-
-    !Read the input file, and store the information in a long string of characters
-    !strlen from defs_basis module
+    !Read the input file, only to the the name of the file which contains the ddb file or xml file
+    ! for getting the number of atoms.
     option=1
     if (iam_master) then
        call instrng (filnam(1),lenstr,option,strlen,string,raw_string)
        !To make case-insensitive, map characters to upper case:
        call inupper(string(1:lenstr))
-
        !Check whether the string only contains valid keywords
        call chkvars(string)
+    end if
+    call xmpi_bcast(string,master, comm, ierr)
+    call xmpi_bcast(raw_string,master, comm, ierr)
+    call xmpi_bcast(lenstr,master, comm, ierr)
+    !To automate a maximum calculation, multibinit reads the number of atoms
+    !in the file (ddb or xml). If DDB file is present in input, the ifc calculation
+    !will be initilaze array to the maximum of atoms (natifc=natom,atifc=1,natom...) in invars10
 
+
+    !Read the input file assuming natom=1 so that the invars10 can work.
+
+    !call invars10(inp,lenstr,natom,string)
+    if(trim(filnam(3)) /='') then
+      sys_fname=filnam(3)
+    else
+      call invars_multibinit_filenames(string, lenstr,  sys_fname=sys_fname)
     end if
 
-    call xmpi_bcast(string,master, comm, ierr)
-    call xmpi_bcast(lenstr,master, comm, ierr)
 
-    !Read the input file
+
+    ! read the reference structure to get natom
+    if (iam_master) then
+      write(message, '(6a)' )' Read the information in the reference structure in ',ch10,&
+            & '-',trim(sys_fname),ch10,' to initialize the multibinit input'
+      call wrtout(ab_out,message,'COLL')
+      call wrtout(std_out,message,'COLL')
+    end if
+
+    call effective_potential_file_getDimSystem(sys_fname,comm,natom,ntypat,nph1l,nrpt)
+    !call effective_potential_file_getDimSystem(filnam(3),natom,ntypat,nph1l,nrpt)
+
+
+    ! read the input again to use the right natom
     call invars10(inp,lenstr,natom,string)
+    call postfix_fnames(input_path, filnam, inp)
+
+    need_new_multibinit= inp%spin_dynamics > 0 .or. inp%lwf_dynamics > 0 .or. inp%dynamics >= 100
 
     if (iam_master) then
+        if(need_new_multibinit) then
+            ABI_ERROR("The new MULTINIT mode should be enabled with --F03 option. ")
+        end if
        !  Echo the inputs to console and main output file
        call outvars_multibinit(inp,std_out)
        call outvars_multibinit(inp,ab_out)
@@ -217,45 +207,33 @@ contains
        !goto 100
     endif
 
-    ! Read and treat the reference structure
-    !****************************************************************************************
-    if (inp%spin_dynamics>0) then
-       if (iam_master) then
-          write(message,'(a,(80a),3a)') ch10,('=',ii=1,80),ch10,ch10,&
-               &     'reading spin terms.'
-       end if
-       !call spin_model%initialize( filnam, inp )
-       call  manager%initialize(filnam, params=inp)
-    else
-       !  Read the model (from DDB or XML)
-       call effective_potential_file_read(filnam(3),reference_effective_potential,inp,comm)
+    !  Read the model (from DDB or XML)
+    call effective_potential_file_read(filnam(3),reference_effective_potential,inp,comm)
 
-       !Read the coefficient from fit
-       !FIXME: hexu: on test farm, it is not no but $path/no
-       if(filnam(4)/=''.and.filnam(4)/='no')then
-          call effective_potential_file_getType(filnam(4),filetype)
-          if(filetype==3.or.filetype==23) then
-             call effective_potential_file_read(filnam(4),reference_effective_potential,inp,comm)
-          else
-             write(message,'(a,(80a),3a)') ch10,('=',ii=1,80),ch10,ch10,&
-                  &         ' There is no specific file for the coefficients from polynomial fitting'
-             call wrtout(ab_out,message,'COLL')
-             call wrtout(std_out,message,'COLL')
-          end if
+
+    if(filnam(4)/=''.and.filnam(4)/='no') then
+       call effective_potential_file_getType(filnam(4),filetype)
+       if(filetype==3.or.filetype==23) then
+          call effective_potential_file_read(filnam(4),reference_effective_potential,inp,comm)
        else
-          if(inp%ncoeff/=0) then
-             write(message, '(5a)' )&
-                  &         'ncoeff is specified in the input but,',ch10,&
-                  &         'there is no file for the coefficients ',ch10,&
-                  &         'Action: add coefficients.xml file'
-             ABI_ERROR(message)
+          write(message,'(a,(80a),3a)') ch10,('=',ii=1,80),ch10,ch10,&
+               &         ' There is no specific file for the coefficients from polynomial fitting'
+          call wrtout(ab_out,message,'COLL')
+          call wrtout(std_out,message,'COLL')
+       end if
+    else
+       if(inp%ncoeff/=0) then
+          write(message, '(5a)' )&
+               &         'ncoeff is specified in the input but,',ch10,&
+               &         'there is no file for the coefficients ',ch10,&
+               &         'Action: add coefficients.xml file'
+          ABI_ERROR(message)
 
-          else
-             write(message,'(a,(80a),3a)') ch10,('=',ii=1,80),ch10,ch10,&
-                  &         ' There is no file for the coefficients from polynomial fitting'
-             call wrtout(ab_out,message,'COLL')
-             call wrtout(std_out,message,'COLL')
-          end if
+       else
+          write(message,'(a,(80a),3a)') ch10,('=',ii=1,80),ch10,ch10,&
+               &         ' There is no file for the coefficients from polynomial fitting'
+          call wrtout(ab_out,message,'COLL')
+          call wrtout(std_out,message,'COLL')
        end if
     end if
 
@@ -325,7 +303,7 @@ elec_eval = .FALSE.
     ! If needed, fit the anharmonic part and compute the confinement potential
     !****************************************************************************************
    if (inp%fit_coeff/=0.or.inp%confinement==2.or.inp%bound_model/=0 .or. inp%opt_effpot/=0) then
-        
+
        if(iam_master) then
           !    Read the MD file
           write(message,'(a,(80a),7a)')ch10,('=',ii=1,80),ch10,ch10,&
@@ -425,7 +403,7 @@ elec_eval = .FALSE.
                call fit_polynomial_coeff_fit(reference_effective_potential,&
                     &         inp%fit_bancoeff,inp%fit_fixcoeff,hist,inp%fit_generateCoeff,&
                     &         inp%fit_rangePower,inp%fit_nbancoeff,inp%fit_ncoeff,&
-                    &         inp%fit_nfixcoeff,inp%fit_nimposecoeff,inp%fit_imposecoeff,& 
+                    &         inp%fit_nfixcoeff,inp%fit_nimposecoeff,inp%fit_imposecoeff,&
                     &         option,comm,cutoff_in=inp%fit_cutoff,&
                     &         max_power_strain=inp%fit_SPC_maxS,initialize_data=inp%fit_initializeData==1,&
                     &         fit_tolMSDF=inp%fit_tolMSDF,fit_tolMSDS=inp%fit_tolMSDS,fit_tolMSDE=inp%fit_tolMSDE,&
@@ -436,66 +414,66 @@ elec_eval = .FALSE.
                     &         fit_iatom=inp%fit_iatom,prt_files=.TRUE.,fit_on=inp%fit_on,sel_on=inp%sel_on,&
                     &         fit_factors=inp%fit_factors,prt_GF_csv=inp%prt_GF_csv,dispterms=inp%fit_dispterms==1)
              else
-                if (inp%fit_ncoeff_per_iatom/=0)then 
-                   if (mod(inp%fit_ncoeff,inp%fit_ncoeff_per_iatom) /= 0)then 
-                      write(message,'(2a,I3,2a,I3,3a)') ch10,& 
-                           & 'fit_ncoeff_per_iatom = ', inp%fit_ncoeff_per_iatom,ch10,& 
+                if (inp%fit_ncoeff_per_iatom/=0)then
+                   if (mod(inp%fit_ncoeff,inp%fit_ncoeff_per_iatom) /= 0)then
+                      write(message,'(2a,I3,2a,I3,3a)') ch10,&
+                           & 'fit_ncoeff_per_iatom = ', inp%fit_ncoeff_per_iatom,ch10,&
                            & 'is not a divider of fit_ncoeff = ', inp%fit_ncoeff,ch10,&
-                           & 'Action: Change fit_ncoeff and/or fit_ncoeff_per_iatom',ch10   
+                           & 'Action: Change fit_ncoeff and/or fit_ncoeff_per_iatom',ch10
                       ABI_ERROR(message)
                    endif
-                   niter = inp%fit_ncoeff/inp%fit_ncoeff_per_iatom 
-                   if (mod(niter,reference_effective_potential%crystal%nirredat) /= 0)then 
-                      write(message,'(2a,I3,2a,I3,2a,I3,3a)') ch10,& 
-                           & 'fit_ncoeff_per_iatom = ', inp%fit_ncoeff_per_iatom,ch10,& 
+                   niter = inp%fit_ncoeff/inp%fit_ncoeff_per_iatom
+                   if (mod(niter,reference_effective_potential%crystal%nirredat) /= 0)then
+                      write(message,'(2a,I3,2a,I3,2a,I3,3a)') ch10,&
+                           & 'fit_ncoeff_per_iatom = ', inp%fit_ncoeff_per_iatom,ch10,&
                            & 'times the number of irreducible atoms = ',reference_effective_potential%crystal%nirredat,ch10,&
                            & 'is not a divider of fit_ncoeff = ', inp%fit_ncoeff,ch10,&
-                           & 'Action: Change fit_ncoeff and/or fit_ncoeff_per_iatom',ch10   
+                           & 'Action: Change fit_ncoeff and/or fit_ncoeff_per_iatom',ch10
                       ABI_ERROR(message)
                    endif
                    niter = niter/reference_effective_potential%crystal%nirredat
-                else if (inp%fit_ncoeff_per_iatom == 0)then      
-                   if (mod(inp%fit_ncoeff,reference_effective_potential%crystal%nirredat) /= 0)then 
-                      write(message,'(2a,I3,2a,I3,3a)') ch10,& 
+                else if (inp%fit_ncoeff_per_iatom == 0)then
+                   if (mod(inp%fit_ncoeff,reference_effective_potential%crystal%nirredat) /= 0)then
+                      write(message,'(2a,I3,2a,I3,3a)') ch10,&
                            & 'The number of irreducible atoms = ',reference_effective_potential%crystal%nirredat,ch10,&
                            & 'is not a divider of fit_ncoeff = ', inp%fit_ncoeff,ch10,&
-                           & 'Action: Change fit_ncoeff',ch10   
+                           & 'Action: Change fit_ncoeff',ch10
                       ABI_ERROR(message)
                    endif
                    inp%fit_ncoeff_per_iatom = inp%fit_ncoeff/reference_effective_potential%crystal%nirredat
                    niter = 1
                 endif
-                write(message,'(a,(80a),7a,I3,3a,I3,3a,I3,3a,I3,2a)') ch10,('=',ii=1,80),ch10,ch10,& 
+                write(message,'(a,(80a),7a,I3,3a,I3,3a,I3,3a,I3,2a)') ch10,('=',ii=1,80),ch10,ch10,&
                      & '  Starting Fit Iterations  ',ch10,&
                      & '  -----------------------  ',ch10,&
                      & '  Select in total fit_ncoeff = ', inp%fit_ncoeff,' coefficients',ch10,&
                      & '  In ', niter,' iterations',ch10,&
-                     & '  Over ', reference_effective_potential%crystal%nirredat, ' irreducible atoms',ch10,& 
-                     & '  Selecting ', inp%fit_ncoeff_per_iatom, ' coefficients per atom in each iteration',ch10 
+                     & '  Over ', reference_effective_potential%crystal%nirredat, ' irreducible atoms',ch10,&
+                     & '  Selecting ', inp%fit_ncoeff_per_iatom, ' coefficients per atom in each iteration',ch10
                 call wrtout(std_out,message,'COLL')
                 call wrtout(ab_out,message,'COLL')
                 need_prt_files=.FALSE.
                 do iiter=1,niter
-                  write(message,'(a,(80a),3a,I3,a,I3,2a)') ch10,('-',ii=1,80),ch10,ch10,& 
+                  write(message,'(a,(80a),3a,I3,a,I3,2a)') ch10,('-',ii=1,80),ch10,ch10,&
                           &    ' Start Iteration (',iiter,'/',niter,')',ch10
                   call wrtout(std_out,message,'COLL')
                   call wrtout(ab_out,message,'COLL')
                   do ii=1,reference_effective_potential%crystal%nirredat
                     if(ii == reference_effective_potential%crystal%nirredat .and. iiter==niter)need_prt_files=.TRUE.
-                    if(ii > 1 .or. iiter > 1)inp%fit_nfixcoeff = -1 
+                    if(ii > 1 .or. iiter > 1)inp%fit_nfixcoeff = -1
                        call fit_polynomial_coeff_fit(reference_effective_potential,&
                           &         inp%fit_bancoeff,inp%fit_fixcoeff,hist,inp%fit_generateCoeff,&
                           &         inp%fit_rangePower,inp%fit_nbancoeff,inp%fit_ncoeff_per_iatom,&
-                          &         inp%fit_nfixcoeff,inp%fit_nimposecoeff,inp%fit_imposecoeff,& 
+                          &         inp%fit_nfixcoeff,inp%fit_nimposecoeff,inp%fit_imposecoeff,&
                           &         option,comm,cutoff_in=inp%fit_cutoff,&
                           &         max_power_strain=inp%fit_SPC_maxS,initialize_data=inp%fit_initializeData==1,&
                           &         fit_tolMSDF=inp%fit_tolMSDF,fit_tolMSDS=inp%fit_tolMSDS,fit_tolMSDE=inp%fit_tolMSDE,&
                           &         fit_tolMSDFS=inp%fit_tolMSDFS,fit_tolGF=inp%fit_tolGF,&
                           &         verbose=.true.,positive=.false.,&
                           &         anharmstr=inp%fit_anhaStrain==1,&
-                          &         spcoupling=inp%fit_SPCoupling==1,prt_anh=inp%analyze_anh_pot,& 
+                          &         spcoupling=inp%fit_SPCoupling==1,prt_anh=inp%analyze_anh_pot,&
                           &         fit_iatom=reference_effective_potential%crystal%irredatindx(ii),&
-                          &         prt_files=need_prt_files,fit_on=inp%fit_on,sel_on=inp%sel_on,& 
+                          &         prt_files=need_prt_files,fit_on=inp%fit_on,sel_on=inp%sel_on,&
                           &         fit_factors=inp%fit_factors,prt_GF_csv=inp%prt_GF_csv,dispterms=inp%fit_dispterms==1)
                   enddo
                 enddo
@@ -521,8 +499,8 @@ elec_eval = .FALSE.
     call wrtout(std_out,message,'COLL')
     call wrtout(ab_out,message,'COLL')
 
-    call opt_effpotbound(reference_effective_potential,inp%bound_rangePower,hist,inp%bound_EFS,&
-&                       inp%bound_factors,inp%bound_penalty,comm) 
+    call opt_effpotbound(reference_effective_potential,inp%bound_rangePower,hist, inp%bound_EFS,&
+&                       inp%bound_factors,inp%bound_penalty,comm)
 
     end if
 
@@ -541,7 +519,7 @@ elec_eval = .FALSE.
      need_analyze_anh_pot = .FALSE.
      if(inp%analyze_anh_pot == 1) need_analyze_anh_pot = .TRUE.
 
-    call opt_effpot(reference_effective_potential,inp%opt_ncoeff,inp%opt_coeff,hist,inp%opt_on,& 
+    call opt_effpot(reference_effective_potential,inp%opt_ncoeff,inp%opt_coeff,hist,inp%opt_on,&
 &                   inp%opt_factors,comm,print_anh=need_analyze_anh_pot)
  end if
 
@@ -587,6 +565,8 @@ elec_eval = .FALSE.
 &                                   print_anharmonic=need_analyze_anh_pot,scup_dtset=inp%scup_dtset,&
 &                                         prt_ph=inp%test_prt_ph)
 
+
+
    end if ! End if(inp%test_effpot == 1)then
 
     !TEST_AM
@@ -598,7 +578,6 @@ elec_eval = .FALSE.
 
     !****************************************************************************************
     !Print the effective potential system + coefficients (only master CPU)
-    ! TODO hexu: add print spin model.
     if(iam_master) then
        if (inp%prt_model >= 1) then
           write(message, '(a,(80a),a)' ) ch10,&
@@ -652,21 +631,9 @@ elec_eval = .FALSE.
     !****************************************************************************************
 
 
-    ! Run spin dynamics
-    !****************************************************************************************
-    if(inp%spin_dynamics/=0) then
-       !call spin_model%run()
-       call manager%run()
-    end if
-    !****************************************************************************************
-
 
     !Free the effective_potential and dataset
     !****************************************************************************************
-    if(inp%spin_dynamics/=0) then
-       call manager%finalize()
-    end if
-
     call effective_potential_free(reference_effective_potential)
     call multibinit_dtset_free(inp)
     call abihist_free(hist)
@@ -677,4 +644,3 @@ elec_eval = .FALSE.
   !!***
 
 end module m_multibinit_driver
-

@@ -7,7 +7,7 @@
 !!  results on different procs.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2021 ABINIT group (MMANCINI)
+!! Copyright (C) 2008-2022 ABINIT group (MMANCINI)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -15,10 +15,6 @@
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -79,11 +75,6 @@ CONTAINS  !===========================================================
 !!
 !! SIDE EFFECTS
 !!  recvbuf= received buffer
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allgatherv,mpi_scatterv
 !!
 !! SOURCE
 subroutine xredistribute_mpi_dp(xval,send_counts,send_displs,recvbuf,&
@@ -152,11 +143,6 @@ end subroutine xredistribute_mpi_dp
 !!
 !! SIDE EFFECTS
 !!  recvbuf= received buffer
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_allgatherv,mpi_scatterv
 !!
 !! SOURCE
 subroutine xredistribute_mpi_2d_dp(xval,send_counts,send_displs,recvbuf,&

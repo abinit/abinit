@@ -6,14 +6,10 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2021 ABINIT group (DCA, XG, MT, DRH)
+!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, MT, DRH)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -83,11 +79,6 @@ contains
 !! NOTES
 !!  This routine must be thread-safe as it is called inside loops that are OpenMP parallelized.
 !!  Please, do not add variables with the save attribute or SIDE EFFECTS.
-!!
-!! PARENTS
-!!      m_opernl
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -649,11 +640,6 @@ end subroutine dfpt_mkffkg
 !! NOTES
 !!  This routine must be thread-safe as it is called inside loops that are OpenMP parallelized.
 !!  Please, do not add variables with the save attribute or SIDE EFFECTS.
-!!
-!! PARENTS
-!!      m_opernl
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

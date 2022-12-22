@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.7.4 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h25 )
+.Starting date : Wed  4 May 2022.
+- ( at 01h23 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v2_t99/t99.in
-- output file    -> t99.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/v2_t99/t99.abi
+- output file    -> t99.abo
 - root for input  files -> t99i
 - root for output files -> t99o
 
@@ -34,7 +34,7 @@
 -    mband =           6        mffmem =           1         mkmem =           8
        mpw =         104          nfft =        3375          nkpt =           8
 ================================================================================
-P This job should need less than                       2.214 Mbytes of memory.
+P This job should need less than                       2.312 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.078 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
@@ -220,10 +220,10 @@ P          mk1mem2        128
            occopt           4
         optdriver1          0
         optdriver2          1
+           prtpot1          0
+           prtpot2          1
               qpt1     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt2    -1.25000000E-01  1.25000000E-01  1.25000000E-01
-            rfdir1          0       0       0
-            rfdir2          1       1       1
            rfphon1          0
            rfphon2          1
             rprim     -5.0000000000E-01  5.0000000000E-01  5.0000000000E-01
@@ -315,8 +315,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/41nb.pspfhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/41nb.pspfhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/41nb.pspfhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/41nb.pspfhi
 - Niobium, fhi98PP : TM-type, LDA, l=0 local
 - 41.00000   5.00000     10122                znucl, zion, pspdat
     6    7    2    0       539   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -487,7 +487,6 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      7.000   => boxcut(ratio)=   2.18758
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t99o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -515,10 +514,8 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t99o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t99o_DS1_WFK
  dfpt_looppert : total number of electrons, from k and k+q
   fully or partially occupied states are    5.000000E+00 and    5.000000E+00.
  Initialisation of the first-order wave-functions :
@@ -534,9 +531,9 @@ tolerances: {tolvrs: 1.00E-09, }
 -ETOT  1   30335.038338233      2.992E+04 1.772E+00 1.718E+08
  ETOT  2   97785.939244114      6.745E+04 6.607E+00 5.508E+08
  ETOT  3   32.461182141901     -9.775E+04 2.849E+00 1.678E+05
- ETOT  4   2.7869166602612     -2.967E+01 5.900E-03 6.754E+00
+ ETOT  4   2.7869166602613     -2.967E+01 5.900E-03 6.754E+00
  ETOT  5   2.7856301204384     -1.287E-03 1.095E-04 2.269E-03
- ETOT  6   2.7856294073640     -7.131E-07 3.996E-07 4.611E-05
+ ETOT  6   2.7856294073639     -7.131E-07 3.996E-07 4.611E-05
  ETOT  7   2.7856294253399      1.798E-08 1.439E-08 1.534E-04
  ETOT  8   2.7856293987148     -2.663E-08 5.647E-11 3.436E-06
  ETOT  9   2.7856293981080     -6.067E-10 2.530E-12 2.513E-08
@@ -606,7 +603,7 @@ tolerances: {tolvrs: 1.00E-09, }
    2    1   2    1         0.0797838641        -0.0000000000
    2    1   3    1         0.0000000000        -0.0000000000
   
-   3    1   1    1         0.0000000000        -0.0000000000
+   3    1   1    1         0.0000000000         0.0000000000
    3    1   2    1         0.0000000000        -0.0000000000
    3    1   3    1         0.0797838641        -0.0000000000
 
@@ -782,10 +779,10 @@ P          mk1mem2        128
            occopt           4
         optdriver1          0
         optdriver2          1
+           prtpot1          0
+           prtpot2          1
               qpt1     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt2    -1.25000000E-01  1.25000000E-01  1.25000000E-01
-            rfdir1          0       0       0
-            rfdir2          1       1       1
            rfphon1          0
            rfphon2          1
             rprim     -5.0000000000E-01  5.0000000000E-01  5.0000000000E-01
@@ -891,7 +888,7 @@ P          mk1mem2        128
 -
 - [4] Ab initio pseudopotentials for electronic structure calculations of poly-atomic systems, 
 - using density-functional theory.
-- M. Fuchs, M. Scheffler, Comput. Phys. Commun. 119, 67 (1999).
+- M. Fuchs and, M. Scheffler, Comput. Phys. Commun. 119, 67 (1999).
 - Comment: Some pseudopotential generated using the FHI code were used.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#fuchs1999
 -
@@ -930,10 +927,10 @@ P          mk1mem2        128
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          4.0  wall=          4.0
+- Proc.   0 individual time (sec): cpu=          5.6  wall=          5.8
 
 ================================================================================
 
  Calculation completed.
-.Delivered   3 WARNINGs and  15 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          4.0  wall=          4.0
+.Delivered   1 WARNINGs and   7 COMMENTs to log file.
++Overall time at end (sec) : cpu=          5.6  wall=          5.8

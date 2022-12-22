@@ -7,17 +7,13 @@
 !!   Computation is done in real space (useful for isolated systems).
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (TRangel, MT, DC)
+!!  Copyright (C) 2013-2022 ABINIT group (TRangel, MT, DC)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! TODO
 !!  This module could be merged with m_mklocl
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -97,12 +93,6 @@ contains
 !!  (if option==2) grtn(3,natom)=grads of Etot wrt tn. These gradients are in
 !!                 reduced coordinates. Multiply them by rprimd to get
 !!                 gradients in cartesian coordinates.
-!!
-!! PARENTS
-!!      m_mklocl
-!!
-!! CHILDREN
-!!      calcdvloc_wvl,derf_ab,paw_splint_der
 !!
 !! SOURCE
 
@@ -613,12 +603,6 @@ end subroutine mklocl_realspace
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_mklocl_realspace
-!!
-!! CHILDREN
-!!      calcdvloc_wvl,derf_ab,paw_splint_der
-!!
 !! SOURCE
 
 subroutine createIonicPotential_new(fftn3_distrib,ffti3_local,geocode,iproc,&
@@ -888,12 +872,6 @@ subroutine createIonicPotential_new(fftn3_distrib,ffti3_local,geocode,iproc,&
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_mklocl_realspace
-!!
-!! CHILDREN
-!!      calcdvloc_wvl,derf_ab,paw_splint_der
-!!
 !! SOURCE
 
 subroutine calcVloc_mklocl(yy,xx,rloc,Z)
@@ -928,8 +906,6 @@ subroutine calcVloc_mklocl(yy,xx,rloc,Z)
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -997,12 +973,6 @@ end subroutine createIonicPotential_new
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_mklocl_realspace
-!!
-!! CHILDREN
-!!      calcdvloc_wvl,derf_ab,paw_splint_der
 !!
 !! SOURCE
 
@@ -1200,12 +1170,6 @@ subroutine local_forces_new(fftn3_distrib,ffti3_local,&
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_mklocl_realspace
-!!
-!! CHILDREN
-!!      calcdvloc_wvl,derf_ab,paw_splint_der
-!!
 !! SOURCE
 
 subroutine calcdVloc_mklocl(yy,xx,rloc,Z)
@@ -1240,8 +1204,6 @@ subroutine calcdVloc_mklocl(yy,xx,rloc,Z)
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -1312,12 +1274,6 @@ end subroutine local_forces_new
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_mklocl_realspace
-!!
-!! CHILDREN
-!!      calcdvloc_wvl,derf_ab,paw_splint_der
-!!
 !! SOURCE
 
 subroutine ind_positions_mklocl(periodic,i,n,j,go)
@@ -1375,12 +1331,6 @@ subroutine ind_positions_mklocl(periodic,i,n,j,go)
 !!  (if option==2) grtn(3,natom)=grads of Etot wrt tn. These gradients are in
 !!                 reduced coordinates. Multiply them by rprimd to get
 !!                 gradients in cartesian coordinates.
-!!
-!! PARENTS
-!!      m_mklocl,m_wvl_wfsinp
-!!
-!! CHILDREN
-!!      calcdvloc_wvl,derf_ab,paw_splint_der
 !!
 !! SOURCE
 
@@ -1598,12 +1548,6 @@ end subroutine mklocl_wavelets
 !! OUTPUT
 !!  floc(3,natom)=local ionic potential contribution to forces
 !!
-!! PARENTS
-!!      m_mklocl_realspace
-!!
-!! CHILDREN
-!!      calcdvloc_wvl,derf_ab,paw_splint_der
-!!
 !! SOURCE
 
 subroutine local_forces_wvl(iproc,natom,rxyz,hxh,hyh,hzh,n1,n2,n3,n3pi,i3s,n1i,n2i,&
@@ -1814,12 +1758,6 @@ subroutine local_forces_wvl(iproc,natom,rxyz,hxh,hyh,hzh,n1,n2,n3,n3pi,i3s,n1i,n
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_mklocl_realspace
-!!
-!! CHILDREN
-!!      calcdvloc_wvl,derf_ab,paw_splint_der
-!!
 !! SOURCE
 
 subroutine calcdVloc_wvl(yy,xx,rloc,Z)
@@ -1854,8 +1792,6 @@ subroutine calcdVloc_wvl(yy,xx,rloc,Z)
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
 !!
 !! SOURCE
 

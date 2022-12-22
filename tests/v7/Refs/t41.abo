@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.7.4 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h31 )
+.Starting date : Wed  4 May 2022.
+- ( at 01h25 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v7_t41-t42/t41.in
-- output file    -> t41.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/v7_t41-t42/t41.abi
+- output file    -> t41.abo
 - root for input  files -> t41i
 - root for output files -> t41o
 
@@ -34,7 +34,7 @@
 -    mband =           4        mffmem =           1         mkmem =          10
        mpw =          40          nfft =        1000          nkpt =          10
 ================================================================================
-P This job should need less than                       0.891 Mbytes of memory.
+P This job should need less than                       0.920 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.026 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
@@ -51,7 +51,7 @@ _ WF disk file :      0.026 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 -    mband =           9        mffmem =           1         mkmem =          10
        mpw =          40          nfft =        1000          nkpt =          10
 ================================================================================
-P This job should need less than                       0.810 Mbytes of memory.
+P This job should need less than                       0.838 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.057 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
@@ -68,7 +68,7 @@ _ WF disk file :      0.057 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 -    mband =           9        mffmem =           1         mkmem =         128
        mpw =          40          nfft =        1000          nkpt =         128
 ================================================================================
-P This job should need less than                       1.674 Mbytes of memory.
+P This job should need less than                       1.703 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.705 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
@@ -463,15 +463,21 @@ P          mk1mem6        128
         optdriver4          1
         optdriver5          1
         optdriver6          1
+           prtpot1          0
+           prtpot2          0
+           prtpot3          0
+           prtpot4          1
+           prtpot5          1
+           prtpot6          1
             prtwf1          1
             prtwf2          1
             prtwf3          1
             prtwf4          3
             prtwf5          3
             prtwf6          3
-            rfdir1          0       0       0
-            rfdir2          0       0       0
-            rfdir3          0       0       0
+            rfdir1          1       1       1
+            rfdir2          1       1       1
+            rfdir3          1       1       1
             rfdir4          1       0       0
             rfdir5          0       1       0
             rfdir6          0       0       1
@@ -628,8 +634,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      2.000   => boxcut(ratio)=   2.19589
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -814,17 +820,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   2.89E-14
  -1.8521E-01  1.1067E-01  1.8079E-01  1.8145E-01  3.1246E-01  3.7320E-01
   4.0530E-01  4.1372E-01  5.2365E-01
-  prteigrs : nnsclo,ikpt=   25    1 max resid (incl. the buffer)=  2.88971E-14
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-  prteigrs : nnsclo,ikpt=   25    2 max resid (incl. the buffer)=  7.74761E-17
-  prteigrs : nnsclo,ikpt=   25    3 max resid (incl. the buffer)=  2.16658E-11
-  prteigrs : nnsclo,ikpt=   25    4 max resid (incl. the buffer)=  9.98174E-08
-  prteigrs : nnsclo,ikpt=   25    6 max resid (incl. the buffer)=  4.84704E-10
-  prteigrs : nnsclo,ikpt=   25    7 max resid (incl. the buffer)=  3.26917E-10
-  prteigrs : nnsclo,ikpt=   25    8 max resid (incl. the buffer)=  1.90155E-16
-  prteigrs : nnsclo,ikpt=   25    9 max resid (incl. the buffer)=  4.30239E-10
-  prteigrs : nnsclo,ikpt=   25   10 max resid (incl. the buffer)=  9.72208E-11
 
 
 --- !ResultsGS
@@ -919,129 +916,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   8.00E-16
  -1.8521E-01  1.1067E-01  1.8079E-01  1.8145E-01  3.1246E-01  3.7320E-01
   4.0530E-01  4.1372E-01  5.2365E-01
-  prteigrs : nnsclo,ikpt=   25    1 max resid (incl. the buffer)=  7.99714E-16
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-  prteigrs : nnsclo,ikpt=   25    2 max resid (incl. the buffer)=  7.99646E-16
-  prteigrs : nnsclo,ikpt=   25    3 max resid (incl. the buffer)=  2.14957E-18
-  prteigrs : nnsclo,ikpt=   25    4 max resid (incl. the buffer)=  3.33622E-19
-  prteigrs : nnsclo,ikpt=   25    5 max resid (incl. the buffer)=  1.32026E-12
-  prteigrs : nnsclo,ikpt=   25    6 max resid (incl. the buffer)=  3.64147E-09
-  prteigrs : nnsclo,ikpt=   25    7 max resid (incl. the buffer)=  1.32026E-12
-  prteigrs : nnsclo,ikpt=   25    8 max resid (incl. the buffer)=  2.66915E-16
-  prteigrs : nnsclo,ikpt=   25    9 max resid (incl. the buffer)=  6.27350E-11
-  prteigrs : nnsclo,ikpt=   25   10 max resid (incl. the buffer)=  3.33621E-19
-  prteigrs : nnsclo,ikpt=   25   11 max resid (incl. the buffer)=  3.64147E-09
-  prteigrs : nnsclo,ikpt=   25   12 max resid (incl. the buffer)=  6.27350E-11
-  prteigrs : nnsclo,ikpt=   25   13 max resid (incl. the buffer)=  4.57805E-20
-  prteigrs : nnsclo,ikpt=   25   15 max resid (incl. the buffer)=  2.73256E-10
-  prteigrs : nnsclo,ikpt=   25   16 max resid (incl. the buffer)=  6.27350E-11
-  prteigrs : nnsclo,ikpt=   25   17 max resid (incl. the buffer)=  3.00493E-10
-  prteigrs : nnsclo,ikpt=   25   18 max resid (incl. the buffer)=  4.65394E-19
-  prteigrs : nnsclo,ikpt=   25   19 max resid (incl. the buffer)=  1.02596E-18
-  prteigrs : nnsclo,ikpt=   25   20 max resid (incl. the buffer)=  3.00493E-10
-  prteigrs : nnsclo,ikpt=   25   21 max resid (incl. the buffer)=  1.80430E-12
-  prteigrs : nnsclo,ikpt=   25   22 max resid (incl. the buffer)=  1.02596E-18
-  prteigrs : nnsclo,ikpt=   25   23 max resid (incl. the buffer)=  4.65393E-19
-  prteigrs : nnsclo,ikpt=   25   24 max resid (incl. the buffer)=  2.73256E-10
-  prteigrs : nnsclo,ikpt=   25   25 max resid (incl. the buffer)=  4.65426E-19
-  prteigrs : nnsclo,ikpt=   25   26 max resid (incl. the buffer)=  1.02596E-18
-  prteigrs : nnsclo,ikpt=   25   27 max resid (incl. the buffer)=  5.22750E-12
-  prteigrs : nnsclo,ikpt=   25   28 max resid (incl. the buffer)=  3.64147E-09
-  prteigrs : nnsclo,ikpt=   25   30 max resid (incl. the buffer)=  6.27350E-11
-  prteigrs : nnsclo,ikpt=   25   31 max resid (incl. the buffer)=  1.02596E-18
-  prteigrs : nnsclo,ikpt=   25   32 max resid (incl. the buffer)=  4.65383E-19
-  prteigrs : nnsclo,ikpt=   25   33 max resid (incl. the buffer)=  3.64147E-09
-  prteigrs : nnsclo,ikpt=   25   34 max resid (incl. the buffer)=  1.04192E-19
-  prteigrs : nnsclo,ikpt=   25   35 max resid (incl. the buffer)=  1.44885E-12
-  prteigrs : nnsclo,ikpt=   25   36 max resid (incl. the buffer)=  7.99732E-16
-  prteigrs : nnsclo,ikpt=   25   37 max resid (incl. the buffer)=  3.64147E-09
-  prteigrs : nnsclo,ikpt=   25   38 max resid (incl. the buffer)=  1.32026E-12
-  prteigrs : nnsclo,ikpt=   25   39 max resid (incl. the buffer)=  1.02596E-18
-  prteigrs : nnsclo,ikpt=   25   40 max resid (incl. the buffer)=  4.65377E-19
-  prteigrs : nnsclo,ikpt=   25   41 max resid (incl. the buffer)=  3.00493E-10
-  prteigrs : nnsclo,ikpt=   25   42 max resid (incl. the buffer)=  3.00493E-10
-  prteigrs : nnsclo,ikpt=   25   43 max resid (incl. the buffer)=  4.65413E-19
-  prteigrs : nnsclo,ikpt=   25   44 max resid (incl. the buffer)=  1.02596E-18
-  prteigrs : nnsclo,ikpt=   25   45 max resid (incl. the buffer)=  1.80430E-12
-  prteigrs : nnsclo,ikpt=   25   46 max resid (incl. the buffer)=  1.02596E-18
-  prteigrs : nnsclo,ikpt=   25   47 max resid (incl. the buffer)=  4.65440E-19
-  prteigrs : nnsclo,ikpt=   25   48 max resid (incl. the buffer)=  2.73256E-10
-  prteigrs : nnsclo,ikpt=   25   49 max resid (incl. the buffer)=  6.27350E-11
-  prteigrs : nnsclo,ikpt=   25   50 max resid (incl. the buffer)=  2.66915E-16
-  prteigrs : nnsclo,ikpt=   25   51 max resid (incl. the buffer)=  3.64147E-09
-  prteigrs : nnsclo,ikpt=   25   52 max resid (incl. the buffer)=  4.65384E-19
-  prteigrs : nnsclo,ikpt=   25   53 max resid (incl. the buffer)=  1.02596E-18
-  prteigrs : nnsclo,ikpt=   25   54 max resid (incl. the buffer)=  6.27350E-11
-  prteigrs : nnsclo,ikpt=   25   56 max resid (incl. the buffer)=  2.14942E-18
-  prteigrs : nnsclo,ikpt=   25   57 max resid (incl. the buffer)=  1.44885E-12
-  prteigrs : nnsclo,ikpt=   25   58 max resid (incl. the buffer)=  7.99753E-16
-  prteigrs : nnsclo,ikpt=   25   59 max resid (incl. the buffer)=  1.32025E-12
-  prteigrs : nnsclo,ikpt=   25   60 max resid (incl. the buffer)=  3.00493E-10
-  prteigrs : nnsclo,ikpt=   25   61 max resid (incl. the buffer)=  1.80430E-12
-  prteigrs : nnsclo,ikpt=   25   62 max resid (incl. the buffer)=  2.66915E-16
-  prteigrs : nnsclo,ikpt=   25   63 max resid (incl. the buffer)=  2.14935E-18
-  prteigrs : nnsclo,ikpt=   25   64 max resid (incl. the buffer)=  2.81624E-15
-  prteigrs : nnsclo,ikpt=   25   65 max resid (incl. the buffer)=  8.17133E-14
-  prteigrs : nnsclo,ikpt=   25   66 max resid (incl. the buffer)=  1.04192E-19
-  prteigrs : nnsclo,ikpt=   25   68 max resid (incl. the buffer)=  3.33680E-19
-  prteigrs : nnsclo,ikpt=   25   69 max resid (incl. the buffer)=  3.64147E-09
-  prteigrs : nnsclo,ikpt=   25   70 max resid (incl. the buffer)=  6.27350E-11
-  prteigrs : nnsclo,ikpt=   25   71 max resid (incl. the buffer)=  6.27350E-11
-  prteigrs : nnsclo,ikpt=   25   72 max resid (incl. the buffer)=  2.73256E-10
-  prteigrs : nnsclo,ikpt=   25   73 max resid (incl. the buffer)=  4.65394E-19
-  prteigrs : nnsclo,ikpt=   25   74 max resid (incl. the buffer)=  1.02596E-18
-  prteigrs : nnsclo,ikpt=   25   75 max resid (incl. the buffer)=  1.32026E-12
-  prteigrs : nnsclo,ikpt=   25   76 max resid (incl. the buffer)=  3.64147E-09
-  prteigrs : nnsclo,ikpt=   25   77 max resid (incl. the buffer)=  5.22750E-12
-  prteigrs : nnsclo,ikpt=   25   78 max resid (incl. the buffer)=  1.02596E-18
-  prteigrs : nnsclo,ikpt=   25   79 max resid (incl. the buffer)=  4.65410E-19
-  prteigrs : nnsclo,ikpt=   25   80 max resid (incl. the buffer)=  6.27350E-11
-  prteigrs : nnsclo,ikpt=   25   81 max resid (incl. the buffer)=  3.64147E-09
-  prteigrs : nnsclo,ikpt=   25   82 max resid (incl. the buffer)=  3.33623E-19
-  prteigrs : nnsclo,ikpt=   25   83 max resid (incl. the buffer)=  4.57804E-20
-  prteigrs : nnsclo,ikpt=   25   84 max resid (incl. the buffer)=  6.27350E-11
-  prteigrs : nnsclo,ikpt=   25   85 max resid (incl. the buffer)=  3.64147E-09
-  prteigrs : nnsclo,ikpt=   25   86 max resid (incl. the buffer)=  8.17137E-14
-  prteigrs : nnsclo,ikpt=   25   87 max resid (incl. the buffer)=  3.33648E-19
-  prteigrs : nnsclo,ikpt=   25   88 max resid (incl. the buffer)=  2.73256E-10
-  prteigrs : nnsclo,ikpt=   25   89 max resid (incl. the buffer)=  5.22750E-12
-  prteigrs : nnsclo,ikpt=   25   90 max resid (incl. the buffer)=  4.57804E-20
-  prteigrs : nnsclo,ikpt=   25   91 max resid (incl. the buffer)=  4.88206E-17
-  prteigrs : nnsclo,ikpt=   25   93 max resid (incl. the buffer)=  1.04192E-19
-  prteigrs : nnsclo,ikpt=   25   94 max resid (incl. the buffer)=  1.04192E-19
-  prteigrs : nnsclo,ikpt=   25   95 max resid (incl. the buffer)=  3.64147E-09
-  prteigrs : nnsclo,ikpt=   25   96 max resid (incl. the buffer)=  4.65412E-19
-  prteigrs : nnsclo,ikpt=   25   97 max resid (incl. the buffer)=  1.02596E-18
-  prteigrs : nnsclo,ikpt=   25   98 max resid (incl. the buffer)=  6.27350E-11
-  prteigrs : nnsclo,ikpt=   25  100 max resid (incl. the buffer)=  2.14943E-18
-  prteigrs : nnsclo,ikpt=   25  102 max resid (incl. the buffer)=  6.27350E-11
-  prteigrs : nnsclo,ikpt=   25  103 max resid (incl. the buffer)=  1.02596E-18
-  prteigrs : nnsclo,ikpt=   25  104 max resid (incl. the buffer)=  4.65420E-19
-  prteigrs : nnsclo,ikpt=   25  105 max resid (incl. the buffer)=  3.64147E-09
-  prteigrs : nnsclo,ikpt=   25  106 max resid (incl. the buffer)=  1.04192E-19
-  prteigrs : nnsclo,ikpt=   25  107 max resid (incl. the buffer)=  4.57804E-20
-  prteigrs : nnsclo,ikpt=   25  108 max resid (incl. the buffer)=  5.22750E-12
-  prteigrs : nnsclo,ikpt=   25  109 max resid (incl. the buffer)=  2.73256E-10
-  prteigrs : nnsclo,ikpt=   25  110 max resid (incl. the buffer)=  3.33585E-19
-  prteigrs : nnsclo,ikpt=   25  111 max resid (incl. the buffer)=  4.57805E-20
-  prteigrs : nnsclo,ikpt=   25  112 max resid (incl. the buffer)=  5.22750E-12
-  prteigrs : nnsclo,ikpt=   25  113 max resid (incl. the buffer)=  2.73256E-10
-  prteigrs : nnsclo,ikpt=   25  114 max resid (incl. the buffer)=  3.33613E-19
-  prteigrs : nnsclo,ikpt=   25  115 max resid (incl. the buffer)=  2.14950E-18
-  prteigrs : nnsclo,ikpt=   25  116 max resid (incl. the buffer)=  2.66914E-16
-  prteigrs : nnsclo,ikpt=   25  117 max resid (incl. the buffer)=  1.80430E-12
-  prteigrs : nnsclo,ikpt=   25  118 max resid (incl. the buffer)=  3.00493E-10
-  prteigrs : nnsclo,ikpt=   25  119 max resid (incl. the buffer)=  1.32026E-12
-  prteigrs : nnsclo,ikpt=   25  120 max resid (incl. the buffer)=  7.99670E-16
-  prteigrs : nnsclo,ikpt=   25  121 max resid (incl. the buffer)=  2.14957E-18
-  prteigrs : nnsclo,ikpt=   25  122 max resid (incl. the buffer)=  2.66914E-16
-  prteigrs : nnsclo,ikpt=   25  123 max resid (incl. the buffer)=  1.80430E-12
-  prteigrs : nnsclo,ikpt=   25  124 max resid (incl. the buffer)=  3.00493E-10
-  prteigrs : nnsclo,ikpt=   25  125 max resid (incl. the buffer)=  1.32026E-12
-  prteigrs : nnsclo,ikpt=   25  126 max resid (incl. the buffer)=  7.99630E-16
-  prteigrs : nnsclo,ikpt=   25  127 max resid (incl. the buffer)=  2.81628E-15
-  prteigrs : nnsclo,ikpt=   25  128 max resid (incl. the buffer)=  4.88216E-17
 
 
 --- !ResultsGS
@@ -1126,7 +1002,6 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=      2.000   => boxcut(ratio)=   2.19589
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t41o_DS3_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -1143,7 +1018,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t41o_DS3_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1208,7 +1082,7 @@ tolerances: {tolwfr: 1.00E-20, }
 
  WARNING : Localization tensor calculation (this does not apply to other properties).
   Not all d/dk perturbations were computed. So the localization tensor in reciprocal space is incomplete,
-  and transformation to cartesian coordinates may be wrong.
+  and transformation to cartesian coordinates may be wrong. Check input variable rfdir.
 
  respfn : d/dk was computed, but no 2DTE, so no DDB output.
 
@@ -1244,7 +1118,6 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=      2.000   => boxcut(ratio)=   2.19589
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t41o_DS3_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -1261,7 +1134,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t41o_DS3_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1326,7 +1198,7 @@ tolerances: {tolwfr: 1.00E-20, }
 
  WARNING : Localization tensor calculation (this does not apply to other properties).
   Not all d/dk perturbations were computed. So the localization tensor in reciprocal space is incomplete,
-  and transformation to cartesian coordinates may be wrong.
+  and transformation to cartesian coordinates may be wrong. Check input variable rfdir.
 
  respfn : d/dk was computed, but no 2DTE, so no DDB output.
 
@@ -1362,7 +1234,6 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=      2.000   => boxcut(ratio)=   2.19589
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t41o_DS3_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -1379,7 +1250,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t41o_DS3_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1444,7 +1314,7 @@ tolerances: {tolwfr: 1.00E-20, }
 
  WARNING : Localization tensor calculation (this does not apply to other properties).
   Not all d/dk perturbations were computed. So the localization tensor in reciprocal space is incomplete,
-  and transformation to cartesian coordinates may be wrong.
+  and transformation to cartesian coordinates may be wrong. Check input variable rfdir.
 
  respfn : d/dk was computed, but no 2DTE, so no DDB output.
 
@@ -1783,15 +1653,21 @@ P          mk1mem6        128
         optdriver4          1
         optdriver5          1
         optdriver6          1
+           prtpot1          0
+           prtpot2          0
+           prtpot3          0
+           prtpot4          1
+           prtpot5          1
+           prtpot6          1
             prtwf1          1
             prtwf2          1
             prtwf3          1
             prtwf4          3
             prtwf5          3
             prtwf6          3
-            rfdir1          0       0       0
-            rfdir2          0       0       0
-            rfdir3          0       0       0
+            rfdir1          1       1       1
+            rfdir2          1       1       1
+            rfdir3          1       1       1
             rfdir4          1       0       0
             rfdir5          0       1       0
             rfdir6          0       0       1
@@ -1992,10 +1868,10 @@ P          mk1mem6        128
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          2.2  wall=          2.3
+- Proc.   0 individual time (sec): cpu=          2.8  wall=          3.0
 
 ================================================================================
 
  Calculation completed.
-.Delivered  22 WARNINGs and  10 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.2  wall=          2.3
+.Delivered  20 WARNINGs and  11 COMMENTs to log file.
++Overall time at end (sec) : cpu=          2.8  wall=          3.0

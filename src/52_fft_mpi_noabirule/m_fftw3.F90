@@ -6,7 +6,7 @@
 !!  This module provides wrappers for the FFTW3 routines: in-place and out-of-place version.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2021 ABINIT group (MG, FD)
+!! Copyright (C) 2009-2022 ABINIT group (MG, FD)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -287,12 +287,6 @@ CONTAINS  !===========================================================
 !! OUTPUT
 !! fofr(cplex,ldx*ldy*ldz*ndat)=The FFT of fofg
 !!
-!! PARENTS
-!!      m_fft
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
-!!
 !! SOURCE
 
 subroutine fftw3_seqfourdp(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,isign,fofg,fofr,fftw_flags)
@@ -439,12 +433,6 @@ end subroutine fftw3_seqfourdp
 !! for option==3, fofr(2,ldx*ldy*ldz*ndat) contains the input real space wavefunction;
 !!                fofgout(2,npwout*ndat) contains its output Fourier transform;
 !!                no use of fofgin and npwin.
-!!
-!! PARENTS
-!!      m_fft
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
 !!
 !! SOURCE
 
@@ -778,11 +766,6 @@ end subroutine fftw3_seqfourwf
 !! in both directions. Also accomplish some post-processing.
 !! See fftw3_fftrisc_dp for API doc.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
-!!
 !! SOURCE
 
 subroutine fftw3_fftrisc_sp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,kg_kin,kg_kout,&
@@ -899,12 +882,6 @@ end subroutine fftw3_fftrisc_sp
 !!                 fofgout(2,npwout) contains its Fourier transform;
 !!                 no use of fofgin and npwin.
 !!
-!! PARENTS
-!!      m_fftw3
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
-!!
 !! SOURCE
 
 subroutine fftw3_fftrisc_dp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,kg_kin,kg_kout,&
@@ -958,12 +935,6 @@ end subroutine fftw3_fftrisc_dp
 !! FUNCTION
 !!  Mixed precision version of fftrisc: input/output in dp, computation done in sp.
 !!  See fftw3_fftrisc_dp for API docs.
-!!
-!! PARENTS
-!!      m_fftw3
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
 !!
 !! SOURCE
 
@@ -1036,12 +1007,6 @@ end subroutine fftw3_fftrisc_mixprec
 !! OUTPUT
 !!  ur(ldx*ldy*ldz*ndat)=wavefunctions in real space.
 !!
-!! PARENTS
-!!      m_fftw3
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
-!!
 !! SOURCE
 
 subroutine fftw3_fftug_dp(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k,gbound,ug,ur)
@@ -1105,11 +1070,6 @@ end subroutine fftw3_fftug_dp
 !!
 !! OUTPUT
 !!  ur(ldx*ldy*ldz*ndat)=wavefunctions in real space
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
 !!
 !! SOURCE
 
@@ -1175,11 +1135,6 @@ end subroutine fftw3_fftug_spc
 !!
 !! OUTPUT
 !!  ur(ldx*ldy*ldz*ndat)=wavefunctions in real space.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
 !!
 !! SOURCE
 
@@ -1247,11 +1202,6 @@ end subroutine fftw3_fftug_dpc
 !!                       Destroyed in output. Do not use ur anymore!
 !! OUTPUT
 !! ug(npw_k*ndat)=wavefunctions in reciprocal space.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
 !!
 !! SOURCE
 
@@ -1321,11 +1271,6 @@ end subroutine fftw3_fftur_dp
 !! OUTPUT
 !! ug(npw_k*ndat)=wavefunctions in reciprocal space.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
-!!
 !! SOURCE
 
 subroutine fftw3_fftur_spc(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k,gbound,ur,ug)
@@ -1394,11 +1339,6 @@ end subroutine fftw3_fftur_spc
 !! OUTPUT
 !! ug(npw_k*ndat)=wavefunctions in reciprocal space
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
-!!
 !! SOURCE
 
 subroutine fftw3_fftur_dpc(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k,gbound,ur,ug)
@@ -1460,12 +1400,6 @@ end subroutine fftw3_fftur_dpc
 !!  ff(ldx*ldy*ldz*ndat)=
 !!    In input: the complex array to be transformed.
 !!    In output: the Fourier transformed in the space specified by isign.
-!!
-!! PARENTS
-!!      m_fftw3
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
 !!
 !! SOURCE
 
@@ -1545,11 +1479,6 @@ end subroutine fftw3_c2c_ip_spc
 !!    input: The array with the data to be transformed.
 !!    output: The results of the FFT.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
-!!
 !! SOURCE
 
 subroutine fftw3_fftpad_spc(ff,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
@@ -1601,11 +1530,6 @@ end subroutine fftw3_fftpad_spc
 !!  ff(ldx*ldy*ldz*ndat)=
 !!    In input: the complex array to be transformed.
 !!    In output: the Fourier transformed in the space specified by isign.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
 !!
 !! SOURCE
 
@@ -1680,11 +1604,6 @@ end subroutine fftw3_c2c_ip_dpc
 !!
 !! OUTPUT
 !! gg(ldx*ldy*ldz*ndat)=The FFT of ff.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
 !!
 !! SOURCE
 
@@ -1761,11 +1680,6 @@ end subroutine fftw3_c2c_op_spc
 !!
 !! OUTPUT
 !! gg(ldx*ldy*ldz*ndat)=The FFT of ff.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
 !!
 !! SOURCE
 
@@ -1844,12 +1758,6 @@ end subroutine fftw3_c2c_op_dpc
 !! NOTES
 !!  FIXME For the time-being. No augmentation of the mesh to reduce memory conflicts, as MKL crashes
 !!  if the advanced interface is used.
-!!
-!! PARENTS
-!!      m_fftw3
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
 !!
 !! SOURCE
 
@@ -2002,12 +1910,6 @@ end subroutine fftw3_r2c_op
 !!  FIXME For the time-being. No augmentation of the mesh to reduce memory conflicts, as MKL crashes
 !!  if the advanced interface is used.
 !!
-!! PARENTS
-!!      m_fftw3
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
-!!
 !! SOURCE
 
 subroutine fftw3_c2r_op(nx,ny,nz,ldx,ldy,ldz,ndat,ff,gg,fftw_flags)
@@ -2119,12 +2021,6 @@ end subroutine fftw3_c2r_op
 !! OUTPUT
 !! fout(2,ldx*ldy*ldz*ndat)=The Fourier transform of fin.
 !!
-!! PARENTS
-!!      m_fftw3
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
-!!
 !! SOURCE
 
 subroutine fftw3_many_dft_op(nx,ny,nz,ldx,ldy,ldz,ndat,isign,fin,fout,fftw_flags)
@@ -2204,12 +2100,6 @@ end subroutine fftw3_many_dft_op
 !!   In input: The complex array to be transformed.
 !!   In output: The FFT results.
 !!
-!! PARENTS
-!!      m_fftw3
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
-!!
 !! SOURCE
 
 subroutine fftw3_many_dft_ip(nx,ny,nz,ldx,ldy,ldz,ndat,isign,finout,fftw_flags)
@@ -2283,12 +2173,6 @@ end subroutine fftw3_many_dft_ip
 !!  fftw3_cleanup does not deallocate your plans, however. To prevent memory leaks, you must still call
 !!  fftw_destroy_plan before executing fftw3_cleanup
 !!
-!! PARENTS
-!!      m_driver
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
-!!
 !! SOURCE
 
 subroutine fftw3_cleanup()
@@ -2322,12 +2206,6 @@ end subroutine fftw3_cleanup
 !!  Release the memory allocate for the plan.
 !!
 !! INPUTS
-!!
-!! PARENTS
-!!      m_fftw3
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
 !!
 !! SOURCE
 
@@ -2366,12 +2244,6 @@ end subroutine fftw3_destroy_plan
 !! SIDE EFFECTS
 !!  The one-time initialization required to use FFTW3 threads is performed when the routine
 !!  is called for the first time.
-!!
-!! PARENTS
-!!      fftprof,m_driver
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
 !!
 !! SOURCE
 
@@ -2426,12 +2298,6 @@ end subroutine fftw3_init_threads
 !!
 !! INPUTS
 !!  [nthreads]=The number of threads you want FFTW3 to use.  Default xomp_get_max_threads()
-!!
-!! PARENTS
-!!      m_fft_prof,m_fftw3
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
 !!
 !! SOURCE
 
@@ -2510,12 +2376,6 @@ end subroutine fftw3_set_nthreads
 !!     input: The array with the data to be transformed.
 !!     output: The results of the FFT.
 !!
-!! PARENTS
-!!      m_fftw3
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
-!!
 !! SOURCE
 
 subroutine fftw3_fftpad_dp(ff,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
@@ -2573,11 +2433,6 @@ end subroutine fftw3_fftpad_dp
 !!    input: The array with the data to be transformed.
 !!    output: The results of the FFT.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
-!!
 !! SOURCE
 
 subroutine fftw3_fftpad_dpc(ff,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
@@ -2621,8 +2476,6 @@ end subroutine fftw3_fftpad_dpc
 !! INPUTS
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -2673,8 +2526,6 @@ end function dplan_many_dft_1D
 !!
 !! SIDE EFFECTS
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 function dplan_many_dft_2D(rank,n,howmany,fin,inembed,istride,idist,fout,onembed,ostride,odist,sign,flags,nthreads) result(plan)
@@ -2723,8 +2574,6 @@ end function dplan_many_dft_2D
 !! INPUTS
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
 !!
 !! SOURCE
 !! FIXME  technically it should be intent(inout) since FFTW3 can destroy the input for particular flags.
@@ -2776,8 +2625,6 @@ end function cplan_many_dft
 !!
 !! SIDE EFFECTS
 !!
-!! PARENTS
-!!
 !! SOURCE
 !! FIXME  technically it should be intent(inout) since FFTW3 can destroy the input for particular flags.
 
@@ -2827,8 +2674,6 @@ end function zplan_many_dft
 !! INPUTS
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
 !!
 !! SOURCE
 !! FIXME  technically it should be intent(inout) since FFTW3 can destroy the input
@@ -2880,8 +2725,6 @@ end function dplan_many_dft_r2c
 !! INPUTS
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -2940,11 +2783,6 @@ end function dplan_many_dft_c2r
 !!  containing the real and imaginary part. I have to admit that this interface
 !!  is a bit ambiguous since FFTW3 provides routines for real-to-real transforms.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
-!!
 !! SOURCE
 
 #ifdef HAVE_FFTW3
@@ -2972,11 +2810,6 @@ end subroutine fftw3_execute_dft_dp
 !! NAME
 !! fftw3_execute_dft_spc
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
-!!
 !! SOURCE
 
 #ifdef HAVE_FFTW3
@@ -3003,11 +2836,6 @@ end subroutine fftw3_execute_dft_spc
 !!****f* m_fftw3/fftw3_execute_dft_dpc
 !! NAME
 !! fftw3_execute_dft_dpc
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
 !!
 !! SOURCE
 
@@ -3037,11 +2865,6 @@ end subroutine fftw3_execute_dft_dpc
 !! fftw3_alloc_real1d_dp
 !!
 !! FUNCTION
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
 !!
 !! SOURCE
 
@@ -3075,11 +2898,6 @@ end subroutine fftw3_alloc_real1d_dp
 !! NAME
 !! fftw3_alloc_real2d_dp
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
-!!
 !! SOURCE
 
 #ifdef HAVE_FFTW3
@@ -3112,11 +2930,6 @@ end subroutine fftw3_alloc_real2d_dp
 !! NAME
 !! fftw3_alloc_complex1d_spc
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
-!!
 !! SOURCE
 
 #ifdef HAVE_FFTW3
@@ -3148,11 +2961,6 @@ end subroutine fftw3_alloc_complex1d_spc
 !!****f* m_fftw3/fftw3_alloc_complex1d_dpc
 !! NAME
 !! fftw3_alloc_complex1d_dpc
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
 !!
 !! SOURCE
 
@@ -3194,8 +3002,6 @@ end subroutine fftw3_alloc_complex1d_dpc
 !!  ndat=Number of FFT transforms to do
 !!  nthreads = Number of threads available
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 function fftw3_spawn_threads_here(ndat,nthreads) result(ans)
@@ -3226,12 +3032,6 @@ end function fftw3_spawn_threads_here
 !! FUNCTION
 !!
 !! INPUTS
-!!
-!! PARENTS
-!!      m_fft
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
 !!
 !! SOURCE
 
@@ -3266,11 +3066,6 @@ end subroutine fftw3_use_lib_threads
 !! cdata_f,cdata_r: C pointers to use for fourier andreal data
 !! n0,n0_tr : local size on the shared dimension (nz or ny if transposed mode is used)
 !! offset,offset_tr : offset per process in continuous tabx
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
 !!
 !! SOURCE
 
@@ -3329,11 +3124,6 @@ end subroutine fftwmpi_get_work_array
 !! OUTPUT
 !! cdata_f,cdata_r: C pointers to free for fourier andreal data
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
-!!
 !! SOURCE
 
 subroutine fftwmpi_free_work_array(cdata_f,cdata_r)
@@ -3383,11 +3173,6 @@ end subroutine fftwmpi_free_work_array
 !!
 !! OUTPUT
 !! fout(2,ldx*ldy*ldz*ndat)=The Fourier transform of fin.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
 !!
 !! SOURCE
 
@@ -3500,11 +3285,6 @@ end subroutine fftw3mpi_many_dft_ip
 !! OUTPUT
 !! fout(2,ldx*ldy*ldz*ndat)=The Fourier transform of fin.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
-!!
 !! SOURCE
 
 subroutine fftw3mpi_many_dft_tr(nx,ny,nz,ndat,isign,fin,fout,comm_fft,fftw_flags)
@@ -3580,12 +3360,6 @@ end subroutine fftw3mpi_many_dft_tr
 !! LOCAL DATA IN FOURIER SPACE : TRANSPOSED ORDER
 !! real space     --> dim = [  nx  | ny | nz/np_fft]
 !! fourier  space --> dim = [ nx/2 | nz | ny/np_ff ]
-!!
-!! PARENTS
-!!      m_fftw3
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
 !!
 !! SOURCE
 
@@ -3728,12 +3502,6 @@ end subroutine fftw3_mpifourdp_c2r
 !! we can't take in account the symetric of the real case because after
 !! fft have been computed, the symetric data needed are dispatched over
 !! other process in parallel
-!!
-!! PARENTS
-!!      m_fftw3
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
 !!
 !! SOURCE
 
@@ -3880,11 +3648,6 @@ end subroutine fftw3_mpifourdp_r2c
 !! fofg(2,nfft*ndat)=f(G), complex.
 !! fofr(cplex*nfft*ndat)=input function f(r) (real or complex)
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
-!!
 !! SOURCE
 
 subroutine old_fftw3_mpifourdp(cplex,nfft,ngfft,ndat,isign,&
@@ -3994,12 +3757,6 @@ end subroutine old_fftw3_mpifourdp
 !! Input/Output
 !! fofg(2,nfft*ndat)=f(G), complex.
 !! fofr(cplex*nfft*ndat)=input function f(r) (real or complex)
-!!
-!! PARENTS
-!!      m_fftw3
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
 !!
 !! SOURCE
 
@@ -4175,12 +3932,6 @@ end subroutine fftw3_mpifourdp_c2c
 !!   slow and less dramatic decrease of performance. If NCACHE is set
 !!   to a value so small, that not even a single one dimensional transform
 !!   can be done in the workarray zw, the program stops with an error message.
-!!
-!! PARENTS
-!!      m_fft
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
 !!
 !! SOURCE
 
@@ -4531,12 +4282,6 @@ end subroutine fftw3_mpiback_wf
 !!  to a value so small, that not even a single one dimensional transform
 !!  can be done in the workarray zw, the program stops with an error message.
 !!
-!! PARENTS
-!!      m_fft
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
-!!
 !! SOURCE
 
 subroutine fftw3_mpiforw_wf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
@@ -4882,12 +4627,6 @@ end subroutine fftw3_mpiforw_wf
 !!   to a value so small, that not even a single one dimensional transform
 !!   can be done in the workarray zw, the program stops with an error message.
 !!
-!! PARENTS
-!!      m_fftw3
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
-!!
 !! SOURCE
 
 subroutine fftw3_mpiback(cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd1eff,nd2proc,nd3proc,option,zf,zr,comm_fft)
@@ -5181,12 +4920,6 @@ end subroutine fftw3_mpiback
 !!  to a value so small, that not even a single one dimensional transform
 !!  can be done in the workarray zw, the program stops with an error message.
 !!
-!! PARENTS
-!!      m_fftw3
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
-!!
 !! SOURCE
 
 subroutine fftw3_mpiforw(cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd1eff,nd2proc,nd3proc,option,zr,zf,comm_fft)
@@ -5446,12 +5179,6 @@ end subroutine fftw3_mpiforw
 !! fofg(2,nfft)=f(G), complex.
 !! fofr(cplex*nfft)=input function f(r) (real or complex)
 !!
-!! PARENTS
-!!      m_fft
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
-!!
 !! SOURCE
 
 subroutine fftw3_mpifourdp(cplex,nfft,ngfft,ndat,isign,&
@@ -5562,12 +5289,6 @@ end subroutine fftw3_mpifourdp
 !!   slow and less dramatic decrease of performance. If NCACHE is set
 !!   to a value so small, that not even a single one dimensional transform
 !!   can be done in the workarray zw, the program stops with an error message.
-!!
-!! PARENTS
-!!      m_fft
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
 !!
 !! SOURCE
 
@@ -6035,12 +5756,6 @@ end subroutine fftw3_applypot
 !!   to a value so small, that not even a single one dimensional transform
 !!   can be done in the workarray zw, the program stops with an error message.
 !!
-!! PARENTS
-!!      m_fft
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
-!!
 !! SOURCE
 
 subroutine fftw3_accrho(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
@@ -6363,12 +6078,6 @@ end subroutine fftw3_accrho
 !!   slow and less dramatic decrease of performance. If NCACHE is set
 !!   to a value so small, that not even a single one dimensional transform
 !!   can be done in the workarray zw, the program stops with an error message.
-!!
-!! PARENTS
-!!      m_fft
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
 !!
 !! SOURCE
 
@@ -6716,12 +6425,6 @@ end subroutine fftw3_mpiback_manywf
 !!  to a value so small, that not even a single one dimensional transform
 !!  can be done in the workarray zw, the program stops with an error message.
 !!
-!! PARENTS
-!!      m_fft
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
-!!
 !! SOURCE
 
 subroutine fftw3_mpiforw_manywf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
@@ -7056,12 +6759,6 @@ end subroutine fftw3_mpiforw_manywf
 !!   slow and less dramatic decrease of performance. If NCACHE is set
 !!   to a value so small, that not even a single one dimensional transform
 !!   can be done in the workarray zw, the program stops with an error message.
-!!
-!! PARENTS
-!!      m_fft
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
 !!
 !! SOURCE
 
@@ -7515,12 +7212,6 @@ end subroutine fftw3_applypot_many
 !! NOTES
 !!   vg is given on the FFT mesh instead of the augmented mesh [ldx,ldy,ldz]
 !!   in order to simplify the interface with the other routines operating of vg
-!!
-!! PARENTS
-!!      m_fft
-!!
-!! CHILDREN
-!!      fftw3_destroy_plan,fftw3_execute_dft
 !!
 !! SOURCE
 

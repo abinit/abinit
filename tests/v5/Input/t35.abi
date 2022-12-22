@@ -13,7 +13,7 @@ prtvhxc 0
 prtwf 0
 prteig 0
 
-prtefg 3 # this value computes EFG using PAW and also point charge model
+nucefg 3 # this value computes EFG using PAW and also point charge model
 
 quadmom 0.00 -0.0261 # quad moments of Si-29 and O-17 in barns
 ptcharge 4.0 -2.0 # ionic charges of silicon and oxygen at the 1st-year chemistry level

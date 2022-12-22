@@ -58,8 +58,6 @@
                         # smdelta = 1 ==> Fermi-Dirac smearing.
  nbdbuf?4  2            # 2 buffer bands. RF converges much faster.
  rfphon?4  1            # Do phonon response
- rfatpol?4 1 2          # Treat displacements of all atoms
- rfdir?4   1 1 1        # Do all directions 
  tolwfr?4  1.0d-8       # Underconverged : tolwfr 1.0d-22 should be used for converged results
  kptopt?4  3
 
@@ -143,7 +141,7 @@
 #%% exclude_builders = [^s][^c][^o].*
 #%% [files]
 #%% files_to_test = 
-#%%   tdepes_4.abo,  tolnlines= 0, tolabs=  0.0, tolrel=  0.0
+#%%   tdepes_4.abo,  tolnlines= 1000, tolabs=  0.002, tolrel=  1.0e-03
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

@@ -1,0 +1,660 @@
+!!****m* ABINIT/m_gwr_driver
+!! NAME
+!!  m_gwr_driver
+!!
+!! FUNCTION
+!!   Driver for GWR calculations
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2021-2022 ABINIT group (MG)
+!!  This file is distributed under the terms of the
+!!  APACHE license version 2.0, see ~abinit/COPYING
+!!  or https://www.apache.org/licenses/LICENSE-2.0 .
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_gwr_driver
+
+ use defs_basis
+ use defs_wvltypes
+ use m_errors
+ use m_abicore
+ use m_xmpi
+ use m_xomp
+ use m_hdr
+ use libxc_functionals
+ use m_crystal
+ use m_ebands
+ use m_dtset
+ use m_dtfil
+ use m_wfk
+ use m_distribfft
+ use m_nctk
+
+ use defs_datatypes,    only : pseudopotential_type, ebands_t
+ use defs_abitypes,     only : MPI_type
+ use m_io_tools,        only : file_exists, open_file
+ use m_time,            only : cwtime, cwtime_report
+ use m_fstrings,        only : strcat, sjoin, ftoa, itoa
+ use m_fftcore,         only : print_ngfft ! ngfft_seq,
+ use m_fft,             only : fourdp
+ use m_ioarr,           only : read_rhor
+ use m_energies,        only : energies_type, energies_init
+ use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq
+ use m_pawang,          only : pawang_type
+ use m_pawrad,          only : pawrad_type
+ use m_pawtab,          only : pawtab_type, pawtab_print, pawtab_get_lsize
+ use m_paw_an,          only : paw_an_type, paw_an_init, paw_an_free, paw_an_nullify
+ use m_paw_ij,          only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify
+ use m_pawfgrtab,       only : pawfgrtab_type, pawfgrtab_init, pawfgrtab_free, pawfgrtab_print
+ use m_pawrhoij,        only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy, pawrhoij_free, &
+                               pawrhoij_inquire_dim, pawrhoij_symrhoij, pawrhoij_unpack
+ use m_pawdij,          only : pawdij, symdij_all
+ use m_pawfgr,          only : pawfgr_type, pawfgr_init, pawfgr_destroy
+ use m_paw_pwaves_lmn,  only : paw_pwaves_lmn_t, paw_pwaves_lmn_init, paw_pwaves_lmn_free
+ use m_pawpwij,         only : pawpwff_t, pawpwff_init, pawpwff_free
+ use m_kg,              only : getph !, getcut
+ use m_pspini,          only : pspini
+ use m_paw_correlations,only : pawpuxinit
+ use m_paw_dmft,        only : paw_dmft_type
+ use m_paw_sphharm,     only : setsym_ylm
+ use m_paw_mkrho,       only : denfgr
+ use m_paw_nhat,        only : nhatgrid, pawmknhat
+ use m_paw_tools,       only : chkpawovlp, pawprt
+ use m_paw_denpot,      only : pawdenpot
+ use m_paw_init,        only : pawinit, paw_gencond
+ use m_mkrho,           only : prtrhomxmn
+ use m_melemts,         only : melflags_t !, melements_t
+ use m_setvtr,          only : setvtr
+ use m_vhxc_me,         only : calc_vhxc_me
+ use m_gwr,             only : gwr_t
+ !use m_ephtk,          only : ephtk_update_ebands
+
+ implicit none
+
+ private
+!!***
+
+ public :: gwr_driver
+!!***
+
+contains
+!!***
+
+!!****f* m_gwr_driver/gwr_driver
+!! NAME
+!!  gwr_driver
+!!
+!! FUNCTION
+!! Main routine for GWR calculations.
+!!
+!! INPUTS
+!! acell(3)=Length scales of primitive translations (bohr)
+!! codvsn=Code version
+!! dtfil<datafiles_type>=Variables related to files.
+!! dtset<dataset_type>=All input variables for this dataset.
+!! pawang<pawang_type)>=PAW angular mesh and related data.
+!! pawrad(ntypat*usepaw)<pawrad_type>=Paw radial mesh and related data.
+!! pawtab(ntypat*usepaw)<pawtab_type>=Paw tabulated starting data.
+!! psps<pseudopotential_type>=Variables related to pseudopotentials.
+!!   Before entering the first time in the routine, a significant part of Psps has been initialized :
+!!   the integers dimekb,lmnmax,lnmax,mpssang,mpssoang,mpsso,mgrid,ntypat,n1xccc,usepaw,useylm,
+!!   and the arrays dimensioned to npsp. All the remaining components of Psps are to be initialized in
+!!   the call to pspini. The next time the code enters bethe_salpeter, Psps might be identical to the
+!!   one of the previous Dtset, in which case, no reinitialisation is scheduled in pspini.F90.
+!! rprim(3,3)=Dimensionless real space primitive translations.
+!! xred(3,natom)=Reduced atomic coordinates.
+!!
+!! NOTES
+!!
+!! ON THE USE OF FFT GRIDS:
+!! =================
+!! In case of PAW:
+!! ---------------
+!!    Two FFT grids are used:
+!!    - A "coarse" FFT grid (defined by ecut) for the application of the Hamiltonian on the plane waves basis.
+!!      It is defined by nfft, ngfft, mgfft, ...
+!!      Hamiltonian, wave-functions, density related to WFs (rhor here), ... are expressed on this grid.
+!!    - A "fine" FFT grid (defined) by ecutdg) for the computation of the density inside PAW spheres.
+!!      It is defined by nfftf, ngfftf, mgfftf, ... Total density, potentials, ... are expressed on this grid.
+!! In case of norm-conserving:
+!! ---------------------------
+!!    - Only the usual FFT grid (defined by ecut) is used. It is defined by nfft, ngfft, mgfft, ...
+!!      For compatibility reasons, (nfftf,ngfftf,mgfftf) are set equal to (nfft,ngfft,mgfft) in that case.
+!!
+!! SOURCE
+
+subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim, xred)
+
+!Arguments ------------------------------------
+!scalars
+ character(len=8),intent(in) :: codvsn
+ type(datafiles_type),intent(in) :: dtfil
+ type(dataset_type),intent(inout) :: dtset
+ type(pawang_type),intent(inout) :: pawang
+ type(pseudopotential_type),intent(inout) :: psps
+!arrays
+ real(dp),intent(in) :: acell(3),rprim(3,3),xred(3,dtset%natom)
+ type(pawrad_type),intent(inout) :: pawrad(psps%ntypat*psps%usepaw)
+ type(pawtab_type),intent(inout) :: pawtab(psps%ntypat*psps%usepaw)
+
+!Local variables ------------------------------
+!scalars
+ integer,parameter :: master = 0, cplex1 = 1, ipert0 = 0, idir0 = 0, optrhoij1 = 1
+ integer :: ii, comm, nprocs, my_rank, mgfftf, nfftf, omp_ncpus, work_size, nks_per_proc, ierr
+ real(dp) :: eff, mempercpu_mb, max_wfsmem_mb, nonscal_mem
+ real(dp) :: ecore, ecut_eff, ecutdg_eff, cpu, wall, gflops
+ logical, parameter :: is_dfpt = .false.
+ logical :: use_wfk
+ character(len=500) :: msg
+ character(len=fnlen) :: wfk_path, den_path, kden_path
+ type(hdr_type) :: wfk_hdr, den_hdr, kden_hdr
+ type(crystal_t) :: cryst, den_cryst, wfk_cryst
+ type(ebands_t) :: ks_ebands
+ type(pawfgr_type) :: pawfgr
+ type(wvl_data) :: wvl
+ type(mpi_type) :: mpi_enreg
+ type(gwr_t) :: gwr
+!arrays
+ real(dp), parameter :: k0(3) = zero
+ integer :: cplex, cplex_dij, cplex_rhoij
+ integer :: gnt_option !,has_dijU,has_dijso,iab,bmin,bmax,irr_idx1,irr_idx2
+ integer :: istep, moved_atm_inside, moved_rhor, n3xccc
+ integer :: ndij !,ndim,nfftf,nfftf_tot,nkcalc,gwc_nfft,gwc_nfftot,gwx_nfft,gwx_nfftot
+ integer :: ngrvdw, nhatgrdim, nkxc, nspden_rhoij, optene !nzlmopt,
+ integer :: optcut, optgr0, optgr1, optgr2, optrad, psp_gencond !option,
+ integer :: rhoxsp_method, usexcnhat !, use_aerhor,use_umklp
+ !real(dp) :: compch_fft, compch_sph !,r_s,rhoav,alpha
+ real(dp) :: gsqcutc_eff, gsqcutf_eff, gsqcut_shp
+ real(dp) :: vxcavg !,vxcavg_qp ucvol,
+ real(dp) :: gwc_gsq, gwx_gsq,gw_gsq !, gsqcut
+ logical :: call_pawinit
+ type(energies_type) :: KS_energies
+ type(melflags_t) :: KS_mflags
+ type(paw_dmft_type) :: Paw_dmft
+!arrays
+ integer :: ngfftc(18),ngfftf(18),unts(2) ! gwc_ngfft(18),gwx_ngfft(18),
+ integer,allocatable :: nq_spl(:), l_size_atm(:) !,qp_vbik(:,:),tmp_gfft(:,:),ks_vbik(:,:),nband(:,:),
+ integer,allocatable :: tmp_kstab(:,:,:)
+ real(dp) :: strsxc(6) !,tsec(2)
+ real(dp),allocatable :: grchempottn(:,:),grewtn(:,:),grvdw(:,:),qmax(:)
+ real(dp),allocatable :: ks_nhat(:,:),ks_nhatgr(:,:,:),ks_rhog(:,:)
+ real(dp),allocatable :: ks_rhor(:,:),ks_vhartr(:), ks_vtrial(:,:), ks_vxc(:,:), ks_taur(:,:)
+ real(dp),allocatable :: kxc(:,:), ph1d(:,:), ph1df(:,:) !qp_kxc(:,:),
+ real(dp),allocatable :: vpsp(:), xccc3d(:), dijexc_core(:,:,:) !, dij_hf(:,:,:)
+ type(Paw_an_type),allocatable :: KS_paw_an(:)
+ type(Paw_ij_type),allocatable :: KS_paw_ij(:)
+ type(Pawfgrtab_type),allocatable :: Pawfgrtab(:)
+ type(Pawrhoij_type),allocatable :: KS_Pawrhoij(:)
+ type(pawpwff_t),allocatable :: Paw_pwff(:)
+
+!************************************************************************
+
+ ! This part performs the initialization of the basic objects used to perform e-ph calculations:
+ !
+ !     1) Crystal structure `cryst`
+ !     2) Ground state band energies: `ks_ebands`
+ !     5) Pseudos and PAW basic objects.
+ !
+ ! Once we have these objects, we can call specialized routines for e-ph calculations.
+ ! Notes:
+ !
+ !   * Any modification to the basic objects mentioned above should be done here (e.g. change of efermi)
+ !   * This routines shall not allocate big chunks of memory. The CPU-demanding sections should be
+ !     performed in the subdriver that will employ different MPI distribution schemes optimized for that particular task.
+
+ call cwtime(cpu, wall, gflops, "start")
+
+ if (psps%usepaw == 1) then
+   ABI_ERROR("PAW not implemented")
+   ABI_UNUSED((/pawang%nsym, pawrad(1)%mesh_size/))
+ end if
+
+#ifndef HAVE_LINALG_SCALAPACK
+  ABI_ERROR("GWR code requires scalapack library")
+#endif
+
+ ! abirules!
+ if (.False.) write(std_out,*)acell,codvsn,rprim,xred
+
+ comm = xmpi_world; nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+ unts(:) = [std_out, ab_out]
+
+ ! autoparal section
+ ! TODO: This just to activate autoparal in AbiPy. Lot of things should be improved.
+ if (dtset%max_ncpus /= 0) then
+   write(ab_out,'(a)')"--- !Autoparal"
+   write(ab_out,"(a)")"# Autoparal section for GWR runs"
+   write(ab_out,"(a)")   "info:"
+   write(ab_out,"(a,i0)")"    autoparal: ",dtset%autoparal
+   write(ab_out,"(a,i0)")"    max_ncpus: ",dtset%max_ncpus
+   write(ab_out,"(a,i0)")"    nkpt: ",dtset%nkpt
+   write(ab_out,"(a,i0)")"    nsppol: ",dtset%nsppol
+   write(ab_out,"(a,i0)")"    nspinor: ",dtset%nspinor
+   write(ab_out,"(a,i0)")"    mband: ",dtset%mband
+   write(ab_out,"(a,i0)")"    gwr_task: ",trim(dtset%gwr_task)
+
+   work_size = dtset%nkpt * dtset%nsppol
+   ! Non-scalable memory in Mb i.e. memory that is not distributed with MPI.
+   nonscal_mem = zero
+   max_wfsmem_mb = (two * dp * dtset%mpw * dtset%mband * dtset%nkpt * dtset%nsppol * dtset%nspinor * b2Mb) * 1.1_dp
+
+   ! List of configurations.
+   ! Assuming an OpenMP implementation with perfect speedup!
+   write(ab_out,"(a)")"configurations:"
+
+   do ii=1,dtset%max_ncpus
+     nks_per_proc = work_size / ii
+     nks_per_proc = nks_per_proc + mod(work_size, ii)
+     eff = (one * work_size) / (ii * nks_per_proc)
+     ! Add the non-scalable part and increase by 10% to account for other datastructures.
+     mempercpu_mb = (max_wfsmem_mb + nonscal_mem) * 1.1_dp
+
+     do omp_ncpus=1,1 !xomp_get_max_threads()
+       write(ab_out,"(a,i0)")"    - tot_ncpus: ",ii * omp_ncpus
+       write(ab_out,"(a,i0)")"      mpi_ncpus: ",ii
+       write(ab_out,"(a,i0)")"      omp_ncpus: ",omp_ncpus
+       write(ab_out,"(a,f12.9)")"      efficiency: ",eff
+       write(ab_out,"(a,f12.2)")"      mem_per_cpu: ",mempercpu_mb
+     end do
+   end do
+   write(ab_out,'(a)')"..."
+   ABI_STOP("Stopping now!")
+ end if
+
+ cryst = dtset%get_crystal(img=1)
+ use_wfk = .True.
+
+ ! Some variables need to be initialized/nullify at start
+ usexcnhat = 0
+ call energies_init(KS_energies)
+
+ den_path = dtfil%fildensin
+ wfk_path = dtfil%fnamewffk
+ kden_path = dtfil%filkdensin
+
+ if (my_rank == master) then
+   ! Initialize filenames. Accept files in Fortran or in netcdf format.
+   ! Accept DEN file in Fortran or in netcdf format.
+   if (nctk_try_fort_or_ncfile(den_path, msg) /= 0) then
+     ABI_ERROR(sjoin("Cannot find DEN file:", den_path, ". Error:", msg))
+   end if
+   call wrtout(unts, sjoin("- Reading GS density from: ", den_path))
+
+   if (use_wfk) then
+     if (nctk_try_fort_or_ncfile(wfk_path, msg) /= 0) then
+       ABI_ERROR(sjoin("Cannot find GS WFK file:", wfk_path, ". Error:", msg))
+     end if
+     call wrtout(unts, sjoin("- Reading GS states from WFK file:", wfk_path))
+   end if
+
+   if (dtset%usekden == 1) then
+     if (nctk_try_fort_or_ncfile(kden_path, msg) /= 0) then
+       ABI_ERROR(sjoin("Cannot find KDEN file:", kden_path, ". Error:", msg))
+     end if
+     call wrtout(unts, sjoin("- Reading KDEN kinetic energy density from: ", kden_path))
+   end if
+
+   call wrtout(ab_out, ch10//ch10)
+ end if ! master
+
+ ! Broadcast filenames (needed because they might have been changed if we are using netcdf files)
+ call xmpi_bcast(wfk_path, master, comm, ierr)
+ call xmpi_bcast(den_path, master, comm, ierr)
+ call xmpi_bcast(kden_path, master, comm, ierr)
+
+ if (use_wfk) then
+   ! Construct crystal and ks_ebands from the GS WFK file.
+   ks_ebands = wfk_read_ebands(wfk_path, comm, out_hdr=wfk_hdr)
+   call wfk_hdr%vs_dtset(dtset)
+
+   wfk_cryst = wfk_hdr%get_crystal()
+   if (cryst%compare(wfk_cryst, header=" Comparing input crystal with WFK crystal") /= 0) then
+     ABI_ERROR("Crystal structure from input and from WFK file do not agree! Check messages above!")
+   end if
+   call wfk_cryst%free()
+   !call wfk_cryst%print(header="crystal structure from WFK file")
+
+   call ebands_update_occ(ks_ebands, dtset%spinmagntarget, prtvol=0)
+
+   ! Here we change the GS bands (Fermi level, scissors operator ...)
+   ! All the modifications to ebands should be done here.
+   !call ephtk_update_ebands(dtset, ks_ebands, "Ground state energies")
+   !ks_ebands%fermie = ks_ebands%fermie + (7.648 - 5.362) * eV_Ha / two
+
+   ! TODO: Make sure that ef is inside the gap if semiconductor.
+ end if
+
+ ! TODO: FFT meshes for DEN/POT should be initialized from the DEN file instead of the dtset.
+ ! Interpolating the DEN indeed breaks degeneracies in the vxc matrix elements.
+
+ call pawfgr_init(pawfgr, dtset, mgfftf, nfftf, ecut_eff, ecutdg_eff, ngfftc, ngfftf, &
+                  gsqcutc_eff=gsqcutc_eff, gsqcutf_eff=gsqcutf_eff, gmet=cryst%gmet, k0=k0)
+
+ call print_ngfft(ngfftc, header='Coarse FFT mesh for the wavefunctions')
+ call print_ngfft(ngfftf, header='Dense FFT mesh for densities and potentials')
+
+ ! Fake MPI_type for the sequential part.
+ call initmpi_seq(mpi_enreg)
+ call init_distribfft_seq(mpi_enreg%distribfft, 'c', ngfftc(2), ngfftc(3), 'all')
+ call init_distribfft_seq(mpi_enreg%distribfft, 'f', ngfftf(2), ngfftf(3), 'all')
+
+ ! ===========================================
+ ! === Open and read pseudopotential files ===
+ ! ===========================================
+ call pspini(dtset, dtfil, ecore, psp_gencond, gsqcutc_eff, gsqcutf_eff, pawrad, pawtab, psps, cryst%rprimd, comm_mpi=comm)
+
+ ! ============================
+ ! ==== PAW initialization ====
+ ! ============================
+ if (dtset%usepaw == 1) then
+   call chkpawovlp(cryst%natom, cryst%ntypat, dtset%pawovlp, pawtab, cryst%rmet, cryst%typat, cryst%xred)
+
+   cplex_dij = dtset%nspinor; cplex = 1; ndij = 1
+
+   ABI_MALLOC(ks_pawrhoij, (cryst%natom))
+   call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij, nspden_rhoij=nspden_rhoij, &
+                             nspden=dtset%nspden, spnorb=dtset%pawspnorb, cpxocc=dtset%pawcpxocc)
+   call pawrhoij_alloc(ks_pawrhoij, cplex_rhoij, nspden_rhoij, dtset%nspinor, dtset%nsppol, cryst%typat, pawtab=pawtab)
+
+   ! Test if we have to call pawinit
+   gnt_option = 1; if (dtset%pawxcdev == 2 .or. (dtset%pawxcdev == 1 .and. dtset%positron /= 0)) gnt_option = 2
+   call paw_gencond(dtset, gnt_option, "test", call_pawinit)
+
+   if (psp_gencond == 1 .or. call_pawinit) then
+     gsqcut_shp = two * abs(dtset%diecut) * dtset%dilatmx**2 / pi**2
+     call pawinit(dtset%effmass_free, gnt_option, gsqcut_shp, zero, dtset%pawlcutd, dtset%pawlmix, &
+                  psps%mpsang, dtset%pawnphi, cryst%nsym, dtset%pawntheta, pawang, pawrad, &
+                  dtset%pawspnorb, pawtab, dtset%pawxcdev, dtset%ixc, dtset%usepotzero)
+
+     ! Update internal values
+     call paw_gencond(dtset, gnt_option, "save", call_pawinit)
+   else
+     if (pawtab(1)%has_kij  ==1) pawtab(1:cryst%ntypat)%has_kij   = 2
+     if (pawtab(1)%has_nabla==1) pawtab(1:cryst%ntypat)%has_nabla = 2
+   end if
+
+   psps%n1xccc = MAXVAL(pawtab(1:cryst%ntypat)%usetcore)
+
+   ! Initialize optional flags in Pawtab to zero
+   ! Cannot be done in Pawinit since the routine is called only if some pars. are changed
+   pawtab(:)%has_nabla = 0
+
+   call setsym_ylm(cryst%gprimd, pawang%l_max-1, cryst%nsym, dtset%pawprtvol, cryst%rprimd, cryst%symrec, pawang%zarot)
+
+   ! Initialize and compute data for DFT+U
+   Paw_dmft%use_dmft = Dtset%usedmft
+   call pawpuxinit(Dtset%dmatpuopt,Dtset%exchmix,Dtset%f4of2_sla,Dtset%f6of2_sla, &
+                   is_dfpt,Dtset%jpawu,Dtset%lexexch,Dtset%lpawu,dtset%nspinor,Cryst%ntypat,Pawang,Dtset%pawprtvol, &
+                   Pawrad,Pawtab,Dtset%upawu,Dtset%usedmft,Dtset%useexexch,Dtset%usepawu,dtset%ucrpa)
+
+   if (my_rank == master) call pawtab_print(Pawtab)
+
+   ! Get Pawrhoij from the header of the WFK file.
+   !call pawrhoij_copy(wfk_hdr%pawrhoij, KS_Pawrhoij)
+
+   !  Evaluate form factor of radial part of phi.phj-tphi.tphj.
+   rhoxsp_method = 1  ! Arnaud-Alouani (default in sigma)
+   !rhoxsp_method = 2 ! Shiskin-Kresse
+   if (Dtset%pawoptosc /= 0) rhoxsp_method = Dtset%pawoptosc
+
+   ! The q-grid must contain the FFT mesh used for sigma_c and the G-sphere for the exchange part.
+   ! We use the FFT mesh for sigma_c since COHSEX and the extrapolar method require oscillator
+   ! strengths on the FFT mesh.
+   !ABI_MALLOC(tmp_gfft,(3, gwc_nfftot))
+   !call get_gftt(gwc_ngfft, k0, gmet, gwc_gsq, tmp_gfft)
+   !ABI_FREE(tmp_gfft)
+
+   gwx_gsq = Dtset%ecutsigx/(two*pi**2)
+   gw_gsq = MAX(gwx_gsq, gwc_gsq)
+
+   ! Set up q-grid, make qmax 20% larger than largest expected.
+   ABI_MALLOC(nq_spl, (Psps%ntypat))
+   ABI_MALLOC(qmax, (Psps%ntypat))
+   qmax = SQRT(gw_gsq)*1.2d0
+   nq_spl = Psps%mqgrid_ff
+   ! write(std_out,*)"using nq_spl",nq_spl,"qmax=",qmax
+   ABI_MALLOC(Paw_pwff, (Psps%ntypat))
+
+   call pawpwff_init(Paw_pwff,rhoxsp_method,nq_spl,qmax,cryst%gmet,Pawrad,Pawtab,Psps)
+
+   ABI_FREE(nq_spl)
+   ABI_FREE(qmax)
+
+   ! Variables/arrays related to the fine FFT grid
+   ABI_MALLOC(ks_nhat, (nfftf, Dtset%nspden))
+   ks_nhat = zero
+   ABI_MALLOC(Pawfgrtab, (Cryst%natom))
+   call pawtab_get_lsize(Pawtab,l_size_atm,Cryst%natom,Cryst%typat)
+
+   cplex = 1
+   call pawfgrtab_init(Pawfgrtab,cplex,l_size_atm,Dtset%nspden,Dtset%typat)
+   ABI_FREE(l_size_atm)
+   !compch_fft=greatest_real
+   usexcnhat = MAXVAL(Pawtab(:)%usexcnhat)
+   ! * 0 if Vloc in atomic data is Vbare    (Blochl's formulation)
+   ! * 1 if Vloc in atomic data is VH(tnzc) (Kresse's formulation)
+   call wrtout(std_out, sjoin(' using usexcnhat: ', itoa(usexcnhat)))
+   !
+   ! Identify parts of the rectangular grid where the density has to be calculated ===
+   optcut = 0; optgr0 = Dtset%pawstgylm; optgr1 = 0; optgr2 = 0; optrad = 1 - Dtset%pawstgylm
+   if (Dtset%pawcross==1) optrad=1
+   if (Dtset%xclevel==2.and.usexcnhat>0) optgr1=Dtset%pawstgylm
+
+   call nhatgrid(cryst%atindx1, cryst%gmet, cryst%natom,Cryst%natom,Cryst%nattyp,ngfftf,Cryst%ntypat,&
+    optcut,optgr0,optgr1,optgr2,optrad,Pawfgrtab,Pawtab,Cryst%rprimd,Cryst%typat,Cryst%ucvol,Cryst%xred)
+
+   call pawfgrtab_print(Pawfgrtab,Cryst%natom,unit=std_out,prtvol=Dtset%pawprtvol)
+
+ else
+   ABI_MALLOC(Paw_pwff, (0))
+   ABI_MALLOC(Pawfgrtab, (0))
+ end if ! End of PAW Initialization
+
+ ! Allocate these arrays anyway, since they are passed to subroutines.
+ if (.not.allocated(ks_nhat)) then
+   ABI_MALLOC(ks_nhat, (nfftf, 0))
+ end if
+ if (.not.allocated(dijexc_core)) then
+   ABI_MALLOC(dijexc_core, (1, 1, 0))
+ end if
+
+ ! Read density and compare crystal structures.
+ ABI_MALLOC(ks_rhor, (nfftf, dtset%nspden))
+
+ call read_rhor(den_path, cplex1, dtset%nspden, nfftf, ngfftf, dtset%usepaw, mpi_enreg, ks_rhor, &
+                den_hdr, ks_pawrhoij, comm) !, allow_interp=.True.)
+
+ call prtrhomxmn(std_out, MPI_enreg, nfftf, ngfftf, dtset%nspden, 1, ks_rhor, ucvol=cryst%ucvol)
+
+ den_cryst = den_hdr%get_crystal()
+ if (cryst%compare(den_cryst, header=" Comparing input crystal with DEN crystal") /= 0) then
+   ABI_ERROR("Crystal structure from input and from DEN file do not agree! Check messages above!")
+ end if
+ call den_cryst%free()
+ call den_hdr%free()
+
+ ! FFT n(r) --> n(g)
+ ABI_MALLOC(ks_rhog, (2, nfftf))
+ call fourdp(cplex1, ks_rhog, ks_rhor(:, 1), -1, mpi_enreg, nfftf, 1, ngfftf, 0)
+
+ ABI_MALLOC(ks_taur, (nfftf, dtset%nspden * dtset%usekden))
+ if (dtset%usekden == 1) then
+   call read_rhor(kden_path, cplex1, dtset%nspden, nfftf, ngfftf, 0, mpi_enreg, ks_taur, &
+                  kden_hdr, ks_pawrhoij, comm) !, allow_interp=.True.)
+   call kden_hdr%free()
+
+   call prtrhomxmn(std_out, MPI_enreg, nfftf, ngfftf, dtset%nspden, 1, ks_taur, optrhor=1, ucvol=cryst%ucvol)
+ end if
+
+ !========================================
+ !==== Additional computation for PAW ====
+ !========================================
+ nhatgrdim = 0
+ if (dtset%usepaw == 1) then
+   ABI_ERROR("Not Implemented")
+ else
+   ABI_MALLOC(ks_nhatgr, (0, 0, 0))
+   ABI_MALLOC(ks_paw_ij, (0))
+   ABI_MALLOC(ks_paw_an, (0))
+ end if ! PAW
+
+ ! Compute structure factor phases and large sphere cutoff
+ ABI_MALLOC(ph1d, (2, 3 * (2 * Dtset%mgfft + 1) * Cryst%natom))
+ ABI_MALLOC(ph1df, (2, 3 * (2 * mgfftf + 1) * Cryst%natom))
+
+ call getph(Cryst%atindx, Cryst%natom, ngfftc(1), ngfftc(2), ngfftc(3), ph1d, Cryst%xred)
+
+ if (psps%usepaw == 1 .and. pawfgr%usefinegrid == 1) then
+   call getph(Cryst%atindx, Cryst%natom, ngfftf(1), ngfftf(2), ngfftf(3), ph1df, Cryst%xred)
+ else
+   ph1df(:,:)=ph1d(:,:)
+ end if
+
+ ! The following steps have been gathered in the setvtr routine:
+ !  - get Ewald energy and Ewald forces
+ !  - compute local ionic pseudopotential vpsp
+ !  - eventually compute 3D core electron density xccc3d
+ !  - eventually compute vxc and vhartr
+ !  - set up ks_vtrial
+ !
+ !*******************************************************************
+ !**** NOTE THAT HERE Vxc CONTAINS THE CORE-DENSITY CONTRIBUTION ****
+ !*******************************************************************
+
+ ngrvdw = 0
+ ABI_MALLOC(grvdw, (3, ngrvdw))
+ ABI_MALLOC(grchempottn, (3, Cryst%natom))
+ ABI_MALLOC(grewtn, (3, Cryst%natom))
+ nkxc = 0
+ if (Dtset%nspden == 1) nkxc = 2
+ if (Dtset%nspden >= 2) nkxc = 3 ! check GGA and spinor, quite a messy part!!!
+ ! In case of MGGA, fxc and kxc are not available and we dont need them (for now ...)
+ if (Dtset%ixc < 0 .and. libxc_functionals_ismgga()) nkxc = 0
+ if (nkxc /= 0) then
+   ABI_MALLOC(kxc, (nfftf, nkxc))
+ end if
+
+ n3xccc = 0; if (Psps%n1xccc /= 0) n3xccc = nfftf
+ ABI_MALLOC(xccc3d, (n3xccc))
+ ABI_MALLOC(ks_vhartr, (nfftf))
+ ABI_MALLOC(ks_vtrial, (nfftf, Dtset%nspden))
+ ABI_MALLOC(vpsp, (nfftf))
+ ABI_MALLOC(ks_vxc, (nfftf, Dtset%nspden))
+
+ optene = 4; moved_atm_inside = 0; moved_rhor = 0; istep = 1
+
+ call setvtr(Cryst%atindx1,Dtset,KS_energies,cryst%gmet,cryst%gprimd,grchempottn,grewtn,grvdw,gsqcutf_eff,&
+             istep,kxc,mgfftf,moved_atm_inside,moved_rhor,MPI_enreg,&
+             Cryst%nattyp,nfftf,ngfftf,ngrvdw,ks_nhat,ks_nhatgr,nhatgrdim,nkxc,Cryst%ntypat,Psps%n1xccc,n3xccc,&
+             optene,pawrad,Pawtab,ph1df,Psps,ks_rhog,ks_rhor,cryst%rmet,cryst%rprimd,strsxc,&
+             Cryst%ucvol,usexcnhat,ks_vhartr,vpsp,ks_vtrial,ks_vxc,vxcavg,Wvl,xccc3d,Cryst%xred,taur=ks_taur)
+
+ ABI_FREE(grvdw)
+ ABI_FREE(grchempottn)
+ ABI_FREE(grewtn)
+
+ call cwtime_report(" prepare gwr_driver_init", cpu, wall, gflops)
+
+ ! ====================================================
+ ! === This is the real GWR stuff once all is ready ===
+ ! ====================================================
+
+ call gwr%init(dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg, comm)
+
+ !=== Calculate Vxc(b1,b2,k,s)=<b1,k,s|v_{xc}|b2,k,s> for all the states included in GW ===
+ !  * This part is parallelized within wfd%comm since each node has all GW wavefunctions.
+ !  * Note that vH matrix elements are calculated using the true uncutted interaction.
+
+ call KS_mflags%reset()
+ !if (rdm_update) then
+ !KS_mflags%has_hbare=1
+ !KS_mflags%has_kinetic=1
+ !end if
+ KS_mflags%has_vhartree=1
+ KS_mflags%has_vxc     =1
+ KS_mflags%has_vxcval  =1
+ if (Dtset%usepawu /= 0  )  KS_mflags%has_vu      = 1
+ if (Dtset%useexexch /= 0)  KS_mflags%has_lexexch = 1
+ if (Dtset%usepaw==1 .and. Dtset%gw_sigxcore == 1) KS_mflags%has_sxcore = 1
+ !if (gwcalctyp<10        )  KS_mflags%only_diago = 1 ! off-diagonal elements only for SC on wavefunctions.
+ KS_mflags%only_diago = 1 ! off-diagonal elements only for SC on wavefunctions.
+
+ ! Load wavefunctions for Sigma_nk in kcalc_wfd
+ call gwr%load_kcalc_wfd(wfk_path, tmp_kstab)
+
+ call calc_vhxc_me(gwr%kcalc_wfd, ks_mflags, gwr%ks_me, cryst, dtset, nfftf, ngfftf, &
+                   ks_vtrial, ks_vhartr, ks_vxc, psps, pawtab, ks_paw_an, pawang, pawfgrtab, ks_paw_ij, dijexc_core, &
+                   ks_rhor, usexcnhat, ks_nhat, ks_nhatgr, nhatgrdim, tmp_kstab, taur=ks_taur)
+
+ if (my_rank == master) call gwr%ks_me%print(header="KS matrix elements", unit=std_out)
+ ABI_FREE(tmp_kstab)
+
+ if (use_wfk) then
+   ! Build Green's function in imaginary-time from WFK file
+   call gwr%build_gtau_from_wfk(wfk_path)
+ else
+   !call gwr%build_gtau_from_vtrial(wfk_path, ngfftf, ks_vtrial)
+ end if
+
+ select case (dtset%gwr_task)
+ case ("G0W0")
+   call gwr%run_g0w0()
+
+ case ("RPA_ENERGY")
+   call gwr%rpa_energy()
+
+ case default
+   ABI_ERROR(sjoin("Invalid value of gwr_task:", dtset%gwr_task))
+ end select
+
+ !=====================
+ !==== Free memory ====
+ !=====================
+ ABI_FREE(ks_nhat)
+ ABI_FREE(ks_nhatgr)
+ ABI_FREE(dijexc_core)
+ call pawfgr_destroy(pawfgr)
+
+ if (dtset%usepaw == 1) then
+   ! Deallocation for PAW.
+   call pawrhoij_free(ks_pawrhoij)
+   ABI_FREE(ks_pawrhoij)
+   call pawfgrtab_free(pawfgrtab)
+   ABI_FREE(pawfgrtab)
+   call paw_ij_free(ks_paw_ij)
+   ABI_FREE(ks_paw_ij)
+   !call paw_an_free(ks_paw_an)
+   !ABI_FREE(ks_paw_an)
+   call pawpwff_free(Paw_pwff)
+ end if
+
+ ABI_FREE(ph1d)
+ ABI_FREE(ph1df)
+ ABI_FREE(ks_rhor)
+ ABI_FREE(ks_rhog)
+ ABI_FREE(ks_taur)
+ ABI_FREE(kxc)
+ ABI_FREE(xccc3d)
+ ABI_FREE(ks_vhartr)
+ ABI_FREE(ks_vtrial)
+ ABI_FREE(vpsp)
+ ABI_FREE(ks_vxc)
+
+ call cryst%free()
+ call wfk_hdr%free()
+ call ebands_free(ks_ebands)
+ call destroy_mpi_enreg(mpi_enreg)
+ call gwr%free()
+
+end subroutine gwr_driver
+!!***
+
+end module m_gwr_driver
+!!***

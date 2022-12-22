@@ -7,7 +7,7 @@
 !! using the "cg" convention, namely real array of shape cg(2,...)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1992-2021 ABINIT group (MG, MT, XG, DCA, GZ, FB, MVer, DCA, GMR, FF)
+!! Copyright (C) 1992-2022 ABINIT group (MG, MT, XG, DCA, GZ, FB, MVer, DCA, GMR, FF)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -149,11 +149,6 @@ CONTAINS  !=====================================================================
 !! OUTPUT
 !!  ocplx(n)=Output complex array.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      daxpy
-!!
 !! SOURCE
 
 subroutine cg_tocplx(n, cg, ocplx)
@@ -196,11 +191,6 @@ end subroutine cg_tocplx
 !! OUTPUT
 !!  ocg(2*n)=Output array with real and imaginary part.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      daxpy
-!!
 !! SOURCE
 
 subroutine cg_fromcplx(n, icplx, ocg)
@@ -238,8 +228,6 @@ end subroutine cg_fromcplx
 !!
 !! INPUTS
 !!  nband=Number of vectors in icg1
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -292,8 +280,6 @@ end subroutine cg_kfilter
 !! SIDE EFFECT
 !!  arr(2,ldx,ldy,ldz*ndat)= all entries in the augmented region are set to zero
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 pure subroutine cg_setaug_zero(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,arr)
@@ -345,11 +331,6 @@ end subroutine cg_setaug_zero
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      daxpy
-!!
 !! SOURCE
 
 subroutine cg_to_reim(npw, ndat, cg, factor, reim)
@@ -387,11 +368,6 @@ end subroutine cg_to_reim
 !! FUNCTION
 !!
 !! INPUTS
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      daxpy
 !!
 !! SOURCE
 
@@ -436,13 +412,6 @@ end subroutine cg_from_reim
 !! OUTPUT
 !!  y = In output, y contains a copy of the values of x.
 !!
-!! PARENTS
-!!      lapackprof,m_cgwf,m_cgwf_cprj,m_dfpt_cgwf,m_dfpt_mkrho,m_dfpt_vtowfk
-!!      m_iowf,m_rmm_diis,m_wfd
-!!
-!! CHILDREN
-!!      daxpy
-!!
 !! SOURCE
 
 subroutine cg_zcopy(n, x, y)
@@ -476,12 +445,6 @@ end subroutine cg_zcopy
 !!
 !! OUTPUT
 !!  x = Updated vector.
-!!
-!! PARENTS
-!!      m_cgtools,m_cgwf,m_cgwf_cprj
-!!
-!! CHILDREN
-!!      daxpy
 !!
 !! SOURCE
 
@@ -521,8 +484,6 @@ end subroutine cg_zscal
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 function cg_dznrm2(n, x) result(res)
@@ -556,8 +517,6 @@ end function cg_dznrm2
 !!
 !! OUTPUT
 !!  res(2)=Real and Imaginary part of the scalar product.
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -615,8 +574,6 @@ end function cg_zdotc
 !! OUTPUT
 !!  res=Real part of the scalar product.
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 function cg_real_zdotc(n,x,y) result(res)
@@ -655,8 +612,6 @@ end function cg_real_zdotc
 !!
 !! OUTPUT
 !!  res(2)=Real and Imaginary part of the scalar product.
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -714,12 +669,6 @@ end function cg_zdotu
 !! SIDE EFFECTS
 !!  y = Array. In output, y contains the updated vector.
 !!
-!! PARENTS
-!!      lapackprof,m_cgwf,m_dfpt_cgwf,m_dfpt_vtowfk,m_rf2_init
-!!
-!! CHILDREN
-!!      daxpy
-!!
 !! SOURCE
 
 subroutine cg_zaxpy(n, alpha, x, y)
@@ -762,11 +711,6 @@ end subroutine cg_zaxpy
 !!
 !! OUTPUT
 !! y Contains the updated vector y.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      daxpy
 !!
 !! SOURCE
 
@@ -813,12 +757,6 @@ end subroutine cg_zaxpby
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      lapackprof,m_cgtools,m_rmm_diis
-!!
-!! CHILDREN
-!!      daxpy
 !!
 !! SOURCE
 
@@ -878,12 +816,6 @@ end subroutine cg_zgemv
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      lapackprof,m_cgtools,m_phonons,m_rmm_diis,m_sigmaph
-!!
-!! CHILDREN
-!!      daxpy
 !!
 !! SOURCE
 
@@ -964,10 +896,6 @@ end subroutine cg_zgemm
 !!  and therefore:
 !!   u_{G0/2}(G) = u_{G0/2}(-G-G0)^*.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 integer pure function set_istwfk(kpoint) result(istwfk)
@@ -1021,13 +949,6 @@ end function set_istwfk
 !!
 !! OUTPUT
 !!  dotr= <vect|vect>
-!!
-!! PARENTS
-!!      m_cgtools,m_cgwf,m_cgwf_cprj,m_dfpt_cgwf,m_dfpt_vtowfk,m_dft_energy
-!!      m_epjdos,m_rf2_init
-!!
-!! CHILDREN
-!!      daxpy
 !!
 !! SOURCE
 
@@ -1099,15 +1020,6 @@ end subroutine sqnorm_g
 !! OUTPUT
 !!  $doti=\Im ( <vect1|vect2> )$ , output only if option=2 and eventually option=3.
 !!  $dotr=\Re ( <vect1|vect2> )$
-!!
-!! PARENTS
-!!      m_cgcprj,m_cgtools,m_cgwf,m_cgwf_cprj,m_chebfi,m_d2frnl,m_dfpt_cgwf
-!!      m_dfpt_lwwf,m_dfpt_nstwf,m_dfpt_scfcv,m_dfpt_vtowfk,m_dfptnl_pert
-!!      m_dft_energy,m_efmas,m_eig2d,m_extraprho,m_fock_getghc,m_gkk,m_nonlop
-!!      m_nonlop_test,m_pead_nl_loop,m_phpi,m_rf2,m_rf2_init,m_rmm_diis
-!!
-!! CHILDREN
-!!      daxpy
 !!
 !! SOURCE
 
@@ -1196,12 +1108,6 @@ end subroutine dotprod_g
 !! OUTPUT
 !!  ai=imaginary part of the matrix element
 !!  ar=real part of the matrix element
-!!
-!! PARENTS
-!!      m_dfpt_vtowfk
-!!
-!! CHILDREN
-!!      daxpy
 !!
 !! SOURCE
 
@@ -1354,12 +1260,6 @@ end subroutine matrixelmt_g
 !! OUTPUT
 !!  dotr= value of the dot product
 !!
-!! PARENTS
-!!      m_epjdos
-!!
-!! CHILDREN
-!!      daxpy
-!!
 !! SOURCE
 
 subroutine dotprod_v(cplex,dotr,nfft,nspden,opt_storage,pot1,pot2,comm)
@@ -1456,14 +1356,6 @@ end subroutine dotprod_v
 !!   cplex=2:
 !!     V is stored as : V^11, V^22, V^12, i.V^21 (complex)
 !!     N is stored as : n, m_x, m_y, mz          (complex)
-!!
-!! PARENTS
-!!      m_dfpt_elt,m_dfpt_lw,m_dfpt_nstwf,m_dfpt_rhotov,m_dfpt_scfcv
-!!      m_dfptnl_pert,m_dft_energy,m_odamix,m_prcref,m_respfn_driver,m_rhotov
-!!      m_rhotoxc,m_setvtr
-!!
-!! CHILDREN
-!!      daxpy
 !!
 !! SOURCE
 
@@ -1703,12 +1595,6 @@ end subroutine dotprod_vn
 !! OUTPUT
 !!  norm2= value of the square of the norm
 !!
-!! PARENTS
-!!      m_dfpt_rhotov,m_dfpt_vtorho,m_rhotov,m_vtorho
-!!
-!! CHILDREN
-!!      daxpy
-!!
 !! SOURCE
 
 subroutine sqnorm_v(cplex,nfft,norm2,nspden,opt_storage,pot,mpi_comm_sphgrid)
@@ -1790,13 +1676,6 @@ end subroutine sqnorm_v
 !! OUTPUT
 !!  meansp(nspden)=mean value for each nspden component
 !!
-!! PARENTS
-!!      m_electronpositron,m_forces,m_newvtr,m_paw_nhat,m_prcref,m_psolver
-!!      m_rhotov,m_rhotoxc
-!!
-!! CHILDREN
-!!      daxpy
-!!
 !! SOURCE
 
 subroutine mean_fftr(arraysp,meansp,nfft,nfftot,nspden,mpi_comm_sphgrid)
@@ -1853,12 +1732,6 @@ end subroutine mean_fftr
 !! OUTPUT
 !!  spin = 3-vector of spin components for this state
 !!  cgcmat = outer spin product of spinorial wf with itself
-!!
-!! PARENTS
-!!      m_cut3d,m_epjdos
-!!
-!! CHILDREN
-!!      daxpy
 !!
 !! SOURCE
 
@@ -1926,11 +1799,6 @@ end subroutine cg_getspin
 !! If istwf_k differs from 1, then special storage modes must be taken
 !! into account, for symmetric wavefunctions coming from k=(0 0 0) or other
 !! special k points.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      daxpy
 !!
 !! SOURCE
 
@@ -2087,12 +1955,6 @@ end subroutine cg_gsph2box
 !! OUTPUT
 !!  oarrsph(2,npw_k*ndat)=Data defined on the G-sphere.
 !!
-!! PARENTS
-!!      m_dfti,m_fft,m_fftw3
-!!
-!! CHILDREN
-!!      daxpy
-!!
 !! SOURCE
 
 subroutine cg_box2gsph(nx,ny,nz,ldx,ldy,ldz,ndat,npw_k,kg_k,iarrbox,oarrsph,rscal)
@@ -2193,12 +2055,6 @@ end subroutine cg_box2gsph
 !!  rho(ldx,ldy,ldz) = contains the input density at input,
 !!                  modified in input with the contribution gived by ur.
 !!
-!! PARENTS
-!!      m_dfti,m_fft,m_fftw3
-!!
-!! CHILDREN
-!!      daxpy
-!!
 !! SOURCE
 
 subroutine cg_addtorho(nx,ny,nz,ldx,ldy,ldz,ndat,weight_r,weight_i,ur,rho)
@@ -2271,12 +2127,6 @@ end subroutine cg_addtorho
 !!  ur(2,ldx,ldy,ldz*ndat)=
 !!    Input = wavefunctions in real space.
 !!    Output= vloc |ur>
-!!
-!! PARENTS
-!!      m_dfti,m_fftw3
-!!
-!! CHILDREN
-!!      daxpy
 !!
 !! SOURCE
 
@@ -2388,12 +2238,6 @@ end subroutine cg_vlocpsi
 !!
 !! OUTPUT
 !!  [umat]=Cholesky upper triangle matrix.
-!!
-!! PARENTS
-!!      m_cgtools,m_rmm_diis
-!!
-!! CHILDREN
-!!      daxpy
 !!
 !! SOURCE
 
@@ -2555,12 +2399,6 @@ end subroutine cgnc_cholesky
 !! OUTPUT
 !!  [umat]=Cholesky upper triangle matrix.
 !!
-!! PARENTS
-!!      m_cgtools,m_rmm_diis
-!!
-!! CHILDREN
-!!      daxpy
-!!
 !! SOURCE
 
 subroutine cgpaw_cholesky(npwsp, nband, cg, gsc, istwfk, me_g0, comm_pw, umat)
@@ -2684,12 +2522,6 @@ end subroutine cgpaw_cholesky
 !!
 !! SIDE EFFECTS
 !!
-!! PARENTS
-!!      m_cgtools,m_rmm_diis
-!!
-!! CHILDREN
-!!      daxpy
-!!
 !! SOURCE
 
 subroutine cgnc_normalize(npwsp, nband, cg, istwfk, me_g0, comm_pw)
@@ -2773,12 +2605,6 @@ end subroutine cgnc_normalize
 !!    input: Input set of vectors.
 !!    output: Orthonormalized set.
 !!
-!! PARENTS
-!!      m_cgtools
-!!
-!! CHILDREN
-!!      daxpy
-!!
 !! SOURCE
 
 subroutine cgnc_gsortho(npwsp, nband1, icg1, nband2, iocg2, istwfk, normalize, me_g0, comm_pw)
@@ -2861,8 +2687,6 @@ end subroutine cgnc_gsortho
 !!    input: Input set of vectors.
 !!    output: Orthonormalized set.
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 subroutine cgnc_gramschmidt(npwsp, nband, cg, istwfk, me_g0, comm_pw)
@@ -2918,12 +2742,6 @@ end subroutine cgnc_gramschmidt
 !!  gsc(2*npwsp*nband)
 !!    input: Input set of vectors S|C>
 !!    output: New S|C> compute with the new |C>
-!!
-!! PARENTS
-!!      m_cgtools,m_rmm_diis
-!!
-!! CHILDREN
-!!      daxpy
 !!
 !! SOURCE
 
@@ -3015,12 +2833,6 @@ end subroutine cgpaw_normalize
 !!    input: set of |C> and S|C> wher |C> is the set of states to orthogonalize
 !!    output: Orthonormalized set.
 !!
-!! PARENTS
-!!      m_cgtools
-!!
-!! CHILDREN
-!!      daxpy
-!!
 !! SOURCE
 
 subroutine cgpaw_gsortho(npwsp, nband1, icg1, igsc1, nband2, iocg2, iogsc2, istwfk, normalize, me_g0, comm_pw)
@@ -3104,8 +2916,6 @@ end subroutine cgpaw_gsortho
 !!  cg(2*npwsp*nband), gsc(2*npwsp*nband)
 !!    input: Input set of vectors.
 !!    output: Orthonormalized set.
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -3196,13 +3006,6 @@ end subroutine cgpaw_gramschmidt
 !!     if cg and scg are inverted, projbd applies P_c+ projector
 !!
 !!  4) cg_zgemv wraps ZGEMM whose implementation is more efficient, especially in the threaded case.
-!!
-!! PARENTS
-!!      lapackprof,m_cgwf,m_cgwf_cprj,m_dfpt_cgwf,m_dfpt_nstwf,m_getgh1c
-!!      m_orbmag
-!!
-!! CHILDREN
-!!      daxpy
 !!
 !! SOURCE
 
@@ -3337,12 +3140,6 @@ end subroutine projbd
 !! OUTPUT
 !!  cg(2,mcg)=revised values (not orthonormalized)
 !!
-!! PARENTS
-!!      m_inwffil
-!!
-!! CHILDREN
-!!      daxpy
-!!
 !! SOURCE
 
 
@@ -3428,12 +3225,6 @@ end subroutine cg_envlop
 !!
 !! OUTPUT
 !!  cg(2*npw,nband)=nband normalized eigenvectors
-!!
-!! PARENTS
-!!      m_cgtools
-!!
-!! CHILDREN
-!!      daxpy
 !!
 !! SOURCE
 
@@ -3522,12 +3313,6 @@ end subroutine cg_normev
 !! OUTPUT
 !!  pcon(npw)=preconditioning matrix
 !!  vect(2,npw*nspinor)=<G|(H-eval)|C_{n,k}>*(polynomial ratio)
-!!
-!! PARENTS
-!!      m_cgtools,m_cgwf,m_cgwf_cprj,m_dfpt_cgwf
-!!
-!! CHILDREN
-!!      daxpy
 !!
 !! SOURCE
 
@@ -3658,12 +3443,6 @@ end subroutine cg_precon
 !!  pcon(npw,blocksize)=preconditionning matrix
 !!            input  if optpcon=0,2 and iterationnumber/=1
 !!            output if optpcon=0,2 and iterationnumber==1
-!!
-!! PARENTS
-!!      m_lobpcg
-!!
-!! CHILDREN
-!!      daxpy
 !!
 !! SOURCE
 
@@ -3951,12 +3730,6 @@ end subroutine cg_precon_block
 !!            input  if optpcon=0,2 and iterationnumber/=1
 !!            output if optpcon=0,2 and iterationnumber==1
 !!
-!! PARENTS
-!!      m_lobpcg
-!!
-!! CHILDREN
-!!      daxpy
-!!
 !! SOURCE
 
 subroutine cg_zprecon_block(cg,eval,blocksize,iterationnumber,kinpw,&
@@ -4114,12 +3887,6 @@ end subroutine cg_zprecon_block
 !! OUTPUT
 !!  cg(2,mcg)=same array with altered phase.
 !!  gsc(2,mgsc)= same array with altered phase.
-!!
-!! PARENTS
-!!      m_dynmat,m_rayleigh_ritz
-!!
-!! CHILDREN
-!!      daxpy
 !!
 !! SOURCE
 
@@ -4346,12 +4113,6 @@ end subroutine fxphas_seq
 !!
 !! The current implementation if not compatible with TR-symmetry (i.e. istwfk/=1) !
 !!
-!! PARENTS
-!!      m_berrytk,m_dfpt_fef
-!!
-!! CHILDREN
-!!      daxpy
-!!
 !! SOURCE
 
 subroutine overlap_g(doti,dotr,mpw,npw_k1,npw_k2,nspinor,pwind_k,vect1,vect2)
@@ -4421,12 +4182,6 @@ end subroutine overlap_g
 !!  subovl(nband_k*(nband_k+1)*use_subovl)=overlap matrix expressed in the WFs subspace. Hermitianized in output.
 !!  cg(2,mcg)=wavefunctions
 !!  gsc(2,mgsc)=<g|S|c> matrix elements (S=overlap)
-!!
-!! PARENTS
-!!      m_rayleigh_ritz,m_rmm_diis,m_vtowfk
-!!
-!! CHILDREN
-!!      daxpy
 !!
 !! SOURCE
 
@@ -4659,12 +4414,6 @@ end subroutine subdiago
 !! SIDE EFFECTS
 !!  cg(2,mcg)=wavefunctions
 !!
-!! PARENTS
-!!      m_vtowfk
-!!
-!! CHILDREN
-!!      daxpy
-!!
 !! SOURCE
 
 subroutine subdiago_low_memory(cg,eig_k,evec,icg,istwf_k,&
@@ -4890,12 +4639,6 @@ end subroutine subdiago_low_memory
 !! Note that each vector has an arbitrary phase which is not fixed in this routine.
 !!
 !! WARNING: not yet suited for nspinor=2 with istwfk/=1
-!!
-!! PARENTS
-!!      lapackprof,m_inwffil,m_vtowfk
-!!
-!! CHILDREN
-!!      daxpy
 !!
 !! SOURCE
 
@@ -5415,10 +5158,6 @@ end subroutine pw_orthon
 !! NOTES
 !! Note that each vector has an arbitrary phase which is not fixed in this routine.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pw_orthon_cprj(icg,mcg,nelem,nspinor,nvec,ortalgo,ovl_mat,vecnm,cprj)
@@ -5599,12 +5338,6 @@ end subroutine pw_orthon_cprj
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_vtowfk
-!!
-!! CHILDREN
-!!      daxpy
-!!
 !! SOURCE
 
 subroutine cg_hprotate_and_get_diag(nband_k, subvnlx, evec, enlx_k)
@@ -5662,12 +5395,6 @@ end subroutine cg_hprotate_and_get_diag
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_vtowfk
-!!
-!! CHILDREN
-!!      daxpy
 !!
 !! SOURCE
 
@@ -5735,12 +5462,6 @@ end subroutine cg_hrotate_and_get_diag
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_rmm_diis
-!!
-!! CHILDREN
-!!      daxpy
-!!
 !! SOURCE
 
 subroutine cg_get_eigens(usepaw, istwf_k, npwsp, ndat, cg, ghc, gsc, eig, me_g0, comm)
@@ -5785,12 +5506,6 @@ end subroutine cg_get_eigens
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_rmm_diis
-!!
-!! CHILDREN
-!!      daxpy
-!!
 !! SOURCE
 
 subroutine cg_get_residvecs(usepaw, npwsp, ndat, eig, cg, ghc, gsc, residvecs)
@@ -5832,12 +5547,6 @@ end subroutine cg_get_residvecs
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_rmm_diis
-!!
-!! CHILDREN
-!!      daxpy
-!!
 !! SOURCE
 
 subroutine cg_norm2g(istwf_k, npwsp, ndat, cg, norms, me_g0, comm)
@@ -5869,12 +5578,6 @@ end subroutine cg_norm2g
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_rmm_diis
-!!
-!! CHILDREN
-!!      daxpy
 !!
 !! SOURCE
 
@@ -5927,12 +5630,6 @@ end subroutine cg_zdotg_zip
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_rmm_diis
-!!
-!! CHILDREN
-!!      daxpy
-!!
 !! SOURCE
 
 subroutine cg_precon_many(istwf_k, npw, nspinor, ndat, cg, optekin, kinpw, vect, me_g0, comm)
@@ -5977,12 +5674,6 @@ end subroutine cg_precon_many
 !! SIDE EFFECTS
 !!  y = Array. In output, y contains the updated vector.
 !!
-!! PARENTS
-!!      m_rmm_diis
-!!
-!! CHILDREN
-!!      daxpy
-!!
 !! SOURCE
 
 subroutine cg_zaxpy_many_areal(npwsp, ndat, alphas, x, y)
@@ -6025,10 +5716,6 @@ end subroutine cg_zaxpy_many_areal
 !!  cg(2*npwsp*nband)
 !!    input: Input set of vectors.
 !!    output: Orthonormalized set.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

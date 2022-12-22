@@ -6,7 +6,7 @@
 !!  management of output and log files when parallelisation on cells is activated
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2021 ABINIT group (FJ,MT)
+!!  Copyright (C) 2001-2022 ABINIT group (FJ,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~ABINIT/Infos/copyright
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -58,12 +58,6 @@ contains
 !!   filnam(5)=character strings giving file names
 !!   nam= name of the extension of the files
 !!   nfil= number of files to be named
-!!
-!! PARENTS
-!!      m_dfpt_looppert,m_gstateimg
-!!
-!! CHILDREN
-!!      abi_io_redirect,libpaw_write_comm_set
 !!
 !! SOURCE
 !!
@@ -125,12 +119,6 @@ contains
 !!   nfil= number of files to be named
 !!   paral= flag to activate parallelisation
 !!   prtvol= flag to activate printing
-!!
-!! PARENTS
-!!      m_dfpt_looppert,m_gstateimg
-!!
-!! CHILDREN
-!!      abi_io_redirect,libpaw_write_comm_set
 !!
 !! SOURCE
 !!
@@ -197,12 +185,6 @@ contains
 !!   nfil= number of files to be named
 !!   paral= flag to activate parallelisation
 !!   prtvol= flag to activate printing
-!!
-!! PARENTS
-!!      m_dfpt_looppert,m_gstateimg
-!!
-!! CHILDREN
-!!      abi_io_redirect,libpaw_write_comm_set
 !!
 !! SOURCE
 !!
@@ -301,12 +283,6 @@ contains
 !!   nfil= number of files to be named
 !!   paral= flag to activate parallelisation
 !!   prtvol= flag to activate printing  
-!!
-!! PARENTS
-!!      m_dfpt_looppert,m_gstateimg
-!!
-!! CHILDREN
-!!      abi_io_redirect,libpaw_write_comm_set
 !!
 !! SOURCE
 !!

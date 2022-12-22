@@ -5,12 +5,12 @@ need_cpp_vars = [
 "HAVE_WANNIER90",
 ]
 
-#: List of keywords that are automatically added to all the tests of this suite. 
+#: List of keywords that are automatically added to all the tests of this suite.
 keywords = [
 ]
 
 subsuites = [
-"w90",
+"w90", "z2",
 ]
 
 #: List of input files
@@ -19,4 +19,7 @@ inp_files = [
 "tw90_2.abi",
 "tw90_3.abi",
 "tw90_4.abi",
+"tw90_5.abi",
+"tw90_6.abi",
+"tz2_2.abi",
 ]

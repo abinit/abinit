@@ -7,7 +7,7 @@
 !!   or 2nd-order PAW occupancies.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2021 ABINIT group (LB)
+!! Copyright (C) 2018-2022 ABINIT group (LB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -85,12 +85,6 @@ CONTAINS  !=====================================================================
 !!  d3exc= real and imaginary parts of the contribution to the third derivative of the total energy
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
-!!      m_dfptnl_pert
-!!
-!! CHILDREN
-!!      free_my_atmtab,get_my_atmtab
 !!
 !! SOURCE
 
@@ -291,12 +285,6 @@ end subroutine paw_dfptnl_energy
 !!  d3exc1_iat = E_at(kxc,rho1,rho2,rho3) (see FUNCTION above)
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
-!!      m_paw_dfptnl
-!!
-!! CHILDREN
-!!      free_my_atmtab,get_my_atmtab
 !!
 !! SOURCE
 
@@ -511,12 +499,6 @@ end subroutine paw_dfptnl_xc
 !!  pawrhoij(natom) <type(pawrhoij_type)>= 2-nd order paw rhoij occupancies and related data
 !!  On output, has been updated with the contribution of current n,k
 !!        pawrhoij(:)%rhoij_(lmn2_size,nspden) (non symetrized)
-!!
-!! PARENTS
-!!      m_dfptnl_pert
-!!
-!! CHILDREN
-!!      free_my_atmtab,get_my_atmtab
 !!
 !! SOURCE
 

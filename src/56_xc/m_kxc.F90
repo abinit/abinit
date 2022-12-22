@@ -8,7 +8,7 @@
 !! since the ACFD code has been disabled.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2021 ABINIT group (DCA, MF, XG, GMR, LSI, YMN, Rhaltaf, MS)
+!!  Copyright (C) 1998-2022 ABINIT group (DCA, MF, XG, GMR, LSI, YMN, Rhaltaf, MS)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,8 +28,6 @@
 !!   ! Revert libxc module to the original settings
 !!   if (new_ixc<0) call libxc_functionals_end()
 !!   if (old_ixc<0) call libxc_functionals_init(old_ixc,nspden)
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -100,13 +98,6 @@ CONTAINS  !=====================================================================
 !!
 !! OUTPUT
 !!  krpa(npw) = the Hartree kernel.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      destroy_mpi_enreg,fourdp,fourdp_6d,hartre,initmpi_seq
-!!      libxc_functionals_end,libxc_functionals_init,printxsf,rhotoxc,wrtout
-!!      xcdata_init
 !!
 !! SOURCE
 
@@ -190,13 +181,6 @@ end subroutine kxc_rpa
 !!
 !! OUTPUT
 !!  kxc(2,npwdiel,nspden,npwdiel,nspden) = the matrix of the xc kernel.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      destroy_mpi_enreg,fourdp,fourdp_6d,hartre,initmpi_seq
-!!      libxc_functionals_end,libxc_functionals_init,printxsf,rhotoxc,wrtout
-!!      xcdata_init
 !!
 !! SOURCE
 
@@ -385,13 +369,6 @@ end subroutine kxc_local
 !! WARNINGS
 !! Current restrictions are:
 !!  a - Spin-polarized case not tested.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      destroy_mpi_enreg,fourdp,fourdp_6d,hartre,initmpi_seq
-!!      libxc_functionals_end,libxc_functionals_init,printxsf,rhotoxc,wrtout
-!!      xcdata_init
 !!
 !! SOURCE
 
@@ -639,13 +616,6 @@ end subroutine kxc_alda
 !! (then not the kernel of course). This could help to check convergence
 !! with respect to 'npw'. See +ex_pgg comment.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      destroy_mpi_enreg,fourdp,fourdp_6d,hartre,initmpi_seq
-!!      libxc_functionals_end,libxc_functionals_init,printxsf,rhotoxc,wrtout
-!!      xcdata_init
-!!
 !! SOURCE
 
 subroutine kxc_pgg(gmet,kg,khxcg,npw,rcut_coulomb,susmat,ucvol)
@@ -859,13 +829,6 @@ end subroutine kxc_pgg
 !!
 !! WARNINGS
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      destroy_mpi_enreg,fourdp,fourdp_6d,hartre,initmpi_seq
-!!      libxc_functionals_end,libxc_functionals_init,printxsf,rhotoxc,wrtout
-!!      xcdata_init
-!!
 !! SOURCE
 
 subroutine kxc_eok(ixceok,kxcg,mpi_enreg,nfft,ngfft,nspden,rhor,rhocut)
@@ -1014,14 +977,6 @@ end subroutine kxc_eok
 !! NOTES
 !!  No xc quadrature
 !!  No nl core correction
-!!
-!! PARENTS
-!!      m_screening_driver,m_sigma_driver
-!!
-!! CHILDREN
-!!      destroy_mpi_enreg,fourdp,fourdp_6d,hartre,initmpi_seq
-!!      libxc_functionals_end,libxc_functionals_init,printxsf,rhotoxc,wrtout
-!!      xcdata_init
 !!
 !! SOURCE
 
@@ -1267,14 +1222,6 @@ end subroutine kxc_driver
 !! NOTES
 !!  No xc quadrature
 !!  No nl core correction
-!!
-!! PARENTS
-!!      m_screening_driver,m_sigma_driver
-!!
-!! CHILDREN
-!!      destroy_mpi_enreg,fourdp,fourdp_6d,hartre,initmpi_seq
-!!      libxc_functionals_end,libxc_functionals_init,printxsf,rhotoxc,wrtout
-!!      xcdata_init
 !!
 !! SOURCE
 

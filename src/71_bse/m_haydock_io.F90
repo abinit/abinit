@@ -6,12 +6,10 @@
 !!  This module provides routines to read the Haydock file
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (YG)
+!!  Copyright (C) 2013-2022 ABINIT group (YG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -104,11 +102,6 @@ CONTAINS  !====================================================================
 !! OUTPUT
 !!  haydock_file = file descriptor for the haydock file
 !!
-!! PARENTS
-!!      m_haydock
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine open_haydock(filename, haydock_file)
@@ -148,11 +141,6 @@ end subroutine open_haydock
 !!
 !! INPUT/OUTPUT
 !!  haydock_file = haydock file descriptor
-!!
-!! PARENTS
-!!      m_haydock
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -215,11 +203,6 @@ end subroutine read_dim_haydock
 !! INPUTS
 !!  haydock_file = haydock file descriptor
 !!
-!! PARENTS
-!!      m_haydock
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine write_dim_haydock(haydock_file)
@@ -251,11 +234,6 @@ end subroutine write_dim_haydock
 !!  haydock_file = haydock file descriptor
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_haydock_io
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -298,11 +276,6 @@ end subroutine skip_dim_haydock
 !!
 !! NOTES
 !!  niter = 0 if the q-point has not been found
-!!
-!! PARENTS
-!!      m_haydock
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -393,11 +366,6 @@ end subroutine read_haydock
 !!  niter = number of iterations done
 !!  factor = pre-factor used to obtain the green function
 !!
-!! PARENTS
-!!      m_haydock
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine write_haydock(haydock_file, hsize, q, aa, bb, phi_n, phi_nm1, niter, factor)
@@ -443,11 +411,6 @@ end subroutine write_haydock
 !!
 !! INPUTS
 !!  haydock_file = haydock file descriptor
-!!
-!! PARENTS
-!!      m_haydock
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

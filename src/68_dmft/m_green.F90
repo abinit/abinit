@@ -5,14 +5,10 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2021 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2022 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -203,12 +199,6 @@ CONTAINS
 !! OUTPUTS
 !! green  = variable of type green_type
 !!
-!! PARENTS
-!!      m_dmft,m_forctqmc,m_green,m_hubbard_one,m_outscfcv
-!!
-!! CHILDREN
-!!      fourier_fct,wrtout
-!!
 !! SOURCE
 
 subroutine init_green(green,paw_dmft,opt_oper_ksloc,wtype)
@@ -324,12 +314,6 @@ end subroutine init_green
 !! OUTPUTS
 !!  green  <type(green_type)>= green function data
 !!
-!! PARENTS
-!!      m_dmft,m_green
-!!
-!! CHILDREN
-!!      fourier_fct,wrtout
-!!
 !! SOURCE
 
 subroutine init_green_tau(green,paw_dmft,opt_ksloc)
@@ -381,12 +365,6 @@ end subroutine init_green_tau
 !!  green  <type(green_type)>= green function data
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_dmft,m_forctqmc,m_green,m_hubbard_one,m_outscfcv
-!!
-!! CHILDREN
-!!      fourier_fct,wrtout
 !!
 !! SOURCE
 
@@ -448,12 +426,6 @@ end subroutine destroy_green
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_dmft,m_green
-!!
-!! CHILDREN
-!!      fourier_fct,wrtout
-!!
 !! SOURCE
 
 subroutine destroy_green_tau(green)
@@ -501,12 +473,6 @@ end subroutine destroy_green_tau
 !!          2: copy only green%occup and green%oper  data (frequency)
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_dmft,m_forctqmc,m_green
-!!
-!! CHILDREN
-!!      fourier_fct,wrtout
 !!
 !! SOURCE
 
@@ -563,12 +529,6 @@ end subroutine copy_green
 !!         9: for G(w)
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_dmft,m_forctqmc,m_green
-!!
-!! CHILDREN
-!!      fourier_fct,wrtout
 !!
 !! SOURCE
 
@@ -669,12 +629,6 @@ end subroutine printocc_green
 !!         2 print green function as a function of imaginary time
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_dmft,m_forctqmc,m_green,m_outscfcv
-!!
-!! CHILDREN
-!!      fourier_fct,wrtout
 !!
 !! SOURCE
 
@@ -996,12 +950,6 @@ end subroutine print_green
 !!                   (a keyword: compute_local_green would be in fact equivalent and more clear)
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_dmft,m_green,m_outscfcv
-!!
-!! CHILDREN
-!!      fourier_fct,wrtout
 !!
 !! SOURCE
 
@@ -1372,12 +1320,6 @@ end subroutine compute_green
 !!
 !! OUTPUT
 !!   green%occup = occupations
-!!
-!! PARENTS
-!!      m_dmft,m_green
-!!
-!! CHILDREN
-!!      fourier_fct,wrtout
 !!
 !! SOURCE
 
@@ -1761,7 +1703,7 @@ subroutine integrate_green(cryst_struc,green,paw_dmft&
    if(paw_dmft%lpsichiortho==1) then
      call diff_matlu("Local_projection_of_kohnsham_occupations ",&
 &     "Integration_of_local_green_function ",&
-&       green%occup%matlu,matlu_temp,natom,1,tol4)
+&       green%occup%matlu,matlu_temp,natom,option,tol4)
      write(message,'(2a)') ch10,&
 &     '  ***** => Calculations of Green function in KS and local spaces are coherent ****'
      call wrtout(std_out,message,'COLL')
@@ -1830,12 +1772,6 @@ end subroutine integrate_green
 !!  opt_self = optional argument, if =1, upfold self-energy
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_dmft
-!!
-!! CHILDREN
-!!      fourier_fct,wrtout
 !!
 !! SOURCE
 
@@ -1927,12 +1863,6 @@ end subroutine icip_green
 !!  pawang <type(pawang)>=paw angular mesh and related data
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_dmft,m_forctqmc,m_green
-!!
-!! CHILDREN
-!!      fourier_fct,wrtout
 !!
 !! SOURCE
 
@@ -2213,12 +2143,6 @@ end subroutine fourier_green
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_dmft
-!!
-!! CHILDREN
-!!      fourier_fct,wrtout
-!!
 !! SOURCE
 
 subroutine check_fourier_green(cryst_struc,green,paw_dmft,pawang)
@@ -2288,11 +2212,6 @@ end subroutine check_fourier_green
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fourier_fct,wrtout
-!!
 !! SOURCE
 
 subroutine compa_occup_ks(green,paw_dmft)
@@ -2357,7 +2276,7 @@ end subroutine compa_occup_ks
 !! Do integration in matsubara space
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2021 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2022 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2372,12 +2291,6 @@ end subroutine compa_occup_ks
 !! SIDE EFFECTS
 !!  * integral = integral of ff over matsubara frequencies (there is an accumulation in the present routine, so intent(inout))
 !!  * ft= function is time space
-!!
-!! PARENTS
-!!      m_green
-!!
-!! CHILDREN
-!!      fourier_fct,wrtout
 !!
 !! SOURCE
 subroutine add_int_fct(ifreq,ff,ldiag,omega_current,option,integral,temp,wgt_wlo,dmft_nwlo)
@@ -2444,7 +2357,7 @@ end subroutine add_int_fct
 !! Do integration in matsubara space
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2021 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2022 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2461,12 +2374,6 @@ end subroutine add_int_fct
 !!
 !! SIDE EFFECTS
 !!  ft= function is time space
-!!
-!! PARENTS
-!!      m_forctqmc,m_green
-!!
-!! CHILDREN
-!!      fourier_fct,wrtout
 !!
 !! SOURCE
 subroutine int_fct(ff,ldiag,option,paw_dmft,integral,procb,myproc)
@@ -2572,7 +2479,7 @@ end subroutine int_fct
 !! (A spline is performed )
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2021 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2022 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2587,12 +2494,6 @@ end subroutine int_fct
 !! SIDE EFFECTS
 !!  fw= function is frequency space
 !!  ft= function is time space
-!!
-!! PARENTS
-!!      m_green
-!!
-!! CHILDREN
-!!      fourier_fct,wrtout
 !!
 !! SOURCE
 subroutine fourier_fct(fw,ft,ldiag,ltau,opt_four,paw_dmft)
@@ -2711,7 +2612,7 @@ end subroutine fourier_fct
 !! (A spline is performed )
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2021 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2022 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2727,11 +2628,6 @@ end subroutine fourier_fct
 !! SIDE EFFECTS
 !!  fw= function is frequency space
 !!  ft= function is time space
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fourier_fct,wrtout
 !!
 !! SOURCE
 
@@ -2797,12 +2693,6 @@ end subroutine spline_fct
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_forctqmc
-!!
-!! CHILDREN
-!!      fourier_fct,wrtout
-!!
 !! SOURCE
 
 subroutine occup_green_tau(green)
@@ -2843,11 +2733,6 @@ end subroutine occup_green_tau
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -2887,12 +2772,6 @@ end subroutine occup_green_tau
 !!  proct(iw,iproc) : 1 if the frequency "iw" should be computed by the proc "iproc"
 !!                    0 if iw should not   "      "
 !!                    careful: if proct=1, it does not mean that each combination {iw,ikpt} is treated by this proc.
-!! PARENTS
-!!      m_green
-!!
-!! CHILDREN
-!!      fourier_fct,wrtout
-!!
 !! SOURCE
 
  subroutine distrib_paral(nkpt,nproc,nw,nw_perproc,procb,proct)
@@ -3001,7 +2880,7 @@ end subroutine occup_green_tau
 !! Compute levels for ctqmc
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2021 ABINIT group (BAmadon)
+!! Copyright (C) 1999-2022 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3010,11 +2889,6 @@ end subroutine occup_green_tau
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fourier_fct,wrtout
 !!
 !! SOURCE
 
@@ -3091,7 +2965,7 @@ end subroutine occup_green_tau
 !!  Compute Fermi level for DMFT or DFT.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2021 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2022 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3105,12 +2979,6 @@ end subroutine occup_green_tau
 !!
 !! OUTPUT
 !! fermie: output value
-!!
-!! PARENTS
-!!      m_dmft
-!!
-!! CHILDREN
-!!      fourier_fct,wrtout
 !!
 !! SOURCE
 
@@ -3237,7 +3105,7 @@ end subroutine fermi_green
 !!  Compute root of a function with newton methods (newton/halley)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2021 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2022 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3251,12 +3119,6 @@ end subroutine fermi_green
 !! OUTPUT
 !!  f_precision  : output precision on function F
 !!  ierr_hh      : different from zero if an error occurs
-!!
-!! PARENTS
-!!      m_green
-!!
-!! CHILDREN
-!!      fourier_fct,wrtout
 !!
 !! SOURCE
 
@@ -3458,12 +3320,6 @@ subroutine newton(cryst_struc,green,paw_dmft,pawang,self,&
 !!  Fxprime      : Value of F'(x)
 !!  Fxdouble     : Value of F''(x)
 !!
-!! PARENTS
-!!      m_green
-!!
-!! CHILDREN
-!!      fourier_fct,wrtout
-!!
 !! SOURCE
 
 subroutine function_and_deriv(cryst_struc,f_precision,green,iter,paw_dmft,pawang,self&
@@ -3554,12 +3410,6 @@ subroutine function_and_deriv(cryst_struc,f_precision,green,iter,paw_dmft,pawang
 !! Fx           : Value of F(x).
 !! nb_elec_x    : Number of electrons for the value of x
 !!
-!! PARENTS
-!!      m_green
-!!
-!! CHILDREN
-!!      fourier_fct,wrtout
-!!
 !! SOURCE
 
 subroutine compute_nb_elec(cryst_struc,green,paw_dmft,pawang,self,&
@@ -3605,7 +3455,7 @@ end subroutine newton
 !! do the fourier transformation and print it
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2021 ABINIT group (BAmadon)
+!! Copyright (C) 1999-2022 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3620,12 +3470,6 @@ end subroutine newton
 !!
 !! OUTPUT
 !!  paw_dmft =  data for self-consistent DFT+DMFT calculations.
-!!
-!! PARENTS
-!!      m_dmft
-!!
-!! CHILDREN
-!!      fourier_fct,wrtout
 !!
 !! SOURCE
 

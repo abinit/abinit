@@ -7,7 +7,7 @@
 -        xgTransposer_*@all2all       0            0.000            0.000
 -        xgTransposer_*@gatherv       0            0.000            0.000
 -      xgTransposer_@reorganize       0            0.000            0.000
--             xgTransposer_init       1            0.000            0.000
+-     xgTransposer_*constructor       1            0.000            0.000
 -             xgTransposer_free       1            0.000            0.000
 -        xgTransposer_transpose      40            0.000            0.000
 -                         total      42            0.000            0.000
@@ -20,7 +20,7 @@
 -        xgTransposer_*@all2all       0            0.000            0.000
 -        xgTransposer_*@gatherv       0            0.000            0.000
 -      xgTransposer_@reorganize       0            0.000            0.000
--             xgTransposer_init       1            0.000            0.000
+-     xgTransposer_*constructor       1            0.000            0.000
 -             xgTransposer_free       1            0.000            0.000
 -        xgTransposer_transpose      40            0.000            0.000
 -                         total      42            0.000            0.000
@@ -33,7 +33,7 @@
 -        xgTransposer_*@all2all       0            0.000            0.000
 -        xgTransposer_*@gatherv       0            0.000            0.000
 -      xgTransposer_@reorganize       0            0.000            0.000
--             xgTransposer_init       1            0.000            0.000
+-     xgTransposer_*constructor       1            0.000            0.000
 -             xgTransposer_free       1            0.000            0.000
 -        xgTransposer_transpose      40            0.000            0.000
 -                         total      42            0.000            0.000
@@ -46,7 +46,20 @@
 -        xgTransposer_*@all2all       0            0.000            0.000
 -        xgTransposer_*@gatherv       0            0.000            0.000
 -      xgTransposer_@reorganize       0            0.000            0.000
--             xgTransposer_init       1            0.000            0.000
+-     xgTransposer_*constructor       1            0.000            0.000
 -             xgTransposer_free       1            0.000            0.000
 -        xgTransposer_transpose      40            0.000            0.000
 -                         total      42            0.000            0.000
+ Allocation
+ Mapping
+ Transposer constructor
+ Init data
+ Linalg division
+ Linalg norm2
+ Transposer transpose
+ ColsRows divisions
+ Transposer transpose back
+ ColsRows norm2
+ Compare
+ Difference:               0.0000
+ Free everything

@@ -6,7 +6,7 @@
 !! This module contains datatypes for efmas functionalities.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2021 ABINIT group (JLJ)
+!! Copyright (C) 2001-2022 ABINIT group (JLJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -75,12 +75,6 @@ CONTAINS
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_efmas
-!!
-!! CHILDREN
-!!      cgqf,dgemm,dgetrf,dgetri,dsyev,print_tr_efmas,zgemm,zgetrf,zgetri,zheev
-!!
 !! SOURCE
 
 subroutine efmasval_free(efmasval)
@@ -108,12 +102,6 @@ end subroutine efmasval_free
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_eph_driver,m_respfn_driver
-!!
-!! CHILDREN
-!!      cgqf,dgemm,dgetrf,dgetri,dsyev,print_tr_efmas,zgemm,zgetrf,zgetri,zheev
 !!
 !! SOURCE
 
@@ -156,12 +144,6 @@ end subroutine efmasval_free_array
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_efmas
-!!
-!! CHILDREN
-!!      cgqf,dgemm,dgetrf,dgetri,dsyev,print_tr_efmas,zgemm,zgetrf,zgetri,zheev
-!!
 !! SOURCE
 
 subroutine efmasdeg_free(efmasdeg)
@@ -189,12 +171,6 @@ end subroutine efmasdeg_free
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_eph_driver,m_respfn_driver
-!!
-!! CHILDREN
-!!      cgqf,dgemm,dgetrf,dgetri,dsyev,print_tr_efmas,zgemm,zgetrf,zgetri,zheev
 !!
 !! SOURCE
 
@@ -230,12 +206,6 @@ end subroutine efmasdeg_free
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_d2frnl
-!!
-!! CHILDREN
-!!      cgqf,dgemm,dgetrf,dgetri,dsyev,print_tr_efmas,zgemm,zgetrf,zgetri,zheev
 !!
 !! SOURCE
 
@@ -353,12 +323,6 @@ end subroutine efmasdeg_free
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_dfpt_looppert
-!!
-!! CHILDREN
-!!      cgqf,dgemm,dgetrf,dgetri,dsyev,print_tr_efmas,zgemm,zgetrf,zgetri,zheev
 !!
 !! SOURCE
 
@@ -518,12 +482,6 @@ end subroutine print_efmas
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_eph_driver
-!!
-!! CHILDREN
-!!      cgqf,dgemm,dgetrf,dgetri,dsyev,print_tr_efmas,zgemm,zgetrf,zgetri,zheev
-!!
 !! SOURCE
 
  subroutine efmas_ncread(efmasdeg,efmasval,kpt,ncid)
@@ -643,12 +601,6 @@ end subroutine print_efmas
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_efmas
-!!
-!! CHILDREN
-!!      cgqf,dgemm,dgetrf,dgetri,dsyev,print_tr_efmas,zgemm,zgetrf,zgetri,zheev
 !!
 !! SOURCE
 
@@ -847,12 +799,6 @@ end subroutine print_efmas
 !!  efmasval(mband,nkpt_rbz) <type(efmasdeg_type)>= generalized 2nd-order k-derivatives of eigenvalues
 !!    efmasval(:,:)%ch2c INPUT : frozen wavefunction H2 contribution to generalized 2nd order k-derivatives of eigenenergy
 !!    efmasval(:,:)%eig2_diag OUTPUT : generalized 2nd order k-derivatives of eigenenergy
-!!
-!! PARENTS
-!!      m_dfpt_looppert
-!!
-!! CHILDREN
-!!      cgqf,dgemm,dgetrf,dgetri,dsyev,print_tr_efmas,zgemm,zgetrf,zgetri,zheev
 !!
 !! SOURCE
 
@@ -1124,12 +1070,6 @@ end subroutine print_efmas
 !!  rprimd(3,3)=dimensional primitive translations for real space (bohr)
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_dfpt_looppert
-!!
-!! CHILDREN
-!!      cgqf,dgemm,dgetrf,dgetri,dsyev,print_tr_efmas,zgemm,zgetrf,zgetri,zheev
 !!
 !! SOURCE
 

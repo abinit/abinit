@@ -10,7 +10,7 @@
 !!  defined in abi_common
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2021 ABINIT group (MG)
+!! Copyright (C) 2010-2022 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -390,11 +390,6 @@ end subroutine abimem_get_info
 !!  At the end of the calculation a short report is printed on the screen,
 !!  some information can be also written on disk following the needs
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      date_and_time,mpi_abort
-!!
 !! SOURCE
 
 subroutine abimem_record(istat, vname, addr, act, isize, file, line)
@@ -515,11 +510,6 @@ end subroutine abimem_record
 !!  file=File name
 !!  line=Line number
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      date_and_time,mpi_abort
-!!
 !! SOURCE
 
 subroutine abimem_abort(msg, file, line)
@@ -616,10 +606,6 @@ end function abimem_basename
 !!
 !! OUTPUT
 !!  wall= wall clock time in seconds
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

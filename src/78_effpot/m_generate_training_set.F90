@@ -8,14 +8,10 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2021 ABINIT group ()
+!!  Copyright (C) 2008-2022 ABINIT group ()
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -75,13 +71,6 @@ contains
 !! SIDE EFFECTS
 !! hist<type abihist>=Historical record of positions
 !!
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      crystal%free,ifc%free,ifc_init_fromfile,random_number,random_seed
-!!      strain_apply,strain_init,thermal_supercell_free,thermal_supercell_make
-!!      var2hist,wrtout,xcart2xred
 !!
 !! SOURCE
 

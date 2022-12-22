@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2021 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2022 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -13,10 +13,6 @@
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -91,14 +87,6 @@ contains
 !!  paw_dmft <type(paw_dmft_type)> =  data for self-consistent DFT+DMFT calculations.
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_vtorho
-!!
-!! CHILDREN
-!!      compute_green,copy_green,copy_matlu,dc_self,destroy_green,destroy_self
-!!      dftu_self,dyson,hubbard_one,init_green,initialize_self,print_green
-!!      rw_self,wrtout
 !!
 !! SOURCE
 
@@ -491,12 +479,14 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,paw_dmft,pawang,pawtab,pawprtv
 & '========'
  call wrtout(std_out,message,'COLL')
 
- ! compute Edc for U=1 and J=U/J
- call init_energy(cryst_struc,energies_tmp)
- !call compute_dftu_energy(cryst_struc,energies_tmp,green,paw_dmft,pawtab)
- call compute_dftu_energy(cryst_struc,energies_tmp,green,paw_dmft,pawtab,paw_dmft%forentropyDMFT%J_over_U)
- call data4entropyDMFT_setDc(paw_dmft%forentropyDMFT,energies_tmp%e_dc(:))
- call destroy_energy(energies_tmp,paw_dmft)
+ if(paw_dmft%dmft_entropy/=0) then
+   ! compute Edc for U=1 and J=U/J
+   call init_energy(cryst_struc,energies_tmp)
+   !call compute_dftu_energy(cryst_struc,energies_tmp,green,paw_dmft,pawtab)
+   call compute_dftu_energy(cryst_struc,energies_tmp,green,paw_dmft,pawtab,paw_dmft%forentropyDMFT%J_over_U)
+   call data4entropyDMFT_setDc(paw_dmft%forentropyDMFT,energies_tmp%e_dc(:))
+   call destroy_energy(energies_tmp,paw_dmft)
+ endif
 
 !== Compute final values for green functions, occupations, and spectral function
 !--------------------------------------------------------------------------------
@@ -574,14 +564,6 @@ end subroutine dmft_solve
 !!  paw_dmft =  data for self-consistent DFT+DMFT calculations.
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_dmft
-!!
-!! CHILDREN
-!!      compute_green,copy_green,copy_matlu,dc_self,destroy_green,destroy_self
-!!      dftu_self,dyson,hubbard_one,init_green,initialize_self,print_green
-!!      rw_self,wrtout
 !!
 !! SOURCE
 
@@ -841,14 +823,6 @@ end subroutine impurity_solve
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_dmft
-!!
-!! CHILDREN
-!!      compute_green,copy_green,copy_matlu,dc_self,destroy_green,destroy_self
-!!      dftu_self,dyson,hubbard_one,init_green,initialize_self,print_green
-!!      rw_self,wrtout
-!!
 !! SOURCE
 
 subroutine dyson(green,paw_dmft,self,weiss,opt_weissself)
@@ -961,14 +935,6 @@ end subroutine dyson
 !!  paw_dmft = data for self-consistent DFT+DMFT calculations.
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_dmft
-!!
-!! CHILDREN
-!!      compute_green,copy_green,copy_matlu,dc_self,destroy_green,destroy_self
-!!      dftu_self,dyson,hubbard_one,init_green,initialize_self,print_green
-!!      rw_self,wrtout
 !!
 !! SOURCE
 

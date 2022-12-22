@@ -7,14 +7,10 @@
 !!  using the Frohlich model
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2018-2021 ABINIT group (XG)
+!!  Copyright (C) 2018-2022 ABINIT group (XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -62,12 +58,6 @@ contains
 !!   efmasval(:,:)%eig2_diag band curvature double tensor
 !! ifc<ifc_type>=contains the dynamical matrix and the IFCs.
 !!
-!! PARENTS
-!!      m_eph_driver
-!!
-!! CHILDREN
-!!      cgqf,ifc%calcnwrite_nana_terms,zheev
-!!
 !! SOURCE
 
 subroutine frohlichmodel(cryst, dtset, efmasdeg, efmasval, ifc)
@@ -105,6 +95,7 @@ subroutine frohlichmodel(cryst, dtset, efmasdeg, efmasval, ifc)
  real(dp), allocatable :: frohlich_phononfactor_qdir(:)
  real(dp), allocatable :: phfrq_qdir(:,:)
  real(dp), allocatable :: dielt_qdir(:)
+ real(dp), allocatable :: dielt_avg(:)
  real(dp), allocatable :: zpr_frohlich_avg(:)
  complex(dpc), allocatable :: eigenvec(:,:), work(:)
  complex(dpc), allocatable :: eig2_diag_cart(:,:,:,:)
@@ -160,6 +151,7 @@ subroutine frohlichmodel(cryst, dtset, efmasdeg, efmasval, ifc)
  ABI_MALLOC(frohlich_phononfactor_qdir,(nqdir))
  ABI_MALLOC(phfrq_qdir,(3*cryst%natom,nqdir))
  ABI_MALLOC(dielt_qdir,(nqdir))
+ ABI_MALLOC(dielt_avg,(3*cryst%natom))
 
  !Compute phonon frequencies and mode-polarity for each qdir
  call ifc%calcnwrite_nana_terms(cryst, nqdir, unit_qdir, phfrq2l=phfrq_qdir, polarity2l=polarity_qdir)
@@ -174,6 +166,8 @@ subroutine frohlichmodel(cryst, dtset, efmasdeg, efmasval, ifc)
  zpr_q0_phononfactor_qdir=zero
  zpr_q0_avg=zero
  frohlich_phononfactor_qdir=zero
+ dielt_avg=zero
+ 
  do iqdir=1,nqdir
    do imode=4,3*cryst%natom
      proj_polarity_qdir(imode,iqdir)=DOT_PRODUCT(unit_qdir(:,iqdir),polarity_qdir(:,imode,iqdir))
@@ -181,12 +175,26 @@ subroutine frohlichmodel(cryst, dtset, efmasdeg, efmasval, ifc)
 &      proj_polarity_qdir(imode,iqdir)**2 / phfrq_qdir(imode,iqdir) **2
      frohlich_phononfactor_qdir(iqdir)=frohlich_phononfactor_qdir(iqdir)+&
 &      proj_polarity_qdir(imode,iqdir)**2 / phfrq_qdir(imode,iqdir) **(three*half)
-   enddo
+     dielt_avg(imode)=dielt_avg(imode)+&
+&      weight_qdir(iqdir)*frohlich_phononfactor_qdir(iqdir)/dielt_qdir(iqdir)**2
+   enddo   
    zpr_q0_avg=zpr_q0_avg+&
 &    weight_qdir(iqdir)*zpr_q0_phononfactor_qdir(iqdir)/dielt_qdir(iqdir)**2
  enddo
+ dielt_avg=dielt_avg*two**(-half)*cryst%ucvol**(-one)
  zpr_q0_avg=zpr_q0_avg*quarter*piinv
  zpr_q0_fact=zpr_q0_avg*eight*pi*(three*quarter*piinv)**third*cryst%ucvol**(-four*third)
+
+ write(ab_out,'(a)')'--------------------------------------------------------------------------------'
+ write(ab_out,'(a)')' Dielectric average (EQ. 25 Melo2022)'
+ write(ab_out,'(a)')'--------------------------------------------------------------------------------'
+ write(ab_out,'(a)')' Mode    <1/epsilon*SQRT(w_LO/2)>              Cumulative sum'
+ do imode=4,3*cryst%natom
+  write(ab_out,'(i5,f28.12,f28.12)') &
+        !Reversed cummulative sum to avoid rewriting the spherical intergration from above
+&       imode,dielt_avg(imode)-dielt_avg(abs(mod(imode-1,3*cryst%natom))),dielt_avg(imode)
+ enddo
+ write(ab_out,'(a)')'--------------------------------------------------------------------------------'
 
 !DEBUG
 ! do iqdir=1,nqdir,513
@@ -454,6 +462,7 @@ subroutine frohlichmodel(cryst, dtset, efmasdeg, efmasval, ifc)
  ABI_FREE(proj_polarity_qdir)
  ABI_FREE(phfrq_qdir)
  ABI_FREE(dielt_qdir)
+ ABI_FREE(dielt_avg)
  ABI_FREE(zpr_q0_phononfactor_qdir)
  ABI_FREE(frohlich_phononfactor_qdir)
 
@@ -475,12 +484,6 @@ subroutine frohlichmodel(cryst, dtset, efmasdeg, efmasval, ifc)
 !! efmasval(mband,nkpt_rbz) <type(efmasdeg_type)>= double tensor datastructure
 !!   efmasval(:,:)%eig2_diag band curvature double tensor
 !! ifc<ifc_type>=contains the dynamical matrix and the IFCs.
-!!
-!! PARENTS
-!!      m_eph_driver
-!!
-!! CHILDREN
-!!      cgqf,ifc%calcnwrite_nana_terms,zheev
 !!
 !! SOURCE
 
@@ -623,10 +626,10 @@ subroutine polaronmass(cryst, dtset, efmasdeg, efmasval, ifc)
 
        !Check degeneracies in (100) direction, and evaluate A and B.
        !Eigenvalues are 2*A (d=1), 2*B (d=2)
-       if(abs(lutt_eigenval(1,2)-lutt_eigenval(1,3))<tol5) then
+       if(abs(lutt_eigenval(1,2)-lutt_eigenval(1,3))<tol3) then
          lutt_params(2)=0.5*((lutt_eigenval(1,2)+lutt_eigenval(1,3))/2)
          lutt_params(1)=0.5*lutt_eigenval(1,1)
-       else if(abs(lutt_eigenval(1,2)-lutt_eigenval(1,1))<tol5) then
+       else if(abs(lutt_eigenval(1,2)-lutt_eigenval(1,1))<tol3) then
          lutt_params(2)=0.5*((lutt_eigenval(1,2)+lutt_eigenval(1,1))/2)
          lutt_params(1)=0.5*lutt_eigenval(1,3)
        else
@@ -635,9 +638,9 @@ subroutine polaronmass(cryst, dtset, efmasdeg, efmasval, ifc)
 
        !Check degeneracies in (111) direction and evaluate C
        !Eigenvalues are 2/3*(A+2B-C) (d=2), 2/3*(A+2B+2C) (d=1)
-       if(abs(lutt_eigenval(3,2)-lutt_eigenval(3,3))<tol5) then
+       if(abs(lutt_eigenval(3,2)-lutt_eigenval(3,3))<tol3) then
          lutt_params(3)=lutt_params(1)+2*lutt_params(2)-1.5*(0.5*(lutt_eigenval(3,2)+lutt_eigenval(3,3)))
-       else if(abs(lutt_eigenval(3,2)-lutt_eigenval(3,1))<tol5) then
+       else if(abs(lutt_eigenval(3,2)-lutt_eigenval(3,1))<tol3) then
          lutt_params(3)=lutt_params(1)+2*lutt_params(2)-1.5*(0.5*(lutt_eigenval(3,2)+lutt_eigenval(3,1)))
        else
          lutt_warn(2)=.true.
@@ -647,11 +650,11 @@ subroutine polaronmass(cryst, dtset, efmasdeg, efmasval, ifc)
        !Eigenvalues are 2B, A+B-C, A+B+C
        lutt_found=(/.false.,.false.,.false./)
        do ipar=1,deg_dim
-         if(abs(lutt_eigenval(2,ipar)-2*lutt_params(2))<tol4) then
+         if(abs(lutt_eigenval(2,ipar)-2*lutt_params(2))<tol3) then
            lutt_found(1)=.true.
-         else if(abs(lutt_eigenval(2,ipar)-(lutt_params(1)+lutt_params(2)-lutt_params(3)))<tol4) then
+         else if(abs(lutt_eigenval(2,ipar)-(lutt_params(1)+lutt_params(2)-lutt_params(3)))<tol3) then
            lutt_found(2)=.true.
-         else if(abs(lutt_eigenval(2,ipar)-(lutt_params(1)+lutt_params(2)+lutt_params(3)))<tol4) then
+         else if(abs(lutt_eigenval(2,ipar)-(lutt_params(1)+lutt_params(2)+lutt_params(3)))<tol3) then
            lutt_found(3)=.true.
          endif
        enddo

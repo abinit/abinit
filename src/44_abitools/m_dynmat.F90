@@ -6,17 +6,13 @@
 !!  This module provides low-level tools to operate on the dynamical matrix
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2021 ABINIT group (XG, JCC, MJV, NH, RC, MVeithen, MM, MG, MT, DCA)
+!!  Copyright (C) 2014-2022 ABINIT group (XG, JCC, MJV, NH, RC, MVeithen, MM, MG, MT, DCA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! TODO
 !!  Use more explicative names for the procedures!
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -70,8 +66,8 @@ module m_dynmat
  public :: wings3               ! Suppress the wings of the cartesian 2DTE for which the diagonal element is not known
  public :: asrif9               ! Imposes the Acoustic Sum Rule to Interatomic Forces
  public :: get_bigbox_and_weights ! Compute
- public :: make_bigbox          ! Generates a Big Box of R points for the Fourier Transforms the dynamical matrix
- public :: bigbx9               ! Helper functions that faciliates the generation  of a Big Box containing
+ public :: bigbx9               ! Generates a Big Box of R points for the Fourier Transforms the dynamical matrix
+ public :: make_bigbox          ! Helper functions that faciliates the generation  of a Big Box containing
  public :: canat9               ! From reduced to canonical coordinates
  public :: canct9               ! Convert from canonical coordinates to cartesian coordinates
  public :: chkrp9               ! Check if the rprim used for the definition of the unit cell (in the
@@ -127,11 +123,6 @@ contains
 !! OUTPUT
 !! d2asr=matrix used to store the correction needed to fulfill
 !! the acoustic sum rule.
-!!
-!! PARENTS
-!!      m_ddb,m_effective_potential_file,m_respfn_driver
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -294,12 +285,6 @@ end subroutine asria_calc
 !! Input/Output:
 !! d2cart=matrix of second derivatives of total energy, in cartesian coordinates
 !!
-!! PARENTS
-!!      m_ddb,m_ddb_elast,m_ddb_flexo,m_ddb_internalstr,m_respfn_driver
-!!      m_thmeig
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine asria_corr(asr,d2asr,d2cart,mpert,natom)
@@ -365,11 +350,6 @@ end subroutine asria_corr
 !! Input/Output:
 !! d2cart=matrix of second derivatives of total energy, in cartesian coordinates
 !! minvers=inverse of the supermatrix for future application of the corrections
-!!
-!! PARENTS
-!!      m_ddb
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -714,11 +694,6 @@ end subroutine asrprs
 !!    dynamical matrix, effective charges, dielectric tensor,....
 !!    all in cartesian coordinates
 !!
-!! PARENTS
-!!      m_ddb,m_respfn_driver
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine cart29(blkflg,blkval,carflg,d2cart,&
@@ -861,11 +836,6 @@ end subroutine cart29
 !!  flg2(3)=tell if information of each component of vec2 is valid
 !!  vec2(3)=output vector, in cartesian coordinates
 !!
-!! PARENTS
-!!      m_ddb,m_ddb_flexo,m_dfpt_lw,m_dynmat,m_respfn_driver
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine cart39(flg1,flg2,gprimd,ipert,natom,rprimd,vec1,vec2)
@@ -959,11 +929,6 @@ end subroutine cart39
 !! OUTPUT
 !!  d2red(2,3,mpert,3,mpert)=
 !!    second-derivative matrix in reduced coordinates
-!!
-!! PARENTS
-!!      m_ddb_interpolate
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1107,11 +1072,6 @@ end subroutine d2cart_to_red
 !! OUTPUT
 !!  eventually send a warning message
 !!
-!! PARENTS
-!!      m_respfn_driver
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine chkph3(carflg,idir,mpert,natom)
@@ -1167,8 +1127,7 @@ subroutine chkph3(carflg,idir,mpert,natom)
  if(send==1)then
    write(msg, '(a,a,a,a)' )&
    ' chkph3 : WARNING -',ch10,&
-   '  The dynamical matrix was incomplete :',&
-   ' phonon frequencies may be wrong ...'
+   '  Dynamical matrix incomplete, phonon frequencies may be wrong, check input variables rfatpol and rfdir.'
    call wrtout([std_out, ab_out],msg)
  end if
 
@@ -1199,11 +1158,6 @@ end subroutine chkph3
 !!  Input/Output
 !!  d2cart=matrix of second derivatives of total energy, in cartesian
 !!       coordinates
-!!
-!! PARENTS
-!!      m_ddb,m_respfn_driver
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1460,11 +1414,6 @@ end subroutine chneu9
 !!   On 010331, replaced the loops up to mpert by loops up to
 !!   natom+2, because of a crash bug under Windows. However,
 !!   the problem lies likely in the use of the indsym array.
-!!
-!! PARENTS
-!!      m_ddb,m_iogkk,m_respfn_driver
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1897,13 +1846,12 @@ end subroutine d2sym3
 !! FUNCTION
 !! Takes care of the inclusion of the ewald q=0 term in the dynamical
 !! matrix - corrects the dyew matrix provided as input
+!! See Eq.(71) in Gonze&Lee PRB 55, 10355 (1997) [[cite:Gonze1997a]],
+!! get the left hand side.
 !!
 !! INPUTS
-!!  dyewq0(3,3,natom) = part needed to correct
-!!    the dynamical matrix for atom self-interaction.
+!!  dyewq0(3,3,natom) = part needed to correct the dynamical matrix for atom self-interaction.
 !!  natom= number of atom in the unit cell
-!!
-!! OUTPUT
 !!
 !! SIDE EFFECTS
 !!  dyew(2,3,natom,3,natom)= dynamical matrix corrected on output
@@ -1921,11 +1869,6 @@ end subroutine d2sym3
 !!   will produce the correct dynamical matrix dyew starting from
 !!   the previously calculated dyewq0 and the bare(non-corrected)
 !!   dyew matrix
-!!
-!! PARENTS
-!!      m_dynmat,m_ifc,m_respfn_driver
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1963,6 +1906,7 @@ end subroutine q0dy3_apply
 !!
 !! FUNCTION
 !! Calculate the q=0 correction term to the dynamical matrix
+!! See Eq.(71) in Gonze&Lee PRB 55, 10355 (1997) [[cite:Gonze1997a]], the sum over \kappa"
 !!
 !! INPUTS
 !!  dyew(2,3,natom,3,natom)= dynamical matrix
@@ -1995,11 +1939,6 @@ end subroutine q0dy3_apply
 !!   will produce the correct dynamical matrix dyew starting from
 !!   the previously calculated dyewq0 and the bare(non-corrected)
 !!   dyew matrix
-!!
-!! PARENTS
-!!      m_ifc,m_respfn_driver
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2084,11 +2023,6 @@ end subroutine q0dy3_calc
 !!
 !! TODO
 !! A full description of the equations should be included
-!!
-!! PARENTS
-!!      m_dynmat,m_phgamma,m_relaxpol
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2289,11 +2223,6 @@ end subroutine symdyma
 !!    introduction of the q vector for phonon symmetrization
 !! This routine should once be merged with sygrad...
 !!
-!! PARENTS
-!!      m_dfpt_nstwf,m_dfpt_scfcv
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine dfpt_sygra(natom,desym,deunsy,indsym,ipert,nsym,qpt,symrec)
@@ -2420,11 +2349,6 @@ end subroutine dfpt_sygra
 !! where the columns of R and G are the dimensional primitive translations
 !! in real and reciprocal space respectively.
 !! Note the use of "symrec" in the symmetrization expression above.
-!!
-!! PARENTS
-!!      m_respfn_driver
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2573,11 +2497,6 @@ end subroutine dfpt_sydy
 !! OUTPUT
 !!  d2cart(2,3,mpert,3,mpert) without the wings
 !!
-!! PARENTS
-!!      m_respfn_driver
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine wings3(carflg,d2cart,mpert)
@@ -2642,11 +2561,6 @@ end subroutine wings3
 !!
 !! TODO
 !! List of ouput should be included.
-!!
-!! PARENTS
-!!      m_ifc,m_phgamma,m_tdep_abitypes
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2748,11 +2662,6 @@ end subroutine asrif9
 !! rpt(3,nrpt)= Canonical coordinates of the R points in the unit cell. These coordinates are normalized (=> * acell(3)!!)
 !! r_inscribed_sphere
 !! wghatm(natom,natom,nrpt)= Weights associated to a pair of atoms and to a R vector
-!!
-!! PARENTS
-!!      m_dvdb
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2892,17 +2801,12 @@ end subroutine get_bigbox_and_weights
 !! rprim(3,3)= Normalized coordinates in real space  !!! IS THIS CORRECT?
 !!
 !! OUTPUT
-!! cell= (3,nrpt) Give the index of the the cell and irpt
-!! nprt= Number of R points in the Big Box
-!! rpt(3,nrpt)= Canonical coordinates of the R points in the unit cell
+!! cell(3,nrpt)= integer coordinates of the cells (R points) in the rprim basis
+!! nprt= Number of cells (R points) in the Big Box
+!! rpt(3,mrpt)= canonical coordinates of the cells (R points)
 !!  These coordinates are normalized (=> * acell(3)!!)
 !!  The array is allocated here with the proper dimension. Client code is responsible
 !!  for the deallocation.
-!!
-!! PARENTS
-!!      m_dynmat,m_ifc
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2949,7 +2853,7 @@ end subroutine make_bigbox
 !! bigbx9
 !!
 !! FUNCTION
-!! Generation of a Big Box containing all the R points in the
+!! Generation of a Big Box containing all the R points (cells) in the
 !! cartesian real space needed to Fourier Transforms the dynamical
 !! matrix into its corresponding interatomic force.
 !!
@@ -2966,16 +2870,11 @@ end subroutine make_bigbox
 !! rprim(3,3)= Normalized coordinates in real space  !!! IS THIS CORRECT?
 !!
 !! OUTPUT
-!! cell= (3,nrpt) Give the index of the the cell and irpt
-!! nprt= Number of R points in the Big Box
-!! rpt(3,mrpt)= Canonical coordinates of the R points in the unit cell
+!! cell(3,nrpt)= integer coordinates of the cells (R points) in the rprim basis
+!! nprt= Number of cells (R points) in the Big Box
+!! rpt(3,mrpt)= canonical coordinates of the cells (R points)
 !!  These coordinates are normalized (=> * acell(3)!!)
 !!  (output only if choice=1)
-!!
-!! PARENTS
-!!      m_dynmat
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3150,11 +3049,6 @@ end subroutine bigbx9
 !! rcan(3,natom)  = Atomic position in canonical coordinates
 !! trans(3,natom) = Atomic translations : xred = rcan + trans
 !!
-!! PARENTS
-!!      m_dvdb,m_ifc
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 
@@ -3214,12 +3108,12 @@ subroutine canat9(brav,natom,rcan,rprim,trans,xred)
      found=0
      do ii=1,4
        if (found==1) exit
-       ! Canon will produces these coordinate transformations
+       ! Canon will produce these coordinate transformations
        call wrap2_pmhalf(rcan(1,iatom)+dontno(1,ii),rok(1),shift(1))
        call wrap2_pmhalf(rcan(2,iatom)+dontno(2,ii),rok(2),shift(2))
        call wrap2_pmhalf(rcan(3,iatom)+dontno(3,ii),rok(3),shift(3))
        ! In the F.C.C., ABS[ Ri ] + ABS[ Rj ] < or = 1/2
-       ! The equal signs has been treated using a tolerance parameter
+       ! The equal sign hase been treated using a tolerance parameter
        ! not to have twice the same point in the unit cell !
        rok(1)=rok(1)-1.0d-10
        rok(2)=rok(2)-2.0d-10
@@ -3256,7 +3150,7 @@ subroutine canat9(brav,natom,rcan,rprim,trans,xred)
        call wrap2_pmhalf(rcan(3,iatom)+dontno(3,ii),rok(3),shift(3))
        ! In the F.C.C., ABS[ Ri ] < or = 1/2
        ! and    ABS[ R1 ] + ABS[ R2 ] + ABS[ R3 ] < or = 3/4
-       ! The equal signs has been treated using a tolerance parameter
+       ! The equal signs have been treated using a tolerance parameter
        ! not to have twice the same point in the unit cell !
        rok(1)=rok(1)-1.0d-10
        rok(2)=rok(2)-2.0d-10
@@ -3293,10 +3187,10 @@ subroutine canat9(brav,natom,rcan,rprim,trans,xred)
      rec(3)=rok(3)
      ! Passage in Cartesian Normalized Coordinates
      rcan(:,iatom)=rec(1)*rprim(:,1)+rec(2)*rprim(:,2)+rec(3)*rprim(:,3)
-     ! Use of a tolerance parameter not to have twice the same pointin the unit cell !
+     ! Use of a tolerance parameter not to have twice the same point in the unit cell !
      rcan(1,iatom)=rcan(1,iatom)-1.0d-10
      rcan(2,iatom)=rcan(2,iatom)-2.0d-10
-     ! Passage to the honey-com hexagonal unit cell !
+     ! Passage to the honeycomb hexagonal unit cell !
      if (rcan(1,iatom)>0.5_dp) then
        rcan(1,iatom)=rcan(1,iatom)-1.0_dp
      end if
@@ -3355,11 +3249,6 @@ end subroutine canat9
 !! ib=number of the atom in the unit cell
 !! irpt= number of the unit cell to which belong the atom
 !! rcart(3)=cartesian coordinate of the atom indexed by index.
-!!
-!! PARENTS
-!!      m_ifc
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3420,11 +3309,6 @@ end subroutine canct9
 !!
 !! OUTPUT
 !!  (only checking)
-!!
-!! PARENTS
-!!      m_ifc
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3535,11 +3419,6 @@ end subroutine chkrp9
 !! OUTPUT
 !! dist(natom,natom,nrpt)=distances between atoms
 !!
-!! PARENTS
-!!      m_ifc
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine dist9(acell,dist,gprim,natom,nrpt,rcan,rprim,rpt)
@@ -3619,11 +3498,6 @@ end subroutine dist9
 !!
 !! OUTPUT
 !! atmfrc(3,natom,3,natom,nrpt)= Interatomic Forces in real space.
-!!
-!! PARENTS
-!!      m_ifc
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3720,11 +3594,6 @@ end subroutine ftifc_q2r
 !!
 !! OUTPUT
 !! dynmat(2,3,natom,3,natom,nqpt)= Dynamical matrices coming from the Derivative Data Base
-!!
-!! PARENTS
-!!      m_dynmat
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3838,11 +3707,6 @@ end subroutine ftifc_r2q
 !!  The tree directions are stored in the last dimension.
 !!  These coordinates are normalized (=> * acell(3)!!)
 !!
-!! PARENTS
-!!      m_ifc
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine dynmat_dq(qpt,natom,gprim,nrpt,rpt,atmfrc,wghatm,dddq)
@@ -3924,11 +3788,6 @@ end subroutine dynmat_dq
 !! OUTPUT
 !! ifcloc(3,3)= matrix of interatomic force constants in local coordinates
 !!
-!! PARENTS
-!!      m_ifc
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine ifclo9(ifccar,ifcloc,vect1,vect2,vect3)
@@ -3978,7 +3837,7 @@ end subroutine ifclo9
 !! wght9
 !!
 !! FUNCTION
-!! Generates a weight to each R points of the Big Box and for each pair of atoms
+!! Generates a weight to each R point of the Big Box and for each pair of atoms
 !! For each R points included in the space generates by moving
 !! the unit cell around each atom; the weight will be one.
 !! Border conditions are provided.
@@ -4005,11 +3864,6 @@ end subroutine ifclo9
 !! wghatm(natom,natom,nrpt)= Weight associated to the couple of atoms and the R vector
 !!  The vector r(atom2)-r(atom1)+rpt should be inside the moving box
 !! ngqpt(6)= can be modified
-!!
-!! PARENTS
-!!      m_dynmat,m_ifc
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -4403,11 +4257,6 @@ end subroutine wght9
 !!   element of d3 is available (1 if available, 0 otherwise)
 !!  d3(2,3,mpert,3,mpert,3,mpert)= matrix of the 3DTE
 !!
-!! PARENTS
-!!      m_ddb,m_nonlinear
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine d3sym(blkflg,d3,indsym,mpert,natom,nsym,symrec,symrel)
@@ -4610,11 +4459,6 @@ end subroutine d3sym
 !!       1   ->   element has to be computed explicitely
 !!      -1   ->   use symmetry operations to obtain the corresponding element
 !!      -2   ->   element is zero by symmetry
-!!
-!! PARENTS
-!!      m_ddb,m_nonlinear,m_respfn_driver
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -4830,11 +4674,6 @@ end subroutine sytens
 !! vect2(3)= cartesian coordinates of the second local vector
 !! vect3(3)= cartesian coordinates of the third local vector
 !!
-!! PARENTS
-!!      m_ifc
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine axial9(ifccar,vect1,vect2,vect3)
@@ -4928,11 +4767,6 @@ end subroutine axial9
 !! OUTPUT
 !! dynmat = phase shifted dynamical matrices
 !!
-!! PARENTS
-!!      m_dynmat,m_ifc
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine dymfz9(dynmat,natom,nqpt,gprim,option,spqpt,trans)
@@ -4998,6 +4832,9 @@ end subroutine dymfz9
 !! If plus=1 then adds the non-analytical part to the dynamical
 !!           matrices, with number iqpt.
 !!
+!! For plus=0, see Eq.(76) in Gonze&Lee PRB 55, 10355 (1997) [[cite:Gonze1997a]],
+!! get the left hand side.
+!!
 !! INPUTS
 !! dyew(2,3,natom,3,natom)= Non-analytical part
 !! natom= Number of atoms in the unit cell
@@ -5007,11 +4844,6 @@ end subroutine dymfz9
 !!
 !! OUTPUT
 !! dynmat(2,3,natom,3,natom,nqpt)= Dynamical matrices coming from the Derivative Data Base
-!!
-!! PARENTS
-!!      m_dynmat,m_ifc
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -5107,11 +4939,6 @@ end subroutine nanal9
 !!
 !! OUTPUT
 !! d2cart(2,3,mpert,3,mpert)=dynamical matrix obtained for the wavevector qpt (normalized using qphnrm)
-!!
-!! PARENTS
-!!      anaddb,m_ddb_interpolate,m_effective_potential_file,m_ifc,m_phonons
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -5262,12 +5089,6 @@ end subroutine gtdyn9
 !! NOTES
 !!   1) One makes the dynamical matrix hermitian...
 !!   2) In case of q=Gamma, only the real part is used.
-!!
-!! PARENTS
-!!      anaddb,m_ddb,m_effective_potential_file,m_ifc,m_phonons,m_respfn_driver
-!!      m_thmeig
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -5493,10 +5314,6 @@ end subroutine dfpt_phfrq
 !! SIDE EFFECTS
 !!  eigvec(2*3*natom*3*natom)=in output the normalized eigenvectors in cartesian coordinates.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 pure subroutine pheigvec_normalize(natom, eigvec)
@@ -5547,7 +5364,7 @@ end subroutine pheigvec_normalize
 !! phdispl_from_eigvec
 !!
 !! FUNCTION
-!!  Phonon displacements from eigenvectors
+!!  Phonon displacements in cart coords from eigenvectors
 !!
 !! INPUTS
 !!  natom: number of atoms in unit cell
@@ -5558,10 +5375,6 @@ end subroutine pheigvec_normalize
 !!
 !! OUTPUT
 !!  displ(2*3*natom*3*natom)=displacements of atoms in cartesian coordinates.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -5630,11 +5443,6 @@ end subroutine phdispl_from_eigvec
 !!
 !! NOTES
 !! called by one processor only
-!!
-!! PARENTS
-!!      anaddb,m_effective_potential_file,m_ifc,m_phonons,m_respfn_driver
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -5839,10 +5647,6 @@ end subroutine dfpt_prtph
 !! SIDE EFFECTS
 !!  mat(2*3*natom*3*natom)=Multiplies by atomic masses in output.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine massmult_and_breaksym(natom, ntypat, typat, amu, mat)
@@ -5931,11 +5735,6 @@ end subroutine massmult_and_breaksym
 !!  = gamma matrices in recip space coming from the Derivative Data Base
 !! gam_rpt(2,3*natom*3*natom,nrpt)
 !!  = gamma matrices in real space stored in file unit_gkk_rpt
-!!
-!! PARENTS
-!!      m_a2ftr,m_elphon,m_phgamma
-!!
-!! CHILDREN
 !!
 !! NOTES
 !!   copied from ftiaf9.f
@@ -6043,11 +5842,6 @@ end subroutine ftgam
 !!
 !! OUTPUT
 !! coskr, sinkr = cosine and sine of phase factors for given r and q points
-!!
-!! PARENTS
-!!      m_a2ftr,m_elphon,m_phgamma
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

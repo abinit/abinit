@@ -44,8 +44,6 @@
  getwfk     1
  nqpt       1
  rfphon     1 
- rfatpol    1 2 
- rfdir      1 1 1
  kptopt     3
 
  # 2x2x2 Q-mesh

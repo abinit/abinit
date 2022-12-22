@@ -3,7 +3,7 @@
 !! m_FFT_prof
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2021 ABINIT group (MG)
+!!  Copyright (C) 2008-2022 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -164,11 +164,6 @@ CONTAINS  !====================================================================
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      fftprof,m_fft_prof
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine fft_test_init(Ftest,fft_setup,kpoint,ecut,boxcutmin,rprimd,nsym,symrel,MPI_enreg_in)
@@ -191,6 +186,7 @@ subroutine fft_test_init(Ftest,fft_setup,kpoint,ecut,boxcutmin,rprimd,nsym,symre
  logical,allocatable :: mask(:)
  real(dp),parameter :: k0(3)=(/zero,zero,zero/)
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
+ real(dp),allocatable :: tnons(:,:)
 
 ! *************************************************************************
 
@@ -225,8 +221,11 @@ subroutine fft_test_init(Ftest,fft_setup,kpoint,ecut,boxcutmin,rprimd,nsym,symre
  Ftest%ngfft(8) = fftcache
 
  ! Fill part of ngfft
- call getng(boxcutmin,ecut,gmet,k0,Ftest%MPI_enreg%me_fft,Ftest%mgfft,Ftest%nfft,Ftest%ngfft,Ftest%MPI_enreg%nproc_fft,nsym,&
-&  Ftest%MPI_enreg%paral_kgb,symrel, unit=dev_null)
+ ABI_MALLOC(tnons,(3,nsym))
+ tnons=zero
+ call getng(boxcutmin,0,ecut,gmet,k0,Ftest%MPI_enreg%me_fft,Ftest%mgfft,Ftest%nfft,Ftest%ngfft,Ftest%MPI_enreg%nproc_fft,nsym,&
+&  Ftest%MPI_enreg%paral_kgb,symrel,tnons, unit=dev_null)
+ ABI_FREE(tnons)
 
  call init_distribfft(Ftest%MPI_enreg%distribfft,'c',Ftest%MPI_enreg%nproc_fft,Ftest%ngfft(2),Ftest%ngfft(3))
 
@@ -251,11 +250,6 @@ end subroutine fft_test_init
 !!  Nullify all pointers.
 !!
 !! INPUTS
-!!
-!! PARENTS
-!!      fftprof,m_fft_prof
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -285,11 +279,6 @@ end subroutine fft_test_nullify
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_fft_prof
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -350,10 +339,6 @@ end subroutine fft_test_free_0D
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine fft_test_free_1D(Ftest)
@@ -387,11 +372,6 @@ end subroutine fft_test_free_1D
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      fftprof
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -441,8 +421,6 @@ end subroutine fft_test_print
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 function name_of(Ftest)
@@ -480,11 +458,6 @@ end function name_of
 !!  gflops = Gigaflops
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_fft_prof
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -534,11 +507,6 @@ end subroutine fftprof_init
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_fft_prof
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine fftprof_free_0D(Ftprof)
@@ -576,10 +544,6 @@ end subroutine fftprof_free_0D
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine fftprof_free_1D(Ftprof)
@@ -613,11 +577,6 @@ end subroutine fftprof_free_1D
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      fftprof
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -724,11 +683,6 @@ end subroutine fftprof_print
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      fftprof,m_fft_prof
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -860,11 +814,6 @@ end subroutine time_fourdp
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      fftprof
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine time_fftbox(Ftest,isign,inplace,header,Ftprof)
@@ -945,20 +894,20 @@ subroutine time_fftbox(Ftest,isign,inplace,header,Ftprof)
  call cwtime(cpu_time,wall_time,gflops,"start")
 
  ! No augmentation here.
- call fftbox_plan3_many(plan,ndat,Ftest%ngfft(1:3),Ftest%ngfft(1:3),Ftest%ngfft(7),isign)
+ call plan%many(ndat, Ftest%ngfft(1:3), Ftest%ngfft(1:3), Ftest%ngfft(7), isign)
 
  select case (inplace)
  case (0)
    do icall=1,NCALLS_FOR_TEST
      ifft = empty_cache(CACHE_KBSIZE)
-     call fftbox_execute(plan,ffc,ggc)
+     call plan%execute(ffc, ggc)
      ! Store results at the first call.
      if (icall==1) results = ggc
    end do
  case (1)
    do icall=1,NCALLS_FOR_TEST
      ifft = empty_cache(CACHE_KBSIZE)
-     call fftbox_execute(plan,ffc)
+     call plan%execute(ffc)
      ! Store results at the first call.
      if (icall==1) results = ffc
    end do
@@ -992,11 +941,6 @@ end subroutine time_fftbox
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      fftprof,m_fft_prof
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1282,11 +1226,6 @@ end subroutine time_fourwf
 !! SIDE EFFECTS
 !!  NCALLS_FOR_TEST = ncalls
 !!
-!! PARENTS
-!!      fftprof
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine fftprof_ncalls_per_test(ncalls)
@@ -1314,11 +1253,6 @@ end subroutine fftprof_ncalls_per_test
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      fftprof,m_fft_prof
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1464,11 +1398,6 @@ end subroutine time_rhotwg
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      fftprof
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1631,11 +1560,6 @@ end subroutine time_fftu
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      fftprof
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine prof_fourdp(fft_setups,isign,cplex,necut,ecut_arth,boxcutmin,rprimd,nsym,symrel,MPI_enreg_in)
@@ -1734,11 +1658,6 @@ end subroutine prof_fourdp
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      fftprof
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine prof_fourwf(fft_setups,cplex,option,kpoint,necut,ecut_arth,boxcutmin,rprimd,nsym,symrel,MPI_enreg_in)
@@ -1836,11 +1755,6 @@ end subroutine prof_fourwf
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      fftprof
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1949,8 +1863,6 @@ end subroutine prof_rhotwg
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
 !!
 !! SOURCE
 

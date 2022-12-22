@@ -25,6 +25,7 @@
 
  ntypat  2     # IMPORTANT : one needs to define two kinds of atoms, despite that both are hydrogen,
                # in order to constrain the charge for atom 1, and not to impose a constraint for atom 2 !
+ chksymtnons 3    # The default value for chksymtnons (which is 1) is not admitted in case of cDFT calculations.
  znucl  1.0 1.0
  natom 2
  typat  1 2

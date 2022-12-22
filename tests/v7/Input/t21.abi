@@ -62,7 +62,8 @@ dmft_rslf 1       # do not read self
 dmft_mxsf 0.7
 
 # Hubbard Correction
-usepawu    1
+usepawu1    1
+usepawu     10
 lpawu   3    # HUbbard correction ON f-ORBITALS
 upawu1  0.00
 upawu2  0.22

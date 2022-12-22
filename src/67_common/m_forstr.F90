@@ -6,14 +6,10 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, AF, AR, MB, MT)
+!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, AF, AR, MB, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -65,6 +61,8 @@ module m_forstr
  use m_mkffnl,           only : mkffnl
  use m_mpinfo,           only : proc_distrb_cycle
  use m_nonlop,           only : nonlop
+ use m_gemm_nonlop,      only : make_gemm_nonlop,gemm_nonlop_use_gemm, &
+&                               gemm_nonlop_ikpt_this_proc_being_treated
  use m_fock_getghc,      only : fock_getghc
  use m_prep_kgb,         only : prep_nonlop
  use m_paw_nhat,         only : pawmknhat
@@ -74,6 +72,7 @@ module m_forstr
  use m_psolver,          only : psolver_hartree
  use m_wvl_psi,          only : wvl_nl_gradient
  use m_fft,              only : fourdp
+ use iso_c_binding,      only : c_loc,c_f_pointer
 
  implicit none
 
@@ -241,13 +240,6 @@ contains
 !!     the computation of wave functions ; one with nfftf points
 !!     (fine grid) for the computation of total density.
 !!
-!! PARENTS
-!!      m_afterscfloop,m_positron
-!!
-!! CHILDREN
-!!      dfpt_mkvxc,dfpt_mkvxc_noncoll,fourdp,hartre,metric,pawmknhat
-!!      psolver_hartree,rhotoxc,xcdata_init
-!!
 !! SOURCE
 
 subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,energies,favg,fcart,fock,&
@@ -321,7 +313,6 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
  real(dp),allocatable :: grnl(:),vlocal(:,:),vxc_hf(:,:),xcart(:,:),ylmbz(:,:),ylmgrbz(:,:,:)
  real(dp), ABI_CONTIGUOUS pointer :: resid(:,:)
 
-
 ! *************************************************************************
 
  call timab(910,1,tsec)
@@ -389,7 +380,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 &         fock%fock_BZ%mcprj,dtset%mgfft,fock%fock_BZ%mkpt,fock%fock_BZ%mpi_enreg,psps%mpsang,&
 &         dtset%mpw,dtset%natom,nattyp,fock%fock_BZ%nbandocc_bz,dtset%natom,dtset%ngfft,fock%fock_BZ%mkpt,&
 &         dtset%nloalg,fock%fock_BZ%npwarr,dtset%nspinor,&
-&         dtset%nsppol,dtset%ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,ucvol,unpaw,&
+&         dtset%nsppol,fock%fock_common%my_nsppol,dtset%ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,ucvol,unpaw,&
 &         xred,ylmbz,ylmgrbz)
          ABI_FREE(ylmbz)
          ABI_FREE(ylmgrbz)
@@ -399,7 +390,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 &         fock%fock_BZ%mcprj,dtset%mgfft,fock%fock_BZ%mkpt,mpi_enreg,psps%mpsang,&
 &         dtset%mpw,dtset%natom,nattyp,fock%fock_BZ%nbandocc_bz,dtset%natom,dtset%ngfft,fock%fock_BZ%mkpt,&
 &         dtset%nloalg,fock%fock_BZ%npwarr,dtset%nspinor,&
-&         dtset%nsppol,dtset%ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,ucvol,unpaw,&
+&         dtset%nsppol,fock%fock_common%my_nsppol,dtset%ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,ucvol,unpaw,&
 &         xred,ylm,ylmgr)
        end if
      end if
@@ -410,6 +401,9 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 &   dtset%nkpt,dtset%nloalg,npwarr,dtset%nspden,dtset%nspinor,dtset%nsppol,dtset%nsym,ntypat,&
 &   dtset%nucdipmom,occ,optfor,paw_ij,pawtab,ph1d,psps,rprimd,stress_needed,symrec,dtset%typat,&
 &   usecprj,dtset%usefock,dtset%use_gpu_cuda,dtset%wtk,xred,ylm,ylmgr)
+!DEBUG
+!   write(6,*)' after forstrnps, nlstr=',nlstr(1:6)
+!ENDDEBUG
  else if (optfor>0) then !WVL
    ABI_MALLOC(xcart,(3, dtset%natom))
    call xred2xcart(dtset%natom, rprimd, xcart, xred)
@@ -448,6 +442,9 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 &   nattyp,nfftf,ngfftf,nhat,nlstr,dtset%nspden,dtset%nsym,ntypat,optgr,optgr2,optstr,optstr2,&
 &   pawang,pawfgrtab,pawrhoij,pawtab,ph1df,psps,k0,rprimd,symrec,dtset%typat,ucvol_,vlocal,vxc,xred,&
 &   mpi_atmtab=mpi_enreg%my_atmtab, comm_atom=mpi_enreg%comm_atom,mpi_comm_grid=comm_grid)
+!DEBUG
+!   write(6,*)' after pawgrnl, nlstr=',nlstr(1:6)
+!ENDDEBUG
    ABI_FREE(vlocal)
 
  end if
@@ -598,13 +595,6 @@ end subroutine forstr
 !!   11, 22, 33, 32, 31, 21
 !!   npsstr(6)=nonlocal pseudopotential energy part of stress tensor
 !!    (hartree/bohr^3)
-!!
-!! PARENTS
-!!      m_forstr
-!!
-!! CHILDREN
-!!      dfpt_mkvxc,dfpt_mkvxc_noncoll,fourdp,hartre,metric,pawmknhat
-!!      psolver_hartree,rhotoxc,xcdata_init
 !!
 !! SOURCE
 
@@ -938,6 +928,15 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
        ph3d_k   =my_bandfft_kpt%ph3d_gather,compute_gbound=compute_gbound)
      end if
 
+!    Setup gemm_nonlop
+     if (gemm_nonlop_use_gemm) then
+       gemm_nonlop_ikpt_this_proc_being_treated = my_ikpt
+       call make_gemm_nonlop(my_ikpt,gs_hamk%npw_fft_k,gs_hamk%lmnmax,gs_hamk%ntypat, &
+&            gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%istwf_k, gs_hamk%ucvol, &
+&            gs_hamk%ffnl_k, gs_hamk%ph3d_k, gs_hamk%kpt_k, gs_hamk%kg_k, gs_hamk%kpg_k, &
+&            compute_grad_strain=(stress_needed>0),compute_grad_atom=(optfor>0))
+       end if
+
      call timab(922,2,tsec)
 
 !    Loop over (blocks of) bands; accumulate forces and/or stresses
@@ -1242,13 +1241,6 @@ end subroutine forstrnps
 !!
 !! OUTPUT
 !! vresid(nfft,nspden)= the output potential residual
-!!
-!! PARENTS
-!!      m_forstr,m_scfcv_core
-!!
-!! CHILDREN
-!!      dfpt_mkvxc,dfpt_mkvxc_noncoll,fourdp,hartre,metric,pawmknhat
-!!      psolver_hartree,rhotoxc,xcdata_init
 !!
 !! SOURCE
 

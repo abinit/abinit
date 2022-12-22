@@ -6,14 +6,10 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2021 ABINIT group (Mver)
+!! Copyright (C) 2005-2022 ABINIT group (Mver)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -87,12 +83,6 @@ contains
 !!
 !! OUTPUT
 !!   only output to file
-!!
-!! PARENTS
-!!      m_afterscfloop
-!!
-!! CHILDREN
-!!      gamma_function,spline,splint,xred2xcart
 !!
 !! SOURCE
 
@@ -604,12 +594,6 @@ end subroutine spin_current
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_spin_current
-!!
-!! CHILDREN
-!!      gamma_function,spline,splint,xred2xcart
 !!
 !! SOURCE
 

@@ -105,6 +105,8 @@
      wtk   4*0.25
    znucl   32
 
+ rfatpol   1 1  # Only for backward compatibility
+
  pp_dirpath "$ABI_PSPDIR"
  pseudos "32ge.SJ_mod"
 

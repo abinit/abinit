@@ -8,14 +8,10 @@
 !!  used to store results from GS calculations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2021 ABINIT group (MT)
+!! Copyright (C) 2011-2022 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -252,14 +248,6 @@ CONTAINS
 !! SIDE EFFECTS
 !!  results_gs=<type(results_gs_type)>=results_gs datastructure
 !!
-!! PARENTS
-!!      m_gstateimg,m_mover_effpot,m_results_img
-!!
-!! CHILDREN
-!!      stress_voigt_to_mat,ydoc%add_real,ydoc%add_real1d,ydoc%add_real2d
-!!      ydoc%add_reals,ydoc%add_string,ydoc%set_keys_to_string
-!!      ydoc%write_and_free
-!!
 !! SOURCE
 
 subroutine init_results_gs(natom,nspden,nsppol,results_gs,only_part)
@@ -354,13 +342,6 @@ end subroutine init_results_gs
 !!
 !! SIDE EFFECTS
 !!  results_gs(:)=<type(results_gs_type)>=results_gs datastructure 2Darray
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      stress_voigt_to_mat,ydoc%add_real,ydoc%add_real1d,ydoc%add_real2d
-!!      ydoc%add_reals,ydoc%add_string,ydoc%set_keys_to_string
-!!      ydoc%write_and_free
 !!
 !! SOURCE
 
@@ -464,14 +445,6 @@ end subroutine init_results_gs_array
 !! SIDE EFFECTS
 !!  results_gs(:)=<type(results_gs_type)>=results_gs datastructure
 !!
-!! PARENTS
-!!      m_gstateimg,m_mover_effpot,m_results_img
-!!
-!! CHILDREN
-!!      stress_voigt_to_mat,ydoc%add_real,ydoc%add_real1d,ydoc%add_real2d
-!!      ydoc%add_reals,ydoc%add_string,ydoc%set_keys_to_string
-!!      ydoc%write_and_free
-!!
 !! SOURCE
 
 subroutine destroy_results_gs(results_gs)
@@ -520,13 +493,6 @@ end subroutine destroy_results_gs
 !!
 !! SIDE EFFECTS
 !!  results_gs(:)=<type(results_gs_type)>=results_gs datastructure 2D-array
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      stress_voigt_to_mat,ydoc%add_real,ydoc%add_real1d,ydoc%add_real2d
-!!      ydoc%add_reals,ydoc%add_string,ydoc%set_keys_to_string
-!!      ydoc%write_and_free
 !!
 !! SOURCE
 
@@ -587,14 +553,6 @@ end subroutine destroy_results_gs_array
 !!
 !! OUTPUT
 !!  results_gs_out=<type(results_gs_type)>=output results_gs datastructure
-!!
-!! PARENTS
-!!      m_gstateimg,m_results_img
-!!
-!! CHILDREN
-!!      stress_voigt_to_mat,ydoc%add_real,ydoc%add_real1d,ydoc%add_real2d
-!!      ydoc%add_reals,ydoc%add_string,ydoc%set_keys_to_string
-!!      ydoc%write_and_free
 !!
 !! SOURCE
 
@@ -733,12 +691,6 @@ end subroutine copy_results_gs
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_results_gs
-!!
-!! CHILDREN
-!!      energies_ncwrite,results_gs_ncwrite
-!!
 !! SOURCE
 
 integer function results_gs_ncwrite(res, ncid, ecut, pawecutdg) result(ncerr)
@@ -850,13 +802,6 @@ end function results_gs_ncwrite
 !!  [info]: optional info for the final document
 !!  [occopt]: optional Input variable occopt
 !!  [with_conv]: optional True if the convergence dictionary with residuals and diffs should be written.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      stress_voigt_to_mat,ydoc%add_real,ydoc%add_real1d,ydoc%add_real2d
-!!      ydoc%add_reals,ydoc%add_string,ydoc%set_keys_to_string
-!!      ydoc%write_and_free
 !!
 !! SOURCE
 ! CP modified argument list

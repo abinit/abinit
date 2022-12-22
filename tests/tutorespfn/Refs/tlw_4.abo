@@ -2,7 +2,7 @@
 .Version 9.5.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -1029,6 +1029,18 @@ P          mk1mem12       256
           prepalw10         0
           prepalw11         0
           prepalw12         0
+           prtpot1          0
+           prtpot2          1
+           prtpot3          1
+           prtpot4          1
+           prtpot5          0
+           prtpot6          1
+           prtpot7          1
+           prtpot8          1
+           prtpot9          1
+           prtpot10         1
+           prtpot11         1
+           prtpot12         1
               qpt1     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt2     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt3     0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -1041,8 +1053,6 @@ P          mk1mem12       256
               qpt10   -2.50000000E-01  2.50000000E-01  0.00000000E+00
               qpt11    5.00000000E-01  5.00000000E-01  0.00000000E+00
               qpt12   -2.50000000E-01  5.00000000E-01  2.50000000E-01
-          rfatpol           1       2
-            rfdir           1       1       1
            rfelfd1          0
            rfelfd2          2
            rfelfd3          0
@@ -1079,30 +1089,6 @@ P          mk1mem12       256
          rf2_dkdk10         0
          rf2_dkdk11         0
          rf2_dkdk12         0
-    rf2_pert1_dir1          0       0       0
-    rf2_pert1_dir2          0       0       0
-    rf2_pert1_dir3          1       1       1
-    rf2_pert1_dir4          0       0       0
-    rf2_pert1_dir5          0       0       0
-    rf2_pert1_dir6          0       0       0
-    rf2_pert1_dir7          0       0       0
-    rf2_pert1_dir8          0       0       0
-    rf2_pert1_dir9          0       0       0
-    rf2_pert1_dir10         0       0       0
-    rf2_pert1_dir11         0       0       0
-    rf2_pert1_dir12         0       0       0
-    rf2_pert2_dir1          0       0       0
-    rf2_pert2_dir2          0       0       0
-    rf2_pert2_dir3          1       1       1
-    rf2_pert2_dir4          0       0       0
-    rf2_pert2_dir5          0       0       0
-    rf2_pert2_dir6          0       0       0
-    rf2_pert2_dir7          0       0       0
-    rf2_pert2_dir8          0       0       0
-    rf2_pert2_dir9          0       0       0
-    rf2_pert2_dir10         0       0       0
-    rf2_pert2_dir11         0       0       0
-    rf2_pert2_dir12         0       0       0
             rprim      0.0000000000E+00  5.0230160830E+00  5.0230160830E+00
                        5.0230160830E+00  0.0000000000E+00  5.0230160830E+00
                        5.0230160830E+00  5.0230160830E+00  0.0000000000E+00
@@ -7181,6 +7167,18 @@ P          mk1mem12       256
           prepalw10         0
           prepalw11         0
           prepalw12         0
+           prtpot1          0
+           prtpot2          1
+           prtpot3          1
+           prtpot4          1
+           prtpot5          0
+           prtpot6          1
+           prtpot7          1
+           prtpot8          1
+           prtpot9          1
+           prtpot10         1
+           prtpot11         1
+           prtpot12         1
               qpt1     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt2     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt3     0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -7193,8 +7191,6 @@ P          mk1mem12       256
               qpt10   -2.50000000E-01  2.50000000E-01  0.00000000E+00
               qpt11    5.00000000E-01  5.00000000E-01  0.00000000E+00
               qpt12   -2.50000000E-01  5.00000000E-01  2.50000000E-01
-          rfatpol           1       2
-            rfdir           1       1       1
            rfelfd1          0
            rfelfd2          2
            rfelfd3          0
@@ -7231,30 +7227,6 @@ P          mk1mem12       256
          rf2_dkdk10         0
          rf2_dkdk11         0
          rf2_dkdk12         0
-    rf2_pert1_dir1          0       0       0
-    rf2_pert1_dir2          0       0       0
-    rf2_pert1_dir3          1       1       1
-    rf2_pert1_dir4          0       0       0
-    rf2_pert1_dir5          0       0       0
-    rf2_pert1_dir6          0       0       0
-    rf2_pert1_dir7          0       0       0
-    rf2_pert1_dir8          0       0       0
-    rf2_pert1_dir9          0       0       0
-    rf2_pert1_dir10         0       0       0
-    rf2_pert1_dir11         0       0       0
-    rf2_pert1_dir12         0       0       0
-    rf2_pert2_dir1          0       0       0
-    rf2_pert2_dir2          0       0       0
-    rf2_pert2_dir3          1       1       1
-    rf2_pert2_dir4          0       0       0
-    rf2_pert2_dir5          0       0       0
-    rf2_pert2_dir6          0       0       0
-    rf2_pert2_dir7          0       0       0
-    rf2_pert2_dir8          0       0       0
-    rf2_pert2_dir9          0       0       0
-    rf2_pert2_dir10         0       0       0
-    rf2_pert2_dir11         0       0       0
-    rf2_pert2_dir12         0       0       0
             rprim      0.0000000000E+00  5.0230160830E+00  5.0230160830E+00
                        5.0230160830E+00  0.0000000000E+00  5.0230160830E+00
                        5.0230160830E+00  5.0230160830E+00  0.0000000000E+00

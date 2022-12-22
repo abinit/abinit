@@ -24,6 +24,7 @@
  znucl  1.0 
  natom 2
  typat  2*1 
+ chksymtnons 3    # The default value for chksymtnons (which is 1) is not admitted in case of cDFT calculations.
 
  nsppol 1    nspden 2  # Antiferromagnetic case
  nband 1

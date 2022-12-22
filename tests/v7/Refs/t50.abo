@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.7.4 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h32 )
+.Starting date : Wed  4 May 2022.
+- ( at 01h25 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v7_t50-t51-t52-t53-t54/t50.in
-- output file    -> t50.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/v7_t50-t51-t52-t53-t54/t50.abi
+- output file    -> t50.abo
 - root for input  files -> t50i
 - root for output files -> t50o
 
@@ -34,7 +34,7 @@
 -    mband =           8        mffmem =           1         mkmem =           8
        mpw =         166          nfft =        8000          nkpt =           8
 ================================================================================
-P This job should need less than                       2.750 Mbytes of memory.
+P This job should need less than                       2.987 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.164 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
@@ -51,7 +51,7 @@ _ WF disk file :      0.164 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 -    mband =           8        mffmem =           1         mkmem =          64
        mpw =         328          nfft =        8000          nkpt =          64
 ================================================================================
-P This job should need less than                       4.495 Mbytes of memory.
+P This job should need less than                       4.725 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      2.565 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
@@ -68,7 +68,7 @@ _ WF disk file :      2.565 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 -    mband =           8        mffmem =           1         mkmem =           8
        mpw =         166          nfft =        8000          nkpt =           8
 ================================================================================
-P This job should need less than                       1.774 Mbytes of memory.
+P This job should need less than                       2.010 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.164 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
@@ -103,7 +103,7 @@ _ WF disk file :      0.326 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 -    mband =           8        mffmem =           1         mkmem =           8
        mpw =         332          nfft =        8000          nkpt =           8
 ================================================================================
-P This job should need less than                       1.980 Mbytes of memory.
+P This job should need less than                       2.209 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.326 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
@@ -138,7 +138,7 @@ _ WF disk file :      0.326 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 -    mband =           8        mffmem =           1         mkmem =           8
        mpw =         332          nfft =        8000          nkpt =           8
 ================================================================================
-P This job should need less than                       1.980 Mbytes of memory.
+P This job should need less than                       2.209 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.326 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
@@ -394,6 +394,13 @@ P          mk1mem7          8
         optdriver5          0
         optdriver6          1
         optdriver7          0
+           prtpot1          0
+           prtpot2          0
+           prtpot3          0
+           prtpot4          1
+           prtpot5          0
+           prtpot6          1
+           prtpot7          0
               qpt1     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt2     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt3     0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -402,20 +409,6 @@ P          mk1mem7          8
               qpt6     5.00000000E-01  0.00000000E+00  0.00000000E+00
               qpt7     5.00000000E-01  5.00000000E-01  0.00000000E+00
             rfasr           1
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          1       1
-          rfatpol4          1       2
-          rfatpol5          1       1
-          rfatpol6          1       2
-          rfatpol7          1       1
-            rfdir1          0       0       0
-            rfdir2          0       0       0
-            rfdir3          0       0       0
-            rfdir4          1       1       1
-            rfdir5          0       0       0
-            rfdir6          1       1       1
-            rfdir7          0       0       0
            rfphon1          0
            rfphon2          0
            rfphon3          0
@@ -511,8 +504,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.09587
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -702,62 +695,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   6.8622E-01  9.9279E-01
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-  prteigrs : nnsclo,ikpt=   30    2 max resid (incl. the buffer)=  7.05117E-11
-  prteigrs : nnsclo,ikpt=   30    4 max resid (incl. the buffer)=  7.05117E-11
-  prteigrs : nnsclo,ikpt=   30    5 max resid (incl. the buffer)=  7.20933E-11
-  prteigrs : nnsclo,ikpt=   30    6 max resid (incl. the buffer)=  2.72059E-15
-  prteigrs : nnsclo,ikpt=   30    7 max resid (incl. the buffer)=  3.01603E-15
-  prteigrs : nnsclo,ikpt=   30    8 max resid (incl. the buffer)=  1.00398E-11
-  prteigrs : nnsclo,ikpt=   30   10 max resid (incl. the buffer)=  2.33544E-15
-  prteigrs : nnsclo,ikpt=   30   12 max resid (incl. the buffer)=  2.33544E-15
-  prteigrs : nnsclo,ikpt=   30   13 max resid (incl. the buffer)=  7.20933E-11
-  prteigrs : nnsclo,ikpt=   30   14 max resid (incl. the buffer)=  1.00398E-11
-  prteigrs : nnsclo,ikpt=   30   15 max resid (incl. the buffer)=  3.01603E-15
-  prteigrs : nnsclo,ikpt=   30   16 max resid (incl. the buffer)=  2.72055E-15
-  prteigrs : nnsclo,ikpt=   30   17 max resid (incl. the buffer)=  9.68967E-11
-  prteigrs : nnsclo,ikpt=   30   18 max resid (incl. the buffer)=  5.24481E-15
-  prteigrs : nnsclo,ikpt=   30   19 max resid (incl. the buffer)=  9.44127E-16
-  prteigrs : nnsclo,ikpt=   30   20 max resid (incl. the buffer)=  1.35691E-11
-  prteigrs : nnsclo,ikpt=   30   21 max resid (incl. the buffer)=  1.99909E-15
-  prteigrs : nnsclo,ikpt=   30   22 max resid (incl. the buffer)=  1.01171E-10
-  prteigrs : nnsclo,ikpt=   30   23 max resid (incl. the buffer)=  2.05413E-12
-  prteigrs : nnsclo,ikpt=   30   24 max resid (incl. the buffer)=  2.22073E-15
-  prteigrs : nnsclo,ikpt=   30   25 max resid (incl. the buffer)=  1.00737E-15
-  prteigrs : nnsclo,ikpt=   30   26 max resid (incl. the buffer)=  1.84405E-12
-  prteigrs : nnsclo,ikpt=   30   27 max resid (incl. the buffer)=  7.61410E-13
-  prteigrs : nnsclo,ikpt=   30   28 max resid (incl. the buffer)=  2.25177E-14
-  prteigrs : nnsclo,ikpt=   30   29 max resid (incl. the buffer)=  1.48416E-11
-  prteigrs : nnsclo,ikpt=   30   30 max resid (incl. the buffer)=  1.00709E-15
-  prteigrs : nnsclo,ikpt=   30   31 max resid (incl. the buffer)=  2.25177E-14
-  prteigrs : nnsclo,ikpt=   30   32 max resid (incl. the buffer)=  7.61410E-13
-  prteigrs : nnsclo,ikpt=   30   34 max resid (incl. the buffer)=  1.10297E-15
-  prteigrs : nnsclo,ikpt=   30   36 max resid (incl. the buffer)=  1.10297E-15
-  prteigrs : nnsclo,ikpt=   30   37 max resid (incl. the buffer)=  1.33673E-15
-  prteigrs : nnsclo,ikpt=   30   38 max resid (incl. the buffer)=  1.74888E-12
-  prteigrs : nnsclo,ikpt=   30   39 max resid (incl. the buffer)=  1.10953E-12
-  prteigrs : nnsclo,ikpt=   30   40 max resid (incl. the buffer)=  2.25177E-14
-  prteigrs : nnsclo,ikpt=   30   42 max resid (incl. the buffer)=  5.94634E-13
-  prteigrs : nnsclo,ikpt=   30   44 max resid (incl. the buffer)=  5.94634E-13
-  prteigrs : nnsclo,ikpt=   30   45 max resid (incl. the buffer)=  1.33673E-15
-  prteigrs : nnsclo,ikpt=   30   46 max resid (incl. the buffer)=  2.25177E-14
-  prteigrs : nnsclo,ikpt=   30   47 max resid (incl. the buffer)=  1.10953E-12
-  prteigrs : nnsclo,ikpt=   30   48 max resid (incl. the buffer)=  1.74888E-12
-  prteigrs : nnsclo,ikpt=   30   49 max resid (incl. the buffer)=  9.68967E-11
-  prteigrs : nnsclo,ikpt=   30   50 max resid (incl. the buffer)=  1.35691E-11
-  prteigrs : nnsclo,ikpt=   30   51 max resid (incl. the buffer)=  9.44127E-16
-  prteigrs : nnsclo,ikpt=   30   52 max resid (incl. the buffer)=  5.24483E-15
-  prteigrs : nnsclo,ikpt=   30   53 max resid (incl. the buffer)=  1.48416E-11
-  prteigrs : nnsclo,ikpt=   30   54 max resid (incl. the buffer)=  7.61410E-13
-  prteigrs : nnsclo,ikpt=   30   55 max resid (incl. the buffer)=  2.25177E-14
-  prteigrs : nnsclo,ikpt=   30   56 max resid (incl. the buffer)=  1.00709E-15
-  prteigrs : nnsclo,ikpt=   30   57 max resid (incl. the buffer)=  1.00737E-15
-  prteigrs : nnsclo,ikpt=   30   58 max resid (incl. the buffer)=  2.25177E-14
-  prteigrs : nnsclo,ikpt=   30   59 max resid (incl. the buffer)=  7.61410E-13
-  prteigrs : nnsclo,ikpt=   30   60 max resid (incl. the buffer)=  1.84405E-12
-  prteigrs : nnsclo,ikpt=   30   61 max resid (incl. the buffer)=  1.99910E-15
-  prteigrs : nnsclo,ikpt=   30   62 max resid (incl. the buffer)=  2.22073E-15
-  prteigrs : nnsclo,ikpt=   30   63 max resid (incl. the buffer)=  2.05413E-12
-  prteigrs : nnsclo,ikpt=   30   64 max resid (incl. the buffer)=  1.01171E-10
 
 
 --- !ResultsGS
@@ -854,13 +791,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   6.8622E-01  9.9279E-01
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-  prteigrs : nnsclo,ikpt=   30    2 max resid (incl. the buffer)=  3.52639E-13
-  prteigrs : nnsclo,ikpt=   30    3 max resid (incl. the buffer)=  1.67281E-14
-  prteigrs : nnsclo,ikpt=   30    4 max resid (incl. the buffer)=  4.24279E-09
-  prteigrs : nnsclo,ikpt=   30    5 max resid (incl. the buffer)=  1.75861E-12
-  prteigrs : nnsclo,ikpt=   30    6 max resid (incl. the buffer)=  3.73647E-11
-  prteigrs : nnsclo,ikpt=   30    7 max resid (incl. the buffer)=  1.32550E-09
-  prteigrs : nnsclo,ikpt=   30    8 max resid (incl. the buffer)=  1.00930E-13
 
 
 --- !ResultsGS
@@ -953,7 +883,6 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.09587
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -975,10 +904,8 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS3_WFQ
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -996,10 +923,10 @@ tolerances: {tolwfr: 1.00E-16, }
  ETOT  5   13.616148620549      7.095E-06 3.190E-07 2.627E-02
  ETOT  6   13.616101513491     -4.711E-05 1.960E-08 2.034E-05
  ETOT  7   13.616101484700     -2.879E-08 1.103E-09 1.068E-08
- ETOT  8   13.616101484696     -4.405E-12 1.633E-12 6.214E-11
- ETOT  9   13.616101484696      5.684E-13 6.529E-14 6.007E-13
- ETOT 10   13.616101484695     -9.095E-13 2.577E-16 3.997E-15
- ETOT 11   13.616101484695     -5.684E-14 9.915E-17 4.826E-17
+ ETOT  8   13.616101484696     -4.292E-12 1.633E-12 6.214E-11
+ ETOT  9   13.616101484696      3.695E-13 6.529E-14 6.007E-13
+ ETOT 10   13.616101484695     -7.105E-13 2.577E-16 3.997E-15
+ ETOT 11   13.616101484695      0.000E+00 9.915E-17 4.826E-17
 
  At SCF step   11   max residual=  9.91E-17 < tolwfr=  1.00E-16 =>converged.
 ================================================================================
@@ -1036,10 +963,8 @@ tolerances: {tolwfr: 1.00E-16, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS3_WFQ
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -1057,9 +982,9 @@ tolerances: {tolwfr: 1.00E-16, }
  ETOT  5   13.616149724018      6.288E-06 3.377E-07 2.324E-02
  ETOT  6   13.616108053356     -4.167E-05 1.801E-08 2.272E-05
  ETOT  7   13.616108020295     -3.306E-08 8.825E-10 1.072E-08
- ETOT  8   13.616108020292     -3.695E-12 1.664E-12 5.770E-11
- ETOT  9   13.616108020292      3.979E-13 6.441E-14 1.601E-13
- ETOT 10   13.616108020292     -3.411E-13 2.702E-16 1.603E-15
+ ETOT  8   13.616108020292     -3.439E-12 1.664E-12 5.770E-11
+ ETOT  9   13.616108020292      2.274E-13 6.441E-14 1.601E-13
+ ETOT 10   13.616108020292     -3.695E-13 2.702E-16 1.603E-15
  ETOT 11   13.616108020291     -5.400E-13 9.451E-17 3.259E-17
 
  At SCF step   11   max residual=  9.45E-17 < tolwfr=  1.00E-16 =>converged.
@@ -1097,10 +1022,8 @@ tolerances: {tolwfr: 1.00E-16, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS3_WFQ
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -1113,15 +1036,15 @@ tolerances: {tolwfr: 1.00E-16, }
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   23.427748124165     -2.429E+02 7.932E-01 1.095E+04
  ETOT  2   13.932565888811     -9.495E+00 1.414E-01 2.651E+02
- ETOT  3   13.618116766911     -3.144E-01 4.440E-03 1.908E+00
+ ETOT  3   13.618116766910     -3.144E-01 4.440E-03 1.908E+00
  ETOT  4   13.616115849999     -2.001E-03 2.012E-05 1.231E-02
  ETOT  5   13.616110705827     -5.144E-06 2.365E-07 2.032E-03
  ETOT  6   13.616107364901     -3.341E-06 3.985E-09 1.607E-04
  ETOT  7   13.616107081501     -2.834E-07 2.836E-10 1.169E-08
- ETOT  8   13.616107081494     -6.253E-12 1.928E-11 4.941E-11
- ETOT  9   13.616107081495      3.979E-13 1.229E-13 1.172E-13
- ETOT 10   13.616107081494     -1.080E-12 7.916E-15 1.406E-15
- ETOT 11   13.616107081495      8.527E-13 9.659E-17 3.309E-17
+ ETOT  8   13.616107081494     -6.338E-12 1.928E-11 4.941E-11
+ ETOT  9   13.616107081495      3.695E-13 1.229E-13 1.172E-13
+ ETOT 10   13.616107081494     -1.137E-12 7.916E-15 1.406E-15
+ ETOT 11   13.616107081494      7.958E-13 9.659E-17 3.309E-17
 
  At SCF step   11   max residual=  9.66E-17 < tolwfr=  1.00E-16 =>converged.
 ================================================================================
@@ -1158,10 +1081,8 @@ tolerances: {tolwfr: 1.00E-16, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS3_WFQ
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -1179,10 +1100,10 @@ tolerances: {tolwfr: 1.00E-16, }
  ETOT  5   13.616164225842      7.661E-06 3.682E-07 3.237E-02
  ETOT  6   13.616106184384     -5.804E-05 2.064E-08 1.688E-05
  ETOT  7   13.616106161861     -2.252E-08 1.222E-09 1.063E-08
- ETOT  8   13.616106161858     -3.183E-12 2.065E-12 6.242E-11
- ETOT  9   13.616106161857     -9.663E-13 6.408E-14 6.224E-13
- ETOT 10   13.616106161857     -2.842E-13 3.180E-16 3.985E-15
- ETOT 11   13.616106161858      9.095E-13 9.461E-17 5.611E-17
+ ETOT  8   13.616106161858     -3.212E-12 2.065E-12 6.242E-11
+ ETOT  9   13.616106161857     -1.023E-12 6.408E-14 6.224E-13
+ ETOT 10   13.616106161857     -3.411E-13 3.180E-16 3.985E-15
+ ETOT 11   13.616106161858      9.948E-13 9.461E-17 5.611E-17
 
  At SCF step   11   max residual=  9.46E-17 < tolwfr=  1.00E-16 =>converged.
 ================================================================================
@@ -1219,10 +1140,8 @@ tolerances: {tolwfr: 1.00E-16, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS3_WFQ
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -1237,10 +1156,10 @@ tolerances: {tolwfr: 1.00E-16, }
  ETOT  2   13.932307099064     -9.492E+00 1.470E-01 2.649E+02
  ETOT  3   13.618145651698     -3.142E-01 4.294E-03 1.928E+00
  ETOT  4   13.616145296623     -2.000E-03 3.428E-05 3.125E-02
- ETOT  5   13.616152592300      7.296E-06 3.678E-07 2.787E-02
+ ETOT  5   13.616152592299      7.296E-06 3.678E-07 2.787E-02
  ETOT  6   13.616102620397     -4.997E-05 2.015E-08 1.929E-05
  ETOT  7   13.616102593542     -2.686E-08 9.571E-10 1.067E-08
- ETOT  8   13.616102593538     -4.292E-12 1.628E-12 5.703E-11
+ ETOT  8   13.616102593538     -4.377E-12 1.628E-12 5.703E-11
  ETOT  9   13.616102593538      2.558E-13 5.531E-14 9.370E-14
  ETOT 10   13.616102593539      5.684E-13 2.823E-16 1.162E-15
  ETOT 11   13.616102593540      7.958E-13 9.959E-17 1.768E-17
@@ -1280,10 +1199,8 @@ tolerances: {tolwfr: 1.00E-16, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS3_WFQ
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -1301,10 +1218,10 @@ tolerances: {tolwfr: 1.00E-16, }
  ETOT  5   13.616110170233     -4.853E-06 2.379E-07 2.448E-03
  ETOT  6   13.616106049035     -4.121E-06 4.370E-09 1.425E-04
  ETOT  7   13.616105798708     -2.503E-07 3.153E-10 1.136E-08
- ETOT  8   13.616105798703     -4.803E-12 1.783E-11 5.055E-11
- ETOT  9   13.616105798702     -7.958E-13 1.397E-13 1.121E-13
- ETOT 10   13.616105798702      4.832E-13 8.009E-15 1.288E-15
- ETOT 11   13.616105798703      9.948E-13 8.603E-17 2.872E-17
+ ETOT  8   13.616105798703     -4.775E-12 1.783E-11 5.055E-11
+ ETOT  9   13.616105798702     -7.105E-13 1.397E-13 1.121E-13
+ ETOT 10   13.616105798702      3.411E-13 8.009E-15 1.288E-15
+ ETOT 11   13.616105798703      1.080E-12 8.603E-17 2.872E-17
 
  At SCF step   11   max residual=  8.60E-17 < tolwfr=  1.00E-16 =>converged.
 ================================================================================
@@ -1569,16 +1486,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   5.79E-17  4.13E-18  1.92E-17  2.86E-17  9.59E-17  2.01E-17  7.75E-18  3.53E-13
  -9.4871E-02 -2.0933E-02  3.7797E-01  3.7797E-01  7.9181E-01  7.9181E-01
   8.2076E-01  1.0514E+00
-  prteigrs : nnsclo,ikpt=   30    1 max resid (incl. the buffer)=  3.52639E-13
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-  prteigrs : nnsclo,ikpt=   30    2 max resid (incl. the buffer)=  8.53614E-14
-  prteigrs : nnsclo,ikpt=   30    3 max resid (incl. the buffer)=  4.24279E-09
-  prteigrs : nnsclo,ikpt=   30    4 max resid (incl. the buffer)=  2.24534E-13
-  prteigrs : nnsclo,ikpt=   30    5 max resid (incl. the buffer)=  3.73647E-11
-  prteigrs : nnsclo,ikpt=   30    6 max resid (incl. the buffer)=  1.64006E-11
-  prteigrs : nnsclo,ikpt=   30    7 max resid (incl. the buffer)=  1.00930E-13
-  prteigrs : nnsclo,ikpt=   30    8 max resid (incl. the buffer)=  5.06560E-08
 
 
 --- !ResultsGS
@@ -1671,8 +1580,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   1.99246
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1688,7 +1597,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -1710,10 +1618,8 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS5_WFQ
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -1730,13 +1636,13 @@ tolerances: {tolwfr: 1.00E-16, }
  ETOT  4   12.722049007695     -6.964E+00 3.433E-02 8.514E+01
  ETOT  5   12.668449417365     -5.360E-02 4.571E-04 4.297E-01
  ETOT  6   12.668148909432     -3.005E-04 1.141E-05 6.823E-03
- ETOT  7   12.668145767287     -3.142E-06 1.382E-07 1.035E-04
+ ETOT  7   12.668145767286     -3.142E-06 1.382E-07 1.035E-04
  ETOT  8   12.668145721970     -4.532E-08 1.550E-09 2.615E-06
- ETOT  9   12.668145720768     -1.202E-09 1.942E-11 1.601E-07
- ETOT 10   12.668145720696     -7.179E-11 7.803E-13 3.116E-10
- ETOT 11   12.668145720697      1.251E-12 3.537E-14 1.521E-11
- ETOT 12   12.668145720697     -3.411E-13 1.894E-16 1.573E-13
- ETOT 13   12.668145720697      1.705E-13 9.975E-17 4.928E-14
+ ETOT  9   12.668145720768     -1.203E-09 1.942E-11 1.601E-07
+ ETOT 10   12.668145720696     -7.151E-11 7.803E-13 3.116E-10
+ ETOT 11   12.668145720697      1.080E-12 3.537E-14 1.521E-11
+ ETOT 12   12.668145720697     -2.274E-13 1.894E-16 1.573E-13
+ ETOT 13   12.668145720697      1.137E-13 9.975E-17 4.928E-14
 
  At SCF step   13   max residual=  9.98E-17 < tolwfr=  1.00E-16 =>converged.
 ================================================================================
@@ -1773,10 +1679,8 @@ tolerances: {tolwfr: 1.00E-16, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS5_WFQ
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -1794,17 +1698,17 @@ tolerances: {tolwfr: 1.00E-16, }
  ETOT  5   10.447917237735     -5.432E-05 4.991E-07 1.878E-02
  ETOT  6   10.447904305611     -1.293E-05 5.700E-08 2.821E-05
  ETOT  7   10.447904284366     -2.124E-08 3.509E-10 8.126E-07
- ETOT  8   10.447904283986     -3.802E-10 8.935E-12 2.786E-08
- ETOT  9   10.447904283974     -1.251E-11 1.428E-13 2.041E-11
- ETOT 10   10.447904283974      1.137E-13 6.188E-15 9.642E-14
- ETOT 11   10.447904283973     -2.274E-13 9.943E-17 1.461E-14
+ ETOT  8   10.447904283986     -3.804E-10 8.935E-12 2.786E-08
+ ETOT  9   10.447904283974     -1.216E-11 1.428E-13 2.041E-11
+ ETOT 10   10.447904283974      0.000E+00 6.188E-15 9.642E-14
+ ETOT 11   10.447904283973     -3.411E-13 9.943E-17 1.461E-14
 
  At SCF step   11   max residual=  9.94E-17 < tolwfr=  1.00E-16 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   47.609E-18; max=  99.425E-18
+ Mean square residual over all n,k,spin=   47.609E-18; max=  99.426E-18
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -1834,10 +1738,8 @@ tolerances: {tolwfr: 1.00E-16, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS5_WFQ
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -1855,10 +1757,10 @@ tolerances: {tolwfr: 1.00E-16, }
  ETOT  5   10.447915004481     -7.916E-05 5.128E-07 1.791E-02
  ETOT  6   10.447902619213     -1.239E-05 5.364E-08 2.007E-05
  ETOT  7   10.447902601188     -1.803E-08 4.238E-10 2.898E-07
- ETOT  8   10.447902601017     -1.706E-10 9.985E-12 2.582E-08
- ETOT  9   10.447902601003     -1.387E-11 1.204E-13 2.661E-11
- ETOT 10   10.447902601004      1.023E-12 3.873E-15 8.789E-14
- ETOT 11   10.447902601004     -5.684E-13 9.751E-17 2.335E-15
+ ETOT  8   10.447902601017     -1.704E-10 9.985E-12 2.582E-08
+ ETOT  9   10.447902601003     -1.404E-11 1.204E-13 2.661E-11
+ ETOT 10   10.447902601004      1.080E-12 3.873E-15 8.789E-14
+ ETOT 11   10.447902601004     -4.547E-13 9.751E-17 2.335E-15
 
  At SCF step   11   max residual=  9.75E-17 < tolwfr=  1.00E-16 =>converged.
 ================================================================================
@@ -1895,10 +1797,8 @@ tolerances: {tolwfr: 1.00E-16, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS5_WFQ
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -1917,10 +1817,10 @@ tolerances: {tolwfr: 1.00E-16, }
  ETOT  6   12.668162292106     -3.013E-04 1.180E-05 6.862E-03
  ETOT  7   12.668159124932     -3.167E-06 1.155E-07 1.038E-04
  ETOT  8   12.668159079902     -4.503E-08 5.751E-10 3.022E-06
- ETOT  9   12.668159078506     -1.396E-09 1.829E-11 1.593E-07
- ETOT 10   12.668159078437     -6.941E-11 8.371E-13 3.420E-10
- ETOT 11   12.668159078434     -2.672E-12 3.764E-14 1.561E-11
- ETOT 12   12.668159078434      1.137E-13 1.957E-16 7.967E-13
+ ETOT  9   12.668159078506     -1.395E-09 1.829E-11 1.593E-07
+ ETOT 10   12.668159078437     -6.958E-11 8.371E-13 3.420E-10
+ ETOT 11   12.668159078434     -2.558E-12 3.764E-14 1.561E-11
+ ETOT 12   12.668159078434      0.000E+00 1.957E-16 7.967E-13
  ETOT 13   12.668159078435      1.364E-12 9.745E-17 3.245E-14
 
  At SCF step   13   max residual=  9.74E-17 < tolwfr=  1.00E-16 =>converged.
@@ -1958,10 +1858,8 @@ tolerances: {tolwfr: 1.00E-16, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS5_WFQ
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -1979,11 +1877,11 @@ tolerances: {tolwfr: 1.00E-16, }
  ETOT  5   10.447904089584     -5.880E-05 5.131E-07 1.903E-02
  ETOT  6   10.447890998019     -1.309E-05 5.621E-08 2.646E-05
  ETOT  7   10.447890979694     -1.833E-08 3.999E-10 9.527E-07
- ETOT  8   10.447890979217     -4.766E-10 6.947E-12 2.633E-08
- ETOT  9   10.447890979202     -1.546E-11 3.020E-13 1.950E-11
+ ETOT  8   10.447890979217     -4.765E-10 6.947E-12 2.633E-08
+ ETOT  9   10.447890979202     -1.535E-11 3.020E-13 1.950E-11
  ETOT 10   10.447890979203      1.592E-12 9.220E-15 1.713E-13
  ETOT 11   10.447890979202     -1.364E-12 1.895E-16 6.301E-15
- ETOT 12   10.447890979204      1.535E-12 8.740E-17 3.469E-16
+ ETOT 12   10.447890979204      1.478E-12 8.740E-17 3.469E-16
 
  At SCF step   12   max residual=  8.74E-17 < tolwfr=  1.00E-16 =>converged.
 ================================================================================
@@ -2020,10 +1918,8 @@ tolerances: {tolwfr: 1.00E-16, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS5_WFQ
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -2041,11 +1937,11 @@ tolerances: {tolwfr: 1.00E-16, }
  ETOT  5   10.447906875739     -8.980E-05 6.175E-07 1.786E-02
  ETOT  6   10.447894576642     -1.230E-05 5.175E-08 1.659E-05
  ETOT  7   10.447894563191     -1.345E-08 5.131E-10 2.994E-07
- ETOT  8   10.447894563032     -1.589E-10 7.870E-12 2.622E-08
- ETOT  9   10.447894563020     -1.251E-11 2.696E-13 2.850E-11
- ETOT 10   10.447894563017     -3.013E-12 5.738E-15 1.603E-13
- ETOT 11   10.447894563018      1.194E-12 1.676E-16 2.535E-14
- ETOT 12   10.447894563018      2.274E-13 9.497E-17 3.769E-15
+ ETOT  8   10.447894563032     -1.591E-10 7.870E-12 2.622E-08
+ ETOT  9   10.447894563020     -1.216E-11 2.696E-13 2.850E-11
+ ETOT 10   10.447894563017     -3.297E-12 5.738E-15 1.603E-13
+ ETOT 11   10.447894563018      1.137E-12 1.676E-16 2.535E-14
+ ETOT 12   10.447894563018      3.411E-13 9.497E-17 3.769E-15
 
  At SCF step   12   max residual=  9.50E-17 < tolwfr=  1.00E-16 =>converged.
 ================================================================================
@@ -2077,12 +1973,12 @@ tolerances: {tolwfr: 1.00E-16, }
  For automatic tests, printing the matrix for the first k-point, first band, first atom.
    1   1   1   1   -3.8699029271E+00    0.0000000000E+00
    1   1   2   1   -1.0303659337E+00    7.5921831054E-07
-   1   1   3   1   -1.0224146442E+00    2.7110550400E-06
+   1   1   3   1   -1.0224146442E+00    2.7110550402E-06
    2   1   1   1   -1.0303659337E+00   -7.5921831053E-07
    2   1   2   1   -2.0497016722E+00    0.0000000000E+00
-   2   1   3   1   -1.0413952269E+00   -3.3320658002E-07
-   3   1   1   1   -1.0224146442E+00   -2.7110550400E-06
-   3   1   2   1   -1.0413952269E+00    3.3320658001E-07
+   2   1   3   1   -1.0413952269E+00   -3.3320657999E-07
+   3   1   1   1   -1.0224146442E+00   -2.7110550402E-06
+   3   1   2   1   -1.0413952269E+00    3.3320658000E-07
    3   1   3   1   -2.0258497976E+00    0.0000000000E+00
  
  Components of second-order derivatives of the electronic energy, EIGI2D.
@@ -2276,8 +2172,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.09587
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2300,15 +2196,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   1.02E-17  2.71E-17  5.51E-17  1.84E-17  7.02E-18  2.02E-17  5.36E-10  4.24E-09
   1.1540E-02  1.1540E-02  2.4526E-01  2.4526E-01  6.5072E-01  6.5072E-01
   1.1134E+00  1.1134E+00
-  prteigrs : nnsclo,ikpt=   30    1 max resid (incl. the buffer)=  4.24279E-09
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-  prteigrs : nnsclo,ikpt=   30    2 max resid (incl. the buffer)=  2.24534E-13
-  prteigrs : nnsclo,ikpt=   30    3 max resid (incl. the buffer)=  9.54501E-12
-  prteigrs : nnsclo,ikpt=   30    5 max resid (incl. the buffer)=  1.00930E-13
-  prteigrs : nnsclo,ikpt=   30    6 max resid (incl. the buffer)=  5.06560E-08
-  prteigrs : nnsclo,ikpt=   30    7 max resid (incl. the buffer)=  5.74042E-10
-  prteigrs : nnsclo,ikpt=   30    8 max resid (incl. the buffer)=  5.24464E-13
 
 
 --- !ResultsGS
@@ -2618,6 +2507,13 @@ P          mk1mem7          8
         optdriver5          0
         optdriver6          1
         optdriver7          0
+           prtpot1          0
+           prtpot2          0
+           prtpot3          0
+           prtpot4          1
+           prtpot5          0
+           prtpot6          1
+           prtpot7          0
               qpt1     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt2     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt3     0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -2626,20 +2522,6 @@ P          mk1mem7          8
               qpt6     5.00000000E-01  0.00000000E+00  0.00000000E+00
               qpt7     5.00000000E-01  5.00000000E-01  0.00000000E+00
             rfasr           1
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          1       1
-          rfatpol4          1       2
-          rfatpol5          1       1
-          rfatpol6          1       2
-          rfatpol7          1       1
-            rfdir1          0       0       0
-            rfdir2          0       0       0
-            rfdir3          0       0       0
-            rfdir4          1       1       1
-            rfdir5          0       0       0
-            rfdir6          1       1       1
-            rfdir7          0       0       0
            rfphon1          0
            rfphon2          0
            rfphon3          0
@@ -2794,10 +2676,10 @@ P          mk1mem7          8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         15.8  wall=         16.0
+- Proc.   0 individual time (sec): cpu=         19.1  wall=         19.8
 
 ================================================================================
 
  Calculation completed.
-.Delivered  10 WARNINGs and 258 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         15.8  wall=         16.0
+.Delivered  19 WARNINGs and  41 COMMENTs to log file.
++Overall time at end (sec) : cpu=         19.1  wall=         19.8

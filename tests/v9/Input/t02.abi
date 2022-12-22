@@ -40,6 +40,7 @@
   ! Unit cell
     acell   3*5.42
     ntypat 1  natom 2  typat 2*1
+    chksymtnons 3    # The default value for chksymtnons (which is 1) is not admitted in case of cDFT calculations.
     znucl 26
     xred    0   0   0
             0.5 0.5 0.5

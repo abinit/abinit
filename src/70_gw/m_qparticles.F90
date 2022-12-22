@@ -8,14 +8,10 @@
 !!  of KS states.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2021 ABINIT group (FB, MG)
+!! Copyright (C) 2008-2022 ABINIT group (FB, MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -108,11 +104,6 @@ CONTAINS  !=====================================================================
 !!   |     <\psi_{ib,k,s}^{KS}|\psi_{jb,k,s}^{QP}>$, ib=1,nbnds
 !!   | FFT dimensions of the fine grid
 !!   | QP density in real space.
-!!
-!! PARENTS
-!!      m_sigma_driver
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -263,11 +254,6 @@ end subroutine wrqps
 !!
 !! TODO
 !!  The value of nspden is not reported in the QPS file thus we have a possible undetected error.
-!!
-!! PARENTS
-!!      m_bethe_salpeter,m_mlwfovlp_qp,m_screening_driver,m_sigma_driver
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -558,11 +544,6 @@ end subroutine rdqps
 !! NOTES
 !!  Only master node should call this routine.
 !!
-!! PARENTS
-!!      m_sigma_driver
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine show_QP(Bst,m_ks_to_qp,fromb,tob,unit,prtvol,tolmat,kmask)
@@ -697,11 +678,6 @@ end subroutine show_QP
 !!
 !! OUTPUT
 !!   igwene(Bst%mband,Bst%nkpt,Bst%nsppol)= The imaginary part of the QP energies.
-!!
-!! PARENTS
-!!      m_bethe_salpeter,m_mlwfovlp_qp,m_screening_driver,m_sigma_driver
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -906,11 +882,6 @@ end subroutine rdgw
 !!
 !! NOTES
 !!  Only master node should call this routine.
-!!
-!! PARENTS
-!!      m_sigma_driver
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

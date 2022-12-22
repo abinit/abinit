@@ -9,15 +9,11 @@
 !!   N.D.M.Hine (nicholas.hine at imperial.ac.uk) November 2004
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, JYR, MKV, MT, FJ)
+!! Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, JYR, MKV, MT, FJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -78,12 +74,6 @@ contains
 !!
 !! OUTPUT
 !! Writes the file pwfn.data
-!!
-!! PARENTS
-!!      m_gstate
-!!
-!! CHILDREN
-!!      wrtout,xred2xcart
 !!
 !! SOURCE
 

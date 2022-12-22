@@ -7,15 +7,11 @@
 !!  They permit to hide the complex/real form of the WFs.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2021 ABINIT group (FBottin,CS,FDahm,MT)
+!! Copyright (C) 2009-2022 ABINIT group (FBottin,CS,FDahm,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! NOTES
 !!
@@ -60,7 +56,7 @@ CONTAINS
 !!  for a block of band (band-FFT parallelisation)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2021 ABINIT group (FBottin,CS)
+!! Copyright (C) 1998-2022 ABINIT group (FBottin,CS)
 !! this file is distributed under the terms of the
 !! gnu general public license, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -87,12 +83,6 @@ CONTAINS
 !!
 !! OUTPUT
 !!  vect(2,npw)=<g|(h-eval)|c_{n,k}>*(polynomial ratio)
-!!
-!! PARENTS
-!!      m_lobpcgwf_old
-!!
-!! CHILDREN
-!!      abi_xcopy,cg_precon_block,cg_zprecon_block,timab
 !!
 !! SOURCE
 

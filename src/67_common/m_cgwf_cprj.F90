@@ -6,14 +6,10 @@
 !!  Conjugate-gradient eigensolver.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2020 ABINIT group (DCA, XG, GMR, MT, MVeithen, ISouza, JIniguez)
+!!  Copyright (C) 2008-2022 ABINIT group (DCA, XG, GMR, MT, MVeithen, ISouza, JIniguez)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -98,12 +94,6 @@ contains
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_vtowfk
-!!
-!! CHILDREN
-!!      fourwf
-!!
 !! SOURCE
 
 subroutine cgwf_cprj(cg,cprj_cwavef_bands,cprj_update_lvl,eig,&
@@ -185,7 +175,7 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
  ABI_MALLOC(scprod,(2,nband))
  ABI_MALLOC(scprod_csc,(2*nband))
  ABI_MALLOC(direc_tmp,(2,npw*nspinor))
- ABI_MALLOC(gvnlxc,(2,npw*nspinor))
+ ABI_MALLOC(gvnlxc,(0,0))
 
  ABI_MALLOC(cprj_direc ,(natom,nspinor))
  ABI_MALLOC(cprj_conjgr ,(natom,nspinor))
@@ -784,12 +774,6 @@ end subroutine cgwf_cprj
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_vtowfk
-!!
-!! CHILDREN
-!!      fourwf
-!!
 !! SOURCE
 !!
 subroutine mksubovl(cg,cprj_cwavef_bands,gs_hamk,icg,nband,subovl,mpi_enreg)
@@ -854,12 +838,6 @@ end subroutine mksubovl
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_cgwf_cprj,m_vtowfk
-!!
-!! CHILDREN
-!!      fourwf
-!!
 !! SOURCE
 !!
 subroutine cprj_update(cg,cprj_cwavef_bands,gs_hamk,icg,nband,mpi_enreg,tim_getcprj)
@@ -922,12 +900,6 @@ end subroutine cprj_update
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_cgwf_cprj,m_vtowfk
-!!
-!! CHILDREN
-!!      fourwf
-!!
 !! SOURCE
 !!
 subroutine cprj_update_oneband(cwavef,cprj_cwavef,gs_hamk,mpi_enreg,tim_getcprj)
@@ -983,11 +955,6 @@ end subroutine cprj_update_oneband
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fourwf
 !!
 !! SOURCE
 !!
@@ -1088,11 +1055,6 @@ end subroutine cprj_check
 !!
 !! NOTES
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fourwf
-!!
 !! SOURCE
 !!
 subroutine cprj_check_oneband(cwavef,cprj_cwavef,gs_hamk,message,mpi_enreg)
@@ -1178,10 +1140,6 @@ end subroutine cprj_check_oneband
 !!
 !! NOTES
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 !!
 real(dp) function get_cprj_id(cprj)
@@ -1223,12 +1181,6 @@ end function get_cprj_id
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_cgwf_cprj
-!!
-!! CHILDREN
-!!      fourwf
 !!
 !! SOURCE
 !!

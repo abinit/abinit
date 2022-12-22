@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ANADDB 
+.Version 9.7.4 of ANADDB 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h27 )
+.Starting date : Wed  4 May 2022.
+- ( at 01h24 )
   
 
 ================================================================================
@@ -74,7 +74,7 @@
 
  Calculation of the interatomic forces 
 
--begin at tcpu      0.025  and twall      0.026 sec
+-begin at tcpu      0.031  and twall      0.038 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -372,10 +372,10 @@
      4        4.921878E-04       -1.021121E-06
      5       -2.068650E-04       -1.197535E-06
 -
-- Proc.   0 individual time (sec): cpu=          0.2  wall=          0.2
+- Proc.   0 individual time (sec): cpu=          0.3  wall=          0.3
 
 ================================================================================
 
-+Total cpu time      0.235  and wall time      0.237 sec
++Total cpu time      0.290  and wall time      0.305 sec
 
  anaddb : the run completed succesfully.

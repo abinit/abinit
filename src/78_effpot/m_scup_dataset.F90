@@ -7,14 +7,10 @@
 !!  when initialized this is a subtype of multibinit_dtset_type
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2021 ABINIT group (AM)
+!!  Copyright (C) 2014-2022 ABINIT group (AM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -112,12 +108,6 @@ CONTAINS
 !! NOTES
 !! Should be executed by one processor only.
 !!
-!! PARENTS
-!!      m_scup_dataset
-!!
-!! CHILDREN
-!!      scup_kpath%print
-!!
 !! SOURCE
 
 subroutine scup_dtset_init(scup_dtset)
@@ -170,12 +160,6 @@ end subroutine  scup_dtset_init
 !! OUTPUTS
 !!  scup_dtset <type(scup_dtset_type)> = scup_dataset structure
 !!
-!! PARENTS
-!!      m_multibinit_dataset
-!!
-!! CHILDREN
-!!      scup_kpath%print
-!!
 !! SOURCE
 
 subroutine scup_dtset_free(scup_dtset)
@@ -217,12 +201,6 @@ end subroutine scup_dtset_free
 !!
 !! NOTES
 !! Should be executed by one processor only.
-!!
-!! PARENTS
-!!      m_multibinit_dataset
-!!
-!! CHILDREN
-!!      scup_kpath%print
 !!
 !! SOURCE
 
@@ -301,12 +279,6 @@ end subroutine outvars_scup
 !!
 !! NOTES
 !! Should be executed by one processor only.
-!!
-!! PARENTS
-!!      m_multibinit_dataset
-!!
-!! CHILDREN
-!!      scup_kpath%print
 !!
 !! SOURCE
 
@@ -684,11 +656,6 @@ end subroutine invars10scup
 !! NOTES
 !! Should be executed by one processor only.
 !!
-!! PARENTS
-!!      multibinit
-!!
-!! CHILDREN
-!!  
 !!  m_bz_mesh/kpath_new
 !!
 !! SOURCE
@@ -759,12 +726,6 @@ end subroutine scup_kpath_new
 !!
 !! NOTES
 !! Should be executed by one processor only.
-!!
-!! PARENTS
-!!      m_multibinit_driver
-!!
-!! CHILDREN
-!!      scup_kpath%print
 !!
 !! SOURCE
 

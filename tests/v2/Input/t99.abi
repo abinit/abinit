@@ -14,8 +14,6 @@
   kptopt2  3
     nqpt2  1
      qpt2 -0.125d0 0.125d0 0.125d0
- rfatpol2  1 1
-   rfdir2  1 1 1
   rfphon2  1
   tolvrs2  1.0d-9
 

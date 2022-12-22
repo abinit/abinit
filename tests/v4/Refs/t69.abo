@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.7.4 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h26 )
+.Starting date : Wed  4 May 2022.
+- ( at 01h23 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v4_t69-t70/t69.in
-- output file    -> t69.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/v4_t69-t70/t69.abi
+- output file    -> t69.abo
 - root for input  files -> t69i
 - root for output files -> t69o
 
@@ -34,7 +34,7 @@
 -    mband =           4        mffmem =           1         mkmem =          10
        mpw =          77          nfft =        1728          nkpt =          10
 ================================================================================
-P This job should need less than                       1.450 Mbytes of memory.
+P This job should need less than                       1.499 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.049 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
@@ -250,12 +250,9 @@ P          mk1mem3        128
         optdriver1          0
         optdriver2          1
         optdriver3          1
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          1       2
-            rfdir1          0       0       0
-            rfdir2          1       1       1
-            rfdir3          1       1       1
+           prtpot1          0
+           prtpot2          1
+           prtpot3          1
            rfelfd1          0
            rfelfd2          2
            rfelfd3          3
@@ -355,8 +352,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.05142
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/13al.981214.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/13al.981214.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/13al.981214.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/13al.981214.fhi
 - Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
 - 13.00000   3.00000    981214                znucl, zion, pspdat
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -368,8 +365,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              1    0.900554
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
 -  Troullier-Martins psp for element  As        Thu Oct 27 17:37:14 EDT 1994
 - 33.00000   5.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -543,7 +540,6 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.05142
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t69o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -562,7 +558,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t69o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -621,7 +616,6 @@ tolerances: {tolwfr: 1.00E-22, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t69o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -680,7 +674,6 @@ tolerances: {tolwfr: 1.00E-22, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t69o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -785,7 +778,6 @@ meta: {optdriver: 1, rfelfd: 3, rfphon: 1, rfstrs: 3, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.05142
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t69o_DS1_WFK
  symkchk : k-point set has full space-group symmetry.
 
  ==>  initialize data related to q vector <== 
@@ -842,7 +834,6 @@ meta: {optdriver: 1, rfelfd: 3, rfphon: 1, rfstrs: 3, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t69o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -902,7 +893,6 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t69o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -962,7 +952,6 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t69o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1016,7 +1005,6 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t69o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1077,7 +1065,6 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t69o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1138,7 +1125,6 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t69o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1199,7 +1185,6 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t69o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1213,8 +1198,8 @@ tolerances: {tolvrs: 1.00E-08, }
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   1.4996589691751     -2.957E+00 4.506E-03 8.046E+01
- ETOT  2  0.90362703959759     -5.960E-01 3.402E-04 1.138E+00
- ETOT  3  0.89623323832598     -7.394E-03 4.213E-06 6.025E-02
+ ETOT  2  0.90362703959758     -5.960E-01 3.402E-04 1.138E+00
+ ETOT  3  0.89623323832599     -7.394E-03 4.213E-06 6.025E-02
  ETOT  4  0.89592898173361     -3.043E-04 1.727E-07 1.642E-03
  ETOT  5  0.89592234136491     -6.640E-06 5.663E-09 1.117E-05
  ETOT  6  0.89592230018088     -4.118E-08 3.915E-11 6.514E-08
@@ -1260,7 +1245,6 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t69o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1321,7 +1305,6 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t69o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -2026,12 +2009,9 @@ P          mk1mem3        128
         optdriver1          0
         optdriver2          1
         optdriver3          1
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          1       2
-            rfdir1          0       0       0
-            rfdir2          1       1       1
-            rfdir3          1       1       1
+           prtpot1          0
+           prtpot2          1
+           prtpot3          1
            rfelfd1          0
            rfelfd2          2
            rfelfd3          3
@@ -2155,7 +2135,7 @@ P          mk1mem3        128
 -
 - [5] Ab initio pseudopotentials for electronic structure calculations of poly-atomic systems, 
 - using density-functional theory.
-- M. Fuchs, M. Scheffler, Comput. Phys. Commun. 119, 67 (1999).
+- M. Fuchs and, M. Scheffler, Comput. Phys. Commun. 119, 67 (1999).
 - Comment: Some pseudopotential generated using the FHI code were used.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#fuchs1999
 -
@@ -2194,10 +2174,10 @@ P          mk1mem3        128
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         13.9  wall=         14.0
+- Proc.   0 individual time (sec): cpu=         17.3  wall=         17.6
 
 ================================================================================
 
  Calculation completed.
-.Delivered  10 WARNINGs and  45 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         13.9  wall=         14.0
+.Delivered   7 WARNINGs and   4 COMMENTs to log file.
++Overall time at end (sec) : cpu=         17.3  wall=         17.6

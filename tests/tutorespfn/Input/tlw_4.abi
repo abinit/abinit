@@ -17,7 +17,6 @@ kptopt2   2
 iscf2    -3     
 rfelfd2   2    
 tolwfr2   1.0d-20
-rfdir2   1 1 1 
 
 #Set 3: Response function calculation of d2/dkdk wave function
 #*************************************************************
@@ -33,8 +32,6 @@ kptopt4   2
 getddk4   2
 rfelfd4   3
 rfphon4   1
-rfatpol4  1 2
-rfdir4   1 1 1
 tolvrs4   1.0d-8
 prepalw4  1
 
@@ -66,7 +63,6 @@ getwfk   1
 kptopt   3    
 rfphon   1   
 rfatpol   1 2 
-rfdir   1 1 1 
 tolvrs   1.0d-8
 useylm  1
 nqpt   1

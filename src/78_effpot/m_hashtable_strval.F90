@@ -46,9 +46,23 @@ MODULE m_hashtable_strval
   use defs_basis
   use m_errors
   use m_abicore
+  !use iso_c_binding, only: c_double, c_int64_t
+  !USE, INTRINSIC :: IEEE_ARITHMETIC
+
+  !use, intrinsic :: ieee_arithmetic, only: IEEE_Value, IEEE_QUIET_NAN
+  !use, intrinsic :: iso_fortran_env, only: real64
 
   IMPLICIT NONE ! Use strong typing
   INTEGER, PARAMETER :: tbl_size = 50
+  !real(real64) :: nan 
+  !nan = IEEE_VALUE(nan, IEEE_QUIET_NAN)
+  ! The above one is more standard, but how to make nan a parameter?
+  ! The following is used instead.
+  !real(c_double), parameter :: NAN=IEEE_VALUE(nan, IEEE_QUIET_NAN)
+
+  !real(c_double), parameter :: NAN = TRANSFER(9218868437227405313_c_int64_t, 1._c_double)
+  ! NOTE: this is not NAN really. The correct one is the last line. But NAG compiler does not think it is a valid floating number. 
+  ! real(c_double), parameter :: NAN = TRANSFER(921886843722740531_c_int64_t, 1._c_double)
 
   TYPE sllist
      TYPE(sllist), POINTER :: child => NULL()
@@ -76,6 +90,7 @@ MODULE m_hashtable_strval
      PROCEDURE :: sum_val => sum_val_hash_table_t
      PROCEDURE :: print_all => print_all_hash_table_t
      procedure :: print_entry => print_entry_hash_table_t
+     procedure :: has_key
   END TYPE hash_table_t
 
   PUBLIC :: hash_table_t
@@ -115,6 +130,7 @@ CONTAINS
     INTEGER                                      :: vallen
 
     vallen = 0
+    val=MAGIC_UNDEF
     IF (ALLOCATED(list%key) .AND. (list%key == key)) THEN
        val = list%val
     ELSE IF(ASSOCIATED(list%child)) THEN ! keep going
@@ -276,15 +292,15 @@ CONTAINS
   END SUBROUTINE put_hash_table_t
 
 
-  SUBROUTINE get_hash_table_t(tbl,key,val)
+  function get_hash_table_t(tbl,key) result(val)
     CLASS(hash_table_t),           INTENT(in)    :: tbl
     CHARACTER(len=*),              INTENT(in)    :: key
-    real(dp),                      INTENT(out)   :: val
+    real(dp)                                    :: val
     INTEGER                                      :: hash
 
     hash = MOD(sum_string(key),tbl%vec_len) + 1
     CALL tbl%vec(hash)%get(key=key,val=val)
-  END SUBROUTINE get_hash_table_t
+  END function get_hash_table_t
 
 
   SUBROUTINE free_hash_table_t(tbl)
@@ -302,6 +318,12 @@ CONTAINS
     tbl%is_init = .FALSE.
   END SUBROUTINE free_hash_table_t
 
+  function has_key(self, key)
+    class(hash_table_t), intent(in) :: self
+    character(*), intent(in) :: key
+    logical :: has_key
+    has_key=(self%get(key)/=MAGIC_UNDEF)
+  end function has_key
   
   function sum_val_hash_table_t(self, label, prefix) result(s)
     class(hash_table_t), intent(in) :: self

@@ -58,6 +58,9 @@ occopt1? 7
  so_psp 0
 # Non-collinear case
  nspden 4  nspinor 2  
+
+ chksymtnons 3    # The default value for chksymtnons (which is 1) is not admitted in case of cDFT calculations.
+
 #Computational parameters
  tolvrs11 1.0d-7
  tolvrs 1.0d-8

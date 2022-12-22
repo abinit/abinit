@@ -1,8 +1,8 @@
 ---
-authors: T. Rangel
+authors: T. Rangel, O. Gingras
 ---
 
-# Tutorial on the use of Wannier90 library
+# Wannier90 postprocessor
 
 ## The Wannier90 interface tutorial
 
@@ -12,12 +12,12 @@ Maximally Localized Wannier Functions (MLWFs).
 You will learn how to get MLWFs with ABINIT and Wannier90 and what are the
 basic variables to govern the numerical efficiency.
 
-This tutorial should take about 1 hour and it is important to note that the examples in this tutorial
+This tutorial should take about 2 hours and it is important to note that the examples in this tutorial
 are not converged, they are just examples to show how to use the code.
 
 [TUTORIAL_README]
 
-## Summary of Wannier90 in ABINIT
+## 1. Summary of Wannier90 in ABINIT
 
 Wannier90 is a code that computes MLWFs (see [www.wannier.org](http://www.wannier.org) ).
 Wannier90 uses the methodology introduced by N. Marzari and D. Vanderbilt in 1997 and it is
@@ -46,7 +46,7 @@ and compute these two ingredients. Then, Wannier90 is executed. Wannier90 is
 included as a library in ABINIT and the process is automatic, so that in a
 single run you can do both the ground state calculation and the computation of MLWFs.
 
-## A first example: silicon
+## 2. A first example: silicon
 
 Before starting make sure that you compiled abinit enabling Wannier90.
 You may have to recompile the code with
@@ -151,7 +151,7 @@ Wannier90 which were created by ABINIT are:
 
 To obtain information about the steepest-descent minimization just issue:
 
-    grep CONV tw90_1o_DS2_w90.wout
+    grep CONV wannier90.wout
 
 You will obtain a table of the following form:
 
@@ -180,7 +180,7 @@ You will obtain a table of the following form:
     If |AbiPy| is installed on your machine, you can use the |abiopen| script
     with the `wout` command and the `--expose` option to visualize the iterations
 
-        abiopen.py tw90_1o_DS2_w90.wout --expose -sns
+        abiopen.py wannier90.wout --expose -sns
 
     ![](wannier90_assets/abiopen_tw90_1o_DS2_w90.png)
 
@@ -189,14 +189,14 @@ You will obtain a table of the following form:
 
 You can see the Wannier functions in |xcrysden| format. Just type:
 
-    xcrysden --xsf tw90_1o_DS2_w90_00001.xsf
+    xcrysden --xsf wannier90_00001.xsf
 
 To see the isosurface click on: Tools->Data Grid -> OK
 And modify the isovalue, put, for instance, 0.3 and check the option "Render +/- isovalue" then click on OK
 Alternatively, one can read the xsf file with |vesta|.
 MacOsx users can use the command line:
 
-    open tw90_1o_DS2_w90_00003.xsf -a vesta
+    open wannier90_00003.xsf -a vesta
 
 to invoke vesta directly from the terminal:
 
@@ -220,7 +220,7 @@ to invoke vesta directly from the terminal:
       To setup the prefix, ABINIT will first look for a file named **abo**
       __w90.win_ if it is not found then it will look for _w90.win_ and finally for _wannier90.win_.
 
-## The PAW case
+## 3. The PAW case
 
 Before starting it is assumed that you have already completed the tutorials [PAW1](/tutorial/paw1) and [PAW2](/tutorial/paw2).
 
@@ -244,7 +244,7 @@ As it is expected, the results should be similar than those of the PW case.
     wavefunctions. The contribution inside the spheres is not computed, however,
     they can be used to plot the Wannier functions.
 
-## Defining the initial projections
+## 4. Defining the initial projections
 
 Up to now we have obtained the MLWF for the four valence bands of silicon. It
 is important to note that for valence states the MLWF can be obtained starting
@@ -291,7 +291,7 @@ instance, you can define the centers in Cartesian coordinates or rotate the
 axis. Please refer to the Wannier90 user guide and see the part related to
 projections (see [www.wannier90.org](http://www.wannier.org)).
 
-## More on Wannier90 + ABINIT
+## 5. More on Wannier90 + ABINIT
 
 Now we will redo the silicon case but defining different initial projections.
 
@@ -335,9 +335,161 @@ The interpolated band structure is in *tw90_4o_DS3_w90_band.dat*
 
 To plot the bands, open |gnuplot| in the terminal and type:
 
-```gnuplot
-load "tw90_4o_DS3_w90_band.gnu"
+```
+gnuplot "tw90_4o_DS3_w90_band.gnu"
 ```
 
 ![](wannier90_assets/load_tw90_4o_DS3_w90_band.png)
 
+
+## 6. A second example: La2CuO4
+
+As a next example, we will compute a single MLWF for the cuprate La2CuO4.
+This material is the parent compound of a set of non-conventional superconductors.
+DFT predicts it is a metal, yet experimentally it is a well known antiferromagnetic insulator.
+The reason is that it is a strongly correlated material which undergoes a Mott
+transition.
+
+Because DFT with the LDA functional is not able to account for strong electronic
+correlations, one needs to use many-body methods to correctly describe the insulating
+phase of this material.
+For example, one can apply DFT+DMFT to describe the Mott transition correctly.
+
+In this tutorial, we will show how one can construct an effective Hamiltonian in the
+correlated orbital subset using Wannier90.
+Once this Hamiltonian is generated, DMFT can be applied to study the Mott transition.
+
+
+
+### 6.1 Orbital characters of the band structure
+
+Let's start by running the first calculations. Copy this file:
+
+    cp ../tw90_5.abi .
+
+and run abinit using
+
+    mpirun -n 4 abinit tw90_5.abi > tw90_5.log &
+
+This calculation should take a couple of minutes.
+
+The most important physics at low energy derives from the orbitals near the Fermi level.
+In order to correctly select the subset of correlated orbitals that we want to model
+in our effective Hamiltonian and how to project it, we need to study the orbital character
+of the band structure of the material.
+
+Let's look at the input file:
+{% dialog tests/tutoplugs/Input/tw90_5.abi %}
+
+The first dataset is simply useful to compute the ground state.
+DFT will predict it to be metallic, so we use an occupation option [[occopt]] for metals.
+
+In the second dataset, we compute a band structure along with the orbital character
+of the bands. We use [[pawfatbnd]] to specify that we want the L and M resolved orbitals,
+meaning we want to separate the contributions for the angular momentum L and its projection M.
+We select a high symmetry path using [[kptbounds]].
+A few parameters are useful for the postprocessing step following, that is 
+[[pawprtdos]], [[prtdos]] and [[prtdosm]].
+
+Now before looking at the output from the calculation, let's discuss what we expect to find.
+The correlated atom here is the cupper, which has a partially filled 3d shell.
+The d means the orbitals have angular momentum l=2.
+There are 5 such orbitals, with two spins.
+
+In vaccuum, these 10 states are degenerate.
+However, La2CuO4 here has a layered perosvkite structure, which means the cupper atom
+feels a crystal field produced by the surrounding atoms.
+In particular, an octaedron of oxygen with lift the degeneracy of the 3d shell into
+two subshells: the t2g and eg shells. Furthermore, the elongation of this 
+octaedron splits even more these subshells.
+The resulting splits are illustrated in the following figure.
+
+![](wannier90_assets/crystal_field_LCO.png)
+
+Additionally, by counting the stoechiometry of this material, we find that there
+should be 9 electrons occupying this shell, thus we expect only the x2-y2 orbital
+to be partially filled, at the Fermi level.
+
+!!! tip
+    Let's now look at the resulting fatbands now.
+    We use abipy with the following commands in a python script:
+    
+        from abipy.abilab import abiopen                                                
+                                                                                    
+        with abiopen("tw90_5o_DS2_FATBANDS.nc") as fb:                                 
+            fb.plot_fatbands_mview(iatom=2, fact=1.5, lmax=2, ylims=[-8, 2])
+    
+    These are the fatbands for the atom 2 (third atom as python starts at 0), thus the
+    cupper atom. First column is the s character, second are the 3 p characters and
+    last column are the 5 d characters. The last one is the dx2-y2, the only one
+    that is partially filled, as expected.
+    
+    ![](wannier90_assets/LCO_fatbands.png) 
+
+    This block contains 17 bands, mostly formed by the hybridization of the 4 times 3 O-2p orbitals
+    with the 5 Cu-3d orbitals. It includes band numbers 19 to 33.
+
+
+## 6.2 Wannier90 projection
+
+We will now use the ABINIT + Wannier90 interface to compute an effective Hamiltonian
+for the Cu 3d x^2 -y^2 orbital.
+First copy this file:
+
+    cp ../tw90_6.abi .
+    cp ../tw90_6o_DS3_w90.win .
+
+and run abinit using
+
+    mpirun -n 4 abinit tw90_6.abi > tw90_6.log &
+
+This calculation should take a couple of minutes. It uses two files.
+The first one is
+
+{% dialog tests/tutoplugs/Input/tw90_6.abi %}
+
+which contains four datasets. In the first one, we simply compute the density and wave function
+of the ground state on a coarse grid.
+In the second dataset, we use this coarse-grid ground state to do a non-self-consistent
+calculation on a finer grid.
+In the third dataset, we call the Wannier90 library to perform the projection,
+which uses the data computed in the second dataset.
+The fourth dataset computes a band structure, that we use to compare with the projected band structure
+computed by Wannier90.
+
+The important part here happens in the third set. The Wannier90 library uses the following input file:
+
+{% dialog tests/tutoplugs/Input/tw90_6o_DS3_w90.win %}
+
+The keywords can be understood using Wannier90's user guide found on their web page ([https://raw.githubusercontent.com/wannier-developers/wannier90/v3.1.0/doc/compiled_docs/user_guide.pdf](https://raw.githubusercontent.com/wannier-developers/wannier90/v3.1.0/doc/compiled_docs/user_guide.pdf)). 
+
+We want to make a one band model of the dx^2 -y^2 cupper orbital, which is defined by the projection keyword.
+As seen from the fatbands calculation, this orbital has overlap with many bands, across a specific energy window.
+The non-important bands which can give a non-accurate representation of the band structure are excluded using the exclude_bands keyword.
+The energy window is defined using the dis_win_min and dis_win_max keywords.
+
+Moreover, this orbital has to be disentangled with other orbital, so we need the disentanglement procedure.
+The number of iterations in specified by dis_num_iter.
+
+Finally, we want to compare the resulting band structure with the one coming from the Kohn-Sham basis.
+This is enforced using the bands_plot keyword, along with a defined path which corresponds to the same path
+as the one calculated in ABINIT.
+
+To plot the resulting band structures, you will need a little bit of work. Run this python script:
+
+    python ../EIG_to_col.py
+
+Then you can use gnuplot to plot both the band structures together to compare them, with something like:
+
+    echo 'plot [][0:9] "tw90_6o_DS3_w90_band.dat" u ($1/3.0470170):2 tit "Wannier90" w l lw 4, "band_struct.dat" u ($1/167):2 tit "DFT" w l
+    pause -1' > plot.gnu
+    gnuplot plot.gnu
+
+Performing the calculation with more converged parameters, we find the following band strcture:
+
+![](wannier90_assets/Wannier90_vs_ABINIT.png) 
+
+The resulting Hamiltonian is written as the tw90_6o_DS3_w90_hr.dat file.
+It can be used for example using the TRIQS package to apply DMFT, thus correcting the
+DFT calculation to compute correctly the strong electronic correlations.
+We would then observe a Mott transition with respect to temperature.

@@ -6,14 +6,10 @@
 !!   Simple argument parser used in main programs
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2021 ABINIT group (MG)
+!!  Copyright (C) 2008-2022 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -121,9 +117,6 @@ contains
 !!
 !! FUNCTION
 !!  Simple command line argument parser for abinit.
-!!
-!! PARENTS
-!!      abinit
 !!
 !! SOURCE
 
@@ -919,11 +912,6 @@ end function get_arg_list_dp
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      abitk
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

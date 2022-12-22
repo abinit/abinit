@@ -15,7 +15,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2021 ABINIT group (hexu)
+!! Copyright (C) 2001-2022 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -65,7 +65,7 @@ module m_spmat_convert
 contains
 
   !-----------------------------------------------------------------------
-  !> @brief dense matrix to LIL matrix 
+  !> @brief dense matrix to LIL matrix
   !> @param [in] mat: 2D array
   !> @param [out] ll : LIL matrix
   !-----------------------------------------------------------------------
@@ -204,7 +204,7 @@ contains
   !-------------------------------------------------------------------!
   ! COO_to_CSR:
   !  translate COO matrix to CSR matrix
-  !  NOTE: This can be quite slow when it is large due to the sort algorithm 
+  !  NOTE: This can be quite slow when it is large due to the sort algorithm
   ! Input:
   !  COO matrix
   ! Output:
@@ -284,8 +284,8 @@ contains
     call dense_to_csr(mat, csr)
     call coo%group_by_1dim(ngroup, i1list, ise)
     call coo%sum_duplicates()
-    if(allocated(i1list)) ABI_FREE(i1list)
-    if(allocated(ise)) ABI_FREE(ise)
+    ABI_SFREE(i1list)
+    ABI_SFREE(ise)
     call coo_to_csr(coo, csr2)
 
     x=[1,2,3,4]

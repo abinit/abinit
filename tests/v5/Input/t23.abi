@@ -11,7 +11,6 @@ ndtset 3
    toldfe1   1.0d-10
     nband1   4
  berryopt1   -1
-    rfdir1   1 1 1
 
 # Dataset #2 ground state in electric field *******
    nband2    4
@@ -23,8 +22,6 @@ ndtset 3
 
 # Dataset #3 Response-function calculation
   rfphon3   1
- rfatpol3   1 2
-   rfdir3   1 1 1
     nqpt3   1
   kptopt3   3
 berryopt3   4

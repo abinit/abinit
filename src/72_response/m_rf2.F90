@@ -7,14 +7,10 @@
 !! equation.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2015-2021 ABINIT group (LB,MT)
+!!  Copyright (C) 2015-2022 ABINIT group (LB,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -147,11 +143,6 @@ CONTAINS  !=====================================================================
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_dfptnl_loop,m_dfptnl_pert
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine rf2_getidir(idir1,idir2,idir)
@@ -186,11 +177,6 @@ end subroutine rf2_getidir
 !!  idir2 : index of the 2nd direction (1<=idir2<=3)
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_dfpt_looppert,m_dfpt_lw,m_dfpt_scfcv,m_rf2_init
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -266,10 +252,6 @@ end subroutine rf2_getidirs
 !! OUTPUT
 !!
 !! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -428,11 +410,6 @@ end subroutine rf2_accumulate_bands
 !!    <Proj_i^(0)|u^(0)> and <Proj_i^(1)|u^(0)> (dir=1,2 and 3) for all wavefunctions u^(0) or
 !!    <Proj_i^(0)|u^(1)> and <Proj_i^(1)|u^(1)> (dir=1,2 and 3) for all 1st-order wavefunctions u^(1).
 !!    Note that <Proj_i^(2)|u^(0)> is always computed on the fly.
-!!
-!! PARENTS
-!!      m_dfptnl_pert,m_rf2_init
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -793,10 +770,6 @@ end subroutine rf2_apply_hamiltonian
 !! OUTPUT
 !!
 !! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

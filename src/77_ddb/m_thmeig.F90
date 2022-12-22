@@ -6,14 +6,10 @@
 !! Calculate thermal corrections to the eigenvalues.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2021 ABINIT group (PB, XG, GA)
+!!  Copyright (C) 2008-2022 ABINIT group (PB, XG, GA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -70,11 +66,6 @@ contains
 !!  comm=MPI communicator
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      anaddb
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -150,7 +141,7 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, ddbun, iout, n
  real(dp),allocatable :: eigvec(:,:,:,:),eigval(:,:),g2f(:,:,:),intweight(:,:,:)
  real(dp),allocatable :: indtweightde(:,:,:),tmpg2f(:,:,:),tmpphondos(:),total_dos(:),tweight(:,:)
  real(dp),allocatable :: phfreq(:,:)
- real(dp),allocatable :: blkval2(:,:,:,:),blkval2gqpt(:,:,:,:),kpnt(:,:,:)
+ real(dp),allocatable :: eig2dGamma(:,:,:,:),kpnt(:,:,:)
  real(dp),allocatable :: dedni(:,:,:,:),dednr(:,:,:,:)
  real(dp),allocatable :: eigen_in(:)
  real(dp),allocatable :: qpt_full(:,:),qptnrm(:)
@@ -192,7 +183,7 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, ddbun, iout, n
  write(std_out, '(a)' )  '- thmeig: Initialize the second-order electron-phonon file with name :'
  write(std_out, '(a,a)' )'-         ',trim(eig2_filnam)
 
- call ddb_hdr_open_read(ddb_hdr, eig2_filnam, ddbun, DDB_VERSION)
+ call ddb_hdr%open_read(eig2_filnam, ddbun, xmpi_comm_self)
 
  mband = ddb_hdr%mband
  nkpt = ddb_hdr%nkpt
@@ -234,10 +225,9 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, ddbun, iout, n
  mpert_eig2=natom
  msize2=3*mpert_eig2*3*mpert_eig2
 
- call ddb_eig2%malloc(msize2,nblok2,natom,ntypat)
+ call ddb_eig2%malloc(msize2,nblok2,natom,ntypat,mpert_eig2,nkpt,mband)
 
- ABI_MALLOC(blkval2,(2,msize2,mband,nkpt))
- ABI_MALLOC(blkval2gqpt,(2,msize2,mband,nkpt))
+ ABI_MALLOC(eig2dGamma,(2,msize2,mband,nkpt))
 
  ABI_MALLOC(eigvec,(2,3,natom,3*natom))
  ABI_MALLOC(phfreq,(3*natom,ddb%nblok))
@@ -291,7 +281,7 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, ddbun, iout, n
 !and perform small treatment if needed.
  call chkin9(atifc,natifc,natom)
 
- blkval2gqpt(:,:,:,:)=zero
+ eig2dGamma(:,:,:,:)=zero
 
  ABI_MALLOC(carflg_eig2,(3,mpert_eig2,3,mpert_eig2))
  ABI_MALLOC(kpnt,(3,nkpt,1))
@@ -318,15 +308,13 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, ddbun, iout, n
    found=0
    do iblok2=1,nblok2
 
-     call ddb_eig2%read_block(iblok2,mband,mpert_eig2,msize2,&
-&     nkpt,ddbun,blkval2(:,:,:,:),kpnt(:,:,1))
-
+     call ddb_eig2%read_eig2d(ddbun, iblok2)
 
      qnrm = ddb_eig2%qpt(1,iblok2)*ddb_eig2%qpt(1,iblok2)+ &
 &     ddb_eig2%qpt(2,iblok2)*ddb_eig2%qpt(2,iblok2)+ &
 &     ddb_eig2%qpt(3,iblok2)*ddb_eig2%qpt(3,iblok2)
      if(qnrm < DDB_QTOL) then
-       blkval2gqpt(:,:,:,:) = blkval2(:,:,:,:)
+       eig2dGamma(:,:,:,:) = ddb_eig2%eig2dval(:,:,:,:)
        gqpt=iblok2
        write(std_out,*)'-thmeig: found Gamma point in EIG2 DDB, blok number ',iblok2
        found=1
@@ -341,8 +329,8 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, ddbun, iout, n
      ABI_ERROR(message)
    end if
 
-!  Put blkval2gqpt in cartesian coordinates
-   call carttransf(ddb_eig2%flg,blkval2gqpt,carflg_eig2,gprimd,gqpt,mband,&
+!  Put eig2dGamma in cartesian coordinates
+   call carttransf(ddb_eig2%flg,eig2dGamma,carflg_eig2,gprimd,gqpt,mband,&
 &   mpert_eig2,msize2,natom,nblok2,nkpt,rprimd)
 
  end if
@@ -396,8 +384,8 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, ddbun, iout, n
      qptopt=3
    end if
 
+   ! GA: This is useless
    brav=inp%brav
-
    if(abs(brav)/=1)then
      message = ' The possibility to have abs(brav)/=1 for thmeig was disabled.'
      ABI_ERROR(message)
@@ -450,7 +438,7 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, ddbun, iout, n
  dedni(:,:,:,:) = zero
 
 !!Prepare the reading of the EIG2 files
- call ddb_hdr_open_read(ddb_hdr, eig2_filnam, ddbun, DDB_VERSION, msym=msym)
+ call ddb_hdr%open_read(eig2_filnam, ddbun, xmpi_comm_self, msym=msym)
  call ddb_hdr%free()
 
 !iqpt2 will be the index of the q point bloks inside the EIG2 file
@@ -506,10 +494,7 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, ddbun, iout, n
    found=0 ; iqpt2_previous=iqpt2
    do while (iqpt2<nblok2)
      iqpt2=iqpt2+1
-     call ddb_eig2%read_block(iqpt2,mband,mpert_eig2,msize2,&
-&     nkpt,ddbun,blkval2(:,:,:,:),kpnt(:,:,1))
-     !write (300,*) 'blkval2 _bis_ in thmeig'
-     !write (300,*) blkval2
+     call ddb_eig2%read_eig2d(ddbun, iqpt2)
      diff_qpt(:)=ddb_eig2%qpt(1:3,iqpt2)/ddb_eig2%nrm(1,iqpt2)-spqpt(:,iqpt)
      if(diff_qpt(1)**2+diff_qpt(2)**2+diff_qpt(3)**2 < DDB_QTOL )then
        found=1
@@ -524,14 +509,13 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, ddbun, iout, n
 !    from the beginning of the file
      close(ddbun)
 
-     call ddb_hdr_open_read(ddb_hdr, eig2_filnam, ddbun, DDB_VERSION, msym=msym)
+     call ddb_hdr%open_read(eig2_filnam, ddbun, xmpi_comm_self, msym=msym)
      call ddb_hdr%free()
 
 !    And examine again the EIG2 file. Still, not beyond the previously examined value.
      found=0
      do iqpt2=1,iqpt2_previous
-       call ddb_eig2%read_block(iqpt2,mband,mpert_eig2,msize2,&
-&       nkpt,ddbun,blkval2(:,:,:,:),kpnt(:,:,1))
+       call ddb_eig2%read_eig2d(ddbun, iqpt2)
        diff_qpt(:)=ddb_eig2%qpt(1:3,iqpt2)/ddb_eig2%nrm(1,iqpt2)-spqpt(:,iqpt)
        if(diff_qpt(1)**2+diff_qpt(2)**2+diff_qpt(3)**2 < DDB_QTOL )then
          found=1
@@ -548,8 +532,8 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, ddbun, iout, n
 
    end if
 
-!  Put blkval2 in cartesian coordinates
-   call carttransf(ddb_eig2%flg,blkval2,carflg_eig2,gprimd,iqpt,mband,&
+!  Put eig2dval in cartesian coordinates
+   call carttransf(ddb_eig2%flg,ddb_eig2%eig2dval,carflg_eig2,gprimd,iqpt,mband,&
 &   mpert_eig2,msize2,natom,nblok2,nkpt,rprimd)
 
    do imod=1,3*natom
@@ -600,14 +584,14 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, ddbun, iout, n
 &               amu_emass/2 !/norm(idir1)/norm(idir2)
              end if
 
-             multr(:,:) =(blkval2(1,index,:,:)*vecr - blkval2(2,index,:,:)*veci) !/(norm(idir1)*norm(idir2))
-             multi(:,:) =(blkval2(1,index,:,:)*veci + blkval2(2,index,:,:)*vecr) !/(norm(idir1)*norm(idir2))
+             multr(:,:) =(ddb_eig2%eig2dval(1,index,:,:)*vecr - ddb_eig2%eig2dval(2,index,:,:)*veci) !/(norm(idir1)*norm(idir2))
+             multi(:,:) =(ddb_eig2%eig2dval(1,index,:,:)*veci + ddb_eig2%eig2dval(2,index,:,:)*vecr) !/(norm(idir1)*norm(idir2))
 
 
 !            Debye-Waller Term
              if(thmflag==3 .or. thmflag==5 .or. thmflag==7) then
-               dwtermr(1:mband,1:nkpt)=dwtermr(1:mband,1:nkpt)+fact2r*blkval2gqpt(1,index,:,:)-fact2i*blkval2gqpt(2,index,:,:)
-               dwtermi(1:mband,1:nkpt)=dwtermi(1:mband,1:nkpt)+fact2r*blkval2gqpt(2,index,:,:)+fact2i*blkval2gqpt(1,index,:,:)
+               dwtermr(1:mband,1:nkpt)=dwtermr(1:mband,1:nkpt)+fact2r*eig2dGamma(1,index,:,:)-fact2i*eig2dGamma(2,index,:,:)
+               dwtermi(1:mband,1:nkpt)=dwtermi(1:mband,1:nkpt)+fact2r*eig2dGamma(2,index,:,:)+fact2i*eig2dGamma(1,index,:,:)
              end if
 
 !            Self-energy Term (Fan)
@@ -689,6 +673,7 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, ddbun, iout, n
    dos_phon(:) = dos_phon(:) / nqpt
 
 !  output the g2f
+   kpnt(:,:,1) = ddb_eig2%kpt(:,:)
    unit_g2f = 108
    call outg2f(domega,omega_min,omega_max,elph_base_name,g2f,g2fsmear,kpnt,mband,ng2f,nkpt,nqpt,1,telphint,unit_g2f)
 
@@ -978,8 +963,7 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, ddbun, iout, n
  ABI_FREE(eigvec)
  ABI_FREE(phfreq)
 
- ABI_FREE(blkval2)
- ABI_FREE(blkval2gqpt)
+ ABI_FREE(eig2dGamma)
  ABI_FREE(kpnt)
  ABI_FREE(carflg_eig2)
 
@@ -1018,11 +1002,6 @@ end subroutine thmeig
 !! NOTES
 !!   FIXME
 !!   overcomplete inputs. Eliminate unit_phdos (just filnam) and deltaene (gotten from max-min/nene)
-!!
-!! PARENTS
-!!      m_thmeig
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1110,11 +1089,6 @@ subroutine outphdos(deltaene,dos_phon,enemin,enemax,filnam,g2fsmear,nene,nqpt,nt
 !!
 !! OUTPUT
 !!  only write
-!!
-!! PARENTS
-!!      m_thmeig
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

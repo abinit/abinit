@@ -1,8 +1,8 @@
 
-.Version 9.1.2 of MULTIBINIT 
-.(sequential version, prepared for a x86_64_linux_gnu9.2 computer) 
+.Version 9.3.3 of MULTIBINIT 
+.(MPI version, prepared for a x86_64_linux_gnu10.2 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  MULTIBINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,16 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat  4 Apr 2020.
-- ( at 14h20 )
+.Starting date : Thu 17 Dec 2020.
+- ( at 13h52 )
   
 -  nproc =    1
 
 ================================================================================
 
- Read the information in the reference structure in 
--/home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/xuhe_Multibinit-slc/tests/v8/Input/t23.xml
- to initialize the multibinit input
 
 ================================================================================
 
@@ -59,8 +56,6 @@
 dipdip_range        10        10        10
       ifcana         0
       ifcout   2000000
-      natifc         1
-       atifc         1
  Description of grid 1 :
         brav         1
        ngqpt         1         1         1
@@ -120,7 +115,7 @@ Measurement run:
   Summary of spin dynamics:
     At the end of the run, the average spin at each sublattice is
       Sublattice       <M_i>(x)  <M_i>(y)  <M_i>(z)  ||<M_i>||
--        0001           0.28509   0.30615   0.29255   0.51048
+-        0001           0.28509   0.30614   0.29255   0.51048
 
 
 # Temperature              Cv             chi        BinderU4             Mst
@@ -134,6 +129,6 @@ Measurement run:
 
 ================================================================================
 
-+Total cpu time      1.465  and wall time      1.475 sec
++Total cpu time      1.467  and wall time      1.481 sec
 
  multibinit : the run completed succesfully.

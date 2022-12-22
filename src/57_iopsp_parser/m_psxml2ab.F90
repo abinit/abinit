@@ -7,7 +7,7 @@
 !!  convert to abinit internal datastructures for pspheader.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2021 ABINIT group (MJV).
+!! Copyright (C) 2005-2022 ABINIT group (MJV).
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -19,12 +19,6 @@
 !! OUTPUT
 !! psphead = psp information structure
 !! atmsymb = atomic symbol
-!!
-!! PARENTS
-!!      inpspheads,pspatm_abinit
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -388,7 +382,7 @@ end module m_psxml2ab
 !!  allows calling software to decide how fatal the PSML die call actually is.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2021 ABINIT group (MJV).
+!! Copyright (C) 2005-2022 ABINIT group (MJV).
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -398,10 +392,6 @@ end module m_psxml2ab
 !!   str = string with error message
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

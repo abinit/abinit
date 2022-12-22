@@ -9,14 +9,10 @@
 !! a detailed analysis of the time-consuming routines.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2021 ABINIT group (XG, GMR)
+!!  Copyright (C) 1998-2022 ABINIT group (XG, GMR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -130,12 +126,6 @@ contains
 !!
 !!    NOTE : the number of fourwf calls is equal to
 !!    the # of nonlop (choice=1) calls + the # of nonlop (choice=2) calls
-!!
-!! PARENTS
-!!      abinit
-!!
-!! CHILDREN
-!!      timab,time_accu,wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -968,7 +958,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1634) = "rmm_diis:band_opt             "; basic(1634) = 1
 
  ! lobpcg2
- names(1650) = 'lobpcgwf2                     '; 
+ names(1650) = 'lobpcgwf2                     ';
  names(1651) = 'lobpcg_init                    '
  names(1652) = 'lobpcg_free                    '
  names(1653) = 'lobpcg_run                     '
@@ -1080,7 +1070,24 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  !names(1750)='gtdyn9'; basic(1750) = 1
  !names(1751)='dfpt_phfrq'; basic(1751) = 1
 
- names(1780)='cgtk_rotate'; basic(1780) = 1
+ ! chebfi2
+ names(1750) = 'chebfiwf2                     '; basic(1750) = 1
+ names(1751) = 'chebfi2_init                  '
+ names(1752) = 'chebfi2_free                  '
+ names(1753) = 'chebfi2_run                   '
+ names(1754) = 'chebfi2_getAX_BX              '
+ names(1755) = 'chebfi2_invovl                '
+ names(1756) = 'chebfi2_residu                '
+ names(1757) = 'chebfi2_RayleighRitz          '
+ names(1758) = 'chebfi2_pcond                 '
+ names(1759) = 'chebfi2_RR_q                  '
+ names(1760) = 'chebfi2_next_p                '
+ names(1761) = 'chebfi2_swap                  '
+ names(1762) = 'chebfi2_amp_f                 '
+ names(1763) = 'chebfi2_alltoall              '
+
+ names(1780)='ctgk_rotate'; basic(1780) = 1
+
 
  ! DVDB object
  names(1800)='dvdb_new'; basic(1800) = 1
@@ -1708,8 +1715,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        case(50)
          list(:3)=(/1501,1502,1515/)                                 ; msg='hartreefock '
        case(60)
-         list(:13) = (/1600,1607,1630,1631,1632,1601,1603,1604,1605,1606,1608,1609,1610/)
-         msg = 'chebfi'
+         list(:13) = (/1600,1607,1630,1631,1632,1601,1603,1604,1605,1606,1608,1609,1610/) ; msg = 'chebfi'
        case(61)
          list(:3) = (/1620,1621,1622/)                               ; msg = 'mkinvovl'
        case(70)
@@ -1727,25 +1733,21 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        case(76)
          list(:18)=(/ (ii,ii=1670,1687,1) /)                         ; msg='low-level xgBlock type '
        case(77)
-         list(:5)=(/1690,1691,1692,1693,1694/)
-         msg='low-level xgScalapack type '
+         list(:5)=(/1690,1691,1692,1693,1694/) ; msg='low-level xgScalapack type '
        case(78)
-         list(:8)=(/ (ii,ii=1662,1669,1) /)                          ; msg='low-level xgTransposer type '
+         list(:8)=(/1662,1663,1664,1665,1666,1667,1668,1669/) ; msg='low-level xgTransposer type '
        case(79)
-         list(:12)=(/1300,1293,1302,1303,1304,1305,1363,1370,201,211,880,1301/)
-         msg='cgwf_cprj'
+         list(:12)=(/1300,1293,1302,1303,1304,1305,1363,1370,201,211,880,1301/) ; msg='cgwf_cprj'
        case(80)
-         list(:10)=(/1100,1101,1102,1103,1104,1105,1106,1107,1108,1119/)
-         msg='nonlop_ylm'
+         list(:10)=(/1100,1101,1102,1103,1104,1105,1106,1107,1108,1119/) ; msg='nonlop_ylm'
        case(81)
-         list(:5)=(/1290,1293,1294,1295,1299/)
-         msg='getcprj'
+         list(:5)=(/1290,1293,1294,1295,1299/) ; msg='getcprj'
        case(82)
-         list(:4)=(/1360,1363,1364,1362/)
-         msg='getcsc'
+         list(:4)=(/1360,1363,1364,1362/)      ; msg='getcsc'
        case(83)
-         list(:5)=(/1370,235,1371,1372,1375/)
-         msg='getchc'
+         list(:5)=(/1370,235,1371,1372,1375/)  ; msg='getchc'
+       case(84)
+         list(:14)=(/1750,1751,1752,1753,1754,1755,1756,1757,1758,1759,1760,1761,1762,1763/) ; msg='chebfiwf2 core engine '
        case default
          cycle ! This allows one to disable temporarily some partitionings
 

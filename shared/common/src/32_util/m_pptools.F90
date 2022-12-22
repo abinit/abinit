@@ -6,15 +6,11 @@
 !!  Helper functions used for post-processing.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2021 ABINIT group (MG, ZL, MJV, BXu)
+!! Copyright (C) 2002-2022 ABINIT group (MG, ZL, MJV, BXu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -66,12 +62,6 @@ CONTAINS  !===========================================================
 !!
 !! OUTPUT
 !!  (only writing)
-!!
-!! PARENTS
-!!      m_geometry,m_inwffil,m_paw_uj
-!!
-!! CHILDREN
-!!      wrap2_pmhalf
 !!
 !! SOURCE
 
@@ -144,12 +134,6 @@ end subroutine prmat
 !!
 !! OUTPUT
 !! Only write
-!!
-!! PARENTS
-!!      m_exc_analyze,m_kxc,m_nesting,m_paw_mkrho,m_spin_current,m_wfd
-!!
-!! CHILDREN
-!!      wrap2_pmhalf
 !!
 !! SOURCE
 
@@ -274,12 +258,6 @@ end subroutine printxsf
 !! OUTPUT
 !!  Only writing
 !!
-!! PARENTS
-!!      m_cut3d
-!!
-!! CHILDREN
-!!      wrap2_pmhalf
-!!
 !! SOURCE
 
 
@@ -360,12 +338,6 @@ end subroutine print_fofr_ri
 !!
 !! OUTPUT
 !!  Only writing
-!!
-!! PARENTS
-!!      m_cut3d
-!!
-!! CHILDREN
-!!      wrap2_pmhalf
 !!
 !! SOURCE
 
@@ -454,12 +426,6 @@ end subroutine print_fofr_xyzri
 !!
 !! OUTPUT
 !!  Only writing
-!!
-!! PARENTS
-!!      m_cut3d
-!!
-!! CHILDREN
-!!      wrap2_pmhalf
 !!
 !! SOURCE
 
@@ -560,12 +526,6 @@ end subroutine print_fofr_cube
 !! OUTPUT
 !!  ierr=Status error.
 !!  BXSF file.
-!!
-!! PARENTS
-!!      m_ebands,m_ifc
-!!
-!! CHILDREN
-!!      wrap2_pmhalf
 !!
 !! SOURCE
 
@@ -800,12 +760,6 @@ end subroutine printbxsf
 !! OUTPUT
 !!  ierr=Status error.
 !!  BXSF file.
-!!
-!! PARENTS
-!!      m_elphon
-!!
-!! CHILDREN
-!!      wrap2_pmhalf
 !!
 !! SOURCE
 

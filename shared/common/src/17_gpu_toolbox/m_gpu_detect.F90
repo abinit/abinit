@@ -7,7 +7,7 @@
 !! possible, to any proc
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2010-2021 ABINIT group (MMancini)
+!!  Copyright (C) 2010-2022 ABINIT group (MMancini)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -59,11 +59,6 @@ CONTAINS  !===========================================================
 !! ngpu=total number of gpu distributed on all node <=nproc
 !! gpu_map(0,nproc-1)=contains for any proc the associated device
 !! number. -1 if no gpu is associated
-!!
-!! PARENTS
-!!      m_rec
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -167,11 +162,6 @@ end subroutine find_set_gpu
 !!        3: n cpu n gpu
 !!        4: n cpu > m gpu;
 !!        5: n cpu < m gpu
-!!
-!! PARENTS
-!!      m_rec
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

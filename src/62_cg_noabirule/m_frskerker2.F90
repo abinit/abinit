@@ -8,7 +8,7 @@
 !! with some residuals and a real space dielectric function
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2021 ABINIT group (DCA, XG, MT)
+!! Copyright (C) 1998-2022 ABINIT group (DCA, XG, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -17,10 +17,6 @@
 !! NOTES
 !! this is neither a function nor a subroutine. This is a module
 !! It is made of two functions and one init subroutine
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -67,12 +63,6 @@ contains
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_prcref
-!!
-!! CHILDREN
-!!      laplacian
 !!
 !! SOURCE
 
@@ -121,12 +111,6 @@ subroutine frskerker2__init(dtset_in,mpi_enreg_in,nfft_in,ngfft_in,nspden_in,rdi
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_prcref
-!!
-!! CHILDREN
-!!      laplacian
-!!
 !! SOURCE
 
   subroutine frskerker2__end()
@@ -157,11 +141,6 @@ subroutine frskerker2__init(dtset_in,mpi_enreg_in,nfft_in,ngfft_in,nspden_in,rdi
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      laplacian
-!!
 !! SOURCE
 
 subroutine frskerker2__newvres2(nv1,nv2,x, grad, vrespc)
@@ -189,10 +168,6 @@ subroutine frskerker2__newvres2(nv1,nv2,x, grad, vrespc)
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -239,10 +214,6 @@ subroutine frskerker2__newvres2(nv1,nv2,x, grad, vrespc)
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

@@ -6,14 +6,10 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, DRH)
+!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, DRH)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -82,13 +78,6 @@ contains
 !!  OPTIONAL OUTPUT
 !!  lrhonow(cplex*nfft,nspden)=Laplacian of the electron (spin)-density in real space
 !!    in electrons/bohr**5 (in case of meta GGA)
-!!
-!! PARENTS
-!!      m_afterscfloop,m_dfpt_mkvxc,m_dfpt_mkvxcstr,m_electronpositron
-!!      m_gammapositron,m_rhotoxc
-!!
-!! CHILDREN
-!!      fourdp,ptabs_fourdp,timab
 !!
 !! SOURCE
 
@@ -384,12 +373,6 @@ end subroutine xcden
 !!  [vxctau(cplex*nfft,nspden,4)]=derivative of XC energy density with respect to
 !!   kinetic energy density (depsxcdtau). The arrays vxctau(nfft,nspden,4) contains also
 !!   the gradient of vxctau (gvxctau) which will be computed here in vxctau(:,:,2:4).
-!!
-!! PARENTS
-!!      m_dfpt_mkvxc,m_dfpt_mkvxcstr,m_newvtr,m_rhotoxc
-!!
-!! CHILDREN
-!!      fourdp,ptabs_fourdp,timab
 !!
 !! SOURCE
 
@@ -720,12 +703,6 @@ end subroutine xcpot
 !! OUTPUT
 !!  vxc(cplex*nfft,nspden)]=q-derivative of the GGA xc potential.
 !!      At input already includes three terms. 
-!!
-!! PARENTS
-!!      m_dfpt_mkvxc
-!!
-!! CHILDREN
-!!      fourdp,ptabs_fourdp,timab
 !!
 !! SOURCE
 

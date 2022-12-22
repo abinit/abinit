@@ -7,7 +7,7 @@
 !! and its related init and destroy routines
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2021 ABINIT group (XG)
+!! Copyright (C) 2018-2022 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -96,12 +96,6 @@ contains  !=============================================================
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gstateimg
-!!
-!! CHILDREN
-!!      abihist_free,abimover_destroy,delocint_fin,mttk_fin
 !!
 !! SOURCE
 
@@ -217,12 +211,6 @@ contains  !=============================================================
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gstateimg
-!!
-!! CHILDREN
-!!      abihist_free,abimover_destroy,delocint_fin,mttk_fin
 !!
 !! SOURCE
 

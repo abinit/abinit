@@ -6,14 +6,10 @@
 !!  Initialize pspcod=1 or 4 pseudopotential (Teter format)
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, FrD, MT)
+!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, FrD, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -104,12 +100,6 @@ contains
 !! 2) The core charge density differs: for pspcod=1, it is a
 !!    revised expression for core density of 5 Nov 1992, while
 !!    for pspcod=4, it is an older expression, of 7 May 1992 .
-!!
-!! PARENTS
-!!      m_pspini
-!!
-!! CHILDREN
-!!      spline
 !!
 !! SOURCE
 
@@ -436,12 +426,6 @@ end subroutine psp1in
 !!  yp1,ypn=derivative of q^2 v(q) wrt q at q=0 and q=qmax
 !!   (needed for spline fitter).
 !!
-!! PARENTS
-!!      m_psp1
-!!
-!! CHILDREN
-!!      spline
-!!
 !! SOURCE
 
 subroutine psp1lo(drad,epsatm,mmax,mqgrid,qgrid,q2vq,rad,&
@@ -600,12 +584,6 @@ end subroutine psp1lo
 !! This is the eigenvalue of the Kleinman-Bylander operator and sets
 !! the energy scale of the nonlocal psp corrections.
 !! Bessel functions replaced by besj, which accomodates args near 0.
-!!
-!! PARENTS
-!!      m_psp1
-!!
-!! CHILDREN
-!!      spline
 !!
 !! SOURCE
 
@@ -870,12 +848,6 @@ end subroutine psp1nl
 !!  df(0 to n)=derivative $ \frac{df}{dr}$ on grid
 !!  smf= $ \int_{r(0)}^{r(nlast)} f(r) dr $.
 !!
-!! PARENTS
-!!      m_psp1
-!!
-!! CHILDREN
-!!      spline
-!!
 !! SOURCE
 
 subroutine der_int(ff,df,rr,dr,nlast,smf)
@@ -976,12 +948,6 @@ end subroutine der_int
 !! this algorithm places strong constraints on accuracy,
 !! so this routine is machine-dependent.
 !!
-!! PARENTS
-!!      m_psp1
-!!
-!! CHILDREN
-!!      spline
-!!
 !! SOURCE
 
 subroutine sincos(iq,irmax,mmax,pspwk,rad,tpiq)
@@ -1075,12 +1041,6 @@ end subroutine sincos
 !!
 !! WARNINGS
 !! the fifth derivative is not yet delivered.
-!!
-!! PARENTS
-!!      m_psp1
-!!
-!! CHILDREN
-!!      spline
 !!
 !! SOURCE
 

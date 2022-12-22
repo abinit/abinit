@@ -7,7 +7,7 @@
 !!  atomic positions, and potential shifts.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2021 ABINIT group (DJA)
+!!  Copyright (C) 1998-2022 ABINIT group (DJA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -16,13 +16,6 @@
 !! NOTES
 !! INPUTS
 !! OUTPUT
-!! PARENTS
-!!
-!! CHILDREN
-!!      abi_io_redirect,abimem_init,abinit_doctor,destroy_mpi_enreg,herald
-!!      initmpi_seq,intagm,isfile,parsefile,pawuj_det,pawuj_free,pawuj_ini
-!!      wrtout,xmpi_end,xmpi_init
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
