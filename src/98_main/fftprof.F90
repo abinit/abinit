@@ -72,6 +72,10 @@ program fftprof
  use m_FFT_prof
  use m_abicore
  use m_dfti
+#ifdef HAVE_GPU_CUDA
+ use m_gpu_toolbox
+ use m_manage_cuda
+#endif
 
  use defs_abitypes,only : MPI_type
  use m_fstrings,   only : lower
@@ -87,10 +91,9 @@ program fftprof
  implicit none
 
 !Arguments -----------------------------------
-!Local variables-------------------------------
 !scalars
- integer,parameter :: MAX_NFFTALGS=50,MAX_NSYM=48
- integer,parameter :: paral_kgb0=0,me_fft0=0,nproc_fft1=1,master=0
+ integer,parameter :: MAX_NFFTALGS = 50, MAX_NSYM = 48
+ integer,parameter :: paral_kgb0 = 0, me_fft0 = 0, nproc_fft1 = 1, master = 0
  integer :: ii,fftcache,it,cplex,ntests,option_fourwf,osc_npw
  integer :: map2sphere,use_padfft,isign,nthreads,comm,nprocs,my_rank
  integer :: iset,iall,inplace,nsets,avail,ith,idx,ut_nfft,ut_mgfft
@@ -104,25 +107,27 @@ program fftprof
  type(MPI_type) :: MPI_enreg
 !arrays
  integer :: ut_ngfft(18)
- real(dp),parameter :: gamma_point(3)=(/zero,zero,zero/)
+#ifdef HAVE_GPU_CUDA
+ integer :: gpu_devices(5)
+#endif
+ real(dp),parameter :: gamma_point(3) = zero
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
  type(FFT_test_t),allocatable :: Ftest(:)
  type(FFT_prof_t),allocatable :: Ftprof(:)
- integer,allocatable :: osc_gvec(:,:)
- integer,allocatable :: fft_setups(:,:),fourwf_params(:,:)
+ integer,allocatable :: osc_gvec(:,:), fft_setups(:,:),fourwf_params(:,:)
 ! ==========  INPUT FILE ==============
- integer :: ncalls = 10, max_nthreads = 1, ndat = 1, necut = 0, nsym = 1, mixprec = 0
+ integer :: ncalls = 10, max_nthreads = 1, ndat = 1, necut = 0, nsym = 1, mixprec = 0, use_gpu = 0
  character(len=500) :: tasks="all"
  integer :: fftalgs(MAX_NFFTALGS) = 0
  integer :: symrel(3,3,MAX_NSYM) = 0
  real(dp),parameter :: k0(3)=(/zero,zero,zero/)
- real(dp) :: ecut=30,osc_ecut=3
- real(dp) :: ecut_arth(2)=zero
+ real(dp) :: ecut = 30, osc_ecut = 3
+ real(dp) :: ecut_arth(2) = zero
  real(dp) :: rprimd(3,3)
  real(dp) :: kpoint(3) = (/0.1,0.2,0.3/)
  real(dp) :: tnons(3,MAX_NSYM) = zero
  logical :: use_lib_threads = .FALSE.
- namelist /CONTROL/ tasks, ncalls, max_nthreads, ndat, fftalgs, necut, ecut_arth, use_lib_threads, mixprec
+ namelist /CONTROL/ tasks, ncalls, max_nthreads, ndat, fftalgs, necut, ecut_arth, use_lib_threads, mixprec, use_gpu
  namelist /SYSTEM/ ecut, rprimd, kpoint, osc_ecut, nsym, symrel
 
 ! *************************************************************************
@@ -178,9 +183,11 @@ program fftprof
    call xmpi_bcast(ndat,master,comm,ierr)
    call xmpi_bcast(fftalgs,master,comm,ierr)
    call xmpi_bcast(necut,master,comm,ierr)
-   ! SYSTEM
    call xmpi_bcast(ecut_arth,master,comm,ierr)
    call xmpi_bcast(use_lib_threads,master,comm,ierr)
+   call xmpi_bcast(mixprec,master,comm,ierr)
+   call xmpi_bcast(use_gpu,master,comm,ierr)
+   ! SYSTEM
    call xmpi_bcast(ecut,master,comm,ierr)
    call xmpi_bcast(rprimd,master,comm,ierr)
    call xmpi_bcast(kpoint,master,comm,ierr)
@@ -221,6 +228,14 @@ program fftprof
 
  call fft_use_lib_threads(use_lib_threads)
  !write(std_out,*)"use_lib_threads: ",use_lib_threads
+
+#if defined HAVE_GPU_CUDA
+ if (use_gpu /= 0) then
+   gpu_devices(:)=-1
+   call setdevice_cuda(gpu_devices, use_gpu)
+   ABI_CHECK(use_gpu == 0, "Cannot find any free GPU device!")
+ end if
+#endif
 
  if (do_mpi_utests) then
    ! Execute unit tests for MPI FFTs and terminate execution.
@@ -422,7 +437,7 @@ program fftprof
      write(msg,"(3(a,i0))")"fftbox_utests with fftalg = ",fftalg,", ndat = ",ndat,", nthreads = ",nthreads
      call wrtout(std_out, msg)
 
-     nfailed = nfailed + fftbox_utests(fftalg,ndat,nthreads)
+     nfailed = nfailed + fftbox_utests(fftalg, ndat, nthreads)
 
      ! Warning: This routine is not thread safe hence we have to initialize ngfft it here.
      ut_ngfft = -1
@@ -435,7 +450,7 @@ program fftprof
      write(msg,"(3(a,i0))")"fftu_utests with fftalg = ",fftalg,", ndat = ",ndat,", nthreads = ",nthreads
      call wrtout(std_out, msg)
 
-     nfailed = nfailed + fftu_utests(ecut,ut_ngfft,rprimd,ndat,nthreads)
+     nfailed = nfailed + fftu_utests(ecut, ut_ngfft, rprimd, ndat, nthreads)
    end do
 
    write(msg,'(a,i0)')"Total number of failed tests = ",nfailed
@@ -495,6 +510,10 @@ program fftprof
  call fftprof_free(Ftprof)
  ABI_FREE(Ftprof)
  call destroy_mpi_enreg(MPI_enreg)
+
+#if defined HAVE_GPU_CUDA
+ call unsetdevice_cuda(use_gpu)
+#endif
 
  call flush_unit(std_out)
 

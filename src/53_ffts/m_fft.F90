@@ -1112,17 +1112,16 @@ end subroutine fft_use_lib_threads
 !!
 !! SOURCE
 
-function fftbox_utests(fftalg, ndat, nthreads, unit) result(nfailed)
+integer function fftbox_utests(fftalg, ndat, nthreads, unit) result(nfailed)
 
 !Arguments -----------------------------------
 !scalars
- integer,intent(in) :: fftalg,ndat,nthreads
+ integer,intent(in) :: fftalg, ndat, nthreads
  integer,optional,intent(in) :: unit
- integer :: nfailed
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: NSETS=6, use_gpu0 = 0, fftcache0 = 0
+ integer,parameter :: NSETS=6, fftcache0 = 0, use_gpu0 = 1
  integer :: ifft,ierr,ldxyz,old_nthreads,ount,cplex
  integer :: iset,nx,ny,nz,ldx,ldy,ldz,fftalga,fftalgc
  !integer :: ix,iy,iz,padat,dat
