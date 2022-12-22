@@ -177,7 +177,7 @@ MODULE m_fft
      integer(c_int),intent(in) :: f_dims(3), f_embed(3)
      integer(c_int),value, intent(in) :: ndat, isign, kind
      type(c_ptr),intent(in) :: h_ff
-     type(c_ptr),intent(inout) :: plan_pp, d_ff
+     type(c_ptr),intent(in) :: plan_pp, d_ff
    end subroutine xgpu_fftbox_c2c_ip
    subroutine gpu_planpp_free(plan_pp) bind(C)
      use iso_c_binding
@@ -360,7 +360,7 @@ subroutine fftbox_execute_ip_spc(plan, ff, isign)
 
 !Arguments ------------------------------------
 !scalars
- class(fftbox_plan3_t),intent(inout) :: plan
+ class(fftbox_plan3_t),target,intent(inout) :: plan
  integer,intent(in) :: isign
 !arrays
  complex(spc),target,intent(inout) :: ff(plan%ldxyz*plan%ndat)
@@ -407,7 +407,7 @@ subroutine fftbox_execute_ip_dpc(plan, ff, isign)
 
 !Arguments ------------------------------------
 !scalars
- class(fftbox_plan3_t),intent(inout) :: plan
+ class(fftbox_plan3_t),target,intent(inout) :: plan
  integer,intent(in) :: isign
 !arrays
  complex(dpc),target,intent(inout) :: ff(plan%ldxyz*plan%ndat)
