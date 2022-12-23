@@ -71,6 +71,7 @@ prteig 0          # Do not print eigenvalues
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = graphene_gnu_11.2_macports
 #%% [files]
 #%% files_to_test = 
 #%%   tpaw2_1.abo, tolnlines=  13, tolabs=  1.1e-2,    tolrel=  5.0e-1, fld_options=-medium
