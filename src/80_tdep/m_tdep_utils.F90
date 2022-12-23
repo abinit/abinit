@@ -6,7 +6,7 @@
 #include "abi_common.h"
 
 module m_tdep_utils
-  
+
   use defs_basis
   use m_errors
   use m_abicore
@@ -71,7 +71,7 @@ contains
 !=====================================================================================================
  subroutine tdep_calc_MoorePenrose(CoeffMoore,Forces,simult,Invar,IFC_coeff,MPIdata)
 
-  implicit none 
+  implicit none
 
   type(Input_type),intent(in) :: Invar
   type(Coeff_Moore_type), intent(in) :: CoeffMoore
@@ -79,7 +79,7 @@ contains
   double precision, intent(out)  :: IFC_coeff(CoeffMoore%ntotcoeff,1)
   type(MPI_enreg_type), intent(in) :: MPIdata
   integer, intent(in) :: simult
-  
+
   integer :: INFO,ntotcoeff,ntotconst
   integer :: natnstep,nconcoef,ierr,ncoeff_prev,nconst_prev,iconst,icoeff
   integer, allocatable :: IPIV(:)
@@ -92,24 +92,24 @@ contains
   natnstep=3*Invar%natom*Invar%my_nstep
 
   if (simult.eq.0) then
-!   Simultaneously (Invar%together=1) 
+!   Simultaneously (Invar%together=1)
     ncoeff_prev=0
     nconst_prev=0
     ntotcoeff=CoeffMoore%ntotcoeff
     ntotconst=CoeffMoore%ntotconst
-  else if (simult.eq.1) then  
+  else if (simult.eq.1) then
 !   Successively (Invar%together=0 and Invar%order=2)
     ncoeff_prev=0
     nconst_prev=0
     ntotcoeff=CoeffMoore%ncoeff1st +CoeffMoore%ncoeff2nd
     ntotconst=CoeffMoore%nconst_1st+CoeffMoore%nconst_2nd
-  else if (simult.eq.2) then  
+  else if (simult.eq.2) then
 !   Successively (Invar%together=0 and Invar%order=3)
     ncoeff_prev=CoeffMoore%ncoeff1st +CoeffMoore%ncoeff2nd
     nconst_prev=CoeffMoore%nconst_1st+CoeffMoore%nconst_2nd
     ntotcoeff=CoeffMoore%ncoeff3rd
     ntotconst=CoeffMoore%nconst_3rd
-  else if (simult.eq.3) then  
+  else if (simult.eq.3) then
 !   Successively (Invar%together=0 and Invar%order=4)
     ncoeff_prev=CoeffMoore%ncoeff1st +CoeffMoore%ncoeff2nd +CoeffMoore%ncoeff3rd
     nconst_prev=CoeffMoore%nconst_1st+CoeffMoore%nconst_2nd+CoeffMoore%nconst_3rd
@@ -122,7 +122,7 @@ contains
 !  write(Invar%stdout,*) 'ntotconst=',ntotconst
 !  write(Invar%stdout,*) 'ntotcoeff=',ntotcoeff
 !  write(Invar%stdout,*) 'nconcoef=',nconcoef
-  if ((ntotconst.gt.0).and.(simult.ge.2)) then 
+  if ((ntotconst.gt.0).and.(simult.ge.2)) then
     ABI_MALLOC(b_const,(ntotconst)) ; b_const(:)=0.d0
     do iconst=1,ntotconst
       do icoeff=1,ncoeff_prev
@@ -130,7 +130,7 @@ contains
 &         CoeffMoore%const(nconst_prev+iconst,icoeff)*IFC_coeff(icoeff,1)
       end do
     end do
-  end if  
+  end if
 
   ABI_MALLOC(ffcoeff_tmp,(ntotcoeff,ntotcoeff)) ; ffcoeff_tmp(:,:)=0.d0
   ABI_MALLOC(fforces_tmp,(ntotcoeff)) ; fforces_tmp(:)=0.d0
@@ -157,17 +157,19 @@ contains
     A_tot(1:ntotcoeff,ntotcoeff+1:nconcoef)=&
 &                     transpose(CoeffMoore%const(nconst_prev+1:nconst_prev+ntotconst,ncoeff_prev+1:ncoeff_prev+ntotcoeff))
 !FB    ABI_FREE(CoeffMoore%const)
-  end if  
+  end if
   b_tot(1:ntotcoeff)=fforces_tmp(:)
   if ((ntotconst.gt.0).and.(simult.ge.2)) then
     b_tot(ntotcoeff+1:nconcoef)=-b_const(1:ntotconst)
     ABI_FREE(b_const)
-  end if  
+  end if
   ABI_FREE(fforces_tmp)
 
   ABI_MALLOC(IPIV,(nconcoef)); IPIV(:)=0
   ABI_MALLOC(WORK,(nconcoef)); WORK(:)=0.d0
-  A_inv(:,:)=A_tot(:,:)
+  !DGETRF doesnt like zeros on the diagonal (MT nov 22)
+  !A_inv(:,:)=A_tot(:,:)
+  A_inv(:,:)=merge(A_tot(:,:),1.d-14,abs(A_tot(:,:))>1.d-14)
   call DGETRF(nconcoef,nconcoef,A_inv,nconcoef,IPIV,INFO)
   if (INFO.ne.0) write(Invar%stdout,*) 'INFO (dgetrf)=',INFO
 !FB  write(Invar%stdout,*) ' '
@@ -206,7 +208,7 @@ contains
  subroutine tdep_MatchIdeal2Average(distance,Forces_MD,Invar,Lattice,MPIdata,&
 &                              Rlatt_cart,Rlatt4dos,Sym,ucart)
 
-  implicit none 
+  implicit none
 
   type(Input_type),intent(inout) :: Invar
   type(Lattice_type),intent(in) :: Lattice
@@ -217,7 +219,7 @@ contains
   double precision, intent(out)  :: Rlatt_cart(3,Invar%natom_unitcell,Invar%natom)
   double precision, intent(out)  :: Rlatt4dos (3,Invar%natom_unitcell,Invar%natom)
   double precision, intent(out)  :: ucart(3,Invar%natom,Invar%my_nstep)
-  
+
   integer :: ii,jj,kk,max_ijk,iatcell,jatcell,iatom,jatom,eatom,fatom,istep
   integer :: foo,foo2,atom_ref,ierr
   double precision :: tmp(3),tmp1(3),tmp2(3),Rlatt(3),xred_tmp(3),rprimd_md_tmp(3,3)
@@ -249,10 +251,10 @@ contains
       if ((Invar%xred_unitcell(ii,iatcell).le.(-0.5)).or.(Invar%xred_unitcell(ii,iatcell).gt.(0.5))) then
         do while (Invar%xred_unitcell(ii,iatcell).le.(-0.5))
           Invar%xred_unitcell(ii,iatcell)=Invar%xred_unitcell(ii,iatcell)+1.d0
-        end do  
+        end do
         do while (Invar%xred_unitcell(ii,iatcell).gt.(0.5))
           Invar%xred_unitcell(ii,iatcell)=Invar%xred_unitcell(ii,iatcell)-1.d0
-        end do  
+        end do
 !FB        write(Invar%stdout,*) 'xred_unitcell='
 !FB        write(Invar%stdout,*)  Invar%xred_unitcell(:,1:Invar%natom_unitcell)
 !FB        write(Invar%stdout,*) 'Please put the atoms in the ]-0.5;0.5] range'
@@ -279,31 +281,31 @@ contains
           call DGEMV('T',3,3,1.d0,Lattice%multiplicitym1(:,:),3,tmp(:),1,0.d0,xred_tmp(:),1)
 
 !         If the first atom of the pattern is in the [0;1[ range then keep all the
-!         atoms of the pattern (even if the others are outside the box). Elsewhere, 
+!         atoms of the pattern (even if the others are outside the box). Elsewhere,
 !         none are taken.
           if (iatcell==1) then
             if (minval(xred_tmp(:)).lt.0.d0.or.maxval(xred_tmp(:)).ge.(1.d0-1.d-12)) then
               cycle
             else
               ok=.true.
-            end if  
-          else 
+            end if
+          else
             if (.not.ok) cycle
           end if
           if (iatom.gt.(Invar%natom+1)) then
             ABI_ERROR('The number of atoms found in the bigbox exceeds natom' )
-          end if  
+          end if
           xred_ideal(:,iatom)=xred_tmp(:)
           call DGEMV('T',3,3,1.d0,Lattice%multiplicitym1(:,:),3,Rlatt(:),1,0.d0,Rlatt_red(:,1,iatom),1)
           iatom=iatom+1
-        end do   
+        end do
       end do
     end do
   end do
 
   if (iatom.lt.Invar%natom) then
     ABI_ERROR('The number of atoms found in the bigbox is lower than natom')
-  end if  
+  end if
 
 ! Compute the distances between ideal positions in the SUPERcell
   do eatom=1,Invar%natom
@@ -317,8 +319,8 @@ contains
         distance(eatom,fatom,1)=distance(eatom,fatom,1)+(distance(eatom,fatom,ii+1))**2
       end do
       distance(eatom,fatom,1)=distance(eatom,fatom,1)**0.5
-    end do  
-  end do  
+    end do
+  end do
 
 ! Compute the distances between ideal positions in the UNITcell
   ABI_MALLOC(dist_unitcell,(Invar%natom_unitcell,Invar%natom_unitcell,3)); dist_unitcell(:,:,:)=zero
@@ -328,13 +330,13 @@ contains
       call tdep_make_inbox(tmp,1,tol8)
       dist_unitcell(iatcell,jatcell,:)=tmp(:)
     end do
-  end do  
+  end do
 
 !==========================================================================================
 !======== 2/ Find the matching between the ideal and average ==============================
 !========   (from the MD simulations) positions. ==========================================
-!======== NOTE: - xred_center is used to find the matching with the ideal positions ======= 
-!========       - xred_average is used to compute the displacements (from MD trajectories) 
+!======== NOTE: - xred_center is used to find the matching with the ideal positions =======
+!========       - xred_average is used to compute the displacements (from MD trajectories)
 !==========================================================================================
   write(Invar%stdout,*)' Compute average positions...'
   ABI_MALLOC(xred_average,(3,Invar%natom))             ; xred_average(:,:)=0.d0
@@ -387,9 +389,9 @@ contains
 !FB      write(Invar%stdlog,*) 'ATOM REF (bug)=',iatom
       ABI_BUG(' Something wrong: WTF')
     endif
-  end do  
+  end do
   if (ok) then
-    if (MPIdata%iam_master) then 
+    if (MPIdata%iam_master) then
       open(unit=31,file=trim(Invar%output_prefix)//'xred_average.xyz')
       do iatom=1,Invar%natom
         write(31,'(a,1x,3(f10.6,1x))') 'C',xred_center(:,iatom)
@@ -399,12 +401,12 @@ contains
     end if
     ABI_ERROR_NOSTOP('The basis of atoms written in input.in file does not appear in the MD trajectory',ierr)
     ABI_ERROR('Perhaps, you can adjust the tolerance (tolmotif)')
-  end if  
+  end if
   ABI_FREE(dist_unitcell)
 
 ! Modification of xred and Rlatt tabs
-! For averaged quantities --> kk=1: xred_center, xred_average et xred 
-! For ideal quantities    --> kk=2: Rlatt_red et xred_ideal 
+! For averaged quantities --> kk=1: xred_center, xred_average et xred
+! For ideal quantities    --> kk=2: Rlatt_red et xred_ideal
   write(Invar%stdout,*)' Compare ideal and average positions using PBC...'
   do kk=1,2
 !   1/ The "atom_ref" (kk=1) or iatom=1 (kk=2) atom is put in (0.0;0.0;0.0)
@@ -413,14 +415,14 @@ contains
     else if (kk==2) then
       tmp1(:)=xred_ideal(:,1)
       tmp2(:)=Rlatt_red(:,1,1)
-    end if  
+    end if
     do jatom=1,Invar%natom
       if (kk==1) xred_center(:,jatom)=xred_center(:,jatom)-tmp(:)
       if (kk==2) then
         xred_ideal(:,jatom)=  xred_ideal(:,jatom)  -tmp1(:)
         Rlatt_red (:,1,jatom)=Rlatt_red (:,1,jatom)-tmp2(:)
-      end if        
-    end do  
+      end if
+    end do
 !   2/ All the atoms are put in the range [-0.5;0.5[ (use of PBC)
     do jatom=1,Invar%natom
       if (kk==1) then
@@ -429,15 +431,15 @@ contains
         call tdep_make_inbox(tmp,1,Invar%tolinbox,xred_average(:,jatom))
         do istep=1,Invar%my_nstep
           call tdep_make_inbox(tmp,1,Invar%tolinbox,Invar%xred(:,jatom,istep))
-        end do  
+        end do
       else if (kk==2) then
         tmp(:)=xred_ideal(:,jatom)
         call tdep_make_inbox(tmp,1,tol8,xred_ideal(:,jatom))
         call tdep_make_inbox(tmp,1,tol8,Rlatt_red(:,1,jatom))
 !FB        call tdep_make_inbox(Rlatt_red(:,1,jatom),1,tol8)
-      end if  
-    end do  
-  end do  
+      end if
+    end do
+  end do
 
 ! When the multiplicity equals 1 along one direction, there is some trouble
 ! To clean!!!!!!!
@@ -454,7 +456,7 @@ contains
     do iatcell=2,Invar%natom_unitcell
       Rlatt_red(:,iatcell,:)=Rlatt_red(:,1,:)
     end do
-  end if  
+  end if
   do iatom=1,Invar%natom
     do iatcell=1,Invar%natom_unitcell
       tmp(:)=xred_ideal(:,iatom)-xred_ideal(:,iatcell)
@@ -466,8 +468,8 @@ contains
       write(Invar%stdout,*) 'For iatcell=',iatcell
       do jatom=1,Invar%natom
         write(Invar%stdout,'(a,i4,a,3(f16.10,1x))') 'For jatom=',jatom,', Rlatt=',Rlatt_red(1:3,iatcell,jatom)
-      end do  
-    end do  
+      end do
+    end do
   end if
 
 ! Matching between Ideal and Average positions: xred_ideal and xred_center
@@ -533,8 +535,8 @@ contains
         end do
         ok=.false.
         exit
-      end if  
-    end do  
+      end if
+    end do
     if (ok) then
       write(Invar%stdout,*) 'Problem to find the average position for iatom=',iatom
       write(Invar%stdout,*) '  Reasons:'
@@ -547,11 +549,11 @@ contains
         write(Invar%stdout,'(a,1x,3(f10.6,1x))') 'C',xred_center(:,eatom)
       end do
       ABI_ERROR('Problem to find the average position')
-    end if  
+    end if
   end do
 
-! WARNING: VERY IMPORTANT: The positions are displayed/sorted (and used in the following) 
-! according to ideal positions xred_ideal. 
+! WARNING: VERY IMPORTANT: The positions are displayed/sorted (and used in the following)
+! according to ideal positions xred_ideal.
   if (MPIdata%iam_master) then
     open(unit=31,file=trim(Invar%output_prefix)//'xred_average.xyz')
     write(31,'(i4)') Invar%natom*2
@@ -560,8 +562,8 @@ contains
     do iatom=1,Invar%natom
       write(31,'(a,1x,3(f10.6,1x))') 'Ired',xred_ideal (:,iatom)
       write(31,'(a,1x,3(f10.6,1x))') 'Cred',xred_center(:,FromIdeal2Average(iatom))
-    end do  
-!   --> In cartesian coordinates  
+    end do
+!   --> In cartesian coordinates
     do iatom=1,Invar%natom
       tmp(:)=zero
       call DGEMV('T',3,3,1.d0,Lattice%rprimd_md(:,:),3,xred_ideal (:,iatom),1,0.d0,tmp(:),1)
@@ -569,7 +571,7 @@ contains
       tmp(:)=zero
       call DGEMV('T',3,3,1.d0,Lattice%rprimd_md(:,:),3,xred_center(:,FromIdeal2Average(iatom)),1,0.d0,tmp(:),1)
       write(31,'(a,1x,3(f10.6,1x))') 'Ccart',tmp(:)
-    end do  
+    end do
     close(31)
   end if
   ABI_FREE(xred_center)
@@ -587,8 +589,8 @@ contains
 !FB        distance_average(eatom,fatom,1)=distance_average(eatom,fatom,1)+(distance_average(eatom,fatom,ii+1))**2
 !FB      end do
 !FB      distance_average(eatom,fatom,1)=distance_average(eatom,fatom,1)**0.5
-!FB    end do  
-!FB  end do  
+!FB    end do
+!FB  end do
 !FB  ABI_FREE(xred_center)
 !FB  ABI_FREE(distance_average)
 
@@ -599,7 +601,7 @@ contains
 ! b/ Compute ucart and fcart tabs
 ! c/ The atoms are sorted according the IDEAL arrangement
 !    The correspondance function is contained in: FromIdeal2Average
-!    WARNING : Consequently the arrangement of the xcart* tabs is not modified. 
+!    WARNING : Consequently the arrangement of the xcart* tabs is not modified.
   write(Invar%stdout,*)' Compute cartesian coordinates and forces...'
   ABI_MALLOC(xcart        ,(3,Invar%natom,Invar%my_nstep)); xcart(:,:,:)=0.d0
   ABI_MALLOC(xcart_ideal  ,(3,Invar%natom))               ; xcart_ideal(:,:)=0.d0
@@ -610,7 +612,7 @@ contains
     call DGEMV('T',3,3,1.d0,Lattice%rprimd_md(:,:),3,xred_average(:,iatom),1,0.d0,xcart_average(:,iatom),1)
     do iatcell=1,Invar%natom_unitcell
       call DGEMV('T',3,3,1.d0,Lattice%rprimd_md(:,:),3,Rlatt_red(:,iatcell,iatom),1,0.d0,Rlatt_cart(:,iatcell,iatom),1)
-    end do  
+    end do
   end do
   do istep=1,Invar%my_nstep
     do iatom=1,Invar%natom
@@ -620,7 +622,7 @@ contains
         ucart_tmp(:,iatom,istep)=xcart(:,FromIdeal2Average(iatom),istep)-xcart_average(:,FromIdeal2Average(iatom))
       else
         ucart_tmp(:,iatom,istep)=xcart(:,FromIdeal2Average(iatom),istep)-xcart_ideal  (:,iatom)
-      end if  
+      end if
     end do
   end do
   ABI_FREE(xred_average)
@@ -633,16 +635,16 @@ contains
   do istep=1,Invar%my_nstep
     do iatom=1,Invar%natom
       fcart_tmp(:,iatom,istep)=Invar%fcart(:,FromIdeal2Average(iatom),istep)
-    end do  
-  end do  
+    end do
+  end do
   do istep=1,Invar%my_nstep
     do jatom=1,Invar%natom
-      do ii=1,3 
+      do ii=1,3
         Forces_MD(ii+3*(jatom-1)+3*Invar%natom*(istep-1))=fcart_tmp(ii,jatom,istep)
         ucart(ii,jatom,istep)=ucart_tmp(ii,jatom,istep)
-      enddo  
+      enddo
     enddo
-  enddo  
+  enddo
   ABI_FREE(FromIdeal2Average)
   ABI_FREE(ucart_tmp)
   ABI_FREE(fcart_tmp)
@@ -650,14 +652,14 @@ contains
 ! Define Rlatt4dos, fulfilling the definition of mkphdos (ABINIT routine)
   do ii=1,3
     rprimd_md_tmp(ii,:)=Lattice%rprimd_md(ii,:)/Lattice%acell_unitcell(ii)
-  end do  
+  end do
   do iatom=1,Invar%natom
     do iatcell=1,Invar%natom_unitcell
       call DGEMV('T',3,3,1.d0,rprimd_md_tmp(:,:),3,Rlatt_red(:,iatcell,iatom),1,0.d0,Rlatt4dos(:,iatcell,iatom),1)
-    end do  
+    end do
   end do
 
-! Find the symetry operation between 2 atoms 
+! Find the symetry operation between 2 atoms
   call tdep_SearchS_1at(Invar,Lattice,MPIdata,Sym,xred_ideal)
   ABI_MALLOC(Invar%xred_ideal,(3,Invar%natom)) ; Invar%xred_ideal(:,:)=0.d0
   Invar%xred_ideal(:,:)=xred_ideal(:,:)
@@ -668,9 +670,9 @@ contains
 
 !====================================================================================================
  subroutine tdep_calc_model(Forces_MD,Forces_TDEP,Invar,MPIdata,Phi1Ui,Phi2UiUj,&
-&                           Phi3UiUjUk,Phi4UiUjUkUl,U0) 
+&                           Phi3UiUjUk,Phi4UiUjUkUl,U0)
 
-  implicit none 
+  implicit none
 
   type(Input_type),intent(in) :: Invar
   type(MPI_enreg_type), intent(in) :: MPIdata
@@ -681,7 +683,7 @@ contains
   double precision, intent(in)  :: Phi2UiUj(Invar%my_nstep)
   double precision, intent(in)  :: Phi3UiUjUk(Invar%my_nstep)
   double precision, intent(in)  :: Phi4UiUjUkUl(Invar%my_nstep)
-  
+
   integer :: ii,istep,iatom
   double precision :: Delta_F2,Delta_U,Delta_U2
   double precision :: sigma,U_1,U_2,U_3,U_4,UMD
@@ -695,9 +697,9 @@ contains
   write(Invar%stdout,*) '#############################################################################'
   write(Invar%stdout,*) '######################### Energies, errors,...  #############################'
   write(Invar%stdout,*) '#############################################################################'
-  
+
 ! Compute U0, U_TDEP, Delta_U and write them in the data.out file
-  write(Invar%stdout,'(a)') ' Thermodynamic quantities and convergence parameters of THE MODEL,' 
+  write(Invar%stdout,'(a)') ' Thermodynamic quantities and convergence parameters of THE MODEL,'
   write(Invar%stdout,'(a)') '      as a function of the step number (energies in eV/atom and forces in Ha/bohr) :'
   if (Invar%order.eq.4) then
     write(Invar%stdout,'(a)') ' <U_TDEP> = U_0 + U_1 + U_2 + U_3 + U_4'
@@ -713,12 +715,12 @@ contains
     write(Invar%stdout,'(a)') '        and U_1 = <      sum_i    Phi1 ui >'
     write(Invar%stdout,'(a)') '        and U_2 = < 1/2  sum_ij   Phi2 ui uj >'
     write(Invar%stdout,'(a)') '        and U_3 = < 1/6  sum_ijk  Phi3 ui uj uk >'
-  else  
+  else
     write(Invar%stdout,'(a)') ' <U_TDEP> = U_0 + U_1 + U_2'
     write(Invar%stdout,'(a)') '       with U_0 = < U_MD - sum_i Phi1 ui - 1/2 sum_ij Phi2 ui uj >'
     write(Invar%stdout,'(a)') '        and U_1 = <      sum_i    Phi1 ui >'
     write(Invar%stdout,'(a)') '        and U_2 = < 1/2  sum_ij   Phi2 ui uj >'
-  end if  
+  end if
   write(Invar%stdout,'(a)') '  Delta_U =   < U_MD - U_TDEP > '
   write(Invar%stdout,'(a)') '  Delta_U2= (< (U_MD - U_TDEP)^2 >)**0.5 '
   write(Invar%stdout,'(a)') '  Delta_F2= (< (F_MD - F_TDEP)^2 >)**0.5 '
@@ -732,9 +734,9 @@ contains
   else
     write(Invar%stdout,'(2a)') '     <U_MD>            U_0              U_1              U_2  ',&
 &     '          Delta_U          Delta_U2          Delta_F2          Sigma'
-  end if  
+  end if
 
-! Compute eucledian distance for forces    
+! Compute eucledian distance for forces
   ABI_MALLOC(tmp,(11))                  ; tmp(:)   =0.d0
   do istep=1,Invar%my_nstep
     do iatom=1,Invar%natom
@@ -743,7 +745,7 @@ contains
 &               -Forces_TDEP(ii+3*(iatom-1)+3*Invar%natom*(istep-1)))**2*Invar%weights(istep)
         tmp(5)=tmp(5)+Forces_MD(ii+3*(iatom-1)+3*Invar%natom*(istep-1))**2*Invar%weights(istep)
       end do
-    end do  
+    end do
   end do
 ! Compute energies
   ABI_MALLOC(U_TDEP,     (Invar%nstep_tot)) ; U_TDEP(:)=0.d0
@@ -781,9 +783,9 @@ contains
   Delta_F2 =tmp(4) /real(Invar%natom*3)
   if (tmp(5).eq.0.d0) then
     sigma    =0.d0
-  else  
+  else
     sigma    =dsqrt(tmp(4)/tmp(5))
-  end if  
+  end if
   if (Invar%order.eq.4) then
     write(Invar%stdout,'(10(f12.5,5x))') UMD*Ha_eV,U0*Ha_eV,U_1*Ha_eV,U_2*Ha_eV,U_3*Ha_eV,U_4*Ha_eV,&
 &     Delta_U*Ha_eV,Delta_U2**0.5*Ha_eV,Delta_F2**0.5,sigma
@@ -793,7 +795,7 @@ contains
   else
     write(Invar%stdout,'(8(f12.5,5x))') UMD*Ha_eV,U0*Ha_eV,U_1*Ha_eV,U_2*Ha_eV,&
 &     Delta_U*Ha_eV,Delta_U2**0.5*Ha_eV,Delta_F2**0.5,sigma
-  endif 
+  endif
   ABI_FREE(tmp)
   write(Invar%stdout,'(a,1x,f12.5)') ' NOTE : in the harmonic and classical limit (T>>T_Debye), U_2=3/2*kB*T=',&
 &   3.d0/2.d0*kb_HaK*Ha_eV*Invar%temperature
@@ -809,18 +811,18 @@ contains
     write(33,'(a)') '# Forces_MD(Ha/bohr) Forces_TDEP(Ha/bohr)'
     do istep=1,Invar%nstep_tot
       write(32,'(i6,1x,2(f17.6,1x))') istep,U_MD(istep),U_TDEP(istep)
-    end do  
+    end do
     do istep=1,Invar%my_nstep
       do iatom=1,Invar%natom
         do ii=1,3
           write(33,'(2(f17.10,1x))') Forces_MD  (ii+3*(iatom-1)+3*Invar%natom*(istep-1)),&
 &                                    Forces_TDEP(ii+3*(iatom-1)+3*Invar%natom*(istep-1))
         end do
-      end do  
-    end do  
+      end do
+    end do
     close(32)
     close(33)
-  end if  
+  end if
   ABI_FREE(U_MD)
   ABI_FREE(U_TDEP)
   ABI_FREE(Phi_tot)
@@ -872,7 +874,7 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,Invar,ishell,jatom,katom,latom,MPI
     facorder=6
   else if (order==4) then
     facorder=24
-  end if  
+  end if
 
 ! If we want to remove the constraints coming from the symetries
 !FB  if (order==3) then
@@ -881,7 +883,7 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,Invar,ishell,jatom,katom,latom,MPI
 !FB    end do
 !FB    ncoeff=norder
 !FB    return
-!FB  end if  
+!FB  end if
 
   nconst_loc=0
   const_tot=0
@@ -898,20 +900,20 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,Invar,ishell,jatom,katom,latom,MPI
   do isyminv=1,nsyminv
     isym=(isyminv-1)/facorder+1
     inv=isyminv-(isym-1)*facorder
-    if (isym==1) cycle 
+    if (isym==1) cycle
 
 !   For the 1st order: Search if the atom is let invariant
     if (order==1) then
       if (Sym%indsym(4,isym,iatcell)==iatcell) then
-        if (MPIdata%iam_master) then 
+        if (MPIdata%iam_master) then
           write(16,'(a,1x,i3)')'===========The atom is kept invariant for isym=',isym
-        end if  
+        end if
       else
         cycle
-      end if  
-    end if 
+      end if
+    end if
 
-!   For the 2nd order: Search if the bond is kept invariant or reversed    
+!   For the 2nd order: Search if the bond is kept invariant or reversed
     if (order==2) then
       vect_trial(:)=zero
       if (inv==1) then ; watom=iatcell ; xatom=jatom   ; endif !\Phi_ij
@@ -919,20 +921,20 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,Invar,ishell,jatom,katom,latom,MPI
       do ii=1,3
         do jj=1,3
           vect_trial(ii)=vect_trial(ii)+Sym%S_ref(ii,jj,isym,1)*distance(watom,xatom,jj+1)
-        end do  
+        end do
       end do
       jatcell=mod(jatom-1,Invar%natom_unitcell)+1
       if ((sum(abs(vect_trial(:)-distance(iatcell,jatom,2:4))).lt.tol8).and.&
 &         (Sym%indsym(4,isym,watom)==iatcell).and.&
 &         (Sym%indsym(4,isym,xatom)==jatcell)) then
-        if (MPIdata%iam_master) then 
+        if (MPIdata%iam_master) then
           if (inv==1) write(16,'(a,1x,i3)')'===========The bond is kept invariant for isym=',isym
           if (inv==2) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j) --> (j,i) for isym=',isym
-        end if  
+        end if
       else
         cycle
-      end if  
-    end if  
+      end if
+    end if
 
 !   For the 3rd order : 6 permutations at all
     if (order==3) then
@@ -950,7 +952,7 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,Invar,ishell,jatom,katom,latom,MPI
           vect_trial1(ii)=vect_trial1(ii)+Sym%S_ref(ii,jj,isym,1)*distance(watom,xatom,jj+1)
           vect_trial2(ii)=vect_trial2(ii)+Sym%S_ref(ii,jj,isym,1)*distance(xatom,yatom,jj+1)
           vect_trial3(ii)=vect_trial3(ii)+Sym%S_ref(ii,jj,isym,1)*distance(yatom,watom,jj+1)
-        end do  
+        end do
       end do
       jatcell=mod(jatom-1,Invar%natom_unitcell)+1
       katcell=mod(katom-1,Invar%natom_unitcell)+1
@@ -960,18 +962,18 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,Invar,ishell,jatom,katom,latom,MPI
 &         (Sym%indsym(4,isym,watom)==iatcell).and.&
 &         (Sym%indsym(4,isym,xatom)==jatcell).and.&
 &         (Sym%indsym(4,isym,yatom)==katcell)) then
-        if (MPIdata%iam_master) then 
+        if (MPIdata%iam_master) then
           if (inv==1) write(16,'(a,1x,i3)')'===========The bond is kept invariant for isym=',isym
           if (inv==2) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k) --> (i,k,j) for isym=',isym
           if (inv==3) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k) --> (j,i,k) for isym=',isym
           if (inv==4) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k) --> (j,k,i) for isym=',isym
           if (inv==5) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k) --> (k,i,j) for isym=',isym
           if (inv==6) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k) --> (k,j,i) for isym=',isym
-        end if  
+        end if
       else
         cycle
-      end if  
-    end if  
+      end if
+    end if
 
 !   For the 4th order : 24 permutations at all
     if (order==4) then
@@ -1017,7 +1019,7 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,Invar,ishell,jatom,katom,latom,MPI
           vect_trial4(ii)=vect_trial4(ii)+Sym%S_ref(ii,jj,isym,1)*distance(xatom,yatom,jj+1)
           vect_trial5(ii)=vect_trial5(ii)+Sym%S_ref(ii,jj,isym,1)*distance(xatom,zatom,jj+1)
           vect_trial6(ii)=vect_trial6(ii)+Sym%S_ref(ii,jj,isym,1)*distance(yatom,zatom,jj+1)
-        end do  
+        end do
       end do
       jatcell=mod(jatom-1,Invar%natom_unitcell)+1
       katcell=mod(katom-1,Invar%natom_unitcell)+1
@@ -1032,14 +1034,14 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,Invar,ishell,jatom,katom,latom,MPI
 &         (Sym%indsym(4,isym,xatom)==jatcell).and.&
 &         (Sym%indsym(4,isym,yatom)==katcell).and.&
 &         (Sym%indsym(4,isym,zatom)==latcell)) then
-        if (MPIdata%iam_master) then 
+        if (MPIdata%iam_master) then
           if (inv==1 ) write(16,'(a,1x,i3)')'===========The bond is kept invariant for isym=',isym
           if (inv==2 ) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (i,k,j,l) for isym=',isym !\Phi4_ikjl
           if (inv==3 ) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (j,i,k,l) for isym=',isym !\Phi4_jikl
           if (inv==4 ) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (j,k,i,l) for isym=',isym !\Phi4_jkil
           if (inv==5 ) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (k,i,j,l) for isym=',isym !\Phi4_kijl
           if (inv==6 ) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (k,j,i,l) for isym=',isym !\Phi4_kjil
-  
+
           if (inv==7 ) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (i,j,l,k) for isym=',isym !\Phi4_ijlk
           if (inv==8 ) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (i,k,l,j) for isym=',isym !\Phi4_iklj
           if (inv==9 ) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (j,i,l,k) for isym=',isym !\Phi4_jilk
@@ -1060,11 +1062,11 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,Invar,ishell,jatom,katom,latom,MPI
           if (inv==22) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (l,j,k,i) for isym=',isym !\Phi4_ljki
           if (inv==23) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (l,k,i,j) for isym=',isym !\Phi4_lkij
           if (inv==24) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (l,k,j,i) for isym=',isym !\Phi4_lkji
-        end if  
+        end if
       else
         cycle
-      end if  
-    end if  
+      end if
+    end if
 
 !   Write the S_ref matrix
 !FB    write(16,'(3(f16.12,1x))') Sym%S_ref(1,1,isym,1),Sym%S_ref(1,2,isym,1),Sym%S_ref(1,3,isym,1)
@@ -1075,8 +1077,8 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,Invar,ishell,jatom,katom,latom,MPI
     do ii=1,3
       do jj=1,3
         eigvec(ii,jj)=Sym%S_ref(jj,ii,isym,1)
-      end do  
-    end do  
+      end do
+    end do
     LWORK=4*3
     ABI_MALLOC(WORK,(LWORK)); WORK(:)=zero
 !   This one is real and could be non-symmetric
@@ -1100,9 +1102,9 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,Invar,ishell,jatom,katom,latom,MPI
       else
         do kk=1,3
           eigenvectors(kk,ii)=dcmplx(VR(kk,ii),zero)
-        end do  
+        end do
       end if
-    end do  
+    end do
 
 !   Write the eigenvalues and eigenvectors
 !   These ones could be complex!!!!
@@ -1116,8 +1118,8 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,Invar,ishell,jatom,katom,latom,MPI
 !FB      write(16,'(2(f16.12,1x))') eigenvectors(3,ii)
       if ((aimag(eigenvalues(1)).ne.0).or.(aimag(eigenvalues(2)).ne.0).or.(aimag(eigenvalues(3)).ne.0)) then
         ok=.true.
-      end if  
-    end do  
+      end if
+    end do
     if (ok.and.MPIdata%iam_master) write(16,'(a)') '            WARNING: THERE IS COMPLEX EIGENVALUES'
 
 !   If the transformation matrix keeps the bond invariant:
@@ -1127,14 +1129,14 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,Invar,ishell,jatom,katom,latom,MPI
 !     = \sum_{\mu\nu,\alpha\beta} p_{\alpha}^l.p_{\beta}^k.S_{\alpha\mu}.S_{\beta\nu}.Phi_{\mu\nu}
 !     = lambda^{*l}.lambda^{*k} \sum_{\mu\nu} p_{\mu}^l.p_{\nu}^k.Phi_{\mu\nu}
 !   So, if lambda^{*l}.lambda^{*k} = -1, we must have:
-!      \sum_{\alpha\beta} p_{\alpha}^l.p_{\beta}^k.Phi_{\alpha\beta}= 0      
+!      \sum_{\alpha\beta} p_{\alpha}^l.p_{\beta}^k.Phi_{\alpha\beta}= 0
 !
 !   In the case of the reversed bond, one obtains the following constraint:
-!      \sum_{\alpha\beta} (lambda^{*l}.lambda^{*k}.p_{\alpha}^l.p_{\beta}^k-p_{\beta}^l.p_{\alpha}^k).Phi_{\alpha\beta}= 0 
+!      \sum_{\alpha\beta} (lambda^{*l}.lambda^{*k}.p_{\alpha}^l.p_{\beta}^k-p_{\beta}^l.p_{\alpha}^k).Phi_{\alpha\beta}= 0
 !   which applies whether lambda^{*l}.lambda^{*k} = \pm 1
 !
 !   We obtain n vectors with norder coefficients (defined in the R^norder space).
-!   The space of the independent solutions are in the R^(norder-n) space, orthogonal 
+!   The space of the independent solutions are in the R^(norder-n) space, orthogonal
 !   to the space spanned by the starting n vectors.
     if (order==1) then
       do ii=1,3
@@ -1144,10 +1146,10 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,Invar,ishell,jatom,katom,latom,MPI
         iconst(isyminv)=iconst(isyminv)+1
 !FB        const_tot=const_tot+1
 !FB        write(16,*)'  The eigenvalue',ii
-!FB        write(16,*)'  is equal to ',lambda  
+!FB        write(16,*)'  is equal to ',lambda
         do mu=1,3
           alphaij(isyminv,mu,iconst(isyminv))=eigenvectors(mu,ii)
-        end do  
+        end do
 !FB        write(16,*)'  Real & imaginary parts of the eigenvectors product:'
 !FB        write(16,'(3(f16.12,1x))')  real(alphaij(isyminv,:,iconst(isyminv)))
 !FB        write(16,'(3(f16.12,1x))') aimag(alphaij(isyminv,:,iconst(isyminv)))
@@ -1162,12 +1164,12 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,Invar,ishell,jatom,katom,latom,MPI
           iconst(isyminv)=iconst(isyminv)+1
 !FB          const_tot=const_tot+1
 !FB          write(16,*)'  The product of eigenvalues',ii,jj
-!FB          write(16,*)'  is equal to ',lambda  
+!FB          write(16,*)'  is equal to ',lambda
           do mu=1,3
             do nu=1,3
               pp(mu,nu)=eigenvectors(mu,ii)*eigenvectors(nu,jj)
             end do
-          end do  
+          end do
           do mu=1,3
             do nu=1,3
               if (inv==1) then
@@ -1177,14 +1179,14 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,Invar,ishell,jatom,katom,latom,MPI
               else
                 ABI_BUG('This symetry is neither Keptinvariant nor Reversed')
               end if
-            end do  
-          end do  
+            end do
+          end do
 !FB          write(16,*)'  Real & imaginary parts of the eigenvectors product:'
 !FB          write(16,'(9(f16.12,1x))')  real(alphaij(isyminv,:,iconst(isyminv)))
 !FB          write(16,'(9(f16.12,1x))') aimag(alphaij(isyminv,:,iconst(isyminv)))
         end do !jj
       end do !ii
-    else if (order==3) then  
+    else if (order==3) then
       do ii=1,3
         do jj=1,3
           do kk=1,3
@@ -1199,14 +1201,14 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,Invar,ishell,jatom,katom,latom,MPI
             iconst(isyminv)=iconst(isyminv)+1
 !FB            const_tot=const_tot+1
 !FB            write(16,*)'  The product of eigenvalues',ii,jj
-!FB            write(16,*)'  is equal to ',lambda  
+!FB            write(16,*)'  is equal to ',lambda
             do mu=1,3
               do nu=1,3
                 do xi=1,3
                   ppp(mu,nu,xi)=eigenvectors(mu,ii)*eigenvectors(nu,jj)*eigenvectors(xi,kk)
                 end do !xi
               end do !nu
-            end do !mu 
+            end do !mu
             do mu=1,3
               do nu=1,3
                 do xi=1,3
@@ -1225,8 +1227,8 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,Invar,ishell,jatom,katom,latom,MPI
                   else
                     ABI_BUG('This symetry is neither Keptinvariant nor Reversed')
                   end if
-                end do !xi  
-              end do !nu 
+                end do !xi
+              end do !nu
             end do !mu
 !FB            write(16,*)'  Real & imaginary parts of the eigenvectors product:'
 !FB            write(16,'(27(f16.12,1x))')  real(alphaij(isyminv,:,iconst(isyminv)))
@@ -1234,7 +1236,7 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,Invar,ishell,jatom,katom,latom,MPI
           end do !kk
         end do !jj
       end do !ii
-    else if (order==4) then  
+    else if (order==4) then
       do ii=1,3
         do jj=1,3
           do kk=1,3
@@ -1268,12 +1270,12 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,Invar,ishell,jatom,katom,latom,MPI
 &                 ((inv==22).and.(ii==ll))                          .or.& !\Phi4_ljki
 &                 ((inv==23).and.(ii==jj).and.(jj==kk).and.(kk==ll)).or.& !\Phi4_lkij
 &                 ((inv==24).and.(ii==ll).and.(jj==kk))) cycle            !\Phi4_lkji
-              end if                
+              end if
               unchanged(isyminv)=.true.
               iconst(isyminv)=iconst(isyminv)+1
 !FB              const_tot=const_tot+1
 !FB              write(16,*)'  The product of eigenvalues',ii,jj
-!FB              write(16,*)'  is equal to ',lambda  
+!FB              write(16,*)'  is equal to ',lambda
               do mu=1,3
                 do nu=1,3
                   do xi=1,3
@@ -1282,7 +1284,7 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,Invar,ishell,jatom,katom,latom,MPI
                     end do !zeta
                   end do !xi
                 end do !nu
-              end do !mu 
+              end do !mu
               do mu=1,3
                 do nu=1,3
                   do xi=1,3
@@ -1317,9 +1319,9 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,Invar,ishell,jatom,katom,latom,MPI
                       else if (inv==24) then ; alphaij(isyminv,itemp,iconst(isyminv))=lambda*pppp(mu,nu,xi,zeta)-pppp(zeta,xi,nu,mu)
                       else ; ABI_BUG('This symetry is neither Keptinvariant nor Reversed')
                       end if
-                    end do !zeta  
-                  end do !xi  
-                end do !nu 
+                    end do !zeta
+                  end do !xi
+                end do !nu
               end do !mu
 !FB              write(16,*)'  Real & imaginary parts of the eigenvectors product:'
 !FB              write(16,'(81(f16.12,1x))')  real(alphaij(isyminv,:,iconst(isyminv)))
@@ -1330,7 +1332,7 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,Invar,ishell,jatom,katom,latom,MPI
       end do !ii
     else
       ABI_BUG('Only the first, second, third and fourth order are allowed')
-    end if  
+    end if
 
 
 !FB=================================================================
@@ -1344,8 +1346,8 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,Invar,ishell,jatom,katom,latom,MPI
       do jj=1,iconst(itemp)
         ii=ii+1
         tab_vec(:,ii)=alphaij(itemp,:,jj)
-      end do  
-    end if  
+      end do
+    end if
   end do
 
   do kk=2,nconst_loc
@@ -1357,7 +1359,7 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,Invar,ishell,jatom,katom,latom,MPI
           if (abs( real(tab_vec(ii,kk))).lt.1.d-8) tab_vec(ii,kk)=dcmplx(zero,aimag(tab_vec(ii,kk)))
           if (abs(aimag(tab_vec(ii,kk))).lt.1.d-8) tab_vec(ii,kk)=dcmplx( real(tab_vec(ii,kk)),zero)
         end do
-      end if  
+      end if
     end do
   end do
 
@@ -1369,8 +1371,8 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,Invar,ishell,jatom,katom,latom,MPI
     if (abs(prod_scal).gt.tol8) then
       ii=ii+1
       temp(:,ii)=tab_vec(:,kk)/dsqrt(prod_scal)
-    end if  
-  end do  
+    end if
+  end do
   ABI_FREE(tab_vec)
   iconst(isyminv)=ii-const_tot
   const_tot=const_tot+iconst(isyminv)
@@ -1382,23 +1384,23 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,Invar,ishell,jatom,katom,latom,MPI
       do jj=1,iconst(itemp)
         ii=ii+1
         alphaij(itemp,:,jj)=temp(:,ii)
-      end do  
-    end if  
+      end do
+    end if
   end do
   ABI_FREE(temp)
 !FB=================================================================
 !FB======== TO CLEAN ===============================================
 !FB=================================================================
-  
-    
-    
-    
-    
+
+
+
+
+
 
 !   WARNING: There are some minimum and maximum of constraints
     if (order==1.and.(iconst(isyminv).eq.3)) then
       ncoeff=0
-      proj(:,:,ishell)=zero   
+      proj(:,:,ishell)=zero
       ABI_FREE(unchanged)
       ABI_FREE(alphaij)
       ABI_FREE(iconst)
@@ -1433,38 +1435,38 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,Invar,ishell,jatom,katom,latom,MPI
         do nu=1,3
           do xi=1,3
             ii=ii+1
-            if (iatcell.eq.jatom) then 
+            if (iatcell.eq.jatom) then
               if (mu.eq.nu) cycle
               constraints(1,(mu-1)*9+(nu-1)*3+xi,ii)= cone
               constraints(1,(nu-1)*9+(mu-1)*3+xi,ii)=-cone
-            end if 
-            if (iatcell.eq.katom) then 
+            end if
+            if (iatcell.eq.katom) then
               if (mu.eq.xi) cycle
               constraints(2,(mu-1)*9+(nu-1)*3+xi,ii)= cone
               constraints(2,(xi-1)*9+(nu-1)*3+mu,ii)=-cone
-            end if 
-            if (jatom.eq.katom) then 
+            end if
+            if (jatom.eq.katom) then
               if (nu.eq.xi) cycle
               constraints(3,(mu-1)*9+(nu-1)*3+xi,ii)= cone
               constraints(3,(mu-1)*9+(xi-1)*3+nu,ii)=-cone
-            end if 
-            if ((iatcell.eq.jatom).and.(jatom.eq.katom)) then 
+            end if
+            if ((iatcell.eq.jatom).and.(jatom.eq.katom)) then
               if ((nu.eq.xi).and.(nu.eq.mu)) cycle
               constraints(4,(mu-1)*9+(nu-1)*3+xi,ii)= cone
               constraints(4,(xi-1)*9+(mu-1)*3+nu,ii)=-cone
-            end if 
-            if ((iatcell.eq.jatom).and.(jatom.eq.katom)) then 
+            end if
+            if ((iatcell.eq.jatom).and.(jatom.eq.katom)) then
               if ((nu.eq.xi).and.(nu.eq.mu)) cycle
               constraints(5,(mu-1)*9+(nu-1)*3+xi,ii)= cone
               constraints(5,(nu-1)*9+(xi-1)*3+mu,ii)=-cone
-            end if 
-          end do  
-        end do  
-      end do  
+            end if
+          end do
+        end do
+      end do
     end if
   end if
 
-! The (iikl, ijil, ijki, ijjl, ijkj, ijkk, iiil, iiki, ijii, ijjj, iiii) 
+! The (iikl, ijil, ijki, ijjl, ijkj, ijkk, iiil, iiki, ijii, ijjj, iiii)
 ! fourth order IFCs are symmetric with respect to some permutations.
 ! Some constraints have to be added :
   if (order.eq.4) then
@@ -1480,105 +1482,105 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,Invar,ishell,jatom,katom,latom,MPI
           do xi=1,3
             do zeta=1,3
               ii=ii+1
-              if (iatcell.eq.jatom) then 
+              if (iatcell.eq.jatom) then
                 if (mu.eq.nu) cycle
                 constraints(1,(mu-1)*27+(nu-1)*9+(xi-1)*3+zeta,ii)= cone
                 constraints(1,(nu-1)*27+(mu-1)*9+(xi-1)*3+zeta,ii)=-cone
-              end if 
-              if (iatcell.eq.katom) then 
+              end if
+              if (iatcell.eq.katom) then
                 if (mu.eq.xi) cycle
                 constraints(2,(mu-1)*27+(nu-1)*9+(xi-1)*3+zeta,ii)= cone
                 constraints(2,(xi-1)*27+(nu-1)*9+(mu-1)*3+zeta,ii)=-cone
-              end if 
-              if (iatcell.eq.latom) then 
+              end if
+              if (iatcell.eq.latom) then
                 if (mu.eq.zeta) cycle
                 constraints(3,(mu  -1)*27+(nu-1)*9+(xi-1)*3+zeta,ii)= cone
                 constraints(3,(zeta-1)*27+(nu-1)*9+(xi-1)*3+mu  ,ii)=-cone
-              end if 
-              if (jatom.eq.katom) then 
+              end if
+              if (jatom.eq.katom) then
                 if (nu.eq.xi) cycle
                 constraints(4,(mu-1)*27+(nu-1)*9+(xi-1)*3+zeta,ii)= cone
                 constraints(4,(mu-1)*27+(xi-1)*9+(nu-1)*3+zeta,ii)=-cone
-              end if 
-              if (jatom.eq.latom) then 
+              end if
+              if (jatom.eq.latom) then
                 if (nu.eq.zeta) cycle
                 constraints(5,(mu-1)*27+(nu  -1)*9+(xi-1)*3+zeta,ii)= cone
                 constraints(5,(mu-1)*27+(zeta-1)*9+(xi-1)*3+nu  ,ii)=-cone
-              end if 
-              if (katom.eq.latom) then 
+              end if
+              if (katom.eq.latom) then
                 if (xi.eq.zeta) cycle
                 constraints(6,(mu-1)*27+(nu-1)*9+(xi  -1)*3+zeta,ii)= cone
                 constraints(6,(mu-1)*27+(nu-1)*9+(zeta-1)*3+xi  ,ii)=-cone
-              end if 
+              end if
 
-              if ((iatcell.eq.jatom).and.(jatom.eq.katom)) then 
+              if ((iatcell.eq.jatom).and.(jatom.eq.katom)) then
                 if ((mu.eq.nu).and.(nu.eq.xi)) cycle
                 constraints(7,(mu-1)*27+(nu-1)*9+(xi-1)*3+zeta,ii)= cone
                 constraints(7,(xi-1)*27+(mu-1)*9+(nu-1)*3+zeta,ii)=-cone
-              end if 
-              if ((iatcell.eq.jatom).and.(jatom.eq.katom)) then 
+              end if
+              if ((iatcell.eq.jatom).and.(jatom.eq.katom)) then
                 if ((mu.eq.nu).and.(nu.eq.xi)) cycle
                 constraints(8,(mu-1)*27+(nu-1)*9+(xi-1)*3+zeta,ii)= cone
                 constraints(8,(nu-1)*27+(xi-1)*9+(mu-1)*3+zeta,ii)=-cone
-              end if 
+              end if
 
-              if ((iatcell.eq.jatom).and.(jatom.eq.latom)) then 
+              if ((iatcell.eq.jatom).and.(jatom.eq.latom)) then
                 if ((mu.eq.nu).and.(nu.eq.zeta)) cycle
                 constraints(9,(mu-1)*27+(nu  -1)*9+(xi-1)*3+zeta,ii)= cone
                 constraints(9,(nu-1)*27+(zeta-1)*9+(xi-1)*3+mu  ,ii)=-cone
-              end if 
-              if ((iatcell.eq.jatom).and.(jatom.eq.latom)) then 
+              end if
+              if ((iatcell.eq.jatom).and.(jatom.eq.latom)) then
                 if ((mu.eq.nu).and.(nu.eq.zeta)) cycle
                 constraints(10,(mu  -1)*27+(nu-1)*9+(xi-1)*3+zeta,ii)= cone
                 constraints(10,(zeta-1)*27+(mu-1)*9+(xi-1)*3+nu  ,ii)=-cone
-              end if 
+              end if
 
-              if ((iatcell.eq.katom).and.(katom.eq.latom)) then 
+              if ((iatcell.eq.katom).and.(katom.eq.latom)) then
                 if ((mu.eq.xi).and.(xi.eq.zeta)) cycle
                 constraints(11,(mu-1)*27+(nu-1)*9+(xi  -1)*3+zeta,ii)= cone
                 constraints(11,(xi-1)*27+(nu-1)*9+(zeta-1)*3+mu  ,ii)=-cone
-              end if 
-              if ((iatcell.eq.katom).and.(katom.eq.latom)) then 
+              end if
+              if ((iatcell.eq.katom).and.(katom.eq.latom)) then
                 if ((mu.eq.xi).and.(xi.eq.zeta)) cycle
                 constraints(12,(mu  -1)*27+(nu-1)*9+(xi-1)*3+zeta,ii)= cone
                 constraints(12,(zeta-1)*27+(nu-1)*9+(mu-1)*3+xi  ,ii)=-cone
-              end if 
+              end if
 
-              if ((jatom.eq.katom).and.(katom.eq.latom)) then 
+              if ((jatom.eq.katom).and.(katom.eq.latom)) then
                 if ((nu.eq.xi).and.(xi.eq.zeta)) cycle
                 constraints(13,(mu-1)*27+(nu-1)*9+(xi  -1)*3+zeta,ii)= cone
                 constraints(13,(mu-1)*27+(xi-1)*9+(zeta-1)*3+nu  ,ii)=-cone
-              end if 
-              if ((jatom.eq.katom).and.(katom.eq.latom)) then 
+              end if
+              if ((jatom.eq.katom).and.(katom.eq.latom)) then
                 if ((nu.eq.xi).and.(xi.eq.zeta)) cycle
                 constraints(14,(mu-1)*27+(nu  -1)*9+(xi-1)*3+zeta,ii)= cone
                 constraints(14,(mu-1)*27+(zeta-1)*9+(nu-1)*3+xi  ,ii)=-cone
-              end if 
+              end if
 
-              if ((iatcell.eq.jatom).and.(jatom.eq.katom).and.(katom.eq.latom)) then 
+              if ((iatcell.eq.jatom).and.(jatom.eq.katom).and.(katom.eq.latom)) then
                 if ((mu.eq.nu).and.(nu.eq.xi).and.(xi.eq.zeta)) cycle
                 constraints(15,(mu-1)*27+(nu-1)*9+(xi  -1)*3+zeta,ii)= cone
                 constraints(15,(nu-1)*27+(xi-1)*9+(zeta-1)*3+mu  ,ii)=-cone
-              end if 
-              if ((iatcell.eq.jatom).and.(jatom.eq.katom).and.(katom.eq.latom)) then 
+              end if
+              if ((iatcell.eq.jatom).and.(jatom.eq.katom).and.(katom.eq.latom)) then
                 if ((mu.eq.nu).and.(nu.eq.xi).and.(xi.eq.zeta)) cycle
                 constraints(16,(mu-1)*27+(nu  -1)*9+(xi-1)*3+zeta,ii)= cone
                 constraints(16,(xi-1)*27+(zeta-1)*9+(mu-1)*3+nu  ,ii)=-cone
-              end if 
-              if ((iatcell.eq.jatom).and.(jatom.eq.katom).and.(katom.eq.latom)) then 
+              end if
+              if ((iatcell.eq.jatom).and.(jatom.eq.katom).and.(katom.eq.latom)) then
                 if ((mu.eq.nu).and.(nu.eq.xi).and.(xi.eq.zeta)) cycle
                 constraints(17,(mu  -1)*27+(nu-1)*9+(xi-1)*3+zeta,ii)= cone
                 constraints(17,(zeta-1)*27+(mu-1)*9+(nu-1)*3+xi  ,ii)=-cone
-              end if 
-            end do  
-          end do  
-        end do  
-      end do  
+              end if
+            end do
+          end do
+        end do
+      end do
     end if
   end if
 
-! In the case where the matrix has norder**2 inequivalent and non-zero elements  
-  if (const_tot==0) then 
+! In the case where the matrix has norder**2 inequivalent and non-zero elements
+  if (const_tot==0) then
     write(message,'(a,1x,i3,1x,a)') 'For shell number=',ishell,'there is no symetry operation reducing the number of coefficients'
     ABI_WARNING(message)
     proj(:,:,ishell)=0.d0
@@ -1594,9 +1596,9 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,Invar,ishell,jatom,katom,latom,MPI
 
 ! When some constraints have been found
   ncount=const_tot
-  if (MPIdata%iam_master) then 
+  if (MPIdata%iam_master) then
     write(16,'(a,1x,i7,1x,a)') 'There is a total of ',ncount,' non-independant constraints for this shell'
-  end if  
+  end if
   ii=0
   ABI_MALLOC(tab_vec,(norder,ncount)); tab_vec(:,:)=czero
   ABI_MALLOC(temp   ,(norder,ncount)); temp(:,:)   =czero
@@ -1605,13 +1607,13 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,Invar,ishell,jatom,katom,latom,MPI
       do jj=1,iconst(isyminv)
         ii=ii+1
         tab_vec(:,ii)=alphaij(isyminv,:,jj)
-      end do  
-    end if  
+      end do
+    end if
   end do
   ABI_FREE(unchanged)
   ABI_FREE(alphaij)
   ABI_FREE(iconst)
-! Add the constraints coming from the symmetry of the IFCs (at the 3rd order)  
+! Add the constraints coming from the symmetry of the IFCs (at the 3rd order)
   if (nconst_perm.gt.0) then
     do jj=1,norder
       do kk=1,nconst_perm
@@ -1624,7 +1626,7 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,Invar,ishell,jatom,katom,latom,MPI
   if (ii.ne.ncount) then
     write(message,'(i7,1x,a,1x,i7)') ii,' non equal to ',ncount
     ABI_BUG(message)
-  end if  
+  end if
   do ii=1,norder
     do jj=1,ncount
       if (abs( real(tab_vec(ii,jj))).lt.1.d-8) tab_vec(ii,jj)=dcmplx(zero,aimag(tab_vec(ii,jj)))
@@ -1639,8 +1641,8 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,Invar,ishell,jatom,katom,latom,MPI
     if (abs(prod_scal).gt.tol8) then
       ii=ii+1
       temp(:,ii)=tab_vec(:,kk)/dsqrt(prod_scal)
-    end if  
-  end do  
+    end if
+  end do
   ncount=ii
   ABI_FREE(tab_vec)
   ABI_MALLOC(tab_vec,(norder,ncount)); tab_vec(:,1:ncount)=temp(:,1:ncount)
@@ -1661,7 +1663,7 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,Invar,ishell,jatom,katom,latom,MPI
         end do
 !FB      else
 !FB        write(Invar%stdout,*)'One prod_scal equals zero'
-      end if  
+      end if
     end do
   end do
 
@@ -1672,8 +1674,8 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,Invar,ishell,jatom,katom,latom,MPI
     if (abs(prod_scal).gt.tol8) then
       ii=ii+1
       temp(:,ii)=tab_vec(:,kk)/dsqrt(prod_scal)
-    end if  
-  end do  
+    end if
+  end do
   ncount=ii
   ABI_FREE(tab_vec)
 
@@ -1683,10 +1685,10 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,Invar,ishell,jatom,katom,latom,MPI
 !FB  do kk=1,ncount
 !FB    write(16,'(81(f16.12,1x))')  real(temp(:,kk))
 !FB    write(16,'(81(f16.12,1x))') aimag(temp(:,kk))
-!FB  end do  
-  if (MPIdata%iam_master) then 
+!FB  end do
+  if (MPIdata%iam_master) then
     write(16,'(a,1x,i7,1x,a)') '  ======= Finally, there are ',ncount,' independent vectors'
-  end if  
+  end if
   if (ncount.gt.8.and.order==2) then
     ABI_ERROR(' Order 2 : There are too many independent vectors')
   end if
@@ -1704,12 +1706,12 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,Invar,ishell,jatom,katom,latom,MPI
   do kk=1,norder
     if (kk.le.ncount) then
       tab_vec(:,kk)=temp(:,kk)
-    else  
+    else
       do jj=1,norder
 !FB        call random_number(drandom)
         drandom=uniformrandom(iseed)
         tab_vec(jj,kk)=dcmplx(drandom,zero)
-      end do  
+      end do
       do jj=1,kk-1
         prod_scal=sum( real(tab_vec(:,jj))* real(tab_vec(:,jj))+aimag(tab_vec(:,jj))*aimag(tab_vec(:,jj)))
         if (abs(prod_scal).gt.tol8) then
@@ -1718,7 +1720,7 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,Invar,ishell,jatom,katom,latom,MPI
             if (abs( real(tab_vec(ii,kk))).lt.1.d-8) tab_vec(ii,kk)=dcmplx(zero,aimag(tab_vec(ii,kk)))
             if (abs(aimag(tab_vec(ii,kk))).lt.1.d-8) tab_vec(ii,kk)=dcmplx( real(tab_vec(ii,kk)),zero)
           end do
-        end if  
+        end if
         prod_scal=sum( real(tab_vec(:,kk))* real(tab_vec(:,kk))+aimag(tab_vec(:,kk))*aimag(tab_vec(:,kk)))
         tab_vec(:,kk)=tab_vec(:,kk)/dsqrt(prod_scal)
       end do
@@ -1737,11 +1739,11 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,Invar,ishell,jatom,katom,latom,MPI
 &       (abs(aimag(tab_vec(1,kk))).gt.1.d-6)) then
       ABI_ERROR('the constraint has an imaginary part')
     end if
-  end do  
+  end do
   ncoeff=norder-ncount
-  if (MPIdata%iam_master) then 
+  if (MPIdata%iam_master) then
     write(16,'(a,1x,i7,1x,a)') '  ======= Finally, there are ',ncoeff,' coefficients'
-  end if  
+  end if
 
 ! On copie tab_vec dans proj
   do icoeff=1,ncoeff

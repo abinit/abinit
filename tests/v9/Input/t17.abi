@@ -49,9 +49,10 @@ usekden 1
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = graphene_gnu_11.2_macports
 #%% [files]
 #%% files_to_test = 
-#%%   t17.abo , tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%%   t17.abo , tolnlines = 18, tolabs = 8.0e-6, tolrel = 2.0e-7
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
