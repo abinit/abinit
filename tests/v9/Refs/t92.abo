@@ -1,6 +1,11 @@
 
+<<<<<<< HEAD
 .Version 9.9.0 of ABINIT 
 .(MPI version, prepared for a x86_64_darwin21.5.0_gnu12.2 computer) 
+=======
+.Version 9.8.1 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+>>>>>>> release-9.8
 
 .Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,16 +19,21 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
+<<<<<<< HEAD
 .Starting date : Mon  5 Sep 2022.
 - ( at 19h44 )
+=======
+.Starting date : Wed 21 Dec 2022.
+- ( at 21h26 )
+>>>>>>> release-9.8
   
-- input  file    -> t92.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken-9.8/tests/TestBot_MPI1/v9_t92/t92.abi
 - output file    -> t92.abo
 - root for input  files -> t92i
 - root for output files -> t92o
 
 - inpspheads : Reading pseudopotential header in XML form from 
--   ./Al.LDA-PW-paw.xml
+-   /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken-9.8/tests/Psps_for_tests/Al.LDA-PW-paw.xml
 
  DATASET    1 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
@@ -108,7 +118,11 @@ _ WF disk file :      0.315 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -   iomode0 =  0 , fftalg0 =312 , wfoptalg0 = 10
 -
 - outvars: echo of global parameters not present in the input file              
+<<<<<<< HEAD
 -  max_nthreads =    8
+=======
+-  max_nthreads =    0
+>>>>>>> release-9.8
 -
  -outvars: echo values of preprocessed input variables --------
             acell      7.6513171070E+00  7.6513171070E+00  7.6513171070E+00 Bohr
@@ -270,7 +284,7 @@ P           mkmem           2
 
 ================================================================================
 == DATASET  1 ==================================================================
--   mpi_nproc: 1, omp_nthreads: 1 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -299,9 +313,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.07746
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is ./Al.LDA-PW-paw.xml
-- pspatm: opening atomic psp file    ./Al.LDA-PW-paw.xml
-- pspatm : Reading pseudopotential header in XML form from ./Al.LDA-PW-paw.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken-9.8/tests/Psps_for_tests/Al.LDA-PW-paw.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken-9.8/tests/Psps_for_tests/Al.LDA-PW-paw.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken-9.8/tests/Psps_for_tests/Al.LDA-PW-paw.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.60997197
@@ -338,6 +352,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  1  -585.27482573046    -5.853E+02 1.731E+01 5.404E+02
  ETOT  2  -564.60251731221     2.067E+01 2.590E-02 8.372E+01
  ETOT  3  -560.82488680426     3.778E+00 5.214E-01 1.110E+00
+<<<<<<< HEAD
  ETOT  4  -560.79115783755     3.373E-02 4.661E-03 5.001E-03
  ETOT  5  -560.79148439992    -3.266E-04 6.715E-04 1.296E-04
  ETOT  6  -560.79153410216    -4.970E-05 1.130E-03 1.036E-05
@@ -353,6 +368,23 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT 16  -560.79168161657    -1.291E-06 4.534E-05 2.213E-08
  ETOT 17  -560.79168239441    -7.778E-07 2.410E-05 1.776E-08
  ETOT 18  -560.79168286194    -4.675E-07 1.638E-05 3.859E-09
+=======
+ ETOT  4  -560.79115783753     3.373E-02 4.661E-03 5.001E-03
+ ETOT  5  -560.79148439992    -3.266E-04 6.715E-04 1.296E-04
+ ETOT  6  -560.79153410214    -4.970E-05 1.130E-03 1.036E-05
+ ETOT  7  -560.79156826392    -3.416E-05 9.944E-04 8.154E-07
+ ETOT  8  -560.79159993420    -3.167E-05 1.181E-03 3.220E-07
+ ETOT  9  -560.79162646610    -2.653E-05 8.093E-04 1.597E-07
+ ETOT 10  -560.79164635339    -1.989E-05 7.134E-04 1.299E-06
+ ETOT 11  -560.79166006872    -1.372E-05 4.210E-04 9.177E-07
+ ETOT 12  -560.79166903745    -8.969E-06 3.170E-04 5.494E-07
+ ETOT 13  -560.79167469437    -5.657E-06 1.750E-04 5.353E-07
+ ETOT 14  -560.79167819504    -3.501E-06 1.231E-04 1.064E-07
+ ETOT 15  -560.79168032589    -2.131E-06 6.612E-05 3.185E-08
+ ETOT 16  -560.79168161659    -1.291E-06 4.534E-05 2.213E-08
+ ETOT 17  -560.79168239442    -7.778E-07 2.410E-05 1.776E-08
+ ETOT 18  -560.79168286195    -4.675E-07 1.638E-05 3.859E-09
+>>>>>>> release-9.8
 
  At SCF step   18, etot is converged : 
   for the second time, diff in etot=  4.675E-07 < toldfe=  1.000E-06
@@ -397,8 +429,13 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
+<<<<<<< HEAD
  Compensation charge over spherical meshes =      0.303557966791602
  Compensation charge over fft grid         =      0.303572105669203
+=======
+ Compensation charge over spherical meshes =      0.303557966792740
+ Compensation charge over fft grid         =      0.303572105669324
+>>>>>>> release-9.8
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -471,6 +508,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
+<<<<<<< HEAD
 kinetic             :  5.16923609201485E+00
 kinetic_extfpmd     :  1.56629696383039E+02
 total_kinetic       :  1.61798932475054E+02
@@ -484,12 +522,28 @@ internal            :  1.17153139832938E+02
 '-kT*entropy'       : -6.77944793432359E+02
 total_energy        : -5.60791653599421E+02
 total_energy_eV     : -1.52599169515780E+04
+=======
+kinetic             :  5.16923609201723E+00
+kinetic_extfpmd     :  1.56629696383035E+02
+total_kinetic       :  1.61798932475052E+02
+hartree             :  1.07719172876014E-01
+xc                  : -4.18384367531035E+00
+Ewald energy        : -3.62531249988025E+01
+psp_core            :  6.96266374422875E-01
+local_psp           : -4.76853832179476E+00
+spherical_terms     : -2.44271193482222E-01
+internal            :  1.17153139832961E+02
+'-kT*entropy'       : -6.77944793432358E+02
+total_energy        : -5.60791653599397E+02
+total_energy_eV     : -1.52599169515773E+04
+>>>>>>> release-9.8
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 1, }
 comment             : '"Double-counting" decomposition of free energy'
+<<<<<<< HEAD
 band_energy         : -5.72471009453348E-01
 kinetic_extfpmd_dc  :  1.52098554908434E+02
 Ewald energy        : -3.62531249988025E+01
@@ -500,6 +554,18 @@ internal            :  1.17153110570415E+02
 '-kT*entropy'       : -6.77944793432359E+02
 total_energy_dc     : -5.60791682861944E+02
 total_energy_dc_eV  : -1.52599177478517E+04
+=======
+band_energy         : -5.72471009459702E-01
+kinetic_extfpmd_dc  :  1.52098554908429E+02
+Ewald energy        : -3.62531249988025E+01
+psp_core            :  6.96266374422875E-01
+xc_dc               :  1.17602772048824E+00
+spherical_terms     :  7.85757533080633E-03
+internal            :  1.17153110570409E+02
+'-kT*entropy'       : -6.77944793432358E+02
+total_energy_dc     : -5.60791682861949E+02
+total_energy_dc_eV  : -1.52599177478519E+04
+>>>>>>> release-9.8
 ...
 
 
@@ -515,7 +581,7 @@ total_energy_dc_eV  : -1.52599177478517E+04
 
 ================================================================================
 == DATASET  2 ==================================================================
--   mpi_nproc: 1, omp_nthreads: 1 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -559,6 +625,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -565.52340914465     1.880E+01 2.590E-02 8.394E+01
  ETOT  3  -561.55085760060     3.973E+00 5.233E-01 1.107E+00
  ETOT  4  -561.53361166654     1.725E-02 4.585E-03 5.146E-03
+<<<<<<< HEAD
  ETOT  5  -561.53110643313     2.505E-03 6.801E-04 1.497E-04
  ETOT  6  -561.53265269332    -1.546E-03 1.128E-03 1.188E-05
  ETOT  7  -561.53389863835    -1.246E-03 9.997E-04 8.308E-07
@@ -576,10 +643,29 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT 19  -561.53737170980    -8.430E-06 8.657E-06 5.852E-09
  ETOT 20  -561.53737635627    -4.646E-06 5.804E-06 1.955E-09
  ETOT 21  -561.53737919348    -2.837E-06 3.102E-06 1.575E-11
+=======
+ ETOT  5  -561.53110643312     2.505E-03 6.801E-04 1.497E-04
+ ETOT  6  -561.53265269333    -1.546E-03 1.128E-03 1.188E-05
+ ETOT  7  -561.53389863833    -1.246E-03 9.997E-04 8.308E-07
+ ETOT  8  -561.53487588650    -9.772E-04 1.175E-03 3.146E-07
+ ETOT  9  -561.53565615471    -7.803E-04 8.120E-04 1.623E-07
+ ETOT 10  -561.53626053108    -6.044E-04 7.078E-04 1.623E-06
+ ETOT 11  -561.53667954903    -4.190E-04 4.217E-04 8.443E-07
+ ETOT 12  -561.53694952785    -2.700E-04 3.138E-04 6.003E-07
+ ETOT 13  -561.53711907097    -1.695E-04 1.751E-04 6.792E-07
+ ETOT 14  -561.53722313632    -1.041E-04 1.217E-04 2.122E-07
+ ETOT 15  -561.53728559737    -6.246E-05 6.604E-05 3.778E-06
+ ETOT 16  -561.53732724085    -4.164E-05 4.482E-05 5.758E-08
+ ETOT 17  -561.53735059084    -2.335E-05 2.407E-05 1.534E-07
+ ETOT 18  -561.53736328007    -1.269E-05 1.618E-05 2.938E-08
+ ETOT 19  -561.53737170979    -8.430E-06 8.657E-06 5.852E-09
+ ETOT 20  -561.53737635626    -4.646E-06 5.804E-06 1.955E-09
+ ETOT 21  -561.53737919347    -2.837E-06 3.102E-06 1.575E-11
+>>>>>>> release-9.8
  ETOT 22  -561.53738099012    -1.797E-06 2.079E-06 3.232E-11
  ETOT 23  -561.53738207224    -1.082E-06 1.110E-06 8.916E-12
  ETOT 24  -561.53738271962    -6.474E-07 7.446E-07 2.510E-11
- ETOT 25  -561.53738310283    -3.832E-07 3.976E-07 8.722E-12
+ ETOT 25  -561.53738310285    -3.832E-07 3.976E-07 8.722E-12
 
  At SCF step   25, etot is converged : 
   for the second time, diff in etot=  3.832E-07 < toldfe=  1.000E-06
@@ -624,8 +710,13 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
+<<<<<<< HEAD
  Compensation charge over spherical meshes =      0.301670042485342
  Compensation charge over fft grid         =      0.301684143042781
+=======
+ Compensation charge over spherical meshes =      0.301670042485108
+ Compensation charge over fft grid         =      0.301684143042796
+>>>>>>> release-9.8
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -698,6 +789,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 2, }
 comment             : Components of total free energy in Hartree
+<<<<<<< HEAD
 kinetic             :  5.13534304472080E+00
 kinetic_extfpmd     :  1.56874936727481E+02
 total_kinetic       :  1.62010279772201E+02
@@ -711,12 +803,28 @@ internal            :  1.17393366051999E+02
 '-kT*entropy'       : -6.78184463604456E+02
 total_energy        : -5.60791097552457E+02
 total_energy_eV     : -1.52599018207706E+04
+=======
+kinetic             :  5.13534304472106E+00
+kinetic_extfpmd     :  1.56874936727488E+02
+total_kinetic       :  1.62010279772209E+02
+hartree             :  1.06387304874134E-01
+xc                  : -4.18472629740470E+00
+Ewald energy        : -3.62531249988025E+01
+psp_core            :  6.96266374422875E-01
+local_psp           : -4.73899012039938E+00
+spherical_terms     : -2.42725982892749E-01
+internal            :  1.17393366052007E+02
+'-kT*entropy'       : -6.78184463604483E+02
+total_energy        : -5.60791097552476E+02
+total_energy_eV     : -1.52599018207711E+04
+>>>>>>> release-9.8
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 2, }
 comment             : '"Double-counting" decomposition of free energy'
+<<<<<<< HEAD
 band_energy         : -5.71714650690143E-01
 kinetic_extfpmd_dc  :  1.51590142885997E+02
 Ewald energy        : -3.62531249988025E+01
@@ -727,6 +835,18 @@ internal            :  1.16647080501622E+02
 '-kT*entropy'       : -6.78184463604456E+02
 total_energy_dc     : -5.61537383102834E+02
 total_energy_dc_eV  : -1.52802092833511E+04
+=======
+band_energy         : -5.71714650690237E-01
+kinetic_extfpmd_dc  :  1.51590142886004E+02
+Ewald energy        : -3.62531249988025E+01
+psp_core            :  6.96266374422875E-01
+xc_dc               :  1.17763160583914E+00
+spherical_terms     :  7.87928485600803E-03
+internal            :  1.16647080501629E+02
+'-kT*entropy'       : -6.78184463604483E+02
+total_energy_dc     : -5.61537383102854E+02
+total_energy_dc_eV  : -1.52802092833516E+04
+>>>>>>> release-9.8
 ...
 
 
@@ -742,7 +862,7 @@ total_energy_dc_eV  : -1.52802092833511E+04
 
 ================================================================================
 == DATASET  3 ==================================================================
--   mpi_nproc: 1, omp_nthreads: 1 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -791,24 +911,36 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  7  -560.57426584471    -3.136E-03 9.949E-04 9.076E-07
  ETOT  8  -560.58248578138    -8.220E-03 1.173E-03 3.139E-07
  ETOT  9  -560.58514552934    -2.660E-03 8.098E-04 1.613E-07
+<<<<<<< HEAD
  ETOT 10  -560.59000567871    -4.860E-03 7.083E-04 1.685E-06
  ETOT 11  -560.59150623627    -1.501E-03 4.216E-04 8.819E-07
  ETOT 12  -560.59368225060    -2.176E-03 3.146E-04 6.638E-07
+=======
+ ETOT 10  -560.59000567872    -4.860E-03 7.083E-04 1.685E-06
+ ETOT 11  -560.59150623628    -1.501E-03 4.216E-04 8.819E-07
+ ETOT 12  -560.59368225062    -2.176E-03 3.146E-04 6.638E-07
+>>>>>>> release-9.8
  ETOT 13  -560.59431154641    -6.293E-04 1.754E-04 7.167E-07
- ETOT 14  -560.59517323893    -8.617E-04 1.221E-04 1.397E-07
- ETOT 15  -560.59540848137    -2.352E-04 6.643E-05 1.509E-06
+ ETOT 14  -560.59517323894    -8.617E-04 1.221E-04 1.397E-07
+ ETOT 15  -560.59540848134    -2.352E-04 6.643E-05 1.509E-06
  ETOT 16  -560.59574681359    -3.383E-04 4.495E-05 2.590E-08
  ETOT 17  -560.59582996474    -8.315E-05 2.422E-05 5.301E-08
  ETOT 18  -560.59596285607    -1.329E-04 1.625E-05 7.237E-09
  ETOT 19  -560.59599001784    -2.716E-05 8.720E-06 2.923E-09
+<<<<<<< HEAD
  ETOT 20  -560.59604505782    -5.504E-05 5.837E-06 9.723E-10
  ETOT 21  -560.59605285805    -7.800E-06 3.128E-06 9.440E-13
+=======
+ ETOT 20  -560.59604505781    -5.504E-05 5.837E-06 9.723E-10
+ ETOT 21  -560.59605285804    -7.800E-06 3.128E-06 9.440E-13
+>>>>>>> release-9.8
  ETOT 22  -560.59607775073    -2.489E-05 2.093E-06 1.276E-11
  ETOT 23  -560.59607909895    -1.348E-06 1.121E-06 4.025E-12
  ETOT 24  -560.59609123975    -1.214E-05 7.505E-07 1.098E-11
  ETOT 25  -560.59609072315     5.166E-07 4.020E-07 8.272E-12
- ETOT 26  -560.59609711264    -6.389E-06 2.692E-07 8.171E-12
+ ETOT 26  -560.59609711265    -6.390E-06 2.692E-07 8.171E-12
  ETOT 27  -560.59609627639     8.363E-07 1.442E-07 2.185E-11
+<<<<<<< HEAD
  ETOT 28  -560.59609986125    -3.585E-06 9.662E-08 2.218E-11
  ETOT 29  -560.59609908398     7.773E-07 5.175E-08 2.035E-11
  ETOT 30  -560.59610118560    -2.102E-06 3.469E-08 6.347E-12
@@ -816,6 +948,15 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT 32  -560.59610193032    -1.223E-06 1.246E-08 5.606E-12
  ETOT 33  -560.59610155323     3.771E-07 6.675E-09 7.518E-12
  ETOT 34  -560.59610230266    -7.494E-07 4.478E-09 3.199E-13
+=======
+ ETOT 28  -560.59609986124    -3.585E-06 9.662E-08 2.218E-11
+ ETOT 29  -560.59609908398     7.773E-07 5.175E-08 2.035E-11
+ ETOT 30  -560.59610118563    -2.102E-06 3.469E-08 6.352E-12
+ ETOT 31  -560.59610070777     4.779E-07 1.858E-08 1.173E-10
+ ETOT 32  -560.59610193034    -1.223E-06 1.246E-08 5.610E-12
+ ETOT 33  -560.59610155326     3.771E-07 6.675E-09 7.522E-12
+ ETOT 34  -560.59610230268    -7.494E-07 4.478E-09 3.204E-13
+>>>>>>> release-9.8
 
  At SCF step   34, etot is converged : 
   for the second time, diff in etot=  7.494E-07 < toldfe=  1.000E-06
@@ -836,7 +977,11 @@ lattice_vectors:
 lattice_lengths: [   5.41030,    5.41030,    5.41030, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.1198210E+02
+<<<<<<< HEAD
 convergence: {deltae: -7.494E-07, res2:  3.199E-13, residm:  4.478E-09, diffor: null, }
+=======
+convergence: {deltae: -7.494E-07, res2:  3.204E-13, residm:  4.478E-09, diffor: null, }
+>>>>>>> release-9.8
 etotal    :  -5.60596102E+02
 entropy   :   0.00000000E+00
 fermie    :  -3.77835910E+01
@@ -860,8 +1005,13 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
+<<<<<<< HEAD
  Compensation charge over spherical meshes =      0.304176563508142
  Compensation charge over fft grid         =      0.304190765046168
+=======
+ Compensation charge over spherical meshes =      0.304176563512455
+ Compensation charge over fft grid         =      0.304190765046387
+>>>>>>> release-9.8
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -934,6 +1084,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 3, }
 comment             : Components of total free energy in Hartree
+<<<<<<< HEAD
 kinetic             :  5.18035078238824E+00
 kinetic_extfpmd     :  1.55025934896208E+02
 total_kinetic       :  1.60206285678596E+02
@@ -947,12 +1098,28 @@ internal            :  1.15550991256408E+02
 '-kT*entropy'       : -6.77546572274530E+02
 total_energy        : -5.61995581018123E+02
 total_energy_eV     : -1.52926774827079E+04
+=======
+kinetic             :  5.18035078239298E+00
+kinetic_extfpmd     :  1.55025934896205E+02
+total_kinetic       :  1.60206285678598E+02
+hartree             :  1.08160552899177E-01
+xc                  : -4.18355496831880E+00
+Ewald energy        : -3.62531249988025E+01
+psp_core            :  6.96266374422875E-01
+local_psp           : -4.77826523349655E+00
+spherical_terms     : -2.44776148841415E-01
+internal            :  1.15550991256461E+02
+'-kT*entropy'       : -6.77546572274542E+02
+total_energy        : -5.61995581018082E+02
+total_energy_eV     : -1.52926774827068E+04
+>>>>>>> release-9.8
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 3, }
 comment             : '"Double-counting" decomposition of free energy'
+<<<<<<< HEAD
 band_energy         : -5.72707261382037E-01
 kinetic_extfpmd_dc  :  1.51896688352916E+02
 Ewald energy        : -3.62531249988025E+01
@@ -963,6 +1130,18 @@ internal            :  1.16950469971871E+02
 '-kT*entropy'       : -6.77546572274530E+02
 total_energy_dc     : -5.60596102302659E+02
 total_energy_dc_eV  : -1.52545957301775E+04
+=======
+band_energy         : -5.72707261392467E-01
+kinetic_extfpmd_dc  :  1.51896688352910E+02
+Ewald energy        : -3.62531249988025E+01
+psp_core            :  6.96266374422875E-01
+xc_dc               :  1.17549736889266E+00
+spherical_terms     :  7.85013583275490E-03
+internal            :  1.16950469971863E+02
+'-kT*entropy'       : -6.77546572274542E+02
+total_energy_dc     : -5.60596102302679E+02
+total_energy_dc_eV  : -1.52545957301780E+04
+>>>>>>> release-9.8
 ...
 
 
@@ -1204,7 +1383,10 @@ total_energy_dc_eV  : -1.52599177669113E+04
             fcart1    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart2    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart3    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
+<<<<<<< HEAD
             fcart4    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
+=======
+>>>>>>> release-9.8
 -          fftalg         312
     extfpmd_nbcut          10
    extfpmd_nbdbuf1          0
@@ -1440,10 +1622,19 @@ P           mkmem           2
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
+<<<<<<< HEAD
 - Proc.   0 individual time (sec): cpu=         11.9  wall=          9.6
+=======
+- Proc.   0 individual time (sec): cpu=          6.5  wall=          6.6
+>>>>>>> release-9.8
 
 ================================================================================
 
  Calculation completed.
+<<<<<<< HEAD
 .Delivered   0 WARNINGs and   4 COMMENTs to log file.
 +Overall time at end (sec) : cpu=         11.9  wall=          9.6
+=======
+.Delivered   0 WARNINGs and   3 COMMENTs to log file.
++Overall time at end (sec) : cpu=          6.5  wall=          6.6
+>>>>>>> release-9.8

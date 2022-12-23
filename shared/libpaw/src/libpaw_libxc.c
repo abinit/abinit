@@ -282,8 +282,10 @@ void libpaw_xc_func_set_params(XC(func_type) *xc_func, double *ext_params, int n
  }
 
 /* ===============================================================
- * Wrapper to xc_func_set_dens_threshold for backward compatibility
- *    Allows to change the zero-density threshold of a XC functional
+ * Wrapper to xc_func_set_dens_threshold
+ *    and xc_func_set_sigma_threshold for backward compatibility
+ *    Allows to change the zero-density (zero-gradient) threshold
+ *    of a XC functional
  *    Only available from libXC v4
  * ===============================================================
  */
@@ -293,6 +295,14 @@ void libpaw_xc_func_set_density_threshold(XC(func_type) *xc_func, double *dens_t
    {XC(func_set_dens_threshold)(xc_func, *dens_threshold);}
 #else
    {fprintf(stderr, "WARNING: setting density threshold not available for libXC<4.0!\n");}
+#endif
+
+void libpaw_xc_func_set_sig_threshold(XC(func_type) *xc_func, double *sigma_threshold)
+#if ( XC_MAJOR_VERSION > 4 )
+/* ==== libXC v5.0 and later ==== */
+   {XC(func_set_sigma_threshold)(xc_func, *sigma_threshold);}
+#else
+   {fprintf(stderr, "WARNING: setting sigma threshold not available for libXC<4.0!\n");}
 #endif
 
 /* ===============================================================

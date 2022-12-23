@@ -6,8 +6,8 @@ jdtset 1  2  3  4  5  6  7  8  9
    10 11 12 13 14 15 16    18
 
 # (S)LDAs X + different correlations
-ixc1  -1022
-ixc2  -1023
+ixc1  -1003
+ixc2  -1012
 ixc3  -1024
 
 # GGAs : different exchanges + LYP correlation
