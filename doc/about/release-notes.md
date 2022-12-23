@@ -1,6 +1,6 @@
 ## v9.8
 
-Version 9.8, released on December 9, 2022.
+Version 9.8, released on December 23, 2022.
 List of changes with respect to version 9.6.
 <!-- Release notes updated on December 3, 2022. -->
 
