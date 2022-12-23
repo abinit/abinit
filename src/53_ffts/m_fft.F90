@@ -172,13 +172,6 @@ MODULE m_fft
 
 #if defined HAVE_GPU_CUDA
  interface
-   subroutine xgpu_fftbox_c2c_ip(f_dims, f_embed, ndat, isign, kind, h_ff, plan_pp, d_ff) bind(C)
-     use iso_c_binding
-     integer(c_int),intent(in) :: f_dims(3), f_embed(3)
-     integer(c_int),value, intent(in) :: ndat, isign, kind
-     type(c_ptr),intent(in) :: h_ff
-     type(c_ptr),intent(inout) :: plan_pp, d_ff
-   end subroutine xgpu_fftbox_c2c_ip
    subroutine gpu_planpp_free(plan_pp) bind(C)
      use iso_c_binding
      type(c_ptr),intent(inout) :: plan_pp
@@ -187,6 +180,20 @@ MODULE m_fft
      use iso_c_binding
      type(c_ptr),intent(inout) :: dev_pp
    end subroutine devpp_free
+   subroutine xgpu_fftbox_c2c_ip(f_dims, f_embed, ndat, isign, kind, h_ff, plan_pp, d_ff) bind(C)
+     use iso_c_binding
+     integer(c_int),intent(in) :: f_dims(3), f_embed(3)
+     integer(c_int),value, intent(in) :: ndat, isign, kind
+     type(c_ptr),intent(in) :: h_ff
+     type(c_ptr),intent(inout) :: plan_pp, d_ff
+   end subroutine xgpu_fftbox_c2c_ip
+   subroutine xgpu_fftbox_c2c_op(f_dims, f_embed, ndat, isign, kind, h_ff, h_gg, plan_pp, d_ff, d_gg) bind(C)
+     use iso_c_binding
+     integer(c_int),intent(in) :: f_dims(3), f_embed(3)
+     integer(c_int),value, intent(in) :: ndat, isign, kind
+     type(c_ptr),intent(in) :: h_ff, h_gg
+     type(c_ptr),intent(inout) :: plan_pp, d_ff, d_gg
+   end subroutine xgpu_fftbox_c2c_op
  end interface
 #endif
 
@@ -317,19 +324,18 @@ subroutine fftbox_plan3_free(plan)
 
 ! *************************************************************************
 
-#define _SFREE_PLAN(gpu_plan) if (c_associated(gpu_plan)) call gpu_planpp_free(gpu_plan)
-#define _SFREE_DEVPP(dev_pp) if (c_associated(dev_pp)) call devpp_free(dev_pp)
-
- _SFREE_PLAN(plan%gpu_plan_ip_spc)
- _SFREE_DEVPP(plan%gpu_data_ip_spc)
- _SFREE_PLAN(plan%gpu_plan_ip_dpc)
- _SFREE_DEVPP(plan%gpu_data_ip_dpc)
- _SFREE_PLAN(plan%gpu_plan_op_spc)
- !_SFREE_DEVPP(plan%gpu_idata_op_spc)
- !_SFREE_DEVPP(plan%gpu_odata_op_spc)
- _SFREE_PLAN(plan%gpu_plan_op_dpc)
- !_SFREE_DEVPP(plan%gpu_idata_op_dpc)
- !_SFREE_DEVPP(plan%gpu_odata_op_dpc)
+#if defined HAVE_GPU_CUDA
+ call gpu_planpp_free(plan%gpu_plan_ip_spc)
+ call devpp_free(plan%gpu_data_ip_spc)
+ call gpu_planpp_free(plan%gpu_plan_ip_dpc)
+ call devpp_free(plan%gpu_data_ip_dpc)
+ call gpu_planpp_free(plan%gpu_plan_op_spc)
+ call devpp_free(plan%gpu_idata_op_spc)
+ call devpp_free(plan%gpu_odata_op_spc)
+ call gpu_planpp_free(plan%gpu_plan_op_dpc)
+ call devpp_free(plan%gpu_idata_op_dpc)
+ call devpp_free(plan%gpu_odata_op_dpc)
+#endif
 
 end subroutine fftbox_plan3_free
 !!***
@@ -463,11 +469,14 @@ subroutine fftbox_execute_op_spc(plan, ff, gg, isign)
 
 ! *************************************************************************
 
- !if (plan%use_gpu /= 0) then
- !  call xgpu_c2c_op(plan%dims, plan%embed, plan%ndat, isign, ff, gg, &
- !                   plan%gpu_plan_op_spc, plan%gpu_idata_op_spc, plan%gpu_odata_op_spc)
- !  return
- !end if
+#if defined HAVE_GPU_CUDA
+ if (plan%use_gpu /= 0) then
+   call xgpu_fftbox_c2c_op(plan%dims, plan%embed, plan%ndat, isign, 4, c_loc(ff), c_loc(gg), &
+                           plan%gpu_plan_op_spc, plan%gpu_idata_op_spc, plan%gpu_odata_op_spc)
+   if (isign == -1) gg = gg / product(plan%dims)
+   return
+ end if
+#endif
 
  ! Cpu version
 #include "fftbox_op_driver.finc"
@@ -508,11 +517,14 @@ subroutine fftbox_execute_op_dpc(plan, ff, gg, isign)
 
 ! *************************************************************************
 
- !if (plan%use_gpu /= 0) then
- !  call xgpu_c2c_op(plan%dims, plan%embed, plan%ndat, isign, ff, gg, &
- !                   plan%gpu_plan_op_dpc, plan%gpu_idata_op_dpc, plan%gpu_odata_op_dpc)
- !  return
- !end if
+#if defined HAVE_GPU_CUDA
+ if (plan%use_gpu /= 0) then
+   call xgpu_fftbox_c2c_op(plan%dims, plan%embed, plan%ndat, isign, 8, c_loc(ff), c_loc(gg), &
+                           plan%gpu_plan_op_dpc, plan%gpu_idata_op_dpc, plan%gpu_odata_op_dpc)
+   if (isign == -1) gg = gg / product(plan%dims)
+   return
+ end if
+#endif
 
  ! Cpu version
 #include "fftbox_op_driver.finc"
