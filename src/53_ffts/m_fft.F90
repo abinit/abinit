@@ -177,16 +177,16 @@ MODULE m_fft
      integer(c_int),intent(in) :: f_dims(3), f_embed(3)
      integer(c_int),value, intent(in) :: ndat, isign, kind
      type(c_ptr),intent(in) :: h_ff
-     type(c_ptr),intent(in) :: plan_pp, d_ff
+     type(c_ptr),intent(inout) :: plan_pp, d_ff
    end subroutine xgpu_fftbox_c2c_ip
    subroutine gpu_planpp_free(plan_pp) bind(C)
      use iso_c_binding
      type(c_ptr),intent(inout) :: plan_pp
    end subroutine gpu_planpp_free
-   subroutine devptr_free(dev_ptr) bind(C)
+   subroutine devpp_free(dev_pp) bind(C)
      use iso_c_binding
-     type(c_ptr),intent(inout) :: dev_ptr
-   end subroutine devptr_free
+     type(c_ptr),intent(inout) :: dev_pp
+   end subroutine devpp_free
  end interface
 #endif
 
@@ -313,23 +313,23 @@ end subroutine fftbox_plan3_from_ngfft
 subroutine fftbox_plan3_free(plan)
 
 !Arguments ------------------------------------
- class(fftbox_plan3_t),intent(inout) :: plan
+ class(fftbox_plan3_t),target,intent(inout) :: plan
 
 ! *************************************************************************
 
-!#define _SFREE_PLAN(gpu_plan) if (c_associated(gpu_plan)) call gpu_planpp_free(gpu_plan)
-!#define _SFREE_DEVPTR(dev_ptr) if (c_associated(dev_ptr)) call devptr_free(dev_ptr)
-!
-! _SFREE_PLAN(plan%gpu_plan_ip_spc)
-! _SFREE_DEVPTR(plan%gpu_data_ip_spc)
-! _SFREE_PLAN(plan%gpu_plan_ip_dpc)
-! _SFREE_DEVPTR(plan%gpu_data_ip_dpc)
-! _SFREE_PLAN(plan%gpu_plan_op_spc)
-! _SFREE_DEVPTR(plan%gpu_idata_op_spc)
-! _SFREE_DEVPTR(plan%gpu_odata_op_spc)
-! _SFREE_PLAN(plan%gpu_plan_op_dpc)
-! _SFREE_DEVPTR(plan%gpu_idata_op_dpc)
-! _SFREE_DEVPTR(plan%gpu_odata_op_dpc)
+#define _SFREE_PLAN(gpu_plan) if (c_associated(gpu_plan)) call gpu_planpp_free(gpu_plan)
+#define _SFREE_DEVPP(dev_pp) if (c_associated(dev_pp)) call devpp_free(dev_pp)
+
+ _SFREE_PLAN(plan%gpu_plan_ip_spc)
+ _SFREE_DEVPP(plan%gpu_data_ip_spc)
+ _SFREE_PLAN(plan%gpu_plan_ip_dpc)
+ _SFREE_DEVPP(plan%gpu_data_ip_dpc)
+ _SFREE_PLAN(plan%gpu_plan_op_spc)
+ !_SFREE_DEVPP(plan%gpu_idata_op_spc)
+ !_SFREE_DEVPP(plan%gpu_odata_op_spc)
+ _SFREE_PLAN(plan%gpu_plan_op_dpc)
+ !_SFREE_DEVPP(plan%gpu_idata_op_dpc)
+ !_SFREE_DEVPP(plan%gpu_odata_op_dpc)
 
 end subroutine fftbox_plan3_free
 !!***
@@ -370,7 +370,7 @@ subroutine fftbox_execute_ip_spc(plan, ff, isign)
 #if defined HAVE_GPU_CUDA
  if (plan%use_gpu /= 0) then
    call xgpu_fftbox_c2c_ip(plan%dims, plan%embed, plan%ndat, isign, 4, c_loc(ff), &
-                           c_loc(plan%gpu_plan_ip_spc), plan%gpu_data_ip_spc)
+                           plan%gpu_plan_ip_spc, plan%gpu_data_ip_spc)
    if (isign == -1) ff = ff / product(plan%dims)
    return
  end if
@@ -418,7 +418,7 @@ subroutine fftbox_execute_ip_dpc(plan, ff, isign)
 #if defined HAVE_GPU_CUDA
  if (plan%use_gpu /= 0) then
    call xgpu_fftbox_c2c_ip(plan%dims, plan%embed, plan%ndat, isign, 8, c_loc(ff), &
-                           c_loc(plan%gpu_plan_ip_dpc), plan%gpu_data_ip_dpc)
+                           plan%gpu_plan_ip_dpc, plan%gpu_data_ip_dpc)
    if (isign == -1) ff = ff / product(plan%dims)
    return
  end if
@@ -1123,7 +1123,7 @@ integer function fftbox_utests(fftalg, ndat, nthreads, unit) result(nfailed)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: NSETS=6, fftcache0 = 0, use_gpu0 = 0 !,  use_gpu0 = 1
+ integer,parameter :: NSETS=6, fftcache0 = 0, use_gpu0 = 1 !,  use_gpu0 = 1
  integer :: ifft,ierr,ldxyz,old_nthreads,ount,cplex
  integer :: iset,nx,ny,nz,ldx,ldy,ldz,fftalga,fftalgc
  !integer :: ix,iy,iz,padat,dat
@@ -1195,6 +1195,10 @@ integer function fftbox_utests(fftalg, ndat, nthreads, unit) result(nfailed)
    ! in-place version.
    call bw_plan%execute(ffsp, +1)
    call fw_plan%execute(ffsp, -1)
+
+   ! do it twice to test GPU version
+   !call bw_plan%execute(ffsp, +1)
+   !call fw_plan%execute(ffsp, -1)
 
    ierr = COUNT(ABS(ffsp - ff_refsp) > ATOL_SP)
    nfailed = nfailed + ierr
@@ -1282,6 +1286,7 @@ integer function fftbox_utests(fftalg, ndat, nthreads, unit) result(nfailed)
 
    call bw_plan%free()
    call fw_plan%free()
+   !stop
 
    do cplex=1,2
      !if (fftalga == FFT_FFTW3 .and. ndat > 1 .and. cplex==1) then
