@@ -1142,7 +1142,7 @@ integer function fftbox_utests(fftalg, ndat, nthreads, unit) result(nfailed)
  real(dp),parameter :: ATOL_SP=tol6,ATOL_DP=tol12 ! Tolerances on the absolute error
  real(dp) :: max_abserr
  character(len=500) :: msg,info,library,cplex_mode,padding_mode
- type(fftbox_plan3_t) :: bw_plan, fw_plan
+ type(fftbox_plan3_t) :: box_plan
 !arrays
  integer :: pars(6,NSETS)
  real(dp) :: crand(2)
@@ -1156,7 +1156,7 @@ integer function fftbox_utests(fftalg, ndat, nthreads, unit) result(nfailed)
 
  ount = std_out; if (PRESENT(unit)) ount = unit
 
- if (nthreads>0) then
+ if (nthreads > 0) then
    old_nthreads = xomp_get_max_threads()
    call xomp_set_num_threads(nthreads)
  end if
@@ -1181,15 +1181,14 @@ integer function fftbox_utests(fftalg, ndat, nthreads, unit) result(nfailed)
    ldx=pars(4,iset); ldy=pars(5,iset); ldz=pars(6,iset)
    !write(std_out,*)pars(1:6,iset)
 
-   ! Create the FFT plans.
-   call bw_plan%init(ndat, pars(1,iset), pars(4,iset), fftalg, fftcache0, use_gpu0)
-   call fw_plan%init(ndat, pars(1,iset), pars(4,iset), fftalg, fftcache0, use_gpu0)
+   ! Create the FFT plan
+   call box_plan%init(ndat, pars(1,iset), pars(4,iset), fftalg, fftcache0, use_gpu0)
 
    ldxyz = ldx*ldy*ldz
    !
-   ! ================================================================
-   ! === TEST the single precision version of dfti_c2c_* routines ===
-   ! ================================================================
+   ! ======================================
+   ! === TEST the single precision version
+   ! ======================================
    ABI_MALLOC(ff_refsp, (ldxyz*ndat))
    ABI_MALLOC(ffsp,     (ldxyz*ndat))
    ABI_MALLOC(ggsp,     (ldxyz*ndat))
@@ -1199,18 +1198,17 @@ integer function fftbox_utests(fftalg, ndat, nthreads, unit) result(nfailed)
      ff_refsp(ifft) = DCMPLX(crand(1), crand(2))
    end do
 
-   ! Set the augmentation region to zero, because FFTW3 wrappers
-   ! use zscal to scale the results.
+   ! Set the augmentation region to zero to avoid SIGFPE, as FFTW3 wrappers use zscal to scale the results.
    call cplx_setaug_zero_spc(nx,ny,nz,ldx,ldy,ldz,ndat,ff_refsp)
    ffsp = ff_refsp
 
    ! in-place version.
-   call bw_plan%execute(ffsp, +1)
-   call fw_plan%execute(ffsp, -1)
+   call box_plan%execute(ffsp, +1)
+   call box_plan%execute(ffsp, -1)
 
    ! do it twice to test GPU version
-   !call bw_plan%execute(ffsp, +1)
-   !call fw_plan%execute(ffsp, -1)
+   !call box_plan%execute(ffsp, +1)
+   !call box_plan%execute(ffsp, -1)
 
    ierr = COUNT(ABS(ffsp - ff_refsp) > ATOL_SP)
    nfailed = nfailed + ierr
@@ -1224,9 +1222,10 @@ integer function fftbox_utests(fftalg, ndat, nthreads, unit) result(nfailed)
    end if
    call wrtout(ount,sjoin(info,msg))
 
+   ! out-of-place version.
    ffsp = ff_refsp
-   call bw_plan%execute(ffsp, ggsp, +1)
-   call fw_plan%execute(ggsp, ffsp, -1)
+   call box_plan%execute(ffsp, ggsp, +1)
+   call box_plan%execute(ggsp, ffsp, -1)
 
    ierr = COUNT(ABS(ffsp - ff_refsp) > ATOL_SP)
    nfailed = nfailed + ierr
@@ -1244,9 +1243,9 @@ integer function fftbox_utests(fftalg, ndat, nthreads, unit) result(nfailed)
    ABI_FREE(ffsp)
    ABI_FREE(ggsp)
 
-   ! ================================================================
-   ! === TEST the double precision version of dfti_c2c_* routines ===
-   ! ================================================================
+   ! =======================================
+   ! === TEST the double precision version
+   ! =======================================
    ABI_MALLOC(ff_ref, (ldxyz*ndat))
    ABI_MALLOC(ff,     (ldxyz*ndat))
    ABI_MALLOC(gg,     (ldxyz*ndat))
@@ -1256,13 +1255,13 @@ integer function fftbox_utests(fftalg, ndat, nthreads, unit) result(nfailed)
      ff_ref(ifft) = DCMPLX(crand(1), crand(2))
    end do
 
-   ! Set the augmentation region to zero, because FFTW3 wrappers
-   ! use zscal to scale the results.
+   ! Set the augmentation region to zero to avoid SIGFPE, as FFTW3 wrappers use zscal to scale the results.
    call cplx_setaug_zero_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,ff_ref)
    ff = ff_ref
 
-   call bw_plan%execute(ff, +1)
-   call fw_plan%execute(ff, -1)
+   ! in-place version.
+   call box_plan%execute(ff, +1)
+   call box_plan%execute(ff, -1)
 
    ierr = COUNT(ABS(ff - ff_ref) > ATOL_DP)
    nfailed = nfailed + ierr
@@ -1276,9 +1275,10 @@ integer function fftbox_utests(fftalg, ndat, nthreads, unit) result(nfailed)
    end if
    call wrtout(ount,sjoin(info, msg))
 
+   ! out-of-place version.
    ff = ff_ref
-   call bw_plan%execute(ff, gg, +1)
-   call fw_plan%execute(gg, ff, -1)
+   call box_plan%execute(ff, gg, +1)
+   call box_plan%execute(gg, ff, -1)
 
    ierr = COUNT(ABS(ff - ff_ref) > ATOL_DP)
    nfailed = nfailed + ierr
@@ -1296,8 +1296,7 @@ integer function fftbox_utests(fftalg, ndat, nthreads, unit) result(nfailed)
    ABI_FREE(ff)
    ABI_FREE(gg)
 
-   call bw_plan%free()
-   call fw_plan%free()
+   call box_plan%free()
    !stop
 
    do cplex=1,2
@@ -1313,19 +1312,19 @@ integer function fftbox_utests(fftalg, ndat, nthreads, unit) result(nfailed)
      !call cg_setaug_zero(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,fofr_ref)
      fofr = fofr_ref
 
-     SELECT CASE (fftalga)
-     CASE (FFT_FFTW3)
+     select case (fftalga)
+     case (FFT_FFTW3)
        call fftw3_seqfourdp(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,-1,fofg,fofr)
        call fftw3_seqfourdp(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,+1,fofg,fofr)
 
-     CASE (FFT_DFTI)
+     case (FFT_DFTI)
        call dfti_seqfourdp(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,-1,fofg,fofr)
        call dfti_seqfourdp(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,+1,fofg,fofr)
 
-     CASE DEFAULT
+     case default
        ! TODO
        continue
-     END SELECT
+     end select
 
      !call cg_setaug_zero(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,fofr)
 
