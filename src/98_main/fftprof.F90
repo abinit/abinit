@@ -243,7 +243,7 @@ program fftprof
 
    ! List the FFT libraries that will be tested.
    ! Goedecker FFTs are always available, other libs are optional.
-   nfftalgs = COUNT(fftalgs/=0)
+   nfftalgs = COUNT(fftalgs /= 0)
    ABI_CHECK(nfftalgs > 0, "fftalgs must be specified")
 
    nfailed = 0; nthreads = 0
@@ -316,20 +316,16 @@ program fftprof
  ABI_MALLOC(Ftest,(ntests))
  ABI_MALLOC(Ftprof,(ntests))
 
- do it=1,ntests ! Needed for crappy compilers that do not support => null() in type declarations.
-   call fft_test_nullify(Ftest(it))
- end do
-
  do it=1,ntests
-   call fft_test_init(Ftest(it),fft_setups(:,it),kpoint,ecut,boxcutmin2,rprimd,nsym,symrel,MPI_enreg)
+   call Ftest(it)%init(fft_setups(:,it), kpoint, ecut, boxcutmin2, rprimd, nsym, symrel, MPI_enreg)
     ! Ftest%results is allocated using nfftot and the consistency btw libs is tested assuming an equal number of FFT-points.
    if ( ANY(Ftest(it)%ngfft(1:3) /= Ftest(1)%ngfft(1:3)) ) then
      ABI_ERROR("Consistency check assumes equal FFT meshes. Cannot continue")
    end if
    if (it == 1) then
-     call fft_test_print(Ftest(it)) !,header)
+     call Ftest(it)%print() !,header)
    else if (fft_setups(1,it) /= fft_setups(1,it-1)) then
-     call fft_test_print(Ftest(it)) !,header)
+     call Ftest(it)%print() !,header)
    end if
  end do
  !
@@ -340,9 +336,9 @@ program fftprof
    do isign=-1,1,2
      do cplex=1,2
        do it=1,ntests
-         call time_fourdp(Ftest(it),isign,cplex,header,Ftprof(it))
+         call Ftest(it)%time_fourdp(isign, cplex, header, Ftprof(it))
        end do
-       call fftprof_print(Ftprof,header)
+       call fftprof_print(Ftprof, header)
        call fftprof_free(Ftprof)
      end do
    end do
@@ -366,7 +362,7 @@ program fftprof
      option_fourwf = fourwf_params(1,iset)
      cplex         = fourwf_params(2,iset)
      do it=1,ntests
-       call time_fourwf(Ftest(it),cplex,option_fourwf,header,Ftprof(it))
+       call Ftest(it)%time_fourwf(cplex, option_fourwf, header, Ftprof(it))
      end do
      call fftprof_print(Ftprof, header)
      call fftprof_free(Ftprof)
@@ -385,9 +381,9 @@ program fftprof
    do isign=-1,1,2
      do inplace=0,1
        do it=1,ntests
-         call time_fftbox(Ftest(it),isign,inplace,header,Ftprof(it))
+         call Ftest(it)%time_fftbox(isign, inplace, header, Ftprof(it))
        end do
-       call fftprof_print(Ftprof,header)
+       call fftprof_print(Ftprof, header)
        call fftprof_free(Ftprof)
      end do
    end do
@@ -395,14 +391,14 @@ program fftprof
    ! ==== zero padded with complex arrays ====
    do isign=-1,1,2
      do it=1,ntests
-       call time_fftu(Ftest(it),isign,header,Ftprof(it))
+       call Ftest(it)%time_fftu(isign, header, Ftprof(it))
      end do
-     call fftprof_print(Ftprof,header)
+     call fftprof_print(Ftprof, header)
      call fftprof_free(Ftprof)
    end do
    !
    ! ==== rho_tw_g timing ====
-   ABI_CHECK(osc_ecut > zero,"osc_ecut <= zero!")
+   ABI_CHECK(osc_ecut > zero, "osc_ecut <= zero!")
 
    call get_kg(gamma_point,1,osc_ecut,gmet,osc_npw,osc_gvec)
    ! TODO should reorder by shells to be consistent with the GW part!
@@ -412,9 +408,9 @@ program fftprof
 
    do use_padfft=0,1
      do it=1,ntests
-       call time_rhotwg(Ftest(it),map2sphere,use_padfft,osc_npw,osc_gvec,header,Ftprof(it))
+       call Ftest(it)%time_rhotwg(map2sphere, use_padfft, osc_npw, osc_gvec, header, Ftprof(it))
      end do
-     call fftprof_print(Ftprof,header)
+     call fftprof_print(Ftprof, header)
      call fftprof_free(Ftprof)
    end do
 
@@ -464,10 +460,10 @@ program fftprof
 
    if (INDEX(tasks, "bench_fourdp") > 0) then
      isign=1; cplex=1
-     call prof_fourdp(fft_setups,isign,cplex,necut,ecut_arth,boxcutmin2,rprimd,nsym,symrel,MPI_enreg)
+     call prof_fourdp(fft_setups, isign, cplex, necut, ecut_arth, boxcutmin2, rprimd, nsym, symrel, MPI_enreg)
 
      isign=1; cplex=2
-     call prof_fourdp(fft_setups,isign,cplex,necut,ecut_arth,boxcutmin2,rprimd,nsym,symrel,MPI_enreg)
+     call prof_fourdp(fft_setups, isign, cplex, necut, ecut_arth, boxcutmin2, rprimd, nsym, symrel, MPI_enreg)
    end if
 
    if (INDEX(tasks, "bench_fourwf") > 0) then
@@ -516,9 +512,7 @@ program fftprof
 #endif
 
  call flush_unit(std_out)
-
  call abinit_doctor("__fftprof")
-
  100 call xmpi_end()
 
  end program fftprof
