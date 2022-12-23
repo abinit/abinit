@@ -10,25 +10,6 @@
 #include "cuda_api_error_check.h"
 #endif
 
-
-extern "C" void gpu_planpp_free(void **plan_pp) {
-  if (*plan_pp == NULL) return;
-  cufftHandle plan = * ((cufftHandle *) (*plan_pp));
-  //cufftHandle plan = * ((cufftHandle *) (plan_pp));
-  printf("About to free GPU plan: %d @ %p\n", plan, &plan);
-  printf("plan_pp: %p, *plan_pp: %p\n", plan_pp, *plan_pp);
-  //CHECK_CUDA_ERROR(cufftDestroy(plan));
-  *plan_pp = NULL;
-}
-
-
-extern "C" void devpp_free(void **dev_pp) {
-  printf("About to free devptr %p\n", *dev_pp);
-  if (*dev_pp == NULL) return;
-  CHECK_CUDA_ERROR(cudaFree(*dev_pp));
-  *dev_pp = NULL;
-}
-
 static void 
 _cuget_type_nbytes_dir_cc(int dist_ndat, int kind, int isign, 
                           cufftType *type, size_t *nbytes, int *direction){
@@ -60,7 +41,25 @@ _cuget_type_nbytes_dir_cc(int dist_ndat, int kind, int isign,
   }
 }
 
+extern "C" void 
+gpu_planpp_free(void **plan_pp) {
+  if (*plan_pp == NULL) return;
+  cufftHandle plan = * ((cufftHandle *) (*plan_pp));
+  //cufftHandle plan = * ((cufftHandle *) (plan_pp));
+  printf("About to free GPU plan: %d @ %p\n", plan, &plan);
+  printf("plan_pp: %p, *plan_pp: %p\n", plan_pp, *plan_pp);
+  //CHECK_CUDA_ERROR(cufftDestroy(plan));
+  *plan_pp = NULL;
+}
 
+
+extern "C" void 
+devpp_free(void **dev_pp) {
+  printf("About to free devptr %p\n", *dev_pp);
+  if (*dev_pp == NULL) return;
+  CHECK_CUDA_ERROR(cudaFree(*dev_pp));
+  *dev_pp = NULL;
+}
 
 // For scaling see:
 // https://github.com/zchee/cuda-sample/blob/master/7_CUDALibraries/simpleCUFFT_callback/simpleCUFFT_callback.cu
@@ -79,32 +78,7 @@ xgpu_fftbox_c2c_ip(int *f_dims, int *f_embed, int ndat, int isign, int kind,
 #if defined HAVE_GPU_CUDA
   cufftType type;
   cufftHandle plan;
-  //__cuget_type_nbytes_dir_cc(dist * ndat, kind, isign, &type, &nbytes, &direction);
-  switch (kind) {
-  case 4:
-    type = CUFFT_C2C;
-    nbytes = dist * ndat * sizeof(cufftComplex);
-    break;
-  case 8:
-    type = CUFFT_Z2Z;
-    nbytes = dist * ndat * sizeof(cufftDoubleComplex);
-    break;
-  default:
-    printf("Invalid kind: %d\n", kind);
-    abi_cabort();
-  }
-
-  switch (isign) {
-  case 1:
-    direction = CUFFT_INVERSE;
-    break;
-  case -1:
-    direction = CUFFT_FORWARD;
-    break;
-  default:
-    printf("Invalid isign: %d\n", isign);
-    abi_cabort();
-  }
+  _cuget_type_nbytes_dir_cc(dist * ndat, kind, isign, &type, &nbytes, &direction);
 
   if (*d_ff == NULL) {
     printf("Calling cudaMalloc\n");
@@ -137,11 +111,11 @@ xgpu_fftbox_c2c_ip(int *f_dims, int *f_embed, int ndat, int isign, int kind,
 
   /* Transform the signal in place. */
   if (type == CUFFT_C2C) {
-		CHECK_CUDA_ERROR(cufftExecC2C(plan, (cufftComplex *) *d_ff, (cufftComplex *) *d_ff, direction));
-	}
+    CHECK_CUDA_ERROR(cufftExecC2C(plan, (cufftComplex *) *d_ff, (cufftComplex *) *d_ff, direction));
+  }
   if (type == CUFFT_Z2Z) {
-		CHECK_CUDA_ERROR(cufftExecZ2Z(plan, (cufftDoubleComplex *) *d_ff, (cufftDoubleComplex *) *d_ff, direction));
-	}
+    CHECK_CUDA_ERROR(cufftExecZ2Z(plan, (cufftDoubleComplex *) *d_ff, (cufftDoubleComplex *) *d_ff, direction));
+  }
 
   CHECK_CUDA_ERROR(cudaDeviceSynchronize());
   CHECK_CUDA_ERROR(cudaMemcpy(*h_ff, *d_ff, nbytes, cudaMemcpyDeviceToHost));
@@ -156,7 +130,7 @@ xgpu_fftbox_c2c_ip(int *f_dims, int *f_embed, int ndat, int isign, int kind,
 
 extern "C" void 
 xgpu_fftbox_c2c_op(int *f_dims, int *f_embed, int ndat, int isign, int kind,
-                    void **h_ff, void **g_ff, void **plan_pp, void **d_ff, void **d_gg) {
+                   void **h_ff, void **h_gg, void **plan_pp, void **d_ff, void **d_gg) {
 
   const int RANK = 3, stride = 1;
   size_t nbytes;
@@ -168,7 +142,7 @@ xgpu_fftbox_c2c_op(int *f_dims, int *f_embed, int ndat, int isign, int kind,
 #if defined HAVE_GPU_CUDA
   cufftType type;
   cufftHandle plan;
-  __cuget_type_nbytes_dir_cc(dist * ndat, kind, isign, &type, &nbytes, &direction);
+  _cuget_type_nbytes_dir_cc(dist * ndat, kind, isign, &type, &nbytes, &direction);
 
   if (*d_ff == NULL) {
     printf("Calling cudaMalloc for d_ff\n");
@@ -201,11 +175,11 @@ xgpu_fftbox_c2c_op(int *f_dims, int *f_embed, int ndat, int isign, int kind,
 
   /* Transform the signal out of place. */
   if (type == CUFFT_C2C) {
-		CHECK_CUDA_ERROR(cufftExecC2C(plan, (cufftComplex *) *d_ff, (cufftComplex *) *d_gg, direction));
-	}
+     CHECK_CUDA_ERROR(cufftExecC2C(plan, (cufftComplex *) *d_ff, (cufftComplex *) *d_gg, direction));
+  }
   if (type == CUFFT_Z2Z) {
-		CHECK_CUDA_ERROR(cufftExecZ2Z(plan, (cufftDoubleComplex *) *d_ff, (cufftDoubleComplex *) *d_gg, direction));
-	}
+     CHECK_CUDA_ERROR(cufftExecZ2Z(plan, (cufftDoubleComplex *) *d_ff, (cufftDoubleComplex *) *d_gg, direction));
+  }
 
   CHECK_CUDA_ERROR(cudaDeviceSynchronize());
   CHECK_CUDA_ERROR(cudaMemcpy(*h_gg, *d_gg, nbytes, cudaMemcpyDeviceToHost));

@@ -464,8 +464,8 @@ subroutine fftbox_execute_op_spc(plan, ff, gg, isign)
  class(fftbox_plan3_t),intent(inout) :: plan
  integer,intent(in) :: isign
 !arrays
- complex(spc),intent(in) :: ff(plan%ldxyz*plan%ndat)
- complex(spc),intent(inout) :: gg(plan%ldxyz*plan%ndat)
+ complex(spc),target,intent(in) :: ff(plan%ldxyz*plan%ndat)
+ complex(spc),target,intent(inout) :: gg(plan%ldxyz*plan%ndat)
 
 ! *************************************************************************
 
@@ -512,8 +512,8 @@ subroutine fftbox_execute_op_dpc(plan, ff, gg, isign)
  class(fftbox_plan3_t),intent(inout) :: plan
  integer,intent(in) :: isign
 !arrays
- complex(dpc),intent(in) :: ff(plan%ldxyz*plan%ndat)
- complex(dpc),intent(inout) :: gg(plan%ldxyz*plan%ndat)
+ complex(dpc),target,intent(in) :: ff(plan%ldxyz*plan%ndat)
+ complex(dpc),target,intent(inout) :: gg(plan%ldxyz*plan%ndat)
 
 ! *************************************************************************
 
