@@ -45,7 +45,7 @@ module m_mover_effpot
  use m_multibinit_dataset,    only : multibinit_dtset_type
  use m_effective_potential,   only : effective_potential_type
  use m_fit_polynomial_coeff,  only : polynomial_coeff_writeXML, &
-   fit_polynomial_coeff_fit, genereList, fit_polynomial_coeff_getPositive,fit_polynomial_coeff_getCoeffBound
+   fit_polynomial_coeff_fit, genereList, fit_polynomial_coeff_getPositive !,fit_polynomial_coeff_getCoeffBound
  use m_polynomial_coeff,only : polynomial_coeff_getNorder
 ! use m_pawang,       only : pawang_type, pawang_free
 ! use m_pawrad,       only : pawrad_type, pawrad_free
