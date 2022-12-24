@@ -45,6 +45,16 @@ MODULE m_FFT_prof
 
  integer,private,parameter :: TNAME_LEN=100
 !!***
+
+!----------------------------------------------------------------------
+
+ public :: fftprof_ncalls_per_test
+
+ ! Routines for benchmarking
+ public :: prof_fourdp
+ public :: prof_fourwf
+ public :: prof_rhotwg
+
 !----------------------------------------------------------------------
 
 !!****t* m_fft_mesh/FFT_test_t
@@ -140,15 +150,6 @@ MODULE m_FFT_prof
 !!***
 
 !----------------------------------------------------------------------
-
- public :: fftprof_ncalls_per_test
-
- ! Routines for benchmarking
- public :: prof_fourdp
- public :: prof_fourwf
- public :: prof_rhotwg
-
-!----------------------------------------------------------------------
  ! Number of calls of each FFT algo, used to have a betters statistics for timing.
  integer,save,private :: NCALLS_FOR_TEST=10
 
@@ -217,6 +218,7 @@ subroutine fft_test_init(Ftest, fft_setup, kpoint, ecut, boxcutmin, rprimd, nsym
  Ftest%paral_kgb = 0
  Ftest%kpoint    = kpoint
  Ftest%ndat      = ndat
+ !Ftest%use_gpu   = use_gpu
 
  Ftest%istwf_k = set_istwfk(kpoint)
 
@@ -271,7 +273,6 @@ subroutine fft_test_free_0D(Ftest)
 
 ! *********************************************************************
 
- !@FFT_test_t
  Ftest%available=0
  Ftest%istwf_k=-1
  Ftest%mgfft=-1
@@ -406,7 +407,7 @@ function name_of(Ftest)
 
 ! *********************************************************************
 
- call fftalg_info(Ftest%ngfft(7),library_name,cplex_mode,padding_mode)
+ call fftalg_info(Ftest%ngfft(7), library_name, cplex_mode, padding_mode)
  !name_of = TRIM(library_name)//"; "//TRIM(cplex_mode)//"; "//TRIM(padding_mode)
 
  write(name_of,'(i3)')Ftest%ngfft(7)
@@ -1496,7 +1497,7 @@ subroutine prof_fourdp(fft_setups, isign, cplex, necut, ecut_arth, boxcutmin, rp
 
 ! *********************************************************************
 
- nsetups = SIZE(fft_setups,DIM=2)
+ nsetups = size(fft_setups, dim=2)
  ecut_list = arth(ecut_arth(1),ecut_arth(2),necut)
  !
  ! Open file and write header with info.
