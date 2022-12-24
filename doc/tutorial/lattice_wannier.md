@@ -4,6 +4,12 @@ authors: HeXu
 
 # Lattice Wannier functions (LWFs). 
 
+!!! tip
+
+    This feature is still under heavy development. Tests and feedbacks are welcome! 
+    It is not recommended to be used in production at this stage.
+    Please contact the developers (x.he@uliege.be) for feedbacks and help.
+
 This tutorial introduces the methods for constructing lattice Wannier funtions (LWFs)[[cite:rabe1995]]. 
 You will learn how to use the SCDM-k (selected columns of the density matrix in k-space -
 [[cite:damle2015]] [[cite:damle2017]] and [[cite:damle2018]]) method for constructing the LWFs, 
