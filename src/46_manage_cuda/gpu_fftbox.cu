@@ -45,9 +45,8 @@ extern "C" void
 gpu_planpp_free(void **plan_pp) {
   if (*plan_pp == NULL) return;
   cufftHandle plan = * ((cufftHandle *) (*plan_pp));
-  //cufftHandle plan = * ((cufftHandle *) (plan_pp));
-  printf("About to free GPU plan: %d @ %p\n", plan, &plan);
-  printf("plan_pp: %p, *plan_pp: %p\n", plan_pp, *plan_pp);
+  //printf("About to free GPU plan: %d @ %p\n", plan, &plan);
+  //printf("plan_pp: %p, *plan_pp: %p\n", plan_pp, *plan_pp);
   //CHECK_CUDA_ERROR(cufftDestroy(plan));
   *plan_pp = NULL;
 }
@@ -55,7 +54,7 @@ gpu_planpp_free(void **plan_pp) {
 
 extern "C" void 
 devpp_free(void **dev_pp) {
-  printf("About to free devptr %p\n", *dev_pp);
+  //printf("About to free devptr %p\n", *dev_pp);
   if (*dev_pp == NULL) return;
   CHECK_CUDA_ERROR(cudaFree(*dev_pp));
   *dev_pp = NULL;
@@ -81,11 +80,11 @@ xgpu_fftbox_c2c_ip(int *f_dims, int *f_embed, int ndat, int isign, int kind,
   _cuget_type_nbytes_dir_cc(dist * ndat, kind, isign, &type, &nbytes, &direction);
 
   if (*d_ff == NULL) {
-    printf("Calling cudaMalloc\n");
+    //printf("Calling cudaMalloc\n");
     //CHECK_CUDA_ERROR(cudaMalloc((void**) &d_ff, nbytes));
     CHECK_CUDA_ERROR(cudaMalloc(d_ff, nbytes));}
   else {
-    printf("Reusing devptr %p\n", *d_ff);
+    //printf("Reusing devptr %p\n", *d_ff);
   }
 
   CHECK_CUDA_ERROR(cudaMemcpy(*d_ff, *h_ff, nbytes, cudaMemcpyHostToDevice));
@@ -97,16 +96,16 @@ xgpu_fftbox_c2c_ip(int *f_dims, int *f_embed, int ndat, int isign, int kind,
                               cufftType type, int batch);
   */
 
-  printf("plan_pp: %p, *plan_pp: %p\n", plan_pp, *plan_pp);
+  //printf("plan_pp: %p, *plan_pp: %p\n", plan_pp, *plan_pp);
 
   if (*plan_pp == NULL) {
     CHECK_CUDA_ERROR(cufftPlanMany(&plan, RANK, c_dims, c_embed, stride, dist, c_embed, stride, dist, type, ndat));
     *plan_pp = &plan;
-    printf("Creating new GPU plan: %d @ %p\n", plan, &plan);
+    //printf("Creating new GPU plan: %d @ %p\n", plan, &plan);
   }
   else {
     plan = * ((cufftHandle *) (*plan_pp));
-    printf("Reusing GPU plan: %d @ %p\n", plan, &plan);
+    //printf("Reusing GPU plan: %d @ %p\n", plan, &plan);
   }
 
   /* Transform the signal in place. */
@@ -145,18 +144,18 @@ xgpu_fftbox_c2c_op(int *f_dims, int *f_embed, int ndat, int isign, int kind,
   _cuget_type_nbytes_dir_cc(dist * ndat, kind, isign, &type, &nbytes, &direction);
 
   if (*d_ff == NULL) {
-    printf("Calling cudaMalloc for d_ff\n");
+    //printf("Calling cudaMalloc for d_ff\n");
     CHECK_CUDA_ERROR(cudaMalloc(d_ff, nbytes));}
   else {
-    printf("Reusing *d_ff devptr %p\n", *d_ff);
+    //printf("Reusing *d_ff devptr %p\n", *d_ff);
   }
   CHECK_CUDA_ERROR(cudaMemcpy(*d_ff, *h_ff, nbytes, cudaMemcpyHostToDevice));
 
   if (*d_gg == NULL) {
-    printf("Calling cudaMalloc for d_gg\n");
+    //printf("Calling cudaMalloc for d_gg\n");
     CHECK_CUDA_ERROR(cudaMalloc(d_gg, nbytes));}
   else {
-    printf("Reusing *d_gg devptr %p\n", *d_gg);
+    //printf("Reusing *d_gg devptr %p\n", *d_gg);
   }
   CHECK_CUDA_ERROR(cudaMemcpy(*d_gg, *h_gg, nbytes, cudaMemcpyHostToDevice));
 
@@ -166,11 +165,11 @@ xgpu_fftbox_c2c_op(int *f_dims, int *f_embed, int ndat, int isign, int kind,
   if (*plan_pp == NULL) {
     CHECK_CUDA_ERROR(cufftPlanMany(&plan, RANK, c_dims, c_embed, stride, dist, c_embed, stride, dist, type, ndat));
     *plan_pp = &plan;
-    printf("Creating new GPU plan: %d @ %p\n", plan, &plan);
+    //printf("Creating new GPU plan: %d @ %p\n", plan, &plan);
   }
   else {
     plan = * ((cufftHandle *) (*plan_pp));
-    printf("Reusing GPU plan: %d @ %p\n", plan, &plan);
+    //printf("Reusing GPU plan: %d @ %p\n", plan, &plan);
   }
 
   /* Transform the signal out of place. */

@@ -290,7 +290,7 @@ program fftprof
  ! Goedecker FFTs are always available, other libs are optional.
  ! write(std_out,*)"ndat = ",ndat
  nfftalgs = COUNT(fftalgs/=0)
- ABI_CHECK(nfftalgs > 0,"fftalgs must be specified")
+ ABI_CHECK(nfftalgs > 0, "fftalgs must be specified")
 
  ntests = max_nthreads * nfftalgs
 
