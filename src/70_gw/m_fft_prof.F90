@@ -233,7 +233,7 @@ subroutine fft_test_init(Ftest, fft_setup, kpoint, ecut, boxcutmin, rprimd, nsym
  ABI_CALLOC(tnons,(3,nsym))
 
  call getng(boxcutmin,0,ecut,gmet,k0,Ftest%MPI_enreg%me_fft,Ftest%mgfft,Ftest%nfft,Ftest%ngfft,Ftest%MPI_enreg%nproc_fft,nsym,&
-&  Ftest%MPI_enreg%paral_kgb,symrel,tnons, unit=dev_null)
+&  Ftest%MPI_enreg%paral_kgb,symrel,tnons, unit=dev_null, use_gpu_cuda=ftest%use_gpu)
 
  ABI_FREE(tnons)
 
@@ -403,11 +403,14 @@ character(len=TNAME_LEN) function name_of(Ftest)
 
 ! *********************************************************************
 
- call fftalg_info(Ftest%ngfft(7), library_name, cplex_mode, padding_mode)
- !name_of = TRIM(library_name)//"; "//TRIM(cplex_mode)//"; "//TRIM(padding_mode)
-
- write(name_of,'(i3)')Ftest%ngfft(7)
- name_of = TRIM(library_name)//" ("//TRIM(name_of)//")"
+ if (ftest%use_gpu == 0) then
+   call fftalg_info(Ftest%ngfft(7), library_name, cplex_mode, padding_mode)
+   !name_of = TRIM(library_name)//"; "//TRIM(cplex_mode)//"; "//TRIM(padding_mode)
+   write(name_of,'(i3)')Ftest%ngfft(7)
+   name_of = TRIM(library_name)//" ("//TRIM(name_of)//")"
+ else 
+   name_of = "GPU"
+ end if 
 
 end function name_of
 !!***
