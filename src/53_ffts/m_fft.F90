@@ -324,6 +324,8 @@ subroutine fftbox_plan3_free(plan)
 
 ! *************************************************************************
 
+ ABI_UNUSED(plan%ldxyz)
+
 #if defined HAVE_GPU_CUDA
  call gpu_planpp_free(plan%gpu_plan_ip_spc)
  call devpp_free(plan%gpu_data_ip_spc)
@@ -802,7 +804,7 @@ end subroutine fft_ur_spc
 !!
 !! SOURCE
 
-subroutine fft_ur_dpc(npw_k,nfft,nspinor,ndat,mgfft,ngfft,istwf_k,kg_k,gbound_k,ur,ug)
+subroutine fft_ur_dpc(npw_k, nfft, nspinor, ndat, mgfft, ngfft, istwf_k, kg_k, gbound_k, ur, ug)
 
 !Arguments ------------------------------------
 !scalars
@@ -1119,6 +1121,7 @@ end subroutine fft_use_lib_threads
 !! fftalg =fftalg input variable.
 !! ndat = Number of transform to execute
 !! nthreads = Number of OpenMP threads.
+!! use_gpu= /= to activate GPU version.
 !! [unit]=Output Unit number (DEFAULT std_out)
 !!
 !! OUTPUT
@@ -1126,16 +1129,16 @@ end subroutine fft_use_lib_threads
 !!
 !! SOURCE
 
-integer function fftbox_utests(fftalg, ndat, nthreads, unit) result(nfailed)
+integer function fftbox_utests(fftalg, ndat, nthreads, use_gpu, unit) result(nfailed)
 
 !Arguments -----------------------------------
 !scalars
- integer,intent(in) :: fftalg, ndat, nthreads
+ integer,intent(in) :: fftalg, ndat, nthreads, use_gpu
  integer,optional,intent(in) :: unit
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: NSETS=6, fftcache0 = 0, use_gpu0 = 1 !,  use_gpu0 = 1
+ integer,parameter :: NSETS=6, fftcache0 = 0
  integer :: ifft,ierr,ldxyz,old_nthreads,ount,cplex
  integer :: iset,nx,ny,nz,ldx,ldy,ldz,fftalga,fftalgc
  !integer :: ix,iy,iz,padat,dat
@@ -1182,7 +1185,7 @@ integer function fftbox_utests(fftalg, ndat, nthreads, unit) result(nfailed)
    !write(std_out,*)pars(1:6,iset)
 
    ! Create the FFT plan
-   call box_plan%init(ndat, pars(1,iset), pars(4,iset), fftalg, fftcache0, use_gpu0)
+   call box_plan%init(ndat, pars(1,iset), pars(4,iset), fftalg, fftcache0, use_gpu)
 
    ldxyz = ldx*ldy*ldz
    !

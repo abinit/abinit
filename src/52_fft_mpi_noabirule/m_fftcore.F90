@@ -183,15 +183,12 @@ end function fftcore_set_mixprec
 !!
 !! SOURCE
 
-pure function fftalg_isavailable(fftalg) result(ans)
+logical pure function fftalg_isavailable(fftalg) result(ans)
 
 !Arguments ------------------------------------
-!scalars
  integer,intent(in) :: fftalg
- logical :: ans
 
 !Local variables-------------------------------
-!scalars
  integer :: fftalga,fftalgb,fftalgc
 
 ! *************************************************************************
