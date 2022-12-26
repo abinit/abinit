@@ -116,9 +116,9 @@ program fftprof
  type(FFT_prof_t),allocatable :: Ftprof(:)
  integer,allocatable :: osc_gvec(:,:), fft_setups(:,:),fourwf_params(:,:)
 ! ==========  INPUT FILE ==============
- integer :: ncalls = 10, max_nthreads = 1, ndat = 1, necut = 0, nsym = 1, mixprec = 0, use_gpu = 0
+ integer :: ncalls = 10, max_nthreads = 1, ndat = 1, necut = 0, nsym = 1, mixprec = 0, use_gpu = 0, init_gpu
  character(len=500) :: tasks="all"
- integer :: fftalgs(MAX_NFFTALGS) = 0
+ integer :: fftalgs(MAX_NFFTALGS) = 0, use_gpu_fftalgs(MAX_NFFTALGS) = 0
  integer :: symrel(3,3,MAX_NSYM) = 0
  real(dp),parameter :: k0(3)=(/zero,zero,zero/)
  real(dp) :: ecut = 30, osc_ecut = 3
@@ -127,7 +127,8 @@ program fftprof
  real(dp) :: kpoint(3) = (/0.1,0.2,0.3/)
  real(dp) :: tnons(3,MAX_NSYM) = zero
  logical :: use_lib_threads = .FALSE.
- namelist /CONTROL/ tasks, ncalls, max_nthreads, ndat, fftalgs, necut, ecut_arth, use_lib_threads, mixprec, use_gpu
+ namelist /CONTROL/ tasks, ncalls, max_nthreads, ndat, fftalgs, use_gpu_fftalgs, &
+                    necut, ecut_arth, use_lib_threads, mixprec
  namelist /SYSTEM/ ecut, rprimd, kpoint, osc_ecut, nsym, symrel
 
 ! *************************************************************************
@@ -182,11 +183,11 @@ program fftprof
    call xmpi_bcast(max_nthreads,master,comm,ierr)
    call xmpi_bcast(ndat,master,comm,ierr)
    call xmpi_bcast(fftalgs,master,comm,ierr)
+   call xmpi_bcast(use_gpu_fftalgs,master,comm,ierr)
    call xmpi_bcast(necut,master,comm,ierr)
    call xmpi_bcast(ecut_arth,master,comm,ierr)
    call xmpi_bcast(use_lib_threads,master,comm,ierr)
    call xmpi_bcast(mixprec,master,comm,ierr)
-   call xmpi_bcast(use_gpu,master,comm,ierr)
    ! SYSTEM
    call xmpi_bcast(ecut,master,comm,ierr)
    call xmpi_bcast(rprimd,master,comm,ierr)
@@ -229,11 +230,14 @@ program fftprof
  call fft_use_lib_threads(use_lib_threads)
  !write(std_out,*)"use_lib_threads: ",use_lib_threads
 
+ init_gpu = maxval(use_gpu_fftalgs)
 #if defined HAVE_GPU_CUDA
- if (use_gpu /= 0) then
+ if (init_gpu /= 0) then
    gpu_devices(:)=-1
-   call setdevice_cuda(gpu_devices, use_gpu)
-   ABI_CHECK(use_gpu /= 0, "Cannot find any free GPU device!")
+   call setdevice_cuda(gpu_devices, init_gpu)
+   ABI_CHECK(init_gpu /= 0, "Cannot find any free GPU device!")
+   ! Cublas initialization
+   call gpu_linalg_init()
  end if
 #endif
 
@@ -248,7 +252,7 @@ program fftprof
 
    nfailed = 0; nthreads = 0
    do ii=1,nfftalgs
-     fftalg = fftalgs(ii)
+     fftalg = fftalgs(ii); use_gpu = use_gpu_fftalgs(ii)
      do paral_kgb=1,1
        write(msg,"(5(a,i0))")&
         "MPI fftu_utests with fftalg = ",fftalg,", paral_kgb = ",paral_kgb," ndat = ",ndat,", nthreads = ",nthreads
@@ -259,7 +263,7 @@ program fftprof
 
    nfailed = 0; nthreads = 0
    do ii=1,nfftalgs
-     fftalg = fftalgs(ii)
+     fftalg = fftalgs(ii); use_gpu = use_gpu_fftalgs(ii)
      do cplex=1,2
        write(msg,"(4(a,i0))")&
          "MPI fftbox_utests with fftalg = ",fftalg,", cplex = ",cplex," ndat = ",ndat,", nthreads = ",nthreads
@@ -274,7 +278,6 @@ program fftprof
  end if
 
  call initmpi_seq(MPI_enreg)
-
  call metric(gmet,gprimd,std_out,rmet,rprimd,ucvol)
 
  ! symmetries (if given) are used for defining the FFT mesh.
@@ -288,31 +291,29 @@ program fftprof
 
  ! List the FFT libraries that will be tested.
  ! Goedecker FFTs are always available, other libs are optional.
- ! write(std_out,*)"ndat = ",ndat
- nfftalgs = COUNT(fftalgs/=0)
+ nfftalgs = count(fftalgs /= 0)
  ABI_CHECK(nfftalgs > 0, "fftalgs must be specified")
 
  ntests = max_nthreads * nfftalgs
 
- ! First dimension contains (fftalg, fftcache, ndat, nthreads, available).
- ABI_MALLOC(fft_setups,(5,ntests))
+ ! First dimension contains [fftalg, fftcache, ndat, nthreads, available, use_gpu]
+ ABI_MALLOC(fft_setups, (6, ntests))
 
  ! Default Goedecker library.
  idx=0
  do alg=1,nfftalgs
-   fftalg = fftalgs(alg)
-   fftalga=fftalg/100; fftalgc=mod(fftalg,10)
-   avail = 1
-   if (.not. fftalg_isavailable(fftalg)) avail = 0
+   fftalg = fftalgs(alg); use_gpu = use_gpu_fftalgs(alg)
+   fftalga = fftalg/100; fftalgc = mod(fftalg, 10)
+   avail = merge(1, 0, fftalg_isavailable(fftalg))
+   !fftcache is machine-dependent.
+   fftcache = get_cache_kb()
    do ith=1,max_nthreads
-     !fftcache is machine-dependent.
-     fftcache = get_cache_kb()
      idx = idx + 1
-     fft_setups(:,idx) = [fftalg, fftcache, ndat, ith, avail]
+     fft_setups(:,idx) = [fftalg, fftcache, ndat, ith, avail, use_gpu]
    end do
  end do
 
- ! Compute FFT box.
+ ! Init Ftest objects.
  ABI_MALLOC(Ftest,(ntests))
  ABI_MALLOC(Ftprof,(ntests))
 
@@ -338,8 +339,8 @@ program fftprof
        do it=1,ntests
          call Ftest(it)%time_fourdp(isign, cplex, header, Ftprof(it))
        end do
-       call fftprof_print(Ftprof, header)
-       call fftprof_free(Ftprof)
+       call fftprofs_print(Ftprof, header)
+       call fftprofs_free(Ftprof)
      end do
    end do
  end if
@@ -364,8 +365,8 @@ program fftprof
      do it=1,ntests
        call Ftest(it)%time_fourwf(cplex, option_fourwf, header, Ftprof(it))
      end do
-     call fftprof_print(Ftprof, header)
-     call fftprof_free(Ftprof)
+     call fftprofs_print(Ftprof, header)
+     call fftprofs_free(Ftprof)
    end do
    ABI_FREE(fourwf_params)
  end if
@@ -383,8 +384,8 @@ program fftprof
        do it=1,ntests
          call Ftest(it)%time_fftbox(isign, inplace, header, Ftprof(it))
        end do
-       call fftprof_print(Ftprof, header)
-       call fftprof_free(Ftprof)
+       call fftprofs_print(Ftprof, header)
+       call fftprofs_free(Ftprof)
      end do
    end do
    !
@@ -393,8 +394,8 @@ program fftprof
      do it=1,ntests
        call Ftest(it)%time_fftu(isign, header, Ftprof(it))
      end do
-     call fftprof_print(Ftprof, header)
-     call fftprof_free(Ftprof)
+     call fftprofs_print(Ftprof, header)
+     call fftprofs_free(Ftprof)
    end do
    !
    ! ==== rho_tw_g timing ====
@@ -410,32 +411,33 @@ program fftprof
      do it=1,ntests
        call Ftest(it)%time_rhotwg(map2sphere, use_padfft, osc_npw, osc_gvec, header, Ftprof(it))
      end do
-     call fftprof_print(Ftprof, header)
-     call fftprof_free(Ftprof)
+     call fftprofs_print(Ftprof, header)
+     call fftprofs_free(Ftprof)
    end do
 
    ABI_FREE(osc_gvec)
  end if ! test_gw
 
  if (do_seq_utests) then
-   call wrtout(std_out,"=== FFT Unit Tests ===")
+   call wrtout(std_out, "=== FFT Unit Tests ===")
 
    nfailed = 0
    do idx=1,ntests
      ! fft_setups(:,idx) = (/fftalg,fftcache,ndat,ith,avail/)
-     fftalg   = fft_setups(1,idx)
-     fftcache = fft_setups(2,idx)
-     ndat     = fft_setups(3,idx)
-     nthreads = fft_setups(4,idx)
+     fftalg   = fft_setups(1, idx)
+     fftcache = fft_setups(2, idx)
+     ndat     = fft_setups(3, idx)
+     nthreads = fft_setups(4, idx)
      ! Skip the test if library is not available.
      if (fft_setups(5,idx) == 0) CYCLE
+     use_gpu = fft_setups(6, idx)
 
      write(msg,"(3(a,i0))")"fftbox_utests with fftalg = ",fftalg,", ndat = ",ndat,", nthreads = ",nthreads
      call wrtout(std_out, msg)
 
-     nfailed = nfailed + fftbox_utests(fftalg, ndat, nthreads)
+     nfailed = nfailed + fftbox_utests(fftalg, ndat, nthreads, use_gpu)
 
-     ! Warning: This routine is not thread safe hence we have to initialize ngfft it here.
+     ! Initialize ngfft(7:8) here.
      ut_ngfft = -1
      ut_ngfft(7) = fftalg
      ut_ngfft(8) = fftcache
@@ -484,11 +486,11 @@ program fftprof
    end if
 
    if (INDEX(tasks, "bench_rhotwg") > 0) then
-     map2sphere=1; use_padfft=1
+     map2sphere = 1; use_padfft = 1
      call prof_rhotwg(fft_setups,map2sphere,use_padfft,necut,ecut_arth,osc_ecut,boxcutmin2,&
       rprimd,nsym,symrel,gmet,MPI_enreg)
 
-     map2sphere=1; use_padfft=0
+     map2sphere = 1; use_padfft = 0
      call prof_rhotwg(fft_setups,map2sphere,use_padfft,necut,ecut_arth,osc_ecut,boxcutmin2,&
       rprimd,nsym,symrel,gmet,MPI_enreg)
    end if
@@ -501,14 +503,15 @@ program fftprof
 
  ABI_FREE(fft_setups)
 
- call fft_test_free(Ftest)
+ call fft_tests_free(Ftest)
  ABI_FREE(Ftest)
- call fftprof_free(Ftprof)
+ call fftprofs_free(Ftprof)
  ABI_FREE(Ftprof)
  call destroy_mpi_enreg(MPI_enreg)
 
 #if defined HAVE_GPU_CUDA
- call unsetdevice_cuda(use_gpu)
+ call gpu_linalg_shutdown()
+ call unsetdevice_cuda(init_gpu)
 #endif
 
  call flush_unit(std_out)

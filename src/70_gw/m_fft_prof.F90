@@ -77,7 +77,7 @@ MODULE m_FFT_prof
    integer :: npw_k = -1
    integer :: npw_kout = -1
    integer :: paral_kgb = -1
-   !integer :: use_gpu = 0
+   integer :: use_gpu = 0
 
    real(dp) :: ecut=zero
    integer :: ngfft(18)=-1
@@ -94,7 +94,7 @@ MODULE m_FFT_prof
 
  contains
    procedure :: init => fft_test_init
-   !procedure :: free => fft_test_free
+   procedure :: free => fft_test_free_0D
    procedure :: print => fft_test_print
 
    ! Timing routines.
@@ -105,13 +105,13 @@ MODULE m_FFT_prof
    procedure :: time_fftu
  end type FFT_test_t
 
- public :: fft_test_free
-!!***
+ public :: fft_tests_free
 
- interface fft_test_free
+ interface fft_tests_free
    module procedure fft_test_free_0D
    module procedure fft_test_free_1D
- end interface fft_test_free
+ end interface fft_tests_free
+!!***
 
 !----------------------------------------------------------------------
 
@@ -127,6 +127,7 @@ MODULE m_FFT_prof
  type,public :: FFT_prof_t
    integer :: ncalls
    integer :: ndat
+   integer :: use_gpu
    integer :: nthreads
    real(dp) :: cpu_time
    real(dp) :: wall_time
@@ -136,17 +137,16 @@ MODULE m_FFT_prof
 
  contains
    procedure :: init => fftprof_init
-   !procedure :: free => fftprof_free
-   !procedure :: print => fftprof_print
+   procedure :: free => fftprof_free_0D
  end type FFT_prof_t
 
- public :: fftprof_free
- public :: fftprof_print
+ public :: fftprofs_free
+ public :: fftprofs_print
 
- interface fftprof_free
+ interface fftprofs_free
    module procedure fftprof_free_0D
    module procedure fftprof_free_1D
- end interface fftprof_free
+ end interface fftprofs_free
 !!***
 
 !----------------------------------------------------------------------
@@ -183,7 +183,7 @@ subroutine fft_test_init(Ftest, fft_setup, kpoint, ecut, boxcutmin, rprimd, nsym
  real(dp),intent(in) :: ecut,boxcutmin
  class(MPI_type),intent(in) :: MPI_enreg_in
 !arrays
- integer,intent(in) :: fft_setup(5),symrel(3,3,nsym)
+ integer,intent(in) :: fft_setup(6),symrel(3,3,nsym)
  real(dp),intent(in) :: kpoint(3),rprimd(3,3)
 
 !Local variables-------------------------------
@@ -202,23 +202,22 @@ subroutine fft_test_init(Ftest, fft_setup, kpoint, ecut, boxcutmin, rprimd, nsym
 
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
- !@FFT_test_t
  Ftest%rprimd = rprimd
  Ftest%rmet   = rmet
  Ftest%gprimd = gprimd
  Ftest%gmet   = gmet
  Ftest%ecut   = ecut
 
- fftalg   = fft_setup(1)
- fftcache = fft_setup(2)
- ndat     = fft_setup(3)
+ fftalg          = fft_setup(1)
+ fftcache        = fft_setup(2)
+ ndat            = fft_setup(3)
  Ftest%nthreads  = fft_setup(4)
  Ftest%available = fft_setup(5)
+ Ftest%use_gpu   = fft_setup(6)
 
  Ftest%paral_kgb = 0
  Ftest%kpoint    = kpoint
  Ftest%ndat      = ndat
- !Ftest%use_gpu   = use_gpu
 
  Ftest%istwf_k = set_istwfk(kpoint)
 
@@ -327,7 +326,7 @@ subroutine fft_test_free_1D(Ftest)
 ! *********************************************************************
 
  do ii=LBOUND(Ftest,DIM=1),UBOUND(Ftest,DIM=1)
-   call fft_test_free_0D(Ftest(ii))
+   call Ftest(ii)%free()
  end do
 
 end subroutine fft_test_free_1D
@@ -373,9 +372,8 @@ subroutine fft_test_print(Ftest, header, unit, mode_paral, prtvol)
    call wrtout(my_unt,msg,my_mode)
  end if
 
- !TODO add additional info
  write(msg,'(a,i3)')"FFT setup for fftalg ",Ftest%ngfft(7)
- call print_ngfft(Ftest%ngfft,header=msg,unit=my_unt,mode_paral="COLL")
+ call print_ngfft(Ftest%ngfft, header=msg, unit=my_unt)
 
 end subroutine fft_test_print
 !!***
@@ -395,14 +393,12 @@ end subroutine fft_test_print
 !!
 !! SOURCE
 
-function name_of(Ftest)
+character(len=TNAME_LEN) function name_of(Ftest)
 
 !Arguments -----------------------------------
  class(FFT_test_t),intent(in) :: Ftest
- character(len=TNAME_LEN) :: name_of
 
 !Local variables-------------------------------
-!scalars
  character(len=TNAME_LEN) :: library_name,cplex_mode,padding_mode
 
 ! *********************************************************************
@@ -432,11 +428,11 @@ end function name_of
 !!
 !! SOURCE
 
-subroutine fftprof_init(Ftprof, test_name, nthreads, ncalls, ndat, cpu_time, wall_time, gflops, results)
+subroutine fftprof_init(Ftprof, test_name, nthreads, ncalls, ndat, use_gpu, cpu_time, wall_time, gflops, results)
 
 !Arguments -----------------------------------
  class(FFT_prof_t),intent(out) :: Ftprof
- integer,intent(in) :: ncalls,nthreads,ndat
+ integer,intent(in) :: ncalls,nthreads,ndat, use_gpu
  real(dp),intent(in) :: cpu_time,wall_time,gflops
  character(len=*),intent(in) :: test_name
 !arrays
@@ -444,15 +440,14 @@ subroutine fftprof_init(Ftprof, test_name, nthreads, ncalls, ndat, cpu_time, wal
 
 ! *************************************************************************
 
- !@FFT_prof_t
  Ftprof%ncalls    = ncalls
  Ftprof%nthreads  = nthreads
  Ftprof%ndat      = ndat
+ Ftprof%use_gpu   = use_gpu
  Ftprof%cpu_time  = cpu_time
  Ftprof%wall_time = wall_time
  Ftprof%gflops    = gflops
  Ftprof%test_name = test_name
- !Ftprof%use_gpu = use_gpu
 
  if (present(results)) then
    ABI_REMALLOC(Ftprof%results, (size(results)))
@@ -525,9 +520,9 @@ end subroutine fftprof_free_1D
 
 !----------------------------------------------------------------------
 
-!!****f* m_FFT_prof/fftprof_print
+!!****f* m_FFT_prof/fftprofs_print
 !! NAME
-!!  fftprof_print
+!!  fftprofs_print
 !!
 !! FUNCTION
 !!  Printout of the FFT_prof_t structured datatype.
@@ -538,7 +533,7 @@ end subroutine fftprof_free_1D
 !!
 !! SOURCE
 
-subroutine fftprof_print(Fprof, header, unit, mode_paral, prtvol)
+subroutine fftprofs_print(Fprof, header, unit, mode_paral, prtvol)
 
 !Arguments -----------------------------------
  class(FFT_prof_t),intent(in) :: Fprof(:)
@@ -606,8 +601,8 @@ subroutine fftprof_print(Fprof, header, unit, mode_paral, prtvol)
      if (Fprof(ii)%nthreads==1) ref_wtime = Fprof(ii)%wall_time
      para_eff = 100 * ref_wtime / ( Fprof(ii)%wall_time * Fprof(ii)%nthreads)
      write(std_out,ofmt)&
-&      "- "//Fprof(ii)%test_name,Fprof(ii)%cpu_time/ncalls,Fprof(ii)%wall_time/ncalls,&
-&       Fprof(ii)%nthreads,"(",NINT(para_eff),"%)",ncalls,mabs_err,mean_err
+       "- "//Fprof(ii)%test_name,Fprof(ii)%cpu_time/ncalls,Fprof(ii)%wall_time/ncalls,&
+        Fprof(ii)%nthreads,"(",NINT(para_eff),"%)",ncalls,mabs_err,mean_err
      check_mabs_err = MAX(check_mabs_err, mabs_err)
      check_mean_err = MAX(check_mean_err, mean_err)
    else
@@ -623,7 +618,7 @@ subroutine fftprof_print(Fprof, header, unit, mode_paral, prtvol)
  end if
  write(std_out,*)
 
-end subroutine fftprof_print
+end subroutine fftprofs_print
 !!***
 
 !----------------------------------------------------------------------
@@ -654,7 +649,7 @@ subroutine time_fourdp(Ftest, isign, cplex, header, Ftprof)
  integer,parameter :: nspinor1=1
  integer :: icall,i1,i2,i3,n1,n2,n3,ifft
  real(dp) :: cpu_time,wall_time,gflops,gsq
- character(len=500) :: msg
+ !character(len=500) :: msg
  character(len=TNAME_LEN) :: test_name
 !arrays
  integer,parameter :: g0(3)=(/1,2,-1/)
@@ -670,7 +665,7 @@ subroutine time_fourdp(Ftest, isign, cplex, header, Ftprof)
  write(header,'(2(a,i2),a)')" fourdp with cplex ",cplex,", isign ",isign,", ndat 1"
 
  if (Ftest%available==0) then
-   call Ftprof%init(test_name,0,0,0,zero,zero,zero)
+   call Ftprof%init(test_name,0,0,0,0,zero,zero,zero)
    RETURN
  end if
 
@@ -714,9 +709,8 @@ subroutine time_fourdp(Ftest, isign, cplex, header, Ftprof)
    end if
  end if
 
- ABI_CALLOC(results,(Ftest%nfft))
-
- call cwtime(cpu_time,wall_time,gflops,"start")
+ ABI_CALLOC(results, (Ftest%nfft))
+ call cwtime(cpu_time, wall_time, gflops, "start")
 
  do icall=1,NCALLS_FOR_TEST
    ifft = empty_cache(CACHE_KBSIZE)
@@ -736,13 +730,12 @@ subroutine time_fourdp(Ftest, isign, cplex, header, Ftprof)
    end if
  end do
 
- call cwtime(cpu_time,wall_time,gflops,"stop")
+ call cwtime(cpu_time, wall_time, gflops, "stop")
+ call Ftprof%init(test_name,Ftest%nthreads,NCALLS_FOR_TEST,Ftest%ndat,ftest%use_gpu, &
+                  cpu_time,wall_time,gflops,results=results)
 
  ABI_FREE(fofg)
  ABI_FREE(fofr)
-
- call Ftprof%init(test_name,Ftest%nthreads,NCALLS_FOR_TEST,Ftest%ndat,cpu_time,wall_time,gflops,results=results)
-
  ABI_FREE(results)
 
 end subroutine time_fourdp
@@ -773,10 +766,10 @@ subroutine time_fftbox(Ftest, isign, inplace, header, Ftprof)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: nspinor1 = 1, fftcache0 = 0, use_gpu0 = 0
+ integer,parameter :: nspinor1 = 1, fftcache0 = 0
  integer :: icall,i1,i2,i3,n1,n2,n3,ifft,ndat,nfft,dat,padat
  real(dp) :: cpu_time,wall_time,gflops,gsq
- character(len=500) :: msg
+ !character(len=500) :: msg
  character(len=TNAME_LEN) :: test_name
  type(fftbox_plan3_t) :: plan
 !arrays
@@ -788,7 +781,7 @@ subroutine time_fftbox(Ftest, isign, inplace, header, Ftprof)
  test_name = name_of(Ftest)
 
  if (Ftest%available == 0) then
-   call Ftprof%init(test_name, 0, 0, 0, zero, zero, zero)
+   call Ftprof%init(test_name, 0, 0, 0, 0, zero, zero, zero)
    return
  end if
 
@@ -832,10 +825,10 @@ subroutine time_fftbox(Ftest, isign, inplace, header, Ftprof)
    end do
  end do
 
- call cwtime(cpu_time,wall_time,gflops,"start")
+ call cwtime(cpu_time, wall_time, gflops, "start")
 
  ! No augmentation here.
- call plan%init(ndat, Ftest%ngfft(1:3), Ftest%ngfft(1:3), Ftest%ngfft(7), fftcache0, use_gpu0)
+ call plan%init(ndat, Ftest%ngfft(1:3), Ftest%ngfft(1:3), Ftest%ngfft(7), fftcache0, ftest%use_gpu)
 
  select case (inplace)
  case (0)
@@ -856,14 +849,13 @@ subroutine time_fftbox(Ftest, isign, inplace, header, Ftprof)
    ABI_ERROR(sjoin("Wrong value for inplace:", itoa(inplace)))
  end select
 
- call cwtime(cpu_time,wall_time,gflops,"stop")
+ call cwtime(cpu_time, wall_time, gflops, "stop")
+ call Ftprof%init(test_name,Ftest%nthreads,NCALLS_FOR_TEST,Ftest%ndat,ftest%use_gpu, &
+                  cpu_time,wall_time,gflops,results=results)
 
  call plan%free()
  ABI_FREE(ffc)
  ABI_FREE(ggc)
-
- call Ftprof%init(test_name,Ftest%nthreads,NCALLS_FOR_TEST,Ftest%ndat,cpu_time,wall_time,gflops,results=results)
-
  ABI_FREE(results)
 
 end subroutine time_fftbox
@@ -900,14 +892,13 @@ subroutine time_fourwf(Ftest, cplex, option_fourwf, header, Ftprof)
  real(dp),parameter :: weight_i=one,weight_r=one
  real(dp) :: cpu_time,wall_time,gflops,gsq,g0dotr
  logical :: isbuggy,not_supported
- character(len=500) :: msg
+ !character(len=500) :: msg
  character(len=TNAME_LEN) :: test_name
 !arrays
  integer,parameter :: g0(3)=[1,-1,2] !g0(3)=[1,0,0]
  integer :: gg(3)
  integer,allocatable :: gbound_in(:,:),gbound_out(:,:)
- real(dp),allocatable :: denpot(:,:,:),fofg_in(:,:)
- real(dp),allocatable :: fofr_4(:,:,:,:),fofg_out(:,:)
+ real(dp),allocatable :: denpot(:,:,:),fofg_in(:,:), fofr_4(:,:,:,:),fofg_out(:,:)
  complex(dpc),allocatable :: results(:)
 
 ! *********************************************************************
@@ -917,13 +908,13 @@ subroutine time_fourwf(Ftest, cplex, option_fourwf, header, Ftprof)
  fftalg  = Ftest%ngfft(7); fftalga = fftalg/100; fftalgc = MOD(fftalg,10)
 
  isbuggy = &
-&   (option_fourwf==3 .and. fftalga==FFT_SG2002 .and. fftalgc /= 0 .and. any(Ftest%istwf_k == [3,4,5,6,7,8,9]))  ! see sg_fourwf
+    (option_fourwf==3 .and. fftalga==FFT_SG2002 .and. fftalgc /= 0 .and. &
+     any(Ftest%istwf_k == [3,4,5,6,7,8,9]))  ! see sg_fourwf
  !isbuggy = .False.
 
  !FIXME problems with the unitary tests reference files!
  not_supported = ( &
-&  (fftalgc == 2 .and. option_fourwf==0 .and. Ftest%istwf_k >  2) &
-&                )
+  (fftalgc == 2 .and. option_fourwf==0 .and. Ftest%istwf_k >  2))
  !not_supported = .FALSE.
 
  npw_out= Ftest%npw_kout
@@ -934,7 +925,7 @@ subroutine time_fourwf(Ftest, cplex, option_fourwf, header, Ftprof)
  write(header,'(4(a,i2))')" fourwf with option ",option_fourwf,", cplex ",cplex,", ndat ",ndat,", istwf_k ",Ftest%istwf_k
 
  if (isbuggy .or. not_supported .or. Ftest%available==0) then
-   call Ftprof%init(test_name,0,0,0,zero,zero,zero)
+   call Ftprof%init(test_name,0,0,0,0,zero,zero,zero)
    RETURN
  end if
 
@@ -1039,15 +1030,15 @@ subroutine time_fourwf(Ftest, cplex, option_fourwf, header, Ftprof)
    ABI_ERROR(sjoin("Wrong value for option_fourwf:", itoa(option_fourwf)))
  end select
 
- call cwtime(cpu_time,wall_time,gflops,"start")
+ call cwtime(cpu_time, wall_time, gflops, "start")
 
  do icall=1,NCALLS_FOR_TEST
 
    i1 = empty_cache(CACHE_KBSIZE)
 
    call fourwf(cplex,denpot,fofg_in,fofg_out,fofr_4,gbound_in,gbound_out,Ftest%istwf_k,&
-&    Ftest%kg_k,Ftest%kg_kout,Ftest%mgfft,Ftest%MPI_enreg,ndat,Ftest%ngfft,Ftest%npw_k,npw_out,n4,n5,n6,option_fourwf,&
-&    tim0,weight_r,weight_i)
+    Ftest%kg_k,Ftest%kg_kout,Ftest%mgfft,Ftest%MPI_enreg,ndat,Ftest%ngfft,Ftest%npw_k,npw_out,n4,n5,n6,option_fourwf,&
+    tim0,weight_r,weight_i, use_gpu_cuda=ftest%use_gpu)
 
    ! Store results at the first call.
    if (icall == 1) then
@@ -1123,7 +1114,9 @@ subroutine time_fourwf(Ftest, cplex, option_fourwf, header, Ftprof)
    end if
  end do
 
- call cwtime(cpu_time,wall_time,gflops,"stop")
+ call cwtime(cpu_time, wall_time, gflops, "stop")
+ call Ftprof%init(test_name,Ftest%nthreads,NCALLS_FOR_TEST,Ftest%ndat,ftest%use_gpu,&
+                  cpu_time,wall_time,gflops,results=results)
 
  ABI_FREE(denpot)
  ABI_FREE(fofg_in)
@@ -1131,9 +1124,6 @@ subroutine time_fourwf(Ftest, cplex, option_fourwf, header, Ftprof)
  ABI_FREE(fofr_4)
  ABI_FREE(gbound_in)
  ABI_FREE(gbound_out)
-
- call Ftprof%init(test_name,Ftest%nthreads,NCALLS_FOR_TEST,Ftest%ndat,cpu_time,wall_time,gflops,results=results)
-
  ABI_FREE(results)
 
 end subroutine time_fourwf
@@ -1195,7 +1185,7 @@ subroutine time_rhotwg(Ftest, map2sphere, use_padfft, osc_npw, osc_gvec, header,
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: nspinor1=1,dim_rtwg=1,istwfk1=1
+ integer,parameter :: nspinor1=1,dim_rtwg1=1,istwfk1=1
  integer :: icall,ifft,itim1,itim2,nfft,dat,sprc,ptr,ndat, n1,n2,n3,n4,n5,n6
  real(dp) :: cpu_time,wall_time,gflops
  complex(dpc) :: ktabp1 = cone, ktabp2 = cone
@@ -1215,8 +1205,7 @@ subroutine time_rhotwg(Ftest, map2sphere, use_padfft, osc_npw, osc_gvec, header,
 
  test_name = name_of(Ftest)
 
- nfft = Ftest%nfft
- ndat = Ftest%ndat
+ nfft = Ftest%nfft; ndat = Ftest%ndat
  n1=Ftest%ngfft(1); n2=Ftest%ngfft(2); n3=Ftest%ngfft(3)
  n4=Ftest%ngfft(4); n5=Ftest%ngfft(5); n6=Ftest%ngfft(6)
 
@@ -1226,7 +1215,7 @@ subroutine time_rhotwg(Ftest, map2sphere, use_padfft, osc_npw, osc_gvec, header,
  not_implemented = (use_padfft==1.and.Ftest%ngfft(7) == 412)
 
  if (Ftest%available==0.or.not_implemented) then
-   call Ftprof%init(test_name,0,0,0,zero,zero,zero)
+   call Ftprof%init(test_name,0,0,0,0,zero,zero,zero)
    return
  end if
 
@@ -1269,23 +1258,24 @@ subroutine time_rhotwg(Ftest, map2sphere, use_padfft, osc_npw, osc_gvec, header,
    end do
  end do
 
- ABI_MALLOC(rhotwg,(osc_npw*dim_rtwg*ndat))
- ABI_MALLOC(results,(osc_npw*dim_rtwg*ndat))
+ ABI_MALLOC(rhotwg,(osc_npw*dim_rtwg1*ndat))
+ ABI_MALLOC(results,(osc_npw*dim_rtwg1*ndat))
 
- call cwtime(cpu_time,wall_time,gflops,"start")
+ call cwtime(cpu_time, wall_time, gflops, "start")
 
  do icall=1,NCALLS_FOR_TEST
-
      ifft = empty_cache(CACHE_KBSIZE)
      call rho_tw_g(nspinor1,osc_npw,nfft,ndat,Ftest%ngfft,map2sphere,use_padfft,igfftg0,gbound,&
         wfn1,itim1,ktabr1,ktabp1,spinrot1,&
         wfn2,itim2,ktabr2,ktabp2,spinrot2,&
-        dim_rtwg,rhotwg)
+        dim_rtwg1,rhotwg)
      ! Store results at the first call.
      if (icall==1) results = rhotwg
  end do
 
- call cwtime(cpu_time,wall_time,gflops,"stop")
+ call cwtime(cpu_time, wall_time, gflops, "stop")
+ call Ftprof%init(test_name,Ftest%nthreads,NCALLS_FOR_TEST,Ftest%ndat,ftest%use_gpu, &
+                  cpu_time,wall_time,gflops,results=results)
 
  ABI_FREE(ktabr1)
  ABI_FREE(ktabr2)
@@ -1294,11 +1284,8 @@ subroutine time_rhotwg(Ftest, map2sphere, use_padfft, osc_npw, osc_gvec, header,
  ABI_FREE(rhotwg)
  ABI_FREE(wfn1)
  ABI_FREE(wfn2)
-
- call Ftprof%init(test_name,Ftest%nthreads,NCALLS_FOR_TEST,Ftest%ndat,cpu_time,wall_time,gflops,results)
-
- call destroy_mpi_enreg(MPI_enreg_seq)
  ABI_FREE(results)
+ call destroy_mpi_enreg(MPI_enreg_seq)
 
 end subroutine time_rhotwg
 !!***
@@ -1333,7 +1320,7 @@ subroutine time_fftu(Ftest, isign, header, Ftprof)
  !integer :: n4,n5,n6,n456,idx
  real(dp) :: cpu_time,wall_time,gflops,gsq,g0dotr
  logical :: not_implemented
- character(len=500) :: msg
+ !character(len=500) :: msg
  character(len=TNAME_LEN) :: test_name
 !arrays
  integer,parameter :: g0(3) = [1,-2,1]
@@ -1357,7 +1344,7 @@ subroutine time_fftu(Ftest, isign, header, Ftprof)
  not_implemented = (Ftest%ngfft(7) == 412)
 
  if (Ftest%available==0.or.not_implemented) then
-   call Ftprof%init(test_name,0,0,0,zero,zero,zero)
+   call Ftprof%init(test_name,0,0,0,0,zero,zero,zero)
    return
  end if
 
@@ -1419,7 +1406,7 @@ subroutine time_fftu(Ftest, isign, header, Ftprof)
    ABI_ERROR(sjoin("Wrong isign:", itoa(isign)))
  end if
 
- call cwtime(cpu_time,wall_time,gflops,"start")
+ call cwtime(cpu_time, wall_time, gflops, "start")
 
  do icall=1,NCALLS_FOR_TEST
    ifft = empty_cache(CACHE_KBSIZE)
@@ -1441,15 +1428,14 @@ subroutine time_fftu(Ftest, isign, header, Ftprof)
    !end if
  end do
 
- call cwtime(cpu_time,wall_time,gflops,"stop")
+ call cwtime(cpu_time, wall_time, gflops, "stop")
+ call Ftprof%init(test_name,Ftest%nthreads,NCALLS_FOR_TEST,ndat,ftest%use_gpu, &
+                  cpu_time,wall_time,gflops,results=results)
 
  ABI_FREE(kg_k)
  ABI_FREE(gbound)
  ABI_FREE(ug)
  ABI_FREE(ur)
-
- call Ftprof%init(test_name,Ftest%nthreads,NCALLS_FOR_TEST,ndat,cpu_time,wall_time,gflops,results=results)
-
  ABI_FREE(results)
 
 end subroutine time_fftu
@@ -1511,35 +1497,33 @@ subroutine prof_fourdp(fft_setups, isign, cplex, necut, ecut_arth, boxcutmin, rp
 
  write(funt,'(a)')"# "//TRIM(msg)
  do set=1,nsetups
-   write(funt,'(a,5(a,i0))') "#",&
+   write(funt,'(a, 6(a,i0))') "#",&
     "  fftalg = "   ,fft_setups(1,set), &
     ", fftcache = " ,fft_setups(2,set), &
     ", ndat = "     ,fft_setups(3,set), &
     ", nthreads = " ,fft_setups(4,set), &
-    ", available = ",fft_setups(5,set)
+    ", available = ",fft_setups(5,set), &
+    ", use_gpu = ",fft_setups(6,set)
  end do
 
  ABI_MALLOC(prof_res,(2,necut,nsetups))
 
  do set=1,nsetups
-   !
    do iec=1,necut
      call Ftest%init(fft_setups(:,set),k_gamma,ecut_list(iec),boxcutmin,rprimd,nsym,symrel,MPI_enreg_in)
-
      call Ftest%time_fourdp(isign, cplex, header, Ftprof)
 
      prof_res(1,iec,set) = Ftprof%cpu_time /Ftprof%ncalls
      prof_res(2,iec,set) = Ftprof%wall_time/Ftprof%ncalls
-     !
-     ! Save FFT divisions.
-     if (set==1) ngfft_ecut(:,iec) = Ftest%ngfft
 
-     call fftprof_free(Ftprof)
-     call fft_test_free(Ftest)
+     ! Save FFT divisions.
+     if (set == 1) ngfft_ecut(:,iec) = Ftest%ngfft
+
+     call Ftprof%free()
+     call Ftest%free()
    end do
-   !
  end do
- !
+
  ! Write the wall-time as a function of ecut.
  write(frm,*)"(f7.1,3i4,",nsetups,"(f7.4))"
  do iec=1,necut
@@ -1567,7 +1551,8 @@ end subroutine prof_fourdp
 !!
 !! SOURCE
 
-subroutine prof_fourwf(fft_setups,cplex,option,kpoint,necut,ecut_arth,boxcutmin,rprimd,nsym,symrel,MPI_enreg_in)
+subroutine prof_fourwf(fft_setups, cplex, option, kpoint, necut, ecut_arth, &
+                       boxcutmin, rprimd, nsym, symrel, MPI_enreg_in)
 
 !Arguments -----------------------------------
 !scalars
@@ -1593,7 +1578,7 @@ subroutine prof_fourwf(fft_setups,cplex,option,kpoint,necut,ecut_arth,boxcutmin,
 
 ! *********************************************************************
 
- nsetups = SIZE(fft_setups,DIM=2)
+ nsetups = SIZE(fft_setups, DIM=2)
  ecut_list = arth(ecut_arth(1),ecut_arth(2),necut)
  istwf_k = set_istwfk(kpoint)
 
@@ -1608,12 +1593,13 @@ subroutine prof_fourwf(fft_setups,cplex,option,kpoint,necut,ecut_arth,boxcutmin,
 
  write(funt,'(a)')"# "//TRIM(msg)
  do set=1,nsetups
-   write(funt,'(a,5(a,i0))') "#",&
-    "  fftalg = "   ,fft_setups(1,set),&
-    ", fftcache = " ,fft_setups(2,set),&
-    ", ndat = "     ,fft_setups(3,set),&
-    ", nthreads = " ,fft_setups(4,set),&
-    ", available = ",fft_setups(5,set)
+   write(funt,'(a,6(a,i0))') "#",&
+    "  fftalg = "   ,fft_setups(1,set), &
+    ", fftcache = " ,fft_setups(2,set), &
+    ", ndat = "     ,fft_setups(3,set), &
+    ", nthreads = " ,fft_setups(4,set), &
+    ", available = ",fft_setups(5,set), &
+    ", use_gpu = ",fft_setups(6,set)
  end do
 
  ABI_MALLOC(prof_res,(2,necut,nsetups))
@@ -1621,17 +1607,15 @@ subroutine prof_fourwf(fft_setups,cplex,option,kpoint,necut,ecut_arth,boxcutmin,
  do set=1,nsetups
    do iec=1,necut
      call Ftest%init(fft_setups(:,set),kpoint,ecut_list(iec),boxcutmin,rprimd,nsym,symrel,MPI_enreg_in)
-
      call Ftest%time_fourwf(cplex, option, header, Ftprof)
 
      prof_res(1,iec,set) = Ftprof%cpu_time /Ftprof%ncalls
      prof_res(2,iec,set) = Ftprof%wall_time/Ftprof%ncalls
-     !
-     ! Save FFT divisions.
-     if (set==1) ngfft_ecut(:,iec) = Ftest%ngfft
 
-     call fftprof_free(Ftprof)
-     call fft_test_free(Ftest)
+     ! Save FFT divisions.
+     if (set == 1) ngfft_ecut(:,iec) = Ftest%ngfft
+     call Ftprof%free()
+     call Ftest%free()
    end do
  end do
 
@@ -1663,7 +1647,7 @@ end subroutine prof_fourwf
 !! SOURCE
 
 subroutine prof_rhotwg(fft_setups,map2sphere,use_padfft,necut,ecut_arth,osc_ecut,boxcutmin,&
-&  rprimd,nsym,symrel,gmet,MPI_enreg_in)
+                       rprimd,nsym,symrel,gmet,MPI_enreg_in)
 
 !Arguments -----------------------------------
 !scalars
@@ -1691,7 +1675,7 @@ subroutine prof_rhotwg(fft_setups,map2sphere,use_padfft,necut,ecut_arth,osc_ecut
 
 ! *********************************************************************
 
- nsetups = SIZE(fft_setups, DIM=2)
+ nsetups = size(fft_setups, dim=2)
  ecut_list = arth(ecut_arth(1), ecut_arth(2), necut)
 
  ! Open file and write header with info.
@@ -1706,12 +1690,13 @@ subroutine prof_rhotwg(fft_setups,map2sphere,use_padfft,necut,ecut_arth,osc_ecut
 
  write(funt,'(a)')"# "//TRIM(msg)
  do set=1,nsetups
-   write(funt,'(a,5(a,i0))') "#",&
+   write(funt,'(a,6(a,i0))') "#",&
     "  fftalg = "   ,fft_setups(1,set),&
     ", fftcache = " ,fft_setups(2,set),&
     ", ndat = "     ,fft_setups(3,set),&
     ", nthreads = " ,fft_setups(4,set),&
-    ", available = ",fft_setups(5,set)
+    ", available = ",fft_setups(5,set),&
+    ", use_gpu = ",fft_setups(6,set)
  end do
 
  call get_kg([zero,zero,zero],1,osc_ecut,gmet,osc_npw,osc_gvec)
@@ -1732,8 +1717,8 @@ subroutine prof_rhotwg(fft_setups,map2sphere,use_padfft,necut,ecut_arth,osc_ecut
      ! Save FFT divisions.
      if (set==1) ngfft_ecut(:,iec) = Ftest%ngfft
 
-     call fftprof_free(Ftprof)
-     call fft_test_free(Ftest)
+     call Ftprof%free()
+     call Ftest%free()
    end do
  end do
 
