@@ -379,7 +379,6 @@ subroutine fftbox_execute_ip_spc(plan, ff, isign)
  if (plan%use_gpu /= 0) then
    call xgpu_fftbox_c2c_ip(plan%dims, plan%embed, plan%ndat, isign, 4, c_loc(ff), &
                            plan%gpu_plan_ip_spc, plan%gpu_data_ip_spc)
-   if (isign == -1) ff = ff / product(plan%dims)
    return
  end if
 #endif
@@ -427,7 +426,6 @@ subroutine fftbox_execute_ip_dpc(plan, ff, isign)
  if (plan%use_gpu /= 0) then
    call xgpu_fftbox_c2c_ip(plan%dims, plan%embed, plan%ndat, isign, 8, c_loc(ff), &
                            plan%gpu_plan_ip_dpc, plan%gpu_data_ip_dpc)
-   if (isign == -1) ff = ff / product(plan%dims)
    return
  end if
 #endif
@@ -475,7 +473,6 @@ subroutine fftbox_execute_op_spc(plan, ff, gg, isign)
  if (plan%use_gpu /= 0) then
    call xgpu_fftbox_c2c_op(plan%dims, plan%embed, plan%ndat, isign, 4, c_loc(ff), c_loc(gg), &
                            plan%gpu_plan_op_spc, plan%gpu_idata_op_spc, plan%gpu_odata_op_spc)
-   if (isign == -1) gg = gg / product(plan%dims)
    return
  end if
 #endif
@@ -523,7 +520,6 @@ subroutine fftbox_execute_op_dpc(plan, ff, gg, isign)
  if (plan%use_gpu /= 0) then
    call xgpu_fftbox_c2c_op(plan%dims, plan%embed, plan%ndat, isign, 8, c_loc(ff), c_loc(gg), &
                            plan%gpu_plan_op_dpc, plan%gpu_idata_op_dpc, plan%gpu_odata_op_dpc)
-   if (isign == -1) gg = gg / product(plan%dims)
    return
  end if
 #endif
