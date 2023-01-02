@@ -40,7 +40,7 @@ MODULE m_pspheads
  use defs_datatypes, only : pspheader_type
  use m_time,     only : timab
  use m_io_tools, only : open_file
- use m_fstrings, only : basename, lstrip, sjoin, startswith, atoi
+ use m_fstrings, only : basename, lstrip, sjoin, startswith, atoi, itoa
  use m_read_upf_pwscf,  only : read_pseudo
  use m_pawpsp,   only : pawpsp_read_header_xml,pawpsp_read_pawheader
  use m_pawxmlps, only : rdpawpsxml,rdpawpsxml_header, paw_setup_free,paw_setuploc
@@ -144,43 +144,47 @@ subroutine inpspheads(filnam, npsp, pspheads, ecut_tmp)
      usexml = 0
    end if
 
+   ! Check if pseudopotential file is a Q-espresso UPF2 file
+   useupf = 0
    if (testxml(1:4) == '<UPF') then
      ! Make sure this is not UPF version >= 2
      ! "<UPF version="2.0.1">
      ii = index(testxml, '"')
      if (ii /= 0) then
-       if (atoi(testxml(ii+1:ii+1)) >= 2) then
-         ABI_ERROR(sjoin("UPF >= 2 is not supported by Abinit. Use psp8 or psml format.", ch10, "Path:", filnam(ipsp)))
-       end if
+       useupf = atoi(testxml(ii+1:ii+1))
+       !if (atoi(testxml(ii+1:ii+1)) >= 2) then
+       !if (useupf >= 2) then
+       !  ABI_ERROR(sjoin("UPF >= 2 is not supported by Abinit. Use psp8 or psml format.", ch10, "Path:", filnam(ipsp)))
+       !end if
      else
-       ABI_ERROR(sjoin("Cannot find version attributed in UPF file:", filnam(ipsp)))
+       ABI_ERROR(sjoin("Cannot find version attribute in UPF2 file:", filnam(ipsp)))
      end if
    end if
 
    close(unit=unt, err=10, iomsg=errmsg)
 
    ! Check if pseudopotential file is a Q-espresso UPF1 file
-   useupf = 0
-   if (open_file(filnam(ipsp), msg, newunit=unt, form="formatted", status="old") /= 0) then
-     ABI_ERROR(msg)
-   end if
+   if (useupf == 0) then
+     if (open_file(filnam(ipsp), msg, newunit=unt, form="formatted", status="old") /= 0) then
+       ABI_ERROR(msg)
+     end if
 
-   rewind(unit=unt, err=10, iomsg=errmsg)
-   read(unt,*,err=10,iomsg=errmsg) testxml ! just a string, no relation to xml.
-   if (testxml(1:9)=='<PP_INFO>') then
-     useupf = 1
-   else
-     useupf = 0
+     rewind(unit=unt, err=10, iomsg=errmsg)
+     read(unt,*,err=10,iomsg=errmsg) testxml ! just a string, no relation to xml.
+     if (testxml(1:9)=='<PP_INFO>') then
+       useupf = 1
+     else
+       useupf = 0
+     end if
+     close(unit=unt,err=10,iomsg=errmsg)
    end if
-   close(unit=unt,err=10,iomsg=errmsg)
 
    ! Read the header of the pseudopotential file
-   if (usexml /= 1 .and. useupf /= 1) then
+   if (usexml /= 1 .and. useupf == 0) then
      ! Open the psp file and read a normal abinit style header
      if (open_file(filnam(ipsp), msg, newunit=unt, form='formatted', status='old') /= 0) then
        ABI_ERROR(msg)
      end if
-
      rewind (unit=unt, err=10, iomsg=errmsg)
 
      ! Read the three first lines
@@ -230,26 +234,35 @@ subroutine inpspheads(filnam, npsp, pspheads, ecut_tmp)
      call pawpsxml2ab(filnam(ipsp),ecut_tmp(:,:,ipsp), pspheads(ipsp),1)
      pspcod=17; pspheads(ipsp)%pspcod=pspcod
 
-   else if (useupf == 1) then
-     pspheads(ipsp)%pspcod = 11
-
+   else if (useupf > 0) then
      pspheads(ipsp)%xccc  = n1xccc_default ! will be set to 0 if no nlcc
-     ! call upfoctheader2abi (filnam(ipsp),  &
-     call upfheader2abi(filnam(ipsp), &
-       pspheads(ipsp)%znuclpsp, pspheads(ipsp)%zionpsp, pspheads(ipsp)%pspxc, pspheads(ipsp)%lmax, pspheads(ipsp)%xccc, &
-       nproj, nprojso)
+
+     if (useupf == 1) then
+       pspheads(ipsp)%pspcod = 11
+       call upf1header2abi(filnam(ipsp), &
+         pspheads(ipsp)%znuclpsp, pspheads(ipsp)%zionpsp, pspheads(ipsp)%pspxc, pspheads(ipsp)%lmax, pspheads(ipsp)%xccc, &
+         nproj, nprojso)
+
+       ! FIXME : generalize for SO pseudos
+       pspheads(ipsp)%pspso = 0
+
+     else
+       pspheads(ipsp)%pspcod = 12
+       call upf2header2abi(filnam(ipsp), &
+         pspheads(ipsp)%znuclpsp, pspheads(ipsp)%zionpsp, pspheads(ipsp)%pspxc, pspheads(ipsp)%lmax, pspheads(ipsp)%xccc, &
+         nproj, nprojso)
+       !ABI_ERROR("USE UPF2")
+     end if
 
      pspcod = pspheads(ipsp)%pspcod
      lmax   = pspheads(ipsp)%lmax
-     ! FIXME : generalize for SO pseudos
-     pspheads(ipsp)%pspso = 0
    end if
 
-   !write(std_out,*) pspheads(ipsp)%znuclpsp
-   !write(std_out,*) pspheads(ipsp)%zionpsp
-   !write(std_out,*) pspheads(ipsp)%pspcod
-   !write(std_out,*) pspheads(ipsp)%pspxc
-   !write(std_out,*) pspheads(ipsp)%lmax
+   !write(std_out,*) "pspheads(ipsp)%znuclpsp", pspheads(ipsp)%znuclpsp
+   !write(std_out,*) "pspheads(ipsp)%zionpsp",  pspheads(ipsp)%zionpsp
+   !write(std_out,*) "pspheads(ipsp)%pspcod",   pspheads(ipsp)%pspcod
+   !write(std_out,*) "pspheads(ipsp)%pspxc",    pspheads(ipsp)%pspxc
+   !write(std_out,*) "pspheads(ipsp)%lmax",     pspheads(ipsp)%lmax
 
    ! Initialize nproj, nprojso, pspso, as well as xccc, for each type of psp
    pspheads(ipsp)%GTHradii = zero
@@ -459,13 +472,13 @@ subroutine inpspheads(filnam, npsp, pspheads, ecut_tmp)
        end if
      end do
 
-   else if (pspcod == 11.or.pspcod == 17) then
+   else if (any(pspcod == [11, 12, 17])) then
      ! already done above
 
    else
      write(msg, '(a,i0,4a)' )&
        'The pseudopotential code (pspcod) read from file is ',pspcod,ch10,&
-       'This value is not allowed (should be between 1 and 10). ',ch10,&
+       'This value is not allowed.',ch10,&
        'Action: use a correct pseudopotential file.'
      ABI_ERROR(msg)
    end if ! pspcod
@@ -762,17 +775,17 @@ subroutine pawpsxml2ab( filnam,ecut_tmp, pspheads,option)
 end subroutine pawpsxml2ab
 !!***
 
-!!****f* m_pspheads/upfheader2abi
+!!****f* m_pspheads/upf1header2abi
 !! NAME
-!! upfheader2abi
+!! upf1header2abi
 !!
 !! FUNCTION
 !!  This routine wraps a call to a PWSCF module, which reads in
-!!  a UPF (PWSCF / Espresso) format pseudopotential, then transfers
+!!  a UPF1 (PWSCF / Espresso) format pseudopotential, then transfers
 !!  data for the HEADER of abinit psps only!
 !!
 !! INPUTS
-!!  filpsp = name of file with UPF data
+!!  filpsp = name of file with UPF1 data
 !!
 !! OUTPUT
 !!  pspxc = index of xc functional for this pseudo
@@ -785,34 +798,33 @@ end subroutine pawpsxml2ab
 !!
 !! SOURCE
 
-subroutine upfheader2abi (filpsp, znucl, zion, pspxc, lmax_, n1xccc, nproj_l, nprojso_l)
+subroutine upf1header2abi(filpsp, znucl, zion, pspxc, lmax_, n1xccc, nproj_l, nprojso_l)
 
 !Arguments -------------------------------
-  character(len=fnlen), intent(in) :: filpsp
-  integer, intent(inout) :: n1xccc
-  integer, intent(out) :: pspxc, lmax_
-  real(dp), intent(out) :: znucl, zion
-  !arrays
-  integer, intent(out) :: nproj_l(0:3)
-  integer, intent(out) :: nprojso_l(1:3)
+ character(len=fnlen), intent(in) :: filpsp
+ integer,intent(inout) :: n1xccc
+ integer,intent(out) :: pspxc, lmax_
+ real(dp),intent(out) :: znucl, zion
+!arrays
+ integer,intent(out) :: nproj_l(0:3)
+ integer,intent(out) :: nprojso_l(1:3)
 
 !Local variables -------------------------
-  integer :: iproj, ll, iunit
-  character(len=500) :: msg
-  type(atomdata_t) :: atom
+ integer :: iproj, ll, iunit
+ character(len=500) :: msg
+ type(atomdata_t) :: atom
 
 ! *********************************************************************
 
-!call pwscf routine for reading in UPF
  if (open_file(filpsp, msg, newunit=iunit, status='old',form='formatted') /= 0) then
    ABI_ERROR(msg)
  end if
 
-!read in psp data to static data in pseudo module, for ipsx == 1
+ ! read in psp data to static data in pseudo module, for ipsx == 1
  call read_pseudo(1,iunit)
  close (iunit)
 
-!copy over to abinit internal arrays and vars
+ ! copy over to abinit internal arrays and vars
  call upfxc2abi(dft(1), pspxc)
  lmax_ = lmax(1)
  call atomdata_from_symbol(atom,psd(1))
@@ -826,13 +838,90 @@ subroutine upfheader2abi (filpsp, znucl, zion, pspxc, lmax_, n1xccc, nproj_l, np
  end do
 
  nprojso_l = 0 !FIXME deal with so
-!do iproj = 1, nbeta(1)
-!nprojso_l(ll+1) = nprojso_l(ll+1) + 1
-!end do
+ !do iproj = 1, nbeta(1)
+ !nprojso_l(ll+1) = nprojso_l(ll+1) + 1
+ !end do
 
  if (.not. nlcc(1)) n1xccc = 0
 
-end subroutine upfheader2abi
+end subroutine upf1header2abi
+!!***
+
+!!****f* m_pspheads/upf2header2abi
+!! NAME
+!! upf2header2abi
+!!
+!! FUNCTION
+!!  This routine wraps a call to a PWSCF module, which reads in
+!!  a UPF2 (PWSCF / Espresso) format pseudopotential, then transfers
+!!  data for the HEADER of abinit psps only!
+!!
+!! INPUTS
+!!  filpsp = name of file with UPF1 data
+!!
+!! OUTPUT
+!!  pspxc = index of xc functional for this pseudo
+!!  lmax_ = maximal angular momentum
+!!  znucl = charge of species nucleus
+!!  zion = valence charge
+!!  n1xccc = default number of points. Set to 0 if no nlcc is present
+!!  nproj_l= number of projectors for each channel
+!!  nprojso_l= number of projectors for each channel for SO correction projectors
+!!
+!! SOURCE
+
+subroutine upf2header2abi(filpsp, znucl, zion, pspxc, lmax_, n1xccc, nproj_l, nprojso_l)
+
+  use pseudo_types, only : pseudo_upf, deallocate_pseudo_upf !, pseudo_config
+  use read_upf_new_module, only : read_upf_new
+
+!Arguments -------------------------------
+ character(len=fnlen), intent(in) :: filpsp
+ integer,intent(inout) :: n1xccc
+ integer,intent(out) :: pspxc, lmax_
+ real(dp),intent(out) :: znucl, zion
+!arrays
+ integer,intent(out) :: nproj_l(0:3)
+ integer,intent(out) :: nprojso_l(1:3)
+
+!Local variables -------------------------
+ integer :: ierr , iproj, ll
+ !character(len=500) :: msg
+ type(pseudo_upf) :: upf
+ type(atomdata_t) :: atom
+
+! *********************************************************************
+
+ call read_upf_new(filpsp, upf, ierr)
+ ABI_CHECK(ierr == 0, sjoin("read_upf_new returned ierr:", itoa(ierr)))
+
+ ! Consistency check
+ ABI_CHECK(upf%typ == "NC", sjoin("Only NC UPF2 pseudos are supported. typ is:", upf%typ))
+ ABI_CHECK(upf%rel /= "full", sjoin("Relativistic NC UPF2 pseudos are supported. rel is:", upf%rel))
+
+ ! copy over to abinit internal arrays and vars
+ ! FIXME: This is buggy if PBEsol
+ call upfxc2abi(upf%dft, pspxc)
+ lmax_ = upf%lmax
+ call atomdata_from_symbol(atom, upf%psd)
+ znucl = atom%znucl
+ zion = upf%zp
+
+ nproj_l = 0
+ do iproj=1,upf%nbeta
+   ll = upf%lll(iproj)
+   nproj_l(ll) = nproj_l(ll) + 1
+ end do
+
+ nprojso_l = 0 !FIXME deal with so
+ !do iproj = 1, nbeta(1)
+ !nprojso_l(ll+1) = nprojso_l(ll+1) + 1
+ !end do
+
+ if (.not. upf%nlcc) n1xccc = 0
+ call deallocate_pseudo_upf(upf)
+
+end subroutine upf2header2abi
 !!***
 
 !!****f* m_pspheads/upfxc2abi
@@ -860,12 +949,12 @@ end subroutine upfheader2abi
 subroutine upfxc2abi(dft, pspxc)
 
 !Arguments -------------------------------
-  character(len=20), intent(in) :: dft
-  integer, intent(out) :: pspxc
+ character(len=*), intent(in) :: dft
+ integer, intent(out) :: pspxc
 
 !Local variables -------------------------
-  integer :: iexch,icorr,igcx,igcc
-  integer :: totalindex, offset
+ integer :: iexch,icorr,igcx,igcc
+ integer :: totalindex, offset
 
 ! *********************************************************************
 !extract from char*20 :: dft(:)
@@ -881,7 +970,8 @@ subroutine upfxc2abi(dft, pspxc)
    igcx = get_igcx()
    igcc = get_igcc()
  end if
-!reset dft string to avoid stray spaces
+
+ !reset dft string to avoid stray spaces
  call set_dft_from_indices(iexch,icorr,igcx,igcc)
  write(std_out,'(a)') ' upf2abinit: XC string from pseudopotential is :'
  write(std_out,'(3a)') '>', dft, '<'
