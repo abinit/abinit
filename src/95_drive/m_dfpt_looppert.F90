@@ -263,7 +263,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  integer :: ask_accurate,band_index,bantot,bantot_rbz,bdeigrf,bdtot1_index,nsppol,nspinor,band2tot_index
  integer :: bdtot_index,choice,cplex,cplex_rhoij,dim_eig2rf,formeig
  integer :: gscase,g0term,iband,iblok,icase,icase_eq,idir,idir0,idir1,idir2,idir_eq,idir_dkdk,ierr
- integer :: ii,ikpt,ikpt1,jband,initialized,iorder_cprj,ipert,ipert_cnt,ipert_eq,ipert_me,ireadwf0
+ integer :: ifft,ii,ikpt,ikpt1,jband,initialized,iorder_cprj,ipert,ipert_cnt,ipert_eq,ipert_me,ireadwf0
  integer :: iscf_mod,iscf_mod_save,isppol,istr,isym,mcg,mcgq,mcg1,mcprj,mcprjq,mband
  integer :: mband_mem_rbz
  integer :: mcgmq,mcg1mq,mpw1_mq !+/-q duplicates
@@ -284,7 +284,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  logical,parameter :: paral_pert_inplace=.true.,remove_inv=.false.
  logical :: first_entry,found_eq_gkk,t_exist,paral_atom,write_1wfk,init_rhor1
  logical :: kramers_deg
- character(len=fnlen) :: dscrpt,fiden1i,fiwf1i,fiwf1o,fiwf1o_mq,fiwfddk,fnamewff(4),gkkfilnam,fname,filnam, fnamewffmq_
+ character(len=fnlen) :: dscrpt,fiden1i,fiwf1i,fiwf1i_mq,fiwf1o,fiwf1o_mq,fiwfddk,fnamewff(4),gkkfilnam,fname,filnam, fnamewffmq_
  character(len=500) :: msg
  type(crystal_t) :: crystal,ddb_crystal
  type(dataset_type), pointer :: dtset_tmp
@@ -1483,6 +1483,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    call appdig(pertcase,dtfil%fnamewff1,fiwf1i)
    call appdig(pertcase,dtfil%fnameabo_1wf,fiwf1o)
    if (.not.kramers_deg) then
+     call appdig(pertcase_mq,dtfil%fnamewff1,fiwf1i_mq)
      call appdig(pertcase_mq,dtfil%fnameabo_1wf,fiwf1o_mq)
    end if
 
@@ -1873,11 +1874,40 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
          ABI_FREE(rho1wfg)
          ABI_FREE(rho1wfr)
        else
-         !SPr: need to modify dfpt_mkrho to taken into account q,-q and set proper formulas when +q and -q spinors are related
          call dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon1,istwfk_rbz,&
            kg,kg1,dtset%mband,mband_mem_rbz,dtset%mgfft,mkmem_rbz,mk1mem_rbz,mpi_enreg,mpw,mpw1,nband_rbz,&
            dtset%nfft,dtset%ngfft,nkpt_rbz,npwarr,npwar1,nspden,dtset%nspinor,dtset%nsppol,nsym1,&
            occ_rbz,phnons1,rhog1,rhor1,rprimd,symaf1,symrl1,tnons1,ucvol,wtk_rbz)
+
+         if (.not.kramers_deg) then
+           rhor1_pq(:,:)=rhor1(:,:)
+           rhog1_pq(:,:)=rhog1(:,:)
+           call dfpt_mkrho(cg,cg1_mq,cplex,gprimd,irrzon1,istwfk_rbz,&
+             kg,kg1_mq,dtset%mband,mband_mem_rbz,dtset%mgfft,mkmem_rbz,mk1mem_rbz,mpi_enreg,mpw,mpw1_mq,nband_rbz,&
+             dtset%nfft,dtset%ngfft,nkpt_rbz,npwarr,npwar1_mq,nspden,dtset%nspinor,dtset%nsppol,nsym1,&
+             occ_rbz,phnons1,rhog1_mq,rhor1_mq,rprimd,symaf1,symrl1,tnons1,ucvol,wtk_rbz)
+
+           !reconstruct the +q and -q densities, this might bug if fft parallelization is used, todo...
+           do ifft=1,nfftf
+             rhor1(2*ifft-1,1) = half*(rhor1_pq(2*ifft-1,1)+rhor1_mq(2*ifft-1,1))
+             rhor1(2*ifft  ,1) = half*(rhor1_pq(2*ifft  ,1)-rhor1_mq(2*ifft  ,1))
+           end do
+           if (nspden >= 2) then
+             do ifft=1,nfftf
+               rhor1(2*ifft-1,2) = half*(rhor1_pq(2*ifft-1,2)+rhor1_mq(2*ifft-1,2))
+               rhor1(2*ifft  ,2) = half*(rhor1_pq(2*ifft  ,2)-rhor1_mq(2*ifft  ,2))
+             end do
+           end if
+           if (nspden > 2) then
+             do ifft=1,nfftf
+               rhor1(2*ifft-1,3) = half*(rhor1_pq(2*ifft-1,3)+rhor1_mq(2*ifft  ,4))
+               rhor1(2*ifft  ,3) = half*(rhor1_pq(2*ifft  ,3)-rhor1_mq(2*ifft-1,4))
+               rhor1(2*ifft  ,4) = half*(rhor1_pq(2*ifft  ,4)+rhor1_mq(2*ifft-1,3))
+               rhor1(2*ifft-1,4) = half*(rhor1_pq(2*ifft-1,4)-rhor1_mq(2*ifft  ,3))
+             end do
+           end if
+           call fourdp(cplex,rhog1,rhor1(:,1),-1,mpi_enreg,nfftf,1, ngfftf, 0)
+         end if
        end if
 
      else if (.not. found_eq_gkk) then
