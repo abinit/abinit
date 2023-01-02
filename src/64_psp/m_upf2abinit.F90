@@ -27,8 +27,8 @@ module m_upf2abinit
  use m_errors
  use m_atomdata
  use pseudo_pwscf ! pwscf module with all data explicit!
- use m_read_upf_pwscf, only : read_pseudo
 
+ use m_read_upf_pwscf, only : read_pseudo
  use defs_datatypes,  only : pseudopotential_type
  use m_io_tools,      only : open_file
  use m_numeric_tools, only : smooth, nderiv, ctrap
@@ -42,6 +42,7 @@ module m_upf2abinit
 !!***
 
  public :: upf2abinit
+ !public :: new_upf2abinit
 !!***
 
 contains
@@ -87,101 +88,95 @@ contains
 subroutine upf2abinit (filpsp, znucl, zion, pspxc, lmax_, lloc, mmax, &
 &  psps, epsatm, xcccrc, indlmn, ekb, ffspl, nproj_l, vlspl, xccc1d)
 
-  implicit none
-
 !Arguments -------------------------------
+ character(len=fnlen), intent(in) :: filpsp
+ type(pseudopotential_type),intent(in) :: psps
+ ! used contents:
+ !   psps%lmnmax
+ !   psps%mqgrid_ff
+ !   psps%mqgrid_vl
+ !   psps%dimekb
+ !   psps%n1xccc
+ !   psps%qgrid_ff
+ !   psps%qgrid_vl
 
-  character(len=fnlen), intent(in) :: filpsp
-  type(pseudopotential_type),intent(in) :: psps
-  ! used contents:
-  !   psps%lmnmax
-  !   psps%mqgrid_ff
-  !   psps%mqgrid_vl
-  !   psps%dimekb
-  !   psps%n1xccc
-  !   psps%qgrid_ff
-  !   psps%qgrid_vl
-
-  integer, intent(out) :: pspxc, lmax_, lloc, mmax
-  real(dp), intent(out) :: znucl, zion
-  real(dp), intent(out) :: epsatm, xcccrc
-  !arrays
-  integer, intent(out)  :: indlmn(6,psps%lmnmax)
-  integer, intent(out)  :: nproj_l(psps%mpssoang)
-  real(dp), intent(inout) :: ekb(psps%dimekb) !vz_i
-  real(dp), intent(inout) :: ffspl(psps%mqgrid_ff,2,psps%lnmax) !vz_i
-  real(dp), intent(out) :: vlspl(psps%mqgrid_vl,2)
-  real(dp), intent(inout) :: xccc1d(psps%n1xccc,6) !vz_i
+ integer, intent(out) :: pspxc, lmax_, lloc, mmax
+ real(dp), intent(out) :: znucl, zion
+ real(dp), intent(out) :: epsatm, xcccrc
+ !arrays
+ integer, intent(out)  :: indlmn(6,psps%lmnmax)
+ integer, intent(out)  :: nproj_l(psps%mpssoang)
+ real(dp), intent(inout) :: ekb(psps%dimekb)
+ real(dp), intent(inout) :: ffspl(psps%mqgrid_ff,2,psps%lnmax)
+ real(dp), intent(out) :: vlspl(psps%mqgrid_vl,2)
+ real(dp), intent(inout) :: xccc1d(psps%n1xccc,6)
 
 !Local variables -------------------------
-  integer :: ir, iproj, ll, iunit
-  real(dp) :: yp1, ypn
-  character(len=500) :: msg
-  type(atomdata_t) :: atom
+ integer :: ir, iproj, ll, iunit
+ real(dp) :: yp1, ypn
+ character(len=500) :: msg
+ type(atomdata_t) :: atom
+ logical, allocatable :: found_l(:)
+ real(dp), allocatable :: work_space(:),work_spl(:)
+ real(dp), allocatable :: ff(:), ff1(:), ff2(:), rad_cc(:), proj(:,:)
 
-  logical, allocatable :: found_l(:)
-  real(dp), allocatable :: work_space(:),work_spl(:)
-  real(dp), allocatable :: ff(:), ff1(:), ff2(:), rad_cc(:), proj(:,:)
-
-  ! ######### in module pseudo: ############
-  !
-  !  only npsx = 1 is used here
-  !  grids are allocated for much larger fixed length (ndm=2000)
-  !  number of species (6) and projectors (8) as well...
-  !
-  !  psd(npsx) = specied string
-  !  pseudotype = uspp / nc string
-  !  dft(npsx) = exchange correlation string (20 chars)
-  !  lmax(npsx) = maximum l channel
-  !  mesh(npsx) = number of points for local pot
-  !  nbeta(npsx) = number of projectors (beta functions for uspp)
-  !  nlcc(npsx) = flag for presence of NL core correction
-  !  zp(npsx) = valence ionic charge
-  !  r(ndm,npsx) = radial mesh
-  !  rab(ndm,npsx) = dr / di for radial mesh
-  !  rho_atc(ndm,npsx) = NLCC pseudocharge density
-  !  vloc0(ndm,npsx) = local pseudopotential
-  !  betar(ndm, nbrx, npsx) = projector functions in real space mesh
-  !  lll(nbrx,npsx) = angular momentum channel for each projector
-  !  ikk2(nbrx,npsx) = maximum index for each projector function
-  !  dion(nbrx,nbrx,npsx) = dij or Kleinman Bylander energies
-  !
-  !  ########  end description of pseudo module contents ##########
+ ! ######### in module pseudo: ############
+ !
+ !  only npsx = 1 is used here
+ !  grids are allocated for much larger fixed length (ndm=2000)
+ !  number of species (6) and projectors (8) as well...
+ !
+ !  psd(npsx) = specied string
+ !  pseudotype = uspp / nc string
+ !  dft(npsx) = exchange correlation string (20 chars)
+ !  lmax(npsx) = maximum l channel
+ !  mesh(npsx) = number of points for local pot
+ !  nbeta(npsx) = number of projectors (beta functions for uspp)
+ !  nlcc(npsx) = flag for presence of NL core correction
+ !  zp(npsx) = valence ionic charge
+ !  r(ndm,npsx) = radial mesh
+ !  rab(ndm,npsx) = dr / di for radial mesh
+ !  rho_atc(ndm,npsx) = NLCC pseudocharge density
+ !  vloc0(ndm,npsx) = local pseudopotential
+ !  betar(ndm, nbrx, npsx) = projector functions in real space mesh
+ !  lll(nbrx,npsx) = angular momentum channel for each projector
+ !  ikk2(nbrx,npsx) = maximum index for each projector function
+ !  dion(nbrx,nbrx,npsx) = dij or Kleinman Bylander energies
+ !
+ !  ########  end description of pseudo module contents ##########
 
 ! *********************************************************************
 
-!call pwscf routine for reading in UPF
  if (open_file (filpsp,msg,newunit=iunit,status='old',form='formatted') /= 0) then
    ABI_ERROR(msg)
  end if
 
-!read in psp data to static data in pseudo module, for ipsx == 1
+ ! read in psp data to static data in pseudo module, for ipsx == 1
  call read_pseudo(1,iunit)
  close (iunit)
 
-!convert to Ha units
- vloc0  = half * vloc0
-!betar = half * betar ! ???
- dion   = half * dion
+ ! convert to Ha units
+ vloc0 = half * vloc0
+ ! betar = half * betar ! ???
+ dion = half * dion
 
-!if upf file is a USPP one, stop
+ ! if upf file is a USPP one, stop
  if (pseudotype == 'US') then
    ABI_ERROR('upf2abinit: USPP UPF files not supported')
  end if
 
-!copy over to abinit internal arrays and vars
+ ! copy over to abinit internal arrays and vars
  call upfxc2abi(dft(1), pspxc)
  lmax_ = lmax(1)
 
-!Check if the local component is one of the angular momentum channels
-!effectively if one of the ll is absent from the NL projectors
- ABI_MALLOC(found_l,(0:lmax_))
+ ! Check if the local component is one of the angular momentum channels
+ ! effectively if one of the ll is absent from the NL projectors
+ ABI_MALLOC(found_l, (0:lmax_))
  found_l = .true.
  do ll = 0, lmax_
-   if (any(lll(1:nbeta(1),1) == ll)) then
-     found_l(ll) = .false.
-   end if
+   if (any(lll(1:nbeta(1),1) == ll)) found_l(ll) = .false.
  end do
+
  if (count(found_l) /= 1) then
    lloc = -1
  else
@@ -192,8 +187,9 @@ subroutine upf2abinit (filpsp, znucl, zion, pspxc, lmax_, lloc, mmax, &
      end if
    end do
  end if
+
  ABI_FREE(found_l)
-!FIXME: do something about lloc == -1
+ !FIXME: do something about lloc == -1
 
  call atomdata_from_symbol(atom,psd(1))
  znucl = atom%znucl
@@ -201,24 +197,26 @@ subroutine upf2abinit (filpsp, znucl, zion, pspxc, lmax_, lloc, mmax, &
  mmax = mesh(1)
 
  call psp11lo(rab(1:mmax,1),epsatm,mmax,psps%mqgrid_vl,psps%qgrid_vl,&
-& vlspl(:,1),r(1:mmax,1),vloc0(1:mmax,1),yp1,ypn,zion)
+              vlspl(:,1),r(1:mmax,1),vloc0(1:mmax,1),yp1,ypn,zion)
 
-!Fit spline to q^2 V(q) (Numerical Recipes subroutine)
- ABI_MALLOC(work_space,(psps%mqgrid_vl))
- ABI_MALLOC(work_spl,(psps%mqgrid_vl))
+ ! Fit spline to q^2 V(q) (Numerical Recipes subroutine)
+ ABI_MALLOC(work_space, (psps%mqgrid_vl))
+ ABI_MALLOC(work_spl, (psps%mqgrid_vl))
+
  call spline (psps%qgrid_vl,vlspl(:,1),psps%mqgrid_vl,yp1,ypn,work_spl)
- vlspl(:,2)=work_spl(:)
+
+ vlspl(:,2) = work_spl(:)
  ABI_FREE(work_space)
  ABI_FREE(work_spl)
 
-!this has to do the FT of the projectors to reciprocal space
-! allocate proj to avoid temporary copy.
+ ! this has to do the FT of the projectors to reciprocal space
+ ! allocate proj to avoid temporary copy.
  ABI_MALLOC(proj, (mmax,1:nbeta(1)))
- proj = betar(1:mmax,1:nbeta(1),1)
+ proj = betar(1:mmax,1:nbeta(1), 1)
 
  call psp11nl(ffspl, indlmn, mmax, psps%lnmax, psps%lmnmax, psps%mqgrid_ff, &
-& nbeta(1), proj, lll(1:nbeta(1),1), ikk2(1:nbeta(1),1), &
-& psps%qgrid_ff, r(1:mmax,1), rab(1:mmax,1), psps%useylm)
+              nbeta(1), proj, lll(1:nbeta(1),1), ikk2(1:nbeta(1),1), &
+              psps%qgrid_ff, r(1:mmax,1), rab(1:mmax,1), psps%useylm)
 
  ABI_FREE(proj)
 
@@ -228,20 +226,19 @@ subroutine upf2abinit (filpsp, znucl, zion, pspxc, lmax_, lloc, mmax, &
    nproj_l(ll+1) = nproj_l(ll+1) + 1
  end do
 
-!shape = dimekb  vs. shape = n_proj
+ ! shape = dimekb  vs. shape = n_proj
  do ll = 1, nbeta(1)
    ekb(ll) = dion(ll,ll,1)
  end do
 
- xcccrc = zero
- xccc1d = zero
-!if we find a core density, do something about it
-!rho_atc contains the nlcc density
-!rho_at contains the total density
+ xcccrc = zero; xccc1d = zero
+ ! if we find a core density, do something about it
+ ! rho_atc contains the nlcc density
+ ! rho_at contains the total density
  if (nlcc(1)) then
-   ABI_MALLOC(ff,(mmax))
-   ABI_MALLOC(ff1,(mmax))
-   ABI_MALLOC(ff2,(mmax))
+   ABI_MALLOC(ff, (mmax))
+   ABI_MALLOC(ff1, (mmax))
+   ABI_MALLOC(ff2, (mmax))
    ff(1:mmax) = rho_atc(1:mmax,1) ! model core charge without derivative factor
 
    ff1 = zero
@@ -254,7 +251,7 @@ subroutine upf2abinit (filpsp, znucl, zion, pspxc, lmax_, lloc, mmax, &
    ff2(1:mmax) = ff2(1:mmax) / rab(1:mmax,1)
    call smooth(ff2, mmax, 15) ! run 10 iterations of smoothing?
 
-!  determine a good rchrg = xcccrc
+   ! determine a good rchrg = xcccrc
    do ir = mmax, 1, -1
      if (abs(ff(ir)) > 1.e-6) then
        xcccrc = r(ir,1)
@@ -269,8 +266,7 @@ subroutine upf2abinit (filpsp, znucl, zion, pspxc, lmax_, lloc, mmax, &
    ABI_FREE(ff)
    ABI_FREE(ff1)
    ABI_FREE(ff2)
-
- end if !if nlcc present
+ end if ! nlcc present
 
 end subroutine upf2abinit
 !!***
@@ -309,8 +305,6 @@ end subroutine upf2abinit
 
 subroutine psp11nl(ffspl,indlmn,mmax,lnmax,lmnmax,mqgrid,n_proj,&
 &                  proj, proj_l, proj_np, qgrid, r, drdi, useylm)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -434,8 +428,6 @@ end subroutine psp11nl
 !! SOURCE
 
 subroutine psp11lo(drdi,epsatm,mmax,mqgrid,qgrid,q2vq,rad,vloc,yp1,ypn,zion)
-
- implicit none
 
 !Arguments----------------------------------------------------------
 !scalars

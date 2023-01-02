@@ -6,6 +6,15 @@
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
 !--------------------------------------------------------
+
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+
 MODULE  read_upf_new_module
   !-----------------------------------------------------
   !! this module contains the simplified code for reading
@@ -15,6 +24,11 @@ MODULE  read_upf_new_module
   !USE upf_kinds, ONLY: dp
   use defs_basis, only : dp
   USE pseudo_types, ONLY: pseudo_upf, pseudo_config
+
+
+
+
+
   !
   LOGICAL :: v2
   !! true if UPF v.2 version, false if new UPF with xml schema
@@ -843,4 +857,18 @@ CONTAINS
     !
   END SUBROUTINE read_pp_gipaw
   !
+
+SUBROUTINE upf_error( calling_routine, message, ierr )
+  use m_abicore
+  use m_errors
+
+  CHARACTER(LEN=*), INTENT(IN) :: calling_routine, message
+    ! the name of the calling calling_routine
+    ! the output message
+  INTEGER,          INTENT(IN) :: ierr
+
+  ABI_ERROR(message)
+
+END SUBROUTINE upf_error
+
 END MODULE read_upf_new_module

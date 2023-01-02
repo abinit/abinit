@@ -80,7 +80,7 @@ contains
 !! OUTPUT
 !!  usexml=1 if XML file
 !!  xmlpaw=1 if PAW file in XML format
-!!  useupf=1 if UPF file.
+!!  useupf=1 or 2 if UPF file.
 !!
 !! SOURCE
 
@@ -119,9 +119,10 @@ subroutine test_xml_xmlpaw_upf(path, usexml, xmlpaw, useupf)
      ! "<UPF version="2.0.1">
      ii = index(testxml, '"')
      if (ii /= 0) then
-       if (atoi(testxml(ii+1:ii+1)) >= 2) then
-         ABI_ERROR(sjoin("UPF version >= 2 is not supported by Abinit. Use psp8 or psml format.", ch10, "Pseudo:", path))
-       end if
+       useupf = atoi(testxml(ii+1:ii+1))
+       !if (useupf >= 2) then
+       !  ABI_ERROR(sjoin("UPF version >= 2 is not supported by Abinit. Use psp8 or psml format.", ch10, "Pseudo:", path))
+       !end if
      else
        ABI_ERROR(sjoin("Cannot find version attributed in UPF file:", path))
      end if
@@ -129,13 +130,15 @@ subroutine test_xml_xmlpaw_upf(path, usexml, xmlpaw, useupf)
    end if
  end if
 
- !Check if pseudopotential file is a Q-espresso UPF file
- rewind (unit=temp_unit,err=10,iomsg=errmsg)
- read(temp_unit,*,err=10,iomsg=errmsg) testxml ! just a string, no relation to xml.
- if(testxml(1:9)=='<PP_INFO>')then
-   useupf = 1
- else
-   useupf = 0
+ ! Check if pseudopotential file is a Q-espresso UPF1 file
+ if (useupf == 0) then
+   rewind (unit=temp_unit,err=10,iomsg=errmsg)
+   read(temp_unit,*,err=10,iomsg=errmsg) testxml ! just a string, no relation to xml.
+   if(testxml(1:9)=='<PP_INFO>')then
+     useupf = 1
+   else
+     useupf = 0
+   end if
  end if
 
  close(unit=temp_unit,err=10,iomsg=errmsg)

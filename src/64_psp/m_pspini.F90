@@ -51,7 +51,7 @@ module m_pspini
  use m_psp6,       only : psp6in
  use m_psp8,       only : psp8in
  use m_psp9,       only : psp9in
- use m_upf2abinit, only : upf2abinit
+ use m_upf2abinit, only : upf2abinit !, new_upf2abinit
  use m_psp_hgh,    only : psp2in, psp3in, psp10in
  use m_wvl_descr_psp,  only : wvl_descr_psp_fill
 
@@ -242,7 +242,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
 
    ! JWZ debug added for development of testcprj routine in m_orbmag
    if(dtset%userid .EQ. 1) paw_options(8) = 1
- 
+
  end if
 
 !Determine whether the spin-orbit characteristic has changed
@@ -871,11 +871,11 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
    ABI_MALLOC(nproj,(psps%mpssoang))
    nproj(:)=0
 
-   if (usexml /= 1 .and. useupf /= 1) then
+   if (usexml /= 1 .and. useupf == 0) then
 
-     !    Open the atomic data file, and read the three first lines
-     !    These three first lines have a similar format in all allowed psp files
-     !    Open atomic data file (note: formatted input file)
+     ! Open the atomic data file, and read the three first lines
+     ! These three first lines have a similar format in all allowed psp files
+     ! Open atomic data file (note: formatted input file)
      if (open_file(psps%filpsp(ipsp), msg, unit=tmp_unit, form='formatted', status='old') /= 0) then
        ABI_ERROR(msg)
      end if
@@ -955,17 +955,23 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
      pawpsp_header%rshp=pspheads_tmp%pawheader%rshp
      lloc=0; pspcod=17
 
-   else if (useupf == 1) then
+   else if (useupf /= 0) then
      if (psps%usepaw /= 0) then
        ABI_ERROR("UPF format not allowed with PAW (USPP part not read yet)")
      end if
 
-     pspcod = 11
      r2well = 0
-
-!    should initialize znucl,zion,pspxc,lmax,lloc,mmax
-     call upf2abinit (psps%filpsp(ipsp), znucl, zion, pspxc, lmax, lloc, mmax, &
-       psps, epsatm, xcccrc, indlmn, ekb, ffspl, nproj, vlspl, xccc1d)
+     ! should initialize znucl,zion,pspxc,lmax,lloc,mmax
+     if (useupf == 1) then
+       pspcod = 11
+       call upf2abinit(psps%filpsp(ipsp), znucl, zion, pspxc, lmax, lloc, mmax, &
+                       psps, epsatm, xcccrc, indlmn, ekb, ffspl, nproj, vlspl, xccc1d)
+     else
+       pspcod = 12
+       !call new_upf2abinit(psps%filpsp(ipsp), znucl, zion, pspxc, lmax, lloc, mmax, &
+       !                    psps, epsatm, xcccrc, indlmn, ekb, ffspl, nproj, vlspl, xccc1d)
+       ABI_BUG("UPF2")
+     end if
 
    else
      ABI_ERROR("You should not be here! erroneous type or pseudopotential input")
