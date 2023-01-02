@@ -92,18 +92,20 @@ MODULE m_fft
  !public :: fftmpi_u
 
  interface fft_ug
-   !module procedure fft_ug_dp  TODO
+   module procedure fft_ug_sp
+   module procedure fft_ug_dp
    module procedure fft_ug_spc
    module procedure fft_ug_dpc
+   module procedure fft_ug_dpc_2d
  end interface fft_ug
- !public :: fft_ug_spc, fft_ug_dpc
 
  interface fft_ur
-   !module procedure fft_ur_dp  TODO
+   !module procedure fft_ur_sp  TODO
+   module procedure fft_ur_dp
    module procedure fft_ur_spc
    module procedure fft_ur_dpc
+   module procedure fft_ur_dpc_2d
  end interface fft_ur
- !public :: fft_ur_spc, fft_ur_dpc
 
  interface fftpad
    !module procedure fftpad_dp  TODO
@@ -289,7 +291,7 @@ end subroutine fftbox_plan3_init
 !!  fftbox_plan3_from_ngfft
 !!
 !! FUNCTION
-!!  Initialize plan for ndat 3d FFTs from ngfft array.
+!!  Initialize plan for ndat 3d FFTs from ngfft.
 !!
 !! SOURCE
 
@@ -383,7 +385,7 @@ subroutine fftbox_execute_ip_spc(plan, ff, isign)
  end if
 #endif
 
- ! Cpu version
+ ! CPU version
 #include "fftbox_ip_driver.finc"
 
 end subroutine fftbox_execute_ip_spc
@@ -430,7 +432,7 @@ subroutine fftbox_execute_ip_dpc(plan, ff, isign)
  end if
 #endif
 
- ! Cpu version
+ ! CPU version
 #include "fftbox_ip_driver.finc"
 
 end subroutine fftbox_execute_ip_dpc
@@ -450,7 +452,7 @@ end subroutine fftbox_execute_ip_dpc
 !! INPUTS
 !! plan<fftbox_plan3_t>=Structure with the parameters defining the transform.
 !! ff(plan%ldxyz*plan%ndat)=The input array to be transformed.
-!!  isign= Sign of the exponential in the FFT
+!! isign= Sign of the exponential in the FFT
 !!
 !! OUTPUT
 !!  gg(plan%ldxyz*plan%ndat)= The FFT results.
@@ -477,7 +479,7 @@ subroutine fftbox_execute_op_spc(plan, ff, gg, isign)
  end if
 #endif
 
- ! Cpu version
+ ! CPU version
 #include "fftbox_op_driver.finc"
 
 end subroutine fftbox_execute_op_spc
@@ -493,11 +495,12 @@ end subroutine fftbox_execute_op_spc
 !!  Out-of-place FFT transform of complex arrays.
 !!  Call (FFTW3|DFTI) routines if available, otherwise fallback to SG routines
 !!  TARGET: dpc arrays
-!!  isign= Sign of the exponential in the FFT
+
 !!
 !! INPUTS
 !! plan<fftbox_plan3_t>=Structure with the parameters defining the transform.
 !! ff(plan%ldxyz*plan%ndat)=The input array to be transformed.
+!! isign= Sign of the exponential in the FFT
 !!
 !! OUTPUT
 !!  gg(plan%ldxyz*plan%ndat)= The FFT results.
@@ -524,14 +527,49 @@ subroutine fftbox_execute_op_dpc(plan, ff, gg, isign)
  end if
 #endif
 
- ! Cpu version
+ ! CPU version
 #include "fftbox_op_driver.finc"
 
 end subroutine fftbox_execute_op_dpc
 !!***
 
 !----------------------------------------------------------------------
-#if 0
+
+!!****f* m_fft/fft_ug_sp
+!! NAME
+!! fft_ug_sp
+!!
+!! FUNCTION
+!! Driver routine for G-->R transform of wavefunctions with zero-padded FFT.
+!! TARGET: single precision real arrays with Re/Im.
+!!
+!! INPUTS
+!!  See fft_ug_dpc
+!!
+!! SOURCE
+
+subroutine fft_ug_sp(npw_k, nfft, nspinor, ndat, mgfft, ngfft, istwf_k, kg_k, gbound_k, ug, ur)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: npw_k,nfft,nspinor,istwf_k,mgfft,ndat
+!arrays
+ integer,intent(in) :: ngfft(18),gbound_k(2*mgfft+8,2),kg_k(3,npw_k)
+ real(sp),target,intent(in) :: ug(2*npw_k*nspinor*ndat)
+ real(sp),target,intent(out) :: ur(2*nfft*nspinor*ndat)
+
+!Local variables-------------------------------
+ complex(sp),contiguous,pointer :: ug_cplx(:), ur_cplx(:)
+
+! *************************************************************************
+
+ call C_F_pointer(c_loc(ug), ug_cplx, shape=[npw_k*nspinor*ndat])
+ call C_F_pointer(c_loc(ur), ur_cplx, shape=[nfft*nspinor*ndat])
+
+ call fft_ug_spc(npw_k, nfft, nspinor, ndat, mgfft, ngfft, istwf_k, kg_k, gbound_k, ug_cplx, ur_cplx)
+
+end subroutine fft_ug_sp
+!!***
 
 !!****f* m_fft/fft_ug_dp
 !! NAME
@@ -539,22 +577,10 @@ end subroutine fftbox_execute_op_dpc
 !!
 !! FUNCTION
 !! Driver routine for G-->R transform of wavefunctions with zero-padded FFT.
-!! TARGET: double precision real arrays
+!! TARGET: double precision real arrays with Re/Im.
 !!
 !! INPUTS
-!! npw_k=number of plane waves for this k-point.
-!! nfft=Number of FFT points.
-!! nspinor=number of spinorial components
-!! ndat=Numer of wavefunctions to transform.
-!! mgfft=Max number of FFT divisions
-!! ngfft(18)=information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
-!! istwfk=Option describing the storage of the wavefunction. (at present must be 1)
-!! kg_k(3,npw_k)=G-vectors in reduced coordinates
-!! gbound_k_k(2*mgfft+8,2)=Table for padded-FFT. See sphereboundary.
-!! ug(npw_k*nspinor*ndat)=wavefunctions in reciprocal space
-!!
-!! OUTPUT
-!!  ur(nfft*nspinor*ndat)=wavefunctions in real space.
+!!  See fft_ug_dpc
 !!
 !! SOURCE
 
@@ -565,18 +591,21 @@ subroutine fft_ug_dp(npw_k, nfft, nspinor, ndat, mgfft, ngfft, istwf_k, kg_k, gb
  integer,intent(in) :: npw_k,nfft,nspinor,istwf_k,mgfft,ndat
 !arrays
  integer,intent(in) :: ngfft(18),gbound_k(2*mgfft+8,2),kg_k(3,npw_k)
- real(dp),intent(in) :: ug(2*npw_k*nspinor*ndat)
- real(dp),intent(out) :: ur(2*nfft*nspinor*ndat)
+ real(dp),target,intent(in) :: ug(2*npw_k*nspinor*ndat)
+ real(dp),target,intent(out) :: ur(2*nfft*nspinor*ndat)
+
+!Local variables-------------------------------
+ complex(dp),contiguous,pointer :: ug_cplx(:), ur_cplx(:)
 
 ! *************************************************************************
 
- ABI_ERROR("This is a Stub")
-!#include "fftug_driver.finc"
+ call C_F_pointer(c_loc(ug), ug_cplx, shape=[npw_k*nspinor*ndat])
+ call C_F_pointer(c_loc(ur), ur_cplx, shape=[nfft*nspinor*ndat])
+
+ call fft_ug_dpc(npw_k, nfft, nspinor, ndat, mgfft, ngfft, istwf_k, kg_k, gbound_k, ug_cplx, ur_cplx)
 
 end subroutine fft_ug_dp
 !!***
-
-#endif
 
 !----------------------------------------------------------------------
 
@@ -667,7 +696,37 @@ end subroutine fft_ug_dpc
 !!***
 
 !----------------------------------------------------------------------
-#if 0
+
+!!****f* m_fft/fft_ug_dpc_2d
+!! NAME
+!! fft_ug_dpc_3d
+!!
+!! FUNCTION
+!! Driver routine for G-->R transform of wavefunctions with zero-padded FFT.
+!! TARGET: double precision 2d arrays
+
+!----------------------------------------------------------------------
+
+subroutine fft_ug_dpc_2d(npw_k, nfft, nspinor, ndat, mgfft, ngfft, istwf_k, kg_k, gbound_k, ug, ur)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: npw_k,nfft,nspinor,istwf_k,mgfft,ndat
+!arrays
+ integer,intent(in) :: ngfft(18),gbound_k(2*mgfft+8,2),kg_k(3,npw_k)
+ complex(dpc),target,intent(in) :: ug(npw_k*nspinor,ndat)
+ complex(dpc),target,intent(out) :: ur(nfft*nspinor,ndat)
+
+!Local variables-------------------------------
+ complex(dp),contiguous,pointer :: ug_cplx(:), ur_cplx(:)
+! *************************************************************************
+
+ call C_F_pointer(c_loc(ug), ug_cplx, shape=[npw_k*nspinor*ndat])
+ call C_F_pointer(c_loc(ur), ur_cplx, shape=[nfft*nspinor*ndat])
+ call fft_ug_dpc(npw_k, nfft, nspinor, ndat, mgfft, ngfft, istwf_k, kg_k, gbound_k, ug_cplx, ur_cplx)
+
+end subroutine fft_ug_dpc_2d
+!!***
 
 !!****f* m_fft/fft_ur_dp
 !! NAME
@@ -676,25 +735,10 @@ end subroutine fft_ug_dpc
 !! FUNCTION
 !! Compute ndat zero-padded FFTs from R- to G-space .
 !! Mainly used for the transform of wavefunctions.
-!! TARGET: dp real arrays
+!! TARGET: double precision real arrays with re/im
 !!
 !! INPUTS
-!! npw_k=number of plane waves for this k-point.
-!! nfft=Number of FFT points.
-!! nspinor=number of spinorial components
-!! ndat=Number of wavefunctions to transform.
-!! mgfft=Max number of FFT divisions
-!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
-!! istwfk=Option describing the storage of the wavefunction. (at present must be 1)
-!! kg_k(3,npw_k)=G-vectors in reduced coordinates
-!! gbound_k(2*mgfft+8,2)=Table for padded-FFT. See sphereboundary.
-!!
-!! SIDE EFFECTS
-!!  ur(nfft*nspinor*ndat)=In input: wavefunctions in real space
-!!                        Destroyed in output. Do not use ur anymore!
-!!
-!! OUTPUT
-!!  ug(npw_k*nspinor*ndat)=wavefunctions in reciprocal space given on the G-sphere.
+!!  See fft_ur_dpc
 !!
 !! SOURCE
 
@@ -704,21 +748,21 @@ subroutine fft_ur_dp(npw_k,nfft,nspinor,ndat,mgfft,ngfft,istwf_k,kg_k,gbound_k,u
 !scalars
  integer,intent(in) :: npw_k,nfft,nspinor,ndat,istwf_k,mgfft
 !arrays
- integer,intent(in) :: ngfft(18),gbound_k(2*mgfft+8,2)
- integer,intent(in) :: kg_k(3,npw_k)
- real(dp),intent(inout) :: ur(2*nfft*nspinor*ndat)
- real(dp),intent(out) :: ug(2*npw_k*nspinor*ndat)
+ integer,intent(in) :: ngfft(18),gbound_k(2*mgfft+8,2), kg_k(3,npw_k)
+ real(dp),target,intent(inout) :: ur(2*nfft*nspinor*ndat)
+ real(dp),target,intent(out) :: ug(2*npw_k*nspinor*ndat)
+
+!Local variables-------------------------------
+ complex(dp),contiguous,pointer :: ug_cplx(:), ur_cplx(:)
 
 ! *************************************************************************
 
- ABI_ERROR("This is a Stub")
-
-!#include "fftur_driver.finc"
+ call C_F_pointer(c_loc(ug), ug_cplx, shape=[npw_k*nspinor*ndat])
+ call C_F_pointer(c_loc(ur), ur_cplx, shape=[nfft*nspinor*ndat])
+ call fft_ur_dpc(npw_k, nfft, nspinor, ndat, mgfft, ngfft, istwf_k, kg_k, gbound_k, ur_cplx, ug_cplx)
 
 end subroutine fft_ur_dp
 !!***
-
-#endif
 
 !----------------------------------------------------------------------
 
@@ -757,8 +801,7 @@ subroutine fft_ur_spc(npw_k,nfft,nspinor,ndat,mgfft,ngfft,istwf_k,kg_k,gbound_k,
 !scalars
  integer,intent(in) :: npw_k,nfft,nspinor,ndat,istwf_k,mgfft
 !arrays
- integer,intent(in) :: ngfft(18),gbound_k(2*mgfft+8,2)
- integer,intent(in) :: kg_k(3,npw_k)
+ integer,intent(in) :: ngfft(18),gbound_k(2*mgfft+8,2),kg_k(3,npw_k)
  complex(spc),intent(inout) :: ur(nfft*nspinor*ndat)
  complex(spc),intent(out) :: ug(npw_k*nspinor*ndat)
 
@@ -806,8 +849,7 @@ subroutine fft_ur_dpc(npw_k, nfft, nspinor, ndat, mgfft, ngfft, istwf_k, kg_k, g
 !scalars
  integer,intent(in) :: npw_k,nfft,nspinor,ndat,istwf_k,mgfft
 !arrays
- integer,intent(in) :: ngfft(18),gbound_k(2*mgfft+8,2)
- integer,intent(in) :: kg_k(3,npw_k)
+ integer,intent(in) :: ngfft(18),gbound_k(2*mgfft+8,2),kg_k(3,npw_k)
  complex(dpc),intent(inout) :: ur(nfft*nspinor*ndat)
  complex(dpc),intent(out) :: ug(npw_k*nspinor*ndat)
 
@@ -816,6 +858,42 @@ subroutine fft_ur_dpc(npw_k, nfft, nspinor, ndat, mgfft, ngfft, istwf_k, kg_k, g
 #include "fftur_driver.finc"
 
 end subroutine fft_ur_dpc
+!!***
+
+!!****f* m_fft/fft_ur_dpc
+!! NAME
+!! fft_ur_dpc
+!!
+!! FUNCTION
+!! Compute ndat zero-padded FFTs from R- to G-space .
+!! Mainly used for the transform of wavefunctions.
+!! TARGET: double precision 2d complex arrays
+!!
+!! INPUTS
+!!  See fft_ur_dpc
+!!
+!! SOURCE
+
+subroutine fft_ur_dpc_2d(npw_k, nfft, nspinor, ndat, mgfft, ngfft, istwf_k, kg_k, gbound_k, ur, ug)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: npw_k,nfft,nspinor,ndat,istwf_k,mgfft
+!arrays
+ integer,intent(in) :: ngfft(18),gbound_k(2*mgfft+8,2), kg_k(3,npw_k)
+ complex(dp),target,intent(inout) :: ur(2*nfft*nspinor, ndat)
+ complex(dp),target,intent(out) :: ug(2*npw_k*nspinor, ndat)
+
+!Local variables-------------------------------
+ complex(dp),contiguous,pointer :: ug_cplx(:), ur_cplx(:)
+
+! *************************************************************************
+
+ call C_F_pointer(c_loc(ug), ug_cplx, shape=[npw_k*nspinor*ndat])
+ call C_F_pointer(c_loc(ur), ur_cplx, shape=[nfft*nspinor*ndat])
+ call fft_ur_dpc(npw_k, nfft, nspinor, ndat, mgfft, ngfft, istwf_k, kg_k, gbound_k, ur_cplx, ug_cplx)
+
+end subroutine fft_ur_dpc_2d
 !!***
 
 !----------------------------------------------------------------------
@@ -980,8 +1058,8 @@ subroutine fftpad_dpc(ff, ngfft, nx, ny, nz, ldx, ldy, ldz, ndat, mgfft, isign, 
    ! alternatif of ZCOPY from vz
    ABI_MALLOC(fofrvz,(2,ncount))     !vz_d
    do ivz=1,ncount                !vz_d
-      fofrvz(1,ivz)= real(ff(ivz))  !vz_d
-      fofrvz(2,ivz)=aimag(ff(ivz))  !vz_d
+     fofrvz(1,ivz)= real(ff(ivz))  !vz_d
+     fofrvz(2,ivz)=aimag(ff(ivz))  !vz_d
    end do                         !vz_d
    call DCOPY(2*ncount,fofrvz,1,fofr,1) !vz_d
    ABI_FREE(fofrvz)             !vz_d
@@ -1152,7 +1230,6 @@ integer function fftbox_utests(fftalg, ndat, nthreads, use_gpu, unit) result(nfa
 ! *************************************************************************
 
  nfailed = 0
-
  ount = std_out; if (PRESENT(unit)) ount = unit
 
  if (nthreads > 0) then
@@ -1178,7 +1255,6 @@ integer function fftbox_utests(fftalg, ndat, nthreads, use_gpu, unit) result(nfa
  do iset=1,SIZE(pars,DIM=2)
    nx =pars(1,iset);  ny=pars(2,iset);  nz=pars(3,iset)
    ldx=pars(4,iset); ldy=pars(5,iset); ldz=pars(6,iset)
-   !write(std_out,*)pars(1:6,iset)
 
    ! Create the FFT plan
    call box_plan%init(ndat, pars(1,iset), pars(4,iset), fftalg, fftcache0, use_gpu)
@@ -1212,7 +1288,7 @@ integer function fftbox_utests(fftalg, ndat, nthreads, use_gpu, unit) result(nfa
    ierr = COUNT(ABS(ffsp - ff_refsp) > ATOL_SP)
    nfailed = nfailed + ierr
 
-   info = sjoin(library,"c2c_ip_spc :")
+   info = sjoin(library, "c2c_ip_spc :")
    if (ierr /= 0) then
      max_abserr = MAXVAL(ABS(ffsp - ff_refsp))
      write(msg,"(a,es9.2,a)")" FAILED (max_abserr = ",max_abserr,")"
@@ -1229,14 +1305,14 @@ integer function fftbox_utests(fftalg, ndat, nthreads, use_gpu, unit) result(nfa
    ierr = COUNT(ABS(ffsp - ff_refsp) > ATOL_SP)
    nfailed = nfailed + ierr
 
-   info = sjoin(library,"c2c_op_spc :")
+   info = sjoin(library, "c2c_op_spc :")
    if (ierr /= 0) then
      max_abserr = MAXVAL(ABS(ffsp - ff_refsp))
      write(msg,"(a,es9.2,a)")" FAILED (max_abserr = ",max_abserr,")"
    else
      write(msg,"(a)")" OK"
    end if
-   call wrtout(ount,sjoin(info,msg))
+   call wrtout(ount, sjoin(info, msg))
 
    ABI_FREE(ff_refsp)
    ABI_FREE(ffsp)
@@ -1265,7 +1341,7 @@ integer function fftbox_utests(fftalg, ndat, nthreads, use_gpu, unit) result(nfa
    ierr = COUNT(ABS(ff - ff_ref) > ATOL_DP)
    nfailed = nfailed + ierr
 
-   info = sjoin(library,"c2c_ip_dpc :")
+   info = sjoin(library, "c2c_ip_dpc :")
    if (ierr /= 0) then
      max_abserr = MAXVAL(ABS(ff - ff_ref))
      write(msg,"(a,es9.2,a)")" FAILED (max_abserr = ",max_abserr,")"
@@ -1282,14 +1358,14 @@ integer function fftbox_utests(fftalg, ndat, nthreads, use_gpu, unit) result(nfa
    ierr = COUNT(ABS(ff - ff_ref) > ATOL_DP)
    nfailed = nfailed + ierr
 
-   info = sjoin(library,"c2c_op_dpc :")
+   info = sjoin(library, "c2c_op_dpc :")
    if (ierr /= 0) then
      max_abserr = MAXVAL(ABS(ff - ff_ref))
      write(msg,"(a,es9.2,a)")" FAILED (max_abserr = ",max_abserr,")"
    else
      write(msg,"(a)")" OK"
    end if
-   call wrtout(ount,sjoin(info, msg))
+   call wrtout(ount, sjoin(info, msg))
 
    ABI_FREE(ff_ref)
    ABI_FREE(ff)
@@ -1330,7 +1406,7 @@ integer function fftbox_utests(fftalg, ndat, nthreads, use_gpu, unit) result(nfa
      ierr = COUNT(ABS(fofr - fofr_ref) > ATOL_DP)
      nfailed = nfailed + ierr
 
-     write(info,"(a,i1,a)")sjoin(library,"fourdp (cplex "),cplex,") :"
+     write(info,"(a,i1,a)")sjoin(library, "fourdp (cplex "),cplex,") :"
      !write(info,"(2a,i1,a,i0,a)")trim(library), "fourdp (cplex ", cplex,"), ndata = ",ndat," :"
      if (ierr /= 0) then
        max_abserr = MAXVAL(ABS(fofr - fofr_ref))
@@ -1344,7 +1420,6 @@ integer function fftbox_utests(fftalg, ndat, nthreads, use_gpu, unit) result(nfa
      ABI_FREE(fofr_ref)
      ABI_FREE(fofr)
    end do
-   !
  end do
 
  if (nthreads > 0) call xomp_set_num_threads(old_nthreads)
@@ -1448,12 +1523,11 @@ function fftu_utests(ecut, ngfft, rprimd, ndat, nthreads, unit) result(nfailed)
 
  do ikpt=1,SIZE(kpoints,DIM=2)
    kpoint = kpoints(:,ikpt)
-
    istwf_k = set_istwfk(kpoint)
 
    ! Calculate the number of G-vectors for this k-point.
    call kpgsph(ecut,exchn2n3d0,gmet,ikg0,0,istwf_k,kg_dum,kpoint,0,MPI_enreg_seq,0,npw_k)
-   !
+
    ! Allocate and calculate the set of G-vectors.
    ABI_MALLOC(kg_k,(3,npw_k))
    call kpgsph(ecut,exchn2n3d0,gmet,ikg0,0,istwf_k,kg_k,kpoint,mkmem1,MPI_enreg_seq,npw_k,npw_k_test)
@@ -1562,7 +1636,7 @@ function fftu_utests(ecut, ngfft, rprimd, ndat, nthreads, unit) result(nfailed)
    else
      write(msg,"(a)")" OK"
    end if
-   call wrtout(ount,sjoin(info, msg))
+   call wrtout(ount, sjoin(info, msg))
 
    ABI_FREE(kg_k)
    ABI_FREE(gbound_k)
@@ -1571,15 +1645,12 @@ function fftu_utests(ecut, ngfft, rprimd, ndat, nthreads, unit) result(nfailed)
  ABI_FREE(cg_ref)
  ABI_FREE(cg)
  ABI_FREE(cr)
-
  ABI_FREE(ug_ref)
  ABI_FREE(ug)
  ABI_FREE(ur)
-
  ABI_FREE(ug_refsp)
  ABI_FREE(ugsp)
  ABI_FREE(ursp)
-
  call destroy_mpi_enreg(MPI_enreg_seq)
 
  if (nthreads > 0) call xomp_set_num_threads(old_nthreads)
@@ -1713,8 +1784,7 @@ function fftbox_mpi_utests(fftalg, cplex, ndat, nthreads, comm_fft, unit) result
    !  call dfti_mpifourdp(cplex,nfft,ngfft,ndat,+1,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local,fofg,fofr,comm_fft)
 
    case default
-     write(msg,'(a,i0,a)')"fftalg: ",fftalg," does not support MPI-FFT"
-     ABI_BUG(msg)
+     ABI_BUG(sjoin("fftalg: ", itoa(fftalg), " does not support MPI-FFT"))
    end select
 
    call cwtime(ctime,wtime,gflops,"stop")
@@ -2053,7 +2123,7 @@ function fftu_mpi_utests(fftalg, ecut, rprimd, ndat, nthreads, comm_fft, paral_k
    else
      write(msg,"(a)")" OK"
    end if
-   call wrtout(ount,sjoin(info, msg))
+   call wrtout(ount, sjoin(info, msg))
 
    ABI_FREE(density)
 
@@ -2103,7 +2173,7 @@ function fftu_mpi_utests(fftalg, ecut, rprimd, ndat, nthreads, comm_fft, paral_k
    else
      write(msg,"(a)")" OK"
    end if
-   call wrtout(ount,sjoin(info,msg))
+   call wrtout(ount, sjoin(info, msg))
 
    ABI_FREE(fofg_out)
    ABI_FREE(pot)

@@ -96,6 +96,7 @@ MODULE m_FFT_prof
    procedure :: init => fft_test_init
    procedure :: free => fft_test_free_0D
    procedure :: print => fft_test_print
+   procedure :: get_name
 
    ! Timing routines.
    procedure :: time_fourdp
@@ -192,7 +193,7 @@ subroutine fft_test_init(Ftest, fft_setup, kpoint, ecut, boxcutmin, rprimd, nsym
  real(dp) :: ucvol
 !arrays
  logical,allocatable :: mask(:)
- real(dp),parameter :: k0(3)=(/zero,zero,zero/)
+ real(dp),parameter :: k0(3)=zero
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
  real(dp),allocatable :: tnons(:,:)
 
@@ -271,25 +272,6 @@ subroutine fft_test_free_0D(Ftest)
  class(FFT_test_t),intent(inout) :: Ftest
 
 ! *********************************************************************
-
- Ftest%available=0
- Ftest%istwf_k=-1
- Ftest%mgfft=-1
- Ftest%ndat=-1
- Ftest%nfft=-1
- Ftest%nthreads=1
- Ftest%npw_k=-1
- Ftest%npw_kout=-1
- Ftest%paral_kgb=-1
-
- Ftest%ecut=zero
- Ftest%ngfft=-1
-
- Ftest%kpoint =zero
- Ftest%rprimd =zero
- Ftest%rmet   =zero
- Ftest%gprimd =zero
- Ftest%gmet   =zero
 
  ABI_SFREE(Ftest%indpw_k)
  ABI_SFREE(Ftest%kg_k)
@@ -380,9 +362,9 @@ end subroutine fft_test_print
 
 !----------------------------------------------------------------------
 
-!!****f* m_FFT_prof/name_of
+!!****f* m_FFT_prof/get_name
 !! NAME
-!!  name_of
+!!  get_name
 !!
 !! FUNCTION
 !!  Returns a string with info on the test.
@@ -393,7 +375,7 @@ end subroutine fft_test_print
 !!
 !! SOURCE
 
-character(len=TNAME_LEN) function name_of(Ftest)
+character(len=TNAME_LEN) function get_name(Ftest)
 
 !Arguments -----------------------------------
  class(FFT_test_t),intent(in) :: Ftest
@@ -405,14 +387,14 @@ character(len=TNAME_LEN) function name_of(Ftest)
 
  if (ftest%use_gpu == 0) then
    call fftalg_info(Ftest%ngfft(7), library_name, cplex_mode, padding_mode)
-   !name_of = TRIM(library_name)//"; "//TRIM(cplex_mode)//"; "//TRIM(padding_mode)
-   write(name_of,'(i3)')Ftest%ngfft(7)
-   name_of = TRIM(library_name)//" ("//TRIM(name_of)//")"
- else 
-   name_of = "GPU"
- end if 
+   !get_name = TRIM(library_name)//"; "//TRIM(cplex_mode)//"; "//TRIM(padding_mode)
+   write(get_name,'(i3)')Ftest%ngfft(7)
+   get_name = TRIM(library_name)//" ("//TRIM(get_name)//")"
+ else
+   get_name = "GPU"
+ end if
 
-end function name_of
+end function get_name
 !!***
 
 !----------------------------------------------------------------------
@@ -478,12 +460,6 @@ subroutine fftprof_free_0D(Ftprof)
 
 ! *********************************************************************
 
- Ftprof%ncalls=0
- Ftprof%nthreads=0
- Ftprof%cpu_time=zero
- Ftprof%wall_time=zero
- Ftprof%test_name = "None"
-
  ABI_SFREE(Ftprof%results)
 
 end subroutine fftprof_free_0D
@@ -513,7 +489,6 @@ subroutine fftprof_free_1D(Ftprof)
  integer :: ii
 ! *********************************************************************
 
- !@FFT_prof_t
  do ii=LBOUND(Ftprof,DIM=1),UBOUND(Ftprof,DIM=1)
    call fftprof_free_0D(Ftprof(ii))
  end do
@@ -569,7 +544,6 @@ subroutine fftprofs_print(Fprof, header, unit, mode_paral, prtvol)
    field1_w = MAX(field1_w, LEN_TRIM(Fprof(ii)%test_name))
  end do
 
- ! TODO Add gflops
  if (field1_w==0) RETURN
  field1_w = field1_w + 2 ! To account for ". "
  write(ofmt,*)"(a",field1_w,",2x,2(f7.4,4x),1x,i2,1x,a,i3,a,1x,i0,4x,2(es9.2,3x))"
@@ -662,7 +636,7 @@ subroutine time_fourdp(Ftest, isign, cplex, header, Ftprof)
 
 ! *********************************************************************
 
- test_name = name_of(Ftest)
+ test_name = Ftest%get_name()
  n1=Ftest%ngfft(1); n2=Ftest%ngfft(2); n3=Ftest%ngfft(3)
 
  write(header,'(2(a,i2),a)')" fourdp with cplex ",cplex,", isign ",isign,", ndat 1"
@@ -781,7 +755,7 @@ subroutine time_fftbox(Ftest, isign, inplace, header, Ftprof)
  complex(dpc),allocatable :: ffc(:),ggc(:),results(:)
 ! *********************************************************************
 
- test_name = name_of(Ftest)
+ test_name = Ftest%get_name()
 
  if (Ftest%available == 0) then
    call Ftprof%init(test_name, 0, 0, 0, 0, zero, zero, zero)
@@ -906,7 +880,7 @@ subroutine time_fourwf(Ftest, cplex, option_fourwf, header, Ftprof)
 
 ! *********************************************************************
 
- test_name = name_of(Ftest)
+ test_name = Ftest%get_name()
 
  fftalg  = Ftest%ngfft(7); fftalga = fftalg/100; fftalgc = MOD(fftalg,10)
 
@@ -1099,6 +1073,7 @@ subroutine time_fourwf(Ftest, cplex, option_fourwf, header, Ftprof)
        do ipw=1,npw_out*ndat
          results(ipw) = DCMPLX(fofg_out(1,ipw),fofg_out(2,ipw))
        end do
+
      case (3)
        !! for option==3, fofr(2,n4,n5,n6*ndat) contains the input real space wavefunction;
        !!                fofgout(2,npwout*ndat) contains its output Fourier transform;
@@ -1206,7 +1181,7 @@ subroutine time_rhotwg(Ftest, map2sphere, use_padfft, osc_npw, osc_gvec, header,
 
 ! *********************************************************************
 
- test_name = name_of(Ftest)
+ test_name = Ftest%get_name()
 
  nfft = Ftest%nfft; ndat = Ftest%ndat
  n1=Ftest%ngfft(1); n2=Ftest%ngfft(2); n3=Ftest%ngfft(3)
@@ -1332,7 +1307,7 @@ subroutine time_fftu(Ftest, isign, header, Ftprof)
  complex(dpc),allocatable :: ug(:),results(:),ur(:)
 ! *********************************************************************
 
- test_name = name_of(Ftest)
+ test_name = Ftest%get_name()
 
  n1=Ftest%ngfft(1); n2=Ftest%ngfft(2); n3=Ftest%ngfft(3)
  !n4=Ftest%ngfft(4); n5=Ftest%ngfft(5); n6=Ftest%ngfft(6)
@@ -1487,8 +1462,8 @@ subroutine prof_fourdp(fft_setups, isign, cplex, necut, ecut_arth, boxcutmin, rp
 ! *********************************************************************
 
  nsetups = size(fft_setups, dim=2)
- ecut_list = arth(ecut_arth(1),ecut_arth(2),necut)
- !
+ ecut_list = arth(ecut_arth(1), ecut_arth(2), necut)
+
  ! Open file and write header with info.
  write(fname,'(2(a,i1))')"PROF_fourdp_cplex",cplex,"_isign",isign
  if (open_file(fname, msg, newunit=funt) /= 0) then
@@ -1581,8 +1556,8 @@ subroutine prof_fourwf(fft_setups, cplex, option, kpoint, necut, ecut_arth, &
 
 ! *********************************************************************
 
- nsetups = SIZE(fft_setups, DIM=2)
- ecut_list = arth(ecut_arth(1),ecut_arth(2),necut)
+ nsetups = size(fft_setups, dim=2)
+ ecut_list = arth(ecut_arth(1), ecut_arth(2), necut)
  istwf_k = set_istwfk(kpoint)
 
  ! Open file and write header with info.
