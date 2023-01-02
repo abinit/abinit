@@ -1,3 +1,4 @@
+block
 !Local variables-------------------------------
 !scalars
  integer,parameter :: cplex0=0,option0=0,ndat1=1,iflag1=1,me_g0=1
@@ -100,3 +101,5 @@
    write(msg,"(a,i0)")"Wrong fftalga: ",fftalga
    ABI_ERROR(msg)
  end select
+
+end block

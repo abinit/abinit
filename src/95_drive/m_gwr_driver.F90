@@ -42,7 +42,7 @@ module m_gwr_driver
  use defs_abitypes,     only : MPI_type
  use m_io_tools,        only : file_exists, open_file, get_unit, iomode_from_fname
  use m_time,            only : cwtime, cwtime_report, sec2str
- use m_fstrings,        only : strcat, sjoin, ftoa, itoa
+ use m_fstrings,        only : strcat, sjoin, ftoa, itoa, string_in
  use m_slk,             only : matrix_scalapack
  use m_fftcore,         only : print_ngfft, get_kg
  use m_fft,             only : fourdp
@@ -156,7 +156,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  real(dp) :: eff, mempercpu_mb, max_wfsmem_mb, nonscal_mem
  real(dp) :: ecore, ecut_eff, ecutdg_eff, cpu, wall, gflops, diago_cpu, diago_wall, diago_gflops
  logical, parameter :: is_dfpt = .false.
- logical :: read_wfk
+ logical :: read_wfk, write_wfk, cc4s_task
  character(len=500) :: msg
  character(len=fnlen) :: wfk_path, den_path, kden_path, out_path
  type(hdr_type) :: wfk_hdr, den_hdr, kden_hdr, owfk_hdr
@@ -570,7 +570,8 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
 
  call cwtime_report(" prepare gwr_driver_init", cpu, wall, gflops)
 
- if (dtset%gwr_task == "HDIAGO" .or. dtset%gwr_task == "HDIAGO_FULL") then
+ if (string_in(dtset%gwr_task, "HDIAGO, HDIAGO_FULL, CC4S, CC4S_FULL")) then
+
    ! ==========================================
    ! Direct diagonalization of the Hamiltonian
    ! ==========================================
@@ -585,9 +586,16 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
      ABI_FREE(gvec_)
    end do
 
+   ! CC4S does not need to output the WFK file.
+   write_wfk = string_in(dtset%gwr_task, "HDIAGO, HDIAGO_FULL")
+
    ! Use input nband or min of npwarr_ik to set the number of bands.
-   if (dtset%gwr_task == "HDIAGO") nband_iks(:,:) = maxval(dtset%nband)
-   if (dtset%gwr_task == "HDIAGO_FULL") nband_iks(:,:) = minval(npwarr_ik)
+   if (string_in(dtset%gwr_task, "HDIAGO, CC4S")) nband_iks(:,:) = maxval(dtset%nband)
+   if (string_in(dtset%gwr_task, "HDIAGO_FULL, CC4S_FULL")) nband_iks(:,:) = minval(npwarr_ik)
+   cc4s_task = string_in(dtset%gwr_task, "CC4S, CC4S_FULL")
+   if (cc4s_task) then
+     ABI_CHECK(dtset%nkpt == 1 .and. all(abs(dtset%kptns(:,1)) < tol12), "CC4S requires Gamm-only sampling")
+   end if
 
    ! Build header with new npwarr and nband.
    owfk_ebands = ebands_from_dtset(dtset, npwarr_ik, nband=nband_iks)
@@ -603,20 +611,22 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
    call diago_pool%from_dims(dtset%nkpt, dtset%nsppol, comm, rectangular=.True.)
    diago_info = zero
 
-   ! Master writes header and Fortran record markers if needed.
-   out_path = dtfil%fnameabo_wfk; if (dtset%iomode == IO_MODE_ETSF) out_path = nctk_ncify(out_path)
-   iomode__ = iomode_from_fname(out_path)
-   call wrtout(std_out, sjoin(" Writing wavefunctions to file:", out_path))
-   if (my_rank == master) then
-     call owfk%open_write(owfk_hdr, out_path, 0, iomode__, get_unit(), xmpi_comm_self, &
-                          write_hdr=.True., write_frm=.True.)
-     call owfk%close()
-   end if
-   call xmpi_barrier(comm)
+   if (write_wfk) then
+     ! Master writes header and Fortran record markers if needed.
+     out_path = dtfil%fnameabo_wfk; if (dtset%iomode == IO_MODE_ETSF) out_path = nctk_ncify(out_path)
+     iomode__ = iomode_from_fname(out_path)
+     call wrtout(std_out, sjoin(" Writing wavefunctions to file:", out_path))
+     if (my_rank == master) then
+       call owfk%open_write(owfk_hdr, out_path, 0, iomode__, get_unit(), xmpi_comm_self, &
+                            write_hdr=.True., write_frm=.True.)
+       call owfk%close()
+     end if
+     call xmpi_barrier(comm)
 
-   ! Reopen file inside diago_pool%comm.
-   call owfk%open_write(owfk_hdr, out_path, 0, iomode__, get_unit(), diago_pool%comm%value, &
-                        write_hdr=.False., write_frm=.False.)
+     ! Reopen file inside diago_pool%comm.
+     call owfk%open_write(owfk_hdr, out_path, 0, iomode__, get_unit(), diago_pool%comm%value, &
+                          write_hdr=.False., write_frm=.False.)
+   end if
 
    do spin=1,dtset%nsppol
      do ik_ibz=1,dtset%nkpt
@@ -633,25 +643,27 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
 
        owfk_ebands%eig(1:nband_k, ik_ibz, spin) = eig_k(1:nband_k)
 
-       ! occupancies are set to zero.
-       ! Client code is responsible for recomputing occ and fermie when reading this WFK.
-       ABI_CALLOC(occ_k, (owfk%mband))
+       if (write_wfk) then
+        ! occupancies are set to zero.
+        ! Client code is responsible for recomputing occ and fermie when reading this WFK.
+        ABI_CALLOC(occ_k, (owfk%mband))
+        sc_mode = merge(xmpio_single, xmpio_collective, ugb%has_idle_procs)
+        if (ugb%my_nband > 0) then
+          ABI_CHECK(all(shape(ugb%cg_k) == [2, ugb%npwsp, ugb%my_nband]), "Wrong shape")
+          ABI_CHECK_IEQ(ugb%npw_k, owfk_hdr%npwarr(ik_ibz), "Wronk npw_k")
+          call c_f_pointer(c_loc(ugb%cg_k), cg_k_ptr, shape=[2, ugb%npwsp * ugb%my_nband])
 
-       sc_mode = merge(xmpio_single, xmpio_collective, ugb%has_idle_procs)
-
-       if (ugb%my_nband > 0) then
-         ABI_CHECK(all(shape(ugb%cg_k) == [2, ugb%npwsp, ugb%my_nband]), "Wrong shape")
-         ABI_CHECK_IEQ(ugb%npw_k, owfk_hdr%npwarr(ik_ibz), "Wronk npw_k")
-         call c_f_pointer(c_loc(ugb%cg_k), cg_k_ptr, shape=[2, ugb%npwsp * ugb%my_nband])
-
-         call owfk%write_band_block([ugb%my_bstart, ugb%my_bstop], ik_ibz, spin, sc_mode, &
-                                     kg_k=ugb%kg_k, cg_k=cg_k_ptr, &
-                                     eig_k=owfk_ebands%eig(:, ik_ibz, spin), occ_k=occ_k)
+          call owfk%write_band_block([ugb%my_bstart, ugb%my_bstop], ik_ibz, spin, sc_mode, &
+                                      kg_k=ugb%kg_k, cg_k=cg_k_ptr, &
+                                      eig_k=owfk_ebands%eig(:, ik_ibz, spin), occ_k=occ_k)
+        end if
+        ABI_FREE(occ_k)
        end if
-       ABI_FREE(occ_k)
 
        call cwtime(diago_cpu, diago_wall, diago_gflops, "stop")
        if (diago_pool%comm%me == 0) diago_info(2:3, ik_ibz, spin) = [diago_wall, dble(diago_pool%comm%nproc)]
+
+       if (cc4s_task) call cc4s_gamma(spin, ik_ibz, dtset, cryst, ugb)
 
        ABI_FREE(eig_k)
        call ugb%free()
@@ -838,103 +850,156 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  call destroy_mpi_enreg(mpi_enreg)
  call gwr%free()
 
-contains
+end subroutine gwr_driver
+!!***
 
-! Compute matrix elements at q = 0.
-subroutine cc4cs()
+!!****f* m_gwr_driver/cc4s_gamma
+!! NAME
+!!  cc4s_gamm
+!!
+!! FUNCTION
+!! Interface with CC4S code.
+!! Compute <i,k|e^{-iGr}|j,k> matrix elements and store them to disk
+!!
+!! INPUTS
 
- use m_fftcore,       only : sphereboundary !, getng, print_ngfft get_kg,
- use m_fft,           only : fft_ug !, fft_ur, fftbox_plan3_t, fourdp
+subroutine cc4s_gamma(spin, ik_ibz, dtset, cryst, ugb)
 
- integer,parameter :: ndat = 1, ndat1 = 1
- integer :: nproc, my_rank, master, my_ib, master_ib, npw_k, nspinor !, idat
- real(dp),contiguous,pointer :: master_cg_k(:,:,:)
- integer :: master_brange(2), master_bstart, master_bstop, master_nband
- integer,allocatable :: gbound_k(:,:)
- integer :: u_ngfft(18), u_nfft, u_mgfft
- complex(gwpc),allocatable :: my_ur(:), master_ur(:,:)
+ use m_numeric_tools, only : blocked_loop
+ use m_fftcore,       only : sphereboundary !, getng
+ use m_fft_mesh,      only : setmesh
+ use m_fft,           only : fft_ug, fft_ur
+
+!Arguments ------------------------------------
+ integer,intent(in) :: spin, ik_ibz
+ type(dataset_type),intent(in) :: dtset
+ type(crystal_t),intent(in) :: cryst
+ type(ugb_t), target,intent(in) :: ugb
+
+!Local variables-------------------------------
+!scalars
+ integer,parameter :: istwfk1 = 1, mG0(3) = 0
+ integer :: nproc, my_rank, master, my_ib2, npw_k, nspinor, m_npw, npwvec
+ integer :: band1_start, band1_stop, batch1_size, n1dat, idat1
+ integer :: band2_start, band2_stop, batch2_size, n2dat, idat2
+ real(dp) :: cpu, wall, gflops
+ integer :: u_ngfft(18), u_nfft, u_mgfft, enforce_sym, method
+ integer,pointer :: gvec_max(:,:)
+ integer,allocatable :: gbound_k(:,:), m_gbound(:,:)
+ integer,allocatable,target :: m_gvec(:,:)
+ complex(dpc),allocatable :: ug1_batch(:,:), ur1_batch(:,:), ur2_batch(:,:), ur12_batch(:,:), ug12_batch(:,:)
+
+! *************************************************************************
+
+ call cwtime(cpu, wall, gflops, "start")
 
  nproc = xmpi_comm_size(ugb%comm); my_rank = xmpi_comm_rank(ugb%comm)
- ! M_{12}(g) = <1|e^{-ig.r}|2> => M_{12}(g) = M_{21}(-g)^*
-
  npw_k = ugb%npw_k; nspinor = ugb%nspinor
 
- ! Setup FFT mesh for wavefunctions and g-sphere for oscillators
- !u_ngfft(18) ??
- u_nfft = product(u_ngfft(1:3)); u_mgfft = maxval(u_ngfft(1:3))
+ ! g-sphere for oscillators.
+ call get_kg([zero, zero, zero], istwfk1, dtset%ecuteps, cryst%gmet, m_npw, m_gvec, kin_sorted=.False.)
 
- !call ugb%set_ngfft(u_ngfft)
+ ! Setup FFT mesh
+ u_ngfft = dtset%ngfft
+ method = 2
+ if (dtset%fftgw==00 .or. dtset%fftgw==01) method=0
+ if (dtset%fftgw==10 .or. dtset%fftgw==11) method=1
+ if (dtset%fftgw==20 .or. dtset%fftgw==21) method=2
+ if (dtset%fftgw==30 .or. dtset%fftgw==31) method=3
+ enforce_sym = MOD(dtset%fftgw, 10)
+ enforce_sym = 0 ! Gamma only --> we don't need to rotate wavefunctions as
+
+ npwvec = npw_k; gvec_max => ugb%kg_k
+ if (m_npw > npw_k) then
+   npwvec = m_npw; gvec_max => m_gvec
+ end if
+ call setmesh(cryst%gmet, gvec_max, u_ngfft, npwvec, m_npw, npw_k, u_nfft, method, mG0, cryst, enforce_sym, unit=std_out)
+ !call print_ngfft(ngfftf,header='Dense FFT mesh used for densities and potentials')
+ u_mgfft = maxval(u_ngfft(1:3))
 
  ABI_MALLOC(gbound_k, (2 * u_mgfft + 8, 2))
  call sphereboundary(gbound_k, ugb%istwf_k, ugb%kg_k, u_mgfft, npw_k)
 
- ABI_MALLOC(my_ur, (u_nfft * nspinor * ndat1))
- ABI_MALLOC(master_ur, (u_nfft * nspinor, ndat))
+ ABI_MALLOC(m_gbound, (2 * u_mgfft + 8, 2))
+ call sphereboundary(m_gbound, istwfk1, m_gvec, u_mgfft, m_npw)
 
- !block_size = min(48, gwr%ugb_nband)
+ ! Allocate workspace arrays.
+ batch1_size = min(24, ugb%nband_k)
+ batch2_size = 4
+ !batch2_size = 1
 
- !do band1_start=1, gwr%ugb_nband, block_size
- !  nb = blocked_loop(band1_start, gwr%ugb_nband, block_size)
- !  band1_stop = band1_start + nb - 1
- !  call ugb_kibz%zcollect(npw_ki * nspinor, nb, [1, band1_start], ug1_block)
- !  ABI_FREE(ug1_block)
- !end if
+ ABI_MALLOC(ur1_batch, (u_nfft * nspinor, batch1_size))
+ ABI_MALLOC(ur2_batch, (u_nfft * nspinor, batch2_size))
+ ABI_MALLOC(ur12_batch, (u_nfft * nspinor**2, batch2_size))
+ ABI_MALLOC(ug12_batch, (m_npw * nspinor**2, batch2_size))
+ ABI_CHECK(nspinor == 1, "nspinor == 2 not implemented in CC4S")
 
- do master=0,nproc-1
+ ! TODO: take advantage of
+ ! M_{12}(g) = <1|e^{-ig.r}|2> => M_{12}(g) = M_{21}(-g)^*
+ ! once I have a better understanding of the fileformat expected by CC4S
 
-   if (my_rank == master) master_brange = [ugb%my_bstart, ugb%my_bstop]
-   call xmpi_bcast(master_brange, master, ugb%comm, ierr)
-   master_bstart = master_brange(1); master_bstop = master_brange(2); master_nband = master_bstop - master_bstart + 1
+ do band1_start=1, ugb%nband_k, batch1_size
 
-   if (my_rank /= master) then
-     ABI_MALLOC(master_cg_k, (2, ugb%npwsp, master_nband))
-   else
-     master_cg_k => ugb%cg_k
-   end if
-   call xmpi_bcast(master_cg_k, master, ugb%comm, ierr)
+   ! Collect n1dat bands starting from band1_start on each proc.
+   n1dat = blocked_loop(band1_start, ugb%nband_k, batch1_size)
+   band1_stop = band1_start + n1dat - 1
+   call ugb%mat%collect_cplx(ugb%npwsp, n1dat, [1, band1_start], ug1_batch)
 
-   do my_ib=ugb%my_bstart, ugb%my_bstop
+   ! ug1_batch --> ur1_batch
+   call fft_ug(ugb%npw_k, u_nfft, nspinor, n1dat, &
+               u_mgfft, u_ngfft, ugb%istwf_k, ugb%kg_k, gbound_k, &
+               ug1_batch, &      ! in
+               ur1_batch)        ! out
 
-     !call fft_ug(ugb%npw_k, u_nfft, nspinor, ndat1, &
-     !            u_mgfft, u_ngfft, ugb%istwfk, ugb%kg_k, gbound_k, &
-     !            ugb%cg_k(:,:,my_ib), &      ! in
-     !            my_ur)                      ! out
+   if (ugb%istwf_k /= 2) ur1_batch = conjg(ur1_batch)  ! Not needed if k == Gamma
+   ABI_FREE(ug1_batch)
 
-     do master_ib=master_bstart, master_bstop !, batch_size
-       !ndat = blocked_loop(master_ib, master_btop, batch_size)
+   ! NB: Assuming bands distributed in contiguous blocks.
+   do band2_start=ugb%my_bstart, ugb%my_bstop, batch2_size
+     my_ib2 = band2_start - ugb%my_bstart + 1
+     n2dat = blocked_loop(band2_start, ugb%my_bstop, batch2_size)
+     band2_stop = band2_start + n2dat - 1
 
-       !call fft_ug(ugb%npw_k, u_nfft, nspinor, ndat, &
-       !            u_mgfft, u_ngfft, ugb%istwfk, ugb%kg_k, gbound_k, &
-       !            master_cg_k(:,:,master_ib)), &   ! in
-       !            master_ur)                       ! out
+     call fft_ug(ugb%npw_k, u_nfft, nspinor, n2dat, &
+                 u_mgfft, u_ngfft, ugb%istwf_k, ugb%kg_k, gbound_k, &
+                 ugb%mat%buffer_cplx(:,my_ib2:), &     ! in
+                 ur2_batch)                            ! out
 
-       !do idat=1,ndat
-       !  master_ur(:, idat) = conjg(master_ur(:, idat)) * my_ur(:)
-       !end do
+     do idat1=1,n1dat
+       do idat2=1,n2dat
+         ur12_batch(:, idat2) = ur1_batch(:, idat1) * ur2_batch(:, idat2)
+       end do
 
-       !call fft_ur(desc%npw, u_nfft, nspinor, ndat, &
-       !            u_mgfft, u_ngfft, desc%istwfk, desc%gvec, desc%gbound, &
-       !            master_ur, &                ! in
-       !            rpr%buffer_cplx(:, ir1))    ! out
+       ! FIXME: nspinor
+       call fft_ur(m_npw, u_nfft, nspinor, n2dat, &
+                   u_mgfft, u_ngfft, istwfk1, m_gvec, m_gbound, &
+                   ur12_batch, &    ! in
+                   ug12_batch)      ! out
 
-       !call fftpad(u12prod, ngfft, nx, ny, nz, ldx, ldy, ldz, ndat, mgfft, -1, gbound)
-     end do ! master_ib
-   end do ! my_ib
+      !do idat2=1,n2dat
+      !  write(std_out, *)ug12_batch(1, idat2), idat2, "ug12_batch(1, idat2), idat"
+      !end do
 
-   ! TODO: Write data
+     end do ! idat1
+   end do ! my_ib2
 
-   if (my_rank /= master) then
-     ABI_FREE(master_cg_k)
-   end if
- end do ! iproc
+   ! TODO: Write data.
+   !  - Handle parallel IO if nsppol 2 (we are inside the spin loop that is already mpi distributed!
+   !  - Format for nspinor == 2
+
+ end do  ! band1_start
 
  ABI_FREE(gbound_k)
- ABI_FREE(my_ur)
- ABI_FREE(master_ur)
+ ABI_FREE(m_gbound)
+ ABI_FREE(m_gvec)
+ ABI_FREE(ur1_batch)
+ ABI_FREE(ur2_batch)
+ ABI_FREE(ur12_batch)
+ ABI_FREE(ug12_batch)
 
-end subroutine cc4cs
+ call cwtime_report(" cc4s_gamma", cpu, wall, gflops)
 
-end subroutine gwr_driver
+end subroutine cc4s_gamma
 !!***
 
 end module m_gwr_driver

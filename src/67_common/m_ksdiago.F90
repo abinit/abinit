@@ -67,18 +67,25 @@ module m_ksdiago
 !!  ugb_t
 !!
 !! FUNCTION
+!!  Stores the wavefunctions for giveen (k-point, spin) in a PBLAS matrix
+!!  distributed over bands.
 !!
 !! SOURCE
 
  type, public :: ugb_t
 
    integer :: istwf_k = -1
+
    integer :: nspinor = -1
+
    integer :: npw_k = -1
+   ! Number of planewaves.
+
    integer :: npwsp = -1
+   ! nnpw_k * nspinor
 
    integer :: nband_k = - 1
-   ! Total number of bands
+   ! Total number of bands (global)
 
    integer :: my_bstart = -1, my_bstop = - 1, my_nband = - 1
    ! 1) Initial band
@@ -94,7 +101,9 @@ module m_ksdiago
    type(processor_scalapack) :: processor
 
    type(matrix_scalapack) :: mat
-   ! Global matrix (npwsp, nband_k)
+   ! PBLAS matrix with MPI-distributed Fourier components
+   ! Local buffer: (2, npwsp * my_nband)
+   ! Global matrix: (npwsp, nband_k)
 
    integer, allocatable :: kg_k(:,:)
    ! (3, npw_k)
@@ -959,9 +968,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
    call init_distribfft_seq(mpi_enreg_seq%distribfft, 'f', pawfgr%ngfft(2), pawfgr%ngfft(3), 'all')
  end if
 
- nspinor = dtset%nspinor
- nsppol = dtset%nsppol
- nspden = dtset%nspden
+ nspinor = dtset%nspinor; nsppol = dtset%nsppol; nspden = dtset%nspden
  if (nsppol == 1) stag = ['          ','          ']
  if (nsppol == 2) stag = ['SPIN UP:  ','SPIN DOWN:']
 

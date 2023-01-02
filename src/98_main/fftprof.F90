@@ -11,9 +11,6 @@
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! INPUTS
-!!  (main program)
-!!
 !! OUTPUT
 !!  Timing analysis of the different FFT libraries and algorithms.
 !!
@@ -32,6 +29,7 @@
 !!                 gw_fft --> Test the FFT transforms used in the GW code.
 !!                 all    --> Test all FFT routines (DEFAULT)
 !!     fftalgs = list of fftalg values (used to select the FFT libraries to use, see abinit doc for more info)
+!!     use_gpu_fftalgs = for each fftalg in fftalgs, it is set to 1 if the GPU version should be used.
 !!     ncalls = integer defining the number of calls for each tests. The final Wall time and CPU time
 !!              are computed by averaging the final results over ncalls executions.
 !!     max_nthreads = Maximum number of threads (DEFAULT 1, meaningful only if the code
@@ -51,7 +49,8 @@
 !!     osc_ecut  = cutoff energy (Hartree) for the oscillator matrix elements computed in the GW code
 !!                 Corresponds to the input variables (ecuteps, ecutsigx) used in the main code.
 !!     nsym     =Number of symmetry operations (DEFAULT 1)
-!!     symrel(3,3,nsym) = Symmetry operation in real space used to select the FFT mesh in the routine getng (default: Identity matrix)
+!!     symrel(3,3,nsym) = Symmetry operation in real space used to select
+!!               the FFT mesh in the routine getng (default: Identity matrix)
 !!               NOTE that the real tnons is not taken into account anyhow: tnons is set to zero.
 !!
 !! SOURCE
@@ -212,9 +211,8 @@ program fftprof
  test_fourwf = (iall>0 .or. INDEX(tasks," fourwf")>0 )
  test_gw     = (iall>0 .or. INDEX(tasks," gw_fft")>0 )
 
- do_seq_utests = INDEX(tasks," utests")>0
- do_seq_bench  = INDEX(tasks," bench")>0
-
+ do_seq_utests = INDEX(tasks," utests") >0
+ do_seq_bench  = INDEX(tasks," bench") >0
  do_mpi_utests = INDEX(tasks," mpi-utests")>0
  !do_mpi_bench  = INDEX(tasks," mpi-bench")>0
 
@@ -377,8 +375,8 @@ program fftprof
  ! These routines are used in the GW part, FFTW3 is expected to
  ! be more efficient as the conversion complex(:) <--> real(2,:) is not needed.
  if (test_gw) then
-   !
-   ! ==== fourdp timing with complex arrays ====
+
+   ! fourdp timing with complex arrays
    do isign=-1,1,2
      do inplace=0,1
        do it=1,ntests
@@ -388,8 +386,8 @@ program fftprof
        call fftprofs_free(Ftprof)
      end do
    end do
-   !
-   ! ==== zero padded with complex arrays ====
+
+   ! zero padded FFTs with complex arrays
    do isign=-1,1,2
      do it=1,ntests
        call Ftest(it)%time_fftu(isign, header, Ftprof(it))
@@ -397,8 +395,8 @@ program fftprof
      call fftprofs_print(Ftprof, header)
      call fftprofs_free(Ftprof)
    end do
-   !
-   ! ==== rho_tw_g timing ====
+
+   ! rho_tw_g timing
    ABI_CHECK(osc_ecut > zero, "osc_ecut <= zero!")
 
    call get_kg(gamma_point,1,osc_ecut,gmet,osc_npw,osc_gvec)
@@ -423,7 +421,7 @@ program fftprof
 
    nfailed = 0
    do idx=1,ntests
-     ! fft_setups(:,idx) = (/fftalg,fftcache,ndat,ith,avail/)
+     ! fft_setups(:,idx) = [fftalg,fftcache,ndat,ith,avail,use_gpu]
      fftalg   = fft_setups(1, idx)
      fftcache = fft_setups(2, idx)
      ndat     = fft_setups(3, idx)
@@ -502,7 +500,6 @@ program fftprof
  call wrtout(std_out,ch10//" Analysis completed.")
 
  ABI_FREE(fft_setups)
-
  call fft_tests_free(Ftest)
  ABI_FREE(Ftest)
  call fftprofs_free(Ftprof)

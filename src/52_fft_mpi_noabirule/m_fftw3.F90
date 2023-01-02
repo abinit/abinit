@@ -323,7 +323,7 @@ subroutine fftw3_seqfourdp(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,isign,fofg,fofr,fftw_
        ABI_BUG("Wrong isign")
      end if
 
-     call fftw3_c2c_ip_spc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,work_sp,fftw_flags=my_flags)
+     call fftw3_c2c_ip_spc(nx, ny, nz, ldx, ldy, ldz, ndat, isign, work_sp, fftw_flags=my_flags)
 
      if (isign == ABI_FFTW_BACKWARD) then ! +1
        jj = 1
@@ -332,7 +332,7 @@ subroutine fftw3_seqfourdp(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,isign,fofg,fofr,fftw_
          fofr(jj+1) = aimag(work_sp(ii))
          jj = jj + 2
        end do
-     else if (isign == ABI_FFTW_FORWARD) then  ! -1
+     else if (isign == ABI_FFTW_FORWARD) then ! -1
        jj = 1
        do ii=1,ldx*ldy*ldz*ndat
          fofg(jj) = real(work_sp(ii), kind=dp)
@@ -1434,7 +1434,7 @@ end subroutine fftw3_fftur_dpc
 !!
 !! SOURCE
 
-subroutine fftw3_c2c_ip_spc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,ff,fftw_flags)
+subroutine fftw3_c2c_ip_spc(nx, ny, nz, ldx, ldy, ldz, ndat, isign, ff, fftw_flags)
 
 !Arguments ------------------------------------
 !scalars
@@ -1458,8 +1458,8 @@ subroutine fftw3_c2c_ip_spc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,ff,fftw_flags)
 
  stride = 1
  dist   = ldx*ldy*ldz
- embed  = (/ldx,ldy,ldz/)
- n      = (/nx ,ny ,nz /)
+ embed  = [ldx, ldy, ldz]
+ n      = [nx ,ny ,nz]
 
  my_plan = fftw3_plan_many_dft(rank3, n, ndat, ff, embed, stride, dist, ff, embed, stride, dist, isign, my_flags, nt_all)
 
@@ -1588,8 +1588,8 @@ subroutine fftw3_c2c_ip_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,ff,fftw_flags)
 
  stride = 1
  dist   = ldx*ldy*ldz
- embed  = (/ldx,ldy,ldz/)
- n      = (/nx ,ny ,nz /)
+ embed  = [ldx, ldy, ldz]
+ n      = [nx ,ny ,nz]
 
  my_plan = fftw3_plan_many_dft(rank3, n, ndat, ff, embed, stride, dist, ff, embed, stride, dist, isign, my_flags, nt_all)
 
@@ -1598,7 +1598,8 @@ subroutine fftw3_c2c_ip_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,ff,fftw_flags)
 
  call fftw3_destroy_plan(my_plan)
 
- if (isign==ABI_FFTW_FORWARD) then ! -1, FFTW returns not normalized FTs
+ ! -1, FFTW returns not normalized FTs
+ if (isign == ABI_FFTW_FORWARD) then
   call ZDSCAL(ldx*ldy*ldz*ndat, one/(nx*ny*nz), ff, 1)
  end if
 
@@ -1638,7 +1639,7 @@ end subroutine fftw3_c2c_ip_dpc
 !!
 !! SOURCE
 
-subroutine fftw3_c2c_op_spc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,ff,gg,fftw_flags)
+subroutine fftw3_c2c_op_spc(nx, ny, nz, ldx, ldy, ldz, ndat, isign, ff, gg, fftw_flags)
 
 !Arguments ------------------------------------
 !scalars
@@ -1714,7 +1715,7 @@ end subroutine fftw3_c2c_op_spc
 !!
 !! SOURCE
 
-subroutine fftw3_c2c_op_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,ff,gg,fftw_flags)
+subroutine fftw3_c2c_op_dpc(nx, ny, nz, ldx, ldy, ldz, ndat, isign, ff, gg, fftw_flags)
 
 !Arguments ------------------------------------
 !scalars
@@ -1853,7 +1854,8 @@ subroutine fftw3_r2c_op(nx,ny,nz,ldx,ldy,ldz,ndat,ff,gg,fftw_flags)
 
  call fftw3_destroy_plan(my_plan)
 
- call ZDSCAL(nhp*ndat, one/(nx*ny*nz), gg_hp, 1)  ! FFTW returns not normalized FTs
+ ! FFTW returns not normalized FTs
+ call ZDSCAL(nhp*ndat, one/(nx*ny*nz), gg_hp, 1)
 
  ! Reconstruct full FFT: Hermitian redundancy: out[i] is the conjugate of out[n-i]
  padx = (nx/2+1)
@@ -2079,8 +2081,8 @@ subroutine fftw3_many_dft_op(nx,ny,nz,ldx,ldy,ldz,ndat,isign,fin,fout,fftw_flags
 
  stride = 1
  dist   = ldx*ldy*ldz
- embed  = (/ldx,ldy,ldz/)
- n      = (/nx ,ny ,nz /)
+ embed  = [ldx,ldy,ldz]
+ n      = [nx ,ny ,nz]
 
  my_plan = fftw3_plan_many_dft(rank3, n, ndat, fin, embed, stride, dist, fout, embed, stride, dist, isign, my_flags, nt_all)
 
@@ -2089,7 +2091,8 @@ subroutine fftw3_many_dft_op(nx,ny,nz,ldx,ldy,ldz,ndat,isign,fin,fout,fftw_flags
 
  call fftw3_destroy_plan(my_plan)
 
- if (isign==ABI_FFTW_FORWARD) then ! -1, FFTW returns not normalized FTs
+ ! -1, FFTW returns not normalized FTs
+ if (isign == ABI_FFTW_FORWARD) then
   call ZDSCAL(ldx*ldy*ldz*ndat, one/(nx*ny*nz), fout, 1)
   !call cg_zscal(ldx*ldy*ldz*ndat, (/one/(nx*ny*nz), zero/), fout)
  end if
@@ -2157,17 +2160,17 @@ subroutine fftw3_many_dft_ip(nx,ny,nz,ldx,ldy,ldz,ndat,isign,finout,fftw_flags)
 
  stride = 1
  dist   = ldx*ldy*ldz
- embed  = (/ldx,ldy,ldz/)
- n      = (/nx ,ny ,nz /)
+ embed  = [ldx,ldy,ldz]
+ n      = [nx, ny ,nz]
 
  my_plan = fftw3_plan_many_dft(rank3, n, ndat, finout, embed, stride, dist, finout,embed, stride, dist, isign, my_flags, nt_all)
 
  ! Now perform the 3D FFT via FFTW.
  call dfftw_execute_dft(my_plan, finout, finout)
-
  call fftw3_destroy_plan(my_plan)
 
- if (isign==ABI_FFTW_FORWARD) then ! -1, FFTW returns not normalized FTs
+ ! -1, FFTW returns not normalized FTs
+ if (isign == ABI_FFTW_FORWARD) then
   call ZDSCAL(ldx*ldy*ldz*ndat, one/(nx*ny*nz), finout, 1)
   !call cg_zscal(ldx*ldy*ldz*ndat, (/one/(nx*ny*nz),zero/), finout)
  end if
@@ -2335,7 +2338,6 @@ end subroutine fftw3_init_threads
 subroutine fftw3_set_nthreads(nthreads)
 
 !Arguments ------------------------------------
-!scalars
  integer,optional,intent(in) :: nthreads
 
 !Local variables ------------------------------

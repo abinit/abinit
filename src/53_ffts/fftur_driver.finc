@@ -1,3 +1,4 @@
+block
 !Local variables-------------------------------
 !scalars
  integer,parameter :: cplex0=0,option3=3,npwin0=0,ndat1=1
@@ -15,17 +16,16 @@
  fftalg=ngfft(7); fftalga=fftalg/100; fftalgc=MOD(fftalg,10); fftcache=ngfft(8)
  nx=ngfft(1); ny=ngfft(2); nz=ngfft(3)
 
- SELECT CASE (fftalga)
-
- CASE (FFT_FFTW3)
+ select case (fftalga)
+ case (FFT_FFTW3)
    ldx=nx; ldy=ny; ldz=nz ! No augmentation, the caller does not support it.
    call fftw3_fftur(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,nspinor*ndat,istwf_k,mgfft,kg_k,gbound_k,ur,ug)
 
- CASE (FFT_DFTI)
+ case (FFT_DFTI)
    ldx=nx; ldy=ny; ldz=nz ! No augmentation, the caller does not support it.
    call dfti_fftur(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,nspinor*ndat,istwf_k,mgfft,kg_k,gbound_k,ur,ug)
 
- CASE (FFT_SG, FFT_SG2002)
+ case (FFT_SG, FFT_SG2002)
    ! Goedecker routines.
    ! 1) sg_fftrisc does not support istwkf >= 2 for the u(r) --> u(G) transform.
    ldx=ngfft(4); ldy=ngfft(5); ldz=ngfft(6)
@@ -75,12 +75,11 @@
 
    ABI_FREE(fofgout)
    ABI_FREE(fofr)
-
-   if (allocated(fg_box)) then
-     ABI_FREE(fg_box)
-   end if
+   ABI_SFREE(fg_box)
 
  CASE DEFAULT
    write(msg,"(a,i0)")"Wrong fftalga= ",fftalga
    ABI_ERROR(msg)
  END SELECT
+
+end block

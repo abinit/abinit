@@ -108,7 +108,6 @@ module m_gstore
  use m_errors
  use m_htetra
  use libtetrabz
-
  use m_ebands
  use iso_c_binding
  use netcdf
@@ -126,7 +125,6 @@ module m_gstore
  use m_wfd
  use m_ephtk
  use m_mkffnl
-
 
  use defs_abitypes,    only : mpi_type
  use m_time,           only : cwtime, cwtime_report, sec2str
@@ -1139,20 +1137,13 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, eph_np_pqbks, priority, n
    call MPI_CART_COORDS(comm_cart, me_cart, ndims, gqk%coords_qkp, ierr)
 
    ! Create communicator for q-points
-   keepdim = .False.; keepdim(1) = .True.
-   call gqk%qpt_comm%from_cart_sub(comm_cart, keepdim)
-
+   keepdim = .False.; keepdim(1) = .True.; call gqk%qpt_comm%from_cart_sub(comm_cart, keepdim)
    ! Create communicator for k-points
-   keepdim = .False.; keepdim(2) = .True.
-   call gqk%kpt_comm%from_cart_sub(comm_cart, keepdim)
-
+   keepdim = .False.; keepdim(2) = .True.; call gqk%kpt_comm%from_cart_sub(comm_cart, keepdim)
    ! Create communicator for perturbations.
-   keepdim = .False.; keepdim(3) = .True.
-   call gqk%pert_comm%from_cart_sub(comm_cart, keepdim)
-
+   keepdim = .False.; keepdim(3) = .True.; call gqk%pert_comm%from_cart_sub(comm_cart, keepdim)
    ! Create communicator for the (qpt, pert) 2D grid
-   keepdim = .False.; keepdim(1) = .True.; keepdim(3) = .True.
-   call gqk%qpt_pert_comm%from_cart_sub(comm_cart, keepdim)
+   keepdim = .False.; keepdim(1) = .True.; keepdim(3) = .True.; call gqk%qpt_pert_comm%from_cart_sub(comm_cart, keepdim)
 
    call xmpi_comm_free(comm_cart)
 #endif

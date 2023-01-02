@@ -167,7 +167,7 @@ subroutine cg_tocplx(n, cg, ocplx)
 
 ! *************************************************************************
 
-!$OMP PARALLEL DO PRIVATE(ii,idx)
+!$OMP PARALLEL DO IF (ndat > 1) PRIVATE(idx)
  do ii=1,n
    idx = 2*ii-1
    ocplx(ii) = DCMPLX(cg(idx),cg(idx+1))
@@ -209,7 +209,7 @@ subroutine cg_fromcplx(n, icplx, ocg)
 
 ! *************************************************************************
 
-!$OMP PARALLEL DO PRIVATE(ii,idx)
+!$OMP PARALLEL DO PRIVATE(idx)
  do ii=1,n
    idx = 2*ii-1
    ocg(idx  ) = DBLE (icplx(ii))
@@ -5624,13 +5624,13 @@ subroutine cg_get_residvecs(usepaw, npwsp, ndat, eig, cg, ghc, gsc, residvecs)
 
  if (usepaw == 1) then
    ! (H - e) |psi>
-!$OMP PARALLEL DO
+   !$OMP PARALLEL DO IF (ndat > 1)
    do idat=1,ndat
      residvecs(:,idat) = ghc(:,idat) - eig(idat) * gsc(:,idat)
    end do
  else
    ! (H - eS) |psi>
-!$OMP PARALLEL DO
+   !$OMP PARALLEL DO IF (ndat > 1)
    do idat=1,ndat
      residvecs(:,idat) = ghc(:,idat) - eig(idat) * cg(:,idat)
    end do
@@ -5662,7 +5662,7 @@ subroutine cg_norm2g(istwf_k, npwsp, ndat, cg, norms, me_g0, comm)
  integer :: idat, ierr
 ! *************************************************************************
 
-!$OMP PARALLEL DO
+!$OMP PARALLEL DO IF (ndat > 1)
  do idat=1,ndat
    call sqnorm_g(norms(idat), istwf_k, npwsp, cg(:,idat), me_g0, xmpi_comm_self)
  end do
@@ -5695,7 +5695,7 @@ subroutine cg_zdotg_zip(istwf_k, npwsp, ndat, option, cg1, cg2, dots, me_g0, com
  real(dp) :: dotr, doti, re_dots(ndat)
 ! *************************************************************************
 
-!$OMP PARALLEL DO PRIVATE(dotr, doti)
+!$OMP PARALLEL DO IF (ndat > 1) PRIVATE(dotr, doti)
  do idat=1,ndat
    call dotprod_g(dotr, doti, istwf_k, npwsp, option, cg1(:,idat), cg2(:,idat), me_g0, xmpi_comm_self)
    if (istwf_k == 2) then
@@ -5793,7 +5793,7 @@ subroutine cg_zaxpy_many_areal(npwsp, ndat, alphas, x, y)
  integer :: idat
 ! *************************************************************************
 
-!$OMP PARALLEL DO
+!$OMP PARALLEL DO IF (ndat > 1)
  do idat=1,ndat
    call daxpy(2*npwsp, alphas(idat), x(1,idat), 1, y(1,idat), 1)
  end do

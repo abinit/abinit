@@ -6281,8 +6281,8 @@ end subroutine bool2index
 !!   batch_size = 4
 !!   allocate(work(..., batch_size)
 !!
-!!   do ii=1, loop_stop, batch_size
-!!     ndat = blocked_loop(ii, loop_stop, batch_size)
+!!   do loop_index=1, loop_stop, batch_size
+!!     ndat = blocked_loop(loop_index, loop_stop, batch_size)
 !!     ! operate on ndat items in work
 !!   end do
 !!

@@ -173,7 +173,7 @@ module m_gwr
  use m_slk,           only : matrix_scalapack, slkmat_sp_t, processor_scalapack, slk_array_free, slk_array_set, &
                              slk_array_locmem_mb, block_dist_1d, slk_pgemm
  use m_wfk,           only : wfk_read_ebands, wfk_t, wfk_open_read
- use m_wfd,           only : wfd_init, wfd_t, wfdgw_t, wave_t, WFD_STORED
+ use m_wfd,           only : wfd_init, wfd_t, wfdgw_t
  use m_ddk,           only : ddkop_t, ddkop_new
  use m_pawtab,        only : pawtab_type
  use m_pawcprj,       only : pawcprj_type
@@ -1201,7 +1201,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
    ABI_FREE(gvec_)
    call getng(dtset%gwr_boxcutmin, dtset%chksymtnons, dtset%ecut, cryst%gmet, &
               kk_bz, me_fft0, gwr%g_mgfft, gwr%g_nfft, gwr%g_ngfft, nproc_fft1, cryst%nsym, paral_fft0, &
-              cryst%symrel, cryst%tnons, unit=dev_null)
+              cryst%symrel, cryst%tnons, use_gpu_cuda=gwr%dtset%use_gpu_cuda, unit=dev_null)
    gwr%green_mpw = max(gwr%green_mpw, npw_)
  end do
 
@@ -1212,7 +1212,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
    ABI_FREE(gvec_)
    call getng(dtset%gwr_boxcutmin, dtset%chksymtnons, dtset%ecuteps, cryst%gmet, &
               qq_bz, me_fft0, gwr%g_mgfft, gwr%g_nfft, gwr%g_ngfft, nproc_fft1, cryst%nsym, &
-              paral_fft0, cryst%symrel, cryst%tnons, unit=dev_null)
+              paral_fft0, cryst%symrel, cryst%tnons, use_gpu_cuda=gwr%dtset%use_gpu_cuda, unit=dev_null)
    gwr%tchi_mpw = max(gwr%tchi_mpw, npw_)
    if (iq_bz == 1) then
      ABI_CHECK(all(abs(qq_bz) < tol16), "First qpoint in qbz should be Gamma!")
@@ -1225,7 +1225,10 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  ! Define batch sizes for FFT transforms, use multiples of OpenMP threads.
  omp_nt = xomp_get_num_threads(open_parallel=.True.)
  gwr%uc_batch_size = omp_nt; gwr%sc_batch_size = omp_nt
- !gwr%uc_batch_size = 4; gwr%sc_batch_size = 4
+ !gwr%uc_batch_size = 4; gwr%sc_batch_size = 2
+ if (gwr%dtset%use_gpu_cuda /= 0) then
+   !gwr%uc_batch_size = 4; gwr%sc_batch_size = 2
+ end if
 
  if (my_rank == master) then
    call print_ngfft(gwr%g_ngfft, header="FFT mesh for Green's function", unit=std_out)
@@ -3811,6 +3814,7 @@ else
          gt_scbox = gt_scbox / sc_nfft
 end if
 
+         ! The GG part is the hotspot
          ! Compute tchi(R',r) for this r. Note that results are real so one might use r2c
          !chit_scbox(:) = gt_scbox(:, 1) * conjg(gt_scbox(:, 2))
          chit_scbox(:) = gt_scbox(1:sc_nfft * gwr%nspinor * ndat) * conjg(gt_scbox(sc_nfft * gwr%nspinor * ndat + 1:))
@@ -3819,12 +3823,8 @@ end if
          ! Back to tchi(G'=q+g',r) space immediately with isign + 1.
          call plan_rp2gp%execute(chit_scbox, +1)
 
-         ! The GG part is the hotspot
-         !call cwtime_report("GG part", cpu, wall, gflops)
-
          ! Extract tchi_q(g',r) on the ecuteps g-sphere from the FFT box in the supercell
          ! and save data in chiq_gpr PBLAS matrix. Only my q-points in the IBZ are considered.
-
          do my_iqi=1,gwr%my_nqibz
            iq_ibz = gwr%my_qibz_inds(my_iqi)
            qq_ibz = gwr%qibz(:, iq_ibz)
@@ -7357,7 +7357,7 @@ subroutine gwr_get_u_ngfft(gwr, boxcutmin, u_ngfft, u_nfft, u_mgfft, u_mpw, gmax
    ABI_FREE(gvec_)
    call getng(boxcutmin, gwr%dtset%chksymtnons, gwr%dtset%ecut, gwr%cryst%gmet, &
               kk_bz, me_fft0, u_mgfft, u_nfft, u_ngfft, nproc_fft1, gwr%cryst%nsym, paral_fft0, &
-              gwr%cryst%symrel, gwr%cryst%tnons, unit=dev_null)
+              gwr%cryst%symrel, gwr%cryst%tnons, use_gpu_cuda=gwr%dtset%use_gpu_cuda, unit=dev_null)
  end do
 
 end subroutine gwr_get_u_ngfft
