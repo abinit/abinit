@@ -303,8 +303,8 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
 subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
-    & nfftf,ngfftf,npwarr,occ,paw_ij,paw_an,pawang,pawfgr,pawfgrtab,pawrad,&
-    & pawtab,psps,rprimd,vtrial,vxc,xred,ylm,ylmgr)
+    & nfftf,ngfftf,npwarr,occ,paw_ij,paw_an,pawang,pawfgr,pawrad,&
+    & pawtab,psps,rprimd,vtrial,xred,ylm,ylmgr)
 
  !Arguments ------------------------------------
  !scalars
@@ -323,13 +323,11 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
  real(dp), intent(in) :: occ(dtset%mband*dtset%nkpt*dtset%nsppol)
  real(dp),intent(in) :: rprimd(3,3),xred(3,dtset%natom)
  real(dp),intent(inout) :: vtrial(nfftf,dtset%nspden)
- real(dp),intent(inout) :: vxc(nfftf,dtset%nspden)
  real(dp),intent(in) :: ylm(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),intent(in) :: ylmgr(dtset%mpw*dtset%mkmem,3,psps%mpsang*psps%mpsang*psps%useylm)
  type(pawcprj_type),intent(in) ::  cprj(dtset%natom,mcprj)
  type(paw_ij_type),intent(inout) :: paw_ij(dtset%natom*psps%usepaw)
  type(paw_an_type),intent(inout) :: paw_an(dtset%natom)
- type(pawfgrtab_type),intent(inout) :: pawfgrtab(dtset%natom)
  type(pawrad_type),intent(in) :: pawrad(dtset%ntypat*psps%usepaw)
  type(pawtab_type),intent(inout) :: pawtab(psps%ntypat*psps%usepaw)
 
@@ -461,8 +459,8 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
  ! note: in make_d, terms will be filled as iatom using atindx
  call dterm_alloc(dterm,psps%lmnmax,lmn2max,dtset%natom)
 
- call make_d(atindx,atindx1,cprj,dimlmn,dterm,dtset,gprimd,mcprj,nfftf,&
-   & mpi_enreg,occ,paw_an,pawang,paw_ij,pawrad,pawtab,psps,ucvol)
+ call make_d(atindx,atindx1,cprj,dimlmn,dterm,dtset,gprimd,mcprj,&
+   & mpi_enreg,occ,paw_an,pawang,paw_ij,pawrad,pawtab,psps)
 
  icg = 0
  ikg = 0
@@ -3128,12 +3126,12 @@ end subroutine dterm_rd2a
 !!
 !! SOURCE
 
-subroutine dterm_rd2a1(atindx,dterm,dtset,gntselect,gprimd,lmnmax,my_lmax,&
+subroutine dterm_rd2a1(atindx,dterm,dtset,gntselect,gprimd,my_lmax,&
     & pawrad,pawrhoij1,pawtab,realgnt)
 
   !Arguments ------------------------------------
   !scalars
-  integer,intent(in) :: lmnmax,my_lmax
+  integer,intent(in) :: my_lmax
   type(dterm_type),intent(inout) :: dterm
   type(dataset_type),intent(in) :: dtset
 
@@ -4112,14 +4110,12 @@ end subroutine sum_d
 !!
 !! SOURCE
 
-subroutine make_d(atindx,atindx1,cprj,dimlmn,dterm,dtset,gprimd,mcprj,nfftf,&
-    & mpi_enreg,occ,paw_an,pawang,paw_ij,pawrad,pawtab,psps,&
-    & ucvol)
+subroutine make_d(atindx,atindx1,cprj,dimlmn,dterm,dtset,gprimd,mcprj,&
+    & mpi_enreg,occ,paw_an,pawang,paw_ij,pawrad,pawtab,psps)
 
   !Arguments ------------------------------------
   !scalars
-  integer,intent(in) :: mcprj,nfftf
-  real(dp),intent(in) :: ucvol
+  integer,intent(in) :: mcprj
   type(dterm_type),intent(inout) :: dterm
   type(dataset_type),intent(in) :: dtset
   type(MPI_type), intent(inout) :: mpi_enreg
