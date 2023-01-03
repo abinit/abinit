@@ -51,7 +51,7 @@ module m_pspini
  use m_psp6,       only : psp6in
  use m_psp8,       only : psp8in
  use m_psp9,       only : psp9in
- use m_upf2abinit, only : upf2abinit !, new_upf2abinit
+ use m_upf2abinit, only : upf2abinit, new_upf2abinit
  use m_psp_hgh,    only : psp2in, psp3in, psp10in
  use m_wvl_descr_psp,  only : wvl_descr_psp_fill
 
@@ -708,7 +708,8 @@ end subroutine pspcor
 !! or "Phoney pseudopotentials" (Hamman grid in real space) (pspcod=5)
 !! or "Troullier-Martins pseudopotentials" from the FHI (pspcod=6)
 !! or "XML format" (pspcod=9)
-!! or "UPF PWSCF format" (pspcod=11)
+!! or "UPF1 PWSCF format" (pspcod=11)
+!! or "UPF2 PWSCF format" (pspcod=12)
 !!
 !! INPUTS
 !!  dq= spacing of the q-grid
@@ -849,6 +850,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
  end if
 
  nctab%has_tvale = .False.; nctab%has_tcore = .False.
+ pspcod = -1
 
  if (me==0) then
 !  Dimensions of form factors and Vloc q grids must be the same in Norm-Conserving case
@@ -968,9 +970,9 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
                        psps, epsatm, xcccrc, indlmn, ekb, ffspl, nproj, vlspl, xccc1d)
      else
        pspcod = 12
-       !call new_upf2abinit(psps%filpsp(ipsp), znucl, zion, pspxc, lmax, lloc, mmax, &
-       !                    psps, epsatm, xcccrc, indlmn, ekb, ffspl, nproj, vlspl, xccc1d)
-       ABI_BUG("UPF2")
+       call new_upf2abinit(psps%filpsp(ipsp), znucl, zion, pspxc, lmax, lloc, mmax, &
+                           psps, epsatm, xcccrc, indlmn, ekb, ffspl, nproj, vlspl, xccc1d, nctab, maxrad)
+       !ABI_ERROR("UPF2")
      end if
 
    else
@@ -1058,10 +1060,11 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
    end if
 
 !  MJV 16/6/2009 added pspcod 11 for upf format
-   if( pspcod<1 .or. (pspcod>11.and.pspcod/=17) ) then
+   !if( pspcod<1 .or. (pspcod>11.and.pspcod/=17) ) then
+   if( pspcod<1)  then
      write(msg, '(a,i0,4a)' )&
       'In reading atomic psp file, finds pspcod= ',pspcod,ch10,&
-      'This is not an allowed value. Allowed values are 1 to 11 .',ch10,&
+      'This is not an allowed value. Allowed values are 1-12 or 17 .',ch10,&
       'Action: check pseudopotential input file.'
      ABI_ERROR(msg)
    end if
@@ -1245,7 +1248,6 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
    ABI_FREE(nproj)
 
    if (dtset%prtvol > 9 .and. psps%usepaw==0 .and. psps%lmnmax>3) then
-
      write (filnam, '(a,i0,a)') trim(dtfil%fnameabo_pspdata), ipsp, ".dat"
      if (open_file(filnam, msg, newunit=unt) /= 0) then
        ABI_ERROR(msg)

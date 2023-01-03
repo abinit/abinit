@@ -26,8 +26,8 @@ module m_psp8
  use m_abicore
  use m_splines
 
- use defs_datatypes,  only : nctab_t
  use m_pawrad,        only : pawrad_type, pawrad_init, pawrad_free
+ use defs_datatypes,  only : nctab_t
  use m_psps,          only : nctab_eval_tvalespl
  use m_psptk,         only : psp8lo, psp8nl
 
@@ -162,7 +162,7 @@ subroutine psp8in(ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
  write(msg, '(3f20.14,t64,a)' ) rchrg,fchrg,qchrg,'rchrg,fchrg,qchrg'
  call wrtout([std_out, ab_out], msg)
 
- ABI_MALLOC(nproj_tmp,(mpssoang))
+ ABI_MALLOC(nproj_tmp, (mpssoang))
 
  nproj_tmp(:)=0
  read (tmp_unit,*, err=10, iomsg=errmsg) nproj_tmp(1:lmax+1)
@@ -192,7 +192,7 @@ subroutine psp8in(ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
    has_tvale =  (extension_switch == 1)
  else
    write(msg, '(a,i0,2a)' ) 'invalid extension_switch: ',extension_switch,ch10,&
-&   'Should be [0,1] for scalar-relativistic psp or [2,3] to include spin-orbit'
+    'Should be [0,1] for scalar-relativistic psp or [2,3] to include spin-orbit'
    ABI_ERROR(msg)
  end if
 
@@ -217,12 +217,12 @@ subroutine psp8in(ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
    nso=2
    if (pspso==0) then
      write (msg, '(3a)') 'You are reading a pseudopotential file with spin orbit projectors',ch10,&
-&     ' but internal variable pspso is 0'
+     ' but internal variable pspso is 0'
      ABI_COMMENT(msg)
    end if
  else
    write(msg, '(a,i0,2a)' ) 'invalid extension_switch: ',extension_switch,ch10,&
-&   'Should be [0,1] for scalar-relativistic psp or [2,3] to include spin-orbit'
+   'Should be [0,1] for scalar-relativistic psp or [2,3] to include spin-orbit'
    ABI_ERROR(msg)
  end if
 
@@ -310,14 +310,14 @@ subroutine psp8in(ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 
  if(ll_err>0) then
    write(msg, '(5a,i4,a,i4,a,a)' )&
-&   'Pseudopotential input file does not have angular momenta in order',ch10,&
-&   'or has inconsistent general local potential index',ch10,&
-&   'Expected',ll_err-1,' , got',ll,ch10,&
-&   'Action: check your pseudopotential input file.'
+     'Pseudopotential input file does not have angular momenta in order',ch10,&
+     'or has inconsistent general local potential index',ch10,&
+     'Expected',ll_err-1,' , got',ll,ch10,&
+     'Action: check your pseudopotential input file.'
    ABI_ERROR(msg)
  end if
 
-!Check that rad grid is linear starting at zero
+ ! Check that rad grid is linear starting at zero
  amesh=rad(2)-rad(1)
  damesh=zero
  do irad=2,mmax-1
@@ -325,17 +325,17 @@ subroutine psp8in(ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
  end do
  if(damesh>tol8 .or. rad(1)/=zero) then
    write(msg, '(5a)' )&
-&   'Pseudopotential input file requires linear radial mesh',ch10,&
-&   'starting at zero.',ch10,&
-&   'Action: check your pseudopotential input file.'
+     'Pseudopotential input file requires linear radial mesh',ch10,&
+     'starting at zero.',ch10,&
+     'Action: check your pseudopotential input file.'
    ABI_ERROR(msg)
  end if
 
-!Get core charge function and derivatives, if needed
+ !Get core charge function and derivatives, if needed
  if(fchrg>1.0d-15)then
-   call psp8cc(mmax,n1xccc,rchrg,xccc1d)
-!  The core charge function for pspcod=8 becomes zero beyond rchrg.
-!  Thus xcccrc must be set equal to rchrg.
+   call psp8cc(mmax, n1xccc, rchrg, xccc1d)
+   ! The core charge function for pspcod=8 becomes zero beyond rchrg.
+   ! Thus xcccrc must be set equal to rchrg.
    xcccrc=rchrg
  else
    xccc1d(:,:) = zero
@@ -346,28 +346,28 @@ subroutine psp8in(ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 
  maxrad = rad(mmax)
 
-!!   DEBUG
-!    write(std_out,*)' xcccrc = ', xcccrc, rchrg
-!    write(std_out,*)
-!    write(std_out,*) '# psp8in NLCC data ', n1xccc, xcccrc
-!    do ii = 1, n1xccc
-!    write(std_out,'(7e20.8)')xcccrc*(ii-1.d0)/(n1xccc-1.d0),xccc1d(ii,1),&
-! &         xccc1d(ii,2),xccc1d(ii,3),xccc1d(ii,4),xccc1d(ii,5),xccc1d(ii,6)
-!    enddo
-!    write(std_out,*)
-!    stop
-!!   ENDDEBUG
+!! DEBUG
+!write(std_out,*)' xcccrc = ', xcccrc, rchrg
+!write(std_out,*)
+!write(std_out,*) '# psp8in NLCC data ', n1xccc, xcccrc
+!do ii = 1, n1xccc
+!write(std_out,'(7e20.8)')xcccrc*(ii-1.d0)/(n1xccc-1.d0),xccc1d(ii,1),&
+!     xccc1d(ii,2),xccc1d(ii,3),xccc1d(ii,4),xccc1d(ii,5),xccc1d(ii,6)
+!enddo
+!write(std_out,*)
+!stop
+!! ENDDEBUG
 
 
 !--------------------------------------------------------------------
 !Carry out calculations for local (lloc) pseudopotential.
 !Obtain Fourier transform (1-d sine transform) to get q^2 V(q).
 
- call psp8lo(amesh,epsatm,mmax,mqgrid,qgrid,vlspl(:,1),rad,vloc,yp1,ypn,zion)
+ call psp8lo(amesh, epsatm, mmax, mqgrid, qgrid, vlspl(:,1), rad, vloc, yp1, ypn, zion)
 
-!Fit spline to q^2 V(q) (Numerical Recipes subroutine)
+ ! Fit spline to q^2 V(q) (Numerical Recipes subroutine)
  ABI_MALLOC(work_spl,(mqgrid))
- call spline (qgrid,vlspl(:,1),mqgrid,yp1,ypn,work_spl)
+ call spline(qgrid,vlspl(:,1),mqgrid,yp1,ypn,work_spl)
  vlspl(:,2)=work_spl(:)
  ABI_FREE(work_spl)
 
@@ -399,14 +399,13 @@ subroutine psp8in(ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 !Take care of non-local part
 
 !Allow for option of no nonlocal corrections (lloc=lmax=0)
- if (lloc==0.and.lmax==0) then
+ if (lloc == 0 .and. lmax == 0) then
    write(msg, '(a,f5.1)' ) ' Note: local psp for atom with Z=',znucl
    call wrtout([std_out, ab_out], msg)
  else
 
-!  Compute Vanderbilt-KB form factors and fit splines
-   call psp8nl(amesh,ffspl,indlmn,lmax,lmnmax,lnmax,mmax,mqgrid,qgrid,rad,vpspll)
-
+   ! Compute Vanderbilt-KB form factors and fit splines
+   call psp8nl(amesh, ffspl, indlmn, lmax, lmnmax, lnmax, mmax, mqgrid, qgrid, rad, vpspll)
  end if
 
 !!  DEBUG
@@ -438,31 +437,30 @@ subroutine psp8in(ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 ! stop
 !!  ENDDEBUG
 
-! Read pseudo valence charge in real space on the linear mesh
-! and transform it to reciprocal space on a regular grid. Use vloc as workspace.
+ ! Read pseudo valence charge in real space on the linear mesh
+ ! and transform it to reciprocal space on a regular grid. Use vloc as workspace.
  vloc(:) = zero
  if (has_tvale) then
    do irad=1,mmax
-     read(tmp_unit,*, err=10, iomsg=errmsg)jj,rad(irad),vloc(irad)
+     read(tmp_unit,*, err=10, iomsg=errmsg)jj, rad(irad), vloc(irad)
      vloc(irad) = vloc(irad) / four_pi
    end do
 
    ! Check that rad grid is linear starting at zero
-   amesh=rad(2)-rad(1)
-   damesh=zero
+   amesh = rad(2) - rad(1); damesh = zero
    do irad=2,mmax-1
-     damesh=max(damesh,abs(rad(irad)+amesh-rad(irad+1)))
+     damesh = max(damesh, abs(rad(irad)+amesh-rad(irad+1)))
    end do
-   if(damesh>tol8 .or. rad(1)/=zero) then
-     write(msg, '(5a)' )&
-&     'Pseudopotential input file requires linear radial mesh',ch10,&
-&     'starting at zero.',ch10,&
-&     'Action: check your pseudopotential input file.'
+
+   if (damesh > tol8 .or. abs(rad(1)) > tol16) then
+     write(msg,'(3a)')&
+     'Assuming pseudized valence charge given on linear radial mesh starting at zero.',ch10,&
+     'Action: check your pseudopotential file.'
      ABI_ERROR(msg)
    end if
 
-   !  Evaluate spline-fit of the atomic pseudo valence charge in reciprocal space.
-   call pawrad_init(mesh,mesh_size=mmax,mesh_type=1,rstep=amesh)
+   ! Evaluate spline-fit of the atomic pseudo valence charge in reciprocal space.
+   call pawrad_init(mesh, mesh_size=mmax, mesh_type=1, rstep=amesh)
    call nctab_eval_tvalespl(nctab, zion, mesh, vloc, mqgrid_vl, qgrid_vl)
    call pawrad_free(mesh)
  end if
@@ -500,7 +498,7 @@ end subroutine psp8in
 !!
 !! SOURCE
 
-subroutine psp8cc(mmax,n1xccc,rchrg,xccc1d)
+subroutine psp8cc(mmax, n1xccc, rchrg, xccc1d)
 
 !Arguments ------------------------------------
 !scalars
@@ -524,16 +522,16 @@ subroutine psp8cc(mmax,n1xccc,rchrg,xccc1d)
  ABI_MALLOC(rad,(mmax))
 
  pi4i=quarter/pi
-!
-!Read from pp file the model core charge and its first 4 derivatives
-!assumed to be on a linear grid starting at zero.
-!The input functions contain the 4pi factor, and must be rescaled.
+ !
+ ! Read from pp file the model core charge and its first 4 derivatives
+ ! assumed to be on a linear grid starting at zero.
+ ! The input functions contain the 4pi factor, and must be rescaled.
 
  do irad=1,mmax
    read(tmp_unit,*, err=10, iomsg=errmsg) idum,rad(irad),(ff(irad,jj),jj=1,5)
  end do
 
-!Check that rad grid is linear starting at zero
+ ! Check that rad grid is linear starting at zero
  amesh=rad(2)-rad(1)
  damesh=zero
  do irad=2,mmax-1
@@ -548,7 +546,7 @@ subroutine psp8cc(mmax,n1xccc,rchrg,xccc1d)
    ABI_ERROR(msg)
  end if
 
-!Check that input rchrg is consistent with last grid point
+ ! Check that input rchrg is consistent with last grid point
  if(rchrg>rad(mmax)) then
    write(msg, '(5a)' )&
    'Pseudopotential input file core charge mesh',ch10,&
