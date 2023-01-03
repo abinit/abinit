@@ -1,6 +1,6 @@
 
 .Version 9.9.1 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_intel2021.7 computer) 
+.(MPI version, prepared for a x86_64_linux_intel2021.8 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 23 Dec 2022.
-- ( at 15h31 )
+.Starting date : Tue  3 Jan 2023.
+- ( at 08h26 )
   
 - input  file    -> /home/jzwanzig/abinit/abinit/tmp-build/intel/fast/tests/Test_suite/v9_t44/t44.abi
 - output file    -> t44.abo
@@ -106,7 +106,7 @@ P          mk1mem           1
         optforces           0
         optstress           0
            orbmag1          0
-           orbmag2          3
+           orbmag2          2
         pawcpxocc           2
         pawecutdg      6.00000000E+00 Hartree
          pawxcdev           0
@@ -651,7 +651,6 @@ tolerances: {tolwfr: 1.00E-20, }
     rho(1) VV1 :  -1.64696968E-04 -3.77700058E-17  5.82491731E-17
     rho(1) VV2 :  -3.95081764E-05  4.70695412E-17  3.84885027E-18
      rho(0) NL :   7.22872651E-04  9.31901464E-19  1.49769663E-17
-   rho(0) n(1) :   0.00000000E+00  0.00000000E+00  0.00000000E+00
    <L_R> terms :   2.69648385E-04  3.44258708E-17 -5.56436320E-19
  <A0.An> terms :  -9.12549974E-05  2.46844527E-18 -5.67865256E-18
     Lamb terms :  -3.41860000E-04  0.00000000E+00  0.00000000E+00
@@ -670,7 +669,6 @@ tolerances: {tolwfr: 1.00E-20, }
     rho(1) VV1 :  -2.78174719E-04 -6.23847508E-17  7.33076711E-17
     rho(1) VV2 :   1.39441609E-04  2.07482567E-17  2.67611245E-18
      rho(0) NL :   7.28880988E-04 -1.98423959E-18  1.70738375E-17
-   rho(0) n(1) :   0.00000000E+00  0.00000000E+00  0.00000000E+00
    <L_R> terms :   9.84662823E-26 -5.36349000E-27 -1.10572186E-26
  <A0.An> terms :  -8.88412145E-06  2.18090274E-28  6.51747976E-30
     Lamb terms :   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -688,7 +686,6 @@ tolerances: {tolwfr: 1.00E-20, }
     rho(1) VV1 :  -4.38886408E-03  4.72161118E-13 -8.21365172E-13
     rho(1) VV2 :  -8.15445040E-02  8.38212127E-12 -1.45905029E-11
      rho(0) NL :   3.25209611E-02 -3.34148992E-12  5.81387713E-12
-   rho(0) n(1) :   0.00000000E+00  0.00000000E+00  0.00000000E+00
    <L_R> terms :   4.06356180E-01 -4.17705225E-11  7.27045933E-11
  <A0.An> terms :  -3.29599387E-05  8.47031129E-16 -1.47434777E-15
     Lamb terms :   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -706,7 +703,6 @@ tolerances: {tolwfr: 1.00E-20, }
     rho(1) VV1 :  -4.80270022E-07 -9.12113215E-13  1.59197250E-12
     rho(1) VV2 :   9.66227945E-24 -1.67114764E-11  2.91664587E-11
      rho(0) NL :  -1.78016660E-24  6.67268323E-12 -1.16458098E-11
-   rho(0) n(1) :   0.00000000E+00  0.00000000E+00  0.00000000E+00
    <L_R> terms :  -4.70274320E-23  8.33412117E-11 -1.45455019E-10
  <A0.An> terms :  -1.64741757E-05 -1.65653905E-18 -6.42343766E-18
     Lamb terms :   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -724,7 +720,6 @@ tolerances: {tolwfr: 1.00E-20, }
     rho(1) VV1 :   4.50282211E-03  4.39976712E-13 -7.70622383E-13
     rho(1) VV2 :   8.13655542E-02  8.32938145E-12 -1.45759546E-11
      rho(0) NL :  -3.25269695E-02 -3.33119039E-12  5.83193057E-12
-   rho(0) n(1) :   0.00000000E+00  0.00000000E+00  0.00000000E+00
    <L_R> terms :  -4.06086531E-01 -4.15706548E-11  7.27504249E-11
  <A0.An> terms :  -3.29367615E-05 -8.42906144E-16  1.47509256E-15
     Lamb terms :   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -785,7 +780,7 @@ P          mk1mem           1
         optforces           0
         optstress           0
            orbmag1          0
-           orbmag2          3
+           orbmag2          2
         pawcpxocc           2
         pawecutdg      6.00000000E+00 Hartree
          pawxcdev           0
@@ -910,10 +905,10 @@ P          mk1mem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         15.0  wall=         15.4
+- Proc.   0 individual time (sec): cpu=         15.0  wall=         15.5
  
 ================================================================================
  
  Calculation completed.
 .Delivered  57 WARNINGs and  15 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         15.0  wall=         15.4
++Overall time at end (sec) : cpu=         15.0  wall=         15.5

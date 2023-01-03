@@ -13427,8 +13427,7 @@ Compute quantities related to orbital magnetic moment. The
 
 * [[orbmag]] = 1: Compute orbital magnetization and Chern number
 * [[orbmag]] = 2: Same as [[orbmag]] 1 but also print out values of each term making up total
-orbital magnetic moment.
-* [[orbmag]] = 3: Same as [[orbmag]] 2 but print out values of each term for each band.
+orbital magnetic moment and a band-by-band decomposition.
 """,
 ),
 
