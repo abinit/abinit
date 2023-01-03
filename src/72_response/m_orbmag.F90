@@ -2284,6 +2284,7 @@ subroutine dterm_rd2e(atindx,dterm,dtset,pawrad,pawtab)
  dterm%has_rd2e = 2
  
 end subroutine dterm_rd2e
+!!***
 
 
 !!****f* ABINIT/dterm_rd2b
@@ -2387,6 +2388,7 @@ subroutine dterm_rd2b(atindx,dterm,dtset,pawrad,pawtab)
  dterm%has_rd2b = 2
  
 end subroutine dterm_rd2b
+!!***
 
 !!****f* ABINIT/dterm_rd2f
 !! NAME
@@ -2512,6 +2514,7 @@ subroutine dterm_rd2f(atindx,dterm,dtset,gntselect,lmnmax,my_lmax,&
  dterm%has_rd2f = 2
 
 end subroutine dterm_rd2f
+!!***
 
 !!****f* ABINIT/dterm_rd2d
 !! NAME
@@ -2636,6 +2639,7 @@ subroutine dterm_rd2d(atindx,dterm,dtset,gntselect,lmnmax,my_lmax,&
  dterm%has_rd2d = 2
 
 end subroutine dterm_rd2d
+!!***
 
 !!****f* ABINIT/dterm_rd2c
 !! NAME
@@ -2761,6 +2765,7 @@ subroutine dterm_rd2c(atindx,dterm,dtset,gntselect,lmnmax,my_lmax,&
  dterm%has_rd2c = 2
  
 end subroutine dterm_rd2c
+!!***
 
 !!****f* ABINIT/dterm_rd3a
 !! NAME
@@ -2895,6 +2900,7 @@ subroutine dterm_rd3a(atindx,dterm,dtset,gntselect,gprimd,lmnmax,my_lmax,&
  dterm%has_rd3a = 2
 
 end subroutine dterm_rd3a
+!!***
 
 !!****f* ABINIT/dterm_rd1a
 !! NAME
@@ -2973,6 +2979,7 @@ subroutine dterm_rd1a(atindx,dterm,dtset,pawrad,pawtab)
  dterm%has_rd1a = 2
 
 end subroutine dterm_rd1a
+!!***
 
 
 !!****f* ABINIT/dterm_dijhat
@@ -3096,7 +3103,7 @@ subroutine dterm_dijhat(atindx,dterm,dtset,gprimd,nfftf,pawang,&
  dterm%has_dijhat = 2
 
 end subroutine dterm_dijhat
-
+!!***
 
 !!****f* ABINIT/dterm_rd2a
 !! NAME
@@ -3229,6 +3236,7 @@ subroutine dterm_rd2a(atindx,dterm,dtset,gntselect,lmnmax,my_lmax,&
  dterm%has_rd2a = 2
  
 end subroutine dterm_rd2a
+!!***
 
 !!****f* ABINIT/dterm_rd2a1
 !! NAME
@@ -3372,7 +3380,7 @@ subroutine dterm_rd2a1(atindx,dterm,dtset,gntselect,gprimd,lmnmax,my_lmax,&
  dterm%has_rd2a1 = 2
  
 end subroutine dterm_rd2a1
-
+!!***
 
 !!****f* ABINIT/dterm_rd1
 !! NAME
