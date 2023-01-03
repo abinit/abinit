@@ -171,14 +171,14 @@ end subroutine test_xml_xmlpaw_upf
 !!
 !! SOURCE
 
-subroutine psps_init_global(mtypalch, npsp, psps, pspheads)
+subroutine psps_init_global(psps, mtypalch, npsp, pspheads)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: mtypalch,npsp
  class(pseudopotential_type),intent(inout) :: psps
+ integer,intent(in) :: mtypalch,npsp
 !arrays
- class(pspheader_type),intent(in) :: pspheads(npsp)
+ type(pspheader_type),intent(in) :: pspheads(npsp)
 
 !Local variables-------------------------------
 !scalars
@@ -245,22 +245,20 @@ end subroutine psps_init_global
 !! pspheads(npsp)=<type pspheader_type>all the important information from the
 !!   pseudopotential file header, as well as the psp file name
 !!
-!! OUTPUT
-!!
 !! SIDE EFFECTS
 !! psps=<type pseudopotential_type>the pseudopotentials description
 !!
 !! SOURCE
 
-subroutine psps_init_from_dtset(dtset, idtset, psps, pspheads)
+subroutine psps_init_from_dtset(psps, dtset, idtset, pspheads)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: idtset
- class(dataset_type),intent(in) :: dtset
  class(pseudopotential_type),intent(inout) :: psps
+ integer,intent(in) :: idtset
+ type(dataset_type),intent(in) :: dtset
 !arrays
- class(pspheader_type),intent(in) :: pspheads(psps%npsp)
+ type(pspheader_type),intent(in) :: pspheads(psps%npsp)
 
 !Local variables-------------------------------
 !scalars
