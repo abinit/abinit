@@ -16,7 +16,7 @@ rfddk2 1
 rfdir2 1 1 1
 iscf2 -3
 getwfk2 -1
-orbmag2 3
+orbmag2 2
 lambsig2 341.86D-6
 
 kptopt 0
