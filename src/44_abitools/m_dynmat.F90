@@ -92,6 +92,7 @@ module m_dynmat
                                 ! If q is Gamma, the non-analytical behaviour can be included.
  public :: pheigvec_normalize   ! Normalize input eigenvectors in cartesian coordinates.
  public :: phdispl_from_eigvec  ! Phonon displacements from eigenvectors
+ public :: phangmom_from_eigvec ! compute phonon angular momentum for one q-point from eigenvectors
  public :: dfpt_prtph           ! Print phonon frequencies
  public :: massmult_and_breaksym  ! Multiply IFC(q) by atomic masses.
 
@@ -5411,6 +5412,59 @@ pure subroutine phdispl_from_eigvec(natom, ntypat, typat, amu, eigvec, displ)
 end subroutine phdispl_from_eigvec
 !!***
 
+!!****f* m_dynmat/phangmom_from_eigvec
+!! NAME
+!! phangmom_from_eigvec
+!!
+!! FUNCTION
+!!  Phonon angular momenta in cart coords from eigenvectors
+!!
+!! INPUTS
+!!  natom: number of atoms in unit cell
+!!  eigvec(2*3*natom*3*natom)= eigenvectors of the dynamical matrix in cartesian coordinates.
+!!
+!! OUTPUT
+!!  phangmom(3*3*natom)= angular momentum of each phonon mode in cartesian coordinates.
+!!    The first index runs on the direction,
+!!    The second index runs on the modes.
+!!
+!! SOURCE
+
+pure subroutine phangmom_from_eigvec(natom, eigvec, phangmom)
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: natom
+!arrays
+ real(dp),intent(in) :: eigvec(2*3*natom*3*natom)
+ real(dp),intent(out) :: phangmom(3*3*natom)
+
+!Local variables -------------------------
+!scalars
+ integer :: imode,ipert, index
+!arrays
+ real(dp) :: eigvecatom(2*3)
+
+! *********************************************************************
+
+ phangmom = zero
+
+ do imode=1,3*natom
+   do ipert=1,natom
+     index = 3*natom*(imode-1) + 3*(ipert-1)
+     eigvecatom = eigvec(2*index+1 : 2*index + 2*3) ! = Re(u_x), Im(u_x), Re(u_y), Im(u_y), Re(u_z), Im(u_z)
+     phangmom(3*(imode-1)+1) = phangmom(3*(imode-1)+1)&
+             + two * (eigvecatom(3) * eigvecatom(6) - eigvecatom(4) * eigvecatom(5)) ! Re(u_y)*Im(u_z) - Im(u_y)*Re(u_z)
+     phangmom(3*(imode-1)+2) = phangmom(3*(imode-1)+2)&
+             + two * (eigvecatom(5) * eigvecatom(2) - eigvecatom(6) * eigvecatom(1)) ! Re(u_z)*Im(u_x) - Im(u_z)*Re(u_x)
+     phangmom(3*(imode-1)+3) = phangmom(3*(imode-1)+3)&
+             + two * (eigvecatom(1) * eigvecatom(4) - eigvecatom(2) * eigvecatom(3)) ! Re(u_x)*Im(u_y) - Im(u_x)*Re(u_y)
+   end do
+ end do
+
+end subroutine phangmom_from_eigvec
+!!***
+
 !!****f* m_dynmat/dfpt_prtph
 !! NAME
 !! dfpt_prtph
@@ -5434,7 +5488,7 @@ end subroutine phdispl_from_eigvec
 !!    0=> Hartree and cm-1, 1=> eV and Thz, other=> Ha,Thz,eV,cm-1 and K
 !!  iout= unit for long print (if negative, the routine only print on unit 6, and in Hartree only).
 !!  natom= number of atom
-!!  phfreq(3*natom)= phonon frequencies in Hartree
+!!  phfrq(3*natom)= phonon frequencies in Hartree
 !!  qphnrm=phonon wavevector normalisation factor
 !!  qphon(3)=phonon wavevector
 !!
