@@ -251,7 +251,9 @@ subroutine inpspheads(filnam, npsp, pspheads, ecut_tmp)
        call upf2header2abi(filnam(ipsp), &
          pspheads(ipsp)%znuclpsp, pspheads(ipsp)%zionpsp, pspheads(ipsp)%pspxc, pspheads(ipsp)%lmax, pspheads(ipsp)%xccc, &
          nproj, nprojso)
-       !ABI_ERROR("USE UPF2")
+
+       ! FIXME : generalize for SO pseudos
+       pspheads(ipsp)%pspso = 0
      end if
 
      pspcod = pspheads(ipsp)%pspcod

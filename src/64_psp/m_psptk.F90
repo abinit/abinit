@@ -1146,7 +1146,7 @@ end subroutine psp5nl
 !!
 !! SOURCE
 
-subroutine psp8lo(amesh,epsatm,mmax,mqgrid,qgrid,q2vq,rad,vloc,yp1,ypn,zion)
+subroutine psp8lo(amesh, epsatm, mmax, mqgrid, qgrid, q2vq, rad, vloc, yp1, ypn, zion)
 
 !Arguments----------------------------------------------------------
 !scalars
@@ -1159,8 +1159,7 @@ subroutine psp8lo(amesh,epsatm,mmax,mqgrid,qgrid,q2vq,rad,vloc,yp1,ypn,zion)
 
 !Local variables-------------------------------
 !Following parameter controls accuracy of Fourier transform based on qmax
-!and represents the minimun number of integration points in one period.
-!scalars
+!and represents the minimun number of integration points in one period scalars
  integer,parameter :: NPT_IN_2PI=200
  integer :: ider,iq,ir,irmu,irn,mesh_mult,mmax_new
  real(dp) :: amesh_new,arg,fp1,fpn,qmesh,result,ztor1
@@ -1316,7 +1315,7 @@ end subroutine psp8lo
 !!
 !! SOURCE
 
-subroutine psp8nl(amesh,ffspl,indlmn,lmax,lmnmax,lnmax,mmax,mqgrid,qgrid,rad,vpspll)
+subroutine psp8nl(amesh, ffspl, indlmn, lmax, lmnmax, lnmax, mmax, mqgrid, qgrid, rad, vpspll)
 
 !Arguments----------------------------------------------------------
 !scalars
