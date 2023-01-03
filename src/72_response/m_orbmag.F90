@@ -337,7 +337,7 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
  !Local
  !scalars
  integer :: adir,buff_size,choice,cpopt,dimffnl,exchn2n3d,iat,iatom,icg,icmplx,icprj,ider,idir,ierr
- integer :: ikg,ikg1,ikpt,ilm,indx,isppol,istwf_k,iterm,itypat,klmn,lmn2max
+ integer :: ikg,ikg1,ikpt,ilm,indx,isppol,istwf_k,iterm,itypat,lmn2max
  integer :: me,mcgk,my_lmax,my_nspinor,nband_k,ngfft1,ngfft2,ngfft3,ngfft4
  integer :: ngfft5,ngfft6,ngnt,nl1_option,nn,nkpg,npw_k,nproc,spaceComm,with_vectornd
  real(dp) :: arg,ecut_eff,trnrm,ucvol
@@ -350,7 +350,7 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
  real(dp) :: gmet(3,3),gprimd(3,3),kpoint(3),omlamb(2,3),rhodum(1),rmet(3,3)
  real(dp),allocatable :: buffer1(:),buffer2(:)
  real(dp),allocatable :: b1_k(:,:,:),b2_k(:,:,:)
- real(dp),allocatable :: cg_k(:,:),cg1_k(:,:,:),cgrvtrial(:,:),cwavef(:,:),cwavef_d(:,:)
+ real(dp),allocatable :: cg_k(:,:),cg1_k(:,:,:),cgrvtrial(:,:),cwavef(:,:)
  real(dp),allocatable :: eig_k(:),ffnl_k(:,:,:,:),kinpw(:),kpg_k(:,:),m1_k(:,:,:),m2_k(:,:,:)
  real(dp),allocatable :: occ_k(:),orbmag_terms(:,:,:,:),orbmag_trace(:,:,:)
  real(dp),allocatable :: pcg1_k(:,:,:),ph1d(:,:),ph3d(:,:,:),phkxred(:,:),realgnt(:)
@@ -852,7 +852,6 @@ subroutine orbmag_nl1_k(atindx,cprj_k,dterm,dtset,m1_k,nband_k,nl1_option,pawtab
   integer :: adir,nn
   complex(dpc) :: tt
   !arrays
-  complex(dpc) :: m1(3)
 
 !--------------------------------------------------------------------
 
@@ -1010,7 +1009,7 @@ subroutine make_v2b_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,gs_hamk,&
   !Local variables -------------------------
   !scalars
   integer :: adir,bdir,choice,cpopt,gdir,ndat,nn,nnlout,np
-  integer :: paw_opt,sij_opt,signs,tim_nonlop
+  integer :: paw_opt,signs,tim_nonlop
   real(dp) :: doti,dotr,epsabg
   complex(dpc) :: mb,mg,mv2b,prefac_m
   !arrays
@@ -1419,8 +1418,7 @@ subroutine make_pcg1(atindx,cg_k,cg1_k,cprj_k,dimlmn,dtset,gs_hamk,&
   !scalars
   integer :: adir,choice,cpopt,iband,jband
   integer :: ndat,nnlout,paw_opt,signs,tim_nonlop
-  real(dp) :: doti,dotr,s0,s1
-  real(dp) :: cg1,pcg1,vcg
+  real(dp) :: doti,dotr
   !arrays
   real(dp) :: lambda(1)
   real(dp),allocatable :: cwavef(:,:),enlout(:),svectout(:,:)
@@ -2823,7 +2821,7 @@ subroutine dterm_rd3a(atindx,dterm,dtset,gntselect,gprimd,lmnmax,my_lmax,&
   !scalars
   integer :: iat,iatom,ilm,ilmn,imesh,ipt,itypat,jlm,jlmn
   integer :: klmn,kln,mesh_size,nkxc,nk3xc,usecore,usexcnhat,xc_option
-  real(dp) :: dij,eexc,eexcdc,hyb_mixing,rr,xcint,xcintr
+  real(dp) :: dij,eexc,eexcdc,hyb_mixing,rr,xcint
   logical :: non_magnetic_xc
 
   !arrays
@@ -4099,7 +4097,7 @@ subroutine check_eig_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,&
 
   !Local variables -------------------------
   !scalars
-  integer :: cpopt,iat,iatom,itypat,klmn,ndat,nn,sij_opt,tim_getghc,type_calc
+  integer :: cpopt,ndat,nn,sij_opt,tim_getghc,type_calc
   real(dp) :: dotr_ghc,dotr_kloc,eig_aij,lambda
   complex(dpc) :: dij
   !arrays
@@ -4285,11 +4283,10 @@ subroutine make_d(atindx,atindx1,cprj,dimlmn,dterm,dtset,gprimd,mcprj,nfftf,&
 
   !Local variables -------------------------
   !scalars
-  integer :: adir,iat,iatom,iband,isel,itypat,ijlmn,kllmn
+  integer :: adir,iat,iatom,itypat
   integer :: my_lmax,ngnt,nzlmopt
   integer :: opt_compch,opt_dens,opt_l,opt_print
-  real(dp) :: compch_sph,eijkl,hdij,my_eijkl,rrhokl
-  complex(dpc) :: cdij,cpi,cpj,rhoij,rhokl
+  real(dp) :: compch_sph
   type(paw_dmft_type) :: paw_dmft
  
   !arrays
