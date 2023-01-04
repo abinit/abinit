@@ -24,8 +24,10 @@ AC_DEFUN([ABI_MSG_END],
 #
 if test "${abi_openmp_enable}" = "yes"; then
   tmp_omp_collapse="${abi_omp_has_collapse}"
+  tmp_omp_gpu_offload="${abi_omp_has_gpu_offload}"
 else
   tmp_omp_collapse="ignored"
+  tmp_omp_gpu_offload="ignored"
 fi
 
 # Set library-related status reports
@@ -64,7 +66,7 @@ Core build parameters
   * debugging         : ${abi_debug_flavor}
   * optimizations     : ${abi_optim_flavor}
 
-  * OpenMP enabled    : ${abi_openmp_enable} (collapse: ${tmp_omp_collapse})
+  * OpenMP enabled    : ${abi_openmp_enable} (collapse: ${tmp_omp_collapse}; GPU offload: ${tmp_omp_gpu_offload})
   * MPI    enabled    : ${abi_mpi_enable} (flavor: ${abi_mpi_flavor})
   * MPI    in-place   : ${abi_mpi_inplace_enable}
   * MPI-IO enabled    : ${abi_mpi_io_enable}
