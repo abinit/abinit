@@ -1355,6 +1355,10 @@
 #
 #enable_openmp="yes"
 
+# Enable OpenMP GPU offload (sarrautem, torrent)
+#
+#enable_openmp_offload="yes"
+
 # Enable ZDOTC and ZDOTU bugfix (gmatteo)
 #
 #enable_zdot_bugfix="yes"
