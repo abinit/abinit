@@ -48,3 +48,49 @@ AC_DEFUN([ABI_OMP_CHECK_COLLAPSE],[
     AC_DEFINE([HAVE_OMP_COLLAPSE],1,[Set to 1 if OpenMP has a working implementation of COLLAPSE.])
   fi
 ]) # ABI_OMP_CHECK_COLLAPSE
+
+# ABI_OMP_CHECK_GPU_OFFLOAD()
+# ------------------------
+#
+# Check whether OpenMP has a working implementation of TARGET offload directives.
+#
+AC_DEFUN([ABI_OMP_CHECK_GPU_OFFLOAD],[
+  dnl Init
+  abi_omp_has_gpu_offload="unknown"
+
+  dnl Check whether OpenMP's TARGET offload directives are recognized
+  AC_LANG_PUSH([Fortran])
+  AC_MSG_CHECKING([whether OpenMP TARGET offload directives are recognized])
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([],
+    [[
+      integer :: alfa,i,levels,arr(7)
+      levels = 7
+      arr = 0
+
+      ! Not an actual GPU offload test, as users may not compile on host with GPU.
+      ! Only compiler capabilities are checked.
+      if (levels == 8) then
+!$OMP TARGET ENTER EXIT MAP(to:arr)
+!$OMP TARGET PARALLEL DO COLLAPSE(2) PRIVATE(alfa,i) MAP(to:arr)
+      do alfa=1,1
+        do i=1,levels
+          arr(i)=i
+        end do
+      end do
+!$OMP END TARGET PARALLEL DO
+
+!$OMP TARGET DATA USE_DEVICE_ADDR(arr)
+      alfa=1
+!$OMP END TARGET DATA
+!$OMP TARGET EXIT DATA MAP(from:arr)
+      end if
+
+    ]])], [abi_omp_has_gpu_offload="yes"], [abi_omp_has_gpu_offload="no"])
+  AC_MSG_RESULT([${abi_omp_has_gpu_offload}])
+  AC_LANG_POP([Fortran])
+
+  dnl Propagate result
+  if test "${abi_omp_has_gpu_offload}" != "yes"; then
+    AC_MSG_ERROR([OpenMP GPU offload is enabled but is not supported by your compiler. Perhaps do you have flags missing ?])
+  fi
+]) # ABI_OMP_CHECK_GPU_OFFLOAD
