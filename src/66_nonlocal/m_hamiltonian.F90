@@ -57,7 +57,7 @@ module m_hamiltonian
 #endif
 
 #if defined HAVE_FC_ISO_C_BINDING
- use, intrinsic :: iso_c_binding, only : c_ptr,c_loc,c_f_pointer,c_int32_t
+ use, intrinsic :: iso_c_binding, only : c_ptr,c_loc,c_f_pointer,c_int32_t,c_int64_t,c_size_t
 #endif
 
 #if defined HAVE_GPU && defined HAVE_YAKL
@@ -870,7 +870,10 @@ subroutine init_hamiltonian(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
 !  Update enl on GPU (will do it later for PAW)
 #if defined HAVE_GPU_CUDA
    if (ham%use_gpu_cuda==1) then
-     call gpu_update_ham_data(ham%ekb(:,:,:,1),size(ham%ekb),ham%sij,size(ham%sij),ham%gprimd,size(ham%gprimd))
+     call gpu_update_ham_data(&
+       & ham%ekb(:,:,:,1), INT(size(ham%ekb),   c_int64_t), &
+       & ham%sij,          INT(size(ham%sij),   c_int64_t), &
+       & ham%gprimd,       INT(size(ham%gprimd),c_int64_t))
    end if
 #endif
 
@@ -1476,7 +1479,10 @@ subroutine load_spin_hamiltonian(Ham,isppol,vectornd,vlocal,vxctaulocal,with_non
  ! Update enl and sij on GPU
 #if defined HAVE_GPU_CUDA
  if (Ham%use_gpu_cuda==1) then
-   call gpu_update_ham_data(Ham%ekb(:,:,:,1),size(Ham%ekb),Ham%sij,size(Ham%sij),Ham%gprimd,size(Ham%gprimd))
+   call gpu_update_ham_data(&
+     & Ham%ekb(:,:,:,1), INT(size(Ham%ekb),   c_int64_t), &
+     & Ham%sij,          INT(size(Ham%sij),   c_int64_t), &
+     & Ham%gprimd,       INT(size(Ham%gprimd),c_int64_t))
  end if
 #endif
 

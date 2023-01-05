@@ -67,6 +67,10 @@ module m_dft_energy
  use m_prep_kgb,         only : prep_getghc, prep_nonlop
  use m_psolver,          only : psolver_rhohxc
 
+#ifdef HAVE_FC_ISO_C_BINDING
+ use, intrinsic :: iso_c_binding, only : c_int64_t
+#endif
+
 #if defined HAVE_GPU_CUDA
  use m_manage_cuda
 #endif
@@ -675,7 +679,9 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
 
 #if defined HAVE_GPU_CUDA
      if (dtset%use_gpu_cuda==1) then
-       call gpu_update_ffnl_ph3d(ph3d,size(ph3d),ffnl,size(ffnl))
+       call gpu_update_ffnl_ph3d( &
+         & ph3d, INT(size(ph3d),c_int64_t), &
+         & ffnl, INT(size(ffnl),c_int64_t) )
      end if
 #endif
 
