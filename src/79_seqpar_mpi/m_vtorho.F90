@@ -104,7 +104,7 @@ module m_vtorho
 #endif
 
 #ifdef HAVE_FC_ISO_C_BINDING
- use, intrinsic :: iso_c_binding
+ use, intrinsic :: iso_c_binding, only : c_int64_t
 #endif
 
 
@@ -975,7 +975,9 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
 #if defined HAVE_GPU_CUDA
        if (dtset%use_gpu_cuda==1) then
-         call gpu_update_ffnl_ph3d(ph3d,size(ph3d),ffnl,size(ffnl))
+         call gpu_update_ffnl_ph3d( &
+           & ph3d, INT(size(ph3d),c_int64_t), &
+           & ffnl, INT(size(ffnl),c_int64_t) )
        end if
 #endif
 

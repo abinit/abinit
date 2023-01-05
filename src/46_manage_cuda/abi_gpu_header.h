@@ -124,16 +124,16 @@ extern "C" {
   void free_nonlop_gpu_();
 
   void gpu_update_ham_data_(double *enl,
-                            int *size_enl,
+                            int64_t *size_enl,
                             double *sij,
-                            int *size_sij,
+                            int64_t *size_sij,
                             double *gprimd,
-                            int *size_gprimd);
+                            int64_t *size_gprimd);
 
   void gpu_update_ffnl_ph3d_(double *ph3din,
-                             int *dimph3din,
+                             int64_t *dimph3din,
                              double *ffnlin,
-                             int *dimffnlin);
+                             int64_t *dimffnlin);
 
   void gpu_finalize_ham_data_();
 
