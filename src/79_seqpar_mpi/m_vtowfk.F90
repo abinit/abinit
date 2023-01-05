@@ -356,7 +356,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !nnsclo_now=number of non-self-consistent loops for the current vtrial
 !(often 1 for SCF calculation, =nstep for non-SCF calculations)
  call timab(39,1,tsec) ! "vtowfk (loop)"
-
+ 
  do inonsc=1,nnsclo_now
    if (iscf < 0 .and. (inonsc <= enough .or. mod(inonsc, 10) == 0)) call cwtime(cpu, wall, gflops, "start")
 
@@ -403,7 +403,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
        call cprj_update_oneband(cwavef_iband,cprj_cwavef,gs_hamk,mpi_enreg,tim_getcprj)
      end if
    end do
-
+   
    ! JLJ 17/10/2014: If it is a GWLS calculation, construct the hamiltonian
    ! as in a usual GS calc., but skip any minimisation procedure.
    ! This would be equivalent to nstep=0, if the latter did work.
@@ -543,7 +543,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    end if
    ABI_NVTX_END_RANGE()
 
-!  Print energies
+   !  Print energies
    if(prtvol>2 .or. ikpt<=nkpt_max)then
      do ii=0,(nband_k-1)/8
        write(msg, '(a,8es10.2)' )' ene:',(eig_k(iband),iband=1+ii*8,min(nband_k,8+ii*8))
@@ -647,7 +647,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    update_cprj=dtset%cprj_update_lvl<=3.and.dtset%cprj_update_lvl/=2
    if (update_cprj) call cprj_update(cg,cprj_cwavef_bands,gs_hamk,icg,nband_k,mpi_enreg,tim_getcprj)
  end if
-
+ 
  call timab(39,2,tsec)
  call timab(30,1,tsec) ! "vtowfk  (afterloop)"
 
@@ -722,17 +722,18 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 &     cg(:,1+(iband-1)*npw_k*my_nspinor+icg:iband*npw_k*my_nspinor+icg),0)
 
      ek_k(iband)=ar
-
      if(ANY(ABS(dtset%nucdipmom)>tol8)) then
-       ABI_MALLOC(ghc_vectornd,(2,npw_k))
-       call getghc_nucdip(cwavef,ghc_vectornd,gs_hamk%gbound_k,gs_hamk%istwf_k,kg_k,gs_hamk%kpt_k,&
-&        gs_hamk%mgfft,mpi_enreg,ndat,gs_hamk%ngfft,npw_k,gs_hamk%nvloc,&
-&        gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,my_nspinor,gs_hamk%vectornd,gs_hamk%use_gpu_cuda)
-       end_k(iband)=DOT_PRODUCT(cwavef(1,1:npw_k),ghc_vectornd(1,1:npw_k))+&
-         & DOT_PRODUCT(cwavef(2,1:npw_k),ghc_vectornd(2,1:npw_k))
+       ABI_MALLOC(ghc_vectornd,(2,npw_k*my_nspinor))
+       call getghc_nucdip(cg(:,1+(iband-1)*npw_k*my_nspinor+icg:iband*npw_k*my_nspinor+icg),&
+         & ghc_vectornd,gs_hamk%gbound_k,gs_hamk%istwf_k,kg_k,gs_hamk%kpt_k,&
+         & gs_hamk%mgfft,mpi_enreg,ndat,gs_hamk%ngfft,npw_k,gs_hamk%nvloc,&
+         & gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,my_nspinor,gs_hamk%vectornd,gs_hamk%use_gpu_cuda)
+       end_k(iband)=DOT_PRODUCT(cg(1,1+(iband-1)*npw_k*my_nspinor+icg:iband*npw_k*my_nspinor+icg),&
+         &                      ghc_vectornd(1,1:npw_k*my_nspinor))+&
+         &          DOT_PRODUCT(cg(2,1+(iband-1)*npw_k*my_nspinor+icg:iband*npw_k*my_nspinor+icg),&
+         &                      ghc_vectornd(2,1:npw_k*my_nspinor))
        ABI_FREE(ghc_vectornd)
      end if
-
      if(paw_dmft%use_dmft==1) then
        do iband1=1,nband_k
          call meanvalue_g(ar,kinpw,0,istwf_k,mpi_enreg,npw_k,my_nspinor,&
