@@ -211,8 +211,10 @@ extern "C" void gpu_fourwf_(int *cplex,
 
   int deviceId;
   CHECK_CUDA_ERROR( cudaGetDevice(&deviceId) );
-  if(*option!=3)
-    CHECK_CUDA_ERROR( cudaMemPrefetchAsync ( fofgin,  2*(*npwin)*(*ndat)*sizeof(double), deviceId) );
+  if(*option!=3) {
+    //printf("debug prefetch : &fofgin=%p fofgin=%f npwin=%d ndat=%d, deviceId=%d\n",fofgin, *fofgin,  *npwin, *ndat, deviceId);
+    CHECK_CUDA_ERROR( cudaMemPrefetchAsync ( fofgin, 2*(*npwin)*(*ndat)*sizeof(double), deviceId) );
+  }
 
   if(*option==2 || *option==3)
     CHECK_CUDA_ERROR( cudaMemPrefetchAsync ( fofgout, 2*(*npwout)*(*ndat)*sizeof(double), deviceId) );
