@@ -16,7 +16,7 @@ For a more complete theoretical introduction, see [[cite:Giustino2017]] and refe
 It is assumed the user has already completed the two tutorials [RF1](/tutorial/rf1) and [RF2](/tutorial/rf2),
 and that he/she is familiar with the calculation of ground state and vibrational properties **in metals**.
 The user should have read the [fourth lesson on Al](/tutorial/base4) as well
-as the [introduction page for the EPH code](tutorial/eph_intro) before running these examples.
+as the [introduction page for the EPH code](/tutorial/eph_intro) before running these examples.
 
 This lesson should take about 1.5 hour.
 
