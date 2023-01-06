@@ -7,7 +7,7 @@ release are NOT described here...
 NOTE that problems are presently (for about three years) most often reported on the issue manager of the internal ABINIT Gitlab .
 Still, the list of platforms and corresponding failing tests is maintained in the present document.
 
-The present release ABINITv9.7.5 is for development
+The present release ABINITv9.8.1 is for production
 
 0. List of platforms
 1. Batteries of tests
@@ -16,7 +16,7 @@ The present release ABINITv9.7.5 is for development
 ================================================================
 0. Platforms
 
-For ABINITv9.7.5, list closed on 2022 07 20
+For ABINITv9.8.1, list closed on 2022 12 03
 after installation and successful tests for the standard set of platforms,
 as mentioned on
 https://bbportal.abinit.org/#/status
