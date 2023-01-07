@@ -335,8 +335,9 @@ subroutine psps_init_from_dtset(psps, dtset, idtset, pspheads)
      !  ABI_WARNING("Setting pspso to 2 although nspinor == 1")
      !  psps%pspso(ipsp) = 2
      !end if
-!    Ideally the following line should not exist,
-!      but at present, the space has to be booked
+
+     ! Ideally the following line should not exist,
+     ! but at present, the space has to be booked
      if(pspheads(ipsp)%pspso/=0)psps%mpspso=2
    else if (psps%usepaw==0) then
      if(dtset%so_psp(ipsp)/=1)then
@@ -1289,7 +1290,6 @@ subroutine nctab_eval_tcorespl(nctab, n1xccc, xcccrc, xccc1d, mqgrid_vl, qgrid_v
  real(dp),intent(in) :: xccc1d(n1xccc,6),qgrid_vl(mqgrid_vl)
 
 !Local variables-------------------------------
-!scalars
  real(dp) :: amesh,yp1,ypn
  type(pawrad_type) :: core_mesh
 

@@ -6,6 +6,13 @@
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
 !------------------------------------------------------------------------------!
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
 MODULE upf_kinds
 !------------------------------------------------------------------------------!
   !

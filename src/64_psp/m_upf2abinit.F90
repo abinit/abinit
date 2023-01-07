@@ -3,10 +3,11 @@
 !!  m_upf2abinit
 !!
 !! FUNCTION
-!!
+!!  Procedures to read NC pseudos in UPF1/UPF2 format and convert data into
+!!  the internal ABINIT representation.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2009-2022 ABINIT group (MJV)
+!!  Copyright (C) 2009-2022 ABINIT group (MJV, MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -30,7 +31,6 @@ module m_upf2abinit
  use defs_datatypes,  only : pseudopotential_type
  use m_io_tools,      only : open_file
  use m_numeric_tools, only : smooth, nderiv, ctrap
- use m_pspheads,      only : upfxc2abi
  use m_paw_numeric,   only : jbessel => paw_jbessel
  use m_pawrad,        only : pawrad_type, pawrad_init, pawrad_free
  use m_psptk,         only : cc_derivatives, psp8lo, psp8nl
@@ -40,16 +40,16 @@ module m_upf2abinit
  private
 !!***
 
- public :: upf2abinit
- public :: new_upf2abinit
+ public :: upf1_to_abinit
+ public :: upf2_to_abinit
 !!***
 
 contains
 !!***
 
-!!****f* ABINIT/upf2abinit
+!!****f* ABINIT/upf1_to_abinit
 !! NAME
-!! upf2abinit
+!! upf1_to_abinit
 !!
 !! FUNCTION
 !!  This routine wraps a call to a PWSCF module, which reads in
@@ -92,12 +92,13 @@ contains
 !!
 !! SOURCE
 
-subroutine upf2abinit (filpsp, znucl, zion, pspxc, lmax_, lloc, mmax, &
-                       psps, epsatm, xcccrc, indlmn, ekb, ffspl, nproj_l, vlspl, xccc1d)
+subroutine upf1_to_abinit(filpsp, znucl, zion, pspxc, lmax_, lloc, mmax, &
+                          psps, epsatm, xcccrc, indlmn, ekb, ffspl, nproj_l, vlspl, xccc1d)
 
 
  use pseudo_pwscf ! pwscf module with all data explicit!
  use m_read_upf_pwscf, only : read_pseudo
+ use m_pspheads,      only : upfxc2abi
 
 !Arguments -------------------------------
  character(len=fnlen), intent(in) :: filpsp
@@ -157,17 +158,18 @@ subroutine upf2abinit (filpsp, znucl, zion, pspxc, lmax_, lloc, mmax, &
  call read_pseudo(1,iunit)
  close (iunit)
 
- ! convert to Ha units
+ ! convert from Rydberg to Ha units
  vloc0 = half * vloc0
- ! betar = half * betar ! ???
  dion = half * dion
 
  ! if upf file is a USPP one, stop
  if (pseudotype == 'US') then
-   ABI_ERROR('upf2abinit: USPP UPF files not supported')
+   ABI_ERROR('upf1_to_abinit: USPP UPF files not supported')
  end if
 
  ! copy over to abinit internal arrays and vars
+ ! FIXME: The API is broken. It does not recognize PBEsol
+ ! should use upfdft_to_ixc
  call upfxc2abi(dft(1), pspxc)
  lmax_ = lmax(1)
 
@@ -252,7 +254,7 @@ subroutine upf2abinit (filpsp, znucl, zion, pspxc, lmax_, lloc, mmax, &
    ff2 = zero
    call nderiv(one, ff1, ff2, mmax, 1) ! second derivative
    ff2(1:mmax) = ff2(1:mmax) / rab(1:mmax,1)
-   call smooth(ff2, mmax, 15) ! run 10 iterations of smoothing?
+   call smooth(ff2, mmax, 15) ! run 15 iterations of smoothing?
 
    ! determine a good rchrg = xcccrc
    do ir = mmax, 1, -1
@@ -273,13 +275,12 @@ subroutine upf2abinit (filpsp, znucl, zion, pspxc, lmax_, lloc, mmax, &
    ABI_FREE(ff2)
  end if ! nlcc present
 
-end subroutine upf2abinit
+end subroutine upf1_to_abinit
 !!***
 
-
-!!****f* ABINIT/new_upf2abinit
+!!****f* ABINIT/upf2_to_abinit
 !! NAME
-!! new_upf2abinit
+!! upf2_to_abinit
 !!
 !! FUNCTION
 !!  This routine wraps a call to a PWSCF module, which reads in
@@ -325,13 +326,14 @@ end subroutine upf2abinit
 !!
 !! SOURCE
 
-subroutine new_upf2abinit(filpsp, znucl, zion, pspxc, lmax_, lloc, mmax, &
+subroutine upf2_to_abinit(filpsp, znucl, zion, pspxc, lmax_, lloc, mmax, &
                           psps, epsatm, xcccrc, indlmn, ekb, ffspl, nproj_l, vlspl, xccc1d, nctab, maxrad)
 
  use pseudo_types,        only : pseudo_upf, deallocate_pseudo_upf !, pseudo_config
  use read_upf_new_module, only : read_upf_new
  use defs_datatypes,      only : nctab_t
  use m_psps,              only : nctab_eval_tvalespl
+ use m_pspheads,          only : upfdft_to_ixc
 
 !Arguments -------------------------------
  character(len=fnlen), intent(in) :: filpsp
@@ -349,16 +351,16 @@ subroutine new_upf2abinit(filpsp, znucl, zion, pspxc, lmax_, lloc, mmax, &
  real(dp), intent(inout) :: xccc1d(psps%n1xccc,6)
 
 !Local variables -------------------------
- integer :: ierr, ir, irad, iproj, ll, iunit
- real(dp) :: yp1, ypn
- real(dp) :: amesh, damesh !,fchrg,rchrg,yp1,ypn
+ integer :: ierr, ir, irad, iproj, ll, smooth_niter
+ real(dp) :: yp1, ypn, amesh, damesh
  character(len=500) :: msg
+ logical :: linear_mesh
  type(pseudo_upf) :: upf
  type(atomdata_t) :: atom
  type(pawrad_type) :: mesh
- logical, allocatable :: found_l(:)
- real(dp), allocatable :: work_space(:),work_spl(:)
- real(dp), allocatable :: ff(:), ff1(:), ff2(:), rad_cc(:), proj(:,:)
+ logical,allocatable :: found_l(:)
+ real(dp),allocatable :: work_space(:),work_spl(:)
+ real(dp),allocatable :: ff(:), ff1(:), ff2(:), rad_cc(:), proj(:,:)
 
 ! *********************************************************************
 
@@ -366,34 +368,45 @@ subroutine new_upf2abinit(filpsp, znucl, zion, pspxc, lmax_, lloc, mmax, &
  call read_upf_new(filpsp, upf, ierr)
  ABI_CHECK(ierr == 0, sjoin("read_upf_new returned ierr:", itoa(ierr)))
 
- ! convert to Ha units
+ ABI_CHECK(upfdft_to_ixc(upf%dft, pspxc, msg) == 0, msg)
+ lmax_ = upf%lmax
+
+ ! convert from Rydberg to Ha units
  upf%vloc = half * upf%vloc
- ! betar = half * betar ! ???
  upf%dion = half * upf%dion
 
- ! copy over to abinit internal arrays and vars
- call upfxc2abi(upf%dft, pspxc)
- lmax_ = upf%lmax
+ nproj_l = 0
+ do iproj=1,upf%nbeta
+   ll = upf%lll(iproj)
+   nproj_l(ll+1) = nproj_l(ll+1) + 1
+ end do
+
+ !write(msg, '(a,5i6)' ) '     nproj',nproj_l(1:lmax_+1)
+ !call wrtout([std_out, ab_out], msg)
+
+ ! shape = dimekb  vs. shape = n_proj
+ do ll=1,upf%nbeta
+   ekb(ll) = upf%dion(ll,ll)
+ end do
 
  ! Check if the local component is one of the angular momentum channels
  ! effectively if one of the ll is absent from the NL projectors
  ABI_MALLOC(found_l, (0:lmax_))
  found_l = .true.
- do ll = 0, lmax_
+ do ll=0, lmax_
    if (any(upf%lll(1:upf%nbeta) == ll)) found_l(ll) = .false.
  end do
 
  if (count(found_l) /= 1) then
    lloc = -1
  else
-   do ll = 0, lmax_
+   do ll=0,lmax_
      if (found_l(ll)) then
        lloc = ll
        exit
      end if
    end do
  end if
-
  ABI_FREE(found_l)
  !FIXME: do something about lloc == -1
 
@@ -401,37 +414,40 @@ subroutine new_upf2abinit(filpsp, znucl, zion, pspxc, lmax_, lloc, mmax, &
  znucl = atom%znucl
  zion = upf%zp
  mmax = upf%mesh
+ ! FIXME Temporary hack
+ !mmax = 300  ! H
+ !mmax = 600  ! Si
  maxrad = upf%rmax
+ !maxrad = upf%r(mmax)
 
  ! Check that rad grid is linear starting at zero
+ linear_mesh = .True.
  amesh = upf%r(2) - upf%r(1); damesh = zero
  do irad=2,mmax-1
    damesh = max(damesh, abs(upf%r(irad)+amesh-upf%r(irad+1)))
  end do
+ linear_mesh = damesh < tol8
 
- if (damesh > tol8 .or. abs(upf%r(1)) > tol16) then
+ if (.not. linear_mesh .or. abs(upf%r(1)) > tol16) then
    write(msg,'(3a)')&
    'Assuming pseudized valence charge given on linear radial mesh starting at zero.',ch10,&
    'Action: check your pseudopotential file.'
    ABI_ERROR(msg)
  end if
 
-#if 1
- call psp11lo(upf%rab(1:mmax), epsatm, mmax, psps%mqgrid_vl, psps%qgrid_vl,&
-              vlspl(:,1), upf%r(1:mmax), upf%vloc(1:mmax), yp1, ypn, zion)
-#else
- call psp8lo(amesh, epsatm, mmax, psps%mqgrid_vl, psps%qgrid_vl, &
-             vlspl(:,1), upf%r(1:mmax), upf%vloc(1:mmax), yp1, ypn, zion)
-#endif
- ! This to reproduce psp8 results
- !epsatm = 7.86468782_dp  ! Si Pbe-sol
- !epsatm = 0.35491505_dp  ! H Lda
+ if (linear_mesh) then
+   call psp8lo(amesh, epsatm, mmax, psps%mqgrid_vl, psps%qgrid_vl, &
+               vlspl(:,1), upf%r(1:mmax), upf%vloc(1:mmax), yp1, ypn, zion)
+ else
+   call psp11lo(upf%rab(1:mmax), epsatm, mmax, psps%mqgrid_vl, psps%qgrid_vl,&
+                vlspl(:,1), upf%r(1:mmax), upf%vloc(1:mmax), yp1, ypn, zion)
+ end if
 
  ! Fit spline to q^2 V(q) (Numerical Recipes subroutine)
  ABI_MALLOC(work_space, (psps%mqgrid_vl))
  ABI_MALLOC(work_spl, (psps%mqgrid_vl))
 
- call spline(psps%qgrid_vl,vlspl(:,1),psps%mqgrid_vl,yp1,ypn,work_spl)
+ call spline(psps%qgrid_vl, vlspl(:,1), psps%mqgrid_vl, yp1, ypn, work_spl)
 
  vlspl(:,2) = work_spl(:)
  ABI_FREE(work_space)
@@ -449,23 +465,9 @@ subroutine new_upf2abinit(filpsp, znucl, zion, pspxc, lmax_, lloc, mmax, &
 
  ! This to reproduce psp8in version with linear meshes.
  ! Compute Vanderbilt-KB form factors and fit splines
- !call psp8nl(amesh, ffspl, indlmn, lmax_, psps%lmnmax, psps%lnmax, mmax, psps%mqgrid_ff, psps%qgrid_ff, upf%r, proj)
+ call psp8nl(amesh, ffspl, indlmn, lmax_, psps%lmnmax, psps%lnmax, mmax, psps%mqgrid_ff, psps%qgrid_ff, upf%r, proj)
 
  ABI_FREE(proj)
-
- nproj_l = 0
- do iproj = 1, upf%nbeta
-   ll = upf%lll(iproj)
-   nproj_l(ll+1) = nproj_l(ll+1) + 1
- end do
-
- !write(msg, '(a,5i6)' ) '     nproj',nproj_l(1:lmax_+1)
- !call wrtout([std_out, ab_out], msg)
-
- ! shape = dimekb  vs. shape = n_proj
- do ll = 1, upf%nbeta
-   ekb(ll) = upf%dion(ll,ll)
- end do
 
  xcccrc = zero; xccc1d = zero
 
@@ -477,30 +479,35 @@ subroutine new_upf2abinit(filpsp, znucl, zion, pspxc, lmax_, lloc, mmax, &
    ABI_MALLOC(ff1, (mmax))
    ABI_MALLOC(ff2, (mmax))
    ff(1:mmax) = upf%rho_atc(1:mmax) ! model core charge without derivative factor
+   smooth_niter = 15 ! run 15 iterations of smoothing?
+   smooth_niter = 0
 
    ff1 = zero
-   call nderiv(one,ff,ff1,mmax,1) ! first derivative
+   call nderiv(one, ff, ff1, mmax, 1) ! first derivative
    ff1(1:mmax) = ff1(1:mmax) / upf%rab(1:mmax)
-   call smooth(ff1, mmax, 15) ! run 15 iterations of smoothing
+   call smooth(ff1, mmax, smooth_niter)
 
    ff2 = zero
    call nderiv(one, ff1, ff2, mmax, 1) ! second derivative
    ff2(1:mmax) = ff2(1:mmax) / upf%rab(1:mmax)
-   call smooth(ff2, mmax, 15) ! run 10 iterations of smoothing?
+   call smooth(ff2, mmax, smooth_niter)
 
    ! determine a good rchrg = xcccrc
    do ir = mmax, 1, -1
-     if (abs(ff(ir)) > 1.e-6) then
+     !if (abs(ff(ir)) > 1.e-6) then
+     if (abs(ff(ir)) > tol20) then
        xcccrc = upf%r(ir)
        exit
      end if
    end do
+   !xcccrc = upf%r(mmax)
 
    ABI_MALLOC(rad_cc, (mmax))
    rad_cc = upf%r(1:mmax)
    rad_cc(1) = zero ! force this so that the core charge covers whole spline interval.
 
-   call cc_derivatives(rad_cc,ff,ff1,ff2,mmax,psps%n1xccc,xcccrc,xccc1d)
+   call cc_derivatives(rad_cc, ff, ff1, ff2, mmax, psps%n1xccc, xcccrc, xccc1d)
+   !call psp8cc(mmax, psps%n1xccc, xcccrc, xccc1d)
 
    ABI_FREE(rad_cc)
    ABI_FREE(ff)
@@ -533,7 +540,7 @@ subroutine new_upf2abinit(filpsp, znucl, zion, pspxc, lmax_, lloc, mmax, &
 
  call deallocate_pseudo_upf(upf)
 
-end subroutine new_upf2abinit
+end subroutine upf2_to_abinit
 !!***
 
 !!****f* m_upf2abinit/psp11nl
@@ -551,10 +558,10 @@ end subroutine new_upf2abinit
 !!  lmnmax= maximum index for all projectors, dimension of indlmn
 !!  mqgrid=number of grid points for q grid
 !!  n_proj = total number of NL projectors read in
-!!  proj = projector data times r, on a real space grid
-!!  proj_l = ang mom channel for each projector
-!!  proj_np = max number of points used for each projector
-!!  qgrid(mqgrid)=values at which form factors are returned
+!!  proj = projector functions times r, on a real space grid
+!!  proj_l = angular momentum channel for each projector
+!!  proj_nr = max number of r-points used for each projector
+!!  qgrid(mqgrid)=q-values at which form factors are returned
 !!  r(mmax)=radial grid values
 !!  drdi=derivative of grid point wrt index
 !!  useylm = input to use m dependency of NL part, or only Legendre polynomials
@@ -564,19 +571,17 @@ end subroutine new_upf2abinit
 !!   second derivative from spline fit for each angular momentum
 !!  indlmn = indexing of each projector, for n, l, m, s, ln, lmn (see pspatm.F90)
 !!
-!! NOTES
-!!
 !! SOURCE
 
 subroutine psp11nl(ffspl,indlmn, mmax, lnmax, lmnmax, mqgrid, n_proj, &
-                   proj, proj_l, proj_np, qgrid, r, drdi, useylm)
+                   proj, proj_l, proj_nr, qgrid, r, drdi, useylm)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mmax, lnmax, lmnmax, mqgrid, useylm, n_proj
 !arrays
  integer, intent(in) :: proj_l(n_proj)
- integer, intent(in) :: proj_np(n_proj)
+ integer, intent(in) :: proj_nr(n_proj)
  integer, intent(out) :: indlmn(6,lmnmax)
  real(dp),intent(in) :: r(mmax)
  real(dp),intent(in) :: drdi(mmax)
@@ -586,9 +591,8 @@ subroutine psp11nl(ffspl,indlmn, mmax, lnmax, lmnmax, mqgrid, n_proj, &
 
 !Local variables-------------------------------
 !scalars
- integer :: iproj, np, ll, llold, ipsang, i_indlmn
- integer :: iproj_1l, ir, iq, mm
- integer :: bessorder
+ integer :: iproj, nr, ll, llold, ipsang, i_indlmn
+ integer :: iproj_1l, ir, iq, mm, bessorder
  real(dp) :: res, arg, besfact, dummy, dummy2
  real(dp), allocatable :: work(:)
  character(len=500) :: msg
@@ -603,14 +607,14 @@ subroutine psp11nl(ffspl,indlmn, mmax, lnmax, lmnmax, mqgrid, n_proj, &
  iproj_1l = 1
 
  ! loop over all projectors
- do iproj = 1, n_proj
+ do iproj=1,n_proj
    if (iproj > lmnmax) then
      write(msg,'(a,2i0)') ' Too many projectors found. n_proj, lmnmax = ',n_proj, lmnmax
      ABI_ERROR(msg)
    end if
 
-   np = proj_np(iproj)
-   ABI_MALLOC(work,(np))
+   nr = proj_nr(iproj)
+   ABI_MALLOC(work, (nr))
    ll = proj_l(iproj)
    if (ll < llold) then
      ABI_ERROR('UPF projectors are not in order of increasing ll')
@@ -622,7 +626,7 @@ subroutine psp11nl(ffspl,indlmn, mmax, lnmax, lmnmax, mqgrid, n_proj, &
    end if
 
    ! determine indlmn for this projector (keep in UPF order and enforce that they are in increasing ll)
-   do mm = 1, 2*ll*useylm+1
+   do mm=1,2*ll*useylm+1
      i_indlmn = i_indlmn + 1
      indlmn(1,i_indlmn) = ll
      indlmn(2,i_indlmn) = mm-ll*useylm-1
@@ -633,24 +637,24 @@ subroutine psp11nl(ffspl,indlmn, mmax, lnmax, lmnmax, mqgrid, n_proj, &
    end do
 
    ! FT projectors to reciprocal space q
-   do iq = 1, mqgrid
-     arg = two_pi*qgrid(iq)
+   do iq=1,mqgrid
+     arg = two_pi * qgrid(iq)
 
      ! FIXME: add semianalytic form for integral from 0 to first point
-     do ir = 1, np
+     do ir=1,nr
        call jbessel(besfact, dummy, dummy2, ll, bessorder, arg*r(ir))
        ! besfact = sin(arg*r(ir))
        work(ir) = drdi(ir) * besfact * proj(ir, iproj) * r(ir) !* r(ir)
      end do
-     call ctrap (np, work, one, res)
+     call ctrap (nr, work, one, res)
      ffspl(iq, 1, iproj) = res
    end do
    ABI_FREE(work)
  end do ! iproj
 
  ! add derivative of ffspl(:,1,:) for spline interpolation later
- ABI_MALLOC(work,(mqgrid))
- do ipsang = 1, lnmax
+ ABI_MALLOC(work, (mqgrid))
+ do ipsang=1,lnmax
    call spline(qgrid,ffspl(:,1,ipsang),mqgrid,zero,zero,ffspl(:,2,ipsang))
  end do
  ABI_FREE(work)
@@ -666,7 +670,7 @@ end subroutine psp11nl
 !! Compute sine transform to transform from V(r) to q^2 V(q).
 !! Computes integrals on logarithmic grid using related uniform
 !! grid in exponent and corrected trapezoidal integration.
-!! Generalized from psp5lo for non log grids using dr/di
+!! Generalized from psp5lo for non-log grids using dr/di weights.
 !!
 !! INPUTS
 !!  drdi=derivative of radial grid wrt index
