@@ -747,7 +747,7 @@ subroutine psp5nl(al,ekb,ffspl,lmax,mmax,mpsang,mqgrid,qgrid,rad,vloc,vpspll,wfl
 !    ENDDEBUG
 
 !    If dvms is not 0 for any given angular momentum l,
-!    compute Xavier Gonze s definition of the Kleinman-Bylander
+!    compute Xavier Gonze's definition of the Kleinman-Bylander
 !    energy E_KB = dvms/eta.  In this case also renormalize
 !    the projection operator to u_KB(r)=$u_l(r)*dV(r)/\sqrt{dvms}$.
 !    This means dvwf gets multiplied by the normalization factor
@@ -1083,33 +1083,28 @@ subroutine psp5nl(al,ekb,ffspl,lmax,mmax,mpsang,mqgrid,qgrid,rad,vloc,vpspll,wfl
  ABI_FREE(work3)
  ABI_FREE(work4)
 
- contains
+contains
 
-   function  bes0_psp5(arg)
+function  bes0_psp5(arg)
+ real(dp) :: bes0_psp5,arg
+ bes0_psp5=sin(arg)/arg
+end function bes0_psp5
 
-   real(dp) :: bes0_psp5,arg
-   bes0_psp5=sin(arg)/arg
- end function bes0_psp5
+function bes1_psp5(arg)
+  real(dp) :: bes1_psp5,arg
+  bes1_psp5=(sin(arg)-arg*cos(arg))/arg**2
+end function bes1_psp5
 
-   function bes1_psp5(arg)
+function bes2_psp5(arg)
+  real(dp) :: bes2_psp5,arg
+  bes2_psp5=( (3.0d0-arg**2)*sin(arg)- 3.0d0*arg*cos(arg))/arg**3
+end function bes2_psp5
 
-   real(dp) :: bes1_psp5,arg
-   bes1_psp5=(sin(arg)-arg*cos(arg))/arg**2
- end function bes1_psp5
-
-   function bes2_psp5(arg)
-
-   real(dp) :: bes2_psp5,arg
-   bes2_psp5=( (3.0d0-arg**2)*sin(arg)-&
-&   3.0d0*arg*cos(arg) )      /arg**3
- end function bes2_psp5
-
-   function bes3_psp5(arg)
-
-   real(dp) :: bes3_psp5, arg
-   bes3_psp5=(15.d0*sin(arg)-15.d0*arg*cos(arg) &
-&   -6.d0*arg**2*sin(arg)+arg**3*cos(arg) )/arg**4
- end function bes3_psp5
+function bes3_psp5(arg)
+  real(dp) :: bes3_psp5, arg
+  bes3_psp5=(15.d0*sin(arg)-15.d0*arg*cos(arg) &
+              -6.d0*arg**2*sin(arg)+arg**3*cos(arg) )/arg**4
+end function bes3_psp5
 
 end subroutine psp5nl
 !!***
@@ -1494,7 +1489,7 @@ end subroutine psp8nl
 !!
 !! FUNCTION
 !! subroutine to spline the core charge and get derivatives
-!!   extracted from previous version of psp6cc_drh
+!! extracted from previous version of psp6cc_drh
 !! input on log grid, and splined to regular grid between 0 and rchrg
 !!
 !! INPUTS
@@ -1505,7 +1500,6 @@ end subroutine psp8nl
 !!  ff=core charge at points in rad
 !!  ff1=first derivative of ff on log grid
 !!  ff2=second derivative of ff on log grid
-!!
 !!
 !! OUTPUT
 !!  xccc1d(n1xccc,6)= 1D core charge function and its five first derivatives
@@ -1534,63 +1528,60 @@ subroutine cc_derivatives(rad,ff,ff1,ff2,mmax,n1xccc,rchrg,xccc1d)
  real(dp),allocatable :: gg3(:),gg4(:),work(:),xx(:)
 
 ! *************************************************************************
- ABI_MALLOC(ff3,(mmax))
- ABI_MALLOC(ff4,(mmax))
- ABI_MALLOC(gg,(n1xccc))
- ABI_MALLOC(gg1,(n1xccc))
- ABI_MALLOC(gg2,(n1xccc))
- ABI_MALLOC(gg3,(n1xccc))
- ABI_MALLOC(gg4,(n1xccc))
- ABI_MALLOC(work,(mmax))
- ABI_MALLOC(xx,(n1xccc))
 
  !write(std_out,*) 'cc_derivatives : enter'
 
-!calculate third derivative ff3 on logarithmic grid
+ ABI_MALLOC(ff3, (mmax))
+ ABI_MALLOC(ff4, (mmax))
+ ABI_MALLOC(gg, (n1xccc))
+ ABI_MALLOC(gg1, (n1xccc))
+ ABI_MALLOC(gg2, (n1xccc))
+ ABI_MALLOC(gg3, (n1xccc))
+ ABI_MALLOC(gg4, (n1xccc))
+ ABI_MALLOC(work, (mmax))
+ ABI_MALLOC(xx, (n1xccc))
+
+ ! calculate third derivative ff3 on logarithmic grid
  der1=ff2(1)
  dern=ff2(mmax)
  call spline(rad,ff1,mmax,der1,dern,ff3)
 
-!calculate fourth derivative ff4 on logarithmic grid
+ ! calculate fourth derivative ff4 on logarithmic grid
  der1=0.d0
  dern=0.d0
  call spline(rad,ff2,mmax,der1,dern,ff4)
 
-!generate uniform mesh xx in the box cut by rchrg:
-
+ ! generate uniform mesh xx in the box cut by rchrg:
  do i1xccc=1,n1xccc
    xx(i1xccc)=(i1xccc-1)* rchrg/dble(n1xccc-1)
  end do
-!
-!now interpolate core charge and derivatives on the uniform grid
-!
-!core charge, input=ff,  output=gg
+
+ !now interpolate core charge and derivatives on the uniform grid
+ !core charge, input=ff,  output=gg
  call splint(mmax,rad,ff,ff2,n1xccc,xx,gg)
 
-!first derivative input=ff1, output=gg1
+ ! first derivative input=ff1, output=gg1
  call splint(mmax,rad,ff1,ff3,n1xccc,xx,gg1)
 
-!normalize gg1
-!gg1(:)=gg1(:)*rchrg
+ !normalize gg1
+ !gg1(:)=gg1(:)*rchrg
 
-!second derivative input=ff2, output=gg2
+ ! second derivative input=ff2, output=gg2
  call splint(mmax,rad,ff2,ff4,n1xccc,xx,gg2)
 
-!normalize gg2
-!gg2(:)=gg2(:)*rchrg**2
+ !normalize gg2
+ !gg2(:)=gg2(:)*rchrg**2
 
-!reallocate work otherwise the calls to spline crash (n1xccc /= mmax)
+ ! reallocate work otherwise the calls to spline crash (n1xccc /= mmax)
  ABI_FREE(work)
- ABI_MALLOC(work,(n1xccc))
+ ABI_MALLOC(work, (n1xccc))
 
-!recalculate 3rd derivative consistent with spline fit to first derivative
-!on linear grid
+!recalculate 3rd derivative consistent with spline fit to first derivative on linear grid
  der1=gg2(1)
  dern=gg2(n1xccc)
  call spline(xx,gg1,n1xccc,der1,dern,gg3)
 
-!calculate 4th derivative consistent with spline fit to second derivative
-!on linear grid
+!calculate 4th derivative consistent with spline fit to second derivative on linear grid
  der1=0.0d0
  dern=0.0d0
  call spline(xx,gg2,n1xccc,der1,dern,gg4)
@@ -1628,10 +1619,7 @@ subroutine cc_derivatives(rad,ff,ff1,ff2,mmax,n1xccc,rchrg,xccc1d)
  xccc1d(:,3)=gg2(:)*rchrg**2
  xccc1d(:,4)=gg3(:)*rchrg**3
  xccc1d(:,5)=gg4(:)*rchrg**4
-!***drh test
 !write(std_out,'(a,2i6)') 'drh:psp6cc_drh - mmax,n1xccc',mmax,n1xccc
-!***end drh test
-
 
 !DEBUG
 !note: the normalization condition is the following:

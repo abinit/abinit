@@ -51,7 +51,7 @@ module m_pspini
  use m_psp6,       only : psp6in
  use m_psp8,       only : psp8in
  use m_psp9,       only : psp9in
- use m_upf2abinit, only : upf2abinit, new_upf2abinit
+ use m_upf2abinit, only : upf1_to_abinit, upf2_to_abinit
  use m_psp_hgh,    only : psp2in, psp3in, psp10in
  use m_wvl_descr_psp,  only : wvl_descr_psp_fill
 
@@ -134,7 +134,6 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
  type(datafiles_type),intent(in) :: dtfil
 !arrays
  real(dp),intent(in) :: rprimd(3,3)
-!no_abirules
  type(pseudopotential_type), target,intent(inout) :: psps
  type(pawrad_type), intent(inout) :: pawrad(psps%ntypat*psps%usepaw)
  type(pawtab_type), intent(inout) :: pawtab(psps%ntypat*psps%usepaw)
@@ -190,9 +189,8 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
    ABI_BUG("npsp>npspmax in pspini !")
  end if
 
-!Size of grids for atomic data represented in reciprocal space
-
-!Set up q grids, make qmax 20% larger than largest expected:
+! Set up q grids for atomic data represented in reciprocal space
+! make qmax 20% larger than largest expected:
  qmax=1.2d0 * sqrt(gsqcut)
 !ffnl is always computed in reciprocal space
  dq=qmax/(one*(psps%mqgrid_ff-1))
@@ -330,10 +328,10 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
    end if
 
 !  Read atomic pseudopotential data and get transforms
-!  for each atom type : two cases, alchemy or not.
+!  for each atom type: two cases, alchemy or not.
 
-!  No alchemical pseudoatom, in all datasets, npsp=ntypat
    if(mtypalch==0)then
+     !  No alchemical pseudoatom, in all datasets, npsp=ntypat
 
      do ipsp=1,npsp
 
@@ -347,8 +345,8 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
        write(msg, '(a,i4,a,t38,a)' )'- pspini: atom type',ipsp,'  psp file is',trim(psps%filpsp(ipsp))
        call wrtout([std_out, ab_out], msg)
 
-!      Read atomic psp V(r) and wf(r) to get local and nonlocal psp:
-!      Cannot use the same call in case of bound checking, because of pawrad/pawtab
+       ! Read atomic psp V(r) and wf(r) to get local and nonlocal psp:
+       ! Cannot use the same call in case of bound checking, because of pawrad/pawtab
        if(psps%usepaw==0)then
          call pspatm(dq,dtset,dtfil,ekb,epsatm(ipsp),ffspl,indlmn,ipsp,&
            pawrad_dum,pawtab_dum,psps,vlspl,dvlspl,xcccrc,xccc1d,psps%nctab(ipsp))
@@ -371,7 +369,8 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
        if (.not.psps%vlspl_recipSpace) psps%dvlspl(:, :, ipsp) = dvlspl(:, :)
      end do ! ipsp
 
-   else ! if mtypalch/=0
+   else
+     ! mtypalch/=0
 
      npspalch=psps%npspalch
      ntyppure=npsp-npspalch
@@ -817,9 +816,10 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
  integer :: ii,il,ilmn,iln,iln0,lloc,lmax,me,mmax
  integer :: paral_mode,pspcod,pspdat,pspxc,useupf,usexml,xmlpaw,unt
  real(dp) :: maxrad,qchrg,r2well,zion,znucl
+ logical,parameter :: nc_debug = .False.
+ !logical,parameter :: nc_debug = .True.
  character(len=500) :: msg,errmsg
- character(len=fnlen) :: title
- character(len=fnlen) :: filnam
+ character(len=fnlen) :: title, filnam
  type(pawpsp_header_type):: pawpsp_header
  type(pspheader_type) :: pspheads_tmp
 !arrays
@@ -962,17 +962,23 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
        ABI_ERROR("UPF format not allowed with PAW (USPP part not read yet)")
      end if
 
-     r2well = 0
+     r2well = 0; qchrg=zero
+
      ! should initialize znucl,zion,pspxc,lmax,lloc,mmax
      if (useupf == 1) then
        pspcod = 11
-       call upf2abinit(psps%filpsp(ipsp), znucl, zion, pspxc, lmax, lloc, mmax, &
+       call upf1_to_abinit(psps%filpsp(ipsp), znucl, zion, pspxc, lmax, lloc, mmax, &
                        psps, epsatm, xcccrc, indlmn, ekb, ffspl, nproj, vlspl, xccc1d)
      else
        pspcod = 12
-       call new_upf2abinit(psps%filpsp(ipsp), znucl, zion, pspxc, lmax, lloc, mmax, &
+       call upf2_to_abinit(psps%filpsp(ipsp), znucl, zion, pspxc, lmax, lloc, mmax, &
                            psps, epsatm, xcccrc, indlmn, ekb, ffspl, nproj, vlspl, xccc1d, nctab, maxrad)
-       !ABI_ERROR("UPF2")
+
+       if (nc_debug) then
+         call psp_dump_outputs("UPF2", pspcod, psps%lmnmax, psps%lnmax, psps%mpssoang, &
+           psps%mqgrid_ff, psps%n1xccc, mmax, maxrad, epsatm, qchrg, xcccrc, nctab, &
+           indlmn, nproj, ekb, ffspl, vlspl, xccc1d)
+       end if
      end if
 
    else
@@ -1082,7 +1088,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
    rcpsp(:)=zero;rms(:)=zero
    ekb1(:)=zero ;ekb2(:)=zero
    epspsp(:)=zero
-   qchrg=0
+   qchrg=zero
 
 !  ----------------------------------------------------------------------
    if (pspcod==1 .or. pspcod==4)then
@@ -1134,29 +1140,29 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
        psps%mpsang,psps%mpssoang,psps%mqgrid_ff,psps%mqgrid_vl,nproj,psps%n1xccc,psps%pspso(ipsp),&
        qchrg,psps%qgrid_ff,psps%qgrid_vl,psps%useylm,vlspl,xcccrc,xccc1d,zion,psps%znuclpsp(ipsp),nctab,maxrad)
 
-#if defined DEV_YP_DEBUG_PSP
-     call psp_dump_outputs("DBG",pspcod,psps%lmnmax,psps%lnmax,psps%mpssoang, &
-&     psps%mqgrid_ff,psps%n1xccc,mmax,maxrad,epsatm,qchrg,xcccrc,nctab, &
-&     indlmn,nproj,ekb,ffspl,vlspl,xccc1d)
-#endif
+     if (nc_debug) then
+       call psp_dump_outputs("PSP8",pspcod,psps%lmnmax,psps%lnmax,psps%mpssoang, &
+         psps%mqgrid_ff,psps%n1xccc,mmax,maxrad,epsatm,qchrg,xcccrc,nctab, &
+         indlmn,nproj,ekb,ffspl,vlspl,xccc1d)
+     end if
 
    else if (pspcod==9)then
 
 #if defined HAVE_LIBPSML
      call psp9in(psps%filpsp(ipsp),ekb,epsatm,ffspl,indlmn,lloc,lmax,psps%lmnmax,psps%lnmax,mmax,&
-&     psps%mpsang,psps%mpssoang,psps%mqgrid_ff,psps%mqgrid_vl,nproj,psps%n1xccc, &
-&     psps%pspso(ipsp),qchrg,psps%qgrid_ff,psps%qgrid_vl,psps%useylm,vlspl,&
-&     xcccrc,xccc1d,zion,psps%znuclpsp(ipsp),nctab,maxrad)
+       psps%mpsang,psps%mpssoang,psps%mqgrid_ff,psps%mqgrid_vl,nproj,psps%n1xccc, &
+       psps%pspso(ipsp),qchrg,psps%qgrid_ff,psps%qgrid_vl,psps%useylm,vlspl,&
+       xcccrc,xccc1d,zion,psps%znuclpsp(ipsp),nctab,maxrad)
 
-#if defined DEV_YP_DEBUG_PSP
-     call psp_dump_outputs("DBG",pspcod,psps%lmnmax,psps%lnmax,psps%mpssoang, &
-&     psps%mqgrid_ff,psps%n1xccc,mmax,maxrad,epsatm,qchrg,xcccrc,nctab, &
-&     indlmn,nproj,ekb,ffspl,vlspl,xccc1d)
-#endif
+     if (nc_debug) then
+       call psp_dump_outputs("PSML",pspcod,psps%lmnmax,psps%lnmax,psps%mpssoang, &
+        psps%mqgrid_ff,psps%n1xccc,mmax,maxrad,epsatm,qchrg,xcccrc,nctab, &
+        indlmn,nproj,ekb,ffspl,vlspl,xccc1d)
+     end if
 #else
      write(msg,'(2a)')  &
        'ABINIT is not compiled with XML support for reading this type of pseudopotential ', trim(psps%filpsp(ipsp))
-     ABI_BUG(msg)
+     ABI_ERROR(msg)
 #endif
 
    else if (pspcod==10)then
@@ -1229,7 +1235,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
    end if
 
    ! NC: Evalute spline-fit of the model core charge in reciprocal space.
-   ! TODO: Be careful, because we will be using the PAW part in which tcore is always available!
+   ! TODO: Be careful, because we will be using the PAW routines in which tcore is always available!
    ! Should add a test with 2 NC pseudos: one with NLCC and the other without!
    if (psps%usepaw == 0) then
      call nctab_eval_tcorespl(nctab, psps%n1xccc, xcccrc, xccc1d, psps%mqgrid_vl, psps%qgrid_vl)
@@ -1281,7 +1287,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
      close(unt)
    end if
 
- end if !me=0
+ end if ! me=0
 
  if (paral_mode==1) then
    call timab(48,1,tsec)
@@ -1347,22 +1353,13 @@ end subroutine pspatm
 !! psp_dump_outputs
 !!
 !! FUNCTION
-!! (To be described ...)
-!!
-!! INPUTS
-!! (to be filled)
-!!
-!! OUTPUT
-!! (to be filled)
-!!
-!! SIDE EFFECTS
-!! (to be filled)
+!! Debugging routines used to dumo PSP data in Yaml format.
 !!
 !! SOURCE
 
 subroutine psp_dump_outputs(pfx,pspcod,lmnmax,lnmax,mpssoang, &
-&      mqgrid,n1xccc,mmax,maxrad,epsatm,qchrg,xcccrc,nctab, &
-&      indlmn,nproj,ekb,ffspl,vlspl,xccc1d)
+                            mqgrid,n1xccc,mmax,maxrad,epsatm,qchrg,xcccrc,nctab, &
+                            indlmn,nproj,ekb,ffspl,vlspl,xccc1d)
 
 !Arguments ------------------------------------
 !scalars

@@ -175,7 +175,7 @@ subroutine psp8in(ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 
 ! The integer labeled "extension switch" on line 6
 ! of the *.psp8 file will be set to 1 (non- or scalar-relativistic)
-! or 3 (relativistic) to signal this to Abinit that the file contains the pseudo valence charge.
+! or 3 (relativistic) to signal to Abinit that the file contains the pseudo valence charge.
 
  has_tvale = .False.
  read (tmp_unit,*, err=10, iomsg=errmsg) extension_switch
@@ -490,7 +490,7 @@ end subroutine psp8in
 !!
 !! INPUTS
 !!  mmax=maximum number of points in real space grid in the psp file
-!!  n1xccc=dimension of xccc1d ; 0 if no XC core correction is used
+!!  n1xccc=dimension of xccc1d; 0 if no XC core correction is used
 !!  rchrg=cut-off radius for the core density
 !!
 !! OUTPUT

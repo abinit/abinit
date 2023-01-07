@@ -25,10 +25,6 @@ MODULE  read_upf_new_module
   use defs_basis, only : dp
   USE pseudo_types, ONLY: pseudo_upf, pseudo_config
 
-
-
-
-
   !
   LOGICAL :: v2
   !! true if UPF v.2 version, false if new UPF with xml schema
@@ -330,7 +326,7 @@ CONTAINS
     TYPE(pseudo_upf),INTENT(INOUT) :: upf ! the pseudo data
     !
     LOGICAL :: isnull
-    INTEGER :: nb, ind, l, l_, ln, lm, mb, nmb
+    INTEGER :: nb, l, l_, ln, lm, mb, nmb !ind,
     CHARACTER(LEN=15) :: tag
     REAL(dp), ALLOCATABLE :: aux(:)
     !
@@ -510,7 +506,7 @@ CONTAINS
     IMPLICIT NONE
     TYPE(pseudo_upf),INTENT(INOUT) :: upf ! the pseudo data
     !
-    INTEGER :: nw, ind, l
+    INTEGER :: nw, ind !, l
     CHARACTER(LEN=8) :: tag
     !
     allocate ( upf%chi(1:upf%mesh,upf%nwfc) )
@@ -868,6 +864,7 @@ SUBROUTINE upf_error( calling_routine, message, ierr )
   INTEGER,          INTENT(IN) :: ierr
 
   ABI_ERROR(message)
+  if (.False.) write(*,*)trim(calling_routine), ierr
 
 END SUBROUTINE upf_error
 

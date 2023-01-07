@@ -6,6 +6,13 @@
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
 !--------------------------------------------------------
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
 MODULE xmltools
   !--------------------------------------------------------
   !
@@ -558,8 +565,8 @@ CONTAINS
     INTEGER :: ierr
     ! See list of error codes in the header of this file
     !
-    LOGICAL :: have_list, have_vals
-    INTEGER :: i, la, lv, n1a,n2a, n1v, n2v
+    !LOGICAL :: have_list, have_vals
+    INTEGER :: i !, la, lv, n1a,n2a, n1v, n2v
     !
     IF ( LEN_TRIM(name) > maxlength ) THEN
        ierr = 2
@@ -652,7 +659,7 @@ CONTAINS
     !
     character(len=*), intent(in) :: data_in
     character(len=:), allocatable :: data_out
-    character(len=1) :: c
+    !character(len=1) :: c
     integer:: n, i
     !
     n = len_trim(adjustl(data_in))
@@ -701,7 +708,7 @@ CONTAINS
     character(len=:), allocatable :: c
     character(len=30) :: caux
     !
-    integer :: n, m, i
+    !integer :: n, m, i
     ! The format of real numbers can be vastly improved
     ! this is just the simplest solution
     write(caux,*) f
@@ -930,7 +937,7 @@ CONTAINS
     character(len=*), intent(out):: cval
     integer, intent(out), optional :: ierr
     !
-    integer ::  i, j, lt, ll
+    integer ::  i, j, lt !, ll
     character(len=1) :: endtag
     !
     call xmlr_opentag ( tag, ierr )
@@ -938,7 +945,7 @@ CONTAINS
     cval = ''
     if ( eot < 0 ) then
        if ( .not. present(ierr) ) then
-          print *, 'end of file reached, tag not found'
+          write(std_out,*) 'end of file reached, tag not found'
        else
           ierr = 1
        end if
@@ -967,7 +974,7 @@ CONTAINS
              endtag = adjustl( line(j+i+1+lt:) )
              if ( endtag /= '>' ) then
                 if ( .not.present(ierr)) then
-                   print *, 'tag ',trim(tag),' not correctly closed'
+                   write(std_out,*) 'tag ',trim(tag),' not correctly closed'
                 else
                    ierr = 2
                 endif
@@ -993,7 +1000,7 @@ CONTAINS
 10  if ( present(ierr) ) then
        ierr = 1
     else
-       print *, 'end of file reached, tag </'//trim(tag)//'> not found'
+       write(std_out,*) 'end of file reached, tag </'//trim(tag)//'> not found'
     end if
     !
   end subroutine readtag_c
@@ -1024,7 +1031,7 @@ CONTAINS
        read(xmlunit,'(a)', end=10) line
        ll = len_trim(line)
        if ( ll == maxline ) then
-          print *, 'xmlr_opentag: severe error, line too long'
+          write(std_out,*)'xmlr_opentag: severe error, line too long'
           if (present(ierr)) ierr = 3
           return
        end if
@@ -1091,7 +1098,7 @@ CONTAINS
                 if (present(ierr)) ierr = 0
                 nlevel = nlevel+1
                 IF ( nlevel > maxlevel ) THEN
-                   print *, 'xmlr_opentag: severe error, too many levels'
+                   write(std_out,*) 'xmlr_opentag: severe error, too many levels'
                    if (present(ierr)) ierr = 4
                 else
                    open_tags(nlevel) = trim(tag)
@@ -1146,10 +1153,10 @@ CONTAINS
           rewind(xmlunit)
           if ( ntry == 1 ) go to 1
        else
-          print *, 'end of file reached, tag '//trim(tag)//' not found'
+          write(std_out,*) 'end of file reached, tag '//trim(tag)//' not found'
        end if
     else
-       print *, 'xmlr_opentag: severe parsing error'
+       write(std_out,*) 'xmlr_opentag: severe parsing error'
        if ( present(ierr) ) ierr = 2
     end if
     !
@@ -1185,7 +1192,7 @@ CONTAINS
        read(xmlunit,'(a)', end=10) line
        ll = len_trim(line)
        if ( ll == maxline ) then
-          print *, 'Fatal error: line too long'
+          write(std_out,*) 'Fatal error: line too long'
           if (present(ierr)) ierr = 2
           return
        end if
@@ -1256,7 +1263,7 @@ CONTAINS
        !
     end do
     !
-10  print *, 'end of file reached, closing tag not found'
+10  write(std_out,*) 'end of file reached, closing tag not found'
     if ( present(ierr) ) ierr = 1
     !
   end subroutine xmlr_closetag
