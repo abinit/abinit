@@ -335,7 +335,7 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
  !scalars
  integer :: adir,buff_size,choice,cpopt,dimffnl,exchn2n3d,iat,iatom,icg,icmplx,icprj,ider,idir,ierr
  integer :: ikg,ikg1,ikpt,ilm,indx,isppol,istwf_k,iterm,itypat,lmn2max
- integer :: me,mcgk,my_lmax,my_nspinor,nband_k,ngfft1,ngfft2,ngfft3,ngfft4
+ integer :: me,mcgk,mcprjk,my_lmax,my_nspinor,nband_k,ngfft1,ngfft2,ngfft3,ngfft4
  integer :: ngfft5,ngfft6,ngnt,nl1_option,nn,nkpg,npw_k,nproc,spaceComm,with_vectornd
  real(dp) :: arg,ecut_eff,ucvol
  logical :: has_nucdip
@@ -399,12 +399,12 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
 
  ABI_MALLOC(dimlmn,(dtset%natom))
  call pawcprj_getdim(dimlmn,dtset%natom,nattyp,dtset%ntypat,dtset%typat,pawtab,'O')
- ABI_MALLOC(cprj_k,(dtset%natom,dtset%mband*dtset%nspinor))
- call pawcprj_alloc(cprj_k,cprj(1,1)%ncpgr,dimlmn)
- ABI_MALLOC(cprj1_k,(dtset%natom,dtset%mband*dtset%nspinor,3))
- do adir = 1, 3
-   call pawcprj_alloc(cprj1_k(:,:,adir),0,dimlmn)
- end do
+ !ABI_MALLOC(cprj_k,(dtset%natom,dtset%mband*dtset%nspinor))
+ !call pawcprj_alloc(cprj_k,cprj(1,1)%ncpgr,dimlmn)
+ !ABI_MALLOC(cprj1_k,(dtset%natom,dtset%mband*dtset%nspinor,3))
+ !do adir = 1, 3
+ !  call pawcprj_alloc(cprj1_k(:,:,adir),0,dimlmn)
+ !end do
  ABI_MALLOC(cwaveprj,(dtset%natom,dtset%nspinor))
  call pawcprj_alloc(cwaveprj,0,dimlmn)
 
@@ -549,19 +549,26 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
    eig_k(1:nband_k) = eigen0(nband_k*(ikpt-1)+1:nband_k*ikpt)   
    
    ! retrieve cprj_k
+   mcprjk = nband_k*dtset%nspinor
+   ABI_MALLOC(cprj_k,(dtset%natom,mcprjk))
+   call pawcprj_alloc(cprj_k,cprj(1,1)%ncpgr,dimlmn)
    call pawcprj_get(atindx,cprj_k,cprj,dtset%natom,1,icprj,ikpt,0,isppol,dtset%mband,&
      & dtset%mkmem,dtset%natom,nband_k,nband_k,my_nspinor,dtset%nsppol,0)
    
    ! compute P_c|cg1>
    ABI_MALLOC(pcg1_k,(2,mcgk,3))
    call make_pcg1(atindx,cg_k,cg1_k,cprj_k,dimlmn,dtset,gs_hamk,ikpt,isppol,&
-     & mcgk,mpi_enreg,nband_k,npw_k,my_nspinor,pcg1_k)
+     & mcgk,mcprjk,mpi_enreg,nband_k,npw_k,my_nspinor,pcg1_k)
    
    ! compute <p|Pc cg1> cprjs
-   ABI_MALLOC(cwavef,(2,npw_k))
+   ABI_MALLOC(cprj1_k,(dtset%natom,mcprjk,3))
+   do adir = 1, 3
+     call pawcprj_alloc(cprj1_k(:,:,adir),0,dimlmn)
+   end do
    choice = 1
    cpopt = 0
    idir = 0
+   ABI_MALLOC(cwavef,(2,npw_k))
    do nn = 1, nband_k
      do adir = 1, 3
        cwavef(1:2,1:npw_k) = pcg1_k(1:2,(nn-1)*npw_k+1:nn*npw_k,adir)
@@ -588,28 +595,28 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
    ABI_MALLOC(m2_k,(2,nband_k,3))
    
    call orbmag_cc_k(atindx,b1_k,cprj1_k,dimlmn,dtset,eig_k,gs_hamk,ikpt,isppol,m1_k,&
-    & mcgk,mpi_enreg,my_nspinor,nband_k,npw_k,occ_k,pcg1_k,ucvol)
+    & mcgk,mcprjk,mpi_enreg,my_nspinor,nband_k,npw_k,occ_k,pcg1_k,ucvol)
    orbmag_terms(:,:,:,ibcc) = orbmag_terms(:,:,:,ibcc) + b1_k(:,:,:)
    orbmag_terms(:,:,:,imcc) = orbmag_terms(:,:,:,imcc) + m1_k(:,:,:)
 
    call orbmag_vv_k(atindx,b1_k,b2_k,cg_k,cprj_k,dimlmn,dtset,eig_k,gs_hamk,&
-    & ikpt,isppol,m1_k,m2_k,mcgk,mpi_enreg,my_nspinor,nband_k,npw_k,occ_k,pcg1_k,ucvol)
+    & ikpt,isppol,m1_k,m2_k,mcgk,mcprjk,mpi_enreg,my_nspinor,nband_k,npw_k,occ_k,pcg1_k,ucvol)
    orbmag_terms(:,:,:,ibvv1) = orbmag_terms(:,:,:,ibvv1) + b1_k(:,:,:)
    orbmag_terms(:,:,:,ibvv2) = orbmag_terms(:,:,:,ibvv2) + b2_k(:,:,:)
    orbmag_terms(:,:,:,imvv1) = orbmag_terms(:,:,:,imvv1) + m1_k(:,:,:)
    orbmag_terms(:,:,:,imvv2) = orbmag_terms(:,:,:,imvv2) + m2_k(:,:,:)
    
-   call orbmag_nl_k(atindx,cprj_k,dterm,dtset,eig_k,ikpt,m1_k,nband_k,occ_k,pawtab,ucvol)
+   call orbmag_nl_k(atindx,cprj_k,dterm,dtset,eig_k,ikpt,m1_k,mcprjk,nband_k,occ_k,pawtab,ucvol)
    orbmag_terms(:,:,:,imnl) = orbmag_terms(:,:,:,imnl) + m1_k(:,:,:)
    
-   call make_m1_k(atindx,cprj_k,dterm,dtset,ikpt,m1_k,nband_k,occ_k,pawtab,ucvol)
+   call make_m1_k(atindx,cprj_k,dterm,dtset,ikpt,m1_k,mcprjk,nband_k,occ_k,pawtab,ucvol)
    orbmag_terms(:,:,:,imden1) = orbmag_terms(:,:,:,imden1) + m1_k(:,:,:)
 
    nl1_option = 1 ! LR 
-   call orbmag_nl1_k(atindx,cprj_k,dterm,dtset,ikpt,m1_k,nband_k,nl1_option,occ_k,pawtab,ucvol)
+   call orbmag_nl1_k(atindx,cprj_k,dterm,dtset,ikpt,m1_k,mcprjk,nband_k,nl1_option,occ_k,pawtab,ucvol)
    orbmag_terms(:,:,:,imlr) = orbmag_terms(:,:,:,imlr) + m1_k
    nl1_option = 2 ! BM 
-   call orbmag_nl1_k(atindx,cprj_k,dterm,dtset,ikpt,m1_k,nband_k,nl1_option,occ_k,pawtab,ucvol)
+   call orbmag_nl1_k(atindx,cprj_k,dterm,dtset,ikpt,m1_k,mcprjk,nband_k,nl1_option,occ_k,pawtab,ucvol)
    orbmag_terms(:,:,:,imbm) = orbmag_terms(:,:,:,imbm) + m1_k
    
    ABI_FREE(b1_k)
@@ -617,9 +624,9 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
    ABI_FREE(m1_k)
    ABI_FREE(m2_k)
 
-   icg = icg + npw_k*nband_k
+   icg = icg + mcgk
    ikg = ikg + npw_k
-   icprj = icprj + nband_k
+   icprj = icprj + mcprjk
 
    ABI_FREE(cg_k)
    ABI_FREE(cg1_k)
@@ -631,7 +638,13 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
    ABI_FREE(kpg_k)
    ABI_FREE(ffnl_k)
    ABI_FREE(ph3d)
-   ABI_FREE(phkxred)
+   ABI_FREE(phkxred) 
+   call pawcprj_free(cprj_k)
+   ABI_FREE(cprj_k)
+   do adir = 1, 3
+     call pawcprj_free(cprj1_k(:,:,adir))
+   end do
+   ABI_FREE(cprj1_k)
 
  end do ! end loop over kpts
 
@@ -717,13 +730,7 @@ call orbmag_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace)
  ABI_FREE(nattyp)
 
  ABI_FREE(dimlmn)
- call pawcprj_free(cprj_k)
- ABI_FREE(cprj_k)
- do adir = 1, 3
-   call pawcprj_free(cprj1_k(:,:,adir))
- end do
- ABI_FREE(cprj1_k)
- call pawcprj_free(cwaveprj)
+call pawcprj_free(cwaveprj)
  ABI_FREE(cwaveprj)
 
  call dterm_free(dterm)
@@ -762,11 +769,11 @@ end subroutine orbmag
 !!
 !! SOURCE
 
-subroutine make_m1_k(atindx,cprj_k,dterm,dtset,ikpt,m1_k,nband_k,occ_k,pawtab,ucvol)
+subroutine make_m1_k(atindx,cprj_k,dterm,dtset,ikpt,m1_k,mcprjk,nband_k,occ_k,pawtab,ucvol)
 
   !Arguments ------------------------------------
   !scalars
-  integer,intent(in) :: ikpt,nband_k
+  integer,intent(in) :: ikpt,mcprjk,nband_k
   real(dp),intent(in) :: ucvol
   type(dterm_type),intent(in) :: dterm
   type(dataset_type),intent(in) :: dtset
@@ -775,7 +782,7 @@ subroutine make_m1_k(atindx,cprj_k,dterm,dtset,ikpt,m1_k,nband_k,occ_k,pawtab,uc
   integer,intent(in) :: atindx(dtset%natom)
   real(dp),intent(in) :: occ_k(nband_k)
   real(dp),intent(out) :: m1_k(2,nband_k,3)
-  type(pawcprj_type),intent(in) :: cprj_k(dtset%natom,nband_k)
+  type(pawcprj_type),intent(in) :: cprj_k(dtset%natom,mcprjk)
   type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
 
   !Local variables -------------------------
@@ -828,11 +835,11 @@ end subroutine make_m1_k
 !!
 !! SOURCE
 
-subroutine orbmag_nl1_k(atindx,cprj_k,dterm,dtset,ikpt,m1_k,nband_k,nl1_option,occ_k,pawtab,ucvol)
+subroutine orbmag_nl1_k(atindx,cprj_k,dterm,dtset,ikpt,m1_k,mcprjk,nband_k,nl1_option,occ_k,pawtab,ucvol)
 
   !Arguments ------------------------------------
   !scalars
-  integer,intent(in) :: ikpt,nband_k,nl1_option
+  integer,intent(in) :: ikpt,mcprjk,nband_k,nl1_option
   real(dp),intent(in) :: ucvol
   type(dterm_type),intent(in) :: dterm
   type(dataset_type),intent(in) :: dtset
@@ -841,7 +848,7 @@ subroutine orbmag_nl1_k(atindx,cprj_k,dterm,dtset,ikpt,m1_k,nband_k,nl1_option,o
   integer,intent(in) :: atindx(dtset%natom)
   real(dp),intent(in) :: occ_k(nband_k)
   real(dp),intent(out) :: m1_k(2,nband_k,3)  
-  type(pawcprj_type),intent(in) :: cprj_k(dtset%natom,nband_k)
+  type(pawcprj_type),intent(in) :: cprj_k(dtset%natom,mcprjk)
   type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
 
   !Local variables -------------------------
@@ -906,11 +913,11 @@ end subroutine orbmag_nl1_k
 !!
 !! SOURCE
 
-subroutine orbmag_nl_k(atindx,cprj_k,dterm,dtset,eig_k,ikpt,m1_k,nband_k,occ_k,pawtab,ucvol)
+subroutine orbmag_nl_k(atindx,cprj_k,dterm,dtset,eig_k,ikpt,m1_k,mcprjk,nband_k,occ_k,pawtab,ucvol)
 
   !Arguments ------------------------------------
   !scalars
-  integer,intent(in) :: ikpt,nband_k
+  integer,intent(in) :: ikpt,mcprjk,nband_k
   real(dp),intent(in) :: ucvol
   type(dterm_type),intent(in) :: dterm
   type(dataset_type),intent(in) :: dtset
@@ -919,7 +926,7 @@ subroutine orbmag_nl_k(atindx,cprj_k,dterm,dtset,eig_k,ikpt,m1_k,nband_k,occ_k,p
   integer,intent(in) :: atindx(dtset%natom)
   real(dp),intent(in) :: eig_k(nband_k),occ_k(nband_k)
   real(dp),intent(out) :: m1_k(2,nband_k,3)
-  type(pawcprj_type),intent(in) :: cprj_k(dtset%natom,nband_k)
+  type(pawcprj_type),intent(in) :: cprj_k(dtset%natom,mcprjk)
   type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
 
   !Local variables -------------------------
@@ -990,11 +997,11 @@ end subroutine orbmag_nl_k
 !! SOURCE
 
 subroutine orbmag_cc_k(atindx,b1_k,cprj1_k,dimlmn,dtset,eig_k,gs_hamk,ikpt,isppol,m1_k,&
-    & mcgk,mpi_enreg,my_nspinor,nband_k,npw_k,occ_k,pcg1_k,ucvol)
+    & mcgk,mcprjk,mpi_enreg,my_nspinor,nband_k,npw_k,occ_k,pcg1_k,ucvol)
 
   !Arguments ------------------------------------
   !scalars
-  integer,intent(in) :: ikpt,isppol,mcgk,my_nspinor,nband_k,npw_k
+  integer,intent(in) :: ikpt,isppol,mcgk,mcprjk,my_nspinor,nband_k,npw_k
   real(dp),intent(in) :: ucvol
   type(dataset_type),intent(in) :: dtset
   type(gs_hamiltonian_type),intent(inout) :: gs_hamk
@@ -1004,7 +1011,7 @@ subroutine orbmag_cc_k(atindx,b1_k,cprj1_k,dimlmn,dtset,eig_k,gs_hamk,ikpt,isppo
   integer,intent(in) :: atindx(dtset%natom),dimlmn(dtset%natom)
   real(dp),intent(in) :: eig_k(nband_k),occ_k(nband_k),pcg1_k(2,mcgk,3)
   real(dp),intent(out) :: b1_k(2,nband_k,3),m1_k(2,nband_k,3)
-  type(pawcprj_type),intent(in) :: cprj1_k(dtset%natom,nband_k,3)
+  type(pawcprj_type),intent(in) :: cprj1_k(dtset%natom,mcprjk,3)
 
   !Local variables -------------------------
   !scalars
@@ -1113,11 +1120,11 @@ end subroutine orbmag_cc_k
 !! SOURCE
 
 subroutine orbmag_vv_k(atindx,b1_k,b2_k,cg_k,cprj_k,dimlmn,dtset,eig_k,gs_hamk,&
-    & ikpt,isppol,m1_k,m2_k,mcgk,mpi_enreg,my_nspinor,nband_k,npw_k,occ_k,pcg1_k,ucvol)
+    & ikpt,isppol,m1_k,m2_k,mcgk,mcprjk,mpi_enreg,my_nspinor,nband_k,npw_k,occ_k,pcg1_k,ucvol)
 
   !Arguments ------------------------------------
   !scalars
-  integer,intent(in) :: ikpt,isppol,mcgk,my_nspinor,nband_k,npw_k
+  integer,intent(in) :: ikpt,isppol,mcgk,mcprjk,my_nspinor,nband_k,npw_k
   real(dp),intent(in) :: ucvol
   type(dataset_type),intent(in) :: dtset
   type(gs_hamiltonian_type),intent(inout) :: gs_hamk
@@ -1128,7 +1135,7 @@ subroutine orbmag_vv_k(atindx,b1_k,b2_k,cg_k,cprj_k,dimlmn,dtset,eig_k,gs_hamk,&
   real(dp),intent(in) :: cg_k(2,mcgk),eig_k(nband_k),occ_k(nband_k),pcg1_k(2,mcgk,3)
   real(dp),intent(out) :: b1_k(2,nband_k,3),b2_k(2,nband_k,3)
   real(dp),intent(out) :: m1_k(2,nband_k,3),m2_k(2,nband_k,3)
-  type(pawcprj_type),intent(in) :: cprj_k(dtset%natom,nband_k)
+  type(pawcprj_type),intent(in) :: cprj_k(dtset%natom,mcprjk)
 
   !Local variables -------------------------
   !scalars
@@ -1273,11 +1280,11 @@ end subroutine orbmag_vv_k
 !! SOURCE
 
 subroutine make_pcg1(atindx,cg_k,cg1_k,cprj_k,dimlmn,dtset,gs_hamk,&
-    & ikpt,isppol,mcgk,mpi_enreg,nband_k,npw_k,my_nspinor,pcg1_k)
+    & ikpt,isppol,mcgk,mcprjk,mpi_enreg,nband_k,npw_k,my_nspinor,pcg1_k)
 
   !Arguments ------------------------------------
   !scalars
-  integer,intent(in) :: ikpt,isppol,mcgk,my_nspinor,nband_k,npw_k
+  integer,intent(in) :: ikpt,isppol,mcgk,mcprjk,my_nspinor,nband_k,npw_k
   type(dataset_type),intent(in) :: dtset
   type(gs_hamiltonian_type),intent(inout) :: gs_hamk
   type(MPI_type), intent(inout) :: mpi_enreg
@@ -1286,7 +1293,7 @@ subroutine make_pcg1(atindx,cg_k,cg1_k,cprj_k,dimlmn,dtset,gs_hamk,&
   integer,intent(in) :: atindx(dtset%natom),dimlmn(dtset%natom)
   real(dp),intent(in) :: cg_k(2,mcgk),cg1_k(2,mcgk,3)
   real(dp),intent(out) :: pcg1_k(2,mcgk,3)
-  type(pawcprj_type),intent(in) ::  cprj_k(dtset%natom,nband_k)
+  type(pawcprj_type),intent(in) ::  cprj_k(dtset%natom,mcprjk)
 
   !Local variables -------------------------
   !scalars
