@@ -140,4 +140,5 @@ inp_files = [
 
     # more DFPT
     "t130.abi",  # test orbital magnetism with DDK wavefunctions on AlP solid
+    "t131.abi",  # test orbital magnetism with DDK wavefunctions on AlP solid with nspinor 2
 ]

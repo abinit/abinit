@@ -596,7 +596,7 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
    ABI_MALLOC(m2_k,(2,nband_k,3))
   
    call orbmag_cc_k(atindx,b1_k,cprj1_k,dimlmn,dtset,eig_k,gs_hamk,ikpt,isppol,m1_k,&
-    & mcgk,mcprjk,mpi_enreg,my_nspinor,nband_k,npw_k,occ_k,pcg1_k,ucvol)
+    & mcgk,mcprjk,mpi_enreg,nband_k,npw_k,occ_k,pcg1_k,ucvol)
    orbmag_terms(:,:,:,ibcc) = orbmag_terms(:,:,:,ibcc) + b1_k(:,:,:)
    orbmag_terms(:,:,:,imcc) = orbmag_terms(:,:,:,imcc) + m1_k(:,:,:)
    
@@ -1028,11 +1028,11 @@ end subroutine orbmag_nl_k
 !! SOURCE
 
 subroutine orbmag_cc_k(atindx,b1_k,cprj1_k,dimlmn,dtset,eig_k,gs_hamk,ikpt,isppol,m1_k,&
-    & mcgk,mcprjk,mpi_enreg,my_nspinor,nband_k,npw_k,occ_k,pcg1_k,ucvol)
+    & mcgk,mcprjk,mpi_enreg,nband_k,npw_k,occ_k,pcg1_k,ucvol)
 
   !Arguments ------------------------------------
   !scalars
-  integer,intent(in) :: ikpt,isppol,mcgk,mcprjk,my_nspinor,nband_k,npw_k
+  integer,intent(in) :: ikpt,isppol,mcgk,mcprjk,nband_k,npw_k
   real(dp),intent(in) :: ucvol
   type(dataset_type),intent(in) :: dtset
   type(gs_hamiltonian_type),intent(inout) :: gs_hamk
