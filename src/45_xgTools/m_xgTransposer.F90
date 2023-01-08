@@ -24,6 +24,9 @@
 #include "abi_common.h"
 
 module m_xgTransposer
+
+  use, intrinsic :: iso_c_binding, only: c_double
+
   use defs_basis, only : std_err, std_out
   use m_profiling_abi
   use m_xmpi
@@ -31,8 +34,12 @@ module m_xgTransposer
   use m_xg
   use m_time
 
+#if defined HAVE_YAKL
+  use gator_mod
+#endif
+
 #ifdef HAVE_MPI2
- use mpi
+  use mpi
 #endif
 
   implicit none
@@ -86,7 +93,11 @@ module m_xgTransposer
     integer :: mpiAlgo
     integer :: type
     integer :: perPair
+#if defined HAVE_GPU && defined HAVE_YAKL
+    real(kind=c_double), ABI_CONTIGUOUS pointer:: buffer(:,:) => null()
+#else
     double precision, allocatable :: buffer(:,:)
+#endif
   end type xgTransposer_t
 
   public :: xgTransposer_constructor
@@ -401,13 +412,24 @@ module m_xgTransposer
     case (STATE_LINALG)
       ! Assume xgBlock_colsrows is empty and not constructed because user cannot
       ! predict the size
+#if defined HAVE_GPU && defined HAVE_YAKL
+      if ( associated(xgTransposer%buffer) ) then
+        ABI_FREE_MANAGED(xgTransposer%buffer)
+      end if
+#else
       if ( allocated(xgTransposer%buffer) ) then
         ABI_FREE(xgTransposer%buffer)
       end if
+#endif
+
       if ( xgTransposer%mpiData(MPI_COLS)%size == 1 ) then
         xgTransposer%xgBlock_colsrows = xgTransposer%xgBlock_linalg
       else
+#if defined HAVE_GPU && defined HAVE_YAKL
+        ABI_MALLOC_MANAGED(xgTransposer%buffer,(/2,xgTransposer%ncolsColsRows*xgTransposer%nrowsColsRows/))
+#else
         ABI_MALLOC(xgTransposer%buffer,(2,xgTransposer%ncolsColsRows*xgTransposer%nrowsColsRows))
+#endif
         call xgBlock_map(xgTransposer%xgBlock_colsrows,xgTransposer%buffer,space(xgTransposer%xgBlock_linalg),&
           xgTransposer%perPair*xgTransposer%nrowsColsRows,&
           xgTransposer%ncolsColsRows,xgTransposer%mpiData(MPI_ROWS)%comm)
@@ -863,9 +885,16 @@ module m_xgTransposer
       ABI_FREE(xgTransposer%nrowsLinalg)
     end if
 
+#if defined HAVE_GPU && defined HAVE_YAKL
+    if ( associated(xgTransposer%buffer) ) then
+      ABI_FREE_MANAGED(xgTransposer%buffer)
+    end if
+#else
     if ( allocated(xgTransposer%buffer) ) then
       ABI_FREE(xgTransposer%buffer)
     end if
+#endif
+
     call timab(tim_free,2,tsec)
 
   end subroutine xgTransposer_free
