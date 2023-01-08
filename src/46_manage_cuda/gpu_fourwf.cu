@@ -128,6 +128,13 @@ static double *buff_weightr;
 static double *buff_weighti;
 //static double *buff_kgkout;
 
+extern "C" void gpu_check_pointer_(void *ptr, const char* message="")
+{
+  cudaPointerAttributes pointer_attributes;
+  cudaPointerGetAttributes (&pointer_attributes, ptr);
+  printf("[GPU DEBUG %s] : ptr=%p pointer attribute type=%s\n", message, ptr, cudaMemoryTypeToString(pointer_attributes.type));
+  fflush(stdout);
+}
 
 extern "C" void gpu_fourwf_(int *cplex,
                             double *denpot,
@@ -212,7 +219,7 @@ extern "C" void gpu_fourwf_(int *cplex,
   int deviceId;
   CHECK_CUDA_ERROR( cudaGetDevice(&deviceId) );
   if(*option!=3) {
-    //printf("debug prefetch : &fofgin=%p fofgin=%f npwin=%d ndat=%d, deviceId=%d\n",fofgin, *fofgin,  *npwin, *ndat, deviceId);
+    //printf("[debug prefetch] &fofgin=%p fofgin=%f npwin=%d ndat=%d, deviceId=%d\n",fofgin, *fofgin,  *npwin, *ndat, deviceId);
     CHECK_CUDA_ERROR( cudaMemPrefetchAsync ( fofgin, 2*(*npwin)*(*ndat)*sizeof(double), deviceId) );
   }
 

@@ -533,5 +533,22 @@ inline bool checkCudaCapabilities(int major_version, int minor_version) {
 }
 #endif /* __CUDA_RUNTIME_H__ */
 
+#ifdef __CUDA_RUNTIME_API_H__
+// cuBLAS API errors
+static const char *cudaMemoryTypeToString(enum cudaMemoryType type) {
+  switch (type) {
+   case cudaMemoryTypeUnregistered:
+    return "cudaMemoryTypeUnregistered";
+   case cudaMemoryTypeHost:
+    return "cudaMemoryTypeHost";
+   case cudaMemoryTypeDevice:
+    return "cudaMemoryTypeDevice";
+   case cudaMemoryTypeManaged:
+    return "cudaMemoryTypeManaged";
+  }
+
+  return "<unknown>";
+}
+#endif /* __CUDA_RUNTIME_API_H__ */
 
 #endif /* CUDA_API_ERROR_CHECK_H_ */
