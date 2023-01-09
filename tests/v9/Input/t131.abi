@@ -1,9 +1,12 @@
 # test DDK and orbital magnetism response with nuclear dipole moment and nspinor 2
 # AlP solid
 
-# unconverged, use at least 20 for convergence
+# unconverged, use ecut at least 20 for convergence
 ecut 5
 pawecutdg 10
+
+# limit steps to speed test
+nstep 10
 
 #nuclear magnetic dipole moment on Al site
 #size 1 in a.u. along x axis
@@ -46,7 +49,6 @@ shiftk 3*1/2
 0 1/2 0
 0 0 1/2
 
-nstep 30
 
 prtwf 0
 prteig 0
