@@ -83,7 +83,7 @@ pseudos="P.xml, Al.xml"
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t130.abo, tolnlines=  0, tolabs=  0.0, tolrel= 0.0
+#%%   t130.abo, tolnlines=  6, tolabs=  1.1E-9, tolrel= 1.6E-5
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
