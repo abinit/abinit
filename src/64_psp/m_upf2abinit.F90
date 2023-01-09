@@ -7,7 +7,7 @@
 !!  the internal ABINIT representation.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2009-2022 ABINIT group (MJV, MG)
+!!  Copyright (C) 2009-2022 ABINIT group (MJV, MG, DRH)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -326,7 +326,7 @@ end subroutine upf1_to_abinit
 !!
 !! SOURCE
 
-subroutine upf2_to_abinit(filpsp, znucl, zion, pspxc, lmax_, lloc, mmax, &
+subroutine upf2_to_abinit(filpsp, znucl, zion, pspxc, lmax, lloc, mmax, &
                           psps, epsatm, xcccrc, indlmn, ekb, ffspl, nproj_l, vlspl, xccc1d, nctab, maxrad)
 
  use pseudo_types,        only : pseudo_upf, deallocate_pseudo_upf !, pseudo_config
@@ -339,12 +339,11 @@ subroutine upf2_to_abinit(filpsp, znucl, zion, pspxc, lmax_, lloc, mmax, &
  character(len=fnlen), intent(in) :: filpsp
  type(pseudopotential_type),intent(in) :: psps
  type(nctab_t),intent(inout) :: nctab
- integer, intent(out) :: pspxc, lmax_, lloc, mmax
+ integer, intent(out) :: pspxc, lmax, lloc, mmax
  real(dp), intent(out) :: znucl, zion
  real(dp), intent(out) :: epsatm, xcccrc, maxrad
  !arrays
- integer, intent(out)  :: indlmn(6,psps%lmnmax)
- integer, intent(out)  :: nproj_l(psps%mpssoang)
+ integer, intent(out)  :: indlmn(6,psps%lmnmax), nproj_l(psps%mpssoang)
  real(dp), intent(inout) :: ekb(psps%dimekb)
  real(dp), intent(inout) :: ffspl(psps%mqgrid_ff,2,psps%lnmax)
  real(dp), intent(out) :: vlspl(psps%mqgrid_vl,2)
@@ -358,57 +357,16 @@ subroutine upf2_to_abinit(filpsp, znucl, zion, pspxc, lmax_, lloc, mmax, &
  type(pseudo_upf) :: upf
  type(atomdata_t) :: atom
  type(pawrad_type) :: mesh
+ integer :: nproj_tmp(psps%mpssoang)
  logical,allocatable :: found_l(:)
  real(dp),allocatable :: work_space(:),work_spl(:)
  real(dp),allocatable :: ff(:), ff1(:), ff2(:), rad_cc(:), proj(:,:)
 
 ! *********************************************************************
 
- ! See also: https://github.com/ltalirz/upf-schema/blob/master/upf.xsd
+ ! See also https://github.com/QEF/qeschemas/blob/master/UPF/qe_pp-0.99.xsd
  call read_upf_new(filpsp, upf, ierr)
  ABI_CHECK(ierr == 0, sjoin("read_upf_new returned ierr:", itoa(ierr)))
-
- ABI_CHECK(upfdft_to_ixc(upf%dft, pspxc, msg) == 0, msg)
- lmax_ = upf%lmax
-
- ! convert from Rydberg to Ha units
- upf%vloc = half * upf%vloc
- upf%dion = half * upf%dion
-
- nproj_l = 0
- do iproj=1,upf%nbeta
-   ll = upf%lll(iproj)
-   nproj_l(ll+1) = nproj_l(ll+1) + 1
- end do
-
- !write(msg, '(a,5i6)' ) '     nproj',nproj_l(1:lmax_+1)
- !call wrtout([std_out, ab_out], msg)
-
- ! shape = dimekb  vs. shape = n_proj
- do ll=1,upf%nbeta
-   ekb(ll) = upf%dion(ll,ll)
- end do
-
- ! Check if the local component is one of the angular momentum channels
- ! effectively if one of the ll is absent from the NL projectors
- ABI_MALLOC(found_l, (0:lmax_))
- found_l = .true.
- do ll=0, lmax_
-   if (any(upf%lll(1:upf%nbeta) == ll)) found_l(ll) = .false.
- end do
-
- if (count(found_l) /= 1) then
-   lloc = -1
- else
-   do ll=0,lmax_
-     if (found_l(ll)) then
-       lloc = ll
-       exit
-     end if
-   end do
- end if
- ABI_FREE(found_l)
- !FIXME: do something about lloc == -1
 
  call atomdata_from_symbol(atom, upf%psd)
  znucl = atom%znucl
@@ -419,6 +377,9 @@ subroutine upf2_to_abinit(filpsp, znucl, zion, pspxc, lmax_, lloc, mmax, &
  !mmax = 600  ! Si
  maxrad = upf%rmax
  !maxrad = upf%r(mmax)
+
+ ABI_CHECK(upfdft_to_ixc(upf%dft, pspxc, msg) == 0, msg)
+ lmax = upf%lmax
 
  ! Check that rad grid is linear starting at zero
  linear_mesh = .True.
@@ -434,6 +395,30 @@ subroutine upf2_to_abinit(filpsp, znucl, zion, pspxc, lmax_, lloc, mmax, &
    'Action: check your pseudopotential file.'
    ABI_ERROR(msg)
  end if
+
+ ! Check if the local component is one of the angular momentum channels
+ ! effectively if one of the ll is absent from the NL projectors
+ ABI_MALLOC(found_l, (0:lmax))
+ found_l = .true.
+ do ll=0,lmax
+   if (any(upf%lll(1:upf%nbeta) == ll)) found_l(ll) = .false.
+ end do
+
+ if (count(found_l) /= 1) then
+   lloc = -1
+ else
+   do ll=0,lmax
+     if (found_l(ll)) then
+       lloc = ll
+       exit
+     end if
+   end do
+ end if
+ ABI_FREE(found_l)
+ !FIXME: do something about lloc == -1
+
+ ! convert vloc from Rydberg to Ha
+ upf%vloc = half * upf%vloc
 
  if (linear_mesh) then
    call psp8lo(amesh, epsatm, mmax, psps%mqgrid_vl, psps%qgrid_vl, &
@@ -453,34 +438,56 @@ subroutine upf2_to_abinit(filpsp, znucl, zion, pspxc, lmax_, lloc, mmax, &
  ABI_FREE(work_space)
  ABI_FREE(work_spl)
 
- ! this has to do the FT of the projectors to reciprocal space
- ! allocate proj to avoid temporary copy.
- ABI_MALLOC(proj, (mmax,1:upf%nbeta))
- proj = upf%beta(1:mmax,1:upf%nbeta)
+ nproj_l = 0
+ if (.not. upf%has_so) then
 
- call psp11nl(ffspl, indlmn, mmax, psps%lnmax, psps%lmnmax, psps%mqgrid_ff, &
-              upf%nbeta, proj, upf%lll(1:upf%nbeta), upf%kbeta(1:upf%nbeta), &
-              psps%qgrid_ff, upf%r(1:mmax), upf%rab(1:mmax), psps%useylm)
+   do iproj=1,upf%nbeta
+     ll = upf%lll(iproj)
+     nproj_l(ll+1) = nproj_l(ll+1) + 1
+   end do
+   !write(msg, '(a,5i6)' ) '     nproj',nproj_l(1:lmax+1)
+   !call wrtout([std_out, ab_out], msg)
+
+   ! shape = dimekb  vs. shape = n_proj
+   ! convert from Rydberg to Ha
+   do ll=1,upf%nbeta
+     ekb(ll) = upf%dion(ll,ll) * half
+   end do
+
+   ! this has to do the FT of the projectors to reciprocal space
+   ! allocate proj to avoid temporary copy.
+   ABI_MALLOC(proj, (mmax,1:upf%nbeta))
+   proj = upf%beta(1:mmax,1:upf%nbeta)
+
+   call psp11nl(ffspl, indlmn, mmax, psps%lnmax, psps%lmnmax, psps%mqgrid_ff, &
+                upf%nbeta, proj, upf%lll(1:upf%nbeta), upf%kbeta(1:upf%nbeta), &
+                psps%qgrid_ff, upf%r(1:mmax), upf%rab(1:mmax), psps%useylm)
 
 
- ! This to reproduce psp8in version with linear meshes.
- ! Compute Vanderbilt-KB form factors and fit splines
- call psp8nl(amesh, ffspl, indlmn, lmax_, psps%lmnmax, psps%lnmax, mmax, psps%mqgrid_ff, psps%qgrid_ff, upf%r, proj)
+   ! This to reproduce psp8in version with linear meshes.
+   ! Compute Vanderbilt-KB form factors and fit splines
+   call psp8nl(amesh, ffspl, indlmn, lmax, psps%lmnmax, psps%lnmax, mmax, &
+               psps%mqgrid_ff, psps%qgrid_ff, upf%r, proj)
 
- ABI_FREE(proj)
+   ABI_FREE(proj)
 
- xcccrc = zero; xccc1d = zero
+ else
+   nproj_tmp = 0
+   ABI_ERROR("UPF2 with SOC")
+ end if
 
  ! if we find a core density, do something about it
  ! rho_atc contains the nlcc density
  ! rho_at contains the total density
+ xcccrc = zero; xccc1d = zero
+
  if (upf%nlcc) then
    ABI_MALLOC(ff, (mmax))
    ABI_MALLOC(ff1, (mmax))
    ABI_MALLOC(ff2, (mmax))
    ff(1:mmax) = upf%rho_atc(1:mmax) ! model core charge without derivative factor
-   smooth_niter = 15 ! run 15 iterations of smoothing?
-   smooth_niter = 0
+   !smooth_niter = 15 ! run 15 iterations of smoothing?
+   smooth_niter = 0   ! Don't smooth core charges to be consistent with treatment done in psp8in
 
    ff1 = zero
    call nderiv(one, ff, ff1, mmax, 1) ! first derivative
@@ -626,14 +633,19 @@ subroutine psp11nl(ffspl,indlmn, mmax, lnmax, lmnmax, mqgrid, n_proj, &
    end if
 
    ! determine indlmn for this projector (keep in UPF order and enforce that they are in increasing ll)
+   ! indlmn(6,lmnmax,ntypat)
+   ! For each type of psp,
+   ! array giving l,m,n,lm,ln,spin for i=ln  (if useylm=0)
+   !                                or i=lmn (if useylm=1)
+   ! NB: spin is used for NC pseudos with SOC term: 1 if scalar term (spin diagonal), 2 if SOC term.
    do mm=1,2*ll*useylm+1
      i_indlmn = i_indlmn + 1
-     indlmn(1,i_indlmn) = ll
-     indlmn(2,i_indlmn) = mm-ll*useylm-1
-     indlmn(3,i_indlmn) = iproj_1l
-     indlmn(4,i_indlmn) = ll*ll+(1-useylm)*ll+mm
-     indlmn(5,i_indlmn) = iproj
-     indlmn(6,i_indlmn) = 1 !spin? FIXME: to get j for relativistic cases
+     indlmn(1, i_indlmn) = ll
+     indlmn(2, i_indlmn) = mm-ll*useylm-1
+     indlmn(3, i_indlmn) = iproj_1l
+     indlmn(4, i_indlmn) = ll*ll+(1-useylm)*ll+mm
+     indlmn(5, i_indlmn) = iproj
+     indlmn(6, i_indlmn) = 1 !spin? FIXME: to get j for relativistic cases
    end do
 
    ! FT projectors to reciprocal space q

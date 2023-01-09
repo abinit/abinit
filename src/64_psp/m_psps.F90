@@ -212,8 +212,6 @@ subroutine psps_init_global(psps, mtypalch, npsp, pspheads)
 !Set values independant from dtset
  psps%npsp   = npsp
 !Note that mpsang is the max of 1+lmax, with minimal value 1 (even for local psps, at present)
-!mpsang=max(maxval(pspheads(1:npsp)%lmax)+1,1) ! might not work with HP compiler
-!n1xccc=maxval(pspheads(1:npsp)%xccc)
  mpsang=1
  n1xccc=pspheads(1)%xccc
  do ii=1,psps%npsp
@@ -276,6 +274,7 @@ subroutine psps_init_from_dtset(psps, dtset, idtset, pspheads)
  nptsgvec         = 200 !This has to be chosen one and for all or else ??
  newmqgrid        = dtset%mqgrid
  newmqgriddg      = dtset%mqgriddg
+
  !JB:Which image to use ? I guess 1 always works
  call matr3inv(dtset%rprimd_orig(:,:,1),gprimd_orig)
  if ( dtset%usewvl == 0) then
@@ -302,11 +301,8 @@ subroutine psps_init_from_dtset(psps, dtset, idtset, pspheads)
 
 !Set the flag for reciprocal space or real space calculations
  psps%vlspl_recipSpace = (dtset%icoulomb /= 1)
-!changed by RShaltaf
  psps%positron = dtset%positron
  psps%useylm   = dtset%useylm
-
-!Added by T. Rangel for WVL+PAW
  psps%usewvl   = dtset%usewvl
 
 ! Define treatment of the model core density for NC pseudos.
@@ -336,8 +332,7 @@ subroutine psps_init_from_dtset(psps, dtset, idtset, pspheads)
      !  psps%pspso(ipsp) = 2
      !end if
 
-     ! Ideally the following line should not exist,
-     ! but at present, the space has to be booked
+     ! Ideally the following line should not exist, but at present, the space has to be booked
      if(pspheads(ipsp)%pspso/=0)psps%mpspso=2
    else if (psps%usepaw==0) then
      if(dtset%so_psp(ipsp)/=1)then

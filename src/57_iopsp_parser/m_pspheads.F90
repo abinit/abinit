@@ -7,7 +7,7 @@
 !!  in order to initialize pspheads(1:npsp).
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, FrD, AF, MT, FJ, MJV, MG)
+!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, FrD, AF, MT, FJ, MJV, MG, DRH)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -39,7 +39,8 @@ MODULE m_pspheads
  use defs_datatypes, only : pspheader_type
  use m_time,         only : timab
  use m_io_tools,     only : open_file
- use m_fstrings,     only : basename, lstrip, sjoin, startswith, atoi, itoa
+ use m_numeric_tools,only : simpson
+ use m_fstrings,     only : basename, lstrip, sjoin, startswith, atoi, itoa, ftoa
  use m_pawpsp,       only : pawpsp_read_header_xml,pawpsp_read_pawheader
  use m_pawxmlps,     only : rdpawpsxml,rdpawpsxml_header, paw_setup_free,paw_setuploc
 
@@ -237,7 +238,7 @@ subroutine inpspheads(filnam, npsp, pspheads, ecut_tmp)
        call upf1_to_psphead(filnam(ipsp), pspheads(ipsp)%znuclpsp, pspheads(ipsp)%zionpsp, pspheads(ipsp)%pspxc, &
          pspheads(ipsp)%lmax, pspheads(ipsp)%xccc, nproj, nprojso)
 
-       ! FIXME : generalize for SO pseudos
+       ! FIXME: generalize for SO pseudos
        pspheads(ipsp)%pspso = 0
 
      else
@@ -246,8 +247,7 @@ subroutine inpspheads(filnam, npsp, pspheads, ecut_tmp)
        call upf2_to_psphead(filnam(ipsp), pspheads(ipsp)%znuclpsp, pspheads(ipsp)%zionpsp, pspheads(ipsp)%pspxc, &
          pspheads(ipsp)%lmax, pspheads(ipsp)%xccc, nproj, nprojso)
 
-       ! FIXME : generalize for SO pseudos
-       pspheads(ipsp)%pspso = 0
+       pspheads(ipsp)%pspso = merge(2, 0, any(nprojso > 0))
      end if
 
      pspcod = pspheads(ipsp)%pspcod
@@ -484,10 +484,8 @@ subroutine inpspheads(filnam, npsp, pspheads, ecut_tmp)
      pspheads(ipsp)%nproj(0:3)=nproj(0:3)
      pspheads(ipsp)%nprojso(1:3)=nprojso(1:3)
    end if
-   ! write(msg,'(a,10i6)') 'nproj = ', pspheads(ipsp)%nproj(:)
-   ! call wrtout(std_out,msg,'PERS')
-   ! write(msg,'(a,10i6)') 'nprojso = ', pspheads(ipsp)%nprojso(:)
-   ! call wrtout(std_out,msg,'PERS')
+   !write(std_out,'(a,*(i0,1x))') 'nproj = ', pspheads(ipsp)%nproj(:)
+   !write(std_out,'(a,*(i0,1x))') 'nprojso = ', pspheads(ipsp)%nprojso(:)
 
    close(unt)
 
@@ -496,8 +494,6 @@ subroutine inpspheads(filnam, npsp, pspheads, ecut_tmp)
  end do ! ipsp=1,npsp
 
  ! Note that mpsang is the max of 1+lmax, with minimal value 1 (even for local psps, at present)
- ! mpsang=max(maxval(pspheads(1:npsp)%lmax)+1,1) ! Likely troubles with HP compiler
- ! n1xccc=maxval(pspheads(1:npsp)%xccc)
  mpsang=1
  n1xccc=pspheads(1)%xccc
  do ii=1,npsp
@@ -868,7 +864,7 @@ end subroutine upf1_to_psphead
 !!
 !! SOURCE
 
-subroutine upf2_to_psphead(filpsp, znucl, zion, pspxc, lmax_, n1xccc, nproj_l, nprojso_l)
+subroutine upf2_to_psphead(filpsp, znucl, zion, pspxc, lmax, n1xccc, nproj_l, nprojso_l)
 
   use pseudo_types, only : pseudo_upf, deallocate_pseudo_upf !, pseudo_config
   use read_upf_new_module, only : read_upf_new
@@ -876,47 +872,147 @@ subroutine upf2_to_psphead(filpsp, znucl, zion, pspxc, lmax_, n1xccc, nproj_l, n
 !Arguments -------------------------------
  character(len=fnlen), intent(in) :: filpsp
  integer,intent(inout) :: n1xccc
- integer,intent(out) :: pspxc, lmax_
+ integer,intent(out) :: pspxc, lmax
  real(dp),intent(out) :: znucl, zion
 !arrays
  integer,intent(out) :: nproj_l(0:3), nprojso_l(1:3)
 
 !Local variables -------------------------
- integer :: ierr , iproj, ll
+ integer :: ierr , iprj, ii, ll, l1, il, ik, mmax, irad, mxprj
+ real(dp) :: amesh, damesh, jtot !yp1, ypn,
+ real(dp) :: eps_srso
  character(len=500) :: msg
+ logical :: linear_mesh
  type(pseudo_upf) :: upf
  type(atomdata_t) :: atom
+! arrays
+integer :: irc6(6),nproj6(6), done_ilk(6,2)
+ real(dp),allocatable :: vkb(:,:,:,:), evkb(:,:,:), vsr(:,:,:), esr(:,:), vso(:,:,:), eso(:,:)
 
 ! *********************************************************************
 
+ ! See also https://github.com/QEF/qeschemas/blob/master/UPF/qe_pp-0.99.xsd
  call read_upf_new(filpsp, upf, ierr)
  ABI_CHECK(ierr == 0, sjoin("read_upf_new returned ierr:", itoa(ierr)))
 
- ! Consistency check
- ABI_CHECK(upf%typ == "NC", sjoin("Only NC UPF2 pseudos are supported. type is:", upf%typ))
- ABI_CHECK(upf%rel /= "full", sjoin("Relativistic NC UPF2 pseudos are supported. rel is:", upf%rel))
-
- ABI_CHECK(upfdft_to_ixc(upf%dft, pspxc, msg) == 0, msg)
-
- lmax_ = upf%lmax
  call atomdata_from_symbol(atom, upf%psd)
  znucl = atom%znucl
  zion = upf%zp
+ lmax = upf%lmax
+ mmax = upf%mesh
 
- nproj_l = 0
- do iproj=1,upf%nbeta
-   ll = upf%lll(iproj)
-   nproj_l(ll) = nproj_l(ll) + 1
- end do
-
- nprojso_l = 0 !FIXME deal with so
- !do iproj=1,upf%nbeta
- !nprojso_l(ll+1) = nprojso_l(ll+1) + 1
- !end do
-
- !pspheads(ipsp)%pspso = 0
-
+ ! Consistency check
+ ABI_CHECK(upf%typ == "NC", sjoin("Only NC pseudos in UPF2 format are supported while type is:", upf%typ))
+ !ABI_CHECK(upf%rel /= "full", sjoin("Relativistic NC UPF2 pseudos are supported. rel is:", upf%rel))
+ ABI_CHECK(upfdft_to_ixc(upf%dft, pspxc, msg) == 0, msg)
  if (.not. upf%nlcc) n1xccc = 0
+
+ ! Check that rad grid is linear starting at zero
+ linear_mesh = .True.
+ amesh = upf%r(2) - upf%r(1); damesh = zero
+ do irad=2,mmax-1
+   damesh = max(damesh, abs(upf%r(irad)+amesh-upf%r(irad+1)))
+ end do
+ linear_mesh = damesh < tol8
+
+ if (.not. linear_mesh .or. abs(upf%r(1)) > tol16) then
+   write(msg,'(3a)')&
+   'Assuming pseudized valence charge given on linear radial mesh starting at zero.',ch10,&
+   'Action: check your pseudopotential file.'
+   ABI_ERROR(msg)
+ end if
+
+ nproj_l = 0; nprojso_l = 0
+
+ if (.not. upf%has_so) then
+   ! Scalar case
+   do iprj=1,upf%nbeta
+     ll = upf%lll(iprj)
+     nproj_l(ll) = nproj_l(ll) + 1
+   end do
+
+ else
+   ! Pseudo in j = l + s representation.
+   !call upf2_jl2soc(upf, mmax, mxprj, nproj_l, nprojso_l, esr, vsr, vso, eso)
+   irc6 = zero; nproj6 = zero
+   do iprj=1,upf%nbeta
+     ll = upf%lll(iprj)
+     nproj6(ll+1) = nproj6(ll+1) + 1
+     !irc6(ll+1) = max(upf%kbeta(iprj), irc6(ll+1))
+     irc6(ll+1) = mmax
+   end do
+
+   ! Divide by two for l > 0 as this is sr_so_r expects.
+   nproj6(2:) = nproj6(2:) / 2
+   mxprj = maxval(nproj6)
+
+   ABI_MALLOC(vkb, (mmax,mxprj,4,2))
+   ABI_MALLOC(evkb, (mxprj,4,2))
+   ABI_MALLOC(vsr, (mmax,2*mxprj,4))
+   ABI_MALLOC(esr, (2*mxprj,4))
+   ABI_MALLOC(vso, (mmax,2*mxprj,4))
+   ABI_MALLOC(eso, (2*mxprj,4))
+
+   done_ilk = 0
+   do iprj=1,upf%nbeta
+     jtot = upf%jjj(iprj)
+     ll = upf%lll(iprj)
+     il = ll + 1
+     if (ll == 0) then
+       ik = 1
+     else
+       ! l+1/2 --> ik 1, l-1/2 --> ik 2
+       if (abs(jtot - (ll + half)) < tol6) then
+         ik = 1
+       else if (abs(jtot - (ll - half)) < tol6) then
+         ik = 2
+       else
+         ABI_ERROR(sjoin("Cannot detect ik index from jtot:", ftoa(jtot)))
+       end if
+     end if
+
+     done_ilk(il, ik) = done_ilk(il, ik) + 1
+     ii = done_ilk(il, ik)
+     evkb(ii,il,ik) = upf%dion(iprj,iprj) * half  ! convert from Rydberg to Ha
+     vkb(:,ii,il,ik) = upf%beta(:,iprj)
+   end do
+
+   call sr_so_r(lmax, irc6, nproj6, upf%r, mmax, mxprj, evkb, vkb, vsr, esr, vso, eso)
+
+   ! set smallest components to zero (following the approach used in oncvpsp)
+   eps_srso=1.0d-3
+   do l1=1,lmax+1
+     if (nproj6(l1) > 0) then
+       do iprj=2,2*nproj6(l1)
+         if (abs(esr(iprj,l1)) < eps_srso*abs(esr(1,l1))) esr(iprj,l1) = 0.0d0
+         if (l1 == 1) cycle
+         if (abs(eso(iprj,l1)) < eps_srso*abs(eso(1,l1))) eso(iprj,l1) = 0.0d0
+       end do
+     end if
+   end do
+
+   ! set up projector number for sr_so calculations based on non-zero coefficients
+   ! note that energies and projectors have been sorted sr_so_r
+   ! so the relevant projectors are packed in the first positions.
+   do l1=1,lmax+1
+    ll = l1 - 1
+    do ii=1,2*nproj6(l1)
+     if (abs(esr(ii,l1)) > 0.0d0) nproj_l(ll) = nproj_l(ll) + 1
+     if (abs(eso(ii,l1)) > 0.0d0) nprojso_l(ll) = nprojso_l(ll) + 1
+    end do
+    !write(std_out,'(a,3i4)') 'll,nproj_l,nprojso_l',ll,nproj_l(l1),nprojso_l(l1)
+   end do
+
+   ABI_FREE(vkb)
+   ABI_FREE(evkb)
+   ABI_FREE(vsr)
+   ABI_FREE(esr)
+   ABI_FREE(vso)
+   ABI_FREE(eso)
+
+   !ABI_WARNING("UPF2 with SOC")
+ end if
+
  call deallocate_pseudo_upf(upf)
 
 end subroutine upf2_to_psphead
@@ -1069,6 +1165,368 @@ integer function upfdft_to_ixc(dft, ixc, msg) result(ierr)
  end select
 
 end function upfdft_to_ixc
+!!***
+!
+! Copyright (c) 1989-2019 by D. R. Hamann, Mat-Sim Research LLC and Rutgers
+! University
+!
+!
+! This program is free software: you can redistribute it and/or modify
+! it under the terms of the GNU General Public License as published by
+! the Free Software Foundation, either version 3 of the License, or
+! (at your option) any later version.
+!
+! This program is distributed in the hope that it will be useful,
+! but WITHOUT ANY WARRANTY; without even the implied warranty of
+! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+! GNU General Public License for more details.
+!
+! You should have received a copy of the GNU General Public License
+! along with this program.  If not, see <http://www.gnu.org/licenses/>.
+!
+ subroutine sr_so_r(lmax,irc,nproj,rr,mmax,mxprj,evkb,vkb, &
+&                       vsr,esr,vso,eso)
+
+! reformulates non-local potentials based on j = l +/- 1/2 to scalar-
+! relativistic and L dot S projectors
+! uses relationship <L dot S> = (J^2 - L^2 - S^2)/2
+! so L dot S = +/- l/2 for j = l +/- 1/2
+
+!lmax  maximum angular momentum
+!irc  core radii indices
+!nproj  number of projectors for each l
+!rr  log radial grid
+!mmax  size of radial grid
+!mmax  dimension of log grid
+!mxprj  dimension of number of projectors
+!vkb  vkb projectors
+!evkb  coefficients of BKB projectors
+!vsr  normalized scalar projectors
+!esr  energy  coefficients of vscal
+!vso  normalized spin-orbig projectors
+!esol  energy  coefficients of vso
+
+ !implicit none
+ !integer, parameter :: dp=kind(1.0d0)
+
+!Input variables
+ integer,intent(in) :: lmax,mmax,mxprj
+ integer,intent(in) :: irc(6),nproj(6)
+ real(dp),intent(in) :: rr(mmax),vkb(mmax,mxprj,4,2),evkb(mxprj,4,2)
+
+!Output variables
+ real(dp),intent(out) :: vsr(mmax,2*mxprj,4),esr(2*mxprj,4)
+ real(dp),intent(out) :: vso(mmax,2*mxprj,4),eso(2*mxprj,4)
+
+!Local variables
+ integer :: ii,jj,kk,ierr,ik1,ik2,ip1,ip2,ipk,ll,l1,info,nn
+ real(dp) :: amesh
+ real(dp) :: apk,sn,tt,qq1mxprj
+ real(dp) :: sovl(2*mxprj,2*mxprj),sovlev(2*mxprj),ascl(2*mxprj,2*mxprj),aso(2*mxprj,2*mxprj)
+ real(dp) :: asclst(2*mxprj,2*mxprj),wsclst(2*mxprj),asost(2*mxprj,2*mxprj),wsost(2*mxprj)
+ real(dp) :: asclt(2*mxprj,2*mxprj),asot(2*mxprj,2*mxprj)
+ real(dp) :: sphalf(2*mxprj,2*mxprj),smhalf(2*mxprj,2*mxprj)
+ real(dp) :: fscl(mxprj),fso(mxprj),work(10*mxprj)
+ real(dp), allocatable :: vkbt(:,:),vkbst(:,:)
+ logical :: sorted
+ character(len=500) :: msg
+
+ ! Check that rad grid is linear starting at zero
+ !linear_mesh = .True.
+ amesh = rr(2) - rr(1) !; damesh = zero
+ !do irad=2,mmax-1
+ !  damesh = max(damesh, abs(upf%r(irad)+amesh-upf%r(irad+1)))
+ !end do
+ !linear_mesh = damesh < tol8
+
+ !if (.not. linear_mesh .or. abs(upf%r(1)) > tol16) then
+ !  write(msg,'(3a)')&
+ !  'Assuming pseudized valence charge given on linear radial mesh starting at zero.',ch10,&
+ !  'Action: check your pseudopotential file.'
+ !  ABI_ERROR(msg)
+ !end if
+
+ !allocate(vkbt(mmax,2*mxprj),vkbst(mmax,2*mxprj))
+ ABI_MALLOC(vkbt, (mmax,2*mxprj))
+ ABI_MALLOC(vkbst, (mmax,2*mxprj))
+
+ do l1=1,lmax+1
+  ll=l1-1
+
+  if(ll==0) then
+   vsr(:,:,l1)=0.0d0
+   vso(:,:,l1)=0.0d0
+   esr(:,l1)=0.0d0
+   eso(:,l1)=0.0d0
+   if(nproj(l1)>=1) then
+    do ii=1,nproj(l1)
+     vsr(:,ii,l1)=vkb(:,ii,l1,1)
+     esr(ii,l1)=evkb(ii,l1,1)
+    end do
+   end if
+   cycle
+  end if
+
+  nn=2*nproj(l1)
+
+  fscl(1)=(ll+1)/dble(2*ll+1)
+  fscl(2)=ll/dble(2*ll+1)
+  fso(1)=2/dble(2*ll+1)
+  fso(2)=-2/dble(2*ll+1)
+
+! construct overlap matrix and diagonal energy matrices
+
+   sovl(:,:)=0.0d0
+   ascl(:,:)=0.0d0
+   aso(:,:)=0.0d0
+   vkbt(:,:)=0.0d0
+
+   do ik1=1,2
+    do ip1=1,nproj(l1)
+     ii=ip1+(ik1-1)*nproj(l1)
+
+     ascl(ii,ii)=fscl(ik1)*evkb(ip1,l1,ik1)
+     aso(ii,ii)=fso(ik1)*evkb(ip1,l1,ik1)
+
+     vkbt(:,ii)=vkb(:,ip1,l1,ik1)
+
+     do ik2=1,2
+      do ip2=1,nproj(l1)
+       jj=ip2+(ik2-1)*nproj(l1)
+
+       ! MG: This routine cannot be used as it assumes log mesh.
+       !call vpinteg(vkb(1,ip1,l1,ik1),vkb(1,ip2,l1,ik2),irc(l1),2*l1, &
+       !             sovl(ii,jj),rr)
+
+       sovl(ii,jj) = simpson(amesh, vkb(:,ip1,l1,ik1) * vkb(:,ip2,l1,ik2))
+       !print *, "vkb(1,ip1,l1,ik1),vkb(1,ip2,l1,ik2), irc(l1)"
+       !print *, vkb(1,ip1,l1,ik1),vkb(1,ip2,l1,ik2), irc(l1)
+       !print *, sovl(ii, jj), "ll", ll
+
+      end do
+     end do
+    end do
+   end do
+
+   call dsyev( 'V', 'U', nn, sovl, 2*mxprj, sovlev, work, 10*mxprj, info )
+
+   if(info .ne. 0) then
+    write(msg,'(a,i4)') 'sr_so_r: S matrix eigenvalue ERROR, info=',info
+    ABI_ERROR(msg)
+   end if
+
+! construct S^(-1/2) AND s^(1/2)
+
+   do jj=1,nn
+    tt=sqrt(sovlev(jj))
+    do ii=1,nn
+     sphalf(ii,jj)=tt*sovl(ii,jj)
+     smhalf(ii,jj)=sovl(ii,jj)/tt
+    end do
+   end do
+
+! take linear combinations to form orthonormal basis functions
+
+   vkbst(:,:)=0.0d0
+
+   do jj=1,nn
+    do ii=1,nn
+     vkbst(:,jj)=vkbst(:,jj) + smhalf(ii,jj)*vkbt(:,ii)
+    end do
+   end do
+
+! construct A^(-1)* = S^(1/2)^T A^(-1) S^(1/2)
+
+     asclt(:,:)=0.0d0
+     asclst(:,:)=0.0d0
+     asot(:,:)=0.0d0
+     asost(:,:)=0.0d0
+
+     do ii=1,nn
+      do jj=1,nn
+       do kk=1,nn
+        asclt(ii,jj)=asclt(ii,jj)+ascl(ii,kk)*sphalf(kk,jj)
+        asot(ii,jj) =asot(ii,jj) + aso(ii,kk)*sphalf(kk,jj)
+       end do
+      end do
+     end do
+
+     do ii=1,nn
+      do jj=1,nn
+       do kk=1,nn
+        asclst(ii,jj)=asclst(ii,jj)+asclt(kk,jj)*sphalf(kk,ii)
+        asost(ii,jj) =asost(ii,jj) + asot(kk,jj)*sphalf(kk,ii)
+       end do
+      end do
+     end do
+
+! find eigenvalues and eigenvectors of the A* matrices
+
+!      SUBROUTINE DSYEV( JOBZ, UPLO, N, A, LDA, W, WORK, LWORK, INFO )
+
+     call dsyev( 'V', 'U', nn, asclst, 2*mxprj, wsclst, work, 10*mxprj, info )
+
+     if(info .ne. 0) then
+      write(msg,'(a,i4)') 'sr_so_r: A* matrix eigenvalue ERROR, info=',info
+      ABI_ERROR(msg)
+     end if
+
+     call dsyev( 'V', 'U', nn,  asost, 2*mxprj,  wsost, work, 10*mxprj, info )
+
+
+     if(info .ne. 0) then
+      write(msg,'(a,i4)') 'sr_so_r: A* matrix eigenvalue ERROR, info=',info
+      ABI_ERROR(msg)
+     end if
+
+! take linear combinations to form orthonormal projectors
+
+     vsr(:,:,l1)=0.0d0
+     vso(:,:,l1)=0.0d0
+     esr(:,l1)=0.0d0
+     eso(:,l1)=0.0d0
+
+     do ii=1,nn
+      esr(ii,l1)=wsclst(ii)
+      eso(ii,l1)=  wsost(ii)
+      do jj=1,nn
+       vsr(:,ii,l1)=vsr(:,ii,l1) + asclst(jj,ii)*vkbst(:,jj)
+       vso(:,ii,l1)= vso(:,ii,l1) +   asost(jj,ii)*vkbst(:,jj)
+      end do
+     end do
+
+! bubble-sort on coefficient magnitudes for scalar and then s-o
+! (Yes, I know bubble-sort is the least-efficient sorting algorithm.)
+
+     do ii=1,100
+      sorted=.true.
+      do jj=2,nn
+       if(abs(esr(jj-1,l1))<abs(esr(jj,l1))) then
+        tt=esr(jj,l1)
+        vkbt(:,1)=vsr(:,jj,l1)
+        esr(jj,l1)=esr(jj-1,l1)
+        vsr(:,jj,l1)=vsr(:,jj-1,l1)
+        esr(jj-1,l1)=tt
+        vsr(:,jj-1,l1)=vkbt(:,1)
+        sorted=.false.
+       end if
+      end do
+      if(sorted) exit
+     end do
+
+     do ii=1,100
+      sorted=.true.
+      do jj=2,nn
+       if(abs(eso(jj-1,l1))<abs(eso(jj,l1))) then
+        tt=eso(jj,l1)
+        vkbt(:,1)=vso(:,jj,l1)
+        eso(jj,l1)=eso(jj-1,l1)
+        vso(:,jj,l1)=vso(:,jj-1,l1)
+        eso(jj-1,l1)=tt
+        vso(:,jj-1,l1)=vkbt(:,1)
+        sorted=.false.
+       end if
+      end do
+      if(sorted) exit
+     end do
+
+     write(6,'(/a,i2)') &
+&         ' Orthonormal scalar projector coefficients, l = ',ll
+     write(6,'(1p,6e12.4)') (esr(jj,l1),jj=1,nn)
+     write(6,'(/a,i2)') &
+&         ' Orthonormal spin-orbit projector coefficients, l = ',ll
+     write(6,'(1p,6e12.4)') (eso(jj,l1),jj=1,nn)
+
+! Set sign of projectors (physically irrelevant) so that they are positive
+! at their peak (needed for compaisons apparently)
+
+     do jj=1,nn
+       apk=0.0d0
+       do ii=1,mmax
+         if(abs(vso(ii,jj,l1))>apk) then
+           apk=abs(vso(ii,jj,l1))
+           ipk=ii
+         end if
+       end do
+       if(vso(ipk,jj,l1)<0.0d0) then
+         vso(:,jj,l1)=-vso(:,jj,l1)
+       end if
+       apk=0.0d0
+       do ii=1,mmax
+         if(abs(vsr(ii,jj,l1))>apk) then
+           apk=abs(vsr(ii,jj,l1))
+           ipk=ii
+         end if
+       end do
+       if(vsr(ipk,jj,l1)<0.0d0) then
+         vsr(:,jj,l1)=-vsr(:,jj,l1)
+       end if
+     end do
+
+ end do ! l1
+
+ ABI_FREE(vkbt)
+ ABI_FREE(vkbst)
+ return
+end subroutine sr_so_r
+!!***
+
+!
+! Copyright (c) 1989-2019 by D. R. Hamann, Mat-Sim Research LLC and Rutgers
+! University
+!
+!
+! This program is free software: you can redistribute it and/or modify
+! it under the terms of the GNU General Public License as published by
+! the Free Software Foundation, either version 3 of the License, or
+! (at your option) any later version.
+!
+! This program is distributed in the hope that it will be useful,
+! but WITHOUT ANY WARRANTY; without even the implied warranty of
+! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+! GNU General Public License for more details.
+!
+! You should have received a copy of the GNU General Public License
+! along with this program.  If not, see <http://www.gnu.org/licenses/>.
+!
+ subroutine vpinteg(gg,hh,nn,mm,ss,rr)
+
+ !implicit none
+ !integer, parameter :: dp=kind(1.0d0)
+
+! integrals that go into construction of Vanderbilt separable pseudopotential
+
+! product of functions gg*hh goes like rr**mm at rr -> 0
+! integral on usual log mesh from 1 to nn
+
+!Input variables
+ real(dp),intent(in) :: gg(nn),hh(nn),rr(nn)
+ integer,intent(in) :: nn,mm
+
+!Output variable
+ real(dp),intent(out) :: ss
+
+!Local variables
+ real(dp) :: r0,amesh,al
+ integer :: ii
+
+ al = 0.01d0 * dlog(rr(101)/rr(1))
+ amesh = exp(al)
+
+ r0=rr(1)/dsqrt(amesh)
+ ss=r0**(mm+1)*(gg(1)*hh(1)/rr(1)**mm)/dfloat(mm+1)
+
+ do ii = 4, nn - 3
+   ss =  ss + al*gg(ii)*hh(ii)*rr(ii)
+ end do
+
+ ss=ss + al*(23.d0*rr(nn-2)*gg(nn-2)*hh(nn-2) &
+&        + 28.d0*rr(nn-1)*gg(nn-1)*hh(nn-1) &
+&        +  9.d0*rr(nn  )*gg(nn  )*hh(nn  ))/24.d0
+
+
+ return
+ end subroutine vpinteg
 !!***
 
 end module m_pspheads

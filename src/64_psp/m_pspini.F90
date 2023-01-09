@@ -994,10 +994,11 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
 !  HGH is ok - can always turn SOC on or off.
 !  PAW is ok - can be used with or without SOC
 !  write(std_out,*) pspso
-   if((pspcod/=3).and.(pspcod/=5).and.(pspcod/=8).and.(pspcod/=10).and. (pspcod/=7).and.(pspcod/=17))then
+   if((pspcod/=3).and.(pspcod/=5).and.(pspcod/=8).and.(pspcod/=10).and. pspcod /= 12 .and. &
+      (pspcod/=7).and.(pspcod/=17))then
 !    If pspso requires internal characteristics, set it to 1 for non-HGH psps
      if(psps%pspso(ipsp)==1) psps%pspso(ipsp)=0
-     if(psps%pspso(ipsp)/=0)then
+     if(psps%pspso(ipsp) /= 0)then
        write(msg, '(3a,i0,3a)' )&
         'Pseudopotential file cannot give spin-orbit characteristics,',ch10,&
         'while pspso(itypat)= ',psps%pspso(ipsp),'.',ch10,&

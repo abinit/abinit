@@ -14,7 +14,6 @@
 
 #include "abi_common.h"
 
-
 MODULE  read_upf_new_module
   !-----------------------------------------------------
   !! this module contains the simplified code for reading
@@ -22,7 +21,7 @@ MODULE  read_upf_new_module
   !
   USE xmltools
   !USE upf_kinds, ONLY: dp
-  use defs_basis, only : dp
+  use defs_basis, only : dp, std_out
   USE pseudo_types, ONLY: pseudo_upf, pseudo_config
 
   !
@@ -864,7 +863,7 @@ SUBROUTINE upf_error( calling_routine, message, ierr )
   INTEGER,          INTENT(IN) :: ierr
 
   ABI_ERROR(message)
-  if (.False.) write(*,*)trim(calling_routine), ierr
+  if (.False.) write(std_out,*)trim(calling_routine), ierr
 
 END SUBROUTINE upf_error
 
