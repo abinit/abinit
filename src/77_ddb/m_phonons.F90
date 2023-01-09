@@ -2493,8 +2493,6 @@ end subroutine phonons_ncwrite
  real(dp) :: dummy
  character(len=300) :: formt
  character(len=500) :: msg
-!arrays
- character(len=50) :: comp_name(3)
 
 ! *************************************************************************
 
@@ -2563,12 +2561,13 @@ end subroutine phonons_ncwrite
  write (iunit, '(a)')     '# '
 
  write (formt,'(a,i0,a)') "(I5, ", nphmodes, "E20.10)"
- comp_name = (/"L_x", "L_y", "L_z"/)
  do icomp = 1, 3
-   write (iunit, '(a,a)') '# ', comp_name(icomp)
    do iq= 1, nqpts
      write (iunit, formt)  iq, phangmom(icomp,:,iq)
    end do
+   if (icomp /= 3) then
+     write (iunit, '(a,a)') ''
+   end if
  end do
 
  close(iunit)
