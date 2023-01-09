@@ -538,7 +538,9 @@ subroutine getBm1X(X,Bm1X,transposer)
  if(l_istwf == 2) then
    call xgBlock_scale(X,inv_sqrt2,1)
    if (l_paral_kgb == 0) then
-     if(l_mpi_enreg%me_g0 == 1) ghc_filter(:, 1:spacedim*blockdim:l_npw) = ghc_filter(:, 1:spacedim*blockdim:l_npw) * sqrt2
+      if(l_mpi_enreg%me_g0 == 1) then
+         ghc_filter(:, 1:spacedim*blockdim:l_npw) = ghc_filter(:, 1:spacedim*blockdim:l_npw) * sqrt2
+      end if
    else
      cpuRow = xgTransposer_getRank(transposer, 2)
      if (cpuRow == 0) then
