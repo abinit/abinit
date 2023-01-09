@@ -993,8 +993,9 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
            call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir,lambda,mpi_enreg,blocksize,nnlout,&
 &           paw_opt,signs,nonlop_dum,tim_nonlop,cwavef,cwavef)
          else
+           ! here we MUST pass option use_gpu_cuda=0, as cwavef here is a host memory buffer
            call prep_nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir,lambda,blocksize,&
-&           mpi_enreg,nnlout,paw_opt,signs,nonlop_dum,tim_nonlop_prep,cwavef,cwavef)
+&           mpi_enreg,nnlout,paw_opt,signs,nonlop_dum,tim_nonlop_prep,cwavef,cwavef,use_gpu_cuda=0)
          end if
          if ((stress_needed==1).and.(usefock_loc).and.(psps%usepaw==1))then
            call gs_hamk%load_k(ffnl_k=ffnl_str)
