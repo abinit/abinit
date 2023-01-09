@@ -1,3 +1,331 @@
+## v9.8
+
+Version 9.8, released on December 9, 2022.
+List of changes with respect to version 9.6.
+<!-- Release notes updated on December 3, 2022. -->
+
+Many thanks to the contributors to the ABINIT project between
+October 2021 and August 2022, and some late contributions up to December 2022 ! These release notes
+are relative to modifications/improvements of ABINIT v9.8 with respect to v9.6.
+<!-- Merge requests up to and including MR874. Also, MR881, 882, 885, 891, 892, and 894 are taken into account. -->
+
+The list of contributors includes:
+B. Amadon, G. Antonius, L. Baguet, S. Bandyopadhyay, L. Bastogne, J.-M. Beuken, J. Bieder, A. Blanchet, 
+F. Bottin, J. Bouchet, E. Bousquet, F. Brieuc, V. Brousseau-Couture, N. Brouwer, F. Bruneval, M. Cote, 
+C. Espejo, Ph. Ghosez, M. Giantomassi, O. Gingras, X. Gonze, B. Guster, P. Kesterner, 
+R. Outerovich, Ch. Paillard, M. Royo, A. Sasani, B. Sataric, M. Schmitt, F. Soubiran, 
+M. Torrent, M. Verstraete, He Xu, J. Zwanziger.
+
+It is worth to read carefully all the modifications that are mentioned in the present file,
+and examine the links to help files or test cases.
+This might take some time ...
+
+Xavier
+
+### **A.** Important remarks and warnings.
+
+**A.1** Warning : the input variables prtefg and prtfc have been renamed [[nucefg]] and [[nucfc]].
+
+By J. Zwanziger (MR850)
+
+**A.2**
+Within PAW in ABINIT, the ZORA relativistic factor for all PAW+spin-orbit coupling has been corrected:
+A ^2 was missing for the 1/(1-(v/c)^2) factor.
+This changes slightly all the PAW+SOC results (because the factor is very small), without any influence on physical results. 
+However, previous results cannot be anymore obtained.
+
+By M. Torrent (MR849)
+
+**A.3**
+The default value for [[rfdir]] is now (1 1 1), instead of (0 0 0).  
+The one of [[rfatpol]] is now (1 [[natom]]).
+
+By X. Gonze (MR852)
+
+* * *
+
+### **B.** Most noticeable achievements
+
+**B.1** Lattice Wannier functions can be computed, using the SCDM-k algorithm, or the projected Wannier function algorithm.
+
+The [[tutorial:lattice_wannier]] has been written to teach how to construct such lattice Wannier functions. 
+They are used in localized bases for atomic distortions. 
+One typical use case is to build an effective Hamiltonian of collective, localized, atomic displacements (see the next achievement). 
+
+A script (compare_phbands.py) to compare phonon/LWF band structures is added to the scripts/post_processing directory.
+
+Related input variables : 
+[[lwfflag@anaddb]],
+[[lwf_anchor_ibands@anaddb]],
+[[lwf_anchor_proj@anaddb]],
+[[lwf_anchor_qpt@anaddb]],
+[[lwf_disentangle@anaddb]],
+[[lwf_mu@anaddb]],
+[[lwf_ngqpt@anaddb]],
+[[lwf_nwann@anaddb]],
+[[lwf_projector@anaddb]],
+[[lwf_sigma@anaddb]].
+
+Related topic [[topic:LWFModel]].
+See tests [[test:lwf_1]], [[test:v9_110]], and [[test:v9_111]].
+
+This feature is still under heavy development. The current version should be regarded as a "technology preview". 
+
+By He Xu (MR844)
+
+**B.2** Lattice Wannier function dynamics is available inside the second-principle engine MULTIBINIT.
+
+Once Lattice Wannier functions are available, they can be used with different dynamical algorithm to deduce heat capacity, susceptibility, structural phase transition, critical temperature, instead of doing standard molecular dynamics with all atoms.
+Related input variables :
+[[lwf_constraint@multibinit]],
+[[lwf_dt@multibinit]],
+[[lwf_dynamics@multibinit]],
+[[lwf_init_state@multibinit]],
+[[lwf_init_hist_fname@multibinit]],
+lwf_mc_avg_amp@multibinit,
+[[lwf_nctime@multibinit]],
+[[lwf_ntime@multibinit]],
+[[lwf_pot_fname@multibinit]],
+[[lwf_taut@multibinit]],
+lwf_temperature@multibinit,
+[[lwf_temperature_end@multibinit]],
+[[lwf_temperature_nstep@multibinit]],
+[[lwf_temperature_start@multibinit]],
+[[lwf_var_temperature@multibinit]].
+
+See the tutorial [[tutorial:lwf_model]] and related tests.
+
+This feature is still under heavy development. The current version should be regarded as a "technology preview". 
+
+By He Xu (MR851)
+
+**B.3** Numerous miscellaneous improvements of the second-principle engine MULTIBINIT.
+
+Hybrid Monte-Carlo Mover with NPT ensemble ([[ionmov]]=25).
+
+MULTIBINIT can now be used without 'files' file, as the main ABINIT or ANADDB. 
+Related input variables [[latt_pot_fname@multibinit]], [[latt_harm_pot_fname@multibinit]], 
+[[latt_anharm_pot_fname@multibinit]], [[latt_training_set_fname@multibinit]], 
+[[latt_test_set_fname@multibinit]], [[spin_pot_fname@multibinit]], [[spin_init_hist_fname@multibinit]], [[slc_pot_fname@multibinit]],
+[[outdata_prefix@multibinit]].
+
+The MULTIBINIT tutorial has been improved. In particular, it is now starting with a global introduction ([[tutorial:multibinit]]).  
+
+The following MULTIBINIT features and input variables have been introduced :
+define oblique supercells ([[ncellmat@multibinit]]), print Goal-Function values in CSV format ([[prt_GF_csv@multibinit]]), 
+impose the seed for MULTIBINIT spin/LWF dynamics to obtain reproducible results ([[randomseed@multibinit]]),
+specify three weights for Energy, Forces and Stresses in the calculation of the Goal Function ([[bound_factors@multibinit]]),
+specify three weights for Energy, Forces and Stresses in the calculation of the Goal Function during the fit process ([[fit_factors@multibinit]]),
+specify three weights for Energy, Forces and Stresses in the calculation of the Goal Function during the optimization process ([[opt_factors@multibinit]]),
+specify the relative penalty for the determination of bounding coefficient values ([[bound_penalty@multibinit]]),
+activate the generation of pure displacement coefficients ([[fit_dispterms@multibinit]]), 
+specify the number of anharmonic coefficients per symmetric irreducible atom to add during fit process ([[fit_ncoeff_per_iatom@multibinit]]),
+specify the number of coefficients imposed with fixed value as in the input xml during the fit process for the mode
+([[fit_nimposecoeff@multibinit]]),
+specify the indices of the imposed coefficients with fixed coefficient value during the fit process for the model ([[fit_imposecoeff@multibinit]]),
+
+See the tests in which these input variables are used. 
+
+By He Xu, M. Schmitt, A. Sasani, L. Bastogne, S. Bandyopadhyay, and P. Ghosez (MR812, 851, 868, 894)
+
+
+**B.4** The TDEP formalism implemented in ABINIT (aTDEP), allowing to compute temperature-dependent phonon band structures,
+ has been made more robust, and tested extensively. One tutorial ([[tutorial:atdep1]]) is now available.
+See the thirty-seven tests from [[test:atdep_01]] to [[test:atdep_37]] and the tests mentioned in the 
+tutorial [[tutorial:atdep1]]. Related publication, see [[cite:Bottin2020]].
+
+By F. Bottin, J. Bieder and J. Bouchet (MR 836).
+
+
+**B.5** 
+The conducti utility can treat Spin-Orbit Coupling for transport properties (within PAW) : conductivity, XANES, transport coefficients, ...
+See [[cite:Brouwer2021]].
+The writing of documentation and tutorial is in progress.
+
+By M. Torrent and N. Brouwer (MR849).
+
+* * *
+
+### **C.** Changes for the developers (including information about compilers)
+
+**C.1** Added support for NAG 7.1
+
+From J.-M. Beuken (MR830).
+
+**C.2** Update build system to allow the use of NVTX library, providing profiling annotations (only when gpu is enabled). 
+This makes more readable profiling and tracing information when viewed with nsys-ui. 
+Add new parameter [[use_nvtx]] to enable/disable nvtx annotations at runtime. 
+If abinit is built without gpu, annotations completely vanish at compile time.
+
+From P. Kestener (MR843)
+
+**C.3** Improve detection of inlined macros. The developers should now use 
+
+    ABI_SFREE(allocateble_array)
+
+instead of
+
+    if(allocated(allocatable_array)) ABI_FREE(allocatable_array)
+
+From M. Giantomassi (MR859)
+
+**C.4** The DDB IO routines have been refactored throughout the different main codes
+(respfn, gstate, anaddb, nonlineal, longwave, ddb_interpolate, gruns_new, thmeig).
+The ddb merging routines have been refactored (merge_ddb replaces mblktyp1 and mblktyp5).
+New MPI treatment of ddb reading (no more free-for-all reading).
+Removed several arguments of ddb_from_file: natom, natifc and atifc.
+Moved routine dfptnl_doutput from m_ddb to m_nonlinear. Remove dfpt_lw_doutput .
+
+From G. Antonius (MR872)
+
+**C.5** Suppressed CHILDREN and PARENTS sections in ROBODOC header.
+They were not maintained automatically anymore, so many had become misleading.
+
+From X. Gonze (MR874)
+
+**C.6**  
+A new type of file 'GSTORE' has been introduced,  for the electron-phonon matrix element storage, where it is taken advantage
+of filters (on energy or band or wavevectors) to reduce the size compared to the more usual EIG1 file type.
+It contains also the related metadata.
+Related input variables : [[getgstore_filepath]], [[gstore_cplex]], [[gstore_with_vk]], [[gstore_kzone]], [[gstore_qzone]],
+[[gstore_kfilter]], [[gstore_brange]], [[gstore_erange]].
+
+By M. Giantomassi (MR870)
+
+
+* * *
+
+### **D.**  Other changes (or on-going developments, not yet finalized)
+
+**D.1** New tutorial on the use of the Z2pack postprocessor ([[tutorial:z2pack]]).
+In this tutorial, the topological transition from Z2 trivial to Z2 non-trivial under pressure is reproduced. 
+A test has been added but one needs to install z2pack to test it. See doc/tests/tutoplugs/z2.py, and [[tutorial:z2pack]].
+
+From O. Gingras, V. Brousseau-Couture and M. Cote (MR 871)
+
+**D.2** Improved the Wannier90 tutorial ([[tutorial:wannier90]]).
+There is a new part, that describes projecting the band structure of La$_2$CuO$_4$ to a single orbital 
+($d_{x^2-y^2}$) Hamiltonian. 
+This is the first step in order the study the Mott transition in La$_2$CuO$_4$ using DFT+DMFT. 
+From this step, one can use TRIQS to study the Mott transition.
+
+From O. Gingras (MR 871)
+
+**D.3** Make abinit compile and run with libxc v6
+
+From M. Torrent (MR885)
+
+**D.4** Modified [[optcell]]=4,5,6 to allow for relaxation of a vectors length and angle without constraining it to be orthogonal to the three others
+
+From C. Paillard (MR858)
+
+**D.5** New input variable for Optic, [[nband_sum@optic]], allowing to select the maximal number of bands included. This is convenient for convergence studies.
+
+From M. Giantomassi (MR817)
+
+**D.6** Implementation of Chebyshev filtering algorithm, version 2.
+
+From B. Sataric, J. Bieder, and M. Torrent (MR 826)
+
+**D.7** Miscellaneous improvements of the iterative Boltzmann transport equation coding. Input variable [[ibte_alpha_mix]].
+
+From M. Giantomassi (MR821)
+
+**D.8** Improvements related to electron-phonon interaction.
+
+Miscellaneous improvement of the electron-phonon part of ABINIT (documentation, bug fixes, improved parallelism)
+
+Work in progress : a new tutorial [[tutorial:eph4isotc]] 
+to demonstrate the computation of superconducting properties within the isotropic Eliashberg formalism.
+See tests in the [[tutorial:eph4isotc]].
+
+By M. Giantomassi (MR870)
+
+**D.9** Improvements of the cRPA determination of the U and J parameters (default keywords, tests and tutos). 
+
+From R. Outerovich (MR835)
+
+**D.10** Work on Real-time Time-Dependent Density Functional Theory implementation within ABINIT.
+
+From F. Brieuc (MR853)
+
+**D.11** Test of the Zero-point renormalization for hexagonal systems (Frohlich generalized model). See [[test:v8_60]].
+
+From B. Guster (MR815)
+
+**D.12** Implement [[chksymtnons]]=3 : FFT grid and spatial symmetry operations are coherent.
+
+From X. Gonze (MR828)
+
+**D.13** Improvement of VdW-DF.
+Corrections to the implementation of vdW-DF non-local functional found in files 56_xc_/m_xc_vdw.F90 and 98_main/vdw_kernelgen have been done, also several debugging lines have been included. From a careful comparison of the computed quantities from a pre-calculated density and gradient obtained with Siesta, it has been observed that Abinit is getting the correct numbers up to the final 3D FFTs which still present differences that lead to incorrect values for the vdW-DF correlation energy.
+
+From C. Espejo (MR829)
+
+**D.14** 
+Make use of gvnlxc optional in getghc, which allows memory savings in lobpcg2 and chebfi2. Could be useful in other parts of the code.
+
+From L. Baguet (MR831)
+
+**D.15**
+Miscellaneous changes in DMFT: keyword for Wannier orthonormalisation, 
+implementation of calculation of the weight of configuration in CTMQC, 
+double counting for chargeonly DFT+DMFT ([[dmft_dc]]=6), work in progress concerning alternate calculation of electronic entropy in DMFT. 
+
+From B. Amadon and R. Outerovich (MR833) 
+
+**D.16**
+Move DDK reading outside of loop for non var matrix element calculations. Should be much more efficient IO.
+
+From M. Verstraete (MR840)
+
+**D.17**
+Use wfdgw_t subclass in GW/BSE code. This is needed so that the wfd in EPH does not allocate bks_tab whose size scales badly with nprocs and nkibz.
+ 
+From M. Giantomassi (MR841)
+
+**D.18**
+Add spinat to GSR.nc
+
+From M. Giantomassi (MR842)
+
+**D.19** Orbital magnetism progress 
+
+From J. Zwanziger (MR847)
+
+**D.20** Fix [[prtwf]] and [[prtpot]] in DFPT 
+
+From M. Giantomassi (MR848).
+
+**D.21** Improved ABINIT+TRIQS python invocation interface.
+
+From O. Gingras (MR851)
+
+**D.22** Bug fixes for PAW+Hybrid
+
+From F. Bruneval and F. Soubiran (MR854)
+
+**D.23** Improvements of the Frohlich model implementation (e.g. dielectric average decomposition).
+
+From B. Guster (MR860)
+
+**D.24** Bug fix of DFT+U in the non-collinear case
+
+From E. Bousquet (MR881)
+
+**D.25** GPU coding : inverse overlap matrix, and non-local operator
+
+From P. Kestener (MR843 and 869)
+
+**D.26** Miscellaneous additional bug fixes, typos fixes, or upgrade of build system.
+
+By F. Goudreault (MR816), M. Giantomassi (MR821 and 845), P. Kestener (MR827 and 843), 
+A. Blanchet (MR832), C. Paillard (MR834), M. Verstraete (MR837),
+M. Torrent (MR838 and 873), B. Seddon and X. Gonze (MR839 and 855), L. Baguet (MR857),
+J.-M. Beuken (MR882).
+
+* * *
+
 ## v9.6
 
 Version 9.6, released on October 4, 2021.
@@ -72,7 +400,7 @@ By X. Gonze (MR802)
 
 **B.5** The computation of effective mass renormalization due to electron-phonon coupling, treated in the generalized Frohlich model,
 is now available, for cubic materials. An article has been submitted, see <https:arxiv.org/abs/2109.12594>.
-Activate it using [[eph_task]]=10.
+Activate it using [[eph_task]]=10. 
 
 See test [[test:v9_66]].
 
