@@ -709,12 +709,12 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 #if defined HAVE_GPU_CUDA
      !call wrtout(std_out, "Calling gemm_nonlop_gpu")
      call gemm_nonlop_gpu(atindx1_, choice, cpopt, cprjin_, dimenl1, dimenl2_, dimekbq, &
-       &                  dimffnlin,dimffnlout, &
-       &                  enl_,indlmn_,istwf_k, &
+       &                  dimffnlin, dimffnlout, &
+       &                  enl_, indlmn_, istwf_k, &
        &                  lambda, hamk%lmnmax, matblk_, &
        &                  mpi_enreg, natom_, nattyp_, ndat, nkpgin, nkpgout, &
        &                  nnlout, npwin, npwout, my_nspinor, hamk%nspinor, ntypat_, paw_opt, &
-       &                  sij_,svectout, &
+       &                  sij_, svectout, &
        &                  hamk%useylm, vectin, vectout, &
        &                  hamk%use_gpu_cuda)
 #else

@@ -740,10 +740,12 @@ subroutine apply_invovl(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_enreg, 
   paw_opt = 3 ! S nonlocal operator
   if (mpi_enreg%paral_kgb==1) then
     call prep_nonlop(choice,cpopt,cwaveprj_in,enlout,ham,idir,lambda_block,ndat,mpi_enreg,&
-      &                   nnlout,paw_opt,signs,sm1cwavef,tim_nonlop,cwavef,gvnlxc,already_transposed=.true.)
+      &                   nnlout,paw_opt,signs,sm1cwavef,tim_nonlop,cwavef,gvnlxc,&
+      &                   already_transposed=.true.,&
+      &                   use_gpu_cuda=ham%use_gpu_cuda)
   else
-    call nonlop(choice,cpopt,cwaveprj_in,enlout,ham,idir,lambda_block,mpi_enreg,ndat,nnlout,&
-      &              paw_opt,signs,sm1cwavef,tim_nonlop,cwavef,gvnlxc)
+    call nonlop(choice,cpopt,cwaveprj_in,enlout,ham,idir,lambda_block,mpi_enreg,ndat,&
+      &              nnlout,paw_opt,signs,sm1cwavef,tim_nonlop,cwavef,gvnlxc)
   end if
   ABI_NVTX_END_RANGE()
 
