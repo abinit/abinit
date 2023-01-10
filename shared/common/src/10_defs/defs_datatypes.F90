@@ -412,15 +412,14 @@ module defs_datatypes
 
   real(dp), allocatable :: ekb(:,:)
    ! ekb(dimekb,ntypat*(1-usepaw))
-   !  ->NORM-CONSERVING PSPS ONLY:
+   ! NORM-CONSERVING PSPS ONLY:
    !    (Real) Kleinman-Bylander energies (hartree)
    !           for number of basis functions (l,n) (lnmax)
    !           and number of atom types (ntypat)
-   ! NOTE (MT) : ekb (norm-conserving) is now diagonal (one dimension
-   !             lnmax); it would be easy to give it a second
-   !             (symmetric) dimension by putting
-   !             dimekb=lnmax*(lnmax+1)/2
-   !             in the place of dimekb=lmnmax.
+   ! NOTE (MT):
+   !   ekb (norm-conserving) is now diagonal (one dimension lnmax);
+   !   it would be easy to give it a second (symmetric) dimension by putting
+   !   dimekb=lnmax*(lnmax+1)/2 in the place of dimekb=lmnmax.
 
   real(dp), allocatable :: ffspl(:,:,:,:)
    ! ffspl(mqgrid_ff,2,lnmax,ntypat)

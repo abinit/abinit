@@ -2362,8 +2362,8 @@ subroutine getdim_nloc(lmnmax,lmnmaxso,lnmax,lnmaxso,mixalch,nimage,npsp,npspalc
 !if (lmnmaxso<llmax) lmnmaxso=llmax
 
  write(msg, '(a,a,i4,a,i4,3a,i4,a,i4,a)' ) ch10,&
-& ' getdim_nloc : deduce lmnmax  =',lmnmax,', lnmax  =',lnmax,',',ch10,&
-& '                      lmnmaxso=',lmnmaxso,', lnmaxso=',lnmaxso,'.'
+ ' getdim_nloc: deduce lmnmax  =',lmnmax,', lnmax  =',lnmax,',',ch10,&
+ '                      lmnmaxso=',lmnmaxso,', lnmaxso=',lnmaxso,'.'
  call wrtout(std_out,msg)
 
  ABI_FREE(lmnproj_typat)

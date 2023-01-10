@@ -68,9 +68,9 @@ contains
 !!  qgrid(mqgrid)=values of q (or |G|) on grid from 0 to qmax
 !!  qgrid_vl(psps%mqgrid_vl)=values of q on grid from 0 to qmax (bohr^-1) for valence charge
 !!  pspso=spin-orbit characteristics, govern the content of ffspl and ekb
-!!   if =0 : this input requires NO spin-orbit characteristics of the psp
-!!   if =2 : this input requires HGH or psp8 characteristics of the psp
-!!   if =3 : this input requires HFN characteristics of the psp
+!!    if =0: this input requires no spin-orbit characteristics of the psp
+!!    if =2: this input requires hgh or psp8/upf2 characteristics of the psp
+!!    if =3: this input requires hfn characteristics of the psp
 !!  useylm=governs the way the nonlocal operator is to be applied:
 !!         1=using Ylm, 0=using Legendre polynomials
 !!  zion=nominal valence of atom as specified in psp file
@@ -226,21 +226,22 @@ subroutine psp8in(ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
    ABI_ERROR(msg)
  end if
 
- pspindex=0; iln=0; indlmn(:,:)=0
+ pspindex=0; iln=0; indlmn=0
  do nn=1,nso
    do ipsang=1+(nn-1)*(lmax+1),nn*lmax+1
-     ll=ipsang-(nn-1)*lmax-1
+     ll = ipsang-(nn-1)*lmax-1
      if (nproj_tmp(ipsang)>0) then
        do kk=1,nproj_tmp(ipsang)
-         iln=iln+1
+         iln = iln+1
          do mm=1,2*ll*useylm+1
-           pspindex=pspindex+1
-           indlmn(1,pspindex)=ll
-           indlmn(2,pspindex)=mm-ll*useylm-1
-           indlmn(3,pspindex)=kk
-           indlmn(4,pspindex)=ll*ll+(1-useylm)*ll+mm
-           indlmn(5,pspindex)=iln
-           indlmn(6,pspindex)=nn
+           pspindex = pspindex + 1
+           indlmn(1,pspindex) = ll
+           indlmn(2,pspindex) = mm-ll*useylm-1
+           indlmn(3,pspindex) = kk
+           indlmn(4,pspindex) = ll*ll+(1-useylm)*ll+mm
+           indlmn(5,pspindex) = iln
+           indlmn(6,pspindex) = nn
+           !print *, "indlmn:", indlmn(:,pspindex), "pspindex:", pspindex
          end do
        end do
      end if

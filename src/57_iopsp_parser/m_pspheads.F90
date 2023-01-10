@@ -43,6 +43,8 @@ MODULE m_pspheads
  use m_fstrings,     only : basename, lstrip, sjoin, startswith, atoi, itoa, ftoa
  use m_pawpsp,       only : pawpsp_read_header_xml,pawpsp_read_pawheader
  use m_pawxmlps,     only : rdpawpsxml,rdpawpsxml_header, paw_setup_free,paw_setuploc
+ use pseudo_types,    only : pseudo_upf, deallocate_pseudo_upf !, pseudo_config
+ use read_upf_new_module, only : read_upf_new
 
  implicit none
 
@@ -53,6 +55,7 @@ MODULE m_pspheads
  public :: pspheads_comm   ! Communicate pspheads to all processors
  public :: pawpsxml2ab
 
+ public :: upf2_jl2srso
  public :: upfxc2abi       ! UPF XcC to Abinit pspxc (DEPRECATED. Only used for UPF1)
  public :: upfdft_to_ixc   ! UPF2 dft to Abinit pspxc.
 
@@ -866,9 +869,6 @@ end subroutine upf1_to_psphead
 
 subroutine upf2_to_psphead(filpsp, znucl, zion, pspxc, lmax, n1xccc, nproj_l, nprojso_l)
 
-  use pseudo_types, only : pseudo_upf, deallocate_pseudo_upf !, pseudo_config
-  use read_upf_new_module, only : read_upf_new
-
 !Arguments -------------------------------
  character(len=fnlen), intent(in) :: filpsp
  integer,intent(inout) :: n1xccc
@@ -878,16 +878,14 @@ subroutine upf2_to_psphead(filpsp, znucl, zion, pspxc, lmax, n1xccc, nproj_l, np
  integer,intent(out) :: nproj_l(0:3), nprojso_l(1:3)
 
 !Local variables -------------------------
- integer :: ierr , iprj, ii, ll, l1, il, ik, mmax, irad, mxprj
- real(dp) :: amesh, damesh, jtot !yp1, ypn,
- real(dp) :: eps_srso
+ integer :: ierr , iprj, ii, ll, mmax, irad
+ real(dp) :: amesh, damesh
  character(len=500) :: msg
  logical :: linear_mesh
  type(pseudo_upf) :: upf
  type(atomdata_t) :: atom
 ! arrays
-integer :: irc6(6),nproj6(6), done_ilk(6,2)
- real(dp),allocatable :: vkb(:,:,:,:), evkb(:,:,:), vsr(:,:,:), esr(:,:), vso(:,:,:), eso(:,:)
+ real(dp),allocatable :: vsr(:,:,:), esr(:,:), vso(:,:,:), eso(:,:)
 
 ! *********************************************************************
 
@@ -903,7 +901,6 @@ integer :: irc6(6),nproj6(6), done_ilk(6,2)
 
  ! Consistency check
  ABI_CHECK(upf%typ == "NC", sjoin("Only NC pseudos in UPF2 format are supported while type is:", upf%typ))
- !ABI_CHECK(upf%rel /= "full", sjoin("Relativistic NC UPF2 pseudos are supported. rel is:", upf%rel))
  ABI_CHECK(upfdft_to_ixc(upf%dft, pspxc, msg) == 0, msg)
  if (.not. upf%nlcc) n1xccc = 0
 
@@ -933,89 +930,144 @@ integer :: irc6(6),nproj6(6), done_ilk(6,2)
 
  else
    ! Pseudo in j = l + s representation.
-   !call upf2_jl2soc(upf, mmax, mxprj, nproj_l, nprojso_l, esr, vsr, vso, eso)
-   irc6 = zero; nproj6 = zero
-   do iprj=1,upf%nbeta
-     ll = upf%lll(iprj)
-     nproj6(ll+1) = nproj6(ll+1) + 1
-     !irc6(ll+1) = max(upf%kbeta(iprj), irc6(ll+1))
-     irc6(ll+1) = mmax
-   end do
+   call upf2_jl2srso(upf, nproj_l, nprojso_l, vsr, esr, vso, eso)
 
-   ! Divide by two for l > 0 as this is sr_so_r expects.
-   nproj6(2:) = nproj6(2:) / 2
-   mxprj = maxval(nproj6)
-
-   ABI_MALLOC(vkb, (mmax,mxprj,4,2))
-   ABI_MALLOC(evkb, (mxprj,4,2))
-   ABI_MALLOC(vsr, (mmax,2*mxprj,4))
-   ABI_MALLOC(esr, (2*mxprj,4))
-   ABI_MALLOC(vso, (mmax,2*mxprj,4))
-   ABI_MALLOC(eso, (2*mxprj,4))
-
-   done_ilk = 0
-   do iprj=1,upf%nbeta
-     jtot = upf%jjj(iprj)
-     ll = upf%lll(iprj)
-     il = ll + 1
-     if (ll == 0) then
-       ik = 1
-     else
-       ! l+1/2 --> ik 1, l-1/2 --> ik 2
-       if (abs(jtot - (ll + half)) < tol6) then
-         ik = 1
-       else if (abs(jtot - (ll - half)) < tol6) then
-         ik = 2
-       else
-         ABI_ERROR(sjoin("Cannot detect ik index from jtot:", ftoa(jtot)))
-       end if
-     end if
-
-     done_ilk(il, ik) = done_ilk(il, ik) + 1
-     ii = done_ilk(il, ik)
-     evkb(ii,il,ik) = upf%dion(iprj,iprj) * half  ! convert from Rydberg to Ha
-     vkb(:,ii,il,ik) = upf%beta(:,iprj)
-   end do
-
-   call sr_so_r(lmax, irc6, nproj6, upf%r, mmax, mxprj, evkb, vkb, vsr, esr, vso, eso)
-
-   ! set smallest components to zero (following the approach used in oncvpsp)
-   eps_srso=1.0d-3
-   do l1=1,lmax+1
-     if (nproj6(l1) > 0) then
-       do iprj=2,2*nproj6(l1)
-         if (abs(esr(iprj,l1)) < eps_srso*abs(esr(1,l1))) esr(iprj,l1) = 0.0d0
-         if (l1 == 1) cycle
-         if (abs(eso(iprj,l1)) < eps_srso*abs(eso(1,l1))) eso(iprj,l1) = 0.0d0
-       end do
-     end if
-   end do
-
-   ! set up projector number for sr_so calculations based on non-zero coefficients
-   ! note that energies and projectors have been sorted sr_so_r
-   ! so the relevant projectors are packed in the first positions.
-   do l1=1,lmax+1
-    ll = l1 - 1
-    do ii=1,2*nproj6(l1)
-     if (abs(esr(ii,l1)) > 0.0d0) nproj_l(ll) = nproj_l(ll) + 1
-     if (abs(eso(ii,l1)) > 0.0d0) nprojso_l(ll) = nprojso_l(ll) + 1
-    end do
-    !write(std_out,'(a,3i4)') 'll,nproj_l,nprojso_l',ll,nproj_l(l1),nprojso_l(l1)
-   end do
-
-   ABI_FREE(vkb)
-   ABI_FREE(evkb)
    ABI_FREE(vsr)
    ABI_FREE(esr)
    ABI_FREE(vso)
    ABI_FREE(eso)
-
-   !ABI_WARNING("UPF2 with SOC")
  end if
 
  call deallocate_pseudo_upf(upf)
 
 end subroutine upf2_to_psphead
+!!***
+
+!!****f* m_pspheads/upf2_jl2srso
+!! NAME
+!! upf2_jl2srso
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine upf2_jl2srso(upf, nproj_l, nprojso_l, vsr, esr, vso, eso)
+
+!Arguments -------------------------------
+ type(pseudo_upf),intent(in) :: upf
+!arrays
+ integer,intent(out) :: nproj_l(0:3), nprojso_l(1:3)
+ real(dp),allocatable,intent(out) :: vsr(:,:,:), esr(:,:), vso(:,:,:), eso(:,:)
+
+!Local variables -------------------------
+ integer :: iprj, ii, ll, l1, il, ik, lmax, mmax, mxprj
+ real(dp) :: jtot, eps_srso, eprmin
+ character(len=500) :: msg
+! arrays
+integer :: irc6(6),nproj6(6), done_ilk(6,2)
+ real(dp),allocatable :: vkb(:,:,:,:), evkb(:,:,:)
+
+! *********************************************************************
+
+ lmax = upf%lmax; mmax = upf%mesh
+ nproj_l = 0; nprojso_l = 0
+
+ ! Pseudo in j = l + s representation.
+ irc6 = zero; nproj6 = zero
+ do iprj=1,upf%nbeta
+   ll = upf%lll(iprj)
+   nproj6(ll+1) = nproj6(ll+1) + 1
+   !irc6(ll+1) = max(upf%kbeta(iprj), irc6(ll+1))
+   irc6(ll+1) = mmax
+ end do
+
+ ! Divide by two for l > 0 as this is sr_so_r expects.
+ nproj6(2:) = nproj6(2:) / 2
+ mxprj = maxval(nproj6)
+
+ ABI_MALLOC(vkb, (mmax,mxprj,4,2))
+ ABI_MALLOC(evkb, (mxprj,4,2))
+ ABI_MALLOC(vsr, (mmax,2*mxprj,4))
+ ABI_MALLOC(esr, (2*mxprj,4))
+ ABI_MALLOC(vso, (mmax,2*mxprj,4))
+ ABI_MALLOC(eso, (2*mxprj,4))
+
+ done_ilk = 0
+ do iprj=1,upf%nbeta
+   jtot = upf%jjj(iprj)
+   ll = upf%lll(iprj)
+   il = ll + 1
+   if (ll == 0) then
+     ik = 1
+   else
+     ! l+1/2 --> ik 1, l-1/2 --> ik 2
+     if (abs(jtot - (ll + half)) < tol6) then
+       ik = 1
+     else if (abs(jtot - (ll - half)) < tol6) then
+       ik = 2
+     else
+       ABI_ERROR(sjoin("Cannot detect ik index from jtot:", ftoa(jtot)))
+     end if
+   end if
+
+   done_ilk(il, ik) = done_ilk(il, ik) + 1
+   ii = done_ilk(il, ik)
+   evkb(ii,il,ik) = upf%dion(iprj,iprj) * half  ! convert from Rydberg to Ha
+   vkb(:,ii,il,ik) = upf%beta(:,iprj)
+ end do
+
+ call sr_so_r(lmax, irc6, nproj6, upf%r, mmax, mxprj, evkb, vkb, vsr, esr, vso, eso)
+
+ ! MG: This is done in oncvpsp 3.3 but not in oncvpsp4
+ ! drop sr, so orthonormal projectors with neglibible coefficients
+ ! modify cutoff if desired
+
+ eprmin=2.0d-5
+ write(std_out,'(/a,1p,e10.2,a)') 'Orthonormal projectors with coefficients <', &
+     eprmin,' Ha will be dropped'
+
+ do l1=1,lmax+1
+  if(abs(esr(3,l1))<eprmin) esr(3,l1)=0.0d0
+  if(abs(esr(4,l1))<eprmin) esr(4,l1)=0.0d0
+  if(abs(eso(3,l1))<eprmin) eso(3,l1)=0.0d0
+  if(abs(eso(4,l1))<eprmin) eso(4,l1)=0.0d0
+ end do
+
+#if 0
+ ! MG: This is done in oncvpsp 4 but not in oncvpsp 3.3
+ ! set smallest components to zero (following the approach used in oncvpsp)
+ eps_srso=1.0d-3
+ do l1=1,lmax+1
+   if (nproj6(l1) > 0) then
+     do iprj=2,2*nproj6(l1)
+       if (abs(esr(iprj,l1)) < eps_srso*abs(esr(1,l1))) esr(iprj,l1) = 0.0d0
+       if (l1 == 1) cycle
+       if (abs(eso(iprj,l1)) < eps_srso*abs(eso(1,l1))) eso(iprj,l1) = 0.0d0
+     end do
+   end if
+ end do
+#endif
+
+ ! set up projector number for sr_so calculations based on non-zero coefficients
+ ! note that energies and projectors have been sorted sr_so_r
+ ! so the relevant projectors are packed in the first positions.
+ do l1=1,lmax+1
+   ll = l1 - 1
+   do ii=1,2*nproj6(l1)
+    if (abs(esr(ii,l1)) > 0.0d0) nproj_l(ll) = nproj_l(ll) + 1
+    if (abs(eso(ii,l1)) > 0.0d0) nprojso_l(ll) = nprojso_l(ll) + 1
+   end do
+   !write(std_out, '(a,3(i0,1x))')' ll, nproj_l, nprojso_l',ll, nproj_l(ll), nprojso_l(ll)
+ end do
+
+ ABI_FREE(vkb)
+ ABI_FREE(evkb)
+
+end subroutine upf2_jl2srso
 !!***
 
 !!****f* m_pspheads/upfxc2abi
@@ -1144,7 +1196,7 @@ integer function upfdft_to_ixc(dft, ixc, msg) result(ierr)
  case ("PZ")
    ixc = -001009
  case ("PBE")
-   ixc = -101130
+   ixc = -101130 !; ixc = 11
  case ("PW91")
    ixc = -109134
  case ("PBESOL")
