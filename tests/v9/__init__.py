@@ -137,4 +137,5 @@ inp_files = [
     # GS PAW Hybrid functionals
     "t120.abi",  # test PBE0 and related functionals with PAW
     "t130.abi",  # UPF2
+    "t131.abi",  # UPF2 with SOC
 ]

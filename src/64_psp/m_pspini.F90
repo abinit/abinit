@@ -789,7 +789,7 @@ end subroutine pspcor
 !! SOURCE
 
 subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
-&  psps,vlspl,dvlspl,xcccrc,xccc1d,nctab,comm_mpi)
+                  psps,vlspl,dvlspl,xcccrc,xccc1d,nctab,comm_mpi)
 
 !Arguments ---------------------------------------------
 !scalars
@@ -971,7 +971,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
                        psps, epsatm, xcccrc, indlmn, ekb, ffspl, nproj, vlspl, xccc1d)
      else
        pspcod = 12
-       call upf2_to_abinit(psps%filpsp(ipsp), znucl, zion, pspxc, lmax, lloc, mmax, &
+       call upf2_to_abinit(ipsp, psps%filpsp(ipsp), znucl, zion, pspxc, lmax, lloc, mmax, &
                            psps, epsatm, xcccrc, indlmn, ekb, ffspl, nproj, vlspl, xccc1d, nctab, maxrad)
 
        if (nc_debug) then
@@ -1213,6 +1213,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
    if (pspcod/=7.and.pspcod/=17) then
      write(msg, '(a,f14.8,a,a)' ) '  pspatm : epsatm=',epsatm,ch10,'         --- l  ekb(1:nproj) -->'
      call wrtout([std_out, ab_out], msg)
+     !print *, "nproj", nproj
      iln0=0
      do ilmn=1,psps%lmnmax
        iln=indlmn(5,ilmn)
@@ -1222,6 +1223,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
            iln0=iln0+nproj(il+1)
            write(msg, '(13x,i1,4f12.6)' ) il,(ekb(iln+ii),ii=0,nproj(il+1)-1)
          else
+           ! Note il = ll here i.e. the s channel in the SOC part is not included in nproj.
            iln0=iln0+nproj(il+psps%mpsang)
            if (dtset%spnorbscl /= one) then
              call wrtout([std_out, ab_out], &

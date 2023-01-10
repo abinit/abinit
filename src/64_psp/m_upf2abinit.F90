@@ -326,16 +326,17 @@ end subroutine upf1_to_abinit
 !!
 !! SOURCE
 
-subroutine upf2_to_abinit(filpsp, znucl, zion, pspxc, lmax, lloc, mmax, &
+subroutine upf2_to_abinit(ipsp, filpsp, znucl, zion, pspxc, lmax, lloc, mmax, &
                           psps, epsatm, xcccrc, indlmn, ekb, ffspl, nproj_l, vlspl, xccc1d, nctab, maxrad)
 
  use pseudo_types,        only : pseudo_upf, deallocate_pseudo_upf !, pseudo_config
  use read_upf_new_module, only : read_upf_new
  use defs_datatypes,      only : nctab_t
  use m_psps,              only : nctab_eval_tvalespl
- use m_pspheads,          only : upfdft_to_ixc
+ use m_pspheads,          only : upfdft_to_ixc, upf2_jl2srso
 
 !Arguments -------------------------------
+ integer,intent(in) :: ipsp
  character(len=fnlen), intent(in) :: filpsp
  type(pseudopotential_type),intent(in) :: psps
  type(nctab_t),intent(inout) :: nctab
@@ -350,17 +351,19 @@ subroutine upf2_to_abinit(filpsp, znucl, zion, pspxc, lmax, lloc, mmax, &
  real(dp), intent(inout) :: xccc1d(psps%n1xccc,6)
 
 !Local variables -------------------------
- integer :: ierr, ir, irad, iproj, ll, smooth_niter
+ integer :: ierr, ir, irad, iprj, il, ll, smooth_niter, nso, nn, iln, kk, mm, pspindex, ipsang
  real(dp) :: yp1, ypn, amesh, damesh
  character(len=500) :: msg
  logical :: linear_mesh
  type(pseudo_upf) :: upf
  type(atomdata_t) :: atom
  type(pawrad_type) :: mesh
- integer :: nproj_tmp(psps%mpssoang)
+ integer :: my_nproj_l(0:3), my_nprojso_l(1:3)
+ !integer :: nproj_tmp(psps%mpssoang)
  logical,allocatable :: found_l(:)
  real(dp),allocatable :: work_space(:),work_spl(:)
  real(dp),allocatable :: ff(:), ff1(:), ff2(:), rad_cc(:), proj(:,:)
+ real(dp),allocatable :: vsr(:,:,:), esr(:,:), vso(:,:,:), eso(:,:)
 
 ! *********************************************************************
 
@@ -380,6 +383,14 @@ subroutine upf2_to_abinit(filpsp, znucl, zion, pspxc, lmax, lloc, mmax, &
 
  ABI_CHECK(upfdft_to_ixc(upf%dft, pspxc, msg) == 0, msg)
  lmax = upf%lmax
+
+ ! Write some description of file
+ write(msg, '(3(a,1x))' ) '-',trim(upf%psd), trim(upf%generated)
+ call wrtout([std_out, ab_out], msg)
+ write(msg,'(a,f9.5,f10.5,2x,a,t47,a)')'-',znucl,zion,trim(upf%date),'znucl, zion, pspdat'
+ call wrtout([std_out, ab_out], msg)
+ write(msg, '(5(i0,1x),t47,a)' ) 12, pspxc, lmax, upf%lloc, mmax,'pspcod,pspxc,lmax,lloc,mmax'
+ call wrtout([std_out, ab_out], msg)
 
  ! Check that rad grid is linear starting at zero
  linear_mesh = .True.
@@ -439,14 +450,14 @@ subroutine upf2_to_abinit(filpsp, znucl, zion, pspxc, lmax, lloc, mmax, &
  ABI_FREE(work_spl)
 
  nproj_l = 0
- if (.not. upf%has_so) then
 
-   do iproj=1,upf%nbeta
-     ll = upf%lll(iproj)
+ if (.not. upf%has_so) then
+   do iprj=1,upf%nbeta
+     ll = upf%lll(iprj)
      nproj_l(ll+1) = nproj_l(ll+1) + 1
    end do
-   !write(msg, '(a,5i6)' ) '     nproj',nproj_l(1:lmax+1)
-   !call wrtout([std_out, ab_out], msg)
+   write(msg, '(a,*(i6))' ) '     nproj',nproj_l
+   call wrtout([std_out, ab_out], msg)
 
    ! shape = dimekb  vs. shape = n_proj
    ! convert from Rydberg to Ha
@@ -463,7 +474,6 @@ subroutine upf2_to_abinit(filpsp, znucl, zion, pspxc, lmax, lloc, mmax, &
                 upf%nbeta, proj, upf%lll(1:upf%nbeta), upf%kbeta(1:upf%nbeta), &
                 psps%qgrid_ff, upf%r(1:mmax), upf%rab(1:mmax), psps%useylm)
 
-
    ! This to reproduce psp8in version with linear meshes.
    ! Compute Vanderbilt-KB form factors and fit splines
    call psp8nl(amesh, ffspl, indlmn, lmax, psps%lmnmax, psps%lnmax, mmax, &
@@ -472,8 +482,89 @@ subroutine upf2_to_abinit(filpsp, znucl, zion, pspxc, lmax, lloc, mmax, &
    ABI_FREE(proj)
 
  else
-   nproj_tmp = 0
-   ABI_ERROR("UPF2 with SOC")
+   call upf2_jl2srso(upf, my_nproj_l, my_nprojso_l, vsr, esr, vso, eso)
+
+   write(msg, '(a,*(i6))' ) '     nproj',my_nproj_l
+   call wrtout([std_out, ab_out], msg)
+   write(msg, '(5x,a)' ) "spin-orbit psp"
+   call wrtout([std_out, ab_out], msg)
+   write(msg, '(5x,a,*(i6))' ) '   nprojso',my_nprojso_l
+   call wrtout([std_out, ab_out], msg)
+
+   ABI_CALLOC(proj, (mmax, psps%lnmax))
+   pspindex = 0; iln=0; indlmn(:,:)=0
+   nso = 2
+
+   if (psps%pspso(ipsp) == 0) then
+     write (msg, '(3a)') 'You are reading a pseudopotential file with spin orbit projectors',ch10,&
+     ' but internal variable pspso is 0'
+     ABI_COMMENT(msg)
+     nso = 1
+   end if
+
+   do nn=1,nso
+     !do ipsang=1+(nn-1)*(lmax+1),nn*lmax+1
+     !  ll = ipsang-(nn-1)*lmax-1
+     do il=1,lmax+1
+       ll = il - 1
+       if (nn == 1) then
+         ! SR part
+         do iprj=1,my_nproj_l(ll)
+           iln = iln + 1
+           ekb(iln) = esr(iprj, il)
+           proj(:,iln) = vsr(:, iprj, il)
+           nproj_l(il) = my_nproj_l(ll)
+           kk = iprj
+           do mm=1,2*ll*psps%useylm+1
+             pspindex = pspindex + 1
+             indlmn(1,pspindex) = ll
+             indlmn(2,pspindex) = mm-ll*psps%useylm-1
+             indlmn(3,pspindex) = kk
+             indlmn(4,pspindex) = ll*ll+(1-psps%useylm)*ll+mm
+             indlmn(5,pspindex) = iln
+             indlmn(6,pspindex) = nn
+             !print *, "indlmn:", indlmn(:,pspindex), "pspindex:", pspindex
+           end do
+         end do
+
+       else
+         ! SOC part
+         do iprj=1,my_nprojso_l(ll)
+           iln = iln + 1
+           ekb(iln) = eso(iprj, il)
+           proj(:,iln) = vso(:,iprj,il)
+           ! Note ll in nproj_l i.e. the s channel in the SOC part is not included in nproj.
+           nproj_l(ll + psps%mpsang) = my_nprojso_l(ll)
+           kk = iprj !+ my_nproj_l(ll)
+           do mm=1,2*ll*psps%useylm+1
+             pspindex = pspindex + 1
+             indlmn(1,pspindex) = ll
+             indlmn(2,pspindex) = mm-ll*psps%useylm-1
+             indlmn(3,pspindex) = kk
+             indlmn(4,pspindex) = ll*ll+(1-psps%useylm)*ll+mm
+             indlmn(5,pspindex) = iln
+             indlmn(6,pspindex) = nn
+             !print *, "indlmn:", indlmn(:,pspindex), "pspindex:", pspindex
+           end do
+         end do
+       end if
+
+     end do ! il
+   end do ! nn
+
+   !ABI_CHECK_IEQ(iln, psps%lnmax, "iln /= lnmax")
+
+   ! This to reproduce psp8in version with linear meshes.
+   ! Compute Vanderbilt-KB form factors and fit splines
+   call psp8nl(amesh, ffspl, indlmn, lmax, psps%lmnmax, psps%lnmax, mmax, &
+               psps%mqgrid_ff, psps%qgrid_ff, upf%r, proj)
+
+   ABI_FREE(proj)
+   ABI_FREE(vsr)
+   ABI_FREE(esr)
+   ABI_FREE(vso)
+   ABI_FREE(eso)
+   ABI_WARNING("upf2_to_abinit: UPF2 with SOC")
  end if
 
  ! if we find a core density, do something about it

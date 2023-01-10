@@ -181,6 +181,10 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 --- Pseudopotential description ------------------------------------------------
 - pspini: atom type   1  psp file is /Users/gmatteo/git_repos/abinit_quick_prs/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Si.upf
 - pspatm: opening atomic psp file    /Users/gmatteo/git_repos/abinit_quick_prs/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Si.upf
+- Si Generated using ONCVPSP code by D. R. Hamann
+- 14.00000   4.00000  171031                  znucl, zion, pspdat
+12 -101130 2 -1 1510                          pspcod,pspxc,lmax,lloc,mmax
+     nproj     2     2     2
   pspatm : epsatm=    9.34293668
          --- l  ekb(1:nproj) -->
              0    5.168965    0.829883
@@ -190,6 +194,10 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 - pspini: atom type   2  psp file is /Users/gmatteo/git_repos/abinit_quick_prs/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/O.upf
 - pspatm: opening atomic psp file    /Users/gmatteo/git_repos/abinit_quick_prs/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/O.upf
+- O Generated using ONCVPSP code by D. R. Hamann
+-  8.00000   6.00000  171031                  znucl, zion, pspdat
+12 -101130 2 -1 936                           pspcod,pspxc,lmax,lloc,mmax
+     nproj     2     2     1
   pspatm : epsatm=    6.19432686
          --- l  ekb(1:nproj) -->
              0    6.056735    0.824024
@@ -411,6 +419,10 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 --- Pseudopotential description ------------------------------------------------
 - pspini: atom type   1  psp file is /Users/gmatteo/git_repos/abinit_quick_prs/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Si.upf
 - pspatm: opening atomic psp file    /Users/gmatteo/git_repos/abinit_quick_prs/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Si.upf
+- Si Generated using ONCVPSP code by D. R. Hamann
+- 14.00000   4.00000  171031                  znucl, zion, pspdat
+12 -101130 2 -1 1510                          pspcod,pspxc,lmax,lloc,mmax
+     nproj     2     2     2
   pspatm : epsatm=    9.34293668
          --- l  ekb(1:nproj) -->
              0    5.168965    0.829883
@@ -420,6 +432,10 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 - pspini: atom type   2  psp file is /Users/gmatteo/git_repos/abinit_quick_prs/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/O.upf
 - pspatm: opening atomic psp file    /Users/gmatteo/git_repos/abinit_quick_prs/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/O.upf
+- O Generated using ONCVPSP code by D. R. Hamann
+-  8.00000   6.00000  171031                  znucl, zion, pspdat
+12 -101130 2 -1 936                           pspcod,pspxc,lmax,lloc,mmax
+     nproj     2     2     1
   pspatm : epsatm=    6.19432686
          --- l  ekb(1:nproj) -->
              0    6.056735    0.824024
