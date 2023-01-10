@@ -529,6 +529,7 @@ subroutine upf2_to_abinit(ipsp, filpsp, znucl, zion, pspxc, lmax, lloc, mmax, &
 
        else
          ! SOC part
+         if (ll == 0) cycle
          do iprj=1,my_nprojso_l(ll)
            iln = iln + 1
            ekb(iln) = eso(iprj, il)
@@ -552,8 +553,6 @@ subroutine upf2_to_abinit(ipsp, filpsp, znucl, zion, pspxc, lmax, lloc, mmax, &
      end do ! il
    end do ! nn
 
-   !ABI_CHECK_IEQ(iln, psps%lnmax, "iln /= lnmax")
-
    ! This to reproduce psp8in version with linear meshes.
    ! Compute Vanderbilt-KB form factors and fit splines
    call psp8nl(amesh, ffspl, indlmn, lmax, psps%lmnmax, psps%lnmax, mmax, &
@@ -564,7 +563,7 @@ subroutine upf2_to_abinit(ipsp, filpsp, znucl, zion, pspxc, lmax, lloc, mmax, &
    ABI_FREE(esr)
    ABI_FREE(vso)
    ABI_FREE(eso)
-   ABI_WARNING("upf2_to_abinit: UPF2 with SOC")
+   !ABI_WARNING("upf2_to_abinit: UPF2 with SOC")
  end if
 
  ! if we find a core density, do something about it
