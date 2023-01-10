@@ -878,7 +878,7 @@ subroutine upf2_to_psphead(filpsp, znucl, zion, pspxc, lmax, n1xccc, nproj_l, np
  integer,intent(out) :: nproj_l(0:3), nprojso_l(1:3)
 
 !Local variables -------------------------
- integer :: ierr , iprj, ii, ll, mmax, irad
+ integer :: ierr , iprj, ll, mmax, irad
  real(dp) :: amesh, damesh
  character(len=500) :: msg
  logical :: linear_mesh
@@ -965,8 +965,8 @@ subroutine upf2_jl2srso(upf, nproj_l, nprojso_l, vsr, esr, vso, eso)
 
 !Local variables -------------------------
  integer :: iprj, ii, ll, l1, il, ik, lmax, mmax, mxprj
- real(dp) :: jtot, eps_srso, eprmin
- character(len=500) :: msg
+ real(dp) :: jtot, eprmin !eps_srso,
+ !character(len=500) :: msg
 ! arrays
 integer :: irc6(6),nproj6(6), done_ilk(6,2)
  real(dp),allocatable :: vkb(:,:,:,:), evkb(:,:,:)
@@ -1237,7 +1237,7 @@ end function upfdft_to_ixc
 ! along with this program.  If not, see <http://www.gnu.org/licenses/>.
 !
  subroutine sr_so_r(lmax,irc,nproj,rr,mmax,mxprj,evkb,vkb, &
-&                       vsr,esr,vso,eso)
+&                   vsr,esr,vso,eso)
 
 ! reformulates non-local potentials based on j = l +/- 1/2 to scalar-
 ! relativistic and L dot S projectors
@@ -1271,9 +1271,9 @@ end function upfdft_to_ixc
  real(dp),intent(out) :: vso(mmax,2*mxprj,4),eso(2*mxprj,4)
 
 !Local variables
- integer :: ii,jj,kk,ierr,ik1,ik2,ip1,ip2,ipk,ll,l1,info,nn
+ integer :: ii,jj,kk,ik1,ik2,ip1,ip2,ipk,ll,l1,info,nn
  real(dp) :: amesh
- real(dp) :: apk,sn,tt,qq1mxprj
+ real(dp) :: apk,tt
  real(dp) :: sovl(2*mxprj,2*mxprj),sovlev(2*mxprj),ascl(2*mxprj,2*mxprj),aso(2*mxprj,2*mxprj)
  real(dp) :: asclst(2*mxprj,2*mxprj),wsclst(2*mxprj),asost(2*mxprj,2*mxprj),wsost(2*mxprj)
  real(dp) :: asclt(2*mxprj,2*mxprj),asot(2*mxprj,2*mxprj)
@@ -1282,6 +1282,8 @@ end function upfdft_to_ixc
  real(dp), allocatable :: vkbt(:,:),vkbst(:,:)
  logical :: sorted
  character(len=500) :: msg
+
+ ABI_UNUSED(irc(1))
 
  ! Check that rad grid is linear starting at zero
  !linear_mesh = .True.
@@ -1482,12 +1484,12 @@ end function upfdft_to_ixc
       if(sorted) exit
      end do
 
-     write(6,'(/a,i2)') &
+     write(std_out,'(/a,i2)') &
 &         ' Orthonormal scalar projector coefficients, l = ',ll
-     write(6,'(1p,6e12.4)') (esr(jj,l1),jj=1,nn)
-     write(6,'(/a,i2)') &
+     write(std_out,'(1p,6e12.4)') (esr(jj,l1),jj=1,nn)
+     write(std_out,'(/a,i2)') &
 &         ' Orthonormal spin-orbit projector coefficients, l = ',ll
-     write(6,'(1p,6e12.4)') (eso(jj,l1),jj=1,nn)
+     write(std_out,'(1p,6e12.4)') (eso(jj,l1),jj=1,nn)
 
 ! Set sign of projectors (physically irrelevant) so that they are positive
 ! at their peak (needed for compaisons apparently)
