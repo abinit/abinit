@@ -265,13 +265,13 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  integer :: gscase,g0term,iband,iblok,icase,icase_eq,idir,idir0,idir1,idir2,idir_eq,idir_dkdk,ierr
  integer :: ii,ikpt,ikpt1,jband,initialized,iorder_cprj,ipert,ipert_cnt,ipert_eq,ipert_me,ireadwf0
  integer :: iscf_mod,iscf_mod_save,isppol,istr,isym,mcg,mcgq,mcg1,mcprj,mcprjq,mband
- integer :: mband_mem_rbz
+ integer :: mband_mem_rbz, mpert_
  integer :: mcgmq,mcg1mq,mpw1_mq !+/-q duplicates
  integer :: maxidir,me,mgfftf,mkmem_rbz,mk1mem_rbz,mkqmem_rbz,mpw,mpw1,my_nkpt_rbz
  integer :: n3xccc,nband_k,ncpgr,ndir,nkpt_eff,nkpt_max,nline_save,nmatel,npert_io,npert_me,nspden_rhoij
  integer :: nstep_save,nsym1,ntypat,nwffile,nylmgr,nylmgr1,old_comm_atom,openexit,option,optorth,optthm,pertcase
  integer :: qphase_rhoij,rdwr,rdwrpaw,spaceComm,smdelta,timrev_pert,timrev_kpt,to_compute_this_pert
- integer :: unitout,useylmgr,useylmgr1,vrsddb,dfpt_scfcv_retcode,optn2
+ integer :: useylmgr,useylmgr1,dfpt_scfcv_retcode,optn2
 #ifdef HAVE_NETCDF
  integer :: ncerr,ncid
 #endif
@@ -290,7 +290,6 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  type(dataset_type), pointer :: dtset_tmp
  type(ebands_t) :: ebands_k,ebands_kq,gkk_ebands
  type(ebands_t) :: ebands_kmq !+/-q duplicates
- type(eigr2d_t)  :: eigr2d,eigi2d
  type(gkk_t)     :: gkk2d
  type(hdr_type) :: hdr,hdr_den,hdr_tmp
  type(ddb_hdr_type) :: ddb_hdr, tmp_ddb_hdr
@@ -626,7 +625,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  ABI_MALLOC(zeff,(3,3,dtset%natom))
  if (dtset%getddb .ne. 0 .or. dtset%irdddb .ne. 0 ) then
    filnam = dtfil%filddbsin
-   call ddb%from_file(filnam, 1, tmp_ddb_hdr, ddb_crystal, mpi_enreg%comm_world)
+   call ddb%from_file(filnam, tmp_ddb_hdr, ddb_crystal, mpi_enreg%comm_world)
    call tmp_ddb_hdr%free()
    ! Get Dielectric Tensor and Effective Charges
    ! (initialized to one_3D and zero if the derivatives are not available in the DDB file)
@@ -957,6 +956,9 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 !  this is a more delicate issue
 !  NOTE : this takes into account that indkpt1 is ordered
 !  MG: What about using occ(band,kpt,spin) ???
+!  GA: Would be better indeed, but I think indices neededed to be consistent
+!      with second derivative of eigenvalues, which has spin index wrapped up
+!      to avoid arrays with rank larger than 7.
    bdtot_index=0;bdtot1_index=0
    do isppol=1,dtset%nsppol
      ikpt1=1
@@ -975,7 +977,6 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        bdtot_index=bdtot_index+nband_k
      end do
    end do
-
 
 !  Compute maximum number of planewaves at k
    call timab(142,1,tsec)
@@ -1103,6 +1104,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &          cg, eigen=eigen0, occ=occ_disk)
 
    call timab(144,2,tsec)
+
 
    ! Update energies GS energies at k
    call put_eneocc_vect(ebands_k, "eig", eigen0)
@@ -2373,65 +2375,90 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      end if
      call wrtout(std_out, 'Leaving: eig2stern')
 
+
+     ! -------------------------
+     ! Output d2eig data to file
+     ! -------------------------
      if (dtset%ieig2rf==1.or.dtset%ieig2rf==2) then
-       if (me==master) then
-!        print _EIGR2D file for this perturbation
+
+       ! GA: Here, mpert needs to be replaced by natom
+       !     but why is mpert larger than natom in the first place?
+       mpert_ = dtset%natom
+
+       ! Initialize perturbation flags
+       ! GA: At the moment, they are all set to one
+       ! Instead, they should be used to save individual perturbations
+       ! to separate files and merge them after the loop.
+       ABI_MALLOC(blkflg_save,(3,mpert_,3,mpert_))
+       blkflg_save = one
+
+       ! Initialize ddb object
+       call ddb%init(dtset, 1, mpert_, &
+                    mband=bdeigrf,&
+                    nkpt=nkpt_rbz,&
+                    kpt=dtset%kptns(1:3,1:nkpt_rbz),&
+                    with_d2eig=.true.)
+
+       ! Create the ddb header
+       dscrpt=' Note : temporary (transfer) database '
+       call ddb_hdr%init(dtset,psps,pawtab,dscrpt,1,&
+                         mpert=mpert_,&
+                         xred=xred,occ=occ_pert,&
+                         mband=bdeigrf / dtset%nsppol,&
+                         nkpt=nkpt_rbz,&
+                         kpt=dtset%kptns(:,1:nkpt_rbz))
+
+       ! Set d2eig data
+       call ddb%set_qpt(1, dtset%qptn)
+       call ddb%set_d2eig_reshape(1, eig2nkq, blkflg_save)
+
+       call ddb_hdr%set_typ(ddb%nblok, ddb%typ)
+
+       ! Open the file and write header
+       call ddb_hdr%open_write(dtfil%fnameabo_eigr2d, with_psps=1)
+
+       ! Write d2eig data block
+       call ddb%write_d2eig(ddb_hdr, 1)
+
+       ! close and free memory
+       call ddb_hdr%close()
+       call ddb_hdr%free()
+       call ddb%free()
+
+       if(smdelta>0) then
+         ! write out _EIGI2D file
+
+         call ddb%init(dtset, 1, mpert_, &
+                      mband=bdeigrf,&
+                      nkpt=nkpt_rbz,&
+                      kpt=dtset%kptns(:,1:nkpt_rbz),&
+                      with_d2eig=.true.)
+
+         ! Create the ddb header
          dscrpt=' Note : temporary (transfer) database '
-         unitout = dtfil%unddb
-         vrsddb=100401
+         call ddb_hdr%init(dtset,psps,pawtab,dscrpt,1,&
+                           mpert=mpert_,&
+                           xred=xred,occ=occ_pert,&
+                           mband=bdeigrf / dtset%nsppol,&
+                           nkpt=nkpt_rbz,&
+                           kpt=dtset%kptns(:,1:nkpt_rbz))
 
-         call ddb_hdr%init(dtset,psps,pawtab,dscrpt,&
-&         1,xred=xred,occ=occ_pert)
+         call ddb%set_qpt(1, dtset%qptn)
+         call ddb%set_d2eig_reshape(1, eigbrd, blkflg_save, blktyp=BLKTYP_d2eig_im)
 
-         call ddb_hdr%open_write(dtfil%fnameabo_eigr2d, dtfil%unddb)
+         call ddb_hdr%set_typ(ddb%nblok, ddb%typ)
 
-         call outbsd(bdeigrf,dtset,eig2nkq,dtset%natom,nkpt_rbz,unitout)
-!        print _EIGI2D file for this perturbation
-         if(smdelta>0) then
+         call ddb_hdr%open_write(dtfil%fnameabo_eigi2d, with_psps=1)
+         call ddb%write_d2eig(ddb_hdr, 1)
 
-           unitout = dtfil%unddb
-           call ddb_hdr%open_write(dtfil%fnameabo_eigi2d, unitout)
-
-           call outbsd(bdeigrf,dtset,eigbrd,dtset%natom,nkpt_rbz,unitout)
-         end if !smdelta
-
+         call ddb_hdr%close()
          call ddb_hdr%free()
+         call ddb%free()
 
-!        Output of the EIGR2D.nc file.
-         fname = strcat(dtfil%filnam_ds(4),"_EIGR2D.nc")
+       end if !smdelta
 
-!        Electronic band energies.
-         bantot= dtset%mband*dtset%nkpt*dtset%nsppol
-         call ebands_init(bantot,gkk_ebands,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,&
-&         doccde,eigen0_pert,hdr0%istwfk,hdr0%kptns,&
-&         hdr0%nband, hdr0%nkpt,hdr0%npwarr,hdr0%nsppol,hdr0%nspinor,&
-&         hdr0%tphysel,hdr0%tsmear,hdr0%occopt,hdr0%occ,hdr0%wtk,&
-&         hdr0%cellcharge, hdr0%kptopt, hdr0%kptrlatt_orig, hdr0%nshiftk_orig, hdr0%shiftk_orig, &
-&         hdr0%kptrlatt, hdr0%nshiftk, hdr0%shiftk)
+       ABI_FREE(blkflg_save)
 
-!        Second order derivative EIGR2D (real and Im)
-         call eigr2d_init(eig2nkq,eigr2d,dtset%mband,hdr0%nsppol,nkpt_rbz,dtset%natom)
-#ifdef HAVE_NETCDF
-         NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating EIGR2D file")
-         NCF_CHECK(crystal%ncwrite(ncid))
-         NCF_CHECK(ebands_ncwrite(gkk_ebands, ncid))
-         call eigr2d_ncwrite(eigr2d,dtset%qptn(:),dtset%wtq,ncid)
-         NCF_CHECK(nf90_close(ncid))
-#endif
-         if(smdelta>0) then
-!          Output of the EIGI2D.nc file.
-           fname = strcat(dtfil%filnam_ds(4),"_EIGI2D.nc")
-!          Broadening EIGI2D (real and Im)
-           call eigr2d_init(eigbrd,eigi2d,dtset%mband,hdr0%nsppol,nkpt_rbz,dtset%natom)
-#ifdef HAVE_NETCDF
-           NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating EIGI2D file")
-           NCF_CHECK(crystal%ncwrite(ncid))
-           NCF_CHECK(ebands_ncwrite(gkk_ebands, ncid))
-           call eigr2d_ncwrite(eigi2d,dtset%qptn(:),dtset%wtq,ncid)
-           NCF_CHECK(nf90_close(ncid))
-#endif
-         end if
-       end if
      end if !ieig2rf==1.or.ieig2rf==2
    else
      write(msg,'(3a)')&
@@ -2481,11 +2508,6 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  if(dtset%ieig2rf /= 3 .and. dtset%ieig2rf /= 4 .and. dtset%ieig2rf /= 5) call hdr0%free()
  ABI_FREE(eigen0_copy)
  call crystal%free()
-
- ! GKK stuff (deprecated)
- call ebands_free(gkk_ebands)
- call eigr2d_free(eigr2d)
- call eigr2d_free(eigi2d)
 
  call timab(147,2,tsec)
 !######################################################################################

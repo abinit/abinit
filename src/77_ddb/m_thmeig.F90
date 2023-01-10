@@ -69,7 +69,7 @@ contains
 !!
 !! SOURCE
 
-subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, ddbun, iout, natom, mpert, msize, d2asr, comm)
+subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, iout, natom, mpert, msize, d2asr, comm)
 
 !Arguments ------------------------------------
 !scalars
@@ -77,7 +77,7 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, ddbun, iout, n
  integer,intent(in) :: mpert,msize
  integer,intent(in) :: comm
  character(len=*),intent(in) :: elph_base_name, eig2_filnam
- integer,intent(in) :: ddbun,iout
+ integer,intent(in) :: iout
  type(crystal_t), intent(inout) :: crystal
  type(anaddb_dataset_type),intent(inout) :: inp
  type(ddb_type),intent(inout) :: ddb
@@ -183,9 +183,9 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, ddbun, iout, n
  write(std_out, '(a)' )  '- thmeig: Initialize the second-order electron-phonon file with name :'
  write(std_out, '(a,a)' )'-         ',trim(eig2_filnam)
 
- call ddb_hdr%open_read(eig2_filnam, ddbun, xmpi_comm_self)
+ call ddb_hdr%open_read(eig2_filnam, xmpi_comm_self)
 
- mband = ddb_hdr%mband
+ mband = ddb_hdr%mband * ddb_hdr%nsppol
  nkpt = ddb_hdr%nkpt
  ntypat = ddb_hdr%ntypat
 
@@ -225,6 +225,7 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, ddbun, iout, n
  mpert_eig2=natom
  msize2=3*mpert_eig2*3*mpert_eig2
 
+ ddb_eig2%nsppol = ddb_hdr%nsppol
  call ddb_eig2%malloc(msize2,nblok2,natom,ntypat,mpert_eig2,nkpt,mband)
 
  ABI_MALLOC(eig2dGamma,(2,msize2,mband,nkpt))
@@ -308,7 +309,7 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, ddbun, iout, n
    found=0
    do iblok2=1,nblok2
 
-     call ddb_eig2%read_eig2d(ddbun, iblok2)
+     call ddb_eig2%read_d2eig(ddb_hdr, iblok2, iblok2)
 
      qnrm = ddb_eig2%qpt(1,iblok2)*ddb_eig2%qpt(1,iblok2)+ &
 &     ddb_eig2%qpt(2,iblok2)*ddb_eig2%qpt(2,iblok2)+ &
@@ -335,7 +336,7 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, ddbun, iout, n
 
  end if
 
- close(ddbun)
+ call ddb_hdr%close()
 
 !=========================================================================
 !2) Calculation of dE(n,k)/dn(Q,j) : consider all q and modes
@@ -438,7 +439,7 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, ddbun, iout, n
  dedni(:,:,:,:) = zero
 
 !!Prepare the reading of the EIG2 files
- call ddb_hdr%open_read(eig2_filnam, ddbun, xmpi_comm_self, msym=msym)
+ call ddb_hdr%open_read(eig2_filnam, xmpi_comm_self, msym=msym)
  call ddb_hdr%free()
 
 !iqpt2 will be the index of the q point bloks inside the EIG2 file
@@ -494,7 +495,7 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, ddbun, iout, n
    found=0 ; iqpt2_previous=iqpt2
    do while (iqpt2<nblok2)
      iqpt2=iqpt2+1
-     call ddb_eig2%read_eig2d(ddbun, iqpt2)
+     call ddb_eig2%read_d2eig(ddb_hdr, iqpt2, iqpt2)
      diff_qpt(:)=ddb_eig2%qpt(1:3,iqpt2)/ddb_eig2%nrm(1,iqpt2)-spqpt(:,iqpt)
      if(diff_qpt(1)**2+diff_qpt(2)**2+diff_qpt(3)**2 < DDB_QTOL )then
        found=1
@@ -507,15 +508,14 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, ddbun, iout, n
 
 !    If the EIG2 database file has to be read again, close it, then search for the right q point,
 !    from the beginning of the file
-     close(ddbun)
+     call ddb_hdr%close()
 
-     call ddb_hdr%open_read(eig2_filnam, ddbun, xmpi_comm_self, msym=msym)
-     call ddb_hdr%free()
+     call ddb_hdr%open_read(eig2_filnam, xmpi_comm_self, msym=msym)
 
 !    And examine again the EIG2 file. Still, not beyond the previously examined value.
      found=0
      do iqpt2=1,iqpt2_previous
-       call ddb_eig2%read_eig2d(ddbun, iqpt2)
+       call ddb_eig2%read_d2eig(ddb_hdr, iqpt2, iqpt2)
        diff_qpt(:)=ddb_eig2%qpt(1:3,iqpt2)/ddb_eig2%nrm(1,iqpt2)-spqpt(:,iqpt)
        if(diff_qpt(1)**2+diff_qpt(2)**2+diff_qpt(3)**2 < DDB_QTOL )then
          found=1
@@ -529,6 +529,8 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, ddbun, iout, n
 &       'Action: compute the contribution from this point, and merge it in your EIG2 DDB file.'
        ABI_ERROR(message)
      end if
+
+     call ddb_hdr%free()
 
    end if
 
@@ -614,7 +616,7 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, ddbun, iout, n
    end do ! imod
  end do !iqpt
 
- close(ddbun)
+ call ddb_hdr%close()
 
 
 !=============================================================================
