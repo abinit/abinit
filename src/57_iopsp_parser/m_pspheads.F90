@@ -1352,11 +1352,8 @@ end function upfdft_to_ixc
        !call vpinteg(vkb(1,ip1,l1,ik1),vkb(1,ip2,l1,ik2),irc(l1),2*l1, &
        !             sovl(ii,jj),rr)
 
+       ! So we replace it with simpson integration
        sovl(ii,jj) = simpson(amesh, vkb(:,ip1,l1,ik1) * vkb(:,ip2,l1,ik2))
-       !print *, "vkb(1,ip1,l1,ik1),vkb(1,ip2,l1,ik2), irc(l1)"
-       !print *, vkb(1,ip1,l1,ik1),vkb(1,ip2,l1,ik2), irc(l1)
-       !print *, sovl(ii, jj), "ll", ll
-
       end do
      end do
     end do
