@@ -1486,6 +1486,7 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
        do ipert2=1,min(natom+2,mpert)
          do idir2=1,3
 
+           ! FIXME use is_type functions
 !          If an element exists
            if(blkflg(idir1,ipert1,idir2,ipert2)==1)then
 
@@ -2246,16 +2247,6 @@ subroutine dfpt_sygra(natom,desym,deunsy,indsym,ipert,nsym,qpt,symrec)
  real(dp) :: arg,im,re,sumi,sumr
 
 ! *********************************************************************
-
-!DEBUG
-!write(std_out,*)' dfpt_sygra : enter '
-!write(std_out,*)' dfpt_sygra : qpt(:)',qpt(:)
-!do ia=1,natom
-!do mu=1,3
-!write(std_out,*)' dfpt_sygra : deunsy(:2,mu,ia)',deunsy(:2,mu,ia)
-!enddo
-!enddo
-!ENDDEBUG
 
  if (nsym==1) then
 

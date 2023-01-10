@@ -345,6 +345,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  gmet_for_kg=matmul(transpose(gprimd_for_kg),gprimd_for_kg)
 
 !Define the set of admitted perturbations
+! Note that we have a global parameter (mpert=natom+MPERT_MAX)
+! with MPERT_MAX=8, but we use a smaller value here.
  mpert=natom+7
  if (rf2_dkdk>0.or.rf2_dkde>0) mpert=natom+11
 
@@ -1118,7 +1120,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  write(message,'(a)') ' The list of irreducible perturbations for this q vector is:'
  call wrtout([std_out, ab_out] ,message)
  ii=1
- do ipert=1,natom+6
+ do ipert=1,natom+6  ! GA: Why natom+6 instead of natom+MPERT_MAX ?
    do idir=1,3
      if(rfpert(ipert)==1.and.rfdir(idir)==1)then
        if( pertsy(idir,ipert)==1 )then
@@ -1493,17 +1495,14 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 &   nblok=1,xred=xred,occ=occ,ngfft=ngfft)
 
 !  Initialize ddb object
-   call ddb%init(dtset, nblok=1, mpert=mpert, msize=(3*mpert*3*mpert))
+   call ddb%init(dtset, nblok=1, mpert=mpert, with_d2E=.true.)
 
 ! Set the values for the 2nd order derivatives
    call ddb%set_qpt(iblok=1, qpt=qphon(1:3))
-   call ddb%set_d2matr(d2matr, blkflg, iblok=1)
+   call ddb%set_d2matr(1, d2matr, blkflg)
 
-! Output dynamical matrix in text format.
-   call ddb%write_txt(ddb_hdr, dtfil%fnameabo_ddb)
-
-! Output dynamical matrix in netcdf format.
-   call ddb%write_nc(ddb_hdr, strcat(dtfil%fnameabo_ddb, ".nc"))
+! Output dynamical matrix
+   call ddb%write(ddb_hdr, dtfil%fnameabo_ddb)
 
 ! Deallocate ddb object
    call ddb_hdr%free()

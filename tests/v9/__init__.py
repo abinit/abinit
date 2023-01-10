@@ -164,7 +164,9 @@ inp_files = [
     "t146.abi",  # test antisymmetric vector potential response and quadrupoles of HF molecule
     "t147.abi",  # test total vector potential response and quadrupoles of HF molecule
     "t148.abi",  # test flexoelectric tensor calculation with ffnl_lw=1
-
     # write_files behaviour
     "t150.abi",  # test the behaviour of supravariable write_files
+    # DDB file conversion
+    "t160.abi",  # convert DDB from text to netcdf
+    "t161.abi",  # convert DDB from netcdf to text
 ]
