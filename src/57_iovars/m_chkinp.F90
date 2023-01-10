@@ -2004,7 +2004,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !  nproj
 !  If there is more than one projector for some angular momentum channel of some pseudopotential
    do ilang=0,3
-!    nprojmax(ilang)=maxval(pspheads(1:npsp)%nproj(ilang)) ! Likely problems with HP compiler
      nprojmax(ilang)=pspheads(1)%nproj(ilang)
      if(npsp>=2)then
        do ii=2,npsp
@@ -3257,7 +3256,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !      If nspinor=2, the spin-orbit contribution should be present in the pseudopotentials,
 !      unless the user explicitly allows not to treat it.
        if ( nspinor==2 .and. dt%so_psp(ipsp)/=0 .and. pspheads(ipsp)%pspso==0 ) then
-         write(msg, '(a,i2,a,i3,9a)' )&
+         write(msg, '(2(a,i0),9a)' )&
          'so_psp(',ipsp,') was input as ',dt%so_psp(ipsp),', with nspinor=2 and usepaw=0.',ch10,&
          'This requires a treatment of the spin-orbit interaction. However, it has been detected ',ch10,&
          'that the pseudopotential that you want to use does not specify the spin-orbit coupling.',ch10,&
