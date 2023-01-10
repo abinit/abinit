@@ -351,7 +351,7 @@ subroutine upf2_to_abinit(ipsp, filpsp, znucl, zion, pspxc, lmax, lloc, mmax, &
  real(dp), intent(inout) :: xccc1d(psps%n1xccc,6)
 
 !Local variables -------------------------
- integer :: ierr, ir, irad, iprj, il, ll, smooth_niter, nso, nn, iln, kk, mm, pspindex, ipsang
+ integer :: ierr, ir, irad, iprj, il, ll, smooth_niter, nso, nn, iln, kk, mm, pspindex !, ipsang
  real(dp) :: yp1, ypn, amesh, damesh
  character(len=500) :: msg
  logical :: linear_mesh
