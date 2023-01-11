@@ -167,7 +167,7 @@ subroutine cg_tocplx(n, cg, ocplx)
 
 ! *************************************************************************
 
-!$OMP PARALLEL DO IF (ndat > 1) PRIVATE(idx)
+!$OMP PARALLEL DO PRIVATE(idx)
  do ii=1,n
    idx = 2*ii-1
    ocplx(ii) = DCMPLX(cg(idx),cg(idx+1))
