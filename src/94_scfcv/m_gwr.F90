@@ -63,7 +63,7 @@
 !!       Note, however, that tchi is Hermitian along the imaginary axis, expect for omega = 0 in metals
 !!       but I don't think the minmax grids contain omega = 0.
 !!
-!!    - In principle, it's possible to compute QP correction along a k-path is a new WFK file is provided.
+!!    - In principle, it's possible to compute QP correction along a k-path if a new WFK file is provided.
 !!      The correlated part is evaluated in real-space in the super-cell.
 !!      For Sigma_x, we need a specialized routine that can handle arbitrary q, especially at the level of v(q, G)
 !!      but I don't know if this approach will give smooth bands
@@ -771,12 +771,11 @@ module m_gwr
    module procedure sc_sum_spc
  end interface sc_sum
 
- ! private parameters.
+ ! Handy named costants (private stuff)
  integer,private,parameter :: PRINT_MODR = 500
 
  real(dp),private,parameter :: TOL_EDIFF = 0.001_dp * eV_Ha
 
- ! Handy named costants.
  integer,private,parameter :: istwfk1 = 1, ndat1 = 1, me_fft0 = 0, paral_fft0 = 0, nproc_fft1 = 1
 contains
 !!***
@@ -1989,7 +1988,7 @@ subroutine gwr_load_kcalc_wfd(gwr, wfk_path, tmp_kstab)
 
  ks_ebands = wfk_read_ebands(wfk_path, gwr%comm%value, out_hdr=wfk_hdr)
  call wfk_hdr%vs_dtset(dtset)
- ! TODO: More consistency checks e.g. nkibz,...
+ ! TODO: Add more consistency checks e.g. nkibz,...
 
  !cryst = wfk_hdr%get_crystal()
  !call cryst%print(header="crystal structure from WFK file")
@@ -2093,7 +2092,7 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
 
  wfk_ebands = wfk_read_ebands(wfk_path, gwr%comm%value, out_hdr=wfk_hdr)
  call wfk_hdr%vs_dtset(dtset)
- ! TODO: More consistency checks e.g. nkibz,...
+ ! TODO: Add more consistency checks e.g. nkibz,...
 
  !cryst = wfk_hdr%get_crystal()
  !call cryst%print(header="crystal structure from WFK file")
@@ -2504,6 +2503,7 @@ subroutine gwr_rotate_gpm(gwr, ik_bz, itau, spin, desc_kbz, gt_pm)
  ! Rotate gvec, recompute gbound and rotate vc_sqrt
  ! TODO: 1) Handle TR and routine to rotate tchi/W including vc_sqrt
  !       2) Make sure that the FFT box is large enough to accomodate umklapps
+
  desc_kbz%ig0 = -1
  do ig1=1,desc_kbz%npw
    desc_kbz%gvec(:,ig1) = tsign_k * matmul(gwr%cryst%symrec(:,:,isym_k), desc_kibz%gvec(:,ig1)) - g0_k
@@ -3211,7 +3211,7 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
      ! batch_size in terms of columns
      ! TODO: Determine batch_size automatically to avoid going OOM
      !batch_size = 1
-     batch_size = 24
+     !batch_size = 24
      batch_size = 48
      !batch_size = loc2_size
 
@@ -4382,12 +4382,11 @@ subroutine gwr_build_wc(gwr)
  ! Allocate PBLAS arrays for wc_qibz(g,g')
  ! =======================================
  ! Note that we have already summed tchi over spin.
- ! Also, G=0 corresponds to iglob = 1 since only q-points in the IBZ are treated.
- ! This is not true for ther other q-points in the full BZ as we may have a non-zero umklapp g0_q
+ ! Also, G=0 corresponds to iglob = 1 as only q-points in the IBZ are treated.
+ ! This is not true for the other q-points in the full BZ as we may have a non-zero umklapp g0_q
  ABI_MALLOC(gwr%wc_qibz, (gwr%nqibz, gwr%ntau, gwr%nsppol))
 
  free_tchi = .True.; if (free_tchi) gwr%tchi_space = "none"
-
  em1_wq = zero; eps_wq = zero
 
  ! If possible, use 2d rectangular grid of processors for diagonalization.
@@ -4685,7 +4684,7 @@ if (gwr%use_supercell_for_sigma) then
 
    do ikcalc=1,gwr%nkcalc
      kcalc_bz = gwr%kcalc(:, ikcalc)
-     ikcalc_ibz = gwr%kcalc2ibz(ikcalc, 1)  ! TODO: Assuming wfs in IBZ
+     ikcalc_ibz = gwr%kcalc2ibz(ikcalc, 1)  ! NB: Assuming wfs in the IBZ.
 
      ! Compute e^{ik.r} phases in the unit cell.
      call calc_ceikr(kcalc_bz, gwr%g_ngfft, gwr%g_nfft, gwr%nspinor, uc_ceikr)
@@ -4885,7 +4884,7 @@ else
 
    do ikcalc=1,gwr%nkcalc
      kcalc_bz = gwr%kcalc(:, ikcalc)
-     ikcalc_ibz = gwr%kcalc2ibz(ikcalc, 1)  ! TODO: Assuming wfs in IBZ
+     ikcalc_ibz = gwr%kcalc2ibz(ikcalc, 1)  ! NB: Assuming wfs in IBZ
 
      do band=gwr%bstart_ks(ikcalc, spin), gwr%bstop_ks(ikcalc, spin)
        call gwr%kcalc_wfd%get_ur(band, ikcalc_ibz, spin, ur)
@@ -5526,7 +5525,7 @@ subroutine gwr_rpa_energy(gwr)
          end do
 
          ! Diagonalize sub-matrix and perform integration in imaginary frequency.
-         ! Eq (6) 10.1103/PhysRevB.81.115126
+         ! Eq (6) in 10.1103/PhysRevB.81.115126
          ! NB: have to build chi_tmp inside loop over icut as matrix is destroyed by pzheev.
          mat_size = bisect(kin_qg, ecut_chi(icut))
 
@@ -5623,7 +5622,7 @@ subroutine gwr_run_g0w0(gwr, free_ugb)
 
  free_ugb__ = .True.; if (present(free_ugb)) free_ugb__ = free_ugb
 
- ! Use ugb wavefunctions and Lehmann representation to compute head/wings and Sigma_x
+ ! Use ugb wavefunctions and the Lehmann representation to compute head/wings and Sigma_x matrix elements.
  call gwr%build_chi0_head_and_wings()
  call gwr%build_sigxme()
 
@@ -5795,7 +5794,7 @@ subroutine gwr_check_scf_cycle(gwr, converged)
  end do
  end associate
 
- ! Just to make sure that all MPI procs agree!
+ ! Just to make sure that all MPI procs agree on this!
  call xmpi_land(converged, gwr%comm%value)
 
  if (gwr%comm%me == master) then
@@ -7336,7 +7335,7 @@ subroutine gwr_get_u_ngfft(gwr, boxcutmin, u_ngfft, u_nfft, u_mgfft, u_mpw, gmax
 
 ! *************************************************************************
 
- ! All procs execute this part.
+ ! All MPI procs execute this part.
  ! Note the loops over the full BZ to compute u_mpw
  ! FIXME: umklapp, ecutsigx and q-centered G-sphere
  ! TODO: Write new routine to compute best FFT mesh for ecut1 + ecut1. See set_mesh from GW code.
