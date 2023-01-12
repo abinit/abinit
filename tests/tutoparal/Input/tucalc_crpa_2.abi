@@ -149,14 +149,14 @@ pseudos "Pseudodojo_paw_pw_standard/V.xml, Pseudodojo_paw_pw_standard/Sr.xml, Ps
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = tucrpa_2.abi
+#%% test_chain = tucalc_crpa_2.abi
 #%% [files]
 #%% [shell] 
 #%% [paral_info]
 #%% max_nprocs = 24
 #%% nprocs_to_test = 24
 #%% [NCPU_24]
-#%% files_to_test = tucrpa_2_MPI24.abo, tolnlines = 10, tolabs = 5.000e-01, tolrel = 1.100e-02
+#%% files_to_test = tucal_crpa_2_MPI24.abo, tolnlines = 10, tolabs = 5.000e-01, tolrel = 1.100e-02
 #%% [extra_info]
 #%% keywords = LDA, CRPA
 #%% authors = B. Amadon, R. Outerovitch
