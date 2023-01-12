@@ -440,6 +440,7 @@ type, public :: dataset_type
 !O
  integer :: occopt
  integer :: optcell
+ integer :: optdcmagpawu
  integer :: optdriver
  integer :: optforces
  integer :: optnlxccc
@@ -1781,6 +1782,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%nzchempot          = dtin%nzchempot
  dtout%occopt             = dtin%occopt
  dtout%optcell            = dtin%optcell
+ dtout%optdcmagpawu       = dtin%optdcmagpawu
  dtout%optdriver          = dtin%optdriver
  dtout%optforces          = dtin%optforces
  dtout%optnlxccc          = dtin%optnlxccc
@@ -3384,7 +3386,7 @@ subroutine chkvars(string)
 !O
  list_vars=trim(list_vars)//' objaat objbat objaax objbax objan objbn objarf'
  list_vars=trim(list_vars)//' objbrf objaro objbro objatr objbtr occ'
- list_vars=trim(list_vars)//' occopt omegasimax omegasrdmax optcell optdriver optforces'
+ list_vars=trim(list_vars)//' occopt omegasimax omegasrdmax optcell optdcmagpawu optdriver optforces '
  list_vars=trim(list_vars)//' optnlxccc optstress orbmag ortalg'
  list_vars=trim(list_vars)//' opt_effpot opt_ncoeff opt_coeff output_file outdata_prefix'
 !P

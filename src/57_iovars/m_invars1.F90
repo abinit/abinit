@@ -1969,12 +1969,17 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 
  dtset%usedmatpu=0
  dtset%lpawu(1:dtset%ntypat)=-1
+ dtset%optdcmagpawu=3
  if (dtset%usepawu/=0.or.dtset%usedmft>0) then
    call intagm(dprarr,intarr,jdtset,marr,dtset%ntypat,string(1:lenstr),'lpawu',tread,'INT')
    if(tread==1) dtset%lpawu(1:dtset%ntypat)=intarr(1:dtset%ntypat)
 
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'usedmatpu',tread,'INT')
    if(tread==1) dtset%usedmatpu=intarr(1)
+   if (dtset%nspden==4) then
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'optdcmagpawu',tread,'INT')
+     if(tread==1) dtset%optdcmagpawu=intarr(1)
+   end if
  end if
 
 !Some PAW+Exact exchange keywords
@@ -2382,7 +2387,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%kptnrm=one
    dtsets(idtset)%kptns_hf(:,:)=zero
    dtsets(idtset)%kptopt=1
-   if(dtsets(idtset)%nspden==4)dtsets(idtset)%kptopt=4
+!   if(dtsets(idtset)%nspden==4)dtsets(idtset)%kptopt=4 ! LB-01/22: useless to write this here as nspden is define later
    dtsets(idtset)%kptrlen=30.0_dp
 !  L
 
