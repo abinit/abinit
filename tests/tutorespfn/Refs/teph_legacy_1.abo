@@ -17,10 +17,10 @@
 .Starting date : Wed  4 May 2022.
 - ( at 03h29 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/tutorespfn_teph_1-teph_2-teph_3-teph_4-teph_5-teph_6/teph_1.abi
-- output file    -> teph_1.abo
-- root for input  files -> teph_1i
-- root for output files -> teph_1o
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/tutorespfn_teph_legacy_1-teph_legacy_2-teph_legacy_3-teph_legacy_4-teph_legacy_5-teph_legacy_6/teph_legacy_1.abi
+- output file    -> teph_legacy_1.abo
+- root for input  files -> teph_legacy_1i
+- root for output files -> teph_legacy_1o
 
 
  DATASET    1 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
@@ -1864,7 +1864,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  7.500000000000  7.500000000000  7.500000000000 bohr
               =  3.968829064425  3.968829064425  3.968829064425 angstroms
- prteigrs : about to open file teph_1o_DS1_EIG
+ prteigrs : about to open file teph_legacy_1o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.29731   Average Vxc (hartree)=  -0.37095
  Eigenvalues (hartree) for nkpt=  16  k points:
  kpt#   1, nband= 10, wtk=  0.00463, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -2818,7 +2818,7 @@ tolerances: {tolwfr: 1.00E-14, }
  Mean square residual over all n,k,spin=   29.817E-16; max=  97.835E-16
  dfpt_looppert : ek2=    1.2633093633E+01
           f-sum rule ratio=    3.9893272779E+00
- prteigrs : about to open file teph_1t_1WF1_EIG
+ prteigrs : about to open file teph_legacy_1t_1WF1_EIG
  Expectation of eigenvalue derivatives (hartree) for nkpt= 216  k points:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband= 10, wtk=  0.00463, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -2878,7 +2878,7 @@ tolerances: {tolwfr: 1.00E-14, }
  Mean square residual over all n,k,spin=   29.653E-16; max=  97.835E-16
  dfpt_looppert : ek2=    1.2633093633E+01
           f-sum rule ratio=    3.9893272741E+00
- prteigrs : about to open file teph_1t_1WF1_EIG
+ prteigrs : about to open file teph_legacy_1t_1WF1_EIG
  Expectation of eigenvalue derivatives (hartree) for nkpt= 216  k points:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband= 10, wtk=  0.00463, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -2938,7 +2938,7 @@ tolerances: {tolwfr: 1.00E-14, }
  Mean square residual over all n,k,spin=   29.715E-16; max=  97.835E-16
  dfpt_looppert : ek2=    1.2633093633E+01
           f-sum rule ratio=    3.9893272777E+00
- prteigrs : about to open file teph_1t_1WF1_EIG
+ prteigrs : about to open file teph_legacy_1t_1WF1_EIG
  Expectation of eigenvalue derivatives (hartree) for nkpt= 216  k points:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband= 10, wtk=  0.00463, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -2997,7 +2997,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      4.000   => boxcut(ratio)=   2.11524
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file teph_1o_DS1_WFK
+-inwffil : will read wavefunctions from disk file teph_legacy_1o_DS1_WFK
 _setup2: Arith. and geom. avg. npw (full set) are      40.079      39.994
 
 ================================================================================
@@ -3071,7 +3071,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  7.500000000000  7.500000000000  7.500000000000 bohr
               =  3.968829064425  3.968829064425  3.968829064425 angstroms
- prteigrs : about to open file teph_1o_DS6_EIG
+ prteigrs : about to open file teph_legacy_1o_DS6_EIG
  Fermi (or HOMO) energy (hartree) =   0.29731   Average Vxc (hartree)=  -0.37095
  Eigenvalues (hartree) for nkpt= 216  k points:
  kpt#   1, nband= 10, wtk=  0.00463, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -3919,7 +3919,7 @@ tolerances: {tolwfr: 1.00E-14, }
  Mean square residual over all n,k,spin=   21.463E-02; max=  23.399E-01
  dfpt_looppert : ek2=    1.2633093633E+01
           f-sum rule ratio=    3.9898106906E+00
- prteigrs : about to open file teph_1t_1WF1_EIG
+ prteigrs : about to open file teph_legacy_1t_1WF1_EIG
  Expectation of eigenvalue derivatives (hartree) for nkpt= 216  k points:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband= 10, wtk=  0.00463, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -3976,7 +3976,7 @@ tolerances: {tolwfr: 1.00E-14, }
  Mean square residual over all n,k,spin=   21.471E-02; max=  23.399E-01
  dfpt_looppert : ek2=    1.2633093633E+01
           f-sum rule ratio=    3.9898106865E+00
- prteigrs : about to open file teph_1t_1WF1_EIG
+ prteigrs : about to open file teph_legacy_1t_1WF1_EIG
  Expectation of eigenvalue derivatives (hartree) for nkpt= 216  k points:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband= 10, wtk=  0.00463, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -4033,7 +4033,7 @@ tolerances: {tolwfr: 1.00E-14, }
  Mean square residual over all n,k,spin=   21.480E-02; max=  23.399E-01
  dfpt_looppert : ek2=    1.2633093633E+01
           f-sum rule ratio=    3.9898106824E+00
- prteigrs : about to open file teph_1t_1WF1_EIG
+ prteigrs : about to open file teph_legacy_1t_1WF1_EIG
  Expectation of eigenvalue derivatives (hartree) for nkpt= 216  k points:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband= 10, wtk=  0.00463, kpt=  0.0000  0.0000  0.0000 (reduced coord)

@@ -148,10 +148,10 @@ nstep        800
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain =  teph_1.abi, teph_2.abi, teph_3.abi, teph_4.abi, teph_5.abi, teph_6.abi
+#%% test_chain =  teph_legacy_1.abi, teph_legacy_2.abi, teph_legacy_3.abi, teph_legacy_4.abi, teph_legacy_5.abi, teph_legacy_6.abi
 #%% [files]
 #%% files_to_test = 
-#%%   teph_1.abo, tolnlines= 57, tolabs=  3.000e-02, tolrel=  6.000e-03, fld_options= -easy
+#%%   teph_legacy_1.abo, tolnlines= 57, tolabs=  3.000e-02, tolrel=  6.000e-03, fld_options= -easy
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

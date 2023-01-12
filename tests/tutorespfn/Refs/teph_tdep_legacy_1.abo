@@ -17,10 +17,10 @@
 .Starting date : Wed 21 Dec 2022.
 - ( at 21h06 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken-9.8/tests/TestBot_MPI1/tutorespfn_tdepes_1/tdepes_1.abi
-- output file    -> tdepes_1.abo
-- root for input  files -> tdepes_1i
-- root for output files -> tdepes_1o
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken-9.8/tests/TestBot_MPI1/tutorespfn_teph_tdep_legacy_1/teph_tdep_legacy_1.abi
+- output file    -> teph_tdep_legacy_1.abo
+- root for input  files -> teph_tdep_legacy_1i
+- root for output files -> teph_tdep_legacy_1o
 
 
  DATASET    1 : space group P1 (#  1); Bravais aP (primitive triclinic)
@@ -308,7 +308,7 @@ force_length_stats: {min:   5.56986232E-08, max:   5.56986232E-08, mean:   5.569
  frms,max,avg= 1.6536109E-06 2.6604281E-06  -3.600E-07 -3.130E-07  1.336E-07 e/A
  length scales=  6.675000000000  6.675000000000  6.675000000000 bohr
               =  3.532257867338  3.532257867338  3.532257867338 angstroms
- prteigrs : about to open file tdepes_1o_DS1_EIG
+ prteigrs : about to open file teph_tdep_legacy_1o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.39943   Average Vxc (hartree)=  -0.50614
  Eigenvalues (hartree) for nkpt=   8  k points:
  kpt#   1, nband= 12, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -378,7 +378,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
 
 
 ================================================================================
- prteigrs : about to open file tdepes_1o_DS2_EIG
+ prteigrs : about to open file teph_tdep_legacy_1o_DS2_EIG
  Non-SCF case, kpt    1 (  0.00000  0.00000  0.00000), residuals and eigenvalues=
   1.02E-09  2.08E-09  2.76E-09  1.87E-09  2.76E-09  1.81E-09  2.19E-09  4.39E-09
   5.88E-09  9.56E-09  5.26E-07  4.21E-09
@@ -430,7 +430,7 @@ force_length_stats: {min: null, max: null, mean: null, }
     2      0.88306446683456     0.88306446683456     0.88306446683456
  length scales=  6.675000000000  6.675000000000  6.675000000000 bohr
               =  3.532257867338  3.532257867338  3.532257867338 angstroms
- prteigrs : about to open file tdepes_1o_DS2_EIG
+ prteigrs : about to open file teph_tdep_legacy_1o_DS2_EIG
  Eigenvalues (hartree) for nkpt=   8  k points:
  kpt#   1, nband= 12, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -0.40681    0.39943    0.39943    0.39943    0.60260    0.60260    0.60260    0.91923
