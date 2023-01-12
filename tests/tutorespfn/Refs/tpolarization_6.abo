@@ -17,10 +17,10 @@
 .Starting date : Thu  2 Jun 2022.
 - ( at 11h01 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__hack/tests/Test_suite/tutorespfn_tffield_6/tffield_6.abi
-- output file    -> tffield_6.abo
-- root for input  files -> tffield_6i
-- root for output files -> tffield_6o
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__hack/tests/Test_suite/tutorespfn_tpolarization_6/tpolarization_6.abi
+- output file    -> tpolarization_6.abo
+- root for input  files -> tpolarization_6i
+- root for output files -> tpolarization_6o
 
 
  DATASET   11 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
@@ -613,7 +613,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      5.513   => boxcut(ratio)=   2.08150
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tffield_6o_DS11_WFK
+-inwffil : will read wavefunctions from disk file tpolarization_6o_DS11_WFK
 _setup2: Arith. and geom. avg. npw (full set) are     167.843     167.817
   initberry: for direction 1, nkstr =   6, nstr =    144
   initberry: for direction 2, nkstr =   6, nstr =    144
@@ -865,7 +865,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      5.513   => boxcut(ratio)=   2.08150
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tffield_6o_DS11_WFK
+-inwffil : will read wavefunctions from disk file tpolarization_6o_DS11_WFK
 _setup2: Arith. and geom. avg. npw (full set) are     167.843     167.817
   initberry: for direction 1, nkstr =   6, nstr =    144
   initberry: for direction 2, nkstr =   6, nstr =    144

@@ -17,10 +17,10 @@
 .Starting date : Wed 23 Dec 2020.
 - ( at 14h07 )
   
-- input  file    -> tffield_1.abi
-- output file    -> tffield_1.abo
-- root for input  files -> tffield_1i
-- root for output files -> tffield_1o
+- input  file    -> tpolarization_1.abi
+- output file    -> tpolarization_1.abo
+- root for input  files -> tpolarization_1i
+- root for output files -> tpolarization_1o
 
 
  DATASET    1 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
