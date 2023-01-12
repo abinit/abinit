@@ -79,28 +79,28 @@ and the [Abipy tutorials](https://github.com/abinit/abitutorials).
 The reference input files for this tutorial are located in
 ~abinit/tests/tutorespfn/Input and the corresponding reference output files
 are in ~abinit/tests/tutorespfn/Refs.
-The prefix for files is **eph_tdep_legacy**. As usual, we use the shorthand `~abinit` to indicate
+The prefix for files is **teph_tdep_legacy**. As usual, we use the shorthand `~abinit` to indicate
 the root directory where the abinit package has been deployed, but most often
 consider the paths relative to this directory.
 
-First, examine the [[tests/tutorespfn/Input/eph_tdep_legacy_1.abi]] input file.
-{% dialog tests/tutorespfn/Input/eph_tdep_legacy_1.abi %}
+First, examine the [[tests/tutorespfn/Input/teph_tdep_legacy_1.abi]] input file.
+{% dialog tests/tutorespfn/Input/teph_tdep_legacy_1.abi %}
 
 Note that there are three datasets ([[ndtset]]=3). The first dataset corresponds to a standard
 self-consistent calculation, with an unshifted eight k-point grid,
-producing e.g. the ground-state eigenvalue file eph_tdep_legacy_1o_DS1_EIG.nc ,
-as well as the density file eph_tdep_legacy_1o_DS1_DEN. The latter is read ([[getden]]2=1)
+producing e.g. the ground-state eigenvalue file teph_tdep_legacy_1o_DS1_EIG.nc ,
+as well as the density file teph_tdep_legacy_1o_DS1_DEN. The latter is read ([[getden]]2=1)
 to initiate the second dataset calculation,
 which is a non-self-consistent run, specifically at the Gamma point only (there is no real recomputation
 with respect to the dataset 1, it only extract a subset of the eight k-point grid).
-This second dataset produces the wavefunction file eph_tdep_legacy_1o_DS2_WFQ, that is read by the third dataset ([[getwfq]]3=2),
-as well as the eph_tdep_legacy_1o_DS1_WFK file from the first dataset ([[getwfk]]3=1).
+This second dataset produces the wavefunction file teph_tdep_legacy_1o_DS2_WFQ, that is read by the third dataset ([[getwfq]]3=2),
+as well as the teph_tdep_legacy_1o_DS1_WFK file from the first dataset ([[getwfk]]3=1).
 
 The third dataset corresponds to a DFPT phonon calculation ([[rfphon]]3=1)
 with displacement of all atoms ([[rfatpol]]3= 1 2) in all directions ([[rfdir]]3= 1 1 1), which are the default values.
-This induces the creation of the Derivative DataBase file eph_tdep_legacy_1o_DS3_DDB.
+This induces the creation of the Derivative DataBase file teph_tdep_legacy_1o_DS3_DDB.
 The electron-phonon matrix elements are produced because of [[ieig2rf]]3=5 ,
-this option generating the needed netCDF files eph_tdep_legacy_1o_DS3_EIGR2D.nc and eph_tdep_legacy_1o_DS3_GKK.nc .
+this option generating the needed netCDF files teph_tdep_legacy_1o_DS3_EIGR2D.nc and teph_tdep_legacy_1o_DS3_GKK.nc .
 
 In order to run abinit, we suggest that you create a working directory, why not call it `Work`,
 as subdirectory of ~abinit/tests/tutorespfn/Input, then
@@ -109,11 +109,11 @@ copy/modify the relevant files. Explicitly:
     cd ~abinit/tests/tutorespfn/Input
     mkdir Work
     cd Work
-    cp ../eph_tdep_legacy*in .
+    cp ../teph_tdep_legacy*in .
 
 Finally, issue
 
-    abinit eph_tdep_legacy_1.abi 
+    abinit teph_tdep_legacy_1.abi 
 
 The calculation will produce several _EIG.nc, _DDB, EIGR2D.nc and EIGI2D.nc files, 
 that contain respectively the eigenvalues (GS or perturbed), 
@@ -144,7 +144,7 @@ You can then simply run the python script with the following command:
     python temperature_final.py
 
 and enter the information asked by the script, typically the following
-(data contained in ~abinit/tests/tutorespfn/Input/eph_tdep_legacy_1_temperature.in):
+(data contained in ~abinit/tests/tutorespfn/Input/teph_tdep_legacy_1_temperature.in):
 
 ```
 1                          # Number of cpus
@@ -155,18 +155,18 @@ temperature_1              # Prefix for output files
 0 0.5                      # Energy range for the PDOS and Eliashberg calculations (in eV)
 0 1000 50                  # min, max temperature and temperature step
 1                          # Number of Q-points we have (here we only computed $\Gamma$)
-eph_tdep_legacy_1o_DS3_DDB          # Name of the response-funtion (RF) DDB file
-eph_tdep_legacy_1o_DS2_EIG.nc       # Eigenvalues at $\mathbf{k+q}$
-eph_tdep_legacy_1o_DS3_EIGR2D.nc    # Second-order electron-phonon matrix element
-eph_tdep_legacy_1o_DS3_GKK.nc       # Name of the 0 GKK file
-eph_tdep_legacy_1o_DS1_EIG.nc       # Name of the unperturbed EIG.nc file with Eigenvalues at $k$
+teph_tdep_legacy_1o_DS3_DDB          # Name of the response-funtion (RF) DDB file
+teph_tdep_legacy_1o_DS2_EIG.nc       # Eigenvalues at $\mathbf{k+q}$
+teph_tdep_legacy_1o_DS3_EIGR2D.nc    # Second-order electron-phonon matrix element
+teph_tdep_legacy_1o_DS3_GKK.nc       # Name of the 0 GKK file
+teph_tdep_legacy_1o_DS1_EIG.nc       # Name of the unperturbed EIG.nc file with Eigenvalues at $k$
 ```
 
 Alternatively, copy this example file in the Work directory if not yet done, and then run
 
-    python temperature_final.py < eph_tdep_legacy_1_temperature.in
+    python temperature_final.py < teph_tdep_legacy_1_temperature.in
 
-{% dialog tests/tutorespfn/Input/eph_tdep_legacy_1_temperature.in %}
+{% dialog tests/tutorespfn/Input/teph_tdep_legacy_1_temperature.in %}
 
 !!! warning
 
@@ -266,50 +266,50 @@ As usual, checking whether the input parameters give converged values is of cour
 In this case, we should first use [[help:mrgddb|mrgddb]] to merge the _DDB and _EIGR2D/_EIGI2D
 but since we only have one q-point we do not have to perform this step.
 The static temperature dependence and the G2F can be computed thanks to anaddb
-with the files file eph_tdep_legacy_2.files and the input
-file [[tests/tutorespfn/Input/eph_tdep_legacy_2.abi]].
+with the files file teph_tdep_legacy_2.files and the input
+file [[tests/tutorespfn/Input/teph_tdep_legacy_2.abi]].
 
 The information contained in the files file can be understood by looking at the echo
 if its reading in the standard output:
 
 ```
   Give name for formatted input file:
--   eph_tdep_legacy_2.abi
+-   teph_tdep_legacy_2.abi
   Give name for formatted output file:
--   eph_tdep_legacy_2.out
+-   teph_tdep_legacy_2.out
   Give name for input derivative database:
--   eph_tdep_legacy_1o_DS3_DDB
+-   teph_tdep_legacy_1o_DS3_DDB
   Give name for output molecular dynamics:
 -   dummyo.md
   Give name for input elphon matrix elements (GKK file):
--   eph_tdep_legacy_1o_DS3_EIGR2D
+-   teph_tdep_legacy_1o_DS3_EIGR2D
   Give root name for elphon output files:
--   eph_tdep_legacy_1_ana
+-   teph_tdep_legacy_1_ana
   Give name for file containing ddk filenames for elphon/transport:
 -   dummy.ddk
 ```
 
-{% dialog tests/tutorespfn/Input/eph_tdep_legacy_2.abi %}
+{% dialog tests/tutorespfn/Input/teph_tdep_legacy_2.abi %}
 
 As concern the anaddb input file, note that the electron-phonon analysis is triggered by
 [[anaddb:thmflag]] 3, as well as [[anaddb:telphint]] 1 .
 
 Launch anaddb by the command
 
-    anaddb eph_tdep_legacy_2.abi 
+    anaddb teph_tdep_legacy_2.abi 
 
 (where `anaddb` might have to be replaced by the proper location of the anaddb executable).
 
 The run will generate 3 files:
 
-**eph_tdep_legacy_2.out_ep_G2F**
+**teph_tdep_legacy_2.out_ep_G2F**
 :  This g2F spectral function represents the contribution of the phononic modes of energy E
    to the change of electronic eigenenergies according to the equation
 
-**eph_tdep_legacy_2.out_ep_PDS**
+**teph_tdep_legacy_2.out_ep_PDS**
 :  This file contains the phonon density of states
 
-**eph_tdep_legacy_2.out_ep_TBS**
+**teph_tdep_legacy_2.out_ep_TBS**
 :  This file contains the eigenenergy corrections as well
    as the temperature dependence one.
    You can check that the results are the same as with the python script approach here above.
@@ -379,8 +379,8 @@ Suppose that one is looking for the number of q-points corresponding to
     nshiftq 1
     shiftq 0.0 0.0 0.0
 
-One make a quick ABINIT run with [[tests/tutorespfn/Input/eph_tdep_legacy_2.abi]].
-Note that several input variables have been changed with respect to [[tests/tutorespfn/Input/eph_tdep_legacy_1.abi]]:
+One make a quick ABINIT run with [[tests/tutorespfn/Input/teph_tdep_legacy_2.abi]].
+Note that several input variables have been changed with respect to [[tests/tutorespfn/Input/teph_tdep_legacy_1.abi]]:
 
     ndtset 1
     nstep 0
@@ -399,7 +399,7 @@ grid. The use of symmetries has been reenabled thanks to [[nsym]]=0.
 
 To run it, issue:
 
-    abinit  eph_tdep_legacy_2.abi  
+    abinit  teph_tdep_legacy_2.abi  
 
 Now, the number of points can be seen in the output file :
 
@@ -433,9 +433,9 @@ So, compared to the first run in this tutorial, we have to replace
 
     ndtset 3     by      ndtset 24 udtset 8 3
 
-in the input file [[tests/tutorespfn/Input/eph_tdep_legacy_3.abi]], and adjusted accordingly all input variables that were dataset-dependent.
+in the input file [[tests/tutorespfn/Input/teph_tdep_legacy_3.abi]], and adjusted accordingly all input variables that were dataset-dependent.
 
-{% dialog tests/tutorespfn/Input/eph_tdep_legacy_3.abi %}
+{% dialog tests/tutorespfn/Input/teph_tdep_legacy_3.abi %}
 
 Please, refer to the
 [[help:abinit#35-defining-a-double-loop-dataset|explanation of the usage of a double-loop of datasets]]
@@ -460,16 +460,16 @@ allowing to perform calculations for three datasets at each q-point.
 
 Then issue:
 
-    abinit eph_tdep_legacy_3.abi
+    abinit teph_tdep_legacy_3.abi
 
 This is a significantly longer ABINIT run (still less than two minutes), also producing many files.
 
-When the run is finished, copy the file [[tests/tutorespfn/Input/eph_tdep_legacy_3_temperature.in]] in the
+When the run is finished, copy the file [[tests/tutorespfn/Input/teph_tdep_legacy_3_temperature.in]] in the
 working directory (if not yet done) and launch the python script with:
 
-    ./temperature_final.py < eph_tdep_legacy_3_temperature.in
+    ./temperature_final.py < teph_tdep_legacy_3_temperature.in
 
-{% dialog tests/tutorespfn/Input/eph_tdep_legacy_3_temperature.in %}
+{% dialog tests/tutorespfn/Input/teph_tdep_legacy_3_temperature.in %}
 
 Examination of the same HOMO and LUMO bands at k=$\Gamma$ for a 4x4x4 q-point grid gives a very different result
 than previously. 
@@ -508,9 +508,9 @@ $\Psi^{(0)}_{kBS+q}$ : The ground-state wavefunctions obtained from reading the 
 Reading the previous quantity we obtain the el-ph matrix elements along the bandstructure with all physical
 quantities integrated over a homogeneous grid.
 
-We will use the [[tests/tutorespfn/Input/eph_tdep_legacy_4.abi]] input file
+We will use the [[tests/tutorespfn/Input/teph_tdep_legacy_4.abi]] input file
 
-{% dialog tests/tutorespfn/Input/eph_tdep_legacy_4.abi %}
+{% dialog tests/tutorespfn/Input/teph_tdep_legacy_4.abi %}
 
 Note the use of the usual input variables to define a path in the Brillouin Zone to build an electronic band structure:
 [[kptbounds]], [[kptopt]], and [[ndivsm]]. Note also that we have defined [[qptopt]]=3. The number of q-points
@@ -519,22 +519,22 @@ even less dense than the one for section 2.
 
 Then issue:
 
-    abinit eph_tdep_legacy_4.abi
+    abinit teph_tdep_legacy_4.abi
 
 This is a significantly longer ABINIT run (5-10 minutes), also producing many files.
 
 
-then use [[tests/tutorespfn/Input/eph_tdep_legacy_4_temperature.in]] for the python script.
+then use [[tests/tutorespfn/Input/teph_tdep_legacy_4_temperature.in]] for the python script.
 
-{% dialog tests/tutorespfn/Input/eph_tdep_legacy_4_temperature.in %}
+{% dialog tests/tutorespfn/Input/teph_tdep_legacy_4_temperature.in %}
 
 with the usual syntax:
 
-    ./temperature_final.py < eph_tdep_legacy_4_temperature.in
+    ./temperature_final.py < teph_tdep_legacy_4_temperature.in
 
 <!-- THIS SECTION DOES NOT SEEM CORRECT : there is no other k point computed in section 2 ...
 Of course, the high symmetry points computed in section 2 have the same value here.
-It is a good idea to check it by running the script with the file eph_tdep_legacy_3bis.files.
+It is a good idea to check it by running the script with the file teph_tdep_legacy_3bis.files.
 
 -->
 
@@ -555,7 +555,7 @@ L \Gamma X W K L W X K \Gamma
 
 or more directly
 
-    ./plot_bs.py < eph_tdep_legacy_4_plot_bs.abi
+    ./plot_bs.py < teph_tdep_legacy_4_plot_bs.abi
 
 This should give the following bandstructure
 

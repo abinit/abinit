@@ -2,9 +2,9 @@
 authors: MG
 ---
 
-# How to compile ABINIT
+# How to build ABINIT
 
-This tutorial explains how to compile ABINIT including the external dependencies
+This tutorial explains how to build ABINIT including the external dependencies
 without relying on pre-compiled libraries, package managers and root privileges.
 You will learn how to use the standard **configure** and **make** Linux tools
 to build and install your own software stack including the MPI library and the associated
@@ -32,7 +32,8 @@ If this is the first time you use the **configure && make** approach to build so
 we **strongly** recommend to read this
 [guide](https://www.codecoffee.com/software-installation-configure-make-install/)
 before proceeding with the next steps.
-If, on the other hand, you are not interested in compiling all the components from source,
+
+If, on the other hand, you are **not interested in compiling all the components from source**,
 you may want to consider the following alternatives:
 
 * Compilation with external libraries provided by apt-based Linux distributions (e.g. **Ubuntu**).
@@ -1979,7 +1980,7 @@ These are the options I have to select in the
 [mkl-link-line-advisor](https://software.intel.com/en-us/articles/intel-mkl-link-line-advisor)
 to enable this configuration with my software stack:
 
-![](compilation_assets/link_line_advisor.png)
+![](abinit_build_assets/link_line_advisor.png)
 
 The options should be self-explanatory.
 Perhaps the tricky part is **Select interface layer** where one should select **32-bit integer**.
