@@ -855,7 +855,7 @@ end subroutine gwr_driver
 
 !!****f* m_gwr_driver/cc4s_gamma
 !! NAME
-!!  cc4s_gamm
+!!  cc4s_gamma
 !!
 !! FUNCTION
 !! Interface with CC4S code.
@@ -907,7 +907,7 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, cryst, ugb)
  if (dtset%fftgw==20 .or. dtset%fftgw==21) method=2
  if (dtset%fftgw==30 .or. dtset%fftgw==31) method=3
  enforce_sym = MOD(dtset%fftgw, 10)
- enforce_sym = 0 ! Gamma only --> we don't need to rotate wavefunctions as
+ enforce_sym = 0 ! Gamma only --> we don't need to rotate wavefunctions in the BZ
 
  npwvec = npw_k; gvec_max => ugb%kg_k
  if (m_npw > npw_k) then
@@ -983,11 +983,11 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, cryst, ugb)
      end do ! idat1
    end do ! my_ib2
 
-   ! TODO: Write data.
-   !  - Handle parallel IO if nsppol 2 (we are inside the spin loop that is already mpi distributed!
-   !  - Format for nspinor == 2
+   ! TODO: Write ug12_batch.
+   !  - Handle parallel IO if nsppol 2 (we are inside the spin loop that is already MPI distributed!
+   !  - Format for nspinor == 2?
 
- end do  ! band1_start
+ end do ! band1_start
 
  ABI_FREE(gbound_k)
  ABI_FREE(m_gbound)
