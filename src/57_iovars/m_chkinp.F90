@@ -2337,6 +2337,11 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !  call chkint_eq(1,1,cond_string,cond_values,ierr,'optcell',dt%optcell,1,(/0/),iout)
 !  end if
 
+   ! optdcmagpawu
+   if (dt%usepawu/=0.and.dt%nspden==4) then
+     call chkint_eq(0,0,cond_string,cond_values,ierr,'optdcmagpawu',dt%optdcmagpawu,3,(/1,2,3/),iout)
+   end if
+
 !  optdriver
    call chkint_eq(0,0,cond_string,cond_values,ierr,'optdriver',optdriver,11,&
 &   [RUNL_GSTATE,RUNL_RESPFN,RUNL_SCREENING,RUNL_SIGMA,RUNL_NONLINEAR,RUNL_BSE,&
