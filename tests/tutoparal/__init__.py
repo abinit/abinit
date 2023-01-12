@@ -15,13 +15,13 @@ is_multi_parallel = True
 subsuites = [
 "dfpt",
 "dmft",
-"gspw",
+"paral_bandpw",
 "gswvl",
 "images",
 "mbt",
 "moldyn",
 "psic",
-"ucrpa",
+"ucalc_crpa",
 ]
 
 #: List of input files
