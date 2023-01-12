@@ -23,7 +23,7 @@ subsuites = [
 "positron",
 "spin",
 "tddft",
-"udet",
+"ucalc_lr",
 "fold2bloch",
 ]
 
