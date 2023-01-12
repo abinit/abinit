@@ -134,7 +134,7 @@ pseudos      "Pseudodojo_paw_pw_standard/Au.xml"
 nband         640
 occopt        3 
 tsmear        0.002
-ngkpt         4 4 4 
+nkpt          1
 
 # Convergence parameters
 # ======================
@@ -143,16 +143,14 @@ pawecutdg     5  # Minimal value not converge to run with ecut
 
 # Control of the SCF cycle
 # ========================
-nstep         10
+nstep         5
 toldfe        1.e-7
 
 # Parallelization
 # ===============
 paral_kgb     1
-np_spkpt         4
-npband        16  
-bandpp        2   # Change this line according to the tutorial
-npfft         4   
+npband        16  # Change this line according to the tutorial  
+npfft         4   # Change this line according to the tutorial
 timopt        -3  # Get timing information of the run in the *.abo (output) file
 
 ##############################################################
@@ -161,12 +159,12 @@ timopt        -3  # Get timing information of the run in the *.abo (output) file
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% [NCPU_256]
+#%% [NCPU_64]
 #%% files_to_test = 
-#%%   tgspw_02_MPI256.abo, tolnlines = 170, tolabs = 1.1e-3, tolrel = 1.0e-2 
+#%%   tparal_bandpw_02_MPI64.abo, tolnlines = 170, tolabs = 1.1e-3, tolrel = 1.0e-2 
 #%% [paral_info]
-#%% max_nprocs = 256
-#%% nprocs_to_test = 256
+#%% max_nprocs = 64
+#%% nprocs_to_test = 64
 #%% [extra_info]
 #%% authors = F. Bottin, J. Bieder
 #%% keywords = 

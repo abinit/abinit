@@ -34,11 +34,11 @@ inp_files = [
 #"tdfpt_04PAW.abi",
 "tdmft_1.abi",
 "tdmft_2.abi",
-"tgspw_01.abi",
-"tgspw_02.abi",    # OK
-"tgspw_03.abi",    # OK
-"tgspw_04.abi",   # Unstable because nstep=5 and bandpp: 2d iteration oscillates and fldiff does not handle it!
-#"tgspw_05.abi",
+"tparal_bandpw_01.abi",
+"tparal_bandpw_02.abi",    # OK
+"tparal_bandpw_03.abi",    # OK
+"tparal_bandpw_04.abi",   # Unstable because nstep=5 and bandpp: 2d iteration oscillates and fldiff does not handle it!
+#"tparal_bandpw_05.abi",
 "tgswvl_1.abi",
 "tgswvl_2.abi",
 "timages_01.abi",

@@ -85,14 +85,14 @@ or
 
 OK, let's start!
 
-Copy the `tgspw_01.abi` file the tutorial directory into your working directory.
+Copy the `tparal_bandpw_01.abi` file the tutorial directory into your working directory.
 
-{% dialog tests/tutoparal/Input/tgspw_01.abi %}
+{% dialog tests/tutoparal/Input/tparal_bandpw_01.abi %}
 
 Then run ABINIT on 1 CPU core (using 1 MPI process and 1 *OpenMP* thread).
 
 ABINIT should stop without starting a calculation (don't pay attention to the error message).
-At the end of the output file `tgspw_01.abo`, you will see:
+At the end of the output file `tparal_bandpw_01.abo`, you will see:
 
 ```md
  Searching for all possible proc distributions for this input with #CPUs<=64:
@@ -138,9 +138,9 @@ But somehow, you did it without understanding how you got the result...
 In this part we will try to recover the previous process distribution, but with a better
 understanding. As shown above, the pair ([[npband]] x [[npfft]]) of input variables
 can have various values: (64x1), (32x2), (16x4), (8x8), (4x16).
-In order to perform these 5 calculations you can use the `tgspw_02.abi`.
+In order to perform these 5 calculations you can use the `tparal_bandpw_02.abi`.
 
-{% dialog tests/tutoparal/Input/tgspw_02.abi %}
+{% dialog tests/tutoparal/Input/tparal_bandpw_02.abi %}
 
 Change the line corresponding to the processor distribution.
 A first calculation with:
@@ -163,9 +163,9 @@ And so on, until you have run all 5 calculations ([[npband]]x[[npfft]]) : (64x1)
 
 Store all the output files by renaming them as follows:
 The timing of each calculation can be retrieved using the shell command:
-`tgspw_02.64.01.abo`, `tgspw_02.32.02.abo`,
-`tgspw_02.16.04.abo`, `tgspw_02.08.08.abo` and
-`tgspw_02.04.16.abo`
+`tparal_bandpw_02.64.01.abo`, `tparal_bandpw_02.32.02.abo`,
+`tparal_bandpw_02.16.04.abo`, `tparal_bandpw_02.08.08.abo` and
+`tparal_bandpw_02.04.16.abo`
 
 The timing of each calculation can be retrieved using the shell command:
 ```bash
@@ -173,11 +173,11 @@ grep Proc *.abo
 ```
 
 ```bash
-tgspw_02.04.16.abo:- Proc.   0 individual time (sec): cpu=         62.9  wall=         69.4
-tgspw_02.08.08.abo:- Proc.   0 individual time (sec): cpu=         57.9  wall=         64.0
-tgspw_02.16.04.abo:- Proc.   0 individual time (sec): cpu=         56.0  wall=         61.8
-tgspw_02.32.02.abo:- Proc.   0 individual time (sec): cpu=         57.1  wall=         62.8
-tgspw_02.64.01.abo:- Proc.   0 individual time (sec): cpu=         60.7  wall=         66.4
+tparal_bandpw_02.04.16.abo:- Proc.   0 individual time (sec): cpu=         62.9  wall=         69.4
+tparal_bandpw_02.08.08.abo:- Proc.   0 individual time (sec): cpu=         57.9  wall=         64.0
+tparal_bandpw_02.16.04.abo:- Proc.   0 individual time (sec): cpu=         56.0  wall=         61.8
+tparal_bandpw_02.32.02.abo:- Proc.   0 individual time (sec): cpu=         57.1  wall=         62.8
+tparal_bandpw_02.64.01.abo:- Proc.   0 individual time (sec): cpu=         60.7  wall=         66.4
 ```
 
 As far as the timing is concerned, the best distributions are the ones
@@ -200,11 +200,11 @@ The last iterations of the SCF loops are:
 
 ```bash
 grep "ETOT  5" *.abo
-tgspw_02.04.16.abo: ETOT  5  -3654.9080524851    -1.683E-04 6.622E-05 2.509E-04
-tgspw_02.08.08.abo: ETOT  5  -3654.9081359132    -2.710E-04 6.111E-05 2.318E-04
-tgspw_02.16.04.abo: ETOT  5  -3654.9082768015    -6.727E-05 5.277E-05 1.490E-04
-tgspw_02.32.02.abo: ETOT  5  -3654.9081759902    -2.737E-04 2.495E-05 1.968E-04
-tgspw_02.64.01.abo: ETOT  5  -3654.9083410155    -1.580E-04 6.181E-05 1.440E-04
+tparal_bandpw_02.04.16.abo: ETOT  5  -3654.9080524851    -1.683E-04 6.622E-05 2.509E-04
+tparal_bandpw_02.08.08.abo: ETOT  5  -3654.9081359132    -2.710E-04 6.111E-05 2.318E-04
+tparal_bandpw_02.16.04.abo: ETOT  5  -3654.9082768015    -6.727E-05 5.277E-05 1.490E-04
+tparal_bandpw_02.32.02.abo: ETOT  5  -3654.9081759902    -2.737E-04 2.495E-05 1.968E-04
+tparal_bandpw_02.64.01.abo: ETOT  5  -3654.9083410155    -1.580E-04 6.181E-05 1.440E-04
 ```
 
 The last column indicates the convergence of the **residual of the density** (because we are using PAW, otherwise it would be the residual of the potential in norm-conserving).
@@ -216,11 +216,11 @@ the (64x1) distribution... when the **worst timing** is measured.
 Already at the third iteration this behaviour is observed !
 ```bash
 grep "ETOT  3" *.abo
-tgspw_02.04.16.abo: ETOT  3  -3654.8846449612    -2.877E-01 5.690E-04 7.055E-02
-tgspw_02.08.08.abo: ETOT  3  -3654.8848503583    -2.884E-01 8.889E-04 7.093E-02
-tgspw_02.16.04.abo: ETOT  3  -3654.8858758622    -2.798E-01 5.805E-04 6.792E-02
-tgspw_02.32.02.abo: ETOT  3  -3654.8866790037    -2.689E-01 6.794E-05 6.472E-02
-tgspw_02.64.01.abo: ETOT  3  -3654.8885890816    -2.528E-01 4.112E-05 5.918E-02
+tparal_bandpw_02.04.16.abo: ETOT  3  -3654.8846449612    -2.877E-01 5.690E-04 7.055E-02
+tparal_bandpw_02.08.08.abo: ETOT  3  -3654.8848503583    -2.884E-01 8.889E-04 7.093E-02
+tparal_bandpw_02.16.04.abo: ETOT  3  -3654.8858758622    -2.798E-01 5.805E-04 6.792E-02
+tparal_bandpw_02.32.02.abo: ETOT  3  -3654.8866790037    -2.689E-01 6.794E-05 6.472E-02
+tparal_bandpw_02.64.01.abo: ETOT  3  -3654.8885890816    -2.528E-01 4.112E-05 5.918E-02
 ```
 
 So, you face a dilemma. The calculation with the smallest number of iterations
@@ -265,11 +265,11 @@ In the following we use the same settings as previously, just performing more el
 + bandpp        1 # This is the default value
 ```
 
-{% dialog tests/tutoparal/Input/tgspw_03.abi %}
+{% dialog tests/tutoparal/Input/tparal_bandpw_03.abi %}
 
-Copy the input file `tgspw_03.abi` then run ABINIT over 64 CPUs,
+Copy the input file `tparal_bandpw_03.abi` then run ABINIT over 64 CPUs,
 setting [[bandpp]]**=1** and then [[bandpp]]**=2**. The output files will be
-named `tgspw_03.bandpp1.abo` and `tgspw_03.bandpp2.abo`, respectively. A
+named `tparal_bandpw_03.bandpp1.abo` and `tparal_bandpw_03.bandpp2.abo`, respectively. A
 comparison of these two files shows that the convergence is better in the
 second case.
 Conclusion: for a given number of processors, it is possible to improve
@@ -279,16 +279,16 @@ However, as you can see, the CPU time per iteration
 increases when [[bandpp]] increases: 
 
 ```bash
-grep Proc tgspw_03.bandpp1.abo tgspw_03.bandpp2.abo
-tgspw_03.bandpp1.abo:- Proc.   0 individual time (sec): cpu=         90.0  wall=         95.6
-tgspw_03.bandpp2.abo:- Proc.   0 individual time (sec): cpu=         90.6  wall=         96.4
+grep Proc tparal_bandpw_03.bandpp1.abo tparal_bandpw_03.bandpp2.abo
+tparal_bandpw_03.bandpp1.abo:- Proc.   0 individual time (sec): cpu=         90.0  wall=         95.6
+tparal_bandpw_03.bandpp2.abo:- Proc.   0 individual time (sec): cpu=         90.6  wall=         96.4
 ```
 
 Now look at the last iteration
 ```bash
-grep "ETOT 10" tgspw_03.bandpp1.abo tgspw_03.bandpp2.abo
-tgspw_03.bandpp1.abo: ETOT 10  -3654.9085401615    -2.882E-08 5.100E-05 1.247E-08
-tgspw_03.bandpp2.abo: ETOT 10  -3654.9085401624    -3.744E-08 2.632E-05 8.003E-09
+grep "ETOT 10" tparal_bandpw_03.bandpp1.abo tparal_bandpw_03.bandpp2.abo
+tparal_bandpw_03.bandpp1.abo: ETOT 10  -3654.9085401615    -2.882E-08 5.100E-05 1.247E-08
+tparal_bandpw_03.bandpp2.abo: ETOT 10  -3654.9085401624    -3.744E-08 2.632E-05 8.003E-09
 ```
 
 With [[bandpp]]=2, the calculation is more converged ! 
@@ -308,10 +308,10 @@ Use the same input file and change it according to:
 + npfft         2  
 ```
 
-Then run ABINIT over 64 MPI processes and name the output file `tgspw_03.32.02.bandpp1.abo` 
+Then run ABINIT over 64 MPI processes and name the output file `tparal_bandpw_03.32.02.bandpp1.abo` 
 (This is one of the calculation you already did in the previous section but with [[nstep]]=10 instead of 5).
-Perform a `diff` between the two output files `tgspw_03.bandpp2.abo` 
-and `tgspw_03.32.02.bandpp1.abo`. 
+Perform a `diff` between the two output files `tparal_bandpw_03.bandpp2.abo` 
+and `tparal_bandpw_03.32.02.bandpp1.abo`. 
 As you can see, the two calculations give exactly the same 
 convergence rate. This was expected since, in both cases, the block sizes are equal (to 32)
 and the number of FFT processors [[npfft]] does not affect the convergence.
@@ -370,25 +370,25 @@ Let's try!
     When using threads, we have to impose [[npfft]] **= 1**.
     The best is to suppress it from the input file.
 
-The `tgspw_04.abi` input file has the parallelization set to [[npband]]=32 and [[npfft]]=2.
+The `tparal_bandpw_04.abi` input file has the parallelization set to [[npband]]=32 and [[npfft]]=2.
 Thus it uses 32 MPI processes. We have set [[bandpp]]=2.
 
-1. Run ABINIT using 64 MPI processes and 1 *OpenMP* threads (set `OMP_NUM_THREADS=1`). Copy the output file to `tgspw_04.bandpp2.1thread.abo`
-2. Set [[npfft]]=1 and run ABINIT using 32 MPI processes and 2 *OpenMP* threads (set `OMP_NUM_THREADS=2`). Copy the output file to `tgspw_04.bandpp2.2thread.abo`
+1. Run ABINIT using 64 MPI processes and 1 *OpenMP* threads (set `OMP_NUM_THREADS=1`). Copy the output file to `tparal_bandpw_04.bandpp2.1thread.abo`
+2. Set [[npfft]]=1 and run ABINIT using 32 MPI processes and 2 *OpenMP* threads (set `OMP_NUM_THREADS=2`). Copy the output file to `tparal_bandpw_04.bandpp2.2thread.abo`
 
 !!! note
 
     32 MPI x 2 threads = 64 cores.
 
 
-{% dialog tests/tutoparal/Input/tgspw_04.abi %}
+{% dialog tests/tutoparal/Input/tparal_bandpw_04.abi %}
 
 Let's have a look at the timings and compare them :
 
 ```bash
-grep Proc tgspw_04.bandpp2.1thread.abo tgspw_04.bandpp2.2thread.abo
-tgspw_04.bandpp2.1thread.abo:- Proc.   0 individual time (sec): cpu=         97.0  wall=        102.5
-tgspw_04.bandpp2.2thread.abo:- Proc.   0 individual time (sec): cpu=        148.3  wall=         86.5
+grep Proc tparal_bandpw_04.bandpp2.1thread.abo tparal_bandpw_04.bandpp2.2thread.abo
+tparal_bandpw_04.bandpp2.1thread.abo:- Proc.   0 individual time (sec): cpu=         97.0  wall=        102.5
+tparal_bandpw_04.bandpp2.2thread.abo:- Proc.   0 individual time (sec): cpu=        148.3  wall=         86.5
 ```
 
 As you can wee, the new output file show a larger computing time for process 0: (cpu=....) disappointing?
@@ -404,9 +404,9 @@ The best way to confirm that is to look at the *Wall Time* (cumulated on all tas
 of the output file:
 
 ```bash
-grep Overall tgspw_04.bandpp2.1thread.abo tgspw_04.bandpp2.2thread.abo
-tgspw_04.bandpp2.1thread.abo:+Overall time at end (sec) : cpu=       6419.3  wall=       6555.8
-tgspw_04.bandpp2.2thread.abo:+Overall time at end (sec) : cpu=       4853.7  wall=       2766.3
+grep Overall tparal_bandpw_04.bandpp2.1thread.abo tparal_bandpw_04.bandpp2.2thread.abo
+tparal_bandpw_04.bandpp2.1thread.abo:+Overall time at end (sec) : cpu=       6419.3  wall=       6555.8
+tparal_bandpw_04.bandpp2.2thread.abo:+Overall time at end (sec) : cpu=       4853.7  wall=       2766.3
 ```
 
 *How does ABINIT distribute the workload?*
@@ -444,13 +444,13 @@ First we change the input file as follows:
 + bandpp        4
 ```
 
-Then we run ABINIT using 16 MPI processes and 4 threads (still 64 cores) and rename the output file `tgspw_04.bandpp4.4thread.abo`
+Then we run ABINIT using 16 MPI processes and 4 threads (still 64 cores) and rename the output file `tparal_bandpw_04.bandpp4.4thread.abo`
 And we compare the timing of this "4 threads" case with the previous "2 threads" case:
 
 ```bash
-grep Overall tgspw_04.bandpp2.2thread.abo tgspw_04.bandpp4.4thread.abo
-tgspw_04.bandpp2.2thread.abo:+Overall time at end (sec) : cpu=       4853.7  wall=       2766.3
-tgspw_04.bandpp4.4thread.abo:+Overall time at end (sec) : cpu=       4423.2  wall=       1316.8
+grep Overall tparal_bandpw_04.bandpp2.2thread.abo tparal_bandpw_04.bandpp4.4thread.abo
+tparal_bandpw_04.bandpp2.2thread.abo:+Overall time at end (sec) : cpu=       4853.7  wall=       2766.3
+tparal_bandpw_04.bandpp4.4thread.abo:+Overall time at end (sec) : cpu=       4423.2  wall=       1316.8
 ```
 
 We again have improved ABINIT performances!
@@ -471,16 +471,16 @@ We don't change here the number of threads (keeping 4).
 And we obtain the following timings:
 
 ```diff
-grep Overall tgspw_04.bandpp4.4thread.abo tgspw_04.bandpp8.4thread.abo
-tgspw_04.bandpp4.4thread.abo:+Overall time at end (sec) : cpu=       4423.2  wall=       1316.8
-tgspw_04.bandpp8.4thread.abo:+Overall time at end (sec) : cpu=       4704.6  wall=       1417.3
+grep Overall tparal_bandpw_04.bandpp4.4thread.abo tparal_bandpw_04.bandpp8.4thread.abo
+tparal_bandpw_04.bandpp4.4thread.abo:+Overall time at end (sec) : cpu=       4423.2  wall=       1316.8
+tparal_bandpw_04.bandpp8.4thread.abo:+Overall time at end (sec) : cpu=       4704.6  wall=       1417.3
 ```
 
 The new settings do not give a better result...**but** for a few second you have a better convergence
 ```diff
-grep "ETOT 10" tgspw_04.bandpp4.4thread.abo tgspw_04.bandpp8.4thread.abo
-tgspw_04.bandpp4.4thread.abo: ETOT 10  -3654.9085401627    -5.105E-09 2.274E-05 1.673E-09
-tgspw_04.bandpp8.4thread.abo: ETOT 10  -3654.9085401627    -1.376E-09 1.912E-05 6.053E-10
+grep "ETOT 10" tparal_bandpw_04.bandpp4.4thread.abo tparal_bandpw_04.bandpp8.4thread.abo
+tparal_bandpw_04.bandpp4.4thread.abo: ETOT 10  -3654.9085401627    -5.105E-09 2.274E-05 1.673E-09
+tparal_bandpw_04.bandpp8.4thread.abo: ETOT 10  -3654.9085401627    -1.376E-09 1.912E-05 6.053E-10
 ```
 Convergence has a cost...
 
@@ -503,8 +503,8 @@ You can try this with `max_ncpus=64` and `OMP_NUM_THREADS=4`...
 ## 6 The KGB parallelization
 
 !!! note
-    For this part, a cluster was used and therefore the timing for `tgspw_03.abi` is different than the previous run in the previous section.
-    **Use the same cluster to run `tgspw_03.abi` and the following run.**
+    For this part, a cluster was used and therefore the timing for `tparal_bandpw_03.abi` is different than the previous run in the previous section.
+    **Use the same cluster to run `tparal_bandpw_03.abi` and the following run.**
 
 Up to now, we only performed a "GB" parallelization, using 2 levels (bands and/or FFT).
 If the system has more than 1 *k-point*, one can add a third level of parallelization
@@ -512,7 +512,7 @@ and perform a full "KBG" parallelization. There is no difficulty in
 adding processes to this level.
 
 To test the full parallelism, we restart
-with the same input file as in `tgspw_03.abi` and add a denser *k-point* grid.
+with the same input file as in `tparal_bandpw_03.abi` and add a denser *k-point* grid.
 In this case, the system has 4 *k-points* in
 the *irreducible Brillouin zone* (IBZ) so the calculation can be parallelized over (at most) 4 *k-points*
 MPI processes. This is done using the [[npkpt]] input variable:
@@ -524,13 +524,13 @@ MPI processes. This is done using the [[npkpt]] input variable:
 ```
 
 We need 4 times more processes than before, so run ABINIT over
-256 CPU cores (only MPI) with the `tgspw_05.abi` file.
-The timing obtained in the output file `tgspw_05.abo` and `tgspw_03.abo` are:
+256 CPU cores (only MPI) with the `tparal_bandpw_05.abi` file.
+The timing obtained in the output file `tparal_bandpw_05.abo` and `tparal_bandpw_03.abo` are:
 
 ```bash
-grep Proc tgspw_03.abo tgspw_05.abo 
-tgspw_03.abo:- Proc.   0 individual time (sec): cpu=         44.2  wall=         45.5
-tgspw_05.abo:- Proc.   0 individual time (sec): cpu=         49.3  wall=         50.4
+grep Proc tparal_bandpw_03.abo tparal_bandpw_05.abo 
+tparal_bandpw_03.abo:- Proc.   0 individual time (sec): cpu=         44.2  wall=         45.5
+tparal_bandpw_05.abo:- Proc.   0 individual time (sec): cpu=         49.3  wall=         50.4
 ```
 They are quasi-identical !
 This means that the scalability of ABINIT is quasi-linear on the *k-point* level.
@@ -540,10 +540,10 @@ This means that the scalability of ABINIT is quasi-linear on the *k-point* level
     When you want to parallelize a calculation, begin by the k-point level, then
     follow with the band level; then activate the FFT level or OpenMP threads.
 
-Here, the timing obtained for the output `tgspw_05.abo` leads to a hypothetical
+Here, the timing obtained for the output `tparal_bandpw_05.abo` leads to a hypothetical
 speedup of $45.5/50.4 \times 256\approx 231$, which is good, but not 256 as expected if the scaling was
 linear. Indeed, the time needed here is slightly longer (5 sec. more) than
-the one obtained in `tgspw_03.abo`.
+the one obtained in `tparal_bandpw_03.abo`.
 To go further, let's compare the time spent in all the routines.
 All the input files you have used contain the input variable [[timopt]]=-3 which activates the timing of different subparts of the run. 
 You can find the results a the end of the output files before the references.
@@ -554,11 +554,11 @@ This sequential part is mainly (99%) done outside the "vtowfk level".
 Let's have a look at the time spend in the well parallelized subroutine `vtowfk`:
 
 ```bash
-grep -e '- vtowfk *[[:digit:]]' tgspw_03.abo tgspw_05.abo
-tgspw_03.abo:- vtowfk                      2574.132  89.4   2589.639  89.3            640                   0.99       0.99
-tgspw_03.abo:- vtowfk                      2574.132  89.4   2589.639  89.3            640                   0.99       0.99
-tgspw_05.abo:- vtowfk                     10521.057  82.3  10595.093  82.3           2560                   0.99       0.99
-tgspw_05.abo:- vtowfk                     10521.057  82.3  10595.093  82.3           2560                   0.99       0.99
+grep -e '- vtowfk *[[:digit:]]' tparal_bandpw_03.abo tparal_bandpw_05.abo
+tparal_bandpw_03.abo:- vtowfk                      2574.132  89.4   2589.639  89.3            640                   0.99       0.99
+tparal_bandpw_03.abo:- vtowfk                      2574.132  89.4   2589.639  89.3            640                   0.99       0.99
+tparal_bandpw_05.abo:- vtowfk                     10521.057  82.3  10595.093  82.3           2560                   0.99       0.99
+tparal_bandpw_05.abo:- vtowfk                     10521.057  82.3  10595.093  82.3           2560                   0.99       0.99
 ```
 
 We see that the KGB parallelization performs really well, since the wall time

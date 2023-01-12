@@ -134,7 +134,7 @@ pseudos      "Pseudodojo_paw_pw_standard/Au.xml"
 nband         640
 occopt        3 
 tsmear        0.002
-nkpt          1
+ngkpt         4 4 4 
 
 # Convergence parameters
 # ======================
@@ -149,9 +149,10 @@ toldfe        1.e-7
 # Parallelization
 # ===============
 paral_kgb     1
-npband        16  # Change this line according to the tutorial  
+np_spkpt         4
+npband        16  
 bandpp        2   # Change this line according to the tutorial
-npfft         4   # Change this line according to the tutorial
+npfft         4   
 timopt        -3  # Get timing information of the run in the *.abo (output) file
 
 ##############################################################
@@ -160,15 +161,14 @@ timopt        -3  # Get timing information of the run in the *.abo (output) file
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% [NCPU_64]
+#%% [NCPU_256]
 #%% files_to_test = 
-#%%   tgspw_03_MPI64.abo, tolnlines = 170, tolabs = 1.1e-3, tolrel = 1.0e-2 
+#%%   tparal_bandpw_02_MPI256.abo, tolnlines = 170, tolabs = 1.1e-3, tolrel = 1.0e-2 
 #%% [paral_info]
-#%% max_nprocs = 64
-#%% nprocs_to_test = 64
+#%% max_nprocs = 256
+#%% nprocs_to_test = 256
 #%% [extra_info]
 #%% authors = F. Bottin, J. Bieder
 #%% keywords = 
 #%% description = 
 #%%<END TEST_INFO>
-

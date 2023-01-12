@@ -17,10 +17,10 @@
 .Starting date : Mon 28 Jun 2021.
 - ( at 18h59 )
   
-- input  file    -> /home/buildbot/ABINIT/scope_gnu_10.2_s64/trunk_develop/tests/TestBot_MPI64/tutoparal_tgspw_03_MPI64/tgspw_03.abi
-- output file    -> tgspw_03_MPI64.abo
-- root for input  files -> tgspw_03_MPI64i
-- root for output files -> tgspw_03_MPI64o
+- input  file    -> /home/buildbot/ABINIT/scope_gnu_10.2_s64/trunk_develop/tests/TestBot_MPI64/tutoparal_tparal_bandpw_03_MPI64/tparal_bandpw_03.abi
+- output file    -> tparal_bandpw_03_MPI64.abo
+- root for input  files -> tparal_bandpw_03_MPI64i
+- root for output files -> tparal_bandpw_03_MPI64o
 
 - inpspheads : Reading pseudopotential header in XML form from 
 -   /home/buildbot/ABINIT/scope_gnu_10.2_s64/trunk_develop/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Au.xml
@@ -1604,7 +1604,7 @@ force_length_stats: {min:   1.34202269E-19, max:   9.73856571E-03, mean:   1.541
  frms,max,avg= 9.8175577E-02 3.5410291E-01   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 23.010000000000 23.010000000000 23.010000000000 bohr
               = 12.176367569656 12.176367569656 12.176367569656 angstroms
- prteigrs : about to open file tgspw_03_MPI64o_EIG
+ prteigrs : about to open file tparal_bandpw_03_MPI64o_EIG
  Fermi (or HOMO) energy (hartree) =   0.28145   Average Vxc (hartree)=  -0.43600
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband=640, wtk=  1.00000, kpt=  0.2500  0.2500  0.2500 (reduced coord)

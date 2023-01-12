@@ -17,10 +17,10 @@
 .Starting date : Sun 21 Mar 2021.
 - ( at 09h28 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze-9.4/tests/TestBot_MPI1/tutoparal_tgspw_01_MPI1/tgspw_01.abi
-- output file    -> tgspw_01_MPI1.abo
-- root for input  files -> tgspw_01_MPI1i
-- root for output files -> tgspw_01_MPI1o
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze-9.4/tests/TestBot_MPI1/tutoparal_tparal_bandpw_01_MPI1/tparal_bandpw_01.abi
+- output file    -> tparal_bandpw_01_MPI1.abo
+- root for input  files -> tparal_bandpw_01_MPI1i
+- root for output files -> tparal_bandpw_01_MPI1o
 
 - inpspheads : Reading pseudopotential header in XML form from 
 -   /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze-9.4/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Au.xml
