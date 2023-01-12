@@ -1,11 +1,11 @@
-# Finite difference calculation of the relaxed ion
+# Finite difference calculation of the clamped-ion
 # piezoelectric constants of AlP
 #
 # The calculation proceeds by computing the change in cell
 # polarization by a Berrys phase formula, due to changes 
-# in the strain of the unit cell. In this case, the ion positions
-# will be allowed to relax to to their new equilibrium positions
-# within the strain cell.
+# in the strain of the unit cell. "Clamped-ion" refers to the
+# fact that the ions move with the strains but are not 
+# allowed to relax to their new equilibrium positions
 
 # Berry phase calculation of the polarization
 # berryopt -1 triggers the implementation of M. Viethen
@@ -65,12 +65,6 @@ xred
 1/4 1/4 1/4
 0 0 0
 
-# Relaxation of atomic positions
-optcell 0 # the cell geometry is not allowed to changed
-ionmov 2 # the ion positions will be relaxed
-tolmxf 1.0d-5
-ntime 13
-
 #Numerical parameters of the calculation : planewave basis set and k point grid
 ecut  5 # this value is very low but is used here to achieve very low calculation times.
         # in a production environment this should be checked carefully for convergence and
@@ -87,7 +81,7 @@ shiftk 0.5 0.5 0.5
        0.0 0.0 0.5
 
 #Parameters for the SCF procedure
-tolvrs 1.0D-19
+toldfe 1.0d-15
 nstep 8
 
 # suppress printing of density, wavefunctions, etc for this tutorial
@@ -103,13 +97,13 @@ prteig 0
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   tffield_5.abo, tolnlines=  22, tolabs=  1.100e-08, tolrel=  4.500e-04
+#%%   tpolarization_4.abo, tolnlines=  10, tolabs= 9.999e-9, tolrel= 1.224e-04
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = J. Zwanziger, M. Veithen
 #%% keywords = NC, DFPT
 #%% description = 
-#%%   Finite difference calculation of the clamped-ion
-#%%   piezoelectric constants of AlP
+#%%  Finite difference calculation of the clamped-ion
+#%%  piezoelectric constants of AlP
 #%%<END TEST_INFO>
