@@ -4219,7 +4219,7 @@ Electron-phonon self-energy (also spectral function) with **eph_task** = 4):
 
 Imaginary part of the electron-phonon self-energy (**eph_task** = -4):
 
-:   The default is [[eph_intmeth]] == 2, Tetrahedron method by [[cite:Blochl1994]] except when [[symsigma]] == 0,
+:   The default is [[eph_intmeth]] == 2, Tetrahedron method by [[cite:Bloechl1994]] except when [[symsigma]] == 0,
     where it is [[eph_intmeth]] == 1.
 """,
 ),
