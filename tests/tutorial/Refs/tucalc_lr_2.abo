@@ -17,10 +17,10 @@
 .Starting date : Sun  6 Nov 2022.
 - ( at 13h40 )
   
-- input  file    -> tudet_2.abi
-- output file    -> tudet_2.abo
-- root for input  files -> tudet_1.o
-- root for output files -> tudet_2o
+- input  file    -> tucalc_lr_2.abi
+- output file    -> tucalc_lr_2.abo
+- root for input  files -> tucalc_lr_1.o
+- root for output files -> tucalc_lr_2o
 
 - inpspheads : Reading pseudopotential header in XML form from 
 -   ../../Psps_for_tests/Pseudodojo_paw_pbe_standard/Fe.xml
@@ -236,7 +236,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
    1.98910826E+03                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tudet_1.o_WFK
+-inwffil : will read wavefunctions from disk file tucalc_lr_1.o_WFK
 _setup2: Arith. and geom. avg. npw (full set) are     173.333     173.266
 
 

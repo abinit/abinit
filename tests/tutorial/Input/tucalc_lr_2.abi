@@ -84,7 +84,7 @@
      prtden  0
 
 #PAW atomic data
-     indata_prefix = "tudet_1.o"
+     indata_prefix = "tucalc_lr_1.o"
 
      pp_dirpath "$ABI_PSPDIR"
      pseudos "Pseudodojo_paw_pbe_standard/Fe.xml"
@@ -96,11 +96,11 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = tudet_1.abi, tudet_2.abi, tudet_3.abi
+#%% test_chain = tucalc_lr_1.abi, tucalc_lr_2.abi, tucalc_lr_3.abi
 #%% [files]
 #%% files_to_test = 
-#%%   tudet_2.abo, tolnlines=  4, tolabs=  8.000e-03, tolrel=  6.500e-01, fld_options = -easy
-#%% output_file = "tudet_2.abo"
+#%%   tucalc_lr_2.abo, tolnlines=  4, tolabs=  8.000e-03, tolrel=  6.500e-01, fld_options = -easy
+#%% output_file = "tucalc_lr_2.abo"
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
