@@ -21,48 +21,6 @@ Six tutorials are intermediate level ones, that might be prerequisite for some m
 The following schema should help to understand these dependencies.
 
 <center>
-<!-- 
-<map id="map1" name="map1">
-<area shape="rect" coords="145  ,15 ,250 , 90 " href="base1/index.html" /> <!--2,3,4-->
-<area shape="rect" coords="70  ,135 ,180 ,160 " href="spin/index.html" />
-<area shape="rect" coords="70  ,165 ,129 ,184 " href="paw1/index.html" />
-<area shape="rect" coords="130 ,165 ,144 ,184 " href="paw2/index.html" />
-<area shape="rect" coords="145 ,165 ,180 ,184 " href="paw3/index.html" />
-<area shape="rect" coords="70  ,185 ,180 ,230 " href="nuc/index.html" />
-<area shape="rect" coords="70  ,235 ,124 ,257 " href="dftu/index.html" />
-<area shape="rect" coords="125 ,235 ,180 ,257 " href="dmft/index.html" />
-<area shape="rect" coords="70  ,258 ,125 ,280 " href="ucalc_crpa/index.html" />
-<area shape="rect" coords="125 ,258 ,180 ,280 " href="udet/index.html" />
-<area shape="rect" coords="70  ,285 ,180 ,310 " href="tddft/index.html" />
-<area shape="rect" coords="70  ,315 ,180 ,335 " href="positron/index.html" />
-<area shape="rect" coords="70  ,345 ,180 ,369 " href="ffield/index.html" />
-<area shape="rect" coords="70  ,370 ,180 ,390 " href="cut3d/index.html" />
-<area shape="rect" coords="70  ,395 ,180 ,420 " href="fold2bloch/index.html" />
-<area shape="rect" coords="70  ,425 ,180 ,445 " href="wannier90/index.html" />
-<area shape="rect" coords="70  ,450 ,180 ,475" href="../developers/developers_howto/index.html" />
-<area shape="rect" coords="210  ,135 ,330 ,199 " href="rf1/index.html" />
-<area shape="rect" coords="210  ,210 ,330 ,240 " href="optic/index.html" />
-<area shape="rect" coords="210  ,250 ,330 ,280 " href="rf2/index.html" />
-<area shape="rect" coords="210  ,300 ,330 ,325 " href="elastic/index.html" />
-<area shape="rect" coords="210  ,326 ,289 ,379 " href="lattice_model/index.html" />
-<area shape="rect" coords="290  ,326 ,330 ,379 " href="spin_model/index.html" />
-<area shape="rect" coords="210  ,390 ,330 ,420 " href="nlo/index.html" />
-<area shape="rect" coords="210  ,425 ,330 ,464 " href="eph_intro/index.html" />
-<area shape="rect" coords="210  ,465 ,264 ,494 " href="eph_intro/index.html" />
-<area shape="rect" coords="265  ,465 ,330 ,484 " href="eph4mob/index.html" />
-<area shape="rect" coords="210  ,485 ,330 ,524 " href="eph4zpr/index.html" />
-<area shape="rect" coords="355  ,400 ,440 ,440 " href="gw1/index.html" />
-<area shape="rect" coords="355  ,460 ,440 ,479 " href="gw2/index.html" />
-<area shape="rect" coords="355  ,480 ,440 ,520 " href="bse/index.html" />
-<area shape="rect" coords="485  ,15 ,590 , 90 " href="basepar/index.html" />
-<area shape="rect" coords="475  ,125 ,615 ,175 " href="paral_gspw/index.html" />
-<area shape="rect" coords="475  ,180 ,615 ,235 " href="paral_moldyn/index.html" />
-<area shape="rect" coords="475  ,240 ,615 ,295 " href="paral_images/index.html" />
-<area shape="rect" coords="475  ,300 ,615 ,355 " href="paral_gswvl/index.html" />
-<area shape="rect" coords="475  ,360 ,615 ,410 " href="paral_dfpt/index.html" />
-<area shape="rect" coords="415  ,420 ,615 ,470 " href="paral_mbt/index.html" />
-</map>
--->
 <img style="height: 540px; width: 720px;" alt="Schema 1" src="index_assets/tutorial_flowchart_v11.png" usemap="#map1"/>
 </center>
 
@@ -81,7 +39,8 @@ while a dashed brown arrow indicates that only some of the tutorials of the indi
 Inside a theme, there are also subsets of tutorials indicated with a light contour. 
 They are logically related to each other, and usually to be done
 one after the other. Otherwise, advanced tutorials usually do not have mutual dependencies.
-There are however two exceptions : the GW1 tutorial is a prerequisite for the paral_MBPT tutorial, while the lattice_wannier tutorial
+There are however three exceptions : the GW1 tutorial is a prerequisite for the paral_MBPT tutorial, 
+the parallelism tutorial is a prerequisite for the U_calc_LR tutorial, while the lattice_wannier tutorial
 is a prerequisite for the lwf_model tutorial. 
 
 
@@ -193,9 +152,9 @@ there are also specific User Guides for several postprocessors..**
   * [The tutorial on DFT+U](dftu) shows how to perform a DFT+U calculation using ABINIT,
     and will lead to compute the projected DOS of NiO. 
 
-  * [The tutorial U_calc_RPA](ucalc_crpa)
+  * [The tutorial U_calc_cRPA](ucalc_crpa)
     shows how to determine the U value for DFT+U with the constrained Random Phase Approximation (cRPA)
-    using projected Wannier orbitals. Prerequisite: [DFT+U](dftu).
+    using projected Wannier orbitals. Prerequisite: [DFT+U](dftu). Require at least 8 cores.
 
   * [The tutorial U_calc_LR](udet) shows how to determine the U value for DFT+U
     with the linear response method. Prerequisite: [DFT+U](dftu).

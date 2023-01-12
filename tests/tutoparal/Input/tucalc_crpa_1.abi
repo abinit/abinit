@@ -71,14 +71,14 @@ kptbounds2  1/4 1/4 1/4 #R'
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = tucrpa_1.abi
+#%% test_chain = tucalc_crpa_1.abi
 #%% [files]
 #%% [shell] 
 #%% [paral_info]
 #%% max_nprocs = 24
 #%% nprocs_to_test = 24
 #%% [NCPU_24]
-#%% files_to_test = tucrpa_1_MPI24.abo, tolnlines = 3, tolabs = 4.0e-10, tolrel = 2.0e-02
+#%% files_to_test = tucalc_crpa_1_MPI24.abo, tolnlines = 3, tolabs = 4.0e-10, tolrel = 2.0e-02
 #%% [extra_info]
 #%% keywords = LDA, FATBANDS
 #%% authors = B. Amadon

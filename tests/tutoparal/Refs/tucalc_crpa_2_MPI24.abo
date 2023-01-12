@@ -17,10 +17,10 @@
 .Starting date : Wed 23 Mar 2022.
 - ( at 01h07 )
   
-- input  file    -> /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk__gonze/tests/TestBot_MPI24/tutoparal_tucrpa_2_MPI24/tucrpa_2.abi
-- output file    -> tucrpa_2_MPI24.abo
-- root for input  files -> tucrpa_2_MPI24i
-- root for output files -> tucrpa_2_MPI24o
+- input  file    -> /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk__gonze/tests/TestBot_MPI24/tutoparal_tucalc_crpa_2_MPI24/tucalc_crpa_2.abi
+- output file    -> tucalc_crpa_2_MPI24.abo
+- root for input  files -> tucalc_crpa_2_MPI24i
+- root for output files -> tucalc_crpa_2_MPI24o
 
 - inpspheads : Reading pseudopotential header in XML form from 
 -   /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk__gonze/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
@@ -873,7 +873,7 @@ tolerances: {tolvrs: 1.00E-13, }
 
  ETOT  1  -151.72919607689    -1.517E+02 1.416E+00 1.695E+01
 
- prteigrs : about to open file tucrpa_2_MPI24o_DS1_EIG
+ prteigrs : about to open file tucalc_crpa_2_MPI24o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.34535   Average Vxc (hartree)=  -0.44565
  Eigenvalues (hartree) for nkpt=  32  k points:
  kpt#   1, nband= 50, wtk=  0.03125, kpt=  0.1250  0.1250  0.1250 (reduced coord)
@@ -1391,7 +1391,7 @@ tolerances: {tolvrs: 1.00E-13, }
 
  ETOT  2  -152.25985515637    -5.307E-01 8.421E-03 1.139E+02
 
- prteigrs : about to open file tucrpa_2_MPI24o_DS1_EIG
+ prteigrs : about to open file tucalc_crpa_2_MPI24o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.24197   Average Vxc (hartree)=  -0.44033
  Eigenvalues (hartree) for nkpt=  32  k points:
  kpt#   1, nband= 50, wtk=  0.03125, kpt=  0.1250  0.1250  0.1250 (reduced coord)
@@ -1909,7 +1909,7 @@ tolerances: {tolvrs: 1.00E-13, }
 
  ETOT  3  -151.96503607087     2.948E-01 8.166E-03 3.753E+00
 
- prteigrs : about to open file tucrpa_2_MPI24o_DS1_EIG
+ prteigrs : about to open file tucalc_crpa_2_MPI24o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.32437   Average Vxc (hartree)=  -0.44018
  Eigenvalues (hartree) for nkpt=  32  k points:
  kpt#   1, nband= 50, wtk=  0.03125, kpt=  0.1250  0.1250  0.1250 (reduced coord)
@@ -2427,7 +2427,7 @@ tolerances: {tolvrs: 1.00E-13, }
 
  ETOT  4  -151.93491640427     3.012E-02 2.106E-03 7.060E-01
 
- prteigrs : about to open file tucrpa_2_MPI24o_DS1_EIG
+ prteigrs : about to open file tucalc_crpa_2_MPI24o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.30014   Average Vxc (hartree)=  -0.43986
  Eigenvalues (hartree) for nkpt=  32  k points:
  kpt#   1, nband= 50, wtk=  0.03125, kpt=  0.1250  0.1250  0.1250 (reduced coord)
@@ -2945,7 +2945,7 @@ tolerances: {tolvrs: 1.00E-13, }
 
  ETOT  5  -151.92870443009     6.212E-03 1.216E-03 4.507E-02
 
- prteigrs : about to open file tucrpa_2_MPI24o_DS1_EIG
+ prteigrs : about to open file tucalc_crpa_2_MPI24o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.28091   Average Vxc (hartree)=  -0.43955
  Eigenvalues (hartree) for nkpt=  32  k points:
  kpt#   1, nband= 50, wtk=  0.03125, kpt=  0.1250  0.1250  0.1250 (reduced coord)
@@ -3463,7 +3463,7 @@ tolerances: {tolvrs: 1.00E-13, }
 
  ETOT  6  -151.92845729101     2.471E-04 4.115E-04 5.531E-03
 
- prteigrs : about to open file tucrpa_2_MPI24o_DS1_EIG
+ prteigrs : about to open file tucalc_crpa_2_MPI24o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.28337   Average Vxc (hartree)=  -0.43949
  Eigenvalues (hartree) for nkpt=  32  k points:
  kpt#   1, nband= 50, wtk=  0.03125, kpt=  0.1250  0.1250  0.1250 (reduced coord)
@@ -3981,7 +3981,7 @@ tolerances: {tolvrs: 1.00E-13, }
 
  ETOT  7  -151.92841949592     3.780E-05 2.807E-05 1.077E-03
 
- prteigrs : about to open file tucrpa_2_MPI24o_DS1_EIG
+ prteigrs : about to open file tucalc_crpa_2_MPI24o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.28445   Average Vxc (hartree)=  -0.43946
  Eigenvalues (hartree) for nkpt=  32  k points:
  kpt#   1, nband= 50, wtk=  0.03125, kpt=  0.1250  0.1250  0.1250 (reduced coord)
@@ -4499,7 +4499,7 @@ tolerances: {tolvrs: 1.00E-13, }
 
  ETOT  8  -151.92841096933     8.527E-06 2.407E-06 1.822E-04
 
- prteigrs : about to open file tucrpa_2_MPI24o_DS1_EIG
+ prteigrs : about to open file tucalc_crpa_2_MPI24o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.28501   Average Vxc (hartree)=  -0.43945
  Eigenvalues (hartree) for nkpt=  32  k points:
  kpt#   1, nband= 50, wtk=  0.03125, kpt=  0.1250  0.1250  0.1250 (reduced coord)
@@ -5017,7 +5017,7 @@ tolerances: {tolvrs: 1.00E-13, }
 
  ETOT  9  -151.92840912746     1.842E-06 2.372E-07 5.065E-06
 
- prteigrs : about to open file tucrpa_2_MPI24o_DS1_EIG
+ prteigrs : about to open file tucalc_crpa_2_MPI24o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.28546   Average Vxc (hartree)=  -0.43943
  Eigenvalues (hartree) for nkpt=  32  k points:
  kpt#   1, nband= 50, wtk=  0.03125, kpt=  0.1250  0.1250  0.1250 (reduced coord)
@@ -5535,7 +5535,7 @@ tolerances: {tolvrs: 1.00E-13, }
 
  ETOT 10  -151.92840913753    -1.007E-08 4.869E-08 5.156E-06
 
- prteigrs : about to open file tucrpa_2_MPI24o_DS1_EIG
+ prteigrs : about to open file tucalc_crpa_2_MPI24o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.28548   Average Vxc (hartree)=  -0.43943
  Eigenvalues (hartree) for nkpt=  32  k points:
  kpt#   1, nband= 50, wtk=  0.03125, kpt=  0.1250  0.1250  0.1250 (reduced coord)
@@ -6053,7 +6053,7 @@ tolerances: {tolvrs: 1.00E-13, }
 
  ETOT 11  -151.92840909796     3.957E-08 1.165E-08 3.508E-08
 
- prteigrs : about to open file tucrpa_2_MPI24o_DS1_EIG
+ prteigrs : about to open file tucalc_crpa_2_MPI24o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.28543   Average Vxc (hartree)=  -0.43944
  Eigenvalues (hartree) for nkpt=  32  k points:
  kpt#   1, nband= 50, wtk=  0.03125, kpt=  0.1250  0.1250  0.1250 (reduced coord)
@@ -6571,7 +6571,7 @@ tolerances: {tolvrs: 1.00E-13, }
 
  ETOT 12  -151.92840909773     2.270E-10 2.432E-09 3.787E-10
 
- prteigrs : about to open file tucrpa_2_MPI24o_DS1_EIG
+ prteigrs : about to open file tucalc_crpa_2_MPI24o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.28542   Average Vxc (hartree)=  -0.43944
  Eigenvalues (hartree) for nkpt=  32  k points:
  kpt#   1, nband= 50, wtk=  0.03125, kpt=  0.1250  0.1250  0.1250 (reduced coord)
@@ -7089,7 +7089,7 @@ tolerances: {tolvrs: 1.00E-13, }
 
  ETOT 13  -151.92840909773    -6.253E-13 4.905E-10 6.158E-11
 
- prteigrs : about to open file tucrpa_2_MPI24o_DS1_EIG
+ prteigrs : about to open file tucalc_crpa_2_MPI24o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.28542   Average Vxc (hartree)=  -0.43944
  Eigenvalues (hartree) for nkpt=  32  k points:
  kpt#   1, nband= 50, wtk=  0.03125, kpt=  0.1250  0.1250  0.1250 (reduced coord)
@@ -7607,7 +7607,7 @@ tolerances: {tolvrs: 1.00E-13, }
 
  ETOT 14  -151.92840909773    -1.990E-13 8.788E-11 1.573E-11
 
- prteigrs : about to open file tucrpa_2_MPI24o_DS1_EIG
+ prteigrs : about to open file tucalc_crpa_2_MPI24o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.28542   Average Vxc (hartree)=  -0.43944
  Eigenvalues (hartree) for nkpt=  32  k points:
  kpt#   1, nband= 50, wtk=  0.03125, kpt=  0.1250  0.1250  0.1250 (reduced coord)
@@ -8125,7 +8125,7 @@ tolerances: {tolvrs: 1.00E-13, }
 
  ETOT 15  -151.92840909773     1.990E-13 1.981E-11 2.834E-13
 
- prteigrs : about to open file tucrpa_2_MPI24o_DS1_EIG
+ prteigrs : about to open file tucalc_crpa_2_MPI24o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.28542   Average Vxc (hartree)=  -0.43944
  Eigenvalues (hartree) for nkpt=  32  k points:
  kpt#   1, nband= 50, wtk=  0.03125, kpt=  0.1250  0.1250  0.1250 (reduced coord)
@@ -8643,7 +8643,7 @@ tolerances: {tolvrs: 1.00E-13, }
 
  ETOT 16  -151.92840909773    -3.979E-13 4.088E-12 2.954E-14
 
- prteigrs : about to open file tucrpa_2_MPI24o_DS1_EIG
+ prteigrs : about to open file tucalc_crpa_2_MPI24o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.28542   Average Vxc (hartree)=  -0.43944
  Eigenvalues (hartree) for nkpt=  32  k points:
  kpt#   1, nband= 50, wtk=  0.03125, kpt=  0.1250  0.1250  0.1250 (reduced coord)
@@ -9596,7 +9596,7 @@ force_length_stats: {min:   2.44626159E-10, max:   6.39637916E-10, mean:   4.103
  frms,max,avg= 1.2897239E-08 2.3058003E-08   5.193E-10  1.802E-09  4.017E-10 e/A
  length scales=  7.260500000000  7.260500000000  7.260500000000 bohr
               =  3.842091122968  3.842091122968  3.842091122968 angstroms
- prteigrs : about to open file tucrpa_2_MPI24o_DS1_EIG
+ prteigrs : about to open file tucalc_crpa_2_MPI24o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.28542   Average Vxc (hartree)=  -0.43944
  Eigenvalues (hartree) for nkpt=  32  k points:
  kpt#   1, nband= 50, wtk=  0.03125, kpt=  0.1250  0.1250  0.1250 (reduced coord)
@@ -10288,7 +10288,7 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
 
 
 ================================================================================
- prteigrs : about to open file tucrpa_2_MPI24o_DS2_EIG
+ prteigrs : about to open file tucalc_crpa_2_MPI24o_DS2_EIG
  Non-SCF case, kpt    1 (  0.12500  0.12500  0.12500), residuals and eigenvalues=
   2.06E-19  1.40E-19  8.26E-19  8.35E-19  1.46E-19  2.84E-19  9.35E-19  6.78E-19
   2.96E-19  4.29E-19  2.18E-19  2.60E-19  2.03E-19  2.41E-19  6.71E-19  3.92E-19
@@ -11307,7 +11307,7 @@ force_length_stats: {min: null, max: null, mean: null, }
     5      0.00000000000000     0.00000000000000     1.92104556148385
  length scales=  7.260500000000  7.260500000000  7.260500000000 bohr
               =  3.842091122968  3.842091122968  3.842091122968 angstroms
- prteigrs : about to open file tucrpa_2_MPI24o_DS2_EIG
+ prteigrs : about to open file tucalc_crpa_2_MPI24o_DS2_EIG
  Eigenvalues (hartree) for nkpt=  32  k points:
  kpt#   1, nband= 50, wtk=  0.03125, kpt=  0.1250  0.1250  0.1250 (reduced coord)
   -2.10113   -1.15203   -1.15202   -1.15202   -0.96527   -0.42839   -0.38629   -0.38629
