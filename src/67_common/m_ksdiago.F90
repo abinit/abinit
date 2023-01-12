@@ -67,8 +67,7 @@ module m_ksdiago
 !!  ugb_t
 !!
 !! FUNCTION
-!!  Stores the wavefunctions for giveen (k-point, spin) in a PBLAS matrix
-!!  distributed over bands.
+!!  Stores the wavefunctions for given (k-point, spin) in a PBLAS matrix distributed over bands (columns)
 !!
 !! SOURCE
 
@@ -123,8 +122,6 @@ module m_ksdiago
     ! Build object by direct diagonalization of the KS Hamiltonian
 
    !procedure :: print => ugb_print
-
-   !procedure :: bcast => ugb_bcast
 
    procedure :: free => ugb_free
     ! Free memory
