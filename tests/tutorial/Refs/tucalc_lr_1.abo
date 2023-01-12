@@ -17,10 +17,10 @@
 .Starting date : Sun  6 Nov 2022.
 - ( at 13h40 )
   
-- input  file    -> tudet_1.abi
-- output file    -> tudet_1.abo
-- root for input  files -> tudet_1i
-- root for output files -> tudet_1.o
+- input  file    -> tucalc_lr_1.abi
+- output file    -> tucalc_lr_1.abo
+- root for input  files -> tucalc_lr_1i
+- root for output files -> tucalc_lr_1.o
 
 - inpspheads : Reading pseudopotential header in XML form from 
 -   ../../Psps_for_tests/Pseudodojo_paw_pbe_standard/Fe.xml

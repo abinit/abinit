@@ -2,9 +2,9 @@
 authors: DJA
 ---
 
-# Calculation of U and J using Cococcioni's approach
+# Calculation of U and J using the linear response approach
 
-## How to determine *U* for DFT+*U* in ABINIT? Cococcioni's approach.
+## How to determine *U* for DFT+*U* in ABINIT? Cococcioni's linear response approach.
 
 This tutorial aims to show how you can determine *U* for further DFT+*U*
 calculations consistently and in a fast an easy way. You will learn how to prepare
@@ -63,33 +63,33 @@ The implementation of the determination of *U* in ABINIT is briefly discussed in
 ## How to determine *U* in ABINIT
 
 *Before continuing, you may consider to work in a different subdirectory as
-for the other tutorials. Why not Work_udet?*
+for the other tutorials. Why not Work_ucalc_lr?*
 
 !!! important
 
     In what follows, the name of files are mentioned as if you were in this subdirectory.
     All the input files can be found in the $ABI_TESTS/tutorial/Input directory
      You can compare your results with reference output files located in
-     $ABI_TESTS/tutorial/Refs directory (for the present tutorial they are named tudet*.abo).
+     $ABI_TESTS/tutorial/Refs directory (for the present tutorial they are named tucalc_lr*.abo).
 
-The input file *tudet_1.abi* is an example of a file to prepare a wave function
-for further processing. The corresponding output file is ../Refs/tudet_1.abo).
+The input file *tucalc_lr_1.abi* is an example of a file to prepare a wave function
+for further processing. The corresponding output file is ../Refs/tucalc_lr_1.abo).
 
-Copy the files *tudet_1.abi* in your work directory, and run ABINIT:
+Copy the files *tucalc_lr_1.abi* in your work directory, and run ABINIT:
 
 ```sh
 cd $ABI_TESTS/tutorial/Input
-mkdir Work_udet
-cd Work_udet
-cp ../tudet_1.abi .
+mkdir Work_ucalc_lr
+cd Work_calc_lr
+cp ../tucalc_lr_1.abi .
 
-abinit  tudet_1.abi > log 2> err &
+abinit  tucalc_lr_1.abi > log 2> err &
 ```
 
 In the meantime, you can read the input file and see that this is a usual
 DFT+U calculation, with *U*=0.
 
-{% dialog tests/tutorial/Input/tudet_1.abi %}
+{% dialog tests/tutorial/Input/tucalc_lr_1.abi %}
 
 This setting allows us to read the occupations of
 the Fe $3d$ orbitals ([[lpawu]] 2). The cell contains 2 atoms. This is the
@@ -101,15 +101,15 @@ We do not suppress the writing of the *WFK* file, because this is the input for
 the calculations of U.
 
 Once this calculation has finished, run the second one:
-Copy the file *tudet_2.abi* in your work directory, and run ABINIT:
+Copy the file *tucalc_lr_2.abi* in your work directory, and run ABINIT:
 
-    abinit tudet_2.abi > tudet_2.log
+    abinit tucalc_lr_2.abi > tucalc_lr_2.log
 
-{% dialog tests/tutorial/Input/tudet_2.abi %}
+{% dialog tests/tutorial/Input/tucalc_lr_2.abi %}
 
-As you can see from the *tudet_2.abi* file, this run uses the *tudet_1o_WFK* as
-an input (as indata_prefix = "tudet_1.o"). In the *tudet_2.abi* all the symmetry relations are specified
-explicitly. In the *tudet_2.log* you can verify that none of the symmetries
+As you can see from the *tucalc_lr_2.abi* file, this run uses the *tucalc_lr_1o_WFK* as
+an input (as indata_prefix = "tucalc_lr_1.o"). In the *tucalc_lr_2.abi* all the symmetry relations are specified
+explicitly. In the *tucalc_lr_2.log* you can verify that none of the symmetries
 connects atoms 1 with atom 2:
 
     symatm: atom number    1 is reached starting at atom
@@ -131,7 +131,7 @@ You can generate these symmetries, in a separate run, where you specify the
 atom where the perturbation is done as a different species. From the output
 you read the number of symmetries ([[nsym]]), the symmetry operations
 ([[symrel]]) and the non-symmorphic vectors ([[tnons]]). This is already
-done here and inserted in the *tudet_2.abi* file. Note that you can alternatively
+done here and inserted in the *tucalc_lr_2.abi* file. Note that you can alternatively
 disable all symmetries with [[nsym]] = 1, or break specific symmetries by
 displacing the impurity atom in the preliminary run. However, for the
 determination of *U*, the positions should be the ideal positions and only the
@@ -141,7 +141,7 @@ For the rest, usually it is enough to set [[macro_uj]] 1 to run the
 calculation of *U*. Note also, that the [[irdwfk]] 1 and the [[tolvrs]] 1d-8
 need not be set explicitly, because they are the defaults with [[macro_uj]] 1.
 
-Once the calculation tudet_2 is converged, you can have look at the output.
+Once the calculation tucalc_lr_2 is converged, you can have look at the output.
 You can see, that the atomic shift ([[atvshift]]) is automatically set:
 
              atvshift      0.00367    0.00367    0.00367    0.00367    0.00367
@@ -153,7 +153,7 @@ This means, that all the 10 3d spin-spin orbitals on the first Fe atom where
 shifted by 0.1 eV (=0.00367 Ha). On the second atom no shift was applied.
 Self-consistency was reached twice: Once for a positive shift, once for the negative shift:
 
-    grep SCF  tudet_2.abo
+    grep SCF  tucalc_lr_2.abo
 
 The lines starting with URES
 
@@ -193,7 +193,7 @@ executable *ujdet* was created. The output of abinit is formatted so that you
 can easily "cut" the part with the ujdet input variables: you can generate
 the standard input file for the ujdet utility by typing:
 
-    sed -n "/MARK/,/MARK/p" tudet_2.abo  > ujdet.in
+    sed -n "/MARK/,/MARK/p" tucalc_lr_2.abo  > ujdet.in
 
 Note that the input for the ujdet utility is always called *ujdet.in*
 
