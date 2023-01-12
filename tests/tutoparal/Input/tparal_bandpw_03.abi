@@ -143,15 +143,16 @@ pawecutdg     5  # Minimal value not converge to run with ecut
 
 # Control of the SCF cycle
 # ========================
-nstep         5
+nstep         10
 toldfe        1.e-7
 
 # Parallelization
 # ===============
 paral_kgb     1
-autoparal     1
-max_ncpus     64
-timopt        -3 # Get timing information of the run in the *.abo (output) file
+npband        16  # Change this line according to the tutorial  
+bandpp        2   # Change this line according to the tutorial
+npfft         4   # Change this line according to the tutorial
+timopt        -3  # Get timing information of the run in the *.abo (output) file
 
 ##############################################################
 # This section is used only for regression testing of ABINIT #
@@ -159,15 +160,15 @@ timopt        -3 # Get timing information of the run in the *.abo (output) file
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% expected_failure = yes
-#%% [NCPU_1]
+#%% [NCPU_64]
 #%% files_to_test = 
-#%%   tgspw_01_MPI1.abo, tolnlines = 0, tolabs = 1.100e-03, tolrel = 3.000e-03
+#%%   tparal_bandpw_03_MPI64.abo, tolnlines = 170, tolabs = 1.1e-3, tolrel = 1.0e-2 
 #%% [paral_info]
-#%% max_nprocs = 1
-#%% nprocs_to_test = 1
+#%% max_nprocs = 64
+#%% nprocs_to_test = 64
 #%% [extra_info]
 #%% authors = F. Bottin, J. Bieder
 #%% keywords = 
-#%% description =  Gold with one vacancy (107 atoms of gold).
+#%% description = 
 #%%<END TEST_INFO>
+
