@@ -12,7 +12,7 @@ They might be used for other operating systems, but the commands have to be adap
 
 At present, more than forty tutorials are available. 
 Each of them is at most two hours of student work. 
-The set of tutorials is more structured than the user guides, but one need to invest some time to read them.
+The set of tutorials is more structured and gradual than the user guides, but one need to invest more time to read them.
 
 Dependencies between tutorials are present.
 To start with, four tutorials cover the basics of using ABINIT, and one tutorial explains in detail the build of ABINIT 
@@ -39,9 +39,10 @@ while a dashed brown arrow indicates that only some of the tutorials of the indi
 Inside a theme, there are also subsets of tutorials indicated with a light contour. 
 They are logically related to each other, and usually to be done
 one after the other. Otherwise, advanced tutorials usually do not have mutual dependencies.
-There are however three exceptions : the GW1 tutorial is a prerequisite for the paral_MBPT tutorial, 
-the parallelism tutorial is a prerequisite for the U_calc_LR tutorial, while the lattice_wannier tutorial
-is a prerequisite for the lwf_model tutorial. 
+There are however three exceptions : the [GW1 tutorial](GW1) is a prerequisite for the [paral_MBPT tutorial](paral_mbt), 
+the [parallelism tutorial](parallelism) is a prerequisite for the [U_calc_LR tutorial](ucalc_lr), 
+while the [lattice_wannier tutorial](lattice_wannier)
+is a prerequisite for the [lwf_model tutorial](lwf_model). 
 
 
 Visualisation tools are NOT covered in the ABINIT tutorials.
@@ -80,7 +81,7 @@ should not skip any of these.**
 * [The basic tutorial 4](base4) deals with crystalline aluminum (a metal), and its surface: occupation numbers,
   smearing the Fermi-Dirac distribution, the surface energy, and again, convergence studies ...
 
-* [The ABINIT_build tutorial](compilation) explains how to compile ABINIT from source
+* [The ABINIT_build tutorial](abinit_build) explains how to compile ABINIT from source
   including the external libraries.
   More advanced topics such as using **modules** in supercomputing centers,
   compiling and linking with the **intel compilers** and the **MKL library** as well as **OpenMP threads**
@@ -156,7 +157,7 @@ there are also specific User Guides for several postprocessors..**
     shows how to determine the U value for DFT+U with the constrained Random Phase Approximation (cRPA)
     using projected Wannier orbitals. Prerequisite: [DFT+U](dftu). Require at least 8 cores.
 
-  * [The tutorial U_calc_LR](udet) shows how to determine the U value for DFT+U
+  * [The tutorial U_calc_LR](ucalc_lr) shows how to determine the U value for DFT+U
     with the linear response method. Prerequisite: [DFT+U](dftu).
 
   * [The tutorial PAW2](paw2) presents the generation of atomic data for use with the PAW method. 
@@ -231,10 +232,10 @@ interaction, elastic response, Raman coefficients, piezoelectricity ...)**
 The implementations are still available at time of writing,
 but have been superseded by the new implementations, described in the above-mentioned tutorials.**
 
-  * [The legacy tutorial on the electron-phonon interaction](eph) presents the use of the utility MRGKK and ANADDB
+  * [The legacy tutorial on the electron-phonon interaction](eph_legacy) presents the use of the utility MRGKK and ANADDB
     to examine the electron-phonon interaction and the subsequent calculation of superconductivity temperature (for bulk systems).
 
-  * [The legacy tutorial on temperature dependence of the electronic structure](tdepes) presents the computation
+  * [The legacy tutorial on temperature dependence of the electronic structure](eph_tdep_legacy) presents the computation
     of the temperature dependence of the electronic structure,
     the zero-point motion effect, the lifetime/broadening of eigenenergies.
 
@@ -263,24 +264,24 @@ but have been superseded by the new implementations, described in the above-ment
 **For each of these tutorials, familiarization with the
 corresponding tutorial for the sequential calculation is mandatory, if it exists.**
 
-  * [Parallelism for ground-state calculations, with plane waves](paral_gspw) presents the combined
+  * [Parallelism for ground-state calculations, based on band and  plane waves distribution - paral_bandpw](paral_bandpw) presents the combined
     k-point (K), plane-wave (G), band (B), spin/spinor parallelism of ABINIT (so, the "KGB" parallelism),
     for the computation of total energy, density, and ground state properties
-
-  * [Parallelism for molecular dynamics calculations](paral_moldyn)
-
-  * [Parallelism based on "images"](paral_images), e.g. for the determination of transitions paths
-    (NEB or string method), or for PIMD, that can be activated alone, or on top of other parallelisms,
-    e.g. the "KGB" parallelism for force calculations.
 
   * [Parallelism for ground-state calculations, with wavelets](paral_gswvl) presents the parallelism of ABINIT,
     when wavelets are used as a basis function instead of planewaves, for the computation
     of total energy, density, and ground state properties
 
+  * [Parallelism for molecular dynamics calculations - paral_MD](paral_moldyn)
+
+  * [Parallelism based on "images"](paral_images), e.g. for the determination of transitions paths
+    (NEB or string method), or for PIMD, that can be activated alone, or on top of other parallelisms,
+    e.g. the "KGB" parallelism for force calculations.
+
   * [Parallelism of DFPT calculations](paral_dfpt)  you need to be familiarized with the calculation
    of response properties within ABINIT, see the tutorial [DFPT 1 (RF1)](rf1)
 
-  * [Parallelism of Many-Body Perturbation calculations (GW)](paral_mbt) allows to speed up
+  * [Parallelism of Many-Body Perturbation calculations (GW) - paral_MBPT](paral_mbt) allows to speed up
     the calculation of accurate electronic structures (quasi-particle band structure, including many-body effects).
 
 !!! note

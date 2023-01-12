@@ -401,7 +401,7 @@ Possible exceptions are systems with very small effective masses (e.g. GaAs) in 
 a very dense $\kk$-sampling is needed to sample the electron (hole) pocket.
 In this case, using the same sampling for electrons and phonons may be enough to converge.-->
 
-* By default, the code use the tetrahedron method [[cite:Blochl1994]]
+* By default, the code use the tetrahedron method [[cite:Bloechl1994]]
   to perform the integration in $\qq$-mesh.
   This allows to efficiently filter out the $\qq$-points that do not contribute to the lifetimes
   since these transitions are not compatible with energy and crystalline-momentum conservation.

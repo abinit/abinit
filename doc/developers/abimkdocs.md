@@ -429,7 +429,7 @@ and the new tests [[test:v8_04]], [[test:libxc_41]].
 Added in [[gitsha:f74dba1ed8346ca586dc95fd10fe4b8ced108d5e]]
 
 B.2
-Added subsuite syntax [[test:gspw_01]]
+Added subsuite syntax [[test:paral_bandpw_01]]
 
 C.2
 New versions of Fortran compilers have been integrated in the test farm:
@@ -452,7 +452,7 @@ and the new tests [[test:v8_04]], [[test:libxc_41]].
 Added in [[gitsha:f74dba1ed8346ca586dc95fd10fe4b8ced108d5e]].
 
 B.2
-Added subsuite syntax [[test:gspw_01]]
+Added subsuite syntax [[test:paral_bandpw_01]]
 
 C.2
 New versions of Fortran compilers have been integrated in the test farm:
