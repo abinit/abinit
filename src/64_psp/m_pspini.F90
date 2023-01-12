@@ -217,7 +217,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
  paw_options=0;paw_size=0
  if (psps%usepaw==1) then
    paw_size=size(pawtab)
-   has_kij=(dtset%positron/=0.or.abs(dtset%effmass_free-one)>tol8)
+   has_kij=(dtset%positron/=0.or.abs(dtset%effmass_free-one)>tol8.or.dtset%orbmag>0)
    has_tvale=.true. ! Will be modified later (depending on PAW dataset format)
    has_nabla=.false.
    has_shapefncg=(dtset%optdriver==RUNL_GSTATE.and.((dtset%iprcel>=20.and.dtset%iprcel<70).or.dtset%iprcel>=80))
@@ -237,10 +237,6 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
    paw_options(3) = 1
    paw_options(4) = 1
    !end if
-
-   ! JWZ debug added for development of testcprj routine in m_orbmag
-   if(dtset%userid .EQ. 1) paw_options(8) = 1
-
  end if
 
 !Determine whether the spin-orbit characteristic has changed
