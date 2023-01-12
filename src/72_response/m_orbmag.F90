@@ -104,8 +104,8 @@ module m_orbmag
   ! accounts for exp(i k.r) in abinit derivatives rather than exp( 2pi i k.r)
   real(dp),parameter :: c2=one/(two_pi*two_pi) 
   real(dp),parameter :: cdij=sqrt(four_pi/three) ! conversion from r_a to cdij*S_{1a}*r
-  complex(dpc),parameter :: cbc=j_dpc/two_pi ! Berry curvature pre-factor
   complex(dpc),parameter :: com=-half*j_dpc  ! Orbital magnetism pre-factor
+  complex(dpc),parameter :: cbc=-com ! Berry curvature pre-factor
 
   ! local datatype for d_\alpha terms
   type,private :: dterm_type
