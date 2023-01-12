@@ -17,10 +17,10 @@
 .Starting date : Wed 21 Dec 2022.
 - ( at 21h06 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken-9.8/tests/TestBot_MPI1/tutorespfn_tdepes_3/tdepes_3.abi
-- output file    -> tdepes_3.abo
-- root for input  files -> tdepes_3i
-- root for output files -> tdepes_3o
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken-9.8/tests/TestBot_MPI1/tutorespfn_teph_tdep_legacy_3/teph_tdep_legacy_3.abi
+- output file    -> teph_tdep_legacy_3.abo
+- root for input  files -> teph_tdep_legacy_3i
+- root for output files -> teph_tdep_legacy_3o
 
 
  DATASET   11 : space group P1 (#  1); Bravais aP (primitive triclinic)
@@ -1059,7 +1059,7 @@ force_length_stats: {min:   5.56986232E-08, max:   5.56986232E-08, mean:   5.569
  frms,max,avg= 1.6536109E-06 2.6604281E-06  -3.600E-07 -3.130E-07  1.336E-07 e/A
  length scales=  6.675000000000  6.675000000000  6.675000000000 bohr
               =  3.532257867338  3.532257867338  3.532257867338 angstroms
- prteigrs : about to open file tdepes_3o_DS11_EIG
+ prteigrs : about to open file teph_tdep_legacy_3o_DS11_EIG
  Fermi (or HOMO) energy (hartree) =   0.39943   Average Vxc (hartree)=  -0.50614
  Eigenvalues (hartree) for nkpt=   8  k points:
  kpt#   1, nband= 12, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -1129,7 +1129,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
 
 
 ================================================================================
- prteigrs : about to open file tdepes_3o_DS12_EIG
+ prteigrs : about to open file teph_tdep_legacy_3o_DS12_EIG
  Non-SCF case, kpt    1 (  0.00000  0.00000  0.00000), residuals and eigenvalues=
   1.02E-09  2.08E-09  2.76E-09  1.87E-09  2.76E-09  1.81E-09  2.19E-09  4.39E-09
   5.88E-09  9.56E-09  5.26E-07  4.21E-09
@@ -1181,7 +1181,7 @@ force_length_stats: {min: null, max: null, mean: null, }
     2      0.88306446683456     0.88306446683456     0.88306446683456
  length scales=  6.675000000000  6.675000000000  6.675000000000 bohr
               =  3.532257867338  3.532257867338  3.532257867338 angstroms
- prteigrs : about to open file tdepes_3o_DS12_EIG
+ prteigrs : about to open file teph_tdep_legacy_3o_DS12_EIG
  Eigenvalues (hartree) for nkpt=   8  k points:
  kpt#   1, nband= 12, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -0.40681    0.39943    0.39943    0.39943    0.60260    0.60260    0.60260    0.91923
@@ -1912,7 +1912,7 @@ force_length_stats: {min:   5.56986232E-08, max:   5.56986232E-08, mean:   5.569
  frms,max,avg= 1.6536109E-06 2.6604281E-06  -3.600E-07 -3.130E-07  1.336E-07 e/A
  length scales=  6.675000000000  6.675000000000  6.675000000000 bohr
               =  3.532257867338  3.532257867338  3.532257867338 angstroms
- prteigrs : about to open file tdepes_3o_DS21_EIG
+ prteigrs : about to open file teph_tdep_legacy_3o_DS21_EIG
  Fermi (or HOMO) energy (hartree) =   0.39943   Average Vxc (hartree)=  -0.50614
  Eigenvalues (hartree) for nkpt=   8  k points:
  kpt#   1, nband= 12, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -1982,7 +1982,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
 
 
 ================================================================================
- prteigrs : about to open file tdepes_3o_DS22_EIG
+ prteigrs : about to open file teph_tdep_legacy_3o_DS22_EIG
  Non-SCF case, kpt    1 (  0.25000  0.00000  0.00000), residuals and eigenvalues=
   1.74E-09  3.99E-10  2.57E-09  7.22E-09  6.01E-09  3.34E-09  2.69E-09  7.06E-09
   4.45E-09  9.32E-09  7.95E-09  3.26E-09
@@ -2034,7 +2034,7 @@ force_length_stats: {min: null, max: null, mean: null, }
     2      0.88306446683456     0.88306446683456     0.88306446683456
  length scales=  6.675000000000  6.675000000000  6.675000000000 bohr
               =  3.532257867338  3.532257867338  3.532257867338 angstroms
- prteigrs : about to open file tdepes_3o_DS22_EIG
+ prteigrs : about to open file teph_tdep_legacy_3o_DS22_EIG
  Eigenvalues (hartree) for nkpt=   8  k points:
  kpt#   1, nband= 12, wtk=  0.12500, kpt=  0.2500  0.0000  0.0000 (reduced coord)
   -0.34215    0.14960    0.33207    0.33207    0.68591    0.68591    0.70811    0.94864
@@ -2745,7 +2745,7 @@ force_length_stats: {min:   5.56986232E-08, max:   5.56986232E-08, mean:   5.569
  frms,max,avg= 1.6536109E-06 2.6604281E-06  -3.600E-07 -3.130E-07  1.336E-07 e/A
  length scales=  6.675000000000  6.675000000000  6.675000000000 bohr
               =  3.532257867338  3.532257867338  3.532257867338 angstroms
- prteigrs : about to open file tdepes_3o_DS31_EIG
+ prteigrs : about to open file teph_tdep_legacy_3o_DS31_EIG
  Fermi (or HOMO) energy (hartree) =   0.39943   Average Vxc (hartree)=  -0.50614
  Eigenvalues (hartree) for nkpt=   8  k points:
  kpt#   1, nband= 12, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -2815,7 +2815,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
 
 
 ================================================================================
- prteigrs : about to open file tdepes_3o_DS32_EIG
+ prteigrs : about to open file teph_tdep_legacy_3o_DS32_EIG
  Non-SCF case, kpt    1 (  0.50000  0.00000  0.00000), residuals and eigenvalues=
   6.60E-10  8.51E-10  1.20E-09  1.12E-09  3.29E-09  2.05E-09  6.26E-10  8.64E-09
   2.39E-09  3.76E-09  8.52E-09  1.96E-09
@@ -2867,7 +2867,7 @@ force_length_stats: {min: null, max: null, mean: null, }
     2      0.88306446683456     0.88306446683456     0.88306446683456
  length scales=  6.675000000000  6.675000000000  6.675000000000 bohr
               =  3.532257867338  3.532257867338  3.532257867338 angstroms
- prteigrs : about to open file tdepes_3o_DS32_EIG
+ prteigrs : about to open file teph_tdep_legacy_3o_DS32_EIG
  Eigenvalues (hartree) for nkpt=   8  k points:
  kpt#   1, nband= 12, wtk=  0.12500, kpt=  0.5000  0.0000  0.0000 (reduced coord)
   -0.18326   -0.11195    0.29206    0.29206    0.70848    0.70848    0.74271    0.96721
@@ -3584,7 +3584,7 @@ force_length_stats: {min:   5.56986232E-08, max:   5.56986232E-08, mean:   5.569
  frms,max,avg= 1.6536109E-06 2.6604281E-06  -3.600E-07 -3.130E-07  1.336E-07 e/A
  length scales=  6.675000000000  6.675000000000  6.675000000000 bohr
               =  3.532257867338  3.532257867338  3.532257867338 angstroms
- prteigrs : about to open file tdepes_3o_DS41_EIG
+ prteigrs : about to open file teph_tdep_legacy_3o_DS41_EIG
  Fermi (or HOMO) energy (hartree) =   0.39943   Average Vxc (hartree)=  -0.50614
  Eigenvalues (hartree) for nkpt=   8  k points:
  kpt#   1, nband= 12, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -3654,7 +3654,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
 
 
 ================================================================================
- prteigrs : about to open file tdepes_3o_DS42_EIG
+ prteigrs : about to open file teph_tdep_legacy_3o_DS42_EIG
  Non-SCF case, kpt    1 (  0.25000  0.25000  0.00000), residuals and eigenvalues=
   1.01E-09  4.98E-09  6.08E-09  1.32E-09  4.95E-09  2.16E-09  2.91E-09  6.03E-09
   2.82E-09  6.10E-09  6.59E-07  4.33E-07
@@ -3706,7 +3706,7 @@ force_length_stats: {min: null, max: null, mean: null, }
     2      0.88306446683456     0.88306446683456     0.88306446683456
  length scales=  6.675000000000  6.675000000000  6.675000000000 bohr
               =  3.532257867338  3.532257867338  3.532257867338 angstroms
- prteigrs : about to open file tdepes_3o_DS42_EIG
+ prteigrs : about to open file teph_tdep_legacy_3o_DS42_EIG
  Eigenvalues (hartree) for nkpt=   8  k points:
  kpt#   1, nband= 12, wtk=  0.12500, kpt=  0.2500  0.2500  0.0000 (reduced coord)
   -0.32074    0.23439    0.24013    0.24013    0.55883    0.77230    0.83118    0.83118
@@ -4421,7 +4421,7 @@ force_length_stats: {min:   5.56986232E-08, max:   5.56986232E-08, mean:   5.569
  frms,max,avg= 1.6536109E-06 2.6604281E-06  -3.600E-07 -3.130E-07  1.336E-07 e/A
  length scales=  6.675000000000  6.675000000000  6.675000000000 bohr
               =  3.532257867338  3.532257867338  3.532257867338 angstroms
- prteigrs : about to open file tdepes_3o_DS51_EIG
+ prteigrs : about to open file teph_tdep_legacy_3o_DS51_EIG
  Fermi (or HOMO) energy (hartree) =   0.39943   Average Vxc (hartree)=  -0.50614
  Eigenvalues (hartree) for nkpt=   8  k points:
  kpt#   1, nband= 12, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -4491,7 +4491,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
 
 
 ================================================================================
- prteigrs : about to open file tdepes_3o_DS52_EIG
+ prteigrs : about to open file teph_tdep_legacy_3o_DS52_EIG
  Non-SCF case, kpt    1 (  0.50000  0.25000  0.00000), residuals and eigenvalues=
   7.10E-09  7.99E-10  3.65E-10  3.02E-09  4.74E-10  1.84E-09  7.65E-09  2.41E-09
   1.86E-09  6.11E-09  9.48E-09  1.40E-07
@@ -4543,7 +4543,7 @@ force_length_stats: {min: null, max: null, mean: null, }
     2      0.88306446683456     0.88306446683456     0.88306446683456
  length scales=  6.675000000000  6.675000000000  6.675000000000 bohr
               =  3.532257867338  3.532257867338  3.532257867338 angstroms
- prteigrs : about to open file tdepes_3o_DS52_EIG
+ prteigrs : about to open file teph_tdep_legacy_3o_DS52_EIG
  Eigenvalues (hartree) for nkpt=   8  k points:
  kpt#   1, nband= 12, wtk=  0.12500, kpt=  0.5000  0.2500  0.0000 (reduced coord)
   -0.17826   -0.00749    0.14292    0.21161    0.61732    0.81834    0.87550    0.90197
@@ -5256,7 +5256,7 @@ force_length_stats: {min:   5.56986232E-08, max:   5.56986232E-08, mean:   5.569
  frms,max,avg= 1.6536109E-06 2.6604281E-06  -3.600E-07 -3.130E-07  1.336E-07 e/A
  length scales=  6.675000000000  6.675000000000  6.675000000000 bohr
               =  3.532257867338  3.532257867338  3.532257867338 angstroms
- prteigrs : about to open file tdepes_3o_DS61_EIG
+ prteigrs : about to open file teph_tdep_legacy_3o_DS61_EIG
  Fermi (or HOMO) energy (hartree) =   0.39943   Average Vxc (hartree)=  -0.50614
  Eigenvalues (hartree) for nkpt=   8  k points:
  kpt#   1, nband= 12, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -5326,7 +5326,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
 
 
 ================================================================================
- prteigrs : about to open file tdepes_3o_DS62_EIG
+ prteigrs : about to open file teph_tdep_legacy_3o_DS62_EIG
  Non-SCF case, kpt    1 ( -0.25000  0.25000  0.00000), residuals and eigenvalues=
   3.73E-09  4.87E-09  1.51E-09  1.45E-09  3.63E-09  3.42E-09  5.52E-10  5.98E-10
   1.51E-09  1.59E-09  1.77E-09  5.82E-06
@@ -5378,7 +5378,7 @@ force_length_stats: {min: null, max: null, mean: null, }
     2      0.88306446683456     0.88306446683456     0.88306446683456
  length scales=  6.675000000000  6.675000000000  6.675000000000 bohr
               =  3.532257867338  3.532257867338  3.532257867338 angstroms
- prteigrs : about to open file tdepes_3o_DS62_EIG
+ prteigrs : about to open file teph_tdep_legacy_3o_DS62_EIG
  Eigenvalues (hartree) for nkpt=   8  k points:
  kpt#   1, nband= 12, wtk=  0.12500, kpt= -0.2500  0.2500  0.0000 (reduced coord)
   -0.23780    0.07385    0.10683    0.28354    0.68893    0.76988    0.86080    0.92245
@@ -6091,7 +6091,7 @@ force_length_stats: {min:   5.56986232E-08, max:   5.56986232E-08, mean:   5.569
  frms,max,avg= 1.6536109E-06 2.6604281E-06  -3.600E-07 -3.130E-07  1.336E-07 e/A
  length scales=  6.675000000000  6.675000000000  6.675000000000 bohr
               =  3.532257867338  3.532257867338  3.532257867338 angstroms
- prteigrs : about to open file tdepes_3o_DS71_EIG
+ prteigrs : about to open file teph_tdep_legacy_3o_DS71_EIG
  Fermi (or HOMO) energy (hartree) =   0.39943   Average Vxc (hartree)=  -0.50614
  Eigenvalues (hartree) for nkpt=   8  k points:
  kpt#   1, nband= 12, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -6161,7 +6161,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
 
 
 ================================================================================
- prteigrs : about to open file tdepes_3o_DS72_EIG
+ prteigrs : about to open file teph_tdep_legacy_3o_DS72_EIG
  Non-SCF case, kpt    1 (  0.50000  0.50000  0.00000), residuals and eigenvalues=
   3.17E-09  2.85E-09  2.42E-09  4.35E-09  1.49E-09  6.47E-10  4.62E-09  3.39E-09
   3.27E-09  5.18E-09  4.29E-08  6.58E-07
@@ -6213,7 +6213,7 @@ force_length_stats: {min: null, max: null, mean: null, }
     2      0.88306446683456     0.88306446683456     0.88306446683456
  length scales=  6.675000000000  6.675000000000  6.675000000000 bohr
               =  3.532257867338  3.532257867338  3.532257867338 angstroms
- prteigrs : about to open file tdepes_3o_DS72_EIG
+ prteigrs : about to open file teph_tdep_legacy_3o_DS72_EIG
  Eigenvalues (hartree) for nkpt=   8  k points:
  kpt#   1, nband= 12, wtk=  0.12500, kpt=  0.5000  0.5000  0.0000 (reduced coord)
   -0.07741   -0.07741    0.15706    0.15706    0.56687    0.56687    1.02787    1.02787
@@ -6927,7 +6927,7 @@ force_length_stats: {min:   5.56986232E-08, max:   5.56986232E-08, mean:   5.569
  frms,max,avg= 1.6536109E-06 2.6604281E-06  -3.600E-07 -3.130E-07  1.336E-07 e/A
  length scales=  6.675000000000  6.675000000000  6.675000000000 bohr
               =  3.532257867338  3.532257867338  3.532257867338 angstroms
- prteigrs : about to open file tdepes_3o_DS81_EIG
+ prteigrs : about to open file teph_tdep_legacy_3o_DS81_EIG
  Fermi (or HOMO) energy (hartree) =   0.39943   Average Vxc (hartree)=  -0.50614
  Eigenvalues (hartree) for nkpt=   8  k points:
  kpt#   1, nband= 12, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -6997,7 +6997,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
 
 
 ================================================================================
- prteigrs : about to open file tdepes_3o_DS82_EIG
+ prteigrs : about to open file teph_tdep_legacy_3o_DS82_EIG
  Non-SCF case, kpt    1 ( -0.25000  0.50000  0.25000), residuals and eigenvalues=
   3.25E-10  4.38E-10  4.42E-09  9.39E-10  1.62E-09  3.37E-09  9.18E-10  1.39E-09
   9.64E-09  2.42E-09  8.50E-09  6.25E-09
@@ -7049,7 +7049,7 @@ force_length_stats: {min: null, max: null, mean: null, }
     2      0.88306446683456     0.88306446683456     0.88306446683456
  length scales=  6.675000000000  6.675000000000  6.675000000000 bohr
               =  3.532257867338  3.532257867338  3.532257867338 angstroms
- prteigrs : about to open file tdepes_3o_DS82_EIG
+ prteigrs : about to open file teph_tdep_legacy_3o_DS82_EIG
  Eigenvalues (hartree) for nkpt=   8  k points:
  kpt#   1, nband= 12, wtk=  0.12500, kpt= -0.2500  0.5000  0.2500 (reduced coord)
   -0.04379   -0.04379    0.07578    0.07578    0.78270    0.78270    0.86526    0.86526

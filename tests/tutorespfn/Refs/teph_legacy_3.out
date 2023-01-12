@@ -27,8 +27,8 @@
   Names of the GKK files...
 
  Enter name of output file:
- Output                     = teph_3o_GKK.bin
- Ground State file          = teph_1o_DS6_WFK
+ Output                     = teph_legacy_3o_GKK.bin
+ Ground State file          = teph_legacy_1o_DS6_WFK
  Number of 1WF files        =    0
  Number of GKK files        =    9
  Total Number of 1WF in GKK =    9

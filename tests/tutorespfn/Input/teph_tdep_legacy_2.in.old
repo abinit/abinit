@@ -30,12 +30,12 @@
 #%% [setup]
 #%% executable = anaddb
 #%% need_cpp_vars = HAVE_NETCDF
-#%% test_chain =  tdepes_1.in, tdepes_2.in, tdepes_3.in,  tdepes_4.in
-#%% input_ddb = tdepes_1o_DS3_DDB
-#%% input_gkk = tdepes_1o_DS3_EIGR2D
+#%% test_chain =  teph_tdep_legacy_1.in, teph_tdep_legacy_2.in, teph_tdep_legacy_3.in,  teph_tdep_legacy_4.in
+#%% input_ddb = teph_tdep_legacy_1o_DS3_DDB
+#%% input_gkk = teph_tdep_legacy_1o_DS3_EIGR2D
 #%% [files]
 #%% files_to_test =
-#%%   tdepes_2.out , tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00, fld_options=-easy
+#%%   teph_tdep_legacy_2.out , tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00, fld_options=-easy
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

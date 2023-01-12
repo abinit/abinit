@@ -17,10 +17,10 @@
 .Starting date : Wed  4 May 2022.
 - ( at 03h29 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/tutorespfn_tdepes_4/tdepes_4.abi
-- output file    -> tdepes_4.abo
-- root for input  files -> tdepes_4i
-- root for output files -> tdepes_4o
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/tutorespfn_t_eph_tdep_legacy4/teph_tdep_legacy_4.abi
+- output file    -> teph_tdep_legacy_4.abo
+- root for input  files -> teph_tdep_legacy_4i
+- root for output files -> teph_tdep_legacy_4o
 
 
  DATASET   11 : space group P1 (#  1); Bravais aP (primitive triclinic)
@@ -4128,7 +4128,7 @@ force_length_stats: {min:   5.56986234E-08, max:   5.56986234E-08, mean:   5.569
  frms,max,avg= 1.6536109E-06 2.6604281E-06  -3.600E-07 -3.130E-07  1.336E-07 e/A
  length scales=  6.675000000000  6.675000000000  6.675000000000 bohr
               =  3.532257867338  3.532257867338  3.532257867338 angstroms
- prteigrs : about to open file tdepes_4o_DS11_EIG
+ prteigrs : about to open file teph_tdep_legacy_4o_DS11_EIG
  Fermi (or HOMO) energy (hartree) =   0.39943   Average Vxc (hartree)=  -0.50614
  Eigenvalues (hartree) for nkpt=   8  k points:
  kpt#   1, nband= 12, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -4198,10 +4198,10 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
          ecut(hartree)=     37.000   => boxcut(ratio)=   2.01471
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tdepes_4o_DS11_WFK
+-inwffil : will read wavefunctions from disk file teph_tdep_legacy_4o_DS11_WFK
 
 ================================================================================
- prteigrs : about to open file tdepes_4o_DS12_EIG
+ prteigrs : about to open file teph_tdep_legacy_4o_DS12_EIG
  Non-SCF case, kpt    1 (  0.50000  0.00000  0.00000), residuals and eigenvalues=
   1.15E-14  8.93E-15  1.49E-14  1.23E-14  1.30E-14  1.65E-14  1.37E-14  2.13E-14
   1.89E-14  1.73E-14  4.05E-14  2.38E-14
@@ -4671,7 +4671,7 @@ force_length_stats: {min: null, max: null, mean: null, }
     2      0.88306446683456     0.88306446683456     0.88306446683456
  length scales=  6.675000000000  6.675000000000  6.675000000000 bohr
               =  3.532257867338  3.532257867338  3.532257867338 angstroms
- prteigrs : about to open file tdepes_4o_DS12_EIG
+ prteigrs : about to open file teph_tdep_legacy_4o_DS12_EIG
  Eigenvalues (hartree) for nkpt=  85  k points:
  kpt#   1, nband= 12, wtk=  1.00000, kpt=  0.5000  0.0000  0.0000 (reduced coord)
   -0.18326   -0.11195    0.29206    0.29206    0.70848    0.70848    0.74271    0.96721
@@ -5213,10 +5213,10 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
          ecut(hartree)=     37.000   => boxcut(ratio)=   2.01471
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tdepes_4o_DS11_WFK
+-inwffil : will read wavefunctions from disk file teph_tdep_legacy_4o_DS11_WFK
 
 ================================================================================
- prteigrs : about to open file tdepes_4o_DS13_EIG
+ prteigrs : about to open file teph_tdep_legacy_4o_DS13_EIG
  Non-SCF case, kpt    1 (  0.00000  0.00000  0.00000), residuals and eigenvalues=
   2.36E-15  7.49E-15  1.62E-14  8.30E-15  1.61E-14  1.28E-14  8.27E-15  1.03E-14
   1.28E-14  9.47E-09  4.22E-06  3.31E-14
@@ -5268,7 +5268,7 @@ force_length_stats: {min: null, max: null, mean: null, }
     2      0.88306446683456     0.88306446683456     0.88306446683456
  length scales=  6.675000000000  6.675000000000  6.675000000000 bohr
               =  3.532257867338  3.532257867338  3.532257867338 angstroms
- prteigrs : about to open file tdepes_4o_DS13_EIG
+ prteigrs : about to open file teph_tdep_legacy_4o_DS13_EIG
  Eigenvalues (hartree) for nkpt=   8  k points:
  kpt#   1, nband= 12, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -0.40681    0.39943    0.39943    0.39943    0.60260    0.60260    0.60260    0.91923
@@ -5921,10 +5921,10 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
          ecut(hartree)=     37.000   => boxcut(ratio)=   2.01471
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tdepes_4o_DS12_WFK
+-inwffil : will read wavefunctions from disk file teph_tdep_legacy_4o_DS12_WFK
 
 ================================================================================
- prteigrs : about to open file tdepes_4o_DS15_EIG
+ prteigrs : about to open file teph_tdep_legacy_4o_DS15_EIG
  Non-SCF case, kpt    1 (  0.50000  0.00000  0.00000), residuals and eigenvalues=
   4.46E-15  5.98E-15  1.02E-14  1.12E-14  1.10E-14  1.00E-14  6.12E-15  1.57E-14
   1.27E-14  1.37E-14  2.23E-14  3.85E-14
@@ -6394,7 +6394,7 @@ force_length_stats: {min: null, max: null, mean: null, }
     2      0.88306446683456     0.88306446683456     0.88306446683456
  length scales=  6.675000000000  6.675000000000  6.675000000000 bohr
               =  3.532257867338  3.532257867338  3.532257867338 angstroms
- prteigrs : about to open file tdepes_4o_DS15_EIG
+ prteigrs : about to open file teph_tdep_legacy_4o_DS15_EIG
  Eigenvalues (hartree) for nkpt=  85  k points:
  kpt#   1, nband= 12, wtk=  1.00000, kpt=  0.5000  0.0000  0.0000 (reduced coord)
   -0.18326   -0.11195    0.29206    0.29206    0.70848    0.70848    0.74271    0.96721
@@ -7512,7 +7512,7 @@ force_length_stats: {min:   5.56986234E-08, max:   5.56986234E-08, mean:   5.569
  frms,max,avg= 1.6536109E-06 2.6604281E-06  -3.600E-07 -3.130E-07  1.336E-07 e/A
  length scales=  6.675000000000  6.675000000000  6.675000000000 bohr
               =  3.532257867338  3.532257867338  3.532257867338 angstroms
- prteigrs : about to open file tdepes_4o_DS21_EIG
+ prteigrs : about to open file teph_tdep_legacy_4o_DS21_EIG
  Fermi (or HOMO) energy (hartree) =   0.39943   Average Vxc (hartree)=  -0.50614
  Eigenvalues (hartree) for nkpt=   8  k points:
  kpt#   1, nband= 12, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -7582,10 +7582,10 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
          ecut(hartree)=     37.000   => boxcut(ratio)=   2.01471
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tdepes_4o_DS21_WFK
+-inwffil : will read wavefunctions from disk file teph_tdep_legacy_4o_DS21_WFK
 
 ================================================================================
- prteigrs : about to open file tdepes_4o_DS22_EIG
+ prteigrs : about to open file teph_tdep_legacy_4o_DS22_EIG
  Non-SCF case, kpt    1 (  0.50000  0.00000  0.00000), residuals and eigenvalues=
   1.15E-14  8.93E-15  1.49E-14  1.23E-14  1.30E-14  1.65E-14  1.37E-14  2.13E-14
   1.89E-14  1.73E-14  4.05E-14  2.38E-14
@@ -8055,7 +8055,7 @@ force_length_stats: {min: null, max: null, mean: null, }
     2      0.88306446683456     0.88306446683456     0.88306446683456
  length scales=  6.675000000000  6.675000000000  6.675000000000 bohr
               =  3.532257867338  3.532257867338  3.532257867338 angstroms
- prteigrs : about to open file tdepes_4o_DS22_EIG
+ prteigrs : about to open file teph_tdep_legacy_4o_DS22_EIG
  Eigenvalues (hartree) for nkpt=  85  k points:
  kpt#   1, nband= 12, wtk=  1.00000, kpt=  0.5000  0.0000  0.0000 (reduced coord)
   -0.18326   -0.11195    0.29206    0.29206    0.70848    0.70848    0.74271    0.96721
@@ -8597,10 +8597,10 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
          ecut(hartree)=     37.000   => boxcut(ratio)=   2.01471
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tdepes_4o_DS21_WFK
+-inwffil : will read wavefunctions from disk file teph_tdep_legacy_4o_DS21_WFK
 
 ================================================================================
- prteigrs : about to open file tdepes_4o_DS23_EIG
+ prteigrs : about to open file teph_tdep_legacy_4o_DS23_EIG
  Non-SCF case, kpt    1 (  0.50000  0.00000  0.00000), residuals and eigenvalues=
   1.15E-14  8.93E-15  1.49E-14  1.23E-14  1.30E-14  1.65E-14  1.37E-14  2.13E-14
   1.89E-14  1.73E-14  4.05E-14  2.38E-14
@@ -8652,7 +8652,7 @@ force_length_stats: {min: null, max: null, mean: null, }
     2      0.88306446683456     0.88306446683456     0.88306446683456
  length scales=  6.675000000000  6.675000000000  6.675000000000 bohr
               =  3.532257867338  3.532257867338  3.532257867338 angstroms
- prteigrs : about to open file tdepes_4o_DS23_EIG
+ prteigrs : about to open file teph_tdep_legacy_4o_DS23_EIG
  Eigenvalues (hartree) for nkpt=   8  k points:
  kpt#   1, nband= 12, wtk=  0.12500, kpt=  0.5000  0.0000  0.0000 (reduced coord)
   -0.18326   -0.11195    0.29206    0.29206    0.70848    0.70848    0.74271    0.96721
@@ -9287,10 +9287,10 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tdepes_4o_DS22_WFK
+-inwffil : will read wavefunctions from disk file teph_tdep_legacy_4o_DS22_WFK
 
 ================================================================================
- prteigrs : about to open file tdepes_4o_DS25_EIG
+ prteigrs : about to open file teph_tdep_legacy_4o_DS25_EIG
  Non-SCF case, kpt    1 (  1.00000  0.00000  0.00000), residuals and eigenvalues=
   2.36E-15  7.49E-15  1.62E-14  8.30E-15  1.61E-14  1.28E-14  8.27E-15  1.03E-14
   1.28E-14  9.29E-09  9.77E-07  3.31E-14
@@ -9834,7 +9834,7 @@ force_length_stats: {min: null, max: null, mean: null, }
     2      0.88306446683456     0.88306446683456     0.88306446683456
  length scales=  6.675000000000  6.675000000000  6.675000000000 bohr
               =  3.532257867338  3.532257867338  3.532257867338 angstroms
- prteigrs : about to open file tdepes_4o_DS25_EIG
+ prteigrs : about to open file teph_tdep_legacy_4o_DS25_EIG
  Eigenvalues (hartree) for nkpt=  85  k points:
  kpt#   1, nband= 12, wtk=  1.00000, kpt=  1.0000  0.0000  0.0000 (reduced coord)
   -0.40681    0.39943    0.39943    0.39943    0.60260    0.60260    0.60260    0.91923
@@ -10953,7 +10953,7 @@ force_length_stats: {min:   5.56986234E-08, max:   5.56986234E-08, mean:   5.569
  frms,max,avg= 1.6536109E-06 2.6604281E-06  -3.600E-07 -3.130E-07  1.336E-07 e/A
  length scales=  6.675000000000  6.675000000000  6.675000000000 bohr
               =  3.532257867338  3.532257867338  3.532257867338 angstroms
- prteigrs : about to open file tdepes_4o_DS31_EIG
+ prteigrs : about to open file teph_tdep_legacy_4o_DS31_EIG
  Fermi (or HOMO) energy (hartree) =   0.39943   Average Vxc (hartree)=  -0.50614
  Eigenvalues (hartree) for nkpt=   8  k points:
  kpt#   1, nband= 12, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -11023,10 +11023,10 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
          ecut(hartree)=     37.000   => boxcut(ratio)=   2.01471
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tdepes_4o_DS31_WFK
+-inwffil : will read wavefunctions from disk file teph_tdep_legacy_4o_DS31_WFK
 
 ================================================================================
- prteigrs : about to open file tdepes_4o_DS32_EIG
+ prteigrs : about to open file teph_tdep_legacy_4o_DS32_EIG
  Non-SCF case, kpt    1 (  0.50000  0.00000  0.00000), residuals and eigenvalues=
   1.15E-14  8.93E-15  1.49E-14  1.23E-14  1.30E-14  1.65E-14  1.37E-14  2.13E-14
   1.89E-14  1.73E-14  4.05E-14  2.38E-14
@@ -11496,7 +11496,7 @@ force_length_stats: {min: null, max: null, mean: null, }
     2      0.88306446683456     0.88306446683456     0.88306446683456
  length scales=  6.675000000000  6.675000000000  6.675000000000 bohr
               =  3.532257867338  3.532257867338  3.532257867338 angstroms
- prteigrs : about to open file tdepes_4o_DS32_EIG
+ prteigrs : about to open file teph_tdep_legacy_4o_DS32_EIG
  Eigenvalues (hartree) for nkpt=  85  k points:
  kpt#   1, nband= 12, wtk=  1.00000, kpt=  0.5000  0.0000  0.0000 (reduced coord)
   -0.18326   -0.11195    0.29206    0.29206    0.70848    0.70848    0.74271    0.96721
@@ -12038,10 +12038,10 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
          ecut(hartree)=     37.000   => boxcut(ratio)=   2.01471
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tdepes_4o_DS31_WFK
+-inwffil : will read wavefunctions from disk file teph_tdep_legacy_4o_DS31_WFK
 
 ================================================================================
- prteigrs : about to open file tdepes_4o_DS33_EIG
+ prteigrs : about to open file teph_tdep_legacy_4o_DS33_EIG
  Non-SCF case, kpt    1 (  0.00000  0.50000  0.00000), residuals and eigenvalues=
   9.53E-15  1.37E-14  1.35E-14  1.03E-14  1.23E-14  1.44E-14  1.08E-14  1.91E-14
   1.71E-14  2.29E-14  3.13E-14  2.81E-14
@@ -12093,7 +12093,7 @@ force_length_stats: {min: null, max: null, mean: null, }
     2      0.88306446683456     0.88306446683456     0.88306446683456
  length scales=  6.675000000000  6.675000000000  6.675000000000 bohr
               =  3.532257867338  3.532257867338  3.532257867338 angstroms
- prteigrs : about to open file tdepes_4o_DS33_EIG
+ prteigrs : about to open file teph_tdep_legacy_4o_DS33_EIG
  Eigenvalues (hartree) for nkpt=   8  k points:
  kpt#   1, nband= 12, wtk=  0.12500, kpt=  0.0000  0.5000  0.0000 (reduced coord)
   -0.18326   -0.11195    0.29206    0.29206    0.70848    0.70848    0.74271    0.96721
@@ -12726,10 +12726,10 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tdepes_4o_DS32_WFK
+-inwffil : will read wavefunctions from disk file teph_tdep_legacy_4o_DS32_WFK
 
 ================================================================================
- prteigrs : about to open file tdepes_4o_DS35_EIG
+ prteigrs : about to open file teph_tdep_legacy_4o_DS35_EIG
  Non-SCF case, kpt    1 (  0.50000  0.50000  0.00000), residuals and eigenvalues=
   5.34E-15  5.92E-15  8.44E-15  8.27E-15  8.27E-15  1.07E-14  1.19E-14  1.25E-14
   1.36E-14  1.38E-14  1.47E-13  2.38E-13
@@ -13287,7 +13287,7 @@ force_length_stats: {min: null, max: null, mean: null, }
     2      0.88306446683456     0.88306446683456     0.88306446683456
  length scales=  6.675000000000  6.675000000000  6.675000000000 bohr
               =  3.532257867338  3.532257867338  3.532257867338 angstroms
- prteigrs : about to open file tdepes_4o_DS35_EIG
+ prteigrs : about to open file teph_tdep_legacy_4o_DS35_EIG
  Eigenvalues (hartree) for nkpt=  85  k points:
  kpt#   1, nband= 12, wtk=  1.00000, kpt=  0.5000  0.5000  0.0000 (reduced coord)
   -0.07741   -0.07741    0.15706    0.15706    0.56687    0.56687    1.02787    1.02787
@@ -14406,7 +14406,7 @@ force_length_stats: {min:   5.56986234E-08, max:   5.56986234E-08, mean:   5.569
  frms,max,avg= 1.6536109E-06 2.6604281E-06  -3.600E-07 -3.130E-07  1.336E-07 e/A
  length scales=  6.675000000000  6.675000000000  6.675000000000 bohr
               =  3.532257867338  3.532257867338  3.532257867338 angstroms
- prteigrs : about to open file tdepes_4o_DS41_EIG
+ prteigrs : about to open file teph_tdep_legacy_4o_DS41_EIG
  Fermi (or HOMO) energy (hartree) =   0.39943   Average Vxc (hartree)=  -0.50614
  Eigenvalues (hartree) for nkpt=   8  k points:
  kpt#   1, nband= 12, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -14476,10 +14476,10 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
          ecut(hartree)=     37.000   => boxcut(ratio)=   2.01471
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tdepes_4o_DS41_WFK
+-inwffil : will read wavefunctions from disk file teph_tdep_legacy_4o_DS41_WFK
 
 ================================================================================
- prteigrs : about to open file tdepes_4o_DS42_EIG
+ prteigrs : about to open file teph_tdep_legacy_4o_DS42_EIG
  Non-SCF case, kpt    1 (  0.50000  0.00000  0.00000), residuals and eigenvalues=
   1.15E-14  8.93E-15  1.49E-14  1.23E-14  1.30E-14  1.65E-14  1.37E-14  2.13E-14
   1.89E-14  1.73E-14  4.05E-14  2.38E-14
@@ -14949,7 +14949,7 @@ force_length_stats: {min: null, max: null, mean: null, }
     2      0.88306446683456     0.88306446683456     0.88306446683456
  length scales=  6.675000000000  6.675000000000  6.675000000000 bohr
               =  3.532257867338  3.532257867338  3.532257867338 angstroms
- prteigrs : about to open file tdepes_4o_DS42_EIG
+ prteigrs : about to open file teph_tdep_legacy_4o_DS42_EIG
  Eigenvalues (hartree) for nkpt=  85  k points:
  kpt#   1, nband= 12, wtk=  1.00000, kpt=  0.5000  0.0000  0.0000 (reduced coord)
   -0.18326   -0.11195    0.29206    0.29206    0.70848    0.70848    0.74271    0.96721
@@ -15491,10 +15491,10 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
          ecut(hartree)=     37.000   => boxcut(ratio)=   2.01471
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tdepes_4o_DS41_WFK
+-inwffil : will read wavefunctions from disk file teph_tdep_legacy_4o_DS41_WFK
 
 ================================================================================
- prteigrs : about to open file tdepes_4o_DS43_EIG
+ prteigrs : about to open file teph_tdep_legacy_4o_DS43_EIG
  Non-SCF case, kpt    1 (  0.50000  0.50000  0.00000), residuals and eigenvalues=
   1.05E-14  1.18E-14  1.51E-14  1.20E-14  1.04E-14  1.79E-14  1.79E-14  1.45E-14
   1.71E-14  1.84E-14  2.41E-13  1.48E-13
@@ -15546,7 +15546,7 @@ force_length_stats: {min: null, max: null, mean: null, }
     2      0.88306446683456     0.88306446683456     0.88306446683456
  length scales=  6.675000000000  6.675000000000  6.675000000000 bohr
               =  3.532257867338  3.532257867338  3.532257867338 angstroms
- prteigrs : about to open file tdepes_4o_DS43_EIG
+ prteigrs : about to open file teph_tdep_legacy_4o_DS43_EIG
  Eigenvalues (hartree) for nkpt=   8  k points:
  kpt#   1, nband= 12, wtk=  0.12500, kpt=  0.5000  0.5000  0.0000 (reduced coord)
   -0.07741   -0.07741    0.15706    0.15706    0.56687    0.56687    1.02787    1.02787
@@ -16179,10 +16179,10 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tdepes_4o_DS42_WFK
+-inwffil : will read wavefunctions from disk file teph_tdep_legacy_4o_DS42_WFK
 
 ================================================================================
- prteigrs : about to open file tdepes_4o_DS45_EIG
+ prteigrs : about to open file teph_tdep_legacy_4o_DS45_EIG
  Non-SCF case, kpt    1 (  1.00000  0.50000  0.00000), residuals and eigenvalues=
   9.16E-03  1.24E-01  1.39E-01  4.53E-01  2.94E-01  2.02E-01  1.94E-01  2.45E-01
   1.20E-01  7.23E-02  1.51E-01  1.03E-01
@@ -16719,7 +16719,7 @@ force_length_stats: {min: null, max: null, mean: null, }
     2      0.88306446683456     0.88306446683456     0.88306446683456
  length scales=  6.675000000000  6.675000000000  6.675000000000 bohr
               =  3.532257867338  3.532257867338  3.532257867338 angstroms
- prteigrs : about to open file tdepes_4o_DS45_EIG
+ prteigrs : about to open file teph_tdep_legacy_4o_DS45_EIG
  Eigenvalues (hartree) for nkpt=  85  k points:
  kpt#   1, nband= 12, wtk=  1.00000, kpt=  1.0000  0.5000  0.0000 (reduced coord)
   -0.17516   -0.10351    0.29697    0.33698    0.71901    0.75111    0.75969    0.97588
@@ -17838,7 +17838,7 @@ force_length_stats: {min:   5.56986234E-08, max:   5.56986234E-08, mean:   5.569
  frms,max,avg= 1.6536109E-06 2.6604281E-06  -3.600E-07 -3.130E-07  1.336E-07 e/A
  length scales=  6.675000000000  6.675000000000  6.675000000000 bohr
               =  3.532257867338  3.532257867338  3.532257867338 angstroms
- prteigrs : about to open file tdepes_4o_DS51_EIG
+ prteigrs : about to open file teph_tdep_legacy_4o_DS51_EIG
  Fermi (or HOMO) energy (hartree) =   0.39943   Average Vxc (hartree)=  -0.50614
  Eigenvalues (hartree) for nkpt=   8  k points:
  kpt#   1, nband= 12, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -17908,10 +17908,10 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
          ecut(hartree)=     37.000   => boxcut(ratio)=   2.01471
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tdepes_4o_DS51_WFK
+-inwffil : will read wavefunctions from disk file teph_tdep_legacy_4o_DS51_WFK
 
 ================================================================================
- prteigrs : about to open file tdepes_4o_DS52_EIG
+ prteigrs : about to open file teph_tdep_legacy_4o_DS52_EIG
  Non-SCF case, kpt    1 (  0.50000  0.00000  0.00000), residuals and eigenvalues=
   1.15E-14  8.93E-15  1.49E-14  1.23E-14  1.30E-14  1.65E-14  1.37E-14  2.13E-14
   1.89E-14  1.73E-14  4.05E-14  2.38E-14
@@ -18381,7 +18381,7 @@ force_length_stats: {min: null, max: null, mean: null, }
     2      0.88306446683456     0.88306446683456     0.88306446683456
  length scales=  6.675000000000  6.675000000000  6.675000000000 bohr
               =  3.532257867338  3.532257867338  3.532257867338 angstroms
- prteigrs : about to open file tdepes_4o_DS52_EIG
+ prteigrs : about to open file teph_tdep_legacy_4o_DS52_EIG
  Eigenvalues (hartree) for nkpt=  85  k points:
  kpt#   1, nband= 12, wtk=  1.00000, kpt=  0.5000  0.0000  0.0000 (reduced coord)
   -0.18326   -0.11195    0.29206    0.29206    0.70848    0.70848    0.74271    0.96721
@@ -18923,10 +18923,10 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
          ecut(hartree)=     37.000   => boxcut(ratio)=   2.01471
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tdepes_4o_DS51_WFK
+-inwffil : will read wavefunctions from disk file teph_tdep_legacy_4o_DS51_WFK
 
 ================================================================================
- prteigrs : about to open file tdepes_4o_DS53_EIG
+ prteigrs : about to open file teph_tdep_legacy_4o_DS53_EIG
  Non-SCF case, kpt    1 (  0.00000  0.00000  0.50000), residuals and eigenvalues=
   1.04E-14  1.19E-14  1.25E-14  1.55E-14  1.10E-14  1.26E-14  1.15E-14  1.92E-14
   1.76E-14  2.36E-14  2.03E-14  3.05E-14
@@ -18978,7 +18978,7 @@ force_length_stats: {min: null, max: null, mean: null, }
     2      0.88306446683456     0.88306446683456     0.88306446683456
  length scales=  6.675000000000  6.675000000000  6.675000000000 bohr
               =  3.532257867338  3.532257867338  3.532257867338 angstroms
- prteigrs : about to open file tdepes_4o_DS53_EIG
+ prteigrs : about to open file teph_tdep_legacy_4o_DS53_EIG
  Eigenvalues (hartree) for nkpt=   8  k points:
  kpt#   1, nband= 12, wtk=  0.12500, kpt=  0.0000  0.0000  0.5000 (reduced coord)
   -0.18326   -0.11195    0.29206    0.29206    0.70848    0.70848    0.74271    0.96721
@@ -19614,10 +19614,10 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tdepes_4o_DS52_WFK
+-inwffil : will read wavefunctions from disk file teph_tdep_legacy_4o_DS52_WFK
 
 ================================================================================
- prteigrs : about to open file tdepes_4o_DS55_EIG
+ prteigrs : about to open file teph_tdep_legacy_4o_DS55_EIG
  Non-SCF case, kpt    1 (  0.50000  0.00000  0.50000), residuals and eigenvalues=
   9.25E-03  1.21E-01  5.88E-02  4.32E-01  4.04E-01  2.93E-01  9.72E-02  3.95E-01
   7.89E-02  4.75E-01  1.15E-01  4.05E-02
@@ -20175,7 +20175,7 @@ force_length_stats: {min: null, max: null, mean: null, }
     2      0.88306446683456     0.88306446683456     0.88306446683456
  length scales=  6.675000000000  6.675000000000  6.675000000000 bohr
               =  3.532257867338  3.532257867338  3.532257867338 angstroms
- prteigrs : about to open file tdepes_4o_DS55_EIG
+ prteigrs : about to open file teph_tdep_legacy_4o_DS55_EIG
  Eigenvalues (hartree) for nkpt=  85  k points:
  kpt#   1, nband= 12, wtk=  1.00000, kpt=  0.5000  0.0000  0.5000 (reduced coord)
   -0.07493   -0.06012    0.16812    0.16945    0.58091    0.61433    1.03367    1.03559
@@ -21294,7 +21294,7 @@ force_length_stats: {min:   5.56986234E-08, max:   5.56986234E-08, mean:   5.569
  frms,max,avg= 1.6536109E-06 2.6604281E-06  -3.600E-07 -3.130E-07  1.336E-07 e/A
  length scales=  6.675000000000  6.675000000000  6.675000000000 bohr
               =  3.532257867338  3.532257867338  3.532257867338 angstroms
- prteigrs : about to open file tdepes_4o_DS61_EIG
+ prteigrs : about to open file teph_tdep_legacy_4o_DS61_EIG
  Fermi (or HOMO) energy (hartree) =   0.39943   Average Vxc (hartree)=  -0.50614
  Eigenvalues (hartree) for nkpt=   8  k points:
  kpt#   1, nband= 12, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -21364,10 +21364,10 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
          ecut(hartree)=     37.000   => boxcut(ratio)=   2.01471
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tdepes_4o_DS61_WFK
+-inwffil : will read wavefunctions from disk file teph_tdep_legacy_4o_DS61_WFK
 
 ================================================================================
- prteigrs : about to open file tdepes_4o_DS62_EIG
+ prteigrs : about to open file teph_tdep_legacy_4o_DS62_EIG
  Non-SCF case, kpt    1 (  0.50000  0.00000  0.00000), residuals and eigenvalues=
   1.15E-14  8.93E-15  1.49E-14  1.23E-14  1.30E-14  1.65E-14  1.37E-14  2.13E-14
   1.89E-14  1.73E-14  4.05E-14  2.38E-14
@@ -21837,7 +21837,7 @@ force_length_stats: {min: null, max: null, mean: null, }
     2      0.88306446683456     0.88306446683456     0.88306446683456
  length scales=  6.675000000000  6.675000000000  6.675000000000 bohr
               =  3.532257867338  3.532257867338  3.532257867338 angstroms
- prteigrs : about to open file tdepes_4o_DS62_EIG
+ prteigrs : about to open file teph_tdep_legacy_4o_DS62_EIG
  Eigenvalues (hartree) for nkpt=  85  k points:
  kpt#   1, nband= 12, wtk=  1.00000, kpt=  0.5000  0.0000  0.0000 (reduced coord)
   -0.18326   -0.11195    0.29206    0.29206    0.70848    0.70848    0.74271    0.96721
@@ -22379,10 +22379,10 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
          ecut(hartree)=     37.000   => boxcut(ratio)=   2.01471
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tdepes_4o_DS61_WFK
+-inwffil : will read wavefunctions from disk file teph_tdep_legacy_4o_DS61_WFK
 
 ================================================================================
- prteigrs : about to open file tdepes_4o_DS63_EIG
+ prteigrs : about to open file teph_tdep_legacy_4o_DS63_EIG
  Non-SCF case, kpt    1 (  0.50000  0.00000  0.50000), residuals and eigenvalues=
   1.17E-14  9.48E-15  1.42E-14  1.12E-14  1.29E-14  1.57E-14  1.49E-14  1.44E-14
   1.57E-14  1.69E-14  1.36E-13  2.17E-13
@@ -22434,7 +22434,7 @@ force_length_stats: {min: null, max: null, mean: null, }
     2      0.88306446683456     0.88306446683456     0.88306446683456
  length scales=  6.675000000000  6.675000000000  6.675000000000 bohr
               =  3.532257867338  3.532257867338  3.532257867338 angstroms
- prteigrs : about to open file tdepes_4o_DS63_EIG
+ prteigrs : about to open file teph_tdep_legacy_4o_DS63_EIG
  Eigenvalues (hartree) for nkpt=   8  k points:
  kpt#   1, nband= 12, wtk=  0.12500, kpt=  0.5000  0.0000  0.5000 (reduced coord)
   -0.07741   -0.07741    0.15706    0.15706    0.56687    0.56687    1.02787    1.02787
@@ -23068,10 +23068,10 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tdepes_4o_DS62_WFK
+-inwffil : will read wavefunctions from disk file teph_tdep_legacy_4o_DS62_WFK
 
 ================================================================================
- prteigrs : about to open file tdepes_4o_DS65_EIG
+ prteigrs : about to open file teph_tdep_legacy_4o_DS65_EIG
  Non-SCF case, kpt    1 (  1.00000  0.00000  0.50000), residuals and eigenvalues=
   8.20E-03  1.39E-01  1.48E-01  3.44E-02  3.27E-02  1.37E-01  1.25E-01  9.50E-02
   4.20E-02  9.21E-02  4.02E-02  3.91E-02
@@ -23615,7 +23615,7 @@ force_length_stats: {min: null, max: null, mean: null, }
     2      0.88306446683456     0.88306446683456     0.88306446683456
  length scales=  6.675000000000  6.675000000000  6.675000000000 bohr
               =  3.532257867338  3.532257867338  3.532257867338 angstroms
- prteigrs : about to open file tdepes_4o_DS65_EIG
+ prteigrs : about to open file teph_tdep_legacy_4o_DS65_EIG
  Eigenvalues (hartree) for nkpt=  85  k points:
  kpt#   1, nband= 12, wtk=  1.00000, kpt=  1.0000  0.0000  0.5000 (reduced coord)
   -0.18158   -0.11029    0.29251    0.29939    0.71659    0.72057    0.74627    0.97413
@@ -24734,7 +24734,7 @@ force_length_stats: {min:   5.56986234E-08, max:   5.56986234E-08, mean:   5.569
  frms,max,avg= 1.6536109E-06 2.6604281E-06  -3.600E-07 -3.130E-07  1.336E-07 e/A
  length scales=  6.675000000000  6.675000000000  6.675000000000 bohr
               =  3.532257867338  3.532257867338  3.532257867338 angstroms
- prteigrs : about to open file tdepes_4o_DS71_EIG
+ prteigrs : about to open file teph_tdep_legacy_4o_DS71_EIG
  Fermi (or HOMO) energy (hartree) =   0.39943   Average Vxc (hartree)=  -0.50614
  Eigenvalues (hartree) for nkpt=   8  k points:
  kpt#   1, nband= 12, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -24804,10 +24804,10 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
          ecut(hartree)=     37.000   => boxcut(ratio)=   2.01471
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tdepes_4o_DS71_WFK
+-inwffil : will read wavefunctions from disk file teph_tdep_legacy_4o_DS71_WFK
 
 ================================================================================
- prteigrs : about to open file tdepes_4o_DS72_EIG
+ prteigrs : about to open file teph_tdep_legacy_4o_DS72_EIG
  Non-SCF case, kpt    1 (  0.50000  0.00000  0.00000), residuals and eigenvalues=
   1.15E-14  8.93E-15  1.49E-14  1.23E-14  1.30E-14  1.65E-14  1.37E-14  2.13E-14
   1.89E-14  1.73E-14  4.05E-14  2.38E-14
@@ -25277,7 +25277,7 @@ force_length_stats: {min: null, max: null, mean: null, }
     2      0.88306446683456     0.88306446683456     0.88306446683456
  length scales=  6.675000000000  6.675000000000  6.675000000000 bohr
               =  3.532257867338  3.532257867338  3.532257867338 angstroms
- prteigrs : about to open file tdepes_4o_DS72_EIG
+ prteigrs : about to open file teph_tdep_legacy_4o_DS72_EIG
  Eigenvalues (hartree) for nkpt=  85  k points:
  kpt#   1, nband= 12, wtk=  1.00000, kpt=  0.5000  0.0000  0.0000 (reduced coord)
   -0.18326   -0.11195    0.29206    0.29206    0.70848    0.70848    0.74271    0.96721
@@ -25819,10 +25819,10 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
          ecut(hartree)=     37.000   => boxcut(ratio)=   2.01471
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tdepes_4o_DS71_WFK
+-inwffil : will read wavefunctions from disk file teph_tdep_legacy_4o_DS71_WFK
 
 ================================================================================
- prteigrs : about to open file tdepes_4o_DS73_EIG
+ prteigrs : about to open file teph_tdep_legacy_4o_DS73_EIG
  Non-SCF case, kpt    1 (  0.00000  0.50000  0.50000), residuals and eigenvalues=
   1.36E-14  1.01E-14  1.01E-14  1.29E-14  1.18E-14  1.78E-14  1.00E-14  1.59E-14
   1.78E-14  1.72E-14  1.98E-13  8.46E-14
@@ -25874,7 +25874,7 @@ force_length_stats: {min: null, max: null, mean: null, }
     2      0.88306446683456     0.88306446683456     0.88306446683456
  length scales=  6.675000000000  6.675000000000  6.675000000000 bohr
               =  3.532257867338  3.532257867338  3.532257867338 angstroms
- prteigrs : about to open file tdepes_4o_DS73_EIG
+ prteigrs : about to open file teph_tdep_legacy_4o_DS73_EIG
  Eigenvalues (hartree) for nkpt=   8  k points:
  kpt#   1, nband= 12, wtk=  0.12500, kpt=  0.0000  0.5000  0.5000 (reduced coord)
   -0.07741   -0.07741    0.15706    0.15706    0.56687    0.56687    1.02787    1.02787
@@ -26506,10 +26506,10 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tdepes_4o_DS72_WFK
+-inwffil : will read wavefunctions from disk file teph_tdep_legacy_4o_DS72_WFK
 
 ================================================================================
- prteigrs : about to open file tdepes_4o_DS75_EIG
+ prteigrs : about to open file teph_tdep_legacy_4o_DS75_EIG
  Non-SCF case, kpt    1 (  0.50000  0.50000  0.50000), residuals and eigenvalues=
   3.62E-15  4.70E-15  8.97E-15  1.05E-14  8.35E-15  7.14E-15  9.66E-15  1.57E-14
   1.50E-14  1.03E-14  1.78E-14  2.04E-14
@@ -27051,7 +27051,7 @@ force_length_stats: {min: null, max: null, mean: null, }
     2      0.88306446683456     0.88306446683456     0.88306446683456
  length scales=  6.675000000000  6.675000000000  6.675000000000 bohr
               =  3.532257867338  3.532257867338  3.532257867338 angstroms
- prteigrs : about to open file tdepes_4o_DS75_EIG
+ prteigrs : about to open file teph_tdep_legacy_4o_DS75_EIG
  Eigenvalues (hartree) for nkpt=  85  k points:
  kpt#   1, nband= 12, wtk=  1.00000, kpt=  0.5000  0.5000  0.5000 (reduced coord)
   -0.18326   -0.11195    0.29206    0.29206    0.70848    0.70848    0.74271    0.96721
@@ -28170,7 +28170,7 @@ force_length_stats: {min:   5.56986234E-08, max:   5.56986234E-08, mean:   5.569
  frms,max,avg= 1.6536109E-06 2.6604281E-06  -3.600E-07 -3.130E-07  1.336E-07 e/A
  length scales=  6.675000000000  6.675000000000  6.675000000000 bohr
               =  3.532257867338  3.532257867338  3.532257867338 angstroms
- prteigrs : about to open file tdepes_4o_DS81_EIG
+ prteigrs : about to open file teph_tdep_legacy_4o_DS81_EIG
  Fermi (or HOMO) energy (hartree) =   0.39943   Average Vxc (hartree)=  -0.50614
  Eigenvalues (hartree) for nkpt=   8  k points:
  kpt#   1, nband= 12, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -28240,10 +28240,10 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
          ecut(hartree)=     37.000   => boxcut(ratio)=   2.01471
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tdepes_4o_DS81_WFK
+-inwffil : will read wavefunctions from disk file teph_tdep_legacy_4o_DS81_WFK
 
 ================================================================================
- prteigrs : about to open file tdepes_4o_DS82_EIG
+ prteigrs : about to open file teph_tdep_legacy_4o_DS82_EIG
  Non-SCF case, kpt    1 (  0.50000  0.00000  0.00000), residuals and eigenvalues=
   1.15E-14  8.93E-15  1.49E-14  1.23E-14  1.30E-14  1.65E-14  1.37E-14  2.13E-14
   1.89E-14  1.73E-14  4.05E-14  2.38E-14
@@ -28713,7 +28713,7 @@ force_length_stats: {min: null, max: null, mean: null, }
     2      0.88306446683456     0.88306446683456     0.88306446683456
  length scales=  6.675000000000  6.675000000000  6.675000000000 bohr
               =  3.532257867338  3.532257867338  3.532257867338 angstroms
- prteigrs : about to open file tdepes_4o_DS82_EIG
+ prteigrs : about to open file teph_tdep_legacy_4o_DS82_EIG
  Eigenvalues (hartree) for nkpt=  85  k points:
  kpt#   1, nband= 12, wtk=  1.00000, kpt=  0.5000  0.0000  0.0000 (reduced coord)
   -0.18326   -0.11195    0.29206    0.29206    0.70848    0.70848    0.74271    0.96721
@@ -29255,10 +29255,10 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
          ecut(hartree)=     37.000   => boxcut(ratio)=   2.01471
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tdepes_4o_DS81_WFK
+-inwffil : will read wavefunctions from disk file teph_tdep_legacy_4o_DS81_WFK
 
 ================================================================================
- prteigrs : about to open file tdepes_4o_DS83_EIG
+ prteigrs : about to open file teph_tdep_legacy_4o_DS83_EIG
  Non-SCF case, kpt    1 (  0.50000  0.50000  0.50000), residuals and eigenvalues=
   1.13E-14  1.24E-14  1.17E-14  1.21E-14  1.16E-14  1.08E-14  1.87E-14  2.56E-14
   2.06E-14  1.76E-14  2.33E-14  1.87E-14
@@ -29310,7 +29310,7 @@ force_length_stats: {min: null, max: null, mean: null, }
     2      0.88306446683456     0.88306446683456     0.88306446683456
  length scales=  6.675000000000  6.675000000000  6.675000000000 bohr
               =  3.532257867338  3.532257867338  3.532257867338 angstroms
- prteigrs : about to open file tdepes_4o_DS83_EIG
+ prteigrs : about to open file teph_tdep_legacy_4o_DS83_EIG
  Eigenvalues (hartree) for nkpt=   8  k points:
  kpt#   1, nband= 12, wtk=  0.12500, kpt=  0.5000  0.5000  0.5000 (reduced coord)
   -0.18326   -0.11195    0.29206    0.29206    0.70848    0.70848    0.74271    0.96721
@@ -29952,10 +29952,10 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tdepes_4o_DS82_WFK
+-inwffil : will read wavefunctions from disk file teph_tdep_legacy_4o_DS82_WFK
 
 ================================================================================
- prteigrs : about to open file tdepes_4o_DS85_EIG
+ prteigrs : about to open file teph_tdep_legacy_4o_DS85_EIG
  Non-SCF case, kpt    1 (  1.00000  0.50000  0.50000), residuals and eigenvalues=
   4.10E-15  5.55E-15  7.37E-15  7.24E-15  5.63E-15  1.12E-14  1.15E-14  9.97E-15
   1.36E-14  1.27E-14  2.05E-13  7.35E-14
@@ -30510,7 +30510,7 @@ force_length_stats: {min: null, max: null, mean: null, }
     2      0.88306446683456     0.88306446683456     0.88306446683456
  length scales=  6.675000000000  6.675000000000  6.675000000000 bohr
               =  3.532257867338  3.532257867338  3.532257867338 angstroms
- prteigrs : about to open file tdepes_4o_DS85_EIG
+ prteigrs : about to open file teph_tdep_legacy_4o_DS85_EIG
  Eigenvalues (hartree) for nkpt=  85  k points:
  kpt#   1, nband= 12, wtk=  1.00000, kpt=  1.0000  0.5000  0.5000 (reduced coord)
   -0.07741   -0.07741    0.15706    0.15706    0.56687    0.56687    1.02787    1.02787

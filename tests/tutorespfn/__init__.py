@@ -10,8 +10,8 @@ keywords = [
 
 subsuites = [
 "elast",
-"depes",
-"eph",
+"eph_legacy",
+"eph_tdep_legacy",
 "eph4mob",
 "eph4isotc",
 "eph4zpr",
@@ -25,10 +25,10 @@ subsuites = [
 
 #: List of input files
 inp_files = [
-"tdepes_1.abi",
-"tdepes_2.abi",
-"tdepes_3.abi",
-"tdepes_4.abi",
+"teph_tdep_legacy_1.abi",
+"teph_tdep_legacy_2.abi",
+"teph_tdep_legacy_3.abi",
+"teph_tdep_legacy_4.abi",
 #
 "telast_1.abi",
 "telast_2.abi",
@@ -37,12 +37,12 @@ inp_files = [
 "telast_5.abi",
 "telast_6.abi",
 #
-"teph_1.abi",
-"teph_2.abi",
-"teph_3.abi",
-"teph_4.abi",
-"teph_5.abi",
-"teph_6.abi",
+"teph_legacy_1.abi",
+"teph_legacy_2.abi",
+"teph_legacy_3.abi",
+"teph_legacy_4.abi",
+"teph_legacy_5.abi",
+"teph_legacy_6.abi",
 #
 "teph4mob_1.abi",
 "teph4mob_2.abi",

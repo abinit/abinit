@@ -56,12 +56,12 @@ qph1l
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = anaddb
-#%% input_ddb = teph_2.ddb.out 
-#%% input_gkk = teph_3o_GKK.bin
-#%% test_chain =  teph_1.abi, teph_2.abi, teph_3.abi, teph_4.abi, teph_5.abi, teph_6.abi
+#%% input_ddb = teph_legacy_2.ddb.out 
+#%% input_gkk = teph_legacy_3o_GKK.bin
+#%% test_chain =  teph_legacy_1.abi, teph_legacy_2.abi, teph_legacy_3.abi, teph_legacy_4.abi, teph_legacy_5.abi, teph_legacy_6.abi
 #%% [files]
 #%% files_to_test = 
-#%%   teph_4.abo, tolnlines=  300, tolabs=  3.010e-05, tolrel=  6.000e-07, fld_options=-medium
+#%%   teph_legacy_4.abo, tolnlines=  300, tolabs=  3.010e-05, tolrel=  6.000e-07, fld_options=-medium
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
