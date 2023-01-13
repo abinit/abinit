@@ -12688,7 +12688,7 @@ Variable(
     dimensions=[3, '[[natom]]'],
     defaultval=0.0,
     mnemonics="NUClear DIPole MOMents",
-    requires="[[usepaw]] = 1; [[pawcpxocc]] = 2; [[kptopt]] > 2",
+    requires="[[usepaw]] = 1; [[pawcpxocc]] = 2; [[kptopt]] = 3",
     added_in_version="before_v9",
     text=r"""
 Places an array of nuclear magnetic dipole moments on the atomic
@@ -13419,18 +13419,15 @@ Compute quantities related to orbital magnetic moment. The
     insulators have orbital magnetization zero, except in the presence
     of nonzero nuclear dipole moments, see [[nucdipmom]].  [[orbmag]]
     is parallelized over k points only. The implementation follows the
-    theory outlined in [[cite:Ceresoli2010]], [[cite:Ceresoli2006]],
-    and [[cite:Gonze2011a]] extended to the PAW case.
+    theory outlined in [[cite:Gonze2011a]] extended to the PAW case.
     The computed results are returned in the
     standard output file, search for "Orbital magnetic moment". This calculation requires
     both the ground state and DDK wavefunctions, and is triggered at the end of a
     DDK calculation.
 
-* [[orbmag]] = 1: Compute orbital magnetization and integral of the
-Berry curvature (Chern number) over the Brillouin zone.
+* [[orbmag]] = 1: Compute orbital magnetization and Chern number
 * [[orbmag]] = 2: Same as [[orbmag]] 1 but also print out values of each term making up total
-orbital magnetic moment.
-* [[orbmag]] = 3: Same as [[orbmag]] 2 but print out values of each term for each band.
+orbital magnetic moment and a band-by-band decomposition.
 """,
 ),
 

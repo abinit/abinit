@@ -5333,14 +5333,14 @@ end subroutine vdiff_print
 !!
 !! INPUTS
 !!  mesh=Number of points.
-!!  it=Number of iterations.
+!!  it=Number of iterations. <= 0 to return a unchanged.
 !!
 !! SIDE EFFECTS
 !!  a(mesh)=Input values, smoothed in output
 !!
 !! SOURCE
 
-subroutine smooth(a,mesh,it)
+subroutine smooth(a, mesh, it)
 
 !Arguments ------------------------------------
 !scalars
