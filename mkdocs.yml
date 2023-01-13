@@ -244,6 +244,7 @@ nav:
     - Documents: theory/documents.md
     - Acknowledgments: theory/acknowledgments.md
     - Bibliography: theory/bibliography.md
+    - Acronyms: theory/acronyms.md
 - Developers:
     - Git and Gitlab: developers/git_and_gitlab.md
     - HowTo for developers: developers/developers_howto.md

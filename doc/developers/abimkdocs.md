@@ -374,7 +374,7 @@ A new Markdown file **without underscore** will be generated and included in `mk
     so that `./mksite.py` can fill the template.
     Remember to restart `./mksite.py` to see the changes.
 
-## How to a add a new document
+## How to add a new document
 
 In order to add a new tutorial, create a new Markdown file in doc/tutorial and
 register it in `mkdocs.yml`
