@@ -827,7 +827,7 @@ subroutine cumulant_compute(self)
  character(len=500) :: msg
 !arrays
  real(dp),allocatable :: temp_g(:,:,:), temp_r(:,:), temp_r_cplx(:,:), temp_g_ce(:,:,:)
- real(dp),allocatable :: betaoverw2(:)
+ real(dp),allocatable :: betaoverw2(:), dfft(:)
  complex(dpc),allocatable :: betaoverw2c(:), temp_reflex(:)
  real(dp),allocatable :: wrmesh_shifted(:), wrmesh_shifted_ce(:), beta(:), inv_wrmesh_shifted_sq(:), c3(:)
  real(dp),allocatable :: time_mesh(:), time_mesh_temp(:)
@@ -859,6 +859,7 @@ subroutine cumulant_compute(self)
  ABI_CALLOC(c3, (nwr))
  ABI_CALLOC(g1, (nwr_ce))
  ABI_CALLOC(gw, (nwr_ce))
+ ABI_CALLOC(dfft, (nwr_ce))
  ABI_CALLOC(time_mesh, (nwr_ce))
  ABI_CALLOC(time_mesh_temp, (nwr))
  ABI_CALLOC(ct, (nwr_ce))
@@ -877,6 +878,13 @@ subroutine cumulant_compute(self)
  ABI_CALLOC(betaoverw2c, (nwr))
  Ha_fs = 8.955433106
 
+ ! Setting direct domain after fft
+ ! 0 1 2 3 ... N/2    -(N-1)/2 ... -1    <= gc
+ ! 1 2 3 4 ....N/2+1  N/2+2    ...  N    <= index ig
+
+ !do iw=1,nwr_ce
+ !       dfft(iw) = ig2gfft(iw,nwr)
+ !end do
 
  fftalg = self%ce_ngfft(7)
  ! Loops are MPI-parallelized over k-points and spin.
@@ -1011,9 +1019,18 @@ subroutine cumulant_compute(self)
            call fourdp(2, temp_g_ce, temp_r_cplx, 1, self%ce_mpi_enreg, nwr_ce, 1, self%ce_ngfft_g , 0 )
            gw(:) = temp_r_cplx(1::2,1) + j_dpc* temp_r_cplx(2::2,1)
 
+           
            ! TODO use ig2gfft from 52_fft_mpi_noabirule/m_fftcore.F90 instead of the two following lines
-           self%gw_vals(:int(nwr_ce/2.0), itemp, ib, my_ik, spin) = gw(int(nwr_ce/2.0):)
-           self%gw_vals(int(nwr_ce/2.0):, itemp, ib, my_ik, spin) = gw(:int(nwr_ce/2.0))
+           print *,int(nwr_ce/2.0)-1, nwr_ce - (int(nwr_ce/2.0) + 1)
+           if ( mod(nwr_ce,2) == 0 ) then
+                   print *,"Even"
+                   self%gw_vals(1:int(nwr_ce/2.0), itemp, ib, my_ik, spin) = gw(int(nwr_ce/2.0):nwr_ce)
+                   self%gw_vals(int(nwr_ce/2.0)+1:nwr_ce, itemp, ib, my_ik, spin) = gw(1:int(nwr_ce/2.0)-1)
+           else
+                   print *,"Odd"
+                   self%gw_vals(1:int(nwr_ce/2.0)+1, itemp, ib, my_ik, spin) = gw(int(nwr_ce/2.0)+1:nwr_ce)
+                   self%gw_vals(int(nwr_ce/2.0)+2:nwr_ce, itemp, ib, my_ik, spin) = gw(1:int(nwr_ce/2.0))
+           endif
 
  
            self%gw_vals(:, itemp, ib, my_ik, spin) = self%gw_vals(:, itemp, ib, my_ik, spin) * time_step
