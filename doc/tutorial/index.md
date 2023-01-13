@@ -29,7 +29,7 @@ Each block in brown represents one intermediate-level tutorial. The blocks in re
 gather by themes -one block per theme- the more advanced tutorials. 
 The following themes are covered: ABINIT postprocessors, static DFT, Many-Body Theory and excitations, 
 Density-Functional Perturbation Theory -DFPT- and electron-phonon interaction, multiscale calculations with MULTIBINIT, 
-and parallelism.
+and parallelism. See the [[theory:acronyms|list of acronyms]].
 
 The basic tutorials are prerequisite for all other tutorials, as represented by the heavy orange arrows.
 Then, some relationships between intermediate-level and advanced-level tutorials are indicated, in brown.
