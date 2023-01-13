@@ -881,7 +881,7 @@ New input variables: [[brav]], [[dvdb_add_lr]], [[dvdb_qcache_mb]], [[dvdb_qdamp
 
 Note that the new EPH processing unit of ABINIT [[optdriver]]=7 has a different implementation than the one implemented in anaddb.
 Three new tutorials are availables, [[tutorial:eph_intro]], [[tutorial:eph4mob]] and [[tutorial:eph4zpr]], and supercede the legacy tutorials
-[[tutorial:eph]] and [[tutorial:tdepes]].
+[[tutorial:eph_legacy]] and [[tutorial:eph_tdep_legacy]].
 For further details about the implementation and usage, please consult [[cite:Brunin2020b]].
 
 By G. Brunin, H. Miranda, M. Giantomassi, G.-M. Rignanese, G. Hautier.
@@ -1332,7 +1332,7 @@ By H. Miranda and M. Giantomassi
 
 By M. Giantomassi
 
-**D.8** Upgraded [[tutorial:paral_gspw]], new version of auto paral (with threads)
+**D.8** Upgraded [[tutorial:paral_bandpw]], new version of auto paral (with threads)
 
 By M. Torrent (MR502).
 
@@ -2064,7 +2064,7 @@ By H. Miranda and M. Giantomassi
 
 By M. Giantomassi
 
-**D.8** Upgraded [[tutorial:paral_gspw]], new version of auto paral (with threads)
+**D.8** Upgraded [[tutorial:paral_bandpw]], new version of auto paral (with threads)
 
 By M. Torrent (MR502).
 
