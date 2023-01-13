@@ -2536,8 +2536,8 @@ See the new tests v7#67-72 libxc#44, 45, 72, 73, 74,
 and also the updated tests v4#86, 87, v67mbpt#09, v7#65, libxc#41, 42, 43, paral#09.
 By X. Gonze and F. Jollet, with help by M. Torrent.
 
-D.3 The [[tutorial:tdepes|tutorial on temperature-dependence of the electronic structure]] has been upgraded, and carefully tested.
-    See all tests in `tutorespfn/tdepes*`.
+D.3 The [[tutorial:eph_tdep_legacy|tutorial on temperature-dependence of the electronic structure]] has been upgraded, and carefully tested.
+    See all tests in `tutorespfn/teph_tdep_legacy*`.
     By X. Gonze and M. Giantomassi
 
 D.4 Output of interpolated density in the MPI-IO case is now tested, [[test:mpiio_26]] and [[test:mpiio_27]].

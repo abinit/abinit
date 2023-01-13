@@ -818,7 +818,7 @@ If these tricks do not solve your problem, consider using OpenMP threads.
 The code is not highly-optimized for OpenMP but a couple of threads may be useful to avoid replicating memory at the MPI level.
 As a rule of thumb, 2-4 OpenMP threads should be OK provided you link with threaded FFT and BLAS libraries.
 To compile ABINIT with OpenMP support and link with a threaded library see the
-corresponding section in the [compilation tutorial](/tutorial/compilation).
+corresponding section in the [ABINIT_build tutorial](/tutorial/abinit_build).
 
 !!! warning
 

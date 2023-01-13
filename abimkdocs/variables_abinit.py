@@ -303,7 +303,7 @@ distribution if not specified in input file.
 
     Note that this variable is only used when running **ground-state calculations** in parallel with MPI.
     Other [[optdriver]] runlevels implement different MPI algorithms that rely on other input variables that are
-    not automatically set by [[autoparal]]. Please consult the tutorials to learn how
+    not automatically set by [[autoparal]]. Please consult the [[tutorial:paral_mbt|tutorial on parallelism for Many-Body Perturbation Theory]] to learn how
     to run beyond-GS calculations with MPI.
 
 Given a total number of processors, ABINIT can find a suitable distribution that fill (when possible)
@@ -2947,7 +2947,7 @@ When activated, in conjunction with [[iscf]] = -2 or -3, a calculation
 of k-resolved spectral function (or density of state) is possible.
 However, the calculation requires as input the self-energy computed in the real
 axis using an external analytical continuation code.
-The section 7 of the DFT+DMFT tutorial  details how to obtain this data
+The section 7 of the [[tutorial:dmft|tutorial on DFT+DMFT]]  details how to obtain this data
 and related informations.
 """,
 ),
@@ -15688,7 +15688,8 @@ If set to 1, provide output of electron-phonon "gkk" matrix elements, for
 further treatment by mrggkk utility or anaddb utility. Note that symmetry will
 be disabled for the calculation of the perturbation, forcing the inclusion of
 all k-points and all perturbation directions. Additional information on
-electron-phonon treatment in ABINIT is given in the tutorial [[tutorial:eph]].
+electron-phonon treatment in ABINIT is given in the tutorial [[tutorial:eph_intro]] and subsequent ones, [[tutorial:eph4mob]] 
+and [[tutorial:eph4zpr]].
 """,
 ),
 
@@ -21600,7 +21601,7 @@ Possible values are:
   * "wfk_optics_fullbz" --> Similar to "wfk_ddk" but accepts a WFK with wavefunctions in the IBZ
      and generates a new WFK and three `_EVK.nc` files with $\kk$-points in the full BZ.
      This procedure is equivalent to performing a NSCF + DDK calculation with [[kptopt]] = 3 as documented
-     in the optic tutorial for non-linear optical properties but it is much faster and, most importantly,
+     in the tutorial [[tutorial:optic]] for non-linear optical properties but it is much faster and, most importantly,
      less memory demanding.
 
   * "wfk_kpts_erange" --> Read WFK file, use star-function and [[einterp]] parameters to interpolate
