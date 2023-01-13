@@ -4031,16 +4031,16 @@ einterp consists of 4 entries.
 The first element specifies the interpolation method.
 
   * 0 --> No interpolation (default)
-  * 1 --> Star-function interpolation (Shankland-Koelling-Wood Fourier interpolation scheme, see [[cite:Pickett1988]]
+  * 1 --> Star-function interpolation (modified Shankland-Koelling-Wood Fourier interpolation scheme, see [[cite:Pickett1988]]).
 
 The meaning of the other entries depend on the interpolation technique selected.
 In the case of star-function interpolation:
 
   * einterp(2): Number of star-functions per ab-initio k-point
-  * einterp(3): If non-zero, activate Fourier filtering according to Eq 9 of [[cite:Uehara2000]].
+  * einterp(3): If non-zero, activate Fourier filtering according to Eq. 9 of [[cite:Uehara2000]].
     In this case, rcut is given by einterp(2) * Rmax where Rmax is the maximum length of
     the lattice vectors included in the star expansion
-  * einterp(4): Used if einterp(3) /= 0. It defines rsigma in Eq 9
+  * einterp(4): Used if einterp(3) /= 0. It defines rsigma in Eq. 9
 
 """,
 ),
@@ -13326,7 +13326,7 @@ The choice is among:
   * 4 --> self-energy calculation (SIG), routine *sigma*.
   * 5 --> non-linear response functions (NONLINEAR), using the 2n+1 theorem, routine *nonlinear*.
   * 7 --> electron-phonon coupling (EPH), see also [[eph_task]] input variable.
-  * 8 --> Post-processing of WFK file, routine *wfk_analyze*. See also [[wfk_task]] input variable.
+  * 8 --> post-processing of WFK file, routine *wfk_analyze*. See also [[wfk_task]] input variable.
   * 10 --> longwave response functions (LONGWAVE), routine *longwave*. See also [[lw_flexo]] or [[lw_qdrpl]] input variables.
   * 66 --> GW using Lanczos-Sternheimer, see input variables whose name start with `gwls_*`.
   * 99 --> Bethe-Salpeter calculation (BSE), routine *bethe_salpeter*
@@ -21567,7 +21567,7 @@ Variable(
     defaultval=0,
     dimensions="scalar",
     requires="[[optdriver]] == 8",
-    mnemonics="WFK TASK",
+    mnemonics="WaveFunction at K TASK",
     added_in_version="9.0.0",
     text=r"""
 
@@ -21579,11 +21579,11 @@ Possible values are:
      This option can be used to interface Abinit with external tools (e.g. lobster)
      requiring $\kk$-points in the full BZ.
 
-  * "wfk_einterp" --> Read energies from WFK file and interpolate the band structure with the SKW method
+  * "wfk_einterp" --> Read energies from WFK file and interpolate the band structure with the modified SKW method [[cite:Pickett1988]],
      using the parameters specified by [[einterp]].
 
   * "wfk_ddk" --> Compute velocity matrix elements for all bands and $\kk$-points found the input WFK file.
-     The code generates three `_EVK.nc` netcdf files with the matrix element of the $ \dfrac{d}{d_{\kk_i}} $
+     The code generates three `_EVK.nc` netcdf files with the matrix element of the $\frac{d}{d{\kk_i}}$
      operator using the same list of $\kk$-points found in the input WFK file i.e. the same value of [[kptopt]].
      These files can then be passed to optics via the `ddkfile_1, ddkfile_2, ddkfile_3` variables
      without having to call the DFPT part that is much more expensive at the level of memory.
