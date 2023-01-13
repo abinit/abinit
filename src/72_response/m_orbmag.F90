@@ -977,15 +977,16 @@ subroutine orbmag_nl_k(atindx,cprj_k,dimlmn,dterm,dtset,eig_k,ikpt,isppol,&
        do gdir = 1, 3
          epsabg = eijk(adir,bdir,gdir)
          if (ABS(epsabg) .LT. half) cycle
-         prefac_m = -com*c2*epsabg
+         prefac_m = com*c2*epsabg
         
          call txt_me(dterm%aij,atindx,cwaveprj,bdir,dtset,gdir,cwaveprj,&
            & dterm%lmn2max,pawtab,txt_d)
          
          call txt_me(dterm%qij,atindx,cwaveprj,bdir,dtset,gdir,cwaveprj,&
            & dterm%lmn2max,pawtab,txt_q)
-
-         m1 = m1 + prefac_m*(txt_d - eig_k(nn)*txt_q)
+         
+         ! note rho^0 H^1 term has opposite sign of rho^1 H^0
+         m1 = m1 - prefac_m*(txt_d - eig_k(nn)*txt_q)
 
        end do !gdir
      end do !bdir
@@ -1634,7 +1635,7 @@ end subroutine tt_me
 !!
 !! SOURCE
 
-subroutine dterm_qij(atindx,dterm,dtset,pawrad,pawtab)
+subroutine dterm_qij(atindx,dterm,dtset,pawtab)
 
   !Arguments ------------------------------------
   !scalars
@@ -1643,51 +1644,23 @@ subroutine dterm_qij(atindx,dterm,dtset,pawrad,pawtab)
 
   !arrays
   integer,intent(in) :: atindx(dtset%natom)
-  type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
   type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
 
   !Local variables -------------------------
   !scalars
-  integer :: iat,iatom,itypat,ilm,ilmn,jlm,jlmn
-  integer :: klm,klmn,kln,mesh_size
-  real(dp) :: qij
+  integer :: iat,iatom,itypat,lmn2_size
 
   !arrays
-  real(dp),allocatable :: ff(:)
 
 !--------------------------------------------------------------------
 
  dterm%qij = czero
-
  do iat = 1, dtset%natom
    iatom = atindx(iat)
    itypat = dtset%typat(iat)
-
-   mesh_size = pawtab(itypat)%mesh_size
-   ABI_MALLOC(ff,(mesh_size))
-
-   do klmn = 1, pawtab(itypat)%lmn2_size
-     klm  = pawtab(itypat)%indklmn(1,klmn)
-     kln  = pawtab(itypat)%indklmn(2,klmn)
-     ilmn = pawtab(itypat)%indklmn(7,klmn) 
-     ilm  = pawtab(itypat)%indlmn(4,ilmn)
-     jlmn = pawtab(itypat)%indklmn(8,klmn) 
-     jlm  = pawtab(itypat)%indlmn(4,jlmn)
-
-     qij = zero
-     if (ilm .EQ. jlm) then
-       ff(2:mesh_size) = pawtab(itypat)%phiphj(2:mesh_size,kln)
-       ff(2:mesh_size) = ff(2:mesh_size) - &
-         & pawtab(itypat)%tphitphj(2:mesh_size,kln)
-       call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
-       call simp_gen(qij,ff,pawrad(itypat))
-     end if
-     dterm%qij(iatom,klmn) = CMPLX(qij,zero)
-
-   end do ! klmn
-
-   ABI_FREE(ff)
-
+   lmn2_size = pawtab(itypat)%lmn2_size
+   dterm%qij(iatom,1:lmn2_size) = &
+     & CMPLX(pawtab(itypat)%sij(1:lmn2_size),zero)
  end do ! iat
 
  dterm%has_qij=2
@@ -4255,7 +4228,7 @@ subroutine make_d(atindx,atindx1,cprj,dimlmn,dterm,dtset,gprimd,mcprj,&
 
  ! generate d terms
 
- call dterm_qij(atindx,dterm,dtset,pawrad,pawtab)
+ call dterm_qij(atindx,dterm,dtset,pawtab)
 
  call dterm_LR(atindx,dterm,dtset,gprimd,pawrad,pawtab)
  
