@@ -16,7 +16,7 @@ authors: xuhe
 
 This lesson aims at showing how to build a LWF model and run a LWF dynamics calculation.
 
-**Before beginning, we recommend the reading of the theory on Lattice Wannier functions in the literature [[cite:rabe1995]]. The construction of LWF from the phonon band structure is covered in another [tutorial](/tutorial/lattice_wannier). **
+**Before beginning, we recommend the reading of the theory on Lattice Wannier functions in the literature [[cite:Rabe1995]]. The construction of LWF from the phonon band structure is covered in another [tutorial](/tutorial/lattice_wannier). **
 
 
 With this lesson, you will learn to:

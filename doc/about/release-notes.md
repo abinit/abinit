@@ -1,6 +1,6 @@
 ## v9.8
 
-Version 9.8, released on December 9, 2022.
+Version 9.8, released on December 23, 2022.
 List of changes with respect to version 9.6.
 <!-- Release notes updated on December 3, 2022. -->
 
@@ -317,7 +317,11 @@ From E. Bousquet (MR881)
 
 From P. Kestener (MR843 and 869)
 
-**D.26** Miscellaneous additional bug fixes, typos fixes, or upgrade of build system.
+**D.26** Restructuring of the tutorial index page, doci/tutorial/index.md ..
+
+From X. Gonze
+
+**D.27** Miscellaneous additional bug fixes, typos fixes, or upgrade of build system.
 
 By F. Goudreault (MR816), M. Giantomassi (MR821 and 845), P. Kestener (MR827 and 843), 
 A. Blanchet (MR832), C. Paillard (MR834), M. Verstraete (MR837),
@@ -881,7 +885,7 @@ New input variables: [[brav]], [[dvdb_add_lr]], [[dvdb_qcache_mb]], [[dvdb_qdamp
 
 Note that the new EPH processing unit of ABINIT [[optdriver]]=7 has a different implementation than the one implemented in anaddb.
 Three new tutorials are availables, [[tutorial:eph_intro]], [[tutorial:eph4mob]] and [[tutorial:eph4zpr]], and supercede the legacy tutorials
-[[tutorial:eph]] and [[tutorial:tdepes]].
+[[tutorial:eph_legacy]] and [[tutorial:eph_tdep_legacy]].
 For further details about the implementation and usage, please consult [[cite:Brunin2020b]].
 
 By G. Brunin, H. Miranda, M. Giantomassi, G.-M. Rignanese, G. Hautier.
@@ -1328,11 +1332,13 @@ Test tolerance in the new integration weights, tests [[test:v8_52]], [[test:v8_5
 By H. Miranda and M. Giantomassi
 
 **D.7** Test calculation of velocity matrix elements (DDK) with
- optdriver 8 and [[wfk_task]] "wfk_ddk”, see [[test:v8_59]].
+ [[optdriver]] 8 and [[wfk_task]] "wfk_ddk”, see [[test:v8_59]]. By the way, the 
+ other capabilities linked to [[wfk_task]] ("wfk_fullbz", "wfk_einterp", "wfk_optics_fullbz", "wfk_kpts_erange") seem
+ not to have been properly advertised.
 
 By M. Giantomassi
 
-**D.8** Upgraded [[tutorial:paral_gspw]], new version of auto paral (with threads)
+**D.8** Upgraded [[tutorial:paral_bandpw]], new version of auto paral (with threads)
 
 By M. Torrent (MR502).
 
@@ -2064,7 +2070,7 @@ By H. Miranda and M. Giantomassi
 
 By M. Giantomassi
 
-**D.8** Upgraded [[tutorial:paral_gspw]], new version of auto paral (with threads)
+**D.8** Upgraded [[tutorial:paral_bandpw]], new version of auto paral (with threads)
 
 By M. Torrent (MR502).
 
@@ -2536,8 +2542,8 @@ See the new tests v7#67-72 libxc#44, 45, 72, 73, 74,
 and also the updated tests v4#86, 87, v67mbpt#09, v7#65, libxc#41, 42, 43, paral#09.
 By X. Gonze and F. Jollet, with help by M. Torrent.
 
-D.3 The [[tutorial:tdepes|tutorial on temperature-dependence of the electronic structure]] has been upgraded, and carefully tested.
-    See all tests in `tutorespfn/tdepes*`.
+D.3 The [[tutorial:eph_tdep_legacy|tutorial on temperature-dependence of the electronic structure]] has been upgraded, and carefully tested.
+    See all tests in `tutorespfn/teph_tdep_legacy*`.
     By X. Gonze and M. Giantomassi
 
 D.4 Output of interpolated density in the MPI-IO case is now tested, [[test:mpiio_26]] and [[test:mpiio_27]].
