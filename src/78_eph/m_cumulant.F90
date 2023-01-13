@@ -1022,11 +1022,9 @@ subroutine cumulant_compute(self)
            
            ! TODO use ig2gfft from 52_fft_mpi_noabirule/m_fftcore.F90 instead of the two following lines
            if ( mod(nwr_ce,2) == 0 ) then
-                   print *,"Even"
                    self%gw_vals(1:int(nwr_ce/2.0), itemp, ib, my_ik, spin) = gw(int(nwr_ce/2.0):nwr_ce)
                    self%gw_vals(int(nwr_ce/2.0)+1:nwr_ce, itemp, ib, my_ik, spin) = gw(1:int(nwr_ce/2.0)-1)
            else
-                   print *,"Odd"
                    self%gw_vals(1:int(nwr_ce/2.0)+1, itemp, ib, my_ik, spin) = gw(int(nwr_ce/2.0)+1:nwr_ce)
                    self%gw_vals(int(nwr_ce/2.0)+2:nwr_ce, itemp, ib, my_ik, spin) = gw(1:int(nwr_ce/2.0))
            endif
