@@ -9671,7 +9671,7 @@ input as an array of values, one for each type, see [[ntypat]]. In calculations
 where the orbital magnetic moment is requested in the presence of a nuclear magnetic
 dipole moment (see [[orbmag]] and [[nucdipmom]]), the effect of this shielding
 will be included. Because the PAW input files do not include the core orbitals,
-the user must compute this value separately, from the Lamb formula [[cite:Abragam1961Principles]],
+the user must compute this value separately, from the Lamb formula [[cite:Abragam1961]],
 and input it here.
 """,
 ),
@@ -10069,7 +10069,7 @@ Variable(
 [[mdf_epsinf]] specifies the value of the macroscopic dielectric function used
 to model the screening function (see [[cite:Bechstedt1992]]).
 The proper spatial symmetry of the screening $W(\mathbf{r},\mathbf{r}^\prime)$ is enforced using
-Eq. (7) of [[cite:vonderLinden1988]].
+Eq. (7) of [[cite:VonDerLinden1988]].
 """,
 ),
 
@@ -15024,7 +15024,7 @@ Variable(
     text=r"""
   * **ppmodel** = 1: PP model of Godby and Needs [[cite:Godby1989]].
   * **ppmodel** = 2: PP model of Hybertsen and Louie [[cite:Hybertsen1986]].
-  * **ppmodel** = 3: PP model of W. von der Linden and P. Horsh [[cite:vonderLinden1988]].
+  * **ppmodel** = 3: PP model of W. von der Linden and P. Horsh [[cite:VonDerLinden1988]].
   * **ppmodel** = 4: PP model of Farid and Engel [[cite:Engel1993]].
   * **ppmodel** = 0: no PP model, numerical integration (contour deformation method [[cite:Lebegue2003]]).
 
