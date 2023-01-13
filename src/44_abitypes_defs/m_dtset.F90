@@ -440,7 +440,7 @@ type, public :: dataset_type
 !O
  integer :: occopt
  integer :: optcell
- integer :: optdcmagpawu
+ integer :: optdcmagpawu = 3
  integer :: optdriver
  integer :: optforces
  integer :: optnlxccc

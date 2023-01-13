@@ -120,8 +120,9 @@ CONTAINS  !=====================================================================
 !scalars
  integer,intent(in) :: dmatpuopt,nspinor,ntypat,pawprtvol,use_dmft,useexexch,usepawu
 !Option for interaction energy in case of non-collinear magnetism:
-!           1: E_int=-J/4.N.(N-2)                   (better)
-!           2: E_int=-J/2.(Nup.(Nup-1)+Ndn.(Ndn-1)) (Nup and Ndn are ill-defined)
+!           1: E_int=-J/4.N.(N-2)
+!           2: E_int=-J/2.(Nup.(Nup-1)+Ndn.(Ndn-1))   (Nup and Ndn are ill-defined)
+!           3: E_int=-J/4.( N.(N-2) + mx^2 + my^2 + mz^2 )
 ! Default is 3
  integer,intent(in) :: option_interaction
  logical :: is_dfpt
@@ -217,6 +218,10 @@ CONTAINS  !=====================================================================
    option_interaction_ = 1
    write(message, '(a)' ) "When usepawu>=10, option_interaction is set to 1"
    call wrtout(std_out,message,'COLL')
+ end if
+ if(usepawu<0.and.nspinor==2.and.option_interaction_==2) then
+   write(message, '(a)' ) "option_interaction=2 is not implemented for usepawu<0. Change 'usepawu' or 'optdcmagpawu' in the input."
+   ABI_ERROR(message)
  end if
 
 !Loop on atom types
@@ -550,7 +555,7 @@ CONTAINS  !=====================================================================
                  ! Must be consistent with pawuenergy and pawpupot
                  if (m1==m2.and.m3==m4) then ! In that case, we have to add the double-counting term
 
-                   if (abs(usepawu)==1.and.(nspinor==1.or.pawtab(itypat)%option_interaction_pawu==2)) then ! FLL
+                   if (abs(usepawu)==1.and.nspinor==1) then ! FLL
 
                      euijkl_dc(1) = &
 &                     phiint_ij * phiint_ipjp * ( pawtab(itypat)%upawu - pawtab(itypat)%jpawu )
@@ -572,12 +577,9 @@ CONTAINS  !=====================================================================
                      ! Add term taking into account global magnetization
                      if (abs(usepawu)/=4.and.pawtab(itypat)%option_interaction_pawu==3) then
 
-                       !euijkl_dc(1) = euijkl_dc(1) - eighth  * phiint_ij * phiint_ipjp * pawtab(itypat)%jpawu
-                       !euijkl_dc(2) = euijkl_dc(2) + eighth  * phiint_ij * phiint_ipjp * pawtab(itypat)%jpawu
-                       !euijkl_dc(3) = eUijkl_dc(3) + quarter * phiint_ij * phiint_ipjp * pawtab(itypat)%jpawu
                        euijkl_dc(1) = euijkl_dc(1) - half  * phiint_ij * phiint_ipjp * pawtab(itypat)%jpawu
                        euijkl_dc(2) = euijkl_dc(2) + half  * phiint_ij * phiint_ipjp * pawtab(itypat)%jpawu
-                       euijkl_dc(3) = eUijkl_dc(3) +         phiint_ij * phiint_ipjp * pawtab(itypat)%jpawu
+                       euijkl_dc(3) = eUijkl_dc(3) -         phiint_ij * phiint_ipjp * pawtab(itypat)%jpawu
 
                      end if
 
