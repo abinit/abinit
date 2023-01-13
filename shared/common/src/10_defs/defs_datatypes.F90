@@ -285,11 +285,9 @@ module defs_datatypes
 ! Integer scalars
   integer :: dimekb
    ! Dimension of Ekb
-   ! ->Norm conserving : Max. number of Kleinman-Bylander energies
-   !                     for each atom type
+   ! ->Norm conserving : Max. number of Kleinman-Bylander energies for each atom type
    !                     dimekb=lnmax (lnmax: see this file)
-   ! ->PAW : Max. number of Dij coefficients connecting projectors
-   !                     for each atom type
+   ! ->PAW : Max. number of Dij coefficients connecting projectors for each atom type
    !                     dimekb=lmnmax*(lmnmax+1)/2 (lmnmax: see this file)
 
   integer :: lmnmax
@@ -309,14 +307,13 @@ module defs_datatypes
 
   integer :: mpsang
    ! Highest angular momentum of non-local projectors over all type of psps.
-   ! shifted by 1 : for all local psps, mpsang=0; for largest s, mpsang=1,
+   ! shifted by 1: for all local psps, mpsang=0; for largest s, mpsang=1,
    ! for largest p, mpsang=2; for largest d, mpsang=3; for largest f, mpsang=4
    ! This gives also the number of non-local "channels"
 
   integer :: mpspso
    ! mpspso is set to 1 if none of the psps is used with a spin-orbit part (that
-   !  is, if the user input variable so_psp is not equal
-   !  to 1 in at least one case
+   !  is, if the user input variable so_psp is not equal to 1 in at least one case
    ! otherwise, it is set to 2
 
   integer :: mpssoang
@@ -415,15 +412,14 @@ module defs_datatypes
 
   real(dp), allocatable :: ekb(:,:)
    ! ekb(dimekb,ntypat*(1-usepaw))
-   !  ->NORM-CONSERVING PSPS ONLY:
+   ! NORM-CONSERVING PSPS ONLY:
    !    (Real) Kleinman-Bylander energies (hartree)
    !           for number of basis functions (l,n) (lnmax)
    !           and number of atom types (ntypat)
-   ! NOTE (MT) : ekb (norm-conserving) is now diagonal (one dimension
-   !             lnmax); it would be easy to give it a second
-   !             (symmetric) dimension by putting
-   !             dimekb=lnmax*(lnmax+1)/2
-   !             in the place of dimekb=lmnmax.
+   ! NOTE (MT):
+   !   ekb (norm-conserving) is now diagonal (one dimension lnmax);
+   !   it would be easy to give it a second (symmetric) dimension by putting
+   !   dimekb=lnmax*(lnmax+1)/2 in the place of dimekb=lmnmax.
 
   real(dp), allocatable :: ffspl(:,:,:,:)
    ! ffspl(mqgrid_ff,2,lnmax,ntypat)

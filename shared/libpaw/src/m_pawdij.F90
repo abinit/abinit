@@ -2401,7 +2401,8 @@ subroutine pawdijnd(dijnd,cplex_dij,ndij,nucdipmom,pawrad,pawtab)
 
 !Local variables ---------------------------------------
 !scalars
- integer :: idir,ij_size,il,ilmn,im,jl,jlmn,jm,klmn,kln,lmn2_size,mesh_size
+ integer :: idir,ij_size,il,ilmn,im,imesh,jl,jlmn,jm,klmn,kln,lmn2_size,mesh_size
+ real(dp) :: rr
  complex(dpc) :: cmatrixelement,lms
 !arrays
  integer,pointer :: indlmn(:,:),indklmn(:,:)
@@ -2437,8 +2438,10 @@ subroutine pawdijnd(dijnd,cplex_dij,ndij,nucdipmom,pawrad,pawtab)
 
  LIBPAW_ALLOCATE(ff,(mesh_size))
  do kln=1,ij_size
-   ff(2:mesh_size)=(pawtab%phiphj(2:mesh_size,kln) - &
-&    pawtab%tphitphj(2:mesh_size,kln))/pawrad%rad(2:mesh_size)**3
+   do imesh = 2, mesh_size
+     rr = pawrad%rad(imesh)
+     ff(imesh)=(pawtab%phiphj(imesh,kln)- pawtab%tphitphj(imesh,kln))/(rr**3)
+   end do !imesh
    call pawrad_deducer0(ff,mesh_size,pawrad)
    call simp_gen(intgr3(kln),ff,pawrad)
  end do

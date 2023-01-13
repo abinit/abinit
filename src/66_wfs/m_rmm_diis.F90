@@ -1288,8 +1288,7 @@ subroutine subspace_rotation(gs_hamk, prtvol, mpi_enreg, nband, npw, my_nspinor,
  real(dp),target :: fake_gsc_bk(0,0)
  real(dp) :: subovl(use_subovl0)
  real(dp),allocatable :: subham(:), h_ij(:,:,:), evec(:,:,:), evec_re(:,:), gwork(:,:)
- real(dp),ABI_CONTIGUOUS pointer :: ghc_bk(:,:), gvnlxc_bk(:,:)
- real(dp), ABI_CONTIGUOUS pointer :: gsc_bk(:,:)
+ real(dp),ABI_CONTIGUOUS pointer :: ghc_bk(:,:), gvnlxc_bk(:,:), gsc_bk(:,:)
  real(dp) :: dots(2, nband)
  type(pawcprj_type) :: cprj_dum(1,1)
 
