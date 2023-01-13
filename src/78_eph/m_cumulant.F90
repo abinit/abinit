@@ -1021,7 +1021,6 @@ subroutine cumulant_compute(self)
 
            
            ! TODO use ig2gfft from 52_fft_mpi_noabirule/m_fftcore.F90 instead of the two following lines
-           print *,int(nwr_ce/2.0)-1, nwr_ce - (int(nwr_ce/2.0) + 1)
            if ( mod(nwr_ce,2) == 0 ) then
                    print *,"Even"
                    self%gw_vals(1:int(nwr_ce/2.0), itemp, ib, my_ik, spin) = gw(int(nwr_ce/2.0):nwr_ce)
@@ -1191,7 +1190,7 @@ subroutine cumulant_kubo_transport(self, dtset, cryst)
  integer :: cnt
  integer :: nbands, ib, ikcalc, it, iw, spin, itemp, comm, ik_ibz
  integer :: ieh, ib_eph
- integer :: ii, jj, time_opt, isym_k, trev_k, dfdw
+ integer :: ii, jj, time_opt, isym_k, trev_k
  integer :: my_rank, nprocs, ierr, my_spin, my_ik
  real(dp) :: time, omega, init_t, time_step, time_max
  real(dp) :: cpu, wall, gflops, cpu_kloop, wall_kloop, gflops_kloop
@@ -1200,7 +1199,7 @@ subroutine cumulant_kubo_transport(self, dtset, cryst)
  character(len=500) :: msg
 !arrays
  real(dp),allocatable :: kernel(:), test_Aw(:), test_dfdw(:),dfdw_acc(:),Aw(:),Aw_l0(:),dfdw_l0(:)
- real(dp) :: int_Aw, int_dfdw
+ real(dp) :: int_Aw, int_dfdw, dfdw
  real(dp) :: vr(3), vv_tens(3,3), S(3,3), wtk, spfunc
  real(dp), allocatable :: onsager_coeff(:,:)
  real(dp) :: work_33(3,3),l0inv_33nw(3,3,2)
@@ -1332,7 +1331,6 @@ subroutine cumulant_kubo_transport(self, dtset, cryst)
          self%kappa(:,:,ieh,spin,itemp) = work_33 / Tkelv
          !self%conductivity_mu( :, :, ieh, spin, itemp ) = self%conductivity_mu( :, :, ieh, spin, itemp ) + integration*vv_tens(:,:)*wtk
 !         call xmpi_sum(self%conductivity_mu(:, :, ieh, spin, itemp) , self%wt_comm%value, ierr)
-         !print *,"cond",ikcalc, itemp, self%conductivity_mu(1, 1, 1,1, itemp)
          end do ! itemp
 
      end do !ib
@@ -1348,7 +1346,6 @@ subroutine cumulant_kubo_transport(self, dtset, cryst)
  self%kappa = + volt_SI**2 * fact0 * self%kappa
  do itemp=1, self%ntemp
          Tkelv = self%kTmesh(itemp) / kb_HaK; if (Tkelv < one) Tkelv = one
-        print *, Tkelv, fact0*Aw_l0(itemp), fact0*dfdw_l0(itemp)
  end do
 
  ! Scale by the carrier concentration
