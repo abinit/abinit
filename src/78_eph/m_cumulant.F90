@@ -407,11 +407,11 @@ subroutine cumulant_driver(dtfil, dtset, ebands, cryst, comm)
 
 !Local variables ------------------------------
  integer,parameter :: master = 0
- integer :: my_rank, ierr
+ integer :: my_rank!, ierr
 #ifdef HAVE_NETCDF
- integer :: ncid
+! integer :: ncid
 #endif
- character(len=1000) :: msg
+! character(len=1000) :: msg
  character(len=fnlen) :: path
  type(cumulant_t) :: cumulant
  type(sigmaph_t) :: sigmaph
@@ -440,7 +440,8 @@ subroutine cumulant_driver(dtfil, dtset, ebands, cryst, comm)
  ! Output netcdf file with cumulant results e.g. A_nk(w).
  ! Use EPH prefix because we may also have EE and PHE cumulants.
  path = strcat(dtfil%filnam_ds(4), "_EPH_CUMULANT.nc")
- call cumulant%ncwrite(path, cryst, ebands, dtset)
+ !call cumulant%ncwrite(path, cryst, ebands, dtset)
+ call cumulant%ncwrite(path, cryst, dtset)
 
  !if (my_rank == master) then
  !  ! Print cumulant expansion results to stdout and other external txt files (for the test suite)
@@ -448,7 +449,8 @@ subroutine cumulant_driver(dtfil, dtset, ebands, cryst, comm)
  !end if
 
  ! Free memory
-100 call cumulant%free()
+!100 
+call cumulant%free()
 
 end subroutine cumulant_driver
 !!***
@@ -487,7 +489,7 @@ subroutine cumulant_init(self, dtset, dtfil, cryst, ebands, comm, sigmaph )
 
 !Local variables --------------------------------
  integer, parameter :: master = 0
- integer :: ncerr, ncid, my_rank, nprocs, ierr, spin, ikcalc, ib, cnt, nbands, color !my_spin, my_kcalc,
+ integer :: ncerr, ncid, my_rank, nprocs, ierr, spin, ikcalc, ib,  color !my_spin, my_kcalc, cnt, nbands,
  real(dp) :: cpu, wall, gflops, rsize
  logical :: is_prime
  character(len=500) :: msg
@@ -820,23 +822,21 @@ subroutine cumulant_compute(self)
  integer,parameter :: master = 0
  integer :: nbands, ib, ikcalc, it, iw, spin, itemp, comm
  integer :: nwr, nwr_ce
- integer :: my_rank, nprocs, ierr, my_spin, my_ik
- real(dp) :: time, omega, init_t, time_step, time_step_init, time_max, init_w, end_w, wmesh_step_init
+ integer :: my_rank, nprocs, my_spin, my_ik
+ real(dp) :: time, omega, init_t, time_step, time_step_init, time_max!, wmesh_step_init
  real(dp) :: cpu, wall, gflops, cpu_kloop, wall_kloop, gflops_kloop
- real(dp) :: wr_step, wr_step_ce, Ha_fs
+ real(dp) :: wr_step, Ha_fs ! wr_step_ce
  character(len=500) :: msg
 !arrays
  real(dp),allocatable :: temp_g(:,:,:), temp_r(:,:), temp_r_cplx(:,:), temp_g_ce(:,:,:)
  real(dp),allocatable :: betaoverw2(:), dfft(:)
  complex(dpc),allocatable :: betaoverw2c(:), temp_reflex(:)
- real(dp),allocatable :: wrmesh_shifted(:), wrmesh_shifted_ce(:), beta(:), inv_wrmesh_shifted_sq(:), c3(:)
+ real(dp),allocatable :: wrmesh_shifted(:), wrmesh_shifted_ce(:), beta(:), c3(:)
  real(dp),allocatable :: time_mesh(:), time_mesh_temp(:)
- real(dp) :: output_value, output_c3, output_test2r, output_test2i
+ real(dp) :: output_c3!, output_test2r, output_test2i
  real(dp) :: m_fit_re, b_fit_re, m_fit_im, b_fit_im, res_re, res_im
  complex(dpc),allocatable :: c1(:), ct_temp(:), c_temp(:)
  complex(dpc),allocatable :: c2(:), ct(:), gt(:), gw(:), g1(:)
- complex(dpc) :: output_test, output_test2
- Integer :: sts, itest
  integer :: fftalg
  logical :: use_fft
 
@@ -980,8 +980,8 @@ subroutine cumulant_compute(self)
          ! The cumulant function as sum of the different components
          ct_temp(:) = c1 + c2 + c3
          ! Fitting the cumulant function
-    	 res_re = linfit(nwr,time_mesh_temp(:), real(ct_temp(:)), m_fit_re, b_fit_re)
-    	 res_im = linfit(nwr,time_mesh_temp(:), aimag(ct_temp(:)), m_fit_im, b_fit_im)
+         res_re = linfit(nwr,time_mesh_temp(:), real(ct_temp(:)), m_fit_re, b_fit_re)
+         res_im = linfit(nwr,time_mesh_temp(:), aimag(ct_temp(:)), m_fit_im, b_fit_im)
 !         call xmpi_sum(ct, self%wt_comm%value, ierr)
          if (self%debug == 1) then ! .and. self%wt_comm%nproc > 1) then
                 self%ct_vals(:, itemp, ib, my_ik, spin) = ct(:)
@@ -989,16 +989,16 @@ subroutine cumulant_compute(self)
                 self%c2(:, itemp, ib, my_ik, spin) = c2(:)
                 self%c3(:, itemp, ib, my_ik, spin) = c3(:)
          endif
-	    
+        
          ! Adding extra interpolated points to the cumulant function
-    	 !!ct(:nwr/2) = ct_temp(:nwr/2)
-    	 !!ct(nwr/2:) = time_mesh(nwr/2:) * m_fit_re + b_fit_re + j_dpc * ( time_mesh(nwr/2:) * m_fit_im + b_fit_im )
+         !!ct(:nwr/2) = ct_temp(:nwr/2)
+         !!ct(nwr/2:) = time_mesh(nwr/2:) * m_fit_re + b_fit_re + j_dpc * ( time_mesh(nwr/2:) * m_fit_im + b_fit_im )
 
-    	 !!do iw=1, nwr/2
-	     !!    temp_reflex(nwr/2-iw) = - ct(iw) + time_mesh(iw) * m_fit_re + b_fit_re + j_dpc * ( time_mesh(iw) * m_fit_im + b_fit_im )
-    	 !!enddo
-	     !!ct(nwr_ce - nwr/2:) =  ct(nwr_ce - nwr/2:) + temp_reflex(:)
-    	 ct(:) = ct_temp(:)
+         !!do iw=1, nwr/2
+         !!    temp_reflex(nwr/2-iw) = - ct(iw) + time_mesh(iw) * m_fit_re + b_fit_re + j_dpc * ( time_mesh(iw) * m_fit_im + b_fit_im )
+         !!enddo
+         !!ct(nwr_ce - nwr/2:) =  ct(nwr_ce - nwr/2:) + temp_reflex(:)
+         ct(:) = ct_temp(:)
          ! Retarded Green's function in time domain
          gt = - j_dpc * exp( ct )
 
@@ -1188,20 +1188,20 @@ subroutine cumulant_kubo_transport(self, dtset, cryst)
 !Local variables ------------------------------
  integer,parameter :: master = 0
  integer :: cnt
- integer :: nbands, ib, ikcalc, it, iw, spin, itemp, comm, ik_ibz
+ integer :: nbands, ib, ikcalc, iw, spin, itemp, comm, ik_ibz
  integer :: ieh, ib_eph
  integer :: ii, jj, time_opt, isym_k, trev_k
- integer :: my_rank, nprocs, ierr, my_spin, my_ik
- real(dp) :: time, omega, init_t, time_step, time_max
+ integer :: my_rank, nprocs, my_spin, my_ik
+ real(dp) :: omega!, time_step!, time_max
  real(dp) :: cpu, wall, gflops, cpu_kloop, wall_kloop, gflops_kloop
  real(dp) :: eig_nk, sp_func, wr_step
  real(dp) :: integration, mu_e, max_occ, fact0, fact
  character(len=500) :: msg
 !arrays
- real(dp),allocatable :: kernel(:), test_Aw(:), test_dfdw(:),dfdw_acc(:),Aw(:),Aw_l0(:),dfdw_l0(:)
+ real(dp),allocatable :: kernel(:), dfdw_acc(:),Aw(:),Aw_l0(:),dfdw_l0(:)!test_Aw(:), test_dfdw(:)
  real(dp) :: int_Aw, int_dfdw, dfdw
- real(dp) :: vr(3), vv_tens(3,3), S(3,3), wtk, spfunc
- real(dp), allocatable :: onsager_coeff(:,:)
+ real(dp) :: vr(3), vv_tens(3,3), S(3,3), wtk!, spfunc
+! real(dp), allocatable :: onsager_coeff(:,:)
  real(dp) :: work_33(3,3),l0inv_33nw(3,3,2)
  real(dp) :: Tkelv
 
@@ -1291,7 +1291,7 @@ subroutine cumulant_kubo_transport(self, dtset, cryst)
        ! Calculation of the velocity tensor
        vv_tens = cryst%symmetrize_cart_tens33(vv_tens, time_opt)
          do itemp=1,self%ntemp
-	 !if (itemp > 1) cycle
+     !if (itemp > 1) cycle
          
          Tkelv = self%kTmesh(itemp) / kb_HaK; if (Tkelv < one) Tkelv = one
            do iw=1, self%nwr
@@ -1406,7 +1406,7 @@ subroutine cumulant_sigmaph_ncread(self, path, ncid, comm)
  integer,intent(out) :: ncid
 
 !Local variables --------------------------------
- integer :: ncerr,ierr
+ integer :: ierr
  real(dp) :: cpu, wall, gflops
  character(len=1000) :: msg
  !real(dp), allocatable :: vals_wr(:,:,:,:,:,:),vals_e0ks(:,:,:,:,:)
@@ -1488,18 +1488,19 @@ end subroutine cumulant_sigmaph_ncread
 !!
 !! SOURCE
 
-subroutine cumulant_ncwrite(self, path, cryst, ebands, dtset)
+!subroutine cumulant_ncwrite(self, path, cryst, ebands, dtset)
+subroutine cumulant_ncwrite(self, path, cryst, dtset)
 
 !Arguments --------------------------------------
  class(cumulant_t),intent(in) :: self
  type(crystal_t),intent(in) :: cryst
- type(ebands_t),intent(in) :: ebands
+! type(ebands_t),intent(in) :: ebands
  type(dataset_type),intent(in) :: dtset
  character(len=*),intent(in) :: path
 
 !Local variables --------------------------------
  integer,parameter :: master = 0
- integer :: ncerr, ncid, my_rank, ikcalc, spin, comm, my_ik, ib, itemp, ntemp
+ integer :: ncerr, ncid, ikcalc, spin, my_ik, ib, itemp, ntemp
  integer :: ii, jj
  real(dp) :: cpu, wall, gflops
 
