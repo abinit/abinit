@@ -317,7 +317,11 @@ From E. Bousquet (MR881)
 
 From P. Kestener (MR843 and 869)
 
-**D.26** Miscellaneous additional bug fixes, typos fixes, or upgrade of build system.
+**D.26** Restructuring of the tutorial index page, doci/tutorial/index.md ..
+
+From X. Gonze
+
+**D.27** Miscellaneous additional bug fixes, typos fixes, or upgrade of build system.
 
 By F. Goudreault (MR816), M. Giantomassi (MR821 and 845), P. Kestener (MR827 and 843), 
 A. Blanchet (MR832), C. Paillard (MR834), M. Verstraete (MR837),
@@ -1328,7 +1332,9 @@ Test tolerance in the new integration weights, tests [[test:v8_52]], [[test:v8_5
 By H. Miranda and M. Giantomassi
 
 **D.7** Test calculation of velocity matrix elements (DDK) with
- optdriver 8 and [[wfk_task]] "wfk_ddk”, see [[test:v8_59]].
+ [[optdriver]] 8 and [[wfk_task]] "wfk_ddk”, see [[test:v8_59]]. By the way, the 
+ other capabilities linked to [[wfk_task]] ("wfk_fullbz", "wfk_einterp", "wfk_optics_fullbz", "wfk_kpts_erange") seem
+ not to have been properly advertised.
 
 By M. Giantomassi
 
