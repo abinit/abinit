@@ -50,11 +50,32 @@ $$\displaystyle  E^{tot}(\boldsymbol{u},\boldsymbol{\eta}) =  E^{0} + [ E^{phono
 
 The first term $E^0$ is the energy of the RS, which has been fully relaxed (e.g. [[ionmov]]=2 and [[optcell]]=2) with very strict tolerance criterium ([[tolmxf]] < 1E-7) since we assume that all first energy derivatives are zero.  This $E^0$ energy has to be included in the global DDB file, by including the ground-state DDB when merging all partial DDBs with [[lesson:rf2| mrgddb]]. 
 
-Then, for the set of harmonic terms, the coefficents correspond to various second derivatives of the energy respect to atomic displacements and macroscopic strains. They can be directly computed with ABINIT using DFPT ([[lesson:rf1| phonon response]], [[lesson:elastic|strain response]], [[lesson:ffield|electric field response]]) and used as parameters of our model. As such, our second-principles model reproduces exactly the first-principles results at the harmonic level (i.e. full phonon dispersion curves, elastic and piezoelectric constants of the RS). In practice, the global DDB file produced by ABINIT is so used as an input file for MULTIBINIT containing all the harmonic coefficients.  This file must contain second energy derivatives respect to (i) all atomic displacements ([[rfphon]] 1; [[rfatpol]] 1 natom; [[rfdir]] 1 1 1) on a converged grid of q-points (defining the range of interactions in real space), (ii) macroscopic strains ([[rfstrs]] 3; [[rfdir]] 1 1 1) and also, for insulators, (iii) electric fields ([[rfelfd]] 1; [[rfdir]] 1 1 1) in order to provide the Born effective charges and dielectric constant used for the description of long-range dipole-dipole interactions.
+Then, for the set of harmonic terms, the coefficients correspond to various second derivatives of the energy respect to atomic displacements and macroscopic strains. 
+They can be directly computed with ABINIT using DFPT ([[lesson:rf1| phonon response]], [[lesson:elastic|strain response]]) 
+and used as parameters of our model. See also [[lesson:polarization|electric polarization]].
+As such, our second-principles model reproduces exactly the first-principles results at the harmonic level 
+(i.e. full phonon dispersion curves, elastic and piezoelectric constants of the RS). 
+In practice, the global DDB file produced by ABINIT is so used as an input file for MULTIBINIT containing all the harmonic coefficients.  
+This file must contain second energy derivatives respect to (i) all atomic displacements 
+([[rfphon]] 1; [[rfatpol]] 1 natom; [[rfdir]] 1 1 1) 
+on a converged grid of q-points (defining the range of interactions in real space), 
+(ii) macroscopic strains ([[rfstrs]] 3; [[rfdir]] 1 1 1) and also, for insulators, 
+(iii) electric fields ([[rfelfd]] 1; [[rfdir]] 1 1 1) in order to provide the Born effective charges and dielectric constant 
+used for the description of long-range dipole-dipole interactions.
 
-The coefficients of the set of anharmonic terms correspond to higher-order derivatives of the energy respect to atomic displacements and macroscopic strains. They are numerous and not computed individually at the first-principles level. Instead, the most important terms will be selected by MULTIBINIT and related coefficients fitted in order to reproduce the BO energy surface. To that end, a training set (TS) of ABINIT data needs to be provided on which the fit will be realized. This TS consists in a set of atomistic configurations realized on a suitable supercell depending on the range of anharmonic interactions (typically 2x2x2 supercell) and for which energy, forces and stresses are provided. This takes the form of an ABINIT netcdf "_HIST.nc" file. Providing an appropriate TS, properly sampling the BO surface, is crucial to obtain an appropriate model. How to built it depends on the kind of system (stable or with instabilities) and will not be further discussed here. 
+The coefficients of the set of anharmonic terms correspond to higher-order derivatives of the energy respect to atomic displacements and macroscopic strains. 
+They are numerous and not computed individually at the first-principles level. 
+Instead, the most important terms will be selected by MULTIBINIT and related coefficients fitted in order to reproduce the BO energy surface. 
+To that end, a training set (TS) of ABINIT data needs to be provided on which the fit will be realized. 
+This TS consists in a set of atomistic configurations realized on a suitable supercell depending on the range of anharmonic interactions (typically 2x2x2 supercell) and for which energy, forces and stresses are provided. 
+This takes the form of an ABINIT netcdf "_HIST.nc" file. 
+Providing an appropriate TS, properly sampling the BO surface, is crucial to obtain an appropriate model. 
+How to built it depends on the kind of system (stable or with instabilities) and will not be further discussed here. 
 
-In summary, constructing a second-principles lattice model with MULTIBINIT requires two input files which are direct output of ABINIT : (i) a full "DDB" file containing the reference energy and second energy derivatives which correspond to harmonic coefficients of the model and (ii) a "_HIST.nc" file containing the energy, forces and stresses of an appropriate training set of configurations from which the anharmonic terms will be automatically selected and fitted. 
+In summary, constructing a second-principles lattice model with MULTIBINIT requires two input files which are direct output of ABINIT : 
+(i) a full "DDB" file containing the reference energy and second energy derivatives which correspond to harmonic coefficients of the model and 
+(ii) a "_HIST.nc" file containing the energy, forces and stresses of an appropriate training set of configurations 
+from which the anharmonic terms will be automatically selected and fitted. 
 
 For this tutorial both these files will be provided.  
 
