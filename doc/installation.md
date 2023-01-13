@@ -18,7 +18,7 @@ working in the terminal), the installation/compilation steps are:
      possibly some recommended libraries (MPI) and other optional libraries such as Wannier90.
      The libraries can be installed with the help of the "fallback" procedure, see below for more info on this step.
      Alternatively, you may want to install everything from source using the procedure detailed in
-     this [tutorial](/tutorial/compilation).
+     this [tutorial](/tutorial/ABINIT_build).
   2. Get the [latest version of the ABINIT package](https://www.abinit.org/packages) (abinit-x.y.z.tar.gz)
      from the abinit web site.
      More information are available [here](#how-to-get-a-version-of-abinit).
@@ -38,7 +38,7 @@ working in the terminal), the installation/compilation steps are:
 
 Note that the details of step 1 and 3 might vary significantly depending on the operating system.
 Further details are provided by 
-[this tutorial](/tutorial/compilation) that cover the scenario in which you want to build everything from source
+[this tutorial](/tutorial/ABINIT_build) that cover the scenario in which you want to build everything from source
 and install libraries in your $HOME directory.
 There are also other pages focusing on
 [macOS](/INSTALL_MacOS), [CentOS](/INSTALL_CentOS) and [Ubuntu](/INSTALL_Ubuntu)

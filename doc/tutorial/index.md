@@ -39,10 +39,10 @@ while a dashed brown arrow indicates that only some of the tutorials of the indi
 Inside a theme, there are also subsets of tutorials indicated with a light contour. 
 They are logically related to each other, and usually to be done
 one after the other. Otherwise, advanced tutorials usually do not have mutual dependencies.
-There are however three exceptions : the [GW1 tutorial](GW1) is a prerequisite for the [paral_MBPT tutorial](paral_mbt), 
-the [parallelism tutorial](parallelism) is a prerequisite for the [U_calc_LR tutorial](ucalc_lr), 
-while the [lattice_wannier tutorial](lattice_wannier)
-is a prerequisite for the [lwf_model tutorial](lwf_model). 
+There are however three exceptions : the [GW1](gw1) tutorial is a prerequisite for the [paral_MBPT](paral_mbt) tutorial, 
+the [parallelism](basepar) tutorial is a prerequisite for the [U_calc_LR](ucalc_lr) tutorial, 
+while the [lattice_wannier](lattice_wannier) tutorial
+is a prerequisite for the [lwf_model](lwf_model) tutorial. 
 
 
 Visualisation tools are NOT covered in the ABINIT tutorials.
@@ -98,7 +98,7 @@ should not skip any of these.**
   * [The tutorial on spin in ABINIT](spin) presents the properties related to spin:
    spin-polarized calculations and spin-orbit coupling.
 
-  * [The tutorial on polarization and finite electric field](ffield) deals with the computation
+  * [The tutorial on polarization and finite electric field](polarization) deals with the computation
     of the polarization of an insulator (e.g. ferroelectric, or dielectric material) thanks
     to the Berry phase approach, and also presents the computation of materials properties
     in the presence of a finite electric field (also thanks to the Berry phase approach).
