@@ -56,8 +56,6 @@ module m_orbmag
   use m_mkffnl,           only : mkffnl
   use m_mpinfo,           only : proc_distrb_cycle
   use m_nonlop,           only : nonlop
-  use m_paw_an,           only : paw_an_type
-  use m_pawang,           only : pawang_type
   use m_pawcprj,          only : pawcprj_type, pawcprj_alloc, pawcprj_free,pawcprj_getdim, pawcprj_get, pawcprj_put
   use m_paw_dmft,         only : paw_dmft_type
   use m_pawfgr,           only : pawfgr_type
@@ -196,7 +194,7 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
 subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
-    & nfftf,ngfftf,npwarr,occ,paw_ij,paw_an,pawang,pawfgr,pawrad,&
+    & nfftf,ngfftf,npwarr,occ,paw_ij,pawfgr,pawrad,&
     & pawtab,psps,rprimd,vtrial,xred,ylm,ylmgr)
 
  !Arguments ------------------------------------
@@ -205,7 +203,6 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
  real(dp),intent(in) :: gsqcut
  type(dataset_type),intent(in) :: dtset
  type(MPI_type), intent(inout) :: mpi_enreg
- type(pawang_type),intent(in) :: pawang
  type(pawfgr_type),intent(in) :: pawfgr
  type(pseudopotential_type), intent(inout) :: psps
 
@@ -220,7 +217,6 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
  real(dp),intent(in) :: ylmgr(dtset%mpw*dtset%mkmem,3,psps%mpsang*psps%mpsang*psps%useylm)
  type(pawcprj_type),intent(in) ::  cprj(dtset%natom,mcprj)
  type(paw_ij_type),intent(inout) :: paw_ij(dtset%natom*psps%usepaw)
- type(paw_an_type),intent(inout) :: paw_an(dtset%natom)
  type(pawrad_type),intent(in) :: pawrad(dtset%ntypat*psps%usepaw)
  type(pawtab_type),intent(inout) :: pawtab(psps%ntypat*psps%usepaw)
 
