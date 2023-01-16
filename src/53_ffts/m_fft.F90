@@ -860,9 +860,9 @@ subroutine fft_ur_dpc(npw_k, nfft, nspinor, ndat, mgfft, ngfft, istwf_k, kg_k, g
 end subroutine fft_ur_dpc
 !!***
 
-!!****f* m_fft/fft_ur_dpc
+!!****f* m_fft/fft_ur_dpc_2d
 !! NAME
-!! fft_ur_dpc
+!! fft_ur_dpc_2d
 !!
 !! FUNCTION
 !! Compute ndat zero-padded FFTs from R- to G-space .
