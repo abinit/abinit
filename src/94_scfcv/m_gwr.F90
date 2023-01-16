@@ -274,8 +274,8 @@ module m_gwr
    real(dp) :: efficiency = zero
    real(dp) :: speedup = zero
 
- !contains
-   !procedure :: print => mem_print
+ contains
+   procedure :: print => est_print
  end type est_t
 !!***
 
@@ -1218,7 +1218,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
    end if
  end do
 
- ! TODO: For the time being no augmentation
+ ! For the time being no augmentation
  gwr%g_ngfft(4:6) = gwr%g_ngfft(1:3)
 
  ! Define batch sizes for FFT transforms, use multiples of OpenMP threads.
@@ -1318,6 +1318,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
      call wrtout(units, msg)
      write(msg, "(a,4(i4,2x),3(es12.5,2x))")"- ", ip_k, ip_g, ip_t, ip_s, est%mem_total, est%efficiency, est%speedup
      call wrtout(units, msg, newlines=1)
+     call est%print(units)
 
      !call ps%from_pid()
      !call ps%print([std_out])
@@ -1684,7 +1685,7 @@ type(est_t) pure function estimate(gwr, np_kgts) result(est)
 
  ! NB: array dimensioned with nkibz and nqibz do not scale as 1/np_k as we distribute the BZ, IBZ points might be replicated.
 
- ! Resident memory needed to store G(g,g',+/-tau) and chi(g,g',tau)
+ ! Resident memory in Mb for G(g,g',+/-tau) and chi(g,g',tau)
  est%mem_green_gg = two * two * (one*gwr%nspinor*gwr%green_mpw)**2 * two*gwr%ntau * gwr%nkibz * gwr%nsppol * gwp*b2Mb / np_tot
  est%mem_chi_gg = two * (one*gwr%tchi_mpw)**2 * gwr%ntau * gwr%nqibz * gwp*b2Mb / (np_g * np_t * np_k)
  est%mem_ugb = two * gwr%green_mpw * gwr%nspinor * gwr%dtset%nband(1) * gwr%nkibz * gwr%nsppol * gwp*b2Mb / np_tot
@@ -1719,6 +1720,39 @@ real(dp) pure function speedup(size, np, weight)
 end function speedup
 
 end function estimate
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_gwr/est_print
+!! NAME
+!! est_print
+!!
+!! FUNCTION
+!!
+!! SOURCE
+
+subroutine est_print(est, units)
+
+!Arguments ------------------------------------
+ class(est_t), intent(in) :: est
+ integer,intent(in) :: units(:)
+
+!Local variables-------------------------------
+ !real(dp) :: np_k, np_g, np_t, np_s, w_k, w_g, w_t, w_s, np_tot
+
+! *************************************************************************
+
+ call wrtout(units, "- Resident memory in Mb for G(g,g',+/-tau) and chi(g,g',tau):")
+ !est%mem_green_gg
+ !est%mem_chi_gg
+ !est%mem_ugb
+
+ call wrtout(units, "- Temporary memory allocated inside the tau loops:")
+ !est%mem_green_rg
+ !est%mem_chi_rg
+
+end subroutine est_print
 !!***
 
 !----------------------------------------------------------------------

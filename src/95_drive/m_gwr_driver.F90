@@ -879,7 +879,7 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, cryst, ugb)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: istwfk1 = 1, mG0(3) = 0
- integer :: nproc, my_rank, master, my_ib2, npw_k, nspinor, m_npw, npwvec
+ integer :: nproc, my_rank, my_ib2, npw_k, nspinor, m_npw, npwvec !master,
  integer :: band1_start, band1_stop, batch1_size, n1dat, idat1
  integer :: band2_start, band2_stop, batch2_size, n2dat, idat2
  real(dp) :: cpu, wall, gflops
