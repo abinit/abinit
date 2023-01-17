@@ -4,12 +4,16 @@
 #OPTIONS AND DATASETS
 prtvol 3
 pawprtvol -3
-nstep 100
 nline 12
-tolvrs 1.0d-10
+tolvrs 1.0d-15
 chksymbreak 0
 
 ndtset 8
+
+nstep 15
+
+nstep5 50
+nstep6 50
 
 optdcmagpawu1 1
 optdcmagpawu2 1

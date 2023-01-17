@@ -5,10 +5,11 @@
 prtvol 3
 pawprtvol -3
 iscf 3 
-nstep 100
 nline 8
 tolvrs 1.0d-15
 chksymbreak 0
+
+nstep 15
 
 ndtset 6
 usepawu1  1 
