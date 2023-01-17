@@ -4150,7 +4150,7 @@ end subroutine pawdijfr
    msg = "usepawu<0 not allowed!"
    LIBPAW_BUG(msg)
  end if
- if(pawtab%option_interaction_pawu==3.and.pawtab%usepawu>=10) then
+ if(ndij==4.and.pawtab%option_interaction_pawu==3.and.pawtab%usepawu>=10) then
    msg = "Option_interaction==3 is not compatible with usepawu>=10 in pawpupot"
    LIBPAW_ERROR(msg)
  end if
