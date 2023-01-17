@@ -216,7 +216,7 @@ CONTAINS  !=====================================================================
  option_interaction_ = option_interaction
  if(abs(usepawu)>=10.and.nspinor==2.and.option_interaction/=1) then
    option_interaction_ = 1
-   write(message, '(a)' ) "When usepawu>=10, option_interaction is set to 1"
+   write(message, '(a)' ) "When usepawu>=10, option_interaction for DC is set to 1"
    call wrtout(std_out,message,'COLL')
  end if
  if(usepawu<0.and.nspinor==2.and.option_interaction_==2) then
