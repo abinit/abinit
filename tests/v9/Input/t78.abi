@@ -10,10 +10,17 @@ chksymbreak 0
 
 ndtset 8
 
-nstep1 15
-nstep2 15
+nstep1 21
+nstep2 21
 
-nstep 22
+nstep3 31
+nstep4 31
+
+nstep5 33
+nstep6 33
+
+nstep7 31
+nstep8 31
 
 optdcmagpawu1 1
 optdcmagpawu2 1

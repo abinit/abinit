@@ -2387,7 +2387,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%kptnrm=one
    dtsets(idtset)%kptns_hf(:,:)=zero
    dtsets(idtset)%kptopt=1
-!   if(dtsets(idtset)%nspden==4)dtsets(idtset)%kptopt=4 ! LB-01/22: useless to write this here as nspden is define later
+   if(dtsets(idtset)%nspden==4)dtsets(idtset)%kptopt=4
    dtsets(idtset)%kptrlen=30.0_dp
 !  L
 
