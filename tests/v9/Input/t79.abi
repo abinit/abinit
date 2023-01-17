@@ -1,111 +1,72 @@
-# Fe LDA+U
-# Tests various usepawu (>0 and <0)
+# ================================================================
+# NiO: 2 Ni and 2 O atoms in a fcc supercell
+#
+# Test for Abinit: PAW + U + non-collinear magnetism
+# Low cut-off for test; too few k-points
+# ================================================================
 
-#OPTIONS AND DATASETS
-prtvol 3
-pawprtvol -3
-nline 12
-tolvrs 1.0d-15
+nsppol 1  nspden 1  nspinor 2
+
+# === Structure and cell
+natom 4 ntypat 2 typat 1 1 2 2
+spinat 0 0 1   0 0 -1   0 0 0   0 0 0
+znucl  28.0 8.0
+xred 0 0 0.1 # to test non-zero forces
+    0.0 0.0 0.5
+    0.5 0.5 0.25
+    0.5 0.5 0.75
+acell   3*7.92
+rprim 0.0 1/2 1/2
+      1/2 0.0 1/2
+      1.0 1.0 0.0
+nband 50
+occopt 7  tsmear 0.015
+
+# === SCF cycle options
+nstep 5  tolvrs 1.d-7
+ecut 8. pawecutdg 10.
+diemix 0.5
+
+# === K-points and syms
+# The following kptopt values are actually default values for the different nspden cases.
+kptopt 4
+kptrlatt 2 0 0 0 2 0 0 0 2
 chksymbreak 0
 
-nstep   20
+ndtset 2
+# === DFT+U options
+usepawu1  1
+usepawu2 -1
 
-nstep1  40
-nstep2  40
+spnorbscl 1000 # To enhance spin-orbit coupling, non physical
 
-ndtset 8
+lpawu   2 -1        # Applied on d electrons of Nickel
+upawu  0.30   0.0   # Value of U parameter
+jpawu  0.0350 0.0   # Value of J parameter
 
-optdcmagpawu1 1
-optdcmagpawu2 1
-optdcmagpawu3 1
-optdcmagpawu4 1
-
-optdcmagpawu5 3
-optdcmagpawu6 3
-optdcmagpawu7 3
-optdcmagpawu8 3
-
-usepawu1  1 
-usepawu2 -1 
-usepawu3  4 
-usepawu4 -4 
-
-usepawu5  1 
-usepawu6 -1 
-usepawu7  4 
-usepawu8 -4 
-
-getden1 0
-#getwfk1 0
-getden2 0
-#getwfk2 0
-
-getden3 1
-#getwfk3 1
-getden4 2
-#getwfk4 2
-
-getden5 1
-#getwfk5 1
-getden6 2
-#getwfk6 2
-
-getden7 1
-#getwfk7 1
-getden8 2
-#getwfk8 2
-
-# SPIN 
-nsppol  1
-nspinor 2
-nspden  1
-
-# CONVERGENCE PARAM
-ecut 14
-pawecutdg  30
-nband  24
-occopt 7
-tsmear 1600 K
-
-
-# PHYSICAL DATA
-natom 1 ntypat  1 typat  1  
-znucl  26.0 
-xred  0.d0   0.d0   0.d0
-
-#Definition of the unit cell
-acell   3*5.42
-rprim     -0.5  0.5  0.5
-           0.5 -0.5  0.5
-           0.5  0.5 -0.5
-
-# POINTSK 
-kptopt 3  
-ngkpt 1 1 1
-nshiftk 1
-shiftk 0.0 0.0 0.0
-
-# DFT+U
-dmatpuopt 2
-lpawu   2
-upawu  6.0000 eV
-jpawu  3.0000 eV
+# === Other options
+prtden 0  prteig 0  prtwf 0
+optforces 1
+pawprtvol 3
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "26fe.lda2.paw"
+ pseudos "28ni.paw, 8o.2.paw"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%   t79.abo, tolnlines = 0, tolabs = 0.000e-00, tolrel = 0.000e-00
+#%%   t79.abo, tolnlines = 74, tolabs = 1.100e-05, tolrel = 1.300e-06
 #%% [paral_info]
-#%% max_nprocs = 1
+#%% max_nprocs = 4
 #%% [extra_info]
 #%% authors = L. Baguet
 #%% keywords = PAW, DFTU
 #%% description =
-#%%  Tests various usepawu on Fe. usepaw=X should give the same result than usepawu=-X.
-#%% topics = DFT+U
+#%%   NiO: 2 Ni and 2 O atoms in an fcc supercell.
+#%%   Different versions of PAW+U formalism are tested.
+#%%   Negative values of usepawu should give exactly the same results as with positive values.
+#%%   Cut-off and k-points are unrealistic.
+#%% topics = DFT+U, spinpolarisation
 #%%<END TEST_INFO>

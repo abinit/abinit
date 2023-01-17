@@ -10,10 +10,10 @@ chksymbreak 0
 
 ndtset 8
 
-nstep 15
+nstep1 15
+nstep2 15
 
-nstep5 50
-nstep6 50
+nstep 22
 
 optdcmagpawu1 1
 optdcmagpawu2 1
@@ -35,26 +35,6 @@ usepawu6 -1
 usepawu7  4 
 usepawu8 -4 
 
-getden1 0
-getwfk1 0
-getden2 0
-getwfk2 0
-
-getden3 1
-getwfk3 1
-getden4 2
-getwfk4 2
-
-getden5 1
-getwfk5 1
-getden6 2
-getwfk6 2
-
-getden7 1
-getwfk7 1
-getden8 2
-getwfk8 2
-
 # SPIN 
 nsppol  1
 nspinor 2
@@ -67,7 +47,6 @@ pawecutdg  30
 nband  24
 occopt 7
 tsmear 1600 K
-
 
 # PHYSICAL DATA
 natom 1 ntypat  1 typat  1  
@@ -90,7 +69,7 @@ shiftk 0.0 0.0 0.0
 dmatpuopt 2
 lpawu   2
 upawu  6.0000 eV
-jpawu  3.0000 eV
+jpawu  1.0000 eV
 
  pp_dirpath "$ABI_PSPDIR"
  pseudos "26fe.lda2.paw"
