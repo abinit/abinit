@@ -110,28 +110,29 @@ module m_orbmag
     integer :: lmnmax
     integer :: lmn2max
     integer :: natom
+    integer :: ndij
     integer :: has_aij=0
     integer :: has_qij=0
     integer :: has_LR=0
     integer :: has_BM=0
 
     ! sum of \Delta A_ij
-    ! aij(natom,lmn2max)
-    complex(dpc),allocatable :: aij(:,:)
+    ! aij(natom,lmn2max,ndij)
+    complex(dpc),allocatable :: aij(:,:,:)
     
     ! <phi|phi> - <tphi|tphi>
-    ! qij(natom,lmn2max)
-    complex(dpc),allocatable :: qij(:,:)
+    ! qij(natom,lmn2max,ndij)
+    complex(dpc),allocatable :: qij(:,:,:)
     
     ! onsite L_R/2
     ! <phi|L_R/2|phi> - <tphi|L_R/2|tphi>
-    ! LR(natom,lmn2max,3)
-    complex(dpc),allocatable :: LR(:,:,:)
+    ! LR(natom,lmn2max,ndij,3)
+    complex(dpc),allocatable :: LR(:,:,:,:)
 
     ! onsite BM
     ! <phi|Bxr . mxr|phi> - <tphi|Bxr . mxr|tphi>
-    ! BM(natom,lmn2max,3)
-    complex(dpc),allocatable :: BM(:,:,:)
+    ! BM(natom,lmn2max,ndij,3)
+    complex(dpc),allocatable :: BM(:,:,:,:)
 
   end type dterm_type
 
@@ -346,7 +347,7 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
  lmn2max = psps%lmnmax*(psps%lmnmax+1)/2
 
  ! note: in make_d, terms will be filled as iatom using atindx
- call dterm_alloc(dterm,psps%lmnmax,lmn2max,dtset%natom)
+ call dterm_alloc(dterm,psps%lmnmax,lmn2max,dtset%natom,paw_ij(1)%ndij)
 
  call make_d(atindx,dterm,dtset,gprimd,paw_ij,pawrad,pawtab,psps)
 
@@ -699,9 +700,9 @@ subroutine orbmag_nl1_k(atindx,cprj_k,dimlmn,dterm,dtset,ikpt,isppol,m1_k,mcprjk
      
      select case (nl1_option)
      case(1)
-       call tt_me(dterm%LR(:,:,adir),atindx,cwaveprj,dtset,cwaveprj,dterm%lmn2max,pawtab,tt)
+       call tt_me(dterm%LR(:,:,:,adir),atindx,cwaveprj,dtset,cwaveprj,dterm%lmn2max,dterm%ndij,pawtab,tt)
      case(2)
-       call tt_me(dterm%BM(:,:,adir),atindx,cwaveprj,dtset,cwaveprj,dterm%lmn2max,pawtab,tt)
+       call tt_me(dterm%BM(:,:,:,adir),atindx,cwaveprj,dtset,cwaveprj,dterm%lmn2max,dterm%ndij,pawtab,tt)
      case default
        tt = czero
      end select
@@ -789,10 +790,10 @@ subroutine orbmag_nl_k(atindx,cprj_k,dimlmn,dterm,dtset,eig_k,ikpt,isppol,&
          prefac_m = com*c2*epsabg
         
          call txt_me(dterm%aij,atindx,cwaveprj,bdir,dtset,gdir,cwaveprj,&
-           & dterm%lmn2max,pawtab,txt_d)
+           & dterm%lmn2max,dterm%ndij,pawtab,txt_d)
          
          call txt_me(dterm%qij,atindx,cwaveprj,bdir,dtset,gdir,cwaveprj,&
-           & dterm%lmn2max,pawtab,txt_q)
+           & dterm%lmn2max,dterm%ndij,pawtab,txt_q)
          
          ! note rho^0 H^1 term has opposite sign of rho^1 H^0
          m1 = m1 - prefac_m*(txt_d - eig_k(nn)*txt_q)
@@ -1295,17 +1296,17 @@ end subroutine lamb_core
 !!
 !! SOURCE
 
-subroutine txt_me(aij,atindx,bcp,bdir,dtset,gdir,kcp,lmn2max,pawtab,txt)
+subroutine txt_me(aij,atindx,bcp,bdir,dtset,gdir,kcp,lmn2max,ndij,pawtab,txt)
 
   !Arguments ------------------------------------
   !scalars
-  integer,intent(in) :: bdir,gdir,lmn2max
+  integer,intent(in) :: bdir,gdir,lmn2max,ndij
   complex(dpc),intent(out) :: txt
   type(dataset_type),intent(in) :: dtset
 
   !arrays
   integer,intent(in) :: atindx(dtset%natom)
-  complex(dpc),intent(in) :: aij(dtset%natom,lmn2max)
+  complex(dpc),intent(in) :: aij(dtset%natom,lmn2max,ndij)
   type(pawcprj_type),intent(in) :: bcp(dtset%natom,dtset%nspinor)
   type(pawcprj_type),intent(in) :: kcp(dtset%natom,dtset%nspinor)
   type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
@@ -1327,7 +1328,7 @@ subroutine txt_me(aij,atindx,bcp,bdir,dtset,gdir,kcp,lmn2max,pawtab,txt)
       do ilmn = 1, pawtab(itypat)%lmn_size
         do jlmn = 1, pawtab(itypat)%lmn_size
           klmn = MATPACK(ilmn,jlmn)
-          dij = aij(iatom,klmn)
+          dij = aij(iatom,klmn,isp)
           ! see note at top of file near definition of MATPACK macro
           if (ilmn .GT. jlmn) dij = CONJG(dij)
           dcpi = CMPLX(bcp(iatom,isp)%dcp(1,bdir,ilmn),bcp(iatom,isp)%dcp(2,bdir,ilmn))
@@ -1371,17 +1372,17 @@ end subroutine txt_me
 !!
 !! SOURCE
 
-subroutine tt_me(aij,atindx,bcp,dtset,kcp,lmn2max,pawtab,tt)
+subroutine tt_me(aij,atindx,bcp,dtset,kcp,lmn2max,ndij,pawtab,tt)
 
   !Arguments ------------------------------------
   !scalars
-  integer,intent(in) :: lmn2max
+  integer,intent(in) :: lmn2max,ndij
   complex(dpc),intent(out) :: tt
   type(dataset_type),intent(in) :: dtset
 
   !arrays
   integer,intent(in) :: atindx(dtset%natom)
-  complex(dpc),intent(in) :: aij(dtset%natom,lmn2max)
+  complex(dpc),intent(in) :: aij(dtset%natom,lmn2max,ndij)
   type(pawcprj_type),intent(in) :: bcp(dtset%natom,dtset%nspinor),kcp(dtset%natom,dtset%nspinor)
   type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
 
@@ -1404,7 +1405,7 @@ subroutine tt_me(aij,atindx,bcp,dtset,kcp,lmn2max,pawtab,tt)
           klmn=MATPACK(ilmn,jlmn)
           cpi =  CMPLX(bcp(iatom,isp)%cp(1,ilmn),bcp(iatom,isp)%cp(2,ilmn))
           cpj =  CMPLX(kcp(iatom,isp)%cp(1,jlmn),kcp(iatom,isp)%cp(2,jlmn))
-          dij = aij(iatom,klmn)
+          dij = aij(iatom,klmn,isp)
           ! see note at top of file near definition of MATPACK macro
           if (ilmn .GT. jlmn) dij = CONJG(dij)
           tt = tt + CONJG(cpi)*dij*cpj
@@ -1468,8 +1469,12 @@ subroutine dterm_qij(atindx,dterm,dtset,pawtab)
    iatom = atindx(iat)
    itypat = dtset%typat(iat)
    lmn2_size = pawtab(itypat)%lmn2_size
-   dterm%qij(iatom,1:lmn2_size) = &
+   dterm%qij(iatom,1:lmn2_size,1) = &
      & CMPLX(pawtab(itypat)%sij(1:lmn2_size),zero)
+   if (dterm%ndij > 1) then
+     dterm%qij(iatom,1:lmn2_size,2) = &
+       & CMPLX(pawtab(itypat)%sij(1:lmn2_size),zero)
+   end if
  end do ! iat
 
  dterm%has_qij=2
@@ -1625,7 +1630,10 @@ subroutine dterm_BM(atindx,dterm,dtset,gntselect,gprimd,my_lmax,pawrad,pawtab,re
 
       dij_red = MATMUL(TRANSPOSE(gprimd),dij_cart)
 
-      dterm%BM(iatom,klmn,1:3) = dij_red(1:3)
+      dterm%BM(iatom,klmn,1,1:3) = dij_red(1:3)
+      if (dterm%ndij > 1) then
+        dterm%BM(iatom,klmn,2,1:3) = dij_red(1:3)
+      end if
       
     end do ! end loop over klmn
     ABI_FREE(ff)
@@ -1726,7 +1734,10 @@ subroutine dterm_LR(atindx,dterm,dtset,gprimd,pawrad,pawtab)
       do iat=1,dtset%natom
         iatom = atindx(iat)
         if(dtset%typat(iat) .EQ. itypat) then
-          dterm%LR(iatom,klmn,1:3) = dij_red(1:3)
+          dterm%LR(iatom,klmn,1,1:3) = dij_red(1:3)
+          if (dterm%ndij > 1) then
+            dterm%LR(iatom,klmn,2,1:3) = dij_red(1:3)
+          end if
         end if
       end do
     end do ! end loop over klmn
@@ -1990,11 +2001,11 @@ end subroutine dterm_free
 !!
 !! SOURCE
 
-subroutine dterm_alloc(dterm,lmnmax,lmn2max,natom)
+subroutine dterm_alloc(dterm,lmnmax,lmn2max,natom,ndij)
 
   !Arguments ------------------------------------
   !scalars
-  integer,intent(in) :: lmnmax,lmn2max,natom
+  integer,intent(in) :: lmnmax,lmn2max,natom,ndij
   type(dterm_type),intent(inout) :: dterm
 
   !arrays
@@ -2008,29 +2019,30 @@ subroutine dterm_alloc(dterm,lmnmax,lmn2max,natom)
   dterm%lmnmax = lmnmax
   dterm%lmn2max = lmn2max
   dterm%natom = natom
+  dterm%ndij = ndij
 
   if(allocated(dterm%aij)) then
     ABI_FREE(dterm%aij)
   end if
-  ABI_MALLOC(dterm%aij,(natom,lmn2max))
+  ABI_MALLOC(dterm%aij,(natom,lmn2max,ndij))
   dterm%has_aij=1
 
   if(allocated(dterm%qij)) then
     ABI_FREE(dterm%qij)
   end if
-  ABI_MALLOC(dterm%qij,(natom,lmn2max))
+  ABI_MALLOC(dterm%qij,(natom,lmn2max,ndij))
   dterm%has_qij=1
 
   if(allocated(dterm%LR)) then
     ABI_FREE(dterm%LR)
   end if
-  ABI_MALLOC(dterm%LR,(natom,lmn2max,3))
+  ABI_MALLOC(dterm%LR,(natom,lmn2max,ndij,3))
   dterm%has_LR=1
   
   if(allocated(dterm%BM)) then
     ABI_FREE(dterm%BM)
   end if
-  ABI_MALLOC(dterm%BM,(natom,lmn2max,3))
+  ABI_MALLOC(dterm%BM,(natom,lmn2max,ndij,3))
   dterm%has_BM=1
   
 end subroutine dterm_alloc
@@ -2081,7 +2093,7 @@ subroutine dterm_aij(atindx,dterm,dtset,paw_ij,pawtab)
 
   !Local variables -------------------------
   !scalars
-  integer :: iat,iatom,itypat,klmn
+  integer :: iat,iatom,idij,itypat,klmn
   !arrays
 !--------------------------------------------------------------------
 
@@ -2091,10 +2103,12 @@ subroutine dterm_aij(atindx,dterm,dtset,paw_ij,pawtab)
     iatom=atindx(iat)
     itypat=dtset%typat(iat)
     do klmn=1,pawtab(itypat)%lmn2_size
-      dterm%aij(iatom,klmn) = &
-        & CMPLX(paw_ij(iatom)%dij(2*klmn-1,1),paw_ij(iatom)%dij(2*klmn,1))
-    end do
-  end do
+      do idij = 1, dterm%ndij
+        dterm%aij(iatom,klmn,idij) = &
+          & CMPLX(paw_ij(iatom)%dij(2*klmn-1,idij),paw_ij(iatom)%dij(2*klmn,idij))
+      end do ! idij
+    end do ! klmn
+  end do ! iat
 
   dterm%has_aij = 2
 
