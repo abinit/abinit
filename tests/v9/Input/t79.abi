@@ -4,10 +4,14 @@
 #OPTIONS AND DATASETS
 prtvol 3
 pawprtvol -3
-nstep 100
 nline 12
-tolvrs 1.0d-10
+tolvrs 1.0d-15
 chksymbreak 0
+
+nstep   20
+
+nstep1  40
+nstep2  40
 
 ndtset 8
 
