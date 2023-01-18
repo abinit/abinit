@@ -5658,6 +5658,8 @@ end subroutine gtdyn9
 !! NOTES
 !!   1) One makes the dynamical matrix hermitian...
 !!   2) In case of q=Gamma, only the real part is used.
+!!      (MR: Modified since at finite omega imaginary components may arise 
+!!      also at Gamma in broken time-reversal symmetry crystals)
 !!
 !! SOURCE
 
@@ -5720,7 +5722,7 @@ subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
    do i1=1,3*natom
      do i2=1,3*natom
        index=i1+3*natom*(i2-1)
-       displ(2*index)=zero
+       if (abs(displ(2*index)) < tol8) then displ(2*index)=zero
      end do
    end do
  end if
@@ -5764,7 +5766,7 @@ subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
            i2=i2+1
            index=i1+3*natom*(i2-1)
            displ(2*index-1)=displ(2*index-1)+four_pi/ucvol*zeff(idir1,ipert1)*zeff(idir2,ipert2)/epsq
-           displ(2*index  )=zero
+           if (abs(displ(2*index)) < tol8) then displ(2*index)=zero
          end do
        end do
      end do
