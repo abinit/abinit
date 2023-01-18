@@ -1888,24 +1888,28 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
              occ_rbz,phnons1,rhog1_mq,rhor1_mq,rprimd,symaf1,symrl1,tnons1,ucvol,wtk_rbz)
 
            !reconstruct the +q and -q densities, this might bug if fft parallelization is used, todo...
+!           do ifft=1,nfftf
+!             rhor1(2*ifft-1,1) = half*(rhor1_pq(2*ifft-1,1)+rhor1_mq(2*ifft-1,1))
+!             rhor1(2*ifft  ,1) = half*(rhor1_pq(2*ifft  ,1)-rhor1_mq(2*ifft  ,1))
+!           end do
+!           if (nspden >= 2) then
+!             do ifft=1,nfftf
+!               rhor1(2*ifft-1,2) = half*(rhor1_pq(2*ifft-1,2)+rhor1_mq(2*ifft-1,2))
+!               rhor1(2*ifft  ,2) = half*(rhor1_pq(2*ifft  ,2)-rhor1_mq(2*ifft  ,2))
+!             end do
+!           end if
+!           if (nspden > 2) then
+!             do ifft=1,nfftf
+!               rhor1(2*ifft-1,3) = half*(rhor1_pq(2*ifft-1,3)+rhor1_mq(2*ifft  ,4))
+!               rhor1(2*ifft  ,3) = half*(rhor1_pq(2*ifft  ,3)-rhor1_mq(2*ifft-1,4))
+!               rhor1(2*ifft  ,4) = half*(rhor1_pq(2*ifft  ,4)+rhor1_mq(2*ifft-1,3))
+!               rhor1(2*ifft-1,4) = half*(rhor1_pq(2*ifft-1,4)-rhor1_mq(2*ifft  ,3))
+!             end do
+!           end if
            do ifft=1,nfftf
-             rhor1(2*ifft-1,1) = half*(rhor1_pq(2*ifft-1,1)+rhor1_mq(2*ifft-1,1))
-             rhor1(2*ifft  ,1) = half*(rhor1_pq(2*ifft  ,1)-rhor1_mq(2*ifft  ,1))
+             rhor1(2*ifft-1,:) = half*(rhor1_pq(2*ifft-1,:)+rhor1_mq(2*ifft-1,:))
+             rhor1(2*ifft  ,:) = half*(rhor1_pq(2*ifft  ,:)-rhor1_mq(2*ifft  ,:))
            end do
-           if (nspden >= 2) then
-             do ifft=1,nfftf
-               rhor1(2*ifft-1,2) = half*(rhor1_pq(2*ifft-1,2)+rhor1_mq(2*ifft-1,2))
-               rhor1(2*ifft  ,2) = half*(rhor1_pq(2*ifft  ,2)-rhor1_mq(2*ifft  ,2))
-             end do
-           end if
-           if (nspden > 2) then
-             do ifft=1,nfftf
-               rhor1(2*ifft-1,3) = half*(rhor1_pq(2*ifft-1,3)+rhor1_mq(2*ifft  ,4))
-               rhor1(2*ifft  ,3) = half*(rhor1_pq(2*ifft  ,3)-rhor1_mq(2*ifft-1,4))
-               rhor1(2*ifft  ,4) = half*(rhor1_pq(2*ifft  ,4)+rhor1_mq(2*ifft-1,3))
-               rhor1(2*ifft-1,4) = half*(rhor1_pq(2*ifft-1,4)-rhor1_mq(2*ifft  ,3))
-             end do
-           end if
            call fourdp(cplex,rhog1,rhor1(:,1),-1,mpi_enreg,nfftf,1, ngfftf, 0)
          end if
        end if
