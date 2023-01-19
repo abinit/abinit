@@ -10,9 +10,9 @@ authors: HeXu
     It is not recommended to be used in production at this stage.
     Please contact the developers (x.he@uliege.be) for feedbacks and help.
 
-This tutorial introduces the methods for constructing lattice Wannier funtions (LWFs)[[cite:rabe1995]]. 
+This tutorial introduces the methods for constructing lattice Wannier funtions (LWFs)[[cite:Rabe1995]]. 
 You will learn how to use the SCDM-k (selected columns of the density matrix in k-space -
-[[cite:damle2015]] [[cite:damle2017]] and [[cite:damle2018]]) method for constructing the LWFs, 
+[[cite:Damle2015]] [[cite:Damle2017]] and [[cite:Damle2018]]) method for constructing the LWFs, 
 and how to plot the phonon band structure from the LWFs and compare it with the full phonon band structures. 
 
 The LWF is a close analogy to the electron Wannier functions, but for atomic displacements.  
