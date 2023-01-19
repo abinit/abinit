@@ -10,8 +10,8 @@
 #include "cuda_api_error_check.h"
 #endif
 
-static void 
-_cuget_type_nbytes_dir_cc(int dist_ndat, int kind, int isign, 
+static void
+_cuget_type_nbytes_dir_cc(int dist_ndat, int kind, int isign,
                           cufftType *type, size_t *nbytes, int *direction){
 
   switch (kind) {
@@ -41,7 +41,7 @@ _cuget_type_nbytes_dir_cc(int dist_ndat, int kind, int isign,
   }
 }
 
-extern "C" void 
+extern "C" void
 gpu_planpp_free(void **plan_pp) {
   if (*plan_pp == NULL) return;
   //cufftHandle plan = * ((cufftHandle *) (*plan_pp));
@@ -52,7 +52,7 @@ gpu_planpp_free(void **plan_pp) {
 }
 
 
-extern "C" void 
+extern "C" void
 devpp_free(void **dev_pp) {
   //printf("About to free devptr %p\n", *dev_pp);
   if (*dev_pp == NULL) return;
@@ -60,8 +60,7 @@ devpp_free(void **dev_pp) {
   *dev_pp = NULL;
 }
 
-
-extern "C" void 
+extern "C" void
 xgpu_fftbox_c2c_ip(int *f_dims, int *f_embed, int ndat, int isign, int kind,
                    void **h_ff, void **plan_pp, void **d_ff) {
 
@@ -132,7 +131,7 @@ xgpu_fftbox_c2c_ip(int *f_dims, int *f_embed, int ndat, int isign, int kind,
 }
 
 
-extern "C" void 
+extern "C" void
 xgpu_fftbox_c2c_op(int *f_dims, int *f_embed, int ndat, int isign, int kind,
                    void **h_ff, void **h_gg, void **plan_pp, void **d_ff, void **d_gg) {
 
