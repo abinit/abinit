@@ -10,11 +10,11 @@ chksymbreak 0
 
 ndtset 5
 
-nstep1   33
-nstep2   32
-nstep3   34
-nstep4   38
-nstep5   36
+nstep1   31
+nstep2   30
+nstep3   32
+nstep4   36
+nstep5   34
 
 usepawu1  4 
 usepawu2  4 
