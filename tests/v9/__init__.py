@@ -109,6 +109,10 @@ inp_files = [
     "t86.abi",  # Spin lattice coupling, Only Oiju term activated.
     "t87.abi",  # Spin lattice coupling, Oiju and Tijuv.
 
+    # test usepawu options with nspinor=2,nspden=4 and different pawxcdev
+    "t88.abi", # LDA
+    "t89.abi", # GGA
+
     # GS Coulomb cut-off
     "t90.abi",  # checkG Coulomb cut-off, large tolerance a.t.m.
     "t91.abi",  # occopt 9 tests on Si
