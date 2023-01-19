@@ -1033,7 +1033,7 @@ subroutine fconv(fcart,iatfix,iexit,itime,natom,ntime,optcell,strfact,strtarget,
 !arrays
  integer,intent(in) :: iatfix(3,natom)
  real(dp),intent(in) :: fcart(3,natom),strtarget(6),strten(6)
- !real(dp), intent(in) :: rprim(3,3)
+ real(dp), intent(in) :: rprim(3,3)
 
 !Local variables-------------------------------
 !scalars
@@ -1044,6 +1044,8 @@ subroutine fconv(fcart,iatfix,iexit,itime,natom,ntime,optcell,strfact,strtarget,
  real(dp) :: dstr(6)
 
 ! *************************************************************************
+
+ABI_UNUSED(rprim)
 
 !Compute maximal component of forces, EXCLUDING any fixed components
  fmax=zero
