@@ -163,7 +163,7 @@ module m_gwr
  use m_cgtk,          only : cgtk_rotate
  use m_mpinfo,        only : initmpi_seq, destroy_mpi_enreg
  use m_distribfft,    only : init_distribfft_seq
- use m_fft,           only : fftbox_plan3_t, uplan_t, fft_ug, fft_ur, fourdp
+ use m_fft,           only : fftbox_plan3_t, uplan_t, fft_ug, fft_ur !, fourdp
  use m_fft_mesh,      only : calc_ceikr, calc_ceigr, ctimes_eikr
  use m_kpts,          only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, kpts_map, kpts_map_print, kpts_pack_in_stars
  use m_bz_mesh,       only : littlegroup_t, findqg0
@@ -2613,9 +2613,10 @@ subroutine gwr_get_myk_green_gpr(gwr, itau, spin, desc_mykbz, gt_gpr)
  integer :: my_ikf, ik_bz, ig2, ipm, npwsp, col_bsize, idat, ndat
  logical :: k_is_gamma
  real(dp) :: kk_bz(3), cpu, wall, gflops !, mem_mb
+ complex(gwpc),allocatable :: ceikr(:)
  character(len=500) :: msg
  type(__slkmat_t) :: rgp, gt_pm(2)
- complex(gwpc),allocatable :: ceikr(:)
+ type(uplan_t) :: uplan_k
 
 ! *************************************************************************
 
@@ -2636,8 +2637,12 @@ subroutine gwr_get_myk_green_gpr(gwr, itau, spin, desc_mykbz, gt_gpr)
    ! Get G_kbz(+/- itau) in the BZ.
    call gwr%rotate_gpm(ik_bz, itau, spin, desc_mykbz(my_ikf), gt_pm)
 
+   associate (desc_k => desc_mykbz(my_ikf))
+   call uplan_k%init(desc_k%npw, gwr%nspinor, gwr%uc_batch_size, gwr%g_ngfft, desc_k%istwfk, &
+                     desc_k%gvec, gwpc, gwr%dtset%use_gpu_cuda)
+
    do ipm=1,2
-     associate (ggp => gt_pm(ipm), desc_k => desc_mykbz(my_ikf))
+     associate (ggp => gt_pm(ipm))
 
      ! Allocate rgp PBLAS matrix to store G_kbz(r,g')
      npwsp = desc_k%npw * gwr%nspinor
@@ -2650,13 +2655,15 @@ subroutine gwr_get_myk_green_gpr(gwr, itau, spin, desc_mykbz, gt_gpr)
      do ig2=1, ggp%sizeb_local(2), gwr%uc_batch_size
        ndat = blocked_loop(ig2, ggp%sizeb_local(2), gwr%uc_batch_size)
 
-       !ABI_CHECK_IEQ(size(ggp%buffer_cplx(:, ig2)), desc_k%npw * gwr%nspinor, "npw")
-       !ABI_CHECK_IEQ(size(rgp%buffer_cplx(:, ig2)), gwr%g_nfft * gwr%nspinor, "gwr%g_nfft * gwr%nspinor")
-
+#if 0
        call fft_ug(desc_k%npw, gwr%g_nfft, gwr%nspinor, ndat, &
                    gwr%g_mgfft, gwr%g_ngfft, desc_k%istwfk, desc_k%gvec, desc_k%gbound, &
                    ggp%buffer_cplx(:, ig2), &  ! in
                    rgp%buffer_cplx(:, ig2))    ! out
+
+#else
+       call uplan_k%execute_gr(ndat, ggp%buffer_cplx(:, ig2), rgp%buffer_cplx(:, ig2))
+#endif
 
        if (.not. k_is_gamma) then
          ! Multiply by e^{ik.r}
@@ -2672,7 +2679,9 @@ subroutine gwr_get_myk_green_gpr(gwr, itau, spin, desc_mykbz, gt_gpr)
      end associate
    end do ! ipm
 
+   call uplan_k%free()
    call slk_array_free(gt_pm)
+   end associate
  end do ! my_ikf
 
  ABI_FREE(ceikr)
@@ -2710,38 +2719,42 @@ subroutine gwr_get_gk_rpr_pm(gwr, ik_bz, itau, spin, gk_rpr_pm)
  integer :: ig2, ipm, npwsp, col_bsize, ir1, ndat
  real(dp) :: cpu, wall, gflops
  type(__slkmat_t) :: rgp, gt_pm(2), gpr
- type(desc_t) :: desk_kbz
+ type(desc_t) :: desc_kbz
+ type(uplan_t) :: uplan_k
  character(len=500) :: msg
 
 ! *************************************************************************
 
  call cwtime(cpu, wall, gflops, "start")
 
+ ABI_ERROR("This should be tested")
+
  !kk_bz = gwr%kbz(:, ik_bz)
 
  ! Get G_k(+/- itau) in the BZ.
- call gwr%rotate_gpm(ik_bz, itau, spin, desk_kbz, gt_pm)
+ call gwr%rotate_gpm(ik_bz, itau, spin, desc_kbz, gt_pm)
+
+ call uplan_k%init(desc_kbz%npw, gwr%nspinor, gwr%uc_batch_size, gwr%g_ngfft, desc_kbz%istwfk, &
+                   desc_kbz%gvec, gwpc, gwr%dtset%use_gpu_cuda)
 
  do ipm=1,2
    ! Allocate rgp PBLAS matrix to store G(r,g')
-   npwsp = desk_kbz%npw * gwr%nspinor
+   npwsp = desc_kbz%npw * gwr%nspinor
    ABI_CHECK(block_dist_1d(npwsp, gwr%g_comm%nproc, col_bsize, msg), msg)
-   call rgp%init(gwr%g_nfft * gwr%nspinor, npwsp, gwr%g_slkproc, desk_kbz%istwfk, size_blocs=[-1, col_bsize])
+   call rgp%init(gwr%g_nfft * gwr%nspinor, npwsp, gwr%g_slkproc, desc_kbz%istwfk, size_blocs=[-1, col_bsize])
 
    associate (ggp => gt_pm(ipm))
    !ABI_CHECK_IEQ(size(ggp%buffer_cplx, dim=2), size(rgp%buffer_cplx, dim=2), "len2")
    do ig2=1, ggp%sizeb_local(2), gwr%uc_batch_size
      ndat = blocked_loop(ig2, ggp%sizeb_local(2), gwr%uc_batch_size)
 
-     !ABI_CHECK_IEQ(size(ggp%buffer_cplx(:, ig2)), desk_kbz%npw * gwr%nspinor, "npw")
-     !ABI_CHECK_IEQ(size(rgp%buffer_cplx(:, ig2)), gwr%g_nfft * gwr%nspinor, "gwr%g_nfft * gwr%nspinor")
-
      ! Perform FFT G_k(g,g') -> G_k(r,g') and store results in rgp.
-     call fft_ug(desk_kbz%npw, gwr%g_nfft, gwr%nspinor, ndat, &
-                 gwr%g_mgfft, gwr%g_ngfft, desk_kbz%istwfk, desk_kbz%gvec, desk_kbz%gbound, &
-                 ggp%buffer_cplx(:, ig2), &  ! in
-                 rgp%buffer_cplx(:, ig2))    ! out
+     !call fft_ug(desc_kbz%npw, gwr%g_nfft, gwr%nspinor, ndat, &
+     !            gwr%g_mgfft, gwr%g_ngfft, desc_kbz%istwfk, desc_kbz%gvec, desc_kbz%gbound, &
+     !            ggp%buffer_cplx(:, ig2), &  ! in
+     !            rgp%buffer_cplx(:, ig2))    ! out
 
+     call uplan_k%execute_gr(ndat, ggp%buffer_cplx(:, ig2), rgp%buffer_cplx(:, ig2))
    end do ! ig2
    end associate
 
@@ -2751,16 +2764,16 @@ subroutine gwr_get_gk_rpr_pm(gwr, ik_bz, itau, spin, gk_rpr_pm)
    do ir1=1, gpr%sizeb_local(2), gwr%uc_batch_size
      ndat = blocked_loop(ir1, gpr%sizeb_local(2), gwr%uc_batch_size)
 
-     !ABI_CHECK_IEQ(size(gpr%buffer_cplx(:, ir1)), desk_kbz%npw * gwr%nspinor, "npw")
-     !ABI_CHECK_IEQ(size(gk_rpr_pm(ipm)%buffer_cplx(:, ir1)), gwr%g_nfft * gwr%nspinor, "gwr%g_nfft * gwr%nspinor")
-
      ! Perform FFT G_k(g',r) -> G_k(r',r) and store results in rgp.
+
      ! FIXME: FFT sign is wrong (should be - instead of + but I need to change the API)
-     call fft_ug(desk_kbz%npw, gwr%g_nfft, gwr%nspinor, ndat, &
-                 gwr%g_mgfft, gwr%g_ngfft, desk_kbz%istwfk, desk_kbz%gvec, desk_kbz%gbound, &
-                 gpr%buffer_cplx(:, ir1), &             ! in
-                 gk_rpr_pm(ipm)%buffer_cplx(:, ir1))    ! out
-   end do
+     !call fft_ug(desc_kbz%npw, gwr%g_nfft, gwr%nspinor, ndat, &
+     !            gwr%g_mgfft, gwr%g_ngfft, desc_kbz%istwfk, desc_kbz%gvec, desc_kbz%gbound, &
+     !            gpr%buffer_cplx(:, ir1), &             ! in
+     !            gk_rpr_pm(ipm)%buffer_cplx(:, ir1))    ! out
+
+     call uplan_k%execute_gr(ndat, gpr%buffer_cplx(:, ir1), gk_rpr_pm(ipm)%buffer_cplx(:, ir1))
+   end do ! ir1
    call gpr%free()
 
    ! Rescale
@@ -2768,7 +2781,8 @@ subroutine gwr_get_gk_rpr_pm(gwr, ik_bz, itau, spin, gk_rpr_pm)
  end do ! ipm
 
  call slk_array_free(gt_pm)
- call desk_kbz%free()
+ call desc_kbz%free()
+ call uplan_k%free()
 
  call cwtime_report(" gwr_get_gk_rpr_pm:", cpu, wall, gflops)
 
@@ -2803,6 +2817,7 @@ subroutine gwr_ggp_to_rpr(gwr, desc, ggp, rpr)
  integer :: ig2, npwsp, col_bsize, ir1, ndat
  type(__slkmat_t) :: rgp, gpr
  character(len=500) :: msg
+ type(uplan_t) :: uplan_k
 
 ! *************************************************************************
 
@@ -2813,26 +2828,25 @@ subroutine gwr_ggp_to_rpr(gwr, desc, ggp, rpr)
  ABI_CHECK(block_dist_1d(npwsp, gwr%g_comm%nproc, col_bsize, msg), msg)
  call rgp%init(gwr%g_nfft * gwr%nspinor, npwsp, gwr%g_slkproc, desc%istwfk, size_blocs=[-1, col_bsize])
 
- do ig2=1,ggp%sizeb_local(2), gwr%uc_batch_size
+ call uplan_k%init(desc%npw, gwr%nspinor, gwr%uc_batch_size, gwr%g_ngfft, desc%istwfk, &
+                   desc%gvec, gwpc, gwr%dtset%use_gpu_cuda)
+
+ do ig2=1, ggp%sizeb_local(2), gwr%uc_batch_size
    ndat = blocked_loop(ig2, ggp%sizeb_local(2), gwr%uc_batch_size)
-   call fft_ug(desc%npw, gwr%g_nfft, gwr%nspinor, ndat, &
-               gwr%g_mgfft, gwr%g_ngfft, desc%istwfk, desc%gvec, desc%gbound, &
-               ggp%buffer_cplx(:, ig2), & ! in
-               rgp%buffer_cplx(:, ig2))   ! out
+   call uplan_k%execute_gr(ndat, ggp%buffer_cplx(:, ig2), rgp%buffer_cplx(:, ig2))
  end do ! ig2
 
  ! F(r,g') --> F(g',r)
  call rgp%ptrans("N", gpr, free=.True.)
 
  ! F(g',r) -> F(r',r) and store results in rpr
- do ir1=1,gpr%sizeb_local(2), gwr%uc_batch_size
+ ! FIXME: FFT sign is wrong (should be - instead of + but I need to change the API)
+ do ir1=1, gpr%sizeb_local(2), gwr%uc_batch_size
    ndat = blocked_loop(ir1, gpr%sizeb_local(2), gwr%uc_batch_size)
-   call fft_ug(desc%npw, gwr%g_nfft, gwr%nspinor, ndat, &
-               gwr%g_mgfft, gwr%g_ngfft, desc%istwfk, desc%gvec, desc%gbound, &
-               gpr%buffer_cplx(:, ir1), &  ! in
-               rpr%buffer_cplx(:, ir1))    ! out
+   call uplan_k%execute_gr(ndat, gpr%buffer_cplx(:, ir1), rpr%buffer_cplx(:, ir1))
  end do ! ir1
 
+ call uplan_k%free()
  call gpr%free()
 
 end subroutine gwr_ggp_to_rpr
@@ -2976,6 +2990,7 @@ subroutine gwr_get_myq_wc_gpr(gwr, itau, spin, desc_myqbz, wc_gpr)
  logical :: q_is_gamma
  character(len=500) :: msg
  type(__slkmat_t) :: rgp, wc_qbz
+ type(uplan_t) :: uplan_q
  complex(gwpc),allocatable :: ceiqr(:)
 
 ! *************************************************************************
@@ -3001,6 +3016,9 @@ subroutine gwr_get_myq_wc_gpr(gwr, itau, spin, desc_myqbz, wc_gpr)
 
    !ABI_CHECK_IEQ(size(wc_qbz%buffer_cplx, dim=2), size(rgp%buffer_cplx, dim=2), "len2")
 
+   call uplan_q%init(desc_q%npw, gwr%nspinor, gwr%uc_batch_size, gwr%g_ngfft, desc_q%istwfk, &
+                     desc_q%gvec, gwpc, gwr%dtset%use_gpu_cuda)
+
    ! FFT. Results stored in rgp
    do ig2=1,wc_qbz%sizeb_local(2), gwr%uc_batch_size
      ndat = blocked_loop(ig2, wc_qbz%sizeb_local(2), gwr%uc_batch_size)
@@ -3008,10 +3026,14 @@ subroutine gwr_get_myq_wc_gpr(gwr, itau, spin, desc_myqbz, wc_gpr)
      !ABI_CHECK_IEQ(size(wc_qbz%buffer_cplx(:, ig2)), desc_q%npw, "npw")
      !ABI_CHECK_IEQ(size(rgp%buffer_cplx(:, ig2)), gwr%g_nfft * gwr%nspinor, "gwr%g_nfft * gwr%nspinor")
 
+#if 0
      call fft_ug(desc_q%npw, gwr%g_nfft, gwr%nspinor, ndat, &
                  gwr%g_mgfft, gwr%g_ngfft, desc_q%istwfk, desc_q%gvec, desc_q%gbound, &
                  wc_qbz%buffer_cplx(:, ig2), &  ! in
                  rgp%buffer_cplx(:, ig2))       ! out
+#else
+     call uplan_q%execute_gr(ndat, wc_qbz%buffer_cplx(:, ig2), rgp%buffer_cplx(:, ig2))
+#endif
 
      ! Multiply by e^{iq.r}
      if (.not. q_is_gamma) then
@@ -3021,6 +3043,8 @@ subroutine gwr_get_myq_wc_gpr(gwr, itau, spin, desc_myqbz, wc_gpr)
        end do
      end if
    end do ! ig2
+
+   call uplan_q%free()
 
    ! MPI transposition: Wc(r,g') -> Wc(g',r)
    call rgp%ptrans("N", wc_gpr(my_iqf), free=.True.)
@@ -3095,10 +3119,10 @@ subroutine gwr_get_wc_rpr_qbz(gwr, qq_bz, itau, spin, wc_rpr)
 
  !ABI_CHECK_IEQ(size(wc_ggp%buffer_cplx, dim=2), size(rgp%buffer_cplx, dim=2), "len2")
 
- !call uplan%init(npw, nspinor, gwr%uc_batch_size, ngfft, istwfk, gvec, gwpc, gwr%dtset%use_gpu_cuda, gbound=desc_qbz%gbound)
- !call uplan%execute_gr(ndat, ug, ur, isign=+1, scale=.False.)
- !call uplan%execute_rg(ndat, ur, ug, isign=-1, scale=.True.)
- !call uplan%free()
+ !call uplan_k%init(npw, nspinor, gwr%uc_batch_size, ngfft, istwfk, gvec, gwpc, gwr%dtset%use_gpu_cuda, gbound=desc_qbz%gbound)
+ !call uplan_k%execute_gr(ndat, ug, ur, isign=+1, scale=.False.)
+ !call uplan_k%execute_rg(ndat, ur, ug, isign=-1, scale=.True.)
+ !call uplan_k%free()
 
  ! FFT. Results stored in rgp
  do ig2=1,wc_ggp%sizeb_local(2), gwr%uc_batch_size
@@ -3659,7 +3683,7 @@ subroutine gwr_build_tchi(gwr)
  type(__slkmat_t),allocatable :: gt_gpr(:,:), chiq_gpr(:), gk_rpr_pm(:)
  type(desc_t), target, allocatable :: desc_mykbz(:)
  type(fftbox_plan3_t) :: plan_gp2rp, plan_rp2gp
- type(uplan_t) :: uplan
+ type(uplan_t) :: uplan_q
 
 ! *************************************************************************
 
@@ -3911,7 +3935,7 @@ end if
 
          ! FFT r --> g along the first dimension: tchi_q(r,g') --> tchi_q(g,g').
          ! Results stored in gwr%tchi_qibz.
-         call uplan%init(desc_q%npw, gwr%nspinor, gwr%uc_batch_size, gwr%g_ngfft, istwfk1, &
+         call uplan_q%init(desc_q%npw, gwr%nspinor, gwr%uc_batch_size, gwr%g_ngfft, istwfk1, &
                          desc_q%gvec, gwpc, gwr%dtset%use_gpu_cuda)
 
          do ig2=1, chi_rgp%sizeb_local(2), gwr%uc_batch_size
@@ -3931,7 +3955,7 @@ end if
                        gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx(:, ig2))  ! ug(out)
 #else
 
-           call uplan%execute_rg(ndat, chi_rgp%buffer_cplx(:, ig2), &
+           call uplan_q%execute_rg(ndat, chi_rgp%buffer_cplx(:, ig2), &
                                  gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx(:, ig2))
 #endif
 
@@ -3942,7 +3966,7 @@ end if
            end do
          end do ! ig2
 
-         call uplan%free()
+         call uplan_q%free()
          call chi_rgp%free()
 
          call gwr%tchi_qibz(iq_ibz, itau, spin)%set_imag_diago_to_zero(local_max)

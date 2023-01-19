@@ -225,10 +225,8 @@ MODULE m_fft
    integer, contiguous, pointer :: kg_k(:,:)
    integer, allocatable :: gbound(:,:)
 
-   integer :: batch_size = -1       ! Number of FFTs associated to the plan.
-   !integer :: dims(3) = -1    ! The number of FFT divisions.
-   !integer :: embed(3) = -1   ! Leading dimensions of the input, output arrays.
-   integer :: use_gpu = 0     ! /= 0 if FFTs should be offloaded to the GPU.
+   integer :: batch_size = -1  ! Max number of FFTs associated to the plan.
+   integer :: use_gpu = 0      ! /= 0 if FFTs should be offloaded to the GPU.
 
  contains
 
