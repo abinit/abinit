@@ -4517,7 +4517,7 @@ end function ebands_interp_kpath
 !!    2 or -2 for tetrahedra (-2 if Blochl corrections must be included).
 !!    If nkpt == 1 (Gamma only), the routine fallbacks to the Gaussian method.
 !!  step=Step on the linear mesh in Ha. If < 0, the routine will use the mean of the energy level spacing
-!!  broad=Gaussian broadening, If <0, the routine will use a default
+!!  broad=Gaussian broadening, If < 0, the routine will use a default
 !!    value for the broadening computed from the mean of the energy level spacing.
 !!    No meaning for tetrahedra
 !!  comm=MPI communicator
@@ -4793,34 +4793,31 @@ type(edos_t) function ebands_get_edos_matrix_elements(ebands, cryst, bsize, &
  ! Use bisection to find the Fermi level.
  ! Warning: this code assumes idos[i+1] >= idos[i]. This condition may not be
  ! fullfilled if we use tetra and this is the reason why we have filtered the DOS.
- ! CP modified
- ! ief = bisect(edos%idos(:,0), ebands%nelect)
- if (ebands%occopt==9) then
-    ihf = bisect(edos%idos(:,0), ebands%nelect-ebands%nh_qFD)
-    ief = bisect(edos%idos(:,0), ebands%nelect+ebands%ne_qFD)
+ if (ebands%occopt == 9) then
+   ihf = bisect(edos%idos(:,0), ebands%nelect-ebands%nh_qFD)
+   ief = bisect(edos%idos(:,0), ebands%nelect+ebands%ne_qFD)
  else
-    ief = bisect(edos%idos(:,0), ebands%nelect)
-    ihf = ief
+   ief = bisect(edos%idos(:,0), ebands%nelect)
+   ihf = ief
  end if
- ! End CP modified
+
  ! Handle out of range condition.
  if (ief == 0 .or. ief == nw) then
    write(msg,"(a, f14.2, 4a)") &
-    "Bisection could not find an initial guess for the Fermi level with nelect:",ebands%nelect, ch10, &
-    "Possible reasons: not enough bands in DOS or wrong number of electrons.", ch10, &
+    "Bisection could not find an initial guess for the Fermi level with nelect: ",ebands%nelect, ch10, &
+    "Possible reasons: not enough bands for DOS or wrong number of electrons.", ch10, &
     "Returning from ebands_get_edos_matrix_elements without setting edos%ief !"
    ABI_WARNING(msg)
    return
  end if
- ! CP added
+
  if (ihf == 0 .or. ihf == nw) then
    write(msg,"(3a)")&
     "Bisection could not find an initial guess for the holes Fermi level!",ch10,&
     "Possible reasons: not enough bands or wrong number of holes"
-   !ABI_WARNING(msg)
+   ABI_WARNING(msg)
    return
  end if
- ! End CP added
 
  ! TODO: Use linear interpolation to find an improved estimate of the Fermi level?
  edos%ief = ief

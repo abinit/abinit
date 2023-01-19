@@ -33,7 +33,6 @@ MODULE m_fft
  use m_sg2002
  use m_fftw3
  use m_dfti
-
 #if defined HAVE_MPI2
  use mpi
 #endif
@@ -121,21 +120,23 @@ MODULE m_fft
 !! fftbox_plan3_t
 !!
 !! FUNCTION
-!!  Options passed to the fftbox_* routines.
+!!  Options passed to the fftbox_* routines to perform dense 3d FFTs.
 !!
 !! SOURCE
 
  type,public :: fftbox_plan3_t
 
    private
-   integer :: fftalg = 112    ! Flag defining the library to call.
-   integer :: fftcache = 16   ! Size of the cache (kB). Only used in SG routines.
-   integer :: nfft            ! Total number of points in the FFT box.
+   integer :: fftalg = 112    ! The library to call.
+   integer :: fftcache = 16   ! Cache size in kB. Only used in SG routines.
+   integer :: nfft = -1       ! Total number of points in the FFT box.
    integer :: ldxyz = -1      ! Physical dimension of the array to transform
+   ! TODO: ndat should be replaced by batch_size
+   ! There are cases, indeed, in which ndat < batch_size where ndat is computed inside the loop.
+
    integer :: ndat = -1       ! Number of FFTs associated to the plan.
    integer :: dims(3) = -1    ! The number of FFT divisions.
-   integer :: embed(3) = -1   ! Leading dimensions of the input,output arrays.
-
+   integer :: embed(3) = -1   ! Leading dimensions of the input, output arrays.
    integer :: use_gpu = 0     ! /= 0 if FFTs should be offloaded to the GPU.
 
    type(c_ptr) :: gpu_plan_ip_spc = c_null_ptr
@@ -153,7 +154,6 @@ MODULE m_fft
 
    procedure :: init => fftbox_plan3_init                 ! Low-level constructor
    procedure :: from_ngfft => fftbox_plan3_from_ngfft     ! Build object from ngfft.
-
    procedure :: execute_ip_spc => fftbox_execute_ip_spc
    procedure :: execute_ip_dpc => fftbox_execute_ip_dpc
    procedure :: execute_op_spc => fftbox_execute_op_spc
@@ -167,7 +167,7 @@ MODULE m_fft
                          execute_op_dpc
 
    procedure :: free => fftbox_plan3_free
-   ! Free dynamic memory allocated on the GPU
+   ! Free dynamic memory
 
  end type fftbox_plan3_t
 !!***
@@ -198,6 +198,57 @@ MODULE m_fft
    end subroutine xgpu_fftbox_c2c_op
  end interface
 #endif
+
+
+!----------------------------------------------------------------------
+
+!!****t* m_fft/uplan_t
+!! NAME
+!! uplan_t
+!!
+!! FUNCTION
+!!
+!! SOURCE
+
+ type, public :: uplan_t
+   private
+   integer :: npw = -1
+   integer :: nspinor = -1
+   integer :: istwfk = -1
+   integer :: kind = -1
+   integer :: mgfft = -1
+   integer :: nfft = -1       ! Total number of points in the FFT box.
+   integer :: ngfft(18)
+   !integer :: ldxyz = -1      ! Physical dimension of the array to transform
+   ! TODO: ndat should be replaced by batch_size
+   ! There are cases, indeed, in which ndat < batch_size where ndat is computed inside the loop.
+   integer, contiguous, pointer :: kg_k(:,:)
+   integer, allocatable :: gbound(:,:)
+
+   integer :: batch_size = -1       ! Number of FFTs associated to the plan.
+   !integer :: dims(3) = -1    ! The number of FFT divisions.
+   !integer :: embed(3) = -1   ! Leading dimensions of the input, output arrays.
+   integer :: use_gpu = 0     ! /= 0 if FFTs should be offloaded to the GPU.
+
+ contains
+
+   procedure :: init => uplan_init    ! Build object
+   procedure :: free => uplan_free    ! Free dynamic memory
+
+   procedure :: execute_gr_spc => uplan_execute_gr_spc
+   procedure :: execute_gr_dpc => uplan_execute_gr_dpc
+   procedure :: execute_rg_spc => uplan_execute_rg_spc
+   procedure :: execute_rg_dpc => uplan_execute_rg_dpc
+
+   ! Main entry point for performing FFTs on the full box
+   ! complex-to-complex version, operating on complex arrays
+   generic :: execute_gr => execute_gr_spc, &
+                            execute_gr_dpc
+
+   generic :: execute_rg => execute_rg_spc, &
+                            execute_rg_dpc
+ end type uplan_t
+!!***
 
 !----------------------------------------------------------------------
 
@@ -277,7 +328,6 @@ subroutine fftbox_plan3_init(plan, ndat, dims, embed, fftalg, fftcache, use_gpu)
  plan%fftalg   = fftalg                     ! ngfft(7)
  if (fftcache > 0) plan%fftcache = fftcache ! ngfft(8)
  plan%use_gpu  = use_gpu
-
  plan%nfft  = product(plan%dims)
  plan%ldxyz = product(plan%embed)
 
@@ -315,7 +365,7 @@ end subroutine fftbox_plan3_from_ngfft
 !!  fftbox_plan3_free
 !!
 !! FUNCTION
-!!  Free dynamic memory allocated on the GPU
+!!  Free dynamic memory.
 !!
 !! SOURCE
 
@@ -4528,7 +4578,6 @@ end subroutine fftpac
 
 subroutine indirect_parallel_Fourier(index,left,mpi_enreg,ngleft,ngright,nleft,nright,paral_kgb,right,sizeindex)
 
-
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: ngleft(18),ngright(18),nleft,nright,paral_kgb,sizeindex
@@ -4675,13 +4724,11 @@ end subroutine fft_stop_counters
 !!
 !! SOURCE
 
-subroutine fft_output_counters(nbandtot,mpi_enreg)
+subroutine fft_output_counters(nbandtot, mpi_enreg)
 
 !Arguments ------------------------------------
-!scalars
  integer,intent(in) :: nbandtot
  type(MPI_type),intent(in) :: mpi_enreg
-!arrays
 
 !Local variables-------------------------------
 !scalars
@@ -4715,5 +4762,253 @@ subroutine fft_output_counters(nbandtot,mpi_enreg)
 end subroutine fft_output_counters
 !!***
 
-END MODULE m_fft
+!----------------------------------------------------------------------
+
+!!****f* m_fft/uplan_init
+!! NAME
+!!  uplan_init
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! SOURCE
+
+subroutine uplan_init(uplan, npw, nspinor, batch_size, ngfft, istwfk, kg_k, kind, use_gpu)
+
+!Arguments ------------------------------------
+!scalars
+ class(uplan_t),intent(out) :: uplan
+ integer,intent(in) :: npw, nspinor, batch_size, istwfk, kind, use_gpu
+!arrays
+ integer,intent(in) :: ngfft(18)
+ integer,target,intent(in) :: kg_k(3,npw)
+
+! *************************************************************************
+
+ uplan%npw = npw
+ uplan%nspinor = nspinor
+ uplan%istwfk = istwfk
+ uplan%batch_size = batch_size
+ uplan%kind  = kind
+ uplan%use_gpu  = use_gpu
+ uplan%ngfft = ngfft
+ uplan%mgfft = maxval(ngfft(1:3))
+ uplan%nfft  = product(ngfft(1:3))
+ !uplan%ldxyz = product(plan%embed)
+ uplan%kg_k => kg_k
+
+ ABI_MALLOC(uplan%gbound, (2 * uplan%mgfft + 8, 2))
+ call sphereboundary(uplan%gbound, uplan%istwfk, uplan%kg_k, uplan%mgfft, uplan%npw)
+
+ if (uplan%use_gpu /= 0) then
+   ! Allocate memory on the device and transfer data.
+   NOT_IMPLEMENTED_ERROR()
+ end if
+
+end subroutine uplan_init
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_fft/uplan_free
+!! NAME
+!!  uplan_free
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! SOURCE
+
+subroutine uplan_free(uplan)
+
+!Arguments ------------------------------------
+ class(uplan_t),intent(inout) :: uplan
+! *************************************************************************
+
+ ABI_SFREE(uplan%gbound)
+ if (uplan%use_gpu /= 0) then
+   ! Free memory on the GPU
+ end if
+
+end subroutine uplan_free
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_fft/uplan_execute_gr_spc
+!! NAME
+!!  uplan_execute_gr_spc
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! SOURCE
+
+subroutine uplan_execute_gr_spc(uplan, ndat, ug, ur, isign, scale)
+
+!Arguments ------------------------------------
+ class(uplan_t),intent(in) :: uplan
+ integer,intent(in) :: ndat
+ complex(sp),intent(in) :: ug(uplan%npw*uplan%nspinor*ndat)
+ complex(sp),intent(out) :: ur(uplan%nfft*uplan%nspinor*ndat)
+ integer,optional,intent(in) :: isign
+ logical,optional,intent(in) :: scale
+
+!Local variables-------------------------------
+ integer :: isign__
+ logical :: scale__
+
+! *************************************************************************
+
+ ABI_CHECK_ILEQ(ndat, uplan%batch_size, "ndat > batch_size!")
+ ABI_CHECK_IEQ(sp, uplan%kind, "Incosistent kind!")
+
+ isign__ = +1; if (present(isign)) isign__ = isign
+ scale__ = .True.; if (present(scale)) scale__ = scale
+
+ if (uplan%use_gpu /= 0) then
+   NOT_IMPLEMENTED_ERROR()
+ else
+   call fft_ug(uplan%npw, uplan%nfft, uplan%nspinor, ndat, uplan%mgfft, uplan%ngfft, &
+               uplan%istwfk, uplan%kg_k, uplan%gbound, ug, ur)
+ end if
+
+end subroutine uplan_execute_gr_spc
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_fft/uplan_execute_gr_dpc
+!! NAME
+!!  uplan_execute_gr_dpc
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! SOURCE
+
+subroutine uplan_execute_gr_dpc(uplan, ndat, ug, ur, isign, scale)
+
+!Arguments ------------------------------------
+ class(uplan_t),intent(in) :: uplan
+ integer,intent(in) :: ndat
+ complex(dp),intent(in) :: ug(uplan%npw*uplan%nspinor*ndat)
+ complex(dp),intent(out) :: ur(uplan%nfft*uplan%nspinor*ndat)
+ integer,optional,intent(in) :: isign
+ logical,optional,intent(in) :: scale
+
+!Local variables-------------------------------
+ integer :: isign__
+ logical :: scale__
+
+! *************************************************************************
+
+ ABI_CHECK_ILEQ(ndat, uplan%batch_size, "ndat > batch_size!")
+ ABI_CHECK_IEQ(dp, uplan%kind, "Incosistent kind!")
+
+ isign__ = +1; if (present(isign)) isign__ = isign
+ scale__ = .True.; if (present(scale)) scale__ = scale
+
+ if (uplan%use_gpu /= 0) then
+   NOT_IMPLEMENTED_ERROR()
+ else
+   call fft_ug(uplan%npw, uplan%nfft, uplan%nspinor, ndat, uplan%mgfft, uplan%ngfft, &
+               uplan%istwfk, uplan%kg_k, uplan%gbound, ug, ur)
+ end if
+
+end subroutine uplan_execute_gr_dpc
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_fft/uplan_execute_rg_spc
+!! NAME
+!!  uplan_execute_rg_spc
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! SOURCE
+
+subroutine uplan_execute_rg_spc(uplan, ndat, ur, ug, isign, scale)
+
+!Arguments ------------------------------------
+ class(uplan_t),intent(in) :: uplan
+ integer,intent(in) :: ndat
+ complex(sp),intent(inout) :: ur(uplan%nfft*uplan%nspinor*ndat)
+ complex(sp),intent(out) :: ug(uplan%npw*uplan%nspinor*ndat)
+ integer,optional,intent(in) :: isign
+ logical,optional,intent(in) :: scale
+
+!Local variables-------------------------------
+ integer :: isign__
+ logical :: scale__
+
+! *************************************************************************
+
+ ABI_CHECK_ILEQ(ndat, uplan%batch_size, "ndat > batch_size!")
+ ABI_CHECK_IEQ(sp, uplan%kind, "Incosistent kind!")
+
+ isign__ = -1; if (present(isign)) isign__ = isign
+ scale__ = .True.; if (present(scale)) scale__ = scale
+
+ if (uplan%use_gpu /= 0) then
+   NOT_IMPLEMENTED_ERROR()
+ else
+   call fft_ur(uplan%npw, uplan%nfft, uplan%nspinor, ndat, uplan%mgfft, uplan%ngfft, &
+               uplan%istwfk, uplan%kg_k, uplan%gbound, ur, ug)
+ end if
+
+end subroutine uplan_execute_rg_spc
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_fft/uplan_execute_rg_dpc
+!! NAME
+!!  uplan_execute_rg_dpc
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! SOURCE
+
+subroutine uplan_execute_rg_dpc(uplan, ndat, ur, ug, isign, scale)
+
+!Arguments ------------------------------------
+ class(uplan_t),intent(in) :: uplan
+ integer,intent(in) :: ndat
+ complex(dp),intent(inout) :: ur(uplan%nfft*uplan%nspinor*ndat)
+ complex(dp),intent(out) :: ug(uplan%npw*uplan%nspinor*ndat)
+ integer,optional,intent(in) :: isign
+ logical,optional,intent(in) :: scale
+
+!Local variables-------------------------------
+ integer :: isign__
+ logical :: scale__
+! *************************************************************************
+
+ ABI_CHECK_ILEQ(ndat, uplan%batch_size, "ndat > batch_size!")
+ ABI_CHECK_IEQ(dp, uplan%kind, "Incosistent kind!")
+
+ isign__ = -1; if (present(isign)) isign__ = isign
+ scale__ = .True.; if (present(scale)) scale__ = scale
+
+ if (uplan%use_gpu /= 0) then
+   NOT_IMPLEMENTED_ERROR()
+ else
+   call fft_ur(uplan%npw, uplan%nfft, uplan%nspinor, ndat, uplan%mgfft, uplan%ngfft, &
+               uplan%istwfk, uplan%kg_k, uplan%gbound, ur, ug)
+ end if
+
+end subroutine uplan_execute_rg_dpc
+!!***
+
+end module m_fft
 !!***
