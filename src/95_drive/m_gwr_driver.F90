@@ -868,7 +868,7 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, cryst, ugb)
  use m_numeric_tools, only : blocked_loop
  use m_fftcore,       only : sphereboundary !, getng
  use m_fft_mesh,      only : setmesh
- use m_fft,           only : fft_ug, fft_ur
+ use m_fft,           only : fft_ug, fft_ur, uplan_t
 
 !Arguments ------------------------------------
  integer,intent(in) :: spin, ik_ibz
@@ -883,6 +883,7 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, cryst, ugb)
  integer :: band1_start, band1_stop, batch1_size, n1dat, idat1
  integer :: band2_start, band2_stop, batch2_size, n2dat, idat2
  real(dp) :: cpu, wall, gflops
+ type(uplan_t) :: uplan_1, uplan_2, uplan_m
  integer :: u_ngfft(18), u_nfft, u_mgfft, enforce_sym, method
  integer,pointer :: gvec_max(:,:)
  integer,allocatable :: gbound_k(:,:), m_gbound(:,:)
@@ -938,6 +939,10 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, cryst, ugb)
  ! M_{12}(g) = <1|e^{-ig.r}|2> => M_{12}(g) = M_{21}(-g)^*
  ! once I have a better understanding of the fileformat expected by CC4S
 
+ call uplan_1%init(npw_k, nspinor, batch1_size, u_ngfft, ugb%istwf_k, ugb%kg_k, dp, dtset%use_gpu_cuda)
+ call uplan_2%init(npw_k, nspinor, batch2_size, u_ngfft, ugb%istwf_k, ugb%kg_k, dp, dtset%use_gpu_cuda)
+ call uplan_m%init(m_npw, nspinor, batch2_size, u_ngfft, istwfk1, m_gvec, dp, dtset%use_gpu_cuda)
+
  do band1_start=1, ugb%nband_k, batch1_size
 
    ! Collect n1dat bands starting from band1_start on each proc.
@@ -946,10 +951,12 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, cryst, ugb)
    call ugb%mat%collect_cplx(ugb%npwsp, n1dat, [1, band1_start], ug1_batch)
 
    ! ug1_batch --> ur1_batch
-   call fft_ug(ugb%npw_k, u_nfft, nspinor, n1dat, &
-               u_mgfft, u_ngfft, ugb%istwf_k, ugb%kg_k, gbound_k, &
-               ug1_batch, &      ! in
-               ur1_batch)        ! out
+   !call fft_ug(ugb%npw_k, u_nfft, nspinor, n1dat, &
+   !            u_mgfft, u_ngfft, ugb%istwf_k, ugb%kg_k, gbound_k, &
+   !            ug1_batch, &      ! in
+   !            ur1_batch)        ! out
+
+   call uplan_1%execute_gr(n1dat, ug1_batch(:,1), ur1_batch(:,1))
 
    if (ugb%istwf_k /= 2) ur1_batch = conjg(ur1_batch)  ! Not needed if k == Gamma
    ABI_FREE(ug1_batch)
@@ -963,7 +970,10 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, cryst, ugb)
      call fft_ug(ugb%npw_k, u_nfft, nspinor, n2dat, &
                  u_mgfft, u_ngfft, ugb%istwf_k, ugb%kg_k, gbound_k, &
                  ugb%mat%buffer_cplx(:,my_ib2:), &     ! in
+                 !ugb%mat%buffer_cplx(1,my_ib2), &     ! in
                  ur2_batch)                            ! out
+
+     !call uplan_2%execute_gr(n2dat, ugb%mat%buffer_cplx(:,my_ib2:), ur2_batch(:,1))
 
      do idat1=1,n1dat
        do idat2=1,n2dat
@@ -971,10 +981,12 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, cryst, ugb)
        end do
 
        ! FIXME: nspinor
-       call fft_ur(m_npw, u_nfft, nspinor, n2dat, &
-                   u_mgfft, u_ngfft, istwfk1, m_gvec, m_gbound, &
-                   ur12_batch, &    ! in
-                   ug12_batch)      ! out
+       !call fft_ur(m_npw, u_nfft, nspinor, n2dat, &
+       !            u_mgfft, u_ngfft, istwfk1, m_gvec, m_gbound, &
+       !            ur12_batch, &    ! in
+       !            ug12_batch)      ! out
+
+       call uplan_m%execute_rg(n2dat, ur12_batch(:,1), ug12_batch(:,1))
 
       !do idat2=1,n2dat
       !  write(std_out, *)ug12_batch(1, idat2), idat2, "ug12_batch(1, idat2), idat"
@@ -988,6 +1000,10 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, cryst, ugb)
    !  - Format for nspinor == 2?
 
  end do ! band1_start
+
+ call uplan_1%free()
+ call uplan_2%free()
+ call uplan_m%free()
 
  ABI_FREE(gbound_k)
  ABI_FREE(m_gbound)
