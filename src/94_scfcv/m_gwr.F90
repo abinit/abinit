@@ -2655,15 +2655,7 @@ subroutine gwr_get_myk_green_gpr(gwr, itau, spin, desc_mykbz, gt_gpr)
      do ig2=1, ggp%sizeb_local(2), gwr%uc_batch_size
        ndat = blocked_loop(ig2, ggp%sizeb_local(2), gwr%uc_batch_size)
 
-#if 0
-       call fft_ug(desc_k%npw, gwr%g_nfft, gwr%nspinor, ndat, &
-                   gwr%g_mgfft, gwr%g_ngfft, desc_k%istwfk, desc_k%gvec, desc_k%gbound, &
-                   ggp%buffer_cplx(:, ig2), &  ! in
-                   rgp%buffer_cplx(:, ig2))    ! out
-
-#else
        call uplan_k%execute_gr(ndat, ggp%buffer_cplx(:, ig2), rgp%buffer_cplx(:, ig2))
-#endif
 
        if (.not. k_is_gamma) then
          ! Multiply by e^{ik.r}
@@ -2744,16 +2736,10 @@ subroutine gwr_get_gk_rpr_pm(gwr, ik_bz, itau, spin, gk_rpr_pm)
    call rgp%init(gwr%g_nfft * gwr%nspinor, npwsp, gwr%g_slkproc, desc_kbz%istwfk, size_blocs=[-1, col_bsize])
 
    associate (ggp => gt_pm(ipm))
-   !ABI_CHECK_IEQ(size(ggp%buffer_cplx, dim=2), size(rgp%buffer_cplx, dim=2), "len2")
    do ig2=1, ggp%sizeb_local(2), gwr%uc_batch_size
      ndat = blocked_loop(ig2, ggp%sizeb_local(2), gwr%uc_batch_size)
 
      ! Perform FFT G_k(g,g') -> G_k(r,g') and store results in rgp.
-     !call fft_ug(desc_kbz%npw, gwr%g_nfft, gwr%nspinor, ndat, &
-     !            gwr%g_mgfft, gwr%g_ngfft, desc_kbz%istwfk, desc_kbz%gvec, desc_kbz%gbound, &
-     !            ggp%buffer_cplx(:, ig2), &  ! in
-     !            rgp%buffer_cplx(:, ig2))    ! out
-
      call uplan_k%execute_gr(ndat, ggp%buffer_cplx(:, ig2), rgp%buffer_cplx(:, ig2))
    end do ! ig2
    end associate
@@ -2767,11 +2753,6 @@ subroutine gwr_get_gk_rpr_pm(gwr, ik_bz, itau, spin, gk_rpr_pm)
      ! Perform FFT G_k(g',r) -> G_k(r',r) and store results in rgp.
 
      ! FIXME: FFT sign is wrong (should be - instead of + but I need to change the API)
-     !call fft_ug(desc_kbz%npw, gwr%g_nfft, gwr%nspinor, ndat, &
-     !            gwr%g_mgfft, gwr%g_ngfft, desc_kbz%istwfk, desc_kbz%gvec, desc_kbz%gbound, &
-     !            gpr%buffer_cplx(:, ir1), &             ! in
-     !            gk_rpr_pm(ipm)%buffer_cplx(:, ir1))    ! out
-
      call uplan_k%execute_gr(ndat, gpr%buffer_cplx(:, ir1), gk_rpr_pm(ipm)%buffer_cplx(:, ir1))
    end do ! ir1
    call gpr%free()
@@ -3026,14 +3007,7 @@ subroutine gwr_get_myq_wc_gpr(gwr, itau, spin, desc_myqbz, wc_gpr)
      !ABI_CHECK_IEQ(size(wc_qbz%buffer_cplx(:, ig2)), desc_q%npw, "npw")
      !ABI_CHECK_IEQ(size(rgp%buffer_cplx(:, ig2)), gwr%g_nfft * gwr%nspinor, "gwr%g_nfft * gwr%nspinor")
 
-#if 0
-     call fft_ug(desc_q%npw, gwr%g_nfft, gwr%nspinor, ndat, &
-                 gwr%g_mgfft, gwr%g_ngfft, desc_q%istwfk, desc_q%gvec, desc_q%gbound, &
-                 wc_qbz%buffer_cplx(:, ig2), &  ! in
-                 rgp%buffer_cplx(:, ig2))       ! out
-#else
      call uplan_q%execute_gr(ndat, wc_qbz%buffer_cplx(:, ig2), rgp%buffer_cplx(:, ig2))
-#endif
 
      ! Multiply by e^{iq.r}
      if (.not. q_is_gamma) then
@@ -3125,11 +3099,6 @@ subroutine gwr_get_wc_rpr_qbz(gwr, qq_bz, itau, spin, wc_rpr)
  do ig2=1,wc_ggp%sizeb_local(2), gwr%uc_batch_size
    ndat = blocked_loop(ig2, wc_ggp%sizeb_local(2), gwr%uc_batch_size)
 
-   !call fft_ug(desc_qbz%npw, gwr%g_nfft, gwr%nspinor, ndat, &
-   !            gwr%g_mgfft, gwr%g_ngfft, desc_qbz%istwfk, desc_qbz%gvec, desc_qbz%gbound, &
-   !            wc_ggp%buffer_cplx(:, ig2), &  ! in
-   !            rgp%buffer_cplx(:, ig2))       ! out
-
    call uplan_k%execute_gr(ndat, wc_ggp%buffer_cplx(:, ig2), rgp%buffer_cplx(:, ig2))  ! isign=+1, scale=.False.)
 
    ! Multiply by e^{iq.r}
@@ -3151,11 +3120,6 @@ subroutine gwr_get_wc_rpr_qbz(gwr, qq_bz, itau, spin, wc_rpr)
 
    ! FIXME: FFT sign is wrong (should be - instead of + but I need to change the FFT API)
    ! Perform FFT Wc_q(g',r) -> Wc_q(r',r) and store results in wc_rgp.
-   !call fft_ug(desc_qbz%npw, gwr%g_nfft, gwr%nspinor, ndat, &
-   !            gwr%g_mgfft, gwr%g_ngfft, desc_qbz%istwfk, desc_qbz%gvec, desc_qbz%gbound, &
-   !            gpr%buffer_cplx(:, ir1), &     ! in
-   !            wc_rpr%buffer_cplx(:, ir1))    ! out
-
    call uplan_k%execute_gr(ndat, gpr%buffer_cplx(:, ir1), wc_rpr%buffer_cplx(:, ir1))
    !isign=+1, scale=.False.)
  end do ! ir1
@@ -3940,7 +3904,7 @@ end if
          ! FFT r --> g along the first dimension: tchi_q(r,g') --> tchi_q(g,g').
          ! Results stored in gwr%tchi_qibz.
          call uplan_q%init(desc_q%npw, gwr%nspinor, gwr%uc_batch_size, gwr%g_ngfft, istwfk1, &
-                         desc_q%gvec, gwpc, gwr%dtset%use_gpu_cuda)
+                           desc_q%gvec, gwpc, gwr%dtset%use_gpu_cuda)
 
          do ig2=1, chi_rgp%sizeb_local(2), gwr%uc_batch_size
            ndat = blocked_loop(ig2, chi_rgp%sizeb_local(2), gwr%uc_batch_size)
@@ -3952,16 +3916,8 @@ end if
              end do
            end if
 
-#if 0
-           call fft_ur(desc_q%npw, gwr%g_nfft, gwr%nspinor, ndat, gwr%g_mgfft, gwr%g_ngfft, &
-                       istwfk1, desc_q%gvec, desc_q%gbound, &
-                       chi_rgp%buffer_cplx(:, ig2),         &                  ! ur(in)
-                       gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx(:, ig2))  ! ug(out)
-#else
-
            call uplan_q%execute_rg(ndat, chi_rgp%buffer_cplx(:, ig2), &
                                    gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx(:, ig2))
-#endif
 
            !$OMP PARALLEL DO
            do idat=0,ndat-1
