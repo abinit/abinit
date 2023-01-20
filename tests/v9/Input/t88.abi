@@ -8,39 +8,29 @@ nline 12
 tolvrs 1.0d-15
 chksymbreak 0
 
-ndtset 8
+ndtset 6
 
-nstep1 21
-nstep2 21
+nstep1   28
+nstep2   29
+nstep3   27
+nstep4   44
+nstep5   31
+nstep6   29
 
-nstep3 31
-nstep4 31
-
-nstep5 33
-nstep6 33
-
-nstep7 31
-nstep8 31
-
-optdcmagpawu1 1
-optdcmagpawu2 1
-optdcmagpawu3 1
-optdcmagpawu4 1
-
-optdcmagpawu5 3
-optdcmagpawu6 3
-optdcmagpawu7 3
-optdcmagpawu8 3
-
-usepawu1  1 
-usepawu2 -1 
+usepawu1  4 
+usepawu2  4 
 usepawu3  4 
-usepawu4 -4 
 
+usepawu4  1 
 usepawu5  1 
-usepawu6 -1 
-usepawu7  4 
-usepawu8 -4 
+usepawu6  1 
+
+pawxcdev1 0
+pawxcdev2 1
+pawxcdev3 2
+pawxcdev4 0
+pawxcdev5 1
+pawxcdev6 2
 
 # SPIN 
 nsppol  1
@@ -80,19 +70,20 @@ jpawu  1.0000 eV
 
  pp_dirpath "$ABI_PSPDIR"
  pseudos "26fe.lda2.paw"
+ #pseudos "Pseudodojo_paw_pbe_standard/Fe.xml"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%   t78.abo, tolnlines = 19, tolabs = 1.100e-04, tolrel = 2.000e-03, fld_options = -medium
+#%%   t88.abo, tolnlines = 70, tolabs = 1.100e-04, tolrel = 9.000e-01, fld_options = -medium
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = L. Baguet
 #%% keywords = PAW, DFTU
 #%% description =
-#%%  Tests various usepawu on Fe. usepaw=X should give the same result than usepawu=-X.
+#%%  Tests pawxcdev and usepawu together. LDA. Similar to v9/78.
 #%% topics = DFT+U
 #%%<END TEST_INFO>
