@@ -3089,6 +3089,7 @@ subroutine gwr_get_wc_rpr_qbz(gwr, qq_bz, itau, spin, wc_rpr)
  character(len=500) :: msg
  type(desc_t) :: desc_qbz
  type(__slkmat_t) :: wc_ggp, rgp, gpr
+ type(uplan_t) :: uplan_k
  complex(dp),allocatable :: ceiqr(:)
 
 ! *************************************************************************
@@ -3117,20 +3118,19 @@ subroutine gwr_get_wc_rpr_qbz(gwr, qq_bz, itau, spin, wc_rpr)
  ABI_CHECK(block_dist_1d(npwsp, gwr%g_comm%nproc, col_bsize, msg), msg)
  call rgp%init(gwr%g_nfft * gwr%nspinor, npwsp, gwr%g_slkproc, desc_qbz%istwfk, size_blocs=[-1, col_bsize])
 
- !ABI_CHECK_IEQ(size(wc_ggp%buffer_cplx, dim=2), size(rgp%buffer_cplx, dim=2), "len2")
-
- !call uplan_k%init(npw, nspinor, gwr%uc_batch_size, ngfft, istwfk, gvec, gwpc, gwr%dtset%use_gpu_cuda, gbound=desc_qbz%gbound)
- !call uplan_k%execute_gr(ndat, ug, ur, isign=+1, scale=.False.)
- !call uplan_k%execute_rg(ndat, ur, ug, isign=-1, scale=.True.)
- !call uplan_k%free()
+ call uplan_k%init(desc_qbz%npw, gwr%nspinor, gwr%uc_batch_size, gwr%g_ngfft, desc_qbz%istwfk, &
+                   desc_qbz%gvec, gwpc, gwr%dtset%use_gpu_cuda)
 
  ! FFT. Results stored in rgp
  do ig2=1,wc_ggp%sizeb_local(2), gwr%uc_batch_size
    ndat = blocked_loop(ig2, wc_ggp%sizeb_local(2), gwr%uc_batch_size)
-   call fft_ug(desc_qbz%npw, gwr%g_nfft, gwr%nspinor, ndat, &
-               gwr%g_mgfft, gwr%g_ngfft, desc_qbz%istwfk, desc_qbz%gvec, desc_qbz%gbound, &
-               wc_ggp%buffer_cplx(:, ig2), &  ! in
-               rgp%buffer_cplx(:, ig2))       ! out
+
+   !call fft_ug(desc_qbz%npw, gwr%g_nfft, gwr%nspinor, ndat, &
+   !            gwr%g_mgfft, gwr%g_ngfft, desc_qbz%istwfk, desc_qbz%gvec, desc_qbz%gbound, &
+   !            wc_ggp%buffer_cplx(:, ig2), &  ! in
+   !            rgp%buffer_cplx(:, ig2))       ! out
+
+   call uplan_k%execute_gr(ndat, wc_ggp%buffer_cplx(:, ig2), rgp%buffer_cplx(:, ig2))  ! isign=+1, scale=.False.)
 
    ! Multiply by e^{iq.r}
    !if (.not. q_is_gamma) then
@@ -3151,12 +3151,16 @@ subroutine gwr_get_wc_rpr_qbz(gwr, qq_bz, itau, spin, wc_rpr)
 
    ! FIXME: FFT sign is wrong (should be - instead of + but I need to change the FFT API)
    ! Perform FFT Wc_q(g',r) -> Wc_q(r',r) and store results in wc_rgp.
-   call fft_ug(desc_qbz%npw, gwr%g_nfft, gwr%nspinor, ndat, &
-               gwr%g_mgfft, gwr%g_ngfft, desc_qbz%istwfk, desc_qbz%gvec, desc_qbz%gbound, &
-               gpr%buffer_cplx(:, ir1), &     ! in
-               wc_rpr%buffer_cplx(:, ir1))    ! out
- end do
+   !call fft_ug(desc_qbz%npw, gwr%g_nfft, gwr%nspinor, ndat, &
+   !            gwr%g_mgfft, gwr%g_ngfft, desc_qbz%istwfk, desc_qbz%gvec, desc_qbz%gbound, &
+   !            gpr%buffer_cplx(:, ir1), &     ! in
+   !            wc_rpr%buffer_cplx(:, ir1))    ! out
 
+   call uplan_k%execute_gr(ndat, gpr%buffer_cplx(:, ir1), wc_rpr%buffer_cplx(:, ir1))
+   !isign=+1, scale=.False.)
+ end do ! ir1
+
+ call uplan_k%free()
  call gpr%free()
  call desc_qbz%free()
  call wc_ggp%free()
@@ -3956,7 +3960,7 @@ end if
 #else
 
            call uplan_q%execute_rg(ndat, chi_rgp%buffer_cplx(:, ig2), &
-                                 gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx(:, ig2))
+                                   gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx(:, ig2))
 #endif
 
            !$OMP PARALLEL DO

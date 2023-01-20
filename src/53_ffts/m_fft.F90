@@ -95,7 +95,6 @@ MODULE m_fft
    module procedure fft_ug_dp
    module procedure fft_ug_spc
    module procedure fft_ug_dpc
-   module procedure fft_ug_dpc_2d
  end interface fft_ug
 
  interface fft_ur
@@ -103,7 +102,6 @@ MODULE m_fft
    module procedure fft_ur_dp
    module procedure fft_ur_spc
    module procedure fft_ur_dpc
-   module procedure fft_ur_dpc_2d
  end interface fft_ur
 
  interface fftpad
@@ -126,14 +124,13 @@ MODULE m_fft
 
  type,public :: fftbox_plan3_t
 
-   private
    integer :: fftalg = 112    ! The library to call.
    integer :: fftcache = 16   ! Cache size in kB. Only used in SG routines.
    integer :: nfft = -1       ! Total number of points in the FFT box.
    integer :: ldxyz = -1      ! Physical dimension of the array to transform
+
    ! TODO: ndat should be replaced by batch_size
    ! There are cases, indeed, in which ndat < batch_size where ndat is computed inside the loop.
-
    integer :: ndat = -1       ! Number of FFTs associated to the plan.
    integer :: dims(3) = -1    ! The number of FFT divisions.
    integer :: embed(3) = -1   ! Leading dimensions of the input, output arrays.
@@ -211,7 +208,7 @@ MODULE m_fft
 !! SOURCE
 
  type, public :: uplan_t
-   private
+
    integer :: npw = -1
    integer :: nspinor = -1
    integer :: istwfk = -1
@@ -219,7 +216,6 @@ MODULE m_fft
    integer :: mgfft = -1
    integer :: nfft = -1       ! Total number of points in the FFT box.
    integer :: ngfft(18)
-   !integer :: ldxyz = -1      ! Physical dimension of the array to transform
    ! TODO: ndat should be replaced by batch_size
    ! There are cases, indeed, in which ndat < batch_size where ndat is computed inside the loop.
    integer, contiguous, pointer :: kg_k(:,:)
@@ -253,8 +249,8 @@ MODULE m_fft
  ! unit tests
  public :: fftbox_utests          ! Unit tests for FFTs on the full box.
  public :: fftu_utests            ! Unit tests for the FFTs of wavefunctions.
- public :: fftbox_mpi_utests      ! Unit tests for the MPI-FFTs on the full box.
- public :: fftu_mpi_utests        ! Unit tests for the MPI-FFTs of the wavefunctions.
+ public :: fftbox_mpi_utests      ! Unit tests for MPI-FFT on the full box.
+ public :: fftu_mpi_utests        ! Unit tests for MPI-FFT of the wavefunctions.
 !!***
 
  ! Flag used to enable/disable the use of non-blocking IALLTOALL
@@ -421,7 +417,7 @@ subroutine fftbox_execute_ip_spc(plan, ff, isign)
  class(fftbox_plan3_t),target,intent(inout) :: plan
  integer,intent(in) :: isign
 !arrays
- complex(spc),target,intent(inout) :: ff(plan%ldxyz*plan%ndat)
+ complex(spc),target,intent(inout) :: ff(*) ! plan%ldxyz*plan%ndat)
 
 ! *************************************************************************
 
@@ -468,7 +464,7 @@ subroutine fftbox_execute_ip_dpc(plan, ff, isign)
  class(fftbox_plan3_t),target,intent(inout) :: plan
  integer,intent(in) :: isign
 !arrays
- complex(dpc),target,intent(inout) :: ff(plan%ldxyz*plan%ndat)
+ complex(dpc),target,intent(inout) :: ff(*) ! plan%ldxyz*plan%ndat)
 
 ! *************************************************************************
 
@@ -514,8 +510,8 @@ subroutine fftbox_execute_op_spc(plan, ff, gg, isign)
  class(fftbox_plan3_t),intent(inout) :: plan
  integer,intent(in) :: isign
 !arrays
- complex(spc),target,intent(in) :: ff(plan%ldxyz*plan%ndat)
- complex(spc),target,intent(inout) :: gg(plan%ldxyz*plan%ndat)
+ complex(spc),target,intent(in) :: ff(*)    !plan%ldxyz*plan%ndat)
+ complex(spc),target,intent(inout) :: gg(*) !plan%ldxyz*plan%ndat)
 
 ! *************************************************************************
 
@@ -562,8 +558,8 @@ subroutine fftbox_execute_op_dpc(plan, ff, gg, isign)
  class(fftbox_plan3_t),intent(inout) :: plan
  integer,intent(in) :: isign
 !arrays
- complex(dpc),target,intent(in) :: ff(plan%ldxyz*plan%ndat)
- complex(dpc),target,intent(inout) :: gg(plan%ldxyz*plan%ndat)
+ complex(dpc),target,intent(in) :: ff(*)    !plan%ldxyz*plan%ndat)
+ complex(dpc),target,intent(inout) :: gg(*) !plan%ldxyz*plan%ndat)
 
 ! *************************************************************************
 
@@ -639,8 +635,8 @@ subroutine fft_ug_dp(npw_k, nfft, nspinor, ndat, mgfft, ngfft, istwf_k, kg_k, gb
  integer,intent(in) :: npw_k,nfft,nspinor,istwf_k,mgfft,ndat
 !arrays
  integer,intent(in) :: ngfft(18),gbound_k(2*mgfft+8,2),kg_k(3,npw_k)
- real(dp),target,intent(in) :: ug(2*npw_k*nspinor*ndat)
- real(dp),target,intent(out) :: ur(2*nfft*nspinor*ndat)
+ real(dp),target,intent(in) :: ug(*)  !2*npw_k*nspinor*ndat)
+ real(dp),target,intent(out) :: ur(*) !2*nfft*nspinor*ndat)
 
 !Local variables-------------------------------
  complex(dp),contiguous,pointer :: ug_cplx(:), ur_cplx(:)
@@ -689,8 +685,8 @@ subroutine fft_ug_spc(npw_k,nfft,nspinor,ndat,mgfft,ngfft,istwf_k,kg_k,gbound_k,
  integer,intent(in) :: npw_k,nfft,nspinor,istwf_k,mgfft,ndat
 !arrays
  integer,intent(in) :: ngfft(18),gbound_k(2*mgfft+8,2),kg_k(3,npw_k)
- complex(spc),intent(in) :: ug(npw_k*nspinor*ndat)
- complex(spc),intent(out) :: ur(nfft*nspinor*ndat)
+ complex(spc),intent(in) :: ug(*)  !npw_k*nspinor*ndat)
+ complex(spc),intent(out) :: ur(*) !nfft*nspinor*ndat)
 
 ! *************************************************************************
 
@@ -733,47 +729,14 @@ subroutine fft_ug_dpc(npw_k, nfft, nspinor, ndat, mgfft, ngfft, istwf_k, kg_k, g
  integer,intent(in) :: npw_k,nfft,nspinor,istwf_k,mgfft,ndat
 !arrays
  integer,intent(in) :: ngfft(18),gbound_k(2*mgfft+8,2),kg_k(3,npw_k)
- complex(dpc),intent(in) :: ug(npw_k*nspinor*ndat)
- complex(dpc),intent(out) :: ur(nfft*nspinor*ndat)
+ complex(dpc),intent(in) :: ug(*)  !npw_k*nspinor*ndat)
+ complex(dpc),intent(out) :: ur(*) !nfft*nspinor*ndat)
 
 ! *************************************************************************
 
 #include "fftug_driver.finc"
 
 end subroutine fft_ug_dpc
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_fft/fft_ug_dpc_2d
-!! NAME
-!! fft_ug_dpc_3d
-!!
-!! FUNCTION
-!! Driver routine for G-->R transform of wavefunctions with zero-padded FFT.
-!! TARGET: double precision 2d arrays
-
-!----------------------------------------------------------------------
-
-subroutine fft_ug_dpc_2d(npw_k, nfft, nspinor, ndat, mgfft, ngfft, istwf_k, kg_k, gbound_k, ug, ur)
-
-!Arguments ------------------------------------
-!scalars
- integer,intent(in) :: npw_k,nfft,nspinor,istwf_k,mgfft,ndat
-!arrays
- integer,intent(in) :: ngfft(18),gbound_k(2*mgfft+8,2),kg_k(3,npw_k)
- complex(dpc),target,intent(in) :: ug(npw_k*nspinor,ndat)
- complex(dpc),target,intent(out) :: ur(nfft*nspinor,ndat)
-
-!Local variables-------------------------------
- complex(dp),contiguous,pointer :: ug_cplx(:), ur_cplx(:)
-! *************************************************************************
-
- call C_F_pointer(c_loc(ug), ug_cplx, shape=[npw_k*nspinor*ndat])
- call C_F_pointer(c_loc(ur), ur_cplx, shape=[nfft*nspinor*ndat])
- call fft_ug_dpc(npw_k, nfft, nspinor, ndat, mgfft, ngfft, istwf_k, kg_k, gbound_k, ug_cplx, ur_cplx)
-
-end subroutine fft_ug_dpc_2d
 !!***
 
 !!****f* m_fft/fft_ur_dp
@@ -797,8 +760,8 @@ subroutine fft_ur_dp(npw_k,nfft,nspinor,ndat,mgfft,ngfft,istwf_k,kg_k,gbound_k,u
  integer,intent(in) :: npw_k,nfft,nspinor,ndat,istwf_k,mgfft
 !arrays
  integer,intent(in) :: ngfft(18),gbound_k(2*mgfft+8,2), kg_k(3,npw_k)
- real(dp),target,intent(inout) :: ur(2*nfft*nspinor*ndat)
- real(dp),target,intent(out) :: ug(2*npw_k*nspinor*ndat)
+ real(dp),target,intent(inout) :: ur(*) !2*nfft*nspinor*ndat)
+ real(dp),target,intent(out) :: ug(*)   !2*npw_k*nspinor*ndat)
 
 !Local variables-------------------------------
  complex(dp),contiguous,pointer :: ug_cplx(:), ur_cplx(:)
@@ -850,8 +813,8 @@ subroutine fft_ur_spc(npw_k,nfft,nspinor,ndat,mgfft,ngfft,istwf_k,kg_k,gbound_k,
  integer,intent(in) :: npw_k,nfft,nspinor,ndat,istwf_k,mgfft
 !arrays
  integer,intent(in) :: ngfft(18),gbound_k(2*mgfft+8,2),kg_k(3,npw_k)
- complex(spc),intent(inout) :: ur(nfft*nspinor*ndat)
- complex(spc),intent(out) :: ug(npw_k*nspinor*ndat)
+ complex(spc),intent(inout) :: ur(*) !nfft*nspinor*ndat)
+ complex(spc),intent(out) :: ug(*)   !npw_k*nspinor*ndat)
 
 ! *************************************************************************
 
@@ -898,50 +861,14 @@ subroutine fft_ur_dpc(npw_k, nfft, nspinor, ndat, mgfft, ngfft, istwf_k, kg_k, g
  integer,intent(in) :: npw_k,nfft,nspinor,ndat,istwf_k,mgfft
 !arrays
  integer,intent(in) :: ngfft(18),gbound_k(2*mgfft+8,2),kg_k(3,npw_k)
- complex(dpc),intent(inout) :: ur(nfft*nspinor*ndat)
- complex(dpc),intent(out) :: ug(npw_k*nspinor*ndat)
+ complex(dpc),intent(inout) :: ur(*) ! nfft*nspinor*ndat)
+ complex(dpc),intent(out) :: ug(*)   ! npw_k*nspinor*ndat)
 
 ! *************************************************************************
 
 #include "fftur_driver.finc"
 
 end subroutine fft_ur_dpc
-!!***
-
-!!****f* m_fft/fft_ur_dpc_2d
-!! NAME
-!! fft_ur_dpc_2d
-!!
-!! FUNCTION
-!! Compute ndat zero-padded FFTs from R- to G-space .
-!! Mainly used for the transform of wavefunctions.
-!! TARGET: double precision 2d complex arrays
-!!
-!! INPUTS
-!!  See fft_ur_dpc
-!!
-!! SOURCE
-
-subroutine fft_ur_dpc_2d(npw_k, nfft, nspinor, ndat, mgfft, ngfft, istwf_k, kg_k, gbound_k, ur, ug)
-
-!Arguments ------------------------------------
-!scalars
- integer,intent(in) :: npw_k,nfft,nspinor,ndat,istwf_k,mgfft
-!arrays
- integer,intent(in) :: ngfft(18),gbound_k(2*mgfft+8,2), kg_k(3,npw_k)
- complex(dp),target,intent(inout) :: ur(2*nfft*nspinor, ndat)
- complex(dp),target,intent(out) :: ug(2*npw_k*nspinor, ndat)
-
-!Local variables-------------------------------
- complex(dp),contiguous,pointer :: ug_cplx(:), ur_cplx(:)
-
-! *************************************************************************
-
- call C_F_pointer(c_loc(ug), ug_cplx, shape=[npw_k*nspinor*ndat])
- call C_F_pointer(c_loc(ur), ur_cplx, shape=[nfft*nspinor*ndat])
- call fft_ur_dpc(npw_k, nfft, nspinor, ndat, mgfft, ngfft, istwf_k, kg_k, gbound_k, ur_cplx, ug_cplx)
-
-end subroutine fft_ur_dpc_2d
 !!***
 
 !----------------------------------------------------------------------
@@ -4073,8 +4000,7 @@ end subroutine fourwf_mpi
 !subroutine fftmpi_u(npw_k,n4,n5,n6,nspinor,ndat,mgfft,ngfft,istwf_k,kg_k,gbound_k,fftabs,isign,fofg,fofr)
 
 subroutine fftmpi_u(npw_k,n4,n5,n6,ndat,mgfft,ngfft,&
-&  istwf_k,gbound_k,kg_k,me_g0,distribfft,isign,fofg,fofr,comm_fft,cplexwf)
-
+                    istwf_k,gbound_k,kg_k,me_g0,distribfft,isign,fofg,fofr,comm_fft,cplexwf)
 
 !Arguments ------------------------------------
 !scalars
