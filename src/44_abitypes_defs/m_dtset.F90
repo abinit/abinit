@@ -897,7 +897,7 @@ type, public :: dataset_type
  real(dp) :: strtarget(6)
  real(dp) :: tmesh(3) = [5._dp, 59._dp, 6._dp]  ! [start, stop, num]
  real(dp) :: ucrpa_window(2)
- real(dp) :: vcutgeo(3)
+ real(dp) :: vcutgeo(3) = [0.0_dp,0.0_dp,0.0_dp]
  real(dp) :: vprtrb(2)
  real(dp) :: zeemanfield(3)
  real(dp) :: mdtemp(2)
