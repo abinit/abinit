@@ -975,9 +975,15 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
 #if defined HAVE_GPU_CUDA
        if (dtset%use_gpu_cuda==1) then
-         call gpu_update_ffnl_ph3d( &
-           & ph3d, INT(size(ph3d),c_int64_t), &
-           & ffnl, INT(size(ffnl),c_int64_t) )
+         if (mpi_enreg%paral_kgb==1) then
+           call gpu_update_ffnl_ph3d( &
+             & my_bandfft_kpt%ph3d_gather, INT(size(my_bandfft_kpt%ph3d_gather),c_int64_t), &
+             & my_bandfft_kpt%ffnl_gather, INT(size(my_bandfft_kpt%ffnl_gather),c_int64_t) )
+         else
+           call gpu_update_ffnl_ph3d( &
+             & ph3d, INT(size(ph3d),c_int64_t), &
+             & ffnl, INT(size(ffnl),c_int64_t) )
+         end if
        end if
 #endif
 
