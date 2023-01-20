@@ -23202,4 +23202,19 @@ Note that [[gstore_erange]] is not compatible with [[gstore_brange]].
 """,
 ),
 
+Variable(
+    abivarname="optdcmagpawu",
+    varset="paw",
+    vartype="integer",
+    topics=['DFT+U_expert'],
+    dimensions="scalar",
+    defaultval=3,
+    mnemonics="OPTion for Double-Counting MAGnetic term in PAW+U formalism",
+    requires="[[usepaw]] == 1, [[usepawu]] == 1 or 4, and [[nspden]] == 4",
+    added_in_version="9.8.2",
+    text=r"""
+This option is usefull only for tests and code comparisons. For magnetic computations ([[nspden]]==4), it defines how the double counting term in the PAW+U formalism is computed. The default is 3, but Abinit versions before 9.8 correspond to 1.
+""",
+),
+
 ]
