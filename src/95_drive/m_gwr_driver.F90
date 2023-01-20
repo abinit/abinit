@@ -967,13 +967,12 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, cryst, ugb)
      n2dat = blocked_loop(band2_start, ugb%my_bstop, batch2_size)
      band2_stop = band2_start + n2dat - 1
 
-     call fft_ug(ugb%npw_k, u_nfft, nspinor, n2dat, &
-                 u_mgfft, u_ngfft, ugb%istwf_k, ugb%kg_k, gbound_k, &
-                 ugb%mat%buffer_cplx(:,my_ib2:), &     ! in
-                 !ugb%mat%buffer_cplx(1,my_ib2), &     ! in
-                 ur2_batch)                            ! out
+     !call fft_ug(ugb%npw_k, u_nfft, nspinor, n2dat, &
+     !            u_mgfft, u_ngfft, ugb%istwf_k, ugb%kg_k, gbound_k, &
+     !            ugb%mat%buffer_cplx(:,my_ib2), &     ! in
+     !            ur2_batch(:,1))                      ! out
 
-     !call uplan_2%execute_gr(n2dat, ugb%mat%buffer_cplx(:,my_ib2:), ur2_batch(:,1))
+     call uplan_2%execute_gr(n2dat, ugb%mat%buffer_cplx(:,my_ib2), ur2_batch(:,1))
 
      do idat1=1,n1dat
        do idat2=1,n2dat
