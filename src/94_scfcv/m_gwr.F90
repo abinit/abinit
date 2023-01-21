@@ -1222,7 +1222,11 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  ! Define batch sizes for FFT transforms, use multiples of OpenMP threads.
  omp_nt = xomp_get_num_threads(open_parallel=.True.)
  gwr%uc_batch_size = omp_nt; gwr%sc_batch_size = omp_nt
- !gwr%uc_batch_size = 4; gwr%sc_batch_size = 2
+ !gwr%uc_batch_size = 2; gwr%sc_batch_size = 2
+ !gwr%uc_batch_size = 3; gwr%sc_batch_size = 3
+ gwr%uc_batch_size = 4; gwr%sc_batch_size = 4
+ gwr%uc_batch_size = 5; gwr%sc_batch_size = 5
+ !gwr%sc_batch_size = 1; gwr%uc_batch_size = 1
  if (gwr%dtset%use_gpu_cuda /= 0) then
    !gwr%uc_batch_size = 4; gwr%sc_batch_size = 2
  end if
@@ -4682,6 +4686,7 @@ if (gwr%use_supercell_for_sigma) then
  ! The first option requires less memory provided we are interested in a small set of KS states.
  ! The second option is interesting if we need to compute several matrix elements, including off-diagonal terms.
 
+ !gwr%sc_batch_size = 1; gwr%uc_batch_size = 1
  ndat = gwr%sc_batch_size
  ABI_CALLOC(gt_scbox, (sc_nfft * gwr%nspinor * ndat * 2))
  ABI_CALLOC(wct_scbox, (sc_nfft * gwr%nspinor * ndat))
@@ -4762,7 +4767,8 @@ if (gwr%use_supercell_for_sigma) then
          end do
 
          do ipm=1,2
-           ii = 1 + (ipm - 1) * sc_nfft * gwr%nspinor * ndat
+           !ii = 1 + (ipm - 1) * sc_nfft * gwr%nspinor * ndat
+           ii = 1 + (ipm - 1) * sc_nfft * gwr%nspinor * gwr%sc_batch_size
            call gsph2box(sc_ngfft, desc_k%npw, gwr%nspinor * ndat, green_scgvec, &
                          gt_gpr(ipm, my_ikf)%buffer_cplx(:, my_ir), &  ! in
                          gt_scbox(ii:))                                ! inout
@@ -4816,7 +4822,8 @@ if (gwr%use_supercell_for_sigma) then
        ! Use gt_scbox to store GW (R',r, +/- i tau) for this r.
        ii = sc_nfft * gwr%nspinor * ndat
        gt_scbox(1:ii) = gt_scbox(1:ii) * wct_scbox(:)
-       gt_scbox(ii+1:) = gt_scbox(ii+1:) * wct_scbox(:)
+       ii = 1 + sc_nfft * gwr%nspinor * gwr%sc_batch_size
+       gt_scbox(ii:) = gt_scbox(ii:) * wct_scbox(:)
        !print *, "Maxval abs imag G:", maxval(abs(aimag(gt_scbox)))
 
        ! Integrate self-energy matrix elements in the R-supercell for fixed set of ndat r-points.
@@ -4831,7 +4838,7 @@ if (gwr%use_supercell_for_sigma) then
              ir = uc_ir + idat - 1
              cpsi_r = conjg(uc_psi_bk(ir, band, ikcalc))
              do ipm=1,2
-               ibeg = 1 + (idat - 1) * sc_nfft * gwr%nspinor + (ipm - 1) * sc_nfft * gwr%nspinor * ndat
+               ibeg = 1 + (idat - 1) * sc_nfft * gwr%nspinor + (ipm - 1) * sc_nfft * gwr%nspinor * gwr%sc_batch_size
                iend = ibeg + sc_nfft * gwr%nspinor - 1
                call sc_sum(gwr%ngkpt, gwr%g_ngfft, gwr%nspinor, scph1d_kcalc(:,:,ikcalc), k_is_gamma, &
                  cpsi_r, gt_scbox(ibeg:), uc_psi_bk(:, band, ikcalc), sigc_pm(ipm))
