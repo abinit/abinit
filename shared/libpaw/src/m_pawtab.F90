@@ -227,6 +227,12 @@ MODULE m_pawtab
    ! nproju is the number of projectors for orbitals on which paw+u acts.
    ! Also used for local exact-exchange
 
+  integer :: option_interaction_pawu
+   ! Option for interaction energy (PAW+U) in case of non-collinear magnetism:
+   ! 1: E_int=-J/4.N.(N-2)                      
+   ! 2: E_int=-J/2.(Nup.(Nup-1)+Ndn.(Ndn-1))    (Nup and Ndn are ill-defined)
+   ! 3: E_int=-J/4.( N.(N-2) + mx^2 + my^2 + mz^2 )
+
   integer :: mesh_size
    ! Dimension of radial mesh for generic arrays contained in this pawtab datastructure
    ! The mesh is usually defined up to the PAW augmentation region boundary
@@ -697,6 +703,7 @@ subroutine pawtab_nullify_0D(Pawtab)
  Pawtab%lmnmix_sz=0
  Pawtab%lpawu=-1
  Pawtab%nproju=0
+ Pawtab%option_interaction_pawu=0
  Pawtab%mesh_size=0
  Pawtab%partialwave_mesh_size=0
  Pawtab%core_mesh_size=0
@@ -960,6 +967,7 @@ subroutine pawtab_free_0D(Pawtab)
  Pawtab%lmnmix_sz=0
  Pawtab%lpawu=-1
  Pawtab%nproju=0
+ Pawtab%option_interaction_pawu=0
  Pawtab%mesh_size=0
  Pawtab%partialwave_mesh_size=0
  Pawtab%core_mesh_size=0
@@ -1230,6 +1238,8 @@ subroutine pawtab_print(Pawtab,header,unit,prtvol,mode_paral)
     call wrtout(my_unt,msg,my_mode)
     write(msg,'(a,i4)')'  Number of projectors on which U or EXX acts .... ',Pawtab(ityp)%nproju
     call wrtout(my_unt,msg,my_mode)
+    write(msg,'(a,i4)')'  Option interaction for PAW+U (double-counting).. ',Pawtab(ityp)%option_interaction_pawu
+    call wrtout(my_unt,msg,my_mode)
   end if
   write(msg,'(a,i4)')'  Use potential zero ............................. ',Pawtab(ityp)%usepotzero
   call wrtout(my_unt,msg,my_mode)
@@ -1469,8 +1479,9 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
 
 !Integers (depending on the parameters of the calculation)
 !-------------------------------------------------------------------------
-!  ij_proj,lcut_size,lexexch,lmnmix_sz,lpawu,mqgrid_shp,nproju,useexexch,usepawu,usepotzero,usespnorb
-   if (full_broadcast) nn_int=nn_int+11
+!  ij_proj,lcut_size,lexexch,lmnmix_sz,lpawu,mqgrid_shp,nproju,useexexch,usepawu,usepotzero,
+!  option_interaction_pawu,usespnorb
+   if (full_broadcast) nn_int=nn_int+12
 
 !Reals (read from psp file)
 !-------------------------------------------------------------------------
@@ -1979,6 +1990,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
      list_int(ii)=pawtab%lpawu  ;ii=ii+1
      list_int(ii)=pawtab%mqgrid_shp  ;ii=ii+1
      list_int(ii)=pawtab%nproju  ;ii=ii+1
+     list_int(ii)=pawtab%option_interaction_pawu ;ii=ii+1
      list_int(ii)=pawtab%useexexch  ;ii=ii+1
      list_int(ii)=pawtab%usepawu  ;ii=ii+1
      list_int(ii)=pawtab%usepotzero ;ii=ii+1
@@ -2156,6 +2168,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
      pawtab%lpawu=list_int(ii)  ;ii=ii+1
      pawtab%mqgrid_shp=list_int(ii)  ;ii=ii+1
      pawtab%nproju=list_int(ii)  ;ii=ii+1
+     pawtab%option_interaction_pawu=list_int(ii) ;ii=ii+1
      pawtab%useexexch=list_int(ii)  ;ii=ii+1
      pawtab%usepawu=list_int(ii)  ;ii=ii+1
      pawtab%usepotzero=list_int(ii) ;ii=ii+1
