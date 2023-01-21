@@ -582,6 +582,10 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr, intarr, jdtset, marr, narr, string(1:lenstr), 'gwr_np_kgts', tread, 'INT')
  if (tread == 1) dtset%gwr_np_kgts = intarr(1:narr)
 
+ narr = size(dtset%gwr_ucsc_batch)
+ call intagm(dprarr, intarr, jdtset, marr, narr, string(1:lenstr), 'gwr_ucsc_batch', tread, 'INT')
+ if (tread == 1) dtset%gwr_ucsc_batch = intarr(1:narr)
+
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gwr_ntau', tread,'INT')
  if (tread == 1) dtset%gwr_ntau = intarr(1)
 

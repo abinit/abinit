@@ -15650,7 +15650,7 @@ If set to 1, provide output of electron-phonon "gkk" matrix elements, for
 further treatment by mrggkk utility or anaddb utility. Note that symmetry will
 be disabled for the calculation of the perturbation, forcing the inclusion of
 all k-points and all perturbation directions. Additional information on
-electron-phonon treatment in ABINIT is given in the tutorial [[tutorial:eph_intro]] and subsequent ones, [[tutorial:eph4mob]] 
+electron-phonon treatment in ABINIT is given in the tutorial [[tutorial:eph_intro]] and subsequent ones, [[tutorial:eph4mob]]
 and [[tutorial:eph4zpr]].
 """,
 ),
@@ -23231,6 +23231,23 @@ and the basic dimensions of the job computed at runtime.
     the **only variable** that should be used to change the default behaviour.
     Other variables such as [[npband]], [[npfft]], [[npkpt]] and [[paral_kgb]]
     are **not used** in the GWR subdriver.
+""",
+),
+
+Variable(
+    abivarname="gwr_ucsc_batch",
+    varset="gw",
+    vartype="integer",
+    topics=['GWR_expert'],
+    dimensions=[2],
+    defaultval=-1,
+    mnemonics="GWR Unit Cell, Supercell BATCH SIZE.",
+    requires="[[optdriver]] == 6",
+    added_in_version="9.6.2",
+    text=r"""
+This variable defines the maximum number of FFTs performed in the unit cell/super cell.
+If not specified in the input, the code will automatically define these values to find a good compromise
+betweeen memory and performance.
 """,
 ),
 

@@ -49,6 +49,7 @@ gwr_boxcutmin3  1.1  # This should be subject to convergence studies
 #mixprec3    1       # Mixed precision FFT.
 #gw_icutcoul3   16   # Monte-Carlo integration in the mini-Brillouin zone for Full Coulomb interaction.
 #gw_icutcoul3   0     # Spherical cutoff
+gwr_ucsc_batch3 4 2
 
 nband3      30       # Bands to be used in the screening calculation
 ecuteps3    4        # Cut-off energy of the planewave set to represent the dielectric matrix.

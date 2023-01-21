@@ -221,7 +221,7 @@ end subroutine mkffnl_objs
 !!
 !!  1) l may be 0, 1, 2, or 3 in this version.
 !!
-!!  2) Norm-conserving psps : only FFNL for which ekb is not zero are calculated.
+!!  2) Norm-conserving psps: only FFNL for which ekb is not zero are calculated.
 !!
 !!  3) Each expression above approaches a constant as $|k+G| \rightarrow 0 $.
 !!     In the cases where $|k+G|$ is in the denominator, there is always a
