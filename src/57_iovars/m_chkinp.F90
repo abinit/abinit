@@ -2110,12 +2110,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
       'Please use "nspden=1 or 2".'
      ABI_ERROR(msg)
    end if
-!  When (usepawu/=0) and pawxcdev=0, nspden must be 1 or 2
-   if( dt%usepawu/=0.and.dt%pawxcdev==0)then
-     cond_string(1)='usepawu' ; cond_values(1)=dt%usepawu
-     cond_string(2)='pawxcdev' ; cond_values(2)=dt%pawxcdev
-     call chkint_eq(1,2,cond_string,cond_values,ierr,'nspden',nspden,2,(/1,2/),iout)
-   end if
 !  When abs(usepawu) is not 0, 1, 4, 10 or 14, nspden must be 1 or 2
    if( abs(dt%usepawu)/=0 .and. abs(dt%usepawu)/=1 .and. abs(dt%usepawu)/=4 .and. &
 &      abs(dt%usepawu)/=10 .and. abs(dt%usepawu)/=14 )then
@@ -2336,7 +2330,12 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !  call chkint_eq(1,1,cond_string,cond_values,ierr,'optcell',dt%optcell,1,(/0/),iout)
 !  end if
 
-   ! Check the value of optdriver
+!  optdcmagpawu
+   if (dt%usepawu/=0.and.dt%nspden==4) then
+     call chkint_eq(0,0,cond_string,cond_values,ierr,'optdcmagpawu',dt%optdcmagpawu,3,(/1,2,3/),iout)
+   end if
+
+!  Check the value of optdriver
    call chkint_eq(0, 0, cond_string, cond_values, ierr, 'optdriver', optdriver, 12,&
                   [RUNL_GSTATE,RUNL_RESPFN,RUNL_SCREENING,RUNL_SIGMA,RUNL_NONLINEAR,RUNL_GWR, RUNL_BSE, &
                    RUNL_GWLS, RUNL_WFK,RUNL_EPH,RUNL_LONGWAVE,RUNL_RTTDDFT], iout)
