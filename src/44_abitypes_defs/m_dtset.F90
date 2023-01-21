@@ -663,6 +663,7 @@ type, public :: dataset_type
  integer :: eph_np_pqbks(5) = 0
  integer :: fockdownsampling(3)
  integer :: gwr_np_kgts(4) = 0
+ integer :: gwr_ucsc_batch(2) = -1
  integer :: jfielddir(3)
  integer :: kptrlatt(3,3)
  integer :: kptrlatt_orig(3,3)=0
@@ -1536,6 +1537,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%fft_count          = dtin%fft_count
  dtout%fockdownsampling   = dtin%fockdownsampling
  dtout%gwr_np_kgts        = dtin%gwr_np_kgts
+ dtout%gwr_ucsc_batch     = dtin%gwr_ucsc_batch
  dtout%fockoptmix         = dtin%fockoptmix
  dtout%fock_icutcoul      = dtin%fock_icutcoul
  dtout%freqim_alpha       = dtin%freqim_alpha
@@ -3304,9 +3306,8 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' fit_nfixcoeff fit_nimposecoeff fit_rangePower fit_SPCoupling fit_SPC_maxS'
  list_vars=trim(list_vars)//' fit_tolGF fit_tolMSDE fit_tolMSDF fit_tolMSDFS fit_tolMSDS'
  list_vars=trim(list_vars)//' fockoptmix focktoldfe fockdownsampling fock_icutcoul'
- list_vars=trim(list_vars)//' gwr_np_kgts gwr_ntau gwr_boxcutmin gwr_task'
+ list_vars=trim(list_vars)//' gwr_np_kgts gwr_ucsc_batch gwr_ntau gwr_boxcutmin gwr_task'
  list_vars=trim(list_vars)//' freqim_alpha freqremax freqremin freqspmax'
- list_vars=trim(list_vars)//' freqspmin friction frzfermi fxcartfactor'
  list_vars=trim(list_vars)//' freqspmin friction frzfermi fxcartfactor'
  list_vars=trim(list_vars)//' f4of2_sla f6of2_sla'
 !G

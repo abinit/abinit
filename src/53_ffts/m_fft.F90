@@ -539,7 +539,6 @@ end subroutine fftbox_execute_op_spc
 !!  Out-of-place FFT transform of complex arrays.
 !!  Call (FFTW3|DFTI) routines if available, otherwise fallback to SG routines
 !!  TARGET: dpc arrays
-
 !!
 !! INPUTS
 !! plan<fftbox_plan3_t>=Structure with the parameters defining the transform.

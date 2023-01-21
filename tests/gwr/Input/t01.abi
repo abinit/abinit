@@ -8,7 +8,7 @@ ndtset      4
 timopt 1
 
 # This to compute QP without symmetries for debugging purposes
-#nsym 1 
+#nsym 1
 #kptopt 3
 #kptopt 2
 
@@ -45,6 +45,7 @@ gwr_boxcutmin3  1.1  # This should be subject to convergence studies
 #mixprec3    1       # Mixed precision FFT.
 #gw_icutcoul3   16   # Monte-Carlo integration in the mini-Brillouin zone for Full Coulomb interaction.
 #gw_icutcoul3   0    # Spherical cutoff
+gwr_ucsc_batch3 3 5
 
 nband3      30       # Bands to be used in the screening calculation
 ecuteps3    4        # Cut-off energy of the planewave set to represent the dielectric matrix.
@@ -67,16 +68,16 @@ nfreqsp3 50
 freqspmax3 5 eV
 
 ################################
-# Dataset 4: RPA energy 
+# Dataset 4: RPA energy
 ################################
 optdriver4  6        # Activate GWR code
 gwr_task4 "RPA_ENERGY"     # Compute RPA energy.
 getden4 1
 getwfk4 2 # WFK file with empty states
-gwr_ntau4   6        
-gwr_boxcutmin4  1.1  
-nband4      30       
-ecuteps4    4        
+gwr_ntau4   6
+gwr_boxcutmin4  1.1
+nband4      30
+ecuteps4    4
 
 # Definition of the k-point grid
 # IMPORTANT: GWR requires Gamma-centered k-meshes
