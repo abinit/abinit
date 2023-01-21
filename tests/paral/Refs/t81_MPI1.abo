@@ -4,7 +4,7 @@
                    for lattice, spin and electron degrees of freedom.
 
 .Version 9.8.2 of MULTIBINIT 
-.(MPI version, prepared for a x86_64_linux_gnu12.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
  MULTIBINIT comes with ABSOLUTELY NO WARRANTY.
@@ -33,14 +33,14 @@
 
 
 .Starting date : Thu 19 Jan 2023.
-- ( at 15h19 )
+- ( at 15h26 )
   
 -  nproc =    1
 
 ================================================================================
 
  Read the information in the reference structure in 
--/home/hexu/cprojects/abinit_v98fix/tests/paral/Input/t81_ddb.in
+-/home/buildbot/ABINIT/alps_gnu_9.3_openmpi/xuhe_mbfix98_v5/tests/paral/Input/t81_ddb.in
  to initialize the multibinit input
 
 ================================================================================
@@ -196,7 +196,7 @@
 ================================================================================
 
 -Reading the training-set file :
--/home/hexu/cprojects/abinit_v98fix/tests/paral/Input/t81_HIST
+-/home/buildbot/ABINIT/alps_gnu_9.3_openmpi/xuhe_mbfix98_v5/tests/paral/Input/t81_HIST
 
 
 ================================================================================
@@ -227,9 +227,9 @@
 
  Goal function values at the begining of the fit process (eV^2/A^2):
    Energy          :   4.0372994902680415E-05
-   Forces+Stresses :   7.4805078532507504E-03
-   Forces          :   7.3678370383277224E-03
-   Stresses        :   1.1267081492302770E-04
+   Forces+Stresses :   7.4805078532507747E-03
+   Forces          :   7.3678370383277467E-03
+   Stresses        :   1.1267081492302757E-04
 
  N   Selecting          MSDE              MSDFS              MSDF              MSDS
     Coefficient      (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)
@@ -241,10 +241,10 @@
  171 =>  -1.5201595294E-02 (Sr_y-O1_y)^2(Sr_x-O2_x[-1 0 -1])^1
 
  Goal function values at the end of the fit process (eV^2/A^2):
-   Energy          :   3.5781888938353315E-05
-   Forces+Stresses :   7.0936342089015373E-03
-   Forces          :   6.9812431483529435E-03
-   Stresses        :   1.1239106054859278E-04
+   Energy          :   3.5781888938353268E-05
+   Forces+Stresses :   7.0936342089015650E-03
+   Forces          :   6.9812431483529721E-03
+   Stresses        :   1.1239106054859269E-04
 
 
 --------------------------------------------------------------------------------
@@ -262,9 +262,9 @@
 
  Goal function values at the begining of the fit process (eV^2/A^2):
    Energy          :   4.0372994902680415E-05
-   Forces+Stresses :   7.4805078532507504E-03
-   Forces          :   7.3678370383277224E-03
-   Stresses        :   1.1267081492302770E-04
+   Forces+Stresses :   7.4805078532507747E-03
+   Forces          :   7.3678370383277467E-03
+   Stresses        :   1.1267081492302757E-04
 
  N   Selecting          MSDE              MSDFS              MSDF              MSDS
     Coefficient      (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)
@@ -278,10 +278,10 @@
  9 =>   8.0818747419E-02 (Ru_x-O1_x)^1(Ru_y-O2_y)^1(Ru_y-O1_y)^1
 
  Goal function values at the end of the fit process (eV^2/A^2):
-   Energy          :   2.4682517225956856E-05
-   Forces+Stresses :   6.0193720010110153E-03
-   Forces          :   5.9065263781563427E-03
-   Stresses        :   1.1284562285467297E-04
+   Energy          :   2.4682517225956633E-05
+   Forces+Stresses :   6.0193720010110223E-03
+   Forces          :   5.9065263781563496E-03
+   Stresses        :   1.1284562285467288E-04
 
 
 --------------------------------------------------------------------------------
@@ -299,9 +299,9 @@
 
  Goal function values at the begining of the fit process (eV^2/A^2):
    Energy          :   4.0372994902680415E-05
-   Forces+Stresses :   7.4805078532507504E-03
-   Forces          :   7.3678370383277224E-03
-   Stresses        :   1.1267081492302770E-04
+   Forces+Stresses :   7.4805078532507747E-03
+   Forces          :   7.3678370383277467E-03
+   Stresses        :   1.1267081492302757E-04
 
  N   Selecting          MSDE              MSDFS              MSDF              MSDS
     Coefficient      (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)
@@ -317,10 +317,10 @@
  144 =>   7.9592927971E-02 (O1_y-Ru_y)^1(O1_x-Sr_x)^1(O1_z-Sr_z[0 1 1])^1
 
  Goal function values at the end of the fit process (eV^2/A^2):
-   Energy          :   1.3594815613709763E-05
-   Forces+Stresses :   4.8795087694940538E-03
-   Forces          :   4.7673550808230419E-03
-   Stresses        :   1.1215368867101130E-04
+   Energy          :   1.3594815613709570E-05
+   Forces+Stresses :   4.8795087694940677E-03
+   Forces          :   4.7673550808230566E-03
+   Stresses        :   1.1215368867101115E-04
 
 
 ================================================================================
@@ -332,15 +332,10 @@
 ================================================================================
 
 -
-- Proc.   0 individual time (sec): cpu=          3.8  wall=          3.8
+- Proc.   0 individual time (sec): cpu=          4.0  wall=          4.0
 
 ================================================================================
 
-+Total cpu time      3.763  and wall time      3.788 sec
++Total cpu time      3.988  and wall time      3.997 sec
 
  multibinit : the run completed succesfully.
-- [ALL OK] MEMORY CONSUMPTION REPORT FOR C CODE:
--   There were 0 allocations and 0 deallocations in C code
-- [ALL OK] MEMORY CONSUMPTION REPORT FOR FORTRAN CODE:
--   There were 859868 allocations and 859868 deallocations in Fortran
--   Remaining memory at the end of the calculation is 0
