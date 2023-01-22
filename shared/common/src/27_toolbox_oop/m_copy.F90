@@ -38,7 +38,6 @@ MODULE m_copy
 
  use defs_basis,  only : dp, spc, dpc
  use iso_c_binding
-
  use m_abicore
 
  implicit none

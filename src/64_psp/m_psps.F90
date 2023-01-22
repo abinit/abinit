@@ -1112,7 +1112,7 @@ subroutine nctab_init(nctab, mqgrid_vl, has_tcore, has_tvale)
 !Arguments ------------------------------------
  class(nctab_t),intent(inout) :: nctab
  integer,intent(in) :: mqgrid_vl
- logical,intent(in) :: has_tcore,has_tvale
+ logical,intent(in) :: has_tcore, has_tvale
 
 ! *************************************************************************
 
@@ -1151,11 +1151,13 @@ subroutine nctab_free(nctab)
 
 ! *************************************************************************
 
- nctab%mqgrid_vl = 0
- nctab%has_tvale = .False.
  ABI_SFREE(nctab%tvalespl)
- nctab%has_tcore = .False.
  ABI_SFREE(nctab%tcorespl)
+ ABI_SFREE(nctab%tphi_qspl)
+ ABI_SFREE(nctab%tphi_n)
+ ABI_SFREE(nctab%tphi_l)
+ ABI_SFREE(nctab%tphi_jtot)
+ ABI_SFREE(nctab%tphi_occ)
 
 end subroutine nctab_free
 !!***
