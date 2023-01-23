@@ -39,10 +39,6 @@
 #include <thrust/device_ptr.h>
 #include <thrust/transform_reduce.h>
 
-#include <mpi.h>
-
-extern "C" void xmpi_sum_dp_c(double* array, int32_t array_size, MPI_Fint* comm, int32_t* ierr);
-
 //! token used to store memory state for buffers that need to be uploaded each time
 //! apply_block is called.
 //!
