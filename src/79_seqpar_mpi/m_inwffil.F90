@@ -3136,6 +3136,7 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
              ! foldre is between 0 and 20, foldim is between 0 and 18
              foldre=mod(fold1+fold2,21)
              foldim=mod(3*fold1+2*fold2,19)
+
              cg2(1,index+icg2)=dble(foldre)
              cg2(2,index+icg2)=dble(foldim)
            else
@@ -3156,6 +3157,7 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
              fold2 = modulo(1664525_int64 * fold1 + 1013904223_int64, 2147483648_int64)
              fold1=modulo(fold1,3)+modulo(fold1,5)+modulo(fold1,7)+modulo(fold1,11)+modulo(fold1,13)
              fold2=modulo(fold2,3)+modulo(fold2,5)+modulo(fold2,7)+modulo(fold2,11)+modulo(fold2,13)
+
              cg2(1,index+icg2)=dble(fold1)/34-0.5
              cg2(2,index+icg2)=dble(fold2)/34-0.5
            end if
@@ -3455,9 +3457,8 @@ subroutine cg_from_atoms(ikpt, isppol, rprimd, xred, kg_k, cg, dtset, psps, eig,
  integer :: iatom, itypat, iln, ig, iband, ilmn, ilm, im, lnmax
  real(dp) :: kpg1, kpg2, kpg3, kpgc1, kpgc2, kpgc3, rep, yt, rr
  complex(dp) :: cfact
- logical,parameter :: timeit = .True.
  logical :: supported, use_fft_mixprec, has_fock
- real(dp) :: cpu, wall, gflops, cpu_all, wall_all, gflops_all, ucvol, arg
+ real(dp) :: ucvol, arg ! cpu, wall, gflops,
  character(len=500) :: msg
 !arrays
  real(dp) :: tsec(2), gmet(3,3), gprimd(3,3), rmet(3,3), kpt(3), phase_l(2), ri(2)
@@ -3488,18 +3489,16 @@ subroutine cg_from_atoms(ikpt, isppol, rprimd, xred, kg_k, cg, dtset, psps, eig,
  if (dtset%nspinor == 2) supported = .False.
  if (dtset%usepaw /= 0) supported = .False.
  if (.not. supported) then
-   call wrtout(std_out, " cg initialization from atomic orbitals not available. returning")
+   if (me_cell == 0 .and. ikpt == 1) then
+     call wrtout(std_out, " cg initialization from atomic orbitals not available. returning")
+   end if
    return
- end if
-
- if (timeit) then
-   call cwtime(cpu_all, wall_all, gflops_all, "start")
-   call cwtime(cpu, wall, gflops, "start")
  end if
 
  if (me_cell == 0 .and. ikpt == 1) then
    call wrtout(std_out, sjoin(" Initializing cg from atomic orbitals for ikpt:", itoa(ikpt), ", spin:", itoa(isppol)))
  end if
+ !call cwtime(cpu, wall, gflops, "start")
 
  call metric(gmet, gprimd, -1, rmet, rprimd, ucvol)
 
@@ -3510,8 +3509,8 @@ subroutine cg_from_atoms(ikpt, isppol, rprimd, xred, kg_k, cg, dtset, psps, eig,
  ABI_SFREE(ylm_gr)
 
  ! Compute nonlocal form factors ffnl at (k+G)
- ! Note that here we need to work with useylm = 1 to have the m-dependency
- ! even when Vnl is applied with Legendre polynomials
+ ! Note that we need to work with useylm = 1 to keep the m-dependency
+ ! even when Vnl is applied with Legendre polynomials (useylm = 0)
 
  ! Get |k+G|
  ABI_MALLOC(kpgnorm, (npw))
@@ -3574,12 +3573,13 @@ subroutine cg_from_atoms(ikpt, isppol, rprimd, xred, kg_k, cg, dtset, psps, eig,
        ilmn = ilmn + 1
        ilm = im + ll**2
        iband = iband + 1
+
        ! NB: Assuming nspinor == 1
        do ig=1,npw ! *my_nspinor
          yt = ylm(ig, ilm) * tphiq(ig, iln, itypat)
          ri(1) = phase_l(1) * sf(1, ig) - phase_l(2) * sf(2, ig)
          ri(2) = phase_l(1) * sf(2, ig) + phase_l(2) * sf(1, ig)
-         call randomize(ri)
+         if (dtset%wfinit == 1) call randomize(ri)
          cg(1, ig, iband) = ri(1) * yt
          cg(2, ig, iband) = ri(2) * yt
          !wfcatom (ig, 1, n_starting_wfc) = phase_l * sf(1, ig) * ylm(ig, ilm) * chiq(ig, nb, nt)
@@ -3599,19 +3599,6 @@ subroutine cg_from_atoms(ikpt, isppol, rprimd, xred, kg_k, cg, dtset, psps, eig,
  ABI_SFREE(kpg_k)
  ABI_FREE(ylm)
 
- ! Ortoghonalization is in principle not needed but it seems to improve.
- if (dtset%wfinit > 0) then
-   !ortalgo = 3 !; ortalgo = mpi_enreg%paral_kgb
-   !call pw_orthon(0, 0, istwf_k, mcg, mgsc, npwsp, nband, ortalgo, gsc, usepaw, cg, me_g0, comm_bsf)
-
-   ! TODO: Merge the two routines.
-   if (usepaw == 1) then
-     call cgpaw_cholesky(npwsp, nband, cg, gsc, istwf_k, me_g0, comm_bsf)
-   else
-     call cgnc_cholesky(npwsp, nband, cg, istwf_k, me_g0, comm_bsf, use_gemm=.False.)
-   end if
- end if
-
  ! Use mixed precisions if requested by the user but only for low accuracy_level
  !use_fft_mixprec = dtset%mixprec == 1 .and. accuracy_level < 2
  !if (use_fft_mixprec) prev_mixprec = fftcore_set_mixprec(1)
@@ -3623,9 +3610,28 @@ subroutine cg_from_atoms(ikpt, isppol, rprimd, xred, kg_k, cg, dtset, psps, eig,
  ABI_MALLOC(gsc, (2, npw*my_nspinor*nband*dtset%usepaw))
  call subspace_rotation(gs_hamk, dtset%prtvol, mpi_enreg, nband, npw, my_nspinor, savemem, &
                         enlx, eig, cg, gsc, ghc, gvnlxc)
- ABI_FREE(gsc)
+
  ABI_SFREE(ghc)
  ABI_SFREE(gvnlxc)
+
+ ! Revert mixprec to previous status before returning.
+ !if (use_fft_mixprec) prev_mixprec = fftcore_set_mixprec(prev_mixprec)
+
+ ! Ortoghonalization is in principle not needed but it seems to improve a bit.
+ if (dtset%wfinit < 0) then
+   !ortalgo = 3 !; ortalgo = mpi_enreg%paral_kgb
+   !call pw_orthon(0, 0, istwf_k, mcg, mgsc, npwsp, nband, ortalgo, gsc, usepaw, cg, me_g0, comm_bsf)
+
+   ! TODO: Merge the two routines.
+   if (usepaw == 1) then
+     call cgpaw_cholesky(npwsp, nband, cg, gsc, istwf_k, me_g0, comm_bsf)
+   else
+     call cgnc_cholesky(npwsp, nband, cg, istwf_k, me_g0, comm_bsf, use_gemm=.False.)
+   end if
+ end if
+
+ ABI_FREE(gsc)
+ !call cwtime_report(" cg_from_atoms:", cpu, wall, gflops)
 
 contains
 subroutine randomize(ri)
