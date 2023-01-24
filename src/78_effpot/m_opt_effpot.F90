@@ -1703,7 +1703,7 @@ subroutine opt_getSingleDispTerms(terms,crystal, sc_size,comm)
       call polynomial_coeff_getNorder(terms_tmp,crystal,cutoff,ncoeff,ncoeff_out,power_disp,&
         &                               power_strph,option_GN,sc_size,comm,anharmstr=.false.,spcoupling=.false.,&
         &                               only_odd_power=.false.,only_even_power=.true.,verbose=.false.,&
-        &                               compute_symmetric=.false.,fit_iatom=iatom, max_nbody=[6, 6,6,6,6,6])
+        &                               compute_symmetric=.false.,fit_iatom=iatom, max_nbody=[999,999,999,999,999,999])
       !TEST MS
       !  write(std_out,*) "behind call getNorder"
       !  write(std_out,*) "ncoeff_out: ", ncoeff_out

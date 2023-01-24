@@ -124,7 +124,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 &                                   positive,verbose,anharmstr,spcoupling,&
 &                                   only_odd_power,only_even_power,prt_anh,&
 &                                   fit_iatom,prt_files,fit_on,sel_on,fit_factors,prt_GF_csv,&
-&                                   dispterms, max_nbody)
+&                                   dispterms,coeff_file_rw,read_effective_potential, max_nbody)
 
  implicit none
 
@@ -136,8 +136,9 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  integer,intent(in) :: fixcoeff(nfixcoeff), bancoeff(nbancoeff),imposecoeff(nimposecoeff)
  integer,intent(in) :: power_disps(2)
  type(effective_potential_type),target,intent(inout) :: eff_pot
+ type(effective_potential_type),optional,intent(inout) :: read_effective_potential
  type(abihist),intent(inout) :: hist
- integer,optional,intent(in) :: max_power_strain,prt_anh,fit_iatom, max_nbody(:)
+ integer,optional,intent(in) :: max_power_strain,prt_anh,fit_iatom,  coeff_file_rw, max_nbody(:)
  real(dp),optional,intent(in) :: cutoff_in,fit_tolMSDF,fit_tolMSDS,fit_tolMSDE,fit_tolMSDFS
  real(dp),optional,intent(in) :: fit_tolGF
  logical,optional,intent(in) :: verbose,positive,anharmstr,spcoupling
@@ -147,10 +148,11 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  real(dp),optional,intent(in) :: fit_factors(3)
 !Local variables-------------------------------
 !scalar
- integer :: ii,icoeff,my_icoeff,icycle,icycle_tmp,ierr,info,index_min,iproc,isweep,jcoeff,ia
- integer :: master,max_power_strain_in,my_rank,my_ncoeff,ncoeff_model,ncoeff_tot,natom_sc,ncell,ncycle
+ integer :: ii,icoeff,my_icoeff,icycle,icycle_tmp,ierr,info,index_min,iproc,isweep,jcoeff,ia,generateterm_in
+ integer :: master,max_power_strain_in,my_rank,my_ncoeff,ncoeff_model,ncoeff_tot,natom_sc,ncell,ncycle,ncoeff_tot_tmp
  integer :: ncycle_tot,ncycle_max,nproc,ntime,nsweep,size_mpi,ncoeff_fix,ncoeff_out
- integer :: rank_to_send,unit_anh,fit_iatom_in,unit_GF_val,nfix_and_impose,nfixcoeff_corr
+ integer :: my_ncoeff_start,my_ncoeff_end,my_ncoeff_simple,ncoeff_alone
+ integer :: rank_to_send,unit_anh,fit_iatom_in,unit_GF_val,nfix_and_impose,nfixcoeff_corr,atom_start,atom_end
  integer :: ncopy_terms
  real(dp) :: cutoff,factor,time,tolMSDF,tolMSDS,tolMSDE,tolMSDFS,tolGF,check_value
  real(dp),parameter :: HaBohr_eVAng = 27.21138386d0 / 0.529177249d0
@@ -173,7 +175,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  real(dp),allocatable :: fcart_coeffs(:,:,:,:),gf_values(:,:),gf_mpi(:,:)
  real(dp),allocatable :: fcart_coeffs_tmp(:,:,:,:),strten_coeffs_tmp(:,:,:)
  real(dp),allocatable :: strten_coeffs(:,:,:)
- type(polynomial_coeff_type),allocatable :: my_coeffs(:)
+ type(polynomial_coeff_type),allocatable :: my_coeffs(:),coeffs_iatom(:)
  type(polynomial_coeff_type),allocatable :: coeffs_out(:)
  type(polynomial_coeff_type),target,allocatable :: coeffs_tmp(:)
  type(polynomial_coeff_type),pointer :: coeffs_in(:)
@@ -204,6 +206,12 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  need_spcoupling = .TRUE.
  if(present(spcoupling)) need_spcoupling = spcoupling
  need_only_odd_power = .FALSE.
+  !----------------
+ generateterm_in = generateterm
+  if(present(coeff_file_rw))then
+     if (coeff_file_rw==2) generateterm_in = 0
+  end if
+ !----------------
  if(present(only_odd_power)) need_only_odd_power = only_odd_power
  need_prt_anh = .FALSE.
  if(present(prt_anh))then
@@ -442,13 +450,26 @@ endif
  ABI_MALLOC(symbols,(eff_pot%crystal%natom))
  call symbols_crystal(eff_pot%crystal%natom,eff_pot%crystal%ntypat,eff_pot%crystal%npsp,&
 &                     symbols,eff_pot%crystal%typat,eff_pot%crystal%znucl)
+!!atom_start,atom_end,ii,coeffs_iatom
+if (fit_iatom==-2 .and. generateterm==1) then
+   atom_start = 1
+   atom_end = eff_pot%crystal%nirredat
+else
+   atom_start = fit_iatom_in
+   atom_end = fit_iatom_in
+end if
 
  if(generateterm == 1)then
 ! we need to regenerate them
+  ncoeff_tot = 0
+  do ii = atom_start, atom_end
+    if (fit_iatom==-2) then
+        fit_iatom_in=eff_pot%crystal%irredatindx(ii)
+    end if  ! fit_iatom==-2
    if(need_verbose)then
      if(fit_iatom_in > 0)then
        write(message, '(2a,I3,4a)' )ch10,' The coefficients for the fit around atom', fit_iatom_in,': ',&
-&                                   trim(symbols(fit_iatom)),', will be generated',ch10
+&                                    trim(symbols(fit_iatom_in)),', will be generated',ch10
        call wrtout(std_out,message,'COLL')
        call wrtout(ab_out,message,'COLL')
      else
@@ -458,19 +479,90 @@ endif
      endif
      write(message,'(a,F6.3,a)') " Cutoff of ",cutoff," Bohr is imposed"
      call wrtout(std_out,message,'COLL')
-   end if
-
-   call polynomial_coeff_getNorder(coeffs_tmp,eff_pot%crystal,cutoff,my_ncoeff,ncoeff_tot,power_disps,&
+    end if  !need_verbose
+    call polynomial_coeff_getNorder(coeffs_iatom,eff_pot%crystal,cutoff,my_ncoeff,ncoeff_tot_tmp,power_disps,&
 &                                  max_power_strain_in,0,sc_size,comm,anharmstr=need_anharmstr,&
 &                                  spcoupling=need_spcoupling,distributed=.true.,&
 &                                  only_odd_power=need_only_odd_power,&
 &                                  only_even_power=need_only_even_power,&
 &                                  fit_iatom=fit_iatom_in,dispterms=need_disp, &
 &                                  max_nbody=max_nbody)
- end if
 
+    if (fit_iatom/=-2) then
+      call polynomial_coeff_list_free(coeffs_tmp)
+      ncoeff_tot = ncoeff_tot_tmp
+      ABI_MALLOC(coeffs_tmp,(my_ncoeff))
+      call coeffs_list_copy(coeffs_tmp,coeffs_iatom)
+      call polynomial_coeff_list_free(coeffs_iatom)
+    else
+      ncoeff_tot = ncoeff_tot+ncoeff_tot_tmp
+      if(.not.(allocated(coeffs_tmp))) then
+         ABI_MALLOC(coeffs_tmp,(size(coeffs_iatom)))
+         call coeffs_list_copy(coeffs_tmp,coeffs_iatom)
+      else
+         call coeffs_list_conc_onsite(coeffs_tmp,coeffs_iatom)
+ end if
+      call polynomial_coeff_list_free(coeffs_iatom)
+    end if  !fit_iatom/=-2
+  end do  ! ii = atom_start, atom_end
+
+  if (fit_iatom==-2 .and. iam_master) then
+        write(message, '(2a,I6,a)' )ch10,' fit_iatom = -2 : The total number of coefficients for all atoms are',ncoeff_tot,ch10
+        call wrtout(std_out,message,'COLL')
+        call wrtout(ab_out,message,'COLL')
+  end if
+end if   ! generateterm == 1
+
+ my_ncoeff = size(coeffs_tmp)
  ABI_FREE(symbols)
 
+ !polynomial_coeff_broadcast(coeffs_tmp, my_rank, comm)
+  if (coeff_file_rw==1 .and. generateterm_in == 1 ) then
+     write (filename, "(A9,I2,I2,A4)") "TEST_TERMS", my_rank+1,fit_iatom_in,".xml"
+     call polynomial_coeff_writeXML(coeffs_tmp,my_ncoeff,filename=filename)
+  end if
+
+  if (coeff_file_rw==2) then
+      ncoeff_tot = read_effective_potential%anharmonics_terms%ncoeff
+      if (iam_master) then
+           write(message,'(1a,I7,1a)')' Reading coefficients from file',ncoeff_tot,' Coefficients read'
+           call wrtout(std_out,message,'COLL')
+           write(message,'(1a)')' Redistributing the coefficients over CPUs'
+           call wrtout(std_out,message,'COLL')
+      end if
+
+      ncoeff_alone = mod(ncoeff_tot,nproc)
+      my_ncoeff_simple = int(aint(real(ncoeff_tot,sp)/(nproc)))
+      if(ncoeff_alone == 0 .and. ncoeff_tot >= nproc)then
+          my_ncoeff_start = (my_ncoeff_simple * my_rank) + 1
+          my_ncoeff_end   = my_ncoeff_start + my_ncoeff_simple - 1
+      else if(ncoeff_tot < nproc)then
+          if(my_rank + 1 <= ncoeff_tot)then !myrank smaller than ncombi
+              my_ncoeff_start = my_rank + 1
+              my_ncoeff_end = my_ncoeff_start
+          else
+              my_ncoeff_start = ncoeff_tot + 1 !myrank bigger than ncombi
+              my_ncoeff_end = ncoeff_tot + 1
+          endif
+      else if(ncoeff_tot > nproc .and. ncoeff_alone /= 0)then
+          if(my_rank >= (nproc-ncoeff_alone)) then
+              my_ncoeff_start = (my_ncoeff_simple * my_rank) + 1 + (my_rank - nproc + ncoeff_alone)
+              my_ncoeff_end = my_ncoeff_start + my_ncoeff_simple
+          else
+              my_ncoeff_start = (my_ncoeff_simple * my_rank) + 1
+              my_ncoeff_end   = my_ncoeff_start + my_ncoeff_simple - 1
+          endif
+      end if
+      if(my_ncoeff_end <= ncoeff_tot)then
+         my_ncoeff = my_ncoeff_end+1-my_ncoeff_start
+      else
+         my_ncoeff = 0
+      endif
+     call polynomial_coeff_list_free(coeffs_tmp)
+     ABI_MALLOC(coeffs_tmp,(my_ncoeff))
+     if(my_ncoeff /= 0)coeffs_tmp = read_effective_potential%anharmonics_terms%coefficients(my_ncoeff_start:my_ncoeff_end)
+  end if
+!print *, ' DEBUG ---------->> my_ncoeff, my rank   ' ,my_ncoeff, my_rank
 !Copy the initial coefficients from the model on the CPU 0
  ncoeff_tot = ncoeff_tot + ncoeff_model
  if((iam_master .and. ncopy_terms > 0)) my_ncoeff = my_ncoeff + ncopy_terms

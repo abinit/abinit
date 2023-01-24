@@ -90,7 +90,7 @@ contains
     character(len=fnlen), intent(inout) :: filnam(18)
     integer, intent(in) :: dry_run
     type(multibinit_dtset_type), target :: inp
-    type(effective_potential_type) :: reference_effective_potential
+    type(effective_potential_type) :: reference_effective_potential, read_effective_potential
     type(abihist) :: hist, hist_tes
 
     !type(spin_model_t) :: spin_model
@@ -210,6 +210,16 @@ contains
     !  Read the model (from DDB or XML)
     call effective_potential_file_read(filnam(3),reference_effective_potential,inp,comm)
 
+       if (inp%coeff_file_rw==2) then
+          read_effective_potential=reference_effective_potential
+          !call effective_potential_file_read(filnam(3),read_effective_potential,inp,comm)
+          if(filnam(6)/=''.and.filnam(6)/='no')then
+              call effective_potential_file_getType(filnam(6),filetype)
+              if(filetype==3.or.filetype==23) then
+                  call effective_potential_file_read(filnam(6),read_effective_potential,inp,comm)
+              end if
+          end if
+       end if
 
     if(filnam(4)/=''.and.filnam(4)/='no') then
        call effective_potential_file_getType(filnam(4),filetype)
@@ -412,7 +422,9 @@ elec_eval = .FALSE.
                     &         anharmstr=inp%fit_anhaStrain==1,&
                     &         spcoupling=inp%fit_SPCoupling==1,prt_anh=inp%analyze_anh_pot,&
                     &         fit_iatom=inp%fit_iatom,prt_files=.TRUE.,fit_on=inp%fit_on,sel_on=inp%sel_on,&
-                    &         fit_factors=inp%fit_factors,prt_GF_csv=inp%prt_GF_csv,dispterms=inp%fit_dispterms==1)
+                    &         fit_factors=inp%fit_factors,prt_GF_csv=inp%prt_GF_csv,dispterms=inp%fit_dispterms==1,&
+                    &         coeff_file_rw=inp%coeff_file_rw,read_effective_potential=read_effective_potential, &
+                    &         max_nbody=inp%fit_max_nbody)
              else
                 if (inp%fit_ncoeff_per_iatom/=0)then
                    if (mod(inp%fit_ncoeff,inp%fit_ncoeff_per_iatom) /= 0)then
@@ -475,6 +487,7 @@ elec_eval = .FALSE.
                           &         fit_iatom=reference_effective_potential%crystal%irredatindx(ii),&
                           &         prt_files=need_prt_files,fit_on=inp%fit_on,sel_on=inp%sel_on,&
                           &         fit_factors=inp%fit_factors,prt_GF_csv=inp%prt_GF_csv,dispterms=inp%fit_dispterms==1, &
+   &         coeff_file_rw=inp%coeff_file_rw,read_effective_potential=read_effective_potential, &
                           &         max_nbody=inp%fit_max_nbody)
                   enddo
                 enddo
