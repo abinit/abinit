@@ -3,11 +3,12 @@
  tolvrs  1e-8
  #rmm_diis 1
 
-#DATASET 1: GS run with SOC
+# DATASET 1: GS run with SOC
  nspinor1 2
  nband1   32
+ #wfinitw1 1
 
-#DATASET 1: GS run without SOC
+# DATASET 2: GS run without SOC
  nspinor2 1
  nband2   16
  #getwfk2 -1   # This triggers SIGSEV, likely due to different istwfk

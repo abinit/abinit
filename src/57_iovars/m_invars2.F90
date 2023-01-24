@@ -1429,6 +1429,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'get1wf',tread,'INT')
  if(tread==1) dtset%get1wf=intarr(1)
+ ! TODO
+ !call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'get1wf_filepath',tread,'KEY', key_value=key_value)
+ !if(tread==1) dtset%get1wf_filepath = key_value
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getddk',tread,'INT')
  if(tread==1) dtset%getddk=intarr(1)
