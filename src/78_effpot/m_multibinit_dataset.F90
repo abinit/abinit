@@ -119,6 +119,7 @@ module m_multibinit_dataset
   integer :: optcell
   integer :: prt_model
   integer :: dipdip_prt
+  integer :: coeff_file_rw
   integer :: prt_phfrq
   integer :: prt_ifc
   integer :: randomseed
@@ -242,7 +243,7 @@ module m_multibinit_dataset
   !real(dp) :: spin_tolavg !average
   !real(dp) :: spin_tolvar !covariance
 
-  real(dp) :: spin_mag_field(3)  ! external magnetc field
+  real(dp) :: spin_mag_field(3)  ! external magnetic field
   real(dp) :: spin_projection_qpoint(3) ! qpoint to check if spin configuration is random
   real(dp) :: spin_sia_k1dir(3)
   real(dp) :: spin_init_qpoint(3) ! qpoint to specify initial spin configuration
@@ -962,6 +963,16 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
    ABI_ERROR(message)
  end if
 
+  multibinit_dtset%coeff_file_rw=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'coeff_file_rw',tread,'INT')
+ if(tread==1) multibinit_dtset%coeff_file_rw=intarr(1)
+ if(multibinit_dtset%coeff_file_rw<0.or.multibinit_dtset%coeff_file_rw>2)then
+   write(message, '(a,i8,a,a,a,a,a)' )&
+&   'coeff_file_rw is',multibinit_dtset%prtsrlr,', but the only allowed values',ch10,&
+    'are 0 or 1 2.',ch10,&
+&   'Action: correct coeff_file_rw in your input file.'
+   ABI_ERROR(message)
+ end if
 
  multibinit_dtset%dtion=100
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dtion',tread,'INT')
@@ -1017,7 +1028,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  multibinit_dtset%fit_iatom=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fit_iatom',tread,'INT')
  if(tread==1) multibinit_dtset%fit_iatom=intarr(1)
- if(multibinit_dtset%fit_iatom<-1)then
+ if(multibinit_dtset%fit_iatom<-2)then
    write(message, '(a,i8,a,a,a,a,a)' )&
 &   'fit_iatom is',multibinit_dtset%fit_iatom,', but the only allowed values',ch10,&
 &   'are larger than -1 for multibinit.',ch10,&
