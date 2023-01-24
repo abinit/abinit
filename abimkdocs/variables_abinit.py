@@ -15685,7 +15685,7 @@ If set to 1, provide output of electron-phonon "gkk" matrix elements, for
 further treatment by mrggkk utility or anaddb utility. Note that symmetry will
 be disabled for the calculation of the perturbation, forcing the inclusion of
 all k-points and all perturbation directions. Additional information on
-electron-phonon treatment in ABINIT is given in the tutorial [[tutorial:eph_intro]] and subsequent ones, [[tutorial:eph4mob]] 
+electron-phonon treatment in ABINIT is given in the tutorial [[tutorial:eph_intro]] and subsequent ones, [[tutorial:eph4mob]]
 and [[tutorial:eph4zpr]].
 """,
 ),
@@ -16000,7 +16000,7 @@ range of energy (positive or negative), determined by the (positive or
 negative, but non-zero) value of the STM bias [[stmbias]].
 Specifying a non-zero negative value is also allowed, and will produce also
 the output of an electron density in real space, like the above, but moreover
-will additionally filter it to have the contribution of one band only, 
+will additionally filter it to have the contribution of one band only,
 whose number is the absolute value of [[prtstm]]. Obviously abs([[prtstm]])
 must be smaller or equal to [[nband]].
 
@@ -20927,6 +20927,24 @@ points. That is why we divide **n1**, **n2** and **n3** by [[w90prtunk]]. The ou
 for plotting with XCrysDen will also be on the coarse grid. When this does not
 produce an acceptable plot, [[w90prtunk]] can be set to 1 to output every grid point.
 (You should try spline interpolation in XCrysDen first.)
+""",
+),
+
+Variable(
+    abivarname="wfinit",
+    varset="gstate",
+    vartype="integer",
+    topics=['TuningSpeedMem_useful','SCFAlgorithms_useful'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="WaveFunctions INITialization",
+    added_in_version="9.9.0",
+    text=r"""
+This option specifies how to initialize the wavefunctions in the case of GS calculations.
+Possible values are:
+
+    * 0: Start from random wavefunctions.
+    * 1: Use atomic orbitals + random numbers
 """,
 ),
 

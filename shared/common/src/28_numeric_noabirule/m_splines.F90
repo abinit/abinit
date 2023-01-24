@@ -75,9 +75,9 @@ contains
 !!   This is only computed for ider=0 or 1.
 !!
 !! NOTES
-!!        if ider=0, compute only the function (contained in fun)
-!!        if ider=1, compute the function (contained in fun) and its first derivative (in derfun)
-!!        if ider=2, compute only the second derivative of the function (in derfun)
+!!  if ider=0, compute only the function (contained in fun)
+!!  if ider=1, compute the function (contained in fun) and its first derivative (in derfun)
+!!  if ider=2, compute only the second derivative of the function (in derfun)
 !!
 !! SOURCE
 

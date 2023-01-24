@@ -3143,7 +3143,7 @@ end subroutine projbd
 !! SOURCE
 
 
-subroutine cg_envlop(cg,ecut,gmet,icgmod,kg,kpoint,mcg,nband,npw,nspinor)
+subroutine cg_envlop(cg, ecut, gmet, icgmod, kg, kpoint, mcg, nband, npw, nspinor)
 
 !Arguments ------------------------------------
 !scalars

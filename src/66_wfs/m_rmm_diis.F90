@@ -53,6 +53,7 @@ module m_rmm_diis
 !!***
 
  public :: rmm_diis
+ public :: subspace_rotation   ! rayleigh-ritz procedure from gs_hamk
 !!***
 
  type,private :: rmm_diis_t
