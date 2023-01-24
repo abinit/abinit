@@ -29,6 +29,8 @@ module m_anharmonics_terms
  use m_abicore
  use m_polynomial_coeff
  use m_ifc, only : ifc_type
+ use m_supercell, only: getPBCIndexes_supercell
+ use m_xmpi
 
  implicit none
 

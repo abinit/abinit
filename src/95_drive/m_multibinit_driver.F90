@@ -474,7 +474,8 @@ elec_eval = .FALSE.
                           &         spcoupling=inp%fit_SPCoupling==1,prt_anh=inp%analyze_anh_pot,&
                           &         fit_iatom=reference_effective_potential%crystal%irredatindx(ii),&
                           &         prt_files=need_prt_files,fit_on=inp%fit_on,sel_on=inp%sel_on,&
-                          &         fit_factors=inp%fit_factors,prt_GF_csv=inp%prt_GF_csv,dispterms=inp%fit_dispterms==1)
+                          &         fit_factors=inp%fit_factors,prt_GF_csv=inp%prt_GF_csv,dispterms=inp%fit_dispterms==1, &
+                          &         max_nbody=inp%fit_max_nbody)
                   enddo
                 enddo
              endif

@@ -572,6 +572,23 @@ Set the range of the powers for the anharmonic coefficients
 """,
 ),
 
+
+
+Variable(
+    abivarname="fit_max_nobdy@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['FitProcess_basic'],
+    dimensions=['max([[multibinit:fit_rangePower]])-min([[multibinit:fit_rangePower]])+1'],
+    defaultval=0,
+    mnemonics="FIT MAXimum Number of BODY for the coefficients",
+    added_in_version="before_v9",
+    text=r"""
+For terms of every order specified in [[multibinit:fit_rangePower]], set the maximum of the number of bodies involved. The number of values should be the same as the number of orders. This can reduce the number of terms generated, so that the high order terms can be generated within a reasonable time. Note that each atomic motion in one direction and each strain component count as one body.
+""",
+),
+
+
 Variable(
     abivarname="fit_cutoff@multibinit",
     varset="multibinit",

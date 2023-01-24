@@ -127,7 +127,7 @@ subroutine opt_effpot(eff_pot,opt_ncoeff,opt_coeff,hist,opt_on,opt_factors,comm,
   natom_sc = size(hist%xred,2)
   factor   = 1._dp/natom_sc
   need_print_anh =.False.
-  
+
   if(present(print_anh)) then
     if(print_anh) need_print_anh=.True.
   end if
@@ -557,7 +557,7 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
       ncombi = ncombi1 + ncombi2
       nterm_start = eff_pot%anharmonics_terms%ncoeff
     else ! if iterm = nterm + 1 => Take care about strain
-      call opt_getHOstrain(my_coeffs,ncombi,nterm_start,eff_pot,order_ran,comm)
+      call opt_getHOstrain(my_coeffs,ncombi,nterm_start,eff_pot,order_ran,comm, max_nbody=[8,8,8,8,8,8])
     endif !
 
 
@@ -1326,7 +1326,7 @@ end subroutine opt_filterdisp
 !!
 !! SOURCE
 
-subroutine opt_getHOstrain(terms,ncombi,nterm_start,eff_pot,power_strain,comm)
+subroutine opt_getHOstrain(terms,ncombi,nterm_start,eff_pot,power_strain,comm, max_nbody)
 
   implicit none
 
@@ -1335,7 +1335,7 @@ subroutine opt_getHOstrain(terms,ncombi,nterm_start,eff_pot,power_strain,comm)
   integer,intent(in) :: comm
   type(polynomial_coeff_type),allocatable,intent(inout) :: terms(:)
   type(effective_potential_type), intent(in) :: eff_pot
-  integer,intent(in) :: power_strain(2)
+  integer,intent(in) :: power_strain(2), max_nbody(:)
   integer,intent(out) :: ncombi,nterm_start
   !arrays
   !Logicals
@@ -1367,7 +1367,7 @@ subroutine opt_getHOstrain(terms,ncombi,nterm_start,eff_pot,power_strain,comm)
   call wrtout(std_out,message,'COLL')
 
   !1406 get count of high order even anharmonic strain terms and the strain terms itself
-  call polynomial_coeff_getEvenAnhaStrain(strain_terms_tmp,crystal,ncombi,power_strain,comm)
+  call polynomial_coeff_getEvenAnhaStrain(strain_terms_tmp,crystal,ncombi,power_strain,comm, max_nbody)
   ! Allocate my_coeffs with ncombi free space to work with
 
   nterm_start = eff_pot%anharmonics_terms%ncoeff
@@ -1703,7 +1703,7 @@ subroutine opt_getSingleDispTerms(terms,crystal, sc_size,comm)
       call polynomial_coeff_getNorder(terms_tmp,crystal,cutoff,ncoeff,ncoeff_out,power_disp,&
         &                               power_strph,option_GN,sc_size,comm,anharmstr=.false.,spcoupling=.false.,&
         &                               only_odd_power=.false.,only_even_power=.true.,verbose=.false.,&
-        &                               compute_symmetric=.false.,fit_iatom=iatom)
+        &                               compute_symmetric=.false.,fit_iatom=iatom, max_nbody=[6, 6,6,6,6,6])
       !TEST MS
       !  write(std_out,*) "behind call getNorder"
       !  write(std_out,*) "ncoeff_out: ", ncoeff_out
