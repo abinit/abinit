@@ -34,7 +34,7 @@ module m_upf2abinit
  use m_copy,          only : alloc_copy
  use m_paw_numeric,   only : jbessel => paw_jbessel
  use m_pawpsp,        only : pawpsp_nl
- use m_pawrad,        only : pawrad_type, pawrad_init, pawrad_free
+ use m_pawrad,        only : pawrad_type, pawrad_init, pawrad_free, simp_gen
  use m_psptk,         only : cc_derivatives, psp8lo, psp8nl
 
  implicit none
@@ -355,7 +355,7 @@ subroutine upf2_to_abinit(ipsp, filpsp, znucl, zion, pspxc, lmax, lloc, mmax, &
 !Local variables -------------------------
  integer :: ierr, ir, irad, iprj, il, ll, smooth_niter, nso, nn, iln, kk, mm, pspindex, iwfc, iq
  integer :: atmwfc_lmax
- real(dp) :: yp1, ypn, amesh, damesh
+ real(dp) :: yp1, ypn, amesh, damesh, intg
  character(len=500) :: msg
  logical :: linear_mesh
  type(pseudo_upf) :: upf
@@ -372,6 +372,7 @@ subroutine upf2_to_abinit(ipsp, filpsp, znucl, zion, pspxc, lmax, lloc, mmax, &
 ! *********************************************************************
 
  ! See also https://github.com/QEF/qeschemas/blob/master/UPF/qe_pp-0.99.xsd
+ ! and https://github.com/QEF/qeschemas/files/9497267/pp.md
  call read_upf_new(filpsp, upf, ierr)
  ABI_CHECK(ierr == 0, sjoin("read_upf_new returned ierr:", itoa(ierr)))
 
@@ -631,13 +632,32 @@ subroutine upf2_to_abinit(ipsp, filpsp, znucl, zion, pspxc, lmax, lloc, mmax, &
  call pawrad_init(mesh, mesh_size=mmax, mesh_type=1, rstep=amesh)
  call nctab_eval_tvalespl(nctab, zion, mesh, ff, psps%mqgrid_vl, psps%qgrid_vl)
 
- ABI_FREE(ff)
-
  nctab%num_tphi = upf%nwfc
  if (upf%nwfc > 0) then
-   ! Store atomic wavefunctions in nctab + metadata and compute form factors for spline.
+   ! Store atomic wavefunctions and metadata in nctab, then compute form factors for spline.
+   ! NB: lchi is the radial part of the KS equation, multiplied by r.
    ABI_MALLOC(awfc_indlmn, (6, upf%nwfc))
    awfc_indlmn = huge(1)
+   atmwfc_lmax = -1
+
+   do iwfc=1, upf%nwfc
+     !print *, "label: ", upf%els(iwfc)
+     !print *, "n", upf%nchi(iwfc)
+     !print *, "nn", upf%nn(iwfc)
+     !print *, "j", upf%jchi(iwfc)
+     !print *, "l", upf%lchi(iwfc)
+     !print *, "occ:", upf%oc(iwfc)
+     atmwfc_lmax = max(atmwfc_lmax, upf%lchi(iwfc))
+     ff = upf%chi(:, iwfc) ** 2; call simp_gen(intg, ff, mesh)
+     write(std_out, *)" wavefunction (before rescaling) integrates to: ",intg
+     upf%chi(:, iwfc) = upf%chi(:, iwfc) / sqrt(intg)
+     ff = upf%chi(:, iwfc) ** 2; call simp_gen(intg, ff, mesh)
+     write(std_out, *)" wavefunction (after rescaling) integrates to: ",intg
+
+     ! NB: we only need ll (1), and iln (5) in psp8nl
+     awfc_indlmn(1, iwfc) = upf%lchi(iwfc)
+     awfc_indlmn(5, iwfc) = iwfc
+   end do
 
    ! All this sfree/remalloc stuff is for handling memory in multi dataset mode!
    ABI_REMALLOC(nctab%tphi_qspl, (psps%mqgrid_ff, 2, upf%nwfc))
@@ -651,21 +671,6 @@ subroutine upf2_to_abinit(ipsp, filpsp, znucl, zion, pspxc, lmax, lloc, mmax, &
    nctab%has_jtot = upf%has_so
    if (upf%has_so) call alloc_copy(upf%jchi, nctab%tphi_jtot)
 
-   atmwfc_lmax = -1
-   do iwfc=1, upf%nwfc
-     !print *, "label: ", upf%els(iwfc)
-     !print *, "n", upf%nchi(iwfc)
-     !print *, "nn", upf%nn(iwfc)
-     !print *, "j", upf%jchi(iwfc)
-     !print *, "l", upf%lchi(iwfc)
-     !print *, "occ:", upf%oc(iwfc)
-     atmwfc_lmax = max(atmwfc_lmax, upf%lchi(iwfc))
-
-     ! NB: we only need ll (1), and iln (5) in psp8nl
-     awfc_indlmn(1, iwfc) = upf%lchi(iwfc)
-     awfc_indlmn(5, iwfc) = iwfc
-   end do
-
    !call psp8nl(amesh, nctab%tphi_qspl, awfc_indlmn, atmwfc_lmax, upf%nwfc, upf%nwfc, mmax, &
    !            psps%mqgrid_ff, psps%qgrid_ff, upf%r, upf%chi)
 
@@ -673,6 +678,14 @@ subroutine upf2_to_abinit(ipsp, filpsp, znucl, zion, pspxc, lmax, lloc, mmax, &
    !  do iq=1,psps%mqgrid_ff
    !    write(555, *) nctab%tphi_qspl(iq,:,iwfc)
    !  end do
+   !end do
+
+   !do iwfc=1, upf%nwfc
+   !  where (abs(upf%r) > tol16)
+   !    upf%chi(:,iwfc) = upf%chi(:,iwfc) / upf%r
+   !  else where
+   !    upf%chi(:,iwfc) = zero
+   !  end where
    !end do
 
    call pawpsp_nl(nctab%tphi_qspl, awfc_indlmn, upf%nwfc, upf%nwfc, psps%mqgrid_ff, psps%qgrid_ff, mesh, upf%chi)
@@ -687,6 +700,7 @@ subroutine upf2_to_abinit(ipsp, filpsp, znucl, zion, pspxc, lmax, lloc, mmax, &
    !stop "nwfc"
  end if ! upf%nwfc > 0
 
+ ABI_FREE(ff)
  call pawrad_free(mesh)
  call deallocate_pseudo_upf(upf)
 

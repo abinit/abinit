@@ -1209,10 +1209,12 @@ integer function upfdft_to_ixc(dft, ixc, msg) result(ierr)
    ixc = -106131
  case ("WC")
    ixc = -118130
+ case ("SLA  PW   NOGX NOGC")  ! string produced by oncvpsp3
+   ixc = -1012
  case default
    ierr = 1
    write(msg, "(4a)") &
-     "Cannot find ABINIT ixc value corresponding to QE dft:", trim(dft), ch10, &
+     "Cannot find ABINIT ixc value corresponding to QE dft string:", trim(dft), ch10, &
      "Please update mapping in m_pspheads/upfdft_to_ixc."
  end select
 

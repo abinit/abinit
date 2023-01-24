@@ -36,7 +36,8 @@ module m_inwffil
 #endif
 
  use defs_abitypes, only : MPI_type
- use m_time,     only : timab
+ use m_fstrings, only : sjoin, itoa
+ use m_time,     only : timab, cwtime, cwtime_report
  use m_io_tools, only : file_exists, get_unit
  use m_geometry, only : getspinrot
  use m_pptools,  only : prmat
@@ -59,7 +60,8 @@ module m_inwffil
  private
 !!***
 
- public ::  inwffil
+ public :: inwffil
+ public :: cg_from_atoms
 !!***
 
 contains
@@ -2657,7 +2659,7 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
  integer :: istwf10_k,istwf1_k,istwf2_k,isym,itimrev
  integer :: mgfft1,mgfft2,n1,n2,n3,n4,n5,n6
  integer :: nbremn,npwtot,nspinor_index,nspinor1_this_proc,nspinor2_this_proc
- integer :: order,ortalgo 
+ integer :: order,ortalgo
  real(dp) :: ai,ar,arg,bi,br,eig_tmp,spinrots,spinrotx,spinroty,spinrotz
  character(len=500) :: message
  integer, parameter :: int64 = selected_int_kind(18)
@@ -3109,10 +3111,10 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
 
          do ipw=1,npw2
            index=index+1
-!          Different seed for different planewave and band
-!          DEBUG seq==par
-!          if(.false.) then
-!          ENDDEBUG seq==par
+           ! Different seed for different planewave and band
+           ! DEBUG seq==par
+           ! if(.false.) then
+           ! ENDDEBUG seq==par
 
            if ( mpi_enreg2%paral_kgb /= 1.or.mpi_enreg2%nproc_cell == 1) then
              seed=(iband-1)*npw2*nspinor2 + (ispinor-1)*npw2 + ipw
@@ -3122,15 +3124,16 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
            end if
 
            if(randalg == 0) then
-!            For portability, use only integer numbers
-!            The series of couples (fold1,fold2) is periodic with a period of
-!            3x5x7x11x13x17x19x23x29x31, that is, larger than 2**32, the largest integer*4
-!            fold1 is between 0 and 34, fold2 is between 0 and 114. As sums of five
-!            uniform random variables, their distribution is close to a gaussian
+             ! For portability, use only integer numbers
+             ! The series of couples (fold1,fold2) is periodic with a period of
+             ! 3x5x7x11x13x17x19x23x29x31, that is, larger than 2**32, the largest integer*4
+             ! fold1 is between 0 and 34, fold2 is between 0 and 114. As sums of five
+             ! uniform random variables, their distribution is close to a gaussian
              fold1=modulo(seed,3)+modulo(seed,5)+modulo(seed,7)+modulo(seed,11)+modulo(seed,13)
              fold2=modulo(seed,17)+modulo(seed,19)+modulo(seed,23)+modulo(seed,29)+modulo(seed,31)
-!            The gaussian distributions are folded, in order to be back to a uniform distribution
-!            foldre is between 0 and 20, foldim is between 0 and 18
+
+             ! The gaussian distributions are folded, in order to be back to a uniform distribution
+             ! foldre is between 0 and 20, foldim is between 0 and 18
              foldre=mod(fold1+fold2,21)
              foldim=mod(3*fold1+2*fold2,19)
              cg2(1,index+icg2)=dble(foldre)
@@ -3159,15 +3162,14 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
          end do
        end do
 
-!      XG030513 : MPIWF need to impose cg to zero when at Gamma
-!      Time-reversal symmetry for k=gamma impose zero imaginary part at G=0
-!      XG : I do not know what happens for spin-orbit here :
-       if(istwf2_k==2 .and. mpi_enreg2%me_g0==1) then
+       ! XG030513: Time-reversal symmetry for k=gamma imposes zero imaginary part at G=0
+       ! XG: I do not know what happens for spin-orbit here.
+       if (istwf2_k == 2 .and. mpi_enreg2%me_g0 == 1) then
          cg2(2,1+(iband-1)*npw2*nspinor2_this_proc+icg2)=zero
        end if
-     end do
+     end do ! iband
 
-!    Multiply with envelope function to reduce kinetic energy
+     ! Multiply with envelope function to reduce kinetic energy
      icgmod=icg2+npw2*nspinor2_this_proc*(nbd1/nspinor1)
      nbremn=nbd2-nbd1
      call cg_envlop(cg2,ecut2,gmet2,icgmod,kg2,kpoint2_sph,mcg2,nbremn,npw2,nspinor2_this_proc)
@@ -3382,6 +3384,270 @@ subroutine pareigocc(eigen,formeig,localrdwf,mpi_enreg,mband,nband,nkpt,nsppol,o
  end if
 
 end subroutine pareigocc
+!!***
+
+!!****f* ABINIT/cg_from_atoms
+!! NAME
+!! cg_from_atoms
+!!
+!! FUNCTION
+!! This routine initialize the wave functions at a given (k-point, spin) using Bloch sums of atomic orbitals.
+!!
+!! INPUTS
+!!  ikpt,isppol=k-point index, spin index
+!!  rprimd(3,3)=Direct lattice vectors in Bohr.
+!!  xred(3,natom)=Atomic positions.
+!!  dtset <type(dataset_type)>=all input variables for this dataset
+!!  gs_hamk <type(gs_hamiltonian_type)>=all data for the hamiltonian at k
+!!  kg_k(3,npw_k)=reduced planewave coordinates.
+!!  kinpw(npw)=(modified) kinetic energy for each plane wave (hartree)
+!!  mpi_enreg=information about MPI parallelization
+!!  nband=number of bands at this k point for that spin polarization
+!!  npw=number of plane waves at this k point
+!!  my_nspinor=number of plane waves at this k point
+!!
+!! OUTPUT
+!!  eig(nband)=array for holding eigenvalues (hartree)
+!!  If usepaw==1:
+!!    gsc(2,*)=<g|s|c> matrix elements (s=overlap)
+!!  If usepaw==0
+!!    enlx(nband)=contribution from each band to nonlocal psp + potential Fock ACE part
+!!                of total energy, at this k-point
+!!
+!! SIDE EFFECTS
+!!  cg(2,*)=updated wavefunctions
+!!
+!! SOURCE
+
+subroutine cg_from_atoms(ikpt, isppol, rprimd, xred, kg_k, cg, dtset, psps, eig, occ, gs_hamk, kinpw, &
+                         mpi_enreg, nband, npw, my_nspinor)
+
+ use defs_datatypes,  only : pseudopotential_type
+ use m_geometry,      only : metric
+ use m_splines,       only : splfit
+ use m_initylmg,      only : initylmg_k
+ use m_hamiltonian,   only : gs_hamiltonian_type
+ use m_getghc,        only : getghc
+ use m_nonlop,        only : nonlop
+ use m_pawcprj,       only : pawcprj_type
+ use m_rmm_diis,      only : subspace_rotation
+ use m_cgtools,       only : cgpaw_cholesky, cgnc_cholesky
+
+!Arguments ------------------------------------
+ integer,intent(in) :: ikpt, isppol, nband, npw, my_nspinor
+ type(gs_hamiltonian_type),intent(inout) :: gs_hamk
+ type(dataset_type),intent(in) :: dtset
+ type(pseudopotential_type),intent(in) :: psps
+ type(mpi_type),intent(inout) :: mpi_enreg
+ real(dp),intent(in) :: rprimd(3,3), xred(3,dtset%natom)
+ integer, intent(in) :: kg_k(3,npw)
+ real(dp),target,intent(inout) :: cg(2,npw*my_nspinor,nband)
+ real(dp),intent(in) :: occ(nband), kinpw(npw)
+ real(dp),intent(out) :: eig(nband)
+
+!Local variables-------------------------------
+ integer,parameter :: optder0 = 0, ider0 = 0, icg0 = 0
+ !integer,parameter ::  idir0 = 0, !, type_calc0 = 0, option1 = 1, option2 = 2, tim_getghc = 0
+ integer :: ierr, prtvol, bsize, nblocks, iblock, npwsp, ndat, idat, paral_kgb !, ortalgo
+ integer :: mcg, mgsc, istwf_k, usepaw
+ integer :: me_g0, jj, kk, prev_mixprec, me_cell
+ integer :: comm_bsf, savemem, ll
+ integer :: iatom, itypat, iln, ig, iband, ilmn, ilm, im, lnmax
+ real(dp) :: kpg1, kpg2, kpg3, kpgc1, kpgc2, kpgc3, rep, yt, rr
+ complex(dp) :: cfact
+ logical,parameter :: timeit = .True.
+ logical :: supported, use_fft_mixprec, has_fock
+ real(dp) :: cpu, wall, gflops, cpu_all, wall_all, gflops_all, ucvol, arg
+ character(len=500) :: msg
+!arrays
+ real(dp) :: tsec(2), gmet(3,3), gprimd(3,3), rmet(3,3), kpt(3), phase_l(2), ri(2)
+ real(dp) :: enlx(nband)
+ real(dp),target,allocatable :: ghc(:,:), gvnlxc(:,:)  ! umat(:,:,:)
+ real(dp),allocatable :: kpg_k(:,:), tphiq(:,:,:), sf(:,:) !,ph3d(:,:,:) ffnl(:,:,:,:)
+ real(dp),allocatable :: ylm(:,:), ylm_gr(:,:,:), gsc(:,:)
+ real(dp),allocatable :: kpgnorm(:), wk_ffnl2(:) !, kpgc(:,:)!,kpgnorm_inv(:),
+ !real(dp), ABI_CONTIGUOUS pointer :: gsc_bk(:,:), cg_bk(:,:)
+
+! *************************************************************************
+
+ ! Define useful vars.
+ usepaw = dtset%usepaw; istwf_k = gs_hamk%istwf_k; paral_kgb = mpi_enreg%paral_kgb
+ me_g0 = mpi_enreg%me_g0; comm_bsf = mpi_enreg%comm_bandspinorfft
+ npwsp = npw * my_nspinor; mcg = npwsp * nband; mgsc = npwsp * nband * usepaw
+ me_cell = mpi_enreg%me_cell; prtvol = dtset%prtvol !; prtvol = -level
+ has_fock = associated(gs_hamk%fockcommon)
+ kpt = dtset%kptns(:,ikpt)
+
+ supported = .True.
+ if (dtset%usepaw == 0) then
+   lnmax = maxval(psps%nctab(:)%num_tphi)
+   supported = supported .and. minval(psps%nctab(:)%num_tphi) > 0
+ end if
+
+ ! Test whether cg initialization from ps atomic orbitals is coded/supported.
+ if (dtset%nspinor == 2) supported = .False.
+ if (dtset%usepaw /= 0) supported = .False.
+ if (.not. supported) then
+   call wrtout(std_out, " cg initialization from atomic orbitals not available. returning")
+   return
+ end if
+
+ if (timeit) then
+   call cwtime(cpu_all, wall_all, gflops_all, "start")
+   call cwtime(cpu, wall, gflops, "start")
+ end if
+
+ if (me_cell == 0 .and. ikpt == 1) then
+   call wrtout(std_out, sjoin(" Initializing cg from atomic orbitals for ikpt:", itoa(ikpt), ", spin:", itoa(isppol)))
+ end if
+
+ call metric(gmet, gprimd, -1, rmet, rprimd, ucvol)
+
+ ABI_MALLOC(ylm, (npw, psps%mpsang**2))
+ ABI_MALLOC(ylm_gr, (npw, 3+6*(optder0/2), psps%mpsang**2))
+
+ call initylmg_k(npw, psps%mpsang, optder0, rprimd, gprimd, kpt, kg_k, ylm, ylm_gr)
+ ABI_SFREE(ylm_gr)
+
+ ! Compute nonlocal form factors ffnl at (k+G)
+ ! Note that here we need to work with useylm = 1 to have the m-dependency
+ ! even when Vnl is applied with Legendre polynomials
+
+ ! Get |k+G|
+ ABI_MALLOC(kpgnorm, (npw))
+
+!$OMP PARALLEL DO PRIVATE(kpg1, kpg2, kpg3, kpgc1, kpgc2, kpgc3)
+ do ig=1,npw
+   kpg1=kpt(1)+dble(kg_k(1,ig))
+   kpg2=kpt(2)+dble(kg_k(2,ig))
+   kpg3=kpt(3)+dble(kg_k(3,ig))
+   kpgc1=kpg1*gprimd(1,1)+kpg2*gprimd(1,2)+kpg3*gprimd(1,3)
+   kpgc2=kpg1*gprimd(2,1)+kpg2*gprimd(2,2)+kpg3*gprimd(2,3)
+   kpgc3=kpg1*gprimd(3,1)+kpg2*gprimd(3,2)+kpg3*gprimd(3,3)
+   kpgnorm(ig)=sqrt(kpgc1*kpgc1+kpgc2*kpgc2+kpgc3*kpgc3)
+ end do
+
+ ABI_MALLOC(tphiq, (npw, lnmax, psps%ntypat))
+ ABI_MALLOC(wk_ffnl2, (npw))
+
+ do itypat=1,psps%ntypat
+   do iln=1,psps%nctab(itypat)%num_tphi
+     call splfit(psps%qgrid_ff, wk_ffnl2, psps%nctab(itypat)%tphi_qspl(:,:,iln), &
+                 ider0, kpgnorm, tphiq(:,iln,itypat), psps%mqgrid_ff, npw)
+   end do
+ end do
+
+ ABI_FREE(kpgnorm)
+ ABI_FREE(wk_ffnl2)
+
+ !ABI_MALLOC(ffnl, (npw, 1, psps%lmnmax, psps%ntypat))
+ !call mkffnl(dimekb, dimffnl, ekb, ffnl, ffspl, gmet, gprimd, ider0, idir0, indlmn, &
+ !            kg_k, kpg, kpt, lmnmax, lnmax, mpsang, psps%mqgrid_ff, nkpg, npw, psps%ntypat, pspso, &
+ !            psps%qgrid_ff, rmet, psps%usepaw, useylm, ylm, ylm_gr)
+ !ABI_FREE(ffnl)
+
+ !call getph(atindx, natom, n1, n2, n3, ph1d, xred)
+ !call ph1d3d(iatom, jatom, kg_k, matblk, natom, npw_k, n1, n2, n3, phkxred, ph1d, ph3d)
+
+ ! Now init cg. Assuming cg has been already filled with random numbers previously
+ ! so we only need to init the first states
+ ABI_MALLOC(sf, (2, npw))
+ iband = 0
+ do iatom=1,dtset%natom
+   itypat= dtset%typat(iatom)
+
+   ! Structure factor.
+   do ig=1,npw
+     arg = -two_pi * dot_product(xred(:,iatom), kpt + kg_k(:,ig))
+     sf(1,ig) = cos(arg)
+     sf(2,ig) = sin(arg)
+   end do
+
+   ilmn = 0
+   do iln=1,psps%nctab(itypat)%num_tphi
+     !if (psps%nctab(itypat)%tphi_occ(iln) < zero) cycle
+     ll = psps%nctab(itypat)%tphi_l(iln)
+     cfact = (j_dpc ** ll) * four_pi / sqrt(ucvol)
+     phase_l(1) = dble(cfact)
+     phase_l(2) = aimag(cfact)
+     do im=1, 2*ll+1
+       ilmn = ilmn + 1
+       ilm = im + ll**2
+       iband = iband + 1
+       ! NB: Assuming nspinor == 1
+       do ig=1,npw ! *my_nspinor
+         yt = ylm(ig, ilm) * tphiq(ig, iln, itypat)
+         ri(1) = phase_l(1) * sf(1, ig) - phase_l(2) * sf(2, ig)
+         ri(2) = phase_l(1) * sf(2, ig) + phase_l(2) * sf(1, ig)
+         call randomize(ri)
+         cg(1, ig, iband) = ri(1) * yt
+         cg(2, ig, iband) = ri(2) * yt
+         !wfcatom (ig, 1, n_starting_wfc) = phase_l * sf(1, ig) * ylm(ig, ilm) * chiq(ig, nb, nt)
+       end do ! ig
+
+       ! XG030513: Time-reversal symmetry for k=gamma imposes zero imaginary part at G=0
+       ! XG: I do not know what happens for spin-orbit here.
+       if (istwf_k == 2 .and. mpi_enreg%me_g0 == 1) cg(2, 1, iband) = zero
+     end do
+   end do
+ end do ! iatom
+
+ !call cg_envlop(cg, dtset%ecut, gmet, icg0, kg_k, kpt, mcg, nband, npw, my_nspinor)
+
+ ABI_FREE(sf)
+ ABI_FREE(tphiq)
+ ABI_SFREE(kpg_k)
+ ABI_FREE(ylm)
+
+ ! Ortoghonalization is in principle not needed but it seems to improve.
+ if (dtset%wfinit > 0) then
+   !ortalgo = 3 !; ortalgo = mpi_enreg%paral_kgb
+   !call pw_orthon(0, 0, istwf_k, mcg, mgsc, npwsp, nband, ortalgo, gsc, usepaw, cg, me_g0, comm_bsf)
+
+   ! TODO: Merge the two routines.
+   if (usepaw == 1) then
+     call cgpaw_cholesky(npwsp, nband, cg, gsc, istwf_k, me_g0, comm_bsf)
+   else
+     call cgnc_cholesky(npwsp, nband, cg, istwf_k, me_g0, comm_bsf, use_gemm=.False.)
+   end if
+ end if
+
+ ! Use mixed precisions if requested by the user but only for low accuracy_level
+ !use_fft_mixprec = dtset%mixprec == 1 .and. accuracy_level < 2
+ !if (use_fft_mixprec) prev_mixprec = fftcore_set_mixprec(1)
+
+ ! =========================
+ ! === Subspace rotation ===
+ ! =========================
+ savemem = 1
+ ABI_MALLOC(gsc, (2, npw*my_nspinor*nband*dtset%usepaw))
+ call subspace_rotation(gs_hamk, dtset%prtvol, mpi_enreg, nband, npw, my_nspinor, savemem, &
+                        enlx, eig, cg, gsc, ghc, gvnlxc)
+ ABI_FREE(gsc)
+ ABI_SFREE(ghc)
+ ABI_SFREE(gvnlxc)
+
+contains
+subroutine randomize(ri)
+  real(dp),intent(inout) :: ri(2)
+
+!Local variables-------------------------------
+  real(dp) :: arg, rr, rand_rd(2)
+  complex(dp) :: c2, c1
+! *************************************************************************
+
+  call random_number(arg)
+  arg = two_pi * arg
+  call random_number(rr)
+  c1 = cmplx(ri(1), ri(2), kind=dp)
+  c2 = one + 0.05_dp * cmplx(rr*cos(arg), rr*sin(arg), kind=dp)
+  c2 = c1 * c2
+  ri(1) = real(c2)
+  ri(2) = aimag(c2)
+
+end subroutine randomize
+
+end subroutine cg_from_atoms
 !!***
 
 end module m_inwffil
