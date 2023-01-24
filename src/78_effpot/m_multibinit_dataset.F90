@@ -242,7 +242,7 @@ module m_multibinit_dataset
   !real(dp) :: spin_tolavg !average
   !real(dp) :: spin_tolvar !covariance
 
-  real(dp) :: spin_mag_field(3)  ! external magnetic field
+  real(dp) :: spin_mag_field(3)  ! external magnetc field
   real(dp) :: spin_projection_qpoint(3) ! qpoint to check if spin configuration is random
   real(dp) :: spin_sia_k1dir(3)
   real(dp) :: spin_init_qpoint(3) ! qpoint to specify initial spin configuration
@@ -263,6 +263,8 @@ module m_multibinit_dataset
   integer, allocatable :: iatfix(:,:)
   ! iatfix(3,natom) atom fix contraints for Broyden
 
+  integer, allocatable :: fit_max_nbody_inrange(:)
+  integer, allocatable :: fit_max_nbody(:)
   integer, allocatable :: opt_coeff(:)
   ! opt_coeff(opt_ncoeff)
 
@@ -454,7 +456,7 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%nsphere=0
  multibinit_dtset%optcell=0
  multibinit_dtset%opt_effpot=0
- multibinit_dtset%opt_coeff=0
+ !multibinit_dtset%opt_coeff=0
  multibinit_dtset%prt_model=0
  multibinit_dtset%prt_phfrq=0
  multibinit_dtset%prt_ifc = 0
@@ -628,6 +630,9 @@ subroutine multibinit_dtset_free(multibinit_dtset)
  if (allocated(multibinit_dtset%opt_coeff))  then
    ABI_FREE(multibinit_dtset%opt_coeff)
  end if
+ ABI_SFREE(multibinit_dtset%fit_max_nbody)
+ ABI_SFREE(multibinit_dtset%fit_max_nbody_inrange)
+
  if (allocated(multibinit_dtset%qmass))  then
    ABI_FREE(multibinit_dtset%qmass)
  end if
@@ -2344,9 +2349,11 @@ multibinit_dtset%lwf_temperature_start=0.0
    ABI_ERROR(message)
  end if
 
+
+
  multibinit_dtset%test_effpot=0
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'test_effpot',tread,'DPR')
- if(tread==1) multibinit_dtset%test_effpot=dprarr(1)
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'test_effpot',tread,'INT')
+ if(tread==1) multibinit_dtset%test_effpot=intarr(1)
  if(multibinit_dtset%test_effpot<0 .or. multibinit_dtset%test_effpot>1)then
    write(message, '(a,i0,a,a,a,a,a)' )&
 &   'test_effpot is ',multibinit_dtset%test_effpot,'. The only allowed values',ch10,&
@@ -2356,8 +2363,8 @@ multibinit_dtset%lwf_temperature_start=0.0
  end if
 
  multibinit_dtset%test_prt_ph=0
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'test_prt_ph',tread,'DPR')
- if(tread==1) multibinit_dtset%test_prt_ph=dprarr(1)
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'test_prt_ph',tread,'INT')
+ if(tread==1) multibinit_dtset%test_prt_ph=intarr(1)
  if(multibinit_dtset%test_prt_ph<0 .or. multibinit_dtset%test_prt_ph>1)then
    write(message, '(a,i0,a,a,a,a,a)' )&
 &   'test_prt_ph is ',multibinit_dtset%test_prt_ph,'. The only allowed values',ch10,&
@@ -2897,6 +2904,21 @@ multibinit_dtset%lwf_temperature_start=0.0
  end if
 
 !O
+ block
+   integer :: min, max, n
+   min =multibinit_dtset%fit_rangepower(1)
+   max =multibinit_dtset%fit_rangepower(2)
+   n=max-min+1
+ call read_int_array_var(int_array_var=multibinit_dtset%fit_max_nbody_inrange, &
+   & size=n, &
+   & var_name='fit_max_nbody', type='INT', default=999)
+ ABI_MALLOC(multibinit_dtset%fit_max_nbody, (max))
+ multibinit_dtset%fit_max_nbody(:)=999
+ multibinit_dtset%fit_max_nbody(min:max) = multibinit_dtset%fit_max_nbody_inrange
+
+
+
+end block
 
  ABI_MALLOC(multibinit_dtset%opt_coeff,(multibinit_dtset%opt_ncoeff))
  if (multibinit_dtset%opt_ncoeff >0)then
@@ -3310,6 +3332,29 @@ call invars10scup(multibinit_dtset%scup_dtset,lenstr,string)
    ABI_BUG(message)
  end if
 
+contains
+  subroutine read_int_array_var(int_array_var, size, var_name, type, default)
+    integer, allocatable, intent(inout) :: int_array_var(:)
+    integer, intent(in) :: size, default
+    character(*), intent(in) :: var_name, type
+    ABI_MALLOC(int_array_var,(size))
+    if (size >0)then
+      if(size>marr)then
+        marr=size
+        ABI_FREE(intarr)
+        ABI_MALLOC(intarr,(marr))
+      end if
+      int_array_var(:)=default
+      call intagm(dprarr,intarr,jdtset,marr,size,&
+        &              string(1:lenstr),var_name,tread, type)
+      if(tread==1)then
+        do ii=1,size
+          int_array_var(ii)=intarr(ii)
+        end do
+      end if
+    end if
+  end subroutine read_int_array_var
+
 end subroutine invars10
 !!***
 
@@ -3349,6 +3394,7 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
 !Set routine version number here:
 !scalars
  integer :: ii,iph1,iph2,iqshft,natfix
+ integer :: n
 
 !*********************************************************************
 
@@ -3525,6 +3571,15 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
    write(nunit,'(1x,a17,I3)')  '  fit_anhaStrain',multibinit_dtset%fit_anhaStrain
    write(nunit,'(1x,a17,I3)')  '  fit_SPCoupling',multibinit_dtset%fit_SPCoupling
    write(nunit,'(1x,a17,I3)')  '  fit_SPC_maxS',multibinit_dtset%fit_SPC_maxS
+
+
+   n=multibinit_dtset%fit_rangePower(2)-multibinit_dtset%fit_rangePower(1)+1
+   if(n > 0) then
+     write(nunit,'(1x,a17)',advance='no') '   fit_max_nbody'
+     write(nunit,'(4x,9i7)') (multibinit_dtset%fit_max_nbody_inrange(ii),ii=1,n)
+   end if
+
+
    if(multibinit_dtset%fit_nbancoeff /= 0) then
      write(nunit,'(1x,a17,I3)')  '   fit_nbancoeff',multibinit_dtset%fit_nbancoeff
      write(nunit,'(1x,a17)',advance='no')'   fit_bancoeff'

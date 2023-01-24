@@ -26,6 +26,7 @@ module m_fit_polynomial_coeff
  use defs_basis
  use m_errors
  use m_abicore
+ use m_polynomial_term
  use m_polynomial_coeff
  use m_atomdata
  use m_xmpi
@@ -123,7 +124,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 &                                   positive,verbose,anharmstr,spcoupling,&
 &                                   only_odd_power,only_even_power,prt_anh,&
 &                                   fit_iatom,prt_files,fit_on,sel_on,fit_factors,prt_GF_csv,&
-&                                   dispterms)
+&                                   dispterms, max_nbody)
 
  implicit none
 
@@ -136,7 +137,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  integer,intent(in) :: power_disps(2)
  type(effective_potential_type),target,intent(inout) :: eff_pot
  type(abihist),intent(inout) :: hist
- integer,optional,intent(in) :: max_power_strain,prt_anh,fit_iatom
+ integer,optional,intent(in) :: max_power_strain,prt_anh,fit_iatom, max_nbody(:)
  real(dp),optional,intent(in) :: cutoff_in,fit_tolMSDF,fit_tolMSDS,fit_tolMSDE,fit_tolMSDFS
  real(dp),optional,intent(in) :: fit_tolGF
  logical,optional,intent(in) :: verbose,positive,anharmstr,spcoupling
@@ -464,7 +465,8 @@ endif
 &                                  spcoupling=need_spcoupling,distributed=.true.,&
 &                                  only_odd_power=need_only_odd_power,&
 &                                  only_even_power=need_only_even_power,&
-&                                  fit_iatom=fit_iatom_in,dispterms=need_disp)
+&                                  fit_iatom=fit_iatom_in,dispterms=need_disp, &
+&                                  max_nbody=max_nbody)
  end if
 
  ABI_FREE(symbols)
@@ -1647,13 +1649,13 @@ end subroutine fit_polynomial_coeff_getPositive
 !!
 !! SOURCE
 
-subroutine fit_polynomial_coeff_getCoeffBound(eff_pot,coeffs_out,hist,ncoeff_bound,comm,verbose)
+subroutine fit_polynomial_coeff_getCoeffBound(eff_pot,coeffs_out,hist,ncoeff_bound,comm,verbose, max_nbody)
 
  implicit none
 
 !Arguments ------------------------------------
  !scalars
- integer,intent(in) :: comm
+ integer,intent(in) :: comm, max_nbody(:)
  integer,intent(out) :: ncoeff_bound
  logical,optional,intent(in) :: verbose
 !arrays
@@ -1834,7 +1836,7 @@ subroutine fit_polynomial_coeff_getCoeffBound(eff_pot,coeffs_out,hist,ncoeff_bou
    if(counter==0)ncoeff_model = ncoeff_model + ncoeff_bound
 !   call effective_potential_setCoeffs(coeffs_test,eff_pot,ncoeff_model)
    call fit_polynomial_coeff_fit(eff_pot,(/0/),(/0/),hist,0,(/0,0/),1,0,&
-&             -1,0,(/0/),1,comm,verbose=.true.,positive=.false.)
+&             -1,0,(/0/),1,comm,verbose=.true.,positive=.false., max_nbody=max_nbody)
 
    coeffs_in => eff_pot%anharmonics_terms%coefficients
 
