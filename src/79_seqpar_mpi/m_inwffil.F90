@@ -3394,27 +3394,22 @@ end subroutine pareigocc
 !! cg_from_atoms
 !!
 !! FUNCTION
-!! Initialize the wave functions at a given (k-point, spin) using Bloch sums of atomic orbitals.
+!! Initialize wave functions at a given (k-point, spin) using Bloch sums of atomic orbitals.
 !!
 !! INPUTS
 !!  ikpt,isppol=k-point index, spin index
 !!  rprimd(3,3)=Direct lattice vectors in Bohr.
 !!  xred(3,natom)=Atomic positions.
+!!  kg_k(3,npw_k)=reduced planewave coordinates.
 !!  dtset <type(dataset_type)>=all input variables for this dataset
 !!  gs_hamk <type(gs_hamiltonian_type)>=all data for the hamiltonian at k
-!!  kg_k(3,npw_k)=reduced planewave coordinates.
 !!  mpi_enreg=information about MPI parallelization
 !!  nband=number of bands at this k point for that spin polarization
 !!  npw=number of plane waves at this k point
-!!  my_nspinor=number of plane waves at this k point
+!!  my_nspinor=number of spinors treated by this MPI proc
 !!
 !! OUTPUT
 !!  eig(nband)=array for holding eigenvalues (hartree)
-!!  If usepaw==1:
-!!    gsc(2,*)=<g|s|c> matrix elements (s=overlap)
-!!  If usepaw==0
-!!    enlx(nband)=contribution from each band to nonlocal psp + potential Fock ACE part
-!!                of total energy, at this k-point
 !!
 !! SIDE EFFECTS
 !!  cg(2,*)=updated wavefunctions
@@ -3449,21 +3444,21 @@ subroutine cg_from_atoms(ikpt, isppol, rprimd, xred, kg_k, cg, dtset, psps, eig,
 !Local variables-------------------------------
  integer,parameter :: optder0 = 0, ider0 = 0, icg0 = 0
  !integer,parameter ::  idir0 = 0, !, type_calc0 = 0, option1 = 1, option2 = 2, tim_getghc = 0
- integer :: ierr, npwsp !, ortalgo
+ integer :: npwsp !, ortalgo, ierr,
  integer :: istwf_k, usepaw, mcg !, mgsc
  integer :: me_g0, me_cell !prev_mixprec,
  integer :: comm_bsf, savemem, ll
  integer :: iatom, itypat, iln, ig, iband, ilmn, ilm, im, lnmax
  real(dp) :: kpg1, kpg2, kpg3, kpgc1, kpgc2, kpgc3
  complex(dp) :: cfact
- logical :: supported, use_fft_mixprec
+ logical :: supported !, use_fft_mixprec
  real(dp) :: ucvol, arg ! cpu, wall, gflops,
  !character(len=500) :: msg
 !arrays
  real(dp) :: gmet(3,3), gprimd(3,3), rmet(3,3), kpt(3), phase_l(2), ri(2)
- real(dp) :: enlx(nband), tsec(2)
- real(dp),allocatable :: ghc(:,:), gvnlxc(:,:)  ! umat(:,:,:)
- real(dp),allocatable :: kpg_k(:,:), tphiq(:,:,:), sf(:,:) !,ph3d(:,:,:) ffnl(:,:,:,:)
+ real(dp) :: enlx(nband) !, tsec(2)
+ real(dp),allocatable :: ghc(:,:), gvnlxc(:,:)
+ real(dp),allocatable :: kpg_k(:,:), tphiq(:,:,:), sf(:,:) !,ph3d(:,:,:)
  real(dp),allocatable :: ylm(:,:), ylm_gr(:,:,:), gsc(:,:)
  real(dp),allocatable :: kpgnorm(:), wk_ffnl2(:)
 
@@ -3505,7 +3500,7 @@ subroutine cg_from_atoms(ikpt, isppol, rprimd, xred, kg_k, cg, dtset, psps, eig,
  call initylmg_k(npw, psps%mpsang, optder0, rprimd, gprimd, kpt, kg_k, ylm, ylm_gr)
  ABI_SFREE(ylm_gr)
 
- ! Compute nonlocal form factors ffnl at (k+G)
+ ! Compute nonlocal form factors at (k+G)
  ! Note that we need to work with useylm = 1 to keep the m-dependency
  ! even when Vnl is applied with Legendre polynomials (useylm = 0)
 
@@ -3535,12 +3530,6 @@ subroutine cg_from_atoms(ikpt, isppol, rprimd, xred, kg_k, cg, dtset, psps, eig,
 
  ABI_FREE(kpgnorm)
  ABI_FREE(wk_ffnl2)
-
- !ABI_MALLOC(ffnl, (npw, 1, psps%lmnmax, psps%ntypat))
- !call mkffnl(dimekb, dimffnl, ekb, ffnl, ffspl, gmet, gprimd, ider0, idir0, indlmn, &
- !            kg_k, kpg, kpt, lmnmax, lnmax, mpsang, psps%mqgrid_ff, nkpg, npw, psps%ntypat, pspso, &
- !            psps%qgrid_ff, rmet, psps%usepaw, useylm, ylm, ylm_gr)
- !ABI_FREE(ffnl)
 
  !call getph(atindx, natom, n1, n2, n3, ph1d, xred)
  !call ph1d3d(iatom, jatom, kg_k, matblk, natom, npw_k, n1, n2, n3, phkxred, ph1d, ph3d)
