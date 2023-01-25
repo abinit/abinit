@@ -37,7 +37,6 @@ module m_chebfi2
  use m_xg
  use m_xgTransposer
  use m_xgScalapack
- use m_cgtools
 
  use m_xmpi
  use m_xomp
