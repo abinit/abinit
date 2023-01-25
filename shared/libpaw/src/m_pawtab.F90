@@ -229,7 +229,7 @@ MODULE m_pawtab
 
   integer :: option_interaction_pawu
    ! Option for interaction energy (PAW+U) in case of non-collinear magnetism:
-   ! 1: E_int=-J/4.N.(N-2)                      
+   ! 1: E_int=-J/4.N.(N-2)
    ! 2: E_int=-J/2.(Nup.(Nup-1)+Ndn.(Ndn-1))    (Nup and Ndn are ill-defined)
    ! 3: E_int=-J/4.( N.(N-2) + mx^2 + my^2 + mz^2 )
 
@@ -399,6 +399,7 @@ MODULE m_pawtab
    ! Also used for local exact-exchange
 
   integer, allocatable :: orbitals(:)
+   ! (basis_size)
    ! gives the l quantum number per basis element
 
 !Real (real(dp)) arrays

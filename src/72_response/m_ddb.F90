@@ -46,7 +46,6 @@ module m_ddb
  use m_crystal,        only : crystal_t, crystal_init
  use m_dynmat,         only : cart29, d2sym3, cart39, d3sym, chneu9, asria_calc, asria_corr, asrprs, dfpt_phfrq, sytens
  use m_pawtab,         only : pawtab_type, pawtab_nullify, pawtab_free
- use m_psps,           only : psps_copy, psps_free
 
  implicit none
 
@@ -169,7 +168,7 @@ module m_ddb
      ! Allocate dynamic memory
 
     procedure :: copy => ddb_copy
-     ! Copy the object. 
+     ! Copy the object.
 
     procedure :: set_qpt => ddb_set_qpt
      ! Set the wavevector
@@ -709,7 +708,7 @@ end subroutine ddb_set_pel
 !!  Set the stress tensor.
 !!
 !! INPUTS
-!!  strten=the stress tensor in cartesian coordinates. 
+!!  strten=the stress tensor in cartesian coordinates.
 !!  iblok=index of the block we are setting.
 !!
 !! OUTPUT
@@ -4026,6 +4025,10 @@ end subroutine ddb_set_d3matr
 !! FUNCTION
 !!   Initialize a dataset object from ddb.
 !!
+!! FIXME: I don't understand the goal of this routine.
+!! The dtset constructed from the DDB won't be equal to the one used to generate the DDB
+!!  There's only one safe way to init dtset i.e. from file by calling the parser
+!!
 !! INPUTS
 !!
 !! OUTPUT
@@ -4059,8 +4062,6 @@ subroutine ddb_to_dtset(comm, dtset, filename, psps)
 !close ddb file, just want to read the headers
  close(ddbun)
  dtset%ngfft = ddb_hdr%ngfft
-
-! call psps_copy(psps, ddb_hdr%psps)
 
 ! Copy scalars from ddb
  dtset%natom = ddb_hdr%natom
@@ -4382,7 +4383,7 @@ subroutine merge_ddb(nddb, filenames, outfile, dscrpt, chkopt)
        nblok = nblok + 1
        iblok = nblok
      end if
-       
+
      ! Add the blok to the output ddb
      ddb%typ(iblok) = ddb2%typ(iblok2)
      do ii=1,9
@@ -4398,7 +4399,7 @@ subroutine merge_ddb(nddb, filenames, outfile, dscrpt, chkopt)
          ddb%val(2,ii,iblok) = ddb2%val(2,ii,iblok2)
        end if
      end do
-      
+
    end do  ! iblok2
 
    call ddb2%free()

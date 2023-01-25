@@ -1433,6 +1433,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'get1wf',tread,'INT')
  if(tread==1) dtset%get1wf=intarr(1)
+ ! TODO
+ !call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'get1wf_filepath',tread,'KEY', key_value=key_value)
+ !if(tread==1) dtset%get1wf_filepath = key_value
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getddk',tread,'INT')
  if(tread==1) dtset%getddk=intarr(1)
@@ -2803,6 +2806,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,3*dtset%natsph_extra,string(1:lenstr),'xredsph_extra',tread,'DPR')
  if(tread==1) dtset%xredsph_extra=reshape(dprarr(1:3*dtset%natsph_extra), (/3,dtset%natsph_extra/))
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'wfinit',tread,'INT')
+ if(tread==1) dtset%wfinit=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'wfmix',tread,'DPR')
  if(tread==1) dtset%wfmix=dprarr(1)
