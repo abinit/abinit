@@ -23310,6 +23310,21 @@ See the corresponding input variable for the usual GS grid [[boxcutmin]].
 ),
 
 Variable(
+    abivarname="gwr_max_hwtene",
+    varset="gw",
+    vartype="real",
+    topics=['GWR_useful'],
+    dimensions=[1],
+    defaultval=-1.0,
+    mnemonics="GWR MAX Head Wings Transition ENErgy",
+    requires="[[optdriver]] == 6",
+    added_in_version="9.8.0",
+    text=r"""
+Energy window for the empty states used in the computation of the head/wings of the polarizability.
+""",
+),
+
+Variable(
     abivarname="optdcmagpawu",
     varset="paw",
     vartype="integer",

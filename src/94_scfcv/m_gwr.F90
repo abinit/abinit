@@ -586,9 +586,10 @@ module m_gwr
    type(processor_scalapack) :: gtau_slkproc
 
    integer :: ugb_nband = -1
+   ! Number of bands in ugb.
 
    type(vcgen_t) :: vcgen
-   ! Object used to compute vc(q,g)
+   ! Object used to compute Coulomb term vc(q,g)
 
    character(len=fnlen) :: gwrnc_path = ABI_NOFILE
    ! Path to the GWR.nc file with output results.
@@ -3651,7 +3652,7 @@ subroutine gwr_build_tchi(gwr)
 
 !Local variables-------------------------------
 !scalars
- integer :: my_is, my_it, my_ikf, ig, my_ir, my_nr, npwsp, ncol_glob, col_bsize, my_iqi, ii !, my_iki ! my_iqf,
+ integer :: my_is, my_it, my_ikf, ig, my_ir, my_nr, npwsp, ncol_glob, col_bsize, my_iqi !, ii !, my_iki ! my_iqf,
  integer :: idat, ndat, sc_nfft, spin, ik_bz, iq_ibz, ierr, ipm, itau, ig2 !, ig1
  real(dp) :: cpu_tau, wall_tau, gflops_tau, cpu_all, wall_all, gflops_all, cpu_ir, wall_ir, gflops_ir
  real(dp) :: tchi_rfact, mem_mb, local_max, max_abs_imag_chit !, spin_fact, sc_ucvol, ik_ibz,
@@ -4567,9 +4568,9 @@ subroutine gwr_build_sigmac(gwr)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0
- integer :: my_is, my_it, spin, ik_ibz, ikcalc_ibz, sc_nfft, sc_size, my_ir, my_nr, iw, idat, ndat, ii !sc_mgfft,
+ integer :: my_is, my_it, spin, ik_ibz, ikcalc_ibz, sc_nfft, sc_size, my_ir, my_nr, iw, idat, ndat !, ii !sc_mgfft,
  integer :: my_iqf, iq_ibz, iq_bz, itau, ierr, ibc, bmin, bmax, band, nbc ! col_bsize, ib1, ib2,
- integer :: my_ikf, ipm, ik_bz, ig, ikcalc, uc_ir, ir, ncid, col_bsize, npwsp, ibeg, nrsp ! my_iqi, sc_ir
+ integer :: my_ikf, ipm, ik_bz, ig, ikcalc, uc_ir, ir, ncid, col_bsize, ibeg, nrsp ! npwsp, my_iqi, sc_ir
  real(dp) :: cpu_tau, wall_tau, gflops_tau, cpu_all, wall_all, gflops_all !, cpu, wall, gflops
  real(dp) :: mem_mb, cpu_ir, wall_ir, gflops_ir
  real(dp) :: max_abs_imag_wct, max_abs_re_wct, sck_ucvol, scq_ucvol !, spin_fact
@@ -6340,7 +6341,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: two_poles = 2, one_pole = 1, gwcomp0 = 0, spmeth0 = 0
- integer :: nsppol, nspinor, ierr, my_is, spin, my_ikf, itau, my_it
+ integer :: nsppol, nspinor, ierr, my_is, spin, my_ikf, itau, my_it, band1_max
  integer :: ik_bz, ik_ibz, isym_k, trev_k, g0_k(3)
  !integer :: iq_bz, iq_ibz, isym_q, trev_q, g0_q(3)
  integer :: nkpt_summed, use_umklp, band1, band2, band1_start, band1_stop
@@ -6348,7 +6349,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  integer :: istwf_ki, npw_ki, nI, nJ, nomega, io, iq, nq, dim_rtwg !ig,
  integer :: npwe, u_nfft, u_mgfft, u_mpw
  logical :: isirr_k, use_tr, is_metallic
- real(dp) :: spin_fact, weight, deltaf_b1b2, deltaeGW_b1b2, gwr_boxcutmin_c, zcut, qlen, eig_nk
+ real(dp) :: spin_fact, weight, deltaf_b1b2, deltaeGW_b1b2, gwr_boxcutmin_c, zcut, qlen, eig_nk, e0
  real(dp) :: cpu_all, wall_all, gflops_all, cpu_k, wall_k, gflops_k
  complex(dpc) :: deltaeKS_b1b2
  type(__slkmat_t),pointer :: ugb_kibz
@@ -6485,6 +6486,25 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  ! Should introduce a tolerance on the frequency part computed at the first minimax frequency and
  ! compute max_nband from this.
 
+ ! Find band1_max from gwr_max_hwtene
+ band1_max = gwr%ugb_nband
+
+ !now_gaps = now_ebands_get_gaps(now_ebands, gap_err)
+ !call now_gaps%free()
+
+ if (gwr%dtset%gwr_max_hwtene > zero) then
+   ! TODO: e0 is set to the top of valence band if semiconductor.
+   e0 = now_ebands%fermie
+   do band1_start=1, gwr%ugb_nband
+     if (all(qp_eig(band1_start,:,:) - e0 < gwr%dtset%gwr_max_hwtene) .and. &
+         all(qp_eig(band1_start,:,:) - e0 > 0)) then
+       band1_max = band1_start; exit
+     end if
+   end do
+ end if
+ call wrtout(std_out, sjoin(" gwr_max_hwtene:", ftoa(gwr%dtset%gwr_max_hwtene)))
+ call wrtout(std_out, sjoin(" Using: ", itoa(band1_start), "/", itoa(gwr%ugb_nband), "bands for chi0 head and wings."))
+
  ! Loop on spin to calculate $\chi_{\up,\up} + \chi_{\down,\down}$
  ! TODO: Spinor
  nI = 1; nJ = 1; nomega = gwr%ntau
@@ -6553,7 +6573,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
      !  3) Invert the loops
 
      block_size = min(48, gwr%ugb_nband)
-     block_size = min(200, gwr%ugb_nband)
+     !block_size = min(200, gwr%ugb_nband)
      !block_size = 1
 
      do band1_start=1, gwr%ugb_nband, block_size
@@ -6561,6 +6581,8 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
          !print *, "exiting band1_start loop"
          exit
        end if
+       !if (band1_stop > band1_max) exit
+
        !print *, "band1_start, gwr%ugb_nband, block_size", band1_start, gwr%ugb_nband, block_size
        nb = blocked_loop(band1_start, gwr%ugb_nband, block_size)
        band1_stop = band1_start + nb - 1
