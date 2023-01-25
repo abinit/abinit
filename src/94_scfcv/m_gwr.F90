@@ -85,9 +85,6 @@
 !!      optional argument. Refactoring of all the FFT routines used in the GW code is needed
 !!      in order to exploit R2C, C2R (e.g. chi0(q=0) and GPU version.
 !!
-!!    - TODO: Possible incompatibilities between gwpc, slk matrices that are always in dp and GW machinery
-!!      Single precision for scalapack matrices?
-!!
 !!    - Use round-robin distribution instead of blocked-distribution to improve load balance.
 !!
 !!    - Memory peaks:
@@ -109,7 +106,7 @@
 !!
 !! NOTES:
 !!
-!!  1) _slk_mat_t is a macro defined in abi_common.h that allows us to use PBLAS in single/double precision
+!!  1) _slk_mat_t is a CPP macro defined in abi_common.h that allows us to use PBLAS in single/double precision
 !!     Be careful when using c_f_pointer because there's no type checking.
 !!
 !! COPYRIGHT
@@ -163,7 +160,7 @@ module m_gwr
  use m_cgtk,          only : cgtk_rotate
  use m_mpinfo,        only : initmpi_seq, destroy_mpi_enreg
  use m_distribfft,    only : init_distribfft_seq
- use m_fft,           only : fftbox_plan3_t, uplan_t, fft_ug, fft_ur !, fourdp
+ use m_fft,           only : fftbox_plan3_t, uplan_t, fft_ug, fft_ur
  use m_fft_mesh,      only : calc_ceikr, calc_ceigr, ctimes_eikr
  use m_kpts,          only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, kpts_map, kpts_map_print, kpts_pack_in_stars
  use m_bz_mesh,       only : littlegroup_t, findqg0
