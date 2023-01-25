@@ -161,6 +161,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  logical :: need_anharmstr,need_spcoupling,ditributed_coefficients,need_prt_anh
  logical :: need_only_odd_power,need_only_even_power,need_initialize_data
  logical :: need_prt_files,need_prt_GF_csv,need_disp
+ logical :: fit_iatom_all
 !arrays
  real(dp) :: mingf(4),int_fit_factors(3)
  integer :: sc_size(3)
@@ -245,6 +246,12 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  else
     fit_iatom_in = -1
  endif
+
+fit_iatom_all=.False.
+ if(present(fit_iatom)) then
+    fit_iatom_all=(fit_iatom==-2)
+end if
+
  !Set int fit factors to default value if fit factors not present
  int_fit_factors = (/1,1,1/)
  if (present(fit_factors)) int_fit_factors = fit_factors
@@ -450,8 +457,9 @@ endif
  ABI_MALLOC(symbols,(eff_pot%crystal%natom))
  call symbols_crystal(eff_pot%crystal%natom,eff_pot%crystal%ntypat,eff_pot%crystal%npsp,&
 &                     symbols,eff_pot%crystal%typat,eff_pot%crystal%znucl)
-!!atom_start,atom_end,ii,coeffs_iatom
-if (fit_iatom==-2 .and. generateterm==1) then
+
+
+if (fit_iatom_all .and. generateterm==1) then
    atom_start = 1
    atom_end = eff_pot%crystal%nirredat
 else
@@ -463,9 +471,9 @@ end if
 ! we need to regenerate them
   ncoeff_tot = 0
   do ii = atom_start, atom_end
-    if (fit_iatom==-2) then
+    if (fit_iatom_all) then  ! fit_iatom=-2
         fit_iatom_in=eff_pot%crystal%irredatindx(ii)
-    end if  ! fit_iatom==-2
+    end if  
    if(need_verbose)then
      if(fit_iatom_in > 0)then
        write(message, '(2a,I3,4a)' )ch10,' The coefficients for the fit around atom', fit_iatom_in,': ',&
@@ -488,7 +496,10 @@ end if
 &                                  fit_iatom=fit_iatom_in,dispterms=need_disp, &
 &                                  max_nbody=max_nbody)
 
-    if (fit_iatom/=-2) then
+
+
+
+    if (.not. fit_iatom_all) then
       call polynomial_coeff_list_free(coeffs_tmp)
       ncoeff_tot = ncoeff_tot_tmp
       ABI_MALLOC(coeffs_tmp,(my_ncoeff))
@@ -501,22 +512,23 @@ end if
          call coeffs_list_copy(coeffs_tmp,coeffs_iatom)
       else
          call coeffs_list_conc_onsite(coeffs_tmp,coeffs_iatom)
- end if
+      end if ! not allocate coeffs_tmp
       call polynomial_coeff_list_free(coeffs_iatom)
     end if  !fit_iatom/=-2
   end do  ! ii = atom_start, atom_end
+  my_ncoeff = size(coeffs_tmp)
 
-  if (fit_iatom==-2 .and. iam_master) then
+  if (fit_iatom_all .and. iam_master) then
         write(message, '(2a,I6,a)' )ch10,' fit_iatom = -2 : The total number of coefficients for all atoms are',ncoeff_tot,ch10
         call wrtout(std_out,message,'COLL')
         call wrtout(ab_out,message,'COLL')
   end if
 end if   ! generateterm == 1
 
- my_ncoeff = size(coeffs_tmp)
  ABI_FREE(symbols)
 
  !polynomial_coeff_broadcast(coeffs_tmp, my_rank, comm)
+ if(present(coeff_file_rw)) then
   if (coeff_file_rw==1 .and. generateterm_in == 1 ) then
      write (filename, "(A9,I2,I2,A4)") "TEST_TERMS", my_rank+1,fit_iatom_in,".xml"
      call polynomial_coeff_writeXML(coeffs_tmp,my_ncoeff,filename=filename)
@@ -562,6 +574,8 @@ end if   ! generateterm == 1
      ABI_MALLOC(coeffs_tmp,(my_ncoeff))
      if(my_ncoeff /= 0)coeffs_tmp = read_effective_potential%anharmonics_terms%coefficients(my_ncoeff_start:my_ncoeff_end)
   end if
+
+  endif
 !print *, ' DEBUG ---------->> my_ncoeff, my rank   ' ,my_ncoeff, my_rank
 !Copy the initial coefficients from the model on the CPU 0
  ncoeff_tot = ncoeff_tot + ncoeff_model
@@ -917,7 +931,7 @@ end if   ! generateterm == 1
      !Print all GF VALUES in CSV if wanted
      !Open *csv file for storing GF values of all cores for this iteration
      if(need_prt_GF_csv)then
-        write(filename,'(a,I1,a,I3.3,a,I3.3,a)') "GF_values_iatom",fit_iatom,"_proc",my_rank,"_iter",icycle,".csv"
+        write(filename,'(a,I1,a,I3.3,a,I3.3,a)') "GF_values_iatom",fit_iatom_in,"_proc",my_rank,"_iter",icycle,".csv"
         unit_GF_val = get_unit()
         if (open_file(filename,message,unit=unit_GF_val,form="formatted",&
 &          status="unknown",action="write") /= 0) then
