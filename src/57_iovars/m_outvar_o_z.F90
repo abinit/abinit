@@ -1355,6 +1355,8 @@ contains
 !###########################################################
 !### 03. Print all the input variables (W)
 !##
+ intarr(1,:)=dtsets(:)%wfinit
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'wfinit','INT',0)
 
  dprarr(1,:)=dtsets(:)%wfmix
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'wfmix','DPR',0)

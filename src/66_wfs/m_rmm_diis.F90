@@ -53,6 +53,7 @@ module m_rmm_diis
 !!***
 
  public :: rmm_diis
+ public :: subspace_rotation   ! rayleigh-ritz procedure from gs_hamk
 !!***
 
  type,private :: rmm_diis_t
@@ -139,7 +140,7 @@ contains
 !!  mpi_enreg=information about MPI parallelization
 !!  nband=number of bands at this k point for that spin polarization
 !!  npw=number of plane waves at this k point
-!!  my_nspinor=number of plane waves at this k point
+!!  my_nspinor=number of spinors treated by this MPI proc
 !!
 !! OUTPUT
 !!  eig(nband)=array for holding eigenvalues (hartree)

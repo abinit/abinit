@@ -3123,10 +3123,10 @@ end subroutine projbd
 !! FUNCTION
 !! Multiply random number values in cg by envelope function to lower initial kinetic energy.
 !! Envelope  $\left( 1-\left( G/G_{\max }\right) ^2\right) ^{power}$ for |G|<= Gmax.
-!! Near G=0, little scaling, and goes to zero flatly near Gmax.Loop over perturbations
+!! Near G=0, little scaling, and goes to zero flatly near Gmax.
 !!
 !! INPUTS
-!! cg(2,npw*nband)=initial random number wavefunctions
+!! cg(2,mcg)=initial random number wavefunctions
 !! ecut=kinetic energy cutoff in Ha
 !! gmet(3,3)=reciprocal space metric (bohr^-2)
 !! icgmod=shift to be given to the location of data in cg
@@ -3143,7 +3143,7 @@ end subroutine projbd
 !! SOURCE
 
 
-subroutine cg_envlop(cg,ecut,gmet,icgmod,kg,kpoint,mcg,nband,npw,nspinor)
+subroutine cg_envlop(cg, ecut, gmet, icgmod, kg, kpoint, mcg, nband, npw, nspinor)
 
 !Arguments ------------------------------------
 !scalars

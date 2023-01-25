@@ -1142,14 +1142,9 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
        end if
 
        if (rdwrpaw/=0) then
-         ! CP modified
-         !call hdr%update(bantot,etot,fermie,residm,&
-         !  rprimd,occ,pawrhoij,xred,args_gs%amu,&
-         !  comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
          call hdr%update(bantot,etot,fermie,fermih,residm,&
            rprimd,occ,pawrhoij,xred,args_gs%amu,&
            comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
-         ! End CP modified
        end if
 
        ! Read kinetic energy density

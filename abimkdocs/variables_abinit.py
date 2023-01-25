@@ -20896,6 +20896,26 @@ produce an acceptable plot, [[w90prtunk]] can be set to 1 to output every grid p
 ),
 
 Variable(
+    abivarname="wfinit",
+    varset="gstate",
+    vartype="integer",
+    topics=['TuningSpeedMem_useful','SCFAlgorithms_useful'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="WaveFunctions INITialization",
+    added_in_version="9.9.0",
+    text=r"""
+This option specifies how to initialize the wavefunctions in the case of GS calculations.
+It requires pseudos with pseudized wavefunctions e.g. UPF2.
+Possible values are:
+
+    * 0: Start from random wavefunctions (default)
+    * 1: Use atomic orbitals + random numbers.
+    * 2: Use atomic orbitals without random numbers.
+""",
+),
+
+Variable(
     abivarname="wfmix",
     varset="gstate",
     vartype="real",

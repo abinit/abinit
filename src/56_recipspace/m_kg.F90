@@ -611,7 +611,7 @@ end subroutine kpgio
 !!
 !! SOURCE
 
-subroutine ph1d3d(iatom,jatom,kg_k,matblk,natom,npw_k,n1,n2,n3,phkxred,ph1d,ph3d)
+subroutine ph1d3d(iatom, jatom, kg_k, matblk, natom, npw_k, n1, n2, n3, phkxred, ph1d, ph3d)
 
 !Arguments ------------------------------------
 !scalars
@@ -682,7 +682,6 @@ end subroutine ph1d3d
 !!***
 
 !!****f* m_kg/getph
-!!
 !! NAME
 !! getph
 !!
