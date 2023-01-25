@@ -3,10 +3,10 @@
 !!  m_inwffil
 !!
 !! FUNCTION
-!!  Do initialization of wavefunction files.
+!!  Initialization of wavefunctions.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, AR, MB, MVer, ZL, MB, TD)
+!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, AR, MB, MVer, ZL, MB, TD, MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -60,8 +60,8 @@ module m_inwffil
  private
 !!***
 
- public :: inwffil
- public :: cg_from_atoms
+ public :: inwffil        ! Do initialization of wavefunctions.
+ public :: cg_from_atoms  !Initialize wave functions using Bloch sums of atomic orbitals.
 !!***
 
 contains
@@ -72,7 +72,7 @@ contains
 !! inwffil
 !!
 !! FUNCTION
-!! Do initialization of wavefunction files.
+!! Do initialization of wavefunctions.
 !! Also call other relevant routines for this initialisation
 !! (initialization of wavefunctions from scratch or from file, translations of wavefunctions, ...)
 !!
@@ -134,7 +134,7 @@ contains
 !!  wvl <type(wvl_data)>=all wavelets data.
 !!
 !! NOTES
-!! Detailed description :
+!! Detailed description:
 !!  Initialize unit wff1%unwff for input of wf data if ireadwf=1
 !!  Opens file on unit wffnow%unwff
 !!   if the storage on disk is needed (mkmem==0)
@@ -155,15 +155,16 @@ contains
 !! The wavefunctions after this initialisation are stored in unit wffnow%unwff
 !!
 !! WARNINGS
-!! The symmetry operations are used to translate the data from one
-!! k point to another, symmetric, k point.
-!! They can be completely different from the symmetry operations
-!! contained on the disk file. No check is performed between the two sets.
 !!
-!! Occupations will not be modified nor output, in the present status of this routine.
+!! * The symmetry operations are used to translate the data from one
+!!   k point to another, symmetric, k point.
+!!   They can be completely different from the symmetry operations
+!!   contained on the disk file. No check is performed between the two sets.
 !!
-!! If ground state format (formeig=0) occ(mband*nkpt*nsppol) was output.
-!! NOT OUTPUT NOW !
+!! * Occupations will not be modified nor output, in the present status of this routine.
+!!
+!! * If ground state format (formeig=0) occ(mband*nkpt*nsppol) was output.
+!!   NOT OUTPUT NOW!
 !!
 !! SOURCE
 
@@ -1916,7 +1917,7 @@ subroutine initwf(cg,eig_k,formeig,headform,icg,ikpt,ikptsp_old,&
 end subroutine initwf
 !!***
 
-!!****f* ABINIT/newkpt
+!!****f* m_inwffil/newkpt
 !! NAME
 !! newkpt
 !!
@@ -2505,7 +2506,7 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
 end subroutine newkpt
 !!***
 
-!!****f* ABINIT/wfconv
+!!****f* m_inwffil/wfconv
 !! NAME
 !! wfconv
 !!
@@ -3388,12 +3389,12 @@ subroutine pareigocc(eigen,formeig,localrdwf,mpi_enreg,mband,nband,nkpt,nsppol,o
 end subroutine pareigocc
 !!***
 
-!!****f* ABINIT/cg_from_atoms
+!!****f* m_inwffil/cg_from_atoms
 !! NAME
 !! cg_from_atoms
 !!
 !! FUNCTION
-!! This routine initialize the wave functions at a given (k-point, spin) using Bloch sums of atomic orbitals.
+!! Initialize the wave functions at a given (k-point, spin) using Bloch sums of atomic orbitals.
 !!
 !! INPUTS
 !!  ikpt,isppol=k-point index, spin index
@@ -3402,7 +3403,6 @@ end subroutine pareigocc
 !!  dtset <type(dataset_type)>=all input variables for this dataset
 !!  gs_hamk <type(gs_hamiltonian_type)>=all data for the hamiltonian at k
 !!  kg_k(3,npw_k)=reduced planewave coordinates.
-!!  kinpw(npw)=(modified) kinetic energy for each plane wave (hartree)
 !!  mpi_enreg=information about MPI parallelization
 !!  nband=number of bands at this k point for that spin polarization
 !!  npw=number of plane waves at this k point
@@ -3421,7 +3421,7 @@ end subroutine pareigocc
 !!
 !! SOURCE
 
-subroutine cg_from_atoms(ikpt, isppol, rprimd, xred, kg_k, cg, dtset, psps, eig, occ, gs_hamk, kinpw, &
+subroutine cg_from_atoms(ikpt, isppol, rprimd, xred, kg_k, cg, dtset, psps, eig, gs_hamk, &
                          mpi_enreg, nband, npw, my_nspinor)
 
  use defs_datatypes,  only : pseudopotential_type
@@ -3443,40 +3443,37 @@ subroutine cg_from_atoms(ikpt, isppol, rprimd, xred, kg_k, cg, dtset, psps, eig,
  type(mpi_type),intent(inout) :: mpi_enreg
  real(dp),intent(in) :: rprimd(3,3), xred(3,dtset%natom)
  integer, intent(in) :: kg_k(3,npw)
- real(dp),target,intent(inout) :: cg(2,npw*my_nspinor,nband)
- real(dp),intent(in) :: occ(nband), kinpw(npw)
+ real(dp),intent(inout) :: cg(2,npw*my_nspinor,nband)
  real(dp),intent(out) :: eig(nband)
 
 !Local variables-------------------------------
  integer,parameter :: optder0 = 0, ider0 = 0, icg0 = 0
  !integer,parameter ::  idir0 = 0, !, type_calc0 = 0, option1 = 1, option2 = 2, tim_getghc = 0
- integer :: ierr, prtvol, bsize, nblocks, iblock, npwsp, ndat, idat, paral_kgb !, ortalgo
- integer :: mcg, mgsc, istwf_k, usepaw
- integer :: me_g0, jj, kk, prev_mixprec, me_cell
+ integer :: ierr, npwsp !, ortalgo
+ integer :: istwf_k, usepaw, mcg !, mgsc
+ integer :: me_g0, me_cell !prev_mixprec,
  integer :: comm_bsf, savemem, ll
  integer :: iatom, itypat, iln, ig, iband, ilmn, ilm, im, lnmax
- real(dp) :: kpg1, kpg2, kpg3, kpgc1, kpgc2, kpgc3, rep, yt, rr
+ real(dp) :: kpg1, kpg2, kpg3, kpgc1, kpgc2, kpgc3
  complex(dp) :: cfact
- logical :: supported, use_fft_mixprec, has_fock
+ logical :: supported, use_fft_mixprec
  real(dp) :: ucvol, arg ! cpu, wall, gflops,
- character(len=500) :: msg
+ !character(len=500) :: msg
 !arrays
- real(dp) :: tsec(2), gmet(3,3), gprimd(3,3), rmet(3,3), kpt(3), phase_l(2), ri(2)
- real(dp) :: enlx(nband)
- real(dp),target,allocatable :: ghc(:,:), gvnlxc(:,:)  ! umat(:,:,:)
+ real(dp) :: gmet(3,3), gprimd(3,3), rmet(3,3), kpt(3), phase_l(2), ri(2)
+ real(dp) :: enlx(nband), tsec(2)
+ real(dp),allocatable :: ghc(:,:), gvnlxc(:,:)  ! umat(:,:,:)
  real(dp),allocatable :: kpg_k(:,:), tphiq(:,:,:), sf(:,:) !,ph3d(:,:,:) ffnl(:,:,:,:)
  real(dp),allocatable :: ylm(:,:), ylm_gr(:,:,:), gsc(:,:)
- real(dp),allocatable :: kpgnorm(:), wk_ffnl2(:) !, kpgc(:,:)!,kpgnorm_inv(:),
- !real(dp), ABI_CONTIGUOUS pointer :: gsc_bk(:,:), cg_bk(:,:)
+ real(dp),allocatable :: kpgnorm(:), wk_ffnl2(:)
 
 ! *************************************************************************
 
  ! Define useful vars.
- usepaw = dtset%usepaw; istwf_k = gs_hamk%istwf_k; paral_kgb = mpi_enreg%paral_kgb
+ usepaw = dtset%usepaw; istwf_k = gs_hamk%istwf_k
  me_g0 = mpi_enreg%me_g0; comm_bsf = mpi_enreg%comm_bandspinorfft
- npwsp = npw * my_nspinor; mcg = npwsp * nband; mgsc = npwsp * nband * usepaw
- me_cell = mpi_enreg%me_cell; prtvol = dtset%prtvol !; prtvol = -level
- has_fock = associated(gs_hamk%fockcommon)
+ npwsp = npw * my_nspinor; mcg = npwsp * nband !; mgsc = npwsp * nband * usepaw
+ me_cell = mpi_enreg%me_cell
  kpt = dtset%kptns(:,ikpt)
 
  supported = .True.
@@ -3549,11 +3546,12 @@ subroutine cg_from_atoms(ikpt, isppol, rprimd, xred, kg_k, cg, dtset, psps, eig,
  !call ph1d3d(iatom, jatom, kg_k, matblk, natom, npw_k, n1, n2, n3, phkxred, ph1d, ph3d)
 
  ! Now init cg. Assuming cg has been already filled with random numbers previously
- ! so we only need to init the first states
+ ! so we only need to init the first states. We don't take into account the occupancies
+ ! in the isolated atom. We just loop over all nlm states until we have filled max nband states.
  ABI_MALLOC(sf, (2, npw))
  iband = 0
- do iatom=1,dtset%natom
-   itypat= dtset%typat(iatom)
+ iatom_loop: do iatom=1,dtset%natom
+   itypat = dtset%typat(iatom)
 
    ! Structure factor.
    do ig=1,npw
@@ -3566,31 +3564,32 @@ subroutine cg_from_atoms(ikpt, isppol, rprimd, xred, kg_k, cg, dtset, psps, eig,
    do iln=1,psps%nctab(itypat)%num_tphi
      !if (psps%nctab(itypat)%tphi_occ(iln) < zero) cycle
      ll = psps%nctab(itypat)%tphi_l(iln)
-     cfact = (j_dpc ** ll) * four_pi / sqrt(ucvol)
+     !cfact = (j_dpc ** ll) * four_pi / sqrt(ucvol)
+     cfact = (-j_dpc ** ll) * four_pi / sqrt(ucvol)
      phase_l(1) = dble(cfact)
      phase_l(2) = aimag(cfact)
      do im=1, 2*ll+1
        ilmn = ilmn + 1
        ilm = im + ll**2
        iband = iband + 1
+       ! Another good reason why nband should be > nbocc.
+       if (iband > nband) exit iatom_loop
 
        ! NB: Assuming nspinor == 1
        do ig=1,npw ! *my_nspinor
-         yt = ylm(ig, ilm) * tphiq(ig, iln, itypat)
          ri(1) = phase_l(1) * sf(1, ig) - phase_l(2) * sf(2, ig)
          ri(2) = phase_l(1) * sf(2, ig) + phase_l(2) * sf(1, ig)
          if (dtset%wfinit == 1) call randomize(ri)
-         cg(1, ig, iband) = ri(1) * yt
-         cg(2, ig, iband) = ri(2) * yt
+         cg(:, ig, iband) = ri(:) * ylm(ig, ilm) * tphiq(ig, iln, itypat)
          !wfcatom (ig, 1, n_starting_wfc) = phase_l * sf(1, ig) * ylm(ig, ilm) * chiq(ig, nb, nt)
        end do ! ig
 
        ! XG030513: Time-reversal symmetry for k=gamma imposes zero imaginary part at G=0
        ! XG: I do not know what happens for spin-orbit here.
        if (istwf_k == 2 .and. mpi_enreg%me_g0 == 1) cg(2, 1, iband) = zero
-     end do
-   end do
- end do ! iatom
+     end do ! im
+   end do ! iln
+ end do iatom_loop
 
  !call cg_envlop(cg, dtset%ecut, gmet, icg0, kg_k, kpt, mcg, nband, npw, my_nspinor)
 
@@ -3638,7 +3637,7 @@ subroutine randomize(ri)
   real(dp),intent(inout) :: ri(2)
 
 !Local variables-------------------------------
-  real(dp) :: arg, rr, rand_rd(2)
+  real(dp) :: arg, rr
   complex(dp) :: c2, c1
 ! *************************************************************************
 

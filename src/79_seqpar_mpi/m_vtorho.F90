@@ -930,7 +930,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        !print *, "istep, itimes(1), wfinit", istep, itimes(1), dtset%wfinit
        ! FIXME: This check is not enough as I need to check whether cg have been read from WFK file
        if (istep == 1 .and. itimes(1) == 0 .and. dtset%wfinit /= 0) then
-         call cg_from_atoms(ikpt, isppol, rprimd, xred, kg_k, cg(:,icg+1), dtset, psps, eig_k, occ_k, gs_hamk, kinpw, &
+         call cg_from_atoms(ikpt, isppol, rprimd, xred, kg_k, cg(:,icg+1:), dtset, psps, eig_k, gs_hamk, &
                             mpi_enreg, nband_k, npw_k, my_nspinor)
        end if
 
