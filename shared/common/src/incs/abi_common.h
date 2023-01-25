@@ -42,12 +42,12 @@
  * Remember, indeed, that ISO doesn't define any standard and __FILE__ could expand to the full path name.
  * This can lead to compilation errors if the compiler does not accept statements longer than 132 columns.
  */
-#ifdef HAVE_FC_LONG_LINES 
+#ifdef HAVE_FC_LONG_LINES
 #define _FILE_LINE_ARGS_    ,file=__FILE__, line=__LINE__
 #define _FILE_ABIFUNC_LINE_ARGS_    ,file=__FILE__, line=__LINE__
 #else
-#define _FILE_LINE_ARGS_ 
-#define _FILE_ABIFUNC_LINE_ARGS_ 
+#define _FILE_LINE_ARGS_
+#define _FILE_ABIFUNC_LINE_ARGS_
 #endif
 
 /** this does not work with gfort, pgi, **/
@@ -76,7 +76,7 @@
  * but NAG does not like this CPP macro so we cannot use it!
  *
 #define IADD(var, increment) var = var + increment
-*/ 
+*/
 
 /*
  * ABI_  abinit macros.
@@ -139,17 +139,17 @@
 
 #ifdef HAVE_MEM_PROFILING
 
-/* 
+/*
  These macros are used to get the memory address of the objet and the memory allocated.
 
    - loc returns the address and is a language extension supported by gfortran and ifort.
    - storage_size was introduced in F2003 and returns the size in bits.
 
- Both loc and storage_size are polymorphic so one can use it with intrinsic types as well 
+ Both loc and storage_size are polymorphic so one can use it with intrinsic types as well
  as user-defined datatypes. scalar types require a special treatment (MALLOC_SCALAR, FREE_SCALAR)
  because shape == 0 thus it's not possible to discern with ABI_MEM between zero-sized arrays and scalar
 */
-#  define _LOC(x)  int(loc(x), kind=8) 
+#  define _LOC(x)  int(loc(x), kind=8)
 
 /* and now the debugging macros */
 #  define ABI_MALLOC(ARR, SIZE) \
@@ -166,7 +166,7 @@
 
 #  define ABI_FREE(ARR) \
    call abimem_record(0, QUOTE(ARR), _LOC(ARR), "D", - ABI_MEM_BITS(ARR), __FILE__,  __LINE__) NEWLINE \
-   deallocate(ARR) 
+   deallocate(ARR)
 
 #  define ABI_STAT_MALLOC(ARR,SIZE,ierr) \
    allocate(ARR SIZE, stat=ierr) NEWLINE \
@@ -212,7 +212,7 @@
 
 /* Macro used to deallocate memory allocated by Fortran libraries that do not use m_profiling_abi.F90
  * or allocate arrays before calling MOVE_ALLOC.
-   In this case, indeed, we should not count the deallocation 
+   In this case, indeed, we should not count the deallocation
 #define ABI_MALLOC_NOCOUNT(arr, size) allocate(arr size)
 */
 #define ABI_FREE_NOCOUNT(arr) deallocate(arr)
@@ -291,13 +291,13 @@
 
 /* Dummy use of unused arguments to silence compiler warnings */
 #define ABI_UNUSED(var) if (.FALSE.) call unused_var(var)
-/* 
- * The method above work for basic types (integer, real, etc...). 
+/*
+ * The method above work for basic types (integer, real, etc...).
  * For types, arrays, we can use associate (F03 feature)
  * Does not work for character(*) with gfortran <=5.x (>7.x is fine. No 6.x data)
  * character with fixed length is fine.
- * */ 
-#define ABI_UNUSED_A(var) associate( var => var ) NEWLINE end associate 
+ * */
+#define ABI_UNUSED_A(var) associate( var => var ) NEWLINE end associate
 
 /* Macro to set the default the value of a local variable when optional arguments are used.
 Use if statement instead of Fortran merge. See https://software.intel.com/en-us/forums/intel-fortran-compiler/topic/640598
@@ -325,7 +325,7 @@ Use if statement instead of Fortran merge. See https://software.intel.com/en-us/
 #ifdef HAVE_FC_ASYNC
 #define ABI_ASYNC ,asynchronous
 #else
-#define ABI_ASYNC 
+#define ABI_ASYNC
 #endif
 
 #ifdef HAVE_FC_PRIVATE
@@ -348,8 +348,8 @@ Use if statement instead of Fortran merge. See https://software.intel.com/en-us/
 #define ABI_CONTIGUOUS
 #endif
 
-/* 
- * Temporary trick used to pass contiguous array descriptors to F90 routines 
+/*
+ * Temporary trick used to pass contiguous array descriptors to F90 routines
  * Mainly used to avoid copy-in copy-out in m_abi_linalg
 #define DEV_CONTARRD contiguous,
 */
@@ -376,8 +376,8 @@ Use if statement instead of Fortran merge. See https://software.intel.com/en-us/
 #endif
 
 
+/* Temporary hack to use GREENX library
 #define __HAVE_GREENX
-/* Temporary hack to use GREENX library 
 */
 
 #endif
