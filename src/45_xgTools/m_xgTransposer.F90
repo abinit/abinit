@@ -516,6 +516,7 @@ module m_xgTransposer
    !integer, allocatable :: request(:), status(:)
    type(ptr_t), allocatable :: sendptrbuf(:)
    integer, pointer :: nrowsLinalg(:)
+   integer(c_size_t) :: buffer_size
    double precision :: tsec(2)
 
     call timab(tim_toLinalg,1,tsec)
@@ -542,6 +543,16 @@ module m_xgTransposer
    end do
 
    call xgBlock_reverseMap(xgTransposer%xgBlock_linalg,recvbuf,xgTransposer%perPair,cols(xgTransposer%xgBlock_linalg)*nrowsLinalgMe)
+
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS) && defined(HAVE_YAKL)
+   ! just for debug
+   if( xgTransposer%use_gpu == 1) then
+      !call gpu_managed_ptr_status(C_LOC(recvbuf))
+      buffer_size = size(recvbuf) * dp
+      call gpu_data_prefetch_async(C_LOC(recvbuf), buffer_size, CPU_DEVICE_ID)
+      call gpu_device_synchronize()
+   end if
+#endif
 
    ABI_MALLOC(sendcounts,(ncpu))
    ABI_MALLOC(sdispls,(ncpu))
