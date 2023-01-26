@@ -2585,7 +2585,7 @@ if (has_ext_filed)  then
   call xmpi_sum(fcart_part , comm, ierr)
 
   energy = energy + energy_part
-  fcart = fcart + fcart_part
+  fcart = fcart - fcart_part
 
 !-------------------------------------------
 ! 8 - Compute electronic Part with SCALE-UP
