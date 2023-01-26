@@ -307,7 +307,8 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
 &                 dtset%paral_kgb,l_mpi_enreg%nproc_band,l_mpi_enreg%bandpp, &
 &                 l_mpi_enreg%nproc_fft,nline, space,1,l_gs_hamk%istwf_k, &
 &                 l_mpi_enreg%comm_bandspinorfft,l_mpi_enreg%me_g0,l_paw, &
-&                 l_gs_hamk%use_gpu_cuda)
+&                 l_gs_hamk%use_gpu_cuda, &
+&                 gpu_num_openmp_threads=dtset%use_gpu_openmp_threads)
  ABI_NVTX_END_RANGE()
 
 !################    RUUUUUUUN    #####################################

@@ -113,7 +113,14 @@ module m_chebfi2
    logical :: paw
    integer :: eigenProblem   !1 (A*x = (lambda)*B*x), 2 (A*B*x = (lambda)*x), 3 (B*A*x = (lambda)*x)
    integer :: istwf_k
+
+   ! when GPU is enabled, currently OpenMP is not fully supported, abinit is launched
+   ! with OMP_NUM_THREADS=1, but we may locally increase the number of OpenMP threads
+   ! wherever it is safe to do; in that case we use gpu_num_openmp_threads to specify
+   ! the number of OpenMP threads. This value is controlly by dtset variable
+   ! dtset%use_gpu_openmp_threads
    integer :: use_gpu_cuda
+   integer :: gpu_num_openmp_threads = 1 ! only used if gpu is enabled, number of OpenMP threads used
    integer :: me_g0
 
    !ARRAYS
@@ -184,8 +191,10 @@ module m_chebfi2
 !!
 !! SOURCE
 
-subroutine chebfi_init(chebfi,neigenpairs,spacedim,tolerance,ecut,paral_kgb,nproc_band,bandpp,nproc_fft, &
-                       nline,space,eigenProblem,istwf_k,spacecom,me_g0,paw,use_gpu_cuda)
+subroutine chebfi_init(chebfi,neigenpairs,spacedim,tolerance,ecut, &
+     paral_kgb,nproc_band,bandpp,nproc_fft, &
+     nline,space,eigenProblem,istwf_k,spacecom,me_g0,paw,use_gpu_cuda, &
+     gpu_num_openmp_threads)
 
  implicit none
 
@@ -207,6 +216,7 @@ subroutine chebfi_init(chebfi,neigenpairs,spacedim,tolerance,ecut,paral_kgb,npro
  real(dp)      , intent(in   ) :: ecut
  real(dp)      , intent(in   ) :: tolerance
  type(chebfi_t), intent(inout) :: chebfi
+ integer       , intent(in   ), optional :: gpu_num_openmp_threads
 
  ! Local variables-------------------------------
  real(dp)                      :: tsec(2)
@@ -231,6 +241,12 @@ subroutine chebfi_init(chebfi,neigenpairs,spacedim,tolerance,ecut,paral_kgb,npro
  chebfi%me_g0        = me_g0
  chebfi%paw          = paw
  chebfi%use_gpu_cuda = use_gpu_cuda
+
+ if (present(gpu_num_openmp_threads)) then
+    chebfi%gpu_num_openmp_threads = gpu_num_openmp_threads
+ else
+    chebfi%gpu_num_openmp_threads = 1
+ end if
 
  call chebfi_allocateAll(chebfi)
 
@@ -569,6 +585,15 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,mpi_enreg)
 
    call xgTransposer_copyConstructor(chebfi%xgTransposerAX,chebfi%xgTransposerX,chebfi%AX%self,chebfi%xAXColsRows,STATE_LINALG)
    call xgTransposer_copyConstructor(chebfi%xgTransposerBX,chebfi%xgTransposerX,chebfi%BX%self,chebfi%xBXColsRows,STATE_LINALG)
+
+   ! only used if GPU is enabled
+   chebfi%xgTransposerX%use_gpu  = chebfi%use_gpu_cuda
+   chebfi%xgTransposerAX%use_gpu = chebfi%use_gpu_cuda
+   chebfi%xgTransposerBX%use_gpu = chebfi%use_gpu_cuda
+
+   chebfi%xgTransposerX%gpu_num_openmp_threads  = chebfi%gpu_num_openmp_threads
+   chebfi%xgTransposerAX%gpu_num_openmp_threads = chebfi%gpu_num_openmp_threads
+   chebfi%xgTransposerBX%gpu_num_openmp_threads = chebfi%gpu_num_openmp_threads
 
    call xgTransposer_transpose(chebfi%xgTransposerX,STATE_COLSROWS)
    call xgTransposer_transpose(chebfi%xgTransposerAX,STATE_COLSROWS)

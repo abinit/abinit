@@ -25,9 +25,10 @@
 
 module m_xgTransposer
 
-  use, intrinsic :: iso_c_binding, only: c_double
+  use, intrinsic :: iso_c_binding, only: c_double, c_size_t, c_loc
 
-  use defs_basis, only : std_err, std_out
+  use defs_basis, only : std_err, std_out, dp
+  use m_xomp
   use m_profiling_abi
   use m_xmpi
   use m_errors
@@ -36,6 +37,10 @@ module m_xgTransposer
 
 #if defined HAVE_YAKL
   use gator_mod
+#endif
+
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
+ use m_gpu_toolbox, only : CPU_DEVICE_ID, gpu_device_synchronize, gpu_data_prefetch_async
 #endif
 
 #ifdef HAVE_MPI2
@@ -93,6 +98,8 @@ module m_xgTransposer
     integer :: mpiAlgo
     integer :: type
     integer :: perPair
+    integer :: use_gpu = 0
+    integer :: gpu_num_openmp_threads = 1
 #if defined HAVE_GPU && defined HAVE_YAKL
     real(kind=c_double), ABI_CONTIGUOUS pointer:: buffer(:,:) => null()
 #else
@@ -766,9 +773,9 @@ module m_xgTransposer
 
   subroutine xgTransposer_reorganizeData(xgTransposer,bufferMess)
 
-    type(xgTransposer_t), intent(inout) :: xgTransposer
-    double precision    , intent(inout) :: bufferMess(:,:)
-    double precision, pointer :: bufferOrdered(:,:) => null()
+    type(xgTransposer_t), intent(inout)          :: xgTransposer
+    double precision    , intent(inout), target  :: bufferMess(:,:)
+    double precision,                    pointer :: bufferOrdered(:,:) => null()
     integer :: shiftCpu
     integer :: nrowsColsRows
     integer :: ncolsColsRows
@@ -778,6 +785,9 @@ module m_xgTransposer
     integer :: nPair
     integer, pointer :: nrowsLinalg(:)
     double precision :: tsec(2)
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS) && defined(HAVE_YAKL)
+    integer(c_size_t) :: buffer_size
+#endif
 
     call timab(tim_reorganize,1,tsec)
 
@@ -788,6 +798,22 @@ module m_xgTransposer
 
     call xgBlock_reverseMap(xgTransposer%xgBlock_colsrows,bufferOrdered,xgTransposer%perPair,nPair)
     nrowsLinalg => xgTransposer%nrowsLinalg
+
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS) && defined(HAVE_YAKL)
+    ! if gpu is enabled, data are located in GPU memory, so we prefetch them on host
+    ! to do the following reorganization.
+    ! Alternatively, we should provide a GPU implementation of this data layout reorganization
+    if( xgTransposer%use_gpu == 1) then
+       buffer_size = size(bufferOrdered) * dp
+       call gpu_data_prefetch_async(C_LOC(bufferOrdered), buffer_size, CPU_DEVICE_ID)
+       call gpu_device_synchronize()
+    end if
+
+    ! if gpu enabled increase locally OpenMP num threads
+    if (xgTransposer%use_gpu == 1) then
+       call xomp_set_num_threads(xgTransposer%gpu_num_openmp_threads)
+    end if
+#endif
 
     select case (xgTransposer%state)
     case (STATE_LINALG)
@@ -817,6 +843,21 @@ module m_xgTransposer
         end do
       end do
     end select
+
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS) && defined(HAVE_YAKL)
+    ! if gpu enable restore OpenMP num threads to 1
+    if (xgTransposer%use_gpu == 1) then
+       ! restore OMP_NUM_THREADS=1
+       call xomp_set_num_threads(1)
+    end if
+
+    ! if gpu is enabled, transfer back data on GPU
+    if (xgTransposer%use_gpu == 1) then
+       buffer_size = size(bufferOrdered) * dp
+       call gpu_data_prefetch_async(C_LOC(bufferOrdered), buffer_size)
+       call gpu_device_synchronize()
+    end if
+#endif
 
     call timab(tim_reorganize,2,tsec)
 
