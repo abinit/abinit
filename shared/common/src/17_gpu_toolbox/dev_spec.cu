@@ -405,7 +405,7 @@ extern "C" void gpu_memset_(void **gpu_ptr, const int32_t* value, const size_t* 
 /* Kind of equivalent of fortran "allocated". Check if a gpu pointer          */
 /* actually points to device allocated memory.                                */
 /*                                                                            */
-/* This is void function becaus I can't manage to bind it via iso_c_binding   */
+/* This is void function because I can't manage to bind it via iso_c_binding  */
 /* as a fortran function; binding as a subroutine is ok though (?!)           */
 /*                                                                            */
 /* INPUTS                                                                     */
@@ -430,3 +430,34 @@ extern "C" void gpu_allocated_impl_(void **gpu_ptr, bool* is_allocated)
   }
 
 } // gpu_allocated_impl_
+
+/*============================================================================*/
+/* Utility routine to print memory location of a cuda managed pointer.        */
+/*                                                                            */
+/* We check that the pointer has actually been allocated with                 */
+/* cudaMallocManaged and then prints device and host addresses.               */
+/*                                                                            */
+/* INPUTS                                                                     */
+/*  gpu_ptr = C_PTR on gpu memory location                                    */
+/*                                                                            */
+/* OUTPUT                                                                     */
+/*  None.                                                                     */
+/*============================================================================*/
+
+extern "C" void gpu_managed_ptr_status_(void **gpu_ptr)
+{
+
+  cudaPointerAttributes attributes;
+
+  CHECK_CUDA_ERROR(cudaPointerGetAttributes(&attributes, *gpu_ptr));
+
+  if(attributes.type == cudaMemoryTypeManaged)
+  {
+    printf("ptr %p is memory managed, host addr=%p, device addr=%p\n", *gpu_ptr,
+           attributes.hostPointer,
+           attributes.devicePointer);
+  } else {
+    printf("ptr %p is not memory managed.\n");
+  }
+
+} // gpu_managed_ptr_status_
