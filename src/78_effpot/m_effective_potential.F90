@@ -2171,7 +2171,7 @@ end subroutine effective_potential_writeAbiInput
 
 subroutine effective_potential_evaluate(eff_pot,energy,fcart,gred,strten,natom,rprimd,&
 &                                       displacement,du_delta,strain,xred,&
-&                                       compute_anharmonic,verbose,filename,elec_eval)
+&                                       compute_anharmonic,verbose,filename,elec_eval,efield)
 
 !Arguments ------------------------------------
 !scalars
@@ -2185,6 +2185,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,gred,strten,natom,r
   real(dp),intent(out) :: strten(6)
   real(dp),intent(in)  :: rprimd(3,3)
   real(dp),intent(in),optional  :: xred(3,natom)
+  real(dp),intent(in),optional  :: efield(3)  
   real(dp),intent(in),optional :: strain(6)
   real(dp),intent(in),optional :: displacement(3,natom)
   real(dp),intent(in),optional :: du_delta(6,3,natom)
@@ -2198,6 +2199,8 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,gred,strten,natom,r
   logical :: err_eng, err_for
   logical*1 :: update_dens
   logical :: need_elec_eval
+  logical :: has_ext_filed
+  integer :: icell,ierr,kk
   integer, parameter:: master = 0
 !array
   type(strain_type) :: strain_t
@@ -2209,6 +2212,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,gred,strten,natom,r
   real(dp) :: strain_tmp(6),strten_part(6)
   real(dp) :: energy_coeff_part(eff_pot%anharmonics_terms%ncoeff)
   real(dp),allocatable :: xcart(:,:)
+  real(dp) :: ,ext_field(3)
   character(len=500) :: msg
 ! *************************************************************************
 
@@ -2235,6 +2239,13 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,gred,strten,natom,r
   need_anharmonic = .TRUE.
   if(present(compute_anharmonic))then
     need_anharmonic = compute_anharmonic
+  end if
+
+  has_ext_filed = .FALSE.
+  ext_field = zero
+  if(present(efield)) then
+      has_ext_filed=.TRUE.
+      ext_field = efield
   end if
 
   need_elec_eval = .FALSE.
@@ -2547,6 +2558,34 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,gred,strten,natom,r
     end if
   end if
 
+!-------------------------------------------
+!!! External_ELECTRIC_FILED
+! 7.5 - Compute Forces and energies from external electric field
+!------------------------------------------
+  
+if (has_ext_filed)  then
+
+  temp_pol = zero
+  energy_part = zero
+  fcart_part(:,:)  = zero
+  ext_field = ext_field*eV_Ha*Bohr_meter  
+
+ do icell = 1,eff_pot%mpi_coeff%my_ncell
+    ii = eff_pot%mpi_coeff%my_index_cells(4,icell)
+          do ia = 1, eff_pot%crystal%natom
+            kk = ii + ia
+            temp_pol = temp_pol+matmul(disp_tmp(:,kk),eff_pot%harmonics_terms%zeff(:,:,eff_pot%supercell%atom_indexing(kk)))
+            fcart_part(:,kk) = matmul(ext_field , eff_pot%harmonics_terms%zeff(:,:,eff_pot%supercell%atom_indexing(kk))) 
+          end do
+  end do
+
+  energy_part = DOT_PRODUCT(ext_field(:),temp_pol(:)) !*eV_Ha
+
+  call xmpi_sum(energy_part, comm, ierr)
+  call xmpi_sum(fcart_part , comm, ierr)
+
+  energy = energy + energy_part
+  fcart = fcart + fcart_part
 
 !-------------------------------------------
 ! 8 - Compute electronic Part with SCALE-UP
