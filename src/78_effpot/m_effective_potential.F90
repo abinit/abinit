@@ -2212,7 +2212,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,gred,strten,natom,r
   real(dp) :: strain_tmp(6),strten_part(6)
   real(dp) :: energy_coeff_part(eff_pot%anharmonics_terms%ncoeff)
   real(dp),allocatable :: xcart(:,:)
-  real(dp) :: ,ext_field(3)
+  real(dp) :: ext_field(3),temp_pol(3)
   character(len=500) :: msg
 ! *************************************************************************
 
