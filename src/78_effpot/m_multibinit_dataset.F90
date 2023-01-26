@@ -190,6 +190,7 @@ module m_multibinit_dataset
   real(dp) :: delta_df
   real(dp) :: dyn_tolsym
   real(dp) :: energy_reference
+  real(dp) :: efield(3)
   real(dp) :: bound_cutoff
   real(dp) :: bound_Temp
   real(dp) :: fit_cutoff
@@ -553,6 +554,7 @@ multibinit_dtset%outdata_prefix=""
  multibinit_dtset%acell(:) = one
  multibinit_dtset%conf_cutoff_strain(1:6) = zero
  multibinit_dtset%dipdip_range(:)= (/0,0,0/)
+ multibinit_dtset%efield(:)= (/0,0,0/)
  multibinit_dtset%fit_grid(:)= 1
  multibinit_dtset%fit_rangePower(:)= (/3,4/)
  multibinit_dtset%bound_rangePower(:)= (/6,6/)
@@ -2569,6 +2571,20 @@ multibinit_dtset%lwf_temperature_start=0.0
 &   'Action: correct eivec in your input file.'
    ABI_ERROR(message)
  end if
+
+
+!!         EXTERNAL_EFIELD
+ multibinit_dtset%efield= zero
+ if(3>marr)then
+   marr=3
+   ABI_FREE(intarr)
+   ABI_FREE(dprarr)
+   ABI_MALLOC(intarr,(marr))
+   ABI_MALLOC(dprarr,(marr))
+ end if
+ call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'efield',tread,'DPR')
+ if(tread==1) multibinit_dtset%efield(1:3)= dprarr(1:3)
+
 
 !F
   multibinit_dtset%fit_anhaStrain=0

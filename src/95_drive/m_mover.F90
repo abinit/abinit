@@ -186,7 +186,7 @@ contains
 
 subroutine mover(scfcv_args,ab_xfh,acell,amu_curr,dtfil,&
 & electronpositron,rhog,rhor,rprimd,vel,vel_cell,xred,xred_old,&
-& effective_potential,filename_ddb,itimimage_gstate,verbose,writeHIST,scup_dtset,sc_size)
+& effective_potential,filename_ddb,itimimage_gstate,verbose,writeHIST,scup_dtset,sc_size,efield)
 
 !Arguments ------------------------------------
 !scalars
@@ -205,6 +205,7 @@ real(dp), intent(in),target :: amu_curr(:) !(scfcv%dtset%ntypat)
 real(dp), pointer :: rhog(:,:),rhor(:,:)
 real(dp), intent(inout) :: xred(3,scfcv_args%dtset%natom),xred_old(3,scfcv_args%dtset%natom)
 real(dp), intent(inout) :: vel(3,scfcv_args%dtset%natom),vel_cell(3,3),rprimd(3,3)
+real(dp), optional,intent(in):: efield(3)
 type(scup_dtset_type),optional, intent(inout) :: scup_dtset
 integer,optional,intent(in) :: sc_size(3)
 
@@ -645,7 +646,7 @@ real(dp),allocatable :: gred_corrected(:,:),xred_prev(:,:)
            call effective_potential_evaluate( &
 &           effective_potential,scfcv_args%results_gs%etotal,scfcv_args%results_gs%fcart,scfcv_args%results_gs%gred,&
 &           scfcv_args%results_gs%strten,ab_mover%natom,rprimd,xred=xred,verbose=need_verbose,&
-&           filename=name_file,elec_eval=need_elec_eval)
+&           filename=name_file,elec_eval=need_elec_eval,efield=efield)
 
 !          Check if the simulation did not diverge...
            if(itime > 3 .and.ABS(scfcv_args%results_gs%etotal - hist%etot(1)) > 1E5)then
