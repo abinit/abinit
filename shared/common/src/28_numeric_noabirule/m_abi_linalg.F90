@@ -271,6 +271,12 @@ module m_abi_linalg
       logical(kind=c_bool),           intent(out) :: is_allocated
     end subroutine gpu_allocated_impl
 
+    subroutine gpu_managed_ptr_status(gpu_ptr) bind(c, name="gpu_managed_ptr_status_")
+      use, intrinsic :: iso_c_binding
+      implicit none
+      type(c_ptr),                    intent(in)  :: gpu_ptr
+    end subroutine gpu_managed_ptr_status
+
   end interface
 
 #else
@@ -282,6 +288,7 @@ module m_abi_linalg
  public :: dealloc_on_gpu
  public :: gpu_memset
  public :: gpu_allocated_impl
+ public :: gpu_managed_ptr_status
  public :: gpu_linalg_init
  public :: gpu_linalg_shutdown
  public :: gpu_xgemm
