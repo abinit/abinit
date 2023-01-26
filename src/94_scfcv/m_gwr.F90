@@ -8,7 +8,7 @@
 !! NOTES
 !!   Memory and workload are distributed using a 4D cartesian grid: (g/r, tau, k-points, spin).
 !!
-!!   Inside the g/r communicator, we use PBLAS matrices to store G, tchi and W.
+!!   Inside the g/r communicator, we use PBLAS matrices to store G, tchi and W
 !!   using a 1D processor grid with block distribution along columns.
 !!   A 2D grid, indeed, would require MPI-FFT or some communication before performing the FFTs.
 !!
@@ -32,7 +32,7 @@
 !!                |         |         |
 !!                |--------------------
 !!
-!!   At this point, we use ptrans to MPI transpose the (r, g') matrix, and we end up with:
+!!   At this point, we call ptrans to MPI transpose the (r, g') matrix, and we end up with:
 !!
 !!                       r-axis
 !!                |--------------------
@@ -47,7 +47,7 @@
 !!    - All the two-point functions are defined on k/q-centered g-spheres while GW uses a single Gamma-centered sphere.
 !!    - The frequency/tau meshes are automatically defined by ntau and the KS spectrum (minimax meshes)
 !!
-!!   Technical properties:
+!!   Technical proplems:
 !!
 !!     - it's not clear to me that one can use vc(Sq, SG) when a cutoff is used as the cutoff breaks
 !!       the spherical symmetry of vc(r). Besides, when symmetries are used to reconstruct the term for q in the BZ,
@@ -231,7 +231,7 @@ module m_gwr
  contains
 
    procedure :: init => desc_init
-   ! Init object
+   ! Initialize the object
 
    procedure :: copy => desc_copy
    ! Copy object.
@@ -290,7 +290,7 @@ module m_gwr
  type, public :: gwr_t
 
   integer :: nsppol = 1, nspinor = -1, nspden = -1
-  ! Number of independent spin polarizations, number of spinor components and spin density.
+  ! Number of independent spin polarizations, number of spinor components and spin densities.
 
   integer :: natom = -1
    ! Number of atoms
@@ -531,6 +531,9 @@ module m_gwr
    type(ebands_t), pointer :: ks_ebands => null()
    ! initial KS energies
 
+   type(gaps_t) :: ks_gaps
+   ! Info on the KS gaps.
+
    type(ebands_t) :: qp_ebands
    ! QP energies
 
@@ -544,7 +547,7 @@ module m_gwr
    ! PAW data
 
    type(mpi_type),pointer :: mpi_enreg => null()
-   ! Sequential mpi_type needed to invoke routines requiring it.
+   ! Sequential mpi_type needed to invoke ABINIT routines requiring it.
 
    type(processor_scalapack) :: g_slkproc
 
@@ -624,7 +627,7 @@ module m_gwr
 
    real(dp),allocatable :: qibz(:,:)
    ! (3, nqibz)
-   ! Reduced coordinates of the q-points in the IBZ (full simmetry of the system).
+   ! Reduced coordinates of the q-points in the IBZ (full symmetry of the system).
 
    real(dp),allocatable :: wtq(:)
    ! (nqibz)
@@ -821,7 +824,6 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  logical :: isirr_k, changed, q_is_gamma, reorder
  character(len=5000) :: msg
  type(krank_t) :: qrank, krank_ibz
- type(gaps_t) :: ks_gaps
  type(est_t) :: est
  !type(pstat_t) :: ps
 !arrays
@@ -961,13 +963,13 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  ! ==========================
  ! Setup k-points in Sigma_nk
  ! ==========================
- ks_gaps = ebands_get_gaps(ks_ebands, gap_err)
+ gwr%ks_gaps = ebands_get_gaps(ks_ebands, gap_err)
  if (my_rank == master) then
    !call ebands_print(ks_ebands, header="KS band structure", unit=std_out, prtvol=gwr%dtset%prtvol)
    !call ebands_print_gaps(ks_ebands, ab_out, header="KS gaps (Fermi energy set to zero)")
    msg = "Kohn-Sham gaps and band edges from IBZ mesh"
-   call ks_gaps%print(unit=std_out, header=msg)
-   call ks_gaps%print(unit=ab_out, header=msg)
+   call gwr%ks_gaps%print(unit=std_out, header=msg)
+   call gwr%ks_gaps%print(unit=ab_out, header=msg)
  end if
 
  ! TODO: nkcalc should be spin dependent.
@@ -982,7 +984,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
 
    if (any(abs(dtset%sigma_erange) > zero)) then
      ! Use sigma_erange and (optionally) sigma_ngkpt
-     call sigtk_kcalc_from_erange(dtset, cryst, ks_ebands, ks_gaps, &
+     call sigtk_kcalc_from_erange(dtset, cryst, ks_ebands, gwr%ks_gaps, &
                                   gwr%nkcalc, gwr%kcalc, gwr%bstart_ks, gwr%nbcalc_ks, input_comm)
 
    else
@@ -1005,7 +1007,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
      else
        ! qprange is not specified in the input.
        ! Include direct and fundamental KS gap or include states depending on the position wrt band edges.
-       call sigtk_kcalc_from_gaps(dtset, ks_ebands, ks_gaps, gwr%nkcalc, gwr%kcalc, gwr%bstart_ks, gwr%nbcalc_ks)
+       call sigtk_kcalc_from_gaps(dtset, ks_ebands, gwr%ks_gaps, gwr%nkcalc, gwr%kcalc, gwr%bstart_ks, gwr%nbcalc_ks)
      end if
    end if
 
@@ -1125,7 +1127,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  ! Setup tau/omega mesh and weights
  ! ================================
  ! Compute min/max transition energy taking into account nsppol if any.
- te_min = minval(ks_gaps%cb_min - ks_gaps%vb_max)
+ te_min = minval(gwr%ks_gaps%cb_min - gwr%ks_gaps%vb_max)
  te_max = maxval(ks_ebands%eig(nbsum,:,:) - ks_ebands%eig(1,:,:))
  if (te_min <= tol6) then
    te_min = tol6
@@ -1177,8 +1179,6 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
 
  endif
  !stop
-
- call ks_gaps%free()
 
  ! =========================================
  ! Find FFT mesh and max number of g-vectors
@@ -1720,7 +1720,7 @@ type(est_t) pure function estimate(gwr, np_kgts) result(est)
 
  ! Estimate speedup and parallel efficiency using heuristic weights. Note g_nfft instead of green_mpw.
  w_k = 0.799_dp; w_g = 0.899_dp; w_t = 1.1_dp; w_s = 1.2_dp
- ! Promote kpt parallelism under particular circustamnces.
+ ! Promote kpt parallelism under particular circumstances.
  if (gwr%nkbz > 4**3) w_k = w_g + tol2 * merge(+1, -1, np_k < 5)
 
  est%speedup = speedup(gwr%nkbz, nint(np_k), w_k) * speedup(gwr%g_nfft, nint(np_g), w_g) * &
@@ -1931,6 +1931,7 @@ subroutine gwr_free(gwr)
  ABI_SFREE(gwr%kcalc2ibz)
  ABI_SFREE(gwr%x_mat)
 
+ call gwr%ks_gaps%free()
  call ebands_free(gwr%qp_ebands)
  call ebands_free(gwr%qp_ebands_prev)
  call gwr%kcalc_wfd%free()
@@ -2202,7 +2203,7 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
 
  ! Init set of (npwsp, nbsum) PBLAS matrix distributed within the gtau communicator.
  ! and distribute it over bands so that each proc reads a subset of bands in read_band_block
- ! Note size_blocs below that corresponds to roud-robin distribution along band axis.
+ ! Note size_blocs below that corresponds to round-robin distribution along band axis.
 
  ABI_MALLOC(gwr%ugb, (gwr%nkibz, gwr%nsppol))
  gwr%ugb_nband = nbsum
@@ -2348,7 +2349,7 @@ end subroutine gwr_read_ugb_from_wfk
 !!  Store only G_k for the IBZ k-points treated by this MPI proc.
 !!
 !! INPUTS
-!!  free_ugb: True if gwr%ugb wavefunctions should be deallocated before returning.
+!!  free_ugb: True if the gwr%ugb wavefunctions should be deallocated before returning.
 !!
 !! SOURCE
 
@@ -2558,7 +2559,7 @@ subroutine gwr_rotate_gpm(gwr, ik_bz, itau, spin, desc_kbz, gt_pm)
 
  ! Rotate gvec, recompute gbound and rotate vc_sqrt
  ! TODO: 1) Handle TR and routine to rotate tchi/W including vc_sqrt
- !       2) Make sure that the FFT box is large enough to accomodate umklapps
+ !       2) Make sure that the FFT box is large enough to accommodate umklapps
 
  desc_kbz%ig0 = -1
  do ig1=1,desc_kbz%npw
@@ -3234,7 +3235,7 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
    end do
  end do
 
- ! And now perform inhomogenous FT in parallel.
+ ! And now perform inhomogeneous FT in parallel.
  do my_is=1,gwr%my_nspins
    spin = gwr%my_spins(my_is)
    do my_iqi=1,gwr%my_nqibz
@@ -3955,7 +3956,7 @@ subroutine gwr_build_tchi(gwr)
         call cwtime(cpu_tau, wall_tau, gflops_tau, "start")
         itau = gwr%my_itaus(my_it)
 
-        ! Redistribute G_k(g,g') in the IBZ so that each MPI proc can recostruct G_k in the BZ on the fly.
+        ! Redistribute G_k(g,g') in the IBZ so that each MPI proc can reconstruct G_k in the BZ on the fly.
         !need_gt_kibz = ?
         !call gwr%distrib_gt_kibz(itau, spin, need_kibz, got_kibz, "communicate')
 
@@ -4257,7 +4258,7 @@ subroutine gwr_print_trace(gwr, what)
 ! *************************************************************************
 
  ! The same q/k point in the IBZ might be available on different procs in kpt_comm
- ! thus we have to rescale the trace before summing the results in gwr%comm.
+ ! hence we have to rescale the trace before summing the results in gwr%comm.
 
  comment = "Invalid space!"; units = [std_out, ab_out]
 
@@ -4447,7 +4448,7 @@ subroutine gwr_build_wc(gwr)
 
        ! Invert symmetrized epsilon.
        ! NB: PZGETRF requires square block cyclic decomposition along the two axis
-       ! hence we neeed to redistribute the data before calling invert.
+       ! hence we hace to redistribute the data before calling invert.
 
        call wc%change_size_blocs(em1) ! processor=slkproc_4diag
        !call em1%invert()
@@ -4860,7 +4861,7 @@ if (gwr%use_supercell_for_sigma) then
 else
  call wrtout(std_out, sjoin(" Building Sigma_c with convolutions in q-space:", ltoa(sc_ngfft(1:3))), pre_newlines=2)
 
- ! Allocate workspace to store Wc(r' r) and Sigma_kcalc(r',r)
+ ! Allocate workspace to store Wc(r',r) and Sigma_kcalc(r',r)
  nrsp = gwr%g_nfft * gwr%nspinor
  col_bsize = nrsp / gwr%g_comm%nproc; if (mod(nrsp, gwr%g_comm%nproc) /= 0) col_bsize = col_bsize + 1
  call wc_rpr%init(nrsp, nrsp, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize])
@@ -4931,8 +4932,8 @@ else
      ! Deallocate extra Wc matrices
      call gwr%distrib_mats_qibz("wc", itau, spin, need_qibz, got_qibz, "free")
 
-     ! Integrate self-energy matrix elements in the unit cell
-     ! Remember that sigma is stored as (r', r) with the second dimension MPI-distributed
+     ! Integrate self-energy matrix elements in the unit cell.
+     ! Remember that Sigma is stored as (r', r) with the second dimension MPI-distributed
      do ikcalc=1,gwr%nkcalc
        do band=gwr%bstart_ks(ikcalc, spin), gwr%bstop_ks(ikcalc, spin)
          !call diag_braket("T", sigc_rpr(1, ikcalc), gwr%g_nfft * gwr%nspinor, uc_psi_bk(:, band, ikcalc), sigc_pm(1))
@@ -6493,7 +6494,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  !call now_gaps%free()
 
  if (gwr%dtset%gwr_max_hwtene > zero) then
-   ! TODO: e0 is set to the top of valence band if semiconductor.
+   ! TODO: e0 should be set to the top of valence band if semiconductor.
    e0 = now_ebands%fermie
    do band1_start=1, gwr%ugb_nband
      if (all(qp_eig(band1_start,:,:) - e0 < gwr%dtset%gwr_max_hwtene) .and. &
