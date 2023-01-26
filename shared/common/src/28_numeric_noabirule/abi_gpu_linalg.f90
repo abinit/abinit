@@ -256,6 +256,35 @@ subroutine gpu_allocated_impl(gpu_ptr, is_allocated)
 end subroutine gpu_allocated_impl
 !!***
 
+!!****f* m_abi_gpu_linalg/gpu_managed_ptr_status
+!! NAME
+!!  gpu_managed_ptr_status_impl
+!!
+!! FUNCTION
+!!  Print information about a managed pointer (host or device address when accessible).
+!!
+!! INPUTS
+!!  gpu_ptr= C_PTR on gpu memory location
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!   WARNING! : this routine is a dummy one when HAVE_GPU_CUDA is not enabled
+!!   the correct one is in 17_gpu_toolbox/dev_spec.cu
+!!
+!! PARENTS
+!!
+!! SOURCE
+
+subroutine gpu_managed_ptr_status(gpu_ptr)
+
+  !Arguments ------------------------------------
+  type(c_ptr)                       :: gpu_ptr
+  ABI_UNUSED(gpu_ptr)
+
+end subroutine gpu_managed_ptr_status
+!!***
+
 !!****f* m_abi_gpu_linalg/gpu_linalg_init
 !! NAME
 !!  gpu_linalg_init
