@@ -1195,7 +1195,7 @@ end function itoa_4b
 !!  Convert an float into a string using format fmt  (es16.6 if fmt is not given).
 !!
 
-pure function ftoa(value,fmt)
+pure function ftoa(value, fmt)
 
  real(dp),intent(in) :: value
  character(len=*),optional,intent(in) :: fmt

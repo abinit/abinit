@@ -1332,22 +1332,22 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
        end do
      end do
 
-     est = estimate(gwr, dims_kgts)
-     call wrtout(units, "-")
-     call wrtout(units, "- Selected MPI grid:")
-     ip_k = dims_kgts(1); ip_g = dims_kgts(2); ip_t = dims_kgts(3); ip_s = dims_kgts(4)
-     write(msg, "(a,4(a4,2x),3(a12,2x))") "- ", "np_k", "np_g", "np_t", "np_s", "memb_per_cpu", "efficiency", "speedup"
-     call wrtout(units, msg)
-     write(msg, "(a,4(i4,2x),3(es12.5,2x))")"- ", ip_k, ip_g, ip_t, ip_s, est%mem_total, est%efficiency, est%speedup
-     call wrtout(units, msg, newlines=1)
-     call est%print(units)
-
      !call ps%from_pid()
      !call ps%print([std_out])
    end if ! master
 
    call xmpi_bcast(dims_kgts, master, gwr%comm%value, ierr)
    np_k = dims_kgts(1); np_g = dims_kgts(2); np_t = dims_kgts(3); np_s = dims_kgts(4)
+
+   est = estimate(gwr, dims_kgts)
+   call wrtout(units, "-")
+   call wrtout(units, "- Selected MPI grid:")
+   ip_k = dims_kgts(1); ip_g = dims_kgts(2); ip_t = dims_kgts(3); ip_s = dims_kgts(4)
+   write(msg, "(a,4(a4,2x),3(a12,2x))") "- ", "np_k", "np_g", "np_t", "np_s", "memb_per_cpu", "efficiency", "speedup"
+   call wrtout(units, msg)
+   write(msg, "(a,4(i4,2x),3(es12.5,2x))")"- ", ip_k, ip_g, ip_t, ip_s, est%mem_total, est%efficiency, est%speedup
+   call wrtout(units, msg, newlines=1)
+   call est%print(units)
 
 #else
    ! Determine number of processors for the spin axis. if all_nproc is odd, spin is not distributed when nsppol == 2
@@ -1760,18 +1760,18 @@ subroutine est_print(est, units)
  integer,intent(in) :: units(:)
 
 !Local variables-------------------------------
- !real(dp) :: np_k, np_g, np_t, np_s, w_k, w_g, w_t, w_s, np_tot
+ character(len=4),parameter :: fmt = "f8.1"
 
 ! *************************************************************************
 
  call wrtout(units, "- Resident memory in Mb for G(g,g',+/-tau) and chi(g,g',tau):")
- !est%mem_green_gg
- !est%mem_chi_gg
- !est%mem_ugb
+ call wrtout(units, sjoin("- G_k(g,g,tau): ", ftoa(est%mem_green_gg, fmt=fmt)))
+ call wrtout(units, sjoin("- Chi_q(g,g,tau): ", ftoa(est%mem_chi_gg, fmt=fmt)))
+ call wrtout(units, sjoin("- u_k(g,b): ", ftoa(est%mem_ugb, fmt=fmt)))
 
  call wrtout(units, "- Temporary memory allocated inside the tau loops:")
- !est%mem_green_rg
- !est%mem_chi_rg
+ call wrtout(units, sjoin("- G_k(r,g): ", ftoa(est%mem_green_rg, fmt=fmt)))
+ call wrtout(units, sjoin("- chi_q(r,g): ", ftoa(est%mem_chi_rg, fmt=fmt)))
 
 end subroutine est_print
 !!***
@@ -6335,10 +6335,10 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: two_poles = 2, one_pole = 1, gwcomp0 = 0, spmeth0 = 0
- integer :: nsppol, nspinor, ierr, my_is, spin, my_ikf, itau, my_it, band1_max
+ integer :: nsppol, nspinor, ierr, my_is, spin, my_ikf, itau, my_it
  integer :: ik_bz, ik_ibz, isym_k, trev_k, g0_k(3)
  !integer :: iq_bz, iq_ibz, isym_q, trev_q, g0_q(3)
- integer :: nkpt_summed, use_umklp, band1, band2, band1_start, band1_stop
+ integer :: nkpt_summed, use_umklp, band1, band2, band1_start, band1_stop, band1_max
  integer :: ib, il_b1, il_b2, nb, block_size, ii, mband
  integer :: istwf_ki, npw_ki, nI, nJ, nomega, io, iq, nq, dim_rtwg !ig,
  integer :: npwe, u_nfft, u_mgfft, u_mpw
@@ -6354,11 +6354,12 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  type(littlegroup_t) :: ltg_q
  type(desc_t),pointer :: desc_ki
 !arrays
+
  integer :: gmax(3), u_ngfft(18), work_ngfft(18) ! spinor_padx(2,4), g0(3),
  integer,contiguous, pointer :: kg_ki(:,:)
  integer,allocatable :: gvec_q0(:,:), gbound_q0(:,:), u_gbound(:,:)
  real(dp) :: kk_ibz(3), kk_bz(3), tsec(2)
- real(dp),contiguous, pointer :: qp_eig(:,:,:), qp_occ(:,:,:), ks_eig(:,:,:), cwave(:,:)
+ real(dp),contiguous, pointer :: qp_eig(:,:,:), qp_occ(:,:,:), ks_eig(:,:,:) !, cwave(:,:)
  real(dp),allocatable :: work(:,:,:,:), qdirs(:,:)
  logical :: gradk_not_done(gwr%nkibz)
  logical,allocatable :: bbp_mask(:,:)
@@ -6483,12 +6484,10 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  ! Find band1_max from gwr_max_hwtene
  band1_max = gwr%ugb_nband
 
- !now_gaps = now_ebands_get_gaps(now_ebands, gap_err)
- !call now_gaps%free()
-
  if (gwr%dtset%gwr_max_hwtene > zero) then
-   ! TODO: e0 should be set to the top of valence band if semiconductor.
+   ! Set e0 to top of valence band if semiconductor else Fermi level
    e0 = now_ebands%fermie
+   if (all(gwr%ks_gaps%ierr == 0)) e0 = minval(gwr%ks_gaps%vb_max)
    do band1_start=1, gwr%ugb_nband
      if (all(qp_eig(band1_start,:,:) - e0 < gwr%dtset%gwr_max_hwtene) .and. &
          all(qp_eig(band1_start,:,:) - e0 > 0)) then
@@ -6497,7 +6496,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
    end do
  end if
  call wrtout(std_out, sjoin(" gwr_max_hwtene:", ftoa(gwr%dtset%gwr_max_hwtene)))
- call wrtout(std_out, sjoin(" Using: ", itoa(band1_start), "/", itoa(gwr%ugb_nband), "bands for chi0 head and wings."))
+ call wrtout(std_out, sjoin(" Using: ", itoa(band1_max), "/", itoa(gwr%ugb_nband), "bands for chi0 head and wings."))
 
  ! Loop on spin to calculate $\chi_{\up,\up} + \chi_{\down,\down}$
  ! TODO: Spinor
@@ -6575,17 +6574,16 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
          !print *, "exiting band1_start loop"
          exit
        end if
-       !if (band1_stop > band1_max) exit
-
        !print *, "band1_start, gwr%ugb_nband, block_size", band1_start, gwr%ugb_nband, block_size
        nb = blocked_loop(band1_start, gwr%ugb_nband, block_size)
        band1_stop = band1_start + nb - 1
+       if (band1_stop > band1_max) exit
 
        ! Collect nb bands starting from band1_start on each proc.
        call ugb_kibz%collect_cplx(npw_ki * nspinor, nb, [1, band1_start], ug1_block)
 
        ! Dump algorithm based on xmpi_sum. To be replaced by an all_gather
-       ! The advantage is that it works indipendently of the PBLAS distribution.
+       ! The advantage is that it works independently of the PBLAS distribution.
        !ABI_CALLOC(ug1_block, (npw_ki * nspinor, nb))
        !do il_b1=1, ugb_kibz%sizeb_local(2)
        !  band1 = ugb_kibz%loc2gcol(il_b1)
@@ -6600,7 +6598,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
          eig_nk = gwr%ks_ebands%eig(band1, ik_ibz, spin)
 
          ! FIXME: This is wrong if spc
-         call c_f_pointer(c_loc(ugb_kibz%buffer_cplx(:,il_b1)), cwave, shape=[2, npw_ki*nspinor])
+         !call c_f_pointer(c_loc(ugb_kibz%buffer_cplx(:,il_b1)), cwave, shape=[2, npw_ki*nspinor])
          !call ddkop%apply(eig_nk, npw_ki, nspinor, cwave, cwaveprj)
          !gh1c_block(:,:,:,xx_ib) = ddkop%gh1c(:, 1:npw_ki*nspinor,:)
        end do
