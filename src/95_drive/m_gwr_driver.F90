@@ -245,12 +245,6 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
   ABI_ERROR("GWR code requires scalapack library")
 #endif
 
-!#ifndef HAVE_MPI_IBCAST
-! do ii=1,5
-!   ABI_WARNING("Your MPI library does not provide MPI_IBCAST. Calculations parallelized over perturbations will be slow")
-! end do
-!#endif
-
  ! abirules!
  if (.False.) write(std_out,*)acell,codvsn,rprim,xred
 
@@ -470,7 +464,9 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  call read_rhor(den_path, cplex1, dtset%nspden, nfftf, ngfftf, dtset%usepaw, mpi_enreg, ks_rhor, &
                 den_hdr, ks_pawrhoij, comm) !, allow_interp=.True.)
 
+ ! TODO: Overloaded interface with units or just change the API to accept units
  call prtrhomxmn(std_out, MPI_enreg, nfftf, ngfftf, dtset%nspden, 1, ks_rhor, ucvol=cryst%ucvol)
+ call prtrhomxmn(ab_out, MPI_enreg, nfftf, ngfftf, dtset%nspden, 1, ks_rhor, ucvol=cryst%ucvol)
 
  den_cryst = den_hdr%get_crystal()
  if (cryst%compare(den_cryst, header=" Comparing input crystal with DEN crystal") /= 0) then
@@ -488,7 +484,6 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
    call read_rhor(kden_path, cplex1, dtset%nspden, nfftf, ngfftf, 0, mpi_enreg, ks_taur, &
                   kden_hdr, ks_pawrhoij, comm) !, allow_interp=.True.)
    call kden_hdr%free()
-
    call prtrhomxmn(std_out, MPI_enreg, nfftf, ngfftf, dtset%nspden, 1, ks_taur, optrhor=1, ucvol=cryst%ucvol)
  end if
 
@@ -698,6 +693,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
 
    if (my_rank == master) then
      call ebands_print_gaps(owfk_ebands, ab_out, header="KS gaps after direct diagonalization")
+     call ebands_print_gaps(owfk_ebands, std_out, header="KS gaps after direct diagonalization")
    end if
 
    ABI_FREE(npwarr_ik)

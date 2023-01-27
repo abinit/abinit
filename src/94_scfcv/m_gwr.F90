@@ -2743,7 +2743,6 @@ subroutine gwr_get_gk_rpr_pm(gwr, ik_bz, itau, spin, gk_rpr_pm)
 ! *************************************************************************
 
  call cwtime(cpu, wall, gflops, "start")
-
  ABI_ERROR("This should be tested")
 
  !kk_bz = gwr%kbz(:, ik_bz)
@@ -2776,7 +2775,6 @@ subroutine gwr_get_gk_rpr_pm(gwr, ik_bz, itau, spin, gk_rpr_pm)
      ndat = blocked_loop(ir1, gpr%sizeb_local(2), gwr%uc_batch_size)
 
      ! Perform FFT G_k(g',r) -> G_k(r',r) and store results in rgp.
-
      ! FIXME: FFT sign is wrong (should be - instead of + but I need to change the API)
      call uplan_k%execute_gr(ndat, gpr%buffer_cplx(:, ir1), gk_rpr_pm(ipm)%buffer_cplx(:, ir1))
    end do ! ir1
@@ -2789,7 +2787,6 @@ subroutine gwr_get_gk_rpr_pm(gwr, ik_bz, itau, spin, gk_rpr_pm)
  call slk_array_free(gt_pm)
  call desc_kbz%free()
  call uplan_k%free()
-
  call cwtime_report(" gwr_get_gk_rpr_pm:", cpu, wall, gflops)
 
 end subroutine gwr_get_gk_rpr_pm
@@ -3094,7 +3091,6 @@ subroutine gwr_get_wc_rpr_qbz(gwr, qq_bz, itau, spin, wc_rpr)
 ! *************************************************************************
 
  ABI_ERROR("Not Implemented error")
-
  call wrtout(std_out, trim(ktoa(qq_bz)))
 
  ! Identify q + g0 = k - kp with q in gwr%qbz.
@@ -3181,12 +3177,12 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
 !scalars
  integer :: my_iqi, my_is, ig1, ig2, my_it, ierr, iq_ibz, itau, spin, it0, iw
  integer :: ndat, idat, loc1_size, loc2_size, batch_size
- real(dp) :: cpu, wall, gflops !, tau
+ real(dp) :: cpu, wall, gflops
  logical :: sum_spins_
 !arrays
  integer,allocatable :: requests(:)
  real(dp), pointer :: weights_ptr(:,:)
- complex(dp) :: wgt_globmy(gwr%ntau, gwr%my_ntau)  ! Use complex instead of real to be able to call ZGEMM.
+ complex(dp) :: wgt_globmy(gwr%ntau, gwr%my_ntau)  ! Complex instead of real to be able to call ZGEMM.
  complex(dp),allocatable :: cwork_myit(:,:,:), glob_cwork(:,:,:)
  type(__slkmat_t), pointer :: mats(:)
 
@@ -3809,7 +3805,6 @@ subroutine gwr_build_tchi(gwr)
            do ipm=1,2
              !ABI_CHECK_IEQ(size(gt_gpr(ipm, my_ikf)%buffer_cplx, dim=2), my_nr, "my_nr!")
              !ABI_CHECK_IEQ(size(gt_gpr(ipm, my_ikf)%buffer_cplx, dim=1), desc_k%npw, "desc_k!")
-             !ii = 1 + (ipm - 1) * sc_nfft * gwr%nspinor * ndat
              call gsph2box(sc_ngfft, desc_k%npw, gwr%nspinor * ndat, green_scgvec, &
                            gt_gpr(ipm, my_ikf)%buffer_cplx(:, my_ir), &  ! in
                            gt_scbox(:,ipm))                              ! inout
@@ -3938,7 +3933,6 @@ subroutine gwr_build_tchi(gwr)
    ABI_FREE(desc_mykbz)
    !ABI_SFREE(gt_ucbox)
    !ABI_SFREE(sc_ceimkr)
-
    call slk_array_free(chiq_gpr)
    ABI_FREE(chiq_gpr)
 
@@ -4210,7 +4204,7 @@ subroutine gwr_distrib_mats_qibz(gwr, what, itau, spin, need_qibz, got_qibz, act
    end do
 
  case ("free")
-   ! Use got_qibz to free previously allocated memory
+   ! Use got_qibz table to free previously allocated memory
    do iq_ibz=1,gwr%nqibz
      if (got_qibz(iq_ibz) == 1) call gwr%tchi_desc_qibz(iq_ibz)%free()
    end do
@@ -4379,7 +4373,6 @@ subroutine gwr_build_wc(gwr)
  call cwtime(cpu_all, wall_all, gflops_all, "start")
  call timab(1924, 1, tsec)
  call wrtout([std_out, ab_out], " Building correlated screening Wc", pre_newlines=2)
-
  ABI_CHECK(gwr%tchi_space == "iomega", sjoin("tchi_space: ", gwr%tchi_space, " != iomega"))
 
  if (allocated(gwr%wc_qibz)) then
@@ -4447,8 +4440,8 @@ subroutine gwr_build_wc(gwr)
        end do ! il_g2
 
        ! Invert symmetrized epsilon.
-       ! NB: PZGETRF requires square block cyclic decomposition along the two axis
-       ! hence we hace to redistribute the data before calling invert.
+       ! NB: PZGETRF requires square block cyclic decomposition along the two axes
+       ! hence we have to redistribute the data before calling invert.
 
        call wc%change_size_blocs(em1) ! processor=slkproc_4diag
        !call em1%invert()
@@ -4854,14 +4847,13 @@ if (gwr%use_supercell_for_sigma) then
  !call wrtout(std_out, sjoin(" Maxval abs imag W:", ftoa(max_abs_imag_wct)))
  ABI_FREE(gt_scbox)
  ABI_FREE(wct_scbox)
-
  call gt_plan_gp2rp%free()
  call wt_plan_gp2rp%free()
 
 else
  call wrtout(std_out, sjoin(" Building Sigma_c with convolutions in q-space:", ltoa(sc_ngfft(1:3))), pre_newlines=2)
 
- ! Allocate workspace to store Wc(r',r) and Sigma_kcalc(r',r)
+ ! Allocate PBLAS matrices to store Wc(r',r, tau), Wc(r',r, +/-tau)  and Sigma_kcalc(r',r, +/-tau)
  nrsp = gwr%g_nfft * gwr%nspinor
  col_bsize = nrsp / gwr%g_comm%nproc; if (mod(nrsp, gwr%g_comm%nproc) /= 0) col_bsize = col_bsize + 1
  call wc_rpr%init(nrsp, nrsp, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize])
@@ -4913,13 +4905,14 @@ else
        ik_bz = gwr%my_kbz_inds(my_ikf)
        kk_bz = gwr%kbz(:, ik_bz)
 
-       ! Use symmetries to get G_k from the IBZ. G_k(g,g') --> G_k(r,r')
+       ! Use symmetries to get G_k from the IBZ. Then G_k(g,g') --> G_k(r,r')
        call gwr%get_gk_rpr_pm(ik_bz, itau, spin, gk_rpr_pm)
 
        do ikcalc=1,gwr%nkcalc
          qq_bz = gwr%kcalc(:, ikcalc) - kk_bz
+         !iq_bz = ??
 
-         ! FIXME: Finalize implementation
+         ! FIXME: Finalize implementation and take into account umklapp as qq may be outside of the first BZ.
          call gwr%get_wc_rpr_qbz(qq_bz, itau, spin, wc_rpr)
 
          do ipm=1,2
@@ -4932,8 +4925,8 @@ else
      ! Deallocate extra Wc matrices
      call gwr%distrib_mats_qibz("wc", itau, spin, need_qibz, got_qibz, "free")
 
-     ! Integrate self-energy matrix elements in the unit cell.
-     ! Remember that Sigma is stored as (r', r) with the second dimension MPI-distributed
+     ! Now Integrate self-energy matrix elements in the unit cell.
+     ! Remember that Sigma is stored as (r',r) with the second dimension MPI-distributed
      do ikcalc=1,gwr%nkcalc
        do band=gwr%bstart_ks(ikcalc, spin), gwr%bstop_ks(ikcalc, spin)
          !call diag_braket("T", sigc_rpr(1, ikcalc), gwr%g_nfft * gwr%nspinor, uc_psi_bk(:, band, ikcalc), sigc_pm(1))
@@ -5341,8 +5334,8 @@ subroutine diag_braket(trans, mat, nfftsp, u_glob, cout, do_mpi_sum)
  case ("T")
    ABI_CHECK_IEQ(nfftsp, mat%sizeb_local(1), "First dimension should be local to each MPI proc!")
 
-   ! (r',r) with r' local and r-index PBLAS-distributed.
    ! Integrate over r'
+   ! (r',r) with r' local and r-index PBLAS-distributed.
    ABI_MALLOC(loc_cwork, (mat%sizeb_local(2)))
    loc_cwork(:) = matmul(transpose(mat%buffer_cplx), u_glob)
 
