@@ -2951,6 +2951,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      call chkint_eq(0,0,cond_string,cond_values,ierr,'prtdensph',dt%prtdensph,2,(/0,1/),iout)
    endif
 
+   !  prt_lorbmag
+   if (usepaw==1) call chkint_eq(0,0,cond_string,cond_values,ierr,'prt_lorbmag',dt%prt_lorbmag,2,(/0,1/),iout)
+
 !  prtdos
    call chkint_eq(0,0,cond_string,cond_values,ierr,'prtdos',dt%prtdos,6,(/0,1,2,3,4,5/),iout)
 
