@@ -556,7 +556,6 @@ subroutine ksdiago(Diago_ctl, nband_k, nfftc, mgfftc, ngfftc, natom, &
 
  ! Loop over the |beta,G''> component.
  do igsp2=1,npw_k*nspinor
-
    bras(1, igsp2) = one
 
    ! Get <:|H|beta,G''> and <:|S_{PAW}|beta,G''>
@@ -1195,7 +1194,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  if (do_full_diago) then
    write(msg,'(5a, (a,i0), 2a)')ch10,&
      ' Begin full diagonalization for kpt: ',trim(ktoa(kpoint)), stag(spin), ch10,&
-     ' Matrix size: ',npwsp, ", Scalapack grid: ", trim(ltoa(ghg_4diag%processor%grid%dims))
+     " H_GG' Matrix size: ",npwsp, ", Scalapack grid: ", trim(ltoa(ghg_4diag%processor%grid%dims))
    call wrtout(std_out, msg)
    call cwtime(cpu, wall, gflops, "start")
 
@@ -1210,7 +1209,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  else
    write(msg,'(6a,i0,(a,i0), 2a)') ch10,&
      ' Begin partial diagonalization for kpt: ',trim(ktoa(kpoint)), stag(spin), ch10,&
-     ' Matrix size: ',npwsp,', nband_k: ', nband_k,", Scalapack grid: ", trim(ltoa(ghg_4diag%processor%grid%dims))
+     " H_GG' Matrix size: ",npwsp,', nband_k: ', nband_k,", Scalapack grid: ", trim(ltoa(ghg_4diag%processor%grid%dims))
    call wrtout(std_out, msg)
    call cwtime(cpu, wall, gflops, "start")
 
@@ -1281,14 +1280,12 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
 
  if (psps%usepaw == 1 .and. ugb%my_nband > 0) then
    ! Calculate <Proj_i|Cnk> from output eigenstates. Note my_nband
-
    ABI_MALLOC(ugb%cprj_k, (cryst%natom, nspinor * ugb%my_nband))
    call pawcprj_alloc(ugb%cprj_k, 0, gs_hamk%dimcprj)
    idir = 0; cprj_choice = 1  ! Only projected wave functions.
 
    do my_ib=1,ugb%my_nband
      ibs1 = nspinor * (my_ib - 1) + 1
-
      call getcprj(cprj_choice, 0, ugb%cg_k(:,:,my_ib), ugb%cprj_k(:,ibs1),&
       gs_hamk%ffnl_k,idir,gs_hamk%indlmn,gs_hamk%istwf_k,gs_hamk%kg_k,&
       gs_hamk%kpg_k,gs_hamk%kpt_k,gs_hamk%lmnmax,gs_hamk%mgfft, mpi_enreg_seq,&

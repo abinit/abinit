@@ -677,7 +677,7 @@ end subroutine fft_ug_dp
 !!
 !! SOURCE
 
-subroutine fft_ug_spc(npw_k,nfft,nspinor,ndat,mgfft,ngfft,istwf_k,kg_k,gbound_k,ug,ur)
+subroutine fft_ug_spc(npw_k, nfft, nspinor, ndat, mgfft, ngfft, istwf_k, kg_k, gbound_k, ug, ur)
 
 !Arguments ------------------------------------
 !scalars

@@ -4213,10 +4213,8 @@ subroutine kpgsph(ecut,exchn2n3d,gmet,ikg,ikpt,istwf_k,kg,kpt,mkmem,mpi_enreg,mp
      npw_remain=modulo(npw_split,np_fft)
      if(mpi_enreg%me_fft < npw_remain) npw=npw+1
      ig=npw
-#ifdef DEBUG_MODE
      !write(msg,*) 'New npw_fft = ', npw
      !call wrtout(std_out,msg)
-#endif
      alloc_size = max(alloc_size,npw)
      if(mpw>0 ) then  !Step for requilibration between fft process
        ABI_MALLOC(npw_disp,(np_fft))
