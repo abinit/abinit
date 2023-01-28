@@ -671,7 +671,7 @@ module m_gwr
    procedure :: get_myk_green_gpr => gwr_get_myk_green_gpr
     ! G_k(g,g') --> G_k(g',r) for each k in the BZ treated by this MPI proc for given spin and tau.
 
-   procedure :: get_gk_rpr_pm => gwr_get_gk_rpr_pm
+   procedure :: get_gkbz_rpr_pm => gwr_get_gkbz_rpr_pm
    ! Compute G_k(r',r) with (r, r') in the unit cell and k in the full BZ.
 
    procedure :: rotate_wc => gwr_rotate_wc
@@ -814,7 +814,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
 !scalars
  integer,parameter :: qptopt1 = 1, qtimrev1 = 1, master = 0, ndims = 4
  integer :: my_it, my_ikf, my_iqf, ii, ebands_timrev, my_iki, my_iqi, itau, spin
- integer :: my_nshiftq, iq_bz, iq_ibz, npw_, ncid !, ig
+ integer :: my_nshiftq, iq_bz, iq_ibz, ikq_ibz, npw_, ncid !, ig
  integer :: comm_cart, me_cart, ierr, all_nproc, my_rank, qprange_, gap_err, ncerr, omp_nt !np_work,
  integer :: cnt, ikcalc, ndeg, mband, bstop, nbsum !, it, iw ! jj,
  integer :: ik_ibz, ik_bz, isym_k, trev_k, g0_k(3)
@@ -1399,7 +1399,6 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
 
    end if
 #endif
-
  end if
 
  ! ================================
@@ -2710,9 +2709,9 @@ end subroutine gwr_get_myk_green_gpr
 
 !----------------------------------------------------------------------
 
-!!****f* m_gwr/gwr_get_gk_rpr_pm
+!!****f* m_gwr/gwr_get_gkbz_rpr_pm
 !! NAME
-!!  gwr_get_gk_rpr_pm
+!!  gwr_get_gkbz_rpr_pm
 !!
 !! FUNCTION
 !!  Compute G_k(r',r) from G_k(g,g') for k in the BZ and given spin and tau.
@@ -2724,7 +2723,7 @@ end subroutine gwr_get_myk_green_gpr
 !!
 !! SOURCE
 
-subroutine gwr_get_gk_rpr_pm(gwr, ik_bz, itau, spin, gk_rpr_pm)
+subroutine gwr_get_gkbz_rpr_pm(gwr, ik_bz, itau, spin, gk_rpr_pm)
 
 !Arguments ------------------------------------
  class(gwr_t),intent(in) :: gwr
@@ -2787,9 +2786,9 @@ subroutine gwr_get_gk_rpr_pm(gwr, ik_bz, itau, spin, gk_rpr_pm)
  call slk_array_free(gt_pm)
  call desc_kbz%free()
  call uplan_k%free()
- call cwtime_report(" gwr_get_gk_rpr_pm:", cpu, wall, gflops)
+ call cwtime_report(" gwr_get_gkbz_rpr_pm:", cpu, wall, gflops)
 
-end subroutine gwr_get_gk_rpr_pm
+end subroutine gwr_get_gkbz_rpr_pm
 !!***
 
 !----------------------------------------------------------------------
@@ -2816,7 +2815,6 @@ subroutine gwr_ggp_to_rpr(gwr, desc, ggp, rpr)
  type(__slkmat_t),intent(inout) :: rpr
 
 !Local variables-------------------------------
-!scalars
  integer :: ig2, npwsp, col_bsize, ir1, ndat
  type(__slkmat_t) :: rgp, gpr
  character(len=500) :: msg
@@ -2837,22 +2835,85 @@ subroutine gwr_ggp_to_rpr(gwr, desc, ggp, rpr)
  do ig2=1, ggp%sizeb_local(2), gwr%uc_batch_size
    ndat = blocked_loop(ig2, ggp%sizeb_local(2), gwr%uc_batch_size)
    call uplan_k%execute_gr(ndat, ggp%buffer_cplx(:, ig2), rgp%buffer_cplx(:, ig2))
- end do ! ig2
+ end do
 
  ! F(r,g') --> F(g',r)
  call rgp%ptrans("N", gpr, free=.True.)
 
- ! F(g',r) -> F(r',r) and store results in rpr
+ ! F(g',r) -> F(r',r) and store results in rpr%buffer
  ! FIXME: FFT sign is wrong (should be - instead of + but I need to change the API)
  do ir1=1, gpr%sizeb_local(2), gwr%uc_batch_size
    ndat = blocked_loop(ir1, gpr%sizeb_local(2), gwr%uc_batch_size)
    call uplan_k%execute_gr(ndat, gpr%buffer_cplx(:, ir1), rpr%buffer_cplx(:, ir1))
- end do ! ir1
+ end do
 
  call uplan_k%free()
  call gpr%free()
 
 end subroutine gwr_ggp_to_rpr
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_gwr/gwr_rpr_to_ggp
+!! NAME
+!!  gwr_rpr_to_ggp
+!!
+!! FUNCTION
+!!  Helper function to FFT transform a two-point function: F_{r',r} --> F_{g,g'}
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine gwr_rpr_to_ggp(gwr, desc, rpr, ggp)
+
+!Arguments ------------------------------------
+ class(gwr_t),intent(in) :: gwr
+ type(desc_t),intent(in) :: desc
+ class(__slkmat_t),intent(inout) :: rpr
+ class(__slkmat_t),intent(out) :: ggp
+
+!Local variables-------------------------------
+ integer :: ig2, npwsp, col_bsize, ir2, ndat
+ type(__slkmat_t) :: rgp, gpr
+ character(len=500) :: msg
+ type(uplan_t) :: uplan_k
+
+! *************************************************************************
+
+ ABI_ERROR("Not Implemented Error")
+
+ ! Allocate intermediate gpr PBLAS matrix to store F(g',r)
+ npwsp = desc%npw * gwr%nspinor
+ ABI_CHECK(block_dist_1d(gwr%g_nfft * gwr%nspinor, gwr%g_comm%nproc, col_bsize, msg), msg)
+ call gpr%init(npwsp, gwr%g_nfft * gwr%nspinor, gwr%g_slkproc, desc%istwfk, size_blocs=[-1, col_bsize])
+
+ call uplan_k%init(desc%npw, gwr%nspinor, gwr%uc_batch_size, gwr%g_ngfft, desc%istwfk, &
+                   desc%gvec, gwpc, gwr%dtset%use_gpu_cuda)
+
+ ! F(r',r) --> F(g',r) and store results in gpr%buffer
+ ! FIXME: FFT sign is wrong (should be - instead of + but I need to change the API)
+ do ir2=1, rpr%sizeb_local(2), gwr%uc_batch_size
+   ndat = blocked_loop(ir2, rpr%sizeb_local(2), gwr%uc_batch_size)
+   call uplan_k%execute_rg(ndat, rpr%buffer_cplx(:, ir2), gpr%buffer_cplx(:, ir2))
+ end do
+
+ ! F(g',r) --> F(r,g')
+ call gpr%ptrans("N", rgp, free=.True.)
+
+ ! F(r',g) --> F(g',r) and store results in gpr%buffer
+ do ig2=1, ggp%sizeb_local(2), gwr%uc_batch_size
+   ndat = blocked_loop(ig2, ggp%sizeb_local(2), gwr%uc_batch_size)
+   call uplan_k%execute_rg(ndat, rgp%buffer_cplx(:, ig2), ggp%buffer_cplx(:, ig2))
+ end do
+
+ call uplan_k%free()
+ call rgp%free()
+
+end subroutine gwr_rpr_to_ggp
 !!***
 
 !----------------------------------------------------------------------
@@ -3649,8 +3710,8 @@ subroutine gwr_build_tchi(gwr)
 
 !Local variables-------------------------------
 !scalars
- integer :: my_is, my_it, my_ikf, ig, my_ir, my_nr, npwsp, ncol_glob, col_bsize, my_iqi !, ii !, my_iki ! my_iqf,
- integer :: idat, ndat, sc_nfft, spin, ik_bz, iq_ibz, ierr, ipm, itau, ig2 !, ig1
+ integer :: my_is, my_it, my_ikf, ig, my_ir, my_nr, nrsp, npwsp, ncol_glob, col_bsize, my_iqi !, ii !, my_iki ! my_iqf,
+ integer :: idat, ndat, sc_nfft, spin, ik_bz, iq_ibz, ikq_ibz, ikq_bz, ierr, ipm, itau, ig2 !, ig1
  real(dp) :: cpu_tau, wall_tau, gflops_tau, cpu_all, wall_all, gflops_all, cpu_ir, wall_ir, gflops_ir
  real(dp) :: tchi_rfact, mem_mb, local_max, max_abs_imag_chit !, spin_fact, sc_ucvol, ik_ibz,
  complex(gwpc) :: head_q
@@ -3662,12 +3723,11 @@ subroutine gwr_build_tchi(gwr)
 !arrays
  integer :: sc_ngfft(18), gg(3)
  integer,allocatable :: green_scgvec(:,:), chi_scgvec(:,:)
- integer :: mask_qibz(gwr%nqibz)
+ integer :: mask_qibz(gwr%nqibz), need_kibz(gwr%nkibz), got_kibz(gwr%nkibz)
  real(dp) :: kk_bz(3), kpq_bz(3), qq_ibz(3), tsec(2) !, qq_bz(3) ! kk_ibz(3),
- !logical :: need_gt_kibz(gwr%nkibz), got_gt_kibz(gwr%nkibz)
  complex(gwpc),allocatable :: gt_scbox(:,:), chit_scbox(:)
  complex(gwpc),allocatable :: low_wing_q(:), up_wing_q(:), cemiqr(:) !, sc_ceimkr(:,:) !, uc_ceikr(:)
- !type(__slkmat_t) :: gt_gpr(2, gwr%my_nkbz), chiq_gpr(gwr%my_nqibz), gk_rpr_pm(2)
+ type(__slkmat_t) :: gkq_rpr_pm(2), chiq_rpr(gwr%my_nqibz) !, gk_rpr_pm(2)  !gt_gpr(2, gwr%my_nkbz), chiq_gpr(gwr%my_nqibz),
  !type(desc_t), target :: desc_mykbz(gwr%my_nkbz)
  type(__slkmat_t),allocatable :: gt_gpr(:,:), chiq_gpr(:), gk_rpr_pm(:)
  type(desc_t), target, allocatable :: desc_mykbz(:)
@@ -3943,6 +4003,14 @@ subroutine gwr_build_tchi(gwr)
     ! ===================================================================
     ! Mixed-space algorithm in the unit cell with convolutions in k-space
     ! ===================================================================
+    call wrtout(std_out, " Building chi with convolutions in k-space:", pre_newlines=2)
+
+    ! Allocate memory for chi_q(r',r)
+    nrsp = gwr%g_nfft * gwr%nspinor
+    col_bsize = nrsp / gwr%g_comm%nproc; if (mod(nrsp, gwr%g_comm%nproc) /= 0) col_bsize = col_bsize + 1
+    do my_iqi=1,gwr%my_nqibz
+      call chiq_rpr(my_iqi)%init(nrsp, nrsp, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize])
+    end do
 
     do my_is=1,gwr%my_nspins
       spin = gwr%my_spins(my_is)
@@ -3950,43 +4018,65 @@ subroutine gwr_build_tchi(gwr)
         call cwtime(cpu_tau, wall_tau, gflops_tau, "start")
         itau = gwr%my_itaus(my_it)
 
-        ! Redistribute G_k(g,g') in the IBZ so that each MPI proc can reconstruct G_k in the BZ on the fly.
-        !need_gt_kibz = ?
-        !call gwr%distrib_gt_kibz(itau, spin, need_kibz, got_kibz, "communicate')
+        ! Redistribute G_k(g,g') with k in the IBZ so that each MPI proc
+        ! can reconstruct G_{k+q} in the BZ inside the MPI-parallelized loops.
+        need_kibz = 0
+        do my_ikf=1,gwr%my_nkbz
+          ik_bz = gwr%my_kbz_inds(my_ikf)
+          kk_bz = gwr%kbz(:, ik_bz)
+          do my_iqi=1,gwr%my_nqibz
+            iq_ibz = gwr%my_qibz_inds(my_iqi)
+            qq_ibz = gwr%qibz(:, iq_ibz)
+            kpq_bz = kk_bz + qq_ibz
+            ! here I may need to take into account the umklapp
+            !ikq_ibz = ??
+            need_kibz(ikq_ibz) = 1
+          end do
+        end do
+
+        call gwr%distrib_gt_kibz(itau, spin, need_kibz, got_kibz, "communicate")
 
         do my_ikf=1,gwr%my_nkbz
           ik_bz = gwr%my_kbz_inds(my_ikf)
           kk_bz = gwr%kbz(:, ik_bz)
 
-          ! Use symmetries to get G_k(g,g') from the IBZ, then G_k(g,g') -> G_k(r,r').
-          call gwr%get_gk_rpr_pm(ik_bz, itau, spin, gk_rpr_pm)
+          ! Use symmetries to get G_kbz(g,g') from the IBZ, then G_kbz(g,g') -> G_kbz(r',r).
+          call gwr%get_gkbz_rpr_pm(ik_bz, itau, spin, gk_rpr_pm)
 
-          do iq_ibz=1,gwr%nqibz
-            !do my_iqi=1,gwr%my_nqibz
-            !iq_ibz = gwr%my_qibz_inds(my_iqi)
+          do my_iqi=1,gwr%my_nqibz
+            iq_ibz = gwr%my_qibz_inds(my_iqi)
             qq_ibz = gwr%qibz(:, iq_ibz)
-            !iq_bz = gwr%my_qbz_inds(my_iqf)
-            !qq_bz = gwr%qbz(:, iq_bz)
             kpq_bz = kk_bz + qq_ibz
-            !ikpq_ibz = ??
-            !kmq_bz = kk_bz - qq_ibz
-            !ikmq_ibz = ??
-            ! here I may need to take into account the umklapp
-            !call gwr%get_gk_rpr_pm(ikq_bz, itau, spin, gkq_rpr_pm)
-            !chiq_rpr%buffer_cplx = chiq_rpr%buffer_cplx + gk_rpr_pm(1)%buffer_cplx * conjg(gkq_rpr_pm(2)%buffer_cplx)
-          end do ! iq_ibz
+            ! TODO: here I may need to take into account the umklapp
+            !ikq_ibz = ??
+            ! Use symmetries to get G_kqbz(g,g') from the IBZ, then G_kqbz(g,g') -> G_kqbz(r',r).
+            ! Also, we don't need G(+/-t) for both k, k+q wavevectors.
+            call gwr%get_gkbz_rpr_pm(ikq_bz, itau, spin, gkq_rpr_pm)
+
+            chiq_rpr(my_iqi)%buffer_cplx = chiq_rpr(my_iqi)%buffer_cplx + &
+               gk_rpr_pm(1)%buffer_cplx * conjg(gkq_rpr_pm(2)%buffer_cplx)
+          end do ! my_iqi
         end do ! my_ikf
 
-        ! Deallocate extra G's
-        !call gwr%distrib_gt_kibz(itau, spin, need_kibz, got_kibz, "free")
-
+        ! Deallocate got_kibz Green's functions.
+        call gwr%distrib_gt_kibz(itau, spin, need_kibz, got_kibz, "free")
         call slk_array_free(gk_rpr_pm)
-        !gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx =
+
+        ! From chi_q(r',r) to chi_q(g,g') for each q in the IBZ treated by me.
+        do my_iqi=1,gwr%my_nqibz
+          iq_ibz = gwr%my_qibz_inds(my_iqi)
+          !gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx = zero
+          desc_q => gwr%tchi_desc_qibz(iq_ibz)
+          ! TODO: Recheck the API
+          call gwr_rpr_to_ggp(gwr, desc_q, chiq_rpr(my_iqi), gwr%tchi_qibz(iq_ibz, itau, spin))
+        end do ! my_iqi
 
        write(msg,'(3(a,i0),a)')" My itau [", my_it, "/", gwr%my_ntau, "] (tot: ", gwr%ntau, ")"
        call cwtime_report(msg, cpu_tau, wall_tau, gflops_tau)
      end do ! my_it
    end do ! spin
+
+   call slk_array_free(chiq_rpr)
  end if
 
  !call wrtout(std_out, sjoin(" max_abs_imag_chit", ftoa(max_abs_imag_chit)))
@@ -4072,7 +4162,7 @@ subroutine gwr_distrib_gt_kibz(gwr, itau, spin, need_kibz, got_kibz, action)
  integer :: ik_ibz, ipm, ierr, lsize(2) ! col_bsize, npwsp,
  integer :: do_mpi_kibz(gwr%nkibz), sender_kibz(gwr%nkibz)
  real(dp) :: kk_ibz(3), cpu, wall, gflops
- complex(dp),allocatable :: cbuf_k(:,:)
+ complex(gwpc),allocatable :: cbuf_k(:,:)
 
 ! *************************************************************************
 
@@ -4573,7 +4663,7 @@ subroutine gwr_build_sigmac(gwr)
  type(desc_t), pointer :: desc_q, desc_k
  type(yamldoc_t) :: ydoc
 !arrays
- integer :: sc_ngfft(18), need_qibz(gwr%nqibz),  got_qibz(gwr%nqibz), units(3), gg(3)
+ integer :: sc_ngfft(18), need_qibz(gwr%nqibz), got_qibz(gwr%nqibz), units(3), gg(3)
  integer,allocatable :: green_scgvec(:,:), wc_scgvec(:,:)
  real(dp) :: kk_bz(3), kcalc_bz(3), qq_bz(3), tsec(2)  !, qq_ibz(3)
  complex(gwpc) :: cpsi_r, sigc_pm(2)
@@ -4851,7 +4941,10 @@ if (gwr%use_supercell_for_sigma) then
  call wt_plan_gp2rp%free()
 
 else
- call wrtout(std_out, sjoin(" Building Sigma_c with convolutions in q-space:", ltoa(sc_ngfft(1:3))), pre_newlines=2)
+ ! ===================================================================
+ ! Mixed-space algorithm in the unit cell with convolutions in k-space
+ ! ===================================================================
+ call wrtout(std_out, " Building Sigma_c with convolutions in k-space:", pre_newlines=2)
 
  ! Allocate PBLAS matrices to store Wc(r',r, tau), Wc(r',r, +/-tau)  and Sigma_kcalc(r',r, +/-tau)
  nrsp = gwr%g_nfft * gwr%nspinor
@@ -4898,6 +4991,17 @@ else
 
      ! Redistribute W_q(g,g') in the IBZ so that each MPI proc can reconstruct Wc_q in the BZ on the fly.
      need_qibz = 0
+     do my_ikf=1,gwr%my_nkbz
+       ik_bz = gwr%my_kbz_inds(my_ikf)
+       kk_bz = gwr%kbz(:, ik_bz)
+       do ikcalc=1,gwr%nkcalc
+         qq_bz = gwr%kcalc(:, ikcalc) - kk_bz
+         !iq_bz = ??
+         !iq_ibz = ??
+         !need_qibz(iq_ibz) = 1
+       end do
+     end do
+
      call gwr%distrib_mats_qibz("wc", itau, spin, need_qibz, got_qibz, "communicate")
      call slk_array_set(sigc_rpr, czero)
 
@@ -4906,11 +5010,13 @@ else
        kk_bz = gwr%kbz(:, ik_bz)
 
        ! Use symmetries to get G_k from the IBZ. Then G_k(g,g') --> G_k(r,r')
-       call gwr%get_gk_rpr_pm(ik_bz, itau, spin, gk_rpr_pm)
+       call gwr%get_gkbz_rpr_pm(ik_bz, itau, spin, gk_rpr_pm)
 
        do ikcalc=1,gwr%nkcalc
          qq_bz = gwr%kcalc(:, ikcalc) - kk_bz
          !iq_bz = ??
+         !iq_bz = ??
+         !iq_ibz = ??
 
          ! FIXME: Finalize implementation and take into account umklapp as qq may be outside of the first BZ.
          call gwr%get_wc_rpr_qbz(qq_bz, itau, spin, wc_rpr)
@@ -4922,7 +5028,7 @@ else
        end do ! ikcalc
      end do ! my_ikf
 
-     ! Deallocate extra Wc matrices
+     ! Deallocate extra Wc matrices defined by got_qibz
      call gwr%distrib_mats_qibz("wc", itau, spin, need_qibz, got_qibz, "free")
 
      ! Now Integrate self-energy matrix elements in the unit cell.
@@ -5043,7 +5149,7 @@ end if
 
  if (gwr%nkcalc == gwr%nkibz) then
 
-   ! Here I shift the bands that are not explictly included in the SCF calculation.
+   ! Shift the bands that are not explicitly included in the SCF calculation.
    ! using the correction evaluated at bstop_ks/bstart_ks to accelerate self-consistent calculations.
    do spin=1,gwr%nsppol
      do ikcalc=1,gwr%nkcalc
@@ -5625,7 +5731,7 @@ subroutine gwr_run_energy_scf(gwr)
 
 ! *************************************************************************
 
- !  [free_ugb]: True if array with empty KS states should freed as soon as possibile. Default: True
+ !  [free_ugb]: True if array with empty KS states should freed as soon as possible. Default: True
 
  ! TODO:
  ! To implement restart capabilities we need to read scf_iteration, qp_ebands and gwr_task from GWR.nc
@@ -6495,7 +6601,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
      end if
    end do
  end if
- call wrtout(std_out, sjoin(" gwr_max_hwtene:", ftoa(gwr%dtset%gwr_max_hwtene)))
+ call wrtout(std_out, sjoin(" gwr_max_hwtene:", ftoa(gwr%dtset%gwr_max_hwtene * Ha_eV), " (eV)"))
  call wrtout(std_out, sjoin(" Using: ", itoa(band1_max), "/", itoa(gwr%ugb_nband), "bands for chi0 head and wings."))
 
  ! Loop on spin to calculate $\chi_{\up,\up} + \chi_{\down,\down}$
@@ -6540,7 +6646,6 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
      npw_ki   =  desc_ki%npw
      istwf_ki =  desc_ki%istwfk
      kg_ki    => desc_ki%gvec
-     !print *, "ik_ibz", ik_ibz, "npw_ki", npw_ki
 
      ABI_MALLOC(ug1, (npw_ki * nspinor))
      ABI_MALLOC(ug2, (npw_ki * nspinor))
@@ -6574,6 +6679,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
          !print *, "exiting band1_start loop"
          exit
        end if
+
        !print *, "band1_start, gwr%ugb_nband, block_size", band1_start, gwr%ugb_nband, block_size
        nb = blocked_loop(band1_start, gwr%ugb_nband, block_size)
        band1_stop = band1_start + nb - 1

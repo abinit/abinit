@@ -387,6 +387,29 @@ meta: {optdriver: 6, }
 
 --------------------------------------------------------------------------------
 
+ Total charge density [el/Bohr^3]
+)     Maximum=    9.7874E-02  at reduced coord.    0.1333    0.1333    0.6000
+)     Minimum=    1.9245E-03  at reduced coord.    0.7333    0.7333    0.7333
+   Integrated=    8.0000E+00
+ x component of magnetization [el/Bohr^3]
+)     Maximum=    8.9871E-08  at reduced coord.    0.2000    0.8000    0.8667
+)     Minimum=   -8.9871E-08  at reduced coord.    0.8000    0.2000    0.1333
+   Integrated=    0.0000E+00
+ y component of magnetization [el/Bohr^3]
+)     Maximum=    8.9871E-08  at reduced coord.    0.8000    0.2000    0.8667
+)     Minimum=   -8.9871E-08  at reduced coord.    0.2000    0.8000    0.1333
+   Integrated=    0.0000E+00
+ z component of magnetization [el/Bohr^3]
+)     Maximum=    8.9871E-08  at reduced coord.    0.8000    0.8667    0.2000
+)     Minimum=   -8.9871E-08  at reduced coord.    0.2000    0.1333    0.8000
+   Integrated=    0.0000E+00
+ Magnetization (absolute value) [el/Bohr^3]
+)     Maximum=    1.0175E-07  at reduced coord.    0.3333    0.3333    0.3333
+)     Minimum=    0.0000E+00  at reduced coord.    0.0000    0.0000    0.0000
+   Integrated=    1.2980E-05
+ Relative magnetization (=zeta, between -1 and 1)
+)     Maximum=    2.6583E-06  at reduced coord.    0.8667    0.8667    0.8667
+)     Minimum=    0.0000E+00  at reduced coord.    0.0000    0.0000    0.0000
 
  === KS gaps after direct diagonalization ===
  Indirect band gap semiconductor
