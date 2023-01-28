@@ -523,6 +523,25 @@ meta: {optdriver: 6, }
 
 --------------------------------------------------------------------------------
 
+ Total charge density [el/Bohr^3]
+)     Maximum=    9.7811E-02  at reduced coord.    0.1333    0.1333    0.6000
+)     Minimum=    1.9174E-03  at reduced coord.    0.7333    0.7333    0.7333
+   Integrated=    8.0000E+00
+ Spin up density      [el/Bohr^3]
+)     Maximum=    4.8906E-02  at reduced coord.    0.1333    0.1333    0.6000
+)     Minimum=    9.5871E-04  at reduced coord.    0.7333    0.7333    0.7333
+   Integrated=    4.0000E+00
+ Spin down density    [el/Bohr^3]
+)     Maximum=    4.8906E-02  at reduced coord.    0.1333    0.1333    0.6000
+)     Minimum=    9.5871E-04  at reduced coord.    0.7333    0.7333    0.7333
+   Integrated=    4.0000E+00
+ Magnetization (spin up - spin down) [el/Bohr^3]
+)     Maximum=    0.0000E+00  at reduced coord.    0.9333    0.9333    0.9333
+)     Minimum=    0.0000E+00  at reduced coord.    0.0000    0.0000    0.0000
+   Integrated=    0.0000E+00
+ Relative magnetization (=zeta, between -1 and 1)
+)     Maximum=    0.0000E+00  at reduced coord.    0.9333    0.9333    0.9333
+)     Minimum=    0.0000E+00  at reduced coord.    0.0000    0.0000    0.0000
 
  === KS gaps after direct diagonalization ===
  >>>> For spin 1
@@ -569,6 +588,25 @@ meta: {optdriver: 6, }
 
 --------------------------------------------------------------------------------
 
+ Total charge density [el/Bohr^3]
+)     Maximum=    9.7811E-02  at reduced coord.    0.1333    0.1333    0.6000
+)     Minimum=    1.9174E-03  at reduced coord.    0.7333    0.7333    0.7333
+   Integrated=    8.0000E+00
+ Spin up density      [el/Bohr^3]
+)     Maximum=    4.8906E-02  at reduced coord.    0.1333    0.1333    0.6000
+)     Minimum=    9.5871E-04  at reduced coord.    0.7333    0.7333    0.7333
+   Integrated=    4.0000E+00
+ Spin down density    [el/Bohr^3]
+)     Maximum=    4.8906E-02  at reduced coord.    0.1333    0.1333    0.6000
+)     Minimum=    9.5871E-04  at reduced coord.    0.7333    0.7333    0.7333
+   Integrated=    4.0000E+00
+ Magnetization (spin up - spin down) [el/Bohr^3]
+)     Maximum=    0.0000E+00  at reduced coord.    0.9333    0.9333    0.9333
+)     Minimum=    0.0000E+00  at reduced coord.    0.0000    0.0000    0.0000
+   Integrated=    0.0000E+00
+ Relative magnetization (=zeta, between -1 and 1)
+)     Maximum=    0.0000E+00  at reduced coord.    0.9333    0.9333    0.9333
+)     Minimum=    0.0000E+00  at reduced coord.    0.0000    0.0000    0.0000
 - Reading GS states from WFK file: t02o_DS2_WFK
   Mapping kBZ --> kIBZ
  Legend: bz = TS(ibz) + g0 where isym is the index of the symrec operation S and itim is 1 if TR is used.
@@ -973,6 +1011,25 @@ meta: {optdriver: 6, }
 
 --------------------------------------------------------------------------------
 
+ Total charge density [el/Bohr^3]
+)     Maximum=    9.7811E-02  at reduced coord.    0.1333    0.1333    0.6000
+)     Minimum=    1.9174E-03  at reduced coord.    0.7333    0.7333    0.7333
+   Integrated=    8.0000E+00
+ Spin up density      [el/Bohr^3]
+)     Maximum=    4.8906E-02  at reduced coord.    0.1333    0.1333    0.6000
+)     Minimum=    9.5871E-04  at reduced coord.    0.7333    0.7333    0.7333
+   Integrated=    4.0000E+00
+ Spin down density    [el/Bohr^3]
+)     Maximum=    4.8906E-02  at reduced coord.    0.1333    0.1333    0.6000
+)     Minimum=    9.5871E-04  at reduced coord.    0.7333    0.7333    0.7333
+   Integrated=    4.0000E+00
+ Magnetization (spin up - spin down) [el/Bohr^3]
+)     Maximum=    0.0000E+00  at reduced coord.    0.9333    0.9333    0.9333
+)     Minimum=    0.0000E+00  at reduced coord.    0.0000    0.0000    0.0000
+   Integrated=    0.0000E+00
+ Relative magnetization (=zeta, between -1 and 1)
+)     Maximum=    0.0000E+00  at reduced coord.    0.9333    0.9333    0.9333
+)     Minimum=    0.0000E+00  at reduced coord.    0.0000    0.0000    0.0000
 - Reading GS states from WFK file: t02o_DS2_WFK
   Mapping kBZ --> kIBZ
  Legend: bz = TS(ibz) + g0 where isym is the index of the symrec operation S and itim is 1 if TR is used.

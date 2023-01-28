@@ -471,6 +471,10 @@ meta: {optdriver: 6, }
 
 --------------------------------------------------------------------------------
 
+ Total charge density [el/Bohr^3]
+)     Maximum=    9.7811E-02  at reduced coord.    0.1333    0.1333    0.6000
+)     Minimum=    1.9174E-03  at reduced coord.    0.7333    0.7333    0.7333
+   Integrated=    8.0000E+00
 
  === KS gaps after direct diagonalization ===
  Indirect band gap semiconductor
@@ -510,6 +514,10 @@ meta: {optdriver: 6, }
 
 --------------------------------------------------------------------------------
 
+ Total charge density [el/Bohr^3]
+)     Maximum=    9.7811E-02  at reduced coord.    0.1333    0.1333    0.6000
+)     Minimum=    1.9174E-03  at reduced coord.    0.7333    0.7333    0.7333
+   Integrated=    8.0000E+00
 - Reading GS states from WFK file: t01o_DS2_WFK
   Mapping kBZ --> kIBZ
  Legend: bz = TS(ibz) + g0 where isym is the index of the symrec operation S and itim is 1 if TR is used.
@@ -798,6 +806,10 @@ meta: {optdriver: 6, }
 
 --------------------------------------------------------------------------------
 
+ Total charge density [el/Bohr^3]
+)     Maximum=    9.7811E-02  at reduced coord.    0.1333    0.1333    0.6000
+)     Minimum=    1.9174E-03  at reduced coord.    0.7333    0.7333    0.7333
+   Integrated=    8.0000E+00
 - Reading GS states from WFK file: t01o_DS2_WFK
   Mapping kBZ --> kIBZ
  Legend: bz = TS(ibz) + g0 where isym is the index of the symrec operation S and itim is 1 if TR is used.
