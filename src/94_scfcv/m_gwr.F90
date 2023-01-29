@@ -151,7 +151,7 @@ module m_gwr
                              c2r, linfit, bisect, hermitianize
  use m_copy,          only : alloc_copy
  use m_geometry,      only : normv, vdotw
- use m_fstrings,      only : sjoin, itoa, strcat, ktoa, ltoa, ftoa
+ use m_fstrings,      only : sjoin, itoa, strcat, ktoa, ltoa, ftoa, string_in
  use m_sort,          only : sort_dp, sort_rvals
  use m_krank,         only : krank_t, krank_new, krank_from_kptrlatt, get_ibz2bz, star_from_ibz_idx
  use m_crystal,       only : crystal_t
@@ -778,6 +778,7 @@ module m_gwr
 
  ! Handy named costants (private stuff)
  integer,private,parameter :: PRINT_MODR = 500
+ integer,private,parameter :: PRINT_MODK = 5
 
  real(dp),private,parameter :: TOL_EDIFF = 0.001_dp * eV_Ha
 
@@ -1804,7 +1805,7 @@ subroutine gwr_malloc_free_mats(gwr, mask_ibz, what, action)
 
 ! *************************************************************************
 
- ABI_CHECK(action == "malloc" .or. action == "free", sjoin("Invalid action:", action))
+ ABI_CHECK(string_in(action, "malloc, free"), sjoin("Invalid action:", action))
 
  !num_pm = 2; ipm_list__ = [1, 2]
  !if (present(ipm_list)) then
@@ -2273,9 +2274,9 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
 
        ABI_CHECK(all(kg_k(:,1:npw_k) == desc_k%gvec), "kg_k != desc_k%gvec")
 
-       if (my_iki <= 4 .or. mod(my_iki, 4) == 0) then
+       if (my_iki <= PRINT_MODK .or. mod(my_iki, PRINT_MODK) == 0) then
          write(msg,'(4x,3(a,i0),a)')"Read ugb_k: my_iki [", my_iki, "/", gwr%my_nkibz, "] (tot: ", gwr%nkibz, ")"
-         call cwtime_report(msg, cpu_green, wall_green, gflops_green)
+         call cwtime_report(msg, cpu_green, wall_green, gflops_green); if (my_iki == PRINT_MODK) call wrtout(std_out, " ...")
        end if
        end associate
      end do ! my_iki
@@ -2325,10 +2326,6 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
            call xmpi_bcast(cg_work, master, bcast_comm, ierr)
          endif
 
-         !bcast_comm = gwr%comm%value
-         !call xmpi_bcast(kg_k, master, bcast_comm, ierr)
-         !call xmpi_bcast(cg_work, master, bcast_comm, ierr)
-
          ! Copy my portion of cg_work to buffer_cplx if I treat this (spin, ik_ibz).
          if (need_block) then
            associate (ugb => gwr%ugb(ik_ibz, spin), desc_k => gwr%green_desc_kibz(ik_ibz))
@@ -2348,9 +2345,9 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
 
        call xmpi_comm_free(bcast_comm)
 
-       if (ik_ibz <= 4 .or. mod(ik_ibz, 4) == 0) then
+       if (ik_ibz <= PRINT_MODK .or. mod(ik_ibz, PRINT_MODK) == 0) then
          write(msg,'(4x,2(a,i0),a)')"Read ugb_k: ik_ibz [", ik_ibz, "/", gwr%nkibz, "]"
-         call cwtime_report(msg, cpu_green, wall_green, gflops_green)
+         call cwtime_report(msg, cpu_green, wall_green, gflops_green); if (ik_ibz == PRINT_MODK) call wrtout(std_out, " ...")
        end if
      end do ! ik_ibz
    end do ! spin
@@ -2484,9 +2481,9 @@ subroutine gwr_build_green(gwr, free_ugb)
      call green%free()
      if (free_ugb) call ugb%free()
 
-     if (my_iki < 4 .or. mod(my_iki, 4) == 0) then
+     if (my_iki < PRINT_MODK .or. mod(my_iki, PRINT_MODK) == 0) then
        write(msg,'(4x,3(a,i0),a)')"G_ikbz [", my_iki, "/", gwr%my_nkibz, "] (tot: ", gwr%nkibz, ")"
-       call cwtime_report(msg, cpu_green, wall_green, gflops_green)
+       call cwtime_report(msg, cpu_green, wall_green, gflops_green); if (my_iki == PRINT_MODK) call wrtout(std_out, " ...")
      end if
      end associate
    end do ! my_iki
@@ -3887,8 +3884,8 @@ subroutine gwr_build_tchi(gwr)
            end do
 
            do ipm=1,2
-             !ABI_CHECK_IEQ(size(gt_gpr(ipm, my_ikf)%buffer_cplx, dim=2), my_nr, "my_nr!")
-             !ABI_CHECK_IEQ(size(gt_gpr(ipm, my_ikf)%buffer_cplx, dim=1), desc_k%npw, "desc_k!")
+             !ABI_CHECK(gt_gpr(ipm, my_ikf)%check_local_shape([desc_k%npw, my_nr], msg), msg)
+
              call gsph2box(sc_ngfft, desc_k%npw, gwr%nspinor * ndat, green_scgvec, &
                            gt_gpr(ipm, my_ikf)%buffer_cplx(:, my_ir), &  ! in
                            gt_scbox(:,ipm))                              ! inout
@@ -3927,6 +3924,8 @@ subroutine gwr_build_tchi(gwr)
            end do
 
            !ABI_CHECK_IEQ(size(chiq_gpr(my_iqi)%buffer_cplx, dim=1), desc_q%npw, "desc_q!")
+           !ABI_CHECK(chiq_gpr(my_iqi)%check_local_shape([desc_q%npw], msg), msg)
+
            call box2gsph(sc_ngfft, desc_q%npw, gwr%nspinor * ndat, chi_scgvec, &
                          chit_scbox, &                            ! in
                          chiq_gpr(my_iqi)%buffer_cplx(:, my_ir))  ! out
@@ -3940,7 +3939,6 @@ subroutine gwr_build_tchi(gwr)
            !            chiq_gpr(my_iqi)%buffer_cplx(:, my_ir))  ! out
 
          end do ! my_iqi
-         !call cwtime_report("chiq part", cpu, wall, gflops)
 
          if (my_ir <= 3 * gwr%sc_batch_size .or. mod(my_ir, PRINT_MODR) == 0) then
            write(msg,'(4x,3(a,i0),a)')"tChi my_ir [", my_ir, "/", my_nr, "] (tot: ", gwr%g_nfft, ")"
@@ -3969,7 +3967,8 @@ subroutine gwr_build_tchi(gwr)
 
          ! MPI-transposition: tchi_q(g',r) => tchi_q(r,g')
          call chiq_gpr(my_iqi)%ptrans("N", chi_rgp)
-         ABI_CHECK_IEQ(size(gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx, dim=2), size(chi_rgp%buffer_cplx, dim=2), "len2")
+
+         !ABI_CHECK_IEQ(size(gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx, dim=2), size(chi_rgp%buffer_cplx, dim=2), "len2")
 
          ! FFT r --> g along the first dimension: tchi_q(r,g') --> tchi_q(g,g').
          ! Results stored in gwr%tchi_qibz.
@@ -5621,7 +5620,7 @@ subroutine gwr_rpa_energy(gwr)
        if (my_it == 1) then
          ! Allocate workspace. NB: npw_q is the total number of PWs for this q.
          call tchi%copy(chi_tmp)
-         ABI_CHECK_IEQ(npw_q, tchi%sizeb_global(1), "npw_q")
+         !ABI_CHECK_IEQ(npw_q, tchi%sizeb_global(1), "npw_q")
          ABI_MALLOC(eig, (npw_q))
        end if
 
@@ -6373,7 +6372,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  integer :: ik_bz, ik_ibz, isym_k, trev_k, g0_k(3)
  !integer :: iq_bz, iq_ibz, isym_q, trev_q, g0_q(3)
  integer :: nkpt_summed, use_umklp, band1, band2, band1_start, band1_stop, band1_max
- integer :: ib, il_b1, il_b2, nb, block_size, ii, mband
+ integer :: ib, il_b1, il_b2, nb, block_size, ii, mband, block_counter
  integer :: istwf_ki, npw_ki, nI, nJ, nomega, io, iq, nq, dim_rtwg !ig,
  integer :: npwe, u_nfft, u_mgfft, u_mpw
  logical :: isirr_k, use_tr, is_metallic
@@ -6603,7 +6602,12 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
      !block_size = min(200, gwr%ugb_nband)
      !block_size = 1
 
+     block_counter = 0
      do band1_start=1, gwr%ugb_nband, block_size
+       block_counter = block_counter + 1
+       ! Distribute blocks inside tau_comm as wavefunctions are replicated
+       !if (gwr%tau_comm%skip(block_counter)) cycle
+
        if (all(.not. bbp_mask(band1_start:, :))) then
          !print *, "exiting band1_start loop"
          exit
@@ -6725,9 +6729,9 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
 
      ABI_FREE(ug1)
      ABI_FREE(ug2)
-     if (my_ikf <= 4 .or. mod(my_ikf, 4) == 0) then
+     if (my_ikf <= 5 .or. mod(my_ikf, 5) == 0) then
        write(msg,'(4x,3(a,i0),a)')"my_ikf [", my_ikf, "/", gwr%my_nkbz, "] (tot: ", gwr%nkbz, ")"
-       call cwtime_report(msg, cpu_k, wall_k, gflops_k)
+       call cwtime_report(msg, cpu_k, wall_k, gflops_k); if (my_ikf == 5) call wrtout(std_out, " ...")
      end if
    end do ! my_ikf
 
@@ -7101,6 +7105,9 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
      ugb_kibz => gwr%ugb(ik_ibz, spin)
 
      do il_b=1,ugb_kibz%sizeb_local(2)
+       ! Distribute bands inside tau_comm as wavefunctions are replicated
+       !if (gwr%tau_comm%skip(il_b)) cycle
+
        band_sum = ugb_kibz%loc2gcol(il_b)
 
        ! Skip empty states. MRM: allow negative occ numbers.

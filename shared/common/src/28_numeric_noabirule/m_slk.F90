@@ -33,7 +33,6 @@ module m_slk
 #endif
 
  use m_fstrings,      only : firstchar, toupper, itoa, sjoin, ltoa
- !use m_copy,          only : alloc_copy
  use m_time,          only : cwtime, cwtime_report
  use m_numeric_tools, only : blocked_loop !, print_arr
 
@@ -184,6 +183,9 @@ module m_slk
 
    procedure :: print => slkmat_print
     ! Print info on the object.
+
+   procedure :: check_local_shape => slkmat_check_local_shape
+   !  Debugging tool to test the local shape `lshape` of the local buffer.
 
    procedure :: free => matrix_scalapack_free
     ! Free memory
@@ -782,6 +784,69 @@ subroutine slkmat_print(mat, header, unit, prtvol)
  !if (prtvol > 10) call mat%write(unit)
 
 end subroutine slkmat_print
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_slk/slkmat_check_shape
+!! NAME
+!!  slkmat_check_shape
+!!
+!! FUNCTION
+!!  Debugging tool to test the local shape `lshape` of the local buffer.
+!!  Return exit status in `ok` and error message in `msg`.
+!!
+!! SOURCE
+
+logical function slkmat_check_local_shape(mat, lshape, msg) result (ok)
+
+!Arguments ------------------------------------
+ class(basemat_t),intent(in) :: mat
+ integer,intent(in) :: lshape(2)
+ character(len=*),intent(out) :: msg
+
+! *********************************************************************
+
+ msg = ""
+ ok = all(mat%sizeb_local == lshape)
+ if (.not. ok) then
+   msg = sjoin("mat%sizeb_local:", ltoa(mat%sizeb_local), " not equal to input local lshape ", ltoa(lshape))
+   return
+ end if
+
+ select type (mat)
+ class is (matrix_scalapack)
+   if (allocated(mat%buffer_cplx)) then
+     ok = all(shape(mat%buffer_cplx) == lshape)
+     if (.not. ok) then
+       msg = sjoin("shape(buffer_cplx):", ltoa(shape(mat%buffer_cplx)), " != input local lshape ", ltoa(lshape)); return
+     end if
+   else if (allocated(mat%buffer_real)) then
+     ok = all(shape(mat%buffer_real) == lshape)
+     if (.not. ok) then
+       msg = sjoin("shape(buffer_real):", ltoa(shape(mat%buffer_real)), " != input local lshape ", ltoa(lshape)); return
+     end if
+   end if
+
+ class is (slkmat_sp_t)
+   ! Same piece of code as above. May use include file!
+   if (allocated(mat%buffer_cplx)) then
+     ok = all(shape(mat%buffer_cplx) == lshape)
+     if (.not. ok) then
+       msg = sjoin("shape(buffer_cplx):", ltoa(shape(mat%buffer_cplx)), " != input local lshape ", ltoa(lshape)); return
+     end if
+   else if (allocated(mat%buffer_real)) then
+     ok = all(shape(mat%buffer_real) == lshape)
+     if (.not. ok) then
+       msg = sjoin("shape(buffer_real):", ltoa(shape(mat%buffer_real)), " != input local lshape ", ltoa(lshape)); return
+     end if
+   end if
+
+ class default
+   ABI_ERROR("Wrong class")
+ end select
+
+end function slkmat_check_local_shape
 !!***
 
 !----------------------------------------------------------------------
