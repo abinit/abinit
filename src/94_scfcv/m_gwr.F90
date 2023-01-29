@@ -590,6 +590,7 @@ module m_gwr
    ! to mix it with low-level just to make memory for ugb scale better.
 
    type(processor_scalapack) :: gtau_slkproc
+   ! Scalapack grid with (g,tau) processors
 
    integer :: ugb_nband = -1
    ! Number of bands in ugb.
@@ -2225,8 +2226,8 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
      ik_ibz = gwr%my_kibz_inds(my_iki)
      npw_k = gwr%green_desc_kibz(ik_ibz)%npw
      npwsp = npw_k * gwr%nspinor
-     call gwr%ugb(ik_ibz, spin)%init(npwsp, gwr%ugb_nband, gwr%gtau_slkproc, istwfk1, size_blocs=[-1, 1])
-     !call gwr%ugb(ik_ibz, spin)%init(npwsp, gwr%ugb_nband, gwr%g_slkproc, istwfk1, size_blocs=[-1, 1])
+     !call gwr%ugb(ik_ibz, spin)%init(npwsp, gwr%ugb_nband, gwr%gtau_slkproc, istwfk1, size_blocs=[-1, 1])
+     call gwr%ugb(ik_ibz, spin)%init(npwsp, gwr%ugb_nband, gwr%g_slkproc, istwfk1, size_blocs=[-1, 1])
    end do
  end do
  call gwr%print_mem(unit=std_out)
@@ -2389,7 +2390,7 @@ subroutine gwr_build_green(gwr, free_ugb)
 
 !Local variables-------------------------------
 !scalars
- integer :: my_is, my_iki, spin, ik_ibz, band, itau, ipm, il_b, npwsp, isgn
+ integer :: my_is, my_iki, spin, ik_ibz, band, itau, ipm, il_b, npwsp, isgn, my_it
  real(dp) :: f_nk, eig_nk, cpu, wall, gflops, cpu_green, wall_green, gflops_green
  character(len=500) :: msg
  complex(dp) :: gt_cfact
@@ -2441,14 +2442,15 @@ subroutine gwr_build_green(gwr, free_ugb)
      !call ugb%change_size_blocs(work, size_blocs=, processor=)
      !call work%copy(green, empty=.True.)
 
-     ! Init output of pzgemm.
-     call green%init(npwsp, npwsp, gwr%gtau_slkproc, istwfk1) ! size_blocs=[-1, col_bsize])
-     !call green%init(npwsp, npwsp, gwr%g_slkproc, istwfk1) ! size_blocs=[-1, col_bsize])
+     ! Init output of pzgemm in g-communicator
+     !call green%init(npwsp, npwsp, gwr%gtau_slkproc, istwfk1) ! size_blocs=[-1, col_bsize])
+     call green%init(npwsp, npwsp, gwr%g_slkproc, istwfk1) ! size_blocs=[-1, col_bsize])
 
      ! We loop over ntau instead of my_ntau as pzgemm is done inside gtau_comm.
-     !do my_it=1,gwr%my_ntau
-     !  itau = gwr%my_itaus(my_it)
-     do itau=1,gwr%ntau
+     !do itau=1,gwr%ntau
+     ! Loop over my_ntau as pzgemm is done in g_comm
+     do my_it=1,gwr%my_ntau
+       itau = gwr%my_itaus(my_it)
        do ipm=1,2
          ! Multiply columns by exponentials in imaginary time.
          work%buffer_cplx = ugb%buffer_cplx
@@ -6606,7 +6608,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
      do band1_start=1, gwr%ugb_nband, block_size
        block_counter = block_counter + 1
        ! Distribute blocks inside tau_comm as wavefunctions are replicated
-       !if (gwr%tau_comm%skip(block_counter)) cycle
+       if (gwr%tau_comm%skip(block_counter)) cycle
 
        if (all(.not. bbp_mask(band1_start:, :))) then
          !print *, "exiting band1_start loop"
@@ -7001,7 +7003,8 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
    end if
 
    ! Collect and rescale
-   call xmpi_sum(ur_bdgw, gwr%kgt_comm%value, ierr)
+   !call xmpi_sum(ur_bdgw, gwr%kgt_comm%value, ierr)
+   call xmpi_sum(ur_bdgw, gwr%kg_comm%value, ierr)
    ur_bdgw = ur_bdgw / gwr%np_kibz(ikcalc_ibz)
 
    ABI_MALLOC(ur_prod, (u_nfft * nspinor))
@@ -7106,7 +7109,7 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
 
      do il_b=1,ugb_kibz%sizeb_local(2)
        ! Distribute bands inside tau_comm as wavefunctions are replicated
-       !if (gwr%tau_comm%skip(il_b)) cycle
+       if (gwr%tau_comm%skip(il_b)) cycle
 
        band_sum = ugb_kibz%loc2gcol(il_b)
 
