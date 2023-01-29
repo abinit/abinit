@@ -1,3 +1,4 @@
+block
 !Local variables-------------------------------
 !scalars
  integer,parameter :: ndat1 = 1, option3 = 3, cplex0 = 0, npwin0 = 0
@@ -75,5 +76,6 @@
        call TK_PREF(box2gsph) (nx,ny,nz,ldx,ldy,ldz,ndat1,npw_k,kg_k,ur(box_pt:),ug(gsp_pt:))
      end do
    end if
-
  end if
+
+end block

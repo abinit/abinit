@@ -1,3 +1,4 @@
+block
 !Local variables-------------------------------
 !scalars
  integer,parameter :: ndat1 = 1, option0 = 0, cplex0 = 0, npwout0 = 0
@@ -11,7 +12,6 @@
 ! *************************************************************************
 
  ! FFT: ug -> ur 
-
  use_fftrisc = mod(fftalg, 10) == 2 .and. any(istwf_k== [1, 2])
 
  if (use_fftrisc) then
@@ -51,7 +51,6 @@
    end if
 
  else
-
    nthreads = xomp_get_num_threads(open_parallel=.TRUE.)
 
    if (.not. SPAWN_THREADS_HERE(ndat, nthreads)) then
@@ -76,3 +75,5 @@
      end do
    end if
  end if
+
+end block
