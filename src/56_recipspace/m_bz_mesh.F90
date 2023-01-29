@@ -2124,7 +2124,6 @@ end subroutine findq
 !!
 !! SOURCE
 
-
 subroutine findqg0(iq, g0, kmkp, nqbz, qbz, mG0)
 
 !Arguments ------------------------------------
@@ -2148,12 +2147,12 @@ subroutine findqg0(iq, g0, kmkp, nqbz, qbz, mG0)
 
 ! *************************************************************************
 
- iq=0
+ iq = 0
 
- if (ALL(ABS(kmkp(:))<EPSILON(one))) then
+ if (ALL(ABS(kmkp) < EPSILON(one))) then
    ! Find q close to 0
    do iqbz=1,nqbz
-     if (ALL(ABS(qbz(:,iqbz))<tolq0)) then
+     if (ALL(ABS(qbz(:,iqbz)) < tolq0)) then
        iq = iqbz
      end if
    end do
@@ -2204,7 +2203,7 @@ subroutine findqg0(iq, g0, kmkp, nqbz, qbz, mG0)
       rg(2) = glist2(jg02)
       do jg03=1,2*mG0(3)+1
          rg(3) = glist3(jg03)
-         !
+
          ! Form q+G0 and check if it is the one.
          do iqbz=1,nqbz
           qpg0= qbz(:,iqbz) + rg
@@ -2223,7 +2222,6 @@ subroutine findqg0(iq, g0, kmkp, nqbz, qbz, mG0)
     write(msg,'(a, 3f9.5)')' q = k-kp+G0 not found. kmkp:',kmkp
     ABI_ERROR(msg)
   end if
-
  end if
 
 end subroutine findqg0
