@@ -678,6 +678,7 @@ interface xmpi_sum
   module procedure xmpi_sum_dp3d2t !?
   module procedure xmpi_sum_dp4d2t !?
   module procedure xmpi_sum_c0dc
+  module procedure xmpi_sum_c0sc
   module procedure xmpi_sum_c1dc
   module procedure xmpi_sum_c2dc
   module procedure xmpi_sum_c3dc
