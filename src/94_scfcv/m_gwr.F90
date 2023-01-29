@@ -5438,7 +5438,7 @@ subroutine diag_braket(trans, mat, nfftsp, u_glob, cout, do_mpi_sum)
  integer,intent(in) :: nfftsp
  class(__slkmat_t),intent(in) :: mat
  complex(gwpc),intent(in) :: u_glob(nfftsp)
- complex(dp),intent(out) :: cout
+ complex(gwpc),intent(out) :: cout
  logical,optional,intent(in) :: do_mpi_sum
 
 !Local variables-------------------------------
