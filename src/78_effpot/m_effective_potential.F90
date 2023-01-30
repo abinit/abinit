@@ -2244,7 +2244,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,gred,strten,natom,r
   has_ext_filed = .FALSE.
   ext_field = zero
   if(present(efield)) then
-      if (any(efield(:)>tol10)) then
+      if (any(abs(efield(:))>tol10)) then
           has_ext_filed=.TRUE.
           ext_field = efield
       end if
