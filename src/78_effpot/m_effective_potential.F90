@@ -2585,7 +2585,7 @@ if (has_ext_filed)  then
   call xmpi_sum(fcart_part , comm, ierr)
 
   energy = energy + energy_part
-  fcart = fcart - fcart_part
+  fcart = fcart + fcart_part
 
     if(abs(energy_part) > tol10 .and. need_verbose )then
       write(msg, '(a,1ES24.16,a)' ) ' Energy from electric field is :',&
