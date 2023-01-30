@@ -2587,20 +2587,6 @@ if (has_ext_filed)  then
   energy = energy + energy_part
   fcart = fcart + fcart_part
 
-    if(abs(energy_part) > tol10 .and. need_verbose )then
-      write(msg, '(a,1ES24.16,a)' ) ' Energy from electric field is :',&
-&                                       energy_part,' Hartree'
-      call wrtout(ab_out,msg,'COLL')
-      call wrtout(std_out,msg,'COLL')
-    
-    end if
-
-      write(msg, '(a,1ES24.16,a)' ) 'The polarization is :',&
-&                                       temp_pol/(eff_pot%supercell%ncells*eff_pot%crystal%ucvol),' eU/Bohr^2'
-      call wrtout(ab_out,msg,'COLL')
-      call wrtout(std_out,msg,'COLL')
-
-end if
 !-------------------------------------------
 ! 8 - Compute electronic Part with SCALE-UP
 !------------------------------------------
