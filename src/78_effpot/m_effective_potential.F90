@@ -2570,7 +2570,7 @@ if (has_ext_filed)  then
   temp_pol = zero
   energy_part = zero
   fcart_part(:,:)  = zero
-  ext_field = -1*ext_field*eV_Ha*Bohr_meter  
+  ext_field = -1*ext_field   !*eV_Ha*Bohr_meter  
 
  do icell = 1,eff_pot%mpi_coeff%my_ncell
     ii = eff_pot%mpi_coeff%my_index_cells(4,icell)
@@ -2581,7 +2581,7 @@ if (has_ext_filed)  then
           end do
   end do
 
-  energy_part = DOT_PRODUCT(ext_field(:),temp_pol(:)) !*eV_Ha
+  energy_part = DOT_PRODUCT(ext_field(:),temp_pol(:))  
 
   call xmpi_sum(energy_part, comm, ierr)
   call xmpi_sum(fcart_part , comm, ierr)
