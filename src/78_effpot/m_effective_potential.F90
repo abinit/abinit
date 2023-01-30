@@ -2244,8 +2244,10 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,gred,strten,natom,r
   has_ext_filed = .FALSE.
   ext_field = zero
   if(present(efield)) then
-      has_ext_filed=.TRUE.
-      ext_field = efield
+      if (any(efield(:)>tol10)) then
+          has_ext_filed=.TRUE.
+          ext_field = efield
+      end if
   end if
 
   need_elec_eval = .FALSE.
@@ -2568,7 +2570,7 @@ if (has_ext_filed)  then
   temp_pol = zero
   energy_part = zero
   fcart_part(:,:)  = zero
-  ext_field = ext_field*eV_Ha*Bohr_meter  
+  ext_field = -1*ext_field*eV_Ha*Bohr_meter  
 
  do icell = 1,eff_pot%mpi_coeff%my_ncell
     ii = eff_pot%mpi_coeff%my_index_cells(4,icell)
@@ -2584,9 +2586,22 @@ if (has_ext_filed)  then
   call xmpi_sum(energy_part, comm, ierr)
   call xmpi_sum(fcart_part , comm, ierr)
 
+      write(msg, '(a,1ES24.16,a)' ) ' Energy from electric field is             :',&
+&                                       energy_part,' Hartree'
+      call wrtout(ab_out,msg,'COLL')
+      call wrtout(std_out,msg,'COLL')
+    
+
+!    temp_pol = temp_pol/(eff_pot%supercell%ncells*eff_pot%crystal%ucvol)
+!       write(msg, '(a,1ES16.6,1ES16.6,1ES16.6,a)' ) 'The polarization is :',&
+! &                                       temp_pol(1),temp_pol(2),temp_pol(3), ' eU/Bohr^2'
+!       call wrtout(ab_out,msg,'COLL')
+!       call wrtout(std_out,msg,'COLL')
+
   energy = energy + energy_part
   fcart = fcart + fcart_part
 
+ end if
 !-------------------------------------------
 ! 8 - Compute electronic Part with SCALE-UP
 !------------------------------------------
