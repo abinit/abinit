@@ -166,6 +166,9 @@ module m_xmpi
    integer :: value = xmpi_comm_self
    integer :: nproc = 1
    integer :: me = 0
+   integer,private :: can_use_shmem__ = -1
+     ! -1 --> unitialized, 0 if ranks do not belong to a shared memory region else 1
+
  contains
    procedure :: skip => xcomm_skip                     ! Skip iteration according to rank
    procedure :: set_to_null => xcomm_set_to_null
@@ -174,6 +177,7 @@ module m_xmpi
    procedure :: from_cart_sub => xcomm_from_cart_sub   ! Build sub-communicators in a Cartesian grid.
    procedure :: prep_gatherv => xcomm_prep_gatherv     ! Prepare a typical gatherv operation.
    procedure :: print_names => xcomm_print_names
+   procedure :: can_use_shmem => xcomm_can_use_shmem
  end type xcomm_t
 
  public :: xcomm_from_mpi_int
@@ -772,9 +776,7 @@ subroutine xmpi_init()
  !required = MPI_THREAD_SERIALIZED
  !required = MPI_THREAD_MULTIPLE
  call MPI_INIT_THREAD(required,provided,mpierr)
- if (provided /= required) then
-   call xmpi_abort(msg="MPI_INIT_THREADS: provided /= required")
- end if
+ if (provided /= required) call xmpi_abort(msg="MPI_INIT_THREADS: provided /= required")
 #endif
 
  !%comm_world = xmpi_world ! Needed to bypass a bug in some OMPI implementations (intent(inout))
@@ -5055,6 +5057,7 @@ subroutine xcomm_from_cart_sub(self, comm_cart, keepdim)
 #endif
  self%me = xmpi_comm_rank(self%value)
  self%nproc = xmpi_comm_size(self%value)
+
 end subroutine xcomm_from_cart_sub
 
 ! Prepare a typical gatherv operation in which each MPI rank sends
@@ -5102,7 +5105,73 @@ subroutine xcomm_print_names(self)
      write(std_out, "(i5,2x,a20)")ip, trim(names(ip+1))
    end do
  end if
+
 end subroutine xcomm_print_names
+!!***
+
+! Return True if all procs in self can create a shared memory region. Cache the result.
+logical function xcomm_can_use_shmem(self) result(ok)
+
+ class(xcomm_t),intent(inout) :: self
+
+!Local variables-------------------
+ integer :: ierr, new_comm
+!----------------------------------------------------------------------
+
+ ok = .False.
+#ifdef HAVE_MPI
+ if (self%can_use_shmem__ == - 1) then
+   ! First call --> cache result
+   call MPI_COMM_SPLIT_TYPE(self%value, MPI_COMM_TYPE_SHARED, self%me, MPI_INFO_NULL, new_comm, ierr)
+   self%can_use_shmem__ = merge(1, 0, xmpi_comm_size(new_comm) == self%nproc)
+   call xmpi_comm_free(new_comm)
+ end if
+ ok = self%can_use_shmem__ == 1
+#endif
+
+end function xcomm_can_use_shmem
+!!***
+
+subroutine xcomm_allocate_shared_master(self, size, kind, info, baseptr, win)
+
+ class(xcomm_t),intent(inout) :: self
+ !character(len=*),intent(in) :: stype
+ integer(kind=XMPI_ADDRESS_KIND), intent(in) :: size
+ integer,intent(in) :: kind, info
+ type(c_ptr), intent(out) :: baseptr
+ !INTEGER(KIND=XMPI_ADDRESS_KIND) :: baseptr
+ integer,intent(out) :: win
+
+!Local variables-------------------
+ integer :: ierr, disp_unit
+ integer(kind=XMPI_ADDRESS_KIND) :: my_size
+!----------------------------------------------------------------------
+
+ if (.not. self%can_use_shmem()) call xmpi_abort(msg="MPI communicator does not support shared memory allocation!")
+
+ select case (kind)
+ case (sp)
+  disp_unit = xmpi_bsize_sp
+ case (dp)
+  disp_unit = xmpi_bsize_dp
+ case default
+  call xmpi_abort(msg="MPI communicator does not support shared memory allocation!")
+ end select
+ !disp_unit = sizeof_stype(stype)
+
+#ifdef HAVE_MPI
+ my_size = 0; if (self%me == 0) my_size = size
+ call MPI_WIN_ALLOCATE_SHARED(my_size, disp_unit, info, self%value, baseptr, win, ierr)
+                              !INTEGER(KIND=MPI_ADDRESS_KIND) SIZE, BASEPTR
+                              !INTEGER DISP_UNIT, INFO, COMM, WIN, ierr)
+
+ if (self%me /= 0) call MPI_WIN_SHARED_QUERY(win, 0, my_size, disp_unit, baseptr, ierr)
+ !MPI_WIN_SHARED_QUERY(WIN, RANK, SIZE, DISP_UNIT, BASEPTR, IERROR)
+ !       INTEGER WIN, RANK, DISP_UNIT, IERROR
+ !       INTEGER(KIND=MPI_ADDRESS_KIND) SIZE, BASEPTR
+#endif
+
+end subroutine xcomm_allocate_shared_master
 !!***
 
 !!****f* m_xmpi/pool2d_from_dims
