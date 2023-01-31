@@ -1459,7 +1459,7 @@ subroutine fftw3_c2c_ip_spc(nx, ny, nz, ldx, ldy, ldz, ndat, isign, ff, fftw_fla
  stride = 1
  dist   = ldx*ldy*ldz
  embed  = [ldx, ldy, ldz]
- n      = [nx ,ny ,nz]
+ n      = [nx, ny, nz]
 
  my_plan = fftw3_plan_many_dft(rank3, n, ndat, ff, embed, stride, dist, ff, embed, stride, dist, isign, my_flags, nt_all)
 
@@ -1589,7 +1589,7 @@ subroutine fftw3_c2c_ip_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,ff,fftw_flags)
  stride = 1
  dist   = ldx*ldy*ldz
  embed  = [ldx, ldy, ldz]
- n      = [nx ,ny ,nz]
+ n      = [nx, ny, nz]
 
  my_plan = fftw3_plan_many_dft(rank3, n, ndat, ff, embed, stride, dist, ff, embed, stride, dist, isign, my_flags, nt_all)
 
@@ -1664,8 +1664,8 @@ subroutine fftw3_c2c_op_spc(nx, ny, nz, ldx, ldy, ldz, ndat, isign, ff, gg, fftw
 
  stride = 1
  dist   = ldx*ldy*ldz
- embed  = (/ldx,ldy,ldz/)
- n      = (/nx ,ny ,nz/)
+ embed  = [ldx, ldy, ldz]
+ n      = [nx, ny, nz]
 
  my_plan = fftw3_plan_many_dft(rank3, n, ndat, ff, embed, stride, dist, gg, embed, stride, dist, isign, my_flags, nt_all)
 
@@ -1740,8 +1740,8 @@ subroutine fftw3_c2c_op_dpc(nx, ny, nz, ldx, ldy, ldz, ndat, isign, ff, gg, fftw
 
  stride = 1
  dist   = ldx*ldy*ldz
- embed  = (/ldx,ldy,ldz/)
- n      = (/nx ,ny ,nz/)
+ embed  = [ldx, ldy, ldz]
+ n      = [nx, ny, nz]
 
  my_plan = fftw3_plan_many_dft(rank3, n, ndat, ff, embed, stride, dist, gg, embed, stride, dist, isign, my_flags, nt_all)
 
@@ -1903,7 +1903,6 @@ subroutine fftw3_r2c_op(nx,ny,nz,ldx,ldy,ldz,ndat,ff,gg,fftw_flags)
  ABI_FREE(i1inver)
  ABI_FREE(i2inver)
  ABI_FREE(i3inver)
-
  ABI_FREE(gg_hp)
 
 #else
@@ -2015,7 +2014,6 @@ subroutine fftw3_c2r_op(nx,ny,nz,ldx,ldy,ldz,ndat,ff,gg,fftw_flags)
  call dfftw_execute_dft_c2r(my_plan, ff_hp, gg)
 
  call fftw3_destroy_plan(my_plan)
-
  ABI_FREE(ff_hp)
 
 #else
@@ -2081,8 +2079,8 @@ subroutine fftw3_many_dft_op(nx,ny,nz,ldx,ldy,ldz,ndat,isign,fin,fout,fftw_flags
 
  stride = 1
  dist   = ldx*ldy*ldz
- embed  = [ldx,ldy,ldz]
- n      = [nx ,ny ,nz]
+ embed  = [ldx, ldy, ldz]
+ n      = [nx, ny, nz]
 
  my_plan = fftw3_plan_many_dft(rank3, n, ndat, fin, embed, stride, dist, fout, embed, stride, dist, isign, my_flags, nt_all)
 
@@ -2094,7 +2092,6 @@ subroutine fftw3_many_dft_op(nx,ny,nz,ldx,ldy,ldz,ndat,isign,fin,fout,fftw_flags
  ! -1, FFTW returns not normalized FTs
  if (isign == ABI_FFTW_FORWARD) then
   call ZDSCAL(ldx*ldy*ldz*ndat, one/(nx*ny*nz), fout, 1)
-  !call cg_zscal(ldx*ldy*ldz*ndat, (/one/(nx*ny*nz), zero/), fout)
  end if
 
 #else
@@ -2160,10 +2157,10 @@ subroutine fftw3_many_dft_ip(nx,ny,nz,ldx,ldy,ldz,ndat,isign,finout,fftw_flags)
 
  stride = 1
  dist   = ldx*ldy*ldz
- embed  = [ldx,ldy,ldz]
- n      = [nx, ny ,nz]
+ embed  = [ldx, ldy, ldz]
+ n      = [nx, ny, nz]
 
- my_plan = fftw3_plan_many_dft(rank3, n, ndat, finout, embed, stride, dist, finout,embed, stride, dist, isign, my_flags, nt_all)
+ my_plan = fftw3_plan_many_dft(rank3, n, ndat, finout, embed, stride, dist, finout, embed, stride, dist, isign, my_flags, nt_all)
 
  ! Now perform the 3D FFT via FFTW.
  call dfftw_execute_dft(my_plan, finout, finout)
@@ -2172,7 +2169,6 @@ subroutine fftw3_many_dft_ip(nx,ny,nz,ldx,ldy,ldz,ndat,isign,finout,fftw_flags)
  ! -1, FFTW returns not normalized FTs
  if (isign == ABI_FFTW_FORWARD) then
   call ZDSCAL(ldx*ldy*ldz*ndat, one/(nx*ny*nz), finout, 1)
-  !call cg_zscal(ldx*ldy*ldz*ndat, (/one/(nx*ny*nz),zero/), finout)
  end if
 
 #else

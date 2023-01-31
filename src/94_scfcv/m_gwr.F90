@@ -1420,7 +1420,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
    write(msg, "(a,i0,3a, 5(a,1x,i0))") &
      "Cannot create 4D Cartesian grid with total nproc: ", all_nproc, ch10, &
      "Idle MPI processes are not supported. The product of the `nproc_*` vars should be equal to nproc.", ch10, &
-     "g_nproc (", np_g, ") x tau_nproc (", np_t, ") x kpt_nproc (", np_k,") x spin_nproc (", np_s, ") != ", all_nproc
+     "k_nproc (", np_k, ") x g_nproc (", np_g, ") x tau_nproc (", np_t,") x spin_nproc (", np_s, ") != ", all_nproc
    ABI_ERROR(msg)
  end if
 
@@ -3742,15 +3742,16 @@ subroutine gwr_build_tchi(gwr)
 !scalars
  integer :: my_is, my_it, my_ikf, ig, my_ir, my_nr, nrsp, npwsp, ncol_glob, col_bsize, my_iqi !, ii !, my_iki ! my_iqf,
  integer :: idat, ndat, max_ndat, sc_nfft, sc_nfftsp, spin, ik_bz, iq_ibz, ikq_ibz, ikq_bz, ierr, ipm, itau, ig2 !, ig1
- !integer(kind=XMPI_ADDRESS_KIND) :: buf_size
+ integer(kind=XMPI_ADDRESS_KIND) :: buf_size
  real(dp) :: cpu_tau, wall_tau, gflops_tau, cpu_all, wall_all, gflops_all, cpu_ir, wall_ir, gflops_ir
  real(dp) :: tchi_rfact, mem_mb, local_max, max_abs_imag_chit !, spin_fact, sc_ucvol, ik_ibz,
  complex(gwpc) :: head_q
  complex(dp) :: chq(3), wng(3)
- logical :: q_is_gamma
+ logical :: q_is_gamma, use_shmem_for_k, use_mpi_for_k
  character(len=5000) :: msg
  type(desc_t),pointer :: desc_k, desc_q
  type(__slkmat_t) :: chi_rgp
+ type(c_ptr) :: void_ptr
 !arrays
  integer :: sc_ngfft(18), gg(3), g0_kq(3)
  integer,allocatable :: green_scgvec(:,:), chi_scgvec(:,:)
@@ -3805,17 +3806,18 @@ subroutine gwr_build_tchi(gwr)
    ! Perhaps the safest approach would be to generate the plan on the fly.
    max_ndat = gwr%sc_batch_size
 
-   !use_shmem_for_k = gwr%sc_batch_size > 1 .and. mod(gwr%sc_batch_size, gwr%kpt_comm%nproc) == 0
-   !use_shmem_for_k = use_shmem_for_k .and. gwr%kpt_comm%can_use_shmem()
-   !if (use_shmem_for_k) then
-   !  buf_size = 2 * (sc_nfftsp * max_ndat * 2)
-   !  call gwr%kpt_comm%allocate_shared_master(buf_size, gwpc, info, void_ptr, gt_scbox_win)
-   !  call c_f_pointer(void_ptr, gt_scbox, shape=[sc_nfftsp * max_ndat, 2)
-   !end if
-   !if (use_shmem_for_k) then
-   !  call xmpi_win_free(gt_scbox_win, ierr)
-   !  call xmpi_win_free(chit_scbox_win, ierr)
-   !end if
+   use_shmem_for_k = gwr%sc_batch_size > 1 .and. mod(gwr%sc_batch_size, gwr%kpt_comm%nproc) == 0
+   use_shmem_for_k = use_shmem_for_k .and. gwr%kpt_comm%can_use_shmem()
+   if (use_shmem_for_k) then
+     buf_size = 2 * (sc_nfftsp * max_ndat * 2)
+     !call gwr%kpt_comm%allocate_shared_master(buf_size, gwpc, info, void_ptr, gt_scbox_win)
+     !call c_f_pointer(void_ptr, gt_scbox, shape=[sc_nfftsp, max_ndat, 2])
+   end if
+   !if (use_shmem_for_k) call xmpi_win_free(gt_scbox_win, ierr)
+   use_shmem_for_k = .False.
+
+   use_mpi_for_k = gwr%sc_batch_size > 1 .and. mod(gwr%sc_batch_size, gwr%kpt_comm%nproc) == 0
+   use_mpi_for_k = .False.
 
    ABI_CALLOC(gt_scbox, (sc_nfftsp, max_ndat, 2))
    mem_mb = (sc_nfftsp * max_ndat * 2 * gwpc) * b2Mb
@@ -3863,7 +3865,6 @@ subroutine gwr_build_tchi(gwr)
        ! Moreover the FFTs are distributed inside kpt_comm
        ! Also, one can save all the FFTs in a matrix G(mnfft * ndat, my_nkbz) multiply by the e^{-ikr} phase
        ! and then use zgemm to compute Out(r,L) = [e^{-ikr}G_k(r)] e^{-ikL} with precomputed e^{-iLk} phases.
-
        my_nr = gt_gpr(1,1)%sizeb_local(2)
 
        do my_ir=1, my_nr, gwr%sc_batch_size
@@ -3872,13 +3873,15 @@ subroutine gwr_build_tchi(gwr)
            call cwtime(cpu_ir, wall_ir, gflops_ir, "start")
          end if
 
-!if (.not. use_shmem_for_k) then
+if (.not. use_shmem_for_k) then
          ! Insert G_k(g',r) in G'-space in the supercell FFT box for fixed r.
          ! Note that we need to take the union of (k, g') for k in the BZ so we need to communicate in kpt_comm.
+         ! call fill_gtscbox()
          gt_scbox = zero
          do my_ikf=1,gwr%my_nkbz
            ! Compute k+g
-           ik_bz = gwr%my_kbz_inds(my_ikf); desc_k => desc_mykbz(my_ikf); gg = nint(gwr%kbz(:, ik_bz) * gwr%ngkpt)
+           ik_bz = gwr%my_kbz_inds(my_ikf); gg = nint(gwr%kbz(:, ik_bz) * gwr%ngkpt)
+           desc_k => desc_mykbz(my_ikf);
            do ig=1,desc_k%npw
              green_scgvec(:,ig) = gg + gwr%ngkpt * desc_k%gvec(:,ig)
            end do
@@ -3888,46 +3891,76 @@ subroutine gwr_build_tchi(gwr)
            end do
          end do ! my_ikf
 
-         ! TODO: Should block using nproc in kpt_comm, scatter data and perform multiple FFTs in parallel.
-         if (gwr%kpt_comm%nproc > 1) call xmpi_sum(gt_scbox, gwr%kpt_comm%value, ierr)
+         if (.not. use_mpi_for_k) then
+           call xmpi_sum(gt_scbox, gwr%kpt_comm%value, ierr)
+           ! G(G',r) --> G(R',r) = sum_{k,g'} e^{-i(k+g').R'} G_k(g',r)
+           call green_plan%execute(gt_scbox(:,1,1), -1)
+           call xscal(size(gt_scbox), real(sc_nfft, kind=gwpc), gt_scbox(:,1,1), 1)  ! gt_scbox *= sc_nfft
 
-         ! G(G',r) --> G(R',r) = sum_{k,g'} e^{-i(k+g').R'} G_k(g',r)
-         call green_plan%execute(gt_scbox(:,1,1), -1)
-         call xscal(size(gt_scbox), real(sc_nfft, kind=gwpc), gt_scbox(:,1,1), 1)  ! gt_scbox *= sc_nfft
+           ! Compute tchi(R',r) for this r and store it in (:,:,1). Note that results are real so one might use r2c FFT.
+           ! Then back to tchi(G'=q+g',r) immediately with isign + 1.
+           gt_scbox(:,:,1) = gt_scbox(:,:,1) * conjg(gt_scbox(:,:,2))
+           !max_abs_imag_chit = max(max_abs_imag_chit, maxval(abs(aimag(gt_scbox(:,:,1)))))
+           call green_plan%execute(gt_scbox(:,1,1), +1)
 
-         ! Compute tchi(R',r) for this r and store it in (:,:,1).
-         ! Note that results are real so one might use r2c FFT.
+         else
+           !   TODO: Should block using nproc in kpt_comm, scatter data and perform multiple FFTs in parallel.
+           !do idat=1,ndat
+           !do ipm=1,2
+           !  call xmpi_sum_master(gt_scbox(:,idat,ipm), idat-1, gwr%kpt_comm%value, ierr)
+           !end do
+           !end do
+
+           idat = gwr%kpt_comm%value
+           do ipm=1,2
+             !call green_plan%execute(gt_scbox(:,idat,ipm), -1, howmany=1)
+             gt_scbox(:,idat,ipm) = gt_scbox(:,idat,ipm) * sc_nfft
+           end do
+           gt_scbox(:,idat,1) = gt_scbox(:,idat,1) * conjg(gt_scbox(:,idat,2))
+           !call green_plan%execute(gt_scbox(:,idat,1), +1, howmany=1)
+
+           !do idat=1,ndat
+           !  call xmpi_bcast(gt_scbox(:,idat,1), idat-1, gwr%kpt_comm%value, ierr)
+           !end do
+         end if
+
+else
+         idat = gwr%kpt_comm%me + 1
+         do ipm=1,2
+           gt_scbox(:,idat,ipm) = zero
+         end do
+         !call MPI_Win_fence(0, gt_scbox_win, ierr)
+
          !do idat=1,ndat
-         gt_scbox(:,:,1) = gt_scbox(:,:,1) * conjg(gt_scbox(:,:,2))
-         !end do
-         !max_abs_imag_chit = max(max_abs_imag_chit, maxval(abs(aimag(gt_scbox(:,:,1)))))
+         do my_ikf=1,gwr%my_nkbz
+           ! Compute k+g
+           ik_bz = gwr%my_kbz_inds(my_ikf); gg = nint(gwr%kbz(:, ik_bz) * gwr%ngkpt)
+           desc_k => desc_mykbz(my_ikf);
+           do ig=1,desc_k%npw
+             green_scgvec(:,ig) = gg + gwr%ngkpt * desc_k%gvec(:,ig)
+           end do
+           do ipm=1,2
+             call gsph2box(sc_ngfft, desc_k%npw, gwr%nspinor * ndat1, green_scgvec, &
+                           gt_gpr(ipm, my_ikf)%buffer_cplx(:,my_ir), gt_scbox(:,idat,ipm))
+           end do
+         end do ! my_ikf
+         !end do ! idat
+         !call MPI_Win_fence(0, gt_scbox_win, ierr)
 
-         ! Back to tchi(G'=q+g',r) immediately with isign + 1.
-         call green_plan%execute(gt_scbox(:,1,1), +1)
-!else
-!         idat = gwr%kpt_comm%me + 1
-!         gt_scbox(:,idat,:) = zero
-!         call MPI_Win_fence(0, gt_scbox_win, ierr)
-!
-!         do idat=1,ndat
-!           do my_ikf=1,gwr%my_nkbz
-!             ! Compute k+g
-!             ik_bz = gwr%my_kbz_inds(my_ikf); desc_k => desc_mykbz(my_ikf); gg = nint(gwr%kbz(:, ik_bz) * gwr%ngkpt)
-!             do ig=1,desc_k%npw
-!               green_scgvec(:,ig) = gg + gwr%ngkpt * desc_k%gvec(:,ig)
-!             end do
-!             do ipm=1,2
-!               call gsph2box(sc_ngfft, desc_k%npw, gwr%nspinor * ndat1, green_scgvec, &
-!                             gt_gpr(ipm, my_ikf)%buffer_cplx(:,my_ir), gt_scbox(:,idat,ipm))
-!             end do
-!           end do ! my_ikf
-!         end do
-!         call MPI_Win_fence(0, gt_scbox_win, ierr)
-!         idat = gwr%kpt_comm%me + 1
-!end if
+         !idat = gwr%kpt_comm%me + 1
+         !howmany = 2 * gwr%nspinor
+         !call green_plan%execute(gt_scbox(:,1,idat), -1, howmany=howmany)
+         !call xscal(gwr%ng_fft * howmany, real(sc_nfft, kind=gwpc), gt_scbox(:,1,idat), 1)  ! gt_scbox *= sc_nfft
+         !gt_scbox(:,:,1) = gt_scbox(:,:,1) * conjg(gt_scbox(:,:,2))
+         !call green_plan%execute(gt_scbox(:,1,idat), +1, howmany=howmany)
+         !call MPI_Win_fence(0, gt_scbox_win, ierr)
+end if
 
          ! Now extract tchi_q(g',r) on the ecuteps (q+g)-sphere from the FFT box in the supercell
          ! and save data in chiq_gpr PBLAS matrix. Only my q-points in the IBZ are considered.
+         ! Alternatively, one can avoid the above FFT,
+         ! use zero-padded to go from the supercell to the ecuteps g-sphere inside the my_iqi loop.
+         ! This approach should play well with k-point parallelism.
          do my_iqi=1,gwr%my_nqibz
            iq_ibz = gwr%my_qibz_inds(my_iqi)
            qq_ibz = gwr%qibz(:, iq_ibz)
@@ -3943,10 +3976,6 @@ subroutine gwr_build_tchi(gwr)
 
            call box2gsph(sc_ngfft, desc_q%npw, gwr%nspinor * ndat, chi_scgvec, &
                          gt_scbox(:,1,1), chiq_gpr(my_iqi)%buffer_cplx(:, my_ir))
-
-           ! Alternatively, one can avoid the above FFT,
-           ! use zero-padded to go from the supercell to the ecuteps g-sphere inside the my_iqi loop.
-           ! This approach should play well with k-point parallelism.
          end do ! my_iqi
 
          if (my_ir <= 3 * gwr%sc_batch_size .or. mod(my_ir, LOG_MODR) == 0) then
