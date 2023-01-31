@@ -216,13 +216,13 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
  use_lapack_gpu=use_linalg_gpu
 #endif
  if(use_linalg_gpu==1) then
-   call alloc_on_gpu(A_gpu,cplx*dp*vectsize*blocksize)
-   call alloc_on_gpu(C_gpu,cplx*dp*vectsize*blocksize)
-   call alloc_on_gpu(blockvectorr_gpu,cplx*dp*vectsize*blocksize)
-   call alloc_on_gpu(blockvectorar_gpu,cplx*dp*vectsize*blocksize)
-   call alloc_on_gpu(blockvectorbr_gpu,cplx*dp*vectsize*blocksize)
-   call alloc_on_gpu(coordx2_gpu,cplx*dp*blocksize*blocksize)
-   call alloc_on_gpu(coordx3_gpu,cplx*dp*blocksize*blocksize)
+   call alloc_on_gpu(A_gpu,             INT(cplx, c_size_t)*dp*vectsize*blocksize)
+   call alloc_on_gpu(C_gpu,             INT(cplx, c_size_t)*dp*vectsize*blocksize)
+   call alloc_on_gpu(blockvectorr_gpu,  INT(cplx, c_size_t)*dp*vectsize*blocksize)
+   call alloc_on_gpu(blockvectorar_gpu, INT(cplx, c_size_t)*dp*vectsize*blocksize)
+   call alloc_on_gpu(blockvectorbr_gpu, INT(cplx, c_size_t)*dp*vectsize*blocksize)
+   call alloc_on_gpu(coordx2_gpu,       INT(cplx, c_size_t)*dp*blocksize*blocksize)
+   call alloc_on_gpu(coordx3_gpu,       INT(cplx, c_size_t)*dp*blocksize*blocksize)
  end if
 
  if(abs(dtset%timopt)==4) then
@@ -283,11 +283,11 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
 
    if(use_linalg_gpu==1) then
      if(iblock/=1) then
-       call alloc_on_gpu(bblockvector_gpu,cplx*dp*vectsize*bblocksize)
-       call alloc_on_gpu(gram_gpu,cplx*dp*bblocksize*blocksize)
+       call alloc_on_gpu(bblockvector_gpu, INT(cplx, c_size_t)*dp*vectsize*bblocksize)
+       call alloc_on_gpu(gram_gpu,         INT(cplx, c_size_t)*dp*bblocksize*blocksize)
      else
-       call alloc_on_gpu(bblockvector_gpu,cplx*dp*vectsize*blocksize)
-       call alloc_on_gpu(gram_gpu,cplx*dp*blocksize*blocksize)
+       call alloc_on_gpu(bblockvector_gpu, INT(cplx, c_size_t)*dp*vectsize*blocksize)
+       call alloc_on_gpu(gram_gpu,         INT(cplx, c_size_t)*dp*blocksize*blocksize)
      end if
    end if
 
@@ -479,7 +479,7 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
      end if
 
      if(use_linalg_gpu==1) then
-       call copy_on_gpu(C_LOC(blockvectorr(1,1)),blockvectorr_gpu,cplx*dp*vectsize*blocksize)
+       call copy_on_gpu(C_LOC(blockvectorr(1,1)), blockvectorr_gpu, INT(cplx, c_size_t)*dp*vectsize*blocksize)
      end if
 
      if(iblock /=1) then
@@ -487,10 +487,10 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
 !      blockvectorr=blockvectorr-matmul(blockvectory,matmul((blockvectorby)^T,blockvectorr))
 
        if(use_linalg_gpu==1) then
-         call copy_on_gpu(C_LOC(blockvectorby(1,1)),bblockvector_gpu,cplx*dp*vectsize*bblocksize)
+         call copy_on_gpu(C_LOC(blockvectorby(1,1)), bblockvector_gpu, INT(cplx, c_size_t)*dp*vectsize*bblocksize)
          call gpu_xgemm(cplx,cparam(cplx),'n',bblocksize,blocksize,vectsize,cone,bblockvector_gpu,&
 &         vectsize,blockvectorr_gpu,vectsize,czero,gram_gpu,bblocksize)
-         call copy_from_gpu(C_LOC(gramyx(1,1)),gram_gpu,cplx*dp*bblocksize*blocksize)
+         call copy_from_gpu(C_LOC(gramyx(1,1)), gram_gpu, INT(cplx, c_size_t)*dp*bblocksize*blocksize)
        else
          call abi_xgemm(cparam(cplx),'n',bblocksize,blocksize,vectsize,cone,blockvectorby,&
 &         vectsize,blockvectorr,vectsize,czero,gramyx,bblocksize,x_cplx=x_cplx)
@@ -505,8 +505,8 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
        end if
 
        if(use_linalg_gpu==1) then
-         call copy_on_gpu(C_LOC(gramyx(1,1)),gram_gpu,cplx*dp*bblocksize*blocksize)
-         call copy_on_gpu(C_LOC(blockvectory(1,1)),bblockvector_gpu,cplx*dp*vectsize*bblocksize)
+         call copy_on_gpu(C_LOC(gramyx(1,1)),       gram_gpu,         INT(cplx, c_size_t)*dp*bblocksize*blocksize)
+         call copy_on_gpu(C_LOC(blockvectory(1,1)), bblockvector_gpu, INT(cplx, c_size_t)*dp*vectsize*bblocksize)
          call gpu_xgemm(cplx,'n','n',vectsize,blocksize,bblocksize,cminusone,bblockvector_gpu,&
 &         vectsize,gram_gpu,bblocksize,cone,blockvectorr_gpu,vectsize)
        else
@@ -519,10 +519,10 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
 !    Residuals orthogonal to blockvectorx
 !    blockvectorr=blockvectorr-matmul(blockvectorx,matmul((blockvectorbx)^T,blockvectorr))
      if(use_linalg_gpu==1) then
-       call copy_on_gpu(C_LOC(blockvectorbx(1,1)),C_gpu,cplx*dp*vectsize*blocksize)
+       call copy_on_gpu(C_LOC(blockvectorbx(1,1)), C_gpu, INT(cplx, c_size_t)*dp*vectsize*blocksize)
        call gpu_xgemm(cplx,cparam(cplx),'n',blocksize,blocksize,vectsize,cone,C_gpu,&
 &       vectsize,blockvectorr_gpu,vectsize,czero,gram_gpu,blocksize)
-       call copy_from_gpu(C_LOC(gramxax(1,1)),gram_gpu,cplx*dp*blocksize*blocksize)
+       call copy_from_gpu(C_LOC(gramxax(1,1)), gram_gpu, INT(cplx, c_size_t)*dp*blocksize*blocksize)
      else
        call abi_xgemm(cparam(cplx),'n',blocksize,blocksize,vectsize,cone,blockvectorbx,&
 &       vectsize,blockvectorr,vectsize,czero,gramxax,blocksize,x_cplx=x_cplx)
@@ -537,11 +537,11 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
      end if
 
      if(use_linalg_gpu==1) then
-       call copy_on_gpu(C_LOC(gramxax(1,1)),gram_gpu,cplx*dp*blocksize*blocksize)
-       call copy_on_gpu(C_LOC(blockvectorx(1,1)),C_gpu,cplx*dp*vectsize*blocksize)
+       call copy_on_gpu(C_LOC(gramxax(1,1)),      gram_gpu, INT(cplx, c_size_t)*dp*blocksize*blocksize)
+       call copy_on_gpu(C_LOC(blockvectorx(1,1)), C_gpu,    INT(cplx, c_size_t)*dp*vectsize*blocksize)
        call gpu_xgemm(cplx,'n','n',vectsize,blocksize,blocksize,cminusone,C_gpu,&
 &       vectsize,gram_gpu,blocksize,cone,blockvectorr_gpu,vectsize)
-       call copy_from_gpu(C_LOC(blockvectorr(1,1)),blockvectorr_gpu,cplx*dp*vectsize*blocksize)
+       call copy_from_gpu(C_LOC(blockvectorr(1,1)), blockvectorr_gpu, INT(cplx, c_size_t)*dp*vectsize*blocksize)
      else
        call abi_xgemm('n','n',vectsize,blocksize,blocksize,cminusone,blockvectorx,&
 &       vectsize,gramxax,blocksize,cone,blockvectorr,vectsize,x_cplx=x_cplx)
@@ -597,21 +597,21 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
      ABI_FREE(swavef)
 
      if(use_linalg_gpu==1) then
-       call copy_on_gpu(C_LOC(blockvectorbr(1,1)),blockvectorbr_gpu,cplx*dp*vectsize*blocksize)
+       call copy_on_gpu(C_LOC(blockvectorbr(1,1)), blockvectorbr_gpu, INT(cplx, c_size_t)*dp*vectsize*blocksize)
        call gpu_xorthonormalize(blockvectorr_gpu,blockvectorbr_gpu,blocksize,mpi_enreg%comm_bandspinorfft,gram_gpu,vectsize,&
 &       x_cplx,timopt=timopt,tim_xortho=tim_xortho)
-       call copy_from_gpu(C_LOC(blockvectorr(1,1)),blockvectorr_gpu,cplx*dp*vectsize*blocksize)
+       call copy_from_gpu(C_LOC(blockvectorr(1,1)),  blockvectorr_gpu,  INT(cplx, c_size_t)*dp*vectsize*blocksize)
        call gpu_xtrsm(cplx,'r','u','n','n',vectsize,blocksize,cone,gram_gpu,blocksize,blockvectorbr_gpu,vectsize)
-       call copy_from_gpu(C_LOC(blockvectorbr(1,1)),blockvectorbr_gpu,cplx*dp*vectsize*blocksize)
-       call copy_on_gpu(C_LOC(blockvectorar(1,1)),blockvectorar_gpu,cplx*dp*vectsize*blocksize)
+       call copy_from_gpu(C_LOC(blockvectorbr(1,1)), blockvectorbr_gpu, INT(cplx, c_size_t)*dp*vectsize*blocksize)
+       call copy_on_gpu(C_LOC(blockvectorar(1,1)),   blockvectorar_gpu, INT(cplx, c_size_t)*dp*vectsize*blocksize)
        call gpu_xtrsm(cplx,'r','u','n','n',vectsize,blocksize,cone,gram_gpu,blocksize,blockvectorar_gpu,vectsize)
-       call copy_from_gpu(C_LOC(blockvectorar(1,1)),blockvectorar_gpu,cplx*dp*vectsize*blocksize)
+       call copy_from_gpu(C_LOC(blockvectorar(1,1)), blockvectorar_gpu, INT(cplx, c_size_t)*dp*vectsize*blocksize)
        if (gs_hamk%usepaw==0) then
-         call copy_on_gpu(C_LOC(blockvectorvr(1,1)),A_gpu,cplx*dp*vectsize*blocksize)
+         call copy_on_gpu(C_LOC(blockvectorvr(1,1)),   A_gpu, INT(cplx, c_size_t)*dp*vectsize*blocksize)
          call gpu_xtrsm(cplx,'r','u','n','n',vectsize,blocksize,cone,gram_gpu,blocksize,A_gpu,vectsize)
-         call copy_from_gpu(C_LOC(blockvectorvr(1,1)),A_gpu,cplx*dp*vectsize*blocksize)
+         call copy_from_gpu(C_LOC(blockvectorvr(1,1)), A_gpu, INT(cplx, c_size_t)*dp*vectsize*blocksize)
        end if
-       call copy_from_gpu(C_LOC(gramrbr(1,1)),gram_gpu,cplx*dp*blocksize*blocksize)
+       call copy_from_gpu(C_LOC(gramrbr(1,1)), gram_gpu, INT(cplx, c_size_t)*dp*blocksize*blocksize)
      else
        call abi_xorthonormalize(blockvectorr,blockvectorbr,blocksize,mpi_enreg%comm_bandspinorfft,gramrbr,vectsize,&
 &       x_cplx,timopt=timopt,tim_xortho=tim_xortho)
@@ -624,22 +624,22 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
 
      if(iterationnumber>1) then
        if(use_linalg_gpu==1) then
-         call copy_on_gpu(C_LOC(blockvectorp(1,1)),A_gpu,cplx*dp*vectsize*blocksize)
-         call copy_on_gpu(C_LOC(blockvectorbp(1,1)),C_gpu,cplx*dp*vectsize*blocksize)
+         call copy_on_gpu(C_LOC(blockvectorp(1,1)),    A_gpu, INT(cplx, c_size_t)*dp*vectsize*blocksize)
+         call copy_on_gpu(C_LOC(blockvectorbp(1,1)),   C_gpu, INT(cplx, c_size_t)*dp*vectsize*blocksize)
          call gpu_xorthonormalize(A_gpu,C_gpu,blocksize,mpi_enreg%comm_bandspinorfft,gram_gpu,vectsize,&
 &         x_cplx,timopt=timopt,tim_xortho=tim_xortho)
-         call copy_from_gpu(C_LOC(blockvectorp(1,1)),A_gpu,cplx*dp*vectsize*blocksize)
+         call copy_from_gpu(C_LOC(blockvectorp(1,1)),  A_gpu, INT(cplx, c_size_t)*dp*vectsize*blocksize)
          call gpu_xtrsm(cplx,'r','u','n','n',vectsize,blocksize,cone,gram_gpu,blocksize,C_gpu,vectsize)
-         call copy_from_gpu(C_LOC(blockvectorbp(1,1)),C_gpu,cplx*dp*vectsize*blocksize)
-         call copy_on_gpu(C_LOC(blockvectorap(1,1)),A_gpu,cplx*dp*vectsize*blocksize)
+         call copy_from_gpu(C_LOC(blockvectorbp(1,1)), C_gpu, INT(cplx, c_size_t)*dp*vectsize*blocksize)
+         call copy_on_gpu(C_LOC(blockvectorap(1,1)),   A_gpu, INT(cplx, c_size_t)*dp*vectsize*blocksize)
          call gpu_xtrsm(cplx,'r','u','n','n',vectsize,blocksize,cone,gram_gpu,blocksize,A_gpu,vectsize)
-         call copy_from_gpu(C_LOC(blockvectorap(1,1)),A_gpu,cplx*dp*vectsize*blocksize)
+         call copy_from_gpu(C_LOC(blockvectorap(1,1)), A_gpu, INT(cplx, c_size_t)*dp*vectsize*blocksize)
          if (gs_hamk%usepaw==0) then
-           call copy_on_gpu(C_LOC(blockvectorvp(1,1)),A_gpu,cplx*dp*vectsize*blocksize)
+           call copy_on_gpu(C_LOC(blockvectorvp(1,1)), A_gpu, INT(cplx, c_size_t)*dp*vectsize*blocksize)
            call gpu_xtrsm(cplx,'r','u','n','n',vectsize,blocksize,cone,gram_gpu,blocksize,A_gpu,vectsize)
-           call copy_from_gpu(C_LOC(blockvectorvp(1,1)),A_gpu,cplx*dp*vectsize*blocksize)
+           call copy_from_gpu(C_LOC(blockvectorvp(1,1)), A_gpu, INT(cplx, c_size_t)*dp*vectsize*blocksize)
          end if
-         call copy_from_gpu(C_LOC(grampbp(1,1)),gram_gpu,cplx*dp*blocksize*blocksize)
+         call copy_from_gpu(C_LOC(grampbp(1,1)), gram_gpu, INT(cplx, c_size_t)*dp*blocksize*blocksize)
        else
 !        call orthonormalize(blockvectorp,blockvectorbp,blockvectorap)
          call abi_xorthonormalize(blockvectorp,blockvectorbp,blocksize,mpi_enreg%comm_bandspinorfft,grampbp,vectsize,&
@@ -666,17 +666,17 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
 !    gramrar=matmul((blockvectorar)^T,blockvectorr)
 !    gramxax=matmul((blockvectorax)^T,blockvectorx)
      if(use_linalg_gpu==1) then
-       call copy_on_gpu(C_LOC(blockvectorax(1,1)),A_gpu,cplx*dp*vectsize*blocksize)
+       call copy_on_gpu(C_LOC(blockvectorax(1,1)), A_gpu, INT(cplx, c_size_t)*dp*vectsize*blocksize)
        call gpu_xgemm(cplx,cparam(cplx),'n',blocksize,blocksize,vectsize,cone,A_gpu,&
 &       vectsize,blockvectorr_gpu,vectsize,czero,gram_gpu,blocksize)
-       call copy_from_gpu(C_LOC(gramxar(1,1)),gram_gpu,cplx*dp*blocksize*blocksize)
+       call copy_from_gpu(C_LOC(gramxar(1,1)), gram_gpu, INT(cplx, c_size_t)*dp*blocksize*blocksize)
        call gpu_xgemm(cplx,cparam(cplx),'n',blocksize,blocksize,vectsize,cone,blockvectorar_gpu,&
 &       vectsize,blockvectorr_gpu,vectsize,czero,gram_gpu,blocksize)
-       call copy_from_gpu(C_LOC(gramrar(1,1)),gram_gpu,cplx*dp*blocksize*blocksize)
-       call copy_on_gpu(C_LOC(blockvectorx(1,1)),C_gpu,cplx*dp*vectsize*blocksize)
+       call copy_from_gpu(C_LOC(gramrar(1,1)), gram_gpu, INT(cplx, c_size_t)*dp*blocksize*blocksize)
+       call copy_on_gpu(C_LOC(blockvectorx(1,1)), C_gpu, INT(cplx, c_size_t)*dp*vectsize*blocksize)
        call gpu_xgemm(cplx,cparam(cplx),'n',blocksize,blocksize,vectsize,cone,A_gpu,&
 &       vectsize,C_gpu,vectsize,czero,gram_gpu,blocksize)
-       call copy_from_gpu(C_LOC(gramxax(1,1)),gram_gpu,cplx*dp*blocksize*blocksize)
+       call copy_from_gpu(C_LOC(gramxax(1,1)), gram_gpu, INT(cplx, c_size_t)*dp*blocksize*blocksize)
      else
        call abi_xgemm(cparam(cplx),'n',blocksize,blocksize,vectsize,cone,blockvectorax,&
 &       vectsize,blockvectorr,vectsize,czero,gramxar,blocksize,x_cplx=x_cplx)
@@ -734,25 +734,25 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
 !        gramrbp=matmul((blockvectorbr)^T,blockvectorp)
 !        grampbp=matmul((blockvectorbp)^T,blockvectorp)
          if(use_linalg_gpu==1) then
-           call copy_on_gpu(C_LOC(blockvectorp(1,1)),C_gpu,cplx*dp*vectsize*blocksize)
-           call copy_on_gpu(C_LOC(blockvectorax(1,1)),A_gpu,cplx*dp*vectsize*blocksize)
+           call copy_on_gpu(C_LOC(blockvectorp(1,1)), C_gpu, INT(cplx, c_size_t)*dp*vectsize*blocksize)
+           call copy_on_gpu(C_LOC(blockvectorax(1,1)),A_gpu, INT(cplx, c_size_t)*dp*vectsize*blocksize)
            call gpu_xgemm(cplx,cparam(cplx),'n',blocksize,blocksize,vectsize,&
 &           cone,A_gpu,vectsize,C_gpu,vectsize,czero,gram_gpu,blocksize)
-           call copy_from_gpu(C_LOC(gramxap(1,1)),gram_gpu,cplx*dp*blocksize*blocksize)
+           call copy_from_gpu(C_LOC(gramxap(1,1)), gram_gpu, INT(cplx, c_size_t)*dp*blocksize*blocksize)
            call gpu_xgemm(cplx,cparam(cplx),'n',blocksize,blocksize,vectsize,&
 &           cone,blockvectorar_gpu,vectsize,C_gpu,vectsize,czero,gram_gpu,blocksize)
-           call copy_from_gpu(C_LOC(gramrap(1,1)),gram_gpu,cplx*dp*blocksize*blocksize)
-           call copy_on_gpu(C_LOC(blockvectorap(1,1)),A_gpu,cplx*dp*vectsize*blocksize)
+           call copy_from_gpu(C_LOC(gramrap(1,1)), gram_gpu,  INT(cplx, c_size_t)*dp*blocksize*blocksize)
+           call copy_on_gpu(C_LOC(blockvectorap(1,1)), A_gpu, INT(cplx, c_size_t)*dp*vectsize*blocksize)
            call gpu_xgemm(cplx,cparam(cplx),'n',blocksize,blocksize,vectsize,&
 &           cone,A_gpu,vectsize,C_gpu,vectsize,czero,gram_gpu,blocksize)
-           call copy_from_gpu(C_LOC(grampap(1,1)),gram_gpu,cplx*dp*blocksize*blocksize)
-           call copy_on_gpu(C_LOC(blockvectorbx(1,1)),A_gpu,cplx*dp*vectsize*blocksize)
+           call copy_from_gpu(C_LOC(grampap(1,1)), gram_gpu,  INT(cplx, c_size_t)*dp*blocksize*blocksize)
+           call copy_on_gpu(C_LOC(blockvectorbx(1,1)), A_gpu, INT(cplx, c_size_t)*dp*vectsize*blocksize)
            call gpu_xgemm(cplx,cparam(cplx),'n',blocksize,blocksize,vectsize,&
 &           cone,A_gpu,vectsize,C_gpu,vectsize,czero,gram_gpu,blocksize)
-           call copy_from_gpu(C_LOC(gramxbp(1,1)),gram_gpu,cplx*dp*blocksize*blocksize)
+           call copy_from_gpu(C_LOC(gramxbp(1,1)), gram_gpu, INT(cplx, c_size_t)*dp*blocksize*blocksize)
            call gpu_xgemm(cplx,cparam(cplx),'n',blocksize,blocksize,vectsize,&
 &           cone,blockvectorbr_gpu,vectsize,C_gpu,vectsize,czero,gram_gpu,blocksize)
-           call copy_from_gpu(C_LOC(gramrbp(1,1)),gram_gpu,cplx*dp*blocksize*blocksize)
+           call copy_from_gpu(C_LOC(gramrbp(1,1)), gram_gpu, INT(cplx, c_size_t)*dp*blocksize*blocksize)
          else
            call abi_xgemm(cparam(cplx),'n',blocksize,blocksize,vectsize,cone,blockvectorax,&
 &           vectsize,blockvectorp,vectsize,czero,gramxap,blocksize,x_cplx=x_cplx)
@@ -893,9 +893,9 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
 
 
      if(use_linalg_gpu==1) then
-       call copy_on_gpu(C_LOC(coordx2(1,1)),coordx2_gpu,cplx*dp*blocksize*blocksize)
+       call copy_on_gpu(C_LOC(coordx2(1,1)), coordx2_gpu, INT(cplx, c_size_t)*dp*blocksize*blocksize)
        if(bigorder==i4) then
-         call copy_on_gpu(C_LOC(coordx3(1,1)),coordx3_gpu,cplx*dp*blocksize*blocksize)
+         call copy_on_gpu(C_LOC(coordx3(1,1)), coordx3_gpu, INT(cplx, c_size_t)*dp*blocksize*blocksize)
        end if
      end if
 
@@ -907,13 +907,13 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
 !      blockvectorp=matmul(blockvectorr,coordx(i2+1:i3,:))+&
 !      &               matmul(blockvectorp,coordx(i3+1:i4,:))
        if(use_linalg_gpu==1) then
-!        call copy_on_gpu(C_LOC(blockvectorr(1,1)),blockvectorr_gpu,cplx*dp*vectsize*blocksize)
+!        call copy_on_gpu(C_LOC(blockvectorr(1,1)), blockvectorr_gpu, INT(cplx, c_size_t)*dp*vectsize*blocksize)
          call gpu_xgemm(cplx,'n','n',vectsize,blocksize,blocksize,cone,blockvectorr_gpu,&
 &         vectsize,coordx2_gpu,blocksize,czero,C_gpu,vectsize)
-         call copy_on_gpu(C_LOC(blockvectorp(1,1)),A_gpu,cplx*dp*vectsize*blocksize)
+         call copy_on_gpu(C_LOC(blockvectorp(1,1)), A_gpu, INT(cplx, c_size_t)*dp*vectsize*blocksize)
          call gpu_xgemm(cplx,'n','n',vectsize,blocksize,blocksize,cone,A_gpu,vectsize,&
 &         coordx3_gpu,blocksize,cone,C_gpu,vectsize)
-         call copy_from_gpu(C_LOC(blockvectorp(1,1)),C_gpu,cplx*dp*vectsize*blocksize)
+         call copy_from_gpu(C_LOC(blockvectorp(1,1)), C_gpu, INT(cplx, c_size_t)*dp*vectsize*blocksize)
        else
          call abi_xgemm('n','n',vectsize,blocksize,blocksize,cone,blockvectorr,&
 &         vectsize,coordx2,blocksize,czero,blockvectordumm,vectsize,x_cplx=x_cplx)
@@ -928,10 +928,10 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
 !        call copy_on_gpu(C_LOC(blockvectorar(1,1)),blockvectorar_gpu,cplx*dp*vectsize*blocksize)
          call gpu_xgemm(cplx,'n','n',vectsize,blocksize,blocksize,cone,blockvectorar_gpu,&
 &         vectsize,coordx2_gpu,blocksize,czero,C_gpu,vectsize)
-         call copy_on_gpu(C_LOC(blockvectorap(1,1)),A_gpu,cplx*dp*vectsize*blocksize)
+         call copy_on_gpu(C_LOC(blockvectorap(1,1)), A_gpu, INT(cplx, c_size_t)*dp*vectsize*blocksize)
          call gpu_xgemm(cplx,'n','n',vectsize,blocksize,blocksize,cone,A_gpu,vectsize,&
 &         coordx3_gpu,blocksize,cone,C_gpu,vectsize)
-         call copy_from_gpu(C_LOC(blockvectorap(1,1)),C_gpu,cplx*dp*vectsize*blocksize)
+         call copy_from_gpu(C_LOC(blockvectorap(1,1)), C_gpu, INT(cplx, c_size_t)*dp*vectsize*blocksize)
        else
          call abi_xgemm('n','n',vectsize,blocksize,blocksize,cone,blockvectorar,&
 &         vectsize,coordx2,blocksize,czero,blockvectordumm,vectsize,x_cplx=x_cplx)
@@ -945,13 +945,13 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
 !      &                matmul(blockvectorvp,coordx(i3+1:i4,:))
        if (gs_hamk%usepaw==0) then
          if(use_linalg_gpu==1) then
-           call copy_on_gpu(C_LOC(blockvectorvr(1,1)),A_gpu,cplx*dp*vectsize*blocksize)
+           call copy_on_gpu(C_LOC(blockvectorvr(1,1)), A_gpu, INT(cplx, c_size_t)*dp*vectsize*blocksize)
            call gpu_xgemm(cplx,'n','n',vectsize,blocksize,blocksize,cone,A_gpu,&
 &           vectsize,coordx2_gpu,blocksize,czero,C_gpu,vectsize)
-           call copy_on_gpu(C_LOC(blockvectorvp(1,1)),A_gpu,cplx*dp*vectsize*blocksize)
+           call copy_on_gpu(C_LOC(blockvectorvp(1,1)), A_gpu, INT(cplx, c_size_t)*dp*vectsize*blocksize)
            call gpu_xgemm(cplx,'n','n',vectsize,blocksize,blocksize,cone,A_gpu,&
 &           vectsize,coordx3_gpu,blocksize,cone,C_gpu,vectsize)
-           call copy_from_gpu(C_LOC(blockvectorvp(1,1)),C_gpu,cplx*dp*vectsize*blocksize)
+           call copy_from_gpu(C_LOC(blockvectorvp(1,1)), C_gpu, INT(cplx, c_size_t)*dp*vectsize*blocksize)
          else
            call abi_xgemm('n','n',vectsize,blocksize,blocksize,cone,blockvectorvr,&
 &           vectsize,coordx2,blocksize,czero,blockvectordumm,vectsize,x_cplx=x_cplx)
@@ -967,10 +967,10 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
 !        call copy_on_gpu(C_LOC(blockvectorbr(1,1)),blockvectorbr_gpu,cplx*dp*vectsize*blocksize)
          call gpu_xgemm(cplx,'n','n',vectsize,blocksize,blocksize,cone,blockvectorbr_gpu,&
 &         vectsize,coordx2_gpu,blocksize,czero,C_gpu,vectsize)
-         call copy_on_gpu(C_LOC(blockvectorbp(1,1)),A_gpu,cplx*dp*vectsize*blocksize)
+         call copy_on_gpu(C_LOC(blockvectorbp(1,1)), A_gpu, INT(cplx, c_size_t)*dp*vectsize*blocksize)
          call gpu_xgemm(cplx,'n','n',vectsize,blocksize,blocksize,cone,A_gpu,vectsize,&
 &         coordx3_gpu,blocksize,cone,C_gpu,vectsize)
-         call copy_from_gpu(C_LOC(blockvectorbp(1,1)),C_gpu,cplx*dp*vectsize*blocksize)
+         call copy_from_gpu(C_LOC(blockvectorbp(1,1)), C_gpu, INT(cplx, c_size_t)*dp*vectsize*blocksize)
        else
          call abi_xgemm('n','n',vectsize,blocksize,blocksize,cone,blockvectorbr,&
 &         vectsize,coordx2,blocksize,czero,blockvectordumm,vectsize,x_cplx=x_cplx)
@@ -986,7 +986,7 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
 !        call copy_on_gpu(C_LOC(blockvectorr(1,1)),blockvectorr_gpu,cplx*dp*vectsize*blocksize)
          call gpu_xgemm(cplx,'n','n',vectsize,blocksize,blocksize,cone,blockvectorr_gpu,&
 &         vectsize,coordx2_gpu,blocksize,czero,C_gpu,vectsize)
-         call copy_from_gpu(C_LOC(blockvectorp(1,1)),C_gpu,cplx*dp*vectsize*blocksize)
+         call copy_from_gpu(C_LOC(blockvectorp(1,1)), C_gpu, INT(cplx, c_size_t)*dp*vectsize*blocksize)
        else
          call abi_xgemm('n','n',vectsize,blocksize,blocksize,cone,blockvectorr,&
 &         vectsize,coordx2,blocksize,czero,blockvectorp,vectsize,x_cplx=x_cplx)
@@ -997,7 +997,7 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
 !        call copy_on_gpu(C_LOC(blockvectorar(1,1)),blockvectorar_gpu,cplx*dp*vectsize*blocksize)
          call gpu_xgemm(cplx,'n','n',vectsize,blocksize,blocksize,cone,blockvectorar_gpu,&
 &         vectsize,coordx2_gpu,blocksize,czero,C_gpu,vectsize)
-         call copy_from_gpu(C_LOC(blockvectorap(1,1)),C_gpu,cplx*dp*vectsize*blocksize)
+         call copy_from_gpu(C_LOC(blockvectorap(1,1)), C_gpu, INT(cplx, c_size_t)*dp*vectsize*blocksize)
        else
          call abi_xgemm('n','n',vectsize,blocksize,blocksize,cone,blockvectorar,&
 &         vectsize,coordx2,blocksize,czero,blockvectorap,vectsize,x_cplx=x_cplx)
@@ -1005,10 +1005,10 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
 !      blockvectorvp=matmul(blockvectorvr,coordx(i2+1:i3,:))
        if (gs_hamk%usepaw==0) then
          if(use_linalg_gpu==1) then
-           call copy_on_gpu(C_LOC(blockvectorvr(1,1)),A_gpu,cplx*dp*vectsize*blocksize)
+           call copy_on_gpu(C_LOC(blockvectorvr(1,1)), A_gpu, INT(cplx, c_size_t)*dp*vectsize*blocksize)
            call gpu_xgemm(cplx,'n','n',vectsize,blocksize,blocksize,cone,A_gpu,&
 &           vectsize,coordx2_gpu,blocksize,czero,C_gpu,vectsize)
-           call copy_from_gpu(C_LOC(blockvectorvp(1,1)),C_gpu,cplx*dp*vectsize*blocksize)
+           call copy_from_gpu(C_LOC(blockvectorvp(1,1)), C_gpu, INT(cplx, c_size_t)*dp*vectsize*blocksize)
          else
            call abi_xgemm('n','n',vectsize,blocksize,blocksize,cone,blockvectorvr,&
 &           vectsize,coordx2,blocksize,czero,blockvectorvp,vectsize,x_cplx=x_cplx)
@@ -1020,7 +1020,7 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
 !        call copy_on_gpu(C_LOC(blockvectorbr(1,1)),blockvectorbr_gpu,cplx*dp*vectsize*blocksize)
          call gpu_xgemm(cplx,'n','n',vectsize,blocksize,blocksize,cone,blockvectorbr_gpu,&
 &         vectsize,coordx2_gpu,blocksize,czero,C_gpu,vectsize)
-         call copy_from_gpu(C_LOC(blockvectorbp(1,1)),C_gpu,cplx*dp*vectsize*blocksize)
+         call copy_from_gpu(C_LOC(blockvectorbp(1,1)), C_gpu, INT(cplx, c_size_t)*dp*vectsize*blocksize)
        else
          call abi_xgemm('n','n',vectsize,blocksize,blocksize,cone,blockvectorbr,&
 &         vectsize,coordx2,blocksize,czero,blockvectorbp,vectsize,x_cplx=x_cplx)
@@ -1028,15 +1028,15 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
      end if
 
      if(use_linalg_gpu==1) then
-       call copy_on_gpu(C_LOC(coordx1(1,1)),coordx2_gpu,cplx*dp*blocksize*blocksize)
+       call copy_on_gpu(C_LOC(coordx1(1,1)), coordx2_gpu, INT(cplx, c_size_t)*dp*blocksize*blocksize)
      end if
 
 !    blockvectorx = matmul(blockvectorx,coordx(i1+1:i2,:))+blockvectorp
      if(use_linalg_gpu==1) then
-       call copy_on_gpu(C_LOC(blockvectorx(1,1)),A_gpu,cplx*dp*vectsize*blocksize)
+       call copy_on_gpu(C_LOC(blockvectorx(1,1)), A_gpu, INT(cplx, c_size_t)*dp*vectsize*blocksize)
        call gpu_xgemm(cplx,'n','n',vectsize,blocksize,blocksize,cone,A_gpu,&
 &       vectsize,coordx2_gpu,blocksize,czero,C_gpu,vectsize)
-       call copy_from_gpu(C_LOC(blockvectordumm(1,1)),C_gpu,cplx*dp*vectsize*blocksize)
+       call copy_from_gpu(C_LOC(blockvectordumm(1,1)), C_gpu, INT(cplx, c_size_t)*dp*vectsize*blocksize)
      else
        call abi_xgemm('n','n',vectsize,blocksize,blocksize,cone,blockvectorx,&
 &       vectsize,coordx1,blocksize,czero,blockvectordumm,vectsize,x_cplx=x_cplx)
@@ -1045,10 +1045,10 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
 
 !    blockvectorax= matmul(blockvectorax,coordx(i1+1:i2,:))+blockvectorap
      if(use_linalg_gpu==1) then
-       call copy_on_gpu(C_LOC(blockvectorax(1,1)),A_gpu,cplx*dp*vectsize*blocksize)
+       call copy_on_gpu(C_LOC(blockvectorax(1,1)), A_gpu, INT(cplx, c_size_t)*dp*vectsize*blocksize)
        call gpu_xgemm(cplx,'n','n',vectsize,blocksize,blocksize,cone,A_gpu,&
 &       vectsize,coordx2_gpu,blocksize,czero,C_gpu,vectsize)
-       call copy_from_gpu(C_LOC(blockvectordumm(1,1)),C_gpu,cplx*dp*vectsize*blocksize)
+       call copy_from_gpu(C_LOC(blockvectordumm(1,1)), C_gpu, INT(cplx, c_size_t)*dp*vectsize*blocksize)
      else
        call abi_xgemm('n','n',vectsize,blocksize,blocksize,cone,blockvectorax,&
 &       vectsize,coordx1,blocksize,czero,blockvectordumm,vectsize,x_cplx=x_cplx)
@@ -1058,10 +1058,10 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
 !    blockvectorvx= matmul(blockvectorvx,coordx(i1+1:i2,:))+blockvectorvp
      if (gs_hamk%usepaw==0) then
        if(use_linalg_gpu==1) then
-         call copy_on_gpu(C_LOC(blockvectorvx(1,1)),A_gpu,cplx*dp*vectsize*blocksize)
+         call copy_on_gpu(C_LOC(blockvectorvx(1,1)), A_gpu, INT(cplx, c_size_t)*dp*vectsize*blocksize)
          call gpu_xgemm(cplx,'n','n',vectsize,blocksize,blocksize,cone,A_gpu,&
 &         vectsize,coordx2_gpu,blocksize,czero,C_gpu,vectsize)
-         call copy_from_gpu(C_LOC(blockvectordumm(1,1)),C_gpu,cplx*dp*vectsize*blocksize)
+         call copy_from_gpu(C_LOC(blockvectordumm(1,1)), C_gpu, INT(cplx, c_size_t)*dp*vectsize*blocksize)
        else
          call abi_xgemm('n','n',vectsize,blocksize,blocksize,cone,blockvectorvx,&
 &         vectsize,coordx1,blocksize,czero,blockvectordumm,vectsize,x_cplx=x_cplx)
@@ -1071,10 +1071,10 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
 
 !    blockvectorbx= matmul(blockvectorbx,coordx(i1+1:i2,:))+blockvectorbp
      if(use_linalg_gpu==1) then
-       call copy_on_gpu(C_LOC(blockvectorbx(1,1)),A_gpu,cplx*dp*vectsize*blocksize)
+       call copy_on_gpu(C_LOC(blockvectorbx(1,1)), A_gpu, INT(cplx, c_size_t)*dp*vectsize*blocksize)
        call gpu_xgemm(cplx,'n','n',vectsize,blocksize,blocksize,cone,A_gpu,&
 &       vectsize,coordx2_gpu,blocksize,czero,C_gpu,vectsize)
-       call copy_from_gpu(C_LOC(blockvectordumm(1,1)),C_gpu,cplx*dp*vectsize*blocksize)
+       call copy_from_gpu(C_LOC(blockvectordumm(1,1)), C_gpu, INT(cplx, c_size_t)*dp*vectsize*blocksize)
      else
        call abi_xgemm('n','n',vectsize,blocksize,blocksize,cone,blockvectorbx,&
 &       vectsize,coordx1,blocksize,czero,blockvectordumm,vectsize,x_cplx=x_cplx)

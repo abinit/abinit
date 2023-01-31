@@ -16,6 +16,37 @@
 
 !!***
 
+#ifndef HAVE_GPU_CUDA
+
+!!****f* m_abi_gpu_linalg/check_gpu_mem
+!! NAME
+!!  check_gpu_mem
+!!
+!! FUNCTION
+!!  Print information about amount of free memory on GPU and total amount of memory on GPU (current device).
+!!
+!! INPUTS
+!!  str is a string message (character array).
+!!
+!! OUTPUT
+!!  None
+!!
+!! SIDE EFFECTS
+!!   WARNING! : this routine is a dummy one when HAVE_GPU_CUDA is not enabled
+!!   the correct one is in 17_gpu_toolbox/dev_spec.cu
+!!
+!! SOURCE
+
+subroutine check_gpu_mem(str)
+
+!Arguments ------------------------------------
+  character (KIND=c_char), intent(in)  :: str(*)
+
+  !ABI_UNUSED(str)
+
+end subroutine check_gpu_mem
+!!***
+
 
 !!****f* m_abi_gpu_linalg/alloc_on_gpu
 !! NAME
@@ -36,13 +67,11 @@
 !!
 !! SOURCE
 
-#ifndef HAVE_GPU_CUDA
-
 subroutine alloc_on_gpu(gpu_ptr,size)
 
 !Arguments ------------------------------------
- type(c_ptr)             :: gpu_ptr
- integer    , intent(in) :: size ! size in bytes to allocate
+ type(c_ptr),                intent(inout) :: gpu_ptr
+ integer(kind=c_size_t),     intent(in)    :: size ! size in bytes to allocate
 
  ABI_UNUSED(gpu_ptr)
  ABI_UNUSED(size)
@@ -75,7 +104,7 @@ subroutine copy_from_gpu(cpu_ptr,gpu_ptr,size_in_bytes)
 !Arguments ------------------------------------
  type(c_ptr)                         :: cpu_ptr
  type(c_ptr)                         :: gpu_ptr
- integer(kind=c_int32_t), intent(in) :: size_in_bytes ! size in byte (to be transfered)
+ integer(kind=c_size_t), intent(in)  :: size_in_bytes ! size in byte (to be transfered)
 
  ABI_UNUSED(cpu_ptr)
  ABI_UNUSED(gpu_ptr)
@@ -109,7 +138,7 @@ subroutine copy_on_gpu(cpu_ptr,gpu_ptr,size_in_bytes)
   !Arguments ------------------------------------
   type(c_ptr)                         :: cpu_ptr
   type(c_ptr)                         :: gpu_ptr
-  integer(kind=c_int32_t), intent(in) :: size_in_bytes ! size in byte (to be transfered)
+  integer(kind=c_size_t), intent(in)  :: size_in_bytes ! size in byte (to be transfered)
 
   ABI_UNUSED(cpu_ptr)
   ABI_UNUSED(gpu_ptr)
@@ -146,7 +175,7 @@ subroutine copy_gpu_to_gpu(cpu_ptr,gpu_ptr,size_in_bytes)
   !Arguments ------------------------------------
   type(c_ptr)                         :: cpu_ptr
   type(c_ptr)                         :: gpu_ptr
-  integer(kind=c_int32_t), intent(in) :: size_in_bytes ! size in byte (to be transfered)
+  integer(kind=c_size_t), intent(in)  :: size_in_bytes ! size in byte (to be transfered)
 
   ABI_UNUSED(gpu_ptr)
   ABI_UNUSED(gpu_ptr)
@@ -699,11 +728,11 @@ subroutine gpu_xorthonormalize(blockvectorx_gpu,blockvectorbx_gpu,blocksize,spac
  integer,intent(in) :: blocksize,spaceComm,vectsize,x_cplx
  integer, intent(in), optional :: timopt,tim_xortho
 !arrays
- type(c_ptr),intent(inout) :: blockvectorbx_gpu, blockvectorx_gpu,sqgram_gpu
+ type(c_ptr),intent(inout) :: blockvectorbx_gpu, blockvectorx_gpu, sqgram_gpu
 !Local variables-------------------------------
 #if defined HAVE_GPU_CUDA
  integer :: ierr,info
- real(dp),dimension(:,:),allocatable, target :: d_sqgram
+ real(dp),    dimension(:,:),allocatable, target :: d_sqgram
  complex(dpc),dimension(:,:),allocatable, target :: z_sqgram
  character :: tr
  real(dp) :: tsec(2)
@@ -732,15 +761,15 @@ subroutine gpu_xorthonormalize(blockvectorx_gpu,blockvectorbx_gpu,blocksize,spac
 & cone,blockvectorx_gpu,vectsize,blockvectorbx_gpu,vectsize,czero,sqgram_gpu,blocksize)
 
  if ( x_cplx == 1 ) then
-   call copy_from_gpu(C_LOC(d_sqgram(1,1)),sqgram_gpu,x_cplx*dp*blocksize*blocksize)
+   call copy_from_gpu(C_LOC(d_sqgram(1,1)), sqgram_gpu, INT(x_cplx, c_size_t)*dp*blocksize*blocksize)
    call xmpi_sum(d_sqgram,spaceComm,ierr)
    call abi_xpotrf('u',blocksize,d_sqgram,blocksize,info)
-   call copy_on_gpu(C_LOC(d_sqgram(1,1)),sqgram_gpu,x_cplx*dp*blocksize*blocksize)
+   call copy_on_gpu(C_LOC(d_sqgram(1,1)), sqgram_gpu, INT(x_cplx, c_size_t)*dp*blocksize*blocksize)
  else
-   call copy_from_gpu(C_LOC(z_sqgram(1,1)),sqgram_gpu,x_cplx*dp*blocksize*blocksize)
+   call copy_from_gpu(C_LOC(z_sqgram(1,1)), sqgram_gpu, INT(x_cplx, c_size_t)*dp*blocksize*blocksize)
    call xmpi_sum(z_sqgram,spaceComm,ierr)
    call abi_xpotrf('u',blocksize,z_sqgram,blocksize,info)
-   call copy_on_gpu(C_LOC(z_sqgram(1,1)),sqgram_gpu,x_cplx*dp*blocksize*blocksize)
+   call copy_on_gpu(C_LOC(z_sqgram(1,1)), sqgram_gpu, INT(x_cplx, c_size_t)*dp*blocksize*blocksize)
  end if
 
  if (info /= 0 ) then

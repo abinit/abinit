@@ -351,11 +351,14 @@ extern "C" void alloc_gpu_fourwf_(int *ngfft, int *ndat, int *npwin, int *npwout
   //Association du plan au stream de calcul
   CHECK_CUDA_ERROR(cufftSetStream( plan_fft,stream_compute) );
 
-  CHECK_CUDA_ERROR( cudaMalloc(&work_gpu,2*ndat_loc*fft_size*sizeof(double)) );
-  CHECK_CUDA_ERROR( cudaMalloc(&fofr_gpu,2*ndat_loc*fft_size*sizeof(double)) );
+  printf("[alloc_gpu_fourwf_] with ndat_loc=%d, fft_size=%ld n1=%d n2=%d n3=%d that is %ld Bytes\n",ndat_loc, fft_size, n1, n2, n3, 2*ndat_loc*fft_size*sizeof(double));
+  fflush(stdout);
+
+  CHECK_CUDA_ERROR( cudaMalloc(&work_gpu, 2*ndat_loc*fft_size*sizeof(double)) );
+  CHECK_CUDA_ERROR( cudaMalloc(&fofr_gpu, 2*ndat_loc*fft_size*sizeof(double)) );
   //CHECK_CUDA_ERROR( cudaMalloc(&denpot_gpu,fft_size*sizeof(double)) );
-  CHECK_CUDA_ERROR( cudaMalloc(&weightr_gpu,ndat_loc*sizeof(double)) );
-  CHECK_CUDA_ERROR( cudaMalloc(&weighti_gpu,ndat_loc*sizeof(double)) );
+  CHECK_CUDA_ERROR( cudaMalloc(&weightr_gpu, ndat_loc*sizeof(double)) );
+  CHECK_CUDA_ERROR( cudaMalloc(&weighti_gpu, ndat_loc*sizeof(double)) );
   //CHECK_CUDA_ERROR( cudaMalloc(&kg_kin_gpu,3*npw*sizeof(int)) );
   //CHECK_CUDA_ERROR( cudaMalloc(&fofgin_gpu,2*npw*ndat_loc*sizeof(double)) );
   //CHECK_CUDA_ERROR( cudaMalloc(&kg_kout_gpu,3*npw*sizeof(int)) );
@@ -363,8 +366,8 @@ extern "C" void alloc_gpu_fourwf_(int *ngfft, int *ndat, int *npwin, int *npwout
 
   // Allocation des buffers cpu "pinned"
   //CHECK_CUDA_ERROR( cudaMallocHost(&buff_denpot,fft_size*sizeof(double))) ;
-  CHECK_CUDA_ERROR( cudaMallocHost(&buff_weightr,ndat_loc*sizeof(double)) );
-  CHECK_CUDA_ERROR( cudaMallocHost(&buff_weighti,ndat_loc*sizeof(double)) );
+  CHECK_CUDA_ERROR( cudaMallocHost(&buff_weightr, ndat_loc*sizeof(double)) );
+  CHECK_CUDA_ERROR( cudaMallocHost(&buff_weighti, ndat_loc*sizeof(double)) );
 
 }//End of alloc_gpu_fourwf_
 

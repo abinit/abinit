@@ -213,11 +213,17 @@ module m_abi_linalg
 
   interface
 
+    subroutine check_gpu_mem(str) bind(c, name="check_gpu_mem_")
+      use, intrinsic :: iso_c_binding
+      implicit none
+      character (KIND=c_char), intent(in)  :: str(*)
+    end subroutine check_gpu_mem
+
     subroutine alloc_on_gpu(gpu_ptr,size_in_bytes) bind(c, name="alloc_on_gpu_")
       use, intrinsic :: iso_c_binding
       implicit none
       type(c_ptr),                    intent(inout)  :: gpu_ptr
-      integer(kind=c_int32_t),        intent(in)     :: size_in_bytes
+      integer(kind=c_size_t),         intent(in)     :: size_in_bytes
     end subroutine alloc_on_gpu
 
     subroutine dealloc_on_gpu(gpu_ptr) bind(c, name="dealloc_on_gpu_")
@@ -231,7 +237,7 @@ module m_abi_linalg
       implicit none
       type(c_ptr),                    intent(in)    :: cpu_ptr
       type(c_ptr),                    intent(inout) :: gpu_ptr
-      integer(kind=c_int32_t),        intent(in)    :: size_in_bytes
+      integer(kind=c_size_t),         intent(in)    :: size_in_bytes
     end subroutine copy_on_gpu
 
     subroutine copy_from_gpu(cpu_ptr, gpu_ptr, size_in_bytes) bind(c, name="copy_from_gpu_")
@@ -239,7 +245,7 @@ module m_abi_linalg
       implicit none
       type(c_ptr),                    intent(in)    :: cpu_ptr
       type(c_ptr),                    intent(inout) :: gpu_ptr
-      integer(kind=c_int32_t),        intent(in)    :: size_in_bytes
+      integer(kind=c_size_t),         intent(in)    :: size_in_bytes
     end subroutine copy_from_gpu
 
     subroutine copy_gpu_to_gpu(dest_gpu_ptr, src_gpu_ptr, size_in_bytes) bind(c, name="copy_gpu_to_gpu_")
@@ -247,7 +253,7 @@ module m_abi_linalg
       implicit none
       type(c_ptr)                                   :: dest_gpu_ptr
       type(c_ptr)                                   :: src_gpu_ptr
-      integer(kind=c_int32_t),        intent(in)    :: size_in_bytes
+      integer(kind=c_size_t),        intent(in)    :: size_in_bytes
     end subroutine copy_gpu_to_gpu
 
     subroutine gpu_memset(gpu_ptr, val, size_in_bytes) bind(c, name="gpu_memset_")
