@@ -178,7 +178,7 @@ module m_xmpi
    procedure :: prep_gatherv => xcomm_prep_gatherv     ! Prepare a typical gatherv operation.
    procedure :: print_names => xcomm_print_names
    procedure :: can_use_shmem => xcomm_can_use_shmem
-   !procedure :: allocate_shared_master => xcomm_allocate_shared_master
+   procedure :: allocate_shared_master => xcomm_allocate_shared_master
  end type xcomm_t
 
  public :: xcomm_from_mpi_int
@@ -5136,10 +5136,9 @@ end function xcomm_can_use_shmem
 subroutine xcomm_allocate_shared_master(self, size, kind, info, baseptr, win)
 
  class(xcomm_t),intent(inout) :: self
- !character(len=*),intent(in) :: stype
  integer(kind=XMPI_ADDRESS_KIND), intent(in) :: size
  integer,intent(in) :: kind, info
- type(c_ptr), intent(out) :: baseptr
+ type(c_ptr),intent(out) :: baseptr
  !INTEGER(KIND=XMPI_ADDRESS_KIND) :: baseptr
  integer,intent(out) :: win
 
@@ -5158,7 +5157,6 @@ subroutine xcomm_allocate_shared_master(self, size, kind, info, baseptr, win)
  case default
   call xmpi_abort(msg="MPI communicator does not support shared memory allocation!")
  end select
- !disp_unit = sizeof_stype(stype)
 
 #ifdef HAVE_MPI
  my_size = 0; if (self%me == 0) my_size = size

@@ -17,10 +17,10 @@ block
  ! Cpu version
  select case (fftalga)
  case (FFT_FFTW3) 
-   call fftw3_c2c_ip(nx, ny, nz, ldx, ldy, ldz, plan%ndat, isign, ff)
+   call fftw3_c2c_ip(nx, ny, nz, ldx, ldy, ldz, ndat__, isign, ff)
 
  case (FFT_DFTI) 
-   call dfti_c2c_ip(nx, ny, nz, ldx, ldy, ldz, plan%ndat, isign, ff)
+   call dfti_c2c_ip(nx, ny, nz, ldx, ldy, ldz, ndat__, isign, ff)
 
  case (FFT_SG, FFT_SG2002)
    ! Fallback to sg_fft_cc
@@ -34,7 +34,7 @@ block
    ABI_MALLOC(arr,   (2, ldx, ldy, ldz))
    ABI_MALLOC(ftarr, (2, ldx, ldy, ldz))
    
-   do dat=1,plan%ndat
+   do dat=1,ndat__
      padat = (dat-1) * plan%ldxyz
 
      ! Copy input data in arr
